@@ -169,12 +169,12 @@ int MLI_Method::setParams(char *in_name, int argc, char *argv[])
          else if (!strcmp(param2, "ParaSails")) set_id = MLI_SOLVER_PARASAILS_ID;
          else 
          {
-            cerr << "MLI_AMGSA ERROR : setSmoother - invalid smoother." << endl;
+            cerr << "MLI_Method ERROR : setSmoother - invalid smoother." << endl;
             return 1;
          } 
          if ( argc != 2 )
          {
-            cerr << "MLI_AMGSA ERROR : setSmoother needs 2 arguments." << endl;
+            cerr << "MLI_Method ERROR : setSmoother needs 2 arguments." << endl;
             return 1;
          } 
          pre_post = MLI_SMOOTHER_PRE;
@@ -189,15 +189,16 @@ int MLI_Method::setParams(char *in_name, int argc, char *argv[])
          else if (!strcmp(param2, "GS"))        set_id = MLI_SOLVER_GS_ID;
          else if (!strcmp(param2, "SGS"))       set_id = MLI_SOLVER_SGS_ID;
          else if (!strcmp(param2, "Schwarz"))   set_id = MLI_SOLVER_SCHWARZ_ID;
+         else if (!strcmp(param2, "MLS"))       set_id = MLI_SOLVER_MLS_ID;
          else if (!strcmp(param2, "ParaSails")) set_id = MLI_SOLVER_PARASAILS_ID;
          else 
          {
-            cerr << "MLI_AMGSA ERROR : setSmoother - invalid smoother." << endl;
+            cerr << "MLI_Method ERROR : setSmoother - invalid smoother." << endl;
             return 1;
          } 
          if ( argc != 2 )
          {
-            cerr << "MLI_AMGSA ERROR : setSmoother needs 2 arguments." << endl;
+            cerr << "MLI_Method ERROR : setSmoother needs 2 arguments." << endl;
             return 1;
          } 
          pre_post = MLI_SMOOTHER_POST;
@@ -216,12 +217,12 @@ int MLI_Method::setParams(char *in_name, int argc, char *argv[])
          else if (!strcmp(param2, "SuperLU"))   set_id = MLI_SOLVER_SUPERLU_ID;
          else 
          {
-            cerr << "MLI_AMGSA ERROR : setCoarseSolver - invalid smoother.\n";
+            cerr << "MLI_Method ERROR : setCoarseSolver - invalid smoother.\n";
             return 1;
          } 
          if ( set_id != MLI_SOLVER_SUPERLU_ID && argc != 2 )
          {
-            cerr << "MLI_AMGSA ERROR : setCoarseSolver needs 2 arguments.\n";
+            cerr << "MLI_Method ERROR : setCoarseSolver needs 2 arguments.\n";
             return 1;
          } 
          else if ( set_id != MLI_SOLVER_SUPERLU_ID )
@@ -235,7 +236,7 @@ int MLI_Method::setParams(char *in_name, int argc, char *argv[])
       {
          if ( argc != 4 )
          {
-            cerr << "MLI_AMGSA ERROR : setNullSpace needs 4 arguments." << endl;
+            cerr << "MLI_Method ERROR : setNullSpace needs 4 arguments." << endl;
             return 1;
          } 
          node_dofs = *(int *)   argv[0];
