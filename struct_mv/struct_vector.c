@@ -228,6 +228,49 @@ zzz_SetStructVectorValues( zzz_StructVector *vector,
 }
 
 /*--------------------------------------------------------------------------
+ * zzz_GetStructVectorValues
+ *--------------------------------------------------------------------------*/
+
+int 
+zzz_GetStructVectorValues( zzz_StructVector *vector,
+                           zzz_Index        *grid_index,
+                           double           *values     )
+{
+   int    ierr;
+
+   zzz_BoxArray     *boxes;
+   zzz_Box          *box;
+   zzz_Index        *imin;
+   zzz_Index        *imax;
+
+   double           *vecp;
+
+   int               i;
+
+   boxes = zzz_StructGridBoxes(zzz_StructVectorGrid(vector));
+
+   zzz_ForBoxI(i, boxes)
+   {
+      box = zzz_BoxArrayBox(boxes, i);
+      imin = zzz_BoxIMin(box);
+      imax = zzz_BoxIMax(box);
+
+      if ((zzz_IndexX(grid_index) >= zzz_IndexX(imin)) &&
+          (zzz_IndexX(grid_index) <= zzz_IndexX(imax)) &&
+          (zzz_IndexY(grid_index) >= zzz_IndexY(imin)) &&
+          (zzz_IndexY(grid_index) <= zzz_IndexY(imax)) &&
+          (zzz_IndexZ(grid_index) >= zzz_IndexZ(imin)) &&
+          (zzz_IndexZ(grid_index) <= zzz_IndexZ(imax))   )
+      {
+         vecp = zzz_StructVectorBoxDataValue(vector, i, grid_index);
+         *values = *vecp;
+      }
+   }
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
  * zzz_SetStructVectorBoxValues
  *--------------------------------------------------------------------------*/
 
