@@ -44,6 +44,8 @@ setws.f
 strong.f
 tests.f
 testsB.f
+timing.c
+timing.h
 trunc.f
 vcopy.f
 vector.c
