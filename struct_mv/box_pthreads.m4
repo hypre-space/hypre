@@ -25,7 +25,7 @@ sinclude(pthreads_c_definitions.m4)
 
 
 extern int hypre_thread_counter;
-extern int iteration_counter[3];
+extern int iteration_counter;
 
 /*--------------------------------------------------------------------------
  * Threaded Looping macros:

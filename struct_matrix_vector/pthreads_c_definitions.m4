@@ -70,7 +70,6 @@ Arguments:  $1 -- the name of the increment variable for the loop
             $3 -- the stopping value for the increment variable
                   (loop will not be entered when increment reaches this value)
             $4 -- the name of an array of indices
-            $5 -- an index of the given array
             $6 -- an integer counter to count each thread as it passes
             $7 -- a pthread_mutex_t object (must be initialized
                   externally)
@@ -79,9 +78,9 @@ Arguments:  $1 -- the name of the increment variable for the loop
 */
 
 define(PLOOP,
- <<for ($1 = ifetchadd(&$4[$5], &$7) + $2;\
+ <<for ($1 = ifetchadd(&$4, &$7) + $2;\
         $1 <  $3;\
-        $1 = ifetchadd(&$4[$5], &$7) + $2) {\
+        $1 = ifetchadd(&$4, &$7) + $2) {\
       $9\
    }\
    pthread_mutex_lock(&$7);\
@@ -92,10 +91,11 @@ define(PLOOP,
       pthread_mutex_lock(&$7);\
       $6--;\
       pthread_mutex_unlock(&$7);\
+      while (hypre_thread_release);\
    }\
    else if ($6 == NUM_THREADS) {\
       $6--;\
-      $4[$5] = 0;\
+      $4 = 0;\
       pthread_mutex_unlock(&$7);\
       hypre_thread_release=1;\
       while ($6);\
