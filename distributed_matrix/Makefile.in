@@ -13,7 +13,7 @@
 srcdir = @srcdir@
 VPATH = @srcdir@
 
-all: lib
+all: libHYPRE_DistributedMatrix.a
 
 install:all
 	@cp -f $(srcdir)/HYPRE_*.h $$HYPRE_INSTALL_DIR/include/.
@@ -92,7 +92,7 @@ link:
 	rm driver
 	$(MAKE) driver
 
-lib: $(PROTOS) ${OBJS}
+libHYPRE_DistributedMatrix.a: ${OBJS}
 	@echo  "Building $@ ... "
 	@echo  "Building ${OBJS} ... "
 	@${AR} -rcu libHYPRE_DistributedMatrix.a ${OBJS}

@@ -14,9 +14,7 @@
 srcdir = @srcdir@
 VPATH = @srcdir@
 
-default: lib
-
-all: lib
+all: libHYPRE_MatrixMatrix.a
 
 install:all
 	@cp -f $(srcdir)/HYPRE_*.h $$HYPRE_INSTALL_DIR/include/.
@@ -29,7 +27,7 @@ HYPREFILES =\
  HYPRE_ConvertParCSRMatrixToDistributedMatrix.c
 ## HYPRE_BuildIJMatrixFromDistributedMatrix.c
 
-FILES = $(HYPREFILES) $(LOCALFILES)
+FILES = $(HYPREFILES)
 
 OBJS = ${FILES:.c=.o}
 
@@ -73,7 +71,7 @@ RANLIB = @RANLIB@
 # Main rules
 ##################################################################
 
-lib: $(PROTOS) ${OBJS}
+libHYPRE_MatrixMatrix.a: ${OBJS}
 	@echo  "Building $@ ... "
 	@${AR} -rcu libHYPRE_MatrixMatrix.a ${OBJS}
 	${RANLIB} libHYPRE_MatrixMatrix.a

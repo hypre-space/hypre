@@ -1,9 +1,10 @@
 # Makefile for lobpcg; AK 080802, MEA 081802
 
 .SUFFIXES:
-.SUFFIXES: .c .C .f .o .CXX.o
+.SUFFIXES: .c .C .f .o
 
 srcdir = @srcdir@
+VPATH = @srcdir@
 
 # Compiler and compiler options
 
@@ -30,9 +31,15 @@ CDEFS = -DHYPRE_TIMING
 
 CFLAGS = \
  ${C_COMPILE_FLAGS}\
+ -I../..\
  -I$(srcdir)\
  -I$(srcdir)/../..\
- -I../../hypre/include\
+ -I$(srcdir)/../../seq_mv\
+ -I$(srcdir)/../../IJ_mv\
+ -I$(srcdir)/../../parcsr_mv\
+ -I$(srcdir)/../../parcsr_ls\
+ -I$(srcdir)/../../krylov\
+ -I$(srcdir)/../../utilities\
  ${CINCLUDES}\
  ${CDEFS}
 
@@ -47,14 +54,14 @@ LDLIBFLAGS  = @LDLIBDIRS@ @LDLIBS@
 
 HYPRE_STANDARD_DRIVERS = lobpcg.c lobpcg_matrix.c lobpcg_utilities.c
 
-CTARGET = libHYPRE_lobpcg.a
+
 OBJS    = ${HYPRE_STANDARD_DRIVERS:.c=.o}
 INCS    = HYPRE_lobpcg.h lobpcg.h mmio.h
 
 HYPRE_DRIVERS = IJ_eigen_solver.c ${HYPRE_STANDARD_DRIVERS}
 HYPRE_DRIVER_OBJS=${HYPRE_DRIVERS:.c=.o}
 
-all: ${CTARGET}
+all: libHYPRE_lobpcg.a
 
 install: all
 	@cp -f $(srcdir)/HYPRE_*.h $$HYPRE_INSTALL_DIR/include/.
@@ -71,7 +78,7 @@ veryclean: clean
 # Rules
 ##################################################################
 
-${HYPRE_DRIVER_OBJS}: ${INCS} Makefile.dec
+${OBJS}: ${INCS} 
 
 libHYPRE_lobpcg.a: ${OBJS}
 	@echo  "Building $@ ... "
