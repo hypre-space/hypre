@@ -250,6 +250,120 @@ int HYPRE_SStructGMRESGetFinalRelativeResidualNorm(HYPRE_SStructSolver  solver,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
+/**
+ * @name SStruct SysPFMG Solver
+ **/
+/*@{*/
+
+/**
+ * Create a solver object.
+ **/
+int HYPRE_SStructSysPFMGCreate( MPI_Comm             comm,
+                                HYPRE_SStructSolver *solver );
+
+/**
+ * Destroy a solver object.
+ **/
+int HYPRE_SStructSysPFMGDestroy(HYPRE_SStructSolver solver);
+
+/**
+ **/
+int HYPRE_SStructSysPFMGSetup(HYPRE_SStructSolver solver,
+                              HYPRE_SStructMatrix A,
+                              HYPRE_SStructVector b,
+                              HYPRE_SStructVector x);
+
+/**
+ * Solve the system.
+ **/
+int HYPRE_SStructSysPFMGSolve(HYPRE_SStructSolver solver,
+                              HYPRE_SStructMatrix A,
+                              HYPRE_SStructVector b,
+                              HYPRE_SStructVector x);
+
+/**
+ * (Optional) Set the convergence tolerance.
+ **/
+int HYPRE_SStructSysPFMGSetTol(HYPRE_SStructSolver solver,
+                               double              tol);
+
+/**
+ * (Optional) Set maximum number of iterations.
+ **/
+int HYPRE_SStructSysPFMGSetMaxIter(HYPRE_SStructSolver solver,
+                                   int                 max_iter);
+
+/**
+ * (Optional) Additionally require that the relative difference in
+ * successive iterates be small.
+ **/
+int HYPRE_SStructSysPFMGSetRelChange(HYPRE_SStructSolver solver,
+                                     int                 rel_change);
+
+/**
+ * (Optional) Use a zero initial guess.
+ **/
+int HYPRE_SStructSysPFMGSetZeroGuess(HYPRE_SStructSolver solver);
+
+/**
+ * (Optional) Use a nonzero initial guess.
+ **/
+int HYPRE_SStructSysPFMGSetNonZeroGuess(HYPRE_SStructSolver solver);
+
+/**
+ * (Optional) Set relaxation type.
+ **/
+int HYPRE_SStructSysPFMGSetRelaxType(HYPRE_SStructSolver solver,
+                                  int                relax_type);
+
+/**
+ * (Optional) Set number of pre-relaxation sweeps.
+ **/
+int HYPRE_SStructSysPFMGSetNumPreRelax(HYPRE_SStructSolver solver,
+                                       int                 num_pre_relax);
+
+/**
+ * (Optional) Set number of post-relaxation sweeps.
+ **/
+int HYPRE_SStructSysPFMGSetNumPostRelax(HYPRE_SStructSolver solver,
+                                        int                 num_post_relax);
+
+/**
+ * (Optional) Skip relaxation on certain grids for isotropic problems.
+ **/
+int HYPRE_SStructSysPFMGSetSkipRelax(HYPRE_SStructSolver solver,
+                                     int                 skip_relax);
+
+/*
+ * RE-VISIT
+ **/
+int HYPRE_SStructSysPFMGSetDxyz(HYPRE_SStructSolver  solver,
+                                double              *dxyz);
+
+/**
+ * (Optional) Set the amount of logging to do.
+ **/
+int HYPRE_SStructSysPFMGSetLogging(HYPRE_SStructSolver solver,
+                                   int                 logging);
+
+/**
+ * Return the number of iterations taken.
+ **/
+int HYPRE_SStructSysPFMGGetNumIterations(HYPRE_SStructSolver  solver,
+                                         int                 *num_iterations);
+
+/**
+ * Return the norm of the final relative residual.
+ **/
+int HYPRE_SStructSysPFMGGetFinalRelativeResidualNorm(
+                                          HYPRE_SStructSolver solver,
+                                          double             *norm);
+
+/*@}*/
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
 /*
  * @name SStruct Split Solver
  **/

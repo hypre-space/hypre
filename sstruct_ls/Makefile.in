@@ -41,12 +41,23 @@ RANLIB= @RANLIB@
 HEADERS =\
  HYPRE_sstruct_ls.h\
  sstruct_ls.h\
+ sys_pfmg.h\
  headers.h
 
 FILES =\
  HYPRE_sstruct_gmres.c\
  HYPRE_sstruct_pcg.c\
  HYPRE_sstruct_split.c\
+ HYPRE_sstruct_sys_pfmg.c\
+ node_relax.c\
+ sys_pfmg.c\
+ sys_pfmg_relax.c\
+ sys_pfmg_setup.c\
+ sys_pfmg_setup_interp.c\
+ sys_pfmg_setup_rap.c\
+ sys_pfmg_solve.c\
+ sys_semi_interp.c\
+ sys_semi_restrict.c\
  krylov.c\
  krylov_sstruct.c
 
