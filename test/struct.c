@@ -176,16 +176,9 @@ main( int   argc,
    solver_id = 0;
    solver_type = 1;
 
-/*     istart[0] = -3; */
-/*     istart[1] = -3; */
-/*     istart[2] = -3; */
-/* ... original was -3 */
-/*    istart[0] = 1; */
-/*    istart[1] = 1; */
-/*    istart[2] = 1; */
-   istart[0] = 1;
-   istart[1] = 1;
-   istart[2] = 1;
+   istart[0] = -3; 
+   istart[1] = -3; 
+   istart[2] = -3; 
 
    px = 0;
    py = 0;
@@ -1182,6 +1175,7 @@ main( int   argc,
       HYPRE_StructPFMGCreate(MPI_COMM_WORLD, &solver);
       HYPRE_StructPFMGSetMaxIter(solver, 50);
       HYPRE_StructPFMGSetTol(solver, 1.0e-06);
+      HYPRE_StructPFMGSetNormType(solver, 0);
       HYPRE_StructPFMGSetRelChange(solver, 0);
       HYPRE_StructPFMGSetRAPType(solver, rap);
       HYPRE_StructPFMGSetRelaxType(solver, relax);
