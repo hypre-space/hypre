@@ -44,10 +44,10 @@ PrunedRows *PrunedRowsCreate(Matrix *mat, int size, DiagScale *diag_scale,
     PrunedRows *p = (PrunedRows *) malloc(sizeof(PrunedRows));
 
     p->mem  = MemCreate();
-    p->size = size;
+    p->size = MAX(size, mat->end_row - mat->beg_row + 1);
 
-    p->len = (int *)  malloc(size * sizeof(int));
-    p->ind = (int **) malloc(size * sizeof(int *));
+    p->len = (int *)  malloc(p->size * sizeof(int));
+    p->ind = (int **) malloc(p->size * sizeof(int *));
 
     /* Prune and store the rows on the local processor */
 
