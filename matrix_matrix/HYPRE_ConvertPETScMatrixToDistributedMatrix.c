@@ -12,14 +12,7 @@
  *
  *****************************************************************************/
 
-#include "general.h"
 #include "./header.h"
-
-/* Solver structure from PETSc */
-#include "sles.h"
-
-/* Prototypes for DistributedMatrix */
-#include "HYPRE.h"
 
 /*--------------------------------------------------------------------------
  * HYPRE_ConvertPETScMatrixToDistributedMatrix
