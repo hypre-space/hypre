@@ -351,6 +351,7 @@ int MLI_Solver_SGS::setParams( char *param_string, int argc, char **argv )
    if ( !strcasecmp(param_string, "useCG") )
    {
       useCG_ = 1; 
+      useOffProcData_  = 0;
       return 0;
    }
    else if ( !strcasecmp(param_string, "useOffProcData") )
