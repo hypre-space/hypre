@@ -155,6 +155,7 @@ f77_ij_LDADD = \
  @FLIBS@\
  $(LIBM)
 f77_ij_b_LDADD = \
+ @BABELLIBFLAGS@\
  -L$(libdir)\
  -lHYPRE_parcsr_ls\
  -lHYPRE_DistributedMatrixPilutSolver \
@@ -207,6 +208,7 @@ fei_LDADD = \
  $(BLASLIBFLAGS)\
  $(LIBM)
 ij_b_LDADD = \
+ @BABELLIBFLAGS@\
  -L$(libdir)\
  -lHYPRE_parcsr_ls\
  -lHYPRE_DistributedMatrixPilutSolver \
