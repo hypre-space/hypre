@@ -270,8 +270,7 @@ scp -r linear_solvers ${HYPRE_COMPILE_MACHINE}:${HYPRE_REMOTE_DIR}
 # compile
 ssh ${HYPRE_COMPILE_MACHINE} "\
     (\
-        /usr/bin/sh -c \
-        /usr/bin/cd ${HYPRE_REMOTE_DIR}/linear_solvers;\
+        cd ${HYPRE_REMOTE_DIR}/linear_solvers;\
 	. test/env.${HYPRE_ARCH};\
         ./configure ;\
         /usr/ccs/bin/make -k beta;\
@@ -280,16 +279,14 @@ ssh ${HYPRE_COMPILE_MACHINE} "\
 # run test suite
 ssh ${HYPRE_RUN_MACHINE} "\
     (\
-        /usr/bin/sh -c \
-        /usr/bin/cd ${HYPRE_REMOTE_DIR}/linear_solvers/test;\
+        cd ${HYPRE_REMOTE_DIR}/linear_solvers/test;\
 	. ./env.${HYPRE_ARCH};\
         ./test_drivers.sh -mail\
     )"
 
 ssh ${HYPRE_COMPILE_MACHINE} "\
     (\
-        /usr/bin/sh -c \
-        /usr/bin/cd ${HYPRE_REMOTE_DIR}/linear_solvers;\
+        cd ${HYPRE_REMOTE_DIR}/linear_solvers;\
 	. test/env.${HYPRE_ARCH};\
         ./configure --with-openmp;\
 	/usr/ccs/bin/make veryclean;\
