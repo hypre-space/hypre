@@ -9,56 +9,38 @@
 
 /******************************************************************************
  *
- * C/Fortran interface routines
+ * Routines for manipulating global structures.
  *
  *****************************************************************************/
+
+#define AMG_GLOBALS
 
 #include "amg.h"
 
 
 /*--------------------------------------------------------------------------
- * writeysm_ (F to C)
+ * NewGlobals
  *--------------------------------------------------------------------------*/
 
-void     writeysm_(file_name, data, ia, ja, size, file_name_len)
-char    *file_name;
-double  *data;
-int     *ia;
-int     *ja;
-int     *size;
-int      file_name_len;
+void   NewGlobals(run_name)
+char  *run_name;
 {
-   Matrix  *matrix;
+   globals = ctalloc(Globals, 1);
 
-
-   matrix = NewMatrix(data, ia, ja, *size);
-
-   WriteYSMP(file_name, matrix);
-
-   tfree(matrix);
-
-   return;
+   sprintf(GlobalsRunName,     "%s",     run_name);
+   sprintf(GlobalsInFileName,  "%s.in",  run_name);
+   sprintf(GlobalsOutFileName, "%s.out", run_name);
+   sprintf(GlobalsLogFileName, "%s.log", GlobalsOutFileName);
 }
+
 
 /*--------------------------------------------------------------------------
- * writevec_ (F to C)
+ * FreeGlobals
  *--------------------------------------------------------------------------*/
 
-void     writevec_(file_name, data, size, file_name_len)
-char    *file_name;
-double  *data;
-int     *size;
-int      file_name_len;
+void  FreeGlobals()
 {
-   Vector  *vector;
-
-
-   vector = NewVector(data, *size);
-
-   WriteVec(file_name, vector);
-
-   tfree(vector);
-
-   return;
+   tfree(globals);
 }
+
 

@@ -4,7 +4,8 @@ amg.h
 amg_proto.h
 amgproto
 amgrun
-amgs01.f
+amgs01.c
+amgs01.h
 bsetup.f
 build
 cforce.f
@@ -12,15 +13,17 @@ color.f
 crsgd.f
 crushb.f
 ctest.f
-dirslv.f
 default.in.problem
+default.in.solver
+dirslv.f
 fftests.f
 form.f
 fortran.c
 fortran.h
 general.h
+globals.c
+globals.h
 iinvert.f
-input.f
 matrix.c
 matrix.h
 memoryx.f
@@ -29,6 +32,8 @@ ms.f
 opdfn.f
 outprt.f
 params.amg
+pcg.c
+pcg.h
 problem.c
 problem.h
 random.c
@@ -41,6 +46,8 @@ setcw.f
 setdep.f
 setup.f
 setws.f
+solver.c
+solver.h
 solvr.f
 strong.f
 tests.f

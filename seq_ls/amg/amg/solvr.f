@@ -8,7 +8,7 @@ c=====================================================================
 c
       subroutine solve(levels,ncyc,mu,ntrlx,iprlx,ierlx,iurlx,iprtc,
      *     nun,imin,imax,u,f,a,ia,ja,iu,icg,b,ib,jb,
-     *     ipmn,ipmx,iv,ip,xp,yp)
+     *     ipmn,ipmx,iv,ip,xp,yp,lfname)
 c
 c---------------------------------------------------------------------
 c
@@ -52,6 +52,8 @@ c
       dimension ierlx(4)
       dimension iurlx(4)
 c
+      character*(*)  lfname
+c
 c     storage for convergence data
 c
       dimension resv(20)
@@ -59,6 +61,16 @@ c
 c     work space
 c
       dimension iarr(10)
+
+c---------------------------------------------------------------------
+c open the log file and write some initial info
+c---------------------------------------------------------------------
+
+      open(6,file=lfname,access='append')
+
+      write(6,9000)
+ 9000  format(/'SOLVE INFO:'/)
+
 c
 c---------------------------------------------------------------------
 c
@@ -77,7 +89,10 @@ c
       ivstar=iarr(1)-1
       ifcycl=iarr(2)
       ncycle=iarr(3)
-      if(ncycle.eq.0) return
+      if(ncycle.eq.0) then
+        close(6)
+        return
+      endif
 c     write(6,7000)
 c
 c===> find initial residual
@@ -122,6 +137,8 @@ cveh      tcyc=ttot/ncycle
       cmpop=float(ia(imax(levels)+1)-1)/float(ia(imax(1)+1)-1)
       cmpgr=float(imax(levels))/float(imax(1))
       write(6,3000) cmpgr,cmpop,cmpcy
+
+      close(6)
 
       return
 
@@ -421,7 +438,7 @@ c
       go to 100
 c
 400   continue
-      return
+
 c3999  format(/'    k   tpeu   residual     energy   res 1,2,...')
 3999  format(/'    k  tpeu  residual    energy  res 1,2,...')
 5000  format(26(1x,i2))
@@ -430,5 +447,7 @@ c3999  format(/'    k   tpeu   residual     energy   res 1,2,...')
 c6000  format(3x,i2,3x,4i1,1p,5(2x,e9.2))
 c6001  format(3x,i2,7x,1p,5(2x,e9.2))
 c6002  format(34x,1p,3(2x,e9.2))
+
+      return
       end
 c

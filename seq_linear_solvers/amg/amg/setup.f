@@ -8,7 +8,7 @@ c=====================================================================
 c
       subroutine setup(levels,nstr,ecg,ncg,ewt,nwt,icdep,idump,
      *                 nun,imin,imax,u,f,a,ia,ja,iu,ip,icg,ifg,
-     *                 b,ib,jb,ipmn,ipmx,iv,xp,yp,ifc)
+     *                 b,ib,jb,ipmn,ipmx,iv,xp,yp,ifc,lfname)
 c
 c---------------------------------------------------------------------
 c
@@ -45,6 +45,18 @@ c
 c     vector used for forced coarse grid points (formerly icgfix)
 c
       dimension ifc(*)
+c
+      character*(*)  lfname
+
+c---------------------------------------------------------------------
+c open the log file and write some initial info
+c---------------------------------------------------------------------
+
+      open(6,file=lfname,access='append')
+
+      write(6,9000)
+ 9000 format(/'SETUP INFO:'/)
+
 c
 c---------------------------------------------------------------------
 c
@@ -101,7 +113,10 @@ c
 c
       call msample
 c
-      if(levels.le.1) return
+      if(levels.le.1) then
+        close(6)
+        return
+      endif
 c
 c===> coarsen problem
 c
@@ -168,6 +183,8 @@ c
 c     call crushb(levels,imin,imax,icg,b,ib,jb)
 c
       call mreport(1)
+
+      close(6)
 
       return
       end

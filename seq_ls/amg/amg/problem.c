@@ -40,9 +40,9 @@ char     *file_name;
    int     *ip;
    int     *iv;
 
-   double  *x;
-   double  *y;
-   double  *z;
+   double  *xp;
+   double  *yp;
+   double  *zp;
 
    char     temp_file_name[256];
    FILE    *temp_fp;
@@ -178,12 +178,12 @@ char     *file_name;
    }
 
    /*----------------------------------------------------------
-    * x, y, z
+    * xp, yp, zp
     *----------------------------------------------------------*/
 
-   x = talloc(double, NDIMP(num_points));
-   y = talloc(double, NDIMP(num_points));
-   z = talloc(double, NDIMP(num_points));
+   xp = talloc(double, NDIMP(num_points));
+   yp = talloc(double, NDIMP(num_points));
+   zp = talloc(double, NDIMP(num_points));
 
    fscanf(fp, "%d", &flag);
 
@@ -193,11 +193,11 @@ char     *file_name;
       temp_fp = fopen(temp_file_name, "r");
 
       for (j = 0; j < num_points; j++)
-	 fscanf(temp_fp, "%le", &x[j]);
+	 fscanf(temp_fp, "%le", &xp[j]);
       for (j = 0; j < num_points; j++)
-	 fscanf(temp_fp, "%le", &y[j]);
+	 fscanf(temp_fp, "%le", &yp[j]);
       for (j = 0; j < num_points; j++)
-	 fscanf(temp_fp, "%le", &z[j]);
+	 fscanf(temp_fp, "%le", &zp[j]);
 
       fclose(temp_fp);
    }
@@ -227,9 +227,9 @@ char     *file_name;
    ProblemIP(problem)           = ip;
    ProblemIV(problem)           = iv;
 
-   ProblemX(problem)            = x;
-   ProblemY(problem)            = y;
-   ProblemZ(problem)            = z;
+   ProblemXP(problem)           = xp;
+   ProblemYP(problem)           = yp;
+   ProblemZP(problem)           = zp;
 
    return problem;
 }
@@ -246,9 +246,9 @@ Problem  *problem;
       tfree(ProblemIU(problem));
       tfree(ProblemIP(problem));
       tfree(ProblemIV(problem));
-      tfree(ProblemX(problem));
-      tfree(ProblemY(problem));
-      tfree(ProblemZ(problem));
+      tfree(ProblemXP(problem));
+      tfree(ProblemYP(problem));
+      tfree(ProblemZP(problem));
       tfree(problem);
    }
 }

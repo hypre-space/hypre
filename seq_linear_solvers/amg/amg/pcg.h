@@ -9,56 +9,35 @@
 
 /******************************************************************************
  *
- * C/Fortran interface routines
+ * Header for PCG
  *
  *****************************************************************************/
 
-#include "amg.h"
+#ifndef _PCG_HEADER
+#define _PCG_HEADER
 
 
 /*--------------------------------------------------------------------------
- * writeysm_ (F to C)
+ * PCGData
  *--------------------------------------------------------------------------*/
 
-void     writeysm_(file_name, data, ia, ja, size, file_name_len)
-char    *file_name;
-double  *data;
-int     *ia;
-int     *ja;
-int     *size;
-int      file_name_len;
+typedef struct
 {
-   Matrix  *matrix;
+   int    max_iter;
+   int    two_norm;
 
+   char  *log_file_name;
 
-   matrix = NewMatrix(data, ia, ja, *size);
-
-   WriteYSMP(file_name, matrix);
-
-   tfree(matrix);
-
-   return;
-}
+} PCGData;
 
 /*--------------------------------------------------------------------------
- * writevec_ (F to C)
+ * Accessor functions for the PCGData structure
  *--------------------------------------------------------------------------*/
 
-void     writevec_(file_name, data, size, file_name_len)
-char    *file_name;
-double  *data;
-int     *size;
-int      file_name_len;
-{
-   Vector  *vector;
+#define PCGDataMaxIter(pcg_data)      ((pcg_data) -> max_iter)
+#define PCGDataTwoNorm(pcg_data)      ((pcg_data) -> two_norm)
+
+#define PCGDataLogFileName(pcg_data)  ((pcg_data) -> log_file_name)
 
 
-   vector = NewVector(data, *size);
-
-   WriteVec(file_name, vector);
-
-   tfree(vector);
-
-   return;
-}
-
+#endif

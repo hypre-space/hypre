@@ -19,25 +19,17 @@ int   argc;
 char *argv[];
 {
    char    *run_name;
-   char     in_file_name[255];
-   char     out_file_name[255];
 
    char     file_name[255];
    FILE    *fp;
 
    Problem *problem;
+   Solver  *solver;
 
-   Matrix  *A;
-   Vector  *f;
-   Vector  *u;
-
-   int     *ifc;
-   int      isw;
-
-   int      ndimu;
-   int      ndimp;
-   int      ndima;
-   int      ndimb;
+   Vector      *u;
+   Vector      *f;
+   double       stop_tolerance;
+   Data        *amgs01_data;
 
 
    /*-------------------------------------------------------
@@ -51,56 +43,64 @@ char *argv[];
    }
 
    /*-------------------------------------------------------
-    * Set up the file names
+    * Set up globals
     *-------------------------------------------------------*/
 
    run_name = argv[1];
-   sprintf(in_file_name,  "%s.in", run_name);
-   sprintf(out_file_name, "%s.out", run_name);
+   NewGlobals(run_name);
 
    /*-------------------------------------------------------
     * Set up the problem
     *-------------------------------------------------------*/
 
-   sprintf(file_name, "%s.problem.strp", in_file_name);
+   sprintf(file_name, "%s.problem.strp", GlobalsInFileName);
    problem = NewProblem(file_name);
 
+   /*-------------------------------------------------------
+    * Set up the solver
+    *-------------------------------------------------------*/
+
+   sprintf(file_name, "%s.solver.strp", GlobalsInFileName);
+   solver = NewSolver(file_name);
+
+   /*-------------------------------------------------------
+    * Debugging prints
+    *-------------------------------------------------------*/
+#if 0
    A = ProblemA(problem);
    f = ProblemF(problem);
    u = ProblemU(problem);
 
-#if 0
+   sprintf(file_name, "%s.ysmp", GlobalsOutFileName);
+   WriteYSMP(file_name, ProblemA(problem));
+
+   sprintf(file_name, "%s.rhs", GlobalsOutFileName);
+   WriteVec(file_name, ProblemF(problem));
+
+   sprintf(file_name, "%s.initu", GlobalsOutFileName);
+   WriteVec(file_name, ProblemU(problem));
+#endif
+
    /*-------------------------------------------------------
-    * Debugging prints
+    * Write initial logging info
     *-------------------------------------------------------*/
 
-   sprintf(file_name, "%s.ysmp", out_file_name);
-   WriteYSMP(file_name, A);
+   fp = fopen(GlobalsLogFileName, "w");
 
-   sprintf(file_name, "%s.rhs", out_file_name);
-   WriteVec(file_name, f);
-
-   sprintf(file_name, "%s.initu", out_file_name);
-   WriteVec(file_name, u);
-
-#endif
+   fclose(fp);
 
    /*-------------------------------------------------------
     * Call AMGS01
     *-------------------------------------------------------*/
 
-   /* Set some array dimension variables (not yet used)*/
-   ndimu = NDIMU(ProblemNumVariables(problem));
-   ndimp = NDIMP(ProblemNumPoints(problem));
-   ndima = NDIMU(MatrixIA(A)[ProblemNumVariables(problem)]-1);
-   ndimb = NDIMB(MatrixIA(A)[ProblemNumVariables(problem)]-1);
+   u = ProblemU(problem);
+   f = ProblemF(problem);
 
-   ifc = ctalloc(int, ndimu);
-   isw = 1;
+   stop_tolerance = SolverStopTolerance(solver);
+   amgs01_data    = SolverAMGS01Data(solver);
 
-   sprintf(file_name, "%s.log", out_file_name);
-
-   amgs01(u, f, A, problem, ifc, isw, file_name);
+   AMGS01Setup(problem, amgs01_data);
+   AMGS01(u, f, stop_tolerance, amgs01_data);
 
    return 0;
 }

@@ -9,56 +9,47 @@
 
 /******************************************************************************
  *
- * C/Fortran interface routines
+ * Header info for Solver data structures
  *
  *****************************************************************************/
 
-#include "amg.h"
+#ifndef _SOLVER_HEADER
+#define _SOLVER_HEADER
 
 
 /*--------------------------------------------------------------------------
- * writeysm_ (F to C)
+ * Data
  *--------------------------------------------------------------------------*/
 
-void     writeysm_(file_name, data, ia, ja, size, file_name_len)
-char    *file_name;
-double  *data;
-int     *ia;
-int     *ja;
-int     *size;
-int      file_name_len;
-{
-   Matrix  *matrix;
-
-
-   matrix = NewMatrix(data, ia, ja, *size);
-
-   WriteYSMP(file_name, matrix);
-
-   tfree(matrix);
-
-   return;
-}
+typedef void Data;
 
 /*--------------------------------------------------------------------------
- * writevec_ (F to C)
+ * Solver
  *--------------------------------------------------------------------------*/
 
-void     writevec_(file_name, data, size, file_name_len)
-char    *file_name;
-double  *data;
-int     *size;
-int      file_name_len;
+typedef struct
 {
-   Vector  *vector;
+   int          type;
+
+   double       stop_tolerance;
+
+   Data        *pcg_data;
+
+   Data        *amgs01_data;
+   
+} Solver;
+
+/*--------------------------------------------------------------------------
+ * Accessor functions for the Solver structure
+ *--------------------------------------------------------------------------*/
+
+#define SolverType(solver)           ((solver) -> type)
+
+#define SolverStopTolerance(solver)  ((solver) -> stop_tolerance)
+
+#define SolverPCGData(solver)        ((solver) -> pcg_data)
+
+#define SolverAMGS01Data(solver)     ((solver) -> amgs01_data)
 
 
-   vector = NewVector(data, *size);
-
-   WriteVec(file_name, vector);
-
-   tfree(vector);
-
-   return;
-}
-
+#endif

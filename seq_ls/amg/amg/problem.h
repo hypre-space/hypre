@@ -36,9 +36,9 @@ typedef struct
    int     *ip;
    int     *iv;
 
-   double  *x;
-   double  *y;
-   double  *z;
+   double  *xp;
+   double  *yp;
+   double  *zp;
 
 } Problem;
 
@@ -59,9 +59,9 @@ typedef struct
 #define ProblemIP(problem)             ((problem) -> ip)
 #define ProblemIV(problem)             ((problem) -> iv)
 
-#define ProblemX(problem)              ((problem) -> x)
-#define ProblemY(problem)              ((problem) -> y)
-#define ProblemZ(problem)              ((problem) -> z)
+#define ProblemXP(problem)             ((problem) -> xp)
+#define ProblemYP(problem)             ((problem) -> yp)
+#define ProblemZP(problem)             ((problem) -> zp)
 
 
 #endif

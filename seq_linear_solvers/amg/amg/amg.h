@@ -25,7 +25,10 @@
 #include "matrix.h"
 #include "vector.h"
 
+#include "globals.h"
+
 #include "problem.h"
+#include "solver.h"
 
 #include "amg_proto.h"
 #include "fortran.h"
