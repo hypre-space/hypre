@@ -148,7 +148,8 @@ int  impl_Hypre_StructMatrixBldr_New
    HYPRE_StructMatrix * M;
    int ierr = 0;
 
-   Hypre_StructMatrix_deleteReference( this->d_table->newmat );
+   if ( this->d_table->newmat != NULL )
+      Hypre_StructMatrix_deleteReference( this->d_table->newmat );
    this->d_table->newmat = Hypre_StructMatrix_new();
    this->d_table->matgood = 0;
    Hypre_StructMatrix_addReference( this->d_table->newmat );
