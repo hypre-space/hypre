@@ -16,28 +16,32 @@
 #include "fortran.h"
 
 /*--------------------------------------------------------------------------
- * HYPRE_CreateParCSRMatrix
+ * HYPRE_NewParCSRMatrix
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_createparcsrmatrix)( int *comm,
-                                           int *global_num_rows,
-                                           int *global_num_cols,
-                                           int *row_starts,
-                                           int *col_starts,
-                                           int *num_cols_offd,
-                                           int *num_nonzeros_diag,
-                                           int *num_nonzeros_offd
-                                           int *ierr )
+hypre_F90_IFACE(hypre_newparcsrmatrix)( int      *comm,
+                                        int      *global_num_rows,
+                                        int      *global_num_cols,
+                                        int      *row_starts,
+                                        int      *col_starts,
+                                        int      *num_cols_offd,
+                                        int      *num_nonzeros_diag,
+                                        int      *num_nonzeros_offd,
+                                        long int *matrix,
+                                        int      *ierr               )
 {
-   *ierr = (int) ( HYPRE_CreateParCSRMatrix( (MPI_Comm) *comm,
-                                             (int)      *global_num_rows,
-                                             (int)      *global_num_cols,
-                                             (int *)    row_starts,
-                                             (int *)    col_starts,
-                                             (int)      *num_cols_offd,
-                                             (int)      *num_nonzeros_diag,
-                                             (int)      *num_nonzeros_offd) );
+   *matrix = (HYPRE_ParCSRMatrix)
+             ( HYPRE_CreateParCSRMatrix( (MPI_Comm) *comm,
+                                         (int)      *global_num_rows,
+                                         (int)      *global_num_cols,
+                                         (int *)     row_starts,
+                                         (int *)     col_starts,
+                                         (int)      *num_cols_offd,
+                                         (int)      *num_nonzeros_diag,
+                                         (int)      *num_nonzeros_offd  ) );
+
+   *ierr = 0;
 }
 
 /*--------------------------------------------------------------------------
