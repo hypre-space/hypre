@@ -1,0 +1,71 @@
+#!/bin/sh
+#BHEADER***********************************************************************
+# (c) 1998   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+DIR=/home/casc/software/hypre
+
+#===========================================================================
+# Check out the repository source
+#===========================================================================
+
+if [ ! -d $DIR/src.new ]
+then
+
+  mkdir $DIR/src.new
+  chmod 700 src.new
+
+  cd $DIR/src.new
+  cvs checkout linear_solvers
+
+  # store a representative date for this version of the source
+  date > $DIR/src.new/VERSION_DATE
+
+fi
+
+#===========================================================================
+# Build the libraries
+#===========================================================================
+
+cd $DIR/src.new/utilities
+make -f Makefile.opt
+
+cd $DIR/src.new/struct_matrix_vector
+make -f Makefile.opt
+
+cd $DIR/src.new/struct_linear_solvers
+make -f Makefile.opt
+
+#===========================================================================
+# Install the libraries
+#===========================================================================
+
+if [ "$1" = "install" ]
+then
+
+  mv -f $DIR/src.new $DIR/src
+
+  cd $DIR/src/utilities
+  cp -f memory.h timer.h timing.h $DIR/include
+  cp -f *.a $DIR/lib
+  
+  cd $DIR/src/struct_matrix_vector
+  cp -f HYPRE_mv.h hypre_mv.h $DIR/include
+  cp -f *.a $DIR/lib
+  
+  cd $DIR/src/struct_linear_solvers
+  cp -f HYPRE_ls.h hypre_ls.h $DIR/include
+  cp -f *.a $DIR/lib
+
+  # Set permissions: give everybody `rx', and give group `w'
+  cd $DIR
+  chmod -fR a+rX,g+w .
+
+fi
+
+
