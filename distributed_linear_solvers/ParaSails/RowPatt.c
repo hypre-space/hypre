@@ -14,20 +14,9 @@
  *****************************************************************************/
 
 #include <stdlib.h>
-#include "mpi.h"
+#include "Common.h"
 #include "Hash.h"
 #include "RowPatt.h"
-
-/*--------------------------------------------------------------------------
- * ROWPATT_EXIT - Print message, flush all output streams, return -1 to
- * operating system, and exit to operating system.  Used internally only.
- *--------------------------------------------------------------------------*/
-
-#define ROWPATT_EXIT \
-{  printf("Exiting...\n"); \
-   fflush(NULL); \
-   MPI_Abort(MPI_COMM_WORLD, -1); \
-}
 
 /*--------------------------------------------------------------------------
  * RowPattCreate - Return (a pointer to) a pattern of a row with a maximum

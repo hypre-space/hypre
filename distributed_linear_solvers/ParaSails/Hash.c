@@ -19,19 +19,8 @@
 
 #include <stdlib.h>
 #include <assert.h>
-#include "mpi.h"
+#include "Common.h"
 #include "Hash.h"
-
-/*--------------------------------------------------------------------------
- * HASH_EXIT - Print message, flush all output streams, return -1 to
- * operating system, and exit to operating system.  Used internally only.
- *--------------------------------------------------------------------------*/
-
-#define HASH_EXIT \
-{  printf("Exiting...\n"); \
-   fflush(NULL); \
-   MPI_Abort(MPI_COMM_WORLD, -1); \
-}
 
 /*--------------------------------------------------------------------------
  * HashCreate - Return (a pointer to) a hash table of size "size".
@@ -96,7 +85,7 @@ int HashInsert(Hash *h, int key, int *inserted)
         if (loc == initloc)
         {
 	    printf("HashInsert: hash table of size %d is full.\n", h->size);
-	    HASH_EXIT;
+	    PARASAILS_EXIT;
 	}
     }
 

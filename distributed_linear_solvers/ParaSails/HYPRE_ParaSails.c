@@ -12,8 +12,7 @@
  *
  *****************************************************************************/
 
-#include "mpi.h"
-#include "utilities.h"
+#include "Common.h"
 #include "HYPRE_distributed_matrix_types.h"
 #include "HYPRE_distributed_matrix_protos.h"
 #include "HYPRE_ParaSails.h"

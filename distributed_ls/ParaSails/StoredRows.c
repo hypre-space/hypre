@@ -19,22 +19,11 @@
 
 #include <stdlib.h>
 #include <assert.h>
-#include "mpi.h"
+#include "Common.h"
 #include "Mem.h"
 #include "Hash.h"
 #include "Matrix.h"
 #include "StoredRows.h"
-
-/*--------------------------------------------------------------------------
- * STOREDROWS_EXIT - Print message, flush all output streams, return -1 to 
- * operating system, and exit to operating system.  Used internally only.
- *--------------------------------------------------------------------------*/
-
-#define STOREDROWS_EXIT \
-{  printf("Exiting...\n"); \
-   fflush(NULL); \
-   MPI_Abort(MPI_COMM_WORLD, -1); \
-}
 
 /*--------------------------------------------------------------------------
  * StoredRowsCreate - Return (a pointer to) a stored rows object.
@@ -107,7 +96,7 @@ void StoredRowsPut(StoredRows *p, int index, int len, int *ind, double *val)
     if (p->mat->beg_row <= index && index <= p->mat->end_row)
     {
         printf("StoredRowsPut: index %d is a local row.\n", index);
-        STOREDROWS_EXIT;
+        PARASAILS_EXIT;
     }
 
     loc = HashInsert(p->hash, index, &inserted);
@@ -137,7 +126,7 @@ void StoredRowsGet(StoredRows *p, int index, int *lenp, int **indp,
         if (loc == HASH_NOTFOUND)
         {
             printf("StoredRowsGet: index %d not found in hash table.\n", index);
-            STOREDROWS_EXIT;
+            PARASAILS_EXIT;
         }
 
         *lenp = p->len[loc];

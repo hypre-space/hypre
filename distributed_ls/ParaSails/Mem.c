@@ -33,21 +33,8 @@
 
 #include <assert.h>
 #include <stdlib.h>
-#include "mpi.h"
+#include "Common.h"
 #include "Mem.h"
-
-#define MAX(a,b) ((a)>(b)?(a):(b))
-
-/*--------------------------------------------------------------------------
- * MEM_EXIT - Print message, flush all output streams, return -1 to 
- * operating system, and exit to operating system.  Used internally only.
- *--------------------------------------------------------------------------*/
-
-#define MEM_EXIT \
-{  printf("Exiting...\n"); \
-   fflush(NULL); \
-   MPI_Abort(MPI_COMM_WORLD, -1); \
-}
 
 /*--------------------------------------------------------------------------
  * MemCreate - Return (a pointer to) a memory pool object.
@@ -105,7 +92,7 @@ char *MemAlloc(Mem *m, int size)
         {
 	    printf("MemAlloc: max number of blocks %d exceeded.\n",
 	        MEM_MAXBLOCKS);
-	    MEM_EXIT;
+	    PARASAILS_EXIT;
         }
 
 	/* Size of requested block */
@@ -116,7 +103,7 @@ char *MemAlloc(Mem *m, int size)
         if (m->avail == NULL)
         {
 	    printf("MemAlloc: request for %d bytes failed.\n", req);
-	    MEM_EXIT;
+	    PARASAILS_EXIT;
         }
 
         m->blocks[m->num_blocks] = m->avail;

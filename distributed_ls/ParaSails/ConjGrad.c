@@ -14,11 +14,11 @@
  *****************************************************************************/
 
 #include "math.h"
-#include "mpi.h"
+#include "Common.h"
 #include "Matrix.h"
 #include "ParaSails.h"
 
-#ifdef HYPRE_RS6000
+#ifdef ESSL
 #include <essl.h>
 #else
 double ddot_(int *, double *, int *, double *, int *);
@@ -31,7 +31,7 @@ static double InnerProd(int n, double *x, double *y, MPI_Comm comm)
 {
     double local_result, result;
 
-#ifdef HYPRE_RS6000
+#ifdef ESSL
     local_result = ddot(n, x, 1, y, 1);
 #else
     int one = 1;
@@ -45,7 +45,7 @@ static double InnerProd(int n, double *x, double *y, MPI_Comm comm)
 
 static void CopyVector(int n, double *x, double *y)
 {
-#ifdef HYPRE_RS6000
+#ifdef ESSL
     dcopy(n, x, 1, y, 1);
 #else
     int one = 1;
@@ -55,7 +55,7 @@ static void CopyVector(int n, double *x, double *y)
 
 static void ScaleVector(int n, double alpha, double *x)
 {
-#ifdef HYPRE_RS6000
+#ifdef ESSL
     dscal(n, alpha, x, 1);
 #else
     int one = 1;
@@ -65,7 +65,7 @@ static void ScaleVector(int n, double alpha, double *x)
 
 static void Axpy(int n, double alpha, double *x, double *y)
 {
-#ifdef HYPRE_RS6000
+#ifdef ESSL
     daxpy(n, alpha, x, 1, y, 1);
 #else
     int one = 1;

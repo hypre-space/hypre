@@ -12,36 +12,20 @@
  * processor.  Direct access to these rows is available, and is accomplished 
  * through a hash table.
  *
- * The local pruned rows are stored in first num_local locations of the 
- * data structure, where num_local is the number of local rows.
+ * The local pruned rows are stored in the first num_local locations.
+ * num_local is added to the hash table locations to get the storage locations
+ * of the external pruned rows.
  *
  *****************************************************************************/
 
 #include <stdlib.h>
 #include <assert.h>
-#include "mpi.h"
+#include "Common.h"
 #include "Mem.h"
 #include "Hash.h"
 #include "Matrix.h"
 #include "DiagScale.h"
 #include "PrunedRows.h"
-
-#define ABS(x) (((x)<0)?(-(x)):(x))
-
-/*--------------------------------------------------------------------------
- * PRUNEDROWS_EXIT - Print message, flush all output streams, return -1 to 
- * operating system, and exit to operating system.  Used internally only.
- *
- * The local pruned rows are stored in the first num_local locations.
- * num_local is added to the hash table locations to get the storage locations
- * of the external pruned rows.
- *--------------------------------------------------------------------------*/
-
-#define PRUNEDROWS_EXIT \
-{  printf("Exiting...\n"); \
-   fflush(NULL); \
-   MPI_Abort(MPI_COMM_WORLD, -1); \
-}
 
 /*--------------------------------------------------------------------------
  * PrunedRowsCreate - Return (a pointer to) a pruned rows object.
@@ -138,7 +122,7 @@ void PrunedRowsPut(PrunedRows *p, int index, int len, int *ind)
     if (p->mat->beg_row <= index && index <= p->mat->end_row)
     {
         printf("PrunedRowsPut: index %d is a local row.\n", index);
-        PRUNEDROWS_EXIT;
+        PARASAILS_EXIT;
     }
 
     loc = HashInsert(p->hash, index, &inserted);
@@ -170,7 +154,7 @@ void PrunedRowsGet(PrunedRows *p, int index, int *lenp, int **indp)
         if (loc == HASH_NOTFOUND)
         {
             printf("PrunedRowsGet: index %d not found in hash table.\n", index);
-            PRUNEDROWS_EXIT;
+            PARASAILS_EXIT;
         }
 
 	loc += p->num_local;

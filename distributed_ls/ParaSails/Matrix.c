@@ -22,23 +22,11 @@
 #include <stdlib.h>
 #include <memory.h>
 #include <assert.h>
-#include "mpi.h"
+#include "Common.h"
 #include "Matrix.h"
 
 /* prototypes for some static functions used in this file */
 static void MatrixMatvecSetup(Matrix *mat);
-
-
-/*--------------------------------------------------------------------------
- * MATRIX_EXIT - Print message, flush all output streams, return -1 to 
- * operating system, and exit to operating system.  Used internally only.
- *--------------------------------------------------------------------------*/
-
-#define MATRIX_EXIT \
-{  printf("Exiting...\n"); \
-   fflush(NULL); \
-   MPI_Abort(MPI_COMM_WORLD, -1); \
-}
 
 /*--------------------------------------------------------------------------
  * MatrixCreate - Return (a pointer to) a matrix object.
@@ -148,7 +136,7 @@ int MatrixRowPe(Matrix *mat, int row)
     }
 
     printf("MatrixRowPe: could not map row %d.\n", row);
-    MATRIX_EXIT;
+    PARASAILS_EXIT;
 
     return -1; /* for picky compilers */
 }

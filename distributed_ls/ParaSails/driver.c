@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <assert.h>
-#include "mpi.h"
+#include "Common.h"
 #include "Matrix.h"
 #include "ParaSails.h"
 #include "ConjGrad.h"

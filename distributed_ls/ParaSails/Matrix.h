@@ -13,7 +13,7 @@
  *****************************************************************************/
 
 #include <stdio.h>
-#include "mpi.h"
+#include "Common.h"
 #include "Mem.h"
 #include "Hash.h"
 
@@ -60,25 +60,6 @@ typedef struct
     MPI_Status  *statuses;
 }
 Matrix;
-
-#if 0 /* old */
-typedef struct
-{
-    MPI_Comm comm;
-
-    int      beg_row;
-    int      end_row;
-    int     *beg_rows;
-    int     *end_rows;
-
-    Mem     *mem;
-
-    int     *lens;
-    int    **inds;
-    double **vals;
-}
-Matrix;
-#endif
 
 Matrix *MatrixCreate(MPI_Comm comm, int beg_row, int end_row);
 void MatrixDestroy(Matrix *mat);

@@ -8,39 +8,19 @@
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
- * DiagScale - Diagonal scaling.  Provide  
- * to 
+ * DiagScale - Diagonal scaling.
  *
  *****************************************************************************/
 
 #include <stdlib.h>
 #include <assert.h>
 #include "math.h"
-#include "mpi.h"
+#include "Common.h"
 #include "Hash.h"
 #include "Matrix.h"
 #include "RowPatt.h"
 #include "DiagScale.h"
 #include "OrderStat.h"
-
-#define MAX_NPES 1024
-#define DIAG_VALS_TAG 222
-#define DIAG_INDS_TAG 223
-
-#define DIAGSCALE_MAXLEN 50021  /* a prime number */
-
-#define ABS(x) (((x)<0)?(-(x)):(x))
-
-/*--------------------------------------------------------------------------
- * DIAGSCALE_EXIT - Print message, flush all output streams, return -1 to 
- * operating system, and exit to operating system.  Used internally only.
- *--------------------------------------------------------------------------*/
-
-#define DIAGSCALE_EXIT \
-{  printf("Exiting...\n"); \
-   fflush(NULL); \
-   MPI_Abort(MPI_COMM_WORLD, -1); \
-}
 
 /*--------------------------------------------------------------------------
  * ExchangeDiagEntries - Given a list of indices of diagonal entries required

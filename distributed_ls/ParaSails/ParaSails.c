@@ -17,7 +17,7 @@
 #include <strings.h>
 #include <assert.h>
 #include <math.h>
-#include "mpi.h"
+#include "Common.h"
 #include "Matrix.h"
 #include "RowPatt.h"
 #include "StoredRows.h"
@@ -25,19 +25,9 @@
 #include "OrderStat.h"
 #include "ParaSails.h"
 
-#ifdef HYPRE_RS6000
+#ifdef ESSL
 #include <essl.h>
 #endif
-
-#define ROW_REQ_TAG    222
-#define ROW_REPI_TAG   223
-#define ROW_REPV_TAG   224
-
-#define ROWPATT_MAXLEN 50021 /* a prime number */
-
-#define ABS(x) (((x)<0)?(-(x)):(x))
-#define MAX(a,b) ((a)>(b)?(a):(b))
-#define MIN(a,b) ((a)<(b)?(a):(b))
 
 /*--------------------------------------------------------------------------
  * SendRequests - Given a list of indices "reqind" of length "reqlen",
@@ -618,7 +608,7 @@ static void ComputeValues(StoredRows *stored_rows, Matrix *mat)
 
     int inserted;
 
-#ifndef HYPRE_RS6000
+#ifndef ESSL
     char uplo = 'L';
     int one = 1;
     int info;
@@ -652,7 +642,7 @@ static void ComputeValues(StoredRows *stored_rows, Matrix *mat)
     index = (int *) malloc((4*maxlen+1) * sizeof(int));
     local = (int *) malloc((4*maxlen+1) * sizeof(int));
 
-#ifdef HYPRE_RS6000
+#ifdef ESSL
     ahat = (double *) malloc(maxlen*(maxlen+1)/2 * sizeof(double));
 #else
     ahat = (double *) malloc(maxlen*maxlen * sizeof(double));
@@ -672,7 +662,7 @@ static void ComputeValues(StoredRows *stored_rows, Matrix *mat)
 	}
 
 	/* Initialize ahat to zero */
-#ifdef HYPRE_RS6000
+#ifdef ESSL
         bzero(ahat, len*(len+1)/2 * sizeof(double));
 #else
         bzero(ahat, len*len * sizeof(double));
@@ -685,7 +675,7 @@ static void ComputeValues(StoredRows *stored_rows, Matrix *mat)
         for (i=0; i<len; i++)
         {
             StoredRowsGet(stored_rows, ind[i], &len2, &ind2, &val2);
-#ifdef HYPRE_RS6000
+#ifdef ESSL
             for (j=0; j<len2; j++)
             {
                 loc = HashLookup(hash, ind2[j]);
@@ -728,7 +718,7 @@ static void ComputeValues(StoredRows *stored_rows, Matrix *mat)
         val[local[loc]] = 1.0;
 
         time0 = MPI_Wtime();
-#ifdef HYPRE_RS6000
+#ifdef ESSL
         dppf(ahat, len, 1);
         dpps(ahat, len, val, 1);
 #else
