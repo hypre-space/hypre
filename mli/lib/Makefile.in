@@ -1,0 +1,44 @@
+# Generated automatically from Makefile.in by configure.
+#BHEADER***********************************************************************
+# (c) 2001   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+.SUFFIXES:
+.SUFFIXES: .C .c .f .o
+
+RANLIB = @RANLIB@
+
+OBJS = mli.o           mli_oneLevel.o    cmli.o         mli_matrix.o \
+       mli_vector.o    mli_jacobi.o      mli_method.o   mli_fedata.o \
+       mli_utils.o     mli_amgsa.o       mli_gs.o       mli_sgs.o \
+       mli_parasails.o mli_schwarz.o     mli_solver.o   mli_amgsa_coarsen1.o \
+       mli_superlu.o   mli_amgsa_calib.o mli_mls.o      mli_matrix_utils.o \
+       mli_elem_aggl.o mli_fedata_utils.o
+
+##################################################################
+# Targets
+##################################################################
+
+all: libHYPRE_mli.a 
+ 
+install: all
+ 
+clean:
+	@rm -f *.o libHYPRE_mli.a
+
+veryclean: clean
+
+##################################################################
+# Rules
+##################################################################
+
+libHYPRE_mli.a: ${OBJS}
+	@echo  "Building $@ ... "
+	ar -rcu $@ ${OBJS}
+	${RANLIB} $@
+ 
