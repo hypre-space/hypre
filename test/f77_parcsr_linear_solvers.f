@@ -56,8 +56,8 @@ c     HYPRE_Solver        precond
 
       integer*8           solver
       integer*8           precond
-      integer*8           row_starts
       integer*8           grid_relax_points
+      integer*8           row_starts
 
       double precision    values(3)
 
@@ -101,7 +101,8 @@ c-----------------------------------------------------------------------
       n_pre  = 1
       n_post = 1
 
-      solver_id = 0
+      solver_id = 3
+      max_levels = 25
 
 c-----------------------------------------------------------------------
 c     Read options
