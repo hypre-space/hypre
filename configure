@@ -476,7 +476,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os STATICONLY_TRUE STATICONLY_FALSE MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO AMTAR install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot PACKAGE_DATETIME CC CXX F77 babeldir subdirs BABEL_DIR BABEL_HYPRE_INCLUDES BABELLIBFLAGS HYPRE_BABELLIBDIR BABELDIR LIBDIRNEEDED_TRUE LIBDIRNEEDED_FALSE USE_FEI_BASE_DIR_DEFAULT_TRUE USE_FEI_BASE_DIR_DEFAULT_FALSE USE_FEI_LIB_DIR_DEFAULT_TRUE USE_FEI_LIB_DIR_DEFAULT_FALSE USE_FEI_INC_DIR_DEFAULT_TRUE USE_FEI_INC_DIR_DEFAULT_FALSE CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP LN_S CXXFLAGS ac_ct_CXX FFLAGS ac_ct_F77 FLIBS EGREP ECHO AR ac_ct_AR RANLIB ac_ct_RANLIB DLLTOOL ac_ct_DLLTOOL AS ac_ct_AS OBJDUMP ac_ct_OBJDUMP CXXCPP LIBTOOL LIBTOOL_DEPS POW_LIB LIBOBJS MPILIBS BLAS_LIBS BLASNEEDED_TRUE BLASNEEDED_FALSE BLASLIBFLAGS LAPACK_LIBS LAPACKNEEDED_TRUE LAPACKNEEDED_FALSE LAPACKLIBFLAGS LIBM CCLD CXXLD MLI_DIR MLILIBS MLILIBDIRS MLIINCLUDE FEI_BASE_DIR FEI_LIB_DIR FEI_INC_DIR DOCSDIR_TRUE DOCSDIR_FALSE TOOLSDIR_TRUE TOOLSDIR_FALSE LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os STATICONLY_TRUE STATICONLY_FALSE MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO AMTAR install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot PACKAGE_DATETIME CC CXX F77 subdirs BABELDIR LIBDIRNEEDED_TRUE LIBDIRNEEDED_FALSE USE_FEI_BASE_DIR_DEFAULT_TRUE USE_FEI_BASE_DIR_DEFAULT_FALSE USE_FEI_LIB_DIR_DEFAULT_TRUE USE_FEI_LIB_DIR_DEFAULT_FALSE USE_FEI_INC_DIR_DEFAULT_TRUE USE_FEI_INC_DIR_DEFAULT_FALSE CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP LN_S CXXFLAGS ac_ct_CXX FFLAGS ac_ct_F77 FLIBS EGREP ECHO AR ac_ct_AR RANLIB ac_ct_RANLIB DLLTOOL ac_ct_DLLTOOL AS ac_ct_AS OBJDUMP ac_ct_OBJDUMP CXXCPP LIBTOOL LIBTOOL_DEPS POW_LIB LIBOBJS MPILIBS BLAS_LIBS BLASNEEDED_TRUE BLASNEEDED_FALSE BLASLIBFLAGS LAPACK_LIBS LAPACKNEEDED_TRUE LAPACKNEEDED_FALSE LAPACKLIBFLAGS LIBM CCLD CXXLD MLI_DIR MLILIBS MLILIBDIRS MLIINCLUDE FEI_BASE_DIR FEI_LIB_DIR FEI_INC_DIR DOCSDIR_TRUE DOCSDIR_FALSE TOOLSDIR_TRUE TOOLSDIR_FALSE LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -2119,15 +2119,15 @@ _ACEOF
 
 
 cat >>confdefs.h <<\_ACEOF
-#define PACKAGE_TIME "10:35:00"
+#define PACKAGE_TIME "10:36:00"
 _ACEOF
 
 
 cat >>confdefs.h <<\_ACEOF
-#define PACKAGE_DATETIME "2004/02/14 10:35:00"
+#define PACKAGE_DATETIME "2004/02/14 10:36:00"
 _ACEOF
 
-PACKAGE_DATETIME="2004/02/14 10:35:00"
+PACKAGE_DATETIME="2004/02/14 10:36:00"
 
 
 if test "x$CC" != "x" ||
@@ -3311,8 +3311,6 @@ done
   fi
 
 
-HYPRE_BABELLIBDIR=""
-BABEL_RUNTIME_DIR=""
 BABELDIR=""
 
 # Check whether --with-babel or --without-babel was given.
@@ -3320,23 +3318,6 @@ if test "${with_babel+set}" = set; then
   withval="$with_babel"
    if test "$withval" = "yes"; then
     casc_using_babel=yes
-    BABEL_INSTALL_DIR=`pwd`/babel-runtime
-    BABEL_HYPRE_INCLUDES="\
-    -I\$ac_top_srcdir/hypre/include\
-    -I$BABEL_INSTALL_DIR/sidl\
-    -I\$ac_top_srcdir/babel/bHYPRE"
-    BABEL_LIB_DIR="`pwd`/hypre/lib"
-    BABELLIBFLAGS="\
-    -LHYPRE_TOP_SRC_DIR/babel/bHYPREClient-C -lbHYPREClient-C\
-    -LHYPRE_TOP_SRC_DIR/babel/bHYPREClient-F -lbHYPREClient-F\
-    -LHYPRE_TOP_SRC_DIR/babel/bHYPRE -lbHYPRE\
-    -L${BABEL_LIB_DIR} -lsidl"
-
-    babeldir="${BABEL_INSTALL_DIR}"
-
-
-    HYPRE_BABELLIBDIR="`pwd`/babel"
-    BABEL_RUNTIME_DIR="`pwd`/babel-runtime"
 
     BABELDIR="babel-runtime babel"
     export CC CXX F77 F90 CPP LD
@@ -3350,10 +3331,6 @@ else
   casc_using_babel=no
 
 fi;
-
-
-
-
 
 
 
@@ -6327,7 +6304,7 @@ fi
 
 
 # Provide some information about the compiler.
-echo "$as_me:6330:" \
+echo "$as_me:6307:" \
      "checking for Fortran 77 compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -6523,7 +6500,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_verb"
-(eval echo $as_me:6526: \"$ac_link\") >&5
+(eval echo $as_me:6503: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -6601,7 +6578,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_cv_prog_f77_v"
-(eval echo $as_me:6604: \"$ac_link\") >&5
+(eval echo $as_me:6581: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -7831,7 +7808,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 7834 "configure"' > conftest.$ac_ext
+  echo '#line 7811 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -9757,11 +9734,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9760: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9737: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:9764: \$? = $ac_status" >&5
+   echo "$as_me:9741: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -9989,11 +9966,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9992: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9969: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:9996: \$? = $ac_status" >&5
+   echo "$as_me:9973: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -10056,11 +10033,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:10059: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:10036: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:10063: \$? = $ac_status" >&5
+   echo "$as_me:10040: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -12246,7 +12223,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 12249 "configure"
+#line 12226 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12344,7 +12321,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 12347 "configure"
+#line 12324 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -14516,11 +14493,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14519: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14496: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:14523: \$? = $ac_status" >&5
+   echo "$as_me:14500: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -14583,11 +14560,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14586: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14563: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:14590: \$? = $ac_status" >&5
+   echo "$as_me:14567: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -15968,7 +15945,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 15971 "configure"
+#line 15948 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -16066,7 +16043,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 16069 "configure"
+#line 16046 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -16888,11 +16865,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:16891: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:16868: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:16895: \$? = $ac_status" >&5
+   echo "$as_me:16872: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -16955,11 +16932,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:16958: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:16935: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:16962: \$? = $ac_status" >&5
+   echo "$as_me:16939: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -18921,11 +18898,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:18924: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:18901: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:18928: \$? = $ac_status" >&5
+   echo "$as_me:18905: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -19153,11 +19130,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:19156: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:19133: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:19160: \$? = $ac_status" >&5
+   echo "$as_me:19137: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -19220,11 +19197,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:19223: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:19200: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:19227: \$? = $ac_status" >&5
+   echo "$as_me:19204: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -21410,7 +21387,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 21413 "configure"
+#line 21390 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -21508,7 +21485,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 21511 "configure"
+#line 21488 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -26911,12 +26888,7 @@ s,@PACKAGE_DATETIME@,$PACKAGE_DATETIME,;t t
 s,@CC@,$CC,;t t
 s,@CXX@,$CXX,;t t
 s,@F77@,$F77,;t t
-s,@babeldir@,$babeldir,;t t
 s,@subdirs@,$subdirs,;t t
-s,@BABEL_DIR@,$BABEL_DIR,;t t
-s,@BABEL_HYPRE_INCLUDES@,$BABEL_HYPRE_INCLUDES,;t t
-s,@BABELLIBFLAGS@,$BABELLIBFLAGS,;t t
-s,@HYPRE_BABELLIBDIR@,$HYPRE_BABELLIBDIR,;t t
 s,@BABELDIR@,$BABELDIR,;t t
 s,@LIBDIRNEEDED_TRUE@,$LIBDIRNEEDED_TRUE,;t t
 s,@LIBDIRNEEDED_FALSE@,$LIBDIRNEEDED_FALSE,;t t

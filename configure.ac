@@ -4,7 +4,7 @@
 m4_define(HYPRE_NAME, hypre)
 m4_define(HYPRE_VERSION, 1.8.3b)
 m4_define(HYPRE_DATE, 2004/02/14)
-m4_define(HYPRE_TIME, 10:35:00)
+m4_define(HYPRE_TIME, 10:36:00)
 m4_define(HYPRE_DATETIME, [HYPRE_DATE HYPRE_TIME])
 m4_define(HYPRE_BUGS,http://www-casc.llnl.gov/bugs/enter_bug.cgi?product=HYPRE)
 m4_define(HYPRE_TOP_SRC_DIR, `pwd`)
@@ -58,30 +58,11 @@ ACX_PURIFY
 
 ACX_ASCI_HOST
 
-HYPRE_BABELLIBDIR=""
-BABEL_RUNTIME_DIR=""
 BABELDIR=""
 AC_ARG_WITH(babel,
 AC_HELP_STRING([--with-babel],[use babel]),
 [ if test "$withval" = "yes"; then
     casc_using_babel=yes
-    BABEL_INSTALL_DIR=HYPRE_TOP_SRC_DIR/babel-runtime
-    BABEL_HYPRE_INCLUDES="\
-    -I\$ac_top_srcdir/hypre/include\
-    -I$BABEL_INSTALL_DIR/sidl\
-    -I\$ac_top_srcdir/babel/bHYPRE"
-    BABEL_LIB_DIR="HYPRE_TOP_SRC_DIR/hypre/lib"
-    BABELLIBFLAGS="\
-    -LHYPRE_TOP_SRC_DIR/babel/bHYPREClient-C -lbHYPREClient-C\
-    -LHYPRE_TOP_SRC_DIR/babel/bHYPREClient-F -lbHYPREClient-F\
-    -LHYPRE_TOP_SRC_DIR/babel/bHYPRE -lbHYPRE\
-    -L${BABEL_LIB_DIR} -lsidl"
- 
-    babeldir="${BABEL_INSTALL_DIR}"
-    AC_SUBST(babeldir)
-
-    HYPRE_BABELLIBDIR="HYPRE_TOP_SRC_DIR/babel"
-    BABEL_RUNTIME_DIR="HYPRE_TOP_SRC_DIR/babel-runtime"
 
     BABELDIR="babel-runtime babel"
     export CC CXX F77 F90 CPP LD
@@ -89,12 +70,6 @@ AC_HELP_STRING([--with-babel],[use babel]),
     AC_CONFIG_SUBDIRS(babel-runtime)
   fi], [casc_using_babel=no]
 )
-dnl BABEL-related header files, libraries and directories for those
-dnl libraries
-AC_SUBST(BABEL_DIR)
-AC_SUBST(BABEL_HYPRE_INCLUDES)
-AC_SUBST(BABELLIBFLAGS)
-AC_SUBST(HYPRE_BABELLIBDIR)
 AC_SUBST(BABELDIR)
 
 dnl option to ignore the lib directory (speed-up builds/testing)
