@@ -1076,12 +1076,6 @@ int HYPRE_LSI_BlockP::solveBSolve(HYPRE_IJVector x1,HYPRE_IJVector x2,
 
    if ( A11Solver_ == NULL )
    {
-      HYPRE_ParCSRPCGCreate(mpi_comm, &A11Solver_);
-      HYPRE_ParCSRPCGSetMaxIter(A11Solver_, max_iter );
-      HYPRE_ParCSRPCGSetTol(A11Solver_, tol);
-      HYPRE_ParCSRPCGSetLogging(A11Solver_, 1);
-      HYPRE_ParCSRPCGSetRelChange(A11Solver_, 0);
-      HYPRE_ParCSRPCGSetTwoNorm(A11Solver_, 1);
       HYPRE_BoomerAMGCreate(&A11Precond_);
       HYPRE_BoomerAMGSetMaxIter(A11Precond_, 10);
       HYPRE_BoomerAMGSetCycleType(A11Precond_, 1);
@@ -1100,9 +1094,30 @@ int HYPRE_LSI_BlockP::solveBSolve(HYPRE_IJVector x1,HYPRE_IJVector x2,
       relaxWt = (double *) malloc( 25 * sizeof(double) );
       for ( i = 0; i < 25; i++ ) relaxWt[i] = 0.0;
       HYPRE_BoomerAMGSetRelaxWeight(A11Precond_, relaxWt);
-      HYPRE_ParCSRPCGSetPrecond(A11Solver_, HYPRE_BoomerAMGSolve,
-                                HYPRE_BoomerAMGSetup, A11Precond_);
-      HYPRE_ParCSRPCGSetup(A11Solver_, A11mat_csr, f1_csr, x1_csr);
+      if ( scheme_ == HYPRE_INCFLOW_BTRI )
+      {
+         HYPRE_ParCSRGMRESCreate(mpi_comm, &A11Solver_);
+         HYPRE_ParCSRGMRESSetMaxIter(A11Solver_, max_iter );
+         HYPRE_ParCSRGMRESSetTol(A11Solver_, tol);
+         HYPRE_ParCSRGMRESSetLogging(A11Solver_, 1);
+         HYPRE_ParCSRGMRESSetKDim(A11Solver_, 50);
+         HYPRE_ParCSRGMRESSetPrecond(A11Solver_, HYPRE_BoomerAMGSolve,
+                                     HYPRE_BoomerAMGSetup, A11Precond_);
+         HYPRE_ParCSRGMRESSetup(A11Solver_, A11mat_csr, f1_csr, x1_csr);
+
+      }
+      else
+      {
+         HYPRE_ParCSRPCGCreate(mpi_comm, &A11Solver_);
+         HYPRE_ParCSRPCGSetMaxIter(A11Solver_, max_iter );
+         HYPRE_ParCSRPCGSetTol(A11Solver_, tol);
+         HYPRE_ParCSRPCGSetLogging(A11Solver_, 1);
+         HYPRE_ParCSRPCGSetRelChange(A11Solver_, 0);
+         HYPRE_ParCSRPCGSetTwoNorm(A11Solver_, 1);
+         HYPRE_ParCSRPCGSetPrecond(A11Solver_, HYPRE_BoomerAMGSolve,
+                                   HYPRE_BoomerAMGSetup, A11Precond_);
+         HYPRE_ParCSRPCGSetup(A11Solver_, A11mat_csr, f1_csr, x1_csr);
+      }
    }
    if ( A22Solver_ == NULL )
    {
@@ -1147,8 +1162,8 @@ int HYPRE_LSI_BlockP::solveBSolve(HYPRE_IJVector x1,HYPRE_IJVector x2,
    {
       HYPRE_ParCSRMatrixMatvec(-1.0, A12mat_csr, x2_csr, 1.0, f1_csr);
    }
-   //HYPRE_ParCSRPCGSolve(A11Solver_, A11mat_csr, f1_csr, x1_csr);
-   solveUsingSuperLU(A11mat_, F1vec_, X1vec_);
+   HYPRE_ParCSRPCGSolve(A11Solver_, A11mat_csr, f1_csr, x1_csr);
+   //solveUsingSuperLU(A11mat_, F1vec_, X1vec_);
    return 0;
 }
 
@@ -1214,9 +1229,30 @@ int HYPRE_LSI_BlockP::solveBISolve(HYPRE_IJVector x1,HYPRE_IJVector x2,
       relaxWt = (double *) malloc( 25 * sizeof(double) );
       for ( i = 0; i < 25; i++ ) relaxWt[i] = 0.0;
       HYPRE_BoomerAMGSetRelaxWeight(A11Precond_, relaxWt);
-      HYPRE_ParCSRPCGSetPrecond(A11Solver_, HYPRE_BoomerAMGSolve,
-                                HYPRE_BoomerAMGSetup, A11Precond_);
-      HYPRE_ParCSRPCGSetup(A11Solver_, A11mat_csr, f1_csr, x1_csr);
+      if ( scheme_ == HYPRE_INCFLOW_BTRI )
+      {
+         HYPRE_ParCSRGMRESCreate(mpi_comm, &A11Solver_);
+         HYPRE_ParCSRGMRESSetMaxIter(A11Solver_, max_iter );
+         HYPRE_ParCSRGMRESSetTol(A11Solver_, tol);
+         HYPRE_ParCSRGMRESSetLogging(A11Solver_, 1);
+         HYPRE_ParCSRGMRESSetKDim(A11Solver_, 50);
+         HYPRE_ParCSRGMRESSetPrecond(A11Solver_, HYPRE_BoomerAMGSolve,
+                                     HYPRE_BoomerAMGSetup, A11Precond_);
+         HYPRE_ParCSRGMRESSetup(A11Solver_, A11mat_csr, f1_csr, x1_csr);
+
+      }
+      else
+      {
+         HYPRE_ParCSRPCGCreate(mpi_comm, &A11Solver_);
+         HYPRE_ParCSRPCGSetMaxIter(A11Solver_, max_iter );
+         HYPRE_ParCSRPCGSetTol(A11Solver_, tol);
+         HYPRE_ParCSRPCGSetLogging(A11Solver_, 1);
+         HYPRE_ParCSRPCGSetRelChange(A11Solver_, 0);
+         HYPRE_ParCSRPCGSetTwoNorm(A11Solver_, 1);
+         HYPRE_ParCSRPCGSetPrecond(A11Solver_, HYPRE_BoomerAMGSolve,
+                                   HYPRE_BoomerAMGSetup, A11Precond_);
+         HYPRE_ParCSRPCGSetup(A11Solver_, A11mat_csr, f1_csr, x1_csr);
+      }
    }
    if ( A22Solver_ == NULL )
    {
