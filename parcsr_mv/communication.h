@@ -1,3 +1,6 @@
+#ifndef HYPRE_PAR_CSR_COMMUNICATION_HEADER
+#define HYPRE_PAR_CSR_COMMUNICATION_HEADER
+
 /*--------------------------------------------------------------------------
  * hypre_ParCSRCommPkg:
  *   Structure containing information for doing communications
@@ -74,3 +77,4 @@ typedef struct
 #define hypre_ParCSRCommHandleRequests(comm_handle)    (comm_handle -> requests)
 #define hypre_ParCSRCommHandleRequest(comm_handle, i)  (comm_handle -> requests[i])
 
+#endif /* HYPRE_PAR_CSR_COMMUNICATION_HEADER */
