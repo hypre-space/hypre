@@ -8,6 +8,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 #include <stdio.h>
 
 #include "parcsr_mv/parcsr_mv.h"
@@ -22,8 +23,8 @@ MLI_Solver_Jacobi::MLI_Solver_Jacobi() : MLI_Solver(MLI_SOLVER_JACOBI_ID)
 {
    Amat             = NULL;
    nsweeps          = 1;
-   relax_weights    = new double[1];
-   relax_weights[0] = 0.5;
+   relax_weights    = new double[10];
+   for ( int i = 0; i < 10; i++ ) relax_weights[i] = 0.5;
 }
 
 /******************************************************************************

@@ -21,6 +21,7 @@
  * --------------------------------------------------------------------------*/
 
 #include <string.h>
+#include <strings.h>
 #include "base/mli_defs.h"
 #include "amgs/mli_method_amgsa.h"
 #include "mli_solver_arpacksuperlu.h"
