@@ -469,7 +469,9 @@ hypre_BoomerAMGCreateSmoothVecs(void         *data,
    double rlx_wt, omega;
 
    int rlx_type;
-   int *smooth_option;
+   int smooth_type;
+   int smooth_option = 0;
+   int smooth_num_levels;
    HYPRE_Solver *smoother;
 
    int debug_flag = hypre_ParAMGDataDebugFlag(amg_data);
@@ -484,12 +486,13 @@ hypre_BoomerAMGCreateSmoothVecs(void         *data,
       printf("Creating smooth dirs, %d sweeps, %d samples\n", num_sweeps, 
          nsamples);
 
-   smooth_option = hypre_ParAMGDataSmoothOption(amg_data);
-   if (smooth_option[0] > 0)
+   smooth_type = hypre_ParAMGDataSmoothType(amg_data);
+   smooth_num_levels = hypre_ParAMGDataSmoothNumLevels(amg_data);
+   if (smooth_num_levels > level)
    {
+      smooth_option = smooth_type;
       smoother = hypre_ParAMGDataSmoother(amg_data);
-      if (smooth_option[level] != -1)
-	 num_sweeps = hypre_ParAMGDataSmoothNumSweep(amg_data);
+      num_sweeps = hypre_ParAMGDataSmoothNumSweeps(amg_data);
    }
    rlx_type = hypre_ParAMGDataGridRelaxType(amg_data)[0];
    rlx_wt = hypre_ParAMGDataRelaxWeight(amg_data)[level];
@@ -528,7 +531,7 @@ hypre_BoomerAMGCreateSmoothVecs(void         *data,
 
        for (i=0; i<num_sweeps; i++)
        {
-	   if (smooth_option[level] == 6)
+	   if (smooth_option == 6)
 	   {
 	      HYPRE_SchwarzSolve(smoother[level],
 			(HYPRE_ParCSRMatrix) A, 

@@ -58,12 +58,14 @@ hypre_BoomerAMGCGRelaxWt( void              *amg_vdata,
 
    int       Solve_err_flag;
    int       i, j, jj;
-   int       num_sweep;
+   int       num_sweeps;
    int       relax_type;
    int       local_size;
    int       old_size;
    int       my_id = 0;
-   int       smooth_option;
+   int       smooth_type;
+   int       smooth_num_levels;
+   int       smooth_option = 0;
 
    double    alpha;
    double    beta;
@@ -115,7 +117,8 @@ hypre_BoomerAMGCGRelaxWt( void              *amg_vdata,
    hypre_ParVectorSetPartitioningOwner(Ztemp,0);
 
    grid_relax_type     = hypre_ParAMGDataGridRelaxType(amg_data);
-   smooth_option       = hypre_ParAMGDataSmoothOption(amg_data)[level]; 
+   smooth_type         = hypre_ParAMGDataSmoothType(amg_data);
+   smooth_num_levels   = hypre_ParAMGDataSmoothNumLevels(amg_data);
 
    /* Initialize */
 
@@ -124,17 +127,18 @@ hypre_BoomerAMGCGRelaxWt( void              *amg_vdata,
    comm = hypre_ParCSRMatrixComm(A);
    MPI_Comm_rank(comm,&my_id);
 
-   if (smooth_option > 0)
+   if (smooth_num_levels > level)
    {
       smoother = hypre_ParAMGDataSmoother(amg_data);
-   }
-   if (smooth_option > 6 && smooth_option < 10)
-   {
-      Utemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
+      smooth_option = smooth_type;
+      if (smooth_type > 6 && smooth_type < 10)
+      {
+         Utemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
                                  hypre_ParCSRMatrixGlobalNumRows(A),
                                  hypre_ParCSRMatrixRowStarts(A));
-      hypre_ParVectorOwnsPartitioning(Utemp) = 0;
-      hypre_ParVectorInitialize(Utemp);
+         hypre_ParVectorOwnsPartitioning(Utemp) = 0;
+         hypre_ParVectorInitialize(Utemp);
+      }
    }
 
    /*---------------------------------------------------------------------
@@ -142,7 +146,7 @@ hypre_BoomerAMGCGRelaxWt( void              *amg_vdata,
     *--------------------------------------------------------------------*/
 
    relax_type = grid_relax_type[1];
-   num_sweep = 1;
+   num_sweeps = 1;
    
    local_size = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
    old_size 
@@ -171,15 +175,15 @@ hypre_BoomerAMGCGRelaxWt( void              *amg_vdata,
 /*   hypre_ParVectorSetRandomValues(Rtemp,5128);    */
 
       /*------------------------------------------------------------------
-       * Do the relaxation num_sweep times
+       * Do the relaxation num_sweeps times
        *-----------------------------------------------------------------*/
 
    for (jj = 0; jj < num_cg_sweeps; jj++)
    {
       hypre_ParVectorSetConstantValues(Ztemp, 0.0);
-      for (j = 0; j < num_sweep; j++)
+      for (j = 0; j < num_sweeps; j++)
       {
-         if (smooth_option > 6 && smooth_option < 10)
+         if (smooth_option > 6)
          {
     
             hypre_ParVectorCopy(Rtemp,Vtemp);

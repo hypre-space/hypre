@@ -100,7 +100,8 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
    double  *omega;
    double   tol;
 
-   int *smooth_option;
+   int smooth_type;
+   int smooth_num_levels;
  
    MPI_Comm_size(comm, &num_procs);   
    MPI_Comm_rank(comm,&my_id);
@@ -110,7 +111,8 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
    num_levels = hypre_ParAMGDataNumLevels(amg_data);
    coarsen_type = hypre_ParAMGDataCoarsenType(amg_data);
    measure_type = hypre_ParAMGDataMeasureType(amg_data);
-   smooth_option = hypre_ParAMGDataSmoothOption(amg_data);
+   smooth_type = hypre_ParAMGDataSmoothType(amg_data);
+   smooth_num_levels = hypre_ParAMGDataSmoothNumLevels(amg_data);
 
    /*----------------------------------------------------------
     * Get the amg_data data
@@ -471,20 +473,18 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
       for (j = 0; j < num_grid_sweeps[3]; j++)
               printf("  %2d", grid_relax_points[3][j]);
       printf( "\n\n");
-      /*if(grid_relax_type[0] == 0 || grid_relax_type[1] == 0 ||
-         grid_relax_type[2] == 0 || grid_relax_type[3] == 0)*/
-      {
-         for (j=0; j < num_levels; j++)
-            if (smooth_option[j] == 6)
-               printf( " Schwarz Relaxation Weight %f level %d\n",
+      if (smooth_type == 6)
+         for (j=0; j < smooth_num_levels; j++)
+            printf( " Schwarz Relaxation Weight %f level %d\n",
 			hypre_ParAMGDataSchwarzRlxWeight(amg_data),j);
-         for (j=0; j < num_levels; j++)
-         printf( " Relaxation Weight %f level %d\n",relax_weight[j],j);
-         for (j=0; j < num_levels; j++)
-         printf( " Outer relaxation weight %f level %d\n",omega[j],j);
-      }
-
+      for (j=0; j < num_levels; j++)
+         if (relax_weight[j] != 1)
+	       printf( " Relaxation Weight %f level %d\n",relax_weight[j],j);
+      for (j=0; j < num_levels; j++)
+         if (omega[j] != 1)
+               printf( " Outer relaxation weight %f level %d\n",omega[j],j);
    }
+
    hypre_TFree(num_coeffs);
    hypre_TFree(num_variables);
    hypre_TFree(send_buff);
@@ -515,8 +515,10 @@ void    *data;
    int     *grid_relax_type;   
    int    **grid_relax_points; 
    double  *relax_weight;
+   double  *omega;
    double   tol;
- 
+   int      smooth_type; 
+   int      smooth_num_levels; 
    /* amg output params */
    int      amg_print_level;
  
@@ -534,6 +536,9 @@ void    *data;
    grid_relax_type = hypre_ParAMGDataGridRelaxType(amg_data);
    grid_relax_points = hypre_ParAMGDataGridRelaxPoints(amg_data);
    relax_weight = hypre_ParAMGDataRelaxWeight(amg_data); 
+   omega = hypre_ParAMGDataOmega(amg_data); 
+   smooth_type = hypre_ParAMGDataSmoothType(amg_data); 
+   smooth_num_levels = hypre_ParAMGDataSmoothNumLevels(amg_data); 
    tol = hypre_ParAMGDataTol(amg_data);
  
    amg_print_level = hypre_ParAMGDataPrintLevel(amg_data);
@@ -573,12 +578,16 @@ void    *data;
       for (j = 0; j < num_grid_sweeps[3]; j++)
               printf("  %2d", grid_relax_points[3][j]);
       printf( "\n\n");
-      /*if(grid_relax_type[0] == 0 || grid_relax_type[1] == 0 ||
-         grid_relax_type[2] == 0 || grid_relax_type[3] == 0)*/
-      {
-         for (j=0; j < num_levels; j++)
-         printf( "  Relaxation Weight (Jacobi) %f level %d\n",relax_weight[j],j);
-      }
+      if (smooth_type == 6)
+         for (j=0; j < smooth_num_levels; j++)
+            printf( " Schwarz Relaxation Weight %f level %d\n",
+			hypre_ParAMGDataSchwarzRlxWeight(amg_data),j);
+      for (j=0; j < num_levels; j++)
+         if (relax_weight[j] != 1)
+	       printf( " Relaxation Weight %f level %d\n",relax_weight[j],j);
+      for (j=0; j < num_levels; j++)
+         if (omega[j] != 1)
+               printf( " Outer relaxation weight %f level %d\n",omega[j],j);
 
       printf( " Output flag (print_level): %d \n", amg_print_level);
    }

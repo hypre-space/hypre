@@ -86,7 +86,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    int       num_cg_sweeps;
 
    HYPRE_Solver *smoother;
-   int      *smooth_option = hypre_ParAMGDataSmoothOption(amg_data);
+   int       smooth_type = hypre_ParAMGDataSmoothType(amg_data);
+   int       smooth_num_levels = hypre_ParAMGDataSmoothNumLevels(amg_data);
    int	     sym;
    int	     nlevel;
    double    thresh;
@@ -270,9 +271,9 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    strong_threshold = hypre_ParAMGDataStrongThreshold(amg_data);
    max_row_sum = hypre_ParAMGDataMaxRowSum(amg_data);
    trunc_factor = hypre_ParAMGDataTruncFactor(amg_data);
-   if (smooth_option[level] == 6)
+   if (smooth_num_levels > level)
    {
-      smoother = hypre_CTAlloc(HYPRE_Solver, max_levels);
+      smoother = hypre_CTAlloc(HYPRE_Solver, smooth_num_levels);
       hypre_ParAMGDataSmoother(amg_data) = smoother;
    }
 
@@ -313,7 +314,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
           fflush(NULL);
       }
 
-      if (smooth_option[level] == 6)
+      if (smooth_type == 6 && smooth_num_levels > level)
       {
 	 schwarz_relax_wt = hypre_ParAMGDataSchwarzRlxWeight(amg_data);
          HYPRE_SchwarzCreate(&smoother[level]);
@@ -563,47 +564,9 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
     * Setup F and U arrays
     *-----------------------------------------------------------------------*/
 
-   if (smooth_option[0] == 9)
+   for (j = 0; j < num_levels; j++)
    {
-      smoother = hypre_CTAlloc(HYPRE_Solver, num_levels);
-      hypre_ParAMGDataSmoother(amg_data) = smoother;
-      HYPRE_EuclidCreate(comm, &smoother[0]);
-      if (euclidfile)
-	 HYPRE_EuclidSetParamsFromFile(smoother[0],euclidfile);
-      HYPRE_EuclidSetup(smoother[0],
-                        (HYPRE_ParCSRMatrix) A_array[0],
-                        (HYPRE_ParVector) F_array[0],
-                        (HYPRE_ParVector) U_array[0]); 
-   }
-   else if (smooth_option[0] == 8)
-   {
-      smoother = hypre_CTAlloc(HYPRE_Solver, num_levels);
-      hypre_ParAMGDataSmoother(amg_data) = smoother;
-      HYPRE_ParCSRParaSailsCreate(comm, &smoother[0]);
-      HYPRE_ParCSRParaSailsSetParams(smoother[0],thresh,level);
-      HYPRE_ParCSRParaSailsSetFilter(smoother[0],filter);
-      HYPRE_ParCSRParaSailsSetSym(smoother[0],sym);
-      HYPRE_ParCSRParaSailsSetup(smoother[0],
-                        (HYPRE_ParCSRMatrix) A_array[0],
-                        (HYPRE_ParVector) F_array[0],
-                        (HYPRE_ParVector) U_array[0]);
-   }
-   else if (smooth_option[0] == 7)
-   {
-      smoother = hypre_CTAlloc(HYPRE_Solver, num_levels);
-      hypre_ParAMGDataSmoother(amg_data) = smoother;
-      HYPRE_ParCSRPilutCreate(comm, &smoother[0]);
-      HYPRE_ParCSRPilutSetup(smoother[0],
-                        (HYPRE_ParCSRMatrix) A_array[0],
-                        (HYPRE_ParVector) F_array[0],
-                        (HYPRE_ParVector) U_array[0]);
-      HYPRE_ParCSRPilutSetDropTolerance(smoother[0],drop_tol);
-      HYPRE_ParCSRPilutSetFactorRowSize(smoother[0],max_nz_per_row);
-   }
-      
-   for (j = 1; j < num_levels; j++)
-   {
-      if (smooth_option[j] == 9)
+      if (smooth_type == 9 && smooth_num_levels > j)
       {
          HYPRE_EuclidCreate(comm, &smoother[j]);
          if (euclidfile)
@@ -613,7 +576,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                         (HYPRE_ParVector) F_array[j],
                         (HYPRE_ParVector) U_array[j]); 
       }
-      else if (smooth_option[j] == 8)
+      else if (smooth_type == 8 && smooth_num_levels > j)
       {
          HYPRE_ParCSRParaSailsCreate(comm, &smoother[j]);
          HYPRE_ParCSRParaSailsSetParams(smoother[j],thresh,nlevel);
@@ -624,7 +587,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                         (HYPRE_ParVector) F_array[j],
                         (HYPRE_ParVector) U_array[j]);
       }
-      else if (smooth_option[j] == 7)
+      else if (smooth_type == 7 && smooth_num_levels > j)
       {
          HYPRE_ParCSRPilutCreate(comm, &smoother[j]);
          HYPRE_ParCSRPilutSetup(smoother[j],
@@ -637,9 +600,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    }
 
    if ( amg_log_level > 2 ) {
-      Residual_array= hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_array[0]),
-                                            hypre_ParCSRMatrixGlobalNumRows(A_array[0]),
-                                            hypre_ParCSRMatrixRowStarts(A_array[0]) );
+      Residual_array= 
+	hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_array[0]),
+                              hypre_ParCSRMatrixGlobalNumRows(A_array[0]),
+                              hypre_ParCSRMatrixRowStarts(A_array[0]) );
       hypre_ParVectorInitialize(Residual_array);
       hypre_ParVectorSetPartitioningOwner(Residual_array,0);
       hypre_ParAMGDataResidual(amg_data) = Residual_array;

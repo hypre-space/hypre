@@ -2212,6 +2212,9 @@ int hypre_ParAdSchwarzSolve(hypre_ParCSRMatrix *A,
      comm_handle = NULL;
   }
 
+  for (i=0; i < num_cols_offd; i++)
+     x_ext_data[i] = 0.0;
+
   matrix_size_counter = 0;
   for (i=0; i < num_domains; i++)
     {

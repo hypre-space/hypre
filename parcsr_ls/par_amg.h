@@ -62,9 +62,10 @@ typedef struct
    int                  num_levels;
 
    /* data for more complex smoothers */
-   int                 *smooth_option;
+   int                  smooth_num_levels;
+   int                  smooth_type;
    HYPRE_Solver        *smoother;
-   int			smooth_num_sweep;
+   int			smooth_num_sweeps;
    int                  variant;
    int                  overlap;
    int                  domain_type;
@@ -150,9 +151,12 @@ typedef struct
 #define hypre_ParAMGDataPointDofMapArray(amg_data) \
 ((amg_data)->point_dof_map_array) 
 #define hypre_ParAMGDataNumLevels(amg_data) ((amg_data)->num_levels)	
-#define hypre_ParAMGDataSmoothOption(amg_data) ((amg_data)->smooth_option)
+#define hypre_ParAMGDataSmoothType(amg_data) ((amg_data)->smooth_type)
+#define hypre_ParAMGDataSmoothNumLevels(amg_data) \
+((amg_data)->smooth_num_levels)
+#define hypre_ParAMGDataSmoothNumSweeps(amg_data) \
+((amg_data)->smooth_num_sweeps)	
 #define hypre_ParAMGDataSmoother(amg_data) ((amg_data)->smoother)	
-#define hypre_ParAMGDataSmoothNumSweep(amg_data) ((amg_data)->smooth_num_sweep)	
 #define hypre_ParAMGDataVariant(amg_data) ((amg_data)->variant)	
 #define hypre_ParAMGDataOverlap(amg_data) ((amg_data)->overlap)	
 #define hypre_ParAMGDataDomainType(amg_data) ((amg_data)->domain_type)	

@@ -238,14 +238,20 @@ int HYPRE_BoomerAMGInitGridRelaxation(int    **num_grid_sweeps_ptr,
 /*
  * (Optional) Sets more complex smoothers.
  **/
-int HYPRE_BoomerAMGSetSmoothOption(HYPRE_Solver  solver,
-                                  int       *smooth_option);
+int HYPRE_BoomerAMGSetSmoothType(HYPRE_Solver  solver,
+                                 int       smooth_type);
+
+/*
+ * (Optional) Sets the number of levels for more complex smoothers.
+ **/
+int HYPRE_BoomerAMGSetSmoothNumLevels(HYPRE_Solver  solver,
+                                      int       smooth_num_levels);
 
 /*
  * (Optional) Sets the number of sweeps for more complex smoothers.
  **/
-int HYPRE_BoomerAMGSetSmoothNumSweep(HYPRE_Solver  solver,
-                                  int       smooth_num_sweep);
+int HYPRE_BoomerAMGSetSmoothNumSweeps(HYPRE_Solver  solver,
+                                  int       smooth_num_sweeps);
 
 /*
  * (Optional) Name of file to which BoomerAMG will print;
