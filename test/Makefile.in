@@ -22,7 +22,9 @@ CXX_COMPILE_FLAGS=@CXXFLAGS@
 F77_COMPILE_FLAGS=@F77FLAGS@
 LD_LINK_FLAGS=@LDFLAGS@
 CINCLUDES=@INCLUDES@ @MPIINCLUDE@
+CXXINCLUDES=@INCLUDES@ @MPIINCLUDE@
 CDEFS = -DHYPRE_TIMING
+CXXDEFS = -DHYPRE_TIMING -DMPICH_SKIP_MPICXX
 BABEL_HYPRE_INCLUDES = @BABEL_HYPRE_INCLUDES@
  
 CFLAGS = \
@@ -33,6 +35,15 @@ CFLAGS = \
  -I../hypre/include\
  ${CINCLUDES}\
  ${CDEFS}
+ 
+CXXFLAGS = \
+ ${CXX_COMPILE_FLAGS}\
+ -I$(srcdir)\
+ -I$(srcdir)/..\
+ ${BABEL_HYPRE_INCLUDES}\
+ -I../hypre/include\
+ ${CXXINCLUDES}\
+ ${CXXDEFS}
  
 FFLAGS = \
  ${F77_COMPILE_FLAGS}\
@@ -312,7 +323,7 @@ ${HYPRE_BABEL_DRIVER_F77_EXECS}: ${HYPRE_BABEL_DRIVER_F77_OBJS}
 	${CC} -o $@ -c ${CFLAGS} $<
 
 .C.o:
-	${CXX} -o $@ -c -DNOFEI ${CFLAGS} $<
+	${CXX} -o $@ -c -DNOFEI ${CXXFLAGS} $<
 
 .f.o:
 	${F77} -o $@ -c ${FFLAGS} $<
@@ -320,5 +331,5 @@ ${HYPRE_BABEL_DRIVER_F77_EXECS}: ${HYPRE_BABEL_DRIVER_F77_OBJS}
 # rule to compile C files with C++
 .c.C++.o:
 	cp -f $< ${@:.o=.C}
-	${CXX} -o $@ -c ${CFLAGS} ${@:.o=.C}
+	${CXX} -o $@ -c ${CXXFLAGS} ${@:.o=.C}
 	rm -f ${@:.o=.C}
