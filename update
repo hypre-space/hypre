@@ -190,9 +190,12 @@ then
             update \
             UPDATE/VER* \
             UPDATE/docs \
+            UPDATE/bin \
             UPDATE/src/linear_solvers/configure \
             UPDATE/src/linear_solvers/tarch \
             UPDATE/src/linear_solvers/Makefile.in \
+            UPDATE/src/linear_solvers/HYPRE.h \
+            UPDATE/src/linear_solvers/HYPRE_config.h.in \
             UPDATE/src/linear_solvers/blas \
             UPDATE/src/linear_solvers/utilities \
             UPDATE/src/linear_solvers/struct_matrix_vector \
