@@ -281,7 +281,10 @@ hypre_ParCSRMatrixRead( MPI_Comm    comm,
         offd = hypre_CSRMatrixRead(new_file_o);
    }
    else
+   {
         offd = hypre_CSRMatrixCreate(local_num_rows,0,0);
+        hypre_CSRMatrixInitialize(offd);
+   }
 
         
    matrix = hypre_CTAlloc(hypre_ParCSRMatrix, 1);
