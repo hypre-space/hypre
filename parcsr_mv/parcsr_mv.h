@@ -4,8 +4,8 @@
 #ifndef hypre_PARCSR_MV_HEADER
 #define hypre_PARCSR_MV_HEADER
 
-#include "utilities.h"
-#include "seq_matrix_vector.h"
+#include "../utilities/utilities.h"
+#include "../seq_matrix_vector/seq_matrix_vector.h"
 
 #ifdef __cplusplus
 extern "C" {
