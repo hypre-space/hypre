@@ -131,7 +131,6 @@ hypre_ParVector
 {
    char 	new_file_name[80];
    hypre_ParVector *par_vector;
-   hypre_Vector *vector;
    int  	my_id, num_procs;
    int		*partitioning;
    int		global_size, i;
