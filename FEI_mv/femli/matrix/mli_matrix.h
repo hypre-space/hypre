@@ -30,20 +30,23 @@
 
 class MLI_Matrix
 {
-   char   name[100];
-   int    g_nrows_, max_nnz_, min_nnz_, tot_nnz_;
-   double max_val_, min_val_;
-   void   *matrix;
-   int    (*destroy_func)(void *);
+   char   name_[100];
+   int    gNRows_, maxNNZ_, minNNZ_, totNNZ_;
+   double maxVal_, minVal_;
+   void   *matrix_;
+   int    (*destroyFunc_)(void *);
+   int    subMatrixLength_;
+   int    *subMatrixEqnList_;
 
 public :
 
    MLI_Matrix( void *, char *, MLI_Function *func);
    ~MLI_Matrix();
-   void       *getMatrix()                          { return matrix; }
-   void	      *takeMatrix()                         { destroy_func = NULL;
-                                                      return matrix; }
-   char       *getName()                            { return name; }
+   void       setSubMatrixEqnList(int leng, int *list);
+   void       *getMatrix()                          { return matrix_; }
+   void	      *takeMatrix()                         { destroyFunc_ = NULL;
+                                                      return matrix_; }
+   char       *getName()                            { return name_; }
    int        apply( double, MLI_Vector *, double, MLI_Vector *, MLI_Vector * );
    MLI_Vector *createVector();
    int        getMatrixInfo(char *, int &, double &);
