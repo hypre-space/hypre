@@ -42,7 +42,8 @@ HYPRE_IJ_DIRS =\
  matrix_matrix\
  IJ_mv\
  distributed_ls\
- parcsr_ls
+ parcsr_ls\
+ parcsr_es/LOBPCG
 
 #These are the directories for the FEI
 HYPRE_FEI_DIRS =\
