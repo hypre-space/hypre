@@ -8,7 +8,7 @@
 #include "Hypre_StructVectorBuilder_Skel.h" 
 #include "Hypre_StructVectorBuilder_Data.h" 
 
-
+#include "Hypre_MapStructVector_Skel.h"
 #include "Hypre_StructVector_Skel.h" 
 #include "Hypre_StructVector_Data.h" 
 #include "HYPRE_mv.h"
@@ -105,16 +105,37 @@ int  impl_Hypre_StructVectorBuilder_SetNumGhost
  * impl_Hypre_StructVectorBuilder_SetMap
  **********************************************************/
 int  impl_Hypre_StructVectorBuilder_SetMap(Hypre_StructVectorBuilder this, Hypre_Map map) {
-   printf("Hypre_StructVectorBuilder_SetMap doesn't work. TO DO: implement this\n");
-   return 1;
+   array1int num_ghost;
+   Hypre_StructGrid grid;
+   Hypre_StructVector vec = this->Hypre_StructVectorBuilder_data->newvec;
+   Hypre_MapStructVector mapsv = (Hypre_MapStructVector) Hypre_Map_castTo
+      ( map, "Hypre.MapStructVector" );
+   if ( mapsv==NULL ) {
+      printf("Hypre_StructVectorBuilder_SetMap: null map");
+      return 1;
+   };
+   if ( vec == NULL ) return 1;
+   grid = mapsv->Hypre_MapStructVector_data->grid;
+   vec->Hypre_StructVector_data->grid = grid;
+   num_ghost.data = mapsv->Hypre_MapStructVector_data->num_ghost;
+   num_ghost.lower[0] = 0;
+   num_ghost.upper[0] = 6;
+   Hypre_StructVectorBuilder_SetNumGhost( this, num_ghost );
+
+   return 0;
 } /* end impl_Hypre_StructVectorBuilder_SetMap */
 
 /* ********************************************************
  * impl_Hypre_StructVectorBuilder_GetMap
  **********************************************************/
-int  impl_Hypre_StructVectorBuilder_GetMap(Hypre_StructVectorBuilder this, Hypre_Map* map) {
-   printf("Hypre_StructVectorBuilder_GetMap doesn't work. TO DO: implement this\n");
-   return 1;
+int  impl_Hypre_StructVectorBuilder_GetMap
+( Hypre_StructVectorBuilder this, Hypre_Map* map ) {
+   Hypre_StructVector newvec = this->Hypre_StructVectorBuilder_data->newvec;
+   if ( newvec==NULL ) {
+      *map = (Hypre_Map) NULL;
+      return 1;
+   };
+   return Hypre_StructVector_GetMap( newvec, map );
 } /* end impl_Hypre_StructVectorBuilder_GetMap */
 
 /* ********************************************************

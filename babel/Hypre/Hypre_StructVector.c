@@ -11,6 +11,7 @@
 #include "Hypre_StructVectorBuilder_Skel.h" 
 #include "Hypre_StructVectorBuilder_Data.h" 
 
+#include "Hypre_MapStructVectorBuilder_Skel.h"
 #include "Hypre_Box_Skel.h"
 #include "Hypre_Box_Data.h"
 #include "Hypre_StructGrid_Skel.h"
@@ -52,20 +53,29 @@ void Hypre_StructVector_destructor(Hypre_StructVector this) {
 
 /* ********************************************************
  * impl_Hypre_StructVector_GetNumGhost
+ * We may want to delete this from the public interface, in favor of
+ *   GetMap(StructVector,...) + GetNumGhost(Map,...)
+ * (Internally, GetMap works by calling GetNumGhost(StructVector,...),
+ *  hence this function)
  **********************************************************/
 int  impl_Hypre_StructVector_GetNumGhost
-( Hypre_StructVector this, array1int values )
+( Hypre_StructVector this, array1int *values )
 {
    int  i;
-/*   int * num_ghost = &(values.data[*(values.lower)]);*/
-   int * num_ghost = values.data;
+/*   int * num_ghost = &(values->data[*(values->lower)]);*/
+
    HYPRE_StructVector *V = this->Hypre_StructVector_data->hsvec;
    hypre_StructVector * vector = (hypre_StructVector *) (*V);
 
-   (values.lower)[0] = 0;
-   (values.upper)[0] = 6;
+   if ( (values->upper)[0] - (values->lower)[0] < 6 ) {
+      /* values->data isn't big enough */
+      values->data = (int *) malloc( 6*sizeof(int) );
+   };
+
+   (values->lower)[0] = 0;
+   (values->upper)[0] = 6;
    for (i = 0; i < 6; i++)
-      num_ghost[i] = hypre_StructVectorNumGhost(vector)[i];
+      (values->data)[i] = hypre_StructVectorNumGhost(vector)[i];
 
    return 0;
 
@@ -144,8 +154,9 @@ int  impl_Hypre_StructVector_Copy(Hypre_StructVector this, Hypre_Vector x) {
  **********************************************************/
 int  impl_Hypre_StructVector_Clone(Hypre_StructVector this, Hypre_Vector* x) {
    int ierr = 0;
-   int numghost_data[6] = {0, 0, 0, 0, 0, 0};
-   array1int num_ghost;
+/*   int numghost_data[6] = {0, 0, 0, 0, 0, 0};*/
+/*   array1int num_ghost;*/
+   Hypre_Map* map = (Hypre_Map *) malloc( sizeof( Hypre_Map ) );
    int dim;
    struct Hypre_StructVector_private_type *SVyp = this->Hypre_StructVector_data;
    HYPRE_StructVector *Vy = SVyp->hsvec;
@@ -157,19 +168,21 @@ int  impl_Hypre_StructVector_Clone(Hypre_StructVector this, Hypre_Vector* x) {
    ierr += Hypre_StructGrid_GetParameterInt( G, "dim", &dim );
    Hypre_StructVectorBuilder_Start( SVB, G );
 
+/*
    num_ghost.lower[0] = 0;
    num_ghost.upper[0] = 2*dim;
    num_ghost.data = numghost_data;
    Hypre_StructVector_GetNumGhost( this, num_ghost );
    Hypre_StructVectorBuilder_SetNumGhost( SVB, num_ghost );
+*/
+   Hypre_StructVector_GetMap( this, map );
+   Hypre_StructVectorBuilder_SetMap( SVB, *map );
 
    Hypre_StructVectorBuilder_Setup( SVB );
    ierr += Hypre_StructVectorBuilder_GetConstructedObject( SVB, x );
    /* ... *x is really a Hypre_StructVector */
 
    return ierr;
-
-/* TO DO: change get/set numghost to get/set parameter. */
 
 } /* end impl_Hypre_StructVector_Clone */
 
@@ -299,10 +312,33 @@ int  impl_Hypre_StructVector_GetGlobalSize(Hypre_StructVector this, int* size) {
 
 /* ********************************************************
  * impl_Hypre_StructVector_GetMap
- *       insert the library code below
  **********************************************************/
 int  impl_Hypre_StructVector_GetMap(Hypre_StructVector this, Hypre_Map* map) {
-   printf("Hypre_StructVector_GetMap doesn't work. TO DO: implement this\n");
-   return 1;
+   int ierr = 0;
+   array1int num_ghost;
+   Hypre_StructuredGrid grid;
+   Hypre_StructGrid mygrid;
+   Hypre_MapStructuredVector mapsv;
+   Hypre_MapStructuredVector * mapsvp = &mapsv;
+   Hypre_MapStructVectorBuilder bldr = Hypre_MapStructVectorBuilder_New();
+
+   num_ghost.lower[0] = 0;
+   num_ghost.upper[0] = num_ghost.lower[0]; /* to signal no space in num_ghost */
+   ierr += Hypre_StructVector_GetNumGhost( this, &num_ghost );
+   mygrid = this->Hypre_StructVector_data->grid;
+   grid = (Hypre_StructuredGrid) Hypre_StructGrid_castTo( mygrid, "Hypre.StructuredGrid" );
+   if ( grid==NULL ) return 1;
+
+   ierr += Hypre_MapStructVectorBuilder_Start( bldr, num_ghost, grid );
+   ierr += Hypre_MapStructVectorBuilder_Setup( bldr );
+   ierr += Hypre_MapStructVectorBuilder_GetConstructedObject( bldr, mapsvp );
+   *map = (Hypre_Map) Hypre_MapStructuredVector_castTo( *mapsvp, "Hypre.Map" );
+   if ( *map==NULL ) {
+      ++ierr;
+      printf("cannot cast MapStructuredVector to Map\n");
+   };
+   if ( ierr>0 ) printf("error in StructVector_GetMap\n" );
+   Hypre_MapStructVectorBuilder_deleteReference( bldr );
+   return ierr;
 } /* end impl_Hypre_StructVector_GetMap */
 
