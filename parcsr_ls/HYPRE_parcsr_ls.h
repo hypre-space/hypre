@@ -1344,6 +1344,10 @@ int
 HYPRE_ParCSRHybridSetRelaxWeight( HYPRE_Solver solver,
                               double             *relax_weight    );
  
+int
+HYPRE_ParCSRHybridSetOmega( HYPRE_Solver solver,
+                              double             *omega    );
+ 
 int HYPRE_ParCSRHybridGetNumIterations(HYPRE_Solver  solver,
                                        int                *num_its);
  

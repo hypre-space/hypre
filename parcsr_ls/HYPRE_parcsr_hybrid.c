@@ -293,6 +293,17 @@ HYPRE_ParCSRHybridSetRelaxWeight( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetOmega
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParCSRHybridSetOmega( HYPRE_Solver solver,
+                              double             *omega    )
+{
+   return( hypre_AMGHybridSetOmega( (void *) solver, omega ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_ParCSRHybridGetNumIterations
  *--------------------------------------------------------------------------*/
 

@@ -54,6 +54,7 @@ typedef struct
    int		       *grid_relax_type;
    int		      **grid_relax_points;
    double	       *relax_weight;
+   double	       *omega;
 
 } hypre_AMGHybridData;
 
@@ -100,6 +101,7 @@ hypre_AMGHybridCreate( )
    (AMGhybrid_data -> grid_relax_type)  = NULL;
    (AMGhybrid_data -> grid_relax_points)  = NULL;
    (AMGhybrid_data -> relax_weight)  = NULL;
+   (AMGhybrid_data -> omega)  = NULL;
 
    return (void *) AMGhybrid_data; 
 }
@@ -135,6 +137,11 @@ hypre_AMGHybridDestroy( void  *AMGhybrid_vdata )
    {
       hypre_TFree( (AMGhybrid_data -> relax_weight) );
       (AMGhybrid_data -> relax_weight) = NULL;
+   }
+   if (AMGhybrid_data -> omega)  
+   {
+      hypre_TFree( (AMGhybrid_data -> omega) );
+      (AMGhybrid_data -> omega) = NULL;
    }
    if (AMGhybrid_data)
    {
@@ -478,6 +485,24 @@ hypre_AMGHybridSetRelaxWeight( void *AMGhybrid_vdata,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_AMGHybridSetOmega
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_AMGHybridSetOmega( void *AMGhybrid_vdata,
+                        double *omega  )
+{
+   hypre_AMGHybridData *AMGhybrid_data = AMGhybrid_vdata;
+   int               ierr = 0;
+
+   if ((AMGhybrid_data -> omega) != NULL )
+      hypre_TFree((AMGhybrid_data -> omega));
+   (AMGhybrid_data -> omega) = omega;
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_AMGHybridGetNumIterations
  *--------------------------------------------------------------------------*/
 
@@ -596,11 +621,13 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
    int	       *grid_relax_type = (AMGhybrid_data -> grid_relax_type);
    int	      **grid_relax_points = (AMGhybrid_data -> grid_relax_points);
    double      *relax_weight = (AMGhybrid_data -> relax_weight);
+   double      *omega = (AMGhybrid_data -> omega);
 
    int	       *boom_ngs;
    int	       *boom_grt;
    int	      **boom_grp;
    double      *boom_rlxw;
+   double      *boom_omega;
 
    int                pcg_default    = (AMGhybrid_data -> pcg_default);
    int              (*pcg_precond_solve)();
@@ -740,6 +767,13 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
 	    for (i=0; i < max_levels; i++)
 	       boom_rlxw[i] = relax_weight[i];
             hypre_BoomerAMGSetRelaxWeight(pcg_precond, boom_rlxw);
+         }
+   	 if (omega)
+         {
+	    boom_omega = hypre_CTAlloc(double,max_levels);
+	    for (i=0; i < max_levels; i++)
+	       boom_omega[i] = omega[i];
+            hypre_BoomerAMGSetOmega(pcg_precond, boom_omega);
          }
    	 if (grid_relax_points)
          {

@@ -39,6 +39,7 @@ int hypre_AMGHybridSetNumGridSweeps( void *AMGhybrid_vdata , int *num_grid_sweep
 int hypre_AMGHybridSetGridRelaxType( void *AMGhybrid_vdata , int *grid_relax_type );
 int hypre_AMGHybridSetGridRelaxPoints( void *AMGhybrid_vdata , int **grid_relax_points );
 int hypre_AMGHybridSetRelaxWeight( void *AMGhybrid_vdata , double *relax_weight );
+int hypre_AMGHybridSetOmega( void *AMGhybrid_vdata , double *omega );
 int hypre_AMGHybridGetNumIterations( void *AMGhybrid_vdata , int *num_its );
 int hypre_AMGHybridGetDSCGNumIterations( void *AMGhybrid_vdata , int *dscg_num_its );
 int hypre_AMGHybridGetPCGNumIterations( void *AMGhybrid_vdata , int *pcg_num_its );
@@ -184,6 +185,7 @@ int HYPRE_ParCSRHybridSetNumGridSweeps( HYPRE_Solver solver , int *num_grid_swee
 int HYPRE_ParCSRHybridSetGridRelaxType( HYPRE_Solver solver , int *grid_relax_type );
 int HYPRE_ParCSRHybridSetGridRelaxPoints( HYPRE_Solver solver , int **grid_relax_points );
 int HYPRE_ParCSRHybridSetRelaxWeight( HYPRE_Solver solver , double *relax_weight );
+int HYPRE_ParCSRHybridSetOmega( HYPRE_Solver solver , double *omega );
 int HYPRE_ParCSRHybridGetNumIterations( HYPRE_Solver solver , int *num_its );
 int HYPRE_ParCSRHybridGetDSCGNumIterations( HYPRE_Solver solver , int *dscg_num_its );
 int HYPRE_ParCSRHybridGetPCGNumIterations( HYPRE_Solver solver , int *pcg_num_its );
