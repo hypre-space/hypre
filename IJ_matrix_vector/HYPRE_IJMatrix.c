@@ -37,7 +37,7 @@ participate in any collective operations.
 /*---------------------------------------------------------------------- */
 
 int HYPRE_NewIJMatrix( HYPRE_IJMatrix &in_matrix_ptr, MPI_Comm comm, 
-          int global_m, int global_n, int local_m, int local_n )
+          int global_m, int global_n)
 
 {
    int ierr=0;
@@ -46,12 +46,12 @@ int HYPRE_NewIJMatrix( HYPRE_IJMatrix &in_matrix_ptr, MPI_Comm comm,
 
    matrix = hypre_CTAlloc(hypre_IJMatrix, 1);
 
-   hypre_IJMatrixContext(matrix) = context;
-   hypre_IJMatrixM(matrix)    = -1;
-   hypre_IJMatrixN(matrix)    = -1;
+   hypre_IJMatrixContext(matrix) = comm;
+   hypre_IJMatrixM(matrix)    = global_m;
+   hypre_IJMatrixN(matrix)    = global_n;
    hypre_IJMatrixLocalStorage(matrix) = NULL;
    hypre_IJMatrixTranslator(matrix) = NULL;
-   hypre_IJMatrixLocalStorageType(matrix) = HYPRE_UNITIALIZED;
+   hypre_IJMatrixLocalStorageType(matrix) = HYPRE_UNINITIALIZED;
    hypre_IJMatrixInsertionSemantics = 0;
    hypre_IJMatrixReferenceCount = 1;
 
@@ -163,7 +163,7 @@ Not collective, but must be same on all processors in group that stores matrix.
 @return integer error code
 @param HYPRE_IJMatrix &matrix [IN]
  the matrix to be operated on. 
-@param int type [IN}
+@param int type [IN]
 possible types should be documented with each implementation. The first HYPRE implementation
 will list its possible values in HYPRE.h (at least for now). Note that this function is optional,
 as all implementations must have a default. Eventually the plan is to let solvers choose a storage
@@ -177,6 +177,40 @@ HYPRE_SetIJMatrixLocalStorageType( HYPRE_IJMatrix IJmatrix, int type )
    hypre_IJMatrix *matrix = (hypre_IJMatrix *) IJmatrix;
 
    hypre_IJMatrixLocalStorageType(matrix) = type;
+
+   return(ierr);
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_SetIJMatrixLocalSize
+ *--------------------------------------------------------------------------*/
+
+/**
+Tells "matrix" local size
+@return integer error code
+@param HYPRE_IJMatrix &matrix [IN]
+ the matrix to be operated on. 
+@param int local_m [IN]
+ local number of rows
+@param int local_n [IN]
+ local number of columns
+HYPRE_SetIJMatrixLocalStorageType needs to be called before this routine
+*/
+
+int 
+HYPRE_SetIJMatrixLocalSize( HYPRE_IJMatrix IJmatrix, int local_m, int local_n )
+{
+   int ierr = 0;
+   hypre_IJMatrix *matrix = (hypre_IJMatrix *) IJmatrix;
+
+   if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PETSC_MATRIX )
+      ierr = hypre_SetIJMatrixLocalSizePETSC (matrix, local_m, local_n);
+   if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_ISIS_MATRIX )
+      ierr = hypre_SetIJMatrixLocalSizeISIS (matrix, local_m, local_n);
+   if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PARCSR_MATRIX )
+      ierr = hypre_SetIJMatrixLocalSizeParcsr (matrix, local_m, local_n);
+   else
+      ierr = -1;
 
    return(ierr);
 }
