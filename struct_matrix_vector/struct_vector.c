@@ -372,25 +372,25 @@ hypre_StructVectorGetValues( hypre_StructVector *vector,
 
    double              values;
 
-   hypre_BoxArray     *boxes;
-   hypre_Box          *box;
+   hypre_BoxArray     *data_space;
+   hypre_Box          *data_box;
 
    double             *vecp;
 
    int                 i;
 
-   boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(vector));
+   data_space = hypre_StructVectorDataSpace(vector);
 
-   hypre_ForBoxI(i, boxes)
+   hypre_ForBoxI(i, data_space)
       {
-         box = hypre_BoxArrayBox(boxes, i);
+         data_box = hypre_BoxArrayBox(data_space, i);
 
-         if ((hypre_IndexX(grid_index) >= hypre_BoxIMinX(box)) &&
-             (hypre_IndexX(grid_index) <= hypre_BoxIMaxX(box)) &&
-             (hypre_IndexY(grid_index) >= hypre_BoxIMinY(box)) &&
-             (hypre_IndexY(grid_index) <= hypre_BoxIMaxY(box)) &&
-             (hypre_IndexZ(grid_index) >= hypre_BoxIMinZ(box)) &&
-             (hypre_IndexZ(grid_index) <= hypre_BoxIMaxZ(box))   )
+         if ((hypre_IndexX(grid_index) >= hypre_BoxIMinX(data_box)) &&
+             (hypre_IndexX(grid_index) <= hypre_BoxIMaxX(data_box)) &&
+             (hypre_IndexY(grid_index) >= hypre_BoxIMinY(data_box)) &&
+             (hypre_IndexY(grid_index) <= hypre_BoxIMaxY(data_box)) &&
+             (hypre_IndexZ(grid_index) >= hypre_BoxIMinZ(data_box)) &&
+             (hypre_IndexZ(grid_index) <= hypre_BoxIMaxZ(data_box))   )
          {
             vecp = hypre_StructVectorBoxDataValue(vector, i, grid_index);
             values = *vecp;
@@ -413,8 +413,6 @@ hypre_StructVectorGetBoxValues( hypre_StructVector *vector,
 {
    int    ierr = 0;
 
-   hypre_BoxArray     *grid_boxes;
-   hypre_Box          *grid_box;
    hypre_BoxArray     *box_array;
    hypre_Box          *box;
 
@@ -436,16 +434,16 @@ hypre_StructVectorGetBoxValues( hypre_StructVector *vector,
    int                 loopi, loopj, loopk;
 
    /*-----------------------------------------------------------------------
-    * Set up `box_array' by intersecting `box' with the grid boxes
+    * Set up `box_array' by intersecting `box' with the vector data space
     *-----------------------------------------------------------------------*/
 
-   grid_boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(vector));
-   box_array = hypre_BoxArrayCreate(hypre_BoxArraySize(grid_boxes));
+   data_space = hypre_StructVectorDataSpace(vector);
+   box_array = hypre_BoxArrayCreate(hypre_BoxArraySize(data_space));
    box = hypre_BoxCreate();
-   hypre_ForBoxI(i, grid_boxes)
+   hypre_ForBoxI(i, data_space)
       {
-         grid_box = hypre_BoxArrayBox(grid_boxes, i);
-         hypre_IntersectBoxes(value_box, grid_box, box);
+         data_box = hypre_BoxArrayBox(data_space, i);
+         hypre_IntersectBoxes(value_box, data_box, box);
          hypre_CopyBox(box, hypre_BoxArrayBox(box_array, i));
       }
    hypre_BoxDestroy(box);
