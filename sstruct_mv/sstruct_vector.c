@@ -229,7 +229,7 @@ hypre_SStructPVectorAssemble( hypre_SStructPVector *pvector )
          hypre_CommPkgCreate(comm_info,
                              hypre_StructVectorDataSpace(svectors[var]),
                              hypre_StructVectorDataSpace(svectors[var]),
-                             1, 0, hypre_StructVectorComm(svectors[var]),
+                             1, hypre_StructVectorComm(svectors[var]),
                              &comm_pkgs[var]);
       }
    }
