@@ -110,12 +110,32 @@ hypre_GetDistributedMatrixRowISIS( hypre_DistributedMatrix *dm,
 
    rowbuf = (RowBuf *) dm->auxiliary_data;
 
+   mat->getRow(row+1, temp, rowbuf->val, rowbuf->ind);
+
+   // add diagonal element if necessary
+   {
+       int *p;
+       int found = 0;
+
+       for (i=0, p=rowbuf->ind; i<temp; i++, p++)
+       {
+	   if (*p == row+1) 
+	       found = 1;
+       }
+
+       if (!found)
+       {
+	   rowbuf->ind[temp] = row+1;
+	   rowbuf->val[temp] = 1.; // pick a value
+	   temp++;
+       }
+   }
+
    // set pointers to local buffers
    if (col_ind != NULL)
    {
        int *p;
 
-       mat->getRow(row+1, temp, rowbuf->ind);
        *size = temp;
        *col_ind = rowbuf->ind;
 
@@ -126,13 +146,9 @@ hypre_GetDistributedMatrixRowISIS( hypre_DistributedMatrix *dm,
 
    if (values != NULL)
    {
-       mat->getRow(row+1, temp, rowbuf->val);
        *values = rowbuf->val;
        *size = temp;
    }
-
-   // should try to use this if possible
-   // mat->getRow(row+1, *size, *values, *col_ind);
 
    return 0;
 }
