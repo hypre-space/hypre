@@ -79,7 +79,7 @@ hypre_MAlloc( int size )
       ptr = malloc(size);
 #endif
 
-#if 0
+#if 1
       if (ptr == NULL)
         hypre_OutOfMemory(size);
 #endif
@@ -113,7 +113,7 @@ hypre_CAlloc( int count,
       ptr = calloc(count, elt_size);
 #endif
 
-#if 0
+#if 1
       if (ptr == NULL)
         hypre_OutOfMemory(count * elt_size);
 #endif
@@ -153,7 +153,7 @@ hypre_ReAlloc( char *ptr,
    ptr = realloc(ptr, size);
 #endif
 
-#if 0
+#if 1
    if (ptr == NULL)
      hypre_OutOfMemory(size);
 #endif

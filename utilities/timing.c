@@ -537,9 +537,9 @@ hypre_PrintTiming( char     *heading,
                for (threadid = 0; threadid < hypre_NumThreads; threadid++)
                {
                   local_wall_time = 
-                     max(local_wall_time, hypre_TimingWallTime(index));
+                     hypre_max(local_wall_time, hypre_TimingWallTime(index));
                   local_cpu_time  = 
-                     max(local_cpu_time, hypre_TimingCPUTime(index));
+                     hypre_max(local_cpu_time, hypre_TimingCPUTime(index));
                }
             }
 
