@@ -52,6 +52,7 @@ unset F77
 casc_user_chose_compilers=no
 casc_user_chose_mpi=no
 casc_using_pthreads=no
+casc_using_petsc=no
 
 AC_ARG_WITH(CC,
    [  --with-CC=ARG		manually set C compiler to ARG],
@@ -196,6 +197,14 @@ AC_ARG_WITH(pthreads,
    fi
 )
 
+
+AC_ARG_WITH(petsc,
+   [  --with-petsc		use petsc],
+   if test "$withval" != "no"
+   then
+      casc_using_patsc=yes
+   fi
+)
 
 AC_PROG_RANLIB
 
@@ -534,6 +543,10 @@ then
   HYPRE_FIND_MPI
 fi
 
+if test "$casc_using_petsc" = "yes"
+then
+   CASC_FIND_PETSC
+fi
 
 CC="$PREPEND $CC"
 
@@ -583,6 +596,11 @@ AC_SUBST(CFLAGS)
 AC_SUBST(CXXFLAGS)
 AC_SUBST(F77FLAGS)
 AC_SUBST(PREPEND)
+AC_SUBST(HAVE_PETSC)
+AC_SUBST(LACKS_PETSC)
+AC_SUBST(PETSCLIBS)
+AC_SUBST(PETSCLIBDIRS)
+AC_SUBST(PETSCINCLUDE)
 
 dnl *********************************************************************
 dnl * Use CASC_CONFIG_OUTPUT_LIST with AC_OUTPUT if you want to handle the
