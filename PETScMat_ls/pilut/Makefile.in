@@ -80,7 +80,7 @@ driver: driver.o lib_HYPRE_PETScMatPilutSolver.a
 
 link:
 	rm driver
-	make driver
+	$(MAKE) $(MAKEFLAGS) driver
 
 lib: ${PROTOS} ${OBJS}
 	@echo  "Building $@ ... "
