@@ -49,6 +49,7 @@ hypre_StructMatrixCreate( MPI_Comm             comm,
 {
    hypre_StructMatrix  *matrix;
 
+   int                  ndim             = hypre_StructGridDim(grid);
    int                  i;
 
    matrix = hypre_CTAlloc(hypre_StructMatrix, 1);
@@ -64,7 +65,16 @@ hypre_StructMatrixCreate( MPI_Comm             comm,
    hypre_StructMatrixSymmetric(matrix) = 0;
    hypre_StructMatrixConstantCoefficient(matrix) = 0;
    for (i = 0; i < 6; i++)
+   {
       hypre_StructMatrixNumGhost(matrix)[i] = 0;
+   }
+
+   for (i = 0; i < ndim; i++)
+   {
+      hypre_StructMatrixNumGhost(matrix)[2*i] = 1;
+      hypre_StructMatrixNumGhost(matrix)[2*i+1] = 1;
+   }
+
 
    return matrix;
 }
