@@ -2303,7 +2303,7 @@ int HYPRE_LinSysCore::putNodalFieldData(int fieldID, int fieldSize,
 //---------------------------------------------------------------------------
 
 int HYPRE_LinSysCore::enforceEssentialBC(int* globalEqn, double* alpha,
-                                          double* gamma, int leng)
+                                          double* gamma1, int leng)
 {
    int    i, j, k, localEqnNum, colIndex, rowSize, *colInd;
    int    numLocalRows, eqnNum, rowSize2, *colInd2, numLabels, *labels;
@@ -2367,7 +2367,7 @@ int HYPRE_LinSysCore::enforceEssentialBC(int* globalEqn, double* alpha,
                   {
                      if ( colInd2[k]-1 == globalEqn[i] ) 
                      {
-                        rhs_term = gamma[i] / alpha[i] * colVal2[k];
+                        rhs_term = gamma1[i] / alpha[i] * colVal2[k];
                         eqnNum = colIndex - 1;
                         HYPRE_IJVectorGetValues(HYb_,1,&eqnNum, &val);
                         val -= rhs_term;
@@ -2382,7 +2382,7 @@ int HYPRE_LinSysCore::enforceEssentialBC(int* globalEqn, double* alpha,
          }// end for(j<rowSize) loop
 
          // Set rhs for boundary point
-         rhs_term = gamma[i] / alpha[i];
+         rhs_term = gamma1[i] / alpha[i];
          eqnNum = globalEqn[i];
          HYPRE_IJVectorSetValues(HYb_, 1, (const int *) &eqnNum,
                                  (const double *) &rhs_term);
@@ -2492,7 +2492,7 @@ int HYPRE_LinSysCore::enforceRemoteEssBCs(int numEqns, int* globalEqns,
 //---------------------------------------------------------------------------
 
 int HYPRE_LinSysCore::enforceOtherBC(int* globalEqn, double* alpha, 
-                                     double* beta, double* gamma, int leng)
+                                     double* beta, double* gamma1, int leng)
 {
    int    i, j, numLocalRows, localEqnNum, *colInd, rowSize, eqnNum;
    double val, *colVal;
@@ -2543,7 +2543,7 @@ int HYPRE_LinSysCore::enforceOtherBC(int* globalEqn, double* alpha,
 
       eqnNum = globalEqn[i];
       HYPRE_IJVectorGetValues(HYb_,1,&eqnNum,&val);
-      val += ( gamma[i] / beta[i] );
+      val += ( gamma1[i] / beta[i] );
       HYPRE_IJVectorSetValues(HYb_, 1, (const int *) &eqnNum,
                               (const double *) &val);
    }

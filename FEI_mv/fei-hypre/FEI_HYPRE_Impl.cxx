@@ -1036,7 +1036,7 @@ int FEI_HYPRE_Impl::resetInitialGuess(double s)
  load node boundary conditions
  -------------------------------------------------------------------------*/
 int FEI_HYPRE_Impl::loadNodeBCs(int numNodes, int *nodeIDs, int fieldID,
-                             double **alpha, double **beta, double **gamma)
+                             double **alpha, double **beta, double **gamma1)
 {
    int   iN, iD, oldNumBCNodes, *oldBCNodeIDs;
    double **oldBCAlpha, **oldBCBeta, **oldBCGamma;
@@ -1064,7 +1064,7 @@ int FEI_HYPRE_Impl::loadNodeBCs(int numNodes, int *nodeIDs, int fieldID,
             {
                BCNodeAlpha_[iN][iD] = alpha[iN][iD];
                BCNodeBeta_[iN][iD]  = beta[iN][iD];
-               BCNodeGamma_[iN][iD] = gamma[iN][iD];
+               BCNodeGamma_[iN][iD] = gamma1[iN][iD];
             }
          }
       }
@@ -1101,7 +1101,7 @@ int FEI_HYPRE_Impl::loadNodeBCs(int numNodes, int *nodeIDs, int fieldID,
             {
                BCNodeAlpha_[oldNumBCNodes+iN][iD] = alpha[iN][iD];
                BCNodeBeta_[oldNumBCNodes+iN][iD]  = beta[iN][iD];
-               BCNodeGamma_[oldNumBCNodes+iN][iD] = gamma[iN][iD];
+               BCNodeGamma_[oldNumBCNodes+iN][iD] = gamma1[iN][iD];
             }
          }
       }
@@ -2032,7 +2032,7 @@ void FEI_HYPRE_Impl::buildGlobalMatrixVector()
    int    *ToffdIA=NULL, *ToffdJA=NULL, elemNExt, elemNLocal, nodeID;
    int    diagOffset, offdOffset; 
    double **elemMats=NULL, *elemMat=NULL, *TdiagAA=NULL, *ToffdAA=NULL;
-   double alpha, beta, gamma;
+   double alpha, beta, gamma1;
 
    if ( outputLevel_ >= 2 )
       printf("%4d : FEI_HYPRE_Impl::buildGlobalMatrixVector begins..\n",mypid_);
@@ -2311,7 +2311,7 @@ void FEI_HYPRE_Impl::buildGlobalMatrixVector()
          {
             alpha = BCNodeAlpha_[iN][iD%nodeDOF_]; 
             beta  = BCNodeBeta_[iN][iD%nodeDOF_]; 
-            gamma = BCNodeGamma_[iN][iD%nodeDOF_]; 
+            gamma1= BCNodeGamma_[iN][iD%nodeDOF_]; 
             if ( beta == 0.0 && alpha != 0.0 )
             {
                for (iD2=TdiagIA[iD]; iD2<TdiagIA[iD]+diagCounts[iD]; iD2++)
@@ -2324,7 +2324,7 @@ void FEI_HYPRE_Impl::buildGlobalMatrixVector()
                      {
                         if ( TdiagJA[iD3] == iD && TdiagAA[iD3] != 0.0 )
                         {
-                           rhsVector_[rowInd] -= (gamma/alpha*TdiagAA[iD3]); 
+                           rhsVector_[rowInd] -= (gamma1/alpha*TdiagAA[iD3]); 
                            TdiagAA[iD3] = 0.0;
                            break;
                         }
@@ -2350,7 +2350,7 @@ void FEI_HYPRE_Impl::buildGlobalMatrixVector()
                         {
                            if ( TdiagJA[iD3] == iD && TdiagAA[iD3] != 0.0 )
                            {
-                              rhsVector_[rowInd] -= (gamma/alpha*TdiagAA[iD3]); 
+                              rhsVector_[rowInd] -= (gamma1/alpha*TdiagAA[iD3]);
                               TdiagAA[iD3] = 0.0;
                               break;
                            }
@@ -2363,7 +2363,7 @@ void FEI_HYPRE_Impl::buildGlobalMatrixVector()
                      ToffdAA[iD2] = 0.0;
                   }
                }
-               rhsVector_[iD] = gamma / alpha;
+               rhsVector_[iD] = gamma1 / alpha;
             }
             else if ( beta != 0.0 )
             {
@@ -2376,7 +2376,7 @@ void FEI_HYPRE_Impl::buildGlobalMatrixVector()
                      break;
                   }
                }
-               rhsVector_[iD] += gamma / beta;
+               rhsVector_[iD] += gamma1 / beta;
             }
          }
       }
@@ -2394,7 +2394,7 @@ void FEI_HYPRE_Impl::buildGlobalMatrixVector()
          {
             alpha = BCNodeAlpha_[iN][iD%nodeDOF_]; 
             beta  = BCNodeBeta_[iN][iD%nodeDOF_]; 
-            gamma = BCNodeGamma_[iN][iD%nodeDOF_]; 
+            gamma1= BCNodeGamma_[iN][iD%nodeDOF_]; 
             if ( beta == 0.0 && alpha != 0.0 )
             {
                if ( numExtNodes_ > 0 )
@@ -2409,7 +2409,7 @@ void FEI_HYPRE_Impl::buildGlobalMatrixVector()
                         {
                            if ( ToffdJA[iD3] == iD && ToffdAA[iD3] != 0.0 )
                            {
-                              rhsVector_[rowInd] -= (gamma/alpha*ToffdAA[iD3]); 
+                              rhsVector_[rowInd] -= (gamma1/alpha*ToffdAA[iD3]);
                               ToffdAA[iD3] = 0.0;
                               break;
                            }
@@ -2426,7 +2426,7 @@ void FEI_HYPRE_Impl::buildGlobalMatrixVector()
                         {
                            if ( ToffdJA[iD3] == iD && ToffdAA[iD3] != 0.0 )
                            {
-                              rhsVector_[rowInd] -= (gamma/alpha*ToffdAA[iD3]);
+                              rhsVector_[rowInd] -= (gamma1/alpha*ToffdAA[iD3]);
                               ToffdAA[iD3] = 0.0;
                               break;
                            }
@@ -3154,7 +3154,7 @@ int FEI_HYPRE_Impl::solveUsingBicgstab()
    int    iM, jM, numTrials, innerIteration, blen=2, vecByteSize;
    double *rVec, *rhVec, *xhVec, *tVec, **utVec, **rtVec;
    double rho, rho1, alpha, dtemp, dtemp2, rnorm, rnorm0;
-   double beta, omega, gamma, eps1, dArray[2], dArray2[2];
+   double beta, omega, gamma1, eps1, dArray[2], dArray2[2];
    double *sigma, *gammap, *gammanp, *gammapp, **mat, **tau;
 
    /* -----------------------------------------------------------------
@@ -3277,9 +3277,9 @@ int FEI_HYPRE_Impl::solveUsingBicgstab()
             dtemp = 0.0;
             for ( irow = 0; irow < localNRows; irow++ ) 
                dtemp += (rhVec[irow] * utVec[iM+2][irow]);
-            MPI_Allreduce(&dtemp, &gamma, 1, MPI_DOUBLE, MPI_SUM, mpiComm_);
+            MPI_Allreduce(&dtemp, &gamma1, 1, MPI_DOUBLE, MPI_SUM, mpiComm_);
 
-            alpha = rho / gamma; 
+            alpha = rho / gamma1; 
             for ( jM = 0; jM <= iM; jM++ ) 
                for ( irow = 0; irow < localNRows; irow++ ) 
                   rtVec[jM+1][irow] -= alpha * utVec[jM+2][irow]; 

@@ -119,7 +119,7 @@ extern "C" int HYPRE_LSC_MappedMatrixLoad(LinSysCore* lsc, int row,
 
 extern "C" char *HYPRE_LSC_GetVersion(LinSysCore* lsc)
 {
-   char *version;
+   char *lscVersion;
 
    if (lsc == NULL) return(NULL);
 
@@ -127,9 +127,9 @@ extern "C" char *HYPRE_LSC_GetVersion(LinSysCore* lsc)
 
    if (linSys == NULL) return(NULL);
 
-   version = linSys->getVersion();
+   lscVersion = linSys->getVersion();
 
-   return(version);
+   return(lscVersion);
 }
 
 /******************************************************************************/
@@ -317,7 +317,7 @@ extern "C" int HYPRE_LSC_matrixLoadComplete(LinSysCore *lsc)
 /*----------------------------------------------------------------------------*/
 
 extern "C" int HYPRE_LSC_enforceEssentialBC(LinSysCore *lsc, int* globalEqn,
-                     double* alpha, double* gamma, int leng)
+                     double* alpha, double* gamma1, int leng)
 {
    if (lsc == NULL) return(1);
 
@@ -325,7 +325,7 @@ extern "C" int HYPRE_LSC_enforceEssentialBC(LinSysCore *lsc, int* globalEqn,
 
    if (linSys == NULL) return(1);
 
-   linSys->enforceEssentialBC(globalEqn, alpha, gamma, leng);
+   linSys->enforceEssentialBC(globalEqn, alpha, gamma1, leng);
 
    return(0);
 }
@@ -354,7 +354,7 @@ extern "C" int HYPRE_LSC_enforceRemoteEssBCs(LinSysCore *lsc,int numEqns,
 /*----------------------------------------------------------------------------*/
 
 extern "C" int HYPRE_LSC_enforceOtherBC(LinSysCore *lsc, int* globalEqn, 
-                     double* alpha, double* beta, double* gamma, int leng)
+                     double* alpha, double* beta, double* gamma1, int leng)
 {
    if (lsc == NULL) return(1);
 
@@ -362,7 +362,7 @@ extern "C" int HYPRE_LSC_enforceOtherBC(LinSysCore *lsc, int* globalEqn,
 
    if (linSys == NULL) return(1);
 
-   linSys->enforceOtherBC(globalEqn, alpha, beta, gamma, leng);
+   linSys->enforceOtherBC(globalEqn, alpha, beta, gamma1, leng);
 
    return(0);
 }

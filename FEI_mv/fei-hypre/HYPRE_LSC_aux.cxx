@@ -4209,12 +4209,12 @@ void HYPRE_LinSysCore::loadConstraintNumbers(int nConstr, int *constrList)
 
 char *HYPRE_LinSysCore::getVersion()
 {
-   static char version[100];
-   char        hypre[200], hypre_version[50], ctmp[50];
+   static char extVersion[100];
+   char        hypre[200], hypreVersion[50], ctmp[50];
    sprintf(hypre, "%s", HYPRE_Version());
-   sscanf(hypre, "%s %s", ctmp, hypre_version);
-   sprintf(version, "%s-%s", HYPRE_FEI_Version(), hypre_version);
-   return version;
+   sscanf(hypre, "%s %s", ctmp, hypreVersion);
+   sprintf(extVersion, "%s-%s", HYPRE_FEI_Version(), hypreVersion);
+   return extVersion;
 }
 
 //***************************************************************************
