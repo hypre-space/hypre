@@ -124,9 +124,9 @@ HYPRE_SStructMatrixCreate( MPI_Comm              comm,
    hypre_SStructMatrixGlobalSize(matrix)  = 0;
    hypre_SStructMatrixRefCount(matrix)    = 1;
   
-   /* GEC0902 setting the default of the object_type to 3333 HYPRE_SSTRUCT for now */ 
+   /* GEC0902 setting the default of the object_type to HYPRE_SSTRUCT */ 
 
-   hypre_SStructMatrixObjectType(matrix) = 3333;
+   hypre_SStructMatrixObjectType(matrix) = HYPRE_SSTRUCT;
 
    *matrix_ptr = matrix;
 
@@ -707,24 +707,27 @@ HYPRE_SStructMatrixSetObjectType( HYPRE_SStructMatrix  matrix,
    int                     stencil_size;
    int                     part, var, i;
 
-   for (part = 0; part < nparts; part++)
+   hypre_SStructMatrixObjectType(matrix) = type ;   
+
+   /* RDF: This and all other modifications to 'split' really belong
+    * in the Initialize routine */
+   if (type != HYPRE_SSTRUCT)
    {
-      pgrid = hypre_SStructGraphPGrid(graph, part);
-      nvars = hypre_SStructPGridNVars(pgrid);
-      for (var = 0; var < nvars; var++)
+      for (part = 0; part < nparts; part++)
       {
-         stencil_size = hypre_SStructStencilSize(stencils[part][var]);
-         for (i = 0; i < stencil_size; i++)
+         pgrid = hypre_SStructGraphPGrid(graph, part);
+         nvars = hypre_SStructPGridNVars(pgrid);
+         for (var = 0; var < nvars; var++)
          {
-            splits[part][var][i] = -1;
+            stencil_size = hypre_SStructStencilSize(stencils[part][var]);
+            for (i = 0; i < stencil_size; i++)
+            {
+               splits[part][var][i] = -1;
+            }
          }
       }
    }
    
-   /* GEC0902 Injecting the type into the matrix data structure   */
-
-   hypre_SStructMatrixObjectType(matrix) = type ;   
- 
    return ierr;
 }
 
