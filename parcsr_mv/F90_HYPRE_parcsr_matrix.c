@@ -31,7 +31,7 @@ hypre_F90_IFACE(hypre_newparcsrmatrix)( int      *comm,
                                         long int *matrix,
                                         int      *ierr               )
 {
-   *matrix = (HYPRE_ParCSRMatrix)
+   *matrix = (long int)
              ( HYPRE_CreateParCSRMatrix( (MPI_Comm) *comm,
                                          (int)      *global_num_rows,
                                          (int)      *global_num_cols,

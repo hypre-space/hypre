@@ -26,7 +26,7 @@ hypre_F90_IFACE(hypre_newparvector)( int      *comm,
                                      long int *vector,
                                      int      *ierr          )
 {
-   *vector = (HYPRE_ParVector)
+   *vector = (long int)
              ( HYPRE_CreateParVector( (MPI_Comm) *comm,
                                       (int)      *global_size,
                                       (int *)     partitioning ) );
