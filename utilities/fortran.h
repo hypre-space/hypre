@@ -26,6 +26,11 @@
 #  define hypre_NAME_C_CALLING_FORT(name,NAME) NAME
 #  define hypre_NAME_FORT_CALLING_C(name,NAME) NAME
 
+#elif defined(HYPRE_LINUX)
+
+#  define hypre_NAME_C_CALLING_FORT(name,NAME) name##__
+#  define hypre_NAME_FORT_CALLING_C(name,NAME) name##__
+
 #else
 
 #  define hypre_NAME_C_CALLING_FORT(name,NAME) name##_
