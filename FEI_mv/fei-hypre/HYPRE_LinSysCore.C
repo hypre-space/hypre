@@ -3066,7 +3066,7 @@ void HYPRE_LinSysCore::solveUsingSuperLU(int& status)
     ind_array = new int[nrows];
     for ( i = 0; i < nrows; i++ ) ind_array[i] = i;
     rhs = new double[nrows];
-    ierr = HYPRE_IJVectorGetLocalComponents(currb_, nrows, ind_array, NULL, rhs);
+    ierr = HYPRE_IJVectorGetLocalComponents(currB_, nrows, ind_array, NULL, rhs);
     assert(!ierr);
     dCreate_Dense_Matrix(&B, nrows, 1, rhs, nrows, DN, _D, GE);
 
@@ -3120,7 +3120,7 @@ void HYPRE_LinSysCore::solveUsingSuperLU(int& status)
     if ( info == 0 )
     {
        soln = (double *) ((DNformat *) B.Store)->nzval;
-       ierr = HYPRE_IJVectorSetLocalComponents(currx_,nrows,ind_array,NULL,soln);
+       ierr = HYPRE_IJVectorSetLocalComponents(currX_,nrows,ind_array,NULL,soln);
        assert(!ierr);
        x_csr  = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(currX_);
        b_csr  = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(currB_);
