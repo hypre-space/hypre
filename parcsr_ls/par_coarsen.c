@@ -95,6 +95,7 @@
 int
 hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
                      double                 strength_threshold,
+                     int                    debug_flag,
                      hypre_ParCSRMatrix   **S_ptr,
                      int                  **CF_marker_ptr,
                      int                   *coarse_size_ptr     )
@@ -155,7 +156,7 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
                       
    double              diag, row_scale;
    int                 i, j, k, ic, jc, kc, jj, kk, jA, jS, kS, ig;
-   int		       index, start, num_procs, jrow;
+   int		       index, start, my_id, num_procs, jrow;
                       
    int                 ierr = 0;
    int                 break_var = 1;
@@ -166,6 +167,14 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
    int		       block_lens[2];
    int		       num_data, start_index;
    int		       *recv_vec_starts;
+   double	    wall_time;
+   double	    wall_time_ip = 0;
+   double	    wall_time_bp = 0;
+   double	    wall_time_rs = 0;
+   double	    sum_time_ip = 0;
+   double	    sum_time_bp = 0;
+   double	    sum_time_rs = 0;
+   int   iter = 0;
 
 #if 0 /* debugging */
    char  filename[256];
@@ -187,7 +196,9 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
     * to "unaccounted-for" dependence.
     *----------------------------------------------------------------*/
 
+   if (debug_flag == 3) wall_time = time_getWallclockSeconds();
    MPI_Comm_size(comm,&num_procs);
+   MPI_Comm_rank(comm,&my_id);
 
    if (!comm_pkg)
    {
@@ -497,12 +508,19 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
    hypre_CommPkgRecvMPITypes(comm_pkg_mS) = recv_datatype;   
  
    
+   if (debug_flag == 3)
+   {
+      wall_time = time_getWallclockSeconds() - wall_time;
+      printf("Proc = %d    Initialize CLJP phase = %f\n",
+                     my_id, wall_time); 
+   }
    while (1)
    {
       /*------------------------------------------------
        * Exchange boundary data, i.i. get measures and S_ext_data
        *------------------------------------------------*/
 
+      if (debug_flag == 3) wall_time = time_getWallclockSeconds();
       index = 0;
       for (i = 0; i < num_sends; i++)
       {
@@ -652,6 +670,7 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
       hypre_ParAMGIndepSet(S, S_ext, measure_array, graph_array, graph_size, 
 				CF_marker, CF_marker_offd);
 
+      iter++;
       /*------------------------------------------------
        * Exchange boundary data for CF_marker
        *------------------------------------------------*/
@@ -670,10 +689,17 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
  
       hypre_FinalizeCommunication(comm_handle);   
  
+      if (debug_flag == 3)
+      {
+         wall_time = time_getWallclockSeconds() - wall_time;
+         printf("Proc = %d  iter %d  comm. and subgraph update = %f\n",
+                     my_id, iter, wall_time); 
+      }
       /*------------------------------------------------
        * Set C_pts and apply heuristics.
        *------------------------------------------------*/
 
+      if (debug_flag == 3) wall_time = time_getWallclockSeconds();
       for (ig = 0; ig < graph_size; ig++)
       {
          i = graph_array[ig];
@@ -834,7 +860,8 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
                         }
    		        else
    		        {
-   		           kc = -1;
+   		           kc = hypre_BinarySearch(col_map_offd,k,num_cols_offd);
+   		           /* kc = -1;
    		           for (kk = 0; kk < num_cols_offd; kk++)
    		           {
    			      if (col_map_offd[kk] == k)
@@ -842,7 +869,7 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
    			         kc = kk;
    			         break;
    			      }
-   		           }
+   		           } */
    		           if (kc > -1 && S_ext_data[kS] && 
    				CF_marker_offd[kc] == COMMON_C_PT)
    		           {
@@ -877,7 +904,9 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
 		     }
 		     else
 		     {
-		        jj = -1;
+   		        jj = hypre_BinarySearch(col_map_offd,j,num_cols_offd);
+			if (jj != -1) jj += num_variables;
+		        /* jj = -1;
 			for (jc = 0; jc < num_cols_offd; jc++)
 			{
 			   if (col_map_offd[jc] == j) 
@@ -885,7 +914,7 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
 			      jj = jc+num_variables;
 			      break;
 			   }
-			}
+			} */
 		     }
                
                      /* "remove" edge from S */
@@ -945,28 +974,25 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
 	          }
 	          else
 	          {
-		     for (jj = 0; jj < num_cols_offd; jj++)
+   		     jj = hypre_BinarySearch(col_map_offd,j,num_cols_offd);
+		     if (jj != -1)
 		     {
-		        if (col_map_offd[jj] == j)
-		        {
-                  	   if (CF_marker_offd[jj] > 0)
-                  	   {
-                     	      if (S_ext_data[jS] < 0)
-                     	      {
-                        	 /* "remove" edge from S */
-                        	 S_ext_data[jS] = -S_ext_data[jS];
-                     	      }
+                        if (CF_marker_offd[jj] > 0)
+                  	{
+                     	   if (S_ext_data[jS] < 0)
+                     	   {
+                              /* "remove" edge from S */
+                       	      S_ext_data[jS] = -S_ext_data[jS];
+                     	   }
 
-                     	      /* IMPORTANT: consider all dependencies */
-                     	      if (S_ext_data[jS])
-                     	      {
-                        	 /* temporarily modify CF_marker */
-                        	 CF_marker_offd[jj] = COMMON_C_PT;
-                     	      }
+                     	   /* IMPORTANT: consider all dependencies */
+                     	   if (S_ext_data[jS])
+                     	   {
+                              /* temporarily modify CF_marker */
+                              CF_marker_offd[jj] = COMMON_C_PT;
                   	   }
-			   break;
                         }
-		     }
+                     }
 	          }
                }
 
@@ -1021,7 +1047,8 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
                      }
 		     else
 		     {
-		        jc = -1;
+   		        jc = hypre_BinarySearch(col_map_offd,j,num_cols_offd);
+		        /* jc = -1;
 		        for (jj = 0; jj < num_cols_offd; jj++)
 		        {
 		           if (col_map_offd[jj] == j)
@@ -1029,7 +1056,7 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
 			      jc = jj;
 			      break;
 		           }
-		        }
+		        } */
 		        if (jc > -1 )
                         {
 		           for (kS = S_ext_i[jc]; kS < S_ext_i[jc+1]; kS++)
@@ -1049,7 +1076,8 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
                               }
 			      else
 			      {
-			         kc = -1;
+   		                 kc = hypre_BinarySearch(col_map_offd,k,num_cols_offd);
+			         /* kc = -1;
 			         for (kk = 0; kk < num_cols_offd; kk++)
 			         {
 			            if (col_map_offd[kk] == k)
@@ -1057,7 +1085,7 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
 			               kc = kk;
 			               break;
 			            }
-			         }
+			         } */
 			         if (kc > -1 && CF_marker_offd[kc] == COMMON_C_PT)
 			         {
                                     /* "remove" edge from S and update measure*/
@@ -1109,18 +1137,18 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
                }
 	       else
 	       {
-	          for (jj = 0; jj < num_cols_offd; jj++)
-		  {
-		     if (col_map_offd[jj] == j && 
-			CF_marker_offd[jj] == COMMON_C_PT)
-                     {
-                        CF_marker_offd[jj] = C_PT;
-		 	break;
-                     }
-                  }
+   		  jj = hypre_BinarySearch(col_map_offd,j,num_cols_offd);
+	          if (jj != -1 && CF_marker_offd[jj] == COMMON_C_PT)
+                           CF_marker_offd[jj] = C_PT;
                }
             }
          }
+      }
+      if (debug_flag == 3)
+      {
+         wall_time = time_getWallclockSeconds() - wall_time;
+         printf("Proc = %d    CLJP phase = %f graph_size = %d nc_offd = %d\n",
+                     my_id, wall_time, graph_size, num_cols_offd); 
       }
    }
 
@@ -1180,7 +1208,6 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
    hypre_CommPkg   *comm_pkg      = hypre_ParCSRMatrixCommPkg(A);
    hypre_CommHandle *comm_handle;
    int		   *row_starts    = hypre_ParCSRMatrixRowStarts(A);
-   int		   *col_map_offd_A= hypre_ParCSRMatrixColMapOffd(A);
    hypre_CSRMatrix *A_diag        = hypre_ParCSRMatrixDiag(A);
    hypre_CSRMatrix *A_offd        = hypre_ParCSRMatrixOffd(A);
    int             *A_i           = hypre_CSRMatrixI(A_diag);
@@ -1308,7 +1335,7 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
    hypre_SetParCSRMatrixRowStartsOwner(S,0);
    col_map_offd_S = hypre_CTAlloc(int,num_cols_offd);
    for (i=0; i < num_cols_offd; i++)
-	col_map_offd_S[i] = col_map_offd_A[i];
+	col_map_offd_S[i] = col_map_offd[i];
 
    hypre_ParCSRMatrixColMapOffd(S) = col_map_offd_S;
 
@@ -1776,20 +1803,17 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
                         }
                         else
                         {
-                           for (jk = 0; jk < num_cols_offd; jk++)
+   		           jk = hypre_BinarySearch(col_map_offd,index,num_cols_offd);
+                           if (jk != -1)
                            {
-                              if (col_map_offd[jk] == index)
+                              for (jl=0; jl < ci_size_offd; jl++)
                               {
-                                 for (jl=0; jl < ci_size_offd; jl++)
+                                 if (ci_array[jl] == jk)
                                  {
-                                    if (ci_array[jl] == jk)
-                                    {
-                                       set_empty = 0;
-                                       break;
-                                    }
+                                    set_empty = 0;
+                                    break;
                                  }
                               }
-                              if (!set_empty) break;
                            }
                            if (!set_empty) break;
                         }
@@ -1951,11 +1975,9 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
    	       }
    	       else
    	       {
-   	          for (jj = 0; jj < num_cols_offd; jj++)
-   	          {
-   		     if (col_map_offd[jj] == j && CF_marker_offd[jj] > 0)
+   		  jj = hypre_BinarySearch(col_map_offd,j,num_cols_offd);
+   		  if (jj != -1 && CF_marker_offd[jj] > 0)
    	                ci_array[ci_size_offd++] = jj;
-    	          }	
     	       }	
     	    }
    	    for (ji = S_ext_i[i]; ji < S_ext_i[i+1]; ji++)
@@ -2023,73 +2045,68 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
    	       }
    	       else
    	       {
-   	          for (jm = 0; jm < num_cols_offd; jm++)
+   		  jm = hypre_BinarySearch(col_map_offd,j,num_cols_offd);
+   		  if (jm != -1 && CF_marker_offd[jm] == -1)
    	          {
-   		     if (col_map_offd[jm] == j && CF_marker_offd[jm] == -1)
+   	             set_empty = 1;
+   	             for (jj = S_ext_i[jm]; jj < S_ext_i[jm+1]; jj++)
    	             {
-   	                set_empty = 1;
-   	                for (jj = S_ext_i[jm]; jj < S_ext_i[jm+1]; jj++)
-   	                {
-   		           index = S_ext_j[jj];
-   		           if (index > col_0 && index < col_n) 
-   			   {
-   			      for (jl=0; jl < ci_size; jl++)
+   		        index = S_ext_j[jj];
+   		        if (index > col_0 && index < col_n) 
+   		  	{
+   			   for (jl=0; jl < ci_size; jl++)
+   		           {
+   		              if (graph_array[jl] == index)
    		              {
-   		                 if (graph_array[jl] == index)
-   		                 {
+   		                 set_empty = 0;
+   		                 break;
+   		              }
+   	             	   }
+   	              	   if (!set_empty) break;
+   	                }
+   			else
+   			{
+   		           jk = hypre_BinarySearch(col_map_offd,index,num_cols_offd);
+   			   if (jk != -1)
+   			   {
+   			      for (jl=0; jl < ci_size_offd; jl++)
+   		              {
+   		              	 if (ci_array[jl] == jk)
+   		            	 {
    		                    set_empty = 0;
    		                    break;
    		                 }
-   	             	      }
-   	              	      if (!set_empty) break;
-   	                   }
-   			   else
-   			   {
-   			      for (jk = 0; jk < num_cols_offd; jk++)
-   			      {
-   			         if (col_map_offd[jk] == index)
-   			         {
-   				    for (jl=0; jl < ci_size_offd; jl++)
-   		           	    {
-   		              	       if (ci_array[jl] == jk)
-   		              	       {
-   		                          set_empty = 0;
-   		                          break;
-   		                       }
-   		                    }
-   		                 }
-   	              	         if (!set_empty) break;
-   	             	      }
-   	              	      if (!set_empty) break;
-   	                   }
+   		              }
+   		           }
+   	              	   if (!set_empty) break;
    	                }
-   	                if (set_empty)
-   	                {
-   		           if (C_i_nonempty)
-   		           {
-   		              CF_marker_offd[i] = 1;
-   		              for (jj=0 ; jj < ci_tilde_size; jj++)
-   		              {
-   			         CF_marker[graph_ptr[jj]] = -1;
-   		              }
-   		              for (jj=0 ; jj < ci_tilde_size_offd; jj++)
-   		              {
-   			         CF_marker_offd[citilde_array[jj]] = -1;
-   		              }
-   		              ci_tilde_size = 0;
-   		              ci_tilde_size_offd = 0;
-   		              break;
-   		           }
-   		           else
-   		           {
-   		              citilde_array[ci_tilde_size_offd++] = jm;
-   		              CF_marker_offd[jm] = 1;
-   		              C_i_nonempty = 1;
-   		              i--;
-   		              break;
-   		           }
-   		        }
    	             }
+   	             if (set_empty)
+   	             {
+   		        if (C_i_nonempty)
+   		        {
+   		           CF_marker_offd[i] = 1;
+   		           for (jj=0 ; jj < ci_tilde_size; jj++)
+   		           {
+   			      CF_marker[graph_ptr[jj]] = -1;
+   		           }
+   		           for (jj=0 ; jj < ci_tilde_size_offd; jj++)
+   		           {
+   			      CF_marker_offd[citilde_array[jj]] = -1;
+   		           }
+   		           ci_tilde_size = 0;
+   		           ci_tilde_size_offd = 0;
+   		           break;
+   		        }
+   		        else
+   		        {
+   		           citilde_array[ci_tilde_size_offd++] = jm;
+   		           CF_marker_offd[jm] = 1;
+   		           C_i_nonempty = 1;
+   		           i--;
+   		           break;
+   		        }
+   		     }
    	          }
    	       }
    	    }
@@ -2231,20 +2248,17 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
                      }
                      else
                      {
-                        for (jk = 0; jk < num_cols_offd; jk++)
+   		        jk = hypre_BinarySearch(col_map_offd,index,num_cols_offd);
+                        if (jk != -1)
                         {
-                           if (col_map_offd[jk] == index)
+                           for (jl=0; jl < ci_size_offd; jl++)
                            {
-                              for (jl=0; jl < ci_size_offd; jl++)
+                              if (ci_array[jl] == jk)
                               {
-                                 if (ci_array[jl] == jk)
-                                 {
-                                    set_empty = 0;
-                                    break;
-                                 }
+                                 set_empty = 0;
+                                 break;
                               }
                            }
-                           if (!set_empty) break;
                         }
                         if (!set_empty) break;
                      }
@@ -2367,8 +2381,8 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
                       
    hypre_ParVector    *ones_vector;
    hypre_ParVector    *measure_vector;
-   double             *d_measure_array;
-   int                *measure_array;
+   double             *measure_array;
+   int                *i_measure_array;
    int                *graph_array;
    int                 graph_size;
    int                 global_graph_size;
@@ -2416,6 +2430,12 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
    int              ierr = 0;
    int              break_var = 0;
    double	    wall_time;
+   double	    wall_time_ip = 0;
+   double	    wall_time_bp = 0;
+   double	    wall_time_rs = 0;
+   double	    sum_time_ip = 0;
+   double	    sum_time_bp = 0;
+   double	    sum_time_rs = 0;
 
 
 
@@ -2657,13 +2677,19 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
     * neighbor processors
     *----------------------------------------------------------*/
 
-   measure_array = hypre_CTAlloc(int, num_variables);
+   i_measure_array = hypre_CTAlloc(int, num_variables);
 
    for (i = 0; i < num_variables; i++)
    {
-      measure_array[i] = ST_i[i+1]-ST_i[i];
+      i_measure_array[i] = ST_i[i+1]-ST_i[i];
    }
 
+   if (debug_flag == 3)
+   {
+      wall_time = time_getWallclockSeconds() - wall_time;
+      printf("Proc = %d    Initialize S, measures = %f\n",
+                     my_id, wall_time); 
+   }
    /*---------------------------------------------------
     * Loop until all points are either fine or coarse.
     *---------------------------------------------------*/
@@ -2685,7 +2711,7 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
  
    for (j = 0; j < num_variables; j++) 
    {    
-      measure = measure_array[j];
+      measure = i_measure_array[j];
       if (measure > 0) 
       {
          enter_on_lists(&LoL_head, &LoL_tail, measure, j, lists, where);
@@ -2721,8 +2747,8 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
 
       CF_marker[index] = CPOINT;
       ++coarse_size;
-      measure = measure_array[index];
-      measure_array[index] = 0;
+      measure = i_measure_array[index];
+      i_measure_array[index] = 0;
       --num_left;
       
       remove_point(&LoL_head, &LoL_tail, measure, index, lists, where);
@@ -2733,7 +2759,7 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
          if (CF_marker[nabor] == UNDECIDED)
          {
             CF_marker[nabor] = FPOINT;
-            measure = measure_array[nabor];
+            measure = i_measure_array[nabor];
 
             remove_point(&LoL_head, &LoL_tail, measure, nabor, lists, where);
             --num_left;
@@ -2743,11 +2769,11 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
                nabor_two = S_diag_j[k];
                if (CF_marker[nabor_two] == UNDECIDED)
                {
-                  measure = measure_array[nabor_two];
+                  measure = i_measure_array[nabor_two];
                   remove_point(&LoL_head, &LoL_tail, measure, 
                                nabor_two, lists, where);
 
-                  new_meas = ++(measure_array[nabor_two]);
+                  new_meas = ++(i_measure_array[nabor_two]);
                  
                   enter_on_lists(&LoL_head, &LoL_tail, new_meas,
                                  nabor_two, lists, where);
@@ -2757,7 +2783,7 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
       }
    }
 
-   hypre_TFree(measure_array);
+   hypre_TFree(i_measure_array);
    hypre_DestroyCSRMatrix(ST);
 
    if (debug_flag == 3)
@@ -2858,6 +2884,7 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
 
    hypre_TFree(graph_ptr);
    
+   if (debug_flag == 3) wall_time = time_getWallclockSeconds();
    num_sends = hypre_CommPkgNumSends(comm_pkg);
    num_recvs = hypre_CommPkgNumRecvs(comm_pkg);
    recv_vec_starts = hypre_CommPkgRecvVecStarts(comm_pkg);
@@ -2886,7 +2913,7 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
     * Compute the measures
     *
     * The measures are currently given by the column sums of S.
-    * Hence, d_measure_array[i] is the number of influences
+    * Hence, measure_array[i] is the number of influences
     * of variable i.
     *
     * The measures are augmented by a random number
@@ -2898,10 +2925,10 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
    hypre_InitializeParVector(ones_vector);
    hypre_SetParVectorConstantValues(ones_vector,-1.0);
 
-   d_measure_array = hypre_CTAlloc(double, num_variables+num_cols_offd);
+   measure_array = hypre_CTAlloc(double, num_variables+num_cols_offd);
    measure_vector = hypre_CreateParVector(comm,global_num_vars,row_starts);
    hypre_SetParVectorPartitioningOwner(measure_vector,0);
-   hypre_VectorData(hypre_ParVectorLocalVector(measure_vector))=d_measure_array;
+   hypre_VectorData(hypre_ParVectorLocalVector(measure_vector))=measure_array;
 
    hypre_ParCSRMatrixCommPkg(S) = hypre_ParCSRMatrixCommPkg(A);
 
@@ -2910,7 +2937,7 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
    hypre_ParCSRMatrixCommPkg(S) = NULL;
 
    /* this augments the measures */
-   hypre_InitParAMGIndepSet(S, d_measure_array);
+   hypre_InitParAMGIndepSet(S, measure_array);
 
    /*---------------------------------------------------
     * Initialize the graph array
@@ -3015,13 +3042,19 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
       start_index = S_ext_i[recv_vec_starts[i]];
       block_lens[0] = recv_vec_starts[i+1] - recv_vec_starts[i];
       block_lens[1] = S_ext_i[recv_vec_starts[i+1]]-start_index; 
-      MPI_Address(&d_measure_array[num_variables+recv_vec_starts[i]],&displs[0]);
+      MPI_Address(&measure_array[num_variables+recv_vec_starts[i]],&displs[0]);
       MPI_Address(&S_ext_data[start_index], &displs[1]);
       MPI_Type_struct(2,block_lens,displs,types,&recv_datatype[i]);
       MPI_Type_commit(&recv_datatype[i]); 
    }
    hypre_CommPkgRecvMPITypes(comm_pkg_mS) = recv_datatype;   
  
+   if (debug_flag == 3)
+   {
+      wall_time = time_getWallclockSeconds() - wall_time;
+      printf("Proc = %d    Initialize CLJP phase = %f\n",
+                     my_id, wall_time); 
+   }
    iter = 0; 
    while (1)
    {
@@ -3029,13 +3062,14 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
        * Exchange boundary data, i.i. get measures and S_ext_data
        *------------------------------------------------*/
 
+   if (debug_flag == 3) wall_time = time_getWallclockSeconds();
       index = 0;
       for (i = 0; i < num_sends; i++)
       {
 	 start = hypre_CommPkgSendMapStart(comm_pkg_mS, i);
          for (j = start; j < hypre_CommPkgSendMapStart(comm_pkg_mS, i+1); j++)
             buf_data[index++] 
-                 = d_measure_array[hypre_CommPkgSendMapElmt(comm_pkg_mS,j)];
+                 = measure_array[hypre_CommPkgSendMapElmt(comm_pkg_mS,j)];
          for (j = start; j < hypre_CommPkgSendMapStart(comm_pkg_mS, i+1); j++)
          {
             jrow = hypre_CommPkgSendMapElmt(comm_pkg_mS,j);
@@ -3066,7 +3100,7 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
 
 	    if (i < num_variables)
 	    { 
-               if ( (CF_marker[i] != C_PT) && (d_measure_array[i] < 1) )
+               if ( (CF_marker[i] != C_PT) && (measure_array[i] < 1) )
                {
                   /* set to be an F-pt */
                   CF_marker[i] = F_PT;
@@ -3089,7 +3123,7 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
                }
                if (CF_marker[i])
                {
-                  d_measure_array[i] = 0;
+                  measure_array[i] = 0;
  
                   /* take point out of the subgraph */
                   graph_size--;
@@ -3101,7 +3135,7 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
 	    else
 	    {
                ic = i - num_variables;
-               if ( (CF_marker_offd[ic] != C_PT) && (d_measure_array[i] < 1) )
+               if ( (CF_marker_offd[ic] != C_PT) && (measure_array[i] < 1) )
                {
                   /* set to be an F-pt */
                   CF_marker_offd[ic] = F_PT;
@@ -3117,7 +3151,7 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
  
                if (CF_marker_offd[ic])
                {
-                  d_measure_array[i] = 0;
+                  measure_array[i] = 0;
  
                   /* take point out of the subgraph */
                   graph_size--;
@@ -3143,7 +3177,7 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
       fp = fopen(filename, "w");
       for (i = 0; i < num_variables; i++)
       {
-         fprintf(fp, "%f\n", d_measure_array[i]);
+         fprintf(fp, "%f\n", measure_array[i]);
       }
       fclose(fp);
 
@@ -3177,7 +3211,7 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
        * maximal measure.
        *------------------------------------------------*/
       if (iter)
-         hypre_ParAMGIndepSet(S, S_ext, d_measure_array, graph_array, 
+         hypre_ParAMGIndepSet(S, S_ext, measure_array, graph_array, 
 				graph_size, CF_marker, CF_marker_offd);
       iter++;
 
@@ -3199,10 +3233,17 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
  
       hypre_FinalizeCommunication(comm_handle);   
  
+   if (debug_flag == 3)
+   {
+      wall_time = time_getWallclockSeconds() - wall_time;
+      printf("Proc = %d  iter %d  comm. and subgraph update = %f\n",
+                     my_id, iter, wall_time); 
+   }
       /*------------------------------------------------
        * Set C_pts and apply heuristics.
        *------------------------------------------------*/
 
+   if (debug_flag == 3) wall_time = time_getWallclockSeconds();
       for (ig = 0; ig < graph_size; ig++)
       {
          i = graph_array[ig];
@@ -3214,6 +3255,7 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
 
          if (i < num_variables)  /*interior points */
 	 {
+   if (debug_flag == 3) wall_time_ip = time_getWallclockSeconds();
             if (CF_marker[i] > 0)
             {  
                /* set to be a C-pt */
@@ -3232,7 +3274,7 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
                      /* decrement measures of unmarked neighbors */
                      if (!CF_marker[j])
                      {
-                        d_measure_array[j]--;
+                        measure_array[j]--;
                      }
                   }
                }
@@ -3248,7 +3290,7 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
                      /* decrement measures of unmarked neighbors */
                      if (!CF_marker_offd[j])
                      {
-                        d_measure_array[j+num_variables]--;
+                        measure_array[j+num_variables]--;
                      }
                   }
                }
@@ -3314,7 +3356,7 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
                         {
                            /* "remove" edge from S and update measure*/
                            S_diag_data[jS] = -S_diag_data[jS];
-                           d_measure_array[j]--;
+                           measure_array[j]--;
                            break_var = 0;
                            break;
                         }
@@ -3331,7 +3373,7 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
                            {
                               /* "remove" edge from S and update measure*/
                               S_diag_data[jS] = -S_diag_data[jS];
-                              d_measure_array[j]--;
+                              measure_array[j]--;
                               break;
                            }
                         }
@@ -3357,13 +3399,14 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
                            {
                               /* "remove" edge from S and update measure*/
                               S_offd_data[jS] = -S_offd_data[jS];
-                              d_measure_array[j+num_variables]--;
+                              measure_array[j+num_variables]--;
                               break;
                            }
                         }
    		        else
    		        {
-   		           kc = -1;
+   		           kc = hypre_BinarySearch(col_map_offd,k,num_cols_offd);
+   		           /* kc = -1;
    		           for (kk = 0; kk < num_cols_offd; kk++)
    		           {
    			      if (col_map_offd[kk] == k)
@@ -3371,13 +3414,13 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
    			         kc = kk;
    			         break;
    			      }
-   		           }
+   		           } */
    		           if (kc > -1 && S_ext_data[kS] && 
    				CF_marker_offd[kc] == COMMON_C_PT)
    		           {
                               /* "remove" edge from S and update measure*/
                               S_offd_data[jS] = -S_offd_data[jS];
-                              d_measure_array[j+num_variables]--;
+                              measure_array[j+num_variables]--;
                               break;
    		           }
    		        }
@@ -3385,10 +3428,12 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
                   }
                }
             }
+   if (debug_flag == 3) sum_time_ip += time_getWallclockSeconds()-wall_time_ip;
     	 }
 
 	 else /* boundary points */
 	 {
+   if (debug_flag == 3) wall_time_bp = time_getWallclockSeconds();
 	    ic = i - num_variables;
             if (CF_marker_offd[ic] > 0)
             {  
@@ -3406,7 +3451,9 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
 		     }
 		     else
 		     {
-		        jj = -1;
+   		        jj = hypre_BinarySearch(col_map_offd,j,num_cols_offd);
+			if (jj != -1) jj += num_variables;
+		        /* jj = -1;
 			for (jc = 0; jc < num_cols_offd; jc++)
 			{
 			   if (col_map_offd[jc] == j) 
@@ -3414,7 +3461,7 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
 			      jj = jc+num_variables;
 			      break;
 			   }
-			}
+			} */
 		     }
                
                      /* "remove" edge from S */
@@ -3425,14 +3472,14 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
 		     {
 			if (jj != -1 && !CF_marker[jj])
                         {
-                           d_measure_array[jj]--;
+                           measure_array[jj]--;
                         }
                      }
 		     else
 		     {
 			if (!CF_marker_offd[jj-num_variables])
                         {
-                           d_measure_array[jj]--;
+                           measure_array[jj]--;
                         }
                      }
                   }
@@ -3474,28 +3521,25 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
 	          }
 	          else
 	          {
-		     for (jj = 0; jj < num_cols_offd; jj++)
+   		     jj = hypre_BinarySearch(col_map_offd,j,num_cols_offd);
+		     if (jj != -1)
 		     {
-		        if (col_map_offd[jj] == j)
-		        {
-                  	   if (CF_marker_offd[jj] > 0)
-                  	   {
-                     	      if (S_ext_data[jS] < 0)
-                     	      {
-                        	 /* "remove" edge from S */
-                        	 S_ext_data[jS] = -S_ext_data[jS];
-                     	      }
+                  	if (CF_marker_offd[jj] > 0)
+                  	{
+                     	   if (S_ext_data[jS] < 0)
+                     	   {
+                              /* "remove" edge from S */
+                              S_ext_data[jS] = -S_ext_data[jS];
+                     	   }
 
-                     	      /* IMPORTANT: consider all dependencies */
-                     	      if (S_ext_data[jS])
-                     	      {
-                        	 /* temporarily modify CF_marker */
-                        	 CF_marker_offd[jj] = COMMON_C_PT;
-                     	      }
-                  	   }
-			   break;
+                     	   /* IMPORTANT: consider all dependencies */
+                     	   if (S_ext_data[jS])
+                     	   {
+                              /* temporarily modify CF_marker */
+                              CF_marker_offd[jj] = COMMON_C_PT;
+                     	   }
                         }
-		     }
+                     }
 	          }
                }
 
@@ -3522,7 +3566,7 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
                               {
                                  /* "remove" edge from S and update measure*/
                                  S_ext_data[jS] = -S_ext_data[jS];
-                                 d_measure_array[jc]--;
+                                 measure_array[jc]--;
                                  break_var = 0;
                                  break;
                               }
@@ -3541,7 +3585,7 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
                                  {
                                     /* "remove" edge from S and update measure*/
                                     S_ext_data[jS] = -S_ext_data[jS];
-                                    d_measure_array[jc]--;
+                                    measure_array[jc]--;
                                     break;
                                  }
                               }
@@ -3550,7 +3594,8 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
                      }
 		     else
 		     {
-		        jc = -1;
+   		        jc = hypre_BinarySearch(col_map_offd,j,num_cols_offd);
+		        /* jc = -1;
 		        for (jj = 0; jj < num_cols_offd; jj++)
 		        {
 		           if (col_map_offd[jj] == j)
@@ -3558,7 +3603,7 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
 			      jc = jj;
 			      break;
 		           }
-		        }
+		        } */
 		        if (jc > -1 )
                         {
 		           for (kS = S_ext_i[jc]; kS < S_ext_i[jc+1]; kS++)
@@ -3572,13 +3617,14 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
                                  {
                                     /* "remove" edge from S and update measure*/
                                     S_ext_data[jS] = -S_ext_data[jS];
-                                    d_measure_array[jc+num_variables]--;
+                                    measure_array[jc+num_variables]--;
                                     break;
                                  }
                               }
 			      else
 			      {
-			         kc = -1;
+   		                 kc = hypre_BinarySearch(col_map_offd,k,num_cols_offd);
+			         /* kc = -1;
 			         for (kk = 0; kk < num_cols_offd; kk++)
 			         {
 			            if (col_map_offd[kk] == k)
@@ -3586,12 +3632,12 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
 			               kc = kk;
 			               break;
 			            }
-			         }
+			         } */
 			         if (kc > -1 && CF_marker_offd[kc] == COMMON_C_PT)
 			         {
                                     /* "remove" edge from S and update measure*/
                                     S_ext_data[jS] = -S_ext_data[jS];
-                                    d_measure_array[jc+num_variables]--;
+                                    measure_array[jc+num_variables]--;
 			            break;
 			         }
                               }
@@ -3601,8 +3647,10 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
                   }
                }
  	    }
+   if (debug_flag == 3) sum_time_bp += time_getWallclockSeconds()-wall_time_bp;
          }
 
+   if (debug_flag == 3) wall_time_rs = time_getWallclockSeconds();
          /* reset CF_marker */
          if (i < num_variables)
 	 {
@@ -3638,19 +3686,25 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
                }
 	       else
 	       {
-	          for (jj = 0; jj < num_cols_offd; jj++)
-		  {
-		     if (col_map_offd[jj] == j && 
-			CF_marker_offd[jj] == COMMON_C_PT)
-                     {
-                        CF_marker_offd[jj] = C_PT;
-		 	break;
-                     }
-                  }
+   		  jj = hypre_BinarySearch(col_map_offd,j,num_cols_offd);
+		  if (jj != -1 && CF_marker_offd[jj] == COMMON_C_PT)
+                      CF_marker_offd[jj] = C_PT;
                }
             }
          }
+   if (debug_flag == 3) sum_time_rs += time_getWallclockSeconds()-wall_time_rs;
       }
+   if (debug_flag == 3)
+   {
+      wall_time = time_getWallclockSeconds() - wall_time;
+      printf("Proc = %d    CLJP phase = %f graph_size = %d nc_offd = %d\n",
+                     my_id, wall_time, graph_size, num_cols_offd); 
+      printf("Proc = %d    ip = %f bp = %f rs = %f\n",
+                     my_id, sum_time_ip, sum_time_bp, sum_time_rs);
+	sum_time_ip = 0;
+	sum_time_bp = 0;
+	sum_time_rs = 0;
+   }
    }
 
    /*---------------------------------------------------
