@@ -47,6 +47,7 @@ MLI_FEData::MLI_FEData(MPI_Comm mpi_comm)
 MLI_FEData::~MLI_FEData()
 {
    for ( int i = 0; i < numElemBlocks_; i++ ) deleteElemBlock(i);
+   delete [] elemBlockList_;
    if ( fieldIDs_   != NULL ) delete [] fieldIDs_;
    if ( fieldSizes_ != NULL ) delete [] fieldSizes_;
 }
@@ -125,6 +126,8 @@ int MLI_FEData::setCurrentElemBlockID(int blockID)
       cout << "setCurrentElemBlockID ERROR : blockID other than 0 invalid.\n";
       exit(1);
    }
+   if ( outputLevel_ >= 1 ) 
+      cout << "setCurrentElemBlockID = " << blockID << endl;
    currentElemBlock_ = blockID;
    return 1;
 }
@@ -140,6 +143,13 @@ int MLI_FEData::initFields(int nFields, const int *fieldSizes,
    {
       cout << "initFields ERROR : nFields invalid.\n";
       exit(1);
+   }
+   if ( outputLevel_ >= 1 ) 
+   {
+      cout << "initFields : number of fields = " << nFields << endl;
+      for ( int i = 0; i < nFields; i++ )
+         cout << "     fieldID and size = " << fieldIDs[i] << " " 
+              << fieldSizes[i] <<  endl;
    }
    numFields_ = nFields;
    if ( fieldSizes_ != NULL ) delete [] fieldSizes_;
@@ -181,7 +191,12 @@ int MLI_FEData::initElemBlock(int nElems, int nNodesPerElem,
       cout << "initElemBlock ERROR : nodeNumFields < 0." << endl;
       exit(1);
    }
-   if (outputLevel_ >= 1) cout << "initElemBlock nElems = " << nElems << endl;
+   if (outputLevel_ >= 1) 
+   {
+      cout << "initElemBlock : nElems = " << nElems << endl;
+      cout << "initElemBlock : node nFields = " << nodeNumFields << endl;
+      cout << "initElemBlock : elem nFields = " << elemNumFields << endl;
+   }
 
    // -------------------------------------------------------------
    // --- clean up previous element setups
@@ -272,6 +287,24 @@ int MLI_FEData::initElemBlockNodeLists(int nElems,
       cout << "initElemBlockNodeLists ERROR : spaceDim invalid.\n";
       exit(1);
    }
+
+#ifdef MLI_DEBUG_DETAILED
+   cout << "initElemBlockNodeLists Diagnostics: segFault test.\n";
+   double ddata;
+   for (i = 0; i < nElems; i++) 
+   {
+      index  = eGlobalIDs[i];
+      for (j = 0; j < nNodesPerElem; j++) 
+         length = nGlobalIDLists[i][j];
+      if ( coord != NULL )
+      {
+         for (j = 0; j < nNodesPerElem*spaceDim; j++) 
+         ddata = coord[i][j];
+      }
+   }
+   cout << "initElemBlockNodeLists Diagnostics : passed the segFault test.\n";
+#endif
+
 
    // -------------------------------------------------------------
    // --- allocate storage and load for storing element global IDs
@@ -371,6 +404,18 @@ int MLI_FEData::initSharedNodes(int nNodes, int *nGlobalIDs,
    if ( currBlock->sharedNodeProc_ != NULL )
       cout << "initSharedNodes WARNING : already initialized (3) ?\n";
 
+#ifdef MLI_DEBUG_DETAILED
+   cout << "initSharedNodes Diagnostics: segFault test.\n";
+   for (i = 0; i < nNodes; i++) 
+   {
+      index  = nGlobalIDs[i];
+      length = numProcs[i];
+      for (j = 0; j < length; j++) 
+         index = procLists[i][j];
+   }
+   cout << "initSharedNodes Diagnostics: passed the segFault test.\n";
+#endif
+
    // -------------------------------------------------------------
    // --- allocate space for shared node information
    // -------------------------------------------------------------
@@ -432,6 +477,13 @@ int MLI_FEData::initElemBlockFaceLists(int nElems, int nFaces,
       exit(1);
    }
 
+#ifdef MLI_DEBUG_DETAILED
+   cout << "initElemBlockFaceLists Diagnostics: segFault test.\n";
+   for (i = 0; i < nElems; i++) 
+      for (j = 0; j < nFaces; j++) index = fGlobalIDLists[i][j];
+   cout << "initElemBlockFaceLists Diagnostics: passed the segFault test.\n";
+#endif
+
    // -------------------------------------------------------------
    // --- allocate storage space
    // -------------------------------------------------------------
@@ -458,7 +510,6 @@ int MLI_FEData::initElemBlockFaceLists(int nElems, int nFaces,
    return 1;
 } 
 
-
 //*************************************************************************
 // initialize face node list
 //-------------------------------------------------------------------------
@@ -479,6 +530,17 @@ int MLI_FEData::initFaceBlockNodeLists(int nFaces, const int *fGlobalIDs,
       cout << "initFaceBlockNodeLists ERROR : elem-face not initialized.\n";
       exit(1);
    }
+
+#ifdef MLI_DEBUG_DETAILED
+   cout << "initFaceBlockNodeLists Diagnostics: segFault test.\n";
+   for (i = 0; i < nFaces; i++) 
+   {
+      index  = fGlobalIDs[i];
+      for (j = 0; j < nNodes; j++) 
+         index = nGlobalIDLists[i][j];
+   }
+   cout << "initFaceBlockNodeLists Diagnostics: passed the segFault test.\n";
+#endif
 
    // -------------------------------------------------------------
    // --- find out how many distinct faces from elemFaceIDList
@@ -538,6 +600,17 @@ int MLI_FEData::initSharedFaces(int nFaces, const int *fGlobalIDs,
    if ( currBlock->sharedFaceProc_ != NULL )
       cout << "initSharedFaces WARNING : already initialized (3) ?\n";
 
+#ifdef MLI_DEBUG_DETAILED
+   cout << "initSharedFaces Diagnostics: segFault test.\n";
+   for (i = 0; i < nFaces; i++) 
+   {
+      index  = fGlobalIDs[i];
+      length = numProcs[i];
+      for (j = 0; j < length; j++) index = procList[i][j];
+   }
+   cout << "initSharedFaces Diagnostics: passed the segFault test.\n";
+#endif
+
    // -------------------------------------------------------------
    // --- allocate space for the incoming data 
    // -------------------------------------------------------------
@@ -587,8 +660,12 @@ int MLI_FEData::initComplete()
    int           **elemNodeList, searchInd, elemNumFaces, numSharedFaces;
    int           *sharedFaceIDs, *sharedFaceNProcs, **sharedFaceProc, numProcs;
    int           mypid, totalFaces, nExtFaces, *faceArray, *procArray;
-   int           **elemFaceList, *procArray2;
+   int           **elemFaceList, *procArray2, *ownerP, *sndrcvReg, nProcs;
+   int           nRecv, nSend, *recvProcs, *sendProcs, *recvLengs, *sendLengs;
+   int           nNodes, pnum, **sendBuf, **recvBuf, *iauxArray, index2; 
    double        *dtemp_array, *nodeCoords; 
+   MPI_Request   *request;
+   MPI_Status    status;
    MLI_ElemBlock *currBlock;
 
    currBlock = elemBlockList_[currentElemBlock_];
@@ -718,21 +795,146 @@ int MLI_FEData::initComplete()
    // --- create an aux array for holding mapped external node IDs
    // -------------------------------------------------------------
 
-/*
+   MPI_Comm_size( mpiComm_, &nProcs );
+
+   if ( nExtNodes > 0 ) ownerP = new int[nExtNodes];
+   if ( nExtNodes > 0 ) iauxArray = new int[nExtNodes];
+   if ( numSharedNodes > 0 ) sndrcvReg = new int[numSharedNodes];
+
+   nNodes = currBlock->numLocalNodes_;
    for ( i = 0; i < numSharedNodes; i++ )
    {
-      index = searchNode( sharedNodeList[i] ) - nNodes;
+      index = searchNode( sharedNodeIDs[i] ) - nNodes;
       if ( index >= 0 )
       {
-         sndrcvReg[i] = 0; // recv
+         sndrcvReg[i] = 1; // recv
          pnum  = mypid;
          for ( j = 0; j < sharedNodeNProcs[i]; j++ )
             if ( sharedNodeProc[i][j] < pnum ) pnum = sharedNodeProc[i][j];
-         owner[index] = pnum;
+         ownerP[index] = pnum;
+         iauxArray[index] = pnum;
       }
       else sndrcvReg[i] = 0; // send
    }
-*/
+
+   nRecv     = 0;
+   recvProcs = NULL;
+   recvLengs = NULL;
+   recvBuf   = NULL;
+   intQSort2( iauxArray, NULL, 0, nExtNodes-1);
+   nRecv = 1;
+   for ( i = 1; i < nExtNodes; i++ )
+      if (iauxArray[i] != iauxArray[i-1]) iauxArray[nRecv++] = iauxArray[i];
+   if ( nRecv > 0 )
+   {
+      recvProcs = new int[nRecv];
+      for ( i = 0; i < nRecv; i++ ) recvProcs[i] = iauxArray[i];
+      recvLengs = new int[nRecv];
+      for ( i = 0; i < nRecv; i++ ) recvLengs[i] = 0;
+      for ( i = 0; i < nExtNodes; i++ ) 
+      {
+         index = search( ownerP[i], recvProcs, nRecv );
+         recvLengs[index]++;
+      }
+      recvBuf = new int*[nRecv];
+      for ( i = 0; i < nRecv; i++ ) recvBuf[i] = new int[recvLengs[i]];
+   }
+   delete [] iauxArray;
+
+   counter = 0;
+   for ( i = 0; i < numSharedNodes; i++ ) 
+      if ( sndrcvReg[i] == 0 ) counter += sharedNodeNProcs[i];
+   iauxArray = new int[counter];
+   counter = 0;
+   for ( i = 0; i < numSharedNodes; i++ ) 
+   {
+      if ( sndrcvReg[i] == 0 ) 
+      {
+         for ( j = 0; j < sharedNodeNProcs[i]; j++ ) 
+            iauxArray[counter++] = sharedNodeProc[i][j];
+      }
+   }
+   nSend     = 0;
+   sendProcs = NULL;
+   sendLengs = NULL;
+   sendBuf   = NULL;
+   if ( counter > 0 )
+   {
+      intQSort2( iauxArray, NULL, 0, counter-1);
+      nSend = 1;
+      for ( i = 1; i < counter; i++ )
+         if (iauxArray[i] != iauxArray[i-1]) iauxArray[nSend++] = iauxArray[i];
+      sendProcs = new int[nSend];
+      for ( i = 0; i < nSend; i++ ) sendProcs[i] = iauxArray[i];
+      sendLengs = new int[nSend];
+      for ( i = 0; i < nSend; i++ ) sendLengs[i] = 0;
+      for ( i = 0; i < numSharedNodes; i++ ) 
+      {
+         if ( sndrcvReg[i] == 0 ) 
+         {
+            for ( j = 0; j < sharedNodeNProcs[i]; j++ )
+            {
+               if ( sharedNodeProc[i][j] != mypid ) 
+               {
+                  index = sharedNodeProc[i][j];
+                  index = search( index, sendProcs, nSend );
+                  sendLengs[index]++;
+               }        
+            }        
+         }        
+      }        
+      sendBuf = new int*[nSend];
+      for ( i = 0; i < nSend; i++ ) sendBuf[i] = new int[sendLengs[i]];
+      for ( i = 0; i < nSend; i++ ) sendLengs[i] = 0;
+      for ( i = 0; i < numSharedNodes; i++ ) 
+      {
+         if ( sndrcvReg[i] == 0 ) 
+         {
+            for ( j = 0; j < sharedNodeNProcs[i]; j++ )
+            {
+               if ( sharedNodeProc[i][j] != mypid ) 
+               {
+                  index = sharedNodeProc[i][j];
+                  index = search( index, sendProcs, nSend );
+                  index2 = searchNode( sharedNodeIDs[i] );
+                  sendBuf[index][sendLengs[index]++] = 
+                     currBlock->nodeOffset_ + index2;
+               }        
+            }        
+         }        
+      }        
+   }
+   delete [] iauxArray;
+
+   if ( nRecv > 0 ) request = new MPI_Request[nRecv];
+   for ( i = 0; i < nRecv; i++ )
+      MPI_Irecv( recvBuf[i], recvLengs[i], MPI_INT, 
+                 recvProcs[i], 183, mpiComm_, &request[i]);
+   for ( i = 0; i < nSend; i++ )
+      MPI_Send( sendBuf[i], sendLengs[i], MPI_INT, 
+                sendProcs[i], 183, mpiComm_);
+   for ( i = 0; i < nRecv; i++ ) MPI_Wait( &request[i], &status );
+   if ( nExtNodes > 0 ) currBlock->nodeExtNewGlobalIDs_ = new int[nExtNodes];
+   for ( i = 0; i < nRecv; i++ ) recvLengs[i] = 0;
+   for ( i = 0; i < nExtNodes; i++ ) 
+   {
+      index = search( ownerP[i], recvProcs, nRecv );
+      j = recvBuf[index][recvLengs[index]++];
+      currBlock->nodeExtNewGlobalIDs_[i] =  j;
+   }
+   if ( nExtNodes > 0 ) delete [] ownerP;
+   if ( numSharedNodes > 0 ) delete [] sndrcvReg;
+   delete [] ownerP;
+   delete [] sndrcvReg;
+   delete [] recvLengs;
+   delete [] recvProcs;
+   for ( i = 0; i < nRecv; i++ ) delete [] recvBuf[i];
+   delete [] recvBuf;
+   delete [] sendLengs;
+   delete [] sendProcs;
+   for ( i = 0; i < nSend; i++ ) delete [] sendBuf[i];
+   delete [] sendBuf;
+   delete [] request;
 
    // -------------------------------------------------------------
    // --- now that the node list if finalized, shuffle the coordinates
@@ -907,6 +1109,16 @@ int MLI_FEData::loadElemBlockMatrices(int nElems, int sMatDim,
       exit(1);
    }
 
+#ifdef MLI_DEBUG_DETAILED
+   cout << "loadElemBlockMatrices Diagnostics: segFault test.\n";
+   double ddata;
+   for (i = 0; i < nElems; i++) 
+   {
+      for (j = 0; j < sMatDim*sMatDim; j++) ddata = stiffMat[i][j];
+   }
+   cout << "loadElemBlockMatrices Diagnostics: passed the segFault test.\n";
+#endif
+
    // -------------------------------------------------------------
    // --- allocate storage and load element stiffness matrices
    // -------------------------------------------------------------
@@ -964,6 +1176,16 @@ int MLI_FEData::loadElemBlockNullSpaces(int nElems, const int *nNSpace,
          currBlock->elemNumNS_[i]     = 0;
       }
    }
+#ifdef MLI_DEBUG_DETAILED
+   cout << "loadElemBlockNullSpaces Diagnostics: segFault test.\n";
+   double ddata;
+   for (i = 0; i < nElems; i++) 
+   {
+      length = nNSpace[i];
+      for (j = 0; j < sMatDim*length; j++) ddata = nSpace[i][j];
+   }
+   cout << "loadElemBlockNullSpaces Diagnostics: passed the segFault test.\n";
+#endif
 
    // -------------------------------------------------------------
    // --- load null space information
@@ -1008,6 +1230,13 @@ int MLI_FEData::loadElemBlockVolumes(int nElems, const double *elemVols)
    if ( currBlock->elemVolume_ == NULL )
       currBlock->elemVolume_ = new double[nElems];
 
+#ifdef MLI_DEBUG_DETAILED
+   cout << "loadElemBlockVolumes Diagnostics: segFault test.\n";
+   double ddata;
+   for (i = 0; i < nElems; i++) ddata = elemVols[i];
+   cout << "loadElemBlockVolumes Diagnostics: passed the segFault test.\n";
+#endif
+
    // -------------------------------------------------------------
    // --- load element volume information
    // -------------------------------------------------------------
@@ -1047,6 +1276,13 @@ int MLI_FEData::loadElemBlockMaterials(int nElems, const int *elemMats)
    if ( currBlock->elemMaterial_ == NULL )
       currBlock->elemMaterial_ = new int[nElems];
 
+#ifdef MLI_DEBUG_DETAILED
+   cout << "loadElemBlockMaterials Diagnostics: segFault test.\n";
+   double ddata;
+   for (i = 0; i < nElems; i++) ddata = elemVols[i];
+   cout << "loadElemBlockMaterials Diagnostics: passed the segFault test.\n";
+#endif
+
    // -------------------------------------------------------------
    // --- load element material space information
    // -------------------------------------------------------------
@@ -1085,6 +1321,12 @@ int MLI_FEData::loadElemBlockParentIDs(int nElems, const int *elemPIDs)
    }
    if ( currBlock->elemParentIDs_ == NULL )
       currBlock->elemParentIDs_ = new int[nElems];
+
+#ifdef MLI_DEBUG_DETAILED
+   cout << "loadElemBlockParentIDs Diagnostics: segFault test.\n";
+   for (i = 0; i < nElems; i++) index = elemPIDs[i];
+   cout << "loadElemBlockParentIDs Diagnostics: passed the segFault test.\n";
+#endif
 
    // -------------------------------------------------------------
    // --- load element material space information
@@ -1129,6 +1371,14 @@ int MLI_FEData::loadElemBlockLoads(int nElems, int loadDim,
       cout << "loadElemBlockLoads ERROR : initialization not complete.\n";
       exit(1);
    }
+
+#ifdef MLI_DEBUG_DETAILED
+   double ddata;
+   cout << "loadElemBlockLoads Diagnostics: segFault test.\n";
+   for (i = 0; i < nElems; i++) 
+      for (j = 0; j < loadDim; j++) ddata = elemLoads[i][j];
+   cout << "loadElemBlockLoads Diagnostics: passed the segFault test.\n";
+#endif
 
    // -------------------------------------------------------------
    // --- allocate storage space
@@ -1185,6 +1435,14 @@ int MLI_FEData::loadElemBlockSolutions(int nElems, int solDim,
       cout << "loadElemBlockSolutions ERROR : initialization not complete.\n";
       exit(1);
    }
+
+#ifdef MLI_DEBUG_DETAILED
+   cout << "loadElemBlockSolutions Diagnostics: segFault test.\n";
+   double ddata;
+   for (i = 0; i < nElems; i++) 
+      for (j = 0; j < loadDim; j++) ddata = elemSols[i][j];
+   cout << "loadElemBlockSolutions Diagnostics: passed the segFault test.\n";
+#endif
 
    // -------------------------------------------------------------
    // --- allocate storage space
@@ -1246,6 +1504,19 @@ int MLI_FEData::loadElemBCs(int nElems, const int *eGlobalIDs,
       cout << "loadElemBCs ERROR : initialization not complete.\n";
       exit(1);
    }
+
+#ifdef MLI_DEBUG_DETAILED
+   cout << "loadElemBCs Diagnostics: segFault test.\n";
+   char   cdata;
+   double ddata;
+   for (i = 0; i < nElems; i++) 
+   {
+      j = eGlobalIDs[i];
+      for (j = 0; j < elemDOF; j++) cdata = BCFlags[i][j];
+      for (j = 0; j < elemDOF; j++) ddata = BCVals[i][j];
+   }
+   cout << "loadElemBCs Diagnostics: passed the segFault test.\n";
+#endif
 
    // -------------------------------------------------------------
    // --- allocate storage space
@@ -1597,6 +1868,19 @@ int MLI_FEData::loadNodeBCs(int nNodes, const int *nodeIDs, int nodeDOF,
       exit(1);
    }
 
+#ifdef MLI_DEBUG_DETAILED
+   cout << "loadNodeBCs Diagnostics: segFault test.\n";
+   char   cdata;
+   double ddata;
+   for (i = 0; i < nNodes; i++) 
+   {
+      j = nodeIDs[i];
+      for (j = 0; j < nodeDOF; j++) cdata = BCFlags[i][j];
+      for (j = 0; j < nodeDOF; j++) ddata = BCVals[i][j];
+   }
+   cout << "loadNodeBCs Diagnostics: passed the segFault test.\n";
+#endif
+
    // -------------------------------------------------------------
    // --- allocate storage space
    // -------------------------------------------------------------
@@ -1689,6 +1973,12 @@ int MLI_FEData::getElemNumFields(int& numFields)
 
 int MLI_FEData::getElemFieldIDs(int numFields, int *fieldIDs)
 {
+#ifdef MLI_DEBUG_DETAILED
+   cout << "getElemFieldIDs Diagnostics: segFault test.\n";
+   for (int i = 0; i < numFields; i++) fieldIDs[i] = 0;
+   cout << "getElemFieldIDs Diagnostics: passed the segFault test.\n";
+#endif
+
    MLI_ElemBlock *currBlock = elemBlockList_[currentElemBlock_];
    for ( int i = 0; i < numFields; i++ )
       fieldIDs[i] = currBlock->elemFieldIDs_[i];
@@ -1701,6 +1991,10 @@ int MLI_FEData::getElemFieldIDs(int numFields, int *fieldIDs)
 
 int MLI_FEData::getElemGlobalID(int localID, int &globalID)
 {
+   // -------------------------------------------------------------
+   // --- error checking
+   // -------------------------------------------------------------
+
    MLI_ElemBlock *currBlock = elemBlockList_[currentElemBlock_];
 #ifdef MLI_DEBUG_DETAILED
    if ( ! currBlock->initComplete_ )
@@ -1724,10 +2018,14 @@ int MLI_FEData::getElemGlobalID(int localID, int &globalID)
 
 int MLI_FEData::getElemBlockGlobalIDs(int nElems, int *eGlobalIDs)
 {
+   // -------------------------------------------------------------
+   // --- error checking
+   // -------------------------------------------------------------
+
    MLI_ElemBlock *currBlock = elemBlockList_[currentElemBlock_];
    if ( ! currBlock->initComplete_ )
    {
-      cout << "getElemBlockGlobalIDs ERROR : initialization not complete.\n";
+      cout << "getElemGlobalID ERROR : initialization not complete.\n";
       exit(1);
    }
    if ( currBlock->numLocalElems_ != nElems )
@@ -1735,6 +2033,13 @@ int MLI_FEData::getElemBlockGlobalIDs(int nElems, int *eGlobalIDs)
       cout << "getElemBlockGlobalIDs ERROR : nElems mismatch.\n";
       exit(1);
    }
+
+#ifdef MLI_DEBUG_DETAILED
+   cout << "getElemBlockGlobalIDs Diagnostics: segFault test.\n";
+   for (int i = 0; i < nElems; i++) eGlobalIDs[i] = 0;
+   cout << "getElemBlockGlobalIDs Diagnostics: passed the segFault test.\n";
+#endif
+
    for ( int i = 0; i < nElems; i++ ) 
       eGlobalIDs[i] = currBlock->elemGlobalIDs_[i];
    return 1;
@@ -1777,6 +2082,13 @@ int MLI_FEData::getElemBlockNodeLists(int nElems, int nNodes, int **nodeList)
       cout << "getElemBlockNodeLists ERROR : elemNumNodes do not match.\n";
       exit(1);
    }
+
+#ifdef MLI_DEBUG_DETAILED
+   cout << "getElemBlockNodeLists Diagnostics: segFault test.\n";
+   for (int i = 0; i < nElems; i++) 
+      for (int j = 0; j < nNodes; j++) nodeList[i][j] = 0;
+   cout << "getElemBlockNodeLists Diagnostics: passed the segFault test.\n";
+#endif
 
    // -------------------------------------------------------------
    // --- get nodelists
@@ -1831,8 +2143,15 @@ int MLI_FEData::getElemBlockMatrices(int nElems,int eMatDim,double **elemMat)
       exit(1);
    }
 
+#ifdef MLI_DEBUG_DETAILED
+   cout << "getElemBlockMatrices Diagnostics: segFault test.\n";
+   for (i = 0; i < nElems; i++) 
+      for (j = 0; j < eMatDim*eMatDim; j++) elemMat[i][j] = 0.0;
+   cout << "getElemBlockMatrices Diagnostics: passed the segFault test.\n";
+#endif
+
    // -------------------------------------------------------------
-   // --- load element matrices
+   // --- get element matrices
    // -------------------------------------------------------------
 
    for ( i = 0; i < nElems; i++ )
@@ -1870,6 +2189,12 @@ int MLI_FEData::getElemBlockNullSpaceSizes(int nElems, int *dimNS)
       cout << "getElemBlockNullSpaceSizes ERROR : nElems do not match.\n";
       exit(1);
    }
+
+#ifdef MLI_DEBUG_DETAILED
+   cout << "getElemBlockNullSpaceSizes Diagnostics: segFault test.\n";
+   for (i = 0; i < nElems; i++) dimNS[i] = 0; 
+   cout << "getElemBlockNullSpaceSizes Diagnostics: passed the segFault test.\n";
+#endif
 
    // -------------------------------------------------------------
    // --- load nullspace sizes
@@ -1915,6 +2240,13 @@ int MLI_FEData::getElemBlockNullSpaces(int nElems, const int *dimNS,
       cout << "getElemBlockNullSpaces ERROR : no null space information.\n";
       exit(1);
    }
+
+#ifdef MLI_DEBUG_DETAILED
+   cout << "getElemBlockNullSpaces Diagnostics: segFault test.\n";
+   for (i = 0; i < nElems; i++) 
+      for (j = 0; j < dimNS[i]*eMatDim; j++) nullSpaces[i][j] = 0.0; 
+   cout << "getElemBlockNullSpaces Diagnostics: passed the segFault test.\n";
+#endif
 
    // -------------------------------------------------------------
    // --- load nullspace sizes
