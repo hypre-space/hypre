@@ -496,7 +496,7 @@ HYPRE_IJMatrixRead( const char     *filename,
    int ierr = 0;
    HYPRE_IJMatrix  matrix;
    int             ilower, iupper, jlower, jupper;
-   int             nrows, ncols, I, J;
+   int             ncols, I, J;
    double          value;
    int             myid;
    char            new_filename[255];
@@ -518,11 +518,10 @@ HYPRE_IJMatrixRead( const char     *filename,
    ierr += HYPRE_IJMatrixSetObjectType(matrix, type);
    ierr += HYPRE_IJMatrixInitialize(matrix);
 
-   nrows = 1;
    ncols = 1;
    while ( fscanf(file, "%d %d %le", &I, &J, &value) != EOF )
    {
-      ierr += HYPRE_IJMatrixSetValues(matrix, nrows, &ncols, &I, &J, &value);
+      ierr += HYPRE_IJMatrixSetValues(matrix, 1, &ncols, &I, &J, &value);
    }
 
    ierr += HYPRE_IJMatrixAssemble(matrix);
@@ -555,6 +554,12 @@ HYPRE_IJMatrixPrint( HYPRE_IJMatrix  matrix,
    FILE     *file;
    void     *object;
 
+   if (!matrix)
+   {
+      printf("Variable matrix is NULL -- HYPRE_IJMatrixPrint\n");
+      exit(1);
+   }
+
    if ( (hypre_IJMatrixObjectType(matrix) != HYPRE_PARCSR) )
    {
       printf("Unrecognized object type -- HYPRE_IJMatrixPrint\n");
@@ -568,12 +573,6 @@ HYPRE_IJMatrixPrint( HYPRE_IJMatrix  matrix,
    if ((file = fopen(new_filename, "w")) == NULL)
    {
       printf("Error: can't open output file %s\n", new_filename);
-      exit(1);
-   }
-
-   if (!matrix)
-   {
-      printf("Variable matrix is NULL -- HYPRE_IJMatrixPrint\n");
       exit(1);
    }
 

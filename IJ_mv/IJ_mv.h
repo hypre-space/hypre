@@ -268,8 +268,6 @@ int hypre_IJVectorSetValuesPar( hypre_IJVector *vector , int num_values , const 
 int hypre_IJVectorAddToValuesPar( hypre_IJVector *vector , int num_values , const int *indices , const double *values );
 int hypre_IJVectorAssemblePar( hypre_IJVector *vector );
 int hypre_IJVectorGetValuesPar( hypre_IJVector *vector , int num_values , const int *indices , double *values );
-int hypre_IJVectorPrintPar( hypre_IJVector *vec , const char *filename );
-int hypre_IJVectorReadPar( MPI_Comm comm , const char *filename , hypre_IJVector **vec );
 
 
 /* HYPRE_IJMatrix.c */
