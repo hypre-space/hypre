@@ -26,7 +26,7 @@ hypre_StructIJVectorCreate( MPI_Comm             comm,
    vector = hypre_CTAlloc(hypre_StructIJVector, 1);  
    
    hypre_StructIJVectorComm(vector)      = comm;
-   hypre_StructIJVectorGrid(vector)      = hypre_StructGridRef(grid);
+   hypre_StructGridRef(grid, &hypre_StructIJVectorGrid(vector));
    hypre_StructIJVectorStencil(vector)   = hypre_StructStencilRef(stencil);
    hypre_StructIJVectorRefCount(vector)  = 1;
 

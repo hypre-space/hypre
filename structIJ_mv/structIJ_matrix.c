@@ -33,7 +33,7 @@ hypre_StructIJMatrixCreate( MPI_Comm             comm,
    matrix = hypre_CTAlloc(hypre_StructIJMatrix, 1);  
    
    hypre_StructIJMatrixComm(matrix)      = comm;
-   hypre_StructIJMatrixGrid(matrix)      = hypre_StructGridRef(grid);
+   hypre_StructGridRef(grid, &hypre_StructIJMatrixGrid(matrix));
    hypre_StructIJMatrixStencil(matrix)   = hypre_StructStencilRef(stencil);
    hypre_StructIJMatrixSymmetric(matrix) = 0;
    hypre_StructIJMatrixRefCount(matrix)  = 1;
