@@ -252,12 +252,23 @@ char *argv[];
 #if 0
    sprintf(file_name, "%s.lastu", GlobalsOutFileName);
    WriteVec(file_name, u);
+#endif
+#if 0
+   printf("soln norm = %e\n", sqrt(InnerProd(u,u)));
 
+   printf("rhs norm = %e\n", sqrt(InnerProd(f,f)));
    Matvec(-1.0, A, u, 1.0, f);
    sprintf(file_name, "%s.res", GlobalsOutFileName);
    WriteVec(file_name, f);
 
-   printf("r_norm = %e\n", sqrt(InnerProd(f,f)));
+   printf("res_norm = %e\n", sqrt(InnerProd(f,f)));
+
+   sprintf(file_name, "%s.A", GlobalsOutFileName);
+   WriteYSMP(file_name, A);
+
+   Matvec(1.0, A, u, 0.0, f);
+   sprintf(file_name, "%s.Au", GlobalsOutFileName);
+   WriteVec(file_name, f);
 #endif
 
    return 0;
