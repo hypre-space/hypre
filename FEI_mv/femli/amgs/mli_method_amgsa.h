@@ -142,6 +142,7 @@ private :
    double genP( MLI_Matrix *Amat, MLI_Matrix **Pmat, int, int * );
    double genPGlobal(hypre_ParCSRMatrix *Amat, MLI_Matrix **Pmat, int, int *);
    int    formSmoothVec(MLI_Matrix *mli_Amat);
+   int    formSmoothVecLanczos(MLI_Matrix *mli_Amat);
    int    smoothTwice(MLI_Matrix *mli_Amat);
    int    formLocalGraph( hypre_ParCSRMatrix *Amat, hypre_ParCSRMatrix **graph,
                           int *labels);
