@@ -290,8 +290,9 @@ int hypre_FGMRESSolve(void  *fgmres_vdata, void  *A, void  *b, void  *x)
          if (logging > 0)
          {
             norms[iter] = r_norm;
-            printf("FGMRES : iteration = %6d, norm of r = %e\n", iter,
-                   r_norm);
+            if (my_id == 0)
+               printf("FGMRES : iteration = %6d, norm of r = %e\n", iter,
+                      r_norm);
          }
       }
 
