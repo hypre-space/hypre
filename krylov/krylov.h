@@ -738,7 +738,7 @@ extern "C" {
 
 
 /* bicgstab.c */
-hypre_BiCGSTABFunctions *hypre_BiCGSTABFunctionsCreate( void *(*CreateVector )(void *vvector ), int (*DestroyVector )(void *vvector ), void *(*MatvecCreate )(void *A ,void *x ), int (*Matvec )(void *matvec_data ,double alpha ,void *A ,void *x ,double beta ,void *y ), int (*MatvecDestroy )(void *matvec_data ), double (*InnerProd )(void *x ,void *y ), int (*CopyVector )(void *x ,void *y ), int (*ScaleVector )(double alpha ,void *x ), int (*Axpy )(double alpha ,void *x ,void *y ), int (*CommInfo )(void *A ,int *my_id ,int *num_procs ), int (*precond )(), int (*precond_setup )());
+hypre_BiCGSTABFunctions *hypre_BiCGSTABFunctionsCreate( void *(*CreateVector )(void *vvector ), int (*DestroyVector )(void *vvector ), void *(*MatvecCreate )(void *A ,void *x ), int (*Matvec )(void *matvec_data ,double alpha ,void *A ,void *x ,double beta ,void *y ), int (*MatvecDestroy )(void *matvec_data ), double (*InnerProd )(void *x ,void *y ), int (*CopyVector )(void *x ,void *y ), int (*ScaleVector )(double alpha ,void *x ), int (*Axpy )(double alpha ,void *x ,void *y ), int (*CommInfo )(void *A ,int *my_id ,int *num_procs ), int (*PrecondSetup)( void *vdata , void *A , void *b , void *x ), int (*Precond)( void *vdata , void *A , void *b , void *x ));
 void *hypre_BiCGSTABCreate( hypre_BiCGSTABFunctions *bicgstab_functions );
 int hypre_BiCGSTABDestroy( void *bicgstab_vdata );
 int hypre_BiCGSTABSetup( void *bicgstab_vdata , void *A , void *b , void *x );
