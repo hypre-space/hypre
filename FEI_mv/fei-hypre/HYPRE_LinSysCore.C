@@ -1337,7 +1337,7 @@ int HYPRE_LinSysCore::sumIntoSystemMatrix(int numPtRows, const int* ptRows,
 
     if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
     {
-       printf("%4d : HYPRE_LSC::leaving  sumIntoSystemMatrix.\n",mypid_);
+       printf("%4d : HYPRE_LSC::leaving  sumIntoSystemMatrix(2).\n",mypid_);
     }
     return (0);
 }
