@@ -5473,7 +5473,7 @@ void HYPRE_LinSysCore::solveUsingSuperLU(int& status)
 {
     int                i, nnz, nrows, ierr;
     int                rowSize, *colInd, *new_ia, *new_ja, *ind_array;
-    int                j, nz_ptr;
+    int                j, nz_ptr, *partition, start_row, end_row;
     double             *colVal, *new_a, rnorm;
     HYPRE_ParCSRMatrix A_csr;
     HYPRE_ParVector    r_csr;
@@ -5518,19 +5518,19 @@ void HYPRE_LinSysCore::solveUsingSuperLU(int& status)
        status = -1;
        return;
     }
-    if (slideReduction_  == 1) 
-         nrows = localEndRow_ - 2 * nConstraints_;
-    else if (slideReduction_  == 2) 
-         nrows = localEndRow_ - nConstraints_;
-    else if (schurReduction_ == 1) 
-         nrows = localEndRow_ - localStartRow_ + 1 - A21NRows_;
-    else nrows = localEndRow_;
 
-    //nnz   = 0;
-    //for ( i = 0; i < nrows; i++ ) nnz += rowLengths_[i];
+    //------------------------------------------------------------------
+    // get information about the current matrix
+    //------------------------------------------------------------------
+
     A_csr  = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(currA_);
+    HYPRE_ParCSRMatrixGetRowPartitioning( A_csr, &partition );
+    start_row = partition[0];
+    end_row   = partition[1] - 1;
+    nrows     = end_row - start_row + 1;
+
     nnz   = 0;
-    for ( i = localStartRow_-1; i <= localEndRow_-1; i++ )
+    for ( i = start_row; i < end_row; i++ )
     {
        HYPRE_ParCSRMatrixGetRow(A_csr,i,&rowSize,&colInd,&colVal);
        nnz += rowSize;
@@ -5540,10 +5540,8 @@ void HYPRE_LinSysCore::solveUsingSuperLU(int& status)
     new_ia = new int[nrows+1];
     new_ja = new int[nnz];
     new_a  = new double[nnz];
-
     nz_ptr = getMatrixCSR(currA_, nrows, nnz, new_ia, new_ja, new_a);
-
-    nnz = nz_ptr;
+    nnz    = nz_ptr;
 
     //------------------------------------------------------------------
     // set up SuperLU CSR matrix and the corresponding rhs
@@ -5656,6 +5654,7 @@ void HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
     int                i, k, nnz, nrows, ierr;
     int                rowSize, *colInd, *new_ia, *new_ja, *ind_array;
     int                j, nz_ptr, *colLengths, count, maxRowSize, rowSize2;
+    int                *partition, start_row, end_row;
     double             *colVal, *new_a, rnorm;
     HYPRE_ParCSRMatrix A_csr;
     HYPRE_ParVector    r_csr;
@@ -5706,13 +5705,16 @@ void HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
        status = -1;
        return;
     }
-    if (slideReduction_  == 1) 
-         nrows = localEndRow_ - 2 * nConstraints_;
-    else if (slideReduction_  == 2) 
-         nrows = localEndRow_ - nConstraints_;
-    else if (schurReduction_ == 1) 
-         nrows = localEndRow_ - localStartRow_ + 1 - A21NRows_;
-    else nrows = localEndRow_;
+
+    //------------------------------------------------------------------
+    // get information about the current matrix
+    //------------------------------------------------------------------
+
+    A_csr  = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(currA_);
+    HYPRE_ParCSRMatrixGetRowPartitioning( A_csr, &partition );
+    start_row = partition[0];
+    end_row   = partition[1] - 1;
+    nrows     = end_row - start_row + 1;
 
     colLengths = new int[nrows];
     for ( i = 0; i < nrows; i++ ) colLengths[i] = 0;
@@ -5733,10 +5735,8 @@ void HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
     new_ia = new int[nrows+1];
     new_ja = new int[nnz];
     new_a  = new double[nnz];
-
     nz_ptr = getMatrixCSR(currA_, nrows, nnz, new_ia, new_ja, new_a);
-
-    nnz = nz_ptr;
+    nnz    = nz_ptr;
 
     //------------------------------------------------------------------
     // set up SuperLU CSR matrix and the corresponding rhs

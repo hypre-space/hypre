@@ -1192,6 +1192,17 @@ void HYPRE_LinSysCore::buildSchurReducedRHS()
     } 
     HYPRE_IJVectorDestroy(f2hat);
 
+    //******************************************************************
+    // initialize current matrix system
+    //------------------------------------------------------------------
+
+    if ( reducedB_ != NULL ) HYPRE_IJVectorDestroy(reducedB_);
+    reducedB_ = f2;
+    currA_    = reducedA_;
+    currB_    = reducedB_;
+    currR_    = reducedR_;
+    currX_    = reducedX_;
+
     if ( mypid_ == 0 && (HYOutputLevel_ & HYFEI_SCHURREDUCE1) )
     {
        printf("buildSchurRHS ends....\n");

@@ -11,4 +11,6 @@
             - correct an error in MPI_Allreduce in buildSchurRHS.
             - take out a duplicate destroy(f1) in buildSchurRHS
             - in matrixLoadComplete, change to print original matrix
+            - fix the SuperLU nrows for Schur reduced systems
+            - in BuildSchurReducedRHS, set currX and currB
 
