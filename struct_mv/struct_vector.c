@@ -206,7 +206,8 @@ hypre_StructVectorInitialize( hypre_StructVector *vector )
 int 
 hypre_StructVectorSetValues( hypre_StructVector *vector,
                              hypre_Index         grid_index,
-                             double              values     )
+                             double              values,
+                             int                 add_to     )
 {
    int    ierr = 0;
 
@@ -231,52 +232,16 @@ hypre_StructVectorSetValues( hypre_StructVector *vector,
              (hypre_IndexZ(grid_index) <= hypre_BoxIMaxZ(box))   )
          {
             vecp = hypre_StructVectorBoxDataValue(vector, i, grid_index);
-            *vecp = values;
+            if (add_to)
+            {
+               *vecp += values;
+            }
+            else
+            {
+               *vecp = values;
+            }
          }
       }
-
-   return ierr;
-}
-
-/*--------------------------------------------------------------------------
- * hypre_StructVectorGetValues
- *--------------------------------------------------------------------------*/
-
-int 
-hypre_StructVectorGetValues( hypre_StructVector *vector,
-                             hypre_Index         grid_index,
-                             double             *values_ptr )
-{
-   int    ierr = 0;
-
-   double              values;
-
-   hypre_BoxArray     *boxes;
-   hypre_Box          *box;
-
-   double             *vecp;
-
-   int                 i;
-
-   boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(vector));
-
-   hypre_ForBoxI(i, boxes)
-      {
-         box = hypre_BoxArrayBox(boxes, i);
-
-         if ((hypre_IndexX(grid_index) >= hypre_BoxIMinX(box)) &&
-             (hypre_IndexX(grid_index) <= hypre_BoxIMaxX(box)) &&
-             (hypre_IndexY(grid_index) >= hypre_BoxIMinY(box)) &&
-             (hypre_IndexY(grid_index) <= hypre_BoxIMaxY(box)) &&
-             (hypre_IndexZ(grid_index) >= hypre_BoxIMinZ(box)) &&
-             (hypre_IndexZ(grid_index) <= hypre_BoxIMaxZ(box))   )
-         {
-            vecp = hypre_StructVectorBoxDataValue(vector, i, grid_index);
-            values = *vecp;
-         }
-      }
-
-   *values_ptr = values;
 
    return ierr;
 }
@@ -288,7 +253,8 @@ hypre_StructVectorGetValues( hypre_StructVector *vector,
 int 
 hypre_StructVectorSetBoxValues( hypre_StructVector *vector,
                                 hypre_Box          *value_box,
-                                double             *values     )
+                                double             *values,
+                                int                 add_to    )
 {
    int    ierr = 0;
 
@@ -356,16 +322,32 @@ hypre_StructVectorSetBoxValues( hypre_StructVector *vector,
  
                hypre_BoxGetSize(box, loop_size);
 
-               hypre_BoxLoop2Begin(loop_size,
-                                   data_box, data_start, data_stride, datai,
-                                   dval_box, dval_start, dval_stride, dvali);
+               if (add_to)
+               {
+                  hypre_BoxLoop2Begin(loop_size,
+                                      data_box,data_start,data_stride,datai,
+                                      dval_box,dval_start,dval_stride,dvali);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,datai,dvali
 #include "hypre_box_smp_forloop.h"
-               hypre_BoxLoop2For(loopi, loopj, loopk, datai, dvali)
-                  {
-                     datap[datai] = values[dvali];
-                  }
-               hypre_BoxLoop2End(datai, dvali);
+                  hypre_BoxLoop2For(loopi, loopj, loopk, datai, dvali)
+                     {
+                        datap[datai] += values[dvali];
+                     }
+                  hypre_BoxLoop2End(datai, dvali);
+               }
+               else
+               {
+                  hypre_BoxLoop2Begin(loop_size,
+                                      data_box,data_start,data_stride,datai,
+                                      dval_box,dval_start,dval_stride,dvali);
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,datai,dvali
+#include "hypre_box_smp_forloop.h"
+                  hypre_BoxLoop2For(loopi, loopj, loopk, datai, dvali)
+                     {
+                        datap[datai] = values[dvali];
+                     }
+                  hypre_BoxLoop2End(datai, dvali);
+               }
             }
          }
 
@@ -373,6 +355,49 @@ hypre_StructVectorSetBoxValues( hypre_StructVector *vector,
    }
  
    hypre_BoxArrayDestroy(box_array);
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_StructVectorGetValues
+ *--------------------------------------------------------------------------*/
+
+int 
+hypre_StructVectorGetValues( hypre_StructVector *vector,
+                             hypre_Index         grid_index,
+                             double             *values_ptr )
+{
+   int    ierr = 0;
+
+   double              values;
+
+   hypre_BoxArray     *boxes;
+   hypre_Box          *box;
+
+   double             *vecp;
+
+   int                 i;
+
+   boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(vector));
+
+   hypre_ForBoxI(i, boxes)
+      {
+         box = hypre_BoxArrayBox(boxes, i);
+
+         if ((hypre_IndexX(grid_index) >= hypre_BoxIMinX(box)) &&
+             (hypre_IndexX(grid_index) <= hypre_BoxIMaxX(box)) &&
+             (hypre_IndexY(grid_index) >= hypre_BoxIMinY(box)) &&
+             (hypre_IndexY(grid_index) <= hypre_BoxIMaxY(box)) &&
+             (hypre_IndexZ(grid_index) >= hypre_BoxIMinZ(box)) &&
+             (hypre_IndexZ(grid_index) <= hypre_BoxIMaxZ(box))   )
+         {
+            vecp = hypre_StructVectorBoxDataValue(vector, i, grid_index);
+            values = *vecp;
+         }
+      }
+
+   *values_ptr = values;
 
    return ierr;
 }

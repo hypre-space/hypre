@@ -76,36 +76,7 @@ HYPRE_StructVectorSetValues( HYPRE_StructVector  vector,
       hypre_IndexD(new_grid_index, d) = grid_index[d];
    }
 
-   ierr = hypre_StructVectorSetValues( new_vector, new_grid_index, values );
-
-   return (ierr);
-}
-
-/*--------------------------------------------------------------------------
- * HYPRE_StructVectorGetValues
- *--------------------------------------------------------------------------*/
-
-int 
-HYPRE_StructVectorGetValues( HYPRE_StructVector  vector,
-                             int                *grid_index,
-                             double             *values_ptr )
-{
-   hypre_StructVector *new_vector = (hypre_StructVector *) vector;
-   hypre_Index         new_grid_index;
-
-   int                 d;
-   int                 ierr = 0;
-
-   hypre_ClearIndex(new_grid_index);
-   for (d = 0;
-        d < hypre_StructGridDim(hypre_StructVectorGrid(new_vector));
-        d++)
-   {
-      hypre_IndexD(new_grid_index, d) = grid_index[d];
-   }
-
-   ierr = hypre_StructVectorGetValues( new_vector, new_grid_index,
-                                       values_ptr );
+   ierr = hypre_StructVectorSetValues( new_vector, new_grid_index, values, 0 );
 
    return (ierr);
 }
@@ -140,9 +111,105 @@ HYPRE_StructVectorSetBoxValues( HYPRE_StructVector  vector,
    new_value_box = hypre_BoxCreate();
    hypre_BoxSetExtents(new_value_box, new_ilower, new_iupper);
 
-   ierr = hypre_StructVectorSetBoxValues( new_vector, new_value_box, values );
+   ierr = hypre_StructVectorSetBoxValues( new_vector, new_value_box,
+                                          values, 0 );
 
    hypre_BoxDestroy(new_value_box);
+
+   return (ierr);
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_StructVectorAddToValues
+ *--------------------------------------------------------------------------*/
+
+int 
+HYPRE_StructVectorAddToValues( HYPRE_StructVector  vector,
+                               int                *grid_index,
+                               double              values     )
+{
+   hypre_StructVector *new_vector = (hypre_StructVector *) vector;
+   hypre_Index         new_grid_index;
+
+   int                 d;
+   int                 ierr = 0;
+
+   hypre_ClearIndex(new_grid_index);
+   for (d = 0;
+        d < hypre_StructGridDim(hypre_StructVectorGrid(new_vector));
+        d++)
+   {
+      hypre_IndexD(new_grid_index, d) = grid_index[d];
+   }
+
+   ierr = hypre_StructVectorSetValues( new_vector, new_grid_index, values, 1 );
+
+   return (ierr);
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_StructVectorAddToBoxValues
+ *--------------------------------------------------------------------------*/
+
+int 
+HYPRE_StructVectorAddToBoxValues( HYPRE_StructVector  vector,
+                                  int                *ilower,
+                                  int                *iupper,
+                                  double             *values )
+{
+   hypre_StructVector *new_vector = (hypre_StructVector *) vector;
+   hypre_Index         new_ilower;
+   hypre_Index         new_iupper;
+   hypre_Box          *new_value_box;
+                    
+   int                 d;
+   int                 ierr = 0;
+
+   hypre_ClearIndex(new_ilower);
+   hypre_ClearIndex(new_iupper);
+   for (d = 0;
+        d < hypre_StructGridDim(hypre_StructVectorGrid(new_vector));
+        d++)
+   {
+      hypre_IndexD(new_ilower, d) = ilower[d];
+      hypre_IndexD(new_iupper, d) = iupper[d];
+   }
+   new_value_box = hypre_BoxCreate();
+   hypre_BoxSetExtents(new_value_box, new_ilower, new_iupper);
+
+   ierr = hypre_StructVectorSetBoxValues( new_vector, new_value_box,
+                                          values, 1 );
+
+   hypre_BoxDestroy(new_value_box);
+
+   return (ierr);
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_StructVectorGetValues
+ *--------------------------------------------------------------------------*/
+
+int 
+HYPRE_StructVectorGetValues( HYPRE_StructVector  vector,
+                             int                *grid_index,
+                             double             *values_ptr )
+{
+   hypre_StructVector *new_vector = (hypre_StructVector *) vector;
+   hypre_Index         new_grid_index;
+
+   int                 d;
+   int                 ierr = 0;
+
+   hypre_ClearIndex(new_grid_index);
+   for (d = 0;
+        d < hypre_StructGridDim(hypre_StructVectorGrid(new_vector));
+        d++)
+   {
+      hypre_IndexD(new_grid_index, d) = grid_index[d];
+   }
+
+   ierr = hypre_StructVectorGetValues( new_vector, new_grid_index,
+                                       values_ptr );
 
    return (ierr);
 }

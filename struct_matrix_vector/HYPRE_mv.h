@@ -77,6 +77,8 @@ typedef HYPRE_CommPkgArray       HYPRE_CommPkg;
 #define HYPRE_StructMatrixInitialize HYPRE_StructMatrixInitializePush
 #define HYPRE_StructMatrixSetValues HYPRE_StructMatrixSetValuesPush
 #define HYPRE_StructMatrixSetBoxValues HYPRE_StructMatrixSetBoxValuesPush
+#define HYPRE_StructMatrixAddToValues HYPRE_StructMatrixAddToValuesPush
+#define HYPRE_StructMatrixAddToBoxValues HYPRE_StructMatrixAddToBoxValuesPush
 #define HYPRE_StructMatrixAssemble HYPRE_StructMatrixAssemblePush
 #define HYPRE_StructMatrixSetNumGhost HYPRE_StructMatrixSetNumGhostPush
 #define HYPRE_StructMatrixGetGrid HYPRE_StructMatrixGetGridPush
@@ -89,8 +91,10 @@ typedef HYPRE_CommPkgArray       HYPRE_CommPkg;
 #define HYPRE_StructVectorDestroy HYPRE_StructVectorDestroyPush
 #define HYPRE_StructVectorInitialize HYPRE_StructVectorInitializePush
 #define HYPRE_StructVectorSetValues HYPRE_StructVectorSetValuesPush
-#define HYPRE_StructVectorGetValues HYPRE_StructVectorGetValuesPush
 #define HYPRE_StructVectorSetBoxValues HYPRE_StructVectorSetBoxValuesPush
+#define HYPRE_StructVectorAddToValues HYPRE_StructVectorAddToValuesPush
+#define HYPRE_StructVectorAddToBoxValues HYPRE_StructVectorAddToBoxValuesPush
+#define HYPRE_StructVectorGetValues HYPRE_StructVectorGetValuesPush
 #define HYPRE_StructVectorGetBoxValues HYPRE_StructVectorGetBoxValuesPush
 #define HYPRE_StructVectorAssemble HYPRE_StructVectorAssemblePush
 #define HYPRE_StructVectorPrint HYPRE_StructVectorPrintPush
@@ -102,49 +106,50 @@ typedef HYPRE_CommPkgArray       HYPRE_CommPkg;
 
 #endif
 
-# define	P(s) s
 
 /* HYPRE_struct_grid.c */
-int HYPRE_StructGridCreate P((MPI_Comm comm , int dim , HYPRE_StructGrid *grid ));
-int HYPRE_StructGridDestroy P((HYPRE_StructGrid grid ));
-int HYPRE_StructGridSetExtents P((HYPRE_StructGrid grid , int *ilower , int *iupper ));
-int HYPRE_StructGridSetPeriodic P((HYPRE_StructGrid grid , int *periodic ));
-int HYPRE_StructGridAssemble P((HYPRE_StructGrid grid ));
+int HYPRE_StructGridCreate( MPI_Comm comm , int dim , HYPRE_StructGrid *grid );
+int HYPRE_StructGridDestroy( HYPRE_StructGrid grid );
+int HYPRE_StructGridSetExtents( HYPRE_StructGrid grid , int *ilower , int *iupper );
+int HYPRE_StructGridSetPeriodic( HYPRE_StructGrid grid , int *periodic );
+int HYPRE_StructGridAssemble( HYPRE_StructGrid grid );
 
 /* HYPRE_struct_matrix.c */
-int HYPRE_StructMatrixCreate P((MPI_Comm comm , HYPRE_StructGrid grid , HYPRE_StructStencil stencil , HYPRE_StructMatrix *matrix ));
-int HYPRE_StructMatrixDestroy P((HYPRE_StructMatrix matrix ));
-int HYPRE_StructMatrixInitialize P((HYPRE_StructMatrix matrix ));
-int HYPRE_StructMatrixSetValues P((HYPRE_StructMatrix matrix , int *grid_index , int num_stencil_indices , int *stencil_indices , double *values ));
-int HYPRE_StructMatrixSetBoxValues P((HYPRE_StructMatrix matrix , int *ilower , int *iupper , int num_stencil_indices , int *stencil_indices , double *values ));
-int HYPRE_StructMatrixAssemble P((HYPRE_StructMatrix matrix ));
-int HYPRE_StructMatrixSetNumGhost P((HYPRE_StructMatrix matrix , int *num_ghost ));
-int HYPRE_StructMatrixGetGrid P((HYPRE_StructMatrix matrix , HYPRE_StructGrid *grid ));
-int HYPRE_StructMatrixSetSymmetric P((HYPRE_StructMatrix matrix , int symmetric ));
-int HYPRE_StructMatrixPrint P((char *filename , HYPRE_StructMatrix matrix , int all ));
+int HYPRE_StructMatrixCreate( MPI_Comm comm , HYPRE_StructGrid grid , HYPRE_StructStencil stencil , HYPRE_StructMatrix *matrix );
+int HYPRE_StructMatrixDestroy( HYPRE_StructMatrix matrix );
+int HYPRE_StructMatrixInitialize( HYPRE_StructMatrix matrix );
+int HYPRE_StructMatrixSetValues( HYPRE_StructMatrix matrix , int *grid_index , int num_stencil_indices , int *stencil_indices , double *values );
+int HYPRE_StructMatrixSetBoxValues( HYPRE_StructMatrix matrix , int *ilower , int *iupper , int num_stencil_indices , int *stencil_indices , double *values );
+int HYPRE_StructMatrixAddToValues( HYPRE_StructMatrix matrix , int *grid_index , int num_stencil_indices , int *stencil_indices , double *values );
+int HYPRE_StructMatrixAddToBoxValues( HYPRE_StructMatrix matrix , int *ilower , int *iupper , int num_stencil_indices , int *stencil_indices , double *values );
+int HYPRE_StructMatrixAssemble( HYPRE_StructMatrix matrix );
+int HYPRE_StructMatrixSetNumGhost( HYPRE_StructMatrix matrix , int *num_ghost );
+int HYPRE_StructMatrixGetGrid( HYPRE_StructMatrix matrix , HYPRE_StructGrid *grid );
+int HYPRE_StructMatrixSetSymmetric( HYPRE_StructMatrix matrix , int symmetric );
+int HYPRE_StructMatrixPrint( char *filename , HYPRE_StructMatrix matrix , int all );
 
 /* HYPRE_struct_stencil.c */
-int HYPRE_StructStencilCreate P((int dim , int size , HYPRE_StructStencil *stencil ));
-int HYPRE_StructStencilSetElement P((HYPRE_StructStencil stencil , int element_index , int *offset ));
-int HYPRE_StructStencilDestroy P((HYPRE_StructStencil stencil ));
+int HYPRE_StructStencilCreate( int dim , int size , HYPRE_StructStencil *stencil );
+int HYPRE_StructStencilSetElement( HYPRE_StructStencil stencil , int element_index , int *offset );
+int HYPRE_StructStencilDestroy( HYPRE_StructStencil stencil );
 
 /* HYPRE_struct_vector.c */
-int HYPRE_StructVectorCreate P((MPI_Comm comm , HYPRE_StructGrid grid , HYPRE_StructStencil stencil , HYPRE_StructVector *vector ));
-int HYPRE_StructVectorDestroy P((HYPRE_StructVector struct_vector ));
-int HYPRE_StructVectorInitialize P((HYPRE_StructVector vector ));
-int HYPRE_StructVectorSetValues P((HYPRE_StructVector vector , int *grid_index , double values ));
-int HYPRE_StructVectorGetValues P((HYPRE_StructVector vector , int *grid_index , double *values_ptr ));
-int HYPRE_StructVectorSetBoxValues P((HYPRE_StructVector vector , int *ilower , int *iupper , double *values ));
-int HYPRE_StructVectorGetBoxValues P((HYPRE_StructVector vector , int *ilower , int *iupper , double *values ));
-int HYPRE_StructVectorAssemble P((HYPRE_StructVector vector ));
-int HYPRE_StructVectorPrint P((char *filename , HYPRE_StructVector vector , int all ));
-int HYPRE_StructVectorSetNumGhost P((HYPRE_StructVector vector , int *num_ghost ));
-int HYPRE_StructVectorSetConstantValues P((HYPRE_StructVector vector , double values ));
-int HYPRE_StructVectorGetMigrateCommPkg P((HYPRE_StructVector from_vector , HYPRE_StructVector to_vector , HYPRE_CommPkg *comm_pkg ));
-int HYPRE_StructVectorMigrate P((HYPRE_CommPkg comm_pkg , HYPRE_StructVector from_vector , HYPRE_StructVector to_vector ));
-int HYPRE_CommPkgDestroy P((HYPRE_CommPkg comm_pkg ));
-
-#undef P
+int HYPRE_StructVectorCreate( MPI_Comm comm , HYPRE_StructGrid grid , HYPRE_StructStencil stencil , HYPRE_StructVector *vector );
+int HYPRE_StructVectorDestroy( HYPRE_StructVector struct_vector );
+int HYPRE_StructVectorInitialize( HYPRE_StructVector vector );
+int HYPRE_StructVectorSetValues( HYPRE_StructVector vector , int *grid_index , double values );
+int HYPRE_StructVectorSetBoxValues( HYPRE_StructVector vector , int *ilower , int *iupper , double *values );
+int HYPRE_StructVectorAddToValues( HYPRE_StructVector vector , int *grid_index , double values );
+int HYPRE_StructVectorAddToBoxValues( HYPRE_StructVector vector , int *ilower , int *iupper , double *values );
+int HYPRE_StructVectorGetValues( HYPRE_StructVector vector , int *grid_index , double *values_ptr );
+int HYPRE_StructVectorGetBoxValues( HYPRE_StructVector vector , int *ilower , int *iupper , double *values );
+int HYPRE_StructVectorAssemble( HYPRE_StructVector vector );
+int HYPRE_StructVectorPrint( char *filename , HYPRE_StructVector vector , int all );
+int HYPRE_StructVectorSetNumGhost( HYPRE_StructVector vector , int *num_ghost );
+int HYPRE_StructVectorSetConstantValues( HYPRE_StructVector vector , double values );
+int HYPRE_StructVectorGetMigrateCommPkg( HYPRE_StructVector from_vector , HYPRE_StructVector to_vector , HYPRE_CommPkg *comm_pkg );
+int HYPRE_StructVectorMigrate( HYPRE_CommPkg comm_pkg , HYPRE_StructVector from_vector , HYPRE_StructVector to_vector );
+int HYPRE_CommPkgDestroy( HYPRE_CommPkg comm_pkg );
 
 #ifdef __cplusplus
 }

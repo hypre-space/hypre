@@ -73,22 +73,6 @@ hypre_F90_IFACE(hypre_structvectorsetvalues)( long int *vector,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructVectorGetValues
- *--------------------------------------------------------------------------*/
-
-void 
-hypre_F90_IFACE(hypre_structvectorgetvalues)( long int *vector,
-                                              int      *grid_index,
-                                              double   *values_ptr,
-                                              int      *ierr       )
-{
-   *ierr = (int)
-      ( HYPRE_StructVectorGetValues( (HYPRE_StructVector) *vector,
-                                     (int *)              grid_index,
-                                     (double *)           values_ptr ) );
-}
-
-/*--------------------------------------------------------------------------
  * HYPRE_StructVectorSetBoxValues
  *--------------------------------------------------------------------------*/
 
@@ -104,6 +88,56 @@ hypre_F90_IFACE(hypre_structvectorsetboxvalues)( long int *vector,
                                         (int *)              ilower,
                                         (int *)              iupper,
                                         (double *)           values  ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_StructVectorAddToValues
+ *--------------------------------------------------------------------------*/
+
+void 
+hypre_F90_IFACE(hypre_structvectoraddtovalues)( long int *vector,
+                                                int      *grid_index,
+                                                double   *values,
+                                                int      *ierr       )
+{
+   *ierr = (int)
+      ( HYPRE_StructVectorAddToValues( (HYPRE_StructVector) *vector,
+                                       (int *)              grid_index,
+                                       (double)             *values     ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_StructVectorAddToBoxValues
+ *--------------------------------------------------------------------------*/
+
+void 
+hypre_F90_IFACE(hypre_structvectoraddtoboxvalues)( long int *vector,
+                                                   int      *ilower,
+                                                   int      *iupper,
+                                                   double   *values,
+                                                   int      *ierr   )
+{
+   *ierr = (int)
+      ( HYPRE_StructVectorAddToBoxValues( (HYPRE_StructVector) *vector,
+                                          (int *)              ilower,
+                                          (int *)              iupper,
+                                          (double *)           values  ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_StructVectorGetValues
+ *--------------------------------------------------------------------------*/
+
+void 
+hypre_F90_IFACE(hypre_structvectorgetvalues)( long int *vector,
+                                              int      *grid_index,
+                                              double   *values_ptr,
+                                              int      *ierr       )
+{
+   *ierr = (int)
+      ( HYPRE_StructVectorGetValues( (HYPRE_StructVector) *vector,
+                                     (int *)              grid_index,
+                                     (double *)           values_ptr ) );
 }
 
 /*--------------------------------------------------------------------------

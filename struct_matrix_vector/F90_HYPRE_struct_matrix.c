@@ -100,6 +100,48 @@ hypre_F90_IFACE(hypre_structmatrixsetboxvalues)( long int *matrix,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_StructMatrixAddToValues
+ *--------------------------------------------------------------------------*/
+
+void 
+hypre_F90_IFACE(hypre_structmatrixaddtovalues)( long int *matrix,
+                                                int      *grid_index,
+                                                int      *num_stencil_indices,
+                                                int      *stencil_indices,
+                                                double   *values,
+                                                int      *ierr                )
+{
+   *ierr = (int)
+      ( HYPRE_StructMatrixAddToValues( (HYPRE_StructMatrix) *matrix,
+                                       (int *)     grid_index,
+                                       (int)       *num_stencil_indices,
+                                       (int *)     stencil_indices,
+                                       (double *)  values           ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_StructMatrixAddToBoxValues
+ *--------------------------------------------------------------------------*/
+
+void 
+hypre_F90_IFACE(hypre_structmatrixaddtoboxvalues)( long int *matrix,
+                                                   int    *ilower,
+                                                   int    *iupper,
+                                                   int    *num_stencil_indices,
+                                                   int    *stencil_indices,
+                                                   double *values,
+                                                   int    *ierr              )
+{
+   *ierr = (int)
+      ( HYPRE_StructMatrixAddToBoxValues( (HYPRE_StructMatrix) *matrix,
+                                          (int *)     ilower,
+                                          (int *)     iupper,
+                                          (int)       *num_stencil_indices,
+                                          (int *)     stencil_indices,
+                                          (double *)  values        ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_StructMatrixAssemble
  *--------------------------------------------------------------------------*/
 
