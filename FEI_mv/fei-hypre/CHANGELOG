@@ -68,4 +68,8 @@
             - include automatically SuperLU
             - a few more changes to new IJMatrix/Vectors in SuperLU/AMGe
               part of the code
+09/14/01    2.0.1R5
+            - get rid of the HYPRE_LSI_Sort function
+            - add identity preconditioner
+            - add incompressible flow block preconditioners
  
