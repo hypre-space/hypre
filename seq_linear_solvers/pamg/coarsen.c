@@ -106,7 +106,7 @@ typedef ELEMENT  *DOUBLE_LINK_LIST;
 #define CPOINT 1
 #define FPOINT -1
 #define UNDECIDED 0
-#define REMOVED -3
+
 
 
 
@@ -952,8 +952,6 @@ remove_point(DOUBLE_LINK_LIST   *LoL_head_ptr,
             {
                LoL_head = NULL;
                LoL_tail = NULL;
-               lists[index] = REMOVED;
-               where[index] = REMOVED;
                dispose_elt(list_ptr);
 
                *LoL_head_ptr = LoL_head;
@@ -964,8 +962,6 @@ remove_point(DOUBLE_LINK_LIST   *LoL_head_ptr,
             {
                list_ptr -> next_elt -> prev_elt = NULL;
                LoL_head = list_ptr->next_elt;
-               lists[index] = REMOVED;
-               where[index] = REMOVED;
                dispose_elt(list_ptr);
                
                *LoL_head_ptr = LoL_head;
@@ -976,8 +972,6 @@ remove_point(DOUBLE_LINK_LIST   *LoL_head_ptr,
             {
                list_ptr -> prev_elt -> next_elt = NULL;
                LoL_tail = list_ptr->prev_elt;
-               lists[index] = REMOVED;
-               where[index] = REMOVED;
                dispose_elt(list_ptr);
 
                *LoL_head_ptr = LoL_head;
@@ -988,8 +982,6 @@ remove_point(DOUBLE_LINK_LIST   *LoL_head_ptr,
             {
                list_ptr -> next_elt -> prev_elt = list_ptr -> prev_elt;
                list_ptr -> prev_elt -> next_elt = list_ptr -> next_elt;
-               lists[index] = REMOVED;
-               where[index] = REMOVED;
                dispose_elt(list_ptr);
                
                *LoL_head_ptr = LoL_head;
@@ -1001,22 +993,18 @@ remove_point(DOUBLE_LINK_LIST   *LoL_head_ptr,
          {
             list_ptr->head = lists[index];
             where[lists[index]] = LIST_HEAD;
-            lists[index] = REMOVED;
             return;
          }
          else if (list_ptr->tail == index)      /* index is tail of list */
          {
             list_ptr->tail = where[index];
             lists[where[index]] = LIST_TAIL;
-            where[index] = REMOVED;
             return;
          }
          else                              /* index is in middle of list */
          {
             lists[where[index]] = lists[index];
             where[lists[index]] = where[index];
-            lists[index] = REMOVED;
-            where[index] = REMOVED;
             return;
          }
       }
@@ -1429,7 +1417,6 @@ hypre_AMGCoarsenRugeLoL( hypre_CSRMatrix    *A,
          {
             CF_marker[nabor] = FPOINT;
             measure = measure_array[nabor];
-            measure_array[nabor] = REMOVED;
 
             remove_point(&LoL_head, &LoL_tail, measure, nabor, lists, where);
             --num_left;
