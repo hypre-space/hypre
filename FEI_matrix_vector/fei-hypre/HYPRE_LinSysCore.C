@@ -2780,7 +2780,7 @@ void HYPRE_LinSysCore::putInitialGuess(const int* eqnNumbers,
 
     delete [] local_ind;
 
-    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 0 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
     {
        printf("%4d : HYPRE_LSC::leaving  putInitalGuess.\n",mypid_);
     }
@@ -6043,10 +6043,6 @@ void HYPRE_LinSysCore::endCreateMapFromSoln()
     for ( i = 0; i < mapFromSolnLeng_; i++ )
        mapFromSolnList2_[i] = (int) darray[i];
     delete [] darray;
-
-    for ( i = 0; i < mapFromSolnLeng_; i++ )
-       printf("HYPRE_LSC::mapFromSoln %d = %d\n",mapFromSolnList_[i],
-              mapFromSolnList2_[i]);
 
     if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
     {
