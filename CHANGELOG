@@ -15,6 +15,14 @@
 #=============================================================================
 
 
+- New Hybrid solvers available for ParCSR and Struct.
+- IJ: Modified the 'GetValues' part of the matrix interface to make
+  it possible to get matrix values without knowing the nonzero
+  structure.  In particular, added a new option to IJMatrixGetValues,
+  and added new routines IJMatrixGetRowCounts, IJMatrixGetLocalRange,
+  and IJVectorGetLocalRange.
+- SStruct: Fixed a bug when connecting a part to itself with SetNeighborBox.
+
 Version 1.7.9b released, 2002/10/18.
 
 - SStruct: Added an if around sorting and eliminating duplicate 
