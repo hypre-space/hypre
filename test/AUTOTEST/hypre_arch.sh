@@ -34,7 +34,7 @@ then
 	OSF1)
 	    HYPRE_ARCH="dec";;
 	AIX)
-	    HYPRE_ARCH="frost";;
+	    HYPRE_ARCH="blue";;
 	"TFLOPS O/S")
 	    HYPRE_ARCH="red";;
 	Linux)

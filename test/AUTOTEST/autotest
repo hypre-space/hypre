@@ -224,7 +224,7 @@ do
 	perform_test
         shift;;
     -frost | -frostmp)
-        HYPRE_ARCH="frost"
+        HYPRE_ARCH="blue"
         HYPRE_COMPILE_MACHINE="frost"
         HYPRE_RUN_MACHINE="frost"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/powerpcll-ibm-aix5.1.0.0/AUTOTEST"
@@ -400,7 +400,7 @@ do
         SCP_COMMAND="cp"
         shift;;
     -white)
-        HYPRE_ARCH="white"
+        HYPRE_ARCH="blue"
         HYPRE_COMPILE_MACHINE="white"
         HYPRE_RUN_MACHINE="white"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/powerpcll-ibm-aix5.1.0.0/AUTOTEST"
