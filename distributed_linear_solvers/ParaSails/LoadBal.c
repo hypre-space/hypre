@@ -40,6 +40,9 @@ void LoadBalInit(MPI_Comm comm, double local_cost, double beta,
     double *cost, average, upper, move, accept;
     int i, jj, j;
 
+    if (beta == 0.0)
+	return;
+
     MPI_Comm_rank(comm, &mype);
     MPI_Comm_size(comm, &npes);
 
