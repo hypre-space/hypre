@@ -626,12 +626,12 @@ hypre_ClearStructVectorAllValues( hypre_StructVector *vector )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_MigrateStructVector
+ * hypre_GetMigrateStructVectorCommPkg
  *--------------------------------------------------------------------------*/
 
-int 
-hypre_MigrateStructVector( hypre_StructVector *from_vector,
-                           hypre_StructVector *to_vector   )
+hypre_CommPkg *
+hypre_GetMigrateStructVectorCommPkg( hypre_StructVector *from_vector,
+				     hypre_StructVector *to_vector   )
 {
    hypre_BoxArrayArray   *send_boxes;
    hypre_BoxArrayArray   *recv_boxes;
@@ -643,9 +643,6 @@ hypre_MigrateStructVector( hypre_StructVector *from_vector,
    int                    num_values;
 
    hypre_CommPkg         *comm_pkg;
-   hypre_CommHandle      *comm_handle;
-
-   int                    ierr = 0;
 
    /*------------------------------------------------------
     * Set up hypre_CommPkg
@@ -668,6 +665,22 @@ hypre_MigrateStructVector( hypre_StructVector *from_vector,
                                num_values,
                                hypre_StructVectorComm(from_vector));
 
+   return comm_pkg;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_MigrateStructVector
+ *--------------------------------------------------------------------------*/
+
+int 
+hypre_MigrateStructVector( hypre_CommPkg      *comm_pkg,
+			   hypre_StructVector *from_vector,
+                           hypre_StructVector *to_vector   )
+{
+   hypre_CommHandle      *comm_handle;
+
+   int                    ierr = 0;
+
    /*-----------------------------------------------------------------------
     * Migrate the vector data
     *-----------------------------------------------------------------------*/
@@ -677,6 +690,8 @@ hypre_MigrateStructVector( hypre_StructVector *from_vector,
                                     hypre_StructVectorData(from_vector),
                                     hypre_StructVectorData(to_vector));
    hypre_FinalizeCommunication(comm_handle);
+
+   hypre_FreeCommHandle(comm_handle);
 
    return ierr;
 }
