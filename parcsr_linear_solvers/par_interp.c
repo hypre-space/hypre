@@ -42,7 +42,6 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
    hypre_CSRMatrix *S_offd = hypre_ParCSRMatrixOffd(S);   
    int             *S_offd_i = hypre_CSRMatrixI(S_offd);
    int             *S_offd_j = hypre_CSRMatrixJ(S_offd);
-/*   int	            num_cols_S_offd = hypre_CSRMatrixNumCols(S_offd); */
 
    hypre_ParCSRMatrix *P;
    int		      *col_map_offd_P;
@@ -87,11 +86,13 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
    int              num_cpts_local,total_global_cpts;
    int              num_cols_P_offd,my_first_cpt;
    int             *num_cpts_global;
+
+   int              count;
    
    int              i,i1,i2;
    int              j,jj,jj1;
    int              start;
-   int              c_num,g_num;
+   int              c_num;
    
    double           diagonal;
    double           sum;
@@ -121,6 +122,8 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
    {
       CF_marker_cols[i] = CF_marker[i]*(i+col_1);
    }
+   /* Case where point 0 is fine */
+   if (col_1 == 0 && CF_marker[0] < 0) CF_marker_cols[0] = -1;
  
    CF_marker_offd = hypre_CTAlloc(int, num_cols_A_offd);
 
@@ -146,6 +149,8 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
    comm_handle = hypre_InitializeCommunication( 11, comm_pkg, int_buf_data, 
 	CF_marker_offd);
 
+   hypre_FinalizeCommunication(comm_handle);   
+
    /*----------------------------------------------------------------------
     * Get the ghost rows of A
     *---------------------------------------------------------------------*/
@@ -158,7 +163,7 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
       A_ext_data = hypre_CSRMatrixData(A_ext);
    }
    
-   hypre_FinalizeCommunication(comm_handle);   
+
 
    /*-----------------------------------------------------------------------
     * Determine the number of C-pts on each processor, broadcast,
@@ -272,8 +277,6 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
    P_marker = hypre_CTAlloc(int, n_fine);
    P_marker_offd = hypre_CTAlloc(int, n_fine);
 
-   n_coarse = coarse_counter;
-
    P_offd_size = jj_counter_offd;
 
    P_offd_i    = hypre_CTAlloc(int, n_fine+1);
@@ -301,6 +304,9 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
 
    fine_to_coarse_offd = hypre_CTAlloc(int, num_cols_A_offd); 
 
+/* Test TEST TEST */ 
+
+   for (i = 0; i < n_fine; i++) fine_to_coarse[i] += my_first_cpt;
    index = 0;
    for (i = 0; i < num_sends; i++)
    {
@@ -311,21 +317,14 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
    }
 	
    comm_handle = hypre_InitializeCommunication( 11, comm_pkg, int_buf_data, 
-	fine_to_coarse_offd);
+	fine_to_coarse_offd);  
 
-   hypre_FinalizeCommunication(comm_handle);  
+   hypre_FinalizeCommunication(comm_handle);   
 
-  
-   coarse_counter = 0;
-   for (i = 0; i < num_cols_A_offd; i++)
-   {
-       if (fine_to_coarse_offd[i] >= 0)  
-       {
-           fine_to_coarse_offd[i] = coarse_counter++;
-       }
-   }
-  
-   
+   for (i = 0; i < n_fine; i++) fine_to_coarse[i] -= my_first_cpt;
+
+/*ETEST ETEST ETEST */
+
    /*-----------------------------------------------------------------------
     *  Loop over fine grid points.
     *-----------------------------------------------------------------------*/
@@ -562,7 +561,6 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
 
                   /* find row number */
                   c_num = A_offd_j[jj];
-                  g_num = CF_marker_offd[c_num]; /*g_num is global row num */
 
                   for (jj1 = A_ext_i[c_num]; jj1 < A_ext_i[c_num+1]; jj1++)
                   {
@@ -636,7 +634,8 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
 
                else
                {
-                  diagonal += A_diag_data[jj];
+/*                  diagonal += A_diag_data[jj]; */
+                    diagonal += A_offd_data[jj];
                } 
 
             }
@@ -660,33 +659,17 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
       }
 
 /*   change !!!!! */
-      strong_f_marker--;
+      strong_f_marker--; 
 
       P_offd_i[i+1] = jj_counter_offd;
    }
    P_diag_i[i] = jj_counter; 
-
-   num_cols_P_offd = 0;
-   for (i = 0; i < P_offd_i[n_fine]; i++)
-   {
-      if (num_cols_P_offd < P_offd_j[i]) num_cols_P_offd = P_offd_j[i];     
-   }
-   num_cols_P_offd++;
-
-   /* VEH: I thought we should have num_cols_P_offd=0
-      if num_procs == 1, but the following line:
-
-              if (num_cols_P_offd) num_cols_P_offd++; 
-
-     in place of the simple num_cols_P_offd++  causes a SIGSEGV on driver 
-   */
 
 
    /*----------------------------------------------------------------------
     *  Determine the col_map_offd_P
     *----------------------------------------------------------------------*/
 
-   col_map_offd_P = hypre_CTAlloc(int,num_cols_P_offd);
    coarse_counter = 0;
    for (i = 0; i < n_fine; i++)
    {
@@ -711,16 +694,34 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
 
    hypre_FinalizeCommunication(comm_handle);   
 
-   coarse_counter = 0;
-   for (i = 0; i < num_cols_A_offd; i++)
-   {
-       if (CF_marker_offd[i] >= 0)
-       {
-          col_map_offd_P[coarse_counter] = CF_marker_offd[i];
-          coarse_counter++;
-       }
-   }
+/* Test begins here */
 
+   hypre_TFree(P_marker); 
+   P_marker = hypre_CTAlloc(int, total_global_cpts);
+
+   for (i=0; i < P_offd_size; i++)
+	P_marker[P_offd_j[i]] = -2;
+
+   num_cols_P_offd = 0;
+   for (i=0; i < total_global_cpts; i++)
+	if (P_marker[i] == -2) 
+		num_cols_P_offd++;
+
+   if (num_cols_P_offd)
+	col_map_offd_P = hypre_CTAlloc(int,num_cols_P_offd);
+
+   count = 0;
+   for (i=0; i < total_global_cpts; i++)
+	if (P_marker[i] == -2) 
+	{
+		col_map_offd_P[count] = i;
+		P_marker[i] = count;
+		count++;
+	}
+
+   for (i=0; i < P_offd_size; i++)
+	P_offd_j[i] = P_marker[P_offd_j[i]];
+/* End of replacement text */ 
 
    P = hypre_CreateParCSRMatrix(comm, 
                                 hypre_ParCSRMatrixGlobalNumRows(A), 
@@ -737,8 +738,18 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
    hypre_CSRMatrixJ(P_diag) = P_diag_j; 
    hypre_ParCSRMatrixOwnsRowStarts(P) = 0; 
 
-   if (num_cols_P_offd)
-   {
+   /*-------------------------------------------------------------------
+    * The following block was originally in an 
+    *
+    *           if (num_cols_P_offd)
+    *
+    * block, which has been eliminated to ensure that the code 
+    * runs on one processor.
+    *
+    *-------------------------------------------------------------------*/
+
+/*   if (num_cols_P_offd)
+   { */
    	P_offd = hypre_ParCSRMatrixOffd(P);
 	hypre_CSRMatrixData(P_offd) = P_offd_data; 
    	hypre_CSRMatrixI(P_offd) = P_offd_i; 
@@ -746,7 +757,7 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
    	hypre_ParCSRMatrixOffd(P) = P_offd;
    	hypre_ParCSRMatrixColMapOffd(P) = col_map_offd_P;
         hypre_GetCommPkgRTFromCommPkgA(P,A);
-   }   
+/*   }  */ 
 
    *P_ptr = P;
 
@@ -755,7 +766,7 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
    hypre_TFree(int_buf_data);
    hypre_TFree(fine_to_coarse);
    hypre_TFree(fine_to_coarse_offd);
-   hypre_TFree(P_marker);
+/*   hypre_TFree(P_marker);  */
    hypre_TFree(P_marker_offd);
 
 
