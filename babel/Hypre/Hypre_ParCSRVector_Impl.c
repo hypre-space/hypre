@@ -199,7 +199,7 @@ impl_Hypre_ParCSRVector_Axpy(
   /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRVector.Axpy) */
   /* Insert the implementation of the Axpy method here... */
    int ierr = 0;
-   int type[0];
+   int type[1];
    void * object;
    struct Hypre_ParCSRVector__data * data, * data_x;
    Hypre_ParCSRVector HypreP_x;
