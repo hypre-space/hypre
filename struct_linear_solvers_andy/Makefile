@@ -23,21 +23,6 @@ HYPREFILES =\
 
 FILES = $(HYPREFILES) $(LOCALFILES)
 
-#Automatically generate prototypes when necessary
-HYPRE_protos.h: $(HYPREFILES)
-	mkproto HYPRE*.c > HYPRE_protos.h
-
-hypre_protos.h: $(FILES)
-	mkproto hypre*.c > hypre_protos.h
-
-internal_protos.h: $(FILES)
-	mkproto *.c > internal_protos.h
-
-PROTOS =\
- HYPRE_protos.h\
- hypre_protos.h\
- internal_protos.h
- 
 OBJS = ${FILES:.c=.o}
 
 
