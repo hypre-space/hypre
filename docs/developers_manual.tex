@@ -650,11 +650,16 @@ hypre_SampleD( hypre_Matrix *A,
 
 \subsection{Autotest Procedures}
 What is autotest?
+\newline
 ----------------------------------------------------------------------------
+\newline
 Autotest is a set of driver programs and scripts set up as a cron job to test daily code changes.
 
 How is autotest structured?
+\newline
 ----------------------------------------------------------------------------
+
+\newline
 The /linear_solvers/test/ subdirectory (in the repository) contain
 1.) various driver programs (.c files)
 2.) bourne shell scripts to run the driver programs
@@ -669,7 +674,9 @@ calls the test_drivers.sh script in the newly checked out directory structure,
 and sets permissions.  This file should seldom change.
 
 Features of autotest
+\newline
 ----------------------------------------------------------------------------
+\newline
 1.) works with the autoconfig infrastructure.
 2.) test suites can be added/removed easily.
 3.) identify failure/success of a test (future feature)
@@ -677,7 +684,9 @@ Features of autotest
 5.) test on all target platforms (future feature)
 
 How to modify autotest
+\newline
 ----------------------------------------------------------------------------
+\newline
 1.) create and test a driver program -- somedriver.c
 2.) create and test a Bourne shell script to run the driver -- somedriver.sh
 3.) append the following to the test_drivers.sh file
