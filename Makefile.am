@@ -130,8 +130,14 @@ nofei:
 	    done; \
 	  fi; \
 	done; \
-	(cd lib && touch libHYPRE.* .libs/libHYPRE.*); \
+	(cd lib && touch libHYPRE.* .libs/libHYPRE.*)
+if STATICONLY
+	(cd lib && $(MAKE) $(AM_MAKEFLAGS) libHYPRE_LSI.a)
+	(cd lib && $(MAKE) $(AM_MAKEFLAGS) install-libLIBRARIES)
+else !STATICONLY
 	(cd lib && $(MAKE) $(AM_MAKEFLAGS) libHYPRE_LSI.la)
+	(cd lib && $(MAKE) $(AM_MAKEFLAGS) install-libLTLIBRARIES)
+endif !STATICONLY
 
 clean-local:
 	@ \
