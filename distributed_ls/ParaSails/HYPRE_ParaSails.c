@@ -95,7 +95,7 @@ int HYPRE_ParaSailsDestroy(HYPRE_ParaSails obj)
 
 int HYPRE_ParaSailsSetup(HYPRE_ParaSails obj,
   HYPRE_DistributedMatrix *distmat, int sym, double thresh, int nlevels,
-  double filter, double loadbal)
+  double filter, double loadbal, int logging)
 {
     double cost;
     Matrix *mat;
@@ -110,13 +110,15 @@ int HYPRE_ParaSailsSetup(HYPRE_ParaSails obj,
 
     ParaSailsSetupPattern(internal->ps, mat, thresh, nlevels);
 
-    cost = ParaSailsStatsPattern(internal->ps, mat);
+    if (logging)
+        cost = ParaSailsStatsPattern(internal->ps, mat);
 
     internal->ps->loadbal_beta = loadbal;
 
     ParaSailsSetupValues(internal->ps, mat, filter);
 
-    ParaSailsStatsValues(internal->ps, mat);
+    if (logging)
+        ParaSailsStatsValues(internal->ps, mat);
 
     MatrixDestroy(mat);
 
@@ -128,7 +130,8 @@ int HYPRE_ParaSailsSetup(HYPRE_ParaSails obj,
  *--------------------------------------------------------------------------*/
 
 int HYPRE_ParaSailsSetupPattern(HYPRE_ParaSails obj,
-  HYPRE_DistributedMatrix *distmat, int sym, double thresh, int nlevels)
+  HYPRE_DistributedMatrix *distmat, int sym, double thresh, int nlevels,
+  int logging)
 {
     double cost;
     Matrix *mat;
@@ -143,7 +146,8 @@ int HYPRE_ParaSailsSetupPattern(HYPRE_ParaSails obj,
 
     ParaSailsSetupPattern(internal->ps, mat, thresh, nlevels);
 
-    cost = ParaSailsStatsPattern(internal->ps, mat);
+    if (logging)
+        cost = ParaSailsStatsPattern(internal->ps, mat);
 
     MatrixDestroy(mat);
 
@@ -155,7 +159,8 @@ int HYPRE_ParaSailsSetupPattern(HYPRE_ParaSails obj,
  *--------------------------------------------------------------------------*/
 
 int HYPRE_ParaSailsSetupValues(HYPRE_ParaSails obj,
-  HYPRE_DistributedMatrix *distmat, double filter, double loadbal)
+  HYPRE_DistributedMatrix *distmat, double filter, double loadbal,
+  int logging)
 {
     Matrix *mat;
     hypre_ParaSails *internal = (hypre_ParaSails *) obj;
@@ -167,7 +172,8 @@ int HYPRE_ParaSailsSetupValues(HYPRE_ParaSails obj,
 
     ParaSailsSetupValues(internal->ps, mat, filter);
 
-    ParaSailsStatsValues(internal->ps, mat);
+    if (logging)
+        ParaSailsStatsValues(internal->ps, mat);
 
     MatrixDestroy(mat);
 
