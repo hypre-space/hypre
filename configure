@@ -1693,12 +1693,12 @@ fi
 if test "${with_FEI_BASE_DIR+set}" = set; then
   withval="$with_FEI_BASE_DIR"
   case "${withval}" in
-   yes) FEI_BASE_DIR="${srcdir}/FEI_mv/fei-base" ;;
-   no)  FEI_BASE_DIR="${srcdir}/FEI_mv/fei-base" ;;
+   yes) FEI_BASE_DIR="${srcdir}/../fei-base" ;;
+   no)  FEI_BASE_DIR="${srcdir}/../fei-base" ;;
    *)   FEI_BASE_DIR=$withval ;;
  esac
 else
-  FEI_BASE_DIR="${srcdir}/FEI_mv/fei-base"
+  FEI_BASE_DIR="${srcdir}/../fei-base"
 
 fi
 

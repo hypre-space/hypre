@@ -440,11 +440,11 @@ AC_ARG_WITH(FEI_BASE_DIR,
 [  --with-FEI_BASE_DIR     specify the directory where the fei header
                           files live.], 
 [case "${withval}" in
-   yes) FEI_BASE_DIR="${srcdir}/FEI_mv/fei-base" ;;
-   no)  FEI_BASE_DIR="${srcdir}/FEI_mv/fei-base" ;;
+   yes) FEI_BASE_DIR="${srcdir}/../fei-base" ;;
+   no)  FEI_BASE_DIR="${srcdir}/../fei-base" ;;
    *)   FEI_BASE_DIR=$withval ;;
  esac],
-[FEI_BASE_DIR="${srcdir}/FEI_mv/fei-base"]
+[FEI_BASE_DIR="${srcdir}/../fei-base"]
 )
 
 AC_ARG_WITH(FEI_LIB_DIR,
