@@ -538,6 +538,9 @@ void HYPRE_LinSysCore::buildSchurReducedSystem()
                                               globalNSchur);
              if (searchIndex >= 0) newRowSize++;
           }
+          if ( newRowSize <= 0 && (HYOutputLevel_ & HYFEI_SCHURREDUCE1) )
+             printf("%d : WARNING at row %d - empty row.\n", mypid_, i);
+          if ( newRowSize <= 0 ) newRowSize = 1;
           CTMatSize[rowCount++] = newRowSize;
           maxRowSize = ( newRowSize > maxRowSize ) ? newRowSize : maxRowSize;
           HYPRE_ParCSRMatrixRestoreRow(A_csr,i,&rowSize,&colInd,&colVal);
@@ -571,12 +574,21 @@ void HYPRE_LinSysCore::buildSchurReducedSystem()
              if (searchIndex >= 0) 
              {
                 newColInd[newRowSize] = searchIndex;
+                if ( searchIndex >= globalNSchur )
+                {
+                   if ( HYOutputLevel_ & HYFEI_SCHURREDUCE1 )
+                   {
+                      printf("%4d buildSchurSystem WARNING : CTmat ", mypid_);
+                      printf("out of range %d - %d (%d)\n", rowCount, searchIndex, 
+                              globalNSchur);
+                   } 
+                }
                 newColVal[newRowSize++] = colVal[j];
              }
           }
           if ( newRowSize == 0 )
           {
-             newColInd[0] = rowCount;
+             newColInd[0] = ProcNSchur[mypid_];
              newColVal[0] = 0.0;
              newRowSize = 1;
           }
