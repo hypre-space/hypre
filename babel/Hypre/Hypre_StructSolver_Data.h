@@ -7,7 +7,7 @@
 #ifndef Hypre_StructSolver_DataMembers_
 #define Hypre_StructSolver_DataMembers_
 
-#include "struct_linear_solvers.h"
+#include "struct_ls.h"
 
 struct Hypre_StructSolver_private_type
 {

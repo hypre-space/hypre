@@ -125,10 +125,10 @@ main( int   argc,
   Max_level = 25;
 
 
-  element_node_file = "/home/panayot/linear_solvers/seq_linear_solvers/amge/charles/element_node_small";
-  element_matrix_file = "/home/panayot/linear_solvers/seq_linear_solvers/amge/charles/element_chord_small";
+  element_node_file = "/home/panayot/linear_solvers/seq_ls/amge/charles/element_node_small";
+  element_matrix_file = "/home/panayot/linear_solvers/seq_ls/amge/charles/element_chord_small";
   /* coordinates_file = "coordinates"; */
-  node_on_boundary_file = "/home/panayot/linear_solvers/seq_linear_solvers/amge/charles/node_on_boundary_small";
+  node_on_boundary_file = "/home/panayot/linear_solvers/seq_ls/amge/charles/node_on_boundary_small";
 
 
   /*-----------------------------------------------------------

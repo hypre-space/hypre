@@ -23,7 +23,7 @@ int
 HYPRE_CSRPCGCreate( HYPRE_Solver *solver )
 {
    /* The function names with a CG in them are in
-      seq_linear_solvers/pamg/cg_fun.c .  These functions do rather little -
+      seq_ls/pamg/cg_fun.c .  These functions do rather little -
       e.g., cast to the correct type - before calling something else.
    */
    hypre_PCGFunctions * pcg_functions =

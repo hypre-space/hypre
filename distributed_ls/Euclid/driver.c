@@ -2,7 +2,7 @@
  * Search for "HACK" to find changes from the original.
  *
  * Test driver for Euclid preconditioning; this is the same as 
- * IJ_linear_solvers.c, (whose comments are repeated below), 
+ * IJ_ls.c, (whose comments are repeated below), 
  * with stuph added for Euclid.  Search for "HACK" to find changes 
  * from the original.
  *
@@ -20,7 +20,7 @@
  *
  * Preconditioning is performed in single-precision.
  * (This is a compile-time decision; to change to double,
- * see src/distributed_linear_solvers/Euclid/include/euclid_config.h).
+ * see src/distributed_ls/Euclid/include/euclid_config.h).
  *
  * Euclid includes a sparsification feature: small (absolute value) entries 
  * in the input matrix can be discarded prior to factorization via the switch
@@ -37,7 +37,7 @@
  *
  * Test driver for unstructured matrix interface (IJ_matrix interface).
  * Do `driver -help' for usage info.
- * This driver started from the driver for parcsr_linear_solvers, and it
+ * This driver started from the driver for parcsr_ls, and it
  * works by first building a parcsr matrix as before and then "copying"
  * that matrix row-by-row into the IJMatrix interface. AJC 7/99.
  *--------------------------------------------------------------------------*/

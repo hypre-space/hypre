@@ -11,5 +11,5 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "parcsr_linear_solvers.h"
+#include "parcsr_ls.h"
 

@@ -13,10 +13,10 @@
  *
  *****************************************************************************/
 
-/* This was based on the pcg.c formerly in struct_linear_solvers, with
+/* This was based on the pcg.c formerly in struct_ls, with
    changes (GetPrecond and stop_crit) for compatibility with the pcg.c
-   in parcsr_linear_solvers and elsewhere.  Incompatibilities with the
-   parcsr_linear_solvers version:
+   in parcsr_ls and elsewhere.  Incompatibilities with the
+   parcsr_ls version:
    - logging is different; no attempt has been made to be the same
    - treatment of b=0 in Ax=b is different: this returns x=0; the parcsr
    version iterates with a special stopping criterion

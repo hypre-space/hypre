@@ -139,12 +139,12 @@ main( int   argc,
 
 
 
-  element_node_file = "/home/panayot/linear_solvers/seq_linear_solvers/amge/toni/el_node_4";
-  element_matrix_file = "/home/panayot/linear_solvers/seq_linear_solvers/amge/toni/el_matrix_4";
+  element_node_file = "/home/panayot/linear_solvers/seq_ls/amge/toni/el_node_4";
+  element_matrix_file = "/home/panayot/linear_solvers/seq_ls/amge/toni/el_matrix_4";
   /*
-  coordinates_file = "/home/panayot/linear_solvers/seq_linear_solvers/amge/toni/coord_4"; 
+  coordinates_file = "/home/panayot/linear_solvers/seq_ls/amge/toni/coord_4"; 
   */
-  node_on_boundary_file = "/home/panayot/linear_solvers/seq_linear_solvers/amge/toni/node_on_bdr_4";
+  node_on_boundary_file = "/home/panayot/linear_solvers/seq_ls/amge/toni/node_on_bdr_4";
 
 
   /*-----------------------------------------------------------

@@ -8,7 +8,7 @@
 #define Hypre_ParAMG_DataMembers_
 
 #include "Hypre_ParCSRMatrix_IOR.h"
-#include "parcsr_linear_solvers.h"
+#include "parcsr_ls.h"
 
 struct Hypre_ParAMG_private_type
 {

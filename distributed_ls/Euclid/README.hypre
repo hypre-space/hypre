@@ -13,13 +13,13 @@ Euclid recognizes the following command-line switches:
        prints a summary of Euclid's memory usage. Useful for
        optimizing switches, e.g, executing:
 
-       >IJ_linear_solvers -nodes 1 -solver 43 -27pt -n 40 40 40  \
+       >IJ_ls -nodes 1 -solver 43 -27pt -n 40 40 40  \
          -printMemReport
 
        shows a maximum dynamic allocation of 98.93 Mbytes; adding
        the switch "-rho 2.3" (see below)
 
-       >IJ_linear_solvers -nodes 1 -solver 43 -27pt -n 40 40 40  \
+       >IJ_ls -nodes 1 -solver 43 -27pt -n 40 40 40  \
          -printMemReport -rho 2.3
 
        reduces maximum allocation to 49.93 Mbytes.

@@ -145,10 +145,10 @@ main( int   argc,
   node_on_boundary_file = hypre_CTAlloc(char, 1);
   */
 
-  element_node_file = "/home/panayot/linear_solvers/seq_linear_solvers/amge/charles/element_node";
-  element_matrix_file = "/home/panayot/linear_solvers/seq_linear_solvers/amge/charles/element_chord";
+  element_node_file = "/home/panayot/linear_solvers/seq_ls/amge/charles/element_node";
+  element_matrix_file = "/home/panayot/linear_solvers/seq_ls/amge/charles/element_chord";
   /* coordinates_file = "coordinates"; */
-  node_on_boundary_file = "/home/panayot/linear_solvers/seq_linear_solvers/amge/charles/node_on_boundary";
+  node_on_boundary_file = "/home/panayot/linear_solvers/seq_ls/amge/charles/node_on_boundary";
 
 
   /*-----------------------------------------------------------

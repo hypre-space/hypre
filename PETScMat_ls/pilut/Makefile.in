@@ -51,7 +51,7 @@ CFLAGS = \
  -I$(srcdir)/../..\
  -I$(srcdir)/../../utilities\
  -I$(srcdir)/../../distributed_matrix\
- -I$(srcdir)/../../distributed_linear_solvers/pilut \
+ -I$(srcdir)/../../distributed_ls/pilut \
  @PETSCINCLUDE@ \
  ${C_COMPILE_FLAGS}\
  ${CINCLUDES} ${CDEFS}

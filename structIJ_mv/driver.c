@@ -7,7 +7,7 @@
 /*------------------------------------------------------------------------
  * The problem is the standard 7-point laplacian in 3D with grid and 
  * anisotropy determined as command line arguments, as in the
- * struct_linear_solvers test driver.  1D and 2D problems are possible
+ * struct_ls test driver.  1D and 2D problems are possible
  * too, but these have not been tested.  Do `driver -help' for usage info.
  *------------------------------------------------------------------------*/
 

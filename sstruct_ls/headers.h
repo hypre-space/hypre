@@ -11,4 +11,4 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "sstruct_linear_solvers.h"
+#include "sstruct_ls.h"

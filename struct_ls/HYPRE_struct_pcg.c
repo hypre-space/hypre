@@ -29,7 +29,7 @@ int
 HYPRE_StructPCGCreate( MPI_Comm comm, HYPRE_StructSolver *solver )
 {
    /* The function names with a PCG in them are in
-      struct_linear_solvers/pcg_struct.c .  These functions do rather little -
+      struct_ls/pcg_struct.c .  These functions do rather little -
       e.g., cast to the correct type - before calling something else.
       These names should be called, e.g., hypre_struct_Free, to reduce the
       chance of name conflicts. */

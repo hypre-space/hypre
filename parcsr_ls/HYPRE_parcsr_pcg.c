@@ -22,7 +22,7 @@ int
 HYPRE_ParCSRPCGCreate( MPI_Comm comm, HYPRE_Solver *solver )
 {
    /* The function names with a PCG in them are in
-      parcsr_linear_solvers/pcg_par.c .  These functions do rather little -
+      parcsr_ls/pcg_par.c .  These functions do rather little -
       e.g., cast to the correct type - before calling something else.
       These names should be called, e.g., hypre_struct_Free, to reduce the
       chance of name conflicts. */

@@ -7,7 +7,7 @@
 #ifndef Hypre_StructJacobi_DataMembers_
 #define Hypre_StructJacobi_DataMembers_
 
-#include "struct_linear_solvers.h"
+#include "struct_ls.h"
 #include "Hypre_StructMatrix_IOR.h"
 
 struct Hypre_StructJacobi_private_type
