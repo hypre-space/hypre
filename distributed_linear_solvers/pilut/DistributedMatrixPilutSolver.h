@@ -56,6 +56,10 @@ int SLUD_timer;
 int SLUM_timer;
 int UL_timer;
 int FNR_timer;
+int SDSeptimer;
+int SDKeeptimer;
+int SDUSeptimer;
+int SDUKeeptimer;
 
   /* solves */
 int Ll_timer;

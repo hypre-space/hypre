@@ -119,11 +119,19 @@ int SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
   ldu->nnodes[0] = nlocal;
 
 #ifdef HYPRE_TIMING
+   globals->SDSeptimer = hypre_InitializeTiming("SecondDrop Separation");
+   globals->SDKeeptimer = hypre_InitializeTiming("SecondDrop extraction of kept elements");
+   globals->SDUSeptimer = hypre_InitializeTiming("SecondDropUpdate Separation");
+   globals->SDUKeeptimer = hypre_InitializeTiming("SecondDropUpdate extraction of kept elements");
+#endif
+
+#ifdef HYPRE_TIMING
   {
    int           LFtimer;
    LFtimer = hypre_InitializeTiming( "Local factorization computational stage");
    hypre_BeginTiming( LFtimer );
 #endif
+
   /* myprintf("Nlocal: %d, Nbnd: %d\n", nlocal, nbnd); */
 
   /*******************************************************************/
@@ -501,6 +509,9 @@ void SecondDrop(int maxnz, double tol, int row,
       i++;
   }
 
+#ifdef HYPRE_TIMING
+  hypre_BeginTiming( globals->SDSeptimer );
+#endif
 
   if (lastjr == 0)
     last = first = 0;
@@ -531,10 +542,18 @@ void SecondDrop(int maxnz, double tol, int row,
       }
     }
   }
+#ifdef HYPRE_TIMING
+  hypre_EndTiming( globals->SDSeptimer );
+#endif
+
   /*****************************************************************
   * The entries between [0, last) are part of L
   * The entries [first, lastjr) are part of U
   ******************************************************************/
+
+#ifdef HYPRE_TIMING
+  hypre_BeginTiming(globals-> SDKeeptimer );
+#endif
 
 
   /* Now, I want to keep maxnz elements of L. Go and extract them */
@@ -567,6 +586,10 @@ void SecondDrop(int maxnz, double tol, int row,
     jw[max] = jw[--lastjr];
     w[max] = w[lastjr];
   }
+#ifdef HYPRE_TIMING
+  hypre_EndTiming( globals->SDKeeptimer );
+#endif
+
 
 }
 
@@ -605,7 +628,11 @@ void SecondDropUpdate(int maxnz, int maxnzkeep, double tol, int row,
   }
 
 
-  if (lastjr == 1)
+#ifdef HYPRE_TIMING
+  hypre_BeginTiming( globals->SDUSeptimer );
+#endif
+
+   if (lastjr == 1)
     last = first = 1;
   else { /* Perform a Qsort type pass to seperate L and U entries */
     last = 1, first = lastjr-1;
@@ -642,10 +669,18 @@ void SecondDropUpdate(int maxnz, int maxnzkeep, double tol, int row,
       }
     }
   }
+#ifdef HYPRE_TIMING
+  hypre_EndTiming( globals->SDUSeptimer );
+#endif
+
   /*****************************************************************
   * The entries between [1, last) are part of L
   * The entries [first, lastjr) are part of U
   ******************************************************************/
+
+#ifdef HYPRE_TIMING
+  hypre_BeginTiming( globals->SDUKeeptimer );
+#endif
 
 
   /* Keep large maxnz elements of L */
@@ -693,6 +728,9 @@ void SecondDropUpdate(int maxnz, int maxnzkeep, double tol, int row,
       w[max] = w[lastjr];
     }
   }
+#ifdef HYPRE_TIMING
+  hypre_EndTiming( globals->SDUKeeptimer );
+#endif
 
 }
 
