@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <mpi.h>
+#include <math.h>
 #include "util/mli_utils.h"
 #include "base/mli_defs.h"
 #include "cintface/cmli.h"
@@ -11,23 +12,29 @@
 #include "krylov/krylov.h"
 #define habs(x) ((x)>=0 ? x : -x)
 
-HYPRE_ParCSRMatrix GenerateConvectionDiffusion(MPI_Comm,
-                      int nx, int ny, int nz, int P, int Q, int R,
-                      int p, int q, int r, double alpha, double beta,
-                      double  *value );
+int GenerateConvectionDiffusion3D(MPI_Comm, int, int, int, int, int, int,
+                      int, int, int, double, double, double *, 
+                      HYPRE_ParCSRMatrix *,HYPRE_ParVector*);
+int GenerateRugeStuben1(MPI_Comm,double,double,HYPRE_ParCSRMatrix*,
+                        HYPRE_ParVector*);
+int GenerateRugeStuben2(MPI_Comm,double,HYPRE_ParCSRMatrix*,HYPRE_ParVector*);
+int GenerateRugeStuben3(MPI_Comm,double,HYPRE_ParCSRMatrix*, HYPRE_ParVector*);
+int GenerateStuben(MPI_Comm,double,HYPRE_ParCSRMatrix*,HYPRE_ParVector*);
 
 int main(int argc, char **argv)
 {
 
-   int                j, nx=7, ny=7, nz=3, P, Q, R, p, q, r, nprocs;
+   int                j, nx=65, ny=65, nz=3, P, Q, R, p, q, r, nprocs;
    int                mypid, startRow;
    int                *partition, globalSize, localSize, nsweeps, rowSize;
    int                *colInd, k, *procCnts, *offsets, *rowCnts, ftype;
-   int                ndofs=3, nullDim=6, testProb=0, solver=2, scaleFlag=0;
-   int                fleng, rleng, status;
+   int                ndofs=3, nullDim=6, testProb=2, solver=2, scaleFlag=0;
+   int                fleng, rleng, status, amgMethod=0;
    char               *targv[10], fname[100], rhsFname[100], methodName[10];
+   char               argStr[40];
    double             *values, *nullVecs, *scaleVec, *colVal, *gscaleVec;
-   double             *rhsVector=NULL, alpha, beta, *weights;
+   double             *rhsVector=NULL, alpha, beta, *weights, Lvalue=4.0;
+   double             epsilon=0.001, Pweight;
    HYPRE_IJMatrix     newIJA;
    HYPRE_IJVector     IJrhs;
    HYPRE_ParCSRMatrix HYPREA;
@@ -51,6 +58,16 @@ int main(int argc, char **argv)
     * problem setup
     * ------------------------------------------------------------- */
 
+   if ( mypid == 0 )
+   {
+      printf("Which test problem (0-5) : ");
+      scanf("%d", &testProb);
+   }
+   MPI_Bcast(&testProb, 1, MPI_INT, 0, MPI_COMM_WORLD);
+   if ( testProb < 0 ) testProb = 0;
+   if ( testProb > 5 ) testProb = 5;
+
+   /* --- Test problem 1 --- */
    if ( testProb == 0 )
    {
       P = 1;
@@ -64,10 +81,11 @@ int main(int argc, char **argv)
       values[2] = -1.0;
       values[1] = -2.0;
       values[0] = 6.0;
-      alpha     = 240.0;
-      beta      = 120.0;
-      HYPREA = (HYPRE_ParCSRMatrix) GenerateConvectionDiffusion(MPI_COMM_WORLD, 
-                           nx, ny, nz, P, Q, R, p, q, r, alpha, beta, values); 
+      alpha     = 7200.0;
+      beta      = 3600.0;
+      GenerateConvectionDiffusion3D(MPI_COMM_WORLD, nx, ny, nz, P, Q, R, p, 
+                        q, r, alpha, beta, values, &HYPREA, 
+                        (HYPRE_ParVector *) &rhs); 
       free( values );
       HYPRE_ParCSRMatrixGetRowPartitioning(HYPREA, &partition);
       globalSize = partition[nprocs];
@@ -143,6 +161,8 @@ int main(int argc, char **argv)
          free( scaleVec );
       } else nullVecs = NULL;
    }
+
+   /* --- Test problem 2 --- */
    else if ( testProb == 1 )
    {
       if ( mypid == 0 )
@@ -190,6 +210,28 @@ int main(int argc, char **argv)
          free( rhsVector );
          rhsVector = NULL;
       }
+      HYPRE_ParCSRMatrixGetRowPartitioning(HYPREA, &partition);
+      HYPRE_IJVectorCreate(MPI_COMM_WORLD, partition[mypid],
+                               partition[mypid+1]-1, &IJrhs);
+      free( partition );
+      HYPRE_IJVectorSetObjectType(IJrhs, HYPRE_PARCSR);
+      HYPRE_IJVectorInitialize(IJrhs);
+      HYPRE_IJVectorAssemble(IJrhs);
+      if ( rhsVector != NULL )
+      {
+         colInd = (int *) malloc(localSize * sizeof(int));
+         for (j = 0; j < localSize; j++) colInd[j] = startRow + j;
+         HYPRE_IJVectorSetValues(IJrhs, localSize, (const int *) colInd,
+                                 (const double *) rhsVector);
+         free(colInd);
+      }
+      HYPRE_IJVectorGetObject(IJrhs, (void*) &rhs);
+      HYPRE_IJVectorSetObjectType(IJrhs, -1);
+      HYPRE_IJVectorDestroy(IJrhs);
+      if ( rhsVector == NULL )
+         hypre_ParVectorSetConstantValues( rhs, 0.0 );
+      else free(rhsVector);
+
       nullVecs = ( double *) malloc(localSize * nullDim * sizeof(double));
 /*
       MLI_Utils_DoubleParVectorRead("rigid_body_mode01",MPI_COMM_WORLD,
@@ -235,33 +277,86 @@ int main(int argc, char **argv)
       }
    }
 
+   /* --- Test problem 3 --- */
+   else if ( testProb == 2 )
+   {
+      if ( mypid == 0 )
+      {
+         printf("Convection diffusion equation (1) : L = (0-4) ? ");
+         scanf("%lg", &Lvalue);
+         printf("Convection diffusion equation (1) : epsilon = ");
+         scanf("%lg", &epsilon);
+      }
+      MPI_Bcast(&Lvalue, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+      MPI_Bcast(&epsilon, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+      GenerateRugeStuben1(MPI_COMM_WORLD,Lvalue,epsilon,&HYPREA,
+                          (HYPRE_ParVector *) &rhs);
+      HYPRE_ParCSRMatrixGetRowPartitioning(HYPREA, &partition);
+      globalSize = partition[nprocs];
+      startRow   = partition[mypid];
+      localSize  = partition[mypid+1] - startRow;
+      free( partition );
+   }   
+
+   /* --- Test problem 4 --- */
+   else if ( testProb == 3 )
+   {
+      if ( mypid == 0 )
+      {
+         printf("Convection diffusion equation (2) : epsilon = ");
+         scanf("%lg", &epsilon);
+      }
+      MPI_Bcast(&epsilon, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+      GenerateRugeStuben2(MPI_COMM_WORLD,epsilon,&HYPREA,
+                          (HYPRE_ParVector *) &rhs);
+      HYPRE_ParCSRMatrixGetRowPartitioning(HYPREA, &partition);
+      globalSize = partition[nprocs];
+      startRow   = partition[mypid];
+      localSize  = partition[mypid+1] - startRow;
+      free( partition );
+   }   
+
+   /* --- Test problem 5 --- */
+   else if ( testProb == 4 )
+   {
+      if ( mypid == 0 )
+      {
+         printf("Convection diffusion equation (3) : epsilon = ");
+         scanf("%lg", &epsilon);
+      }
+      MPI_Bcast(&epsilon, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+      GenerateRugeStuben3(MPI_COMM_WORLD,epsilon,&HYPREA,
+                          (HYPRE_ParVector *) &rhs);
+      HYPRE_ParCSRMatrixGetRowPartitioning(HYPREA, &partition);
+      globalSize = partition[nprocs];
+      startRow   = partition[mypid];
+      localSize  = partition[mypid+1] - startRow;
+      free( partition );
+   }   
+
+   /* --- Test problem 6 --- */
+   else if ( testProb == 5 )
+   {
+      if ( mypid == 0 )
+      {
+         printf("Convection diffusion equation (4) : epsilon = ");
+         scanf("%lg", &epsilon);
+      }
+      MPI_Bcast(&epsilon, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+      GenerateStuben(MPI_COMM_WORLD,epsilon,&HYPREA,
+                     (HYPRE_ParVector *) &rhs);
+      HYPRE_ParCSRMatrixGetRowPartitioning(HYPREA, &partition);
+      globalSize = partition[nprocs];
+      startRow   = partition[mypid];
+      localSize  = partition[mypid+1] - startRow;
+      free( partition );
+   }   
+
    hypreA = (hypre_ParCSRMatrix *) HYPREA;
    HYPRE_ParCSRMatrixGetRowPartitioning(HYPREA, &partition);
    sol = hypre_ParVectorCreate(MPI_COMM_WORLD, globalSize, partition);
    hypre_ParVectorInitialize( sol );
-   hypre_ParVectorSetConstantValues( sol, 0.0 );
-
-   HYPRE_ParCSRMatrixGetRowPartitioning(HYPREA, &partition);
-   HYPRE_IJVectorCreate(MPI_COMM_WORLD, partition[mypid],
-                               partition[mypid+1]-1, &IJrhs);
-   free( partition );
-   HYPRE_IJVectorSetObjectType(IJrhs, HYPRE_PARCSR);
-   HYPRE_IJVectorInitialize(IJrhs);
-   HYPRE_IJVectorAssemble(IJrhs);
-   if ( rhsVector != NULL )
-   {
-      colInd = (int *) malloc(localSize * sizeof(double));
-      for (j = 0; j < localSize; j++) colInd[j] = startRow + j;
-      HYPRE_IJVectorSetValues(IJrhs, localSize, (const int *) colInd,
-                              (const double *) rhsVector);
-   }
-   HYPRE_IJVectorGetObject(IJrhs, (void*) &rhs);
-   HYPRE_IJVectorSetObjectType(IJrhs, -1);
-   HYPRE_IJVectorDestroy(IJrhs);
-   if ( rhsVector == NULL )
-      hypre_ParVectorSetConstantValues( rhs, 1.0 );
-   else
-      free( rhsVector );
+   hypre_ParVectorSetConstantValues( sol, 1.0 );
 
    funcPtr = (MLI_Function *) malloc( sizeof( MLI_Function ) );
    MLI_Utils_HypreParVectorGetDestroyFunc(funcPtr);
@@ -276,57 +371,118 @@ int main(int argc, char **argv)
    cmliMat = MLI_MatrixCreate((void*) hypreA,"HYPRE_ParCSR",funcPtr);
    free( funcPtr );
    cmli = MLI_Create( MPI_COMM_WORLD );
-   strcpy( methodName, "AMGRS" );
+   if ( mypid == 0 )
+   {
+      printf("Which AMG to use (0 - RSAMG, 1 - SAAMG) : ");
+      scanf("%d", &amgMethod);
+   }
+   MPI_Bcast(&amgMethod, 1, MPI_INT, 0, MPI_COMM_WORLD);
+   if ( amgMethod == 0 ) strcpy( methodName, "AMGRS" );
+   else                  strcpy( methodName, "AMGSA" );
+
    cmliMethod = MLI_MethodCreate( methodName, MPI_COMM_WORLD );
-   MLI_MethodSetParams( cmliMethod, "setOutputLevel 2", 0, NULL );
-   MLI_MethodSetParams( cmliMethod, "setNumLevels 2", 0, NULL );
+   MLI_MethodSetParams( cmliMethod, "setNumLevels 10", 0, NULL );
+   MLI_MethodSetParams( cmliMethod, "setMaxIterations 100", 0, NULL );
    MLI_MethodSetParams( cmliMethod, "setMinCoarseSize 5", 0, NULL );
    MLI_MethodSetParams( cmliMethod, "setCoarseSolver SuperLU", 2, targv );
    if ( ! strcmp(methodName, "AMGRS") )
    {
-      nsweeps = 2;
+      if ( mypid == 0 )
+      {
+         printf("RSAMG number of sweeps = ");
+         scanf("%d", &nsweeps);
+      }
+      MPI_Bcast(&nsweeps, 1, MPI_INT, 0, MPI_COMM_WORLD);
+      if ( nsweeps <= 0 ) nsweeps = 1;
       weights = (double *) malloc( sizeof(double)*nsweeps );
-      for ( j = 0; j < nsweeps; j++ ) weights[j] = 0.05;
+      if ( mypid == 0 )
+      {
+         printf("RSAMG relaxation weights = ");
+         scanf("%lg", &weights[0]);
+      }
+      MPI_Bcast(&weights[0], 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+      if ( weights[0] <= 0.0 ) weights[0] = 1.0; 
+      for ( j = 1; j < nsweeps; j++ ) weights[j] = weights[0];
       targv[0] = (char *) &nsweeps;
       targv[1] = (char *) weights;
-      MLI_MethodSetParams( cmliMethod, "setPreSmoother SGS", 2, targv );
-      MLI_MethodSetParams( cmliMethod, "setPostSmoother SGS", 2, targv );
+      MLI_MethodSetParams( cmliMethod, "setPreSmoother Kaczmarz", 2, targv );
+      MLI_MethodSetParams( cmliMethod, "setPostSmoother Kaczmarz", 2, targv );
       free(weights);
-      MLI_MethodSetParams( cmliMethod, "setCoarsenScheme ruge", 0, NULL );
-      MLI_MethodSetParams( cmliMethod, "setStrengthThreshold 0.0", 0, NULL );
+      MLI_MethodSetParams( cmliMethod, "setCoarsenScheme cljp", 0, NULL );
+      MLI_MethodSetParams( cmliMethod, "setStrengthThreshold 0.25", 0, NULL );
+      if ( mypid == 0 )
+      {
+         printf("RSAMG smootherPrintRNorm ? (0 for no, 1 for yes) = ");
+         scanf("%d", &j);
+      }
+      MPI_Bcast(&j, 1, MPI_INT, 0, MPI_COMM_WORLD);
+      if ( j != 0 )
+         MLI_MethodSetParams( cmliMethod, "setSmootherPrintRNorm", 0, NULL );
+      if ( mypid == 0 )
+      {
+         printf("RSAMG smootherFindOmega ? (0 for no, 1 for yes) = ");
+         scanf("%d", &j);
+      }
+      MPI_Bcast(&j, 1, MPI_INT, 0, MPI_COMM_WORLD);
+      if ( j != 0 )
+         MLI_MethodSetParams( cmliMethod, "setSmootherFindOmega", 0, NULL );
+      if ( mypid == 0 )
+      {
+         printf("RSAMG nonsymmetric ? (0 for no, 1 for yes) = ");
+         scanf("%d", &j);
+      }
+      MPI_Bcast(&j, 1, MPI_INT, 0, MPI_COMM_WORLD);
+      if ( j != 0 )
+         MLI_MethodSetParams( cmliMethod, "useNonsymmetric", 0, NULL );
 /*
-      MLI_MethodSetParams( cmliMethod, "setSmootherPrintRNorm", 0, NULL );
-*/
-      MLI_MethodSetParams( cmliMethod, "setSmootherFindOmega", 0, NULL );
-/*
-*/
-/*
-*/
-/*
-      MLI_MethodSetParams( cmliMethod, "useInjectionForR", 0, NULL );
-MLI_MethodSetParams( cmliMethod, "nonsymmetric", 0, NULL );
+MLI_MethodSetParams( cmliMethod, "useInjectionForR", 0, NULL );
 */
    }
    else
    {
-      nsweeps = 2;
+      if ( mypid == 0 )
+      {
+         printf("SAAMG number of sweeps = ");
+         scanf("%d", &nsweeps);
+      }
+      MPI_Bcast(&nsweeps, 1, MPI_INT, 0, MPI_COMM_WORLD);
+      if ( nsweeps <= 0 ) nsweeps = 1;
       weights = (double *) malloc( sizeof(double)*nsweeps );
-      for ( j = 0; j < nsweeps; j++ ) weights[j] = 0.1;
+      if ( mypid == 0 )
+      {
+         printf("SAAMG relaxation weights = ");
+         scanf("%lg", &weights[0]);
+      }
+      MPI_Bcast(&weights[0], 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+      if ( weights[0] <= 0.0 ) weights[0] = 1.0; 
+      for ( j = 1; j < nsweeps; j++ ) weights[j] = weights[0];
       targv[0] = (char *) &nsweeps;
       targv[1] = (char *) weights;
-      MLI_MethodSetParams( cmliMethod, "setPreSmoother SGS", 2, targv );
-      MLI_MethodSetParams( cmliMethod, "setPostSmoother SGS", 2, targv );
+      MLI_MethodSetParams( cmliMethod, "setPreSmoother Kaczmarz", 2, targv );
+      MLI_MethodSetParams( cmliMethod, "setPostSmoother Kaczmarz", 2, targv );
       free(weights);
-      MLI_MethodSetParams( cmliMethod, "setPweight 0.0", 0, NULL );
       MLI_MethodSetParams( cmliMethod, "setStrengthThreshold 0.08", 0, NULL );
       MLI_MethodSetParams( cmliMethod, "setCalibrationSize 0", 0, NULL );
+      if ( mypid == 0 )
+      {
+         printf("SAAMG Pweight weights = ");
+         scanf("%lg", &Pweight);
+      }
+      MPI_Bcast(&Pweight, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+      if ( Pweight < 0.0 ) Pweight = 0.0;
+      sprintf( argStr, "setPweight %e", Pweight);
+      MLI_MethodSetParams( cmliMethod, argStr, 0, NULL );
+      if ( mypid == 0 )
+      {
+         printf("SAAMG nonsymmetric ? (0 for no, 1 for yes) = ");
+         scanf("%d", &j);
+      }
+      MPI_Bcast(&j, 1, MPI_INT, 0, MPI_COMM_WORLD);
+      if ( j != 0 )
+         MLI_MethodSetParams( cmliMethod, "useNonsymmetric", 0, NULL );
    }
-   nsweeps = 1;
-   targv[0] = (char *) &nsweeps;
-   targv[1] = (char *) NULL;
-/*
-   MLI_MethodSetParams( cmliMethod, "setSmootherPrintRNorm", 0, NULL );
-*/
+   MLI_MethodSetParams( cmliMethod, "setOutputLevel 2", 0, NULL );
+
    if ( testProb == 0 )
    {
       ndofs    = 1;
@@ -354,6 +510,15 @@ MLI_MethodSetParams( cmliMethod, "nonsymmetric", 0, NULL );
    MLI_SetSystemMatrix( cmli, 0, cmliMat );
    MLI_SetOutputLevel( cmli, 2 );
 
+   if ( mypid == 0 )
+   {
+      printf("outer Krylov solver (0 - none, 1 - CG, 2 - GMRES) : ");
+      scanf("%d", &solver);
+   }
+   MPI_Bcast(&solver, 1, MPI_INT, 0, MPI_COMM_WORLD);
+   if ( solver < 0 ) solver = 0;
+   if ( solver > 2 ) solver = 2;
+
    if ( solver == 0 )
    {
       MLI_Setup( cmli );
@@ -378,8 +543,13 @@ MLI_MethodSetParams( cmliMethod, "nonsymmetric", 0, NULL );
    MPI_Finalize();
 }
 
-/* *************************************************************** *
+/* **************************************************************** *
  * problem generation
+ * ---------------------------------------------------------------- */
+
+/* ---------------------------------------------------------------- *
+   convection diffusion equation where (value, alpha, beta) determine 
+   the diffusion and convection terms
  * ---------------------------------------------------------------- */
 
 int hypre_GeneratePartitioning(int, int, int**);
@@ -403,26 +573,24 @@ int hypre_mapCD( int  ix, int  iy, int  iz, int  p, int  q, int  r,
    return global_index;
 }
 
-HYPRE_ParCSRMatrix GenerateConvectionDiffusion( MPI_Comm comm,
-                      int nx, int ny, int nz, int P, int Q, int R,
-                      int p, int q, int r, double alpha, double beta,
-                      double  *value )
+int GenerateConvectionDiffusion3D( MPI_Comm comm, int nx, int ny, int nz, 
+            int P, int Q, int R, int p, int q, int r, double alpha, 
+            double beta, double  *value, HYPRE_ParCSRMatrix *rA, 
+            HYPRE_ParVector *rrhs )
 {
    hypre_ParCSRMatrix *A;
-   hypre_CSRMatrix *diag, *offd;
+   hypre_CSRMatrix    *diag, *offd;
+   HYPRE_IJVector     IJrhs;
+   hypre_ParVector    *rhs;
 
-   int    *diag_i, *diag_j, *offd_i, *offd_j;
-   double *diag_data, *offd_data;
-
-   int *global_part, ix, iy, iz, cnt, o_cnt, local_num_rows; 
-   int *col_map_offd, row_index, i,j;
-
-   int nx_local, ny_local, nz_local;
-   int nx_size, ny_size, nz_size, num_cols_offd, grid_size;
-
-   int *nx_part, *ny_part, *nz_part;
-
-   int num_procs, my_id, P_busy, Q_busy, R_busy;
+   int                *diag_i, *diag_j, *offd_i, *offd_j;
+   double             *diag_data, *offd_data;
+   int                *global_part, ix, iy, iz, cnt, o_cnt, local_num_rows; 
+   int                *col_map_offd, row_index, i,j, *partition;
+   int                nx_local, ny_local, nz_local;
+   int                nx_size, ny_size, nz_size, num_cols_offd, grid_size;
+   int                *nx_part, *ny_part, *nz_part;
+   int                num_procs, my_id, P_busy, Q_busy, R_busy;
 
    MPI_Comm_size(comm,&num_procs);
    MPI_Comm_rank(comm,&my_id);
@@ -604,7 +772,6 @@ HYPRE_ParCSRMatrix GenerateConvectionDiffusion( MPI_Comm comm,
             {
                diag_j[cnt] = row_index-1;
                diag_data[cnt++] = value[1] - 0.5 * alpha / (double) (nx-1);
-if ( row_index == 0 ) printf("convection = %e\n", diag_data[cnt-1]);
             }
             else
             {
@@ -619,7 +786,6 @@ if ( row_index == 0 ) printf("convection = %e\n", diag_data[cnt-1]);
             {
                diag_j[cnt] = row_index+1;
                diag_data[cnt++] = value[1] + 0.5 * alpha / (double) (nx-1);
-if ( row_index == 0 ) printf("convection = %e\n", diag_data[cnt-1]);
             }
             else
             {
@@ -703,6 +869,484 @@ if ( row_index == 0 ) printf("convection = %e\n", diag_data[cnt-1]);
    hypre_TFree(ny_part);
    hypre_TFree(nz_part);
 
-   return (HYPRE_ParCSRMatrix) A;
+   HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) A, &partition);
+   HYPRE_IJVectorCreate(comm, partition[my_id], partition[my_id+1]-1, &IJrhs);
+   free( partition );
+   HYPRE_IJVectorSetObjectType(IJrhs, HYPRE_PARCSR);
+   HYPRE_IJVectorInitialize(IJrhs);
+   HYPRE_IJVectorAssemble(IJrhs);
+   HYPRE_IJVectorGetObject(IJrhs, (void*) &rhs);
+   HYPRE_IJVectorSetObjectType(IJrhs, -1);
+   HYPRE_IJVectorDestroy(IJrhs);
+   hypre_ParVectorSetConstantValues( rhs, 0.0 );
+   (*rA) = (HYPRE_ParCSRMatrix) A;
+   (*rrhs) = (HYPRE_ParVector) rhs;
+   return (0);
+}
+
+/* ---------------------------------------------------------------- *
+   convection diffusion equation 
+   - epsilon del^2 u + a(x,y) u_x + b(x,y) u_y
+     a(x,y) = sin (L * pi/8), b(x,y) = cos(L*pi/8), L - input
+ * ---------------------------------------------------------------- */
+
+int GenerateRugeStuben1(MPI_Comm comm, double Lval, double epsilon, 
+                        HYPRE_ParCSRMatrix *rA, HYPRE_ParVector *rrhs) 
+{
+   hypre_ParCSRMatrix *A;
+   hypre_ParVector    *rhs;
+   hypre_CSRMatrix    *diag, *offd;
+   HYPRE_IJVector     IJrhs;
+
+   int    *diag_i, *diag_j, *offd_i, mypid;
+   double *diag_data, sum1, L=2.0;
+
+   int n, *global_part, cnt, local_num_rows, *partition; 
+   int row_index, i,j, grid_size;
+   double h, ac, bc, pi=3.1415928, mu_x, mu_y;
+
+   n = 63;
+   h = 1.0 / (n + 1.0);
+   ac = sin(Lval * pi / 8.0);
+   bc = cos(Lval * pi / 8.0);
+   if      ( ac * h >= epsilon )  mu_x = epsilon / ( 2 * ac * h );
+   else if ( ac * h < - epsilon ) mu_x = 1 + epsilon / ( 2 * ac * h );
+   else                           mu_x = 0.5;
+   if       ( bc* h >= epsilon )  mu_y = epsilon / ( 2 * bc* h );
+   else if ( bc* h < - epsilon )  mu_y = 1 + epsilon / ( 2 * bc* h );
+   else                           mu_y = 0.5;
+
+   grid_size = n * n;
+   global_part = hypre_CTAlloc(int,2);
+   global_part[0] = 0;
+   global_part[1] = grid_size;
+   local_num_rows = grid_size;
+   diag_i = hypre_CTAlloc(int, local_num_rows+1);
+   offd_i = hypre_CTAlloc(int, local_num_rows+1);
+   for ( i = 0; i <= local_num_rows; i++ ) offd_i[i] = 0; 
+   diag_j = hypre_CTAlloc(int, 5*local_num_rows);
+   diag_data = hypre_CTAlloc(double, 5*local_num_rows);
+   cnt = 0;
+   diag_i[0] = 0;
+   for ( j = 0; j < n; j++ ) 
+   {
+      for ( i = 0; i < n; i++ ) 
+      {
+         row_index = j * n + i;
+         cnt++;
+         sum1 = 0.0;
+         if ( j > 0 )
+         {
+            diag_j[cnt] = row_index - n;
+            diag_data[cnt++] = - epsilon + bc * h * (mu_y - 1);
+         }
+         sum1 = sum1 + epsilon - bc * h * (mu_y - 1);
+         if ( i > 0 )
+         {
+            diag_j[cnt] = row_index - 1;
+            diag_data[cnt++] = - epsilon + ac * h * (mu_x - 1);
+         }
+         sum1 = sum1 + epsilon - ac * h * (mu_x - 1);
+         if ( i < n-1 )
+         {
+            diag_j[cnt] = row_index + 1;
+            diag_data[cnt++] = - epsilon + ac * h * mu_x;
+         }
+         sum1 = sum1 + epsilon - ac * h * mu_x;
+         if ( j < n-1 )
+         {
+            diag_j[cnt] = row_index + n;
+            diag_data[cnt++] = - epsilon + bc * h * mu_y;
+         }
+         sum1 = sum1 + epsilon - bc * h * mu_y;
+         diag_j[diag_i[row_index]] = row_index;
+         diag_data[diag_i[row_index]] = sum1;
+         diag_i[row_index+1] = cnt;
+      }
+   }
+      
+   A = hypre_ParCSRMatrixCreate(comm, grid_size, grid_size,
+                                global_part, global_part, 0,
+                                diag_i[local_num_rows],
+                                offd_i[local_num_rows]);
+/*
+   hypre_ParCSRMatrixColMapOffd(A) = NULL;
+*/
+   diag = hypre_ParCSRMatrixDiag(A);
+   hypre_CSRMatrixI(diag) = diag_i;
+   hypre_CSRMatrixJ(diag) = diag_j;
+   hypre_CSRMatrixData(diag) = diag_data;
+   offd = hypre_ParCSRMatrixOffd(A);
+   hypre_CSRMatrixI(offd) = offd_i;
+
+   HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) A, &partition);
+   MPI_Comm_rank(comm, &mypid);
+   HYPRE_IJVectorCreate(comm, partition[mypid], partition[mypid+1]-1, &IJrhs);
+   free( partition );
+   HYPRE_IJVectorSetObjectType(IJrhs, HYPRE_PARCSR);
+   HYPRE_IJVectorInitialize(IJrhs);
+   HYPRE_IJVectorAssemble(IJrhs);
+   HYPRE_IJVectorGetObject(IJrhs, (void*) &rhs);
+   HYPRE_IJVectorSetObjectType(IJrhs, -1);
+   HYPRE_IJVectorDestroy(IJrhs);
+   hypre_ParVectorSetConstantValues( rhs, 0.0 );
+   (*rA) = (HYPRE_ParCSRMatrix) A;
+   (*rrhs) = (HYPRE_ParVector) rhs;
+   return (0);
+}
+
+/* ---------------------------------------------------------------- *
+   convection diffusion equation 
+   - epsilon del^2 u + a(x,y) u_x + b(x,y) u_y
+     a(x,y) = (2y-1)(1-x^2), b(x,y) = 2xy(y-1)
+ * ---------------------------------------------------------------- */
+
+int GenerateRugeStuben2( MPI_Comm comm, double epsilon, 
+                         HYPRE_ParCSRMatrix *rA, HYPRE_ParVector *rrhs) 
+{
+   hypre_ParCSRMatrix *A;
+   hypre_CSRMatrix    *diag, *offd;
+   hypre_ParVector    *rhs;
+   HYPRE_IJVector     IJrhs;
+
+   int                *diag_i, *diag_j, *offd_i;
+   double             *diag_data, sum1;
+
+   int                n, *global_part, cnt, local_num_rows, *partition; 
+   int                mypid, row_index, i,j, grid_size;
+   double             h, ac, bc, mu_x, mu_y;
+
+   n = 63;
+   h = 1.0 / (n + 1.0);
+
+   grid_size = n * n;
+   global_part = hypre_CTAlloc(int,2);
+   global_part[0] = 0;
+   global_part[1] = grid_size;
+   local_num_rows = grid_size;
+   diag_i = hypre_CTAlloc(int, local_num_rows+1);
+   offd_i = hypre_CTAlloc(int, local_num_rows+1);
+   for ( i = 0; i <= local_num_rows; i++ ) offd_i[i] = 0; 
+   diag_j = hypre_CTAlloc(int, 5*local_num_rows);
+   diag_data = hypre_CTAlloc(double, 5*local_num_rows);
+   cnt = 0;
+   diag_i[0] = 0;
+   for ( j = 0; j < n; j++ ) 
+   {
+      for ( i = 0; i < n; i++ ) 
+      {
+         row_index = j * n + i;
+         cnt++;
+         sum1 = 0.0;
+         ac = ( 2.0 * j * h - 1.0 ) * ( 1.0 - i * i * h * h );
+         bc = 2.0 * i * h * j * h * ( j * h - 1.0);
+         if      ( ac * h >= epsilon )  mu_x = epsilon / ( 2 * ac * h );
+         else if ( ac * h < - epsilon ) mu_x = 1 + epsilon / ( 2 * ac * h );
+         else                           mu_x = 0.5;
+         if ( bc* h > epsilon )         mu_y = epsilon / ( 2 * bc* h );
+         else if ( bc* h < - epsilon )  mu_y = 1 + epsilon / ( 2 * bc* h );
+         else                           mu_y = 0.5;
+         if ( j > 0 )
+         {
+            diag_j[cnt] = row_index - n;
+            diag_data[cnt++] = - epsilon + bc * h * (mu_y - 1);
+         }
+         sum1 = sum1 + epsilon - bc * h * (mu_y - 1);
+         if ( i > 0 )
+         {
+            diag_j[cnt] = row_index - 1;
+            diag_data[cnt++] = - epsilon + ac * h * (mu_x - 1);
+         }
+         sum1 = sum1 + epsilon - ac * h * (mu_x - 1);
+         if ( i < n-1 )
+         {
+            diag_j[cnt] = row_index + 1;
+            diag_data[cnt++] = - epsilon + ac * h * mu_x;
+         }
+         sum1 = sum1 + epsilon - ac * h * mu_x;
+         if ( j < n-1 )
+         {
+            diag_j[cnt] = row_index + n;
+            diag_data[cnt++] = - epsilon + bc * h * mu_y;
+         }
+         sum1 = sum1 + epsilon - bc * h * mu_y;
+         diag_j[diag_i[row_index]] = row_index;
+         diag_data[diag_i[row_index]] = sum1;
+         diag_i[row_index+1] = cnt;
+      }
+   }
+      
+   A = hypre_ParCSRMatrixCreate(comm, grid_size, grid_size,
+                                global_part, global_part, 0,
+                                diag_i[local_num_rows],
+                                offd_i[local_num_rows]);
+/*
+   hypre_ParCSRMatrixColMapOffd(A) = NULL;
+*/
+   diag = hypre_ParCSRMatrixDiag(A);
+   hypre_CSRMatrixI(diag) = diag_i;
+   hypre_CSRMatrixJ(diag) = diag_j;
+   hypre_CSRMatrixData(diag) = diag_data;
+   offd = hypre_ParCSRMatrixOffd(A);
+   hypre_CSRMatrixI(offd) = offd_i;
+
+   HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) A, &partition);
+   MPI_Comm_rank(comm, &mypid);
+   HYPRE_IJVectorCreate(comm, partition[mypid], partition[mypid+1]-1, &IJrhs);
+   free( partition );
+   HYPRE_IJVectorSetObjectType(IJrhs, HYPRE_PARCSR);
+   HYPRE_IJVectorInitialize(IJrhs);
+   HYPRE_IJVectorAssemble(IJrhs);
+   HYPRE_IJVectorGetObject(IJrhs, (void*) &rhs);
+   HYPRE_IJVectorSetObjectType(IJrhs, -1);
+   HYPRE_IJVectorDestroy(IJrhs);
+   hypre_ParVectorSetConstantValues( rhs, 0.0 );
+   (*rA) = (HYPRE_ParCSRMatrix) A;
+   (*rrhs) = (HYPRE_ParVector) rhs;
+   return (0);
+}
+
+/* ---------------------------------------------------------------- *
+   convection diffusion equation 
+   - epsilon del^2 u + a(x,y) u_x + b(x,y) u_y
+     a(x,y) = 4x(x-1)(1-2y), b(x,y) = -4y(y-1)(1-2x)
+ * ---------------------------------------------------------------- */
+
+int GenerateRugeStuben3(MPI_Comm comm, double epsilon, 
+                        HYPRE_ParCSRMatrix *rA,HYPRE_ParVector *rrhs) 
+{
+   hypre_ParCSRMatrix *A;
+   hypre_CSRMatrix    *diag, *offd;
+   hypre_ParVector    *rhs;
+   HYPRE_IJVector     IJrhs;
+   int                *diag_i, *diag_j, *offd_i;
+   double             *diag_data, sum1;
+   int                n, *global_part, cnt, local_num_rows, *partition; 
+   int                row_index, i,j, grid_size, mypid, nprocs;
+   double             h, ac, bc, mu_x, mu_y;
+
+   MPI_Comm_size(comm, &nprocs);
+   if ( nprocs != 1 )
+   {  
+      printf("GenerateStuben ERROR : nprocs > 1\n");
+      exit(1);
+   }
+
+   n = 63;
+   h = 1.0 / (n + 1.0);
+
+   grid_size = n * n;
+   global_part = hypre_CTAlloc(int,2);
+   global_part[0] = 0;
+   global_part[1] = grid_size;
+   local_num_rows = grid_size;
+   diag_i = hypre_CTAlloc(int, local_num_rows+1);
+   offd_i = hypre_CTAlloc(int, local_num_rows+1);
+   for ( i = 0; i <= local_num_rows; i++ ) offd_i[i] = 0; 
+   diag_j = hypre_CTAlloc(int, 5*local_num_rows);
+   diag_data = hypre_CTAlloc(double, 5*local_num_rows);
+   cnt = 0;
+   diag_i[0] = 0;
+   for ( j = 0; j < n; j++ ) 
+   {
+      for ( i = 0; i < n; i++ ) 
+      {
+         row_index = j * n + i;
+         cnt++;
+         sum1 = 0.0;
+         ac = 4.0 * i * h * ( i * h - 1.0 ) * ( 1.0 - 2 * j * h );
+         bc = -4.0 * j * h * ( j * h - 1.0) * ( 1.0 - 2 * i * h );
+         if      ( ac * h >= epsilon )  mu_x = epsilon / ( 2 * ac * h );
+         else if ( ac * h < - epsilon ) mu_x = 1 + epsilon / ( 2 * ac * h );
+         else                           mu_x = 0.5;
+         if ( bc* h > epsilon )         mu_y = epsilon / ( 2 * bc* h );
+         else if ( bc* h < - epsilon )  mu_y = 1 + epsilon / ( 2 * bc* h );
+         else                           mu_y = 0.5;
+         if ( j > 0 )
+         {
+            diag_j[cnt] = row_index - n;
+            diag_data[cnt++] = - epsilon + bc * h * (mu_y - 1);
+         }
+         sum1 = sum1 + epsilon - bc * h * (mu_y - 1);
+         if ( i > 0 )
+         {
+            diag_j[cnt] = row_index - 1;
+            diag_data[cnt++] = - epsilon + ac * h * (mu_x - 1);
+         }
+         sum1 = sum1 + epsilon - ac * h * (mu_x - 1);
+         if ( i < n-1 )
+         {
+            diag_j[cnt] = row_index + 1;
+            diag_data[cnt++] = - epsilon + ac * h * mu_x;
+         }
+         sum1 = sum1 + epsilon - ac * h * mu_x;
+         if ( j < n-1 )
+         {
+            diag_j[cnt] = row_index + n;
+            diag_data[cnt++] = - epsilon + bc * h * mu_y;
+         }
+         sum1 = sum1 + epsilon - bc * h * mu_y;
+         diag_j[diag_i[row_index]] = row_index;
+         diag_data[diag_i[row_index]] = sum1;
+         diag_i[row_index+1] = cnt;
+      }
+   }
+      
+   A = hypre_ParCSRMatrixCreate(comm, grid_size, grid_size,
+                                global_part, global_part, 0,
+                                diag_i[local_num_rows],
+                                offd_i[local_num_rows]);
+/*
+   hypre_ParCSRMatrixColMapOffd(A) = NULL;
+*/
+   diag = hypre_ParCSRMatrixDiag(A);
+   hypre_CSRMatrixI(diag) = diag_i;
+   hypre_CSRMatrixJ(diag) = diag_j;
+   hypre_CSRMatrixData(diag) = diag_data;
+   offd = hypre_ParCSRMatrixOffd(A);
+   hypre_CSRMatrixI(offd) = offd_i;
+
+   HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) A, &partition);
+   MPI_Comm_rank(comm, &mypid);
+   HYPRE_IJVectorCreate(comm, partition[mypid], partition[mypid+1]-1, &IJrhs);
+   free( partition );
+   HYPRE_IJVectorSetObjectType(IJrhs, HYPRE_PARCSR);
+   HYPRE_IJVectorInitialize(IJrhs);
+   HYPRE_IJVectorAssemble(IJrhs);
+   HYPRE_IJVectorGetObject(IJrhs, (void*) &rhs);
+   HYPRE_IJVectorSetObjectType(IJrhs, -1);
+   HYPRE_IJVectorDestroy(IJrhs);
+   hypre_ParVectorSetConstantValues( rhs, 0.0 );
+   (*rA) = (HYPRE_ParCSRMatrix) A;
+   (*rrhs) = (HYPRE_ParVector) rhs;
+   return (0);
+}
+
+/* ---------------------------------------------------------------- *
+   convection diffusion equation 
+   - epsilon del^2 u + a(x,y) u_x + b(x,y) u_y
+     a(x,y) = -sin(pi*x)cos(pi*y), b(x,y)=sin(pi*y)cos(pi*x)
+ * ---------------------------------------------------------------- */
+
+int GenerateStuben(MPI_Comm comm, double epsilon, HYPRE_ParCSRMatrix *rA, 
+                   HYPRE_ParVector *rrhs) 
+{
+   hypre_ParCSRMatrix *A;
+   hypre_CSRMatrix    *diag, *offd;
+   int                *diag_i, *diag_j, *offd_i;
+   double             *diag_data, sum1, *rhsVec;
+   int                n, *global_part, cnt, local_num_rows, *colInd; 
+   int                row_index, i,j, grid_size, mypid, nprocs, *partition;
+   double             h, ac, bc, pi=3.1415928;
+   hypre_ParVector    *rhs;
+   HYPRE_IJVector     IJrhs;
+
+   MPI_Comm_size(comm, &nprocs);
+   if ( nprocs != 1 )
+   {  
+      printf("GenerateStuben ERROR : nprocs > 1\n");
+      exit(1);
+   }
+   MPI_Comm_rank(comm, &mypid);
+
+   n = 63;
+   h = 1.0 / (n + 1.0);
+
+   grid_size = n * n;
+   global_part = hypre_CTAlloc(int,2);
+   global_part[0] = 0;
+   global_part[1] = grid_size;
+   local_num_rows = grid_size;
+   diag_i = hypre_CTAlloc(int, local_num_rows+1);
+   offd_i = hypre_CTAlloc(int, local_num_rows+1);
+   for ( i = 0; i <= local_num_rows; i++ ) offd_i[i] = 0; 
+   diag_j = hypre_CTAlloc(int, 5*local_num_rows);
+   diag_data = hypre_CTAlloc(double, 5*local_num_rows);
+   cnt = 0;
+   diag_i[0] = 0;
+   rhsVec = (double *) malloc(grid_size * sizeof(double));
+   for ( j = 0; j < n; j++ ) 
+   {
+      for ( i = 0; i < n; i++ ) 
+      {
+         row_index = j * n + i;
+         cnt++;
+         rhsVec[row_index] = 1.0;
+         sum1 = 0.0;
+         ac = - sin(pi*(i+0.5)*h) * cos(pi*(j+0.5)*h); 
+         bc = sin(pi*(j+0.5)*h) * cos(pi*(i+0.5)*h); 
+         if ( j > 0 )
+         {
+            diag_j[cnt] = row_index - n;
+            diag_data[cnt++] = - epsilon - bc * h;
+         }
+         sum1 = sum1 + epsilon + bc * h;
+         if ( j == 0 ) 
+            rhsVec[row_index] -= (epsilon+bc*h)*
+                                 (sin(pi*(i+1)*h)+sin(13.0*pi*(i+1)*h));
+         if ( i > 0 )
+         {
+            diag_j[cnt] = row_index - 1;
+            diag_data[cnt++] = - epsilon - ac * h;
+         }
+         sum1 = sum1 + epsilon + ac * h;
+         if ( i == 0 ) 
+            rhsVec[row_index] -= (epsilon+ac*h)*
+                                 (sin(pi*(j+1)*h)+sin(13.0*pi*(j+1)*h));
+         if ( i < n-1 )
+         {
+            diag_j[cnt] = row_index + 1;
+            diag_data[cnt++] = - epsilon;
+         }
+         sum1 = sum1 + epsilon;
+         if ( i == (n-1) ) 
+            rhsVec[row_index] -= epsilon *
+                                 (sin(pi*(j+1)*h)+sin(13.0*pi*(j+1)*h));
+         if ( j < n-1 )
+         {
+            diag_j[cnt] = row_index + n;
+            diag_data[cnt++] = - epsilon;
+         }
+         sum1 = sum1 + epsilon;
+         if ( j == (n-1) ) 
+            rhsVec[row_index] -= epsilon *
+                                 (sin(pi*(i+1)*h)+sin(13.0*pi*(i+1)*h));
+         diag_j[diag_i[row_index]] = row_index;
+         diag_data[diag_i[row_index]] = sum1;
+if ( sum1 <= 0.0 ) printf("row %d : sum1 = %e\n", row_index, sum1);
+         diag_i[row_index+1] = cnt;
+      }
+   }
+      
+   A = hypre_ParCSRMatrixCreate(comm, grid_size, grid_size,
+                                global_part, global_part, 0,
+                                diag_i[local_num_rows],
+                                offd_i[local_num_rows]);
+   diag = hypre_ParCSRMatrixDiag(A);
+   hypre_CSRMatrixI(diag) = diag_i;
+   hypre_CSRMatrixJ(diag) = diag_j;
+   hypre_CSRMatrixData(diag) = diag_data;
+   offd = hypre_ParCSRMatrixOffd(A);
+   hypre_CSRMatrixI(offd) = offd_i;
+
+   HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) A, &partition);
+   HYPRE_IJVectorCreate(comm, partition[mypid], partition[mypid+1]-1, &IJrhs);
+   free( partition );
+   HYPRE_IJVectorSetObjectType(IJrhs, HYPRE_PARCSR);
+   HYPRE_IJVectorInitialize(IJrhs);
+   colInd = (int *) malloc(grid_size * sizeof(int));
+   for (j = 0; j < grid_size; j++) colInd[j] = j;
+   HYPRE_IJVectorSetValues(IJrhs, grid_size, (const int *) colInd,
+                                 (const double *) rhsVec);
+   free( colInd );
+   free( rhsVec );
+   HYPRE_IJVectorAssemble(IJrhs);
+   HYPRE_IJVectorGetObject(IJrhs, (void*) &rhs);
+   HYPRE_IJVectorSetObjectType(IJrhs, -1);
+   HYPRE_IJVectorDestroy(IJrhs);
+   hypre_ParVectorSetConstantValues( rhs, 0.0 );
+   (*rA) = (HYPRE_ParCSRMatrix) A;
+   (*rrhs) = (HYPRE_ParVector) rhs;
+   return (0);
 }
 
