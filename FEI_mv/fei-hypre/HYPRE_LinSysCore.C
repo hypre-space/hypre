@@ -1296,7 +1296,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
 
        else
        {
-          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 && mypid_ == 0 )
           {
              printf("HYPRE_LSC::parameters WARNING : %s not recognized\n",
                     params[i]);
