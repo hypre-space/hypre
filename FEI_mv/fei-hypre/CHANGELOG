@@ -2,5 +2,9 @@
 * This file records the changes made to this directory                */
 ***********************************************************************
  
-2/7/01    Version 1.5.1
-  
+02/07/01    Version 1.5.0R1
+02/13/01    version 1.5.0R2 
+            - modify the matrixLoadComplete function to output matrix
+              to a file even when it has been previously assembled
+              (per Tim Dunn's request)
+

@@ -32,7 +32,7 @@ class Lookup
 };
 #endif
 
-#define HYPRE_FEI_Version() "FEI/HYPRE 1.5.0R1"
+#define HYPRE_FEI_Version() "FEI/HYPRE 1.5.0R2"
 
 // *************************************************************************
 // local enumerations and defines
