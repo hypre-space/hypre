@@ -83,7 +83,7 @@ int MLI_Solver_SGS::solve(MLI_Vector *fIn, MLI_Vector *uIn)
    int                 iC, index, nprocs, mypid, nSends, start;
    register double     res;
    double              zero = 0.0, relaxWeight, rnorm;
-   double              *vBufData, *tmpData, *vExtData;
+   double              *vBufData=NULL, *tmpData, *vExtData=NULL;
    MPI_Comm            comm;
    hypre_ParCSRMatrix     *A;
    hypre_CSRMatrix        *ADiag, *AOffd;
