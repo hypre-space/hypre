@@ -1019,6 +1019,7 @@ CASC_CONFIG_OUTPUT_LIST(\
  PETScMat_linear_solvers/pilut\
  PETSc_linear_solvers/ParILUT\
  distributed_linear_solvers/ParaSails\
+ distributed_linear_solvers/Euclid\
  krylov\
  test\
  tools\
