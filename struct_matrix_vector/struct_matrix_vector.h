@@ -48,7 +48,7 @@ typedef int *hypre_IndexRef;
  *   Structure describing a cartesian region of some index space.
  *--------------------------------------------------------------------------*/
 
-typedef struct
+typedef struct hypre_Box_struct
 {
    hypre_Index imin;           /* min bounding indices */
    hypre_Index imax;           /* max bounding indices */
@@ -60,7 +60,7 @@ typedef struct
  *   An array of boxes.
  *--------------------------------------------------------------------------*/
 
-typedef struct
+typedef struct hypre_BoxArray_struct
 {
    hypre_Box  *boxes;         /* Array of boxes */
    int         size;          /* Size of box array */
@@ -75,7 +75,7 @@ typedef struct
  *   An array of box arrays.
  *--------------------------------------------------------------------------*/
 
-typedef struct
+typedef struct hypre_BoxArrayArray_struct
 {
    hypre_BoxArray  **box_arrays;    /* Array of pointers to box arrays */
    int               size;          /* Size of box array array */
@@ -879,10 +879,10 @@ int  kinc = (hypre_IndexZ(stride)*\
  * hypre_RankLink:
  *--------------------------------------------------------------------------*/
 
-typedef struct rank_link
+typedef struct hypre_RankLink_struct
 {
-   int               rank;
-   struct rank_link *next;
+   int                           rank;
+   struct hypre_RankLink_struct *next;
 
 } hypre_RankLink;
 
@@ -892,7 +892,7 @@ typedef hypre_RankLink *hypre_RankLinkArray[3][3][3];
  * hypre_BoxNeighbors:
  *--------------------------------------------------------------------------*/
 
-typedef struct
+typedef struct hypre_BoxNeighbors_struct
 {
    hypre_BoxArray      *boxes;            /* boxes in the neighborhood */
    int                 *procs;            /* procs for 'boxes' */
@@ -1006,7 +1006,7 @@ typedef struct
  * hypre_StructStencil
  *--------------------------------------------------------------------------*/
 
-typedef struct
+typedef struct hypre_StructStencil_struct
 {
    hypre_Index   *shape;   /* Description of a stencil's shape */
    int            size;    /* Number of stencil coefficients */
@@ -1053,7 +1053,7 @@ hypre_StructStencilShape(stencil)[i]
  * hypre_StructGrid:
  *--------------------------------------------------------------------------*/
 
-typedef struct
+typedef struct hypre_StructGrid_struct
 {
    MPI_Comm             comm;
                       
@@ -1122,7 +1122,7 @@ hypre_ForBoxI(i, hypre_StructGridBoxes(grid))
  * hypre_CommTypeEntry:
  *--------------------------------------------------------------------------*/
 
-typedef struct
+typedef struct hypre_CommTypeEntry_struct
 {
    hypre_Index  imin;             /* global imin for the data */
    hypre_Index  imax;             /* global imin for the data */
@@ -1138,7 +1138,7 @@ typedef struct
  * hypre_CommType:
  *--------------------------------------------------------------------------*/
 
-typedef struct
+typedef struct hypre_CommType_struct
 {
    hypre_CommTypeEntry  **comm_entries;
    int                    num_entries;
@@ -1150,7 +1150,7 @@ typedef struct
  *   Structure containing information for doing communications
  *--------------------------------------------------------------------------*/
 
-typedef struct
+typedef struct hypre_CommPkg_struct
 {
    int                    num_values;
    MPI_Comm               comm;
@@ -1176,7 +1176,7 @@ typedef struct
  * CommHandle:
  *--------------------------------------------------------------------------*/
 
-typedef struct
+typedef struct hypre_CommHandle_struct
 {
    hypre_CommPkg  *comm_pkg;
    double         *send_data;
@@ -1280,7 +1280,7 @@ typedef struct
  *   Structure containing information for doing computations.
  *--------------------------------------------------------------------------*/
 
-typedef struct
+typedef struct hypre_ComputePkg_struct
 {
    hypre_CommPkg         *comm_pkg;
 
@@ -1330,7 +1330,7 @@ typedef struct
  * hypre_StructMatrix:
  *--------------------------------------------------------------------------*/
 
-typedef struct
+typedef struct hypre_StructMatrix_struct
 {
    MPI_Comm              comm;
 
@@ -1415,7 +1415,7 @@ hypre_BoxArrayBox(hypre_StructMatrixDataSpace(matrix), b)
  * hypre_StructVector:
  *--------------------------------------------------------------------------*/
 
-typedef struct
+typedef struct hypre_StructVector_struct
 {
    MPI_Comm              comm;
 

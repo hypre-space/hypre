@@ -34,7 +34,7 @@ typedef int *hypre_IndexRef;
  *   Structure describing a cartesian region of some index space.
  *--------------------------------------------------------------------------*/
 
-typedef struct
+typedef struct hypre_Box_struct
 {
    hypre_Index imin;           /* min bounding indices */
    hypre_Index imax;           /* max bounding indices */
@@ -46,7 +46,7 @@ typedef struct
  *   An array of boxes.
  *--------------------------------------------------------------------------*/
 
-typedef struct
+typedef struct hypre_BoxArray_struct
 {
    hypre_Box  *boxes;         /* Array of boxes */
    int         size;          /* Size of box array */
@@ -61,7 +61,7 @@ typedef struct
  *   An array of box arrays.
  *--------------------------------------------------------------------------*/
 
-typedef struct
+typedef struct hypre_BoxArrayArray_struct
 {
    hypre_BoxArray  **box_arrays;    /* Array of pointers to box arrays */
    int               size;          /* Size of box array array */

@@ -27,11 +27,16 @@ extern "C" {
  * Structures
  *--------------------------------------------------------------------------*/
 
-typedef struct {int opaque;} *HYPRE_StructStencilBase;
-typedef struct {int opaque;} *HYPRE_StructGridBase;
-typedef struct {int opaque;} *HYPRE_StructMatrixBase;
-typedef struct {int opaque;} *HYPRE_StructVectorBase;
-typedef struct {int opaque;} *HYPRE_CommPkgBase;
+struct hypre_StructStencil_struct;
+typedef struct hypre_StructStencil_struct *HYPRE_StructStencilBase;
+struct hypre_StructGrid_struct;
+typedef struct hypre_StructGrid_struct *HYPRE_StructGridBase;
+struct hypre_StructMatrix_struct;
+typedef struct hypre_StructMatrix_struct *HYPRE_StructMatrixBase;
+struct hypre_StructVector_struct;
+typedef struct hypre_StructVector_struct *HYPRE_StructVectorBase;
+struct hypre_CommPkg_struct;
+typedef struct hypre_CommPkg_struct *HYPRE_CommPkgBase;
 
 #ifndef HYPRE_USE_PTHREADS
 #define hypre_MAX_THREADS 1

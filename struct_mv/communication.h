@@ -14,7 +14,7 @@
  * hypre_CommTypeEntry:
  *--------------------------------------------------------------------------*/
 
-typedef struct
+typedef struct hypre_CommTypeEntry_struct
 {
    hypre_Index  imin;             /* global imin for the data */
    hypre_Index  imax;             /* global imin for the data */
@@ -30,7 +30,7 @@ typedef struct
  * hypre_CommType:
  *--------------------------------------------------------------------------*/
 
-typedef struct
+typedef struct hypre_CommType_struct
 {
    hypre_CommTypeEntry  **comm_entries;
    int                    num_entries;
@@ -42,7 +42,7 @@ typedef struct
  *   Structure containing information for doing communications
  *--------------------------------------------------------------------------*/
 
-typedef struct
+typedef struct hypre_CommPkg_struct
 {
    int                    num_values;
    MPI_Comm               comm;
@@ -68,7 +68,7 @@ typedef struct
  * CommHandle:
  *--------------------------------------------------------------------------*/
 
-typedef struct
+typedef struct hypre_CommHandle_struct
 {
    hypre_CommPkg  *comm_pkg;
    double         *send_data;

@@ -19,10 +19,10 @@
  * hypre_RankLink:
  *--------------------------------------------------------------------------*/
 
-typedef struct rank_link
+typedef struct hypre_RankLink_struct
 {
-   int               rank;
-   struct rank_link *next;
+   int                           rank;
+   struct hypre_RankLink_struct *next;
 
 } hypre_RankLink;
 
@@ -32,7 +32,7 @@ typedef hypre_RankLink *hypre_RankLinkArray[3][3][3];
  * hypre_BoxNeighbors:
  *--------------------------------------------------------------------------*/
 
-typedef struct
+typedef struct hypre_BoxNeighbors_struct
 {
    hypre_BoxArray      *boxes;            /* boxes in the neighborhood */
    int                 *procs;            /* procs for 'boxes' */

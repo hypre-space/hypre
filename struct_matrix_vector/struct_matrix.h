@@ -19,7 +19,7 @@
  * hypre_StructMatrix:
  *--------------------------------------------------------------------------*/
 
-typedef struct
+typedef struct hypre_StructMatrix_struct
 {
    MPI_Comm              comm;
 

@@ -25,55 +25,55 @@ extern "C" {
  * Structures
  *--------------------------------------------------------------------------*/
 
-typedef struct {int opaque;} *HYPRE_CSRMatrix;
-typedef struct {int opaque;} *HYPRE_MappedMatrix;
-typedef struct {int opaque;} *HYPRE_MultiblockMatrix;
-typedef struct {int opaque;} *HYPRE_Vector;
+struct hypre_CSRMatrix_struct;
+typedef struct hypre_CSRMatrix_struct *HYPRE_CSRMatrix;
+struct hypre_MappedMatrix_struct;
+typedef struct hypre_MappedMatrix_struct *HYPRE_MappedMatrix;
+struct hypre_MultiblockMatrix_struct;
+typedef struct hypre_MultiblockMatrix_struct *HYPRE_MultiblockMatrix;
+struct hypre_Vector_struct;
+typedef struct hypre_Vector_struct *HYPRE_Vector;
 
 /*--------------------------------------------------------------------------
  * Prototypes
  *--------------------------------------------------------------------------*/
 
-# define        P(s) s
- 
 /* HYPRE_csr_matrix.c */
-HYPRE_CSRMatrix HYPRE_CSRMatrixCreate P((int num_rows , int num_cols , int *row_sizes ));
-int HYPRE_CSRMatrixDestroy P((HYPRE_CSRMatrix matrix ));
-int HYPRE_CSRMatrixInitialize P((HYPRE_CSRMatrix matrix ));
-HYPRE_CSRMatrix HYPRE_CSRMatrixRead P((char *file_name ));
-void HYPRE_CSRMatrixPrint P((HYPRE_CSRMatrix matrix , char *file_name ));
- 
+HYPRE_CSRMatrix HYPRE_CSRMatrixCreate( int num_rows , int num_cols , int *row_sizes );
+int HYPRE_CSRMatrixDestroy( HYPRE_CSRMatrix matrix );
+int HYPRE_CSRMatrixInitialize( HYPRE_CSRMatrix matrix );
+HYPRE_CSRMatrix HYPRE_CSRMatrixRead( char *file_name );
+void HYPRE_CSRMatrixPrint( HYPRE_CSRMatrix matrix , char *file_name );
+
 /* HYPRE_mapped_matrix.c */
-HYPRE_MappedMatrix HYPRE_MappedMatrixCreate P((void ));
-int HYPRE_MappedMatrixDestroy P((HYPRE_MappedMatrix matrix ));
-int HYPRE_MappedMatrixLimitedDestroy P((HYPRE_MappedMatrix matrix ));
-int HYPRE_MappedMatrixInitialize P((HYPRE_MappedMatrix matrix ));
-int HYPRE_MappedMatrixAssemble P((HYPRE_MappedMatrix matrix ));
-void HYPRE_MappedMatrixPrint P((HYPRE_MappedMatrix matrix ));
-int HYPRE_MappedMatrixGetColIndex P((HYPRE_MappedMatrix matrix , int j ));
-void *HYPRE_MappedMatrixGetMatrix P((HYPRE_MappedMatrix matrix ));
-int HYPRE_MappedMatrixSetMatrix P((HYPRE_MappedMatrix matrix , void *matrix_data ));
-int HYPRE_MappedMatrixSetColMap P((HYPRE_MappedMatrix matrix , int (*ColMap )(int ,void *)));
-int HYPRE_MappedMatrixSetMapData P((HYPRE_MappedMatrix matrix , void *MapData ));
- 
+HYPRE_MappedMatrix HYPRE_MappedMatrixCreate( void );
+int HYPRE_MappedMatrixDestroy( HYPRE_MappedMatrix matrix );
+int HYPRE_MappedMatrixLimitedDestroy( HYPRE_MappedMatrix matrix );
+int HYPRE_MappedMatrixInitialize( HYPRE_MappedMatrix matrix );
+int HYPRE_MappedMatrixAssemble( HYPRE_MappedMatrix matrix );
+void HYPRE_MappedMatrixPrint( HYPRE_MappedMatrix matrix );
+int HYPRE_MappedMatrixGetColIndex( HYPRE_MappedMatrix matrix , int j );
+void *HYPRE_MappedMatrixGetMatrix( HYPRE_MappedMatrix matrix );
+int HYPRE_MappedMatrixSetMatrix( HYPRE_MappedMatrix matrix , void *matrix_data );
+int HYPRE_MappedMatrixSetColMap( HYPRE_MappedMatrix matrix , int (*ColMap )(int ,void *));
+int HYPRE_MappedMatrixSetMapData( HYPRE_MappedMatrix matrix , void *MapData );
+
 /* HYPRE_multiblock_matrix.c */
-HYPRE_MultiblockMatrix HYPRE_MultiblockMatrixCreate P((void ));
-int HYPRE_MultiblockMatrixDestroy P((HYPRE_MultiblockMatrix matrix ));
-int HYPRE_MultiblockMatrixLimitedDestroy P((HYPRE_MultiblockMatrix matrix ));
-int HYPRE_MultiblockMatrixInitialize P((HYPRE_MultiblockMatrix matrix ));
-int HYPRE_MultiblockMatrixAssemble P((HYPRE_MultiblockMatrix matrix ));
-void HYPRE_MultiblockMatrixPrint P((HYPRE_MultiblockMatrix matrix ));
-int HYPRE_MultiblockMatrixSetNumSubmatrices P((HYPRE_MultiblockMatrix matrix , int n ));
-int HYPRE_MultiblockMatrixSetSubmatrixType P((HYPRE_MultiblockMatrix matrix , int j , int type ));
- 
+HYPRE_MultiblockMatrix HYPRE_MultiblockMatrixCreate( void );
+int HYPRE_MultiblockMatrixDestroy( HYPRE_MultiblockMatrix matrix );
+int HYPRE_MultiblockMatrixLimitedDestroy( HYPRE_MultiblockMatrix matrix );
+int HYPRE_MultiblockMatrixInitialize( HYPRE_MultiblockMatrix matrix );
+int HYPRE_MultiblockMatrixAssemble( HYPRE_MultiblockMatrix matrix );
+void HYPRE_MultiblockMatrixPrint( HYPRE_MultiblockMatrix matrix );
+int HYPRE_MultiblockMatrixSetNumSubmatrices( HYPRE_MultiblockMatrix matrix , int n );
+int HYPRE_MultiblockMatrixSetSubmatrixType( HYPRE_MultiblockMatrix matrix , int j , int type );
+
 /* HYPRE_vector.c */
-HYPRE_Vector HYPRE_VectorCreate P((int size ));
-int HYPRE_VectorDestroy P((HYPRE_Vector vector ));
-int HYPRE_VectorInitialize P((HYPRE_Vector vector ));
-int HYPRE_VectorPrint P((HYPRE_Vector vector , char *file_name ));
-HYPRE_Vector HYPRE_VectorRead P((char *file_name ));
- 
-#undef P
+HYPRE_Vector HYPRE_VectorCreate( int size );
+int HYPRE_VectorDestroy( HYPRE_Vector vector );
+int HYPRE_VectorInitialize( HYPRE_Vector vector );
+int HYPRE_VectorPrint( HYPRE_Vector vector , char *file_name );
+HYPRE_Vector HYPRE_VectorRead( char *file_name );
 
 #ifdef __cplusplus
 }

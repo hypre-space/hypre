@@ -20,7 +20,7 @@
  *   Structure containing information for doing computations.
  *--------------------------------------------------------------------------*/
 
-typedef struct
+typedef struct hypre_ComputePkg_struct
 {
    hypre_CommPkg         *comm_pkg;
 

@@ -19,7 +19,7 @@
  * hypre_StructStencil
  *--------------------------------------------------------------------------*/
 
-typedef struct
+typedef struct hypre_StructStencil_struct
 {
    hypre_Index   *shape;   /* Description of a stencil's shape */
    int            size;    /* Number of stencil coefficients */

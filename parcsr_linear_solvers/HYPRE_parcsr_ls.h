@@ -27,138 +27,122 @@ extern "C" {
  * Structures
  *--------------------------------------------------------------------------*/
 
-typedef struct {int opaque;} *HYPRE_Solver;
+struct hypre_Solver_struct;
+typedef struct hypre_Solver_struct *HYPRE_Solver;
 
 /*--------------------------------------------------------------------------
  * Prototypes
  *--------------------------------------------------------------------------*/
 
-# define        P(s) s
+/* HYPRE_parcsr_ParaSails.c */
+int HYPRE_ParCSRParaSailsCreate( MPI_Comm comm , HYPRE_Solver *solver );
+int HYPRE_ParCSRParaSailsDestroy( HYPRE_Solver solver );
+int HYPRE_ParCSRParaSailsSetup( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x );
+int HYPRE_ParCSRParaSailsSolve( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x );
+int HYPRE_ParCSRParaSailsSetParams( HYPRE_Solver solver , double thresh , int nlevels );
+int HYPRE_ParCSRParaSailsSetFilter( HYPRE_Solver solver , double filter );
+int HYPRE_ParCSRParaSailsSetSym( HYPRE_Solver solver , int sym );
+int HYPRE_ParCSRParaSailsSetLoadbal( HYPRE_Solver solver , double loadbal );
+int HYPRE_ParCSRParaSailsSetReuse( HYPRE_Solver solver , int reuse );
 
 /* HYPRE_parcsr_amg.c */
-int HYPRE_ParAMGCreate P((HYPRE_Solver *solver ));
-int HYPRE_ParAMGDestroy P((HYPRE_Solver solver ));
-int HYPRE_ParAMGSetup P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x ));
-int HYPRE_ParAMGSolve P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x ));
-int HYPRE_ParAMGSolveT P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x ));
-int HYPRE_ParAMGSetMaxLevels P((HYPRE_Solver solver , int max_levels ));
-int HYPRE_ParAMGSetStrongThreshold P((HYPRE_Solver solver , double strong_threshold ));
-int HYPRE_ParAMGSetMaxRowSum P((HYPRE_Solver solver , double max_row_sum ));
-int HYPRE_ParAMGSetTruncFactor P((HYPRE_Solver solver , double trunc_factor ));
-int HYPRE_ParAMGSetInterpType P((HYPRE_Solver solver , int interp_type ));
-int HYPRE_ParAMGSetMinIter P((HYPRE_Solver solver , int min_iter ));
-int HYPRE_ParAMGSetMaxIter P((HYPRE_Solver solver , int max_iter ));
-int HYPRE_ParAMGSetCoarsenType P((HYPRE_Solver solver , int coarsen_type ));
-int HYPRE_ParAMGSetMeasureType P((HYPRE_Solver solver , int measure_type ));
-int HYPRE_ParAMGSetCycleType P((HYPRE_Solver solver , int cycle_type ));
-int HYPRE_ParAMGSetTol P((HYPRE_Solver solver , double tol ));
-int HYPRE_ParAMGSetNumGridSweeps P((HYPRE_Solver solver , int *num_grid_sweeps ));
-int HYPRE_ParAMGSetGridRelaxType P((HYPRE_Solver solver , int *grid_relax_type ));
-int HYPRE_ParAMGSetGridRelaxPoints P((HYPRE_Solver solver , int **grid_relax_points ));
-int HYPRE_ParAMGSetRelaxWeight P((HYPRE_Solver solver , double *relax_weight ));
-int HYPRE_ParAMGSetIOutDat P((HYPRE_Solver solver , int ioutdat ));
-int HYPRE_ParAMGSetLogFileName P((HYPRE_Solver solver , char *log_file_name ));
-int HYPRE_ParAMGSetLogging P((HYPRE_Solver solver , int ioutdat , char *log_file_name ));
-int HYPRE_ParAMGSetDebugFlag P((HYPRE_Solver solver , int debug_flag ));
-
-/* HYPRE_parcsr_gmres.c */
-int HYPRE_ParCSRGMRESCreate P((MPI_Comm comm , HYPRE_Solver *solver ));
-int HYPRE_ParCSRGMRESDestroy P((HYPRE_Solver solver ));
-int HYPRE_ParCSRGMRESSetup P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x ));
-int HYPRE_ParCSRGMRESSolve P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x ));
-int HYPRE_ParCSRGMRESSetKDim P((HYPRE_Solver solver , int k_dim ));
-int HYPRE_ParCSRGMRESSetTol P((HYPRE_Solver solver , double tol ));
-int HYPRE_ParCSRGMRESSetMinIter P((HYPRE_Solver solver , int min_iter ));
-int HYPRE_ParCSRGMRESSetMaxIter P((HYPRE_Solver solver , int max_iter ));
-int HYPRE_ParCSRGMRESSetPrecond P((HYPRE_Solver solver , int (*precond )(
-HYPRE_Solver sol, HYPRE_ParCSRMatrix matrix, HYPRE_ParVector b, HYPRE_ParVector
-x), int (*precond_setup )(HYPRE_Solver sol, HYPRE_ParCSRMatrix matrix, 
-HYPRE_ParVector b, HYPRE_ParVector x), void *precond_data ));
-int HYPRE_ParCSRGMRESSetLogging P((HYPRE_Solver solver , int logging ));
-int HYPRE_ParCSRGMRESGetNumIterations P((HYPRE_Solver solver , int *num_iterations));
-int HYPRE_ParCSRGMRESGetFinalRelativeResidualNorm P((HYPRE_Solver solver , double *norm ));
+int HYPRE_ParAMGCreate( HYPRE_Solver *solver );
+int HYPRE_ParAMGDestroy( HYPRE_Solver solver );
+int HYPRE_ParAMGSetup( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x );
+int HYPRE_ParAMGSolve( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x );
+int HYPRE_ParAMGSolveT( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x );
+int HYPRE_ParAMGSetRestriction( HYPRE_Solver solver , int restr_par );
+int HYPRE_ParAMGSetMaxLevels( HYPRE_Solver solver , int max_levels );
+int HYPRE_ParAMGSetStrongThreshold( HYPRE_Solver solver , double strong_threshold );
+int HYPRE_ParAMGSetMaxRowSum( HYPRE_Solver solver , double max_row_sum );
+int HYPRE_ParAMGSetTruncFactor( HYPRE_Solver solver , double trunc_factor );
+int HYPRE_ParAMGSetInterpType( HYPRE_Solver solver , int interp_type );
+int HYPRE_ParAMGSetMinIter( HYPRE_Solver solver , int min_iter );
+int HYPRE_ParAMGSetMaxIter( HYPRE_Solver solver , int max_iter );
+int HYPRE_ParAMGSetCoarsenType( HYPRE_Solver solver , int coarsen_type );
+int HYPRE_ParAMGSetMeasureType( HYPRE_Solver solver , int measure_type );
+int HYPRE_ParAMGSetCycleType( HYPRE_Solver solver , int cycle_type );
+int HYPRE_ParAMGSetTol( HYPRE_Solver solver , double tol );
+int HYPRE_ParAMGSetNumGridSweeps( HYPRE_Solver solver , int *num_grid_sweeps );
+int HYPRE_ParAMGInitGridRelaxation( int **num_grid_sweeps_ptr , int **grid_relax_type_ptr , int ***grid_relax_points_ptr , int coarsen_type , double **relax_weights_ptr , int max_levels );
+int HYPRE_ParAMGSetGridRelaxType( HYPRE_Solver solver , int *grid_relax_type );
+int HYPRE_ParAMGSetGridRelaxPoints( HYPRE_Solver solver , int **grid_relax_points );
+int HYPRE_ParAMGSetRelaxWeight( HYPRE_Solver solver , double *relax_weight );
+int HYPRE_ParAMGSetIOutDat( HYPRE_Solver solver , int ioutdat );
+int HYPRE_ParAMGSetLogFileName( HYPRE_Solver solver , char *log_file_name );
+int HYPRE_ParAMGSetLogging( HYPRE_Solver solver , int ioutdat , char *log_file_name );
+int HYPRE_ParAMGSetDebugFlag( HYPRE_Solver solver , int debug_flag );
+int HYPRE_ParAMGGetNumIterations( HYPRE_Solver solver , int *num_iterations );
+int HYPRE_ParAMGGetFinalRelativeResidualNorm( HYPRE_Solver solver , double *rel_resid_norm );
 
 /* HYPRE_parcsr_cgnr.c */
-int HYPRE_ParCSRCGNRCreate P((MPI_Comm comm , HYPRE_Solver *solver ));
-int HYPRE_ParCSRCGNRDestroy P((HYPRE_Solver solver ));
-int HYPRE_ParCSRCGNRSetup P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x ));
-int HYPRE_ParCSRCGNRSolve P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x ));
-int HYPRE_ParCSRCGNRSetTol P((HYPRE_Solver solver , double tol ));
-int HYPRE_ParCSRCGNRSetMaxIter P((HYPRE_Solver solver , int max_iter ));
-int HYPRE_ParCSRCGNRSetPrecond P((HYPRE_Solver solver , int (*precond )(
-HYPRE_Solver sol, HYPRE_ParCSRMatrix matrix, HYPRE_ParVector b, HYPRE_ParVector
-x), int (*precondT )(HYPRE_Solver sol, HYPRE_ParCSRMatrix matrix, 
-HYPRE_ParVector b, HYPRE_ParVector x), int (*precond_setup )(HYPRE_Solver sol, 
-HYPRE_ParCSRMatrix matrix, HYPRE_ParVector b, HYPRE_ParVector x), void 
-*precond_data ));
-int HYPRE_ParCSRCGNRSetLogging P((HYPRE_Solver solver , int logging ));
-int HYPRE_ParCSRCGNRGetNumIterations P((HYPRE_Solver solver , int *num_iterations));
-int HYPRE_ParCSRCGNRGetFinalRelativeResidualNorm P((HYPRE_Solver solver , double *norm ));
- 
+int HYPRE_ParCSRCGNRCreate( MPI_Comm comm , HYPRE_Solver *solver );
+int HYPRE_ParCSRCGNRDestroy( HYPRE_Solver solver );
+int HYPRE_ParCSRCGNRSetup( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x );
+int HYPRE_ParCSRCGNRSolve( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x );
+int HYPRE_ParCSRCGNRSetTol( HYPRE_Solver solver , double tol );
+int HYPRE_ParCSRCGNRSetMinIter( HYPRE_Solver solver , int min_iter );
+int HYPRE_ParCSRCGNRSetMaxIter( HYPRE_Solver solver , int max_iter );
+int HYPRE_ParCSRCGNRSetStopCrit( HYPRE_Solver solver , int stop_crit );
+int HYPRE_ParCSRCGNRSetPrecond( HYPRE_Solver solver , int (*precond )(HYPRE_Solver sol ,HYPRE_ParCSRMatrix matrix ,HYPRE_ParVector b ,HYPRE_ParVector x ), int (*precondT )(HYPRE_Solver sol ,HYPRE_ParCSRMatrix matrix ,HYPRE_ParVector b ,HYPRE_ParVector x ), int (*precond_setup )(HYPRE_Solver sol ,HYPRE_ParCSRMatrix matrix ,HYPRE_ParVector b ,HYPRE_ParVector x ), void *precond_data );
+int HYPRE_ParCSRCGNRSetLogging( HYPRE_Solver solver , int logging );
+int HYPRE_ParCSRCGNRGetNumIterations( HYPRE_Solver solver , int *num_iterations );
+int HYPRE_ParCSRCGNRGetFinalRelativeResidualNorm( HYPRE_Solver solver , double *norm );
+
+/* HYPRE_parcsr_gmres.c */
+int HYPRE_ParCSRGMRESCreate( MPI_Comm comm , HYPRE_Solver *solver );
+int HYPRE_ParCSRGMRESDestroy( HYPRE_Solver solver );
+int HYPRE_ParCSRGMRESSetup( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x );
+int HYPRE_ParCSRGMRESSolve( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x );
+int HYPRE_ParCSRGMRESSetKDim( HYPRE_Solver solver , int k_dim );
+int HYPRE_ParCSRGMRESSetTol( HYPRE_Solver solver , double tol );
+int HYPRE_ParCSRGMRESSetMinIter( HYPRE_Solver solver , int min_iter );
+int HYPRE_ParCSRGMRESSetMaxIter( HYPRE_Solver solver , int max_iter );
+int HYPRE_ParCSRGMRESSetStopCrit( HYPRE_Solver solver , int stop_crit );
+int HYPRE_ParCSRGMRESSetPrecond( HYPRE_Solver solver , int (*precond )(HYPRE_Solver sol ,HYPRE_ParCSRMatrix matrix ,HYPRE_ParVector b ,HYPRE_ParVector x ), int (*precond_setup )(HYPRE_Solver sol ,HYPRE_ParCSRMatrix matrix ,HYPRE_ParVector b ,HYPRE_ParVector x ), void *precond_data );
+int HYPRE_ParCSRGMRESSetLogging( HYPRE_Solver solver , int logging );
+int HYPRE_ParCSRGMRESGetNumIterations( HYPRE_Solver solver , int *num_iterations );
+int HYPRE_ParCSRGMRESGetFinalRelativeResidualNorm( HYPRE_Solver solver , double *norm );
+
 /* HYPRE_parcsr_pcg.c */
-int HYPRE_ParCSRPCGCreate P((MPI_Comm comm , HYPRE_Solver *solver ));
-int HYPRE_ParCSRPCGDestroy P((HYPRE_Solver solver ));
-int HYPRE_ParCSRPCGSetup P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x ));
-int HYPRE_ParCSRPCGSolve P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x ));
-int HYPRE_ParCSRPCGSetTol P((HYPRE_Solver solver , double tol ));
-int HYPRE_ParCSRPCGSetMaxIter P((HYPRE_Solver solver , int max_iter ));
-int HYPRE_ParCSRPCGSetTwoNorm P((HYPRE_Solver solver , int two_norm ));
-int HYPRE_ParCSRPCGSetRelChange P((HYPRE_Solver solver , int rel_change )) ;
-int HYPRE_ParCSRPCGSetPrecond P((HYPRE_Solver solver , int (*precond )(
-HYPRE_Solver sol, HYPRE_ParCSRMatrix matrix, HYPRE_ParVector b, HYPRE_ParVector
-x), int (*precond_setup )(HYPRE_Solver sol, HYPRE_ParCSRMatrix matrix, 
-HYPRE_ParVector b, HYPRE_ParVector x), void *precond_data ));
-int HYPRE_ParCSRPCGSetLogging P((HYPRE_Solver solver , int logging ));
-int HYPRE_ParCSRPCGGetNumIterations P((HYPRE_Solver solver , int *num_iterations ));
-int HYPRE_ParCSRPCGGetFinalRelativeResidualNorm P((HYPRE_Solver solver , double *norm ));
-int HYPRE_ParCSRDiagScaleSetup P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector y , HYPRE_ParVector x ));
-int HYPRE_ParCSRDiagScale P((HYPRE_Solver solver , HYPRE_ParCSRMatrix HA , HYPRE_ParVector Hy , HYPRE_ParVector Hx ));
+int HYPRE_ParCSRPCGCreate( MPI_Comm comm , HYPRE_Solver *solver );
+int HYPRE_ParCSRPCGDestroy( HYPRE_Solver solver );
+int HYPRE_ParCSRPCGSetup( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x );
+int HYPRE_ParCSRPCGSolve( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x );
+int HYPRE_ParCSRPCGSetTol( HYPRE_Solver solver , double tol );
+int HYPRE_ParCSRPCGSetMaxIter( HYPRE_Solver solver , int max_iter );
+int HYPRE_ParCSRPCGSetTwoNorm( HYPRE_Solver solver , int two_norm );
+int HYPRE_ParCSRPCGSetRelChange( HYPRE_Solver solver , int rel_change );
+int HYPRE_ParCSRPCGSetPrecond( HYPRE_Solver solver , int (*precond )(HYPRE_Solver sol ,HYPRE_ParCSRMatrix matrix ,HYPRE_ParVector b ,HYPRE_ParVector x ), int (*precond_setup )(HYPRE_Solver sol ,HYPRE_ParCSRMatrix matrix ,HYPRE_ParVector b ,HYPRE_ParVector x ), void *precond_data );
+int HYPRE_ParCSRPCGSetLogging( HYPRE_Solver solver , int logging );
+int HYPRE_ParCSRPCGGetNumIterations( HYPRE_Solver solver , int *num_iterations );
+int HYPRE_ParCSRPCGGetFinalRelativeResidualNorm( HYPRE_Solver solver , double *norm );
+int HYPRE_ParCSRDiagScaleSetup( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector y , HYPRE_ParVector x );
+int HYPRE_ParCSRDiagScale( HYPRE_Solver solver , HYPRE_ParCSRMatrix HA , HYPRE_ParVector Hy , HYPRE_ParVector Hx );
 
 /* HYPRE_parcsr_pilut.c */
-int HYPRE_ParCSRPilutCreate P(( MPI_Comm comm, HYPRE_Solver *solver ));
-int HYPRE_ParCSRPilutDestroy P((HYPRE_Solver solver ));
-int HYPRE_ParCSRPilutSetup P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x ));
-int HYPRE_ParCSRPilutSolve P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x ));
-int HYPRE_ParCSRPilutSetMaxIter P((HYPRE_Solver solver , int max_iter ));
-int HYPRE_ParCSRPilutSetDropTolerance P((HYPRE_Solver solver , double tol ));
-int HYPRE_ParCSRPilutSetFactorRowSize P((HYPRE_Solver solver , int size ));
-
-/* HYPRE_parcsr_ParaSails.c */
-int HYPRE_ParCSRParaSailsCreate P((MPI_Comm comm , HYPRE_Solver *solver ));
-int HYPRE_ParCSRParaSailsDestroy P((HYPRE_Solver solver ));
-int HYPRE_ParCSRParaSailsSetup P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x ));
-int HYPRE_ParCSRParaSailsSolve P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x ));
-int HYPRE_ParCSRParaSailsSetParams P((HYPRE_Solver solver , double thresh , int nlevels ));
-int HYPRE_ParCSRParaSailsSetFilter P((HYPRE_Solver solver, double filter));
-int
-HYPRE_ParCSRParaSailsSetSym P((HYPRE_Solver solver, int sym));
-int HYPRE_ParCSRParaSailsSetLoadbal P((HYPRE_Solver solver, double loadbal));
-int HYPRE_ParCSRParaSailsSetReuse P((HYPRE_Solver solver, int reuse));
+int HYPRE_ParCSRPilutCreate( MPI_Comm comm , HYPRE_Solver *solver );
+int HYPRE_ParCSRPilutDestroy( HYPRE_Solver solver );
+int HYPRE_ParCSRPilutSetup( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x );
+int HYPRE_ParCSRPilutSolve( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x );
+int HYPRE_ParCSRPilutSetMaxIter( HYPRE_Solver solver , int max_iter );
+int HYPRE_ParCSRPilutSetDropTolerance( HYPRE_Solver solver , double tol );
+int HYPRE_ParCSRPilutSetFactorRowSize( HYPRE_Solver solver , int size );
 
 /* par_laplace.c */
-HYPRE_ParCSRMatrix GenerateLaplacian P((MPI_Comm comm , int nx , int ny , int nz
- , int P , int Q , int R , int p , int q , int r , double *value ));
-int map P((int ix , int iy , int iz , int p , int q , int r , int P , int Q , 
-int R , int *nx_part , int *ny_part , int *nz_part , int *global_part ));
+HYPRE_ParCSRMatrix GenerateLaplacian( MPI_Comm comm , int nx , int ny , int nz , int P , int Q , int R , int p , int q , int r , double *value );
+int map( int ix , int iy , int iz , int p , int q , int r , int P , int Q , int R , int *nx_part , int *ny_part , int *nz_part , int *global_part );
 
 /* par_laplace_27pt.c */
-HYPRE_ParCSRMatrix GenerateLaplacian27pt P((MPI_Comm comm , int nx , int ny , 
-int nz , int P , int Q , int R , int p , int q , int r , double *value ));
-int map3 P((int ix , int iy , int iz , int p , int q , int r , int P , int Q , 
-int R , int *nx_part , int *ny_part , int *nz_part , int *global_part ));
+HYPRE_ParCSRMatrix GenerateLaplacian27pt( MPI_Comm comm , int nx , int ny , int nz , int P , int Q , int R , int p , int q , int r , double *value );
+int map3( int ix , int iy , int iz , int p , int q , int r , int P , int Q , int R , int *nx_part , int *ny_part , int *nz_part , int *global_part );
 
 /* par_laplace_9pt.c */
-HYPRE_ParCSRMatrix GenerateLaplacian9pt P((MPI_Comm comm , int nx , int ny , int
- P , int Q , int p , int q , double *value ));
-int map2 P((int ix , int iy , int p , int q , int P , int Q , int *nx_part , int
- *ny_part , int *global_part ));
+HYPRE_ParCSRMatrix GenerateLaplacian9pt( MPI_Comm comm , int nx , int ny , int P , int Q , int p , int q , double *value );
+int map2( int ix , int iy , int p , int q , int P , int Q , int *nx_part , int *ny_part , int *global_part );
 
 /* par_difconv.c */
-HYPRE_ParCSRMatrix GenerateDifConv P((MPI_Comm comm , int nx , int ny , int nz ,
- int P , int Q , int R , int p , int q , int r , double *value ));
-#undef P
-
-#undef P
+HYPRE_ParCSRMatrix GenerateDifConv( MPI_Comm comm , int nx , int ny , int nz , int P , int Q , int R , int p , int q , int r , double *value );
 
 #ifdef __cplusplus
 }

@@ -28,7 +28,8 @@ extern "C" {
  * Structures
  *--------------------------------------------------------------------------*/
 
-typedef struct {int opaque;} *HYPRE_StructSolverBase;
+struct hypre_StructSolver_struct;
+typedef struct hypre_StructSolver_struct *HYPRE_StructSolverBase;
 
 #ifndef HYPRE_USE_PTHREADS
 #define hypre_MAX_THREADS 1

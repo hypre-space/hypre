@@ -11,6 +11,7 @@
  * HYPRE_StructGrid interface
  *
  *****************************************************************************/
+
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
@@ -24,7 +25,7 @@ HYPRE_StructGridCreate( MPI_Comm          comm,
 {
    int ierr;
 
-   ierr = hypre_StructGridCreate( comm, dim, (hypre_StructGrid **) grid );
+   ierr = hypre_StructGridCreate(comm, dim, grid);
 
    return ierr;
 }
@@ -36,7 +37,7 @@ HYPRE_StructGridCreate( MPI_Comm          comm,
 int
 HYPRE_StructGridDestroy( HYPRE_StructGrid grid )
 {
-   return ( hypre_StructGridDestroy( (hypre_StructGrid *) grid ) );
+   return ( hypre_StructGridDestroy(grid) );
 }
 
 /*--------------------------------------------------------------------------
@@ -61,8 +62,7 @@ HYPRE_StructGridSetExtents( HYPRE_StructGrid  grid,
       hypre_IndexD(new_iupper, d) = iupper[d];
    }
 
-   return ( hypre_StructGridSetExtents( (hypre_StructGrid *) grid,
-                                        new_ilower, new_iupper ) );
+   return ( hypre_StructGridSetExtents(grid, new_ilower, new_iupper) );
 }
 
 /*--------------------------------------------------------------------------
@@ -71,20 +71,19 @@ HYPRE_StructGridSetExtents( HYPRE_StructGrid  grid,
 
 int
 HYPRE_StructGridSetPeriodic( HYPRE_StructGrid  grid,
-                             int              *periodic)
+                             int              *periodic )
 {
    hypre_Index  new_periodic;
 
    int          d;
 
    hypre_ClearIndex(new_periodic);
-   for (d = 0; d < hypre_StructGridDim((hypre_StructGrid *) grid); d++)
+   for (d = 0; d < hypre_StructGridDim(grid); d++)
    {
       hypre_IndexD(new_periodic, d) = periodic[d];
    }
 
-   return ( hypre_StructGridSetPeriodic( (hypre_StructGrid *) grid,
-                                         new_periodic ) );
+   return ( hypre_StructGridSetPeriodic(grid, new_periodic) );
 }
 
 /*--------------------------------------------------------------------------
@@ -94,5 +93,5 @@ HYPRE_StructGridSetPeriodic( HYPRE_StructGrid  grid,
 int
 HYPRE_StructGridAssemble( HYPRE_StructGrid grid )
 {
-   return ( hypre_StructGridAssemble( (hypre_StructGrid *) grid ) );
+   return ( hypre_StructGridAssemble(grid) );
 }

@@ -19,7 +19,7 @@
  * hypre_StructVector:
  *--------------------------------------------------------------------------*/
 
-typedef struct
+typedef struct hypre_StructVector_struct
 {
    MPI_Comm              comm;
 

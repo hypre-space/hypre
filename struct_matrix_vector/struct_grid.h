@@ -19,7 +19,7 @@
  * hypre_StructGrid:
  *--------------------------------------------------------------------------*/
 
-typedef struct
+typedef struct hypre_StructGrid_struct
 {
    MPI_Comm             comm;
                       
