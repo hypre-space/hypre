@@ -86,6 +86,9 @@ void LDUSolve(DataDistType *ddist, FactorMatType *ldu, double *x, double *b,
     lx[i] = b[perm[i]] - xx;
   }
 
+  /* Allocate requests */
+  receive_requests = hypre_CTAlloc( MPI_Request, npes );
+
   /* Do the distributed next */
   for (ii=1; ii<nlevels; ii++) {
     /* make MPI LX tags unique for this level (so we don't have to sync) */
@@ -93,9 +96,6 @@ void LDUSolve(DataDistType *ddist, FactorMatType *ldu, double *x, double *b,
 
     /* get number of recieves for this level */
     rnum = &(ldu->lcomm.rnum[(ii-1)*rnbrpes]) ;
-
-    /* Allocate requests */
-    receive_requests = hypre_CTAlloc( MPI_Request, npes );
 
     /* Recv the required lx elements from the appropriate processors */
     for (i=0; i<rnbrpes; i++) {
