@@ -308,3 +308,28 @@ zzz_SMGPrintLogging( void *smg_vdata,
   
    return ierr;
 }
+
+/*--------------------------------------------------------------------------
+ * zzz_SMGGetFinalRelativeResidualNorm
+ *--------------------------------------------------------------------------*/
+
+int
+zzz_SMGGetFinalRelativeResidualNorm( void   *smg_vdata,
+                                     double *relative_residual_norm )
+{
+   zzz_SMGData *smg_data = smg_vdata;
+   int          ierr = -1;
+   int          num_iterations  = (smg_data -> num_iterations);
+   int          logging   = (smg_data -> logging);
+   double      *rel_norms = (smg_data -> rel_norms);
+
+   
+   if (logging > 0)
+     {
+       *relative_residual_norm = rel_norms[num_iterations-1];
+       ierr = 0;
+     }
+   
+   return ierr;
+}
+
