@@ -10,13 +10,13 @@
 #define MLI_AGGR_PENDING   -3
 
 /***********************************************************************
- * Function  : MLI_Coarsen_AggregationLocal
+ * Function  : MLI_AMG_SA_CoarsenLocal
  * Purpose   : Form aggregates
  * Inputs    : graph 
  **********************************************************************/
 
-void MLI_Coarsen_AggregationLocal(MLI_Aggregation *mli_aggr, 
-                                  int *mli_aggr_leng, int **mli_aggr_array)
+void MLI_AMG_SA_CoarsenLocal(MLI_Aggregation *mli_aggr, 
+                             int *mli_aggr_leng, int **mli_aggr_array)
 {
    hypre_ParCSRMatrix *hypre_graph;
    MPI_Comm           comm;
