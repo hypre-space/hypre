@@ -717,9 +717,9 @@ case $ARCH in
         AC_CHECK_PROGS(CC, ccc icc pgcc cc gcc kcc)
       else
         if test "$casc_using_openmp" = "no" ; then
-          AC_CHECK_PROGS(CC, icc mpicc)
+          AC_CHECK_PROGS(CC, mpiicc mpipgcc icc mpicc)
         else
-          AC_CHECK_PROGS(CC, icc pgcc) 
+          AC_CHECK_PROGS(CC, mpiicc mpipgcc icc pgcc) 
         fi
       fi
     fi
@@ -730,9 +730,9 @@ case $ARCH in
         AC_CHECK_PROGS(CXX, icc pgCC CC g++)
       else
         if test "$casc_using_openmp" = "no" ; then
-          AC_CHECK_PROGS(CXX, icc mpiCC)
+          AC_CHECK_PROGS(CXX, mpiicc mpipgCC icc mpiCC)
         else
-          AC_CHECK_PROGS(CXX, icc pgCC) 
+          AC_CHECK_PROGS(CXX, mpiicc mpipgCC icc pgCC) 
         fi
       fi
     fi
@@ -743,9 +743,9 @@ case $ARCH in
         AC_CHECK_PROGS(F77, ifc pgf77 fort f77 g77)
       else
         if test "$casc_using_openmp" = "no" ; then
-          AC_CHECK_PROGS(F77, ifc mpif77)
+          AC_CHECK_PROGS(F77, mpiifc mpipgf77 ifc mpif77)
         else
-          AC_CHECK_PROGS(F77, ifc pgf77)
+          AC_CHECK_PROGS(F77, mpiifc mpipgf77 ifc pgf77)
         fi
       fi
     fi

@@ -3399,7 +3399,7 @@ done
 
       else
         if test "$casc_using_openmp" = "no" ; then
-          for ac_prog in icc mpicc
+          for ac_prog in mpiicc mpipgcc icc mpicc
 do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -3434,7 +3434,7 @@ test -n "$CC" && break
 done
 
         else
-          for ac_prog in icc pgcc
+          for ac_prog in mpiicc mpipgcc icc pgcc
 do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -3511,7 +3511,7 @@ done
 
       else
         if test "$casc_using_openmp" = "no" ; then
-          for ac_prog in icc mpiCC
+          for ac_prog in mpiicc mpipgCC icc mpiCC
 do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -3546,7 +3546,7 @@ test -n "$CXX" && break
 done
 
         else
-          for ac_prog in icc pgCC
+          for ac_prog in mpiicc mpipgCC icc pgCC
 do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -3623,7 +3623,7 @@ done
 
       else
         if test "$casc_using_openmp" = "no" ; then
-          for ac_prog in ifc mpif77
+          for ac_prog in mpiifc mpipgf77 ifc mpif77
 do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -3658,7 +3658,7 @@ test -n "$F77" && break
 done
 
         else
-          for ac_prog in ifc pgf77
+          for ac_prog in mpiifc mpipgf77 ifc pgf77
 do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
