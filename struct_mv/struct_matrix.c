@@ -657,7 +657,7 @@ hypre_StructMatrixSetNumGhost( hypre_StructMatrix *matrix,
  *--------------------------------------------------------------------------*/
 
 int
-hypre_StructMatrixPrint( char               *filename,
+hypre_StructMatrixPrint( const char         *filename,
                          hypre_StructMatrix *matrix,
                          int                 all      )
 {
@@ -820,9 +820,9 @@ hypre_StructMatrixMigrate( hypre_StructMatrix *from_matrix,
  *--------------------------------------------------------------------------*/
 
 hypre_StructMatrix *
-hypre_StructMatrixRead( MPI_Comm   comm,
-                        char      *filename,
-                        int       *num_ghost )
+hypre_StructMatrixRead( MPI_Comm    comm,
+                        const char *filename,
+                        int        *num_ghost )
 {
    FILE                 *file;
    char                  new_filename[255];

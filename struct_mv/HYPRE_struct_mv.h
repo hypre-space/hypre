@@ -208,7 +208,7 @@ int HYPRE_StructMatrixSetSymmetric(HYPRE_StructMatrix  matrix,
 /**
  * Print the matrix to file.  This is mainly for debugging purposes.
  **/
-int HYPRE_StructMatrixPrint(char               *filename,
+int HYPRE_StructMatrixPrint(const char         *filename,
                             HYPRE_StructMatrix  matrix,
                             int                 all);
 
@@ -297,7 +297,7 @@ int HYPRE_StructVectorGetBoxValues(HYPRE_StructVector  vector,
 /**
  * Print the vector to file.  This is mainly for debugging purposes.
  **/
-int HYPRE_StructVectorPrint(char               *filename,
+int HYPRE_StructVectorPrint(const char         *filename,
                             HYPRE_StructVector  vector,
                             int                 all);
 

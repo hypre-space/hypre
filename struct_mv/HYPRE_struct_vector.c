@@ -242,7 +242,7 @@ HYPRE_StructVectorAssemble( HYPRE_StructVector vector )
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_StructVectorPrint( char               *filename,
+HYPRE_StructVectorPrint( const char         *filename,
                          HYPRE_StructVector  vector,
                          int                 all )
 {

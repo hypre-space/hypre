@@ -1486,7 +1486,7 @@ int HYPRE_StructMatrixAssemble( HYPRE_StructMatrix matrix );
 int HYPRE_StructMatrixSetNumGhost( HYPRE_StructMatrix matrix , int *num_ghost );
 int HYPRE_StructMatrixGetGrid( HYPRE_StructMatrix matrix , HYPRE_StructGrid *grid );
 int HYPRE_StructMatrixSetSymmetric( HYPRE_StructMatrix matrix , int symmetric );
-int HYPRE_StructMatrixPrint( char *filename , HYPRE_StructMatrix matrix , int all );
+int HYPRE_StructMatrixPrint( const char *filename , HYPRE_StructMatrix matrix , int all );
 
 /* HYPRE_struct_stencil.c */
 int HYPRE_StructStencilCreate( int dim , int size , HYPRE_StructStencil *stencil );
@@ -1504,7 +1504,7 @@ int HYPRE_StructVectorAddToBoxValues( HYPRE_StructVector vector , int *ilower , 
 int HYPRE_StructVectorGetValues( HYPRE_StructVector vector , int *grid_index , double *values_ptr );
 int HYPRE_StructVectorGetBoxValues( HYPRE_StructVector vector , int *ilower , int *iupper , double *values );
 int HYPRE_StructVectorAssemble( HYPRE_StructVector vector );
-int HYPRE_StructVectorPrint( char *filename , HYPRE_StructVector vector , int all );
+int HYPRE_StructVectorPrint( const char *filename , HYPRE_StructVector vector , int all );
 int HYPRE_StructVectorSetNumGhost( HYPRE_StructVector vector , int *num_ghost );
 int HYPRE_StructVectorSetConstantValues( HYPRE_StructVector vector , double values );
 int HYPRE_StructVectorGetMigrateCommPkg( HYPRE_StructVector from_vector , HYPRE_StructVector to_vector , HYPRE_CommPkg *comm_pkg );
@@ -1631,9 +1631,9 @@ int hypre_StructMatrixSetValues( hypre_StructMatrix *matrix , hypre_Index grid_i
 int hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix , hypre_Box *value_box , int num_stencil_indices , int *stencil_indices , double *values , int add_to );
 int hypre_StructMatrixAssemble( hypre_StructMatrix *matrix );
 int hypre_StructMatrixSetNumGhost( hypre_StructMatrix *matrix , int *num_ghost );
-int hypre_StructMatrixPrint( char *filename , hypre_StructMatrix *matrix , int all );
+int hypre_StructMatrixPrint( const char *filename , hypre_StructMatrix *matrix , int all );
 int hypre_StructMatrixMigrate( hypre_StructMatrix *from_matrix , hypre_StructMatrix *to_matrix );
-hypre_StructMatrix *hypre_StructMatrixRead( MPI_Comm comm , char *filename , int *num_ghost );
+hypre_StructMatrix *hypre_StructMatrixRead( MPI_Comm comm , const char *filename , int *num_ghost );
 
 /* struct_matrix_mask.c */
 hypre_StructMatrix *hypre_StructMatrixCreateMask( hypre_StructMatrix *matrix , int num_stencil_indices , int *stencil_indices );
@@ -1673,8 +1673,8 @@ int hypre_StructVectorClearGhostValues( hypre_StructVector *vector );
 int hypre_StructVectorClearAllValues( hypre_StructVector *vector );
 hypre_CommPkg *hypre_StructVectorGetMigrateCommPkg( hypre_StructVector *from_vector , hypre_StructVector *to_vector );
 int hypre_StructVectorMigrate( hypre_CommPkg *comm_pkg , hypre_StructVector *from_vector , hypre_StructVector *to_vector );
-int hypre_StructVectorPrint( char *filename , hypre_StructVector *vector , int all );
-hypre_StructVector *hypre_StructVectorRead( MPI_Comm comm , char *filename , int *num_ghost );
+int hypre_StructVectorPrint( const char *filename , hypre_StructVector *vector , int all );
+hypre_StructVector *hypre_StructVectorRead( MPI_Comm comm , const char *filename , int *num_ghost );
 
 
 #ifdef __cplusplus

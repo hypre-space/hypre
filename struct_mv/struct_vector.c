@@ -768,7 +768,7 @@ hypre_StructVectorMigrate( hypre_CommPkg      *comm_pkg,
  *--------------------------------------------------------------------------*/
 
 int
-hypre_StructVectorPrint( char               *filename,
+hypre_StructVectorPrint( const char         *filename,
                          hypre_StructVector *vector,
                          int                 all      )
 {
@@ -839,9 +839,9 @@ hypre_StructVectorPrint( char               *filename,
  *--------------------------------------------------------------------------*/
 
 hypre_StructVector *
-hypre_StructVectorRead( MPI_Comm   comm,
-                        char      *filename,
-                        int       *num_ghost )
+hypre_StructVectorRead( MPI_Comm    comm,
+                        const char *filename,
+                        int        *num_ghost )
 {
    FILE                 *file;
    char                  new_filename[255];

@@ -238,7 +238,7 @@ HYPRE_StructMatrixSetSymmetric( HYPRE_StructMatrix  matrix,
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_StructMatrixPrint( char               *filename,
+HYPRE_StructMatrixPrint( const char         *filename,
                          HYPRE_StructMatrix  matrix,
                          int                 all )
 {
