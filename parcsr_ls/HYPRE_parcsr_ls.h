@@ -1400,6 +1400,31 @@ HYPRE_ParCSRMatrix GenerateDifConv(MPI_Comm comm,
                                    int      r,
                                    double  *value);
 
+HYPRE_ParCSRMatrix
+GenerateRotate7pt( MPI_Comm comm,
+                      int      nx,
+                      int      ny,
+                      int      P,
+                      int      Q,
+                      int      p,
+                      int      q,
+                      double   alpha,
+                      double   eps );
+                                                                                
+HYPRE_ParCSRMatrix
+GenerateVarDifConv( MPI_Comm comm,
+                 int      nx,
+                 int      ny,
+                 int      nz,
+                 int      P,
+                 int      Q,
+                 int      R,
+                 int      p,
+                 int      q,
+                 int      r,
+                 double eps,
+                 HYPRE_ParVector *rhs_ptr);
+
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 

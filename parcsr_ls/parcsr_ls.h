@@ -439,6 +439,21 @@ int gselim( double *A , double *x , int n );
 /* par_relax_interface.c */
 int hypre_BoomerAMGRelaxIF( hypre_ParCSRMatrix *A , hypre_ParVector *f , int *cf_marker , int relax_type , int relax_order , int cycle_type , double relax_weight , double omega , hypre_ParVector *u , hypre_ParVector *Vtemp );
 
+/* par_rotate_7pt.c */
+HYPRE_ParCSRMatrix GenerateRotate7pt( MPI_Comm comm , int nx , int ny , int P , int Q , int p , int q , double alpha, double eps );
+                                                                                
+/* par_vardifconv.c */
+HYPRE_ParCSRMatrix GenerateVarDifConv( MPI_Comm comm , int nx , int ny , int nz , int P , int Q , int R , int p , int q , int r , double eps, HYPRE_ParVector *rhs_ptr );
+double afun( double xx , double yy , double zz );
+double bfun( double xx , double yy , double zz );
+double cfun( double xx , double yy , double zz );
+double dfun( double xx , double yy , double zz );
+double efun( double xx , double yy , double zz );
+double ffun( double xx , double yy , double zz );
+double gfun( double xx , double yy , double zz );
+double rfun( double xx , double yy , double zz );
+double bndfun( double xx , double yy , double zz );
+                                                                                
 /* par_scaled_matnorm.c */
 int hypre_ParCSRMatrixScaledNorm( hypre_ParCSRMatrix *A , double *scnorm );
 

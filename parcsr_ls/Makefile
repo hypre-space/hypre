@@ -77,6 +77,8 @@ FILES =\
  par_nodal_systems.c\
  par_rap.c\
  par_rap_communication.c\
+ par_rotate_7pt.c\
+ par_vardifconv.c\
  par_relax.c\
  par_relax_interface.c\
  par_scaled_matnorm.c\
