@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/sh
 #BHEADER***********************************************************************
 # (c) 1998   The Regents of the University of California
 #
@@ -8,45 +8,55 @@
 # $Revision$
 #EHEADER***********************************************************************
 
+perform_test()
+{
+  echo ""
+  echo "======================================================================"
+  echo "Running tests on $HYPRE_RUN_MACHINE"
+  echo "======================================================================"
+  echo ""
+
+  echo "creating new AUTOTEST directory...."
+  ssh ${HYPRE_COMPILE_MACHINE} "\
+    (\
+        rm -fR ${HYPRE_REMOTE_DIR};\
+        mkdir ${HYPRE_REMOTE_DIR}\
+    )"
+
+  echo "copying new source...."
+  scp -r linear_solvers ${HYPRE_COMPILE_MACHINE}:${HYPRE_REMOTE_DIR}
+
+  ssh ${HYPRE_COMPILE_MACHINE} "\
+    (\
+        cd ${HYPRE_REMOTE_DIR};\
+	. linear_solvers/test/autotest_env;\
+	. linear_solvers/test/env.${HYPRE_ARCH};\
+        . linear_solvers/test/autotest_test ${HYPRE_MACHINE_COMMANDS} ;\
+    )"
+
+  echo "cleaning up...."
+  ssh ${HYPRE_COMPILE_MACHINE} "\
+    (\
+         cd  ${HYPRE_REMOTE_DIR}/linear_solvers;\
+         tar -cvf autotest.${HYPRE_RUN_MACHINE}.tar test\
+    )"
+
+  echo "copying test results to CASC machine..."
+  scp -r  ${HYPRE_COMPILE_MACHINE}:${HYPRE_REMOTE_DIR}/linear_solvers/autotest.${HYPRE_RUN_MACHINE}.tar $HYPRE_AUTOTEST_DIR/.
+
+  ssh ${HYPRE_COMPILE_MACHINE} "\
+    (\
+         rm -fR ${HYPRE_REMOTE_DIR}\
+    )"
+}
+
 #==============================================================================
 # This script is the top-level script used to regression test hypre.
 #==============================================================================
 
+OldMask=umask
+umask 007
 . ./autotest_env
-
-MAKE="make -i"
-
-#==============================================================================
-# Email lists
-#==============================================================================
-
-HYPRE_DEFAULT_EMAIL="\
- rfalgout@llnl.gov\
- cleary1@llnl.gov\
- treadway1@llnl.gov"
-
-HYPRE_CHECKOUT_EMAIL="$HYPRE_DEFAULT_EMAIL"
-
-HYPRE_CONFIGURE_EMAIL="$HYPRE_DEFAULT_EMAIL"
-
-HYPRE_STRUCT_EMAIL="$HYPRE_DEFAULT_EMAIL\
- jones97@llnl.gov"
-
-HYPRE_IJ_EMAIL="$HYPRE_DEFAULT_EMAIL\
- jones97@llnl.gov\
- yang11@llnl.gov\
- vhenson@llnl.gov\
- chow8@llnl.gov\
- mlambert@llnl.gov\
- chtong@llnl.gov"
-
-HYPRE_FEI_EMAIL="$HYPRE_DEFAULT_EMAIL\
- chow8@llnl.gov\
- chtong@llnl.gov"
-
-HYPRE_ALL_EMAIL="$HYPRE_STRUCT_EMAIL $HYPRE_IJ_EMAIL $HYPRE_FEI_EMAIL"
-
-HYPRE_BETA_EMAIL="$HYPRE_DEFAULT_EMAIL"
 
 #=============================================================================
 # Check out the repository in the HYPRE_AUTOTEST_DIR directory
@@ -62,296 +72,50 @@ cd $HYPRE_AUTOTEST_DIR
 rm -fR linear_solvers
 cvs -q checkout -P linear_solvers 1> $0.checkout.log 2> $0.checkout.err
 echo "$HYPRE_CHECKOUT_EMAIL" > $0.checkout.err.email 
-
-#=============================================================================
-# Make libraries and test drivers (using configure)
-#=============================================================================
-
-cd $HYPRE_AUTOTEST_DIR/linear_solvers
-./configure  1> $0.configure.log 2> $0.configure.err
-echo "$HYPRE_CONFIGURE_EMAIL" > $0.configure.err.email 
-
-$MAKE veryclean
-
-$MAKE struct 1> $0.struct.log 2> $0.struct.err
-echo "$HYPRE_STRUCT_EMAIL" > $0.struct.err.email 
-
-$MAKE IJ 1> $0.IJ.log 2> $0.IJ.err
-echo "$HYPRE_IJ_EMAIL" > $0.IJ.err.email 
-
-$MAKE fei 1> $0.fei.log 2> $0.fei.err
-echo "$HYPRE_FEI_EMAIL" > $0.fei.err.email 
-
-$MAKE
-
-$MAKE beta 1> $0.beta.log 2> $0.beta.err
-echo "$HYPRE_BETA_EMAIL" > $0.beta.err.email 
-
-# make documentation
-(
-    cd docs
-    $MAKE 1> ../$0.docs.log 2> ../$0.docs.err
-    echo "$HYPRE_ALL_EMAIL" > ../$0.docs.err.email 
-)
-
-#==============================
-# Run test suites
-#==============================
-
-$MAKE nofei
-(cd test; $MAKE fei++)
-
-cd $HYPRE_AUTOTEST_DIR/linear_solvers/test
-./test_drivers.sh -mail
-
-#==============================
-# Make C++ test drivers
-#==============================
-
-cd $HYPRE_AUTOTEST_DIR/linear_solvers/test
-$MAKE all++ 1> $0.all++.log 2> $0.all++.err
-echo "$HYPRE_DEFAULT_EMAIL" > $0.all++.err.email 
-
-cd $HYPRE_AUTOTEST_DIR/linear_solvers/test
-$MAKE beta++ 1> $0.beta++.log 2> $0.beta++.err
-echo "$HYPRE_DEFAULT_EMAIL" > $0.beta++.err.email 
-
-#==============================
-# Run test suites
-#==============================
-
-#cd $HYPRE_AUTOTEST_DIR/linear_solvers/test
-#./test_drivers.sh -mail
-
-#==============================
-# Make F77 test drivers
-#==============================
-
-cd $HYPRE_AUTOTEST_DIR/linear_solvers/test
-$MAKE all77 1> $0.all77.log 2> $0.all77.err
-echo "$HYPRE_DEFAULT_EMAIL" > $0.all77.err.email 
-
-cd $HYPRE_AUTOTEST_DIR/linear_solvers/test
-$MAKE beta77 1> $0.beta77.log 2> $0.beta77.err
-echo "$HYPRE_DEFAULT_EMAIL" > $0.beta77.err.email 
-
-#==============================
-# Run test suites
-#==============================
-
-#cd $HYPRE_AUTOTEST_DIR/linear_solvers/test
-#./test_drivers.sh -mail
-
-#=============================================================================
-# Make libraries and test drivers (using configure--with-pthreads)
-#
-# Pthreads is not officially being supported, but want to keep the
-# struct solvers compiling with this on for now.
-#=============================================================================
-
-cd $HYPRE_AUTOTEST_DIR/linear_solvers
-./configure  --with-pthreads 1> $0.configure_threads.log 2> $0.configure_threads.err
-echo "$HYPRE_CONFIGURE_EMAIL" > $0.configure_threads.err.email 
-
-$MAKE veryclean
-
-$MAKE struct 1> $0.struct_threads.log 2> $0.struct_threads.err
-echo "$HYPRE_STRUCT_EMAIL" > $0.struct_threads.err.email 
-
-#=============================================================================
-# Make libraries and test drivers (using configure --without_MPI)
-#=============================================================================
-
-cd $HYPRE_AUTOTEST_DIR/linear_solvers
-./configure  --without-MPI 1> $0.configure_no_mpi.log 2> $0.configure_no_mpi.err
-echo "$HYPRE_CONFIGURE_EMAIL" > $0.configure_no_mpi.err.email 
-
-$MAKE veryclean
-
-$MAKE struct 1> $0.struct_no_mpi.log 2> $0.struct_no_mpi.err
-echo "$HYPRE_STRUCT_EMAIL" > $0.struct_no_mpi.err.email 
-
-$MAKE IJ 1> $0.IJ_no_mpi.log 2> $0.IJ_no_mpi.err
-echo "$HYPRE_IJ_EMAIL" > $0.IJ_no_mpi.err.email 
-
-$MAKE
-
-$MAKE beta 1> $0.beta_no_mpi.log 2> $0.beta_no_mpi.err
-echo "$HYPRE_BETA_EMAIL" > $0.beta_no_mpi.err.email 
-
-#==============================
-# Run test suites
-#==============================
-
-#cd $HYPRE_AUTOTEST_DIR/linear_solvers/test
-#./test_drivers.sh -mail
-
-#=============================================================================
-# Make libraries using kcc for more verbose C compiler syntax messages
-#=============================================================================
-
-cd $HYPRE_AUTOTEST_DIR/linear_solvers
-./configure --with-strict-checking \
-  1> $0.configure_strict_checking.log 2> $0.configure_strict_checking.err
-echo "$HYPRE_CONFIGURE_EMAIL" > $0.configure_strict_checking.err.email 
-
-$MAKE veryclean
-
-$MAKE struct 1> $0.struct_strict_checking.log 2> $0.struct_strict_checking.err
-#echo "$HYPRE_STRUCT_EMAIL" > $0.struct_strict_checking.err.email 
-echo "$HYPRE_CONFIGURE_EMAIL" > $0.struct_strict_checking.err.email 
-
-$MAKE IJ 1> $0.IJ_strict_checking.log 2> $0.IJ_strict_checking.err
-#echo "$HYPRE_IJ_EMAIL" > $0.IJ_strict_checking.err.email 
-echo "$HYPRE_CONFIGURE_EMAIL" > $0.IJ_strict_checking.err.email 
-
-$MAKE 
-
-$MAKE beta 1> $0.beta_strict_checking.log 2> $0.beta_strict_checking.err
-#echo "$HYPRE_BETA_EMAIL" > $0.beta_strict_checking.err.email 
-echo "$HYPRE_CONFIGURE_EMAIL" > $0.beta_strict_checking.err.email 
-
-#==============================
-# Run test suites
-#==============================
-
-#cd $HYPRE_AUTOTEST_DIR/linear_solvers/test
-#./test_drivers.sh -mail
-
-#=============================================================================
-# Clean up
-#=============================================================================
-
-cd $HYPRE_AUTOTEST_DIR/linear_solvers
-$MAKE veryclean
-
-#==============================================================================
-# Set permissions so that all developers can access
-#  -- give everyone read and execute permission
-#  -- give group write permissions
-#==============================================================================
-
-echo "setting permissions...."
-chmod -fR a+rX,ug+w $HYPRE_AUTOTEST_DIR
-
-#===========================================================================
-# Check for errors and send appropriate email
-# NOTE: HYPRE_MAIL must support `-s' subject option
-#===========================================================================
-
-HYPRE_MAIL=mailx
-
-cd $HYPRE_AUTOTEST_DIR
-for i in *.err linear_solvers/*.err linear_solvers/test/*.err
-do 
-    if [ -s "$i" ] -a [ -r ${i}.email ] 
-    then 
-	RECIPIENTS=`cat ${i}.email` 
-	${HYPRE_MAIL} -s "Autotest error: $i" $RECIPIENTS < $i 
-    fi 
-done 
+#chgrp -fR hypre linear_solvers # should not be needed if cron started
+# from hypre group, i.e., make sure to do a newgrp -l hypre; crontab ...
 
 #==============================================================================
 # Run test suites on remote machines
 #==============================================================================
 
-cd $HYPRE_AUTOTEST_DIR
-
 while [ "$*" != "" ]
 do
 
-case $1 in
+  case $1 in
     -dec)
         HYPRE_ARCH="dec"
         HYPRE_COMPILE_MACHINE="west"
         HYPRE_RUN_MACHINE="southeast"
         HYPRE_REMOTE_DIR="/usr/apps/hypre/AUTOTEST"
+	HYPRE_MACHINE_COMMANDS="-m -r $HYPRE_RUN_MACHINE -b 2 -cf -o 1"
+	perform_test
         shift;;
     -blue)
         HYPRE_ARCH="blue"
         HYPRE_COMPILE_MACHINE="blue"
         HYPRE_RUN_MACHINE="blue"
         HYPRE_REMOTE_DIR="/usr/apps/hypre/AUTOTEST"
+	HYPRE_MACHINE_COMMANDS="-m -b 2 -cf -o 1"
+	perform_test
         shift;;
     -red)
         HYPRE_ARCH="red"
         HYPRE_COMPILE_MACHINE="sasn100"
         HYPRE_RUN_MACHINE="janus"
         HYPRE_REMOTE_DIR="/usr/apps/hypre/AUTOTEST"
+	HYPRE_MACHINE_COMMANDS="-m -r $HYPRE_RUN_MACHINE -b 2 -cf -o 1"
+	perform_test
         shift;;
-esac
-
-echo ""
-echo "======================================================================"
-echo "Running tests on $HYPRE_RUN_MACHINE"
-echo "======================================================================"
-echo ""
-
-echo "creating new AUTOTEST directory...."
-ssh ${HYPRE_COMPILE_MACHINE} "\
-    (\
-        rm -fR ${HYPRE_REMOTE_DIR};\
-        mkdir ${HYPRE_REMOTE_DIR}\
-    )"
-
-echo "copying new source...."
-scp -r linear_solvers ${HYPRE_COMPILE_MACHINE}:${HYPRE_REMOTE_DIR}
-
-# compile
-ssh ${HYPRE_COMPILE_MACHINE} "\
-    (\
-        chmod -fR ug+rwX ${HYPRE_REMOTE_DIR};\
-        cd ${HYPRE_REMOTE_DIR}/linear_solvers;\
-	. test/env.${HYPRE_ARCH};\
-        ./configure ;\
-        make -k beta;\
-        make -k nofei;\
-        cd ${HYPRE_REMOTE_DIR}/linear_solvers/test; make fei++; \
-    )"
-
-# run test suite
-ssh ${HYPRE_RUN_MACHINE} "\
-    (\
-        cd ${HYPRE_REMOTE_DIR}/linear_solvers/test;\
-	. ./env.${HYPRE_ARCH};\
-        ./test_drivers.sh -mail\
-    )"
-
-# compile C++ anf F77 drivers
-ssh ${HYPRE_RUN_MACHINE} "\
-    (\
-        cd ${HYPRE_REMOTE_DIR}/linear_solvers/test;\
-	. ./env.${HYPRE_ARCH};\
-	$MAKE all++ 1> $0.all++.log 2> $0.all++.err
-#	$MAKE beta++ 1> $0.beta++.log 2> $0.beta++.err
-	$MAKE all77 1> $0.all77.log 2> $0.all77.err
-#	$MAKE beta77 1> $0.beta77.log 2> $0.beta77.err
-    )"
-
-ssh ${HYPRE_COMPILE_MACHINE} "\
-    (\
-        cd ${HYPRE_REMOTE_DIR}/linear_solvers;\
-	. test/env.${HYPRE_ARCH};\
-        ./configure --with-openmp;\
-	make veryclean;\
-        make -k beta;\
-    )"
-
-
-echo "cleaning up...."
-ssh ${HYPRE_COMPILE_MACHINE} "\
-    (\
-         cd  ${HYPRE_REMOTE_DIR}/linear_solvers;\
-         tar -cvf autotest.${HYPRE_RUN_MACHINE}.tar test\
-    )"
-
-echo "copying test results to CASC machine..."
-scp -r  ${HYPRE_COMPILE_MACHINE}:${HYPRE_REMOTE_DIR}/linear_solvers/autotest.${HYPRE_RUN_MACHINE}.tar $HYPRE_AUTOTEST_DIR/.
-
-ssh ${HYPRE_COMPILE_MACHINE} "\
-    (\
-         rm -fR ${HYPRE_REMOTE_DIR}\
-    )"
+    -casc)
+        HYPRE_ARCH="casc"
+        HYPRE_COMPILE_MACHINE="perrin"
+        HYPRE_RUN_MACHINE="perrin"
+        HYPRE_REMOTE_DIR="/home/casc/software/hypre/autotest"
+	HYPRE_MACHINE_COMMANDS="-m -d -a 2 -cxfy -t 1 -n"
+	./autotest_test $HYPRE_MACHINE_COMMANDS
+        shift;;
+  esac
 
 done
 
@@ -361,3 +125,4 @@ done
 
 touch $HYPRE_AUTOTEST_DIR/autotest_finished
 
+umask $OldMask
