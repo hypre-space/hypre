@@ -32,13 +32,13 @@ class MLI_Matrix;
 
 class MLI_Vector
 {
-   char  name[100];
-   void  *vector;
-   int   (*destroy_func)(void*);
+   char  name_[100];
+   void  *vector_;
+   int   (*destroyFunc_)(void*);
 
 public :
 
-   MLI_Vector( void *in_vec, char *in_name, MLI_Function *func_ptr );
+   MLI_Vector( void *inVec, char *inName, MLI_Function *funcPtr );
    ~MLI_Vector();
    char   *getName();
    void   *getVector();
