@@ -15,13 +15,6 @@
 #ifndef hypre_IJ_VECTOR_HEADER
 #define hypre_IJ_VECTOR_HEADER
 
-#include "../utilities/general.h"
-#include "../utilities/utilities.h"
-
-#include "../HYPRE.h"
-
-/* #include "./HYPRE_IJ_vector_types.h" */
-
 /*--------------------------------------------------------------------------
  * hypre_IJVector:
  *--------------------------------------------------------------------------*/

@@ -124,13 +124,6 @@ typedef struct
 #ifndef hypre_IJ_MATRIX_HEADER
 #define hypre_IJ_MATRIX_HEADER
 
-#include "../utilities/general.h"
-#include "../utilities/utilities.h"
-
-#include "../HYPRE.h"
-
-/* #include "./HYPRE_IJ_matrix_types.h" */
-
 /*--------------------------------------------------------------------------
  * hypre_IJMatrix:
  *--------------------------------------------------------------------------*/
@@ -186,8 +179,6 @@ int
 hypre_GetIJMatrixISISMatrix( HYPRE_IJMatrix IJmatrix, RowMatrix *reference )
 #endif
 
-/* #include "./internal_protos.h" */
-
 #endif
 /*BHEADER**********************************************************************
  * (c) 1999   The Regents of the University of California
@@ -205,13 +196,6 @@ hypre_GetIJMatrixISISMatrix( HYPRE_IJMatrix IJmatrix, RowMatrix *reference )
 
 #ifndef hypre_IJ_VECTOR_HEADER
 #define hypre_IJ_VECTOR_HEADER
-
-#include "../utilities/general.h"
-#include "../utilities/utilities.h"
-
-#include "../HYPRE.h"
-
-/* #include "./HYPRE_IJ_vector_types.h" */
 
 /*--------------------------------------------------------------------------
  * hypre_IJVector:

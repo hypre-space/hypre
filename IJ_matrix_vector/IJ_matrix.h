@@ -15,13 +15,6 @@
 #ifndef hypre_IJ_MATRIX_HEADER
 #define hypre_IJ_MATRIX_HEADER
 
-#include "../utilities/general.h"
-#include "../utilities/utilities.h"
-
-#include "../HYPRE.h"
-
-/* #include "./HYPRE_IJ_matrix_types.h" */
-
 /*--------------------------------------------------------------------------
  * hypre_IJMatrix:
  *--------------------------------------------------------------------------*/
@@ -76,7 +69,5 @@ hypre_GetIJMatrixParCSRMatrix( HYPRE_IJMatrix IJmatrix, Mat *reference )
 int
 hypre_GetIJMatrixISISMatrix( HYPRE_IJMatrix IJmatrix, RowMatrix *reference )
 #endif
-
-/* #include "./internal_protos.h" */
 
 #endif
