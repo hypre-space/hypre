@@ -662,7 +662,7 @@ void hypre_ParCSRMatrixExtractBExt_Arrays
  * initialize communication 
  *--------------------------------------------------------------------------*/
    comm_handle = hypre_ParCSRCommHandleCreate(11,comm_pkg,
-		&B_int_i[1],pB_ext_i[1]);
+		&B_int_i[1],&(*pB_ext_i)[1]);
 
    B_int_j = hypre_CTAlloc(int, *num_nonzeros);
    if (data) B_int_data = hypre_CTAlloc(double, *num_nonzeros);
