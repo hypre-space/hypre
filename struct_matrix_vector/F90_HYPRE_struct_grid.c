@@ -19,7 +19,7 @@
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_createstructgrid)( int      *comm,
+hypre_F90_IFACE(hypre_structgridcreate)( int      *comm,
                                          int      *dim,
                                          long int *grid,
                                          int      *ierr )
@@ -34,7 +34,7 @@ hypre_F90_IFACE(hypre_createstructgrid)( int      *comm,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_destroystructgrid)( long int *grid,
+hypre_F90_IFACE(hypre_structgriddestroy)( long int *grid,
                                           int      *ierr )
 {
    *ierr = (int) ( HYPRE_StructGridDestroy( (HYPRE_StructGrid) *grid ) );
@@ -45,7 +45,7 @@ hypre_F90_IFACE(hypre_destroystructgrid)( long int *grid,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_setstructgridextents)( long int *grid,
+hypre_F90_IFACE(hypre_structgridsetextents)( long int *grid,
                                              int      *ilower,
                                              int      *iupper,
                                              int      *ierr )
@@ -60,7 +60,7 @@ hypre_F90_IFACE(hypre_setstructgridextents)( long int *grid,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_setstructgridperiodic)( long int *grid,
+hypre_F90_IFACE(hypre_structgridsetperiodic)( long int *grid,
                                               int      *periodic,
                                               int      *ierr)
 {
@@ -73,7 +73,7 @@ hypre_F90_IFACE(hypre_setstructgridperiodic)( long int *grid,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_assemblestructgrid)( long int *grid,
+hypre_F90_IFACE(hypre_structgridassemble)( long int *grid,
                                            int      *ierr )
 {
    *ierr = (int) ( HYPRE_StructGridAssemble( (HYPRE_StructGrid) *grid) );

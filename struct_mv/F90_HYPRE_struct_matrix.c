@@ -20,7 +20,7 @@
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_createstructmatrix)( int      *comm,
+hypre_F90_IFACE(hypre_structmatrixcreate)( int      *comm,
                                            long int *grid,
                                            long int *stencil,
                                            long int *matrix,
@@ -38,7 +38,7 @@ hypre_F90_IFACE(hypre_createstructmatrix)( int      *comm,
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_destroystructmatrix)( long int *matrix,
+hypre_F90_IFACE(hypre_structmatrixdestroy)( long int *matrix,
                                             int      *ierr   )
 {
    *ierr = (int)
@@ -50,7 +50,7 @@ hypre_F90_IFACE(hypre_destroystructmatrix)( long int *matrix,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_initializestructmatrix)( long int *matrix,
+hypre_F90_IFACE(hypre_structmatrixinitialize)( long int *matrix,
                                                int      *ierr   )
 {
    *ierr = (int)
@@ -62,7 +62,7 @@ hypre_F90_IFACE(hypre_initializestructmatrix)( long int *matrix,
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_setstructmatrixvalues)( long int *matrix,
+hypre_F90_IFACE(hypre_structmatrixsetvalues)( long int *matrix,
                                               int      *grid_index,
                                               int      *num_stencil_indices,
                                               int      *stencil_indices,
@@ -82,7 +82,7 @@ hypre_F90_IFACE(hypre_setstructmatrixvalues)( long int *matrix,
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_setstructmatrixboxvalues)( long int *matrix,
+hypre_F90_IFACE(hypre_structmatrixsetboxvalues)( long int *matrix,
                                                  int      *ilower,
                                                  int      *iupper,
                                                  int      *num_stencil_indices,
@@ -104,7 +104,7 @@ hypre_F90_IFACE(hypre_setstructmatrixboxvalues)( long int *matrix,
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_assemblestructmatrix)( long int *matrix,
+hypre_F90_IFACE(hypre_structmatrixassemble)( long int *matrix,
                                              int      *ierr   )
 {
    *ierr = (int)
@@ -116,7 +116,7 @@ hypre_F90_IFACE(hypre_assemblestructmatrix)( long int *matrix,
  *--------------------------------------------------------------------------*/
  
 void
-hypre_F90_IFACE(hypre_setstructmatrixnumghost)( long int *matrix,
+hypre_F90_IFACE(hypre_structmatrixsetnumghost)( long int *matrix,
                                                 int      *num_ghost,
                                                 int      *ierr      )
 {
@@ -130,9 +130,9 @@ hypre_F90_IFACE(hypre_setstructmatrixnumghost)( long int *matrix,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_structmatrixgrid)( long int *matrix,
-                                         long int *grid,
-                                         int      *ierr   )
+hypre_F90_IFACE(hypre_structmatrixgetgrid)( long int *matrix,
+                                            long int *grid,
+                                            int      *ierr   )
 {
    *ierr = (int)
       ( HYPRE_StructMatrixGetGrid( (HYPRE_StructMatrix) *matrix,
@@ -144,7 +144,7 @@ hypre_F90_IFACE(hypre_structmatrixgrid)( long int *matrix,
  *--------------------------------------------------------------------------*/
  
 void
-hypre_F90_IFACE(hypre_setstructmatrixsymmetric)( long int *matrix,
+hypre_F90_IFACE(hypre_structmatrixsetsymmetric)( long int *matrix,
                                                  int      *symmetric,
                                                  int      *ierr      )
 {

@@ -261,12 +261,12 @@ c----------------------------------------------------------------------
          enddo
       endif 
 
-      call HYPRE_CreateStructGrid(MPI_COMM_WORLD, dim, grid, ierr)
+      call HYPRE_StructGridCreate(MPI_COMM_WORLD, dim, grid, ierr)
       do ib=1,nblocks
-         call HYPRE_SetStructGridExtents(grid, ilower(1,ib),
+         call HYPRE_StructGridSetExtents(grid, ilower(1,ib),
      & iupper(1,ib), ierr)
       enddo
-      call HYPRE_AssembleStructGrid(grid, ierr)
+      call HYPRE_StructGridAssemble(grid, ierr)
 
 c----------------------------------------------------------------------
 c     Compute the offsets and set up the stencil structure.
@@ -297,9 +297,9 @@ c----------------------------------------------------------------------
          offsets(3,4) =  0
       endif
  
-      call HYPRE_CreateStructStencil(dim, (dim+1), stencil, ierr) 
+      call HYPRE_StructStencilCreate(dim, (dim+1), stencil, ierr) 
       do s=1,dim+1
-         call HYPRE_SetStructStencilElement(stencil, (s - 1),
+         call HYPRE_StructStencilSetElement(stencil, (s - 1),
      & offsets(1,s), ierr)
       enddo
 
@@ -312,11 +312,11 @@ c-----------------------------------------------------------------------
          A_num_ghost(2*i) = 1
       enddo
  
-      call HYPRE_CreateStructMatrix(MPI_COMM_WORLD, grid, stencil,
+      call HYPRE_StructMatrixCreate(MPI_COMM_WORLD, grid, stencil,
      & A, ierr)
-      call HYPRE_SetStructMatrixSymmetric(A, 1, ierr)
-      call HYPRE_SetStructMatrixNumGhost(A, A_num_ghost, ierr)
-      call HYPRE_InitializeStructMatrix(A, ierr)
+      call HYPRE_StructMatrixSetSymmetric(A, 1, ierr)
+      call HYPRE_StructMatrixSetNumGhost(A, A_num_ghost, ierr)
+      call HYPRE_StructMatrixInitialize(A, ierr)
 
 c-----------------------------------------------------------------------
 c     Set the coefficients for the grid
@@ -343,7 +343,7 @@ c-----------------------------------------------------------------------
       enddo
 
       do ib=1,nblocks
-         call HYPRE_SetStructMatrixBoxValues(A, ilower(1,ib),
+         call HYPRE_StructMatrixSetBoxValues(A, ilower(1,ib),
      & iupper(1,ib), (dim+1), stencil_indices, values, ierr)
       enddo
 
@@ -360,45 +360,45 @@ c-----------------------------------------------------------------------
                i = iupper(d,ib)
                iupper(d,ib) = istart(d)
                stencil_indices(1) = d - 1
-               call HYPRE_SetStructMatrixBoxValues(A, ilower(1,ib),
+               call HYPRE_StructMatrixSetBoxValues(A, ilower(1,ib),
      & iupper(1,ib), 1, stencil_indices, values, ierr)
                iupper(d,ib) = i
             endif
          enddo
       enddo
 
-      call HYPRE_AssembleStructMatrix(A, ierr)
-c     call HYPRE_PrintStructMatrix("driver.out.A", A, zero, ierr)
+      call HYPRE_StructMatrixAssemble(A, ierr)
+c     call HYPRE_StructMatrixPrint("driver.out.A", A, zero, ierr)
 
 c-----------------------------------------------------------------------
 c     Set up the rhs and initial guess
 c-----------------------------------------------------------------------
 
-      call HYPRE_CreateStructVector(MPI_COMM_WORLD, grid, stencil,
+      call HYPRE_StructVectorCreate(MPI_COMM_WORLD, grid, stencil,
      & b, ierr)
-      call HYPRE_InitializeStructVector(b, ierr)
+      call HYPRE_StructVectorInitialize(b, ierr)
       do i=1,volume
          values(i) = 1.0
       enddo
       do ib=1,nblocks
-         call HYPRE_SetStructVectorBoxValues(b, ilower(1,ib),
+         call HYPRE_StructVectorSetBoxValues(b, ilower(1,ib),
      & iupper(1,ib), values, ierr)
       enddo
-      call HYPRE_AssembleStructVector(b, ierr)
-c     call HYPRE_PrintStructVector("driver.out.b", b, zero, ierr)
+      call HYPRE_StructVectorAssemble(b, ierr)
+c     call HYPRE_StructVectorPrint("driver.out.b", b, zero, ierr)
 
-      call HYPRE_CreateStructVector(MPI_COMM_WORLD, grid, stencil,
+      call HYPRE_StructVectorCreate(MPI_COMM_WORLD, grid, stencil,
      & x, ierr)
-      call HYPRE_InitializeStructVector(x, ierr)
+      call HYPRE_StructVectorInitialize(x, ierr)
       do i=1,volume
          values(i) = 0.0
       enddo
       do ib=1,nblocks
-         call HYPRE_SetStructVectorBoxValues(x, ilower(1,ib),
+         call HYPRE_StructVectorSetBoxValues(x, ilower(1,ib),
      & iupper(1,ib), values, ierr)
       enddo
-      call HYPRE_AssembleStructVector(x, ierr)
-c     call HYPRE_PrintStructVector("driver.out.x0", x, zero, ierr)
+      call HYPRE_StructVectorAssemble(x, ierr)
+c     call HYPRE_StructVectorPrint("driver.out.x0", x, zero, ierr)
  
 c-----------------------------------------------------------------------
 c     Solve the linear system
@@ -601,7 +601,7 @@ c-----------------------------------------------------------------------
 c     Print the solution and other info
 c-----------------------------------------------------------------------
 
-c  call HYPRE_PrintStructVector("driver.out.x", x, zero, ierr)
+c  call HYPRE_StructVectorPrint("driver.out.x", x, zero, ierr)
 
       if (myid .eq. 0) then
          print *, 'Iterations = ', num_iterations
@@ -612,11 +612,11 @@ c-----------------------------------------------------------------------
 c     Finalize things
 c-----------------------------------------------------------------------
 
-      call HYPRE_DestroyStructGrid(grid, ierr)
-      call HYPRE_DestroyStructStencil(stencil, ierr)
-      call HYPRE_DestroyStructMatrix(A, ierr)
-      call HYPRE_DestroyStructVector(b, ierr)
-      call HYPRE_DestroyStructVector(x, ierr)
+      call HYPRE_StructGridDestroy(grid, ierr)
+      call HYPRE_StructStencilDestroy(stencil, ierr)
+      call HYPRE_StructMatrixDestroy(A, ierr)
+      call HYPRE_StructVectorDestroy(b, ierr)
+      call HYPRE_StructVectorDestroy(x, ierr)
 
 c     Finalize MPI
 
