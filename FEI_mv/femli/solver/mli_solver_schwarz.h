@@ -20,11 +20,11 @@
 
 class MLI_Solver_Schwarz : public MLI_Solver
 {
-   MLI_Matrix *Amat;
-   int        nblocks;
-   int        *block_lengths;
-   int        **block_indices;
-   double     **block_inverses;
+   MLI_Matrix *Amat_;
+   int        nBlocks_;
+   int        *blockLengths_;
+   int        **blockIndices_;
+   double     ***blockInverses_;
 
 public :
 
@@ -35,8 +35,10 @@ public :
    int setParams( char *param_string, int argc, char **argv);
 
    int setNBlocks(int nblocks);
-   int composedOverlappedMatrix(void *A_in, int *off_nrows, 
+   int composedOverlappedMatrix(int *off_nrows, int **off_rows, 
                  int **off_row_lengths, int **off_cols, double **off_vals);
+   int buildBlocks(int off_nrows, int *off_rows, int *off_row_lengths, 
+                   int *off_cols, double *off_vals);
 };
 
 #endif
