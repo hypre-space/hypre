@@ -51,6 +51,7 @@ main( int   argc,
    int                 max_levels = 25;
    int                 num_iterations; 
    int                 num_sweep = 1;
+   int                 smooth_num_sweep = 1;
    double              max_row_sum = 1.0;
    double              norm;
    double              final_res_norm;
@@ -91,6 +92,7 @@ main( int   argc,
    int size, *col_ind;
    int local_num_vars;
    int variant, overlap, domain_type;
+   double schwarz_rlx_weight;
    double *values;
 
    /* parameters for BoomerAMG */
@@ -337,6 +339,11 @@ main( int   argc,
          arg_index++;
          num_sweep = atoi(argv[arg_index++]);
       }
+      else if ( strcmp(argv[arg_index], "-sns") == 0 )
+      {
+         arg_index++;
+         smooth_num_sweep = atoi(argv[arg_index++]);
+      }
       else if ( strcmp(argv[arg_index], "-help") == 0 )
       {
          print_usage = 1;
@@ -440,6 +447,7 @@ main( int   argc,
    variant = 0;  /* multiplicative */
    overlap = 1;  /* 1 layer overlap */
    domain_type = 2; /* through agglomeration */
+   schwarz_rlx_weight = 1.0;
 
    /* defaults for GMRES */
 
@@ -463,6 +471,11 @@ main( int   argc,
          for (i=1; i < max_levels; i++)
 	   relax_weight[i] = relax_weight[0];
         }
+      }
+      else if ( strcmp(argv[arg_index], "-sw") == 0 )
+      {
+         arg_index++;
+         schwarz_rlx_weight  = atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-th") == 0 )
       {
@@ -966,6 +979,7 @@ main( int   argc,
       HYPRE_BoomerAMGSetGridRelaxType(amg_solver, grid_relax_type);
       HYPRE_BoomerAMGSetRelaxWeight(amg_solver, relax_weight);
       HYPRE_BoomerAMGSetSmoothOption(amg_solver, smooth_option);
+      HYPRE_BoomerAMGSetSmoothNumSweep(amg_solver, smooth_num_sweep);
       HYPRE_BoomerAMGSetGridRelaxPoints(amg_solver, grid_relax_points);
       HYPRE_BoomerAMGSetMaxLevels(amg_solver, max_levels);
       HYPRE_BoomerAMGSetMaxRowSum(amg_solver, max_row_sum);
@@ -973,6 +987,7 @@ main( int   argc,
       HYPRE_BoomerAMGSetVariant(amg_solver, variant);
       HYPRE_BoomerAMGSetOverlap(amg_solver, overlap);
       HYPRE_BoomerAMGSetDomainType(amg_solver, domain_type);
+      HYPRE_BoomerAMGSetSchwarzRlxWeight(amg_solver, schwarz_rlx_weight);
       HYPRE_BoomerAMGSetNumFunctions(amg_solver, num_functions);
       if (num_functions > 1)
 	 HYPRE_BoomerAMGSetDofFunc(amg_solver, dof_func);
@@ -1039,6 +1054,7 @@ main( int   argc,
          HYPRE_BoomerAMGSetGridRelaxType(pcg_precond, grid_relax_type);
          HYPRE_BoomerAMGSetRelaxWeight(pcg_precond, relax_weight);
          HYPRE_BoomerAMGSetSmoothOption(pcg_precond, smooth_option);
+         HYPRE_BoomerAMGSetSmoothNumSweep(pcg_precond, smooth_num_sweep);
          HYPRE_BoomerAMGSetGridRelaxPoints(pcg_precond, grid_relax_points);
          HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
@@ -1046,6 +1062,7 @@ main( int   argc,
          HYPRE_BoomerAMGSetVariant(pcg_precond, variant);
          HYPRE_BoomerAMGSetOverlap(pcg_precond, overlap);
          HYPRE_BoomerAMGSetDomainType(pcg_precond, domain_type);
+         HYPRE_BoomerAMGSetSchwarzRlxWeight(pcg_precond, schwarz_rlx_weight);
          if (num_functions > 1)
             HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
          HYPRE_PCGSetPrecond(pcg_solver,
@@ -1089,6 +1106,7 @@ main( int   argc,
 	 HYPRE_SchwarzSetVariant(pcg_precond, variant);
 	 HYPRE_SchwarzSetOverlap(pcg_precond, overlap);
 	 HYPRE_SchwarzSetDomainType(pcg_precond, domain_type);
+         HYPRE_SchwarzSetRelaxWeight(pcg_precond, schwarz_rlx_weight);
 
          HYPRE_PCGSetPrecond(pcg_solver,
                              (HYPRE_PtrToSolverFcn) HYPRE_SchwarzSolve,
@@ -1217,6 +1235,7 @@ main( int   argc,
          HYPRE_BoomerAMGSetGridRelaxType(pcg_precond, grid_relax_type);
          HYPRE_BoomerAMGSetRelaxWeight(pcg_precond, relax_weight);
          HYPRE_BoomerAMGSetSmoothOption(pcg_precond, smooth_option);
+         HYPRE_BoomerAMGSetSmoothNumSweep(pcg_precond, smooth_num_sweep);
          HYPRE_BoomerAMGSetGridRelaxPoints(pcg_precond, grid_relax_points);
          HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
@@ -1401,6 +1420,7 @@ main( int   argc,
          HYPRE_BoomerAMGSetGridRelaxType(pcg_precond, grid_relax_type);
          HYPRE_BoomerAMGSetRelaxWeight(pcg_precond, relax_weight);
          HYPRE_BoomerAMGSetSmoothOption(pcg_precond, smooth_option);
+         HYPRE_BoomerAMGSetSmoothNumSweep(pcg_precond, smooth_num_sweep);
          HYPRE_BoomerAMGSetGridRelaxPoints(pcg_precond, grid_relax_points);
          HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
@@ -1555,6 +1575,7 @@ main( int   argc,
          HYPRE_BoomerAMGSetGridRelaxType(pcg_precond, grid_relax_type);
          HYPRE_BoomerAMGSetRelaxWeight(pcg_precond, relax_weight);
          HYPRE_BoomerAMGSetSmoothOption(pcg_precond, smooth_option);
+         HYPRE_BoomerAMGSetSmoothNumSweep(pcg_precond, smooth_num_sweep);
          HYPRE_BoomerAMGSetGridRelaxPoints(pcg_precond, grid_relax_points);
          HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
