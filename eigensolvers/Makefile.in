@@ -192,7 +192,7 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 SUBDIRS = . lib
 DIST_SUBDIRS = . krylov lib multivector sstruct_ls parcsr_ls struct_ls \
-               utilities test
+               utilities 
 
 all: all-recursive
 

@@ -39,9 +39,9 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 host_triplet = @host@
 subdir = config
-DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in INSTALL \
-	compile config.guess config.sub depcomp install-sh ltmain.sh \
-	missing mkinstalldirs
+DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in compile \
+	config.guess config.sub depcomp install-sh ltmain.sh missing \
+	mkinstalldirs
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/config/acinclude.m4 \
 	$(top_srcdir)/config/acx_blas.m4 \
@@ -107,7 +107,6 @@ LAPACK_LIBS = @LAPACK_LIBS@
 LDFLAGS = @LDFLAGS@
 LIBDIRNEEDED_FALSE = @LIBDIRNEEDED_FALSE@
 LIBDIRNEEDED_TRUE = @LIBDIRNEEDED_TRUE@
-LIBG2C = @LIBG2C@
 LIBM = @LIBM@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@

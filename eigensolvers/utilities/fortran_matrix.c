@@ -4,7 +4,7 @@
 #include <stdio.h>
 
 #include "fortran.h"
-#include "hypre_blas.h"
+/*  #include "hypre_blas.h"  */
 
 #include "fortran_matrix.h"
 
