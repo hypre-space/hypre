@@ -1,0 +1,19 @@
+-threeD 0                    #MatGenWrapper; 0
+-px   1                      #MatGenWrapper; int
+-py   1                      #MatGenWrapper; int
+-pz   0                      #MatGenWrapper; int
+-c    4                      #MatGenWrapper; int
+-id   0                      #MatGenWrapper; int
+-striped_partitioning 0  # ProcGrid_dh
+-bdry_level 1
+-level 1
+-f_param 2.0
+-blocked_matrix   1 #MatGenFD
+-trace_dh  0
+-debug_dh  0
+-logFile logFile
+-inFile_type mtx_real
+-xx_coeff -1.0
+-yy_coeff -1.0
+-zz_coeff -1.0
+#-coeff 1.0                   #MatGenWrapper; double     

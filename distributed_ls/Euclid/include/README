@@ -1,0 +1,18 @@
+File naming convention:  Files with uppercase: classes
+
+all parser ops should be in Euclid_seq.h
+
+euclid.h   -  the only file users need to include; this file merely
+              include the other header files.
+
+euclid_config.h  -  hopefully contains everything that may need to
+                    be changed for interfacing Euclid with other
+                    packages.
+
+euclid_common.h  -  essential declarations used by all Euclid classes;
+                    all global variables are also declared herein.
+
+Euclid_seq.h   - the Euclid data structure (context) and supporting
+                 functions for non-MPI compilations; "_seq" is a
+                 misnomer, since this is also for OpenMP.
+                 
