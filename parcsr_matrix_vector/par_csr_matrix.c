@@ -235,6 +235,12 @@ hypre_PrintParCSRMatrix( hypre_ParCSRMatrix *matrix,
    return ierr;
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_CSRMatrixToParCSRMatrix:
+ * generates a ParCSRMatrix distributed across the processors in comm
+ * from a CSRMatrix on proc 0 .
+ *--------------------------------------------------------------------------*/
+
 hypre_ParCSRMatrix *
 hypre_CSRMatrixToParCSRMatrix( MPI_Comm comm, hypre_CSRMatrix *A,
 			       int **row_starts_ptr,
@@ -333,7 +339,7 @@ hypre_CSRMatrixToParCSRMatrix( MPI_Comm comm, hypre_CSRMatrix *A,
 	for (i=1; i < num_procs; i++)
 	{
 		ind = a_i[row_starts[i]];
-		BuildCSRMatrixMPIDataType(local_num_nonzeros[i], 
+		hypre_BuildCSRMatrixMPIDataType(local_num_nonzeros[i], 
 			local_num_rows[i],
 			&a_data[ind],
 			&a_i[row_starts[i]],
@@ -355,7 +361,7 @@ hypre_CSRMatrixToParCSRMatrix( MPI_Comm comm, hypre_CSRMatrix *A,
    else
    {
 	hypre_InitializeCSRMatrix(local_A);
-	BuildCSRMatrixMPIDataType(num_nonzeros, 
+	hypre_BuildCSRMatrixMPIDataType(num_nonzeros, 
 			local_num_rows[my_id],
 			hypre_CSRMatrixData(local_A),
 			hypre_CSRMatrixI(local_A),
@@ -436,7 +442,7 @@ GenerateDiagAndOffd(hypre_CSRMatrix *A,
    num_cols_diag = last_col_diag - first_col_diag +1;
    num_cols_offd = 0;
 
-   if ((num_cols - num_cols_diag) != 0)
+   if (num_cols - num_cols_diag)
    {
 	hypre_InitializeCSRMatrix(diag);
    	diag_i = hypre_CSRMatrixI(diag);
@@ -535,7 +541,7 @@ GenerateDiagAndOffd(hypre_CSRMatrix *A,
    
    return ierr;
 }
-/*
+
 hypre_CSRMatrix *
 hypre_MergeDiagAndOffd(hypre_ParCSRMatrix *par_matrix)
 {
@@ -545,8 +551,9 @@ hypre_MergeDiagAndOffd(hypre_ParCSRMatrix *par_matrix)
 
    int 		num_cols = hypre_ParCSRMatrixGlobalNumCols(par_matrix);
    int 		first_col_diag = hypre_ParCSRMatrixFirstColDiag(par_matrix);
+   int		*col_map_offd = hypre_ParCSRMatrixColMapOffd(par_matrix);
    int 		num_rows = hypre_CSRMatrixNumRows(diag);
-   int 		num_cols_diag = hypre_CSRMatrixNumCols(diag);
+   int 		num_cols_offd = hypre_CSRMatrixNumCols(offd);
 
    int		*diag_i = hypre_CSRMatrixI(diag);
    int		*diag_j = hypre_CSRMatrixJ(diag);
@@ -560,21 +567,200 @@ hypre_MergeDiagAndOffd(hypre_ParCSRMatrix *par_matrix)
    double	*matrix_data;
 
    int		num_nonzeros, i, j;
+   int		count;
 
-   num_cols_offd = num_cols - num_cols_diag;
-   if (num_cols_offd != 0)
-	num_nonzeros = diag_i[num_rows] + offd_i[num_rows];
-   else
-	num_nonzeros = diag_i[num_rows];
+   if (!num_cols_offd)
+   {
+   	matrix = hypre_CreateCSRMatrix(num_rows,num_cols,diag_i[num_rows]);
+	hypre_CSRMatrixOwnsData(matrix) = 0;
+	hypre_CSRMatrixI(matrix) = diag_i;
+	hypre_CSRMatrixJ(matrix) = diag_j;
+	hypre_CSRMatrixData(matrix) = diag_data;
+ 	return matrix;
+   }
+
+   num_nonzeros = diag_i[num_rows] + offd_i[num_rows];
 
    matrix = hypre_CreateCSRMatrix(num_rows,num_cols,num_nonzeros);
    hypre_InitializeCSRMatrix(matrix);
 
+   matrix_i = hypre_CSRMatrixI(matrix);
+   matrix_j = hypre_CSRMatrixJ(matrix);
+   matrix_data = hypre_CSRMatrixData(matrix);
+
+   count = 0;
+   matrix_i[0] = 0;
    for (i=0; i < num_rows; i++)
    {
-	for (j=diag_i[i]; j < diag_i[i+1]-1; j++)
+	for (j=diag_i[i]; j < diag_i[i+1]; j++)
 	{
 		matrix_data[count] = diag_data[j];
-		matrix_j[count] = diag_j[j]+first_col_diag;
+		matrix_j[count++] = diag_j[j]+first_col_diag;
  	}
-*/	
+	for (j=offd_i[i]; j < offd_i[i+1]; j++)
+	{
+		matrix_data[count] = offd_data[j];
+		matrix_j[count++] = col_map_offd[offd_j[j]];
+ 	}
+	matrix_i[i+1] = count;
+   }
+
+   return matrix;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_ParCSRMatrixToCSRMatrixAll:
+ * generates a CSRMatrix from a ParCSRMatrix on all processors that have
+ * parts of the ParCSRMatrix
+ *--------------------------------------------------------------------------*/
+
+hypre_CSRMatrix *
+hypre_ParCSRMatrixToCSRMatrixAll(MPI_Comm comm, hypre_ParCSRMatrix *par_matrix,
+			      int *row_starts)
+{
+   hypre_CSRMatrix *matrix;
+   hypre_CSRMatrix *local_matrix;
+   int num_rows = hypre_ParCSRMatrixGlobalNumRows(par_matrix);
+   int num_cols = hypre_ParCSRMatrixGlobalNumCols(par_matrix);
+  
+   int *matrix_i;
+   int *matrix_j;
+   double *matrix_data;
+  
+   int *local_matrix_i;
+   int *local_matrix_j;
+   double *local_matrix_data;
+  
+   int i, j;
+   int local_num_rows;
+   int local_num_nonzeros;
+   int num_nonzeros;
+   int num_data;
+   int num_requests;
+   int vec_len, offset;
+   int start_index;
+   int proc_id;
+   int num_procs, my_id;
+   int num_types;
+   int *used_procs;
+
+   MPI_Request *requests;
+   MPI_Status *status;
+   MPI_Datatype *data_type;
+
+   MPI_Comm_size(comm, &num_procs);
+   MPI_Comm_rank(comm, &my_id);
+
+   local_matrix = hypre_MergeDiagAndOffd(par_matrix);
+   local_matrix_i = hypre_CSRMatrixI(local_matrix);
+   local_matrix_j = hypre_CSRMatrixJ(local_matrix);
+   local_matrix_data = hypre_CSRMatrixData(local_matrix);
+   local_num_rows = hypre_CSRMatrixNumRows(local_matrix);
+
+   matrix_i = hypre_CTAlloc(int, num_rows+1);
+
+   num_types = 0;
+   for (i=0; i < num_procs; i++)
+	if (row_starts[i+1]-row_starts[i] && i-my_id)
+		num_types++;
+   num_requests = 2*num_types;
+
+   used_procs = hypre_CTAlloc(int, num_types);
+   j = 0;
+   for (i=0; i < num_procs; i++)
+	if (row_starts[i+1]-row_starts[i] && i-my_id)
+		used_procs[j++] = i;
+
+   requests = hypre_CTAlloc(MPI_Request, num_requests);
+   status = hypre_CTAlloc(MPI_Status, num_requests);
+   data_type = hypre_CTAlloc(MPI_Datatype, num_types+1);
+
+   j = 0;
+   for (i = 0; i < num_types; i++)
+   {
+	proc_id = used_procs[i];
+	vec_len = row_starts[proc_id+1] - row_starts[proc_id];
+	MPI_Irecv(&matrix_i[row_starts[proc_id]+1], vec_len, MPI_INT,
+				proc_id, 0, comm, &requests[j++]);
+   }
+   for (i = 0; i < num_types; i++)
+   {
+	proc_id = used_procs[i];
+	MPI_Isend(&local_matrix_i[1], local_num_rows, MPI_INT,
+				proc_id, 0, comm, &requests[j++]);
+   }
+
+   vec_len = row_starts[my_id+1] - row_starts[my_id];
+   for (i=1; i <= vec_len; i++)
+	matrix_i[row_starts[my_id]+i] = local_matrix_i[i];
+
+   MPI_Waitall(num_requests, requests, status);
+
+/* generate matrix_i */
+
+   offset = matrix_i[row_starts[1]];
+   for (i=1; i < num_procs; i++)
+   {
+	for (j = row_starts[i]; j < row_starts[i+1]; j++)
+		matrix_i[j+1] += offset;
+	offset = matrix_i[row_starts[i+1]];
+   }
+
+   num_nonzeros = matrix_i[num_rows];
+
+   matrix = hypre_CreateCSRMatrix(num_rows, num_cols, num_nonzeros);
+   hypre_CSRMatrixI(matrix) = matrix_i;
+   hypre_InitializeCSRMatrix(matrix);
+   matrix_j = hypre_CSRMatrixJ(matrix);
+   matrix_data = hypre_CSRMatrixData(matrix);
+
+   for (i = 0; i < num_types; i++)
+   {
+	proc_id = used_procs[i];
+	start_index = matrix_i[row_starts[proc_id]];
+	num_data = matrix_i[row_starts[proc_id+1]] - start_index; 
+	hypre_BuildCSRJDataType(num_data,
+			  &matrix_data[start_index],
+			  &matrix_j[start_index],
+			  &data_type[i]);
+   }
+   local_num_nonzeros = local_matrix_i[local_num_rows];
+   hypre_BuildCSRJDataType(local_num_nonzeros,
+		     local_matrix_data,
+		     local_matrix_j,
+		     &data_type[num_types]);
+   j = 0;
+   for (i=0; i < num_types; i++)
+	MPI_Irecv(MPI_BOTTOM, 1, data_type[i],
+			used_procs[i], 0, comm, &requests[j++]);
+   for (i=0; i < num_types; i++)
+	MPI_Isend(MPI_BOTTOM, 1, data_type[num_types],
+			used_procs[i], 0, comm, &requests[j++]);
+
+   start_index = matrix_i[row_starts[my_id]];
+   for (i=0; i < local_num_nonzeros; i++)
+   {
+	matrix_j[start_index+i] = local_matrix_j[i];
+	matrix_data[start_index+i] = local_matrix_data[i];
+   }
+   MPI_Waitall(num_requests, requests, status);
+
+   for (i=0; i <= num_types; i++)
+	MPI_Type_free(&data_type[i]);
+
+   if (hypre_CSRMatrixOwnsData(local_matrix))
+	hypre_DestroyCSRMatrix(local_matrix);
+   else
+	hypre_TFree(local_matrix);
+
+   if (num_requests)
+   {
+	hypre_TFree(requests);
+   	hypre_TFree(status);
+   	hypre_TFree(used_procs);
+   }
+   hypre_TFree(data_type);
+
+   return matrix;
+}
+    
