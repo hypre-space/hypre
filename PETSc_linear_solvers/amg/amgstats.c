@@ -75,7 +75,7 @@ int hypre_AMGSetupStats(hypre_AMGData *amg_data)
    fprintf(fp,"         nonzero         entries p");
    fprintf(fp,"er row        row sums\n");
    fprintf(fp,"lev rows entries  sparse  min max  ");
-   fprintf(fp,"avg    min      max  avg\n");
+   fprintf(fp,"avg       min         max\n");
    fprintf(fp,"=======================================");
    fprintf(fp,"==========================\n");
 
@@ -101,7 +101,7 @@ int hypre_AMGSetupStats(hypre_AMGData *amg_data)
        max_rowsum = 0.0;
 
        for (j = A_i[0]; j < A_i[1]; j++)
-                    min_rowsum += P_data[j];
+                    min_rowsum += A_data[j];
 
        max_rowsum = min_rowsum;
 
@@ -114,7 +114,7 @@ int hypre_AMGSetupStats(hypre_AMGData *amg_data)
 
            rowsum = 0.0;
            for (i = A_i[j]; i < A_i[j+1]; i++)
-               rowsum += A_data[j];
+               rowsum += A_data[i];
 
            min_rowsum = min(rowsum, min_rowsum);
            max_rowsum = max(rowsum, max_rowsum);
@@ -125,7 +125,7 @@ int hypre_AMGSetupStats(hypre_AMGData *amg_data)
        fprintf(fp, "%2d %5d %7d  %0.3f  %3d %3d",
                  level, fine_size, num_nonzeros, sparse, min_entries, 
                  max_entries);
-       fprintf(fp,"  %5.2f  %5.3e  %5.3e\n", avg_entries,
+       fprintf(fp,"  %4.1f  %10.3e  %10.3e\n", avg_entries,
                                  min_rowsum, max_rowsum);
    }
        
@@ -184,7 +184,7 @@ int hypre_AMGSetupStats(hypre_AMGData *amg_data)
 
            rowsum = 0.0;
            for (i = P_i[j]; i < P_i[j+1]; i++)
-               rowsum += P_data[j];
+               rowsum += P_data[i];
 
            min_rowsum = min(rowsum, min_rowsum);
            max_rowsum = max(rowsum, max_rowsum);
