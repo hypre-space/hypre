@@ -142,7 +142,7 @@ hypre_ParCSRCommHandleCreate ( int 	      job,
    	}
 	break;
    }
-   default :
+   /* default :
    {
    	for (i = 0; i < num_recvs; i++)
    	{
@@ -159,7 +159,7 @@ hypre_ParCSRCommHandleCreate ( int 	      job,
 			ip, 0, comm, &requests[j++]);
    	}
 	break;
-   }
+   } */
    }
    /*--------------------------------------------------------------------
     * set up comm_handle and return
@@ -225,15 +225,20 @@ hypre_MatvecCommPkgCreate_core (
    int	i, j, j2, k;
    int	num_procs, my_id, proc_num, num_elmts;
    int	local_info, index, index2, offset, offd_col;
-   int	*proc_mark, *tmp, *recv_buf, *displs, *info;
+   int	*proc_mark, *proc_add, *tmp, *recv_buf, *displs, *info;
    /* outputs: */
    int  num_recvs, * recv_procs, * recv_vec_starts;
    int  num_sends, * send_procs, * send_map_starts, * send_map_elmts;
+   int  ip, vec_start, vec_len, num_requests;
+
+   MPI_Request *requests;
+   MPI_Status *status; 
 
    MPI_Comm_size(comm, &num_procs);  
    MPI_Comm_rank(comm, &my_id);
 
    proc_mark = hypre_CTAlloc(int, num_procs);
+   proc_add = hypre_CTAlloc(int, num_procs);
    info = hypre_CTAlloc(int, num_procs);
 
 /* ----------------------------------------------------------------------
@@ -243,26 +248,42 @@ hypre_MatvecCommPkgCreate_core (
  * ---------------------------------------------------------------------*/
 
    for (i=0; i < num_procs; i++)
-		proc_mark[i] = 0;
+		proc_add[i] = 0;
 
+   proc_num = 0;
+   if (num_cols_offd) offd_col = col_map_offd[0];
+   num_recvs=0;
+   j = 0;
    for (i=0; i < num_cols_offd; i++)
    {
-	offd_col = col_map_offd[i];
-	proc_num = 0;
 	if (num_cols_diag) proc_num = hypre_min(num_procs-1,offd_col / 
 					num_cols_diag);
 	while (col_starts[proc_num] > offd_col )
 		proc_num = proc_num-1;
 	while (col_starts[proc_num+1]-1 < offd_col )
 		proc_num = proc_num+1;
-	proc_mark[proc_num]++;
+	proc_mark[num_recvs] = proc_num;
+	j = i;
+	while (col_starts[proc_num+1] > offd_col)
+	{
+	   proc_add[num_recvs]++;
+	   if (j < num_cols_offd-1) 
+	   {
+	      j++;
+	      offd_col = col_map_offd[j];
+	   }
+	   else
+	   {
+	      j++;
+	      offd_col = col_starts[num_procs];
+	   }
+	}
+	num_recvs++;
+	if (j < num_cols_offd) i = j-1;
+	else i=j;
    }
 
-   num_recvs=0;
-   for (i=0; i < num_procs; i++)
-	if (proc_mark[i]) num_recvs++;
-
-   local_info = 2*num_recvs + num_cols_offd;
+   local_info = 2*num_recvs;
 			
    MPI_Allgather(&local_info, 1, MPI_INT, info, 1, MPI_INT, comm); 
 
@@ -277,31 +298,28 @@ hypre_MatvecCommPkgCreate_core (
    for (i=1; i < num_procs+1; i++)
 	displs[i] = displs[i-1]+info[i-1]; 
    recv_buf = hypre_CTAlloc(int, displs[num_procs]); 
-   recv_procs = hypre_CTAlloc(int, num_recvs);
-   recv_vec_starts = hypre_CTAlloc(int, num_recvs+1);
-   tmp = hypre_CTAlloc(int, local_info);
 
-/*   recv_mpi_types = hypre_CTAlloc(MPI_Datatype, num_recvs); */
+   recv_procs = NULL;
+   tmp = NULL;
+   if (num_recvs)
+   {
+      recv_procs = hypre_CTAlloc(int, num_recvs);
+      tmp = hypre_CTAlloc(int, local_info);
+   }
+   recv_vec_starts = hypre_CTAlloc(int, num_recvs+1);
+
 
    j = 0;
    j2 = 0;
-   recv_vec_starts[0] = 0;
-   for (i=0; i < num_procs; i++)
-	if (proc_mark[i])
-	{
-		recv_procs[j2] = i;
-		recv_vec_starts[j2+1] = recv_vec_starts[j2]+proc_mark[i];
-		/* MPI_Type_contiguous(proc_mark[i], MPI_DOUBLE,
-			&recv_mpi_types[j2]);
-		MPI_Type_commit(&recv_mpi_types[j2]); */
-		j2++;
-		tmp[j++] = i;
+   if (num_recvs) recv_vec_starts[0] = 0;
+   for (i=0; i < num_recvs; i++)
+   {
+		num_elmts = proc_add[i];
+		recv_procs[i] = proc_mark[i];
+		recv_vec_starts[i+1] = recv_vec_starts[i]+num_elmts;
 		tmp[j++] = proc_mark[i];
-		for (k=0; k < num_cols_offd; k++)
-			if (col_map_offd[k] >= col_starts[i] && 
-				col_map_offd[k] < col_starts[i+1])
-				tmp[j++] = col_map_offd[k];
-	}
+		tmp[j++] = num_elmts;
+   }
 
    MPI_Allgatherv(tmp,local_info,MPI_INT,recv_buf,info,displs,MPI_INT,comm);
 	
@@ -312,20 +330,21 @@ hypre_MatvecCommPkgCreate_core (
 
    num_sends = 0;
    num_elmts = 0;
+   proc_add[0] = 0;
    for (i=0; i < num_procs; i++)
    {
-	j = displs[i];
-	while ( j < displs[i+1])
-     	{
-		if (recv_buf[j++] == my_id)
-		{
-			num_sends++;
-			num_elmts += recv_buf[j];
-			break;
-		}
-		j += recv_buf[j];
-		j++;
-	}	
+      j = displs[i];
+      while ( j < displs[i+1])
+      {
+	 if (recv_buf[j++] == my_id)
+	 {
+	    proc_mark[num_sends] = i;
+	    num_sends++;
+	    proc_add[num_sends] = proc_add[num_sends-1]+recv_buf[j];
+	    break;
+	 }
+	 j++;
+      }	
    }
 		
 /* ----------------------------------------------------------------------
@@ -334,39 +353,61 @@ hypre_MatvecCommPkgCreate_core (
  * elements to be send to proc. i
  * ---------------------------------------------------------------------*/
 
-   send_procs = hypre_CTAlloc(int, num_sends);
-   send_map_starts = hypre_CTAlloc(int, num_sends+1);
-   send_map_elmts = hypre_CTAlloc(int, num_elmts);
-   /* send_mpi_types = hypre_CTAlloc(MPI_Datatype, num_procs); */
- 
-   index = 0;
-   index2 = 0; 
-   send_map_starts[0] = 0;
-   for (i=0; i < num_procs; i++)
+   send_procs = NULL;
+   send_map_elmts = NULL;
+
+   if (num_sends)
    {
-	offset = first_col_diag;
-	j = displs[i];
-	while ( j < displs[i+1])
-     	{
-		if (recv_buf[j++] == my_id)
-		{
-			send_procs[index] = i;
-			num_elmts = recv_buf[j++];
-			/* MPI_Type_contiguous(num_elmts, MPI_DOUBLE,
-					&send_mpi_types[index]);
-			MPI_Type_commit(&send_mpi_types[index]); */
-			send_map_starts[index+1] = send_map_starts[index]
-						+ num_elmts;
-			index++;
-			for (k = 0; k < num_elmts; k++)
-				send_map_elmts[index2++] = recv_buf[j++]-offset;
-			break;
-		}
-		j += recv_buf[j];
-		j++;
-	}	
+      send_procs = hypre_CTAlloc(int, num_sends);
+      send_map_elmts = hypre_CTAlloc(int, proc_add[num_sends]);
    }
-		
+   send_map_starts = hypre_CTAlloc(int, num_sends+1);
+   num_requests = num_recvs+num_sends;
+   if (num_requests)
+   {
+      requests = hypre_CTAlloc(MPI_Request, num_requests);
+      status = hypre_CTAlloc(MPI_Status, num_requests);
+   }
+
+   if (num_sends) send_map_starts[0] = 0;
+   for (i=0; i < num_sends; i++)
+   {
+      send_map_starts[i+1] = proc_add[i+1];
+      send_procs[i] = proc_mark[i];
+   }
+
+   j=0;
+   for (i=0; i < num_sends; i++)
+   {
+      vec_start = send_map_starts[i];
+      vec_len = send_map_starts[i+1] - vec_start;
+      ip = send_procs[i];
+      MPI_Irecv(&send_map_elmts[vec_start], vec_len, MPI_INT,
+                        ip, 0, comm, &requests[j++]);
+   }
+   for (i=0; i < num_recvs; i++)
+   {
+      vec_start = recv_vec_starts[i];
+      vec_len = recv_vec_starts[i+1] - vec_start;
+      ip = recv_procs[i];
+      MPI_Isend(&col_map_offd[vec_start], vec_len, MPI_INT,
+                        ip, 0, comm, &requests[j++]);
+   }
+
+   if (num_requests)
+   {
+      MPI_Waitall(num_requests, requests, status);
+      hypre_TFree(requests);
+      hypre_TFree(status);
+   }
+
+   if (num_sends)
+   {
+      for (i=0; i<send_map_starts[num_sends]; i++)
+         send_map_elmts[i] -= first_col_diag;
+   }
+
+   hypre_TFree(proc_add);
    hypre_TFree(proc_mark); 
    hypre_TFree(tmp);
    hypre_TFree(recv_buf);
@@ -451,15 +492,21 @@ hypre_MatvecCommPkgDestroy(hypre_ParCSRCommPkg *comm_pkg)
 {
    int ierr = 0;
 
-   hypre_TFree(hypre_ParCSRCommPkgSendProcs(comm_pkg));
+   if (hypre_ParCSRCommPkgNumSends(comm_pkg))
+   {
+      hypre_TFree(hypre_ParCSRCommPkgSendProcs(comm_pkg));
+      hypre_TFree(hypre_ParCSRCommPkgSendMapElmts(comm_pkg));
+   }
    hypre_TFree(hypre_ParCSRCommPkgSendMapStarts(comm_pkg));
-   hypre_TFree(hypre_ParCSRCommPkgSendMapElmts(comm_pkg));
-   if (hypre_ParCSRCommPkgSendMPITypes(comm_pkg))
-      hypre_TFree(hypre_ParCSRCommPkgSendMPITypes(comm_pkg));
-   hypre_TFree(hypre_ParCSRCommPkgRecvProcs(comm_pkg));
+   /* if (hypre_ParCSRCommPkgSendMPITypes(comm_pkg))
+      hypre_TFree(hypre_ParCSRCommPkgSendMPITypes(comm_pkg)); */ 
+   if (hypre_ParCSRCommPkgNumRecvs(comm_pkg))
+   {
+      hypre_TFree(hypre_ParCSRCommPkgRecvProcs(comm_pkg));
+   }
    hypre_TFree(hypre_ParCSRCommPkgRecvVecStarts(comm_pkg));
-   if (hypre_ParCSRCommPkgRecvMPITypes(comm_pkg))
-      hypre_TFree(hypre_ParCSRCommPkgRecvMPITypes(comm_pkg));
+   /* if (hypre_ParCSRCommPkgRecvMPITypes(comm_pkg))
+      hypre_TFree(hypre_ParCSRCommPkgRecvMPITypes(comm_pkg)); */
    hypre_TFree(comm_pkg);
 
    return ierr;
