@@ -481,6 +481,24 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
        }
 
        //----------------------------------------------------------------
+       // for GMRES, the convergence criterion 
+       //----------------------------------------------------------------
+
+       else if ( !strcmp(param1, "gmresStopCrit") )
+       {
+          sscanf(params[i],"%s %s", param, param2);
+          if      ( !strcmp(param2, "absolute" ) ) normAbsRel_ = 1;
+          else if ( !strcmp(param2, "relative" ) ) normAbsRel_ = 0;
+          else                                     normAbsRel_ = 0;   
+          
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+          {
+             printf("       HYPRE_LinSysCore::parameters gmresStopCrit = %s\n",
+                    param2);
+          }
+       }
+
+       //----------------------------------------------------------------
        // which preconditioner : diagonal, pilut, boomeramg, parasails
        //----------------------------------------------------------------
 
@@ -2120,14 +2138,10 @@ void HYPRE_LinSysCore::selectSolver(char* name)
     {
        case HYPCG :
             HYPRE_ParCSRPCGCreate(comm_, &HYSolver_);
-            //HYPRE_ParCSRPCGSetTwoNorm(HYSolver_, 1);
-            //HYPRE_ParCSRPCGSetRelChange(HYSolver_, 0);
-            //HYPRE_ParCSRPCGSetLogging(HYSolver_, 1);
             break;
 
        case HYGMRES :
             HYPRE_ParCSRGMRESCreate(comm_, &HYSolver_);
-            //HYPRE_ParCSRGMRESSetLogging(HYSolver_, 1);
             break;
     }
 
@@ -2604,7 +2618,10 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   HYPRE_ParCSRParaSailsSetFilter(HYPrecon_,parasailsFilter_);
                   HYPRE_ParCSRParaSailsSetLoadbal(HYPrecon_,parasailsLoadbal_);
                   HYPRE_ParCSRParaSailsSetReuse(HYPrecon_,parasailsReuse_);
-
+                  if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1)
+                  {
+                     HYPRE_ParCSRParaSailsSetLogging(HYPrecon_, 1);
+                  }
                   if ( HYPreconReuse_ == 1 )
                   {
                      HYPRE_ParCSRPCGSetPrecond(HYSolver_,
@@ -2700,6 +2717,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
           if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
           {
              printf("***************************************************\n");
+             HYPRE_ParCSRPCGSetLogging(HYSolver_, 1);
           }
           HYPRE_ParCSRPCGSolve(HYSolver_, A_csr, b_csr, x_csr);
           HYPRE_ParCSRPCGGetNumIterations(HYSolver_, &num_iterations);
@@ -2806,6 +2824,10 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   HYPRE_ParCSRParaSailsSetFilter(HYPrecon_,parasailsFilter_);
                   HYPRE_ParCSRParaSailsSetLoadbal(HYPrecon_,parasailsLoadbal_);
                   HYPRE_ParCSRParaSailsSetReuse(HYPrecon_,parasailsReuse_);
+                  if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1)
+                  {
+                     HYPRE_ParCSRParaSailsSetLogging(HYPrecon_, 1);
+                  }
 
                   if ( HYPreconReuse_ == 1 )
                   {
@@ -2895,13 +2917,14 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
           HYPRE_ParCSRGMRESSetKDim(HYSolver_, gmresDim_);
           HYPRE_ParCSRGMRESSetMaxIter(HYSolver_, maxIterations_);
           HYPRE_ParCSRGMRESSetTol(HYSolver_, tolerance_);
-          //if ( normAbsRel_ == 0 ) HYPRE_ParCSRGMRESSetStopCrit(HYsolver_,0);
-          //else                    HYPRE_ParCSRGMRESSetStopCrit(HYsolver_,1);
+          if ( normAbsRel_ == 0 ) HYPRE_ParCSRGMRESSetStopCrit(HYSolver_,0);
+          else                    HYPRE_ParCSRGMRESSetStopCrit(HYSolver_,1);
           HYPRE_ParCSRGMRESSetup(HYSolver_, A_csr, b_csr, x_csr);
           ptime  = MPI_Wtime();
           if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
           {
              printf("***************************************************\n");
+             HYPRE_ParCSRGMRESSetLogging(HYSolver_, 1);
           }
           HYPRE_ParCSRGMRESSolve(HYSolver_, A_csr, b_csr, x_csr);
           HYPRE_ParCSRGMRESGetNumIterations(HYSolver_, &num_iterations);
