@@ -13,6 +13,7 @@ char malloc_logpath_memory[256];
  *
  * Original Version:  12-16-97
  * Author: pnb
+ * 12-19-97 pnb  commented out the temporary write of the input vector file.
  *
  * Assume only one box in the input file.
  *--------------------------------------------------------------------------*/
@@ -138,7 +139,7 @@ main( int   argc,
    fclose(file_root);
 
    /* Write data read in to output file for testing */
-   zzz_PrintStructVector("zout_vector_test", vector_root, 0);
+   /* zzz_PrintStructVector("zout_vector_test", vector_root, 0); */
 
    /* Get min and max values for box in this file */
    /* Assume only one box in the input file for now */
