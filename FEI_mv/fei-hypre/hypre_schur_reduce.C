@@ -16,13 +16,8 @@
 #include "Data.h"
 #include "basicTypes.h"
 
-#if defined(FEI_V13) 
-#include "LinearSystemCore.1.3.h"
-#elseif defined(FEI_V14)
-#include "LinearSystemCore.1.4.h"
-#else
+#ifndef NOFEI
 #include "LinearSystemCore.h"
-#include "LSC.h"
 #endif
 
 #include "HYPRE.h"
@@ -1186,32 +1181,6 @@ void HYPRE_LinSysCore::buildSchurReducedSystem2()
     reducedA_ = NULL;
 
     //******************************************************************
-    // the nSchur should have been initialized by users already
-    // (We expect this should be greater than 0)
-    //------------------------------------------------------------------
-
-    if ( HYOutputLevel_ & HYFEI_SCHURREDUCE1 )
-    {
-       printf("%4d buildSchurSystem : nSchur = %d\n",mypid_,nSchur);
-       if ( nSchur <= 0 )
-          printf("%4d buildSchurSystem WARNING : nSchur <= 0\n",mypid_);
-    }
-
-    //******************************************************************
-    // find out about the number of rows in the global reduced matrix
-    // (globalNSchur)
-    //------------------------------------------------------------------
-
-    MPI_Allreduce(&nSchur, &globalNSchur, 1, MPI_INT, MPI_SUM,comm_);
-
-    if (globalNSchur == 0 && mypid_ == 0 && (HYOutputLevel_ & HYFEI_SCHURREDUCE1))
-    {
-       printf("buildSchurSystem WARNING : nSchur = 0 on all processors.\n");
-       schurReduction_ = 0;
-       return;
-    }
-
-    //******************************************************************
     // set up local information
     //------------------------------------------------------------------
 
@@ -1222,7 +1191,7 @@ void HYPRE_LinSysCore::buildSchurReducedSystem2()
     if ( HYOutputLevel_ & HYFEI_SCHURREDUCE1 )
     {
        printf("%4d buildSchurSystem : StartRow/EndRow = %d %d\n",mypid_,
-                                         StartRow,EndRow);
+                                      StartRow,EndRow);
     }
 
     //******************************************************************
@@ -1242,6 +1211,45 @@ void HYPRE_LinSysCore::buildSchurReducedSystem2()
        globalNRows += ProcNRows[i];
        ProcNRows[i] = ncnt;
     } 
+
+    //******************************************************************
+    // the nSchur should have been initialized by users already
+    // (We expect this should be greater than 0)
+    // If not, will perform an automatic search
+    //------------------------------------------------------------------
+
+    MPI_Allreduce(&nSchur, &globalNSchur, 1, MPI_INT, MPI_SUM,comm_);
+    if ( mypid_ == 0 && globalNSchur <= 0 )
+          printf("buildSchurSystem : will search for reduced rows\n");
+
+    if ( globalNSchur <= 0 )
+    {
+       nSchur = 0;
+       for ( i = EndRow; i >= StartRow; i-- ) 
+       {
+          HYPRE_ParCSRMatrixGetRow(A_csr,i,&rowSize,&colInd,&colVal);
+          searchIndex = globalNRows + 1;
+          for (j = 0; j < rowSize; j++) 
+          {
+             colIndex = colInd[j];
+             if ( colIndex < searchIndex ) searchIndex = colIndex;
+          }
+          HYPRE_ParCSRMatrixRestoreRow(A_csr,i,&rowSize,&colInd,&colVal);
+          if ( searchIndex < i ) nSchur++;
+          else                   break;
+       }
+       MPI_Allreduce(&nSchur, &globalNSchur, 1, MPI_INT, MPI_SUM,comm_);
+    }
+       
+    if ( HYOutputLevel_ & HYFEI_SCHURREDUCE1 )
+    {
+       printf("%4d buildSchurSystem : nSchur = %d\n",mypid_,nSchur);
+       if ( globalNSchur == 0 && mypid_ == 0 )
+          printf("buildSchurSystem WARNING : nSchur = 0 on all processors.\n");
+       schurReduction_ = 0;
+       delete [] ProcNRows;
+       return;
+    }
 
     //******************************************************************
     // construct global information about the reduced matrix
