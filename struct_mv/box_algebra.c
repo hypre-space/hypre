@@ -55,7 +55,7 @@ hypre_SubtractBoxes( hypre_Box      *box1,
               
    hypre_Box  *box;
    hypre_Box  *rembox;
-   int         d, iminmax, size;
+   int         d, size;
 
    /*------------------------------------------------------
     * Set the box array size to the maximum possible,

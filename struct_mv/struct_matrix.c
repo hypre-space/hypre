@@ -51,7 +51,6 @@ hypre_StructMatrixCreate( MPI_Comm             comm,
    hypre_StructMatrix  *matrix;
 
    int                  i;
-   int                  dim = hypre_StructStencilDim(user_stencil);
 
    matrix = hypre_CTAlloc(hypre_StructMatrix, 1);
 
@@ -153,12 +152,6 @@ hypre_StructMatrixInitializeShell( hypre_StructMatrix *matrix )
                     
    int                   i, j, d;
 
-   int                   k;
-   int                   dim;
-   int                   ix, iy, iz;
-   int                   jx, jy, jz;
-   int                   lower_triangular;
- 
    grid = hypre_StructMatrixGrid(matrix);
 
    /*-----------------------------------------------------------------------

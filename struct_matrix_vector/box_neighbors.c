@@ -75,7 +75,6 @@ hypre_BoxNeighborsCreate( hypre_BoxArray      *boxes,
                           hypre_BoxNeighbors **neighbors_ptr )
 {
    hypre_BoxNeighbors  *neighbors;
-   hypre_RankLink      *rank_link;
 
    neighbors = hypre_CTAlloc(hypre_BoxNeighbors, 1);
    hypre_BoxNeighborsRankLinks(neighbors) =

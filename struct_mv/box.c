@@ -150,7 +150,6 @@ int
 hypre_BoxArrayDestroy( hypre_BoxArray *box_array )
 {
    int  ierr = 0;
-   int  i;
 
    if (box_array)
    {
@@ -232,11 +231,10 @@ hypre_BoxArrayArrayDuplicate( hypre_BoxArrayArray *box_array_array )
 {
    hypre_BoxArrayArray  *new_box_array_array;
    hypre_BoxArray      **new_box_arrays;
-   hypre_Box            *new_box;
    int                   new_size;
  
    hypre_BoxArray      **box_arrays;
-   int                   i, j;
+   int                   i;
  
    new_size = hypre_BoxArrayArraySize(box_array_array);
    new_box_array_array = hypre_BoxArrayArrayCreate(new_size);

@@ -366,8 +366,7 @@ hypre_CreateCommInfoFromNumGhost( hypre_StructGrid      *grid,
    int                     *cbox_arrays_i;
    int                      num_cbox_arrays;
 
-   int                      i, j, k, m, n;
-   int                      s, d;
+   int                      i, j, k, m, n, d;
 
    /* temporary work variables */
    hypre_Box               *box0;
