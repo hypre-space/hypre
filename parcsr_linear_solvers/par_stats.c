@@ -92,6 +92,13 @@ hypre_ParAMGSetupStats( void               *amg_vdata,
    double    global_min_wt;
    double    global_max_wt;
 
+   int     *num_coeffs;
+   int     *num_variables;
+   int      total_coeffs;
+   int      total_variables;
+   double   operat_cmplxty;
+   double   grid_cmplxty;
+
    MPI_Comm_size(comm, &num_procs);   
    MPI_Comm_rank(comm,&my_id);
 
@@ -167,6 +174,9 @@ hypre_ParAMGSetupStats( void               *amg_vdata,
     *  Enter Statistics Loop
     *-----------------------------------------------------*/
 
+   num_coeffs = hypre_CTAlloc(int,num_levels);
+
+   num_variables = hypre_CTAlloc(int,num_levels);
 
    for (level = 0; level < num_levels; level++)
    { 
@@ -185,6 +195,8 @@ hypre_ParAMGSetupStats( void               *amg_vdata,
 
        fine_size = hypre_ParCSRMatrixGlobalNumRows(A_array[level]);
        global_nonzeros = hypre_ParCSRMatrixNumNonzeros(A_array[level]);
+       num_coeffs[level] = global_nonzeros;
+       num_variables[level] = fine_size;
 
        sparse = global_nonzeros /((double) fine_size * (double) fine_size);
 
@@ -397,9 +409,27 @@ hypre_ParAMGSetupStats( void               *amg_vdata,
                     global_min_rsum, global_max_rsum);
        }
    }
-       
+
+   total_variables = 0;
+   operat_cmplxty = 0;
+   for (j=0;j<hypre_ParAMGDataNumLevels(amg_data);j++)
+   {
+      operat_cmplxty += ((double) num_coeffs[j]) / ((double) num_coeffs[0]);
+      total_variables += num_variables[j];
+   }
+   if (num_variables[0])
+      grid_cmplxty = ((double) total_variables) / ((double) num_variables[0]);
+ 
+   if (my_id == 0 )
+   {
+      printf("\n\n     Complexity:    grid = %f\n",grid_cmplxty);
+      printf("                operator = %f\n",operat_cmplxty);
+   }
+
    if (my_id == 0) printf("\n\n");
 
+   hypre_TFree(num_coeffs);
+   hypre_TFree(num_variables);
    hypre_TFree(send_buff);
    hypre_TFree(gather_buff);
    
