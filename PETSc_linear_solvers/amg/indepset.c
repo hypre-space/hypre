@@ -19,7 +19,7 @@
  * hypre_AMGIndepSet
  *--------------------------------------------------------------------------*/
 
-int hypre_AMGIndepSet(ST_i, ST_j, num_variables,
+int hypre_AMGIndepSet(ST_i, ST_j, S_i, S_j, num_variables,
                       measure_array, IS_array, IS_size)
 
 /*--------------------------------------------------
@@ -33,6 +33,10 @@ int hypre_AMGIndepSet(ST_i, ST_j, num_variables,
 
 int             *ST_i;
 int             *ST_j;
+
+int             *S_i;
+int             *S_j;
+
 int              num_variables;
 double          *measure_array;
 int             *IS_array;
@@ -74,6 +78,8 @@ int             *IS_size;
    next_indep_point = 0;
    num_points_in_graph = num_variables;
 
+  hypre_SeedRand(2747);
+
    for (i = 0; i < num_variables; i++)
    {
       /* eliminate vertices already set as C or F points */
@@ -100,11 +106,21 @@ int             *IS_size;
          {
             my_measure = local_measure[i];
             mine_is_bigger = 1;
-            if (ST_i[i] < ST_i[i+1])
+            if (ST_i[i] < ST_i[i+1] || S_i[i] < S_i[i+1])
             {
                for (j = ST_i[i]; j < ST_i[i+1]; j++)
                {
                   nabor = ST_j[j];
+                  if (not_marked[nabor] && local_measure[nabor] > my_measure) 
+                  {
+                     mine_is_bigger = 0;
+		     break;
+                  }
+               }
+
+               for (j = S_i[i]; j < S_i[i+1]; j++)
+               {
+                  nabor = S_j[j];
                   if (not_marked[nabor] && local_measure[nabor] > my_measure) 
                   {
                      mine_is_bigger = 0;
