@@ -55,10 +55,10 @@ extern "C"
 {
    double LSC_Wtime()
    {
-      clock_t  ticks;
-      double   seconds; 
+      clock_t ticks;
+      double  seconds; 
       ticks   = clock() ;
-      seconds = (double) t / (double) CLOCKS_PER_SEC;
+      seconds = (double) ticks / (double) CLOCKS_PER_SEC;
       return seconds;
    }
 }
