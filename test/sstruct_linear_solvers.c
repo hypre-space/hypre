@@ -1372,7 +1372,8 @@ main( int   argc,
                      k = index[i] - pdata.graph_ilowers[entry][i];
                      k /= pdata.graph_strides[entry][i];
                      k *= pdata.graph_index_signs[entry][i];
-                     to_index[j] = pdata.graph_to_ilowers[entry][j] + k;
+                     to_index[j] = pdata.graph_to_ilowers[entry][j] +
+                        k * pdata.graph_to_strides[entry][j];
                   }
                   HYPRE_SStructGraphAddEntries(graph, part, index,
                                                pdata.graph_vars[entry],
