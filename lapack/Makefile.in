@@ -103,9 +103,9 @@ all: ${OBJS}
 	for file in ${OBJS}; \
 	do \
 	  (cp -fp $$file ../utilities); \
-	done; \
-	cp -fp ${LAPACK_LOCAL_HEADER} ../utilities
-	cp -fp ${LAPACK_HEADER} ../utilities
+	done
+	@cp -fp ${LAPACK_LOCAL_HEADER} ../utilities
+	@cp -fp ${LAPACK_HEADER} ../utilities
 
 install: all
 

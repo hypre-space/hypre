@@ -58,7 +58,7 @@ all: ${OBJS}
 	for file in ${OBJS}; \
 	do \
 	 (cp -fp $$file ../utilities); \
-	done; \
+	done
 	@cp -fp ${BLAS_LOCAL_HEADER} ../utilities
 	@cp -fp ${BLAS_HEADER} ../utilities
 

@@ -23,8 +23,8 @@ CFLAGS =\
 ##################################################################
 # Lapack Object Files
 ##################################################################
-LAPACK_HEADERS = 
-@LAPACK_NEEDED@LAPACK_HEADERS = hypre_lapack.h f2c.h
+LAPACK_HEADERS = hypre_no_lapack.h
+@LAPACKNEEDED@LAPACK_HEADERS = hypre_lapack.h f2c.h
 
 LAPACK_FILES =
 @LAPACKNEEDED@LAPACK_FILES = \
@@ -101,8 +101,8 @@ LAPACK_INFO = ${LAPACK_HEADERS} ${LAPACK_FILES}
 ##################################################################
 # Blas Object Files
 ##################################################################
-BLAS_HEADERS = 
-@BLAS_NEEDED@BLAS_HEADERS = hypre_blas.h f2c.h
+BLAS_HEADERS = hypre_no_blas.h
+@BLASNEEDED@BLAS_HEADERS = hypre_blas.h f2c.h
 
 BLAS_FILES =
 @BLASNEEDED@BLAS_FILES = \
@@ -182,7 +182,7 @@ install: all
 	@cp -f libHYPRE_*.a $$HYPRE_INSTALL_DIR/lib/.
 
 clean:
-	@rm -f *.o
+	@rm -f *.o ${BLAS_HEADERS} ${LAPACK_HEADERS}
 
 veryclean: clean
 	@rm -f libHYPRE_*.a
