@@ -12,8 +12,8 @@
  *
  *****************************************************************************/
 
-#ifndef HYPRE_IJ_MV_HEADER
-#define HYPRE_IJ_MV_HEADER
+#ifndef _HYPRE_IJ_MV_H
+#define _HYPRE_IJ_MV_H
 
 #include "HYPRE_utilities.h"
 
@@ -50,7 +50,8 @@ int HYPRE_InsertIJMatrixBlock P((HYPRE_IJMatrix IJmatrix , int m , int n , int *
 int HYPRE_AddBlockToIJMatrix P((HYPRE_IJMatrix IJmatrix , int m , int n , int *rows , int *cols , double *values ));
 int HYPRE_InsertIJMatrixRow P((HYPRE_IJMatrix IJmatrix , int n , int row , int *cols , double *values ));
 int hypre_RefIJMatrix P((HYPRE_IJMatrix IJmatrix , HYPRE_IJMatrix *reference ));
-void * hypre_GetIJMatrixLocalStorage P((HYPRE_IJMatrix IJMatrix ));
+
+void *hypre_GetIJMatrixLocalStorage P((HYPRE_IJMatrix IJMatrix));
 
 #undef P
 
