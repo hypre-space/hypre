@@ -44,7 +44,7 @@ typedef struct {int opaque;} *HYPRE_StructSolver;
 
 
 /* HYPRE_struct_pcg.c */
-HYPRE_StructSolver HYPRE_StructPCGInitialize P((MPI_Comm comm ));
+int HYPRE_StructPCGInitialize P((MPI_Comm comm , HYPRE_StructSolver *solver ));
 int HYPRE_StructPCGFinalize P((HYPRE_StructSolver solver ));
 int HYPRE_StructPCGSetup P((HYPRE_StructSolver solver , HYPRE_StructMatrix A , HYPRE_StructVector b , HYPRE_StructVector x ));
 int HYPRE_StructPCGSolve P((HYPRE_StructSolver solver , HYPRE_StructMatrix A , HYPRE_StructVector b , HYPRE_StructVector x ));
@@ -75,7 +75,7 @@ int HYPRE_StructDiagScalePush P((HYPRE_StructSolver solver , HYPRE_StructMatrix 
 #endif
 
 /* HYPRE_struct_smg.c */
-HYPRE_StructSolver HYPRE_StructSMGInitialize P((MPI_Comm comm ));
+int HYPRE_StructSMGInitialize P((MPI_Comm comm , HYPRE_StructSolver *solver ));
 int HYPRE_StructSMGFinalize P((HYPRE_StructSolver solver ));
 int HYPRE_StructSMGSetup P((HYPRE_StructSolver solver , HYPRE_StructMatrix A , HYPRE_StructVector b , HYPRE_StructVector x ));
 int HYPRE_StructSMGSolve P((HYPRE_StructSolver solver , HYPRE_StructMatrix A , HYPRE_StructVector b , HYPRE_StructVector x ));

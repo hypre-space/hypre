@@ -26,10 +26,12 @@
  * HYPRE_StructPCGInitialize
  *--------------------------------------------------------------------------*/
 
-HYPRE_StructSolver
-HYPRE_StructPCGInitialize( MPI_Comm comm )
+int
+HYPRE_StructPCGInitialize( MPI_Comm comm, HYPRE_StructSolver *solver )
 {
-   return ( (HYPRE_StructSolver) hypre_PCGInitialize( ) );
+   *solver = ( (HYPRE_StructSolver) hypre_PCGInitialize( ) );
+
+   return 0;
 }
 
 #ifdef HYPRE_USE_PTHREADS

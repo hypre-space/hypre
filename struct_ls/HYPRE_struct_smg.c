@@ -25,10 +25,12 @@
  * HYPRE_StructSMGInitialize
  *--------------------------------------------------------------------------*/
 
-HYPRE_StructSolver
-HYPRE_StructSMGInitialize( MPI_Comm comm )
+int
+HYPRE_StructSMGInitialize( MPI_Comm comm, HYPRE_StructSolver *solver )
 {
-   return ( (HYPRE_StructSolver) hypre_SMGInitialize( comm ) );
+   *solver = ( (HYPRE_StructSolver) hypre_SMGInitialize( comm ) );
+
+   return 0;
 }
 
 /*--------------------------------------------------------------------------
