@@ -1210,7 +1210,8 @@ main( int   argc,
       Hypre_IJBuildVector_addReference( Hypre_ij_b );
       Hypre_ParCSRVector_deleteReference( Hypre_b );
       ierr += Hypre_IJBuildVector_SetCommunicator( Hypre_ij_b, &comm );
-      ierr += Hypre_IJBuildVector_Create( Hypre_ij_b, comm, first_local_row,last_local_row );
+      ierr += Hypre_IJBuildVector_Create( Hypre_ij_b, (void *)comm,
+                                          first_local_row,last_local_row );
       ierr += Hypre_IJBuildVector_Initialize( Hypre_ij_b );
 
       dimsl[0] = 0;  dimsu[0] = local_num_rows;
@@ -1253,7 +1254,8 @@ main( int   argc,
       Hypre_IJBuildVector_addReference( Hypre_ij_x );
       Hypre_ParCSRVector_deleteReference( Hypre_x );
       ierr += Hypre_IJBuildVector_SetCommunicator( Hypre_ij_x, &comm );
-      ierr += Hypre_IJBuildVector_Create( Hypre_ij_x, comm, first_local_col,last_local_col );
+      ierr += Hypre_IJBuildVector_Create( Hypre_ij_x, (void *)comm,
+                                          first_local_col,last_local_col );
       ierr += Hypre_IJBuildVector_Initialize( Hypre_ij_x );
 
       dimsl[0] = 0;  dimsu[0] = local_num_cols;
@@ -1631,7 +1633,8 @@ main( int   argc,
       Hypre_IJBuildVector_addReference( Hypre_ij_y );
       Hypre_ParCSRVector_deleteReference( Hypre_y );
       ierr += Hypre_IJBuildVector_SetCommunicator( Hypre_ij_y, &comm );
-      ierr += Hypre_IJBuildVector_Create( Hypre_ij_y, comm, first_local_col,last_local_col );
+      ierr += Hypre_IJBuildVector_Create( Hypre_ij_y, (void *)comm,
+                                          first_local_col,last_local_col );
       ierr += Hypre_IJBuildVector_Initialize( Hypre_ij_y );
       y = Hypre_ParCSRVector__cast2( Hypre_y, "Hypre.Vector" );
 
@@ -1672,9 +1675,10 @@ main( int   argc,
       Hypre_IJBuildVector_addReference( Hypre_ij_y2 );
       Hypre_ParCSRVector_deleteReference( Hypre_y2 );
       ierr += Hypre_IJBuildVector_SetCommunicator( Hypre_ij_y2, &comm );
-      ierr += Hypre_IJBuildVector_Create( Hypre_ij_y2, comm, first_local_col,last_local_col );
+      ierr += Hypre_IJBuildVector_Create( Hypre_ij_y2, (void *)comm,
+                                          first_local_col,last_local_col );
       ierr += Hypre_IJBuildVector_Initialize( Hypre_ij_y2 );
-      Hypre_ParCSRVector_Read( Hypre_y2, "test.clone", comm );
+      Hypre_ParCSRVector_Read( Hypre_y2, "test.clone", (void *)comm );
       Hypre_ParCSRVector_Print( Hypre_y2, "test.read" );
       Hypre_IJBuildVector_deleteReference( Hypre_ij_y2 );
 
@@ -1742,7 +1746,7 @@ main( int   argc,
       Hypre_Vector_b = (Hypre_Vector)Hypre_ParCSRVector__cast2( Hypre_b, "Hypre.Vector" );
       Hypre_Vector_x = (Hypre_Vector)Hypre_ParCSRVector__cast2( Hypre_x, "Hypre.Vector" );
       Hypre_op_A = (Hypre_Operator) Hypre_ParCSRMatrix__cast2( Hypre_parcsr_A, "Hypre.Operator" );
-      ierr += Hypre_ParAMG_SetCommunicator( Hypre_AMG, comm );
+      ierr += Hypre_ParAMG_SetCommunicator( Hypre_AMG, (void *)comm );
       Hypre_ParAMG_SetOperator( Hypre_AMG, Hypre_op_A );
 
       printf("**** before calling Hypre_ParAMGSet*Parameter\n");
@@ -1798,7 +1802,7 @@ main( int   argc,
       log_level = 3;
       Hypre_ParAMG_SetLogging( Hypre_AMG, log_level );
 
-      ierr += Hypre_ParAMG_Setup( Hypre_AMG );
+      ierr += Hypre_ParAMG_Setup( Hypre_AMG, Hypre_Vector_b, Hypre_Vector_x );
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
@@ -1823,7 +1827,8 @@ main( int   argc,
            Hypre_IJBuildVector_addReference( Hypre_ij_y );
            Hypre_ParCSRVector_deleteReference( Hypre_y );
            ierr += Hypre_IJBuildVector_SetCommunicator( Hypre_ij_y, &comm );
-           ierr += Hypre_IJBuildVector_Create( Hypre_ij_y, comm, first_local_col,last_local_col );
+           ierr += Hypre_IJBuildVector_Create( Hypre_ij_y, (void *)comm,
+                                               first_local_col,last_local_col );
            ierr += Hypre_IJBuildVector_Initialize( Hypre_ij_y );
            y = Hypre_ParCSRVector__cast2( Hypre_y, "Hypre.Vector" );
            ierr += Hypre_ParAMG_GetResidual( Hypre_AMG, &y );
@@ -1908,14 +1913,14 @@ main( int   argc,
       Hypre_Vector_b = (Hypre_Vector)Hypre_ParCSRVector__cast2( Hypre_b, "Hypre.Vector" );
       Hypre_Vector_x = (Hypre_Vector)Hypre_ParCSRVector__cast2( Hypre_x, "Hypre.Vector" );
       Hypre_op_A = (Hypre_Operator) Hypre_ParCSRMatrix__cast2( Hypre_parcsr_A, "Hypre.Operator" );
-      ierr += Hypre_PCG_SetCommunicator( Hypre_PCG, comm );
+      ierr += Hypre_PCG_SetCommunicator( Hypre_PCG, (void *)comm );
       Hypre_PCG_SetOperator( Hypre_PCG, Hypre_op_A );
       Hypre_PCG_SetIntParameter( Hypre_PCG, "Max Iter", 500 );
       Hypre_PCG_SetDoubleParameter( Hypre_PCG, "Tol", tol );
       Hypre_PCG_SetIntParameter( Hypre_PCG, "Two Norm", 1 );
       Hypre_PCG_SetIntParameter( Hypre_PCG, "Rel Change", 0 );
       Hypre_PCG_SetPrintLevel( Hypre_PCG, 1 );
-      ierr += Hypre_PCG_Setup( Hypre_PCG );
+      ierr += Hypre_PCG_Setup( Hypre_PCG, Hypre_Vector_b, Hypre_Vector_x );
 
 #else
       HYPRE_ParCSRPCGCreate(MPI_COMM_WORLD, &pcg_solver);
@@ -1970,9 +1975,10 @@ main( int   argc,
          create, set comm, set operator, set other parameters,
          Setup (noop in this case), Apply */
       Hypre_ParDiagScale = Hypre_ParDiagScale__create();
-      ierr += Hypre_ParDiagScale_SetCommunicator( Hypre_ParDiagScale, comm );
+      ierr += Hypre_ParDiagScale_SetCommunicator( Hypre_ParDiagScale, (void *)comm );
       Hypre_ParDiagScale_SetOperator( Hypre_ParDiagScale, Hypre_op_A );
-      ierr += Hypre_ParDiagScale_Setup( Hypre_ParDiagScale );
+      ierr += Hypre_ParDiagScale_Setup( Hypre_ParDiagScale,
+                                        Hypre_Vector_b, Hypre_Vector_x );
       Hypre_SolverPC = (Hypre_Solver) Hypre_ParDiagScale__cast2
          ( Hypre_ParDiagScale, "Hypre.Solver" );
       ierr += Hypre_PCG_SetPreconditioner( Hypre_PCG, Hypre_SolverPC );
@@ -2072,7 +2078,8 @@ main( int   argc,
            Hypre_IJBuildVector_addReference( Hypre_ij_y );
            Hypre_ParCSRVector_deleteReference( Hypre_y );
            ierr += Hypre_IJBuildVector_SetCommunicator( Hypre_ij_y, &comm );
-           ierr += Hypre_IJBuildVector_Create( Hypre_ij_y, comm, first_local_col,last_local_col );
+           ierr += Hypre_IJBuildVector_Create( Hypre_ij_y, (void *)comm,
+                                               first_local_col,last_local_col );
            ierr += Hypre_IJBuildVector_Initialize( Hypre_ij_y );
            y = Hypre_ParCSRVector__cast2( Hypre_y, "Hypre.Vector" );
            ierr += Hypre_PCG_GetResidual( Hypre_PCG, &y );
