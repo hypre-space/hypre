@@ -514,6 +514,16 @@ AC_PROG_CPP
    ;;
 
    IRIX64)
+
+   AC_ARG_WITH(COMM_SIMPLE, [\
+   --without-COMM_SIMPLE           use MPI derived data types (for SGI only)],
+   if test "$withval" = "no"
+   then
+     CFLAGS="$CFLAGS"
+   else
+     CFLAGS="$CFLAGS -DHYPRE_COMM_SIMPLE"
+   fi,
+     CFLAGS="$CFLAGS -DHYPRE_COMM_SIMPLE"
   
      if test "$casc_user_chose_compilers" = "no"
      then
