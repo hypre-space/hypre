@@ -112,7 +112,7 @@ class HYPRE_LSI_BlockP
    int            outputLevel_;      // for diagnostics
    int            lumpedMassScheme_; // use diagonal or approximate inverse
    int            lumpedMassNlevels_;// if approx inverse, nlevels
-   int            lumpedMassThresh_; // if approx inverse, threshold
+   double         lumpedMassThresh_; // if approx inverse, threshold
    int            lumpedMassLength_; // length of M_v and M_p
    double         *lumpedMassDiag_;  // M_v and M_p lumped
    int            scheme_;           // which preconditioning ?
