@@ -28,12 +28,6 @@ struct Hypre_ParCSRVectorBuilder_private_type
    /* ... 1 if newvec is a valid vector, 0 if not, still under construction.
     GetConstructedObject will fail if vecgood=0, some set functions may
    fail if vecgood=1. */
-   /* The following represent data provided in the construction process
-      which need to be saved until the new vector build is finalized... */
-   /* >>>> TO DO not needed????
-   Hypre_MPI_Com com;
-   int global_n;
-   array1int partitioning;*/
 }
 ;
 #endif
