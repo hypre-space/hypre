@@ -900,33 +900,6 @@ case $HYPRE_ARCH in
 esac
 
 dnl *********************************************************************
-dnl * Set flags for building shared libraries
-dnl *********************************************************************
-if test "$casc_using_shared" = "yes"
-then
-   case $HYPRE_ARCH in
-      Linux | LINUX | linux)
-         CFLAGS="-fPIC $CFLAGS"
-         CXXFLAGS="-fPIC $CXXFLAGS"
-         LDFLAGS="-shared $LDFLAGS"
-         HYPRE_LIBSUFFIX=.so
-         ;;
-      rs6000)
-         LDFLAGS="-G $LDFLAGS -binitfini:poe_remote_main"
-         HYPRE_LIBSUFFIX=.so
-         ;;
-      *)
-         CFLAGS="-KPIC $CFLAGS"
-         CXXFLAGS="-KPIC $CXXFLAGS"
-         LDFLAGS="-shared $LDFLAGS"
-         HYPRE_LIBSUFFIX=.so
-         ;;
-   esac
-else
-   HYPRE_LIBSUFFIX=.a
-fi
-
-dnl *********************************************************************
 dnl * AC_SUBST performs the variable substitutions
 dnl * Some macros call AC_SUBST for some variables, but it does no damage
 dnl * to call it again.
@@ -982,11 +955,6 @@ dnl *********************************************************************
 dnl * macro definitions that should be included on compile line
 dnl *********************************************************************
 AC_SUBST(TIMERDEFS)
-
-dnl *********************************************************************
-dnl *BABEL-related files, libraries and directories
-dnl *********************************************************************
-AC_SUBST(BABELDIR)
 
 dnl *********************************************************************
 dnl * FEI-related files, libraries and directories

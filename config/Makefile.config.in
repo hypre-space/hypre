@@ -61,10 +61,10 @@ CXXFLAGS  = @CXXFLAGS@ $(CXX_COMPILE_FLAGS)
 
 CPPFLAGS  = @DEFS@
 
-AR	  = ar -rcu
+AR	  = @AR@
 RANLIB    = @RANLIB@
 
-LDFLAGS   = @LDFLAGS@ $(LOAD_FLAGS)
+LDFLAGS   = @LDFLAGS@
 LDLIBS    = @LDLIBS@
 LDLIBDIRS = @LDLIBDIRS@
 
@@ -72,6 +72,11 @@ INCLUDES = @INCLUDES@
 LIBDIRS = @LIBDIRS@
 LIBS = @LIBS@
 FLIBS = @FLIBS@
+
+##################################################################
+##  BABEL Directories
+##################################################################
+HYPRE_BABEL_DIRS = @BABELDIR@
 
 ##################################################################
 ##  LAPACK Library Flags 
