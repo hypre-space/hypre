@@ -559,6 +559,7 @@ int HYPRE_SStructSplitGetFinalRelativeResidualNorm(HYPRE_SStructSolver  solver,
 /**
  * @name SStruct FAC Solver
  **/
+/*@{*/
                                                                                                             
 /**
  * Create a FAC solver object.
@@ -675,6 +676,7 @@ int HYPRE_SStructFACGetFinalRelativeResidualNorm(
                                           HYPRE_SStructSolver solver,
                                           double             *norm);
                                                                                                             
+/*@}*/
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
