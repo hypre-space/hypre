@@ -87,7 +87,7 @@ extern "C" {
                                    int*,double*);
 
 #ifdef HAVE_MLI
-   int   HYPRE_MLI_SetParams(HYPRE_Solver, char *);
+   int   HYPRE_LSI_MLISetParams(HYPRE_Solver, char *);
 #endif
 
 #ifdef Y12M
@@ -906,7 +906,7 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
 #ifdef HAVE_MLI
           if (HYPreconID_ == HYMLI && HYPrecon_ != NULL )
           {
-             HYPRE_MLI_SetParams(HYPrecon_, params[i]); 
+             HYPRE_LSI_MLISetParams(HYPrecon_, params[i]); 
              if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
                 printf("       HYPRE_LSC::set MLI parameter.\n");
           }
@@ -1144,7 +1144,7 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
     if (HYPreconID_ == HYMLI && MLI_leng > 0 )
     {
        for ( i = 0; i < MLI_leng; i++ ) 
-          HYPRE_MLI_SetParams(HYPrecon_, params[MLI_ind[i]]); 
+          HYPRE_LSI_MLISetParams(HYPrecon_, params[MLI_ind[i]]); 
     }
 #endif
     delete [] blockP_ind;
