@@ -265,7 +265,7 @@ int MLI_Solver_Schwarz::composedOverlappedMatrix(void *A_in,
       proc   = recv_procs[i];
       offset = recv_starts[i];
       length = recv_starts[i+1] - offset;
-      MPI_Irecv(off_row_lengths[offset], length, MPI_INT, proc, 0, comm, 
+      MPI_Irecv(off_row_lengths[offset], length, MPI_INT, proc, 17304, comm, 
                 &requests[req_num++]);
    }
    if ( total_sends > 0 ) isend_buf = hypre_CTAlloc( int, total_sends );
@@ -284,7 +284,7 @@ int MLI_Solver_Schwarz::composedOverlappedMatrix(void *A_in,
          total_send_nnz += row_length;
          hypre_ParCSRMatrixRestoreRow(A,row_num,&row_length,&col_ind,NULL);
       }
-      MPI_Isend(&isend_buf[offset], length, MPI_INT, proc, 0, comm, 
+      MPI_Isend(&isend_buf[offset], length, MPI_INT, proc, 17304, comm, 
                 &requests[req_num++]);
    }
    status = hypre_CTAlloc(MPI_Status, req_num);
@@ -311,7 +311,7 @@ int MLI_Solver_Schwarz::composedOverlappedMatrix(void *A_in,
       length  = recv_starts[i+1] - offset;
       cur_nnz = 0;
       for (j = 0; j < length; j++) cur_nnz += (*off_row_lengths)[offset+j];
-      MPI_Irecv(&cols[total_recv_nnz], cur_nnz, MPI_INT, proc, 0, comm, 
+      MPI_Irecv(&cols[total_recv_nnz], cur_nnz, MPI_INT, proc, 17305, comm, 
                 &requests[req_num++]);
       total_recv_nnz += cur_nnz;
    }
@@ -336,7 +336,7 @@ int MLI_Solver_Schwarz::composedOverlappedMatrix(void *A_in,
          hypre_ParCSRMatrixRestoreRow(A,row_num,&row_length,&col_ind,NULL);
       }
       length = total_send_nnz - base;
-      MPI_Isend(&isend_buf[base], length, MPI_INT, proc, 0, comm, 
+      MPI_Isend(&isend_buf[base], length, MPI_INT, proc, 17305, comm, 
                 &requests[req_num++]);
    }
    status = hypre_CTAlloc(MPI_Status, req_num);
@@ -356,7 +356,7 @@ int MLI_Solver_Schwarz::composedOverlappedMatrix(void *A_in,
       length  = recv_starts[i+1] - offset;
       cur_nnz = 0;
       for (j = 0; j < length; j++) cur_nnz += (*off_row_lengths)[offset+j];
-      MPI_Irecv(&vals[total_recv_nnz], cur_nnz, MPI_DOUBLE, proc, 0, comm, 
+      MPI_Irecv(&vals[total_recv_nnz], cur_nnz, MPI_DOUBLE, proc, 17306, comm, 
                 &requests[req_num++]);
       total_recv_nnz += cur_nnz;
    }
@@ -381,7 +381,7 @@ int MLI_Solver_Schwarz::composedOverlappedMatrix(void *A_in,
          hypre_ParCSRMatrixRestoreRow(A,row_num,&row_length,NULL,&col_val);
       }
       length = total_send_nnz - base;
-      MPI_Isend(&dsend_buf[base], length, MPI_DOUBLE, proc, 0, comm, 
+      MPI_Isend(&dsend_buf[base], length, MPI_DOUBLE, proc, 17306, comm, 
                 &requests[req_num++]);
    }
    status = hypre_CTAlloc(MPI_Status, req_num);

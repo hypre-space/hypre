@@ -25,7 +25,7 @@ MLI_Solver_GS::MLI_Solver_GS() : MLI_Solver(MLI_SOLVER_GS_ID)
    Amat          = NULL;
    nsweeps       = 1;
    relax_weights = new double[1];
-   relax_weights[0] = 0.5;
+   relax_weights = NULL;
 }
 
 /******************************************************************************
@@ -268,7 +268,7 @@ int MLI_Solver_GS::setParams(char *param_string, int argc, char **argv)
 
    if ( !strcmp(param_string, "numSweeps") )
    {
-      sscanf(param_string, "%s %d", param1, &nsweeps);
+      if ( argc == 1 ) nsweeps = *(int*) argv[0];
       if ( nsweeps < 1 ) nsweeps = 1;
       return 0;
    }
