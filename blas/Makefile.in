@@ -50,7 +50,6 @@ FILES =\
  s_copy.c \
  dgels_all.c \
  dasum.c \
- dger.c \
  dmyblas2.c \
  drot.c \
  dsymv.c \
