@@ -312,7 +312,7 @@ hypre_ParAMGCycleT( void              *amg_vdata,
    int       num_sweep;
    int       relax_type;
    int       relax_points;
-   double    relax_weight;
+   double   *relax_weight;
 
    double    alpha;
    double    beta;
