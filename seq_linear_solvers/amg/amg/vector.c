@@ -49,6 +49,40 @@ Vector  *vector;
    }
 }
 
+/*---------------------------------------------------------------------------
+ *    NewVectorInt
+ *--------------------------------------------------------------------------*/
+
+VectorInt  *NewVectorInt(data, size)
+int     *data;
+int      size;
+{
+   VectorInt     *new;
+
+   new = ctalloc(VectorInt, 1);
+
+   VectorIntData(new) = data;
+   VectorIntSize(new) = size;
+
+   return new;
+
+}
+
+
+/*--------------------------------------------------------------------------
+ * FreeVectorInt
+ *--------------------------------------------------------------------------*/
+
+void     FreeVectorInt(vector)
+VectorInt  *vector;
+{
+   if (vector)
+   {
+      tfree(VectorIntData(vector));
+      tfree(vector);
+   }
+}
+
 /*--------------------------------------------------------------------------
  * InitVector
  *--------------------------------------------------------------------------*/

@@ -13,7 +13,8 @@
 
 AMG_CC="gcc"
 
-AMG_F77_FLAGS="-silent"
-
-AMG_F90_FLAGS="-silent"
+AMG_F77="/home/casc/g77/bin/g77"
+AMG_F77_FLAGS=""
+AMG_F77_OPT="-O"
+AMG_F77_DEBUG="-g"
 

@@ -36,4 +36,18 @@ typedef struct
 #define VectorSize(vector)      ((vector) -> size)
 
 
+typedef struct
+{
+   int     *data;
+   int      size;
+
+} VectorInt;
+
+/*--------------------------------------------------------------------------
+ * Accessor functions for the VectorInt structure
+ *--------------------------------------------------------------------------*/
+
+#define VectorIntData(vector)      ((vector) -> data)
+#define VectorIntSize(vector)      ((vector) -> size)
+
 #endif

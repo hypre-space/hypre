@@ -20,7 +20,7 @@
  * amg_Setup
  *--------------------------------------------------------------------------*/
 
-void     amg_setup_(Setup_err_flag, a_data, ia, ja, n, data)
+void     amg_setup__(Setup_err_flag, a_data, ia, ja, n, data)
 int     *Setup_err_flag;
 double  *a_data;
 int     *ia;

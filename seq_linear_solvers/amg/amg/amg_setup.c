@@ -1,5 +1,4 @@
-/*BHEADER**********************************************************************
- * (c) 1996   The Regents of the University of California
+ /* (c) 1996   The Regents of the University of California
  *
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
@@ -51,6 +50,10 @@ void    *data;
    int     *ifg;
    Matrix **A_array;
    Matrix **P_array;
+   VectorInt **IU_array;
+   VectorInt **IP_array;
+   VectorInt **IV_array;
+   VectorInt **ICG_array;
    int     *leva;
    int     *levb;
    int     *levv;
@@ -253,6 +256,10 @@ void    *data;
 
    AMGDataAArray(amg_data) = A_array;
    AMGDataPArray(amg_data) = P_array;
+   AMGDataIUArray(amg_data) = IU_array;
+   AMGDataIPArray(amg_data) = IP_array;
+   AMGDataIVArray(amg_data) = IV_array;
+   AMGDataICGArray(amg_data) = ICG_array;
    AMGDataLevA(amg_data)   = leva;
    AMGDataLevB(amg_data)   = levb;
    AMGDataLevV(amg_data)   = levv;
@@ -413,6 +420,28 @@ void    *data;
    AMGDataAArray(amg_data) = A_array;
    AMGDataPArray(amg_data) = P_array;   
    
+
+   /*----------------------------------------------------------
+    * Set up  IU_array, IP_array, IV_array, and ICG_array
+    *----------------------------------------------------------*/
+   
+   IU_array = talloc(VectorInt*, num_levels);
+   IP_array = talloc(VectorInt*, num_levels);
+   IV_array = talloc(VectorInt*, num_levels);
+   ICG_array = talloc(VectorInt*, num_levels);
+   
+   for (j = 0; j < num_levels; j++)
+   {
+      IU_array[j] = NewVectorInt(&iu[levv[j]-1], numv[j]);
+      IP_array[j] = NewVectorInt(&ip[levv[j]-1], numv[j]);
+      IV_array[j] = NewVectorInt(&iv[levp[j]-1],nump[j]);
+      ICG_array[j] = NewVectorInt(&icg[levv[j]-1], numv[j]);
+   }
+   
+   AMGDataIUArray(amg_data) = IU_array;
+   AMGDataIPArray(amg_data) = IP_array;
+   AMGDataIVArray(amg_data) = IV_array;
+   AMGDataICGArray(amg_data) = ICG_array;
 
    if (AMGDataIOutDat(amg_data) == -1)
    {

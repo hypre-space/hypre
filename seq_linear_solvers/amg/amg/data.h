@@ -27,6 +27,8 @@ typedef struct
 
    /* solve params */
    int      ncyc;
+   int      Fcycle_flag;
+   int      Vstar_flag;
    int     *mu;
    int     *ntrlx;
    int     *iprlx;
@@ -67,6 +69,10 @@ typedef struct
    int     *ifg;
    Matrix **A_array;
    Matrix **P_array;
+   VectorInt **IU_array;
+   VectorInt **IP_array;
+   VectorInt **IV_array;
+   VectorInt **ICG_array;    
    int     *leva;
    int     *levb;
    int     *levv;
@@ -80,6 +86,7 @@ typedef struct
 
    /* data generated in the solve phase */
    double   *vtmp;
+   int       cycle_op_count;
 
 } AMGData;
 
@@ -97,6 +104,8 @@ typedef struct
 		  		      
 /* solve params */
 #define AMGDataNCyc(amg_data)         ((amg_data) -> ncyc)
+#define AMGDataFcycleFlag(amg_data)   ((amg_data) -> Fcycle_flag)
+#define AMGDataVstarFlag(amg_data)    ((amg_data) -> Vstar_flag)
 #define AMGDataMU(amg_data)           ((amg_data) -> mu)
 #define AMGDataNTRLX(amg_data)        ((amg_data) -> ntrlx)
 #define AMGDataIPRLX(amg_data)        ((amg_data) -> iprlx)
@@ -137,6 +146,10 @@ typedef struct
 #define AMGDataIFG(amg_data)          ((amg_data) -> ifg)
 #define AMGDataAArray(amg_data)       ((amg_data) -> A_array)
 #define AMGDataPArray(amg_data)       ((amg_data) -> P_array)
+#define AMGDataIUArray(amg_data)      ((amg_data) -> IU_array)
+#define AMGDataIPArray(amg_data)      ((amg_data) -> IP_array)  
+#define AMGDataIVArray(amg_data)      ((amg_data) -> IV_array)  
+#define AMGDataICGArray(amg_data)     ((amg_data) -> ICG_array)  
 #define AMGDataLevA(amg_data)         ((amg_data) -> leva)
 #define AMGDataLevB(amg_data)         ((amg_data) -> levb)
 #define AMGDataLevV(amg_data)         ((amg_data) -> levv)
@@ -149,6 +162,7 @@ typedef struct
 #define AMGDataNumP(amg_data)         ((amg_data) -> nump)
 				      
 /* data generated in the solve phase */
-#define AMGDataVecTemp(amg_data)        ((amg_data) -> vtmp)
+#define AMGDataVecTemp(amg_data)      ((amg_data) -> vtmp)
+#define AMGDataCycleOpCount(amg_data) ((amg_data) -> cycle_op_count)  
 
 #endif

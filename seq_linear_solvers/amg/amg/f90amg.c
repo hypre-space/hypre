@@ -20,7 +20,7 @@
  * amg_Initialize
  *--------------------------------------------------------------------------*/
 
-void   amg_initialize_(data, port_data)
+void   amg_initialize__(data, port_data)
 int   *data;
 int   *port_data;
 {
@@ -31,7 +31,7 @@ int   *port_data;
  * amg_Finalize
  *--------------------------------------------------------------------------*/
 
-void   amg_finalize_(data)
+void   amg_finalize__(data)
 int   *data;
 {
    amg_Finalize((void *) *data);

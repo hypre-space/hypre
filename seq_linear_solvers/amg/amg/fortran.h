@@ -69,21 +69,22 @@ void setup_(int *, int *, int *, double *, int *, double *, int *,
 void idec_(int *, int *, int *, int *);
 
 /* rsdl */
-#define CALL_RESIDUAL(energy,residual_nrm,resv,u,f,A_array,amg_data) \
+#define CALL_RESIDUAL(energy,residual_nrm,resv,U_array,F_array,A_array,amg_data) \
 rsdl_(&energy,\
       &residual_nrm,\
+      &AMGDataNumUnknowns(amg_data),\
       resv,\
       AMGDataVecTemp(amg_data),\
       AMGDataIMin(amg_data),\
       AMGDataIMax(amg_data),\
-      VectorData(u),\
-      VectorData(f),\
+      VectorData(U_array[0]),\
+      VectorData(F_array[0]),\
       MatrixData(A_array[0]),\
       MatrixIA(A_array[0]),\
       MatrixJA(A_array[0]),\
-      AMGDataIU(amg_data));    
+      AMGDataIU(amg_data));
 
-void rsdl_(double *, double *, double *, double *, int *, int *,
+void rsdl_(double *, double *, int *, double *, double *, int *, int *,
            double *, double *, double *, int *, int *, int *);  
 
 /* cycle */
@@ -144,6 +145,79 @@ void cycle_(int *, int *, int *, int *, int *, int *, int *,
             int *, int *, int *, int *,
             int *, int *, int *, int *, int *,
             int *, int *, int *, int *);
+
+
+
+/* relax  */
+#define CALL_RELAX(Solve_err_flag, u, f, tol, amg_data) \
+relax_(&Solve_err_flag,\
+       &ity[k], &ipt[k], &ieq[k], &iun[k],\
+       &imin[level],&imax[level],\
+       VectorData(U_array[level]),\
+       VectorData(F_array[level]),\
+       MatrixData(A_array[level]),\
+       MatrixIA(A_array[level]),\
+       MatrixJA(A_array[level]),\
+       VectorIntData(IU_array[level]),\
+       VectorIntData(ICG_array[level]),\
+       &ipmn[level],\
+       &ipmx[level],\
+       VectorIntData(IV_array[level]));
+
+ 
+void relax_(int *, int *, int *, int *, int *, int *, int *, 
+	    double *, double *, double *,
+	    int *, int *, int *, int *, int *, int *, int *);
+
+
+
+/* intad */
+#define CALL_INTAD(coarse_grid,fine_grid,numv,Vstar_flag,F_array,U_array,amg_data) \
+intad_(VectorData(U_array[fine_grid]),\
+       VectorIntData(ICG_array[fine_grid]),\
+       MatrixData(P_array[fine_grid]),\
+       MatrixIA(P_array[fine_grid]),\
+       MatrixJA(P_array[fine_grid]),\
+       &numv[fine_grid],\
+       AMGDataVecTemp(amg_data),\
+       VectorData(U_array[coarse_grid]),\
+       VectorData(F_array[coarse_grid]),\
+       MatrixData(A_array[coarse_grid]),\
+       MatrixIA(A_array[coarse_grid]),\
+       MatrixJA(A_array[coarse_grid]),\
+       VectorIntData(IU_array[coarse_grid]),\
+       &numv[coarse_grid],\
+       &Vstar_flag,\
+       &AMGDataNumUnknowns(amg_data));
+
+
+void intad_(double *, int *, double *, int *, int *, int *,
+            double *, double *, double *, double *, 
+            int *, int *, int *, int *, int *, int *);	
+
+
+
+/* rscali */ 
+#define CALL_RSCALI(coarse_grid,fine_grid,numv,F_array,U_array,amg_data) \
+rscali_(VectorData(F_array[coarse_grid]),\
+        &numv[coarse_grid],\
+        VectorData(U_array[fine_grid]),\
+        VectorData(F_array[fine_grid]),\
+        AMGDataVecTemp(amg_data),\
+        MatrixData(A_array[fine_grid]),\
+        MatrixIA(A_array[fine_grid]),\
+        MatrixJA(A_array[fine_grid]),\
+        VectorIntData(ICG_array[fine_grid]),\
+        MatrixData(P_array[fine_grid]),\
+        MatrixIA(P_array[fine_grid]),\
+        MatrixJA(P_array[fine_grid]),\
+        &numv[fine_grid]);                   
+
+void rscali_(double *, int *, double *, double *, double *,
+             double *, int *, int *, int *, 
+             double *, int *, int *, int *); 
+   
+
 
 
 

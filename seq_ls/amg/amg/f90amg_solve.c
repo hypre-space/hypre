@@ -20,7 +20,7 @@
  * amg_Solve
  *--------------------------------------------------------------------------*/
 
-void      amg_solve_(Solve_err_flag, u_data, f_data, n, tol, data)
+void      amg_solve__(Solve_err_flag, u_data, f_data, n, tol, data)
 int      *Solve_err_flag;
 double   *u_data;
 double   *f_data;

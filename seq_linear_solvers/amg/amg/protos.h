@@ -13,6 +13,9 @@
 void *amg_Initialize P((void *port_data ));
 void amg_Finalize P((void *data ));
 
+/* amg_cycle.c */
+int amg_Cycle P((Vector **U_array , Vector **F_array , double tol , void *data ));
+
 /* amg_params.c */
 void amg_SetLevMax P((int levmax , void *data ));
 void amg_SetNCG P((int ncg , void *data ));
@@ -60,6 +63,8 @@ double Rand P((void ));
 /* vector.c */
 Vector *NewVector P((double *data , int size ));
 void FreeVector P((Vector *vector ));
+VectorInt *NewVectorInt P((int *data , int size ));
+void FreeVectorInt P((VectorInt *vector ));
 void InitVector P((Vector *v , double value ));
 void InitVectorRandom P((Vector *v ));
 void CopyVector P((Vector *x , Vector *y ));

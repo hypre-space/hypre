@@ -93,7 +93,7 @@ c     time in milliseconds :
 c     
 
       integer time, nsec
-      nsec = time()
+c     nsec = time()
 
       return
       end

@@ -4,7 +4,7 @@ c     relaxation routines
 c     
 c=====================================================================
 c     
-      subroutine relax(ierr,k,itrel,iprel,ierel,iurel,
+      subroutine relax(ierr,itrel,iprel,ierel,iurel,
      *     imin,imax,u,f,a,ia,ja,iu,icg,ipmn,ipmx,iv)
 c     
 c---------------------------------------------------------------------
@@ -27,7 +27,6 @@ c---------------------------------------------------------------------
 c     
       implicit real*8 (a-h,o-z)
 c     
-      dimension imin(*),imax(*)
       dimension u  (*)
       dimension f  (*)
       dimension ia (*)
@@ -35,8 +34,6 @@ c
       dimension ja (*)
       dimension iu (*)
       dimension icg(*)
-
-      dimension ipmn(*),ipmx(*)
       dimension iv (*)
 c     
 c---------------------------------------------------------------------
@@ -46,7 +43,7 @@ c
 c     
 c     Gauss-Seidel relaxation
 c     
- 100  call relax1(ierr,k,iprel,ierel,imin,imax,u,f,a,ia,ja,iu,icg)
+ 100  call relax1(ierr,iprel,ierel,imin,imax,u,f,a,ia,ja,iu,icg)
       return
 c     
 c     Kaczmarz relaxation (removed)
@@ -54,7 +51,7 @@ c
 c     
 c     Point Gauss-Seidel relaxation
 c     
- 300  call relax3(ierr,k,iprel,u,f,a,ia,ja,iv,ipmn,ipmx,icg)
+ 300  call relax3(ierr,iprel,u,f,a,ia,ja,iv,ipmn,ipmx,icg)
       return
 c     
 c     Collective relaxation (removed)
@@ -62,17 +59,17 @@ c
 c     
 c     Normalization
 c     
- 800  call norml(ierr,k,iurel,imin,imax,u,iu)
+ 800  call norml(ierr,iurel,imin,imax,u,iu)
       return
 c     
 c     Direct solution (low storage)
 c     
- 900  call dirslv(ierr,k,imin,imax,u,f,a,ia,ja)
+ 900  call dirslv(ierr,imin,imax,u,f,a,ia,ja)
       return
  999  return
       end
 c     
-      subroutine relax1(ierr,k,iprel,ierel,imin,imax,u,f,a,ia,ja,iu,icg)
+      subroutine relax1(ierr,iprel,ierel,imin,imax,u,f,a,ia,ja,iu,icg)
 c     
 c---------------------------------------------------------------------
 c     
@@ -92,7 +89,6 @@ c---------------------------------------------------------------------
 c     
       implicit real*8 (a-h,o-z)
 c     
-      dimension imin(*),imax(*)
       dimension u  (*)
       dimension f  (*)
       dimension ia (*)
@@ -103,8 +99,8 @@ c
 c     
 c---------------------------------------------------------------------
 c     
-      ilo=imin(k)
-      ihi=imax(k)
+      ilo=imin
+      ihi=imax
       go to (100,200,300) iprel
       ierr = 5
       return
@@ -156,7 +152,7 @@ c
       return
       end
 c     
-      subroutine relax3(ierr,k,iprel,u,f,a,ia,ja,iv,ipmn,ipmx,icg)
+      subroutine relax3(ierr,iprel,u,f,a,ia,ja,iv,ipmn,ipmx,icg)
 c     
 c---------------------------------------------------------------------
 c     
@@ -184,14 +180,12 @@ c
       dimension icg(*)
       dimension iv (*)
 
-      dimension ipmn(*),ipmx(*)
-c     
       dimension d(10,10),s(10)
 c     
 c---------------------------------------------------------------------
 c     
-      iplo=ipmn(k)
-      iphi=ipmx(k)
+      iplo=ipmn
+      iphi=ipmx
       go to (100,200,300,400,500), iprel
       ierr = 6
       return
@@ -489,7 +483,7 @@ c
       return
       end
 c     
-      subroutine norml(ierr,k,iurel,imin,imax,u,iu)
+      subroutine norml(ierr,iurel,imin,imax,u,iu)
 c     
 c---------------------------------------------------------------------
 c     
@@ -509,7 +503,6 @@ c---------------------------------------------------------------------
 c     
       implicit real*8 (a-h,o-z)
 c     
-      dimension imin(*),imax(*)
       dimension u  (*)
       dimension iu (*)
 c     
@@ -517,8 +510,8 @@ c
 c     
 c---------------------------------------------------------------------
 c     
-      ilo=imin(k)
-      ihi=imax(k)
+      ilo=imin
+      ihi=imax
       do 10 n=1,10
          rs(n)=0.e0
          np(n)=0
