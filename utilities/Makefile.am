@@ -14,6 +14,7 @@ endif !STATICONLY
 include_HEADERS = utilities.h HYPRE_utilities.h
 noinst_HEADERS = \
  amg_linklist.h\
+ exchange_data.h\
  fortran.h\
  general.h\
  hypre_memory.h\
@@ -31,6 +32,7 @@ AM_CPPFLAGS = -DHYPRE_TIMING
 FILES = \
  amg_linklist.c\
  binsearch.c\
+ exchange_data.c\
  hypre_memory.c\
  hypre_qsort.c\
  memory_dmalloc.c\
