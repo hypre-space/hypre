@@ -43,4 +43,3 @@ typedef struct
 #define hypre_ParVectorCommPkg(vector)     ((vector) -> vector_comm_pkg)
 #define hypre_ParVectorOwnsData(vector)    ((vector) -> owns_data)
 
-#endif
