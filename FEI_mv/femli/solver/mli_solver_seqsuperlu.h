@@ -26,12 +26,16 @@ class MLI_Solver_SeqSuperLU : public MLI_Solver
 {
    MLI_Matrix   *mliAmat_;
    int          factorized_;
-   int          *permR_;
-   int          *permC_;
+   int          **permRs_;
+   int          **permCs_;
    int          localNRows_;
-   SuperMatrix  superLU_Amat;
-   SuperMatrix  superLU_Lmat;
-   SuperMatrix  superLU_Umat;
+   SuperMatrix  superLU_Lmats[100];
+   SuperMatrix  superLU_Umats[100];
+   int          nSubProblems_;
+   int          **subProblemRowIndices_;
+   int          *subProblemRowSizes_;
+   int          numColors_;
+   int          *myColors_;
 
 public :
 
@@ -39,7 +43,8 @@ public :
    ~MLI_Solver_SeqSuperLU();
    int setup(MLI_Matrix *Amat);
    int solve(MLI_Vector *f, MLI_Vector *u);
-   int setParams(char *paramString, int argc, char **argv) {return -1;}
+   int setParams(char *paramString, int argc, char **argv);
+   int setupBlockColoring();
 };
 
 #endif
