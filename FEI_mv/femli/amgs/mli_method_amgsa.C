@@ -948,6 +948,19 @@ int MLI_Method_AMGSA::setNodalCoordinates(int num_nodes, int nDOF,
          for ( j = 0 ; j < nullspace_len; j++ ) 
             nullspace_vec[i*nullspace_len+j] *= scalings[j];
    }
+#if 0
+   char fname[100];
+	 FILE *fp;
+	for ( i = 0 ; i < nullspace_dim; i++ )
+   {
+      sprintf(fname, "rigid_body_mode%d.%d", i, mypid);
+      fp = fopen( fname, "w" );
+	for ( j = 0 ; j < nullspace_len; j++ )
+	 fprintf(fp," %25.16e\n", nullspace_vec[i*nullspace_len+j]);
+      fclose(fp);
+   }
+#endif
+
    return 0;
 }
 
