@@ -3,8 +3,8 @@
  * Symbol:        bHYPRE.StructGrid-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * sidl Created:  20050225 15:45:37 PST
- * Generated:     20050225 15:45:40 PST
+ * sidl Created:  20050311 14:16:31 PST
+ * Generated:     20050311 14:16:35 PST
  * Description:   Server-side implementation for bHYPRE.StructGrid
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -198,6 +198,33 @@ impl_bHYPRE_StructGrid_SetPeriodic(
    return ierr;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.StructGrid.SetPeriodic) */
+}
+
+/*
+ * Method:  SetNumGhost[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_StructGrid_SetNumGhost"
+
+int32_t
+impl_bHYPRE_StructGrid_SetNumGhost(
+  /*in*/ bHYPRE_StructGrid self, /*in*/ struct sidl_int__array* num_ghost)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructGrid.SetNumGhost) */
+  /* Insert the implementation of the SetNumGhost method here... */
+
+   int ierr = 0;
+   struct bHYPRE_StructGrid__data * data;
+   HYPRE_StructGrid Hgrid;
+   data = bHYPRE_StructGrid__get_data( self );
+   Hgrid = data -> grid;
+
+   ierr += HYPRE_StructGridSetNumGhost( Hgrid, sidlArrayAddr1( num_ghost, 0 ) );
+
+   return ierr;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.StructGrid.SetNumGhost) */
 }
 
 /*

@@ -3,8 +3,8 @@
  * Symbol:        bHYPRE.StructGrid-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * sidl Created:  20050225 15:45:37 PST
- * Generated:     20050225 15:45:40 PST
+ * sidl Created:  20050311 14:16:31 PST
+ * Generated:     20050311 14:16:35 PST
  * Description:   Server-side glue code for bHYPRE.StructGrid
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -44,6 +44,11 @@ impl_bHYPRE_StructGrid_SetExtents(
 
 extern int32_t
 impl_bHYPRE_StructGrid_SetPeriodic(
+  bHYPRE_StructGrid,
+  struct sidl_int__array*);
+
+extern int32_t
+impl_bHYPRE_StructGrid_SetNumGhost(
   bHYPRE_StructGrid,
   struct sidl_int__array*);
 
@@ -88,6 +93,22 @@ skel_bHYPRE_StructGrid_SetPeriodic(
   return _return;
 }
 
+static int32_t
+skel_bHYPRE_StructGrid_SetNumGhost(
+  /*in*/ bHYPRE_StructGrid self,
+  /*in*/ struct sidl_int__array* num_ghost)
+{
+  int32_t _return;
+  struct sidl_int__array* num_ghost_proxy = sidl_int__array_ensure(num_ghost, 1,
+    sidl_column_major_order);
+  _return =
+    impl_bHYPRE_StructGrid_SetNumGhost(
+      self,
+      num_ghost_proxy);
+  sidl_int__array_deleteRef(num_ghost_proxy);
+  return _return;
+}
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -101,6 +122,7 @@ bHYPRE_StructGrid__set_epv(struct bHYPRE_StructGrid__epv *epv)
   epv->f_SetDimension = impl_bHYPRE_StructGrid_SetDimension;
   epv->f_SetExtents = skel_bHYPRE_StructGrid_SetExtents;
   epv->f_SetPeriodic = skel_bHYPRE_StructGrid_SetPeriodic;
+  epv->f_SetNumGhost = skel_bHYPRE_StructGrid_SetNumGhost;
   epv->f_Assemble = impl_bHYPRE_StructGrid_Assemble;
 }
 #ifdef __cplusplus

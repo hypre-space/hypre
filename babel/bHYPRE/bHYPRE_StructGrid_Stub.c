@@ -3,8 +3,8 @@
  * Symbol:        bHYPRE.StructGrid-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * sidl Created:  20050225 15:45:37 PST
- * Generated:     20050225 15:45:38 PST
+ * sidl Created:  20050311 14:16:31 PST
+ * Generated:     20050311 14:16:33 PST
  * Description:   Client-side glue code for bHYPRE.StructGrid
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -250,6 +250,20 @@ bHYPRE_StructGrid_SetPeriodic(
   return (*self->d_epv->f_SetPeriodic)(
     self,
     periodic);
+}
+
+/*
+ * Method:  SetNumGhost[]
+ */
+
+int32_t
+bHYPRE_StructGrid_SetNumGhost(
+  bHYPRE_StructGrid self,
+  /*in*/ struct sidl_int__array* num_ghost)
+{
+  return (*self->d_epv->f_SetNumGhost)(
+    self,
+    num_ghost);
 }
 
 /*

@@ -3,8 +3,8 @@
  * Symbol:        bHYPRE.StructGrid-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * sidl Created:  20050225 15:45:37 PST
- * Generated:     20050225 15:45:40 PST
+ * sidl Created:  20050311 14:16:31 PST
+ * Generated:     20050311 14:16:35 PST
  * Description:   Server-side implementation for bHYPRE.StructGrid
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -88,6 +88,11 @@ impl_bHYPRE_StructGrid_SetExtents(
 
 extern int32_t
 impl_bHYPRE_StructGrid_SetPeriodic(
+  bHYPRE_StructGrid,
+  struct sidl_int__array*);
+
+extern int32_t
+impl_bHYPRE_StructGrid_SetNumGhost(
   bHYPRE_StructGrid,
   struct sidl_int__array*);
 
