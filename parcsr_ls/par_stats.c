@@ -50,9 +50,9 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
 
    int	    numrows;
    int      num_levels; 
-   int      global_nonzeros;
    int      coarsen_type;
    int      measure_type;
+   double   global_nonzeros;
 
    double  *send_buff;
    double  *gather_buff;
@@ -84,9 +84,9 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
    double    global_min_wt;
    double    global_max_wt;
 
-   int     *num_coeffs;
-   int     *num_variables;
-   int      total_variables;
+   double  *num_coeffs;
+   double  *num_variables;
+   double   total_variables; 
    double   operat_cmplxty;
    double   grid_cmplxty;
 
@@ -200,9 +200,9 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
     *  Enter Statistics Loop
     *-----------------------------------------------------*/
 
-   num_coeffs = hypre_CTAlloc(int,num_levels);
+   num_coeffs = hypre_CTAlloc(double,num_levels);
 
-   num_variables = hypre_CTAlloc(int,num_levels);
+   num_variables = hypre_CTAlloc(double,num_levels);
 
    for (level = 0; level < num_levels; level++)
    { 
@@ -217,9 +217,9 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
        row_starts = hypre_ParCSRMatrixRowStarts(A_array[level]);
 
        fine_size = hypre_ParCSRMatrixGlobalNumRows(A_array[level]);
-       global_nonzeros = hypre_ParCSRMatrixNumNonzeros(A_array[level]);
+       global_nonzeros = (double) hypre_ParCSRMatrixNumNonzeros(A_array[level]);
        num_coeffs[level] = global_nonzeros;
-       num_variables[level] = fine_size;
+       num_variables[level] = (double) fine_size;
 
        sparse = global_nonzeros /((double) fine_size * (double) fine_size);
 
@@ -256,7 +256,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
            max_rowsum = hypre_max(rowsum, max_rowsum);
        }
   }
-       avg_entries = ((double) global_nonzeros) / ((double) fine_size);
+       avg_entries = global_nonzeros / ((double) fine_size);
 
        send_buff[0] = (double) min_entries;
        send_buff[1] = (double) max_entries;
@@ -284,7 +284,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
               global_max_rsum = hypre_max(global_max_rsum, gather_buff[j*4 +3]);
           }
 
-          printf( "%2d %7d %8d  %0.3f  %4d %4d",
+          printf( "%2d %7d %8.0f  %0.3f  %4d %4d",
                     level, fine_size, global_nonzeros, sparse, global_min_e, 
                     global_max_e);
           printf("  %4.1f  %10.3e  %10.3e\n", avg_entries,
@@ -433,11 +433,11 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
    operat_cmplxty = 0;
    for (j=0;j<hypre_ParAMGDataNumLevels(amg_data);j++)
    {
-      operat_cmplxty += ((double) num_coeffs[j]) / ((double) num_coeffs[0]);
+      operat_cmplxty +=  num_coeffs[j] / num_coeffs[0];
       total_variables += num_variables[j];
    }
-   if (num_variables[0])
-      grid_cmplxty = ((double) total_variables) / ((double) num_variables[0]);
+   if (num_variables[0] != 0)
+      grid_cmplxty = total_variables / num_variables[0];
  
    if (my_id == 0 )
    {

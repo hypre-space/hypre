@@ -35,9 +35,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
 
    int      amg_print_level;
    int      amg_logging;
-   int     *num_coeffs;
-   int     *num_variables;
-   int      cycle_op_count;
+   int      cycle_count;
    int      num_levels;
    /* int      num_unknowns; */
    double   tol;
@@ -52,13 +50,15 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
    int      Solve_err_flag;
    int      min_iter;
    int      max_iter;
-   int      cycle_count;
-   int      total_coeffs;
-   int      total_variables;
    int      num_procs, my_id;
 
    double   alpha = 1.0;
    double   beta = -1.0;
+   double   cycle_op_count;
+   double   total_coeffs;
+   double   total_variables;
+   double  *num_coeffs;
+   double  *num_variables;
    double   cycle_cmplxty;
    double   operat_cmplxty;
    double   grid_cmplxty;
@@ -90,8 +90,8 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
    min_iter         = hypre_ParAMGDataMinIter(amg_data);
    max_iter         = hypre_ParAMGDataMaxIter(amg_data);
 
-   num_coeffs       = hypre_CTAlloc(int, num_levels);
-   num_variables    = hypre_CTAlloc(int, num_levels);
+   num_coeffs       = hypre_CTAlloc(double, num_levels);
+   num_variables    = hypre_CTAlloc(double, num_levels);
    num_coeffs[0]    = hypre_ParCSRMatrixNumNonzeros(A);
    num_variables[0] = hypre_ParCSRMatrixGlobalNumRows(A);
  
@@ -109,8 +109,8 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
    Vtemp = hypre_ParAMGDataVtemp(amg_data);
    for (j = 1; j < num_levels; j++)
    {
-      num_coeffs[j]    = hypre_ParCSRMatrixNumNonzeros(A_array[j]);
-      num_variables[j] = hypre_ParCSRMatrixGlobalNumRows(A_array[j]);
+      num_coeffs[j]    = (double) hypre_ParCSRMatrixNumNonzeros(A_array[j]);
+      num_variables[j] = (double) hypre_ParCSRMatrixGlobalNumRows(A_array[j]);
    }
 
    /*-----------------------------------------------------------------------
@@ -268,7 +268,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
     *-----------------------------------------------------------------------*/
 
    if (cycle_count > 0 && tol > 0.) 
-     conv_factor = pow((resid_nrm/resid_nrm_init),(1.0/((double) cycle_count)));
+     conv_factor = pow((resid_nrm/resid_nrm_init),(1.0/(double) cycle_count));
    else
      conv_factor = 1.;
 
@@ -282,11 +282,11 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
    cycle_op_count = hypre_ParAMGDataCycleOpCount(amg_data);
 
    if (num_variables[0])
-      grid_cmplxty = ((double) total_variables) / ((double) num_variables[0]);
+      grid_cmplxty = total_variables / num_variables[0];
    if (num_coeffs[0])
    {
-      operat_cmplxty = ((double) total_coeffs) / ((double) num_coeffs[0]);
-      cycle_cmplxty = ((double) cycle_op_count) / ((double) num_coeffs[0]);
+      operat_cmplxty = total_coeffs / num_coeffs[0];
+      cycle_cmplxty = cycle_op_count / num_coeffs[0];
    }
 
    if (my_id == 0 && amg_print_level > 1)
