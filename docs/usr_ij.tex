@@ -4,7 +4,7 @@
 
 The \code{IJ} interface described in this chapter is the lowest common
 denominator for specifying linear systems in \hypre{}.  This interface
-provides access to general sparse-matrix solvers in \hypre{}, but not
+provides access to general sparse-matrix solvers in \hypre{}, not
 to the specialized solvers that require more problem information.
 
 %==========================================================================
@@ -31,6 +31,8 @@ HYPRE_IJMatrixInitialize(ij_matrix);
 /* set matrix coefficients a row at a time */
 HYPRE_IJMatrixSetValues(ij_matrix, num_values, row, cols, values);
 ...
+HYPRE_IJMatrixAddToValues(ij_matrix, num_values, row, cols, values);
+...
 
 HYPRE_IJMatrixAssemble(ij_matrix);
 
@@ -48,9 +50,41 @@ routines mentioned later in this chapter and in the Reference Manual,
 should be called before this step.  The \code{SetValues()} routine
 sets the matrix coefficients for a specified \code{row} and list of
 \code{cols} (\code{num_values} is the number of column coefficients being set).
+After the coefficients are set, they can be added to with an
+\code{AddTo()} routine.
 The \code{Assemble()} routine is a collective call (i.e., must be
 called on all processes), and finalizes the matrix assembly, making
 the matrix ``ready to use''.
+
+Matrix coefficients can also be set and added to in block-wise fashion,
+with \code{SetBlockValues()} and \code{AddToBlockValues()} routines:
+
+\begin{display}
+\begin{verbatim}
+
+HYPRE_IJMatrixSetBlockValues(ij_matrix, m, n, rows, cols, values);
+HYPRE_IJMatrixAddToBlockValues(ij_matrix, m, n, rows, cols, values);
+
+\end{verbatim}
+\end{display}
+
+Also, one can preset the row sizes of the matrix, in order to
+reduce the execution time for the matrix specification.
+One can specify the total number of coefficients for
+each row, the number of coefficients in the row that couple the diagonal 
+unknown to (\code{Diag}) unknowns in the same processor domain, and the
+number of coefficients in the row that couple the diagonal unknown to
+(\code{Offd}) unknowns in other processor domains:
+
+\begin{display}
+\begin{verbatim}
+
+HYPRE_IJMatrixSetRowSizes(ij_matrix, sizes);
+HYPRE_IJMatrixSetDiagRowSizes(ij_matrix, sizes);
+HYPRE_IJMatrixSetOffDiagRowSizes(ij_matrix, sizes);
+
+\end{verbatim}
+\end{display}
 
 %\begin{figure}
 %\begin{center}
@@ -98,6 +132,8 @@ the matrix ``ready to use''.
 %\qq \vdots \\
 %\qq \;\\
 %\hline
+%\hline
+%\hline
 %\qq \vdots \\
 %\qq \; \\
 %\end{array}
@@ -130,14 +166,14 @@ the matrix ``ready to use''.
 
 The following example code illustrates the basic usage of the
 \code{IJ} interface for building vectors:
+
 \begin{display}
 \begin{verbatim}
-
 MPI_Comm        comm;
-HYPRE_IJVector *ij_vector;
+HYPRE_IJVector  ij_vector;
 int             global_n;
 int             num_values;
-int            *global_indices;
+int            *glob_vec_indices;
 int            *value_indices;
 double         *values;
 
@@ -147,13 +183,13 @@ HYPRE_IJVectorInitialize(ij_vector);
 
 /* set vector values */
 HYPRE_IJVectorSetLocalComponents(ij_vector, num_values,
-                                 global_indices, value_indices, values);
+                                 glob_vec_indices, value_indices, values);
 ...
 
 HYPRE_IJVectorAssemble(ij_vector);
-
 \end{verbatim}
 \end{display}
+
 The \code{Create()} routine creates an empty \code{global_n}-vector
 object that lives on the \code{comm} communicator.  The
 \code{SetLocalStorageType} routine sets the underlying vector storage
@@ -164,23 +200,56 @@ not involve the allocation of memory for the coefficient data,
 depending on the implementation.  The optional \code{Set} routines
 mentioned later in this chapter and in the Reference Manual, should be
 called before this step.  The \code{SetLocalComponents()} routine sets
-the vector coefficients for a specified list of \code{global_indices}
+the vector coefficients for a specified list of \code{glob_vec_indices}
 (\code{num_values} is the number of values being set).  The \code{Assemble()}
-routine is a collective call (i.e., must be called on all processes),
+routine is a trivial collective call (i.e., must be called on all processes),
 and finalizes the vector assembly, making the vector ``ready to use''.
 
-%In general, vector components can be placed into underlying \hypre{}
-%formats either in contiguous subsets (Figure \ref{loc_comps_blk}) or
-%in indexed subsets (Figure \ref{loc_comps}).
-%\begin{figure}
-%\label{loc_comps_blk}
-%\centerline{\epsfig{figure=loc_cmps_blk.eps,height=2.5in}}
-%\caption{Mapping between external array values and
-%  internal vector data for \code{LocalComponentsInBlock} functions.}
-%\end{figure}
-%\begin{figure}
-%\label{loc_comps}
-%\centerline{\epsfig{figure=loc_cmps.eps,height=2.4in}}
-%\caption{Mapping between external array values and
-%   internal vector data for \code{LocalComponents} functions.}
-%\end{figure}
+Currently, there are two general (not so straightforward) ways to set and
+modify vector components in underlying \hypre{} formats.  One general way
+takes components from an indexed subset of an array of values and maps
+the chosen values to a contiguous block of \hypre{} vector components
+(specified by global \hypre{} indices):  this way is implemented with so-called
+\code{LocalComponentsInBlock} functions (see Fig. \ref{loc-comps-blk}):
+
+\begin{display}
+\begin{verbatim}
+HYPRE_IJVectorSetLocalComponentsInBlock(ij_vector,
+                                        glob_vec_index_start,
+                                        glob_vec_index_stop,
+                                        value_indices, values);
+\end{verbatim}
+\end{display}
+
+\begin{figure}
+\label{loc-comps-blk}
+\centerline{\epsfig{figure=loc_cmps_blk.eps,height=2.4in}}
+\caption{Example mapping between external array values and
+  internal vector data for \code{LocalComponentsInBlock} functions.}
+\end{figure}
+
+A more general way takes components from an indexed subset of an array of
+values and maps each chosen value to a particular \hypre{} vector component
+(specified by a global \hypre{} index): this way is implemented with so-called
+\code{LocalComponents} functions (see Fig. \ref{loc-comps}):
+
+\begin{display}
+\begin{verbatim}
+HYPRE_IJVectorSetLocalComponents(ij_vector, num_values,
+                                 glob_vec_indices, value_indices, values);
+\end{verbatim}
+\end{display}
+
+\begin{figure}
+\label{loc-comps}
+\centerline{\epsfig{figure=loc_cmps.eps,height=2.4in}}
+\caption{Example mapping between external array values and
+   internal vector data for \code{LocalComponents} functions.}
+\end{figure}
+
+General mapping of array values to \hypre{} vector components
+facilitates interfacing with application codes that mix
+the local and nonlocal components differently than \hypre{}.
+\code{Get} functions corresponding to these \code{Set} are also
+provided by the interface.
+
