@@ -33,8 +33,10 @@ main( int   argc,
    col_starts = hypre_ParCSRMatrixColStarts(A);
 
    hypre_ParCSRMatrixPrint(A, "echo_A" );
+   hypre_ParCSRMatrixPrintIJ(A, 0, 0, "echo_AIJ" );
    C = hypre_ParCSRAAt( A );
    hypre_ParCSRMatrixPrint(C, "result");
+   hypre_ParCSRMatrixPrintIJ(C, 0, 0, "resultIJ");
 
    if (my_id == 0)
    {

@@ -288,7 +288,7 @@ hypre_MatvecCommPkgCreate_core (
    MPI_Allgather(&local_info, 1, MPI_INT, info, 1, MPI_INT, comm); 
 
 /* ----------------------------------------------------------------------
- * generate information to be send: tmp contains for each recv_proc:
+ * generate information to be sent: tmp contains for each recv_proc:
  * id of recv_procs, number of elements to be received for this processor,
  * indices of elements (in this order)
  * ---------------------------------------------------------------------*/
@@ -324,7 +324,7 @@ hypre_MatvecCommPkgCreate_core (
 	
 
 /* ----------------------------------------------------------------------
- * determine num_sends and number of elements to be send
+ * determine num_sends and number of elements to be sent
  * ---------------------------------------------------------------------*/
 
    num_sends = 0;

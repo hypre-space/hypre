@@ -41,6 +41,8 @@ main( int   argc,
    hypre_ParCSRMatrixSetRowStartsOwner(B,0);
    hypre_ParCSRMatrixSetColStartsOwner(B,0);
    C = hypre_ParMatmul(B,A);
+   hypre_ParCSRMatrixPrint(B, "echo_B" );
+   hypre_ParCSRMatrixPrint(A, "echo_A" );
    hypre_ParCSRMatrixPrint(C, "result");
 
    if (my_id == 0)

@@ -46,5 +46,8 @@ typedef struct
 #define hypre_ParVectorLocalVector(vector)      ((vector) -> local_vector)
 #define hypre_ParVectorOwnsData(vector)         ((vector) -> owns_data)
 #define hypre_ParVectorOwnsPartitioning(vector) ((vector) -> owns_partitioning)
+#define hypre_ParVectorNumVectors(vector)\
+ (hypre_VectorNumVectors( hypre_ParVectorLocalVector(vector) ))
+
 
 #endif

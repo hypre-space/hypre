@@ -51,10 +51,11 @@ main( int   argc,
       (MPI_COMM_WORLD, Bs, col_starts, row_starts);
    hypre_ParCSRBooleanMatrixSetRowStartsOwner(B,0);
    hypre_ParCSRBooleanMatrixSetColStartsOwner(B,0);
-   C = hypre_ParBooleanMatmul(B,A);
-   hypre_ParCSRBooleanMatrixPrint(B, "echo_B" );
+   C = hypre_ParBooleanMatmul(A,B);
    hypre_ParCSRBooleanMatrixPrint(A, "echo_A" );
+   hypre_ParCSRBooleanMatrixPrint(B, "echo_B" );
    hypre_ParCSRBooleanMatrixPrint(C, "result");
+   hypre_ParCSRBooleanMatrixPrintIJ(C, "result_Cij");
 
    if (my_id == 0)
    {

@@ -141,6 +141,9 @@ typedef struct
 #define hypre_ParVectorLocalVector(vector)      ((vector) -> local_vector)
 #define hypre_ParVectorOwnsData(vector)         ((vector) -> owns_data)
 #define hypre_ParVectorOwnsPartitioning(vector) ((vector) -> owns_partitioning)
+#define hypre_ParVectorNumVectors(vector)\
+ (hypre_VectorNumVectors( hypre_ParVectorLocalVector(vector) ))
+
 
 #endif
 /*BHEADER**********************************************************************
@@ -350,15 +353,6 @@ int * hypre_NumbersArray( hypre_NumbersNode * node );
 
 #endif
 
-/* par_csr_communication.c */
-hypre_ParCSRCommHandle *hypre_ParCSRCommHandleCreate( int job , hypre_ParCSRCommPkg *comm_pkg , void *send_data , void *recv_data );
-int hypre_ParCSRCommHandleDestroy( hypre_ParCSRCommHandle *comm_handle );
-void hypre_MatvecCommPkgCreate_core( MPI_Comm comm , int *col_map_offd , int first_col_diag , int *col_starts , int num_cols_diag , int num_cols_offd , int firstColDiag , int *colMapOffd , int data , int *p_num_recvs , int **p_recv_procs , int **p_recv_vec_starts , int *p_num_sends , int **p_send_procs , int **p_send_map_starts , int **p_send_map_elmts );
-int hypre_MatvecCommPkgCreate( hypre_ParCSRMatrix *A );
-int hypre_MatvecCommPkgDestroy( hypre_ParCSRCommPkg *comm_pkg );
-int hypre_BuildCSRMatrixMPIDataType( int num_nonzeros , int num_rows , double *a_data , int *a_i , int *a_j , MPI_Datatype *csr_matrix_datatype );
-int hypre_BuildCSRJDataType( int num_nonzeros , double *a_data , int *a_j , MPI_Datatype *csr_jdata_datatype );
-
 /* communicationT.c */
 void RowsWithColumn_original( int *rowmin , int *rowmax , int column , hypre_ParCSRMatrix *A );
 void RowsWithColumn( int *rowmin , int *rowmax , int column , int num_rows_diag , int firstColDiag , int *colMapOffd , int *mat_i_diag , int *mat_j_diag , int *mat_i_offd , int *mat_j_offd );
@@ -379,7 +373,11 @@ int hypre_MatTCommPkgCreate( hypre_ParCSRMatrix *A );
 
 /* driver_matmul.c */
 
+/* driver_mat_multivec.c */
+
 /* driver_matvec.c */
+
+/* driver_multivec.c */
 
 /* HYPRE_parcsr_matrix.c */
 int HYPRE_ParCSRMatrixCreate( MPI_Comm comm , int global_num_rows , int global_num_cols , int *row_starts , int *col_starts , int num_cols_offd , int num_nonzeros_diag , int num_nonzeros_offd , HYPRE_ParCSRMatrix *matrix );
@@ -400,6 +398,7 @@ int HYPRE_ParCSRMatrixMatvecT( double alpha , HYPRE_ParCSRMatrix A , HYPRE_ParVe
 
 /* HYPRE_parcsr_vector.c */
 int HYPRE_ParVectorCreate( MPI_Comm comm , int global_size , int *partitioning , HYPRE_ParVector *vector );
+int HYPRE_ParMultiVectorCreate( MPI_Comm comm , int global_size , int *partitioning , int number_vectors , HYPRE_ParVector *vector );
 int HYPRE_ParVectorDestroy( HYPRE_ParVector vector );
 int HYPRE_ParVectorInitialize( HYPRE_ParVector vector );
 int HYPRE_ParVectorRead( MPI_Comm comm , const char *file_name , HYPRE_ParVector *vector );
@@ -461,6 +460,15 @@ int hypre_BuildCSRBooleanMatrixMPIDataType( int num_nonzeros , int num_rows , in
 hypre_ParCSRBooleanMatrix *hypre_CSRBooleanMatrixToParCSRBooleanMatrix( MPI_Comm comm , hypre_CSRBooleanMatrix *A , int *row_starts , int *col_starts );
 int BooleanGenerateDiagAndOffd( hypre_CSRBooleanMatrix *A , hypre_ParCSRBooleanMatrix *matrix , int first_col_diag , int last_col_diag );
 
+/* par_csr_communication.c */
+hypre_ParCSRCommHandle *hypre_ParCSRCommHandleCreate( int job , hypre_ParCSRCommPkg *comm_pkg , void *send_data , void *recv_data );
+int hypre_ParCSRCommHandleDestroy( hypre_ParCSRCommHandle *comm_handle );
+void hypre_MatvecCommPkgCreate_core( MPI_Comm comm , int *col_map_offd , int first_col_diag , int *col_starts , int num_cols_diag , int num_cols_offd , int firstColDiag , int *colMapOffd , int data , int *p_num_recvs , int **p_recv_procs , int **p_recv_vec_starts , int *p_num_sends , int **p_send_procs , int **p_send_map_starts , int **p_send_map_elmts );
+int hypre_MatvecCommPkgCreate( hypre_ParCSRMatrix *A );
+int hypre_MatvecCommPkgDestroy( hypre_ParCSRCommPkg *comm_pkg );
+int hypre_BuildCSRMatrixMPIDataType( int num_nonzeros , int num_rows , double *a_data , int *a_i , int *a_j , MPI_Datatype *csr_matrix_datatype );
+int hypre_BuildCSRJDataType( int num_nonzeros , double *a_data , int *a_j , MPI_Datatype *csr_jdata_datatype );
+
 /* par_csr_matop.c */
 void hypre_ParMatmul_RowSizes( int **C_diag_i , int **C_offd_i , int **B_marker , int *A_diag_i , int *A_diag_j , int *A_offd_i , int *A_offd_j , int *B_diag_i , int *B_diag_j , int *B_offd_i , int *B_offd_j , int *B_ext_diag_i , int *B_ext_diag_j , int *B_ext_offd_i , int *B_ext_offd_j , int *map_B_to_C , int *C_diag_size , int *C_offd_size , int num_rows_diag_A , int num_cols_offd_A , int allsquare , int num_cols_diag_B , int num_cols_offd_B , int num_cols_offd_C );
 hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *B );
@@ -495,10 +503,12 @@ int hypre_ParCSRMatrixMatvecT( double alpha , hypre_ParCSRMatrix *A , hypre_ParV
 
 /* par_vector.c */
 hypre_ParVector *hypre_ParVectorCreate( MPI_Comm comm , int global_size , int *partitioning );
+hypre_ParVector *hypre_ParMultiVectorCreate( MPI_Comm comm , int global_size , int *partitioning , int num_vectors );
 int hypre_ParVectorDestroy( hypre_ParVector *vector );
 int hypre_ParVectorInitialize( hypre_ParVector *vector );
 int hypre_ParVectorSetDataOwner( hypre_ParVector *vector , int owns_data );
 int hypre_ParVectorSetPartitioningOwner( hypre_ParVector *vector , int owns_partitioning );
+int hypre_ParVectorSetNumVectors( hypre_ParVector *vector , int num_vectors );
 hypre_ParVector *hypre_ParVectorRead( MPI_Comm comm , const char *file_name );
 int hypre_ParVectorPrint( hypre_ParVector *vector , const char *file_name );
 int hypre_ParVectorSetConstantValues( hypre_ParVector *v , double value );
