@@ -24,7 +24,7 @@ int BuildParDifConv (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatri
 int BuildParFromOneFile (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
 int BuildFuncsFromFiles (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix A , int **dof_func_ptr );
 int BuildFuncsFromOneFile (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix A , int **dof_func_ptr );
-int BuildRhsParFromOneFile (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix A , HYPRE_ParVector *b_ptr );
+int BuildRhsParFromOneFile (int argc , char *argv [], int arg_index , int *partitioning , HYPRE_ParVector *b_ptr );
 int BuildParLaplacian9pt (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
 int BuildParLaplacian27pt (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
 
@@ -850,7 +850,7 @@ main( int   argc,
    }
    else if ( build_rhs_type == 2 )
    {
-      BuildRhsParFromOneFile(argc, argv, build_rhs_arg_index, A, &b);
+      BuildRhsParFromOneFile(argc, argv, build_rhs_arg_index, part_b, &b);
 
       HYPRE_IJVectorCreate(MPI_COMM_WORLD, &ij_x, global_n);
       HYPRE_IJVectorSetLocalStorageType(ij_x,ij_vector_storage_type );
@@ -2247,7 +2247,7 @@ int
 BuildRhsParFromOneFile( int                  argc,
                         char                *argv[],
                         int                  arg_index,
-                        HYPRE_ParCSRMatrix   A,
+                        int		    *partitioning,
                         HYPRE_ParVector     *b_ptr     )
 {
    char           *filename;
@@ -2256,7 +2256,6 @@ BuildRhsParFromOneFile( int                  argc,
    HYPRE_Vector    b_CSR;
 
    int             myid;
-   int            *partitioning;
 
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -2292,7 +2291,6 @@ BuildRhsParFromOneFile( int                  argc,
  
       b_CSR = HYPRE_VectorRead(filename);
    }
-   HYPRE_ParCSRMatrixGetRowPartitioning(A, &partitioning);
    HYPRE_VectorToParVector(MPI_COMM_WORLD, b_CSR, partitioning,&b); 
 
    *b_ptr = b;
