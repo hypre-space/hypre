@@ -32,6 +32,7 @@ BLAS_LIB       =  @BLASLIBFLAGS@
 CFLAGS =\
  ${C_COMPILE_FLAGS}\
  -I$(srcdir)\
+ -I$(srcdir)/..\
  -I$(srcdir)/../..\
  -I$(srcdir)/../../seq_mv\
  -I$(srcdir)/../../parcsr_mv\
@@ -42,6 +43,7 @@ CFLAGS =\
 CXXFLAGS =\
  ${CXX_COMPILE_FLAGS}\
  -I$(srcdir)\
+ -I$(srcdir)/..\
  -I$(srcdir)/../..\
  -I$(srcdir)/../../seq_mv\
  -I$(srcdir)/../../parcsr_mv\

@@ -22,8 +22,8 @@
 #include <string.h>
 #include "utilities/utilities.h"
 
-#include "../matrix/mli_matrix.h"
-#include "../vector/mli_vector.h"
+#include "matrix/mli_matrix.h"
+#include "vector/mli_vector.h"
 
 /*--------------------------------------------------------------------------
  * MLI_Solver data structure declaration

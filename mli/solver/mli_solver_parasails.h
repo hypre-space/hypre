@@ -10,9 +10,9 @@
 #define __MLI_SOLVERPARASAILSH__
 
 #include <stdio.h>
-#include "../matrix/mli_matrix.h"
-#include "../vector/mli_vector.h"
-#include "mli_solver.h"
+#include "matrix/mli_matrix.h"
+#include "vector/mli_vector.h"
+#include "solver/mli_solver.h"
 #ifdef __cplusplus
 extern "C" {
 #endif

@@ -28,6 +28,7 @@ CXXDEFS = -DMLI_SUPERLU
 CFLAGS =\
  ${C_COMPILE_FLAGS}\
  -I$(srcdir)\
+ -I$(srcdir)/..\
  -I$(srcdir)/../..\
  -I$(srcdir)/../../utilities\
  -I$(srcdir)/../../parcsr_mv\
@@ -38,6 +39,7 @@ CFLAGS =\
 CXXFLAGS =\
  ${C_COMPILE_FLAGS}\
  -I$(srcdir)\
+ -I$(srcdir)/..\
  -I$(srcdir)/../..\
  -I$(srcdir)/../../utilities\
  -I$(srcdir)/../../parcsr_mv\

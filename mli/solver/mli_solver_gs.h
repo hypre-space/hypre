@@ -11,9 +11,9 @@
 
 #include <stdio.h>
 #include "parcsr_mv/parcsr_mv.h"
-#include "../matrix/mli_matrix.h"
-#include "../vector/mli_vector.h"
-#include "mli_solver.h"
+#include "matrix/mli_matrix.h"
+#include "vector/mli_vector.h"
+#include "solver/mli_solver.h"
 
 /******************************************************************************
  * data structure for the Gauss Seidel relaxation scheme

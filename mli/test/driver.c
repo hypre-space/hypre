@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <mpi.h>
-#include "../util/mli_utils.h"
-#include "../base/mli_defs.h"
-#include "../cintface/cmli.h"
+#include "util/mli_utils.h"
+#include "base/mli_defs.h"
+#include "cintface/cmli.h"
 #include "HYPRE.h"
 #include "parcsr_mv/parcsr_mv.h"
 #include "IJ_mv/HYPRE_IJ_mv.h"

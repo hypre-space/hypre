@@ -30,6 +30,7 @@ F77DEFS =
 CFLAGS =\
  ${C_COMPILE_FLAGS}\
  -I$(srcdir)\
+ -I$(srcdir)/..\
  -I$(srcdir)/../..\
  -I$(srcdir)/../../utilities\
  -I$(srcdir)/../../parcsr_mv\
@@ -40,6 +41,7 @@ CFLAGS =\
 CXXFLAGS =\
  ${CXX_COMPILE_FLAGS}\
  -I$(srcdir)\
+ -I$(srcdir)/..\
  -I$(srcdir)/../..\
  -I$(srcdir)/../../utilities\
  -I$(srcdir)/../../parcsr_mv\

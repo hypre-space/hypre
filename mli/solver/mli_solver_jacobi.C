@@ -12,8 +12,8 @@
 #include <stdio.h>
 
 #include "parcsr_mv/parcsr_mv.h"
-#include "../base/mli_defs.h"
-#include "mli_solver_jacobi.h"
+#include "base/mli_defs.h"
+#include "solver/mli_solver_jacobi.h"
 
 /******************************************************************************
  * constructor

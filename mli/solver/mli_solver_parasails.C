@@ -10,8 +10,8 @@
 #include <iostream.h>
 
 #include "parcsr_mv/parcsr_mv.h"
-#include "../base/mli_defs.h"
-#include "mli_solver_parasails.h"
+#include "base/mli_defs.h"
+#include "solver/mli_solver_parasails.h"
 
 /******************************************************************************
  * ParaSails relaxation scheme

@@ -9,8 +9,8 @@
 #include <string.h>
 #include <iostream.h>
 #include "parcsr_mv/parcsr_mv.h"
-#include "mli_solver_sgs.h"
-#include "../base/mli_defs.h"
+#include "solver/mli_solver_sgs.h"
+#include "base/mli_defs.h"
 
 /******************************************************************************
  * symmetric Gauss-Seidel relaxation scheme

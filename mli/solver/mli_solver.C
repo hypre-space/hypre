@@ -18,15 +18,15 @@
 
 #include <string.h>
 #include <iostream.h>
-#include "../base/mli_defs.h"
-#include "mli_solver.h"
-#include "mli_solver_jacobi.h"
-#include "mli_solver_gs.h"
-#include "mli_solver_sgs.h"
-#include "mli_solver_parasails.h"
-#include "mli_solver_schwarz.h"
-#include "mli_solver_mls.h"
-#include "mli_solver_superlu.h"
+#include "base/mli_defs.h"
+#include "solver/mli_solver.h"
+#include "solver/mli_solver_jacobi.h"
+#include "solver/mli_solver_gs.h"
+#include "solver/mli_solver_sgs.h"
+#include "solver/mli_solver_parasails.h"
+#include "solver/mli_solver_schwarz.h"
+#include "solver/mli_solver_mls.h"
+#include "solver/mli_solver_superlu.h"
 
 /*****************************************************************************
  * constructor 

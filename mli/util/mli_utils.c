@@ -19,7 +19,7 @@
 #include <assert.h>
 #include <math.h>
 #include "HYPRE.h"
-#include "mli_utils.h"
+#include "util/mli_utils.h"
 #include "IJ_mv/HYPRE_IJ_mv.h"
 #include <mpi.h>
 

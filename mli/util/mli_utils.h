@@ -18,7 +18,7 @@
 #include <time.h>
 #include "utilities/utilities.h"
 typedef struct MLI_Function_Struct MLI_Function;
-#include "../cintface/cmli.h"
+#include "cintface/cmli.h"
 #include "parcsr_mv/parcsr_mv.h"
 #include "parcsr_ls/HYPRE_parcsr_ls.h"
 #include "parcsr_mv/HYPRE_parcsr_mv.h"

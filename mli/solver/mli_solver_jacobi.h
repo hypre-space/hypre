@@ -10,9 +10,9 @@
 #define __MLI_SOLVER_JACOBI__
 
 #include <stdio.h>
-#include "../matrix/mli_matrix.h"
-#include "../vector/mli_vector.h"
-#include "../solver/mli_solver.h"
+#include "matrix/mli_matrix.h"
+#include "vector/mli_vector.h"
+#include "solver/mli_solver.h"
 
 /******************************************************************************
  * data structure for the Damped Jacobi relaxation scheme

@@ -23,8 +23,8 @@ class MLI_Matrix;
  *--------------------------------------------------------------------------*/
 
 #include "utilities/utilities.h"
-#include "../matrix/mli_matrix.h"
-#include "../util/mli_utils.h"
+#include "matrix/mli_matrix.h"
+#include "util/mli_utils.h"
 
 /*--------------------------------------------------------------------------
  * MLI_Matrix data structure declaration

@@ -9,8 +9,8 @@
 #include <string.h>
 #include <iostream.h>
 #include "parcsr_mv/parcsr_mv.h"
-#include "../base/mli_defs.h"
-#include "mli_solver_schwarz.h"
+#include "base/mli_defs.h"
+#include "solver/mli_solver_schwarz.h"
 
 /******************************************************************************
  * Schwarz relaxation scheme 
