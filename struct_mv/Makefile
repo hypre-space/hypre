@@ -78,6 +78,18 @@ driver_internal: driver_internal.o libZZZ_mv.a
 	@echo  "Linking" $@ "... "
 	${CC} -o driver_internal driver_internal.o ${LFLAGS}
 
+one_to_many: one_to_many.o libZZZ_mv.a
+	@echo  "Linking" $@ "... "
+	${CC} -o one_to_many one_to_many.o ${LFLAGS}
+
+create_2d_laplacian: create_2d_laplacian.o libZZZ_mv.a
+	@echo  "Linking" $@ "... "
+	${CC} -o create_2d_laplacian create_2d_laplacian.o ${LFLAGS}
+
+create_3d_laplacian: create_3d_laplacian.o libZZZ_mv.a
+	@echo  "Linking" $@ "... "
+	${CC} -o create_3d_laplacian create_3d_laplacian.o ${LFLAGS}
+
 libZZZ_mv.a: ${OBJS}
 	@echo  "Building $@ ... "
 	ar -ru $@ ${OBJS}
