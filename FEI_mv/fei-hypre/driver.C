@@ -411,9 +411,16 @@ void fei_hypre_domaindecomposition(int argc, char *argv[])
     // call solver
     //------------------------------------------------------------------
 
-    x_csr  = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(H.HYx_);
-    b_csr  = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(H.HYb_);
-    A_csr  = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(H.HYA_);
+    //---old_IJ---------------------------------------------------------
+    //x_csr  = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(H.HYx_);
+    //b_csr  = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(H.HYb_);
+    //A_csr  = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(H.HYA_);
+    //---new_IJ---------------------------------------------------------
+    HYPRE_IJVectorGetObject(H.HYx_, (void**) &x_csr);
+    HYPRE_IJVectorGetObject(H.HYb_, (void**) &b_csr);
+    HYPRE_IJMatrixGetObject(H.HYA_, (void**) &A_csr);
+    //------------------------------------------------------------------
+
     HYPRE_LSI_DDAMGSolve(A_csr,x_csr,b_csr);
  
     MPI_Finalize();

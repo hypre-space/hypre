@@ -285,7 +285,13 @@ int getMatrixCSR(HYPRE_IJMatrix Amat, int nrows, int nnz, int *ia_ptr,
     nz        = 0;
     nz_ptr    = 0;
     ia_ptr[0] = nz_ptr;
-    A_csr  = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(Amat);
+
+    /* ---old_IJ----------------------------------------------------------- */
+    /*A_csr  = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(Amat);*/
+    /* ---new_IJ----------------------------------------------------------- */
+    HYPRE_IJMatrixGetObject(Amat, (void**) &A_csr);
+    /* -------------------------------------------------------------------- */
+
     for ( i = 0; i < nrows; i++ )
     {
        ierr = HYPRE_ParCSRMatrixGetRow(A_csr,i,&rowSize,&colInd,&colVal);

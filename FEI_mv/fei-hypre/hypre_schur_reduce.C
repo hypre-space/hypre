@@ -75,7 +75,7 @@ void HYPRE_LinSysCore::buildSchurReducedSystem()
     int    rowSize, rowCount, rowIndex, maxRowSize, newRowSize;
     int    *CMatSize, *CTMatSize, *MMatSize, *colInd, *newColInd;
     int    *tempList, *recvCntArray, *displArray, *colInd2, rowSize2;
-    int    procIndex, *ProcNRows, *ProcNSchur, searchIndex;
+    int    procIndex, *ProcNRows, *ProcNSchur, searchIndex, CStartCol;
     double *colVal, *colVal2, *newColVal, *diagonal, ddata, maxdiag, mindiag;
 
     HYPRE_IJMatrix     Cmat, CTmat, Mmat, Smat;
@@ -298,13 +298,12 @@ void HYPRE_LinSysCore::buildSchurReducedSystem()
     // ierr += HYPRE_IJMatrixSetLocalStorageType(Cmat, HYPRE_PARCSR);
     // ierr  = HYPRE_IJMatrixSetLocalSize(Cmat, CNRows, CNCols);
     //---new_IJ---------------------------------------------------------
-    //---????????????????
-    ierr  = HYPRE_IJMatrixCreate(comm_,
-				0, 0+CNRows-1,
-				0, 0+CNCols-1,
-				&Cmat);
+    CStartCol = ProcNRows[mypid_] - ProcNSchur[mypid_];
+    ierr  = HYPRE_IJMatrixCreate(comm_, CStartRow, CStartRow+CNRows-1,
+				 CStartCol, CStartCol+CNCols-1, &Cmat);
     ierr += HYPRE_IJMatrixSetObjectType(Cmat, HYPRE_PARCSR);
     //------------------------------------------------------------------
+
     assert(!ierr);
 
     //------------------------------------------------------------------
@@ -409,11 +408,13 @@ void HYPRE_LinSysCore::buildSchurReducedSystem()
     //------------------------------------------------------------------
 
     HYPRE_IJMatrixAssemble(Cmat);
+
     //---old_IJ---------------------------------------------------------
     // C_csr = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(Cmat);
     //---new_IJ---------------------------------------------------------
     HYPRE_IJMatrixGetObject(Cmat, (void **) &C_csr);
     //------------------------------------------------------------------
+
     hypre_MatvecCommPkgCreate((hypre_ParCSRMatrix *) C_csr);
 
     if ( HYOutputLevel_ & HYFEI_SCHURREDUCE3 )
@@ -474,13 +475,11 @@ void HYPRE_LinSysCore::buildSchurReducedSystem()
     // ierr += HYPRE_IJMatrixSetLocalStorageType(Mmat, HYPRE_PARCSR);
     // ierr  = HYPRE_IJMatrixSetLocalSize(Mmat, MNRows, MNCols);
     //---new_IJ---------------------------------------------------------
-    //---???????????????
-    ierr  = HYPRE_IJMatrixCreate(comm_,
-				0, 0+MNRows-1,
-				0, 0+MNCols-1,
-				&Mmat);
+    ierr  = HYPRE_IJMatrixCreate(comm_, MStartRow, MStartRow+MNRows-1,
+				 MStartRow, MStartRow+MNCols-1, &Mmat);
     ierr += HYPRE_IJMatrixSetObjectType(Mmat, HYPRE_PARCSR);
     //------------------------------------------------------------------
+
     MMatSize = new int[MNRows];
     for ( i = 0; i < MNRows; i++ ) MMatSize[i] = 1;
     ierr  = HYPRE_IJMatrixSetRowSizes(Mmat, MMatSize);
@@ -552,11 +551,13 @@ void HYPRE_LinSysCore::buildSchurReducedSystem()
     //------------------------------------------------------------------
 
     HYPRE_IJMatrixAssemble(Mmat);
+
     //---old_IJ------------------------------------------------------
     // M_csr = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(Mmat);
     //---new_IJ------------------------------------------------------
     HYPRE_IJMatrixGetObject(Mmat, (void **) &M_csr);
     //------------------------------------------------------------------
+
     hypre_MatvecCommPkgCreate((hypre_ParCSRMatrix *) M_csr);
 
     //------------------------------------------------------------------
@@ -612,13 +613,11 @@ void HYPRE_LinSysCore::buildSchurReducedSystem()
     // ierr += HYPRE_IJMatrixSetLocalStorageType(CTmat, HYPRE_PARCSR);
     // ierr  = HYPRE_IJMatrixSetLocalSize(CTmat, CTNRows, CTNCols);
     //---new_IJ---------------------------------------------------------
-    //---????????????????
-    ierr  = HYPRE_IJMatrixCreate(comm_,
-				0, 0+CTNRows-1,
-				0, 0+CTNCols-1,
-				&CTmat);
+    ierr  = HYPRE_IJMatrixCreate(comm_, CTStartRow, CTStartRow+CTNRows-1,
+                                 CStartRow, CStartRow+CTNCols-1, &CTmat);
     ierr += HYPRE_IJMatrixSetObjectType(CTmat, HYPRE_PARCSR);
     //------------------------------------------------------------------
+
     assert(!ierr);
 
     //------------------------------------------------------------------
@@ -716,11 +715,13 @@ void HYPRE_LinSysCore::buildSchurReducedSystem()
     //------------------------------------------------------------------
 
     HYPRE_IJMatrixAssemble(CTmat);
+
     //---old_IJ---------------------------------------------------------
     // CT_csr = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(CTmat);
     //---new_IJ---------------------------------------------------------
     HYPRE_IJMatrixGetObject(CTmat, (void **) &CT_csr);
     //------------------------------------------------------------------
+
     hypre_MatvecCommPkgCreate((hypre_ParCSRMatrix *) CT_csr);
 
     if ( HYOutputLevel_ & HYFEI_SCHURREDUCE3 )
@@ -808,6 +809,7 @@ void HYPRE_LinSysCore::buildSchurReducedSystem()
     ierr += HYPRE_IJVectorInitialize(f1);
     ierr += HYPRE_IJVectorAssemble(f1);
     //------------------------------------------------------------------
+
     assert(!ierr);
 
     //---old_IJ---------------------------------------------------------
@@ -823,6 +825,7 @@ void HYPRE_LinSysCore::buildSchurReducedSystem()
     ierr += HYPRE_IJVectorInitialize(f2hat);
     ierr += HYPRE_IJVectorAssemble(f2hat);
     //------------------------------------------------------------------
+
     assert(!ierr);
 
     rowCount = CTStartRow;
@@ -853,6 +856,7 @@ void HYPRE_LinSysCore::buildSchurReducedSystem()
     HYPRE_IJVectorGetObject(f1, (void **) &f1_csr);
     HYPRE_IJVectorGetObject(f2hat, (void **) &f2hat_csr);
     //------------------------------------------------------------------
+
     HYPRE_ParCSRMatrixMatvec( 1.0, C_csr, f1_csr, 0.0, f2hat_csr );
     delete [] diagonal;
     HYPRE_IJVectorDestroy(f1); 
@@ -874,6 +878,7 @@ void HYPRE_LinSysCore::buildSchurReducedSystem()
     ierr += HYPRE_IJVectorInitialize(f2);
     ierr += HYPRE_IJVectorAssemble(f2);
     //------------------------------------------------------------------
+
     assert(!ierr);
 
     rowCount = CStartRow;
@@ -897,6 +902,7 @@ void HYPRE_LinSysCore::buildSchurReducedSystem()
 			(const double *) &ddata);
        HYPRE_IJVectorGetValues(f2, 1, &rowCount, &ddata);
        //------------------------------------------------------------------
+
        assert( !ierr );
        rowCount++;
     } 
@@ -911,11 +917,8 @@ void HYPRE_LinSysCore::buildSchurReducedSystem()
     // ierr += HYPRE_IJMatrixSetLocalStorageType(reducedA_, HYPRE_PARCSR);
     // ierr  = HYPRE_IJMatrixSetLocalSize(reducedA_, CNRows, CNRows);
     //---new_IJ---------------------------------------------------------
-    //---????????????????
-    ierr  = HYPRE_IJMatrixCreate(comm_, 
-				0, 0+CNRows-1,
-				0, 0+CNRows-1,
-				&reducedA_);
+    ierr  = HYPRE_IJMatrixCreate(comm_, CStartRow, CStartRow+CNRows-1,
+				 CStartRow, CStartRow+CNRows-1, &reducedA_);
     ierr += HYPRE_IJMatrixSetObjectType(reducedA_, HYPRE_PARCSR);
     //------------------------------------------------------------------
     assert(!ierr);
@@ -1612,7 +1615,7 @@ void HYPRE_LinSysCore::buildSchurReducedSystem2()
     int    rowSize, rowCount, rowIndex, maxRowSize, newRowSize;
     int    *CMatSize, *CTMatSize, *MMatSize, *colInd, *newColInd, *colInd2;
     int    *tempList, *recvCntArray, *displArray, rowSize2;
-    int    procIndex, *ProcNRows, *ProcNSchur, searchIndex;
+    int    procIndex, *ProcNRows, *ProcNSchur, searchIndex, CStartCol;
     double *colVal, *newColVal, *diagonal, ddata, maxdiag, mindiag, darray[2];
     double darray2[2], *colVal2, rowmax;
 
@@ -1763,11 +1766,9 @@ void HYPRE_LinSysCore::buildSchurReducedSystem2()
     // ierr += HYPRE_IJMatrixSetLocalStorageType(Cmat, HYPRE_PARCSR);
     // ierr  = HYPRE_IJMatrixSetLocalSize(Cmat, CNRows, CNCols);
     //---new_IJ------------------------------------------------------
-    //---??????????????
-    ierr  = HYPRE_IJMatrixCreate(comm_,
-				0, 0+CNRows-1,
-				0, 0+CNCols-1,
-				&Cmat);
+    CStartCol = ProcNRows[mypid_] - ProcNSchur[mypid_];
+    ierr  = HYPRE_IJMatrixCreate(comm_, CStartRow, CStartRow+CNRows-1,
+				 CStartCol, CStartCol+CNCols-1, &Cmat);
     ierr += HYPRE_IJMatrixSetObjectType(Cmat, HYPRE_PARCSR);
     //------------------------------------------------------------------
     assert(!ierr);
@@ -1862,11 +1863,13 @@ void HYPRE_LinSysCore::buildSchurReducedSystem2()
     //------------------------------------------------------------------
 
     HYPRE_IJMatrixAssemble(Cmat);
+
     //---old_IJ------------------------------------------------------
     // C_csr = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(Cmat);
     //---new_IJ------------------------------------------------------
     HYPRE_IJMatrixGetObject(Cmat, (void **) &C_csr);
     //------------------------------------------------------------------
+
     hypre_MatvecCommPkgCreate((hypre_ParCSRMatrix *) C_csr);
 
     if ( HYOutputLevel_ & HYFEI_SCHURREDUCE3 )
@@ -1934,11 +1937,8 @@ void HYPRE_LinSysCore::buildSchurReducedSystem2()
     // ierr += HYPRE_IJMatrixSetLocalStorageType(Mmat, HYPRE_PARCSR);
     // ierr  = HYPRE_IJMatrixSetLocalSize(Mmat, MNRows, MNCols);
     //---new_IJ------------------------------------------------------
-    //---??????????????
-    ierr  = HYPRE_IJMatrixCreate(comm_,
-				0, 0+MNRows-1,
-				0, 0+MNCols-1,
-				&Mmat);
+    ierr  = HYPRE_IJMatrixCreate(comm_, MStartRow, MStartRow+MNRows-1,
+				 MStartRow, MStartRow+MNCols-1, &Mmat);
     ierr += HYPRE_IJMatrixSetObjectType(Mmat, HYPRE_PARCSR);
     //------------------------------------------------------------------
     assert(!ierr);
@@ -1948,11 +1948,8 @@ void HYPRE_LinSysCore::buildSchurReducedSystem2()
     // ierr += HYPRE_IJMatrixSetLocalStorageType(CTmat, HYPRE_PARCSR);
     // ierr  = HYPRE_IJMatrixSetLocalSize(CTmat, CTNRows, CTNCols);
     //---new_IJ------------------------------------------------------
-    //---??????????????
-    ierr  = HYPRE_IJMatrixCreate(comm_,
-				0, 0+CTNRows-1,
-				0, 0+CTNCols-1,
-				&CTmat);
+    ierr  = HYPRE_IJMatrixCreate(comm_, CTStartRow, CTStartRow+CTNRows-1,
+				 CStartRow, CStartRow+CTNCols-1, &CTmat);
     ierr += HYPRE_IJMatrixSetObjectType(Mmat, HYPRE_PARCSR);
     //------------------------------------------------------------------
     assert(!ierr);
@@ -2100,18 +2097,22 @@ void HYPRE_LinSysCore::buildSchurReducedSystem2()
     //------------------------------------------------------------------
 
     HYPRE_IJMatrixAssemble(Mmat);
+
     //---old_IJ------------------------------------------------------
     // M_csr = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(Mmat);
     //---new_IJ------------------------------------------------------
     HYPRE_IJMatrixGetObject(Mmat, (void **) &M_csr);
     //------------------------------------------------------------------
+
     hypre_MatvecCommPkgCreate((hypre_ParCSRMatrix *) M_csr);
     HYPRE_IJMatrixAssemble(CTmat);
+
     //---old_IJ------------------------------------------------------
     // CT_csr = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(CTmat);
     //---new_IJ------------------------------------------------------
     HYPRE_IJMatrixGetObject(CTmat, (void **) &CT_csr);
     //------------------------------------------------------------------
+
     hypre_MatvecCommPkgCreate((hypre_ParCSRMatrix *) CT_csr);
 
     //------------------------------------------------------------------
@@ -2263,6 +2264,7 @@ void HYPRE_LinSysCore::buildSchurReducedSystem2()
     HYPRE_IJVectorGetObject(f1, (void **) &f1_csr);
     HYPRE_IJVectorGetObject(f2hat, (void **) &f2hat_csr);
     //---------------------------------------------------------------
+
     HYPRE_ParCSRMatrixMatvec( 1.0, C_csr, f1_csr, 0.0, f2hat_csr );
     delete [] diagonal;
     HYPRE_IJVectorDestroy(f1); 
@@ -2321,11 +2323,8 @@ void HYPRE_LinSysCore::buildSchurReducedSystem2()
     // ierr += HYPRE_IJMatrixSetLocalStorageType(reducedA_, HYPRE_PARCSR);
     // ierr  = HYPRE_IJMatrixSetLocalSize(reducedA_, CNRows, CNRows);
     //---new_IJ------------------------------------------------------
-    //---????????????
-    ierr  = HYPRE_IJMatrixCreate(comm_,
-				0, 0+CNRows-1,
-				0, 0+CNRows-1,
-				&reducedA_);
+    ierr  = HYPRE_IJMatrixCreate(comm_, CStartRow, CStartRow+CNRows-1,
+				 CStartRow, CStartRow+CNRows-1, &reducedA_);
     ierr += HYPRE_IJMatrixSetObjectType(reducedA_, HYPRE_PARCSR);
     //------------------------------------------------------------------
     assert(!ierr);

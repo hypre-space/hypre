@@ -112,9 +112,16 @@ int HYPRE_LocalAMGSolve(HYPRE_Solver solver, HYPRE_ParVector x_csr,
    /* perform one cycle of AMG to subdomain (internal nodes)  */
    /* --------------------------------------------------------*/
 
-   LA_csr = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(localA);
-   Lx_csr = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(localx);
-   Lb_csr = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(localb);
+   /* ---old_IJ-----------------------------------------------*/
+   /*LA_csr = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(localA);*/
+   /*Lx_csr = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(localx);*/
+   /*Lb_csr = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(localb);*/
+   /* ---new_IJ-----------------------------------------------*/
+   HYPRE_IJMatrixGetObject(localA, (void**) &LA_csr);
+   HYPRE_IJVectorGetObject(localx, (void**) &Lx_csr);
+   HYPRE_IJVectorGetObject(localb, (void**) &Lb_csr);
+   /* --------------------------------------------------------*/
+
    HYPRE_BoomerAMGSolve( solver, LA_csr, Lb_csr, Lx_csr );
 
    /* --------------------------------------------------------*/
@@ -211,9 +218,16 @@ int HYPRE_ApplyExtension(HYPRE_Solver solver, HYPRE_ParVector x_csr,
    /* perform one cycle of AMG to subdomain (internal nodes)  */
    /* --------------------------------------------------------*/
 
-   LA_csr = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(localA);
-   Lx_csr = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(localx);
-   Lb_csr = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(localb);
+   /* ---old_IJ-----------------------------------------------*/
+   /*LA_csr = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(localA);*/
+   /*Lx_csr = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(localx);*/
+   /*Lb_csr = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(localb);*/
+   /* ---new_IJ-----------------------------------------------*/
+   HYPRE_IJMatrixGetObject(localA, (void**) &LA_csr);
+   HYPRE_IJVectorGetObject(localx, (void**) &Lx_csr);
+   HYPRE_IJVectorGetObject(localb, (void**) &Lb_csr);
+   /* --------------------------------------------------------*/
+
    HYPRE_BoomerAMGSolve( solver, LA_csr, Lb_csr, Lx_csr );
 
    /* --------------------------------------------------------*/
@@ -320,9 +334,16 @@ int HYPRE_ApplyExtensionTranspose(HYPRE_Solver solver, HYPRE_ParVector x_csr,
    /* perform one cycle of AMG to subdomain (internal nodes)  */
    /* --------------------------------------------------------*/
 
-   LA_csr  = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(localA);
-   Lx_csr  = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(localx);
-   Lb_csr  = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(localb);
+   /* ---old_IJ-----------------------------------------------*/
+   /*LA_csr = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(localA);*/
+   /*Lx_csr = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(localx);*/
+   /*Lb_csr = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(localb);*/
+   /* ---new_IJ-----------------------------------------------*/
+   HYPRE_IJMatrixGetObject(localA, (void**) &LA_csr);
+   HYPRE_IJVectorGetObject(localx, (void**) &Lx_csr);
+   HYPRE_IJVectorGetObject(localb, (void**) &Lb_csr);
+   /* --------------------------------------------------------*/
+
    HYPRE_BoomerAMGSolve( solver, LA_csr, Lb_csr, Lx_csr );
 
    /* --------------------------------------------------------*/
@@ -437,9 +458,16 @@ int HYPRE_ApplyTransform( HYPRE_Solver solver, HYPRE_ParVector x_csr,
    /* perform one cycle of AMG to subdomain (internal nodes)  */
    /* --------------------------------------------------------*/
 
-   LA_csr = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(localA);
-   Lx_csr = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(localx);
-   Lb_csr = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(localb);
+   /* ---old_IJ-----------------------------------------------*/
+   /*LA_csr = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(localA);*/
+   /*Lx_csr = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(localx);*/
+   /*Lb_csr = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(localb);*/
+   /* ---new_IJ-----------------------------------------------*/
+   HYPRE_IJMatrixGetObject(localA, (void**) &LA_csr);
+   HYPRE_IJVectorGetObject(localx, (void**) &Lx_csr);
+   HYPRE_IJVectorGetObject(localb, (void**) &Lb_csr);
+   /* --------------------------------------------------------*/
+
    HYPRE_BoomerAMGSolve( solver, LA_csr, Lb_csr, Lx_csr );
 
    /* --------------------------------------------------------*/
@@ -523,9 +551,16 @@ int HYPRE_ApplyTransformTranspose(HYPRE_Solver solver, HYPRE_ParVector x_csr,
    /* perform one cycle of AMG to subdomain (internal nodes)  */
    /* --------------------------------------------------------*/
 
-   LA_csr  = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(localA);
-   Lx_csr  = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(localx);
-   Lb_csr  = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(localb);
+   /* ---old_IJ-----------------------------------------------*/
+   /*LA_csr = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(localA);*/
+   /*Lx_csr = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(localx);*/
+   /*Lb_csr = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(localb);*/
+   /* ---new_IJ-----------------------------------------------*/
+   HYPRE_IJMatrixGetObject(localA, (void**) &LA_csr);
+   HYPRE_IJVectorGetObject(localx, (void**) &Lx_csr);
+   HYPRE_IJVectorGetObject(localb, (void**) &Lb_csr);
+   /* --------------------------------------------------------*/
+
    HYPRE_BoomerAMGSolve( solver, LA_csr, Lb_csr, Lx_csr );
 
    /* --------------------------------------------------------*/
@@ -1164,9 +1199,17 @@ int HYPRE_LSI_DDAMGSolve(HYPRE_ParCSRMatrix A_csr, HYPRE_ParVector x_csr,
    HYPRE_BoomerAMGSetGridRelaxType(SeqPrecon, relaxType);
    HYPRE_BoomerAMGSetTol(SeqPrecon, 1.0E-16);
    HYPRE_BoomerAMGSetMeasureType(SeqPrecon, 0);
-   LA_csr  = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(localA);
-   Lb_csr  = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(localb);
-   Lx_csr  = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(localx);
+
+   /* ---old_IJ-----------------------------------------------*/
+   /*LA_csr = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(localA);*/
+   /*Lx_csr = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(localx);*/
+   /*Lb_csr = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(localb);*/
+   /* ---new_IJ-----------------------------------------------*/
+   HYPRE_IJMatrixGetObject(localA, (void**) &LA_csr);
+   HYPRE_IJVectorGetObject(localx, (void**) &Lx_csr);
+   HYPRE_IJVectorGetObject(localb, (void**) &Lb_csr);
+   /* --------------------------------------------------------*/
+
    /*HYPRE_BoomerAMGSetIOutDat(SeqPrecon, 2);*/
    /*HYPRE_BoomerAMGSetDebugFlag(SeqPrecon, 1);*/
    HYPRE_BoomerAMGSetup( SeqPrecon, LA_csr, Lb_csr, Lx_csr);
