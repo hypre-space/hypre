@@ -160,7 +160,7 @@ hypre_AMGSetupStats( void *amg_vdata )
        min_rowsum = 0.0;
        max_rowsum = 0.0;
        min_weight = P_data[0];
-       max_weight = P_data[0];
+       max_weight = 0.0;
 
        for (j = P_i[0]; j < P_i[1]; j++)
                     min_rowsum += P_data[j];
