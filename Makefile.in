@@ -23,7 +23,8 @@ HYPRE_DIRS =\
 HYPRE_EXTRA_DIRS =\
  seq_matrix_vector\
  parcsr_matrix_vector\
- parcsr_linear_solvers
+ parcsr_linear_solvers\
+ seq_linear_solvers/pamg
 
 all:
 	@ \
