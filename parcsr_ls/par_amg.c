@@ -28,6 +28,7 @@ hypre_ParAMGInitialize()
    /* setup params */
    int      max_levels;
    double   strong_threshold;
+   double   trunc_factor;
    int      interp_type;
    int      coarsen_type;
    int      measure_type;
@@ -59,6 +60,7 @@ hypre_ParAMGInitialize()
    /* setup params */
    max_levels = 25;
    strong_threshold = 0.25;
+   trunc_factor = 0.25;
    interp_type = 200;
    coarsen_type = 0;
    measure_type = 0;
@@ -100,6 +102,7 @@ hypre_ParAMGInitialize()
 
    hypre_ParAMGSetMaxLevels(amg_data, max_levels);
    hypre_ParAMGSetStrongThreshold(amg_data, strong_threshold);
+   hypre_ParAMGSetTruncFactor(amg_data, trunc_factor);
    hypre_ParAMGSetInterpType(amg_data, interp_type);
    hypre_ParAMGSetCoarsenType(amg_data, coarsen_type);
    hypre_ParAMGSetMeasureType(amg_data, measure_type);
@@ -195,6 +198,18 @@ hypre_ParAMGSetStrongThreshold( void     *data,
    hypre_ParAMGData  *amg_data = data;
  
    hypre_ParAMGDataStrongThreshold(amg_data) = strong_threshold;
+
+   return (ierr);
+}
+
+int
+hypre_ParAMGSetTruncFactor( void     *data,
+                            double    trunc_factor )
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+
+   hypre_ParAMGDataTruncFactor(amg_data) = trunc_factor;
 
    return (ierr);
 }
