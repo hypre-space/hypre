@@ -163,7 +163,7 @@ int MLI_Matrix::apply(double alpha, MLI_Vector *vec1, double beta,
       ierr += HYPRE_IJVectorSetObjectType(IJV3, HYPRE_PARCSR);
       ierr += HYPRE_IJVectorInitialize(IJV3);
       ierr += HYPRE_IJVectorAssemble(IJV3);
-      ierr += HYPRE_IJVectorGetObject(IJV3, (void **) &hypreV1S);
+      ierr += HYPRE_IJVectorGetObject(IJV3, (void **) &hypreV3S);
       V1S_data = hypre_VectorData(hypre_ParVectorLocalVector(hypreV1S));
       V3S_data = hypre_VectorData(hypre_ParVectorLocalVector(hypreV3S));
       hypreV1 = (hypre_ParVector *) vec1->getVector();
