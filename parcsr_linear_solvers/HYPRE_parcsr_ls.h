@@ -16,8 +16,8 @@
 #define HYPRE_LS_HEADER
 
 #include "HYPRE_utilities.h"
-#include "HYPRE_seq_mv.h"
-#include "HYPRE_parcsr_mv.h"
+#include "../seq_matrix_vector/HYPRE_seq_mv.h"
+#include "../parcsr_matrix_vector/HYPRE_parcsr_mv.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -40,6 +40,7 @@ HYPRE_Solver HYPRE_ParAMGInitialize P((void ));
 int HYPRE_ParAMGFinalize P((HYPRE_Solver solver ));
 int HYPRE_ParAMGSetup P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x ));
 int HYPRE_ParAMGSolve P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x ));
+int HYPRE_ParAMGSolveT P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x ));
 int HYPRE_ParAMGSetMaxLevels P((HYPRE_Solver solver , int max_levels ));
 int HYPRE_ParAMGSetStrongThreshold P((HYPRE_Solver solver , double strong_threshold ));
 int HYPRE_ParAMGSetInterpType P((HYPRE_Solver solver , int interp_type ));
