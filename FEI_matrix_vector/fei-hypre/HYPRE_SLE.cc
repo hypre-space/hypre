@@ -12,6 +12,7 @@
 // it gives warning when compiling fei_proc.cc                  
 //---------------------------------------------------------------------------
 
+#include <math.h>
 #include "HYPRE_SLE.h"
 #include "parcsr_matrix_vector.h"
 
@@ -25,6 +26,7 @@
 //---------------------------------------------------------------------------
 
 extern "C" {
+#ifdef MLPACK
    int HYPRE_ParCSRMLCreate( MPI_Comm, HYPRE_Solver *);
    int HYPRE_ParCSRMLDestroy( HYPRE_Solver );
    int HYPRE_ParCSRMLSetup( HYPRE_Solver, HYPRE_ParCSRMatrix,
@@ -37,6 +39,7 @@ extern "C" {
    int HYPRE_ParCSRMLSetPreSmoother( HYPRE_Solver, int );
    int HYPRE_ParCSRMLSetPostSmoother( HYPRE_Solver, int );
    int HYPRE_ParCSRMLSetDampingFactor( HYPRE_Solver, double );
+#endif
 
    int hypre_ParAMGBuildCoarseOperator(hypre_ParCSRMatrix *,hypre_ParCSRMatrix *,
                                        hypre_ParCSRMatrix *,hypre_ParCSRMatrix **);
@@ -127,7 +130,7 @@ HYPRE_SLE::HYPRE_SLE(MPI_Comm PASSED_COMM_WORLD, int masterRank) :
 
     amg_coarsen_type     = 0;      // default coarsening
     for ( i = 0; i < 3;  i++ ) amg_num_sweeps[i]    = 2;
-    amg_num_sweeps[3] = 1;
+    amg_num_sweeps[3] = 2;
     for ( i = 0; i < 3;  i++ ) amg_relax_type[i]    = 3;   // hybrid
     amg_relax_type[3] = 9;         // direct for the coarsest level
     for ( i = 0; i < 25; i++ ) amg_relax_weight[i]  = 0.0; // damping factor
@@ -142,8 +145,8 @@ HYPRE_SLE::HYPRE_SLE(MPI_Comm PASSED_COMM_WORLD, int masterRank) :
     krylov_dim           = 50;
     ml_npresmoother      = 2;
     ml_npostsmoother     = 2;
-    ml_presmoother_type  = 1;      // default Gauss-Seidel
-    ml_postsmoother_type = 1;      // default Gauss-Seidel
+    ml_presmoother_type  = 2;      // default symmetric Gauss-Seidel
+    ml_postsmoother_type = 2;      // default symmetric Gauss-Seidel
     ml_relax_weight      = 0.5;
     ml_strong_threshold  = 0.0;
 
@@ -163,6 +166,10 @@ HYPRE_SLE::~HYPRE_SLE()
     delete [] HYPrecondName_;
     deleteLinearAlgebraCore();
 
+    //----------------------------------------------------------
+    // deallocate the local store for column indices
+    //----------------------------------------------------------
+
     int numRows = EndRow_ - StartRow_ + 1;
     if ( numRows > 0 && colIndices != NULL ) 
     {
@@ -171,7 +178,45 @@ HYPRE_SLE::~HYPRE_SLE()
        delete [] colIndices;
        if ( rowLengths != NULL ) delete [] rowLengths;
     }
+
+    //----------------------------------------------------------
+    // deallocate the local store for the slave indices 
+    //----------------------------------------------------------
+
     if ( slaveList != NULL ) delete [] slaveList;
+
+    //----------------------------------------------------------
+    // call solver destructors
+    //----------------------------------------------------------
+
+    if ( pcg_solver != NULL ) 
+    {
+       if ( solverID_ == HYPCG )   HYPRE_ParCSRPCGDestroy(pcg_solver);
+       if ( solverID_ == HYGMRES ) HYPRE_ParCSRGMRESDestroy(pcg_solver);
+       pcg_solver = NULL;
+    }
+
+    //----------------------------------------------------------
+    // call preconditioner destructors
+    //----------------------------------------------------------
+
+    if ( pcg_precond != NULL ) 
+    {
+       if ( preconID_ == HYPILUT )
+          HYPRE_ParCSRPilutDestroy( pcg_precond );
+
+       else if ( preconID_ == HYPARASAILS )
+          HYPRE_ParCSRParaSailsDestroy( pcg_precond );
+
+       else if ( preconID_ == HYBOOMERAMG )
+          HYPRE_ParAMGDestroy( pcg_precond );
+
+#ifdef MLPACK
+       else if ( preconID_ == HYML )
+          HYPRE_ParCSRMLDestroy( pcg_precond );
+#endif
+       pcg_precond = NULL;
+    }
     return;
 }
 
@@ -211,7 +256,7 @@ void HYPRE_SLE::parameters(int numParams, char **paramStrings)
     // for GMRES, the restart size
     //----------------------------------------------------------
 
-    if ( getParam("gmres-dim",numParams,paramStrings,param) == 1)
+    if ( getParam("gmresDim",numParams,paramStrings,param) == 1)
     {
        sscanf(param,"%d", &krylov_dim);
        if ( krylov_dim < 1 ) krylov_dim = 50;
@@ -245,7 +290,7 @@ void HYPRE_SLE::parameters(int numParams, char **paramStrings)
     // pilut preconditioner : max no. of nonzeros to keep per row
     //----------------------------------------------------------
 
-    if ( getParam("pilut-row-size",numParams,paramStrings,param) == 1)
+    if ( getParam("pilutRowSize",numParams,paramStrings,param) == 1)
     {
        sscanf(param,"%d", &pilut_row_size);
        if ( pilut_row_size < 1 ) pilut_row_size = 50;
@@ -255,7 +300,7 @@ void HYPRE_SLE::parameters(int numParams, char **paramStrings)
     // pilut preconditioner : threshold to drop small nonzeros
     //----------------------------------------------------------
 
-    if ( getParam("pilut-drop-tol",numParams,paramStrings,param) == 1)
+    if ( getParam("pilutDropTol",numParams,paramStrings,param) == 1)
     {
        sscanf(param,"%lg", &pilut_drop_tol);
        if ( pilut_drop_tol < 0.0 || pilut_drop_tol >= 1.0 ) 
@@ -270,7 +315,7 @@ void HYPRE_SLE::parameters(int numParams, char **paramStrings)
     // superlu : ordering to use (natural, mmd)
     //----------------------------------------------------------
 
-    if ( getParam("superlu-ordering",numParams,paramStrings,param) == 1)
+    if ( getParam("superluOrdering",numParams,paramStrings,param) == 1)
     {
        sscanf(param,"%s", &param2);
        if      ( !strcmp(param2, "natural" ) ) superlu_ordering = 0;
@@ -286,7 +331,7 @@ void HYPRE_SLE::parameters(int numParams, char **paramStrings)
     // superlu : scaling none ('N') or both col/row ('B')
     //----------------------------------------------------------
 
-    if ( getParam("superlu-scale",numParams,paramStrings,param) == 1)
+    if ( getParam("superluScale",numParams,paramStrings,param) == 1)
     {
        sscanf(param,"%s", &param2);
        if      ( !strcmp(param2, "y" ) ) superlu_scale[0] = 'B';
@@ -297,7 +342,7 @@ void HYPRE_SLE::parameters(int numParams, char **paramStrings)
     // amg preconditoner : coarsen type (falgout, ruge, default)
     //----------------------------------------------------------
 
-    if ( getParam("amg-coarsen-type",numParams,paramStrings,param) == 1)
+    if ( getParam("amgCoarsenType",numParams,paramStrings,param) == 1)
     {
        sscanf(param,"%s", param2);
        if      ( !strcmp(param2, "falgout") ) amg_coarsen_type = 6;
@@ -309,7 +354,7 @@ void HYPRE_SLE::parameters(int numParams, char **paramStrings)
     // amg preconditoner : no of relaxation sweeps per level
     //----------------------------------------------------------
 
-    if ( getParam("amg-num-sweeps",numParams,paramStrings,param) == 1)
+    if ( getParam("amgNumSweeps",numParams,paramStrings,param) == 1)
     {
        sscanf(param,"%d", &nsweeps);
        if ( nsweeps < 1 ) nsweeps = 1; 
@@ -320,14 +365,13 @@ void HYPRE_SLE::parameters(int numParams, char **paramStrings)
     // amg preconditoner : which smoother to use
     //----------------------------------------------------------
 
-    if ( getParam("amg-relax-type",numParams,paramStrings,param) == 1)
+    if ( getParam("amgRelaxType",numParams,paramStrings,param) == 1)
     {
        sscanf(param,"%s", param2);
        if      ( !strcmp(param2, "jacobi" ) ) rtype = 2;
-       else if ( !strcmp(param2, "gs-slow") ) rtype = 1;
-       else if ( !strcmp(param2, "gs-fast") ) rtype = 4;
+       else if ( !strcmp(param2, "gsSlow") )  rtype = 1;
+       else if ( !strcmp(param2, "gsFast") )  rtype = 4;
        else if ( !strcmp(param2, "hybrid" ) ) rtype = 3;
-       else if ( !strcmp(param2, "direct" ) ) rtype = 9;
        else 
        {
           rtype = 3;
@@ -340,7 +384,7 @@ void HYPRE_SLE::parameters(int numParams, char **paramStrings)
     // amg preconditoner : damping factor for Jacobi smoother
     //----------------------------------------------------------
 
-    if ( getParam("amg-relax-weight",numParams,paramStrings,param) == 1)
+    if ( getParam("amgRelaxWeight",numParams,paramStrings,param) == 1)
     {
        sscanf(param,"%lg", &weight);
        if ( weight < 0.0 || weight > 1.0 ) 
@@ -356,7 +400,7 @@ void HYPRE_SLE::parameters(int numParams, char **paramStrings)
     // amg preconditoner : threshold to determine strong coupling
     //----------------------------------------------------------
 
-    if ( getParam("amg-strong-threshold",numParams,paramStrings,param) == 1)
+    if ( getParam("amgStrongThreshold",numParams,paramStrings,param) == 1)
     {
        sscanf(param,"%lg", &amg_strong_threshold);
        if ( amg_strong_threshold < 0.0 || amg_strong_threshold > 1.0 ) 
@@ -371,7 +415,7 @@ void HYPRE_SLE::parameters(int numParams, char **paramStrings)
     // parasails preconditoner : threshold ( >= 0.0 )
     //----------------------------------------------------------
 
-    if ( getParam("parasails-threshold",numParams,paramStrings,param) == 1)
+    if ( getParam("parasailsThreshold",numParams,paramStrings,param) == 1)
     {
        sscanf(param,"%lg", &parasails_threshold);
        if ( parasails_threshold < 0.0 ) 
@@ -386,7 +430,7 @@ void HYPRE_SLE::parameters(int numParams, char **paramStrings)
     // parasails preconditoner : nlevels ( >= 1) 
     //----------------------------------------------------------
 
-    if ( getParam("parasails-nlevels",numParams,paramStrings,param) == 1)
+    if ( getParam("parasailsNlevels",numParams,paramStrings,param) == 1)
     {
        sscanf(param,"%d", &parasails_nlevels);
        if ( parasails_nlevels < 1 ) 
@@ -401,19 +445,19 @@ void HYPRE_SLE::parameters(int numParams, char **paramStrings)
     // mlpack preconditoner : no of relaxation sweeps per level
     //----------------------------------------------------------
 
-    if ( getParam("ml-num-presweeps",numParams,paramStrings,param) == 1)
+    if ( getParam("mlNumPresweeps",numParams,paramStrings,param) == 1)
     {
        sscanf(param,"%d", &nsweeps);
        if ( nsweeps < 1 ) nsweeps = 1; 
        ml_npresmoother = nsweeps;
     }
-    if ( getParam("ml-num-postsweeps",numParams,paramStrings,param) == 1)
+    if ( getParam("mlNumPostsweeps",numParams,paramStrings,param) == 1)
     {
        sscanf(param,"%d", &nsweeps);
        if ( nsweeps < 1 ) nsweeps = 1; 
        ml_npostsmoother = nsweeps;
     }
-    if ( getParam("ml-num-sweeps",numParams,paramStrings,param) == 1)
+    if ( getParam("mlNumSweeps",numParams,paramStrings,param) == 1)
     {
        sscanf(param,"%d", &nsweeps);
        if ( nsweeps < 1 ) nsweeps = 1; 
@@ -425,28 +469,31 @@ void HYPRE_SLE::parameters(int numParams, char **paramStrings)
     // mlpack preconditoner : which smoother to use
     //----------------------------------------------------------
 
-    if ( getParam("ml-presmoother-type",numParams,paramStrings,param) == 1)
+    if ( getParam("mlPresmootherType",numParams,paramStrings,param) == 1)
     {
        sscanf(param,"%s", param2);
        rtype = 0;
        if      ( !strcmp(param2, "jacobi" ) ) rtype = 0;
        else if ( !strcmp(param2, "gs") )      rtype = 1;
+       else if ( !strcmp(param2, "sgs") )     rtype = 2;
        ml_presmoother_type  = rtype;
     }
-    if ( getParam("ml-postsmoother-type",numParams,paramStrings,param) == 1)
+    if ( getParam("mlPostsmootherType",numParams,paramStrings,param) == 1)
     {
        sscanf(param,"%s", param2);
        rtype = 0;
        if      ( !strcmp(param2, "jacobi" ) ) rtype = 0;
        else if ( !strcmp(param2, "gs") )      rtype = 1;
+       else if ( !strcmp(param2, "sgs") )     rtype = 2;
        ml_postsmoother_type  = rtype;
     }
-    if ( getParam("ml-relax-type",numParams,paramStrings,param) == 1)
+    if ( getParam("mlRelaxType",numParams,paramStrings,param) == 1)
     {
        sscanf(param,"%s", param2);
        rtype = 0;
        if      ( !strcmp(param2, "jacobi" ) ) rtype = 0;
        else if ( !strcmp(param2, "gs") )      rtype = 1;
+       else if ( !strcmp(param2, "sgs") )     rtype = 2;
        ml_presmoother_type  = rtype;
        ml_postsmoother_type = rtype;
     }
@@ -455,7 +502,7 @@ void HYPRE_SLE::parameters(int numParams, char **paramStrings)
     // mlpack preconditoner : damping factor for Jacobi smoother
     //----------------------------------------------------------
 
-    if ( getParam("ml-relax-weight",numParams,paramStrings,param) == 1)
+    if ( getParam("mlRelaxWeight",numParams,paramStrings,param) == 1)
     {
        sscanf(param,"%lg", &weight);
        if ( weight < 0.0 || weight > 1.0 ) 
@@ -471,7 +518,7 @@ void HYPRE_SLE::parameters(int numParams, char **paramStrings)
     // mlpack preconditoner : threshold to determine strong coupling
     //----------------------------------------------------------
 
-    if ( getParam("ml-strong-threshold",numParams,paramStrings,param) == 1)
+    if ( getParam("mlStrongThreshold",numParams,paramStrings,param) == 1)
     {
        sscanf(param,"%lg", &ml_strong_threshold);
        if ( ml_strong_threshold < 0.0 || ml_strong_threshold > 1.0 ) 
@@ -1341,7 +1388,6 @@ void HYPRE_SLE::matrixLoadComplete()
         HYPRE_IJMatrixGetLocalStorage(HY_A);
 
     HYPRE_ParCSRMatrixPrint(a, "driver.out.a");
-    exit(0);
 #endif
 
 #ifdef DEBUG
@@ -1374,6 +1420,45 @@ void HYPRE_SLE::launchSolver(int* solveStatus)
     x_csr  = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(HY_x);
     b_csr  = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(HY_b);
     r_csr  = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(HY_r);
+
+#ifdef PRINTMAT 
+
+    int    j, rowSize, *colInd, nnz, nrows;
+    double *colVal, value;
+    FILE   *fp;
+
+    if ( my_pid == 0 )
+    {
+       fp = fopen("hypre_mat.out","w");
+       nrows = EndRow_ - StartRow_ + 1;
+       nnz = 0;
+       for ( i = StartRow_-1; i <= EndRow_-1; i++ ) 
+       {
+          HYPRE_ParCSRMatrixGetRow(A_csr,i,&rowSize,&colInd,&colVal);
+          nnz += rowSize;
+          HYPRE_ParCSRMatrixRestoreRow(A_csr,i,&rowSize,&colInd,&colVal);
+       }
+       fprintf(fp, "%6d  %7d \n", nrows, nnz);
+       for ( i = StartRow_-1; i <= EndRow_-1; i++ ) 
+       {
+          HYPRE_ParCSRMatrixGetRow(A_csr,i,&rowSize,&colInd,&colVal);
+          for (j = 0; j < rowSize; j++) 
+             fprintf(fp, "%6d  %6d  %e \n", i+1, colInd[j]+1, colVal[j]);
+          HYPRE_ParCSRMatrixRestoreRow(A_csr,i,&rowSize,&colInd,&colVal);
+       }
+       fclose(fp);
+       fp = fopen("hypre_rhs.out","w");
+       fprintf(fp, "%6d \n", nrows);
+       for ( i = StartRow_-1; i <= EndRow_-1; i++ ) 
+       {
+          HYPRE_IJVectorGetLocalComponents(HY_b, 1, &i, NULL, &value);
+          fprintf(fp, "%6d  %e \n", i+1, value);
+       }
+       fclose(fp);
+       exit(0);
+    }
+
+#endif
 
     //--------------------------------------------------
     // choose PCG or GMRES
@@ -1542,7 +1627,7 @@ void HYPRE_SLE::launchSolver(int* solveStatus)
                   HYPRE_ParAMGSetRelaxWeight(pcg_precond, relax_wt);
 
 #ifdef DEBUG
-                  HYPRE_ParAMGSetIOutDat(pcg_precond, 2);
+                  //HYPRE_ParAMGSetIOutDat(pcg_precond, 2);
                   if ( my_pid == 0 )
                   {
                      printf("HYPRE_SLE::AMG coarsen type = %d\n",amg_coarsen_type);
@@ -1688,10 +1773,10 @@ void ML_Get_IJAMatrixFromFile(double **val, int **ia, int **ja, int *N,
          printf("Error reading row %d (curr_row = %d)\n", rowindex, curr_row);
       if ( colindex < 0 || colindex >= Nrows )
          printf("Error reading col %d (rowindex = %d)\n", colindex, rowindex);
-      /*if ( value != 0.0 ) {*/
+        if ( value != 0.0 ) {
          mat_ja[icount] = colindex;
          mat_a[icount++]  = value;
-      /*}*/
+        }
    }
    fclose(fp);
    for ( i = curr_row+1; i <= Nrows; i++ ) mat_ia[i] = icount;
@@ -3417,7 +3502,7 @@ void fei_hypre_test2(int argc, char *argv[])
 {
     int    i, j, my_rank, num_procs, nrows, nnz, mybegin, myend, status;
     int    *ia, *ja, ncnt, index, chunksize, zeroDiagFlag;
-    double *val, *rhs;
+    double *val, *rhs, *diag, ddata;
 
     //======================================================
     // initialize parallel platform
@@ -3458,6 +3543,30 @@ void fei_hypre_test2(int argc, char *argv[])
        MPI_Bcast(val, nnz,     MPI_DOUBLE, 0, MPI_COMM_WORLD);
        MPI_Bcast(rhs, nrows,   MPI_DOUBLE, 0, MPI_COMM_WORLD);
     }
+    /*
+    diag = ( double * ) malloc(nrows * sizeof(double) );
+    for ( i = 0; i < nrows; i++ ) {
+       for ( j = ia[i]; j < ia[i+1]; j++ ) {
+          if ( (ja[j]-1) == i ) diag[i] = 1.0 / sqrt(val[j]);
+       }
+    }
+    for ( i = 0; i < nrows; i++ ) {
+       for ( j = ia[i]; j < ia[i+1]; j++ ) {
+          val[j] = diag[i] * val[j] * diag[ja[j]-1];
+       }
+       rhs[i] *= diag[i];
+    }
+    if (my_rank == 0 )
+    {
+       for ( i = 0; i < 5; i++ ) {
+          for ( j = ia[i]; j < ia[i+1]; j++ ) {
+             printf("ROW %4d, COL = %5d, data = %e\n", i+1, ja[j],val[j]);
+          }
+       }
+    }
+    free( diag );
+    */
+    for ( i = 0; i < nrows; i++ ) rhs[i] = drand48() * (i+1);
     chunksize = nrows / num_procs;
     mybegin = chunksize * my_rank;
     myend   = chunksize * (my_rank + 1) - 1;
@@ -3497,13 +3606,24 @@ void fei_hypre_test2(int argc, char *argv[])
     }
 
     char *paramString = new char[100];
-    strcpy(paramString, "pilut-row-size 50");
+    strcpy(paramString, "amgRelaxType gsSlow");
     H.parameters(1, &paramString);
-    strcpy(paramString, "amg-relax-type jacobi");
+    strcpy(paramString, "amgRelaxWeight 0.5");
     H.parameters(1, &paramString);
-    strcpy(paramString, "amg-relax-weight 0.5");
+    strcpy(paramString, "gmresDim 200");
     H.parameters(1, &paramString);
-    strcpy(paramString, "gmres-dim 200");
+    strcpy(paramString, "mlNumPresweeps 6");
+    H.parameters(1, &paramString);
+    strcpy(paramString, "mlNumPostsweeps 6");
+    H.parameters(1, &paramString);
+    strcpy(paramString, "mlPresmootherType gs");
+    H.parameters(1, &paramString);
+    strcpy(paramString, "mlPostsmootherType gs");
+    H.parameters(1, &paramString);
+    strcpy(paramString, "mlRelaxWeight 0.1");
+    H.parameters(1, &paramString);
+    //strcpy(paramString, "mlStrongThreshold 0.1");
+    //H.parameters(1, &paramString);
 
     H.selectSolver("gmres");
 
@@ -3517,10 +3637,8 @@ void fei_hypre_test2(int argc, char *argv[])
     }
 
     // get the result
-    /*
-    for (i=1; i<=10; i++)
+    for (i=1; i<=1; i++)
        printf("sol(%d): %f\n", i, H.accessSolnVector(i));
-    */
 
     MPI_Finalize();
 
