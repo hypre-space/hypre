@@ -412,5 +412,6 @@ int MLI_Solver_CG::setParams( char *paramString, int argc, char **argv )
       printf("                Params = %s\n", paramString);
       return 1;
    }
+   return 0;
 }
 
