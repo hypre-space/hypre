@@ -1,11 +1,10 @@
 package Hypre {
 
-   // Definition of Hypre interface.  JfP dec99
+   // Definition of Hypre interface.  JfP dec99 - feb00
    // Sources: partial design chart from Andy Cleary,
    // an earlier IDL file given me by Brent Smolinski
    // The case of the package name is chosen to prevent name conflicts.
 
-   class vector;
    class StructuredGrid;
    interface StructuredGridI;
    interface StructuredGridBuilder;
@@ -17,6 +16,8 @@ package Hypre {
    class MPI_Com;
    interface Solver;
    
+// ---------------- Interfaces ----------------
+
    interface Operator {
       void Apply( in StructVector x, out StructVector b );
    };
@@ -29,33 +30,18 @@ package Hypre {
    // (dot product), vector (cross product, not normally seen except in 3D), or
    // matrix (outer product).  Part of this ambiguity arises because a vector,
    // if seen as a matrix, is ambiguously equivalent to its transpose.
-   //   But even a matrix has alternative interpretations, e.g. scalar to matrix
-   // and matrix to matrix.
+   //   But even a matrix has alternative interpretations as an operator, e.g.
+   // scalar to matrix and matrix to matrix.
    //   If we choose the Operator interface's Apply to be "right" for a matrix,
-   // that leaves us with the cross product, a poor choice.
+   // that leaves us with the cross product for a vector - a poor choice.
    //   I think that Vector would best not inherit from Operator, despite its
    // conceptual similarity to Matrix.  It would best be a data member of
-   // operators, as a Matrix can be a data member of a Solver.
+   // whatever operators it's used in, as a Matrix can be a data member of a
+   // Solver.
 
    interface LinearOperator extends Operator {
       void Apply( in StructVector x, out StructVector b );
    };
-
-   class MPI_Com 
-   {};
-   
-   // ---------------- Grid, matrix, vector interfaces, classes
-
-   class Box {
-      int NewBox( in array<int,1> lower, in array<int,1> upper,
-                  in int dimension );
-      void print();
-   };
-
-   // The "print" functions in this file print brief information
-   // to stdout for debugging use.  The Matrix and Vector ones also
-   // call the Hypre "Print" functions, which print their entire
-   // contents to a file.
 
    interface StructuredGridMatrixBuilder {
       int SetGrid( in StructuredGrid grid ); // was SetStructuredGrid
@@ -70,38 +56,6 @@ package Hypre {
       StructMatrix GetConstructedObject();
    };
 
-   class StructMatrix implements StructuredGridMatrixBuilder, LinearOperator {
-      StructMatrix NewMatrix( in StructuredGrid grid, in StructStencil stencil,
-                              in int symmetric );
-      int Setup( in StructuredGrid grid, in StructStencil stencil,
-                          in int symmetric );
-      void print();
-      int SetGrid( in StructuredGrid grid ); // was SetStructuredGrid
-      int SetStencil( in StructStencil stencil );
-      int SetValues( in Box box, in array<int,1> stencil_indices,
-                     in array<double,1> values );
-      void Apply( in StructVector b, out StructVector x );
-      StructMatrix GetConstructedObject();
-      };
-
-   class StructVector implements StructuredGridMatrixBuilder, LinearOperator {
-      StructVector NewVector( in StructuredGrid grid );
-      int Setup( in StructuredGrid grid, in StructStencil stencil,
-                          in int symmetric );
-      void print();
-      int SetGrid( in StructuredGrid grid ); // was SetStructuredGrid
-      int SetStencil( in StructStencil stencil );
-      // ... not needed, except to prevent Babel from making this
-      // an abstract class; not implemented
-      int SetValues( in Box box, in array<int,1> stencil_indices,
-                     in array<double,1> values );
-      // ... stencil_indices not needed; here for compatibility with
-      // StructuredGridMatrixBuilder
-      void Apply( in StructVector x, out StructVector b );
-      // ... not implemented, doesn't make much sense to use
-      StructMatrix GetConstructedObject();
-   };
-
    interface StructuredGridBuilder 
    {
       int SetGridExtents( in Box box );
@@ -110,34 +64,9 @@ package Hypre {
       StructuredGrid GetConstructedObject();
    };
    
-   class StructuredGrid implements StructuredGridBuilder
-   {
-      StructuredGrid NewGrid( in MPI_Com com, in int dimension );
-      void print();
-      int SetGridExtents( in Box box );
-      int Assemble();
-      void SetParameter( in string name, in double value );
-      StructuredGrid GetConstructedObject();
-   };
-   
-         
    interface Stencil {
       int SetElement( in int element_index, inout array<int,1> element_offset );
    };
-
-   class StructStencil implements Stencil 
-   {
-      StructStencil NewStencil( in int dimension, in int size );
-      void print();
-      int SetElement( in int element_index, inout array<int,1> element_offset );
-   };
-   
-  // ---------------- Solver and related interfaces, classes
-
-  // Some "standard" functions can be expected to work differently on different
-  // solvers, hence have keyword strings in their argument lists.
-  // The generic parameter type is a double because that's easily converted
-  // to int but not vice versa.
 
   interface Solver extends LinearOperator {
      void Apply( in StructVector b, out StructVector x );
@@ -173,6 +102,82 @@ package Hypre {
 
      void SetPreconditioner( in Solver precond );
   };
+
+
+// ---------------- Classes ----------------
+
+   class MPI_Com 
+   {};
+   
+   // ---------------- Grid, matrix, vector interfaces, classes
+
+   class Box {
+      int NewBox( in array<int,1> lower, in array<int,1> upper,
+                  in int dimension );
+      void print();
+   };
+
+   // The "print" functions in this file print brief information
+   // to stdout for debugging use.  The Matrix and Vector ones also
+   // call the Hypre "Print" functions, which print their entire
+   // contents to a file.
+
+   class StructMatrix implements StructuredGridMatrixBuilder, LinearOperator {
+      StructMatrix NewMatrix( in StructuredGrid grid, in StructStencil stencil,
+                              in int symmetric );
+      int Setup( in StructuredGrid grid, in StructStencil stencil,
+                          in int symmetric );
+      void print();
+      int SetGrid( in StructuredGrid grid ); // was SetStructuredGrid
+      int SetStencil( in StructStencil stencil );
+      int SetValues( in Box box, in array<int,1> stencil_indices,
+                     in array<double,1> values );
+      void Apply( in StructVector b, out StructVector x );
+      StructMatrix GetConstructedObject();
+      };
+
+   class StructVector implements StructuredGridMatrixBuilder, LinearOperator {
+      StructVector NewVector( in StructuredGrid grid );
+      int Setup( in StructuredGrid grid, in StructStencil stencil,
+                          in int symmetric );
+      void print();
+      int SetGrid( in StructuredGrid grid ); // was SetStructuredGrid
+      int SetStencil( in StructStencil stencil );
+      // ... not needed, except to prevent Babel from making this
+      // an abstract class; not implemented
+      int SetValues( in Box box, in array<int,1> stencil_indices,
+                     in array<double,1> values );
+      // ... stencil_indices not needed; here for compatibility with
+      // StructuredGridMatrixBuilder
+      void Apply( in StructVector x, out StructVector b );
+      // ... not implemented, doesn't make much sense to use
+      StructMatrix GetConstructedObject();
+   };
+
+   class StructuredGrid implements StructuredGridBuilder
+   {
+      StructuredGrid NewGrid( in MPI_Com com, in int dimension );
+      void print();
+      int SetGridExtents( in Box box );
+      int Assemble();
+      void SetParameter( in string name, in double value );
+      StructuredGrid GetConstructedObject();
+   };
+   
+         
+   class StructStencil implements Stencil 
+   {
+      StructStencil NewStencil( in int dimension, in int size );
+      void print();
+      int SetElement( in int element_index, inout array<int,1> element_offset );
+   };
+   
+  // ---------------- Solver and related interfaces, classes
+
+  // Some "standard" functions can be expected to work differently on different
+  // solvers, hence have keyword strings in their argument lists.
+  // The generic parameter type is a double because that's easily converted
+  // to int but not vice versa.
 
   class StructJacobi implements Solver, SolverBuilder {
      void Apply( in StructVector b, out StructVector x );
