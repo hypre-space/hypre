@@ -5964,7 +5964,7 @@ EOF
 #define HYPRE_HPPA 1
 EOF
 
-    CSUPERLUFLAGS=--DNoChange
+    CSUPERLUFLAGS=-DNoChange
     if test -z "$casc_using_blas" ; then
       casc_using_blas=yes
     fi
@@ -5984,7 +5984,7 @@ EOF
 #define HYPRE_RS6000 1
 EOF
 
-    CSUPERLUFLAGS=--DNoChange
+    CSUPERLUFLAGS=-DNoChange
     if test -z "$casc_using_blas" ; then
       casc_using_blas=yes
     fi

@@ -1028,7 +1028,7 @@ case $ARCH in
   ;;
   hpux | HPUX | hppa | HPPA )
     AC_DEFINE(HYPRE_HPPA)
-    CSUPERLUFLAGS=--DNoChange
+    CSUPERLUFLAGS=-DNoChange
     if test -z "$casc_using_blas" ; then
       casc_using_blas=yes
     fi
@@ -1042,7 +1042,7 @@ case $ARCH in
   ;;
   rs6000)
     AC_DEFINE(HYPRE_RS6000)
-    CSUPERLUFLAGS=--DNoChange
+    CSUPERLUFLAGS=-DNoChange
     if test -z "$casc_using_blas" ; then
       casc_using_blas=yes
     fi
