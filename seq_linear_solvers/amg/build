@@ -23,7 +23,7 @@ DIRS="tools amg"
 for i in $DIRS
 do
    echo "Building $i"
-   (cd $AMG_SRC/$i; ./build)
+   (cd $AMG_SRC/$i; ./build $AMG_BUILD_ARGS)
 done
 
 #=============================================================================
