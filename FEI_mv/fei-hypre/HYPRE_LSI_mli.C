@@ -82,9 +82,9 @@ typedef struct HYPRE_LSI_MLI_Struct
 {
 #ifdef HAVE_MLI
    MLI      *mli_;
+   MLI_FEData *feData_;           /* holds FE information */
 #endif
    MPI_Comm mpiComm_;
-   MLI_FEData *feData_;           /* holds FE information */
    int      outputLevel_;         /* for diagnostics */
    int      nLevels_;             /* max number of levels */
    int      cycleType_;           /* 1 for V and 2 for W */
@@ -146,7 +146,9 @@ int HYPRE_LSI_MLICreate( MPI_Comm comm, HYPRE_Solver *solver )
    HYPRE_LSI_MLI *mli_object = (HYPRE_LSI_MLI *) malloc(sizeof(HYPRE_LSI_MLI));
    *solver = (HYPRE_Solver) mli_object;
    mli_object->mpiComm_             = comm;
+#ifdef HAVE_MLI
    mli_object->feData_              = NULL;
+#endif
    mli_object->outputLevel_         = 0;
    mli_object->nLevels_             = 30;
    mli_object->maxIterations_       = 1;
@@ -627,9 +629,11 @@ int HYPRE_LSI_MLISetFEData(HYPRE_Solver solver, void *object)
 {
    HYPRE_LSI_MLI *mli_object = (HYPRE_LSI_MLI *) solver;
    HYPRE_MLI_FEData *hypre_fedata = (HYPRE_MLI_FEData *) object;
+#ifdef HAVE_MLI
    mli_object->feData_      = hypre_fedata->fedata_; 
    hypre_fedata->fedata_    = NULL; 
    hypre_fedata->fedataOwn_ = 0;
+#endif
    return 0;
 }
 
