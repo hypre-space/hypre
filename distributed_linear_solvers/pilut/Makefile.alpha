@@ -11,7 +11,7 @@ ALE0  = -ysmp test/test0_full.matx
 ALE1  = -ysmp test/test1_full.matx
 ARGS  = 5 1e-4 1 20 10 1e-8
 
-# Gnu gcc
+# gcc
 # OPTIMIZATION = -O3
 OPTIMIZATION = -g
 CC = gcc
@@ -37,6 +37,7 @@ LIBS     = -L. -lHYPREpilut -lm $(MPI_LIBS) $(OTHER_LIBS)
 # Debugging via asserts
 DEBUGFLAGS = -DHYPRE_DEBUG -DHYPRE_MEMORY_CHECK #-DNDEBUG #-DTIME
 DEBUGFLAGS = -DHYPRE_MEMORY_CHECK #-DNDEBUG #-DTIME
+DEBUGFLAGS = -DHYPRE_MEMORY_CHECK -pg
 CFLAGS = $(OPTIMIZATION) $(INCLUDES) $(DEBUGFLAGS)
 
 HYPREFILES =\
