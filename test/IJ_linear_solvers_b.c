@@ -137,6 +137,8 @@ main( int   argc,
    array1int Grid_Relax_Type;
    array2int Grid_Relax_Points;
    array1double Relax_Weight;
+   array1int testint;
+   array1double testdouble;
 
    /* parameters for PILUT */
    double   drop_tol = -1;
@@ -760,6 +762,27 @@ main( int   argc,
        ( MatBuilder, &linop );
     ij_matrix_Hypre = (Hypre_ParCSRMatrix)
        Hypre_LinearOperator_castTo( linop, "Hypre.ParCSRMatrix" );
+
+#if 0
+    /* test Babel-based GetRow/RestoreRow interface ... */
+    for ( i=first_local_row; i<=last_local_row; i=i+100 )
+    {
+       ierr += HYPRE_ParCSRMatrixGetRow( parcsr_A, i, &size, &col_ind, &values );
+       ierr += HYPRE_ParCSRMatrixRestoreRow( parcsr_A, i, &size, &col_ind, &values );
+       printf("HYPRE matrix\n row %i: ", i);
+       for ( j=0; j<size; ++j ) printf(" %i, %f ", col_ind[j], values[j] );
+       printf("\n");
+       testint.data = col_ind;
+       testdouble.data = values;
+       ierr += Hypre_ParCSRMatrix_GetRow
+          ( ij_matrix_Hypre, i, &size, &testint, &testdouble );
+       ierr += Hypre_ParCSRMatrix_RestoreRow
+          ( ij_matrix_Hypre, i, size, testint, testdouble );
+       printf("Hypre matrix\n row %i: ", i);
+       for ( j=0; j<size; ++j ) printf(" %i, %f ", col_ind[j], values[j] );
+       printf("\n");
+    };
+#endif
 
 #if 0
     /* compare the two matrices that should be the same */
