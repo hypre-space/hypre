@@ -1,0 +1,4 @@
+#define SIDL_float__array_isColumnOrder_m ary_isColumnOrder6pq5cs10ihcl_m
+#define sidl_float__array_iscolumnorder_m ary_iscolumnorder6pq5cs10ihcl_m
+#define SIDL_FLOAT__ARRAY_ISCOLUMNORDER_M ARY_ISCOLUMNORDER6PQ5CS10IHCL_M
+
