@@ -170,26 +170,6 @@ int HYPRE_ParCSRGMRESSetLogging P((HYPRE_Solver solver , int logging ));
 int HYPRE_ParCSRGMRESGetNumIterations P((HYPRE_Solver solver , int *num_iterations ));
 int HYPRE_ParCSRGMRESGetFinalRelativeResidualNorm P((HYPRE_Solver solver , double *norm ));
 
-/* HYPRE_parcsr_ml.c */
-int MH_Irecv P((void *buf , unsigned int count , int *src , int *mid , MPI_Comm comm , MPI_Request *request ));
-int MH_Wait P((void *buf , unsigned int count , int *src , int *mid , MPI_Comm comm , MPI_Request *request ));
-int MH_Send P((void *buf , unsigned int count , int dest , int mid , MPI_Comm comm ));
-int MH_ExchBdry P((double *vec , void *obj ));
-int MH_MatVec P((void *obj , int leng1 , double p [], int leng2 , double ap []));
-int MH_GetRow P((void *obj , int N_requested_rows , int requested_rows [], int allocated_space , int columns [], double values [], int row_lengths []));
-int HYPRE_ParCSRMLCreate P((MPI_Comm comm , HYPRE_Solver *solver ));
-int HYPRE_ParCSRMLDestroy P((HYPRE_Solver solver ));
-int HYPRE_ParCSRMLSetup P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x ));
-int HYPRE_ParCSRMLSolve P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x ));
-int HYPRE_ParCSRMLSetStrongThreshold P((HYPRE_Solver solver , double strong_threshold ));
-int HYPRE_ParCSRMLSetNumPreSmoothings P((HYPRE_Solver solver , int num_sweeps ));
-int HYPRE_ParCSRMLSetNumPostSmoothings P((HYPRE_Solver solver , int num_sweeps ));
-int HYPRE_ParCSRMLSetPreSmoother P((HYPRE_Solver solver , int smoother_type ));
-int HYPRE_ParCSRMLSetPostSmoother P((HYPRE_Solver solver , int smoother_type ));
-int HYPRE_ParCSRMLSetDampingFactor P((HYPRE_Solver solver , double factor ));
-int HYPRE_ParCSRMLSetBGSBlockSize P((HYPRE_Solver solver , int size ));
-int HYPRE_ParCSRMLConstructMHMatrix P((HYPRE_ParCSRMatrix A , MH_Matrix *mh_mat , MPI_Comm comm , int *partition , MH_Context *obj ));
-
 /* HYPRE_parcsr_pcg.c */
 int HYPRE_ParCSRPCGCreate P((MPI_Comm comm , HYPRE_Solver *solver ));
 int HYPRE_ParCSRPCGDestroy P((HYPRE_Solver solver ));
