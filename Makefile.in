@@ -149,7 +149,7 @@ IJ: base
 	  fi; \
 	done
 
-fei: IJ
+fei: IJ krylov
 	@ \
 	HYPRE_INSTALL_DIR=`pwd`/hypre; \
 	export HYPRE_INSTALL_DIR; \
