@@ -427,10 +427,6 @@ main( int   argc,
       }
    }
 
-   /* for CGNR preconditioned with Boomeramg, only relaxation scheme 2 is
-      implemented, i.e. Jacobi relaxation with Matvec */
-   if (solver_id == 5) relax_default = 2;
-
    if (solver_id == 8 || solver_id == 18)
    {
      max_levels = 1;
@@ -457,7 +453,37 @@ main( int   argc,
 	omega[i] = 1.;
    }
 
-   if (coarsen_type == 5)
+   /* for CGNR preconditioned with Boomeramg, only relaxation scheme 0 is
+      implemented, i.e. Jacobi relaxation */
+   if (solver_id == 5) 
+   {
+      /* fine grid */
+      relax_default = 7;
+      grid_relax_type[0] = relax_default; 
+      num_grid_sweeps[0] = num_sweep;
+      grid_relax_points[0] = hypre_CTAlloc(int, num_sweep); 
+      for (i=0; i<num_sweep; i++)
+      {
+         grid_relax_points[0][i] = 0;
+      } 
+      /* down cycle */
+      grid_relax_type[1] = relax_default; 
+       num_grid_sweeps[1] = num_sweep;
+      grid_relax_points[1] = hypre_CTAlloc(int, num_sweep); 
+      for (i=0; i<num_sweep; i++)
+      {
+         grid_relax_points[1][i] = 0;
+      } 
+      /* up cycle */
+      grid_relax_type[2] = relax_default; 
+      num_grid_sweeps[2] = num_sweep;
+      grid_relax_points[2] = hypre_CTAlloc(int, num_sweep); 
+      for (i=0; i<num_sweep; i++)
+      {
+         grid_relax_points[2][i] = 0;
+      } 
+   }
+   else if (coarsen_type == 5)
    {
       /* fine grid */
       num_grid_sweeps[0] = 3;
