@@ -536,14 +536,12 @@ hypre_SStructGridAssembleNBorMaps( hypre_SStructGrid *grid )
 
       for (var = 0; var < nvars; var++)
       {
-         hypre_BoxMapIncSize(maps[part][var], nvneighbors[part][var]);
          ninfo[part][var] = hypre_TAlloc(hypre_SStructNMapInfo,
                                          nvneighbors[part][var]);
 
          for (b = 0; b < nvneighbors[part][var]; b++)
          {
             vneighbor = &vneighbors[part][var][b];
-            nbor_box = hypre_SStructNeighborBox(vneighbor);
             nbor_part = hypre_SStructNeighborPart(vneighbor);
             hypre_CopyIndex(hypre_SStructNeighborILower(vneighbor),
                             nbor_ilower);
@@ -592,11 +590,23 @@ hypre_SStructGridAssembleNBorMaps( hypre_SStructGrid *grid )
             stride[c[0]] *= d[0];
             stride[c[1]] *= d[1];
             stride[c[2]] *= d[2];
+         }
+      }
 
+      /* NOTE: It is important not to change the map in the above
+       * loop because it is needed in the 'FindMapEntry' call */
+      for (var = 0; var < nvars; var++)
+      {
+         hypre_BoxMapIncSize(maps[part][var], nvneighbors[part][var]);
+
+         for (b = 0; b < nvneighbors[part][var]; b++)
+         {
+            vneighbor = &vneighbors[part][var][b];
+            nbor_box = hypre_SStructNeighborBox(vneighbor);
             hypre_BoxMapAddEntry(maps[part][var],
                                  hypre_BoxIMin(nbor_box),
                                  hypre_BoxIMax(nbor_box),
-                                 entry_ninfo);
+                                 &ninfo[part][var][b]);
          }
 
          hypre_BoxMapAssemble(maps[part][var]);
