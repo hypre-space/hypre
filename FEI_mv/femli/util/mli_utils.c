@@ -1177,6 +1177,268 @@ int MLI_Utils_SVD(double *uArray, double *sArray, double *vtArray,
     return info;
 }
 
+/******************************************************************************
+ * Return the left singular vectors of a square matrix
+ *--------------------------------------------------------------------------*/
+
+int MLI_Utils_singular_vectors(int n, double *uArray)
+{
+    int info;
+    char jobu  = 'O'; /* overwrite input with U */
+    char jobvt = 'N';
+    double *sArray = (double *) malloc(n*sizeof(double));
+    int workLen = 5*n;
+    double *workArray = (double *) malloc(workLen*sizeof(double));
+
+#ifdef HYPRE_USING_ESSL
+    info = -1;
+#else
+    void hypre_F90_NAME_BLAS(dgesvd, DGESVD)(char *, char *, int *,
+        int *, double *, int *, double *, double *, int *,
+        double *, int *, double *, int *, int *);
+
+    hypre_F90_NAME_BLAS(dgesvd, DGESVD)(&jobu, &jobvt, &n, &n, uArray,
+        &n, sArray, NULL, &n, NULL, &n, workArray, &workLen, &info);
+
+    free(workArray);
+    free(sArray);
+#endif
+
+    return info;
+}
+
+/******************************************************************************
+ * MLI_Utils_ComputeLowEnergyLanczos
+ * inputs:
+ * A = matrix
+ * maxIter = number of Lanczos steps
+ * num_vecs_to_return = number of low energy vectors to return
+ * le_vectors = pointer to storage space where vectors will be returned
+ *--------------------------------------------------------------------------*/
+
+int MLI_Utils_ComputeLowEnergyLanczos(hypre_ParCSRMatrix *A, 
+    int maxIter, int num_vecs_to_return, double *le_vectors)
+{
+   int      i, j, k, its, nprocs, mypid, localNRows, globalNRows;
+   int      startRow, endRow, *partition, *ADiagI;
+   double   alpha, beta, rho, rhom1, sigma, offdiagNorm, *zData;
+   double   rnorm, *alphaArray, *rnormArray, **Tmat, initOffdiagNorm;
+   double   app, aqq, arr, ass, apq, sign, tau, t, c, s;
+   double   *ADiagA, one=1.0, *rData;
+   MPI_Comm comm;
+   hypre_CSRMatrix *ADiag;
+   hypre_ParVector *rVec, *zVec, *pVec, *apVec;
+   double *lanczos, *lanczos_p, *Umat, *ptr, *Uptr, *curr_le_vector;
+   double rVecNorm;
+
+   /*-----------------------------------------------------------------
+    * fetch matrix information 
+    *-----------------------------------------------------------------*/
+
+   comm = hypre_ParCSRMatrixComm(A);
+   MPI_Comm_rank(comm,&mypid);  
+   MPI_Comm_size(comm,&nprocs);  
+
+   ADiag      = hypre_ParCSRMatrixDiag(A);
+   ADiagA     = hypre_CSRMatrixData(ADiag);
+   ADiagI     = hypre_CSRMatrixI(ADiag);
+   HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) A, &partition);
+   startRow    = partition[mypid];
+   endRow      = partition[mypid+1] - 1;
+   globalNRows = partition[nprocs];
+   localNRows  = endRow - startRow + 1;
+   hypre_TFree( partition );
+
+   if ( globalNRows < maxIter )
+   {
+       fprintf(stderr, "Computing Low energy vectors: "
+          "more steps than dim of matrix.\n");
+       exit(-1);
+   }
+
+   /*-----------------------------------------------------------------
+    * allocate space
+    *-----------------------------------------------------------------*/
+
+   if ( localNRows > 0 )
+   {
+      HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix)A,&partition);
+      rVec = hypre_ParVectorCreate(comm, globalNRows, partition);
+      hypre_ParVectorInitialize(rVec);
+      HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix)A,&partition);
+      zVec = hypre_ParVectorCreate(comm, globalNRows, partition);
+      hypre_ParVectorInitialize(zVec);
+      HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix)A,&partition);
+      pVec = hypre_ParVectorCreate(comm, globalNRows, partition);
+      hypre_ParVectorInitialize(pVec);
+      HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix)A,&partition);
+      apVec = hypre_ParVectorCreate(comm, globalNRows, partition);
+      hypre_ParVectorInitialize(apVec);
+      zData  = hypre_VectorData( hypre_ParVectorLocalVector(zVec) );
+      rData  = hypre_VectorData( hypre_ParVectorLocalVector(rVec) );
+   }
+   HYPRE_ParVectorSetRandomValues((HYPRE_ParVector) rVec, 1209873 );
+   alphaArray = (double  *) malloc( (maxIter+1) * sizeof(double) );
+   rnormArray = (double  *) malloc( (maxIter+1) * sizeof(double) );
+   Tmat       = (double **) malloc( (maxIter+1) * sizeof(double*) );
+   for ( i = 0; i <= maxIter; i++ )
+   {
+      Tmat[i] = (double *) malloc( (maxIter+1) * sizeof(double) );
+      for ( j = 0; j <= maxIter; j++ ) Tmat[i][j] = 0.0;
+      Tmat[i][i] = 1.0;
+   }
+
+   /*-----------------------------------------------------------------
+    * compute initial residual vector norm 
+    *-----------------------------------------------------------------*/
+
+   hypre_ParVectorSetRandomValues(rVec, 1209837);
+   hypre_ParVectorSetConstantValues(pVec, 0.0);
+   hypre_ParVectorSetConstantValues(zVec, 0.0);
+   rho = hypre_ParVectorInnerProd(rVec, rVec); 
+   rnorm = sqrt(rho);
+   rnormArray[0] = rnorm;
+   if ( rnorm == 0.0 )
+   {
+      printf("MLI_Utils_ComputeLowEnergyLanczos : fail for res=0.\n");
+      hypre_ParVectorDestroy( rVec );
+      hypre_ParVectorDestroy( pVec );
+      hypre_ParVectorDestroy( zVec );
+      hypre_ParVectorDestroy( apVec );
+      return 1;
+   }
+
+   /* allocate storage for lanzcos vectors */
+
+   lanczos = malloc(maxIter*localNRows*sizeof(double));
+   lanczos_p = lanczos;
+
+   /*-----------------------------------------------------------------
+    * main loop 
+    *-----------------------------------------------------------------*/
+
+   for ( its = 0; its < maxIter; its++ )
+   {
+      for ( i = 0; i < localNRows; i++ ) 
+          zData[i] = rData[i];
+
+      /* scale copy lanczos vector r for use later */
+      rVecNorm = sqrt(hypre_ParVectorInnerProd(rVec, rVec)); 
+      for ( i = 0; i < localNRows; i++ ) 
+          *lanczos_p++ = rData[i] / rVecNorm;
+
+      rhom1 = rho;
+      rho = hypre_ParVectorInnerProd(rVec, zVec); 
+      if (its == 0) beta = 0.0;
+      else 
+      {
+         beta = rho / rhom1;
+         Tmat[its-1][its] = -beta;
+      }
+      HYPRE_ParVectorScale( beta, (HYPRE_ParVector) pVec );
+      hypre_ParVectorAxpy( one, zVec, pVec );
+      hypre_ParCSRMatrixMatvec(one, A, pVec, 0.0, apVec);
+      sigma = hypre_ParVectorInnerProd(pVec, apVec); 
+      alpha  = rho / sigma;
+      alphaArray[its] = sigma;
+      hypre_ParVectorAxpy( -alpha, apVec, rVec );
+      rnorm = sqrt(hypre_ParVectorInnerProd(rVec, rVec)); 
+      rnormArray[its+1] = rnorm;
+      if ( rnorm < 1.0E-8 * rnormArray[0] )
+      {
+         maxIter = its + 1;
+         fprintf(stderr, "Computing Low energy vectors: "
+          "too many Lanczos steps for this problem.\n");
+         exit(-1);
+         break;
+      }
+   }
+
+   /*-----------------------------------------------------------------
+    * construct T 
+    *-----------------------------------------------------------------*/
+
+   Tmat[0][0] = alphaArray[0];
+   for ( i = 1; i < maxIter; i++ )
+      Tmat[i][i]=alphaArray[i]+alphaArray[i-1]*Tmat[i-1][i]*Tmat[i-1][i];
+
+   for ( i = 0; i < maxIter; i++ )
+   {
+      Tmat[i][i+1] *= alphaArray[i];
+      Tmat[i+1][i] = Tmat[i][i+1];
+      rnormArray[i] = 1.0 / rnormArray[i];
+   }
+   for ( i = 0; i < maxIter; i++ )
+      for ( j = 0; j < maxIter; j++ )
+         Tmat[i][j] = Tmat[i][j] * rnormArray[i] * rnormArray[j];
+
+   /* ----------------------------------------------------------------*/
+   /* Compute eigenvectors and eigenvalues of T.                      */
+   /* Since we need the smallest eigenvalue eigenvectors, use an SVD  */
+   /* and return all the singular vectors.                            */
+   /* ----------------------------------------------------------------*/
+
+   Umat = (double *) malloc(maxIter*maxIter*sizeof(double));
+   ptr = Umat;
+   /* copy Tmat into Umat */
+   for ( i = 0; i < maxIter; i++ )
+      for ( j = 0; j < maxIter; j++ )
+         *ptr++ = Tmat[i][j];
+
+   MLI_Utils_singular_vectors(maxIter, Umat);
+
+   /* ----------------------------------------------------------------
+    * compute low-energy vectors
+    * ----------------------------------------------------------------*/
+
+   if (num_vecs_to_return > maxIter)
+   {
+       fprintf(stderr, "Computing Low energy vectors: "
+          "requested more vectors than number of Lanczos steps.\n");
+       exit(-1);
+   }
+
+   for (i=0; i<num_vecs_to_return; i++)
+   {
+       Uptr = Umat + maxIter * (maxIter - num_vecs_to_return + i);
+
+       lanczos_p = lanczos;
+
+       curr_le_vector = le_vectors + i*localNRows;
+
+       for (j=0; j<localNRows; j++)
+           curr_le_vector[j] = 0.;
+
+       for (j=0; j<maxIter; j++)
+       {
+           for (k=0; k<localNRows; k++)
+               curr_le_vector[k] += *Uptr * *lanczos_p++;
+
+           Uptr++;
+       }
+   }
+
+   free(Umat);
+   free(lanczos);
+
+   /* ----------------------------------------------------------------*
+    * de-allocate storage for temporary vectors
+    * ----------------------------------------------------------------*/
+
+   if ( localNRows > 0 )
+   {
+      hypre_ParVectorDestroy( rVec );
+      hypre_ParVectorDestroy( zVec );
+      hypre_ParVectorDestroy( pVec );
+      hypre_ParVectorDestroy( apVec );
+   }
+   free(alphaArray);
+   free(rnormArray);
+   for (i = 0; i <= maxIter; i++) if ( Tmat[i] != NULL ) free( Tmat[i] );
+   free(Tmat);
+   return 0;
+}
+
 /***************************************************************************
  * read a matrix file and create a hypre_ParCSRMatrix from it
  *--------------------------------------------------------------------------*/
@@ -2065,6 +2327,11 @@ int MLI_Utils_HyprePCGSolve( CMLI *cmli, HYPRE_Matrix A,
       printf("\tPCG final relative residual norm = %e\n", norm);
       printf("\tPCG setup time                   = %e seconds\n",setupTime);
       printf("\tPCG solve time                   = %e seconds\n",solveTime);
+
+#if 0
+      printf("& %3d & %7.2f & %7.2f & %7.2f \\\\\n",numIterations,
+        setupTime,solveTime,setupTime+solveTime);
+#endif
    }
    return 0;
 }
