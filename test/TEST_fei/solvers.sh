@@ -9,23 +9,6 @@
 #EHEADER***********************************************************************
 
 #=============================================================================
-# No testing done
-# fei: diffs it against 1 proc case
+# No comparison done
 #=============================================================================
 
-tail -21 solvers.out.0 > solvers.testdata.tmp0
-head solvers.testdata.tmp0 > solvers.testdata
-
-tail -21 solvers.out.1 > solvers.testdata.tmp0
-head solvers.testdata.tmp0 > solvers.testdata.temp
-
-tail -21 solvers.out.2 > solvers.testdata.tmp0
-head solvers.testdata.tmp0 > solvers.testdata.temp
-
-tail -21 solvers.out.3 > solvers.testdata.tmp0
-head solvers.testdata.tmp0 > solvers.testdata.temp
-
-tail -21 solvers.out.4 > solvers.testdata.tmp0
-head solvers.testdata.tmp0 > solvers.testdata.temp
-
-rm -f solvers.testdata solvers.testdata.tmp0 solvers.testdata.temp

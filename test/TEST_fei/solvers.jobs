@@ -12,9 +12,12 @@
 # fei: Run through solvers
 #=============================================================================
 
-mpirun -np 1 ./fei -solver 0 > solvers.out.0
-mpirun -np 1 ./fei -solver 1 > solvers.out.1
-mpirun -np 1 ./fei -solver 2 > solvers.out.2
-mpirun -np 1 ./fei -solver 4 > solvers.out.3
-mpirun -np 1 ./fei -solver 6 > solvers.out.4
+mpirun -np 4 ./fei -solver 0 >& 2
+mpirun -np 4 ./fei -solver 1 >& 2
+mpirun -np 4 ./fei -solver 2 >& 2
+mpirun -np 4 ./fei -solver 3 >& 2
+mpirun -np 4 ./fei -solver 4 >& 2
+mpirun -np 4 ./fei -solver 5 >& 2
+mpirun -np 4 ./fei -solver 6 >& 2
+mpirun -np 4 ./fei -solver 7 >& 2
 

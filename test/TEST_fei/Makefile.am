@@ -2,8 +2,6 @@
 
 #
 FILES = \
- parallel.jobs\
- parallel.sh\
  solvers.jobs\
  solvers.sh
 

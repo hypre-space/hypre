@@ -185,8 +185,6 @@ target_alias = @target_alias@
 
 #
 FILES = \
- parallel.jobs\
- parallel.sh\
  solvers.jobs\
  solvers.sh
 
