@@ -550,7 +550,7 @@ The matrix to be pointed to.
 @param reference [OUT]
 The pointer to be set to point to IJMatrix.
 */
-/*
+
 int 
 hypre_RefIJMatrix( HYPRE_IJMatrix IJmatrix, HYPRE_IJMatrix *reference )
 {
@@ -563,4 +563,30 @@ hypre_RefIJMatrix( HYPRE_IJMatrix IJmatrix, HYPRE_IJMatrix *reference )
 
    return(ierr);
 }
+
+/*--------------------------------------------------------------------------
+ * HYPRE_GetIJMatrixLocalStorage
+ *--------------------------------------------------------------------------*/
+
+/**
+Returns a pointer to an undelying matrix type used to implement IJMatrix.
+Assumes that the implementation has an underlying matrix, so it would not
+work with a direct implementation of IJMatrix. 
+
+@return integer error code
+@param IJMatrix [IN]
+The matrix to be pointed to.
+@param local_storage [OUT]
+The pointer to be set to point to IJMatrix's local storage.
 */
+
+int 
+hypre_GetIJMatrixLocalStorage( HYPRE_IJMatrix IJmatrix, void ** local_storage )
+{
+   int ierr = 0;
+   hypre_IJMatrix *matrix = (hypre_IJMatrix *) IJmatrix;
+
+   *local_storage = hypre_IJMatrixLocalStorage( IJmatrix );
+
+   return(ierr);
+}

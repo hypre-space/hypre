@@ -4,6 +4,9 @@
 /*--------------------------------------------------------------------------
  * Test driver for unstructured matrix interface (IJ_matrix interface).
  * Do `driver -help' for usage info.
+ * This driver started from the driver for parcsr_linear_solvers, and it
+ * works by first building a parcsr matrix as before and then "copying"
+ * that matrix row-by-row into the IJMatrix interface. AJC 7/99.
  *--------------------------------------------------------------------------*/
  
 int
@@ -25,11 +28,13 @@ main( int   argc,
    double              norm;
    double              final_res_norm;
 
-   HYPRE_IJMatrix     *ij_matrix;
+   HYPRE_IJMatrix      ij_matrix;
+   HYPRE_DistributedMatrix distributed_matrix;
+   hypre_ParCSRMatrix *A;
    /* concrete underlying type for ij_matrix defaults to parcsr. AJC. */
    int                 ij_matrix_storage_type=HYPRE_PARCSR_MATRIX;
 
-   hypre_ParCSRMatrix *A;
+   hypre_ParCSRMatrix *hypre_A;
    hypre_ParVector    *b;
    hypre_ParVector    *x;
 
@@ -440,9 +445,29 @@ main( int   argc,
     * Set up matrix
     *-----------------------------------------------------------*/
 
-   if ( build_matrix_type == 3 )
+   if ( build_matrix_type == 0 )
    {
-      IJMatrixBuildParLaplacian9pt(argc, argv, build_matrix_arg_index, &A, &ij_matrix, ij_matrix_storage_type);
+      BuildParFromFile(argc, argv, build_matrix_arg_index, &hypre_A);
+   }
+   else if ( build_matrix_type == 1 )
+   {
+      BuildParLaplacian(argc, argv, build_matrix_arg_index, &hypre_A);
+   }
+   else if ( build_matrix_type == 2 )
+   {
+      BuildParFromOneFile(argc, argv, build_matrix_arg_index, &hypre_A);
+   }
+   else if ( build_matrix_type == 3 )
+   {
+      BuildParLaplacian9pt(argc, argv, build_matrix_arg_index, &hypre_A);
+   }
+   else if ( build_matrix_type == 4 )
+   {
+      BuildParLaplacian27pt(argc, argv, build_matrix_arg_index, &hypre_A);
+   }
+   else if ( build_matrix_type == 5 )
+   {
+      BuildParDifConv(argc, argv, build_matrix_arg_index, &hypre_A);
    }
    else
    {
@@ -451,12 +476,44 @@ main( int   argc,
    }
 
    /*-----------------------------------------------------------
-    * Set up the RHS and initial guess
+    * Wrap the parcsr matrix up as a distributed_matrix
     *-----------------------------------------------------------*/
 
+    ierr = HYPRE_ConvertParCSRMatrixToDistributedMatrix( 
+              (HYPRE_ParCSRMatrix) hypre_A, &distributed_matrix );
+    if (ierr)
+      {
+       printf("Error in driver converting parcsr to distributed matrix. \N");
+       return(-1);
+      }
+
+   /*-----------------------------------------------------------
+    * Copy the distributed matrix into the IJMatrix through interface calls
+    *-----------------------------------------------------------*/
+
+    ierr = HYPRE_BuildIJMatrixFromDistributedMatrix( distributed_matrix, &ij_matrix,
+              HYPRE_PARCSR_MATRIX );
+    if (ierr)
+    {
+       printf("Error in driver building IJMatrix from distributed matrix. \N");
+       return(-1);
+    }
+
+   /*-----------------------------------------------------------
+    * Fetch the resulting underlying matrix out
+    *-----------------------------------------------------------*/
+
+    ierr = HYPRE_GetIJMatrixLocalStorage( ij_matrix, & ( (void *) A) );
+
 #if 0
-   hypre_PrintParCSRMatrix(A, "driver.out.A");
+    /* compare the two matrices that should be the same */
+    hypre_PrintParCSRMatrix(hypre_A, "driver.out.hypre_A");
+    hypre_PrintParCSRMatrix(A, "driver.out.A");
 #endif
+
+   /*-----------------------------------------------------------
+    * Set up the RHS and initial guess
+    *-----------------------------------------------------------*/
 
    if (build_rhs_type == 1)
    {
@@ -882,3 +939,738 @@ main( int   argc,
    return (0);
 }
 
+/*----------------------------------------------------------------------
+ * Build matrix from file. Expects three files on each processor.
+ * filename.D.n contains the diagonal part, filename.O.n contains
+ * the offdiagonal part and filename.INFO.n contains global row
+ * and column numbers, number of columns of offdiagonal matrix
+ * and the mapping of offdiagonal column numbers to global column numbers.
+ * Parameters given in command line.
+ *----------------------------------------------------------------------*/
+
+int
+BuildParFromFile( int                  argc,
+                  char                *argv[],
+                  int                  arg_index,
+                  hypre_ParCSRMatrix **A_ptr     )
+{
+   char               *filename;
+
+   hypre_ParCSRMatrix *A;
+
+   int                 myid;
+
+   /*-----------------------------------------------------------
+    * Initialize some stuff
+    *-----------------------------------------------------------*/
+
+   MPI_Comm_rank(MPI_COMM_WORLD, &myid );
+
+   /*-----------------------------------------------------------
+    * Parse command line
+    *-----------------------------------------------------------*/
+
+   if (arg_index < argc)
+   {
+      filename = argv[arg_index];
+   }
+   else
+   {
+      printf("Error: No filename specified \n");
+      exit(1);
+   }
+
+   /*-----------------------------------------------------------
+    * Print driver parameters
+    *-----------------------------------------------------------*/
+ 
+   if (myid == 0)
+   {
+      printf("  FromFile: %s\n", filename);
+   }
+
+   /*-----------------------------------------------------------
+    * Generate the matrix 
+    *-----------------------------------------------------------*/
+ 
+   A = hypre_ReadParCSRMatrix(MPI_COMM_WORLD, filename);
+
+   *A_ptr = A;
+
+   return (0);
+}
+
+/*----------------------------------------------------------------------
+ * Build standard 7-point laplacian in 3D with grid and anisotropy.
+ * Parameters given in command line.
+ *----------------------------------------------------------------------*/
+
+int
+BuildParLaplacian( int                  argc,
+                   char                *argv[],
+                   int                  arg_index,
+                   hypre_ParCSRMatrix **A_ptr     )
+{
+   int                 nx, ny, nz;
+   int                 P, Q, R;
+   double              cx, cy, cz;
+
+   hypre_ParCSRMatrix *A;
+
+   int                 num_procs, myid;
+   int                 p, q, r;
+   double             *values;
+
+   /*-----------------------------------------------------------
+    * Initialize some stuff
+    *-----------------------------------------------------------*/
+
+   MPI_Comm_size(MPI_COMM_WORLD, &num_procs );
+   MPI_Comm_rank(MPI_COMM_WORLD, &myid );
+
+   /*-----------------------------------------------------------
+    * Set defaults
+    *-----------------------------------------------------------*/
+ 
+   nx = 10;
+   ny = 10;
+   nz = 10;
+
+   P  = 1;
+   Q  = num_procs;
+   R  = 1;
+
+   cx = 1.0;
+   cy = 1.0;
+   cz = 1.0;
+
+   /*-----------------------------------------------------------
+    * Parse command line
+    *-----------------------------------------------------------*/
+   arg_index = 0;
+   while (arg_index < argc)
+   {
+      if ( strcmp(argv[arg_index], "-n") == 0 )
+      {
+         arg_index++;
+         nx = atoi(argv[arg_index++]);
+         ny = atoi(argv[arg_index++]);
+         nz = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-P") == 0 )
+      {
+         arg_index++;
+         P  = atoi(argv[arg_index++]);
+         Q  = atoi(argv[arg_index++]);
+         R  = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-c") == 0 )
+      {
+         arg_index++;
+         cx = atof(argv[arg_index++]);
+         cy = atof(argv[arg_index++]);
+         cz = atof(argv[arg_index++]);
+      }
+      else
+      {
+         arg_index++;
+      }
+   }
+
+   /*-----------------------------------------------------------
+    * Check a few things
+    *-----------------------------------------------------------*/
+
+   if ((P*Q*R) != num_procs)
+   {
+      printf("Error: Invalid number of processors or processor topology \n");
+      exit(1);
+   }
+
+   /*-----------------------------------------------------------
+    * Print driver parameters
+    *-----------------------------------------------------------*/
+ 
+   if (myid == 0)
+   {
+      printf("  Laplacian:\n");
+      printf("    (nx, ny, nz) = (%d, %d, %d)\n", nx, ny, nz);
+      printf("    (Px, Py, Pz) = (%d, %d, %d)\n", P,  Q,  R);
+      printf("    (cx, cy, cz) = (%f, %f, %f)\n", cx, cy, cz);
+   }
+
+   /*-----------------------------------------------------------
+    * Set up the grid structure
+    *-----------------------------------------------------------*/
+
+   /* compute p,q,r from P,Q,R and myid */
+   p = myid % P;
+   q = (( myid - p)/P) % Q;
+   r = ( myid - p - P*q)/( P*Q );
+
+   /*-----------------------------------------------------------
+    * Generate the matrix 
+    *-----------------------------------------------------------*/
+ 
+   values = hypre_CTAlloc(double, 4);
+
+   values[1] = -cx;
+   values[2] = -cy;
+   values[3] = -cz;
+
+   values[0] = 0.0;
+   if (nx > 1)
+   {
+      values[0] += 2.0*cx;
+   }
+   if (ny > 1)
+   {
+      values[0] += 2.0*cy;
+   }
+   if (nz > 1)
+   {
+      values[0] += 2.0*cz;
+   }
+
+   A = hypre_GenerateLaplacian(MPI_COMM_WORLD,
+                               nx, ny, nz, P, Q, R, p, q, r, values);
+
+   hypre_TFree(values);
+
+   *A_ptr = A;
+
+   return (0);
+}
+
+/*----------------------------------------------------------------------
+ * Build standard 7-point convection-diffusion operator 
+ * Parameters given in command line.
+ * Operator:
+ *
+ *  -cx Dxx - cy Dyy - cz Dzz + ax Dx + ay Dy + az Dz = f
+ *
+ *----------------------------------------------------------------------*/
+
+int
+BuildParDifConv( int                  argc,
+                   char                *argv[],
+                   int                  arg_index,
+                   hypre_ParCSRMatrix **A_ptr     )
+{
+   int                 nx, ny, nz;
+   int                 P, Q, R;
+   double              cx, cy, cz;
+   double              ax, ay, az;
+   double              hinx,hiny,hinz;
+
+   hypre_ParCSRMatrix *A;
+
+   int                 num_procs, myid;
+   int                 p, q, r;
+   double             *values;
+
+   /*-----------------------------------------------------------
+    * Initialize some stuff
+    *-----------------------------------------------------------*/
+
+   MPI_Comm_size(MPI_COMM_WORLD, &num_procs );
+   MPI_Comm_rank(MPI_COMM_WORLD, &myid );
+
+   /*-----------------------------------------------------------
+    * Set defaults
+    *-----------------------------------------------------------*/
+ 
+   nx = 10;
+   ny = 10;
+   nz = 10;
+
+   hinx = 1.0/(nx+1);
+   hiny = 1.0/(ny+1);
+   hinz = 1.0/(nz+1);
+
+   P  = 1;
+   Q  = num_procs;
+   R  = 1;
+
+   cx = 1.0;
+   cy = 1.0;
+   cz = 1.0;
+
+   ax = 1.0;
+   ay = 1.0;
+   az = 1.0;
+
+   /*-----------------------------------------------------------
+    * Parse command line
+    *-----------------------------------------------------------*/
+   arg_index = 0;
+   while (arg_index < argc)
+   {
+      if ( strcmp(argv[arg_index], "-n") == 0 )
+      {
+         arg_index++;
+         nx = atoi(argv[arg_index++]);
+         ny = atoi(argv[arg_index++]);
+         nz = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-P") == 0 )
+      {
+         arg_index++;
+         P  = atoi(argv[arg_index++]);
+         Q  = atoi(argv[arg_index++]);
+         R  = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-c") == 0 )
+      {
+         arg_index++;
+         cx = atof(argv[arg_index++]);
+         cy = atof(argv[arg_index++]);
+         cz = atof(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-a") == 0 )
+      {
+         arg_index++;
+         ax = atof(argv[arg_index++]);
+         ay = atof(argv[arg_index++]);
+         az = atof(argv[arg_index++]);
+      }
+      else
+      {
+         arg_index++;
+      }
+   }
+
+   /*-----------------------------------------------------------
+    * Check a few things
+    *-----------------------------------------------------------*/
+
+   if ((P*Q*R) != num_procs)
+   {
+      printf("Error: Invalid number of processors or processor topology \n");
+      exit(1);
+   }
+
+   /*-----------------------------------------------------------
+    * Print driver parameters
+    *-----------------------------------------------------------*/
+ 
+   if (myid == 0)
+   {
+      printf("  Convection-Diffusion: \n");
+      printf("    -cx Dxx - cy Dyy - cz Dzz + ax Dx + ay Dy + az Dz = f\n");  
+      printf("    (nx, ny, nz) = (%d, %d, %d)\n", nx, ny, nz);
+      printf("    (Px, Py, Pz) = (%d, %d, %d)\n", P,  Q,  R);
+      printf("    (cx, cy, cz) = (%f, %f, %f)\n", cx, cy, cz);
+      printf("    (ax, ay, az) = (%f, %f, %f)\n", ax, ay, az);
+   }
+
+   /*-----------------------------------------------------------
+    * Set up the grid structure
+    *-----------------------------------------------------------*/
+
+   /* compute p,q,r from P,Q,R and myid */
+   p = myid % P;
+   q = (( myid - p)/P) % Q;
+   r = ( myid - p - P*q)/( P*Q );
+
+   /*-----------------------------------------------------------
+    * Generate the matrix 
+    *-----------------------------------------------------------*/
+ 
+   values = hypre_CTAlloc(double, 7);
+
+   values[1] = -cx/(hinx*hinx);
+   values[2] = -cy/(hiny*hiny);
+   values[3] = -cz/(hinz*hinz);
+   values[4] = -cx/(hinx*hinx) + ax/hinx;
+   values[5] = -cy/(hiny*hiny) + ay/hiny;
+   values[6] = -cz/(hinz*hinz) + az/hinz;
+
+   values[0] = 0.0;
+   if (nx > 1)
+   {
+      values[0] += 2.0*cx/(hinx*hinx) - 1.0*ax/hinx;
+   }
+   if (ny > 1)
+   {
+      values[0] += 2.0*cy/(hiny*hiny) - 1.0*ay/hiny;
+   }
+   if (nz > 1)
+   {
+      values[0] += 2.0*cz/(hinz*hinz) - 1.0*az/hinz;
+   }
+
+   A = hypre_GenerateDifConv(MPI_COMM_WORLD,
+                               nx, ny, nz, P, Q, R, p, q, r, values);
+
+   hypre_TFree(values);
+
+   *A_ptr = A;
+
+   return (0);
+}
+
+/*----------------------------------------------------------------------
+ * Build matrix from one file on Proc. 0. Expects matrix to be in
+ * CSR format. Distributes matrix across processors giving each about
+ * the same number of rows.
+ * Parameters given in command line.
+ *----------------------------------------------------------------------*/
+
+int
+BuildParFromOneFile( int                  argc,
+                     char                *argv[],
+                     int                  arg_index,
+                     hypre_ParCSRMatrix **A_ptr     )
+{
+   char               *filename;
+
+   hypre_ParCSRMatrix *A;
+   hypre_CSRMatrix *A_CSR;
+
+   int                 myid;
+
+   /*-----------------------------------------------------------
+    * Initialize some stuff
+    *-----------------------------------------------------------*/
+
+   MPI_Comm_rank(MPI_COMM_WORLD, &myid );
+
+   /*-----------------------------------------------------------
+    * Parse command line
+    *-----------------------------------------------------------*/
+
+   if (arg_index < argc)
+   {
+      filename = argv[arg_index];
+   }
+   else
+   {
+      printf("Error: No filename specified \n");
+      exit(1);
+   }
+
+   /*-----------------------------------------------------------
+    * Print driver parameters
+    *-----------------------------------------------------------*/
+ 
+   if (myid == 0)
+   {
+      printf("  FromFile: %s\n", filename);
+
+      /*-----------------------------------------------------------
+       * Generate the matrix 
+       *-----------------------------------------------------------*/
+ 
+      A_CSR = hypre_ReadCSRMatrix(filename);
+   }
+   A = hypre_CSRMatrixToParCSRMatrix(MPI_COMM_WORLD, A_CSR, NULL, NULL);
+
+   *A_ptr = A;
+
+   hypre_DestroyCSRMatrix(A_CSR);
+
+   return (0);
+}
+
+/*----------------------------------------------------------------------
+ * Build Rhs from one file on Proc. 0. Distributes vector across processors 
+ * giving each about using the distribution of the matrix A.
+ *----------------------------------------------------------------------*/
+
+int
+BuildRhsParFromOneFile( int                  argc,
+                        char                *argv[],
+                        int                  arg_index,
+                        hypre_ParCSRMatrix  *A,
+                        hypre_ParVector    **b_ptr     )
+{
+   char               *filename;
+
+   hypre_ParVector *b;
+   hypre_Vector    *b_CSR;
+
+   int                 myid;
+
+   /*-----------------------------------------------------------
+    * Initialize some stuff
+    *-----------------------------------------------------------*/
+
+   MPI_Comm_rank(MPI_COMM_WORLD, &myid );
+
+   /*-----------------------------------------------------------
+    * Parse command line
+    *-----------------------------------------------------------*/
+
+   if (arg_index < argc)
+   {
+      filename = argv[arg_index];
+   }
+   else
+   {
+      printf("Error: No filename specified \n");
+      exit(1);
+   }
+
+   /*-----------------------------------------------------------
+    * Print driver parameters
+    *-----------------------------------------------------------*/
+ 
+   if (myid == 0)
+   {
+      printf("  Rhs FromFile: %s\n", filename);
+
+      /*-----------------------------------------------------------
+       * Generate the matrix 
+       *-----------------------------------------------------------*/
+ 
+      b_CSR = hypre_ReadVector(filename);
+   }
+   b = hypre_VectorToParVector(MPI_COMM_WORLD, b_CSR, 
+                               hypre_ParCSRMatrixRowStarts(A));
+
+   *b_ptr = b;
+
+   hypre_DestroyVector(b_CSR);
+
+   return (0);
+}
+
+/*----------------------------------------------------------------------
+ * Build standard 9-point laplacian in 2D with grid and anisotropy.
+ * Parameters given in command line.
+ *----------------------------------------------------------------------*/
+
+int
+BuildParLaplacian9pt( int                  argc,
+                      char                *argv[],
+                      int                  arg_index,
+                      hypre_ParCSRMatrix **A_ptr     )
+{
+   int                 nx, ny;
+   int                 P, Q;
+
+   hypre_ParCSRMatrix *A;
+
+   int                 num_procs, myid;
+   int                 p, q;
+   double             *values;
+
+   /*-----------------------------------------------------------
+    * Initialize some stuff
+    *-----------------------------------------------------------*/
+
+   MPI_Comm_size(MPI_COMM_WORLD, &num_procs );
+   MPI_Comm_rank(MPI_COMM_WORLD, &myid );
+
+   /*-----------------------------------------------------------
+    * Set defaults
+    *-----------------------------------------------------------*/
+ 
+   nx = 10;
+   ny = 10;
+
+   P  = 1;
+   Q  = num_procs;
+
+   /*-----------------------------------------------------------
+    * Parse command line
+    *-----------------------------------------------------------*/
+   arg_index = 0;
+   while (arg_index < argc)
+   {
+      if ( strcmp(argv[arg_index], "-n") == 0 )
+      {
+         arg_index++;
+         nx = atoi(argv[arg_index++]);
+         ny = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-P") == 0 )
+      {
+         arg_index++;
+         P  = atoi(argv[arg_index++]);
+         Q  = atoi(argv[arg_index++]);
+      }
+      else
+      {
+         arg_index++;
+      }
+   }
+
+   /*-----------------------------------------------------------
+    * Check a few things
+    *-----------------------------------------------------------*/
+
+   if ((P*Q) != num_procs)
+   {
+      printf("Error: Invalid number of processors or processor topology \n");
+      exit(1);
+   }
+
+   /*-----------------------------------------------------------
+    * Print driver parameters
+    *-----------------------------------------------------------*/
+ 
+   if (myid == 0)
+   {
+      printf("  Laplacian 9pt:\n");
+      printf("    (nx, ny) = (%d, %d)\n", nx, ny);
+      printf("    (Px, Py) = (%d, %d)\n", P,  Q);
+   }
+
+   /*-----------------------------------------------------------
+    * Set up the grid structure
+    *-----------------------------------------------------------*/
+
+   /* compute p,q from P,Q and myid */
+   p = myid % P;
+   q = ( myid - p)/P;
+
+   /*-----------------------------------------------------------
+    * Generate the matrix 
+    *-----------------------------------------------------------*/
+ 
+   values = hypre_CTAlloc(double, 2);
+
+   values[1] = -1.0;
+
+   values[0] = 0.0;
+   if (nx > 1)
+   {
+      values[0] += 2.0;
+   }
+   if (ny > 1)
+   {
+      values[0] += 2.0;
+   }
+   if (nx > 1 && ny > 1)
+   {
+      values[0] += 4.0;
+   }
+
+   A = hypre_GenerateLaplacian9pt(MPI_COMM_WORLD,
+                                  nx, ny, P, Q, p, q, values);
+
+   hypre_TFree(values);
+
+   *A_ptr = A;
+
+   return (0);
+}
+/*----------------------------------------------------------------------
+ * Build 27-point laplacian in 3D, 
+ * Parameters given in command line.
+ *----------------------------------------------------------------------*/
+
+int
+BuildParLaplacian27pt( int                  argc,
+                       char                *argv[],
+                       int                  arg_index,
+                       hypre_ParCSRMatrix **A_ptr     )
+{
+   int                 nx, ny, nz;
+   int                 P, Q, R;
+
+   hypre_ParCSRMatrix *A;
+
+   int                 num_procs, myid;
+   int                 p, q, r;
+   double             *values;
+
+   /*-----------------------------------------------------------
+    * Initialize some stuff
+    *-----------------------------------------------------------*/
+
+   MPI_Comm_size(MPI_COMM_WORLD, &num_procs );
+   MPI_Comm_rank(MPI_COMM_WORLD, &myid );
+
+   /*-----------------------------------------------------------
+    * Set defaults
+    *-----------------------------------------------------------*/
+ 
+   nx = 10;
+   ny = 10;
+   nz = 10;
+
+   P  = 1;
+   Q  = num_procs;
+   R  = 1;
+
+   /*-----------------------------------------------------------
+    * Parse command line
+    *-----------------------------------------------------------*/
+   arg_index = 0;
+   while (arg_index < argc)
+   {
+      if ( strcmp(argv[arg_index], "-n") == 0 )
+      {
+         arg_index++;
+         nx = atoi(argv[arg_index++]);
+         ny = atoi(argv[arg_index++]);
+         nz = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-P") == 0 )
+      {
+         arg_index++;
+         P  = atoi(argv[arg_index++]);
+         Q  = atoi(argv[arg_index++]);
+         R  = atoi(argv[arg_index++]);
+      }
+      else
+      {
+         arg_index++;
+      }
+   }
+
+   /*-----------------------------------------------------------
+    * Check a few things
+    *-----------------------------------------------------------*/
+
+   if ((P*Q*R) != num_procs)
+   {
+      printf("Error: Invalid number of processors or processor topology \n");
+      exit(1);
+   }
+
+   /*-----------------------------------------------------------
+    * Print driver parameters
+    *-----------------------------------------------------------*/
+ 
+   if (myid == 0)
+   {
+      printf("  Laplacian_27pt:\n");
+      printf("    (nx, ny, nz) = (%d, %d, %d)\n", nx, ny, nz);
+      printf("    (Px, Py, Pz) = (%d, %d, %d)\n", P,  Q,  R);
+   }
+
+   /*-----------------------------------------------------------
+    * Set up the grid structure
+    *-----------------------------------------------------------*/
+
+   /* compute p,q,r from P,Q,R and myid */
+   p = myid % P;
+   q = (( myid - p)/P) % Q;
+   r = ( myid - p - P*q)/( P*Q );
+
+   /*-----------------------------------------------------------
+    * Generate the matrix 
+    *-----------------------------------------------------------*/
+ 
+   values = hypre_CTAlloc(double, 2);
+
+   values[0] = 26.0;
+   if (nx == 1 || ny == 1 || nz == 1)
+	values[0] = 8.0;
+   if (nx*ny == 1 || nx*nz == 1 || ny*nz == 1)
+	values[0] = 2.0;
+   values[1] = -1.0;
+
+   A = hypre_GenerateLaplacian27pt(MPI_COMM_WORLD,
+                               nx, ny, nz, P, Q, R, p, q, r, values);
+
+   hypre_TFree(values);
+
+   *A_ptr = A;
+
+   return (0);
+}
