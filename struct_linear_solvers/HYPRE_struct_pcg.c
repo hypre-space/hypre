@@ -19,7 +19,6 @@
 
 {\bf Input files:}
 headers.h
-box_pthreads.h (if HYPRE_USE_PTHREADS defined)
 
 @return integer 0
 
