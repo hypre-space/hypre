@@ -68,6 +68,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
    double   relative_resid;
    double   rhs_norm;
    double   old_resid;
+   double   ieee_check = 0.;
 
    hypre_ParVector  *Vtemp;
    hypre_ParVector  *Residual;
@@ -139,22 +140,45 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
    if (my_id == 0 && amg_print_level > 1 && tol > 0.)
      printf("\n\nAMG SOLUTION INFO:\n");
 
+
    /*-----------------------------------------------------------------------
     *    Compute initial fine-grid residual and print 
     *-----------------------------------------------------------------------*/
 
    if (tol > 0.)
    {
-      if ( amg_log_level > 2 ) {
-         hypre_ParVectorCopy(F_array[0], Residual );
-         hypre_ParCSRMatrixMatvec(alpha, A_array[0], U_array[0], beta, Residual );
-         resid_nrm = sqrt(hypre_ParVectorInnerProd( Residual, Residual ));
-      }
-      else {
-         hypre_ParVectorCopy(F_array[0], Vtemp);
-         hypre_ParCSRMatrixMatvec(alpha, A_array[0], U_array[0], beta, Vtemp);
-         resid_nrm = sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
-      }
+     if ( amg_log_level > 2 ) {
+        hypre_ParVectorCopy(F_array[0], Residual );
+        hypre_ParCSRMatrixMatvec(alpha, A_array[0], U_array[0], beta, Residual );
+        resid_nrm = sqrt(hypre_ParVectorInnerProd( Residual, Residual ));
+     }
+     else {
+        hypre_ParVectorCopy(F_array[0], Vtemp);
+        hypre_ParCSRMatrixMatvec(alpha, A_array[0], U_array[0], beta, Vtemp);
+        resid_nrm = sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
+     }
+
+     /* Since it is does not diminish performance, attempt to return an error flag
+        and notify users when they supply bad input. */
+     if (resid_nrm != 0.) ieee_check = resid_nrm/resid_nrm; /* INF -> NaN conversion */
+     if (ieee_check != ieee_check)
+     {
+        /* ...INFs or NaNs in input can make ieee_check a NaN.  This test
+           for ieee_check self-equality works on all IEEE-compliant compilers/
+           machines, c.f. page 8 of "Lecture Notes on the Status of IEEE 754"
+           by W. Kahan, May 31, 1996.  Currently (July 2002) this paper may be
+           found at http://HTTP.CS.Berkeley.EDU/~wkahan/ieee754status/IEEE754.PDF */
+        if (amg_print_level > 0)
+        {
+          printf("\n\nERROR detected by Hypre ...  BEGIN\n");
+          printf("ERROR -- hypre_BoomerAMGSolve: INFs and/or NaNs detected in input.\n");
+          printf("User probably placed non-numerics in supplied A, x_0, or b.\n");
+          printf("Returning error flag += 101.  Program not terminated.\n");
+          printf("ERROR detected by Hypre ...  END\n\n\n");
+        }
+        Solve_err_flag += 101;
+        return Solve_err_flag;
+     }
 
      resid_nrm_init = resid_nrm;
      rhs_norm = sqrt(hypre_ParVectorInnerProd(f, f));

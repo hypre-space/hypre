@@ -241,8 +241,9 @@ hypre_GMRESSolve(void  *gmres_vdata,
    int        my_id, num_procs;
    double     epsilon, gamma, t, r_norm, b_norm, x_norm;
    double     epsmac = 1.e-16; 
+   double     ieee_check = 0.;
 
-   double          guard_zero_residual; 
+   double     guard_zero_residual; 
 
    /*-----------------------------------------------------------------------
     * With relative change convergence test on, it is possible to attempt
@@ -275,17 +276,55 @@ hypre_GMRESSolve(void  *gmres_vdata,
 
    /* compute initial residual */
    (*(gmres_functions->Matvec))(matvec_data,-1.0, A, x, 1.0, p[0]);
-   r_norm = sqrt((*(gmres_functions->InnerProd))(p[0],p[0]));
-   if ( r_norm!=r_norm ) {
-      /* ...NaN's in input will generally make r_norm a NaN.  This test
-         for  rnorm==NaN  works on all IEEE-compliant compilers/machines,
-         c.f. page 8 of "Lecture Notes on the Status of IEEE 754" by W. Kahan,
-         May 31, 1996.  Currently (July 2002) this paper may be found at
-         http://HTTP.CS.Berkeley.EDU/~wkahan/ieee754status/IEEE754.PDF */
+
+   b_norm = sqrt((*(gmres_functions->InnerProd))(b,b));
+
+   /* Since it is does not diminish performance, attempt to return an error flag
+      and notify users when they supply bad input. */
+   if (b_norm != 0.) ieee_check = b_norm/b_norm; /* INF -> NaN conversion */
+   if (ieee_check != ieee_check)
+   {
+      /* ...INFs or NaNs in input can make ieee_check a NaN.  This test
+         for ieee_check self-equality works on all IEEE-compliant compilers/
+         machines, c.f. page 8 of "Lecture Notes on the Status of IEEE 754"
+         by W. Kahan, May 31, 1996.  Currently (July 2002) this paper may be
+         found at http://HTTP.CS.Berkeley.EDU/~wkahan/ieee754status/IEEE754.PDF */
+      if (log_level > 0 || printlevel > 0)
+      {
+        printf("\n\nERROR detected by Hypre ... BEGIN\n");
+        printf("ERROR -- hypre_GMRESSolve: INFs and/or NaNs detected in input.\n");
+        printf("User probably placed non-numerics in supplied b.\n");
+        printf("Returning error flag += 101.  Program not terminated.\n");
+        printf("ERROR detected by Hypre ... END\n\n\n");
+      }
       ierr += 101;
       return ierr;
    }
-   b_norm = sqrt((*(gmres_functions->InnerProd))(b,b));
+
+   r_norm = sqrt((*(gmres_functions->InnerProd))(p[0],p[0]));
+
+   /* Since it is does not diminish performance, attempt to return an error flag
+      and notify users when they supply bad input. */
+   if (r_norm != 0.) ieee_check = r_norm/r_norm; /* INF -> NaN conversion */
+   if (ieee_check != ieee_check)
+   {
+      /* ...INFs or NaNs in input can make ieee_check a NaN.  This test
+         for ieee_check self-equality works on all IEEE-compliant compilers/
+         machines, c.f. page 8 of "Lecture Notes on the Status of IEEE 754"
+         by W. Kahan, May 31, 1996.  Currently (July 2002) this paper may be
+         found at http://HTTP.CS.Berkeley.EDU/~wkahan/ieee754status/IEEE754.PDF */
+      if (log_level > 0 || printlevel > 0)
+      {
+        printf("\n\nERROR detected by Hypre ... BEGIN\n");
+        printf("ERROR -- hypre_GMRESSolve: INFs and/or NaNs detected in input.\n");
+        printf("User probably placed non-numerics in supplied A or x_0.\n");
+        printf("Returning error flag += 101.  Program not terminated.\n");
+        printf("ERROR detected by Hypre ... END\n\n\n");
+      }
+      ierr += 101;
+      return ierr;
+   }
+
    if ( log_level>0 || printlevel>0 )
    {
       norms[0] = r_norm;

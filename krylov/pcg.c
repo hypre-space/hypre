@@ -255,6 +255,7 @@ hypre_PCGSolve( void *pcg_vdata,
    double          gamma, gamma_old;
    double          bi_prod, i_prod, eps;
    double          pi_prod, xi_prod;
+   double          ieee_check = 0.;
                 
    double          i_prod_0;
    double          cf_ave_0 = 0.0;
@@ -301,6 +302,28 @@ hypre_PCGSolve( void *pcg_vdata,
           printf("<C*b,b>: %e\n",bi_prod);
    };
 
+   /* Since it is does not diminish performance, attempt to return an error flag
+      and notify users when they supply bad input. */
+   if (bi_prod != 0.) ieee_check = bi_prod/bi_prod; /* INF -> NaN conversion */
+   if (ieee_check != ieee_check)
+   {
+      /* ...INFs or NaNs in input can make ieee_check a NaN.  This test
+         for ieee_check self-equality works on all IEEE-compliant compilers/
+         machines, c.f. page 8 of "Lecture Notes on the Status of IEEE 754"
+         by W. Kahan, May 31, 1996.  Currently (July 2002) this paper may be
+         found at http://HTTP.CS.Berkeley.EDU/~wkahan/ieee754status/IEEE754.PDF */
+      if (printlevel > 0 || log_level > 0)
+      {
+        printf("\n\nERROR detected by Hypre ...  BEGIN\n");
+        printf("ERROR -- hypre_PCGSolve: INFs and/or NaNs detected in input.\n");
+        printf("User probably placed non-numerics in supplied b.\n");
+        printf("Returning error flag += 101.  Program not terminated.\n");
+        printf("ERROR detected by Hypre ...  END\n\n\n");
+      }
+      ierr += 101;
+      return ierr;
+   }
+
    eps = tol*tol;
    if ( bi_prod > 0.0 ) {
       if ( stop_crit && !rel_change && atolf<=0 ) {  /* pure absolute tolerance */
@@ -337,6 +360,28 @@ hypre_PCGSolve( void *pcg_vdata,
 
    /* gamma = <r,p> */
    gamma = (*(pcg_functions->InnerProd))(r,p);
+
+   /* Since it is does not diminish performance, attempt to return an error flag
+      and notify users when they supply bad input. */
+   if (gamma != 0.) ieee_check = gamma/gamma; /* INF -> NaN conversion */
+   if (ieee_check != ieee_check)
+   {
+      /* ...INFs or NaNs in input can make ieee_check a NaN.  This test
+         for ieee_check self-equality works on all IEEE-compliant compilers/
+         machines, c.f. page 8 of "Lecture Notes on the Status of IEEE 754"
+         by W. Kahan, May 31, 1996.  Currently (July 2002) this paper may be
+         found at http://HTTP.CS.Berkeley.EDU/~wkahan/ieee754status/IEEE754.PDF */
+      if (printlevel > 0 || log_level > 0)
+      {
+        printf("\n\nERROR detected by Hypre ...  BEGIN\n");
+        printf("ERROR -- hypre_PCGSolve: INFs and/or NaNs detected in input.\n");
+        printf("User probably placed non-numerics in supplied A or x_0.\n");
+        printf("Returning error flag += 101.  Program not terminated.\n");
+        printf("ERROR detected by Hypre ...  END\n\n\n");
+      }
+      ierr += 101;
+      return ierr;
+   }
 
    /* Set initial residual norm */
    if ( log_level>0 || printlevel > 0 || cf_tol > 0.0 )
