@@ -37,8 +37,7 @@ extern "C" {
 
 #define MPI_COMM_WORLD     hypre_MPI_COMM_WORLD       
 
-#define MPI_BOTTOM  hypre_MPI_BOTTOM
-#define hypre_MPI_BOTTOM  0x0
+#define MPI_BOTTOM  	   hypre_MPI_BOTTOM
 
 #define MPI_DOUBLE         hypre_MPI_DOUBLE           
 #define MPI_INT            hypre_MPI_INT              
@@ -61,6 +60,8 @@ extern "C" {
 #define MPI_Comm_create    hypre_MPI_Comm_create      
 #define MPI_Allgather      hypre_MPI_Allgather        
 #define MPI_Allgatherv     hypre_MPI_Allgatherv       
+#define MPI_Gather         hypre_MPI_Gather       
+#define MPI_Scatter        hypre_MPI_Scatter       
 #define MPI_Bcast          hypre_MPI_Bcast            
 #define MPI_Send           hypre_MPI_Send             
 #define MPI_Recv           hypre_MPI_Recv             
@@ -72,6 +73,8 @@ extern "C" {
 #define MPI_Comm_size      hypre_MPI_Comm_size        
 #define MPI_Comm_rank      hypre_MPI_Comm_rank        
 #define MPI_Allreduce      hypre_MPI_Allreduce        
+#define MPI_Address        hypre_MPI_Address        
+#define MPI_Type_contiguous hypre_MPI_Type_contiguous     
 #define MPI_Type_hvector   hypre_MPI_Type_hvector     
 #define MPI_Type_struct    hypre_MPI_Type_struct      
 #define MPI_Type_free      hypre_MPI_Type_free        
@@ -91,6 +94,8 @@ typedef int hypre_MPI_Group;
 typedef int hypre_MPI_Aint;
 
 #define hypre_MPI_COMM_WORLD 0
+
+#define hypre_MPI_BOTTOM  0x0
 
 #define hypre_MPI_DOUBLE 0
 #define hypre_MPI_INT 1
@@ -125,6 +130,8 @@ int MPI_Group_incl P((MPI_Group group , int n , int *ranks , MPI_Group *newgroup
 int MPI_Comm_create P((MPI_Comm comm , MPI_Group group , MPI_Comm *newcomm ));
 int MPI_Allgather P((void *sendbuf , int sendcount , MPI_Datatype sendtype , void *recvbuf , int recvcount , MPI_Datatype recvtype , MPI_Comm comm ));
 int MPI_Allgatherv P((void *sendbuf , int sendcount , MPI_Datatype sendtype , void *recvbuf , int *recvcounts , int *displs , MPI_Datatype recvtype , MPI_Comm comm ));
+int MPI_Gather P((void *sendbuf , int sendcount , MPI_Datatype sendtype , void *recvbuf , int recvcount , MPI_Datatype recvtype , int root ,  MPI_Comm comm ));
+int MPI_Scatter P((void *sendbuf , int sendcount , MPI_Datatype sendtype , void *recvbuf , int recvcount , MPI_Datatype recvtype , int root ,  MPI_Comm comm ));
 int MPI_Bcast P((void *buffer , int count , MPI_Datatype datatype , int root , MPI_Comm comm ));
 int MPI_Send P((void *buf , int count , MPI_Datatype datatype , int dest , int tag , MPI_Comm comm ));
 int MPI_Recv P((void *buf , int count , MPI_Datatype datatype , int source , int tag , MPI_Comm comm , MPI_Status *status ));
@@ -136,6 +143,8 @@ int MPI_Waitany P((int count , MPI_Request *array_of_requests , int *index , MPI
 int MPI_Comm_size P((MPI_Comm comm , int *size ));
 int MPI_Comm_rank P((MPI_Comm comm , int *rank ));
 int MPI_Allreduce P((void *sendbuf , void *recvbuf , int count , MPI_Datatype datatype , MPI_Op op , MPI_Comm comm ));
+int MPI_Address P((void *location , MPI_Aint *address ));
+int MPI_Type_contiguous P((int count , MPI_Datatype oldtype , MPI_Datatype *newtype ));
 int MPI_Type_hvector P((int count , int blocklength , MPI_Aint stride , MPI_Datatype oldtype , MPI_Datatype *newtype ));
 int MPI_Type_struct P((int count , int *array_of_blocklengths , MPI_Aint *array_of_displacements , MPI_Datatype *array_of_types , MPI_Datatype *newtype ));
 int MPI_Type_free P((MPI_Datatype *datatype ));
