@@ -16,7 +16,7 @@
 * This function finds the minimum value in the array removes it and
 * returns it. It decreases the size of the array.
 **************************************************************************/
-int ExtractMinLR( hypre_PilutSolverGlobals *globals )
+int hypre_ExtractMinLR( hypre_PilutSolverGlobals *globals )
 {
   int i, j=0 ;
 
@@ -38,7 +38,7 @@ int ExtractMinLR( hypre_PilutSolverGlobals *globals )
 /*************************************************************************
 * This function sort an (idx,val) array in increasing idx values
 **************************************************************************/
-void IdxIncSort(int n, int *idx, double *val)
+void hypre_IdxIncSort(int n, int *idx, double *val)
 {
   int i, j, min;
   double tmpval;
@@ -63,7 +63,7 @@ void IdxIncSort(int n, int *idx, double *val)
 /*************************************************************************
 * This function sort an (idx,val) array in decreasing abs val 
 **************************************************************************/
-void ValDecSort(int n, int *idx, double *val)
+void hypre_ValDecSort(int n, int *idx, double *val)
 {
   int i, j, max;
   int tmpidx;
@@ -91,7 +91,7 @@ void ValDecSort(int n, int *idx, double *val)
 * This function takes an (idx, val) array and compacts it so that every 
 * entry with idx[] = -1, gets removed. It returns the new count
 **************************************************************************/
-int CompactIdx(int n, int *idx, double *val)
+int hypre_CompactIdx(int n, int *idx, double *val)
 {
   int i, j;
 
@@ -122,7 +122,7 @@ int CompactIdx(int n, int *idx, double *val)
 /*************************************************************************
 * This function prints an (idx, val) pair
 **************************************************************************/
-void PrintIdxVal(int n, int *idx, double *val)
+void hypre_PrintIdxVal(int n, int *idx, double *val)
 {
   int i;
 
@@ -138,7 +138,7 @@ void PrintIdxVal(int n, int *idx, double *val)
 /*************************************************************************
 * This function compares 2 KeyValueType variables for sorting in inc order
 **************************************************************************/
-int DecKeyValueCmp(const void *v1, const void *v2)
+int hypre_DecKeyValueCmp(const void *v1, const void *v2)
 {
   KeyValueType *n1, *n2;
 
@@ -153,16 +153,16 @@ int DecKeyValueCmp(const void *v1, const void *v2)
 /*************************************************************************
 * This function sorts an array of type KeyValueType in increasing order
 **************************************************************************/
-void SortKeyValueNodesDec(KeyValueType *nodes, int n)
+void hypre_SortKeyValueNodesDec(KeyValueType *nodes, int n)
 {
-  tex_qsort((void *)nodes, (size_t)n, (size_t)sizeof(KeyValueType), DecKeyValueCmp);
+  tex_qsort((void *)nodes, (size_t)n, (size_t)sizeof(KeyValueType), hypre_DecKeyValueCmp);
 }
 
 
 /*************************************************************************
 * This function sums the entries in an array
 **************************************************************************/
-int sasum(int n, int *x)
+int hypre_sasum(int n, int *x)
 {
   int sum = 0;
   int i;
@@ -193,7 +193,7 @@ static int decshort(const void *v1, const void *v2)
 /*************************************************************************
 * These functions sorts an array of XXX
 **************************************************************************/
-void sincsort(int n, int *a)
+void hypre_sincsort(int n, int *a)
 {
   tex_qsort((void *)a, (size_t)n, (size_t)sizeof(int), incshort);
 }

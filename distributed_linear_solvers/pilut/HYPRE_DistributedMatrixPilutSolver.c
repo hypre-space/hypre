@@ -46,15 +46,15 @@ int  HYPRE_NewDistributedMatrixPilutSolver(
    mype = myid;
 
 #ifdef HYPRE_TIMING
-   globals->CCI_timer = hypre_InitializeTiming( "ComputeCommInfo" );
-   globals->SS_timer = hypre_InitializeTiming( "SelectSet" );
-   globals->SFR_timer = hypre_InitializeTiming( "SendFactoredRows" );
-   globals->CR_timer = hypre_InitializeTiming( "ComputeRmat" );
-   globals->FL_timer = hypre_InitializeTiming( "FactorLocal" );
+   globals->CCI_timer = hypre_InitializeTiming( "hypre_ComputeCommInfo" );
+   globals->SS_timer = hypre_InitializeTiming( "hypre_SelectSet" );
+   globals->SFR_timer = hypre_InitializeTiming( "hypre_SendFactoredRows" );
+   globals->CR_timer = hypre_InitializeTiming( "hypre_ComputeRmat" );
+   globals->FL_timer = hypre_InitializeTiming( "hypre_FactorLocal" );
    globals->SLUD_timer = hypre_InitializeTiming( "SeparateLU_byDIAG" );
    globals->SLUM_timer = hypre_InitializeTiming( "SeparateLU_byMIS" );
-   globals->UL_timer = hypre_InitializeTiming( "UpdateL" );
-   globals->FNR_timer = hypre_InitializeTiming( "FormNRmat" );
+   globals->UL_timer = hypre_InitializeTiming( "hypre_UpdateL" );
+   globals->FNR_timer = hypre_InitializeTiming( "hypre_FormNRmat" );
 
    globals->Ll_timer = hypre_InitializeTiming( "Local part of front solve" );
    globals->Lp_timer = hypre_InitializeTiming( "Parallel part of front solve" );
@@ -357,13 +357,13 @@ int HYPRE_DistributedMatrixPilutSolverSetup( HYPRE_DistributedMatrixPilutSolver 
 {
    int ilut_timer;
 
-   ilut_timer = hypre_InitializeTiming( "ILUT factorization" );
+   ilut_timer = hypre_InitializeTiming( "hypre_ILUT factorization" );
 
    hypre_BeginTiming( ilut_timer );
 #endif
 
    /* Perform approximate factorization */
-   ierr = ILUT( hypre_DistributedMatrixPilutSolverDataDist (solver),
+   ierr = hypre_ILUT( hypre_DistributedMatrixPilutSolverDataDist (solver),
          hypre_DistributedMatrixPilutSolverMatrix (solver),
          hypre_DistributedMatrixPilutSolverFactorMat (solver),
          hypre_DistributedMatrixPilutSolverGmaxnz (solver),
@@ -383,12 +383,12 @@ int HYPRE_DistributedMatrixPilutSolverSetup( HYPRE_DistributedMatrixPilutSolver 
 {
    int Setup_timer;
 
-   Setup_timer = hypre_InitializeTiming( "SetUpLUFactor: setup for triangular solvers");
+   Setup_timer = hypre_InitializeTiming( "hypre_SetUpLUFactor: setup for triangular solvers");
 
    hypre_BeginTiming( Setup_timer );
 #endif
 
-   ierr = SetUpLUFactor( hypre_DistributedMatrixPilutSolverDataDist (solver), 
+   ierr = hypre_SetUpLUFactor( hypre_DistributedMatrixPilutSolverDataDist (solver), 
                hypre_DistributedMatrixPilutSolverFactorMat (solver),
                hypre_DistributedMatrixPilutSolverGmaxnz (solver),
                hypre_DistributedMatrixPilutSolverGlobals (solver) );
@@ -434,12 +434,12 @@ int HYPRE_DistributedMatrixPilutSolverSolve( HYPRE_DistributedMatrixPilutSolver 
 {
    int LDUSolve_timer;
 
-   LDUSolve_timer = hypre_InitializeTiming( "ILUT application" );
+   LDUSolve_timer = hypre_InitializeTiming( "hypre_ILUT application" );
 
    hypre_BeginTiming( LDUSolve_timer );
 #endif
 
-   LDUSolve( hypre_DistributedMatrixPilutSolverDataDist (solver),
+   hypre_LDUSolve( hypre_DistributedMatrixPilutSolverDataDist (solver),
          hypre_DistributedMatrixPilutSolverFactorMat (solver),
          x,
          b,

@@ -64,7 +64,7 @@ struct cphasedef {
   int *auxsptr;	/* Auxiliary send ptr, used at intermediate points */
 
   int *rpes;	/* A rnbrpes   list of PEs to recv data */
-  int *rdone;	/* A rnbrpes   list of # elements recv'd in this LDUSolve */
+  int *rdone;	/* A rnbrpes   list of # elements recv'd in this hypre_LDUSolve */
   int *rnum;        /* A nlevels x npes array of the number of elements to recieve */
 
   int snbrpes;		/* The total number of neighboring PEs (to send to)   */
@@ -134,7 +134,7 @@ typedef struct reducematdef ReduceMatType;
 
 /*************************************************************************
 * This data structure stores information about the send in each phase 
-* of parallel ILUT
+* of parallel hypre_ILUT
 **************************************************************************/
 struct comminfodef {
   double *gatherbuf;	/* Assembly buffer for sending colind & values */

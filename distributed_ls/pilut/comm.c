@@ -24,7 +24,7 @@
 /*************************************************************************
 * This function computes the max of a single element
 **************************************************************************/
-int GlobalSEMax(int value, MPI_Comm MPI_Context )
+int hypre_GlobalSEMax(int value, MPI_Comm MPI_Context )
 {
   int max;
   MPI_Allreduce( &value, &max, 1, MPI_INT, MPI_MAX, MPI_Context );
@@ -36,7 +36,7 @@ int GlobalSEMax(int value, MPI_Comm MPI_Context )
 /*************************************************************************
 * This function computes the max of a single element
 **************************************************************************/
-int GlobalSEMin(int value, MPI_Comm MPI_Context)
+int hypre_GlobalSEMin(int value, MPI_Comm MPI_Context)
 {
   int min;
   MPI_Allreduce( &value, &min, 1, MPI_INT, MPI_MIN, MPI_Context );
@@ -47,7 +47,7 @@ int GlobalSEMin(int value, MPI_Comm MPI_Context)
 /*************************************************************************
 * This function computes the max of a single element
 **************************************************************************/
-int GlobalSESum(int value, MPI_Comm MPI_Context)
+int hypre_GlobalSESum(int value, MPI_Comm MPI_Context)
 {
   int sum;
 
@@ -59,7 +59,7 @@ int GlobalSESum(int value, MPI_Comm MPI_Context)
 /*************************************************************************
 * This function computes the max of a single element
 **************************************************************************/
-double GlobalSEMaxDouble(double value, MPI_Comm MPI_Context)
+double hypre_GlobalSEMaxDouble(double value, MPI_Comm MPI_Context)
 {
   double max;
   MPI_Allreduce( &value, &max, 1, MPI_DOUBLE, MPI_MAX, MPI_Context );
@@ -70,7 +70,7 @@ double GlobalSEMaxDouble(double value, MPI_Comm MPI_Context)
 /*************************************************************************
 * This function computes the max of a single element
 **************************************************************************/
-double GlobalSEMinDouble(double value, MPI_Comm MPI_Context)
+double hypre_GlobalSEMinDouble(double value, MPI_Comm MPI_Context)
 {
   double min;
   MPI_Allreduce( &value, &min, 1, MPI_DOUBLE, MPI_MIN, MPI_Context );
@@ -81,7 +81,7 @@ double GlobalSEMinDouble(double value, MPI_Comm MPI_Context)
 /*************************************************************************
 * This function computes the max of a single element
 **************************************************************************/
-double GlobalSESumDouble(double value, MPI_Comm MPI_Context)
+double hypre_GlobalSESumDouble(double value, MPI_Comm MPI_Context)
 {
   double sum;
   MPI_Allreduce( &value, &sum, 1, MPI_DOUBLE, MPI_SUM, MPI_Context );

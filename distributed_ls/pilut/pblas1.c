@@ -19,13 +19,13 @@
 * This function computes the 2 norm of a vector. The result is returned
 * at all the processors
 **************************************************************************/
-double p_dnrm2(DataDistType *ddist, double *x, hypre_PilutSolverGlobals *globals)
+double hypre_p_dnrm2(DataDistType *ddist, double *x, hypre_PilutSolverGlobals *globals)
 {
   int incx=1;
   double sum;
 
   sum = SNRM2(&(ddist->ddist_lnrows), x, &incx);
-  return sqrt(GlobalSESumDouble(sum*sum, pilut_comm));
+  return sqrt(hypre_GlobalSESumDouble(sum*sum, pilut_comm));
 }
 
 
@@ -33,13 +33,13 @@ double p_dnrm2(DataDistType *ddist, double *x, hypre_PilutSolverGlobals *globals
 * This function computes the dot product of 2 vectors. 
 * The result is returned at all the processors
 **************************************************************************/
-double p_ddot(DataDistType *ddist, double *x, double *y,
+double hypre_p_ddot(DataDistType *ddist, double *x, double *y,
               hypre_PilutSolverGlobals *globals)
 {
   int incx=1;
   double sum;
 
-  return GlobalSESumDouble(SDOT(&(ddist->ddist_lnrows), x, &incx, y, &incx), 
+  return hypre_GlobalSESumDouble(SDOT(&(ddist->ddist_lnrows), x, &incx, y, &incx), 
          pilut_comm );
 }
 
@@ -47,7 +47,7 @@ double p_ddot(DataDistType *ddist, double *x, double *y,
 /*************************************************************************
 * This function performs y = alpha*x, where alpha resides on pe 0
 **************************************************************************/
-void p_daxy(DataDistType *ddist, double alpha, double *x, double *y)
+void hypre_p_daxy(DataDistType *ddist, double alpha, double *x, double *y)
 {
   int i, local_lnrows=ddist->ddist_lnrows;
 
@@ -59,7 +59,7 @@ void p_daxy(DataDistType *ddist, double alpha, double *x, double *y)
 /*************************************************************************
 * This function performs y = alpha*x+y, where alpha resides on pe 0
 **************************************************************************/
-void p_daxpy(DataDistType *ddist, double alpha, double *x, double *y)
+void hypre_p_daxpy(DataDistType *ddist, double alpha, double *x, double *y)
 {
   int i, local_lnrows=ddist->ddist_lnrows;
 
@@ -72,7 +72,7 @@ void p_daxpy(DataDistType *ddist, double alpha, double *x, double *y)
 /*************************************************************************
 * This function performs z = alpha*x+beta*y, where alpha resides on pe 0
 **************************************************************************/
-void p_daxbyz(DataDistType *ddist, double alpha, double *x, double beta, 
+void hypre_p_daxbyz(DataDistType *ddist, double alpha, double *x, double beta, 
               double *y, double *z)
 {
   int i, local_lnrows=ddist->ddist_lnrows;
@@ -84,7 +84,7 @@ void p_daxbyz(DataDistType *ddist, double alpha, double *x, double beta,
 /*************************************************************************
 * This function prints a vector
 **************************************************************************/
-p_vprintf(DataDistType *ddist, double *x, hypre_PilutSolverGlobals *globals )
+hypre_p_vprintf(DataDistType *ddist, double *x, hypre_PilutSolverGlobals *globals )
 {
   int pe, i, j, k;
 

@@ -17,7 +17,7 @@
 /*************************************************************************
 * This function prints an error message and exits
 **************************************************************************/
-void errexit( char *f_str, ...)
+void hypre_errexit( char *f_str, ...)
 {
   va_list argp;
   int nprow, npcol;
@@ -39,7 +39,7 @@ void errexit( char *f_str, ...)
 * This makes life easier by aborting all threads together, and printing
 * some diagnostic with the PE.
 **************************************************************************/
-void my_abort( int inSignal, hypre_PilutSolverGlobals *globals )
+void hypre_my_abort( int inSignal, hypre_PilutSolverGlobals *globals )
 {
   printf( "PE %d caught sig %d\n", mype, inSignal );
   fflush(0);
@@ -50,7 +50,7 @@ void my_abort( int inSignal, hypre_PilutSolverGlobals *globals )
 /*************************************************************************
 * The following function allocates an array of ints
 **************************************************************************/
-int *idx_malloc(int n, char *msg)
+int *hypre_idx_malloc(int n, char *msg)
 {
   int *ptr;
 
@@ -59,7 +59,7 @@ int *idx_malloc(int n, char *msg)
 
   ptr = (int *)malloc(sizeof(int)*n);
   if (ptr == NULL) {
-    errexit("***Memory allocation failed for %s. Requested size: %d bytes", msg, n*sizeof(int));
+    hypre_errexit("***Memory allocation failed for %s. Requested size: %d bytes", msg, n*sizeof(int));
   }
 
   return ptr;
@@ -70,7 +70,7 @@ int *idx_malloc(int n, char *msg)
 /*************************************************************************
 * The follwoing function allocates an array of ints and initializes
 **************************************************************************/
-int *idx_malloc_init(int n, int ival, char *msg)
+int *hypre_idx_malloc_init(int n, int ival, char *msg)
 {
   int *ptr;
   int i;
@@ -80,7 +80,7 @@ int *idx_malloc_init(int n, int ival, char *msg)
 
   ptr = (int *)malloc(sizeof(int)*n);
   if (ptr == NULL) {
-    errexit("***Memory allocation failed for %s. Requested size: %d bytes", msg, n*sizeof(int));
+    hypre_errexit("***Memory allocation failed for %s. Requested size: %d bytes", msg, n*sizeof(int));
   }
 
   for (i=0; i<n; i++)
@@ -93,7 +93,7 @@ int *idx_malloc_init(int n, int ival, char *msg)
 /*************************************************************************
 * The following function allocates an array of floats
 **************************************************************************/
-double *fp_malloc(int n, char *msg)
+double *hypre_fp_malloc(int n, char *msg)
 {
   double *ptr;
 
@@ -102,7 +102,7 @@ double *fp_malloc(int n, char *msg)
 
   ptr = (double *)malloc(sizeof(double)*n);
   if (ptr == NULL) {
-    errexit("***Memory allocation failed for %s. Requested size: %d bytes", msg, n*sizeof(double));
+    hypre_errexit("***Memory allocation failed for %s. Requested size: %d bytes", msg, n*sizeof(double));
   }
 
   return ptr;
@@ -113,7 +113,7 @@ double *fp_malloc(int n, char *msg)
 /*************************************************************************
 * The follwoing function allocates an array of floats and initializes
 **************************************************************************/
-double *fp_malloc_init(int n, double ival, char *msg)
+double *hypre_fp_malloc_init(int n, double ival, char *msg)
 {
   double *ptr;
   int i;
@@ -123,7 +123,7 @@ double *fp_malloc_init(int n, double ival, char *msg)
 
   ptr = (double *)malloc(sizeof(double)*n);
   if (ptr == NULL) {
-    errexit("***Memory allocation failed for %s. Requested size: %d bytes", msg, n*sizeof(double));
+    hypre_errexit("***Memory allocation failed for %s. Requested size: %d bytes", msg, n*sizeof(double));
   }
 
   for (i=0; i<n; i++)
@@ -137,7 +137,7 @@ double *fp_malloc_init(int n, double ival, char *msg)
 /*************************************************************************
 * This function is my wrapper around malloc.
 **************************************************************************/
-void *mymalloc(int nbytes, char *msg)
+void *hypre_mymalloc(int nbytes, char *msg)
 {
   void *ptr;
 
@@ -146,7 +146,7 @@ void *mymalloc(int nbytes, char *msg)
 
   ptr = (void *)malloc(nbytes);
   if (ptr == NULL) {
-    errexit("***Memory allocation failed for %s. Requested size: %d bytes", msg, nbytes);
+    hypre_errexit("***Memory allocation failed for %s. Requested size: %d bytes", msg, nbytes);
   }
 
   return ptr;
@@ -156,7 +156,7 @@ void *mymalloc(int nbytes, char *msg)
 /*************************************************************************
 * This function is my wrapper around free, allows multiple pointers    
 **************************************************************************/
-void free_multi(void *ptr1,...)
+void hypre_free_multi(void *ptr1,...)
 {
   va_list plist;
   void *ptr;
@@ -180,7 +180,7 @@ void free_multi(void *ptr1,...)
 /*************************************************************************
 * The following function copies an int (int) array
 **************************************************************************/
-void memcpy_int( int *dest, const int *src, size_t n )
+void hypre_memcpy_int( int *dest, const int *src, size_t n )
 {
   if (dest) memcpy(dest, src, n*sizeof(int));
 }
@@ -188,7 +188,7 @@ void memcpy_int( int *dest, const int *src, size_t n )
 /*************************************************************************
 * The following function copies an int (int) array
 **************************************************************************/
-void memcpy_idx( int *dest, const int *src, size_t n )
+void hypre_memcpy_idx( int *dest, const int *src, size_t n )
 {
   if (dest) memcpy(dest, src, n*sizeof(int));
 }
@@ -198,7 +198,7 @@ void memcpy_idx( int *dest, const int *src, size_t n )
 * Note this assumes BLAS 1 routine SCOPY. An alternative would be memcpy.
 * There is a noticeable difference between this and just a for loop.
 **************************************************************************/
-void memcpy_fp( double *dest, const double *src, size_t n )
+void hypre_memcpy_fp( double *dest, const double *src, size_t n )
 {
   int i, inc=1;
 

@@ -18,7 +18,7 @@
 /*************************************************************************
 * This function prints a message and file/line number
 **************************************************************************/
-void PrintLine(char *str, hypre_PilutSolverGlobals *globals)
+void hypre_PrintLine(char *str, hypre_PilutSolverGlobals *globals)
 {
   printf("PE %d ---- %-27s (%s, %d)\n",
 	 mype, str, __FILE__, __LINE__);
@@ -29,17 +29,17 @@ void PrintLine(char *str, hypre_PilutSolverGlobals *globals)
 /*************************************************************************
 * This function exits if i is not in [low, up)
 **************************************************************************/
-void CheckBounds(int low, int i ,int up, hypre_PilutSolverGlobals *globals)
+void hypre_CheckBounds(int low, int i ,int up, hypre_PilutSolverGlobals *globals)
 {
   if ((i < low)  ||  (i >= up))
-    errexit("PE %d Bad bound: %d <= %d < %d (%s %d)\n", 
+    hypre_errexit("PE %d Bad bound: %d <= %d < %d (%s %d)\n", 
 	    mype, low, i, up, __FILE__, __LINE__ );
 }
 
 /*************************************************************************
 * This function prints a checksum for an int (int) array
 **************************************************************************/
-long IDX_Checksum(const int *v, int len, const char *msg, int tag,
+long hypre_IDX_Checksum(const int *v, int len, const char *msg, int tag,
           hypre_PilutSolverGlobals *globals)
 {
   static int numChk = 0;
@@ -61,7 +61,7 @@ long IDX_Checksum(const int *v, int len, const char *msg, int tag,
 /*************************************************************************
 * This function prints a checksum for an int (int) array
 **************************************************************************/
-long INT_Checksum(const int *v, int len, const char *msg, int tag,
+long hypre_INT_Checksum(const int *v, int len, const char *msg, int tag,
           hypre_PilutSolverGlobals *globals)
 {
   static int numChk = 0;
@@ -83,7 +83,7 @@ long INT_Checksum(const int *v, int len, const char *msg, int tag,
 /*************************************************************************
 * This function prints a checksum for a float (double) array
 **************************************************************************/
-long FP_Checksum(const double *v, int len, const char *msg, int tag,
+long hypre_FP_Checksum(const double *v, int len, const char *msg, int tag,
           hypre_PilutSolverGlobals *globals)
 {
   static int numChk = 0;
@@ -106,7 +106,7 @@ long FP_Checksum(const double *v, int len, const char *msg, int tag,
 /*************************************************************************
 * This function prints checksums for each array of the rmat struct
 **************************************************************************/
-long RMat_Checksum(const ReduceMatType *rmat,
+long hypre_RMat_Checksum(const ReduceMatType *rmat,
           hypre_PilutSolverGlobals *globals)
 {
   int i;
@@ -132,15 +132,15 @@ long RMat_Checksum(const ReduceMatType *rmat,
   fflush(0);
 
   /* print checksums for each array */
-  IDX_Checksum(rmat->rmat_rnz,     rmat->rmat_ntogo, "rmat->rmat_rnz",     numChk,
+  hypre_IDX_Checksum(rmat->rmat_rnz,     rmat->rmat_ntogo, "rmat->rmat_rnz",     numChk,
       globals);
-  IDX_Checksum(rmat->rmat_rrowlen, rmat->rmat_ntogo, "rmat->rmat_rrowlen", numChk,
+  hypre_IDX_Checksum(rmat->rmat_rrowlen, rmat->rmat_ntogo, "rmat->rmat_rrowlen", numChk,
       globals);
 
   for (i=0; i<rmat->rmat_ntogo; i++) {
-    IDX_Checksum(rmat->rmat_rcolind[i], rmat->rmat_rrowlen[i], "rmat->rmat_rcolind", i,
+    hypre_IDX_Checksum(rmat->rmat_rcolind[i], rmat->rmat_rrowlen[i], "rmat->rmat_rcolind", i,
       globals);
-     FP_Checksum(rmat->rmat_rvalues[i], rmat->rmat_rrowlen[i], "rmat->rmat_rvalues", i,
+     hypre_FP_Checksum(rmat->rmat_rvalues[i], rmat->rmat_rrowlen[i], "rmat->rmat_rvalues", i,
       globals);
   }
 
@@ -150,7 +150,7 @@ long RMat_Checksum(const ReduceMatType *rmat,
 /*************************************************************************
 * This function prints checksums for some arrays of the LDU struct
 **************************************************************************/
-long LDU_Checksum(const FactorMatType *ldu,
+long hypre_LDU_Checksum(const FactorMatType *ldu,
           hypre_PilutSolverGlobals *globals)
 {
   int i, j;
@@ -192,7 +192,7 @@ long LDU_Checksum(const FactorMatType *ldu,
 	 mype, numChk, lisum, ldsum, dsum, uisum, udsum);
   fflush(0);
 
-  FP_Checksum(ldu->nrm2s, lnrows, "2-norms", numChk,
+  hypre_FP_Checksum(ldu->nrm2s, lnrows, "2-norms", numChk,
       globals);
 
   return 1;
@@ -202,7 +202,7 @@ long LDU_Checksum(const FactorMatType *ldu,
 /*************************************************************************
 * This function prints a vector on each processor 
 **************************************************************************/
-void PrintVector(int *v, int n, char *msg,
+void hypre_PrintVector(int *v, int n, char *msg,
           hypre_PilutSolverGlobals *globals)
 {
   int i, penum;

@@ -2,16 +2,16 @@
  * trifactor.c
  *
  * This file contains a number of fuction that are used in solving
- * the triangular systems resulting from the ILUT
+ * the triangular systems resulting from the hypre_ILUT
  *
  * Started 11/13/95
  * George
  *
  * 7/8
- *  - seperate SetUpFactor from SetUpLUFactor and verify
+ *  - seperate hypre_SetUpFactor from hypre_SetUpLUFactor and verify
  * 7/9
  *  - MPI support, adding to the comm structure
- *  - timing of the LDUSolve. The computation is very scalable, but the
+ *  - timing of the hypre_LDUSolve. The computation is very scalable, but the
  *    communication and sync is not. Partially this comes from sending
  *    zero length messages. I'll fix that.
  * 7/10
@@ -32,7 +32,7 @@
 * This function performs the forward and backward substitution.
 * It solves the system LDUx = b.
 **************************************************************************/
-void LDUSolve(DataDistType *ddist, FactorMatType *ldu, double *x, double *b,
+void hypre_LDUSolve(DataDistType *ddist, FactorMatType *ldu, double *x, double *b,
                    hypre_PilutSolverGlobals *globals)
 {
   int ii, i, j, k, l, TAG;
@@ -43,7 +43,7 @@ void LDUSolve(DataDistType *ddist, FactorMatType *ldu, double *x, double *b,
   MPI_Status Status;
   MPI_Request *receive_requests;
 
-  /* PrintLine("LDUSolve start", globals); */
+  /* hypre_PrintLine("hypre_LDUSolve start", globals); */
 
   lnrows    = ddist->ddist_lnrows;
   perm      = ldu->perm;
@@ -64,7 +64,7 @@ void LDUSolve(DataDistType *ddist, FactorMatType *ldu, double *x, double *b,
   sptr    = ldu->lcomm.sptr;
   sind    = ldu->lcomm.sind;
   auxsptr = ldu->lcomm.auxsptr;
-  if( sptr != NULL ) memcpy_idx(auxsptr, sptr, snbrpes+1);
+  if( sptr != NULL ) hypre_memcpy_idx(auxsptr, sptr, snbrpes+1);
 
   rnbrpes = ldu->lcomm.rnbrpes;
   raddr   = ldu->lcomm.raddr;
@@ -161,7 +161,7 @@ void LDUSolve(DataDistType *ddist, FactorMatType *ldu, double *x, double *b,
   sptr    = ldu->ucomm.sptr;
   sind    = ldu->ucomm.sind;
   auxsptr = ldu->ucomm.auxsptr;
-  memcpy_idx(auxsptr, sptr, snbrpes+1);
+  hypre_memcpy_idx(auxsptr, sptr, snbrpes+1);
 
   rnbrpes = ldu->ucomm.rnbrpes;
   raddr   = ldu->ucomm.raddr;
@@ -258,15 +258,15 @@ void LDUSolve(DataDistType *ddist, FactorMatType *ldu, double *x, double *b,
 * This function sets-up the communication parameters for the forward
 * and backward substitution, and relabels the L and U matrices 
 **************************************************************************/
-int SetUpLUFactor(DataDistType *ddist, FactorMatType *ldu, int maxnz,
+int hypre_SetUpLUFactor(DataDistType *ddist, FactorMatType *ldu, int maxnz,
                    hypre_PilutSolverGlobals *globals )
 {
   int i, maxsend;
   int *petotal, *rind, *imap;
 
-  petotal = idx_malloc(npes+1,       "SetUpLUFactor: petotal");
-  rind    = idx_malloc(ddist->ddist_nrows, "SetUpLUFactor: rind"   );
-  imap    = idx_malloc_init(ddist->ddist_nrows, -1, "SetUpLUFactor: imap");
+  petotal = hypre_idx_malloc(npes+1,       "hypre_SetUpLUFactor: petotal");
+  rind    = hypre_idx_malloc(ddist->ddist_nrows, "hypre_SetUpLUFactor: rind"   );
+  imap    = hypre_idx_malloc_init(ddist->ddist_nrows, -1, "hypre_SetUpLUFactor: imap");
 
   /* This is the global maximum for both L and U */
   maxsend = 0;
@@ -275,12 +275,12 @@ int SetUpLUFactor(DataDistType *ddist, FactorMatType *ldu, int maxnz,
 {
    int Ltimer;
 
-   Ltimer = hypre_InitializeTiming( "SetUpFactor for L" );
+   Ltimer = hypre_InitializeTiming( "hypre_SetUpFactor for L" );
 
    hypre_BeginTiming( Ltimer );
 #endif
   /* Work on L first */
-  SetUpFactor( ddist, ldu, maxnz,   petotal, rind, imap, &maxsend,   true,
+  hypre_SetUpFactor( ddist, ldu, maxnz,   petotal, rind, imap, &maxsend,   true,
                globals  );
 #ifdef HYPRE_TIMING
    hypre_EndTiming( Ltimer );
@@ -292,12 +292,12 @@ int SetUpLUFactor(DataDistType *ddist, FactorMatType *ldu, int maxnz,
  {
    int Utimer;
 
-   Utimer = hypre_InitializeTiming( "SetUpFactor for U" );
+   Utimer = hypre_InitializeTiming( "hypre_SetUpFactor for U" );
 
    hypre_BeginTiming( Utimer );
 #endif
   /* Now work on U   */
-  SetUpFactor( ddist, ldu, maxnz,   petotal, rind, imap, &maxsend,   false,
+  hypre_SetUpFactor( ddist, ldu, maxnz,   petotal, rind, imap, &maxsend,   false,
                globals );
 #ifdef HYPRE_TIMING
    hypre_EndTiming( Utimer );
@@ -306,9 +306,9 @@ int SetUpLUFactor(DataDistType *ddist, FactorMatType *ldu, int maxnz,
 #endif
 
   /* Allocate memory for the gather buffer. This is an overestimate */
-  ldu->gatherbuf = fp_malloc(maxsend, "SetUpLUFactor: ldu->gatherbuf");
+  ldu->gatherbuf = hypre_fp_malloc(maxsend, "hypre_SetUpLUFactor: ldu->gatherbuf");
 
-  free_multi(petotal, rind, imap, -1);
+  hypre_free_multi(petotal, rind, imap, -1);
 
   return(0);
 }
@@ -320,7 +320,7 @@ int SetUpLUFactor(DataDistType *ddist, FactorMatType *ldu, int maxnz,
 * differentiates the two calls for the minor differences between them.
 * These differences are marked by **** in comments
 **************************************************************************/
-void SetUpFactor(DataDistType *ddist, FactorMatType *ldu, int maxnz,
+void hypre_SetUpFactor(DataDistType *ddist, FactorMatType *ldu, int maxnz,
 		 int *petotal, int *rind, int *imap,
 		 int *maxsendP, int DoingL,
                    hypre_PilutSolverGlobals *globals )
@@ -364,16 +364,16 @@ void SetUpFactor(DataDistType *ddist, FactorMatType *ldu, int maxnz,
       }
     }
   }
-  sincsort_fast(nrecv, rind);
+  hypre_sincsort_fast(nrecv, rind);
 
   /**** select between L and U "x" vectors ****/
   if ( DoingL ) {
-    ldu->lxlen = GlobalSEMax(lnrows+nrecv, pilut_comm );
-    x = ldu->lx  = fp_malloc_init(ldu->lxlen, 0, "SetUpFactor: ldu->lx");
+    ldu->lxlen = hypre_GlobalSEMax(lnrows+nrecv, pilut_comm );
+    x = ldu->lx  = hypre_fp_malloc_init(ldu->lxlen, 0, "hypre_SetUpFactor: ldu->lx");
   }
   else {
-    ldu->uxlen = GlobalSEMax(lnrows+nrecv, pilut_comm);
-    x = ldu->ux  = fp_malloc_init(ldu->uxlen, 0, "SetUpFactor: ldu->ux");
+    ldu->uxlen = hypre_GlobalSEMax(lnrows+nrecv, pilut_comm);
+    x = ldu->ux  = hypre_fp_malloc_init(ldu->uxlen, 0, "hypre_SetUpFactor: ldu->ux");
   }
 
   /* Determine processor boundaries */
@@ -413,15 +413,15 @@ void SetUpFactor(DataDistType *ddist, FactorMatType *ldu, int maxnz,
   TriSolveComm->snbrpes = snbrpes;
 
   /* Allocate sufficient memory for the various data structures for TriSolveComm */
-          TriSolveComm->auxsptr = idx_malloc(snbrpes+1, "SetUpFactor: TriSolveComm->auxsptr");
-  spes  = TriSolveComm->spes    = idx_malloc(snbrpes,   "SetUpFactor: TriSolveComm->spes"   );
-  sptr  = TriSolveComm->sptr    = idx_malloc(snbrpes+1, "SetUpFactor: TriSolveComm->sptr"   );
-  sind  = TriSolveComm->sind    = idx_malloc(GlobalSEMax(nsend, pilut_comm), "SetUpFactor: TriSolveComm->sind");
+          TriSolveComm->auxsptr = hypre_idx_malloc(snbrpes+1, "hypre_SetUpFactor: TriSolveComm->auxsptr");
+  spes  = TriSolveComm->spes    = hypre_idx_malloc(snbrpes,   "hypre_SetUpFactor: TriSolveComm->spes"   );
+  sptr  = TriSolveComm->sptr    = hypre_idx_malloc(snbrpes+1, "hypre_SetUpFactor: TriSolveComm->sptr"   );
+  sind  = TriSolveComm->sind    = hypre_idx_malloc(hypre_GlobalSEMax(nsend, pilut_comm), "hypre_SetUpFactor: TriSolveComm->sind");
 
-          TriSolveComm->rdone   = idx_malloc(rnbrpes,  "SetUpFactor: TriSolveComm->rpes");
-  rpes  = TriSolveComm->rpes    = idx_malloc(rnbrpes,  "SetUpFactor: TriSolveComm->rpes" );
-  raddr = TriSolveComm->raddr   = (double**) mymalloc( sizeof(double*)*(rnbrpes+1),
-					       "SetUpFactor: TriSolveComm->raddr");
+          TriSolveComm->rdone   = hypre_idx_malloc(rnbrpes,  "hypre_SetUpFactor: TriSolveComm->rpes");
+  rpes  = TriSolveComm->rpes    = hypre_idx_malloc(rnbrpes,  "hypre_SetUpFactor: TriSolveComm->rpes" );
+  raddr = TriSolveComm->raddr   = (double**) hypre_mymalloc( sizeof(double*)*(rnbrpes+1),
+					       "hypre_SetUpFactor: TriSolveComm->raddr");
 
   /* Save send addresses, lengths, and construct spes */
   snbrpes = 0;
@@ -460,7 +460,7 @@ void SetUpFactor(DataDistType *ddist, FactorMatType *ldu, int maxnz,
       MPI_Send( rind+k, petotal[i], MPI_INT ,
 		i, TAG_SetUp_rind, pilut_comm );
 
-      /* recv info for LDUSolve */
+      /* recv info for hypre_LDUSolve */
       raddr[rnbrpes] = x + k + lnrows;
       rpes [rnbrpes] = i;
       rnbrpes++;
@@ -482,7 +482,7 @@ void SetUpFactor(DataDistType *ddist, FactorMatType *ldu, int maxnz,
      stored in (sptr, sind) */
   /* Apply the iperm[] onto the sind in order to sort them according to MIS */
   for (i=0; i<nsend; i++) {
-    CheckBounds(firstrow, sind[i], lastrow, globals);
+    hypre_CheckBounds(firstrow, sind[i], lastrow, globals);
     sind[i] = iperm[sind[i]-firstrow];
   }
 
@@ -490,16 +490,16 @@ void SetUpFactor(DataDistType *ddist, FactorMatType *ldu, int maxnz,
    **** L is sorted increasing, U is sorted decreasing. ****/
   if ( DoingL ) {
     for (i=0; i<snbrpes; i++) 
-      sincsort_fast(sptr[i+1]-sptr[i], sind+sptr[i]);
+      hypre_sincsort_fast(sptr[i+1]-sptr[i], sind+sptr[i]);
   }
   else {
     for (i=0; i<snbrpes; i++)
-      sdecsort_fast(sptr[i+1]-sptr[i], sind+sptr[i]);
+      hypre_sdecsort_fast(sptr[i+1]-sptr[i], sind+sptr[i]);
   }
 
   /* Apply the perm[] onto the sind to take it back to the original index space */
   for (i=0; i<nsend; i++) {
-    CheckBounds(0, sind[i], lnrows, globals);
+    hypre_CheckBounds(0, sind[i], lnrows, globals);
     sind[i] = perm[sind[i]]+firstrow;
   }
 
@@ -541,9 +541,9 @@ void SetUpFactor(DataDistType *ddist, FactorMatType *ldu, int maxnz,
     imap[firstrow+perm[i]] = i;
 
   /* rnum is a 2D array of nlevels rows of rnbrpes columns each */
-  TriSolveComm->rnum = idx_malloc(nlevels * rnbrpes, "SetUpFactor: TriSolveComm->rnum");
-        rnum = idx_malloc(nlevels, "SetUpFactor: rnum"      );
-  memcpy_idx(TriSolveComm->auxsptr, sptr, snbrpes+1);
+  TriSolveComm->rnum = hypre_idx_malloc(nlevels * rnbrpes, "hypre_SetUpFactor: TriSolveComm->rnum");
+        rnum = hypre_idx_malloc(nlevels, "hypre_SetUpFactor: rnum"      );
+  hypre_memcpy_idx(TriSolveComm->auxsptr, sptr, snbrpes+1);
 
   /**** send the number of elements we are going to send to each PE.
    **** Note the inner for loop has no body, and L and U differ slightly.
@@ -588,9 +588,9 @@ void SetUpFactor(DataDistType *ddist, FactorMatType *ldu, int maxnz,
   MPI_Type_free( &MyColType_rnbr );
 
   /* Now, go and create the renumbered L (U) that is also in CSR format */
-  newrowptr = idx_malloc(lnrows+1,     "SetUpFactor: rowptr");
-  newcolind = idx_malloc(lnrows*maxnz, "SetUpFactor: colind");
-  newvalues =  fp_malloc(lnrows*maxnz, "SetUpFactor: values");
+  newrowptr = hypre_idx_malloc(lnrows+1,     "hypre_SetUpFactor: rowptr");
+  newcolind = hypre_idx_malloc(lnrows*maxnz, "hypre_SetUpFactor: colind");
+  newvalues =  hypre_fp_malloc(lnrows*maxnz, "hypre_SetUpFactor: values");
 
   newrowptr[0] = 0;
   k = 0;
@@ -608,7 +608,7 @@ void SetUpFactor(DataDistType *ddist, FactorMatType *ldu, int maxnz,
   /**** Store new L (DU) into LDU ****/
   if ( DoingL ) {
     /* Free memory that stored the L so far and relink the data structures */
-    free_multi(ldu->lsrowptr, ldu->lerowptr, ldu->lcolind, ldu->lvalues, -1);
+    hypre_free_multi(ldu->lsrowptr, ldu->lerowptr, ldu->lcolind, ldu->lvalues, -1);
     ldu->lrowptr = newrowptr;
     ldu->lcolind = newcolind;
     ldu->lvalues = newvalues;
@@ -617,10 +617,10 @@ void SetUpFactor(DataDistType *ddist, FactorMatType *ldu, int maxnz,
     /* Use uvalues as a buffer to permute the dvalues */
     for (i=0; i<lnrows; i++)
       values[i] = ldu->dvalues[perm[i]];
-    memcpy_fp(ldu->dvalues, values, lnrows);
+    hypre_memcpy_fp(ldu->dvalues, values, lnrows);
 
     /* Free memory that stored the U so far and relink the data structures */
-    free_multi(ldu->usrowptr, ldu->uerowptr, ldu->ucolind, ldu->uvalues, -1);
+    hypre_free_multi(ldu->usrowptr, ldu->uerowptr, ldu->ucolind, ldu->uvalues, -1);
     ldu->urowptr = newrowptr;
     ldu->ucolind = newcolind;
     ldu->uvalues = newvalues;

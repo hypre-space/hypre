@@ -16,7 +16,6 @@ PETSC_INCLUDES = -I${PETSC_DIR}/include
 HYPRE_INCLUDES = \
  -I../..\
  -I../../utilities\
- -I/home/casc/include\
  -I.\
  -I../../distributed_matrix
 
@@ -59,12 +58,6 @@ CFLAGS = \
  $(OPTIMIZATION)\
  $(INCLUDES)\
  $(DEBUGFLAGS)\
- -I..\
- -I../utilities\
- -I.\
- -I../CI_struct_matrix_vector\
- -I../PETSc_linear_solvers/ParILUT\
- @PETSCINCLUDE@ \
  ${C_COMPILE_FLAGS}\
  ${CINCLUDES}\
  ${CDEFS}

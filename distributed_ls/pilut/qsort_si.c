@@ -26,7 +26,7 @@ static void sdqst(int *, int *);
  * It's not...
  */
 
-void sincsort_fast(int n, int *base)
+void hypre_sincsort_fast(int n, int *base)
 {
   register int *i;
   register int *j;
@@ -191,7 +191,7 @@ swap:
 /*************************************************************************
 * A decreasing sort of int ints 
 **************************************************************************/
-void sdecsort_fast(int n, int *base)
+void hypre_sdecsort_fast(int n, int *base)
 {
   register int *i;
   register int *j;

@@ -1,7 +1,7 @@
 /*
  * serilut.c
  *
- * This file implements ILUT in the local part of the matrix
+ * This file implements hypre_ILUT in the local part of the matrix
  *
  * Started 10/18/95
  * George
@@ -9,8 +9,8 @@
  * 7/8 MRG
  * - added rrowlen and verified
  * 7/22 MRG
- * - removed SelectInterior function form SerILUT code
- * - changed FindMinGreater to ExtractMinLR
+ * - removed hypre_SelectInterior function form hypre_SerILUT code
+ * - changed FindMinGreater to hypre_ExtractMinLR
  * - changed lr to using permutation; this allows reorderings like RCM.
  *
  * 12/4 AJC
@@ -28,9 +28,9 @@
 
 
 /*************************************************************************
-* This function takes a matrix and performs an ILUT of the internal nodes
+* This function takes a matrix and performs an hypre_ILUT of the internal nodes
 **************************************************************************/
-int SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
+int hypre_SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
              FactorMatType *ldu,
 	     ReduceMatType *rmat, int maxnz, double tol, 
              hypre_PilutSolverGlobals *globals)
@@ -62,13 +62,13 @@ int SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
 
   /* Allocate work space */
   if (jr) { free(jr); jr = NULL; }
-  jr = idx_malloc_init(nrows, -1, "SerILUT: jr");
+  jr = hypre_idx_malloc_init(nrows, -1, "hypre_SerILUT: jr");
   if (lr) { free(lr); lr = NULL; }
-  lr = idx_malloc_init(nrows, -1, "SerILUT: lr");
+  lr = hypre_idx_malloc_init(nrows, -1, "hypre_SerILUT: lr");
   if (jw) { free(jw); jw = NULL; }
-  jw = idx_malloc(nrows, "SerILUT: jw");
+  jw = hypre_idx_malloc(nrows, "hypre_SerILUT: jw");
   if (w) { free(w); w = NULL; }
-  w  =  fp_malloc(nrows, "SerILUT: w" );
+  w  =  hypre_fp_malloc(nrows, "hypre_SerILUT: w" );
 
   /* Find structural union of local rows */
 
@@ -97,10 +97,10 @@ int SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
 #ifdef HYPRE_TIMING
   {
    int           SItimer;
-   SItimer = hypre_InitializeTiming( "SelectInterior");
+   SItimer = hypre_InitializeTiming( "hypre_SelectInterior");
    hypre_BeginTiming( SItimer );
 #endif
-  nlocal = SelectInterior( lnrows, matrix, structural_union,
+  nlocal = hypre_SelectInterior( lnrows, matrix, structural_union,
                            perm, iperm, globals );
 #ifdef HYPRE_TIMING
    hypre_EndTiming( SItimer );
@@ -119,10 +119,10 @@ int SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
   ldu->nnodes[0] = nlocal;
 
 #ifdef HYPRE_TIMING
-   globals->SDSeptimer = hypre_InitializeTiming("SecondDrop Separation");
-   globals->SDKeeptimer = hypre_InitializeTiming("SecondDrop extraction of kept elements");
-   globals->SDUSeptimer = hypre_InitializeTiming("SecondDropUpdate Separation");
-   globals->SDUKeeptimer = hypre_InitializeTiming("SecondDropUpdate extraction of kept elements");
+   globals->SDSeptimer = hypre_InitializeTiming("hypre_SecondDrop Separation");
+   globals->SDKeeptimer = hypre_InitializeTiming("hypre_SecondDrop extraction of kept elements");
+   globals->SDUSeptimer = hypre_InitializeTiming("hypre_SecondDropUpdate Separation");
+   globals->SDUKeeptimer = hypre_InitializeTiming("hypre_SecondDropUpdate extraction of kept elements");
 #endif
 
 #ifdef HYPRE_TIMING
@@ -180,7 +180,7 @@ int SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
        * of the permutation, search for the min each time.
        * Note that we depend on the permutation order following natural index
        * order for the interior rows. */
-      kk = perm[ExtractMinLR( globals )];
+      kk = perm[hypre_ExtractMinLR( globals )];
       k  = kk+firstrow;
 
       mult = w[jr[k]]*dvalues[kk];
@@ -209,7 +209,7 @@ int SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
     }
 
     /* Apply 2nd dropping rule -- forms L and U */
-    SecondDrop(maxnz, rtol, i+firstrow, perm, iperm, ldu, globals );
+    hypre_SecondDrop(maxnz, rtol, i+firstrow, perm, iperm, ldu, globals );
   }
 
 #ifdef HYPRE_TIMING
@@ -229,12 +229,12 @@ int SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
   /******************************************************************/
   /* Allocate memory for the reduced matrix */
   rnz =
-    rmat->rmat_rnz     = idx_malloc(nbnd, "SerILUT: rmat->rmat_rnz"    );
-  rmat->rmat_rrowlen   = idx_malloc(nbnd, "SerILUT: rmat->rmat_rrowlen");
+    rmat->rmat_rnz     = hypre_idx_malloc(nbnd, "hypre_SerILUT: rmat->rmat_rnz"    );
+  rmat->rmat_rrowlen   = hypre_idx_malloc(nbnd, "hypre_SerILUT: rmat->rmat_rrowlen");
   rcolind =
-    rmat->rmat_rcolind = (int **)mymalloc(sizeof(int *)*nbnd, "SerILUT: rmat->rmat_rcolind");
+    rmat->rmat_rcolind = (int **)hypre_mymalloc(sizeof(int *)*nbnd, "hypre_SerILUT: rmat->rmat_rcolind");
   rvalues =
-    rmat->rmat_rvalues =  (double **)mymalloc(sizeof(double *)*nbnd, "SerILUT: rmat->rmat_rvalues");
+    rmat->rmat_rvalues =  (double **)hypre_mymalloc(sizeof(double *)*nbnd, "hypre_SerILUT: rmat->rmat_rvalues");
   rmat->rmat_ndone = nlocal;
   rmat->rmat_ntogo = nbnd;
 
@@ -279,7 +279,7 @@ int SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
 
     k = -1;
     while (lastlr != 0) {
-      kk = perm[ExtractMinLR(globals)];
+      kk = perm[hypre_ExtractMinLR(globals)];
       k  = kk+firstrow;
 
       mult = w[jr[k]]*dvalues[kk];
@@ -295,7 +295,7 @@ int SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
           continue;  /* Don't add fill if the element is too small */
 
         if (m == -1) {  /* Create fill */
-	  CheckBounds(firstrow, ucolind[l], lastrow, globals);
+	  hypre_CheckBounds(firstrow, ucolind[l], lastrow, globals);
           if (iperm[ucolind[l]-firstrow] < nlocal) 
             lr[lastlr++] = iperm[ucolind[l]-firstrow]; /* Copy the L elements separately */
 
@@ -309,7 +309,7 @@ int SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
     }
 
     /* Apply 2nd dropping rule -- forms partial L and rmat */
-    SecondDropUpdate(maxnz, MAX(3*maxnz, row_size),
+    hypre_SecondDropUpdate(maxnz, MAX(3*maxnz, row_size),
 		     rtol, i+firstrow,
 		     nlocal, perm, iperm, ldu, rmat, globals);
   }
@@ -320,7 +320,7 @@ int SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
   }
 #endif
 
-  free_multi(jr, jw, lr, w, -1);
+  hypre_free_multi(jr, jw, lr, w, -1);
   jr = NULL;
   jw = NULL;
   lr = NULL;
@@ -336,7 +336,7 @@ int SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
 * It takes a vector that marks rows as being forced to not be in the interior.
 * For full generality this would also mark them in the map, but it doesn't.
 **************************************************************************/
-int SelectInterior( int local_num_rows, 
+int hypre_SelectInterior( int local_num_rows, 
                     HYPRE_DistributedMatrix matrix, 
                     int *external_rows,
 		    int *newperm, int *newiperm, 
@@ -458,7 +458,7 @@ int ExchangeStructuralUnions( DataDistType *ddist,
   hypre_TFree( *structural_union );
   *structural_union = hypre_TAlloc( int, lnrows );
 
-  memcpy_int( *structural_union, &recv_unions[firstrow], lnrows );
+  hypre_memcpy_int( *structural_union, &recv_unions[firstrow], lnrows );
 
   /* deallocate recv_unions */
   hypre_TFree( recv_unions );
@@ -471,11 +471,11 @@ int ExchangeStructuralUnions( DataDistType *ddist,
 * This function applies the second droping rule where maxnz elements 
 * greater than tol are kept. The elements are stored into LDU.
 **************************************************************************/
-void SecondDrop(int maxnz, double tol, int row,
+void hypre_SecondDrop(int maxnz, double tol, int row,
 		int *perm, int *iperm,
 		FactorMatType *ldu, hypre_PilutSolverGlobals *globals)
 {
-  int i, j;
+  int i, j, ierr;
   int max, nz, diag, lrow;
   int first, last, itmp;
   double dtmp;
@@ -555,8 +555,19 @@ void SecondDrop(int maxnz, double tol, int row,
   hypre_BeginTiming(globals-> SDKeeptimer );
 #endif
 
-
   /* Now, I want to keep maxnz elements of L. Go and extract them */
+
+  ierr = hypre_DoubleQuickSplit( w, jw, last, maxnz ); 
+  if (ierr) exit;
+  for ( j= hypre_max(0,last-maxnz); j< last; j++ ) 
+  {
+     ldu->lcolind[ldu->lerowptr[lrow]] = jw[ j ];
+     ldu->lvalues[ldu->lerowptr[lrow]++] = w[ j ];
+  }
+
+
+  /* This was the previous insertion sort that was replaced with
+     the QuickSplit routine above. AJC, 5/00 
   for (nz=0; nz<maxnz && last>0; nz++) {
     for (max=0, j=1; j<last; j++) {
       if (fabs(w[j]) > fabs(w[max]))
@@ -570,9 +581,21 @@ void SecondDrop(int maxnz, double tol, int row,
     jw[max] = jw[--last];
     w[max] = w[last];
   }
+  */
 
 
   /* Now, I want to keep maxnz elements of U. Go and extract them */
+  ierr = hypre_DoubleQuickSplit( w+first, jw+first, lastjr-first, maxnz ); 
+  if (ierr) exit;
+  for ( j=hypre_max(first, lastjr-maxnz); j< lastjr; j++ ) 
+  {
+     ldu->ucolind[ldu->uerowptr[lrow]] = jw[ j ];
+     ldu->uvalues[ldu->uerowptr[lrow]++] = w[ j ];
+  }
+
+  /*
+     This was the previous insertion sort that was replaced with
+     the QuickSplit routine above. AJC, 5/00 
   for (nz=0; nz<maxnz && lastjr>first; nz++) {
     for (max=first, j=first+1; j<lastjr; j++) {
       if (fabs(w[j]) > fabs(w[max]))
@@ -586,6 +609,9 @@ void SecondDrop(int maxnz, double tol, int row,
     jw[max] = jw[--lastjr];
     w[max] = w[lastjr];
   }
+  */
+
+
 #ifdef HYPRE_TIMING
   hypre_EndTiming( globals->SDKeeptimer );
 #endif
@@ -599,7 +625,7 @@ void SecondDrop(int maxnz, double tol, int row,
 * greater than tol are kept. The elements are stored into L and the Rmat.
 * This version keeps only maxnzkeep 
 **************************************************************************/
-void SecondDropUpdate(int maxnz, int maxnzkeep, double tol, int row,
+void hypre_SecondDropUpdate(int maxnz, int maxnzkeep, double tol, int row,
 		      int nlocal, int *perm, int *iperm, 
 		      FactorMatType *ldu, ReduceMatType *rmat,
                       hypre_PilutSolverGlobals *globals )
@@ -701,8 +727,8 @@ void SecondDropUpdate(int maxnz, int maxnzkeep, double tol, int row,
   /* Allocate appropriate amount of memory for the reduced row */
   nl = MIN(lastjr-first+1, maxnzkeep);
   rmat->rmat_rnz[rrow] = nl;
-  rmat->rmat_rcolind[rrow] = idx_malloc(nl, "SecondDropUpdate: rmat->rmat_rcolind[rrow]");
-  rmat->rmat_rvalues[rrow] =  fp_malloc(nl, "SecondDropUpdate: rmat->rmat_rvalues[rrow]");
+  rmat->rmat_rcolind[rrow] = hypre_idx_malloc(nl, "hypre_SecondDropUpdate: rmat->rmat_rcolind[rrow]");
+  rmat->rmat_rvalues[rrow] =  hypre_fp_malloc(nl, "hypre_SecondDropUpdate: rmat->rmat_rvalues[rrow]");
 
   rmat->rmat_rrowlen[rrow]    = nl;
   rmat->rmat_rcolind[rrow][0] = row;  /* Put the diagonal at the begining */
