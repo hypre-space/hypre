@@ -38,7 +38,7 @@ CFLAGS =\
  -I/usr/local/include\
  -I/home/casc/include\
  -I/usr/local/mpi/mpich/include\
- -g -Wall -DHYPRE_DEBUG 
+ -g -Wall -DHYPRE_MEMORY_DMALLOC\
 #-g -Wall  
 
 FFLAGS = -g
@@ -56,7 +56,7 @@ LFLAGS =\
  -lHYPRE_memory\
  -lf2c\
  -lcegdb\
- -lmalloc\
+ -ldmalloc\
  -lm
 
 
