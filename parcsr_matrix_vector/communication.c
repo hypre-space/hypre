@@ -393,57 +393,6 @@ hypre_GenerateMatvecCommunicationInfo ( hypre_ParCSRMatrix *A)
    return ierr;
 }
 
-hypre_VectorCommPkg *
-hypre_InitializeVectorCommPkg(MPI_Comm comm, int vec_len, int *vec_starts)
-{
-   hypre_VectorCommPkg  *vector_comm_pkg;
-   MPI_Datatype		*vector_mpi_types;
-
-   int          i;
-   int          num_procs;
-   int          len;
- 
-   vector_comm_pkg = hypre_CTAlloc(hypre_VectorCommPkg,1);
-   MPI_Comm_size( comm, &num_procs);
-   if (!vec_starts)
-   {
-   	vec_starts = hypre_CTAlloc(int, num_procs+1); 
-   	for (i=0; i < num_procs; i++)
-   	{
-        	MPE_Decomp1d(vec_len, num_procs, i, &vec_starts[i], &len);
-        	vec_starts[i]--;
-   	}
-   }
-   vec_starts[num_procs] = vec_len;
-   vector_mpi_types = hypre_CTAlloc(MPI_Datatype, num_procs); 
-
-   for (i=0; i < num_procs; i++)
-   {
-        len = vec_starts[i+1]-vec_starts[i];
-        MPI_Type_contiguous(len,MPI_DOUBLE, &vector_mpi_types[i]);
-        MPI_Type_commit(&vector_mpi_types[i]);
-   }
-   vec_starts[num_procs] = vec_len;
-
-   hypre_VectorCommPkgComm(vector_comm_pkg) = comm;
-   hypre_VectorCommPkgVecStarts(vector_comm_pkg) = vec_starts;
-   hypre_VectorCommPkgVectorMPITypes(vector_comm_pkg) = vector_mpi_types;
- 
-   return vector_comm_pkg;
-}
-
-int
-hypre_DestroyVectorCommPkg( hypre_VectorCommPkg *vector_comm_pkg)
-{
-   int  ierr=0;
-
-   hypre_TFree (hypre_VectorCommPkgVecStarts(vector_comm_pkg));
-   hypre_TFree (hypre_VectorCommPkgVectorMPITypes(vector_comm_pkg));
-   hypre_TFree (vector_comm_pkg);
-
-   return ierr;
-}
-
 int
 hypre_DestroyMatvecCommPkg(hypre_CommPkg *comm_pkg)
 {
