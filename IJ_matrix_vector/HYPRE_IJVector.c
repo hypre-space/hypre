@@ -174,7 +174,7 @@ to choose which concrete class to use is by *instantiating* the class of choice 
 implementation) or by *linking* in the implementation of choice (a "compile time" choice). An
 intermediate method is through the use of HYPRE_SetIJVectorStorageType that *may* be provided
 by specific implementations. For example, it is possible to build either a PETSc MPIAIJ vector
-or a ParCSR vector from the IJ vector interface, and this choice can be controlled through this
+or a ParVector from the IJ vector interface, and this choice can be controlled through this
 function.
 
 Not collective, but must be same on all processors in group that stores vector.
@@ -316,7 +316,7 @@ HYPRE_InsertIJVectorRows( HYPRE_IJVector IJvector, int n,
    else if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_ISIS_VECTOR )
       ierr = hypre_InsertIJVectorRowsISIS( vector, n, rows, values );
    else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PAR_VECTOR )
-      ierr = hypre_InsertIJVectorRowsParCSR( vector, n, rows, values );
+      ierr = hypre_InsertIJVectorRowsPar( vector, n, rows, values );
    else
       ierr = -1;
 
