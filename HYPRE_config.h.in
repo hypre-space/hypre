@@ -34,6 +34,10 @@
 #undef HYPRE_SOLARIS
 #endif
 
+#ifndef HYPRE_LINUX
+#undef HYPRE_LINUX
+#endif
+
 #ifndef HYPRE_ALPHA
 #undef HYPRE_ALPHA
 #endif
