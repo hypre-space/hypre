@@ -110,7 +110,9 @@ all: libHYPRE_FEI.a
 lib: all
 
 install: all
-	@cp -f HYPRE_LinSysCore.h cfei.h fei-hypre.h $$HYPRE_INSTALL_DIR/include
+	@cp -f HYPRE_LinSysCore.h $$HYPRE_INSTALL_DIR/include
+	@cp -f cfei_hypre.h $$HYPRE_INSTALL_DIR/include
+	@cp -f cfei-hypre.h $$HYPRE_INSTALL_DIR/include
 	@cp -f libHYPRE_FEI.a $$HYPRE_INSTALL_DIR/lib
 
 driver: driver.o libHYPRE_FEI.a
