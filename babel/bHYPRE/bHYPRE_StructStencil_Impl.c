@@ -3,8 +3,8 @@
  * Symbol:        bHYPRE.StructStencil-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * sidl Created:  20050208 15:29:05 PST
- * Generated:     20050208 15:29:08 PST
+ * sidl Created:  20050225 15:45:37 PST
+ * Generated:     20050225 15:45:40 PST
  * Description:   Server-side implementation for bHYPRE.StructStencil
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -33,6 +33,9 @@
 
 /* DO-NOT-DELETE splicer.begin(bHYPRE.StructStencil._includes) */
 /* Put additional includes or other arbitrary code here... */
+#include <assert.h>
+#include "mpi.h"
+#include "struct_mv.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.StructStencil._includes) */
 
 /*
@@ -48,6 +51,14 @@ impl_bHYPRE_StructStencil__ctor(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructStencil._ctor) */
   /* Insert the implementation of the constructor method here... */
+
+   struct bHYPRE_StructStencil__data * data;
+   data = hypre_CTAlloc( struct bHYPRE_StructStencil__data, 1 );
+   data -> stencil = NULL;
+   data -> dim = 0;
+   data -> size = 0;
+   bHYPRE_StructStencil__set_data( self, data );
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.StructStencil._ctor) */
 }
 
@@ -64,6 +75,16 @@ impl_bHYPRE_StructStencil__dtor(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructStencil._dtor) */
   /* Insert the implementation of the destructor method here... */
+
+   int ierr = 0;
+   struct bHYPRE_StructStencil__data * data;
+   HYPRE_StructStencil stencil;
+   data = bHYPRE_StructStencil__get_data( self );
+   stencil = data -> stencil;
+   ierr += HYPRE_StructStencilDestroy( stencil );
+   assert( ierr==0 );
+   hypre_TFree( data );
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.StructStencil._dtor) */
 }
 
@@ -80,7 +101,27 @@ impl_bHYPRE_StructStencil_SetDimension(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructStencil.SetDimension) */
   /* Insert the implementation of the SetDimension method here... */
-   return 1;
+
+   int ierr = 0;
+   struct bHYPRE_StructStencil__data * data;
+   HYPRE_StructStencil stencil;
+   int size;
+
+   data = bHYPRE_StructStencil__get_data( self );
+   stencil = data -> stencil;
+   assert( stencil == NULL );  /* can't reset dimension */
+   assert( dim > 0 );
+   data -> dim = dim;
+   size = data -> size;
+
+   if ( size>0 )
+   {
+      ierr += HYPRE_StructStencilCreate( dim, size, &stencil );
+      data -> stencil = stencil;
+   }
+
+   return ierr;
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.StructStencil.SetDimension) */
 }
 
@@ -97,7 +138,27 @@ impl_bHYPRE_StructStencil_SetSize(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructStencil.SetSize) */
   /* Insert the implementation of the SetSize method here... */
-   return 1;
+ 
+   int ierr = 0;
+   struct bHYPRE_StructStencil__data * data;
+   HYPRE_StructStencil stencil;
+   int dim;
+
+   data = bHYPRE_StructStencil__get_data( self );
+   stencil = data -> stencil;
+   assert( stencil == NULL );  /* can't reset size */
+   assert( size>0 );
+   data -> size = size;
+   dim = data -> dim;
+
+   if ( dim>0 )
+   {
+      ierr += HYPRE_StructStencilCreate( dim, size, &stencil );
+      data -> stencil = stencil;
+   }
+
+   return ierr;
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.StructStencil.SetSize) */
 }
 
@@ -115,6 +176,19 @@ impl_bHYPRE_StructStencil_SetElement(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructStencil.SetElement) */
   /* Insert the implementation of the SetElement method here... */
-   return 1;
+
+   int ierr = 0;
+   struct bHYPRE_StructStencil__data * data;
+   HYPRE_StructStencil stencil;
+
+   data = bHYPRE_StructStencil__get_data( self );
+   stencil = data -> stencil;
+   assert( stencil != NULL );
+
+   ierr += HYPRE_StructStencilSetElement( stencil, index,
+                                          sidlArrayAddr1( offset, 0 ) );
+
+   return ierr;
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.StructStencil.SetElement) */
 }

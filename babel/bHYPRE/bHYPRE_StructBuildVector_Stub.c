@@ -3,8 +3,8 @@
  * Symbol:        bHYPRE.StructBuildVector-v1.0.0
  * Symbol Type:   interface
  * Babel Version: 0.9.8
- * sidl Created:  20050208 15:29:04 PST
- * Generated:     20050208 15:29:06 PST
+ * sidl Created:  20050225 15:45:36 PST
+ * Generated:     20050225 15:45:39 PST
  * Description:   Client-side glue code for bHYPRE.StructBuildVector
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -215,17 +215,17 @@ bHYPRE_StructBuildVector_SetGrid(
 }
 
 /*
- * Method:  SetStencil[]
+ * Method:  SetNumGhost[]
  */
 
 int32_t
-bHYPRE_StructBuildVector_SetStencil(
+bHYPRE_StructBuildVector_SetNumGhost(
   bHYPRE_StructBuildVector self,
-  /*in*/ bHYPRE_StructStencil stencil)
+  /*in*/ struct sidl_int__array* num_ghost)
 {
-  return (*self->d_epv->f_SetStencil)(
+  return (*self->d_epv->f_SetNumGhost)(
     self->d_object,
-    stencil);
+    num_ghost);
 }
 
 /*

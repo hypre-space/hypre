@@ -3,8 +3,8 @@
  * Symbol:        bHYPRE.StructMatrix-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * sidl Created:  20050208 15:29:05 PST
- * Generated:     20050208 15:29:07 PST
+ * sidl Created:  20050225 15:45:37 PST
+ * Generated:     20050225 15:45:40 PST
  * Description:   Server-side implementation for bHYPRE.StructMatrix
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -38,6 +38,7 @@
 
 /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix._includes) */
 /* Put additional include files here... */
+#include "HYPRE_struct_mv.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix._includes) */
 
 /*
@@ -47,7 +48,10 @@
 struct bHYPRE_StructMatrix__data {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix._data) */
   /* Put private data members here... */
-  int ignore; /* dummy to force non-empty struct; remove if you add data */
+   HYPRE_StructMatrix matrix;
+   MPI_Comm comm;
+   HYPRE_StructGrid grid;
+   HYPRE_StructStencil stencil;
   /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix._data) */
 };
 

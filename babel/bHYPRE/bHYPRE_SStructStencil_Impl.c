@@ -3,8 +3,8 @@
  * Symbol:        bHYPRE.SStructStencil-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * sidl Created:  20050208 15:29:05 PST
- * Generated:     20050208 15:29:08 PST
+ * sidl Created:  20050225 15:45:37 PST
+ * Generated:     20050225 15:45:40 PST
  * Description:   Server-side implementation for bHYPRE.SStructStencil
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -78,6 +78,7 @@ impl_bHYPRE_SStructStencil_SetNumDimSize(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructStencil.SetNumDimSize) */
   /* Insert the implementation of the SetNumDimSize method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructStencil.SetNumDimSize) */
 }
 
@@ -96,5 +97,6 @@ impl_bHYPRE_SStructStencil_SetEntry(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructStencil.SetEntry) */
   /* Insert the implementation of the SetEntry method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructStencil.SetEntry) */
 }

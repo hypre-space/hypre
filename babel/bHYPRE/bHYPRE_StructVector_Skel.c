@@ -3,8 +3,8 @@
  * Symbol:        bHYPRE.StructVector-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * sidl Created:  20050208 15:29:05 PST
- * Generated:     20050208 15:29:08 PST
+ * sidl Created:  20050225 15:45:37 PST
+ * Generated:     20050225 15:45:40 PST
  * Description:   Server-side glue code for bHYPRE.StructVector
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -81,9 +81,9 @@ impl_bHYPRE_StructVector_SetGrid(
   bHYPRE_StructGrid);
 
 extern int32_t
-impl_bHYPRE_StructVector_SetStencil(
+impl_bHYPRE_StructVector_SetNumGhost(
   bHYPRE_StructVector,
-  bHYPRE_StructStencil);
+  struct sidl_int__array*);
 
 extern int32_t
 impl_bHYPRE_StructVector_SetValue(
@@ -97,6 +97,22 @@ impl_bHYPRE_StructVector_SetBoxValues(
   struct sidl_int__array*,
   struct sidl_int__array*,
   struct sidl_double__array*);
+
+static int32_t
+skel_bHYPRE_StructVector_SetNumGhost(
+  /*in*/ bHYPRE_StructVector self,
+  /*in*/ struct sidl_int__array* num_ghost)
+{
+  int32_t _return;
+  struct sidl_int__array* num_ghost_proxy = sidl_int__array_ensure(num_ghost, 1,
+    sidl_column_major_order);
+  _return =
+    impl_bHYPRE_StructVector_SetNumGhost(
+      self,
+      num_ghost_proxy);
+  sidl_int__array_deleteRef(num_ghost_proxy);
+  return _return;
+}
 
 static int32_t
 skel_bHYPRE_StructVector_SetValue(
@@ -162,7 +178,7 @@ bHYPRE_StructVector__set_epv(struct bHYPRE_StructVector__epv *epv)
   epv->f_Assemble = impl_bHYPRE_StructVector_Assemble;
   epv->f_GetObject = impl_bHYPRE_StructVector_GetObject;
   epv->f_SetGrid = impl_bHYPRE_StructVector_SetGrid;
-  epv->f_SetStencil = impl_bHYPRE_StructVector_SetStencil;
+  epv->f_SetNumGhost = skel_bHYPRE_StructVector_SetNumGhost;
   epv->f_SetValue = skel_bHYPRE_StructVector_SetValue;
   epv->f_SetBoxValues = skel_bHYPRE_StructVector_SetBoxValues;
 }

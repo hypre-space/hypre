@@ -3,8 +3,8 @@
  * Symbol:        bHYPRE.Vector-v1.0.0
  * Symbol Type:   interface
  * Babel Version: 0.9.8
- * sidl Created:  20050208 15:29:04 PST
- * Generated:     20050208 15:29:06 PST
+ * sidl Created:  20050225 15:45:37 PST
+ * Generated:     20050225 15:45:38 PST
  * Description:   Client-side glue code for bHYPRE.Vector
  * 
  * WARNING: Automatically generated; changes will be lost

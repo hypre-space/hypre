@@ -3,8 +3,8 @@
  * Symbol:        bHYPRE.StructMatrix-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * sidl Created:  20050208 15:29:05 PST
- * Generated:     20050208 15:29:05 PST
+ * sidl Created:  20050225 15:45:37 PST
+ * Generated:     20050225 15:45:37 PST
  * Description:   Intermediate Object Representation for bHYPRE.StructMatrix
  * 
  * WARNING: Automatically generated; changes will be lost

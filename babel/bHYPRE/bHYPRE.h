@@ -3,8 +3,8 @@
  * Symbol:        bHYPRE-v1.0.0
  * Symbol Type:   package
  * Babel Version: 0.9.8
- * sidl Created:  20050208 15:29:04 PST
- * Generated:     20050208 15:29:07 PST
+ * sidl Created:  20050225 15:45:35 PST
+ * Generated:     20050225 15:45:39 PST
  * Description:   Client-side glue code for bHYPRE
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -100,6 +100,9 @@
 #endif
 #ifndef included_bHYPRE_StructMatrix_h
 #include "bHYPRE_StructMatrix.h"
+#endif
+#ifndef included_bHYPRE_StructSMG_h
+#include "bHYPRE_StructSMG.h"
 #endif
 #ifndef included_bHYPRE_StructStencil_h
 #include "bHYPRE_StructStencil.h"

@@ -3,8 +3,8 @@
  * Symbol:        bHYPRE.StructVector-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * sidl Created:  20050208 15:29:05 PST
- * Generated:     20050208 15:29:08 PST
+ * sidl Created:  20050225 15:45:37 PST
+ * Generated:     20050225 15:45:40 PST
  * Description:   Server-side implementation for bHYPRE.StructVector
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -32,12 +32,13 @@
 #ifndef included_bHYPRE_StructVector_h
 #include "bHYPRE_StructVector.h"
 #endif
-#ifndef included_bHYPRE_StructStencil_h
-#include "bHYPRE_StructStencil.h"
-#endif
 
 /* DO-NOT-DELETE splicer.begin(bHYPRE.StructVector._includes) */
 /* Put additional include files here... */
+#include "HYPRE_struct_mv.h"
+#include "HYPRE.h"
+#include "utilities.h"
+#include "bHYPRE_StructBuildVector.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.StructVector._includes) */
 
 /*
@@ -47,7 +48,8 @@
 struct bHYPRE_StructVector__data {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructVector._data) */
   /* Put private data members here... */
-  int ignore; /* dummy to force non-empty struct; remove if you add data */
+   HYPRE_StructVector vec;
+   MPI_Comm comm;
   /* DO-NOT-DELETE splicer.end(bHYPRE.StructVector._data) */
 };
 
@@ -135,9 +137,9 @@ impl_bHYPRE_StructVector_SetGrid(
   bHYPRE_StructGrid);
 
 extern int32_t
-impl_bHYPRE_StructVector_SetStencil(
+impl_bHYPRE_StructVector_SetNumGhost(
   bHYPRE_StructVector,
-  bHYPRE_StructStencil);
+  struct sidl_int__array*);
 
 extern int32_t
 impl_bHYPRE_StructVector_SetValue(

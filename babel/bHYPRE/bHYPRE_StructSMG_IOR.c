@@ -1,23 +1,23 @@
 /*
- * File:          bHYPRE_Pilut_IOR.c
- * Symbol:        bHYPRE.Pilut-v1.0.0
+ * File:          bHYPRE_StructSMG_IOR.c
+ * Symbol:        bHYPRE.StructSMG-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
  * sidl Created:  20050225 15:45:37 PST
  * Generated:     20050225 15:45:38 PST
- * Description:   Intermediate Object Representation for bHYPRE.Pilut
+ * Description:   Intermediate Object Representation for bHYPRE.StructSMG
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.9.8
- * source-line   = 1227
+ * source-line   = 1251
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #include <stdlib.h>
 #include <stddef.h>
 #include <string.h>
-#include "bHYPRE_Pilut_IOR.h"
+#include "bHYPRE_StructSMG_IOR.h"
 #ifndef included_sidl_BaseClass_Impl_h
 #include "sidl_BaseClass_Impl.h"
 #endif
@@ -55,8 +55,8 @@ static int s_classInfo_init = 1;
 static int s_method_initialized = 0;
 static int s_remote_initialized = 0;
 
-static struct bHYPRE_Pilut__epv s_new__bhypre_pilut;
-static struct bHYPRE_Pilut__epv s_rem__bhypre_pilut;
+static struct bHYPRE_StructSMG__epv s_new__bhypre_structsmg;
+static struct bHYPRE_StructSMG__epv s_rem__bhypre_structsmg;
 
 static struct bHYPRE_Operator__epv s_new__bhypre_operator;
 static struct bHYPRE_Operator__epv s_rem__bhypre_operator;
@@ -80,8 +80,8 @@ static struct sidl_BaseInterface__epv  s_rem__sidl_baseinterface;
 extern "C" {
 #endif
 
-extern void bHYPRE_Pilut__set_epv(
-  struct bHYPRE_Pilut__epv* epv);
+extern void bHYPRE_StructSMG__set_epv(
+  struct bHYPRE_StructSMG__epv* epv);
 #ifdef __cplusplus
 }
 #endif
@@ -90,16 +90,16 @@ extern void bHYPRE_Pilut__set_epv(
  * CAST: dynamic type casting support.
  */
 
-static void* ior_bHYPRE_Pilut__cast(
-  struct bHYPRE_Pilut__object* self,
+static void* ior_bHYPRE_StructSMG__cast(
+  struct bHYPRE_StructSMG__object* self,
   const char* name)
 {
   void* cast = NULL;
 
-  struct bHYPRE_Pilut__object*   s0 = self;
-  struct sidl_BaseClass__object* s1 = &s0->d_sidl_baseclass;
+  struct bHYPRE_StructSMG__object* s0 = self;
+  struct sidl_BaseClass__object*   s1 = &s0->d_sidl_baseclass;
 
-  if (!strcmp(name, "bHYPRE.Pilut")) {
+  if (!strcmp(name, "bHYPRE.StructSMG")) {
     cast = (void*) s0;
   } else if (!strcmp(name, "bHYPRE.Operator")) {
     cast = (void*) &s0->d_bhypre_operator;
@@ -118,11 +118,11 @@ static void* ior_bHYPRE_Pilut__cast(
  * DELETE: call destructor and free object memory.
  */
 
-static void ior_bHYPRE_Pilut__delete(
-  struct bHYPRE_Pilut__object* self)
+static void ior_bHYPRE_StructSMG__delete(
+  struct bHYPRE_StructSMG__object* self)
 {
-  bHYPRE_Pilut__fini(self);
-  memset((void*)self, 0, sizeof(struct bHYPRE_Pilut__object));
+  bHYPRE_StructSMG__fini(self);
+  memset((void*)self, 0, sizeof(struct bHYPRE_StructSMG__object));
   free((void*) self);
 }
 
@@ -130,13 +130,13 @@ static void ior_bHYPRE_Pilut__delete(
  * EPV: create method entry point vector (EPV) structure.
  */
 
-static void bHYPRE_Pilut__init_epv(
-  struct bHYPRE_Pilut__object* self)
+static void bHYPRE_StructSMG__init_epv(
+  struct bHYPRE_StructSMG__object* self)
 {
-  struct bHYPRE_Pilut__object*   s0 = self;
-  struct sidl_BaseClass__object* s1 = &s0->d_sidl_baseclass;
+  struct bHYPRE_StructSMG__object* s0 = self;
+  struct sidl_BaseClass__object*   s1 = &s0->d_sidl_baseclass;
 
-  struct bHYPRE_Pilut__epv*       epv = &s_new__bhypre_pilut;
+  struct bHYPRE_StructSMG__epv*   epv = &s_new__bhypre_structsmg;
   struct bHYPRE_Operator__epv*    e0  = &s_new__bhypre_operator;
   struct bHYPRE_Solver__epv*      e1  = &s_new__bhypre_solver;
   struct sidl_BaseClass__epv*     e2  = &s_new__sidl_baseclass;
@@ -145,22 +145,23 @@ static void bHYPRE_Pilut__init_epv(
   s_old__sidl_baseinterface = s1->d_sidl_baseinterface.d_epv;
   s_old__sidl_baseclass     = s1->d_epv;
 
-  epv->f__cast                    = ior_bHYPRE_Pilut__cast;
-  epv->f__delete                  = ior_bHYPRE_Pilut__delete;
+  epv->f__cast                    = ior_bHYPRE_StructSMG__cast;
+  epv->f__delete                  = ior_bHYPRE_StructSMG__delete;
   epv->f__ctor                    = NULL;
   epv->f__dtor                    = NULL;
-  epv->f_addRef                   = (void (*)(struct bHYPRE_Pilut__object*)) 
-    s1->d_epv->f_addRef;
-  epv->f_deleteRef                = (void (*)(struct bHYPRE_Pilut__object*)) 
-    s1->d_epv->f_deleteRef;
-  epv->f_isSame                   = (sidl_bool (*)(struct bHYPRE_Pilut__object*,
+  epv->f_addRef                   = (void (*)(struct 
+    bHYPRE_StructSMG__object*)) s1->d_epv->f_addRef;
+  epv->f_deleteRef                = (void (*)(struct 
+    bHYPRE_StructSMG__object*)) s1->d_epv->f_deleteRef;
+  epv->f_isSame                   = (sidl_bool (*)(struct 
+    bHYPRE_StructSMG__object*,
     struct sidl_BaseInterface__object*)) s1->d_epv->f_isSame;
   epv->f_queryInt                 = (struct sidl_BaseInterface__object* 
-    (*)(struct bHYPRE_Pilut__object*,const char*)) s1->d_epv->f_queryInt;
-  epv->f_isType                   = (sidl_bool (*)(struct bHYPRE_Pilut__object*,
-    const char*)) s1->d_epv->f_isType;
+    (*)(struct bHYPRE_StructSMG__object*,const char*)) s1->d_epv->f_queryInt;
+  epv->f_isType                   = (sidl_bool (*)(struct 
+    bHYPRE_StructSMG__object*,const char*)) s1->d_epv->f_isType;
   epv->f_getClassInfo             = (struct sidl_ClassInfo__object* (*)(struct 
-    bHYPRE_Pilut__object*)) s1->d_epv->f_getClassInfo;
+    bHYPRE_StructSMG__object*)) s1->d_epv->f_getClassInfo;
   epv->f_SetCommunicator          = NULL;
   epv->f_SetIntParameter          = NULL;
   epv->f_SetDoubleParameter       = NULL;
@@ -181,7 +182,7 @@ static void bHYPRE_Pilut__init_epv(
   epv->f_GetNumIterations         = NULL;
   epv->f_GetRelResidualNorm       = NULL;
 
-  bHYPRE_Pilut__set_epv(epv);
+  bHYPRE_StructSMG__set_epv(epv);
 
   e0->f__cast                    = (void* (*)(void*,const char*)) epv->f__cast;
   e0->f__delete                  = (void (*)(void*)) epv->f__delete;
@@ -306,7 +307,7 @@ static void bHYPRE_Pilut__init_epv(
  * SUPER: return's parent's non-overrided EPV
  */
 
-static struct sidl_BaseClass__epv* bHYPRE_Pilut__super(void) {
+static struct sidl_BaseClass__epv* bHYPRE_StructSMG__super(void) {
   return s_old__sidl_baseclass;
 }
 
@@ -323,7 +324,7 @@ initClassInfo(sidl_ClassInfo *info)
     impl = sidl_ClassInfoI__create();
     s_classInfo = sidl_ClassInfo__cast(impl);
     if (impl) {
-      sidl_ClassInfoI_setName(impl, "bHYPRE.Pilut");
+      sidl_ClassInfoI_setName(impl, "bHYPRE.StructSMG");
       sidl_ClassInfoI_setIORVersion(impl, s_IOR_MAJOR_VERSION,
         s_IOR_MINOR_VERSION);
     }
@@ -342,7 +343,7 @@ initClassInfo(sidl_ClassInfo *info)
  */
 
 static void
-initMetadata(struct bHYPRE_Pilut__object* self)
+initMetadata(struct bHYPRE_StructSMG__object* self)
 {
   if (self) {
     struct sidl_BaseClass__data *data = 
@@ -359,13 +360,13 @@ initMetadata(struct bHYPRE_Pilut__object* self)
  * NEW: allocate object and initialize it.
  */
 
-struct bHYPRE_Pilut__object*
-bHYPRE_Pilut__new(void)
+struct bHYPRE_StructSMG__object*
+bHYPRE_StructSMG__new(void)
 {
-  struct bHYPRE_Pilut__object* self =
-    (struct bHYPRE_Pilut__object*) malloc(
-      sizeof(struct bHYPRE_Pilut__object));
-  bHYPRE_Pilut__init(self);
+  struct bHYPRE_StructSMG__object* self =
+    (struct bHYPRE_StructSMG__object*) malloc(
+      sizeof(struct bHYPRE_StructSMG__object));
+  bHYPRE_StructSMG__init(self);
   initMetadata(self);
   return self;
 }
@@ -374,16 +375,16 @@ bHYPRE_Pilut__new(void)
  * INIT: initialize a new instance of the class object.
  */
 
-void bHYPRE_Pilut__init(
-  struct bHYPRE_Pilut__object* self)
+void bHYPRE_StructSMG__init(
+  struct bHYPRE_StructSMG__object* self)
 {
-  struct bHYPRE_Pilut__object*   s0 = self;
-  struct sidl_BaseClass__object* s1 = &s0->d_sidl_baseclass;
+  struct bHYPRE_StructSMG__object* s0 = self;
+  struct sidl_BaseClass__object*   s1 = &s0->d_sidl_baseclass;
 
   sidl_BaseClass__init(s1);
 
   if (!s_method_initialized) {
-    bHYPRE_Pilut__init_epv(s0);
+    bHYPRE_StructSMG__init_epv(s0);
   }
 
   s1->d_sidl_baseinterface.d_epv = &s_new__sidl_baseinterface;
@@ -391,7 +392,7 @@ void bHYPRE_Pilut__init(
 
   s0->d_bhypre_operator.d_epv = &s_new__bhypre_operator;
   s0->d_bhypre_solver.d_epv   = &s_new__bhypre_solver;
-  s0->d_epv                   = &s_new__bhypre_pilut;
+  s0->d_epv                   = &s_new__bhypre_structsmg;
 
   s0->d_bhypre_operator.d_object = self;
 
@@ -406,11 +407,11 @@ void bHYPRE_Pilut__init(
  * FINI: deallocate a class instance (destructor).
  */
 
-void bHYPRE_Pilut__fini(
-  struct bHYPRE_Pilut__object* self)
+void bHYPRE_StructSMG__fini(
+  struct bHYPRE_StructSMG__object* self)
 {
-  struct bHYPRE_Pilut__object*   s0 = self;
-  struct sidl_BaseClass__object* s1 = &s0->d_sidl_baseclass;
+  struct bHYPRE_StructSMG__object* s0 = self;
+  struct sidl_BaseClass__object*   s1 = &s0->d_sidl_baseclass;
 
   (*(s0->d_epv->f__dtor))(s0);
 
@@ -425,16 +426,16 @@ void bHYPRE_Pilut__fini(
  */
 
 void
-bHYPRE_Pilut__IOR_version(int32_t *major, int32_t *minor)
+bHYPRE_StructSMG__IOR_version(int32_t *major, int32_t *minor)
 {
   *major = s_IOR_MAJOR_VERSION;
   *minor = s_IOR_MINOR_VERSION;
 }
-static const struct bHYPRE_Pilut__external
+static const struct bHYPRE_StructSMG__external
 s_externalEntryPoints = {
-  bHYPRE_Pilut__new,
-  bHYPRE_Pilut__remote,
-  bHYPRE_Pilut__super
+  bHYPRE_StructSMG__new,
+  bHYPRE_StructSMG__remote,
+  bHYPRE_StructSMG__super
 };
 
 /*
@@ -443,8 +444,8 @@ s_externalEntryPoints = {
  * one-stop shopping for loading DLLs.
  */
 
-const struct bHYPRE_Pilut__external*
-bHYPRE_Pilut__externals(void)
+const struct bHYPRE_StructSMG__external*
+bHYPRE_StructSMG__externals(void)
 {
   return &s_externalEntryPoints;
 }
@@ -453,8 +454,8 @@ bHYPRE_Pilut__externals(void)
  * REMOTE CAST: dynamic type casting for remote objects.
  */
 
-static void* remote_bHYPRE_Pilut__cast(
-  struct bHYPRE_Pilut__object* self,
+static void* remote_bHYPRE_StructSMG__cast(
+  struct bHYPRE_StructSMG__object* self,
   const char* name)
 {
   return NULL;
@@ -464,8 +465,8 @@ static void* remote_bHYPRE_Pilut__cast(
  * REMOTE DELETE: call the remote destructor for the object.
  */
 
-static void remote_bHYPRE_Pilut__delete(
-  struct bHYPRE_Pilut__object* self)
+static void remote_bHYPRE_StructSMG__delete(
+  struct bHYPRE_StructSMG__object* self)
 {
   free((void*) self);
 }
@@ -475,8 +476,8 @@ static void remote_bHYPRE_Pilut__delete(
  */
 
 static void
-remote_bHYPRE_Pilut_addRef(
-  struct bHYPRE_Pilut__object* self)
+remote_bHYPRE_StructSMG_addRef(
+  struct bHYPRE_StructSMG__object* self)
 {
 }
 
@@ -485,8 +486,8 @@ remote_bHYPRE_Pilut_addRef(
  */
 
 static void
-remote_bHYPRE_Pilut_deleteRef(
-  struct bHYPRE_Pilut__object* self)
+remote_bHYPRE_StructSMG_deleteRef(
+  struct bHYPRE_StructSMG__object* self)
 {
 }
 
@@ -495,8 +496,8 @@ remote_bHYPRE_Pilut_deleteRef(
  */
 
 static sidl_bool
-remote_bHYPRE_Pilut_isSame(
-  struct bHYPRE_Pilut__object* self,
+remote_bHYPRE_StructSMG_isSame(
+  struct bHYPRE_StructSMG__object* self,
   struct sidl_BaseInterface__object* iobj)
 {
   return 0;
@@ -507,8 +508,8 @@ remote_bHYPRE_Pilut_isSame(
  */
 
 static struct sidl_BaseInterface__object*
-remote_bHYPRE_Pilut_queryInt(
-  struct bHYPRE_Pilut__object* self,
+remote_bHYPRE_StructSMG_queryInt(
+  struct bHYPRE_StructSMG__object* self,
   const char* name)
 {
   return (struct sidl_BaseInterface__object*) 0;
@@ -519,8 +520,8 @@ remote_bHYPRE_Pilut_queryInt(
  */
 
 static sidl_bool
-remote_bHYPRE_Pilut_isType(
-  struct bHYPRE_Pilut__object* self,
+remote_bHYPRE_StructSMG_isType(
+  struct bHYPRE_StructSMG__object* self,
   const char* name)
 {
   return 0;
@@ -531,8 +532,8 @@ remote_bHYPRE_Pilut_isType(
  */
 
 static struct sidl_ClassInfo__object*
-remote_bHYPRE_Pilut_getClassInfo(
-  struct bHYPRE_Pilut__object* self)
+remote_bHYPRE_StructSMG_getClassInfo(
+  struct bHYPRE_StructSMG__object* self)
 {
   return (struct sidl_ClassInfo__object*) 0;
 }
@@ -542,8 +543,8 @@ remote_bHYPRE_Pilut_getClassInfo(
  */
 
 static int32_t
-remote_bHYPRE_Pilut_SetCommunicator(
-  struct bHYPRE_Pilut__object* self,
+remote_bHYPRE_StructSMG_SetCommunicator(
+  struct bHYPRE_StructSMG__object* self,
   void* mpi_comm)
 {
   return 0;
@@ -554,8 +555,8 @@ remote_bHYPRE_Pilut_SetCommunicator(
  */
 
 static int32_t
-remote_bHYPRE_Pilut_SetIntParameter(
-  struct bHYPRE_Pilut__object* self,
+remote_bHYPRE_StructSMG_SetIntParameter(
+  struct bHYPRE_StructSMG__object* self,
   const char* name,
   int32_t value)
 {
@@ -567,8 +568,8 @@ remote_bHYPRE_Pilut_SetIntParameter(
  */
 
 static int32_t
-remote_bHYPRE_Pilut_SetDoubleParameter(
-  struct bHYPRE_Pilut__object* self,
+remote_bHYPRE_StructSMG_SetDoubleParameter(
+  struct bHYPRE_StructSMG__object* self,
   const char* name,
   double value)
 {
@@ -580,8 +581,8 @@ remote_bHYPRE_Pilut_SetDoubleParameter(
  */
 
 static int32_t
-remote_bHYPRE_Pilut_SetStringParameter(
-  struct bHYPRE_Pilut__object* self,
+remote_bHYPRE_StructSMG_SetStringParameter(
+  struct bHYPRE_StructSMG__object* self,
   const char* name,
   const char* value)
 {
@@ -593,8 +594,8 @@ remote_bHYPRE_Pilut_SetStringParameter(
  */
 
 static int32_t
-remote_bHYPRE_Pilut_SetIntArray1Parameter(
-  struct bHYPRE_Pilut__object* self,
+remote_bHYPRE_StructSMG_SetIntArray1Parameter(
+  struct bHYPRE_StructSMG__object* self,
   const char* name,
   struct sidl_int__array* value)
 {
@@ -606,8 +607,8 @@ remote_bHYPRE_Pilut_SetIntArray1Parameter(
  */
 
 static int32_t
-remote_bHYPRE_Pilut_SetIntArray2Parameter(
-  struct bHYPRE_Pilut__object* self,
+remote_bHYPRE_StructSMG_SetIntArray2Parameter(
+  struct bHYPRE_StructSMG__object* self,
   const char* name,
   struct sidl_int__array* value)
 {
@@ -619,8 +620,8 @@ remote_bHYPRE_Pilut_SetIntArray2Parameter(
  */
 
 static int32_t
-remote_bHYPRE_Pilut_SetDoubleArray1Parameter(
-  struct bHYPRE_Pilut__object* self,
+remote_bHYPRE_StructSMG_SetDoubleArray1Parameter(
+  struct bHYPRE_StructSMG__object* self,
   const char* name,
   struct sidl_double__array* value)
 {
@@ -632,8 +633,8 @@ remote_bHYPRE_Pilut_SetDoubleArray1Parameter(
  */
 
 static int32_t
-remote_bHYPRE_Pilut_SetDoubleArray2Parameter(
-  struct bHYPRE_Pilut__object* self,
+remote_bHYPRE_StructSMG_SetDoubleArray2Parameter(
+  struct bHYPRE_StructSMG__object* self,
   const char* name,
   struct sidl_double__array* value)
 {
@@ -645,8 +646,8 @@ remote_bHYPRE_Pilut_SetDoubleArray2Parameter(
  */
 
 static int32_t
-remote_bHYPRE_Pilut_GetIntValue(
-  struct bHYPRE_Pilut__object* self,
+remote_bHYPRE_StructSMG_GetIntValue(
+  struct bHYPRE_StructSMG__object* self,
   const char* name,
   int32_t* value)
 {
@@ -658,8 +659,8 @@ remote_bHYPRE_Pilut_GetIntValue(
  */
 
 static int32_t
-remote_bHYPRE_Pilut_GetDoubleValue(
-  struct bHYPRE_Pilut__object* self,
+remote_bHYPRE_StructSMG_GetDoubleValue(
+  struct bHYPRE_StructSMG__object* self,
   const char* name,
   double* value)
 {
@@ -671,8 +672,8 @@ remote_bHYPRE_Pilut_GetDoubleValue(
  */
 
 static int32_t
-remote_bHYPRE_Pilut_Setup(
-  struct bHYPRE_Pilut__object* self,
+remote_bHYPRE_StructSMG_Setup(
+  struct bHYPRE_StructSMG__object* self,
   struct bHYPRE_Vector__object* b,
   struct bHYPRE_Vector__object* x)
 {
@@ -684,8 +685,8 @@ remote_bHYPRE_Pilut_Setup(
  */
 
 static int32_t
-remote_bHYPRE_Pilut_Apply(
-  struct bHYPRE_Pilut__object* self,
+remote_bHYPRE_StructSMG_Apply(
+  struct bHYPRE_StructSMG__object* self,
   struct bHYPRE_Vector__object* b,
   struct bHYPRE_Vector__object** x)
 {
@@ -697,8 +698,8 @@ remote_bHYPRE_Pilut_Apply(
  */
 
 static int32_t
-remote_bHYPRE_Pilut_SetOperator(
-  struct bHYPRE_Pilut__object* self,
+remote_bHYPRE_StructSMG_SetOperator(
+  struct bHYPRE_StructSMG__object* self,
   struct bHYPRE_Operator__object* A)
 {
   return 0;
@@ -709,8 +710,8 @@ remote_bHYPRE_Pilut_SetOperator(
  */
 
 static int32_t
-remote_bHYPRE_Pilut_SetTolerance(
-  struct bHYPRE_Pilut__object* self,
+remote_bHYPRE_StructSMG_SetTolerance(
+  struct bHYPRE_StructSMG__object* self,
   double tolerance)
 {
   return 0;
@@ -721,8 +722,8 @@ remote_bHYPRE_Pilut_SetTolerance(
  */
 
 static int32_t
-remote_bHYPRE_Pilut_SetMaxIterations(
-  struct bHYPRE_Pilut__object* self,
+remote_bHYPRE_StructSMG_SetMaxIterations(
+  struct bHYPRE_StructSMG__object* self,
   int32_t max_iterations)
 {
   return 0;
@@ -733,8 +734,8 @@ remote_bHYPRE_Pilut_SetMaxIterations(
  */
 
 static int32_t
-remote_bHYPRE_Pilut_SetLogging(
-  struct bHYPRE_Pilut__object* self,
+remote_bHYPRE_StructSMG_SetLogging(
+  struct bHYPRE_StructSMG__object* self,
   int32_t level)
 {
   return 0;
@@ -745,8 +746,8 @@ remote_bHYPRE_Pilut_SetLogging(
  */
 
 static int32_t
-remote_bHYPRE_Pilut_SetPrintLevel(
-  struct bHYPRE_Pilut__object* self,
+remote_bHYPRE_StructSMG_SetPrintLevel(
+  struct bHYPRE_StructSMG__object* self,
   int32_t level)
 {
   return 0;
@@ -757,8 +758,8 @@ remote_bHYPRE_Pilut_SetPrintLevel(
  */
 
 static int32_t
-remote_bHYPRE_Pilut_GetNumIterations(
-  struct bHYPRE_Pilut__object* self,
+remote_bHYPRE_StructSMG_GetNumIterations(
+  struct bHYPRE_StructSMG__object* self,
   int32_t* num_iterations)
 {
   return 0;
@@ -769,8 +770,8 @@ remote_bHYPRE_Pilut_GetNumIterations(
  */
 
 static int32_t
-remote_bHYPRE_Pilut_GetRelResidualNorm(
-  struct bHYPRE_Pilut__object* self,
+remote_bHYPRE_StructSMG_GetRelResidualNorm(
+  struct bHYPRE_StructSMG__object* self,
   double* norm)
 {
   return 0;
@@ -780,45 +781,47 @@ remote_bHYPRE_Pilut_GetRelResidualNorm(
  * REMOTE EPV: create remote entry point vectors (EPVs).
  */
 
-static void bHYPRE_Pilut__init_remote_epv(void)
+static void bHYPRE_StructSMG__init_remote_epv(void)
 {
-  struct bHYPRE_Pilut__epv*       epv = &s_rem__bhypre_pilut;
+  struct bHYPRE_StructSMG__epv*   epv = &s_rem__bhypre_structsmg;
   struct bHYPRE_Operator__epv*    e0  = &s_rem__bhypre_operator;
   struct bHYPRE_Solver__epv*      e1  = &s_rem__bhypre_solver;
   struct sidl_BaseClass__epv*     e2  = &s_rem__sidl_baseclass;
   struct sidl_BaseInterface__epv* e3  = &s_rem__sidl_baseinterface;
 
-  epv->f__cast                    = remote_bHYPRE_Pilut__cast;
-  epv->f__delete                  = remote_bHYPRE_Pilut__delete;
+  epv->f__cast                    = remote_bHYPRE_StructSMG__cast;
+  epv->f__delete                  = remote_bHYPRE_StructSMG__delete;
   epv->f__ctor                    = NULL;
   epv->f__dtor                    = NULL;
-  epv->f_addRef                   = remote_bHYPRE_Pilut_addRef;
-  epv->f_deleteRef                = remote_bHYPRE_Pilut_deleteRef;
-  epv->f_isSame                   = remote_bHYPRE_Pilut_isSame;
-  epv->f_queryInt                 = remote_bHYPRE_Pilut_queryInt;
-  epv->f_isType                   = remote_bHYPRE_Pilut_isType;
-  epv->f_getClassInfo             = remote_bHYPRE_Pilut_getClassInfo;
-  epv->f_SetCommunicator          = remote_bHYPRE_Pilut_SetCommunicator;
-  epv->f_SetIntParameter          = remote_bHYPRE_Pilut_SetIntParameter;
-  epv->f_SetDoubleParameter       = remote_bHYPRE_Pilut_SetDoubleParameter;
-  epv->f_SetStringParameter       = remote_bHYPRE_Pilut_SetStringParameter;
-  epv->f_SetIntArray1Parameter    = remote_bHYPRE_Pilut_SetIntArray1Parameter;
-  epv->f_SetIntArray2Parameter    = remote_bHYPRE_Pilut_SetIntArray2Parameter;
+  epv->f_addRef                   = remote_bHYPRE_StructSMG_addRef;
+  epv->f_deleteRef                = remote_bHYPRE_StructSMG_deleteRef;
+  epv->f_isSame                   = remote_bHYPRE_StructSMG_isSame;
+  epv->f_queryInt                 = remote_bHYPRE_StructSMG_queryInt;
+  epv->f_isType                   = remote_bHYPRE_StructSMG_isType;
+  epv->f_getClassInfo             = remote_bHYPRE_StructSMG_getClassInfo;
+  epv->f_SetCommunicator          = remote_bHYPRE_StructSMG_SetCommunicator;
+  epv->f_SetIntParameter          = remote_bHYPRE_StructSMG_SetIntParameter;
+  epv->f_SetDoubleParameter       = remote_bHYPRE_StructSMG_SetDoubleParameter;
+  epv->f_SetStringParameter       = remote_bHYPRE_StructSMG_SetStringParameter;
+  epv->f_SetIntArray1Parameter    = 
+    remote_bHYPRE_StructSMG_SetIntArray1Parameter;
+  epv->f_SetIntArray2Parameter    = 
+    remote_bHYPRE_StructSMG_SetIntArray2Parameter;
   epv->f_SetDoubleArray1Parameter = 
-    remote_bHYPRE_Pilut_SetDoubleArray1Parameter;
+    remote_bHYPRE_StructSMG_SetDoubleArray1Parameter;
   epv->f_SetDoubleArray2Parameter = 
-    remote_bHYPRE_Pilut_SetDoubleArray2Parameter;
-  epv->f_GetIntValue              = remote_bHYPRE_Pilut_GetIntValue;
-  epv->f_GetDoubleValue           = remote_bHYPRE_Pilut_GetDoubleValue;
-  epv->f_Setup                    = remote_bHYPRE_Pilut_Setup;
-  epv->f_Apply                    = remote_bHYPRE_Pilut_Apply;
-  epv->f_SetOperator              = remote_bHYPRE_Pilut_SetOperator;
-  epv->f_SetTolerance             = remote_bHYPRE_Pilut_SetTolerance;
-  epv->f_SetMaxIterations         = remote_bHYPRE_Pilut_SetMaxIterations;
-  epv->f_SetLogging               = remote_bHYPRE_Pilut_SetLogging;
-  epv->f_SetPrintLevel            = remote_bHYPRE_Pilut_SetPrintLevel;
-  epv->f_GetNumIterations         = remote_bHYPRE_Pilut_GetNumIterations;
-  epv->f_GetRelResidualNorm       = remote_bHYPRE_Pilut_GetRelResidualNorm;
+    remote_bHYPRE_StructSMG_SetDoubleArray2Parameter;
+  epv->f_GetIntValue              = remote_bHYPRE_StructSMG_GetIntValue;
+  epv->f_GetDoubleValue           = remote_bHYPRE_StructSMG_GetDoubleValue;
+  epv->f_Setup                    = remote_bHYPRE_StructSMG_Setup;
+  epv->f_Apply                    = remote_bHYPRE_StructSMG_Apply;
+  epv->f_SetOperator              = remote_bHYPRE_StructSMG_SetOperator;
+  epv->f_SetTolerance             = remote_bHYPRE_StructSMG_SetTolerance;
+  epv->f_SetMaxIterations         = remote_bHYPRE_StructSMG_SetMaxIterations;
+  epv->f_SetLogging               = remote_bHYPRE_StructSMG_SetLogging;
+  epv->f_SetPrintLevel            = remote_bHYPRE_StructSMG_SetPrintLevel;
+  epv->f_GetNumIterations         = remote_bHYPRE_StructSMG_GetNumIterations;
+  epv->f_GetRelResidualNorm       = remote_bHYPRE_StructSMG_GetRelResidualNorm;
 
   e0->f__cast                    = (void* (*)(void*,const char*)) epv->f__cast;
   e0->f__delete                  = (void (*)(void*)) epv->f__delete;
@@ -943,18 +946,18 @@ static void bHYPRE_Pilut__init_remote_epv(void)
  * REMOTE: generate remote instance given URL string.
  */
 
-struct bHYPRE_Pilut__object*
-bHYPRE_Pilut__remote(const char *url)
+struct bHYPRE_StructSMG__object*
+bHYPRE_StructSMG__remote(const char *url)
 {
-  struct bHYPRE_Pilut__object* self =
-    (struct bHYPRE_Pilut__object*) malloc(
-      sizeof(struct bHYPRE_Pilut__object));
+  struct bHYPRE_StructSMG__object* self =
+    (struct bHYPRE_StructSMG__object*) malloc(
+      sizeof(struct bHYPRE_StructSMG__object));
 
-  struct bHYPRE_Pilut__object*   s0 = self;
-  struct sidl_BaseClass__object* s1 = &s0->d_sidl_baseclass;
+  struct bHYPRE_StructSMG__object* s0 = self;
+  struct sidl_BaseClass__object*   s1 = &s0->d_sidl_baseclass;
 
   if (!s_remote_initialized) {
-    bHYPRE_Pilut__init_remote_epv();
+    bHYPRE_StructSMG__init_remote_epv();
   }
 
   s1->d_sidl_baseinterface.d_epv    = &s_rem__sidl_baseinterface;
@@ -970,7 +973,7 @@ bHYPRE_Pilut__remote(const char *url)
   s0->d_bhypre_solver.d_object = NULL; /* FIXME */
 
   s0->d_data = NULL; /* FIXME */
-  s0->d_epv  = &s_rem__bhypre_pilut;
+  s0->d_epv  = &s_rem__bhypre_structsmg;
 
   return self;
 }

@@ -3,8 +3,8 @@
  * Symbol:        bHYPRE.StructGrid-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * sidl Created:  20050208 15:29:05 PST
- * Generated:     20050208 15:29:07 PST
+ * sidl Created:  20050225 15:45:37 PST
+ * Generated:     20050225 15:45:40 PST
  * Description:   Server-side implementation for bHYPRE.StructGrid
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -30,6 +30,10 @@
 
 /* DO-NOT-DELETE splicer.begin(bHYPRE.StructGrid._includes) */
 /* Put additional includes or other arbitrary code here... */
+#include <assert.h>
+#include "mpi.h"
+#include "HYPRE_struct_mv.h"
+#include "utilities.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.StructGrid._includes) */
 
 /*
@@ -45,6 +49,13 @@ impl_bHYPRE_StructGrid__ctor(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructGrid._ctor) */
   /* Insert the implementation of the constructor method here... */
+
+   struct bHYPRE_StructGrid__data * data;
+   data = hypre_CTAlloc( struct bHYPRE_StructGrid__data, 1 );
+   data -> grid = NULL;
+   data -> comm = MPI_COMM_NULL;
+   bHYPRE_StructGrid__set_data( self, data );
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.StructGrid._ctor) */
 }
 
@@ -61,6 +72,16 @@ impl_bHYPRE_StructGrid__dtor(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructGrid._dtor) */
   /* Insert the implementation of the destructor method here... */
+
+   int ierr = 0;
+   struct bHYPRE_StructGrid__data * data;
+   HYPRE_StructGrid Hgrid;
+   data = bHYPRE_StructGrid__get_data( self );
+   Hgrid = data -> grid;
+   ierr = HYPRE_StructGridDestroy( Hgrid );
+   assert( ierr==0 );
+   hypre_TFree( data );
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.StructGrid._dtor) */
 }
 
@@ -78,7 +99,15 @@ impl_bHYPRE_StructGrid_SetCommunicator(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructGrid.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
-   return 1;
+
+   /* This should be called before SetDimension */
+   int ierr = 0;
+   struct bHYPRE_StructGrid__data * data;
+   data = bHYPRE_StructGrid__get_data( self );
+   data -> comm = (MPI_Comm) mpi_comm;
+
+   return ierr;
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.StructGrid.SetCommunicator) */
 }
 
@@ -95,7 +124,21 @@ impl_bHYPRE_StructGrid_SetDimension(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructGrid.SetDimension) */
   /* Insert the implementation of the SetDimension method here... */
-   return 1;
+   /* SetCommunicator should be called before this function.
+      In Hypre, the dimension is permanently set at creation,
+      so HYPRE_StructGridCreate is called here .*/
+
+   int ierr = 0;
+   struct bHYPRE_StructGrid__data * data;
+   HYPRE_StructGrid * Hgrid;
+   data = bHYPRE_StructGrid__get_data( self );
+   Hgrid = &(data -> grid);
+   assert( *Hgrid==NULL );  /* grid shouldn't have already been created */
+
+   ierr += HYPRE_StructGridCreate( data->comm, dim, Hgrid );
+
+   return ierr;
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.StructGrid.SetDimension) */
 }
 
@@ -113,7 +156,20 @@ impl_bHYPRE_StructGrid_SetExtents(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructGrid.SetExtents) */
   /* Insert the implementation of the SetExtents method here... */
-   return 1;
+
+   /* SetCommunicator and SetDimension should have been called before
+      this function, Assemble afterwards. */
+
+   int ierr = 0;
+   struct bHYPRE_StructGrid__data * data;
+   HYPRE_StructGrid Hgrid;
+   data = bHYPRE_StructGrid__get_data( self );
+   Hgrid = data -> grid;
+
+   ierr += HYPRE_StructGridSetExtents( Hgrid, sidlArrayAddr1( ilower, 0 ),
+                                       sidlArrayAddr1( iupper, 0 ) );
+   return ierr;
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.StructGrid.SetExtents) */
 }
 
@@ -130,7 +186,17 @@ impl_bHYPRE_StructGrid_SetPeriodic(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructGrid.SetPeriodic) */
   /* Insert the implementation of the SetPeriodic method here... */
-   return 1;
+
+   int ierr = 0;
+   struct bHYPRE_StructGrid__data * data;
+   HYPRE_StructGrid Hgrid;
+   data = bHYPRE_StructGrid__get_data( self );
+   Hgrid = data -> grid;
+
+   ierr += HYPRE_StructGridSetPeriodic( Hgrid, sidlArrayAddr1( periodic, 0 ) );
+
+   return ierr;
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.StructGrid.SetPeriodic) */
 }
 
@@ -147,6 +213,19 @@ impl_bHYPRE_StructGrid_Assemble(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructGrid.Assemble) */
   /* Insert the implementation of the Assemble method here... */
-   return 1;
+
+   /* Call everything else before Assemble: constructor, SetCommunicator,
+      SetDimension, SetExtents, SetPeriodic (optional) in that order (normally) */
+
+   int ierr = 0;
+   struct bHYPRE_StructGrid__data * data;
+   HYPRE_StructGrid Hgrid;
+   data = bHYPRE_StructGrid__get_data( self );
+   Hgrid = data -> grid;
+
+   ierr += HYPRE_StructGridAssemble( Hgrid );
+
+   return ierr;
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.StructGrid.Assemble) */
 }

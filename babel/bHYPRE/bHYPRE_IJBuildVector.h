@@ -3,8 +3,8 @@
  * Symbol:        bHYPRE.IJBuildVector-v1.0.0
  * Symbol Type:   interface
  * Babel Version: 0.9.8
- * sidl Created:  20050208 15:29:04 PST
- * Generated:     20050208 15:29:07 PST
+ * sidl Created:  20050225 15:45:36 PST
+ * Generated:     20050225 15:45:39 PST
  * Description:   Client-side glue code for bHYPRE.IJBuildVector
  * 
  * WARNING: Automatically generated; changes will be lost

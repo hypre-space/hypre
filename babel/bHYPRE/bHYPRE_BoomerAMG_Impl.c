@@ -3,8 +3,8 @@
  * Symbol:        bHYPRE.BoomerAMG-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * sidl Created:  20050208 15:29:05 PST
- * Generated:     20050208 15:29:07 PST
+ * sidl Created:  20050225 15:45:37 PST
+ * Generated:     20050225 15:45:40 PST
  * Description:   Server-side implementation for bHYPRE.BoomerAMG
  * 
  * WARNING: Automatically generated; only changes within splicers preserved

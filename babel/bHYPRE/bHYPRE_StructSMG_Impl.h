@@ -1,37 +1,42 @@
 /*
  * File:          bHYPRE_StructSMG_Impl.h
- * Symbol:        bHYPRE.StructSMG-v0.1.6
+ * Symbol:        bHYPRE.StructSMG-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.8.0
- * SIDL Created:  20030210 16:05:28 PST
- * Generated:     20030210 16:05:37 PST
+ * Babel Version: 0.9.8
+ * sidl Created:  20050225 15:45:37 PST
+ * Generated:     20050225 15:45:40 PST
  * Description:   Server-side implementation for bHYPRE.StructSMG
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.8.0
- * source-line   = 458
+ * babel-version = 0.9.8
+ * source-line   = 1251
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #ifndef included_bHYPRE_StructSMG_Impl_h
 #define included_bHYPRE_StructSMG_Impl_h
 
-#ifndef included_SIDL_header_h
-#include "SIDL_header.h"
-#endif
-#ifndef included_bHYPRE_Vector_h
-#include "bHYPRE_Vector.h"
-#endif
-#ifndef included_bHYPRE_StructSMG_h
-#include "bHYPRE_StructSMG.h"
+#ifndef included_sidl_header_h
+#include "sidl_header.h"
 #endif
 #ifndef included_bHYPRE_Operator_h
 #include "bHYPRE_Operator.h"
 #endif
+#ifndef included_bHYPRE_StructSMG_h
+#include "bHYPRE_StructSMG.h"
+#endif
+#ifndef included_bHYPRE_Vector_h
+#include "bHYPRE_Vector.h"
+#endif
 
 /* DO-NOT-DELETE splicer.begin(bHYPRE.StructSMG._includes) */
 /* Put additional include files here... */
+#include "HYPRE.h"
+/* #include "HYPRE_parcsr_ls.h" will be needed if we use HYPRE_Solver */
+#include "HYPRE_struct_ls.h"
+#include "utilities.h"
+#include "bHYPRE_StructMatrix.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.StructSMG._includes) */
 
 /*
@@ -41,7 +46,9 @@
 struct bHYPRE_StructSMG__data {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructSMG._data) */
   /* Put private data members here... */
-  int ignore; /* dummy to force non-empty struct; remove if you add data */
+   MPI_Comm comm;
+   HYPRE_StructSolver solver;
+   bHYPRE_StructMatrix matrix;
   /* DO-NOT-DELETE splicer.end(bHYPRE.StructSMG._data) */
 };
 
@@ -80,16 +87,10 @@ impl_bHYPRE_StructSMG_SetCommunicator(
   void*);
 
 extern int32_t
-impl_bHYPRE_StructSMG_GetDoubleValue(
+impl_bHYPRE_StructSMG_SetIntParameter(
   bHYPRE_StructSMG,
   const char*,
-  double*);
-
-extern int32_t
-impl_bHYPRE_StructSMG_GetIntValue(
-  bHYPRE_StructSMG,
-  const char*,
-  int32_t*);
+  int32_t);
 
 extern int32_t
 impl_bHYPRE_StructSMG_SetDoubleParameter(
@@ -98,28 +99,46 @@ impl_bHYPRE_StructSMG_SetDoubleParameter(
   double);
 
 extern int32_t
-impl_bHYPRE_StructSMG_SetIntParameter(
-  bHYPRE_StructSMG,
-  const char*,
-  int32_t);
-
-extern int32_t
 impl_bHYPRE_StructSMG_SetStringParameter(
   bHYPRE_StructSMG,
   const char*,
   const char*);
 
 extern int32_t
-impl_bHYPRE_StructSMG_SetIntArrayParameter(
+impl_bHYPRE_StructSMG_SetIntArray1Parameter(
   bHYPRE_StructSMG,
   const char*,
-  struct SIDL_int__array*);
+  struct sidl_int__array*);
 
 extern int32_t
-impl_bHYPRE_StructSMG_SetDoubleArrayParameter(
+impl_bHYPRE_StructSMG_SetIntArray2Parameter(
   bHYPRE_StructSMG,
   const char*,
-  struct SIDL_double__array*);
+  struct sidl_int__array*);
+
+extern int32_t
+impl_bHYPRE_StructSMG_SetDoubleArray1Parameter(
+  bHYPRE_StructSMG,
+  const char*,
+  struct sidl_double__array*);
+
+extern int32_t
+impl_bHYPRE_StructSMG_SetDoubleArray2Parameter(
+  bHYPRE_StructSMG,
+  const char*,
+  struct sidl_double__array*);
+
+extern int32_t
+impl_bHYPRE_StructSMG_GetIntValue(
+  bHYPRE_StructSMG,
+  const char*,
+  int32_t*);
+
+extern int32_t
+impl_bHYPRE_StructSMG_GetDoubleValue(
+  bHYPRE_StructSMG,
+  const char*,
+  double*);
 
 extern int32_t
 impl_bHYPRE_StructSMG_Setup(
@@ -139,9 +158,14 @@ impl_bHYPRE_StructSMG_SetOperator(
   bHYPRE_Operator);
 
 extern int32_t
-impl_bHYPRE_StructSMG_GetResidual(
+impl_bHYPRE_StructSMG_SetTolerance(
   bHYPRE_StructSMG,
-  bHYPRE_Vector*);
+  double);
+
+extern int32_t
+impl_bHYPRE_StructSMG_SetMaxIterations(
+  bHYPRE_StructSMG,
+  int32_t);
 
 extern int32_t
 impl_bHYPRE_StructSMG_SetLogging(
@@ -152,6 +176,16 @@ extern int32_t
 impl_bHYPRE_StructSMG_SetPrintLevel(
   bHYPRE_StructSMG,
   int32_t);
+
+extern int32_t
+impl_bHYPRE_StructSMG_GetNumIterations(
+  bHYPRE_StructSMG,
+  int32_t*);
+
+extern int32_t
+impl_bHYPRE_StructSMG_GetRelResidualNorm(
+  bHYPRE_StructSMG,
+  double*);
 
 #ifdef __cplusplus
 }

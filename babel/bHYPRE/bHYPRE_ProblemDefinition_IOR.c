@@ -3,8 +3,8 @@
  * Symbol:        bHYPRE.ProblemDefinition-v1.0.0
  * Symbol Type:   interface
  * Babel Version: 0.9.8
- * sidl Created:  20050208 15:29:04 PST
- * Generated:     20050208 15:29:05 PST
+ * sidl Created:  20050225 15:45:35 PST
+ * Generated:     20050225 15:45:37 PST
  * Description:   Intermediate Object Representation for bHYPRE.ProblemDefinition
  * 
  * WARNING: Automatically generated; changes will be lost

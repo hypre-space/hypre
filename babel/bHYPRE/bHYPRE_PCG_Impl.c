@@ -3,8 +3,8 @@
  * Symbol:        bHYPRE.PCG-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * sidl Created:  20050208 15:29:05 PST
- * Generated:     20050208 15:29:08 PST
+ * sidl Created:  20050225 15:45:37 PST
+ * Generated:     20050225 15:45:40 PST
  * Description:   Server-side implementation for bHYPRE.PCG
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -41,6 +41,8 @@
 #include "bHYPRE_BoomerAMG_Impl.h"
 #include "bHYPRE_ParCSRDiagScale.h"
 #include "bHYPRE_ParCSRDiagScale_Impl.h"
+#include "bHYPRE_StructSMG.h"
+#include "bHYPRE_StructSMG_Impl.h"
 #include <assert.h>
 #include "mpi.h"
 
@@ -954,6 +956,8 @@ impl_bHYPRE_PCG_SetPreconditioner(
    struct bHYPRE_PCG__data * dataself;
    struct bHYPRE_BoomerAMG__data * AMG_dataprecond;
    bHYPRE_BoomerAMG AMG_s;
+   struct bHYPRE_StructSMG__data * SMG_dataprecond;
+   bHYPRE_StructSMG SMG_s;
    HYPRE_PtrToSolverFcn precond, precond_setup; /* functions */
 
    dataself = bHYPRE_PCG__get_data( self );
@@ -979,6 +983,18 @@ impl_bHYPRE_PCG_SetPreconditioner(
        * ignored. */
       precond = (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScale;
       precond_setup = (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScaleSetup;
+   }
+   else if ( bHYPRE_Solver_queryInt( s, "bHYPRE.StructSMG" ) )
+   {
+      /* s is a bHYPRE_StructSMG */
+      SMG_s = bHYPRE_StructSMG__cast
+         ( bHYPRE_Solver_queryInt( s, "bHYPRE.StructSMG") );
+      SMG_dataprecond = bHYPRE_StructSMG__get_data( SMG_s );
+      solverprecond = &SMG_dataprecond->solver;
+      assert( solverprecond != NULL );
+      precond = (HYPRE_PtrToSolverFcn) HYPRE_StructSMGSolve;
+      precond_setup = (HYPRE_PtrToSolverFcn) HYPRE_StructSMGSetup;
+      bHYPRE_StructSMG_deleteRef( SMG_s ); /* extra reference from queryInt */
    }
    /* put other preconditioner types here */
    else

@@ -3,8 +3,8 @@
  * Symbol:        bHYPRE.SStructParCSRVector-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * sidl Created:  20050208 15:29:04 PST
- * Generated:     20050208 15:29:08 PST
+ * sidl Created:  20050225 15:45:37 PST
+ * Generated:     20050225 15:45:40 PST
  * Description:   Server-side implementation for bHYPRE.SStructParCSRVector
  * 
  * WARNING: Automatically generated; only changes within splicers preserved

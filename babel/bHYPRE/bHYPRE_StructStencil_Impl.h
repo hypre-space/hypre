@@ -3,8 +3,8 @@
  * Symbol:        bHYPRE.StructStencil-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * sidl Created:  20050208 15:29:05 PST
- * Generated:     20050208 15:29:08 PST
+ * sidl Created:  20050225 15:45:37 PST
+ * Generated:     20050225 15:45:40 PST
  * Description:   Server-side implementation for bHYPRE.StructStencil
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -26,6 +26,7 @@
 
 /* DO-NOT-DELETE splicer.begin(bHYPRE.StructStencil._includes) */
 /* Put additional include files here... */
+#include "struct_mv.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.StructStencil._includes) */
 
 /*
@@ -35,7 +36,9 @@
 struct bHYPRE_StructStencil__data {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructStencil._data) */
   /* Put private data members here... */
-  int ignore; /* dummy to force non-empty struct; remove if you add data */
+   HYPRE_StructStencil  stencil;
+   int32_t dim;
+   int32_t size;
   /* DO-NOT-DELETE splicer.end(bHYPRE.StructStencil._data) */
 };
 
