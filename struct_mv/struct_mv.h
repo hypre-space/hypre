@@ -1,12 +1,9 @@
-
-#include <HYPRE_config.h>
+#include "utilities.h"
 
 #include "HYPRE_struct_mv.h"
 
 #ifndef hypre_STRUCT_MV_HEADER
 #define hypre_STRUCT_MV_HEADER
-
-#include "utilities.h"
 
 #ifdef __cplusplus
 extern "C" {
