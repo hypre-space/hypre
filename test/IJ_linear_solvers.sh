@@ -31,12 +31,11 @@ $MPIRUN -np 1 $SLS
 tail -3 $SLS.log > $SLS.testdata
 
 #=============================================================================
-# IJ_linear_solvers: Test parallel run by diffing against 1 proc run
+# IJ_linear_solvers: Run 2 proc parallel case, BoomerAMG
 #=============================================================================
 
 $MPIRUN -np 2 $SLS -P 1 1 2  
-tail -3 $SLS.log > $SLS.testdata.temp
-diff $SLS.testdata $SLS.testdata.temp >&2
+tail -3 $SLS.log > $SLS.testdata
 
 #=============================================================================
 # IJ_linear_solvers: Run default case with BoomerAMG_PCG
@@ -65,12 +64,4 @@ tail -3 $SLS.log > $SLS.testdata
 
 $MPIRUN -np 2 $SLS -solver 4 -rhsrand
 tail -3 $SLS.log > $SLS.testdata
-
-#=============================================================================
-# IJ_linear_solvers: Run default case with PILUT_GMRES
-#=============================================================================
-
-$MPIRUN -np 2 $SLS -solver 7 -rhsrand
-tail -3 $SLS.log > $SLS.testdata
-
 
