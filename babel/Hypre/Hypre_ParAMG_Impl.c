@@ -198,6 +198,8 @@ impl_Hypre_ParAMG_GetResidual(
    struct Hypre_ParCSRVector__data * datar;
    Hypre_ParCSRVector HypreP_r;
    HYPRE_ParVector rr;
+   HYPRE_ParVector rr2;
+   HYPRE_ParVector * prr = &rr2;
    HYPRE_IJVector ij_r;
 
    data = Hypre_ParAMG__get_data( self );
@@ -211,7 +213,8 @@ impl_Hypre_ParAMG_GetResidual(
    ierr += HYPRE_IJVectorGetObject( ij_r, &objectr );
    rr = (HYPRE_ParVector) objectr;
 
-   ierr += HYPRE_BoomerAMGGetResidual( solver, rr );
+   ierr += HYPRE_BoomerAMGGetResidual( solver, prr );
+   HYPRE_ParVectorCopy( *prr, rr );
 
    return ierr;
   /* DO-NOT-DELETE splicer.end(Hypre.ParAMG.GetResidual) */
