@@ -93,14 +93,14 @@ int MLI_Method_AMGSA::setupCalibration( MLI *mli )
    if ( nullspace_store != NULL )
    {
       dble_array = nullspace_store;
-      nullspace_store = new double[nrows*(n_null+calibration_size)];
+      nullspace_store = new double[nrows*(n_null+calibrationSize_)];
       for (i = 0; i < nrows*n_null; i++) nullspace_store[i] = dble_array[i]; 
       delete [] dble_array;
    }
    else
    {
       nrows = local_nrows;
-      nullspace_store = new double[nrows*(n_null+calibration_size)];
+      nullspace_store = new double[nrows*(n_null+calibrationSize_)];
       for ( j = 0; j < n_null; j++ ) 
       {
          for ( k = 0; k < nrows; k++ ) 
@@ -124,8 +124,8 @@ int MLI_Method_AMGSA::setupCalibration( MLI *mli )
    targv[0] = (char *) &relax_num;
    targv[1] = (char *) relax_wts;
    new_amgsa->setParams( param_string, targc, targv );
-   Q_array = new double[nrows*(n_null+calibration_size)];
-   R_array = new double[(n_null+calibration_size)*(n_null+calibration_size)];
+   Q_array = new double[nrows*(n_null+calibrationSize_)];
+   R_array = new double[(n_null+calibrationSize_)*(n_null+calibrationSize_)];
    new_mli = new MLI( comm );
    new_mli->setMaxIterations(2);
    new_mli->setMethod( new_amgsa );
@@ -137,7 +137,7 @@ int MLI_Method_AMGSA::setupCalibration( MLI *mli )
 
    start_time = MLI_Utils_WTime();
 
-   for ( i = 0; i < calibration_size; i++ )
+   for ( i = 0; i < calibrationSize_; i++ )
    {
       /* ------------------------------------------------------------ */
       /* set the current set of null space vectors                    */
@@ -185,17 +185,17 @@ int MLI_Method_AMGSA::setupCalibration( MLI *mli )
 #endif
    }
 
-   total_time += ( MLI_Utils_WTime() - start_time );
+   totalTime_ += ( MLI_Utils_WTime() - start_time );
 
    /* --------------------------------------------------------------- */
    /* store the new set of null space vectors, and call mli setup     */
    /* --------------------------------------------------------------- */
 
    setNullSpace(ndofs, n_null, nullspace_store, nrows);
-   calib_size_tmp = calibration_size;
-   calibration_size = 0;
+   calib_size_tmp = calibrationSize_;
+   calibrationSize_ = 0;
    level = setup( mli );
-   calibration_size = calib_size_tmp;
+   calibrationSize_ = calib_size_tmp;
 
    /* --------------------------------------------------------------- */
    /* clean up                                                        */
@@ -295,7 +295,7 @@ int MLI_Method_AMGSA::setupCalibration( MLI *mli )
 
    new_mli = NULL;
 
-   for ( i = 0; i < calibration_size; i++ )
+   for ( i = 0; i < calibrationSize_; i++ )
    {
       dtime = time_getWallclockSeconds();
       hypre_ParVectorSetRandomValues( trial_sol, (int) dtime );
@@ -342,22 +342,22 @@ int MLI_Method_AMGSA::setupCalibration( MLI *mli )
       targv[3] = (char *) &nrows;  
       new_amgsa->setParams( param_string, targc, targv );
 
-      if ( i < calibration_size-1 ) new_mli->setup();
+      if ( i < calibrationSize_-1 ) new_mli->setup();
    }
    delete new_amgsa;
    delete new_mli;
 
-   total_time += ( MLI_Utils_WTime() - start_time );
+   totalTime_ += ( MLI_Utils_WTime() - start_time );
 
    /* --------------------------------------------------------------- */
    /* store the new set of null space vectors, and call mli setup     */
    /* --------------------------------------------------------------- */
 
    setNullSpace(ndofs, n_null, nullspace_store, nrows);
-   calib_size_tmp = calibration_size;
-   calibration_size = 0;
+   calib_size_tmp = calibrationSize_;
+   calibrationSize_ = 0;
    level = setup( mli );
-   calibration_size = calib_size_tmp;
+   calibrationSize_ = calib_size_tmp;
 
    /* --------------------------------------------------------------- */
    /* clean up                                                        */
