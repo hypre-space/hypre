@@ -19,7 +19,9 @@ int hypre_ParAxpy P((double alpha , hypre_ParVector *x , hypre_ParVector *y ));
 double hypre_ParInnerProd P((MPI_Comm comm, hypre_ParVector *x , 
    	hypre_ParVector *y ));
 hypre_ParVector *hypre_VectorToParVector P((MPI_Comm comm, hypre_Vector *v,
-	int *vec_starts));
+	int **vec_starts_ptr));
+hypre_Vector *hypre_ParVectorToVectorAll P((MPI_Comm comm, 
+	hypre_ParVector *par_v, int *vec_starts));
 int hypre_BuildParVectorMPITypes P((MPI_Comm comm, int vec_len, 
 	int *vec_starts, MPI_Datatype *vector_mpi_types));
 
@@ -61,6 +63,5 @@ int hypre_ParMatvec P((double alpha, hypre_ParCSRMatrix *A,
 	hypre_ParVector *x, double beta, hypre_ParVector *y));
 int hypre_ParMatvecT P((double alpha, hypre_ParCSRMatrix *A, 
 	hypre_ParVector *x, double beta, hypre_ParVector *y));
-
 
 #undef P
