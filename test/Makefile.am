@@ -85,7 +85,7 @@ ij_dependencies = \
  $(includedir)/krylov.h
 
 # ij, build 
-ij_es_SOURCES = ij.c
+ij_es_SOURCES = ij_es.c
 ij_es_libraries = \
  -L$(libdir)\
  -lHYPRE_parcsr_es\

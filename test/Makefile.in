@@ -88,7 +88,7 @@ ij_C___DEPENDENCIES = $(am__DEPENDENCIES_2)
 am_ij_b_OBJECTS = ij_b-ij_b.$(OBJEXT)
 ij_b_OBJECTS = $(am_ij_b_OBJECTS)
 ij_b_DEPENDENCIES = $(am__DEPENDENCIES_3)
-am_ij_es_OBJECTS = ij.$(OBJEXT)
+am_ij_es_OBJECTS = ij_es.$(OBJEXT)
 ij_es_OBJECTS = $(am_ij_es_OBJECTS)
 ij_es_DEPENDENCIES = $(am__DEPENDENCIES_2)
 am_ij_mv_OBJECTS = ij_mv-ij_mv.$(OBJEXT)
@@ -355,7 +355,7 @@ ij_dependencies = \
 
 
 # ij, build 
-ij_es_SOURCES = ij.c
+ij_es_SOURCES = ij_es.c
 ij_es_libraries = \
  -L$(libdir)\
  -lHYPRE_parcsr_es\
