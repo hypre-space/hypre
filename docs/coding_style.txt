@@ -22,8 +22,7 @@ be made here:
 
   2. Guidelines for indentation are given below.
 
-  3. Guidelines for documentation are given below (well, they will be
-  at some point :).
+  3. Guidelines for documentation are given below.
 
 --------------------------------------------------------------------------
 
@@ -61,23 +60,34 @@ The term "user" here refers to someone who wants to solve linear systems,
 but is not developing linear solvers.  The term "internal code" refers to
 code that is not part of the user interface.
 
-The following convention has been used to some degree already in Hypre
-for separating the two above notions.  Files containing internal routines
-are given names *without* the `hypre_' prefix and include only *one* internal
-header file, usually called `headers.h'.  All user interface routines are
-defined in files beginning with the prefix `HYPRE_'.  One user interface
-header file is defined that contains prototypes, etc., for the interface
-routines.
+NOTE: It is important to clearly distinguish between supported
+routines and everything else in the library.  The mechanism described
+below is one way of making this explicit.
+
+The following convention has been used to some degree already in hypre
+for separating the two above notions.  Files containing internal
+routines are given names *without* the `hypre_' prefix and include
+only *one* internal header file with some name that is unique in the
+hypre library (Note: The SMG code currently uses the convention of
+giving this header file the same name as the user header file, but
+with a lower-case `hypre_' prefix.  See the below example).  All user
+interface routines are defined in files beginning with the prefix
+`HYPRE_'.  One user interface header file is defined that contains
+prototypes, etc., for the interface routines.
 
 By doing this, it is easy to create prototypes for internal routines and
 user interface routines.  For example,
 
-  mkproto *.c >> headers.h
+  mkproto *.c >> hypre_lib.h
   mkproto HYPRE_*.c >> HYPRE_lib.h
 
-I would like to continue this convention for now.  It is possible that
-this may be changed to some other convention in the future, but if we
-have a common way of doing it now, it will be easier to change later.
+We should continue this convention for now.  It is possible that this
+may be changed to some other convention in the future, but if we have
+a common way of doing it now, it will be easier to change later.
+
+Note that NT does not distinguish between lower and upper case file
+names, so we will need to change the naming convention slightly.
+Suggestions?
 
 --------------------------------------------------------------------------
 
@@ -101,8 +111,18 @@ INDENTATION
 
 DOCUMENTATION
 
-  DOC++ is to be used for documentation.  An initial document needs
-  to be constructed here to get things started.
+  DOC++ is to be used for documentation.
+
+  Example documentation for C routines can be found in the directory
+  `struct_matrix_vector' in the files:
+
+     DevManual.dxx
+     communication.c
+
+  Initial user's and developer's manuals need to be constructed in
+  DOC++ to get things started.
+
+  The above `.dxx' file could serve as a beginning developer's manual.
 
 --------------------------------------------------------------------------
 
