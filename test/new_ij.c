@@ -29,6 +29,10 @@ int BuildRhsParFromOneFile (int argc , char *argv [], int arg_index , int *parti
 int BuildParLaplacian9pt (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
 int BuildParLaplacian27pt (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
 
+HYPRE_ParCSRMatrix GenerateSysLaplacian (MPI_Comm comm, int nx, int ny, int nz, 
+                                         int P, int Q, int R, int p, int q, int r,
+                                         int num_fun, double *mtrx, double *value);
+
 #define SECOND_TIME 0
  
 int
