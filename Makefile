@@ -178,6 +178,9 @@ distclean:
 	done
 	rm -rf ./config/Makefile.config
 	rm -rf ./TAGS
+	rm -rf ./autom4te.cache
+	rm -rf ./config.log
+	rm -rf ./config.status
 
 tags:
 	etags `find . -name "*.c" -or -name "*.C" -or -name "*.h" -or\
