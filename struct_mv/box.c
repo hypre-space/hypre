@@ -340,3 +340,63 @@ zzz_AppendBoxArrayArray( zzz_BoxArrayArray *box_array_array_0,
                          zzz_BoxArrayArrayBoxArray(box_array_array_1, i));
 }
 
+/*--------------------------------------------------------------------------
+ * zzz_CopyBoxArrayData
+ *  This function assumes only one box in box_array_in and
+ *  that box_array_out consists of a sub_grid to that in box_array_in.
+ *  This routine then copies data values from box_array_in to box_array_out.
+ *  Author: pnb, 12-16-97
+ *--------------------------------------------------------------------------*/
+
+void
+zzz_CopyBoxArrayData( zzz_BoxArray     *box_array_in,
+                      zzz_BoxArray     *data_space_in,
+                      int               num_values_in,
+                      double           *data_in,
+		      zzz_BoxArray     *box_array_out,
+                      zzz_BoxArray     *data_space_out,
+                      int               num_values_out,
+                      double           *data_out       )
+{
+   zzz_Box         *box_in, *box_out;
+   zzz_Box         *data_box_in, *data_box_out;
+
+   int              data_box_volume_in, data_box_volume_out;
+   int              datai_in, datai_out;
+
+   zzz_Index       *index;
+   zzz_Index       *stride;
+
+   int              j;
+
+   /*----------------------------------------
+    * Read data
+    *----------------------------------------*/
+
+   index = zzz_NewIndex();
+   stride = zzz_NewIndex();
+   zzz_SetIndex(stride, 1, 1, 1);
+
+   box_in      = zzz_BoxArrayBox(box_array_in, 0);
+   data_box_in = zzz_BoxArrayBox(data_space_in, 0);
+   
+   data_box_volume_in = zzz_BoxVolume(data_box_in);
+   
+   box_out      = zzz_BoxArrayBox(box_array_out, 0);
+   data_box_out = zzz_BoxArrayBox(data_space_out, 0);
+   
+   data_box_volume_out = zzz_BoxVolume(data_box_out);
+
+   zzz_BoxLoop2(box_out, index,
+		data_box_in, zzz_BoxIMin(box_in), stride, datai_in,
+		data_box_out, zzz_BoxIMin(box_out), stride, datai_out,\
+		for (j = 0; j < num_values_out; j++)
+		{
+		  data_out[datai_out + j*data_box_volume_out] =
+		    data_in[datai_in + j*data_box_volume_in];
+		})
+
+   zzz_FreeIndex(index);
+   zzz_FreeIndex(stride);
+}
+
