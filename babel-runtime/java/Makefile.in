@@ -385,10 +385,10 @@ force-jarfile:
 
 clean-local:
 	@if test -d gov; then						\
-	  echo $(RM) -f `find gov SIDL -name '*.class' -print`;		\
-	  $(RM) -f `find gov SIDL -name '*.class' -print`;		\
+	  echo rm -f `find gov SIDL -name '*.class' -print`;		\
+	  rm -f `find gov SIDL -name '*.class' -print`;		\
 	fi
-	$(RM) -f *.jar
+	rm -f *.jar
 
 dist-hook:
 	dirs=`cd $(srcdir); find gov SIDL -type d \( -name SCCS -prune -o  \

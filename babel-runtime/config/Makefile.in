@@ -47,7 +47,7 @@ AUTOHEADER = @AUTOHEADER@ \
 	     && @PERL@ -p -i.bak \
 	          -e "s/^\#undef (.*)$$/\#ifndef \1\n\#undef \1\n\#endif/" \
 	          babel_config.h.in \
-             && $(RM) -f babel_config.h.in.bak
+             && rm -f babel_config.h.in.bak
 
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@

@@ -47,7 +47,7 @@ AUTOHEADER = @AUTOHEADER@ \
 	     && @PERL@ -p -i.bak \
 	          -e "s/^\#undef (.*)$$/\#ifndef \1\n\#undef \1\n\#endif/" \
 	          babel_config.h.in \
-             && $(RM) -f babel_config.h.in.bak
+             && rm -f babel_config.h.in.bak
 
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
@@ -838,7 +838,7 @@ $(HEADERS_INSTALL) $(HEADERS_BABEL) $(SOURCES_BABEL): babel-stamp
 @BABEL_RUNTIME_ONLY_TRUE@	touch babel-stamp
 
 @BABEL_RUNTIME_ONLY_TRUE@clean-local:
-@BABEL_RUNTIME_ONLY_TRUE@	$(RM) -f babel-stamp babel-compile stamp-h1 *.o *.lo
+@BABEL_RUNTIME_ONLY_TRUE@	rm -f babel-stamp babel-compile stamp-h1 *.o *.lo
 @BABEL_RUNTIME_ONLY_FALSE@babel-compile: babel-stamp
 @BABEL_RUNTIME_ONLY_FALSE@	touch babel-compile
 @BABEL_RUNTIME_ONLY_FALSE@	$(MAKE) $(AM_MAKEFLAGS) $(OBJECTS_BABEL) $(OBJECTS_SPLICE)
@@ -850,15 +850,15 @@ $(HEADERS_INSTALL) $(HEADERS_BABEL) $(SOURCES_BABEL): babel-stamp
 @BABEL_RUNTIME_ONLY_FALSE@	touch babel-stamp
 
 @BABEL_RUNTIME_ONLY_FALSE@clean-local:
-@BABEL_RUNTIME_ONLY_FALSE@	$(RM) -f $(HEADERS_BABEL) $(OBJECTS_BABEL) $(SOURCES_BABEL)
-@BABEL_RUNTIME_ONLY_FALSE@	$(RM) -f babel-stamp babel-compile stamp-h1
+@BABEL_RUNTIME_ONLY_FALSE@	rm -f $(HEADERS_BABEL) $(OBJECTS_BABEL) $(SOURCES_BABEL)
+@BABEL_RUNTIME_ONLY_FALSE@	rm -f babel-stamp babel-compile stamp-h1
 @BABEL_RUNTIME_ONLY_FALSE@	$(SHELL) $(top_srcdir)/bin/remove.sh $(srcdir) $(FILES_COPY)
 @BABEL_RUNTIME_ONLY_FALSE@	test "X$(srcdir)" = "X." || rm -f babel.make
 
 dist-hook:
 	touch $(distdir)/Makefile.am $(distdir)/Makefile.in
 distclean-local:
-	$(RM) -f babel_config.h
+	rm -f babel_config.h
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:
