@@ -156,39 +156,42 @@ hypre_StructMatrixInitializeShell( hypre_StructMatrix *matrix )
 
    /*-----------------------------------------------------------------------
     * Set up stencil and num_values:
-    *    The stencil is a "symmetrized" version of the user's stencil
-    *    as computed by hypre_StructStencilSymmetrize.
     *
-    *    The `symm_elements' array is used to determine what data is
-    *    explicitely stored (symm_elements[i] < 0) and what data does is
-    *    not explicitely stored (symm_elements[i] >= 0), but is instead
-    *    stored as the transpose coefficient at a neighboring grid point.
+    * If the matrix is symmetric, then the stencil is a "symmetrized"
+    * version of the user's stencil.  If the matrix is not symmetric,
+    * then the stencil is the same as the user's stencil.
+    * 
+    * The `symm_elements' array is used to determine what data is
+    * explicitely stored (symm_elements[i] < 0) and what data does is
+    * not explicitely stored (symm_elements[i] >= 0), but is instead
+    * stored as the transpose coefficient at a neighboring grid point.
     *-----------------------------------------------------------------------*/
 
    if (hypre_StructMatrixStencil(matrix) == NULL)
    {
       user_stencil = hypre_StructMatrixUserStencil(matrix);
 
-      hypre_StructStencilSymmetrize(user_stencil, &stencil, &symm_elements);
-
-      stencil_shape = hypre_StructStencilShape(stencil);
-      stencil_size  = hypre_StructStencilSize(stencil);
-
-      if (!hypre_StructMatrixSymmetric(matrix))
+      if (hypre_StructMatrixSymmetric(matrix))
       {
-         /* store all element data */
-         for (i = 0; i < stencil_size; i++)
-            symm_elements[i] = -1;
-         num_values = stencil_size;
+         /* store only symmetric stencil entry data */
+         hypre_StructStencilSymmetrize(user_stencil, &stencil, &symm_elements);
+         num_values = ( hypre_StructStencilSize(stencil) + 1 ) / 2;
       }
       else
       {
-         num_values = (stencil_size + 1) / 2;
+         /* store all stencil entry data */
+         stencil = hypre_StructStencilRef(user_stencil);
+         num_values = hypre_StructStencilSize(stencil);
+         symm_elements = hypre_TAlloc(int, num_values);
+         for (i = 0; i < num_values; i++)
+         {
+            symm_elements[i] = -1;
+         }
       }
 
-      hypre_StructMatrixStencil(matrix)   = stencil;
+      hypre_StructMatrixStencil(matrix)      = stencil;
       hypre_StructMatrixSymmElements(matrix) = symm_elements;
-      hypre_StructMatrixNumValues(matrix) = num_values;
+      hypre_StructMatrixNumValues(matrix)    = num_values;
    }
 
    /*-----------------------------------------------------------------------
