@@ -28,6 +28,7 @@
 
 #include "protos.h"
 
+#include "../../../HYPRE_config.h"
 #include "fortran_setup.h"
 
 /* malloc debug stuff */
