@@ -688,7 +688,7 @@ case $ARCH in
       if test "$casc_using_mpi" = "no" &&
         test "$casc_using_openmp" = "no"
       then
-        AC_CHECK_PROGS(CC, ccc icc pgcc cc gcc kcc)
+        AC_CHECK_PROGS(CC, ccc icc pgcc cc gcc kcc KCC)
       else
         if test "$casc_using_openmp" = "no" ; then
           AC_CHECK_PROGS(CC, mpiicc mpipgcc icc mpicc)
@@ -701,7 +701,7 @@ case $ARCH in
       if test "$casc_using_mpi" = "no" &&
         test "$casc_using_openmp" = "no"
       then
-        AC_CHECK_PROGS(CXX, icc pgCC CC g++)
+        AC_CHECK_PROGS(CXX, icc pgCC CC g++ KCC)
       else
         if test "$casc_using_openmp" = "no" ; then
           AC_CHECK_PROGS(CXX, mpiicc mpipgCC icc mpiCC)
