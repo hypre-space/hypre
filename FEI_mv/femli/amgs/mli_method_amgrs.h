@@ -43,6 +43,7 @@ class MLI_Method_AMGRS : public MLI_Method
    int      minCoarseSize_;          /* tell when to stop coarsening     */
    double   maxRowSum_;              /* used in Boomeramg                */
    int      symmetric_;              /* symmetric or nonsymmetric amg    */
+   int      useInjectionForR_;       /* how R is to be constructed       */
    char     smoother_[20];           /* denote which pre-smoother to use */
    int      smootherNSweeps_;        /* number of pre-smoother sweeps    */
    double   *smootherWeights_;       /* number of postsmoother sweeps    */

@@ -10,6 +10,8 @@
 #define strcasecmp _stricmp
 #endif
 
+/* #define MLI_USE_HYPRE_MATMATMULT */
+
 #include <string.h>
 #include <assert.h>
 #include "HYPRE.h"
@@ -32,18 +34,19 @@ MLI_Method_AMGRS::MLI_Method_AMGRS( MPI_Comm comm ) : MLI_Method( comm )
    strcpy(name, "AMGRS");
    setName( name );
    setID( MLI_METHOD_AMGRS_ID );
-   outputLevel_   = 0;
-   maxLevels_     = 25;
-   numLevels_     = 25;
-   currLevel_     = 0;
-   coarsenScheme_ = 0;              /* default : CLJP */
-   measureType_   = 0;              /* default : local measure */
-   threshold_     = 0.5;
-   nodeDOF_       = 1;
-   minCoarseSize_ = 200;
-   maxRowSum_     = 0.9;
-   symmetric_     = 1;
-   truncFactor_   = 0.0;
+   outputLevel_      = 0;
+   maxLevels_        = 25;
+   numLevels_        = 25;
+   currLevel_        = 0;
+   coarsenScheme_    = 0;              /* default : CLJP */
+   measureType_      = 0;              /* default : local measure */
+   threshold_        = 0.5;
+   nodeDOF_          = 1;
+   minCoarseSize_    = 200;
+   maxRowSum_        = 0.9;
+   symmetric_        = 1;
+   useInjectionForR_ = 0;
+   truncFactor_      = 0.0;
    strcpy(smoother_, "Jacobi");
    smootherNSweeps_ = 2;
    smootherWeights_  = new double[2];
@@ -149,6 +152,11 @@ int MLI_Method_AMGRS::setParams(char *in_name, int argc, char *argv[])
       symmetric_ = 0;
       return 0;
    }
+   else if ( !strcasecmp(param1, "useInjectionForR" ))
+   {
+      useInjectionForR_ = 1;
+      return 0;
+   }
    else if ( !strcasecmp(param1, "setSmoother" ) || 
              !strcasecmp(param1, "setPreSmoother" ))
    {
@@ -211,20 +219,23 @@ int MLI_Method_AMGRS::setParams(char *in_name, int argc, char *argv[])
 
 int MLI_Method_AMGRS::setup( MLI *mli ) 
 {
-   int             k, level, irow, local_nrows, mypid, nprocs;
-   int             num_nodes, one=1, global_nrows, *coarse_partition;
-   int             *CF_markers, coarse_nrows, *dof_array, *cdof_array=NULL;
-   int             reduceArray1[2], reduceArray2[2], zeroNRows;
-   double          start_time, elapsed_time;
-   char            param_string[100], *targv[10];
+   int             k, level, irow, localNRows, mypid, nprocs, startRow;
+   int             numNodes, one=1, globalNRows, *coarsePartition;
+   int             *CFMarkers, coarseNRows, *dofArray, *cdofArray=NULL;
+   int             *reduceArray1, *reduceArray2, *rowLengs, ierr, zeroNRows;
+   int             startCol, localNCols, colInd, rowNum;
+   int             globalCoarseNRows;
+   double          startTime, elapsedTime, colVal=1.0;
+   char            paramString[100], *targv[10];
    MLI_Matrix      *mli_Pmat, *mli_Rmat, *mli_APmat, *mli_Amat, *mli_cAmat;
    MLI_Matrix      *mli_ATmat;
-   MLI_Solver      *smoother_ptr, *csolve_ptr;
+   MLI_Solver      *smootherPtr, *csolverPtr;
    MPI_Comm        comm;
-   MLI_Function    *func_ptr;
+   MLI_Function    *funcPtr;
+   HYPRE_IJMatrix  IJRmat;
    hypre_ParCSRMatrix *hypreA, *hypreS, *hypreAT, *hypreST, *hypreP, *hypreR;
    hypre_ParCSRMatrix *hypreRT;
-#if 0 
+#ifdef MLI_USE_HYPRE_MATMATMULT
    hypre_ParCSRMatrix *hypreAP, *hypreCA;
 #endif
 
@@ -233,23 +244,25 @@ int MLI_Method_AMGRS::setup( MLI *mli )
 #endif
 
    /* --------------------------------------------------------------- */
-   /* traverse all levels                                             */
+   /* fetch machine parameters                                        */
    /* --------------------------------------------------------------- */
 
    RAPTime_ = 0.0;
    comm     = getComm();
    MPI_Comm_rank( comm, &mypid );
    MPI_Comm_size( comm, &nprocs );
-   level    = 0;
-   mli_Amat   = mli->getSystemMatrix(level);
    totalTime_ = MLI_Utils_WTime();
 
-   for (level = 0; level < numLevels_; level++ )
+   /* --------------------------------------------------------------- */
+   /* traverse all levels                                             */
+   /* --------------------------------------------------------------- */
+
+   for ( level = 0; level < numLevels_; level++ )
    {
       if ( mypid == 0 && outputLevel_ > 0 )
       {
          printf("\t*****************************************************\n");
-         printf("\t*** RS AMG : level = %d\n", level);
+         printf("\t*** Ruge Stuben AMG : level = %d\n", level);
          printf("\t-----------------------------------------------------\n");
       }
       currLevel_ = level;
@@ -260,33 +273,34 @@ int MLI_Method_AMGRS::setup( MLI *mli )
       mli_Amat = mli->getSystemMatrix(level);
       assert ( mli_Amat != NULL );
       hypreA = (hypre_ParCSRMatrix *) mli_Amat->getMatrix();
-      local_nrows  = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(hypreA));
-      global_nrows = hypre_ParCSRMatrixGlobalNumRows(hypreA);
+      startRow    = hypre_ParCSRMatrixFirstRowIndex(hypreA);
+      localNRows  = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(hypreA));
+      globalNRows = hypre_ParCSRMatrixGlobalNumRows(hypreA);
 
       /* ------create strength matrix----------------------------------- */
 
-      num_nodes = local_nrows / nodeDOF_;
-      if ( level == 0 && (num_nodes * nodeDOF_) != local_nrows )
+      numNodes = localNRows / nodeDOF_;
+      if ( level == 0 && (numNodes * nodeDOF_) != localNRows )
       {
          printf("\tMLI_Method_AMGRS::setup - nrows not divisible by dof.\n");
          printf("\tMLI_Method_AMGRS::setup - revert nodeDOF to 1.\n");
          nodeDOF_ = 1; 
-         num_nodes = local_nrows / nodeDOF_;
+         numNodes = localNRows / nodeDOF_;
       }
       if ( level == 0 )
       {
-         if ( local_nrows > 0 ) dof_array = new int[local_nrows];
-         else                   dof_array = NULL;
-         for ( irow = 0; irow < local_nrows; irow+=nodeDOF_ )
-            for ( k = 0; k < nodeDOF_; k++ ) dof_array[irow+k] = k;
+         if ( localNRows > 0 ) dofArray = new int[localNRows];
+         else                  dofArray = NULL;
+         for ( irow = 0; irow < localNRows; irow+=nodeDOF_ )
+            for ( k = 0; k < nodeDOF_; k++ ) dofArray[irow+k] = k;
       }
       else
       {
-         if ( level > 0 && dof_array != NULL ) delete [] dof_array;
-         dof_array = cdof_array;
+         if ( level > 0 && dofArray != NULL ) delete [] dofArray;
+         dofArray = cdofArray;
       }
       hypre_BoomerAMGCreateS(hypreA, threshold_, maxRowSum_, nodeDOF_,
-                             dof_array, &hypreS);
+                             dofArray, &hypreS);
 
       /* ------perform coarsening--------------------------------------- */
 
@@ -294,54 +308,51 @@ int MLI_Method_AMGRS::setup( MLI *mli )
       {
          case MLI_METHOD_AMGRS_CLJP :
               hypre_BoomerAMGCoarsen(hypreS, hypreA, 0, outputLevel_,
-                            	     &CF_markers);
+                            	     &CFMarkers);
               break;
          case MLI_METHOD_AMGRS_RUGE :
               hypre_BoomerAMGCoarsenRuge(hypreS, hypreA, measureType_,
-                            	 coarsenScheme_, outputLevel_, &CF_markers);
+                            	 coarsenScheme_, outputLevel_, &CFMarkers);
               break;
          case MLI_METHOD_AMGRS_FALGOUT :
               hypre_BoomerAMGCoarsenFalgout(hypreS, hypreA, measureType_, 
-                                            outputLevel_, &CF_markers);
+                                            outputLevel_, &CFMarkers);
               break;
       }
+      coarseNRows = 0;
+      for ( irow = 0; irow < localNRows; irow++ )
+         if ( CFMarkers[irow] == 1 ) coarseNRows++;
 
       /* ------if nonsymmetric, compute S for R------------------------- */
-
-      coarse_nrows = 0;
-      for ( irow = 0; irow < local_nrows; irow++ )
-         if ( CF_markers[irow] == 1 ) coarse_nrows++;
 
       if ( symmetric_ == 0 )
       {
          MLI_Matrix_Transpose( mli_Amat, &mli_ATmat );
          hypreAT = (hypre_ParCSRMatrix *) mli_ATmat->getMatrix();
          hypre_BoomerAMGCreateS(hypreAT, threshold_, maxRowSum_, nodeDOF_,
-                                dof_array, &hypreST);
+                                dofArray, &hypreST);
          hypre_BoomerAMGCoarsen(hypreST, hypreAT, 1, outputLevel_,
-                            	&CF_markers);
-
-         coarse_nrows = 0;
-         for ( irow = 0; irow < local_nrows; irow++ )
-            if ( CF_markers[irow] == 1 ) coarse_nrows++;
+                            	&CFMarkers);
+         coarseNRows = 0;
+         for ( irow = 0; irow < localNRows; irow++ )
+            if ( CFMarkers[irow] == 1 ) coarseNRows++;
       }
-      reduceArray1[0] = coarse_nrows;
-      reduceArray1[1] = local_nrows;
-      MPI_Allreduce(reduceArray1, reduceArray2, 2, MPI_INT, MPI_SUM, comm);
-      if ( outputLevel_ > 1 && mypid == 0 )
-         printf("\tMLI_Method_AMGRS::setup - # C dof = %d(%d)\n",
-                reduceArray2[0],reduceArray2[1]);
 
-      /* ------see if the coarsest level is reached--------------------- */
+      /* ------construct processor maps for the coarse grid------------- */
 
-      coarse_partition = (int *) hypre_CTAlloc(int, nprocs+1);
-      coarse_partition[0] = 0;
-      MPI_Allgather(&coarse_nrows, 1, MPI_INT, &(coarse_partition[1]),
+      coarsePartition = (int *) hypre_CTAlloc(int, nprocs+1);
+      coarsePartition[0] = 0;
+      MPI_Allgather(&coarseNRows, 1, MPI_INT, &(coarsePartition[1]),
 		    1, MPI_INT, comm);
       for ( irow = 2; irow < nprocs+1; irow++ )
-         coarse_partition[irow] += coarse_partition[irow-1];
+         coarsePartition[irow] += coarsePartition[irow-1];
+      globalCoarseNRows = coarsePartition[nprocs];
 
-      /* ------if nonsymmetric, need to make sure local_nrows > 0 ------ */
+      if ( outputLevel_ > 1 && mypid == 0 )
+         printf("\tMLI_Method_AMGRS::setup - # C dof = %d(%d)\n",
+                globalCoarseNRows, globalNRows);
+
+      /* ------if nonsymmetric, need to make sure localNRows > 0 ------ */
       /* ------ or the matrixTranspose function will give problems ----- */
 
       if ( symmetric_ == 0 )
@@ -349,7 +360,7 @@ int MLI_Method_AMGRS::setup( MLI *mli )
          zeroNRows = 0;
          for ( irow = 0; irow < nprocs; irow++ )
          {
-            if ( (coarse_partition[irow+1]-coarse_partition[irow]) <= 0 )
+            if ( (coarsePartition[irow+1]-coarsePartition[irow]) <= 0 )
             {
                zeroNRows = 1;
                break;
@@ -359,75 +370,123 @@ int MLI_Method_AMGRS::setup( MLI *mli )
           
       /* ------ wrap up creating the multigrid hierarchy --------------- */
 
-      if ( coarse_partition[nprocs] < minCoarseSize_ ||
-           coarse_partition[nprocs] == global_nrows || zeroNRows == 1 ) 
+      if ( coarsePartition[nprocs] < minCoarseSize_ ||
+           coarsePartition[nprocs] == globalNRows || zeroNRows == 1 ) 
       {
          if ( symmetric_ == 0 )
          {
             delete mli_ATmat;
             hypre_ParCSRMatrixDestroy(hypreST);
          }
-         hypre_TFree( coarse_partition );
-         if ( CF_markers != NULL ) hypre_TFree( CF_markers );
+         hypre_TFree( coarsePartition );
+         if ( CFMarkers != NULL ) hypre_TFree( CFMarkers );
          if ( hypreS != NULL ) hypre_ParCSRMatrixDestroy(hypreS);
          break;
       }
-      k = (int) (global_nrows * 0.75);
-      if ( coarsenScheme_ > 0 && coarse_partition[nprocs] >= k )
+      k = (int) (globalNRows * 0.75);
+      if ( coarsenScheme_ > 0 && coarsePartition[nprocs] >= k )
          coarsenScheme_ = 0;
 
       /* ------create new dof array for coarse grid--------------------- */
 
-      if ( coarse_nrows > 0 ) cdof_array = new int[coarse_nrows];
-      else                    cdof_array = NULL;
-      coarse_nrows = 0;
-      for ( irow = 0; irow < local_nrows; irow++ )
+      if ( coarseNRows > 0 ) cdofArray = new int[coarseNRows];
+      else                   cdofArray = NULL;
+      coarseNRows = 0;
+      for ( irow = 0; irow < localNRows; irow++ )
       {
-         if ( CF_markers[irow] == 1 )
-            cdof_array[coarse_nrows++] = dof_array[irow];
+         if ( CFMarkers[irow] == 1 )
+            cdofArray[coarseNRows++] = dofArray[irow];
       }
 
       /* ------build and set the interpolation operator----------------- */
 
-      hypre_BoomerAMGBuildInterp(hypreA, CF_markers, hypreS, 
-                  coarse_partition, nodeDOF_, dof_array, outputLevel_, 
+      hypre_BoomerAMGBuildInterp(hypreA, CFMarkers, hypreS, 
+                  coarsePartition, nodeDOF_, dofArray, outputLevel_, 
                   truncFactor_, &hypreP);
-      func_ptr = new MLI_Function();
-      MLI_Utils_HypreParCSRMatrixGetDestroyFunc(func_ptr);
-      sprintf(param_string, "HYPRE_ParCSR" ); 
-      mli_Pmat = new MLI_Matrix( (void *) hypreP, param_string, func_ptr );
+      funcPtr = new MLI_Function();
+      MLI_Utils_HypreParCSRMatrixGetDestroyFunc(funcPtr);
+      sprintf(paramString, "HYPRE_ParCSR" ); 
+      mli_Pmat = new MLI_Matrix( (void *) hypreP, paramString, funcPtr );
       mli->setProlongation(level+1, mli_Pmat);
-      delete func_ptr;
+      delete funcPtr;
       if ( hypreS != NULL ) hypre_ParCSRMatrixDestroy(hypreS);
 
       /* ------build and set the restriction operator, if needed-------- */
 
-      if ( symmetric_ == 0 )
+      if ( useInjectionForR_ == 1 )
       {
-         hypre_BoomerAMGBuildInterp(hypreAT, CF_markers, hypreST, 
-                     coarse_partition, nodeDOF_, dof_array, outputLevel_, 
+         reduceArray1 = new int[nprocs+1];
+         reduceArray2 = new int[nprocs+1];
+         for ( k = 0; k < nprocs; k++ ) reduceArray1[k] = 0;
+         reduceArray1[mypid] = coarseNRows;
+         MPI_Allreduce(reduceArray1,reduceArray2,nprocs,MPI_INT,MPI_SUM,comm);
+         for ( k = 0; k < nprocs; k++ ) reduceArray2[k+1] = reduceArray2[k];
+         reduceArray2[0] = 0;
+         for ( k = 2; k <= nprocs; k++ ) reduceArray2[k] += reduceArray2[k-1];
+         startCol   = reduceArray2[mypid];
+         localNCols = reduceArray2[mypid+1] - startCol;
+         globalCoarseNRows = reduceArray2[nprocs];
+         ierr = HYPRE_IJMatrixCreate(comm, startCol, startCol+localNCols-1,
+                        startRow,startRow+localNRows-1,&IJRmat);
+         ierr = HYPRE_IJMatrixSetObjectType(IJRmat, HYPRE_PARCSR);
+         assert(!ierr);
+         rowLengs = new int[localNCols];
+         for ( k = 0; k < localNCols; k++ ) rowLengs[k] = 1;
+         ierr = HYPRE_IJMatrixSetRowSizes(IJRmat, rowLengs);
+         ierr = HYPRE_IJMatrixInitialize(IJRmat);
+         assert(!ierr);
+         delete [] rowLengs;
+         delete [] reduceArray1;
+         delete [] reduceArray2;
+         k = 0;
+         for ( irow = 0; irow < localNCols; irow++ ) 
+         {
+            while ( CFMarkers[k] != 1 ) k++; 
+            rowNum = startCol + irow;
+            colInd = k + startRow;
+            HYPRE_IJMatrixSetValues(IJRmat, 1, &one, (const int *) &rowNum, 
+                    (const int *) &colInd, (const double *) &colVal);
+            k++;
+         }
+         ierr = HYPRE_IJMatrixAssemble(IJRmat);
+         assert( !ierr );
+         HYPRE_IJMatrixGetObject(IJRmat, (void **) &hypreR);
+         hypre_MatvecCommPkgCreate((hypre_ParCSRMatrix *) hypreR);
+         funcPtr = new MLI_Function();
+         MLI_Utils_HypreParCSRMatrixGetDestroyFunc(funcPtr);
+         sprintf(paramString, "HYPRE_ParCSR" ); 
+         mli_Rmat = new MLI_Matrix( (void *) hypreR, paramString, funcPtr );
+         mli->setRestriction(level, mli_Rmat);
+         delete funcPtr;
+         delete mli_ATmat;
+         hypre_ParCSRMatrixDestroy(hypreST);
+      }
+      else if ( symmetric_ == 0 )
+      {
+         hypre_BoomerAMGBuildInterp(hypreAT, CFMarkers, hypreST, 
+                     coarsePartition, nodeDOF_, dofArray, outputLevel_, 
                      truncFactor_, &hypreRT);
          hypreRT->owns_col_starts = 0;
          hypre_ParCSRMatrixTranspose( hypreRT, &hypreR, one );
-         func_ptr = new MLI_Function();
-         MLI_Utils_HypreParCSRMatrixGetDestroyFunc(func_ptr);
-         sprintf(param_string, "HYPRE_ParCSR" ); 
-         mli_Rmat = new MLI_Matrix( (void *) hypreR, param_string, func_ptr );
+         funcPtr = new MLI_Function();
+         MLI_Utils_HypreParCSRMatrixGetDestroyFunc(funcPtr);
+         sprintf(paramString, "HYPRE_ParCSR" ); 
+         mli_Rmat = new MLI_Matrix( (void *) hypreR, paramString, funcPtr );
          mli->setRestriction(level, mli_Rmat);
-         delete func_ptr;
+         delete funcPtr;
          delete mli_ATmat;
          hypre_ParCSRMatrixDestroy(hypreST);
          hypre_ParCSRMatrixDestroy(hypreRT);
       }
       else
       {
-         sprintf(param_string, "HYPRE_ParCSRT");
-         mli_Rmat = new MLI_Matrix(mli_Pmat->getMatrix(), param_string, NULL);
+         sprintf(paramString, "HYPRE_ParCSRT");
+         mli_Rmat = new MLI_Matrix(mli_Pmat->getMatrix(), paramString, NULL);
          mli->setRestriction(level, mli_Rmat);
       }
-      if ( CF_markers != NULL ) hypre_TFree( CF_markers );
+      if ( CFMarkers != NULL ) hypre_TFree( CFMarkers );
 
-      start_time = MLI_Utils_WTime();
+      startTime = MLI_Utils_WTime();
 
       /* ------construct and set the coarse grid matrix----------------- */
 
@@ -438,65 +497,65 @@ int MLI_Method_AMGRS::setup( MLI *mli )
       }
       else
       {
-#if 1
-           MLI_Matrix_MatMatMult(mli_Amat, mli_Pmat, &mli_APmat);
-           MLI_Matrix_MatMatMult(mli_Rmat, mli_APmat, &mli_cAmat);
-           delete mli_APmat;
-#else
+#ifdef MLI_USE_HYPRE_MATMATMULT
            hypreP  = (hypre_ParCSRMatrix *) mli_Pmat->getMatrix();
            hypreR  = (hypre_ParCSRMatrix *) mli_Rmat->getMatrix();
            hypreAP = hypre_ParMatmul( hypreA, hypreP );
            hypreCA = hypre_ParMatmul( hypreR, hypreAP );
            hypre_ParCSRMatrixDestroy( hypreAP );
-           func_ptr = new MLI_Function();
-           MLI_Utils_HypreParCSRMatrixGetDestroyFunc(func_ptr);
-           sprintf(param_string, "HYPRE_ParCSR" ); 
-           mli_cAmat = new MLI_Matrix((void *) hypreCA, param_string, func_ptr);
-           delete func_ptr;
+           funcPtr = new MLI_Function();
+           MLI_Utils_HypreParCSRMatrixGetDestroyFunc(funcPtr);
+           sprintf(paramString, "HYPRE_ParCSR" ); 
+           mli_cAmat = new MLI_Matrix((void *) hypreCA, paramString, funcPtr);
+           delete funcPtr;
+#else
+           MLI_Matrix_MatMatMult(mli_Amat, mli_Pmat, &mli_APmat);
+           MLI_Matrix_MatMatMult(mli_Rmat, mli_APmat, &mli_cAmat);
+           delete mli_APmat;
 #endif
       }
       mli->setSystemMatrix(level+1, mli_cAmat);
-      elapsed_time = (MLI_Utils_WTime() - start_time);
-      RAPTime_ += elapsed_time;
+      elapsedTime = (MLI_Utils_WTime() - startTime);
+      RAPTime_ += elapsedTime;
       if ( mypid == 0 && outputLevel_ > 0 ) 
-         printf("\tRAP computed, time = %e seconds.\n", elapsed_time);
+         printf("\tRAP computed, time = %e seconds.\n", elapsedTime);
 
       /* ------set the smoothers---------------------------------------- */
 
-      smoother_ptr = MLI_Solver_CreateFromName( smoother_ );
+      smootherPtr = MLI_Solver_CreateFromName( smoother_ );
       targv[0] = (char *) &smootherNSweeps_;
       targv[1] = (char *) smootherWeights_;
-      sprintf( param_string, "relaxWeight" );
-      smoother_ptr->setParams(param_string, 2, targv);
+      sprintf( paramString, "relaxWeight" );
+      smootherPtr->setParams(paramString, 2, targv);
       if ( smootherPrintRNorm_ == 1 )
       {
-         sprintf( param_string, "printRNorm" );
-         smoother_ptr->setParams(param_string, 0, NULL);
+         sprintf( paramString, "printRNorm" );
+         smootherPtr->setParams(paramString, 0, NULL);
       }
       if ( smootherFindOmega_ == 1 )
       {
-         sprintf( param_string, "findOmega" );
-         smoother_ptr->setParams(param_string, 0, NULL);
+         sprintf( paramString, "findOmega" );
+         smootherPtr->setParams(paramString, 0, NULL);
       }
-      smoother_ptr->setup(mli_Amat);
-      mli->setSmoother( level, MLI_SMOOTHER_BOTH, smoother_ptr );
+      smootherPtr->setup(mli_Amat);
+      mli->setSmoother( level, MLI_SMOOTHER_BOTH, smootherPtr );
    }
-   if ( dof_array != NULL ) delete [] dof_array;
+   if ( dofArray != NULL ) delete [] dofArray;
 
    /* ------set the coarse grid solver---------------------------------- */
 
    if (mypid == 0 && outputLevel_ > 0) printf("\tCoarse level = %d\n",level);
-   csolve_ptr = MLI_Solver_CreateFromName( coarseSolver_ );
+   csolverPtr = MLI_Solver_CreateFromName( coarseSolver_ );
    if ( strcmp(coarseSolver_, "SuperLU") )
    {
       targv[0] = (char *) &coarseSolverNSweeps_;
       targv[1] = (char *) coarseSolverWeights_ ;
-      sprintf( param_string, "relaxWeight" );
-      csolve_ptr->setParams(param_string, 2, targv);
+      sprintf( paramString, "relaxWeight" );
+      csolverPtr->setParams(paramString, 2, targv);
    }
    mli_Amat = mli->getSystemMatrix(level);
-   csolve_ptr->setup(mli_Amat);
-   mli->setCoarseSolve(csolve_ptr);
+   csolverPtr->setup(mli_Amat);
+   mli->setCoarseSolve(csolverPtr);
    totalTime_ = MLI_Utils_WTime() - totalTime_;
 
    /* --------------------------------------------------------------- */
@@ -668,6 +727,8 @@ int MLI_Method_AMGRS::print()
       printf("\t*** strength threshold      = %e\n", threshold_);
       printf("\t*** truncation factor       = %e\n", truncFactor_);
       printf("\t*** nodal degree of freedom = %d\n", nodeDOF_);
+      printf("\t*** symmetric flag          = %d\n", symmetric_);
+      printf("\t*** R injection flag        = %d\n", useInjectionForR_);
       printf("\t*** minimum coarse size     = %d\n", minCoarseSize_);
       printf("\t*** smoother type           = %s\n", smoother_); 
       printf("\t*** smoother nsweeps        = %d\n", smootherNSweeps_);
@@ -684,10 +745,10 @@ int MLI_Method_AMGRS::print()
 
 int MLI_Method_AMGRS::printStatistics(MLI *mli)
 {
-   int          mypid, level, global_nrows, tot_nrows, fine_nrows;
-   int          max_nnz, min_nnz, fine_nnz, tot_nnz, this_nnz, itemp;
-   double       max_val, min_val, dtemp;
-   char         param_string[100];
+   int          mypid, level, globalNRows, totNRows, fineNRows;
+   int          maxNnz, minNnz, fineNnz, totNnz, thisNnz, itemp;
+   double       maxVal, minVal, dtemp;
+   char         paramString[100];
    MLI_Matrix   *mli_Amat, *mli_Pmat;
    MPI_Comm     comm = getComm();
 
@@ -716,31 +777,31 @@ int MLI_Method_AMGRS::printStatistics(MLI *mli)
    /* fine and coarse matrix complexity information                   */
    /* --------------------------------------------------------------- */
 
-   tot_nnz = tot_nrows = 0;
+   totNnz = totNRows = 0;
    for ( level = 0; level <= currLevel_; level++ )
    {
       mli_Amat = mli->getSystemMatrix( level );
-      sprintf(param_string, "nrows");
-      mli_Amat->getMatrixInfo(param_string, global_nrows, dtemp);
-      sprintf(param_string, "maxnnz");
-      mli_Amat->getMatrixInfo(param_string, max_nnz, dtemp);
-      sprintf(param_string, "minnnz");
-      mli_Amat->getMatrixInfo(param_string, min_nnz, dtemp);
-      sprintf(param_string, "totnnz");
-      mli_Amat->getMatrixInfo(param_string, this_nnz, dtemp);
-      sprintf(param_string, "maxval");
-      mli_Amat->getMatrixInfo(param_string, itemp, max_val);
-      sprintf(param_string, "minval");
-      mli_Amat->getMatrixInfo(param_string, itemp, min_val);
+      sprintf(paramString, "nrows");
+      mli_Amat->getMatrixInfo(paramString, globalNRows, dtemp);
+      sprintf(paramString, "maxnnz");
+      mli_Amat->getMatrixInfo(paramString, maxNnz, dtemp);
+      sprintf(paramString, "minnnz");
+      mli_Amat->getMatrixInfo(paramString, minNnz, dtemp);
+      sprintf(paramString, "totnnz");
+      mli_Amat->getMatrixInfo(paramString, thisNnz, dtemp);
+      sprintf(paramString, "maxval");
+      mli_Amat->getMatrixInfo(paramString, itemp, maxVal);
+      sprintf(paramString, "minval");
+      mli_Amat->getMatrixInfo(paramString, itemp, minVal);
       if ( mypid == 0 )
       {
          printf("\t*%3d %9d %5d  %5d %10d %8.3e %8.3e *\n",level,
-                global_nrows, max_nnz, min_nnz, this_nnz, max_val, min_val);
+                globalNRows, maxNnz, minNnz, thisNnz, maxVal, minVal);
       }
-      if ( level == 0 ) fine_nnz = this_nnz;
-      tot_nnz += this_nnz;
-      if ( level == 0 ) fine_nrows = global_nrows;
-      tot_nrows += global_nrows;
+      if ( level == 0 ) fineNnz = thisNnz;
+      totNnz += thisNnz;
+      if ( level == 0 ) fineNRows = globalNRows;
+      totNRows += globalNRows;
    }
 
    /* --------------------------------------------------------------- */
@@ -756,22 +817,22 @@ int MLI_Method_AMGRS::printStatistics(MLI *mli)
    for ( level = 1; level <= currLevel_; level++ )
    {
       mli_Pmat = mli->getProlongation( level );
-      sprintf(param_string, "nrows");
-      mli_Pmat->getMatrixInfo(param_string, global_nrows, dtemp);
-      sprintf(param_string, "maxnnz");
-      mli_Pmat->getMatrixInfo(param_string, max_nnz, dtemp);
-      sprintf(param_string, "minnnz");
-      mli_Pmat->getMatrixInfo(param_string, min_nnz, dtemp);
-      sprintf(param_string, "totnnz");
-      mli_Pmat->getMatrixInfo(param_string, this_nnz, dtemp);
-      sprintf(param_string, "maxval");
-      mli_Pmat->getMatrixInfo(param_string, itemp, max_val);
-      sprintf(param_string, "minval");
-      mli_Pmat->getMatrixInfo(param_string, itemp, min_val);
+      sprintf(paramString, "nrows");
+      mli_Pmat->getMatrixInfo(paramString, globalNRows, dtemp);
+      sprintf(paramString, "maxnnz");
+      mli_Pmat->getMatrixInfo(paramString, maxNnz, dtemp);
+      sprintf(paramString, "minnnz");
+      mli_Pmat->getMatrixInfo(paramString, minNnz, dtemp);
+      sprintf(paramString, "totnnz");
+      mli_Pmat->getMatrixInfo(paramString, thisNnz, dtemp);
+      sprintf(paramString, "maxval");
+      mli_Pmat->getMatrixInfo(paramString, itemp, maxVal);
+      sprintf(paramString, "minval");
+      mli_Pmat->getMatrixInfo(paramString, itemp, minVal);
       if ( mypid == 0 )
       {
          printf("\t*%3d %9d %5d  %5d %10d %8.3e %8.3e *\n",level,
-                global_nrows, max_nnz, min_nnz, this_nnz, max_val, min_val);
+                globalNRows, maxNnz, minNnz, thisNnz, maxVal, minVal);
       }
    }
 
@@ -782,9 +843,9 @@ int MLI_Method_AMGRS::printStatistics(MLI *mli)
    if ( mypid == 0 )
    {
       printf("\t********************************************************\n");
-      dtemp = (double) tot_nnz / (double) fine_nnz;
+      dtemp = (double) totNnz / (double) fineNnz;
       printf("\t*** Amat complexity  = %e\n", dtemp);
-      dtemp = (double) tot_nrows / (double) fine_nrows;
+      dtemp = (double) totNRows / (double) fineNRows;
       printf("\t*** grid complexity  = %e\n", dtemp);
       printf("\t********************************************************\n");
       fflush(stdout);
