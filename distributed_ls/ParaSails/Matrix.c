@@ -253,6 +253,9 @@ static void MatrixReadMaster(Matrix *mat, char *filename)
     int ind[10000];
     double val[10000];
 
+    char line[100];
+    int dummy, oldrow;
+
     MPI_Request request;
     MPI_Status  status;
 
@@ -262,11 +265,8 @@ static void MatrixReadMaster(Matrix *mat, char *filename)
     file = fopen(filename, "r");
     assert(file != NULL);
 
-#ifdef ISIS_FORMAT
-    ret = fscanf(file, "%d", &num_rows);
-#else
-    ret = fscanf(file, "%d %*d %*d", &num_rows);
-#endif
+    fgets(line, 100, file);
+    ret = sscanf(line, "%d %d %d", &num_rows, &dummy, &dummy); 
 
     offset = ftell(file);
     fscanf(file, "%d %d %lf", &row, &col, &value);
@@ -283,17 +283,16 @@ static void MatrixReadMaster(Matrix *mat, char *filename)
 	    curr_proc++;
 	}
         offset = ftell(file);
+	oldrow = row;
         fscanf(file, "%d %d %lf", &row, &col, &value);
+        assert(oldrow <= row);
     }
 
     /* Now read our own part */
     rewind(file);
 
-#ifdef ISIS_FORMAT
-    ret = fscanf(file, "%d", &num_rows);
-#else
-    ret = fscanf(file, "%d %*d %*d", &num_rows);
-#endif
+    fgets(line, 100, file);
+    ret = sscanf(line, "%d %d %d", &num_rows, &dummy, &dummy); 
 
     ret = fscanf(file, "%d %d %lf", &row, &col, &value);
     curr_row = row;
@@ -421,7 +420,7 @@ void MatrixRead(Matrix *mat, char *filename)
  * RhsRead - Read a right-hand side file "filename" from disk and store in the 
  * location pointed to by "rhs".  "mat" is needed to provide the partitioning
  * information.  The expected format is: a header line (n, nrhs) followed
- * by n values.
+ * by n values.  Also allows isis format, indicated by 1 int in first line.
  *--------------------------------------------------------------------------*/
 
 void RhsRead(double *rhs, Matrix *mat, char *filename)
@@ -429,9 +428,10 @@ void RhsRead(double *rhs, Matrix *mat, char *filename)
     FILE *file;
     MPI_Status status;
     int mype, npes;
-    int num_rows, num_local, pe, i;
+    int num_rows, num_local, pe, i, dummy, converted;
     double *buffer = NULL;
     int buflen = 0;
+    char line[100];
 
     MPI_Comm_size(mat->comm, &npes);
     MPI_Comm_rank(mat->comm, &mype);
@@ -447,20 +447,16 @@ void RhsRead(double *rhs, Matrix *mat, char *filename)
     file = fopen(filename, "r");
     assert(file != NULL);
 
-#ifdef ISIS_FORMAT
-    i = fscanf(file, "%d", &num_rows);
-#else
-    i = fscanf(file, "%d %*d", &num_rows);
-#endif
+    fgets(line, 100, file);
+    converted = sscanf(line, "%d %d", &num_rows, &dummy);
     assert(num_rows == mat->end_rows[npes-1]);
 
     /* Read own rows first */
     for (i=0; i<num_local; i++)
-#ifdef ISIS_FORMAT
-        fscanf(file, "%*d %lf", &rhs[i]);
-#else
-        fscanf(file, "%lf", &rhs[i]);
-#endif
+        if (converted == 1) /* isis format */
+            fscanf(file, "%*d %lf", &rhs[i]);
+	else
+            fscanf(file, "%lf", &rhs[i]);
 
     for (pe=1; pe<npes; pe++)
     {
@@ -474,11 +470,10 @@ void RhsRead(double *rhs, Matrix *mat, char *filename)
 	}
 
         for (i=0; i<num_local; i++)
-#ifdef ISIS_FORMAT
+          if (converted == 1) /* isis format */
             fscanf(file, "%*d %lf", &buffer[i]);
-#else
+	  else
             fscanf(file, "%lf", &buffer[i]);
-#endif
 
 	MPI_Send(buffer, num_local, MPI_DOUBLE, pe, 0, mat->comm);
     }
