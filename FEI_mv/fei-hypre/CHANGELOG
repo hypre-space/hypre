@@ -48,4 +48,7 @@
             - add system AMG
 05/02/01    2.0.0R9
             - take out iostream.h because it creates problem on solaris
+05/10/01    2.0.0R10
+            - re-work launchSolver parameter setting for preconditioners.
+            - add diagnostic information to SuperLUX
           
