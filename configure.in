@@ -51,14 +51,12 @@ unset F77
 
 casc_user_chose_compilers=no
 casc_user_chose_mpi=no
-casc_using_mpi=yes
 casc_using_pthreads=no
 casc_using_petsc=no
 casc_using_openmp=no   
 casc_using_ibm_smp=no
 casc_using_sgi_smp=no
 casc_using_pgcc_smp=no
-casc_using_system_blas=no
 
 
 AC_ARG_WITH(CC, \[
@@ -195,11 +193,16 @@ dnl * values will be used to determine compilers, flags and libraries needed.
 dnl *********************************************************************
 
 AC_ARG_WITH(MPI, [\
-  --without-MPI           compiles without MPI.  This option could affect
+  --with-MPI              compiles with MPI (this is the default).
+                          Selecting '--without-MPI' may affect
 			  which compiler is chosen],
-  casc_using_mpi=no
-  AC_DEFINE(HYPRE_SEQUENTIAL)
+  casc_using_mpi=$withval,
+  casc_using_mpi=yes
 )
+if test $casc_using_mpi = "no"
+then
+  AC_DEFINE(HYPRE_SEQUENTIAL)
+fi
 
 AC_ARG_WITH(COMM_SIMPLE, [\
   --with-COMM_SIMPLE      Do not use MPI derived data types.  This option
@@ -260,9 +263,10 @@ AC_ARG_WITH(pgcc_smp, [\
   AC_DEFINE(HYPRE_USING_PGCC_SMP)
 )
 
-AC_ARG_WITH(system_blas, [\
-  --with-system-blas      search for and use system BLAS], 
-  casc_using_system_blas=yes
+AC_ARG_WITH(blas, [\
+  --with-blas             search for and use the BLAS], 
+  casc_using_blas=$withval,
+  casc_using_blas=
 )
 
 dnl top level source directory
@@ -325,7 +329,10 @@ case $HOSTNAME in
      CASC_SET_CXXDEBUG(-g) 
      CASC_SET_FOPT(-O)
      CASC_SET_FDEBUG(-g)
-     casc_using_system_blas=yes
+     if test -z "$casc_using_blas"
+     then
+       casc_using_blas=yes
+     fi
 
    ;;
 
@@ -360,7 +367,10 @@ case $HOSTNAME in
      CASC_SET_CXXDEBUG(-g) 
      CASC_SET_FOPT(-O)
      CASC_SET_FDEBUG(-g)
-     casc_using_system_blas=yes
+     if test -z "$casc_using_blas"
+     then
+       casc_using_blas=yes
+     fi
       
    ;;
 
@@ -391,7 +401,10 @@ case $HOSTNAME in
      CASC_SET_CXXDEBUG(-g)
      CASC_SET_FOPT(-O)
      CASC_SET_FDEBUG(-g)
-     casc_using_system_blas=yes
+     if test -z "$casc_using_blas"
+     then
+       casc_using_blas=yes
+     fi
       
    ;;
         
@@ -490,7 +503,10 @@ then
       
      CASC_SET_CXXOPT(-O)
      CASC_SET_CXXDEBUG(-g)
-     casc_using_system_blas=yes
+     if test -z "$casc_using_blas"
+     then
+       casc_using_blas=yes
+     fi
 
      AC_DEFINE(HYPRE_ALPHA)
 
@@ -554,7 +570,10 @@ then
      CASC_SET_CXXOPT(-O3 -qstrict)
      CASC_SET_CXXDEBUG(-g)
      CFLAGS="$CFLAGS -qmaxmem=8192 -DHYPRE_COMM_SIMPLE"
-     casc_using_system_blas=yes
+     if test -z "$casc_using_blas"
+     then
+       casc_using_blas=yes
+     fi
 
      AC_DEFINE(HYPRE_RS6000)
 
@@ -720,7 +739,13 @@ CFLAGS="$CFLAGS $COPT $CDEBUG"
 CXXFLAGS="$CXXFLAGS $CXXOPT $CXXDEBUG"
 F77FLAGS="$F77FLAGS $FOPT $FDEBUG"
 
-if test "$casc_using_system_blas" = "yes"
+dnl * set generic default for blas usage
+if test -z "$casc_using_blas"
+then
+  casc_using_blas=no
+fi
+
+if test "$casc_using_blas" = "yes"
 then
  CASC_FIND_BLAS
  if test "$BLASLIBFLAGS" = "-lessl"
@@ -731,11 +756,11 @@ then
    AC_DEFINE(HYPRE_USING_DXML)
  elif test "$BLASLIBFLAGS" = ""
  then
-   casc_using_system_blas=no
+   casc_using_blas=no
  fi
 fi
 
-if test "$casc_using_system_blas" = "no"
+if test "$casc_using_blas" = "no"
 then
  BLASLIBFLAGS=-lHYPRE_blas
  AC_DEFINE(HYPRE_USING_HYPRE_BLAS)
