@@ -164,11 +164,13 @@ hypre_PFMGBuildCoarseOp7( hypre_StructMatrix *A,
    hypre_Index           index_temp;
 
    hypre_StructGrid     *fgrid;
+   hypre_BoxArray       *fgrid_boxes;
+   hypre_Box            *fgrid_box;
    int                  *fgrid_ids;
    hypre_StructGrid     *cgrid;
    hypre_BoxArray       *cgrid_boxes;
-   int                  *cgrid_ids;
    hypre_Box            *cgrid_box;
+   int                  *cgrid_ids;
    hypre_IndexRef        cstart;
    hypre_Index           stridec;
    hypre_Index           fstart;
@@ -177,18 +179,18 @@ hypre_PFMGBuildCoarseOp7( hypre_StructMatrix *A,
 
    int                   constant_coefficient;
 
-   int                   fi, ci, cbi;
+   int                   fi, ci, fbi;
    int                   loopi, loopj, loopk;
+   int                   floopi, floopj, floopk;
 
    hypre_Box            *A_dbox;
    hypre_Box            *P_dbox;
    hypre_Box            *RAP_dbox;
 
-   hypre_BoxArray       *cboundarya;
-   hypre_BoxArray       *cboundaryb;
-   hypre_Box            *cg_bdy_box;
-   hypre_Index          base_index;
-   hypre_Index          box_index;
+   hypre_BoxArray       *fboundarya;
+   hypre_BoxArray       *fboundaryb;
+   hypre_Box            *fg_bdy_box;
+   hypre_Index           box_index;
 
    double               *pa, *pb;
 
@@ -216,6 +218,7 @@ hypre_PFMGBuildCoarseOp7( hypre_StructMatrix *A,
    hypre_SetIndex(stridec, 1, 1, 1);
 
    fgrid = hypre_StructMatrixGrid(A);
+   fgrid_boxes = hypre_StructGridBoxes(fgrid);
    fgrid_ids = hypre_StructGridIDs(fgrid);
 
    cgrid = hypre_StructMatrixGrid(RAP);
@@ -249,6 +252,7 @@ hypre_PFMGBuildCoarseOp7( hypre_StructMatrix *A,
          }
 
          cgrid_box = hypre_BoxArrayBox(cgrid_boxes, ci);
+         fgrid_box = hypre_BoxArrayBox(fgrid_boxes, fi);
 
          cstart = hypre_BoxIMin(cgrid_box);
          hypre_StructMapCoarseToFine(cstart, cindex, cstride, fstart);
@@ -507,12 +511,9 @@ hypre_PFMGBuildCoarseOp7( hypre_StructMatrix *A,
                diagcorr = a_cw[iA_offd] + a_ce[iA_offd] + a_cs[iA_offd] + a_cn[iA_offd]
                   + a_ac[iA_offd] + a_bc[iA_offd];
 
-               hypre_SetIndex( base_index, hypre_BoxIMinX(cgrid_box),
-                               hypre_BoxIMinY(cgrid_box),
-                               hypre_BoxIMinZ(cgrid_box) );
-               cboundarya = hypre_BoxArrayCreate(0);
-               cboundaryb = hypre_BoxArrayCreate(0);
-               hypre_BoxBoundaryDG( cgrid_box, cgrid, cboundaryb, cboundarya, cdir );
+               fboundarya = hypre_BoxArrayCreate(0);
+               fboundaryb = hypre_BoxArrayCreate(0);
+               hypre_BoxBoundaryDG( fgrid_box, fgrid, fboundaryb, fboundarya, cdir );
                /* ... cgrid_box comes from the grid, so there are no ghost zones
                   involved here */
 
@@ -530,6 +531,7 @@ hypre_PFMGBuildCoarseOp7( hypre_StructMatrix *A,
                      diagm = a_cc[iAm1] + diagcorr;
                      diagp = a_cc[iAp1] + diagcorr;
                      rap_cc[iAc] = a_cc[iA] + diagcorr + diag + 0.5*( diagm+diagp );
+
                      /* ... On a boundary, one of these terms, as well as a_ac or a_bc,
                         should be made 0.  We'll have a different formula, and also
                         we need to make it look like certain constant coefficients
@@ -539,12 +541,17 @@ hypre_PFMGBuildCoarseOp7( hypre_StructMatrix *A,
                      /* The boundary is not done in a separate loop because we
                         don't have a better way to get the parts of A_dbox and
                         RAP_dbox which correspond to the boundary parts of cgrid_box */
+
+                     floopi= fstart[0] + loopi*stridef[0];
+                     floopj= fstart[1] + loopj*stridef[1];
+                     floopk= fstart[2] + loopk*stridef[2];
+                     hypre_SetIndex(box_index, floopi, floopj, floopk);
+
                      bdy = 0;  /* so we don't treat this point as a boundary pt twice */
-                     hypre_BoxLoopGetIndex( box_index, base_index, loopi, loopj, loopk );
-                     hypre_ForBoxI(cbi, cboundarya)
+                     hypre_ForBoxI(fbi, fboundarya)
                         {
-                           cg_bdy_box = hypre_BoxArrayBox( cboundarya, cbi);
-                           if ( hypre_IndexInBoxP( box_index, cg_bdy_box ) && bdy==0 )
+                           fg_bdy_box = hypre_BoxArrayBox( fboundarya, fbi);
+                           if ( hypre_IndexInBoxP( box_index, fg_bdy_box ) && bdy==0 )
                            {  /* we're in a boundary (in the above direction) */
                               rap_cc[iAc] -= above;
                               rap_cc[iAc] -= 0.5*diagp;
@@ -553,10 +560,10 @@ hypre_PFMGBuildCoarseOp7( hypre_StructMatrix *A,
                            }
                         }
                      if ( bdy == 0 )
-                     hypre_ForBoxI(cbi, cboundaryb)
+                     hypre_ForBoxI(fbi, fboundaryb)
                         {
-                           cg_bdy_box = hypre_BoxArrayBox( cboundarya, cbi);
-                           if ( hypre_IndexInBoxP( box_index, cg_bdy_box ) && bdy==0 )
+                           fg_bdy_box = hypre_BoxArrayBox( fboundaryb, fbi);
+                           if ( hypre_IndexInBoxP( box_index, fg_bdy_box ) && bdy==0 )
                            {  /* we're in a boundary (in the below direction) */
                               rap_cc[iAc] -= below;
                               rap_cc[iAc] -= 0.5*diagm;
@@ -567,8 +574,8 @@ hypre_PFMGBuildCoarseOp7( hypre_StructMatrix *A,
                   }
                hypre_BoxLoop2End(iA, iAc);
 
-               hypre_BoxArrayDestroy(cboundarya);
-               hypre_BoxArrayDestroy(cboundaryb);
+               hypre_BoxArrayDestroy(fboundarya);
+               hypre_BoxArrayDestroy(fboundaryb);
 
             }
 
