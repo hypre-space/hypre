@@ -33,7 +33,8 @@
 #define   MLI_SOLVER_SUPERLU_ID   307
 
 #define   MLI_METHOD_AMGSA_ID     701
-#define   MLI_METHOD_AMGRS_ID     702
+#define   MLI_METHOD_AMGSAE_ID    702
+#define   MLI_METHOD_AMGRS_ID     703
 
 #endif
 

@@ -84,7 +84,9 @@ public :
    MLI_Matrix   *getSystemMatrix( int level );
    MLI_Matrix   *getProlongation( int level );
    MLI_Matrix   *getRestriction( int level );
-   MLI_Solver   *getSmoother( int pre_post, int level );
+   MLI_Solver   *getSmoother( int level, int pre_post );
+   MLI_FEData   *getFEData( int level );
+   MLI_Mapper   *getNodeEqnMap( int level );
    int          resetSystemMatrix( int level );
    MLI_Method   *getMethod()           { return method_ptr; }
 };

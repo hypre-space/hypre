@@ -452,6 +452,36 @@ MLI_Solver* MLI::getSmoother( int level, int pre_post )
 }
 
 /*****************************************************************************
+ * get fedata
+ *---------------------------------------------------------------------------*/
+
+MLI_FEData* MLI::getFEData( int level )
+{
+   if ( level >= 0 && level < max_levels )
+      return one_levels[level]->getFEData();
+   else
+   {
+      cout << "MLI::getFEData ERROR : wrong level = " << level << endl;
+      return ((MLI_FEData *) NULL);
+   }
+}
+
+/*****************************************************************************
+ * get node to equation map
+ *---------------------------------------------------------------------------*/
+
+MLI_Mapper* MLI::getNodeEqnMap( int level )
+{
+   if ( level >= 0 && level < max_levels )
+      return one_levels[level]->getNodeEqnMap();
+   else
+   {
+      cout << "MLI::getNodeEqnMap ERROR : wrong level = " << level << endl;
+      return ((MLI_Mapper *) NULL);
+   }
+}
+
+/*****************************************************************************
  * reset discretization matrix
  *---------------------------------------------------------------------------*/
 
