@@ -185,10 +185,6 @@ fei: IJ krylov ES
 	   (cp $$HYPRE_INSTALL_DIR/lib/$$i $$HYPRE_INSTALL_DIR/tmp; \
             cd $$HYPRE_INSTALL_DIR/tmp; \
             ${AR} x $$i; rm -f ___*;);\
-	   if [ $$i = "libHYPRE_DistributedMatrixPilutSolver.a" ]; then \
-	      (cd $$HYPRE_INSTALL_DIR/tmp; mv -f qsort.o psort.o;); \
-	      (cd $$HYPRE_INSTALL_DIR/tmp; mv -f qsort_si.o psort_si.o;); \
-	   fi; \
 	done; \
 	(cd $$HYPRE_INSTALL_DIR/tmp; \
             ${AR} rcu $(FEI_LIB_DIR)/libHYPRE_LSI.a *.o;); \
@@ -215,10 +211,6 @@ nofei: IJ krylov ES
 	   (cp $$HYPRE_INSTALL_DIR/lib/$$i $$HYPRE_INSTALL_DIR/tmp; \
             cd $$HYPRE_INSTALL_DIR/tmp; \
             ${AR} x $$i; rm -f ___*;);\
-	   if [ $$i = "libHYPRE_DistributedMatrixPilutSolver.a" ]; then \
-	      (cd $$HYPRE_INSTALL_DIR/tmp; mv -f qsort.o psort.o;); \
-	      (cd $$HYPRE_INSTALL_DIR/tmp; mv -f qsort_si.o psort_si.o;); \
-	   fi; \
 	done; \
 	(cd $$HYPRE_INSTALL_DIR/tmp; \
             ${AR} rcu $(FEI_LIB_DIR)/libHYPRE_LSI.a *.o;); \
