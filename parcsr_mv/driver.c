@@ -64,7 +64,7 @@ main( int   argc,
 
    hypre_PrintParVector(vector2, "Convert");
 
-   vector = hypre_ParVectorToVectorAll(MPI_COMM_WORLD,vector2);
+   vector = hypre_ParVectorToVectorAll(vector2);
 
    /*-----------------------------------------------------------
     * Copy the vector into tmp_vector
