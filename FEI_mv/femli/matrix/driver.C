@@ -67,7 +67,7 @@ void testOverLapped( HYPRE_ParCSRMatrix HYPREA )
    MLI_Matrix   *mli_mat;
 
    funcPtr = new MLI_Function();
-   MLI_Utils_HypreMatrixGetDestroyFunc(funcPtr);
+   MLI_Utils_HypreParCSRMatrixGetDestroyFunc(funcPtr);
    sprintf(paramString, "HYPRE_ParCSR" );
    mli_mat = new MLI_Matrix( HYPREA, paramString, funcPtr );
    MLI_Matrix_GetOverlappedMatrix(mli_mat, &extNRows, &extRowLengs,
@@ -94,7 +94,7 @@ void testRAP( HYPRE_ParCSRMatrix HYPREA )
 
    MPI_Comm_rank(MPI_COMM_WORLD, &mypid);
    funcPtr = new MLI_Function();
-   MLI_Utils_HypreMatrixGetDestroyFunc(funcPtr);
+   MLI_Utils_HypreParCSRMatrixGetDestroyFunc(funcPtr);
    sprintf(paramString, "HYPRE_ParCSR" );
    mli_mat = new MLI_Matrix( HYPREA, paramString, funcPtr );
 

@@ -7,6 +7,7 @@
  *********************************************************************EHEADER*/
 
 #include <string.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 
@@ -151,7 +152,7 @@ MLI_Vector *MLI_Vector::clone()
    hypre_ParVectorLocalVector(new_vec) = seq_vec;
    sprintf(param_string,"HYPRE_ParVector");
    func_ptr = new MLI_Function();
-   MLI_Utils_HypreVectorGetDestroyFunc(func_ptr);
+   MLI_Utils_HypreParVectorGetDestroyFunc(func_ptr);
    MLI_Vector *mli_vec = new MLI_Vector(new_vec, param_string, func_ptr);
    delete func_ptr;
    return mli_vec;
