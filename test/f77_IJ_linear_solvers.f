@@ -14,11 +14,13 @@ c-----------------------------------------------------------------------
       include 'mpif.h'
 
       integer MAXZONS, MAXBLKS, MAXDIM, MAXLEVELS
+      integer HYPRE_PARCSR
 
       parameter (MAXZONS=4194304)
       parameter (MAXBLKS=32)
       parameter (MAXDIM=3)
       parameter (MAXLEVELS=25)
+      parameter (HYPRE_PARCSR=797997)
 
       integer             num_procs, myid
 
@@ -48,9 +50,9 @@ c     HYPRE_ParCSRMatrix  A
 c     HYPRE_ParVector     b
 c     HYPRE_ParVector     x
 
-      integer*8           A
-      integer*8           b
-      integer*8           x
+      integer*8           A_storage
+      integer*8           b, b_storage
+      integer*8           x, x_storage
 
 c     HYPRE_Solver        solver
 c     HYPRE_Solver        precond
@@ -239,45 +241,52 @@ c-----------------------------------------------------------------------
 
 c Generate a Dirichlet Laplacian
       if (generate_matrix) then
+c        call HYPRE_ParCSRMatrixCreate(MPI_COMM_WORLD, gnrows, gncols,
+c    &      rstarts, cstarts, ncoloffdg, nonzsdg, nonzsoffdg,
+c    &      A_storage, ierr)
+
+c        call HYPRE_ParCSRMatrixInitialize(A_storage, ierr)
+
          call GenerateLaplacian(MPI_COMM_WORLD, nx, ny, nz,
-     &                          Px, Py, Pz, p, q, r, values, A, ierr)
+     &                          Px, Py, Pz, p, q, r, values,
+     &                          A_storage, ierr)
       else
-         call HYPRE_ParCSRMatrixRead(MPI_COMM_WORLD, A, matfile, ierr)
+         call HYPRE_ParCSRMatrixRead(MPI_COMM_WORLD, A_storage,
+     &                               matfile, ierr)
       endif
 
-      call HYPRE_ParCSRMatrixPrint(A, "driver.out.A", ierr)
+      call HYPRE_ParCSRMatrixPrint(A_storage, "driver.out.A", ierr)
 
-c     call HYPRE_ParCSRMatrixCreate(MPI_COMM_WORLD, gnrows, gncols,
-c    &   rstarts, cstarts, ncoloffdg, nonzsdg, nonzsoffdg, A, ierr)
-
-c     call HYPRE_ParCSRMatrixInitialize(A, ierr)
-
-      call hypre_ParCSRMatrixGlobalNumRows(A, num_rows, ierr)
-      call hypre_ParCSRMatrixRowStarts(A, row_starts, ierr)
+      call hypre_ParCSRMatrixGlobalNumRows(A_storage, num_rows, ierr)
+      call hypre_ParCSRMatrixRowStarts(A_storage, row_starts, ierr)
 
 c-----------------------------------------------------------------------
 c     Set up the rhs and initial guess
 c-----------------------------------------------------------------------
 
       if (generate_rhs) then
-        call HYPRE_ParVectorCreate(MPI_COMM_WORLD, num_rows, row_starts,
-     &                          b, ierr)
-        call hypre_SetParVectorPartitioningO(b, 0, ierr)
-        call HYPRE_ParVectorInitialize(b, ierr)
+        call HYPRE_IJVectorCreate(MPI_COMM_WORLD, b, num_rows, ierr)
+        call HYPRE_IJVectorSetLocalStorageTy(b, HYPRE_PARCSR, ierr)
+        call HYPRE_IJVectorSetPartitioning(b, row_starts, ierr)
+        call HYPRE_IJVectorInitialize(b, ierr)
 c Set up a Dirichlet 0 problem
-        call hypre_SetParVectorConstantValue(b, 0d0, ierr)
-        call HYPRE_ParVectorPrint(b, "driver.out.b", ierr)
+        call HYPRE_IJVectorZeroLocalComps(b, ierr)
+        call HYPRE_IJVectorGetLocalStorage(b, b_storage, ierr)
+        call HYPRE_ParVectorPrint(b_storage, "driver.out.b", ierr)
       else
         call HYPRE_ParVectorRead(MPI_COMM_WORLD, b, rhsfile, ierr)
       endif
 
-      call HYPRE_ParVectorCreate(MPI_COMM_WORLD, num_rows, row_starts,
-     &                        x, ierr)
-      call hypre_SetParVectorPartitioningO(x, 0, ierr)
-      call HYPRE_ParVectorInitialize(x, ierr)
+      call HYPRE_IJVectorCreate(MPI_COMM_WORLD, x, num_rows, ierr)
+      call HYPRE_IJVectorSetLocalStorageTy(x, HYPRE_PARCSR, ierr)
+      call HYPRE_IJVectorSetPartitioning(x, row_starts, ierr)
+      call HYPRE_IJVectorInitialize(x, ierr)
+      call HYPRE_IJVectorZeroLocalComps(x, ierr)
+
 c Choose a nonzero initial guess
-      call hypre_SetParVectorConstantValue(x, 1d0, ierr)
-      call HYPRE_ParVectorPrint(x, "driver.out.x0", ierr)
+      call HYPRE_IJVectorGetLocalStorage(x, x_storage, ierr)
+      call hypre_SetParVectorConstantValue(x_storage, 1d0, ierr)
+      call HYPRE_ParVectorPrint(x_storage, "driver.out.x0", ierr)
 
 c-----------------------------------------------------------------------
 c     Solve the linear system
@@ -330,8 +339,10 @@ c Set defaults for BoomerAMG
      &                                      grid_relax_points, ierr)
         call HYPRE_ParAMGSetMaxLevels(solver, MAXLEVELS, ierr)
         call HYPRE_ParAMGSetDebugFlag(solver, debug_flag, ierr)
-        call HYPRE_ParAMGSetup(solver, A, b, x, ierr)
-        call HYPRE_ParAMGSolve(solver, A, b, x, ierr)
+        call HYPRE_ParAMGSetup(solver, A_storage, b_storage,
+     &                         x_storage, ierr)
+        call HYPRE_ParAMGSolve(solver, A_storage, b_storage,
+     &                         x_storage, ierr)
         call HYPRE_ParAMGGetNumIterations(solver, num_iterations, ierr)
         call HYPRE_ParAMGGetFinalRelativeRes(solver,
      &                                       final_res_norm, ierr)
@@ -446,9 +457,11 @@ c         call HYPRE_ParAMGSetTruncFactor(precond, trunc_factor, ierr)
 
         endif
 
-        call HYPRE_ParCSRGMRESSetup(solver, A, b, x, ierr)
+        call HYPRE_ParCSRGMRESSetup(solver, A_storage, b_storage,
+     &                              x_storage, ierr)
 
-        call HYPRE_ParCSRGMRESSolve(solver, A, b, x, ierr)
+        call HYPRE_ParCSRGMRESSolve(solver, A_storage, b_storage,
+     &                              x_storage, ierr)
 
         call HYPRE_ParCSRGMRESGetNumIteratio(solver,
      &                                       num_iterations, ierr)
@@ -464,7 +477,7 @@ c-----------------------------------------------------------------------
 c     Print the solution and other info
 c-----------------------------------------------------------------------
 
-      call HYPRE_ParVectorPrint(x, "driver.out.x", ierr)
+      call HYPRE_ParVectorPrint(x_storage, "driver.out.x", ierr)
 
       if (myid .eq. 0) then
          print *, 'Iterations = ', num_iterations
@@ -475,11 +488,11 @@ c-----------------------------------------------------------------------
 c     Finalize things
 c-----------------------------------------------------------------------
 
-      call HYPRE_ParCSRMatrixDestroy(A, ierr)
+      call HYPRE_ParCSRMatrixDestroy(A_storage, ierr)
 
-      call HYPRE_ParVectorDestroy(b, ierr)
+      call HYPRE_IJVectorDestroy(b, ierr)
 
-      call HYPRE_ParVectorDestroy(x, ierr)
+      call HYPRE_IJVectorDestroy(x, ierr)
 
 c     Finalize MPI
 
