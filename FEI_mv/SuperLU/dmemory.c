@@ -185,7 +185,7 @@ dLUMemInit(char *refact, void *work, int lwork, int m, int n, int annz,
     expanders = (ExpHeader *) SUPERLU_MALLOC( NO_MEMTYPE * sizeof(ExpHeader) );
     if ( !expanders ) ABORT("SUPERLU_MALLOC fails for expanders");
     
-    if ( slulsame_(refact, "N") ) {
+    if ( hypre_F90_NAME_BLAS(lsame,LSAME)(refact, "N") ) {
 	/* Guess for L\U factors */
 	nzumax = nzlumax = FILL * annz;
 	nzlmax = MAX(1, FILL/4.) * annz;

@@ -116,8 +116,8 @@ dgstrs (char *trans, SuperMatrix *L, SuperMatrix *U,
     Bstore = B->Store;
     ldb = Bstore->lda;
     nrhs = B->ncol;
-    notran = slulsame_(trans, "N");
-    if ( !notran && !slulsame_(trans, "T") && !slulsame_(trans, "C") ) 
+    notran = hypre_F90_NAME_BLAS(lsame,LSAME)(trans, "N");
+    if ( !notran && !hypre_F90_NAME_BLAS(lsame,LSAME)(trans, "T") && !hypre_F90_NAME_BLAS(lsame,LSAME)(trans, "C") ) 
         *info = -1;
     else if ( L->nrow != L->ncol || L->nrow < 0 ||
 	      L->Stype != SC || L->Dtype != D_D || L->Mtype != TRLU )
@@ -130,7 +130,7 @@ dgstrs (char *trans, SuperMatrix *L, SuperMatrix *U,
 	*info = -6;
     if ( *info ) {
 	i = -(*info);
-	sluxerbla_("dgstrs", &i);
+	hypre_F90_NAME_BLAS(xerbla,XERBLA)("dgstrs", &i);
 	return;
     }
 
@@ -190,10 +190,10 @@ dgstrs (char *trans, SuperMatrix *L, SuperMatrix *U,
 			&Lval[luptr+nsupc], &nsupr, &Bmat[fsupc], &ldb, 
 			&beta, &work[0], &n );
 #else
-		dtrsm_("L", "L", "N", "U", &nsupc, &nrhs, &alpha,
+		hypre_F90_NAME_BLAS(dtrsm,DTRSM)("L", "L", "N", "U", &nsupc, &nrhs, &alpha,
 		       &Lval[luptr], &nsupr, &Bmat[fsupc], &ldb);
 		
-		dgemm_( "N", "N", &nrow, &nrhs, &nsupc, &alpha, 
+		hypre_F90_NAME_BLAS(dgemm,DGEMM)( "N", "N", &nrow, &nrhs, &nsupc, &alpha, 
 			&Lval[luptr+nsupc], &nsupr, &Bmat[fsupc], &ldb, 
 			&beta, &work[0], &n );
 #endif
@@ -259,7 +259,7 @@ dgstrs (char *trans, SuperMatrix *L, SuperMatrix *U,
 		STRSM( ftcs1, ftcs2, ftcs3, ftcs3, &nsupc, &nrhs, &alpha,
 		       &Lval[luptr], &nsupr, &Bmat[fsupc], &ldb);
 #else
-		dtrsm_("L", "U", "N", "N", &nsupc, &nrhs, &alpha,
+		hypre_F90_NAME_BLAS(dtrsm,DTRSM)("L", "U", "N", "N", &nsupc, &nrhs, &alpha,
 		       &Lval[luptr], &nsupr, &Bmat[fsupc], &ldb);
 #endif
 #else		

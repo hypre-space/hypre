@@ -6,8 +6,8 @@
  * and Lawrence Berkeley National Lab.
  * November 15, 1997
  *
- * Changes made to this file corresponding to calls to blas/lapack functions
- * in Nov 2003 at LLNL
+ * Changes made to this file addressing issue regarding calls to
+ * blas/lapack functions (Dec 2003 at LLNL)
  */
 #include "dsp_defs.h"
 #include "superlu_util.h"
@@ -142,7 +142,7 @@ dgssv(SuperMatrix *A, int *perm_c, int *perm_r, SuperMatrix *L,
 	*info = -6;
     if ( *info != 0 ) {
 	i = -(*info);
-	sluxerbla_("dgssv", &i);
+	hypre_F90_NAME_BLAS(xerbla,XERBLA)("dgssv", &i);
 	return;
     }
     

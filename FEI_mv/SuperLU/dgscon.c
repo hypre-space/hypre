@@ -6,15 +6,14 @@
  * and Lawrence Berkeley National Lab.
  * November 15, 1997
  *
- * Changes made to this file corresponding to calls to blas/lapack functions
- * in Nov 2003 at LLNL
+ * Changes made to this file addressing issue regarding calls to
+ * blas/lapack functions (Dec 2003 at LLNL)
  */
 /*
  * File name:	dgscon.c
  * History:     Modified from lapack routines DGECON.
  */
 #include <math.h>
-#include "fortran.h"
 #include "dsp_defs.h"
 #include "superlu_util.h"
 
@@ -82,8 +81,8 @@ dgscon(char *norm, SuperMatrix *L, SuperMatrix *U,
     
     /* Test the input parameters. */
     *info = 0;
-    onenrm = *(unsigned char *)norm == '1' || slulsame_(norm, "O");
-    if (! onenrm && ! slulsame_(norm, "I")) *info = -1;
+    onenrm = *(unsigned char *)norm == '1' || hypre_F90_NAME_BLAS(lsame,LSAME)(norm, "O");
+    if (! onenrm && ! hypre_F90_NAME_BLAS(lsame,LSAME)(norm, "I")) *info = -1;
     else if (L->nrow < 0 || L->nrow != L->ncol ||
              L->Stype != SC || L->Dtype != D_D || L->Mtype != TRLU)
 	 *info = -2;
@@ -92,7 +91,7 @@ dgscon(char *norm, SuperMatrix *L, SuperMatrix *U,
 	*info = -3;
     if (*info != 0) {
 	i = -(*info);
-	sluxerbla_("dgscon", &i);
+	hypre_F90_NAME_BLAS(xerbla,XERBLA)("dgscon", &i);
 	return;
     }
 

@@ -15,11 +15,13 @@
  * Purpose:             Sparse matrix types and function prototypes
  * History:
  */
-#ifdef _CRAY
 #include <fortran.h>
+#ifdef _CRAY
 #include <string.h>
 #endif
+#if 0
 #include "Cnames.h"
+#endif
 #include "supermatrix.h"
 
 

@@ -14,11 +14,10 @@
  * Purpose:		Sparse BLAS 2, using some dense BLAS 2 operations.
  */
 
-#include "fortran.h"
 #include "dsp_defs.h"
 #include "superlu_util.h"
 
-extern int dtrsv_(char *,char *,char *,int *,double *,int *,double *,int *);
+extern int hypre_F90_NAME_BLAS(dtrsv,DTRSV)(char *,char *,char *,int *,double *,int *,double *,int *);
 
 /* 
  * Function prototypes 
@@ -106,14 +105,14 @@ sp_dtrsv(char *uplo, char *trans, char *diag, SuperMatrix *L,
 
     /* Test the input parameters */
     *info = 0;
-    if ( !slulsame_(uplo,"L") && !slulsame_(uplo, "U") ) *info = -1;
-    else if ( !slulsame_(trans, "N") && !slulsame_(trans, "T") ) *info = -2;
-    else if ( !slulsame_(diag, "U") && !slulsame_(diag, "N") ) *info = -3;
+    if ( !hypre_F90_NAME_BLAS(lsame,LSAME)(uplo,"L") && !hypre_F90_NAME_BLAS(lsame,LSAME)(uplo, "U") ) *info = -1;
+    else if ( !hypre_F90_NAME_BLAS(lsame,LSAME)(trans, "N") && !hypre_F90_NAME_BLAS(lsame,LSAME)(trans, "T") ) *info = -2;
+    else if ( !hypre_F90_NAME_BLAS(lsame,LSAME)(diag, "U") && !hypre_F90_NAME_BLAS(lsame,LSAME)(diag, "N") ) *info = -3;
     else if ( L->nrow != L->ncol || L->nrow < 0 ) *info = -4;
     else if ( U->nrow != U->ncol || U->nrow < 0 ) *info = -5;
     if ( *info ) {
 	i = -(*info);
-	sluxerbla_("sp_dtrsv ", &i);
+	hypre_F90_NAME_BLAS(xerbla,XERBLA)("sp_dtrsv ", &i);
 	return 0;
     }
 
@@ -126,9 +125,9 @@ sp_dtrsv(char *uplo, char *trans, char *diag, SuperMatrix *L,
     if ( !(work = doubleCalloc(L->nrow)) )
 	ABORT("Malloc fails for work in sp_dtrsv().");
     
-    if ( slulsame_(trans, "N") ) {	/* Form x := inv(A)*x. */
+    if ( hypre_F90_NAME_BLAS(lsame,LSAME)(trans, "N") ) {	/* Form x := inv(A)*x. */
 	
-	if ( slulsame_(uplo, "L") ) {
+	if ( hypre_F90_NAME_BLAS(lsame,LSAME)(uplo, "L") ) {
 	    /* Form x := inv(L)*x */
     	    if ( L->nrow == 0 ) return 0; /* Quick return */
 	    
@@ -158,10 +157,10 @@ sp_dtrsv(char *uplo, char *trans, char *diag, SuperMatrix *L,
 		    SGEMV(ftcs2, &nrow, &nsupc, &alpha, &Lval[luptr+nsupc], 
 		       	&nsupr, &x[fsupc], &incx, &beta, &work[0], &incy);
 #else
-		    dtrsv_("L", "N", "U", &nsupc, &Lval[luptr], &nsupr,
+		    hypre_F90_NAME_BLAS(dtrsv,DTRSV)("L", "N", "U", &nsupc, &Lval[luptr], &nsupr,
 		       	&x[fsupc], &incx);
 		
-		    dgemv_("N", &nrow, &nsupc, &alpha, &Lval[luptr+nsupc], 
+		    hypre_F90_NAME_BLAS(dgemv,DGEMV)("N", &nrow, &nsupc, &alpha, &Lval[luptr+nsupc], 
 		       	&nsupr, &x[fsupc], &incx, &beta, &work[0], &incy);
 #endif
 #else
@@ -206,7 +205,7 @@ sp_dtrsv(char *uplo, char *trans, char *diag, SuperMatrix *L,
 		    STRSV(ftcs3, ftcs2, ftcs2, &nsupc, &Lval[luptr], &nsupr,
 		       &x[fsupc], &incx);
 #else
-		    dtrsv_("U", "N", "N", &nsupc, &Lval[luptr], &nsupr,
+		    hypre_F90_NAME_BLAS(dtrsv,DTRSV)("U", "N", "N", &nsupc, &Lval[luptr], &nsupr,
 		       &x[fsupc], &incx);
 #endif
 #else		
@@ -227,7 +226,7 @@ sp_dtrsv(char *uplo, char *trans, char *diag, SuperMatrix *L,
 	}
     } else { /* Form x := inv(A')*x */
 	
-	if ( slulsame_(uplo, "L") ) {
+	if ( hypre_F90_NAME_BLAS(lsame,LSAME)(uplo, "L") ) {
 	    /* Form x := inv(L')*x */
     	    if ( L->nrow == 0 ) return 0; /* Quick return */
 	    
@@ -259,7 +258,7 @@ sp_dtrsv(char *uplo, char *trans, char *diag, SuperMatrix *L,
 		    STRSV(ftcs1, ftcs2, ftcs3, &nsupc, &Lval[luptr], &nsupr,
 			&x[fsupc], &incx);
 #else
-		    dtrsv_("L", "T", "U", &nsupc, &Lval[luptr], &nsupr,
+		    hypre_F90_NAME_BLAS(dtrsv,DTRSV)("L", "T", "U", &nsupc, &Lval[luptr], &nsupr,
 			&x[fsupc], &incx);
 #endif
 		}
@@ -294,7 +293,7 @@ sp_dtrsv(char *uplo, char *trans, char *diag, SuperMatrix *L,
 		    STRSV( ftcs1, ftcs2, ftcs3, &nsupc, &Lval[luptr], &nsupr,
 			    &x[fsupc], &incx);
 #else
-		    dtrsv_("U", "T", "N", &nsupc, &Lval[luptr], &nsupr,
+		    hypre_F90_NAME_BLAS(dtrsv,DTRSV)("U", "T", "N", &nsupc, &Lval[luptr], &nsupr,
 			    &x[fsupc], &incx);
 #endif
 		}
@@ -380,18 +379,18 @@ sp_dgemv(char *trans, double alpha, SuperMatrix *A, double *x,
     int iy, jx, jy, kx, ky;
     int notran;
 
-    notran = slulsame_(trans, "N");
+    notran = hypre_F90_NAME_BLAS(lsame,LSAME)(trans, "N");
     Astore = A->Store;
     Aval = Astore->nzval;
     
     /* Test the input parameters */
     info = 0;
-    if ( !notran && !slulsame_(trans, "T") && !slulsame_(trans, "C")) info = 1;
+    if ( !notran && !hypre_F90_NAME_BLAS(lsame,LSAME)(trans, "T") && !hypre_F90_NAME_BLAS(lsame,LSAME)(trans, "C")) info = 1;
     else if ( A->nrow < 0 || A->ncol < 0 ) info = 3;
     else if (incx == 0) info = 5;
     else if (incy == 0)	info = 8;
     if (info != 0) {
-	sluxerbla_("sp_dgemv ", &info);
+	hypre_F90_NAME_BLAS(xerbla,XERBLA)("sp_dgemv ", &info);
 	return 0;
     }
 
@@ -401,7 +400,7 @@ sp_dgemv(char *trans, double alpha, SuperMatrix *A, double *x,
 
     /* Set  LENX  and  LENY, the lengths of the vectors x and y, and set 
        up the start points in  X  and  Y. */
-    if (slulsame_(trans, "N")) {
+    if (hypre_F90_NAME_BLAS(lsame,LSAME)(trans, "N")) {
 	lenx = A->ncol;
 	leny = A->nrow;
     } else {

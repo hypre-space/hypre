@@ -219,7 +219,7 @@ dpanel_bmod (
 		    STRSV( ftcs1, ftcs2, ftcs3, &segsze, &lusup[luptr], 
 			   &nsupr, TriTmp, &incx );
 #else
-		    dtrsv_( "L", "N", "U", &segsze, &lusup[luptr], 
+		    hypre_F90_NAME_BLAS(dtrsv,DTRSV)( "L", "N", "U", &segsze, &lusup[luptr], 
 			   &nsupr, TriTmp, &incx );
 #endif
 #else		
@@ -266,7 +266,7 @@ dpanel_bmod (
 		    SGEMV(ftcs2, &block_nrow, &segsze, &alpha, &lusup[luptr1], 
 			   &nsupr, TriTmp, &incx, &beta, MatvecTmp, &incy);
 #else
-		    dgemv_("N", &block_nrow, &segsze, &alpha, &lusup[luptr1], 
+		    hypre_F90_NAME_BLAS(dgemv,DGEMV)("N", &block_nrow, &segsze, &alpha, &lusup[luptr1], 
 			   &nsupr, TriTmp, &incx, &beta, MatvecTmp, &incy);
 #endif
 #else
@@ -398,7 +398,7 @@ dpanel_bmod (
 		    STRSV( ftcs1, ftcs2, ftcs3, &segsze, &lusup[luptr], 
 			   &nsupr, tempv, &incx );
 #else
-		    dtrsv_( "L", "N", "U", &segsze, &lusup[luptr], 
+		    hypre_F90_NAME_BLAS(dtrsv,DTRSV)( "L", "N", "U", &segsze, &lusup[luptr], 
 			   &nsupr, tempv, &incx );
 #endif
 		    
@@ -410,7 +410,7 @@ dpanel_bmod (
 		    SGEMV( ftcs2, &nrow, &segsze, &alpha, &lusup[luptr], 
 			   &nsupr, tempv, &incx, &beta, tempv1, &incy );
 #else
-		    dgemv_( "N", &nrow, &segsze, &alpha, &lusup[luptr], 
+		    hypre_F90_NAME_BLAS(dgemv,DGEMV)( "N", &nrow, &segsze, &alpha, &lusup[luptr], 
 			   &nsupr, tempv, &incx, &beta, tempv1, &incy );
 #endif
 #else

@@ -19,8 +19,8 @@
   granted, provided the above notices are retained, and a notice that
   the code was modified is included with the above copyright notice.
 
-  Changes made to this file corresponding to calls to blas/lapack functions
-  in Nov 2003 at LLNL
+  Changes made to this file addressing issue regarding calls to
+  blas/lapack functions (Dec 2003 at LLNL)
 */
 
 #include <stdio.h>
@@ -30,8 +30,8 @@
 
 /* 
  * Function prototypes 
- */
 void sludusolve(int, int, double*, double*);
+ */
 void sludlsolve(int, int, double*, double*);
 void sludmatvec(int, int, int, double*, double*, double*);
 
@@ -221,7 +221,7 @@ dcolumn_bmod (
 		STRSV( ftcs1, ftcs2, ftcs3, &segsze, &lusup[luptr], 
 		       &nsupr, tempv, &incx );
 #else		
-		dtrsv_( "L", "N", "U", &segsze, &lusup[luptr], 
+		hypre_F90_NAME_BLAS(dtrsv,DTRSV)( "L", "N", "U", &segsze, &lusup[luptr], 
 		       &nsupr, tempv, &incx );
 #endif		
  		luptr += segsze;  /* Dense matrix-vector */
@@ -232,7 +232,7 @@ dcolumn_bmod (
 		SGEMV( ftcs2, &nrow, &segsze, &alpha, &lusup[luptr], 
 		       &nsupr, tempv, &incx, &beta, tempv1, &incy );
 #else
-		dgemv_( "N", &nrow, &segsze, &alpha, &lusup[luptr], 
+		hypre_F90_NAME_BLAS(dgemv,DGEMV)( "N", &nrow, &segsze, &alpha, &lusup[luptr], 
 		       &nsupr, tempv, &incx, &beta, tempv1, &incy );
 #endif
 #else
@@ -321,7 +321,7 @@ dcolumn_bmod (
 	STRSV( ftcs1, ftcs2, ftcs3, &nsupc, &lusup[luptr], 
 	       &nsupr, &lusup[ufirst], &incx );
 #else
-	dtrsv_( "L", "N", "U", &nsupc, &lusup[luptr], 
+	hypre_F90_NAME_BLAS(dtrsv,DTRSV)( "L", "N", "U", &nsupc, &lusup[luptr], 
 	       &nsupr, &lusup[ufirst], &incx );
 #endif
 	
@@ -331,7 +331,7 @@ dcolumn_bmod (
 	SGEMV( ftcs2, &nrow, &nsupc, &alpha, &lusup[luptr+nsupc], &nsupr,
 	       &lusup[ufirst], &incx, &beta, &lusup[ufirst+nsupc], &incy );
 #else
-	dgemv_( "N", &nrow, &nsupc, &alpha, &lusup[luptr+nsupc], &nsupr,
+	hypre_F90_NAME_BLAS(dgemv,DGEMV)( "N", &nrow, &nsupc, &alpha, &lusup[luptr+nsupc], &nsupr,
 	       &lusup[ufirst], &incx, &beta, &lusup[ufirst+nsupc], &incy );
 #endif
 #else

@@ -386,7 +386,7 @@ dgssvx(char *fact, char *trans, char *refact,
 
     /* External functions */
     extern double dlangs(char *, SuperMatrix *);
-    extern double sludlamch_(char *);
+    extern double hypre_F90_NAME_BLAS(dlamch,DLAMCH)(char *);
 
     Bstore = B->Store;
     Xstore = X->Store;
@@ -402,30 +402,30 @@ printf("dgssvx: fact=%c, trans=%c, refact=%c, equed=%c\n",
 #endif
     
     *info = 0;
-    nofact = slulsame_(fact, "N");
-    equil = slulsame_(fact, "E");
-    notran = slulsame_(trans, "N");
+    nofact = hypre_F90_NAME_BLAS(lsame,LSAME)(fact, "N");
+    equil = hypre_F90_NAME_BLAS(lsame,LSAME)(fact, "E");
+    notran = hypre_F90_NAME_BLAS(lsame,LSAME)(trans, "N");
     if (nofact || equil) {
 	*(unsigned char *)equed = 'N';
 	rowequ = FALSE;
 	colequ = FALSE;
     } else {
-	rowequ = slulsame_(equed, "R") || slulsame_(equed, "B");
-	colequ = slulsame_(equed, "C") || slulsame_(equed, "B");
-	smlnum = sludlamch_("Safe minimum");
+	rowequ = hypre_F90_NAME_BLAS(lsame,LSAME)(equed, "R") || hypre_F90_NAME_BLAS(lsame,LSAME)(equed, "B");
+	colequ = hypre_F90_NAME_BLAS(lsame,LSAME)(equed, "C") || hypre_F90_NAME_BLAS(lsame,LSAME)(equed, "B");
+	smlnum = hypre_F90_NAME_BLAS(dlamch,DLAMCH)("Safe minimum");
 	bignum = 1. / smlnum;
     }
 
     /* Test the input parameters */
-    if (!nofact && !equil && !slulsame_(fact, "F")) *info = -1;
-    else if (!notran && !slulsame_(trans, "T") && !slulsame_(trans, "C")) 
+    if (!nofact && !equil && !hypre_F90_NAME_BLAS(lsame,LSAME)(fact, "F")) *info = -1;
+    else if (!notran && !hypre_F90_NAME_BLAS(lsame,LSAME)(trans, "T") && !hypre_F90_NAME_BLAS(lsame,LSAME)(trans, "C")) 
        *info = -2;
-    else if ( !(slulsame_(refact,"Y") || slulsame_(refact, "N")) ) *info = -3;
+    else if ( !(hypre_F90_NAME_BLAS(lsame,LSAME)(refact,"Y") || hypre_F90_NAME_BLAS(lsame,LSAME)(refact, "N")) ) *info = -3;
     else if ( A->nrow != A->ncol || A->nrow < 0 ||
 	      (A->Stype != NC && A->Stype != NR) ||
 	      A->Dtype != D_D || A->Mtype != GE )
 	*info = -4;
-    else if (slulsame_(fact, "F") && !(rowequ || colequ || slulsame_(equed, "N")))
+    else if (hypre_F90_NAME_BLAS(lsame,LSAME)(fact, "F") && !(rowequ || colequ || hypre_F90_NAME_BLAS(lsame,LSAME)(equed, "N")))
 	*info = -9;
     else {
 	if (rowequ) {
@@ -466,7 +466,7 @@ printf("dgssvx: fact=%c, trans=%c, refact=%c, equed=%c\n",
     }
     if (*info != 0) {
 	i = -(*info);
-	sluxerbla_("dgssvx", &i);
+	hypre_F90_NAME_BLAS(xerbla,XERBLA)("dgssvx", &i);
 	return;
     }
     
@@ -515,8 +515,8 @@ printf("dgssvx: fact=%c, trans=%c, refact=%c, equed=%c\n",
 	if ( info1 == 0 ) {
 	    /* Equilibrate matrix A. */
 	    dlaqgs(AA, R, C, rowcnd, colcnd, amax, equed);
-	    rowequ = slulsame_(equed, "R") || slulsame_(equed, "B");
-	    colequ = slulsame_(equed, "C") || slulsame_(equed, "B");
+	    rowequ = hypre_F90_NAME_BLAS(lsame,LSAME)(equed, "R") || hypre_F90_NAME_BLAS(lsame,LSAME)(equed, "B");
+	    colequ = hypre_F90_NAME_BLAS(lsame,LSAME)(equed, "C") || hypre_F90_NAME_BLAS(lsame,LSAME)(equed, "B");
 	}
 	utime[EQUIL] = SuperLU_timer_() - t0;
     }
@@ -613,7 +613,7 @@ printf("dgssvx: fact=%c, trans=%c, refact=%c, equed=%c\n",
     }
 
     /* Set INFO = A->ncol+1 if the matrix is singular to working precision. */
-    if ( *rcond < sludlamch_("E") ) *info = A->ncol + 1;
+    if ( *rcond < hypre_F90_NAME_BLAS(dlamch,DLAMCH)("E") ) *info = A->ncol + 1;
 
     dQuerySpace(L, U, panel_size, mem_usage);
 

@@ -6,12 +6,12 @@
  * and Lawrence Berkeley National Lab.
  * November 15, 1997
  *
- * Changes made to this file corresponding to calls to blas/lapack functions
- * in Nov 2003 at LLNL
+ * Changes made to this file addressing issue regarding calls to
+ * blas/lapack functions (Dec 2003 at LLNL)
  */
 #include <math.h>
 #include "fortran.h"
-#include "Cnames.h"
+/*#include "Cnames.h"*/
 
 int
 dlacon_(int *n, double *v, double *x, int *isgn, double *est, int *kase)
@@ -81,9 +81,9 @@ dlacon_(int *n, double *v, double *x, int *isgn, double *est, int *kase)
     extern double SASUM(int *, double *, int *);
     extern int SCOPY(int *, double *, int *, double *, int *);
 #else
-    extern int idamax_(int *, double *, int *);
-    extern double dasum_(int *, double *, int *);
-    extern int dcopy_(int *, double *, int *, double *, int *);
+    extern int hypre_F90_NAME_BLAS(idamax,IDAMAX)(int *, double *, int *);
+    extern double hypre_F90_NAME_BLAS(dasum,DASUM)(int *, double *, int *);
+    extern int hypre_F90_NAME_BLAS(dcopy,DCOPY)(int *, double *, int *, double *, int *);
 #endif
 #define d_sign(a, b) (b >= 0 ? fabs(a) : -fabs(a))    /* Copy sign */
 #define i_dnnt(a) \
@@ -118,7 +118,7 @@ dlacon_(int *n, double *v, double *x, int *isgn, double *est, int *kase)
 #ifdef _CRAY
     *est = SASUM(n, x, &c__1);
 #else
-    *est = dasum_(n, x, &c__1);
+    *est = hypre_F90_NAME_BLAS(dasum,DASUM)(n, x, &c__1);
 #endif
 
     for (i = 0; i < *n; ++i) {
@@ -135,7 +135,7 @@ L40:
 #ifdef _CRAY
     j = ISAMAX(n, &x[0], &c__1);
 #else
-    j = idamax_(n, &x[0], &c__1);
+    j = hypre_F90_NAME_BLAS(idamax,IDAMAX)(n, &x[0], &c__1);
 #endif
     --j;
     iter = 2;
@@ -154,13 +154,13 @@ L70:
 #ifdef _CRAY
     SCOPY(n, x, &c__1, v, &c__1);
 #else
-    dcopy_(n, x, &c__1, v, &c__1);
+    hypre_F90_NAME_BLAS(dcopy,DCOPY)(n, x, &c__1, v, &c__1);
 #endif
     estold = *est;
 #ifdef _CRAY
     *est = SASUM(n, v, &c__1);
 #else
-    *est = dasum_(n, v, &c__1);
+    *est = hypre_F90_NAME_BLAS(dasum,DASUM)(n, v, &c__1);
 #endif
 
     for (i = 0; i < *n; ++i)
@@ -189,7 +189,7 @@ L110:
 #ifdef _CRAY
     j = ISAMAX(n, &x[0], &c__1);
 #else
-    j = idamax_(n, &x[0], &c__1);
+    j = hypre_F90_NAME_BLAS(idamax,IDAMAX)(n, &x[0], &c__1);
 #endif
     --j;
     if (x[jlast] != fabs(x[j]) && iter < 5) {
@@ -214,13 +214,13 @@ L140:
 #ifdef _CRAY
     temp = SASUM(n, x, &c__1) / (double)(*n * 3) * 2.;
 #else
-    temp = dasum_(n, x, &c__1) / (double)(*n * 3) * 2.;
+    temp = hypre_F90_NAME_BLAS(dasum,DASUM)(n, x, &c__1) / (double)(*n * 3) * 2.;
 #endif
     if (temp > *est) {
 #ifdef _CRAY
 	SCOPY(n, &x[0], &c__1, &v[0], &c__1);
 #else
-	dcopy_(n, &x[0], &c__1, &v[0], &c__1);
+	hypre_F90_NAME_BLAS(dcopy,DCOPY)(n, &x[0], &c__1, &v[0], &c__1);
 #endif
 	*est = temp;
     }

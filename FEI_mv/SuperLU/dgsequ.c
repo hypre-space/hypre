@@ -6,15 +6,14 @@
  * and Lawrence Berkeley National Lab.
  * November 15, 1997
  *
- * Changes made to this file corresponding to calls to blas/lapack functions
- * in Nov 2003 at LLNL
+ * Changes made to this file addressing issue regarding calls to
+ * blas/lapack functions (Dec 2003 at LLNL)
  */
 /*
  * File name:	dgsequ.c
  * History:     Modified from LAPACK routine DGEEQU
  */
 #include <math.h>
-#include "fortran.h"
 #include "dsp_defs.h"
 #include "superlu_util.h"
 
@@ -86,7 +85,7 @@ dgsequ(SuperMatrix *A, double *r, double *c, double *rowcnd,
     int i, j, irow;
     double rcmin, rcmax;
     double bignum, smlnum;
-    extern double sludlamch_(char *);
+    extern double hypre_F90_NAME_BLAS(dlamch,DLAMCH)(char *);
     
     /* Test the input parameters. */
     *info = 0;
@@ -95,7 +94,7 @@ dgsequ(SuperMatrix *A, double *r, double *c, double *rowcnd,
 	*info = -1;
     if (*info != 0) {
 	i = -(*info);
-	sluxerbla_("dgsequ", &i);
+	hypre_F90_NAME_BLAS(xerbla,XERBLA)("dgsequ", &i);
 	return;
     }
 
@@ -111,7 +110,7 @@ dgsequ(SuperMatrix *A, double *r, double *c, double *rowcnd,
     Aval = Astore->nzval;
     
     /* Get machine constants. */
-    smlnum = sludlamch_("S");
+    smlnum = hypre_F90_NAME_BLAS(dlamch,DLAMCH)("S");
     bignum = 1. / smlnum;
 
     /* Compute row scale factors. */

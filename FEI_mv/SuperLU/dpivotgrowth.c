@@ -11,6 +11,7 @@
  */
 #include <math.h>
 #include "dsp_defs.h"
+#include "fortran.h"
 #include "superlu_util.h"
 
 double
@@ -55,12 +56,12 @@ dPivotGrowth(int ncols, SuperMatrix *A, int *perm_c,
     int      i, j, k, oldcol;
     int      *inv_perm_c;
     double   rpg, maxaj, maxuj;
-    extern   double sludlamch_(char *);
+    extern   double hypre_F90_NAME_BLAS(dlamch,DLAMCH)(char *);
     double   smlnum;
     double   *luval;
    
     /* Get machine constants. */
-    smlnum = sludlamch_("S");
+    smlnum = hypre_F90_NAME_BLAS(dlamch,DLAMCH)("S");
     rpg = 1. / smlnum;
 
     Astore = A->Store;

@@ -97,7 +97,7 @@ sp_preorder(char *refact,  SuperMatrix *A, int *perm_c,
 	ACstore->colend[perm_c[i]] = Astore->colptr[i+1];
     }
 	
-    if ( slulsame_(refact, "N") ) {
+    if ( hypre_F90_NAME_BLAS(lsame,LSAME)(refact, "N") ) {
 	
 	/* Compute the column elimination tree */
 	sp_coletree(ACstore->colbeg, ACstore->colend, ACstore->rowind,

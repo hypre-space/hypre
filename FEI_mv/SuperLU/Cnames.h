@@ -4,8 +4,8 @@
  * and Lawrence Berkeley National Lab.
  * November 1, 1997
  *
- * Changes made to this file corresponding to calls to blas/lapack functions
- * in Nov 2003 at LLNL
+ * Changes made to this file addressing issue regarding calls to
+ * blas/lapack functions (Dec 2003 at LLNL)
  */
 #ifndef __SUPERLU_CNAMES /* allow multiple inclusions */
 #define __SUPERLU_CNAMES
@@ -47,7 +47,7 @@
  * routine call a C routine
  * No redefinition necessary to have following Fortran to C interface:
  *           FORTRAN CALL               C DECLARATION
- *           call dgemm(...)           void dgemm_(...)
+ *           call dgemm(...)           void hypre_F90_NAME_BLAS(dgemm,DGEMM)(...)
  *
  * This is the default.
  */
@@ -78,21 +78,21 @@
 #define sgemm_    SGEMM
 #define strsm_    STRSM
 
-#define dasum_    SASUM
-#define idamax_   ISAMAX
+#define hypre_F90_NAME_BLAS(dasum,DASUM)    SASUM
+#define hypre_F90_NAME_BLAS(idamax,IDAMAX)   ISAMAX
 #define dcopy_    SCOPY
 #define dscal_    SSCAL
 #define dger_     SGER
 #define dnrm2_    SNRM2
 #define dsymv_    SSYMV
 #define ddot_     SDOT
-#define daxpy_    SAXPY
+#define hypre_F90_NAME_BLAS(daxpy,DAXPY)    SAXPY
 #define dsyr2_    SSYR2
 #define drot_     SROT
-#define dgemv_    SGEMV
-#define dtrsv_    STRSV
-#define dgemm_    SGEMM
-#define dtrsm_    STRSM
+#define hypre_F90_NAME_BLAS(dgemv,DGEMV)    SGEMV
+#define hypre_F90_NAME_BLAS(dtrsv,DTRSV)    STRSV
+#define hypre_F90_NAME_BLAS(dgemm,DGEMM)    SGEMM
+#define hypre_F90_NAME_BLAS(dtrsm,DTRSM)    STRSM
 
 #define scasum_   SCASUM
 #define icamax_   ICAMAX
@@ -149,28 +149,28 @@
 #define sgemm_    sgemm
 #define strsm_    strsm
 
-#define dasum_    dasum
-#define idamax_   idamax
+#define hypre_F90_NAME_BLAS(dasum,DASUM)    dasum
+#define hypre_F90_NAME_BLAS(idamax,IDAMAX)   idamax
 #define dcopy_    dcopy
 #define dscal_    dscal
 #define dger_     dger
 #define dnrm2_    dnrm2
 #define dsymv_    dsymv
 #define ddot_     ddot
-#define daxpy_    daxpy
+#define hypre_F90_NAME_BLAS(daxpy,DAXPY)    daxpy
 #define dsyr2_    dsyr2
 #define drot_     drot
-#define dgemv_    dgemv
-#define dtrsv_    dtrsv
-#define dgemm_    dgemm
-#define dtrsm_    dtrsm
+#define hypre_F90_NAME_BLAS(dgemv,DGEMV)    dgemv
+#define hypre_F90_NAME_BLAS(dtrsv,DTRSV)    dtrsv
+#define hypre_F90_NAME_BLAS(dgemm,DGEMM)    dgemm
+#define hypre_F90_NAME_BLAS(dtrsm,DTRSM)    dtrsm
 
-#define sluxerbla_   sluxerbla
+#define hypre_F90_NAME_BLAS(xerbla,XERBLA)  xerbla
 #define dpotrf_   dpotrf
 #define dgels_    dgels
 #define dpotrs_   dpotrs
-#define slulsame_    slulsame
-#define sludlamch_   sludlamch
+#define hypre_F90_NAME_BLAS(lsame,LSAME)    lsame
+#define hypre_F90_NAME_BLAS(dlamch,DLAMCH)  dlamch
 
 #define scasum_   scasum
 #define icamax_   icamax

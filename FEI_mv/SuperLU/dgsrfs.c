@@ -6,15 +6,14 @@
  * and Lawrence Berkeley National Lab.
  * November 15, 1997
  *
- * Changes made to this file corresponding to calls to blas/lapack functions
- * in Nov 2003 at LLNL
+ * Changes made to this file addressing issue regarding calls to
+ * blas/lapack functions (Dec 2003 at LLNL)
  */
 /*
  * File name:	dgsrfs.c
  * History:     Modified from lapack routine DGERFS
  */
 #include <math.h>
-#include "fortran.h"
 #include "dsp_defs.h"
 #include "superlu_util.h"
 
@@ -148,14 +147,14 @@ dgsrfs(char *trans, SuperMatrix *A, SuperMatrix *L, SuperMatrix *U,
     double   *work;
     double   *rwork;
     int      *iwork;
-    extern double sludlamch_(char *);
+    extern double hypre_F90_NAME_BLAS(dlamch,DLAMCH)(char *);
     extern int dlacon_(int *, double *, double *, int *, double *, int *);
 #ifdef _CRAY
     extern int SCOPY(int *, double *, int *, double *, int *);
     extern int SSAXPY(int *, double *, double *, int *, double *, int *);
 #else
-    extern int dcopy_(int *, double *, int *, double *, int *);
-    extern int daxpy_(int *, double *, double *, int *, double *, int *);
+    extern int hypre_F90_NAME_BLAS(dcopy,DCOPY)(int *, double *, int *, double *, int *);
+    extern int hypre_F90_NAME_BLAS(daxpy,DAXPY)(int *, double *, double *, int *, double *, int *);
 #endif
 
     Astore = A->Store;
@@ -170,8 +169,8 @@ dgsrfs(char *trans, SuperMatrix *A, SuperMatrix *L, SuperMatrix *U,
     
     /* Test the input parameters */
     *info = 0;
-    notran = slulsame_(trans, "N");
-    if ( !notran && !slulsame_(trans, "T") && !slulsame_(trans, "C"))	
+    notran = hypre_F90_NAME_BLAS(lsame,LSAME)(trans, "N");
+    if ( !notran && !hypre_F90_NAME_BLAS(lsame,LSAME)(trans, "T") && !hypre_F90_NAME_BLAS(lsame,LSAME)(trans, "C"))	
         *info = -1;
     else if ( A->nrow != A->ncol || A->nrow < 0 ||
 	      A->Stype != NC || A->Dtype != D_D || A->Mtype != GE )
@@ -190,7 +189,7 @@ dgsrfs(char *trans, SuperMatrix *A, SuperMatrix *L, SuperMatrix *U,
 	*info = -11;
     if (*info != 0) {
 	i = -(*info);
-	sluxerbla_("dgsrfs", &i);
+	hypre_F90_NAME_BLAS(xerbla,XERBLA)("dgsrfs", &i);
 	return;
     }
 
@@ -203,8 +202,8 @@ dgsrfs(char *trans, SuperMatrix *A, SuperMatrix *L, SuperMatrix *U,
 	return;
     }
 
-    rowequ = slulsame_(equed, "R") || slulsame_(equed, "B");
-    colequ = slulsame_(equed, "C") || slulsame_(equed, "B");
+    rowequ = hypre_F90_NAME_BLAS(lsame,LSAME)(equed, "R") || hypre_F90_NAME_BLAS(lsame,LSAME)(equed, "B");
+    colequ = hypre_F90_NAME_BLAS(lsame,LSAME)(equed, "C") || hypre_F90_NAME_BLAS(lsame,LSAME)(equed, "B");
     
     /* Allocate working space */
     work = doubleMalloc(2*A->nrow);
@@ -221,8 +220,8 @@ dgsrfs(char *trans, SuperMatrix *A, SuperMatrix *L, SuperMatrix *U,
 
     /* NZ = maximum number of nonzero elements in each row of A, plus 1 */
     nz     = A->ncol + 1;
-    eps    = sludlamch_("Epsilon");
-    safmin = sludlamch_("Safe minimum");
+    eps    = hypre_F90_NAME_BLAS(dlamch,DLAMCH)("Epsilon");
+    safmin = hypre_F90_NAME_BLAS(dlamch,DLAMCH)("Safe minimum");
     safe1  = nz * safmin;
     safe2  = safe1 / eps;
 
@@ -264,7 +263,7 @@ dgsrfs(char *trans, SuperMatrix *A, SuperMatrix *L, SuperMatrix *U,
 #ifdef _CRAY
 	    SCOPY(&A->nrow, Bptr, &ione, work, &ione);
 #else
-	    dcopy_(&A->nrow, Bptr, &ione, work, &ione);
+	    hypre_F90_NAME_BLAS(dcopy,DCOPY)(&A->nrow, Bptr, &ione, work, &ione);
 #endif
 	    sp_dgemv(trans, ndone, A, Xptr, ione, done, work, ione);
 
@@ -318,7 +317,7 @@ dgsrfs(char *trans, SuperMatrix *A, SuperMatrix *L, SuperMatrix *U,
 		SAXPY(&A->nrow, &done, work, &ione,
 		       &Xmat[j*ldx], &ione);
 #else
-		daxpy_(&A->nrow, &done, work, &ione,
+		hypre_F90_NAME_BLAS(daxpy,DAXPY)(&A->nrow, &done, work, &ione,
 		       &Xmat[j*ldx], &ione);
 #endif
 		lstres = berr[j];
