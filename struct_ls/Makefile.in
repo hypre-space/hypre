@@ -32,19 +32,6 @@ CFLAGS =\
 
 RANLIB = @RANLIB@
 
-MPILIBFLAGS = @MPILIBDIRS@ @MPILIBS@ @MPIFLAGS@ 
-LIBFLAGS = @LIBDIRS@ @LIBS@
-LDLIBFLAGS = @LDLIBDIRS@ @LDLIBS@
-
-LFLAGS =\
- -L.\
- -L../struct_matrix_vector\
- -L../utilities\
- -lHYPRE_ls\
- -lHYPRE_mv\
- -lHYPRE_utilities\
- ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
-
 HEADERS =\
  headers.h\
  pfmg.h\

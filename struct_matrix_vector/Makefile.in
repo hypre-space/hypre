@@ -30,17 +30,6 @@ CFLAGS =\
 
 RANLIB= @RANLIB@
 
-MPILIBFLAGS = @MPILIBDIRS@ @MPILIBS@ @MPIFLAGS@
-LIBFLAGS = @LIBDIRS@ @LIBS@
-LDLIBFLAGS = @LDLIBDIRS@ @LDLIBS@
-
-LFLAGS =\
- -L.\
- -L../utilities\
- -lHYPRE_mv\
- -lHYPRE_utilities\
- ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
-
 HEADERS =\
  box.h\
  box_neighbors.h\
