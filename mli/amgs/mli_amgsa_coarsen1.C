@@ -439,7 +439,7 @@ printf("\n");
        *-----------------------------------------------------------------*
 
       MLI_Utils_ComputeSpectralRadius(Amat, &max_eigen);
-      if ( mypid == 0 && output_level > 0 )
+      if ( mypid == 0 && output_level > 1 )
          printf("\tEstimated spectral radius of A = %e\n", max_eigen);
       assert ( max_eigen > 0.0 );
       alpha = P_weight / max_eigen;
@@ -685,7 +685,7 @@ printf("\n");
       /* ================================================================*/
 
       MLI_Utils_ComputeSpectralRadius(Amat, &max_eigen);
-      if ( mypid == 0 && output_level > 0 )
+      if ( mypid == 0 && output_level > 1 )
          printf("\tEstimated spectral radius of A = %e\n", max_eigen);
       assert ( max_eigen > 0.0 );
       alpha = P_weight / max_eigen;
@@ -780,7 +780,7 @@ int MLI_Method_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
    free( partition );
    local_nrows = end_row - start_row + 1;
    MPI_Allreduce(&local_nrows, &global_nrows, 1, MPI_INT, MPI_SUM, comm);
-   if ( mypid == 0 && output_level > 0 )
+   if ( mypid == 0 && output_level > 1 )
    {
       printf("\t*** Aggregation(U) : total nodes to aggregate = %d\n",
              global_nrows);
@@ -854,7 +854,7 @@ int MLI_Method_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
    itmp[0] = naggr;
    itmp[1] = nselected;
    MPI_Allreduce(itmp, ibuf, 2, MPI_INT, MPI_SUM, comm);
-   if ( mypid == 0 && output_level > 0 )
+   if ( mypid == 0 && output_level > 1 )
    {
       printf("\t*** Aggregation(U) P1 : no. of aggregates     = %d\n",ibuf[0]);
       printf("\t*** Aggregation(U) P1 : no. nodes aggregated  = %d\n",ibuf[1]);
@@ -902,7 +902,7 @@ int MLI_Method_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
       itmp[0] = naggr;
       itmp[1] = nselected;
       MPI_Allreduce(itmp, ibuf, 2, MPI_INT, MPI_SUM, comm);
-      if ( mypid == 0 && output_level > 0 )
+      if ( mypid == 0 && output_level > 1 )
       {
          printf("\t*** Aggregation(U) P2 : no. of aggregates     = %d\n",ibuf[0]);
          printf("\t*** Aggregation(U) P2 : no. nodes aggregated  = %d\n",ibuf[1]);
@@ -959,7 +959,7 @@ int MLI_Method_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
       itmp[0] = naggr;
       itmp[1] = nselected;
       MPI_Allreduce(itmp, ibuf, 2, MPI_INT, MPI_SUM, comm);
-      if ( mypid == 0 && output_level > 0 )
+      if ( mypid == 0 && output_level > 1 )
       {
          printf("\t*** Aggregation(U) P3 : no. of aggregates     = %d\n",ibuf[0]);
          printf("\t*** Aggregation(U) P3 : no. nodes aggregated  = %d\n",ibuf[1]);
@@ -1000,7 +1000,7 @@ int MLI_Method_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
       itmp[0] = naggr;
       itmp[1] = nselected;
       MPI_Allreduce(itmp, ibuf, 2, MPI_INT, MPI_SUM, comm);
-      if ( mypid == 0 && output_level > 0 )
+      if ( mypid == 0 && output_level > 1 )
       {
          printf("\t*** Aggregation(U) P4 : no. of aggregates     = %d\n",ibuf[0]);
          printf("\t*** Aggregation(U) P4 : no. nodes aggregated  = %d\n",ibuf[1]);
@@ -1132,7 +1132,7 @@ int MLI_Method_AMGSA::formLocalGraph( hypre_ParCSRMatrix *Amat,
 
    epsilon = threshold;
    for ( i = 0; i < curr_level; i++ ) epsilon *= 0.5;
-   if ( mypid == 0 && output_level > 0 )
+   if ( mypid == 0 && output_level > 1 )
    {
       printf("\t*** Aggregation(U) : strength threshold       = %8.2e\n",
              epsilon);

@@ -478,7 +478,7 @@ int MLI_Method_AMGSA::setup( MLI *mli )
    /* return the coarsest grid level number                           */
    /* --------------------------------------------------------------- */
 
-   printStatistics(mli);
+   if ( output_level >= 2 ) printStatistics(mli);
 
 #ifdef MLI_DEBUG_DETAILED
    cout << " MLI_Method_AMGSA::setup ends." << endl;
