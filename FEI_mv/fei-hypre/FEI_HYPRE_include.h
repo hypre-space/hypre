@@ -1,13 +1,6 @@
 #ifndef __ALE_FEI_INCLUDE_H__
 #define __ALE_FEI_INCLUDE_H__
 
-#if PARALLEL
-#   include <mpi.h>
-#else
-#   define MPI_Comm       int
-#   define MPI_COMM_WORLD 0
-#endif
-
 #ifdef EIGHT_BYTE_GLOBAL_ID
    typedef long long GlobalID;
 #else
