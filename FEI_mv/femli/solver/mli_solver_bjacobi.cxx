@@ -924,7 +924,7 @@ int MLI_Solver_BJacobi::cleanBlocks()
    offVals_       = NULL;
    if ( esslMatrices_ != NULL )
    {
-      for ( int iB = 0; iB < nBlocks_; iB++ )
+      for ( iB = 0; iB < nBlocks_; iB++ )
       if ( esslMatrices_[iB] != NULL ) delete [] esslMatrices_[iB];
       delete [] esslMatrices_;
       esslMatrices_ = NULL;      
