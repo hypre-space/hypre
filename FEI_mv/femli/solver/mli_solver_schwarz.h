@@ -25,6 +25,9 @@ class MLI_Solver_Schwarz : public MLI_Solver
    int        *blockLengths_;
    int        **blockIndices_;
    double     ***blockInverses_;
+   int        zeroInitialGuess_;
+   int        nSweeps_;
+   double     *relaxWeights_;
 
 public :
 
