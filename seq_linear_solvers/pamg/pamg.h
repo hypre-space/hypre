@@ -98,6 +98,11 @@ int hypre_AMGIndepSet P((hypre_CSRMatrix *S , double *measure_array , int *graph
 /* interp.c */
 int hypre_AMGBuildInterp P((hypre_CSRMatrix *A , int *CF_marker , hypre_CSRMatrix *S , hypre_CSRMatrix **P_ptr ));
 
+/* interpRBM.c */
+int hypre_AMGBuildRBMInterp P((hypre_CSRMatrix *A , int *CF_marker , hypre_CSRMatrix *S , hypre_CSRMatrix **P_ptr ));
+int row_mat_rectmat_prod P((double *a1 , double *a2 , double *a3 , int i_row , int m , int n ));
+int matinv P((double *x , double *a , int k ));
+
 /* laplace.c */
 hypre_CSRMatrix *hypre_GenerateLaplacian P((int nx , int ny , int nz , int P , int Q , int R , double *value ));
 int map P((int ix , int iy , int iz , int p , int q , int r , int P , int Q , int R , int *nx_part , int *ny_part , int *nz_part , int *global_part ));
