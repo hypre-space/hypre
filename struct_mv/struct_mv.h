@@ -1866,6 +1866,9 @@ hypre_StructMatrix *hypre_StructMatrixCreateMask( hypre_StructMatrix *matrix , i
 void *hypre_StructMatvecCreate( void );
 int hypre_StructMatvecSetup( void *matvec_vdata , hypre_StructMatrix *A , hypre_StructVector *x );
 int hypre_StructMatvecCompute( void *matvec_vdata , double alpha , hypre_StructMatrix *A , hypre_StructVector *x , double beta , hypre_StructVector *y );
+int hypre_StructMatvecCC0( double alpha , hypre_StructMatrix *A , hypre_StructVector *x , hypre_StructVector *y , hypre_BoxArrayArray *compute_box_aa , hypre_IndexRef stride );
+int hypre_StructMatvecCC1( double alpha , hypre_StructMatrix *A , hypre_StructVector *x , hypre_StructVector *y , hypre_BoxArrayArray *compute_box_aa , hypre_IndexRef stride );
+int hypre_StructMatvecCC2( double alpha , hypre_StructMatrix *A , hypre_StructVector *x , hypre_StructVector *y , hypre_BoxArrayArray *compute_box_aa , hypre_IndexRef stride );
 int hypre_StructMatvecDestroy( void *matvec_vdata );
 int hypre_StructMatvec( double alpha , hypre_StructMatrix *A , hypre_StructVector *x , double beta , hypre_StructVector *y );
 
