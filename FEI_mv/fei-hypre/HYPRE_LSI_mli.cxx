@@ -200,6 +200,7 @@ int HYPRE_LSI_MLICreate( MPI_Comm comm, HYPRE_Solver *solver )
    mli_object->injectionForR_       = 0;
 #ifdef HAVE_MLI
    mli_object->mli_                 = NULL;
+   mli_object->sfei_                = NULL;
    mli_object->feData_              = NULL;
    mli_object->mapper_              = NULL;
    return 0;
