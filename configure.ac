@@ -83,8 +83,7 @@ AC_HELP_STRING([--with-babel],[use babel]),
     HYPRE_BABELLIBDIR="HYPRE_TOP_SRC_DIR/babel"
     BABEL_RUNTIME_DIR="HYPRE_TOP_SRC_DIR/babel-runtime"
 
-    BABELDIR=babel
-    BABELDIR="$BABELDIR babel-runtime"
+    BABELDIR="babel-runtime babel"
     export CC CXX F77 F90 CPP LD
     export CFLAGS CXXFLAGS FFLAGS F90FLAGS CPPFLAGS LDFLAGS 
     AC_CONFIG_SUBDIRS(babel-runtime)
