@@ -16,6 +16,11 @@
 #include "parcsr_mv/parcsr_mv.h"
 #include "parcsr_ls/parcsr_ls.h"
 
+#ifdef SUPERLU
+#include "dsp_defs.h"
+#include "util.h"
+#endif
+
 extern void qsort1(int*, double*, int, int);
 
 /***************************************************************************/
@@ -275,8 +280,8 @@ void HYPRE_LSI_DSort(double dlist[], int N, int list2[])
 /* this function extracts the matrix in a CSR format                        */
 /* ------------------------------------------------------------------------ */
 
-int getMatrixCSR(HYPRE_IJMatrix Amat, int nrows, int nnz, int *ia_ptr, 
-                 int *ja_ptr, double *a_ptr) 
+int HYPRE_LSI_GetParCSRMatrix(HYPRE_IJMatrix Amat, int nrows, int nnz, 
+                              int *ia_ptr, int *ja_ptr, double *a_ptr) 
 {
     int                nz, i, j, ierr, rowSize, *colInd, nz_ptr, *colInd2;
     int                firstNnz;
@@ -307,7 +312,7 @@ int getMatrixCSR(HYPRE_IJMatrix Amat, int nrows, int nnz, int *ia_ptr,
        qsort1(colInd2, colVal2, 0, rowSize-1);
        for ( j = 0; j < rowSize-1; j++ )
           if ( colInd2[j] == colInd2[j+1] )
-             printf("getMatrixCSR - duplicate colind at row %d \n",i);
+             printf("HYPRE_LSI_GetParCSRMatrix-duplicate colind at row %d \n",i);
 
        firstNnz = 0;
        for ( j = 0; j < rowSize; j++ )
@@ -317,7 +322,7 @@ int getMatrixCSR(HYPRE_IJMatrix Amat, int nrows, int nnz, int *ia_ptr,
              if (nz_ptr > 0 && firstNnz > 0 && colInd2[j] == ja_ptr[nz_ptr-1]) 
              {
                 a_ptr[nz_ptr-1] += colVal2[j];
-                printf("getMatrixCSR :: repeated col in row %d\n", i);
+                printf("HYPRE_LSI_GetParCSRMatrix:: repeated col in row %d\n",i);
              }
              else
              { 
@@ -325,7 +330,8 @@ int getMatrixCSR(HYPRE_IJMatrix Amat, int nrows, int nnz, int *ia_ptr,
                 a_ptr[nz_ptr++]  = colVal2[j];
                 if ( nz_ptr > nnz )
                 {
-                   printf("getMatrixCSR error (1) - %d %d.\n",i, nrows);
+                   printf("HYPRE_LSI_GetParCSRMatrix Error (1) - %d %d.\n",i, 
+                          nrows);
                    exit(1);
                 }
                 firstNnz++;
@@ -341,9 +347,9 @@ int getMatrixCSR(HYPRE_IJMatrix Amat, int nrows, int nnz, int *ia_ptr,
     /*
     if ( nnz != nz_ptr )
     {
-       printf("getMatrixCSR note : matrix sparsity has been changed since\n");
-       printf("             matConfigure - %d > %d ?\n", nnz, nz_ptr);
-       printf("             number of zeros            = %d \n", nz );
+       printf("HYPRE_LSI_GetParCSRMatrix note : matrix sparsity has been \n");
+       printf("      changed since matConfigure - %d > %d ?\n", nnz, nz_ptr);
+       printf("      number of zeros            = %d \n", nz );
     }
     */
     return nz_ptr;
@@ -522,5 +528,150 @@ int HYPRE_LSI_SolveIdentity(HYPRE_Solver solver, HYPRE_ParCSRMatrix Amat,
    (void) Amat;
    HYPRE_ParVectorCopy( b, x );
    return 0;
+}
+
+/* ******************************************************************** */
+/* solve using SuperLU (sequential)
+/* -------------------------------------------------------------------- */
+
+int HYPRE_LSI_SolveUsingSuperLU(HYPRE_IJMatrix Amat,
+                                HYPRE_IJVector f, HYPRE_IJVector x)
+{
+   int                i, nnz, nrows, ierr, nprocs, status;
+   int                rowSize, *colInd, *new_ia, *new_ja, *ind_array;
+   int                j, nz_ptr, *partition, start_row, end_row;
+   double             *colVal, *new_a;
+   HYPRE_ParCSRMatrix A_csr;
+   HYPRE_ParVector    b_csr;
+   HYPRE_ParVector    x_csr;
+   MPI_Comm           mpi_comm;
+
+#ifdef SUPERLU
+   int                info, panel_size, permc_spec;
+   int                *perm_r, *perm_c;
+   double             *rhs, *soln;
+   mem_usage_t        mem_usage;
+   SuperMatrix        A2, B, L, U;
+   NRformat           *Astore, *Ustore;
+   SCformat           *Lstore;
+   DNformat           *Bstore;
+
+   //------------------------------------------------------------------
+   // available for sequential processing only for now
+   //------------------------------------------------------------------
+
+   HYPRE_IJMatrixGetObject(Amat, (void **) &A_csr);
+   HYPRE_ParCSRMatrixGetComm( A_csr, &mpi_comm );
+   MPI_Comm_size( mpi_comm, &nprocs );
+   if ( nprocs > 1 )
+   {
+      printf("solveUsingSuperLU ERROR - too many processors.\n");
+      return -1;
+   }
+
+   //------------------------------------------------------------------
+   // need to construct a CSR matrix, and the column indices should
+   // have been stored in colIndices and rowLengths
+   //------------------------------------------------------------------
+      
+   HYPRE_ParCSRMatrixGetRowPartitioning( A_csr, &partition );
+   start_row = partition[0];
+   end_row   = partition[1] - 1;
+   nrows     = partition[1] - partition[0];
+
+   //------------------------------------------------------------------
+   // get information about the current matrix
+   //------------------------------------------------------------------
+
+   nnz = 0;
+   for ( i = start_row; i <= end_row; i++ )
+   {
+      HYPRE_ParCSRMatrixGetRow(A_csr,i,&rowSize,&colInd,&colVal);
+      nnz += rowSize;
+      HYPRE_ParCSRMatrixRestoreRow(A_csr,i,&rowSize,&colInd,&colVal);
+   }
+
+   new_ia = (int *)    malloc( (nrows+1) * sizeof(int));
+   new_ja = (int *)    malloc( nnz * sizeof(int));
+   new_a  = (double *) malloc( nnz * sizeof(double));
+   nz_ptr = HYPRE_LSI_GetParCSRMatrix(Amat, nrows, nnz, new_ia, new_ja, new_a);
+   nnz    = nz_ptr;
+
+   //------------------------------------------------------------------
+   // set up SuperLU CSR matrix and the corresponding rhs
+   //------------------------------------------------------------------
+
+   dCreate_CompRow_Matrix(&A2,nrows,nrows,nnz,new_a,new_ja,new_ia,NR,D_D,GE);
+   ind_array = (int *) malloc( nrows * sizeof(int) );
+   for ( i = 0; i < nrows; i++ ) ind_array[i] = i;
+   rhs = (double *) malloc( nrows * sizeof(double) );
+
+   ierr = HYPRE_IJVectorGetValues(f, nrows, ind_array, rhs);
+   assert(!ierr);
+   dCreate_Dense_Matrix(&B, nrows, 1, rhs, nrows, DN, D_D, GE);
+
+   //------------------------------------------------------------------
+   // set up the rest and solve (permc_spec=0 : natural ordering)
+   //------------------------------------------------------------------
+ 
+   perm_r = (int *) malloc( nrows * sizeof(int) );
+   perm_c = (int *) malloc( nrows * sizeof(int) );
+   permc_spec = 0;
+   get_perm_c(permc_spec, &A2, perm_c);
+   panel_size = sp_ienv(1);
+
+   dgssv(&A2, perm_c, perm_r, &L, &U, &B, &info);
+
+   //------------------------------------------------------------------
+   // postprocessing of the return status information
+   //------------------------------------------------------------------
+
+   if ( info == 0 ) 
+   {
+      status = 1;
+      Lstore = (SCformat *) L.Store;
+      Ustore = (NRformat *) U.Store;
+   } 
+   else 
+   {
+      status = 0;
+      printf("HYPRE_LinSysCore::solveUsingSuperLU - dgssv error = %d\n",info);
+   }
+
+   //------------------------------------------------------------------
+   // fetch the solution and find residual norm
+   //------------------------------------------------------------------
+
+   if ( info == 0 )
+   {
+      soln = (double *) ((DNformat *) B.Store)->nzval;
+      ierr = HYPRE_IJVectorSetValues(x, nrows, (const int *) ind_array,
+                    	       (const double *) soln);
+      assert(!ierr);
+   }
+
+   //------------------------------------------------------------------
+   // clean up 
+   //------------------------------------------------------------------
+
+   free( ind_array ); 
+   free( rhs ); 
+   free( perm_c ); 
+   free( perm_r ); 
+   free( new_ia ); 
+   free( new_ja ); 
+   free( new_a ); 
+   Destroy_SuperMatrix_Store(&B);
+   Destroy_SuperNode_Matrix(&L);
+   SUPERLU_FREE( A2.Store );
+   SUPERLU_FREE( ((NRformat *) U.Store)->colind);
+   SUPERLU_FREE( ((NRformat *) U.Store)->rowptr);
+   SUPERLU_FREE( ((NRformat *) U.Store)->nzval);
+   SUPERLU_FREE( U.Store );
+   return info;
+#else
+   printf("HYPRE_LSI_BlockP::solveUsingSuperLU : not available.\n");
+   return 1;
+#endif
 }
 

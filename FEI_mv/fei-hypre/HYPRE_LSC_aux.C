@@ -81,7 +81,8 @@ extern "C" {
    int   HYPRE_LSI_Search(int*, int, int);
    int   HYPRE_LSI_SolveIdentity(HYPRE_Solver, HYPRE_ParCSRMatrix,
                                  HYPRE_ParVector , HYPRE_ParVector);
-   int   getMatrixCSR(HYPRE_IJMatrix,int nrows,int nnz,int*,int*,double*);
+   int   HYPRE_LSI_GetParCSRMatrix(HYPRE_IJMatrix,int nrows,int nnz,int*,
+                                   int*,double*);
 
 #ifdef Y12M
    void y12maf_(int*,int*,double*,int*,int*,int*,int*,double*,
@@ -3215,7 +3216,7 @@ void HYPRE_LinSysCore::solveUsingSuperLU(int& status)
     new_ia = new int[nrows+1];
     new_ja = new int[nnz];
     new_a  = new double[nnz];
-    nz_ptr = getMatrixCSR(currA_, nrows, nnz, new_ia, new_ja, new_a);
+    nz_ptr = HYPRE_LSI_GetParCSRMatrix(currA_,nrows,nnz,new_ia,new_ja,new_a);
     nnz    = nz_ptr;
 
     //------------------------------------------------------------------
@@ -3427,7 +3428,7 @@ void HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
     new_ia = new int[nrows+1];
     new_ja = new int[nnz];
     new_a  = new double[nnz];
-    nz_ptr = getMatrixCSR(currA_, nrows, nnz, new_ia, new_ja, new_a);
+    nz_ptr = HYPRE_LSI_GetParCSRMatrix(currA_,nrows,nnz,new_ia,new_ja,new_a);
     nnz = nz_ptr;
 
     //------------------------------------------------------------------
