@@ -98,11 +98,11 @@ typedef struct
 } hypre_CyclicReductionData;
 
 /*--------------------------------------------------------------------------
- * hypre_CyclicReductionInitialize
+ * hypre_CyclicReductionCreate
  *--------------------------------------------------------------------------*/
 
 void *
-hypre_CyclicReductionInitialize( MPI_Comm  comm )
+hypre_CyclicReductionCreate( MPI_Comm  comm )
 {
    hypre_CyclicReductionData *cyc_red_data;
 
@@ -120,11 +120,11 @@ hypre_CyclicReductionInitialize( MPI_Comm  comm )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_CycRedNewCoarseOp
+ * hypre_CycRedCreateCoarseOp
  *--------------------------------------------------------------------------*/
 
 hypre_StructMatrix *
-hypre_CycRedNewCoarseOp( hypre_StructMatrix *A,
+hypre_CycRedCreateCoarseOp( hypre_StructMatrix *A,
                          hypre_StructGrid   *coarse_grid,
                          int                 cdir        )
 {
@@ -188,13 +188,13 @@ hypre_CycRedNewCoarseOp( hypre_StructMatrix *A,
       }
    }
 
-   Ac_stencil = hypre_NewStructStencil(Ac_stencil_dim, Ac_stencil_size,
+   Ac_stencil = hypre_CreateStructStencil(Ac_stencil_dim, Ac_stencil_size,
                                        Ac_stencil_shape);
 
-   Ac = hypre_NewStructMatrix(hypre_StructMatrixComm(A),
+   Ac = hypre_CreateStructMatrix(hypre_StructMatrixComm(A),
                               coarse_grid, Ac_stencil);
 
-   hypre_FreeStructStencil(Ac_stencil);
+   hypre_DestroyStructStencil(Ac_stencil);
 
    /*-----------------------------------------------
     * Coarse operator in symmetric iff fine operator is
@@ -336,7 +336,7 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
                                 Ac_data_box, cstart, stridec, iAc);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iA,iAc,iAm1,iAp1
 #include "hypre_box_smp_forloop.h"
-	    hypre_BoxLoop2For(loopi, loopj, loopk, iA, iAc)
+            hypre_BoxLoop2For(loopi, loopj, loopk, iA, iAc)
                {
                   iAm1 = iA - xOffsetA;
                   iAp1 = iA + xOffsetA;
@@ -366,7 +366,7 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
                                 Ac_data_box, cstart, stridec, iAc);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iA,iAc,iAm1,iAp1
 #include "hypre_box_smp_forloop.h"
-	    hypre_BoxLoop2For(loopi, loopj, loopk, iA, iAc)
+            hypre_BoxLoop2For(loopi, loopj, loopk, iA, iAc)
                {
                   iAm1 = iA - xOffsetA;
                   iAp1 = iA + xOffsetA;
@@ -609,14 +609,14 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
       }
 
       /* compute local boxes */
-      boxes = hypre_NewBoxArray(num_boxes);
+      boxes = hypre_CreateBoxArray(num_boxes);
       for (i = 0; i < num_boxes; i++)
       {
          hypre_CopyBox(hypre_BoxArrayBox(all_boxes, box_ranks[i]),
                        hypre_BoxArrayBox(boxes, i));
       }
 
-      grid_l[l+1] = hypre_NewStructGrid(comm, hypre_StructGridDim(grid_l[l]));
+      grid_l[l+1] = hypre_CreateStructGrid(comm, hypre_StructGridDim(grid_l[l]));
       for (d = 0; d < 3; d++)
       {
          hypre_IndexD(pindex, d) +=
@@ -696,10 +696,10 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
 
    for (l = 0; l < (num_levels - 1); l++)
    {
-      A_l[l+1] = hypre_CycRedNewCoarseOp(A_l[l], grid_l[l+1], cdir);
+      A_l[l+1] = hypre_CycRedCreateCoarseOp(A_l[l], grid_l[l+1], cdir);
       data_size += hypre_StructMatrixDataSize(A_l[l+1]);
 
-      x_l[l+1] = hypre_NewStructVector(comm, grid_l[l+1]);
+      x_l[l+1] = hypre_CreateStructVector(comm, grid_l[l+1]);
       hypre_SetStructVectorNumGhost(x_l[l+1], x_num_ghost);
       hypre_InitializeStructVectorShell(x_l[l+1]);
       data_size += hypre_StructVectorDataSize(x_l[l+1]);
@@ -756,7 +756,7 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
       hypre_ProjectBoxArrayArray(recv_boxes, findex, stride);
       hypre_ProjectBoxArrayArray(indt_boxes, cindex, stride);
       hypre_ProjectBoxArrayArray(dept_boxes, cindex, stride);
-      hypre_NewComputePkg(send_boxes, recv_boxes,
+      hypre_CreateComputePkg(send_boxes, recv_boxes,
                           stride, stride,
                           send_processes, recv_processes,
                           indt_boxes, dept_boxes,
@@ -774,7 +774,7 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
       hypre_ProjectBoxArrayArray(recv_boxes, cindex, stride);
       hypre_ProjectBoxArrayArray(indt_boxes, findex, stride);
       hypre_ProjectBoxArrayArray(dept_boxes, findex, stride);
-      hypre_NewComputePkg(send_boxes, recv_boxes,
+      hypre_CreateComputePkg(send_boxes, recv_boxes,
                           stride, stride,
                           send_processes, recv_processes,
                           indt_boxes, dept_boxes,
@@ -905,8 +905,8 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
 
    hypre_SetIndex(stridec, 1, 1, 1);
 
-   hypre_FreeStructMatrix(A_l[0]);
-   hypre_FreeStructVector(x_l[0]);
+   hypre_DestroyStructMatrix(A_l[0]);
+   hypre_DestroyStructVector(x_l[0]);
    A_l[0] = hypre_RefStructMatrix(A);
    x_l[0] = hypre_RefStructVector(x);
 
@@ -936,7 +936,7 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
                                 b_data_box, start, base_stride, bi);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,xi,bi
 #include "hypre_box_smp_forloop.h"
-	 hypre_BoxLoop2For(loopi, loopj, loopk, xi, bi)
+         hypre_BoxLoop2For(loopi, loopj, loopk, xi, bi)
             {
                xp[xi] = bp[bi];
             }
@@ -994,7 +994,7 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
                                 x_data_box, start, stride, xi);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,xi
 #include "hypre_box_smp_forloop.h"
-	    hypre_BoxLoop2For(loopi, loopj, loopk, Ai, xi)
+            hypre_BoxLoop2For(loopi, loopj, loopk, Ai, xi)
                {
                   xp[xi] /= Ap[Ai]; 
                }
@@ -1069,7 +1069,7 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
                                          xc_data_box, startc, stridec, xci);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,xi,xci
 #include "hypre_box_smp_forloop.h"
-		     hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, xci)
+                     hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, xci)
                         {
                            xcp[xci] = xp[xi] -
                               Awp[Ai]*xwp[xi] -
@@ -1122,7 +1122,7 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
                                 xc_data_box, startc, stridec, xci);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,xi,xci
 #include "hypre_box_smp_forloop.h"
-	    hypre_BoxLoop2For(loopi, loopj, loopk, xi, xci)
+            hypre_BoxLoop2For(loopi, loopj, loopk, xi, xci)
                {
                   xp[xi] = xcp[xci];
                }
@@ -1190,12 +1190,12 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
                                          x_data_box, start, stride, xi);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,xi
 #include "hypre_box_smp_forloop.h"
-	             hypre_BoxLoop2For(loopi, loopj, loopk, Ai, xi)
+                     hypre_BoxLoop2For(loopi, loopj, loopk, Ai, xi)
                         {
                            xp[xi] -= (Awp[Ai]*xwp[xi] +
                                       Aep[Ai]*xep[xi]  ) / Ap[Ai];
                         }
-		     hypre_BoxLoop2End(Ai, xi);
+                     hypre_BoxLoop2End(Ai, xi);
                   }
             }
       }
@@ -1236,11 +1236,11 @@ hypre_CyclicReductionSetBase( void        *cyc_red_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_CyclicReductionFinalize
+ * hypre_CyclicReductionDestroy
  *--------------------------------------------------------------------------*/
 
 int
-hypre_CyclicReductionFinalize( void *cyc_red_vdata )
+hypre_CyclicReductionDestroy( void *cyc_red_vdata )
 {
    hypre_CyclicReductionData *cyc_red_data = cyc_red_vdata;
 
@@ -1249,21 +1249,21 @@ hypre_CyclicReductionFinalize( void *cyc_red_vdata )
 
    if (cyc_red_data)
    {
-      hypre_FreeBoxArray(cyc_red_data -> base_points);
-      hypre_FreeStructGrid(cyc_red_data -> grid_l[0]);
-      hypre_FreeStructMatrix(cyc_red_data -> A_l[0]);
-      hypre_FreeStructVector(cyc_red_data -> x_l[0]);
+      hypre_DestroyBoxArray(cyc_red_data -> base_points);
+      hypre_DestroyStructGrid(cyc_red_data -> grid_l[0]);
+      hypre_DestroyStructMatrix(cyc_red_data -> A_l[0]);
+      hypre_DestroyStructVector(cyc_red_data -> x_l[0]);
       for (l = 0; l < ((cyc_red_data -> num_levels) - 1); l++)
       {
-         hypre_FreeStructGrid(cyc_red_data -> grid_l[l+1]);
-         hypre_FreeBoxArray(cyc_red_data -> fine_points_l[l]);
-         hypre_FreeBoxArray(cyc_red_data -> coarse_points_l[l]);
-         hypre_FreeStructMatrix(cyc_red_data -> A_l[l+1]);
-         hypre_FreeStructVector(cyc_red_data -> x_l[l+1]);
-         hypre_FreeComputePkg(cyc_red_data -> down_compute_pkg_l[l]);
-         hypre_FreeComputePkg(cyc_red_data -> up_compute_pkg_l[l]);
+         hypre_DestroyStructGrid(cyc_red_data -> grid_l[l+1]);
+         hypre_DestroyBoxArray(cyc_red_data -> fine_points_l[l]);
+         hypre_DestroyBoxArray(cyc_red_data -> coarse_points_l[l]);
+         hypre_DestroyStructMatrix(cyc_red_data -> A_l[l+1]);
+         hypre_DestroyStructVector(cyc_red_data -> x_l[l+1]);
+         hypre_DestroyComputePkg(cyc_red_data -> down_compute_pkg_l[l]);
+         hypre_DestroyComputePkg(cyc_red_data -> up_compute_pkg_l[l]);
       }
-      hypre_FreeBoxArray(cyc_red_data -> fine_points_l[l]);
+      hypre_DestroyBoxArray(cyc_red_data -> fine_points_l[l]);
       hypre_SharedTFree(cyc_red_data -> data); 
       hypre_TFree(cyc_red_data -> grid_l);
       hypre_TFree(cyc_red_data -> fine_points_l);

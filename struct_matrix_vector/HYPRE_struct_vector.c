@@ -15,32 +15,32 @@
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * HYPRE_NewStructVector
+ * HYPRE_CreateStructVector
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_NewStructVector( MPI_Comm             comm,
-                       HYPRE_StructGrid     grid,
-                       HYPRE_StructStencil  stencil,
-                       HYPRE_StructVector  *vector )
+HYPRE_CreateStructVector( MPI_Comm             comm,
+                          HYPRE_StructGrid     grid,
+                          HYPRE_StructStencil  stencil,
+                          HYPRE_StructVector  *vector )
 {
    int ierr = 0;
 
    *vector = ( (HYPRE_StructVector)
-               hypre_NewStructVector( comm,
-                                      (hypre_StructGrid *) grid ) );
+               hypre_CreateStructVector( comm,
+                                         (hypre_StructGrid *) grid ) );
 
    return ierr;
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_FreeStructVector
+ * HYPRE_DestroyStructVector
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_FreeStructVector( HYPRE_StructVector struct_vector )
+HYPRE_DestroyStructVector( HYPRE_StructVector struct_vector )
 {
-   return( hypre_FreeStructVector( (hypre_StructVector *) struct_vector ) );
+   return( hypre_DestroyStructVector( (hypre_StructVector *) struct_vector ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -137,12 +137,12 @@ HYPRE_SetStructVectorBoxValues( HYPRE_StructVector  vector,
       hypre_IndexD(new_ilower, d) = ilower[d];
       hypre_IndexD(new_iupper, d) = iupper[d];
    }
-   new_value_box = hypre_NewBox();
+   new_value_box = hypre_CreateBox();
    hypre_SetBoxExtents(new_value_box, new_ilower, new_iupper);
 
    ierr = hypre_SetStructVectorBoxValues( new_vector, new_value_box, values );
 
-   hypre_FreeBox(new_value_box);
+   hypre_DestroyBox(new_value_box);
 
    return (ierr);
 }
@@ -174,12 +174,12 @@ HYPRE_GetStructVectorBoxValues( HYPRE_StructVector  vector,
       hypre_IndexD(new_ilower, d) = ilower[d];
       hypre_IndexD(new_iupper, d) = iupper[d];
    }
-   new_value_box = hypre_NewBox();
+   new_value_box = hypre_CreateBox();
    hypre_SetBoxExtents(new_value_box, new_ilower, new_iupper);
 
    ierr = hypre_GetStructVectorBoxValues( new_vector, new_value_box, values );
 
-   hypre_FreeBox(new_value_box);
+   hypre_DestroyBox(new_value_box);
 
    return (ierr);
 }
@@ -237,7 +237,7 @@ HYPRE_SetStructVectorConstantValues( HYPRE_StructVector  vector,
 
 int
 HYPRE_GetMigrateStructVectorCommPkg( HYPRE_StructVector  from_vector,
-				     HYPRE_StructVector  to_vector,
+                                     HYPRE_StructVector  to_vector,
                                      HYPRE_CommPkg      *comm_pkg    )
 {
    int ierr;
@@ -256,22 +256,22 @@ HYPRE_GetMigrateStructVectorCommPkg( HYPRE_StructVector  from_vector,
 
 int 
 HYPRE_MigrateStructVector( HYPRE_CommPkg      comm_pkg,
-			   HYPRE_StructVector from_vector,
+                           HYPRE_StructVector from_vector,
                            HYPRE_StructVector to_vector   )
 {
-  return( hypre_MigrateStructVector( (hypre_CommPkg *)comm_pkg,
-				     (hypre_StructVector *)from_vector,
-				     (hypre_StructVector *)to_vector ) );
+   return( hypre_MigrateStructVector( (hypre_CommPkg *)comm_pkg,
+                                      (hypre_StructVector *)from_vector,
+                                      (hypre_StructVector *)to_vector ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_FreeCommPkg
+ * HYPRE_DestroyCommPkg
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_FreeCommPkg( HYPRE_CommPkg comm_pkg )
+HYPRE_DestroyCommPkg( HYPRE_CommPkg comm_pkg )
 {
-  return ( hypre_FreeCommPkg( (hypre_CommPkg *)comm_pkg ) );
+   return ( hypre_DestroyCommPkg( (hypre_CommPkg *)comm_pkg ) );
 }
 
 

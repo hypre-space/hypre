@@ -15,19 +15,20 @@
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * HYPRE_NewStructStencil
+ * HYPRE_CreateStructStencil
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_NewStructStencil( int                  dim,
-                        int                  size,
-                        HYPRE_StructStencil *stencil )
+HYPRE_CreateStructStencil( int                  dim,
+                           int                  size,
+                           HYPRE_StructStencil *stencil )
 {
    hypre_Index  *shape;
  
    shape = hypre_CTAlloc(hypre_Index, size);
  
-   *stencil = ((HYPRE_StructStencil) hypre_NewStructStencil(dim, size,shape));
+   *stencil =
+      ((HYPRE_StructStencil) hypre_CreateStructStencil(dim, size,shape));
 
    return 0;
 }
@@ -58,12 +59,12 @@ HYPRE_SetStructStencilElement( HYPRE_StructStencil  stencil,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_FreeStructStencil
+ * HYPRE_DestroyStructStencil
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_FreeStructStencil( HYPRE_StructStencil stencil )
+HYPRE_DestroyStructStencil( HYPRE_StructStencil stencil )
 {
-   return ( hypre_FreeStructStencil( (hypre_StructStencil *) stencil ) );
+   return ( hypre_DestroyStructStencil( (hypre_StructStencil *) stencil ) );
 }
 

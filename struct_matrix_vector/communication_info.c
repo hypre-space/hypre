@@ -46,12 +46,12 @@ headers.h
 /*--------------------------------------------------------------------------*/
 
 int
-hypre_NewCommInfoFromStencil( hypre_StructGrid      *grid,
-                              hypre_StructStencil   *stencil,
-                              hypre_BoxArrayArray  **send_boxes_ptr,
-                              hypre_BoxArrayArray  **recv_boxes_ptr,
-                              int                 ***send_processes_ptr,
-                              int                 ***recv_processes_ptr )
+hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
+                                 hypre_StructStencil   *stencil,
+                                 hypre_BoxArrayArray  **send_boxes_ptr,
+                                 hypre_BoxArrayArray  **recv_boxes_ptr,
+                                 int                 ***send_processes_ptr,
+                                 int                 ***recv_processes_ptr )
 {
    int                      ierr = 0;
 
@@ -109,8 +109,8 @@ hypre_NewCommInfoFromStencil( hypre_StructGrid      *grid,
     * Compute send/recv boxes and processes
     *------------------------------------------------------*/
 
-   send_boxes = hypre_NewBoxArrayArray(hypre_BoxArraySize(boxes));
-   recv_boxes = hypre_NewBoxArrayArray(hypre_BoxArraySize(boxes));
+   send_boxes = hypre_CreateBoxArrayArray(hypre_BoxArraySize(boxes));
+   recv_boxes = hypre_CreateBoxArrayArray(hypre_BoxArraySize(boxes));
    send_processes = hypre_CTAlloc(int *, hypre_BoxArraySize(boxes));
    recv_processes = hypre_CTAlloc(int *, hypre_BoxArraySize(boxes));
 
@@ -119,8 +119,8 @@ hypre_NewCommInfoFromStencil( hypre_StructGrid      *grid,
    neighbor_boxes = hypre_BoxNeighborsBoxes(neighbors);
    neighbor_processes = hypre_BoxNeighborsProcesses(neighbors);
 
-   box0 = hypre_NewBox();
-   shift_box = hypre_NewBox();
+   box0 = hypre_CreateBox();
+   shift_box = hypre_CreateBox();
 
    cbox_arrays =
       hypre_CTAlloc(hypre_BoxArray *, hypre_BoxArraySize(neighbor_boxes));
@@ -159,7 +159,7 @@ hypre_NewCommInfoFromStencil( hypre_StructGrid      *grid,
                   {
                      if (cbox_arrays[j] == NULL)
                      {
-                        cbox_arrays[j] = hypre_NewBoxArray(0);
+                        cbox_arrays[j] = hypre_CreateBoxArray(0);
                         cbox_arrays_i[num_cbox_arrays] = j;
                         num_cbox_arrays++;
                      }
@@ -193,7 +193,7 @@ hypre_NewCommInfoFromStencil( hypre_StructGrid      *grid,
                                 hypre_BoxArrayBox(recv_box_array, n));
                   n++;
                }
-            hypre_FreeBoxArray(cbox_arrays[j]);
+            hypre_DestroyBoxArray(cbox_arrays[j]);
             cbox_arrays[j] = NULL;
          }
 
@@ -240,7 +240,7 @@ hypre_NewCommInfoFromStencil( hypre_StructGrid      *grid,
 
                      if (cbox_arrays[j] == NULL)
                      {
-                        cbox_arrays[j] = hypre_NewBoxArray(0);
+                        cbox_arrays[j] = hypre_CreateBoxArray(0);
                         cbox_arrays_i[num_cbox_arrays] = j;
                         num_cbox_arrays++;
                      }
@@ -281,7 +281,7 @@ hypre_NewCommInfoFromStencil( hypre_StructGrid      *grid,
                                 hypre_BoxArrayBox(send_box_array, n));
                   n++;
                }
-            hypre_FreeBoxArray(cbox_arrays[j]);
+            hypre_DestroyBoxArray(cbox_arrays[j]);
             cbox_arrays[j] = NULL;
          }
       }
@@ -289,8 +289,8 @@ hypre_NewCommInfoFromStencil( hypre_StructGrid      *grid,
    hypre_TFree(cbox_arrays);
    hypre_TFree(cbox_arrays_i);
 
-   hypre_FreeBox(shift_box);
-   hypre_FreeBox(box0);
+   hypre_DestroyBox(shift_box);
+   hypre_DestroyBox(box0);
 
    /*------------------------------------------------------
     * Return
@@ -328,16 +328,16 @@ headers.h
 @param recv_processes_ptr [OUT]
   processors that data is to be received from.
 
-@see hypre_NewCommInfoFromStencil */
+@see hypre_CreateCommInfoFromStencil */
 /*--------------------------------------------------------------------------*/
 
 int
-hypre_NewCommInfoFromNumGhost( hypre_StructGrid      *grid,
-                               int                   *num_ghost,
-                               hypre_BoxArrayArray  **send_boxes_ptr,
-                               hypre_BoxArrayArray  **recv_boxes_ptr,
-                               int                 ***send_processes_ptr,
-                               int                 ***recv_processes_ptr )
+hypre_CreateCommInfoFromNumGhost( hypre_StructGrid      *grid,
+                                  int                   *num_ghost,
+                                  hypre_BoxArrayArray  **send_boxes_ptr,
+                                  hypre_BoxArrayArray  **recv_boxes_ptr,
+                                  int                 ***send_processes_ptr,
+                                  int                 ***recv_processes_ptr )
 {
    int                      ierr = 0;
 
@@ -398,16 +398,16 @@ hypre_NewCommInfoFromNumGhost( hypre_StructGrid      *grid,
     * Compute send/recv boxes and processes
     *------------------------------------------------------*/
 
-   send_boxes = hypre_NewBoxArrayArray(hypre_BoxArraySize(boxes));
-   recv_boxes = hypre_NewBoxArrayArray(hypre_BoxArraySize(boxes));
+   send_boxes = hypre_CreateBoxArrayArray(hypre_BoxArraySize(boxes));
+   recv_boxes = hypre_CreateBoxArrayArray(hypre_BoxArraySize(boxes));
    send_processes = hypre_CTAlloc(int *, hypre_BoxArraySize(boxes));
    recv_processes = hypre_CTAlloc(int *, hypre_BoxArraySize(boxes));
 
    neighbor_boxes = hypre_BoxNeighborsBoxes(neighbors);
    neighbor_processes = hypre_BoxNeighborsProcesses(neighbors);
 
-   box0 = hypre_NewBox();
-   grow_box = hypre_NewBox();
+   box0 = hypre_CreateBox();
+   grow_box = hypre_CreateBox();
 
    cbox_arrays =
       hypre_CTAlloc(hypre_BoxArray *, hypre_BoxArraySize(neighbor_boxes));
@@ -443,7 +443,7 @@ hypre_NewCommInfoFromNumGhost( hypre_StructGrid      *grid,
                {
                   if (cbox_arrays[j] == NULL)
                   {
-                     cbox_arrays[j] = hypre_NewBoxArray(0);
+                     cbox_arrays[j] = hypre_CreateBoxArray(0);
                      cbox_arrays_i[num_cbox_arrays] = j;
                      num_cbox_arrays++;
                   }
@@ -475,7 +475,7 @@ hypre_NewCommInfoFromNumGhost( hypre_StructGrid      *grid,
                                 hypre_BoxArrayBox(recv_box_array, n));
                   n++;
                }
-            hypre_FreeBoxArray(cbox_arrays[j]);
+            hypre_DestroyBoxArray(cbox_arrays[j]);
             cbox_arrays[j] = NULL;
          }
 
@@ -503,7 +503,7 @@ hypre_NewCommInfoFromNumGhost( hypre_StructGrid      *grid,
                {
                   if (cbox_arrays[j] == NULL)
                   {
-                     cbox_arrays[j] = hypre_NewBoxArray(0);
+                     cbox_arrays[j] = hypre_CreateBoxArray(0);
                      cbox_arrays_i[num_cbox_arrays] = j;
                      num_cbox_arrays++;
                   }
@@ -535,7 +535,7 @@ hypre_NewCommInfoFromNumGhost( hypre_StructGrid      *grid,
                                 hypre_BoxArrayBox(send_box_array, n));
                   n++;
                }
-            hypre_FreeBoxArray(cbox_arrays[j]);
+            hypre_DestroyBoxArray(cbox_arrays[j]);
             cbox_arrays[j] = NULL;
          }
       }
@@ -543,8 +543,8 @@ hypre_NewCommInfoFromNumGhost( hypre_StructGrid      *grid,
    hypre_TFree(cbox_arrays);
    hypre_TFree(cbox_arrays_i);
 
-   hypre_FreeBox(grow_box);
-   hypre_FreeBox(box0);
+   hypre_DestroyBox(grow_box);
+   hypre_DestroyBox(box0);
 
    /*------------------------------------------------------
     * Return
@@ -585,12 +585,12 @@ headers.h
 /*--------------------------------------------------------------------------*/
 
 int
-hypre_NewCommInfoFromGrids( hypre_StructGrid      *from_grid,
-                            hypre_StructGrid      *to_grid,
-                            hypre_BoxArrayArray  **send_boxes_ptr,
-                            hypre_BoxArrayArray  **recv_boxes_ptr,
-                            int                 ***send_processes_ptr,
-                            int                 ***recv_processes_ptr )
+hypre_CreateCommInfoFromGrids( hypre_StructGrid      *from_grid,
+                               hypre_StructGrid      *to_grid,
+                               hypre_BoxArrayArray  **send_boxes_ptr,
+                               hypre_BoxArrayArray  **recv_boxes_ptr,
+                               int                 ***send_processes_ptr,
+                               int                 ***recv_processes_ptr )
 {
    int                      ierr = 0;
 
@@ -649,10 +649,10 @@ hypre_NewCommInfoFromGrids( hypre_StructGrid      *from_grid,
                            &remote_processes,
                            &remote_box_ranks);
 
-      comm_boxes = hypre_NewBoxArrayArray(hypre_BoxArraySize(local_boxes));
+      comm_boxes = hypre_CreateBoxArrayArray(hypre_BoxArraySize(local_boxes));
       comm_processes = hypre_CTAlloc(int *, hypre_BoxArraySize(local_boxes));
 
-      comm_box = hypre_NewBox();
+      comm_box = hypre_CreateBox();
       hypre_ForBoxI(i, local_boxes)
          {
             local_box = hypre_BoxArrayBox(local_boxes, i);
@@ -679,9 +679,9 @@ hypre_NewCommInfoFromGrids( hypre_StructGrid      *from_grid,
                hypre_TReAlloc(comm_processes[i],
                               int, hypre_BoxArraySize(comm_box_array));
          }
-      hypre_FreeBox(comm_box);
+      hypre_DestroyBox(comm_box);
 
-      hypre_FreeBoxArray(remote_all_boxes);
+      hypre_DestroyBoxArray(remote_all_boxes);
       hypre_TFree(remote_processes);
       hypre_TFree(remote_box_ranks);
 

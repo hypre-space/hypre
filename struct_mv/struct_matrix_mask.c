@@ -15,7 +15,7 @@
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * hypre_NewStructMatrixMask
+ * hypre_CreateStructMatrixMask
  *    This routine returns the matrix, `mask', containing pointers to
  *    some of the data in the input matrix `matrix'.  This can be useful,
  *    for example, to construct "splittings" of a matrix for use in
@@ -31,9 +31,9 @@
  *--------------------------------------------------------------------------*/
 
 hypre_StructMatrix *
-hypre_NewStructMatrixMask( hypre_StructMatrix *matrix,
-                           int                 num_stencil_indices,
-                           int                *stencil_indices     )
+hypre_CreateStructMatrixMask( hypre_StructMatrix *matrix,
+                              int                 num_stencil_indices,
+                              int                *stencil_indices     )
 {
    hypre_StructMatrix   *mask;
 
@@ -71,9 +71,9 @@ hypre_NewStructMatrixMask( hypre_StructMatrix *matrix,
                       mask_stencil_shape[i]);
    }
    hypre_StructMatrixStencil(mask) =
-      hypre_NewStructStencil(hypre_StructStencilDim(stencil),
-                             mask_stencil_size,
-                             mask_stencil_shape);
+      hypre_CreateStructStencil(hypre_StructStencilDim(stencil),
+                                mask_stencil_size,
+                                mask_stencil_shape);
 
    hypre_StructMatrixNumValues(mask) = hypre_StructMatrixNumValues(matrix);
 

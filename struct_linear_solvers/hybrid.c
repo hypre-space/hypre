@@ -45,11 +45,11 @@ typedef struct
 } hypre_HybridData;
 
 /*--------------------------------------------------------------------------
- * hypre_HybridInitialize
+ * hypre_HybridCreate
  *--------------------------------------------------------------------------*/
 
 void *
-hypre_HybridInitialize( MPI_Comm  comm )
+hypre_HybridCreate( MPI_Comm  comm )
 {
    hypre_HybridData *hybrid_data;
 
@@ -79,11 +79,11 @@ hypre_HybridInitialize( MPI_Comm  comm )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_HybridFinalize
+ * hypre_HybridDestroy
  *--------------------------------------------------------------------------*/
 
 int
-hypre_HybridFinalize( void  *hybrid_vdata )
+hypre_HybridDestroy( void  *hybrid_vdata )
 {
    hypre_HybridData *hybrid_data = hybrid_vdata;
    int ierr = 0;
@@ -362,7 +362,7 @@ hypre_HybridSolve( void               *hybrid_vdata,
    /*-----------------------------------------------------------------------
     * Setup DSCG.
     *-----------------------------------------------------------------------*/
-   pcg_solver = hypre_PCGInitialize();
+   pcg_solver = hypre_PCGCreate();
    hypre_PCGSetMaxIter(pcg_solver, dscg_max_its);
    hypre_PCGSetTol(pcg_solver, tol);
    hypre_PCGSetConvergenceFactorTol(pcg_solver, cf_tol);
@@ -407,7 +407,7 @@ hypre_HybridSolve( void               *hybrid_vdata,
    if( res_norm < tol )
    {
       (hybrid_data -> final_rel_res_norm) = res_norm;
-      hypre_PCGFinalize(pcg_solver);
+      hypre_PCGDestroy(pcg_solver);
    }
 
    /*-----------------------------------------------------------------------
@@ -418,9 +418,9 @@ hypre_HybridSolve( void               *hybrid_vdata,
       /*--------------------------------------------------------------------
        * Free up previous PCG solver structure and set up a new one.
        *--------------------------------------------------------------------*/
-      hypre_PCGFinalize(pcg_solver);
+      hypre_PCGDestroy(pcg_solver);
 
-      pcg_solver = hypre_PCGInitialize();
+      pcg_solver = hypre_PCGCreate();
       hypre_PCGSetMaxIter(pcg_solver, pcg_max_its);
       hypre_PCGSetTol(pcg_solver, tol);
       hypre_PCGSetTwoNorm(pcg_solver, two_norm);
@@ -430,7 +430,7 @@ hypre_HybridSolve( void               *hybrid_vdata,
       /* Setup preconditioner */
       if (pcg_default)
       {
-         pcg_precond = hypre_SMGInitialize(comm);
+         pcg_precond = hypre_SMGCreate(comm);
          hypre_SMGSetMaxIter(pcg_precond, 1);
          hypre_SMGSetTol(pcg_precond, 0.0);
          hypre_SMGSetNumPreRelax(pcg_precond, 1);
@@ -471,10 +471,10 @@ hypre_HybridSolve( void               *hybrid_vdata,
       }
 
       /* Free PCG and preconditioner */
-      hypre_PCGFinalize(pcg_solver);
+      hypre_PCGDestroy(pcg_solver);
       if (pcg_default)
       {
-         hypre_SMGFinalize(pcg_precond);
+         hypre_SMGDestroy(pcg_precond);
       }
    }
 

@@ -14,25 +14,25 @@
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructHybridInitialize
+ * HYPRE_StructHybridCreate
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_StructHybridInitialize( MPI_Comm comm, HYPRE_StructSolver *solver )
+HYPRE_StructHybridCreate( MPI_Comm comm, HYPRE_StructSolver *solver )
 {
-   *solver = ( (HYPRE_StructSolver) hypre_HybridInitialize( comm ) );
+   *solver = ( (HYPRE_StructSolver) hypre_HybridCreate( comm ) );
 
    return 0;
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructHybridFinalize
+ * HYPRE_StructHybridDestroy
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_StructHybridFinalize( HYPRE_StructSolver solver )
+HYPRE_StructHybridDestroy( HYPRE_StructSolver solver )
 {
-   return( hypre_HybridFinalize( (void *) solver ) );
+   return( hypre_HybridDestroy( (void *) solver ) );
 }
 
 /*--------------------------------------------------------------------------

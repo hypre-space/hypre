@@ -15,16 +15,16 @@
 #include "smg.h"
 
 /*--------------------------------------------------------------------------
- * hypre_SMGNewRAPOp
+ * hypre_SMGCreateRAPOp
  *
- *   Wrapper for 2 and 3d NewRAPOp routines which set up new coarse
+ *   Wrapper for 2 and 3d CreateRAPOp routines which set up new coarse
  *   grid structures.
  *--------------------------------------------------------------------------*/
  
 hypre_StructMatrix *
-hypre_SMGNewRAPOp( hypre_StructMatrix *R,
-                   hypre_StructMatrix *A,
-                   hypre_StructMatrix *PT )
+hypre_SMGCreateRAPOp( hypre_StructMatrix *R,
+                      hypre_StructMatrix *A,
+                      hypre_StructMatrix *PT )
 {
    hypre_StructMatrix    *RAP;
    hypre_StructStencil   *stencil;
@@ -34,11 +34,11 @@ hypre_SMGNewRAPOp( hypre_StructMatrix *R,
    switch (hypre_StructStencilDim(stencil)) 
    {
       case 2:
-      RAP = hypre_SMG2NewRAPOp(R ,A, PT);
+      RAP = hypre_SMG2CreateRAPOp(R ,A, PT);
       break;
     
       case 3:
-      RAP = hypre_SMG3NewRAPOp(R ,A, PT);
+      RAP = hypre_SMG3CreateRAPOp(R ,A, PT);
       break;
    } 
 

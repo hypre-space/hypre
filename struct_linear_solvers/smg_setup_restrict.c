@@ -15,13 +15,13 @@
 #include "smg.h"
 
 /*--------------------------------------------------------------------------
- * hypre_SMGNewRestrictOp
+ * hypre_SMGCreateRestrictOp
  *--------------------------------------------------------------------------*/
 
 hypre_StructMatrix *
-hypre_SMGNewRestrictOp( hypre_StructMatrix *A,
-                        hypre_StructGrid   *cgrid,
-                        int                 cdir  )
+hypre_SMGCreateRestrictOp( hypre_StructMatrix *A,
+                           hypre_StructGrid   *cgrid,
+                           int                 cdir  )
 {
    hypre_StructMatrix *R;
 

@@ -24,11 +24,11 @@ typedef struct
 } hypre_JacobiData;
 
 /*--------------------------------------------------------------------------
- * hypre_JacobiInitialize
+ * hypre_JacobiCreate
  *--------------------------------------------------------------------------*/
 
 void *
-hypre_JacobiInitialize( MPI_Comm  comm )
+hypre_JacobiCreate( MPI_Comm  comm )
 {
    hypre_JacobiData *jacobi_data;
    void              *relax_data;
@@ -36,7 +36,7 @@ hypre_JacobiInitialize( MPI_Comm  comm )
    hypre_Index       indices[1];
 
    jacobi_data = hypre_CTAlloc(hypre_JacobiData, 1);
-   relax_data = hypre_PointRelaxInitialize(comm);
+   relax_data = hypre_PointRelaxCreate(comm);
    hypre_PointRelaxSetNumPointsets(relax_data, 1);
    hypre_SetIndex(stride, 1, 1, 1);
    hypre_SetIndex(indices[0], 0, 0, 0);
@@ -47,18 +47,18 @@ hypre_JacobiInitialize( MPI_Comm  comm )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_JacobiFinalize
+ * hypre_JacobiDestroy
  *--------------------------------------------------------------------------*/
 
 int
-hypre_JacobiFinalize( void *jacobi_vdata )
+hypre_JacobiDestroy( void *jacobi_vdata )
 {
    hypre_JacobiData *jacobi_data = jacobi_vdata;
    int               ierr = 0;
 
    if (jacobi_data)
    {
-      hypre_PointRelaxFinalize(jacobi_data -> relax_data);
+      hypre_PointRelaxDestroy(jacobi_data -> relax_data);
       hypre_TFree(jacobi_data);
    }
 

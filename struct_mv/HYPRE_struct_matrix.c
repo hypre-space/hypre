@@ -14,31 +14,31 @@
 
 #include "headers.h"
 /*--------------------------------------------------------------------------
- * HYPRE_NewStructMatrix
+ * HYPRE_CreateStructMatrix
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_NewStructMatrix( MPI_Comm             comm,
-                       HYPRE_StructGrid     grid,
-                       HYPRE_StructStencil  stencil,
-                       HYPRE_StructMatrix  *matrix )
+HYPRE_CreateStructMatrix( MPI_Comm             comm,
+                          HYPRE_StructGrid     grid,
+                          HYPRE_StructStencil  stencil,
+                          HYPRE_StructMatrix  *matrix )
 {
    *matrix = ( (HYPRE_StructMatrix)
-              hypre_NewStructMatrix( comm,
-                                    (hypre_StructGrid *) grid,
-                                    (hypre_StructStencil *) stencil ) );
+               hypre_CreateStructMatrix( comm,
+                                         (hypre_StructGrid *) grid,
+                                         (hypre_StructStencil *) stencil ) );
 
    return 0;
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_FreeStructMatrix
+ * HYPRE_DestroyStructMatrix
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_FreeStructMatrix( HYPRE_StructMatrix matrix )
+HYPRE_DestroyStructMatrix( HYPRE_StructMatrix matrix )
 {
-   return( hypre_FreeStructMatrix( (hypre_StructMatrix *) matrix ) );
+   return( hypre_DestroyStructMatrix( (hypre_StructMatrix *) matrix ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -113,7 +113,7 @@ HYPRE_SetStructMatrixBoxValues( HYPRE_StructMatrix  matrix,
       hypre_IndexD(new_ilower, d) = ilower[d];
       hypre_IndexD(new_iupper, d) = iupper[d];
    }
-   new_value_box = hypre_NewBox();
+   new_value_box = hypre_CreateBox();
    hypre_SetBoxExtents(new_value_box, new_ilower, new_iupper);
 
    ierr = hypre_SetStructMatrixBoxValues( new_matrix,
@@ -121,7 +121,7 @@ HYPRE_SetStructMatrixBoxValues( HYPRE_StructMatrix  matrix,
                                           num_stencil_indices, stencil_indices,
                                           values );
 
-   hypre_FreeBox(new_value_box);
+   hypre_DestroyBox(new_value_box);
 
    return (ierr);
 }
@@ -158,7 +158,7 @@ HYPRE_StructMatrixGrid( HYPRE_StructMatrix matrix, HYPRE_StructGrid *grid )
    int ierr = 0;
 
    *grid = ( (HYPRE_StructGrid)
-            (hypre_StructMatrixGrid( (hypre_StructMatrix *) matrix) ) );
+             (hypre_StructMatrixGrid( (hypre_StructMatrix *) matrix) ) );
 
    return ierr;
 }

@@ -15,26 +15,26 @@
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructJacobiInitialize
+ * HYPRE_StructJacobiCreate
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_StructJacobiInitialize( MPI_Comm            comm,
-                              HYPRE_StructSolver *solver )
+HYPRE_StructJacobiCreate( MPI_Comm            comm,
+                          HYPRE_StructSolver *solver )
 {
-   *solver = ( (HYPRE_StructSolver) hypre_JacobiInitialize( comm ) );
+   *solver = ( (HYPRE_StructSolver) hypre_JacobiCreate( comm ) );
 
    return 0;
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructJacobiFinalize
+ * HYPRE_StructJacobiDestroy
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_StructJacobiFinalize( HYPRE_StructSolver solver )
+HYPRE_StructJacobiDestroy( HYPRE_StructSolver solver )
 {
-   return( hypre_JacobiFinalize( (void *) solver ) );
+   return( hypre_JacobiDestroy( (void *) solver ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -43,9 +43,9 @@ HYPRE_StructJacobiFinalize( HYPRE_StructSolver solver )
 
 int 
 HYPRE_StructJacobiSetup( HYPRE_StructSolver solver,
-                      HYPRE_StructMatrix A,
-                      HYPRE_StructVector b,
-                      HYPRE_StructVector x      )
+                         HYPRE_StructMatrix A,
+                         HYPRE_StructVector b,
+                         HYPRE_StructVector x      )
 {
    return( hypre_JacobiSetup( (void *) solver,
                               (hypre_StructMatrix *) A,
@@ -123,7 +123,7 @@ HYPRE_StructJacobiSetNonZeroGuess( HYPRE_StructSolver solver )
 
 int
 HYPRE_StructJacobiGetNumIterations( HYPRE_StructSolver  solver,
-                                 int                *num_iterations )
+                                    int                *num_iterations )
 {
 #if 0
    return( hypre_JacobiGetNumIterations( (void *) solver, num_iterations ) );
@@ -137,7 +137,7 @@ HYPRE_StructJacobiGetNumIterations( HYPRE_StructSolver  solver,
 
 int
 HYPRE_StructJacobiGetFinalRelativeResidualNorm( HYPRE_StructSolver  solver,
-                                             double             *norm   )
+                                                double             *norm   )
 {
 #if 0
    return( hypre_JacobiGetFinalRelativeResidualNorm( (void *) solver, norm ) );

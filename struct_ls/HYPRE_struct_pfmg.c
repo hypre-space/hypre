@@ -15,25 +15,25 @@
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructPFMGInitialize
+ * HYPRE_StructPFMGCreate
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_StructPFMGInitialize( MPI_Comm comm, HYPRE_StructSolver *solver )
+HYPRE_StructPFMGCreate( MPI_Comm comm, HYPRE_StructSolver *solver )
 {
-   *solver = ( (HYPRE_StructSolver) hypre_PFMGInitialize( comm ) );
+   *solver = ( (HYPRE_StructSolver) hypre_PFMGCreate( comm ) );
 
    return 0;
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructPFMGFinalize
+ * HYPRE_StructPFMGDestroy
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_StructPFMGFinalize( HYPRE_StructSolver solver )
+HYPRE_StructPFMGDestroy( HYPRE_StructSolver solver )
 {
-   return( hypre_PFMGFinalize( (void *) solver ) );
+   return( hypre_PFMGDestroy( (void *) solver ) );
 }
 
 /*--------------------------------------------------------------------------

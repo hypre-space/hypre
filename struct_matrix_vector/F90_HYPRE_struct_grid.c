@@ -15,29 +15,29 @@
 #include "fortran.h"
 
 /*--------------------------------------------------------------------------
- * HYPRE_NewStructGrid
+ * HYPRE_CreateStructGrid
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_newstructgrid)( int      *comm,
-                                      int      *dim,
-                                      long int *grid,
-                                      int      *ierr )
+hypre_F90_IFACE(hypre_createstructgrid)( int      *comm,
+                                         int      *dim,
+                                         long int *grid,
+                                         int      *ierr )
 {
-   *ierr = (int) ( HYPRE_NewStructGrid( (MPI_Comm)           *comm,
-                                        (int)                *dim,
-                                        (HYPRE_StructGrid *) grid ) );
+   *ierr = (int) ( HYPRE_CreateStructGrid( (MPI_Comm)           *comm,
+                                           (int)                *dim,
+                                           (HYPRE_StructGrid *) grid ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_FreeStructGrid
+ * HYPRE_DestroyStructGrid
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_freestructgrid)( long int *grid,
-                                       int      *ierr )
+hypre_F90_IFACE(hypre_destroystructgrid)( long int *grid,
+                                          int      *ierr )
 {
-   *ierr = (int) ( HYPRE_FreeStructGrid( (HYPRE_StructGrid) *grid ) );
+   *ierr = (int) ( HYPRE_DestroyStructGrid( (HYPRE_StructGrid) *grid ) );
 }
 
 /*--------------------------------------------------------------------------

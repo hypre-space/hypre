@@ -16,18 +16,19 @@
 #include "fortran.h"
 
 /*--------------------------------------------------------------------------
- * HYPRE_NewStructStencil
+ * HYPRE_CreateStructStencil
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_newstructstencil)( int      *dim,
-                                         int      *size,
-                                         long int *stencil,
-                                         int      *ierr    )
+hypre_F90_IFACE(hypre_createstructstencil)( int      *dim,
+                                            int      *size,
+                                            long int *stencil,
+                                            int      *ierr    )
 {
-   *ierr = (int) ( HYPRE_NewStructStencil( (int)                   *dim,
-                                           (int)                   *size,
-                                           (HYPRE_StructStencil *)  stencil ) );
+   *ierr = (int)
+      ( HYPRE_CreateStructStencil( (int)                   *dim,
+                                   (int)                   *size,
+                                   (HYPRE_StructStencil *)  stencil ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -40,18 +41,20 @@ hypre_F90_IFACE(hypre_setstructstencilelement)( long int *stencil,
                                                 int      *offset,
                                                 int      *ierr          )
 {
-   *ierr = (int) ( HYPRE_SetStructStencilElement( (HYPRE_StructStencil) *stencil,
-                                                  (int)                 *element_index,
-                                                  (int *)               offset         ) );
+   *ierr = (int)
+      ( HYPRE_SetStructStencilElement( (HYPRE_StructStencil) *stencil,
+                                       (int)                 *element_index,
+                                       (int *)                offset       ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_FreeStructStencil
+ * HYPRE_DestroyStructStencil
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_freestructstencil)( long int *stencil,
-                                          int      *ierr    )
+hypre_F90_IFACE(hypre_destroystructstencil)( long int *stencil,
+                                             int      *ierr    )
 {
-   *ierr = (int) ( HYPRE_FreeStructStencil( (HYPRE_StructStencil) *stencil ) );
+   *ierr = (int)
+      ( HYPRE_DestroyStructStencil( (HYPRE_StructStencil) *stencil ) );
 }

@@ -15,25 +15,25 @@
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructSMGInitialize
+ * HYPRE_StructSMGCreate
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_StructSMGInitialize( MPI_Comm comm, HYPRE_StructSolver *solver )
+HYPRE_StructSMGCreate( MPI_Comm comm, HYPRE_StructSolver *solver )
 {
-   *solver = ( (HYPRE_StructSolver) hypre_SMGInitialize( comm ) );
+   *solver = ( (HYPRE_StructSolver) hypre_SMGCreate( comm ) );
 
    return 0;
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructSMGFinalize
+ * HYPRE_StructSMGDestroy
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_StructSMGFinalize( HYPRE_StructSolver solver )
+HYPRE_StructSMGDestroy( HYPRE_StructSolver solver )
 {
-   return( hypre_SMGFinalize( (void *) solver ) );
+   return( hypre_SMGDestroy( (void *) solver ) );
 }
 
 /*--------------------------------------------------------------------------

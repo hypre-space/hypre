@@ -28,12 +28,12 @@
 
 char  *hypre_PCGCAlloc( int count, int elt_size );
 int    hypre_PCGFree( char *ptr );
-void  *hypre_PCGNewVector( void *vector );
-int    hypre_PCGFreeVector( void *vector );
-void  *hypre_PCGMatvecInitialize( void *A, void *x );
+void  *hypre_PCGCreateVector( void *vector );
+int    hypre_PCGDestroyVector( void *vector );
+void  *hypre_PCGMatvecCreate( void *A, void *x );
 int    hypre_PCGMatvec( void *matvec_data,
                         double alpha, void *A, void *x, double beta, void *y );
-int    hypre_PCGMatvecFinalize( void *matvec_data );
+int    hypre_PCGMatvecDestroy( void *matvec_data );
 double hypre_PCGInnerProd( void *x, void *y );
 int    hypre_PCGCopyVector( void *x, void *y );
 int    hypre_PCGClearVector( void *x );
@@ -108,11 +108,11 @@ hypre_PCGIdentity( void *vdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PCGInitialize
+ * hypre_PCGCreate
  *--------------------------------------------------------------------------*/
 
 void *
-hypre_PCGInitialize( )
+hypre_PCGCreate( )
 {
    hypre_PCGData *pcg_data;
 
@@ -136,11 +136,11 @@ hypre_PCGInitialize( )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PCGFinalize
+ * hypre_PCGDestroy
  *--------------------------------------------------------------------------*/
 
 int
-hypre_PCGFinalize( void *pcg_vdata )
+hypre_PCGDestroy( void *pcg_vdata )
 {
    hypre_PCGData *pcg_data = pcg_vdata;
    int ierr = 0;
@@ -153,11 +153,11 @@ hypre_PCGFinalize( void *pcg_vdata )
          hypre_TFree(pcg_data -> rel_norms);
       }
 
-      hypre_PCGMatvecFinalize(pcg_data -> matvec_data);
+      hypre_PCGMatvecDestroy(pcg_data -> matvec_data);
 
-      hypre_PCGFreeVector(pcg_data -> p);
-      hypre_PCGFreeVector(pcg_data -> s);
-      hypre_PCGFreeVector(pcg_data -> r);
+      hypre_PCGDestroyVector(pcg_data -> p);
+      hypre_PCGDestroyVector(pcg_data -> s);
+      hypre_PCGDestroyVector(pcg_data -> r);
 
       hypre_TFree(pcg_data);
    }
@@ -184,16 +184,16 @@ hypre_PCGSetup( void *pcg_vdata,
    (pcg_data -> A) = A;
 
    /*--------------------------------------------------
-    * The arguments for NewVector are important to
+    * The arguments for CreateVector are important to
     * maintain consistency between the setup and
     * compute phases of matvec and the preconditioner.
     *--------------------------------------------------*/
 
-   (pcg_data -> p) = hypre_PCGNewVector(x);
-   (pcg_data -> s) = hypre_PCGNewVector(x);
-   (pcg_data -> r) = hypre_PCGNewVector(b);
+   (pcg_data -> p) = hypre_PCGCreateVector(x);
+   (pcg_data -> s) = hypre_PCGCreateVector(x);
+   (pcg_data -> r) = hypre_PCGCreateVector(b);
 
-   (pcg_data -> matvec_data) = hypre_PCGMatvecInitialize(A, x);
+   (pcg_data -> matvec_data) = hypre_PCGMatvecCreate(A, x);
 
    precond_setup(precond_data, A, b, x);
 
@@ -332,7 +332,7 @@ hypre_PCGSolve( void *pcg_vdata,
 
       /* r = r - alpha*s */
       hypre_PCGAxpy(-alpha, s, r);
-	 
+         
       /* s = C*r */
       hypre_PCGClearVector(s);
       precond(precond_data, A, r, s);
@@ -342,17 +342,17 @@ hypre_PCGSolve( void *pcg_vdata,
 
       /* set i_prod for convergence test */
       if (two_norm)
-	 i_prod = hypre_PCGInnerProd(r,r);
+         i_prod = hypre_PCGInnerProd(r,r);
       else
-	 i_prod = gamma;
+         i_prod = gamma;
 
 #if 0
       if (two_norm)
-	 printf("Iter (%d): ||r||_2 = %e, ||r||_2/||b||_2 = %e\n",
-		i, sqrt(i_prod), (bi_prod ? sqrt(i_prod/bi_prod) : 0));
+         printf("Iter (%d): ||r||_2 = %e, ||r||_2/||b||_2 = %e\n",
+                i, sqrt(i_prod), (bi_prod ? sqrt(i_prod/bi_prod) : 0));
       else
-	 printf("Iter (%d): ||r||_C = %e, ||r||_C/||b||_C = %e\n",
-		i, sqrt(i_prod), (bi_prod ? sqrt(i_prod/bi_prod) : 0));
+         printf("Iter (%d): ||r||_C = %e, ||r||_C/||b||_C = %e\n",
+                i, sqrt(i_prod), (bi_prod ? sqrt(i_prod/bi_prod) : 0));
 #endif
  
       /* log norm info */
@@ -395,8 +395,8 @@ hypre_PCGSolve( void *pcg_vdata,
          weight   = weight / max(cf_ave_1, cf_ave_0);
          weight   = 1.0 - weight;
 #if 0
-      printf("I = %d: cf_new = %e, cf_old = %e, weight = %e\n",
-              i, cf_ave_1, cf_ave_0, weight );
+         printf("I = %d: cf_new = %e, cf_old = %e, weight = %e\n",
+                i, cf_ave_1, cf_ave_0, weight );
 #endif
          if (weight * cf_ave_1 > cf_tol) break;
       }
@@ -412,10 +412,10 @@ hypre_PCGSolve( void *pcg_vdata,
 #if 0
    if (two_norm)
       printf("Iterations = %d: ||r||_2 = %e, ||r||_2/||b||_2 = %e\n",
-	     i, sqrt(i_prod), (bi_prod ? sqrt(i_prod/bi_prod) : 0));
+             i, sqrt(i_prod), (bi_prod ? sqrt(i_prod/bi_prod) : 0));
    else
       printf("Iterations = %d: ||r||_C = %e, ||r||_C/||b||_C = %e\n",
-	     i, sqrt(i_prod), (bi_prod ? sqrt(i_prod/bi_prod) : 0));
+             i, sqrt(i_prod), (bi_prod ? sqrt(i_prod/bi_prod) : 0));
 #endif
 
    /*-----------------------------------------------------------------------
@@ -469,7 +469,7 @@ hypre_PCGSetTol( void   *pcg_vdata,
 
 int
 hypre_PCGSetConvergenceFactorTol( void   *pcg_vdata,
-                                 double  cf_tol   )
+                                  double  cf_tol   )
 {
    hypre_PCGData *pcg_data = pcg_vdata;
    int            ierr = 0;

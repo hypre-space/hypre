@@ -31,11 +31,11 @@ typedef struct
 } hypre_PFMGRestrictData;
 
 /*--------------------------------------------------------------------------
- * hypre_PFMGRestrictInitialize
+ * hypre_PFMGRestrictCreate
  *--------------------------------------------------------------------------*/
 
 void *
-hypre_PFMGRestrictInitialize( )
+hypre_PFMGRestrictCreate( )
 {
    hypre_PFMGRestrictData *restrict_data;
 
@@ -92,13 +92,13 @@ hypre_PFMGRestrictSetup( void               *restrict_vdata,
    hypre_ProjectBoxArrayArray(indt_boxes, cindex, stride);
    hypre_ProjectBoxArrayArray(dept_boxes, cindex, stride);
 
-   hypre_NewComputePkg(send_boxes, recv_boxes,
-                       stride, stride,
-                       send_processes, recv_processes,
-                       indt_boxes, dept_boxes,
-                       stride, grid,
-                       hypre_StructVectorDataSpace(r), 1,
-                       &compute_pkg);
+   hypre_CreateComputePkg(send_boxes, recv_boxes,
+                          stride, stride,
+                          send_processes, recv_processes,
+                          indt_boxes, dept_boxes,
+                          stride, grid,
+                          hypre_StructVectorDataSpace(r), 1,
+                          &compute_pkg);
 
    /*----------------------------------------------------------
     * Set up the restrict data structure
@@ -252,11 +252,11 @@ hypre_PFMGRestrict( void               *restrict_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PFMGRestrictFinalize
+ * hypre_PFMGRestrictDestroy
  *--------------------------------------------------------------------------*/
 
 int
-hypre_PFMGRestrictFinalize( void *restrict_vdata )
+hypre_PFMGRestrictDestroy( void *restrict_vdata )
 {
    int ierr = 0;
 
@@ -264,8 +264,8 @@ hypre_PFMGRestrictFinalize( void *restrict_vdata )
 
    if (restrict_data)
    {
-      hypre_FreeStructMatrix(restrict_data -> RT);
-      hypre_FreeComputePkg(restrict_data -> compute_pkg);
+      hypre_DestroyStructMatrix(restrict_data -> RT);
+      hypre_DestroyComputePkg(restrict_data -> compute_pkg);
       hypre_FinalizeTiming(restrict_data -> time_index);
       hypre_TFree(restrict_data);
    }

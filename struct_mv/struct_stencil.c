@@ -15,13 +15,13 @@
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * hypre_NewStructStencil
+ * hypre_CreateStructStencil
  *--------------------------------------------------------------------------*/
 
 hypre_StructStencil *
-hypre_NewStructStencil( int           dim,
-                        int           size,
-                        hypre_Index  *shape )
+hypre_CreateStructStencil( int           dim,
+                           int           size,
+                           hypre_Index  *shape )
 {
    hypre_StructStencil   *stencil;
 
@@ -65,11 +65,11 @@ hypre_RefStructStencil( hypre_StructStencil *stencil )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_FreeStructStencil
+ * hypre_DestroyStructStencil
  *--------------------------------------------------------------------------*/
 
 int
-hypre_FreeStructStencil( hypre_StructStencil *stencil )
+hypre_DestroyStructStencil( hypre_StructStencil *stencil )
 {
    int ierr = 0;
 
@@ -193,16 +193,16 @@ hypre_SymmetrizeStructStencil( hypre_StructStencil  *stencil,
                hypre_IndexD(symm_stencil_shape[symm_stencil_size], d) =
                   -hypre_IndexD(symm_stencil_shape[i], d);
             }
-	       
+               
             symm_elements[symm_stencil_size] = i;
             symm_stencil_size++;
          }
       }
    }
 
-   symm_stencil = hypre_NewStructStencil(hypre_StructStencilDim(stencil),
-                                         symm_stencil_size,
-                                         symm_stencil_shape);
+   symm_stencil = hypre_CreateStructStencil(hypre_StructStencilDim(stencil),
+                                            symm_stencil_size,
+                                            symm_stencil_shape);
 
    *symm_stencil_ptr  = symm_stencil;
    *symm_elements_ptr = symm_elements;

@@ -5,7 +5,7 @@
 
 
 /*----------------------------------------------------------------
- * HYPRE_NewStructGrid thread wrappers
+ * HYPRE_CreateStructGrid thread wrappers
  *----------------------------------------------------------------*/
 
 typedef struct {
@@ -13,30 +13,30 @@ typedef struct {
    int dim;
    HYPRE_StructGridArray *grid;
    int  returnvalue[hypre_MAX_THREADS];
-} HYPRE_NewStructGridArgs;
+} HYPRE_CreateStructGridArgs;
 
 void
-HYPRE_NewStructGridVoidPtr( void *argptr )
+HYPRE_CreateStructGridVoidPtr( void *argptr )
 {
    int threadid = hypre_GetThreadID();
 
-   HYPRE_NewStructGridArgs *localargs =
-      (HYPRE_NewStructGridArgs *) argptr;
+   HYPRE_CreateStructGridArgs *localargs =
+      (HYPRE_CreateStructGridArgs *) argptr;
 
    (localargs -> returnvalue[threadid]) =
-      HYPRE_NewStructGrid(
+      HYPRE_CreateStructGrid(
          localargs -> comm,
          localargs -> dim,
          &(*(localargs -> grid))[threadid] );
 }
 
 int 
-HYPRE_NewStructGridPush(
+HYPRE_CreateStructGridPush(
    MPI_Comm comm,
    int dim,
    HYPRE_StructGridArray *grid )
 {
-   HYPRE_NewStructGridArgs pushargs;
+   HYPRE_CreateStructGridArgs pushargs;
    int i;
    int  returnvalue;
 
@@ -44,7 +44,7 @@ HYPRE_NewStructGridPush(
    pushargs.dim = dim;
    pushargs.grid = (HYPRE_StructGridArray *)grid;
    for (i = 0; i < hypre_NumThreads; i++)
-      hypre_work_put( HYPRE_NewStructGridVoidPtr, (void *)&pushargs );
+      hypre_work_put( HYPRE_CreateStructGridVoidPtr, (void *)&pushargs );
 
    hypre_work_wait();
 
@@ -54,38 +54,38 @@ HYPRE_NewStructGridPush(
 }
 
 /*----------------------------------------------------------------
- * HYPRE_FreeStructGrid thread wrappers
+ * HYPRE_DestroyStructGrid thread wrappers
  *----------------------------------------------------------------*/
 
 typedef struct {
    HYPRE_StructGridArray *grid;
    int  returnvalue[hypre_MAX_THREADS];
-} HYPRE_FreeStructGridArgs;
+} HYPRE_DestroyStructGridArgs;
 
 void
-HYPRE_FreeStructGridVoidPtr( void *argptr )
+HYPRE_DestroyStructGridVoidPtr( void *argptr )
 {
    int threadid = hypre_GetThreadID();
 
-   HYPRE_FreeStructGridArgs *localargs =
-      (HYPRE_FreeStructGridArgs *) argptr;
+   HYPRE_DestroyStructGridArgs *localargs =
+      (HYPRE_DestroyStructGridArgs *) argptr;
 
    (localargs -> returnvalue[threadid]) =
-      HYPRE_FreeStructGrid(
+      HYPRE_DestroyStructGrid(
          (*(localargs -> grid))[threadid] );
 }
 
 int 
-HYPRE_FreeStructGridPush(
+HYPRE_DestroyStructGridPush(
    HYPRE_StructGridArray grid )
 {
-   HYPRE_FreeStructGridArgs pushargs;
+   HYPRE_DestroyStructGridArgs pushargs;
    int i;
    int  returnvalue;
 
    pushargs.grid = (HYPRE_StructGridArray *)grid;
    for (i = 0; i < hypre_NumThreads; i++)
-      hypre_work_put( HYPRE_FreeStructGridVoidPtr, (void *)&pushargs );
+      hypre_work_put( HYPRE_DestroyStructGridVoidPtr, (void *)&pushargs );
 
    hypre_work_wait();
 
@@ -230,7 +230,7 @@ HYPRE_AssembleStructGridPush(
 }
 
 /*----------------------------------------------------------------
- * HYPRE_NewStructMatrix thread wrappers
+ * HYPRE_CreateStructMatrix thread wrappers
  *----------------------------------------------------------------*/
 
 typedef struct {
@@ -239,18 +239,18 @@ typedef struct {
    HYPRE_StructStencilArray *stencil;
    HYPRE_StructMatrixArray *matrix;
    int  returnvalue[hypre_MAX_THREADS];
-} HYPRE_NewStructMatrixArgs;
+} HYPRE_CreateStructMatrixArgs;
 
 void
-HYPRE_NewStructMatrixVoidPtr( void *argptr )
+HYPRE_CreateStructMatrixVoidPtr( void *argptr )
 {
    int threadid = hypre_GetThreadID();
 
-   HYPRE_NewStructMatrixArgs *localargs =
-      (HYPRE_NewStructMatrixArgs *) argptr;
+   HYPRE_CreateStructMatrixArgs *localargs =
+      (HYPRE_CreateStructMatrixArgs *) argptr;
 
    (localargs -> returnvalue[threadid]) =
-      HYPRE_NewStructMatrix(
+      HYPRE_CreateStructMatrix(
          localargs -> comm,
          (*(localargs -> grid))[threadid],
          (*(localargs -> stencil))[threadid],
@@ -258,13 +258,13 @@ HYPRE_NewStructMatrixVoidPtr( void *argptr )
 }
 
 int 
-HYPRE_NewStructMatrixPush(
+HYPRE_CreateStructMatrixPush(
    MPI_Comm comm,
    HYPRE_StructGridArray grid,
    HYPRE_StructStencilArray stencil,
    HYPRE_StructMatrixArray *matrix )
 {
-   HYPRE_NewStructMatrixArgs pushargs;
+   HYPRE_CreateStructMatrixArgs pushargs;
    int i;
    int  returnvalue;
 
@@ -273,7 +273,7 @@ HYPRE_NewStructMatrixPush(
    pushargs.stencil = (HYPRE_StructStencilArray *)stencil;
    pushargs.matrix = (HYPRE_StructMatrixArray *)matrix;
    for (i = 0; i < hypre_NumThreads; i++)
-      hypre_work_put( HYPRE_NewStructMatrixVoidPtr, (void *)&pushargs );
+      hypre_work_put( HYPRE_CreateStructMatrixVoidPtr, (void *)&pushargs );
 
    hypre_work_wait();
 
@@ -283,38 +283,38 @@ HYPRE_NewStructMatrixPush(
 }
 
 /*----------------------------------------------------------------
- * HYPRE_FreeStructMatrix thread wrappers
+ * HYPRE_DestroyStructMatrix thread wrappers
  *----------------------------------------------------------------*/
 
 typedef struct {
    HYPRE_StructMatrixArray *matrix;
    int  returnvalue[hypre_MAX_THREADS];
-} HYPRE_FreeStructMatrixArgs;
+} HYPRE_DestroyStructMatrixArgs;
 
 void
-HYPRE_FreeStructMatrixVoidPtr( void *argptr )
+HYPRE_DestroyStructMatrixVoidPtr( void *argptr )
 {
    int threadid = hypre_GetThreadID();
 
-   HYPRE_FreeStructMatrixArgs *localargs =
-      (HYPRE_FreeStructMatrixArgs *) argptr;
+   HYPRE_DestroyStructMatrixArgs *localargs =
+      (HYPRE_DestroyStructMatrixArgs *) argptr;
 
    (localargs -> returnvalue[threadid]) =
-      HYPRE_FreeStructMatrix(
+      HYPRE_DestroyStructMatrix(
          (*(localargs -> matrix))[threadid] );
 }
 
 int 
-HYPRE_FreeStructMatrixPush(
+HYPRE_DestroyStructMatrixPush(
    HYPRE_StructMatrixArray matrix )
 {
-   HYPRE_FreeStructMatrixArgs pushargs;
+   HYPRE_DestroyStructMatrixArgs pushargs;
    int i;
    int  returnvalue;
 
    pushargs.matrix = (HYPRE_StructMatrixArray *)matrix;
    for (i = 0; i < hypre_NumThreads; i++)
-      hypre_work_put( HYPRE_FreeStructMatrixVoidPtr, (void *)&pushargs );
+      hypre_work_put( HYPRE_DestroyStructMatrixVoidPtr, (void *)&pushargs );
 
    hypre_work_wait();
 
@@ -708,7 +708,7 @@ HYPRE_PrintStructMatrixPush(
 }
 
 /*----------------------------------------------------------------
- * HYPRE_NewStructStencil thread wrappers
+ * HYPRE_CreateStructStencil thread wrappers
  *----------------------------------------------------------------*/
 
 typedef struct {
@@ -716,30 +716,30 @@ typedef struct {
    int size;
    HYPRE_StructStencilArray *stencil;
    int  returnvalue[hypre_MAX_THREADS];
-} HYPRE_NewStructStencilArgs;
+} HYPRE_CreateStructStencilArgs;
 
 void
-HYPRE_NewStructStencilVoidPtr( void *argptr )
+HYPRE_CreateStructStencilVoidPtr( void *argptr )
 {
    int threadid = hypre_GetThreadID();
 
-   HYPRE_NewStructStencilArgs *localargs =
-      (HYPRE_NewStructStencilArgs *) argptr;
+   HYPRE_CreateStructStencilArgs *localargs =
+      (HYPRE_CreateStructStencilArgs *) argptr;
 
    (localargs -> returnvalue[threadid]) =
-      HYPRE_NewStructStencil(
+      HYPRE_CreateStructStencil(
          localargs -> dim,
          localargs -> size,
          &(*(localargs -> stencil))[threadid] );
 }
 
 int 
-HYPRE_NewStructStencilPush(
+HYPRE_CreateStructStencilPush(
    int dim,
    int size,
    HYPRE_StructStencilArray *stencil )
 {
-   HYPRE_NewStructStencilArgs pushargs;
+   HYPRE_CreateStructStencilArgs pushargs;
    int i;
    int  returnvalue;
 
@@ -747,7 +747,7 @@ HYPRE_NewStructStencilPush(
    pushargs.size = size;
    pushargs.stencil = (HYPRE_StructStencilArray *)stencil;
    for (i = 0; i < hypre_NumThreads; i++)
-      hypre_work_put( HYPRE_NewStructStencilVoidPtr, (void *)&pushargs );
+      hypre_work_put( HYPRE_CreateStructStencilVoidPtr, (void *)&pushargs );
 
    hypre_work_wait();
 
@@ -806,38 +806,38 @@ HYPRE_SetStructStencilElementPush(
 }
 
 /*----------------------------------------------------------------
- * HYPRE_FreeStructStencil thread wrappers
+ * HYPRE_DestroyStructStencil thread wrappers
  *----------------------------------------------------------------*/
 
 typedef struct {
    HYPRE_StructStencilArray *stencil;
    int  returnvalue[hypre_MAX_THREADS];
-} HYPRE_FreeStructStencilArgs;
+} HYPRE_DestroyStructStencilArgs;
 
 void
-HYPRE_FreeStructStencilVoidPtr( void *argptr )
+HYPRE_DestroyStructStencilVoidPtr( void *argptr )
 {
    int threadid = hypre_GetThreadID();
 
-   HYPRE_FreeStructStencilArgs *localargs =
-      (HYPRE_FreeStructStencilArgs *) argptr;
+   HYPRE_DestroyStructStencilArgs *localargs =
+      (HYPRE_DestroyStructStencilArgs *) argptr;
 
    (localargs -> returnvalue[threadid]) =
-      HYPRE_FreeStructStencil(
+      HYPRE_DestroyStructStencil(
          (*(localargs -> stencil))[threadid] );
 }
 
 int 
-HYPRE_FreeStructStencilPush(
+HYPRE_DestroyStructStencilPush(
    HYPRE_StructStencilArray stencil )
 {
-   HYPRE_FreeStructStencilArgs pushargs;
+   HYPRE_DestroyStructStencilArgs pushargs;
    int i;
    int  returnvalue;
 
    pushargs.stencil = (HYPRE_StructStencilArray *)stencil;
    for (i = 0; i < hypre_NumThreads; i++)
-      hypre_work_put( HYPRE_FreeStructStencilVoidPtr, (void *)&pushargs );
+      hypre_work_put( HYPRE_DestroyStructStencilVoidPtr, (void *)&pushargs );
 
    hypre_work_wait();
 
@@ -847,7 +847,7 @@ HYPRE_FreeStructStencilPush(
 }
 
 /*----------------------------------------------------------------
- * HYPRE_NewStructVector thread wrappers
+ * HYPRE_CreateStructVector thread wrappers
  *----------------------------------------------------------------*/
 
 typedef struct {
@@ -856,18 +856,18 @@ typedef struct {
    HYPRE_StructStencilArray *stencil;
    HYPRE_StructVectorArray *vector;
    int  returnvalue[hypre_MAX_THREADS];
-} HYPRE_NewStructVectorArgs;
+} HYPRE_CreateStructVectorArgs;
 
 void
-HYPRE_NewStructVectorVoidPtr( void *argptr )
+HYPRE_CreateStructVectorVoidPtr( void *argptr )
 {
    int threadid = hypre_GetThreadID();
 
-   HYPRE_NewStructVectorArgs *localargs =
-      (HYPRE_NewStructVectorArgs *) argptr;
+   HYPRE_CreateStructVectorArgs *localargs =
+      (HYPRE_CreateStructVectorArgs *) argptr;
 
    (localargs -> returnvalue[threadid]) =
-      HYPRE_NewStructVector(
+      HYPRE_CreateStructVector(
          localargs -> comm,
          (*(localargs -> grid))[threadid],
          (*(localargs -> stencil))[threadid],
@@ -875,13 +875,13 @@ HYPRE_NewStructVectorVoidPtr( void *argptr )
 }
 
 int 
-HYPRE_NewStructVectorPush(
+HYPRE_CreateStructVectorPush(
    MPI_Comm comm,
    HYPRE_StructGridArray grid,
    HYPRE_StructStencilArray stencil,
    HYPRE_StructVectorArray *vector )
 {
-   HYPRE_NewStructVectorArgs pushargs;
+   HYPRE_CreateStructVectorArgs pushargs;
    int i;
    int  returnvalue;
 
@@ -890,7 +890,7 @@ HYPRE_NewStructVectorPush(
    pushargs.stencil = (HYPRE_StructStencilArray *)stencil;
    pushargs.vector = (HYPRE_StructVectorArray *)vector;
    for (i = 0; i < hypre_NumThreads; i++)
-      hypre_work_put( HYPRE_NewStructVectorVoidPtr, (void *)&pushargs );
+      hypre_work_put( HYPRE_CreateStructVectorVoidPtr, (void *)&pushargs );
 
    hypre_work_wait();
 
@@ -900,38 +900,38 @@ HYPRE_NewStructVectorPush(
 }
 
 /*----------------------------------------------------------------
- * HYPRE_FreeStructVector thread wrappers
+ * HYPRE_DestroyStructVector thread wrappers
  *----------------------------------------------------------------*/
 
 typedef struct {
    HYPRE_StructVectorArray *struct_vector;
    int  returnvalue[hypre_MAX_THREADS];
-} HYPRE_FreeStructVectorArgs;
+} HYPRE_DestroyStructVectorArgs;
 
 void
-HYPRE_FreeStructVectorVoidPtr( void *argptr )
+HYPRE_DestroyStructVectorVoidPtr( void *argptr )
 {
    int threadid = hypre_GetThreadID();
 
-   HYPRE_FreeStructVectorArgs *localargs =
-      (HYPRE_FreeStructVectorArgs *) argptr;
+   HYPRE_DestroyStructVectorArgs *localargs =
+      (HYPRE_DestroyStructVectorArgs *) argptr;
 
    (localargs -> returnvalue[threadid]) =
-      HYPRE_FreeStructVector(
+      HYPRE_DestroyStructVector(
          (*(localargs -> struct_vector))[threadid] );
 }
 
 int 
-HYPRE_FreeStructVectorPush(
+HYPRE_DestroyStructVectorPush(
    HYPRE_StructVectorArray struct_vector )
 {
-   HYPRE_FreeStructVectorArgs pushargs;
+   HYPRE_DestroyStructVectorArgs pushargs;
    int i;
    int  returnvalue;
 
    pushargs.struct_vector = (HYPRE_StructVectorArray *)struct_vector;
    for (i = 0; i < hypre_NumThreads; i++)
-      hypre_work_put( HYPRE_FreeStructVectorVoidPtr, (void *)&pushargs );
+      hypre_work_put( HYPRE_DestroyStructVectorVoidPtr, (void *)&pushargs );
 
    hypre_work_wait();
 
@@ -1464,38 +1464,38 @@ HYPRE_MigrateStructVectorPush(
 }
 
 /*----------------------------------------------------------------
- * HYPRE_FreeCommPkg thread wrappers
+ * HYPRE_DestroyCommPkg thread wrappers
  *----------------------------------------------------------------*/
 
 typedef struct {
    HYPRE_CommPkgArray *comm_pkg;
    int  returnvalue[hypre_MAX_THREADS];
-} HYPRE_FreeCommPkgArgs;
+} HYPRE_DestroyCommPkgArgs;
 
 void
-HYPRE_FreeCommPkgVoidPtr( void *argptr )
+HYPRE_DestroyCommPkgVoidPtr( void *argptr )
 {
    int threadid = hypre_GetThreadID();
 
-   HYPRE_FreeCommPkgArgs *localargs =
-      (HYPRE_FreeCommPkgArgs *) argptr;
+   HYPRE_DestroyCommPkgArgs *localargs =
+      (HYPRE_DestroyCommPkgArgs *) argptr;
 
    (localargs -> returnvalue[threadid]) =
-      HYPRE_FreeCommPkg(
+      HYPRE_DestroyCommPkg(
          (*(localargs -> comm_pkg))[threadid] );
 }
 
 int 
-HYPRE_FreeCommPkgPush(
+HYPRE_DestroyCommPkgPush(
    HYPRE_CommPkgArray comm_pkg )
 {
-   HYPRE_FreeCommPkgArgs pushargs;
+   HYPRE_DestroyCommPkgArgs pushargs;
    int i;
    int  returnvalue;
 
    pushargs.comm_pkg = (HYPRE_CommPkgArray *)comm_pkg;
    for (i = 0; i < hypre_NumThreads; i++)
-      hypre_work_put( HYPRE_FreeCommPkgVoidPtr, (void *)&pushargs );
+      hypre_work_put( HYPRE_DestroyCommPkgVoidPtr, (void *)&pushargs );
 
    hypre_work_wait();
 

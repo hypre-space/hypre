@@ -15,13 +15,13 @@
 #include "pfmg.h"
 
 /*--------------------------------------------------------------------------
- * hypre_PFMGNewInterpOp
+ * hypre_PFMGCreateInterpOp
  *--------------------------------------------------------------------------*/
 
 hypre_StructMatrix *
-hypre_PFMGNewInterpOp( hypre_StructMatrix *A,
-                       hypre_StructGrid   *cgrid,
-                       int                 cdir  )
+hypre_PFMGCreateInterpOp( hypre_StructMatrix *A,
+                          hypre_StructGrid   *cgrid,
+                          int                 cdir  )
 {
    hypre_StructMatrix   *P;
 
@@ -44,13 +44,14 @@ hypre_PFMGNewInterpOp( hypre_StructMatrix *A,
    }
    hypre_IndexD(stencil_shape[0], cdir) = -1;
    hypre_IndexD(stencil_shape[1], cdir) =  1;
-   stencil = hypre_NewStructStencil(stencil_dim, stencil_size, stencil_shape);
+   stencil =
+      hypre_CreateStructStencil(stencil_dim, stencil_size, stencil_shape);
 
    /* set up matrix */
-   P = hypre_NewStructMatrix(hypre_StructMatrixComm(A), cgrid, stencil);
+   P = hypre_CreateStructMatrix(hypre_StructMatrixComm(A), cgrid, stencil);
    hypre_SetStructMatrixNumGhost(P, num_ghost);
 
-   hypre_FreeStructStencil(stencil);
+   hypre_DestroyStructStencil(stencil);
  
    return P;
 }
@@ -139,7 +140,7 @@ hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
                              P_data_box, startc, stridec, Pi);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,Pi,center,si,Ap,Astenc
 #include "hypre_box_smp_forloop.h"
-	 hypre_BoxLoop2For(loopi, loopj, loopk, Ai, Pi)
+         hypre_BoxLoop2For(loopi, loopj, loopk, Ai, Pi)
             {
                center  = 0.0;
                Pp0[Pi] = 0.0;

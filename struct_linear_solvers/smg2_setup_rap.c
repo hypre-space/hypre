@@ -15,12 +15,12 @@
 #include "smg.h"
 
 /*--------------------------------------------------------------------------
- * hypre_SMG2NewRAPOp 
+ * hypre_SMG2CreateRAPOp 
  *    Sets up new coarse grid operator stucture.
  *--------------------------------------------------------------------------*/
  
 hypre_StructMatrix *
-hypre_SMG2NewRAPOp( hypre_StructMatrix *R,
+hypre_SMG2CreateRAPOp( hypre_StructMatrix *R,
                     hypre_StructMatrix *A,
                     hypre_StructMatrix *PT )
 {
@@ -111,13 +111,13 @@ hypre_SMG2NewRAPOp( hypre_StructMatrix *R,
       }
    }
 
-   RAP_stencil = hypre_NewStructStencil(RAP_stencil_dim, RAP_stencil_size,
+   RAP_stencil = hypre_CreateStructStencil(RAP_stencil_dim, RAP_stencil_size,
                                         RAP_stencil_shape);
 
-   RAP = hypre_NewStructMatrix(hypre_StructMatrixComm(A),
+   RAP = hypre_CreateStructMatrix(hypre_StructMatrixComm(A),
                                coarse_grid, RAP_stencil);
 
-   hypre_FreeStructStencil(RAP_stencil);
+   hypre_DestroyStructStencil(RAP_stencil);
 
    /*-----------------------------------------------------------------------
     * Coarse operator in symmetric iff fine operator is

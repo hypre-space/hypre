@@ -51,11 +51,11 @@ typedef struct
 } hypre_PointRelaxData;
 
 /*--------------------------------------------------------------------------
- * hypre_PointRelaxInitialize
+ * hypre_PointRelaxCreate
  *--------------------------------------------------------------------------*/
 
 void *
-hypre_PointRelaxInitialize( MPI_Comm  comm )
+hypre_PointRelaxCreate( MPI_Comm  comm )
 {
    hypre_PointRelaxData *relax_data;
 
@@ -89,11 +89,11 @@ hypre_PointRelaxInitialize( MPI_Comm  comm )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PointRelaxFinalize
+ * hypre_PointRelaxDestroy
  *--------------------------------------------------------------------------*/
 
 int
-hypre_PointRelaxFinalize( void *relax_vdata )
+hypre_PointRelaxDestroy( void *relax_vdata )
 {
    hypre_PointRelaxData *relax_data = relax_vdata;
    int                   i;
@@ -104,17 +104,17 @@ hypre_PointRelaxFinalize( void *relax_vdata )
       for (i = 0; i < (relax_data -> num_pointsets); i++)
       {
          hypre_TFree(relax_data -> pointset_indices[i]);
-         hypre_FreeComputePkg(relax_data -> compute_pkgs[i]);
+         hypre_DestroyComputePkg(relax_data -> compute_pkgs[i]);
       }
       hypre_TFree(relax_data -> pointset_sizes);
       hypre_TFree(relax_data -> pointset_ranks);
       hypre_TFree(relax_data -> pointset_strides);
       hypre_TFree(relax_data -> pointset_indices);
-      hypre_FreeStructMatrix(relax_data -> A);
-      hypre_FreeStructVector(relax_data -> b);
-      hypre_FreeStructVector(relax_data -> x);
+      hypre_DestroyStructMatrix(relax_data -> A);
+      hypre_DestroyStructVector(relax_data -> b);
+      hypre_DestroyStructVector(relax_data -> x);
       hypre_TFree(relax_data -> compute_pkgs);
-      hypre_FreeStructVector(relax_data -> t);
+      hypre_DestroyStructVector(relax_data -> t);
 
       hypre_FinalizeTiming(relax_data -> time_index);
       hypre_TFree(relax_data);
@@ -183,8 +183,8 @@ hypre_PointRelaxSetup( void               *relax_vdata,
 
    if ((relax_data -> t) == NULL)
    {
-      t = hypre_NewStructVector(hypre_StructVectorComm(b),
-                                hypre_StructVectorGrid(b));
+      t = hypre_CreateStructVector(hypre_StructVectorComm(b),
+                                   hypre_StructVectorGrid(b));
       hypre_SetStructVectorNumGhost(t, hypre_StructVectorNumGhost(b));
       hypre_InitializeStructVector(t);
       hypre_AssembleStructVector(t);
@@ -231,7 +231,7 @@ hypre_PointRelaxSetup( void               *relax_vdata,
             break;
          }
          box_aa_size = hypre_BoxArrayArraySize(box_aa);
-         new_box_aa = hypre_NewBoxArrayArray(box_aa_size);
+         new_box_aa = hypre_CreateBoxArrayArray(box_aa_size);
 
          for (i = 0; i < box_aa_size; i++)
          {
@@ -270,16 +270,16 @@ hypre_PointRelaxSetup( void               *relax_vdata,
          }
       }
 
-      hypre_NewComputePkg(send_boxes, recv_boxes,
-                          unit_stride, unit_stride,
-                          send_processes, recv_processes,
-                          indt_boxes, dept_boxes,
-                          stride, grid,
-                          hypre_StructVectorDataSpace(x), 1,
-                          &compute_pkgs[p]);
+      hypre_CreateComputePkg(send_boxes, recv_boxes,
+                             unit_stride, unit_stride,
+                             send_processes, recv_processes,
+                             indt_boxes, dept_boxes,
+                             stride, grid,
+                             hypre_StructVectorDataSpace(x), 1,
+                             &compute_pkgs[p]);
 
-      hypre_FreeBoxArrayArray(orig_indt_boxes);
-      hypre_FreeBoxArrayArray(orig_dept_boxes);
+      hypre_DestroyBoxArrayArray(orig_indt_boxes);
+      hypre_DestroyBoxArrayArray(orig_dept_boxes);
    }
 
    /*----------------------------------------------------------
@@ -381,9 +381,9 @@ hypre_PointRelax( void               *relax_vdata,
 
    hypre_BeginTiming(relax_data -> time_index);
 
-   hypre_FreeStructMatrix(relax_data -> A);
-   hypre_FreeStructVector(relax_data -> b);
-   hypre_FreeStructVector(relax_data -> x);
+   hypre_DestroyStructMatrix(relax_data -> A);
+   hypre_DestroyStructVector(relax_data -> b);
+   hypre_DestroyStructVector(relax_data -> x);
    (relax_data -> A) = hypre_RefStructMatrix(A);
    (relax_data -> x) = hypre_RefStructVector(x);
    (relax_data -> b) = hypre_RefStructVector(b);
@@ -465,7 +465,7 @@ hypre_PointRelax( void               *relax_vdata,
                                          x_data_box, start, stride, xi);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,bi,xi
 #include "hypre_box_smp_forloop.h"
-		     hypre_BoxLoop3For(loopi, loopj, loopk, Ai, bi, xi)
+                     hypre_BoxLoop3For(loopi, loopj, loopk, Ai, bi, xi)
                         {
                            xp[xi] = bp[bi] / Ap[Ai];
                         }
@@ -564,7 +564,7 @@ hypre_PointRelax( void               *relax_vdata,
                                                t_data_box, start, stride, ti);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,xi,ti
 #include "hypre_box_smp_forloop.h"
-		           hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, ti)
+                           hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, ti)
                               {
                                  tp[ti] -= Ap[Ai] * xp[xi];
                               }
@@ -579,7 +579,7 @@ hypre_PointRelax( void               *relax_vdata,
                                          t_data_box, start, stride, ti);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,ti
 #include "hypre_box_smp_forloop.h"
-	             hypre_BoxLoop2For(loopi, loopj, loopk, Ai, ti)
+                     hypre_BoxLoop2For(loopi, loopj, loopk, Ai, ti)
                         {
                            tp[ti] /= Ap[Ai];
                         }
@@ -779,7 +779,7 @@ hypre_PointRelaxSetTempVec( void               *relax_vdata,
    hypre_PointRelaxData *relax_data = relax_vdata;
    int                   ierr = 0;
 
-   hypre_FreeStructVector(relax_data -> t);
+   hypre_DestroyStructVector(relax_data -> t);
    (relax_data -> t) = hypre_RefStructVector(t);
 
    return ierr;

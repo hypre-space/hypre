@@ -14,27 +14,27 @@
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * HYPRE_NewStructGrid
+ * HYPRE_CreateStructGrid
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_NewStructGrid( MPI_Comm          comm,
-                     int               dim,
-                     HYPRE_StructGrid *grid )
+HYPRE_CreateStructGrid( MPI_Comm          comm,
+                        int               dim,
+                        HYPRE_StructGrid *grid )
 {
-   *grid = ( (HYPRE_StructGrid) hypre_NewStructGrid( comm, dim ) );
+   *grid = ( (HYPRE_StructGrid) hypre_CreateStructGrid( comm, dim ) );
 
    return 0;
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_FreeStructGrid
+ * HYPRE_DestroyStructGrid
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_FreeStructGrid( HYPRE_StructGrid grid )
+HYPRE_DestroyStructGrid( HYPRE_StructGrid grid )
 {
-   return ( hypre_FreeStructGrid( (hypre_StructGrid *) grid ) );
+   return ( hypre_DestroyStructGrid( (hypre_StructGrid *) grid ) );
 }
 
 /*--------------------------------------------------------------------------

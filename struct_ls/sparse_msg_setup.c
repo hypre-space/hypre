@@ -137,11 +137,11 @@ hypre_SparseMSGSetup( void               *SparseMSG_vdata,
       }
 
    /* allocate P_all_boxes and f_all_boxes */
-   P_all_boxes = hypre_NewBoxArray(num_all_boxes);
+   P_all_boxes = hypre_CreateBoxArray(num_all_boxes);
 
    /* Compute a bounding box (cbox) used to determine
       num_levels[] and total_num_levels */
-   cbox = hypre_NewBox();
+   cbox = hypre_CreateBox();
    for (d = 0; d < dim; d++)
    {
       idmin = hypre_BoxIMinD(hypre_BoxArrayBox(all_boxes, 0), d);
@@ -205,7 +205,7 @@ hypre_SparseMSGSetup( void               *SparseMSG_vdata,
    }
 
    /* Store some variables and clean up */
-   hypre_FreeBox(cbox);
+   hypre_DestroyBox(cbox);
    (SparseMSG_data->num_grids) = num_grids;
    (SparseMSG_data->total_num_levels) = total_num_levels;
 
@@ -292,7 +292,7 @@ hypre_SparseMSGSetup( void               *SparseMSG_vdata,
                   }
 
                /* compute local boxes */
-               boxes = hypre_NewBoxArray(num_boxes);
+               boxes = hypre_CreateBoxArray(num_boxes);
                for (i = 0; i < num_boxes; i++)
                {
                   hypre_CopyBox(hypre_BoxArrayBox(all_boxes, box_ranks[i]),
@@ -300,7 +300,7 @@ hypre_SparseMSGSetup( void               *SparseMSG_vdata,
                }
                
                grid_array[index] =
-                  hypre_NewStructGrid(comm, hypre_StructGridDim(grid));
+                  hypre_CreateStructGrid(comm, hypre_StructGridDim(grid));
                hypre_SetStructGridBoxes(grid_array[index], boxes);
                hypre_SetStructGridGlobalInfo(grid_array[index],
                                              all_boxes, processes, box_ranks,
@@ -376,7 +376,7 @@ hypre_SparseMSGSetup( void               *SparseMSG_vdata,
                      }
                      
                      /* compute local boxes */
-                     boxes = hypre_NewBoxArray(num_boxes);
+                     boxes = hypre_CreateBoxArray(num_boxes);
                      for (i = 0; i < num_boxes; i++)
                      {
                         hypre_CopyBox(hypre_BoxArrayBox(P_all_boxes,
@@ -385,7 +385,7 @@ hypre_SparseMSGSetup( void               *SparseMSG_vdata,
                      }
                      
                      P_grid_array[rindex] =
-                        hypre_NewStructGrid(comm, hypre_StructGridDim(grid));
+                        hypre_CreateStructGrid(comm, hypre_StructGridDim(grid));
                      hypre_SetStructGridBoxes(P_grid_array[rindex], boxes);
                      hypre_SetStructGridGlobalInfo(P_grid_array[rindex],
                                                    P_all_boxes, processes,
@@ -431,7 +431,7 @@ hypre_SparseMSGSetup( void               *SparseMSG_vdata,
                   }
                   
                   /* compute local boxes */
-                  boxes = hypre_NewBoxArray(num_boxes);
+                  boxes = hypre_CreateBoxArray(num_boxes);
                   for (i = 0; i < num_boxes; i++)
                   {
                      hypre_CopyBox(hypre_BoxArrayBox(all_boxes, box_ranks[i]),
@@ -439,7 +439,7 @@ hypre_SparseMSGSetup( void               *SparseMSG_vdata,
                   }
                   
                   grid_array[index] =
-                     hypre_NewStructGrid(comm, hypre_StructGridDim(grid));
+                     hypre_CreateStructGrid(comm, hypre_StructGridDim(grid));
                   hypre_SetStructGridBoxes(grid_array[index], boxes);
                   hypre_SetStructGridGlobalInfo(grid_array[index],
                                                 all_boxes, processes,
@@ -453,7 +453,7 @@ hypre_SparseMSGSetup( void               *SparseMSG_vdata,
    }
 
    /* free up some things */
-   hypre_FreeBoxArray(P_all_boxes);
+   hypre_DestroyBoxArray(P_all_boxes);
 
    (SparseMSG_data -> grid_array)     = grid_array;
    (SparseMSG_data -> P_grid_array)   = P_grid_array;
@@ -476,11 +476,11 @@ hypre_SparseMSGSetup( void               *SparseMSG_vdata,
    b_array[0] = hypre_RefStructVector(b);
    x_array[0] = hypre_RefStructVector(x);
 
-   tx_array[0] = hypre_NewStructVector(comm, grid_array[0]);
+   tx_array[0] = hypre_CreateStructVector(comm, grid_array[0]);
    hypre_SetStructVectorNumGhost(tx_array[0], x_num_ghost);
    hypre_InitializeStructVector(tx_array[0]);
 
-   r_array[0] = hypre_NewStructVector(comm, grid_array[0]);
+   r_array[0] = hypre_CreateStructVector(comm, grid_array[0]);
    hypre_SetStructVectorNumGhost(r_array[0], x_num_ghost);
    hypre_InitializeStructVector(r_array[0]);
 
@@ -538,8 +538,8 @@ hypre_SparseMSGSetup( void               *SparseMSG_vdata,
                   
                   /* set up interpolation operator */
                   P_array[rindex] =
-                     hypre_PFMGNewInterpOp(A_array[index],
-                                           P_grid_array[(3*index2)+d], d);
+                     hypre_PFMGCreateInterpOp(A_array[index],
+                                              P_grid_array[(3*index2)+d], d);
                   hypre_InitializeStructMatrix(P_array[rindex]);
                   
                   /* set up interpolation either from A or from a previous P */
@@ -581,8 +581,8 @@ hypre_SparseMSGSetup( void               *SparseMSG_vdata,
                   {
 #if 0
                      RT_array[rindex] =
-                        hypre_PFMGNewRestrictOp(A_array[index],
-                                                grid_array[index2], d);
+                        hypre_PFMGCreateRestrictOp(A_array[index],
+                                                   grid_array[index2], d);
                      hypre_InitializeStructMatrix(RT_array[rindex]);
                      hypre_PFMGSetupRestrictOp(A_array[index], tx_array[index],
                                                d, cindex, stride,
@@ -591,10 +591,10 @@ hypre_SparseMSGSetup( void               *SparseMSG_vdata,
                   }
                   
                   /* set up coarse grid operator */
-                  A_array[index2] = hypre_PFMGNewRAPOp(RT_array[rindex],
-                                                       A_array[index],
-                                                       P_array[rindex], 
-                                                       grid_array[index2], d);
+                  A_array[index2] = hypre_PFMGCreateRAPOp(RT_array[rindex],
+                                                          A_array[index],
+                                                          P_array[rindex], 
+                                                          grid_array[index2], d);
                   hypre_InitializeStructMatrix(A_array[index2]);
                   hypre_PFMGSetupRAPOp(RT_array[rindex], A_array[index], 
                                        P_array[rindex], d, cindex, stride, 
@@ -602,19 +602,19 @@ hypre_SparseMSGSetup( void               *SparseMSG_vdata,
                   
                   /* set up b, x, tx, and r_array */
                   b_array[index2] =
-                     hypre_NewStructVector(comm, grid_array[index2]);
+                     hypre_CreateStructVector(comm, grid_array[index2]);
                   hypre_SetStructVectorNumGhost(b_array[index2],b_num_ghost);
                   hypre_InitializeStructVector(b_array[index2]);
                   hypre_AssembleStructVector(b_array[index2]);
                   
                   x_array[index2] =
-                     hypre_NewStructVector(comm, grid_array[index2]);
+                     hypre_CreateStructVector(comm, grid_array[index2]);
                   hypre_SetStructVectorNumGhost(x_array[index2],x_num_ghost);
                   hypre_InitializeStructVector(x_array[index2]);
                   hypre_AssembleStructVector(x_array[index2]);
                   
                   tx_array[index2] =
-                     hypre_NewStructVector(comm, grid_array[index2]);
+                     hypre_CreateStructVector(comm, grid_array[index2]);
                   hypre_SetStructVectorNumGhost(tx_array[index2],x_num_ghost);
                   hypre_InitializeStructVectorShell(tx_array[index2]);
                   hypre_InitializeStructVectorData(tx_array[index2],
@@ -622,7 +622,7 @@ hypre_SparseMSGSetup( void               *SparseMSG_vdata,
                   hypre_AssembleStructVector(tx_array[index2]);
                   
                   r_array[index2] =
-                     hypre_NewStructVector(comm, grid_array[index2]);
+                     hypre_CreateStructVector(comm, grid_array[index2]);
                   hypre_SetStructVectorNumGhost(r_array[index2],x_num_ghost);
                   hypre_InitializeStructVector(r_array[index2]);
                   hypre_AssembleStructVector(r_array[index2]);                   
@@ -632,7 +632,7 @@ hypre_SparseMSGSetup( void               *SparseMSG_vdata,
             /* free any coarse grid operators in the jump*/
             if ((level <= jump) && (level != 0))
             {
-               hypre_FreeStructMatrix(A_array[index]);
+               hypre_DestroyStructMatrix(A_array[index]);
                A_array[index] = NULL;
             }
             
@@ -658,8 +658,8 @@ hypre_SparseMSGSetup( void               *SparseMSG_vdata,
                         num_levels[0],num_levels[1], index2);       
                      
                      P_array[rindex] =
-                        hypre_PFMGNewInterpOp(A_array[index], 
-                                              P_grid_array[(3*index2)+d], d);
+                        hypre_PFMGCreateInterpOp(A_array[index], 
+                                                 P_grid_array[(3*index2)+d], d);
                      hypre_InitializeStructMatrix(P_array[rindex]);
 
                      /* set up interpolation from either A or previous P */
@@ -700,8 +700,8 @@ hypre_SparseMSGSetup( void               *SparseMSG_vdata,
                      {
 #if 0
                         RT_array[rindex] =
-                           hypre_PFMGNewRestrictOp(A_array[index],
-                                                   grid_array[index2],d);
+                           hypre_PFMGCreateRestrictOp(A_array[index],
+                                                      grid_array[index2],d);
                         hypre_InitializeStructMatrix(RT_array[rindex]);
                         hypre_PFMGSetupRestrictOp(
                            A_array[index], tx_array[index], 
@@ -723,9 +723,9 @@ hypre_SparseMSGSetup( void               *SparseMSG_vdata,
 
                   /* set up coarse grid operator */
                   A_array[index2] =
-                     hypre_PFMGNewRAPOp(RT_array[rindex],
-                                        A_array[index],P_array[rindex],
-                                        grid_array[index2],0);
+                     hypre_PFMGCreateRAPOp(RT_array[rindex],
+                                           A_array[index],P_array[rindex],
+                                           grid_array[index2],0);
                   hypre_InitializeStructMatrix(A_array[index2]);
                   hypre_PFMGSetupRAPOp(RT_array[rindex], A_array[index], 
                                        P_array[rindex], 0, cindex, stride, 
@@ -733,19 +733,19 @@ hypre_SparseMSGSetup( void               *SparseMSG_vdata,
                   
                   /* set up b, x, tx, and r_array */
                   b_array[index2] =
-                     hypre_NewStructVector(comm, grid_array[index2]);
+                     hypre_CreateStructVector(comm, grid_array[index2]);
                   hypre_SetStructVectorNumGhost(b_array[index2],b_num_ghost);
                   hypre_InitializeStructVector(b_array[index2]);
                   hypre_AssembleStructVector(b_array[index2]);
                   
                   x_array[index2] =
-                     hypre_NewStructVector(comm, grid_array[index2]);
+                     hypre_CreateStructVector(comm, grid_array[index2]);
                   hypre_SetStructVectorNumGhost(x_array[index2],x_num_ghost);
                   hypre_InitializeStructVector(x_array[index2]);
                   hypre_AssembleStructVector(x_array[index2]);
                   
                   tx_array[index2] =
-                     hypre_NewStructVector(comm, grid_array[index2]);
+                     hypre_CreateStructVector(comm, grid_array[index2]);
                   hypre_SetStructVectorNumGhost(tx_array[index2],x_num_ghost);
                   hypre_InitializeStructVectorShell(tx_array[index2]);
                   hypre_InitializeStructVectorData(
@@ -753,7 +753,7 @@ hypre_SparseMSGSetup( void               *SparseMSG_vdata,
                   hypre_AssembleStructVector(tx_array[index2]);
                   
                   r_array[index2] =
-                     hypre_NewStructVector(comm, grid_array[index2]);
+                     hypre_CreateStructVector(comm, grid_array[index2]);
                   hypre_SetStructVectorNumGhost(r_array[index2],x_num_ghost);
                   hypre_InitializeStructVector(r_array[index2]);
                   hypre_AssembleStructVector(r_array[index2]);
@@ -761,7 +761,7 @@ hypre_SparseMSGSetup( void               *SparseMSG_vdata,
                   /* free any coarse grid operators in the jump */
                   if (level <= jump)
                   {
-                     hypre_FreeStructMatrix(A_array[index]);
+                     hypre_DestroyStructMatrix(A_array[index]);
                      A_array[index] = NULL;
                   }
                }
@@ -787,10 +787,10 @@ hypre_SparseMSGSetup( void               *SparseMSG_vdata,
                if (level > jump || level == 0)
                {
                   /* set up the residual routine */
-                  matvec_data_array[index] = hypre_StructMatvecInitialize();
+                  matvec_data_array[index] = hypre_StructMatvecCreate();
                   hypre_StructMatvecSetup(matvec_data_array[index],
                                           A_array[index], x_array[index]);
-                  relax_data_array[index] = hypre_PFMGRelaxInitialize(comm);
+                  relax_data_array[index] = hypre_PFMGRelaxCreate(comm);
                   hypre_PFMGRelaxSetTol(relax_data_array[index], 0.0);
                   
                   /* set up relaxation */
@@ -834,14 +834,14 @@ hypre_SparseMSGSetup( void               *SparseMSG_vdata,
                         num_levels[0], num_levels[1], index2);       
                      
                      /* set up the interpolation routine */
-                     interp_data_array[rindex] = hypre_PFMGInterpInitialize();
+                     interp_data_array[rindex] = hypre_PFMGInterpCreate();
                      hypre_PFMGInterpSetup(interp_data_array[rindex],
                                            P_array[rindex],
                                            x_array[index2], e_array[index],
                                            cindex, findex, stride);
                      
                      restrict_data_array[rindex] =
-                        hypre_PFMGRestrictInitialize();
+                        hypre_PFMGRestrictCreate();
                      hypre_PFMGRestrictSetup(restrict_data_array[rindex],
                                              RT_array[rindex], r_array[index],
                                              b_array[index2],

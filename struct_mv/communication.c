@@ -57,21 +57,21 @@ headers.h
 @param comm [IN]
   communicator.
 
-@see hypre_NewCommPkgInfo, hypre_CommitCommPkg, hypre_FreeCommPkg */
+@see hypre_CreateCommPkgInfo, hypre_CommitCommPkg, hypre_DestroyCommPkg */
 /*--------------------------------------------------------------------------*/
 
-hypre_CommPkg *
-hypre_NewCommPkg( hypre_BoxArrayArray   *send_boxes,
-                  hypre_BoxArrayArray   *recv_boxes,
-                  hypre_Index            send_stride,
-                  hypre_Index            recv_stride,
-                  hypre_BoxArray        *send_data_space,
-                  hypre_BoxArray        *recv_data_space,
-                  int                  **send_processes,
-                  int                  **recv_processes,
-                  int                    num_values,
-                  MPI_Comm               comm,
-                  hypre_Index            periodic            )
+  hypre_CommPkg *
+  hypre_CreateCommPkg( hypre_BoxArrayArray   *send_boxes,
+                       hypre_BoxArrayArray   *recv_boxes,
+                       hypre_Index            send_stride,
+                       hypre_Index            recv_stride,
+                       hypre_BoxArray        *send_data_space,
+                       hypre_BoxArray        *recv_data_space,
+                       int                  **send_processes,
+                       int                  **recv_processes,
+                       int                    num_values,
+                       MPI_Comm               comm,
+                       hypre_Index            periodic            )
 {
    hypre_CommPkg    *comm_pkg;
                   
@@ -100,22 +100,22 @@ hypre_NewCommPkg( hypre_BoxArrayArray   *send_boxes,
     * Set up communication information
     *------------------------------------------------------*/
 
-   hypre_NewCommPkgInfo(send_boxes, send_stride,
-                        send_data_space, send_processes,
-                        num_values, comm, periodic,
-                        &num_sends, &send_procs,
-                        &send_types, &copy_from_type);
+   hypre_CreateCommPkgInfo(send_boxes, send_stride,
+                           send_data_space, send_processes,
+                           num_values, comm, periodic,
+                           &num_sends, &send_procs,
+                           &send_types, &copy_from_type);
 
    hypre_CommPkgNumSends(comm_pkg)     = num_sends;
    hypre_CommPkgSendProcs(comm_pkg)    = send_procs;
    hypre_CommPkgSendTypes(comm_pkg)    = send_types;
    hypre_CommPkgCopyFromType(comm_pkg) = copy_from_type;
 
-   hypre_NewCommPkgInfo(recv_boxes, recv_stride,
-                        recv_data_space, recv_processes,
-                        num_values, comm,  periodic,
-                        &num_recvs, &recv_procs,
-                        &recv_types, &copy_to_type);
+   hypre_CreateCommPkgInfo(recv_boxes, recv_stride,
+                           recv_data_space, recv_processes,
+                           num_values, comm,  periodic,
+                           &num_recvs, &recv_procs,
+                           &recv_types, &copy_to_type);
 
    hypre_CommPkgNumRecvs(comm_pkg)   = num_recvs;
    hypre_CommPkgRecvProcs(comm_pkg)  = recv_procs;
@@ -128,12 +128,12 @@ hypre_NewCommPkg( hypre_BoxArrayArray   *send_boxes,
 
    hypre_ForBoxArrayI(i, send_boxes)
       hypre_TFree(send_processes[i]);
-   hypre_FreeBoxArrayArray(send_boxes);
+   hypre_DestroyBoxArrayArray(send_boxes);
    hypre_TFree(send_processes);
 
    hypre_ForBoxArrayI(i, recv_boxes)
       hypre_TFree(recv_processes[i]);
-   hypre_FreeBoxArrayArray(recv_boxes);
+   hypre_DestroyBoxArrayArray(recv_boxes);
    hypre_TFree(recv_processes);
 
 #if defined(HYPRE_COMM_SIMPLE) || defined(HYPRE_COMM_VOLATILE)
@@ -142,10 +142,10 @@ hypre_NewCommPkg( hypre_BoxArrayArray   *send_boxes,
 
    /* free up comm types */
    for (i = 0; i < hypre_CommPkgNumSends(comm_pkg); i++)
-      hypre_FreeCommType(hypre_CommPkgSendType(comm_pkg, i));
+      hypre_DestroyCommType(hypre_CommPkgSendType(comm_pkg, i));
    hypre_TFree(hypre_CommPkgSendTypes(comm_pkg));
    for (i = 0; i < hypre_CommPkgNumRecvs(comm_pkg); i++)
-      hypre_FreeCommType(hypre_CommPkgRecvType(comm_pkg, i));
+      hypre_DestroyCommType(hypre_CommPkgRecvType(comm_pkg, i));
    hypre_TFree(hypre_CommPkgRecvTypes(comm_pkg));
 #endif
 
@@ -164,11 +164,11 @@ headers.h
 @param comm_pkg [IN/OUT]
   communication package.
 
-@see hypre_NewCommPkg */
+@see hypre_CreateCommPkg */
 /*--------------------------------------------------------------------------*/
 
 int
-hypre_FreeCommPkg( hypre_CommPkg *comm_pkg )
+hypre_DestroyCommPkg( hypre_CommPkg *comm_pkg )
 {
    int ierr = 0;
 #if defined(HYPRE_COMM_SIMPLE) || defined(HYPRE_COMM_VOLATILE)
@@ -181,10 +181,10 @@ hypre_FreeCommPkg( hypre_CommPkg *comm_pkg )
 #if defined(HYPRE_COMM_SIMPLE) || defined(HYPRE_COMM_VOLATILE)
       /* free up comm types */
       for (i = 0; i < hypre_CommPkgNumSends(comm_pkg); i++)
-         hypre_FreeCommType(hypre_CommPkgSendType(comm_pkg, i));
+         hypre_DestroyCommType(hypre_CommPkgSendType(comm_pkg, i));
       hypre_TFree(hypre_CommPkgSendTypes(comm_pkg));
       for (i = 0; i < hypre_CommPkgNumRecvs(comm_pkg); i++)
-         hypre_FreeCommType(hypre_CommPkgRecvType(comm_pkg, i));
+         hypre_DestroyCommType(hypre_CommPkgRecvType(comm_pkg, i));
       hypre_TFree(hypre_CommPkgRecvTypes(comm_pkg));
 #else
       hypre_UnCommitCommPkg(comm_pkg);
@@ -193,8 +193,8 @@ hypre_FreeCommPkg( hypre_CommPkg *comm_pkg )
       hypre_TFree(hypre_CommPkgSendProcs(comm_pkg));
       hypre_TFree(hypre_CommPkgRecvProcs(comm_pkg));
 
-      hypre_FreeCommType(hypre_CommPkgCopyFromType(comm_pkg));
-      hypre_FreeCommType(hypre_CommPkgCopyToType(comm_pkg));
+      hypre_DestroyCommType(hypre_CommPkgCopyFromType(comm_pkg));
+      hypre_DestroyCommType(hypre_CommPkgCopyToType(comm_pkg));
 
       hypre_TFree(comm_pkg);
    }
@@ -230,7 +230,7 @@ headers.h
 @param comm_handle [OUT]
   communication handle.
 
-@see hypre_FinalizeCommunication, hypre_NewCommPkg */
+@see hypre_FinalizeCommunication, hypre_CreateCommPkg */
 /*--------------------------------------------------------------------------*/
 
 #if defined(HYPRE_COMM_SIMPLE)
@@ -404,13 +404,13 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
    {
       MPI_Irecv(recv_buffers[i], recv_sizes[i], MPI_DOUBLE, 
                 hypre_CommPkgRecvProc(comm_pkg, i), 
-		0, comm, &requests[j++]);
+                0, comm, &requests[j++]);
    }
    for(i = 0; i < num_sends; i++)
    {
       MPI_Isend(send_buffers[i], send_sizes[i], MPI_DOUBLE, 
                 hypre_CommPkgSendProc(comm_pkg, i), 
-		0, comm, &requests[j++]);
+                0, comm, &requests[j++]);
    }
 
    hypre_ExchangeLocalData(comm_pkg, send_data, recv_data);
@@ -485,14 +485,14 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
       MPI_Irecv((void *)recv_data, 1,
                 hypre_CommPkgRecvMPIType(comm_pkg, i), 
                 hypre_CommPkgRecvProc(comm_pkg, i), 
-		0, comm, &requests[j++]);
+                0, comm, &requests[j++]);
    }
    for(i = 0; i < num_sends; i++)
    {
       MPI_Isend((void *)send_data, 1,
                 hypre_CommPkgSendMPIType(comm_pkg, i), 
                 hypre_CommPkgSendProc(comm_pkg, i), 
-		0, comm, &requests[j++]);
+                0, comm, &requests[j++]);
    }
 
 #if defined(HYPRE_COMM_VOLATILE)
@@ -544,7 +544,7 @@ headers.h
 @param comm_handle [IN/OUT]
   communication handle.
 
-@see hypre_InitializeCommunication, hypre_NewCommPkg */
+@see hypre_InitializeCommunication, hypre_CreateCommPkg */
 /*--------------------------------------------------------------------------*/
 
 #if defined(HYPRE_COMM_SIMPLE)
@@ -789,12 +789,12 @@ headers.h
 @param num_entries [IN]
   number of elements in comm\_entries array.
 
-@see hypre_FreeCommType */
+@see hypre_DestroyCommType */
 /*--------------------------------------------------------------------------*/
 
 hypre_CommType *
-hypre_NewCommType( hypre_CommTypeEntry **comm_entries,
-                   int                   num_entries  )
+hypre_CreateCommType( hypre_CommTypeEntry **comm_entries,
+                      int                   num_entries  )
 {
    hypre_CommType      *comm_type;
 
@@ -818,11 +818,11 @@ headers.h
 @param comm_type [IN]
   communication type.
 
-@see hypre_NewCommType */
+@see hypre_CreateCommType */
 /*--------------------------------------------------------------------------*/
 
 int 
-hypre_FreeCommType( hypre_CommType *comm_type )
+hypre_DestroyCommType( hypre_CommType *comm_type )
 {
    int                   ierr = 0;
    hypre_CommTypeEntry  *comm_entry;
@@ -835,7 +835,7 @@ hypre_FreeCommType( hypre_CommType *comm_type )
          for (i = 0; i < hypre_CommTypeNumEntries(comm_type); i++)
          {
             comm_entry = hypre_CommTypeCommEntry(comm_type, i);
-            hypre_FreeCommTypeEntry(comm_entry);
+            hypre_DestroyCommTypeEntry(comm_entry);
          }
       }
 
@@ -865,15 +865,15 @@ headers.h
   offset from some location in memory of the data associated with the
   imin index of data_box.
 
-@see hypre_FreeCommTypeEntry */
+@see hypre_DestroyCommTypeEntry */
 /*--------------------------------------------------------------------------*/
 
 hypre_CommTypeEntry *
-hypre_NewCommTypeEntry( hypre_Box   *box,
-                        hypre_Index  stride,
-                        hypre_Box   *data_box,
-                        int          num_values,
-                        int          data_box_offset )
+hypre_CreateCommTypeEntry( hypre_Box   *box,
+                           hypre_Index  stride,
+                           hypre_Box   *data_box,
+                           int          num_values,
+                           int          data_box_offset )
 {
    hypre_CommTypeEntry  *comm_entry;
 
@@ -945,16 +945,16 @@ hypre_NewCommTypeEntry( hypre_Box   *box,
    /* sort the array according to length_array (largest to smallest) */
    for (i = (dim-1); i > 0; i--)
       for (j = 0; j < i; j++)
-	 if (length_array[j] < length_array[j+1])
-	 {
-	    i_tmp             = length_array[j];
-	    length_array[j]   = length_array[j+1];
-	    length_array[j+1] = i_tmp;
+         if (length_array[j] < length_array[j+1])
+         {
+            i_tmp             = length_array[j];
+            length_array[j]   = length_array[j+1];
+            length_array[j+1] = i_tmp;
 
-	    i_tmp             = stride_array[j];
-	    stride_array[j]   = stride_array[j+1];
-	    stride_array[j+1] = i_tmp;
-	 }
+            i_tmp             = stride_array[j];
+            stride_array[j]   = stride_array[j+1];
+            stride_array[j+1] = i_tmp;
+         }
 #endif
 
    /* if every len was 1 we need to fix to communicate at least one */
@@ -978,11 +978,11 @@ headers.h
 @param comm_entry [IN/OUT]
   communication type entry.
 
-@see hypre_NewCommTypeEntry */
+@see hypre_CreateCommTypeEntry */
 /*--------------------------------------------------------------------------*/
 
 int
-hypre_FreeCommTypeEntry( hypre_CommTypeEntry *comm_entry )
+hypre_DestroyCommTypeEntry( hypre_CommTypeEntry *comm_entry )
 {
    int ierr = 0;
 
@@ -1026,21 +1026,21 @@ ranks involved in the communications.
 @param copy_type_ptr [OUT]
   intra-processor communication type (copies).
 
-@see hypre_NewCommPkg, hypre_SortCommType */
+@see hypre_CreateCommPkg, hypre_SortCommType */
 /*--------------------------------------------------------------------------*/
 
 int
-hypre_NewCommPkgInfo( hypre_BoxArrayArray   *boxes,
-                      hypre_Index            stride,
-                      hypre_BoxArray        *data_space,
-                      int                  **processes,
-                      int                    num_values,
-                      MPI_Comm               comm,
-                      hypre_Index            periodic,
-                      int                   *num_comms_ptr,
-                      int                  **comm_processes_ptr,
-                      hypre_CommType      ***comm_types_ptr,
-                      hypre_CommType       **copy_type_ptr)
+hypre_CreateCommPkgInfo( hypre_BoxArrayArray   *boxes,
+                         hypre_Index            stride,
+                         hypre_BoxArray        *data_space,
+                         int                  **processes,
+                         int                    num_values,
+                         MPI_Comm               comm,
+                         hypre_Index            periodic,
+                         int                   *num_comms_ptr,
+                         int                  **comm_processes_ptr,
+                         hypre_CommType      ***comm_types_ptr,
+                         hypre_CommType       **copy_type_ptr)
 {
    int                    num_comms;
    int                   *comm_processes;
@@ -1131,8 +1131,8 @@ hypre_NewCommPkgInfo( hypre_BoxArrayArray   *boxes,
                   }
 
                   comm_entries[p][num_entries[p]] =
-                     hypre_NewCommTypeEntry(box, stride, data_box,
-                                            num_values, data_box_offset);
+                     hypre_CreateCommTypeEntry(box, stride, data_box,
+                                               num_values, data_box_offset);
 
                   num_entries[p]++;
                }
@@ -1150,7 +1150,7 @@ hypre_NewCommPkgInfo( hypre_BoxArrayArray   *boxes,
    for (m = 0; m < num_comms; m++)
    {
       p = comm_processes[m];
-      comm_types[m] = hypre_NewCommType(comm_entries[p], num_entries[p]);
+      comm_types[m] = hypre_CreateCommType(comm_entries[p], num_entries[p]);
       hypre_SortCommType(comm_types[m], periodic);
    }
 
@@ -1161,12 +1161,12 @@ hypre_NewCommPkgInfo( hypre_BoxArrayArray   *boxes,
    if (comm_entries[my_proc] != NULL)
    {
       p = my_proc;
-      copy_type = hypre_NewCommType(comm_entries[p], num_entries[p]);
+      copy_type = hypre_CreateCommType(comm_entries[p], num_entries[p]);
       hypre_SortCommType(copy_type, periodic);
    }
    else
    {
-      copy_type = hypre_NewCommType(NULL, 0);
+      copy_type = hypre_CreateCommType(NULL, 0);
    }
 
    /*------------------------------------------------------
@@ -1202,53 +1202,116 @@ communication type.
 @param comm_type [IN/OUT]
   communication type to be sorted.
 
-@see hypre_NewCommPkgInfo */
+@see hypre_CreateCommPkgInfo */
 /*--------------------------------------------------------------------------*/
 
 int
 hypre_SortCommType( hypre_CommType  *comm_type,
-                    hypre_Index      periodic )
+hypre_Index      periodic )
 {
-   hypre_CommTypeEntry  **comm_entries = hypre_CommTypeCommEntries(comm_type);
-   int                    num_entries  = hypre_CommTypeNumEntries(comm_type);
+hypre_CommTypeEntry  **comm_entries = hypre_CommTypeCommEntries(comm_type);
+int                    num_entries  = hypre_CommTypeNumEntries(comm_type);
 
-   hypre_CommTypeEntry   *comm_entry;
-   hypre_IndexRef         imin0, imin1;
-   int                   *imax0, *imax1;
-   int                    swap;
-   int                    i, j, ii, jj;
-   int                    ierr = 0;
+hypre_CommTypeEntry   *comm_entry;
+hypre_IndexRef         imin0, imin1;
+int                   *imax0, *imax1;
+int                    swap;
+int                    i, j, ii, jj;
+int                    ierr = 0;
                       
 #if 1
-   /*------------------------------------------------
-    * Sort by imin:
-    *------------------------------------------------*/
+/*------------------------------------------------
+* Sort by imin:
+*------------------------------------------------*/
 
-   for (i = (num_entries - 1); i > 0; i--)
+for (i = (num_entries - 1); i > 0; i--)
+{
+   for (j = 0; j < i; j++)
    {
-      for (j = 0; j < i; j++)
+      swap = 0;
+      imin0 = hypre_CommTypeEntryIMin(comm_entries[j]);
+      imin1 = hypre_CommTypeEntryIMin(comm_entries[j+1]);
+      if ( hypre_IModPeriodZ(imin0, periodic) > 
+           hypre_IModPeriodZ(imin1, periodic) )
       {
-         swap = 0;
-         imin0 = hypre_CommTypeEntryIMin(comm_entries[j]);
-         imin1 = hypre_CommTypeEntryIMin(comm_entries[j+1]);
-         if ( hypre_IModPeriodZ(imin0, periodic) > 
-                 hypre_IModPeriodZ(imin1, periodic) )
+         swap = 1;
+      }
+      else if ( hypre_IModPeriodZ(imin0, periodic) == 
+                hypre_IModPeriodZ(imin1, periodic) )
+      {
+         if ( hypre_IModPeriodY(imin0, periodic) > 
+              hypre_IModPeriodY(imin1, periodic) )
          {
             swap = 1;
          }
-         else if ( hypre_IModPeriodZ(imin0, periodic) == 
-                      hypre_IModPeriodZ(imin1, periodic) )
+         else if ( hypre_IModPeriodY(imin0, periodic) == 
+                   hypre_IModPeriodY(imin1, periodic) )
          {
-            if ( hypre_IModPeriodY(imin0, periodic) > 
-                    hypre_IModPeriodY(imin1, periodic) )
+            if ( hypre_IModPeriodX(imin0, periodic) > 
+                 hypre_IModPeriodX(imin1, periodic) )
             {
                swap = 1;
             }
-            else if ( hypre_IModPeriodY(imin0, periodic) == 
-                         hypre_IModPeriodY(imin1, periodic) )
+         }
+      }
+
+      if (swap)
+      {
+         comm_entry        = comm_entries[j];
+         comm_entries[j]   = comm_entries[j+1];
+         comm_entries[j+1] = comm_entry;
+      }
+   }
+}
+
+/*------------------------------------------------
+ * Sort entries with common imin's by imax:
+ *------------------------------------------------*/
+
+for (ii = 0; ii < (num_entries - 1); ii = jj)
+{
+   /* want jj where entries ii through jj-1 have common imin's */
+   imin0 = hypre_CommTypeEntryIMin(comm_entries[ii]);
+   for (jj = (ii + 1); jj < num_entries; jj++)
+   {
+      imin1 = hypre_CommTypeEntryIMin(comm_entries[jj]);
+      if ( ( hypre_IModPeriodX(imin0, periodic) !=
+             hypre_IModPeriodX(imin1, periodic) ) ||
+           ( hypre_IModPeriodY(imin0, periodic) != 
+             hypre_IModPeriodY(imin1, periodic) ) ||
+           ( hypre_IModPeriodZ(imin0, periodic) !=
+             hypre_IModPeriodZ(imin1, periodic) ) )
+      {
+         break;
+      }
+   }
+
+   /* sort entries ii through jj-1 by imax */
+   for (i = (jj - 1); i > ii; i--)
+   {
+      for (j = ii; j < i; j++)
+      {
+         swap = 0;
+         imax0 = hypre_CommTypeEntryIMax(comm_entries[j]);
+         imax1 = hypre_CommTypeEntryIMax(comm_entries[j+1]);
+         if ( hypre_IModPeriodZ(imax0, periodic) >
+              hypre_IModPeriodZ(imax1, periodic) )
+         {
+            swap = 1;
+         }
+         else if ( hypre_IModPeriodZ(imax0, periodic) ==
+                   hypre_IModPeriodZ(imax1, periodic) )
+         {
+            if ( hypre_IModPeriodY(imax0, periodic) >
+                 hypre_IModPeriodY(imax1, periodic) )
             {
-               if ( hypre_IModPeriodX(imin0, periodic) > 
-                       hypre_IModPeriodX(imin1, periodic) )
+               swap = 1;
+            }
+            else if ( hypre_IModPeriodY(imax0, periodic) ==
+                      hypre_IModPeriodY(imax1, periodic) )
+            {
+               if ( hypre_IModPeriodX(imax0, periodic) >
+                    hypre_IModPeriodX(imax1, periodic) )
                {
                   swap = 1;
                }
@@ -1263,73 +1326,10 @@ hypre_SortCommType( hypre_CommType  *comm_type,
          }
       }
    }
-
-   /*------------------------------------------------
-    * Sort entries with common imin's by imax:
-    *------------------------------------------------*/
-
-   for (ii = 0; ii < (num_entries - 1); ii = jj)
-   {
-      /* want jj where entries ii through jj-1 have common imin's */
-      imin0 = hypre_CommTypeEntryIMin(comm_entries[ii]);
-      for (jj = (ii + 1); jj < num_entries; jj++)
-      {
-         imin1 = hypre_CommTypeEntryIMin(comm_entries[jj]);
-         if ( ( hypre_IModPeriodX(imin0, periodic) !=
-                   hypre_IModPeriodX(imin1, periodic) ) ||
-              ( hypre_IModPeriodY(imin0, periodic) != 
-                   hypre_IModPeriodY(imin1, periodic) ) ||
-              ( hypre_IModPeriodZ(imin0, periodic) !=
-                   hypre_IModPeriodZ(imin1, periodic) ) )
-         {
-            break;
-         }
-      }
-
-      /* sort entries ii through jj-1 by imax */
-      for (i = (jj - 1); i > ii; i--)
-      {
-         for (j = ii; j < i; j++)
-         {
-            swap = 0;
-            imax0 = hypre_CommTypeEntryIMax(comm_entries[j]);
-            imax1 = hypre_CommTypeEntryIMax(comm_entries[j+1]);
-            if ( hypre_IModPeriodZ(imax0, periodic) >
-                    hypre_IModPeriodZ(imax1, periodic) )
-            {
-               swap = 1;
-            }
-            else if ( hypre_IModPeriodZ(imax0, periodic) ==
-                         hypre_IModPeriodZ(imax1, periodic) )
-            {
-               if ( hypre_IModPeriodY(imax0, periodic) >
-                       hypre_IModPeriodY(imax1, periodic) )
-               {
-                  swap = 1;
-               }
-               else if ( hypre_IModPeriodY(imax0, periodic) ==
-                            hypre_IModPeriodY(imax1, periodic) )
-               {
-                  if ( hypre_IModPeriodX(imax0, periodic) >
-                          hypre_IModPeriodX(imax1, periodic) )
-                  {
-                     swap = 1;
-                  }
-               }
-            }
-
-            if (swap)
-            {
-               comm_entry        = comm_entries[j];
-               comm_entries[j]   = comm_entries[j+1];
-               comm_entries[j+1] = comm_entry;
-            }
-         }
-      }
-   }
+}
 
 #endif
-   return ierr;
+return ierr;
 }
 
 /*==========================================================================*/
@@ -1345,7 +1345,7 @@ headers.h
 @param comm_pkg [IN/OUT]
   communication package.
 
-@see hypre_NewCommPkg, hypre_InitializeCommunication,
+@see hypre_CreateCommPkg, hypre_InitializeCommunication,
   hypre_BuildCommMPITypes, hypre_UnCommitCommPkg */
 /*--------------------------------------------------------------------------*/
 

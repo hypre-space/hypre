@@ -63,15 +63,16 @@ typedef HYPRE_CommPkgArray       HYPRE_CommPkg;
  * Prototypes
  *--------------------------------------------------------------------------*/
 
+
 #ifndef HYPRE_NO_PTHREAD_MANGLING
 
-#define HYPRE_NewStructGrid HYPRE_NewStructGridPush
-#define HYPRE_FreeStructGrid HYPRE_FreeStructGridPush
+#define HYPRE_CreateStructGrid HYPRE_CreateStructGridPush
+#define HYPRE_DestroyStructGrid HYPRE_DestroyStructGridPush
 #define HYPRE_SetStructGridExtents HYPRE_SetStructGridExtentsPush
 #define HYPRE_SetStructGridPeriodic HYPRE_SetStructGridPeriodicPush
 #define HYPRE_AssembleStructGrid HYPRE_AssembleStructGridPush
-#define HYPRE_NewStructMatrix HYPRE_NewStructMatrixPush
-#define HYPRE_FreeStructMatrix HYPRE_FreeStructMatrixPush
+#define HYPRE_CreateStructMatrix HYPRE_CreateStructMatrixPush
+#define HYPRE_DestroyStructMatrix HYPRE_DestroyStructMatrixPush
 #define HYPRE_InitializeStructMatrix HYPRE_InitializeStructMatrixPush
 #define HYPRE_SetStructMatrixValues HYPRE_SetStructMatrixValuesPush
 #define HYPRE_SetStructMatrixBoxValues HYPRE_SetStructMatrixBoxValuesPush
@@ -80,11 +81,11 @@ typedef HYPRE_CommPkgArray       HYPRE_CommPkg;
 #define HYPRE_StructMatrixGrid HYPRE_StructMatrixGridPush
 #define HYPRE_SetStructMatrixSymmetric HYPRE_SetStructMatrixSymmetricPush
 #define HYPRE_PrintStructMatrix HYPRE_PrintStructMatrixPush
-#define HYPRE_NewStructStencil HYPRE_NewStructStencilPush
+#define HYPRE_CreateStructStencil HYPRE_CreateStructStencilPush
 #define HYPRE_SetStructStencilElement HYPRE_SetStructStencilElementPush
-#define HYPRE_FreeStructStencil HYPRE_FreeStructStencilPush
-#define HYPRE_NewStructVector HYPRE_NewStructVectorPush
-#define HYPRE_FreeStructVector HYPRE_FreeStructVectorPush
+#define HYPRE_DestroyStructStencil HYPRE_DestroyStructStencilPush
+#define HYPRE_CreateStructVector HYPRE_CreateStructVectorPush
+#define HYPRE_DestroyStructVector HYPRE_DestroyStructVectorPush
 #define HYPRE_InitializeStructVector HYPRE_InitializeStructVectorPush
 #define HYPRE_SetStructVectorValues HYPRE_SetStructVectorValuesPush
 #define HYPRE_GetStructVectorValues HYPRE_GetStructVectorValuesPush
@@ -96,22 +97,22 @@ typedef HYPRE_CommPkgArray       HYPRE_CommPkg;
 #define HYPRE_SetStructVectorConstantValues HYPRE_SetStructVectorConstantValuesPush
 #define HYPRE_GetMigrateStructVectorCommPkg HYPRE_GetMigrateStructVectorCommPkgPush
 #define HYPRE_MigrateStructVector HYPRE_MigrateStructVectorPush
-#define HYPRE_FreeCommPkg HYPRE_FreeCommPkgPush
+#define HYPRE_DestroyCommPkg HYPRE_DestroyCommPkgPush
 
 #endif
 
 # define	P(s) s
 
 /* HYPRE_struct_grid.c */
-int HYPRE_NewStructGrid P((MPI_Comm comm , int dim , HYPRE_StructGrid *grid ));
-int HYPRE_FreeStructGrid P((HYPRE_StructGrid grid ));
+int HYPRE_CreateStructGrid P((MPI_Comm comm , int dim , HYPRE_StructGrid *grid ));
+int HYPRE_DestroyStructGrid P((HYPRE_StructGrid grid ));
 int HYPRE_SetStructGridExtents P((HYPRE_StructGrid grid , int *ilower , int *iupper ));
 int HYPRE_SetStructGridPeriodic P((HYPRE_StructGrid grid , int *periodic ));
 int HYPRE_AssembleStructGrid P((HYPRE_StructGrid grid ));
 
 /* HYPRE_struct_matrix.c */
-int HYPRE_NewStructMatrix P((MPI_Comm comm , HYPRE_StructGrid grid , HYPRE_StructStencil stencil , HYPRE_StructMatrix *matrix ));
-int HYPRE_FreeStructMatrix P((HYPRE_StructMatrix matrix ));
+int HYPRE_CreateStructMatrix P((MPI_Comm comm , HYPRE_StructGrid grid , HYPRE_StructStencil stencil , HYPRE_StructMatrix *matrix ));
+int HYPRE_DestroyStructMatrix P((HYPRE_StructMatrix matrix ));
 int HYPRE_InitializeStructMatrix P((HYPRE_StructMatrix matrix ));
 int HYPRE_SetStructMatrixValues P((HYPRE_StructMatrix matrix , int *grid_index , int num_stencil_indices , int *stencil_indices , double *values ));
 int HYPRE_SetStructMatrixBoxValues P((HYPRE_StructMatrix matrix , int *ilower , int *iupper , int num_stencil_indices , int *stencil_indices , double *values ));
@@ -122,13 +123,13 @@ int HYPRE_SetStructMatrixSymmetric P((HYPRE_StructMatrix matrix , int symmetric 
 int HYPRE_PrintStructMatrix P((char *filename , HYPRE_StructMatrix matrix , int all ));
 
 /* HYPRE_struct_stencil.c */
-int HYPRE_NewStructStencil P((int dim , int size , HYPRE_StructStencil *stencil ));
+int HYPRE_CreateStructStencil P((int dim , int size , HYPRE_StructStencil *stencil ));
 int HYPRE_SetStructStencilElement P((HYPRE_StructStencil stencil , int element_index , int *offset ));
-int HYPRE_FreeStructStencil P((HYPRE_StructStencil stencil ));
+int HYPRE_DestroyStructStencil P((HYPRE_StructStencil stencil ));
 
 /* HYPRE_struct_vector.c */
-int HYPRE_NewStructVector P((MPI_Comm comm , HYPRE_StructGrid grid , HYPRE_StructStencil stencil , HYPRE_StructVector *vector ));
-int HYPRE_FreeStructVector P((HYPRE_StructVector struct_vector ));
+int HYPRE_CreateStructVector P((MPI_Comm comm , HYPRE_StructGrid grid , HYPRE_StructStencil stencil , HYPRE_StructVector *vector ));
+int HYPRE_DestroyStructVector P((HYPRE_StructVector struct_vector ));
 int HYPRE_InitializeStructVector P((HYPRE_StructVector vector ));
 int HYPRE_SetStructVectorValues P((HYPRE_StructVector vector , int *grid_index , double values ));
 int HYPRE_GetStructVectorValues P((HYPRE_StructVector vector , int *grid_index , double *values_ptr ));
@@ -140,7 +141,7 @@ int HYPRE_SetStructVectorNumGhost P((HYPRE_StructVector vector , int *num_ghost 
 int HYPRE_SetStructVectorConstantValues P((HYPRE_StructVector vector , double values ));
 int HYPRE_GetMigrateStructVectorCommPkg P((HYPRE_StructVector from_vector , HYPRE_StructVector to_vector , HYPRE_CommPkg *comm_pkg ));
 int HYPRE_MigrateStructVector P((HYPRE_CommPkg comm_pkg , HYPRE_StructVector from_vector , HYPRE_StructVector to_vector ));
-int HYPRE_FreeCommPkg P((HYPRE_CommPkg comm_pkg ));
+int HYPRE_DestroyCommPkg P((HYPRE_CommPkg comm_pkg ));
 
 #undef P
 

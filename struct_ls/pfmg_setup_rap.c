@@ -15,18 +15,18 @@
 #include "pfmg.h"
 
 /*--------------------------------------------------------------------------
- * hypre_PFMGNewRAPOp
+ * hypre_PFMGCreateRAPOp
  *
- *   Wrapper for 2 and 3d NewRAPOp routines which set up new coarse
+ *   Wrapper for 2 and 3d CreateRAPOp routines which set up new coarse
  *   grid structures.
  *--------------------------------------------------------------------------*/
  
 hypre_StructMatrix *
-hypre_PFMGNewRAPOp( hypre_StructMatrix *R,
-                    hypre_StructMatrix *A,
-                    hypre_StructMatrix *P,
-                    hypre_StructGrid   *coarse_grid,
-                    int                 cdir        )
+hypre_PFMGCreateRAPOp( hypre_StructMatrix *R,
+                       hypre_StructMatrix *A,
+                       hypre_StructMatrix *P,
+                       hypre_StructGrid   *coarse_grid,
+                       int                 cdir        )
 {
    hypre_StructMatrix    *RAP;
    hypre_StructStencil   *stencil;
@@ -36,11 +36,11 @@ hypre_PFMGNewRAPOp( hypre_StructMatrix *R,
    switch (hypre_StructStencilDim(stencil)) 
    {
       case 2:
-      RAP = hypre_PFMG2NewRAPOp(R ,A, P, coarse_grid, cdir);
+      RAP = hypre_PFMG2CreateRAPOp(R ,A, P, coarse_grid, cdir);
       break;
     
       case 3:
-      RAP = hypre_PFMG3NewRAPOp(R ,A, P, coarse_grid, cdir);
+      RAP = hypre_PFMG3CreateRAPOp(R ,A, P, coarse_grid, cdir);
       break;
    } 
 

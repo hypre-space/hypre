@@ -15,25 +15,25 @@
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructSparseMSGInitialize
+ * HYPRE_StructSparseMSGCreate
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_StructSparseMSGInitialize( MPI_Comm comm, HYPRE_StructSolver *solver )
+HYPRE_StructSparseMSGCreate( MPI_Comm comm, HYPRE_StructSolver *solver )
 {
-   *solver = ( (HYPRE_StructSolver) hypre_SparseMSGInitialize( comm ) );
+   *solver = ( (HYPRE_StructSolver) hypre_SparseMSGCreate( comm ) );
 
    return 0;
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructSparseMSGFinalize
+ * HYPRE_StructSparseMSGDestroy
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_StructSparseMSGFinalize( HYPRE_StructSolver solver )
+HYPRE_StructSparseMSGDestroy( HYPRE_StructSolver solver )
 {
-   return( hypre_SparseMSGFinalize( (void *) solver ) );
+   return( hypre_SparseMSGDestroy( (void *) solver ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -197,12 +197,4 @@ HYPRE_StructSparseMSGGetFinalRelativeResidualNorm( HYPRE_StructSolver  solver,
 {
    return( hypre_SparseMSGGetFinalRelativeResidualNorm( (void *) solver, norm ) );
 }
-
-
-
-
-
-
-
-
 

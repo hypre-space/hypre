@@ -25,34 +25,34 @@ typedef struct
 } hypre_PFMGRelaxData;
 
 /*--------------------------------------------------------------------------
- * hypre_PFMGRelaxInitialize
+ * hypre_PFMGRelaxCreate
  *--------------------------------------------------------------------------*/
 
 void *
-hypre_PFMGRelaxInitialize( MPI_Comm  comm )
+hypre_PFMGRelaxCreate( MPI_Comm  comm )
 {
    hypre_PFMGRelaxData *pfmg_relax_data;
 
    pfmg_relax_data = hypre_CTAlloc(hypre_PFMGRelaxData, 1);
-   (pfmg_relax_data -> relax_data) = hypre_PointRelaxInitialize(comm);
+   (pfmg_relax_data -> relax_data) = hypre_PointRelaxCreate(comm);
    (pfmg_relax_data -> relax_type) = 0;        /* Weighted Jacobi */
 
    return (void *) pfmg_relax_data;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PFMGRelaxFinalize
+ * hypre_PFMGRelaxDestroy
  *--------------------------------------------------------------------------*/
 
 int
-hypre_PFMGRelaxFinalize( void *pfmg_relax_vdata )
+hypre_PFMGRelaxDestroy( void *pfmg_relax_vdata )
 {
    hypre_PFMGRelaxData *pfmg_relax_data = pfmg_relax_vdata;
    int                  ierr = 0;
 
    if (pfmg_relax_data)
    {
-      hypre_PointRelaxFinalize(pfmg_relax_data -> relax_data);
+      hypre_PointRelaxDestroy(pfmg_relax_data -> relax_data);
       hypre_TFree(pfmg_relax_data);
    }
 

@@ -43,18 +43,18 @@ headers.h
 @param dept_boxes_ptr [OUT]
   description of computations that depend on communicated data.
 
-@see hypre_NewCommInfoFromStencil */
+@see hypre_CreateCommInfoFromStencil */
 /*--------------------------------------------------------------------------*/
 
-int
-hypre_GetComputeInfo( hypre_StructGrid      *grid,
-                      hypre_StructStencil   *stencil,
-                      hypre_BoxArrayArray  **send_boxes_ptr,
-                      hypre_BoxArrayArray  **recv_boxes_ptr,
-                      int                 ***send_processes_ptr,
-                      int                 ***recv_processes_ptr,
-                      hypre_BoxArrayArray  **indt_boxes_ptr,
-                      hypre_BoxArrayArray  **dept_boxes_ptr     )
+  int
+  hypre_GetComputeInfo( hypre_StructGrid      *grid,
+                        hypre_StructStencil   *stencil,
+                        hypre_BoxArrayArray  **send_boxes_ptr,
+                        hypre_BoxArrayArray  **recv_boxes_ptr,
+                        int                 ***send_processes_ptr,
+                        int                 ***recv_processes_ptr,
+                        hypre_BoxArrayArray  **indt_boxes_ptr,
+                        hypre_BoxArrayArray  **dept_boxes_ptr     )
 {
    int                      ierr = 0;
 
@@ -92,9 +92,9 @@ hypre_GetComputeInfo( hypre_StructGrid      *grid,
     * Get communication info
     *------------------------------------------------------*/
 
-   hypre_NewCommInfoFromStencil(grid, stencil,
-                                &send_boxes, &recv_boxes,
-                                &send_processes, &recv_processes);
+   hypre_CreateCommInfoFromStencil(grid, stencil,
+                                   &send_boxes, &recv_boxes,
+                                   &send_processes, &recv_processes);
 
 #ifdef HYPRE_OVERLAP_COMM_COMP
 
@@ -123,9 +123,9 @@ hypre_GetComputeInfo( hypre_StructGrid      *grid,
     * Set up the dependent boxes
     *------------------------------------------------------*/
 
-   dept_boxes = hypre_NewBoxArrayArray(hypre_BoxArraySize(boxes));
+   dept_boxes = hypre_CreateBoxArrayArray(hypre_BoxArraySize(boxes));
 
-   rembox = hypre_NewBox();
+   rembox = hypre_CreateBox();
    hypre_ForBoxI(i, boxes)
       {
          cbox_array = hypre_BoxArrayArrayBoxArray(dept_boxes, i);
@@ -158,13 +158,13 @@ hypre_GetComputeInfo( hypre_StructGrid      *grid,
          }
          hypre_SetBoxArraySize(cbox_array, cbox_array_size);
       }
-   hypre_FreeBox(rembox);
+   hypre_DestroyBox(rembox);
 
    /*------------------------------------------------------
     * Set up the independent boxes
     *------------------------------------------------------*/
 
-   indt_boxes = hypre_NewBoxArrayArray(hypre_BoxArraySize(boxes));
+   indt_boxes = hypre_CreateBoxArrayArray(hypre_BoxArraySize(boxes));
 
    hypre_ForBoxI(i, boxes)
       {
@@ -192,13 +192,13 @@ hypre_GetComputeInfo( hypre_StructGrid      *grid,
     * Set up the independent boxes
     *------------------------------------------------------*/
 
-   indt_boxes = hypre_NewBoxArrayArray(hypre_BoxArraySize(boxes));
+   indt_boxes = hypre_CreateBoxArrayArray(hypre_BoxArraySize(boxes));
 
    /*------------------------------------------------------
     * Set up the dependent boxes
     *------------------------------------------------------*/
 
-   dept_boxes = hypre_NewBoxArrayArray(hypre_BoxArraySize(boxes));
+   dept_boxes = hypre_CreateBoxArrayArray(hypre_BoxArraySize(boxes));
 
    hypre_ForBoxI(i, boxes)
       {
@@ -264,23 +264,23 @@ headers.h
 @param compute_pkg_ptr [OUT]
   pointer to a computation package
 
-@see hypre_NewCommPkg, hypre_FreeComputePkg */
+@see hypre_CreateCommPkg, hypre_DestroyComputePkg */
 /*--------------------------------------------------------------------------*/
 
-int
-hypre_NewComputePkg( hypre_BoxArrayArray   *send_boxes,
-                     hypre_BoxArrayArray   *recv_boxes,
-                     hypre_Index            send_stride,
-                     hypre_Index            recv_stride,
-                     int                  **send_processes,
-                     int                  **recv_processes,
-                     hypre_BoxArrayArray   *indt_boxes,
-                     hypre_BoxArrayArray   *dept_boxes,
-                     hypre_Index            stride,
-                     hypre_StructGrid      *grid,
-                     hypre_BoxArray        *data_space,
-                     int                    num_values,
-                     hypre_ComputePkg     **compute_pkg_ptr )
+  int
+  hypre_CreateComputePkg( hypre_BoxArrayArray   *send_boxes,
+                          hypre_BoxArrayArray   *recv_boxes,
+                          hypre_Index            send_stride,
+                          hypre_Index            recv_stride,
+                          int                  **send_processes,
+                          int                  **recv_processes,
+                          hypre_BoxArrayArray   *indt_boxes,
+                          hypre_BoxArrayArray   *dept_boxes,
+                          hypre_Index            stride,
+                          hypre_StructGrid      *grid,
+                          hypre_BoxArray        *data_space,
+                          int                    num_values,
+                          hypre_ComputePkg     **compute_pkg_ptr )
 {
    int                ierr = 0;
    hypre_ComputePkg  *compute_pkg;
@@ -288,12 +288,12 @@ hypre_NewComputePkg( hypre_BoxArrayArray   *send_boxes,
    compute_pkg = hypre_CTAlloc(hypre_ComputePkg, 1);
 
    hypre_ComputePkgCommPkg(compute_pkg)     =
-      hypre_NewCommPkg(send_boxes, recv_boxes,
-                       send_stride, recv_stride,
-                       data_space, data_space,
-                       send_processes, recv_processes,
-                       num_values, hypre_StructGridComm(grid),
-                       hypre_StructGridPeriodic(grid));
+      hypre_CreateCommPkg(send_boxes, recv_boxes,
+                          send_stride, recv_stride,
+                          data_space, data_space,
+                          send_processes, recv_processes,
+                          num_values, hypre_StructGridComm(grid),
+                          hypre_StructGridPeriodic(grid));
 
    hypre_ComputePkgIndtBoxes(compute_pkg)   = indt_boxes;
    hypre_ComputePkgDeptBoxes(compute_pkg)   = dept_boxes;
@@ -320,22 +320,22 @@ headers.h
 @param compute_pkg [IN/OUT]
   computation package.
 
-@see hypre_NewComputePkg */
+@see hypre_CreateComputePkg */
 /*--------------------------------------------------------------------------*/
 
 int
-hypre_FreeComputePkg( hypre_ComputePkg *compute_pkg )
+hypre_DestroyComputePkg( hypre_ComputePkg *compute_pkg )
 {
    int ierr = 0;
 
    if (compute_pkg)
    {
-      hypre_FreeCommPkg(hypre_ComputePkgCommPkg(compute_pkg));
+      hypre_DestroyCommPkg(hypre_ComputePkgCommPkg(compute_pkg));
 
-      hypre_FreeBoxArrayArray(hypre_ComputePkgIndtBoxes(compute_pkg));
-      hypre_FreeBoxArrayArray(hypre_ComputePkgDeptBoxes(compute_pkg));
+      hypre_DestroyBoxArrayArray(hypre_ComputePkgIndtBoxes(compute_pkg));
+      hypre_DestroyBoxArrayArray(hypre_ComputePkgDeptBoxes(compute_pkg));
 
-      hypre_FreeStructGrid(hypre_ComputePkgGrid(compute_pkg));
+      hypre_DestroyStructGrid(hypre_ComputePkgGrid(compute_pkg));
 
       hypre_TFree(compute_pkg);
    }
@@ -361,7 +361,7 @@ headers.h
 @param comm_handle [OUT]
   communication handle.
 
-@see hypre_FinalizeIndtComputations, hypre_NewComputePkg,
+@see hypre_FinalizeIndtComputations, hypre_CreateComputePkg,
 hypre_InitializeCommunication */
 /*--------------------------------------------------------------------------*/
 

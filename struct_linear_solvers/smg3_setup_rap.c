@@ -15,14 +15,14 @@
 #include "smg.h"
 
 /*--------------------------------------------------------------------------
- * hypre_SMG3NewRAPOp 
+ * hypre_SMG3CreateRAPOp 
  *    Sets up new coarse grid operator stucture.
  *--------------------------------------------------------------------------*/
  
 hypre_StructMatrix *
-hypre_SMG3NewRAPOp( hypre_StructMatrix *R,
-                    hypre_StructMatrix *A,
-                    hypre_StructMatrix *PT )
+hypre_SMG3CreateRAPOp( hypre_StructMatrix *R,
+                       hypre_StructMatrix *A,
+                       hypre_StructMatrix *PT )
 {
    hypre_StructMatrix    *RAP;
 
@@ -183,12 +183,12 @@ hypre_SMG3NewRAPOp( hypre_StructMatrix *R,
       }
    }
 
-   RAP_stencil = hypre_NewStructStencil(RAP_stencil_dim, RAP_stencil_size,
-                                        RAP_stencil_shape);
-   RAP = hypre_NewStructMatrix(hypre_StructMatrixComm(A),
-                               coarse_grid, RAP_stencil);
+   RAP_stencil = hypre_CreateStructStencil(RAP_stencil_dim, RAP_stencil_size,
+                                           RAP_stencil_shape);
+   RAP = hypre_CreateStructMatrix(hypre_StructMatrixComm(A),
+                                  coarse_grid, RAP_stencil);
 
-   hypre_FreeStructStencil(RAP_stencil);
+   hypre_DestroyStructStencil(RAP_stencil);
 
    /*-----------------------------------------------------------------------
     * Coarse operator in symmetric iff fine operator is
@@ -1416,7 +1416,7 @@ hypre_SMG3BuildRAPNoSym( hypre_StructMatrix *A,
                                 PT_data_box,  cstart, stridec, iP,
                                 R_data_box,   cstart, stridec, iR,
                                 A_data_box,   fstart, stridef, iA,
-				RAP_data_box, cstart, stridec, iAc);
+                                RAP_data_box, cstart, stridec, iAc);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iP,iR,iA,iAc,iAm1,iAp1,iP1
 #include "hypre_box_smp_forloop.h"
             hypre_BoxLoop4For(loopi, loopj, loopk, iP, iR, iA, iAc)
@@ -1675,130 +1675,90 @@ hypre_SMG3RAPPeriodicSym( hypre_StructMatrix *RAP,
       hypre_AssembleStructMatrix(RAP);
 
       hypre_ForBoxI(i, cgrid_boxes)
-      {
-         cgrid_box = hypre_BoxArrayBox(cgrid_boxes, i);
-
-         cstart = hypre_BoxIMin(cgrid_box);
-
-         RAP_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(RAP), i);
-
-         hypre_SetIndex(index_temp,1,0,0);
-         xOffset = hypre_BoxOffsetDistance(RAP_data_box,index_temp);
-         hypre_SetIndex(index_temp,0,1,0);
-         yOffset = hypre_BoxOffsetDistance(RAP_data_box,index_temp);
-
-
-         /*-----------------------------------------------------------------
-          * Extract pointers for 15-point coarse grid operator:
-          *-----------------------------------------------------------------*/
-
-         hypre_SetIndex(index_temp,0,0,-1);
-         rap_bc = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
-
-         hypre_SetIndex(index_temp,-1,0,-1);
-         rap_bw = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
-
-         hypre_SetIndex(index_temp,1,0,-1);
-         rap_be = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
-
-         hypre_SetIndex(index_temp,0,-1,-1);
-         rap_bs = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
-
-         hypre_SetIndex(index_temp,0,1,-1);
-         rap_bn = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
-
-         hypre_SetIndex(index_temp,0,0,0);
-         rap_cc = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
-
-         hypre_SetIndex(index_temp,-1,0,0);
-         rap_cw = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
-
-         hypre_SetIndex(index_temp,0,-1,0);
-         rap_cs = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
-
-         /*-----------------------------------------------------------------
-          * Extract additional pointers for 27-point coarse grid operator:
-          *-----------------------------------------------------------------*/
-
-         if(stencil_size == 27)
          {
-         hypre_SetIndex(index_temp,-1,-1,-1);
-         rap_bsw = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+            cgrid_box = hypre_BoxArrayBox(cgrid_boxes, i);
 
-         hypre_SetIndex(index_temp,1,-1,-1);
-         rap_bse = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+            cstart = hypre_BoxIMin(cgrid_box);
 
-         hypre_SetIndex(index_temp,-1,1,-1);
-         rap_bnw = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+            RAP_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(RAP), i);
 
-         hypre_SetIndex(index_temp,1,1,-1);
-         rap_bne = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+            hypre_SetIndex(index_temp,1,0,0);
+            xOffset = hypre_BoxOffsetDistance(RAP_data_box,index_temp);
+            hypre_SetIndex(index_temp,0,1,0);
+            yOffset = hypre_BoxOffsetDistance(RAP_data_box,index_temp);
 
-         hypre_SetIndex(index_temp,-1,-1,0);
-         rap_csw = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
 
-         hypre_SetIndex(index_temp,1,-1,0);
-         rap_cse = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
-         }
+            /*-----------------------------------------------------------------
+             * Extract pointers for 15-point coarse grid operator:
+             *-----------------------------------------------------------------*/
 
-         /*-----------------------------------------------------------------
-          * Collapse 15 point operator.
-          *-----------------------------------------------------------------*/
+            hypre_SetIndex(index_temp,0,0,-1);
+            rap_bc = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
 
-         hypre_GetBoxSize(cgrid_box, loop_size);
+            hypre_SetIndex(index_temp,-1,0,-1);
+            rap_bw = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
 
-         hypre_BoxLoop1Begin(loop_size,
-                             RAP_data_box,  cstart, stridec, iAc);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iAc,iAcmx,iAcmy
-#include "hypre_box_smp_forloop.h"
-         hypre_BoxLoop1For(loopi, loopj, loopk, iAc)
+            hypre_SetIndex(index_temp,1,0,-1);
+            rap_be = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+
+            hypre_SetIndex(index_temp,0,-1,-1);
+            rap_bs = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+
+            hypre_SetIndex(index_temp,0,1,-1);
+            rap_bn = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+
+            hypre_SetIndex(index_temp,0,0,0);
+            rap_cc = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+
+            hypre_SetIndex(index_temp,-1,0,0);
+            rap_cw = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+
+            hypre_SetIndex(index_temp,0,-1,0);
+            rap_cs = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+
+            /*-----------------------------------------------------------------
+             * Extract additional pointers for 27-point coarse grid operator:
+             *-----------------------------------------------------------------*/
+
+            if(stencil_size == 27)
             {
-               iAcmx = iAc - xOffset;
-               iAcmy = iAc - yOffset;
-               
-               rap_cc[iAc] += (2.0 * rap_bc[iAc]);
-               rap_cw[iAc] += (rap_bw[iAc] + rap_be[iAcmx]);
-               rap_cs[iAc] += (rap_bs[iAc] + rap_bn[iAcmy]);
+               hypre_SetIndex(index_temp,-1,-1,-1);
+               rap_bsw = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+
+               hypre_SetIndex(index_temp,1,-1,-1);
+               rap_bse = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+
+               hypre_SetIndex(index_temp,-1,1,-1);
+               rap_bnw = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+
+               hypre_SetIndex(index_temp,1,1,-1);
+               rap_bne = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+
+               hypre_SetIndex(index_temp,-1,-1,0);
+               rap_csw = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+
+               hypre_SetIndex(index_temp,1,-1,0);
+               rap_cse = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
             }
-         hypre_BoxLoop1End(iAc);
 
-         hypre_BoxLoop1Begin(loop_size,
-                             RAP_data_box,  cstart, stridec, iAc);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iAc
-#include "hypre_box_smp_forloop.h"
-         hypre_BoxLoop1For(loopi, loopj, loopk, iAc)
-            {
-               rap_bc[iAc]  = zero;
-               rap_bw[iAc]  = zero;
-               rap_be[iAc]  = zero;
-               rap_bs[iAc]  = zero;
-               rap_bn[iAc]  = zero;
-            }
-         hypre_BoxLoop1End(iAc);
+            /*-----------------------------------------------------------------
+             * Collapse 15 point operator.
+             *-----------------------------------------------------------------*/
 
-         /*-----------------------------------------------------------------
-          * Collapse additional entries for 27 point operator.
-          *-----------------------------------------------------------------*/
-
-         if (stencil_size == 27)
-         {
             hypre_GetBoxSize(cgrid_box, loop_size);
 
             hypre_BoxLoop1Begin(loop_size,
                                 RAP_data_box,  cstart, stridec, iAc);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iAc,iAcmxmy,iAcmxpy,iAcpxmy,iAcpxpy
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iAc,iAcmx,iAcmy
 #include "hypre_box_smp_forloop.h"
             hypre_BoxLoop1For(loopi, loopj, loopk, iAc)
                {
-                  iAcmxmy = iAc - xOffset - yOffset;
-                  iAcmxpy = iAc - xOffset + yOffset;
-                  iAcpxmy = iAc + xOffset - yOffset;
-                  iAcpxpy = iAc + xOffset + yOffset;
-                  
-                  rap_csw[iAc] += (rap_bsw[iAc] + rap_bne[iAcmxmy]);
-                  
-                  rap_cse[iAc] += (rap_bse[iAc] + rap_bnw[iAcpxmy]);
-                  
+                  iAcmx = iAc - xOffset;
+                  iAcmy = iAc - yOffset;
+               
+                  rap_cc[iAc] += (2.0 * rap_bc[iAc]);
+                  rap_cw[iAc] += (rap_bw[iAc] + rap_be[iAcmx]);
+                  rap_cs[iAc] += (rap_bs[iAc] + rap_bn[iAcmy]);
                }
             hypre_BoxLoop1End(iAc);
 
@@ -1808,15 +1768,55 @@ hypre_SMG3RAPPeriodicSym( hypre_StructMatrix *RAP,
 #include "hypre_box_smp_forloop.h"
             hypre_BoxLoop1For(loopi, loopj, loopk, iAc)
                {
-                  rap_bsw[iAc]  = zero;
-                  rap_bse[iAc]  = zero;
-                  rap_bnw[iAc]  = zero;
-                  rap_bne[iAc]  = zero;
+                  rap_bc[iAc]  = zero;
+                  rap_bw[iAc]  = zero;
+                  rap_be[iAc]  = zero;
+                  rap_bs[iAc]  = zero;
+                  rap_bn[iAc]  = zero;
                }
             hypre_BoxLoop1End(iAc);
-         }
 
-      } /* end ForBoxI */
+            /*-----------------------------------------------------------------
+             * Collapse additional entries for 27 point operator.
+             *-----------------------------------------------------------------*/
+
+            if (stencil_size == 27)
+            {
+               hypre_GetBoxSize(cgrid_box, loop_size);
+
+               hypre_BoxLoop1Begin(loop_size,
+                                   RAP_data_box,  cstart, stridec, iAc);
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iAc,iAcmxmy,iAcmxpy,iAcpxmy,iAcpxpy
+#include "hypre_box_smp_forloop.h"
+               hypre_BoxLoop1For(loopi, loopj, loopk, iAc)
+                  {
+                     iAcmxmy = iAc - xOffset - yOffset;
+                     iAcmxpy = iAc - xOffset + yOffset;
+                     iAcpxmy = iAc + xOffset - yOffset;
+                     iAcpxpy = iAc + xOffset + yOffset;
+                  
+                     rap_csw[iAc] += (rap_bsw[iAc] + rap_bne[iAcmxmy]);
+                  
+                     rap_cse[iAc] += (rap_bse[iAc] + rap_bnw[iAcpxmy]);
+                  
+                  }
+               hypre_BoxLoop1End(iAc);
+
+               hypre_BoxLoop1Begin(loop_size,
+                                   RAP_data_box,  cstart, stridec, iAc);
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iAc
+#include "hypre_box_smp_forloop.h"
+               hypre_BoxLoop1For(loopi, loopj, loopk, iAc)
+                  {
+                     rap_bsw[iAc]  = zero;
+                     rap_bse[iAc]  = zero;
+                     rap_bnw[iAc]  = zero;
+                     rap_bne[iAc]  = zero;
+                  }
+               hypre_BoxLoop1End(iAc);
+            }
+
+         } /* end ForBoxI */
 
    }
    return ierr;
@@ -1875,177 +1875,177 @@ hypre_SMG3RAPPeriodicNoSym( hypre_StructMatrix *RAP,
    if (hypre_IndexZ(hypre_StructGridPeriodic(cgrid)) == 1)
    {
       hypre_ForBoxI(i, cgrid_boxes)
-      {
-         cgrid_box = hypre_BoxArrayBox(cgrid_boxes, i);
-
-         cstart = hypre_BoxIMin(cgrid_box);
-
-         RAP_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(RAP), i);
-
-         /*-----------------------------------------------------------------
-          * Extract pointers for 15-point coarse grid operator:
-          *-----------------------------------------------------------------*/
-
-         hypre_SetIndex(index_temp,0,0,-1);
-         rap_bc = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
-
-         hypre_SetIndex(index_temp,-1,0,-1);
-         rap_bw = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
-
-         hypre_SetIndex(index_temp,1,0,-1);
-         rap_be = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
-
-         hypre_SetIndex(index_temp,0,-1,-1);
-         rap_bs = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
-
-         hypre_SetIndex(index_temp,0,1,-1);
-         rap_bn = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
-
-         hypre_SetIndex(index_temp,0,0,0);
-         rap_cc = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
-
-         hypre_SetIndex(index_temp,-1,0,0);
-         rap_cw = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
-
-         hypre_SetIndex(index_temp,1,0,0);
-         rap_ce = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
-
-         hypre_SetIndex(index_temp,0,-1,0);
-         rap_cs = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
-
-         hypre_SetIndex(index_temp,0,1,0);
-         rap_cn = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
-
-         hypre_SetIndex(index_temp,0,0,1);
-         rap_ac = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
-
-         hypre_SetIndex(index_temp,-1,0,1);
-         rap_aw = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
-
-         hypre_SetIndex(index_temp,1,0,1);
-         rap_ae = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
-
-         hypre_SetIndex(index_temp,0,-1,1);
-         rap_as = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
-
-         hypre_SetIndex(index_temp,0,1,1);
-         rap_an = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
-
-         /*-----------------------------------------------------------------
-          * Extract additional pointers for 27-point coarse grid operator:
-          *-----------------------------------------------------------------*/
-
-         if(stencil_size == 27)
          {
+            cgrid_box = hypre_BoxArrayBox(cgrid_boxes, i);
 
-         hypre_SetIndex(index_temp,-1,-1,-1);
-         rap_bsw = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+            cstart = hypre_BoxIMin(cgrid_box);
 
-         hypre_SetIndex(index_temp,1,-1,-1);
-         rap_bse = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+            RAP_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(RAP), i);
 
-         hypre_SetIndex(index_temp,-1,1,-1);
-         rap_bnw = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+            /*-----------------------------------------------------------------
+             * Extract pointers for 15-point coarse grid operator:
+             *-----------------------------------------------------------------*/
 
-         hypre_SetIndex(index_temp,1,1,-1);
-         rap_bne = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+            hypre_SetIndex(index_temp,0,0,-1);
+            rap_bc = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
 
-         hypre_SetIndex(index_temp,-1,-1,0);
-         rap_csw = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+            hypre_SetIndex(index_temp,-1,0,-1);
+            rap_bw = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
 
-         hypre_SetIndex(index_temp,1,-1,0);
-         rap_cse = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+            hypre_SetIndex(index_temp,1,0,-1);
+            rap_be = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
 
-         hypre_SetIndex(index_temp,-1,1,0);
-         rap_cnw = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+            hypre_SetIndex(index_temp,0,-1,-1);
+            rap_bs = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
 
-         hypre_SetIndex(index_temp,1,1,0);
-         rap_cne = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+            hypre_SetIndex(index_temp,0,1,-1);
+            rap_bn = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
 
-         hypre_SetIndex(index_temp,-1,-1,1);
-         rap_asw = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+            hypre_SetIndex(index_temp,0,0,0);
+            rap_cc = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
 
-         hypre_SetIndex(index_temp,1,-1,1);
-         rap_ase = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+            hypre_SetIndex(index_temp,-1,0,0);
+            rap_cw = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
 
-         hypre_SetIndex(index_temp,-1,1,1);
-         rap_anw = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+            hypre_SetIndex(index_temp,1,0,0);
+            rap_ce = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
 
-         hypre_SetIndex(index_temp,1,1,1);
-         rap_ane = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+            hypre_SetIndex(index_temp,0,-1,0);
+            rap_cs = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
 
-         }
+            hypre_SetIndex(index_temp,0,1,0);
+            rap_cn = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
 
-         /*-----------------------------------------------------------------
-          * Collapse 15 point operator.
-          *-----------------------------------------------------------------*/
+            hypre_SetIndex(index_temp,0,0,1);
+            rap_ac = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
 
-         hypre_GetBoxSize(cgrid_box, loop_size);
+            hypre_SetIndex(index_temp,-1,0,1);
+            rap_aw = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
 
-         hypre_BoxLoop1Begin(loop_size,
-                                RAP_data_box,  cstart, stridec, iAc);
+            hypre_SetIndex(index_temp,1,0,1);
+            rap_ae = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
 
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iAc
-#include "hypre_box_smp_forloop.h"
+            hypre_SetIndex(index_temp,0,-1,1);
+            rap_as = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
 
-         hypre_BoxLoop1For(loopi, loopj, loopk, iAc)
+            hypre_SetIndex(index_temp,0,1,1);
+            rap_an = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+
+            /*-----------------------------------------------------------------
+             * Extract additional pointers for 27-point coarse grid operator:
+             *-----------------------------------------------------------------*/
+
+            if(stencil_size == 27)
             {
-               rap_cc[iAc] += (rap_bc[iAc] + rap_ac[iAc]);
-               rap_bc[iAc]  = zero;
-               rap_ac[iAc]  = zero;
-               
-               rap_cw[iAc] += (rap_bw[iAc] + rap_aw[iAc]);
-               rap_bw[iAc]  = zero;
-               rap_aw[iAc]  = zero;
-               
-               rap_ce[iAc] += (rap_be[iAc] + rap_ae[iAc]);
-               rap_be[iAc]  = zero;
-               rap_ae[iAc]  = zero;
-               
-               rap_cs[iAc] += (rap_bs[iAc] + rap_as[iAc]);
-               rap_bs[iAc]  = zero;
-               rap_as[iAc]  = zero;
-               
-               rap_cn[iAc] += (rap_bn[iAc] + rap_an[iAc]);
-               rap_bn[iAc]  = zero;
-               rap_an[iAc]  = zero;
+
+               hypre_SetIndex(index_temp,-1,-1,-1);
+               rap_bsw = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+
+               hypre_SetIndex(index_temp,1,-1,-1);
+               rap_bse = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+
+               hypre_SetIndex(index_temp,-1,1,-1);
+               rap_bnw = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+
+               hypre_SetIndex(index_temp,1,1,-1);
+               rap_bne = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+
+               hypre_SetIndex(index_temp,-1,-1,0);
+               rap_csw = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+
+               hypre_SetIndex(index_temp,1,-1,0);
+               rap_cse = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+
+               hypre_SetIndex(index_temp,-1,1,0);
+               rap_cnw = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+
+               hypre_SetIndex(index_temp,1,1,0);
+               rap_cne = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+
+               hypre_SetIndex(index_temp,-1,-1,1);
+               rap_asw = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+
+               hypre_SetIndex(index_temp,1,-1,1);
+               rap_ase = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+
+               hypre_SetIndex(index_temp,-1,1,1);
+               rap_anw = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+
+               hypre_SetIndex(index_temp,1,1,1);
+               rap_ane = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+
             }
-         hypre_BoxLoop1End(iAc);
 
-         /*-----------------------------------------------------------------
-          * Collapse additional entries for 27 point operator.
-          *-----------------------------------------------------------------*/
+            /*-----------------------------------------------------------------
+             * Collapse 15 point operator.
+             *-----------------------------------------------------------------*/
 
-         if (stencil_size == 27)
-         {
             hypre_GetBoxSize(cgrid_box, loop_size);
 
             hypre_BoxLoop1Begin(loop_size,
                                 RAP_data_box,  cstart, stridec, iAc);
+
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iAc
 #include "hypre_box_smp_forloop.h"
+
             hypre_BoxLoop1For(loopi, loopj, loopk, iAc)
                {
-                  rap_csw[iAc] += (rap_bsw[iAc] + rap_asw[iAc]);
-                  rap_bsw[iAc]  = zero;
-                  rap_asw[iAc]  = zero;
-                  
-                  rap_cse[iAc] += (rap_bse[iAc] + rap_ase[iAc]);
-                  rap_bse[iAc]  = zero;
-                  rap_ase[iAc]  = zero;
-                  
-                  rap_cnw[iAc] += (rap_bnw[iAc] + rap_anw[iAc]);
-                  rap_bnw[iAc]  = zero;
-                  rap_anw[iAc]  = zero;
-                  
-                  rap_cne[iAc] += (rap_bne[iAc] + rap_ane[iAc]);
-                  rap_bne[iAc]  = zero;
-                  rap_ane[iAc]  = zero;            
-	       }
+                  rap_cc[iAc] += (rap_bc[iAc] + rap_ac[iAc]);
+                  rap_bc[iAc]  = zero;
+                  rap_ac[iAc]  = zero;
+               
+                  rap_cw[iAc] += (rap_bw[iAc] + rap_aw[iAc]);
+                  rap_bw[iAc]  = zero;
+                  rap_aw[iAc]  = zero;
+               
+                  rap_ce[iAc] += (rap_be[iAc] + rap_ae[iAc]);
+                  rap_be[iAc]  = zero;
+                  rap_ae[iAc]  = zero;
+               
+                  rap_cs[iAc] += (rap_bs[iAc] + rap_as[iAc]);
+                  rap_bs[iAc]  = zero;
+                  rap_as[iAc]  = zero;
+               
+                  rap_cn[iAc] += (rap_bn[iAc] + rap_an[iAc]);
+                  rap_bn[iAc]  = zero;
+                  rap_an[iAc]  = zero;
+               }
             hypre_BoxLoop1End(iAc);
-         }
 
-      } /* end ForBoxI */
+            /*-----------------------------------------------------------------
+             * Collapse additional entries for 27 point operator.
+             *-----------------------------------------------------------------*/
+
+            if (stencil_size == 27)
+            {
+               hypre_GetBoxSize(cgrid_box, loop_size);
+
+               hypre_BoxLoop1Begin(loop_size,
+                                   RAP_data_box,  cstart, stridec, iAc);
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iAc
+#include "hypre_box_smp_forloop.h"
+               hypre_BoxLoop1For(loopi, loopj, loopk, iAc)
+                  {
+                     rap_csw[iAc] += (rap_bsw[iAc] + rap_asw[iAc]);
+                     rap_bsw[iAc]  = zero;
+                     rap_asw[iAc]  = zero;
+                  
+                     rap_cse[iAc] += (rap_bse[iAc] + rap_ase[iAc]);
+                     rap_bse[iAc]  = zero;
+                     rap_ase[iAc]  = zero;
+                  
+                     rap_cnw[iAc] += (rap_bnw[iAc] + rap_anw[iAc]);
+                     rap_bnw[iAc]  = zero;
+                     rap_anw[iAc]  = zero;
+                  
+                     rap_cne[iAc] += (rap_bne[iAc] + rap_ane[iAc]);
+                     rap_bne[iAc]  = zero;
+                     rap_ane[iAc]  = zero;            
+                  }
+               hypre_BoxLoop1End(iAc);
+            }
+
+         } /* end ForBoxI */
 
    }
    return ierr;

@@ -439,7 +439,7 @@ main( int   argc,
          break;
    } 
 
-   HYPRE_NewStructGrid(MPI_COMM_WORLD, dim, &grid);
+   HYPRE_CreateStructGrid(MPI_COMM_WORLD, dim, &grid);
    for (ib = 0; ib < nblocks; ib++)
    {
       HYPRE_SetStructGridExtents(grid, ilower[ib], iupper[ib]);
@@ -451,7 +451,7 @@ main( int   argc,
     * Set up the stencil structure
     *-----------------------------------------------------------*/
  
-   HYPRE_NewStructStencil(dim, dim + 1, &stencil);
+   HYPRE_CreateStructStencil(dim, dim + 1, &stencil);
    for (s = 0; s < dim + 1; s++)
    {
       HYPRE_SetStructStencilElement(stencil, s, offsets[s]);
@@ -461,7 +461,7 @@ main( int   argc,
     * Set up the matrix structure
     *-----------------------------------------------------------*/
  
-   HYPRE_NewStructMatrix(MPI_COMM_WORLD, grid, stencil, &A);
+   HYPRE_CreateStructMatrix(MPI_COMM_WORLD, grid, stencil, &A);
    HYPRE_SetStructMatrixSymmetric(A, 1);
    HYPRE_SetStructMatrixNumGhost(A, A_num_ghost);
    HYPRE_InitializeStructMatrix(A);
@@ -537,7 +537,7 @@ main( int   argc,
 
    values = hypre_CTAlloc(double, volume);
 
-   HYPRE_NewStructVector(MPI_COMM_WORLD, grid, stencil, &b);
+   HYPRE_CreateStructVector(MPI_COMM_WORLD, grid, stencil, &b);
    HYPRE_InitializeStructVector(b);
 
    /*-----------------------------------------------------------
@@ -573,7 +573,7 @@ main( int   argc,
    HYPRE_PrintStructVector("driver.out.b", b, 0);
 #endif
 
-   HYPRE_NewStructVector(MPI_COMM_WORLD, grid, stencil, &x);
+   HYPRE_CreateStructVector(MPI_COMM_WORLD, grid, stencil, &x);
    HYPRE_InitializeStructVector(x);
    for (i = 0; i < volume; i++)
    {
@@ -599,7 +599,7 @@ main( int   argc,
       time_index = hypre_InitializeTiming("SMG Setup");
       hypre_BeginTiming(time_index);
 
-      HYPRE_StructSMGInitialize(MPI_COMM_WORLD, &solver);
+      HYPRE_StructSMGCreate(MPI_COMM_WORLD, &solver);
       HYPRE_StructSMGSetMemoryUse(solver, 0);
       HYPRE_StructSMGSetMaxIter(solver, 50);
       HYPRE_StructSMGSetTol(solver, 1.0e-06);
@@ -626,7 +626,7 @@ main( int   argc,
    
       HYPRE_StructSMGGetNumIterations(solver, &num_iterations);
       HYPRE_StructSMGGetFinalRelativeResidualNorm(solver, &final_res_norm);
-      HYPRE_StructSMGFinalize(solver);
+      HYPRE_StructSMGDestroy(solver);
    }
 
    /*-----------------------------------------------------------
@@ -638,7 +638,7 @@ main( int   argc,
       time_index = hypre_InitializeTiming("PFMG Setup");
       hypre_BeginTiming(time_index);
 
-      HYPRE_StructPFMGInitialize(MPI_COMM_WORLD, &solver);
+      HYPRE_StructPFMGCreate(MPI_COMM_WORLD, &solver);
       HYPRE_StructPFMGSetMaxIter(solver, 50);
       HYPRE_StructPFMGSetTol(solver, 1.0e-06);
       HYPRE_StructPFMGSetRelChange(solver, 0);
@@ -668,7 +668,7 @@ main( int   argc,
    
       HYPRE_StructPFMGGetNumIterations(solver, &num_iterations);
       HYPRE_StructPFMGGetFinalRelativeResidualNorm(solver, &final_res_norm);
-      HYPRE_StructPFMGFinalize(solver);
+      HYPRE_StructPFMGDestroy(solver);
    }
 
    /*-----------------------------------------------------------
@@ -680,7 +680,7 @@ main( int   argc,
       time_index = hypre_InitializeTiming("SparseMSG Setup");
       hypre_BeginTiming(time_index);
 
-      HYPRE_StructSparseMSGInitialize(MPI_COMM_WORLD, &solver);
+      HYPRE_StructSparseMSGCreate(MPI_COMM_WORLD, &solver);
       HYPRE_StructSparseMSGSetMaxIter(solver, 50);
       HYPRE_StructSparseMSGSetJump(solver, jump);
       HYPRE_StructSparseMSGSetTol(solver, 1.0e-06);
@@ -710,7 +710,7 @@ main( int   argc,
       HYPRE_StructSparseMSGGetNumIterations(solver, &num_iterations);
       HYPRE_StructSparseMSGGetFinalRelativeResidualNorm(solver,
                                                         &final_res_norm);
-      HYPRE_StructSparseMSGFinalize(solver);
+      HYPRE_StructSparseMSGDestroy(solver);
    }
 
    /*-----------------------------------------------------------
@@ -722,7 +722,7 @@ main( int   argc,
       time_index = hypre_InitializeTiming("PCG Setup");
       hypre_BeginTiming(time_index);
 
-      HYPRE_StructPCGInitialize(MPI_COMM_WORLD, &solver);
+      HYPRE_StructPCGCreate(MPI_COMM_WORLD, &solver);
       HYPRE_StructPCGSetMaxIter(solver, 50);
       HYPRE_StructPCGSetTol(solver, 1.0e-06);
       HYPRE_StructPCGSetTwoNorm(solver, 1);
@@ -732,7 +732,7 @@ main( int   argc,
       if (solver_id == 10)
       {
          /* use symmetric SMG as preconditioner */
-         HYPRE_StructSMGInitialize(MPI_COMM_WORLD, &precond);
+         HYPRE_StructSMGCreate(MPI_COMM_WORLD, &precond);
          HYPRE_StructSMGSetMemoryUse(precond, 0);
          HYPRE_StructSMGSetMaxIter(precond, 1);
          HYPRE_StructSMGSetTol(precond, 0.0);
@@ -749,7 +749,7 @@ main( int   argc,
       else if (solver_id == 11)
       {
          /* use symmetric PFMG as preconditioner */
-         HYPRE_StructPFMGInitialize(MPI_COMM_WORLD, &precond);
+         HYPRE_StructPFMGCreate(MPI_COMM_WORLD, &precond);
          HYPRE_StructPFMGSetMaxIter(precond, 1);
          HYPRE_StructPFMGSetTol(precond, 0.0);
          HYPRE_StructPFMGSetZeroGuess(precond);
@@ -769,7 +769,7 @@ main( int   argc,
       else if (solver_id == 12)
       {
          /* use symmetric SparseMSG as preconditioner */
-         HYPRE_StructSparseMSGInitialize(MPI_COMM_WORLD, &precond);
+         HYPRE_StructSparseMSGCreate(MPI_COMM_WORLD, &precond);
          HYPRE_StructSparseMSGSetMaxIter(precond, 1);
          HYPRE_StructSparseMSGSetJump(precond, jump);
          HYPRE_StructSparseMSGSetTol(precond, 0.0);
@@ -788,7 +788,7 @@ main( int   argc,
       else if (solver_id == 17)
       {
          /* use two-step Jacobi as preconditioner */
-         HYPRE_StructJacobiInitialize(MPI_COMM_WORLD, &precond);
+         HYPRE_StructJacobiCreate(MPI_COMM_WORLD, &precond);
          HYPRE_StructJacobiSetMaxIter(precond, 2);
          HYPRE_StructJacobiSetTol(precond, 0.0);
          HYPRE_StructJacobiSetZeroGuess(precond);
@@ -834,23 +834,23 @@ main( int   argc,
 
       HYPRE_StructPCGGetNumIterations(solver, &num_iterations);
       HYPRE_StructPCGGetFinalRelativeResidualNorm(solver, &final_res_norm);
-      HYPRE_StructPCGFinalize(solver);
+      HYPRE_StructPCGDestroy(solver);
 
       if (solver_id == 10)
       {
-         HYPRE_StructSMGFinalize(precond);
+         HYPRE_StructSMGDestroy(precond);
       }
       else if (solver_id == 11)
       {
-         HYPRE_StructPFMGFinalize(precond);
+         HYPRE_StructPFMGDestroy(precond);
       }
       else if (solver_id == 12)
       {
-         HYPRE_StructSparseMSGFinalize(precond);
+         HYPRE_StructSparseMSGDestroy(precond);
       }
       else if (solver_id == 17)
       {
-         HYPRE_StructJacobiFinalize(precond);
+         HYPRE_StructJacobiDestroy(precond);
       }
    }
 
@@ -863,7 +863,7 @@ main( int   argc,
       time_index = hypre_InitializeTiming("Hybrid Setup");
       hypre_BeginTiming(time_index);
 
-      HYPRE_StructHybridInitialize(MPI_COMM_WORLD, &solver);
+      HYPRE_StructHybridCreate(MPI_COMM_WORLD, &solver);
       HYPRE_StructHybridSetDSCGMaxIter(solver, 100);
       HYPRE_StructHybridSetPCGMaxIter(solver, 50);
       HYPRE_StructHybridSetTol(solver, 1.0e-06);
@@ -875,7 +875,7 @@ main( int   argc,
       if (solver_id == 20)
       {
          /* use symmetric SMG as preconditioner */
-         HYPRE_StructSMGInitialize(MPI_COMM_WORLD, &precond);
+         HYPRE_StructSMGCreate(MPI_COMM_WORLD, &precond);
          HYPRE_StructSMGSetMemoryUse(precond, 0);
          HYPRE_StructSMGSetMaxIter(precond, 1);
          HYPRE_StructSMGSetTol(precond, 0.0);
@@ -892,7 +892,7 @@ main( int   argc,
       else if (solver_id == 21)
       {
          /* use symmetric PFMG as preconditioner */
-         HYPRE_StructPFMGInitialize(MPI_COMM_WORLD, &precond);
+         HYPRE_StructPFMGCreate(MPI_COMM_WORLD, &precond);
          HYPRE_StructPFMGSetMaxIter(precond, 1);
          HYPRE_StructPFMGSetTol(precond, 0.0);
          HYPRE_StructPFMGSetZeroGuess(precond);
@@ -912,7 +912,7 @@ main( int   argc,
       else if (solver_id == 22)
       {
          /* use symmetric SparseMSG as preconditioner */
-         HYPRE_StructSparseMSGInitialize(MPI_COMM_WORLD, &precond);
+         HYPRE_StructSparseMSGCreate(MPI_COMM_WORLD, &precond);
          HYPRE_StructSparseMSGSetJump(precond, jump);
          HYPRE_StructSparseMSGSetMaxIter(precond, 1);
          HYPRE_StructSparseMSGSetTol(precond, 0.0);
@@ -947,19 +947,19 @@ main( int   argc,
 
       HYPRE_StructHybridGetNumIterations(solver, &num_iterations);
       HYPRE_StructHybridGetFinalRelativeResidualNorm(solver, &final_res_norm);
-      HYPRE_StructHybridFinalize(solver);
+      HYPRE_StructHybridDestroy(solver);
 
       if (solver_id == 20)
       {
-         HYPRE_StructSMGFinalize(precond);
+         HYPRE_StructSMGDestroy(precond);
       }
       else if (solver_id == 21)
       {
-         HYPRE_StructPFMGFinalize(precond);
+         HYPRE_StructPFMGDestroy(precond);
       }
       else if (solver_id == 22)
       {
-         HYPRE_StructSparseMSGFinalize(precond);
+         HYPRE_StructSparseMSGDestroy(precond);
       }
    }
 
@@ -983,11 +983,11 @@ main( int   argc,
     * Finalize things
     *-----------------------------------------------------------*/
 
-   HYPRE_FreeStructGrid(grid);
-   HYPRE_FreeStructStencil(stencil);
-   HYPRE_FreeStructMatrix(A);
-   HYPRE_FreeStructVector(b);
-   HYPRE_FreeStructVector(x);
+   HYPRE_DestroyStructGrid(grid);
+   HYPRE_DestroyStructStencil(stencil);
+   HYPRE_DestroyStructMatrix(A);
+   HYPRE_DestroyStructVector(b);
+   HYPRE_DestroyStructVector(x);
 
    for (i = 0; i < nblocks; i++)
    {

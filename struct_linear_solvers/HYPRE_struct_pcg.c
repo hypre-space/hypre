@@ -22,13 +22,13 @@ headers.h
 @param solver [OUT]
   solver structure
 
-@see HYPRE_StructPCGFinalize */
+@see HYPRE_StructPCGDestroy */
 /*--------------------------------------------------------------------------*/
 
 int
-HYPRE_StructPCGInitialize( MPI_Comm comm, HYPRE_StructSolver *solver )
+HYPRE_StructPCGCreate( MPI_Comm comm, HYPRE_StructSolver *solver )
 {
-   *solver = ( (HYPRE_StructSolver) hypre_PCGInitialize( ) );
+   *solver = ( (HYPRE_StructSolver) hypre_PCGCreate( ) );
 
    return 0;
 }
@@ -45,13 +45,13 @@ headers.h
 @param solver [IN/OUT]
   solver structure
 
-@see HYPRE_StructPCGInitialize */
+@see HYPRE_StructPCGCreate */
 /*--------------------------------------------------------------------------*/
 
 int 
-HYPRE_StructPCGFinalize( HYPRE_StructSolver solver )
+HYPRE_StructPCGDestroy( HYPRE_StructSolver solver )
 {
-   return( hypre_PCGFinalize( (void *) solver ) );
+   return( hypre_PCGDestroy( (void *) solver ) );
 }
 
 /*==========================================================================*/
@@ -445,10 +445,10 @@ HYPRE_StructDiagScale( HYPRE_StructSolver solver,
                              y_data_box, start, stride, yi);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi,xi,Ai
 #include "hypre_box_smp_forloop.h"
-	 hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, yi)
-	    {
+         hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, yi)
+            {
                xp[xi] = yp[yi] / Ap[Ai];
-	    }
+            }
          hypre_BoxLoop3End(Ai, xi, yi);
       }
 

@@ -33,11 +33,11 @@ typedef struct
 } hypre_PFMGInterpData;
 
 /*--------------------------------------------------------------------------
- * hypre_PFMGInterpInitialize
+ * hypre_PFMGInterpCreate
  *--------------------------------------------------------------------------*/
 
 void *
-hypre_PFMGInterpInitialize( )
+hypre_PFMGInterpCreate( )
 {
    hypre_PFMGInterpData *interp_data;
 
@@ -94,7 +94,7 @@ hypre_PFMGInterpSetup( void               *interp_vdata,
    hypre_ProjectBoxArrayArray(indt_boxes, findex, stride);
    hypre_ProjectBoxArrayArray(dept_boxes, findex, stride);
 
-   hypre_NewComputePkg(send_boxes, recv_boxes,
+   hypre_CreateComputePkg(send_boxes, recv_boxes,
                        stride, stride,
                        send_processes, recv_processes,
                        indt_boxes, dept_boxes,
@@ -216,7 +216,7 @@ hypre_PFMGInterp( void               *interp_vdata,
                              xc_data_box, startc, stridec, xci);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,ei,xci
 #include "hypre_box_smp_forloop.h"
-	 hypre_BoxLoop2For(loopi, loopj, loopk, ei, xci)
+         hypre_BoxLoop2For(loopi, loopj, loopk, ei, xci)
             {
                ep[ei] = xcp[xci];
             }
@@ -274,7 +274,7 @@ hypre_PFMGInterp( void               *interp_vdata,
                                       e_data_box, start, stride, ei);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Pi,ei
 #include "hypre_box_smp_forloop.h"
-	          hypre_BoxLoop2For(loopi, loopj, loopk, Pi, ei)
+                  hypre_BoxLoop2For(loopi, loopj, loopk, Pi, ei)
                      {
                         ep[ei] =  (Pp0[Pi] * ep0[ei] +
                                    Pp1[Pi] * ep1[ei]);
@@ -295,11 +295,11 @@ hypre_PFMGInterp( void               *interp_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PFMGInterpFinalize
+ * hypre_PFMGInterpDestroy
  *--------------------------------------------------------------------------*/
 
 int
-hypre_PFMGInterpFinalize( void *interp_vdata )
+hypre_PFMGInterpDestroy( void *interp_vdata )
 {
    int ierr = 0;
 
@@ -307,9 +307,9 @@ hypre_PFMGInterpFinalize( void *interp_vdata )
 
    if (interp_data)
    {
-      hypre_FreeStructMatrix(interp_data -> P);
-      hypre_FreeBoxArray(interp_data -> coarse_points);
-      hypre_FreeComputePkg(interp_data -> compute_pkg);
+      hypre_DestroyStructMatrix(interp_data -> P);
+      hypre_DestroyBoxArray(interp_data -> coarse_points);
+      hypre_DestroyComputePkg(interp_data -> compute_pkg);
       hypre_FinalizeTiming(interp_data -> time_index);
       hypre_TFree(interp_data);
    }

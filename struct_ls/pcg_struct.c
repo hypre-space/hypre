@@ -41,17 +41,17 @@ hypre_PCGFree( char *ptr )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PCGNewVector
+ * hypre_PCGCreateVector
  *--------------------------------------------------------------------------*/
 
 void *
-hypre_PCGNewVector( void *vvector )
+hypre_PCGCreateVector( void *vvector )
 {
    hypre_StructVector *vector = vvector;
    hypre_StructVector *new_vector;
 
-   new_vector = hypre_NewStructVector( hypre_StructVectorComm(vector),
-                                       hypre_StructVectorGrid(vector) );
+   new_vector = hypre_CreateStructVector( hypre_StructVectorComm(vector),
+                                          hypre_StructVectorGrid(vector) );
    hypre_InitializeStructVector(new_vector);
    hypre_AssembleStructVector(new_vector);
 
@@ -59,28 +59,28 @@ hypre_PCGNewVector( void *vvector )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PCGFreeVector
+ * hypre_PCGDestroyVector
  *--------------------------------------------------------------------------*/
 
 int
-hypre_PCGFreeVector( void *vvector )
+hypre_PCGDestroyVector( void *vvector )
 {
    hypre_StructVector *vector = vvector;
 
-   return( hypre_FreeStructVector( vector ) );
+   return( hypre_DestroyStructVector( vector ) );
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PCGMatvecInitialize
+ * hypre_PCGMatvecCreate
  *--------------------------------------------------------------------------*/
 
 void *
-hypre_PCGMatvecInitialize( void   *A,
-                           void   *x )
+hypre_PCGMatvecCreate( void   *A,
+                       void   *x )
 {
    void *matvec_data;
 
-   matvec_data = hypre_StructMatvecInitialize();
+   matvec_data = hypre_StructMatvecCreate();
    hypre_StructMatvecSetup(matvec_data, A, x);
 
    return ( matvec_data );
@@ -107,13 +107,13 @@ hypre_PCGMatvec( void   *matvec_data,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PCGMatvecFinalize
+ * hypre_PCGMatvecDestroy
  *--------------------------------------------------------------------------*/
 
 int
-hypre_PCGMatvecFinalize( void *matvec_data )
+hypre_PCGMatvecDestroy( void *matvec_data )
 {
-   return ( hypre_StructMatvecFinalize( matvec_data ) );
+   return ( hypre_StructMatvecDestroy( matvec_data ) );
 }
 
 /*--------------------------------------------------------------------------

@@ -82,9 +82,9 @@ hypre_SparseMSGSolve( void               *SparseMSG_vdata,
 
    hypre_BeginTiming(SparseMSG_data -> time_index);
 
-   hypre_FreeStructMatrix(A_array[0]);
-   hypre_FreeStructVector(b_array[0]);
-   hypre_FreeStructVector(x_array[0]);
+   hypre_DestroyStructMatrix(A_array[0]);
+   hypre_DestroyStructVector(b_array[0]);
+   hypre_DestroyStructVector(x_array[0]);
    A_array[0] = hypre_RefStructMatrix(A);
    b_array[0] = hypre_RefStructVector(b);
    x_array[0] = hypre_RefStructVector(x);

@@ -81,7 +81,7 @@ hypre_SparseMSGSetupInterpOp( hypre_StructMatrix *Q,
                              P_data_box, startc, stridec, Pi);
 #define HYPRE_SMP_PRIVATE loopi,loopj,Qi,Pi
 #include "hypre_smp_forloop.h"
-	 hypre_BoxLoop2For(loopi, loopj, loopk, Qi, Pi)
+         hypre_BoxLoop2For(loopi, loopj, loopk, Qi, Pi)
             {
                Pp0[Pi] = Qp0[Qi];
                Pp1[Pi] = Qp1[Qi];

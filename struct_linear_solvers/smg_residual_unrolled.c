@@ -36,11 +36,11 @@ typedef struct
 } hypre_SMGResidualData;
 
 /*--------------------------------------------------------------------------
- * hypre_SMGResidualInitialize
+ * hypre_SMGResidualCreate
  *--------------------------------------------------------------------------*/
 
 void *
-hypre_SMGResidualInitialize( )
+hypre_SMGResidualCreate( )
 {
    hypre_SMGResidualData *residual_data;
 
@@ -107,7 +107,7 @@ hypre_SMGResidualSetup( void               *residual_vdata,
    hypre_ProjectBoxArrayArray(indt_boxes, base_index, base_stride);
    hypre_ProjectBoxArrayArray(dept_boxes, base_index, base_stride);
 
-   hypre_NewComputePkg(send_boxes, recv_boxes,
+   hypre_CreateComputePkg(send_boxes, recv_boxes,
                        unit_stride, unit_stride,
                        send_processes, recv_processes,
                        indt_boxes, dept_boxes,
@@ -909,11 +909,11 @@ hypre_SMGResidualSetBase( void        *residual_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SMGResidualFinalize
+ * hypre_SMGResidualDestroy
  *--------------------------------------------------------------------------*/
 
 int
-hypre_SMGResidualFinalize( void *residual_vdata )
+hypre_SMGResidualDestroy( void *residual_vdata )
 {
    int ierr;
 
@@ -921,12 +921,12 @@ hypre_SMGResidualFinalize( void *residual_vdata )
 
    if (residual_data)
    {
-      hypre_FreeStructMatrix(residual_data -> A);
-      hypre_FreeStructVector(residual_data -> x);
-      hypre_FreeStructVector(residual_data -> b);
-      hypre_FreeStructVector(residual_data -> r);
-      hypre_FreeBoxArray(residual_data -> base_points);
-      hypre_FreeComputePkg(residual_data -> compute_pkg );
+      hypre_DestroyStructMatrix(residual_data -> A);
+      hypre_DestroyStructVector(residual_data -> x);
+      hypre_DestroyStructVector(residual_data -> b);
+      hypre_DestroyStructVector(residual_data -> r);
+      hypre_DestroyBoxArray(residual_data -> base_points);
+      hypre_DestroyComputePkg(residual_data -> compute_pkg );
       hypre_FinalizeTiming(residual_data -> time_index);
       hypre_TFree(residual_data);
    }

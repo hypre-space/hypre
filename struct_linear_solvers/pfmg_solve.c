@@ -67,9 +67,9 @@ hypre_PFMGSolve( void               *pfmg_vdata,
 
    hypre_BeginTiming(pfmg_data -> time_index);
 
-   hypre_FreeStructMatrix(A_l[0]);
-   hypre_FreeStructVector(b_l[0]);
-   hypre_FreeStructVector(x_l[0]);
+   hypre_DestroyStructMatrix(A_l[0]);
+   hypre_DestroyStructVector(b_l[0]);
+   hypre_DestroyStructVector(x_l[0]);
    A_l[0] = hypre_RefStructMatrix(A);
    b_l[0] = hypre_RefStructVector(b);
    x_l[0] = hypre_RefStructVector(x);

@@ -33,11 +33,11 @@ typedef struct
 } hypre_StructMatvecData;
 
 /*--------------------------------------------------------------------------
- * hypre_StructMatvecInitialize
+ * hypre_StructMatvecCreate
  *--------------------------------------------------------------------------*/
 
 void *
-hypre_StructMatvecInitialize( )
+hypre_StructMatvecCreate( )
 {
    hypre_StructMatvecData *matvec_data;
 
@@ -86,13 +86,13 @@ hypre_StructMatvecSetup( void               *matvec_vdata,
                         &indt_boxes, &dept_boxes);
 
    hypre_SetIndex(unit_stride, 1, 1, 1);
-   hypre_NewComputePkg(send_boxes, recv_boxes,
-                       unit_stride, unit_stride,
-                       send_processes, recv_processes,
-                       indt_boxes, dept_boxes,
-                       unit_stride,
-                       grid, hypre_StructVectorDataSpace(x), 1,
-                       &compute_pkg);
+   hypre_CreateComputePkg(send_boxes, recv_boxes,
+                          unit_stride, unit_stride,
+                          send_processes, recv_processes,
+                          indt_boxes, dept_boxes,
+                          unit_stride,
+                          grid, hypre_StructVectorDataSpace(x), 1,
+                          &compute_pkg);
 
    /*----------------------------------------------------------
     * Set up the matvec data structure
@@ -194,15 +194,15 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
 
             hypre_GetBoxSize(box, loop_size);
 
-	    hypre_BoxLoop1Begin(loop_size,
+            hypre_BoxLoop1Begin(loop_size,
                                 y_data_box, start, stride, yi);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi
 #include "hypre_box_smp_forloop.h"
-	    hypre_BoxLoop1For(loopi, loopj, loopk, yi)
+            hypre_BoxLoop1For(loopi, loopj, loopk, yi)
                {
                   yp[yi] *= beta;
                }
-	    hypre_BoxLoop1End(yi);
+            hypre_BoxLoop1End(yi);
          }
 
       return ierr;
@@ -247,29 +247,29 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                      {
                         hypre_GetBoxSize(box, loop_size);
 
-			hypre_BoxLoop1Begin(loop_size,
+                        hypre_BoxLoop1Begin(loop_size,
                                             y_data_box, start, stride, yi);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi
 #include "hypre_box_smp_forloop.h"
-			hypre_BoxLoop1For(loopi, loopj, loopk, yi)
+                        hypre_BoxLoop1For(loopi, loopj, loopk, yi)
                            {
                               yp[yi] = 0.0;
                            }
-			hypre_BoxLoop1End(yi);
+                        hypre_BoxLoop1End(yi);
                      }
                      else
                      {
                         hypre_GetBoxSize(box, loop_size);
 
-			hypre_BoxLoop1Begin(loop_size,
+                        hypre_BoxLoop1Begin(loop_size,
                                             y_data_box, start, stride, yi);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi
 #include "hypre_box_smp_forloop.h"
-			hypre_BoxLoop1For(loopi, loopj, loopk, yi)
+                        hypre_BoxLoop1For(loopi, loopj, loopk, yi)
                            {
                               yp[yi] *= temp;
                            }
-			hypre_BoxLoop1End(yi);
+                        hypre_BoxLoop1End(yi);
                      }
                   }
             }
@@ -342,7 +342,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                                             y_data_box, start, stride, yi);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi,xi,Ai
 #include "hypre_box_smp_forloop.h"
-			hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, yi)
+                        hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, yi)
                            {
                               yp[yi] +=
                                  Ap0[Ai] * xp[xi + xoff0] +
@@ -353,7 +353,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                                  Ap5[Ai] * xp[xi + xoff5] +
                                  Ap6[Ai] * xp[xi + xoff6];
                            }
-			hypre_BoxLoop3End(Ai, xi, yi);
+                        hypre_BoxLoop3End(Ai, xi, yi);
 
                         break;
 
@@ -384,7 +384,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                                             y_data_box, start, stride, yi);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi,xi,Ai
 #include "hypre_box_smp_forloop.h"
-			hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, yi)
+                        hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, yi)
                            {
                               yp[yi] +=
                                  Ap0[Ai] * xp[xi + xoff0] +
@@ -394,7 +394,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                                  Ap4[Ai] * xp[xi + xoff4] +
                                  Ap5[Ai] * xp[xi + xoff5];
                            }
-			hypre_BoxLoop3End(Ai, xi, yi);
+                        hypre_BoxLoop3End(Ai, xi, yi);
                         
                         break;
 
@@ -422,7 +422,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                                             y_data_box, start, stride, yi);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi,xi,Ai
 #include "hypre_box_smp_forloop.h"
-			hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, yi)
+                        hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, yi)
                            {
                               yp[yi] +=
                                  Ap0[Ai] * xp[xi + xoff0] +
@@ -431,7 +431,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                                  Ap3[Ai] * xp[xi + xoff3] +
                                  Ap4[Ai] * xp[xi + xoff4]; 
                            }
-			hypre_BoxLoop3End(Ai, xi, yi);
+                        hypre_BoxLoop3End(Ai, xi, yi);
 
                         break;
 
@@ -456,7 +456,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                                             y_data_box, start, stride, yi);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi,xi,Ai
 #include "hypre_box_smp_forloop.h"
-			hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, yi)
+                        hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, yi)
                            {
                               yp[yi] +=
                                  Ap0[Ai] * xp[xi + xoff0] +
@@ -464,7 +464,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                                  Ap2[Ai] * xp[xi + xoff2] +
                                  Ap3[Ai] * xp[xi + xoff3];
                            }
-			hypre_BoxLoop3End(Ai, xi, yi);
+                        hypre_BoxLoop3End(Ai, xi, yi);
 
                         break;
 
@@ -486,14 +486,14 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                                             y_data_box, start, stride, yi);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi,xi,Ai
 #include "hypre_box_smp_forloop.h"
-			hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, yi)
+                        hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, yi)
                            {
                               yp[yi] +=
                                  Ap0[Ai] * xp[xi + xoff0] +
                                  Ap1[Ai] * xp[xi + xoff1] +
                                  Ap2[Ai] * xp[xi + xoff2]; 
                            }
-			hypre_BoxLoop3End(Ai, xi, yi);
+                        hypre_BoxLoop3End(Ai, xi, yi);
 
                         break;
 
@@ -512,13 +512,13 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                                             y_data_box, start, stride, yi);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi,xi,Ai
 #include "hypre_box_smp_forloop.h"
-			hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, yi)
+                        hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, yi)
                            {
                               yp[yi] +=
                                  Ap0[Ai] * xp[xi + xoff0] +
                                  Ap1[Ai] * xp[xi + xoff1];
                            }
-			hypre_BoxLoop3End(Ai, xi, yi);
+                        hypre_BoxLoop3End(Ai, xi, yi);
 
                         break;
 
@@ -534,12 +534,12 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                                             y_data_box, start, stride, yi);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi,xi,Ai
 #include "hypre_box_smp_forloop.h"
-			hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, yi)
+                        hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, yi)
                            {
                               yp[yi] +=
                                  Ap0[Ai] * xp[xi + xoff0];
                            }
-			hypre_BoxLoop3End(Ai, xi, yi);
+                        hypre_BoxLoop3End(Ai, xi, yi);
 
                         break;
                      }
@@ -547,15 +547,15 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
 
                   if (alpha != 1.0)
                   {
-		     hypre_BoxLoop1Begin(loop_size,
+                     hypre_BoxLoop1Begin(loop_size,
                                          y_data_box, start, stride, yi);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi
 #include "hypre_box_smp_forloop.h"
-		     hypre_BoxLoop1For(loopi, loopj, loopk, yi)
+                     hypre_BoxLoop1For(loopi, loopj, loopk, yi)
                         {
                            yp[yi] *= alpha;
-			}
-		     hypre_BoxLoop1End(yi);
+                        }
+                     hypre_BoxLoop1End(yi);
                   }
                }
          }
@@ -565,11 +565,11 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructMatvecFinalize
+ * hypre_StructMatvecDestroy
  *--------------------------------------------------------------------------*/
 
 int
-hypre_StructMatvecFinalize( void *matvec_vdata )
+hypre_StructMatvecDestroy( void *matvec_vdata )
 {
    int ierr = 0;
 
@@ -577,9 +577,9 @@ hypre_StructMatvecFinalize( void *matvec_vdata )
 
    if (matvec_data)
    {
-      hypre_FreeStructMatrix(matvec_data -> A);
-      hypre_FreeStructVector(matvec_data -> x);
-      hypre_FreeComputePkg(matvec_data -> compute_pkg );
+      hypre_DestroyStructMatrix(matvec_data -> A);
+      hypre_DestroyStructVector(matvec_data -> x);
+      hypre_DestroyComputePkg(matvec_data -> compute_pkg );
       hypre_TFree(matvec_data);
    }
 
@@ -601,10 +601,10 @@ hypre_StructMatvec( double              alpha,
 
    void *matvec_data;
 
-   matvec_data = hypre_StructMatvecInitialize();
+   matvec_data = hypre_StructMatvecCreate();
    ierr = hypre_StructMatvecSetup(matvec_data, A, x);
    ierr = hypre_StructMatvecCompute(matvec_data, alpha, A, x, beta, y);
-   ierr = hypre_StructMatvecFinalize(matvec_data);
+   ierr = hypre_StructMatvecDestroy(matvec_data);
 
    return ierr;
 }

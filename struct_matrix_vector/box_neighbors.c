@@ -15,11 +15,11 @@
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * hypre_NewRankLink:
+ * hypre_CreateRankLink:
  *--------------------------------------------------------------------------*/
 
 hypre_RankLink *
-hypre_NewRankLink( int  rank )
+hypre_CreateRankLink( int  rank )
 {
    hypre_RankLink  *rank_link;
 
@@ -32,11 +32,11 @@ hypre_NewRankLink( int  rank )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_FreeRankLink:
+ * hypre_DestroyRankLink:
  *--------------------------------------------------------------------------*/
 
 int
-hypre_FreeRankLink( hypre_RankLink  *rank_link )
+hypre_DestroyRankLink( hypre_RankLink  *rank_link )
 {
    int  ierr = 0;
 
@@ -49,7 +49,7 @@ hypre_FreeRankLink( hypre_RankLink  *rank_link )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_NewBoxNeighbors:
+ * hypre_CreateBoxNeighbors:
  *
  * Finds boxes that are "near" the boxes given by `local_ranks',
  * where near is defined by max_distance.
@@ -59,11 +59,11 @@ hypre_FreeRankLink( hypre_RankLink  *rank_link )
  *--------------------------------------------------------------------------*/
 
 hypre_BoxNeighbors *
-hypre_NewBoxNeighbors( int             *local_ranks,
-                       int              num_local,
-                       hypre_BoxArray  *boxes,
-                       int             *processes,
-                       int              max_distance )
+hypre_CreateBoxNeighbors( int             *local_ranks,
+                          int              num_local,
+                          hypre_BoxArray  *boxes,
+                          int             *processes,
+                          int              max_distance )
 {
    hypre_BoxArray      *new_boxes;
    int                 *new_processes;
@@ -130,7 +130,7 @@ hypre_NewBoxNeighbors( int             *local_ranks,
                {
                   new_boxes_ranks[num_new_boxes] = i;
 
-                  rank_link = hypre_NewRankLink(num_new_boxes);
+                  rank_link = hypre_CreateRankLink(num_new_boxes);
                   hypre_RankLinkNext(rank_link) =
                      hypre_BoxNeighborsRankLink(neighbors, j,
                                                 distance_index[0],
@@ -156,7 +156,7 @@ hypre_NewBoxNeighbors( int             *local_ranks,
     *---------------------------------------------*/
 
    new_boxes_ranks = hypre_TReAlloc(new_boxes_ranks, int, num_new_boxes);
-   new_boxes = hypre_NewBoxArray(num_new_boxes);
+   new_boxes = hypre_CreateBoxArray(num_new_boxes);
    for (i = 0; i < num_new_boxes; i++)
    {
       neighbor_box = hypre_BoxArrayBox(boxes, new_boxes_ranks[i]);
@@ -178,11 +178,11 @@ hypre_NewBoxNeighbors( int             *local_ranks,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_FreeBoxNeighbors:
+ * hypre_DestroyBoxNeighbors:
  *--------------------------------------------------------------------------*/
 
 int
-hypre_FreeBoxNeighbors( hypre_BoxNeighbors  *neighbors )
+hypre_DestroyBoxNeighbors( hypre_BoxNeighbors  *neighbors )
 {
    hypre_RankLink  *rank_link;
    hypre_RankLink  *next_rank_link;
@@ -206,14 +206,14 @@ hypre_FreeBoxNeighbors( hypre_BoxNeighbors  *neighbors )
                   while (rank_link)
                   {
                      next_rank_link = hypre_RankLinkNext(rank_link);
-                     hypre_FreeRankLink(rank_link);
+                     hypre_DestroyRankLink(rank_link);
                      rank_link = next_rank_link;
                   }
                }
             }
          }
       }
-      hypre_FreeBoxArray(hypre_BoxNeighborsBoxes(neighbors));
+      hypre_DestroyBoxArray(hypre_BoxNeighborsBoxes(neighbors));
       hypre_TFree(hypre_BoxNeighborsProcesses(neighbors));
       hypre_TFree(hypre_BoxNeighborsRankLinks(neighbors));
       hypre_TFree(neighbors);

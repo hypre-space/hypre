@@ -22,7 +22,6 @@
 extern "C" {
 #endif
 
-
 /*--------------------------------------------------------------------------
  * Structures
  *--------------------------------------------------------------------------*/
@@ -56,8 +55,8 @@ typedef int (*hypre_PtrToStructSolverFcn)(HYPRE_StructSolver,
 
 #ifndef HYPRE_NO_PTHREAD_MANGLING
 
-#define HYPRE_StructHybridInitialize HYPRE_StructHybridInitializePush
-#define HYPRE_StructHybridFinalize HYPRE_StructHybridFinalizePush
+#define HYPRE_StructHybridCreate HYPRE_StructHybridCreatePush
+#define HYPRE_StructHybridDestroy HYPRE_StructHybridDestroyPush
 #define HYPRE_StructHybridSetup HYPRE_StructHybridSetupPush
 #define HYPRE_StructHybridSolve HYPRE_StructHybridSolvePush
 #define HYPRE_StructHybridSetTol HYPRE_StructHybridSetTolPush
@@ -72,8 +71,8 @@ typedef int (*hypre_PtrToStructSolverFcn)(HYPRE_StructSolver,
 #define HYPRE_StructHybridGetDSCGNumIterations HYPRE_StructHybridGetDSCGNumIterationsPush
 #define HYPRE_StructHybridGetPCGNumIterations HYPRE_StructHybridGetPCGNumIterationsPush
 #define HYPRE_StructHybridGetFinalRelativeResidualNorm HYPRE_StructHybridGetFinalRelativeResidualNormPush
-#define HYPRE_StructJacobiInitialize HYPRE_StructJacobiInitializePush
-#define HYPRE_StructJacobiFinalize HYPRE_StructJacobiFinalizePush
+#define HYPRE_StructJacobiCreate HYPRE_StructJacobiCreatePush
+#define HYPRE_StructJacobiDestroy HYPRE_StructJacobiDestroyPush
 #define HYPRE_StructJacobiSetup HYPRE_StructJacobiSetupPush
 #define HYPRE_StructJacobiSolve HYPRE_StructJacobiSolvePush
 #define HYPRE_StructJacobiSetTol HYPRE_StructJacobiSetTolPush
@@ -82,8 +81,8 @@ typedef int (*hypre_PtrToStructSolverFcn)(HYPRE_StructSolver,
 #define HYPRE_StructJacobiSetNonZeroGuess HYPRE_StructJacobiSetNonZeroGuessPush
 #define HYPRE_StructJacobiGetNumIterations HYPRE_StructJacobiGetNumIterationsPush
 #define HYPRE_StructJacobiGetFinalRelativeResidualNorm HYPRE_StructJacobiGetFinalRelativeResidualNormPush
-#define HYPRE_StructPCGInitialize HYPRE_StructPCGInitializePush
-#define HYPRE_StructPCGFinalize HYPRE_StructPCGFinalizePush
+#define HYPRE_StructPCGCreate HYPRE_StructPCGCreatePush
+#define HYPRE_StructPCGDestroy HYPRE_StructPCGDestroyPush
 #define HYPRE_StructPCGSetup HYPRE_StructPCGSetupPush
 #define HYPRE_StructPCGSolve HYPRE_StructPCGSolvePush
 #define HYPRE_StructPCGSetTol HYPRE_StructPCGSetTolPush
@@ -96,8 +95,8 @@ typedef int (*hypre_PtrToStructSolverFcn)(HYPRE_StructSolver,
 #define HYPRE_StructPCGGetFinalRelativeResidualNorm HYPRE_StructPCGGetFinalRelativeResidualNormPush
 #define HYPRE_StructDiagScaleSetup HYPRE_StructDiagScaleSetupPush
 #define HYPRE_StructDiagScale HYPRE_StructDiagScalePush
-#define HYPRE_StructPFMGInitialize HYPRE_StructPFMGInitializePush
-#define HYPRE_StructPFMGFinalize HYPRE_StructPFMGFinalizePush
+#define HYPRE_StructPFMGCreate HYPRE_StructPFMGCreatePush
+#define HYPRE_StructPFMGDestroy HYPRE_StructPFMGDestroyPush
 #define HYPRE_StructPFMGSetup HYPRE_StructPFMGSetupPush
 #define HYPRE_StructPFMGSolve HYPRE_StructPFMGSolvePush
 #define HYPRE_StructPFMGSetTol HYPRE_StructPFMGSetTolPush
@@ -113,8 +112,8 @@ typedef int (*hypre_PtrToStructSolverFcn)(HYPRE_StructSolver,
 #define HYPRE_StructPFMGSetLogging HYPRE_StructPFMGSetLoggingPush
 #define HYPRE_StructPFMGGetNumIterations HYPRE_StructPFMGGetNumIterationsPush
 #define HYPRE_StructPFMGGetFinalRelativeResidualNorm HYPRE_StructPFMGGetFinalRelativeResidualNormPush
-#define HYPRE_StructSMGInitialize HYPRE_StructSMGInitializePush
-#define HYPRE_StructSMGFinalize HYPRE_StructSMGFinalizePush
+#define HYPRE_StructSMGCreate HYPRE_StructSMGCreatePush
+#define HYPRE_StructSMGDestroy HYPRE_StructSMGDestroyPush
 #define HYPRE_StructSMGSetup HYPRE_StructSMGSetupPush
 #define HYPRE_StructSMGSolve HYPRE_StructSMGSolvePush
 #define HYPRE_StructSMGSetMemoryUse HYPRE_StructSMGSetMemoryUsePush
@@ -128,8 +127,8 @@ typedef int (*hypre_PtrToStructSolverFcn)(HYPRE_StructSolver,
 #define HYPRE_StructSMGSetLogging HYPRE_StructSMGSetLoggingPush
 #define HYPRE_StructSMGGetNumIterations HYPRE_StructSMGGetNumIterationsPush
 #define HYPRE_StructSMGGetFinalRelativeResidualNorm HYPRE_StructSMGGetFinalRelativeResidualNormPush
-#define HYPRE_StructSparseMSGInitialize HYPRE_StructSparseMSGInitializePush
-#define HYPRE_StructSparseMSGFinalize HYPRE_StructSparseMSGFinalizePush
+#define HYPRE_StructSparseMSGCreate HYPRE_StructSparseMSGCreatePush
+#define HYPRE_StructSparseMSGDestroy HYPRE_StructSparseMSGDestroyPush
 #define HYPRE_StructSparseMSGSetup HYPRE_StructSparseMSGSetupPush
 #define HYPRE_StructSparseMSGSolve HYPRE_StructSparseMSGSolvePush
 #define HYPRE_StructSparseMSGSetTol HYPRE_StructSparseMSGSetTolPush
@@ -150,8 +149,8 @@ typedef int (*hypre_PtrToStructSolverFcn)(HYPRE_StructSolver,
 # define	P(s) s
 
 /* HYPRE_struct_hybrid.c */
-int HYPRE_StructHybridInitialize P((MPI_Comm comm , HYPRE_StructSolver *solver ));
-int HYPRE_StructHybridFinalize P((HYPRE_StructSolver solver ));
+int HYPRE_StructHybridCreate P((MPI_Comm comm , HYPRE_StructSolver *solver ));
+int HYPRE_StructHybridDestroy P((HYPRE_StructSolver solver ));
 int HYPRE_StructHybridSetup P((HYPRE_StructSolver solver , HYPRE_StructMatrix A , HYPRE_StructVector b , HYPRE_StructVector x ));
 int HYPRE_StructHybridSolve P((HYPRE_StructSolver solver , HYPRE_StructMatrix A , HYPRE_StructVector b , HYPRE_StructVector x ));
 int HYPRE_StructHybridSetTol P((HYPRE_StructSolver solver , double tol ));
@@ -168,8 +167,8 @@ int HYPRE_StructHybridGetPCGNumIterations P((HYPRE_StructSolver solver , int *pc
 int HYPRE_StructHybridGetFinalRelativeResidualNorm P((HYPRE_StructSolver solver , double *norm ));
 
 /* HYPRE_struct_jacobi.c */
-int HYPRE_StructJacobiInitialize P((MPI_Comm comm , HYPRE_StructSolver *solver ));
-int HYPRE_StructJacobiFinalize P((HYPRE_StructSolver solver ));
+int HYPRE_StructJacobiCreate P((MPI_Comm comm , HYPRE_StructSolver *solver ));
+int HYPRE_StructJacobiDestroy P((HYPRE_StructSolver solver ));
 int HYPRE_StructJacobiSetup P((HYPRE_StructSolver solver , HYPRE_StructMatrix A , HYPRE_StructVector b , HYPRE_StructVector x ));
 int HYPRE_StructJacobiSolve P((HYPRE_StructSolver solver , HYPRE_StructMatrix A , HYPRE_StructVector b , HYPRE_StructVector x ));
 int HYPRE_StructJacobiSetTol P((HYPRE_StructSolver solver , double tol ));
@@ -180,8 +179,8 @@ int HYPRE_StructJacobiGetNumIterations P((HYPRE_StructSolver solver , int *num_i
 int HYPRE_StructJacobiGetFinalRelativeResidualNorm P((HYPRE_StructSolver solver , double *norm ));
 
 /* HYPRE_struct_pcg.c */
-int HYPRE_StructPCGInitialize P((MPI_Comm comm , HYPRE_StructSolver *solver ));
-int HYPRE_StructPCGFinalize P((HYPRE_StructSolver solver ));
+int HYPRE_StructPCGCreate P((MPI_Comm comm , HYPRE_StructSolver *solver ));
+int HYPRE_StructPCGDestroy P((HYPRE_StructSolver solver ));
 int HYPRE_StructPCGSetup P((HYPRE_StructSolver solver , HYPRE_StructMatrix A , HYPRE_StructVector b , HYPRE_StructVector x ));
 int HYPRE_StructPCGSolve P((HYPRE_StructSolver solver , HYPRE_StructMatrix A , HYPRE_StructVector b , HYPRE_StructVector x ));
 int HYPRE_StructPCGSetTol P((HYPRE_StructSolver solver , double tol ));
@@ -196,8 +195,8 @@ int HYPRE_StructDiagScaleSetup P((HYPRE_StructSolver solver , HYPRE_StructMatrix
 int HYPRE_StructDiagScale P((HYPRE_StructSolver solver , HYPRE_StructMatrix HA , HYPRE_StructVector Hy , HYPRE_StructVector Hx ));
 
 /* HYPRE_struct_pfmg.c */
-int HYPRE_StructPFMGInitialize P((MPI_Comm comm , HYPRE_StructSolver *solver ));
-int HYPRE_StructPFMGFinalize P((HYPRE_StructSolver solver ));
+int HYPRE_StructPFMGCreate P((MPI_Comm comm , HYPRE_StructSolver *solver ));
+int HYPRE_StructPFMGDestroy P((HYPRE_StructSolver solver ));
 int HYPRE_StructPFMGSetup P((HYPRE_StructSolver solver , HYPRE_StructMatrix A , HYPRE_StructVector b , HYPRE_StructVector x ));
 int HYPRE_StructPFMGSolve P((HYPRE_StructSolver solver , HYPRE_StructMatrix A , HYPRE_StructVector b , HYPRE_StructVector x ));
 int HYPRE_StructPFMGSetTol P((HYPRE_StructSolver solver , double tol ));
@@ -215,8 +214,8 @@ int HYPRE_StructPFMGGetNumIterations P((HYPRE_StructSolver solver , int *num_ite
 int HYPRE_StructPFMGGetFinalRelativeResidualNorm P((HYPRE_StructSolver solver , double *norm ));
 
 /* HYPRE_struct_smg.c */
-int HYPRE_StructSMGInitialize P((MPI_Comm comm , HYPRE_StructSolver *solver ));
-int HYPRE_StructSMGFinalize P((HYPRE_StructSolver solver ));
+int HYPRE_StructSMGCreate P((MPI_Comm comm , HYPRE_StructSolver *solver ));
+int HYPRE_StructSMGDestroy P((HYPRE_StructSolver solver ));
 int HYPRE_StructSMGSetup P((HYPRE_StructSolver solver , HYPRE_StructMatrix A , HYPRE_StructVector b , HYPRE_StructVector x ));
 int HYPRE_StructSMGSolve P((HYPRE_StructSolver solver , HYPRE_StructMatrix A , HYPRE_StructVector b , HYPRE_StructVector x ));
 int HYPRE_StructSMGSetMemoryUse P((HYPRE_StructSolver solver , int memory_use ));
@@ -232,8 +231,8 @@ int HYPRE_StructSMGGetNumIterations P((HYPRE_StructSolver solver , int *num_iter
 int HYPRE_StructSMGGetFinalRelativeResidualNorm P((HYPRE_StructSolver solver , double *norm ));
 
 /* HYPRE_struct_sparse_msg.c */
-int HYPRE_StructSparseMSGInitialize P((MPI_Comm comm , HYPRE_StructSolver *solver ));
-int HYPRE_StructSparseMSGFinalize P((HYPRE_StructSolver solver ));
+int HYPRE_StructSparseMSGCreate P((MPI_Comm comm , HYPRE_StructSolver *solver ));
+int HYPRE_StructSparseMSGDestroy P((HYPRE_StructSolver solver ));
 int HYPRE_StructSparseMSGSetup P((HYPRE_StructSolver solver , HYPRE_StructMatrix A , HYPRE_StructVector b , HYPRE_StructVector x ));
 int HYPRE_StructSparseMSGSolve P((HYPRE_StructSolver solver , HYPRE_StructMatrix A , HYPRE_StructVector b , HYPRE_StructVector x ));
 int HYPRE_StructSparseMSGSetTol P((HYPRE_StructSolver solver , double tol ));

@@ -28,12 +28,12 @@ hypre_IndexD(out_index, cdir) = hypre_IndexD(in_index, 0);\
 cdir = (cdir + 1) % 2;
 
 /*--------------------------------------------------------------------------
- * hypre_PFMG2NewRAPOp 
+ * hypre_PFMG2CreateRAPOp 
  *    Sets up new coarse grid operator stucture.
  *--------------------------------------------------------------------------*/
  
 hypre_StructMatrix *
-hypre_PFMG2NewRAPOp( hypre_StructMatrix *R,
+hypre_PFMG2CreateRAPOp( hypre_StructMatrix *R,
                      hypre_StructMatrix *A,
                      hypre_StructMatrix *P,
                      hypre_StructGrid   *coarse_grid,
@@ -125,13 +125,13 @@ hypre_PFMG2NewRAPOp( hypre_StructMatrix *R,
       }
    }
 
-   RAP_stencil = hypre_NewStructStencil(RAP_stencil_dim, RAP_stencil_size,
+   RAP_stencil = hypre_CreateStructStencil(RAP_stencil_dim, RAP_stencil_size,
                                         RAP_stencil_shape);
 
-   RAP = hypre_NewStructMatrix(hypre_StructMatrixComm(A),
+   RAP = hypre_CreateStructMatrix(hypre_StructMatrixComm(A),
                                coarse_grid, RAP_stencil);
 
-   hypre_FreeStructStencil(RAP_stencil);
+   hypre_DestroyStructStencil(RAP_stencil);
 
    /*-----------------------------------------------------------------------
     * Coarse operator in symmetric iff fine operator is
@@ -395,7 +395,7 @@ hypre_PFMG2BuildRAPSym( hypre_StructMatrix *A,
                                 RAP_data_box, cstart, stridec, iAc);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iP,iR,iA,iAc,iAm1,iAp1,iP1
 #include "hypre_box_smp_forloop.h"
-	    hypre_BoxLoop4For(loopi, loopj, loopk, iP, iR, iA, iAc)
+            hypre_BoxLoop4For(loopi, loopj, loopk, iP, iR, iA, iAc)
                {
                   iAm1 = iA - yOffsetA;
                   iAp1 = iA + yOffsetA;
@@ -446,7 +446,7 @@ hypre_PFMG2BuildRAPSym( hypre_StructMatrix *A,
                                 RAP_data_box, cstart, stridec, iAc);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iP,iR,iA,iAc,iAm1,iAp1,iP1
 #include "hypre_box_smp_forloop.h"
-	    hypre_BoxLoop4For(loopi, loopj, loopk, iP, iR, iA, iAc)
+            hypre_BoxLoop4For(loopi, loopj, loopk, iP, iR, iA, iAc)
                {
                   iAm1 = iA - yOffsetA;
                   iAp1 = iA + yOffsetA;
@@ -726,7 +726,7 @@ hypre_PFMG2BuildRAPNoSym( hypre_StructMatrix *A,
                                 RAP_data_box, cstart, stridec, iAc);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iP,iR,iA,iAc,iAm1,iAp1,iP1
 #include "hypre_box_smp_forloop.h"
-	    hypre_BoxLoop4For(loopi, loopj, loopk, iP, iR, iA, iAc)
+            hypre_BoxLoop4For(loopi, loopj, loopk, iP, iR, iA, iAc)
                {
                   iAm1 = iA - yOffsetA;
                   iAp1 = iA + yOffsetA;
@@ -768,7 +768,7 @@ hypre_PFMG2BuildRAPNoSym( hypre_StructMatrix *A,
                                 RAP_data_box, cstart, stridec, iAc);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iP,iR,iA,iAc,iAm1,iAp1,iP1
 #include "hypre_box_smp_forloop.h"
-	    hypre_BoxLoop4For(loopi, loopj, loopk, iP, iR, iA, iAc)
+            hypre_BoxLoop4For(loopi, loopj, loopk, iP, iR, iA, iAc)
                {
                   iAm1 = iA - yOffsetA;
                   iAp1 = iA + yOffsetA;

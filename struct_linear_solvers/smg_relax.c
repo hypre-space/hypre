@@ -67,11 +67,11 @@ typedef struct
 } hypre_SMGRelaxData;
 
 /*--------------------------------------------------------------------------
- * hypre_SMGRelaxInitialize
+ * hypre_SMGRelaxCreate
  *--------------------------------------------------------------------------*/
 
 void *
-hypre_SMGRelaxInitialize( MPI_Comm  comm )
+hypre_SMGRelaxCreate( MPI_Comm  comm )
 {
    hypre_SMGRelaxData *relax_data;
 
@@ -111,27 +111,27 @@ hypre_SMGRelaxInitialize( MPI_Comm  comm )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SMGRelaxFreeTempVec
+ * hypre_SMGRelaxDestroyTempVec
  *--------------------------------------------------------------------------*/
 
 int
-hypre_SMGRelaxFreeTempVec( void *relax_vdata )
+hypre_SMGRelaxDestroyTempVec( void *relax_vdata )
 {
    hypre_SMGRelaxData  *relax_data = relax_vdata;
    int                  ierr = 0;
 
-   hypre_FreeStructVector(relax_data -> temp_vec);
+   hypre_DestroyStructVector(relax_data -> temp_vec);
    (relax_data -> setup_temp_vec) = 1;
 
    return ierr;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SMGRelaxFreeARem
+ * hypre_SMGRelaxDestroyARem
  *--------------------------------------------------------------------------*/
 
 int
-hypre_SMGRelaxFreeARem( void *relax_vdata )
+hypre_SMGRelaxDestroyARem( void *relax_vdata )
 {
    hypre_SMGRelaxData  *relax_data = relax_vdata;
    int                  i;
@@ -141,10 +141,10 @@ hypre_SMGRelaxFreeARem( void *relax_vdata )
    {
       for (i = 0; i < (relax_data -> num_spaces); i++)
       {
-         hypre_SMGResidualFinalize(relax_data -> residual_data[i]);
+         hypre_SMGResidualDestroy(relax_data -> residual_data[i]);
       }
       hypre_TFree(relax_data -> residual_data);
-      hypre_FreeStructMatrix(relax_data -> A_rem);
+      hypre_DestroyStructMatrix(relax_data -> A_rem);
       (relax_data -> A_rem) = NULL;
    }
    (relax_data -> setup_a_rem) = 1;
@@ -153,11 +153,11 @@ hypre_SMGRelaxFreeARem( void *relax_vdata )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SMGRelaxFreeASol
+ * hypre_SMGRelaxDestroyASol
  *--------------------------------------------------------------------------*/
 
 int
-hypre_SMGRelaxFreeASol( void *relax_vdata )
+hypre_SMGRelaxDestroyASol( void *relax_vdata )
 {
    hypre_SMGRelaxData  *relax_data = relax_vdata;
    int                  stencil_dim;
@@ -170,12 +170,12 @@ hypre_SMGRelaxFreeASol( void *relax_vdata )
       for (i = 0; i < (relax_data -> num_spaces); i++)
       {
          if (stencil_dim > 2)
-            hypre_SMGFinalize(relax_data -> solve_data[i]);
+            hypre_SMGDestroy(relax_data -> solve_data[i]);
          else
-            hypre_CyclicReductionFinalize(relax_data -> solve_data[i]);
+            hypre_CyclicReductionDestroy(relax_data -> solve_data[i]);
       }
       hypre_TFree(relax_data -> solve_data);
-      hypre_FreeStructMatrix(relax_data -> A_sol);
+      hypre_DestroyStructMatrix(relax_data -> A_sol);
       (relax_data -> A_sol) = NULL;
    }
    (relax_data -> setup_a_sol) = 1;
@@ -184,11 +184,11 @@ hypre_SMGRelaxFreeASol( void *relax_vdata )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SMGRelaxFinalize
+ * hypre_SMGRelaxDestroy
  *--------------------------------------------------------------------------*/
 
 int
-hypre_SMGRelaxFinalize( void *relax_vdata )
+hypre_SMGRelaxDestroy( void *relax_vdata )
 {
    hypre_SMGRelaxData *relax_data = relax_vdata;
    int                 ierr = 0;
@@ -199,15 +199,15 @@ hypre_SMGRelaxFinalize( void *relax_vdata )
       hypre_TFree(relax_data -> space_strides);
       hypre_TFree(relax_data -> pre_space_ranks);
       hypre_TFree(relax_data -> reg_space_ranks);
-      hypre_FreeBoxArray(relax_data -> base_box_array);
+      hypre_DestroyBoxArray(relax_data -> base_box_array);
 
-      hypre_FreeStructMatrix(relax_data -> A);
-      hypre_FreeStructVector(relax_data -> b);
-      hypre_FreeStructVector(relax_data -> x);
+      hypre_DestroyStructMatrix(relax_data -> A);
+      hypre_DestroyStructVector(relax_data -> b);
+      hypre_DestroyStructVector(relax_data -> x);
 
-      hypre_SMGRelaxFreeTempVec(relax_vdata);
-      hypre_SMGRelaxFreeARem(relax_vdata);
-      hypre_SMGRelaxFreeASol(relax_vdata);
+      hypre_SMGRelaxDestroyTempVec(relax_vdata);
+      hypre_SMGRelaxDestroyARem(relax_vdata);
+      hypre_SMGRelaxDestroyASol(relax_vdata);
 
       hypre_FinalizeTiming(relax_data -> time_index);
       hypre_TFree(relax_data);
@@ -337,7 +337,7 @@ hypre_SMGRelax( void               *relax_vdata,
 
    if ((stencil_dim - 1) <= (relax_data -> memory_use))
    {
-      hypre_SMGRelaxFreeASol(relax_vdata);
+      hypre_SMGRelaxDestroyASol(relax_vdata);
    }
 
    hypre_EndTiming(relax_data -> time_index);
@@ -362,9 +362,9 @@ hypre_SMGRelaxSetup( void               *relax_vdata,
 
    stencil_dim = hypre_StructStencilDim(hypre_StructMatrixStencil(A));
    (relax_data -> stencil_dim) = stencil_dim;
-   hypre_FreeStructMatrix(relax_data -> A);
-   hypre_FreeStructVector(relax_data -> b);
-   hypre_FreeStructVector(relax_data -> x);
+   hypre_DestroyStructMatrix(relax_data -> A);
+   hypre_DestroyStructVector(relax_data -> b);
+   hypre_DestroyStructVector(relax_data -> x);
    (relax_data -> A) = hypre_RefStructMatrix(A);
    (relax_data -> b) = hypre_RefStructVector(b);
    (relax_data -> x) = hypre_RefStructVector(x);
@@ -434,8 +434,8 @@ hypre_SMGRelaxSetupTempVec( void               *relax_vdata,
 
    if ((relax_data -> temp_vec) == NULL)
    {
-      temp_vec = hypre_NewStructVector(hypre_StructVectorComm(b),
-                                       hypre_StructVectorGrid(b));
+      temp_vec = hypre_CreateStructVector(hypre_StructVectorComm(b),
+                                          hypre_StructVectorGrid(b));
       hypre_SetStructVectorNumGhost(temp_vec, hypre_StructVectorNumGhost(b));
       hypre_InitializeStructVector(temp_vec);
       hypre_AssembleStructVector(temp_vec);
@@ -485,7 +485,7 @@ hypre_SMGRelaxSetupARem( void               *relax_vdata,
     * Free up old data before putting new data into structure
     *----------------------------------------------------------*/
 
-   hypre_SMGRelaxFreeARem(relax_vdata);
+   hypre_SMGRelaxDestroyARem(relax_vdata);
 
    /*----------------------------------------------------------
     * Set up data
@@ -504,7 +504,7 @@ hypre_SMGRelaxSetupARem( void               *relax_vdata,
          num_stencil_indices++;
       }
    }
-   A_rem = hypre_NewStructMatrixMask(A, num_stencil_indices, stencil_indices);
+   A_rem = hypre_CreateStructMatrixMask(A, num_stencil_indices, stencil_indices);
    hypre_TFree(stencil_indices);
 
    /* Set up residual_data */
@@ -515,7 +515,7 @@ hypre_SMGRelaxSetupARem( void               *relax_vdata,
       hypre_IndexD(base_index,  (stencil_dim - 1)) = space_indices[i];
       hypre_IndexD(base_stride, (stencil_dim - 1)) = space_strides[i];
 
-      residual_data[i] = hypre_SMGResidualInitialize();
+      residual_data[i] = hypre_SMGResidualCreate();
       hypre_SMGResidualSetBase(residual_data[i], base_index, base_stride);
       hypre_SMGResidualSetup(residual_data[i], A_rem, x, b, temp_vec);
    }
@@ -570,7 +570,7 @@ hypre_SMGRelaxSetupASol( void               *relax_vdata,
     * Free up old data before putting new data into structure
     *----------------------------------------------------------*/
 
-   hypre_SMGRelaxFreeASol(relax_vdata);
+   hypre_SMGRelaxDestroyASol(relax_vdata);
 
    /*----------------------------------------------------------
     * Set up data
@@ -589,7 +589,7 @@ hypre_SMGRelaxSetupASol( void               *relax_vdata,
          num_stencil_indices++;
       }
    }
-   A_sol = hypre_NewStructMatrixMask(A, num_stencil_indices, stencil_indices);
+   A_sol = hypre_CreateStructMatrixMask(A, num_stencil_indices, stencil_indices);
    hypre_StructStencilDim(hypre_StructMatrixStencil(A_sol)) = stencil_dim - 1;
    hypre_TFree(stencil_indices);
 
@@ -603,7 +603,7 @@ hypre_SMGRelaxSetupASol( void               *relax_vdata,
 
       if (stencil_dim > 2)
       {
-         solve_data[i] = hypre_SMGInitialize(relax_data -> comm);
+         solve_data[i] = hypre_SMGCreate(relax_data -> comm);
          hypre_SMGSetNumPreRelax( solve_data[i], num_pre_relax);
          hypre_SMGSetNumPostRelax( solve_data[i], num_post_relax);
          hypre_SMGSetBase(solve_data[i], base_index, base_stride);
@@ -614,7 +614,7 @@ hypre_SMGRelaxSetupASol( void               *relax_vdata,
       }
       else
       {
-         solve_data[i] = hypre_CyclicReductionInitialize(relax_data -> comm);
+         solve_data[i] = hypre_CyclicReductionCreate(relax_data -> comm);
          hypre_CyclicReductionSetBase(solve_data[i], base_index, base_stride);
          hypre_CyclicReductionSetup(solve_data[i], A_sol, temp_vec, x);
       }
@@ -639,7 +639,7 @@ hypre_SMGRelaxSetTempVec( void               *relax_vdata,
    hypre_SMGRelaxData *relax_data = relax_vdata;
    int                 ierr = 0;
 
-   hypre_SMGRelaxFreeTempVec(relax_vdata);
+   hypre_SMGRelaxDestroyTempVec(relax_vdata);
    (relax_data -> temp_vec) = hypre_RefStructVector(temp_vec);
 
    (relax_data -> setup_temp_vec) = 1;
@@ -878,7 +878,7 @@ hypre_SMGRelaxSetBase( void        *relax_vdata,
  
    if ((relax_data -> base_box_array) != NULL)
    {
-      hypre_FreeBoxArray((relax_data -> base_box_array));
+      hypre_DestroyBoxArray((relax_data -> base_box_array));
       (relax_data -> base_box_array) = NULL;
    }
 

@@ -5,42 +5,42 @@
 
 
 /*----------------------------------------------------------------
- * HYPRE_StructHybridInitialize thread wrappers
+ * HYPRE_StructHybridCreate thread wrappers
  *----------------------------------------------------------------*/
 
 typedef struct {
    MPI_Comm comm;
    HYPRE_StructSolverArray *solver;
    int  returnvalue[hypre_MAX_THREADS];
-} HYPRE_StructHybridInitializeArgs;
+} HYPRE_StructHybridCreateArgs;
 
 void
-HYPRE_StructHybridInitializeVoidPtr( void *argptr )
+HYPRE_StructHybridCreateVoidPtr( void *argptr )
 {
    int threadid = hypre_GetThreadID();
 
-   HYPRE_StructHybridInitializeArgs *localargs =
-      (HYPRE_StructHybridInitializeArgs *) argptr;
+   HYPRE_StructHybridCreateArgs *localargs =
+      (HYPRE_StructHybridCreateArgs *) argptr;
 
    (localargs -> returnvalue[threadid]) =
-      HYPRE_StructHybridInitialize(
+      HYPRE_StructHybridCreate(
          localargs -> comm,
          &(*(localargs -> solver))[threadid] );
 }
 
 int 
-HYPRE_StructHybridInitializePush(
+HYPRE_StructHybridCreatePush(
    MPI_Comm comm,
    HYPRE_StructSolverArray *solver )
 {
-   HYPRE_StructHybridInitializeArgs pushargs;
+   HYPRE_StructHybridCreateArgs pushargs;
    int i;
    int  returnvalue;
 
    pushargs.comm = comm;
    pushargs.solver = (HYPRE_StructSolverArray *)solver;
    for (i = 0; i < hypre_NumThreads; i++)
-      hypre_work_put( HYPRE_StructHybridInitializeVoidPtr, (void *)&pushargs );
+      hypre_work_put( HYPRE_StructHybridCreateVoidPtr, (void *)&pushargs );
 
    hypre_work_wait();
 
@@ -50,38 +50,38 @@ HYPRE_StructHybridInitializePush(
 }
 
 /*----------------------------------------------------------------
- * HYPRE_StructHybridFinalize thread wrappers
+ * HYPRE_StructHybridDestroy thread wrappers
  *----------------------------------------------------------------*/
 
 typedef struct {
    HYPRE_StructSolverArray *solver;
    int  returnvalue[hypre_MAX_THREADS];
-} HYPRE_StructHybridFinalizeArgs;
+} HYPRE_StructHybridDestroyArgs;
 
 void
-HYPRE_StructHybridFinalizeVoidPtr( void *argptr )
+HYPRE_StructHybridDestroyVoidPtr( void *argptr )
 {
    int threadid = hypre_GetThreadID();
 
-   HYPRE_StructHybridFinalizeArgs *localargs =
-      (HYPRE_StructHybridFinalizeArgs *) argptr;
+   HYPRE_StructHybridDestroyArgs *localargs =
+      (HYPRE_StructHybridDestroyArgs *) argptr;
 
    (localargs -> returnvalue[threadid]) =
-      HYPRE_StructHybridFinalize(
+      HYPRE_StructHybridDestroy(
          (*(localargs -> solver))[threadid] );
 }
 
 int 
-HYPRE_StructHybridFinalizePush(
+HYPRE_StructHybridDestroyPush(
    HYPRE_StructSolverArray solver )
 {
-   HYPRE_StructHybridFinalizeArgs pushargs;
+   HYPRE_StructHybridDestroyArgs pushargs;
    int i;
    int  returnvalue;
 
    pushargs.solver = (HYPRE_StructSolverArray *)solver;
    for (i = 0; i < hypre_NumThreads; i++)
-      hypre_work_put( HYPRE_StructHybridFinalizeVoidPtr, (void *)&pushargs );
+      hypre_work_put( HYPRE_StructHybridDestroyVoidPtr, (void *)&pushargs );
 
    hypre_work_wait();
 
@@ -745,42 +745,42 @@ HYPRE_StructHybridGetFinalRelativeResidualNormPush(
 }
 
 /*----------------------------------------------------------------
- * HYPRE_StructJacobiInitialize thread wrappers
+ * HYPRE_StructJacobiCreate thread wrappers
  *----------------------------------------------------------------*/
 
 typedef struct {
    MPI_Comm comm;
    HYPRE_StructSolverArray *solver;
    int  returnvalue[hypre_MAX_THREADS];
-} HYPRE_StructJacobiInitializeArgs;
+} HYPRE_StructJacobiCreateArgs;
 
 void
-HYPRE_StructJacobiInitializeVoidPtr( void *argptr )
+HYPRE_StructJacobiCreateVoidPtr( void *argptr )
 {
    int threadid = hypre_GetThreadID();
 
-   HYPRE_StructJacobiInitializeArgs *localargs =
-      (HYPRE_StructJacobiInitializeArgs *) argptr;
+   HYPRE_StructJacobiCreateArgs *localargs =
+      (HYPRE_StructJacobiCreateArgs *) argptr;
 
    (localargs -> returnvalue[threadid]) =
-      HYPRE_StructJacobiInitialize(
+      HYPRE_StructJacobiCreate(
          localargs -> comm,
          &(*(localargs -> solver))[threadid] );
 }
 
 int 
-HYPRE_StructJacobiInitializePush(
+HYPRE_StructJacobiCreatePush(
    MPI_Comm comm,
    HYPRE_StructSolverArray *solver )
 {
-   HYPRE_StructJacobiInitializeArgs pushargs;
+   HYPRE_StructJacobiCreateArgs pushargs;
    int i;
    int  returnvalue;
 
    pushargs.comm = comm;
    pushargs.solver = (HYPRE_StructSolverArray *)solver;
    for (i = 0; i < hypre_NumThreads; i++)
-      hypre_work_put( HYPRE_StructJacobiInitializeVoidPtr, (void *)&pushargs );
+      hypre_work_put( HYPRE_StructJacobiCreateVoidPtr, (void *)&pushargs );
 
    hypre_work_wait();
 
@@ -790,38 +790,38 @@ HYPRE_StructJacobiInitializePush(
 }
 
 /*----------------------------------------------------------------
- * HYPRE_StructJacobiFinalize thread wrappers
+ * HYPRE_StructJacobiDestroy thread wrappers
  *----------------------------------------------------------------*/
 
 typedef struct {
    HYPRE_StructSolverArray *solver;
    int  returnvalue[hypre_MAX_THREADS];
-} HYPRE_StructJacobiFinalizeArgs;
+} HYPRE_StructJacobiDestroyArgs;
 
 void
-HYPRE_StructJacobiFinalizeVoidPtr( void *argptr )
+HYPRE_StructJacobiDestroyVoidPtr( void *argptr )
 {
    int threadid = hypre_GetThreadID();
 
-   HYPRE_StructJacobiFinalizeArgs *localargs =
-      (HYPRE_StructJacobiFinalizeArgs *) argptr;
+   HYPRE_StructJacobiDestroyArgs *localargs =
+      (HYPRE_StructJacobiDestroyArgs *) argptr;
 
    (localargs -> returnvalue[threadid]) =
-      HYPRE_StructJacobiFinalize(
+      HYPRE_StructJacobiDestroy(
          (*(localargs -> solver))[threadid] );
 }
 
 int 
-HYPRE_StructJacobiFinalizePush(
+HYPRE_StructJacobiDestroyPush(
    HYPRE_StructSolverArray solver )
 {
-   HYPRE_StructJacobiFinalizeArgs pushargs;
+   HYPRE_StructJacobiDestroyArgs pushargs;
    int i;
    int  returnvalue;
 
    pushargs.solver = (HYPRE_StructSolverArray *)solver;
    for (i = 0; i < hypre_NumThreads; i++)
-      hypre_work_put( HYPRE_StructJacobiFinalizeVoidPtr, (void *)&pushargs );
+      hypre_work_put( HYPRE_StructJacobiDestroyVoidPtr, (void *)&pushargs );
 
    hypre_work_wait();
 
@@ -1199,42 +1199,42 @@ HYPRE_StructJacobiGetFinalRelativeResidualNormPush(
 }
 
 /*----------------------------------------------------------------
- * HYPRE_StructPCGInitialize thread wrappers
+ * HYPRE_StructPCGCreate thread wrappers
  *----------------------------------------------------------------*/
 
 typedef struct {
    MPI_Comm comm;
    HYPRE_StructSolverArray *solver;
    int  returnvalue[hypre_MAX_THREADS];
-} HYPRE_StructPCGInitializeArgs;
+} HYPRE_StructPCGCreateArgs;
 
 void
-HYPRE_StructPCGInitializeVoidPtr( void *argptr )
+HYPRE_StructPCGCreateVoidPtr( void *argptr )
 {
    int threadid = hypre_GetThreadID();
 
-   HYPRE_StructPCGInitializeArgs *localargs =
-      (HYPRE_StructPCGInitializeArgs *) argptr;
+   HYPRE_StructPCGCreateArgs *localargs =
+      (HYPRE_StructPCGCreateArgs *) argptr;
 
    (localargs -> returnvalue[threadid]) =
-      HYPRE_StructPCGInitialize(
+      HYPRE_StructPCGCreate(
          localargs -> comm,
          &(*(localargs -> solver))[threadid] );
 }
 
 int 
-HYPRE_StructPCGInitializePush(
+HYPRE_StructPCGCreatePush(
    MPI_Comm comm,
    HYPRE_StructSolverArray *solver )
 {
-   HYPRE_StructPCGInitializeArgs pushargs;
+   HYPRE_StructPCGCreateArgs pushargs;
    int i;
    int  returnvalue;
 
    pushargs.comm = comm;
    pushargs.solver = (HYPRE_StructSolverArray *)solver;
    for (i = 0; i < hypre_NumThreads; i++)
-      hypre_work_put( HYPRE_StructPCGInitializeVoidPtr, (void *)&pushargs );
+      hypre_work_put( HYPRE_StructPCGCreateVoidPtr, (void *)&pushargs );
 
    hypre_work_wait();
 
@@ -1244,38 +1244,38 @@ HYPRE_StructPCGInitializePush(
 }
 
 /*----------------------------------------------------------------
- * HYPRE_StructPCGFinalize thread wrappers
+ * HYPRE_StructPCGDestroy thread wrappers
  *----------------------------------------------------------------*/
 
 typedef struct {
    HYPRE_StructSolverArray *solver;
    int  returnvalue[hypre_MAX_THREADS];
-} HYPRE_StructPCGFinalizeArgs;
+} HYPRE_StructPCGDestroyArgs;
 
 void
-HYPRE_StructPCGFinalizeVoidPtr( void *argptr )
+HYPRE_StructPCGDestroyVoidPtr( void *argptr )
 {
    int threadid = hypre_GetThreadID();
 
-   HYPRE_StructPCGFinalizeArgs *localargs =
-      (HYPRE_StructPCGFinalizeArgs *) argptr;
+   HYPRE_StructPCGDestroyArgs *localargs =
+      (HYPRE_StructPCGDestroyArgs *) argptr;
 
    (localargs -> returnvalue[threadid]) =
-      HYPRE_StructPCGFinalize(
+      HYPRE_StructPCGDestroy(
          (*(localargs -> solver))[threadid] );
 }
 
 int 
-HYPRE_StructPCGFinalizePush(
+HYPRE_StructPCGDestroyPush(
    HYPRE_StructSolverArray solver )
 {
-   HYPRE_StructPCGFinalizeArgs pushargs;
+   HYPRE_StructPCGDestroyArgs pushargs;
    int i;
    int  returnvalue;
 
    pushargs.solver = (HYPRE_StructSolverArray *)solver;
    for (i = 0; i < hypre_NumThreads; i++)
-      hypre_work_put( HYPRE_StructPCGFinalizeVoidPtr, (void *)&pushargs );
+      hypre_work_put( HYPRE_StructPCGDestroyVoidPtr, (void *)&pushargs );
 
    hypre_work_wait();
 
@@ -1865,42 +1865,42 @@ HYPRE_StructDiagScalePush(
 }
 
 /*----------------------------------------------------------------
- * HYPRE_StructPFMGInitialize thread wrappers
+ * HYPRE_StructPFMGCreate thread wrappers
  *----------------------------------------------------------------*/
 
 typedef struct {
    MPI_Comm comm;
    HYPRE_StructSolverArray *solver;
    int  returnvalue[hypre_MAX_THREADS];
-} HYPRE_StructPFMGInitializeArgs;
+} HYPRE_StructPFMGCreateArgs;
 
 void
-HYPRE_StructPFMGInitializeVoidPtr( void *argptr )
+HYPRE_StructPFMGCreateVoidPtr( void *argptr )
 {
    int threadid = hypre_GetThreadID();
 
-   HYPRE_StructPFMGInitializeArgs *localargs =
-      (HYPRE_StructPFMGInitializeArgs *) argptr;
+   HYPRE_StructPFMGCreateArgs *localargs =
+      (HYPRE_StructPFMGCreateArgs *) argptr;
 
    (localargs -> returnvalue[threadid]) =
-      HYPRE_StructPFMGInitialize(
+      HYPRE_StructPFMGCreate(
          localargs -> comm,
          &(*(localargs -> solver))[threadid] );
 }
 
 int 
-HYPRE_StructPFMGInitializePush(
+HYPRE_StructPFMGCreatePush(
    MPI_Comm comm,
    HYPRE_StructSolverArray *solver )
 {
-   HYPRE_StructPFMGInitializeArgs pushargs;
+   HYPRE_StructPFMGCreateArgs pushargs;
    int i;
    int  returnvalue;
 
    pushargs.comm = comm;
    pushargs.solver = (HYPRE_StructSolverArray *)solver;
    for (i = 0; i < hypre_NumThreads; i++)
-      hypre_work_put( HYPRE_StructPFMGInitializeVoidPtr, (void *)&pushargs );
+      hypre_work_put( HYPRE_StructPFMGCreateVoidPtr, (void *)&pushargs );
 
    hypre_work_wait();
 
@@ -1910,38 +1910,38 @@ HYPRE_StructPFMGInitializePush(
 }
 
 /*----------------------------------------------------------------
- * HYPRE_StructPFMGFinalize thread wrappers
+ * HYPRE_StructPFMGDestroy thread wrappers
  *----------------------------------------------------------------*/
 
 typedef struct {
    HYPRE_StructSolverArray *solver;
    int  returnvalue[hypre_MAX_THREADS];
-} HYPRE_StructPFMGFinalizeArgs;
+} HYPRE_StructPFMGDestroyArgs;
 
 void
-HYPRE_StructPFMGFinalizeVoidPtr( void *argptr )
+HYPRE_StructPFMGDestroyVoidPtr( void *argptr )
 {
    int threadid = hypre_GetThreadID();
 
-   HYPRE_StructPFMGFinalizeArgs *localargs =
-      (HYPRE_StructPFMGFinalizeArgs *) argptr;
+   HYPRE_StructPFMGDestroyArgs *localargs =
+      (HYPRE_StructPFMGDestroyArgs *) argptr;
 
    (localargs -> returnvalue[threadid]) =
-      HYPRE_StructPFMGFinalize(
+      HYPRE_StructPFMGDestroy(
          (*(localargs -> solver))[threadid] );
 }
 
 int 
-HYPRE_StructPFMGFinalizePush(
+HYPRE_StructPFMGDestroyPush(
    HYPRE_StructSolverArray solver )
 {
-   HYPRE_StructPFMGFinalizeArgs pushargs;
+   HYPRE_StructPFMGDestroyArgs pushargs;
    int i;
    int  returnvalue;
 
    pushargs.solver = (HYPRE_StructSolverArray *)solver;
    for (i = 0; i < hypre_NumThreads; i++)
-      hypre_work_put( HYPRE_StructPFMGFinalizeVoidPtr, (void *)&pushargs );
+      hypre_work_put( HYPRE_StructPFMGDestroyVoidPtr, (void *)&pushargs );
 
    hypre_work_wait();
 
@@ -2634,42 +2634,42 @@ HYPRE_StructPFMGGetFinalRelativeResidualNormPush(
 }
 
 /*----------------------------------------------------------------
- * HYPRE_StructSMGInitialize thread wrappers
+ * HYPRE_StructSMGCreate thread wrappers
  *----------------------------------------------------------------*/
 
 typedef struct {
    MPI_Comm comm;
    HYPRE_StructSolverArray *solver;
    int  returnvalue[hypre_MAX_THREADS];
-} HYPRE_StructSMGInitializeArgs;
+} HYPRE_StructSMGCreateArgs;
 
 void
-HYPRE_StructSMGInitializeVoidPtr( void *argptr )
+HYPRE_StructSMGCreateVoidPtr( void *argptr )
 {
    int threadid = hypre_GetThreadID();
 
-   HYPRE_StructSMGInitializeArgs *localargs =
-      (HYPRE_StructSMGInitializeArgs *) argptr;
+   HYPRE_StructSMGCreateArgs *localargs =
+      (HYPRE_StructSMGCreateArgs *) argptr;
 
    (localargs -> returnvalue[threadid]) =
-      HYPRE_StructSMGInitialize(
+      HYPRE_StructSMGCreate(
          localargs -> comm,
          &(*(localargs -> solver))[threadid] );
 }
 
 int 
-HYPRE_StructSMGInitializePush(
+HYPRE_StructSMGCreatePush(
    MPI_Comm comm,
    HYPRE_StructSolverArray *solver )
 {
-   HYPRE_StructSMGInitializeArgs pushargs;
+   HYPRE_StructSMGCreateArgs pushargs;
    int i;
    int  returnvalue;
 
    pushargs.comm = comm;
    pushargs.solver = (HYPRE_StructSolverArray *)solver;
    for (i = 0; i < hypre_NumThreads; i++)
-      hypre_work_put( HYPRE_StructSMGInitializeVoidPtr, (void *)&pushargs );
+      hypre_work_put( HYPRE_StructSMGCreateVoidPtr, (void *)&pushargs );
 
    hypre_work_wait();
 
@@ -2679,38 +2679,38 @@ HYPRE_StructSMGInitializePush(
 }
 
 /*----------------------------------------------------------------
- * HYPRE_StructSMGFinalize thread wrappers
+ * HYPRE_StructSMGDestroy thread wrappers
  *----------------------------------------------------------------*/
 
 typedef struct {
    HYPRE_StructSolverArray *solver;
    int  returnvalue[hypre_MAX_THREADS];
-} HYPRE_StructSMGFinalizeArgs;
+} HYPRE_StructSMGDestroyArgs;
 
 void
-HYPRE_StructSMGFinalizeVoidPtr( void *argptr )
+HYPRE_StructSMGDestroyVoidPtr( void *argptr )
 {
    int threadid = hypre_GetThreadID();
 
-   HYPRE_StructSMGFinalizeArgs *localargs =
-      (HYPRE_StructSMGFinalizeArgs *) argptr;
+   HYPRE_StructSMGDestroyArgs *localargs =
+      (HYPRE_StructSMGDestroyArgs *) argptr;
 
    (localargs -> returnvalue[threadid]) =
-      HYPRE_StructSMGFinalize(
+      HYPRE_StructSMGDestroy(
          (*(localargs -> solver))[threadid] );
 }
 
 int 
-HYPRE_StructSMGFinalizePush(
+HYPRE_StructSMGDestroyPush(
    HYPRE_StructSolverArray solver )
 {
-   HYPRE_StructSMGFinalizeArgs pushargs;
+   HYPRE_StructSMGDestroyArgs pushargs;
    int i;
    int  returnvalue;
 
    pushargs.solver = (HYPRE_StructSolverArray *)solver;
    for (i = 0; i < hypre_NumThreads; i++)
-      hypre_work_put( HYPRE_StructSMGFinalizeVoidPtr, (void *)&pushargs );
+      hypre_work_put( HYPRE_StructSMGDestroyVoidPtr, (void *)&pushargs );
 
    hypre_work_wait();
 
@@ -3313,42 +3313,42 @@ HYPRE_StructSMGGetFinalRelativeResidualNormPush(
 }
 
 /*----------------------------------------------------------------
- * HYPRE_StructSparseMSGInitialize thread wrappers
+ * HYPRE_StructSparseMSGCreate thread wrappers
  *----------------------------------------------------------------*/
 
 typedef struct {
    MPI_Comm comm;
    HYPRE_StructSolverArray *solver;
    int  returnvalue[hypre_MAX_THREADS];
-} HYPRE_StructSparseMSGInitializeArgs;
+} HYPRE_StructSparseMSGCreateArgs;
 
 void
-HYPRE_StructSparseMSGInitializeVoidPtr( void *argptr )
+HYPRE_StructSparseMSGCreateVoidPtr( void *argptr )
 {
    int threadid = hypre_GetThreadID();
 
-   HYPRE_StructSparseMSGInitializeArgs *localargs =
-      (HYPRE_StructSparseMSGInitializeArgs *) argptr;
+   HYPRE_StructSparseMSGCreateArgs *localargs =
+      (HYPRE_StructSparseMSGCreateArgs *) argptr;
 
    (localargs -> returnvalue[threadid]) =
-      HYPRE_StructSparseMSGInitialize(
+      HYPRE_StructSparseMSGCreate(
          localargs -> comm,
          &(*(localargs -> solver))[threadid] );
 }
 
 int 
-HYPRE_StructSparseMSGInitializePush(
+HYPRE_StructSparseMSGCreatePush(
    MPI_Comm comm,
    HYPRE_StructSolverArray *solver )
 {
-   HYPRE_StructSparseMSGInitializeArgs pushargs;
+   HYPRE_StructSparseMSGCreateArgs pushargs;
    int i;
    int  returnvalue;
 
    pushargs.comm = comm;
    pushargs.solver = (HYPRE_StructSolverArray *)solver;
    for (i = 0; i < hypre_NumThreads; i++)
-      hypre_work_put( HYPRE_StructSparseMSGInitializeVoidPtr, (void *)&pushargs );
+      hypre_work_put( HYPRE_StructSparseMSGCreateVoidPtr, (void *)&pushargs );
 
    hypre_work_wait();
 
@@ -3358,38 +3358,38 @@ HYPRE_StructSparseMSGInitializePush(
 }
 
 /*----------------------------------------------------------------
- * HYPRE_StructSparseMSGFinalize thread wrappers
+ * HYPRE_StructSparseMSGDestroy thread wrappers
  *----------------------------------------------------------------*/
 
 typedef struct {
    HYPRE_StructSolverArray *solver;
    int  returnvalue[hypre_MAX_THREADS];
-} HYPRE_StructSparseMSGFinalizeArgs;
+} HYPRE_StructSparseMSGDestroyArgs;
 
 void
-HYPRE_StructSparseMSGFinalizeVoidPtr( void *argptr )
+HYPRE_StructSparseMSGDestroyVoidPtr( void *argptr )
 {
    int threadid = hypre_GetThreadID();
 
-   HYPRE_StructSparseMSGFinalizeArgs *localargs =
-      (HYPRE_StructSparseMSGFinalizeArgs *) argptr;
+   HYPRE_StructSparseMSGDestroyArgs *localargs =
+      (HYPRE_StructSparseMSGDestroyArgs *) argptr;
 
    (localargs -> returnvalue[threadid]) =
-      HYPRE_StructSparseMSGFinalize(
+      HYPRE_StructSparseMSGDestroy(
          (*(localargs -> solver))[threadid] );
 }
 
 int 
-HYPRE_StructSparseMSGFinalizePush(
+HYPRE_StructSparseMSGDestroyPush(
    HYPRE_StructSolverArray solver )
 {
-   HYPRE_StructSparseMSGFinalizeArgs pushargs;
+   HYPRE_StructSparseMSGDestroyArgs pushargs;
    int i;
    int  returnvalue;
 
    pushargs.solver = (HYPRE_StructSolverArray *)solver;
    for (i = 0; i < hypre_NumThreads; i++)
-      hypre_work_put( HYPRE_StructSparseMSGFinalizeVoidPtr, (void *)&pushargs );
+      hypre_work_put( HYPRE_StructSparseMSGDestroyVoidPtr, (void *)&pushargs );
 
    hypre_work_wait();
 

@@ -31,11 +31,11 @@ typedef struct
 } hypre_SMGIntAddData;
 
 /*--------------------------------------------------------------------------
- * hypre_SMGIntAddInitialize
+ * hypre_SMGIntAddCreate
  *--------------------------------------------------------------------------*/
 
 void *
-hypre_SMGIntAddInitialize( )
+hypre_SMGIntAddCreate( )
 {
    hypre_SMGIntAddData *intadd_data;
 
@@ -102,14 +102,14 @@ hypre_SMGIntAddSetup( void               *intadd_vdata,
    stencil_dim = hypre_StructStencilDim(stencil_PT);
    stencil_shape = hypre_CTAlloc(hypre_Index, stencil_size);
    hypre_CopyIndex(stencil_PT_shape[1], stencil_shape[0]);
-   stencil = hypre_NewStructStencil(stencil_dim, stencil_size, stencil_shape);
+   stencil = hypre_CreateStructStencil(stencil_dim, stencil_size, stencil_shape);
 
    hypre_GetComputeInfo(grid, stencil,
                         &send_boxes, &recv_boxes,
                         &temp_send_processes, &temp_recv_processes,
                         &indt_boxes, &dept_boxes);
 
-   hypre_FreeStructStencil(stencil);
+   hypre_DestroyStructStencil(stencil);
 
    /*----------------------------------------------------------
     * Project sends and recieves to fine and coarse points
@@ -138,15 +138,15 @@ hypre_SMGIntAddSetup( void               *intadd_vdata,
 
    hypre_ForBoxArrayI(i, f_send_boxes)
       hypre_TFree(temp_send_processes[i]);
-   hypre_FreeBoxArrayArray(f_send_boxes);
+   hypre_DestroyBoxArrayArray(f_send_boxes);
    hypre_TFree(temp_send_processes);
 
    hypre_ForBoxArrayI(i, f_recv_boxes)
       hypre_TFree(temp_recv_processes[i]);
-   hypre_FreeBoxArrayArray(f_recv_boxes);
+   hypre_DestroyBoxArrayArray(f_recv_boxes);
    hypre_TFree(temp_recv_processes);
 
-   hypre_NewComputePkg(send_boxes, recv_boxes,
+   hypre_CreateComputePkg(send_boxes, recv_boxes,
                        stride, stride,
                        send_processes, recv_processes,
                        indt_boxes, dept_boxes,
@@ -408,11 +408,11 @@ hypre_SMGIntAdd( void               *intadd_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SMGIntAddFinalize
+ * hypre_SMGIntAddDestroy
  *--------------------------------------------------------------------------*/
 
 int
-hypre_SMGIntAddFinalize( void *intadd_vdata )
+hypre_SMGIntAddDestroy( void *intadd_vdata )
 {
    int ierr = 0;
 
@@ -420,9 +420,9 @@ hypre_SMGIntAddFinalize( void *intadd_vdata )
 
    if (intadd_data)
    {
-      hypre_FreeStructMatrix(intadd_data -> PT);
-      hypre_FreeBoxArray(intadd_data -> coarse_points);
-      hypre_FreeComputePkg(intadd_data -> compute_pkg);
+      hypre_DestroyStructMatrix(intadd_data -> PT);
+      hypre_DestroyBoxArray(intadd_data -> coarse_points);
+      hypre_DestroyComputePkg(intadd_data -> compute_pkg);
       hypre_FinalizeTiming(intadd_data -> time_index);
       hypre_TFree(intadd_data);
    }

@@ -15,11 +15,11 @@
 #include "smg.h"
 
 /*--------------------------------------------------------------------------
- * hypre_SMGInitialize
+ * hypre_SMGCreate
  *--------------------------------------------------------------------------*/
 
 void *
-hypre_SMGInitialize( MPI_Comm  comm )
+hypre_SMGCreate( MPI_Comm  comm )
 {
    hypre_SMGData *smg_data;
 
@@ -49,11 +49,11 @@ hypre_SMGInitialize( MPI_Comm  comm )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SMGFinalize
+ * hypre_SMGDestroy
  *--------------------------------------------------------------------------*/
 
 int
-hypre_SMGFinalize( void *smg_vdata )
+hypre_SMGDestroy( void *smg_vdata )
 {
    hypre_SMGData *smg_data = smg_vdata;
 
@@ -72,44 +72,44 @@ hypre_SMGFinalize( void *smg_vdata )
       {
          for (l = 0; l < ((smg_data -> num_levels) - 1); l++)
          {
-            hypre_SMGRelaxFinalize(smg_data -> relax_data_l[l]);
-            hypre_SMGResidualFinalize(smg_data -> residual_data_l[l]);
-            hypre_SMGRestrictFinalize(smg_data -> restrict_data_l[l]);
-            hypre_SMGIntAddFinalize(smg_data -> intadd_data_l[l]);
+            hypre_SMGRelaxDestroy(smg_data -> relax_data_l[l]);
+            hypre_SMGResidualDestroy(smg_data -> residual_data_l[l]);
+            hypre_SMGRestrictDestroy(smg_data -> restrict_data_l[l]);
+            hypre_SMGIntAddDestroy(smg_data -> intadd_data_l[l]);
          }
-         hypre_SMGRelaxFinalize(smg_data -> relax_data_l[l]);
+         hypre_SMGRelaxDestroy(smg_data -> relax_data_l[l]);
          if (l == 0)
          {
-            hypre_SMGResidualFinalize(smg_data -> residual_data_l[l]);
+            hypre_SMGResidualDestroy(smg_data -> residual_data_l[l]);
          }
          hypre_TFree(smg_data -> relax_data_l);
          hypre_TFree(smg_data -> residual_data_l);
          hypre_TFree(smg_data -> restrict_data_l);
          hypre_TFree(smg_data -> intadd_data_l);
  
-         hypre_FreeStructVector(smg_data -> tb_l[0]);
-         hypre_FreeStructVector(smg_data -> tx_l[0]);
-         hypre_FreeStructGrid(smg_data -> grid_l[0]);
-         hypre_FreeStructMatrix(smg_data -> A_l[0]);
-         hypre_FreeStructVector(smg_data -> b_l[0]);
-         hypre_FreeStructVector(smg_data -> x_l[0]);
+         hypre_DestroyStructVector(smg_data -> tb_l[0]);
+         hypre_DestroyStructVector(smg_data -> tx_l[0]);
+         hypre_DestroyStructGrid(smg_data -> grid_l[0]);
+         hypre_DestroyStructMatrix(smg_data -> A_l[0]);
+         hypre_DestroyStructVector(smg_data -> b_l[0]);
+         hypre_DestroyStructVector(smg_data -> x_l[0]);
          for (l = 0; l < ((smg_data -> num_levels) - 1); l++)
          {
-            hypre_FreeStructGrid(smg_data -> grid_l[l+1]);
-            hypre_FreeStructMatrix(smg_data -> A_l[l+1]);
+            hypre_DestroyStructGrid(smg_data -> grid_l[l+1]);
+            hypre_DestroyStructMatrix(smg_data -> A_l[l+1]);
             if (smg_data -> PT_l[l] == smg_data -> R_l[l])
             {
-               hypre_FreeStructMatrix(smg_data -> PT_l[l]);
+               hypre_DestroyStructMatrix(smg_data -> PT_l[l]);
             }
             else
             {
-               hypre_FreeStructMatrix(smg_data -> PT_l[l]);
-               hypre_FreeStructMatrix(smg_data -> R_l[l]);
+               hypre_DestroyStructMatrix(smg_data -> PT_l[l]);
+               hypre_DestroyStructMatrix(smg_data -> R_l[l]);
             }
-            hypre_FreeStructVector(smg_data -> b_l[l+1]);
-            hypre_FreeStructVector(smg_data -> x_l[l+1]);
-            hypre_FreeStructVector(smg_data -> tb_l[l+1]);
-            hypre_FreeStructVector(smg_data -> tx_l[l+1]);
+            hypre_DestroyStructVector(smg_data -> b_l[l+1]);
+            hypre_DestroyStructVector(smg_data -> x_l[l+1]);
+            hypre_DestroyStructVector(smg_data -> tb_l[l+1]);
+            hypre_DestroyStructVector(smg_data -> tx_l[l+1]);
          }
          hypre_SharedTFree(smg_data -> data);
          hypre_TFree(smg_data -> grid_l);
@@ -404,15 +404,15 @@ hypre_SMGSetStructVectorConstantValues( hypre_StructVector *vector,
 
          hypre_GetStrideBoxSize(box, stride, loop_size);
 
-	 hypre_BoxLoop1Begin(loop_size,
+         hypre_BoxLoop1Begin(loop_size,
                              v_data_box, start, stride, vi);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,vi
 #include "hypre_box_smp_forloop.h"
-	 hypre_BoxLoop1For(loopi, loopj, loopk, vi)
+         hypre_BoxLoop1For(loopi, loopj, loopk, vi)
             {
                vp[vi] = values;
             }
-	 hypre_BoxLoop1End(vi);
+         hypre_BoxLoop1End(vi);
       }
 
    return ierr;

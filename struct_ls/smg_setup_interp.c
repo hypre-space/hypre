@@ -15,13 +15,13 @@
 #include "smg.h"
 
 /*--------------------------------------------------------------------------
- * hypre_SMGNewInterpOp
+ * hypre_SMGCreateInterpOp
  *--------------------------------------------------------------------------*/
 
 hypre_StructMatrix *
-hypre_SMGNewInterpOp( hypre_StructMatrix *A,
-                      hypre_StructGrid   *cgrid,
-                      int                 cdir  )
+hypre_SMGCreateInterpOp( hypre_StructMatrix *A,
+                         hypre_StructGrid   *cgrid,
+                         int                 cdir  )
 {
    hypre_StructMatrix   *PT;
 
@@ -44,13 +44,14 @@ hypre_SMGNewInterpOp( hypre_StructMatrix *A,
    }
    hypre_IndexD(stencil_shape[0], cdir) = -1;
    hypre_IndexD(stencil_shape[1], cdir) =  1;
-   stencil = hypre_NewStructStencil(stencil_dim, stencil_size, stencil_shape);
+   stencil =
+      hypre_CreateStructStencil(stencil_dim, stencil_size, stencil_shape);
 
    /* set up matrix */
-   PT = hypre_NewStructMatrix(hypre_StructMatrixComm(A), cgrid, stencil);
+   PT = hypre_CreateStructMatrix(hypre_StructMatrixComm(A), cgrid, stencil);
    hypre_SetStructMatrixNumGhost(PT, num_ghost);
 
-   hypre_FreeStructStencil(stencil);
+   hypre_DestroyStructStencil(stencil);
  
    return PT;
 }
@@ -159,9 +160,9 @@ hypre_SMGSetupInterpOp( void               *relax_data,
 
    compute_pkg_stencil_shape =
       hypre_CTAlloc(hypre_Index, compute_pkg_stencil_size);
-   compute_pkg_stencil = hypre_NewStructStencil(compute_pkg_stencil_dim,
-                                                compute_pkg_stencil_size,
-                                                compute_pkg_stencil_shape);
+   compute_pkg_stencil = hypre_CreateStructStencil(compute_pkg_stencil_dim,
+                                                   compute_pkg_stencil_size,
+                                                   compute_pkg_stencil_shape);
 
    for (si = 0; si < PT_stencil_size; si++)
    {
@@ -184,7 +185,7 @@ hypre_SMGSetupInterpOp( void               *relax_data,
          }
       }
       A_mask =
-         hypre_NewStructMatrixMask(A, num_stencil_indices, stencil_indices);
+         hypre_CreateStructMatrixMask(A, num_stencil_indices, stencil_indices);
       hypre_TFree(stencil_indices);
 
       /*-----------------------------------------------------
@@ -202,7 +203,7 @@ hypre_SMGSetupInterpOp( void               *relax_data,
        * Free up A_mask matrix
        *-----------------------------------------------------*/
 
-      hypre_FreeStructMatrix(A_mask);
+      hypre_DestroyStructMatrix(A_mask);
 
       /*-----------------------------------------------------
        * Set up compute package for communication of 
@@ -220,13 +221,13 @@ hypre_SMGSetupInterpOp( void               *relax_data,
       hypre_ProjectBoxArrayArray(recv_boxes, findex, stride);
       hypre_ProjectBoxArrayArray(indt_boxes, cindex, stride);
       hypre_ProjectBoxArrayArray(dept_boxes, cindex, stride);
-      hypre_NewComputePkg(send_boxes, recv_boxes,
-                          stride, stride,
-                          send_processes, recv_processes,
-                          indt_boxes, dept_boxes,
-                          stride, fgrid,
-                          hypre_StructVectorDataSpace(x), 1,
-                          &compute_pkg);
+      hypre_CreateComputePkg(send_boxes, recv_boxes,
+                             stride, stride,
+                             send_processes, recv_processes,
+                             indt_boxes, dept_boxes,
+                             stride, fgrid,
+                             hypre_StructVectorDataSpace(x), 1,
+                             &compute_pkg);
 
       /*-----------------------------------------------------
        * Copy coefficients from x into P^T
@@ -298,13 +299,13 @@ hypre_SMGSetupInterpOp( void               *relax_data,
        * Free up compute package info
        *-----------------------------------------------------*/
 
-      hypre_FreeComputePkg(compute_pkg);
+      hypre_DestroyComputePkg(compute_pkg);
    }
 
    /* Tell SMGRelax that the stencil has changed */
    hypre_SMGRelaxSetNewMatrixStencil(relax_data, PT_stencil);
 
-   hypre_FreeStructStencil(compute_pkg_stencil);
+   hypre_DestroyStructStencil(compute_pkg_stencil);
 
    hypre_AssembleStructMatrix(PT);
 
