@@ -13,6 +13,13 @@
  *
  *****************************************************************************/
 
+/* include files for standalone pcg.c */
+#if 0
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h> 
+#endif
+
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
@@ -68,11 +75,13 @@ typedef struct
 
 } hypre_PCGData;
 
+/* memory macros for standalone pcg.c */
+#if 0
 #define hypre_CTAlloc(type, count) \
 ( (type *)hypre_KrylovCAlloc((unsigned int)(count), (unsigned int)sizeof(type)) )
-
 #define hypre_TFree(ptr) \
 ( hypre_KrylovFree((char *)ptr), ptr = NULL )
+#endif
 
 /*--------------------------------------------------------------------------
  * hypre_KrylovIdentitySetup
