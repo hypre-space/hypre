@@ -403,8 +403,94 @@ impl_Hypre_GMRES_Setup(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.GMRES.Setup) */
   /* Insert the implementation of the Setup method here... */
-   /* Setup is not done here because it requires the entire problem.
-      It is done in Apply instead. */
+   int ierr=0;
+   MPI_Comm comm;
+   HYPRE_Solver solver;
+   HYPRE_Solver * psolver = &solver; /* will get a real value later */
+   struct Hypre_GMRES__data * data;
+   Hypre_Operator mat;
+   HYPRE_Matrix HYPRE_A;
+   Hypre_ParCSRMatrix HypreP_A;
+   HYPRE_ParCSRMatrix AA;
+   HYPRE_IJMatrix ij_A;
+   HYPRE_Vector HYPRE_x, HYPRE_b;
+   Hypre_ParCSRVector HypreP_b, HypreP_x;
+   HYPRE_ParVector bb, xx;
+   HYPRE_IJVector ij_b, ij_x;
+   struct Hypre_ParCSRMatrix__data * dataA;
+   struct Hypre_ParCSRVector__data * datab, * datax;
+   void * objectA, * objectb, * objectx;
+
+   data = Hypre_GMRES__get_data( self );
+   comm = data->comm;
+   assert( comm != (MPI_Comm)NULL ); /* SetCommunicator should have been called earlier */
+   mat = data->matrix;
+   assert( mat != NULL ); /* SetOperator should have been called earlier */
+
+   if ( data -> vector_type == NULL ) {
+      /* This is the first time this Babel GMRES object has seen a vector.
+         So we are ready to create the Hypre GMRES object. */
+      if ( Hypre_Vector_queryInterface( b, "Hypre.ParCSRVector") ) {
+         data -> vector_type = "ParVector";
+         HYPRE_ParCSRGMRESCreate( comm, psolver );
+         assert( solver != NULL );
+         data -> solver = *psolver;
+      }
+      /* Add more vector types here */
+      else {
+         assert( "only ParCSRVector supported by GMRES"==0 );
+      }
+      Hypre_GMRES__set_data( self, data );
+   }
+   else {
+      solver = data->solver;
+      assert( solver != NULL );
+   };
+   /* The SetParameter functions set parameters in the local Babel-interface struct,
+      "data".  That is because the HYPRE struct (where they are actually used) may
+      not exist yet when the functions are called.  At this point we finally know
+      the HYPRE struct exists, so we copy the parameters to it. */
+   ierr += impl_Hypre_GMRES_Copy_Parameters_to_HYPRE_struct( self );
+   if ( data->vector_type == "ParVector" ) {
+         HypreP_b = Hypre_Vector__cast2
+            ( Hypre_Vector_queryInterface( b, "Hypre.ParCSRVector"),
+              "Hypre.ParCSRVector" );
+         datab = Hypre_ParCSRVector__get_data( HypreP_b );
+         ij_b = datab -> ij_b;
+         ierr += HYPRE_IJVectorGetObject( ij_b, &objectb );
+         bb = (HYPRE_ParVector) objectb;
+         HYPRE_b = (HYPRE_Vector) bb;
+
+         HypreP_x = Hypre_Vector__cast2
+            ( Hypre_Vector_queryInterface( x, "Hypre.ParCSRVector"),
+              "Hypre.ParCSRVector" );
+         datax = Hypre_ParCSRVector__get_data( HypreP_x );
+         ij_x = datax -> ij_b;
+         ierr += HYPRE_IJVectorGetObject( ij_x, &objectx );
+         xx = (HYPRE_ParVector) objectx;
+         HYPRE_x = (HYPRE_Vector) xx;
+
+         HypreP_A = Hypre_Operator__cast2
+            ( Hypre_Operator_queryInterface( mat, "Hypre.ParCSRMatrix"),
+              "Hypre.ParCSRMatrix" );
+         assert( HypreP_A != NULL );
+         dataA = Hypre_ParCSRMatrix__get_data( HypreP_A );
+         ij_A = dataA -> ij_A;
+         ierr += HYPRE_IJMatrixGetObject( ij_A, &objectA );
+         AA = (HYPRE_ParCSRMatrix) objectA;
+         HYPRE_A = (HYPRE_Matrix) AA;
+
+   }
+   else {
+         assert( "only ParCSRVector supported by GMRES"==0 );
+   }
+      
+   ierr += HYPRE_GMRESSetPrecond( solver, data->precond, data->precond_setup,
+                                *(data->solverprecond) );
+   HYPRE_GMRESSetup( solver, HYPRE_A, HYPRE_b, HYPRE_x );
+
+   return ierr;
+
   /* DO-NOT-DELETE splicer.end(Hypre.GMRES.Setup) */
 }
 
@@ -450,13 +536,6 @@ impl_Hypre_GMRES_Apply(
    assert( comm != (MPI_Comm)NULL ); /* SetCommunicator should have been called earlier */
    mat = data->matrix;
    assert( mat != NULL ); /* SetOperator should have been called earlier */
-
-   if ( *x==NULL ) {  /* If vector not supplied, make one...*/
-      /* There's no good way to check the size of x.  It would be good to do
-         something similar if x had zero length.  Or assert(x has the right size) */
-      Hypre_Vector_Clone( b, x );
-      Hypre_Vector_Clear( *x );
-   }
 
    if ( data -> vector_type == NULL ) {
       /* This is the first time this Babel GMRES object has seen a vector.
@@ -518,7 +597,7 @@ impl_Hypre_GMRES_Apply(
       
    ierr += HYPRE_GMRESSetPrecond( solver, data->precond, data->precond_setup,
                                 *(data->solverprecond) );
-   HYPRE_GMRESSetup( solver, HYPRE_A, HYPRE_b, HYPRE_x );
+
    HYPRE_GMRESSolve( solver, HYPRE_A, HYPRE_b, HYPRE_x );
 
    return ierr;

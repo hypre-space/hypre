@@ -417,8 +417,66 @@ impl_Hypre_ParAMG_Setup(
   /* DO-NOT-DELETE splicer.begin(Hypre.ParAMG.Setup) */
   /* Insert the implementation of the Setup method here... */
    int ierr = 0;
-   /* nothing to implement - HYPRE_BoomerAMGSetup requires
-      the vectors x,y in Ay=x.  So we do Setup in Apply. */
+
+/* >>> TO DO... everything needed to compute the arguments, but no more.
+   >>> The following is copied from Apply.... >>> */
+   void * objectA, * objectb, * objectx;
+   HYPRE_Solver solver;
+   struct Hypre_ParAMG__data * data;
+   struct Hypre_ParCSRMatrix__data * dataA;
+   struct Hypre_ParCSRVector__data * datab, * datax;
+   Hypre_ParCSRMatrix A;
+   HYPRE_IJMatrix ij_A;
+   HYPRE_ParCSRMatrix HypreP_A;
+   Hypre_ParCSRVector HypreP_b, HypreP_x;
+   HYPRE_ParVector bb, xx;
+   HYPRE_IJVector ij_b, ij_x;
+
+   data = Hypre_ParAMG__get_data( self );
+   solver = data->solver;
+   A = data->matrix;
+
+   dataA = Hypre_ParCSRMatrix__get_data( A );
+   ij_A = dataA -> ij_A;
+   ierr += HYPRE_IJMatrixGetObject( ij_A, &objectA );
+   HypreP_A = (HYPRE_ParCSRMatrix) objectA;
+
+   if ( Hypre_Vector_queryInterface(b, "Hypre.ParCSRVector" ) ) {
+      /* perhaps Hypre_Vector_isInstanceOf( x, "ParCSRVector" ) might do the same job */
+      HypreP_b = Hypre_Vector__cast2( b, "Hypre.ParCSRVector" );
+   }
+   else {
+      assert( "Unrecognized vector type."==(char *)x );
+   }
+   /* This is the old code for the above.
+      HypreP_b = Hypre_Vector__cast2
+         ( Hypre_Vector_queryInterface( b, "Hypre.ParCSRVector"), "Hypre.ParCSRVector" );
+      assert( HypreP_b!=NULL );
+   */
+
+   datab = Hypre_ParCSRVector__get_data( HypreP_b );
+   ij_b = datab -> ij_b;
+   ierr += HYPRE_IJVectorGetObject( ij_b, &objectb );
+   bb = (HYPRE_ParVector) objectb;
+
+   if ( Hypre_Vector_queryInterface( x, "Hypre.ParCSRVector" ) ) {
+      HypreP_x = Hypre_Vector__cast2( x, "Hypre.ParCSRVector" );
+   }
+   else {
+      assert( "Unrecognized vector type."==(char *)(x) );
+   }
+   /* This is the old code for the above.
+      HypreP_x = Hypre_Vector__cast2
+         ( Hypre_Vector_queryInterface( x, "Hypre.ParCSRVector"), "Hypre.ParCSRVector" );
+      assert( HypreP_x!=NULL );
+   */
+
+   datax = Hypre_ParCSRVector__get_data( HypreP_x );
+   ij_x = datax -> ij_b;
+   ierr += HYPRE_IJVectorGetObject( ij_x, &objectx );
+   xx = (HYPRE_ParVector) objectx;
+   ierr += HYPRE_BoomerAMGSetup( solver, HypreP_A, bb, xx );
+
    return ierr;
   /* DO-NOT-DELETE splicer.end(Hypre.ParAMG.Setup) */
 }
@@ -499,7 +557,6 @@ impl_Hypre_ParAMG_Apply(
    ierr += HYPRE_IJVectorGetObject( ij_x, &objectx );
    xx = (HYPRE_ParVector) objectx;
 
-   ierr += HYPRE_BoomerAMGSetup( solver, HypreP_A, bb, xx );
    ierr += HYPRE_BoomerAMGSolve( solver, HypreP_A, bb, xx );
 
    return ierr;
