@@ -12,10 +12,10 @@
  *
  *****************************************************************************/
 
+#ifdef HYPRE_USE_PTHREADS
+
 #ifndef hypre_BOX_PTHREADS_HEADER
 #define hypre_BOX_PTHREADS_HEADER
-
-#ifdef HYPRE_USE_PTHREADS
 
 #include <pthread.h>
 #include "threading.h"
@@ -130,8 +130,6 @@ extern int iteration_counter;
       else\
          clfinish[2] = hypre__nz
 
-
-
 #define hypre_BoxLoop0(i, j, k,loop_size,\
                        body)\
 {\
@@ -161,7 +159,6 @@ extern int iteration_counter;
       });\
    }\
 }
-
 
 #define hypre_BoxLoop1(i, j, k, loop_size,\
                        data_box1, start1, stride1, i1,\
@@ -199,8 +196,6 @@ extern int iteration_counter;
       });\
    }\
 }
-
-
 
 #define hypre_BoxLoop2(i, j, k, loop_size,\
                        data_box1, start1, stride1, i1,\
@@ -245,7 +240,6 @@ extern int iteration_counter;
       });\
    }\
 }
-
 
 #define hypre_BoxLoop3(i, j, k, loop_size,\
                        data_box1, start1, stride1, i1,\
@@ -298,8 +292,6 @@ extern int iteration_counter;
       })\
    }\
 }
-
-
 
 #define hypre_BoxLoop4(i, j, k, loop_size,\
                        data_box1, start1, stride1, i1,\
@@ -358,8 +350,6 @@ extern int iteration_counter;
       });\
    }\
 }
-
-
 
 #endif
 

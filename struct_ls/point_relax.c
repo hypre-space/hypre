@@ -12,9 +12,6 @@
  *****************************************************************************/
 
 #include "headers.h"
-#ifdef HYPRE_USE_PTHREADS
-#include "box_pthreads.h"
-#endif
 
 /*--------------------------------------------------------------------------
  * hypre_PointRelaxData data structure

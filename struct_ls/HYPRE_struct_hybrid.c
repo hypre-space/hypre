@@ -13,10 +13,6 @@
 
 #include "headers.h"
 
-#ifdef HYPRE_USE_PTHREADS
-#include "box_pthreads.h"
-#endif
-
 /*--------------------------------------------------------------------------
  * HYPRE_StructHybridInitialize
  *--------------------------------------------------------------------------*/

@@ -13,9 +13,6 @@
 
 #include "headers.h"
 #include "pfmg.h"
-#ifdef HYPRE_USE_PTHREADS
-#include "box_pthreads.h"
-#endif
 
 /*--------------------------------------------------------------------------
  * hypre_PFMGNewInterpOp
