@@ -218,7 +218,7 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
          printf("    - setDebug <slideReduction1,amgDebug,printFEInfo>\n");
          printf("    - haveFEData <0,1>\n");
          printf("    - schurReduction\n");
-         printf("    - slideReduction or slideReduction2\n");
+         printf("    - slideReduction, slideReduction2, slideReduction3\n");
          printf("    - AConjugateProjection <dsize>\n");
          printf("    - minResProjection <dsize>\n");
          printf("    - solver <cg,gmres,bicgstab,boomeramg,superlux,..>\n");
@@ -318,6 +318,8 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
             HYOutputLevel_ |= HYFEI_PRINTFEINFO;
          else if (!strcmp(param2, "ddilut")) 
            HYOutputLevel_ |= HYFEI_DDILUT;
+         else if (!strcmp(param2, "stopAfterPrint")) 
+           HYOutputLevel_ |= HYFEI_STOPAFTERPRINT;
          else if (!strcmp(param2, "off")) 
             HYOutputLevel_ = 0;
          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
@@ -360,6 +362,12 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
       else if ( !strcmp(param1, "slideReduction2") )
       {
          slideReduction_ = 2;
+         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+            printf("       HYPRE_LSC::parameters - slide reduction.\n");
+      }
+      else if ( !strcmp(param1, "slideReduction3") )
+      {
+         slideReduction_ = 3;
          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
             printf("       HYPRE_LSC::parameters - slide reduction.\n");
       }
@@ -3880,7 +3888,7 @@ void HYPRE_LinSysCore::solveUsingY12M(int& status)
    }
    if (slideReduction_  == 1) 
         nrows = localEndRow_ - 2 * nConstraints_;
-   else if (slideReduction_  == 2) 
+   else if (slideReduction_  == 2 || slideReduction_ == 3) 
         nrows = localEndRow_ - nConstraints_;
    else if (schurReduction_ == 1) 
         nrows = localEndRow_ - localStartRow_ + 1 - A21NRows_;
@@ -4041,7 +4049,7 @@ void HYPRE_LinSysCore::solveUsingAMGe(int &iterations)
    }
    if (slideReduction_  == 1) 
         nrows = localEndRow_ - 2 * nConstraints_;
-   else if (slideReduction_  == 2) 
+   else if (slideReduction_  == 2 || slideReduction_ == 3) 
         nrows = localEndRow_ - nConstraints_;
    else if (schurReduction_ == 1) 
         nrows = localEndRow_ - localStartRow_ + 1 - A21NRows_;
@@ -4445,29 +4453,37 @@ void HYPRE_LinSysCore::addToMinResProjectionSpace(HYPRE_IJVector xvec,
       HYPRE_IJVectorGetObject(HYpbs_[i], (void **) &v_csr);
       HYPRE_ParVectorInnerProd(r_csr, v_csr, &alpha);
       alpha = - alpha;
-      hypre_ParVectorAxpy(alpha,(hypre_ParVector*)v_csr,
-                                (hypre_ParVector*)bn_csr);
-      HYPRE_IJVectorGetObject(HYpxs_[i], (void **) &v_csr);
-      hypre_ParVectorAxpy(alpha,(hypre_ParVector*)v_csr,
-                                (hypre_ParVector*)xn_csr);
+      if ( alpha != 0.0 )
+      {
+         hypre_ParVectorAxpy(alpha,(hypre_ParVector*)v_csr,
+                                   (hypre_ParVector*)bn_csr);
+         HYPRE_IJVectorGetObject(HYpxs_[i], (void **) &v_csr);
+         hypre_ParVectorAxpy(alpha,(hypre_ParVector*)v_csr,
+                                   (hypre_ParVector*)xn_csr);
+      }
    }
    HYPRE_ParVectorInnerProd( bn_csr, bn_csr, &alpha);
    alpha = sqrt( alpha );
-   alpha = 1.0 / alpha;
-   hypre_ParVectorScale(alpha,(hypre_ParVector*)bn_csr);
-   hypre_ParVectorScale(alpha,(hypre_ParVector*)xn_csr);
-
-   projectCurrSize_++;
+   if ( alpha != 0.0 )
+   {
+      alpha = 1.0 / alpha;
+      hypre_ParVectorScale(alpha,(hypre_ParVector*)bn_csr);
+      hypre_ParVectorScale(alpha,(hypre_ParVector*)xn_csr);
+      projectCurrSize_++;
+   }
 
    //-----------------------------------------------------------------------
    // update final solution 
    //-----------------------------------------------------------------------
 
-   HYPRE_IJVectorGetObject(HYpxs_[projectSize_], (void **) &v_csr);
-   hypre_ParVectorAxpy(1.0,(hypre_ParVector*)v_csr,(hypre_ParVector*)x_csr);
+   if ( alpha != 0.0 )
+   {
+      HYPRE_IJVectorGetObject(HYpxs_[projectSize_], (void **) &v_csr);
+      hypre_ParVectorAxpy(1.0,(hypre_ParVector*)v_csr,(hypre_ParVector*)x_csr);
 
-   HYPRE_IJVectorGetObject(HYpbs_[projectSize_], (void **) &v_csr);
-   hypre_ParVectorAxpy(1.0,(hypre_ParVector*)v_csr,(hypre_ParVector*)b_csr);
+      HYPRE_IJVectorGetObject(HYpbs_[projectSize_], (void **) &v_csr);
+      hypre_ParVectorAxpy(1.0,(hypre_ParVector*)v_csr,(hypre_ParVector*)b_csr);
+   }
 
    //-----------------------------------------------------------------------
    // diagnostic message
@@ -4662,28 +4678,36 @@ void HYPRE_LinSysCore::addToAConjProjectionSpace(HYPRE_IJVector xvec,
    {
       HYPRE_IJVectorGetObject(HYpbs_[i], (void **) &v_csr);
       HYPRE_ParVectorInnerProd( x_csr, v_csr, &alpha);
-      alpha = - alpha;
-      HYPRE_IJVectorGetObject(HYpxs_[i], (void **) &v_csr);
-      hypre_ParVectorAxpy(alpha,(hypre_ParVector*)v_csr,
-                                (hypre_ParVector*)xn_csr);
+      if ( alpha != 0.0 )
+      {
+         alpha = - alpha;
+         HYPRE_IJVectorGetObject(HYpxs_[i], (void **) &v_csr);
+         hypre_ParVectorAxpy(alpha,(hypre_ParVector*)v_csr,
+                                   (hypre_ParVector*)xn_csr);
+      }
    }
    HYPRE_ParCSRMatrixMatvec( 1.0, A_csr, xn_csr, 0.0, bn_csr );
    HYPRE_ParVectorInnerProd( xn_csr, bn_csr, &alpha);
-   alpha = 1.0 / sqrt( alpha );
-   hypre_ParVectorScale(alpha,(hypre_ParVector*)xn_csr);
-   hypre_ParVectorScale(alpha,(hypre_ParVector*)bn_csr);
-
-   projectCurrSize_++;
+   if ( alpha != 0.0 )
+   {
+      alpha = 1.0 / sqrt( alpha );
+      hypre_ParVectorScale(alpha,(hypre_ParVector*)xn_csr);
+      hypre_ParVectorScale(alpha,(hypre_ParVector*)bn_csr);
+      projectCurrSize_++;
+   }
 
    //-----------------------------------------------------------------------
    // update final solution 
    //-----------------------------------------------------------------------
 
-   HYPRE_IJVectorGetObject(HYpxs_[projectSize_], (void **) &v_csr);
-   hypre_ParVectorAxpy(1.0,(hypre_ParVector*)v_csr,(hypre_ParVector*)x_csr);
+   if ( alpha != 0.0 )
+   {
+      HYPRE_IJVectorGetObject(HYpxs_[projectSize_], (void **) &v_csr);
+      hypre_ParVectorAxpy(1.0,(hypre_ParVector*)v_csr,(hypre_ParVector*)x_csr);
 
-   HYPRE_IJVectorGetObject(HYpbs_[projectSize_], (void **) &v_csr);
-   hypre_ParVectorAxpy(1.0,(hypre_ParVector*)v_csr,(hypre_ParVector*)b_csr);
+      HYPRE_IJVectorGetObject(HYpbs_[projectSize_], (void **) &v_csr);
+      hypre_ParVectorAxpy(1.0,(hypre_ParVector*)v_csr,(hypre_ParVector*)b_csr);
+   }
 
    //-----------------------------------------------------------------------
    // diagnostic message

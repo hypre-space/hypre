@@ -39,6 +39,7 @@
 #include "HYPRE_LSI_ddict.h"
 #include "HYPRE_LSI_poly.h"
 #include "HYPRE_LSI_block.h"
+#include "HYPRE_SlideReduction.h"
 
 //***************************************************************************
 // SuperLU includes
@@ -1559,7 +1560,7 @@ int HYPRE_LinSysCore::getMatrixRow(int row, double* coefs, int* indices,
 int HYPRE_LinSysCore::sumIntoRHSVector(int num, const double* values,
                        const int* indices)
 {
-   int    i, ierr, *local_ind;
+   int    i, ierr, *localInds;
 
    //-------------------------------------------------------------------
    // diagnostic message
@@ -1580,15 +1581,15 @@ int HYPRE_LinSysCore::sumIntoRHSVector(int num, const double* values,
    // change the incoming indices to 0-based before loading
    //-------------------------------------------------------------------
 
-   local_ind = new int[num];
+   localInds = new int[num];
    for ( i = 0; i < num; i++ ) // change to 0-based
    {
 #if defined(NOFEI)
       if ( indices[i] >= localStartRow_  && indices[i] <= localEndRow_ )
-         local_ind[i] = indices[i] - 1;
+         localInds[i] = indices[i] - 1;
 #else
       if ((indices[i]+1) >= localStartRow_  && (indices[i]+1) <= localEndRow_)
-         local_ind[i] = indices[i];
+         localInds[i] = indices[i];
 #endif
       else
       {
@@ -1598,11 +1599,11 @@ int HYPRE_LinSysCore::sumIntoRHSVector(int num, const double* values,
       }
    }
 
-   ierr = HYPRE_IJVectorAddToValues(HYb_, num, (const int *) local_ind, 
+   ierr = HYPRE_IJVectorAddToValues(HYb_, num, (const int *) localInds, 
                                     (const double *) values);
    assert(!ierr);
 
-   delete [] local_ind;
+   delete [] localInds;
 
    //-------------------------------------------------------------------
    // diagnostic message
@@ -2565,7 +2566,7 @@ int HYPRE_LinSysCore::setRHSID(int rhsID)
 int HYPRE_LinSysCore::putInitialGuess(const int* eqnNumbers,
                                        const double* values, int leng) 
 {
-   int i, ierr, *local_ind, *iarray, *iarray2;
+   int i, ierr, *localInds, *iarray, *iarray2;
 
    //-------------------------------------------------------------------
    // diagnostic message
@@ -2597,11 +2598,11 @@ int HYPRE_LinSysCore::putInitialGuess(const int* eqnNumbers,
       }
    }
 
-   local_ind = new int[leng];
+   localInds = new int[leng];
    for ( i = 0; i < leng; i++ ) // change to 0-based
    {
       if ((eqnNumbers[i]+1) >= localStartRow_ && 
-          (eqnNumbers[i]+1) <= localEndRow_) local_ind[i] = eqnNumbers[i];
+          (eqnNumbers[i]+1) <= localEndRow_) localInds[i] = eqnNumbers[i];
       else
       {
          printf("%d : putInitialGuess ERROR - index %d out of range\n",
@@ -2614,11 +2615,11 @@ int HYPRE_LinSysCore::putInitialGuess(const int* eqnNumbers,
          mapFromSolnList2_[mapFromSolnLeng_++] = (int) values[i];
       }
    }
-   ierr = HYPRE_IJVectorSetValues(HYx_, leng, (const int *) local_ind,
+   ierr = HYPRE_IJVectorSetValues(HYx_, leng, (const int *) localInds,
                                   (const double *) values);
    assert(!ierr);
 
-   delete [] local_ind;
+   delete [] localInds;
 
    //-------------------------------------------------------------------
    // diagnostic message
@@ -3188,18 +3189,17 @@ int HYPRE_LinSysCore::formResidual(double* values, int leng)
 
 int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
 {
-   int                i, j, num_iterations=0, status, *num_sweeps, *relax_type;
-   int                ierr, localNRows, rowNum, index, x2NRows;
-   int                startRow, *int_array, *gint_array, startRow2;
-   int                rowSize, *colInd, nnz, nrows;
-   double             rnorm=0.0, *relax_wt, ddata, *colVal, value;
+   int                i, j, numIterations=0, status, ierr, localNRows;
+   int                startRow, *procNRows, rowSize, *colInd, nnz, nrows;
+   double             rnorm=0.0, ddata, *colVal;
    double             stime, etime, ptime, rtime1, rtime2, newnorm;
    char               fname[40];
    FILE               *fp;
+   HYPRE_IJMatrix     TempA;
+   HYPRE_IJVector     TempX, TempB, TempR;
    HYPRE_ParCSRMatrix A_csr;
-   HYPRE_ParVector    x_csr;
-   HYPRE_ParVector    b_csr;
-   HYPRE_ParVector    r_csr;
+   HYPRE_ParVector    x_csr, b_csr, r_csr;
+   HYPRE_SlideReduction *slideObj;
 
    //-------------------------------------------------------------------
    // diagnostic message 
@@ -3227,6 +3227,36 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
       constrList_ = NULL;
       if      ( slideReduction_ == 1 ) buildSlideReducedSystem();
       else if ( slideReduction_ == 2 ) buildSlideReducedSystem2();
+      else if ( slideReduction_ == 3 ) 
+      {
+         slideObj = new HYPRE_SlideReduction(comm_);
+         TempA = currA_;
+         TempX = currX_;
+         TempB = currB_;
+         TempR = currR_;
+         if ( HYOutputLevel_ & HYFEI_SLIDEREDUCE1 )
+            slideObj->setOutputLevel(1);
+         if ( HYOutputLevel_ & HYFEI_SLIDEREDUCE2 )
+            slideObj->setOutputLevel(2);
+         if ( HYOutputLevel_ & HYFEI_SLIDEREDUCE3 )
+            slideObj->setOutputLevel(3);
+         slideObj->setup(currA_, currX_, currB_);
+         slideObj->getReducedMatrix(&currA_);
+         slideObj->getReducedSolnVector(&currX_);
+         slideObj->getReducedRHSVector(&currB_);
+         slideObj->getReducedAuxVector(&currR_);
+HYPRE_IJVectorGetObject(currB_, (void **) &b_csr);
+HYPRE_ParVectorInnerProd( b_csr, b_csr, &rnorm);
+printf("rnorm = %e\n", sqrt(rnorm));
+         if ( currA_ == NULL )
+         {
+printf("REPLACE AGAIN\n");
+            currA_ = TempA;
+            currX_ = TempX;
+            currB_ = TempB;
+            currR_ = TempR;
+         }
+      }
    }
 
    MPI_Barrier(comm_);
@@ -3247,54 +3277,10 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
 
    if ( HYOutputLevel_ & HYFEI_PRINTREDMAT )
    {
-      if ( schurReduction_ == 1 )
-      {
-         x2NRows = localEndRow_ - localStartRow_ + 1 - A21NRows_;
-         int_array = new int[numProcs_];
-         gint_array = new int[numProcs_];
-         for ( i = 0; i < numProcs_; i++ ) int_array[i] = 0;
-         int_array[mypid_] = x2NRows;
-         MPI_Allreduce(int_array,gint_array,numProcs_,MPI_INT,MPI_SUM,comm_);
-         rowNum = 0;
-         for ( i = 0; i < mypid_; i++ ) rowNum += gint_array[i];
-         startRow = rowNum;
-         delete [] int_array;
-         delete [] gint_array;
-         nrows = x2NRows;
-      }
-      else if ( slideReduction_ == 1 )
-      {
-         int_array = new int[numProcs_];
-         gint_array = new int[numProcs_];
-         for ( i = 0; i < numProcs_; i++ ) int_array[i] = 0;
-         int_array[mypid_] = 2 * nConstraints_;
-         MPI_Allreduce(int_array,gint_array,numProcs_,MPI_INT,MPI_SUM,comm_);
-         rowNum = 0;
-         for ( i = 0; i < mypid_; i++ ) rowNum += gint_array[i];
-         startRow = localStartRow_ - 1 - rowNum;
-         delete [] int_array;
-         delete [] gint_array;
-         nrows = localEndRow_ - localStartRow_ + 1 - 2 * nConstraints_;
-      }
-      else if ( slideReduction_ == 2 )
-      {
-         int_array = new int[numProcs_];
-         gint_array = new int[numProcs_];
-         for ( i = 0; i < numProcs_; i++ ) int_array[i] = 0;
-         int_array[mypid_] = nConstraints_;
-         MPI_Allreduce(int_array,gint_array,numProcs_,MPI_INT,MPI_SUM,comm_);
-         rowNum = 0;
-         for ( i = 0; i < mypid_; i++ ) rowNum += gint_array[i];
-         startRow = localStartRow_ - 1 - rowNum;
-         delete [] int_array;
-         delete [] gint_array;
-         nrows = localEndRow_ - localStartRow_ + 1 - nConstraints_;
-      }
-      else
-      {
-         nrows = localEndRow_ - localStartRow_ + 1;
-         startRow = localStartRow_ - 1;
-      }
+      HYPRE_ParCSRMatrixGetRowPartitioning( A_csr, &procNRows );
+      startRow = procNRows[mypid_];
+      nrows = procNRows[mypid_+1] - startRow;
+      free( procNRows );
 
       sprintf(fname, "hypre_mat.out.%d", mypid_);
       fp = fopen( fname, "w");
@@ -3312,7 +3298,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
          for ( j = 0; j < rowSize; j++ )
          {
             if ( colVal[j] != 0.0 )
-               fprintf(fp, "%6d  %6d  %25.16e \n",i+1,colInd[j]+1, colVal[j]);
+               fprintf(fp, "%6d  %6d  %25.8e \n",i+1,colInd[j]+1, colVal[j]);
          }
          HYPRE_ParCSRMatrixRestoreRow(A_csr,i,&rowSize,&colInd,&colVal);
       }
@@ -3324,10 +3310,15 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
       for ( i = startRow; i < startRow+nrows; i++ )
       {
          HYPRE_IJVectorGetValues(currB_, 1, &i, &ddata);
-         fprintf(fp, "%6d  %25.16e \n", i+1, ddata);
+         fprintf(fp, "%6d  %25.8e \n", i+1, ddata);
       }
       fclose(fp);
+      sprintf(fname, "HYPRE_Mat");
+      HYPRE_ParCSRMatrixPrint( A_csr, fname);
+      sprintf(fname, "HYPRE_RHS");
+      HYPRE_ParVectorPrint( b_csr, fname);
       MPI_Barrier(comm_);
+      if ( HYOutputLevel_ & HYFEI_STOPAFTERPRINT ) exit(1);
    }
 #ifdef HAVE_AMGE
    if ( HYOutputLevel_ & HYFEI_PRINTFEINFO )
@@ -3359,6 +3350,9 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
       HYPRE_LSI_MLISetFEData( HYPrecon_, feData_ );
 #endif
 
+HYPRE_IJVectorGetObject(currB_, (void **) &b_csr);
+HYPRE_ParVectorInnerProd( b_csr, b_csr, &rnorm);
+printf("(2) rnorm = %e\n", sqrt(rnorm));
    switch ( HYSolverID_ )
    {
       //----------------------------------------------------------------
@@ -3393,7 +3387,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
            MPI_Barrier( comm_ );
            ptime  = LSC_Wtime();
            HYPRE_ParCSRPCGSolve(HYSolver_, A_csr, b_csr, x_csr);
-           HYPRE_ParCSRPCGGetNumIterations(HYSolver_, &num_iterations);
+           HYPRE_ParCSRPCGGetNumIterations(HYSolver_, &numIterations);
            HYPRE_ParVectorCopy( b_csr, r_csr );
            HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
            HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
@@ -3403,7 +3397,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
               case 1 : addToAConjProjectionSpace(currX_,currB_);  break;
               case 2 : addToMinResProjectionSpace(currX_,currB_); break;
            }
-           if ( num_iterations >= maxIterations_ ) status = 1; else status = 0;
+           if ( numIterations >= maxIterations_ ) status = 1; else status = 0;
            break;
 
       //----------------------------------------------------------------
@@ -3433,11 +3427,17 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
               if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
                  HYPRE_ParCSRGMRESSetLogging(HYSolver_, 2);
            }
+HYPRE_IJVectorGetObject(currB_, (void **) &b_csr);
+HYPRE_ParVectorInnerProd( b_csr, b_csr, &rnorm);
+printf("(3) rnorm = %e\n", sqrt(rnorm));
            HYPRE_ParCSRGMRESSetup(HYSolver_, A_csr, b_csr, x_csr);
            MPI_Barrier( comm_ );
+HYPRE_IJVectorGetObject(currB_, (void **) &b_csr);
+HYPRE_ParVectorInnerProd( b_csr, b_csr, &rnorm);
+printf("(4) rnorm = %e\n", sqrt(rnorm));
            ptime  = LSC_Wtime();
            HYPRE_ParCSRGMRESSolve(HYSolver_, A_csr, b_csr, x_csr);
-           HYPRE_ParCSRGMRESGetNumIterations(HYSolver_, &num_iterations);
+           HYPRE_ParCSRGMRESGetNumIterations(HYSolver_, &numIterations);
            HYPRE_ParVectorCopy( b_csr, r_csr );
            HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
            HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
@@ -3447,7 +3447,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
               case 1 : addToAConjProjectionSpace(currX_,currB_);  break;
               case 2 : addToMinResProjectionSpace(currX_,currB_); break;
            }
-           if ( num_iterations >= maxIterations_ ) status = 1; else status = 0;
+           if ( numIterations >= maxIterations_ ) status = 1; else status = 0;
            break;
 
       //----------------------------------------------------------------
@@ -3480,7 +3480,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
            MPI_Barrier( comm_ );
            ptime  = LSC_Wtime();
            HYPRE_ParCSRFGMRESSolve(HYSolver_, A_csr, b_csr, x_csr);
-           HYPRE_ParCSRFGMRESGetNumIterations(HYSolver_, &num_iterations);
+           HYPRE_ParCSRFGMRESGetNumIterations(HYSolver_, &numIterations);
            HYPRE_ParVectorCopy( b_csr, r_csr );
            HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
            HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
@@ -3490,7 +3490,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
               case 1 : addToAConjProjectionSpace(currX_,currB_);  break;
               case 2 : addToMinResProjectionSpace(currX_,currB_); break;
            }
-           if ( num_iterations >= maxIterations_ ) status = 1; else status = 0;
+           if ( numIterations >= maxIterations_ ) status = 1; else status = 0;
            break;
 
       //----------------------------------------------------------------
@@ -3521,7 +3521,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
            MPI_Barrier( comm_ );
            ptime  = LSC_Wtime();
            HYPRE_ParCSRBiCGSTABSolve(HYSolver_, A_csr, b_csr, x_csr);
-           HYPRE_ParCSRBiCGSTABGetNumIterations(HYSolver_, &num_iterations);
+           HYPRE_ParCSRBiCGSTABGetNumIterations(HYSolver_, &numIterations);
            HYPRE_ParVectorCopy( b_csr, r_csr );
            HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
            HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
@@ -3531,7 +3531,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
               case 1 : addToAConjProjectionSpace(currX_,currB_);  break;
               case 2 : addToMinResProjectionSpace(currX_,currB_); break;
            }
-           if ( num_iterations >= maxIterations_ ) status = 1; else status = 0;
+           if ( numIterations >= maxIterations_ ) status = 1; else status = 0;
            break;
 
       //----------------------------------------------------------------
@@ -3562,7 +3562,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
            MPI_Barrier( comm_ );
            ptime  = LSC_Wtime();
            HYPRE_ParCSRBiCGSTABLSolve(HYSolver_, A_csr, b_csr, x_csr);
-           HYPRE_ParCSRBiCGSTABLGetNumIterations(HYSolver_, &num_iterations);
+           HYPRE_ParCSRBiCGSTABLGetNumIterations(HYSolver_, &numIterations);
            HYPRE_ParVectorCopy( b_csr, r_csr );
            HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
            HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
@@ -3572,7 +3572,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
               case 1 : addToAConjProjectionSpace(currX_,currB_);  break;
               case 2 : addToMinResProjectionSpace(currX_,currB_); break;
            }
-           if ( num_iterations >= maxIterations_ ) status = 1; else status = 0;
+           if ( numIterations >= maxIterations_ ) status = 1; else status = 0;
            break;
 
       //----------------------------------------------------------------
@@ -3603,7 +3603,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
            MPI_Barrier( comm_ );
            ptime  = LSC_Wtime();
            HYPRE_ParCSRTFQmrSolve(HYSolver_, A_csr, b_csr, x_csr);
-           HYPRE_ParCSRTFQmrGetNumIterations(HYSolver_, &num_iterations);
+           HYPRE_ParCSRTFQmrGetNumIterations(HYSolver_, &numIterations);
            HYPRE_ParVectorCopy( b_csr, r_csr );
            HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
            HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
@@ -3613,7 +3613,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
               case 1 : addToAConjProjectionSpace(currX_,currB_);  break;
               case 2 : addToMinResProjectionSpace(currX_,currB_); break;
            }
-           if ( num_iterations >= maxIterations_ ) status = 1; else status = 0;
+           if ( numIterations >= maxIterations_ ) status = 1; else status = 0;
            break;
 
       //----------------------------------------------------------------
@@ -3644,7 +3644,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
            MPI_Barrier( comm_ );
            ptime  = LSC_Wtime();
            HYPRE_ParCSRBiCGSSolve(HYSolver_, A_csr, b_csr, x_csr);
-           HYPRE_ParCSRBiCGSGetNumIterations(HYSolver_, &num_iterations);
+           HYPRE_ParCSRBiCGSGetNumIterations(HYSolver_, &numIterations);
            HYPRE_ParVectorCopy( b_csr, r_csr );
            HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
            HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
@@ -3654,7 +3654,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
               case 1 : addToAConjProjectionSpace(currX_,currB_);  break;
               case 2 : addToMinResProjectionSpace(currX_,currB_); break;
            }
-           if ( num_iterations >= maxIterations_ ) status = 1; else status = 0;
+           if ( numIterations >= maxIterations_ ) status = 1; else status = 0;
            break;
 
       //----------------------------------------------------------------
@@ -3685,7 +3685,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
            MPI_Barrier( comm_ );
            ptime  = LSC_Wtime();
            HYPRE_ParCSRSymQMRSolve(HYSolver_, A_csr, b_csr, x_csr);
-           HYPRE_ParCSRSymQMRGetNumIterations(HYSolver_, &num_iterations);
+           HYPRE_ParCSRSymQMRGetNumIterations(HYSolver_, &numIterations);
            HYPRE_ParVectorCopy( b_csr, r_csr );
            HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
            HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
@@ -3695,7 +3695,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
               case 1 : addToAConjProjectionSpace(currX_,currB_);  break;
               case 2 : addToMinResProjectionSpace(currX_,currB_); break;
            }
-           if ( num_iterations >= maxIterations_ ) status = 1; else status = 0;
+           if ( numIterations >= maxIterations_ ) status = 1; else status = 0;
            break;
 
       //----------------------------------------------------------------
@@ -3704,12 +3704,12 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
 
       case HYAMG :
            solveUsingBoomeramg(status);
-           HYPRE_BoomerAMGGetNumIterations(HYSolver_, &num_iterations);
+           HYPRE_BoomerAMGGetNumIterations(HYSolver_, &numIterations);
            HYPRE_ParVectorCopy( b_csr, r_csr );
            HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
            HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
            rnorm = sqrt( rnorm );
-           if ( num_iterations >= maxIterations_ ) status = 1; else status = 0;
+           if ( numIterations >= maxIterations_ ) status = 1; else status = 0;
            ptime  = stime;
            //printf("Boomeramg solver - return status = %d\n",status);
            break;
@@ -3729,7 +3729,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
 #ifndef NOFEI
            if ( status == 1 ) status = 0; 
 #endif      
-           num_iterations = 1;
+           numIterations = 1;
            ptime  = stime;
            //printf("SuperLU solver - return status = %d\n",status);
            break;
@@ -3749,7 +3749,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
 #ifndef NOFEI
            if ( status == 1 ) status = 0; 
 #endif      
-           num_iterations = 1;
+           numIterations = 1;
            //printf("SuperLUX solver - return status = %d\n",status);
            break;
 
@@ -3769,7 +3769,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
 #ifndef NOFEI
            if ( status == 1 ) status = 0; 
 #endif      
-           num_iterations = 1;
+           numIterations = 1;
            ptime  = stime;
            //printf("Y12M solver - return status = %d\n",status);
            break;
@@ -3791,8 +3791,8 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
               printf("* AMGe (sequential) solver\n");
               printf("*--------------------------------------------------\n");
            }
-           solveUsingAMGe(num_iterations);
-           if ( num_iterations >= maxIterations_ ) status = 1;
+           solveUsingAMGe(numIterations);
+           if ( numIterations >= maxIterations_ ) status = 1;
            ptime  = stime;
            break;
 #endif
@@ -3812,6 +3812,24 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
       newnorm = rnorm;
       rnorm   = buildSlideReducedSoln2();
    }
+   else if ( slideReduction_ == 3 )
+   {
+      newnorm = rnorm;
+      currA_ = TempA;
+      currX_ = TempX;
+      currB_ = TempB;
+      currR_ = TempR;
+      HYPRE_IJMatrixGetObject(currA_, (void **) &A_csr);
+      HYPRE_IJVectorGetObject(currX_, (void **) &x_csr);
+      HYPRE_IJVectorGetObject(currB_, (void **) &b_csr);
+      HYPRE_IJVectorGetObject(currR_, (void **) &r_csr);
+      slideObj->buildReducedSolnVector(currX_, currB_);
+      delete slideObj;
+      HYPRE_ParVectorCopy( b_csr, r_csr );
+      HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
+      HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
+      rnorm = sqrt( rnorm );
+   }
    else if ( schurReduction_ == 1 )
    {
       newnorm = rnorm;
@@ -3823,7 +3841,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
    //-------------------------------------------------------------------
 
    solveStatus = status;
-   iterations = num_iterations;
+   iterations = numIterations;
 
    MPI_Barrier(comm_);
    etime = LSC_Wtime();
@@ -3837,7 +3855,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
       printf("** HYPRE preconditioner setup time = %e\n", ptime - stime);
       printf("** HYPRE solution time             = %e\n", etime - ptime);
       printf("** HYPRE total time                = %e\n", etime - stime);
-      printf("** HYPRE number of iterations      = %d\n", num_iterations);
+      printf("** HYPRE number of iterations      = %d\n", numIterations);
       if ( slideReduction_ || schurReduction_ )
          printf("** HYPRE reduced residual norm     = %e\n", newnorm);
       printf("** HYPRE final residual norm       = %e\n", rnorm);

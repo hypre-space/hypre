@@ -96,4 +96,6 @@
 03/26/02    2.0.1R14
             - optimize the matrix loading phase
             - get rid of the old matrix stuff
+04/26/02    2.0.1R15
+            - add new slide reduction capability 
  

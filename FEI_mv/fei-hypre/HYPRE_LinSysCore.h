@@ -13,7 +13,7 @@
 #ifndef _HYPRE_LinSysCore_h_
 #define _HYPRE_LinSysCore_h_
 
-#define HYPRE_FEI_Version() "FEI/HYPRE 2.0.1R14"
+#define HYPRE_FEI_Version() "FEI/HYPRE 2.0.1R15"
 
 // *************************************************************************
 // system libraries used
@@ -54,6 +54,7 @@ enum HYpreconID {HYIDENTITY,HYDIAGONAL,HYPILUT,HYPARASAILS,HYBOOMERAMG,HYML,
 #define HYFEI_SCHURREDUCE3          131072
 #define HYFEI_PRINTFEINFO           262144
 #define HYFEI_AMGDEBUG              524288
+#define HYFEI_STOPAFTERPRINT       1048576
 
 // *************************************************************************
 // class definition

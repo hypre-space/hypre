@@ -15,6 +15,7 @@
 #include "IJ_mv/HYPRE_IJ_mv.h"
 #include "parcsr_mv/parcsr_mv.h"
 #include "parcsr_ls/parcsr_ls.h"
+#include "seq_mv/seq_mv.h"
 
 #ifdef HAVE_SUPERLU
 #include "dsp_defs.h"
@@ -22,6 +23,8 @@
 #endif
 
 extern void qsort1(int*, double*, int, int);
+
+#define abs(x) ((x) > 0.0 ? x : -(x))
 
 /***************************************************************************/
 /* reading a matrix from a file in ija format (first row : nrows, nnz)     */
@@ -662,4 +665,99 @@ int HYPRE_LSI_Cuthill(int n, int *ia, int *ja, double *aa, int *order_array,
    free( queue );
    return 0;
 }   
+
+/* ******************************************************************** */
+/* matrix of a dense matrix                                             */
+/* -------------------------------------------------------------------- */
+
+int HYPRE_LSI_MatrixInverse( double **Amat, int ndim, double ***Cmat )
+{
+   int    i, j, k;
+   double denom, **Bmat, dmax;
+
+   (*Cmat) = NULL;
+   if ( ndim == 1 ) 
+   {
+      if ( abs(Amat[0][0]) <= 1.0e-16 ) return -1;
+      Bmat = (double **) malloc( ndim * sizeof(double*) );
+      for ( i = 0; i < ndim; i++ ) 
+         Bmat[i] = (double *) malloc( ndim * sizeof(double) ); 
+      Bmat[0][0] = 1.0 / Amat[0][0];
+      (*Cmat) = Bmat;
+      return 0;
+   }
+   if ( ndim == 2 )
+   {
+      denom = Amat[0][0] * Amat[1][1] - Amat[0][1] * Amat[1][0];
+      if ( abs( denom ) <= 1.0e-16 ) return -1;
+      Bmat = (double **) malloc( ndim * sizeof(double*) );
+      for ( i = 0; i < ndim; i++ ) 
+         Bmat[i] = (double *) malloc( ndim * sizeof(double) ); 
+      Bmat[0][0] = Amat[1][1] / denom;
+      Bmat[1][1] = Amat[0][0] / denom;
+      Bmat[0][1] = - ( Amat[0][1] / denom );
+      Bmat[1][0] = - ( Amat[1][0] / denom );
+      (*Cmat) = Bmat;
+      return 0;
+   }
+   else
+   {
+      Bmat = (double **) malloc( ndim * sizeof(double*) );
+      for ( i = 0; i < ndim; i++ ) 
+      { 
+         Bmat[i] = (double *) malloc( ndim * sizeof(double) ); 
+         for ( j = 0; j < ndim; j++ ) Bmat[i][j] = 0.0;
+         Bmat[i][i] = 1.0;
+      } 
+      for ( i = 1; i < ndim; i++ ) 
+      {
+         for ( j = 0; j < i; j++ ) 
+         {
+            if ( abs(Amat[j][j]) < 1.0e-16 ) return -1;
+            denom = Amat[i][j] / Amat[j][j];
+            for ( k = 0; k < ndim; k++ ) 
+            {
+               Amat[i][k] -= denom * Amat[j][k];
+               Bmat[i][k] -= denom * Bmat[j][k];
+            }
+         }
+      }
+      for ( i = ndim-2; i >= 0; i-- ) 
+      {
+         for ( j = ndim-1; j >= i+1; j-- ) 
+         {
+            if ( abs(Amat[j][j]) < 1.0e-16 ) return -1;
+            denom = Amat[i][j] / Amat[j][j];
+            for ( k = 0; k < ndim; k++ ) 
+            {
+               Amat[i][k] -= denom * Amat[j][k];
+               Bmat[i][k] -= denom * Bmat[j][k];
+            }
+         }
+      }
+      for ( i = 0; i < ndim; i++ ) 
+      {
+         denom = Amat[i][i];
+         if ( abs(denom) < 1.0e-16 ) return -1;
+         for ( j = 0; j < ndim; j++ ) Bmat[i][j] /= denom;
+      }
+
+      for ( i = 0; i < ndim; i++ ) 
+         for ( j = 0; j < ndim; j++ ) 
+            if ( abs(Bmat[i][j]) < 1.0e-17 ) Bmat[i][j] = 0.0;
+/*
+      for ( i = 0; i < ndim; i++ ) 
+      {
+         dmax = 0.0;
+         for ( j = 0; j < ndim; j++ ) 
+            if ( abs(Bmat[i][j]) > dmax ) dmax = abs(Bmat[i][j]);
+         for ( j = 0; j < ndim; j++ ) 
+            if ( abs(Bmat[i][j]/dmax) < 1.0e-15 ) Bmat[i][j] = 0.0;
+      }
+*/
+      (*Cmat) = Bmat;
+      return 0;
+   }
+   return -1;
+}
 
