@@ -11,7 +11,7 @@
 class Lookup;
 
 
-/**
+/**  
   This is the 'generic' interface (to be replaced by ESI_LSManager) to a
   solver-library -- the destination for the data being assembled into a linear
   system by the FEI implementation.
@@ -21,7 +21,7 @@ class Lookup;
   task that must be performed is the implementation of this interface,
   LinearSystemCore (Note: the LinearSystemCore interface will ultimately be
   replaced by the ESI_LSManager interface.).
-
+  
   This is the class that holds and manipulates all solver-library-specific
   stuff, such as matrices/vectors, solvers/preconditioners, etc. An
   instance of this class is owned and used by the class that implements
@@ -43,7 +43,7 @@ class Lookup;
   - An equation can be mapped to a node/field pair. i.e., given a globally
     unique node number, and a solution field on that node, a global
     equation number can be obtained, and vice versa.
-
+  
   - The term 'block' is used in two different ways here. A block-entry matrix
     is a matrix made up of dense sub-blocks, with each sub-block containing a
     number of equations. An element-block is a finite-element term, denoting a
@@ -102,7 +102,7 @@ NOTES:
   before being passed to LinearSystemCore::sumIntoSystemMatrix.
   The finite-element application doesn't have the concept of node ownership,
   instead processors can equally share nodes. The FEI implementation designates
-  a single processor as the owner of these nodes, and moves any shared
+  a single processor as the owner of these nodes, and moves any shared 
   stiffness data onto the appropriate owning processor.
   The data supplied through setStiffnessMatrices is the un-modified stiffness
   data supplied by the application, including any shared-non-local portions.
@@ -111,7 +111,7 @@ NOTES:
   provides local data, while setLoadVectors supplies the un-modified element-
   load vectors from the application, including any shared portions.
 
-*/
+*/  
 
 class LinearSystemCore {
  public:
@@ -196,7 +196,7 @@ class LinearSystemCore {
     @param numElems Length of the elemIDs list.
     @param elemIDs Identifiers for each element for which a stiffness array is
        being supplied.
-    @param stiff List of 'numElems' tables, each table is of size
+    @param stiff List of 'numElems' tables, each table is of size 
          'numEqnsPerElem' X 'numEqnsPerElem'.
     @param numEqnsPerElem
     @param eqnIndices Table, with 'numElems' rows, each row being a list of
@@ -217,7 +217,7 @@ class LinearSystemCore {
     @param numElems Length of the elemIDs list.
     @param elemIDs Identifiers for each element for which a load vector is
        being supplied.
-    @param load Table with 'numElems' rows, each row is of length
+    @param load Table with 'numElems' rows, each row is of length 
          'numEqnsPerElem'.
     @param numEqnsPerElem
     @param eqnIndices Table, with 'numElems' rows, each row being a list of
@@ -234,7 +234,7 @@ class LinearSystemCore {
    /** Supply LinearSystemCore with information defining the structure of the
        sparse matrix to be assembled. Implementers of LinearSystemCore may safely
        assume that this function will not be called until after the
-       function 'setGlobalOffsets' has been called. Using the information
+       function 'setGlobalOffsets' has been called. Using the information 
        provided via setGlobalOffsets, the number-of-local-equations can be
        trivially calculated. After setMatrixStructure has been called, there
        should be enough information to instantiate internal linear-algebra
@@ -302,7 +302,7 @@ class LinearSystemCore {
                                     int numBlkCols, const int* blkCols,
                                     const double* const* values) = 0;
 
-   /** Purely point-entry version for accumulating coefficient data into the
+   /** Purely point-entry version for accumulating coefficient data into the 
       matrix. This will be called when a matrix contribution fills only part of
       a block-equation. e.g., when a penalty constraint is being applied to a
   single solution field on a node that has several solution fields.
@@ -325,6 +325,11 @@ class LinearSystemCore {
      coefficients. Note that this is different from a typical matrix "get-row"
      operation, in that the column-indices are input here -- the caller is
      requesting SPECIFIC coefficients.
+     @param numPtRows Length of the ptRows list, and numPtCols list.
+     @param ptRows Global 0-based equation numbers.
+     @param numPtCols Number of column entries requested for each row.
+     @param ptCols Table of global 0-based equation numbers. (num-rows ==
+     numPtRows)
    */
    virtual int getFromSystemMatrix(int numPtRows, const int* ptRows,
                                     int numPtCols, const int* ptCols,
@@ -362,7 +367,7 @@ class LinearSystemCore {
                                   const double* data) = 0;
 
 
-   /** For setting the scalar 's' (usually 0.0) throughout the matrix rhs
+   /** For setting the scalar 's' (usually 0.0) throughout the matrix rhs 
     vector.
    */
    virtual int resetMatrixAndVector(double s) = 0;
@@ -378,8 +383,8 @@ class LinearSystemCore {
    /** The FEI implementation calls this function to inform LinearSystemCore
        of equations that need to have essential (Dirichlet) boundary conditions
       enforced on them. The intent is that the LinearSystemCore implementation
-      will  perform the column-modification b[i] = gamma[i]/alpha[i] if i ==
-     globalEqn[i], otherwise b[i] -= gamma[i]/alpha[i] * A(i,globalEqn[i]) if
+      will  perform the column-modification b[i] = gamma[i]/alpha[i] if i == 
+     globalEqn[i], otherwise b[i] -= gamma[i]/alpha[i] * A(i,globalEqn[i]) if 
      i != globalEqn[i]. After this operation is performed, all of row
      globalEqn[i] and column globalEqn[i] should be set to 0.0, except for the
      diagonal position. (Naturally the implementer is free to enforce the
@@ -419,8 +424,8 @@ class LinearSystemCore {
 
    /** This function is called to inform LinearSystemCore that natural (or
     Neumann) or mixed boundary conditions are to be enforce on some equations.
-    Basically, these can be enforced by performing this operation:
-    A(globalEqn[i], globalEqn[i]) += alpha[i]/beta[i], and b(globalEqn[i]) +=
+    Basically, these can be enforced by performing this operation: 
+    A(globalEqn[i], globalEqn[i]) += alpha[i]/beta[i], and b(globalEqn[i]) += 
     gamma[i]/beta[i], for all i in [0 .. len-1]. (Note that alpha[i]==0.0
     implies a Natural or Neumann boundary condition, while gamma[i]==0.0 implies
     a mixed boundary condition.
@@ -476,16 +481,16 @@ class LinearSystemCore {
    /** Same semantics as sumInMatrix, but applied to rhs vector. */
    virtual int sumInRHSVector(double scalar, const Data& data) = 0;
 
-   /** Utility function for destroying the matrix in a Data container. The
+   /** Utility function for destroying the matrix in a Data container. The 
     caller (owner of 'data') can't destroy the matrix because they don't know
-    what concrete type it is and can't get to its destructor. The contents of
+    what concrete type it is and can't get to its destructor. The contents of 
     'data' is a matrix previously passed out via 'copyOutMatrix'.
     @param data See documentation for Data class.
    */
    virtual int destroyMatrixData(Data& data) = 0;
 
-   /** Utility function for destroying the vector in a Data container. The
- caller (owner of 'data') can't destroy the vector because they don't know what
+   /** Utility function for destroying the vector in a Data container. The 
+ caller (owner of 'data') can't destroy the vector because they don't know what 
     concrete type it is and can't get to its destructor. The contents of 'data'
     is a vector previously passed out via 'copyOutRHSVector'.
     @param data See documentation for Data class.
@@ -496,7 +501,7 @@ class LinearSystemCore {
      This function will be called by the FEI implementation at or near the
      beginning of the problem assembly. If numRHSs is greater than 1, then
      calls to 'getMemberInterface' requesting an interface to an rhs vector
-     will use the 'objName' argument "b_Vector_n", where n is in [0 ..
+     will use the 'objName' argument "b_Vector_n", where n is in [0 .. 
      numRHSs-1]. If there is only one rhs-vector, then 'objName' will be
      simply "b_Vector".
     @param numRHSs Length of the rhsIDs list.
@@ -506,7 +511,7 @@ class LinearSystemCore {
    */
    virtual int setNumRHSVectors(int numRHSs, const int* rhsIDs) = 0;
 
-   /** Set the 'current context' to the rhs-vector corresponding to rhsID.
+   /** Set the 'current context' to the rhs-vector corresponding to rhsID. 
     Subsequent data received via 'sumIntoRHSVector' should be directed into
     this rhs-vector. Any other function-calls having to do with the rhs-vector
     should also effect this rhs-vector.
@@ -561,7 +566,7 @@ class LinearSystemCore {
    */
    virtual int launchSolver(int& solveStatus, int& iterations) = 0;
 
-   /** This function's intent is to provide a file-name to be used by
+   /** This function's intent is to provide a file-name to be used by 
     LinearSystemCore in writing the linear system into disk files. Format is
     not specified. Implementers may choose to augment this name in the style
     of writing 3 files: A_name, x_name, b_name, or some other convention.
