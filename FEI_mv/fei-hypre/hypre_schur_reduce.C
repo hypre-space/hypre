@@ -15,21 +15,21 @@
 #include "utilities/utilities.h"
 
 //############### 1.5 includes #################
-#ifndef NOFEI 
-#include "Data.h"
-#include "basicTypes.h"
-#include "LinearSystemCore.h"
-#include "LSC.h"
-#endif
-//##############################################
-
-//############### 2.0 includes #################
 //#ifndef NOFEI 
-//#include "fei_defs.h"
 //#include "Data.h"
 //#include "basicTypes.h"
 //#include "LinearSystemCore.h"
+//#include "LSC.h"
 //#endif
+//##############################################
+
+//############### 2.0 includes #################
+#ifndef NOFEI 
+#include "fei_defs.h"
+#include "Data.h"
+#include "basicTypes.h"
+#include "LinearSystemCore.h"
+#endif
 //##############################################
 
 #include "HYPRE.h"
@@ -144,15 +144,23 @@ void HYPRE_LinSysCore::buildSchurReducedSystem()
     for ( i = StartRow; i <= EndRow; i++ ) 
     {
        HYPRE_ParCSRMatrixGetRow(A_csr,i,&rowSize,&colInd,&colVal);
-       searchIndex = globalNRows + 1;
+       //searchIndex = globalNRows + 1;
+       //for (j = 0; j < rowSize; j++) 
+       //{
+       //   colIndex = colInd[j];
+       //   if ( colIndex < searchIndex && colVal[j] != 0.0 ) 
+       //      searchIndex = colIndex;
+       //}
+       //if ( searchIndex < i ) nSchur++;
+       searchIndex = -1;
        for (j = 0; j < rowSize; j++) 
        {
           colIndex = colInd[j];
-          if ( colIndex < searchIndex && colVal[j] != 0.0 ) 
-             searchIndex = colIndex;
+          if ( colIndex < i && colVal[j] != 0.0 ) 
+             if ( colIndex > searchIndex ) searchIndex = colIndex;
        }
+       if ( searchIndex >= StartRow ) nSchur++;
        HYPRE_ParCSRMatrixRestoreRow(A_csr,i,&rowSize,&colInd,&colVal);
-       if ( searchIndex < i ) nSchur++;
     }
 
     if ( HYOutputLevel_ & HYFEI_SCHURREDUCE1 )
@@ -176,14 +184,22 @@ void HYPRE_LinSysCore::buildSchurReducedSystem()
     for ( i = StartRow; i <= EndRow; i++ ) 
     {
        HYPRE_ParCSRMatrixGetRow(A_csr,i,&rowSize,&colInd,&colVal);
-       searchIndex = globalNRows + 1;
+       //searchIndex = globalNRows + 1;
+       //for (j = 0; j < rowSize; j++) 
+       //{
+       //   colIndex = colInd[j];
+       //   if ( colIndex < searchIndex && colVal[j] != 0.0 ) 
+       //      searchIndex = colIndex;
+       //}
+       //if ( searchIndex < i ) schurList[nSchur++] = i;
+       searchIndex = -1;
        for (j = 0; j < rowSize; j++) 
        {
           colIndex = colInd[j];
-          if ( colIndex < searchIndex && colVal[j] != 0.0 ) 
-             searchIndex = colIndex;
+          if ( colIndex < i && colVal[j] != 0.0 ) 
+             if ( colIndex > searchIndex ) searchIndex = colIndex;
        }
-       if ( searchIndex < i ) schurList[nSchur++] = i;
+       if ( searchIndex >= StartRow ) schurList[nSchur++] = i;
        HYPRE_ParCSRMatrixRestoreRow(A_csr,i,&rowSize,&colInd,&colVal);
     }
 

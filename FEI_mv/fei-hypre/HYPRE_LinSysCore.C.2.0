@@ -13,14 +13,16 @@
 #include <assert.h>
 #include <math.h>
 
-#include "utilities/utilities.h"
-#ifndef NOFEI
 #include "fei_defs.h"
 #include "Data.h"
 #include "basicTypes.h"
+#include "utilities/utilities.h"
+
+#ifndef NOFEI
 #include "Lookup.h"
 #include "LinearSystemCore.h"
 #endif
+
 #include "HYPRE.h"
 #include "../../IJ_mv/HYPRE_IJ_mv.h"
 #include "../../parcsr_mv/HYPRE_parcsr_mv.h"
@@ -2584,9 +2586,17 @@ int HYPRE_LinSysCore::enforceEssentialBC(int* globalEqn, double* alpha,
                 }
              }
           }// end for(j<rowSize) loop
-          rowLengths_[localEqnNum] = 1;
-          colIndices_[localEqnNum][0] = globalEqn[i] + 1;
-          colValues_[localEqnNum][0] = 1.0;
+          for ( j = 0; j < rowLengths_[localEqnNum]; j++ ) 
+          {
+             if ( colIndices_[localEqnNum][j] == globalEqn[i]+1 )
+             {
+                colValues_[localEqnNum][j] = 1.0;
+             }
+             else
+             {
+                colValues_[localEqnNum][j] = 0.0;
+             }
+          }
 
           // Set rhs for boundary point
           rhs_term = gamma[i] / alpha[i];
