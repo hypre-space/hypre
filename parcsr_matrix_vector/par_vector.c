@@ -341,7 +341,7 @@ hypre_VectorToParVector (MPI_Comm comm, hypre_Vector *v, int *vec_starts)
 hypre_Vector *
 hypre_ParVectorToVectorAll (hypre_ParVector *par_v)
 {
-   MPI_Comm		comm;
+   MPI_Comm		comm = hypre_ParVectorComm(par_v);
    int 			global_size = hypre_ParVectorGlobalSize(par_v);
    int 			*vec_starts = hypre_ParVectorPartitioning(par_v);
    hypre_Vector     	*local_vector = hypre_ParVectorLocalVector(par_v);
