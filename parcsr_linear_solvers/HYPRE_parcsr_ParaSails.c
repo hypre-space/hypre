@@ -129,8 +129,9 @@ HYPRE_ParCSRParaSailsSetup( HYPRE_Solver solver,
    }
    else /* reuse is true; this is a subsequent call */
    {
+       /* reuse pattern: always use filter value of 0 and loadbal of 0 */
        ierr = HYPRE_ParaSailsSetupValues(secret->obj, mat,
-	 secret->filter, secret->loadbal, secret->logging);
+	 0.0, 0.0, secret->logging);
        if (ierr) return ierr;
    }
 
