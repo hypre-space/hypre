@@ -54,9 +54,6 @@ HEADERS =\
  HYPRE_parcsr_mv.h
 
 FILES =\
- driver.c\
- driver_matmul.c\
- driver_matvec.c\
  communication.c\
  par_csr_matop.c\
  par_csr_matrix.c\
@@ -85,24 +82,11 @@ clean:
 	@rm -f *.o
 
 veryclean: clean
-	@rm -f driver driver_matvec driver_matmul
 	@rm -f libHYPRE_parcsr_mv.a
 
 ##################################################################
 # Rules
 ##################################################################
-
-driver: driver.o libHYPRE_parcsr_mv.a 
-	@echo  "Linking" $@ "... "
-	${CC} -o driver driver.o ${LFLAGS} 
-
-driver_matvec: driver_matvec.o libHYPRE_parcsr_mv.a
-	@echo  "Linking" $@ "... "
-	${CC} -o driver_matvec driver_matvec.o ${LFLAGS} 
-
-driver_matmul: driver_matmul.o libHYPRE_parcsr_mv.a
-	@echo  "Linking" $@ "... "
-	${CC} -o driver_matmul driver_matmul.o ${LFLAGS} 
 
 libHYPRE_parcsr_mv.a: ${OBJS}
 	@echo  "Building $@ ... "
