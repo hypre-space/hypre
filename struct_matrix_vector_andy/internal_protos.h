@@ -58,6 +58,8 @@ hypre_StructGridToCoordTable *hypre_NewStructGridToCoordTable P((hypre_StructGri
 void hypre_FreeStructGridToCoordTable P((hypre_StructGridToCoordTable *table ));
 hypre_StructGridToCoordTableEntry *hypre_FindStructGridToCoordTableEntry P((hypre_Index *index , hypre_StructGridToCoordTable *table ));
 
+/* hypre.c */
+
 /* struct_grid.c */
 hypre_StructGrid *hypre_NewStructGrid P((int dim ));
 void hypre_FreeStructGrid P((hypre_StructGrid *grid ));
@@ -100,7 +102,5 @@ int hypre_SetStructVectorPETScCoeffs P((hypre_StructVector *struct_vector , hypr
 int hypre_SetStructVectorPETSc P((hypre_StructVector *struct_vector , double *val ));
 int hypre_AssembleStructVectorPETSc P((hypre_StructVector *struct_vector ));
 int hypre_PrintStructVectorPETSc P((hypre_StructVector *struct_vector ));
-
-/* hypre.c */
 
 #undef P

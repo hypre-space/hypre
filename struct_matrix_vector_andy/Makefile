@@ -55,79 +55,8 @@ PROTOS =\
  
 OBJS = ${FILES:.c=.o}
 
-CC = gcc
-
-F77 = /home/casc/g77/bin/g77
-
-PETSC_CFLAGS =\
- -I${PETSC_DIR}/src/mat/impls/aij/mpi\
- -I${PETSC_DIR}/src/mat/impls/aij/seq\
- -I${PETSC_DIR}/src/mat\
- -I${PETSC_DIR}\
- -I${PETSC_DIR}/include\
- -I/usr/local/mpi/mpich/include
-CFLAGS =\
- ${PETSC_CFLAGS}\
- -I/usr/local/include\
- -I/home/casc/include\
- -I../includes\
- -DHYPRE_MEMORY_CHECK\
- -DHYPRE_DEBUG\
- -g
-
-FFLAGS = -g
-
-include ${PETSC_DIR}/bmake/${PETSC_ARCH}/base.site
-PETSC_OPT = g
-PETSC_LFLAGS =\
- -L${PETSC_DIR}/lib/lib${PETSC_OPT}/${PETSC_ARCH}\
- -lpetscsles\
- -lpetscmat\
- -lpetscvec\
- -lpetscsys\
- ${SUPERLU_LIB}\
- ${BS_LIB}\
- ${LAPACK_LIB}\
- ${BLAS_LIB}\
- ${X11_LIB}\
- ${MPE_LIB}\
- ${MPI_LIB}\
- ${SYS_LIB}
-LFLAGS =\
- -Wl,"-zmuldefs"\
- -L/usr/local/lib\
- -L/home/casc/lib\
- -L/home/casc/g77/lib\
- -L../PETScMat_linear_solvers/pilut\
- -L../PETSc_linear_solvers/Block_Preconditioned\
- -L../PETSc_linear_solvers/ParILUT\
- -L../distributed_linear_solvers/pilut\
- -L../distributed_matrix\
- -L../matrix_matrix\
- -L../seq_linear_solvers/ilut\
- -L../seq_linear_solvers/ict\
- -L../seq_linear_solvers/sparskit\
- -L../seq_matrix_vector \
- -L../struct_linear_solvers_andy \
- -L../struct_matrix_vector_andy\
- -L../utilities\
- -lHYPRE_StructSolver \
- -lHYPREPETScSolverParILUT \
- -lHYPREPETScMatPilutSolver \
- -lHYPREDistributedMatrixPilutSolver \
- -lilu -lic -ldsparskit\
- -lHYPRE_StructMatrix \
- -lHYPREDistributedMatrix \
- -lHYPRE_MatrixMatrix\
- -lHYPREseq_mat_vec\
- -lHYPRE_memory\
- ${PETSC_LFLAGS}\
- -lf2c\
- -lcegdb\
- -lmalloc\
- -lm
-
-# This line taken out for now... refers to Petsc block solvers -lHYPREILU -lHYPREIC\
+# Declarations for this installation site
+include ../bmakes/base
 
 ##################################################################
 # Main rules
@@ -135,7 +64,7 @@ LFLAGS =\
 
 driver: driver.o lib
 	@echo  "Linking" $@ "... "
-	${CC} -o driver driver.o ${LFLAGS}
+	${CC} -o driver driver.o ${LFLAGS} 
 
 link:
 	rm driver

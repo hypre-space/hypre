@@ -29,7 +29,7 @@ hypre_IndexD(new_index, 2) = hypre_IndexD(index, 2) + stencil_shape[2];
 int 
 hypre_FreeStructMatrixPETSc( hypre_StructMatrix *struct_matrix )
 {
-   Mat PETSc_matrix = (Mat) hypre_StructMatrixData(struct_matrix);;
+   Mat PETSc_matrix = (Mat) hypre_StructMatrixData(struct_matrix);
 
    hypre_FreeStructGridToCoordTable( (hypre_StructGridToCoordTable *)
 			     hypre_StructMatrixTranslator(struct_matrix) );

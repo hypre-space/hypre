@@ -141,8 +141,8 @@ char *argv[];
    soln = HYPRE_NewStructVector( MPI_COMM_WORLD, grid, stencil );
 
    /* Fill in elements for RHS and soln */
-   HYPRE_SetStructVector( rhs, &zero );
-   HYPRE_SetStructVector( soln, &one );
+   HYPRE_SetStructVector( rhs, &one );
+   HYPRE_SetStructVector( soln, &zero );
 
    /* Set up the solver structure */
    solver = HYPRE_NewStructSolver( MPI_COMM_WORLD, grid, stencil );
