@@ -61,7 +61,7 @@ double MLI_Method_AMGSA::genP(MLI_Matrix *mli_Amat,
    int       PLocalNRows, PStartRow, *rowLengths, rowNum, GGlobalNRows;
    int       blkSize, maxAggSize, *aggCntArray, **aggIndArray;
    int       aggSize, info, nzcnt, *localLabels=NULL, AGlobalNRows;
-   double    *colVal, **P_vecs, maxEigen=0, alpha;
+   double    *colVal, **P_vecs, maxEigen=0, alpha, dtemp;
    double    *qArray, *newNull, *rArray, ritzValues[2];
    char      paramString[200];
 
@@ -269,7 +269,7 @@ double MLI_Method_AMGSA::genP(MLI_Matrix *mli_Amat,
 
    if ( (currLevel_ >= 0 && Pweight_ != 0.0) || 
         !strcmp(preSmoother_, "MLS") ||
-        !strcmp(postSmoother_, "MLS") || initAggr != NULL )
+        !strcmp(postSmoother_, "MLS"))
    {
       MLI_Utils_ComputeExtremeRitzValues(Amat, ritzValues, 1);
       maxEigen = ritzValues[0];
@@ -437,12 +437,12 @@ double MLI_Method_AMGSA::genP(MLI_Matrix *mli_Amat,
          {
             for ( k = 0; k < nullspaceDim_; k++ ) 
             {
-               alpha = 0.0;
+               dtemp = 0.0;
                for ( j = 0; j < aggSize; j++ ) 
-                  alpha += qArray[aggSize*k+j] * qArray[aggSize*k+j];
-               alpha = 1.0 / sqrt(alpha);
+                  dtemp += qArray[aggSize*k+j] * qArray[aggSize*k+j];
+               dtemp = 1.0 / sqrt(dtemp);
                for ( j = 0; j < aggSize; j++ ) 
-                  qArray[aggSize*k+j] *= alpha;
+                  qArray[aggSize*k+j] *= dtemp;
             }
          }
 
