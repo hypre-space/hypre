@@ -296,7 +296,7 @@ with the next function.
 @param HYPRE_IJMatrix &matrix [IN] 
 the matrix to be operated on.
 @param int *sizes [IN]
-a vector of length = local_m giving the estimated sizes for the diagonal parts of
+a vector of length = local_m giving the exact sizes for the diagonal parts of
 all local_m rows, in order from lowest globally numbered local row to highest.
 */
 
@@ -337,7 +337,7 @@ Not collective.
 @param HYPRE_IJMatrix &matrix [IN]
 the matrix to be operated on
 @param int *sizes [IN]
-a vector of length >= local_m giving the estimated sizes for the off-diagonal parts of
+a vector of length >= local_m giving the exact sizes for the off-diagonal parts of
 all local_m rows, in order from lowest globally numbered local row to highest
 */
 
