@@ -129,6 +129,7 @@ hypre_PFMGRelaxSetType( void  *pfmg_relax_vdata,
       break;
 
       case 2: /* Red-Black Gauss-Seidel */
+      case 3: /* Red-Black Gauss-Seidel (non-symmetric) */
       {
          hypre_Index  stride;
          hypre_Index  indices[4];
@@ -181,6 +182,13 @@ hypre_PFMGRelaxSetPreRelax( void  *pfmg_relax_vdata )
          hypre_PointRelaxSetPointsetRank(relax_data, 1, 1);
       }
       break;
+
+      case 3: /* Red-Black Gauss-Seidel (non-symmetric) */
+      {
+         hypre_PointRelaxSetPointsetRank(relax_data, 0, 0);
+         hypre_PointRelaxSetPointsetRank(relax_data, 1, 1);
+      }
+      break;
    }
 
    return ierr;
@@ -208,6 +216,13 @@ hypre_PFMGRelaxSetPostRelax( void  *pfmg_relax_vdata )
       {
          hypre_PointRelaxSetPointsetRank(relax_data, 0, 1);
          hypre_PointRelaxSetPointsetRank(relax_data, 1, 0);
+      }
+      break;
+
+      case 3: /* Red-Black Gauss-Seidel (non-symmetric) */
+      {
+         hypre_PointRelaxSetPointsetRank(relax_data, 0, 0);
+         hypre_PointRelaxSetPointsetRank(relax_data, 1, 1);
       }
       break;
    }

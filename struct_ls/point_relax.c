@@ -13,6 +13,12 @@
 
 #include "headers.h"
 
+/* this currently cannot be greater than 7 */
+#ifdef MAX_DEPTH
+#undef MAX_DEPTH
+#endif
+#define MAX_DEPTH 7
+
 /*--------------------------------------------------------------------------
  * hypre_PointRelaxData data structure
  *--------------------------------------------------------------------------*/
@@ -350,9 +356,23 @@ hypre_PointRelax( void               *relax_vdata,
    int                    Ai;
    int                    bi;
    int                    xi;
+   int                    xoff0;
+   int                    xoff1;
+   int                    xoff2;
+   int                    xoff3;
+   int                    xoff4;
+   int                    xoff5;
+   int                    xoff6;
    int                    ti;
                         
    double                *Ap;
+   double                *Ap0;
+   double                *Ap1;
+   double                *Ap2;
+   double                *Ap3;
+   double                *Ap4;
+   double                *Ap5;
+   double                *Ap6;
    double                *bp;
    double                *xp;
    double                *tp;
@@ -365,7 +385,8 @@ hypre_PointRelax( void               *relax_vdata,
    hypre_Index           *stencil_shape;
    int                    stencil_size;
                         
-   int                    iter, p, compute_i, i, j, si;
+   int                    iter, p, compute_i, i, j, k;
+   int                    si, sk, ssi[MAX_DEPTH], depth;
    int                    loopi, loopj, loopk;
    int                    pointset;
 
@@ -529,6 +550,7 @@ hypre_PointRelax( void               *relax_vdata,
                   hypre_BoxArrayBox(hypre_StructVectorDataSpace(t), i);
 
                bp = hypre_StructVectorBoxData(b, i);
+               xp = hypre_StructVectorBoxData(x, i);
                tp = hypre_StructVectorBoxData(t, i);
 
                hypre_ForBoxI(j, compute_box_a)
@@ -549,15 +571,69 @@ hypre_PointRelax( void               *relax_vdata,
                         }
                      hypre_BoxLoop2End(bi, ti);
 
-                     for (si = 0; si < stencil_size; si++)
+                     /* unroll up to depth MAX_DEPTH */
+                     for (si = 0; si < stencil_size; si += MAX_DEPTH)
                      {
-                        if (si != diag_rank)
-                        {
-                           Ap = hypre_StructMatrixBoxData(A, i, si);
-                           xp = hypre_StructVectorBoxData(x, i) +
-                              hypre_BoxOffsetDistance(x_data_box,
-                                                      stencil_shape[si]);
+                        depth = hypre_min(MAX_DEPTH, (stencil_size - si));
 
+                        for (k = 0, sk = si; k < depth; sk++)
+                        {
+                           if (sk == diag_rank)
+                           {
+                              depth--;
+                           }
+                           else
+                           {
+                              ssi[k] = sk;
+                              k++;
+                           }
+                        }
+
+                        switch(depth)
+                        {
+                           case 7:
+                           Ap6 = hypre_StructMatrixBoxData(A, i, ssi[6]);
+                           xoff6 = hypre_BoxOffsetDistance(
+                              x_data_box, stencil_shape[ssi[6]]);
+
+                           case 6:
+                           Ap5 = hypre_StructMatrixBoxData(A, i, ssi[5]);
+                           xoff5 = hypre_BoxOffsetDistance(
+                              x_data_box, stencil_shape[ssi[5]]);
+
+                           case 5:
+                           Ap4 = hypre_StructMatrixBoxData(A, i, ssi[4]);
+                           xoff4 = hypre_BoxOffsetDistance(
+                              x_data_box, stencil_shape[ssi[4]]);
+
+                           case 4:
+                           Ap3 = hypre_StructMatrixBoxData(A, i, ssi[3]);
+                           xoff3 = hypre_BoxOffsetDistance(
+                              x_data_box, stencil_shape[ssi[3]]);
+
+                           case 3:
+                           Ap2 = hypre_StructMatrixBoxData(A, i, ssi[2]);
+                           xoff2 = hypre_BoxOffsetDistance(
+                              x_data_box, stencil_shape[ssi[2]]);
+
+                           case 2:
+                           Ap1 = hypre_StructMatrixBoxData(A, i, ssi[1]);
+                           xoff1 = hypre_BoxOffsetDistance(
+                              x_data_box, stencil_shape[ssi[1]]);
+
+                           case 1:
+                           Ap0 = hypre_StructMatrixBoxData(A, i, ssi[0]);
+                           xoff0 = hypre_BoxOffsetDistance(
+                              x_data_box, stencil_shape[ssi[0]]);
+
+                           case 0:
+
+                           break;
+                        }
+                           
+                        switch(depth)
+                        {
+                           case 7:
                            hypre_BoxLoop3Begin(loop_size,
                                                A_data_box, start, stride, Ai,
                                                x_data_box, start, stride, xi,
@@ -566,9 +642,125 @@ hypre_PointRelax( void               *relax_vdata,
 #include "hypre_box_smp_forloop.h"
                            hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, ti)
                               {
-                                 tp[ti] -= Ap[Ai] * xp[xi];
+                                 tp[ti] -=
+                                    Ap0[Ai] * xp[xi + xoff0] +
+                                    Ap1[Ai] * xp[xi + xoff1] +
+                                    Ap2[Ai] * xp[xi + xoff2] +
+                                    Ap3[Ai] * xp[xi + xoff3] +
+                                    Ap4[Ai] * xp[xi + xoff4] +
+                                    Ap5[Ai] * xp[xi + xoff5] +
+                                    Ap6[Ai] * xp[xi + xoff6];
                               }
                            hypre_BoxLoop3End(Ai, xi, ti);
+                           break;
+
+                           case 6:
+                           hypre_BoxLoop3Begin(loop_size,
+                                               A_data_box, start, stride, Ai,
+                                               x_data_box, start, stride, xi,
+                                               t_data_box, start, stride, ti);
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,xi,ti
+#include "hypre_box_smp_forloop.h"
+                           hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, ti)
+                              {
+                                 tp[ti] -=
+                                    Ap0[Ai] * xp[xi + xoff0] +
+                                    Ap1[Ai] * xp[xi + xoff1] +
+                                    Ap2[Ai] * xp[xi + xoff2] +
+                                    Ap3[Ai] * xp[xi + xoff3] +
+                                    Ap4[Ai] * xp[xi + xoff4] +
+                                    Ap5[Ai] * xp[xi + xoff5];
+                              }
+                           hypre_BoxLoop3End(Ai, xi, ti);
+                           break;
+
+                           case 5:
+                           hypre_BoxLoop3Begin(loop_size,
+                                               A_data_box, start, stride, Ai,
+                                               x_data_box, start, stride, xi,
+                                               t_data_box, start, stride, ti);
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,xi,ti
+#include "hypre_box_smp_forloop.h"
+                           hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, ti)
+                              {
+                                 tp[ti] -=
+                                    Ap0[Ai] * xp[xi + xoff0] +
+                                    Ap1[Ai] * xp[xi + xoff1] +
+                                    Ap2[Ai] * xp[xi + xoff2] +
+                                    Ap3[Ai] * xp[xi + xoff3] +
+                                    Ap4[Ai] * xp[xi + xoff4];
+                              }
+                           hypre_BoxLoop3End(Ai, xi, ti);
+                           break;
+
+                           case 4:
+                           hypre_BoxLoop3Begin(loop_size,
+                                               A_data_box, start, stride, Ai,
+                                               x_data_box, start, stride, xi,
+                                               t_data_box, start, stride, ti);
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,xi,ti
+#include "hypre_box_smp_forloop.h"
+                           hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, ti)
+                              {
+                                 tp[ti] -=
+                                    Ap0[Ai] * xp[xi + xoff0] +
+                                    Ap1[Ai] * xp[xi + xoff1] +
+                                    Ap2[Ai] * xp[xi + xoff2] +
+                                    Ap3[Ai] * xp[xi + xoff3];
+                              }
+                           hypre_BoxLoop3End(Ai, xi, ti);
+                           break;
+
+                           case 3:
+                           hypre_BoxLoop3Begin(loop_size,
+                                               A_data_box, start, stride, Ai,
+                                               x_data_box, start, stride, xi,
+                                               t_data_box, start, stride, ti);
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,xi,ti
+#include "hypre_box_smp_forloop.h"
+                           hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, ti)
+                              {
+                                 tp[ti] -=
+                                    Ap0[Ai] * xp[xi + xoff0] +
+                                    Ap1[Ai] * xp[xi + xoff1] +
+                                    Ap2[Ai] * xp[xi + xoff2];
+                              }
+                           hypre_BoxLoop3End(Ai, xi, ti);
+                           break;
+
+                           case 2:
+                           hypre_BoxLoop3Begin(loop_size,
+                                               A_data_box, start, stride, Ai,
+                                               x_data_box, start, stride, xi,
+                                               t_data_box, start, stride, ti);
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,xi,ti
+#include "hypre_box_smp_forloop.h"
+                           hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, ti)
+                              {
+                                 tp[ti] -=
+                                    Ap0[Ai] * xp[xi + xoff0] +
+                                    Ap1[Ai] * xp[xi + xoff1];
+                              }
+                           hypre_BoxLoop3End(Ai, xi, ti);
+                           break;
+
+                           case 1:
+                           hypre_BoxLoop3Begin(loop_size,
+                                               A_data_box, start, stride, Ai,
+                                               x_data_box, start, stride, xi,
+                                               t_data_box, start, stride, ti);
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,xi,ti
+#include "hypre_box_smp_forloop.h"
+                           hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, ti)
+                              {
+                                 tp[ti] -=
+                                    Ap0[Ai] * xp[xi + xoff0];
+                              }
+                           hypre_BoxLoop3End(Ai, xi, ti);
+                           break;
+
+                           case 0:
+                           break;
                         }
                      }
 
