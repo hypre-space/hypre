@@ -25,9 +25,13 @@ typedef struct
    int      A_max_elmts;
    int      P_max_elmts;
    int      coarsen_type;
+   int      agg_coarsen_type;
    int      interp_type;
+   int      agg_interp_type;
+   int      agg_levels;
    int      num_relax_steps;  
-  int use_block_flag;
+   int      num_jacs;
+   int use_block_flag;
 
    /* solve params */
    int      max_iter;
@@ -52,7 +56,7 @@ typedef struct
    hypre_Vector    **F_array;
    hypre_Vector    **U_array;
    hypre_CSRMatrix **P_array;
-  hypre_BCSRMatrix **PB_array;
+   hypre_BCSRMatrix **PB_array;
    int             **CF_marker_array;
    int             **dof_func_array;
    int             **dof_point_array;
@@ -89,8 +93,12 @@ typedef struct
 #define hypre_AMGDataAMaxElmts(amg_data) ((amg_data)->A_max_elmts)
 #define hypre_AMGDataPMaxElmts(amg_data) ((amg_data)->P_max_elmts)
 #define hypre_AMGDataCoarsenType(amg_data) ((amg_data)->coarsen_type)
+#define hypre_AMGDataAggCoarsenType(amg_data) ((amg_data)->agg_coarsen_type)
 #define hypre_AMGDataInterpType(amg_data) ((amg_data)->interp_type)
+#define hypre_AMGDataAggInterpType(amg_data) ((amg_data)->agg_interp_type)
+#define hypre_AMGDataAggLevels(amg_data) ((amg_data)->agg_levels)
 #define hypre_AMGDataNumRelaxSteps(amg_data) ((amg_data)->num_relax_steps)
+#define hypre_AMGDataNumJacs(amg_data) ((amg_data)->num_jacs)
 #define hypre_AMGDataUseBlockFlag(amg_data) ((amg_data)->use_block_flag)
 /* solve params */
 

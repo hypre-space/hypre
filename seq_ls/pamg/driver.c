@@ -35,6 +35,10 @@ main( int   argc,
    int                 i, j, k;
    int                 k_dim;
    int		       ierr = 0;
+   int		       agg_levels = 0;
+   int		       agg_coarsen_type;
+   int		       agg_interp_type;
+   int		       num_jacs = 1;
 
 #if 0
    hypre_ParCSRMatrix *A;
@@ -72,6 +76,7 @@ main( int   argc,
       double   final_res_norm;
       int     *schwarz_option;
       int      schwarz_lev;
+      int     *coarsen_option;
 
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -201,28 +206,38 @@ main( int   argc,
       else if ( strcmp(argv[arg_index], "-a1") == 0 )
       {
          arg_index++;
-         coarsen_type = 11;
+         agg_coarsen_type = 11;
       }
       else if ( strcmp(argv[arg_index], "-a2") == 0 )
       {
          arg_index++;
-         coarsen_type = 9;
+         agg_coarsen_type = 9;
       }
       else if ( strcmp(argv[arg_index], "-cljp2") == 0 )
       {
          arg_index++;
-         coarsen_type = 8;
+         agg_coarsen_type = 8;
       }
       else if ( strcmp(argv[arg_index], "-cljp1") == 0 )
       {
          arg_index++;
-         coarsen_type = 10;
+         agg_coarsen_type = 10;
+      }
+      else if ( strcmp(argv[arg_index], "-agg") == 0 )
+      {
+         arg_index++;
+         agg_levels = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-nj") == 0 )
+      {
+         arg_index++;
+         num_jacs = atoi(argv[arg_index++]);
       }
       /* begin HANS added */
       else if ( strcmp(argv[arg_index], "-wLJP") == 0 )
       {
          arg_index++;
-         coarsen_type = 4;
+         agg_coarsen_type = 4;
       }
       else if ( strcmp(argv[arg_index], "-ruge1p") == 0 )
       {
@@ -232,12 +247,12 @@ main( int   argc,
       else if ( strcmp(argv[arg_index], "-mp") == 0 )
       {
          arg_index++;
-         interp_type = 5;
+         agg_interp_type = 5;
       }
       else if ( strcmp(argv[arg_index], "-jac") == 0 )
       {
          arg_index++;
-         interp_type = 6;
+         agg_interp_type = 6;
       }
       /* end HANS added */
 
@@ -635,6 +650,8 @@ main( int   argc,
       amg_solver = HYPRE_AMGInitialize();
       HYPRE_AMGSetMaxIter(amg_solver, 20);
       HYPRE_AMGSetCoarsenType(amg_solver, coarsen_type);
+      HYPRE_AMGSetAggCoarsenType(amg_solver, agg_coarsen_type);
+      HYPRE_AMGSetAggLevels(amg_solver, agg_levels);
       HYPRE_AMGSetStrongThreshold(amg_solver, strong_threshold);
       HYPRE_AMGSetMode(amg_solver, mode);
       HYPRE_AMGSetATruncFactor(amg_solver, A_trunc_factor);
@@ -651,6 +668,8 @@ main( int   argc,
       HYPRE_AMGSetSchwarzOption(amg_solver, schwarz_option);
       HYPRE_AMGSetMaxLevels(amg_solver, max_levels);
       HYPRE_AMGSetInterpType(amg_solver, interp_type);
+      HYPRE_AMGSetAggInterpType(amg_solver, agg_interp_type);
+      HYPRE_AMGSetNumJacs(amg_solver, num_jacs);
       HYPRE_AMGSetNumFunctions(amg_solver, num_functions);
       HYPRE_AMGSetDofFunc(amg_solver, dof_func);
       HYPRE_AMGSetUseBlockFlag(amg_solver, use_block_flag);
@@ -698,6 +717,8 @@ main( int   argc,
 	 printf ("Solver: AMG-PCG\n");
          pcg_precond = HYPRE_AMGInitialize();
          HYPRE_AMGSetCoarsenType(pcg_precond, coarsen_type);
+         HYPRE_AMGSetAggCoarsenType(pcg_precond, agg_coarsen_type);
+         HYPRE_AMGSetAggLevels(pcg_precond, agg_levels);
          HYPRE_AMGSetStrongThreshold(pcg_precond, strong_threshold);
          HYPRE_AMGSetMode(pcg_precond, mode);
          HYPRE_AMGSetATruncFactor(pcg_precond, A_trunc_factor);
@@ -715,6 +736,8 @@ main( int   argc,
          HYPRE_AMGSetSchwarzOption(pcg_precond, schwarz_option);
          HYPRE_AMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_AMGSetInterpType(pcg_precond, interp_type);
+         HYPRE_AMGSetAggInterpType(pcg_precond, agg_interp_type);
+         HYPRE_AMGSetNumJacs(pcg_precond, num_jacs);
          HYPRE_AMGSetNumFunctions(pcg_precond, num_functions);
          HYPRE_AMGSetDofFunc(pcg_precond, dof_func);
 	 HYPRE_AMGSetUseBlockFlag(pcg_precond, use_block_flag);
@@ -787,6 +810,8 @@ main( int   argc,
 	 printf ("Solver: AMG-GMRES\n");
          pcg_precond = HYPRE_AMGInitialize();
          HYPRE_AMGSetCoarsenType(pcg_precond, coarsen_type);
+         HYPRE_AMGSetAggCoarsenType(pcg_precond, agg_coarsen_type);
+         HYPRE_AMGSetAggLevels(pcg_precond, agg_levels);
          HYPRE_AMGSetStrongThreshold(pcg_precond, strong_threshold);
          HYPRE_AMGSetMode(pcg_precond, mode);
          HYPRE_AMGSetATruncFactor(pcg_precond, A_trunc_factor);
@@ -804,6 +829,8 @@ main( int   argc,
          HYPRE_AMGSetSchwarzOption(pcg_precond, schwarz_option);
          HYPRE_AMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_AMGSetInterpType(pcg_precond, interp_type);
+         HYPRE_AMGSetAggInterpType(pcg_precond, agg_interp_type);
+         HYPRE_AMGSetNumJacs(pcg_precond, num_jacs);
          HYPRE_AMGSetNumFunctions(pcg_precond, num_functions);
          HYPRE_AMGSetDofFunc(pcg_precond, dof_func);
          HYPRE_GMRESSetPrecond( pcg_solver, (HYPRE_PtrToSolverFcn) HYPRE_AMGSolve,

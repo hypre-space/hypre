@@ -53,10 +53,17 @@ hypre_AMGSetup( void            *amg_vdata,
    int      amg_ioutdat;
    int      interp_type;
    int      num_functions;
+   int      agg_levels;
+   int      agg_coarsen_type;
+   int      agg_interp_type;
+   int      num_jacs;
+   int      main_coarsen_type;
+   int      main_interp_type;
    int use_block_flag;
  
    /* Local variables */
    int              *CF_marker;
+   int              *new_CF_marker;
    hypre_CSRMatrix  *S;
    hypre_CSRMatrix  *S2;
    hypre_CSRMatrix  *S3;
@@ -71,6 +78,7 @@ hypre_AMGSetup( void            *amg_vdata,
    int       num_levels;
    int       level;
    int       coarse_size;
+   int       first_coarse_size;
    int       fine_size;
    int       not_finished_coarsening = 1;
    int       Setup_err_flag;
@@ -99,7 +107,7 @@ hypre_AMGSetup( void            *amg_vdata,
    grid_relax_type = hypre_AMGDataGridRelaxType(amg_data);
    max_levels = hypre_AMGDataMaxLevels(amg_data);
    amg_ioutdat = hypre_AMGDataIOutDat(amg_data);
-   interp_type = hypre_AMGDataInterpType(amg_data);
+   main_interp_type = hypre_AMGDataInterpType(amg_data);
    num_functions = hypre_AMGDataNumFunctions(amg_data);
    relax_type = grid_relax_type[0];
    schwarz_option = hypre_AMGDataSchwarzOption(amg_data);
@@ -171,7 +179,11 @@ hypre_AMGSetup( void            *amg_vdata,
   
    strong_threshold = hypre_AMGDataStrongThreshold(amg_data);
 
-   coarsen_type = hypre_AMGDataCoarsenType(amg_data);
+   main_coarsen_type = hypre_AMGDataCoarsenType(amg_data);
+   agg_levels = hypre_AMGDataAggLevels(amg_data);
+   agg_coarsen_type = hypre_AMGDataAggCoarsenType(amg_data);
+   agg_interp_type = hypre_AMGDataAggInterpType(amg_data);
+   num_jacs = hypre_AMGDataNumJacs(amg_data);
 
    /*-----------------------------------------------------
     *  Enter Coarsening Loop
@@ -180,6 +192,17 @@ hypre_AMGSetup( void            *amg_vdata,
    while (not_finished_coarsening)
    {
      /*****************************************************************/
+
+      if (level < agg_levels)
+      {
+	 coarsen_type = agg_coarsen_type;
+	 interp_type = agg_interp_type;
+      }
+      else
+      {
+	 coarsen_type = main_coarsen_type;
+	 interp_type = main_interp_type;
+      }
 
       if(use_block_flag) {
 	A_tilde = hypre_BCSRMatrixCompress(B_array[level]);
@@ -299,42 +322,63 @@ hypre_AMGSetup( void            *amg_vdata,
       {
 	 if (mode == 1 || mode == 2) S_mode = 1;
 	 hypre_AMGCreateS(A_array[level], strong_threshold, 
+			S_mode, dof_func_array[level], &S);
+         hypre_AMGCoarsen(A_array[level], strong_threshold,
+                       S, &CF_marker, &first_coarse_size);  
+	 hypre_AMGCreate2ndS(S, first_coarse_size, CF_marker, 2, &S2);
+         hypre_AMGCoarsen(S2, strong_threshold,
+                       S2, &new_CF_marker, &coarse_size); 
+         hypre_CSRMatrixDestroy(S2);
+         hypre_AMGCorrectCFMarker(CF_marker, fine_size, new_CF_marker); 
+	 /* if (mode == 1 || mode == 2) S_mode = 1;
+	 hypre_AMGCreateS(A_array[level], strong_threshold, 
 			S_mode, dof_func_array[level], &S2);
-         S2_data = hypre_CSRMatrixData(S2);
-	 num_nz = hypre_CSRMatrixI(S2)[hypre_CSRMatrixNumRows(S2)];
-         for (i=0; i < num_nz; i++)
-	   S2_data[i] = -S2_data[i];
 	 S3 = hypre_CSRMatrixMultiply(S2,S2);
 	 hypre_AMGCompressS(S3, 2);
 	 S = hypre_CSRMatrixAdd(S2,S3);
          hypre_CSRMatrixDestroy(S2);
          hypre_CSRMatrixDestroy(S3);
          hypre_AMGCoarsen(A_array[level], strong_threshold,
-                       S, &CF_marker, &coarse_size); 
-			  /* A_array[level], &CF_marker, &coarse_size); */ 
+                       S, &CF_marker, &coarse_size);  */
       }
       else if (coarsen_type == 10)
       {
 	 if (mode == 1 || mode == 2) S_mode = 1;
 	 hypre_AMGCreateS(A_array[level], strong_threshold, 
+			S_mode, dof_func_array[level], &S);
+         hypre_AMGCoarsen(A_array[level], strong_threshold,
+                       S, &CF_marker, &first_coarse_size); 
+	 hypre_AMGCreate2ndS(S, first_coarse_size, CF_marker, 1, &S2);
+         hypre_AMGCoarsen(S2, strong_threshold,
+                       S2, &new_CF_marker, &coarse_size); 
+         hypre_CSRMatrixDestroy(S2);
+         hypre_AMGCorrectCFMarker(CF_marker, fine_size, new_CF_marker); 
+	 /*if (mode == 1 || mode == 2) S_mode = 1;
+	 hypre_AMGCreateS(A_array[level], strong_threshold, 
 			S_mode, dof_func_array[level], &S2);
-         S2_data = hypre_CSRMatrixData(S2);
-	 num_nz = hypre_CSRMatrixI(S2)[hypre_CSRMatrixNumRows(S2)];
-         for (i=0; i < num_nz; i++)
-	   S2_data[i] = -S2_data[i];
 	 S3 = hypre_CSRMatrixMultiply(S2,S2);
 	 hypre_AMGCompressS(S3, 1);
 	 S = hypre_CSRMatrixAdd(S2,S3);
          hypre_CSRMatrixDestroy(S2);
          hypre_CSRMatrixDestroy(S3);
          hypre_AMGCoarsen(A_array[level], strong_threshold,
-                       S, &CF_marker, &coarse_size); 
+                       S, &CF_marker, &coarse_size); */
 			  /* A_array[level], &CF_marker, &coarse_size); */ 
       }
       else if (coarsen_type == 9)
       {
 	 if (mode == 1 || mode == 2) S_mode = 1;
 	 hypre_AMGCreateS(A_array[level], strong_threshold, 
+			S_mode, dof_func_array[level], &S);
+	 hypre_AMGCoarsenRugeLoL(A_array[level], -strong_threshold,
+				 S, &CF_marker, &first_coarse_size); 
+	 hypre_AMGCreate2ndS(S, first_coarse_size, CF_marker, 2, &S2);
+	 hypre_AMGCoarsenRugeLoL(S2, -strong_threshold,
+				 S2, &new_CF_marker, &coarse_size); 
+         hypre_CSRMatrixDestroy(S2);
+         hypre_AMGCorrectCFMarker(CF_marker, fine_size, new_CF_marker); 
+	 /* if (mode == 1 || mode == 2) S_mode = 1;
+	 hypre_AMGCreateS(A_array[level], strong_threshold, 
 			S_mode, dof_func_array[level], &S2);
          S2_data = hypre_CSRMatrixData(S2);
 	 num_nz = hypre_CSRMatrixI(S2)[hypre_CSRMatrixNumRows(S2)];
@@ -346,12 +390,22 @@ hypre_AMGSetup( void            *amg_vdata,
          hypre_CSRMatrixDestroy(S2);
          hypre_CSRMatrixDestroy(S3);
 	 hypre_AMGCoarsenRugeLoL(A_array[level], -strong_threshold,
-				 S, &CF_marker, &coarse_size); 
+				 S, &CF_marker, &coarse_size); */
 			  /* A_array[level], &CF_marker, &coarse_size); */ 
       }
       else if (coarsen_type == 11)
       {
 	 if (mode == 1 || mode == 2) S_mode = 1;
+	 hypre_AMGCreateS(A_array[level], strong_threshold, 
+			S_mode, dof_func_array[level], &S);
+	 hypre_AMGCoarsenRugeLoL(A_array[level], -strong_threshold,
+				 S, &CF_marker, &first_coarse_size); 
+	 hypre_AMGCreate2ndS(S, first_coarse_size, CF_marker, 1, &S2);
+	 hypre_AMGCoarsenRugeLoL(S2, -strong_threshold,
+				 S2, &new_CF_marker, &coarse_size); 
+         hypre_CSRMatrixDestroy(S2);
+         hypre_AMGCorrectCFMarker(CF_marker, fine_size, new_CF_marker); 
+	 /* if (mode == 1 || mode == 2) S_mode = 1;
 	 hypre_AMGCreateS(A_array[level], strong_threshold, 
 			S_mode, dof_func_array[level], &S2);
          S2_data = hypre_CSRMatrixData(S2);
@@ -364,7 +418,7 @@ hypre_AMGSetup( void            *amg_vdata,
          hypre_CSRMatrixDestroy(S2);
          hypre_CSRMatrixDestroy(S3);
 	 hypre_AMGCoarsenRugeLoL(A_array[level], -strong_threshold,
-				 S, &CF_marker, &coarse_size); 
+				 S, &CF_marker, &coarse_size); */
 			  /* A_array[level], &CF_marker, &coarse_size); */ 
       }
       else if (coarsen_type == 3)
@@ -455,7 +509,7 @@ hypre_AMGSetup( void            *amg_vdata,
       {
           hypre_AMGBuildMultipass(A_array[level], CF_marker_array[level], S,
                              dof_func_array[level], &coarse_dof_func, &P);
-        for(i=0;i<1;i++)
+        for(i=0;i<num_jacs;i++)
 	  hypre_AMGJacobiIterate(A_array[level], CF_marker_array[level], S,
 				 dof_func_array[level], &coarse_dof_func, &P);
       }

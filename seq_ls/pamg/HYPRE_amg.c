@@ -157,6 +157,28 @@ HYPRE_AMGSetCoarsenType( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_AMGSetAggCoarsenType
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_AMGSetAggCoarsenType( HYPRE_Solver solver,
+                         int          agg_coarsen_type  )
+{
+   return( hypre_AMGSetAggCoarsenType( (void *) solver, agg_coarsen_type ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_AMGSetAggLevels
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_AMGSetAggLevels( HYPRE_Solver solver,
+                         int          agg_levels  )
+{
+   return( hypre_AMGSetAggLevels( (void *) solver, agg_levels ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_AMGSetInterpType
  *--------------------------------------------------------------------------*/
 
@@ -165,6 +187,28 @@ HYPRE_AMGSetInterpType( HYPRE_Solver solver,
                         int          interp_type  )
 {
    return( hypre_AMGSetInterpType( (void *) solver, interp_type ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_AMGSetAggInterpType
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_AMGSetAggInterpType( HYPRE_Solver solver,
+                        int          agg_interp_type  )
+{
+   return( hypre_AMGSetAggInterpType( (void *) solver, agg_interp_type ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_AMGSetNumJacs
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_AMGSetNumJacs( HYPRE_Solver solver,
+                     int          num_jacs  )
+{
+   return( hypre_AMGSetNumJacs( (void *) solver, num_jacs ) );
 }
 
 /*--------------------------------------------------------------------------

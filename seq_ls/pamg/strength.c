@@ -252,3 +252,168 @@ hypre_AMGCompressS( hypre_CSRMatrix    *S,
    hypre_CSRMatrixNumNonzeros(S) = S_i[num_rows];
    return 0;
 }
+
+
+int
+hypre_AMGCreate2ndS( hypre_CSRMatrix *A, int n_coarse,
+              int *CF_marker, int num_paths, hypre_CSRMatrix **S_ptr)
+{
+   double     *A_data   = hypre_CSRMatrixData(A);
+   int        *A_i      = hypre_CSRMatrixI(A);
+   int        *A_j      = hypre_CSRMatrixJ(A);
+   int         nrows_A  = hypre_CSRMatrixNumRows(A);
+   hypre_CSRMatrix *S;
+   double     *S_data;
+   int	      *S_i;
+   int        *S_j;
+
+   int         ia, ib, ic, ja, jb, num_nonzeros=0;
+   int	       row_start, cnt, S_cnt;
+   int	       i, j, jcol, col;
+   double      a_entry, b_entry, d_num_paths;
+   int         *B_marker;
+   int         *fine_to_coarse;
+
+
+   B_marker = hypre_CTAlloc(int, nrows_A);
+   S_i = hypre_CTAlloc(int, n_coarse+1);
+   fine_to_coarse = hypre_CTAlloc(int, nrows_A);
+   d_num_paths = (double) num_paths;
+
+   for (ib = 0; ib < nrows_A; ib++)
+   {
+	B_marker[ib] = -1;
+	fine_to_coarse[ib] = -1;
+   }
+
+   cnt = 0;
+   S_i[0] = 0;
+
+   for (ic = 0; ic < nrows_A; ic++)
+   {
+      if (CF_marker[ic] > 0)
+      {
+	fine_to_coarse[ic] = cnt;
+	for (ia = A_i[ic]; ia < A_i[ic+1]; ia++)
+	{
+		jcol = A_j[ia];
+                if (CF_marker[jcol] > 0)
+	        {
+		   B_marker[jcol] = ic;
+		   num_nonzeros++;
+	        }
+	}
+	for (ia = A_i[ic]; ia < A_i[ic+1]; ia++)
+	{
+		ja = A_j[ia];
+		for (ib = A_i[ja]; ib < A_i[ja+1]; ib++)
+		{
+			jb = A_j[ib];
+			if (CF_marker[jb] > 0 && B_marker[jb] != ic)
+			{
+				B_marker[jb] = ic;
+				num_nonzeros++;
+			}
+		}
+   	}
+	S_i[++cnt] = num_nonzeros;
+      }
+   }
+
+   S = hypre_CSRMatrixCreate(n_coarse, n_coarse, num_nonzeros);
+   hypre_CSRMatrixI(S) = S_i;
+   hypre_CSRMatrixInitialize(S);
+   S_j = hypre_CSRMatrixJ(S);
+   S_data = hypre_CSRMatrixData(S);
+
+   for (ib = 0; ib < nrows_A; ib++)
+	B_marker[ib] = -1;
+
+   cnt = 0;
+   S_cnt = 0;
+   for (ic = 0; ic < nrows_A; ic++)
+   {
+      if (CF_marker[ic] > 0)
+      {
+	row_start = S_i[S_cnt++];
+	for (ia = A_i[ic]; ia < A_i[ic+1]; ia++)
+	{
+		jcol = A_j[ia];
+	 	if (CF_marker[jcol] > 0)
+		{
+		   S_j[cnt] = fine_to_coarse[jcol];
+		   S_data[cnt] = 2*A_data[ia];
+		   B_marker[jcol] = cnt;
+		   cnt++;
+		}
+	}
+	for (ia = A_i[ic]; ia < A_i[ic+1]; ia++)
+	{
+		ja = A_j[ia];
+		a_entry = A_data[ia];
+		for (ib = A_i[ja]; ib < A_i[ja+1]; ib++)
+		{
+			jb = A_j[ib];
+			b_entry = A_data[ib];
+			if (CF_marker[jb] > 0)
+			{
+			   if (B_marker[jb] < row_start)
+			   {
+				B_marker[jb] = cnt;
+				S_j[B_marker[jb]] = fine_to_coarse[jb];
+				S_data[B_marker[jb]] = -a_entry*b_entry;
+				cnt++;
+			   }
+			   else
+				S_data[B_marker[jb]] -= a_entry*b_entry;
+			}
+				 
+		}
+	}
+      }
+   }
+   hypre_TFree(B_marker);
+   hypre_TFree(fine_to_coarse);
+   cnt = 0;
+   for (i=0; i < n_coarse; i++)
+   {
+      for (j= S_i[i]; j < S_i[i+1]; j++)
+      {
+	 col = S_j[j];
+	 a_entry = fabs(S_data[j]);
+         if (a_entry >= d_num_paths && col != i)
+         {
+	    S_data[cnt] = -a_entry;
+	    S_j[cnt++] = S_j[j];
+         }
+      }
+      S_i[i] = cnt;
+   }
+
+   for (i=n_coarse; i > 0; i--)
+      S_i[i] = S_i[i-1];
+
+   S_i[0] = 0; 
+
+   hypre_CSRMatrixNumNonzeros(S) = S_i[n_coarse];
+
+   *S_ptr = S;
+
+   return 0;
+}
+
+int
+hypre_AMGCorrectCFMarker(int *CF_marker, int num_var, int *new_CF_marker)
+{
+   int i, cnt;
+
+   cnt = 0;
+   for (i=0; i < num_var; i++)
+   {
+      if (CF_marker[i] > 0)
+	 CF_marker[i] = new_CF_marker[cnt++]; 
+   }
+
+   return 0;
+}
+   	

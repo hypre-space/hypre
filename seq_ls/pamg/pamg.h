@@ -31,7 +31,11 @@ int HYPRE_AMGSetAMaxElmts( HYPRE_Solver solver , int A_max_elmts );
 int HYPRE_AMGSetPTruncFactor( HYPRE_Solver solver , double P_trunc_factor );
 int HYPRE_AMGSetPMaxElmts( HYPRE_Solver solver , int P_max_elmts );
 int HYPRE_AMGSetCoarsenType( HYPRE_Solver solver , int coarsen_type );
+int HYPRE_AMGSetAggCoarsenType( HYPRE_Solver solver , int agg_coarsen_type );
+int HYPRE_AMGSetAggLevels( HYPRE_Solver solver , int agg_levels );
 int HYPRE_AMGSetInterpType( HYPRE_Solver solver , int interp_type );
+int HYPRE_AMGSetAggInterpType( HYPRE_Solver solver , int agg_interp_type );
+int HYPRE_AMGSetNumJacs( HYPRE_Solver solver , int num_jacs );
 int HYPRE_AMGSetMaxIter( HYPRE_Solver solver , int max_iter );
 int HYPRE_AMGSetCycleType( HYPRE_Solver solver , int cycle_type );
 int HYPRE_AMGSetTol( HYPRE_Solver solver , double tol );
@@ -94,7 +98,11 @@ int hypre_AMGSetPTruncFactor( void *data , double P_trunc_factor );
 int hypre_AMGSetAMaxElmts( void *data , int A_max_elmts );
 int hypre_AMGSetPMaxElmts( void *data , int P_max_elmts );
 int hypre_AMGSetCoarsenType( void *data , int coarsen_type );
+int hypre_AMGSetAggCoarsenType( void *data , int agg_coarsen_type );
+int hypre_AMGSetAggLevels( void *data , int agg_levels );
 int hypre_AMGSetInterpType( void *data , int interp_type );
+int hypre_AMGSetAggInterpType( void *data , int agg_interp_type );
+int hypre_AMGSetNumJacs( void *data , int num_jacs );
 int hypre_AMGSetMaxIter( void *data , int max_iter );
 int hypre_AMGSetCycleType( void *data , int cycle_type );
 int hypre_AMGSetTol( void *data , double tol );
@@ -234,6 +242,8 @@ int move_entry( int weight , int *weight_max , int *previous , int *next , int *
 /* strength.c */
 int hypre_AMGCreateS(hypre_CSRMatrix *A, double strength_threshold, int mode, int *dof_func, hypre_CSRMatrix **S_ptr );
 int hypre_AMGCompressS(hypre_CSRMatrix *S, int num_path );
+int hypre_AMGCreate2ndS( hypre_CSRMatrix *A, int n_coarse, int *CF_marker, int num_paths, hypre_CSRMatrix **S_ptr);
+int hypre_AMGCorrectCFMarker(int *CF_marker, int num_var, int *new_CF_marker);
 
 /* stencil_matrix.c */
 hypre_CSRMatrix *hypre_GenerateStencilMatrix( int nx, int ny, int nz, char *infile );

@@ -33,9 +33,13 @@ hypre_AMGInitialize()
    int      A_max_elmts;
    int      P_max_elmts;
    int      coarsen_type;
+   int      agg_coarsen_type;
    int      interp_type;
+   int      agg_interp_type;
    int      num_functions;
+   int      agg_levels;
    int      num_relax_steps;
+   int      num_jacs;
    int use_block_flag;
 
    /* solve params */
@@ -70,9 +74,13 @@ hypre_AMGInitialize()
    A_max_elmts = 0;
    P_max_elmts = 0;
    coarsen_type = 0;
+   agg_coarsen_type = 8;
+   agg_levels = 0;
    interp_type = 200;
+   agg_interp_type = 5;
    num_functions = 1;
    num_relax_steps = 1;
+   num_jacs = 1;
    use_block_flag = 0;
    mode = 0;
 
@@ -118,9 +126,13 @@ hypre_AMGInitialize()
    hypre_AMGSetMaxLevels(amg_data, max_levels);
    hypre_AMGSetStrongThreshold(amg_data, strong_threshold);
    hypre_AMGSetCoarsenType(amg_data, coarsen_type);
+   hypre_AMGSetAggCoarsenType(amg_data, agg_coarsen_type);
+   hypre_AMGSetAggLevels(amg_data, agg_levels);
    hypre_AMGSetInterpType(amg_data, interp_type);
+   hypre_AMGSetAggInterpType(amg_data, agg_interp_type);
    hypre_AMGSetNumFunctions(amg_data, num_functions);
    hypre_AMGSetNumRelaxSteps(amg_data, num_relax_steps);
+   hypre_AMGSetNumJacs(amg_data, num_jacs);
    hypre_AMGSetATruncFactor(amg_data, A_trunc_factor);
    hypre_AMGSetPTruncFactor(amg_data, P_trunc_factor);
    hypre_AMGSetAMaxElmts(amg_data, A_max_elmts);
@@ -312,6 +324,30 @@ hypre_AMGSetCoarsenType( void     *data,
 }
 
 int
+hypre_AMGSetAggCoarsenType( void     *data,
+                        int       agg_coarsen_type )
+{
+   int ierr = 0;
+   hypre_AMGData  *amg_data = data;
+
+   hypre_AMGDataAggCoarsenType(amg_data) = agg_coarsen_type;
+
+   return (ierr);
+}
+
+int
+hypre_AMGSetAggLevels( void     *data,
+                        int       agg_levels )
+{
+   int ierr = 0;
+   hypre_AMGData  *amg_data = data;
+
+   hypre_AMGDataAggLevels(amg_data) = agg_levels;
+
+   return (ierr);
+}
+
+int
 hypre_AMGSetInterpType( void     *data,
                         int       interp_type )
 {
@@ -322,6 +358,30 @@ hypre_AMGSetInterpType( void     *data,
 
    return (ierr);
 }
+
+int
+hypre_AMGSetAggInterpType( void     *data,
+                        int       agg_interp_type )
+{
+   int ierr = 0;
+   hypre_AMGData  *amg_data = data;
+
+   hypre_AMGDataAggInterpType(amg_data) = agg_interp_type;
+
+   return (ierr);
+}
+
+int
+hypre_AMGSetNumJacs( void     *data,
+                     int       num_jacs )
+{
+   int ierr = 0;
+   hypre_AMGData  *amg_data = data;
+ 
+   hypre_AMGDataNumJacs(amg_data) = num_jacs;
+
+   return (ierr);
+} 
 
 int
 hypre_AMGSetMaxIter( void     *data,
