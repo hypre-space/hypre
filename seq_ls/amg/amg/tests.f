@@ -60,7 +60,11 @@ c
      *     3x,' k  i  j    rows   entries  sparse  ',
      *     'min   max  avg       min          max')
  4001 format(4x,72('='))
- 4002 format(//'Interpolation statistics'/)
+ 4002 format(//'Interpolation statistics:'/
+     *     3x,' matrix      entries',24x,
+     *     2x,' minimum    maximum'/
+     *     3x,' k  i   rows min max  min weight  max weight',
+     *     2x,' row sum    row sum')
       end
 
 
