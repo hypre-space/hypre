@@ -263,6 +263,7 @@ ssh ${HYPRE_COMPILE_MACHINE} "\
 	. test/env.${HYPRE_ARCH};\
         ./configure ;\
         /usr/ccs/bin/make -k beta;\
+        cd ${HYPRE_REMOTE_DIR}/linear_solvers/test; make fei++; \
     )"
 
 # run test suite
