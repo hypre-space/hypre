@@ -46,9 +46,12 @@ ZZZ_StructMatrix ZZZ_NewStructMatrix P((MPI_Comm *comm , ZZZ_StructGrid grid , Z
 int ZZZ_FreeStructMatrix P((ZZZ_StructMatrix matrix ));
 int ZZZ_InitializeStructMatrix P((ZZZ_StructMatrix matrix ));
 int ZZZ_SetStructMatrixValues P((ZZZ_StructMatrix matrix , int *grid_index , int num_stencil_indices , int *stencil_indices , double *values ));
+int ZZZ_SetStructMatrixCoeffs P((ZZZ_StructMatrix  matrix, int *grid_index , double *values ));
 int ZZZ_SetStructMatrixBoxValues P((ZZZ_StructMatrix matrix , int *ilower , int *iupper , int num_stencil_indices , int *stencil_indices , double *values ));
 int ZZZ_AssembleStructMatrix P((ZZZ_StructMatrix matrix ));
 void ZZZ_SetStructMatrixNumGhost P((ZZZ_StructMatrix matrix , int *num_ghost ));
+ZZZ_StructGrid ZZZ_StructMatrixGrid P(( ZZZ_StructMatrix matrix ));
+void ZZZ_SetStructMatrixSymmetric P((ZZZ_StructMatrix matrix , int symmetric ));
  
 /* ZZZ_struct_stencil.c */
 ZZZ_StructStencil ZZZ_NewStructStencil P((int dim , int size ));
@@ -60,6 +63,7 @@ ZZZ_StructVector ZZZ_NewStructVector P((MPI_Comm *comm , ZZZ_StructGrid grid , Z
 int ZZZ_FreeStructVector P((ZZZ_StructVector struct_vector ));
 int ZZZ_InitializeStructVector P((ZZZ_StructVector vector ));
 int ZZZ_SetStructVectorValues P((ZZZ_StructVector vector , int *grid_index , double values ));
+int ZZZ_GetStructVectorValues P((ZZZ_StructVector vector , int *grid_index , double *values ));
 int ZZZ_SetStructVectorBoxValues P((ZZZ_StructVector vector , int *ilower , int *iupper , int num_stencil_indices , int *stencil_indices , double *values ));
 int ZZZ_AssembleStructVector P((ZZZ_StructVector vector ));
  
