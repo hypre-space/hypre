@@ -11,13 +11,12 @@ AMGFILES   = amgs01.f input.f setup.f opdfn.f form.f trunc.f crushb.f tests.f \
 MSFILES   = ms.f
 
 
-AMGDRVOBS  = amgdrv.o
+AMGOB  = amg.o
 LAPNOBJS  = lapn.o 
-LAPNSHOBJS = lapnshow.o
 
 MSOBJS    = ms.o
 
-AMGOBJS   = amgs01.o input.o setup.o opdfn.o form.o trunc.o crushb.o tests.o \
+AMGS01OBJS   = amgs01.o input.o setup.o opdfn.o form.o trunc.o crushb.o tests.o \
 	memoryx.o crsgd.o setdep.o strong.o cforce.o ctest.o setcw.o  \
 	color.o testsB.o setc.o setws.o iinvert.o bsetup.o rstdf0.o \
 	fftests.o misc.o
@@ -27,15 +26,14 @@ AMGOBJS   = amgs01.o input.o setup.o opdfn.o form.o trunc.o crushb.o tests.o \
 
 # Rules...
 
+# all: amg lapn
 
-amgdrv: $(AMGDRVOBS) $(AMGOBJS) $(MSOBJS)
-	$(COMP) $(LDFLAGS) -o $(HOME)/bin/amgdrv $(AMGDRVOBS) $(AMGOBJS) $(MSOBJS) $(LIBS)
+amg: $(AMGOB) $(AMGS01OBJS) $(MSOBJS)
+	$(COMP) $(LDFLAGS) -o amg $(AMGOB) $(AMGS01OBJS) $(MSOBJS) $(LIBS)
 
-lapn:  $(LAPNOBJS) $(AMGOBJS) $(MSOBJS)
-	$(COMP) $(LDFLAGS) -o $(HOME)/bin/lapn $(LAPNOBJS) $(AMGOBJS) $(MSOBJS) $(LIBS)
+lapn:  $(LAPNOBJS) $(AMGS01OBJS) $(MSOBJS)
+	$(COMP) $(LDFLAGS) -o lapn $(LAPNOBJS) $(AMGS01OBJS) $(MSOBJS) $(LIBS)
 
-lapnshow: $(LAPNSHOBJS) $(AMGOBJS) $(MSOBJS)
-	$(COMP) $(LDFLAGS) -o $(HOME)/bin/lapnshow $(LAPNSHOBJS) $(AMGOBJS) $(MSOBJS) $(LIBS)
 
 amgs01.o: params.amg
 
