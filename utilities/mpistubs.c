@@ -99,6 +99,14 @@ hypre_MPI_Comm_group( hypre_MPI_Comm   comm,
 }
 
 int
+hypre_MPI_Comm_split( hypre_MPI_Comm   comm,
+                      int n, int m,
+                      hypre_MPI_Comm * comms )
+{
+   return(0);
+}
+
+int
 hypre_MPI_Group_incl( hypre_MPI_Group  group,
                       int              n,
                       int             *ranks,

@@ -111,6 +111,7 @@ extern "C" {
 #define MPI_Comm_size       hypre_MPI_Comm_size        
 #define MPI_Comm_rank       hypre_MPI_Comm_rank        
 #define MPI_Comm_free       hypre_MPI_Comm_free        
+#define MPI_Comm_split      hypre_MPI_Comm_split        
 #define MPI_Group_incl      hypre_MPI_Group_incl       
 #define MPI_Group_free      hypre_MPI_Group_free        
 #define MPI_Address         hypre_MPI_Address        
@@ -198,6 +199,7 @@ int hypre_MPI_Comm_size( hypre_MPI_Comm comm , int *size );
 int hypre_MPI_Comm_rank( hypre_MPI_Comm comm , int *rank );
 int hypre_MPI_Comm_free( hypre_MPI_Comm *comm );
 int hypre_MPI_Comm_group( hypre_MPI_Comm comm , hypre_MPI_Group *group );
+int hypre_MPI_Comm_split( hypre_MPI_Comm comm, int n, int m, hypre_MPI_Comm * comms );
 int hypre_MPI_Group_incl( hypre_MPI_Group group , int n , int *ranks , hypre_MPI_Group *newgroup );
 int hypre_MPI_Group_free( hypre_MPI_Group *group );
 int hypre_MPI_Address( void *location , hypre_MPI_Aint *address );
