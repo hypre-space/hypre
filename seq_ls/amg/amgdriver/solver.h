@@ -18,6 +18,19 @@
 
 
 /*--------------------------------------------------------------------------
+ * Solver types
+ *--------------------------------------------------------------------------*/
+
+#define SOLVER_AMG            0
+#define SOLVER_Jacobi         1
+
+#define SOLVER_AMG_PCG       10
+#define SOLVER_Jacobi_PCG    11
+
+#define SOLVER_AMG_GMRES     20
+#define SOLVER_Jacobi_GMRES  21
+
+/*--------------------------------------------------------------------------
  * Solver
  *--------------------------------------------------------------------------*/
 
@@ -30,6 +43,10 @@ typedef struct
    /* pcg params */
    int      pcg_max_iter;
    int      pcg_two_norm;
+
+   /* gmres params */
+   int      gmres_max_krylov;
+   int      gmres_max_restarts;
 
    /* wjacobi params */
    double   wjacobi_weight;
@@ -64,17 +81,21 @@ typedef struct
  * Accessor functions for the Solver structure
  *--------------------------------------------------------------------------*/
 
-#define SolverType(solver)           ((solver) -> type)
+#define SolverType(solver)             ((solver) -> type)
 
-#define SolverStopTolerance(solver)  ((solver) -> stop_tolerance)
+#define SolverStopTolerance(solver)    ((solver) -> stop_tolerance)
 
 /* pcg params */
-#define SolverPCGMaxIter(solver)      ((solver) -> pcg_max_iter)
-#define SolverPCGTwoNorm(solver)      ((solver) -> pcg_two_norm)
+#define SolverPCGMaxIter(solver)       ((solver) -> pcg_max_iter)
+#define SolverPCGTwoNorm(solver)       ((solver) -> pcg_two_norm)
+
+/* gmres params */
+#define SolverGMRESMaxKrylov(solver)   ((solver) -> gmres_max_krylov)
+#define SolverGMRESMaxRestarts(solver) ((solver) -> gmres_max_restarts)
 
 /* wjacobi params */
-#define SolverWJacobiWeight(solver)      ((solver) -> wjacobi_weight)
-#define SolverWJacobiMaxIter(solver)     ((solver) -> wjacobi_max_iter)
+#define SolverWJacobiWeight(solver)    ((solver) -> wjacobi_weight)
+#define SolverWJacobiMaxIter(solver)   ((solver) -> wjacobi_max_iter)
 
 /* amg setup params */
 #define SolverAMGLevMax(solver)      ((solver) -> amg_levmax)

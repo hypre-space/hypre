@@ -20,7 +20,8 @@ AMG_OBJS  = ${AMG_OBJS1:.f=.${AMG_ARCH}.o}
 ${AMG_DRIVER}.${AMG_ARCH}: ${AMG_OBJS}
 	@echo  "Linking" ${AMG_DRIVER} "... "
 	@${AMG_LINK} -o ${AMG_DRIVER}.${AMG_ARCH} \
-		${LFLAGS} ${AMG_OBJS} -L${AMG_DIR}/lib -lamg ${AMG_LIBS}
+		${LFLAGS} ${AMG_OBJS} -L${AMG_DIR}/lib -lamg \
+		-L${AMG_DIR}/lib/cvode -lcvode ${AMG_LIBS}
 
 .c.${AMG_ARCH}.o:
 	@echo "Making (c) " $@

@@ -104,7 +104,7 @@ void    *data;
    /* gamma = <r,p> */
    gamma = InnerProd(r,p);
 
-   while (((i+1) <= max_iter) && (gamma > 0))
+   while ((i+1) <= max_iter)
    {
       i++;
 

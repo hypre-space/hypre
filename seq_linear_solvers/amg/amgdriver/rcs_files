@@ -8,6 +8,8 @@ default.in.solver
 general.h
 globals.c
 globals.h
+gmres.c
+gmres.h
 headers.h
 pcg.c
 pcg.h

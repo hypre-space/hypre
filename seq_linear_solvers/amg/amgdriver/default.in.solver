@@ -11,10 +11,9 @@
 # Generic solver input
 #---------------------------------------------------------
 
-# solver:
-#   0 - AMG
-#   1 - AMGCG
-#   2 - JCG
+# solver: 0=AMG         1=Jacobi
+#        10=AMG PCG    11=Jacobi PCG
+#        20=AMG GMRES  21=Jacobi GMRES
 0
 
 # stop tolerance
@@ -24,20 +23,24 @@
 # PCG input
 #---------------------------------------------------------
 
-# max iterations
+# max iterations; norm (1 = 2-norm)
 50
+1
 
-# two norm
+#---------------------------------------------------------
+# GMRES input
+#---------------------------------------------------------
+
+# max Krylov subspace; max number of restarts
+20
 0
 
 #---------------------------------------------------------
 # Weighted Jacobi input
 #---------------------------------------------------------
 
-# weight
+# weight; max iterations
 1.0
-
-# max iterations
 2
 
 #---------------------------------------------------------
@@ -50,10 +53,10 @@
 # levmax
 25
 
-# ncg, ecg
+# ncg; ecg
 30012  0.25
 
-# nwt, ewt
+# nwt; ewt
 200  0.35
 
 # nstr
@@ -63,37 +66,24 @@
 # AMG solve data:
 
 # ncyc
-1020
+1040
 
 # mu[10]
 1 1 1 1 1 1 1 1 1 1
 
-# ntrlx[4]
+# ntr[f,d,u,c]; ipr[f,d,u,c]; ier[f,d,u,c]; iur[f,d,u,c]
 133   133  133   19
-
-# iprlx[4]
  31    31   13    2
-
-# ierlx[4]
  99    99   99    9
-
-# iurlx[4]
  99    99   99    9
 
 #-----------------
 # AMG output data:
 
-# ioutdat
+# ioutdat; ioutgrd; ioutmat; ioutres
 1
-
-# ioutgrd
+0
+0
+0
 0
 
-# ioutmat
-1
-
-# ioutres
-0
-
-# ioutsol
-0

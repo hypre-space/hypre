@@ -126,6 +126,12 @@ else
    echo "Can't find config file: using the defaults"
 fi
 
+AMG_BIN_DIR=$AMG_DIR/bin
+AMG_LIB_DIR=$AMG_DIR/lib
+AMG_INCLUDE_DIR=$AMG_DIR/include
+
+export AMG_BIN_DIR AMG_LIB_DIR AMG_INCLUDE_DIR
+ 
 #=============================================================================
 # Install
 #=============================================================================
@@ -139,7 +145,10 @@ then
 
    if [ ! -d $AMG_DIR ]
    then
-      $AMG_MKDIR $AMG_DIR
+      for i in $AMG_DIR $AMG_BIN_DIR $AMG_LIB_DIR $AMG_INCLUDE_DIR
+      do
+        $AMG_MKDIR $i
+      done
    fi
 fi
 

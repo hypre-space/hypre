@@ -9,7 +9,7 @@
 #EHEADER***********************************************************************
 
 #===========================================================================
-# This script builds all of the code in the AMG directory structure
+# This script builds the CVODE library
 #===========================================================================
 
 . $AMG_SRC/config/build_generic
@@ -18,19 +18,39 @@
 # Build
 #=============================================================================
 
-DIRS="tools amgdriver"
-
-for i in $DIRS
-do
-   echo "Building $i"
-   (cd $AMG_SRC/$i; ./build $AMG_BUILD_ARGS)
-done
+if [ "$AMG_ALL_FLAG" ]
+then
+   if [ ! -f "$AMG_SRC/cvode/lib/libcvode.$AMG_ARCH.a" ]
+   then
+      echo "Building cvode ..."
+    
+      (cd $AMG_SRC/cvode; make)
+    
+      mv $AMG_SRC/cvode/lib/libcvode.a $AMG_SRC/cvode/lib/libcvode.$AMG_ARCH.a
+   fi
+fi
 
 #=============================================================================
 # Install
 #=============================================================================
 
+if [ "$AMG_INSTALL_FLAG" ]
+then
+   /bin/rm -fr $AMG_LIB_DIR/cvode 
+   /bin/rm -fr $AMG_INCLUDE_DIR/cvode
+   $AMG_MKDIR $AMG_LIB_DIR/cvode
+   $AMG_MKDIR $AMG_INCLUDE_DIR/cvode
+    
+   $AMG_INSTALL $AMG_SRC/cvode/lib/libcvode.$AMG_ARCH.a \
+                $AMG_LIB_DIR/cvode/libcvode.a
+   $AMG_INSTALL $AMG_SRC/cvode/include/* $AMG_INCLUDE_DIR/cvode
+fi
+
 #=============================================================================
 # Clean
 #=============================================================================
 
+if [ "$AMG_VERYCLEAN_FLAG" ]
+then
+   rm -f $AMG_SRC/cvode/lib/libcvode.$AMG_ARCH.a
+fi

@@ -29,6 +29,10 @@ char     *file_name;
    int      pcg_max_iter;
    int      pcg_two_norm;
 
+   /* gmres params */
+   int      gmres_max_krylov;
+   int      gmres_max_restarts;
+
    /* wjacobi params */
    double   wjacobi_weight;
    int      wjacobi_max_iter;
@@ -88,6 +92,16 @@ char     *file_name;
 
    SolverPCGMaxIter(solver) = pcg_max_iter;
    SolverPCGTwoNorm(solver) = pcg_two_norm;
+
+   /*----------------------------------------------------------
+    * GMRES input
+    *----------------------------------------------------------*/
+
+   fscanf(fp, "%d", &gmres_max_krylov);
+   fscanf(fp, "%d", &gmres_max_restarts);
+
+   SolverGMRESMaxKrylov(solver)   = gmres_max_krylov;
+   SolverGMRESMaxRestarts(solver) = gmres_max_restarts;
 
    /*----------------------------------------------------------
     * Weighted Jacobi input
@@ -204,6 +218,10 @@ Solver  *solver;
    int      pcg_max_iter;
    int      pcg_two_norm;
 
+   /* gmres params */
+   int      gmres_max_krylov;
+   int      gmres_max_restarts;
+
    /* wjacobi params */
    double   wjacobi_weight;
    int      wjacobi_max_iter;
@@ -244,6 +262,9 @@ Solver  *solver;
    pcg_max_iter = SolverPCGMaxIter(solver);
    pcg_two_norm = SolverPCGTwoNorm(solver);
 
+   gmres_max_krylov   = SolverGMRESMaxKrylov(solver);
+   gmres_max_restarts = SolverGMRESMaxRestarts(solver);
+
    wjacobi_weight   = SolverWJacobiWeight(solver);
    wjacobi_max_iter = SolverWJacobiMaxIter(solver);
 
@@ -280,24 +301,36 @@ Solver  *solver;
    fprintf(fp,"\nSOLVER PARAMETERS:\n\n");
    fprintf(fp, "  Solver Type:  %d - ", type);
 
-   if (type == 0)
+   if (type == SOLVER_AMG)
    {
       fprintf(fp, "AMG \n\n");
    }
-   else if (type == 1)
+   else if (type == SOLVER_Jacobi)
    {
-      fprintf(fp, "AMGCG \n\n");
+      fprintf(fp, "Jacobi \n\n");
    }
-   else if (type ==2)
+   else if (type == SOLVER_AMG_PCG)
    {
-      fprintf(fp, "JCG \n\n");
+      fprintf(fp, "AMG PCG \n\n");
+   }
+   else if (type == SOLVER_Jacobi_PCG)
+   {
+      fprintf(fp, "Jacobi PCG \n\n");
+   }
+   else if (type == SOLVER_AMG_GMRES)
+   {
+      fprintf(fp, "AMG GMRES \n\n");
+   }
+   else if (type == SOLVER_Jacobi_GMRES)
+   {
+      fprintf(fp, "Jacobi GMRES \n\n");
    }
 
    /*----------------------------------------------------------
     * PCG info
     *----------------------------------------------------------*/
 
-   if (type == 1 | type == 2)
+   if (type == SOLVER_AMG_PCG || type == SOLVER_Jacobi_PCG)
    {
        fprintf(fp, "  Preconditioned Conjugate Gradient Parameters:\n");
        fprintf(fp, "    Solver Stop Tolerance:  %e \n", stop_tolerance);
@@ -306,10 +339,24 @@ Solver  *solver;
    }
 
    /*----------------------------------------------------------
+    * GMRES info
+    *----------------------------------------------------------*/
+
+   if (type == SOLVER_AMG_GMRES || type == SOLVER_Jacobi_GMRES)
+   {
+       fprintf(fp, "  Generalized Minimum Residual Parameters:\n");
+       fprintf(fp, "    Solver Stop Tolerance:  %e \n", stop_tolerance);
+       fprintf(fp, "    Maximum Krylov Dimension: %d \n", gmres_max_krylov);
+       fprintf(fp, "    Max Number of Restarts: %d \n\n", gmres_max_restarts);
+   }
+
+   /*----------------------------------------------------------
     * Jacobi info
     *----------------------------------------------------------*/
 
-   if (type == 2)
+   if (type == SOLVER_Jacobi ||
+       type == SOLVER_Jacobi_PCG ||
+       type == SOLVER_Jacobi_GMRES)
    {
       fprintf(fp, "  Jacobi Parameters:\n");
       fprintf(fp, "    Weight for Relaxation: %f \n", wjacobi_weight);
@@ -320,7 +367,9 @@ Solver  *solver;
     * AMG info
     *----------------------------------------------------------*/
 
-   if (type == 0 | type == 1)
+   if (type == SOLVER_AMG ||
+       type == SOLVER_AMG_PCG ||
+       type == SOLVER_AMG_GMRES)
    {
       fprintf(fp, "  AMG Parameters:\n");
       fprintf(fp, "    Maximum number of levels:            %d \n",

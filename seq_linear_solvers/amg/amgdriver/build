@@ -20,6 +20,8 @@
 
 AMG_DRIVER=amgdriver
 
+LIBRARY_DIRS="amg cvode"
+ 
 CFLAGS="$AMG_CC_FLAGS -I$AMG_SRC/config -I$AMG_DIR/include"
 FFLAGS="$AMG_F77_FLAGS"
 LFLAGS="$AMG_LINK_FLAGS"
@@ -44,6 +46,11 @@ export AMG_DRIVER CFLAGS FFLAGS LFLAGS
 
 if [ "$AMG_ALL_FLAG" ]
 then
+   for i in $LIBRARY_DIRS
+   do
+      (cd $AMG_SRC/$i; ./build $AMG_BUILD_ARGS install)
+   done
+
    echo "Building"
    echo "       Program:                $AMG_DRIVER"
    echo "       Arch:                   $AMG_ARCH"
@@ -77,15 +84,9 @@ fi
 
 if [ "$AMG_INSTALL_FLAG" ]
 then
-   AMG_BIN=$AMG_DIR/bin
-
-   if [ ! -d $AMG_BIN ]
-   then
-     $AMG_MKDIR $AMG_BIN
-   fi
-
-   $AMG_INSTALL $AMG_SRC/amgdriver/$AMG_DRIVER.$AMG_ARCH $AMG_BIN/$AMG_DRIVER
-   $AMG_INSTALL $AMG_SRC/amgdriver/amgrun $AMG_BIN/.
+   $AMG_INSTALL $AMG_SRC/amgdriver/$AMG_DRIVER.$AMG_ARCH \
+                $AMG_BIN_DIR/$AMG_DRIVER
+   $AMG_INSTALL $AMG_SRC/amgdriver/amgrun $AMG_BIN_DIR/.
 fi
 
 #=============================================================================
@@ -94,11 +95,21 @@ fi
 
 if [ "$AMG_CLEAN_FLAG" ]
 then
+   for i in $LIBRARY_DIRS
+   do
+      (cd $AMG_SRC/$i; ./build $AMG_BUILD_ARGS)
+   done
+
    rm -f *.$AMG_ARCH.o
 fi
 
 if [ "$AMG_VERYCLEAN_FLAG" ]
 then
+   for i in $LIBRARY_DIRS
+   do
+      (cd $AMG_SRC/$i; ./build $AMG_BUILD_ARGS)
+   done
+
    rm -f $AMG_DRIVER.$AMG_ARCH
 fi
 

@@ -33,6 +33,7 @@ char *argv[];
    void    *amg_data;
    void    *wjacobi_data;
    void    *pcg_data;
+   void    *gmres_data;
 
 
    /*-------------------------------------------------------
@@ -103,17 +104,26 @@ char *argv[];
    amg_data     = NewAMGData(problem, solver, GlobalsLogFileName);
    wjacobi_data = NewWJacobiData(problem, solver, GlobalsLogFileName);
    pcg_data     = NewPCGData(problem, solver, GlobalsLogFileName);
+   gmres_data   = NewGMRESData(problem, solver, GlobalsLogFileName);
 
    /* call AMG */
-   if (SolverType(solver) == 0)
+   if (SolverType(solver) == SOLVER_AMG)
    {
       amg_Setup(A, amg_data);
 
       amg_Solve(u, f, stop_tolerance, amg_data);
    }
 
-   /* call AMGCG */
-   else if (SolverType(solver) == 1)
+   /* call Jacobi */
+   if (SolverType(solver) == SOLVER_Jacobi)
+   {
+      WJacobiSetup(A, amg_data);
+
+      WJacobi(u, f, stop_tolerance, wjacobi_data);
+   }
+
+   /* call AMG PCG */
+   else if (SolverType(solver) == SOLVER_AMG_PCG)
    {
       amg_Setup(A, amg_data);
       PCGSetup(A, amg_Solve, amg_data, pcg_data);
@@ -121,8 +131,8 @@ char *argv[];
       PCG(u, f, stop_tolerance, pcg_data);
    }
 
-   /* call JCG */
-   else if (SolverType(solver) == 2)
+   /* call Jacobi PCG */
+   else if (SolverType(solver) == SOLVER_Jacobi_PCG)
    {
       WJacobiSetup(A, wjacobi_data);
       PCGSetup(A, WJacobi, wjacobi_data, pcg_data);
@@ -130,16 +140,36 @@ char *argv[];
       PCG(u, f, stop_tolerance, pcg_data);
    }
 
+   /* call AMG GMRES */
+   else if (SolverType(solver) == SOLVER_AMG_GMRES)
+   {
+      amg_Setup(A, amg_data);
+      GMRESSetup(A, amg_Solve, amg_data, gmres_data);
+
+      GMRES(u, f, stop_tolerance, gmres_data);
+   }
+
+   /* call Jacobi GMRES */
+   else if (SolverType(solver) == SOLVER_Jacobi_GMRES)
+   {
+      WJacobiSetup(A, wjacobi_data);
+      GMRESSetup(A, WJacobi, wjacobi_data, gmres_data);
+
+      GMRES(u, f, stop_tolerance, gmres_data);
+   }
+
    /*-------------------------------------------------------
     * Debugging prints
     *-------------------------------------------------------*/
 #if 0
    sprintf(file_name, "%s.lastu", GlobalsOutFileName);
-   WriteVec(file_name, ProblemU(problem));
+   WriteVec(file_name, u);
 
-   Matvec(-1.0, ProblemA(problem), ProblemU(problem), 1.0, ProblemF(problem));
+   Matvec(-1.0, A, u, 1.0, f);
    sprintf(file_name, "%s.res", GlobalsOutFileName);
-   WriteVec(file_name, ProblemF(problem));
+   WriteVec(file_name, f);
+
+   printf("r_norm = %e\n", sqrt(InnerProd(f,f)));
 #endif
 
    return 0;

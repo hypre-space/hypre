@@ -16,6 +16,14 @@ void *NewAMGData P((Problem *problem , Solver *solver , char *log_file_name ));
 void NewGlobals P((char *run_name ));
 void FreeGlobals P((void ));
 
+/* gmres.c */
+int SPGMRATimes P((void *A_data_arg , N_Vector v_arg , N_Vector z_arg ));
+int SPGMRPSolve P((void *P_data_arg , N_Vector r_arg , N_Vector z_arg , int lr_arg ));
+void GMRES P((Vector *x_arg , Vector *b_arg , double tol_arg , void *data_arg ));
+void GMRESSetup P((Matrix *A , void (*precond )(), void *precond_data , void *data ));
+void *NewGMRESData P((Problem *problem , Solver *solver , char *log_file_name ));
+void FreeGMRESData P((void *data ));
+
 /* pcg.c */
 void PCG P((Vector *x , Vector *b , double tol , void *data ));
 void PCGSetup P((Matrix *A , void (*precond )(), void *precond_data , void *data ));

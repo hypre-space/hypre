@@ -77,22 +77,8 @@ fi
 
 if [ "$AMG_INSTALL_FLAG" ]
 then
-   AMG_LIB=$AMG_DIR/lib
-
-   if [ ! -d $AMG_LIB ]
-   then
-     $AMG_MKDIR $AMG_LIB
-   fi
-
-   AMG_INCLUDE=$AMG_DIR/include
-
-   if [ ! -d $AMG_INCLUDE ]
-   then
-     $AMG_MKDIR $AMG_INCLUDE
-   fi
-
-   $AMG_INSTALL $AMG_LIBRARY.$AMG_ARCH.a $AMG_LIB/lib$AMG_LIBRARY.a
-   $AMG_INSTALL amg.h vector.h matrix.h $AMG_INCLUDE
+   $AMG_INSTALL $AMG_LIBRARY.$AMG_ARCH.a $AMG_LIB_DIR/lib$AMG_LIBRARY.a
+   $AMG_INSTALL amg.h vector.h matrix.h $AMG_INCLUDE_DIR
 fi
 
 #=============================================================================

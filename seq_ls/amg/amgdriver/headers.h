@@ -20,6 +20,8 @@
 #include <stdio.h>
 #include <math.h>
 
+#include <cvode/spgmr.h>
+
 #include <amg.h>
 
 #include "general.h"
