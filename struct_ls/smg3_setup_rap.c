@@ -13,6 +13,9 @@
 
 #include "headers.h"
 #include "smg.h"
+#ifdef HYPRE_USE_PTHREADS
+#include "box_pthreads.h"
+#endif
 
 /*--------------------------------------------------------------------------
  * hypre_SMG3NewRAPOp 
