@@ -71,7 +71,7 @@ MLI_Method_AMGSA::MLI_Method_AMGSA( MPI_Comm comm ) : MLI_Method( comm )
       spectralNorms_[i] = 0.0;
    }
    calcNormScheme_ = 0;              /* use matrix rowsum norm */
-   minCoarseSize_  = 500;            /* smallest coarse grid   */
+   minCoarseSize_  = 1000;           /* smallest coarse grid   */
    minAggrSize_    = 3;              /* smallest aggregate size */
    coarsenScheme_  = MLI_METHOD_AMGSA_LOCAL;
    strcpy(preSmoother_, "HSGS");
