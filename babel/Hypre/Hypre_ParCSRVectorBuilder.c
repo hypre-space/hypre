@@ -13,6 +13,7 @@
 #include "Hypre_ParCSRVector_Data.h" 
 #include "Hypre_MPI_Com_Skel.h" 
 #include "Hypre_MPI_Com_Data.h" 
+#include "Hypre_Partition_Skel.h"
 #include "HYPRE_parcsr_mv.h"
 #include "HYPRE_IJ_mv.h"
 
@@ -90,12 +91,46 @@ int impl_Hypre_ParCSRVectorBuilder_Start
  * IJ_matrix_vector/hypre_IJVector_parcsr.c:hypre_IJVectorSetPartitioningPar
  * and parcsr_matrix_vector/par_vector.c:hypre_ParVectorCreate .
  **********************************************************/
-int  impl_Hypre_ParCSRVectorBuilder_SetPartitioning
-( Hypre_ParCSRVectorBuilder this, array1int partitioning ) {
+/*  int  impl_Hypre_ParCSRVectorBuilder_SetPartitioning */
+/*  ( Hypre_ParCSRVectorBuilder this, array1int partitioning ) { */
+/*     Hypre_ParCSRVector vec = this->Hypre_ParCSRVectorBuilder_data->newvec; */
+/*     HYPRE_IJVector * Hvec = vec->Hypre_ParCSRVector_data->Hvec; */
+/*     int * partition_data = &(partitioning.data[*(partitioning.lower)]); */
+
+/*     if (this->Hypre_ParCSRVectorBuilder_data->vecgood==1) { */
+        /* ... error to set partitioning on a fully built vector */
+        /* This check would better be done by a design-by-contract style "Require"
+           There are many such cases in this code. */
+/*        return 1; */
+/*     } */
+/*     else { */
+/*        return HYPRE_IJVectorSetPartitioning( *Hvec, partition_data ); */
+/*     } */
+/*  }  end impl_Hypre_ParCSRVectorBuilderSetPartitioning */
+
+/* ********************************************************
+ * impl_Hypre_ParCSRVectorBuilderGetPartitioning
+ **********************************************************/
+/*  int  impl_Hypre_ParCSRVectorBuilder_GetPartitioning */
+/*  (Hypre_ParCSRVectorBuilder this, array1int* partitioning) { */
+/*     Hypre_ParCSRVector vec = this->Hypre_ParCSRVectorBuilder_data->newvec; */
+/*     return Hypre_ParCSRVector_GetPartitioning( vec, partitioning ); */
+/*  } end impl_Hypre_ParCSRVectorBuilderGetPartitioning */
+
+/* ********************************************************
+ * impl_Hypre_ParCSRVectorBuilder_SetMap
+ **********************************************************/
+int  impl_Hypre_ParCSRVectorBuilder_SetMap
+( Hypre_ParCSRVectorBuilder this, Hypre_Map map ) {
    Hypre_ParCSRVector vec = this->Hypre_ParCSRVectorBuilder_data->newvec;
    HYPRE_IJVector * Hvec = vec->Hypre_ParCSRVector_data->Hvec;
-   int * partition_data = &(partitioning.data[*(partitioning.lower)]);
-
+   int * partition_data ;
+   Hypre_Partition part = (Hypre_Partition) Hypre_Map_castTo( map, "Hypre.Partition" );
+   if ( part==NULL ) {
+      printf( "wrong kind of map for Hypre_ParCSRVectorBuilder_SetMap\n" );
+      return 1;
+   };
+   partition_data = part->Hypre_Partition_data->partition;
    if (this->Hypre_ParCSRVectorBuilder_data->vecgood==1) {
       /* ... error to set partitioning on a fully built vector */
       /* This check would better be done by a design-by-contract style "Require"
@@ -105,16 +140,18 @@ int  impl_Hypre_ParCSRVectorBuilder_SetPartitioning
    else {
       return HYPRE_IJVectorSetPartitioning( *Hvec, partition_data );
    }
-} /* end impl_Hypre_ParCSRVectorBuilderSetPartitioning */
+} /* end impl_Hypre_ParCSRVectorBuilder_SetMap */
 
 /* ********************************************************
- * impl_Hypre_ParCSRVectorBuilderGetPartitioning
+ * impl_Hypre_ParCSRVectorBuilder_GetMap
  **********************************************************/
-int  impl_Hypre_ParCSRVectorBuilder_GetPartitioning
-(Hypre_ParCSRVectorBuilder this, array1int* partitioning) {
+int  impl_Hypre_ParCSRVectorBuilder_GetMap
+( Hypre_ParCSRVectorBuilder this, Hypre_Map* map ) {
+
    Hypre_ParCSRVector vec = this->Hypre_ParCSRVectorBuilder_data->newvec;
-   return Hypre_ParCSRVector_GetPartitioning( vec, partitioning );
-} /* end impl_Hypre_ParCSRVectorBuilderGetPartitioning */
+   return Hypre_ParCSRVector_GetMap( vec, map );
+
+} /* end impl_Hypre_ParCSRVectorBuilder_GetMap */
 
 /* ********************************************************
  * impl_Hypre_ParCSRVectorBuilderSetLocalComponents

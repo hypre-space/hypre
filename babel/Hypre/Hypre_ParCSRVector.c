@@ -15,6 +15,9 @@ which needs libgcc.a ... */
 
 #include "Hypre_MPI_Com_Skel.h"
 #include "Hypre_MPI_Com_Data.h"
+#include "Hypre_Partition_Skel.h"
+#include "Hypre_PartitionBuilder_Skel.h"
+#include "Hypre_Map_Stub.h"
 #include "HYPRE_IJ_mv.h"
 #include "IJ_matrix_vector.h"
 #include "parcsr_matrix_vector.h"
@@ -119,16 +122,19 @@ int  impl_Hypre_ParCSRVector_Clone(Hypre_ParCSRVector this, Hypre_Vector* x) {
    /* To build the new x, we first need to build a builder...*/
    Hypre_ParCSRVectorBuilder Bldr = Hypre_ParCSRVectorBuilder_Constructor( comm, 0 );
 
-   array1int partitioning;
+//   array1int partitioning;
+   Hypre_Map map;
 
    ierr += impl_Hypre_ParCSRVectorBuilder_Start( Bldr, *comm, global_n );
 
    /* copy partitioning from y to x ... */
-   MPI_Comm_size( *MCp, &num_procs );
-   partitioning.lower[0] = 0;
-   partitioning.upper[0] = num_procs;
-   ierr +=  Hypre_ParCSRVector_GetPartitioning( this, &partitioning );
-   ierr +=  Hypre_ParCSRVectorBuilder_SetPartitioning( Bldr, partitioning );
+//   MPI_Comm_size( *MCp, &num_procs );
+//   partitioning.lower[0] = 0;
+//   partitioning.upper[0] = num_procs;
+//   ierr +=  Hypre_ParCSRVector_GetPartitioning( this, &partitioning );
+//   ierr +=  Hypre_ParCSRVectorBuilder_SetPartitioning( Bldr, partitioning );
+   ierr += Hypre_ParCSRVector_GetMap( this, &map );
+   ierr += Hypre_ParCSRVectorBuilder_SetMap( Bldr, map );
 
    ierr += Hypre_ParCSRVectorBuilder_Setup( Bldr );
    ierr += Hypre_ParCSRVectorBuilder_GetConstructedObject( Bldr, x );
@@ -303,19 +309,74 @@ hypre_IJVectorScalePar( hypre_IJVector *vector, double ascale )
 /* ********************************************************
  * impl_Hypre_ParCSRVectorGetPartitioning
  **********************************************************/
-int  impl_Hypre_ParCSRVector_GetPartitioning
-(Hypre_ParCSRVector this, array1int* partitioning) {
-   int i, p;
+/*  int  impl_Hypre_ParCSRVector_GetPartitioning */
+/*  (Hypre_ParCSRVector this, array1int* partitioning) { */
+/*     int i, p; */
+/*     HYPRE_IJVector * Hvec = this->Hypre_ParCSRVector_data->Hvec; */
+/*     int * new_data_p; */
+/*     int ** new_data = &new_data_p; */
+
+/*     HYPRE_IJVectorGetPartitioning( *Hvec, new_data ); */
+
+  /* >>>> TO DO: Is this right with nonzero lower index ?? >>>> */
+/*     (*partitioning).data = *new_data; */
+/*     return 0; */
+/*  } end impl_Hypre_ParCSRVectorGetPartitioning */
+
+/* ********************************************************
+ * impl_Hypre_ParCSRVector_GetGlobalSize
+ **********************************************************/
+int  impl_Hypre_ParCSRVector_GetGlobalSize(Hypre_ParCSRVector this, int* size) {
+   printf( "Hypre_ParCSRVector_GetGlobalSize doesn't work. TO DO (URGENT): implement this\n" );
+   return 1;
+} /* end impl_Hypre_ParCSRVector_GetGlobalSize */
+
+/* ********************************************************
+ * impl_Hypre_ParCSRVector_GetMap
+ **********************************************************/
+int  JFP_Hypre_PartitionBuilder_GetConstructedObject
+( Hypre_PartitionBuilder this, Hypre_Partition* obj );
+int  impl_Hypre_ParCSRVector_GetMap(Hypre_ParCSRVector this, Hypre_Map* map) {
+   int ierr = 0;
+   Hypre_Partition part;
+   Hypre_PartitionBuilder partBldr;
    HYPRE_IJVector * Hvec = this->Hypre_ParCSRVector_data->Hvec;
    int * new_data_p;
    int ** new_data = &new_data_p;
+   array1int partarray;
 
-   HYPRE_IJVectorGetPartitioning( *Hvec, new_data );
+   struct Hypre_ParCSRVector_private_type *HPy = this->Hypre_ParCSRVector_data;
+   Hypre_MPI_Com comm = HPy->comm;
+   MPI_Comm * MCp = comm->Hypre_MPI_Com_data->hcom;
+   int num_procs;
+   MPI_Comm_size( *MCp, &num_procs );
 
-/* >>>> TO DO: Is this right with nonzero lower index ?? >>>> */
-   (*partitioning).data = *new_data;
-   return 0;
-} /* end impl_Hypre_ParCSRVectorGetPartitioning */
+   if ( (*map)==NULL ) { /* make one ... */
+      partarray.lower[0] = 0;
+      partarray.upper[0] = num_procs;
+      partarray.data = *new_data;
+      partBldr = Hypre_PartitionBuilder_New();
+      ierr += Hypre_PartitionBuilder_Start( partBldr, partarray );
+      ierr += Hypre_PartitionBuilder_Setup( partBldr );
+      ierr += Hypre_PartitionBuilder_GetConstructedObject( partBldr, map );
+      Hypre_Map_addReference( (*map) ); /* compiles */
+/*      Hypre_Map_addReference( *map );*/ /* doesn't compile */
+      Hypre_PartitionBuilder_deleteReference( partBldr );
+   }
+
+   part = (Hypre_Partition) Hypre_Map_castTo( *map, "Hypre.Partition" );
+   if ( part==NULL ) {
+      printf( "wrong kind of map for Hypre_ParCSRVectorBuilder_SetMap\n" );
+      return 1;
+   };
+
+   ierr += HYPRE_IJVectorGetPartitioning( *Hvec, new_data );
+   part->Hypre_Partition_data->partition = *new_data;
+   part->Hypre_Partition_data->lower = 0;
+   part->Hypre_Partition_data->upper = num_procs;
+
+   return ierr;
+} /* end impl_Hypre_ParCSRVector_GetMap */
 
 
 /* ********************************************************
