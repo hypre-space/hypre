@@ -1,0 +1,300 @@
+%==========================================================================
+\chapter{Configuration Management}
+\label{Configuration Management}
+
+This chapter describes the so-called Software Configuration Management
+(SCM) practices used on the \hypre{} project.  Good SCM practices can
+enhance the efficiency of software development and maintenance efforts
+by providing mechanisms for tracking and controlling the evolution of
+a software package.  Whether or not the \hypre{} project uses ``good''
+SCM practices is debatable, but they are described here nonetheless.
+
+%==========================================================================
+\section{The Repository}
+\label{The Repository}
+
+CVS is used as the resource control mechanism for \hypre{}.  This
+allows developers to more easily coordinate their efforts, keep
+previous revisions of software, and track changes and releases.
+
+Some CVS commands you will use most often are:
+\begin{itemize}
+\item '\code{cvs checkout linear_solvers}' - checks out the most
+recent version of the repository source into the current directory.
+\item '\code{cvs update}' - updates your working version, merging
+(or attempting to merge) your file changes with changes made (and
+checked in) by other developers.  This will also give information on
+current status of your changes, such as which files have been modified
+(\code{M}), which files have been added (\code{A}), which files have
+been removed (\code{R}), and which files cannot be accounted for
+(\code{?}).
+\item '\code{cvs commit}' - commits changes to all files in current
+directory and all subdirectories.
+\item '\code{cvs log <file>}' - prints revision history for a file.
+\end{itemize}
+
+It is recommended that developers set up a \file{.cvsrc} file in their
+home directory with the following lines in it:
+\begin{verbatim}
+checkout -P
+update -P -d
+remove -f
+\end{verbatim}
+This sets default options for the CVS commands, \code{checkout},
+\code{update}, and \code{remove} that make life much easier.
+\begin{itemize}
+\item The \code{-P} options cause the \code{checkout} and \code{update}
+commands to ``prune'' (remove) directories that are empty.
+
+\item The \code{-d} option will create any directories that exist in the
+repository if they are missing in your working directory.  So, when
+new directories are added to the repository, they will get added to
+your working copy automatically when an \code{update} is done.
+
+\item The \code{-f} option causes the remove command to first remove the
+file from your working directory, then schedule it for removal from
+the repository.  So, if you want to remove a file from the repository,
+all you need to do is \code{cvs remove <file>}.
+\end{itemize}
+
+The main trunk of the repository must always pass the autotest
+procedures outlined in Section \ref{Autotest Procedures}.  So,
+developers must take extra care that checked-in code does not break
+autotest.  One thing that should almost always be done is to do a
+clean checkout into a temporary subdirectory (e.g., \code{~/tmp}),
+then do a '\code{configure}' and a '\code{make beta}'.  This will at
+least verify that the compile is not broken.  Extra measures should be
+taken when necessary to insure that the autotest runs also do not
+fail.
+
+%==============================
+\subsection{Using CVS Branches}
+\label{Using CVS Branches}
+
+Sometimes a large change needs to be made to the repository that
+involves several developers coordinating their efforts.  Here, it
+would be useful to use CVS to share code during the development
+process, but this may temporarily break code that previously worked.
+To avoid this, developers can use the branch mechanism in CVS.
+
+{\bf WARNING:} The use of branches can easily screw up the repository
+if care is not taken.  Developers should follow the guidelines below
+to reduce the risk of this.  Do not stray from these guidelines
+without first consulting the software technical lead for \hypre{}.
+
+{\bf SECOND WARNING:} Branches should not be created and kept around
+for long periods of time.  They should only be used {\em temporarily}.
+
+\begin{itemize}
+
+\item First, coordinate with the other developers involved to decide
+on a branch name, and to insure that it is okay to start development
+from the latest revision of the repository's main trunk.
+
+\item Create a new branch (we will use the name '\code{foo}' here).
+\begin{verbatim}
+cvs rtag -b foo linear_solvers
+\end{verbatim}
+
+\item Create a working copy of the branch.
+\begin{verbatim}
+cd ~
+mkdir foo
+cd foo
+cvs checkout -r foo linear_solvers
+\end{verbatim}
+
+\item Make modifications to files in '\code{~/foo/linear_solvers}'.
+Code can be checked in/out without doing damage to the main
+development trunk.
+
+\item When the code is working, merge changes into the main trunk.
+\begin{verbatim}
+cd ~
+cvs checkout linear_solvers
+cvs update -j foo
+\end{verbatim}
+
+\item Verify that the merged files are okay, i.e. that the code compiles,
+runs, etc.
+
+\item Commit the changes to the main trunk.
+\begin{verbatim}
+cd ~/linear_solvers
+cvs commit .
+\end{verbatim}
+
+\item Verify that the commit worked okay by doing a clean checkout, etc.
+
+\item Remove the temporary tag, '\code{foo}', so that this branch is
+not accidentally used to make additional changes to the repository.
+\begin{verbatim}
+cvs rtag -d foo linear_solvers
+\end{verbatim}
+
+\end{itemize}
+
+%==========================================================================
+\section{Releases}
+\label{Releases}
+
+The term \hypre{} {\em release} refers to the collection of software
+and documentation distributed and supported for our users.  Only a
+subset of the repository is in the \hypre{} release at any point in
+time.  The files distributed in a release are defined via the Korn
+shell script \file{tools/mkdist} used to create releases.  Note that
+there will be times when pieces of software are distributed with the
+release, but are technically not yet {\em in} the release (i.e., they
+are not yet fully supported).  This is done to ease the process of
+migrating a code from a development stage to a production stage.
+
+The \hypre{} technical lead determines when new software is added to
+the release.  The following criteria must be met before a code is
+added to the release:
+\begin{enumerate}
+
+\item the developer has done fairly rigorous testing of code
+\item an autotest suite has been set up and the code passes
+\item the code conforms to coding guidelines
+\item the code uses autoconfig infrastructure and configures on all
+supported platforms
+\item more than one developer has looked at the code
+\item the code has been documented in the User's and Reference Manuals
+\item runs through purify cleanly
+
+\end{enumerate}
+
+\noindent
+We currently have 3 flavors of releases:
+\begin{itemize}
+\item {\bf Version \#.\#.\#} - This is our {\em general release}.  These
+releases occur infrequently and are available for download from the
+web.  Only bug fixes will be done to these releases (i.e., no new
+technology), indicated by an incremented 3rd digit in the version
+number.  A new CVS branch is created and tagged to allow bug fixes
+without introducing new technology.
+
+\item {\bf Version \#.\#.\#b} - These {\em beta releases} will occur somewhat
+frequently.  Bug fixes will only be available here from new releases,
+which may also include new technology.  Beta releases are not expected
+to be as stable as general releases.  The release is tagged, but a CVS
+branch is not created.
+
+\item {\bf Version \#.\#.\#a} - These {\em alpha releases} are essentially
+the same as beta releases, and may occur very frequently.  They will
+primarily be used to quickly get new code to close collaborators.
+Alpha releases are not expected to be as stable as beta releases.
+The release is tagged, but a CVS branch is not created.
+\end{itemize}
+
+%==========================================================================
+\subsection{Installations}
+\label{Installations}
+
+Installations of the various releases is done as follows:
+\begin{itemize}
+\item General releases and beta releases are installed on all
+supported LLNL platforms.
+\item Alpha releases are installed only on the CASC cluster.
+\end{itemize}
+
+\noindent
+Users can point to one of two installations (three on the CASC
+cluster) by default:
+\begin{itemize}
+\item \file{/usr/apps/hypre} - the latest general release.
+\item \file{/usr/apps/hypre/beta} - the latest general or beta release
+\end{itemize}
+
+\noindent
+On the CASC cluster, the main installation directory is
+\file{/home/casc/software/hypre}, and users can also point to a
+\file{/home/casc/software/hypre/alpha} installation.
+Debugging and threaded versions are also being installed on the
+various platforms.  To get to these, append \file{debug},
+\file{threads}, or \file{threads/debug} to the default install
+directory name (e.g., \file{/usr/apps/hypre/threads}).
+
+%==============================
+\subsection{Release Schedule}
+\label{Release Schedule}
+
+Here is the basic schedule used for general releases:
+\begin{itemize}
+\item {\bf Week 1, Monday} - Tell developers about impending new release.
+Based on response, either go forward with the release or delay it.
+\item {\bf Week 1, M-F} - Developers prepare for the release by cleaning
+up code, documentation, etc.
+\item {\bf Week 2, Monday} - Create a new beta release and install.
+\item {\bf Week 2, Tuesday} - Initial documentation review meeting.
+All changes are to be completed before Week 3, Monday.
+\item {\bf Week 3, Tuesday} - Final documentation review meeting.
+Additional changes to be completed before Week 3, Wednesday.
+\item {\bf Week 3, Thursday} - Create a new general release and test.
+\item {\bf Week 4, Monday} - Install general release on LLNL machines.
+\end{itemize}
+
+No new big code changes should be checked in during the last two weeks
+of the general release schedule (i.e., weeks 2 and 3) without first
+consulting with the \hypre{} software technical lead.  The idea is to
+use these two weeks to allow the code to ``settle'' a little as we do
+testing, etc.  Minor changes are encouraged, of course.
+
+%==========================================================================
+\section{Making Changes to the Repository}
+\label{Making Changes to the Repository}
+
+This section gives guidelines for making changes to the repository.
+Because \hypre{} is a fairly large software library with a number of
+important customers, formal change control guidelines are necessary in
+order to maintain software quality and preserve the sanity of library
+developers (those who are not already lost, anyway :).
+
+There are different classes of code changes that can be commited to
+the repository, some with little or no prerequisites attached, and
+others with heavier prerequisites.
+\begin{itemize}
+
+\item {\bf All code} should at least compile before commiting
+to the repository.
+
+\item {\bf Code that is not being distributed with the release}
+may be changed without consulting with the \hypre{} technical lead.
+
+\item {\bf Code being distributed with the release that is not officially
+part of the release} may be changed without consulting with the
+\hypre{} technical lead.  This code should compile on all platforms
+and pass all autotesting.
+
+\item {\bf Code that is part of the release} may be changed without
+consulting the \hypre{} technical lead if the changes will have no
+noticeable affect on users.  All user interface changes or
+modifications that change the behavior of the library require
+coordination with the \hypre{} technical lead.  This code should
+compile on all platforms, have sufficient user documentation, and pass
+all autotesting.
+
+\end{itemize}
+
+
+%==============================
+\subsection{Tracking Changes}
+\label{Tracking Changes}
+
+Changes to the repository are tracked primarily by CVS, which keeps a
+cronological log of all changes in the following file.
+\begin{verbatim}
+/home/casc/repository/updatelog.linear_solvers
+\end{verbatim}
+
+CVS tags are used to ``tag'' releases with their corresponding release
+number (see Section \ref{Releases}).  For general releases, a new CVS
+branch is also created, and bug fixes are made to that branch.  CVS
+provides commands for viewing the tags and branches in the repository.
+
+Major changes that need to be reported to users are manually entered
+in the \file{CHANGELOG} file in the top-level directory.  This file is
+distributed with each \hypre{} release.
+
+Finally, the \hypre{} bug-tracking facility, Bugzilla, also provides
+the ability to track the status of bugs and new features/changes.
