@@ -259,10 +259,12 @@ int MLI::solve( MLI_Vector *sol, MLI_Vector *rhs )
 {
    int        iter=0, mypid;
    double     norm2, rel_tol, old_norm2, zero=0.0;
-   char       paramString[30];
    MLI_Matrix *Amat;
    MLI_Vector *res;
+#if 0
+   char       paramString[30];
    MLI_Solver *preSmoother;
+#endif
 
    /*-------------------------------------------------------------------*/
    /* check for error                                                   */
