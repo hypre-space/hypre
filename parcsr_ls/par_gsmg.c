@@ -299,7 +299,8 @@ hypre_ParCSRMatrixFillSmooth(int nsamples, double *samples,
 #endif
 
    hypre_TFree(p_ptr);
-   hypre_TFree(dof_func_offd);
+   if (num_functions > 1)
+      hypre_TFree(dof_func_offd);
 
    return 0;
 }
