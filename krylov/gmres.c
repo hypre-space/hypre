@@ -191,7 +191,7 @@ hypre_GMRESSetup( void *gmres_vdata,
    if ((gmres_data -> matvec_data) == NULL)
       (gmres_data -> matvec_data) = (*(gmres_functions->MatvecCreate))(A, x);
  
-   precond_setup(precond_data, A, b, x);
+   ierr = precond_setup(precond_data, A, b, x);
  
    /*-----------------------------------------------------
     * Allocate space for log info

@@ -168,7 +168,7 @@ hypre_BiCGSTABSetup( void *bicgstab_vdata,
       (bicgstab_data -> matvec_data) =
          (*(bicgstab_functions->MatvecCreate))(A, x);
  
-   precond_setup(precond_data, A, b, x);
+   ierr = precond_setup(precond_data, A, b, x);
  
    /*-----------------------------------------------------
     * Allocate space for log info
@@ -185,7 +185,8 @@ hypre_BiCGSTABSetup( void *bicgstab_vdata,
    return ierr;
 }
  
-/*-------------------------------------------------------------------------- * hypre_BiCGSTABSolve
+/*-------------------------------------------------------------------------- 
+ * hypre_BiCGSTABSolve
  *-------------------------------------------------------------------------*/
 
 int

@@ -157,7 +157,7 @@ hypre_CGNRSetup(void *cgnr_vdata,
 
    (cgnr_data -> matvec_data) = (*(cgnr_functions->MatvecCreate))(A, x);
 
-   precond_setup(precond_data, A, b, x);
+   ierr = precond_setup(precond_data, A, b, x);
 
    /*-----------------------------------------------------
     * Allocate space for log info
