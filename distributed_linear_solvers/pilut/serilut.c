@@ -43,6 +43,7 @@ int SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
   double *values, *uvalues, *dvalues, *nrm2s, **rvalues;
   int nlocal, nbnd;
   double mult, rtol;
+  int *structural_union;
 
 
   nrows    = ddist->ddist_nrows;
@@ -65,9 +66,21 @@ int SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
   jw = idx_malloc(nrows, "SerILUT: jw");
   w  =  fp_malloc(nrows, "SerILUT: w" );
 
+  /* Find structural union of local rows */
+  ierr = FindStructuralUnion( matrix, structural_union, globals );
+  if(ierr) return(ierr);
+
+  /* Exchange structural unions with other processors */
+  ierr = ExchangeStructuralUnions( ddist, &structural_union, globals );
+  if(ierr) return(ierr);
+
   /* Select the rows to be factored */
-  nlocal = SelectInterior( lnrows, matrix,
+  nlocal = SelectInterior( lnrows, matrix, structural_union,
                            perm, iperm, globals );
+
+  /* Structural Union no longer required */
+  hypre_TFree( structural_union );
+
   nbnd = lnrows - nlocal ;
   ldu->nnodes[0] = nlocal;
 
@@ -95,7 +108,7 @@ int SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
         w[lastjr] = values[j];
         lastjr++;
       }
-      else { /* Put the diagonal element at the begining */
+      else { /* Put the diagonal element at the beginning */
         diag_present = 1;
         jr[i+firstrow] = 0;
         jw[0] = i+firstrow;
@@ -250,9 +263,12 @@ int SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
 /*************************************************************************
 * This function selects the interior nodes (ones w/o nonzeros corresponding
 * to other PEs) and permutes them first, then boundary nodes last.
+* It takes a vector that marks rows as being forced to not be in the interior.
 * For full generality this would also mark them in the map, but it doesn't.
 **************************************************************************/
-int SelectInterior( int local_num_rows, HYPRE_DistributedMatrix matrix, 
+int SelectInterior( int local_num_rows, 
+                    HYPRE_DistributedMatrix matrix, 
+                    int *external_rows,
 		    int *newperm, int *newiperm, 
                     hypre_PilutSolverGlobals *globals )
 {
@@ -265,35 +281,113 @@ int SelectInterior( int local_num_rows, HYPRE_DistributedMatrix matrix,
    * permuting interior rows first then boundary nodes. */
   nbnd = 0;
   nlocal = 0;
-  for (i=0; i<local_num_rows; i++) {
-    break_loop = 0;
-
-    ierr = HYPRE_GetDistributedMatrixRow( matrix, firstrow+i, &row_size,
-               &col_ind, &values);
-    if (ierr) return(ierr);
-
-    for (j=0; ( j<row_size )&& (break_loop == 0); j++) 
+  for (i=0; i<local_num_rows; i++) 
+  {
+    if (external_rows[i])
     {
-      if (col_ind[j] < firstrow || col_ind[j] >= lastrow) 
-      {
-        newperm[local_num_rows-nbnd-1] = i;
-        newiperm[i] = local_num_rows-nbnd-1;
-        nbnd++;
-        break_loop = 1;
-      }
-    }
+      newperm[local_num_rows-nbnd-1] = i;
+      newiperm[i] = local_num_rows-nbnd-1;
+      nbnd++;
+    } else
+    {
+      ierr = HYPRE_GetDistributedMatrixRow( matrix, firstrow+i, &row_size,
+               &col_ind, &values);
+      if (ierr) return(ierr);
 
-    ierr = HYPRE_RestoreDistributedMatrixRow( matrix, firstrow+i, &row_size,
+      for (j=0; ( j<row_size )&& (break_loop == 0); j++) 
+      {
+        if (col_ind[j] < firstrow || col_ind[j] >= lastrow) 
+        {
+          newperm[local_num_rows-nbnd-1] = i;
+          newiperm[i] = local_num_rows-nbnd-1;
+          nbnd++;
+          break_loop = 1;
+        }
+      }
+
+      ierr = HYPRE_RestoreDistributedMatrixRow( matrix, firstrow+i, &row_size,
                &col_ind, &values);
 
-    if ( break_loop == 0 ) {
-      newperm[nlocal] = i;
-      newiperm[i] = nlocal;
-      nlocal++;
+      if ( break_loop == 0 ) 
+      {
+        newperm[nlocal] = i;
+        newiperm[i] = nlocal;
+        nlocal++;
+      }
     }
   }
 
   return nlocal;
+}
+
+
+/*************************************************************************
+* FindStructuralUnion
+*   Produces a vector of length n that marks the union of the nonzero
+*   structure of all locally stored rows, not including locally stored columns.
+**************************************************************************/
+int FindStructuralUnion( HYPRE_DistributedMatrix matrix, 
+                    int *structural_union,
+                    hypre_PilutSolverGlobals *globals )
+{ 
+  int ierr=0, i, j, row_size, *col_ind;
+
+  /* Allocate and clear structural_union vector */
+  structural_union = hypre_CTAlloc( int, nrows );
+
+  /* Loop through rows */
+  for ( i=0; i< lnrows; i++ )
+  {
+    /* Get row structure; no values needed */
+    ierr = HYPRE_GetDistributedMatrixRow( matrix, firstrow+i, &row_size,
+               &col_ind, NULL );
+    if (ierr) return(ierr);
+
+    /* Loop through nonzeros in this row */
+    for ( j=0; j<row_size; j++)
+    {
+      if (col_ind[j] < firstrow || col_ind[j] >= lastrow) 
+      {
+       structural_union[ col_ind[j] ] = 1;
+      }
+    }
+  }
+
+  return(ierr);
+}
+
+
+/*************************************************************************
+* ExchangeStructuralUnions
+*   Exchanges structural union vectors with other processors and produces
+*   a vector the size of the number of locally stored rows that marks
+*   whether any exterior processor has a nonzero in the column corresponding
+*   to each row. This is used to determine if a local row might have to
+*   update an off-processor row.
+**************************************************************************/
+int ExchangeStructuralUnions( DataDistType *ddist,
+                    int **structural_union,
+                    hypre_PilutSolverGlobals *globals )
+{ 
+  int ierr=0, i, j, *recv_unions;
+
+  /* allocate space for receiving unions */
+  recv_unions = hypre_CTAlloc( int, nrows );
+
+  /* combine my structural_union with all other processors */
+  MPI_Allreduce( *structural_union, recv_unions, nrows, 
+                 MPI_INT, MPI_LOR, pilut_comm );
+
+  /* free and reallocate structural union so that is of local size */
+  hypre_TFree( *structural_union );
+  *structural_union = hypre_TAlloc( int, lnrows );
+
+  memcpy_int( &recv_unions[firstrow], *structural_union, lnrows );
+
+  /* deallocate recv_unions */
+  hypre_TFree( recv_unions );
+
+  return(ierr);
 }
 
 
