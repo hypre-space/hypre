@@ -79,7 +79,9 @@ GENERATED_SRCS = Hypre_Box_Skel.c\
 	Hypre_ParCSRVector_Skel.c\
 	Hypre_ParCSRMatrix_Skel.c\
 	Hypre_ParCSRVectorBuilder_Skel.c\
-	Hypre_ParCSRMatrixBuilder_Skel.c
+	Hypre_ParCSRMatrixBuilder_Skel.c\
+	Hypre_IJVectorBuilder_Skel.c\
+	Hypre_IJMatrixBuilder_Skel.c
 
 GENERATED_HDRS = Hypre.h\
 	Hypre_Box.h\
