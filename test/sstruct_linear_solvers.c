@@ -229,6 +229,8 @@ main( int   argc,
       printf("                         38 - GMRES with diagonal scaling\n");
       printf("                         39 - GMRES\n");
       printf("                         40 - GMRES with BoomerAMG precond\n");
+      printf("                         41 - GMRES with PILUT precond\n");
+      printf("                         42 - GMRES with ParaSails precond\n");
       printf("\n");
 
       exit(1);
@@ -1015,6 +1017,29 @@ main( int   argc,
                                      HYPRE_BoomerAMGSetup,
                                      par_precond);
       }
+      else if (solver_id == 41)
+      {
+         /* use PILUT as preconditioner */
+         HYPRE_ParCSRPilutCreate(MPI_COMM_WORLD, &par_precond ); 
+         /*HYPRE_ParCSRPilutSetDropTolerance(par_precond, drop_tol);*/
+         /*HYPRE_ParCSRPilutSetFactorRowSize(par_precond, nonzeros_to_keep);*/
+         HYPRE_ParCSRGMRESSetPrecond(par_solver,
+                                     HYPRE_ParCSRPilutSolve,
+                                     HYPRE_ParCSRPilutSetup,
+                                     par_precond);
+      }
+
+      else if (solver_id == 42)
+      {
+         /* use ParaSails as preconditioner */
+         HYPRE_ParCSRParaSailsCreate(MPI_COMM_WORLD, &par_precond ); 
+	 HYPRE_ParCSRParaSailsSetParams(par_precond, 0.1, 1);
+	 HYPRE_ParCSRParaSailsSetSym(par_precond, 0);
+         HYPRE_ParCSRGMRESSetPrecond(par_solver,
+                                     HYPRE_ParCSRParaSailsSolve,
+                                     HYPRE_ParCSRParaSailsSetup,
+                                     par_precond);
+      }
 
       HYPRE_ParCSRGMRESSetup(par_solver, par_A, par_b, par_x);
 
@@ -1041,6 +1066,14 @@ main( int   argc,
       if (solver_id == 40)
       {
          HYPRE_BoomerAMGDestroy(par_precond);
+      }
+      else if (solver_id == 41)
+      {
+         HYPRE_ParCSRPilutDestroy(par_precond);
+      }
+      else if (solver_id == 42)
+      {
+         HYPRE_ParCSRParaSailsDestroy(par_precond);
       }
    }
 
