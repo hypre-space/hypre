@@ -35,7 +35,8 @@ HYPRE_AUTOTEST_DIR="/home/casc/software/hypre/autotest"
 #=============================================================================
 
 if [ ! -d "$CVSROOT" ]
-then    echo "Error: no CVS repository, CVSROOT = $CVSROOT"
+then
+    echo "Error: no CVS repository, CVSROOT = $CVSROOT"
     exit
 fi
 
@@ -158,12 +159,6 @@ echo "dwalker@llnl.gov rfalgout@llnl.gov cleary1@llnl.gov" > $0.ci_struct_no_mpi
 make seq 1> $0.seq_no_mpi.log 2> $0.seq_no_mpi.err
 echo "dwalker@llnl.gov rfalgout@llnl.gov yang11@llnl.gov vhenson@llnl.gov" > $0.seq_no_mpi.err.email 
 
-make docs
-
-cd $HYPRE_AUTOTEST_DIR/linear_solvers/test
-make 1> $0.test_no_mpi.log 2> $0.test_no_mpi.err
-echo "dwalker@llnl.gov rfalgout@llnl.gov" > $0.test_no_mpi.err.email 
-
 make beta
 
 #==============================
@@ -194,23 +189,16 @@ chmod -fR a+rX,ug+w $HYPRE_AUTOTEST_DIR
 # NOTE: HYPRE_MAIL must support `-s' subject option
 #===========================================================================
 
-    HYPRE_MAIL=/usr/ucb/Mail
-    case $HYPRE_ARCH in
-	dec)
-	    HYPRE_MAIL=/usr/ucb/Mail;;
-	blue)
-	    HYPRE_MAIL=/usr/ucb/Mail;;
-	red)
-	    HYPRE_MAIL=/usr/ucb/Mail;;
-    esac
+HYPRE_MAIL=/usr/ucb/Mail
 
-for i in *.err 
+cd $HYPRE_AUTOTEST_DIR
+for i in *.err linear_solvers/*.err linear_solvers/test/*.err
 do 
-if [ -s $i ] 
-then 
-RECIPIENTS=`cat ${i}.email` 
-${HYPRE_MAIL} -s "Autotest error(s); see file $i" $RECIPIENTS < $i 
-fi 
+    if [ -s "$i" ] 
+    then 
+	RECIPIENTS=`cat ${i}.email` 
+	${HYPRE_MAIL} -s "Autotest error: $i" $RECIPIENTS < $i 
+    fi 
 done 
 
 #==============================================================================
@@ -249,8 +237,8 @@ echo ""
 echo "creating new AUTOTEST directory...."
 ssh ${HYPRE_COMPILE_MACHINE} "\
     (\
-	rm -fR ${HYPRE_REMOTE_DIR};\
-	mkdir ${HYPRE_REMOTE_DIR}\
+        rm -fR ${HYPRE_REMOTE_DIR};\
+        mkdir ${HYPRE_REMOTE_DIR}\
     )"
 
 echo "copying new source...."
@@ -259,23 +247,23 @@ scp -r linear_solvers ${HYPRE_COMPILE_MACHINE}:${HYPRE_REMOTE_DIR}
 # compile
 ssh ${HYPRE_COMPILE_MACHINE} "\
     (\
-	cd ${HYPRE_REMOTE_DIR}/linear_solvers;\
-	./configure --with-timing;\
-	make beta;\
+        cd ${HYPRE_REMOTE_DIR}/linear_solvers;\
+        ./configure --with-timing;\
+        make beta;\
     )"
 
 # run test suite
 ssh ${HYPRE_RUN_MACHINE} "\
     (\
-	cd ${HYPRE_REMOTE_DIR}/linear_solvers/test;\
-	./test_drivers.sh -mail\
+        cd ${HYPRE_REMOTE_DIR}/linear_solvers/test;\
+        ./test_drivers.sh -mail\
     )"
 
 echo "cleaning up...."
 ssh ${HYPRE_COMPILE_MACHINE} "\
     (\
-	 cd  ${HYPRE_REMOTE_DIR}/linear_solvers;\
-	 tar -cvf autotest.${HYPRE_RUN_MACHINE}.tar test\
+         cd  ${HYPRE_REMOTE_DIR}/linear_solvers;\
+         tar -cvf autotest.${HYPRE_RUN_MACHINE}.tar test\
     )"
 
 echo "copying test results to CASC machine..."
@@ -283,7 +271,7 @@ scp -r  ${HYPRE_COMPILE_MACHINE}:${HYPRE_REMOTE_DIR}/linear_solvers/autotest.${H
 
 ssh ${HYPRE_COMPILE_MACHINE} "\
     (\
-	 rm -fR ${HYPRE_REMOTE_DIR}\
+         rm -fR ${HYPRE_REMOTE_DIR}\
     )"
 
 done
