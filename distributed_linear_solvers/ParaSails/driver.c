@@ -90,10 +90,19 @@ int main(int argc, char *argv[])
 
     /* Right-hand side */
     if (argc > 2)
+    {
         RhsRead(b, A, argv[2]);
+        if (mype == 0) 
+	{
+            printf("Using rhs from %s\n", argv[2]);
+	    fflush(NULL);
+	}
+    }
     else
+    {
         for (i=0; i<end_row-beg_row+1; i++)
             b[i] = (double) (2*rand()) / (double) RAND_MAX - 1.0;
+    }
 
     while (1)
     {
@@ -129,7 +138,7 @@ int main(int argc, char *argv[])
 	{
             printf("selparam %f, nlevels %d, filter %f, beta %f\n", 
 		selparam, nlevels, filter, parasails_loadbal_beta);
-            fflush(stdout);
+            fflush(NULL);
 	}
 
         MPI_Barrier(MPI_COMM_WORLD);
