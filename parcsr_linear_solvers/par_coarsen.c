@@ -1154,13 +1154,15 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
 int
 hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
                          double                 strength_threshold,
+                         int                    measure_type,
+                         int                    coarsen_type,
                          hypre_ParCSRMatrix   **S_ptr,
                          int                  **CF_marker_ptr,
                          int                   *coarse_size_ptr     )
 {
    MPI_Comm         comm          = hypre_ParCSRMatrixComm(A);
    hypre_CommPkg   *comm_pkg      = hypre_ParCSRMatrixCommPkg(A);
-   hypre_CommHandle   *comm_handle;
+   hypre_CommHandle *comm_handle;
    int		   *row_starts    = hypre_ParCSRMatrixRowStarts(A);
    int		   *col_map_offd_A= hypre_ParCSRMatrixColMapOffd(A);
    hypre_CSRMatrix *A_diag        = hypre_ParCSRMatrixDiag(A);
@@ -1220,6 +1222,7 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
    int		    col_0, col_n;
 
    int              ierr = 0;
+   int              break_var = 0;
 
 #if 0 /* debugging */
    char  filename[256];
@@ -1457,7 +1460,7 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
       measure_array[i] = ST_i[i+1]-ST_i[i];
    }
 
-   if (num_procs > 1)
+   if ((measure_type || coarsen_type > 1) && num_procs > 1)
    {
       S_ext      = hypre_ExtractBExt(S,A,0);
       S_ext_i    = hypre_CSRMatrixI(S_ext);
@@ -1466,11 +1469,14 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
       first_col = hypre_ParCSRMatrixFirstColDiag(A);
       col_0 = first_col-1;
       col_n = col_0+num_variables;
-      for (i=0; i < num_nonzeros; i++)
+      if (measure_type)
       {
-	 index = S_ext_j[i] - first_col;
-	 if (index > -1 && index < num_variables)
+	 for (i=0; i < num_nonzeros; i++)
+         {
+	    index = S_ext_j[i] - first_col;
+	    if (index > -1 && index < num_variables)
 		measure_array[index]++;
+         } 
       } 
    }
 
@@ -1565,62 +1571,239 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
    hypre_TFree(measure_array);
    hypre_DestroyCSRMatrix(ST);
 
-   /* second pass, check fine points for coarse neighbors */
+   /* second pass, check fine points for coarse neighbors 
+      for coarsen_type = 2, the second pass includes
+      off-processore boundary points */
 
-   for (i=0; i < num_variables; i++)
+   if (coarsen_type == 2)
    {
-      if (CF_marker[i] == -1)
+      /*------------------------------------------------
+       * Exchange boundary data for CF_marker
+       *------------------------------------------------*/
+    
+      CF_marker_offd = hypre_CTAlloc(int, num_cols_offd);
+      int_buf_data = hypre_CTAlloc(int, hypre_CommPkgSendMapStart(comm_pkg,
+                                                   num_sends));
+    
+      index = 0;
+      for (i = 0; i < num_sends; i++)
       {
-	 ci_tilde_size = 0;
-	 ci_size = 0;
-	 for (ji = S_i[i]; ji < S_i[i+1]; ji++)
-	 {
-	    j = S_j[ji];
-	    if (CF_marker[j] > 0)
-	       graph_array[ci_size++] = j;
- 	 }
-	 for (ji = S_i[i]; ji < S_i[i+1]; ji++)
-	 {
-	    j = S_j[ji];
-	    if (CF_marker[j] == -1)
-	    {
-	       set_empty = 1;
-	       for (jj = S_i[j]; jj < S_i[j+1]; jj++)
-	       {
-		  index = S_j[jj];
-		  for (jl=0; jl < ci_size; jl++)
-		  {
-		     if (graph_array[jl] == index)
-		     {
-		        set_empty = 0;
+        start = hypre_CommPkgSendMapStart(comm_pkg, i);
+        for (j = start; j < hypre_CommPkgSendMapStart(comm_pkg, i+1); j++)
+                int_buf_data[index++]
+                 = CF_marker[hypre_CommPkgSendMapElmt(comm_pkg,j)];
+      }
+    
+      comm_handle = hypre_InitializeCommunication(11, comm_pkg, int_buf_data,
+        CF_marker_offd);
+    
+      hypre_FinalizeCommunication(comm_handle);
+    
+      ci_array = hypre_CTAlloc(int,num_cols_offd);
+      citilde_array = hypre_CTAlloc(int,num_cols_offd);
+
+      for (i=0; i < num_variables; i++)
+      {
+         if (CF_marker[i] == -1)
+         {
+            ci_tilde_size = 0;
+            ci_tilde_size_offd = 0;
+            ci_size = 0;
+            ci_size_offd = 0;
+            break_var = 1;
+            for (ji = S_i[i]; ji < S_i[i+1]; ji++)
+            {
+               j = S_j[ji];
+               if (CF_marker[j] > 0)
+                  graph_array[ci_size++] = j;
+            }
+            for (ji = S_offd_i[i]; ji < S_offd_i[i+1]; ji++)
+            {
+               j = S_offd_j[ji];
+               if (CF_marker_offd[j] > 0)
+                  ci_array[ci_size_offd++] = j;
+            }
+            for (ji = S_i[i]; ji < S_i[i+1]; ji++)
+            {
+               j = S_j[ji];
+               if (CF_marker[j] == -1)
+               {
+                  set_empty = 1;
+                  for (jj = S_i[j]; jj < S_i[j+1]; jj++)
+                  {
+                     index = S_j[jj];
+                     for (jl=0; jl < ci_size; jl++)
+                     {
+                        if (graph_array[jl] == index)
+                        {
+                           set_empty = 0;
+                           break;
+                        }
+                     }
+                     if (!set_empty) break;
+                  }
+                  if (set_empty)
+                  {
+                     if (C_i_nonempty)
+                     {
+                        CF_marker[i] = 1;
+                        coarse_size++;
+                        for (jj=0 ; jj < ci_tilde_size; jj++)
+                        {
+                           CF_marker[graph_ptr[jj]] = -1;
+                           coarse_size--;
+                        }
+                        ci_tilde_size = 0;
+                        break_var = 0;
+                        break;
+                     }
+                     else
+                     {
+                        graph_ptr[ci_tilde_size++] = j;
+                        CF_marker[j] = 1;
+                        coarse_size++;
+                        C_i_nonempty = 1;
+                        i--;
+                        break_var = 0;
+                        break;
+                     }
+                  }
+               }
+            }
+            if (break_var)
+            {
+               for (ji = S_offd_i[i]; ji < S_offd_i[i+1]; ji++)
+               {
+                  j = S_offd_j[ji];
+                  if (CF_marker_offd[j] == -1)
+                  {
+                     set_empty = 1;
+                     for (jj = S_ext_i[j]; jj < S_ext_i[j+1]; jj++)
+                     {
+                        index = S_ext_j[jj];
+                        if (index > col_0 && index < col_n) /* index interior */
+                        {
+                           for (jl=0; jl < ci_size; jl++)
+                           {
+                              if (graph_array[jl] == index)
+                              {
+                                 set_empty = 0;
+                                 break;
+                              }
+                           }
+                           if (!set_empty) break;
+                        }
+                        else
+                        {
+                           for (jk = 0; jk < num_cols_offd; jk++)
+                           {
+                              if (col_map_offd[jk] == index)
+                              {
+                                 for (jl=0; jl < ci_size_offd; jl++)
+                                 {
+                                    if (ci_array[jl] == jk)
+                                    {
+                                       set_empty = 0;
+                                       break;
+                                    }
+                                 }
+                              }
+                              if (!set_empty) break;
+                           }
+                           if (!set_empty) break;
+                        }
+                     }
+                     if (set_empty)
+                     {
+                        if (C_i_nonempty)
+                        {
+                           CF_marker[i] = 1;
+                           coarse_size++;
+                           for (jj=0 ; jj < ci_tilde_size; jj++)
+                           {
+                              CF_marker[graph_ptr[jj]] = -1;
+                              coarse_size--;
+                           }
+                           for (jj=0 ; jj < ci_tilde_size_offd; jj++)
+                           {
+                              CF_marker_offd[citilde_array[jj]] = -1;
+                           }
+                           ci_tilde_size = 0;
+                           ci_tilde_size_offd = 0;
+                           break;
+                        }
+                        else
+                        {
+                           citilde_array[ci_tilde_size_offd++] = j;
+                           CF_marker_offd[j] = 1;
+                           C_i_nonempty = 1;
+                           i--;
+                           break;
+                        }
+                     }
+                  }
+               }
+            }
+         }
+      }
+   }
+   else
+   {
+      for (i=0; i < num_variables; i++)
+      {
+         if (CF_marker[i] == -1)
+         {
+   	    ci_tilde_size = 0;
+   	    ci_size = 0;
+   	    for (ji = S_i[i]; ji < S_i[i+1]; ji++)
+   	    {
+   	       j = S_j[ji];
+   	       if (CF_marker[j] > 0)
+   	          graph_array[ci_size++] = j;
+    	    }
+   	    for (ji = S_i[i]; ji < S_i[i+1]; ji++)
+   	    {
+   	       j = S_j[ji];
+   	       if (CF_marker[j] == -1)
+   	       {
+   	          set_empty = 1;
+   	          for (jj = S_i[j]; jj < S_i[j+1]; jj++)
+   	          {
+   		     index = S_j[jj];
+   		     for (jl=0; jl < ci_size; jl++)
+   		     {
+   		        if (graph_array[jl] == index)
+   		        {
+   		           set_empty = 0;
+   		           break;
+   		        }
+   	             }
+   	             if (!set_empty) break;
+   	          }
+   	          if (set_empty)
+   	          {
+   		     if (C_i_nonempty)
+   		     {
+   		        CF_marker[i] = 1;
+   		        coarse_size++;
+   		        for (jj=0 ; jj < ci_tilde_size; jj++)
+   		        {
+   			   CF_marker[graph_ptr[jj]] = -1;
+   		           coarse_size--;
+   		        }
+   		        ci_tilde_size = 0;
+   		        break;
+   		     }
+   		     else
+   		     {
+   		        graph_ptr[ci_tilde_size++] = j;
+   		        CF_marker[j] = 1;
+   		        coarse_size++;
+   		        C_i_nonempty = 1;
+		        i--;
 		        break;
 		     }
 	          }
-	          if (!set_empty) break;
-	       }
-	       if (set_empty)
-	       {
-		  if (C_i_nonempty)
-		  {
-		     CF_marker[i] = 1;
-		     coarse_size++;
-		     for (jj=0 ; jj < ci_tilde_size; jj++)
-		     {
-			CF_marker[graph_ptr[jj]] = -1;
-		        coarse_size--;
-		     }
-		     ci_tilde_size = 0;
-		     break;
-		  }
-		  else
-		  {
-		     graph_ptr[ci_tilde_size++] = j;
-		     CF_marker[j] = 1;
-		     coarse_size++;
-		     C_i_nonempty = 1;
-		     i--;
-		     break;
-		  }
 	       }
 	    }
 	 }
@@ -1629,228 +1812,234 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
 
    /* third pass, check boundary fine points for coarse neighbors */
 
-   CF_marker_offd = hypre_CTAlloc(int, num_cols_offd);
-   int_buf_data = hypre_CTAlloc(int, hypre_CommPkgSendMapStart(comm_pkg,
+   if (coarsen_type == 3)
+   {
+      CF_marker_offd = hypre_CTAlloc(int, num_cols_offd);
+      int_buf_data = hypre_CTAlloc(int, hypre_CommPkgSendMapStart(comm_pkg,
                                                 num_sends));
 
-   /*------------------------------------------------
-    * Exchange boundary data for CF_marker
-    *------------------------------------------------*/
+      /*------------------------------------------------
+       * Exchange boundary data for CF_marker
+       *------------------------------------------------*/
 
-   index = 0;
-   for (i = 0; i < num_sends; i++)
-   {
-     start = hypre_CommPkgSendMapStart(comm_pkg, i);
-     for (j = start; j < hypre_CommPkgSendMapStart(comm_pkg, i+1); j++)
+      index = 0;
+      for (i = 0; i < num_sends; i++)
+      {
+        start = hypre_CommPkgSendMapStart(comm_pkg, i);
+        for (j = start; j < hypre_CommPkgSendMapStart(comm_pkg, i+1); j++)
              int_buf_data[index++] 
               = CF_marker[hypre_CommPkgSendMapElmt(comm_pkg,j)];
-   }
- 
-   comm_handle = hypre_InitializeCommunication(11, comm_pkg, int_buf_data, 
-     CF_marker_offd);
- 
-   hypre_FinalizeCommunication(comm_handle);   
-
-   ci_array = hypre_CTAlloc(int,num_cols_offd);
-   citilde_array = hypre_CTAlloc(int,num_cols_offd);
- 
-   for (i=0; i < num_cols_offd; i++)
-   {
-      if (CF_marker_offd[i] == -1)
-      {
-	 ci_tilde_size = 0;
-	 ci_tilde_size_offd = 0;
-	 ci_size = 0;
-	 ci_size_offd = 0;
-	 for (ji = S_ext_i[i]; ji < S_ext_i[i+1]; ji++)
-	 {
-	    j = S_ext_j[ji];
-	    if (j > col_0 && j < col_n)
-	    {
-	       j = j - first_col;
-	       if (CF_marker[j] > 0)
-	          graph_array[ci_size++] = j;
-	    }
-	    else
-	    {
-	       for (jj = 0; jj < num_cols_offd; jj++)
-	       {
-		  if (col_map_offd[jj] == j && CF_marker_offd[jj] > 0)
-	             ci_array[ci_size_offd++] = jj;
- 	       }	
- 	    }	
- 	 }
-	 for (ji = S_ext_i[i]; ji < S_ext_i[i+1]; ji++)
-	 {
-	    j = S_ext_j[ji];
-	    if (j > col_0 && j < col_n)
-	    {
-	       j = j - first_col;
-	       if ( CF_marker[j] == -1)
-	       {
-	          set_empty = 1;
-	          for (jj = S_i[j]; jj < S_i[j+1]; jj++)
-	          {
-		     index = S_j[jj];
-		     for (jl=0; jl < ci_size; jl++)
-		     {
-		        if (graph_array[jl] == index)
-		        {
-		           set_empty = 0;
-		           break;
-		        }
-	             }
-	             if (!set_empty) break;
-	          }
-	          for (jj = S_offd_i[j]; jj < S_offd_i[j+1]; jj++)
-	          {
-		     index = S_offd_j[jj];
-		     for (jl=0; jl < ci_size_offd; jl++)
-		     {
-		        if (ci_array[jl] == index)
-		        {
-		           set_empty = 0;
-		           break;
-		        }
-	             }
-	             if (!set_empty) break;
-	          }
-	          if (set_empty)
-	          {
-		     if (C_i_nonempty)
-		     {
-		        CF_marker_offd[i] = 1;
-		        for (jj=0 ; jj < ci_tilde_size; jj++)
-		        {
-			   CF_marker[graph_ptr[jj]] = -1;
-		        }
-		        for (jj=0 ; jj < ci_tilde_size_offd; jj++)
-		        {
-			   CF_marker_offd[citilde_array[jj]] = -1;
-		        }
-		        ci_tilde_size = 0;
-		        ci_tilde_size_offd = 0;
-		        break;
-		     }
-		     else
-		     {
-		        graph_ptr[ci_tilde_size++] = j;
-		        CF_marker[j] = 1;
-		        C_i_nonempty = 1;
-		        i--;
-		        break;
-		     }
-	          }
-	       }
-	    }
-	    else
-	    {
-	       for (jm = 0; jm < num_cols_offd; jm++)
-	       {
-		  if (col_map_offd[jm] == j && CF_marker_offd[jm] == -1)
-	          {
-	             set_empty = 1;
-	             for (jj = S_ext_i[jm]; jj < S_ext_i[jm+1]; jj++)
-	             {
-		        index = S_ext_j[jj];
-		        if (index > col_0 && index < col_n) /* index interior */
-			{
-			   for (jl=0; jl < ci_size; jl++)
-		           {
-		              if (graph_array[jl] == index)
-		              {
-		                 set_empty = 0;
-		                 break;
-		              }
-	             	   }
-	              	   if (!set_empty) break;
-	                }
-			else
-			{
-			   for (jk = 0; jk < num_cols_offd; jk++)
-			   {
-			      if (col_map_offd[jk] == index)
-			      {
-				 for (jl=0; jl < ci_size_offd; jl++)
-		           	 {
-		              	    if (ci_array[jl] == jk)
-		              	    {
-		                       set_empty = 0;
-		                       break;
-		                    }
-		                 }
-		              }
-	              	      if (!set_empty) break;
-	             	   }
-	              	   if (!set_empty) break;
-	                }
-	             }
-	             if (set_empty)
-	             {
-		        if (C_i_nonempty)
-		        {
-		           CF_marker_offd[i] = 1;
-		           for (jj=0 ; jj < ci_tilde_size; jj++)
-		           {
-			      CF_marker[graph_ptr[jj]] = -1;
-		           }
-		           for (jj=0 ; jj < ci_tilde_size_offd; jj++)
-		           {
-			      CF_marker_offd[citilde_array[jj]] = -1;
-		           }
-		           ci_tilde_size = 0;
-		           ci_tilde_size_offd = 0;
-		           break;
-		        }
-		        else
-		        {
-		           citilde_array[ci_tilde_size_offd++] = jm;
-		           CF_marker_offd[jm] = 1;
-		           C_i_nonempty = 1;
-		           i--;
-		           break;
-		        }
-		     }
-	          }
-	       }
-	    }
-	 }
       }
+ 
+      comm_handle = hypre_InitializeCommunication(11, comm_pkg, int_buf_data, 
+     		CF_marker_offd);
+ 
+      hypre_FinalizeCommunication(comm_handle);   
+
+      ci_array = hypre_CTAlloc(int,num_cols_offd);
+      citilde_array = hypre_CTAlloc(int,num_cols_offd);
    }
-   /*------------------------------------------------
-    * Send boundary data for CF_marker back
-    *------------------------------------------------*/
 
-   comm_handle = hypre_InitializeCommunication(12, comm_pkg, CF_marker_offd, 
-			int_buf_data);
- 
-   hypre_FinalizeCommunication(comm_handle);   
- 
-   index = 0;
-   for (i = 0; i < num_sends; i++)
-   {
-     start = hypre_CommPkgSendMapStart(comm_pkg, i);
-     for (j = start; j < hypre_CommPkgSendMapStart(comm_pkg, i+1); j++)
-             CF_marker[hypre_CommPkgSendMapElmt(comm_pkg,j)] =
-                int_buf_data[index++]; 
+   if (coarsen_type > 1)
+   { 
+      for (i=0; i < num_cols_offd; i++)
+      {
+         if (CF_marker_offd[i] == -1)
+         {
+   	    ci_tilde_size = 0;
+   	    ci_tilde_size_offd = 0;
+   	    ci_size = 0;
+   	    ci_size_offd = 0;
+   	    for (ji = S_ext_i[i]; ji < S_ext_i[i+1]; ji++)
+   	    {
+   	       j = S_ext_j[ji];
+   	       if (j > col_0 && j < col_n)
+   	       {
+   	          j = j - first_col;
+   	          if (CF_marker[j] > 0)
+   	             graph_array[ci_size++] = j;
+   	       }
+   	       else
+   	       {
+   	          for (jj = 0; jj < num_cols_offd; jj++)
+   	          {
+   		     if (col_map_offd[jj] == j && CF_marker_offd[jj] > 0)
+   	                ci_array[ci_size_offd++] = jj;
+    	          }	
+    	       }	
+    	    }
+   	    for (ji = S_ext_i[i]; ji < S_ext_i[i+1]; ji++)
+   	    {
+   	       j = S_ext_j[ji];
+   	       if (j > col_0 && j < col_n)
+   	       {
+   	          j = j - first_col;
+   	          if ( CF_marker[j] == -1)
+   	          {
+   	             set_empty = 1;
+   	             for (jj = S_i[j]; jj < S_i[j+1]; jj++)
+   	             {
+   		        index = S_j[jj];
+   		        for (jl=0; jl < ci_size; jl++)
+   		        {
+   		           if (graph_array[jl] == index)
+   		           {
+   		              set_empty = 0;
+   		              break;
+   		           }
+   	                }
+   	                if (!set_empty) break;
+   	             }
+   	             for (jj = S_offd_i[j]; jj < S_offd_i[j+1]; jj++)
+   	             {
+   		        index = S_offd_j[jj];
+   		        for (jl=0; jl < ci_size_offd; jl++)
+   		        {
+   		           if (ci_array[jl] == index)
+   		           {
+   		              set_empty = 0;
+   		              break;
+   		           }
+   	                }
+   	                if (!set_empty) break;
+   	             }
+   	             if (set_empty)
+   	             {
+   		        if (C_i_nonempty)
+   		        {
+   		           CF_marker_offd[i] = 1;
+   		           for (jj=0 ; jj < ci_tilde_size; jj++)
+   		           {
+   			      CF_marker[graph_ptr[jj]] = -1;
+   		           }
+   		           for (jj=0 ; jj < ci_tilde_size_offd; jj++)
+   		           {
+   			      CF_marker_offd[citilde_array[jj]] = -1;
+   		           }
+   		           ci_tilde_size = 0;
+   		           ci_tilde_size_offd = 0;
+   		           break;
+   		        }
+   		        else
+   		        {
+   		           graph_ptr[ci_tilde_size++] = j;
+   		           CF_marker[j] = 1;
+   		           C_i_nonempty = 1;
+   		           i--;
+   		           break;
+   		        }
+   	             }
+   	          }
+   	       }
+   	       else
+   	       {
+   	          for (jm = 0; jm < num_cols_offd; jm++)
+   	          {
+   		     if (col_map_offd[jm] == j && CF_marker_offd[jm] == -1)
+   	             {
+   	                set_empty = 1;
+   	                for (jj = S_ext_i[jm]; jj < S_ext_i[jm+1]; jj++)
+   	                {
+   		           index = S_ext_j[jj];
+   		           if (index > col_0 && index < col_n) 
+   			   {
+   			      for (jl=0; jl < ci_size; jl++)
+   		              {
+   		                 if (graph_array[jl] == index)
+   		                 {
+   		                    set_empty = 0;
+   		                    break;
+   		                 }
+   	             	      }
+   	              	      if (!set_empty) break;
+   	                   }
+   			   else
+   			   {
+   			      for (jk = 0; jk < num_cols_offd; jk++)
+   			      {
+   			         if (col_map_offd[jk] == index)
+   			         {
+   				    for (jl=0; jl < ci_size_offd; jl++)
+   		           	    {
+   		              	       if (ci_array[jl] == jk)
+   		              	       {
+   		                          set_empty = 0;
+   		                          break;
+   		                       }
+   		                    }
+   		                 }
+   	              	         if (!set_empty) break;
+   	             	      }
+   	              	      if (!set_empty) break;
+   	                   }
+   	                }
+   	                if (set_empty)
+   	                {
+   		           if (C_i_nonempty)
+   		           {
+   		              CF_marker_offd[i] = 1;
+   		              for (jj=0 ; jj < ci_tilde_size; jj++)
+   		              {
+   			         CF_marker[graph_ptr[jj]] = -1;
+   		              }
+   		              for (jj=0 ; jj < ci_tilde_size_offd; jj++)
+   		              {
+   			         CF_marker_offd[citilde_array[jj]] = -1;
+   		              }
+   		              ci_tilde_size = 0;
+   		              ci_tilde_size_offd = 0;
+   		              break;
+   		           }
+   		           else
+   		           {
+   		              citilde_array[ci_tilde_size_offd++] = jm;
+   		              CF_marker_offd[jm] = 1;
+   		              C_i_nonempty = 1;
+   		              i--;
+   		              break;
+   		           }
+   		        }
+   	             }
+   	          }
+   	       }
+   	    }
+         }
+      }
+      /*------------------------------------------------
+       * Send boundary data for CF_marker back
+       *------------------------------------------------*/
+
+      comm_handle = hypre_InitializeCommunication(12, comm_pkg, CF_marker_offd, 
+   			int_buf_data);
+    
+      hypre_FinalizeCommunication(comm_handle);   
+    
+      index = 0;
+      for (i = 0; i < num_sends; i++)
+      {
+        start = hypre_CommPkgSendMapStart(comm_pkg, i);
+        for (j = start; j < hypre_CommPkgSendMapStart(comm_pkg, i+1); j++)
+                CF_marker[hypre_CommPkgSendMapElmt(comm_pkg,j)] =
+                   int_buf_data[index++]; 
+      }
+    
+      hypre_TFree(CF_marker_offd);
+   
+      /*---------------------------------------------------
+       * Clean up and return
+       *---------------------------------------------------*/
+   
+      hypre_TFree(int_buf_data);
+      hypre_TFree(ci_array);
+      hypre_TFree(citilde_array);
    }
- 
-   hypre_TFree(CF_marker_offd);
-
-   /*---------------------------------------------------
-    * Clean up and return
-    *---------------------------------------------------*/
-
-   hypre_TFree(int_buf_data);
-   hypre_TFree(ci_array);
-   hypre_TFree(citilde_array);
    hypre_TFree(graph_array);
    hypre_TFree(graph_ptr);
    if (num_procs > 1) hypre_DestroyCSRMatrix(S_ext); 
-
+   
    *S_ptr           = S;
    *CF_marker_ptr   = CF_marker;
    *coarse_size_ptr = coarse_size;
-
+   
    return (ierr);
 }
