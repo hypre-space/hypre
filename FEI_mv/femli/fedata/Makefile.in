@@ -28,11 +28,14 @@ CXXFLAGS =\
  ${CXXDEFS}
  
 HEADERS =\
- mli_festruct.h\
- mli_fedata.h
+ mli_febase.h\
+ mli_fedata.h\
+ mli_sfei.h\
+ mli_fedata_utils.h
 
 FILES =\
  mli_fedata.cxx\
+ mli_sfei.cxx\
  mli_fedata_utils.cxx
 
 DRIVER_FILES = driver.cxx

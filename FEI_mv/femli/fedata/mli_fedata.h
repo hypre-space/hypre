@@ -10,7 +10,7 @@
 #define __MLIFEDATA_H__
 
 #include "utilities/utilities.h"
-#include "fedata/mli_festruct.h"
+#include "fedata/mli_febase.h"
 
 /****************************************************************************/ 
 /* data structures for Finite element grid information                      */
@@ -82,7 +82,7 @@ typedef struct MLI_ElemBlock_Struct
 }
 MLI_ElemBlock;
 
-class MLI_FEData 
+class MLI_FEData : public MLI_FEBase
 {
    MPI_Comm      mpiComm_;
    int           outputLevel_;
@@ -141,7 +141,7 @@ public :
                               const int* const *nGlobalIDLists,
                               int spaceDim, const double* const *coord);
 
-   int initElemNodeList(int eGlobalIDs, int nNodesPerElem, const int *nGlobalIDs,
+   int initElemNodeList(int eGlobalIDs,int nNodesPerElem,const int *nGlobalIDs,
                         int spaceDim, const double *coord);
 
    int initSharedNodes(int nNodes, const int *nGlobalIDs, const int *numProcs,
