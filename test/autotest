@@ -33,8 +33,8 @@ perform_test()
 	. linear_solvers/test/autotest_env;\
 	[ -f linear_solvers/test/env.${HYPRE_ARCH} ] && . linear_solvers/test/env.${HYPRE_ARCH};\
         . linear_solvers/test/autotest_test ${HYPRE_MACHINE_COMMANDS};\
-        chmod -fR a+rX,u+w,go-w linear_solvers;\
         chgrp -fR hypre linear_solvers\
+        chmod -R a+rX,u+w,go-w linear_solvers;\
     )"
   echo "finished autotest...."
 }
