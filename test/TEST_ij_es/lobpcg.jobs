@@ -15,8 +15,8 @@
 #    12: Schwarz-PCG
 #=============================================================================
 
-mpirun -np 4 ./ij_es -9pt -lobpcg -solver 12 -pcgitr 2 -vrand 1 > lobpcg.out.0
-mpirun -np 4 ./ij_es -9pt -lobpcg -solver 12 -pcgitr 2 -vrand 2 > lobpcg.out.1
-mpirun -np 4 ./ij_es -9pt -lobpcg -solver 12 -pcgitr 2 -vrand 4 > lobpcg.out.2
-mpirun -np 4 ./ij_es -9pt -lobpcg -solver 12 -pcgitr 2 -vrand 8 > lobpcg.out.3
+mpirun -np 4 ./ij_es -9pt -lobpcg -solver 12 -pcgitr 2 -veye 1 > lobpcg.out.0
+#mpirun -np 4 ./ij_es -9pt -lobpcg -solver 12 -pcgitr 2 -veye 1 > lobpcg.out.1
+#mpirun -np 4 ./ij_es -9pt -lobpcg -solver 12 -pcgitr 2 -veye 1 > lobpcg.out.2
+#mpirun -np 4 ./ij_es -9pt -lobpcg -solver 12 -pcgitr 2 -veye 1 > lobpcg.out.3
 

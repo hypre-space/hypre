@@ -21,20 +21,20 @@
 # PCG run:
 mpirun -np 4 ./ij_es -solver 1 > solvers.out.0
 #LOBPCG run for one eigenpair:
-mpirun -np 4 ./ij_es -lobpcg -solver 1 -vrand 1 > solvers.out.1
+mpirun -np 4 ./ij_es -lobpcg -solver 1 -veye 1 > solvers.out.1
 #LOBPCG run for several eigenpairs:
-mpirun -np 4 ./ij_es -lobpcg -solver 1 -vrand 5 > solvers.out.2
+#mpirun -np 4 ./ij_es -lobpcg -solver 1 -veye 1 > solvers.out.2
 
 mpirun -np 4 ./ij_es -solver 2 > solvers.out.3
-mpirun -np 4 ./ij_es -lobpcg -solver 2 -vrand 1 > solvers.out.4
-mpirun -np 4 ./ij_es -lobpcg -solver 2 -vrand 5 > solvers.out.5
+mpirun -np 4 ./ij_es -lobpcg -solver 2 -veye 1 > solvers.out.4
+#mpirun -np 4 ./ij_es -lobpcg -solver 2 -veye 1 > solvers.out.5
 mpirun -np 4 ./ij_es -solver 8 > solvers.out.6
-mpirun -np 4 ./ij_es -lobpcg -solver 8 -vrand 1 > solvers.out.7
-mpirun -np 4 ./ij_es -lobpcg -solver 8 -vrand 5 > solvers.out.8
+mpirun -np 4 ./ij_es -lobpcg -solver 8 -veye 1 > solvers.out.7
+#mpirun -np 4 ./ij_es -lobpcg -solver 8 -veye 1 > solvers.out.8
 mpirun -np 4 ./ij_es -solver 12 > solvers.out.9
-mpirun -np 4 ./ij_es -lobpcg -solver 12 -vrand 1 > solvers.out.10
-mpirun -np 4 ./ij_es -lobpcg -solver 12 -vrand 5 > solvers.out.11
+mpirun -np 4 ./ij_es -lobpcg -solver 12 -veye 1 > solvers.out.10
+#mpirun -np 4 ./ij_es -lobpcg -solver 12 -veye 1 > solvers.out.11
 mpirun -np 4 ./ij_es -solver 43 > solvers.out.12
-mpirun -np 4 ./ij_es -lobpcg -solver 43 -vrand 1 > solvers.out.13
-mpirun -np 4 ./ij_es -lobpcg -solver 43 -vrand 5 > solvers.out.14
+mpirun -np 4 ./ij_es -lobpcg -solver 43 -veye 1 > solvers.out.13
+#mpirun -np 4 ./ij_es -lobpcg -solver 43 -veye 1 > solvers.out.14
 
