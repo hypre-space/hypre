@@ -16,6 +16,8 @@ INTERNAL_HEADER=IJ_matrix_vector.h
 
 cat > $INTERNAL_HEADER <<@
 
+#include <HYPRE_config.h>
+
 #ifndef hypre_IJ_HEADER
 #define hypre_IJ_HEADER
 
