@@ -95,6 +95,9 @@ hypre_PCGCreate( hypre_PCGFunctions *pcg_functions )
    (pcg_data -> logging)      = 0;
    (pcg_data -> norms)        = NULL;
    (pcg_data -> rel_norms)    = NULL;
+   (pcg_data -> p)            = NULL;
+   (pcg_data -> s)            = NULL;
+   (pcg_data -> r)            = NULL;
 
    return (void *) pcg_data;
 }
@@ -156,9 +159,12 @@ hypre_PCGSetup( void *pcg_vdata,
     * compute phases of matvec and the preconditioner.
     *--------------------------------------------------*/
 
-   (pcg_data -> p) = (*(pcg_functions->CreateVector))(x);
-   (pcg_data -> s) = (*(pcg_functions->CreateVector))(x);
-   (pcg_data -> r) = (*(pcg_functions->CreateVector))(b);
+   if ( (pcg_data -> p) == NULL )
+      (pcg_data -> p) = (*(pcg_functions->CreateVector))(x);
+   if ( (pcg_data -> s) == NULL )
+      (pcg_data -> s) = (*(pcg_functions->CreateVector))(x);
+   if ( (pcg_data -> r) == NULL )
+      (pcg_data -> r) = (*(pcg_functions->CreateVector))(b);
 
    (pcg_data -> matvec_data) = (*(pcg_functions->MatvecCreate))(A, x);
 
