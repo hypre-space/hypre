@@ -199,10 +199,58 @@ libHYPRE_LSI_la_LDFLAGS = -avoid-version
 @LAPACKNEEDED_TRUE@LAPACKDIR = lapack
 @LAPACKNEEDED_FALSE@LAPACKDIR = 
 @LAPACKNEEDED_TRUE@LAPACKFILES = \
+@LAPACKNEEDED_TRUE@ $(top_srcdir)/lapack/dgebd2.c\
+@LAPACKNEEDED_TRUE@ $(top_srcdir)/lapack/dgebrd.c\
+@LAPACKNEEDED_TRUE@ $(top_srcdir)/lapack/dgelq2.c\
+@LAPACKNEEDED_TRUE@ $(top_srcdir)/lapack/dgelqf.c\
 @LAPACKNEEDED_TRUE@ $(top_srcdir)/lapack/dgels.c\
+@LAPACKNEEDED_TRUE@ $(top_srcdir)/lapack/dgeqr2.c\
+@LAPACKNEEDED_TRUE@ $(top_srcdir)/lapack/dgeqrf.c\
+@LAPACKNEEDED_TRUE@ $(top_srcdir)/lapack/dgesvd.c\
+@LAPACKNEEDED_TRUE@ $(top_srcdir)/lapack/dlabad.c\
+@LAPACKNEEDED_TRUE@ $(top_srcdir)/lapack/dlabrd.c\
+@LAPACKNEEDED_TRUE@ $(top_srcdir)/lapack/dlae2.c\
+@LAPACKNEEDED_TRUE@ $(top_srcdir)/lapack/dlaev2.c\
+@LAPACKNEEDED_TRUE@ $(top_srcdir)/lapack/dlamch.c\
+@LAPACKNEEDED_TRUE@ $(top_srcdir)/lapack/dlange.c\
+@LAPACKNEEDED_TRUE@ $(top_srcdir)/lapack/dlanst.c\
+@LAPACKNEEDED_TRUE@ $(top_srcdir)/lapack/dlansy.c\
+@LAPACKNEEDED_TRUE@ $(top_srcdir)/lapack/dlapy2.c\
+@LAPACKNEEDED_TRUE@ $(top_srcdir)/lapack/dlarf.c\
+@LAPACKNEEDED_TRUE@ $(top_srcdir)/lapack/dlarfb.c\
+@LAPACKNEEDED_TRUE@ $(top_srcdir)/lapack/dlarfg.c\
+@LAPACKNEEDED_TRUE@ $(top_srcdir)/lapack/dlarft.c\
+@LAPACKNEEDED_TRUE@ $(top_srcdir)/lapack/dlartg.c\
+@LAPACKNEEDED_TRUE@ $(top_srcdir)/lapack/dlascl.c\
+@LAPACKNEEDED_TRUE@ $(top_srcdir)/lapack/dlaset.c\
+@LAPACKNEEDED_TRUE@ $(top_srcdir)/lapack/dlasr.c\
+@LAPACKNEEDED_TRUE@ $(top_srcdir)/lapack/dlasrt.c\
+@LAPACKNEEDED_TRUE@ $(top_srcdir)/lapack/dlassq.c\
+@LAPACKNEEDED_TRUE@ $(top_srcdir)/lapack/dlatrd.c\
+@LAPACKNEEDED_TRUE@ $(top_srcdir)/lapack/dorg2l.c\
+@LAPACKNEEDED_TRUE@ $(top_srcdir)/lapack/dorg2r.c\
+@LAPACKNEEDED_TRUE@ $(top_srcdir)/lapack/dorgql.c\
+@LAPACKNEEDED_TRUE@ $(top_srcdir)/lapack/dorgqr.c\
+@LAPACKNEEDED_TRUE@ $(top_srcdir)/lapack/dorgtr.c\
+@LAPACKNEEDED_TRUE@ $(top_srcdir)/lapack/dorm2r.c\
+@LAPACKNEEDED_TRUE@ $(top_srcdir)/lapack/dorml2.c\
+@LAPACKNEEDED_TRUE@ $(top_srcdir)/lapack/dormlq.c\
+@LAPACKNEEDED_TRUE@ $(top_srcdir)/lapack/dormqr.c\
+@LAPACKNEEDED_TRUE@ $(top_srcdir)/lapack/dpotf2.c\
+@LAPACKNEEDED_TRUE@ $(top_srcdir)/lapack/dpotrf.c\
+@LAPACKNEEDED_TRUE@ $(top_srcdir)/lapack/dpotrs.c\
+@LAPACKNEEDED_TRUE@ $(top_srcdir)/lapack/dsteqr.c\
+@LAPACKNEEDED_TRUE@ $(top_srcdir)/lapack/dsterf.c\
 @LAPACKNEEDED_TRUE@ $(top_srcdir)/lapack/dsyev.c\
+@LAPACKNEEDED_TRUE@ $(top_srcdir)/lapack/dsygst.c\
 @LAPACKNEEDED_TRUE@ $(top_srcdir)/lapack/dsygv.c\
-@LAPACKNEEDED_TRUE@ $(top_srcdir)/lapack/lapack_utils.c
+@LAPACKNEEDED_TRUE@ $(top_srcdir)/lapack/dsytd2.c\
+@LAPACKNEEDED_TRUE@ $(top_srcdir)/lapack/dsytrd.c\
+@LAPACKNEEDED_TRUE@ $(top_srcdir)/lapack/ieeeck.c\
+@LAPACKNEEDED_TRUE@ $(top_srcdir)/lapack/ilaenv.c\
+@LAPACKNEEDED_TRUE@ $(top_srcdir)/lapack/lapack_utils.c\
+@LAPACKNEEDED_TRUE@ $(top_srcdir)/lapack/lsame.c\
+@LAPACKNEEDED_TRUE@ $(top_srcdir)/lapack/xerbla.c
 
 @LAPACKNEEDED_FALSE@LAPACKFILES = 
 
@@ -635,9 +683,33 @@ am__libHYPRE_la_SOURCES_DIST = $(top_srcdir)/blas/dasum.c \
 	$(top_srcdir)/blas/dsyrk.c $(top_srcdir)/blas/dtrmm.c \
 	$(top_srcdir)/blas/dtrmv.c $(top_srcdir)/blas/dtrsm.c \
 	$(top_srcdir)/blas/dtrsv.c $(top_srcdir)/blas/idamax.c \
-	$(top_srcdir)/blas/blas_utils.c $(top_srcdir)/lapack/dgels.c \
-	$(top_srcdir)/lapack/dsyev.c $(top_srcdir)/lapack/dsygv.c \
+	$(top_srcdir)/blas/blas_utils.c $(top_srcdir)/lapack/dgebd2.c \
+	$(top_srcdir)/lapack/dgebrd.c $(top_srcdir)/lapack/dgelq2.c \
+	$(top_srcdir)/lapack/dgelqf.c $(top_srcdir)/lapack/dgels.c \
+	$(top_srcdir)/lapack/dgeqr2.c $(top_srcdir)/lapack/dgeqrf.c \
+	$(top_srcdir)/lapack/dgesvd.c $(top_srcdir)/lapack/dlabad.c \
+	$(top_srcdir)/lapack/dlabrd.c $(top_srcdir)/lapack/dlae2.c \
+	$(top_srcdir)/lapack/dlaev2.c $(top_srcdir)/lapack/dlamch.c \
+	$(top_srcdir)/lapack/dlange.c $(top_srcdir)/lapack/dlanst.c \
+	$(top_srcdir)/lapack/dlansy.c $(top_srcdir)/lapack/dlapy2.c \
+	$(top_srcdir)/lapack/dlarf.c $(top_srcdir)/lapack/dlarfb.c \
+	$(top_srcdir)/lapack/dlarfg.c $(top_srcdir)/lapack/dlarft.c \
+	$(top_srcdir)/lapack/dlartg.c $(top_srcdir)/lapack/dlascl.c \
+	$(top_srcdir)/lapack/dlaset.c $(top_srcdir)/lapack/dlasr.c \
+	$(top_srcdir)/lapack/dlasrt.c $(top_srcdir)/lapack/dlassq.c \
+	$(top_srcdir)/lapack/dlatrd.c $(top_srcdir)/lapack/dorg2l.c \
+	$(top_srcdir)/lapack/dorg2r.c $(top_srcdir)/lapack/dorgql.c \
+	$(top_srcdir)/lapack/dorgqr.c $(top_srcdir)/lapack/dorgtr.c \
+	$(top_srcdir)/lapack/dorm2r.c $(top_srcdir)/lapack/dorml2.c \
+	$(top_srcdir)/lapack/dormlq.c $(top_srcdir)/lapack/dormqr.c \
+	$(top_srcdir)/lapack/dpotf2.c $(top_srcdir)/lapack/dpotrf.c \
+	$(top_srcdir)/lapack/dpotrs.c $(top_srcdir)/lapack/dsteqr.c \
+	$(top_srcdir)/lapack/dsterf.c $(top_srcdir)/lapack/dsyev.c \
+	$(top_srcdir)/lapack/dsygst.c $(top_srcdir)/lapack/dsygv.c \
+	$(top_srcdir)/lapack/dsytd2.c $(top_srcdir)/lapack/dsytrd.c \
+	$(top_srcdir)/lapack/ieeeck.c $(top_srcdir)/lapack/ilaenv.c \
 	$(top_srcdir)/lapack/lapack_utils.c \
+	$(top_srcdir)/lapack/lsame.c $(top_srcdir)/lapack/xerbla.c \
 	$(top_srcdir)/FEI_mv/SuperLU/colamd.c \
 	$(top_srcdir)/FEI_mv/SuperLU/dcolumn_bmod.c \
 	$(top_srcdir)/FEI_mv/SuperLU/dcolumn_dfs.c \
@@ -1023,8 +1095,20 @@ am__libHYPRE_la_SOURCES_DIST = $(top_srcdir)/blas/dasum.c \
 @BLASNEEDED_TRUE@	dtrmm.lo dtrmv.lo dtrsm.lo dtrsv.lo idamax.lo \
 @BLASNEEDED_TRUE@	blas_utils.lo
 @BLASNEEDED_FALSE@am__objects_1 =
-@LAPACKNEEDED_TRUE@am__objects_2 = dgels.lo dsyev.lo dsygv.lo \
-@LAPACKNEEDED_TRUE@	lapack_utils.lo
+@LAPACKNEEDED_TRUE@am__objects_2 = dgebd2.lo dgebrd.lo dgelq2.lo \
+@LAPACKNEEDED_TRUE@	dgelqf.lo dgels.lo dgeqr2.lo dgeqrf.lo \
+@LAPACKNEEDED_TRUE@	dgesvd.lo dlabad.lo dlabrd.lo dlae2.lo \
+@LAPACKNEEDED_TRUE@	dlaev2.lo dlamch.lo dlange.lo dlanst.lo \
+@LAPACKNEEDED_TRUE@	dlansy.lo dlapy2.lo dlarf.lo dlarfb.lo \
+@LAPACKNEEDED_TRUE@	dlarfg.lo dlarft.lo dlartg.lo dlascl.lo \
+@LAPACKNEEDED_TRUE@	dlaset.lo dlasr.lo dlasrt.lo dlassq.lo \
+@LAPACKNEEDED_TRUE@	dlatrd.lo dorg2l.lo dorg2r.lo dorgql.lo \
+@LAPACKNEEDED_TRUE@	dorgqr.lo dorgtr.lo dorm2r.lo dorml2.lo \
+@LAPACKNEEDED_TRUE@	dormlq.lo dormqr.lo dpotf2.lo dpotrf.lo \
+@LAPACKNEEDED_TRUE@	dpotrs.lo dsteqr.lo dsterf.lo dsyev.lo \
+@LAPACKNEEDED_TRUE@	dsygst.lo dsygv.lo dsytd2.lo dsytrd.lo \
+@LAPACKNEEDED_TRUE@	ieeeck.lo ilaenv.lo lapack_utils.lo lsame.lo \
+@LAPACKNEEDED_TRUE@	xerbla.lo
 @LAPACKNEEDED_FALSE@am__objects_2 =
 am__objects_3 = $(am__objects_1) $(am__objects_2) colamd.lo \
 	dcolumn_bmod.lo dcolumn_dfs.lo dcopy_to_ucol.lo dgscon.lo \
@@ -1163,9 +1247,33 @@ am__libHYPRE_LSI_la_SOURCES_DIST = $(top_srcdir)/blas/dasum.c \
 	$(top_srcdir)/blas/dsyrk.c $(top_srcdir)/blas/dtrmm.c \
 	$(top_srcdir)/blas/dtrmv.c $(top_srcdir)/blas/dtrsm.c \
 	$(top_srcdir)/blas/dtrsv.c $(top_srcdir)/blas/idamax.c \
-	$(top_srcdir)/blas/blas_utils.c $(top_srcdir)/lapack/dgels.c \
-	$(top_srcdir)/lapack/dsyev.c $(top_srcdir)/lapack/dsygv.c \
+	$(top_srcdir)/blas/blas_utils.c $(top_srcdir)/lapack/dgebd2.c \
+	$(top_srcdir)/lapack/dgebrd.c $(top_srcdir)/lapack/dgelq2.c \
+	$(top_srcdir)/lapack/dgelqf.c $(top_srcdir)/lapack/dgels.c \
+	$(top_srcdir)/lapack/dgeqr2.c $(top_srcdir)/lapack/dgeqrf.c \
+	$(top_srcdir)/lapack/dgesvd.c $(top_srcdir)/lapack/dlabad.c \
+	$(top_srcdir)/lapack/dlabrd.c $(top_srcdir)/lapack/dlae2.c \
+	$(top_srcdir)/lapack/dlaev2.c $(top_srcdir)/lapack/dlamch.c \
+	$(top_srcdir)/lapack/dlange.c $(top_srcdir)/lapack/dlanst.c \
+	$(top_srcdir)/lapack/dlansy.c $(top_srcdir)/lapack/dlapy2.c \
+	$(top_srcdir)/lapack/dlarf.c $(top_srcdir)/lapack/dlarfb.c \
+	$(top_srcdir)/lapack/dlarfg.c $(top_srcdir)/lapack/dlarft.c \
+	$(top_srcdir)/lapack/dlartg.c $(top_srcdir)/lapack/dlascl.c \
+	$(top_srcdir)/lapack/dlaset.c $(top_srcdir)/lapack/dlasr.c \
+	$(top_srcdir)/lapack/dlasrt.c $(top_srcdir)/lapack/dlassq.c \
+	$(top_srcdir)/lapack/dlatrd.c $(top_srcdir)/lapack/dorg2l.c \
+	$(top_srcdir)/lapack/dorg2r.c $(top_srcdir)/lapack/dorgql.c \
+	$(top_srcdir)/lapack/dorgqr.c $(top_srcdir)/lapack/dorgtr.c \
+	$(top_srcdir)/lapack/dorm2r.c $(top_srcdir)/lapack/dorml2.c \
+	$(top_srcdir)/lapack/dormlq.c $(top_srcdir)/lapack/dormqr.c \
+	$(top_srcdir)/lapack/dpotf2.c $(top_srcdir)/lapack/dpotrf.c \
+	$(top_srcdir)/lapack/dpotrs.c $(top_srcdir)/lapack/dsteqr.c \
+	$(top_srcdir)/lapack/dsterf.c $(top_srcdir)/lapack/dsyev.c \
+	$(top_srcdir)/lapack/dsygst.c $(top_srcdir)/lapack/dsygv.c \
+	$(top_srcdir)/lapack/dsytd2.c $(top_srcdir)/lapack/dsytrd.c \
+	$(top_srcdir)/lapack/ieeeck.c $(top_srcdir)/lapack/ilaenv.c \
 	$(top_srcdir)/lapack/lapack_utils.c \
+	$(top_srcdir)/lapack/lsame.c $(top_srcdir)/lapack/xerbla.c \
 	$(top_srcdir)/FEI_mv/SuperLU/colamd.c \
 	$(top_srcdir)/FEI_mv/SuperLU/dcolumn_bmod.c \
 	$(top_srcdir)/FEI_mv/SuperLU/dcolumn_dfs.c \
@@ -1812,6 +1920,42 @@ blas_utils.obj: $(top_srcdir)/blas/blas_utils.c
 blas_utils.lo: $(top_srcdir)/blas/blas_utils.c
 	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o blas_utils.lo `test -f '$(top_srcdir)/blas/blas_utils.c' || echo '$(srcdir)/'`$(top_srcdir)/blas/blas_utils.c
 
+dgebd2.o: $(top_srcdir)/lapack/dgebd2.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dgebd2.o `test -f '$(top_srcdir)/lapack/dgebd2.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dgebd2.c
+
+dgebd2.obj: $(top_srcdir)/lapack/dgebd2.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dgebd2.obj `if test -f '$(top_srcdir)/lapack/dgebd2.c'; then $(CYGPATH_W) '$(top_srcdir)/lapack/dgebd2.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lapack/dgebd2.c'; fi`
+
+dgebd2.lo: $(top_srcdir)/lapack/dgebd2.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dgebd2.lo `test -f '$(top_srcdir)/lapack/dgebd2.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dgebd2.c
+
+dgebrd.o: $(top_srcdir)/lapack/dgebrd.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dgebrd.o `test -f '$(top_srcdir)/lapack/dgebrd.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dgebrd.c
+
+dgebrd.obj: $(top_srcdir)/lapack/dgebrd.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dgebrd.obj `if test -f '$(top_srcdir)/lapack/dgebrd.c'; then $(CYGPATH_W) '$(top_srcdir)/lapack/dgebrd.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lapack/dgebrd.c'; fi`
+
+dgebrd.lo: $(top_srcdir)/lapack/dgebrd.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dgebrd.lo `test -f '$(top_srcdir)/lapack/dgebrd.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dgebrd.c
+
+dgelq2.o: $(top_srcdir)/lapack/dgelq2.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dgelq2.o `test -f '$(top_srcdir)/lapack/dgelq2.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dgelq2.c
+
+dgelq2.obj: $(top_srcdir)/lapack/dgelq2.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dgelq2.obj `if test -f '$(top_srcdir)/lapack/dgelq2.c'; then $(CYGPATH_W) '$(top_srcdir)/lapack/dgelq2.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lapack/dgelq2.c'; fi`
+
+dgelq2.lo: $(top_srcdir)/lapack/dgelq2.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dgelq2.lo `test -f '$(top_srcdir)/lapack/dgelq2.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dgelq2.c
+
+dgelqf.o: $(top_srcdir)/lapack/dgelqf.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dgelqf.o `test -f '$(top_srcdir)/lapack/dgelqf.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dgelqf.c
+
+dgelqf.obj: $(top_srcdir)/lapack/dgelqf.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dgelqf.obj `if test -f '$(top_srcdir)/lapack/dgelqf.c'; then $(CYGPATH_W) '$(top_srcdir)/lapack/dgelqf.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lapack/dgelqf.c'; fi`
+
+dgelqf.lo: $(top_srcdir)/lapack/dgelqf.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dgelqf.lo `test -f '$(top_srcdir)/lapack/dgelqf.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dgelqf.c
+
 dgels.o: $(top_srcdir)/lapack/dgels.c
 	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dgels.o `test -f '$(top_srcdir)/lapack/dgels.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dgels.c
 
@@ -1820,6 +1964,339 @@ dgels.obj: $(top_srcdir)/lapack/dgels.c
 
 dgels.lo: $(top_srcdir)/lapack/dgels.c
 	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dgels.lo `test -f '$(top_srcdir)/lapack/dgels.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dgels.c
+
+dgeqr2.o: $(top_srcdir)/lapack/dgeqr2.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dgeqr2.o `test -f '$(top_srcdir)/lapack/dgeqr2.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dgeqr2.c
+
+dgeqr2.obj: $(top_srcdir)/lapack/dgeqr2.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dgeqr2.obj `if test -f '$(top_srcdir)/lapack/dgeqr2.c'; then $(CYGPATH_W) '$(top_srcdir)/lapack/dgeqr2.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lapack/dgeqr2.c'; fi`
+
+dgeqr2.lo: $(top_srcdir)/lapack/dgeqr2.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dgeqr2.lo `test -f '$(top_srcdir)/lapack/dgeqr2.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dgeqr2.c
+
+dgeqrf.o: $(top_srcdir)/lapack/dgeqrf.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dgeqrf.o `test -f '$(top_srcdir)/lapack/dgeqrf.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dgeqrf.c
+
+dgeqrf.obj: $(top_srcdir)/lapack/dgeqrf.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dgeqrf.obj `if test -f '$(top_srcdir)/lapack/dgeqrf.c'; then $(CYGPATH_W) '$(top_srcdir)/lapack/dgeqrf.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lapack/dgeqrf.c'; fi`
+
+dgeqrf.lo: $(top_srcdir)/lapack/dgeqrf.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dgeqrf.lo `test -f '$(top_srcdir)/lapack/dgeqrf.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dgeqrf.c
+
+dgesvd.o: $(top_srcdir)/lapack/dgesvd.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dgesvd.o `test -f '$(top_srcdir)/lapack/dgesvd.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dgesvd.c
+
+dgesvd.obj: $(top_srcdir)/lapack/dgesvd.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dgesvd.obj `if test -f '$(top_srcdir)/lapack/dgesvd.c'; then $(CYGPATH_W) '$(top_srcdir)/lapack/dgesvd.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lapack/dgesvd.c'; fi`
+
+dgesvd.lo: $(top_srcdir)/lapack/dgesvd.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dgesvd.lo `test -f '$(top_srcdir)/lapack/dgesvd.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dgesvd.c
+
+dlabad.o: $(top_srcdir)/lapack/dlabad.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlabad.o `test -f '$(top_srcdir)/lapack/dlabad.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dlabad.c
+
+dlabad.obj: $(top_srcdir)/lapack/dlabad.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlabad.obj `if test -f '$(top_srcdir)/lapack/dlabad.c'; then $(CYGPATH_W) '$(top_srcdir)/lapack/dlabad.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lapack/dlabad.c'; fi`
+
+dlabad.lo: $(top_srcdir)/lapack/dlabad.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlabad.lo `test -f '$(top_srcdir)/lapack/dlabad.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dlabad.c
+
+dlabrd.o: $(top_srcdir)/lapack/dlabrd.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlabrd.o `test -f '$(top_srcdir)/lapack/dlabrd.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dlabrd.c
+
+dlabrd.obj: $(top_srcdir)/lapack/dlabrd.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlabrd.obj `if test -f '$(top_srcdir)/lapack/dlabrd.c'; then $(CYGPATH_W) '$(top_srcdir)/lapack/dlabrd.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lapack/dlabrd.c'; fi`
+
+dlabrd.lo: $(top_srcdir)/lapack/dlabrd.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlabrd.lo `test -f '$(top_srcdir)/lapack/dlabrd.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dlabrd.c
+
+dlae2.o: $(top_srcdir)/lapack/dlae2.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlae2.o `test -f '$(top_srcdir)/lapack/dlae2.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dlae2.c
+
+dlae2.obj: $(top_srcdir)/lapack/dlae2.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlae2.obj `if test -f '$(top_srcdir)/lapack/dlae2.c'; then $(CYGPATH_W) '$(top_srcdir)/lapack/dlae2.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lapack/dlae2.c'; fi`
+
+dlae2.lo: $(top_srcdir)/lapack/dlae2.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlae2.lo `test -f '$(top_srcdir)/lapack/dlae2.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dlae2.c
+
+dlaev2.o: $(top_srcdir)/lapack/dlaev2.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlaev2.o `test -f '$(top_srcdir)/lapack/dlaev2.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dlaev2.c
+
+dlaev2.obj: $(top_srcdir)/lapack/dlaev2.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlaev2.obj `if test -f '$(top_srcdir)/lapack/dlaev2.c'; then $(CYGPATH_W) '$(top_srcdir)/lapack/dlaev2.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lapack/dlaev2.c'; fi`
+
+dlaev2.lo: $(top_srcdir)/lapack/dlaev2.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlaev2.lo `test -f '$(top_srcdir)/lapack/dlaev2.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dlaev2.c
+
+dlamch.o: $(top_srcdir)/lapack/dlamch.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlamch.o `test -f '$(top_srcdir)/lapack/dlamch.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dlamch.c
+
+dlamch.obj: $(top_srcdir)/lapack/dlamch.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlamch.obj `if test -f '$(top_srcdir)/lapack/dlamch.c'; then $(CYGPATH_W) '$(top_srcdir)/lapack/dlamch.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lapack/dlamch.c'; fi`
+
+dlamch.lo: $(top_srcdir)/lapack/dlamch.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlamch.lo `test -f '$(top_srcdir)/lapack/dlamch.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dlamch.c
+
+dlange.o: $(top_srcdir)/lapack/dlange.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlange.o `test -f '$(top_srcdir)/lapack/dlange.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dlange.c
+
+dlange.obj: $(top_srcdir)/lapack/dlange.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlange.obj `if test -f '$(top_srcdir)/lapack/dlange.c'; then $(CYGPATH_W) '$(top_srcdir)/lapack/dlange.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lapack/dlange.c'; fi`
+
+dlange.lo: $(top_srcdir)/lapack/dlange.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlange.lo `test -f '$(top_srcdir)/lapack/dlange.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dlange.c
+
+dlanst.o: $(top_srcdir)/lapack/dlanst.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlanst.o `test -f '$(top_srcdir)/lapack/dlanst.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dlanst.c
+
+dlanst.obj: $(top_srcdir)/lapack/dlanst.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlanst.obj `if test -f '$(top_srcdir)/lapack/dlanst.c'; then $(CYGPATH_W) '$(top_srcdir)/lapack/dlanst.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lapack/dlanst.c'; fi`
+
+dlanst.lo: $(top_srcdir)/lapack/dlanst.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlanst.lo `test -f '$(top_srcdir)/lapack/dlanst.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dlanst.c
+
+dlansy.o: $(top_srcdir)/lapack/dlansy.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlansy.o `test -f '$(top_srcdir)/lapack/dlansy.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dlansy.c
+
+dlansy.obj: $(top_srcdir)/lapack/dlansy.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlansy.obj `if test -f '$(top_srcdir)/lapack/dlansy.c'; then $(CYGPATH_W) '$(top_srcdir)/lapack/dlansy.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lapack/dlansy.c'; fi`
+
+dlansy.lo: $(top_srcdir)/lapack/dlansy.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlansy.lo `test -f '$(top_srcdir)/lapack/dlansy.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dlansy.c
+
+dlapy2.o: $(top_srcdir)/lapack/dlapy2.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlapy2.o `test -f '$(top_srcdir)/lapack/dlapy2.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dlapy2.c
+
+dlapy2.obj: $(top_srcdir)/lapack/dlapy2.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlapy2.obj `if test -f '$(top_srcdir)/lapack/dlapy2.c'; then $(CYGPATH_W) '$(top_srcdir)/lapack/dlapy2.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lapack/dlapy2.c'; fi`
+
+dlapy2.lo: $(top_srcdir)/lapack/dlapy2.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlapy2.lo `test -f '$(top_srcdir)/lapack/dlapy2.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dlapy2.c
+
+dlarf.o: $(top_srcdir)/lapack/dlarf.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlarf.o `test -f '$(top_srcdir)/lapack/dlarf.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dlarf.c
+
+dlarf.obj: $(top_srcdir)/lapack/dlarf.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlarf.obj `if test -f '$(top_srcdir)/lapack/dlarf.c'; then $(CYGPATH_W) '$(top_srcdir)/lapack/dlarf.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lapack/dlarf.c'; fi`
+
+dlarf.lo: $(top_srcdir)/lapack/dlarf.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlarf.lo `test -f '$(top_srcdir)/lapack/dlarf.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dlarf.c
+
+dlarfb.o: $(top_srcdir)/lapack/dlarfb.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlarfb.o `test -f '$(top_srcdir)/lapack/dlarfb.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dlarfb.c
+
+dlarfb.obj: $(top_srcdir)/lapack/dlarfb.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlarfb.obj `if test -f '$(top_srcdir)/lapack/dlarfb.c'; then $(CYGPATH_W) '$(top_srcdir)/lapack/dlarfb.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lapack/dlarfb.c'; fi`
+
+dlarfb.lo: $(top_srcdir)/lapack/dlarfb.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlarfb.lo `test -f '$(top_srcdir)/lapack/dlarfb.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dlarfb.c
+
+dlarfg.o: $(top_srcdir)/lapack/dlarfg.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlarfg.o `test -f '$(top_srcdir)/lapack/dlarfg.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dlarfg.c
+
+dlarfg.obj: $(top_srcdir)/lapack/dlarfg.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlarfg.obj `if test -f '$(top_srcdir)/lapack/dlarfg.c'; then $(CYGPATH_W) '$(top_srcdir)/lapack/dlarfg.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lapack/dlarfg.c'; fi`
+
+dlarfg.lo: $(top_srcdir)/lapack/dlarfg.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlarfg.lo `test -f '$(top_srcdir)/lapack/dlarfg.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dlarfg.c
+
+dlarft.o: $(top_srcdir)/lapack/dlarft.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlarft.o `test -f '$(top_srcdir)/lapack/dlarft.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dlarft.c
+
+dlarft.obj: $(top_srcdir)/lapack/dlarft.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlarft.obj `if test -f '$(top_srcdir)/lapack/dlarft.c'; then $(CYGPATH_W) '$(top_srcdir)/lapack/dlarft.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lapack/dlarft.c'; fi`
+
+dlarft.lo: $(top_srcdir)/lapack/dlarft.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlarft.lo `test -f '$(top_srcdir)/lapack/dlarft.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dlarft.c
+
+dlartg.o: $(top_srcdir)/lapack/dlartg.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlartg.o `test -f '$(top_srcdir)/lapack/dlartg.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dlartg.c
+
+dlartg.obj: $(top_srcdir)/lapack/dlartg.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlartg.obj `if test -f '$(top_srcdir)/lapack/dlartg.c'; then $(CYGPATH_W) '$(top_srcdir)/lapack/dlartg.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lapack/dlartg.c'; fi`
+
+dlartg.lo: $(top_srcdir)/lapack/dlartg.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlartg.lo `test -f '$(top_srcdir)/lapack/dlartg.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dlartg.c
+
+dlascl.o: $(top_srcdir)/lapack/dlascl.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlascl.o `test -f '$(top_srcdir)/lapack/dlascl.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dlascl.c
+
+dlascl.obj: $(top_srcdir)/lapack/dlascl.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlascl.obj `if test -f '$(top_srcdir)/lapack/dlascl.c'; then $(CYGPATH_W) '$(top_srcdir)/lapack/dlascl.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lapack/dlascl.c'; fi`
+
+dlascl.lo: $(top_srcdir)/lapack/dlascl.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlascl.lo `test -f '$(top_srcdir)/lapack/dlascl.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dlascl.c
+
+dlaset.o: $(top_srcdir)/lapack/dlaset.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlaset.o `test -f '$(top_srcdir)/lapack/dlaset.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dlaset.c
+
+dlaset.obj: $(top_srcdir)/lapack/dlaset.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlaset.obj `if test -f '$(top_srcdir)/lapack/dlaset.c'; then $(CYGPATH_W) '$(top_srcdir)/lapack/dlaset.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lapack/dlaset.c'; fi`
+
+dlaset.lo: $(top_srcdir)/lapack/dlaset.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlaset.lo `test -f '$(top_srcdir)/lapack/dlaset.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dlaset.c
+
+dlasr.o: $(top_srcdir)/lapack/dlasr.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlasr.o `test -f '$(top_srcdir)/lapack/dlasr.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dlasr.c
+
+dlasr.obj: $(top_srcdir)/lapack/dlasr.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlasr.obj `if test -f '$(top_srcdir)/lapack/dlasr.c'; then $(CYGPATH_W) '$(top_srcdir)/lapack/dlasr.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lapack/dlasr.c'; fi`
+
+dlasr.lo: $(top_srcdir)/lapack/dlasr.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlasr.lo `test -f '$(top_srcdir)/lapack/dlasr.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dlasr.c
+
+dlasrt.o: $(top_srcdir)/lapack/dlasrt.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlasrt.o `test -f '$(top_srcdir)/lapack/dlasrt.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dlasrt.c
+
+dlasrt.obj: $(top_srcdir)/lapack/dlasrt.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlasrt.obj `if test -f '$(top_srcdir)/lapack/dlasrt.c'; then $(CYGPATH_W) '$(top_srcdir)/lapack/dlasrt.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lapack/dlasrt.c'; fi`
+
+dlasrt.lo: $(top_srcdir)/lapack/dlasrt.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlasrt.lo `test -f '$(top_srcdir)/lapack/dlasrt.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dlasrt.c
+
+dlassq.o: $(top_srcdir)/lapack/dlassq.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlassq.o `test -f '$(top_srcdir)/lapack/dlassq.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dlassq.c
+
+dlassq.obj: $(top_srcdir)/lapack/dlassq.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlassq.obj `if test -f '$(top_srcdir)/lapack/dlassq.c'; then $(CYGPATH_W) '$(top_srcdir)/lapack/dlassq.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lapack/dlassq.c'; fi`
+
+dlassq.lo: $(top_srcdir)/lapack/dlassq.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlassq.lo `test -f '$(top_srcdir)/lapack/dlassq.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dlassq.c
+
+dlatrd.o: $(top_srcdir)/lapack/dlatrd.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlatrd.o `test -f '$(top_srcdir)/lapack/dlatrd.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dlatrd.c
+
+dlatrd.obj: $(top_srcdir)/lapack/dlatrd.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlatrd.obj `if test -f '$(top_srcdir)/lapack/dlatrd.c'; then $(CYGPATH_W) '$(top_srcdir)/lapack/dlatrd.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lapack/dlatrd.c'; fi`
+
+dlatrd.lo: $(top_srcdir)/lapack/dlatrd.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlatrd.lo `test -f '$(top_srcdir)/lapack/dlatrd.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dlatrd.c
+
+dorg2l.o: $(top_srcdir)/lapack/dorg2l.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dorg2l.o `test -f '$(top_srcdir)/lapack/dorg2l.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dorg2l.c
+
+dorg2l.obj: $(top_srcdir)/lapack/dorg2l.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dorg2l.obj `if test -f '$(top_srcdir)/lapack/dorg2l.c'; then $(CYGPATH_W) '$(top_srcdir)/lapack/dorg2l.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lapack/dorg2l.c'; fi`
+
+dorg2l.lo: $(top_srcdir)/lapack/dorg2l.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dorg2l.lo `test -f '$(top_srcdir)/lapack/dorg2l.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dorg2l.c
+
+dorg2r.o: $(top_srcdir)/lapack/dorg2r.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dorg2r.o `test -f '$(top_srcdir)/lapack/dorg2r.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dorg2r.c
+
+dorg2r.obj: $(top_srcdir)/lapack/dorg2r.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dorg2r.obj `if test -f '$(top_srcdir)/lapack/dorg2r.c'; then $(CYGPATH_W) '$(top_srcdir)/lapack/dorg2r.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lapack/dorg2r.c'; fi`
+
+dorg2r.lo: $(top_srcdir)/lapack/dorg2r.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dorg2r.lo `test -f '$(top_srcdir)/lapack/dorg2r.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dorg2r.c
+
+dorgql.o: $(top_srcdir)/lapack/dorgql.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dorgql.o `test -f '$(top_srcdir)/lapack/dorgql.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dorgql.c
+
+dorgql.obj: $(top_srcdir)/lapack/dorgql.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dorgql.obj `if test -f '$(top_srcdir)/lapack/dorgql.c'; then $(CYGPATH_W) '$(top_srcdir)/lapack/dorgql.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lapack/dorgql.c'; fi`
+
+dorgql.lo: $(top_srcdir)/lapack/dorgql.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dorgql.lo `test -f '$(top_srcdir)/lapack/dorgql.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dorgql.c
+
+dorgqr.o: $(top_srcdir)/lapack/dorgqr.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dorgqr.o `test -f '$(top_srcdir)/lapack/dorgqr.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dorgqr.c
+
+dorgqr.obj: $(top_srcdir)/lapack/dorgqr.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dorgqr.obj `if test -f '$(top_srcdir)/lapack/dorgqr.c'; then $(CYGPATH_W) '$(top_srcdir)/lapack/dorgqr.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lapack/dorgqr.c'; fi`
+
+dorgqr.lo: $(top_srcdir)/lapack/dorgqr.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dorgqr.lo `test -f '$(top_srcdir)/lapack/dorgqr.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dorgqr.c
+
+dorgtr.o: $(top_srcdir)/lapack/dorgtr.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dorgtr.o `test -f '$(top_srcdir)/lapack/dorgtr.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dorgtr.c
+
+dorgtr.obj: $(top_srcdir)/lapack/dorgtr.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dorgtr.obj `if test -f '$(top_srcdir)/lapack/dorgtr.c'; then $(CYGPATH_W) '$(top_srcdir)/lapack/dorgtr.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lapack/dorgtr.c'; fi`
+
+dorgtr.lo: $(top_srcdir)/lapack/dorgtr.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dorgtr.lo `test -f '$(top_srcdir)/lapack/dorgtr.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dorgtr.c
+
+dorm2r.o: $(top_srcdir)/lapack/dorm2r.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dorm2r.o `test -f '$(top_srcdir)/lapack/dorm2r.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dorm2r.c
+
+dorm2r.obj: $(top_srcdir)/lapack/dorm2r.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dorm2r.obj `if test -f '$(top_srcdir)/lapack/dorm2r.c'; then $(CYGPATH_W) '$(top_srcdir)/lapack/dorm2r.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lapack/dorm2r.c'; fi`
+
+dorm2r.lo: $(top_srcdir)/lapack/dorm2r.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dorm2r.lo `test -f '$(top_srcdir)/lapack/dorm2r.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dorm2r.c
+
+dorml2.o: $(top_srcdir)/lapack/dorml2.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dorml2.o `test -f '$(top_srcdir)/lapack/dorml2.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dorml2.c
+
+dorml2.obj: $(top_srcdir)/lapack/dorml2.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dorml2.obj `if test -f '$(top_srcdir)/lapack/dorml2.c'; then $(CYGPATH_W) '$(top_srcdir)/lapack/dorml2.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lapack/dorml2.c'; fi`
+
+dorml2.lo: $(top_srcdir)/lapack/dorml2.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dorml2.lo `test -f '$(top_srcdir)/lapack/dorml2.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dorml2.c
+
+dormlq.o: $(top_srcdir)/lapack/dormlq.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dormlq.o `test -f '$(top_srcdir)/lapack/dormlq.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dormlq.c
+
+dormlq.obj: $(top_srcdir)/lapack/dormlq.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dormlq.obj `if test -f '$(top_srcdir)/lapack/dormlq.c'; then $(CYGPATH_W) '$(top_srcdir)/lapack/dormlq.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lapack/dormlq.c'; fi`
+
+dormlq.lo: $(top_srcdir)/lapack/dormlq.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dormlq.lo `test -f '$(top_srcdir)/lapack/dormlq.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dormlq.c
+
+dormqr.o: $(top_srcdir)/lapack/dormqr.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dormqr.o `test -f '$(top_srcdir)/lapack/dormqr.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dormqr.c
+
+dormqr.obj: $(top_srcdir)/lapack/dormqr.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dormqr.obj `if test -f '$(top_srcdir)/lapack/dormqr.c'; then $(CYGPATH_W) '$(top_srcdir)/lapack/dormqr.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lapack/dormqr.c'; fi`
+
+dormqr.lo: $(top_srcdir)/lapack/dormqr.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dormqr.lo `test -f '$(top_srcdir)/lapack/dormqr.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dormqr.c
+
+dpotf2.o: $(top_srcdir)/lapack/dpotf2.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dpotf2.o `test -f '$(top_srcdir)/lapack/dpotf2.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dpotf2.c
+
+dpotf2.obj: $(top_srcdir)/lapack/dpotf2.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dpotf2.obj `if test -f '$(top_srcdir)/lapack/dpotf2.c'; then $(CYGPATH_W) '$(top_srcdir)/lapack/dpotf2.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lapack/dpotf2.c'; fi`
+
+dpotf2.lo: $(top_srcdir)/lapack/dpotf2.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dpotf2.lo `test -f '$(top_srcdir)/lapack/dpotf2.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dpotf2.c
+
+dpotrf.o: $(top_srcdir)/lapack/dpotrf.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dpotrf.o `test -f '$(top_srcdir)/lapack/dpotrf.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dpotrf.c
+
+dpotrf.obj: $(top_srcdir)/lapack/dpotrf.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dpotrf.obj `if test -f '$(top_srcdir)/lapack/dpotrf.c'; then $(CYGPATH_W) '$(top_srcdir)/lapack/dpotrf.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lapack/dpotrf.c'; fi`
+
+dpotrf.lo: $(top_srcdir)/lapack/dpotrf.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dpotrf.lo `test -f '$(top_srcdir)/lapack/dpotrf.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dpotrf.c
+
+dpotrs.o: $(top_srcdir)/lapack/dpotrs.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dpotrs.o `test -f '$(top_srcdir)/lapack/dpotrs.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dpotrs.c
+
+dpotrs.obj: $(top_srcdir)/lapack/dpotrs.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dpotrs.obj `if test -f '$(top_srcdir)/lapack/dpotrs.c'; then $(CYGPATH_W) '$(top_srcdir)/lapack/dpotrs.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lapack/dpotrs.c'; fi`
+
+dpotrs.lo: $(top_srcdir)/lapack/dpotrs.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dpotrs.lo `test -f '$(top_srcdir)/lapack/dpotrs.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dpotrs.c
+
+dsteqr.o: $(top_srcdir)/lapack/dsteqr.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dsteqr.o `test -f '$(top_srcdir)/lapack/dsteqr.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dsteqr.c
+
+dsteqr.obj: $(top_srcdir)/lapack/dsteqr.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dsteqr.obj `if test -f '$(top_srcdir)/lapack/dsteqr.c'; then $(CYGPATH_W) '$(top_srcdir)/lapack/dsteqr.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lapack/dsteqr.c'; fi`
+
+dsteqr.lo: $(top_srcdir)/lapack/dsteqr.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dsteqr.lo `test -f '$(top_srcdir)/lapack/dsteqr.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dsteqr.c
+
+dsterf.o: $(top_srcdir)/lapack/dsterf.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dsterf.o `test -f '$(top_srcdir)/lapack/dsterf.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dsterf.c
+
+dsterf.obj: $(top_srcdir)/lapack/dsterf.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dsterf.obj `if test -f '$(top_srcdir)/lapack/dsterf.c'; then $(CYGPATH_W) '$(top_srcdir)/lapack/dsterf.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lapack/dsterf.c'; fi`
+
+dsterf.lo: $(top_srcdir)/lapack/dsterf.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dsterf.lo `test -f '$(top_srcdir)/lapack/dsterf.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dsterf.c
 
 dsyev.o: $(top_srcdir)/lapack/dsyev.c
 	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dsyev.o `test -f '$(top_srcdir)/lapack/dsyev.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dsyev.c
@@ -1830,6 +2307,15 @@ dsyev.obj: $(top_srcdir)/lapack/dsyev.c
 dsyev.lo: $(top_srcdir)/lapack/dsyev.c
 	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dsyev.lo `test -f '$(top_srcdir)/lapack/dsyev.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dsyev.c
 
+dsygst.o: $(top_srcdir)/lapack/dsygst.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dsygst.o `test -f '$(top_srcdir)/lapack/dsygst.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dsygst.c
+
+dsygst.obj: $(top_srcdir)/lapack/dsygst.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dsygst.obj `if test -f '$(top_srcdir)/lapack/dsygst.c'; then $(CYGPATH_W) '$(top_srcdir)/lapack/dsygst.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lapack/dsygst.c'; fi`
+
+dsygst.lo: $(top_srcdir)/lapack/dsygst.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dsygst.lo `test -f '$(top_srcdir)/lapack/dsygst.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dsygst.c
+
 dsygv.o: $(top_srcdir)/lapack/dsygv.c
 	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dsygv.o `test -f '$(top_srcdir)/lapack/dsygv.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dsygv.c
 
@@ -1839,6 +2325,42 @@ dsygv.obj: $(top_srcdir)/lapack/dsygv.c
 dsygv.lo: $(top_srcdir)/lapack/dsygv.c
 	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dsygv.lo `test -f '$(top_srcdir)/lapack/dsygv.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dsygv.c
 
+dsytd2.o: $(top_srcdir)/lapack/dsytd2.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dsytd2.o `test -f '$(top_srcdir)/lapack/dsytd2.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dsytd2.c
+
+dsytd2.obj: $(top_srcdir)/lapack/dsytd2.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dsytd2.obj `if test -f '$(top_srcdir)/lapack/dsytd2.c'; then $(CYGPATH_W) '$(top_srcdir)/lapack/dsytd2.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lapack/dsytd2.c'; fi`
+
+dsytd2.lo: $(top_srcdir)/lapack/dsytd2.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dsytd2.lo `test -f '$(top_srcdir)/lapack/dsytd2.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dsytd2.c
+
+dsytrd.o: $(top_srcdir)/lapack/dsytrd.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dsytrd.o `test -f '$(top_srcdir)/lapack/dsytrd.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dsytrd.c
+
+dsytrd.obj: $(top_srcdir)/lapack/dsytrd.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dsytrd.obj `if test -f '$(top_srcdir)/lapack/dsytrd.c'; then $(CYGPATH_W) '$(top_srcdir)/lapack/dsytrd.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lapack/dsytrd.c'; fi`
+
+dsytrd.lo: $(top_srcdir)/lapack/dsytrd.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dsytrd.lo `test -f '$(top_srcdir)/lapack/dsytrd.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dsytrd.c
+
+ieeeck.o: $(top_srcdir)/lapack/ieeeck.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ieeeck.o `test -f '$(top_srcdir)/lapack/ieeeck.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/ieeeck.c
+
+ieeeck.obj: $(top_srcdir)/lapack/ieeeck.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ieeeck.obj `if test -f '$(top_srcdir)/lapack/ieeeck.c'; then $(CYGPATH_W) '$(top_srcdir)/lapack/ieeeck.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lapack/ieeeck.c'; fi`
+
+ieeeck.lo: $(top_srcdir)/lapack/ieeeck.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ieeeck.lo `test -f '$(top_srcdir)/lapack/ieeeck.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/ieeeck.c
+
+ilaenv.o: $(top_srcdir)/lapack/ilaenv.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ilaenv.o `test -f '$(top_srcdir)/lapack/ilaenv.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/ilaenv.c
+
+ilaenv.obj: $(top_srcdir)/lapack/ilaenv.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ilaenv.obj `if test -f '$(top_srcdir)/lapack/ilaenv.c'; then $(CYGPATH_W) '$(top_srcdir)/lapack/ilaenv.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lapack/ilaenv.c'; fi`
+
+ilaenv.lo: $(top_srcdir)/lapack/ilaenv.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ilaenv.lo `test -f '$(top_srcdir)/lapack/ilaenv.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/ilaenv.c
+
 lapack_utils.o: $(top_srcdir)/lapack/lapack_utils.c
 	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o lapack_utils.o `test -f '$(top_srcdir)/lapack/lapack_utils.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/lapack_utils.c
 
@@ -1847,6 +2369,24 @@ lapack_utils.obj: $(top_srcdir)/lapack/lapack_utils.c
 
 lapack_utils.lo: $(top_srcdir)/lapack/lapack_utils.c
 	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o lapack_utils.lo `test -f '$(top_srcdir)/lapack/lapack_utils.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/lapack_utils.c
+
+lsame.o: $(top_srcdir)/lapack/lsame.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o lsame.o `test -f '$(top_srcdir)/lapack/lsame.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/lsame.c
+
+lsame.obj: $(top_srcdir)/lapack/lsame.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o lsame.obj `if test -f '$(top_srcdir)/lapack/lsame.c'; then $(CYGPATH_W) '$(top_srcdir)/lapack/lsame.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lapack/lsame.c'; fi`
+
+lsame.lo: $(top_srcdir)/lapack/lsame.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o lsame.lo `test -f '$(top_srcdir)/lapack/lsame.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/lsame.c
+
+xerbla.o: $(top_srcdir)/lapack/xerbla.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o xerbla.o `test -f '$(top_srcdir)/lapack/xerbla.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/xerbla.c
+
+xerbla.obj: $(top_srcdir)/lapack/xerbla.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o xerbla.obj `if test -f '$(top_srcdir)/lapack/xerbla.c'; then $(CYGPATH_W) '$(top_srcdir)/lapack/xerbla.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lapack/xerbla.c'; fi`
+
+xerbla.lo: $(top_srcdir)/lapack/xerbla.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o xerbla.lo `test -f '$(top_srcdir)/lapack/xerbla.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/xerbla.c
 
 colamd.o: $(top_srcdir)/FEI_mv/SuperLU/colamd.c
 	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o colamd.o `test -f '$(top_srcdir)/FEI_mv/SuperLU/colamd.c' || echo '$(srcdir)/'`$(top_srcdir)/FEI_mv/SuperLU/colamd.c

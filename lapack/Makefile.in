@@ -170,10 +170,58 @@ libHYPRE_lapack_la_LDFLAGS = -avoid-version
 
 #
 FILES = \
+ dgebd2.c\
+ dgebrd.c\
+ dgelq2.c\
+ dgelqf.c\
  dgels.c\
+ dgeqr2.c\
+ dgeqrf.c\
+ dgesvd.c\
+ dlabad.c\
+ dlabrd.c\
+ dlae2.c\
+ dlaev2.c\
+ dlamch.c\
+ dlange.c\
+ dlanst.c\
+ dlansy.c\
+ dlapy2.c\
+ dlarf.c\
+ dlarfb.c\
+ dlarfg.c\
+ dlarft.c\
+ dlartg.c\
+ dlascl.c\
+ dlaset.c\
+ dlasr.c\
+ dlasrt.c\
+ dlassq.c\
+ dlatrd.c\
+ dorg2l.c\
+ dorg2r.c\
+ dorgql.c\
+ dorgqr.c\
+ dorgtr.c\
+ dorm2r.c\
+ dorml2.c\
+ dormlq.c\
+ dormqr.c\
+ dpotf2.c\
+ dpotrf.c\
+ dpotrs.c\
+ dsteqr.c\
+ dsterf.c\
  dsyev.c\
+ dsygst.c\
  dsygv.c\
+ dsytd2.c\
+ dsytrd.c\
+ ieeeck.c\
+ ilaenv.c\
  lapack_utils.c\
+ lsame.c\
+ xerbla.c\
  f2c.h\
  hypre_lapack.h
 
@@ -185,7 +233,15 @@ CONFIG_CLEAN_FILES =
 LTLIBRARIES = $(lib_LTLIBRARIES)
 
 libHYPRE_lapack_la_LIBADD =
-am__objects_1 = dgels.lo dsyev.lo dsygv.lo lapack_utils.lo
+am__objects_1 = dgebd2.lo dgebrd.lo dgelq2.lo dgelqf.lo dgels.lo \
+	dgeqr2.lo dgeqrf.lo dgesvd.lo dlabad.lo dlabrd.lo dlae2.lo \
+	dlaev2.lo dlamch.lo dlange.lo dlanst.lo dlansy.lo dlapy2.lo \
+	dlarf.lo dlarfb.lo dlarfg.lo dlarft.lo dlartg.lo dlascl.lo \
+	dlaset.lo dlasr.lo dlasrt.lo dlassq.lo dlatrd.lo dorg2l.lo \
+	dorg2r.lo dorgql.lo dorgqr.lo dorgtr.lo dorm2r.lo dorml2.lo \
+	dormlq.lo dormqr.lo dpotf2.lo dpotrf.lo dpotrs.lo dsteqr.lo \
+	dsterf.lo dsyev.lo dsygst.lo dsygv.lo dsytd2.lo dsytrd.lo \
+	ieeeck.lo ilaenv.lo lapack_utils.lo lsame.lo xerbla.lo
 am_libHYPRE_lapack_la_OBJECTS = $(am__objects_1)
 libHYPRE_lapack_la_OBJECTS = $(am_libHYPRE_lapack_la_OBJECTS)
 
