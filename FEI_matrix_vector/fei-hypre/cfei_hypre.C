@@ -4,15 +4,17 @@
 #include "utilities/utilities.h"
 
 
-#include "base/basicTypes.h"
-#include "base/Data.h"
-#if defined(FEI_V13) || defined(FEI_V14)
-#include "base1.4/LinearSystemCore.h"
+#include "basicTypes.h"
+#include "Data.h"
+#if defined(FEI_V13)
+#include "LinearSystemCore.1.3.h"
+#elseif defined(FEI_V14)
+#include "LinearSystemCore.1.4.h"
 #else
-#include "base/LinearSystemCore.h"
-#include "base/LSC.h"
+#include "LinearSystemCore.h"
+#include "LSC.h"
 #endif
-#include "base/cfei.h"
+#include "cfei.h"
 
 #include "cfei_hypre.h"
 #include "HYPRE.h"
