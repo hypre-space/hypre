@@ -88,9 +88,9 @@ hypre_AMGBuildRBMInterp( hypre_CSRMatrix     *A,
 
   int *i_fine_to_global, *i_coarse_to_global;
 
-  double *AE_neighbor_matrix;
+
   double *AE;
-  double *AE_f, *AE_fc, *P_coeff, *XE_f;
+
   double coeff_sum;
 
   double *P_ext_int; 
@@ -259,11 +259,7 @@ hypre_AMGBuildRBMInterp( hypre_CSRMatrix     *A,
   AE = hypre_CTAlloc(double, max_local_dof_counter *
 		     max_local_dof_counter);
 
-  AE_neighbor_matrix = hypre_CTAlloc(double, max_local_dof_counter *
-				     max_local_dof_counter);
-
-
-
+  
   i_fine = hypre_CTAlloc(int, max_local_dof_counter);
   i_coarse = hypre_CTAlloc(int, max_local_dof_counter);
 
@@ -275,41 +271,28 @@ hypre_AMGBuildRBMInterp( hypre_CSRMatrix     *A,
   i_coarse_to_global = hypre_CTAlloc(int, max_local_dof_counter);
 
 
-
-
-  AE_f = hypre_CTAlloc(double, max_local_dof_counter *
-                       max_local_dof_counter);
-
-
-
-  AE_fc = hypre_CTAlloc(double, max_local_dof_counter *
-                        max_local_dof_counter);
-
-
-
-  XE_f = hypre_CTAlloc(double, max_local_dof_counter *
-                       max_local_dof_counter);
-
-
-
-  P_coeff = hypre_CTAlloc(double, max_local_dof_counter *
-                          max_local_dof_counter);
-
+  
   i_int = hypre_CTAlloc(int, max_local_dof_counter);
 
   P_ext_int = hypre_CTAlloc(double, max_local_dof_counter *
 			    max_local_dof_counter);
 
+
+  /*
   for (i_loc =0; i_loc < max_local_dof_counter; i_loc++)
     for (j_loc =0; j_loc < max_local_dof_counter; j_loc++)
       P_ext_int[j_loc + i_loc * max_local_dof_counter] = 0.e0;
 
-
+      */
 
   i_ext_int = hypre_CTAlloc(int, max_local_dof_counter+1);
   j_ext_int = hypre_CTAlloc(int, max_local_dof_counter *
 			    max_local_dof_counter);
   
+
+  for (l_loc=0; l_loc < max_local_dof_counter; l_loc++)
+    i_int[l_loc] = -1;
+
 
   for (i_dof =0; i_dof < num_dofs; i_dof++)
     {
@@ -328,10 +311,6 @@ hypre_AMGBuildRBMInterp( hypre_CSRMatrix     *A,
 		  local_dof_counter++;
 		}
 	    }
-
-
-          for (l_loc=0; l_loc < local_dof_counter; l_loc++)
-	    i_int[l_loc] = -1;
 
 	  dof_counter = 0;
 	  i_int[i_global_to_local[i_dof]]=dof_counter;
@@ -464,11 +443,9 @@ hypre_AMGBuildRBMInterp( hypre_CSRMatrix     *A,
 		  j_loc = j_ext_int[j];
 		  AE[i_int[i_loc]+i_int[j_loc] * dof_counter]+=
 		    a_dof_dof[i] * 
-		    /* AE_neighbor_matrix[i_loc+l_loc*local_dof_counter] * */
 		    P_ext_int[l_loc + i_int[j_loc] * local_dof_counter];
 		}
 	    }
-
 	}
 
       for (i = i_dof_neighbor_coarsedof[i_dof]; 
@@ -478,7 +455,6 @@ hypre_AMGBuildRBMInterp( hypre_CSRMatrix     *A,
             {
               j_loc= i_coarse_to_global[i_int[i_global_to_local[
 			        j_dof_neighbor_coarsedof[i]]]]; 
-
 
 	      if (AE[i_fine[0]+dof_counter*i_fine[0]] !=0.e0)
 		Prolong_coeff[i] = -AE[i_fine[0]+dof_counter *i_coarse[j_loc]]
@@ -491,17 +467,27 @@ hypre_AMGBuildRBMInterp( hypre_CSRMatrix     *A,
             Prolong_coeff[i] = 1.e0;
         }
 
-
-      for (j=i_dof_dof[i_dof]; j < i_dof_dof[i_dof+1]; 
-	   j++)
+      if (CF_marker[i_dof] < 0)
 	{
-	  j_dof = j_dof_dof[j];
-	  i_global_to_local[j_dof] = -1;
-	}	       
+	  i_int[i_global_to_local[i_dof]]=-1;
+
+	  for (j = i_dof_neighbor_coarsedof[i_dof]; 
+	       j < i_dof_neighbor_coarsedof[i_dof+1]; j++)
+	    {
+	      j_dof = j_dof_neighbor_coarsedof[j];
+	      i_int[i_global_to_local[j_dof]] = -1;
+	    }
+	  
+
+	  for (j=i_dof_dof[i_dof]; j < i_dof_dof[i_dof+1]; 
+	       j++)
+	    {
+	      j_dof = j_dof_dof[j];
+	      i_global_to_local[j_dof] = -1;
+	    }	       
+	}
 
     }
-
-
 
   /*-----------------------------------------------------------------
   for (i_dof =0; i_dof < num_dofs; i_dof++)
@@ -568,19 +554,16 @@ hypre_AMGBuildRBMInterp( hypre_CSRMatrix     *A,
   hypre_TFree(i_fine_to_global);
 
 
-  hypre_TFree(AE_neighbor_matrix);
+
   hypre_TFree(AE);
 
-  hypre_TFree(XE_f);
-  hypre_TFree(AE_f);
-  hypre_TFree(AE_fc);
 
   hypre_TFree(i_ext_int);
   hypre_TFree(j_ext_int);
   hypre_TFree(P_ext_int);
 
 
-  hypre_TFree(P_coeff);
+
   hypre_TFree(i_global_to_local);
   hypre_TFree(i_local_to_global);
 
