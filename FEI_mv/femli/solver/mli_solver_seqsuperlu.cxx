@@ -99,25 +99,32 @@ int MLI_Solver_SeqSuperLU::setup( MLI_Matrix *Amat )
       exit(1);
    }
    mliAmat_ = Amat;
-   if ( strcmp( mliAmat_->getName(), "HYPRE_ParCSR" ) )
+   if ( !strcmp( mliAmat_->getName(), "HYPRE_ParCSR" ) )
    {
-      printf("MLI_Solver_SeqSuperLU::setup ERROR - not HYPRE_ParCSR(%s).\n",
+      hypreA = (hypre_ParCSRMatrix *) mliAmat_->getMatrix();
+      ADiag = hypre_ParCSRMatrixDiag(hypreA);
+   }
+   else if ( !strcmp( mliAmat_->getName(), "HYPRE_CSR" ) )
+   {
+      ADiag = (hypre_CSRMatrix *) mliAmat_->getMatrix();
+   }
+   else
+   {
+      printf("MLI_Solver_SeqSuperLU::setup ERROR - invalid format(%s).\n",
              mliAmat_->getName());
       exit(1);
    }
-   hypreA = (hypre_ParCSRMatrix *) mliAmat_->getMatrix();
 
    /* ---------------------------------------------------------------
     * fetch matrix
     * -------------------------------------------------------------*/
  
-   ADiag = hypre_ParCSRMatrixDiag(hypreA);
    csrAA = hypre_CSRMatrixData(ADiag);
    csrIA = hypre_CSRMatrixI(ADiag);
    csrJA = hypre_CSRMatrixJ(ADiag);
    nrows = hypre_CSRMatrixNumRows(ADiag);
    nnz   = hypre_CSRMatrixNumNonzeros(ADiag);
-   startRow = hypre_ParCSRMatrixFirstRowIndex(hypreA);
+   startRow = 0;
    localNRows_ = nrows;
 
    /* ---------------------------------------------------------------
