@@ -36,8 +36,8 @@ char *argv[];
 
 
    double  zero=0.0, one=1.0;
-   int     Nx = 100;
-   int     Ny = 50;
+   int     Nx = 4;
+   int     Ny = 3;
    int     nx, ny;
    int     ilower[2];
    int     iupper[2];
@@ -150,7 +150,13 @@ char *argv[];
    /* Set up the solver structure */
    solver = HYPRE_NewStructSolver( MPI_COMM_WORLD, grid, stencil );
 
-   /* ierr = HYPRE_StructSolverSetDropTolerance( solver, 0.0 ); */
+   ierr = HYPRE_StructSolverSetType( solver, HYPRE_PETSC_MAT_PARILUT_SOLVER );
+   if( ierr ) {printf("Error returned by StructSolverSetType\n"); return;}
+
+   ierr = HYPRE_StructSolverInitialize( solver );
+   if( ierr ) {printf("Error returned by StructSolverInitialize\n"); return;}
+
+   ierr = HYPRE_StructSolverSetDropTolerance( solver, 0.0 ); 
 
    ierr = HYPRE_StructSolverSetup( solver, matrix, soln, rhs );
    if( ierr ) {printf("Error returned by StructSolverSetup\n"); return;}
