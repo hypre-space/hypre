@@ -41,8 +41,11 @@ schedule(static)
 #endif
 
 #ifdef HYPRE_USING_PGCC_SMP
-#pragma parallel
-#pragma pfor
+#ifndef HYPRE_SMP_REDUCTION_OP
+#pragma parallel local(HYPRE_SMP_PRIVATE) pfor
+#endif
+#ifdef HYPRE_SMP_REDUCTION_OP
+#endif
 #endif
 
 #undef HYPRE_SMP_PRIVATE
