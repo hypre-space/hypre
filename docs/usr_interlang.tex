@@ -1,7 +1,7 @@
-\chapter{Interlanguage issues}
+\chapter{Interoperability with Fortran}
 
 %==========================================================================
-\section{Calling {\itshape hypre} from Fortran}
+\section{Calls to {\itshape hypre} from Fortran source code}
 
 Fortran 77 subroutine arguments always pass copies of the argument addresses
 on execution of the call.  This is referred to as call-by-address, or
@@ -19,19 +19,30 @@ to be pointers.
 
 The simplicity of Fortran, and the flexibility of C, allow the languages to
 interoperate.  However, portability might introduce complexities to
-configuration fo the interoperation codes.
+configuration of the interoperation codes.
 
 Portability across DEC Compass, DEC Tera, and IBM ASCI-Blue platforms is
 achieved with the specific Fortran-calling-C mapping: 
 
+\vspace{0.1in}
 
-  calling Fortran argument type        called C function parameter type
-  -----------------------------        ------------------------------
+\begin{tabular}{lcl}
 
-   (addr of) integer*8           ---->            long int *
-   (addr of) integer             ---->            int *
-   (addr of) character           ---->            char *
-   (addr of) double precision    ---->            double *
+\underline{calling Fortran argument type} & &
+\underline{called C function parameter type} \\
+                              &                   &   \\
+\hspace{0.1in} (addr of) integer*8        & $\longrightarrow$ &
+\hspace{0.1in} long int * \\
+\hspace{0.1in} (addr of) integer          & $\longrightarrow$ &
+\hspace{0.1in} int * \\
+\hspace{0.1in} (addr of) character        & $\longrightarrow$ &
+\hspace{0.1in} char * \\
+\hspace{0.1in} (addr of) double precision & $\longrightarrow$ &
+\hspace{0.1in} double * \\
+
+\end{tabular}
+
+\vspace{0.1in}
 
 
 In particular, on DEC Compass, DEC Tera, and IBM ASCI-Blue, C-type
@@ -43,16 +54,19 @@ call-by-value).
 
 So, on the above platforms, Fortran can carry addresses in integer*8
 variables.  These addresses might not have originated in any Fortran call,
-and if they are addresses to inhomogeneously typed collectioins of data
+and if they are addresses to inhomogeneously typed collections of data
 (e.g. C structures), Fortran might not have enough information to dereference
 the addresses.  But Fortran can still carry around such addresses, and in
 particular hand them back and forth between various C functions.  The Hypre
 Fortran interface makes extensive use of this technique.
 
-Example:
+\vspace{0.2in}
+
+\noindent Example:
+
+\vspace{0.1in}
 
   Fortran calling:
-
 \begin{verbatim}
 
     integer*8        struct_addr
@@ -63,10 +77,7 @@ Example:
     call sub_name(struct_addr, intg, charact, double_prec, ierr)
 
 \end{verbatim}
-
-
   C called:
-  
 \begin{verbatim}
 
     void hypre_C_NAME(sub_name)( long int  *struct_addr,
@@ -74,5 +85,40 @@ Example:
                                  char      *charact,
                                  double    *double_prec,
                                  int       *ierr          )
+
 \end{verbatim}
+
+\section{Fortran subroutine calls in {\itshape hypre} source code}
+
+\vspace{0.2in}
+
+\noindent Example:
+
+\vspace{0.1in}
+
+  C calling:
+\begin{verbatim}
+
+    long int struct_addr;
+    int      intg, ierr;
+    char     charact;
+    double   double_prec;
+
+    hypre_FORTRAN_NAME(sub_name)( &struct_addr, &intg, &charact,
+                                  &double_prec, &ierr )
+
+\end{verbatim}
+
+  Fortran called:
+\begin{verbatim}
+
+    subroutine sub_name(struct_addr, intg, charact, double_prec, ierr)
+
+    integer*8        struct_addr
+    integer          intg, ierr
+    character        charact
+    double precision double_prec
+
+\end{verbatim}
+
 %==========================================================================

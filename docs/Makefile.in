@@ -66,6 +66,7 @@ ref_ps: HYPRE_code_ref.ps
 ##########
 
 USR_FILES =\
+ usr_interlang.tex\
  usr_building_code.tex\
  usr_example.tex\
  usr_struct.tex\
