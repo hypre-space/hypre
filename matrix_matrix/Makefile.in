@@ -36,7 +36,7 @@ include ../bmakes/Makefile
 
 lib: $(PROTOS) ${OBJS}
 	@echo  "Building $@ ... "
-	@ar -ru lib_HYPRE_MatrixMatrix.a ${OBJS}
+	@ar -rcu lib_HYPRE_MatrixMatrix.a ${OBJS}
 	@ranlib lib_HYPRE_MatrixMatrix.a
 
 ${OBJS}: ${HEADERS}

@@ -59,6 +59,6 @@ link:
 lib: $(PROTOS) ${OBJS}
 	@echo  "Building $@ ... "
 	@echo  "Building ${OBJS} ... "
-	@ar -ru lib_HYPRE_DistributedMatrix.a ${OBJS}
+	@ar -rcu lib_HYPRE_DistributedMatrix.a ${OBJS}
 	@ranlib lib_HYPRE_DistributedMatrix.a 
 
