@@ -52,8 +52,9 @@ c-----------------------------------------------------------------------
          do 60 i = 1,nv
             jlo =  ia(i)
             jhi =  ia(i+1)-1
-c           if (jlo .gt. jhi) go to 40
+            if (jlo .gt. jhi) go to 60
             do 50 j = jlo,jhi
+               if (ja(j) .lt. 0) go to 50
                y(i) = y(i) + a(j) * x(ja(j))
  50         continue
  60      continue
@@ -63,6 +64,7 @@ c           if (jlo .gt. jhi) go to 40
                 jhi =  ia(i+1)-1
                 if (jlo .gt. jhi) go to 80
                 do 70 j = jlo,jhi
+                      if (ja(j) .lt. 0) go to 70
                    y(ja(j)) = y(ja(j)) + a(j) * x(i)
  70             continue
  80          continue
