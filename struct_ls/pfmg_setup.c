@@ -84,6 +84,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 
    int                   num_boxes;
    int                   num_all_boxes;
+   int                   dim;
 
    hypre_Box            *box;
    hypre_Box            *cbox;
@@ -115,6 +116,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    hypre_CopyIndex(hypre_StructGridPStride(grid), pstride);
    num_boxes      = hypre_BoxArraySize(boxes);
    num_all_boxes  = hypre_BoxArraySize(all_boxes);
+   dim            = hypre_StructGridDim(grid);
 
    /* compute all_boxes from base_all_boxes */
    hypre_ForBoxI(i, all_boxes)
@@ -133,7 +135,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 
    /* Compute a bounding box (cbox) used to determine cdir */
    cbox = hypre_NewBox();
-   for (d = 0; d < 3; d++)
+   for (d = 0; d < dim; d++)
    {
       idmin = hypre_BoxIMinD(hypre_BoxArrayBox(all_boxes, 0), d);
       idmax = hypre_BoxIMaxD(hypre_BoxArrayBox(all_boxes, 0), d);
@@ -146,6 +148,11 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       }
       hypre_BoxIMinD(cbox, d) = idmin;
       hypre_BoxIMaxD(cbox, d) = idmax;
+   }
+   for (d = dim; d < 3; d++)
+   {
+      hypre_BoxIMinD(cbox, d) = 0;
+      hypre_BoxIMaxD(cbox, d) = 0;
    }
 
    /* Compute a new max_levels value based on the grid */
@@ -169,7 +176,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       /* determine cdir */
       min_dxyz = dxyz[0] + dxyz[1] + dxyz[2] + 1;
       cdir = -1;
-      for (d = 0; d < 3; d++)
+      for (d = 0; d < dim; d++)
       {
          idmin = hypre_BoxIMinD(cbox, d);
          idmax = hypre_BoxIMaxD(cbox, d);
@@ -195,7 +202,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       hypre_PFMGSetStride(cdir, stride);
 
       /* compute new P_pindex, pindex, and pstride */
-      for (d = 0; d < 3; d++)
+      for (d = 0; d < dim; d++)
       {
          hypre_IndexD(P_pindex, d) = hypre_IndexD(pindex, d) +
             hypre_IndexD(findex, d) * hypre_IndexD(pstride, d);

@@ -24,6 +24,7 @@
  *--------------------------------------------------------------------------*/
 
 #define MapIndex(in_index, cdir, out_index) \
+hypre_IndexD(out_index, 2)    = hypre_IndexD(in_index, 2);\
 hypre_IndexD(out_index, cdir) = hypre_IndexD(in_index, 1);\
 cdir = (cdir + 1) % 2;\
 hypre_IndexD(out_index, cdir) = hypre_IndexD(in_index, 0);\
