@@ -353,7 +353,7 @@ hypre_IJMatrixInsertRowParCSR(hypre_IJMatrix *matrix,
    int row_local;
    int col_0, col_n;
    int i;
-   double temp;
+   /* double temp; */
    int *indx_diag, *indx_offd;
    int **aux_j;
    int *local_j;
@@ -412,26 +412,9 @@ hypre_IJMatrixInsertRowParCSR(hypre_IJMatrix *matrix,
    	    local_data[i] = coeffs[i];
          }
    
-   /* make sure first element is diagonal element, if not, find it and
-      exchange it with first element */
-         if (local_j[0] != row)
-         {
-            for (i=1; i < n; i++)
-     	    {
-   	       if (local_j[i] == row)
-   	       {
-   		   local_j[i] = local_j[0];
-   		   local_j[0] = row;
-   		   temp = local_data[0];
-   		   local_data[0] = local_data[i];
-   		   local_data[i] = temp;
-   		   break;
-   	       }
-     	    }
-         }
-      /* sort data according to column indices, except for first element */
+      /* sort data according to column indices */
 
-         qsort1(local_j,local_data,1,n-1);
+         qsort1(local_j,local_data,0,n-1);
  
       }
       else /* insert immediately into data into ParCSRMatrix structure */
@@ -456,11 +439,6 @@ hypre_IJMatrixInsertRowParCSR(hypre_IJMatrix *matrix,
 	       offd_j[offd_indx] = indices[i];
 	       offd_data[offd_indx++] = coeffs[i];
 	    }
-	    else if (indices[i] == row) /* diagonal element */
-	    {
-	       diag_j[indx_0] = indices[i] - col_0;
-	       diag_data[indx_0] = coeffs[i];
-	    }
 	    else  /* insert into diag */
 	    {
 	       diag_j[diag_indx] = indices[i] - col_0;
@@ -468,7 +446,7 @@ hypre_IJMatrixInsertRowParCSR(hypre_IJMatrix *matrix,
 	    }
 	 }
 	 qsort1(offd_j, offd_data, indx_offd_0, offd_indx-1);
-	 qsort1(diag_j, diag_data, indx_0+1, diag_indx-1);
+	 qsort1(diag_j, diag_data, indx_0, diag_indx-1);
 
 	 hypre_AuxParCSRMatrixIndxDiag(aux_matrix)[row_local] = diag_indx;
 	 hypre_AuxParCSRMatrixIndxOffd(aux_matrix)[row_local] = offd_indx;
@@ -555,21 +533,12 @@ hypre_IJMatrixAddToRowParCSR(hypre_IJMatrix *matrix,
 	 tmp_indx = 0;
          for (i=0; i < n; i++)
 	 {
-	    if (indices[i] == row)
-	    {
-	       local_data[0] += coeffs[i];
-	       local_j[0] = row;
-	    }
-	    else
-	    {
-	       tmp_j[tmp_indx] = indices[i];
-	       tmp_data[tmp_indx++] = coeffs[i];
-	    }
+	    tmp_j[tmp_indx] = indices[i];
+	    tmp_data[tmp_indx++] = coeffs[i];
 	 }
 	 qsort1(tmp_j,tmp_data,0,tmp_indx-1);
 	 indx = 0;
 	 size = row_length[row_local]; 
-	 if (size == 0) size = 1; /* account for diagonal_element */
 	 for (i=1; i < row_length[row_local]; i++)
 	 {
 	    while (indx < tmp_indx && local_j[i] > tmp_j[indx])
@@ -601,7 +570,6 @@ hypre_IJMatrixAddToRowParCSR(hypre_IJMatrix *matrix,
 
          indx = 0; 
 	 cnt = old_size; 
-         if (cnt == 0) cnt = 1; /* account for diagonal_element */
 
 	 for (i=1; i < old_size; i++)
 	 {
@@ -623,9 +591,9 @@ hypre_IJMatrixAddToRowParCSR(hypre_IJMatrix *matrix,
    	    local_data[cnt++] = tmp_data[i];
          }
    
-      /* sort data according to column indices, except for first element */
+      /* sort data according to column indices */
 
-         qsort1(local_j,local_data,1,cnt-1);
+         qsort1(local_j,local_data,0,cnt-1);
 	 hypre_TFree(tmp_j); 
 	 hypre_TFree(tmp_data); 
       }
@@ -643,7 +611,6 @@ hypre_IJMatrixAddToRowParCSR(hypre_IJMatrix *matrix,
          offd_data = hypre_CSRMatrixData(offd);
 
 	 indx_0 = diag_i[row_local];
-	 diag_indx = indx_0+1;
 	 
 	 tmp_diag_j = hypre_CTAlloc(int,n);
 	 tmp_diag_data = hypre_CTAlloc(double,n);
@@ -658,11 +625,7 @@ hypre_IJMatrixAddToRowParCSR(hypre_IJMatrix *matrix,
 	       tmp_offd_j[cnt_offd] = indices[i];
 	       tmp_offd_data[cnt_offd++] = coeffs[i];
 	    }
-	    else if (indices[i] == row) /* diagonal element */
-	    {
-	       diag_j[indx_0] = indices[i] - col_0;
-	       diag_data[indx_0] += coeffs[i];
-	    }
+	    /* diagonal element */
 	    else  /* insert into diag */
 	    {
 	       tmp_diag_j[cnt_diag] = indices[i] - col_0;
@@ -674,10 +637,10 @@ hypre_IJMatrixAddToRowParCSR(hypre_IJMatrix *matrix,
 
          diag_indx = hypre_AuxParCSRMatrixIndxDiag(aux_matrix)[row_local];
 	 if (diag_indx == 0)
-	    diag_indx = indx_0+1;
+	    diag_indx = indx_0;
 	 cnt = diag_indx;
 	 indx = 0;
-	 for (i=diag_i[row_local]+1; i < diag_indx; i++)
+	 for (i=diag_i[row_local]; i < diag_indx; i++)
 	 {
 	    while (indx < cnt_diag && diag_j[i] > tmp_diag_j[indx])
 	    {
@@ -697,9 +660,9 @@ hypre_IJMatrixAddToRowParCSR(hypre_IJMatrix *matrix,
    	    diag_data[cnt++] = tmp_diag_data[i];
          }
    
-      /* sort data according to column indices, except for first element */
+      /* sort data according to column indices */
 
-         qsort1(diag_j,diag_data,indx_0+1,cnt-1);
+         qsort1(diag_j,diag_data,indx_0,cnt-1);
 	 hypre_TFree(tmp_diag_j); 
 	 hypre_TFree(tmp_diag_data); 
 
@@ -730,7 +693,7 @@ hypre_IJMatrixAddToRowParCSR(hypre_IJMatrix *matrix,
    	    offd_data[cnt++] = tmp_offd_data[i];
          }
    
-      /* sort data according to column indices, except for first element */
+      /* sort data according to column indices */
 
          qsort1(offd_j,offd_data,offd_i[row_local],cnt-1);
 	 hypre_TFree(tmp_offd_j); 
@@ -765,7 +728,7 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
    double *offd_data;
    int *row_starts = hypre_ParCSRMatrixRowStarts(par_matrix);
    int *col_starts = hypre_ParCSRMatrixColStarts(par_matrix);
-   int j_indx, cnt, i, j;
+   int j_indx, cnt, i, j, j0, diag_pos;
    int num_cols_offd;
    int *col_map_offd;
    int *row_length;
@@ -783,6 +746,7 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
    int col_0, col_n;
    int nnz_offd;
    int *aux_offd_j;
+   double temp; 
 
    MPI_Comm_size(comm, &num_procs); 
    MPI_Comm_rank(comm, &my_id);
@@ -801,12 +765,26 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
       {
 	 local_j = aux_j[i];
 	 local_data = aux_data[i];
+	 diag_pos = -1;
 	 for (j=0; j < row_length[i]; j++)
 	 {
 	    if (local_j[j] < col_0 || local_j[j] > col_n)
 	       i_offd++;
 	    else
+	    {
 	       i_diag++;
+	       if (local_j[j]-col_0 == i) diag_pos = j;
+	    }
+	 }
+	 /* move diagonal element into first space */
+	 if (diag_pos > -1)
+	 {
+	    local_j[diag_pos] = local_j[0];
+	    local_j[0] = i+col_0;
+	    temp = local_data[0];
+	    local_data[0] = local_data[diag_pos];
+	    local_data[diag_pos] = temp;
+	    
 	 }
 	 diag_i[i+1] = i_diag;
 	 offd_i[i+1] = i_offd;
@@ -844,6 +822,27 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
    }
    else
    {
+      /* move diagonal elements into first space */
+
+      diag_j = hypre_CSRMatrixJ(diag);
+      diag_data = hypre_CSRMatrixData(diag);
+      for (i=0; i < num_rows; i++)
+      {
+	 j0 = diag_i[i];
+         for (j=j0; j < diag_i[i+1]; j++)
+         {
+	    if (diag_j[j] == i)
+	    {
+	       diag_j[j] = diag_j[j0];
+	       diag_j[j0] = i;
+	       temp = diag_data[j];
+	       diag_data[j] = diag_data[j0];
+	       diag_data[j0] = temp;
+	       break;
+	    }
+	 }
+      }
+
       offd_j = hypre_CSRMatrixJ(offd);
    }
 
