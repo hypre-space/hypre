@@ -202,7 +202,6 @@ int hypre_SymQMRSolve(void  *symqmr_vdata, void  *A, void  *b, void  *x)
    if (logging > 0)
    {
       norms          = (symqmr_data -> norms);
-      log_file_name  = (symqmr_data -> log_file_name);
    }
 
    /* initialize work arrays */
