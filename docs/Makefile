@@ -26,24 +26,8 @@ ONLINE_OPTS =\
 ##################################################################
 
 all: html ps pdf
-	mkdir -p $(HYPRE_BUILD_DIR)/docs
-	cp -fr HYPRE_usr_manual    $(HYPRE_BUILD_DIR)/docs/.
-	cp -f  HYPRE_usr_manual.ps $(HYPRE_BUILD_DIR)/docs/.
-	cp -fr HYPRE_ref_manual    $(HYPRE_BUILD_DIR)/docs/.
-	cp -f  HYPRE_ref_manual.ps $(HYPRE_BUILD_DIR)/docs/.
-	cp -fr HYPRE_ref_manual    $(HYPRE_BUILD_DIR)/docs/.
-	cp -f  HYPRE_ref_manual.ps $(HYPRE_BUILD_DIR)/docs/.
-	cp -f  V[1-9]* $(HYPRE_BUILD_DIR)/docs/.
 
-install: html ps pdf
-	mkdir -p $(HYPRE_DOCS_INSTALL)
-	cp -fr HYPRE_usr_manual    $(HYPRE_DOCS_INSTALL)/.
-	cp -f  HYPRE_usr_manual.ps $(HYPRE_DOCS_INSTALL)/.
-	cp -fr HYPRE_ref_manual    $(HYPRE_DOCS_INSTALL)/.
-	cp -f  HYPRE_ref_manual.ps $(HYPRE_DOCS_INSTALL)/.
-	cp -fr HYPRE_ref_manual    $(HYPRE_DOCS_INSTALL)/.
-	cp -f  HYPRE_ref_manual.ps $(HYPRE_DOCS_INSTALL)/.
-	cp -f  V[1-9]* $(HYPRE_DOCS_INSTALL)/.
+install: all
 
 clean:
 	rm -f *.aux *.bbl *.blg *.dvi *.log *.dlog *.toc
