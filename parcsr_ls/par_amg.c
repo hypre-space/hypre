@@ -82,7 +82,7 @@ hypre_BoomerAMGCreate()
    strong_threshold = 0.25;
    max_row_sum = 0.9;
    trunc_factor = 0.0;
-   S_commpkg_switch = 0.05;
+   S_commpkg_switch = 1.0;
    interp_type = 200;
    coarsen_type = 6;
    measure_type = 0;
