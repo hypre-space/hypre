@@ -8,7 +8,6 @@
 
 #include "utilities.h"
 #include "krylov.h"
-#include "struct_ls.h"
 #include "sstruct_mv.h"
 
 #ifdef __cplusplus
@@ -44,6 +43,8 @@ int HYPRE_SStructPCGSetPrecond( HYPRE_SStructSolver solver , HYPRE_PtrToSStructS
 int HYPRE_SStructPCGSetLogging( HYPRE_SStructSolver solver , int logging );
 int HYPRE_SStructPCGGetNumIterations( HYPRE_SStructSolver solver , int *num_iterations );
 int HYPRE_SStructPCGGetFinalRelativeResidualNorm( HYPRE_SStructSolver solver , double *norm );
+int HYPRE_SStructDiagScaleSetup( HYPRE_SStructSolver solver , HYPRE_SStructMatrix A , HYPRE_SStructVector y , HYPRE_SStructVector x );
+int HYPRE_SStructDiagScale( HYPRE_SStructSolver solver , HYPRE_SStructMatrix A , HYPRE_SStructVector y , HYPRE_SStructVector x );
 
 /* HYPRE_sstruct_split.c */
 int HYPRE_SStructSplitCreate( MPI_Comm comm , HYPRE_SStructSolver *solver_ptr );

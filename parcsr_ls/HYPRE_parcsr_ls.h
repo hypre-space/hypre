@@ -748,9 +748,9 @@ int HYPRE_ParCSRPCGGetPrecond(HYPRE_Solver  solver,
                               HYPRE_Solver *precond_data);
 
 /**
- * (Optional) Set the amount of logging to do.
+ * (Optional) Set the amount of print logging to do.
  **/
-int HYPRE_ParCSRPCGSetLogging(HYPRE_Solver solver,
+int HYPRE_ParCSRPCGSetPrintLevel(HYPRE_Solver solver,
                               int          logging);
 
 /**

@@ -15,6 +15,42 @@ extern "C" {
 #endif
 
 
+/* coarsen.c */
+int hypre_StructMapFineToCoarse( hypre_Index findex , hypre_Index index , hypre_Index stride , hypre_Index cindex );
+int hypre_StructMapCoarseToFine( hypre_Index cindex , hypre_Index index , hypre_Index stride , hypre_Index findex );
+int hypre_StructCoarsen( hypre_StructGrid *fgrid , hypre_Index index , hypre_Index stride , int prune , hypre_StructGrid **cgrid_ptr );
+int hypre_StructCoarsen( hypre_StructGrid *fgrid , hypre_Index index , hypre_Index stride , int prune , hypre_StructGrid **cgrid_ptr );
+
+/* cyclic_reduction.c */
+void *hypre_CyclicReductionCreate( MPI_Comm comm );
+hypre_StructMatrix *hypre_CycRedCreateCoarseOp( hypre_StructMatrix *A , hypre_StructGrid *coarse_grid , int cdir );
+int hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A , hypre_StructMatrix *Ac , hypre_Index cindex , hypre_Index cstride );
+int hypre_CyclicReductionSetup( void *cyc_red_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x );
+int hypre_CyclicReduction( void *cyc_red_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x );
+int hypre_CyclicReductionSetBase( void *cyc_red_vdata , hypre_Index base_index , hypre_Index base_stride );
+int hypre_CyclicReductionDestroy( void *cyc_red_vdata );
+
+/* general.c */
+int hypre_Log2( int p );
+
+/* hybrid.c */
+void *hypre_HybridCreate( MPI_Comm comm );
+int hypre_HybridDestroy( void *hybrid_vdata );
+int hypre_HybridSetTol( void *hybrid_vdata , double tol );
+int hypre_HybridSetConvergenceTol( void *hybrid_vdata , double cf_tol );
+int hypre_HybridSetDSCGMaxIter( void *hybrid_vdata , int dscg_max_its );
+int hypre_HybridSetPCGMaxIter( void *hybrid_vdata , int pcg_max_its );
+int hypre_HybridSetTwoNorm( void *hybrid_vdata , int two_norm );
+int hypre_HybridSetRelChange( void *hybrid_vdata , int rel_change );
+int hypre_HybridSetPrecond( void *pcg_vdata , int (*pcg_precond_solve )(), int (*pcg_precond_setup )(), void *pcg_precond );
+int hypre_HybridSetLogging( void *hybrid_vdata , int logging );
+int hypre_HybridGetNumIterations( void *hybrid_vdata , int *num_its );
+int hypre_HybridGetDSCGNumIterations( void *hybrid_vdata , int *dscg_num_its );
+int hypre_HybridGetPCGNumIterations( void *hybrid_vdata , int *pcg_num_its );
+int hypre_HybridGetFinalRelativeResidualNorm( void *hybrid_vdata , double *final_rel_res_norm );
+int hypre_HybridSetup( void *hybrid_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x );
+int hypre_HybridSolve( void *hybrid_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x );
+
 /* HYPRE_struct_gmres.c */
 int HYPRE_StructGMRESCreate( MPI_Comm comm , HYPRE_StructSolver *solver );
 int HYPRE_StructGMRESDestroy( HYPRE_StructSolver solver );
@@ -128,42 +164,6 @@ int HYPRE_StructSparseMSGSetLogging( HYPRE_StructSolver solver , int logging );
 int HYPRE_StructSparseMSGGetNumIterations( HYPRE_StructSolver solver , int *num_iterations );
 int HYPRE_StructSparseMSGGetFinalRelativeResidualNorm( HYPRE_StructSolver solver , double *norm );
 
-/* coarsen.c */
-int hypre_StructMapFineToCoarse( hypre_Index findex , hypre_Index index , hypre_Index stride , hypre_Index cindex );
-int hypre_StructMapCoarseToFine( hypre_Index cindex , hypre_Index index , hypre_Index stride , hypre_Index findex );
-int hypre_StructCoarsen( hypre_StructGrid *fgrid , hypre_Index index , hypre_Index stride , int prune , hypre_StructGrid **cgrid_ptr );
-int hypre_StructCoarsen( hypre_StructGrid *fgrid , hypre_Index index , hypre_Index stride , int prune , hypre_StructGrid **cgrid_ptr );
-
-/* cyclic_reduction.c */
-void *hypre_CyclicReductionCreate( MPI_Comm comm );
-hypre_StructMatrix *hypre_CycRedCreateCoarseOp( hypre_StructMatrix *A , hypre_StructGrid *coarse_grid , int cdir );
-int hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A , hypre_StructMatrix *Ac , hypre_Index cindex , hypre_Index cstride );
-int hypre_CyclicReductionSetup( void *cyc_red_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x );
-int hypre_CyclicReduction( void *cyc_red_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x );
-int hypre_CyclicReductionSetBase( void *cyc_red_vdata , hypre_Index base_index , hypre_Index base_stride );
-int hypre_CyclicReductionDestroy( void *cyc_red_vdata );
-
-/* general.c */
-int hypre_Log2( int p );
-
-/* hybrid.c */
-void *hypre_HybridCreate( MPI_Comm comm );
-int hypre_HybridDestroy( void *hybrid_vdata );
-int hypre_HybridSetTol( void *hybrid_vdata , double tol );
-int hypre_HybridSetConvergenceTol( void *hybrid_vdata , double cf_tol );
-int hypre_HybridSetDSCGMaxIter( void *hybrid_vdata , int dscg_max_its );
-int hypre_HybridSetPCGMaxIter( void *hybrid_vdata , int pcg_max_its );
-int hypre_HybridSetTwoNorm( void *hybrid_vdata , int two_norm );
-int hypre_HybridSetRelChange( void *hybrid_vdata , int rel_change );
-int hypre_HybridSetPrecond( void *pcg_vdata , int (*pcg_precond_solve )(), int (*pcg_precond_setup )(), void *pcg_precond );
-int hypre_HybridSetLogging( void *hybrid_vdata , int logging );
-int hypre_HybridGetNumIterations( void *hybrid_vdata , int *num_its );
-int hypre_HybridGetDSCGNumIterations( void *hybrid_vdata , int *dscg_num_its );
-int hypre_HybridGetPCGNumIterations( void *hybrid_vdata , int *pcg_num_its );
-int hypre_HybridGetFinalRelativeResidualNorm( void *hybrid_vdata , double *final_rel_res_norm );
-int hypre_HybridSetup( void *hybrid_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x );
-int hypre_HybridSolve( void *hybrid_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x );
-
 /* jacobi.c */
 void *hypre_JacobiCreate( MPI_Comm comm );
 int hypre_JacobiDestroy( void *jacobi_vdata );
@@ -192,6 +192,16 @@ int hypre_StructKrylovIdentitySetup( void *vdata , void *A , void *b , void *x )
 int hypre_StructKrylovIdentity( void *vdata , void *A , void *b , void *x );
 int hypre_StructKrylovCommInfo( void *A , int *my_id , int *num_procs );
 
+/* pfmg2_setup_rap.c */
+hypre_StructMatrix *hypre_PFMG2CreateRAPOp( hypre_StructMatrix *R , hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructGrid *coarse_grid , int cdir );
+int hypre_PFMG2BuildRAPSym( hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix *R , int cdir , hypre_Index cindex , hypre_Index cstride , hypre_StructMatrix *RAP );
+int hypre_PFMG2BuildRAPNoSym( hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix *R , int cdir , hypre_Index cindex , hypre_Index cstride , hypre_StructMatrix *RAP );
+
+/* pfmg3_setup_rap.c */
+hypre_StructMatrix *hypre_PFMG3CreateRAPOp( hypre_StructMatrix *R , hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructGrid *coarse_grid , int cdir );
+int hypre_PFMG3BuildRAPSym( hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix *R , int cdir , hypre_Index cindex , hypre_Index cstride , hypre_StructMatrix *RAP );
+int hypre_PFMG3BuildRAPNoSym( hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix *R , int cdir , hypre_Index cindex , hypre_Index cstride , hypre_StructMatrix *RAP );
+
 /* pfmg.c */
 void *hypre_PFMGCreate( MPI_Comm comm );
 int hypre_PFMGDestroy( void *pfmg_vdata );
@@ -208,16 +218,6 @@ int hypre_PFMGSetLogging( void *pfmg_vdata , int logging );
 int hypre_PFMGGetNumIterations( void *pfmg_vdata , int *num_iterations );
 int hypre_PFMGPrintLogging( void *pfmg_vdata , int myid );
 int hypre_PFMGGetFinalRelativeResidualNorm( void *pfmg_vdata , double *relative_residual_norm );
-
-/* pfmg2_setup_rap.c */
-hypre_StructMatrix *hypre_PFMG2CreateRAPOp( hypre_StructMatrix *R , hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructGrid *coarse_grid , int cdir );
-int hypre_PFMG2BuildRAPSym( hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix *R , int cdir , hypre_Index cindex , hypre_Index cstride , hypre_StructMatrix *RAP );
-int hypre_PFMG2BuildRAPNoSym( hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix *R , int cdir , hypre_Index cindex , hypre_Index cstride , hypre_StructMatrix *RAP );
-
-/* pfmg3_setup_rap.c */
-hypre_StructMatrix *hypre_PFMG3CreateRAPOp( hypre_StructMatrix *R , hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructGrid *coarse_grid , int cdir );
-int hypre_PFMG3BuildRAPSym( hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix *R , int cdir , hypre_Index cindex , hypre_Index cstride , hypre_StructMatrix *RAP );
-int hypre_PFMG3BuildRAPNoSym( hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix *R , int cdir , hypre_Index cindex , hypre_Index cstride , hypre_StructMatrix *RAP );
 
 /* pfmg_relax.c */
 void *hypre_PFMGRelaxCreate( MPI_Comm comm );
@@ -277,23 +277,6 @@ int hypre_SemiRestrictDestroy( void *restrict_vdata );
 hypre_StructMatrix *hypre_SemiCreateRAPOp( hypre_StructMatrix *R , hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructGrid *coarse_grid , int cdir , int P_stored_as_transpose );
 int hypre_SemiBuildRAP( hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix *R , int cdir , hypre_Index cindex , hypre_Index cstride , int P_stored_as_transpose , hypre_StructMatrix *RAP );
 
-/* smg.c */
-void *hypre_SMGCreate( MPI_Comm comm );
-int hypre_SMGDestroy( void *smg_vdata );
-int hypre_SMGSetMemoryUse( void *smg_vdata , int memory_use );
-int hypre_SMGSetTol( void *smg_vdata , double tol );
-int hypre_SMGSetMaxIter( void *smg_vdata , int max_iter );
-int hypre_SMGSetRelChange( void *smg_vdata , int rel_change );
-int hypre_SMGSetZeroGuess( void *smg_vdata , int zero_guess );
-int hypre_SMGSetNumPreRelax( void *smg_vdata , int num_pre_relax );
-int hypre_SMGSetNumPostRelax( void *smg_vdata , int num_post_relax );
-int hypre_SMGSetBase( void *smg_vdata , hypre_Index base_index , hypre_Index base_stride );
-int hypre_SMGSetLogging( void *smg_vdata , int logging );
-int hypre_SMGGetNumIterations( void *smg_vdata , int *num_iterations );
-int hypre_SMGPrintLogging( void *smg_vdata , int myid );
-int hypre_SMGGetFinalRelativeResidualNorm( void *smg_vdata , double *relative_residual_norm );
-int hypre_SMGSetStructVectorConstantValues( hypre_StructVector *vector , double values , hypre_BoxArray *box_array , hypre_Index stride );
-
 /* smg2_setup_rap.c */
 hypre_StructMatrix *hypre_SMG2CreateRAPOp( hypre_StructMatrix *R , hypre_StructMatrix *A , hypre_StructMatrix *PT , hypre_StructGrid *coarse_grid );
 int hypre_SMG2BuildRAPSym( hypre_StructMatrix *A , hypre_StructMatrix *PT , hypre_StructMatrix *R , hypre_StructMatrix *RAP , hypre_Index cindex , hypre_Index cstride );
@@ -310,6 +293,23 @@ int hypre_SMG3RAPPeriodicNoSym( hypre_StructMatrix *RAP , hypre_Index cindex , h
 
 /* smg_axpy.c */
 int hypre_SMGAxpy( double alpha , hypre_StructVector *x , hypre_StructVector *y , hypre_Index base_index , hypre_Index base_stride );
+
+/* smg.c */
+void *hypre_SMGCreate( MPI_Comm comm );
+int hypre_SMGDestroy( void *smg_vdata );
+int hypre_SMGSetMemoryUse( void *smg_vdata , int memory_use );
+int hypre_SMGSetTol( void *smg_vdata , double tol );
+int hypre_SMGSetMaxIter( void *smg_vdata , int max_iter );
+int hypre_SMGSetRelChange( void *smg_vdata , int rel_change );
+int hypre_SMGSetZeroGuess( void *smg_vdata , int zero_guess );
+int hypre_SMGSetNumPreRelax( void *smg_vdata , int num_pre_relax );
+int hypre_SMGSetNumPostRelax( void *smg_vdata , int num_post_relax );
+int hypre_SMGSetBase( void *smg_vdata , hypre_Index base_index , hypre_Index base_stride );
+int hypre_SMGSetLogging( void *smg_vdata , int logging );
+int hypre_SMGGetNumIterations( void *smg_vdata , int *num_iterations );
+int hypre_SMGPrintLogging( void *smg_vdata , int myid );
+int hypre_SMGGetFinalRelativeResidualNorm( void *smg_vdata , double *relative_residual_norm );
+int hypre_SMGSetStructVectorConstantValues( hypre_StructVector *vector , double values , hypre_BoxArray *box_array , hypre_Index stride );
 
 /* smg_relax.c */
 void *hypre_SMGRelaxCreate( MPI_Comm comm );
@@ -371,6 +371,16 @@ int hypre_SMGSetupRestrictOp( hypre_StructMatrix *A , hypre_StructMatrix *R , hy
 /* smg_solve.c */
 int hypre_SMGSolve( void *smg_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x );
 
+/* sparse_msg2_setup_rap.c */
+hypre_StructMatrix *hypre_SparseMSG2CreateRAPOp( hypre_StructMatrix *R , hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructGrid *coarse_grid , int cdir );
+int hypre_SparseMSG2BuildRAPSym( hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix *R , int cdir , hypre_Index cindex , hypre_Index cstride , hypre_Index stridePR , hypre_StructMatrix *RAP );
+int hypre_SparseMSG2BuildRAPNoSym( hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix *R , int cdir , hypre_Index cindex , hypre_Index cstride , hypre_Index stridePR , hypre_StructMatrix *RAP );
+
+/* sparse_msg3_setup_rap.c */
+hypre_StructMatrix *hypre_SparseMSG3CreateRAPOp( hypre_StructMatrix *R , hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructGrid *coarse_grid , int cdir );
+int hypre_SparseMSG3BuildRAPSym( hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix *R , int cdir , hypre_Index cindex , hypre_Index cstride , hypre_Index stridePR , hypre_StructMatrix *RAP );
+int hypre_SparseMSG3BuildRAPNoSym( hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix *R , int cdir , hypre_Index cindex , hypre_Index cstride , hypre_Index stridePR , hypre_StructMatrix *RAP );
+
 /* sparse_msg.c */
 void *hypre_SparseMSGCreate( MPI_Comm comm );
 int hypre_SparseMSGDestroy( void *smsg_vdata );
@@ -387,16 +397,6 @@ int hypre_SparseMSGSetLogging( void *smsg_vdata , int logging );
 int hypre_SparseMSGGetNumIterations( void *smsg_vdata , int *num_iterations );
 int hypre_SparseMSGPrintLogging( void *smsg_vdata , int myid );
 int hypre_SparseMSGGetFinalRelativeResidualNorm( void *smsg_vdata , double *relative_residual_norm );
-
-/* sparse_msg2_setup_rap.c */
-hypre_StructMatrix *hypre_SparseMSG2CreateRAPOp( hypre_StructMatrix *R , hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructGrid *coarse_grid , int cdir );
-int hypre_SparseMSG2BuildRAPSym( hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix *R , int cdir , hypre_Index cindex , hypre_Index cstride , hypre_Index stridePR , hypre_StructMatrix *RAP );
-int hypre_SparseMSG2BuildRAPNoSym( hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix *R , int cdir , hypre_Index cindex , hypre_Index cstride , hypre_Index stridePR , hypre_StructMatrix *RAP );
-
-/* sparse_msg3_setup_rap.c */
-hypre_StructMatrix *hypre_SparseMSG3CreateRAPOp( hypre_StructMatrix *R , hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructGrid *coarse_grid , int cdir );
-int hypre_SparseMSG3BuildRAPSym( hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix *R , int cdir , hypre_Index cindex , hypre_Index cstride , hypre_Index stridePR , hypre_StructMatrix *RAP );
-int hypre_SparseMSG3BuildRAPNoSym( hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix *R , int cdir , hypre_Index cindex , hypre_Index cstride , hypre_Index stridePR , hypre_StructMatrix *RAP );
 
 /* sparse_msg_filter.c */
 int hypre_SparseMSGFilterSetup( hypre_StructMatrix *A , int *num_grids , int lx , int ly , int lz , int jump , hypre_StructVector *visitx , hypre_StructVector *visity , hypre_StructVector *visitz );

@@ -297,7 +297,7 @@ int
 HYPRE_StructPCGSetLogging( HYPRE_StructSolver solver,
                            int                logging )
 {
-   return( HYPRE_PCGSetLogging( (HYPRE_Solver) solver, logging ) );
+   return( HYPRE_PCGSetPrintLevel( (HYPRE_Solver) solver, logging ) );
 }
 
 /*==========================================================================*/

@@ -376,7 +376,7 @@ hypre_HybridSolve( void               *hybrid_vdata,
    hypre_PCGSetConvergenceFactorTol(pcg_solver, cf_tol);
    hypre_PCGSetTwoNorm(pcg_solver, two_norm);
    hypre_PCGSetRelChange(pcg_solver, rel_change);
-   hypre_PCGSetLogging(pcg_solver, 1);
+   hypre_PCGSetPrintLevel(pcg_solver, 1);
 
    pcg_precond = NULL;
 
@@ -446,7 +446,7 @@ hypre_HybridSolve( void               *hybrid_vdata,
       hypre_PCGSetTol(pcg_solver, tol);
       hypre_PCGSetTwoNorm(pcg_solver, two_norm);
       hypre_PCGSetRelChange(pcg_solver, rel_change);
-      hypre_PCGSetLogging(pcg_solver, 1);
+      hypre_PCGSetPrintLevel(pcg_solver, 1);
 
       /* Setup preconditioner */
       if (pcg_default)
