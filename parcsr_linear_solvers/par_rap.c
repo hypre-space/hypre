@@ -1063,6 +1063,11 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
    	RAP_offd_j    = hypre_CTAlloc(int, RAP_offd_size);
    } 
 
+   if (RAP_offd_size == 0 && num_cols_offd_RAP != 0)
+   {
+      num_cols_offd_RAP = 0;
+      hypre_TFree(col_map_offd_RAP);
+   }
    /*-----------------------------------------------------------------------
     *  Second Pass: Fill in RAP_diag_data and RAP_diag_j.
     *  Second Pass: Fill in RAP_offd_data and RAP_offd_j.
