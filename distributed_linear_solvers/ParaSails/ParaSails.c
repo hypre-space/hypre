@@ -25,7 +25,7 @@
 #include "OrderStat.h"
 #include "ParaSails.h"
 
-#ifdef AIX
+#ifdef HYPRE_RS6000
 #include <essl.h>
 #endif
 
@@ -590,12 +590,14 @@ static void ConstructPatternForEachRow(PrunedRows *pruned_rows,
         cost += j*j*j; /* long may be only 4 bytes on blue */
     }
 
+#ifdef PARASAILS_TIME
     {
     int mype;
     MPI_Comm_rank(MPI_COMM_WORLD, &mype);
     printf("%d: nnz: %10d  ********* cost %20ld\n", mype, nnz, cost);
     fflush(NULL);
     }
+#endif
 
     RowPattDestroy(row_patt);
     free(marker);
@@ -616,7 +618,7 @@ static void ComputeValues(StoredRows *stored_rows, Matrix *mat)
 
     int inserted;
 
-#ifndef AIX
+#ifndef HYPRE_RS6000
     char uplo = 'L';
     int one = 1;
     int info;
@@ -650,7 +652,7 @@ static void ComputeValues(StoredRows *stored_rows, Matrix *mat)
     index = (int *) malloc((4*maxlen+1) * sizeof(int));
     local = (int *) malloc((4*maxlen+1) * sizeof(int));
 
-#ifdef AIX
+#ifdef HYPRE_RS6000
     ahat = (double *) malloc(maxlen*(maxlen+1)/2 * sizeof(double));
 #else
     ahat = (double *) malloc(maxlen*maxlen * sizeof(double));
@@ -670,7 +672,7 @@ static void ComputeValues(StoredRows *stored_rows, Matrix *mat)
 	}
 
 	/* Initialize ahat to zero */
-#ifdef AIX
+#ifdef HYPRE_RS6000
         bzero(ahat, len*(len+1)/2 * sizeof(double));
 #else
         bzero(ahat, len*len * sizeof(double));
@@ -683,7 +685,7 @@ static void ComputeValues(StoredRows *stored_rows, Matrix *mat)
         for (i=0; i<len; i++)
         {
             StoredRowsGet(stored_rows, ind[i], &len2, &ind2, &val2);
-#ifdef AIX
+#ifdef HYPRE_RS6000
             for (j=0; j<len2; j++)
             {
                 loc = HashLookup(hash, ind2[j]);
@@ -726,7 +728,7 @@ static void ComputeValues(StoredRows *stored_rows, Matrix *mat)
         val[local[loc]] = 1.0;
 
         time0 = MPI_Wtime();
-#ifdef AIX
+#ifdef HYPRE_RS6000
         dppf(ahat, len, 1);
         dpps(ahat, len, val, 1);
 #else
@@ -768,12 +770,14 @@ static void ComputeValues(StoredRows *stored_rows, Matrix *mat)
     free(index);
     free(ahat);
 
+#ifdef PARASAILS_TIME
     {
     int mype;
     MPI_Comm_rank(MPI_COMM_WORLD, &mype);
     printf("%d: Time for ahat: %f, for local solves: %f\n", mype, timea, timet);
     fflush(NULL);
     }
+#endif
 }
 
 /******************************************************************************
@@ -829,19 +833,25 @@ void ParaSailsSetupPattern(ParaSails *ps, double thresh, int num_levels)
     ps->pruned_rows = PrunedRowsCreate(ps->A, ps->max_num_external_rows, 
         ps->diag_scale, ps->thresh);
     time1 = MPI_Wtime();
+#ifdef PARASAILS_TIME
     printf("%d: Time for creating pruned rows: %f\n", mype, time1-time0);
+#endif
 
     time0 = MPI_Wtime();
     ExchangePrunedRows(ps->A->comm, ps->A, ps->pruned_rows, ps->num_levels);
     time1 = MPI_Wtime();
+#ifdef PARASAILS_TIME
     printf("%d: Time for exchanging pruned rows: %f\n", mype, time1-time0);
+#endif
 
     /* set structure in approx inverse */
     time0 = MPI_Wtime();
     ConstructPatternForEachRow(ps->pruned_rows, ps->num_levels, ps->M,
 	&ps->num_replies);
     time1 = MPI_Wtime();
+#ifdef PARASAILS_TIME
     printf("%d: Time cons patt each for each row: %f\n", mype, time1-time0);
+#endif
 }
 
 void ParaSailsSetupValues(ParaSails *ps, Matrix *A)
@@ -858,12 +868,16 @@ void ParaSailsSetupValues(ParaSails *ps, Matrix *A)
     time0 = MPI_Wtime();
     ExchangeStoredRows(ps->A->comm, A, ps->M, ps->stored_rows, ps->num_replies);
     time1 = MPI_Wtime();
+#ifdef PARASAILS_TIME
     printf("%d: Time for exchanging rows: %f\n", mype, time1-time0);
+#endif
 
     time0 = MPI_Wtime();
     ComputeValues(ps->stored_rows, ps->M);
     time1 = MPI_Wtime();
+#ifdef PARASAILS_TIME
     printf("%d: Time for computing values: %f\n", mype, time1-time0);
+#endif
 }
 
 void ParaSailsApply(ParaSails *ps, double *u, double *v)

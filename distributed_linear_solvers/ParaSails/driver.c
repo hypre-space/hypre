@@ -91,7 +91,6 @@ int main(int argc, char *argv[])
         printf("%d: Total time for it sol: %f\n", mype, time1-time0);
 
         MatrixMatvecComplete(A); /* convert matrix back to global numbering */
-        MatrixPrint(A, "Ax");
         ParaSailsDestroy(ps);
     }
 

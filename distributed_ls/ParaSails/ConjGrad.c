@@ -18,7 +18,7 @@
 #include "Matrix.h"
 #include "ParaSails.h"
 
-#ifdef AIX
+#ifdef HYPRE_RS6000
 #include <essl.h>
 #else
 double ddot_(int *, double *, int *, double *, int *);
@@ -31,7 +31,7 @@ static double InnerProd(int n, double *x, double *y, MPI_Comm comm)
 {
     double local_result, result;
 
-#ifdef AIX
+#ifdef HYPRE_RS6000
     local_result = ddot(n, x, 1, y, 1);
 #else
     int one = 1;
@@ -45,7 +45,7 @@ static double InnerProd(int n, double *x, double *y, MPI_Comm comm)
 
 static void CopyVector(int n, double *x, double *y)
 {
-#ifdef AIX
+#ifdef HYPRE_RS6000
     dcopy(n, x, 1, y, 1);
 #else
     int one = 1;
@@ -55,7 +55,7 @@ static void CopyVector(int n, double *x, double *y)
 
 static void ScaleVector(int n, double alpha, double *x)
 {
-#ifdef AIX
+#ifdef HYPRE_RS6000
     dscal(n, alpha, x, 1);
 #else
     int one = 1;
@@ -65,7 +65,7 @@ static void ScaleVector(int n, double alpha, double *x)
 
 static void Axpy(int n, double alpha, double *x, double *y)
 {
-#ifdef AIX
+#ifdef HYPRE_RS6000
     daxpy(n, alpha, x, 1, y, 1);
 #else
     int one = 1;
