@@ -17,6 +17,7 @@ c-----------------------------------------------------------------------
 
       integer             num_procs, myid
 
+      integer             comm
       integer             dim
       integer             nx, ny, nz
       integer             Px, Py, Pz
@@ -47,25 +48,16 @@ c     HYPRE_Solver        precond
       integer*8           solver
       integer*8           precond
 
-      integer             A_num_ghost(6)
-
-      integer             iupper(3,MAXBLKS), ilower(3,MAXBLKS)
-
-      integer             istart(3)
-
       integer             offsets(3,MAXDIM+1)
 
-      integer             stencil_indices(MAXDIM+1)
-      double precision    values((MAXDIM+1)*MAXZONS)
+      double precision    values(3)
 
       integer             p, q, r
-      integer             nblocks, volume
 
       integer             i, s, d
       integer             ix, iy, iz, ib
       integer             ierr
 
-      data A_num_ghost   / 0, 0, 0, 0, 0, 0 /
       data zero          / 0 /
       data one           / 1 /
 
@@ -77,7 +69,6 @@ c-----------------------------------------------------------------------
 
       call MPI_COMM_RANK(MPI_COMM_WORLD, myid, ierr)
       call MPI_COMM_SIZE(MPI_COMM_WORLD, num_procs, ierr)
-
 
 c-----------------------------------------------------------------------
 c     Set defaults
@@ -105,10 +96,6 @@ c-----------------------------------------------------------------------
       n_post = 1
 
       solver_id = 0
-
-      istart(1) = -3
-      istart(2) = -3
-      istart(3) = -3
 
 c-----------------------------------------------------------------------
 c     Read options
@@ -163,25 +150,16 @@ c-----------------------------------------------------------------------
 
       if (dim .eq. 1) then
 
-         volume  = nx
-         nblocks = bx
-
 c        compute p from Px and myid
          p = mod(myid,Px)
 
       elseif (dim .eq. 2) then
-
-         volume  = nx*ny
-         nblocks = bx*by
 
 c        compute p,q from Px, Py and myid
          p = mod(myid,Px)
          q = mod(((myid - p)/Px),Py)
 
       elseif (dim .eq. 3) then
-
-         volume  = nx*ny*nz
-         nblocks = bx*by*bz
 
 c        compute p,q,r from Px,Py,Pz and myid
          p = mod(myid,Px)
@@ -191,129 +169,37 @@ c        compute p,q,r from Px,Py,Pz and myid
       endif
 
 c----------------------------------------------------------------------
-c    Compute ilower and iupper from (p,q,r), (bx,by,bz), and (nx,ny,nz)
-c    and set up the grid structure.
-c----------------------------------------------------------------------
-
-      ib = 1
-      if (dim .eq. 1) then
-
-         do ix=0,bx-1
-            ilower(1,ib) = istart(1) + nx*(bx*p+ix)
-            iupper(1,ib) = istart(1) + nx*(bx*p+ix+1)-1
-            ib = ib + 1
-         enddo
-
-      elseif (dim .eq. 2) then
-
-         do iy=0,by-1
-            do ix=0,bx-1
-               ilower(1,ib) = istart(1) + nx*(bx*p+ix)
-               iupper(1,ib) = istart(1) + nx*(bx*p+ix+1)-1
-               ilower(2,ib) = istart(2) + ny*(by*q+iy)
-               iupper(2,ib) = istart(2) + ny*(by*q+iy+1)-1
-               ib = ib + 1
-            enddo
-         enddo
-
-      elseif (dim .eq. 3) then
-
-         do iz=0,bz-1
-            do iy=0,by-1
-               do ix=0,bx-1
-                  ilower(1,ib) = istart(1) + nx*(bx*p+ix)
-                  iupper(1,ib) = istart(1) + nx*(bx*p+ix+1)-1
-                  ilower(2,ib) = istart(2) + ny*(by*q+iy)
-                  iupper(2,ib) = istart(2) + ny*(by*q+iy+1)-1
-                  ilower(3,ib) = istart(3) + nz*(bz*r+iz)
-                  iupper(3,ib) = istart(3) + nz*(bz*r+iz+1)-1
-                  ib = ib + 1
-               enddo
-            enddo
-         enddo
-
-      endif 
-
-c----------------------------------------------------------------------
-c     Compute the offsets and set up the stencil structure.
-c----------------------------------------------------------------------
-
-      if (dim .eq. 1) then
-
-         offsets(1,1) = -1
-         offsets(1,2) =  0
-
-      elseif (dim .eq. 2) then
-
-         offsets(1,1) = -1
-         offsets(2,1) =  0 
-         offsets(1,2) =  0
-         offsets(2,2) = -1 
-         offsets(1,3) =  0
-         offsets(2,3) =  0
-
-      elseif (dim .eq. 3) then
-
-         offsets(1,1) = -1
-         offsets(2,1) =  0
-         offsets(3,1) =  0
-         offsets(1,2) =  0
-         offsets(2,2) = -1
-         offsets(3,2) =  0 
-         offsets(1,3) =  0
-         offsets(2,3) =  0
-         offsets(3,3) = -1
-         offsets(1,4) =  0
-         offsets(2,4) =  0
-         offsets(3,4) =  0
-
-      endif
- 
-c-----------------------------------------------------------------------
-c     Set up the matrix structure
+c     Set up the matrix
 c-----------------------------------------------------------------------
 
-      call HYPRE_NewParCSRMatrix(MPI_COMM_WORLD, gnrows, gncols,
-     &   rstarts, cstarts, ncoloffdg, nonzsdg, nonzsoffdg, A, ierr)
+      call hypre_GenerateLaplacian(comm, nx, ny, nz, Px, Py, Pz,
+                                   p, q, r, values, A, ierr)
 
-      call HYPRE_InitializeParCSRMatrix(A, ierr)
+c     call HYPRE_NewParCSRMatrix(MPI_COMM_WORLD, gnrows, gncols,
+c    &   rstarts, cstarts, ncoloffdg, nonzsdg, nonzsoffdg, A, ierr)
+
+c     call HYPRE_InitializeParCSRMatrix(A, ierr)
 
 c-----------------------------------------------------------------------
 c     Set up the rhs and initial guess
 c-----------------------------------------------------------------------
 
-#if 0
-      call HYPRE_NewStructVector(MPI_COMM_WORLD, grid, stencil, b, ierr)
-      call HYPRE_InitializeStructVector(b, ierr)
-      do i=1,volume
-         values(i) = 1.0
-      enddo
-      do ib=1,nblocks
-         call HYPRE_SetStructVectorBoxValues(b, ilower(1,ib),
-     & iupper(1,ib), values, ierr)
-      enddo
-      call HYPRE_AssembleStructVector(b, ierr)
-c     call HYPRE_PrintStructVector("driver.out.b", b, zero, ierr)
+      values(1) = -cx
+      values(2) = -cy
+      values(3) = -cz
 
-      call HYPRE_NewStructVector(MPI_COMM_WORLD, grid, stencil, x, ierr)
-      call HYPRE_InitializeStructVector(x, ierr)
-      do i=1,volume
-         values(i) = 0.0
-      enddo
-      do ib=1,nblocks
-         call HYPRE_SetStructVectorBoxValues(x, ilower(1,ib),
-     & iupper(1,ib), values, ierr)
-      enddo
-      call HYPRE_AssembleStructVector(x, ierr)
-c     call HYPRE_PrintStructVector("driver.out.x0", x, zero, ierr)
-#endif
- 
-      call HYPRE_NewParVector(MPI_COMM_WORLD, gnrows, partitioning, b, ierr)
+      call HYPRE_NewParVector(MPI_COMM_WORLD, 
+                              hypre_ParCSRMatrixGlobalNumRows(A),
+                              hypre_ParCSRMatrixRowStarts(A), b, ierr)
+      call hypre_SetParVectorPartioningOwner(b, 0, ierr)
       call HYPRE_InitializeParVector(b, ierr)
+      call hypre_SetParVectorConstantValues(b, 0.0, ierr)
 c     call HYPRE_PrintParVector("driver.out.b", b, zero, ierr)
 
       call HYPRE_NewParVector(MPI_COMM_WORLD, gnrows, partitioning, x, ierr)
+      call hypre_SetParVectorPartioningOwner(b, 0, ierr)
       call HYPRE_InitializeParVector(x, ierr)
+      call hypre_SetParVectorConstantValues(x, 1.0, ierr)
 c     call HYPRE_PrintParVector("driver.out.x0", x, zero, ierr)
 
 c-----------------------------------------------------------------------
