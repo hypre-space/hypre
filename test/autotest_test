@@ -45,7 +45,7 @@ initialize_variables ()
 #
 # Define HYPRE_ARCH
 #
-. $StdTestDir/hypre_arch.sh
+  . $StdTestDir/hypre_arch.sh
   if test ! "$HYPRE_MAIL"
   then
     HYPRE_MAIL=mailx
@@ -100,7 +100,7 @@ parse_arguments () {
      +q) confbuildtest $OPTARG  "--with-purify" "purify"    0 0 0 1 0 1;;
       r) HYPRE_RUN_MACHINE=$OPTARG;;
       s) confbuildtest $Build   "--with-strict-checking" \
-                                         "strict_checking"  1 1 0 1 1 0;;
+                                         "strict_checking"  1 1 1 1 1 0;;
       t) confbuildtest $OPTARG "--with-pthreads" "pthreads" 1 0 0 0 0 0;;
       x) build $Build   "beta++" "beta++" "test";;
       y) build $Build   "beta77" "beta77" "test";;
@@ -185,7 +185,24 @@ mail_errors () {
 
 cleanup () { 
   umask $OldMask
-  echo "Autotest finished leaving $0"
+  echo "Autotest finished leaving $*"
+}
+#=============================================================================
+# General purpose make function /w strict_checking error output redirection
+#=============================================================================
+
+makeit ()
+{
+MakeOpt=$1	 MessageStr=$2
+MailStdGroup=$3	 MailOptGroup=$4
+$MAKE $MakeOpt 1> ${Hdr}.${MessageStr}.${MakeOpt}.log \
+        2> ${Hdr}.${MessageStr}.${MakeOpt}.err
+if [ "$MessageStr" = "strict_checking" ]
+then
+        echo "$MailOptGroup" > ${Hdr}.${MessageStr}.${MakeOpt}.err.email
+else
+        echo "$MailStdGroup" > ${Hdr}.${MessageStr}.${MakeOpt}.err.email
+fi
 }
 #=============================================================================
 # General purpose function for configure, make and execute
@@ -210,50 +227,27 @@ then
 
     if [ $StructOpt -ne $Skip ]
     then
-      $MAKE struct 1> ${Hdr}.${MessageStr}.struct.log \
-	2> ${Hdr}.${MessageStr}.struct.err
-      if [ $MessageStr -eq "strict_checking" ]
-      then
-        echo "$HYPRE_ALL_EMAIL" > ${Hdr}.${MessageStr}.struct.err.email
-      else
-        echo "$HYPRE_STRUCT_EMAIL" > ${Hdr}.${MessageStr}.struct.err.email
-      fi
+      makeit "struct" $MessageStr "$HYPRE_STRUCT_EMAIL" "$HYPRE_STRUCT_EMAIL"
     fi
 
     if [ $IJOpt -ne $Skip ]
     then
-      $MAKE IJ 1> ${Hdr}.${MessageStr}.IJ.log \
-	2> ${Hdr}.${MessageStr}.IJ.err
-      if [ $MessageStr -eq "strict_checking" ]
-      then
-        echo "$HYPRE_ALL_EMAIL" > ${Hdr}.${MessageStr}.IJ.err.email
-      else
-        echo "$HYPRE_IJ_EMAIL" > ${Hdr}.${MessageStr}.IJ.err.email
-      fi
+      makeit "IJ" $MessageStr "$HYPRE_IJ_EMAIL" "$HYPRE_IJ_EMAIL"
     fi
 
     if [ $FeiOpt -ne $Skip ]
     then
-      $MAKE fei 1> ${Hdr}.${MessageStr}.fei.log \
-	2> ${Hdr}.${MessageStr}.fei.err
-      echo "$HYPRE_FEI_EMAIL" > ${Hdr}.${MessageStr}.fei.err.email
+      makeit "fei" $MessageStr "$HYPRE_FEI_EMAIL" "$HYPRE_FEI_EMAIL"
     fi
 
     if [ $MakeOpt -ne $Skip ]
     then
-      $MAKE
+      makeit "all" $MessageStr "$HYPRE_BETA_EMAIL" "$HYPRE_ALL_EMAIL"
     fi
 
     if [ $BetaOpt -ne $Skip ]
     then
-      $MAKE beta 1> ${Hdr}.${MessageStr}.beta.log \
-	2> ${Hdr}.${MessageStr}.beta.err
-      if [ $MessageStr -eq "strict_checking" ]
-      then
-        echo "$HYPRE_ALL_EMAIL" > ${Hdr}.${MessageStr}.beta.err.email
-      else
-        echo "$HYPRE_BETA_EMAIL" > ${Hdr}.${MessageStr}.beta.err.email
-      fi
+      makeit "beta" $MessageStr "$HYPRE_BETA_EMAIL" "$HYPRE_ALL_EMAIL"
     fi
   fi
   if [ ${BuildOpt} -eq $Run ]
