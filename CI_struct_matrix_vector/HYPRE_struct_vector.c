@@ -28,6 +28,7 @@ HYPRE_StructInterfaceVectorCreate( MPI_Comm             context,
 	      hypre_NewStructInterfaceVector( context,
 				  (hypre_StructGrid *) grid,
 				  (hypre_StructStencil *) stencil );
+   return 0;
 }
 
 /*--------------------------------------------------------------------------
