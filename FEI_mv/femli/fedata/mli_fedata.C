@@ -81,7 +81,7 @@ int MLI_FEData::setSpaceDimension(int dimension)
       cout << "setSpaceDimension ERROR : dimension should be > 0 and <= 4.\n";
       exit(1);
    }
-   if (outputLevel_ >= 1) cout << "setSpaceDimension = " << dimension << endl;
+   if (outputLevel_ >= 1) printf("setSpaceDimension = %d\n", dimension);
    spaceDimension_ = dimension;
    return 1;
 }
@@ -97,7 +97,7 @@ int MLI_FEData::setOrderOfPDE(int pdeOrder)
       cout << "setOrderOfPDE ERROR : PDE order should be > 0 and <= 4.\n";
       exit(1);
    }
-   if ( outputLevel_ >= 1 ) cout << "setOrderOfPDE = " << pdeOrder << endl;
+   if (outputLevel_ >= 1) printf("setOrderOfPDE = %d\n", pdeOrder);
    orderOfPDE_ = pdeOrder;
    return 1;
 }
@@ -113,7 +113,7 @@ int MLI_FEData::setOrderOfFE(int feOrder)
       cout << "setOrderOfFE ERROR : order should be > 0 and <= 4.\n";
       exit(1);
    }
-   if ( outputLevel_ >= 1 ) cout << "setOrderOfFE = " << feOrder << endl;
+   if (outputLevel_ >= 1) printf("setOrderOfFE = %d\n", feOrder);
    orderOfFE_ = feOrder;
    return 1;
 }
@@ -129,8 +129,7 @@ int MLI_FEData::setCurrentElemBlockID(int blockID)
       cout << "setCurrentElemBlockID ERROR : blockID other than 0 invalid.\n";
       exit(1);
    }
-   if ( outputLevel_ >= 1 ) 
-      cout << "setCurrentElemBlockID = " << blockID << endl;
+   if ( outputLevel_ >= 1 ) printf("setCurrentElemBlockID = %d\n", blockID);
    currentElemBlock_ = blockID;
    return 1;
 }
@@ -152,10 +151,9 @@ int MLI_FEData::initFields(int nFields, const int *fieldSizes,
    MPI_Comm_rank(mpiComm_, &mypid);
    if ( outputLevel_ >= 1 && mypid == 0 )
    {
-      cout << "\tinitFields : number of fields = " << nFields << endl;
+      printf("\tinitFields : number of fields = %d\n", nFields);
       for ( int i = 0; i < nFields; i++ )
-         cout << "\t     fieldID and size = " << fieldIDs[i] << " " 
-              << fieldSizes[i] <<  endl;
+         printf("\t  fieldID and size = %d %d\n",fieldIDs[i],fieldSizes[i]);
    }
    numFields_ = nFields;
    if ( fieldSizes_ != NULL ) delete [] fieldSizes_;
@@ -199,9 +197,9 @@ int MLI_FEData::initElemBlock(int nElems, int nNodesPerElem,
    }
    if (outputLevel_ >= 1) 
    {
-      cout << "initElemBlock : nElems = " << nElems << endl;
-      cout << "initElemBlock : node nFields = " << nodeNumFields << endl;
-      cout << "initElemBlock : elem nFields = " << elemNumFields << endl;
+      printf("initElemBlock : nElems = %d\n", nElems);
+      printf("initElemBlock : node nFields = %d\n", nodeNumFields);
+      printf("initElemBlock : elem nFields = %d\n", elemNumFields);
    }
 
    // -------------------------------------------------------------
@@ -896,10 +894,10 @@ int MLI_FEData::initComplete()
                                             totalNodes);
             if ( index < 0 ) 
             {
-               cout << "initComplete ERROR : shared node not in elements.\n";
-               cout << "         " << sharedNodeIDs[i] << endl;
+               printf("initComplete ERROR : shared node not in elements.\n");
+               printf("         %d\n", sharedNodeIDs[i]);
                for ( k = 0; k < totalNodes; k++ )
-                  cout << " nodeArray = " << nodeArray[k] << endl;
+                  printf(" nodeArray = %d\n", nodeArray[k]);
                exit(1);
             }
             if ( nodeArrayAux[index] >= 0 )
@@ -1310,6 +1308,8 @@ int MLI_FEData::loadElemBlockNullSpaces(int nElems, const int *nNSpace,
    // -------------------------------------------------------------
    // --- initial checking
    // -------------------------------------------------------------
+
+   (void) sMatDim; 
 
    currBlock = elemBlockList_[currentElemBlock_];
    if ( nElems != currBlock->numLocalElems_ )

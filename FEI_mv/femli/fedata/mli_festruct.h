@@ -32,12 +32,12 @@ public :
    /** set diagnostics level 
        @param level - diagnostics level (0 or higher) 
    */
-   virtual int setOutputLevel(int level) {return -1;}
+   virtual int setOutputLevel(int level) {(void) level; return -1;}
 
    /** set space dimension 
        @param numDim - number of space dimension (3 for 3D)
    */
-   virtual int setSpaceDimension(int numDim) {return -1;}
+   virtual int setSpaceDimension(int numDim) {(void) numDim; return -1;}
 
    /** set order of PDE 
        @param pdeOrder - order of PDE (e.g. 2 for second order)
@@ -47,7 +47,7 @@ public :
    /** set order of finite element discretization 
        @param feOrder - order of FE discretization e.g. 2 for second order)
    */
-   virtual int setOrderOfFE(int feOrder) {return -1;}
+   virtual int setOrderOfFE(int feOrder) {(void) feOrder; return -1;}
 
    // =========================================================================
    // initialization functions 
@@ -57,7 +57,7 @@ public :
        @param blockID - choose blockID as current element block number 
                         (if not called, assume blockID=0)
    */
-   virtual int setCurrentElemBlockID(int blockID) {return -1;}
+   virtual int setCurrentElemBlockID(int blockID) {(void) blockID; return -1;}
 
    /** declare all field variables used in this context
        @param numFields  - total number of fields
@@ -108,7 +108,9 @@ public :
                                int *nGlobalIDs, 
                                const int *numProcs, 
                                const int * const *procLists) 
-                               {return -1;}
+                               {(void) nNodes; (void) nGlobalIDs;
+                                (void) numProcs; (void) procLists;
+                                return -1;}
 
    /** initialize the element face lists of all elements in local processors 
        in the same order as the globalIDs list given above
@@ -119,7 +121,8 @@ public :
    virtual int initElemBlockFaceLists(int nElems, 
                                       int nFaces, 
                                       const int* const *fGlobalIDLists) 
-                                      {return -1;}
+                                      {(void) nElems; (void) nFaces;
+                                       (void) fGlobalIDLists; return -1;}
 
    /** initialize node lists of all local faces 
        @param nFaces            - number of faces in local processor
@@ -131,7 +134,9 @@ public :
                                       const int *fGlobalIDs, 
                                       int nNodes, 
                                       const int * const *nGlobalIDLists) 
-                                      {return -1;}
+                                      {(void) nFaces; (void) fGlobalIDs;
+                                       (void) nNodes; (void) nGlobalIDLists;
+                                       return -1;}
 
    /** initialize a list of faces that are shared with other processors 
        @param nFaces - number of shared faces 
@@ -143,7 +148,9 @@ public :
                                const int *fGlobalIDs, 
                                const int *numProcs, 
                                const int* const *procLists) 
-                               {return -1;}
+                               {(void) nFaces; (void) fGlobalIDs;
+                                (void) numProcs; (void) procLists;
+                                return -1;}
 
    /** initialization complete
    */
@@ -166,7 +173,8 @@ public :
    virtual int loadElemBlockMatrices(int nElems, 
                                      int sMatDim, 
                                      const double* const *stiffMat) 
-                                     {return -1;}
+                                     {(void) nElems; (void) sMatDim;
+                                      (void) stiffMat; return -1;}
 
    /** Load null spaces of all elements in local processors in the same
        order as the globalIDs list given above
@@ -180,7 +188,9 @@ public :
                                        const int *nNSpace, 
                                        int sMatDim, 
                                        const double* const *nSpace) 
-                                       {return -1;}
+                                       {(void) nElems; (void) nNSpace;
+                                        (void) sMatDim; (void) nSpace;
+                                        return -1;}
 
    /** Load volumes of all elements in local processors in the same
        order as the globalIDs list given above
@@ -189,7 +199,8 @@ public :
    */
    virtual int loadElemBlockVolumes(int nElems, 
                                     const double *elemVols)  
-                                    {return -1;}
+                                    {(void) nElems; (void) elemVols;
+                                     return -1;}
 
    /** Load material type of all elements in local processors in the same
        order as the globalIDs list given above
@@ -198,7 +209,8 @@ public :
    */
    virtual int loadElemBlockMaterials(int nElems, 
                                       const int *elemMaterial)  
-                                      {return -1;}
+                                      {(void) nElems; (void) elemMaterial;
+                                       return -1;}
 
    /** Load the element parent IDs of all elements in local processors in the 
        same order as the globalIDs list given above
@@ -207,7 +219,8 @@ public :
    */
    virtual int loadElemBlockParentIDs(int nElems, 
                                       const int *pGlobalIDs) 
-                                      {return -1;}
+                                      {(void) nElems; (void) pGlobalIDs;
+                                       return -1;}
 
    /** Load the element loads (rhs) of all elements in local processors in the 
        same order as the globalIDs list given above
@@ -218,7 +231,8 @@ public :
    virtual int loadElemBlockLoads(int nElems, 
                                   int loadDim, 
                                   const double* const *elemLoads) 
-                                  {return -1;}
+                                  {(void) nElems; (void) loadDim;
+                                   (void) elemLoads; return -1;}
 
    /** Load the element initial guess of all elements in local processors in 
        the same order as the globalIDs list given above
@@ -229,7 +243,8 @@ public :
    virtual int loadElemBlockSolutions(int nElems, 
                                      int solDim,
                                      const double* const *elemSols) 
-                                     {return -1;}
+                                     {(void) nElems; (void) solDim;
+                                      (void) elemSols; return -1;}
 
    /** Load element boundary conditions 
        @param nElems     - number of elements having boundary conditions
@@ -262,7 +277,9 @@ public :
                               const int *nGlobalIDs, 
                               int sMatDim, 
                               const double *stiffMat) 
-                              {return -1;}
+                              {(void) eGlobalID; (void) nNodesPerElem; 
+                               (void) nGlobalIDs; (void) sMatDim; 
+                               (void) stiffMat; return -1;}
 
    /** Load element null space 
        @param eGlobalID - element global ID 
@@ -274,7 +291,9 @@ public :
                                  int nNSpace, 
                                  int sMatDim, 
                                  const double *nSpace) 
-                                 {return -1;}
+                                 {(void) eGlobalID; (void) nNSpace; 
+                                  (void) sMatDim; (void) nSpace; 
+                                  return -1;}
 
    /** load element load 
        @param eGlobalID - element global ID 
@@ -284,7 +303,8 @@ public :
    virtual int loadElemLoad(int eGlobalID, 
                             int sMatDim, 
                             const double *elemLoad)
-                            {return -1;}
+                            {(void) eGlobalID; (void) sMatDim;
+                             (void) elemLoad; return -1;}
 
    /** load element solution (initial guess) 
        @param eGlobalID - element global ID 
@@ -294,7 +314,8 @@ public :
    virtual int loadElemSolution(int eGlobalID, 
                                 int sMatDim, 
                                 const double *elemSol)
-                                {return -1;}
+                                {(void) eGlobalID; (void) sMatDim;
+                                 (void) elemSol; return -1;}
 
    /** load the function pointer to fetch element stiffness matrices 
        @param object - object to pass back to function to get element matrices
@@ -302,7 +323,7 @@ public :
    */
    virtual int loadFunc_getElemMatrix(void *object, 
                    int (*func) (int eGlobalID,int sMatDim,double *stiffMat)) 
-                   {return -1;}
+                   {(void) object; (void) func; return -1;}
 
    // =========================================================================
    // load node boundary conditions and share nodes
@@ -320,7 +341,9 @@ public :
                            int nodeDOF, 
                            const char *const *BCFlags, 
                            const double * const *bcVals) 
-                           {return -1;}
+                           {(void) nNodes; (void) nGlobalIDs; 
+                            (void) nodeDOF; (void) BCFlags;
+                            (void) bcVals; return -1;}
 
    // =========================================================================
    // get general information
@@ -329,17 +352,17 @@ public :
    /** Return the space dimension (2D or 3D) 
        @param (output) numDim - number of space dimension (3 for 3D)
    */
-   virtual int getSpaceDimension(int& numDim) {return -1;}
+   virtual int getSpaceDimension(int& numDim) {(void) numDim; return -1;}
 
    /** Return the order of the PDE 
        @param (output) pdeOrder - order of PDE (2 for 2nd order)
    */
-   virtual int getOrderOfPDE(int& pdeOrder) {return -1;}
+   virtual int getOrderOfPDE(int& pdeOrder) {(void) pdeOrder; return -1;}
 
    /** Return the order of the FE discretization 
        @param (output) feOrder - order of finite element discretization
    */
-   virtual int getOrderOfFE(int& feOrder) {return -1;}
+   virtual int getOrderOfFE(int& feOrder) {(void) feOrder; return -1;}
 
    /** Return the number of unknowns for a given field 
        @param (input)  fieldID   - field ID
@@ -347,7 +370,7 @@ public :
    */
    virtual int getFieldSize(int fieldID, 
                             int &fieldSize) 
-                            {return -1;}
+                            {(void) fieldID; (void) fieldSize; return -1;}
 
    // =========================================================================
    // get element information
@@ -357,13 +380,13 @@ public :
        @param (output) nElems - return the number of element in this block 
    */
    virtual int getNumElements(int& nElems) 
-                              {return -1;}
+                              {(void) nElems; return -1;}
 
    /** Return the number of fields in each element in this block
        @param (output) numFields - number of element fields in this block 
    */
    virtual int getElemNumFields(int& numFields) 
-                                {return -1;}
+                                {(void) numFields; return -1;}
 
    /** Return the field IDs for each element in this block
        @param (input)  numFields - number of element fields (checking)
@@ -371,7 +394,8 @@ public :
    */
    virtual int getElemFieldIDs(int numFields,
                                int *fieldIDs)
-                               {return -1;}
+                               {(void) numFields; (void) fieldIDs; 
+                                return -1;}
 
    // -------------------------------------------------------------------------
    // collective gets
@@ -384,13 +408,14 @@ public :
    */
    virtual int getElemBlockGlobalIDs(int nElems,
                                      int *eGlobalIDs) 
-                                     {return -1;}
+                                     {(void) nElems; (void) eGlobalIDs;
+                                      return -1;}
 
    /** Return the number of nodes for the elements in this block 
        @param (output) nNodes - number of nodes for each element upon return
    */
    virtual int getElemNumNodes(int& nNodes) 
-                               {return -1;}
+                               {(void) nNodes; return -1;}
 
    /** Return the globalIDs of nodes for elements with global IDs 
        given in the call to getElemGlobalIDs (same order) 
@@ -401,13 +426,14 @@ public :
    virtual int getElemBlockNodeLists(int nElems, 
                                     int nNodes, 
                                     int **nGlobalIDLists) 
-                                    {return -1;}
+                                    {(void) nElems; (void) nNodes; 
+                                     (void) nGlobalIDLists; return -1;}
 
    /** Return dimension of element matrix in this block
        @param (output) sMatDim - dimension of the element matrix 
    */
    virtual int getElemMatrixDim(int &sMatDim) 
-                                {return -1;}
+                                {(void) sMatDim; return -1;}
 
    /** Return element matrices for all elements in the block with global IDs
        given in the call to getElemGlobalIDs (same order) 
@@ -418,7 +444,8 @@ public :
    virtual int getElemBlockMatrices(int nElems, 
                                     int sMatDim, 
                                     double **elemMat) 
-                                    {return -1;}
+                                    {(void) nElems; (void) sMatDim; 
+                                     (void) elemMat; return -1;}
 
    /** Return the element null space sizes for elements with global IDs 
        given in the call to getElemGlobalIDs (same order) 
@@ -427,7 +454,8 @@ public :
    */
    virtual int getElemBlockNullSpaceSizes(int nElems, 
                                           int *dimsNS) 
-                                          {return -1;}
+                                          {(void) nElems; (void) dimsNS;
+                                           return -1;}
 
    /** Return the element null space for elements with global IDs 
        given in the call to getElemGlobalIDs (same order) 
@@ -440,7 +468,9 @@ public :
                                       const int *dimsNS, 
                                       int sMatDim, 
                                       double **nullSpaces) 
-                                      {return -1;}
+                                      {(void) nElems; (void) dimsNS;
+                                       (void) sMatDim; (void) nullSpaces;
+                                       return -1;}
 
    /** Return element volumes for elements given in the call to 
        getElemGlobalIDs (in the same order) 
@@ -449,7 +479,8 @@ public :
    */  
    virtual int getElemBlockVolumes(int nElems, 
                                    double *elemVols) 
-                                   {return -1;}
+                                   {(void) nElems; (void) elemVols;
+                                    return -1;}
 
    /** Return element materials for elements given in the call to 
        getElemGlobalIDs (in the same order) 
@@ -458,7 +489,8 @@ public :
    */  
    virtual int getElemBlockMaterials(int nElems, 
                                      int *elemMats) 
-                                     {return -1;}
+                                     {(void) nElems; (void) elemMats;
+                                      return -1;}
 
    /** Return the parent IDs of elements (global IDs) in the same order as
        the list obtained from a call to getElemGlobalIDs 
@@ -467,13 +499,14 @@ public :
    */
    virtual int getElemBlockParentIDs(int nElems, 
                                      int *pGlobalIDs) 
-                                     {return -1;}
+                                     {(void) nElems; (void) pGlobalIDs;
+                                      return -1;}
 
    /** Return the number of faces of each element in this block
        @param (output) nFaces - number of faces for elements in this block
    */
    virtual int getElemNumFaces(int& nFaces) 
-                               {return -1;}
+                               {(void) nFaces; return -1;}
 
    /** Return the face lists of the elements (global IDs) in the same
        order as the IDs obtained by a call to the getElemGlobalIDs 
@@ -484,7 +517,8 @@ public :
    virtual int getElemBlockFaceLists(int nElems, 
                                      int nFaces, 
                                      int **fGlobalIDLists) 
-                                     {return -1;}
+                                     {(void) nElems; (void) nFaces;
+                                      (void) fGlobalIDLists; return -1;}
 
    // -------------------------------------------------------------------------
    // individual (element) gets
@@ -498,7 +532,8 @@ public :
    virtual int getElemNodeList(int eGlobalID, 
                                int nNodes, 
                                int *nGlobalIDs) 
-                               {return -1;}
+                               {(void) eGlobalID; (void) nNodes;
+                                (void) nGlobalIDs; return -1;}
 
    /** Return an element stiffness matrix 
        @param (input)  eGlobalID - global ID of element 
@@ -508,7 +543,8 @@ public :
    virtual int getElemMatrix(int eGlobalID, 
                              int sMatDim, 
                              double *elemMat)
-                             {return -1;}
+                             {(void) eGlobalID; (void) sMatDim;
+                              (void) elemMat; return -1;}
 
    /** Return the element's null space size 
        @param (input)  eGlobalID - element global ID 
@@ -516,7 +552,8 @@ public :
    */ 
    virtual int getElemNullSpaceSize(int eGlobalID, 
                                     int &dimNS) 
-                                    {return -1;}
+                                    {(void) eGlobalID; (void) dimNS;
+                                     return -1;}
 
    /** Return the element's null space 
        @param (input)  eGlobalID - element global ID
@@ -528,7 +565,9 @@ public :
                                 int dimNS, 
                                 int sMatDim, 
                                 double *nSpace) 
-                                {return -1;}
+                                {(void) eGlobalID; (void) dimNS; 
+                                 (void) sMatDim; (void) nSpace;
+                                 return -1;}
 
    /** Return element volume 
        @param (input)  eGlobalID - element global ID
@@ -536,7 +575,7 @@ public :
    */  
    virtual int getElemVolume(int eGlobalID, 
                              double& elemVol) 
-                             {return -1;}
+                             {(void) eGlobalID; (void) elemVol; return -1;}
 
    /** Return element material 
        @param (input)  eGlobalID    - element global ID
@@ -544,7 +583,8 @@ public :
    */  
    virtual int getElemMaterial(int eGlobalID, 
                              int& elemMaterial) 
-                             {return -1;}
+                             {(void) eGlobalID; (void) elemMaterial; 
+                              return -1;}
 
    /** Return the parent ID of a given element 
        @param (input)  eGlobalID  - element global ID
@@ -552,7 +592,8 @@ public :
    */
    virtual int getElemParentID(int eGlobalID, 
                                int& pGlobalID) 
-                               {return -1;}
+                               {(void) eGlobalID; (void) pGlobalID; 
+                                return -1;}
 
    /** Return the face list of a given element 
        @param (input)  eGlobalID  - element global ID
@@ -562,13 +603,14 @@ public :
    virtual int getElemFaceList(int eGlobalID, 
                                int nFaces, 
                                int *fGlobalIDs) 
-                               {return -1;}
+                               {(void) eGlobalID; (void) nFaces;
+                                (void) fGlobalIDs; return -1;}
 
    /** Return the number of elements having essential BCs 
        @param (output) nElems - number of boundary elements
    */
    virtual int getNumBCElems(int& nElems)
-                             {return -1;}
+                             {(void) nElems; return -1;}
 
    /** Return the essential BCs 
        @param (input)  nElems     - number of boundary elements
@@ -587,7 +629,9 @@ public :
                           int eDOFs, 
                           char **BCFlags, 
                           double **BCVals) 
-                          {return -1;}
+                          {(void) nElems; (void) eGlobalIDs;
+                           (void) eDOFs; (void) BCFlags;
+                           (void) BCVals; return -1;}
 
    // =========================================================================
    // get node information
@@ -597,7 +641,7 @@ public :
        @param (output) nNodes - number of nodes for this processor
    */
    virtual int getNumNodes(int& nNodes) 
-                           {return -1;}
+                           {(void) nNodes; return -1;}
 
    /** Return the global node IDs corresponding to local IDs from 0 to nNodes-1 
        with nNodes is the parameter returned from getNumNodes
@@ -606,13 +650,14 @@ public :
    */
    virtual int getNodeBlockGlobalIDs(int nNodes, 
                                      int *nGlobalIDs) 
-                                     {return -1;}
+                                     {(void) nNodes; (void) nGlobalIDs; 
+                                      return -1;}
 
    /** Return the number of fields for each node in the block 
        @param (output) numFields - number of fields for each node
    */
    virtual int getNodeNumFields(int &numFields) 
-                                {return -1;}
+                                {(void) numFields; return -1;}
 
    /** Return the field ID for each node in the block 
        @param (input)  numFields - number of fields for each node
@@ -620,7 +665,8 @@ public :
    */
    virtual int getNodeFieldIDs(int numFields, 
                                int *fieldIDs) 
-                               {return -1;}
+                               {(void) numFields; (void) fieldIDs; 
+                                return -1;}
 
    /** Return the coordinates of the nodes in the block (in the order of
        the node IDs from the call to getNodeBlockGlobalIDs)
@@ -631,13 +677,14 @@ public :
    virtual int getNodeBlockCoordinates(int nNodes, 
                                        int spaceDim,
                                        double *coordinates) 
-                                       {return -1;}
+                                       {(void) nNodes; (void) spaceDim;
+                                        (void) coordinates; return -1;}
 
    /** Return the number of nodes having essential BCs 
        @param (output) nNodes - number of boundary nodes
    */
    virtual int getNumBCNodes(int& nNodes)
-                             {return -1;}
+                             {(void) nNodes; return -1;}
 
    /** Return the essential BCs 
        @param (input)  nNodes     - number of boundary nodes
@@ -656,13 +703,15 @@ public :
                           int nDOFs, 
                           char **BCFlags, 
                           double **BCVals) 
-                          {return -1;}
+                          {(void) nNodes; (void) nGlobalIDs; 
+                           (void) nDOFs; (void) BCFlags;
+                           (void) BCVals; return -1;}
 
    /** Return the number of shared nodes 
        @param (output) nNodes - number of shared nodes
    */
    virtual int getNumSharedNodes(int& nNodes) 
-                                 {return -1;}
+                                 {(void) nNodes; return -1;}
     
    /** Return shared node list and for every of the nodes with how many
        processors is shared (the data is copied)
@@ -673,7 +722,8 @@ public :
    virtual int getSharedNodeNumProcs(int nNodes, 
                                      int *nGlobalIDs, 
                                      int *numProcs)
-                                     {return -1;}
+                                     {(void) nNodes; (void) nGlobalIDs; 
+                                      (void) numProcs; return -1;}
 
    /** Return the processors that share the given node 
        @param (input)  nNodes - number of shared nodes
@@ -684,7 +734,8 @@ public :
    virtual int getSharedNodeProcs(int nNodes, 
                                   int *numProcs, 
                                   int **procList) 
-                                  {return -1;}
+                                  {(void) nNodes; (void) numProcs;
+                                   (void) procList; return -1;}
 
    // =========================================================================
    // get face information
@@ -693,8 +744,8 @@ public :
    /** Return the number of faces in my processor 
        @param (output) nFaces - number of faces
    */
-   virtual int getNumFaces(int& nfaces) 
-                           {return -1;}
+   virtual int getNumFaces(int& nFaces) 
+                           {(void) nFaces; return -1;}
 
    /** Return the global IDs of all internal and external faces
        @param (input)  nFaces     - number of external faces
@@ -702,13 +753,14 @@ public :
    */
    virtual int getFaceBlockGlobalIDs(int nFaces, 
                                      int *fGlobalIDs) 
-                                     {return -1;}
+                                     {(void) nFaces; (void) fGlobalIDs;
+                                      return -1;}
 
    /** Return number of faces shared with other processors 
        @param (output) nFaces - number of shared faces
    */
    virtual int getNumSharedFaces(int& nFaces) 
-                                 {return -1;}
+                                 {(void) nFaces; return -1;}
 
    /** Return shared face information 
        @param (output) nFaces - number of shared faces
@@ -717,7 +769,8 @@ public :
    */
    virtual int getSharedFaceNumProcs(int nFaces, 
                                      int *fGlobalIDs, int *numProcs) 
-                                     {return -1;}
+                                     {(void) nFaces; (void) fGlobalIDs; 
+                                      (void) numProcs; return -1;}
 
    /** Return shared face information (processor) 
        @param (input)  nFaces      - number of shared faces
@@ -728,13 +781,14 @@ public :
    virtual int getSharedFaceProcs(int nFaces, 
                                   int *numProcs, 
                                   int **procList) 
-                                  {return -1;}
+                                  {(void) nFaces; (void) numProcs;
+                                   (void) procList; return -1;}
 
    /** Return the number of nodes in a face
        @param (output) nNodes - number of nodes in a face
    */
    virtual int getFaceNumNodes(int &nNodes) 
-                                    {return -1;}
+                               {(void) nNodes; return -1;}
 
    /** Return the number of nodes in a face
        @param (input)  nFaces         - toal number of faces in this block
@@ -744,7 +798,8 @@ public :
    virtual int getFaceBlockNodeLists(int nFaces,
                                      int nNodesPerFace,
                                      int **nGlobalIDLists) 
-                                     {return -1;}
+                                     {(void) nFaces; (void) nNodesPerFace;
+                                      (void) nGlobalIDLists; return -1;}
 
    /** Return the node list of a face given a global face ID 
        @param (input)  fGlobalID  - face global ID 
@@ -754,7 +809,8 @@ public :
    virtual int getFaceNodeList(int fGlobalID, 
                                int nNodes, 
                                int *nGlobalIDs) 
-                               {return -1;}
+                               {(void) fGlobalID; (void) nNodes;
+                                (void) nGlobalIDs; return -1;}
 
    // -------------------------------------------------------------------------
    // shape function information
@@ -768,7 +824,7 @@ public :
    virtual int loadFunc_computeShapeFuncInterpolant(void *object, 
                    int (*func) (void *,int elemID,int nNodes,const double *coor,
                    double *coef)) 
-                   {return -1;}
+                   {(void) object; (void) func; return -1;}
 
    /** call fetch shape function interpolant 
        @param (input)  eGlobalID - element global ID
@@ -780,7 +836,8 @@ public :
                                        int nNodes, 
                                        const double *coord, 
                                        double *coef) 
-                                       {return -1;}
+                                       {(void) eGlobalID; (void) nNodes;
+                                        (void) coord; (void) coef; return -1;}
 
    // -------------------------------------------------------------------------
    // other functions
@@ -788,27 +845,28 @@ public :
 
    /** This function is used to get/set implementation-specific data 
        of a derived FEBase object. 
-       @param (input)        param_string - command string
+       @param (input)        paramString - command string
        @param (input)        argc         - dimension of argv
        @param (input/output) argv         - data
        returns the number of arguments returned, if appropriate.
    */
-   virtual int impSpecificRequests(char *param_string, 
+   virtual int impSpecificRequests(char *paramString, 
                                    int argc, 
                                    char **argv) 
-                                   {return -1;}
+                                   {(void) paramString; (void) argc;
+                                    (void) argv; return -1;}
 
    /** read the element data from a file
        @param filename - a string storing name of the output file
    */
    virtual int readFromFile(char *filename) 
-                            {return -1;}
+                            {(void) filename; return -1;}
 
    /** write the element data to a file 
        @param filename - a string storing name of the output file
    */
    virtual int writeToFile(char *filename) 
-                          {return -1;}
+                          {(void) filename; return -1;}
 
 };
 
