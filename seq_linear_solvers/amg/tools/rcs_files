@@ -4,6 +4,8 @@ amgmvio
 amgstrip
 build
 general.h
+hbo.m
+hbo2mat.f
 io.h
 vector.h
 matrix.h
