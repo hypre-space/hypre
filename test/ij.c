@@ -811,6 +811,7 @@ main( int   argc,
       printf("  -nf <val>              : set number of functions for systems AMG\n");
       printf("  -numsamp <val>         : set number of sample vectors for GSMG\n");
       printf("  -interptype <val>      : set to 1 to get LS interpolation\n");
+      printf("                         : set to 2 to get interpolation for hyperbolic equations\n");
      
       printf("  -solver_type <val>     : sets solver within Hybrid solver\n");
       printf("                         : 1  PCG  (default)\n");
