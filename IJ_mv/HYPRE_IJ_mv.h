@@ -91,7 +91,8 @@ int HYPRE_IJMatrixDestroy(HYPRE_IJMatrix matrix);
 int HYPRE_IJMatrixInitialize(HYPRE_IJMatrix matrix);
 
 /**
- * Sets values for {\tt nrows} of the matrix.  The arrays {\tt ncols}
+ * Sets values for {\tt nrows} rows or partial rows of the matrix.  
+ * The arrays {\tt ncols}
  * and {\tt rows} are of dimension {\tt nrows} and contain the number
  * of columns in each row and the row indices, respectively.  The
  * array {\tt cols} contains the column indices for each of the {\tt
@@ -111,7 +112,8 @@ int HYPRE_IJMatrixSetValues(HYPRE_IJMatrix  matrix,
                             const double   *values);
 
 /**
- * Adds to values for {\tt nrows} of the matrix.  Usage details are
+ * Adds to values for {\tt nrows} rows or partial rows of the matrix.  
+ * Usage details are
  * analogous to \Ref{HYPRE_IJMatrixSetValues}.  Adds to any previous
  * values at the specified locations, or, if there was no value there
  * before, inserts a new one.
@@ -131,7 +133,18 @@ int HYPRE_IJMatrixAddToValues(HYPRE_IJMatrix  matrix,
 int HYPRE_IJMatrixAssemble(HYPRE_IJMatrix matrix);
 
 /**
- * Gets values for {\tt nrows} of the matrix.  Usage details are
+ * Gets number of nonzeros elements for {\tt nrows} rows specified in {\tt rows}
+ * and returns them in {\tt ncols}, which needs to be allocated by the
+ * user.
+ **/
+int HYPRE_IJMatrixGetRowCounts(HYPRE_IJMatrix  matrix,
+                               int             nrows,
+                               int            *rows,
+                               int            *ncols);
+
+/**
+ * Gets values for {\tt nrows} rows or partial rows of the matrix.  
+ * Usage details are
  * analogous to \Ref{HYPRE_IJMatrixSetValues}.
  **/
 int HYPRE_IJMatrixGetValues(HYPRE_IJMatrix  matrix,
@@ -157,6 +170,16 @@ int HYPRE_IJMatrixSetObjectType(HYPRE_IJMatrix matrix,
  **/
 int HYPRE_IJMatrixGetObjectType(HYPRE_IJMatrix  matrix,
                                 int            *type);
+
+/**
+ * Gets range of rows owned by this processor and range
+ * of column partitioning for this processor.
+ **/
+int HYPRE_IJMatrixGetLocalRange(HYPRE_IJMatrix  matrix,
+                                int            *ilower,
+                                int            *iupper,
+                                int            *jlower,
+                                int            *jupper);
 
 /**
  * Get a reference to the constructed matrix object.
@@ -314,6 +337,13 @@ int HYPRE_IJVectorSetObjectType(HYPRE_IJVector vector,
  **/
 int HYPRE_IJVectorGetObjectType(HYPRE_IJVector  vector,
                                 int            *type);
+
+/**
+ * Returns range of the part of the vector owned by this processor.
+ **/
+int HYPRE_IJVectorGetLocalRange(HYPRE_IJVector  vector,
+                                int            *jlower,
+                                int            *jupper);
 
 /**
  * Get a reference to the constructed vector object.

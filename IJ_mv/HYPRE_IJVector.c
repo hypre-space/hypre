@@ -365,6 +365,34 @@ HYPRE_IJVectorGetObjectType( HYPRE_IJVector vector, int *type )
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_IJVectorGetLocalRange
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_IJVectorGetLocalRange( HYPRE_IJVector vector, int *jlower, int *jupper )
+{
+   hypre_IJVector *vec = (hypre_IJVector *) vector;
+   MPI_Comm comm;
+   int *partitioning;
+   int my_id;
+
+   if (!vec)
+   {
+     printf("Variable vec is NULL -- HYPRE_IJVectorGetObjectType\n");
+     exit(1);
+   } 
+
+   comm = hypre_IJVectorComm(vec);
+   partitioning = hypre_IJVectorPartitioning(vec);
+   MPI_Comm_rank(comm, &my_id);
+
+   *jlower = partitioning[my_id];
+   *jupper = partitioning[my_id+1]-1;
+
+   return 0;
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_IJVectorGetObject
  *--------------------------------------------------------------------------*/
 

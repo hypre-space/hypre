@@ -213,6 +213,56 @@ hypre_IJMatrixInitializeParCSR(hypre_IJMatrix *matrix)
 
 /******************************************************************************
  *
+ * hypre_IJMatrixGetRowCountsParCSR
+ *
+ * gets the number of columns for rows specified by the user
+ * 
+ *****************************************************************************/
+int
+hypre_IJMatrixGetRowCountsParCSR( hypre_IJMatrix *matrix,
+                               int	       nrows,
+                               int            *rows,
+                               int	      *ncols)
+{
+   int ierr = 0;
+   int row_index;
+   MPI_Comm comm = hypre_IJMatrixComm(matrix);
+   hypre_ParCSRMatrix *par_matrix = hypre_IJMatrixObject(matrix);
+
+   int *row_partitioning = hypre_IJMatrixRowPartitioning(matrix);
+
+   hypre_CSRMatrix *diag = hypre_ParCSRMatrixDiag(par_matrix);
+   int *diag_i = hypre_CSRMatrixI(diag);
+
+   hypre_CSRMatrix *offd = hypre_ParCSRMatrixOffd(par_matrix);
+   int *offd_i = hypre_CSRMatrixI(offd);
+
+   int i, my_id;
+
+   MPI_Comm_rank(comm,&my_id);
+
+   for (i=0; i < nrows; i++)
+   {
+      row_index = rows[i];
+      if (row_index >= row_partitioning[my_id] && 
+		row_index < row_partitioning[my_id+1])
+      {
+   	/* compute local row number */
+         row_index -= row_partitioning[my_id]; 
+         ncols[i] = diag_i[row_index+1]-diag_i[row_index]+offd_i[row_index+1]
+		-offd_i[row_index];
+      }
+      else
+      {
+         ncols[i] = 0;
+	 printf ("Warning! Row %d is not on Proc. %d!\n", row_index, my_id);
+      }
+   }
+   
+   return ierr;
+}
+/******************************************************************************
+ *
  * hypre_IJMatrixGetValuesParCSR
  *
  * gets values of an IJMatrix
@@ -229,7 +279,7 @@ hypre_IJMatrixGetValuesParCSR( hypre_IJMatrix *matrix,
    int ierr = 0;
    MPI_Comm comm = hypre_IJMatrixComm(matrix);
    hypre_ParCSRMatrix *par_matrix = hypre_IJMatrixObject(matrix);
-   hypre_AuxParCSRMatrix *aux_matrix = hypre_IJMatrixTranslator(matrix);
+   int assemble_flag = hypre_IJMatrixAssembleFlag(matrix);
 
    hypre_CSRMatrix *diag;
    int *diag_i;
@@ -241,13 +291,6 @@ hypre_IJMatrixGetValuesParCSR( hypre_IJMatrix *matrix,
    int *offd_j;
    double *offd_data;
 
-   int length;
-   int **aux_j;
-   int *local_j;
-   int *row_length;
-   double **aux_data;
-   double *local_data;
-
    int *col_map_offd;
    int *col_starts = hypre_ParCSRMatrixColStarts(par_matrix);
 
@@ -256,7 +299,9 @@ hypre_IJMatrixGetValuesParCSR( hypre_IJMatrix *matrix,
 
    int i, j, n, ii, indx, col_indx;
    int num_procs, my_id;
-   int col_0, col_n, row, row_local;
+   int col_0, col_n, row, row_local, row_size;
+   int warning = 0;
+   int *counter;
 
    int diag_indx;
    int offd_indx;
@@ -266,24 +311,85 @@ hypre_IJMatrixGetValuesParCSR( hypre_IJMatrix *matrix,
    MPI_Comm_size(comm,&num_procs);
    MPI_Comm_rank(comm,&my_id);
 
-   if (aux_matrix == NULL)
+   if (nrows < 0)
    {
-      col_0 = col_starts[my_id];
-      col_n = col_starts[my_id+1]-1;
-      diag = hypre_ParCSRMatrixDiag(par_matrix);
-      diag_i = hypre_CSRMatrixI(diag);
-      diag_j = hypre_CSRMatrixJ(diag);
-      diag_data = hypre_CSRMatrixData(diag);
+      printf("Error! nrows negative! HYPRE_IJMatrixGetValues\n");
+      exit(1);
+   }
+
+   if (assemble_flag == 0)
+   {
+      printf("Error! Matrix not assembled yet! HYPRE_IJMatrixGetValues\n");
+      exit(1);
+   }
+
+   col_0 = col_starts[my_id];
+   col_n = col_starts[my_id+1]-1;
+
+   diag = hypre_ParCSRMatrixDiag(par_matrix);
+   diag_i = hypre_CSRMatrixI(diag);
+   diag_j = hypre_CSRMatrixJ(diag);
+   diag_data = hypre_CSRMatrixData(diag);
    
-      offd = hypre_ParCSRMatrixOffd(par_matrix);
-      offd_i = hypre_CSRMatrixI(offd);
-      if (num_procs > 1)
+   offd = hypre_ParCSRMatrixOffd(par_matrix);
+   offd_i = hypre_CSRMatrixI(offd);
+   if (num_procs > 1)
+   {
+      offd_j = hypre_CSRMatrixJ(offd);
+      offd_data = hypre_CSRMatrixData(offd);
+      col_map_offd = hypre_ParCSRMatrixColMapOffd(par_matrix);
+   }
+
+   if (nrows < 0)
+   {
+      nrows = -nrows;
+      
+      counter = hypre_CTAlloc(int,nrows+1);
+      counter[0] = 0;
+      for (i=0; i < nrows; i++)
+         counter[i+1] = counter[i]+ncols[i];
+
+      indx = 0;   
+      for (i=0; i < nrows; i++)
       {
-         offd_j = hypre_CSRMatrixJ(offd);
-         offd_data = hypre_CSRMatrixData(offd);
-	 col_map_offd = hypre_ParCSRMatrixColMapOffd(par_matrix);
+         row = rows[i];
+         if (row >= row_partitioning[my_id] && row < row_partitioning[my_id+1])
+         {
+            row_local = row - row_partitioning[my_id]; 
+            row_size = diag_i[row_local+1]-diag_i[row_local]+
+			offd_i[row_local+1]-offd_i[row_local];
+            if (counter[i]+row_size > counter[nrows])
+	    {
+	       printf ("Error! Not enough memory! HYPRE_IJMatrixGetValues\n");
+	       exit(1);
+	    }
+            if (ncols[i] < row_size)
+		warning = 1;
+	    for (j = diag_i[row_local]; j < diag_i[row_local+1]; j++)
+ 	    {
+	       cols[indx] = diag_j[j] + col_0;
+	       values[indx++] = diag_data[j];
+	    }
+	    for (j = offd_i[row_local]; j < offd_i[row_local+1]; j++)
+ 	    {
+	       cols[indx] = col_map_offd[offd_j[j]];
+	       values[indx++] = offd_data[j];
+	    }
+	    counter[i+1] = indx;
+         }
+         else
+	    printf ("Warning! Row %d is not on Proc. %d!\n", row, my_id);
       }
-   
+      if (warning)
+      {
+         for (i=0; i < nrows; i++)
+	    ncols[i] = counter[i+1] - counter[i];
+	 printf ("Warning!  ncols has been changed!\n");
+      }
+      hypre_TFree(counter);
+   }
+   else
+   {
       indx = 0;   
       for (ii=0; ii < nrows; ii++)
       {
@@ -324,112 +430,13 @@ hypre_IJMatrixGetValuesParCSR( hypre_IJMatrix *matrix,
 	       indx++;
 	    }
          }
-      }
-   }
-   else if (hypre_AuxParCSRMatrixNeedAux(aux_matrix) == 1)
-   {
-      aux_j = hypre_AuxParCSRMatrixAuxJ(aux_matrix);
-      aux_data = hypre_AuxParCSRMatrixAuxData(aux_matrix);
-      row_length = hypre_AuxParCSRMatrixRowLength(aux_matrix);
-
-      indx = 0;   
-      for (ii=0; ii < nrows; ii++)
-      {
-         row = rows[ii];
-         n = ncols[ii];
-         if (row >= row_partitioning[my_id] && row < row_partitioning[my_id+1])
-         {
-            row_local = row - row_partitioning[my_id]; 
-   				/* compute local row number */
-            local_j = aux_j[row_local];
-            local_data = aux_data[row_local];
-	    length = row_length[row_local];
-
-     	    for (i=0; i < n; i++)
-   	    {
-   	       col_indx = cols[indx];
-   	       values[indx] = 0.0;
-   	       for (j = 0; j < length; j++)
-   	       {
-   	          if (local_j[j] == col_indx)
-   		  {
-                     values[indx] = local_data[j];
-   		     break;
-   	          }
-	       }
-	       indx++;
-	    }
-         }
-      }
-   }
-   else
-   {
-      col_0 = col_partitioning[my_id];
-      col_n = col_partitioning[my_id+1]-1;
-
-      diag = hypre_ParCSRMatrixDiag(par_matrix);
-      diag_i = hypre_CSRMatrixI(diag);
-      diag_j = hypre_CSRMatrixJ(diag);
-      diag_data = hypre_CSRMatrixData(diag);
-   
-      offd = hypre_ParCSRMatrixOffd(par_matrix);
-      offd_i = hypre_CSRMatrixI(offd);
-      if (num_procs > 1)
-      {
-         offd_j = hypre_CSRMatrixJ(offd);
-         offd_data = hypre_CSRMatrixData(offd);
-      }
-      indx_diag = hypre_AuxParCSRMatrixIndxDiag(aux_matrix);
-      indx_offd = hypre_AuxParCSRMatrixIndxOffd(aux_matrix);
-   
-      indx = 0;   
-      for (ii=0; ii < nrows; ii++)
-      {
-         row = rows[ii];
-         n = ncols[ii];
-         if (row >= row_partitioning[my_id] && row < row_partitioning[my_id+1])
-         {
-            row_local = row - row_partitioning[my_id]; 
-   				/* compute local row number */
-            diag_indx = indx_diag[row_local];
-            offd_indx = indx_offd[row_local];
-
-     	    for (i=0; i < n; i++)
-   	    {
-   	       col_indx = cols[indx];
-   	       values[indx] = 0.0;
-   	       if (col_indx < col_0 || col_indx > col_n)
-   				/* search in offd */	
-   	       {
-   	          for (j=offd_i[row_local]; j < offd_indx; j++)
-   	          {
-   		     if (offd_j[j] == col_indx)
-   		     {
-                        values[indx] = offd_data[j];
-   		        break;
-   		     }
-   	          }
-	       }
-	       else  /* search in diag */
-	       {
-	          for (j=diag_i[row_local]; j < diag_indx; j++)
-	          {
-		     if (diag_j[j] == col_indx)
-		     {
-                        values[indx] = diag_data[j];
-		        break;
-		     }
-	          } 
-	       }
-	       indx++;
-	    }
-         }
+         else
+	    printf ("Warning! Row %d is not on Proc. %d!\n", row, my_id);
       }
    }
 
    return ierr;
 }
-
 /******************************************************************************
  *
  * hypre_IJMatrixSetValuesParCSR

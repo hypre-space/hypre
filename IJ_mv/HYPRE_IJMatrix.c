@@ -306,6 +306,40 @@ HYPRE_IJMatrixAssemble( HYPRE_IJMatrix matrix )
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_IJMatrixGetRowCounts
+ *--------------------------------------------------------------------------*/
+
+int 
+HYPRE_IJMatrixGetRowCounts( HYPRE_IJMatrix matrix, int nrows, 
+                         int *rows, int *ncols )
+{
+   int ierr = 0;
+   hypre_IJMatrix *ijmatrix = (hypre_IJMatrix *) matrix;
+
+   if (!ijmatrix)
+   {
+      printf("Variable ijmatrix is NULL -- HYPRE_IJMatrixGetRowCounts\n");
+      exit(1);
+   }
+
+   /* if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PETSC )
+      ierr = hypre_IJMatrixGetRowCountsPETSc( ijmatrix, nrows, rows, ncols );
+   else if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_ISIS )
+      ierr = hypre_IJMatrixGetRowCountsISIS( ijmatrix, nrows, rows, ncols );
+   else */
+
+   if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PARCSR )
+      ierr = hypre_IJMatrixGetRowCountsParCSR( ijmatrix, nrows, rows, ncols );
+   else
+   {
+      printf("Unrecognized object type -- HYPRE_IJMatrixGetRowCounts\n");
+      exit(1);
+   }
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_IJMatrixGetValues
  *--------------------------------------------------------------------------*/
 
@@ -378,6 +412,40 @@ HYPRE_IJMatrixGetObjectType( HYPRE_IJMatrix matrix, int *type )
    }
 
    *type = hypre_IJMatrixObjectType(ijmatrix);
+
+   return 0;
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_IJMatrixGetLocalRange
+ *--------------------------------------------------------------------------*/
+
+int 
+HYPRE_IJMatrixGetLocalRange( HYPRE_IJMatrix matrix, int *ilower, int *iupper,
+			int *jlower, int *jupper )
+{
+   hypre_IJMatrix *ijmatrix = (hypre_IJMatrix *) matrix;
+   MPI_Comm comm;
+   int *row_partitioning;
+   int *col_partitioning;
+   int my_id;
+
+   if (!ijmatrix)
+   {
+      printf("Variable ijmatrix is NULL -- HYPRE_IJMatrixGetObjectType\n");
+      exit(1);
+   }
+
+   comm = hypre_IJMatrixComm(ijmatrix);
+   row_partitioning = hypre_IJMatrixRowPartitioning(ijmatrix);
+   col_partitioning = hypre_IJMatrixColPartitioning(ijmatrix);
+
+   MPI_Comm_rank(comm, &my_id);
+
+   *ilower = row_partitioning[my_id];
+   *iupper = row_partitioning[my_id+1]-1;
+   *jlower = col_partitioning[my_id];
+   *jupper = col_partitioning[my_id+1]-1;
 
    return 0;
 }
