@@ -41,7 +41,6 @@ hypre_GenerateLaplacian( MPI_Comm comm,
    int *global_part;
    int ix, iy, iz;
    int cnt, o_cnt;
-   int end;
    int local_num_rows; 
    int *col_map_offd;
    int row_index;
@@ -62,28 +61,10 @@ hypre_GenerateLaplacian( MPI_Comm comm,
    MPI_Comm_rank(comm,&my_id);
 
    grid_size = nx*ny*nz;
-   nx_part = hypre_CTAlloc(int,P+1);
-   ny_part = hypre_CTAlloc(int,Q+1);
-   nz_part = hypre_CTAlloc(int,R+1);
 
-   for (ix = 0; ix < P; ix++)
-   {
-      MPE_Decomp1d(nx, P, ix, &nx_part[ix], &end);
-      nx_part[ix]--;
-   }
-   nx_part[P] = nx;
-   for (iy = 0; iy < Q; iy++)
-   {
-      MPE_Decomp1d(ny, Q, iy, &ny_part[iy], &end);
-      ny_part[iy]--;
-   }
-   ny_part[Q] = ny;
-   for (iz = 0; iz < R; iz++)
-   {
-      MPE_Decomp1d(nz, R, iz, &nz_part[iz], &end);
-      nz_part[iz]--;
-   }
-   nz_part[R] = nz;
+   hypre_GeneratePartitioning(nx,P,&nx_part);
+   hypre_GeneratePartitioning(ny,Q,&ny_part);
+   hypre_GeneratePartitioning(nz,R,&nz_part);
 
    global_part = hypre_CTAlloc(int,P*Q*R+1);
 
