@@ -8,27 +8,27 @@
  *   Change all names to  to avoid link conflicts
  * --------------------------------------------------------------------------*/
 
-#define dasum   dasum
-#define daxpy   daxpy
-#define dcopy   dcopy
-#define ddot    ddot
-#define dgemm   dgemm
-#define dgemv   dgemv
-#define dger    dger
-#define dnrm2   dnrm2
-#define drot    drot
-#define dscal   dscal
-#define dswap   dswap
-#define dsymm   dsymm
-#define dsymv   dsymv
-#define dsyr2   dsyr2
-#define dsyr2k  dsyr2k
-#define dsyrk   dsyrk
-#define dtrmm   dtrmm
-#define dtrmv   dtrmv
-#define dtrsm   dtrsm
-#define dtrsv   dtrsv
-#define idamax  idamax
+#define dasum   hypre_dasum
+#define daxpy   hypre_daxpy
+#define dcopy   hypre_dcopy
+#define ddot    hypre_ddot
+#define dgemm   hypre_dgemm
+#define dgemv   hypre_dgemv
+#define dger    hypre_dger
+#define dnrm2   hypre_dnrm2
+#define drot    hypre_drot
+#define dscal   hypre_dscal
+#define dswap   hypre_dswap
+#define dsymm   hypre_dsymm
+#define dsymv   hypre_dsymv
+#define dsyr2   hypre_dsyr2
+#define dsyr2k  hypre_dsyr2k
+#define dsyrk   hypre_dsyrk
+#define dtrmm   hypre_dtrmm
+#define dtrmv   hypre_dtrmv
+#define dtrsm   hypre_dtrsm
+#define dtrsv   hypre_dtrsv
+#define idamax  hypre_idamax
 
 /* blas_utils.c */
 logical lsame_ ( char *ca , char *cb );
