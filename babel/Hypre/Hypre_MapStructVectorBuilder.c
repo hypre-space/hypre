@@ -56,7 +56,7 @@ int  impl_Hypre_MapStructVectorBuilder_Start
    MSVp = babel_this->Hypre_MapStructVectorBuilder_data->newmap->
       Hypre_MapStructVector_data;
 /* not done: check that input arguments are valid, the cast is non-null, etc. */
-   MSVp->grid = (Hypre_StructGrid) Hypre_StructuredGrid_castTo( grid, "Hypre_StructGrid" );
+   MSVp->grid = (Hypre_StructGrid) Hypre_StructuredGrid_castTo( grid, "Hypre.StructGrid" );
    MSVp->num_ghost = num_ghost.data;
 
    return 0;
@@ -91,7 +91,7 @@ int  impl_Hypre_MapStructVectorBuilder_GetConstructedObject
    Hypre_MapStructVector newmap = babel_this->Hypre_MapStructVectorBuilder_data->newmap;
    if ( newmap == NULL ) return 1;
    *obj = (Hypre_MapStructuredVector)
-      Hypre_MapStructVector_castTo( newmap, "Hypre_MapStructuredVector" );
+      Hypre_MapStructVector_castTo( newmap, "Hypre.MapStructuredVector" );
    return 0;
 } /* end impl_Hypre_MapStructVectorBuilder_GetConstructedObject */
 

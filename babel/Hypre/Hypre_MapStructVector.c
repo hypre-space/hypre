@@ -8,6 +8,10 @@
 #include "Hypre_MapStructVector_Skel.h" 
 #include "Hypre_MapStructVector_Data.h" 
 
+/* currently on a Sun the assert.h this gives us is
+/usr/local/sparc-sun-solaris2.5/include/assert.h
+which needs libgcc.a ... */
+#include <assert.h>
 
 /* *************************************************
  * Constructor
@@ -48,7 +52,7 @@ int  impl_Hypre_MapStructVector_GetGrid
 ( Hypre_MapStructVector babel_this, Hypre_StructuredGrid* grid ) {
    Hypre_StructGrid mygrid = babel_this->Hypre_MapStructVector_data->grid;
    assert( grid != NULL );
-   *grid = (Hypre_StructuredGrid) Hypre_StructGrid_castTo( mygrid, "Hypre_StructuredGrid" );
+   *grid = (Hypre_StructuredGrid) Hypre_StructGrid_castTo( mygrid, "Hypre.StructuredGrid" );
    return 0;
 } /* end impl_Hypre_MapStructVector_GetGrid */
 
