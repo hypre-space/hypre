@@ -58,6 +58,7 @@ hypre_ParAMGSetupStats( void               *amg_vdata,
    int      num_levels; 
    int      global_nonzeros;
    int      amg_ioutdat;
+   int      coarsen_type;
 
    double  *send_buff;
    double  *gather_buff;
@@ -102,6 +103,7 @@ hypre_ParAMGSetupStats( void               *amg_vdata,
    num_levels = hypre_ParAMGDataNumLevels(amg_data);
    amg_ioutdat = hypre_ParAMGDataIOutDat(amg_data);
    log_file_name = hypre_ParAMGDataLogFileName(amg_data);
+   coarsen_type = hypre_ParAMGDataCoarsenType(amg_data);
 
    send_buff     = hypre_CTAlloc(double, 6);
    gather_buff = hypre_CTAlloc(double,6*num_procs); 
@@ -115,6 +117,8 @@ hypre_ParAMGSetupStats( void               *amg_vdata,
       fprintf(fp," Num levels = %d\n\n",num_levels);
       fprintf(fp," Strength Threshhold = %f\n\n", 
                          hypre_ParAMGDataStrongThreshold(amg_data));
+      fprintf(fp," Coarsening Type = %s\n\n", 
+                  (coarsen_type ? "Ruge" : "Luby-Jones-Plassman"));
 
       fprintf(fp, "\nOperator Matrix Information:\n\n");
 
