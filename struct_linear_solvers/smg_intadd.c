@@ -35,11 +35,11 @@ typedef struct
 void *
 zzz_SMGIntAddInitialize( )
 {
-   zzz_SMGIntAddData *smg_intadd_data;
+   zzz_SMGIntAddData *intadd_data;
 
-   smg_intadd_data = zzz_CTAlloc(zzz_SMGIntAddData, 1);
+   intadd_data = zzz_CTAlloc(zzz_SMGIntAddData, 1);
 
-   return (void *) smg_intadd_data;
+   return (void *) intadd_data;
 }
 
 /*--------------------------------------------------------------------------
@@ -47,7 +47,7 @@ zzz_SMGIntAddInitialize( )
  *--------------------------------------------------------------------------*/
 
 int
-zzz_SMGIntAddSetup( void             *smg_intadd_vdata,
+zzz_SMGIntAddSetup( void             *intadd_vdata,
                     zzz_StructMatrix *PT,
                     zzz_StructVector *xc,
                     zzz_StructVector *x,
@@ -56,7 +56,7 @@ zzz_SMGIntAddSetup( void             *smg_intadd_vdata,
                     zzz_Index        *findex,
                     zzz_Index        *fstride          )
 {
-   zzz_SMGIntAddData *smg_intadd_data = smg_intadd_vdata;
+   zzz_SMGIntAddData    *intadd_data = intadd_vdata;
 
    zzz_StructGrid       *grid;
    zzz_StructStencil    *stencil;
@@ -150,11 +150,11 @@ zzz_SMGIntAddSetup( void             *smg_intadd_vdata,
     * Set up the intadd data structure
     *----------------------------------------------------------*/
 
-   (smg_intadd_data -> PT)            = PT;
-   (smg_intadd_data -> compute_pkg)   = compute_pkg;
-   (smg_intadd_data -> coarse_points) = coarse_points;
-   (smg_intadd_data -> cindex)        = cindex;
-   (smg_intadd_data -> cstride)       = cstride;
+   (intadd_data -> PT)            = PT;
+   (intadd_data -> compute_pkg)   = compute_pkg;
+   (intadd_data -> coarse_points) = coarse_points;
+   (intadd_data -> cindex)        = cindex;
+   (intadd_data -> cstride)       = cstride;
 
    return ierr;
 }
@@ -168,15 +168,15 @@ zzz_SMGIntAddSetup( void             *smg_intadd_vdata,
  *--------------------------------------------------------------------------*/
 
 int
-zzz_SMGIntAdd( void             *smg_intadd_vdata,
+zzz_SMGIntAdd( void             *intadd_vdata,
                zzz_StructVector *xc,
                zzz_StructVector *x           )
 {
    int ierr;
 
-   zzz_SMGIntAddData    *smg_intadd_data = smg_intadd_vdata;
+   zzz_SMGIntAddData    *intadd_data = intadd_vdata;
 
-   zzz_StructMatrix     *PT = (smg_intadd_data -> PT);
+   zzz_StructMatrix     *PT = (intadd_data -> PT);
 
    zzz_ComputePkg       *compute_pkg;
    zzz_SBoxArray        *coarse_points;
@@ -217,10 +217,10 @@ zzz_SMGIntAdd( void             *smg_intadd_vdata,
     * Initialize some things
     *-----------------------------------------------------------------------*/
 
-   compute_pkg   = (smg_intadd_data -> compute_pkg);
-   coarse_points = (smg_intadd_data -> coarse_points);
-   cindex        = (smg_intadd_data -> cindex);
-   cstride       = (smg_intadd_data -> cstride);
+   compute_pkg   = (intadd_data -> compute_pkg);
+   coarse_points = (intadd_data -> coarse_points);
+   cindex        = (intadd_data -> cindex);
+   cstride       = (intadd_data -> cstride);
 
    stencil       = zzz_StructMatrixStencil(PT);
    stencil_shape = zzz_StructStencilShape(stencil);
@@ -353,17 +353,17 @@ zzz_SMGIntAdd( void             *smg_intadd_vdata,
  *--------------------------------------------------------------------------*/
 
 int
-zzz_SMGIntAddFinalize( void *smg_intadd_vdata )
+zzz_SMGIntAddFinalize( void *intadd_vdata )
 {
    int ierr;
 
-   zzz_SMGIntAddData *smg_intadd_data = smg_intadd_vdata;
+   zzz_SMGIntAddData *intadd_data = intadd_vdata;
 
-   if (smg_intadd_data)
+   if (intadd_data)
    {
-      zzz_FreeSBoxArray(smg_intadd_data -> coarse_points);
-      zzz_FreeComputePkg(smg_intadd_data -> compute_pkg);
-      zzz_TFree(smg_intadd_data);
+      zzz_FreeSBoxArray(intadd_data -> coarse_points);
+      zzz_FreeComputePkg(intadd_data -> compute_pkg);
+      zzz_TFree(intadd_data);
    }
 
    return ierr;

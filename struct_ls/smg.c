@@ -126,8 +126,72 @@ int
 zzz_SMGFinalize( void *smg_vdata )
 {
    zzz_SMGData *smg_data = smg_vdata;
+
+   int l;
    int ierr;
 
+   if (smg_data)
+   {
+      if ((smg_data -> logging) > 0)
+      {
+         zzz_TFree(smg_data -> norms);
+         zzz_TFree(smg_data -> rel_norms);
+      }
+
+      zzz_SMGRelaxFinalize(smg_data -> pre_relax_data_initial);
+      zzz_SMGRelaxFinalize(smg_data -> coarse_relax_data);
+      for (l = 0; l < ((smg_data -> num_levels) - 1); l++)
+      {
+         zzz_SMGRelaxFinalize(smg_data -> pre_relax_data_l[l]);
+         zzz_SMGRelaxFinalize(smg_data -> post_relax_data_l[l]);
+         zzz_SMGResidualFinalize(smg_data -> residual_data_l[l]);
+         zzz_SMGRestrictFinalize(smg_data -> restrict_data_l[l]);
+         zzz_SMGIntAddFinalize(smg_data -> intadd_data_l[l]);
+      }
+      zzz_TFree(smg_data -> pre_relax_data_l);
+      zzz_TFree(smg_data -> post_relax_data_l);
+      zzz_TFree(smg_data -> residual_data_l);
+      zzz_TFree(smg_data -> restrict_data_l);
+      zzz_TFree(smg_data -> intadd_data_l);
+ 
+      zzz_FreeStructVector(smg_data -> r_l[0]);
+      for (l = 0; l < ((smg_data -> num_levels) - 1); l++)
+      {
+         zzz_FreeStructGrid(smg_data -> grid_l[l+1]);
+         zzz_FreeStructMatrix(smg_data -> A_l[l+1]);
+         zzz_FreeStructMatrix(smg_data -> PT_l[l]);
+         if (!zzz_StructMatrixSymmetric(smg_data -> A_l[0]))
+            zzz_FreeStructMatrix(smg_data -> R_l[l]);
+         zzz_FreeStructVector(smg_data -> b_l[l+1]);
+         zzz_FreeStructVector(smg_data -> x_l[l+1]);
+         zzz_FreeStructVectorShell(smg_data -> r_l[l+1]);
+      }
+      zzz_TFree(smg_data -> grid_l);
+      zzz_TFree(smg_data -> A_l);
+      zzz_TFree(smg_data -> PT_l);
+      zzz_TFree(smg_data -> R_l);
+      zzz_TFree(smg_data -> b_l);
+      zzz_TFree(smg_data -> x_l);
+      zzz_TFree(smg_data -> r_l);
+ 
+      for (l = 0; l < 2; l++)
+      {
+         zzz_FreeIndex(smg_data -> base_index_l[l]);
+         zzz_FreeIndex(smg_data -> cindex_l[l]);
+         zzz_FreeIndex(smg_data -> findex_l[l]);
+         zzz_FreeIndex(smg_data -> base_stride_l[l]);
+         zzz_FreeIndex(smg_data -> cstride_l[l]);
+         zzz_FreeIndex(smg_data -> fstride_l[l]);
+      }
+      zzz_TFree(smg_data -> base_index_l);
+      zzz_TFree(smg_data -> cindex_l);
+      zzz_TFree(smg_data -> findex_l);
+      zzz_TFree(smg_data -> base_stride_l);
+      zzz_TFree(smg_data -> cstride_l);
+      zzz_TFree(smg_data -> fstride_l);
+ 
+      zzz_TFree(smg_data);
+   }
 
    return(ierr);
 }

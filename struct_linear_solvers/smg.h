@@ -62,9 +62,6 @@ typedef struct
    zzz_StructVector  **x_l;
    zzz_StructVector  **r_l;
 
-   zzz_SBoxArrayArray *coarse_points_l;
-   zzz_SBoxArrayArray *fine_points_l;
-
    void               *pre_relax_data_initial;
    void              **pre_relax_data_l;
    void               *coarse_relax_data;

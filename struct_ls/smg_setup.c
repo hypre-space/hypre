@@ -139,7 +139,6 @@ zzz_SMGSetup( void             *smg_vdata,
    zzz_Box            *box;
 
    int                 idmin, idmax;
-   int                 still_coarsening;
    int                 i, l;
 
    int                 b_num_ghost[] = {1, 1, 1, 1, 1, 1};
@@ -247,10 +246,22 @@ zzz_SMGSetup( void             *smg_vdata,
    grid_l = zzz_TAlloc(zzz_StructGrid *, max_levels);
    grid_l[0] = zzz_StructMatrixGrid(A);
 
-   l = 0;
-   still_coarsening = 1;
-   while ( still_coarsening && (l < (max_levels - 1)) )
+   for (l = 0; ; l++)
    {
+      /* check to see if we should coarsen */
+      idmin = zzz_BoxIMinD(zzz_BoxArrayBox(all_boxes, 0), cdir);
+      idmax = zzz_BoxIMaxD(zzz_BoxArrayBox(all_boxes, 0), cdir);
+      zzz_ForBoxI(i, all_boxes)
+      {
+         idmin = min(idmin, zzz_BoxIMinD(zzz_BoxArrayBox(all_boxes, i), cdir));
+         idmax = max(idmax, zzz_BoxIMaxD(zzz_BoxArrayBox(all_boxes, i), cdir));
+      }
+      if ( (idmin == idmax) || (l == (max_levels - 1)) )
+      {
+         /* stop coarsening */
+         break;
+      }
+
       /* coarsen the grid */
       coarse_points = zzz_ProjectBoxArray(zzz_StructGridAllBoxes(grid_l[l]),
                                           cindex_l[l], cstride_l[l]);
@@ -270,19 +281,7 @@ zzz_SMGSetup( void             *smg_vdata,
       grid_l[l+1] =
          zzz_NewAssembledStructGrid(comm, zzz_StructGridDim(grid_l[l]),
                                     all_boxes, processes);
-
-      /* do we continue coarsening? */
-      idmin = zzz_BoxIMinD(zzz_BoxArrayBox(all_boxes, 0), cdir);
-      idmax = zzz_BoxIMaxD(zzz_BoxArrayBox(all_boxes, 0), cdir);
-      zzz_ForBoxI(i, all_boxes)
-      {
-         idmin = min(idmin, zzz_BoxIMinD(zzz_BoxArrayBox(all_boxes, i), cdir));
-         idmax = max(idmax, zzz_BoxIMaxD(zzz_BoxArrayBox(all_boxes, i), cdir));
-      }
-      if ( idmin == idmax )
-         still_coarsening = 0;
-
-      l++;
+      zzz_FreeSBoxArray(coarse_points);
    }
    num_levels = l + 1;
 
@@ -357,7 +356,8 @@ zzz_SMGSetup( void             *smg_vdata,
          zzz_SMGSetupRestrictOp(A_l[l], R_l[l], r_l[l], cdir,
                                 cindex_l[l], cstride_l[l]);
 
-      zzz_SMGSetupRAPOp(R_l[l], A_l[l], PT_l[l], A_l[l+1]);
+      zzz_SMGSetupRAPOp(R_l[l], A_l[l], PT_l[l], A_l[l+1],
+                        cindex_l[l], cstride_l[l]);
    }
 
    /*-----------------------------------------------------
@@ -377,7 +377,7 @@ zzz_SMGSetup( void             *smg_vdata,
                             pre_relax_data_initial);
    zzz_SMGRelaxSetup(pre_relax_data_initial, A_l[0], b_l[0], x_l[0], r_l[0]);
 
-   for (l = 0; l <= (num_levels - 2); l++)
+   for (l = 0; l < (num_levels - 1); l++)
    {
       pre_relax_data_l[l] = zzz_SMGRelaxInitialize(comm);
       if (l > 0)
@@ -440,6 +440,23 @@ zzz_SMGSetup( void             *smg_vdata,
       (smg_data -> norms)     = zzz_TAlloc(double, max_iter);
       (smg_data -> rel_norms) = zzz_TAlloc(double, max_iter);
    }
+
+#if 1
+{
+   char  filename[255];
+
+   /* debugging stuff */
+   for (l = 0; l < (num_levels - 1); l++)
+   {
+      sprintf(filename, "zout_A.%02d", l);
+      zzz_PrintStructMatrix(filename, A_l[l], 0);
+      sprintf(filename, "zout_PT.%02d", l);
+      zzz_PrintStructMatrix(filename, PT_l[l], 0);
+   }
+   sprintf(filename, "zout_A.%02d", l);
+   zzz_PrintStructMatrix(filename, A_l[l], 0);
+}
+#endif
 
    return ierr;
 }

@@ -34,11 +34,11 @@ typedef struct
 void *
 zzz_SMGRestrictInitialize( )
 {
-   zzz_SMGRestrictData *smg_restrict_data;
+   zzz_SMGRestrictData *restrict_data;
 
-   smg_restrict_data = zzz_CTAlloc(zzz_SMGRestrictData, 1);
+   restrict_data = zzz_CTAlloc(zzz_SMGRestrictData, 1);
 
-   return (void *) smg_restrict_data;
+   return (void *) restrict_data;
 }
 
 /*--------------------------------------------------------------------------
@@ -46,7 +46,7 @@ zzz_SMGRestrictInitialize( )
  *--------------------------------------------------------------------------*/
 
 int
-zzz_SMGRestrictSetup( void             *smg_restrict_vdata,
+zzz_SMGRestrictSetup( void             *restrict_vdata,
                       zzz_StructMatrix *R,
                       zzz_StructVector *r,
                       zzz_StructVector *rc,
@@ -55,7 +55,7 @@ zzz_SMGRestrictSetup( void             *smg_restrict_vdata,
                       zzz_Index        *findex,
                       zzz_Index        *fstride            )
 {
-   zzz_SMGRestrictData *smg_restrict_data = smg_restrict_vdata;
+   zzz_SMGRestrictData  *restrict_data = restrict_vdata;
 
    zzz_StructGrid       *grid;
    zzz_StructStencil    *stencil;
@@ -107,10 +107,10 @@ zzz_SMGRestrictSetup( void             *smg_restrict_vdata,
     * Set up the intadd data structure
     *----------------------------------------------------------*/
 
-   (smg_restrict_data -> R)           = R;
-   (smg_restrict_data -> compute_pkg) = compute_pkg;
-   (smg_restrict_data -> cindex)      = cindex;
-   (smg_restrict_data -> cstride)     = cstride;
+   (restrict_data -> R)           = R;
+   (restrict_data -> compute_pkg) = compute_pkg;
+   (restrict_data -> cindex)      = cindex;
+   (restrict_data -> cstride)     = cstride;
 
    return ierr;
 }
@@ -124,15 +124,15 @@ zzz_SMGRestrictSetup( void             *smg_restrict_vdata,
  *--------------------------------------------------------------------------*/
 
 int
-zzz_SMGRestrict( void             *smg_restrict_vdata,
+zzz_SMGRestrict( void             *restrict_vdata,
                  zzz_StructVector *r,
                  zzz_StructVector *rc                 )
 {
    int ierr;
 
-   zzz_SMGRestrictData  *smg_restrict_data = smg_restrict_vdata;
+   zzz_SMGRestrictData  *restrict_data = restrict_vdata;
 
-   zzz_StructMatrix     *R = (smg_restrict_data -> R);
+   zzz_StructMatrix     *R = (restrict_data -> R);
 
    zzz_ComputePkg       *compute_pkg;
    zzz_Index            *cindex;
@@ -172,9 +172,9 @@ zzz_SMGRestrict( void             *smg_restrict_vdata,
     * Initialize some things.
     *-----------------------------------------------------------------------*/
 
-   compute_pkg   = (smg_restrict_data -> compute_pkg);
-   cindex        = (smg_restrict_data -> cindex);
-   cstride       = (smg_restrict_data -> cstride);
+   compute_pkg   = (restrict_data -> compute_pkg);
+   cindex        = (restrict_data -> cindex);
+   cstride       = (restrict_data -> cstride);
 
    stencil       = zzz_StructMatrixStencil(R);
    stencil_shape = zzz_StructStencilShape(stencil);
@@ -264,16 +264,16 @@ zzz_SMGRestrict( void             *smg_restrict_vdata,
  *--------------------------------------------------------------------------*/
 
 int
-zzz_SMGRestrictFinalize( void *smg_restrict_vdata )
+zzz_SMGRestrictFinalize( void *restrict_vdata )
 {
    int ierr;
 
-   zzz_SMGRestrictData *smg_restrict_data = smg_restrict_vdata;
+   zzz_SMGRestrictData *restrict_data = restrict_vdata;
 
-   if (smg_restrict_data)
+   if (restrict_data)
    {
-      zzz_FreeComputePkg(smg_restrict_data -> compute_pkg);
-      zzz_TFree(smg_restrict_data);
+      zzz_FreeComputePkg(restrict_data -> compute_pkg);
+      zzz_TFree(restrict_data);
    }
 
    return ierr;

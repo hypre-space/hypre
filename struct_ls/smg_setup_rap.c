@@ -56,7 +56,9 @@ int
 zzz_SMGSetupRAPOp( zzz_StructMatrix *R,
                    zzz_StructMatrix *A,
                    zzz_StructMatrix *PT,
-                   zzz_StructMatrix *Ac )
+                   zzz_StructMatrix *Ac,
+                   zzz_Index        *cindex,
+                   zzz_Index        *cstride )
 {
    int ierr;
  
@@ -72,13 +74,13 @@ zzz_SMGSetupRAPOp( zzz_StructMatrix *R,
 /*--------------------------------------------------------------------------
  *    Set lower triangular (+ diagonal) coefficients
  *--------------------------------------------------------------------------*/
-      ierr = zzz_SMG2BuildRAPSym(A, PT, R, Ac);
+      ierr = zzz_SMG2BuildRAPSym(A, PT, R, Ac, cindex, cstride);
 
 /*--------------------------------------------------------------------------
  *    For non-symmetric A, set upper triangular coefficients as well
  *--------------------------------------------------------------------------*/
       if(!zzz_StructMatrixSymmetric(A))
-         ierr += zzz_SMG2BuildRAPNoSym(A, PT, R, Ac);
+         ierr += zzz_SMG2BuildRAPNoSym(A, PT, R, Ac, cindex, cstride);
 
       break;
 
@@ -87,13 +89,13 @@ zzz_SMGSetupRAPOp( zzz_StructMatrix *R,
 /*--------------------------------------------------------------------------
  *    Set lower triangular (+ diagonal) coefficients
  *--------------------------------------------------------------------------*/
-      ierr = zzz_SMG3BuildRAPSym(A, PT, R, Ac);
+      ierr = zzz_SMG3BuildRAPSym(A, PT, R, Ac, cindex, cstride);
 
 /*--------------------------------------------------------------------------
  *    For non-symmetric A, set upper triangular coefficients as well
  *--------------------------------------------------------------------------*/
       if(!zzz_StructMatrixSymmetric(A))
-         ierr += zzz_SMG3BuildRAPNoSym(A, PT, R, Ac);
+         ierr += zzz_SMG3BuildRAPNoSym(A, PT, R, Ac, cindex, cstride);
 
       break;
 

@@ -17,9 +17,10 @@ HEADERS =\
  smg.h
 
 FILES =\
+cyclic_reduction.c\
 general.c\
-smg3_setup_rap.c\
 smg2_setup_rap.c\
+smg3_setup_rap.c\
 smg.c\
 smg_intadd.c\
 smg_relax.c\
@@ -30,9 +31,6 @@ smg_setup_interp.c\
 smg_setup_rap.c\
 smg_setup_restrict.c\
 smg_solve.c
-
-#smg1_setup_rap.c\
-#smg2_setup_rap.c\
 
 OBJS = ${FILES:.c=.o}
 

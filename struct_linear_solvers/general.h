@@ -32,7 +32,7 @@
                             (unsigned int)(sizeof(type) * (count))) : NULL)
 
 /* note: the `else' is required to guarantee termination of the `if' */
-#define zzz_TFree(ptr) if (ptr) free(ptr); else
+#define zzz_TFree(ptr) if (ptr) {free(ptr); ptr = NULL;} else
 
 /*--------------------------------------------------------------------------
  * Define various functions

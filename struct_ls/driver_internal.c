@@ -55,12 +55,18 @@ char *argv[];
     *-----------------------------------------------------------*/
 
    A = zzz_ReadStructMatrix("zin_A", A_num_ghost);
-   b = zzz_ReadStructVector("zin_b", b_num_ghost);
+
+   b = zzz_NewStructVector(&MPI_COMM_WORLD, zzz_StructMatrixGrid(A));
+   zzz_SetStructVectorNumGhost(b, b_num_ghost);
+   zzz_InitializeStructVector(b);
+   zzz_AssembleStructVector(b);
+   zzz_SetStructVectorConstantValues(b, 1.0);
 
    x = zzz_NewStructVector(&MPI_COMM_WORLD, zzz_StructMatrixGrid(A));
    zzz_SetStructVectorNumGhost(x, x_num_ghost);
    zzz_InitializeStructVector(x);
    zzz_AssembleStructVector(x);
+   zzz_SetStructVectorConstantValues(x, 0.0);
  
    /*-----------------------------------------------------------
     * Solve the system
@@ -71,16 +77,19 @@ char *argv[];
    zzz_SMGSolve(smg_data, b, x);
 
    /*-----------------------------------------------------------
+    * Print the solution
+    *-----------------------------------------------------------*/
+
+   zzz_PrintStructVector("zout_x", x, 0);
+
+   /*-----------------------------------------------------------
     * Finalize things
     *-----------------------------------------------------------*/
 
    zzz_SMGFinalize(smg_data);
    zzz_FreeStructGrid(zzz_StructMatrixGrid(A));
-   zzz_FreeStructStencil(zzz_StructMatrixUserStencil(A));
    zzz_FreeStructMatrix(A);
-   zzz_FreeStructGrid(zzz_StructVectorGrid(b));
    zzz_FreeStructVector(b);
-   zzz_FreeStructGrid(zzz_StructVectorGrid(x));
    zzz_FreeStructVector(x);
 
    /* malloc debug stuff */
