@@ -14,6 +14,7 @@
 #include "Hypre_MPI_Com_Skel.h"
 #include "Hypre_MPI_Com_Data.h"
 #include "Hypre_StructJacobi.h"
+#include "Hypre_StructSMG.h"
 #include "math.h"
 
 /* *************************************************
@@ -277,12 +278,22 @@ void  impl_Hypre_PCG_SetPreconditioner
    struct Hypre_StructSolver_private_type *HSSPp = precond->d_table;
    HYPRE_StructSolver * precond_solver = HSSPp->hssolver;
 
+/* attempt to cast to the supported preconditioners ... */
    Hypre_StructJacobi precond_SJ = (Hypre_StructJacobi)
       Hypre_StructSolver_castTo( precond, "Hypre_StructJacobi" );
+   Hypre_StructSMG precond_SMG = (Hypre_StructSMG)
+      Hypre_StructSolver_castTo( precond, "Hypre_StructSMG" );
+/* call the SetPrecond function for whichever preconditioner we could cast to ... */
    if ( precond_SJ != 0 ) {
       HYPRE_StructPCGSetPrecond( *S,
                                  HYPRE_StructJacobiSolve,
                                  HYPRE_StructJacobiSetup,
+                                 *precond_solver );
+   }
+   else if ( precond_SMG != 0 ) {
+      HYPRE_StructPCGSetPrecond( *S,
+                                 HYPRE_StructSMGSolve,
+                                 HYPRE_StructSMGSetup,
                                  *precond_solver );
    }
    else {
