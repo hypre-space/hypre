@@ -485,7 +485,19 @@ char *file_name );
 
 int 
 hypre_ParCSRMatrixPrintIJ( hypre_ParCSRMatrix *matrix , 
+int		 base_i , 
+int		 base_j , 
 char *filename );
+
+
+
+
+int 
+hypre_ParCSRMatrixReadIJ( MPI_Comm 	 comm , 
+			 char *filename , 
+			 int		 *base_i_ptr , 
+			 int		 *base_j_ptr , 
+			 hypre_ParCSRMatrix **matrix_ptr );
 
 
 
@@ -680,6 +692,23 @@ hypre_VectorToParVector( MPI_Comm comm , hypre_Vector *v , int *vec_starts );
 
 hypre_Vector *
 hypre_ParVectorToVectorAll( hypre_ParVector *par_v );
+
+
+
+
+int 
+hypre_ParVectorPrintIJ( hypre_ParVector *vector , 
+int base_j , 
+char *filename );
+
+
+
+
+int 
+hypre_ParVectorReadIJ( MPI_Comm comm , 
+char *filename , 
+int *base_j_ptr , 
+hypre_ParVector **vector_ptr );
 
 
 #ifdef __cplusplus

@@ -434,3 +434,121 @@ hypre_ParVectorToVectorAll (hypre_ParVector *par_v)
 
    return vector;
 }
+
+/*--------------------------------------------------------------------------
+ * hypre_ParVectorPrintIJ
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_ParVectorPrintIJ( hypre_ParVector *vector,
+                        int              base_j,
+                        char            *filename )
+{
+   int ierr = 0;
+   MPI_Comm          comm         = hypre_ParVectorComm(vector);
+   int               global_size  = hypre_ParVectorGlobalSize(vector);
+   int              *partitioning = hypre_ParVectorPartitioning(vector);
+   hypre_Vector     *local_vector;
+   double           *local_data;
+   int               myid, num_procs, i, j, part0;
+   char              new_filename[255];
+   FILE             *file;
+
+   MPI_Comm_rank(comm, &myid);
+   MPI_Comm_size(comm, &num_procs);
+  
+   sprintf(new_filename,"%s.%05d", filename, myid);
+
+   if ((file = fopen(new_filename, "w")) == NULL)
+   {
+      printf("Error: can't open output file %s\n", new_filename);
+      exit(1);
+   }
+
+   local_vector = hypre_ParVectorLocalVector(vector);
+   local_data = hypre_VectorData(hypre_ParVectorLocalVector(vector));
+
+   fprintf(file, "%d \n", global_size);
+
+   for (i=0; i <= num_procs; i++)
+   {
+      fprintf(file, "%d \n", partitioning[i] + base_j);
+   }
+
+   part0 = partitioning[myid];
+   for (j = part0; j < partitioning[myid+1]; j++)
+   {
+      fprintf(file, "%d %le\n", j + base_j, local_data[j-part0]);
+   }
+
+   fclose(file);
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_ParVectorReadIJ
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_ParVectorReadIJ( MPI_Comm             comm,
+                       char                *filename,
+                       int                 *base_j_ptr,
+                       hypre_ParVector    **vector_ptr)
+{
+   int ierr = 0;
+   int               global_size;
+   hypre_ParVector  *vector;
+   hypre_Vector     *local_vector;
+   double           *local_data;
+   int              *partitioning;
+   int               base_j;
+
+   int               myid, num_procs, i, j, J;
+   char              new_filename[255];
+   FILE             *file;
+
+   MPI_Comm_size(comm, &num_procs);
+   MPI_Comm_rank(comm, &myid);
+  
+   sprintf(new_filename,"%s.%05d", filename, myid);
+
+   if ((file = fopen(new_filename, "r")) == NULL)
+   {
+      printf("Error: can't open output file %s\n", new_filename);
+      exit(1);
+   }
+
+   fscanf(file, "%d", &global_size);
+
+   partitioning = hypre_CTAlloc(int,num_procs+1);
+
+   fscanf(file, "%d", partitioning);
+   for (i = 1; i <= num_procs; i++)
+   {
+      fscanf(file, "%d", partitioning+i);
+      partitioning[i] -= partitioning[0];
+   }
+   base_j = partitioning[0];
+   partitioning[0] = 0;
+
+   vector = hypre_ParVectorCreate(comm, global_size,
+                                  partitioning);
+
+   hypre_ParVectorInitialize(vector);
+
+   local_vector = hypre_ParVectorLocalVector(vector);
+   local_data   = hypre_VectorData(local_vector);
+
+   for (j = 0; j < partitioning[myid+1] - partitioning[myid]; j++)
+   {
+      fscanf(file, "%d %le", &J, local_data + j);
+   }
+
+   fclose(file);
+
+   *base_j_ptr = base_j;
+   *vector_ptr = vector;
+
+   return ierr;
+}

@@ -363,6 +363,8 @@ hypre_ParCSRMatrixPrint( hypre_ParCSRMatrix *matrix,
 
 int
 hypre_ParCSRMatrixPrintIJ( hypre_ParCSRMatrix *matrix, 
+                           int		       base_i,
+                           int		       base_j,
                            char               *filename )
 {
    int ierr = 0;
@@ -375,17 +377,22 @@ hypre_ParCSRMatrixPrintIJ( hypre_ParCSRMatrix *matrix,
    hypre_CSRMatrix  *offd            = hypre_ParCSRMatrixOffd(matrix);
    int              *col_map_offd    = hypre_ParCSRMatrixColMapOffd(matrix);
    int               num_rows        = hypre_ParCSRMatrixNumRows(matrix);
+   int              *row_starts      = hypre_ParCSRMatrixRowStarts(matrix);
+   int              *col_starts      = hypre_ParCSRMatrixColStarts(matrix);
    double           *diag_data;
    int              *diag_i;
    int              *diag_j;
    double           *offd_data;
    int              *offd_i;
    int              *offd_j;
-   int               myid, i, j, I, J;
+   int               myid, num_procs, i, j, I, J;
    char              new_filename[255];
    FILE             *file;
+   int num_cols_offd, num_nonzeros_diag, num_nonzeros_offd;
+   int num_cols, row, col;
 
    MPI_Comm_rank(comm, &myid);
+   MPI_Comm_size(comm, &num_procs);
    
    sprintf(new_filename,"%s.%05d", filename, myid);
 
@@ -395,41 +402,234 @@ hypre_ParCSRMatrixPrintIJ( hypre_ParCSRMatrix *matrix,
       exit(1);
    }
 
-   fprintf(file, "%d, %d\n", global_num_rows, global_num_cols);
-   fprintf(file, "%d\n", num_rows);
+   num_cols = hypre_CSRMatrixNumCols(diag);
+   num_cols_offd = hypre_CSRMatrixNumCols(offd);
+   num_nonzeros_offd = hypre_CSRMatrixNumNonzeros(offd);
+   num_nonzeros_diag = hypre_CSRMatrixNumNonzeros(diag);
 
    diag_data = hypre_CSRMatrixData(diag);
    diag_i    = hypre_CSRMatrixI(diag);
    diag_j    = hypre_CSRMatrixJ(diag);
-   if (offd)
+   offd_i    = hypre_CSRMatrixI(offd);
+   if (num_nonzeros_offd)
    {
       offd_data = hypre_CSRMatrixData(offd);
-      offd_i    = hypre_CSRMatrixI(offd);
       offd_j    = hypre_CSRMatrixJ(offd);
    }
+
+   fprintf(file, "%d %d\n", global_num_rows, global_num_cols);
+   fprintf(file, "%d %d %d\n", num_rows, num_cols, num_cols_offd);
+   fprintf(file, "%d %d\n", num_nonzeros_diag, num_nonzeros_offd);
+
+   for (i=0; i <= num_procs; i++)
+   {
+	row = row_starts[i]+base_i;
+	col = col_starts[i]+base_j;
+        fprintf(file, "%d %d\n", row, col);
+   }
+
    for (i = 0; i < num_rows; i++)
    {
-      I = first_row_index + i;
+      I = first_row_index + i + base_i;
 
       /* print diag columns */
       for (j = diag_i[i]; j < diag_i[i+1]; j++)
       {
-         J = first_col_diag + diag_j[j];
-         fprintf(file, "%d, %d, %e\n", I, J, diag_data[j]);
+         J = first_col_diag + diag_j[j] + base_j;
+         fprintf(file, "%d %d %le\n", I, J, diag_data[j]);
       }
 
       /* print offd columns */
-      if ( offd && offd_i && hypre_CSRMatrixNumNonzeros(offd)>0 )
+      if ( num_nonzeros_offd)
       {
          for (j = offd_i[i]; j < offd_i[i+1]; j++)
          {
-            J = col_map_offd[offd_j[j]];
-            fprintf(file, "%d, %d, %e\n", I, J, offd_data[j]);
+            J = col_map_offd[offd_j[j]] + base_j;
+            fprintf(file, "%d %d %e\n", I, J, offd_data[j]);
          }
       }
    }
 
    fclose(file);
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_ParCSRMatrixReadIJ
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_ParCSRMatrixReadIJ( MPI_Comm 	       comm,
+			  char                *filename,
+			  int		      *base_i_ptr,
+			  int		      *base_j_ptr,
+			  hypre_ParCSRMatrix **matrix_ptr) 
+{
+   int ierr = 0;
+   int               global_num_rows;
+   int               global_num_cols;
+   int               first_row_index;
+   int               first_col_diag;
+   int               last_col_diag;
+   hypre_ParCSRMatrix *matrix;
+   hypre_CSRMatrix  *diag;
+   hypre_CSRMatrix  *offd;
+   int              *col_map_offd;
+   int              *row_starts;
+   int              *col_starts;
+   int               num_rows;
+   int               base_i, base_j;
+   double           *diag_data;
+   int              *diag_i;
+   int              *diag_j;
+   double           *offd_data;
+   int              *offd_i;
+   int              *offd_j;
+   int              *aux_offd_j;
+   int               myid, num_procs, i, j, I, J;
+   char              new_filename[255];
+   FILE             *file;
+   int num_cols_offd, num_nonzeros_diag, num_nonzeros_offd;
+   int equal, i_col, num_cols;
+   int diag_cnt, offd_cnt, row_cnt;
+   double data;
+
+   MPI_Comm_size(comm, &num_procs);
+   MPI_Comm_rank(comm, &myid);
+   
+   sprintf(new_filename,"%s.%05d", filename, myid);
+
+   if ((file = fopen(new_filename, "r")) == NULL)
+   {
+      printf("Error: can't open output file %s\n", new_filename);
+      exit(1);
+   }
+
+   fscanf(file, "%d %d", &global_num_rows, &global_num_cols);
+   fscanf(file, "%d %d %d", &num_rows, &num_cols, &num_cols_offd);
+   fscanf(file, "%d %d", &num_nonzeros_diag, &num_nonzeros_offd);
+
+   row_starts = hypre_CTAlloc(int,num_procs+1);
+   col_starts = hypre_CTAlloc(int,num_procs+1);
+
+   for (i = 0; i <= num_procs; i++)
+      fscanf(file, "%d %d", &row_starts[i], &col_starts[i]);
+
+   base_i = row_starts[0];
+   base_j = col_starts[0];
+
+   equal = 1;
+   for (i = 0; i <= num_procs; i++)
+   {
+      row_starts[i] -= base_i;      
+      col_starts[i] -= base_j;
+      if (row_starts[i] != col_starts[i]) equal = 0;
+   }
+
+   if (equal)
+   {
+      hypre_TFree(col_starts);
+      col_starts = row_starts;
+   }
+   matrix = hypre_ParCSRMatrixCreate(comm, global_num_rows, global_num_cols,
+				     row_starts, col_starts,
+				     num_cols_offd,
+				     num_nonzeros_diag, num_nonzeros_offd);
+   hypre_ParCSRMatrixInitialize(matrix);
+ 
+   diag = hypre_ParCSRMatrixDiag(matrix);
+   offd = hypre_ParCSRMatrixOffd(matrix);
+
+   diag_data = hypre_CSRMatrixData(diag);
+   diag_i    = hypre_CSRMatrixI(diag);
+   diag_j    = hypre_CSRMatrixJ(diag);
+
+   offd_i    = hypre_CSRMatrixI(offd);
+   if (num_nonzeros_offd)
+   {
+      offd_data = hypre_CSRMatrixData(offd);
+      offd_j    = hypre_CSRMatrixJ(offd);
+   }
+
+   first_row_index = hypre_ParCSRMatrixFirstRowIndex(matrix);
+   first_col_diag = hypre_ParCSRMatrixFirstColDiag(matrix);
+   last_col_diag = first_col_diag+num_cols-1;
+
+   diag_cnt = 0;
+   offd_cnt = 0;
+   row_cnt = 0;
+   for (i = 0; i < num_nonzeros_diag+num_nonzeros_offd; i++)
+   {
+      /* read values */
+      fscanf(file, "%d %d %le", &I, &J, &data);
+      I = I-base_i-first_row_index;       
+      J -= base_j;
+      if (I > row_cnt)
+      {
+	 diag_i[I] = diag_cnt;
+	 offd_i[I] = offd_cnt;
+	 row_cnt++;
+      }
+      if (J < first_col_diag || J > last_col_diag)
+      {
+	 offd_j[offd_cnt] = J;       
+	 offd_data[offd_cnt++] = data;
+      }
+      else       
+      {
+	 diag_j[diag_cnt] = J - first_col_diag;       
+	 diag_data[diag_cnt++] = data;
+      }
+   }
+   diag_i[num_rows] = diag_cnt;
+   offd_i[num_rows] = offd_cnt;
+
+   fclose(file);
+
+   /*  generate col_map_offd */
+   if (num_nonzeros_offd)
+   {
+      aux_offd_j = hypre_CTAlloc(int, num_nonzeros_offd);
+      for (i=0; i < num_nonzeros_offd; i++)
+         aux_offd_j[i] = offd_j[i];
+      qsort0(aux_offd_j,0,num_nonzeros_offd-1);
+      col_map_offd = hypre_ParCSRMatrixColMapOffd(matrix);
+      col_map_offd[0] = aux_offd_j[0];
+      offd_cnt = 0;
+      for (i=1; i < num_nonzeros_offd; i++)
+      {
+         if (aux_offd_j[i] > col_map_offd[offd_cnt])
+            col_map_offd[++offd_cnt] = aux_offd_j[i];
+      }
+      for (i=0; i < num_nonzeros_offd; i++)
+      {
+	 offd_j[i] = hypre_BinarySearch(col_map_offd, offd_j[i], num_cols_offd);
+      }
+      hypre_TFree(aux_offd_j);
+   }
+
+   /* move diagonal element in first position in each row */
+   for (i=0; i < num_rows; i++)
+   {
+      i_col = diag_i[i];
+      for (j=i_col; j < diag_i[i+1]; j++)
+      {
+	 if (diag_j[j] == i)
+	 {
+	    diag_j[j] = diag_j[i_col];
+	    data = diag_data[j];
+	    diag_data[j] = diag_data[i_col];
+	    diag_data[i_col] = data;
+	    diag_j[i_col] = i;
+      	    break;
+	 }
+      }
+   }
+	  
+   *base_i_ptr = base_i;
+   *base_j_ptr = base_j;
+   *matrix_ptr = matrix;
 
    return ierr;
 }
