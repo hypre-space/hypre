@@ -64,7 +64,7 @@ then
      $AMG_MKDIR $AMG_BIN
    fi
 
-   UTILITIES="amgstrip convert_icf3d readysmp.m"
+   UTILITIES="amgstrip amgmvio convert_icf3d readysmp.m"
 
    for i in $UTILITIES
    do
