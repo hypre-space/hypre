@@ -13,6 +13,7 @@
 #include "bHYPRE_Operator.h"
 #include "bHYPRE_Solver.h"
 #include "bHYPRE_StructSMG.h"
+#include "bHYPRE_StructPFMG.h"
 #include "bHYPRE_PCG.h"
 #include "bHYPRE_StructGrid.h"
 #include "bHYPRE_StructStencil.h"
@@ -37,6 +38,13 @@ int SetStencilBndry
 ( bHYPRE_StructMatrix A_b, bHYPRE_StructGrid grid, int* periodic );
 
 int
+AddValuesMatrix( bHYPRE_StructMatrix A_b,
+                 int dim, int nblocks, int ** ilower, int ** iupper,
+                 double cx, double cy, double cz,
+                 double conx, double cony, double conz,
+                 int symmetric, int constant_coefficient );
+
+int
 main( int   argc,
       char *argv[] )
 {
@@ -48,17 +56,12 @@ main( int   argc,
    int                 bx, by, bz;
    int                 px, py, pz;
    double              cx, cy, cz;
+   double              conx, cony, conz;
    int                 solver_id;
-
-   /*double              dxyz[3];*/
+   int                 relax, rap;
 
    int                 A_num_ghost[6] = {0, 0, 0, 0, 0, 0};
-   /* obsolete double              doubtemp;*/
                      
-/* obsolete...
-   bHYPRE_StructBuildMatrix MatBldr;
-   bHYPRE_StructBuildVector VecBldr;
-*/
 /* not currently used   bHYPRE_Operator lo_test;*/
    bHYPRE_StructMatrix  A_b;
 /* not currently used   bHYPRE_Operator A_LO;*/
@@ -72,6 +75,7 @@ main( int   argc,
    bHYPRE_Solver  precond;
 /*   bHYPRE_StructJacobi  solver_SJ;*/
    bHYPRE_StructSMG solver_SMG;
+   bHYPRE_StructPFMG solver_PFMG;
    bHYPRE_PCG  solver_PCG;
 
    int zero = 0;
@@ -82,18 +86,13 @@ main( int   argc,
    struct sidl_int__array* sidl_periodic;
    struct sidl_int__array* sidl_offsets;
    struct sidl_int__array* sidl_num_ghost;
-   struct sidl_int__array* sidl_stencil_indices;
+   struct sidl_int__array* sidl_constant_stencil_points;
    struct sidl_double__array* sidl_values;
 
+   int constant_coefficient = 0;
+   int symmetric = 1;
    MPI_Comm comm = MPI_COMM_WORLD;
-   int symmetric;
 
-/*    HYPRE_StructMatrix  A; */
-/*    HYPRE_StructVector  b; */
-/*    HYPRE_StructVector  x; */
-
-/*    HYPRE_StructSolver  solver; */
-/*    HYPRE_StructSolver  precond; */
    int                 num_iterations;
    int                 time_index;
    double              final_res_norm;
@@ -114,11 +113,10 @@ main( int   argc,
    int                 periodic[3];
 
    int               **offsets;
+   int               *constant_stencil_points = NULL;
 
    bHYPRE_StructGrid grid;
    bHYPRE_StructStencil stencil;
-/*    HYPRE_StructGrid    grid; */
-/*    HYPRE_StructStencil stencil; */
 
    int                *stencil_indices;
    double             *values;
@@ -155,6 +153,8 @@ main( int   argc,
 
    skip = 0;
    jump = 0;
+   rap = 0;
+   relax = 1;
 
    nx = 10;
    ny = 10;
@@ -171,6 +171,9 @@ main( int   argc,
    cx = 1.0;
    cy = 1.0;
    cz = 1.0;
+   conx = 0.0;
+   cony = 0.0;
+   conz = 0.0;
 
    n_pre  = 1;
    n_post = 1;
@@ -227,6 +230,13 @@ main( int   argc,
          cx = atof(argv[arg_index++]);
          cy = atof(argv[arg_index++]);
          cz = atof(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-convect") == 0 )
+      {
+         arg_index++;
+         conx = atof(argv[arg_index++]);
+         cony = atof(argv[arg_index++]);
+         conz = atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-v") == 0 )
       {
@@ -287,6 +297,8 @@ main( int   argc,
       printf("                         0  - SMG\n");
       printf("                         1  - PFMG\n");
       printf("                         2  - SparseMSG\n");
+      printf("                         3  - PFMG constant coefficients\n");
+      printf("                         4  - PFMG constant coefficients variable diagonal\n");
       printf("                         10 - CG with SMG precond\n");
       printf("                         11 - CG with PFMG precond\n");
       printf("                         12 - CG with SparseMSG precond\n");
@@ -321,6 +333,12 @@ main( int   argc,
       exit(1);
    }
 
+   if ((conx != 0.0 || cony !=0 || conz != 0) && symmetric == 1 )
+   {
+      printf("\n*** Warning: convection produces non-symetric matrix ***\n\n");
+      symmetric = 0;
+   }
+
 
    /*-----------------------------------------------------------
     * Print driver parameters
@@ -334,6 +352,7 @@ main( int   argc,
       printf("  (bx, by, bz)    = (%d, %d, %d)\n", bx, by, bz);
       printf("  (px, py, pz)    = (%d, %d, %d)\n", px, py, pz);
       printf("  (cx, cy, cz)    = (%f, %f, %f)\n", cx, cy, cz);
+      printf("  (conx,cony,conz)= (%f, %f, %f)\n", conx, cony, conz);
       printf("  (n_pre, n_post) = (%d, %d)\n", n_pre, n_post);
       printf("  dim             = %d\n", dim);
       printf("  skip            = %d\n", skip);
@@ -380,7 +399,7 @@ main( int   argc,
 #endif
 
    /*-----------------------------------------------------------
-    * Set up the grid structure
+    * Set up the grid structure and some of the stencil
     *-----------------------------------------------------------*/
 
    switch (dim)
@@ -394,6 +413,18 @@ main( int   argc,
          offsets[0][0] = -1; 
          offsets[1] = hypre_CTAlloc(int, 1);
          offsets[1][0] = 0; 
+         if ( solver_id == 3 || solver_id == 13)
+            {
+               constant_stencil_points = hypre_CTAlloc(int, 2);
+               constant_stencil_points[0] = 0;
+               constant_stencil_points[1] = 1;
+            }
+         if ( solver_id == 4 || solver_id == 14)
+            {
+               constant_stencil_points = hypre_CTAlloc(int, 2);
+               constant_stencil_points[0] = 0;
+               constant_stencil_points[1] = 0;
+            }
          /* compute p from P and myid */
          p = myid % P;
          break;
@@ -411,6 +442,20 @@ main( int   argc,
          offsets[2] = hypre_CTAlloc(int, 2);
          offsets[2][0] = 0; 
          offsets[2][1] = 0; 
+         if ( solver_id == 3 || solver_id == 13)
+            {
+               constant_stencil_points = hypre_CTAlloc(int, 3);
+               constant_stencil_points[0] = 0;
+               constant_stencil_points[1] = 1;
+               constant_stencil_points[2] = 2;
+            }
+         if ( solver_id == 4 || solver_id == 14)
+            {
+               constant_stencil_points = hypre_CTAlloc(int, 3);
+               constant_stencil_points[0] = 0;
+               constant_stencil_points[1] = 1;
+               constant_stencil_points[2] = 1;
+            }
          /* compute p,q from P,Q and myid */
          p = myid % P;
          q = (( myid - p)/P) % Q;
@@ -436,6 +481,22 @@ main( int   argc,
          offsets[3][0] = 0; 
          offsets[3][1] = 0; 
          offsets[3][2] = 0; 
+         if ( solver_id == 3 || solver_id == 13)
+            {
+               constant_stencil_points = hypre_CTAlloc(int, 4);
+               constant_stencil_points[0] = 0;
+               constant_stencil_points[1] = 1;
+               constant_stencil_points[2] = 2;
+               constant_stencil_points[3] = 3;
+            }
+         if ( solver_id == 4 || solver_id == 14)
+            {
+               constant_stencil_points = hypre_CTAlloc(int, 4);
+               constant_stencil_points[0] = 0;
+               constant_stencil_points[1] = 1;
+               constant_stencil_points[2] = 2;
+               constant_stencil_points[3] = 2;
+            }
          /* compute p,q,r from P,Q,R and myid */
          p = myid % P;
          q = (( myid - p)/P) % Q;
@@ -523,14 +584,6 @@ main( int   argc,
 
    bHYPRE_StructGrid_Assemble( grid );
 
-/*    HYPRE_StructGridCreate(MPI_COMM_WORLD, dim, &grid); */
-/*    for (ib = 0; ib < nblocks; ib++) */
-/*    { */
-/*       HYPRE_StructGridSetExtents(grid, ilower[ib], iupper[ib]); */
-/*    } */
-/*    HYPRE_StructGridSetPeriodic(grid, periodic); */
-/*    HYPRE_StructGridAssemble(grid); */
-
    /*-----------------------------------------------------------
     * Set up the stencil structure
     *-----------------------------------------------------------*/
@@ -551,26 +604,18 @@ main( int   argc,
    };
    sidl_int__array_deleteRef( sidl_offsets );
 
-/*    HYPRE_StructStencilCreate(dim, dim + 1, &stencil); */
-/*    for (s = 0; s < dim + 1; s++) */
-/*    { */
-/*       HYPRE_StructStencilSetElement(stencil, s, offsets[s]); */
-/*    } */
-
    /*-----------------------------------------------------------
     * Set up the matrix structure
     *-----------------------------------------------------------*/
  
-/*    HYPRE_StructMatrixCreate(MPI_COMM_WORLD, grid, stencil, &A); */
-/*    HYPRE_StructMatrixSetSymmetric(A, 1); */
-/*    HYPRE_StructMatrixSetNumGhost(A, A_num_ghost); */
-/*    HYPRE_StructMatrixInitialize(A); */
-/*  jfp: it is important to set numGhost before Initialize.
-    Note that HYPRE has an Assemble function too. */
+   if ( solver_id == 3 || solver_id == 13 ) constant_coefficient = 1;
+   else if ( solver_id == 4 || solver_id == 14 ) constant_coefficient = 2;
 
-   symmetric = 1;
-   /* ... this test code, and probably the present Babel interface, only works
-      with symmetric matrix storage */
+   /* This test code, and probably the present Babel interface, has only
+      been tested, and probably only works, with symmetric matrix storage.
+      It may not be a big deal to test & support nonsymmetric storage. */
+   assert( symmetric== 1 );
+
    A_b = bHYPRE_StructMatrix__create();
    ierr += bHYPRE_StructMatrix_SetCommunicator( A_b, (void *) comm );
    ierr += bHYPRE_StructMatrix_SetGrid( A_b, grid );
@@ -581,145 +626,30 @@ main( int   argc,
    sidl_num_ghost= sidl_int__array_borrow( A_num_ghost, 1, &zero, &size, &one );
    ierr += bHYPRE_StructMatrix_SetNumGhost( A_b, sidl_num_ghost );
    sidl_int__array_deleteRef( sidl_num_ghost );
-   ierr += bHYPRE_StructMatrix_Initialize( A_b );
 
-/* obsolete...
-   num_ghost.lower[0] = 0;
-   num_ghost.upper[0] = 2*dim;
-   num_ghost.data = A_num_ghost;
-   MatBldr = bHYPRE_StructMatrixBuilder_Constructor
-      ( grid, stencil, symmetric, num_ghost );
-   bHYPRE_StructMatrixBuilder_Start( MatBldr, grid, stencil, symmetric, num_ghost );
-*/
+   if ( solver_id == 3 || solver_id == 4 || solver_id == 13 || solver_id == 14 )
+   {
+      size = dim+1;
+      sidl_constant_stencil_points = sidl_int__array_borrow
+         ( constant_stencil_points, 1, &zero, &size, &one );
+      bHYPRE_StructMatrix_SetConstantEntries( A_b, dim+1, sidl_constant_stencil_points );
+      sidl_int__array_deleteRef( sidl_constant_stencil_points );
+   }
+
+   ierr += bHYPRE_StructMatrix_Initialize( A_b );
 
    /*-----------------------------------------------------------
     * Fill in the matrix elements
     *-----------------------------------------------------------*/
 
-   values = hypre_CTAlloc(double, (dim +1)*volume);
-
-   /* Set the coefficients for the grid */
-   for (i = 0; i < (dim + 1)*volume; i += (dim + 1))
-   {
-      for (s = 0; s < (dim + 1); s++)
-      {
-         stencil_indices[s] = s;
-         switch (dim)
-         {
-            case 1:
-               values[i  ] = -cx;
-               values[i+1] = 2.0*(cx);
-               break;
-            case 2:
-               values[i  ] = -cx;
-               values[i+1] = -cy;
-               values[i+2] = 2.0*(cx+cy);
-               break;
-            case 3:
-               values[i  ] = -cx;
-               values[i+1] = -cy;
-               values[i+2] = -cz;
-               values[i+3] = 2.0*(cx+cy+cz);
-               break;
-         }
-      }
-   }
-   sidl_lower= sidl_int__array_create1d( dim );
-   sidl_upper= sidl_int__array_create1d( dim );
-   size = dim+1;
-   sidl_stencil_indices= sidl_int__array_borrow( stencil_indices, 1, &zero, &size, &one );
-   size = (dim+1)*volume;
-   sidl_values= sidl_double__array_borrow( values, 1, &zero, &size, &one );
-   for (ib = 0; ib < nblocks; ib++)
-   {
-      for ( i=0; i < dim; i++ )
-      {
-         sidl_int__array_set1( sidl_lower, i, ilower[ib][i] );
-         sidl_int__array_set1( sidl_upper, i, iupper[ib][i] );
-      }
-      ierr += bHYPRE_StructMatrix_SetBoxValues
-         ( A_b, sidl_lower, sidl_upper, dim+1,
-           sidl_stencil_indices,
-           sidl_values );
-   }
-   sidl_int__array_deleteRef( sidl_lower );
-   sidl_int__array_deleteRef( sidl_upper );
-   sidl_int__array_deleteRef( sidl_stencil_indices );
-   sidl_double__array_deleteRef( sidl_values );
-/* obsolete...
-   intvals.lower[0] = 0;
-   intvals.upper[0] = dim+1;
-   doubvals.lower[0] = 0;
-   doubvals.upper[0] = (dim+1)*volume;
-   intvals.data = stencil_indices;
-   doubvals.data = values;
-   for (ib = 0; ib < nblocks; ib++)
-   {
-      bHYPRE_StructMatrixBuilder_SetBoxValues( MatBldr, box[ib], intvals, doubvals );
-   }
-*/
-/*       HYPRE_StructMatrixSetBoxValues(A, ilower[ib], iupper[ib], (dim+1), */
-/*                                      stencil_indices, values); */
+   ierr += AddValuesMatrix( A_b, dim, nblocks, ilower, iupper,
+                            cx, cy, cz, conx, cony, conz,
+                            symmetric, constant_coefficient );
 
    /* Zero out stencils reaching to real boundary */
-   /* this section moved to a new function, SetStencilBndry */
-   ierr += SetStencilBndry( A_b, grid, periodic); 
-#if 0
-   for (i = 0; i < volume; i++)
-   {
-      values[i] = 0.0;
-   }
-   for (d = 0; d < dim; d++)
-   {
-      for (ib = 0; ib < nblocks; ib++)
-      {
-         if( ilower[ib][d] == istart[d] && periodic[d] == 0 )
-         {  /* at boundary */
-
-            /* Make boundary box by flattening out box[ib] for direction d. */
-            isave = iupper[ib][d];
-            iupper[ib][d] = istart[d];
-/* obsolete
-            intvals_lo.lower[0] = 0;
-            intvals_lo.upper[0] = dim;
-            intvals_hi.lower[0] = 0;
-            intvals_hi.upper[0] = dim;
-            intvals_lo.data = ilower[ib];
-            intvals_hi.data = iupper[ib];
-            bbox = bHYPRE_Box_Constructor( intvals_lo, intvals_hi, dim );
-            bHYPRE_Box_Setup( bbox );
-*/
-            /* Put stencil point d (the one in direction d from the "middle"),
-               into stencil_indices, so the corresponding matrix entry will
-               get zeroed. */
-            stencil_indices[0] = d;
-
-/* obsolete
-            intvals.lower[0] = 0;
-            intvals.upper[0] = 1;
-            intvals.data = stencil_indices;
-            doubvals.lower[0] = 0;
-            doubvals.upper[0] = volume;
-            doubvals.data = values;
-            bHYPRE_StructMatrixBuilder_SetBoxValues
-               ( MatBldr, bbox, intvals, doubvals );
-*/
-/*             HYPRE_StructMatrixSetBoxValues(A, ilower[ib], iupper[ib], */
-/*                                            1, stencil_indices, values); */
-            iupper[ib][d] = isave;
-            bHYPRE_Box_destructor( bbox );
-         }
-      }
-   }
-#endif
+   if ( constant_coefficient == 0 ) ierr += SetStencilBndry( A_b, grid, periodic); 
 
    ierr += bHYPRE_StructMatrix_Assemble( A_b );
-/* obsolete...
-   ierr += bHYPRE_StructMatrixBuilder_Setup( MatBldr );
-   ierr += bHYPRE_StructMatrixBuilder_GetConstructedObject( MatBldr, &A_LO );
-   A_b = (bHYPRE_StructMatrix) bHYPRE_LinearOperator_castTo
-      ( A_LO, "bHYPRE.StructMatrix" );
-*/
 
 #if 0
    bHYPRE_StructMatrix_print( A_b );
@@ -738,12 +668,6 @@ main( int   argc,
    ierr += bHYPRE_StructVector_SetCommunicator( b_SV, (void *) comm );
    ierr += bHYPRE_StructVector_SetGrid( b_SV, grid );
    ierr += bHYPRE_StructVector_Initialize( b_SV );
-/* obsolete...
-   VecBldr = bHYPRE_StructVectorBuilder_Constructor( grid );
-   bHYPRE_StructVectorBuilder_Start( VecBldr, grid );
-*/
-/*    HYPRE_StructVectorCreate(MPI_COMM_WORLD, grid, stencil, &b); */
-/*    HYPRE_StructVectorInitialize(b); */
 
    /*-----------------------------------------------------------
     * For periodic b.c. in all directions, need rhs to satisfy 
@@ -785,32 +709,13 @@ main( int   argc,
    sidl_int__array_deleteRef( sidl_upper );
    sidl_double__array_deleteRef( sidl_values );
 
-/* obsolete...
-   doubvals.data = values;
-   for (ib = 0; ib < nblocks; ib++)
-   {
-      bHYPRE_StructVectorBuilder_SetBoxValues( VecBldr, box[ib], doubvals );
-   }
-*/
-/*       HYPRE_StructVectorSetBoxValues(b, ilower[ib], iupper[ib], values); */
-/*   HYPRE_StructVectorAssemble(b); */
    bHYPRE_StructVector_Assemble( b_SV );
-/* obsolete...
-   bHYPRE_StructVectorBuilder_GetConstructedObject( VecBldr, &b_V );
-   b_SV = (bHYPRE_StructVector) bHYPRE_Vector_castTo
-      ( b_V, "bHYPRE.StructVector" );
-*/
 
 #if 0
    bHYPRE_StructVector_Print( b_SV );
 /*   HYPRE_StructVectorPrint("driver.out.b", b, 0); */
 #endif
 
-/* obsolete...
-   bHYPRE_StructVectorBuilder_Start( VecBldr, grid );
-*/
-/*    HYPRE_StructVectorCreate(MPI_COMM_WORLD, grid, stencil, &x); */
-/*    HYPRE_StructVectorInitialize(x); */
    x_SV = bHYPRE_StructVector__create();
    ierr += bHYPRE_StructVector_SetCommunicator( x_SV, (void *) comm );
    ierr += bHYPRE_StructVector_SetGrid( x_SV, grid );
@@ -837,21 +742,6 @@ main( int   argc,
    sidl_double__array_deleteRef( sidl_values );
 
    bHYPRE_StructVector_Assemble( b_SV );
-/* obsolete...
-   doubvals.data = values;
-   for (ib = 0; ib < nblocks; ib++)
-   {
-      bHYPRE_StructVectorBuilder_SetBoxValues( VecBldr, box[ib], doubvals );
-   }
-*/
-/*       HYPRE_StructVectorSetBoxValues(x, ilower[ib], iupper[ib], values); */
-/*   HYPRE_StructVectorAssemble(x); */
-/* obsolete...
-   bHYPRE_StructVectorBuilder_Setup( VecBldr );
-   bHYPRE_StructVectorBuilder_GetConstructedObject( VecBldr, &x_V );
-   x_SV = (bHYPRE_StructVector) bHYPRE_Vector_castTo
-      ( x_V, "bHYPRE.StructVector" );
-*/
 
 #if 0
    bHYPRE_StructVector_Print( x_SV );
@@ -911,7 +801,155 @@ main( int   argc,
    }
 #endif
 
-/* Conjugate Gradient */
+   /*-----------------------------------------------------------
+    * Solve the system using SMG
+    *-----------------------------------------------------------*/
+
+   if (solver_id == 0)
+   {
+      time_index = hypre_InitializeTiming("SMG Setup");
+      hypre_BeginTiming(time_index);
+
+      solver_SMG = bHYPRE_StructSMG__create();
+      ierr += bHYPRE_StructSMG_SetCommunicator( solver_SMG, (void *) comm );
+      bHYPRE_StructSMG_SetIntParameter( solver_SMG, "memory use", 0 );
+      bHYPRE_StructSMG_SetIntParameter( solver_SMG, "max iter", 50 );
+      bHYPRE_StructSMG_SetDoubleParameter( solver_SMG, "tol", 1.0e-6 );
+      bHYPRE_StructSMG_SetIntParameter( solver_SMG, "rel change", 0 );
+      bHYPRE_StructSMG_SetIntParameter( solver_SMG, "num prerelax", n_pre );
+      bHYPRE_StructSMG_SetIntParameter( solver_SMG, "num postrelax", n_post );
+      bHYPRE_StructSMG_SetIntParameter( solver_SMG, "logging", 1 );
+
+      A_O = bHYPRE_Operator__cast( A_b );
+      ierr += bHYPRE_StructSMG_SetOperator( solver_SMG, A_O );
+      b_V = bHYPRE_Vector__cast( b_SV );
+      x_V = bHYPRE_Vector__cast( x_SV );
+      ierr += bHYPRE_StructSMG_Setup( solver_SMG, b_V, x_V );
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+      time_index = hypre_InitializeTiming("SMG Solve");
+      hypre_BeginTiming(time_index);
+
+      bHYPRE_StructSMG_Apply( solver_SMG, b_V, &x_V );
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+   
+      ierr += bHYPRE_StructSMG_GetNumIterations( solver_SMG, &num_iterations );
+      ierr += bHYPRE_StructSMG_GetRelResidualNorm( solver_SMG, &final_res_norm );
+
+      bHYPRE_StructSMG_deleteRef( solver_SMG );
+   }
+
+
+   /*-----------------------------------------------------------
+    * Solve the system using PFMG
+    *-----------------------------------------------------------*/
+
+   else if ( solver_id == 1 || solver_id == 3 || solver_id == 4 )
+   {
+      time_index = hypre_InitializeTiming("PFMG Setup");
+      hypre_BeginTiming(time_index);
+
+      solver_PFMG = bHYPRE_StructPFMG__create();
+      ierr += bHYPRE_StructPFMG_SetCommunicator( solver_PFMG, (void *) comm );
+      bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "max iter", 50 );
+      bHYPRE_StructPFMG_SetDoubleParameter( solver_PFMG, "tol", 1.0e-6 );
+      bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "rel change", 0 );
+      /* weighted Jacobi = 1; red-black GS = 2 */
+      bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "relax type", relax );
+      bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "num prerelax", n_pre );
+      bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "num postrelax", n_post );
+      bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "skip relax", skip );
+      /*HYPRE_StructPFMGSetDxyz(solver, dxyz);*/
+      bHYPRE_StructPFMG_SetLogging( solver_PFMG, 1 );
+      bHYPRE_StructPFMG_SetPrintLevel( solver_PFMG, 1 );
+
+      bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "rap type", rap );
+
+      A_O = bHYPRE_Operator__cast( A_b );
+      ierr += bHYPRE_StructPFMG_SetOperator( solver_PFMG, A_O );
+      b_V = bHYPRE_Vector__cast( b_SV );
+      x_V = bHYPRE_Vector__cast( x_SV );
+      ierr += bHYPRE_StructPFMG_Setup( solver_PFMG, b_V, x_V );
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+      time_index = hypre_InitializeTiming("PFMG Solve");
+      hypre_BeginTiming(time_index);
+
+      bHYPRE_StructPFMG_Apply( solver_PFMG, b_V, &x_V );
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+   
+      ierr += bHYPRE_StructPFMG_GetNumIterations( solver_PFMG, &num_iterations );
+      ierr += bHYPRE_StructPFMG_GetRelResidualNorm( solver_PFMG, &final_res_norm );
+
+      bHYPRE_StructPFMG_deleteRef( solver_PFMG );
+   }
+
+   /*-----------------------------------------------------------
+    * Solve the system using SparseMSG
+    *-----------------------------------------------------------*/
+
+   else if (solver_id == 2)
+   {
+#if 0
+/* most solvers not implemented yet (JfP jan2000) ... */
+      time_index = hypre_InitializeTiming("SparseMSG Setup");
+      hypre_BeginTiming(time_index);
+
+      HYPRE_StructSparseMSGCreate(MPI_COMM_WORLD, &solver);
+      HYPRE_StructSparseMSGSetMaxIter(solver, 50);
+      HYPRE_StructSparseMSGSetJump(solver, jump);
+      HYPRE_StructSparseMSGSetTol(solver, 1.0e-06);
+      HYPRE_StructSparseMSGSetRelChange(solver, 0);
+      /* weighted Jacobi = 1; red-black GS = 2 */
+      HYPRE_StructSparseMSGSetRelaxType(solver, 1);
+      HYPRE_StructSparseMSGSetNumPreRelax(solver, n_pre);
+      HYPRE_StructSparseMSGSetNumPostRelax(solver, n_post);
+      HYPRE_StructSparseMSGSetLogging(solver, 1);
+      HYPRE_StructSparseMSGSetup(solver, A, b, x);
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+      time_index = hypre_InitializeTiming("SparseMSG Solve");
+      hypre_BeginTiming(time_index);
+
+      HYPRE_StructSparseMSGSolve(solver, A, b, x);
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+   
+      HYPRE_StructSparseMSGGetNumIterations(solver, &num_iterations);
+      HYPRE_StructSparseMSGGetFinalRelativeResidualNorm(solver,
+                                                        &final_res_norm);
+      HYPRE_StructSparseMSGDestroy(solver);
+#endif
+   }
+
+   /*-----------------------------------------------------------
+    * Solve the system using CG
+    *-----------------------------------------------------------*/
+
+   /* Conjugate Gradient */
    if ((solver_id > 9) && (solver_id < 20))
    {
       time_index = hypre_InitializeTiming("PCG Setup");
@@ -953,6 +991,29 @@ main( int   argc,
 
          precond = (bHYPRE_Solver) bHYPRE_StructSMG__cast2
             ( solver_SMG, "bHYPRE.Solver" ); 
+      }
+      else if ( solver_id == 11 || solver_id == 13 || solver_id == 14 )
+      {
+         /* use symmetric PFMG as preconditioner */
+         solver_PFMG = bHYPRE_StructPFMG__create();
+         ierr += bHYPRE_StructPFMG_SetCommunicator( solver_PFMG, (void *) comm );
+         ierr += bHYPRE_StructPFMG_SetOperator( solver_PFMG, A_O );
+
+         bHYPRE_StructPFMG_SetMaxIterations( solver_PFMG, 1 );
+         bHYPRE_StructPFMG_SetTolerance( solver_PFMG, 0.0 );
+         bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "zero_guess", 1 );
+         /* weighted Jacobi = 1; red-black GS = 2 */
+         bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "RelaxType", 1 );
+         bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "NumPreRelax", n_pre );
+         bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "NumPostRelax", n_post );
+         bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "SkipRelax", skip );
+         /*bHYPRE_StructPFMG_SetDxyz( solver_PFMG, dxyz);*/
+         bHYPRE_StructPFMG_SetLogging( solver_PFMG, 0 );
+
+         ierr += bHYPRE_StructPFMG_Setup( solver_PFMG, b_V, x_V );
+         precond = (bHYPRE_Solver) bHYPRE_StructPFMG__cast2
+            ( solver_PFMG, "bHYPRE.Solver" ); 
+
       }
 #if 0
       else if (solver_id == 17)
@@ -1027,170 +1088,8 @@ main( int   argc,
 
    }
 
-   /*-----------------------------------------------------------
-    * Solve the system using SMG
-    *-----------------------------------------------------------*/
-
-   if (solver_id == 0)
-   {
-      time_index = hypre_InitializeTiming("SMG Setup");
-      hypre_BeginTiming(time_index);
-
-      solver_SMG = bHYPRE_StructSMG__create();
-      ierr += bHYPRE_StructSMG_SetCommunicator( solver_SMG, (void *) comm );
-      bHYPRE_StructSMG_SetIntParameter( solver_SMG, "memory use", 0 );
-      bHYPRE_StructSMG_SetIntParameter( solver_SMG, "max iter", 50 );
-      bHYPRE_StructSMG_SetDoubleParameter( solver_SMG, "tol", 1.0e-6 );
-      bHYPRE_StructSMG_SetIntParameter( solver_SMG, "rel change", 0 );
-      bHYPRE_StructSMG_SetIntParameter( solver_SMG, "num prerelax", n_pre );
-      bHYPRE_StructSMG_SetIntParameter( solver_SMG, "num postrelax", n_post );
-      bHYPRE_StructSMG_SetIntParameter( solver_SMG, "logging", 1 );
-
-      A_O = bHYPRE_Operator__cast( A_b );
-      ierr += bHYPRE_StructSMG_SetOperator( solver_SMG, A_O );
-      b_V = bHYPRE_Vector__cast( b_SV );
-      x_V = bHYPRE_Vector__cast( x_SV );
-      ierr += bHYPRE_StructSMG_Setup( solver_SMG, b_V, x_V );
-      /* obsolete solver_SMG = bHYPRE_StructSMG_Constructor( comm );*/
-
-      /* obsolete bHYPRE_StructSMG_Setup( solver_SMG, A_LO, b_V, x_V );*/
-/*
-      HYPRE_StructSMGCreate(MPI_COMM_WORLD, &solver);
-      HYPRE_StructSMGSetMemoryUse(solver, 0);
-      HYPRE_StructSMGSetMaxIter(solver, 50);
-      HYPRE_StructSMGSetTol(solver, 1.0e-06);
-      HYPRE_StructSMGSetRelChange(solver, 0);
-      HYPRE_StructSMGSetNumPreRelax(solver, n_pre);
-      HYPRE_StructSMGSetNumPostRelax(solver, n_post);
-      HYPRE_StructSMGSetLogging(solver, 1);
-      HYPRE_StructSMGSetup(solver, A, b, x);
-*/
-
-      hypre_EndTiming(time_index);
-      hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
-      hypre_FinalizeTiming(time_index);
-      hypre_ClearTiming();
-
-      time_index = hypre_InitializeTiming("SMG Solve");
-      hypre_BeginTiming(time_index);
-
-      bHYPRE_StructSMG_Apply( solver_SMG, b_V, &x_V );
-/*      
-      HYPRE_StructSMGSolve(solver, A, b, x);
-*/
-      hypre_EndTiming(time_index);
-      hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
-      hypre_FinalizeTiming(time_index);
-      hypre_ClearTiming();
-   
-      ierr += bHYPRE_StructSMG_GetNumIterations( solver_SMG, &num_iterations );
-      ierr += bHYPRE_StructSMG_GetRelResidualNorm( solver_SMG, &final_res_norm );
-      /* obsolete bHYPRE_StructSMG_GetConvergenceInfo(
-         solver_SMG, "num iterations", &doubtemp );
-         num_iterations = floor( 1.001*doubtemp );
-         bHYPRE_StructSMG_GetConvergenceInfo(
-         solver_SMG, "final relative residual norm", &final_res_norm );*/
-/*
-      HYPRE_StructSMGGetNumIterations(solver, &num_iterations);
-      HYPRE_StructSMGGetFinalRelativeResidualNorm(solver, &final_res_norm);
-*/
-      /* obsolete bHYPRE_StructSMG_destructor( solver_SMG );*/
-      bHYPRE_StructSMG_deleteRef( solver_SMG );
-/*    HYPRE_StructSMGDestroy(solver); */
-   }
-
-#if 0
-/* most solvers not implemented yet (JfP jan2000) ... */
-
-   /*-----------------------------------------------------------
-    * Solve the system using PFMG
-    *-----------------------------------------------------------*/
-
-   else if (solver_id == 1)
-   {
-      time_index = hypre_InitializeTiming("PFMG Setup");
-      hypre_BeginTiming(time_index);
-
-      HYPRE_StructPFMGCreate(MPI_COMM_WORLD, &solver);
-      HYPRE_StructPFMGSetMaxIter(solver, 50);
-      HYPRE_StructPFMGSetTol(solver, 1.0e-06);
-      HYPRE_StructPFMGSetRelChange(solver, 0);
-      /* weighted Jacobi = 1; red-black GS = 2 */
-      HYPRE_StructPFMGSetRelaxType(solver, 1);
-      HYPRE_StructPFMGSetNumPreRelax(solver, n_pre);
-      HYPRE_StructPFMGSetNumPostRelax(solver, n_post);
-      HYPRE_StructPFMGSetSkipRelax(solver, skip);
-      /*HYPRE_StructPFMGSetDxyz(solver, dxyz);*/
-      HYPRE_StructPFMGSetLogging(solver, 1);
-      HYPRE_StructPFMGSetup(solver, A, b, x);
-
-      hypre_EndTiming(time_index);
-      hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
-      hypre_FinalizeTiming(time_index);
-      hypre_ClearTiming();
-
-      time_index = hypre_InitializeTiming("PFMG Solve");
-      hypre_BeginTiming(time_index);
-
-      HYPRE_StructPFMGSolve(solver, A, b, x);
-
-      hypre_EndTiming(time_index);
-      hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
-      hypre_FinalizeTiming(time_index);
-      hypre_ClearTiming();
-   
-      HYPRE_StructPFMGGetNumIterations(solver, &num_iterations);
-      HYPRE_StructPFMGGetFinalRelativeResidualNorm(solver, &final_res_norm);
-      HYPRE_StructPFMGDestroy(solver);
-   }
-
-   /*-----------------------------------------------------------
-    * Solve the system using SparseMSG
-    *-----------------------------------------------------------*/
-
-   else if (solver_id == 2)
-   {
-      time_index = hypre_InitializeTiming("SparseMSG Setup");
-      hypre_BeginTiming(time_index);
-
-      HYPRE_StructSparseMSGCreate(MPI_COMM_WORLD, &solver);
-      HYPRE_StructSparseMSGSetMaxIter(solver, 50);
-      HYPRE_StructSparseMSGSetJump(solver, jump);
-      HYPRE_StructSparseMSGSetTol(solver, 1.0e-06);
-      HYPRE_StructSparseMSGSetRelChange(solver, 0);
-      /* weighted Jacobi = 1; red-black GS = 2 */
-      HYPRE_StructSparseMSGSetRelaxType(solver, 1);
-      HYPRE_StructSparseMSGSetNumPreRelax(solver, n_pre);
-      HYPRE_StructSparseMSGSetNumPostRelax(solver, n_post);
-      HYPRE_StructSparseMSGSetLogging(solver, 1);
-      HYPRE_StructSparseMSGSetup(solver, A, b, x);
-
-      hypre_EndTiming(time_index);
-      hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
-      hypre_FinalizeTiming(time_index);
-      hypre_ClearTiming();
-
-      time_index = hypre_InitializeTiming("SparseMSG Solve");
-      hypre_BeginTiming(time_index);
-
-      HYPRE_StructSparseMSGSolve(solver, A, b, x);
-
-      hypre_EndTiming(time_index);
-      hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
-      hypre_FinalizeTiming(time_index);
-      hypre_ClearTiming();
-   
-      HYPRE_StructSparseMSGGetNumIterations(solver, &num_iterations);
-      HYPRE_StructSparseMSGGetFinalRelativeResidualNorm(solver,
-                                                        &final_res_norm);
-      HYPRE_StructSparseMSGDestroy(solver);
-   }
-
-   /*-----------------------------------------------------------
-    * Solve the system using CG
-    *-----------------------------------------------------------*/
-
-   if ((solver_id > 9) && (solver_id < 20))
+/* duplicate of the above, I don't know how or when it happened...
+   if ( (solver_id > 9) && (solver_id < 20) )
    {
       time_index = hypre_InitializeTiming("PCG Setup");
       hypre_BeginTiming(time_index);
@@ -1201,10 +1100,9 @@ main( int   argc,
       HYPRE_StructPCGSetTwoNorm(solver, 1);
       HYPRE_StructPCGSetRelChange(solver, 0);
       HYPRE_StructPCGSetLogging(solver, 1);
-
       if (solver_id == 10)
       {
-         /* use symmetric SMG as preconditioner */
+         / * use symmetric SMG as preconditioner * /
          HYPRE_StructSMGCreate(MPI_COMM_WORLD, &precond);
          HYPRE_StructSMGSetMemoryUse(precond, 0);
          HYPRE_StructSMGSetMaxIter(precond, 1);
@@ -1213,13 +1111,17 @@ main( int   argc,
          HYPRE_StructSMGSetNumPreRelax(precond, n_pre);
          HYPRE_StructSMGSetNumPostRelax(precond, n_post);
          HYPRE_StructSMGSetLogging(precond, 0);
+
          HYPRE_StructPCGSetPrecond(solver,
                                    HYPRE_StructSMGSolve,
                                    HYPRE_StructSMGSetup,
                                    precond);
       }
 
-      else if (solver_id == 11)
+*/
+#if 0
+/* not implemented yet (JfP jan2000) ... */
+      else if ( solver_id == 11 || solver_id == 13 || solver_id == 14 )
       {
          /* use symmetric PFMG as preconditioner */
          HYPRE_StructPFMGCreate(MPI_COMM_WORLD, &precond);
@@ -1238,7 +1140,10 @@ main( int   argc,
                                    HYPRE_StructPFMGSetup,
                                    precond);
       }
+#endif
 
+#if 0
+/* not implemented yet (JfP jan2000) ... */
       else if (solver_id == 12)
       {
          /* use symmetric SparseMSG as preconditioner */
@@ -1257,7 +1162,9 @@ main( int   argc,
                                    HYPRE_StructSparseMSGSetup,
                                    precond);
       }
+#endif
 #if 0
+/* not implemented yet (JfP jan2000) ... */
       else if (solver_id == 17)
       {
          /* use two-step Jacobi as preconditioner */
@@ -1271,6 +1178,8 @@ main( int   argc,
                                    precond);
       }
 #endif
+#if 0
+/* not implemented yet (JfP jan2000) ... */
       else if (solver_id == 18)
       {
          /* use diagonal scaling as preconditioner */
@@ -1287,7 +1196,8 @@ main( int   argc,
                                    HYPRE_StructDiagScaleSetup,
                                    precond);
       }
-
+#endif
+/* duplicate of the above, I don't know how or when it happened...
       HYPRE_StructPCGSetup(solver, A, b, x);
 
       hypre_EndTiming(time_index);
@@ -1321,20 +1231,21 @@ main( int   argc,
       {
          HYPRE_StructSparseMSGDestroy(precond);
       }
-#if 0
       else if (solver_id == 17)
       {
          HYPRE_StructJacobiDestroy(precond);
       }
 #endif
    }
+*/
 
    /*-----------------------------------------------------------
     * Solve the system using Hybrid
     *-----------------------------------------------------------*/
-
    if ((solver_id > 19) && (solver_id < 30))
    {
+#if 0
+/* most solvers not implemented yet (JfP jan2000) ... */
       time_index = hypre_InitializeTiming("Hybrid Setup");
       hypre_BeginTiming(time_index);
 
@@ -1436,9 +1347,9 @@ main( int   argc,
       {
          HYPRE_StructSparseMSGDestroy(precond);
       }
+#endif
    }
 
-#endif
 
    /*-----------------------------------------------------------
     * Print the solution and other info
@@ -1495,6 +1406,7 @@ main( int   argc,
    for ( i = 0; i < (dim + 1); i++)
       hypre_TFree(offsets[i]);
    hypre_TFree(offsets);
+   if ( constant_stencil_points != NULL) hypre_TFree(constant_stencil_points);
 
    hypre_FinalizeMemoryDebug();
 
@@ -1552,6 +1464,7 @@ int SetStencilBndry
   dim             = hypre_StructGridDim(gridmatrix);
   stencil_indices = hypre_CTAlloc(int, 1);
 
+/* >>> must be changed when constant_coefficient is babelized ... >>> */
   /*  constant_coefficient = hypre_StructMatrixConstantCoefficient(A);*/
   constant_coefficient = 0; /* Babel interface doesn't support c.c. yet */
   if ( constant_coefficient>0 ) return 1;
@@ -1659,6 +1572,427 @@ int SetStencilBndry
   hypre_TFree(iupper);
 
   
+
+  return ierr;
+}
+
+/******************************************************************************
+* Adds values to matrix based on a 7 point (3d) 
+* symmetric stencil for a convection-diffusion problem.
+* It need an initialized matrix, an assembled grid, and the constants
+* that determine the 7 point (3d) convection-diffusion.
+******************************************************************************/
+int
+AddValuesMatrix( bHYPRE_StructMatrix A_b,
+                 int dim, int nblocks, int ** ilower, int ** iupper,
+                 double cx, double cy, double cz,
+                 double conx, double cony, double conz,
+                 int symmetric, int constant_coefficient )
+{
+
+  int ierr=0;
+  int                 i, s, bi;
+  struct sidl_int__array* sidl_upper;
+  struct sidl_int__array* sidl_lower;
+  struct sidl_int__array* sidl_stencil_indices;
+  struct sidl_int__array* sidl_stencil_index_center;
+  struct sidl_double__array* sidl_values;
+  double             *values;
+  double              east,west;
+  double              north,south;
+  double              top,bottom;
+  double              center;
+  int                 volume ;
+  int                *stencil_indices;
+  int                 stencil_size;
+  int zero = 0;
+  int one = 1;
+  int size;
+
+  sidl_lower= sidl_int__array_create1d( dim );
+  sidl_upper= sidl_int__array_create1d( dim );
+
+  bi=0;
+
+  east = -cx;
+  west = -cx;
+  north = -cy;
+  south = -cy;
+  top = -cz;
+  bottom = -cz;
+  center = 2.0*cx;
+  if (dim > 1) center += 2.0*cy;
+  if (dim > 2) center += 2.0*cz;
+
+  stencil_size = 1 + (2 - symmetric) * dim;
+  stencil_indices = hypre_CTAlloc(int, stencil_size);
+  for (s = 0; s < stencil_size; s++)
+  {
+     stencil_indices[s] = s;
+  }
+  sidl_stencil_indices= sidl_int__array_borrow(
+     stencil_indices, 1, &zero, &stencil_size, &one );
+  sidl_stencil_index_center= sidl_int__array_borrow(
+     stencil_indices+dim, 1, &zero, &one, &one );
+
+  if(symmetric)
+  {
+     if ( constant_coefficient==0 )
+     {
+        for ( bi=0; bi<nblocks; ++bi )
+           {
+              volume = 1;
+              for ( i=0; i < dim; i++ )
+              {
+                 volume *= ( iupper[bi][i] - ilower[bi][i] + 1 );
+              }
+              values   = hypre_CTAlloc(double, stencil_size*volume);
+
+              for (i = 0; i < stencil_size*volume; i += stencil_size)
+              {
+                 switch (dim)
+                 {
+                 case 1:
+                    values[i  ] = west;
+                    values[i+1] = center;
+                    break;
+                 case 2:
+                    values[i  ] = west;
+                    values[i+1] = south;
+                    values[i+2] = center;
+                    break;
+                 case 3:
+                    values[i  ] = west;
+                    values[i+1] = south;
+                    values[i+2] = bottom;
+                    values[i+3] = center;
+                    break;
+                 }
+              }
+              for ( i=0; i < dim; i++ )
+              {
+                 sidl_int__array_set1( sidl_lower, i, ilower[bi][i] );
+                 sidl_int__array_set1( sidl_upper, i, iupper[bi][i] );
+              }
+              size = stencil_size*volume;
+              sidl_values= sidl_double__array_borrow( values, 1, &zero, &size, &one );
+
+              bHYPRE_StructMatrix_SetBoxValues(
+                 A_b, sidl_lower, sidl_upper, stencil_size,
+                 sidl_stencil_indices, sidl_values );
+
+              sidl_double__array_deleteRef( sidl_values );
+              hypre_TFree(values);
+           }
+     }
+     else if ( constant_coefficient==1 )
+     {
+        values   = hypre_CTAlloc(double, stencil_size);
+        switch (dim)
+        {
+        case 1:
+           values[0] = west;
+           values[1] = center;
+           break;
+        case 2:
+           values[0] = west;
+           values[1] = south;
+           values[2] = center;
+           break;
+        case 3:
+           values[0] = west;
+           values[1] = south;
+           values[2] = bottom;
+           values[3] = center;
+           break;
+        }
+
+        size = stencil_size*volume;
+        sidl_values= sidl_double__array_borrow( values, 1, &zero, &size, &one );
+
+        bHYPRE_StructMatrix_SetConstantValues(
+           A_b, stencil_size,
+           sidl_stencil_indices, sidl_values );
+
+        sidl_double__array_deleteRef( sidl_values );
+        hypre_TFree(values);
+     }
+     else
+     {
+        assert( constant_coefficient==2 );
+
+        /* stencil index for the center equals dim, so it's easy to leave out */
+        values   = hypre_CTAlloc(double, stencil_size-1);
+        switch (dim)
+        {
+        case 1:
+           values[0] = west;
+           break;
+        case 2:
+           values[0] = west;
+           values[1] = south;
+           break;
+        case 3:
+           values[0] = west;
+           values[1] = south;
+           values[2] = bottom;
+           break;
+        }
+
+        size = stencil_size*volume;
+        sidl_values= sidl_double__array_borrow( values, 1, &zero, &size, &one );
+
+        bHYPRE_StructMatrix_SetConstantValues(
+           A_b, stencil_size-1,
+           sidl_stencil_indices, sidl_values );
+
+        sidl_double__array_deleteRef( sidl_values );
+        hypre_TFree(values);
+
+        for ( bi=0; bi<nblocks; ++bi )
+           {
+              volume = 1;
+              for ( i=0; i < dim; i++ )
+              {
+                 volume *= ( iupper[bi][i] - ilower[bi][i] + 1 );
+              }
+              values   = hypre_CTAlloc(double, volume);
+
+              for ( i=0; i < volume; ++i )
+              {
+                 values[i] = center;
+              }
+              for ( i=0; i < dim; i++ )
+              {
+                 sidl_int__array_set1( sidl_lower, i, ilower[bi][i] );
+                 sidl_int__array_set1( sidl_upper, i, iupper[bi][i] );
+              }
+              size = volume;
+              sidl_values= sidl_double__array_borrow( values, 1, &zero, &size, &one );
+
+              bHYPRE_StructMatrix_SetBoxValues(
+                 A_b, sidl_lower, sidl_upper, 1,
+                 sidl_stencil_index_center, sidl_values );
+
+              sidl_double__array_deleteRef( sidl_values );
+              hypre_TFree(values);
+           }
+     }
+  }
+  else
+  {
+     if (conx > 0.0)
+     {
+        west   -= conx;
+        center += conx;
+     }
+     else if (conx < 0.0) 
+     {
+        east   += conx;
+        center -= conx;
+     }
+     if (cony > 0.0)
+     {
+        south  -= cony;
+        center += cony;
+     }
+     else if (cony < 0.0) 
+     {
+        north  += cony;
+        center -= cony;
+     }
+     if (conz > 0.0)
+     {
+        bottom -= conz;
+        center += conz;
+     }
+     else if (cony < 0.0) 
+     {
+        top    += conz;
+        center -= conz;
+     }
+
+     if ( constant_coefficient==0 )
+     {
+        for ( bi=0; bi<nblocks; ++bi )
+           {
+              volume = 1;
+              for ( i=0; i < dim; i++ )
+              {
+                 volume *= ( iupper[bi][i] - ilower[bi][i] + 1 );
+              }
+              values   = hypre_CTAlloc(double, stencil_size*volume);
+
+              for (i = 0; i < stencil_size*volume; i += stencil_size)
+              {
+                 switch (dim)
+                 {
+                 case 1:
+                    values[i  ] = west;
+                    values[i+1] = center;
+                    values[i+2] = east;
+                    break;
+                 case 2:
+                    values[i  ] = west;
+                    values[i+1] = south;
+                    values[i+2] = center;
+                    values[i+3] = east;
+                    values[i+4] = north;
+                    break;
+                 case 3:
+                    values[i  ] = west;
+                    values[i+1] = south;
+                    values[i+2] = bottom;
+                    values[i+3] = center;
+                    values[i+4] = east;
+                    values[i+5] = north;
+                    values[i+6] = top;
+                    break;
+                 }
+              }
+              for ( i=0; i < dim; i++ )
+              {
+                 sidl_int__array_set1( sidl_lower, i, ilower[bi][i] );
+                 sidl_int__array_set1( sidl_upper, i, iupper[bi][i] );
+              }
+              size = stencil_size*volume;
+              sidl_values= sidl_double__array_borrow( values, 1, &zero, &size, &one );
+
+              bHYPRE_StructMatrix_SetBoxValues(
+                 A_b, sidl_lower, sidl_upper, stencil_size,
+                 sidl_stencil_indices, sidl_values );
+
+              sidl_double__array_deleteRef( sidl_values );
+              hypre_TFree(values);
+           }
+     }
+     else if ( constant_coefficient==1 )
+     {
+        values = hypre_CTAlloc( double, stencil_size );
+
+        switch (dim)
+        {
+        case 1:
+           values[0] = west;
+           values[1] = center;
+           values[2] = east;
+           break;
+        case 2:
+           values[0] = west;
+           values[1] = south;
+           values[2] = center;
+           values[3] = east;
+           values[4] = north;
+           break;
+        case 3:
+           values[0] = west;
+           values[1] = south;
+           values[2] = bottom;
+           values[3] = center;
+           values[4] = east;
+           values[5] = north;
+           values[6] = top;
+           break;
+        }
+
+        size = stencil_size*volume;
+        sidl_values= sidl_double__array_borrow( values, 1, &zero, &size, &one );
+
+        bHYPRE_StructMatrix_SetConstantValues(
+           A_b, stencil_size,
+           sidl_stencil_indices, sidl_values );
+
+        sidl_double__array_deleteRef( sidl_values );
+
+        hypre_TFree(values);
+     }
+     else
+     {
+        assert( constant_coefficient==2 );
+        values = hypre_CTAlloc( double, stencil_size-1 );
+        switch (dim)
+        {  /* no center in stencil_indices and values */
+        case 1:
+           stencil_indices[0] = 0;
+           stencil_indices[1] = 2;
+           values[0] = west;
+           values[1] = east;
+           break;
+        case 2:
+           stencil_indices[0] = 0;
+           stencil_indices[1] = 1;
+           stencil_indices[2] = 3;
+           stencil_indices[3] = 4;
+           values[0] = west;
+           values[1] = south;
+           values[2] = east;
+           values[3] = north;
+           break;
+        case 3:
+           stencil_indices[0] = 0;
+           stencil_indices[1] = 1;
+           stencil_indices[2] = 2;
+           stencil_indices[3] = 4;
+           stencil_indices[4] = 5;
+           stencil_indices[5] = 6;
+           values[0] = west;
+           values[1] = south;
+           values[2] = bottom;
+           values[3] = east;
+           values[4] = north;
+           values[5] = top;
+           break;
+        }
+
+        size = (stencil_size-1)*volume;
+        sidl_values= sidl_double__array_borrow( values, 1, &zero, &size, &one );
+
+        bHYPRE_StructMatrix_SetConstantValues(
+           A_b, stencil_size-1,
+           sidl_stencil_indices, sidl_values );
+
+        sidl_double__array_deleteRef( sidl_values );
+        hypre_TFree(values);
+
+
+        /* center is variable */
+        stencil_indices[0] = dim; /* refers to center */
+        for ( bi=0; bi<nblocks; ++bi )
+           {
+              volume = 1;
+              for ( i=0; i < dim; i++ )
+              {
+                 volume *= ( iupper[bi][i] - ilower[bi][i] + 1 );
+              }
+              values   = hypre_CTAlloc(double, volume);
+
+              for ( i=0; i < volume; ++i )
+              {
+                 values[i] = center;
+              }
+              for ( i=0; i < dim; i++ )
+              {
+                 sidl_int__array_set1( sidl_lower, i, ilower[bi][i] );
+                 sidl_int__array_set1( sidl_upper, i, iupper[bi][i] );
+              }
+              size = volume;
+              sidl_values= sidl_double__array_borrow( values, 1, &zero, &size, &one );
+
+              bHYPRE_StructMatrix_SetBoxValues(
+                 A_b, sidl_lower, sidl_upper, 1,
+                 sidl_stencil_index_center, sidl_values );
+
+              sidl_double__array_deleteRef( sidl_values );
+              hypre_TFree(values);
+           }
+     }
+  }
+
+  hypre_TFree(stencil_indices);
+  sidl_int__array_deleteRef( sidl_lower );
+  sidl_int__array_deleteRef( sidl_upper );
+  sidl_int__array_deleteRef( sidl_stencil_indices );
+  sidl_double__array_deleteRef( sidl_values );
 
   return ierr;
 }
