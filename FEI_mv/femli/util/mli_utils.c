@@ -1342,6 +1342,5 @@ int MLI_Utils_MatrixInverse( double **Amat, int ndim, double ***Bmat )
       if ( dmax > 1.0e6 ) return 1;
       else                return 0;
    }
-   return -1;
 }
 
