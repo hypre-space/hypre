@@ -1,5 +1,5 @@
 c     
-      subroutine dirslv(ierr,k,imin,imax,u,f,a,ia,ja)
+      subroutine dirslv(ierr,imin,imax,u,f,a,ia,ja)
 c     
 c---------------------------------------------------------------------
 c     
@@ -20,7 +20,7 @@ c---------------------------------------------------------------------
 c     
       implicit real*8 (a-h,o-z)
 c     
-      dimension imin(*),imax(*)
+c      dimension imin(*),imax(*)
       dimension u  (*)
       dimension f  (*)
       dimension ia (*)
@@ -33,8 +33,8 @@ c
 c     
 c---------------------------------------------------------------------
 c     
-      ilo=imin(k)
-      ihi=imax(k)
+      ilo=imin
+      ihi=imax
       npts=ihi-ilo+1
       ishft=1-ilo
       if(npts.eq.0) return
