@@ -1,0 +1,63 @@
+HYPRE General Release Checklist
+
+A general release is done when HYPRE is determined to be stable and alpha and 
+beta release bug reports have been resolved.  These releases tend to occur 
+infrequently, are available on the CASC cluster as well as all LLNL supported
+platforms and downloadable from the web.  The following steps must be completed
+and initialed/reviewed by the responsible project member before the release is
+made available to users.
+
+
+Release Number: _______________________________________________________
+
+Date available to users: ______________________________________________
+
+
+_____ 1.  Beta release has been available and used for a reasonable amount of
+          time.  The Project Lead will determine how much time is reasonable, 
+          based on the extent of changes made and other relevant constraints.
+
+_____ 2.  Code adheres to project guidelines
+
+_____ 3.  Developer corrected all bug reports from alpha release 
+
+   _____  3.1 Developer provides updated test cases for regression tests 
+
+_____ 4.  Developer corrected all bug reports from beta release 
+
+   _____  4.1 Developer provides updated test cases for regression tests 
+
+_____ 5.  Appropriate testing, including memory leak checking, has been 
+          completed by developer
+
+   _____  5.1 Developer provides test cases for regression tests 
+
+_____ 6.  Documentation is complete; Developer, User and Reference Manuals
+
+   _____  6.1 Update CHANGELOG file with information regarding contents of 
+              this release
+
+   _____  6.2 Additional information resulting from alpha release is included
+              in documents 
+
+   _____  6.3 Additional information resulting from beta release is included
+              in documents 
+
+_____ 7.  Project Lead and appropriate project members review documents
+
+_____ 8.  Software Lead completes the following:
+
+   _____  8.1.  Creates tar file consistent with project guidelines
+
+   _____  8.2.  Runs regression test suite on CASC platforms
+
+   _____  8.3.  Runs regression test suite on all LLNL open platforms
+
+   _____  8.4.  Only when 8.2 and 8.3 are correct; move files to LLNL closed
+                platforms
+
+   _____  8.5.  Runs regression test suite on closed platforms
+
+   _____  8.4.  Install tar file on CASC cluster, open and closed platforms
+
+   _____  8.5.  Send an email to the hypre-announce users list

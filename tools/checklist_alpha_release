@@ -1,0 +1,37 @@
+HYPRE Alpha Release Checklist
+
+Alpha releases are primarily used to get new code to close collaborators quickly.
+These releases tend to occur frequently, are available only on the CASC cluster 
+and may not be stable.  The following steps must be completed and
+initialed/reviewed by the responsible project member before the release is made 
+available to users.
+
+
+Release Number: _______________________________________________________
+
+Date available to users: ______________________________________________
+
+
+_____ 1.  Code adheres to project guidelines
+
+_____ 2.  Appropriate testing, including memory leak checking, has been 
+          completed by developer
+
+   _____  2.1 Developer provides test cases for regression tests 
+
+_____ 3.  Documentation has been updated/created with basic information
+
+   _____  3.1 Update CHANGELOG file with information regarding contents of
+              this release 
+
+_____ 4.  Project Lead review and/or concurrence to release
+
+_____ 5.  Software lead completes the following:
+
+   _____  5.1.  Creates tar file consistent with project guidelines
+
+   _____  5.2.  Runs regression test suite on CASC platforms
+
+   _____  5.3.  Install tar file on CASC cluster
+
+   _____  5.4.  Inform project team and other appropriate users of availability
