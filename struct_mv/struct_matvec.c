@@ -95,8 +95,8 @@ hypre_StructMatvecSetup( void               *matvec_vdata,
     * Set up the matvec data structure
     *----------------------------------------------------------*/
 
-   (matvec_data -> A)           = A;
-   (matvec_data -> x)           = x;
+   (matvec_data -> A)           = hypre_RefStructMatrix(A);
+   (matvec_data -> x)           = hypre_RefStructVector(x);
    (matvec_data -> compute_pkg) = compute_pkg;
 
    return ierr;
@@ -318,6 +318,8 @@ hypre_StructMatvecFinalize( void *matvec_vdata )
 
    if (matvec_data)
    {
+      hypre_FreeStructMatrix(matvec_data -> A);
+      hypre_FreeStructVector(matvec_data -> x);
       hypre_FreeComputePkg(matvec_data -> compute_pkg );
       hypre_TFree(matvec_data);
    }

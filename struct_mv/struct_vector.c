@@ -30,8 +30,10 @@ hypre_NewStructVector( MPI_Comm          comm,
 
    vector = hypre_CTAlloc(hypre_StructVector, 1);
 
-   hypre_StructVectorComm(vector) = comm;
-   hypre_StructVectorGrid(vector) = grid;
+   hypre_StructVectorComm(vector)        = comm;
+   hypre_StructVectorGrid(vector)        = hypre_RefStructGrid(grid);
+   hypre_StructVectorDataAlloced(vector) = 1;
+   hypre_StructVectorRefCount(vector)    = 1;
 
    /* set defaults */
    for (i = 0; i < 6; i++)
@@ -41,22 +43,15 @@ hypre_NewStructVector( MPI_Comm          comm,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_FreeStructVectorShell
+ * hypre_RefStructVector
  *--------------------------------------------------------------------------*/
 
-int 
-hypre_FreeStructVectorShell( hypre_StructVector *vector )
+hypre_StructVector *
+hypre_RefStructVector( hypre_StructVector *vector )
 {
-   int  ierr = 0;
+   hypre_StructVectorRefCount(vector) ++;
 
-   if (vector)
-   {
-      hypre_TFree(hypre_StructVectorDataIndices(vector));
-      hypre_FreeBoxArray(hypre_StructVectorDataSpace(vector));
-      hypre_TFree(vector);
-   }
-
-   return ierr;
+   return vector;
 }
 
 /*--------------------------------------------------------------------------
@@ -70,8 +65,18 @@ hypre_FreeStructVector( hypre_StructVector *vector )
 
    if (vector)
    {
-      hypre_SharedTFree(hypre_StructVectorData(vector));
-      hypre_FreeStructVectorShell(vector);
+      hypre_StructVectorRefCount(vector) --;
+      if (hypre_StructVectorRefCount(vector) == 0)
+      {
+         if (hypre_StructVectorDataAlloced(vector))
+         {
+            hypre_SharedTFree(hypre_StructVectorData(vector));
+         }
+         hypre_TFree(hypre_StructVectorDataIndices(vector));
+         hypre_FreeBoxArray(hypre_StructVectorDataSpace(vector));
+         hypre_FreeStructGrid(hypre_StructVectorGrid(vector));
+         hypre_TFree(vector);
+      }
    }
 
    return ierr;
@@ -171,6 +176,7 @@ hypre_InitializeStructVectorData( hypre_StructVector *vector,
    int ierr = 0;
 
    hypre_StructVectorData(vector) = data;
+   hypre_StructVectorDataAlloced(vector) = 0;
 
    return ierr;
 }
@@ -189,8 +195,8 @@ hypre_InitializeStructVector( hypre_StructVector *vector )
    ierr = hypre_InitializeStructVectorShell(vector);
 
    data = hypre_SharedCTAlloc(double, hypre_StructVectorDataSize(vector));
-
    hypre_InitializeStructVectorData(vector, data);
+   hypre_StructVectorDataAlloced(vector) = 1;
 
    return ierr;
 }

@@ -39,7 +39,7 @@ hypre_NewStructMatrixMask( hypre_StructMatrix *matrix,
 
    hypre_StructStencil  *stencil;
    hypre_Index          *stencil_shape;
-   hypre_StructStencil  *mask_stencil;
+   int                   stencil_size;
    hypre_Index          *mask_stencil_shape;
    int                   mask_stencil_size;
 
@@ -49,27 +49,20 @@ hypre_NewStructMatrixMask( hypre_StructMatrix *matrix,
 
    int                   i, j;
 
-   mask = hypre_CTAlloc(hypre_StructMatrix, 1);
-
-   hypre_StructMatrixComm(mask)         = hypre_StructMatrixComm(matrix);
-   hypre_StructMatrixGrid(mask)         = hypre_StructMatrixGrid(matrix);
-   hypre_StructMatrixUserStencil(mask)  =
-      hypre_StructMatrixUserStencil(matrix);
-   hypre_StructMatrixNumValues(mask)    = hypre_StructMatrixNumValues(matrix);
-   hypre_StructMatrixDataSpace(mask)    = hypre_StructMatrixDataSpace(matrix);
-   hypre_StructMatrixData(mask)         = hypre_StructMatrixData(matrix);
-   hypre_StructMatrixDataSize(mask)     = hypre_StructMatrixDataSize(matrix);
-   hypre_StructMatrixSymmetric(mask)    = hypre_StructMatrixSymmetric(matrix);
-   hypre_StructMatrixSymmElements(mask) =
-      hypre_StructMatrixSymmElements(matrix);
-   for (i = 0; i < 6; i++)
-      hypre_StructMatrixNumGhost(mask)[i] =
-         hypre_StructMatrixNumGhost(matrix)[i];
-   hypre_StructMatrixCommPkg(mask) = hypre_StructMatrixCommPkg(matrix);
-
-   /* create mask_stencil */
    stencil       = hypre_StructMatrixStencil(matrix);
    stencil_shape = hypre_StructStencilShape(stencil);
+   stencil_size  = hypre_StructStencilSize(stencil);
+
+   mask = hypre_CTAlloc(hypre_StructMatrix, 1);
+
+   hypre_StructMatrixComm(mask) = hypre_StructMatrixComm(matrix);
+
+   hypre_StructMatrixGrid(mask) =
+      hypre_RefStructGrid(hypre_StructMatrixGrid(matrix));
+
+   hypre_StructMatrixUserStencil(mask) =
+      hypre_RefStructStencil(hypre_StructMatrixUserStencil(matrix));
+
    mask_stencil_size  = num_stencil_indices;
    mask_stencil_shape = hypre_CTAlloc(hypre_Index, num_stencil_indices);
    for (i = 0; i < num_stencil_indices; i++)
@@ -77,11 +70,19 @@ hypre_NewStructMatrixMask( hypre_StructMatrix *matrix,
       hypre_CopyIndex(stencil_shape[stencil_indices[i]],
                       mask_stencil_shape[i]);
    }
-   mask_stencil = hypre_NewStructStencil(hypre_StructStencilDim(stencil),
-                                         mask_stencil_size,
-                                         mask_stencil_shape);
+   hypre_StructMatrixStencil(mask) =
+      hypre_NewStructStencil(hypre_StructStencilDim(stencil),
+                             mask_stencil_size,
+                             mask_stencil_shape);
 
-   /* create a new data_indices array */
+   hypre_StructMatrixNumValues(mask) = hypre_StructMatrixNumValues(matrix);
+
+   hypre_StructMatrixDataSpace(mask) =
+      hypre_DuplicateBoxArray(hypre_StructMatrixDataSpace(matrix));
+
+   hypre_StructMatrixData(mask) = hypre_StructMatrixData(matrix);
+   hypre_StructMatrixDataAlloced(mask) = 0;
+   hypre_StructMatrixDataSize(mask) = hypre_StructMatrixDataSize(matrix);
    data_space   = hypre_StructMatrixDataSpace(matrix);
    data_indices = hypre_StructMatrixDataIndices(matrix);
    mask_data_indices = hypre_CTAlloc(int *, hypre_BoxArraySize(data_space));
@@ -93,38 +94,31 @@ hypre_NewStructMatrixMask( hypre_StructMatrix *matrix,
             mask_data_indices[i][j] = data_indices[i][stencil_indices[j]];
          }
       }
-
-   hypre_StructMatrixStencil(mask)     = mask_stencil;
    hypre_StructMatrixDataIndices(mask) = mask_data_indices;
+
+   hypre_StructMatrixSymmetric(mask) = hypre_StructMatrixSymmetric(matrix);
+
+   hypre_StructMatrixSymmElements(mask) = hypre_TAlloc(int, stencil_size);
+   for (i = 0; i < stencil_size; i++)
+   {
+      hypre_StructMatrixSymmElements(mask)[i] =
+         hypre_StructMatrixSymmElements(matrix)[i];
+   }
+
+   for (i = 0; i < 6; i++)
+   {
+      hypre_StructMatrixNumGhost(mask)[i] =
+         hypre_StructMatrixNumGhost(matrix)[i];
+   }
+
    hypre_StructMatrixGlobalSize(mask) =
       hypre_StructGridGlobalSize(hypre_StructMatrixGrid(mask)) *
       mask_stencil_size;
 
+   hypre_StructMatrixCommPkg(mask) = NULL;
+
+   hypre_StructMatrixRefCount(mask) = 1;
+
    return mask;
-}
-
-/*--------------------------------------------------------------------------
- * hypre_FreeStructMatrixMask
- *--------------------------------------------------------------------------*/
-
-int 
-hypre_FreeStructMatrixMask( hypre_StructMatrix *mask )
-{
-   int  ierr = 0;
-
-   int  i;
-
-   if (mask)
-   {
-      hypre_ForBoxI(i, hypre_StructMatrixDataSpace(mask))
-         hypre_TFree(hypre_StructMatrixDataIndices(mask)[i]);
-      hypre_TFree(hypre_StructMatrixDataIndices(mask));
-
-      hypre_FreeStructStencil(hypre_StructMatrixStencil(mask));
-
-      hypre_TFree(mask);
-   }
-
-   return ierr;
 }
 

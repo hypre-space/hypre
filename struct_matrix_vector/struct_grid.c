@@ -39,7 +39,20 @@ hypre_NewStructGrid( MPI_Comm  comm,
    hypre_StructGridBaseAllBoxes(grid) = NULL;
    hypre_SetIndex(hypre_StructGridPIndex(grid), 0, 0, 0);
    hypre_SetIndex(hypre_StructGridPStride(grid), 1, 1, 1);
-   hypre_StructGridAlloced(grid) = 0;
+   hypre_StructGridAlloced(grid)      = 0;
+   hypre_StructGridRefCount(grid)     = 1;
+
+   return grid;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_RefStructGrid
+ *--------------------------------------------------------------------------*/
+
+hypre_StructGrid *
+hypre_RefStructGrid( hypre_StructGrid *grid )
+{
+   hypre_StructGridRefCount(grid) ++;
 
    return grid;
 }
@@ -55,16 +68,20 @@ hypre_FreeStructGrid( hypre_StructGrid *grid )
 
    if (grid)
    {
-      if (hypre_StructGridAlloced(grid))
+      hypre_StructGridRefCount(grid) --;
+      if (hypre_StructGridRefCount(grid) == 0)
       {
-         hypre_FreeBoxArray(hypre_StructGridAllBoxes(grid));
-         hypre_TFree(hypre_StructGridProcesses(grid));
-         hypre_TFree(hypre_StructGridBoxRanks(grid));
-         hypre_FreeBoxArray(hypre_StructGridBaseAllBoxes(grid));
+         if (hypre_StructGridAlloced(grid))
+         {
+            hypre_FreeBoxArray(hypre_StructGridAllBoxes(grid));
+            hypre_TFree(hypre_StructGridProcesses(grid));
+            hypre_TFree(hypre_StructGridBoxRanks(grid));
+            hypre_FreeBoxArray(hypre_StructGridBaseAllBoxes(grid));
+         }
+         hypre_FreeBoxNeighbors(hypre_StructGridNeighbors(grid));
+         hypre_FreeBoxArray(hypre_StructGridBoxes(grid));
+         hypre_TFree(grid);
       }
-      hypre_FreeBoxNeighbors(hypre_StructGridNeighbors(grid));
-      hypre_FreeBoxArray(hypre_StructGridBoxes(grid));
-      hypre_TFree(grid);
    }
 
    return ierr;

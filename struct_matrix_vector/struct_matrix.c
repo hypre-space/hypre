@@ -57,8 +57,11 @@ hypre_NewStructMatrix( MPI_Comm             comm,
    matrix = hypre_CTAlloc(hypre_StructMatrix, 1);
 
    hypre_StructMatrixComm(matrix)        = comm;
-   hypre_StructMatrixGrid(matrix)        = grid;
-   hypre_StructMatrixUserStencil(matrix) = user_stencil;
+   hypre_StructMatrixGrid(matrix)        = hypre_RefStructGrid(grid);
+   hypre_StructMatrixUserStencil(matrix) =
+      hypre_RefStructStencil(user_stencil);
+   hypre_StructMatrixDataAlloced(matrix) = 1;
+   hypre_StructMatrixRefCount(matrix)    = 1;
 
    /* set defaults */
    hypre_StructMatrixSymmetric(matrix) = 0;
@@ -69,34 +72,15 @@ hypre_NewStructMatrix( MPI_Comm             comm,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_FreeStructMatrixShell
+ * hypre_RefStructMatrix
  *--------------------------------------------------------------------------*/
 
-int 
-hypre_FreeStructMatrixShell( hypre_StructMatrix *matrix )
+hypre_StructMatrix *
+hypre_RefStructMatrix( hypre_StructMatrix *matrix )
 {
-   int  ierr = 0;
+   hypre_StructMatrixRefCount(matrix) ++;
 
-   int  i;
-
-   if (matrix)
-   {
-      hypre_FreeCommPkg(hypre_StructMatrixCommPkg(matrix));
-
-      hypre_ForBoxI(i, hypre_StructMatrixDataSpace(matrix))
-         hypre_TFree(hypre_StructMatrixDataIndices(matrix)[i]);
-      hypre_TFree(hypre_StructMatrixDataIndices(matrix));
-
-      hypre_FreeBoxArray(hypre_StructMatrixDataSpace(matrix));
-
-      hypre_TFree(hypre_StructMatrixSymmElements(matrix));
-      hypre_FreeStructStencil(hypre_StructMatrixUserStencil(matrix));
-      hypre_FreeStructStencil(hypre_StructMatrixStencil(matrix));
-
-      hypre_TFree(matrix);
-   }
-
-   return ierr;
+   return matrix;
 }
 
 /*--------------------------------------------------------------------------
@@ -106,12 +90,33 @@ hypre_FreeStructMatrixShell( hypre_StructMatrix *matrix )
 int 
 hypre_FreeStructMatrix( hypre_StructMatrix *matrix )
 {
+   int  i;
    int  ierr = 0;
 
    if (matrix)
    {
-      hypre_SharedTFree(hypre_StructMatrixData(matrix));
-      hypre_FreeStructMatrixShell(matrix);
+      hypre_StructMatrixRefCount(matrix) --;
+      if (hypre_StructMatrixRefCount(matrix) == 0)
+      {
+         if (hypre_StructMatrixDataAlloced(matrix))
+         {
+            hypre_SharedTFree(hypre_StructMatrixData(matrix));
+         }
+         hypre_FreeCommPkg(hypre_StructMatrixCommPkg(matrix));
+         
+         hypre_ForBoxI(i, hypre_StructMatrixDataSpace(matrix))
+            hypre_TFree(hypre_StructMatrixDataIndices(matrix)[i]);
+         hypre_TFree(hypre_StructMatrixDataIndices(matrix));
+         
+         hypre_FreeBoxArray(hypre_StructMatrixDataSpace(matrix));
+         
+         hypre_TFree(hypre_StructMatrixSymmElements(matrix));
+         hypre_FreeStructStencil(hypre_StructMatrixUserStencil(matrix));
+         hypre_FreeStructStencil(hypre_StructMatrixStencil(matrix));
+         hypre_FreeStructGrid(hypre_StructMatrixGrid(matrix));
+         
+         hypre_TFree(matrix);
+      }
    }
 
    return ierr;
@@ -329,6 +334,7 @@ hypre_InitializeStructMatrixData( hypre_StructMatrix *matrix,
    int             loopi, loopj, loopk;
 
    hypre_StructMatrixData(matrix) = data;
+   hypre_StructMatrixDataAlloced(matrix) = 0;
 
    /*-------------------------------------------------
     * If the matrix has a diagonal, set these entries
@@ -377,6 +383,7 @@ hypre_InitializeStructMatrix( hypre_StructMatrix *matrix )
 
    data = hypre_SharedCTAlloc(double, hypre_StructMatrixDataSize(matrix));
    hypre_InitializeStructMatrixData(matrix, data);
+   hypre_StructMatrixDataAlloced(matrix) = 1;
 
    return ierr;
 }

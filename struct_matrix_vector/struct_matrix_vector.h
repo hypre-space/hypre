@@ -514,6 +514,8 @@ typedef struct
                 
    int            dim;     /* Number of dimensions */
 
+   int            ref_count;
+
 } hypre_StructStencil;
 
 /*--------------------------------------------------------------------------
@@ -523,8 +525,8 @@ typedef struct
 #define hypre_StructStencilShape(stencil)      ((stencil) -> shape)
 #define hypre_StructStencilSize(stencil)       ((stencil) -> size)
 #define hypre_StructStencilMaxOffset(stencil)  ((stencil) -> max_offset)
-
-#define hypre_StructStencilDim(stencil)   ((stencil) -> dim)
+#define hypre_StructStencilDim(stencil)        ((stencil) -> dim)
+#define hypre_StructStencilRefCount(stencil)   ((stencil) -> ref_count)
 
 #define hypre_StructStencilElement(stencil, i) \
 hypre_StructStencilShape(stencil)[i]
@@ -576,6 +578,8 @@ typedef struct
    hypre_Index          pstride;        /* project base_all_boxes onto   */
    int                  alloced;        /* boolean used to free up */
 
+   int                  ref_count;
+
 } hypre_StructGrid;
 
 /*--------------------------------------------------------------------------
@@ -597,6 +601,7 @@ typedef struct
 #define hypre_StructGridPIndex(grid)        ((grid) -> pindex)
 #define hypre_StructGridPStride(grid)       ((grid) -> pstride)
 #define hypre_StructGridAlloced(grid)       ((grid) -> alloced)
+#define hypre_StructGridRefCount(grid)      ((grid) -> ref_count)
 
 #define hypre_StructGridBox(grid, i) \
 (hypre_BoxArrayBox(hypre_StructGridBoxes(grid), i))
@@ -848,6 +853,7 @@ typedef struct
    hypre_BoxArray       *data_space;
 
    double               *data;         /* Pointer to matrix data */
+   int                   data_alloced; /* Boolean used for freeing data */
    int                   data_size;    /* Size of matrix data */
    int                 **data_indices; /* num-boxes by stencil-size array
                                           of indices into the data array.
@@ -863,6 +869,8 @@ typedef struct
 
    hypre_CommPkg        *comm_pkg;     /* Info on how to update ghost data */
 
+   int                   ref_count;
+
 } hypre_StructMatrix;
 
 /*--------------------------------------------------------------------------
@@ -876,6 +884,7 @@ typedef struct
 #define hypre_StructMatrixNumValues(matrix)     ((matrix) -> num_values)
 #define hypre_StructMatrixDataSpace(matrix)     ((matrix) -> data_space)
 #define hypre_StructMatrixData(matrix)          ((matrix) -> data)
+#define hypre_StructMatrixDataAlloced(matrix)   ((matrix) -> data_alloced)
 #define hypre_StructMatrixDataSize(matrix)      ((matrix) -> data_size)
 #define hypre_StructMatrixDataIndices(matrix)   ((matrix) -> data_indices)
 #define hypre_StructMatrixSymmetric(matrix)     ((matrix) -> symmetric)
@@ -883,6 +892,7 @@ typedef struct
 #define hypre_StructMatrixNumGhost(matrix)      ((matrix) -> num_ghost)
 #define hypre_StructMatrixGlobalSize(matrix)    ((matrix) -> global_size)
 #define hypre_StructMatrixCommPkg(matrix)       ((matrix) -> comm_pkg)
+#define hypre_StructMatrixRefCount(matrix)      ((matrix) -> ref_count)
 
 #define hypre_StructMatrixBox(matrix, b) \
 hypre_BoxArrayBox(hypre_StructMatrixDataSpace(matrix), b)
@@ -925,6 +935,7 @@ typedef struct
    hypre_BoxArray       *data_space;
 
    double               *data;         /* Pointer to vector data */
+   int                   data_alloced; /* Boolean used for freeing data */
    int                   data_size;    /* Size of vector data */
    int                  *data_indices; /* num-boxes array of indices into
                                           the data array.  data_indices[b]
@@ -934,6 +945,8 @@ typedef struct
    int                   num_ghost[6]; /* Num ghost layers in each direction */
                       
    int                   global_size;  /* Total number coefficients */
+
+   int                   ref_count;
 
 } hypre_StructVector;
 
@@ -945,10 +958,12 @@ typedef struct
 #define hypre_StructVectorGrid(vector)          ((vector) -> grid)
 #define hypre_StructVectorDataSpace(vector)     ((vector) -> data_space)
 #define hypre_StructVectorData(vector)          ((vector) -> data)
+#define hypre_StructVectorDataAlloced(vector)   ((vector) -> data_alloced)
 #define hypre_StructVectorDataSize(vector)      ((vector) -> data_size)
 #define hypre_StructVectorDataIndices(vector)   ((vector) -> data_indices)
 #define hypre_StructVectorNumGhost(vector)      ((vector) -> num_ghost)
 #define hypre_StructVectorGlobalSize(vector)    ((vector) -> global_size)
+#define hypre_StructVectorRefCount(vector)      ((vector) -> ref_count)
  
 #define hypre_StructVectorBox(vector, b) \
 hypre_BoxArrayBox(hypre_StructVectorDataSpace(vector), b)
@@ -1094,6 +1109,7 @@ int hypre_StructCopy P((hypre_StructVector *x , hypre_StructVector *y ));
 
 /* struct_grid.c */
 hypre_StructGrid *hypre_NewStructGrid P((MPI_Comm comm , int dim ));
+hypre_StructGrid *hypre_RefStructGrid P((hypre_StructGrid *grid ));
 int hypre_FreeStructGrid P((hypre_StructGrid *grid ));
 int hypre_SetStructGridPeriodic P((hypre_StructGrid *grid , hypre_Index periodic ));
 int hypre_SetStructGridExtents P((hypre_StructGrid *grid , hypre_Index ilower , hypre_Index iupper ));
@@ -1114,7 +1130,7 @@ int hypre_ReadBoxArrayData P((FILE *file , hypre_BoxArray *box_array , hypre_Box
 /* struct_matrix.c */
 double *hypre_StructMatrixExtractPointerByIndex P((hypre_StructMatrix *matrix , int b , hypre_Index index ));
 hypre_StructMatrix *hypre_NewStructMatrix P((MPI_Comm comm , hypre_StructGrid *grid , hypre_StructStencil *user_stencil ));
-int hypre_FreeStructMatrixShell P((hypre_StructMatrix *matrix ));
+hypre_StructMatrix *hypre_RefStructMatrix P((hypre_StructMatrix *matrix ));
 int hypre_FreeStructMatrix P((hypre_StructMatrix *matrix ));
 int hypre_InitializeStructMatrixShell P((hypre_StructMatrix *matrix ));
 int hypre_InitializeStructMatrixData P((hypre_StructMatrix *matrix , double *data ));
@@ -1129,7 +1145,6 @@ hypre_StructMatrix *hypre_ReadStructMatrix P((MPI_Comm comm , char *filename , i
 
 /* struct_matrix_mask.c */
 hypre_StructMatrix *hypre_NewStructMatrixMask P((hypre_StructMatrix *matrix , int num_stencil_indices , int *stencil_indices ));
-int hypre_FreeStructMatrixMask P((hypre_StructMatrix *mask ));
 
 /* struct_matvec.c */
 void *hypre_StructMatvecInitialize P((void ));
@@ -1143,13 +1158,14 @@ int hypre_StructScale P((double alpha , hypre_StructVector *y ));
 
 /* struct_stencil.c */
 hypre_StructStencil *hypre_NewStructStencil P((int dim , int size , hypre_Index *shape ));
+hypre_StructStencil *hypre_RefStructStencil P((hypre_StructStencil *stencil ));
 int hypre_FreeStructStencil P((hypre_StructStencil *stencil ));
 int hypre_StructStencilElementRank P((hypre_StructStencil *stencil , hypre_Index stencil_element ));
 int hypre_SymmetrizeStructStencil P((hypre_StructStencil *stencil , hypre_StructStencil **symm_stencil_ptr , int **symm_elements_ptr ));
 
 /* struct_vector.c */
 hypre_StructVector *hypre_NewStructVector P((MPI_Comm comm , hypre_StructGrid *grid ));
-int hypre_FreeStructVectorShell P((hypre_StructVector *vector ));
+hypre_StructVector *hypre_RefStructVector P((hypre_StructVector *vector ));
 int hypre_FreeStructVector P((hypre_StructVector *vector ));
 int hypre_InitializeStructVectorShell P((hypre_StructVector *vector ));
 int hypre_InitializeStructVectorData P((hypre_StructVector *vector , double *data ));
@@ -1218,7 +1234,7 @@ int HYPRE_GetStructVectorValuesPush P((HYPRE_StructVectorArray vector , int *gri
 void HYPRE_SetStructVectorBoxValuesVoidPtr P((void *argptr ));
 int HYPRE_SetStructVectorBoxValuesPush P((HYPRE_StructVectorArray vector , int *ilower , int *iupper , double *values ));
 void HYPRE_GetStructVectorBoxValuesVoidPtr P((void *argptr ));
-int HYPRE_GetStructVectorBoxValuesPush P((HYPRE_StructVectorArray vector , int *ilower , int *iupper , double **values_ptr ));
+int HYPRE_GetStructVectorBoxValuesPush P((HYPRE_StructVectorArray vector , int *ilower , int *iupper , double *values ));
 void HYPRE_AssembleStructVectorVoidPtr P((void *argptr ));
 int HYPRE_AssembleStructVectorPush P((HYPRE_StructVectorArray vector ));
 void HYPRE_PrintStructVectorVoidPtr P((void *argptr ));

@@ -31,6 +31,7 @@ typedef struct
    hypre_BoxArray       *data_space;
 
    double               *data;         /* Pointer to matrix data */
+   int                   data_alloced; /* Boolean used for freeing data */
    int                   data_size;    /* Size of matrix data */
    int                 **data_indices; /* num-boxes by stencil-size array
                                           of indices into the data array.
@@ -46,6 +47,8 @@ typedef struct
 
    hypre_CommPkg        *comm_pkg;     /* Info on how to update ghost data */
 
+   int                   ref_count;
+
 } hypre_StructMatrix;
 
 /*--------------------------------------------------------------------------
@@ -59,6 +62,7 @@ typedef struct
 #define hypre_StructMatrixNumValues(matrix)     ((matrix) -> num_values)
 #define hypre_StructMatrixDataSpace(matrix)     ((matrix) -> data_space)
 #define hypre_StructMatrixData(matrix)          ((matrix) -> data)
+#define hypre_StructMatrixDataAlloced(matrix)   ((matrix) -> data_alloced)
 #define hypre_StructMatrixDataSize(matrix)      ((matrix) -> data_size)
 #define hypre_StructMatrixDataIndices(matrix)   ((matrix) -> data_indices)
 #define hypre_StructMatrixSymmetric(matrix)     ((matrix) -> symmetric)
@@ -66,6 +70,7 @@ typedef struct
 #define hypre_StructMatrixNumGhost(matrix)      ((matrix) -> num_ghost)
 #define hypre_StructMatrixGlobalSize(matrix)    ((matrix) -> global_size)
 #define hypre_StructMatrixCommPkg(matrix)       ((matrix) -> comm_pkg)
+#define hypre_StructMatrixRefCount(matrix)      ((matrix) -> ref_count)
 
 #define hypre_StructMatrixBox(matrix, b) \
 hypre_BoxArrayBox(hypre_StructMatrixDataSpace(matrix), b)

@@ -28,6 +28,7 @@ typedef struct
    hypre_BoxArray       *data_space;
 
    double               *data;         /* Pointer to vector data */
+   int                   data_alloced; /* Boolean used for freeing data */
    int                   data_size;    /* Size of vector data */
    int                  *data_indices; /* num-boxes array of indices into
                                           the data array.  data_indices[b]
@@ -37,6 +38,8 @@ typedef struct
    int                   num_ghost[6]; /* Num ghost layers in each direction */
                       
    int                   global_size;  /* Total number coefficients */
+
+   int                   ref_count;
 
 } hypre_StructVector;
 
@@ -48,10 +51,12 @@ typedef struct
 #define hypre_StructVectorGrid(vector)          ((vector) -> grid)
 #define hypre_StructVectorDataSpace(vector)     ((vector) -> data_space)
 #define hypre_StructVectorData(vector)          ((vector) -> data)
+#define hypre_StructVectorDataAlloced(vector)   ((vector) -> data_alloced)
 #define hypre_StructVectorDataSize(vector)      ((vector) -> data_size)
 #define hypre_StructVectorDataIndices(vector)   ((vector) -> data_indices)
 #define hypre_StructVectorNumGhost(vector)      ((vector) -> num_ghost)
 #define hypre_StructVectorGlobalSize(vector)    ((vector) -> global_size)
+#define hypre_StructVectorRefCount(vector)      ((vector) -> ref_count)
  
 #define hypre_StructVectorBox(vector, b) \
 hypre_BoxArrayBox(hypre_StructVectorDataSpace(vector), b)

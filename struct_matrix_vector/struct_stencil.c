@@ -31,9 +31,10 @@ hypre_NewStructStencil( int           dim,
 
    stencil = hypre_TAlloc(hypre_StructStencil, 1);
 
-   hypre_StructStencilShape(stencil) = shape;
-   hypre_StructStencilSize(stencil)  = size;
-   hypre_StructStencilDim(stencil)   = dim;
+   hypre_StructStencilShape(stencil)    = shape;
+   hypre_StructStencilSize(stencil)     = size;
+   hypre_StructStencilDim(stencil)      = dim;
+   hypre_StructStencilRefCount(stencil) = 1;
 
    /* compute max_offset */
    max_offset = 0;
@@ -52,6 +53,18 @@ hypre_NewStructStencil( int           dim,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_RefStructStencil
+ *--------------------------------------------------------------------------*/
+
+hypre_StructStencil *
+hypre_RefStructStencil( hypre_StructStencil *stencil )
+{
+   hypre_StructStencilRefCount(stencil) ++;
+
+   return stencil;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_FreeStructStencil
  *--------------------------------------------------------------------------*/
 
@@ -62,8 +75,12 @@ hypre_FreeStructStencil( hypre_StructStencil *stencil )
 
    if (stencil)
    {
-      hypre_TFree(hypre_StructStencilShape(stencil));
-      hypre_TFree(stencil);
+      hypre_StructStencilRefCount(stencil) --;
+      if (hypre_StructStencilRefCount(stencil) == 0)
+      {
+         hypre_TFree(hypre_StructStencilShape(stencil));
+         hypre_TFree(stencil);
+      }
    }
 
    return ierr;

@@ -27,6 +27,8 @@ typedef struct
                 
    int            dim;     /* Number of dimensions */
 
+   int            ref_count;
+
 } hypre_StructStencil;
 
 /*--------------------------------------------------------------------------
@@ -36,8 +38,8 @@ typedef struct
 #define hypre_StructStencilShape(stencil)      ((stencil) -> shape)
 #define hypre_StructStencilSize(stencil)       ((stencil) -> size)
 #define hypre_StructStencilMaxOffset(stencil)  ((stencil) -> max_offset)
-
-#define hypre_StructStencilDim(stencil)   ((stencil) -> dim)
+#define hypre_StructStencilDim(stencil)        ((stencil) -> dim)
+#define hypre_StructStencilRefCount(stencil)   ((stencil) -> ref_count)
 
 #define hypre_StructStencilElement(stencil, i) \
 hypre_StructStencilShape(stencil)[i]

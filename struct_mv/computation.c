@@ -110,11 +110,11 @@ hypre_GetComputeInfo( hypre_StructGrid      *grid,
          i = hypre_IndexD(stencil_shape[s], d);
          if (i < 0)
          {
-            border[d][0] = max(border[d][0], -i);
+            border[d][0] = hypre_max(border[d][0], -i);
          }
          else if (i > 0)
          {
-            border[d][1] = max(border[d][1], i);
+            border[d][1] = hypre_max(border[d][1], i);
          }
       }
    }
@@ -298,7 +298,7 @@ hypre_NewComputePkg( hypre_BoxArrayArray   *send_boxes,
    hypre_ComputePkgDeptBoxes(compute_pkg)   = dept_boxes;
    hypre_CopyIndex(stride, hypre_ComputePkgStride(compute_pkg));
 
-   hypre_ComputePkgGrid(compute_pkg)        = grid;
+   hypre_ComputePkgGrid(compute_pkg)        = hypre_RefStructGrid(grid);
    hypre_ComputePkgDataSpace(compute_pkg)   = data_space;
    hypre_ComputePkgNumValues(compute_pkg)   = num_values;
 
@@ -333,6 +333,8 @@ hypre_FreeComputePkg( hypre_ComputePkg *compute_pkg )
 
       hypre_FreeBoxArrayArray(hypre_ComputePkgIndtBoxes(compute_pkg));
       hypre_FreeBoxArrayArray(hypre_ComputePkgDeptBoxes(compute_pkg));
+
+      hypre_FreeStructGrid(hypre_ComputePkgGrid(compute_pkg));
 
       hypre_TFree(compute_pkg);
    }

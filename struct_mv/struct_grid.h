@@ -44,6 +44,8 @@ typedef struct
    hypre_Index          pstride;        /* project base_all_boxes onto   */
    int                  alloced;        /* boolean used to free up */
 
+   int                  ref_count;
+
 } hypre_StructGrid;
 
 /*--------------------------------------------------------------------------
@@ -65,6 +67,7 @@ typedef struct
 #define hypre_StructGridPIndex(grid)        ((grid) -> pindex)
 #define hypre_StructGridPStride(grid)       ((grid) -> pstride)
 #define hypre_StructGridAlloced(grid)       ((grid) -> alloced)
+#define hypre_StructGridRefCount(grid)      ((grid) -> ref_count)
 
 #define hypre_StructGridBox(grid, i) \
 (hypre_BoxArrayBox(hypre_StructGridBoxes(grid), i))
