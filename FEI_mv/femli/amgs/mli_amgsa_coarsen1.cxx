@@ -1692,6 +1692,7 @@ int MLI_Method_AMGSA::formSmoothVec(MLI_Matrix *mli_Amat)
    hypre_Vector       *sol_local;
    double *sol_data;
    int local_nrows;
+   char   paramString[200];
 
    MLI_Solver_SGS *smoother;
    double *nsptr;
@@ -1719,13 +1720,14 @@ int MLI_Method_AMGSA::formSmoothVec(MLI_Matrix *mli_Amat)
    zero_rhs = hypre_ParVectorCreate(comm, partition[nprocs], partition);
    hypre_ParVectorInitialize( zero_rhs );
    hypre_ParVectorSetConstantValues( zero_rhs, 0.0 );
-   mli_rhs = new MLI_Vector( (void*) zero_rhs,  "HYPRE_ParVector", NULL );
+   strcpy( paramString, "HYPRE_ParVector" );
+   mli_rhs = new MLI_Vector( (void*) zero_rhs, paramString, NULL );
 
    HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) Amat,
                                         &partition);
    trial_sol = hypre_ParVectorCreate(comm, partition[nprocs], partition);
    hypre_ParVectorInitialize( trial_sol );
-   mli_sol = new MLI_Vector( (void*) trial_sol, "HYPRE_ParVector", NULL );
+   mli_sol = new MLI_Vector( (void*) trial_sol, paramString, NULL );
 
    local_nrows = partition[mypid+1] - partition[mypid];
    sol_local = hypre_ParVectorLocalVector(trial_sol);
@@ -1738,7 +1740,8 @@ int MLI_Method_AMGSA::formSmoothVec(MLI_Matrix *mli_Amat)
    nullspaceVec_ = new double[local_nrows*numSmoothVec_];
    nsptr = nullspaceVec_;
 
-   smoother = new MLI_Solver_SGS("SGS");
+   strcpy( paramString, "SGS" );
+   smoother = new MLI_Solver_SGS( paramString );
    smoother->setParams(numSmoothVecSteps_, NULL);
    smoother->setup(mli_Amat);
 
@@ -1793,6 +1796,7 @@ int MLI_Method_AMGSA::smoothTwice(MLI_Matrix *mli_Amat)
    hypre_Vector       *sol_local;
    double *sol_data;
    int local_nrows;
+   char paramString[200];
 
    MLI_Solver_SGS *smoother;
    double *nsptr;
@@ -1814,13 +1818,14 @@ int MLI_Method_AMGSA::smoothTwice(MLI_Matrix *mli_Amat)
    zero_rhs = hypre_ParVectorCreate(comm, partition[nprocs], partition);
    hypre_ParVectorInitialize( zero_rhs );
    hypre_ParVectorSetConstantValues( zero_rhs, 0.0 );
-   mli_rhs = new MLI_Vector( (void*) zero_rhs,  "HYPRE_ParVector", NULL );
+   strcpy( paramString, "HYPRE_ParVector" );
+   mli_rhs = new MLI_Vector( (void*) zero_rhs,  paramString, NULL );
 
    HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) Amat,
                                         &partition);
    trial_sol = hypre_ParVectorCreate(comm, partition[nprocs], partition);
    hypre_ParVectorInitialize( trial_sol );
-   mli_sol = new MLI_Vector( (void*) trial_sol, "HYPRE_ParVector", NULL );
+   mli_sol = new MLI_Vector( (void*) trial_sol, paramString, NULL );
 
    local_nrows = partition[mypid+1] - partition[mypid];
    sol_local = hypre_ParVectorLocalVector(trial_sol);
@@ -1830,7 +1835,8 @@ int MLI_Method_AMGSA::smoothTwice(MLI_Matrix *mli_Amat)
     * set up smoother
     *-----------------------------------------------------------------*/
 
-   smoother = new MLI_Solver_SGS("SGS");
+   strcpy( paramString, "SGS" );
+   smoother = new MLI_Solver_SGS( paramString );
    smoother->setParams(2, NULL); // 2 smoothing steps
    smoother->setup(mli_Amat);
 
