@@ -26,24 +26,11 @@
 #include <math.h>
 
 //---------------------------------------------------------------------------
-// FEI include files
-//---------------------------------------------------------------------------
-
-#include "fei_defs.h"
-#include "Data.h"
-//#include "basicTypes.h"
-#include "utilities/utilities.h"
-
-#ifndef NOFEI
-#include "Lookup.h"
-#include "LinearSystemCore.h"
-#endif
-
-//---------------------------------------------------------------------------
 // HYPRE include files
 //---------------------------------------------------------------------------
 
 #include "HYPRE.h"
+#include "utilities/utilities.h"
 #include "../../IJ_mv/HYPRE_IJ_mv.h"
 #include "../../parcsr_mv/HYPRE_parcsr_mv.h"
 #include "../../parcsr_ls/HYPRE_parcsr_ls.h"
@@ -53,18 +40,18 @@
 #include "HYPRE_parcsr_symqmr.h"
 #include "HYPRE_parcsr_fgmres.h"
 #include "HYPRE_LinSysCore.h"
-
-//---------------------------------------------------------------------------
-// parcsr_mv.h is put here instead of in HYPRE_LinSysCore.h 
-// because it gives warning when compiling cfei.cc
-//---------------------------------------------------------------------------
-
 #include "parcsr_mv/parcsr_mv.h"
 #include "HYPRE_LSI_schwarz.h"
 #include "HYPRE_LSI_ddilut.h"
 #include "HYPRE_LSI_ddict.h"
 #include "HYPRE_LSI_poly.h"
 #include "HYPRE_LSI_block.h"
+
+//---------------------------------------------------------------------------
+// FEI include files
+//---------------------------------------------------------------------------
+
+#include "HYPRE_FEI_includes.h"
 
 //---------------------------------------------------------------------------
 // SUPERLU include files
