@@ -28,7 +28,8 @@ HYPRE_SStructGridCreate( MPI_Comm           comm,
    hypre_SStructGrid       *grid;
    hypre_SStructPGrid     **pgrids;
    hypre_SStructPGrid      *pgrid;
-   hypre_SStructNeighbor ***neighbors;
+   int                     *nneighbors;
+   hypre_SStructNeighbor  **neighbors;
    int                      i;
 
    grid = hypre_TAlloc(hypre_SStructGrid, 1);
@@ -37,15 +38,18 @@ HYPRE_SStructGridCreate( MPI_Comm           comm,
    hypre_SStructGridNDim(grid)   = ndim;
    hypre_SStructGridNParts(grid) = nparts;
    pgrids = hypre_TAlloc(hypre_SStructPGrid *, nparts);
-   neighbors = hypre_TAlloc(hypre_SStructNeighbor **, nparts);
+   nneighbors = hypre_TAlloc(int, nparts);
+   neighbors  = hypre_TAlloc(hypre_SStructNeighbor *, nparts);
    for (i = 0; i < nparts; i++)
    {
       hypre_SStructPGridCreate(comm, ndim, &pgrid);
       pgrids[i] = pgrid;
-      neighbors[i] = NULL;
+      nneighbors[i] = 0;
+      neighbors[i]  = NULL;
    }
    hypre_SStructGridPGrids(grid)  = pgrids;
-   hypre_SStructGridNeighbors(grid) = neighbors;
+   hypre_SStructGridNNeighbors(grid) = nneighbors;
+   hypre_SStructGridNeighbors(grid)  = neighbors;
    hypre_SStructGridNUCVars(grid) = 0;
    hypre_SStructGridUCVars(grid)  = NULL;
 
@@ -72,10 +76,13 @@ HYPRE_SStructGridDestroy( HYPRE_SStructGrid grid )
 
    int                        nparts;
    hypre_SStructPGrid       **pgrids;
-   hypre_SStructNeighbor   ***neighbors;
-   hypre_SStructNeighbor     *neighbor;
+   int                       *nneighbors;
+   hypre_SStructNeighbor    **neighbors;
+   int                      **nvneighbors;
+   hypre_SStructNeighbor   ***vneighbors;
    hypre_BoxMap            ***maps;
-   hypre_SStructBoxMapInfo ***info;
+   hypre_SStructMapInfo    ***info;
+   hypre_SStructNMapInfo   ***ninfo;
    int                        nvars;
    int                        part, var, i;
 
@@ -86,35 +93,39 @@ HYPRE_SStructGridDestroy( HYPRE_SStructGrid grid )
       {
          nparts  = hypre_SStructGridNParts(grid);
          pgrids  = hypre_SStructGridPGrids(grid);
-         neighbors = hypre_SStructGridNeighbors(grid);
-         maps = hypre_SStructGridMaps(grid);
-         info = hypre_SStructGridInfo(grid);
+         nneighbors  = hypre_SStructGridNNeighbors(grid);
+         neighbors   = hypre_SStructGridNeighbors(grid);
+         nvneighbors = hypre_SStructGridNVNeighbors(grid);
+         vneighbors  = hypre_SStructGridVNeighbors(grid);
+         maps  = hypre_SStructGridMaps(grid);
+         info  = hypre_SStructGridInfo(grid);
+         ninfo = hypre_SStructGridNInfo(grid);
          for (part = 0; part < nparts; part++)
          {
-            if (neighbors[part] != NULL)
-            {
-               for (i = 0; i < nparts; i++)
-               {
-                  neighbor = neighbors[part][i];
-                  hypre_BoxArrayDestroy(hypre_SStructNeighborBoxes(neighbor));
-                  hypre_TFree(hypre_SStructNeighborILowers(neighbor));
-               }
-               hypre_TFree(neighbors[part]);
-            }
             nvars = hypre_SStructPGridNVars(pgrids[part]);
             for (var = 0; var < nvars; var++)
             {
+               hypre_TFree(vneighbors[part][var]);
                hypre_BoxMapDestroy(maps[part][var]);
                hypre_TFree(info[part][var]);
+               hypre_TFree(ninfo[part][var]);
             }
+            hypre_TFree(neighbors[part]);
+            hypre_TFree(nvneighbors[part]);
+            hypre_TFree(vneighbors[part]);
             hypre_SStructPGridDestroy(pgrids[part]);
             hypre_TFree(maps[part]);
             hypre_TFree(info[part]);
+            hypre_TFree(ninfo[part]);
          }
          hypre_TFree(pgrids);
+         hypre_TFree(nneighbors);
          hypre_TFree(neighbors);
+         hypre_TFree(nvneighbors);
+         hypre_TFree(vneighbors);
          hypre_TFree(maps);
          hypre_TFree(info);
+         hypre_TFree(ninfo);
          hypre_TFree(grid);
       }
    }
@@ -217,63 +228,50 @@ HYPRE_SStructGridSetNeighborBox( HYPRE_SStructGrid  grid,
 {
    int ierr = 0;
 
-   int                      ndim      = hypre_SStructGridNDim(grid);
-   hypre_SStructNeighbor ***neighbors = hypre_SStructGridNeighbors(grid);
+   int                      ndim       = hypre_SStructGridNDim(grid);
+   int                     *nneighbors = hypre_SStructGridNNeighbors(grid);
+   hypre_SStructNeighbor  **neighbors  = hypre_SStructGridNeighbors(grid);
    hypre_SStructNeighbor   *neighbor;
-   hypre_BoxArray          *neighbor_boxes;
-   hypre_Index             *neighbor_ilowers;
-   int                      nboxes;
 
+   hypre_Box               *box;
    hypre_Index              cilower;
    hypre_Index              ciupper;
-   hypre_Box                box;
    int                      memchunk = 10;
    int                      d;
 
-   if (neighbors[part] == NULL)
+   /* allocate more memory if needed */
+   if ((nneighbors[part] % memchunk) == 0)
    {
-      int nparts = hypre_SStructGridNParts(grid);
-      int i;
-
-      neighbors[part] = hypre_CTAlloc(hypre_SStructNeighbor *, nparts);
-      for (i = 0; i < nparts; i++)
-      {
-         neighbors[part][i] = hypre_CTAlloc(hypre_SStructNeighbor, 1);
-         hypre_SStructNeighborBoxes(neighbors[part][i]) =
-            hypre_BoxArrayCreate(0);
-      }
+      neighbors[part] = hypre_TReAlloc(neighbors[part], hypre_SStructNeighbor,
+                                       (nneighbors[part] + memchunk));
    }
 
-   neighbor = neighbors[part][nbor_part];
-   neighbor_boxes   = hypre_SStructNeighborBoxes(neighbor);
-   neighbor_ilowers = hypre_SStructNeighborILowers(neighbor);
-   nboxes = hypre_BoxArraySize(neighbor_boxes);
+   neighbor = &neighbors[part][nneighbors[part]];
+   nneighbors[part]++;
 
+   box = hypre_SStructNeighborBox(neighbor);
    hypre_CopyToCleanIndex(ilower, ndim, cilower);
    hypre_CopyToCleanIndex(iupper, ndim, ciupper);
-   hypre_BoxSetExtents(&box, cilower, ciupper);
-   hypre_AppendBox(&box, neighbor_boxes);
+   hypre_BoxSetExtents(box, cilower, ciupper);
 
-   if ((nboxes % memchunk) == 0)
-   {
-      neighbor_ilowers = hypre_TReAlloc(neighbor_ilowers,
-                                        hypre_Index, (nboxes + memchunk));
-      hypre_SStructNeighborILowers(neighbor) = neighbor_ilowers;
-   }
-   hypre_CopyToCleanIndex(nbor_ilower, ndim, neighbor_ilowers[nboxes]);
+   hypre_SStructNeighborPart(neighbor) = nbor_part;
+
+   hypre_CopyToCleanIndex(nbor_ilower, ndim,
+                          hypre_SStructNeighborILower(neighbor));
 
    hypre_CopyToCleanIndex(index_map, ndim,
                           hypre_SStructNeighborCoord(neighbor));
 
-   for (d = 0; d < ndim; d++)
+   for (d = 0; d < 3; d++)
    {
-      if (hypre_IndexD(nbor_ilower, d) > hypre_IndexD(nbor_iupper, d))
+      hypre_IndexD(hypre_SStructNeighborDir(neighbor), d) = 1;
+
+      if (d < ndim)
       {
-         hypre_IndexD(hypre_SStructNeighborDir(neighbor), d) = -1;
-      }
-      else
-      {
-         hypre_IndexD(hypre_SStructNeighborDir(neighbor), d) = 1;
+         if (hypre_IndexD(nbor_ilower, d) > hypre_IndexD(nbor_iupper, d))
+         {
+            hypre_IndexD(hypre_SStructNeighborDir(neighbor), d) = -1;
+         }
       }
    }
 
@@ -302,25 +300,39 @@ HYPRE_SStructGridAssemble( HYPRE_SStructGrid grid )
 {
    int                   ierr = 0;
 
-   int                      nparts    = hypre_SStructGridNParts(grid);
-   hypre_SStructPGrid     **pgrids    = hypre_SStructGridPGrids(grid);
-   hypre_SStructNeighbor ***neighbors = hypre_SStructGridNeighbors(grid);
-   /*hypre_SStructNeighbor   *neighbor;*/
-   /*hypre_BoxArray          *neighbor_boxes;*/
-   /*hypre_Index             *neighbor_ilowers;*/
+   int                      ndim        = hypre_SStructGridNDim(grid);
+   int                      nparts      = hypre_SStructGridNParts(grid);
+   hypre_SStructPGrid     **pgrids      = hypre_SStructGridPGrids(grid);
+   int                     *nneighbors  = hypre_SStructGridNNeighbors(grid);
+   hypre_SStructNeighbor  **neighbors   = hypre_SStructGridNeighbors(grid);
+   int                    **nvneighbors = hypre_SStructGridNVNeighbors(grid);
+   hypre_SStructNeighbor ***vneighbors  = hypre_SStructGridVNeighbors(grid);
+   hypre_SStructNeighbor   *neighbor;
+   hypre_SStructNeighbor   *vneighbor;
+   hypre_Box               *nbor_box;
 
    hypre_SStructPGrid      *pgrid;
-   int                      part;
+   HYPRE_SStructVariable   *vartypes;
+   hypre_Index              varoffset;
+   int                      nvars;
+   int                      part, var, i, b, t;
 
    /*-------------------------------------------------------------
-    * use neighbor info to crop pgrids TODO
+    * set pneighbors for each pgrid info to crop pgrids
     *-------------------------------------------------------------*/
 
    for (part = 0; part < nparts; part++)
    {
-      if (neighbors[part] != NULL)
+      pgrid = hypre_SStructGridPGrid(grid, part);
+      for (i = 0; i < nneighbors[part]; i++)
       {
-         /* set crop boxes for pgrid[part] */
+         neighbor = &neighbors[part][i];
+
+         if (hypre_SStructNeighborPart(neighbor) < part)
+         {
+            hypre_SStructPGridSetPNeighbor(pgrid,
+                                           hypre_SStructNeighborBox(neighbor));
+         }
       }
    }
 
@@ -330,10 +342,7 @@ HYPRE_SStructGridAssemble( HYPRE_SStructGrid grid )
 
    for (part = 0; part < nparts; part++)
    {
-      if (pgrids[part] != NULL)
-      {
-         hypre_SStructPGridAssemble(pgrids[part]);
-      }
+      hypre_SStructPGridAssemble(pgrids[part]);
    }
    
    /*-------------------------------------------------------------
@@ -358,6 +367,66 @@ HYPRE_SStructGridAssemble( HYPRE_SStructGrid grid )
       hypre_SStructGridLocalSize(grid)  += hypre_SStructPGridLocalSize(pgrid);
       hypre_SStructGridGlobalSize(grid) += hypre_SStructPGridGlobalSize(pgrid);
    }
+
+   /*-------------------------------------------------
+    * Set up neighbor info
+    *
+    * ZTODO: This only works for cell-centered variables
+    * right now.  To generalize, we need to subtract from
+    * each neighbor box the local boxes.  But, then we need
+    * to be able to find the offset info, etc.  This may
+    * be straightforward.  The ability to use this info to
+    * construct communication packages in the VectorGather
+    * should also be considered when rewriting.
+    *-------------------------------------------------*/
+
+   nvneighbors = hypre_TAlloc(int *, nparts);
+   vneighbors  = hypre_TAlloc(hypre_SStructNeighbor **, nparts);
+
+   for (part = 0; part < nparts; part++)
+   {
+      pgrid = hypre_SStructGridPGrid(grid, part);
+      nvars = hypre_SStructPGridNVars(pgrid);
+      vartypes = hypre_SStructPGridVarTypes(pgrid);
+      nvneighbors[part] = hypre_TAlloc(int, nvars);
+      vneighbors[part]  = hypre_TAlloc(hypre_SStructNeighbor *, nvars);
+
+      for (var = 0; var < nvars; var++)
+      {
+         t = vartypes[var];
+         vneighbors[part][var] = hypre_TAlloc(hypre_SStructNeighbor,
+                                              nneighbors[part]);
+
+         hypre_SStructVariableGetOffset((hypre_SStructVariable) t,
+                                        ndim, varoffset);
+
+         nvneighbors[part][var] = nneighbors[part];
+         for (b = 0; b < nneighbors[part]; b++)
+         {
+            neighbor  = &neighbors[part][b];
+            vneighbor = &vneighbors[part][var][b];
+
+            nbor_box = hypre_SStructNeighborBox(vneighbor);
+            hypre_CopyBox(hypre_SStructNeighborBox(neighbor), nbor_box);
+            hypre_BoxIMinX(nbor_box) -= hypre_IndexX(varoffset);
+            hypre_BoxIMinY(nbor_box) -= hypre_IndexY(varoffset);
+            hypre_BoxIMinZ(nbor_box) -= hypre_IndexZ(varoffset);
+
+            hypre_SStructNeighborPart(vneighbor) =
+               hypre_SStructNeighborPart(neighbor);
+            /* ZTODO: adjust ILower based on shift/subtract */
+            hypre_CopyIndex(hypre_SStructNeighborILower(neighbor),
+                            hypre_SStructNeighborILower(vneighbor));
+            hypre_CopyIndex(hypre_SStructNeighborCoord(neighbor),
+                            hypre_SStructNeighborCoord(vneighbor));
+            hypre_CopyIndex(hypre_SStructNeighborDir(neighbor),
+                            hypre_SStructNeighborDir(vneighbor));
+         }
+      }
+   }
+
+   hypre_SStructGridNVNeighbors(grid) = nvneighbors;
+   hypre_SStructGridVNeighbors(grid)  = vneighbors;
 
    /*-------------------------------------------------
     * Assemble the map info

@@ -102,6 +102,7 @@ HYPRE_SStructMatrixCreate( MPI_Comm              comm,
          size = hypre_max(size, hypre_SStructStencilSize(stencils[part][vi]));
       }
    }
+   hypre_SStructMatrixEntriesSize(matrix) = size;
    hypre_SStructMatrixSEntries(matrix) = hypre_TAlloc(int, size);
    hypre_SStructMatrixUEntries(matrix) = hypre_TAlloc(int, size);
    hypre_SStructMatrixTmpColCoords(matrix) = NULL;
@@ -427,12 +428,132 @@ int
 HYPRE_SStructMatrixAssemble( HYPRE_SStructMatrix matrix )
 {
    int ierr = 0;
-   int nparts = hypre_SStructMatrixNParts(matrix);
-   int part;
+
+   hypre_SStructGraph      *graph       = hypre_SStructMatrixGraph(matrix);
+   int                      nparts      = hypre_SStructMatrixNParts(matrix);
+   hypre_SStructPMatrix   **pmatrices   = hypre_SStructMatrixPMatrices(matrix);
+   hypre_SStructGrid       *grid        = hypre_SStructGraphGrid(graph);
+   hypre_SStructPGrid     **pgrids      = hypre_SStructGridPGrids(grid);
+   int                    **nvneighbors = hypre_SStructGridNVNeighbors(grid);
+   hypre_SStructNeighbor ***vneighbors  = hypre_SStructGridVNeighbors(grid);
+   hypre_SStructNMapInfo ***ninfo       = hypre_SStructGridNInfo(grid);
+
+   hypre_SStructPMatrix    *pmatrix;
+   hypre_SStructStencil    *stencil;
+   hypre_Index             *shape;
+   int                     *smap;
+   int                     *vars;
+   hypre_StructStencil     *sstencil;
+   hypre_StructMatrix      *smatrix;
+   hypre_StructGrid        *sgrid;
+   hypre_SStructNeighbor   *vneighbor;
+
+   hypre_Box               *box, *sbox, *ibox;
+   hypre_IndexRef           offset;
+
+   int                     *entries;
+   int                     *Sentries;
+   int                     *Uentries;
+   int                      nSentries;
+   int                      nUentries;
+
+   double                  *values = NULL;
+
+   int                      nvars, nentries;
+   int                      part, var, entry, sentry, b, sb, i;
+
+   /*------------------------------------------------------
+    * Move off-part couplings (described by neighbor info)
+    * from S-matrix structure into U-matrix structure.
+    *------------------------------------------------------*/
+
+   box  = hypre_BoxCreate();
+   ibox = hypre_BoxCreate();
+
+   nentries = hypre_SStructMatrixEntriesSize(matrix);
+   entries  = hypre_TAlloc(int, nentries);
+   for (entry = 0; entry < nentries; entry++)
+   {
+      entries[entry] = entry;
+   }
 
    for (part = 0; part < nparts; part++)
    {
-      hypre_SStructPMatrixAssemble(hypre_SStructMatrixPMatrix(matrix, part));
+      pmatrix  = pmatrices[part];
+
+      nvars = hypre_SStructPMatrixNVars(pmatrix);
+      for (var = 0; var < nvars; var++)
+      {
+         stencil  = hypre_SStructPMatrixStencil(pmatrix, var);
+         smap     = hypre_SStructPMatrixSMap(pmatrix, var);
+         shape    = hypre_SStructStencilShape(stencil);
+         vars     = hypre_SStructStencilVars(stencil);
+         nentries = hypre_SStructStencilSize(stencil);
+
+         hypre_SStructMatrixSplitEntries(matrix, part, var, nentries, entries,
+                                         &nSentries, &Sentries,
+                                         &nUentries, &Uentries);
+
+         for (entry = 0; entry < nSentries; entry++)
+         {
+            smatrix = hypre_SStructPMatrixSMatrix(pmatrix, var,
+                                                  vars[entries[entry]]);
+            sentry = smap[entries[entry]];
+
+            /* Shift/intersect neighbor box and move values */
+            for (b = 0; b < nvneighbors[part][var]; b++)
+            {
+               vneighbor = &vneighbors[part][var][b];
+               hypre_CopyBox(hypre_SStructNeighborBox(vneighbor), box);
+
+               /* shift box by stencil offset */
+               offset = shape[entry];
+               hypre_BoxIMinX(box) -= hypre_IndexX(offset);
+               hypre_BoxIMinY(box) -= hypre_IndexY(offset);
+               hypre_BoxIMinZ(box) -= hypre_IndexZ(offset);
+               hypre_BoxIMaxX(box) -= hypre_IndexX(offset);
+               hypre_BoxIMaxY(box) -= hypre_IndexY(offset);
+               hypre_BoxIMaxZ(box) -= hypre_IndexZ(offset);
+
+               sgrid = hypre_StructMatrixGrid(smatrix);
+               hypre_ForStructGridBoxI(sb, sgrid)
+                  {
+                     sbox = hypre_StructGridBox(sgrid, sb);
+                     hypre_IntersectBoxes(box, sbox, ibox);
+
+                     values = hypre_TReAlloc(values, double,
+                                             hypre_BoxVolume(ibox));
+
+                     /* move matrix values from S-matrix to U-matrix */
+                     hypre_StructMatrixSetBoxValues(smatrix, ibox,
+                                                    1, &sentry, values, -1);
+
+                     hypre_SStructUMatrixSetBoxValues(matrix, part,
+                                                      hypre_BoxIMin(ibox),
+                                                      hypre_BoxIMax(ibox),
+                                                      var, 1, &entry,
+                                                      values, 1);
+
+                     for (i = 0; i < hypre_BoxVolume(ibox); i++)
+                     {
+                        values[i] = 0;
+                     }
+                     hypre_StructMatrixSetBoxValues(smatrix, ibox,
+                                                    1, &sentry, values, 0);
+                  }
+            }
+         }
+      }
+   }
+
+   hypre_TFree(entries);
+   hypre_TFree(values);
+   hypre_BoxDestroy(box);
+   hypre_BoxDestroy(ibox);
+
+   for (part = 0; part < nparts; part++)
+   {
+      hypre_SStructPMatrixAssemble(pmatrices[part]);
    }
 
    /* U-matrix */

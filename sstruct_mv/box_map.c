@@ -86,9 +86,11 @@ hypre_BoxMapCreate( int            max_nentries,
    {
       hypre_IndexD(global_imin_ref, d) = hypre_IndexD(global_imin, d);
       hypre_IndexD(global_imax_ref, d) = hypre_IndexD(global_imax, d);
+      hypre_BoxMapIndexesD(map, d)     = NULL;
    }
    hypre_BoxMapNEntries(map) = 0;
    hypre_BoxMapEntries(map)  = hypre_CTAlloc(hypre_BoxMapEntry, max_nentries);
+   hypre_BoxMapTable(map)    = NULL;
       
    *map_ptr = map;
       
@@ -254,9 +256,11 @@ hypre_BoxMapAssemble( hypre_BoxMap *map )
     * Set up the map
     *------------------------------------------------------*/
 
+   hypre_TFree(hypre_BoxMapTable(map));
    hypre_BoxMapTable(map) = table;
    for (d = 0; d < 3; d++)
    {
+      hypre_TFree(hypre_BoxMapIndexesD(map, d));
       hypre_BoxMapIndexesD(map, d) = indexes[d];
       hypre_BoxMapSizeD(map, d) = size[d];
       hypre_BoxMapLastIndexD(map, d) = 0;

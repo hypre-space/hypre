@@ -1532,6 +1532,7 @@ int hypre_BoxGetStrideSize( hypre_Box *box , hypre_Index stride , hypre_Index si
 /* box_algebra.c */
 int hypre_IntersectBoxes( hypre_Box *box1 , hypre_Box *box2 , hypre_Box *ibox );
 int hypre_SubtractBoxes( hypre_Box *box1 , hypre_Box *box2 , hypre_BoxArray *box_array );
+int hypre_SubtractBoxArrays( hypre_BoxArray *box_array1 , hypre_BoxArray *box_array2 , hypre_BoxArray *tmp_box_array );
 int hypre_UnionBoxes( hypre_BoxArray *boxes );
 
 /* box_alloc.c */
@@ -1627,8 +1628,8 @@ int hypre_StructMatrixDestroy( hypre_StructMatrix *matrix );
 int hypre_StructMatrixInitializeShell( hypre_StructMatrix *matrix );
 int hypre_StructMatrixInitializeData( hypre_StructMatrix *matrix , double *data );
 int hypre_StructMatrixInitialize( hypre_StructMatrix *matrix );
-int hypre_StructMatrixSetValues( hypre_StructMatrix *matrix , hypre_Index grid_index , int num_stencil_indices , int *stencil_indices , double *values , int add_to );
-int hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix , hypre_Box *value_box , int num_stencil_indices , int *stencil_indices , double *values , int add_to );
+int hypre_StructMatrixSetValues( hypre_StructMatrix *matrix , hypre_Index grid_index , int num_stencil_indices , int *stencil_indices , double *values , int action );
+int hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix , hypre_Box *value_box , int num_stencil_indices , int *stencil_indices , double *values , int action );
 int hypre_StructMatrixAssemble( hypre_StructMatrix *matrix );
 int hypre_StructMatrixSetNumGhost( hypre_StructMatrix *matrix , int *num_ghost );
 int hypre_StructMatrixPrint( const char *filename , hypre_StructMatrix *matrix , int all );

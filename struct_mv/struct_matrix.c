@@ -388,7 +388,9 @@ hypre_StructMatrixInitialize( hypre_StructMatrix *matrix )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructMatrixSetValues
+ * (action > 0): add-to values
+ * (action = 0): set values
+ * (action < 0): get values
  *--------------------------------------------------------------------------*/
 
 int 
@@ -397,7 +399,7 @@ hypre_StructMatrixSetValues( hypre_StructMatrix *matrix,
                              int                 num_stencil_indices,
                              int                *stencil_indices,
                              double             *values,
-                             int                 add_to              )
+                             int                 action )
 {
    int    ierr = 0;
 
@@ -421,7 +423,7 @@ hypre_StructMatrixSetValues( hypre_StructMatrix *matrix,
              (hypre_IndexZ(grid_index) >= hypre_BoxIMinZ(box)) &&
              (hypre_IndexZ(grid_index) <= hypre_BoxIMaxZ(box))   )
          {
-            if (add_to)
+            if (action > 0)
             {
                for (s = 0; s < num_stencil_indices; s++)
                {
@@ -431,7 +433,7 @@ hypre_StructMatrixSetValues( hypre_StructMatrix *matrix,
                   *matp += values[s];
                }
             }
-            else
+            else if (action > -1)
             {
                for (s = 0; s < num_stencil_indices; s++)
                {
@@ -441,6 +443,16 @@ hypre_StructMatrixSetValues( hypre_StructMatrix *matrix,
                   *matp = values[s];
                }
             }
+            else
+            {
+               for (s = 0; s < num_stencil_indices; s++)
+               {
+                  matp = hypre_StructMatrixBoxDataValue(matrix, i,
+                                                        stencil_indices[s],
+                                                        grid_index);
+                  values[s] = *matp;
+               }
+            }
          }
       }
 
@@ -448,7 +460,9 @@ hypre_StructMatrixSetValues( hypre_StructMatrix *matrix,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructMatrixSetBoxValues
+ * (action > 0): add-to values
+ * (action = 0): set values
+ * (action < 0): get values
  *--------------------------------------------------------------------------*/
 
 int 
@@ -457,7 +471,7 @@ hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix,
                                 int                 num_stencil_indices,
                                 int                *stencil_indices,
                                 double             *values,
-                                int                 add_to              )
+                                int                 action )
 {
    int    ierr = 0;
 
@@ -532,7 +546,7 @@ hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix,
 
                   hypre_BoxGetSize(box, loop_size);
 
-                  if (add_to)
+                  if (action > 0)
                   {
                      hypre_BoxLoop2Begin(loop_size,
                                          data_box,data_start,data_stride,datai,
@@ -545,7 +559,7 @@ hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix,
                         }
                      hypre_BoxLoop2End(datai, dvali);
                   }
-                  else
+                  else if (action > -1)
                   {
                      hypre_BoxLoop2Begin(loop_size,
                                          data_box,data_start,data_stride,datai,
@@ -555,6 +569,19 @@ hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix,
                      hypre_BoxLoop2For(loopi, loopj, loopk, datai, dvali)
                         {
                            datap[datai] = values[dvali];
+                        }
+                     hypre_BoxLoop2End(datai, dvali);
+                  }
+                  else
+                  {
+                     hypre_BoxLoop2Begin(loop_size,
+                                         data_box,data_start,data_stride,datai,
+                                         dval_box,dval_start,dval_stride,dvali);
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,datai,dvali
+#include "hypre_box_smp_forloop.h"
+                     hypre_BoxLoop2For(loopi, loopj, loopk, datai, dvali)
+                        {
+                           values[dvali] = datap[datai];
                         }
                      hypre_BoxLoop2End(datai, dvali);
                   }

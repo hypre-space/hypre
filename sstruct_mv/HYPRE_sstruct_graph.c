@@ -194,7 +194,7 @@ HYPRE_SStructGraphAddEntries( HYPRE_SStructGraph   graph,
    /* compute location (rank) for Uventry */
    hypre_CopyToCleanIndex(index, ndim, cindex);
    hypre_SStructGridFindMapEntry(grid, part, cindex, var, &map_entry);
-   hypre_SStructBoxMapEntryGetGlobalRank(map_entry, cindex, &rank);
+   hypre_SStructMapEntryGetGlobalRank(map_entry, cindex, &rank);
    rank -= hypre_SStructGridStartRank(grid);
 
    iUventries[nUventries] = rank;
@@ -334,13 +334,13 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
          if (map_entry != NULL)
          {
             /* compute ranks locally */
-            hypre_SStructBoxMapEntryGetGlobalRank(map_entry, to_index, &rank);
+            hypre_SStructMapEntryGetGlobalRank(map_entry, to_index, &rank);
             hypre_SStructUVEntryRank(Uventry, j) = rank;
          }
          else
          {
             /* compute ranks off-process: start building type 1 requests */
-            hypre_SStructBoxMapEntryGetProcess(map_entry, &proc);
+            hypre_SStructMapEntryGetProcess(map_entry, &proc);
 
             /* initialize some things */
             if (t1totsize == 0)
@@ -516,7 +516,7 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
             to_var                    = t2commbuf[5*j+4];
             hypre_SStructGridFindMapEntry(grid, to_part, to_index, to_var,
                                           &map_entry);
-            hypre_SStructBoxMapEntryGetGlobalRank(map_entry, to_index, &rank);
+            hypre_SStructMapEntryGetGlobalRank(map_entry, to_index, &rank);
             t2commbuf[j] = rank;
          }
          MPI_Send(t2commbuf, t2bufsize, MPI_INT, proc, 2, comm);

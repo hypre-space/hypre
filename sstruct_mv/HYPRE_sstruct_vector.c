@@ -245,6 +245,19 @@ HYPRE_SStructVectorAssemble( HYPRE_SStructVector vector )
       hypre_SStructPVectorAssemble(hypre_SStructVectorPVector(vector, part));
    }
 
+#if 0
+   /* ZTODO: construct comm_pkg for communications between parts */
+   hypre_CommPkgDestroy(comm_pkgs[var]);
+   comm_pkgs[var] =
+      hypre_CommPkgCreate(send_boxes, recv_boxes,
+                          unit_stride, unit_stride,
+                          hypre_StructVectorDataSpace(svectors[var]),
+                          hypre_StructVectorDataSpace(svectors[var]),
+                          send_processes, recv_processes, 1,
+                          hypre_StructVectorComm(svectors[var]),
+                          hypre_StructGridPeriodic(sgrid));
+#endif
+
    /* u-vector */
    ierr = HYPRE_IJVectorAssemble(ijvector);
    HYPRE_IJVectorGetObject(ijvector, 
@@ -273,7 +286,28 @@ HYPRE_SStructVectorGather( HYPRE_SStructVector vector )
       hypre_SStructPVectorGather(hypre_SStructVectorPVector(vector, part));
    }
 
-   /* gather data from other parts? - TODO*/
+#if 0
+   /* ZTODO: gather data from other parts */
+   {
+      int                    nvars     = hypre_SStructPVectorNVars(pvector);
+      hypre_StructVector   **svectors  = hypre_SStructPVectorSVectors(pvector);
+      hypre_CommPkg        **comm_pkgs = hypre_SStructPVectorCommPkgs(pvector);
+      hypre_CommHandle      *comm_handle;
+      int                    var;
+
+      for (var = 0; var < nvars; var++)
+      {
+         if (comm_pkgs[var] != NULL)
+         {
+            hypre_InitializeCommunication(comm_pkgs[var],
+                                          hypre_StructVectorData(svectors[var]),
+                                          hypre_StructVectorData(svectors[var]),
+                                          &comm_handle);
+            hypre_FinalizeCommunication(comm_handle);
+         }
+      }
+   }
+#endif
 
    return ierr;
 }

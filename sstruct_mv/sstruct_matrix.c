@@ -151,6 +151,7 @@ hypre_SStructPMatrixCreate( MPI_Comm               comm,
    }
    hypre_SStructPMatrixSMatrices(pmatrix) = smatrices;
 
+   hypre_SStructPMatrixSEntriesSize(pmatrix) = size;
    hypre_SStructPMatrixSEntries(pmatrix) = hypre_TAlloc(int, size);
 
    hypre_SStructPMatrixRefCount(pmatrix)   = 1;
@@ -395,6 +396,7 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
    int                     nUventries = hypre_SStructGraphNUVEntries(graph);
    int                    *iUventries = hypre_SStructGraphIUVEntries(graph);
    hypre_SStructUVEntry  **Uventries  = hypre_SStructGraphUVEntries(graph);
+   int                   **nvneighbors = hypre_SStructGridNVNeighbors(grid);
 
    hypre_StructGrid       *sgrid;
    hypre_SStructStencil   *stencil;
@@ -440,6 +442,12 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
             max_row_size = hypre_max(max_row_size, row_sizes[i]);
             i++;
          }
+         /* If there are vneighbors, use stencil size to set max_row_size */
+         if (nvneighbors[part][var])
+         {
+            max_row_size = hypre_max(max_row_size,
+                                     hypre_SStructStencilSize(stencil));
+         }
       }
    }
    for (entry = 0; entry < nUventries; entry++)
@@ -448,6 +456,7 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
       row_sizes[i] += hypre_SStructUVEntryNUEntries(Uventries[i]);
       max_row_size = hypre_max(max_row_size, row_sizes[i]);
    }
+   /* ZTODO: Update row_sizes based on neighbor off-part couplings */
    ierr += HYPRE_IJMatrixSetRowSizes (ijmatrix, (const int *) row_sizes);
 
    hypre_TFree(row_sizes);
@@ -488,6 +497,7 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
    hypre_Index           to_index;
    hypre_SStructUVEntry *Uventry;
    hypre_BoxMapEntry    *map_entry;
+   hypre_SStructMapInfo *entry_info;
    int                   row_coord;
    int                  *col_coords;
    int                   ncoeffs;
@@ -497,15 +507,29 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
    hypre_SStructGridFindMapEntry(grid, part, index, var, &map_entry);
    if (map_entry == NULL)
    {
+      ierr = 1;
+   }
+   else
+   {
+      hypre_BoxMapEntryGetInfo(map_entry, (void **) &entry_info);
+      if (hypre_SStructMapInfoType(entry_info) !=
+          hypre_SSTRUCT_MAP_INFO_DEFAULT)
+      {
+         ierr = 1;
+      }
+   }
+   if (ierr == 1)
+   {
       printf("Warning: Attempt to set coeffs for point not in grid\n");
       printf("hypre_SStructUMatrixSetValues call aborted for grid point\n");
       printf("    part=%d, var=%d, index=(%d, %d, %d)\n", part, var,
              hypre_IndexD(index,0),
              hypre_IndexD(index,1),
              hypre_IndexD(index,2) );
-      return(0);
+      return ierr;
    }
-   hypre_SStructBoxMapEntryGetGlobalRank(map_entry, index, &row_coord);
+
+   hypre_SStructMapEntryGetGlobalRank(map_entry, index, &row_coord);
 
    col_coords = hypre_SStructMatrixTmpColCoords(matrix);
    coeffs     = hypre_SStructMatrixTmpCoeffs(matrix);
@@ -527,8 +551,8 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
          
          if (map_entry != NULL)
          {
-            hypre_SStructBoxMapEntryGetGlobalRank(map_entry, to_index,
-                                                  &col_coords[ncoeffs]);
+            hypre_SStructMapEntryGetGlobalRank(map_entry, to_index,
+                                               &col_coords[ncoeffs]);
             coeffs[ncoeffs] = values[i];
             ncoeffs++;
          }

@@ -44,6 +44,7 @@ typedef struct hypre_SStructVector_struct
    /* s-vector info */
    int                     nparts;
    hypre_SStructPVector  **pvectors;
+   hypre_CommPkg        ***comm_pkgs;    /* nvar array of comm pkgs */
 
    /* u-vector info */
    HYPRE_IJVector          ijvector;

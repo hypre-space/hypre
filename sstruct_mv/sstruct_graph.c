@@ -49,7 +49,7 @@ hypre_SStructGraphFindUVEntry( hypre_SStructGraph    *graph,
    int                    rank;
 
    hypre_SStructGridFindMapEntry(grid, part, index, var, &map_entry);
-   hypre_SStructBoxMapEntryGetGlobalRank(map_entry, index, &rank);
+   hypre_SStructMapEntryGetGlobalRank(map_entry, index, &rank);
    rank -= hypre_SStructGridStartRank(grid);
 
    *Uventry_ptr = Uventries[rank];

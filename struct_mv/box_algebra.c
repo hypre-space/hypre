@@ -16,9 +16,8 @@
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * hypre_IntersectBoxes:
- *   Intersect box1 and box2.
- *   If the boxes do not intersect, the result is a box with zero volume.
+ * Intersect box1 and box2.
+ * If the boxes do not intersect, the result is a box with zero volume.
  *--------------------------------------------------------------------------*/
 
 int
@@ -26,8 +25,8 @@ hypre_IntersectBoxes( hypre_Box *box1,
                       hypre_Box *box2,
                       hypre_Box *ibox )
 {
-   int          ierr = 0;
-   int          d;
+   int ierr = 0;
+   int d;
 
    /* find x, y, and z bounds */
    for (d = 0; d < 3; d++)
@@ -42,8 +41,7 @@ hypre_IntersectBoxes( hypre_Box *box1,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SubtractBoxes:
- *   Compute box1 - box2.
+ * Compute (box1 - box2) and append result to box_array.
  *--------------------------------------------------------------------------*/
 
 int
@@ -51,7 +49,7 @@ hypre_SubtractBoxes( hypre_Box      *box1,
                      hypre_Box      *box2,
                      hypre_BoxArray *box_array )
 {
-   int         ierr = 0;
+   int ierr = 0;
               
    hypre_Box  *box;
    hypre_Box  *rembox;
@@ -62,24 +60,25 @@ hypre_SubtractBoxes( hypre_Box      *box1,
     * plus one, to have space for the remainder box.
     *------------------------------------------------------*/
 
-   hypre_BoxArraySetSize(box_array, 7);
+   size = hypre_BoxArraySize(box_array);
+   hypre_BoxArraySetSize(box_array, (size + 7));
 
    /*------------------------------------------------------
     * Subtract the boxes by cutting box1 in x, y, then z
     *------------------------------------------------------*/
 
-   rembox = hypre_BoxArrayBox(box_array, 6);
+   rembox = hypre_BoxArrayBox(box_array, (size + 6));
    hypre_CopyBox(box1, rembox);
 
-   size = 0;
    for (d = 0; d < 3; d++)
    {
       /* if the boxes do not intersect, the subtraction is trivial */
       if ( (hypre_BoxIMinD(box2, d) > hypre_BoxIMaxD(rembox, d)) ||
            (hypre_BoxIMaxD(box2, d) < hypre_BoxIMinD(rembox, d)) )
       {
-         hypre_CopyBox(box1, hypre_BoxArrayBox(box_array, 0));
-         size = 1;
+         size = hypre_BoxArraySize(box_array) - 7;
+         hypre_CopyBox(box1, hypre_BoxArrayBox(box_array, size));
+         size++;
          break;
       }
 
@@ -110,8 +109,46 @@ hypre_SubtractBoxes( hypre_Box      *box1,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_UnionBoxes:
- *   Compute the union of all boxes.
+ * Compute (box_array1 - box_array2) and replace box_array1 with result.
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_SubtractBoxArrays( hypre_BoxArray *box_array1,
+                         hypre_BoxArray *box_array2,
+                         hypre_BoxArray *tmp_box_array )
+{
+   int ierr = 0;
+              
+   hypre_BoxArray *diff_boxes     = box_array1;
+   hypre_BoxArray *new_diff_boxes = tmp_box_array;
+   hypre_BoxArray  box_array;
+   hypre_Box      *box1;
+   hypre_Box      *box2;
+   int             i, k;
+
+   hypre_ForBoxI(i, box_array2)
+      {
+         box2 = hypre_BoxArrayBox(box_array2, i);
+
+         /* compute new_diff_boxes = (diff_boxes - box2) */
+         hypre_BoxArraySetSize(new_diff_boxes, 0);
+         hypre_ForBoxI(k, diff_boxes)
+            {
+               box1 = hypre_BoxArrayBox(diff_boxes, k);
+               hypre_SubtractBoxes(box1, box2, new_diff_boxes);
+            }
+
+         /* swap internals of diff_boxes and new_diff_boxes */
+         box_array       = *new_diff_boxes;
+         *new_diff_boxes = *diff_boxes;
+         *diff_boxes     = box_array;
+      }
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * Compute the union of all boxes.
  *
  * To compute the union, we first construct a logically rectangular,
  * variably spaced, 3D grid called block.  Each cell (i,j,k) of block
@@ -152,7 +189,7 @@ hypre_SubtractBoxes( hypre_Box      *box1,
 int
 hypre_UnionBoxes( hypre_BoxArray *boxes )
 {
-   int              ierr = 0;
+   int ierr = 0;
 
    hypre_Box       *box;
 

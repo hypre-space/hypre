@@ -168,6 +168,13 @@ int HYPRE_SStructGridAddVariables(HYPRE_SStructGrid      grid,
  * nbor\_part}.  For example, triple (1, 2, 0) means that indexes 0,
  * 1, and 2 on part {\tt part} map to indexes 1, 2, and 0 on part {\tt
  * nbor\_part}, respectively.
+ *
+ * NOTE: All parts related to each other via this routine must have an
+ * identical list of variables and variable types.  For example, if
+ * part 0 has only two variables on it, a cell centered variable and a
+ * node centered variable, and we declare part 1 to be a neighbor of
+ * part 0, then part 1 must also have only two variables on it, and
+ * they must be of type cell and node.
  **/
 int HYPRE_SStructGridSetNeighborBox(HYPRE_SStructGrid  grid,
                                     int                part,

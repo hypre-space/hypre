@@ -46,7 +46,7 @@ typedef struct
    int                   *glue_nbor_parts;
    ProblemIndex          *glue_nbor_ilowers;
    ProblemIndex          *glue_nbor_iuppers;
-   ProblemIndex          *glue_index_maps;
+   Index                 *glue_index_maps;
 
    /* for GraphSetStencil */
    int                   *stencil_num;
@@ -310,9 +310,38 @@ ReadData( char         *filename,
          }
          else if ( strcmp(key, "GridSetNeighborBox:") == 0 )
          {
-            /* TODO */
-            printf("GridSetNeighborBox not yet implemented!\n");
-            exit(1);
+            part = strtol(sdata_ptr, &sdata_ptr, 10);
+            pdata = data.pdata[part];
+            if ((pdata.glue_nboxes % 10) == 0)
+            {
+               size = pdata.glue_nboxes + 10;
+               pdata.glue_ilowers =
+                  hypre_TReAlloc(pdata.glue_ilowers, ProblemIndex, size);
+               pdata.glue_iuppers =
+                  hypre_TReAlloc(pdata.glue_iuppers, ProblemIndex, size);
+               pdata.glue_nbor_parts =
+                  hypre_TReAlloc(pdata.glue_nbor_parts, int, size);
+               pdata.glue_nbor_ilowers =
+                  hypre_TReAlloc(pdata.glue_nbor_ilowers, ProblemIndex, size);
+               pdata.glue_nbor_iuppers =
+                  hypre_TReAlloc(pdata.glue_nbor_iuppers, ProblemIndex, size);
+               pdata.glue_index_maps =
+                  hypre_TReAlloc(pdata.glue_index_maps, Index, size);
+            }
+            SScanProblemIndex(sdata_ptr, &sdata_ptr, data.ndim,
+                              pdata.glue_ilowers[pdata.glue_nboxes]);
+            SScanProblemIndex(sdata_ptr, &sdata_ptr, data.ndim,
+                              pdata.glue_iuppers[pdata.glue_nboxes]);
+            pdata.glue_nbor_parts[pdata.glue_nboxes] =
+               strtol(sdata_ptr, &sdata_ptr, 10);
+            SScanProblemIndex(sdata_ptr, &sdata_ptr, data.ndim,
+                              pdata.glue_nbor_ilowers[pdata.glue_nboxes]);
+            SScanProblemIndex(sdata_ptr, &sdata_ptr, data.ndim,
+                              pdata.glue_nbor_iuppers[pdata.glue_nboxes]);
+            SScanIntArray(sdata_ptr, &sdata_ptr, data.ndim,
+                          pdata.glue_index_maps[pdata.glue_nboxes]);
+            pdata.glue_nboxes++;
+            data.pdata[part] = pdata;
          }
          else if ( strcmp(key, "GridSetPeriodic:") == 0 )
          {
@@ -1345,7 +1374,18 @@ main( int   argc,
       HYPRE_SStructGridSetVariables(grid, part, pdata.nvars, pdata.vartypes);
 
       /* GridAddVariabes */
+
       /* GridSetNeighborBox */
+      for (box = 0; box < pdata.glue_nboxes; box++)
+      {
+         HYPRE_SStructGridSetNeighborBox(grid, part,
+                                         pdata.glue_ilowers[box],
+                                         pdata.glue_iuppers[box],
+                                         pdata.glue_nbor_parts[box],
+                                         pdata.glue_nbor_ilowers[box],
+                                         pdata.glue_nbor_iuppers[box],
+                                         pdata.glue_index_maps[box]);
+      }
 
       HYPRE_SStructGridSetPeriodic(grid, part, pdata.periodic);
    }

@@ -31,6 +31,7 @@ typedef struct
    hypre_StructMatrix   ***smatrices;    /* nvar x nvar array of smatrices */
 
    /* temporary storage for SetValues routines */
+   int                     sentries_size;
    int                    *sentries;
 
    int                     complex;      /* Is the matrix complex */
@@ -55,6 +56,7 @@ typedef struct hypre_SStructMatrix_struct
    hypre_ParCSRMatrix     *parcsrmatrix;
                          
    /* temporary storage for SetValues routines */
+   int                     entries_size;
    int                    *Sentries;
    int                    *Uentries;
    int                    *tmp_col_coords;
@@ -82,6 +84,7 @@ typedef struct hypre_SStructMatrix_struct
 #define hypre_SStructMatrixPMatrix(mat, part)  ((mat) -> pmatrices[part])
 #define hypre_SStructMatrixIJMatrix(mat)       ((mat) -> ijmatrix)
 #define hypre_SStructMatrixParCSRMatrix(mat)   ((mat) -> parcsrmatrix)
+#define hypre_SStructMatrixEntriesSize(mat)    ((mat) -> entries_size)
 #define hypre_SStructMatrixSEntries(mat)       ((mat) -> Sentries)
 #define hypre_SStructMatrixUEntries(mat)       ((mat) -> Uentries)
 #define hypre_SStructMatrixTmpColCoords(mat)   ((mat) -> tmp_col_coords)
@@ -108,7 +111,7 @@ typedef struct hypre_SStructMatrix_struct
 #define hypre_SStructPMatrixSMatrices(pmat)         ((pmat) -> smatrices)
 #define hypre_SStructPMatrixSMatrix(pmat, vi, vj)  \
 ((pmat) -> smatrices[vi][vj])
-#define hypre_SStructPMatrixNSEntries(pmat)         ((pmat) -> nsentries)
+#define hypre_SStructPMatrixSEntriesSize(pmat)      ((pmat) -> sentries_size)
 #define hypre_SStructPMatrixSEntries(pmat)          ((pmat) -> sentries)
 #define hypre_SStructPMatrixComplex(pmat)           ((pmat) -> complex)
 #define hypre_SStructPMatrixRefCount(pmat)          ((pmat) -> ref_count)

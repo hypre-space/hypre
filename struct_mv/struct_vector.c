@@ -624,6 +624,7 @@ hypre_StructVectorClearGhostValues( hypre_StructVector *vector )
             hypre_BoxArrayBox(hypre_StructVectorDataSpace(vector), i);
          vp = hypre_StructVectorBoxData(vector, i);
 
+         hypre_BoxArraySetSize(diff_boxes, 0);
          hypre_SubtractBoxes(v_data_box, box, diff_boxes);
          hypre_ForBoxI(j, diff_boxes)
             {
