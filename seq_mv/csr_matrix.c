@@ -223,3 +223,47 @@ hypre_PrintCSRMatrix( hypre_CSRMatrix *matrix,
    return ierr;
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_CopyCSRMatrix:
+ * copys A to B, 
+ * if copy_data = 0 only the structure of A is copied to B.
+ * the routine does not check if the dimensions of A and B match !!! 
+ *--------------------------------------------------------------------------*/
+
+int 
+hypre_CopyCSRMatrix( hypre_CSRMatrix *A, hypre_CSRMatrix *B, int copy_data )
+{
+   int  ierr=0;
+   int  num_rows = hypre_CSRMatrixNumRows(A);
+   int *A_i = hypre_CSRMatrixI(A);
+   int *A_j = hypre_CSRMatrixJ(A);
+   double *A_data;
+   int *B_i = hypre_CSRMatrixI(B);
+   int *B_j = hypre_CSRMatrixJ(B);
+   double *B_data;
+
+   int i, j;
+
+   for (i=0; i < num_rows; i++)
+   {
+	B_i[i] = A_i[i];
+	for (j=A_i[i]; j < A_i[i+1]; j++)
+	{
+		B_j[j] = A_j[j];
+	}
+   }
+   B_i[num_rows] = A_i[num_rows];
+   if (copy_data)
+   {
+	A_data = hypre_CSRMatrixData(A);
+	B_data = hypre_CSRMatrixData(B);
+   	for (i=0; i < num_rows; i++)
+   	{
+	   for (j=A_i[i]; j < A_i[i+1]; j++)
+	   {
+		B_data[j] = A_data[j];
+	   }
+	}
+   }
+   return ierr;
+}

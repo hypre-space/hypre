@@ -242,6 +242,7 @@ int hypre_InitializeCSRMatrix P((hypre_CSRMatrix *matrix ));
 int hypre_SetCSRMatrixDataOwner P((hypre_CSRMatrix *matrix , int owns_data ));
 hypre_CSRMatrix *hypre_ReadCSRMatrix P((char *file_name ));
 int hypre_PrintCSRMatrix P((hypre_CSRMatrix *matrix , char *file_name ));
+int hypre_CopyCSRMatrix P((hypre_CSRMatrix *A , hypre_CSRMatrix *B , int copy_data ));
 
 /* csr_matvec.c */
 int hypre_Matvec P((double alpha , hypre_CSRMatrix *A , hypre_Vector *x , double beta , hypre_Vector *y ));
