@@ -852,7 +852,7 @@ static void ComputeValuesNonsym(StoredRows *stored_rows, Matrix *mat,
     double *work;
     int ahat_size = 10000, bhat_size = 1000, work_size = 2000*64;
 
-    int row, maxlen, len, *ind;
+    int row, len, *ind;
     double *val;
 
     int i, j, len2, *ind2, loc;
@@ -1412,7 +1412,9 @@ void ParaSailsSetupValues(ParaSails *ps, Matrix *A, double filter)
         MatrixDestroy(ps->M);
         ps->M = filtered_matrix;
 
-        Rescale(ps->M, stored_rows, diag_scale, ps->numb->num_ind);
+	/* rescale if factored preconditioner */
+        if (ps->symmetric != 0)
+            Rescale(ps->M, stored_rows, diag_scale, ps->numb->num_ind);
 
         DiagScaleDestroy(diag_scale);
     }
