@@ -86,17 +86,22 @@ OBJS = ${FILES:.c=.o}
 ##################################################################
 
 all: libHYPRE_sstruct_ls.a
-	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include/.
-	cp -fp $(srcdir)/sstruct_ls.h $(HYPRE_BUILD_DIR)/include/.
-	cp -fp libHYPRE_*.a $(HYPRE_BUILD_DIR)/lib/.
+	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
+	cp -fp $(srcdir)/sstruct_ls.h $(HYPRE_BUILD_DIR)/include
+	cp -fp libHYPRE* $(HYPRE_BUILD_DIR)/lib
+	@\
+	for file in ${OBJS}; \
+	do \
+	   (cp -fp $$file ${HYPRE_SRC_TOP_DIR}/lib); \
+	done
 
 install: libHYPRE_sstruct_ls.a
-	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)/.
-	cp -fp $(srcdir)/sstruct_ls.h $(HYPRE_INC_INSTALL)/.
-	cp -fp libHYPRE_*.a $(HYPRE_LIB_INSTALL)/.
+	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
+	cp -fp $(srcdir)/sstruct_ls.h $(HYPRE_INC_INSTALL)
+	cp -fp libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:
-	rm -f *.o lib*.a
+	rm -f *.o libHYPRE*
 
 distclean: clean
 
