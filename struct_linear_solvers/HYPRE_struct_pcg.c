@@ -12,6 +12,7 @@
  * HYPRE_StructPCG interface
  *
  *****************************************************************************/
+#define NO_PTHREAD_MANGLING
 
 #include "headers.h"
 #include "threading.h"
