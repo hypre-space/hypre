@@ -24,10 +24,8 @@ help ()
   printf "  \"V\" and the version number separated with \"-\" replacing\n"
   printf "  the \".\"s. If the VersionId can not be mapped to a current\n"
   printf "  rtag id, then an error message is generated.\n"
-  printf "  and VersionId will be ued for the distribution labeling.\n"
-  printf "  If VersionId is not provided then the version will be derived\n"
-  printf "  from the main trunk archive it self (either patchlevel.h or\n"
-  printf "  utilites/HYPRE_utilites.h.\n"
+  printf "  The version will be derived from the main trunk archive\n"
+  printf "  using utilites/HYPRE_utilites.h information.\n"
 }
 
 usage ()
