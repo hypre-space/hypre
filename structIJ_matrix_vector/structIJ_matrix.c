@@ -79,11 +79,6 @@ hypre_StructIJMatrixDestroy( hypre_StructIJMatrix *matrix )
 /*--------------------------------------------------------------------------
  * hypre_StructIJMatrixInitialize
  *
- * Note: for now, the number of non-zeros in row i (row_sizes[i]) is set,
- * by inspiration, to 7.  In general, this should be determined from the
- * stencil.  But this is not straightforward because the stencil may be
- * implicitly symmetric.
- *
  * Notes:
  *   - Assumes the local storage type is PARCSR.
  *   - Assumes the number of local rows is equal to the number of local
@@ -115,7 +110,7 @@ hypre_StructIJMatrixInitialize( hypre_StructIJMatrix *matrix )
 
    nnzs = hypre_StructStencilSize( hypre_StructIJMatrixStencil( matrix ) );
    if (hypre_StructIJMatrixSymmetric( matrix ) )
-      nnzs = 2*nnzs + 1;
+      nnzs = 2*nnzs - 1;
 
    row_sizes = hypre_CTAlloc(int, nrows);
    for (i=0; i < nrows; i++)

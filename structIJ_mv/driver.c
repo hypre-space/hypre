@@ -601,7 +601,6 @@ main( int   argc,
     *-----------------------------------------------------------*/
  
    ierr  = HYPRE_StructIJMatrixCreate(MPI_COMM_WORLD, grid, stencil, &A_structij);
-   ierr += HYPRE_StructIJMatrixSetSymmetric(A_structij, 1);  
    ierr += HYPRE_StructIJMatrixInitialize(A_structij);
 
    /*-----------------------------------------------------------
