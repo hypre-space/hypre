@@ -201,8 +201,9 @@ void memcpy_idx( int *dest, const int *src, size_t n )
 **************************************************************************/
 void memcpy_fp( double *dest, const double *src, size_t n )
 {
-  int inc=1;
+  int i, inc=1;
 
-  SCOPY(&n, src, &inc, dest, &inc);
+  /*SCOPY(&n, src, &inc, dest, &inc);*/
+  for (i=0; i<n; i++) dest[i] = src[i];
 }
 

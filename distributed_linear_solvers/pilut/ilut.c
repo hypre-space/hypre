@@ -9,6 +9,7 @@
  * $Id$
  */
 
+#include <math.h>
 #include "./DistributedMatrixPilutSolver.h"
 
 /*************************************************************************
@@ -143,7 +144,10 @@ void ComputeAdd2Nrms(int num_rows, int *rowptr, double *values, double *nrm2s)
 
   for (i=0; i<num_rows; i++) {
     n = rowptr[i+1]-rowptr[i];
-    sum = SNRM2(&n, values+rowptr[i], &incx);
+    /* sum = SNRM2(&n, values+rowptr[i], &incx);*/
+    sum = 0.0;
+    for (j=0; j<n; j++) sum += (values[rowptr[i]+j] * values[rowptr[i]+j]);
+    sum = sqrt( sum );
     nrm2s[i] += sum;
   }
 }
