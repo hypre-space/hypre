@@ -89,6 +89,7 @@ typedef struct
     int          nlevels;
     int          pre, post;
     int          pre_sweeps, post_sweeps;
+    int          BGS_blocksize;
     double       jacobi_wt;
     double       ag_threshold;
     ML_Aggregate *ml_ag;
@@ -303,14 +304,15 @@ int HYPRE_ParCSRMLCreate( MPI_Comm comm, HYPRE_Solver *solver)
     /* fill in all other default parameters */
 
     link->comm         = comm;
-    link->nlevels      = 10;   /* max number of levels */
+    link->nlevels      = 20;   /* max number of levels */
     link->pre          = 0;    /* default is Gauss Seidel */
     link->post         = 0;    /* default is Gauss Seidel */
     link->pre_sweeps   = 2;    /* default is 2 smoothing steps */
     link->post_sweeps  = 2;
+    link->BGS_blocksize = 3;
     link->jacobi_wt    = 0.5;  /* default damping factor */
     link->ml_ag        = NULL;
-    link->ag_threshold = 0.0;  /* threshold for aggregation */
+    link->ag_threshold = 0.18; /* threshold for aggregation */
     link->contxt       = NULL; /* context for matvec */
   
     /* create the ML structure */
@@ -366,6 +368,7 @@ int HYPRE_ParCSRMLSetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
 {
     int        i, my_id, nprocs, coarsest_level, level, sweeps, nlevels;
     int        *row_partition, localEqns, length;
+    int        Nblocks, *blockList;
     double     wght;
     MH_Context *context;
     MH_Matrix  *mh_mat;
@@ -401,7 +404,8 @@ int HYPRE_ParCSRMLSetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
     hypre_TFree( row_partition );
     mh_mat = ( MH_Matrix * ) malloc( sizeof( MH_Matrix) );
     context->Amat = mh_mat;
-    HYPRE_ParCSRMLConstructMHMatrix(A,mh_mat,link->comm,context->partition,context); 
+    HYPRE_ParCSRMLConstructMHMatrix(A,mh_mat,link->comm,
+                                    context->partition,context); 
 
     /* -------------------------------------------------------- */ 
     /* set up the ML communicator information                   */
@@ -429,6 +433,7 @@ int HYPRE_ParCSRMLSetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
     /* -------------------------------------------------------- */ 
 
     ML_Aggregate_Create(&(link->ml_ag));
+    link->ml_ag->max_levels = link->nlevels;
     ML_Aggregate_Set_Threshold( link->ml_ag, link->ag_threshold );
 
     /* -------------------------------------------------------- */ 
@@ -437,8 +442,10 @@ int HYPRE_ParCSRMLSetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
 
     coarsest_level = ML_Gen_MGHierarchy_UsingAggregation(ml, nlevels-1, 
                                         ML_DECREASING, link->ml_ag);
+    if ( my_id == 0 )
+       printf("ML : number of levels = %d\n", coarsest_level);
+
     coarsest_level = nlevels - coarsest_level;
-    printf("nlevels, coarsest = %d %d\n", nlevels, coarsest_level);
 
     /* -------------------------------------------------------- */ 
     /* set up smoother and coarse solver                        */
@@ -459,6 +466,18 @@ int HYPRE_ParCSRMLSetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
           case 2 :
              ML_Gen_SmootherSymGaussSeidel(ml,level,ML_PRESMOOTHER,sweeps,1.0);
              break;
+          case 3 :
+             Nblocks = ML_Aggregate_Get_AggrCount( link->ml_ag, level );
+             ML_Aggregate_Get_AggrMap( link->ml_ag, level, &blockList );
+             ML_Gen_SmootherVBlockGaussSeidel(ml,level,ML_PRESMOOTHER,
+                                              sweeps, Nblocks, blockList);
+             break;
+          case 4 :
+             Nblocks = ML_Aggregate_Get_AggrCount( link->ml_ag, level );
+             ML_Aggregate_Get_AggrMap( link->ml_ag, level, &blockList );
+             ML_Gen_SmootherVBlockJacobi(ml,level,ML_PRESMOOTHER,
+                                         sweeps, wght, Nblocks, blockList);
+             break;
        }
 
        sweeps = link->post_sweeps;
@@ -472,6 +491,18 @@ int HYPRE_ParCSRMLSetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
              break;
           case 2 :
              ML_Gen_SmootherSymGaussSeidel(ml,level,ML_POSTSMOOTHER,sweeps,1.0);
+             break;
+          case 3 :
+             Nblocks = ML_Aggregate_Get_AggrCount( link->ml_ag, level );
+             ML_Aggregate_Get_AggrMap( link->ml_ag, level, &blockList );
+             ML_Gen_SmootherVBlockGaussSeidel(ml,level,ML_POSTSMOOTHER,
+                                              sweeps, Nblocks, blockList);
+             break;
+          case 4 :
+             Nblocks = ML_Aggregate_Get_AggrCount( link->ml_ag, level );
+             ML_Aggregate_Get_AggrMap( link->ml_ag, level, &blockList );
+             ML_Gen_SmootherVBlockJacobi(ml,level,ML_POSTSMOOTHER,
+                                         sweeps, wght, Nblocks, blockList);
              break;
        }
     }
@@ -494,11 +525,26 @@ int HYPRE_ParCSRMLSolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
     double  *rhs, *sol;
     MH_Link *link = (MH_Link *) solver;
     ML      *ml = link->ml_ptr;
+    int     leng, level = ml->ML_num_levels - 1;
+    ML_Operator *Amat = &(ml->Amat[level]);
+    ML_Krylov *ml_kry;
 
     rhs = hypre_VectorData(hypre_ParVectorLocalVector((hypre_ParVector *) b));
     sol = hypre_VectorData(hypre_ParVectorLocalVector((hypre_ParVector *) x));
 
-    ML_Solve_MGV(ml, rhs, sol);
+    /*
+    ml_kry = ML_Krylov_Create(ml->comm);
+    ML_Krylov_Set_Method(ml_kry, 1);
+    ML_Krylov_Set_Amatrix(ml_kry, Amat);
+    ML_Krylov_Set_Precon(ml_kry, ml);
+    ML_Krylov_Set_PreconFunc(ml_kry, ML_AMGVSolve_Wrapper);
+    leng = Amat->outvec_leng;
+    ML_Krylov_Solve(ml_kry, leng, rhs, sol);
+    ML_Krylov_Destroy(&ml_kry);
+    */
+  
+    ML_Solve_AMGV(ml, rhs, sol);
+    //ML_Iterate(ml, sol, rhs);
 
     return 0;
 }
@@ -507,7 +553,8 @@ int HYPRE_ParCSRMLSolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
 /* HYPRE_ParCSRMLSetStrongThreshold                                         */
 /*--------------------------------------------------------------------------*/
 
-int HYPRE_ParCSRMLSetStrongThreshold(HYPRE_Solver solver,double strong_threshold)
+int HYPRE_ParCSRMLSetStrongThreshold(HYPRE_Solver solver,
+                                     double strong_threshold)
 {
     MH_Link *link = (MH_Link *) solver;
   
@@ -571,7 +618,7 @@ int HYPRE_ParCSRMLSetPreSmoother( HYPRE_Solver solver, int smoother_type  )
 {
     MH_Link *link = (MH_Link *) solver;
 
-    if ( smoother_type < 0 || smoother_type > 2 )
+    if ( smoother_type < 0 || smoother_type > 4 )
     {
        printf("HYPRE_ParCSRMLSetPreSmoother error : set to Jacobi.\n");
        link->pre = 0;
@@ -591,7 +638,7 @@ int HYPRE_ParCSRMLSetPostSmoother( HYPRE_Solver solver, int smoother_type  )
 {
     MH_Link *link = (MH_Link *) solver;
 
-    if ( smoother_type < 0 || smoother_type > 2 )
+    if ( smoother_type < 0 || smoother_type > 4 )
     {
        printf("HYPRE_ParCSRMLSetPostSmoother error : set to Jacobi.\n");
        link->post = 0;
@@ -624,11 +671,31 @@ int HYPRE_ParCSRMLSetDampingFactor( HYPRE_Solver solver, double factor  )
 }
 
 /****************************************************************************/
+/* HYPRE_ParCSRMLSetDampingFactor                                           */
+/*--------------------------------------------------------------------------*/
+
+int HYPRE_ParCSRMLSetBGSBlockSize( HYPRE_Solver solver, int size  )
+{
+    MH_Link *link = (MH_Link *) solver;
+
+    if ( size < 0 )
+    {
+       printf("HYPRE_ParCSRMLSetBGSBlockSize error : reset to 1.\n");
+       link->BGS_blocksize = 1;
+    } 
+    else
+    {
+       link->BGS_blocksize = size;
+    } 
+    return( 0 );
+}
+
+/****************************************************************************/
 /* HYPRE_ParCSRMLConstructMHMatrix                                          *
 /*--------------------------------------------------------------------------*/
 
 int HYPRE_ParCSRMLConstructMHMatrix(HYPRE_ParCSRMatrix A, MH_Matrix *mh_mat,
-                                    MPI_Comm comm, int *partition,MH_Context *obj) 
+                             MPI_Comm comm, int *partition,MH_Context *obj) 
 {
     int         i, j, index, my_id, nprocs, msgid, *tempCnt;
     int         sendProcCnt, *sendLeng, *sendProc, **sendList;
@@ -739,7 +806,8 @@ int HYPRE_ParCSRMLConstructMHMatrix(HYPRE_ParCSRMatrix A, MH_Matrix *mh_mat,
           {
              if ( index < startRow || index > endRow )
              {
-                columns[ncnt] = hypre_BinarySearch(externList,index,externLeng );
+                columns[ncnt] = hypre_BinarySearch(externList,index,
+                                                   externLeng );
                 columns[ncnt] += localEqns;
                 values [ncnt++] = colVal[j];
              }
@@ -852,10 +920,12 @@ int HYPRE_ParCSRMLConstructMHMatrix(HYPRE_ParCSRMatrix A, MH_Matrix *mh_mat,
        }
        for ( i = 0; i < sendProcCnt; i++ ) 
        {
-          MPI_Recv((void*) &sendLeng[i],1,MPI_INT,MPI_ANY_SOURCE,msgid,comm,&status);
+          MPI_Recv((void*) &sendLeng[i],1,MPI_INT,MPI_ANY_SOURCE,msgid,
+                   comm,&status);
           sendProc[i] = status.MPI_SOURCE;
           sendList[i] = (int *) malloc( sendLeng[i] * sizeof(int) );
-          if ( sendList[i] == NULL ) printf("allocate problem %d \n", sendLeng[i]);
+          if ( sendList[i] == NULL ) 
+             printf("allocate problem %d \n", sendLeng[i]);
        }
 
        /* ----------------------------------------------------- */ 
@@ -886,12 +956,14 @@ int HYPRE_ParCSRMLConstructMHMatrix(HYPRE_ParCSRMatrix A, MH_Matrix *mh_mat,
           if ( recvProc[i] == 0 ) j = 0;
           else                    j = tempCnt[recvProc[i]-1];
           rowLeng = recvLeng[i];
-          MPI_Send((void*) &externList[j],rowLeng,MPI_INT,recvProc[i],msgid,comm);
+          MPI_Send((void*) &externList[j],rowLeng,MPI_INT,recvProc[i],
+                    msgid,comm);
        }
        for ( i = 0; i < sendProcCnt; i++ ) 
        {
           rowLeng = sendLeng[i];
-          MPI_Recv((void*)sendList[i],rowLeng,MPI_INT,sendProc[i],msgid,comm,&status);
+          MPI_Recv((void*)sendList[i],rowLeng,MPI_INT,sendProc[i],
+                   msgid,comm,&status);
        }
 
        /* ----------------------------------------------------- */ 
@@ -904,8 +976,10 @@ int HYPRE_ParCSRMLConstructMHMatrix(HYPRE_ParCSRMatrix A, MH_Matrix *mh_mat,
           {
              index = sendList[i][j] - startRow;
              if ( index < 0 || index >= localEqns )
-                printf("%d : Construct MH matrix Error - index out of range %d\n",
-                             my_id, index);
+             {
+                printf("%d : Construct MH matrix Error - index out ");
+                printf("of range%d\n", my_id, index);
+             }
              sendList[i][j] = index;
           }
        }
