@@ -403,6 +403,11 @@ int PrintInt10(char *name, int len, int *x)
 
 
 #ifndef HYPRE_USING_HYPRE_BLAS
+#ifndef HYPRE_USING_BLAS_WRAPPERS
+#define HYPRE_USING_BLAS_WRAPPERS 1
+#endif
+#endif
+#ifdef HYPRE_USING_BLAS_WRAPPERS
 int lsame_(char *ca, char *cb)
 {
 /*  -- LAPACK auxiliary routine (version 2.0) --   
