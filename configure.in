@@ -36,7 +36,6 @@ dnl * then default settings will apply.
 dnl *********************************************************************
 
 HYPRE_GUESS_ARCH
-AC_CANONICAL_HOST
 
 dnl *********************************************************************
 dnl * If the user has specified a c, c++, or fortran compiler on the 
@@ -755,23 +754,19 @@ case $ARCH in
         test "$casc_using_mpi" = "yes" &&
         test "$CC" != "mpicc"
     then
-      case "${host}" in
-        sparc-sun-solaris2.7)
-          MPIINCLUDE="-I/usr/local/mpi/mpich-1.2.0/include"
-          MPILIBS="-lmpich -lsocket -lnsl -lnsl -laio"
-          MPILIBDIRS="-L/usr/local/mpi/mpich-1.2.0/lib"
-          ;;
-        sparc-sun-solaris2.8)
-          MPIINCLUDE="-I/usr/apps/mpich/1.2.4/include"
-          MPILIBS="-lmpich -lsocket -lnsl -lnsl -laio"
-          MPILIBDIRS="-L/usr/apps/mpich/1.2.0/lib"
-          ;;
-        *)
-          CASC_CHECK_HEADER(mpi.h, /usr/local/mpi/mpich-1.2.0/include /usr/apps/mpich/1.2.4/include)
-          MPIINCLUDE="$MPIINCLUDE $INCLUDES"
-          CASC_ADD_LIB(mpich, main, /usr/local/mpi/mpich-1.2.0/lib /usr/apps/mpich/1.2.4/lib, MPI)
-           ;;
-      esac
+      if test -r "/usr/local/mpi/mpich-1.2.0/include/mpi.h"; then
+        MPIINCLUDE="-I/usr/local/mpi/mpich-1.2.0/include"
+        MPILIBS="-lmpich -lsocket -lnsl -lnsl -laio"
+        MPILIBDIRS="-L/usr/local/mpi/mpich-1.2.0/lib"
+      elif test -r "/usr/apps/mpich/1.2.4/include/mpi.h"; then
+        MPIINCLUDE="-I/usr/apps/mpich/1.2.4/include"
+        MPILIBS="-lmpich -lsocket -lnsl -lnsl -laio"
+        MPILIBDIRS="-L/usr/apps/mpich/1.2.0/lib"
+      else
+        CASC_CHECK_HEADER(mpi.h, /usr/local/mpi/mpich-1.2.0/include /usr/apps/mpich/1.2.4/include)
+        MPIINCLUDE="$MPIINCLUDE $INCLUDES"
+        CASC_ADD_LIB(mpich, MPI_Init, /usr/local/mpi/mpich-1.2.0/lib /usr/apps/mpich/1.2.4/lib, MPI)
+      fi
       if test -z "$MPILIBS"
       then
         AC_MSG_WARN([MPI not found--in alpha test-must set manually using --with-flags])
