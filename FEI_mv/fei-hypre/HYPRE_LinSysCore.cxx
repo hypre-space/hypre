@@ -104,6 +104,7 @@ extern "C" {
    void  qsort1(int *, double *, int, int);
 }
 
+#define HAVE_MLI
 #define habs(x)  ( ( (x) > 0 ) ? x : -(x))
 
 //***************************************************************************
@@ -561,6 +562,11 @@ int HYPRE_LinSysCore::createMatricesAndVectors(int numGlobalEqns,
       printf("%4d : HYPRE_LSC::startrow, endrow = %d %d\n",mypid_,
                     firstLocalEqn, firstLocalEqn+numLocalEqns-1);
    }
+#ifdef HYPRE_SEQUENTIAL
+printf("SEQUENTIAL\n");
+#else
+printf("NOT SEQUENTIAL\n");
+#endif
 
    //-------------------------------------------------------------------
    // clean up previously allocated matrix

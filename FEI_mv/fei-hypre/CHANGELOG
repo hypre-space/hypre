@@ -200,4 +200,9 @@
             - add a few more options in HYPRE_LSI_mli.cxx
             - perfect the global coarsening in AMGSA
             - smooth vector AMGSA capability by Edmond
+04/21/04    2.5.4R3
+            - take out MPI functions from FEI_HYPRE_Impl.cxx
+            - take out MPI reference from FEI_HYPRE_include.h
+            - add Edmond's smooth vector capabilites via the FEI
+            - MLI now default (HYPRE_LinSycCore.cxx, HYPRE_LSC_aux.cxx, etc.)
 

@@ -28,6 +28,8 @@
 #include "HYPRE_LinSysCore.h"
 #include "HYPRE_LSI_mli.h"
 
+#define HAVE_MLI
+
 //***************************************************************************
 // local defines and external functions
 //---------------------------------------------------------------------------

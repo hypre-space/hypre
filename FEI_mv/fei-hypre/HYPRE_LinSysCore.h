@@ -13,7 +13,7 @@
 #ifndef _HYPRE_LinSysCore_h_
 #define _HYPRE_LinSysCore_h_
 
-#define HYPRE_FEI_Version() "FEI/HYPRE 2.5.4R2"
+#define HYPRE_FEI_Version() "FEI/HYPRE 2.5.4R3"
 
 // *************************************************************************
 // system libraries used
