@@ -110,7 +110,6 @@ int MLI_Matrix::apply(double alpha, MLI_Vector *vec1, double beta,
    {
       hypreV2 = (hypre_ParVector *) vec2->getVector();
       status  = hypre_ParVectorCopy( hypreV2, hypreV3 );
-      status += hypre_ParVectorScale( beta, hypreV3 );
    }
    else status = hypre_ParVectorSetConstantValues( hypreV3, 0.0e0 );
 
