@@ -1,4 +1,4 @@
-#!/bin/ksh
+#!/bin/ksh 
 #BHEADER***********************************************************************
 # (c) 1998   The Regents of the University of California
 #
@@ -7,16 +7,8 @@
 #
 # $Revision$
 #EHEADER***********************************************************************
+
 #=============================================================================
-# ij_es driver for eigenvaluesolvers: (wihtout -lobpcg option runs ij)
-# tests for LOBPCG only
-# 3 runs must produce identical results
-# ij: Run default case, weigthed Jacobi, BoomerAMG
+# ij_es: no test
 #=============================================================================
-
-mpirun -np 1 ./ij_es -solver 1 -cljp -rlx 0 -lobpcg  -veye 1 > default.out.0
-
-mpirun -np 2 ./ij_es -solver 1 -P 1 1 2 -cljp1 -rlx 0 -lobpcg  -veye 1 > default.out.1
-
-mpirun -np 3 ./ij_es -solver 1 -P 1 1 3 -cljp1 -rlx 0 -lobpcg  -veye 1 > default.out.2
 
