@@ -535,7 +535,7 @@ static void ConstructPatternForEachRow(PrunedRows *pruned_rows,
     int row, len, *ind, level, lenprev, *indprev;
     int i, j;
     RowPatt *row_patt;
-    long cost = 0;
+    double cost = 0.0;
     int nnz = 0;
     int *marker, mype, npes, pe;
 
@@ -596,14 +596,14 @@ static void ConstructPatternForEachRow(PrunedRows *pruned_rows,
         MatrixSetRow(M, row, j, ind, NULL);
 
         nnz += j;
-        cost += j*j*j; /* long may be only 4 bytes on blue */
+        cost += (double) j*j*j; /* long may be only 4 bytes on blue */
     }
 
 #ifdef PARASAILS_TIME
     {
     int mype;
     MPI_Comm_rank(MPI_COMM_WORLD, &mype);
-    printf("%d: nnz: %10d  ********* cost %20ld\n", mype, nnz, cost);
+    printf("%d: nnz: %10d  ********* cost %f\n", mype, nnz, cost);
     fflush(NULL);
     }
 #endif
@@ -813,7 +813,7 @@ ParaSails *ParaSailsCreate(Matrix *A)
 
     ps->A = A;
 
-    ps->M = MatrixCreate(A->comm, A->beg_row, A->end_row);
+    ps->M = NULL;
 
     ps->max_num_external_rows = 2*MAX(A->end_row - A->beg_row, 10000) + 1;
 
@@ -861,6 +861,14 @@ void ParaSailsSetupPattern(ParaSails *ps, double thresh, int num_levels)
     ps->thresh     = thresh;
     ps->num_levels = num_levels;
 
+    if (ps->M)
+        MatrixDestroy(ps->M);
+
+    ps->M = MatrixCreate(ps->A->comm, ps->A->beg_row, ps->A->end_row);
+
+    if (ps->pruned_rows)
+        PrunedRowsDestroy(ps->pruned_rows);
+
     time0 = MPI_Wtime();
     ps->pruned_rows = PrunedRowsCreate(ps->A, ps->max_num_external_rows, 
         ps->diag_scale, ps->thresh);
@@ -890,19 +898,19 @@ void ParaSailsSetupPattern(ParaSails *ps, double thresh, int num_levels)
  * ParaSailsSetupValues - Compute the numerical values of the ParaSails
  * preconditioner, for the pattern set up using ParaSailsSetupPattern.
  * This function may be called repeatedly with different input matrices
- * "A", for which a preconditioner is constructed.
+ * "A", for which a preconditioner is constructed.  (A call with the same
+ * matrix as a previous call is not treated any differently.)
  *--------------------------------------------------------------------------*/
 
 void ParaSailsSetupValues(ParaSails *ps, Matrix *A)
 {
-    /* if this is a new matrix, then we need to get a new stored_rows obj */
-    /* cuz it could be a call to set up a different pattern for same matrix */
-    /* if (A != ps->A) */
-
     int mype;
     double time0, time1;
 
     MPI_Comm_rank(A->comm, &mype);
+
+    if (ps->stored_rows)
+        StoredRowsDestroy(ps->stored_rows);
 
     time0 = MPI_Wtime();
     ps->stored_rows = StoredRowsCreate(A, ps->max_num_external_rows);
