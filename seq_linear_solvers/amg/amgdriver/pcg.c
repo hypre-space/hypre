@@ -63,6 +63,7 @@ void    *data;
    /* logging variables */
    double    *norm_log;
    double    *rel_norm_log;
+   double    *conv_rate;
    FILE      *log_fp;
    int        j;
 
@@ -73,6 +74,17 @@ void    *data;
 
    norm_log     = ctalloc(double, max_iter);
    rel_norm_log = ctalloc(double, max_iter);
+   conv_rate    = ctalloc(double, max_iter+1);
+
+ 
+   /*-----------------------------------------------------------------------
+    * Open logging file (destroy pre-existing copy)
+    *-----------------------------------------------------------------------*/
+
+
+   log_fp = fopen(GlobalsLogFileName, "w");
+   fprintf(log_fp, "\nPCG INFO:\n\n");
+
 
    /*-----------------------------------------------------------------------
     * Start pcg solve
@@ -96,6 +108,11 @@ void    *data;
    /* r = b - Ax */
    CopyVector(b, r);
    Matvec(-1.0, A, x, 1.0, r);
+ 
+   /* Set initial residual norm, print to log */
+   norm_log[0] = sqrt(InnerProd(r,r));
+   fprintf(log_fp, "\nInitial residual norm:    %e\n\n", norm_log[0]);
+
 
    /* p = C*r */
    InitVector(p, 0.0);
@@ -145,8 +162,8 @@ void    *data;
 #endif
  
       /* log norm info */
-      norm_log[i-1]     = sqrt(i_prod);
-      rel_norm_log[i-1] = bi_prod ? sqrt(i_prod/bi_prod) : 0;
+      norm_log[i]     = sqrt(i_prod);
+      rel_norm_log[i] = bi_prod ? sqrt(i_prod/bi_prod) : 0;
 
       /* check for convergence */
       if (i_prod < eps)
@@ -173,25 +190,25 @@ void    *data;
     * Print log
     *-----------------------------------------------------------------------*/
 
-   log_fp = fopen(GlobalsLogFileName, "a");
-
-   fprintf(log_fp, "\nPCG INFO:\n\n");
+/*   log_fp = fopen(GlobalsLogFileName, "a"); */
 
    if (two_norm)
    {
-      fprintf(log_fp, "Iters       ||r||_2    ||r||_2/||b||_2\n");
-      fprintf(log_fp, "-----    ------------    ------------\n");
+      fprintf(log_fp, "Iters       ||r||_2    ||r||_2/||b||_2    Conv. Factor\n");
+      fprintf(log_fp, "-----    ------------    ------------   ------------\n");
    }
    else
    {
-      fprintf(log_fp, "Iters       ||r||_C    ||r||_C/||b||_C\n");
-      fprintf(log_fp, "-----    ------------    ------------\n");
+      fprintf(log_fp, "Iters       ||r||_C    ||r||_C/||b||_C    Conv. Factor\n");
+      fprintf(log_fp, "-----    ------------    ------------   ------------\n");
    }
    
-   for (j = 0; j < i; j++)
+
+   for (j = 1; j <= i; j++)
    {
-      fprintf(log_fp, "% 5d    %e    %e\n",
-	      (j+1), norm_log[j], rel_norm_log[j]);
+      conv_rate[j]=norm_log[j]/norm_log[j-1];
+      fprintf(log_fp, "% 5d    %e    %e    %f\n",
+	      (j), norm_log[j], rel_norm_log[j], conv_rate[j]);
    }
    
    fclose(log_fp);
