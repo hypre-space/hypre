@@ -442,6 +442,7 @@ zzz_SMGSetup( void             *smg_vdata,
 
    if ((smg_data -> logging) > 0)
    {
+      max_iter = (smg_data -> max_iter);
       (smg_data -> norms)     = zzz_TAlloc(double, max_iter);
       (smg_data -> rel_norms) = zzz_TAlloc(double, max_iter);
    }
