@@ -186,4 +186,8 @@
 11/07/03    2.5.2R3
             - clean up a lot compiler complaints
             - improve on the AMGSAe capabilities.
+11/18/03    2.5.2R4
+            - clean up a few compiler complaints
+            - a few adjustments for mli
+            - re-do the outputlevel stuff
 
