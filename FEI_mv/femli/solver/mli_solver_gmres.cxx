@@ -156,7 +156,7 @@ int MLI_Solver_GMRES::solve(MLI_Vector *b_in, MLI_Vector *u_in)
    hypre_ParVector    *b, *u, *r, **p, **z;
    int	              i, j, k, ierr = 0, iter, mypid;
    double             *rs, **hh, *c, *s, t, zero=0.0;
-   double             epsilon, gamma, rnorm, epsmac = 1.e-16; 
+   double             epsilon, gamma1, rnorm, epsmac = 1.e-16; 
    char               paramString[100];
    MPI_Comm           comm;
 
@@ -259,10 +259,10 @@ int MLI_Solver_GMRES::solve(MLI_Vector *b_in, MLI_Vector *u_in)
             hh[j-1][i-1] = c[j-1]*t + s[j-1]*hh[j][i-1];		
             hh[j][i-1] = -s[j-1]*t + c[j-1]*hh[j][i-1];
          }
-         gamma = sqrt(hh[i-1][i-1]*hh[i-1][i-1] + hh[i][i-1]*hh[i][i-1]);
-         if (gamma == 0.0) gamma = epsmac;
-         c[i-1] = hh[i-1][i-1]/gamma;
-         s[i-1] = hh[i][i-1]/gamma;
+         gamma1 = sqrt(hh[i-1][i-1]*hh[i-1][i-1] + hh[i][i-1]*hh[i][i-1]);
+         if (gamma1 == 0.0) gamma1 = epsmac;
+         c[i-1] = hh[i-1][i-1]/gamma1;
+         s[i-1] = hh[i][i-1]/gamma1;
          rs[i] = -s[i-1]*rs[i-1];
          rs[i-1] = c[i-1]*rs[i-1];
 
