@@ -56,7 +56,7 @@ AM_CPPFLAGS = -DMLI_SUPERLU \
  -I$(top_srcdir)/FEI_mv/femli\
  -I$(top_srcdir)/IJ_mv\
  -I$(top_srcdir)/krylov\
- -I$(top_srcdir)/parcsr_es/LOBPCG\
+ -I$(top_srcdir)/eigensolvers/krylov\
  -I$(top_srcdir)/parcsr_mv\
  -I$(top_srcdir)/parcsr_ls\
  -I$(top_srcdir)/seq_mv\
