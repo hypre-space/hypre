@@ -40,6 +40,8 @@ then
          esac;;
       IRIX)
          AMG_ARCH="irix";;
+      OSF1)
+         AMG_ARCH="dec";;
    esac
 fi
 
