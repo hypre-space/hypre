@@ -1316,6 +1316,8 @@ PrintUsage( char *progname,
       printf("                        62 - BiCGSTAB with ParaSails precond\n");
       printf("                        120 - PCG with hybrid precond\n");
       printf("  -print             : print out the system\n");
+      printf("  -rhsfromcosine     : solution is cosine function (default)\n");
+      printf("  -rhsone            : rhs is vector with unit components\n");
       printf("  -v <n_pre> <n_post>: SysPFMG # of pre and post relax\n");
       printf("  -skip <s>          : SysPFMG skip relaxation (0 or 1)\n");
 
@@ -1344,6 +1346,8 @@ main( int   argc,
    Index                *block;
    int                   solver_id;
    int                   print_system;
+   int                   cosine;
+   double                scale;
                         
    HYPRE_SStructGrid     grid;
    HYPRE_SStructStencil *stencils;
@@ -1429,6 +1433,7 @@ main( int   argc,
 
    solver_id = 39;
    print_system = 0;
+   cosine = 1;
 
    skip = 0;
    n_pre  = 1;
@@ -1495,6 +1500,16 @@ main( int   argc,
       {
          arg_index++;
          solver_id = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-rhsone") == 0 )
+      {
+         arg_index++;
+         cosine = 0;
+      }
+      else if ( strcmp(argv[arg_index], "-rhsfromcosine") == 0 )
+      {
+         arg_index++;
+         cosine = 1;
       }
       else if ( strcmp(argv[arg_index], "-print") == 0 )
       {
@@ -1878,6 +1893,41 @@ main( int   argc,
    hypre_PrintTiming("SStruct Interface", MPI_COMM_WORLD);
    hypre_FinalizeTiming(time_index);
    hypre_ClearTiming();
+
+   /*-----------------------------------------------------------
+    * If requested, reset linear system so that it has
+    * exact solution:
+    *
+    *   u(part,var,i,j,k) = (part+1)*(var+1)*cosine[(i+j+k)/10]
+    * 
+    *-----------------------------------------------------------*/
+
+   if (cosine)
+   {
+      for (part = 0; part < data.nparts; part++)
+      {
+         pdata = data.pdata[part];
+         for (var = 0; var < pdata.nvars; var++)
+         {
+            scale = (part+1.0)*(var+1.0);
+            for (box = 0; box < pdata.nboxes; box++)
+            {
+               GetVariableBox(pdata.ilowers[box], pdata.iuppers[box], var,
+                              ilower, iupper);
+               SetCosineVector(scale, ilower, iupper, values);
+               HYPRE_SStructVectorSetBoxValues(x, part, ilower, iupper,
+                                               var, values);
+            }
+         }
+      }
+      HYPRE_SStructVectorAssemble(x);
+
+      /* Apply A to cosine vector to yield righthand side */
+      hypre_SStructMatvec(1.0, A, x, 0.0, b);
+      /* Reset initial guess to zero */
+      hypre_SStructMatvec(0.0, A, b, 0.0, x);
+
+   }
 
    /*-----------------------------------------------------------
     * Print out the system and initial guess
@@ -2625,4 +2675,32 @@ main( int   argc,
    MPI_Finalize();
 
    return (0);
+}
+
+/*--------------------------------------------------------------------------
+ * Routine to load cosine function
+ *--------------------------------------------------------------------------*/
+
+int
+SetCosineVector(   double  scale,
+                   Index   ilower,
+                   Index   iupper,
+                   double *values)
+{
+   int          i,j,k;
+   int          count = 0;
+
+   for (k = ilower[2]; k <= iupper[2]; k++)
+   {
+      for (j = ilower[1]; j <= iupper[1]; j++)
+      {
+         for (i = ilower[0]; i <= iupper[0]; i++)
+         {
+            values[count] = scale * cos((i+j+k)/10.0);
+            count++;
+         }
+      }
+   }
+
+   return(0);
 }
