@@ -113,9 +113,6 @@ void RowsWithColumn
  To support both data types, it has hardly any data structures other than int*.
 
 */
-/* >>>> TO DO: same thing for A*B; presently the Boolean A*B function calls
-  >>>>> the non-Boolean CommPkgCreate function, which is a bug.
-*/
 
 void
 hypre_MatTCommPkgCreate_core (

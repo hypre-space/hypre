@@ -271,6 +271,7 @@ int HYPRE_VectorToParVector( MPI_Comm comm , HYPRE_Vector b , int *partitioning 
 /* communication.c */
 hypre_ParCSRCommHandle *hypre_ParCSRCommHandleCreate( int job , hypre_ParCSRCommPkg *comm_pkg , void *send_data , void *recv_data );
 int hypre_ParCSRCommHandleDestroy( hypre_ParCSRCommHandle *comm_handle );
+void hypre_MatvecCommPkgCreate_core( MPI_Comm comm , int *col_map_offd , int first_col_diag , int *col_starts , int num_cols_diag , int num_cols_offd , int firstColDiag , int *colMapOffd , int data , int *p_num_recvs , int **p_recv_procs , int **p_recv_vec_starts , int *p_num_sends , int **p_send_procs , int **p_send_map_starts , int **p_send_map_elmts );
 int hypre_MatvecCommPkgCreate( hypre_ParCSRMatrix *A );
 int hypre_MatvecCommPkgDestroy( hypre_ParCSRCommPkg *comm_pkg );
 int hypre_BuildCSRMatrixMPIDataType( int num_nonzeros , int num_rows , double *a_data , int *a_i , int *a_j , MPI_Datatype *csr_matrix_datatype );
