@@ -5,6 +5,9 @@
  * works by first building a parcsr matrix as before and then "copying"
  * that matrix row-by-row into the IJMatrix interface. AJC 7/99.
  *--------------------------------------------------------------------------*/
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
 
 #include "utilities.h"
 #include "HYPRE.h"
@@ -720,11 +723,11 @@ main( int   argc,
    else if ( build_rhs_type == 3 )
    {
 
-      b = HYPRE_ParVectorCreate(MPI_COMM_WORLD, global_n, part_b);
+      HYPRE_ParVectorCreate(MPI_COMM_WORLD, global_n, part_b,&b);
       HYPRE_ParVectorInitialize(b);
       HYPRE_ParVectorSetRandomValues(b, 22775);
-      norm = HYPRE_ParVectorInnerProd(b,b);
-      norm = 1.0/norm;
+      HYPRE_ParVectorInnerProd(b,b,&norm);
+      norm = 1.0/sqrt(norm);
       ierr = HYPRE_ParVectorScale(norm, b);      
 
       HYPRE_IJVectorCreate(MPI_COMM_WORLD, &ij_x, global_n);
@@ -737,11 +740,11 @@ main( int   argc,
    else if ( build_rhs_type == 4 )
    {
 
-      x = HYPRE_ParVectorCreate(MPI_COMM_WORLD, global_n, part_x);
+      HYPRE_ParVectorCreate(MPI_COMM_WORLD, global_n, part_x, &x);
       HYPRE_ParVectorInitialize(x);
       HYPRE_ParVectorSetConstantValues(x, 1.0);
 
-      b = HYPRE_ParVectorCreate(MPI_COMM_WORLD, global_n, part_b);
+      HYPRE_ParVectorCreate(MPI_COMM_WORLD, global_n, part_b, &b);
       HYPRE_ParVectorInitialize(b);
       HYPRE_ParCSRMatrixMatvec(1.0,A,x,0.0,b);
 
@@ -749,7 +752,7 @@ main( int   argc,
    }
    else /* if ( build_rhs_type == 0 ) */
    {
-      b = HYPRE_ParVectorCreate(MPI_COMM_WORLD, global_n, part_b);
+      HYPRE_ParVectorCreate(MPI_COMM_WORLD, global_n, part_b, &b);
       HYPRE_ParVectorInitialize(b);
       HYPRE_ParVectorSetConstantValues(b, 1.0);
 
@@ -769,7 +772,7 @@ main( int   argc,
       time_index = hypre_InitializeTiming("BoomerAMG Setup");
       hypre_BeginTiming(time_index);
 
-      amg_solver = HYPRE_ParAMGCreate(); 
+      HYPRE_ParAMGCreate(&amg_solver); 
       HYPRE_ParAMGSetCoarsenType(amg_solver, (hybrid*coarsen_type));
       HYPRE_ParAMGSetMeasureType(amg_solver, measure_type);
       HYPRE_ParAMGSetTol(amg_solver, tol);
@@ -824,7 +827,7 @@ main( int   argc,
       if (solver_id == 1)
       {
          /* use BoomerAMG as preconditioner */
-         pcg_precond = HYPRE_ParAMGCreate(); 
+         HYPRE_ParAMGCreate(&pcg_precond); 
          HYPRE_ParAMGSetCoarsenType(pcg_precond, (hybrid*coarsen_type));
          HYPRE_ParAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_ParAMGSetStrongThreshold(pcg_precond, strong_threshold);
@@ -907,7 +910,7 @@ main( int   argc,
       {
          /* use BoomerAMG as preconditioner */
 
-         pcg_precond = HYPRE_ParAMGCreate(); 
+         HYPRE_ParAMGCreate(&pcg_precond); 
          HYPRE_ParAMGSetCoarsenType(pcg_precond, (hybrid*coarsen_type));
          HYPRE_ParAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_ParAMGSetStrongThreshold(pcg_precond, strong_threshold);
@@ -1013,7 +1016,7 @@ main( int   argc,
       if (solver_id == 5)
       {
          /* use BoomerAMG as preconditioner */
-         pcg_precond = HYPRE_ParAMGCreate(); 
+         HYPRE_ParAMGCreate(&pcg_precond); 
          HYPRE_ParAMGSetCoarsenType(pcg_precond, (hybrid*coarsen_type));
          HYPRE_ParAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_ParAMGSetStrongThreshold(pcg_precond, strong_threshold);
@@ -1162,7 +1165,7 @@ BuildParFromFile( int                  argc,
     * Generate the matrix 
     *-----------------------------------------------------------*/
  
-   A = HYPRE_ParCSRMatrixRead(MPI_COMM_WORLD, filename);
+   HYPRE_ParCSRMatrixRead(MPI_COMM_WORLD, filename,&A);
 
    *A_ptr = A;
 
@@ -1533,7 +1536,7 @@ BuildParFromOneFile( int                  argc,
  
       A_CSR = HYPRE_CSRMatrixRead(filename);
    }
-   A = HYPRE_CSRMatrixToParCSRMatrix(MPI_COMM_WORLD, A_CSR, NULL, NULL);
+   HYPRE_CSRMatrixToParCSRMatrix(MPI_COMM_WORLD, A_CSR, NULL, NULL, &A);
 
    *A_ptr = A;
 
@@ -1597,7 +1600,7 @@ BuildRhsParFromOneFile( int                  argc,
       b_CSR = HYPRE_VectorRead(filename);
    }
    HYPRE_ParCSRMatrixGetRowPartitioning(A, &partitioning);
-   b = HYPRE_VectorToParVector(MPI_COMM_WORLD, b_CSR, partitioning); 
+   HYPRE_VectorToParVector(MPI_COMM_WORLD, b_CSR, partitioning,&b); 
 
    *b_ptr = b;
 
