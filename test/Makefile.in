@@ -17,7 +17,7 @@
 #
 # Makefile.am --- automake input file for Hypre test drivers
 #
-SOURCES = $(f77_ij_SOURCES) $(f77_ij_b_SOURCES) $(f77_ij_mv_SOURCES) $(f77_struct_SOURCES) $(fei_SOURCES) $(ij_SOURCES) $(nodist_ij_C___SOURCES) $(ij_b_SOURCES) $(ij_es_SOURCES) $(ij_mv_SOURCES) $(nodist_ij_mv_C___SOURCES) $(new_ij_SOURCES) $(nodist_new_ij_C___SOURCES) $(sstruct_SOURCES) $(nodist_sstruct_C___SOURCES) $(struct_SOURCES) $(nodist_struct_C___SOURCES)
+SOURCES = $(driver_commpkg_SOURCES) $(f77_ij_SOURCES) $(f77_ij_b_SOURCES) $(f77_ij_mv_SOURCES) $(f77_struct_SOURCES) $(fei_SOURCES) $(ij_SOURCES) $(nodist_ij_C___SOURCES) $(ij_b_SOURCES) $(ij_es_SOURCES) $(ij_mv_SOURCES) $(nodist_ij_mv_C___SOURCES) $(new_ij_SOURCES) $(nodist_new_ij_C___SOURCES) $(sstruct_SOURCES) $(nodist_sstruct_C___SOURCES) $(struct_SOURCES) $(nodist_struct_C___SOURCES)
 
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
@@ -45,7 +45,7 @@ EXTRA_PROGRAMS = ij$(EXEEXT) ij_es$(EXEEXT) ij_mv$(EXEEXT) \
 	f77_ij$(EXEEXT) f77_ij_b$(EXEEXT) f77_ij_mv$(EXEEXT) \
 	f77_struct$(EXEEXT) fei$(EXEEXT) ij_b$(EXEEXT) ij.C++$(EXEEXT) \
 	new_ij.C++$(EXEEXT) ij_mv.C++$(EXEEXT) struct.C++$(EXEEXT) \
-	sstruct.C++$(EXEEXT)
+	sstruct.C++$(EXEEXT) driver_commpkg$(EXEEXT)
 subdir = test
 SUBDIRS =
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
@@ -59,11 +59,14 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/HYPRE_config.h
 CONFIG_CLEAN_FILES =
-am_f77_ij_OBJECTS = f77_ij-f77_ij.$(OBJEXT)
-f77_ij_OBJECTS = $(am_f77_ij_OBJECTS)
+am_driver_commpkg_OBJECTS = driver_commpkg.$(OBJEXT)
+driver_commpkg_OBJECTS = $(am_driver_commpkg_OBJECTS)
 am__DEPENDENCIES_1 =
 am__DEPENDENCIES_2 = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1)
+driver_commpkg_DEPENDENCIES = $(am__DEPENDENCIES_2)
+am_f77_ij_OBJECTS = f77_ij-f77_ij.$(OBJEXT)
+f77_ij_OBJECTS = $(am_f77_ij_OBJECTS)
 f77_ij_DEPENDENCIES = $(am__DEPENDENCIES_2)
 am_f77_ij_b_OBJECTS = f77_ij_b-f77_ij_b.$(OBJEXT)
 f77_ij_b_OBJECTS = $(am_f77_ij_b_OBJECTS)
@@ -138,16 +141,17 @@ LTF77COMPILE = $(LIBTOOL) --mode=compile $(F77) $(AM_FFLAGS) $(FFLAGS)
 F77LD = $(F77)
 F77LINK = $(LIBTOOL) --mode=link $(F77LD) $(AM_FFLAGS) $(FFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = $(f77_ij_SOURCES) $(f77_ij_b_SOURCES) $(f77_ij_mv_SOURCES) \
-	$(f77_struct_SOURCES) $(fei_SOURCES) $(ij_SOURCES) \
-	$(nodist_ij_C___SOURCES) $(ij_b_SOURCES) $(ij_es_SOURCES) \
-	$(ij_mv_SOURCES) $(nodist_ij_mv_C___SOURCES) $(new_ij_SOURCES) \
+SOURCES = $(driver_commpkg_SOURCES) $(f77_ij_SOURCES) \
+	$(f77_ij_b_SOURCES) $(f77_ij_mv_SOURCES) $(f77_struct_SOURCES) \
+	$(fei_SOURCES) $(ij_SOURCES) $(nodist_ij_C___SOURCES) \
+	$(ij_b_SOURCES) $(ij_es_SOURCES) $(ij_mv_SOURCES) \
+	$(nodist_ij_mv_C___SOURCES) $(new_ij_SOURCES) \
 	$(nodist_new_ij_C___SOURCES) $(sstruct_SOURCES) \
 	$(nodist_sstruct_C___SOURCES) $(struct_SOURCES) \
 	$(nodist_struct_C___SOURCES)
-DIST_SOURCES = $(f77_ij_SOURCES) $(f77_ij_b_SOURCES) \
-	$(f77_ij_mv_SOURCES) $(f77_struct_SOURCES) $(fei_SOURCES) \
-	$(ij_SOURCES) $(ij_b_SOURCES) $(ij_es_SOURCES) \
+DIST_SOURCES = $(driver_commpkg_SOURCES) $(f77_ij_SOURCES) \
+	$(f77_ij_b_SOURCES) $(f77_ij_mv_SOURCES) $(f77_struct_SOURCES) \
+	$(fei_SOURCES) $(ij_SOURCES) $(ij_b_SOURCES) $(ij_es_SOURCES) \
 	$(ij_mv_SOURCES) $(new_ij_SOURCES) $(sstruct_SOURCES) \
 	$(struct_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
@@ -398,6 +402,25 @@ new_ij_SOURCES = new_ij.c
 new_ij_CPPFLAGS = $(AM_CPPFLAGS)
 new_ij_LDADD = $(ij_libraries)
 
+#driver_commpkg build
+driver_commpkg_SOURCES = driver_commpkg.c
+driver_commpkg_libraries = \
+ -L$(libdir)\
+ -lHYPRE_parcsr_ls\
+ -lHYPRE_parcsr_mv\
+ -lHYPRE_seq_mv\
+ -lHYPRE_utilities\
+ $(LAPACKLIBFLAGS)\
+ $(BLASLIBFLAGS)\
+ $(LIBM)
+
+driver_commpkg_LDADD = $(driver_commpkg_libraries)
+driver_commpkg_dependencies = \
+ $(includedir)/utilities.h\
+ $(includedir)/HYPRE_parcsr_ls.h\
+ $(includedir)/parcsr_mv.h
+
+
 # sstruct, build
 sstruct_SOURCES = sstruct.c
 sstruct_CPPFLAGS = $(AM_CPPFLAGS)
@@ -627,6 +650,9 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
+driver_commpkg$(EXEEXT): $(driver_commpkg_OBJECTS) $(driver_commpkg_DEPENDENCIES) 
+	@rm -f driver_commpkg$(EXEEXT)
+	$(LINK) $(driver_commpkg_LDFLAGS) $(driver_commpkg_OBJECTS) $(driver_commpkg_LDADD) $(LIBS)
 f77_ij$(EXEEXT): $(f77_ij_OBJECTS) $(f77_ij_DEPENDENCIES) 
 	@rm -f f77_ij$(EXEEXT)
 	$(F77LINK) $(f77_ij_LDFLAGS) $(f77_ij_OBJECTS) $(f77_ij_LDADD) $(LIBS)
@@ -1112,7 +1138,7 @@ uninstall-info: uninstall-info-recursive
 
 
 all-local: ij$(EXEEXT) ij_es$(EXEEXT) ij_mv$(EXEEXT) new_ij$(EXEEXT) \
-		struct$(EXEEXT) sstruct$(EXEEXT)
+		struct$(EXEEXT) sstruct$(EXEEXT)  driver_commpkg$(EXEEXT)
 
 fei++: fei$(EXEEXT)
 

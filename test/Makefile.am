@@ -37,7 +37,8 @@ EXTRA_PROGRAMS = \
  new_ij.C++\
  ij_mv.C++\
  struct.C++\
- sstruct.C++
+ sstruct.C++\
+ driver_commpkg
 # f77_struct_b\
 # struct_b
 
@@ -123,6 +124,25 @@ ij_mv_dependencies = \
 new_ij_SOURCES = new_ij.c
 new_ij_CPPFLAGS = $(AM_CPPFLAGS)
 new_ij_LDADD = $(ij_libraries)
+
+
+#driver_commpkg build
+driver_commpkg_SOURCES = driver_commpkg.c
+driver_commpkg_libraries = \
+ -L$(libdir)\
+ -lHYPRE_parcsr_ls\
+ -lHYPRE_parcsr_mv\
+ -lHYPRE_seq_mv\
+ -lHYPRE_utilities\
+ $(LAPACKLIBFLAGS)\
+ $(BLASLIBFLAGS)\
+ $(LIBM)
+driver_commpkg_LDADD = $(driver_commpkg_libraries)
+driver_commpkg_dependencies = \
+ $(includedir)/utilities.h\
+ $(includedir)/HYPRE_parcsr_ls.h\
+ $(includedir)/parcsr_mv.h
+
 
 # sstruct, build
 sstruct_SOURCES = sstruct.c
@@ -311,7 +331,7 @@ struct_C___CXXFLAGS = $(AM_CXXFLAGS)
 struct_C___LDADD = $(struct_libraries)
 
 all-local: ij$(EXEEXT) ij_es$(EXEEXT) ij_mv$(EXEEXT) new_ij$(EXEEXT) \
-		struct$(EXEEXT) sstruct$(EXEEXT)
+		struct$(EXEEXT) sstruct$(EXEEXT)  driver_commpkg$(EXEEXT)
 
 fei++: fei$(EXEEXT)
 
