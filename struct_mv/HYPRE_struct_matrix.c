@@ -13,6 +13,10 @@
  *****************************************************************************/
 
 #include "headers.h"
+#include "threading.h"
+
+
+#define NO_PTHREAD_MANGLING
 
 /*--------------------------------------------------------------------------
  * HYPRE_NewStructMatrix
@@ -43,11 +47,50 @@ HYPRE_FreeStructMatrix( HYPRE_StructMatrix matrix )
  * HYPRE_InitializeStructMatrix
  *--------------------------------------------------------------------------*/
 
+typedef struct {
+   HYPRE_StructMatrix matrix;
+   int *returnvalue;
+} HYPRE_InitializeStructMatrixArgs;
+
+
 int
 HYPRE_InitializeStructMatrix( HYPRE_StructMatrix matrix )
 {
    return ( hypre_InitializeStructMatrix( (hypre_StructMatrix *) matrix ) );
 }
+
+void
+HYPRE_InitializeStructMatrixVoidPtr( void *argptr)
+{
+   HYPRE_InitializeStructMatrixArgs *localargs =
+                                (HYPRE_InitializeStructMatrixArgs *) argptr;
+
+   *(localargs->returnvalue) = 
+                 HYPRE_InitializeStructMatrix( localargs->matrix );
+}
+
+int
+HYPRE_InitializeStructMatrixPush( HYPRE_StructMatrix matrix )
+{
+   HYPRE_InitializeStructMatrixArgs  pushargs;
+   int                               i;
+   int                               returnvalue;
+
+   pushargs.matrix = matrix;
+   pushargs.returnvalue = (int *) malloc(sizeof(int));
+   for (i=0; i<NUM_THREADS; i++)
+      hypre_work_put( HYPRE_InitializeStructMatrixVoidPtr, (void *)&pushargs);
+
+   hypre_work_wait();
+
+   returnvalue = *(pushargs.returnvalue);
+
+   free( pushargs.returnvalue );
+
+   return returnvalue;
+}
+
+
 
 /*--------------------------------------------------------------------------
  * HYPRE_SetStructMatrixValues

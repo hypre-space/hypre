@@ -21,6 +21,8 @@
 extern "C" {
 #endif
 
+#define NO_PTHREAD_MANGLING
+
 /*--------------------------------------------------------------------------
  * Structures
  *--------------------------------------------------------------------------*/
@@ -52,6 +54,8 @@ void HYPRE_AssembleStructGrid P((HYPRE_StructGrid grid ));
 HYPRE_StructMatrix HYPRE_NewStructMatrix P((MPI_Comm comm , HYPRE_StructGrid grid , HYPRE_StructStencil stencil ));
 int HYPRE_FreeStructMatrix P((HYPRE_StructMatrix matrix ));
 int HYPRE_InitializeStructMatrix P((HYPRE_StructMatrix matrix ));
+void HYPRE_InitializeStructMatrixVoidARGS P((void *argptr ));
+int HYPRE_InitializeStructMatrixPush P((HYPRE_StructMatrix matrix ));
 int HYPRE_SetStructMatrixValues P((HYPRE_StructMatrix matrix , int *grid_index , int num_stencil_indices , int *stencil_indices , double *values ));
 int HYPRE_SetStructMatrixBoxValues P((HYPRE_StructMatrix matrix , int *ilower , int *iupper , int num_stencil_indices , int *stencil_indices , double *values ));
 int HYPRE_AssembleStructMatrix P((HYPRE_StructMatrix matrix ));
@@ -59,6 +63,10 @@ void HYPRE_SetStructMatrixNumGhost P((HYPRE_StructMatrix matrix , int *num_ghost
 HYPRE_StructGrid HYPRE_StructMatrixGrid P((HYPRE_StructMatrix matrix ));
 void HYPRE_SetStructMatrixSymmetric P((HYPRE_StructMatrix matrix , int symmetric ));
 void HYPRE_PrintStructMatrix P((char *filename , HYPRE_StructMatrix matrix , int all ));
+
+#ifndef NO_PTHREAD_MANGLING
+#define HYPRE_InitializeStructMatrix HYPRE_InitializeStructMatrixPush
+#endif
 
 /* HYPRE_struct_stencil.c */
 HYPRE_StructStencil HYPRE_NewStructStencil P((int dim , int size ));
