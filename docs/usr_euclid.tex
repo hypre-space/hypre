@@ -66,22 +66,22 @@ HYPRE_ParVector b, x;
 HYPRE_ParCSRMatrix A;
 
 //Instantiate the preconditioner.
-HYPRE_ParCSREuclidCreate(comm, &eu);
+HYPRE_EuclidCreate(comm, &eu);
 
 //Optionally use either or both of the following two calls to set options.
 // 1. pass options from command line or string array.
-HYPRE_ParCSREuclidSetParams(eu, argc, argv);
+HYPRE_EuclidSetParams(eu, argc, argv);
 
 // 2. pass options from a configuration file.
-HYPRE_ParCSREuclidSetParamsFromFile(eu, "filename");
+HYPRE_EuclidSetParamsFromFile(eu, "filename");
 
 //Set Euclid as the preconditioning method for some
-//other solver, using the function calls HYPRE_ParCSREuclidSetup
-//and HYPRE_ParCSREuclidSolve.  We assume that the pcg_solver
+//other solver, using the function calls HYPRE_EuclidSetup
+//and HYPRE_EuclidSolve.  We assume that the pcg_solver
 //has been properly initialized.
 HYPRE_PCGSetPrecond(pcg_solver,
-                    (HYPRE_PtrToSolverFcn) HYPRE_ParCSREuclidSolve,
-                    (HYPRE_PtrToSolverFcn) HYPRE_ParCSREuclidSetup,
+                    (HYPRE_PtrToSolverFcn) HYPRE_EuclidSolve,
+                    (HYPRE_PtrToSolverFcn) HYPRE_EuclidSetup,
                     eu);
 
 //Solve the system by calling the Setup and Solve methods for, 
@@ -91,7 +91,7 @@ HYPRE_PCGSetup(pcg_solver, (HYPRE_Matrix)A, (HYPRE_Vector)b, (HYPRE_Vector)x);
 HYPRE_PCGSolve(pcg_solver, (HYPRE_Matrix)parcsr_A, (HYPRE_Vector)b, (HYPRE_Vector)x);
 
 //Destroy the Euclid preconditioning object.
-HYPRE_ParCSREuclidDestroy(eu);
+HYPRE_EuclidDestroy(eu);
 
 \end{verbatim}
 \end{display}
@@ -130,9 +130,7 @@ no harm should ensue.
 To pass options on the command line, you must call
 \begin{display}
 \begin{verbatim}
-HYPRE_ParCSREuclidSetParams(HYPRE_Solver solver,
-                                 int argc,
-                                 char *argv[]);
+HYPRE_EuclidSetParams(HYPRE_Solver solver, int argc, char *argv[]);
 \end{verbatim}
 \end{display}
 where {\tt argc} and {\tt argv} carry the usual connotation:
@@ -147,8 +145,8 @@ mpirun -np 2 phoo -level 3
 \end{display}
 
 Since Euclid looks for the ``database'' file when 
-{\tt HYPRE\_ParCSREuclidCreate} is called, and parses the command line 
-when {\tt HYPRE\_ParCSREuclidSetParams} is called,
+{\tt HYPRE\_EuclidCreate} is called, and parses the command line 
+when {\tt HYPRE\_EuclidSetParams} is called,
 option values passed on the command line will override 
 any similar settings that may be contained in the ``database'' file.
 Also, if same option name appears more than once on the command 
@@ -172,7 +170,7 @@ options within your \hypre{} code.  For example,
 char name[2][80];
 strcpy( name[1], "-level");
 strcpy( name[2], "3");
-HYPRE_ParCSREuclidSetParams(solver, 2, name);
+HYPRE_EuclidSetParams(solver, 2, name);
 \end{verbatim}
 \end{display}
 
@@ -180,7 +178,7 @@ HYPRE_ParCSREuclidSetParams(solver, 2, name);
 {\bf Method 4.}
 There are two ways in which you can read in options from a file
 whose name is other than ``database.''
-First, you can call {\tt HYPRE\_ParCSREuclidSetParamsFromFile}
+First, you can call {\tt HYPRE\_EuclidSetParamsFromFile}
 to specify a configuration filename.
 Second, if you have passed the command line arguments as 
 described above in Method 2, 
@@ -212,7 +210,7 @@ mpirun -np 2 phoo -db_filename ../myConfigFile
 \item[-eu\_stats] When Euclid's destructor is called a summary of
                  runtime settings and timing information is printed
                  to stdout.  The same report is printed
-                 when {\tt HYPRE\_ParCSREuclidPrintParams()} is called.
+                 when {\tt HYPRE\_EuclidPrintParams()} is called.
                  The timing marks in the report are the maximum over 
                  all processors in the MPI communicator.
 \item[-eu\_mem] When Euclid's destructor is called a summary of
