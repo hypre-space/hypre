@@ -118,6 +118,7 @@ hypre_ParAMGSetup( void               *amg_vdata,
          wall_time = time_getWallclockSeconds() - wall_time;
          printf("Proc = %d    Level = %d    Coarsen Time = %f\n",
                        my_id,level, wall_time); 
+	 fflush();
       }
 
       CF_marker_array[level] = CF_marker;
@@ -135,6 +136,7 @@ hypre_ParAMGSetup( void               *amg_vdata,
          wall_time = time_getWallclockSeconds() - wall_time;
          printf("Proc = %d    Level = %d    Build Interp Time = %f\n",
                        my_id,level, wall_time);
+	 fflush();
       }
 
       P_array[level] = P; 
@@ -159,6 +161,7 @@ hypre_ParAMGSetup( void               *amg_vdata,
          wall_time = time_getWallclockSeconds() - wall_time;
          printf("Proc = %d    Level = %d    Build Coarse Operator Time = %f\n",
                        my_id,level, wall_time);
+	 fflush();
       }
 
       ++level;

@@ -1513,6 +1513,7 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
       wall_time = time_getWallclockSeconds() - wall_time;
       printf("Proc = %d    Coarsen Setup = %f\n",
                       my_id, wall_time); 
+      fflush();
    }
 
    /*---------------------------------------------------
@@ -1590,6 +1591,7 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
       wall_time = time_getWallclockSeconds() - wall_time;
       printf("Proc = %d    Coarsen 1st pass = %f\n",
                      my_id, wall_time); 
+      fflush();
    }
 
    /* second pass, check fine points for coarse neighbors 
@@ -1838,6 +1840,7 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
       wall_time = time_getWallclockSeconds() - wall_time;
       printf("Proc = %d    Coarsen 2nd pass = %f\n",
                        my_id, wall_time); 
+      fflush();
    }
 
    /* third pass, check boundary fine points for coarse neighbors */
@@ -2063,6 +2066,7 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
          if (coarsen_type == 2)
 		printf("Proc = %d    Coarsen 2nd pass = %f\n",
                 my_id, wall_time); 
+         fflush();
       }
    }
    if (coarsen_type == -2)
@@ -2177,6 +2181,7 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
          wall_time = time_getWallclockSeconds() - wall_time;
          printf("Proc = %d    Coarsen special points = %f\n",
                        my_id, wall_time); 
+         fflush();
       }
 
    }
