@@ -706,15 +706,15 @@ main( int   argc,
       printf("       43=Euclid-PCG      44=Euclid-GMRES   \n");
       printf("       45=Euclid-BICGSTAB\n");
       printf("\n");
-      printf("   -cljp                 : CLJP coarsening \n");
-      printf("   -ruge                 : Ruge coarsening (local)\n");
-      printf("   -ruge3                : third pass on boundary\n");
-      printf("   -ruge3c               : third pass on boundary, keep c-points\n");
-      printf("   -ruge2b               : 2nd pass is global\n");
-      printf("   -rugerlx              : relaxes special points\n");
-      printf("   -falgout              : local ruge followed by LJP\n");
-      printf("   -nohybrid             : no switch in coarsening\n");
-      printf("   -gm                   : use global measures\n");
+      printf("  -cljp                 : CLJP coarsening \n");
+      printf("  -ruge                 : Ruge coarsening (local)\n");
+      printf("  -ruge3                : third pass on boundary\n");
+      printf("  -ruge3c               : third pass on boundary, keep c-points\n");
+      printf("  -ruge2b               : 2nd pass is global\n");
+      printf("  -rugerlx              : relaxes special points\n");
+      printf("  -falgout              : local ruge followed by LJP\n");
+      printf("  -nohybrid             : no switch in coarsening\n");
+      printf("  -gm                   : use global measures\n");
       printf("\n");
       printf("  -rlx  <val>            : relaxation type\n");
       printf("       0=Weighted Jacobi  \n");
@@ -747,7 +747,9 @@ main( int   argc,
       printf("\n");  
       printf("  -dbg <val>             : set debug flag\n");
       printf("       0=no debugging\n       1=internal timing\n       2=interpolation truncation\n       3=more detailed timing in coarsening routine\n");
-      printf("   -print_matrix         : print the matrix to a file");
+      printf("  -print_matrix         : print the matrix to a file\n");
+      printf("\n");
+
       exit(1);
    }
 
