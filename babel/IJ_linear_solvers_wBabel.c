@@ -120,7 +120,7 @@ main( int   argc,
    double *values, val;
    struct SIDL_double__array* Hypre_values;
    struct SIDL_int__array* Hypre_indices;
-   int zero = 0;
+   int dimsl[2], dimsu[2];
 
    const double dt_inf = 1.e40;
    double dt = dt_inf;
@@ -1202,8 +1202,9 @@ main( int   argc,
       ierr += Hypre_IJBuildVector_Create( Hypre_ij_b, comm, first_local_row,last_local_row );
       ierr += Hypre_IJBuildVector_Initialize( Hypre_ij_b );
 
-      Hypre_indices = SIDL_int__array_create( 1, &zero, &local_num_rows );
-      Hypre_values = SIDL_double__array_create( 1, &zero, &local_num_rows );
+      dimsl[0] = 0;  dimsu[0] = local_num_rows;
+      Hypre_indices = SIDL_int__array_create( 1, dimsl, dimsu );
+      Hypre_values = SIDL_double__array_create( 1, dimsl, dimsu );
       for ( i=0; i<local_num_rows; ++i ) {
          SIDL_int__array_set1( Hypre_indices, i, i );
          SIDL_double__array_set1( Hypre_values, i, 1 );
@@ -1244,8 +1245,9 @@ main( int   argc,
       ierr += Hypre_IJBuildVector_Create( Hypre_ij_x, comm, first_local_col,last_local_col );
       ierr += Hypre_IJBuildVector_Initialize( Hypre_ij_x );
 
-      Hypre_indices = SIDL_int__array_create( 1, &zero, &local_num_cols );
-      Hypre_values = SIDL_double__array_create( 1, &zero, &local_num_cols );
+      dimsl[0] = 0;  dimsu[0] = local_num_cols;
+      Hypre_indices = SIDL_int__array_create( 1, dimsl, dimsu );
+      Hypre_values = SIDL_double__array_create( 1, dimsl, dimsu );
       for ( i=0; i<local_num_cols; ++i ) {
          SIDL_int__array_set1( Hypre_indices, i, i );
          SIDL_double__array_set1( Hypre_values, i, 0 );
@@ -1629,8 +1631,9 @@ main( int   argc,
       Hypre_IJBuildVector_deleteReference( Hypre_ij_y ); /* delete y */
 
       /* SetValues, x=1; result is all 1's */
-      Hypre_indices = SIDL_int__array_create( 1, &zero, &local_num_cols );
-      Hypre_values = SIDL_double__array_create( 1, &zero, &local_num_cols );
+      dimsl[0] = 0;   dimsu[0] = local_num_cols;
+      Hypre_indices = SIDL_int__array_create( 1, dimsl, dimsu );
+      Hypre_values = SIDL_double__array_create( 1, dimsl, dimsu );
       for ( i=0; i<local_num_cols; ++i ) {
          SIDL_int__array_set1( Hypre_indices, i, i );
          SIDL_double__array_set1( Hypre_values, i, 1.0 );
@@ -1665,8 +1668,9 @@ main( int   argc,
       Hypre_IJBuildVector_deleteReference( Hypre_ij_y2 );
 
       /* GetRow, b[i], tested but not printed */
-      Hypre_indices = SIDL_int__array_create( 1, &zero, &local_num_cols );
-      Hypre_values = SIDL_double__array_create( 1, &zero, &local_num_cols );
+      dimsl[0] = 0;   dimsu[0] = local_num_cols;
+      Hypre_indices = SIDL_int__array_create( 1, dimsl, dimsu );
+      Hypre_values = SIDL_double__array_create( 1, dimsl, dimsu );
       Hypre_ParCSRVector_GetRow( Hypre_b, 6, &local_num_cols, &Hypre_indices, &Hypre_values );
       tmp = SIDL_double__array_get1( Hypre_values, 0 );
       assert( tmp == 1.0 );
@@ -1688,8 +1692,9 @@ main( int   argc,
       /* tested by other parts of this driver program: ParCSRVector_GetObject */
 
       /* Clear and AddToValues, b=1, which restores its initial value of 1 */
-      Hypre_indices = SIDL_int__array_create( 1, &zero, &local_num_cols );
-      Hypre_values = SIDL_double__array_create( 1, &zero, &local_num_cols );
+      dimsl[0] = 0;   dimsu[0] = local_num_cols;
+      Hypre_indices = SIDL_int__array_create( 1, dimsl, dimsu );
+      Hypre_values = SIDL_double__array_create( 1, dimsl, dimsu );
       for ( i=0; i<local_num_cols; ++i ) {
          SIDL_int__array_set1( Hypre_indices, i, i );
          SIDL_double__array_set1( Hypre_values, i, 1.0 );
@@ -1717,6 +1722,7 @@ main( int   argc,
       time_index = hypre_InitializeTiming("BoomerAMG Setup");
       hypre_BeginTiming(time_index);
 
+#if 1
       /* To call a Hypre solver:
          create, set comm, set operator, set other parameters,
          Setup (noop in this case), Apply */
@@ -1726,10 +1732,88 @@ main( int   argc,
       Hypre_op_A = (Hypre_Operator) Hypre_ParCSRMatrix__cast2( Hypre_parcsr_A, "Hypre.Operator" );
       ierr += Hypre_ParAMG_SetCommunicator( Hypre_AMG, comm );
       Hypre_ParAMG_SetOperator( Hypre_AMG, Hypre_op_A );
-      /* >>>> misc parameters not set <<<< */
+
+      Hypre_ParAMG_SetIntParameter( Hypre_AMG, "CoarsenType", (hybrid*coarsen_type));
+      Hypre_ParAMG_SetIntParameter( Hypre_AMG, "MeasureType", measure_type);
+      Hypre_ParAMG_SetDoubleParameter( Hypre_AMG, "Tol", tol);
+      Hypre_ParAMG_SetDoubleParameter( Hypre_AMG, "StrongThreshold", strong_threshold);
+      Hypre_ParAMG_SetDoubleParameter( Hypre_AMG, "TruncFactor", trunc_factor);
+      /* note: log output not specified ... */
+      Hypre_ParAMG_SetIntParameter( Hypre_AMG, "Logging", ioutdat ); 
+      Hypre_ParAMG_SetIntParameter( Hypre_AMG, "CycleType", cycle_type);
+        dimsl[0] = 0;   dimsu[0] = 4;
+        Hypre_indices = SIDL_int__array_create( 1, dimsl, dimsu );
+          for ( i=0; i<4; ++i )
+             SIDL_int__array_set1( Hypre_indices, i, num_grid_sweeps[i] );
+      Hypre_ParAMG_SetIntArrayParameter( Hypre_AMG, "NumGridSweeps", Hypre_indices );
+        SIDL_int__array_destroy( Hypre_indices );
+        dimsl[0] = 0;   dimsu[0] = 4;
+        Hypre_indices = SIDL_int__array_create( 1, dimsl, dimsu );
+        for ( i=0; i<4; ++i )
+           SIDL_int__array_set1( Hypre_indices, i, grid_relax_type[i] );
+      Hypre_ParAMG_SetIntArrayParameter( Hypre_AMG, "GridRelaxType", Hypre_indices );
+        SIDL_int__array_destroy( Hypre_indices );
+        dimsl[0] = 0;   dimsu[0] = max_levels;
+        Hypre_values = SIDL_double__array_create( 1, dimsl, dimsu );
+        for ( i=0; i<max_levels; ++i )
+           SIDL_double__array_set1( Hypre_values, i, relax_weight[i] );
+      Hypre_ParAMG_SetDoubleArrayParameter( Hypre_AMG, "RelaxWeight", Hypre_values );
+        SIDL_double__array_destroy( Hypre_values );
+        dimsl[0] = 0;   dimsu[0] = max_levels;
+        Hypre_indices = SIDL_int__array_create( 1, dimsl, dimsu );
+        for ( i=0; i<max_levels; ++i )
+           SIDL_int__array_set1( Hypre_indices, i, smooth_option[i] );
+      Hypre_ParAMG_SetIntArrayParameter( Hypre_AMG, "SmoothOption", Hypre_indices );
+        SIDL_int__array_destroy ( Hypre_indices );
+      Hypre_ParAMG_SetIntParameter( Hypre_AMG, "SmoothNumSweep", smooth_num_sweep);
+        dimsl[0] = 0;   dimsl[1] = 0;   dimsu[0] = 4;   dimsu[1] = 4;
+        Hypre_indices = SIDL_int__array_create( 2, dimsl, dimsu );
+        for ( i=0; i<4; ++i ) for ( j=0; j<4; ++j )
+           SIDL_int__array_set2( Hypre_indices, i, j, 0 ); /* sdb meaningless. 0 is safer than garbage */
+        for ( i=0; i<4; ++i ) for ( j=0; j<num_grid_sweeps[i]; ++j )
+           SIDL_int__array_set2( Hypre_indices, i, j, grid_relax_points[i][j] );
+      Hypre_ParAMG_SetIntArrayParameter( Hypre_AMG, "GridRelaxPoints", Hypre_indices );
+        SIDL_int__array_destroy ( Hypre_indices );
+      Hypre_ParAMG_SetIntParameter( Hypre_AMG, "MaxLevels", max_levels);
+      Hypre_ParAMG_SetDoubleParameter( Hypre_AMG, "MaxRowSum", max_row_sum);
+      Hypre_ParAMG_SetIntParameter( Hypre_AMG, "DebugFlag", debug_flag);
+      Hypre_ParAMG_SetIntParameter( Hypre_AMG, "Variant", variant);
+      Hypre_ParAMG_SetIntParameter( Hypre_AMG, "Overlap", overlap);
+      Hypre_ParAMG_SetIntParameter( Hypre_AMG, "DomainType", domain_type);
+      Hypre_ParAMG_SetDoubleParameter( Hypre_AMG, "SchwarzRlxWeight", schwarz_rlx_weight);
+      Hypre_ParAMG_SetIntParameter( Hypre_AMG, "NumFunctions", num_functions);
+      if (num_functions > 1) {
+          dimsl[0] = 0;   dimsu[0] = num_functions;
+           Hypre_indices = SIDL_int__array_create( 1, dimsl, dimsu );
+           for ( i=0; i<num_functions; ++i )
+              SIDL_int__array_set1( Hypre_indices, i, dof_func[i] );
+	 Hypre_ParAMG_SetIntArrayParameter( Hypre_AMG, "DofFunc", Hypre_indices );
+           SIDL_int__array_destroy( Hypre_indices );
+      }
+
       ierr += Hypre_ParAMG_Setup( Hypre_AMG );
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+ 
+      time_index = hypre_InitializeTiming("BoomerAMG Solve");
+      hypre_BeginTiming(time_index);
+
       ierr += Hypre_ParAMG_Apply( Hypre_AMG, Hypre_Vector_b, &Hypre_Vector_x );
 
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+      /* Break encapsulation so that the rest of the driver stays the same */
+      temp_vecdata = Hypre_ParCSRVector__get_data( Hypre_x );
+      ij_x = temp_vecdata ->ij_b ;
+      ierr = HYPRE_IJVectorGetObject( ij_x, &object );
+      x = (HYPRE_ParVector) object;
+
+#else
       HYPRE_BoomerAMGCreate(&amg_solver); 
       HYPRE_BoomerAMGSetCoarsenType(amg_solver, (hybrid*coarsen_type));
       HYPRE_BoomerAMGSetMeasureType(amg_solver, measure_type);
@@ -1781,6 +1865,7 @@ main( int   argc,
 #endif
 
       HYPRE_BoomerAMGDestroy(amg_solver);
+#endif
    }
 
    /*-----------------------------------------------------------
