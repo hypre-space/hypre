@@ -444,22 +444,18 @@ int HYPRE_LSI_SolveUsingSuperLU(HYPRE_IJMatrix Amat,
 {
    int                i, nnz, nrows, ierr, nprocs, status;
    int                rowSize, *colInd, *new_ia, *new_ja, *ind_array;
-   int                j, nz_ptr, *partition, start_row, end_row;
+   int                nz_ptr, *partition, start_row, end_row;
    double             *colVal, *new_a;
    HYPRE_ParCSRMatrix A_csr;
-   HYPRE_ParVector    b_csr;
-   HYPRE_ParVector    x_csr;
    MPI_Comm           mpi_comm;
 
 #ifdef HAVE_SUPERLU
    int                info, panel_size, permc_spec;
    int                *perm_r, *perm_c;
    double             *rhs, *soln;
-   mem_usage_t        mem_usage;
    SuperMatrix        A2, B, L, U;
-   NRformat           *Astore, *Ustore;
+   NRformat           *Ustore;
    SCformat           *Lstore;
-   DNformat           *Bstore;
 
    /*----------------------------------------------------------------*/
    /* available for sequential processing only for now               */

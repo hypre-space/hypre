@@ -170,7 +170,6 @@ int hypre_FGMRESSolve(void  *fgmres_vdata, void  *A, void  *b, void  *x)
    void             *matvec_data  = (fgmres_data -> matvec_data);
 
    void             *r            = (fgmres_data -> r);
-   void             *w            = (fgmres_data -> w);
    void            **p            = (fgmres_data -> p);
    void            **z            = (fgmres_data -> z);
 
@@ -185,7 +184,7 @@ int hypre_FGMRESSolve(void  *fgmres_vdata, void  *A, void  *b, void  *x)
 
    int	           i, j, k, ierr = 0, iter, my_id, num_procs;
    double          *rs, **hh, *c, *s, t;
-   double          epsilon, gamma, r_norm, b_norm, x_norm, epsmac = 1.e-16; 
+   double          epsilon, gamma, r_norm, b_norm, epsmac = 1.e-16; 
 
    hypre_ParKrylovCommInfo(A,&my_id,&num_procs);
 

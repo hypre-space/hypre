@@ -79,7 +79,7 @@ void *hypre_LSICGCreate( )
 int hypre_LSICGDestroy( void *lsicg_vdata )
 {
    hypre_LSICGData *lsicg_data = lsicg_vdata;
-   int             i, ierr = 0;
+   int             ierr = 0;
  
    if (lsicg_data)
    {
@@ -100,7 +100,6 @@ int hypre_LSICGDestroy( void *lsicg_vdata )
 int hypre_LSICGSetup( void *lsicg_vdata, void *A, void *b, void *x         )
 {
    hypre_LSICGData *lsicg_data       = lsicg_vdata;
-   int             max_iter          = (lsicg_data -> max_iter);
    int            (*precond_setup)() = (lsicg_data -> precond_setup);
    void           *precond_data      = (lsicg_data -> precond_data);
    int            ierr = 0;
@@ -136,7 +135,7 @@ int hypre_LSICGSetup( void *lsicg_vdata, void *A, void *b, void *x         )
 int hypre_LSICGSolve(void  *lsicg_vdata, void  *A, void  *b, void  *x)
 {
    int               ierr=0, mypid, nprocs, iter, converged=0;
-   double            rhom1, rho, dtmp, r_norm, b_norm, epsilon;
+   double            rhom1, rho, r_norm, b_norm, epsilon;
    double            sigma, alpha, beta, dArray[2], dArray2[2];
    hypre_Vector     *r_local, *z_local;
    MPI_Comm          comm;
