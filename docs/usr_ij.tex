@@ -11,77 +11,115 @@ to the specialized solvers that require more problem information.
 
 \section{IJ Matrix Interface}
 
+As with the other interfaces in \hypre{}, the \code{IJ} interface
+expects to get data in distributed form.  Matrices are assumed to be
+distributed by blocks of rows as follows:
+\begin{equation}
+\left[
+\begin{array}{c}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ \\
+\mbox{rows \code{ilower}$_0$ through \code{iupper}$_0$} \\
+ \\
+\hline
+ \\
+\mbox{rows \code{ilower}$_1$ through \code{iupper}$_1$} \\
+ \\
+\hline
+ \\
+\vdots \\
+ \\
+\hline
+ \\
+\mbox{rows \code{ilower}$_{P-1}$ through \code{iupper}$_{P-1}$} \\
+ \\
+\end{array}
+\right]
+\end{equation}
+In the above example, the matrix is distributed accross the $P$
+processes, $0, 1, ..., P-1$.  The indices \code{ilower} and
+\code{iupper} are the global row numbers for the first and last rows
+in each block, and the subscripts indicate the process that ``owns''
+the block.
+
 The following example code illustrates the basic usage of the
 \code{IJ} interface for building matrices:
 \begin{display}
 \begin{verbatim}
 
-MPI_Comm        comm;
-HYPRE_IJMatrix  ij_matrix;
-int             global_m, global_n;
-int             num_values;
-int             row;
-int            *cols;
-double         *values;
+MPI_Comm            comm;
+HYPRE_IJMatrix      ij_matrix;
+HYPRE_ParCSRMatrix  parcsr_matrix;
+int                 ilower, iupper;
+int                 jlower, jupper;
+int                 nrows;
+int                *ncols;
+int                *rows;
+int                *cols;
+double             *values;
 
-HYPRE_IJMatrixCreate(comm, &ij_matrix, global_m, global_n);
-HYPRE_IJMatrixSetLocalStorageType(ij_matrix, HYPRE_PARCSR);
+HYPRE_IJMatrixCreate(comm, ilower, iupper, jlower, jupper, &ij_matrix);
+HYPRE_IJMatrixSetObjectType(ij_matrix, HYPRE_PARCSR);
 HYPRE_IJMatrixInitialize(ij_matrix);
 
-/* set matrix coefficients a row at a time */
-HYPRE_IJMatrixSetValues(ij_matrix, num_values, row, cols, values);
+/* set matrix coefficients */
+HYPRE_IJMatrixSetValues(ij_matrix, nrows, ncols, rows, cols, values);
 ...
-HYPRE_IJMatrixAddToValues(ij_matrix, num_values, row, cols, values);
+HYPRE_IJMatrixAddToValues(ij_matrix, nrows, ncols, rows, cols, values);
 ...
 
 HYPRE_IJMatrixAssemble(ij_matrix);
+HYPRE_IJMatrixGetObject(ij_matrix, (void **) &parcsr_matrix);
 
 \end{verbatim}
 \end{display}
-The \code{Create()} routine creates an empty \code{global_m} by
-\code{global_n} matrix object that lives on the \code{comm} communicator.
-The \code{SetLocalStorageType} routine sets the underlying matrix
-storage type to \code{HYPRE_PARCSR} (this is the only storage type
-currently supported).  The \code{Initialize()} routine indicates that
-the matrix coefficients (or values) are ready to be set.  This routine
-may or may not involve the allocation of memory for the coefficient
-data, depending on the implementation.  The optional \code{Set}
-routines mentioned later in this chapter and in the Reference Manual,
-should be called before this step.  The \code{SetValues()} routine
-sets the matrix coefficients for a specified \code{row} and list of
-\code{cols} (\code{num_values} is the number of column coefficients being set).
+The \code{Create()} routine creates an empty matrix object that lives
+on the \code{comm} communicator.  This is a collective call (i.e.,
+must be called on all processes), with each process passing its own
+row extents, \code{ilower} and \code{iupper}.  The row partitioning
+must be contiguous, i.e., \code{iupper} for process \code{i} must
+equal \code{ilower}$-1$ for process \code{i}$+1$.  Note that this
+allows matrices to have 0- or 1-based indexing.
+
+The \code{SetObjectType()} routine sets the underlying matrix object
+type to \code{HYPRE_PARCSR} (this is the only object type currently
+supported).  The \code{Initialize()} routine indicates that the matrix
+coefficients (or values) are ready to be set.  This routine may or may
+not involve the allocation of memory for the coefficient data,
+depending on the implementation.  The optional \code{Set} routines
+mentioned later in this chapter and in the Reference Manual, should be
+called before this step.  These routines are all collective calls.
+
+The \code{SetValues()} routine sets matrix values for some number of
+rows (\code{nrows}) and some number of columns in each row
+(\code{ncols}).  The actual row and column numbers of the matrix
+\code{values} to be set are given by \code{rows} and \code{cols}.
 After the coefficients are set, they can be added to with an
-\code{AddTo()} routine.
-The \code{Assemble()} routine is a collective call (i.e., must be
-called on all processes), and finalizes the matrix assembly, making
-the matrix ``ready to use''.
+\code{AddTo()} routine.  Each process should set only those matrix
+values that it ``owns'' in the data distribution.
 
-Matrix coefficients can also be set and added to in block-wise fashion,
-with \code{SetBlockValues()} and \code{AddToBlockValues()} routines:
+The \code{Assemble()} routine is a collective call, and finalizes the
+matrix assembly, making the matrix ``ready to use''.  The
+\code{GetObject()} routine retrieves the built matrix object so that
+it can be passed on to \hypre{} solvers that use the \code{ParCSR}
+internal storage format.  Note that this is not an expensive routine;
+the matrix already exists in \code{ParCSR} storage format, and the
+routine simply returns a ``handle'' or pointer to it.  Although we
+currently only support one underlying data storage format, in the
+future several different formats may be supported.
 
-\begin{display}
-\begin{verbatim}
-
-HYPRE_IJMatrixSetBlockValues(ij_matrix, m, n, rows, cols, values);
-HYPRE_IJMatrixAddToBlockValues(ij_matrix, m, n, rows, cols, values);
-
-\end{verbatim}
-\end{display}
-
-Also, one can preset the row sizes of the matrix, in order to
-reduce the execution time for the matrix specification.
-One can specify the total number of coefficients for
-each row, the number of coefficients in the row that couple the diagonal 
-unknown to (\code{Diag}) unknowns in the same processor domain, and the
-number of coefficients in the row that couple the diagonal unknown to
-(\code{Offd}) unknowns in other processor domains:
+One can preset the row sizes of the matrix in order to reduce the
+execution time for the matrix specification.  One can specify the
+total number of coefficients for each row, the number of coefficients
+in the row that couple the diagonal unknown to (\code{Diag}) unknowns
+in the same processor domain, and the number of coefficients in the
+row that couple the diagonal unknown to (\code{Offd}) unknowns in
+other processor domains:
 
 \begin{display}
 \begin{verbatim}
 
 HYPRE_IJMatrixSetRowSizes(ij_matrix, sizes);
-HYPRE_IJMatrixSetDiagRowSizes(ij_matrix, sizes);
-HYPRE_IJMatrixSetOffDiagRowSizes(ij_matrix, sizes);
+HYPRE_IJMatrixSetDiagOffdSizes(matrix, diag_sizes, offdiag_sizes);
 
 \end{verbatim}
 \end{display}
@@ -169,91 +207,45 @@ The following example code illustrates the basic usage of the
 
 \begin{display}
 \begin{verbatim}
-MPI_Comm        comm;
-HYPRE_IJVector  ij_vector;
-int             global_n;
-int             num_values;
-int            *glob_vec_indices;
-int            *value_indices;
-double         *values;
+MPI_Comm         comm;
+HYPRE_IJVector   ij_vector;
+HYPRE_ParVector  par_vector;
+int              jlower, jupper;
+int              nvalues;
+int             *indices;
+double          *values;
 
-HYPRE_IJVectorCreate(comm, &ij_vector, global_n);
-HYPRE_IJVectorSetLocalStorageType(ij_vector, HYPRE_PARCSR);
+HYPRE_IJVectorCreate(comm, jlower, jupper, &ij_vector);
+HYPRE_IJVectorSetObjectType(ij_vector, HYPRE_PARCSR);
 HYPRE_IJVectorInitialize(ij_vector);
 
 /* set vector values */
-HYPRE_IJVectorSetLocalComponents(ij_vector, num_values,
-                                 glob_vec_indices, value_indices, values);
+HYPRE_IJVectorSetValues(ij_vector, nvalues, indices, values);
 ...
 
 HYPRE_IJVectorAssemble(ij_vector);
+HYPRE_IJVectorGetObject(ij_vector, (void **) &par_vector);
+
 \end{verbatim}
 \end{display}
+The \code{Create()} routine creates an empty vector object that lives
+on the \code{comm} communicator.  This is a collective call, with each
+process passing its own index extents, \code{jlower} and \code{jupper}.
 
-The \code{Create()} routine creates an empty \code{global_n}-vector
-object that lives on the \code{comm} communicator.  The
-\code{SetLocalStorageType} routine sets the underlying vector storage
+The \code{SetObjectType()} routine sets the underlying vector storage
 type to \code{HYPRE_PARCSR} (this is the only storage type currently
 supported).  The \code{Initialize()} routine indicates that the vector
 coefficients (or values) are ready to be set.  This routine may or may
 not involve the allocation of memory for the coefficient data,
-depending on the implementation.  The optional \code{Set} routines
-mentioned later in this chapter and in the Reference Manual, should be
-called before this step.  The \code{SetLocalComponents()} routine sets
-the vector coefficients for a specified list of \code{glob_vec_indices}
-(\code{num_values} is the number of values being set).  The \code{Assemble()}
-routine is a trivial collective call (i.e., must be called on all processes),
-and finalizes the vector assembly, making the vector ``ready to use''.
+depending on the implementation.  These routines are all collective
+calls.
 
-%
-% RDF: Need to do an interface review before documenting these routines.
-% The figure is about the implementation and not the interface.
-%
-%Currently, there are two general (not so straightforward) ways to set and
-%modify vector components in underlying \hypre{} formats.  One general way
-%takes components from an indexed subset of an array of values and maps
-%the chosen values to a contiguous block of \hypre{} vector components
-%(specified by global \hypre{} indices):  this way is implemented with so-called
-%\code{LocalComponentsInBlock} functions (see Fig. \ref{loc-comps-blk}):
-%
-%\begin{display}
-%\begin{verbatim}
-%HYPRE_IJVectorSetLocalComponentsInBlock(ij_vector,
-%					 glob_vec_index_start,
-%					 glob_vec_index_stop,
-%					 value_indices, values);
-%\end{verbatim}
-%\end{display}
-%
-%\begin{figure}
-%\label{loc-comps-blk}
-%\centerline{\epsfig{figure=loc_cmps_blk.eps,height=2.4in}}
-%\caption{Example mapping between external array values and
-%  internal vector data for \code{LocalComponentsInBlock} functions.}
-%\end{figure}
-%
-%A more general way takes components from an indexed subset of an array of
-%values and maps each chosen value to a particular \hypre{} vector component
-%(specified by a global \hypre{} index): this way is implemented with so-called
-%\code{LocalComponents} functions (see Fig. \ref{loc-comps}):
-%
-%\begin{display}
-%\begin{verbatim}
-%HYPRE_IJVectorSetLocalComponents(ij_vector, num_values,
-%				  glob_vec_indices, value_indices, values);
-%\end{verbatim}
-%\end{display}
-%
-%\begin{figure}
-%\label{loc-comps}
-%\centerline{\epsfig{figure=loc_cmps.eps,height=2.4in}}
-%\caption{Example mapping between external array values and
-%   internal vector data for \code{LocalComponents} functions.}
-%\end{figure}
-%
-%General mapping of array values to \hypre{} vector components
-%facilitates interfacing with application codes that mix
-%the local and nonlocal components differently than \hypre{}.
-%\code{Get} functions corresponding to these \code{Set} are also
-%provided by the interface.
+The \code{SetValues()} routine sets the vector \code{values} for some
+number (\code{nvalues}) of \code{indices}.  Each process should set
+only those vector values that it ``owns'' in the data distribution.
 
+The \code{Assemble()} routine is a trivial collective call, and
+finalizes the vector assembly, making the vector ``ready to use''.
+The \code{GetObject()} routine retrieves the built vector object so
+that it can be passed on to \hypre{} solvers that use the
+\code{ParVector} internal storage format.
