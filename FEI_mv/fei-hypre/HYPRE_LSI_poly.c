@@ -158,7 +158,7 @@ int HYPRE_LSI_PolySetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
    int            rowLeng, *colInd, *row_partition;
    double         *coefs=NULL, rowsum, max_norm, *colVal;
    HYPRE_LSI_Poly *poly_ptr = (HYPRE_LSI_Poly *) solver;
-#ifdef HYPRE_SEQUENTIAL
+#ifndef HYPRE_SEQUENTIAL
    double         dtemp;
 #endif
 
