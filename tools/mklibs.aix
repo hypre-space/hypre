@@ -69,20 +69,23 @@ build_beta ()
 
 build_alpha ()
 {
-  HYPRE_INSTALL_DIR=$DIST_DIR/../alpha
-  for i in bin debug docs include lib src
-  do
-    rm -fR $HYPRE_INSTALL_DIR/$i
-    ln -s $DIST_DIR/$i $HYPRE_INSTALL_DIR/$i
-  done
-  for i in serial shared threads
-  do
-    if [ -d $DIST_DIR/$i ]
-    then
+  if [ "$SYS_TYPE" = "SunOS" ]
+  then
+    HYPRE_INSTALL_DIR=$DIST_DIR/../alpha
+    for i in bin debug docs include lib src
+    do
       rm -fR $HYPRE_INSTALL_DIR/$i
       ln -s $DIST_DIR/$i $HYPRE_INSTALL_DIR/$i
-    fi
-  done
+    done
+    for i in serial shared threads
+    do
+      if [ -d $DIST_DIR/$i ]
+      then
+        rm -fR $HYPRE_INSTALL_DIR/$i
+        ln -s $DIST_DIR/$i $HYPRE_INSTALL_DIR/$i
+      fi
+    done
+  fi
 }
 
 # Define install permissions:
@@ -147,7 +150,8 @@ fi
 
 DIST_DIR=`pwd`/${TAR_FILE%.tar.gz}
 SYS_TYPE=`uname -s`
-CONFIGURE="./nopoe ./configure --with-babel"
+###CONFIGURE="./nopoe ./configure --with-babel"
+CONFIGURE="./configure"
 . ../env.blue
 
 #===========================================================================
@@ -165,26 +169,26 @@ then
         cd src
         rm -f config.cache
         $CONFIGURE\
-          CC=mpcc CXX=mpCC F77=mpxlf\
-          CFLAGS="-q32 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -O3 -qstrict"\
-          CXXFLAGS="-q32 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -O3 -qstrict"\
-          F77FLAGS="-q32 -O3 -qstrict"\
-          LDFLAGS="-q32" AR="ar -X32" --prefix=$HYPRE_INSTALL_DIR
-        make -i install
+          --with-CC=mpcc --with-CXX=mpCC --with-F77=mpxlf\
+          --with-CFLAGS="-q32 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -O3 -qstrict"\
+          --with-CXXFLAGS="-q32 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -O3 -qstrict"\
+          --with-F77FLAGS="-q32 -O3 -qstrict"\
+          --with-LDFLAGS="-q32"
+        AR="ar -X32" make -i install
         cd $HYPRE_INSTALL_DIR/lib
         for i in *.a;do
           mv $i ${i}_32
         done
         cd $DIST_DIR/src
-        make -i distclean
+        make -i veryclean
         rm -f config.cache
         $CONFIGURE \
-          CC=mpcc CXX=mpCC F77=mpxlf\
-          CFLAGS="-q64 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -O3 -qstrict"\
-          CXXFLAGS="-q64 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -O3 -qstrict"\
-          F77FLAGS="-q64 -O3 -qstrict"\
-          LDFLAGS="-q64" AR="ar -X64" --prefix=$HYPRE_INSTALL_DIR
-        make -i install
+          --with-CC=mpcc --with-CXX=mpCC --with-F77=mpxlf\
+          --with-CFLAGS="-q64 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -O3 -qstrict"\
+          --with-CXXFLAGS="-q64 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -O3 -qstrict"\
+          --with-F77FLAGS="-q64 -O3 -qstrict"\
+          --with-LDFLAGS="-q64"
+        AR="ar -X64" make -i install
         cd $HYPRE_INSTALL_DIR/lib
         for i in *.a;do
           mv $i ${i}_64
@@ -207,29 +211,29 @@ then
 	mkdir -p $HYPRE_INSTALL_DIR
         
         cd src
-        make -i distclean
+        make -i veryclean
         rm -f config.cache
         $CONFIGURE --enable-debug\
-          CC=mpcc CXX=mpCC F77=mpxlf\
-          CFLAGS="-q32 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -g"\
-          CXXFLAGS="-q32 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -g"\
-          F77FLAGS="-q32 -g"\
-          LDFLAGS="-q32" AR="ar -X32" --prefix=$HYPRE_INSTALL_DIR
-        make -i install
+          --with-CC=mpcc --with-CXX=mpCC --with-F77=mpxlf\
+          --with-CFLAGS="-q32 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -g"\
+          --with-CXXFLAGS="-q32 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -g"\
+          --with-F77FLAGS="-q32 -g"\
+          --with-LDFLAGS="-q32"
+        AR="ar -X32" make -i install
         cd $HYPRE_INSTALL_DIR/lib
         for i in *.a;do
           mv $i ${i}_32
         done
         cd $DIST_DIR/src
-        make -i distclean
+        make -i veryclean
         rm -f config.cache
         $CONFIGURE --enable-debug\
-          CC=mpcc CXX=mpCC F77=mpxlf\
-          CFLAGS="-q64 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -g"\
-          CXXFLAGS="-q64 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -g"\
-          F77FLAGS="-q64 -g"\
-          LDFLAGS="-q64" AR="ar -X64" --prefix=$HYPRE_INSTALL_DIR
-        make -i install
+          --with-CC=mpcc --with-CXX=mpCC --with-F77=mpxlf\
+          --with-CFLAGS="-q64 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -g"\
+          --with-CXXFLAGS="-q64 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -g"\
+          --with-F77FLAGS="-q64 -g"\
+          --with-LDFLAGS="-q64"
+        AR="ar -X64" make -i install
         cd $HYPRE_INSTALL_DIR/lib
         for i in *.a;do
           mv $i ${i}_64
@@ -257,29 +261,29 @@ then
 	mkdir -p $HYPRE_INSTALL_DIR
         
         cd src
-        make -i distclean
+        make -i veryclean
         rm -f config.cache
         $CONFIGURE --without-MPI --with-COMM_SIMPLE\
-          CC=xlc CXX=xlC F77=xlf\
-          CFLAGS="-q32 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -O3 -qstrict"\
-          CXXFLAGS="-q32 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -O3 -qstrict"\
-          F77FLAGS="-q32 -O3 -qstrict"\
-          LDFLAGS="-q32" AR="ar -X32" --prefix=$HYPRE_INSTALL_DIR
-        make -i install
+          --with-CC=xlc --with-CXX=xlC --with-F77=xlf\
+          --with-CFLAGS="-q32 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -O3 -qstrict"\
+          --with-CXXFLAGS="-q32 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -O3 -qstrict"\
+          --with-F77FLAGS="-q32 -O3 -qstrict"\
+          --with-LDFLAGS="-q32"
+        AR="ar -X32" make -i install
         cd $HYPRE_INSTALL_DIR/lib
         for i in *.a;do
           mv $i ${i}_32
         done
         cd $DIST_DIR/src
-        make -i distclean
+        make -i veryclean
         rm -f config.cache
         $CONFIGURE --without-MPI --with-COMM_SIMPLE\
-          CC=xlc CXX=xlC F77=xlf\
-          CFLAGS="-q64 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -O3 -qstrict"\
-          CXXFLAGS="-q64 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -O3 -qstrict"\
-          F77FLAGS="-q64 -O3 -qstrict"\
-          LDFLAGS="-q64" AR="ar -X64" --prefix=$HYPRE_INSTALL_DIR
-        make -i install
+          --with-CC=xlc --with-CXX=xlC --with-F77=xlf\
+          --with-CFLAGS="-q64 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -O3 -qstrict"\
+          --with-CXXFLAGS="-q64 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -O3 -qstrict"\
+          --with-F77FLAGS="-q64 -O3 -qstrict"\
+          --with-LDFLAGS="-q64"
+        AR="ar -X64" make -i install
         cd $HYPRE_INSTALL_DIR/lib
         for i in *.a;do
           mv $i ${i}_64
@@ -302,29 +306,29 @@ then
 	mkdir -p $HYPRE_INSTALL_DIR
         
         cd src
-        make -i distclean
+        make -i veryclean
         rm -f config.cache
         $CONFIGURE --without-MPI --with-COMM_SIMPLE --enable-debug\
-          CC=xlc CXX=xlC F77=xlf\
-          CFLAGS="-q32 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -g"\
-          CXXFLAGS="-q32 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -g"\
-          F77FLAGS="-q32 -g"\
-          LDFLAGS="-q32" AR="ar -X32" --prefix=$HYPRE_INSTALL_DIR
-        make -i install
+          --with-CC=xlc --with-CXX=xlC --with-F77=xlf\
+          --with-CFLAGS="-q32 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -g"\
+          --with-CXXFLAGS="-q32 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -g"\
+          --with-F77FLAGS="-q32 -g"\
+          --with-LDFLAGS="-q32"
+        AR="ar -X32" make -i install
         cd $HYPRE_INSTALL_DIR/lib
         for i in *.a;do
           mv $i ${i}_32
         done
         cd $DIST_DIR/src
-        make -i distclean
+        make -i veryclean
         rm -f config.cache
         $CONFIGURE --without-MPI --with-COMM_SIMPLE --enable-debug\
-          CC=xlc CXX=xlC F77=xlf\
-          CFLAGS="-q64 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -g"\
-          CXXFLAGS="-q64 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -g"\
-          F77FLAGS="-q64 -g"\
-          LDFLAGS="-q64" AR="ar -X64" --prefix=$HYPRE_INSTALL_DIR
-        make -i install
+          --with-CC=xlc --with-CXX=xlC --with-F77=xlf\
+          --with-CFLAGS="-q64 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -g"\
+          --with-CXXFLAGS="-q64 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -g"\
+          --with-F77FLAGS="-q64 -g"\
+          --with-LDFLAGS="-q64"
+        AR="ar -X64" make -i install
         cd $HYPRE_INSTALL_DIR/lib
         for i in *.a;do
           mv $i ${i}_64
@@ -356,29 +360,29 @@ then
 	mkdir -p $HYPRE_INSTALL_DIR
         
         cd src
-        make -i distclean
+        make -i veryclean
         rm -f config.cache
         $CONFIGURE --with-openmp\
-          CC=mpguidec CXX=mpguidec++ F77=mpguidef77\
-          CFLAGS="-q32 -qsmp=omp -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -O3 -qstrict"\
-          CXXFLAGS="-q32 -qsmp=omp -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -O3 -qstrict"\
-          F77FLAGS="-q32 -qsmp=omp -O3 -qstrict"\
-          LDFLAGS="-q32" AR="ar -X32" --prefix=$HYPRE_INSTALL_DIR
-        make -i install
+          --with-CC=mpguidec --with-CXX=mpguidec++ --with-F77=mpguidef77\
+          --with-CFLAGS="-q32 -qsmp=omp -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -O3 -qstrict"\
+          --with-CXXFLAGS="-q32 -qsmp=omp -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -O3 -qstrict"\
+          --with-F77FLAGS="-q32 -qsmp=omp -O3 -qstrict"\
+          --with-LDFLAGS="-q32"
+        AR="ar -X32" make -i install
         cd $HYPRE_INSTALL_DIR/lib
         for i in *.a;do
           mv $i ${i}_32
         done
         cd $DIST_DIR/src
-        make -i distclean
+        make -i veryclean
         rm -f config.cache
         $CONFIGURE --with-openmp\
-          CC=mpguidec CXX=mpguidec++ F77=mpguidef77\
-          CFLAGS="-q64 -qsmp=omp -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -O3 -qstrict"\
-          CXXFLAGS="-q64 -qsmp=omp -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -O3 -qstrict"\
-          F77FLAGS="-q64 -qsmp=omp -O3 -qstrict"\
-          LDFLAGS="-q64" AR="ar -X64" --prefix=$HYPRE_INSTALL_DIR
-        make -i install
+          --with-CC=mpguidec --with-CXX=mpguidec++ --with-F77=mpguidef77\
+          --with-CFLAGS="-q64 -qsmp=omp -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -O3 -qstrict"\
+          --with-CXXFLAGS="-q64 -qsmp=omp -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -O3 -qstrict"\
+          --with-F77FLAGS="-q64 -qsmp=omp -O3 -qstrict"\
+          --with-LDFLAGS="-q64"
+        AR="ar -X64" make -i install
         cd $HYPRE_INSTALL_DIR/lib
         for i in *.a;do
           mv $i ${i}_64
@@ -401,29 +405,29 @@ then
 	mkdir -p $HYPRE_INSTALL_DIR
         
         cd src
-        make -i distclean
+        make -i veryclean
         rm -f config.cache
         $CONFIGURE --with-openmp --enable-debug\
-          CC=mpguidec CXX=mpguidec++ F77=mpguidef77\
-          CFLAGS="-q32 -qsmp=omp -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -g"\
-          CXXFLAGS="-q32 -qsmp=omp -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -g"\
-          F77FLAGS="-q32 -qsmp=omp -g"\
-          LDFLAGS="-q32" AR="ar -X32" --prefix=$HYPRE_INSTALL_DIR
-        make -i install
+          --with-CC=mpguidec --with-CXX=mpguidec++ --with-F77=mpguidef77\
+          --with-CFLAGS="-q32 -qsmp=omp -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -g"\
+          --with-CXXFLAGS="-q32 -qsmp=omp -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -g"\
+          --with-F77FLAGS="-q32 -qsmp=omp -g"\
+          --with-LDFLAGS="-q32"
+        AR="ar -X32" make -i install
         cd $HYPRE_INSTALL_DIR/lib
         for i in *.a;do
           mv $i ${i}_32
         done
         cd $DIST_DIR/src
-        make -i distclean
+        make -i veryclean
         rm -f config.cache
         $CONFIGURE --with-openmp --enable-debug\
-          CC=mpguidec CXX=mpguidec++ F77=mpguidef77\
-          CFLAGS="-q64 -qsmp=omp -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -g"\
-          CXXFLAGS="-q64 -qsmp=omp -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -g"\
-          F77FLAGS="-q64 -qsmp=omp -g"\
-          LDFLAGS="-q64" AR="ar -X64" --prefix=$HYPRE_INSTALL_DIR
-        make -i install
+          --with-CC=mpguidec --with-CXX=mpguidec++ --with-F77=mpguidef77\
+          --with-CFLAGS="-q64 -qsmp=omp -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -g"\
+          --with-CXXFLAGS="-q64 -qsmp=omp -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -g"\
+          --with-F77FLAGS="-q64 -qsmp=omp -g"\
+          --with-LDFLAGS="-q64"
+        AR="ar -X64" make -i install
         cd $HYPRE_INSTALL_DIR/lib
         for i in *.a;do
           mv $i ${i}_64
@@ -440,7 +444,7 @@ then
         done 
         rm -f *.a_32 *.a_64
         cd $DIST_DIR/src
-        make -i distclean
+        make -i veryclean
     )
   fi
 fi

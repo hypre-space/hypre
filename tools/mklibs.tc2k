@@ -69,20 +69,23 @@ build_beta ()
 
 build_alpha ()
 {
-  HYPRE_INSTALL_DIR=$DIST_DIR/../alpha
-  for i in bin debug docs include lib src
-  do
-    rm -fR $HYPRE_INSTALL_DIR/$i
-    ln -s $DIST_DIR/$i $HYPRE_INSTALL_DIR/$i
-  done
-  for i in serial shared threads
-  do
-    if [ -d $DIST_DIR/$i ]
-    then
+  if [ "$SYS_TYPE" = "SunOS" ]
+  then
+    HYPRE_INSTALL_DIR=$DIST_DIR/../alpha
+    for i in bin debug docs include lib src
+    do
       rm -fR $HYPRE_INSTALL_DIR/$i
       ln -s $DIST_DIR/$i $HYPRE_INSTALL_DIR/$i
-    fi
-  done
+    done
+    for i in serial shared threads
+    do
+      if [ -d $DIST_DIR/$i ]
+      then
+        rm -fR $HYPRE_INSTALL_DIR/$i
+        ln -s $DIST_DIR/$i $HYPRE_INSTALL_DIR/$i
+      fi
+    done
+  fi
 }
 
 # Define install permissions:
@@ -146,8 +149,7 @@ fi
 
 DIST_DIR=`pwd`/${TAR_FILE%.tar.gz}
 SYS_TYPE=`uname -s`
-#CONFIGURE="./configure --with-babel"
-CONFIGURE="./configure --with-babel --enable-shared"
+CONFIGURE="./configure"
 MAKE="make -i"
 
 #===========================================================================
@@ -163,9 +165,13 @@ then
         HYPRE_INSTALL_DIR=$DIST_DIR
         export HYPRE_INSTALL_DIR
         cd src
-        $CONFIGURE --prefix=$HYPRE_INSTALL_DIR
+        $CONFIGURE --with-CC=cc --with-CXX=cxx --with-F77=f77 \
+          --with-CFLAGS="-fast -I/usr/include" \
+          --with-CXXFLAGS="-fast -I/usr/include" \
+          --with-LDFLAGS="-L/usr/lib -lmpi"
         $MAKE install
-        $MAKE distclean
+        $MAKE clean
+        $MAKE veryclean
     )
     (
         HYPRE_INSTALL_DIR=$DIST_DIR/debug
@@ -173,10 +179,13 @@ then
 	mkdir -p $HYPRE_INSTALL_DIR
         
         cd src
-        $CONFIGURE --enable-debug \
-		--prefix=$HYPRE_INSTALL_DIR
+        $CONFIGURE --enable-debug --with-CC=cc --with-CXX=cxx --with-F77=f77 \
+          --with-CFLAGS="-fast -I/usr/include" \
+          --with-CXXFLAGS="-fast -I/usr/include" \
+          --with-LDFLAGS="-L/usr/lib -lmpi"
         $MAKE install
-        $MAKE distclean
+        $MAKE clean
+        $MAKE veryclean
     )
 fi
 
@@ -189,10 +198,10 @@ then
 	mkdir -p $HYPRE_INSTALL_DIR
         
         cd src
-        $CONFIGURE --without-MPI \
-		--with-COMM_SIMPLE --prefix=$HYPRE_INSTALL_DIR
+        $CONFIGURE --without-MPI --with-COMM_SIMPLE
         $MAKE install
-        $MAKE distclean
+        $MAKE clean
+        $MAKE veryclean
     )
     (
         HYPRE_INSTALL_DIR=$DIST_DIR/serial/debug
@@ -200,11 +209,10 @@ then
 	mkdir -p $HYPRE_INSTALL_DIR
         
         cd src
-        $CONFIGURE --without-MPI \
-		--with-COMM_SIMPLE \
-		--enable-debug --prefix=$HYPRE_INSTALL_DIR
+        $CONFIGURE --without-MPI --with-COMM_SIMPLE --enable-debug
         $MAKE install
-        $MAKE distclean
+        $MAKE clean
+        $MAKE veryclean
     )
 fi
 
@@ -221,10 +229,10 @@ then
 	mkdir -p $HYPRE_INSTALL_DIR
         
         cd src
-        $CONFIGURE --with-openmp \
-		--prefix=$HYPRE_INSTALL_DIR
+        $CONFIGURE --with-openmp
         $MAKE install
-        $MAKE distclean
+        $MAKE clean
+        $MAKE veryclean
     )
     (
         HYPRE_INSTALL_DIR=$DIST_DIR/threads/debug
@@ -232,10 +240,10 @@ then
 	mkdir -p $HYPRE_INSTALL_DIR
         
         cd src
-        $CONFIGURE --with-openmp \
-		--enable-debug --prefix=$HYPRE_INSTALL_DIR
+        $CONFIGURE --with-openmp --enable-debug
         $MAKE install
-        $MAKE distclean
+        $MAKE clean
+        $MAKE veryclean
     )
   fi
 fi
