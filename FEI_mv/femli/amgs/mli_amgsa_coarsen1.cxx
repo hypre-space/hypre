@@ -135,6 +135,7 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,
       if ( currLevel_ == (numLevels_-1) ) minAggrSize_ = 2;
    }
    else minAggrSize_ = nullspaceDim_;
+   if (currLevel_ == 0) minAggrSize_ = minAggrSize_ * 3 / 2;
 
    /*-----------------------------------------------------------------
     * perform coarsening
@@ -626,7 +627,7 @@ int MLI_Method_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
     * Phase 1 : form aggregates
     *-----------------------------------------------------------------*/
 
-   for ( irow = 0; irow < localNRows; irow++ )
+   for ( irow = 1; irow < localNRows; irow++ )
    {
       if ( nodeStat[irow] == MLI_METHOD_AMGSA_READY )
       {
