@@ -161,6 +161,7 @@ void hypre_F90_IFACE P((int hypre_assembleijmatrix ));
 void hypre_F90_IFACE P((int hypre_distributeijmatrix ));
 void hypre_F90_IFACE P((int hypre_setijmatrixlocalstoragety ));
 void hypre_F90_IFACE P((int hypre_setijmatrixlocalsize ));
+void hypre_F90_IFACE P((int hypre_setijmatrixrowsizes ));
 void hypre_F90_IFACE P((int hypre_setijmatrixdiagrowsizes ));
 void hypre_F90_IFACE P((int hypre_setijmatrixoffdiagrowsize ));
 void hypre_F90_IFACE P((int hypre_setijmatrixtotalsize ));

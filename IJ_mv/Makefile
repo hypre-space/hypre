@@ -1,6 +1,6 @@
 # Generated automatically from Makefile.in by configure.
 #BHEADER***********************************************************************
-# (c) 1997   The Regents of the University of California
+# (c) 1999   The Regents of the University of California
 #
 # See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
 # notice, contact person, and disclaimer.
@@ -12,16 +12,17 @@
 .SUFFIXES: .c .f .o
 
 srcdir = .
- 
+
+
 CC =  mpicc
 
-C_COMPILE_FLAGS= -O 
-CXX_COMPILE_FLAGS= -O 
-F77_COMPILE_FLAGS= -O -silent  
+C_COMPILE_FLAGS=  -g
+CXX_COMPILE_FLAGS=  -g
+F77_COMPILE_FLAGS=  -g -silent
 CINCLUDES= 
-CDEFS = 
- 
-CFLAGS = \
+CDEFS =  -DHYPRE_NO_PTHREAD_MANGLING
+
+CFLAGS =\
  ${C_COMPILE_FLAGS}\
  -I../utilities\
  -I../seq_matrix_vector\
@@ -29,24 +30,23 @@ CFLAGS = \
  -I../parcsr_linear_solvers\
  ${CINCLUDES}\
  ${CDEFS}
- 
-RANLIB = ranlib
- 
-MPILIBFLAGS =    
+
+RANLIB= ranlib
+
+MPILIBFLAGS =   
 LIBFLAGS =   -lm
 LDLIBFLAGS =  
- 
+
 LFLAGS =\
  -L.\
- -L../parcsr_matrix_vector\
- -L../seq_matrix_vector\
  -L../utilities\
+ -L../seq_matrix_vector\
+ -L../parcsr_matrix_vector\
  -lHYPRE_IJ_mv\
  -lHYPRE_parcsr_mv\
  -lHYPRE_mv\
  -lHYPRE_utilities\
  ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
- 
 
 HEADERS =\
  aux_parcsr_matrix.h\
@@ -57,9 +57,10 @@ HEADERS =\
  HYPRE_IJMatrix.h
 
 FILES =\
- F90_HYPRE_IJMatrix.c\
- aux_parcsr_matrix.c\
- hypre_IJMatrix_parcsr.c
+ IJMatrix_parcsr.c\
+ HYPRE_IJMatrix.c\
+ HYPRE_IJMatrix.c\
+ F90_HYPRE_IJMatrix.c
 
 OBJS = ${FILES:.c=.o}
 
@@ -68,15 +69,15 @@ OBJS = ${FILES:.c=.o}
 ##################################################################
 
 all: libHYPRE_IJ_mv.a
- 
+
 install: all
- 
+
 clean:
 	@rm -f *.o
 
 veryclean: clean
-	@rm -f libHYPRE_IJ_mv.a
-	@rm -f driver 
+	@rm -f libHYPRE_*.a
+	@rm -f driver
 
 ##################################################################
 # Rules
@@ -85,11 +86,11 @@ veryclean: clean
 libHYPRE_IJ_mv.a: ${OBJS}
 	@echo  "Building $@ ... "
 	ar -rcu $@ ${OBJS}
-	ranlib $@
+	${RANLIB} $@
 
-driver: driver.o libHYPRE_IJ_mv.a 
+driver: driver.o libHYPRE_IJ_mv.a
 	@echo  "Linking" $@ "... "
-	${CC} -o driver driver.o ${LFLAGS} 
+	${CC} -o driver driver.o ${LFLAGS}
 
 ${OBJS}: ${HEADERS}
 
@@ -100,3 +101,5 @@ ${OBJS}: ${HEADERS}
 .c.o:
 	${CC} -o $@ -c ${CFLAGS} $<
 
+.f.o:
+	${F77} -o $@ -c ${FFLAGS} $<
