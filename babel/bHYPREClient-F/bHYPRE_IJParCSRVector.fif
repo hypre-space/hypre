@@ -2,14 +2,14 @@ C
 C       File:          bHYPRE_IJParCSRVector_Impl.f
 C       Symbol:        bHYPRE.IJParCSRVector-v1.0.0
 C       Symbol Type:   class
-C       Babel Version: 0.8.0
-C       SIDL Created:  20030320 16:52:45 PST
-C       Generated:     20030320 16:52:55 PST
+C       Babel Version: 0.8.2
+C       SIDL Created:  20030401 14:47:46 PST
+C       Generated:     20030401 14:48:18 PST
 C       Description:   Client-side documentation text for bHYPRE.IJParCSRVector
 C       
 C       WARNING: Automatically generated; changes will be lost
 C       
-C       babel-version = 0.8.0
+C       babel-version = 0.8.2
 C       source-line   = 815
 C       source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
 C       
@@ -41,10 +41,23 @@ C       out bHYPRE.IJParCSRVector retval
 
 
 C       
+C       Cast method for interface and type conversions.
+C       
+
+        subroutine bHYPRE_IJParCSRVector__cast_f(ref, retval)
+        implicit none
+C       in opaque ref
+        integer*8 ref
+C       out bHYPRE.IJParCSRVector retval
+        integer*8 retval
+        end
+
+
+C       
 C       Cast method for interface and class type conversions.
 C       
 
-        subroutine bHYPRE_IJParCSRVector__cast_f(self, name, retval)
+        subroutine bHYPRE_IJParCSRVector__cast2_f(self, name, retval)
         implicit none
 C       in bHYPRE.IJParCSRVector self
         integer*8 self
@@ -157,6 +170,108 @@ C       in bHYPRE.IJParCSRVector self
         integer*8 self
 C       out SIDL.ClassInfo retval
         integer*8 retval
+        end
+
+
+C       
+C       Set {\tt self} to 0.
+C       
+C       
+
+        subroutine bHYPRE_IJParCSRVector_Clear_f(self, retval)
+        implicit none
+C       in bHYPRE.IJParCSRVector self
+        integer*8 self
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Copy x into {\tt self}.
+C       
+C       
+
+        subroutine bHYPRE_IJParCSRVector_Copy_f(self, x, retval)
+        implicit none
+C       in bHYPRE.IJParCSRVector self
+        integer*8 self
+C       in bHYPRE.Vector x
+        integer*8 x
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Create an {\tt x} compatible with {\tt self}.
+C       
+C       NOTE: When this method is used in an inherited class, the
+C       cloned {\tt Vector} object can be cast to an object with the
+C       inherited class type.
+C       
+C       
+
+        subroutine bHYPRE_IJParCSRVector_Clone_f(self, x, retval)
+        implicit none
+C       in bHYPRE.IJParCSRVector self
+        integer*8 self
+C       out bHYPRE.Vector x
+        integer*8 x
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Scale {\tt self} by {\tt a}.
+C       
+C       
+
+        subroutine bHYPRE_IJParCSRVector_Scale_f(self, a, retval)
+        implicit none
+C       in bHYPRE.IJParCSRVector self
+        integer*8 self
+C       in double a
+        double precision a
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Compute {\tt d}, the inner-product of {\tt self} and {\tt x}.
+C       
+C       
+
+        subroutine bHYPRE_IJParCSRVector_Dot_f(self, x, d, retval)
+        implicit none
+C       in bHYPRE.IJParCSRVector self
+        integer*8 self
+C       in bHYPRE.Vector x
+        integer*8 x
+C       out double d
+        double precision d
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Add {\tt a}*{\tt x} to {\tt self}.
+C       
+C       
+
+        subroutine bHYPRE_IJParCSRVector_Axpy_f(self, a, x, retval)
+        implicit none
+C       in bHYPRE.IJParCSRVector self
+        integer*8 self
+C       in double a
+        double precision a
+C       in bHYPRE.Vector x
+        integer*8 x
+C       out int retval
+        integer*4 retval
         end
 
 
@@ -389,108 +504,6 @@ C       in string filename
         character*(*) filename
 C       in opaque comm
         integer*8 comm
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Set {\tt self} to 0.
-C       
-C       
-
-        subroutine bHYPRE_IJParCSRVector_Clear_f(self, retval)
-        implicit none
-C       in bHYPRE.IJParCSRVector self
-        integer*8 self
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Copy x into {\tt self}.
-C       
-C       
-
-        subroutine bHYPRE_IJParCSRVector_Copy_f(self, x, retval)
-        implicit none
-C       in bHYPRE.IJParCSRVector self
-        integer*8 self
-C       in bHYPRE.Vector x
-        integer*8 x
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Create an {\tt x} compatible with {\tt self}.
-C       
-C       NOTE: When this method is used in an inherited class, the
-C       cloned {\tt Vector} object can be cast to an object with the
-C       inherited class type.
-C       
-C       
-
-        subroutine bHYPRE_IJParCSRVector_Clone_f(self, x, retval)
-        implicit none
-C       in bHYPRE.IJParCSRVector self
-        integer*8 self
-C       out bHYPRE.Vector x
-        integer*8 x
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Scale {\self} by {\tt a}.
-C       
-C       
-
-        subroutine bHYPRE_IJParCSRVector_Scale_f(self, a, retval)
-        implicit none
-C       in bHYPRE.IJParCSRVector self
-        integer*8 self
-C       in double a
-        double precision a
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Compute {\tt d}, the inner-product of {\tt self} and {\tt x}.
-C       
-C       
-
-        subroutine bHYPRE_IJParCSRVector_Dot_f(self, x, d, retval)
-        implicit none
-C       in bHYPRE.IJParCSRVector self
-        integer*8 self
-C       in bHYPRE.Vector x
-        integer*8 x
-C       out double d
-        double precision d
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Add {\tt a}*{\tt x} to {\tt self}.
-C       
-C       
-
-        subroutine bHYPRE_IJParCSRVector_Axpy_f(self, a, x, retval)
-        implicit none
-C       in bHYPRE.IJParCSRVector self
-        integer*8 self
-C       in double a
-        double precision a
-C       in bHYPRE.Vector x
-        integer*8 x
 C       out int retval
         integer*4 retval
         end

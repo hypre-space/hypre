@@ -2,14 +2,14 @@
  * File:          bHYPRE_StructStencil_fStub.c
  * Symbol:        bHYPRE.StructStencil-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.8.0
- * SIDL Created:  20030320 16:52:45 PST
- * Generated:     20030320 16:52:54 PST
+ * Babel Version: 0.8.2
+ * SIDL Created:  20030401 14:47:46 PST
+ * Generated:     20030401 14:48:18 PST
  * Description:   Client-side glue code for bHYPRE.StructStencil
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.0
+ * babel-version = 0.8.2
  * source-line   = 1088
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -79,11 +79,35 @@ SIDLFortran77Symbol(bhypre_structstencil__create_f,BHYPRE_STRUCTSTENCIL__CREATE_
 }
 
 /*
- * Cast method for interface and class type conversions.
+ * Cast method for interface and type conversions.
  */
 
 void
 SIDLFortran77Symbol(bhypre_structstencil__cast_f,BHYPRE_STRUCTSTENCIL__CAST_F,bHYPRE_StructStencil__cast_f)
+(
+  int64_t *ref,
+  int64_t *retval
+)
+{
+  struct SIDL_BaseInterface__object  *_base =
+    (struct SIDL_BaseInterface__object *)(ptrdiff_t)*ref;
+  if (_base) {
+    *retval = (ptrdiff_t)(
+      *_base->d_epv->f__cast)(
+      _base->d_object,
+      "bHYPRE.StructStencil");
+  }
+  else {
+    *retval = 0;
+  }
+}
+
+/*
+ * Cast method for interface and class type conversions.
+ */
+
+void
+SIDLFortran77Symbol(bhypre_structstencil__cast2_f,BHYPRE_STRUCTSTENCIL__CAST2_F,bHYPRE_StructStencil__cast2_f)
 (
   int64_t *self,
   SIDL_F77_String name
@@ -690,6 +714,23 @@ SIDLFortran77Symbol(bhypre_structstencil__array_smartcopy_f,
 {
   SIDL_interface__array_smartCopy((struct SIDL_interface__array 
     *)(ptrdiff_t)*src);
+}
+
+void
+SIDLFortran77Symbol(bhypre_structstencil__array_slice_f,
+                  BHYPRE_STRUCTSTENCIL__ARRAY_SLICE_F,
+                  bHYPRE_StructStencil__array_slice_f)
+  (int64_t *src,
+   int32_t *dimen,
+   int32_t numElem[],
+   int32_t srcStart[],
+   int32_t srcStride[],
+   int32_t newStart[],
+   int64_t *result)
+{
+  *result = (ptrdiff_t)
+    SIDL_interface__array_slice((struct SIDL_interface__array *)(ptrdiff_t)*src,
+      *dimen, numElem, srcStart, srcStride, newStart);
 }
 
 void

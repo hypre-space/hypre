@@ -2,14 +2,14 @@
  * File:          bHYPRE_StructVector_IOR.c
  * Symbol:        bHYPRE.StructVector-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.8.0
- * SIDL Created:  20030320 16:52:19 PST
- * Generated:     20030320 16:52:23 PST
+ * Babel Version: 0.8.2
+ * SIDL Created:  20030401 14:47:20 PST
+ * Generated:     20030401 14:47:24 PST
  * Description:   Intermediate Object Representation for bHYPRE.StructVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.0
+ * babel-version = 0.8.2
  * source-line   = 1129
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -160,6 +160,12 @@ static void bHYPRE_StructVector__init_epv(
     const char*)) s1->d_epv->f_isType;
   epv->f_getClassInfo    = (struct SIDL_ClassInfo__object* (*)(struct 
     bHYPRE_StructVector__object*)) s1->d_epv->f_getClassInfo;
+  epv->f_Clear           = NULL;
+  epv->f_Copy            = NULL;
+  epv->f_Clone           = NULL;
+  epv->f_Scale           = NULL;
+  epv->f_Dot             = NULL;
+  epv->f_Axpy            = NULL;
   epv->f_SetCommunicator = NULL;
   epv->f_Initialize      = NULL;
   epv->f_Assemble        = NULL;
@@ -168,12 +174,6 @@ static void bHYPRE_StructVector__init_epv(
   epv->f_SetStencil      = NULL;
   epv->f_SetValue        = NULL;
   epv->f_SetBoxValues    = NULL;
-  epv->f_Clear           = NULL;
-  epv->f_Copy            = NULL;
-  epv->f_Clone           = NULL;
-  epv->f_Scale           = NULL;
-  epv->f_Dot             = NULL;
-  epv->f_Axpy            = NULL;
 
   bHYPRE_StructVector__set_epv(epv);
 
@@ -193,15 +193,17 @@ static void bHYPRE_StructVector__init_epv(
   e0->f_getClassInfo = (struct SIDL_ClassInfo__object* (*)(struct 
     SIDL_BaseClass__object*)) epv->f_getClassInfo;
 
-  e1->f__cast     = (void* (*)(void*,const char*)) epv->f__cast;
-  e1->f__delete   = (void (*)(void*)) epv->f__delete;
-  e1->f_addRef    = (void (*)(void*)) epv->f_addRef;
-  e1->f_deleteRef = (void (*)(void*)) epv->f_deleteRef;
-  e1->f_isSame    = (SIDL_bool (*)(void*,
+  e1->f__cast        = (void* (*)(void*,const char*)) epv->f__cast;
+  e1->f__delete      = (void (*)(void*)) epv->f__delete;
+  e1->f_addRef       = (void (*)(void*)) epv->f_addRef;
+  e1->f_deleteRef    = (void (*)(void*)) epv->f_deleteRef;
+  e1->f_isSame       = (SIDL_bool (*)(void*,
     struct SIDL_BaseInterface__object*)) epv->f_isSame;
-  e1->f_queryInt  = (struct SIDL_BaseInterface__object* (*)(void*,
+  e1->f_queryInt     = (struct SIDL_BaseInterface__object* (*)(void*,
     const char*)) epv->f_queryInt;
-  e1->f_isType    = (SIDL_bool (*)(void*,const char*)) epv->f_isType;
+  e1->f_isType       = (SIDL_bool (*)(void*,const char*)) epv->f_isType;
+  e1->f_getClassInfo = (struct SIDL_ClassInfo__object* (*)(void*)) 
+    epv->f_getClassInfo;
 
   e2->f__cast           = (void* (*)(void*,const char*)) epv->f__cast;
   e2->f__delete         = (void (*)(void*)) epv->f__delete;
@@ -212,6 +214,8 @@ static void bHYPRE_StructVector__init_epv(
   e2->f_queryInt        = (struct SIDL_BaseInterface__object* (*)(void*,
     const char*)) epv->f_queryInt;
   e2->f_isType          = (SIDL_bool (*)(void*,const char*)) epv->f_isType;
+  e2->f_getClassInfo    = (struct SIDL_ClassInfo__object* (*)(void*)) 
+    epv->f_getClassInfo;
   e2->f_SetCommunicator = (int32_t (*)(void*,void*)) epv->f_SetCommunicator;
   e2->f_Initialize      = (int32_t (*)(void*)) epv->f_Initialize;
   e2->f_Assemble        = (int32_t (*)(void*)) epv->f_Assemble;
@@ -227,6 +231,8 @@ static void bHYPRE_StructVector__init_epv(
   e3->f_queryInt        = (struct SIDL_BaseInterface__object* (*)(void*,
     const char*)) epv->f_queryInt;
   e3->f_isType          = (SIDL_bool (*)(void*,const char*)) epv->f_isType;
+  e3->f_getClassInfo    = (struct SIDL_ClassInfo__object* (*)(void*)) 
+    epv->f_getClassInfo;
   e3->f_SetCommunicator = (int32_t (*)(void*,void*)) epv->f_SetCommunicator;
   e3->f_Initialize      = (int32_t (*)(void*)) epv->f_Initialize;
   e3->f_Assemble        = (int32_t (*)(void*)) epv->f_Assemble;
@@ -241,24 +247,26 @@ static void bHYPRE_StructVector__init_epv(
   e3->f_SetBoxValues    = (int32_t (*)(void*,struct SIDL_int__array*,
     struct SIDL_int__array*,struct SIDL_double__array*)) epv->f_SetBoxValues;
 
-  e4->f__cast     = (void* (*)(void*,const char*)) epv->f__cast;
-  e4->f__delete   = (void (*)(void*)) epv->f__delete;
-  e4->f_addRef    = (void (*)(void*)) epv->f_addRef;
-  e4->f_deleteRef = (void (*)(void*)) epv->f_deleteRef;
-  e4->f_isSame    = (SIDL_bool (*)(void*,
+  e4->f__cast        = (void* (*)(void*,const char*)) epv->f__cast;
+  e4->f__delete      = (void (*)(void*)) epv->f__delete;
+  e4->f_addRef       = (void (*)(void*)) epv->f_addRef;
+  e4->f_deleteRef    = (void (*)(void*)) epv->f_deleteRef;
+  e4->f_isSame       = (SIDL_bool (*)(void*,
     struct SIDL_BaseInterface__object*)) epv->f_isSame;
-  e4->f_queryInt  = (struct SIDL_BaseInterface__object* (*)(void*,
+  e4->f_queryInt     = (struct SIDL_BaseInterface__object* (*)(void*,
     const char*)) epv->f_queryInt;
-  e4->f_isType    = (SIDL_bool (*)(void*,const char*)) epv->f_isType;
-  e4->f_Clear     = (int32_t (*)(void*)) epv->f_Clear;
-  e4->f_Copy      = (int32_t (*)(void*,
+  e4->f_isType       = (SIDL_bool (*)(void*,const char*)) epv->f_isType;
+  e4->f_getClassInfo = (struct SIDL_ClassInfo__object* (*)(void*)) 
+    epv->f_getClassInfo;
+  e4->f_Clear        = (int32_t (*)(void*)) epv->f_Clear;
+  e4->f_Copy         = (int32_t (*)(void*,
     struct bHYPRE_Vector__object*)) epv->f_Copy;
-  e4->f_Clone     = (int32_t (*)(void*,
+  e4->f_Clone        = (int32_t (*)(void*,
     struct bHYPRE_Vector__object**)) epv->f_Clone;
-  e4->f_Scale     = (int32_t (*)(void*,double)) epv->f_Scale;
-  e4->f_Dot       = (int32_t (*)(void*,struct bHYPRE_Vector__object*,
+  e4->f_Scale        = (int32_t (*)(void*,double)) epv->f_Scale;
+  e4->f_Dot          = (int32_t (*)(void*,struct bHYPRE_Vector__object*,
     double*)) epv->f_Dot;
-  e4->f_Axpy      = (int32_t (*)(void*,double,
+  e4->f_Axpy         = (int32_t (*)(void*,double,
     struct bHYPRE_Vector__object*)) epv->f_Axpy;
 
   s_method_initialized = 1;
@@ -495,6 +503,79 @@ remote_bHYPRE_StructVector_getClassInfo(
 }
 
 /*
+ * REMOTE METHOD STUB:Clear
+ */
+
+static int32_t
+remote_bHYPRE_StructVector_Clear(
+  struct bHYPRE_StructVector__object* self)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:Copy
+ */
+
+static int32_t
+remote_bHYPRE_StructVector_Copy(
+  struct bHYPRE_StructVector__object* self,
+  struct bHYPRE_Vector__object* x)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:Clone
+ */
+
+static int32_t
+remote_bHYPRE_StructVector_Clone(
+  struct bHYPRE_StructVector__object* self,
+  struct bHYPRE_Vector__object** x)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:Scale
+ */
+
+static int32_t
+remote_bHYPRE_StructVector_Scale(
+  struct bHYPRE_StructVector__object* self,
+  double a)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:Dot
+ */
+
+static int32_t
+remote_bHYPRE_StructVector_Dot(
+  struct bHYPRE_StructVector__object* self,
+  struct bHYPRE_Vector__object* x,
+  double* d)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:Axpy
+ */
+
+static int32_t
+remote_bHYPRE_StructVector_Axpy(
+  struct bHYPRE_StructVector__object* self,
+  double a,
+  struct bHYPRE_Vector__object* x)
+{
+  return 0;
+}
+
+/*
  * REMOTE METHOD STUB:SetCommunicator
  */
 
@@ -592,79 +673,6 @@ remote_bHYPRE_StructVector_SetBoxValues(
 }
 
 /*
- * REMOTE METHOD STUB:Clear
- */
-
-static int32_t
-remote_bHYPRE_StructVector_Clear(
-  struct bHYPRE_StructVector__object* self)
-{
-  return 0;
-}
-
-/*
- * REMOTE METHOD STUB:Copy
- */
-
-static int32_t
-remote_bHYPRE_StructVector_Copy(
-  struct bHYPRE_StructVector__object* self,
-  struct bHYPRE_Vector__object* x)
-{
-  return 0;
-}
-
-/*
- * REMOTE METHOD STUB:Clone
- */
-
-static int32_t
-remote_bHYPRE_StructVector_Clone(
-  struct bHYPRE_StructVector__object* self,
-  struct bHYPRE_Vector__object** x)
-{
-  return 0;
-}
-
-/*
- * REMOTE METHOD STUB:Scale
- */
-
-static int32_t
-remote_bHYPRE_StructVector_Scale(
-  struct bHYPRE_StructVector__object* self,
-  double a)
-{
-  return 0;
-}
-
-/*
- * REMOTE METHOD STUB:Dot
- */
-
-static int32_t
-remote_bHYPRE_StructVector_Dot(
-  struct bHYPRE_StructVector__object* self,
-  struct bHYPRE_Vector__object* x,
-  double* d)
-{
-  return 0;
-}
-
-/*
- * REMOTE METHOD STUB:Axpy
- */
-
-static int32_t
-remote_bHYPRE_StructVector_Axpy(
-  struct bHYPRE_StructVector__object* self,
-  double a,
-  struct bHYPRE_Vector__object* x)
-{
-  return 0;
-}
-
-/*
  * REMOTE EPV: create remote entry point vectors (EPVs).
  */
 
@@ -687,6 +695,12 @@ static void bHYPRE_StructVector__init_remote_epv(void)
   epv->f_queryInt        = remote_bHYPRE_StructVector_queryInt;
   epv->f_isType          = remote_bHYPRE_StructVector_isType;
   epv->f_getClassInfo    = remote_bHYPRE_StructVector_getClassInfo;
+  epv->f_Clear           = remote_bHYPRE_StructVector_Clear;
+  epv->f_Copy            = remote_bHYPRE_StructVector_Copy;
+  epv->f_Clone           = remote_bHYPRE_StructVector_Clone;
+  epv->f_Scale           = remote_bHYPRE_StructVector_Scale;
+  epv->f_Dot             = remote_bHYPRE_StructVector_Dot;
+  epv->f_Axpy            = remote_bHYPRE_StructVector_Axpy;
   epv->f_SetCommunicator = remote_bHYPRE_StructVector_SetCommunicator;
   epv->f_Initialize      = remote_bHYPRE_StructVector_Initialize;
   epv->f_Assemble        = remote_bHYPRE_StructVector_Assemble;
@@ -695,12 +709,6 @@ static void bHYPRE_StructVector__init_remote_epv(void)
   epv->f_SetStencil      = remote_bHYPRE_StructVector_SetStencil;
   epv->f_SetValue        = remote_bHYPRE_StructVector_SetValue;
   epv->f_SetBoxValues    = remote_bHYPRE_StructVector_SetBoxValues;
-  epv->f_Clear           = remote_bHYPRE_StructVector_Clear;
-  epv->f_Copy            = remote_bHYPRE_StructVector_Copy;
-  epv->f_Clone           = remote_bHYPRE_StructVector_Clone;
-  epv->f_Scale           = remote_bHYPRE_StructVector_Scale;
-  epv->f_Dot             = remote_bHYPRE_StructVector_Dot;
-  epv->f_Axpy            = remote_bHYPRE_StructVector_Axpy;
 
   e0->f__cast        = (void* (*)(struct SIDL_BaseClass__object*,
     const char*)) epv->f__cast;
@@ -718,15 +726,17 @@ static void bHYPRE_StructVector__init_remote_epv(void)
   e0->f_getClassInfo = (struct SIDL_ClassInfo__object* (*)(struct 
     SIDL_BaseClass__object*)) epv->f_getClassInfo;
 
-  e1->f__cast     = (void* (*)(void*,const char*)) epv->f__cast;
-  e1->f__delete   = (void (*)(void*)) epv->f__delete;
-  e1->f_addRef    = (void (*)(void*)) epv->f_addRef;
-  e1->f_deleteRef = (void (*)(void*)) epv->f_deleteRef;
-  e1->f_isSame    = (SIDL_bool (*)(void*,
+  e1->f__cast        = (void* (*)(void*,const char*)) epv->f__cast;
+  e1->f__delete      = (void (*)(void*)) epv->f__delete;
+  e1->f_addRef       = (void (*)(void*)) epv->f_addRef;
+  e1->f_deleteRef    = (void (*)(void*)) epv->f_deleteRef;
+  e1->f_isSame       = (SIDL_bool (*)(void*,
     struct SIDL_BaseInterface__object*)) epv->f_isSame;
-  e1->f_queryInt  = (struct SIDL_BaseInterface__object* (*)(void*,
+  e1->f_queryInt     = (struct SIDL_BaseInterface__object* (*)(void*,
     const char*)) epv->f_queryInt;
-  e1->f_isType    = (SIDL_bool (*)(void*,const char*)) epv->f_isType;
+  e1->f_isType       = (SIDL_bool (*)(void*,const char*)) epv->f_isType;
+  e1->f_getClassInfo = (struct SIDL_ClassInfo__object* (*)(void*)) 
+    epv->f_getClassInfo;
 
   e2->f__cast           = (void* (*)(void*,const char*)) epv->f__cast;
   e2->f__delete         = (void (*)(void*)) epv->f__delete;
@@ -737,6 +747,8 @@ static void bHYPRE_StructVector__init_remote_epv(void)
   e2->f_queryInt        = (struct SIDL_BaseInterface__object* (*)(void*,
     const char*)) epv->f_queryInt;
   e2->f_isType          = (SIDL_bool (*)(void*,const char*)) epv->f_isType;
+  e2->f_getClassInfo    = (struct SIDL_ClassInfo__object* (*)(void*)) 
+    epv->f_getClassInfo;
   e2->f_SetCommunicator = (int32_t (*)(void*,void*)) epv->f_SetCommunicator;
   e2->f_Initialize      = (int32_t (*)(void*)) epv->f_Initialize;
   e2->f_Assemble        = (int32_t (*)(void*)) epv->f_Assemble;
@@ -752,6 +764,8 @@ static void bHYPRE_StructVector__init_remote_epv(void)
   e3->f_queryInt        = (struct SIDL_BaseInterface__object* (*)(void*,
     const char*)) epv->f_queryInt;
   e3->f_isType          = (SIDL_bool (*)(void*,const char*)) epv->f_isType;
+  e3->f_getClassInfo    = (struct SIDL_ClassInfo__object* (*)(void*)) 
+    epv->f_getClassInfo;
   e3->f_SetCommunicator = (int32_t (*)(void*,void*)) epv->f_SetCommunicator;
   e3->f_Initialize      = (int32_t (*)(void*)) epv->f_Initialize;
   e3->f_Assemble        = (int32_t (*)(void*)) epv->f_Assemble;
@@ -766,24 +780,26 @@ static void bHYPRE_StructVector__init_remote_epv(void)
   e3->f_SetBoxValues    = (int32_t (*)(void*,struct SIDL_int__array*,
     struct SIDL_int__array*,struct SIDL_double__array*)) epv->f_SetBoxValues;
 
-  e4->f__cast     = (void* (*)(void*,const char*)) epv->f__cast;
-  e4->f__delete   = (void (*)(void*)) epv->f__delete;
-  e4->f_addRef    = (void (*)(void*)) epv->f_addRef;
-  e4->f_deleteRef = (void (*)(void*)) epv->f_deleteRef;
-  e4->f_isSame    = (SIDL_bool (*)(void*,
+  e4->f__cast        = (void* (*)(void*,const char*)) epv->f__cast;
+  e4->f__delete      = (void (*)(void*)) epv->f__delete;
+  e4->f_addRef       = (void (*)(void*)) epv->f_addRef;
+  e4->f_deleteRef    = (void (*)(void*)) epv->f_deleteRef;
+  e4->f_isSame       = (SIDL_bool (*)(void*,
     struct SIDL_BaseInterface__object*)) epv->f_isSame;
-  e4->f_queryInt  = (struct SIDL_BaseInterface__object* (*)(void*,
+  e4->f_queryInt     = (struct SIDL_BaseInterface__object* (*)(void*,
     const char*)) epv->f_queryInt;
-  e4->f_isType    = (SIDL_bool (*)(void*,const char*)) epv->f_isType;
-  e4->f_Clear     = (int32_t (*)(void*)) epv->f_Clear;
-  e4->f_Copy      = (int32_t (*)(void*,
+  e4->f_isType       = (SIDL_bool (*)(void*,const char*)) epv->f_isType;
+  e4->f_getClassInfo = (struct SIDL_ClassInfo__object* (*)(void*)) 
+    epv->f_getClassInfo;
+  e4->f_Clear        = (int32_t (*)(void*)) epv->f_Clear;
+  e4->f_Copy         = (int32_t (*)(void*,
     struct bHYPRE_Vector__object*)) epv->f_Copy;
-  e4->f_Clone     = (int32_t (*)(void*,
+  e4->f_Clone        = (int32_t (*)(void*,
     struct bHYPRE_Vector__object**)) epv->f_Clone;
-  e4->f_Scale     = (int32_t (*)(void*,double)) epv->f_Scale;
-  e4->f_Dot       = (int32_t (*)(void*,struct bHYPRE_Vector__object*,
+  e4->f_Scale        = (int32_t (*)(void*,double)) epv->f_Scale;
+  e4->f_Dot          = (int32_t (*)(void*,struct bHYPRE_Vector__object*,
     double*)) epv->f_Dot;
-  e4->f_Axpy      = (int32_t (*)(void*,double,
+  e4->f_Axpy         = (int32_t (*)(void*,double,
     struct bHYPRE_Vector__object*)) epv->f_Axpy;
 
   s_remote_initialized = 1;

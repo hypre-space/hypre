@@ -2,14 +2,14 @@
  * File:          bHYPRE_SStructParCSRMatrix_Impl.h
  * Symbol:        bHYPRE.SStructParCSRMatrix-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.8.0
- * SIDL Created:  20030320 16:52:19 PST
- * Generated:     20030320 16:52:29 PST
+ * Babel Version: 0.8.2
+ * SIDL Created:  20030401 14:47:20 PST
+ * Generated:     20030401 14:47:30 PST
  * Description:   Server-side implementation for bHYPRE.SStructParCSRMatrix
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.8.0
+ * babel-version = 0.8.2
  * source-line   = 827
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -81,72 +81,6 @@ extern int32_t
 impl_bHYPRE_SStructParCSRMatrix_SetCommunicator(
   bHYPRE_SStructParCSRMatrix,
   void*);
-
-extern int32_t
-impl_bHYPRE_SStructParCSRMatrix_SetIntParameter(
-  bHYPRE_SStructParCSRMatrix,
-  const char*,
-  int32_t);
-
-extern int32_t
-impl_bHYPRE_SStructParCSRMatrix_SetDoubleParameter(
-  bHYPRE_SStructParCSRMatrix,
-  const char*,
-  double);
-
-extern int32_t
-impl_bHYPRE_SStructParCSRMatrix_SetStringParameter(
-  bHYPRE_SStructParCSRMatrix,
-  const char*,
-  const char*);
-
-extern int32_t
-impl_bHYPRE_SStructParCSRMatrix_SetIntArray1Parameter(
-  bHYPRE_SStructParCSRMatrix,
-  const char*,
-  struct SIDL_int__array*);
-
-extern int32_t
-impl_bHYPRE_SStructParCSRMatrix_SetIntArray2Parameter(
-  bHYPRE_SStructParCSRMatrix,
-  const char*,
-  struct SIDL_int__array*);
-
-extern int32_t
-impl_bHYPRE_SStructParCSRMatrix_SetDoubleArray1Parameter(
-  bHYPRE_SStructParCSRMatrix,
-  const char*,
-  struct SIDL_double__array*);
-
-extern int32_t
-impl_bHYPRE_SStructParCSRMatrix_SetDoubleArray2Parameter(
-  bHYPRE_SStructParCSRMatrix,
-  const char*,
-  struct SIDL_double__array*);
-
-extern int32_t
-impl_bHYPRE_SStructParCSRMatrix_GetIntValue(
-  bHYPRE_SStructParCSRMatrix,
-  const char*,
-  int32_t*);
-
-extern int32_t
-impl_bHYPRE_SStructParCSRMatrix_GetDoubleValue(
-  bHYPRE_SStructParCSRMatrix,
-  const char*,
-  double*);
-
-extern int32_t
-impl_bHYPRE_SStructParCSRMatrix_Setup(
-  bHYPRE_SStructParCSRMatrix,
-  bHYPRE_Vector,
-  bHYPRE_Vector);
-
-extern int32_t
-impl_bHYPRE_SStructParCSRMatrix_Apply(
-  bHYPRE_SStructParCSRMatrix,
-  bHYPRE_Vector,
-  bHYPRE_Vector*);
 
 extern int32_t
 impl_bHYPRE_SStructParCSRMatrix_Initialize(
@@ -230,6 +164,72 @@ impl_bHYPRE_SStructParCSRMatrix_Print(
   bHYPRE_SStructParCSRMatrix,
   const char*,
   int32_t);
+
+extern int32_t
+impl_bHYPRE_SStructParCSRMatrix_SetIntParameter(
+  bHYPRE_SStructParCSRMatrix,
+  const char*,
+  int32_t);
+
+extern int32_t
+impl_bHYPRE_SStructParCSRMatrix_SetDoubleParameter(
+  bHYPRE_SStructParCSRMatrix,
+  const char*,
+  double);
+
+extern int32_t
+impl_bHYPRE_SStructParCSRMatrix_SetStringParameter(
+  bHYPRE_SStructParCSRMatrix,
+  const char*,
+  const char*);
+
+extern int32_t
+impl_bHYPRE_SStructParCSRMatrix_SetIntArray1Parameter(
+  bHYPRE_SStructParCSRMatrix,
+  const char*,
+  struct SIDL_int__array*);
+
+extern int32_t
+impl_bHYPRE_SStructParCSRMatrix_SetIntArray2Parameter(
+  bHYPRE_SStructParCSRMatrix,
+  const char*,
+  struct SIDL_int__array*);
+
+extern int32_t
+impl_bHYPRE_SStructParCSRMatrix_SetDoubleArray1Parameter(
+  bHYPRE_SStructParCSRMatrix,
+  const char*,
+  struct SIDL_double__array*);
+
+extern int32_t
+impl_bHYPRE_SStructParCSRMatrix_SetDoubleArray2Parameter(
+  bHYPRE_SStructParCSRMatrix,
+  const char*,
+  struct SIDL_double__array*);
+
+extern int32_t
+impl_bHYPRE_SStructParCSRMatrix_GetIntValue(
+  bHYPRE_SStructParCSRMatrix,
+  const char*,
+  int32_t*);
+
+extern int32_t
+impl_bHYPRE_SStructParCSRMatrix_GetDoubleValue(
+  bHYPRE_SStructParCSRMatrix,
+  const char*,
+  double*);
+
+extern int32_t
+impl_bHYPRE_SStructParCSRMatrix_Setup(
+  bHYPRE_SStructParCSRMatrix,
+  bHYPRE_Vector,
+  bHYPRE_Vector);
+
+extern int32_t
+impl_bHYPRE_SStructParCSRMatrix_Apply(
+  bHYPRE_SStructParCSRMatrix,
+  bHYPRE_Vector,
+  bHYPRE_Vector*);
 
 #ifdef __cplusplus
 }

@@ -2,14 +2,14 @@ C
 C       File:          bHYPRE_SStructMatrix_Impl.f
 C       Symbol:        bHYPRE.SStructMatrix-v1.0.0
 C       Symbol Type:   class
-C       Babel Version: 0.8.0
-C       SIDL Created:  20030320 16:52:45 PST
-C       Generated:     20030320 16:52:52 PST
+C       Babel Version: 0.8.2
+C       SIDL Created:  20030401 14:47:46 PST
+C       Generated:     20030401 14:48:07 PST
 C       Description:   Client-side documentation text for bHYPRE.SStructMatrix
 C       
 C       WARNING: Automatically generated; changes will be lost
 C       
-C       babel-version = 0.8.0
+C       babel-version = 0.8.2
 C       source-line   = 1062
 C       source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
 C       
@@ -41,10 +41,23 @@ C       out bHYPRE.SStructMatrix retval
 
 
 C       
+C       Cast method for interface and type conversions.
+C       
+
+        subroutine bHYPRE_SStructMatrix__cast_f(ref, retval)
+        implicit none
+C       in opaque ref
+        integer*8 ref
+C       out bHYPRE.SStructMatrix retval
+        integer*8 retval
+        end
+
+
+C       
 C       Cast method for interface and class type conversions.
 C       
 
-        subroutine bHYPRE_SStructMatrix__cast_f(self, name, retval)
+        subroutine bHYPRE_SStructMatrix__cast2_f(self, name, retval)
         implicit none
 C       in bHYPRE.SStructMatrix self
         integer*8 self
@@ -172,214 +185,6 @@ C       in bHYPRE.SStructMatrix self
         integer*8 self
 C       in opaque mpi_comm
         integer*8 mpi_comm
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Set the int parameter associated with {\tt name}.
-C       
-C       
-
-        subroutine bHYPRE_SStructMatrix_SetIntParameter_f(self, name,
-     &     value, retval)
-        implicit none
-C       in bHYPRE.SStructMatrix self
-        integer*8 self
-C       in string name
-        character*(*) name
-C       in int value
-        integer*4 value
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Set the double parameter associated with {\tt name}.
-C       
-C       
-
-        subroutine bHYPRE_SStructMatrix_SetDoubleParameter_f(self, name,
-     &     value, retval)
-        implicit none
-C       in bHYPRE.SStructMatrix self
-        integer*8 self
-C       in string name
-        character*(*) name
-C       in double value
-        double precision value
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Set the string parameter associated with {\tt name}.
-C       
-C       
-
-        subroutine bHYPRE_SStructMatrix_SetStringParameter_f(self, name,
-     &     value, retval)
-        implicit none
-C       in bHYPRE.SStructMatrix self
-        integer*8 self
-C       in string name
-        character*(*) name
-C       in string value
-        character*(*) value
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Set the int 1-D array parameter associated with {\tt name}.
-C       
-C       
-
-        subroutine bHYPRE_SStructMatrix_SetIntArray1Parameter_f(self,
-     &     name, value, retval)
-        implicit none
-C       in bHYPRE.SStructMatrix self
-        integer*8 self
-C       in string name
-        character*(*) name
-C       in array<int,column-major> value
-        integer*8 value
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Set the int 2-D array parameter associated with {\tt name}.
-C       
-C       
-
-        subroutine bHYPRE_SStructMatrix_SetIntArray2Parameter_f(self,
-     &     name, value, retval)
-        implicit none
-C       in bHYPRE.SStructMatrix self
-        integer*8 self
-C       in string name
-        character*(*) name
-C       in array<int,2,column-major> value
-        integer*8 value
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Set the double 1-D array parameter associated with {\tt name}.
-C       
-C       
-
-        subroutine bHYPRE_SStructMatrix_SetDoubleArray1Parameter_f(self,
-     &     name, value, retval)
-        implicit none
-C       in bHYPRE.SStructMatrix self
-        integer*8 self
-C       in string name
-        character*(*) name
-C       in array<double,column-major> value
-        integer*8 value
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Set the double 2-D array parameter associated with {\tt name}.
-C       
-C       
-
-        subroutine bHYPRE_SStructMatrix_SetDoubleArray2Parameter_f(self,
-     &     name, value, retval)
-        implicit none
-C       in bHYPRE.SStructMatrix self
-        integer*8 self
-C       in string name
-        character*(*) name
-C       in array<double,2,column-major> value
-        integer*8 value
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Set the int parameter associated with {\tt name}.
-C       
-C       
-
-        subroutine bHYPRE_SStructMatrix_GetIntValue_f(self, name, value,
-     &     retval)
-        implicit none
-C       in bHYPRE.SStructMatrix self
-        integer*8 self
-C       in string name
-        character*(*) name
-C       out int value
-        integer*4 value
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Get the double parameter associated with {\tt name}.
-C       
-C       
-
-        subroutine bHYPRE_SStructMatrix_GetDoubleValue_f(self, name,
-     &     value, retval)
-        implicit none
-C       in bHYPRE.SStructMatrix self
-        integer*8 self
-C       in string name
-        character*(*) name
-C       out double value
-        double precision value
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       (Optional) Do any preprocessing that may be necessary in
-C       order to execute {\tt Apply}.
-C       
-C       
-
-        subroutine bHYPRE_SStructMatrix_Setup_f(self, b, x, retval)
-        implicit none
-C       in bHYPRE.SStructMatrix self
-        integer*8 self
-C       in bHYPRE.Vector b
-        integer*8 b
-C       in bHYPRE.Vector x
-        integer*8 x
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Apply the operator to {\tt b}, returning {\tt x}.
-C       
-C       
-
-        subroutine bHYPRE_SStructMatrix_Apply_f(self, b, x, retval)
-        implicit none
-C       in bHYPRE.SStructMatrix self
-        integer*8 self
-C       in bHYPRE.Vector b
-        integer*8 b
-C       inout bHYPRE.Vector x
-        integer*8 x
 C       out int retval
         integer*4 retval
         end
@@ -705,6 +510,214 @@ C       in string filename
         character*(*) filename
 C       in int all
         integer*4 all
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Set the int parameter associated with {\tt name}.
+C       
+C       
+
+        subroutine bHYPRE_SStructMatrix_SetIntParameter_f(self, name,
+     &     value, retval)
+        implicit none
+C       in bHYPRE.SStructMatrix self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       in int value
+        integer*4 value
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Set the double parameter associated with {\tt name}.
+C       
+C       
+
+        subroutine bHYPRE_SStructMatrix_SetDoubleParameter_f(self, name,
+     &     value, retval)
+        implicit none
+C       in bHYPRE.SStructMatrix self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       in double value
+        double precision value
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Set the string parameter associated with {\tt name}.
+C       
+C       
+
+        subroutine bHYPRE_SStructMatrix_SetStringParameter_f(self, name,
+     &     value, retval)
+        implicit none
+C       in bHYPRE.SStructMatrix self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       in string value
+        character*(*) value
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Set the int 1-D array parameter associated with {\tt name}.
+C       
+C       
+
+        subroutine bHYPRE_SStructMatrix_SetIntArray1Parameter_f(self,
+     &     name, value, retval)
+        implicit none
+C       in bHYPRE.SStructMatrix self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       in array<int,column-major> value
+        integer*8 value
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Set the int 2-D array parameter associated with {\tt name}.
+C       
+C       
+
+        subroutine bHYPRE_SStructMatrix_SetIntArray2Parameter_f(self,
+     &     name, value, retval)
+        implicit none
+C       in bHYPRE.SStructMatrix self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       in array<int,2,column-major> value
+        integer*8 value
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Set the double 1-D array parameter associated with {\tt name}.
+C       
+C       
+
+        subroutine bHYPRE_SStructMatrix_SetDoubleArray1Parameter_f(self,
+     &     name, value, retval)
+        implicit none
+C       in bHYPRE.SStructMatrix self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       in array<double,column-major> value
+        integer*8 value
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Set the double 2-D array parameter associated with {\tt name}.
+C       
+C       
+
+        subroutine bHYPRE_SStructMatrix_SetDoubleArray2Parameter_f(self,
+     &     name, value, retval)
+        implicit none
+C       in bHYPRE.SStructMatrix self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       in array<double,2,column-major> value
+        integer*8 value
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Set the int parameter associated with {\tt name}.
+C       
+C       
+
+        subroutine bHYPRE_SStructMatrix_GetIntValue_f(self, name, value,
+     &     retval)
+        implicit none
+C       in bHYPRE.SStructMatrix self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       out int value
+        integer*4 value
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Get the double parameter associated with {\tt name}.
+C       
+C       
+
+        subroutine bHYPRE_SStructMatrix_GetDoubleValue_f(self, name,
+     &     value, retval)
+        implicit none
+C       in bHYPRE.SStructMatrix self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       out double value
+        double precision value
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       (Optional) Do any preprocessing that may be necessary in
+C       order to execute {\tt Apply}.
+C       
+C       
+
+        subroutine bHYPRE_SStructMatrix_Setup_f(self, b, x, retval)
+        implicit none
+C       in bHYPRE.SStructMatrix self
+        integer*8 self
+C       in bHYPRE.Vector b
+        integer*8 b
+C       in bHYPRE.Vector x
+        integer*8 x
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Apply the operator to {\tt b}, returning {\tt x}.
+C       
+C       
+
+        subroutine bHYPRE_SStructMatrix_Apply_f(self, b, x, retval)
+        implicit none
+C       in bHYPRE.SStructMatrix self
+        integer*8 self
+C       in bHYPRE.Vector b
+        integer*8 b
+C       inout bHYPRE.Vector x
+        integer*8 x
 C       out int retval
         integer*4 retval
         end

@@ -383,6 +383,7 @@ impl_Hypre_IJParCSRMatrix_Apply(
    if ( Hypre_Vector_queryInt(b, "Hypre.IJParCSRVector" ) )
    {
       HypreP_b = Hypre_IJParCSRVector__cast( b );
+      Hypre_Vector_deleteRef(b);
    }
    else
    {
@@ -392,6 +393,7 @@ impl_Hypre_IJParCSRMatrix_Apply(
    if ( Hypre_Vector_queryInt( *x, "Hypre.IJParCSRVector" ) )
    {
       HypreP_x = Hypre_IJParCSRVector__cast( *x );
+      Hypre_Vector_deleteRef(*x);
    }
    else
    {

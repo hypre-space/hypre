@@ -1,10 +1,10 @@
 /*
  * File:          SIDL_ClassInfo_fStub.c
- * Symbol:        SIDL.ClassInfo-v0.8.1
+ * Symbol:        SIDL.ClassInfo-v0.8.2
  * Symbol Type:   interface
- * Babel Version: 0.8.0
- * SIDL Created:  20030121 13:48:00 PST
- * Generated:     20030320 16:52:53 PST
+ * Babel Version: 0.8.2
+ * SIDL Created:  20030326 16:09:17 PST
+ * Generated:     20030401 14:48:14 PST
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side glue code for SIDL.ClassInfo
@@ -34,13 +34,13 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.0
- * source-line   = 327
- * source-url    = file:/home/painter/babel-0.8.0/share/../runtime/sidl/sidl.sidl
+ * babel-version = 0.8.2
+ * source-line   = 332
+ * source-url    = file:/home/epperly/current/release_082/linux_gcc2/share/../../babel-0.8.2/runtime/sidl/sidl.sidl
  */
 
 /*
- * Symbol "SIDL.ClassInfo" (version 0.8.1)
+ * Symbol "SIDL.ClassInfo" (version 0.8.2)
  * 
  * This provides an interface to the meta-data available on the
  * class.
@@ -57,11 +57,35 @@
 #include "SIDL_BaseInterface_IOR.h"
 
 /*
- * Cast method for interface and class type conversions.
+ * Cast method for interface and type conversions.
  */
 
 void
 SIDLFortran77Symbol(sidl_classinfo__cast_f,SIDL_CLASSINFO__CAST_F,SIDL_ClassInfo__cast_f)
+(
+  int64_t *ref,
+  int64_t *retval
+)
+{
+  struct SIDL_BaseInterface__object  *_base =
+    (struct SIDL_BaseInterface__object *)(ptrdiff_t)*ref;
+  if (_base) {
+    *retval = (ptrdiff_t)(
+      *_base->d_epv->f__cast)(
+      _base->d_object,
+      "SIDL.ClassInfo");
+  }
+  else {
+    *retval = 0;
+  }
+}
+
+/*
+ * Cast method for interface and class type conversions.
+ */
+
+void
+SIDLFortran77Symbol(sidl_classinfo__cast2_f,SIDL_CLASSINFO__CAST2_F,SIDL_ClassInfo__cast2_f)
 (
   int64_t *self,
   SIDL_F77_String name
@@ -254,6 +278,31 @@ SIDLFortran77Symbol(sidl_classinfo_istype_f,SIDL_CLASSINFO_ISTYPE_F,SIDL_ClassIn
     );
   *retval = ((_proxy_retval == TRUE) ? SIDL_F77_TRUE : SIDL_F77_FALSE);
   free((void *)_proxy_name);
+}
+
+/*
+ * Return the meta-data about the class implementing this interface.
+ */
+
+void
+SIDLFortran77Symbol(sidl_classinfo_getclassinfo_f,SIDL_CLASSINFO_GETCLASSINFO_F,SIDL_ClassInfo_getClassInfo_f)
+(
+  int64_t *self,
+  int64_t *retval
+)
+{
+  struct SIDL_ClassInfo__epv *_epv = NULL;
+  struct SIDL_ClassInfo__object* _proxy_self = NULL;
+  struct SIDL_ClassInfo__object* _proxy_retval = NULL;
+  _proxy_self =
+    (struct SIDL_ClassInfo__object*)
+    (ptrdiff_t)(*self);
+  _epv = _proxy_self->d_epv;
+  _proxy_retval = 
+    (*(_epv->f_getClassInfo))(
+      _proxy_self->d_object
+    );
+  *retval = (ptrdiff_t)_proxy_retval;
 }
 
 /*
@@ -625,6 +674,23 @@ SIDLFortran77Symbol(sidl_classinfo__array_smartcopy_f,
 {
   SIDL_interface__array_smartCopy((struct SIDL_interface__array 
     *)(ptrdiff_t)*src);
+}
+
+void
+SIDLFortran77Symbol(sidl_classinfo__array_slice_f,
+                  SIDL_CLASSINFO__ARRAY_SLICE_F,
+                  SIDL_ClassInfo__array_slice_f)
+  (int64_t *src,
+   int32_t *dimen,
+   int32_t numElem[],
+   int32_t srcStart[],
+   int32_t srcStride[],
+   int32_t newStart[],
+   int64_t *result)
+{
+  *result = (ptrdiff_t)
+    SIDL_interface__array_slice((struct SIDL_interface__array *)(ptrdiff_t)*src,
+      *dimen, numElem, srcStart, srcStride, newStart);
 }
 
 void

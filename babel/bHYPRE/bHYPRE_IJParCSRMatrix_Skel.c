@@ -2,14 +2,14 @@
  * File:          bHYPRE_IJParCSRMatrix_Skel.c
  * Symbol:        bHYPRE.IJParCSRMatrix-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.8.0
- * SIDL Created:  20030320 16:52:19 PST
- * Generated:     20030320 16:52:32 PST
+ * Babel Version: 0.8.2
+ * SIDL Created:  20030401 14:47:20 PST
+ * Generated:     20030401 14:47:33 PST
  * Description:   Server-side glue code for bHYPRE.IJParCSRMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.0
+ * babel-version = 0.8.2
  * source-line   = 789
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -31,14 +31,6 @@ impl_bHYPRE_IJParCSRMatrix_SetDiagOffdSizes(
   bHYPRE_IJParCSRMatrix,
   struct SIDL_int__array*,
   struct SIDL_int__array*);
-
-extern int32_t
-impl_bHYPRE_IJParCSRMatrix_GetRow(
-  bHYPRE_IJParCSRMatrix,
-  int32_t,
-  int32_t*,
-  struct SIDL_int__array**,
-  struct SIDL_double__array**);
 
 extern int32_t
 impl_bHYPRE_IJParCSRMatrix_SetCommunicator(
@@ -190,6 +182,14 @@ impl_bHYPRE_IJParCSRMatrix_Apply(
   bHYPRE_Vector,
   bHYPRE_Vector*);
 
+extern int32_t
+impl_bHYPRE_IJParCSRMatrix_GetRow(
+  bHYPRE_IJParCSRMatrix,
+  int32_t,
+  int32_t*,
+  struct SIDL_int__array**,
+  struct SIDL_double__array**);
+
 static int32_t
 skel_bHYPRE_IJParCSRMatrix_SetDiagOffdSizes(
   bHYPRE_IJParCSRMatrix self,
@@ -208,31 +208,6 @@ skel_bHYPRE_IJParCSRMatrix_SetDiagOffdSizes(
       offdiag_sizes_proxy);
   SIDL_int__array_deleteRef(diag_sizes_proxy);
   SIDL_int__array_deleteRef(offdiag_sizes_proxy);
-  return _return;
-}
-
-static int32_t
-skel_bHYPRE_IJParCSRMatrix_GetRow(
-  bHYPRE_IJParCSRMatrix self,
-  int32_t row,
-  int32_t* size,
-  struct SIDL_int__array** col_ind,
-  struct SIDL_double__array** values)
-{
-  int32_t _return;
-  struct SIDL_int__array* col_ind_proxy = NULL;
-  struct SIDL_double__array* values_proxy = NULL;
-  _return =
-    impl_bHYPRE_IJParCSRMatrix_GetRow(
-      self,
-      row,
-      size,
-      &col_ind_proxy,
-      &values_proxy);
-  *col_ind = SIDL_int__array_ensure(col_ind_proxy, 1, SIDL_column_major_order);
-  SIDL_int__array_deleteRef(col_ind_proxy);
-  *values = SIDL_double__array_ensure(values_proxy, 1, SIDL_column_major_order);
-  SIDL_double__array_deleteRef(values_proxy);
   return _return;
 }
 
@@ -450,13 +425,37 @@ skel_bHYPRE_IJParCSRMatrix_SetDoubleArray2Parameter(
   return _return;
 }
 
+static int32_t
+skel_bHYPRE_IJParCSRMatrix_GetRow(
+  bHYPRE_IJParCSRMatrix self,
+  int32_t row,
+  int32_t* size,
+  struct SIDL_int__array** col_ind,
+  struct SIDL_double__array** values)
+{
+  int32_t _return;
+  struct SIDL_int__array* col_ind_proxy = NULL;
+  struct SIDL_double__array* values_proxy = NULL;
+  _return =
+    impl_bHYPRE_IJParCSRMatrix_GetRow(
+      self,
+      row,
+      size,
+      &col_ind_proxy,
+      &values_proxy);
+  *col_ind = SIDL_int__array_ensure(col_ind_proxy, 1, SIDL_column_major_order);
+  SIDL_int__array_deleteRef(col_ind_proxy);
+  *values = SIDL_double__array_ensure(values_proxy, 1, SIDL_column_major_order);
+  SIDL_double__array_deleteRef(values_proxy);
+  return _return;
+}
+
 void
 bHYPRE_IJParCSRMatrix__set_epv(struct bHYPRE_IJParCSRMatrix__epv *epv)
 {
   epv->f__ctor = impl_bHYPRE_IJParCSRMatrix__ctor;
   epv->f__dtor = impl_bHYPRE_IJParCSRMatrix__dtor;
   epv->f_SetDiagOffdSizes = skel_bHYPRE_IJParCSRMatrix_SetDiagOffdSizes;
-  epv->f_GetRow = skel_bHYPRE_IJParCSRMatrix_GetRow;
   epv->f_SetCommunicator = impl_bHYPRE_IJParCSRMatrix_SetCommunicator;
   epv->f_Initialize = impl_bHYPRE_IJParCSRMatrix_Initialize;
   epv->f_Assemble = impl_bHYPRE_IJParCSRMatrix_Assemble;
@@ -485,6 +484,7 @@ bHYPRE_IJParCSRMatrix__set_epv(struct bHYPRE_IJParCSRMatrix__epv *epv)
   epv->f_GetDoubleValue = impl_bHYPRE_IJParCSRMatrix_GetDoubleValue;
   epv->f_Setup = impl_bHYPRE_IJParCSRMatrix_Setup;
   epv->f_Apply = impl_bHYPRE_IJParCSRMatrix_Apply;
+  epv->f_GetRow = skel_bHYPRE_IJParCSRMatrix_GetRow;
 }
 
 struct bHYPRE_IJParCSRMatrix__data*

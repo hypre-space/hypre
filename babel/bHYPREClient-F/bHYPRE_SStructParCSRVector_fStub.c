@@ -2,14 +2,14 @@
  * File:          bHYPRE_SStructParCSRVector_fStub.c
  * Symbol:        bHYPRE.SStructParCSRVector-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.8.0
- * SIDL Created:  20030320 16:52:45 PST
- * Generated:     20030320 16:52:51 PST
+ * Babel Version: 0.8.2
+ * SIDL Created:  20030401 14:47:46 PST
+ * Generated:     20030401 14:48:06 PST
  * Description:   Client-side glue code for bHYPRE.SStructParCSRVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.0
+ * babel-version = 0.8.2
  * source-line   = 837
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -81,11 +81,35 @@ SIDLFortran77Symbol(bhypre_sstructparcsrvector__create_f,BHYPRE_SSTRUCTPARCSRVEC
 }
 
 /*
- * Cast method for interface and class type conversions.
+ * Cast method for interface and type conversions.
  */
 
 void
 SIDLFortran77Symbol(bhypre_sstructparcsrvector__cast_f,BHYPRE_SSTRUCTPARCSRVECTOR__CAST_F,bHYPRE_SStructParCSRVector__cast_f)
+(
+  int64_t *ref,
+  int64_t *retval
+)
+{
+  struct SIDL_BaseInterface__object  *_base =
+    (struct SIDL_BaseInterface__object *)(ptrdiff_t)*ref;
+  if (_base) {
+    *retval = (ptrdiff_t)(
+      *_base->d_epv->f__cast)(
+      _base->d_object,
+      "bHYPRE.SStructParCSRVector");
+  }
+  else {
+    *retval = 0;
+  }
+}
+
+/*
+ * Cast method for interface and class type conversions.
+ */
+
+void
+SIDLFortran77Symbol(bhypre_sstructparcsrvector__cast2_f,BHYPRE_SSTRUCTPARCSRVECTOR__CAST2_F,bHYPRE_SStructParCSRVector__cast2_f)
 (
   int64_t *self,
   SIDL_F77_String name
@@ -392,7 +416,7 @@ SIDLFortran77Symbol(bhypre_sstructparcsrvector_clone_f,BHYPRE_SSTRUCTPARCSRVECTO
 }
 
 /*
- * Scale {\self} by {\tt a}.
+ * Scale {\tt self} by {\tt a}.
  * 
  */
 
@@ -1321,6 +1345,23 @@ SIDLFortran77Symbol(bhypre_sstructparcsrvector__array_smartcopy_f,
 {
   SIDL_interface__array_smartCopy((struct SIDL_interface__array 
     *)(ptrdiff_t)*src);
+}
+
+void
+SIDLFortran77Symbol(bhypre_sstructparcsrvector__array_slice_f,
+                  BHYPRE_SSTRUCTPARCSRVECTOR__ARRAY_SLICE_F,
+                  bHYPRE_SStructParCSRVector__array_slice_f)
+  (int64_t *src,
+   int32_t *dimen,
+   int32_t numElem[],
+   int32_t srcStart[],
+   int32_t srcStride[],
+   int32_t newStart[],
+   int64_t *result)
+{
+  *result = (ptrdiff_t)
+    SIDL_interface__array_slice((struct SIDL_interface__array *)(ptrdiff_t)*src,
+      *dimen, numElem, srcStart, srcStride, newStart);
 }
 
 void

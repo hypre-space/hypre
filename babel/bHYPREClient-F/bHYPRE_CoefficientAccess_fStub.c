@@ -2,14 +2,14 @@
  * File:          bHYPRE_CoefficientAccess_fStub.c
  * Symbol:        bHYPRE.CoefficientAccess-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.8.0
- * SIDL Created:  20030320 16:52:45 PST
- * Generated:     20030320 16:52:53 PST
+ * Babel Version: 0.8.2
+ * SIDL Created:  20030401 14:47:45 PST
+ * Generated:     20030401 14:48:13 PST
  * Description:   Client-side glue code for bHYPRE.CoefficientAccess
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.0
+ * babel-version = 0.8.2
  * source-line   = 766
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -32,13 +32,38 @@
 #endif
 #include "bHYPRE_CoefficientAccess_IOR.h"
 #include "SIDL_BaseInterface_IOR.h"
+#include "SIDL_ClassInfo_IOR.h"
+
+/*
+ * Cast method for interface and type conversions.
+ */
+
+void
+SIDLFortran77Symbol(bhypre_coefficientaccess__cast_f,BHYPRE_COEFFICIENTACCESS__CAST_F,bHYPRE_CoefficientAccess__cast_f)
+(
+  int64_t *ref,
+  int64_t *retval
+)
+{
+  struct SIDL_BaseInterface__object  *_base =
+    (struct SIDL_BaseInterface__object *)(ptrdiff_t)*ref;
+  if (_base) {
+    *retval = (ptrdiff_t)(
+      *_base->d_epv->f__cast)(
+      _base->d_object,
+      "bHYPRE.CoefficientAccess");
+  }
+  else {
+    *retval = 0;
+  }
+}
 
 /*
  * Cast method for interface and class type conversions.
  */
 
 void
-SIDLFortran77Symbol(bhypre_coefficientaccess__cast_f,BHYPRE_COEFFICIENTACCESS__CAST_F,bHYPRE_CoefficientAccess__cast_f)
+SIDLFortran77Symbol(bhypre_coefficientaccess__cast2_f,BHYPRE_COEFFICIENTACCESS__CAST2_F,bHYPRE_CoefficientAccess__cast2_f)
 (
   int64_t *self,
   SIDL_F77_String name
@@ -231,6 +256,31 @@ SIDLFortran77Symbol(bhypre_coefficientaccess_istype_f,BHYPRE_COEFFICIENTACCESS_I
     );
   *retval = ((_proxy_retval == TRUE) ? SIDL_F77_TRUE : SIDL_F77_FALSE);
   free((void *)_proxy_name);
+}
+
+/*
+ * Return the meta-data about the class implementing this interface.
+ */
+
+void
+SIDLFortran77Symbol(bhypre_coefficientaccess_getclassinfo_f,BHYPRE_COEFFICIENTACCESS_GETCLASSINFO_F,bHYPRE_CoefficientAccess_getClassInfo_f)
+(
+  int64_t *self,
+  int64_t *retval
+)
+{
+  struct bHYPRE_CoefficientAccess__epv *_epv = NULL;
+  struct bHYPRE_CoefficientAccess__object* _proxy_self = NULL;
+  struct SIDL_ClassInfo__object* _proxy_retval = NULL;
+  _proxy_self =
+    (struct bHYPRE_CoefficientAccess__object*)
+    (ptrdiff_t)(*self);
+  _epv = _proxy_self->d_epv;
+  _proxy_retval = 
+    (*(_epv->f_getClassInfo))(
+      _proxy_self->d_object
+    );
+  *retval = (ptrdiff_t)_proxy_retval;
 }
 
 /*
@@ -579,6 +629,23 @@ SIDLFortran77Symbol(bhypre_coefficientaccess__array_smartcopy_f,
 {
   SIDL_interface__array_smartCopy((struct SIDL_interface__array 
     *)(ptrdiff_t)*src);
+}
+
+void
+SIDLFortran77Symbol(bhypre_coefficientaccess__array_slice_f,
+                  BHYPRE_COEFFICIENTACCESS__ARRAY_SLICE_F,
+                  bHYPRE_CoefficientAccess__array_slice_f)
+  (int64_t *src,
+   int32_t *dimen,
+   int32_t numElem[],
+   int32_t srcStart[],
+   int32_t srcStride[],
+   int32_t newStart[],
+   int64_t *result)
+{
+  *result = (ptrdiff_t)
+    SIDL_interface__array_slice((struct SIDL_interface__array *)(ptrdiff_t)*src,
+      *dimen, numElem, srcStart, srcStride, newStart);
 }
 
 void

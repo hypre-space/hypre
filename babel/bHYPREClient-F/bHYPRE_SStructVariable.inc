@@ -2,14 +2,14 @@ C
 C       File:          bHYPRE_SStructVariable.inc
 C       Symbol:        bHYPRE.SStructVariable-v1.0.0
 C       Symbol Type:   enumeration
-C       Babel Version: 0.8.0
-C       SIDL Created:  20030320 16:52:45 PST
-C       Generated:     20030320 16:52:52 PST
+C       Babel Version: 0.8.2
+C       SIDL Created:  20030401 14:47:46 PST
+C       Generated:     20030401 14:48:09 PST
 C       Description:   Client-side glue code for bHYPRE.SStructVariable
 C       
 C       WARNING: Automatically generated; changes will be lost
 C       
-C       babel-version = 0.8.0
+C       babel-version = 0.8.2
 C       source-line   = 888
 C       source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
 C       
@@ -65,21 +65,21 @@ C
 C       
 
 
-        integer UNDEFINED
+        integer*4 UNDEFINED
         parameter (UNDEFINED = -1)
-        integer CELL
+        integer*4 CELL
         parameter (CELL = 0)
-        integer NODE
+        integer*4 NODE
         parameter (NODE = 1)
-        integer XFACE
+        integer*4 XFACE
         parameter (XFACE = 2)
-        integer YFACE
+        integer*4 YFACE
         parameter (YFACE = 3)
-        integer ZFACE
+        integer*4 ZFACE
         parameter (ZFACE = 4)
-        integer XEDGE
+        integer*4 XEDGE
         parameter (XEDGE = 5)
-        integer YEDGE
+        integer*4 YEDGE
         parameter (YEDGE = 6)
-        integer ZEDGE
+        integer*4 ZEDGE
         parameter (ZEDGE = 7)

@@ -2,14 +2,14 @@
  * File:          bHYPRE_Vector_IOR.c
  * Symbol:        bHYPRE.Vector-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.8.0
- * SIDL Created:  20030320 16:52:33 PST
- * Generated:     20030320 16:52:36 PST
+ * Babel Version: 0.8.2
+ * SIDL Created:  20030401 14:47:34 PST
+ * Generated:     20030401 14:47:37 PST
  * Description:   Intermediate Object Representation for bHYPRE.Vector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.0
+ * babel-version = 0.8.2
  * source-line   = 667
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -115,6 +115,17 @@ remote_bHYPRE_Vector_isType(
 }
 
 /*
+ * REMOTE METHOD STUB:getClassInfo
+ */
+
+static struct SIDL_ClassInfo__object*
+remote_bHYPRE_Vector_getClassInfo(
+  void* self)
+{
+  return (struct SIDL_ClassInfo__object*) 0;
+}
+
+/*
  * REMOTE METHOD STUB:Clear
  */
 
@@ -195,19 +206,20 @@ static void bHYPRE_Vector__init_remote_epv(void)
 {
   struct bHYPRE_Vector__epv* epv = &s_rem__bhypre_vector;
 
-  epv->f__cast     = remote_bHYPRE_Vector__cast;
-  epv->f__delete   = remote_bHYPRE_Vector__delete;
-  epv->f_addRef    = remote_bHYPRE_Vector_addRef;
-  epv->f_deleteRef = remote_bHYPRE_Vector_deleteRef;
-  epv->f_isSame    = remote_bHYPRE_Vector_isSame;
-  epv->f_queryInt  = remote_bHYPRE_Vector_queryInt;
-  epv->f_isType    = remote_bHYPRE_Vector_isType;
-  epv->f_Clear     = remote_bHYPRE_Vector_Clear;
-  epv->f_Copy      = remote_bHYPRE_Vector_Copy;
-  epv->f_Clone     = remote_bHYPRE_Vector_Clone;
-  epv->f_Scale     = remote_bHYPRE_Vector_Scale;
-  epv->f_Dot       = remote_bHYPRE_Vector_Dot;
-  epv->f_Axpy      = remote_bHYPRE_Vector_Axpy;
+  epv->f__cast        = remote_bHYPRE_Vector__cast;
+  epv->f__delete      = remote_bHYPRE_Vector__delete;
+  epv->f_addRef       = remote_bHYPRE_Vector_addRef;
+  epv->f_deleteRef    = remote_bHYPRE_Vector_deleteRef;
+  epv->f_isSame       = remote_bHYPRE_Vector_isSame;
+  epv->f_queryInt     = remote_bHYPRE_Vector_queryInt;
+  epv->f_isType       = remote_bHYPRE_Vector_isType;
+  epv->f_getClassInfo = remote_bHYPRE_Vector_getClassInfo;
+  epv->f_Clear        = remote_bHYPRE_Vector_Clear;
+  epv->f_Copy         = remote_bHYPRE_Vector_Copy;
+  epv->f_Clone        = remote_bHYPRE_Vector_Clone;
+  epv->f_Scale        = remote_bHYPRE_Vector_Scale;
+  epv->f_Dot          = remote_bHYPRE_Vector_Dot;
+  epv->f_Axpy         = remote_bHYPRE_Vector_Axpy;
   s_remote_initialized = 1;
 }
 

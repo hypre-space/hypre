@@ -2,14 +2,14 @@
  * File:          bHYPRE_Solver_IOR.c
  * Symbol:        bHYPRE.Solver-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.8.0
- * SIDL Created:  20030320 16:52:45 PST
- * Generated:     20030320 16:52:46 PST
+ * Babel Version: 0.8.2
+ * SIDL Created:  20030401 14:47:45 PST
+ * Generated:     20030401 14:47:47 PST
  * Description:   Intermediate Object Representation for bHYPRE.Solver
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.0
+ * babel-version = 0.8.2
  * source-line   = 708
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -112,6 +112,17 @@ remote_bHYPRE_Solver_isType(
   const char* name)
 {
   return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:getClassInfo
+ */
+
+static struct SIDL_ClassInfo__object*
+remote_bHYPRE_Solver_getClassInfo(
+  void* self)
+{
+  return (struct SIDL_ClassInfo__object*) 0;
 }
 
 /*
@@ -368,6 +379,7 @@ static void bHYPRE_Solver__init_remote_epv(void)
   epv->f_isSame                   = remote_bHYPRE_Solver_isSame;
   epv->f_queryInt                 = remote_bHYPRE_Solver_queryInt;
   epv->f_isType                   = remote_bHYPRE_Solver_isType;
+  epv->f_getClassInfo             = remote_bHYPRE_Solver_getClassInfo;
   epv->f_SetCommunicator          = remote_bHYPRE_Solver_SetCommunicator;
   epv->f_SetIntParameter          = remote_bHYPRE_Solver_SetIntParameter;
   epv->f_SetDoubleParameter       = remote_bHYPRE_Solver_SetDoubleParameter;

@@ -2,14 +2,14 @@
  * File:          bHYPRE.h
  * Symbol:        bHYPRE-v1.0.0
  * Symbol Type:   package
- * Babel Version: 0.8.0
- * SIDL Created:  20030320 16:52:17 PST
- * Generated:     20030320 16:52:25 PST
+ * Babel Version: 0.8.2
+ * SIDL Created:  20030401 14:47:14 PST
+ * Generated:     20030401 14:47:26 PST
  * Description:   Client-side glue code for bHYPRE
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.0
+ * babel-version = 0.8.2
  * source-line   = 16
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */

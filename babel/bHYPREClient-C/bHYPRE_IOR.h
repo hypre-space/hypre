@@ -2,14 +2,14 @@
  * File:          bHYPRE_IOR.h
  * Symbol:        bHYPRE-v1.0.0
  * Symbol Type:   package
- * Babel Version: 0.8.0
- * SIDL Created:  20030320 16:52:33 PST
- * Generated:     20030320 16:52:35 PST
+ * Babel Version: 0.8.2
+ * SIDL Created:  20030401 14:47:33 PST
+ * Generated:     20030401 14:47:36 PST
  * Description:   Intermediate Object Representation for bHYPRE
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.0
+ * babel-version = 0.8.2
  * source-line   = 16
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */

@@ -2,14 +2,14 @@
  * File:          bHYPRE_IJBuildMatrix_IOR.c
  * Symbol:        bHYPRE.IJBuildMatrix-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.8.0
- * SIDL Created:  20030320 16:52:33 PST
- * Generated:     20030320 16:52:35 PST
+ * Babel Version: 0.8.2
+ * SIDL Created:  20030401 14:47:34 PST
+ * Generated:     20030401 14:47:36 PST
  * Description:   Intermediate Object Representation for bHYPRE.IJBuildMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.0
+ * babel-version = 0.8.2
  * source-line   = 85
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -112,6 +112,17 @@ remote_bHYPRE_IJBuildMatrix_isType(
   const char* name)
 {
   return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:getClassInfo
+ */
+
+static struct SIDL_ClassInfo__object*
+remote_bHYPRE_IJBuildMatrix_getClassInfo(
+  void* self)
+{
+  return (struct SIDL_ClassInfo__object*) 0;
 }
 
 /*
@@ -304,6 +315,7 @@ static void bHYPRE_IJBuildMatrix__init_remote_epv(void)
   epv->f_isSame          = remote_bHYPRE_IJBuildMatrix_isSame;
   epv->f_queryInt        = remote_bHYPRE_IJBuildMatrix_queryInt;
   epv->f_isType          = remote_bHYPRE_IJBuildMatrix_isType;
+  epv->f_getClassInfo    = remote_bHYPRE_IJBuildMatrix_getClassInfo;
   epv->f_SetCommunicator = remote_bHYPRE_IJBuildMatrix_SetCommunicator;
   epv->f_Initialize      = remote_bHYPRE_IJBuildMatrix_Initialize;
   epv->f_Assemble        = remote_bHYPRE_IJBuildMatrix_Assemble;

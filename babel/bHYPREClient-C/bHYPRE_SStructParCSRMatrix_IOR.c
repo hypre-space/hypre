@@ -2,14 +2,14 @@
  * File:          bHYPRE_SStructParCSRMatrix_IOR.c
  * Symbol:        bHYPRE.SStructParCSRMatrix-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.8.0
- * SIDL Created:  20030320 16:52:34 PST
- * Generated:     20030320 16:52:36 PST
+ * Babel Version: 0.8.2
+ * SIDL Created:  20030401 14:47:34 PST
+ * Generated:     20030401 14:47:37 PST
  * Description:   Intermediate Object Representation for bHYPRE.SStructParCSRMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.0
+ * babel-version = 0.8.2
  * source-line   = 827
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -166,17 +166,6 @@ static void bHYPRE_SStructParCSRMatrix__init_epv(
   epv->f_getClassInfo             = (struct SIDL_ClassInfo__object* (*)(struct 
     bHYPRE_SStructParCSRMatrix__object*)) s1->d_epv->f_getClassInfo;
   epv->f_SetCommunicator          = NULL;
-  epv->f_SetIntParameter          = NULL;
-  epv->f_SetDoubleParameter       = NULL;
-  epv->f_SetStringParameter       = NULL;
-  epv->f_SetIntArray1Parameter    = NULL;
-  epv->f_SetIntArray2Parameter    = NULL;
-  epv->f_SetDoubleArray1Parameter = NULL;
-  epv->f_SetDoubleArray2Parameter = NULL;
-  epv->f_GetIntValue              = NULL;
-  epv->f_GetDoubleValue           = NULL;
-  epv->f_Setup                    = NULL;
-  epv->f_Apply                    = NULL;
   epv->f_Initialize               = NULL;
   epv->f_Assemble                 = NULL;
   epv->f_GetObject                = NULL;
@@ -189,6 +178,17 @@ static void bHYPRE_SStructParCSRMatrix__init_epv(
   epv->f_SetNSSymmetric           = NULL;
   epv->f_SetComplex               = NULL;
   epv->f_Print                    = NULL;
+  epv->f_SetIntParameter          = NULL;
+  epv->f_SetDoubleParameter       = NULL;
+  epv->f_SetStringParameter       = NULL;
+  epv->f_SetIntArray1Parameter    = NULL;
+  epv->f_SetIntArray2Parameter    = NULL;
+  epv->f_SetDoubleArray1Parameter = NULL;
+  epv->f_SetDoubleArray2Parameter = NULL;
+  epv->f_GetIntValue              = NULL;
+  epv->f_GetDoubleValue           = NULL;
+  epv->f_Setup                    = NULL;
+  epv->f_Apply                    = NULL;
 
   bHYPRE_SStructParCSRMatrix__set_epv(epv);
 
@@ -208,15 +208,17 @@ static void bHYPRE_SStructParCSRMatrix__init_epv(
   e0->f_getClassInfo = (struct SIDL_ClassInfo__object* (*)(struct 
     SIDL_BaseClass__object*)) epv->f_getClassInfo;
 
-  e1->f__cast     = (void* (*)(void*,const char*)) epv->f__cast;
-  e1->f__delete   = (void (*)(void*)) epv->f__delete;
-  e1->f_addRef    = (void (*)(void*)) epv->f_addRef;
-  e1->f_deleteRef = (void (*)(void*)) epv->f_deleteRef;
-  e1->f_isSame    = (SIDL_bool (*)(void*,
+  e1->f__cast        = (void* (*)(void*,const char*)) epv->f__cast;
+  e1->f__delete      = (void (*)(void*)) epv->f__delete;
+  e1->f_addRef       = (void (*)(void*)) epv->f_addRef;
+  e1->f_deleteRef    = (void (*)(void*)) epv->f_deleteRef;
+  e1->f_isSame       = (SIDL_bool (*)(void*,
     struct SIDL_BaseInterface__object*)) epv->f_isSame;
-  e1->f_queryInt  = (struct SIDL_BaseInterface__object* (*)(void*,
+  e1->f_queryInt     = (struct SIDL_BaseInterface__object* (*)(void*,
     const char*)) epv->f_queryInt;
-  e1->f_isType    = (SIDL_bool (*)(void*,const char*)) epv->f_isType;
+  e1->f_isType       = (SIDL_bool (*)(void*,const char*)) epv->f_isType;
+  e1->f_getClassInfo = (struct SIDL_ClassInfo__object* (*)(void*)) 
+    epv->f_getClassInfo;
 
   e2->f__cast                    = (void* (*)(void*,const char*)) epv->f__cast;
   e2->f__delete                  = (void (*)(void*)) epv->f__delete;
@@ -228,6 +230,8 @@ static void bHYPRE_SStructParCSRMatrix__init_epv(
     (*)(void*,const char*)) epv->f_queryInt;
   e2->f_isType                   = (SIDL_bool (*)(void*,
     const char*)) epv->f_isType;
+  e2->f_getClassInfo             = (struct SIDL_ClassInfo__object* (*)(void*)) 
+    epv->f_getClassInfo;
   e2->f_SetCommunicator          = (int32_t (*)(void*,
     void*)) epv->f_SetCommunicator;
   e2->f_SetIntParameter          = (int32_t (*)(void*,const char*,
@@ -262,6 +266,8 @@ static void bHYPRE_SStructParCSRMatrix__init_epv(
   e3->f_queryInt        = (struct SIDL_BaseInterface__object* (*)(void*,
     const char*)) epv->f_queryInt;
   e3->f_isType          = (SIDL_bool (*)(void*,const char*)) epv->f_isType;
+  e3->f_getClassInfo    = (struct SIDL_ClassInfo__object* (*)(void*)) 
+    epv->f_getClassInfo;
   e3->f_SetCommunicator = (int32_t (*)(void*,void*)) epv->f_SetCommunicator;
   e3->f_Initialize      = (int32_t (*)(void*)) epv->f_Initialize;
   e3->f_Assemble        = (int32_t (*)(void*)) epv->f_Assemble;
@@ -277,6 +283,8 @@ static void bHYPRE_SStructParCSRMatrix__init_epv(
   e4->f_queryInt        = (struct SIDL_BaseInterface__object* (*)(void*,
     const char*)) epv->f_queryInt;
   e4->f_isType          = (SIDL_bool (*)(void*,const char*)) epv->f_isType;
+  e4->f_getClassInfo    = (struct SIDL_ClassInfo__object* (*)(void*)) 
+    epv->f_getClassInfo;
   e4->f_SetCommunicator = (int32_t (*)(void*,void*)) epv->f_SetCommunicator;
   e4->f_Initialize      = (int32_t (*)(void*)) epv->f_Initialize;
   e4->f_Assemble        = (int32_t (*)(void*)) epv->f_Assemble;
@@ -548,149 +556,6 @@ remote_bHYPRE_SStructParCSRMatrix_SetCommunicator(
 }
 
 /*
- * REMOTE METHOD STUB:SetIntParameter
- */
-
-static int32_t
-remote_bHYPRE_SStructParCSRMatrix_SetIntParameter(
-  struct bHYPRE_SStructParCSRMatrix__object* self,
-  const char* name,
-  int32_t value)
-{
-  return 0;
-}
-
-/*
- * REMOTE METHOD STUB:SetDoubleParameter
- */
-
-static int32_t
-remote_bHYPRE_SStructParCSRMatrix_SetDoubleParameter(
-  struct bHYPRE_SStructParCSRMatrix__object* self,
-  const char* name,
-  double value)
-{
-  return 0;
-}
-
-/*
- * REMOTE METHOD STUB:SetStringParameter
- */
-
-static int32_t
-remote_bHYPRE_SStructParCSRMatrix_SetStringParameter(
-  struct bHYPRE_SStructParCSRMatrix__object* self,
-  const char* name,
-  const char* value)
-{
-  return 0;
-}
-
-/*
- * REMOTE METHOD STUB:SetIntArray1Parameter
- */
-
-static int32_t
-remote_bHYPRE_SStructParCSRMatrix_SetIntArray1Parameter(
-  struct bHYPRE_SStructParCSRMatrix__object* self,
-  const char* name,
-  struct SIDL_int__array* value)
-{
-  return 0;
-}
-
-/*
- * REMOTE METHOD STUB:SetIntArray2Parameter
- */
-
-static int32_t
-remote_bHYPRE_SStructParCSRMatrix_SetIntArray2Parameter(
-  struct bHYPRE_SStructParCSRMatrix__object* self,
-  const char* name,
-  struct SIDL_int__array* value)
-{
-  return 0;
-}
-
-/*
- * REMOTE METHOD STUB:SetDoubleArray1Parameter
- */
-
-static int32_t
-remote_bHYPRE_SStructParCSRMatrix_SetDoubleArray1Parameter(
-  struct bHYPRE_SStructParCSRMatrix__object* self,
-  const char* name,
-  struct SIDL_double__array* value)
-{
-  return 0;
-}
-
-/*
- * REMOTE METHOD STUB:SetDoubleArray2Parameter
- */
-
-static int32_t
-remote_bHYPRE_SStructParCSRMatrix_SetDoubleArray2Parameter(
-  struct bHYPRE_SStructParCSRMatrix__object* self,
-  const char* name,
-  struct SIDL_double__array* value)
-{
-  return 0;
-}
-
-/*
- * REMOTE METHOD STUB:GetIntValue
- */
-
-static int32_t
-remote_bHYPRE_SStructParCSRMatrix_GetIntValue(
-  struct bHYPRE_SStructParCSRMatrix__object* self,
-  const char* name,
-  int32_t* value)
-{
-  return 0;
-}
-
-/*
- * REMOTE METHOD STUB:GetDoubleValue
- */
-
-static int32_t
-remote_bHYPRE_SStructParCSRMatrix_GetDoubleValue(
-  struct bHYPRE_SStructParCSRMatrix__object* self,
-  const char* name,
-  double* value)
-{
-  return 0;
-}
-
-/*
- * REMOTE METHOD STUB:Setup
- */
-
-static int32_t
-remote_bHYPRE_SStructParCSRMatrix_Setup(
-  struct bHYPRE_SStructParCSRMatrix__object* self,
-  struct bHYPRE_Vector__object* b,
-  struct bHYPRE_Vector__object* x)
-{
-  return 0;
-}
-
-/*
- * REMOTE METHOD STUB:Apply
- */
-
-static int32_t
-remote_bHYPRE_SStructParCSRMatrix_Apply(
-  struct bHYPRE_SStructParCSRMatrix__object* self,
-  struct bHYPRE_Vector__object* b,
-  struct bHYPRE_Vector__object** x)
-{
-  return 0;
-}
-
-/*
  * REMOTE METHOD STUB:Initialize
  */
 
@@ -858,6 +723,149 @@ remote_bHYPRE_SStructParCSRMatrix_Print(
 }
 
 /*
+ * REMOTE METHOD STUB:SetIntParameter
+ */
+
+static int32_t
+remote_bHYPRE_SStructParCSRMatrix_SetIntParameter(
+  struct bHYPRE_SStructParCSRMatrix__object* self,
+  const char* name,
+  int32_t value)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:SetDoubleParameter
+ */
+
+static int32_t
+remote_bHYPRE_SStructParCSRMatrix_SetDoubleParameter(
+  struct bHYPRE_SStructParCSRMatrix__object* self,
+  const char* name,
+  double value)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:SetStringParameter
+ */
+
+static int32_t
+remote_bHYPRE_SStructParCSRMatrix_SetStringParameter(
+  struct bHYPRE_SStructParCSRMatrix__object* self,
+  const char* name,
+  const char* value)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:SetIntArray1Parameter
+ */
+
+static int32_t
+remote_bHYPRE_SStructParCSRMatrix_SetIntArray1Parameter(
+  struct bHYPRE_SStructParCSRMatrix__object* self,
+  const char* name,
+  struct SIDL_int__array* value)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:SetIntArray2Parameter
+ */
+
+static int32_t
+remote_bHYPRE_SStructParCSRMatrix_SetIntArray2Parameter(
+  struct bHYPRE_SStructParCSRMatrix__object* self,
+  const char* name,
+  struct SIDL_int__array* value)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:SetDoubleArray1Parameter
+ */
+
+static int32_t
+remote_bHYPRE_SStructParCSRMatrix_SetDoubleArray1Parameter(
+  struct bHYPRE_SStructParCSRMatrix__object* self,
+  const char* name,
+  struct SIDL_double__array* value)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:SetDoubleArray2Parameter
+ */
+
+static int32_t
+remote_bHYPRE_SStructParCSRMatrix_SetDoubleArray2Parameter(
+  struct bHYPRE_SStructParCSRMatrix__object* self,
+  const char* name,
+  struct SIDL_double__array* value)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:GetIntValue
+ */
+
+static int32_t
+remote_bHYPRE_SStructParCSRMatrix_GetIntValue(
+  struct bHYPRE_SStructParCSRMatrix__object* self,
+  const char* name,
+  int32_t* value)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:GetDoubleValue
+ */
+
+static int32_t
+remote_bHYPRE_SStructParCSRMatrix_GetDoubleValue(
+  struct bHYPRE_SStructParCSRMatrix__object* self,
+  const char* name,
+  double* value)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:Setup
+ */
+
+static int32_t
+remote_bHYPRE_SStructParCSRMatrix_Setup(
+  struct bHYPRE_SStructParCSRMatrix__object* self,
+  struct bHYPRE_Vector__object* b,
+  struct bHYPRE_Vector__object* x)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:Apply
+ */
+
+static int32_t
+remote_bHYPRE_SStructParCSRMatrix_Apply(
+  struct bHYPRE_SStructParCSRMatrix__object* self,
+  struct bHYPRE_Vector__object* b,
+  struct bHYPRE_Vector__object** x)
+{
+  return 0;
+}
+
+/*
  * REMOTE EPV: create remote entry point vectors (EPVs).
  */
 
@@ -886,6 +894,25 @@ static void bHYPRE_SStructParCSRMatrix__init_remote_epv(void)
     remote_bHYPRE_SStructParCSRMatrix_getClassInfo;
   epv->f_SetCommunicator          = 
     remote_bHYPRE_SStructParCSRMatrix_SetCommunicator;
+  epv->f_Initialize               = 
+    remote_bHYPRE_SStructParCSRMatrix_Initialize;
+  epv->f_Assemble                 = remote_bHYPRE_SStructParCSRMatrix_Assemble;
+  epv->f_GetObject                = remote_bHYPRE_SStructParCSRMatrix_GetObject;
+  epv->f_SetGraph                 = remote_bHYPRE_SStructParCSRMatrix_SetGraph;
+  epv->f_SetValues                = remote_bHYPRE_SStructParCSRMatrix_SetValues;
+  epv->f_SetBoxValues             = 
+    remote_bHYPRE_SStructParCSRMatrix_SetBoxValues;
+  epv->f_AddToValues              = 
+    remote_bHYPRE_SStructParCSRMatrix_AddToValues;
+  epv->f_AddToBoxValues           = 
+    remote_bHYPRE_SStructParCSRMatrix_AddToBoxValues;
+  epv->f_SetSymmetric             = 
+    remote_bHYPRE_SStructParCSRMatrix_SetSymmetric;
+  epv->f_SetNSSymmetric           = 
+    remote_bHYPRE_SStructParCSRMatrix_SetNSSymmetric;
+  epv->f_SetComplex               = 
+    remote_bHYPRE_SStructParCSRMatrix_SetComplex;
+  epv->f_Print                    = remote_bHYPRE_SStructParCSRMatrix_Print;
   epv->f_SetIntParameter          = 
     remote_bHYPRE_SStructParCSRMatrix_SetIntParameter;
   epv->f_SetDoubleParameter       = 
@@ -906,25 +933,6 @@ static void bHYPRE_SStructParCSRMatrix__init_remote_epv(void)
     remote_bHYPRE_SStructParCSRMatrix_GetDoubleValue;
   epv->f_Setup                    = remote_bHYPRE_SStructParCSRMatrix_Setup;
   epv->f_Apply                    = remote_bHYPRE_SStructParCSRMatrix_Apply;
-  epv->f_Initialize               = 
-    remote_bHYPRE_SStructParCSRMatrix_Initialize;
-  epv->f_Assemble                 = remote_bHYPRE_SStructParCSRMatrix_Assemble;
-  epv->f_GetObject                = remote_bHYPRE_SStructParCSRMatrix_GetObject;
-  epv->f_SetGraph                 = remote_bHYPRE_SStructParCSRMatrix_SetGraph;
-  epv->f_SetValues                = remote_bHYPRE_SStructParCSRMatrix_SetValues;
-  epv->f_SetBoxValues             = 
-    remote_bHYPRE_SStructParCSRMatrix_SetBoxValues;
-  epv->f_AddToValues              = 
-    remote_bHYPRE_SStructParCSRMatrix_AddToValues;
-  epv->f_AddToBoxValues           = 
-    remote_bHYPRE_SStructParCSRMatrix_AddToBoxValues;
-  epv->f_SetSymmetric             = 
-    remote_bHYPRE_SStructParCSRMatrix_SetSymmetric;
-  epv->f_SetNSSymmetric           = 
-    remote_bHYPRE_SStructParCSRMatrix_SetNSSymmetric;
-  epv->f_SetComplex               = 
-    remote_bHYPRE_SStructParCSRMatrix_SetComplex;
-  epv->f_Print                    = remote_bHYPRE_SStructParCSRMatrix_Print;
 
   e0->f__cast        = (void* (*)(struct SIDL_BaseClass__object*,
     const char*)) epv->f__cast;
@@ -942,15 +950,17 @@ static void bHYPRE_SStructParCSRMatrix__init_remote_epv(void)
   e0->f_getClassInfo = (struct SIDL_ClassInfo__object* (*)(struct 
     SIDL_BaseClass__object*)) epv->f_getClassInfo;
 
-  e1->f__cast     = (void* (*)(void*,const char*)) epv->f__cast;
-  e1->f__delete   = (void (*)(void*)) epv->f__delete;
-  e1->f_addRef    = (void (*)(void*)) epv->f_addRef;
-  e1->f_deleteRef = (void (*)(void*)) epv->f_deleteRef;
-  e1->f_isSame    = (SIDL_bool (*)(void*,
+  e1->f__cast        = (void* (*)(void*,const char*)) epv->f__cast;
+  e1->f__delete      = (void (*)(void*)) epv->f__delete;
+  e1->f_addRef       = (void (*)(void*)) epv->f_addRef;
+  e1->f_deleteRef    = (void (*)(void*)) epv->f_deleteRef;
+  e1->f_isSame       = (SIDL_bool (*)(void*,
     struct SIDL_BaseInterface__object*)) epv->f_isSame;
-  e1->f_queryInt  = (struct SIDL_BaseInterface__object* (*)(void*,
+  e1->f_queryInt     = (struct SIDL_BaseInterface__object* (*)(void*,
     const char*)) epv->f_queryInt;
-  e1->f_isType    = (SIDL_bool (*)(void*,const char*)) epv->f_isType;
+  e1->f_isType       = (SIDL_bool (*)(void*,const char*)) epv->f_isType;
+  e1->f_getClassInfo = (struct SIDL_ClassInfo__object* (*)(void*)) 
+    epv->f_getClassInfo;
 
   e2->f__cast                    = (void* (*)(void*,const char*)) epv->f__cast;
   e2->f__delete                  = (void (*)(void*)) epv->f__delete;
@@ -962,6 +972,8 @@ static void bHYPRE_SStructParCSRMatrix__init_remote_epv(void)
     (*)(void*,const char*)) epv->f_queryInt;
   e2->f_isType                   = (SIDL_bool (*)(void*,
     const char*)) epv->f_isType;
+  e2->f_getClassInfo             = (struct SIDL_ClassInfo__object* (*)(void*)) 
+    epv->f_getClassInfo;
   e2->f_SetCommunicator          = (int32_t (*)(void*,
     void*)) epv->f_SetCommunicator;
   e2->f_SetIntParameter          = (int32_t (*)(void*,const char*,
@@ -996,6 +1008,8 @@ static void bHYPRE_SStructParCSRMatrix__init_remote_epv(void)
   e3->f_queryInt        = (struct SIDL_BaseInterface__object* (*)(void*,
     const char*)) epv->f_queryInt;
   e3->f_isType          = (SIDL_bool (*)(void*,const char*)) epv->f_isType;
+  e3->f_getClassInfo    = (struct SIDL_ClassInfo__object* (*)(void*)) 
+    epv->f_getClassInfo;
   e3->f_SetCommunicator = (int32_t (*)(void*,void*)) epv->f_SetCommunicator;
   e3->f_Initialize      = (int32_t (*)(void*)) epv->f_Initialize;
   e3->f_Assemble        = (int32_t (*)(void*)) epv->f_Assemble;
@@ -1011,6 +1025,8 @@ static void bHYPRE_SStructParCSRMatrix__init_remote_epv(void)
   e4->f_queryInt        = (struct SIDL_BaseInterface__object* (*)(void*,
     const char*)) epv->f_queryInt;
   e4->f_isType          = (SIDL_bool (*)(void*,const char*)) epv->f_isType;
+  e4->f_getClassInfo    = (struct SIDL_ClassInfo__object* (*)(void*)) 
+    epv->f_getClassInfo;
   e4->f_SetCommunicator = (int32_t (*)(void*,void*)) epv->f_SetCommunicator;
   e4->f_Initialize      = (int32_t (*)(void*)) epv->f_Initialize;
   e4->f_Assemble        = (int32_t (*)(void*)) epv->f_Assemble;

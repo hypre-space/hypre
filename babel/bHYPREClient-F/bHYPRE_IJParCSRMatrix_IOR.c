@@ -2,14 +2,14 @@
  * File:          bHYPRE_IJParCSRMatrix_IOR.c
  * Symbol:        bHYPRE.IJParCSRMatrix-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.8.0
- * SIDL Created:  20030320 16:52:45 PST
- * Generated:     20030320 16:52:50 PST
+ * Babel Version: 0.8.2
+ * SIDL Created:  20030401 14:47:45 PST
+ * Generated:     20030401 14:47:59 PST
  * Description:   Intermediate Object Representation for bHYPRE.IJParCSRMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.0
+ * babel-version = 0.8.2
  * source-line   = 789
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -169,7 +169,6 @@ static void bHYPRE_IJParCSRMatrix__init_epv(
   epv->f_getClassInfo             = (struct SIDL_ClassInfo__object* (*)(struct 
     bHYPRE_IJParCSRMatrix__object*)) s1->d_epv->f_getClassInfo;
   epv->f_SetDiagOffdSizes         = NULL;
-  epv->f_GetRow                   = NULL;
   epv->f_SetCommunicator          = NULL;
   epv->f_Initialize               = NULL;
   epv->f_Assemble                 = NULL;
@@ -194,6 +193,7 @@ static void bHYPRE_IJParCSRMatrix__init_epv(
   epv->f_GetDoubleValue           = NULL;
   epv->f_Setup                    = NULL;
   epv->f_Apply                    = NULL;
+  epv->f_GetRow                   = NULL;
 
   bHYPRE_IJParCSRMatrix__set_epv(epv);
 
@@ -213,26 +213,30 @@ static void bHYPRE_IJParCSRMatrix__init_epv(
   e0->f_getClassInfo = (struct SIDL_ClassInfo__object* (*)(struct 
     SIDL_BaseClass__object*)) epv->f_getClassInfo;
 
-  e1->f__cast     = (void* (*)(void*,const char*)) epv->f__cast;
-  e1->f__delete   = (void (*)(void*)) epv->f__delete;
-  e1->f_addRef    = (void (*)(void*)) epv->f_addRef;
-  e1->f_deleteRef = (void (*)(void*)) epv->f_deleteRef;
-  e1->f_isSame    = (SIDL_bool (*)(void*,
+  e1->f__cast        = (void* (*)(void*,const char*)) epv->f__cast;
+  e1->f__delete      = (void (*)(void*)) epv->f__delete;
+  e1->f_addRef       = (void (*)(void*)) epv->f_addRef;
+  e1->f_deleteRef    = (void (*)(void*)) epv->f_deleteRef;
+  e1->f_isSame       = (SIDL_bool (*)(void*,
     struct SIDL_BaseInterface__object*)) epv->f_isSame;
-  e1->f_queryInt  = (struct SIDL_BaseInterface__object* (*)(void*,
+  e1->f_queryInt     = (struct SIDL_BaseInterface__object* (*)(void*,
     const char*)) epv->f_queryInt;
-  e1->f_isType    = (SIDL_bool (*)(void*,const char*)) epv->f_isType;
+  e1->f_isType       = (SIDL_bool (*)(void*,const char*)) epv->f_isType;
+  e1->f_getClassInfo = (struct SIDL_ClassInfo__object* (*)(void*)) 
+    epv->f_getClassInfo;
 
-  e2->f__cast     = (void* (*)(void*,const char*)) epv->f__cast;
-  e2->f__delete   = (void (*)(void*)) epv->f__delete;
-  e2->f_addRef    = (void (*)(void*)) epv->f_addRef;
-  e2->f_deleteRef = (void (*)(void*)) epv->f_deleteRef;
-  e2->f_isSame    = (SIDL_bool (*)(void*,
+  e2->f__cast        = (void* (*)(void*,const char*)) epv->f__cast;
+  e2->f__delete      = (void (*)(void*)) epv->f__delete;
+  e2->f_addRef       = (void (*)(void*)) epv->f_addRef;
+  e2->f_deleteRef    = (void (*)(void*)) epv->f_deleteRef;
+  e2->f_isSame       = (SIDL_bool (*)(void*,
     struct SIDL_BaseInterface__object*)) epv->f_isSame;
-  e2->f_queryInt  = (struct SIDL_BaseInterface__object* (*)(void*,
+  e2->f_queryInt     = (struct SIDL_BaseInterface__object* (*)(void*,
     const char*)) epv->f_queryInt;
-  e2->f_isType    = (SIDL_bool (*)(void*,const char*)) epv->f_isType;
-  e2->f_GetRow    = (int32_t (*)(void*,int32_t,int32_t*,
+  e2->f_isType       = (SIDL_bool (*)(void*,const char*)) epv->f_isType;
+  e2->f_getClassInfo = (struct SIDL_ClassInfo__object* (*)(void*)) 
+    epv->f_getClassInfo;
+  e2->f_GetRow       = (int32_t (*)(void*,int32_t,int32_t*,
     struct SIDL_int__array**,struct SIDL_double__array**)) epv->f_GetRow;
 
   e3->f__cast           = (void* (*)(void*,const char*)) epv->f__cast;
@@ -244,6 +248,8 @@ static void bHYPRE_IJParCSRMatrix__init_epv(
   e3->f_queryInt        = (struct SIDL_BaseInterface__object* (*)(void*,
     const char*)) epv->f_queryInt;
   e3->f_isType          = (SIDL_bool (*)(void*,const char*)) epv->f_isType;
+  e3->f_getClassInfo    = (struct SIDL_ClassInfo__object* (*)(void*)) 
+    epv->f_getClassInfo;
   e3->f_SetCommunicator = (int32_t (*)(void*,void*)) epv->f_SetCommunicator;
   e3->f_Initialize      = (int32_t (*)(void*)) epv->f_Initialize;
   e3->f_Assemble        = (int32_t (*)(void*)) epv->f_Assemble;
@@ -279,6 +285,8 @@ static void bHYPRE_IJParCSRMatrix__init_epv(
     (*)(void*,const char*)) epv->f_queryInt;
   e4->f_isType                   = (SIDL_bool (*)(void*,
     const char*)) epv->f_isType;
+  e4->f_getClassInfo             = (struct SIDL_ClassInfo__object* (*)(void*)) 
+    epv->f_getClassInfo;
   e4->f_SetCommunicator          = (int32_t (*)(void*,
     void*)) epv->f_SetCommunicator;
   e4->f_SetIntParameter          = (int32_t (*)(void*,const char*,
@@ -313,6 +321,8 @@ static void bHYPRE_IJParCSRMatrix__init_epv(
   e5->f_queryInt        = (struct SIDL_BaseInterface__object* (*)(void*,
     const char*)) epv->f_queryInt;
   e5->f_isType          = (SIDL_bool (*)(void*,const char*)) epv->f_isType;
+  e5->f_getClassInfo    = (struct SIDL_ClassInfo__object* (*)(void*)) 
+    epv->f_getClassInfo;
   e5->f_SetCommunicator = (int32_t (*)(void*,void*)) epv->f_SetCommunicator;
   e5->f_Initialize      = (int32_t (*)(void*)) epv->f_Initialize;
   e5->f_Assemble        = (int32_t (*)(void*)) epv->f_Assemble;
@@ -564,21 +574,6 @@ remote_bHYPRE_IJParCSRMatrix_SetDiagOffdSizes(
   struct bHYPRE_IJParCSRMatrix__object* self,
   struct SIDL_int__array* diag_sizes,
   struct SIDL_int__array* offdiag_sizes)
-{
-  return 0;
-}
-
-/*
- * REMOTE METHOD STUB:GetRow
- */
-
-static int32_t
-remote_bHYPRE_IJParCSRMatrix_GetRow(
-  struct bHYPRE_IJParCSRMatrix__object* self,
-  int32_t row,
-  int32_t* size,
-  struct SIDL_int__array** col_ind,
-  struct SIDL_double__array** values)
 {
   return 0;
 }
@@ -902,6 +897,21 @@ remote_bHYPRE_IJParCSRMatrix_Apply(
 }
 
 /*
+ * REMOTE METHOD STUB:GetRow
+ */
+
+static int32_t
+remote_bHYPRE_IJParCSRMatrix_GetRow(
+  struct bHYPRE_IJParCSRMatrix__object* self,
+  int32_t row,
+  int32_t* size,
+  struct SIDL_int__array** col_ind,
+  struct SIDL_double__array** values)
+{
+  return 0;
+}
+
+/*
  * REMOTE EPV: create remote entry point vectors (EPVs).
  */
 
@@ -927,7 +937,6 @@ static void bHYPRE_IJParCSRMatrix__init_remote_epv(void)
   epv->f_getClassInfo             = remote_bHYPRE_IJParCSRMatrix_getClassInfo;
   epv->f_SetDiagOffdSizes         = 
     remote_bHYPRE_IJParCSRMatrix_SetDiagOffdSizes;
-  epv->f_GetRow                   = remote_bHYPRE_IJParCSRMatrix_GetRow;
   epv->f_SetCommunicator          = 
     remote_bHYPRE_IJParCSRMatrix_SetCommunicator;
   epv->f_Initialize               = remote_bHYPRE_IJParCSRMatrix_Initialize;
@@ -960,6 +969,7 @@ static void bHYPRE_IJParCSRMatrix__init_remote_epv(void)
   epv->f_GetDoubleValue           = remote_bHYPRE_IJParCSRMatrix_GetDoubleValue;
   epv->f_Setup                    = remote_bHYPRE_IJParCSRMatrix_Setup;
   epv->f_Apply                    = remote_bHYPRE_IJParCSRMatrix_Apply;
+  epv->f_GetRow                   = remote_bHYPRE_IJParCSRMatrix_GetRow;
 
   e0->f__cast        = (void* (*)(struct SIDL_BaseClass__object*,
     const char*)) epv->f__cast;
@@ -977,26 +987,30 @@ static void bHYPRE_IJParCSRMatrix__init_remote_epv(void)
   e0->f_getClassInfo = (struct SIDL_ClassInfo__object* (*)(struct 
     SIDL_BaseClass__object*)) epv->f_getClassInfo;
 
-  e1->f__cast     = (void* (*)(void*,const char*)) epv->f__cast;
-  e1->f__delete   = (void (*)(void*)) epv->f__delete;
-  e1->f_addRef    = (void (*)(void*)) epv->f_addRef;
-  e1->f_deleteRef = (void (*)(void*)) epv->f_deleteRef;
-  e1->f_isSame    = (SIDL_bool (*)(void*,
+  e1->f__cast        = (void* (*)(void*,const char*)) epv->f__cast;
+  e1->f__delete      = (void (*)(void*)) epv->f__delete;
+  e1->f_addRef       = (void (*)(void*)) epv->f_addRef;
+  e1->f_deleteRef    = (void (*)(void*)) epv->f_deleteRef;
+  e1->f_isSame       = (SIDL_bool (*)(void*,
     struct SIDL_BaseInterface__object*)) epv->f_isSame;
-  e1->f_queryInt  = (struct SIDL_BaseInterface__object* (*)(void*,
+  e1->f_queryInt     = (struct SIDL_BaseInterface__object* (*)(void*,
     const char*)) epv->f_queryInt;
-  e1->f_isType    = (SIDL_bool (*)(void*,const char*)) epv->f_isType;
+  e1->f_isType       = (SIDL_bool (*)(void*,const char*)) epv->f_isType;
+  e1->f_getClassInfo = (struct SIDL_ClassInfo__object* (*)(void*)) 
+    epv->f_getClassInfo;
 
-  e2->f__cast     = (void* (*)(void*,const char*)) epv->f__cast;
-  e2->f__delete   = (void (*)(void*)) epv->f__delete;
-  e2->f_addRef    = (void (*)(void*)) epv->f_addRef;
-  e2->f_deleteRef = (void (*)(void*)) epv->f_deleteRef;
-  e2->f_isSame    = (SIDL_bool (*)(void*,
+  e2->f__cast        = (void* (*)(void*,const char*)) epv->f__cast;
+  e2->f__delete      = (void (*)(void*)) epv->f__delete;
+  e2->f_addRef       = (void (*)(void*)) epv->f_addRef;
+  e2->f_deleteRef    = (void (*)(void*)) epv->f_deleteRef;
+  e2->f_isSame       = (SIDL_bool (*)(void*,
     struct SIDL_BaseInterface__object*)) epv->f_isSame;
-  e2->f_queryInt  = (struct SIDL_BaseInterface__object* (*)(void*,
+  e2->f_queryInt     = (struct SIDL_BaseInterface__object* (*)(void*,
     const char*)) epv->f_queryInt;
-  e2->f_isType    = (SIDL_bool (*)(void*,const char*)) epv->f_isType;
-  e2->f_GetRow    = (int32_t (*)(void*,int32_t,int32_t*,
+  e2->f_isType       = (SIDL_bool (*)(void*,const char*)) epv->f_isType;
+  e2->f_getClassInfo = (struct SIDL_ClassInfo__object* (*)(void*)) 
+    epv->f_getClassInfo;
+  e2->f_GetRow       = (int32_t (*)(void*,int32_t,int32_t*,
     struct SIDL_int__array**,struct SIDL_double__array**)) epv->f_GetRow;
 
   e3->f__cast           = (void* (*)(void*,const char*)) epv->f__cast;
@@ -1008,6 +1022,8 @@ static void bHYPRE_IJParCSRMatrix__init_remote_epv(void)
   e3->f_queryInt        = (struct SIDL_BaseInterface__object* (*)(void*,
     const char*)) epv->f_queryInt;
   e3->f_isType          = (SIDL_bool (*)(void*,const char*)) epv->f_isType;
+  e3->f_getClassInfo    = (struct SIDL_ClassInfo__object* (*)(void*)) 
+    epv->f_getClassInfo;
   e3->f_SetCommunicator = (int32_t (*)(void*,void*)) epv->f_SetCommunicator;
   e3->f_Initialize      = (int32_t (*)(void*)) epv->f_Initialize;
   e3->f_Assemble        = (int32_t (*)(void*)) epv->f_Assemble;
@@ -1043,6 +1059,8 @@ static void bHYPRE_IJParCSRMatrix__init_remote_epv(void)
     (*)(void*,const char*)) epv->f_queryInt;
   e4->f_isType                   = (SIDL_bool (*)(void*,
     const char*)) epv->f_isType;
+  e4->f_getClassInfo             = (struct SIDL_ClassInfo__object* (*)(void*)) 
+    epv->f_getClassInfo;
   e4->f_SetCommunicator          = (int32_t (*)(void*,
     void*)) epv->f_SetCommunicator;
   e4->f_SetIntParameter          = (int32_t (*)(void*,const char*,
@@ -1077,6 +1095,8 @@ static void bHYPRE_IJParCSRMatrix__init_remote_epv(void)
   e5->f_queryInt        = (struct SIDL_BaseInterface__object* (*)(void*,
     const char*)) epv->f_queryInt;
   e5->f_isType          = (SIDL_bool (*)(void*,const char*)) epv->f_isType;
+  e5->f_getClassInfo    = (struct SIDL_ClassInfo__object* (*)(void*)) 
+    epv->f_getClassInfo;
   e5->f_SetCommunicator = (int32_t (*)(void*,void*)) epv->f_SetCommunicator;
   e5->f_Initialize      = (int32_t (*)(void*)) epv->f_Initialize;
   e5->f_Assemble        = (int32_t (*)(void*)) epv->f_Assemble;

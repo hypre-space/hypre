@@ -2,14 +2,14 @@
  * File:          bHYPRE_IJParCSRMatrix_Impl.h
  * Symbol:        bHYPRE.IJParCSRMatrix-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.8.0
- * SIDL Created:  20030320 16:52:19 PST
- * Generated:     20030320 16:52:32 PST
+ * Babel Version: 0.8.2
+ * SIDL Created:  20030401 14:47:20 PST
+ * Generated:     20030401 14:47:33 PST
  * Description:   Server-side implementation for bHYPRE.IJParCSRMatrix
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.8.0
+ * babel-version = 0.8.2
  * source-line   = 789
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -83,14 +83,6 @@ impl_bHYPRE_IJParCSRMatrix_SetDiagOffdSizes(
   bHYPRE_IJParCSRMatrix,
   struct SIDL_int__array*,
   struct SIDL_int__array*);
-
-extern int32_t
-impl_bHYPRE_IJParCSRMatrix_GetRow(
-  bHYPRE_IJParCSRMatrix,
-  int32_t,
-  int32_t*,
-  struct SIDL_int__array**,
-  struct SIDL_double__array**);
 
 extern int32_t
 impl_bHYPRE_IJParCSRMatrix_SetCommunicator(
@@ -241,6 +233,14 @@ impl_bHYPRE_IJParCSRMatrix_Apply(
   bHYPRE_IJParCSRMatrix,
   bHYPRE_Vector,
   bHYPRE_Vector*);
+
+extern int32_t
+impl_bHYPRE_IJParCSRMatrix_GetRow(
+  bHYPRE_IJParCSRMatrix,
+  int32_t,
+  int32_t*,
+  struct SIDL_int__array**,
+  struct SIDL_double__array**);
 
 #ifdef __cplusplus
 }

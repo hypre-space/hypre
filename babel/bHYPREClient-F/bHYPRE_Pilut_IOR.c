@@ -2,14 +2,14 @@
  * File:          bHYPRE_Pilut_IOR.c
  * Symbol:        bHYPRE.Pilut-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.8.0
- * SIDL Created:  20030320 16:52:45 PST
- * Generated:     20030320 16:52:49 PST
+ * Babel Version: 0.8.2
+ * SIDL Created:  20030401 14:47:46 PST
+ * Generated:     20030401 14:47:55 PST
  * Description:   Intermediate Object Representation for bHYPRE.Pilut
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.0
+ * babel-version = 0.8.2
  * source-line   = 1227
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -192,15 +192,17 @@ static void bHYPRE_Pilut__init_epv(
   e0->f_getClassInfo = (struct SIDL_ClassInfo__object* (*)(struct 
     SIDL_BaseClass__object*)) epv->f_getClassInfo;
 
-  e1->f__cast     = (void* (*)(void*,const char*)) epv->f__cast;
-  e1->f__delete   = (void (*)(void*)) epv->f__delete;
-  e1->f_addRef    = (void (*)(void*)) epv->f_addRef;
-  e1->f_deleteRef = (void (*)(void*)) epv->f_deleteRef;
-  e1->f_isSame    = (SIDL_bool (*)(void*,
+  e1->f__cast        = (void* (*)(void*,const char*)) epv->f__cast;
+  e1->f__delete      = (void (*)(void*)) epv->f__delete;
+  e1->f_addRef       = (void (*)(void*)) epv->f_addRef;
+  e1->f_deleteRef    = (void (*)(void*)) epv->f_deleteRef;
+  e1->f_isSame       = (SIDL_bool (*)(void*,
     struct SIDL_BaseInterface__object*)) epv->f_isSame;
-  e1->f_queryInt  = (struct SIDL_BaseInterface__object* (*)(void*,
+  e1->f_queryInt     = (struct SIDL_BaseInterface__object* (*)(void*,
     const char*)) epv->f_queryInt;
-  e1->f_isType    = (SIDL_bool (*)(void*,const char*)) epv->f_isType;
+  e1->f_isType       = (SIDL_bool (*)(void*,const char*)) epv->f_isType;
+  e1->f_getClassInfo = (struct SIDL_ClassInfo__object* (*)(void*)) 
+    epv->f_getClassInfo;
 
   e2->f__cast                    = (void* (*)(void*,const char*)) epv->f__cast;
   e2->f__delete                  = (void (*)(void*)) epv->f__delete;
@@ -212,6 +214,8 @@ static void bHYPRE_Pilut__init_epv(
     (*)(void*,const char*)) epv->f_queryInt;
   e2->f_isType                   = (SIDL_bool (*)(void*,
     const char*)) epv->f_isType;
+  e2->f_getClassInfo             = (struct SIDL_ClassInfo__object* (*)(void*)) 
+    epv->f_getClassInfo;
   e2->f_SetCommunicator          = (int32_t (*)(void*,
     void*)) epv->f_SetCommunicator;
   e2->f_SetIntParameter          = (int32_t (*)(void*,const char*,
@@ -247,6 +251,8 @@ static void bHYPRE_Pilut__init_epv(
     (*)(void*,const char*)) epv->f_queryInt;
   e3->f_isType                   = (SIDL_bool (*)(void*,
     const char*)) epv->f_isType;
+  e3->f_getClassInfo             = (struct SIDL_ClassInfo__object* (*)(void*)) 
+    epv->f_getClassInfo;
   e3->f_SetCommunicator          = (int32_t (*)(void*,
     void*)) epv->f_SetCommunicator;
   e3->f_SetIntParameter          = (int32_t (*)(void*,const char*,
@@ -815,15 +821,17 @@ static void bHYPRE_Pilut__init_remote_epv(void)
   e0->f_getClassInfo = (struct SIDL_ClassInfo__object* (*)(struct 
     SIDL_BaseClass__object*)) epv->f_getClassInfo;
 
-  e1->f__cast     = (void* (*)(void*,const char*)) epv->f__cast;
-  e1->f__delete   = (void (*)(void*)) epv->f__delete;
-  e1->f_addRef    = (void (*)(void*)) epv->f_addRef;
-  e1->f_deleteRef = (void (*)(void*)) epv->f_deleteRef;
-  e1->f_isSame    = (SIDL_bool (*)(void*,
+  e1->f__cast        = (void* (*)(void*,const char*)) epv->f__cast;
+  e1->f__delete      = (void (*)(void*)) epv->f__delete;
+  e1->f_addRef       = (void (*)(void*)) epv->f_addRef;
+  e1->f_deleteRef    = (void (*)(void*)) epv->f_deleteRef;
+  e1->f_isSame       = (SIDL_bool (*)(void*,
     struct SIDL_BaseInterface__object*)) epv->f_isSame;
-  e1->f_queryInt  = (struct SIDL_BaseInterface__object* (*)(void*,
+  e1->f_queryInt     = (struct SIDL_BaseInterface__object* (*)(void*,
     const char*)) epv->f_queryInt;
-  e1->f_isType    = (SIDL_bool (*)(void*,const char*)) epv->f_isType;
+  e1->f_isType       = (SIDL_bool (*)(void*,const char*)) epv->f_isType;
+  e1->f_getClassInfo = (struct SIDL_ClassInfo__object* (*)(void*)) 
+    epv->f_getClassInfo;
 
   e2->f__cast                    = (void* (*)(void*,const char*)) epv->f__cast;
   e2->f__delete                  = (void (*)(void*)) epv->f__delete;
@@ -835,6 +843,8 @@ static void bHYPRE_Pilut__init_remote_epv(void)
     (*)(void*,const char*)) epv->f_queryInt;
   e2->f_isType                   = (SIDL_bool (*)(void*,
     const char*)) epv->f_isType;
+  e2->f_getClassInfo             = (struct SIDL_ClassInfo__object* (*)(void*)) 
+    epv->f_getClassInfo;
   e2->f_SetCommunicator          = (int32_t (*)(void*,
     void*)) epv->f_SetCommunicator;
   e2->f_SetIntParameter          = (int32_t (*)(void*,const char*,
@@ -870,6 +880,8 @@ static void bHYPRE_Pilut__init_remote_epv(void)
     (*)(void*,const char*)) epv->f_queryInt;
   e3->f_isType                   = (SIDL_bool (*)(void*,
     const char*)) epv->f_isType;
+  e3->f_getClassInfo             = (struct SIDL_ClassInfo__object* (*)(void*)) 
+    epv->f_getClassInfo;
   e3->f_SetCommunicator          = (int32_t (*)(void*,
     void*)) epv->f_SetCommunicator;
   e3->f_SetIntParameter          = (int32_t (*)(void*,const char*,

@@ -2,14 +2,14 @@
  * File:          bHYPRE_IJParCSRVector_Impl.c
  * Symbol:        bHYPRE.IJParCSRVector-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.8.0
- * SIDL Created:  20030320 16:52:19 PST
- * Generated:     20030320 16:52:32 PST
+ * Babel Version: 0.8.2
+ * SIDL Created:  20030401 14:47:20 PST
+ * Generated:     20030401 14:47:33 PST
  * Description:   Server-side implementation for bHYPRE.IJParCSRVector
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.8.0
+ * babel-version = 0.8.2
  * source-line   = 815
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -86,6 +86,317 @@ impl_bHYPRE_IJParCSRVector__dtor(
    hypre_TFree( data );
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector._dtor) */
+}
+
+/*
+ * Set {\tt self} to 0.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_IJParCSRVector_Clear"
+
+int32_t
+impl_bHYPRE_IJParCSRVector_Clear(
+  bHYPRE_IJParCSRVector self)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.Clear) */
+  /* Insert the implementation of the Clear method here... */
+
+   int ierr = 0;
+   void * object;
+   struct bHYPRE_IJParCSRVector__data * data;
+   HYPRE_ParVector xx;
+   HYPRE_IJVector ij_x;
+   data = bHYPRE_IJParCSRVector__get_data( self );
+   ij_x = data -> ij_b;
+
+   ierr += HYPRE_IJVectorGetObject( ij_x, &object );
+   xx = (HYPRE_ParVector) object;
+   ierr += HYPRE_ParVectorSetConstantValues( xx, 0 );
+
+   return( ierr );
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector.Clear) */
+}
+
+/*
+ * Copy x into {\tt self}.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_IJParCSRVector_Copy"
+
+int32_t
+impl_bHYPRE_IJParCSRVector_Copy(
+  bHYPRE_IJParCSRVector self, bHYPRE_Vector x)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.Copy) */
+  /* Insert the implementation of the Copy method here... */
+
+   /* Copy the contents of x onto self.  This is a deep copy,
+    * ultimately done by hypre_SeqVectorCopy.  */
+   int ierr = 0;
+   int type[1]; /* type[0] produces silly error messages on Sun */
+   void * objectx, * objecty;
+   struct bHYPRE_IJParCSRVector__data * data_y, * data_x;
+   HYPRE_IJVector ij_y, ij_x;
+   bHYPRE_IJParCSRVector bHYPREP_x;
+   HYPRE_ParVector yy, xx;
+   
+   /* A bHYPRE_Vector is just an interface, we have no knowledge of its
+    * contents.  Check whether it's something we know how to handle.
+    * If not, die. */
+   if ( bHYPRE_Vector_queryInt(x, "bHYPRE.IJParCSRVector" ) )
+   {
+      bHYPREP_x = bHYPRE_IJParCSRVector__cast( x );
+   }
+   else
+   {
+      assert( "Unrecognized vector type."==(char *)x );
+   }
+
+   data_y = bHYPRE_IJParCSRVector__get_data( self );
+   data_x = bHYPRE_IJParCSRVector__get_data( bHYPREP_x );
+   bHYPRE_IJParCSRVector_deleteRef( bHYPREP_x ); /* extra reference from queryInt */
+
+   data_y->comm = data_x->comm;
+
+   ij_x = data_x -> ij_b;
+   ij_y = data_y -> ij_b;
+
+   ierr += HYPRE_IJVectorGetObjectType( ij_y, type );
+   /* ... don't know how to deal with other types */
+   assert( *type == HYPRE_PARCSR );
+   ierr += HYPRE_IJVectorGetObject( ij_y, &objecty );
+   yy = (HYPRE_ParVector) objecty;
+
+   ierr += HYPRE_IJVectorGetObjectType( ij_x, type );
+   /* ... don't know how to deal with other types */
+   assert( *type == HYPRE_PARCSR );
+   ierr += HYPRE_IJVectorGetObject( ij_x, &objectx );
+   xx = (HYPRE_ParVector) objectx;
+
+   ierr += HYPRE_ParVectorCopy( xx, yy );
+
+   return( ierr );
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector.Copy) */
+}
+
+/*
+ * Create an {\tt x} compatible with {\tt self}.
+ * 
+ * NOTE: When this method is used in an inherited class, the
+ * cloned {\tt Vector} object can be cast to an object with the
+ * inherited class type.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_IJParCSRVector_Clone"
+
+int32_t
+impl_bHYPRE_IJParCSRVector_Clone(
+  bHYPRE_IJParCSRVector self, bHYPRE_Vector* x)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.Clone) */
+  /* Insert the implementation of the Clone method here... */
+
+   int ierr = 0;
+   int type[1];  /* type[0] produces silly error messages on Sun */
+   int * partitioning, jlower, jupper, my_id;
+   void * objectx, * objecty;
+   struct bHYPRE_IJParCSRVector__data * data_y, * data_x;
+   HYPRE_IJVector ij_y, ij_x;
+   bHYPRE_IJBuildVector bHYPRE_ij_x;
+   bHYPRE_IJParCSRVector bHYPREP_x;
+   HYPRE_ParVector yy, xx;
+
+   MPI_Comm_rank(MPI_COMM_WORLD, &my_id );
+
+   bHYPREP_x = bHYPRE_IJParCSRVector__create();
+   bHYPRE_ij_x = bHYPRE_IJBuildVector__cast( bHYPREP_x );
+
+   data_y = bHYPRE_IJParCSRVector__get_data( self );
+   data_x = bHYPRE_IJParCSRVector__get_data( bHYPREP_x );
+
+   data_x->comm = data_y->comm;
+
+   ij_y = data_y -> ij_b;
+   ierr = HYPRE_IJVectorGetLocalRange( ij_y, &jlower, &jupper );
+
+   ij_x = data_x->ij_b;
+   ierr += HYPRE_IJVectorCreate( data_x->comm, jlower, jupper, &ij_x );
+   ierr += HYPRE_IJVectorSetObjectType( ij_x, HYPRE_PARCSR );
+   ierr += HYPRE_IJVectorInitialize( ij_x );
+   data_x->ij_b = ij_x;
+
+   ierr += HYPRE_IJVectorGetObjectType( ij_y, type );
+   /* ... don't know how to deal with other types */
+   assert( *type == HYPRE_PARCSR );
+   ierr += HYPRE_IJVectorGetObject( ij_y, &objecty );
+   yy = (HYPRE_ParVector) objecty;
+
+   ierr += HYPRE_IJVectorGetObjectType( ij_x, type );
+   /* ... don't know how to deal with other types */
+   assert( *type == HYPRE_PARCSR );
+   ierr += HYPRE_IJVectorGetObject( ij_x, &objectx );
+   xx = (HYPRE_ParVector) objectx;
+
+   /* Copy data in y to x... */
+   HYPRE_ParVectorCopy( yy, xx );
+
+   ierr += bHYPRE_IJBuildVector_Initialize( bHYPRE_ij_x );
+
+   *x = bHYPRE_Vector__cast( bHYPRE_ij_x );
+
+   return( ierr );
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector.Clone) */
+}
+
+/*
+ * Scale {\tt self} by {\tt a}.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_IJParCSRVector_Scale"
+
+int32_t
+impl_bHYPRE_IJParCSRVector_Scale(
+  bHYPRE_IJParCSRVector self, double a)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.Scale) */
+  /* Insert the implementation of the Scale method here... */
+
+   int ierr = 0;
+   void * object;
+   struct bHYPRE_IJParCSRVector__data * data;
+   HYPRE_ParVector xx;
+   HYPRE_IJVector ij_x;
+   data = bHYPRE_IJParCSRVector__get_data( self );
+   ij_x = data -> ij_b;
+
+   ierr += HYPRE_IJVectorGetObject( ij_x, &object );
+   xx = (HYPRE_ParVector) object;
+   ierr += HYPRE_ParVectorScale( a, xx );
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector.Scale) */
+}
+
+/*
+ * Compute {\tt d}, the inner-product of {\tt self} and {\tt x}.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_IJParCSRVector_Dot"
+
+int32_t
+impl_bHYPRE_IJParCSRVector_Dot(
+  bHYPRE_IJParCSRVector self, bHYPRE_Vector x, double* d)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.Dot) */
+  /* Insert the implementation of the Dot method here... */
+
+   int ierr = 0;
+   void * object;
+   struct bHYPRE_IJParCSRVector__data * data;
+   bHYPRE_IJParCSRVector bHYPREP_x;
+   HYPRE_ParVector xx, yy;
+   HYPRE_IJVector ij_x, ij_y;
+
+   /* A bHYPRE_Vector is just an interface, we have no knowledge of its
+    * contents.  Check whether it's something we know how to handle.
+    * If not, die. */
+   if ( bHYPRE_Vector_queryInt(x, "bHYPRE.IJParCSRVector" ) )
+   {
+      bHYPREP_x = bHYPRE_IJParCSRVector__cast( x );
+   }
+   else
+   {
+      assert( "Unrecognized vector type."==(char *)x );
+   }
+
+   data = bHYPRE_IJParCSRVector__get_data( self );
+   ij_y = data -> ij_b;
+   data = bHYPRE_IJParCSRVector__get_data( bHYPREP_x );
+   bHYPRE_IJParCSRVector_deleteRef( bHYPREP_x );
+   ij_x = data -> ij_b;
+
+   ierr += HYPRE_IJVectorGetObject( ij_x, &object );
+   xx = (HYPRE_ParVector) object;
+   ierr += HYPRE_IJVectorGetObject( ij_y, &object );
+   yy = (HYPRE_ParVector) object;
+
+   ierr += HYPRE_ParVectorInnerProd( xx, yy, d );
+
+   return( ierr );
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector.Dot) */
+}
+
+/*
+ * Add {\tt a}*{\tt x} to {\tt self}.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_IJParCSRVector_Axpy"
+
+int32_t
+impl_bHYPRE_IJParCSRVector_Axpy(
+  bHYPRE_IJParCSRVector self, double a, bHYPRE_Vector x)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.Axpy) */
+  /* Insert the implementation of the Axpy method here... */
+
+   int ierr = 0;
+   int type[1];
+   void * object;
+   struct bHYPRE_IJParCSRVector__data * data, * data_x;
+   bHYPRE_IJParCSRVector bHYPREP_x;
+   HYPRE_IJVector ij_y, ij_x;
+   HYPRE_ParVector yy, xx;
+   data = bHYPRE_IJParCSRVector__get_data( self );
+   ij_y = data -> ij_b;
+
+   ierr += HYPRE_IJVectorGetObjectType( ij_y, type );
+   /* ... don't know how to deal with other types */
+   assert( *type == HYPRE_PARCSR );
+   ierr += HYPRE_IJVectorGetObject( ij_y, &object );
+   yy = (HYPRE_ParVector) object;
+
+   /* A bHYPRE_Vector is just an interface, we have no knowledge of its
+    * contents.  Check whether it's something we know how to handle.
+    * If not, die. */
+   if ( bHYPRE_Vector_queryInt(x, "bHYPRE.IJParCSRVector" ) )
+   {
+      bHYPREP_x = bHYPRE_IJParCSRVector__cast( x );
+   }
+   else
+   {
+      assert( "Unrecognized vector type."==(char *)x );
+   }
+
+   data_x = bHYPRE_IJParCSRVector__get_data( bHYPREP_x );
+   bHYPRE_IJParCSRVector_deleteRef( bHYPREP_x );
+   ij_x = data_x->ij_b;
+   ierr += HYPRE_IJVectorGetObjectType( ij_x, type );
+   /* ... don't know how to deal with other types */
+   assert( *type == HYPRE_PARCSR );
+   ierr += HYPRE_IJVectorGetObject( ij_x, &object );
+   xx = (HYPRE_ParVector) object;
+
+   ierr += hypre_ParVectorAxpy( a, (hypre_ParVector *) xx,
+                                (hypre_ParVector *) yy );
+
+   return( ierr );
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector.Axpy) */
 }
 
 /*
@@ -434,315 +745,4 @@ impl_bHYPRE_IJParCSRVector_Read(
    return( ierr );
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector.Read) */
-}
-
-/*
- * Set {\tt self} to 0.
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_IJParCSRVector_Clear"
-
-int32_t
-impl_bHYPRE_IJParCSRVector_Clear(
-  bHYPRE_IJParCSRVector self)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.Clear) */
-  /* Insert the implementation of the Clear method here... */
-
-   int ierr = 0;
-   void * object;
-   struct bHYPRE_IJParCSRVector__data * data;
-   HYPRE_ParVector xx;
-   HYPRE_IJVector ij_x;
-   data = bHYPRE_IJParCSRVector__get_data( self );
-   ij_x = data -> ij_b;
-
-   ierr += HYPRE_IJVectorGetObject( ij_x, &object );
-   xx = (HYPRE_ParVector) object;
-   ierr += HYPRE_ParVectorSetConstantValues( xx, 0 );
-
-   return( ierr );
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector.Clear) */
-}
-
-/*
- * Copy x into {\tt self}.
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_IJParCSRVector_Copy"
-
-int32_t
-impl_bHYPRE_IJParCSRVector_Copy(
-  bHYPRE_IJParCSRVector self, bHYPRE_Vector x)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.Copy) */
-  /* Insert the implementation of the Copy method here... */
-
-   /* Copy the contents of x onto self.  This is a deep copy,
-    * ultimately done by hypre_SeqVectorCopy.  */
-   int ierr = 0;
-   int type[1]; /* type[0] produces silly error messages on Sun */
-   void * objectx, * objecty;
-   struct bHYPRE_IJParCSRVector__data * data_y, * data_x;
-   HYPRE_IJVector ij_y, ij_x;
-   bHYPRE_IJParCSRVector bHYPREP_x;
-   HYPRE_ParVector yy, xx;
-   
-   /* A bHYPRE_Vector is just an interface, we have no knowledge of its
-    * contents.  Check whether it's something we know how to handle.
-    * If not, die. */
-   if ( bHYPRE_Vector_queryInt(x, "bHYPRE.IJParCSRVector" ) )
-   {
-      bHYPREP_x = bHYPRE_IJParCSRVector__cast( x );
-   }
-   else
-   {
-      assert( "Unrecognized vector type."==(char *)x );
-   }
-
-   data_y = bHYPRE_IJParCSRVector__get_data( self );
-   data_x = bHYPRE_IJParCSRVector__get_data( bHYPREP_x );
-   bHYPRE_IJParCSRVector_deleteRef( bHYPREP_x ); /* extra reference from queryInt */
-
-   data_y->comm = data_x->comm;
-
-   ij_x = data_x -> ij_b;
-   ij_y = data_y -> ij_b;
-
-   ierr += HYPRE_IJVectorGetObjectType( ij_y, type );
-   /* ... don't know how to deal with other types */
-   assert( *type == HYPRE_PARCSR );
-   ierr += HYPRE_IJVectorGetObject( ij_y, &objecty );
-   yy = (HYPRE_ParVector) objecty;
-
-   ierr += HYPRE_IJVectorGetObjectType( ij_x, type );
-   /* ... don't know how to deal with other types */
-   assert( *type == HYPRE_PARCSR );
-   ierr += HYPRE_IJVectorGetObject( ij_x, &objectx );
-   xx = (HYPRE_ParVector) objectx;
-
-   ierr += HYPRE_ParVectorCopy( xx, yy );
-
-   return( ierr );
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector.Copy) */
-}
-
-/*
- * Create an {\tt x} compatible with {\tt self}.
- * 
- * NOTE: When this method is used in an inherited class, the
- * cloned {\tt Vector} object can be cast to an object with the
- * inherited class type.
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_IJParCSRVector_Clone"
-
-int32_t
-impl_bHYPRE_IJParCSRVector_Clone(
-  bHYPRE_IJParCSRVector self, bHYPRE_Vector* x)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.Clone) */
-  /* Insert the implementation of the Clone method here... */
-
-   int ierr = 0;
-   int type[1];  /* type[0] produces silly error messages on Sun */
-   int * partitioning, jlower, jupper, my_id;
-   void * objectx, * objecty;
-   struct bHYPRE_IJParCSRVector__data * data_y, * data_x;
-   HYPRE_IJVector ij_y, ij_x;
-   bHYPRE_IJBuildVector bHYPRE_ij_x;
-   bHYPRE_IJParCSRVector bHYPREP_x;
-   HYPRE_ParVector yy, xx;
-
-   MPI_Comm_rank(MPI_COMM_WORLD, &my_id );
-
-   bHYPREP_x = bHYPRE_IJParCSRVector__create();
-   bHYPRE_ij_x = bHYPRE_IJBuildVector__cast( bHYPREP_x );
-
-   data_y = bHYPRE_IJParCSRVector__get_data( self );
-   data_x = bHYPRE_IJParCSRVector__get_data( bHYPREP_x );
-
-   data_x->comm = data_y->comm;
-
-   ij_y = data_y -> ij_b;
-   ierr = HYPRE_IJVectorGetLocalRange( ij_y, &jlower, &jupper );
-
-   ij_x = data_x->ij_b;
-   ierr += HYPRE_IJVectorCreate( data_x->comm, jlower, jupper, &ij_x );
-   ierr += HYPRE_IJVectorSetObjectType( ij_x, HYPRE_PARCSR );
-   ierr += HYPRE_IJVectorInitialize( ij_x );
-   data_x->ij_b = ij_x;
-
-   ierr += HYPRE_IJVectorGetObjectType( ij_y, type );
-   /* ... don't know how to deal with other types */
-   assert( *type == HYPRE_PARCSR );
-   ierr += HYPRE_IJVectorGetObject( ij_y, &objecty );
-   yy = (HYPRE_ParVector) objecty;
-
-   ierr += HYPRE_IJVectorGetObjectType( ij_x, type );
-   /* ... don't know how to deal with other types */
-   assert( *type == HYPRE_PARCSR );
-   ierr += HYPRE_IJVectorGetObject( ij_x, &objectx );
-   xx = (HYPRE_ParVector) objectx;
-
-   /* Copy data in y to x... */
-   HYPRE_ParVectorCopy( yy, xx );
-
-   ierr += bHYPRE_IJBuildVector_Initialize( bHYPRE_ij_x );
-
-   *x = bHYPRE_Vector__cast( bHYPRE_ij_x );
-
-   return( ierr );
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector.Clone) */
-}
-
-/*
- * Scale {\self} by {\tt a}.
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_IJParCSRVector_Scale"
-
-int32_t
-impl_bHYPRE_IJParCSRVector_Scale(
-  bHYPRE_IJParCSRVector self, double a)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.Scale) */
-  /* Insert the implementation of the Scale method here... */
-
-   int ierr = 0;
-   void * object;
-   struct bHYPRE_IJParCSRVector__data * data;
-   HYPRE_ParVector xx;
-   HYPRE_IJVector ij_x;
-   data = bHYPRE_IJParCSRVector__get_data( self );
-   ij_x = data -> ij_b;
-
-   ierr += HYPRE_IJVectorGetObject( ij_x, &object );
-   xx = (HYPRE_ParVector) object;
-   ierr += HYPRE_ParVectorScale( a, xx );
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector.Scale) */
-}
-
-/*
- * Compute {\tt d}, the inner-product of {\tt self} and {\tt x}.
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_IJParCSRVector_Dot"
-
-int32_t
-impl_bHYPRE_IJParCSRVector_Dot(
-  bHYPRE_IJParCSRVector self, bHYPRE_Vector x, double* d)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.Dot) */
-  /* Insert the implementation of the Dot method here... */
-
-   int ierr = 0;
-   void * object;
-   struct bHYPRE_IJParCSRVector__data * data;
-   bHYPRE_IJParCSRVector bHYPREP_x;
-   HYPRE_ParVector xx, yy;
-   HYPRE_IJVector ij_x, ij_y;
-
-   /* A bHYPRE_Vector is just an interface, we have no knowledge of its
-    * contents.  Check whether it's something we know how to handle.
-    * If not, die. */
-   if ( bHYPRE_Vector_queryInt(x, "bHYPRE.IJParCSRVector" ) )
-   {
-      bHYPREP_x = bHYPRE_IJParCSRVector__cast( x );
-   }
-   else
-   {
-      assert( "Unrecognized vector type."==(char *)x );
-   }
-
-   data = bHYPRE_IJParCSRVector__get_data( self );
-   ij_y = data -> ij_b;
-   data = bHYPRE_IJParCSRVector__get_data( bHYPREP_x );
-   bHYPRE_IJParCSRVector_deleteRef( bHYPREP_x );
-   ij_x = data -> ij_b;
-
-   ierr += HYPRE_IJVectorGetObject( ij_x, &object );
-   xx = (HYPRE_ParVector) object;
-   ierr += HYPRE_IJVectorGetObject( ij_y, &object );
-   yy = (HYPRE_ParVector) object;
-
-   ierr += HYPRE_ParVectorInnerProd( xx, yy, d );
-
-   return( ierr );
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector.Dot) */
-}
-
-/*
- * Add {\tt a}*{\tt x} to {\tt self}.
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_IJParCSRVector_Axpy"
-
-int32_t
-impl_bHYPRE_IJParCSRVector_Axpy(
-  bHYPRE_IJParCSRVector self, double a, bHYPRE_Vector x)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.Axpy) */
-  /* Insert the implementation of the Axpy method here... */
-
-   int ierr = 0;
-   int type[1];
-   void * object;
-   struct bHYPRE_IJParCSRVector__data * data, * data_x;
-   bHYPRE_IJParCSRVector bHYPREP_x;
-   HYPRE_IJVector ij_y, ij_x;
-   HYPRE_ParVector yy, xx;
-   data = bHYPRE_IJParCSRVector__get_data( self );
-   ij_y = data -> ij_b;
-
-   ierr += HYPRE_IJVectorGetObjectType( ij_y, type );
-   /* ... don't know how to deal with other types */
-   assert( *type == HYPRE_PARCSR );
-   ierr += HYPRE_IJVectorGetObject( ij_y, &object );
-   yy = (HYPRE_ParVector) object;
-
-   /* A bHYPRE_Vector is just an interface, we have no knowledge of its
-    * contents.  Check whether it's something we know how to handle.
-    * If not, die. */
-   if ( bHYPRE_Vector_queryInt(x, "bHYPRE.IJParCSRVector" ) )
-   {
-      bHYPREP_x = bHYPRE_IJParCSRVector__cast( x );
-   }
-   else
-   {
-      assert( "Unrecognized vector type."==(char *)x );
-   }
-
-   data_x = bHYPRE_IJParCSRVector__get_data( bHYPREP_x );
-   bHYPRE_IJParCSRVector_deleteRef( bHYPREP_x );
-   ij_x = data_x->ij_b;
-   ierr += HYPRE_IJVectorGetObjectType( ij_x, type );
-   /* ... don't know how to deal with other types */
-   assert( *type == HYPRE_PARCSR );
-   ierr += HYPRE_IJVectorGetObject( ij_x, &object );
-   xx = (HYPRE_ParVector) object;
-
-   ierr += hypre_ParVectorAxpy( a, (hypre_ParVector *) xx,
-                                (hypre_ParVector *) yy );
-
-   return( ierr );
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector.Axpy) */
 }

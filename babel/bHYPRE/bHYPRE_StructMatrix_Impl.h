@@ -2,14 +2,14 @@
  * File:          bHYPRE_StructMatrix_Impl.h
  * Symbol:        bHYPRE.StructMatrix-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.8.0
- * SIDL Created:  20030320 16:52:19 PST
- * Generated:     20030320 16:52:31 PST
+ * Babel Version: 0.8.2
+ * SIDL Created:  20030401 14:47:20 PST
+ * Generated:     20030401 14:47:32 PST
  * Description:   Server-side implementation for bHYPRE.StructMatrix
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.8.0
+ * babel-version = 0.8.2
  * source-line   = 1124
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -86,56 +86,6 @@ impl_bHYPRE_StructMatrix_SetCommunicator(
   void*);
 
 extern int32_t
-impl_bHYPRE_StructMatrix_Initialize(
-  bHYPRE_StructMatrix);
-
-extern int32_t
-impl_bHYPRE_StructMatrix_Assemble(
-  bHYPRE_StructMatrix);
-
-extern int32_t
-impl_bHYPRE_StructMatrix_GetObject(
-  bHYPRE_StructMatrix,
-  SIDL_BaseInterface*);
-
-extern int32_t
-impl_bHYPRE_StructMatrix_SetGrid(
-  bHYPRE_StructMatrix,
-  bHYPRE_StructGrid);
-
-extern int32_t
-impl_bHYPRE_StructMatrix_SetStencil(
-  bHYPRE_StructMatrix,
-  bHYPRE_StructStencil);
-
-extern int32_t
-impl_bHYPRE_StructMatrix_SetValues(
-  bHYPRE_StructMatrix,
-  struct SIDL_int__array*,
-  int32_t,
-  struct SIDL_int__array*,
-  struct SIDL_double__array*);
-
-extern int32_t
-impl_bHYPRE_StructMatrix_SetBoxValues(
-  bHYPRE_StructMatrix,
-  struct SIDL_int__array*,
-  struct SIDL_int__array*,
-  int32_t,
-  struct SIDL_int__array*,
-  struct SIDL_double__array*);
-
-extern int32_t
-impl_bHYPRE_StructMatrix_SetNumGhost(
-  bHYPRE_StructMatrix,
-  struct SIDL_int__array*);
-
-extern int32_t
-impl_bHYPRE_StructMatrix_SetSymmetric(
-  bHYPRE_StructMatrix,
-  int32_t);
-
-extern int32_t
 impl_bHYPRE_StructMatrix_SetIntParameter(
   bHYPRE_StructMatrix,
   const char*,
@@ -200,6 +150,56 @@ impl_bHYPRE_StructMatrix_Apply(
   bHYPRE_StructMatrix,
   bHYPRE_Vector,
   bHYPRE_Vector*);
+
+extern int32_t
+impl_bHYPRE_StructMatrix_Initialize(
+  bHYPRE_StructMatrix);
+
+extern int32_t
+impl_bHYPRE_StructMatrix_Assemble(
+  bHYPRE_StructMatrix);
+
+extern int32_t
+impl_bHYPRE_StructMatrix_GetObject(
+  bHYPRE_StructMatrix,
+  SIDL_BaseInterface*);
+
+extern int32_t
+impl_bHYPRE_StructMatrix_SetGrid(
+  bHYPRE_StructMatrix,
+  bHYPRE_StructGrid);
+
+extern int32_t
+impl_bHYPRE_StructMatrix_SetStencil(
+  bHYPRE_StructMatrix,
+  bHYPRE_StructStencil);
+
+extern int32_t
+impl_bHYPRE_StructMatrix_SetValues(
+  bHYPRE_StructMatrix,
+  struct SIDL_int__array*,
+  int32_t,
+  struct SIDL_int__array*,
+  struct SIDL_double__array*);
+
+extern int32_t
+impl_bHYPRE_StructMatrix_SetBoxValues(
+  bHYPRE_StructMatrix,
+  struct SIDL_int__array*,
+  struct SIDL_int__array*,
+  int32_t,
+  struct SIDL_int__array*,
+  struct SIDL_double__array*);
+
+extern int32_t
+impl_bHYPRE_StructMatrix_SetNumGhost(
+  bHYPRE_StructMatrix,
+  struct SIDL_int__array*);
+
+extern int32_t
+impl_bHYPRE_StructMatrix_SetSymmetric(
+  bHYPRE_StructMatrix,
+  int32_t);
 
 #ifdef __cplusplus
 }

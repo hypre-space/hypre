@@ -1,10 +1,10 @@
 /*
  * File:          SIDL_DLL_fStub.c
- * Symbol:        SIDL.DLL-v0.8.1
+ * Symbol:        SIDL.DLL-v0.8.2
  * Symbol Type:   class
- * Babel Version: 0.8.0
- * SIDL Created:  20030121 13:48:00 PST
- * Generated:     20030320 16:52:50 PST
+ * Babel Version: 0.8.2
+ * SIDL Created:  20030326 16:09:17 PST
+ * Generated:     20030401 14:48:03 PST
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side glue code for SIDL.DLL
@@ -34,13 +34,13 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.0
- * source-line   = 204
- * source-url    = file:/home/painter/babel-0.8.0/share/../runtime/sidl/sidl.sidl
+ * babel-version = 0.8.2
+ * source-line   = 209
+ * source-url    = file:/home/epperly/current/release_082/linux_gcc2/share/../../babel-0.8.2/runtime/sidl/sidl.sidl
  */
 
 /*
- * Symbol "SIDL.DLL" (version 0.8.1)
+ * Symbol "SIDL.DLL" (version 0.8.2)
  * 
  * The <code>DLL</code> class encapsulates access to a single
  * dynamically linked library.  DLLs are loaded at run-time using
@@ -89,11 +89,35 @@ SIDLFortran77Symbol(sidl_dll__create_f,SIDL_DLL__CREATE_F,SIDL_DLL__create_f)
 }
 
 /*
- * Cast method for interface and class type conversions.
+ * Cast method for interface and type conversions.
  */
 
 void
 SIDLFortran77Symbol(sidl_dll__cast_f,SIDL_DLL__CAST_F,SIDL_DLL__cast_f)
+(
+  int64_t *ref,
+  int64_t *retval
+)
+{
+  struct SIDL_BaseInterface__object  *_base =
+    (struct SIDL_BaseInterface__object *)(ptrdiff_t)*ref;
+  if (_base) {
+    *retval = (ptrdiff_t)(
+      *_base->d_epv->f__cast)(
+      _base->d_object,
+      "SIDL.DLL");
+  }
+  else {
+    *retval = 0;
+  }
+}
+
+/*
+ * Cast method for interface and class type conversions.
+ */
+
+void
+SIDLFortran77Symbol(sidl_dll__cast2_f,SIDL_DLL__CAST2_F,SIDL_DLL__cast2_f)
 (
   int64_t *self,
   SIDL_F77_String name
@@ -793,6 +817,23 @@ SIDLFortran77Symbol(sidl_dll__array_smartcopy_f,
 {
   SIDL_interface__array_smartCopy((struct SIDL_interface__array 
     *)(ptrdiff_t)*src);
+}
+
+void
+SIDLFortran77Symbol(sidl_dll__array_slice_f,
+                  SIDL_DLL__ARRAY_SLICE_F,
+                  SIDL_DLL__array_slice_f)
+  (int64_t *src,
+   int32_t *dimen,
+   int32_t numElem[],
+   int32_t srcStart[],
+   int32_t srcStride[],
+   int32_t newStart[],
+   int64_t *result)
+{
+  *result = (ptrdiff_t)
+    SIDL_interface__array_slice((struct SIDL_interface__array *)(ptrdiff_t)*src,
+      *dimen, numElem, srcStart, srcStride, newStart);
 }
 
 void

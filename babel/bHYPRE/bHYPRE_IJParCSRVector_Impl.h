@@ -2,14 +2,14 @@
  * File:          bHYPRE_IJParCSRVector_Impl.h
  * Symbol:        bHYPRE.IJParCSRVector-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.8.0
- * SIDL Created:  20030320 16:52:19 PST
- * Generated:     20030320 16:52:32 PST
+ * Babel Version: 0.8.2
+ * SIDL Created:  20030401 14:47:20 PST
+ * Generated:     20030401 14:47:33 PST
  * Description:   Server-side implementation for bHYPRE.IJParCSRVector
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.8.0
+ * babel-version = 0.8.2
  * source-line   = 815
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -79,6 +79,37 @@ impl_bHYPRE_IJParCSRVector__dtor(
  */
 
 extern int32_t
+impl_bHYPRE_IJParCSRVector_Clear(
+  bHYPRE_IJParCSRVector);
+
+extern int32_t
+impl_bHYPRE_IJParCSRVector_Copy(
+  bHYPRE_IJParCSRVector,
+  bHYPRE_Vector);
+
+extern int32_t
+impl_bHYPRE_IJParCSRVector_Clone(
+  bHYPRE_IJParCSRVector,
+  bHYPRE_Vector*);
+
+extern int32_t
+impl_bHYPRE_IJParCSRVector_Scale(
+  bHYPRE_IJParCSRVector,
+  double);
+
+extern int32_t
+impl_bHYPRE_IJParCSRVector_Dot(
+  bHYPRE_IJParCSRVector,
+  bHYPRE_Vector,
+  double*);
+
+extern int32_t
+impl_bHYPRE_IJParCSRVector_Axpy(
+  bHYPRE_IJParCSRVector,
+  double,
+  bHYPRE_Vector);
+
+extern int32_t
 impl_bHYPRE_IJParCSRVector_SetCommunicator(
   bHYPRE_IJParCSRVector,
   void*);
@@ -139,37 +170,6 @@ impl_bHYPRE_IJParCSRVector_Read(
   bHYPRE_IJParCSRVector,
   const char*,
   void*);
-
-extern int32_t
-impl_bHYPRE_IJParCSRVector_Clear(
-  bHYPRE_IJParCSRVector);
-
-extern int32_t
-impl_bHYPRE_IJParCSRVector_Copy(
-  bHYPRE_IJParCSRVector,
-  bHYPRE_Vector);
-
-extern int32_t
-impl_bHYPRE_IJParCSRVector_Clone(
-  bHYPRE_IJParCSRVector,
-  bHYPRE_Vector*);
-
-extern int32_t
-impl_bHYPRE_IJParCSRVector_Scale(
-  bHYPRE_IJParCSRVector,
-  double);
-
-extern int32_t
-impl_bHYPRE_IJParCSRVector_Dot(
-  bHYPRE_IJParCSRVector,
-  bHYPRE_Vector,
-  double*);
-
-extern int32_t
-impl_bHYPRE_IJParCSRVector_Axpy(
-  bHYPRE_IJParCSRVector,
-  double,
-  bHYPRE_Vector);
 
 #ifdef __cplusplus
 }

@@ -2,14 +2,14 @@
  * File:          bHYPRE_BoomerAMG_Impl.c
  * Symbol:        bHYPRE.BoomerAMG-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.8.0
- * SIDL Created:  20030320 16:52:19 PST
- * Generated:     20030320 16:52:30 PST
+ * Babel Version: 0.8.2
+ * SIDL Created:  20030401 14:47:20 PST
+ * Generated:     20030401 14:47:31 PST
  * Description:   Server-side implementation for bHYPRE.BoomerAMG
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.8.0
+ * babel-version = 0.8.2
  * source-line   = 1217
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -942,11 +942,3 @@ impl_bHYPRE_BoomerAMG_GetRelResidualNorm(
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG.GetRelResidualNorm) */
 }
-
-/**
- * ================= BEGIN UNREFERENCED METHOD(S) ================
- * The following code segment(s) belong to unreferenced method(s).
- * This can result from a method rename/removal in the SIDL file.
- * Move or remove the code in order to compile cleanly.
- */
-/* ================== END UNREFERENCED METHOD(S) ================= */

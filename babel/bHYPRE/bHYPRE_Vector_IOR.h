@@ -2,14 +2,14 @@
  * File:          bHYPRE_Vector_IOR.h
  * Symbol:        bHYPRE.Vector-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.8.0
- * SIDL Created:  20030320 16:52:19 PST
- * Generated:     20030320 16:52:22 PST
+ * Babel Version: 0.8.2
+ * SIDL Created:  20030401 14:47:20 PST
+ * Generated:     20030401 14:47:23 PST
  * Description:   Intermediate Object Representation for bHYPRE.Vector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.0
+ * babel-version = 0.8.2
  * source-line   = 667
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -40,6 +40,8 @@ bHYPRE_Vector__remote(const char *url);
 
 struct SIDL_BaseInterface__array;
 struct SIDL_BaseInterface__object;
+struct SIDL_ClassInfo__array;
+struct SIDL_ClassInfo__object;
 
 /*
  * Declare the method entry point vector.
@@ -52,7 +54,7 @@ struct bHYPRE_Vector__epv {
     const char* name);
   void (*f__delete)(
     void* self);
-  /* Methods introduced in SIDL.BaseInterface-v0.8.1 */
+  /* Methods introduced in SIDL.BaseInterface-v0.8.2 */
   void (*f_addRef)(
     void* self);
   void (*f_deleteRef)(
@@ -66,6 +68,8 @@ struct bHYPRE_Vector__epv {
   SIDL_bool (*f_isType)(
     void* self,
     const char* name);
+  struct SIDL_ClassInfo__object* (*f_getClassInfo)(
+    void* self);
   /* Methods introduced in bHYPRE.Vector-v1.0.0 */
   int32_t (*f_Clear)(
     void* self);

@@ -1,10 +1,10 @@
 /*
  * File:          SIDL_Loader_fStub.c
- * Symbol:        SIDL.Loader-v0.8.1
+ * Symbol:        SIDL.Loader-v0.8.2
  * Symbol Type:   class
- * Babel Version: 0.8.0
- * SIDL Created:  20030121 13:48:00 PST
- * Generated:     20030320 16:52:55 PST
+ * Babel Version: 0.8.2
+ * SIDL Created:  20030326 16:09:17 PST
+ * Generated:     20030401 14:48:19 PST
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side glue code for SIDL.Loader
@@ -34,13 +34,13 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.0
- * source-line   = 261
- * source-url    = file:/home/painter/babel-0.8.0/share/../runtime/sidl/sidl.sidl
+ * babel-version = 0.8.2
+ * source-line   = 266
+ * source-url    = file:/home/epperly/current/release_082/linux_gcc2/share/../../babel-0.8.2/runtime/sidl/sidl.sidl
  */
 
 /*
- * Symbol "SIDL.Loader" (version 0.8.1)
+ * Symbol "SIDL.Loader" (version 0.8.2)
  * 
  * Class <code>Loader</code> manages dyanamic loading and symbol name
  * resolution for the SIDL runtime system.  The <code>Loader</code> class
@@ -104,11 +104,35 @@ SIDLFortran77Symbol(sidl_loader__create_f,SIDL_LOADER__CREATE_F,SIDL_Loader__cre
 }
 
 /*
- * Cast method for interface and class type conversions.
+ * Cast method for interface and type conversions.
  */
 
 void
 SIDLFortran77Symbol(sidl_loader__cast_f,SIDL_LOADER__CAST_F,SIDL_Loader__cast_f)
+(
+  int64_t *ref,
+  int64_t *retval
+)
+{
+  struct SIDL_BaseInterface__object  *_base =
+    (struct SIDL_BaseInterface__object *)(ptrdiff_t)*ref;
+  if (_base) {
+    *retval = (ptrdiff_t)(
+      *_base->d_epv->f__cast)(
+      _base->d_object,
+      "SIDL.Loader");
+  }
+  else {
+    *retval = 0;
+  }
+}
+
+/*
+ * Cast method for interface and class type conversions.
+ */
+
+void
+SIDLFortran77Symbol(sidl_loader__cast2_f,SIDL_LOADER__CAST2_F,SIDL_Loader__cast2_f)
 (
   int64_t *self,
   SIDL_F77_String name
@@ -840,6 +864,23 @@ SIDLFortran77Symbol(sidl_loader__array_smartcopy_f,
 {
   SIDL_interface__array_smartCopy((struct SIDL_interface__array 
     *)(ptrdiff_t)*src);
+}
+
+void
+SIDLFortran77Symbol(sidl_loader__array_slice_f,
+                  SIDL_LOADER__ARRAY_SLICE_F,
+                  SIDL_Loader__array_slice_f)
+  (int64_t *src,
+   int32_t *dimen,
+   int32_t numElem[],
+   int32_t srcStart[],
+   int32_t srcStride[],
+   int32_t newStart[],
+   int64_t *result)
+{
+  *result = (ptrdiff_t)
+    SIDL_interface__array_slice((struct SIDL_interface__array *)(ptrdiff_t)*src,
+      *dimen, numElem, srcStart, srcStride, newStart);
 }
 
 void

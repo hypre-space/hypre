@@ -2,14 +2,14 @@
  * File:          bHYPRE_IJParCSRMatrix_fStub.c
  * Symbol:        bHYPRE.IJParCSRMatrix-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.8.0
- * SIDL Created:  20030320 16:52:45 PST
- * Generated:     20030320 16:52:55 PST
+ * Babel Version: 0.8.2
+ * SIDL Created:  20030401 14:47:45 PST
+ * Generated:     20030401 14:48:19 PST
  * Description:   Client-side glue code for bHYPRE.IJParCSRMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.0
+ * babel-version = 0.8.2
  * source-line   = 789
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -80,11 +80,35 @@ SIDLFortran77Symbol(bhypre_ijparcsrmatrix__create_f,BHYPRE_IJPARCSRMATRIX__CREAT
 }
 
 /*
- * Cast method for interface and class type conversions.
+ * Cast method for interface and type conversions.
  */
 
 void
 SIDLFortran77Symbol(bhypre_ijparcsrmatrix__cast_f,BHYPRE_IJPARCSRMATRIX__CAST_F,bHYPRE_IJParCSRMatrix__cast_f)
+(
+  int64_t *ref,
+  int64_t *retval
+)
+{
+  struct SIDL_BaseInterface__object  *_base =
+    (struct SIDL_BaseInterface__object *)(ptrdiff_t)*ref;
+  if (_base) {
+    *retval = (ptrdiff_t)(
+      *_base->d_epv->f__cast)(
+      _base->d_object,
+      "bHYPRE.IJParCSRMatrix");
+  }
+  else {
+    *retval = 0;
+  }
+}
+
+/*
+ * Cast method for interface and class type conversions.
+ */
+
+void
+SIDLFortran77Symbol(bhypre_ijparcsrmatrix__cast2_f,BHYPRE_IJPARCSRMATRIX__CAST2_F,bHYPRE_IJParCSRMatrix__cast2_f)
 (
   int64_t *self,
   SIDL_F77_String name
@@ -348,46 +372,6 @@ SIDLFortran77Symbol(bhypre_ijparcsrmatrix_setdiagoffdsizes_f,BHYPRE_IJPARCSRMATR
       _proxy_diag_sizes,
       _proxy_offdiag_sizes
     );
-}
-
-/*
- * The GetRow method will allocate space for its two output
- * arrays on the first call.  The space will be reused on
- * subsequent calls.  Thus the user must not delete them, yet
- * must not depend on the data from GetRow to persist beyond the
- * next GetRow call.
- * 
- */
-
-void
-SIDLFortran77Symbol(bhypre_ijparcsrmatrix_getrow_f,BHYPRE_IJPARCSRMATRIX_GETROW_F,bHYPRE_IJParCSRMatrix_GetRow_f)
-(
-  int64_t *self,
-  int32_t *row,
-  int32_t *size,
-  int64_t *col_ind,
-  int64_t *values,
-  int32_t *retval
-)
-{
-  struct bHYPRE_IJParCSRMatrix__epv *_epv = NULL;
-  struct bHYPRE_IJParCSRMatrix__object* _proxy_self = NULL;
-  struct SIDL_int__array* _proxy_col_ind = NULL;
-  struct SIDL_double__array* _proxy_values = NULL;
-  _proxy_self =
-    (struct bHYPRE_IJParCSRMatrix__object*)
-    (ptrdiff_t)(*self);
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_GetRow))(
-      _proxy_self,
-      *row,
-      size,
-      &_proxy_col_ind,
-      &_proxy_values
-    );
-  *col_ind = (ptrdiff_t)_proxy_col_ind;
-  *values = (ptrdiff_t)_proxy_values;
 }
 
 /*
@@ -1324,6 +1308,46 @@ SIDLFortran77Symbol(bhypre_ijparcsrmatrix_apply_f,BHYPRE_IJPARCSRMATRIX_APPLY_F,
   *x = (ptrdiff_t)_proxy_x;
 }
 
+/*
+ * The GetRow method will allocate space for its two output
+ * arrays on the first call.  The space will be reused on
+ * subsequent calls.  Thus the user must not delete them, yet
+ * must not depend on the data from GetRow to persist beyond the
+ * next GetRow call.
+ * 
+ */
+
+void
+SIDLFortran77Symbol(bhypre_ijparcsrmatrix_getrow_f,BHYPRE_IJPARCSRMATRIX_GETROW_F,bHYPRE_IJParCSRMatrix_GetRow_f)
+(
+  int64_t *self,
+  int32_t *row,
+  int32_t *size,
+  int64_t *col_ind,
+  int64_t *values,
+  int32_t *retval
+)
+{
+  struct bHYPRE_IJParCSRMatrix__epv *_epv = NULL;
+  struct bHYPRE_IJParCSRMatrix__object* _proxy_self = NULL;
+  struct SIDL_int__array* _proxy_col_ind = NULL;
+  struct SIDL_double__array* _proxy_values = NULL;
+  _proxy_self =
+    (struct bHYPRE_IJParCSRMatrix__object*)
+    (ptrdiff_t)(*self);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_GetRow))(
+      _proxy_self,
+      *row,
+      size,
+      &_proxy_col_ind,
+      &_proxy_values
+    );
+  *col_ind = (ptrdiff_t)_proxy_col_ind;
+  *values = (ptrdiff_t)_proxy_values;
+}
+
 void
 SIDLFortran77Symbol(bhypre_ijparcsrmatrix__array_createcol_f,
                   BHYPRE_IJPARCSRMATRIX__ARRAY_CREATECOL_F,
@@ -1630,6 +1654,23 @@ SIDLFortran77Symbol(bhypre_ijparcsrmatrix__array_smartcopy_f,
 {
   SIDL_interface__array_smartCopy((struct SIDL_interface__array 
     *)(ptrdiff_t)*src);
+}
+
+void
+SIDLFortran77Symbol(bhypre_ijparcsrmatrix__array_slice_f,
+                  BHYPRE_IJPARCSRMATRIX__ARRAY_SLICE_F,
+                  bHYPRE_IJParCSRMatrix__array_slice_f)
+  (int64_t *src,
+   int32_t *dimen,
+   int32_t numElem[],
+   int32_t srcStart[],
+   int32_t srcStride[],
+   int32_t newStart[],
+   int64_t *result)
+{
+  *result = (ptrdiff_t)
+    SIDL_interface__array_slice((struct SIDL_interface__array *)(ptrdiff_t)*src,
+      *dimen, numElem, srcStart, srcStride, newStart);
 }
 
 void

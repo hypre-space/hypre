@@ -37,6 +37,47 @@
 #include "parcsr_mv.h"
 #include "Hypre_IJBuildVector.h"
 #include "mpi.h"
+
+/* following is to help debugging... */
+#include "../babel-runtime/sidl/SIDL_BaseClass_Impl.h"
+int
+SIDL_BaseClass_ReferenceCount(
+  SIDL_BaseClass self)
+{
+   struct SIDL_BaseClass__data* data = SIDL_BaseClass__get_data(self);
+   if (data) {
+     return (data->d_refcount);
+   }
+   else
+      return 0;
+}
+
+int
+Hypre_IJParCSRVector_ReferenceCount(
+  Hypre_IJParCSRVector self)
+{
+   SIDL_BaseClass base = (SIDL_BaseClass) SIDL_BaseClass__cast( self );
+   struct SIDL_BaseClass__data* data = SIDL_BaseClass__get_data(base);
+   if (data) {
+     return (data->d_refcount);
+   }
+   else
+      return 0;
+}
+
+int
+Hypre_Vector_ReferenceCount(Hypre_Vector self)
+{
+   SIDL_BaseClass base = (SIDL_BaseClass) SIDL_BaseClass__cast( self );
+   struct SIDL_BaseClass__data* data = SIDL_BaseClass__get_data(base);
+   if (data) {
+     return (data->d_refcount);
+   }
+   else
+      return 0;
+}
+/* ... end of section for debugging aids */
+
 /* DO-NOT-DELETE splicer.end(Hypre.IJParCSRVector._includes) */
 
 /*

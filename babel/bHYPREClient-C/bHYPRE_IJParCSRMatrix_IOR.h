@@ -2,14 +2,14 @@
  * File:          bHYPRE_IJParCSRMatrix_IOR.h
  * Symbol:        bHYPRE.IJParCSRMatrix-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.8.0
- * SIDL Created:  20030320 16:52:33 PST
- * Generated:     20030320 16:52:39 PST
+ * Babel Version: 0.8.2
+ * SIDL Created:  20030401 14:47:34 PST
+ * Generated:     20030401 14:47:39 PST
  * Description:   Intermediate Object Representation for bHYPRE.IJParCSRMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.0
+ * babel-version = 0.8.2
  * source-line   = 789
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -91,7 +91,7 @@ struct bHYPRE_IJParCSRMatrix__epv {
     struct bHYPRE_IJParCSRMatrix__object* self);
   void (*f__dtor)(
     struct bHYPRE_IJParCSRMatrix__object* self);
-  /* Methods introduced in SIDL.BaseInterface-v0.8.1 */
+  /* Methods introduced in SIDL.BaseInterface-v0.8.2 */
   void (*f_addRef)(
     struct bHYPRE_IJParCSRMatrix__object* self);
   void (*f_deleteRef)(
@@ -105,10 +105,10 @@ struct bHYPRE_IJParCSRMatrix__epv {
   SIDL_bool (*f_isType)(
     struct bHYPRE_IJParCSRMatrix__object* self,
     const char* name);
-  /* Methods introduced in SIDL.BaseClass-v0.8.1 */
   struct SIDL_ClassInfo__object* (*f_getClassInfo)(
     struct bHYPRE_IJParCSRMatrix__object* self);
-  /* Methods introduced in SIDL.BaseInterface-v0.8.1 */
+  /* Methods introduced in SIDL.BaseClass-v0.8.2 */
+  /* Methods introduced in SIDL.BaseInterface-v0.8.2 */
   /* Methods introduced in bHYPRE.CoefficientAccess-v1.0.0 */
   int32_t (*f_GetRow)(
     struct bHYPRE_IJParCSRMatrix__object* self,
@@ -116,7 +116,7 @@ struct bHYPRE_IJParCSRMatrix__epv {
     int32_t* size,
     struct SIDL_int__array** col_ind,
     struct SIDL_double__array** values);
-  /* Methods introduced in SIDL.BaseInterface-v0.8.1 */
+  /* Methods introduced in SIDL.BaseInterface-v0.8.2 */
   /* Methods introduced in bHYPRE.ProblemDefinition-v1.0.0 */
   int32_t (*f_SetCommunicator)(
     struct bHYPRE_IJParCSRMatrix__object* self,
@@ -177,7 +177,7 @@ struct bHYPRE_IJParCSRMatrix__epv {
     struct bHYPRE_IJParCSRMatrix__object* self,
     const char* filename,
     void* comm);
-  /* Methods introduced in SIDL.BaseInterface-v0.8.1 */
+  /* Methods introduced in SIDL.BaseInterface-v0.8.2 */
   /* Methods introduced in bHYPRE.Operator-v1.0.0 */
   int32_t (*f_SetIntParameter)(
     struct bHYPRE_IJParCSRMatrix__object* self,

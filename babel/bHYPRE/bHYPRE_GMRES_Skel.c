@@ -2,14 +2,14 @@
  * File:          bHYPRE_GMRES_Skel.c
  * Symbol:        bHYPRE.GMRES-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.8.0
- * SIDL Created:  20030320 16:52:19 PST
- * Generated:     20030320 16:52:30 PST
+ * Babel Version: 0.8.2
+ * SIDL Created:  20030401 14:47:20 PST
+ * Generated:     20030401 14:47:31 PST
  * Description:   Server-side glue code for bHYPRE.GMRES
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.0
+ * babel-version = 0.8.2
  * source-line   = 1247
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */

@@ -2,14 +2,14 @@
  * File:          bHYPRE_SStructMatrix_IOR.h
  * Symbol:        bHYPRE.SStructMatrix-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.8.0
- * SIDL Created:  20030320 16:52:34 PST
- * Generated:     20030320 16:52:36 PST
+ * Babel Version: 0.8.2
+ * SIDL Created:  20030401 14:47:34 PST
+ * Generated:     20030401 14:47:37 PST
  * Description:   Intermediate Object Representation for bHYPRE.SStructMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.0
+ * babel-version = 0.8.2
  * source-line   = 1062
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -90,7 +90,7 @@ struct bHYPRE_SStructMatrix__epv {
     struct bHYPRE_SStructMatrix__object* self);
   void (*f__dtor)(
     struct bHYPRE_SStructMatrix__object* self);
-  /* Methods introduced in SIDL.BaseInterface-v0.8.1 */
+  /* Methods introduced in SIDL.BaseInterface-v0.8.2 */
   void (*f_addRef)(
     struct bHYPRE_SStructMatrix__object* self);
   void (*f_deleteRef)(
@@ -104,10 +104,10 @@ struct bHYPRE_SStructMatrix__epv {
   SIDL_bool (*f_isType)(
     struct bHYPRE_SStructMatrix__object* self,
     const char* name);
-  /* Methods introduced in SIDL.BaseClass-v0.8.1 */
   struct SIDL_ClassInfo__object* (*f_getClassInfo)(
     struct bHYPRE_SStructMatrix__object* self);
-  /* Methods introduced in SIDL.BaseInterface-v0.8.1 */
+  /* Methods introduced in SIDL.BaseClass-v0.8.2 */
+  /* Methods introduced in SIDL.BaseInterface-v0.8.2 */
   /* Methods introduced in bHYPRE.Operator-v1.0.0 */
   int32_t (*f_SetCommunicator)(
     struct bHYPRE_SStructMatrix__object* self,
@@ -156,7 +156,7 @@ struct bHYPRE_SStructMatrix__epv {
     struct bHYPRE_SStructMatrix__object* self,
     struct bHYPRE_Vector__object* b,
     struct bHYPRE_Vector__object** x);
-  /* Methods introduced in SIDL.BaseInterface-v0.8.1 */
+  /* Methods introduced in SIDL.BaseInterface-v0.8.2 */
   /* Methods introduced in bHYPRE.ProblemDefinition-v1.0.0 */
   int32_t (*f_Initialize)(
     struct bHYPRE_SStructMatrix__object* self);

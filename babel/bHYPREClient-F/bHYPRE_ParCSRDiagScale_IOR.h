@@ -2,14 +2,14 @@
  * File:          bHYPRE_ParCSRDiagScale_IOR.h
  * Symbol:        bHYPRE.ParCSRDiagScale-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.8.0
- * SIDL Created:  20030320 16:52:45 PST
- * Generated:     20030320 16:52:48 PST
+ * Babel Version: 0.8.2
+ * SIDL Created:  20030401 14:47:46 PST
+ * Generated:     20030401 14:47:50 PST
  * Description:   Intermediate Object Representation for bHYPRE.ParCSRDiagScale
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.0
+ * babel-version = 0.8.2
  * source-line   = 1140
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -85,7 +85,7 @@ struct bHYPRE_ParCSRDiagScale__epv {
     struct bHYPRE_ParCSRDiagScale__object* self);
   void (*f__dtor)(
     struct bHYPRE_ParCSRDiagScale__object* self);
-  /* Methods introduced in SIDL.BaseInterface-v0.8.1 */
+  /* Methods introduced in SIDL.BaseInterface-v0.8.2 */
   void (*f_addRef)(
     struct bHYPRE_ParCSRDiagScale__object* self);
   void (*f_deleteRef)(
@@ -99,10 +99,10 @@ struct bHYPRE_ParCSRDiagScale__epv {
   SIDL_bool (*f_isType)(
     struct bHYPRE_ParCSRDiagScale__object* self,
     const char* name);
-  /* Methods introduced in SIDL.BaseClass-v0.8.1 */
   struct SIDL_ClassInfo__object* (*f_getClassInfo)(
     struct bHYPRE_ParCSRDiagScale__object* self);
-  /* Methods introduced in SIDL.BaseInterface-v0.8.1 */
+  /* Methods introduced in SIDL.BaseClass-v0.8.2 */
+  /* Methods introduced in SIDL.BaseInterface-v0.8.2 */
   /* Methods introduced in bHYPRE.Operator-v1.0.0 */
   int32_t (*f_SetCommunicator)(
     struct bHYPRE_ParCSRDiagScale__object* self,

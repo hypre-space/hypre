@@ -2,14 +2,14 @@
  * File:          bHYPRE_CoefficientAccess_IOR.c
  * Symbol:        bHYPRE.CoefficientAccess-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.8.0
- * SIDL Created:  20030320 16:52:45 PST
- * Generated:     20030320 16:52:48 PST
+ * Babel Version: 0.8.2
+ * SIDL Created:  20030401 14:47:45 PST
+ * Generated:     20030401 14:47:53 PST
  * Description:   Intermediate Object Representation for bHYPRE.CoefficientAccess
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.0
+ * babel-version = 0.8.2
  * source-line   = 766
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -115,6 +115,17 @@ remote_bHYPRE_CoefficientAccess_isType(
 }
 
 /*
+ * REMOTE METHOD STUB:getClassInfo
+ */
+
+static struct SIDL_ClassInfo__object*
+remote_bHYPRE_CoefficientAccess_getClassInfo(
+  void* self)
+{
+  return (struct SIDL_ClassInfo__object*) 0;
+}
+
+/*
  * REMOTE METHOD STUB:GetRow
  */
 
@@ -137,14 +148,15 @@ static void bHYPRE_CoefficientAccess__init_remote_epv(void)
 {
   struct bHYPRE_CoefficientAccess__epv* epv = &s_rem__bhypre_coefficientaccess;
 
-  epv->f__cast     = remote_bHYPRE_CoefficientAccess__cast;
-  epv->f__delete   = remote_bHYPRE_CoefficientAccess__delete;
-  epv->f_addRef    = remote_bHYPRE_CoefficientAccess_addRef;
-  epv->f_deleteRef = remote_bHYPRE_CoefficientAccess_deleteRef;
-  epv->f_isSame    = remote_bHYPRE_CoefficientAccess_isSame;
-  epv->f_queryInt  = remote_bHYPRE_CoefficientAccess_queryInt;
-  epv->f_isType    = remote_bHYPRE_CoefficientAccess_isType;
-  epv->f_GetRow    = remote_bHYPRE_CoefficientAccess_GetRow;
+  epv->f__cast        = remote_bHYPRE_CoefficientAccess__cast;
+  epv->f__delete      = remote_bHYPRE_CoefficientAccess__delete;
+  epv->f_addRef       = remote_bHYPRE_CoefficientAccess_addRef;
+  epv->f_deleteRef    = remote_bHYPRE_CoefficientAccess_deleteRef;
+  epv->f_isSame       = remote_bHYPRE_CoefficientAccess_isSame;
+  epv->f_queryInt     = remote_bHYPRE_CoefficientAccess_queryInt;
+  epv->f_isType       = remote_bHYPRE_CoefficientAccess_isType;
+  epv->f_getClassInfo = remote_bHYPRE_CoefficientAccess_getClassInfo;
+  epv->f_GetRow       = remote_bHYPRE_CoefficientAccess_GetRow;
   s_remote_initialized = 1;
 }
 

@@ -2,14 +2,14 @@
  * File:          bHYPRE_StructVector_Impl.h
  * Symbol:        bHYPRE.StructVector-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.8.0
- * SIDL Created:  20030320 16:52:19 PST
- * Generated:     20030320 16:52:31 PST
+ * Babel Version: 0.8.2
+ * SIDL Created:  20030401 14:47:20 PST
+ * Generated:     20030401 14:47:32 PST
  * Description:   Server-side implementation for bHYPRE.StructVector
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.8.0
+ * babel-version = 0.8.2
  * source-line   = 1129
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -81,6 +81,37 @@ impl_bHYPRE_StructVector__dtor(
  */
 
 extern int32_t
+impl_bHYPRE_StructVector_Clear(
+  bHYPRE_StructVector);
+
+extern int32_t
+impl_bHYPRE_StructVector_Copy(
+  bHYPRE_StructVector,
+  bHYPRE_Vector);
+
+extern int32_t
+impl_bHYPRE_StructVector_Clone(
+  bHYPRE_StructVector,
+  bHYPRE_Vector*);
+
+extern int32_t
+impl_bHYPRE_StructVector_Scale(
+  bHYPRE_StructVector,
+  double);
+
+extern int32_t
+impl_bHYPRE_StructVector_Dot(
+  bHYPRE_StructVector,
+  bHYPRE_Vector,
+  double*);
+
+extern int32_t
+impl_bHYPRE_StructVector_Axpy(
+  bHYPRE_StructVector,
+  double,
+  bHYPRE_Vector);
+
+extern int32_t
 impl_bHYPRE_StructVector_SetCommunicator(
   bHYPRE_StructVector,
   void*);
@@ -120,37 +151,6 @@ impl_bHYPRE_StructVector_SetBoxValues(
   struct SIDL_int__array*,
   struct SIDL_int__array*,
   struct SIDL_double__array*);
-
-extern int32_t
-impl_bHYPRE_StructVector_Clear(
-  bHYPRE_StructVector);
-
-extern int32_t
-impl_bHYPRE_StructVector_Copy(
-  bHYPRE_StructVector,
-  bHYPRE_Vector);
-
-extern int32_t
-impl_bHYPRE_StructVector_Clone(
-  bHYPRE_StructVector,
-  bHYPRE_Vector*);
-
-extern int32_t
-impl_bHYPRE_StructVector_Scale(
-  bHYPRE_StructVector,
-  double);
-
-extern int32_t
-impl_bHYPRE_StructVector_Dot(
-  bHYPRE_StructVector,
-  bHYPRE_Vector,
-  double*);
-
-extern int32_t
-impl_bHYPRE_StructVector_Axpy(
-  bHYPRE_StructVector,
-  double,
-  bHYPRE_Vector);
 
 #ifdef __cplusplus
 }

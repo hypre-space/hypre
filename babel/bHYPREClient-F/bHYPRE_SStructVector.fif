@@ -2,14 +2,14 @@ C
 C       File:          bHYPRE_SStructVector_Impl.f
 C       Symbol:        bHYPRE.SStructVector-v1.0.0
 C       Symbol Type:   class
-C       Babel Version: 0.8.0
-C       SIDL Created:  20030320 16:52:45 PST
-C       Generated:     20030320 16:52:51 PST
+C       Babel Version: 0.8.2
+C       SIDL Created:  20030401 14:47:46 PST
+C       Generated:     20030401 14:48:06 PST
 C       Description:   Client-side documentation text for bHYPRE.SStructVector
 C       
 C       WARNING: Automatically generated; changes will be lost
 C       
-C       babel-version = 0.8.0
+C       babel-version = 0.8.2
 C       source-line   = 1074
 C       source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
 C       
@@ -41,10 +41,23 @@ C       out bHYPRE.SStructVector retval
 
 
 C       
+C       Cast method for interface and type conversions.
+C       
+
+        subroutine bHYPRE_SStructVector__cast_f(ref, retval)
+        implicit none
+C       in opaque ref
+        integer*8 ref
+C       out bHYPRE.SStructVector retval
+        integer*8 retval
+        end
+
+
+C       
 C       Cast method for interface and class type conversions.
 C       
 
-        subroutine bHYPRE_SStructVector__cast_f(self, name, retval)
+        subroutine bHYPRE_SStructVector__cast2_f(self, name, retval)
         implicit none
 C       in bHYPRE.SStructVector self
         integer*8 self
@@ -211,7 +224,7 @@ C       out int retval
 
 
 C       
-C       Scale {\self} by {\tt a}.
+C       Scale {\tt self} by {\tt a}.
 C       
 C       
 

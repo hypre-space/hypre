@@ -2,14 +2,14 @@
  * File:          bHYPRE_Operator_fStub.c
  * Symbol:        bHYPRE.Operator-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.8.0
- * SIDL Created:  20030320 16:52:45 PST
- * Generated:     20030320 16:52:55 PST
+ * Babel Version: 0.8.2
+ * SIDL Created:  20030401 14:47:45 PST
+ * Generated:     20030401 14:48:19 PST
  * Description:   Client-side glue code for bHYPRE.Operator
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.0
+ * babel-version = 0.8.2
  * source-line   = 590
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -38,14 +38,39 @@
 #endif
 #include "bHYPRE_Operator_IOR.h"
 #include "SIDL_BaseInterface_IOR.h"
+#include "SIDL_ClassInfo_IOR.h"
 #include "bHYPRE_Vector_IOR.h"
+
+/*
+ * Cast method for interface and type conversions.
+ */
+
+void
+SIDLFortran77Symbol(bhypre_operator__cast_f,BHYPRE_OPERATOR__CAST_F,bHYPRE_Operator__cast_f)
+(
+  int64_t *ref,
+  int64_t *retval
+)
+{
+  struct SIDL_BaseInterface__object  *_base =
+    (struct SIDL_BaseInterface__object *)(ptrdiff_t)*ref;
+  if (_base) {
+    *retval = (ptrdiff_t)(
+      *_base->d_epv->f__cast)(
+      _base->d_object,
+      "bHYPRE.Operator");
+  }
+  else {
+    *retval = 0;
+  }
+}
 
 /*
  * Cast method for interface and class type conversions.
  */
 
 void
-SIDLFortran77Symbol(bhypre_operator__cast_f,BHYPRE_OPERATOR__CAST_F,bHYPRE_Operator__cast_f)
+SIDLFortran77Symbol(bhypre_operator__cast2_f,BHYPRE_OPERATOR__CAST2_F,bHYPRE_Operator__cast2_f)
 (
   int64_t *self,
   SIDL_F77_String name
@@ -238,6 +263,31 @@ SIDLFortran77Symbol(bhypre_operator_istype_f,BHYPRE_OPERATOR_ISTYPE_F,bHYPRE_Ope
     );
   *retval = ((_proxy_retval == TRUE) ? SIDL_F77_TRUE : SIDL_F77_FALSE);
   free((void *)_proxy_name);
+}
+
+/*
+ * Return the meta-data about the class implementing this interface.
+ */
+
+void
+SIDLFortran77Symbol(bhypre_operator_getclassinfo_f,BHYPRE_OPERATOR_GETCLASSINFO_F,bHYPRE_Operator_getClassInfo_f)
+(
+  int64_t *self,
+  int64_t *retval
+)
+{
+  struct bHYPRE_Operator__epv *_epv = NULL;
+  struct bHYPRE_Operator__object* _proxy_self = NULL;
+  struct SIDL_ClassInfo__object* _proxy_retval = NULL;
+  _proxy_self =
+    (struct bHYPRE_Operator__object*)
+    (ptrdiff_t)(*self);
+  _epv = _proxy_self->d_epv;
+  _proxy_retval = 
+    (*(_epv->f_getClassInfo))(
+      _proxy_self->d_object
+    );
+  *retval = (ptrdiff_t)_proxy_retval;
 }
 
 /*
@@ -988,6 +1038,23 @@ SIDLFortran77Symbol(bhypre_operator__array_smartcopy_f,
 {
   SIDL_interface__array_smartCopy((struct SIDL_interface__array 
     *)(ptrdiff_t)*src);
+}
+
+void
+SIDLFortran77Symbol(bhypre_operator__array_slice_f,
+                  BHYPRE_OPERATOR__ARRAY_SLICE_F,
+                  bHYPRE_Operator__array_slice_f)
+  (int64_t *src,
+   int32_t *dimen,
+   int32_t numElem[],
+   int32_t srcStart[],
+   int32_t srcStride[],
+   int32_t newStart[],
+   int64_t *result)
+{
+  *result = (ptrdiff_t)
+    SIDL_interface__array_slice((struct SIDL_interface__array *)(ptrdiff_t)*src,
+      *dimen, numElem, srcStart, srcStride, newStart);
 }
 
 void

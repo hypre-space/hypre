@@ -2,14 +2,14 @@
  * File:          bHYPRE_StructMatrix_Skel.c
  * Symbol:        bHYPRE.StructMatrix-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.8.0
- * SIDL Created:  20030320 16:52:19 PST
- * Generated:     20030320 16:52:31 PST
+ * Babel Version: 0.8.2
+ * SIDL Created:  20030401 14:47:20 PST
+ * Generated:     20030401 14:47:32 PST
  * Description:   Server-side glue code for bHYPRE.StructMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.0
+ * babel-version = 0.8.2
  * source-line   = 1124
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -30,56 +30,6 @@ extern int32_t
 impl_bHYPRE_StructMatrix_SetCommunicator(
   bHYPRE_StructMatrix,
   void*);
-
-extern int32_t
-impl_bHYPRE_StructMatrix_Initialize(
-  bHYPRE_StructMatrix);
-
-extern int32_t
-impl_bHYPRE_StructMatrix_Assemble(
-  bHYPRE_StructMatrix);
-
-extern int32_t
-impl_bHYPRE_StructMatrix_GetObject(
-  bHYPRE_StructMatrix,
-  SIDL_BaseInterface*);
-
-extern int32_t
-impl_bHYPRE_StructMatrix_SetGrid(
-  bHYPRE_StructMatrix,
-  bHYPRE_StructGrid);
-
-extern int32_t
-impl_bHYPRE_StructMatrix_SetStencil(
-  bHYPRE_StructMatrix,
-  bHYPRE_StructStencil);
-
-extern int32_t
-impl_bHYPRE_StructMatrix_SetValues(
-  bHYPRE_StructMatrix,
-  struct SIDL_int__array*,
-  int32_t,
-  struct SIDL_int__array*,
-  struct SIDL_double__array*);
-
-extern int32_t
-impl_bHYPRE_StructMatrix_SetBoxValues(
-  bHYPRE_StructMatrix,
-  struct SIDL_int__array*,
-  struct SIDL_int__array*,
-  int32_t,
-  struct SIDL_int__array*,
-  struct SIDL_double__array*);
-
-extern int32_t
-impl_bHYPRE_StructMatrix_SetNumGhost(
-  bHYPRE_StructMatrix,
-  struct SIDL_int__array*);
-
-extern int32_t
-impl_bHYPRE_StructMatrix_SetSymmetric(
-  bHYPRE_StructMatrix,
-  int32_t);
 
 extern int32_t
 impl_bHYPRE_StructMatrix_SetIntParameter(
@@ -146,6 +96,128 @@ impl_bHYPRE_StructMatrix_Apply(
   bHYPRE_StructMatrix,
   bHYPRE_Vector,
   bHYPRE_Vector*);
+
+extern int32_t
+impl_bHYPRE_StructMatrix_Initialize(
+  bHYPRE_StructMatrix);
+
+extern int32_t
+impl_bHYPRE_StructMatrix_Assemble(
+  bHYPRE_StructMatrix);
+
+extern int32_t
+impl_bHYPRE_StructMatrix_GetObject(
+  bHYPRE_StructMatrix,
+  SIDL_BaseInterface*);
+
+extern int32_t
+impl_bHYPRE_StructMatrix_SetGrid(
+  bHYPRE_StructMatrix,
+  bHYPRE_StructGrid);
+
+extern int32_t
+impl_bHYPRE_StructMatrix_SetStencil(
+  bHYPRE_StructMatrix,
+  bHYPRE_StructStencil);
+
+extern int32_t
+impl_bHYPRE_StructMatrix_SetValues(
+  bHYPRE_StructMatrix,
+  struct SIDL_int__array*,
+  int32_t,
+  struct SIDL_int__array*,
+  struct SIDL_double__array*);
+
+extern int32_t
+impl_bHYPRE_StructMatrix_SetBoxValues(
+  bHYPRE_StructMatrix,
+  struct SIDL_int__array*,
+  struct SIDL_int__array*,
+  int32_t,
+  struct SIDL_int__array*,
+  struct SIDL_double__array*);
+
+extern int32_t
+impl_bHYPRE_StructMatrix_SetNumGhost(
+  bHYPRE_StructMatrix,
+  struct SIDL_int__array*);
+
+extern int32_t
+impl_bHYPRE_StructMatrix_SetSymmetric(
+  bHYPRE_StructMatrix,
+  int32_t);
+
+static int32_t
+skel_bHYPRE_StructMatrix_SetIntArray1Parameter(
+  bHYPRE_StructMatrix self,
+  const char* name,
+  struct SIDL_int__array* value)
+{
+  int32_t _return;
+  struct SIDL_int__array* value_proxy = SIDL_int__array_ensure(value, 1,
+    SIDL_column_major_order);
+  _return =
+    impl_bHYPRE_StructMatrix_SetIntArray1Parameter(
+      self,
+      name,
+      value_proxy);
+  SIDL_int__array_deleteRef(value_proxy);
+  return _return;
+}
+
+static int32_t
+skel_bHYPRE_StructMatrix_SetIntArray2Parameter(
+  bHYPRE_StructMatrix self,
+  const char* name,
+  struct SIDL_int__array* value)
+{
+  int32_t _return;
+  struct SIDL_int__array* value_proxy = SIDL_int__array_ensure(value, 2,
+    SIDL_column_major_order);
+  _return =
+    impl_bHYPRE_StructMatrix_SetIntArray2Parameter(
+      self,
+      name,
+      value_proxy);
+  SIDL_int__array_deleteRef(value_proxy);
+  return _return;
+}
+
+static int32_t
+skel_bHYPRE_StructMatrix_SetDoubleArray1Parameter(
+  bHYPRE_StructMatrix self,
+  const char* name,
+  struct SIDL_double__array* value)
+{
+  int32_t _return;
+  struct SIDL_double__array* value_proxy = SIDL_double__array_ensure(value, 1,
+    SIDL_column_major_order);
+  _return =
+    impl_bHYPRE_StructMatrix_SetDoubleArray1Parameter(
+      self,
+      name,
+      value_proxy);
+  SIDL_double__array_deleteRef(value_proxy);
+  return _return;
+}
+
+static int32_t
+skel_bHYPRE_StructMatrix_SetDoubleArray2Parameter(
+  bHYPRE_StructMatrix self,
+  const char* name,
+  struct SIDL_double__array* value)
+{
+  int32_t _return;
+  struct SIDL_double__array* value_proxy = SIDL_double__array_ensure(value, 2,
+    SIDL_column_major_order);
+  _return =
+    impl_bHYPRE_StructMatrix_SetDoubleArray2Parameter(
+      self,
+      name,
+      value_proxy);
+  SIDL_double__array_deleteRef(value_proxy);
+  return _return;
+}
 
 static int32_t
 skel_bHYPRE_StructMatrix_SetValues(
@@ -224,93 +296,12 @@ skel_bHYPRE_StructMatrix_SetNumGhost(
   return _return;
 }
 
-static int32_t
-skel_bHYPRE_StructMatrix_SetIntArray1Parameter(
-  bHYPRE_StructMatrix self,
-  const char* name,
-  struct SIDL_int__array* value)
-{
-  int32_t _return;
-  struct SIDL_int__array* value_proxy = SIDL_int__array_ensure(value, 1,
-    SIDL_column_major_order);
-  _return =
-    impl_bHYPRE_StructMatrix_SetIntArray1Parameter(
-      self,
-      name,
-      value_proxy);
-  SIDL_int__array_deleteRef(value_proxy);
-  return _return;
-}
-
-static int32_t
-skel_bHYPRE_StructMatrix_SetIntArray2Parameter(
-  bHYPRE_StructMatrix self,
-  const char* name,
-  struct SIDL_int__array* value)
-{
-  int32_t _return;
-  struct SIDL_int__array* value_proxy = SIDL_int__array_ensure(value, 2,
-    SIDL_column_major_order);
-  _return =
-    impl_bHYPRE_StructMatrix_SetIntArray2Parameter(
-      self,
-      name,
-      value_proxy);
-  SIDL_int__array_deleteRef(value_proxy);
-  return _return;
-}
-
-static int32_t
-skel_bHYPRE_StructMatrix_SetDoubleArray1Parameter(
-  bHYPRE_StructMatrix self,
-  const char* name,
-  struct SIDL_double__array* value)
-{
-  int32_t _return;
-  struct SIDL_double__array* value_proxy = SIDL_double__array_ensure(value, 1,
-    SIDL_column_major_order);
-  _return =
-    impl_bHYPRE_StructMatrix_SetDoubleArray1Parameter(
-      self,
-      name,
-      value_proxy);
-  SIDL_double__array_deleteRef(value_proxy);
-  return _return;
-}
-
-static int32_t
-skel_bHYPRE_StructMatrix_SetDoubleArray2Parameter(
-  bHYPRE_StructMatrix self,
-  const char* name,
-  struct SIDL_double__array* value)
-{
-  int32_t _return;
-  struct SIDL_double__array* value_proxy = SIDL_double__array_ensure(value, 2,
-    SIDL_column_major_order);
-  _return =
-    impl_bHYPRE_StructMatrix_SetDoubleArray2Parameter(
-      self,
-      name,
-      value_proxy);
-  SIDL_double__array_deleteRef(value_proxy);
-  return _return;
-}
-
 void
 bHYPRE_StructMatrix__set_epv(struct bHYPRE_StructMatrix__epv *epv)
 {
   epv->f__ctor = impl_bHYPRE_StructMatrix__ctor;
   epv->f__dtor = impl_bHYPRE_StructMatrix__dtor;
   epv->f_SetCommunicator = impl_bHYPRE_StructMatrix_SetCommunicator;
-  epv->f_Initialize = impl_bHYPRE_StructMatrix_Initialize;
-  epv->f_Assemble = impl_bHYPRE_StructMatrix_Assemble;
-  epv->f_GetObject = impl_bHYPRE_StructMatrix_GetObject;
-  epv->f_SetGrid = impl_bHYPRE_StructMatrix_SetGrid;
-  epv->f_SetStencil = impl_bHYPRE_StructMatrix_SetStencil;
-  epv->f_SetValues = skel_bHYPRE_StructMatrix_SetValues;
-  epv->f_SetBoxValues = skel_bHYPRE_StructMatrix_SetBoxValues;
-  epv->f_SetNumGhost = skel_bHYPRE_StructMatrix_SetNumGhost;
-  epv->f_SetSymmetric = impl_bHYPRE_StructMatrix_SetSymmetric;
   epv->f_SetIntParameter = impl_bHYPRE_StructMatrix_SetIntParameter;
   epv->f_SetDoubleParameter = impl_bHYPRE_StructMatrix_SetDoubleParameter;
   epv->f_SetStringParameter = impl_bHYPRE_StructMatrix_SetStringParameter;
@@ -324,6 +315,15 @@ bHYPRE_StructMatrix__set_epv(struct bHYPRE_StructMatrix__epv *epv)
   epv->f_GetDoubleValue = impl_bHYPRE_StructMatrix_GetDoubleValue;
   epv->f_Setup = impl_bHYPRE_StructMatrix_Setup;
   epv->f_Apply = impl_bHYPRE_StructMatrix_Apply;
+  epv->f_Initialize = impl_bHYPRE_StructMatrix_Initialize;
+  epv->f_Assemble = impl_bHYPRE_StructMatrix_Assemble;
+  epv->f_GetObject = impl_bHYPRE_StructMatrix_GetObject;
+  epv->f_SetGrid = impl_bHYPRE_StructMatrix_SetGrid;
+  epv->f_SetStencil = impl_bHYPRE_StructMatrix_SetStencil;
+  epv->f_SetValues = skel_bHYPRE_StructMatrix_SetValues;
+  epv->f_SetBoxValues = skel_bHYPRE_StructMatrix_SetBoxValues;
+  epv->f_SetNumGhost = skel_bHYPRE_StructMatrix_SetNumGhost;
+  epv->f_SetSymmetric = impl_bHYPRE_StructMatrix_SetSymmetric;
 }
 
 struct bHYPRE_StructMatrix__data*

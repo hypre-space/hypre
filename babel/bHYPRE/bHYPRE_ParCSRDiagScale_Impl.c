@@ -2,14 +2,14 @@
  * File:          bHYPRE_ParCSRDiagScale_Impl.c
  * Symbol:        bHYPRE.ParCSRDiagScale-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.8.0
- * SIDL Created:  20030320 16:52:19 PST
- * Generated:     20030320 16:52:30 PST
+ * Babel Version: 0.8.2
+ * SIDL Created:  20030401 14:47:20 PST
+ * Generated:     20030401 14:47:31 PST
  * Description:   Server-side implementation for bHYPRE.ParCSRDiagScale
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.8.0
+ * babel-version = 0.8.2
  * source-line   = 1140
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -231,7 +231,6 @@ impl_bHYPRE_ParCSRDiagScale_SetDoubleArray1Parameter(
   /* DO-NOT-DELETE 
     splicer.begin(bHYPRE.ParCSRDiagScale.SetDoubleArray1Parameter) */
   /* Insert the implementation of the SetDoubleArray1Parameter method here... */
-   return 1;
   /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale.SetDoubleArray1Parameter) 
     */
 }
@@ -252,7 +251,6 @@ impl_bHYPRE_ParCSRDiagScale_SetDoubleArray2Parameter(
   /* DO-NOT-DELETE 
     splicer.begin(bHYPRE.ParCSRDiagScale.SetDoubleArray2Parameter) */
   /* Insert the implementation of the SetDoubleArray2Parameter method here... */
-   return 1;
   /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale.SetDoubleArray2Parameter) 
     */
 }
@@ -558,11 +556,3 @@ impl_bHYPRE_ParCSRDiagScale_GetRelResidualNorm(
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale.GetRelResidualNorm) */
 }
-
-/**
- * ================= BEGIN UNREFERENCED METHOD(S) ================
- * The following code segment(s) belong to unreferenced method(s).
- * This can result from a method rename/removal in the SIDL file.
- * Move or remove the code in order to compile cleanly.
- */
-/* ================== END UNREFERENCED METHOD(S) ================= */

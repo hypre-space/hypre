@@ -2,14 +2,14 @@
  * File:          bHYPRE_StructStencil_IOR.h
  * Symbol:        bHYPRE.StructStencil-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.8.0
- * SIDL Created:  20030320 16:52:45 PST
- * Generated:     20030320 16:52:49 PST
+ * Babel Version: 0.8.2
+ * SIDL Created:  20030401 14:47:46 PST
+ * Generated:     20030401 14:47:56 PST
  * Description:   Intermediate Object Representation for bHYPRE.StructStencil
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.0
+ * babel-version = 0.8.2
  * source-line   = 1088
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -77,7 +77,7 @@ struct bHYPRE_StructStencil__epv {
     struct bHYPRE_StructStencil__object* self);
   void (*f__dtor)(
     struct bHYPRE_StructStencil__object* self);
-  /* Methods introduced in SIDL.BaseInterface-v0.8.1 */
+  /* Methods introduced in SIDL.BaseInterface-v0.8.2 */
   void (*f_addRef)(
     struct bHYPRE_StructStencil__object* self);
   void (*f_deleteRef)(
@@ -91,9 +91,9 @@ struct bHYPRE_StructStencil__epv {
   SIDL_bool (*f_isType)(
     struct bHYPRE_StructStencil__object* self,
     const char* name);
-  /* Methods introduced in SIDL.BaseClass-v0.8.1 */
   struct SIDL_ClassInfo__object* (*f_getClassInfo)(
     struct bHYPRE_StructStencil__object* self);
+  /* Methods introduced in SIDL.BaseClass-v0.8.2 */
   /* Methods introduced in bHYPRE.StructStencil-v1.0.0 */
   int32_t (*f_SetDimension)(
     struct bHYPRE_StructStencil__object* self,

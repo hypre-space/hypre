@@ -2,14 +2,14 @@
  * File:          bHYPRE_ProblemDefinition_IOR.h
  * Symbol:        bHYPRE.ProblemDefinition-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.8.0
- * SIDL Created:  20030320 16:52:44 PST
- * Generated:     20030320 16:52:46 PST
+ * Babel Version: 0.8.2
+ * SIDL Created:  20030401 14:47:45 PST
+ * Generated:     20030401 14:47:47 PST
  * Description:   Intermediate Object Representation for bHYPRE.ProblemDefinition
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.0
+ * babel-version = 0.8.2
  * source-line   = 42
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -61,6 +61,8 @@ bHYPRE_ProblemDefinition__remote(const char *url);
 
 struct SIDL_BaseInterface__array;
 struct SIDL_BaseInterface__object;
+struct SIDL_ClassInfo__array;
+struct SIDL_ClassInfo__object;
 
 /*
  * Declare the method entry point vector.
@@ -73,7 +75,7 @@ struct bHYPRE_ProblemDefinition__epv {
     const char* name);
   void (*f__delete)(
     void* self);
-  /* Methods introduced in SIDL.BaseInterface-v0.8.1 */
+  /* Methods introduced in SIDL.BaseInterface-v0.8.2 */
   void (*f_addRef)(
     void* self);
   void (*f_deleteRef)(
@@ -87,6 +89,8 @@ struct bHYPRE_ProblemDefinition__epv {
   SIDL_bool (*f_isType)(
     void* self,
     const char* name);
+  struct SIDL_ClassInfo__object* (*f_getClassInfo)(
+    void* self);
   /* Methods introduced in bHYPRE.ProblemDefinition-v1.0.0 */
   int32_t (*f_SetCommunicator)(
     void* self,

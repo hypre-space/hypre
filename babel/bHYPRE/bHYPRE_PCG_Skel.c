@@ -2,14 +2,14 @@
  * File:          bHYPRE_PCG_Skel.c
  * Symbol:        bHYPRE.PCG-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.8.0
- * SIDL Created:  20030320 16:52:19 PST
- * Generated:     20030320 16:52:29 PST
+ * Babel Version: 0.8.2
+ * SIDL Created:  20030401 14:47:20 PST
+ * Generated:     20030401 14:47:29 PST
  * Description:   Server-side glue code for bHYPRE.PCG
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.0
+ * babel-version = 0.8.2
  * source-line   = 1237
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */

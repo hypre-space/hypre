@@ -2,14 +2,14 @@
  * File:          bHYPRE_SStructVariable_fStub.c
  * Symbol:        bHYPRE.SStructVariable-v1.0.0
  * Symbol Type:   enumeration
- * Babel Version: 0.8.0
- * SIDL Created:  20030320 16:52:45 PST
- * Generated:     20030320 16:52:52 PST
+ * Babel Version: 0.8.2
+ * SIDL Created:  20030401 14:47:46 PST
+ * Generated:     20030401 14:48:09 PST
  * Description:   Client-side glue code for bHYPRE.SStructVariable
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.0
+ * babel-version = 0.8.2
  * source-line   = 888
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -315,6 +315,23 @@ SIDLFortran77Symbol(bhypre_sstructvariable__array_smartcopy_f,
   (int64_t *src)
 {
   SIDL_int__array_smartCopy((struct SIDL_int__array *)(ptrdiff_t)*src);
+}
+
+void
+SIDLFortran77Symbol(bhypre_sstructvariable__array_slice_f,
+                  BHYPRE_SSTRUCTVARIABLE__ARRAY_SLICE_F,
+                  bHYPRE_SStructVariable__array_slice_f)
+  (int64_t *src,
+   int32_t *dimen,
+   int32_t numElem[],
+   int32_t srcStart[],
+   int32_t srcStride[],
+   int32_t newStart[],
+   int64_t *result)
+{
+  *result = (ptrdiff_t)
+    SIDL_int__array_slice((struct SIDL_int__array *)(ptrdiff_t)*src,
+      *dimen, numElem, srcStart, srcStride, newStart);
 }
 
 void

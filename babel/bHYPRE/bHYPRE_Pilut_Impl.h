@@ -2,14 +2,14 @@
  * File:          bHYPRE_Pilut_Impl.h
  * Symbol:        bHYPRE.Pilut-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.8.0
- * SIDL Created:  20030320 16:52:19 PST
- * Generated:     20030320 16:52:31 PST
+ * Babel Version: 0.8.2
+ * SIDL Created:  20030401 14:47:20 PST
+ * Generated:     20030401 14:47:32 PST
  * Description:   Server-side implementation for bHYPRE.Pilut
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.8.0
+ * babel-version = 0.8.2
  * source-line   = 1227
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */

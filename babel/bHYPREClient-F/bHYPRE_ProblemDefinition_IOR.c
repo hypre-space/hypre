@@ -2,14 +2,14 @@
  * File:          bHYPRE_ProblemDefinition_IOR.c
  * Symbol:        bHYPRE.ProblemDefinition-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.8.0
- * SIDL Created:  20030320 16:52:44 PST
- * Generated:     20030320 16:52:46 PST
+ * Babel Version: 0.8.2
+ * SIDL Created:  20030401 14:47:45 PST
+ * Generated:     20030401 14:47:47 PST
  * Description:   Intermediate Object Representation for bHYPRE.ProblemDefinition
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.0
+ * babel-version = 0.8.2
  * source-line   = 42
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -115,6 +115,17 @@ remote_bHYPRE_ProblemDefinition_isType(
 }
 
 /*
+ * REMOTE METHOD STUB:getClassInfo
+ */
+
+static struct SIDL_ClassInfo__object*
+remote_bHYPRE_ProblemDefinition_getClassInfo(
+  void* self)
+{
+  return (struct SIDL_ClassInfo__object*) 0;
+}
+
+/*
  * REMOTE METHOD STUB:SetCommunicator
  */
 
@@ -175,6 +186,7 @@ static void bHYPRE_ProblemDefinition__init_remote_epv(void)
   epv->f_isSame          = remote_bHYPRE_ProblemDefinition_isSame;
   epv->f_queryInt        = remote_bHYPRE_ProblemDefinition_queryInt;
   epv->f_isType          = remote_bHYPRE_ProblemDefinition_isType;
+  epv->f_getClassInfo    = remote_bHYPRE_ProblemDefinition_getClassInfo;
   epv->f_SetCommunicator = remote_bHYPRE_ProblemDefinition_SetCommunicator;
   epv->f_Initialize      = remote_bHYPRE_ProblemDefinition_Initialize;
   epv->f_Assemble        = remote_bHYPRE_ProblemDefinition_Assemble;

@@ -2,14 +2,14 @@
  * File:          bHYPRE_StructVector_Impl.c
  * Symbol:        bHYPRE.StructVector-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.8.0
- * SIDL Created:  20030320 16:52:19 PST
- * Generated:     20030320 16:52:31 PST
+ * Babel Version: 0.8.2
+ * SIDL Created:  20030401 14:47:20 PST
+ * Generated:     20030401 14:47:32 PST
  * Description:   Server-side implementation for bHYPRE.StructVector
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.8.0
+ * babel-version = 0.8.2
  * source-line   = 1129
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -59,6 +59,118 @@ impl_bHYPRE_StructVector__dtor(
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructVector._dtor) */
   /* Insert the implementation of the destructor method here... */
   /* DO-NOT-DELETE splicer.end(bHYPRE.StructVector._dtor) */
+}
+
+/*
+ * Set {\tt self} to 0.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_StructVector_Clear"
+
+int32_t
+impl_bHYPRE_StructVector_Clear(
+  bHYPRE_StructVector self)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructVector.Clear) */
+  /* Insert the implementation of the Clear method here... */
+   return 1; /* not implemented */
+  /* DO-NOT-DELETE splicer.end(bHYPRE.StructVector.Clear) */
+}
+
+/*
+ * Copy x into {\tt self}.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_StructVector_Copy"
+
+int32_t
+impl_bHYPRE_StructVector_Copy(
+  bHYPRE_StructVector self, bHYPRE_Vector x)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructVector.Copy) */
+  /* Insert the implementation of the Copy method here... */
+   return 1; /* not implemented */
+  /* DO-NOT-DELETE splicer.end(bHYPRE.StructVector.Copy) */
+}
+
+/*
+ * Create an {\tt x} compatible with {\tt self}.
+ * 
+ * NOTE: When this method is used in an inherited class, the
+ * cloned {\tt Vector} object can be cast to an object with the
+ * inherited class type.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_StructVector_Clone"
+
+int32_t
+impl_bHYPRE_StructVector_Clone(
+  bHYPRE_StructVector self, bHYPRE_Vector* x)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructVector.Clone) */
+  /* Insert the implementation of the Clone method here... */
+   return 1; /* not implemented */
+  /* DO-NOT-DELETE splicer.end(bHYPRE.StructVector.Clone) */
+}
+
+/*
+ * Scale {\tt self} by {\tt a}.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_StructVector_Scale"
+
+int32_t
+impl_bHYPRE_StructVector_Scale(
+  bHYPRE_StructVector self, double a)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructVector.Scale) */
+  /* Insert the implementation of the Scale method here... */
+   return 1; /* not implemented */
+  /* DO-NOT-DELETE splicer.end(bHYPRE.StructVector.Scale) */
+}
+
+/*
+ * Compute {\tt d}, the inner-product of {\tt self} and {\tt x}.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_StructVector_Dot"
+
+int32_t
+impl_bHYPRE_StructVector_Dot(
+  bHYPRE_StructVector self, bHYPRE_Vector x, double* d)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructVector.Dot) */
+  /* Insert the implementation of the Dot method here... */
+   return 1; /* not implemented */
+  /* DO-NOT-DELETE splicer.end(bHYPRE.StructVector.Dot) */
+}
+
+/*
+ * Add {\tt a}*{\tt x} to {\tt self}.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_StructVector_Axpy"
+
+int32_t
+impl_bHYPRE_StructVector_Axpy(
+  bHYPRE_StructVector self, double a, bHYPRE_Vector x)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructVector.Axpy) */
+  /* Insert the implementation of the Axpy method here... */
+   return 1; /* not implemented */
+  /* DO-NOT-DELETE splicer.end(bHYPRE.StructVector.Axpy) */
 }
 
 /*
@@ -213,116 +325,4 @@ impl_bHYPRE_StructVector_SetBoxValues(
   /* Insert the implementation of the SetBoxValues method here... */
    return 1; /* not implemented */
   /* DO-NOT-DELETE splicer.end(bHYPRE.StructVector.SetBoxValues) */
-}
-
-/*
- * Set {\tt self} to 0.
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_StructVector_Clear"
-
-int32_t
-impl_bHYPRE_StructVector_Clear(
-  bHYPRE_StructVector self)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructVector.Clear) */
-  /* Insert the implementation of the Clear method here... */
-   return 1; /* not implemented */
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructVector.Clear) */
-}
-
-/*
- * Copy x into {\tt self}.
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_StructVector_Copy"
-
-int32_t
-impl_bHYPRE_StructVector_Copy(
-  bHYPRE_StructVector self, bHYPRE_Vector x)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructVector.Copy) */
-  /* Insert the implementation of the Copy method here... */
-   return 1; /* not implemented */
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructVector.Copy) */
-}
-
-/*
- * Create an {\tt x} compatible with {\tt self}.
- * 
- * NOTE: When this method is used in an inherited class, the
- * cloned {\tt Vector} object can be cast to an object with the
- * inherited class type.
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_StructVector_Clone"
-
-int32_t
-impl_bHYPRE_StructVector_Clone(
-  bHYPRE_StructVector self, bHYPRE_Vector* x)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructVector.Clone) */
-  /* Insert the implementation of the Clone method here... */
-   return 1; /* not implemented */
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructVector.Clone) */
-}
-
-/*
- * Scale {\self} by {\tt a}.
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_StructVector_Scale"
-
-int32_t
-impl_bHYPRE_StructVector_Scale(
-  bHYPRE_StructVector self, double a)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructVector.Scale) */
-  /* Insert the implementation of the Scale method here... */
-   return 1; /* not implemented */
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructVector.Scale) */
-}
-
-/*
- * Compute {\tt d}, the inner-product of {\tt self} and {\tt x}.
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_StructVector_Dot"
-
-int32_t
-impl_bHYPRE_StructVector_Dot(
-  bHYPRE_StructVector self, bHYPRE_Vector x, double* d)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructVector.Dot) */
-  /* Insert the implementation of the Dot method here... */
-   return 1; /* not implemented */
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructVector.Dot) */
-}
-
-/*
- * Add {\tt a}*{\tt x} to {\tt self}.
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_StructVector_Axpy"
-
-int32_t
-impl_bHYPRE_StructVector_Axpy(
-  bHYPRE_StructVector self, double a, bHYPRE_Vector x)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructVector.Axpy) */
-  /* Insert the implementation of the Axpy method here... */
-   return 1; /* not implemented */
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructVector.Axpy) */
 }

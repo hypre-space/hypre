@@ -1,10 +1,10 @@
 C       
 C       File:          SIDL_BaseInterface_Impl.f
-C       Symbol:        SIDL.BaseInterface-v0.8.1
+C       Symbol:        SIDL.BaseInterface-v0.8.2
 C       Symbol Type:   interface
-C       Babel Version: 0.8.0
-C       SIDL Created:  20030121 13:48:00 PST
-C       Generated:     20030320 16:52:50 PST
+C       Babel Version: 0.8.2
+C       SIDL Created:  20030326 16:09:17 PST
+C       Generated:     20030401 14:48:00 PST
 C       Release:       $Name$
 C       Revision:      @(#) $Id$
 C       Description:   Client-side documentation text for SIDL.BaseInterface
@@ -34,15 +34,15 @@ C       Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 C       
 C       WARNING: Automatically generated; changes will be lost
 C       
-C       babel-version = 0.8.0
+C       babel-version = 0.8.2
 C       source-line   = 47
-C       source-url    = file:/home/painter/babel-0.8.0/share/../runtime/sidl/sidl.sidl
+C       source-url    = file:/home/epperly/current/release_082/linux_gcc2/share/../../babel-0.8.2/runtime/sidl/sidl.sidl
 C       
 
         THIS FILE IS DOCUMENTATION - DO NOT COMPILE IT!
 
 C       
-C       Symbol "SIDL.BaseInterface" (version 0.8.1)
+C       Symbol "SIDL.BaseInterface" (version 0.8.2)
 C       
 C       Every interface in <code>SIDL</code> implicitly inherits
 C       from <code>BaseInterface</code>, and it is implemented
@@ -53,10 +53,23 @@ C
 
 
 C       
+C       Cast method for interface and type conversions.
+C       
+
+        subroutine SIDL_BaseInterface__cast_f(ref, retval)
+        implicit none
+C       in opaque ref
+        integer*8 ref
+C       out SIDL.BaseInterface retval
+        integer*8 retval
+        end
+
+
+C       
 C       Cast method for interface and class type conversions.
 C       
 
-        subroutine SIDL_BaseInterface__cast_f(self, name, retval)
+        subroutine SIDL_BaseInterface__cast2_f(self, name, retval)
         implicit none
 C       in SIDL.BaseInterface self
         integer*8 self
@@ -156,4 +169,17 @@ C       in string name
         character*(*) name
 C       out bool retval
         logical retval
+        end
+
+
+C       
+C       Return the meta-data about the class implementing this interface.
+C       
+
+        subroutine SIDL_BaseInterface_getClassInfo_f(self, retval)
+        implicit none
+C       in SIDL.BaseInterface self
+        integer*8 self
+C       out SIDL.ClassInfo retval
+        integer*8 retval
         end

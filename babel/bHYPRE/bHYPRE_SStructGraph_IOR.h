@@ -2,14 +2,14 @@
  * File:          bHYPRE_SStructGraph_IOR.h
  * Symbol:        bHYPRE.SStructGraph-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.8.0
- * SIDL Created:  20030320 16:52:19 PST
- * Generated:     20030320 16:52:22 PST
+ * Babel Version: 0.8.2
+ * SIDL Created:  20030401 14:47:20 PST
+ * Generated:     20030401 14:47:23 PST
  * Description:   Intermediate Object Representation for bHYPRE.SStructGraph
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.0
+ * babel-version = 0.8.2
  * source-line   = 1022
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -78,7 +78,7 @@ struct bHYPRE_SStructGraph__epv {
     struct bHYPRE_SStructGraph__object* self);
   void (*f__dtor)(
     struct bHYPRE_SStructGraph__object* self);
-  /* Methods introduced in SIDL.BaseInterface-v0.8.1 */
+  /* Methods introduced in SIDL.BaseInterface-v0.8.2 */
   void (*f_addRef)(
     struct bHYPRE_SStructGraph__object* self);
   void (*f_deleteRef)(
@@ -92,9 +92,9 @@ struct bHYPRE_SStructGraph__epv {
   SIDL_bool (*f_isType)(
     struct bHYPRE_SStructGraph__object* self,
     const char* name);
-  /* Methods introduced in SIDL.BaseClass-v0.8.1 */
   struct SIDL_ClassInfo__object* (*f_getClassInfo)(
     struct bHYPRE_SStructGraph__object* self);
+  /* Methods introduced in SIDL.BaseClass-v0.8.2 */
   /* Methods introduced in bHYPRE.SStructGraph-v1.0.0 */
   int32_t (*f_SetGrid)(
     struct bHYPRE_SStructGraph__object* self,
