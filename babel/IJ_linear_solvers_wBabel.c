@@ -75,17 +75,19 @@ main( int   argc,
 
    HYPRE_ParCSRMatrix  parcsr_A;
    Hypre_ParCSRMatrix  Hypre_parcsr_A;
+   Hypre_Operator      Hypre_op_A;
    HYPRE_ParVector     b;
    HYPRE_ParVector     x;
    Hypre_ParCSRVector     Hypre_b;
    Hypre_ParCSRVector     Hypre_x;
    Hypre_ParCSRVector     Hypre_y;
    Hypre_ParCSRVector     Hypre_y2;
-   Hypre_Vector        y,Hypre_Vector_x;
+   Hypre_Vector        y,Hypre_Vector_x, Hypre_Vector_b;
 
    HYPRE_Solver        amg_solver;
    HYPRE_Solver        pcg_solver;
    HYPRE_Solver        pcg_precond, pcg_precond_gotten;
+   Hypre_ParAMG        Hypre_AMG;
 
    int                 num_procs, myid;
    int                 local_row;
@@ -1714,6 +1716,19 @@ main( int   argc,
       if (myid == 0) printf("Solver:  AMG\n");
       time_index = hypre_InitializeTiming("BoomerAMG Setup");
       hypre_BeginTiming(time_index);
+
+      /* To call a Hypre solver:
+         create, set comm, set operator, set other parameters,
+         Setup (noop in this case), Apply */
+      Hypre_AMG = Hypre_ParAMG__create();
+      Hypre_Vector_b = (Hypre_Vector)Hypre_ParCSRVector__cast2( Hypre_b, "Hypre.Vector" );
+      Hypre_Vector_x = (Hypre_Vector)Hypre_ParCSRVector__cast2( Hypre_x, "Hypre.Vector" );
+      Hypre_op_A = (Hypre_Operator) Hypre_ParCSRMatrix__cast2( Hypre_parcsr_A, "Hypre.Operator" );
+      ierr += Hypre_ParAMG_SetCommunicator( Hypre_AMG, comm );
+      Hypre_ParAMG_SetOperator( Hypre_AMG, Hypre_op_A );
+      /* >>>> misc parameters not set <<<< */
+      ierr += Hypre_ParAMG_Setup( Hypre_AMG );
+      ierr += Hypre_ParAMG_Apply( Hypre_AMG, Hypre_Vector_b, &Hypre_Vector_x );
 
       HYPRE_BoomerAMGCreate(&amg_solver); 
       HYPRE_BoomerAMGSetCoarsenType(amg_solver, (hybrid*coarsen_type));

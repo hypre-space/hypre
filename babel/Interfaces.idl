@@ -325,7 +325,11 @@ package Hypre {
   interface Operator 
   {
      int SetCommunicator (in opaque comm);
-     int SetParameter (in string name, in double value);
+     int SetDoubleParameter (in string name, in double value);
+     int SetIntParameter (in string name, in int value);
+     int SetStringParameter (in string name, in string value);
+     int SetIntArrayParameter (in string name, in array<int> value);
+     int SetDoubleArrayParameter (in string name, in array<double> value);
      int Setup ();
      int Apply (in Vector x, out Vector y);
   }
@@ -334,6 +338,18 @@ package Hypre {
   {
      int SetOperator (in Operator A);
      int GetResidual (out Vector r);
+     /* ... error if logging level is not high enough (0,1 are too low) */
+     int SetLogging ( in int level );
+     /* ... logging levels; defaults to 0.
+     /* 0=no logging, 1=minimal cheap logging, >=2=do some work */
+     /* Only level 0 must be implemented.  Details of other levels are
+        implementation-specific. */
+     /* ... SetLogging must be called before Setup and Apply. */
+     int SetPrintLevel ( in int level );
+     /* ...print debugging or status information; Default to 0 for nothing. */
+     /* Only level 0 must be implemented.  Details of other levels are
+        implementation-specific. */
+     /* ... SetPrintLevel may be called any time. */
   }
 
   interface PreconditionedSolver extends Solver 
