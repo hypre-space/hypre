@@ -27,97 +27,113 @@ int
 thread_MPI_Init( int    *argc,
           char ***argv)
 {
+  int returnval;
   if (pthread_equal(pthread_self(),hypre_thread[0]))
   {
-    MPI_Init(argc,argv);
+    returnval=MPI_Init(argc,argv);
   }
   else
   {
-    return(0);
+    returnval=0;
   }
+
+  returnval;
 }
 
 double
 thread_MPI_Wtime( )
 {
+  double=returnval;
   if (pthread_equal(pthread_self(),hypre_thread[0]))
   {
-    MPI_Wtime();
+    returnval=MPI_Wtime();
   }
   else
   {
-    return(0.0);
+    returnval=0.0
   }
+
+  return returnval;
 }
 
 double
 thread_MPI_Wtick( )
 {
+  double returnval;
   if (pthread_equal(pthread_self(),hypre_thread[0]))
   {
-    MPI_Wtick();
+    returnval=MPI_Wtick();
   }
   else
   {
-    return(0.0);
+    returnval=0.0;
   }
+  return returnval;
 }
 
 int
 thread_MPI_Barrier( MPI_Comm comm )
 {
+  int returnval;
   hypre_barrier(&mpi_mtx,&mpi_cnd,&th_sem);
   if (pthread_equal(pthread_self(),hypre_thread[0]))
   {
-    MPI_Barrier(comm);
+    returnval=MPI_Barrier(comm);
   }
   else
   {
-  return(0);
+  returnval=0;
   }
   hypre_barrier(&mpi_mtx,&mpi_cnd,&th_sem);
+  return returnval;
 }
 
 int
 thread_MPI_Finalize( )
 {
+  int returnval;
   hypre_barrier(&mpi_mtx,&mpi_cnd,&th_sem);
   if (pthread_equal(pthread_self(),hypre_thread[0]))
   {
-    MPI_Finalize();
+    returnval=MPI_Finalize();
   }
   else
   {
-    return(0);
+    returnval=0;
   }
+  return returnval;
 }
 
 int
 thread_MPI_Comm_group( MPI_Comm   comm,
                 MPI_Group *group )
 {
+  int returnval;
   if (pthread_equal(pthread_self(),hypre_thread[0]))
   {
-    MPI_Comm_group(comm,group );
+    returnval=MPI_Comm_group(comm,group );
   }
   else
   {
-   return(0);
+   returnval=0;
   }
+  return returnval;
 }
 
 int
 thread_MPI_Comm_dup( MPI_Comm  comm,
               MPI_Comm *newcomm )
 {
+  int returnval;
   if (pthread_equal(pthread_self(),hypre_thread[0]))
   {
-    MPI_Comm_dup(comm,newcomm);
+    returnval=MPI_Comm_dup(comm,newcomm);
   }
   else
   {
-    return(0);
+    returnval=0;
   }
+  return returnval;
 }
 
 int
@@ -126,14 +142,16 @@ thread_MPI_Group_incl( MPI_Group  group,
                 int       *ranks,
                 MPI_Group *newgroup )
 {
+  int returnval;
   if (pthread_equal(pthread_self(),hypre_thread[0]))
   {
-    MPI_Group_incl(group,n,ranks,newgroup );
+    returnval=MPI_Group_incl(group,n,ranks,newgroup );
   }
   else
   {
-    return(0);
+    returnval=0;
   }
+  return returnval;
 }
 
 int
@@ -141,14 +159,16 @@ thread_MPI_Comm_create( MPI_Comm  comm,
                  MPI_Group group,
                  MPI_Comm *newcomm )
 {
+  int returnval;
   if (pthread_equal(pthread_self(),hypre_thread[0]))
   {
-    MPI_Comm_create(comm,group,newcomm );
+    returnval=MPI_Comm_create(comm,group,newcomm );
   }
   else
   {
-    return(0);
+    returnval=0;
   }
+  return returnval;
 }
 
 int
@@ -160,11 +180,13 @@ thread_MPI_Allgather( void        *sendbuf,
                MPI_Datatype recvtype,
                MPI_Comm     comm      ) 
 {
+  int returnval;
   int i;
   hypre_barrier(&mpi_mtx,&mpi_cnd,&th_sem);
   if (pthread_equal(pthread_self(),hypre_thread[0]))
   {
-     MPI_Allgather(sendbuf,sendcount,sendtype,recvbuf,recvcount,recvtype,comm);
+     returnval=MPI_Allgather(sendbuf,sendcount,sendtype,recvbuf,recvcount,
+			     recvtype,comm);
   }
   else
   { 
@@ -204,9 +226,10 @@ thread_MPI_Allgather( void        *sendbuf,
       break;
    }
 
-   return(0);
+   returnval=0;
   }
   hypre_barrier(&mpi_mtx,&mpi_cnd,&th_sem);
+  reutrn returnval;
 }
 
 int
@@ -219,12 +242,12 @@ thread_MPI_Allgatherv( void        *sendbuf,
                 MPI_Datatype recvtype,
                 MPI_Comm     comm       ) 
 { 
-  int i;
+  int i,returnval;
   hypre_barrier(&mpi_mtx,&mpi_cnd,&th_sem);
   if(pthread_equal(pthread_self(),hypre_thread[0]))
   {
-    MPI_Allgatherv(sendbuf,sendcount,sendtype,recvbuf,recvcounts,displs,
-		   recvtype,comm);
+    returnval=MPI_Allgatherv(sendbuf,sendcount,sendtype,recvbuf,recvcounts,
+			     displs,recvtype,comm);
   }
   else
   {
@@ -265,10 +288,11 @@ thread_MPI_Allgatherv( void        *sendbuf,
       break;
    }
 
-   return(0);
+   returnval=0;
 
   }
   hypre_barrier(&mpi_mtx,&mpi_cnd,&th_sem);
+  return returnval;
 }
 
 int
@@ -278,17 +302,19 @@ thread_MPI_Bcast( void        *buffer,
            int          root,
            MPI_Comm     comm     ) 
 { 
+  int returnval;
   hypre_barrier(&mpi_mtx,&mpi_cnd,&th_sem);
   if (pthread_equal(pthread_self(),hypre_thread[0]))
   {
-    MPI_Bcast(buffer,count,datatype,root,comm);
+    returnval=MPI_Bcast(buffer,count,datatype,root,comm);
   }
   else
   {
-   return(0);
+   returnval=0;
   }
 
   hypre_barrier(&mpi_mtx,&mpi_cnd,&th_sem);
+  return returnval;
 }
 
 int
@@ -299,16 +325,18 @@ thread_MPI_Send( void        *buf,
           int          tag,
           MPI_Comm     comm     ) 
 { 
+  int returnval;
   hypre_barrier(&mpi_mtx,&mpi_cnd,&th_sem); 
   if (pthread_equal(pthread_self(),hypre_thread[0]))
   {
-    MPI_Send(buf,count,datatype,dest,tag,comm);
+    returnval=MPI_Send(buf,count,datatype,dest,tag,comm);
   }
   else
   {
-   return(0);
+   returnval=0;
   }
   hypre_barrier(&mpi_mtx,&mpi_cnd,&th_sem); 
+  return returnval;
 }
 
 int
@@ -320,16 +348,18 @@ thread_MPI_Recv( void        *buf,
           MPI_Comm     comm,
           MPI_Status  *status   )
 { 
+  int returnval;
   hypre_barrier(&mpi_mtx,&mpi_cnd,&th_sem); 
   if (pthread_equal(pthread_self(),hypre_thread[0]))
   {
-    MPI_Recv(buf,count,datatype,source,tag,comm,status);
+    returnval=MPI_Recv(buf,count,datatype,source,tag,comm,status);
   }
   else
   {
-    return(0);
+    returnval=0;
   }
   hypre_barrier(&mpi_mtx,&mpi_cnd,&th_sem);
+  return returnval;
 }
 
 int
@@ -341,16 +371,18 @@ thread_MPI_Isend( void        *buf,
            MPI_Comm     comm,
            MPI_Request *request  )
 { 
+  int returnval;
   hypre_barrier(&mpi_mtx,&mpi_cnd,&th_sem);
   if (pthread_equal(pthread_self(),hypre_thread[0]))
   {
-    MPI_Isend(buf,count,datatype,dest,tag,comm,request);
+    returnval=MPI_Isend(buf,count,datatype,dest,tag,comm,request);
   }
   else
   {
-    return(0);
+    returnval=0;
   }
   hypre_barrier(&mpi_mtx,&mpi_cnd,&th_sem);
+  return returnval;
 }
 
 int
@@ -362,32 +394,36 @@ thread_MPI_Irecv( void        *buf,
            MPI_Comm     comm,
            MPI_Request *request  )
 { 
+  int returnval;
   hypre_barrier(&mpi_mtx,&mpi_cnd,&th_sem);
   if (pthread_equal(pthread_self(),hypre_thread[0]))
   {
-    MPI_Irecv(buf,count,datatype,source,tag,comm,request);
+    returnval=MPI_Irecv(buf,count,datatype,source,tag,comm,request);
   }
   else
   {
-    return(0);
+    returnval=0;
   }
   hypre_barrier(&mpi_mtx,&mpi_cnd,&th_sem);
+  return returnval;
 }
 
 int
 thread_MPI_Wait( MPI_Request *request,
           MPI_Status  *status  )
 {
+  int returnval;
   hypre_barrier(&mpi_mtx,&mpi_cnd,&th_sem);
   if (pthread_equal(pthread_self(),hypre_thread[0]))
   {
-    MPI_Wait;
+    returnval=MPI_Wait;
   }
   else
   {
-   return(0);
+   returnval=0;
   }
   hypre_barrier(&mpi_mtx,&mpi_cnd,&th_sem);
+  return returnval;
 }
 
 int
@@ -395,16 +431,18 @@ thread_MPI_Waitall( int          count,
              MPI_Request *array_of_requests,
              MPI_Status  *array_of_statuses )
 {
+  int returnval;
   hypre_barrier(&mpi_mtx,&mpi_cnd,&th_sem);
   if (pthread_equal(pthread_self(),hypre_thread[0]))
   {
-    MPI_Waitall(count,array_of_requests,array_of_statuses);
+    returnval=MPI_Waitall(count,array_of_requests,array_of_statuses);
   }
   else
   {
-   return(0);
+   returnval=0;
   }
   hypre_barrier(&mpi_mtx,&mpi_cnd,&th_sem);
+  return returnval;
 }
 
 int
@@ -413,46 +451,52 @@ thread_MPI_Waitany( int          count,
              int         *index,
              MPI_Status  *status            )
 {
+  int returnval;
   hypre_barrier(&mpi_mtx,&mpi_cnd,&th_sem);
  if (pthread_equal(pthread_self(),hypre_thread[0]))
  {
-   MPI_Waitany(count,array_of_requests,index,status);
+   returnval=MPI_Waitany(count,array_of_requests,index,status);
  }
   else
   {
-   return(0);
+   returnval=0;
   }
   hypre_barrier(&mpi_mtx,&mpi_cnd,&th_sem);
+  return returnval;
 }
 
 int
 thread_MPI_Comm_size( MPI_Comm comm,
                int     *size )
 { 
+  int returnval;
   *size = 1;
   if (pthread_equal(pthread_self(),hypre_thread[0]))
   {
-    MPI_Comm_size(comm,size);
+    returnval=MPI_Comm_size(comm,size);
   }
   else
   {
-   return(0);
+   returnval=0;
   }
+  return returnval;
 }
 
 int
 thread_MPI_Comm_rank( MPI_Comm comm,
                int     *rank )
 { 
+  int returnval;
   *rank=0;
   if (pthread_equal(pthread_self(),hypre_thread[0]))
   {
-    MPI_Comm_rank(comm,rank);
+    returnval=MPI_Comm_rank(comm,rank);
   }
   else
   {
-   return(0);
+   returnval=0;
   }
+  return returnval;
 }
 
 int
@@ -463,10 +507,11 @@ thread_MPI_Allreduce( void        *sendbuf,
                MPI_Op       op,
                MPI_Comm     comm     )
 { 
+  int returnval;
   hypre_barrier(&mpi_mtx,&mpi_cnd,&th_sem);
   if (pthread_equal(pthread_self(),hypre_thread[0]))
   {
-    MPI_Allreduce(sendbuf,recvbuf,count,datatype,op,comm);
+    returnval=MPI_Allreduce(sendbuf,recvbuf,count,datatype,op,comm);
   }
   else
   {
@@ -497,9 +542,10 @@ thread_MPI_Allreduce( void        *sendbuf,
       break;
    }
 
-   return(0);
+   returnval=0;
   }
   hypre_barrier(&mpi_mtx,&mpi_cnd,&th_sem);
+  return returnval;
 }
 
 int
@@ -509,15 +555,17 @@ thread_MPI_Type_hvector( int           count,
                   MPI_Datatype  oldtype,
                   MPI_Datatype *newtype     )
 {
+  int returnval;
  if (pthread_equal(pthread_self(),hypre_thread[0]))
  {
-   MPI_Type_hvector(count,blocklength,stride,oldtype,newtype);
+   returnval=MPI_Type_hvector(count,blocklength,stride,oldtype,newtype);
  }
   else
   {
-   return(0);
+   returnval=0;
   }
   hypre_barrier(&mpi_mtx,&mpi_cnd,&th_sem);
+  return returnval;
 }
 
 int
@@ -527,44 +575,50 @@ thread_MPI_Type_struct( int           count,
                  MPI_Datatype *array_of_types,
                  MPI_Datatype *newtype                )
 {
+  int returnval;
   if (pthread_equal(pthread_self(),hypre_thread[0]))
   {
-    MPI_Type_struct(count,array_of_blocklengths,array_of_displacements,
+    returnval=MPI_Type_struct(count,array_of_blocklengths,array_of_displacements,
 		    array_of_types,newtype);
   }
   else
   {
-   return(0);
+   returnval=0;
   }
   hypre_barrier(&mpi_mtx,&mpi_cnd,&th_sem);
+  return returnval;
 }
 
 int
 thread_MPI_Type_free( MPI_Datatype *datatype )
 {
+  int returnval;
   hypre_barrier(&mpi_mtx,&mpi_cnd,&th_sem);
   if (pthread_equal(pthread_self(),hypre_thread[0]))
   {
-    MPI_Type_free(datatype);
+    returnval=MPI_Type_free(datatype);
   }
   else
   {
-   return(0);
+   returnval=0;
   }
+  return returnval;
 }
 
 int
 thread_MPI_Type_commit( MPI_Datatype *datatype )
 {
+  int returnval;
   if (pthread_equal(pthread_self(),hypre_thread[0]))
   {
-    MPI_Type_commit(datatype);
+    returnval=MPI_Type_commit(datatype);
   }
   else
   {
-   return(0);
+   returnval=0;
   }
   hypre_barrier(&mpi_mtx,&mpi_cnd,&th_sem);
+  return returnval;
 }
 
 #endif
