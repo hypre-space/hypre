@@ -33,6 +33,8 @@ typedef struct
    /* temporary storage for SetValues routines */
    int                    *sentries;
 
+   int                     complex;      /* Is the matrix complex */
+
 } hypre_SStructPMatrix;
 
 typedef struct hypre_SStructMatrix_struct
@@ -55,6 +57,7 @@ typedef struct hypre_SStructMatrix_struct
    int                    *Uentries;
 
    int                     symmetric;    /* Is the matrix symmetric */
+   int                     complex;      /* Is the matrix complex */
    int                     global_size;  /* Total number of nonzero coeffs */
 
    int                     ref_count;
@@ -78,6 +81,7 @@ typedef struct hypre_SStructMatrix_struct
 #define hypre_SStructMatrixSEntries(mat)       ((mat) -> Sentries)
 #define hypre_SStructMatrixUEntries(mat)       ((mat) -> Uentries)
 #define hypre_SStructMatrixSymmetric(mat)      ((mat) -> symmetric)
+#define hypre_SStructMatrixComplex(mat)        ((mat) -> complex)
 #define hypre_SStructMatrixGlobalSize(mat)     ((mat) -> global_size)
 #define hypre_SStructMatrixRefCount(mat)       ((mat) -> ref_count)
 
@@ -100,5 +104,6 @@ typedef struct hypre_SStructMatrix_struct
 ((pmat) -> smatrices[vi][vj])
 #define hypre_SStructPMatrixNSEntries(pmat)         ((pmat) -> nsentries)
 #define hypre_SStructPMatrixSEntries(pmat)          ((pmat) -> sentries)
+#define hypre_SStructPMatrixComplex(pmat)           ((pmat) -> complex)
 
 #endif

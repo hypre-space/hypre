@@ -355,8 +355,13 @@ hypre_SStructPGridAssemble( hypre_SStructPGrid  *pgrid )
    for (var = 0; var < nvars; var++)
    {
       offsets[var] = offset;
-      offset += hypre_StructGridGlobalSize(sgrids[vartypes[var]]);
+      offset += hypre_StructGridLocalSize(sgrids[vartypes[var]]);
       start_rank += hypre_StructMapStartRank(maps[vartypes[var]]);
+   }
+   for (var = 0; var < nvars; var++)
+   {
+      offsets[var] +=
+         start_rank - hypre_StructMapStartRank(maps[vartypes[var]]);
    }
    hypre_SStructPGridOffsets(pgrid)   = offsets;
    hypre_SStructPGridStartRank(pgrid) = start_rank;

@@ -162,7 +162,7 @@ ReadData( char         *filename,
     * Read data file from process 0, then broadcast
     *-----------------------------------------------------------*/
  
-   MPI_Comm_rank(MPI_COMM_WORLD, &myid );
+   MPI_Comm_rank(MPI_COMM_WORLD, &myid);
 
    if (myid == 0)
    {
@@ -484,7 +484,7 @@ DistributeData( ProblemData   global_data,
 
    }
    pool_procs[0] = 0;
-   for (pool = 1; part < (data.npools + 1); pool++)
+   for (pool = 1; pool < (data.npools + 1); pool++)
    {
       pool_procs[pool] = pool_procs[pool - 1] + pool_procs[pool];
    }
@@ -976,8 +976,8 @@ main( int   argc,
    /* Initialize MPI */
    MPI_Init(&argc, &argv);
 
-   MPI_Comm_size(MPI_COMM_WORLD, &num_procs );
-   MPI_Comm_rank(MPI_COMM_WORLD, &myid );
+   MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
+   MPI_Comm_rank(MPI_COMM_WORLD, &myid);
 
    hypre_InitMemoryDebug(myid);
 

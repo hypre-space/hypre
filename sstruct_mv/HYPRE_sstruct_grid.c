@@ -360,8 +360,13 @@ HYPRE_SStructGridAssemble( HYPRE_SStructGrid grid )
    for (part = 0; part < nparts; part++)
    {
       offsets[part] = offset;
-      offset += hypre_SStructPGridGlobalSize(pgrids[part]);
+      offset += hypre_SStructPGridLocalSize(pgrids[part]);
       start_rank += hypre_SStructPGridStartRank(pgrids[part]);
+   }
+   for (part = 0; part < nparts; part++)
+   {
+      offsets[part] += 
+         start_rank - hypre_SStructPGridStartRank(pgrids[part]);
    }
 
    /* set up uoffset - TODO */

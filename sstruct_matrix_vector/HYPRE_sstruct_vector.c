@@ -99,9 +99,12 @@ int
 HYPRE_SStructVectorInitialize( HYPRE_SStructVector vector )
 {
    int ierr = 0;
-   int            nparts   = hypre_SStructVectorNParts(vector);
-   HYPRE_IJVector ijvector = hypre_SStructVectorIJVector(vector);
-   int            part;
+   MPI_Comm        comm     = hypre_SStructVectorComm(vector);
+   int             nparts   = hypre_SStructVectorNParts(vector);
+   HYPRE_IJVector  ijvector = hypre_SStructVectorIJVector(vector);
+   int            *partitioning;
+   int             local_size, num_procs;
+   int             part, i;
 
    for (part = 0; part < nparts; part++)
    {
@@ -109,7 +112,19 @@ HYPRE_SStructVectorInitialize( HYPRE_SStructVector vector )
    }
 
    /* u-vector */
-   ierr  = HYPRE_IJVectorSetLocalStorageType(ijvector, HYPRE_PARCSR);
+   ierr = HYPRE_IJVectorSetLocalStorageType(ijvector, HYPRE_PARCSR);
+
+   MPI_Comm_size(comm, &num_procs);
+   partitioning = hypre_TAlloc(int, num_procs + 1);
+   partitioning[0] = 0;
+   local_size = hypre_SStructGridLocalSize(hypre_SStructVectorGrid(vector));
+   MPI_Allgather(&local_size, 1, MPI_INT, &partitioning[1], 1, MPI_INT, comm);
+   for (i = 1; i < (num_procs + 1); i++)
+   {
+      partitioning[i] += partitioning[i-1];
+   }
+   ierr = HYPRE_IJVectorSetPartitioning(ijvector, partitioning);
+
    ierr += HYPRE_IJVectorInitialize(ijvector);
 
    return ierr;

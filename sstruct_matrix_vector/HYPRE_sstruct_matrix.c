@@ -496,8 +496,8 @@ HYPRE_SStructMatrixPrint( char                *filename,
 
    /* U-matrix */
    sprintf(new_filename, "%s.UMatrix", filename);
-   hypre_ParCSRMatrixPrint(hypre_SStructMatrixParCSRMatrix(matrix),
-                           new_filename);
+   hypre_ParCSRMatrixPrintIJ(hypre_SStructMatrixParCSRMatrix(matrix),
+                             new_filename);
 
    return ierr;
 }
