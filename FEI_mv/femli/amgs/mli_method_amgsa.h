@@ -81,6 +81,7 @@ class MLI_Method_AMGSA : public MLI_Method
    int      coarseSolverNum_;        /* number of coarse solver sweeps   */
    double   *coarseSolverWgt_;       /* weight used in coarse solver     */
    int      calibrationSize_;        /* for calibration AMG method       */
+   int      symmetric_;              /* choose between symm/nonsymm      */
    int      useSAMGeFlag_;           /* element based method             */
    int      useSAMGDDFlag_;          /* domain decomposition (NN) method */
    double   RAPTime_;

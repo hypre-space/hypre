@@ -15,6 +15,7 @@
 #include "HYPRE.h"
 #include "util/mli_utils.h"
 #include "matrix/mli_matrix.h"
+#include "matrix/mli_matrix_misc.h"
 #include "vector/mli_vector.h"
 #include "solver/mli_solver.h"
 #include "amgs/mli_method_amgsa.h"
@@ -92,6 +93,7 @@ MLI_Method_AMGSA::MLI_Method_AMGSA( MPI_Comm comm ) : MLI_Method( comm )
    useSAMGDDFlag_       = 0;
    printNullSpace_      = 0;
    strcpy( paramFile_, "empty" );
+   symmetric_           = 1;
 }
 
 /* ********************************************************************* *
@@ -219,6 +221,11 @@ int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
    else if ( !strcasecmp(param1, "setCalcSpectralNorm" ))
    {
       return ( setCalcSpectralNorm() );
+   }
+   else if ( !strcasecmp(param1, "useNonsymmetric" ))
+   {
+      symmetric_ = 0;
+      return ( 0 );
    }
    else if ( !strcasecmp(param1, "setAggregateInfo" ))
    {
@@ -463,11 +470,13 @@ int MLI_Method_AMGSA::getParams(char *in_name, int *argc, char *argv[])
 int MLI_Method_AMGSA::setup( MLI *mli ) 
 {
    int             level, mypid;
-   double          start_time, elapsed_time, max_eigen;
-   char            param_string[100], *targv[10];
-   MLI_Matrix      *mli_Pmat, *mli_Rmat, *mli_Amat, *mli_cAmat;
-   MLI_Solver      *smoother_ptr, *csolve_ptr;
+   double          start_time, elapsed_time, maxEigen, maxEigenT;
+   char            paramString[100], *targv[10];
+   MLI_Matrix      *mli_Pmat, *mli_Rmat, *mli_Amat, *mli_ATmat, *mli_cAmat;
+   MLI_Solver      *smootherPtr, *csolvePtr;
    MPI_Comm        comm;
+   MLI_Function    *funcPtr;
+   hypre_ParCSRMatrix *hypreRT;
 
 #ifdef MLI_DEBUG_DETAILED
    printf("MLI_Method_AMGSA::setup begins...\n");
@@ -538,13 +547,13 @@ int MLI_Method_AMGSA::setup( MLI *mli )
       {
          case MLI_METHOD_AMGSA_LOCAL :
               if ( level == 0 )
-                 max_eigen = genPLocal(mli_Amat, &mli_Pmat, saCounts_[0], 
+                 maxEigen = genPLocal(mli_Amat, &mli_Pmat, saCounts_[0], 
                                        saData_[0]); 
               else
-                 max_eigen = genPLocal(mli_Amat, &mli_Pmat, 0, NULL); 
+                 maxEigen = genPLocal(mli_Amat, &mli_Pmat, 0, NULL); 
               break;
       }
-      if ( max_eigen != 0.0 ) spectralNorms_[level] = max_eigen;
+      if ( maxEigen != 0.0 ) spectralNorms_[level] = maxEigen;
       if ( mli_Pmat == NULL ) break;
       start_time = MLI_Utils_WTime();
 
@@ -568,10 +577,33 @@ int MLI_Method_AMGSA::setup( MLI *mli )
 
       mli->setProlongation(level+1, mli_Pmat);
 
-      /* ------set the restriction matrix------------------------------- */
+      /* ------if nonsymmetric, generate a different R------------------ */
 
-      sprintf(param_string, "HYPRE_ParCSRT");
-      mli_Rmat = new MLI_Matrix(mli_Pmat->getMatrix(), param_string, NULL);
+      if ( symmetric_ == 0 && Pweight_ != 0.0 )
+      {
+         MLI_Matrix_Transpose( mli_Amat, &mli_ATmat );
+         switch ( coarsenScheme_ )
+         {
+            case MLI_METHOD_AMGSA_LOCAL :
+                 maxEigenT = genPLocal(mli_ATmat, &mli_Rmat, saCounts_[level], 
+                                        saData_[level]); 
+                 break;
+         }
+         delete mli_ATmat;
+         hypreRT = (hypre_ParCSRMatrix *) mli_Rmat->takeMatrix();
+         delete mli_Rmat;
+         sprintf(paramString, "HYPRE_ParCSRT");
+         funcPtr = new MLI_Function();
+         MLI_Utils_HypreParCSRMatrixGetDestroyFunc(funcPtr);
+         sprintf(paramString, "HYPRE_ParCSRT" ); 
+         mli_Rmat = new MLI_Matrix( (void *) hypreRT, paramString, funcPtr );
+         delete funcPtr;
+      }
+      else
+      {
+         sprintf(paramString, "HYPRE_ParCSRT");
+         mli_Rmat = new MLI_Matrix(mli_Pmat->getMatrix(), paramString, NULL);
+      }
       mli->setRestriction(level, mli_Rmat);
 
       /* ------set the smoothers---------------------------------------- */
@@ -580,92 +612,92 @@ int MLI_Method_AMGSA::setup( MLI *mli )
            !strcmp(preSmoother_, "ARPACKSuperLU") )
       {
          setupDDSuperLUSmoother(mli, level);
-         smoother_ptr = MLI_Solver_CreateFromName(preSmoother_);
+         smootherPtr = MLI_Solver_CreateFromName(preSmoother_);
          targv[0] = (char *) ddObj_;
-         sprintf( param_string, "ARPACKSuperLUObject" );
-         smoother_ptr->setParams(param_string, 1, targv);
-         smoother_ptr->setup(mli_Amat);
-         mli->setSmoother( level, MLI_SMOOTHER_PRE, smoother_ptr );
+         sprintf( paramString, "ARPACKSuperLUObject" );
+         smootherPtr->setParams(paramString, 1, targv);
+         smootherPtr->setup(mli_Amat);
+         mli->setSmoother( level, MLI_SMOOTHER_PRE, smootherPtr );
 #if 0
-         smoother_ptr = MLI_Solver_CreateFromName(preSmoother_);
-         smoother_ptr->setParams(param_string, 1, targv);
-         smoother_ptr->setup(mli_Amat);
-         mli->setSmoother( level, MLI_SMOOTHER_POST, smoother_ptr );
+         smootherPtr = MLI_Solver_CreateFromName(preSmoother_);
+         smootherPtr->setParams(paramString, 1, targv);
+         smootherPtr->setup(mli_Amat);
+         mli->setSmoother( level, MLI_SMOOTHER_POST, smootherPtr );
 #endif
          continue;
       }
-      smoother_ptr = MLI_Solver_CreateFromName( preSmoother_ );
+      smootherPtr = MLI_Solver_CreateFromName( preSmoother_ );
       targv[0] = (char *) &preSmootherNum_;
       targv[1] = (char *) preSmootherWgt_;
-      sprintf( param_string, "relaxWeight" );
-      smoother_ptr->setParams(param_string, 2, targv);
+      sprintf( paramString, "relaxWeight" );
+      smootherPtr->setParams(paramString, 2, targv);
       if ( !strcmp(preSmoother_, "MLS") ) 
       {
-         sprintf( param_string, "maxEigen" );
-         targv[0] = (char *) &max_eigen;
-         smoother_ptr->setParams(param_string, 1, targv);
+         sprintf( paramString, "maxEigen" );
+         targv[0] = (char *) &maxEigen;
+         smootherPtr->setParams(paramString, 1, targv);
       }
       if ( smootherPrintRNorm_ == 1 )
       {
-         sprintf( param_string, "printRNorm" );
-         smoother_ptr->setParams(param_string, 0, NULL);
+         sprintf( paramString, "printRNorm" );
+         smootherPtr->setParams(paramString, 0, NULL);
       }
       if ( smootherFindOmega_ == 1 )
       {
-         sprintf( param_string, "findOmega" );
-         smoother_ptr->setParams(param_string, 0, NULL);
+         sprintf( paramString, "findOmega" );
+         smootherPtr->setParams(paramString, 0, NULL);
       }
-      smoother_ptr->setup(mli_Amat);
-      mli->setSmoother( level, MLI_SMOOTHER_PRE, smoother_ptr );
+      smootherPtr->setup(mli_Amat);
+      mli->setSmoother( level, MLI_SMOOTHER_PRE, smootherPtr );
 
       if ( strcmp(preSmoother_, postSmoother_) )
       {
-         smoother_ptr = MLI_Solver_CreateFromName( postSmoother_ );
+         smootherPtr = MLI_Solver_CreateFromName( postSmoother_ );
          targv[0] = (char *) &postSmootherNum_;
          targv[1] = (char *) postSmootherWgt_;
-         sprintf( param_string, "relaxWeight" );
-         smoother_ptr->setParams(param_string, 2, targv);
+         sprintf( paramString, "relaxWeight" );
+         smootherPtr->setParams(paramString, 2, targv);
          if ( !strcmp(postSmoother_, "MLS") ) 
          {
-            sprintf( param_string, "maxEigen" );
-            targv[0] = (char *) &max_eigen;
-            smoother_ptr->setParams(param_string, 1, targv);
+            sprintf( paramString, "maxEigen" );
+            targv[0] = (char *) &maxEigen;
+            smootherPtr->setParams(paramString, 1, targv);
          }
          if ( smootherPrintRNorm_ == 1 )
          {
-            sprintf( param_string, "printRNorm" );
-            smoother_ptr->setParams(param_string, 0, NULL);
+            sprintf( paramString, "printRNorm" );
+            smootherPtr->setParams(paramString, 0, NULL);
          }
          if ( smootherFindOmega_ == 1 )
          {
-            sprintf( param_string, "findOmega" );
-            smoother_ptr->setParams(param_string, 0, NULL);
+            sprintf( paramString, "findOmega" );
+            smootherPtr->setParams(paramString, 0, NULL);
          }
-         smoother_ptr->setup(mli_Amat);
+         smootherPtr->setup(mli_Amat);
       }
-      mli->setSmoother( level, MLI_SMOOTHER_POST, smoother_ptr );
+      mli->setSmoother( level, MLI_SMOOTHER_POST, smootherPtr );
    }
 
    /* ------set the coarse grid solver---------------------------------- */
 
    if (mypid == 0 && outputLevel_ > 0) printf("\tCoarse level = %d\n",level);
-   csolve_ptr = MLI_Solver_CreateFromName( coarseSolver_ );
+   csolvePtr = MLI_Solver_CreateFromName( coarseSolver_ );
    if ( strcmp(coarseSolver_, "SuperLU") )
    {
       targv[0] = (char *) &coarseSolverNum_;
       targv[1] = (char *) coarseSolverWgt_ ;
-      sprintf( param_string, "relaxWeight" );
-      csolve_ptr->setParams(param_string, 2, targv);
+      sprintf( paramString, "relaxWeight" );
+      csolvePtr->setParams(paramString, 2, targv);
       if ( !strcmp(coarseSolver_, "MLS") )
       {
-         sprintf( param_string, "maxEigen" );
-         targv[0] = (char *) &max_eigen;
-         csolve_ptr->setParams(param_string, 1, targv);
+         sprintf( paramString, "maxEigen" );
+         targv[0] = (char *) &maxEigen;
+         csolvePtr->setParams(paramString, 1, targv);
       }
    }
    mli_Amat = mli->getSystemMatrix(level);
-   csolve_ptr->setup(mli_Amat);
-   mli->setCoarseSolve(csolve_ptr);
+   csolvePtr->setup(mli_Amat);
+   mli->setCoarseSolve(csolvePtr);
    totalTime_ = MLI_Utils_WTime() - totalTime_;
 
    /* --------------------------------------------------------------- */
@@ -1139,10 +1171,10 @@ int MLI_Method_AMGSA::print()
 
 int MLI_Method_AMGSA::printStatistics(MLI *mli)
 {
-   int          mypid, level, global_nrows, tot_nrows, fine_nrows;
-   int          max_nnz, min_nnz, fine_nnz, tot_nnz, this_nnz, itemp;
-   double       max_val, min_val, dtemp;
-   char         param_string[100];
+   int          mypid, level, globalNRows, totNRows, fineNRows;
+   int          maxNnz, minNnz, fineNnz, totNnz, thisNnz, itemp;
+   double       maxVal, minVal, dtemp;
+   char         paramString[100];
    MLI_Matrix   *mli_Amat, *mli_Pmat;
    MPI_Comm     comm = getComm();
 
@@ -1171,31 +1203,31 @@ int MLI_Method_AMGSA::printStatistics(MLI *mli)
    /* fine and coarse matrix complexity information                   */
    /* --------------------------------------------------------------- */
 
-   tot_nnz = tot_nrows = 0;
+   totNnz = totNRows = 0;
    for ( level = 0; level <= currLevel_; level++ )
    {
       mli_Amat = mli->getSystemMatrix( level );
-      sprintf(param_string, "nrows");
-      mli_Amat->getMatrixInfo(param_string, global_nrows, dtemp);
-      sprintf(param_string, "maxnnz");
-      mli_Amat->getMatrixInfo(param_string, max_nnz, dtemp);
-      sprintf(param_string, "minnnz");
-      mli_Amat->getMatrixInfo(param_string, min_nnz, dtemp);
-      sprintf(param_string, "totnnz");
-      mli_Amat->getMatrixInfo(param_string, this_nnz, dtemp);
-      sprintf(param_string, "maxval");
-      mli_Amat->getMatrixInfo(param_string, itemp, max_val);
-      sprintf(param_string, "minval");
-      mli_Amat->getMatrixInfo(param_string, itemp, min_val);
+      sprintf(paramString, "nrows");
+      mli_Amat->getMatrixInfo(paramString, globalNRows, dtemp);
+      sprintf(paramString, "maxnnz");
+      mli_Amat->getMatrixInfo(paramString, maxNnz, dtemp);
+      sprintf(paramString, "minnnz");
+      mli_Amat->getMatrixInfo(paramString, minNnz, dtemp);
+      sprintf(paramString, "totnnz");
+      mli_Amat->getMatrixInfo(paramString, thisNnz, dtemp);
+      sprintf(paramString, "maxval");
+      mli_Amat->getMatrixInfo(paramString, itemp, maxVal);
+      sprintf(paramString, "minval");
+      mli_Amat->getMatrixInfo(paramString, itemp, minVal);
       if ( mypid == 0 )
       {
          printf("\t*%3d %9d %5d  %5d %10d %8.3e %8.3e *\n",level,
-                global_nrows, max_nnz, min_nnz, this_nnz, max_val, min_val);
+                globalNRows, maxNnz, minNnz, thisNnz, maxVal, minVal);
       }
-      if ( level == 0 ) fine_nnz = this_nnz;
-      tot_nnz += this_nnz;
-      if ( level == 0 ) fine_nrows = global_nrows;
-      tot_nrows += global_nrows;
+      if ( level == 0 ) fineNnz = thisNnz;
+      totNnz += thisNnz;
+      if ( level == 0 ) fineNRows = globalNRows;
+      totNRows += globalNRows;
    }
 
    /* --------------------------------------------------------------- */
@@ -1211,22 +1243,22 @@ int MLI_Method_AMGSA::printStatistics(MLI *mli)
    for ( level = 1; level <= currLevel_; level++ )
    {
       mli_Pmat = mli->getProlongation( level );
-      sprintf(param_string, "nrows");
-      mli_Pmat->getMatrixInfo(param_string, global_nrows, dtemp);
-      sprintf(param_string, "maxnnz");
-      mli_Pmat->getMatrixInfo(param_string, max_nnz, dtemp);
-      sprintf(param_string, "minnnz");
-      mli_Pmat->getMatrixInfo(param_string, min_nnz, dtemp);
-      sprintf(param_string, "totnnz");
-      mli_Pmat->getMatrixInfo(param_string, this_nnz, dtemp);
-      sprintf(param_string, "maxval");
-      mli_Pmat->getMatrixInfo(param_string, itemp, max_val);
-      sprintf(param_string, "minval");
-      mli_Pmat->getMatrixInfo(param_string, itemp, min_val);
+      sprintf(paramString, "nrows");
+      mli_Pmat->getMatrixInfo(paramString, globalNRows, dtemp);
+      sprintf(paramString, "maxnnz");
+      mli_Pmat->getMatrixInfo(paramString, maxNnz, dtemp);
+      sprintf(paramString, "minnnz");
+      mli_Pmat->getMatrixInfo(paramString, minNnz, dtemp);
+      sprintf(paramString, "totnnz");
+      mli_Pmat->getMatrixInfo(paramString, thisNnz, dtemp);
+      sprintf(paramString, "maxval");
+      mli_Pmat->getMatrixInfo(paramString, itemp, maxVal);
+      sprintf(paramString, "minval");
+      mli_Pmat->getMatrixInfo(paramString, itemp, minVal);
       if ( mypid == 0 )
       {
          printf("\t*%3d %9d %5d  %5d %10d %8.3e %8.3e *\n",level,
-                global_nrows, max_nnz, min_nnz, this_nnz, max_val, min_val);
+                globalNRows, maxNnz, minNnz, thisNnz, maxVal, minVal);
       }
    }
 
@@ -1237,9 +1269,9 @@ int MLI_Method_AMGSA::printStatistics(MLI *mli)
    if ( mypid == 0 )
    {
       printf("\t********************************************************\n");
-      dtemp = (double) tot_nnz / (double) fine_nnz;
+      dtemp = (double) totNnz / (double) fineNnz;
       printf("\t*** Amat complexity  = %e\n", dtemp);
-      dtemp = (double) tot_nrows / (double) fine_nrows;
+      dtemp = (double) totNRows / (double) fineNRows;
       printf("\t*** grid complexity  = %e\n", dtemp);
       printf("\t********************************************************\n");
       fflush(stdout);
