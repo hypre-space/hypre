@@ -181,7 +181,7 @@ hypre_SetIJMatrixRowSizesParCSR(hypre_IJMatrix *matrix,
  *
  * hypre_SetIJMatrixDiagRowSizesParCSR
  * sets diag_i inside the diag part of the ParCSRMatrix,
- * requires exact sizes for diag
+ * requires exact row sizes for diag
  *
  *****************************************************************************/
 int
@@ -202,8 +202,8 @@ hypre_SetIJMatrixDiagRowSizesParCSR(hypre_IJMatrix *matrix,
    local_num_rows = hypre_CSRMatrixNumRows(diag);
    if (!diag_i)
       diag_i = hypre_CTAlloc(int, local_num_rows+1);
-   for (i = 0; i < local_num_rows+1; i++)
-      diag_i[i] = sizes[i];
+   for (i = 0; i < local_num_rows; i++)
+      diag_i[i+1] = diag_i[i] + sizes[i];
    hypre_CSRMatrixI(diag) = diag_i;
    hypre_CSRMatrixNumNonzeros(diag) = diag_i[local_num_rows];
    return 0;
@@ -213,7 +213,7 @@ hypre_SetIJMatrixDiagRowSizesParCSR(hypre_IJMatrix *matrix,
  *
  * hypre_SetIJMatrixOffDiagRowSizesParCSR
  * sets offd_i inside the offd part of the ParCSRMatrix,
- * requires exact sizes for offd
+ * requires exact row sizes for offd
  *
  *****************************************************************************/
 int
@@ -234,8 +234,8 @@ hypre_SetIJMatrixOffDiagRowSizesParCSR(hypre_IJMatrix *matrix,
    local_num_rows = hypre_CSRMatrixNumRows(offd);
    if (!offd_i)
       offd_i = hypre_CTAlloc(int, local_num_rows+1);
-   for (i = 0; i < local_num_rows+1; i++)
-      offd_i[i] = sizes[i];
+   for (i = 0; i < local_num_rows; i++)
+      offd_i[i+1] = offd_i[i] + sizes[i];
    hypre_CSRMatrixI(offd) = offd_i;
    hypre_CSRMatrixNumNonzeros(offd) = offd_i[local_num_rows];
    return 0;
@@ -408,20 +408,18 @@ hypre_InsertIJMatrixRowParCSR(hypre_IJMatrix *matrix,
          row_local = row - row_starts[my_id]; /* compute local row number */
          aux_j = hypre_AuxParCSRMatrixAuxJ(aux_matrix);
          aux_data = hypre_AuxParCSRMatrixAuxData(aux_matrix);
-         local_j = aux_j[row_local];
-         local_data = aux_data[row_local];
             
          row_length[row_local] = n;
          
          if ( row_space[row_local] < n)
          {
-   	    hypre_TFree(local_j);
-   	    hypre_TFree(local_data);
-   	    local_j = hypre_CTAlloc(int,n);
-   	    local_data = hypre_CTAlloc(double,n);
+   	    aux_j[row_local] = hypre_TReAlloc(aux_j[row_local],int,n);
+   	    aux_data[row_local] = hypre_TReAlloc(aux_data[row_local],double,n);
             row_space[row_local] = n;
          }
          
+         local_j = aux_j[row_local];
+         local_data = aux_data[row_local];
          for (i=0; i < n; i++)
          {
    	    local_j[i] = indices[i];

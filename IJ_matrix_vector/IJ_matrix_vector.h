@@ -387,7 +387,7 @@ int hypre_FreeIJMatrixPETSc P((hypre_IJMatrix *matrix ));
 int hypre_SetIJMatrixTotalSizePETSc P((hypre_IJMatrix *matrix , int size ));
 
 /* hypre_IJVector_parcsr.c */
-int hypre_NewIJVectorPar P((hypre_IJVector *vector ));
+int hypre_NewIJVectorPar P((hypre_IJVector *vector , const int *partitioning ));
 int hypre_FreeIJVectorPar P((hypre_IJVector *vector ));
 int hypre_SetIJVectorParPartitioning P((hypre_IJVector *vector , const int *partitioning ));
 int hypre_SetIJVectorParLocalPartitioning P((hypre_IJVector *vector , int vec_start , int vec_stop ));

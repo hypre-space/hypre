@@ -72,26 +72,26 @@ hypre_DestroyAuxParCSRMatrix( hypre_AuxParCSRMatrix *matrix )
 
    if (matrix)
    {
+      if (hypre_AuxParCSRMatrixRowLength(matrix))
+         hypre_TFree(hypre_AuxParCSRMatrixRowLength(matrix));
+      if (hypre_AuxParCSRMatrixRowSpace(matrix))
+         hypre_TFree(hypre_AuxParCSRMatrixRowSpace(matrix));
+      if (hypre_AuxParCSRMatrixAuxJ(matrix))
       {
-         if (hypre_AuxParCSRMatrixRowLength(matrix))
-            hypre_TFree(hypre_AuxParCSRMatrixRowLength(matrix));
-         if (hypre_AuxParCSRMatrixRowSpace(matrix))
-            hypre_TFree(hypre_AuxParCSRMatrixRowSpace(matrix));
-         if (hypre_AuxParCSRMatrixAuxJ(matrix))
-         {
-	    for (i=0; i < num_rows; i++)
-            {
-	       hypre_TFree(hypre_AuxParCSRMatrixAuxJ(matrix)[i]);
-               hypre_TFree(hypre_AuxParCSRMatrixAuxData(matrix)[i]);
-            }
-         }
+         for (i=0; i < num_rows; i++)
+	    hypre_TFree(hypre_AuxParCSRMatrixAuxJ(matrix)[i]);
+	 hypre_TFree(hypre_AuxParCSRMatrixAuxJ(matrix));
       }
+      if (hypre_AuxParCSRMatrixAuxData(matrix))
       {
-         if (hypre_AuxParCSRMatrixIndxDiag(matrix))
+         for (i=0; i < num_rows; i++)
+            hypre_TFree(hypre_AuxParCSRMatrixAuxData(matrix)[i]);
+	 hypre_TFree(hypre_AuxParCSRMatrixAuxData(matrix));
+      }
+      if (hypre_AuxParCSRMatrixIndxDiag(matrix))
             hypre_TFree(hypre_AuxParCSRMatrixIndxDiag(matrix));
-         if (hypre_AuxParCSRMatrixIndxOffd(matrix))
+      if (hypre_AuxParCSRMatrixIndxOffd(matrix))
             hypre_TFree(hypre_AuxParCSRMatrixIndxOffd(matrix));
-      }
       hypre_TFree(matrix);
    }
 

@@ -24,7 +24,7 @@
  *
  *****************************************************************************/
 int
-hypre_NewIJVectorPar(hypre_IJVector *vector)
+hypre_NewIJVectorPar(hypre_IJVector *vector, const int *partitioning)
 {
    MPI_Comm comm = hypre_IJVectorContext(vector);
    int global_n = hypre_IJVectorN(vector); 
@@ -37,7 +37,7 @@ hypre_NewIJVectorPar(hypre_IJVector *vector)
    if (!par_vector)
    {
       hypre_IJVectorLocalStorage(vector) = hypre_CreateParVector(comm,
-               global_n,NULL); 
+               global_n, (int *) partitioning); 
    };
 
    return ierr;
@@ -71,9 +71,15 @@ hypre_SetIJVectorParPartitioning(hypre_IJVector *vector,
    int ierr = 0;
    hypre_ParVector *par_vector = hypre_IJVectorLocalStorage(vector);
 
-   if (!partitioning) ++ierr;
-
-   hypre_ParVectorPartitioning(par_vector) = (int *) partitioning;
+   if (!par_vector)
+   {
+      MPI_Comm comm = hypre_IJVectorContext(vector);
+      int global_n = hypre_IJVectorN(vector); 
+      hypre_IJVectorLocalStorage(vector) = hypre_CreateParVector(comm,
+               global_n, (int *) partitioning); 
+   }
+   else
+      hypre_ParVectorPartitioning(par_vector) = (int *) partitioning;
 
    return ierr;
 }
