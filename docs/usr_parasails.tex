@@ -2,7 +2,7 @@
 \section{ParaSails}
 
 ParaSails is a parallel implementation of a sparse approximate inverse
-preconditioner, using a priori sparsity patterns and least-squares
+preconditioner, using {\em a priori} sparsity patterns and least-squares
 (Frobenius norm) minimization.  Symmetric positive definite (SPD) problems
 are handled using a factored SPD sparse approximate inverse.  General
 (nonsymmetric and/or indefinite) problems are handled with an
@@ -10,7 +10,7 @@ unfactored sparse approximate inverse.  It is also possible to
 precondition nonsymmetric but definite matrices with a factored, SPD
 preconditioner.
 
-ParaSails uses a priori sparsity patterns that are patterns of powers
+ParaSails uses {\em a priori} sparsity patterns that are patterns of powers
 of sparsified matrices.  ParaSails also uses a post-filtering technique
 to reduce the cost of applying the preconditioner.  
 In advanced usage not described here, the pattern of the
@@ -210,7 +210,7 @@ definiteness of the preconditioner, as well as being less expensive
 to construct.
 
 The nonsymmetric matrix $A$ must be definite,
-i.e., $(A+A^T)/2$ is SPD, and the a priori sparsity pattern to be used
+i.e., $(A+A^T)/2$ is SPD, and the {\em a priori} sparsity pattern to be used
 must be symmetric.  The latter may be guaranteed by 1) 
 constructing the sparsity pattern with a symmetric matrix, or 2) if the
 matrix is structurally symmetric (has symmetric pattern), then
