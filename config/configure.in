@@ -831,7 +831,7 @@ case $HYPRE_ARCH in
        ;;
   LINUX | Linux)
        case $HOSTNAME in
-          mcr* | thunder*)
+          mcr* | thunder* | ilx*)
             AC_DEFINE(HYPRE_LINUX_CHAOS2)
             ;;
           *)
