@@ -59,7 +59,44 @@ libLIBRARIES_INSTALL = $(INSTALL_DATA)
 LIBRARIES = $(lib_LIBRARIES)
 libHYPRE_FEI_a_AR = $(AR) $(ARFLAGS)
 libHYPRE_FEI_a_LIBADD =
-am__libHYPRE_FEI_a_SOURCES_DIST = FEI_HYPRE_Impl.cxx HYPRE_LSC_aux.cxx \
+am__libHYPRE_FEI_a_SOURCES_DIST = FEI_HYPRE_Impl.cxx LLNL_FEI_Impl.cxx \
+	LLNL_FEI_Fei.cxx LLNL_FEI_LSCore.cxx LLNL_FEI_Solver.cxx \
+	LLNL_FEI_Matrix.cxx HYPRE_LSC_aux.cxx HYPRE_LSI_Dsuperlu.c \
+	HYPRE_LSI_UZAWA.cxx HYPRE_LSI_blkprec.cxx HYPRE_LSI_ddict.c \
+	HYPRE_LSI_ddilut.c HYPRE_LSI_ml.c HYPRE_LSI_mli.cxx \
+	HYPRE_LSI_poly.c HYPRE_LSI_schwarz.c HYPRE_LinSysCore.cxx \
+	HYPRE_SlideReduction.cxx HYPRE_parcsr_TFQmr.c \
+	HYPRE_parcsr_bicgs.c HYPRE_parcsr_bicgstabl.c \
+	HYPRE_parcsr_fgmres.c HYPRE_parcsr_lsicg.c \
+	HYPRE_parcsr_symqmr.c SymQMR.c TFQmr.c bicgs.c bicgstabl.c \
+	cfei_hypre.cxx fgmres.c hypre_lsi_amge.c hypre_lsi_ddamg.c \
+	hypre_lsi_misc.c hypre_schur_reduce.cxx hypre_slide_reduce.cxx \
+	lsicg.c
+am__objects_1 = FEI_HYPRE_Impl.$(OBJEXT) LLNL_FEI_Impl.$(OBJEXT) \
+	LLNL_FEI_Fei.$(OBJEXT) LLNL_FEI_LSCore.$(OBJEXT) \
+	LLNL_FEI_Solver.$(OBJEXT) LLNL_FEI_Matrix.$(OBJEXT) \
+	HYPRE_LSC_aux.$(OBJEXT) HYPRE_LSI_Dsuperlu.$(OBJEXT) \
+	HYPRE_LSI_UZAWA.$(OBJEXT) HYPRE_LSI_blkprec.$(OBJEXT) \
+	HYPRE_LSI_ddict.$(OBJEXT) HYPRE_LSI_ddilut.$(OBJEXT) \
+	HYPRE_LSI_ml.$(OBJEXT) HYPRE_LSI_mli.$(OBJEXT) \
+	HYPRE_LSI_poly.$(OBJEXT) HYPRE_LSI_schwarz.$(OBJEXT) \
+	HYPRE_LinSysCore.$(OBJEXT) HYPRE_SlideReduction.$(OBJEXT) \
+	HYPRE_parcsr_TFQmr.$(OBJEXT) HYPRE_parcsr_bicgs.$(OBJEXT) \
+	HYPRE_parcsr_bicgstabl.$(OBJEXT) HYPRE_parcsr_fgmres.$(OBJEXT) \
+	HYPRE_parcsr_lsicg.$(OBJEXT) HYPRE_parcsr_symqmr.$(OBJEXT) \
+	SymQMR.$(OBJEXT) TFQmr.$(OBJEXT) bicgs.$(OBJEXT) \
+	bicgstabl.$(OBJEXT) cfei_hypre.$(OBJEXT) fgmres.$(OBJEXT) \
+	hypre_lsi_amge.$(OBJEXT) hypre_lsi_ddamg.$(OBJEXT) \
+	hypre_lsi_misc.$(OBJEXT) hypre_schur_reduce.$(OBJEXT) \
+	hypre_slide_reduce.$(OBJEXT) lsicg.$(OBJEXT)
+@STATICONLY_TRUE@am_libHYPRE_FEI_a_OBJECTS = $(am__objects_1)
+libHYPRE_FEI_a_OBJECTS = $(am_libHYPRE_FEI_a_OBJECTS)
+libLTLIBRARIES_INSTALL = $(INSTALL)
+LTLIBRARIES = $(lib_LTLIBRARIES)
+libHYPRE_FEI_la_LIBADD =
+am__libHYPRE_FEI_la_SOURCES_DIST = FEI_HYPRE_Impl.cxx \
+	LLNL_FEI_Impl.cxx LLNL_FEI_Fei.cxx LLNL_FEI_LSCore.cxx \
+	LLNL_FEI_Solver.cxx LLNL_FEI_Matrix.cxx HYPRE_LSC_aux.cxx \
 	HYPRE_LSI_Dsuperlu.c HYPRE_LSI_UZAWA.cxx HYPRE_LSI_blkprec.cxx \
 	HYPRE_LSI_ddict.c HYPRE_LSI_ddilut.c HYPRE_LSI_ml.c \
 	HYPRE_LSI_mli.cxx HYPRE_LSI_poly.c HYPRE_LSI_schwarz.c \
@@ -70,49 +107,19 @@ am__libHYPRE_FEI_a_SOURCES_DIST = FEI_HYPRE_Impl.cxx HYPRE_LSC_aux.cxx \
 	bicgs.c bicgstabl.c cfei_hypre.cxx fgmres.c hypre_lsi_amge.c \
 	hypre_lsi_ddamg.c hypre_lsi_misc.c hypre_schur_reduce.cxx \
 	hypre_slide_reduce.cxx lsicg.c
-am__objects_1 = FEI_HYPRE_Impl.$(OBJEXT) HYPRE_LSC_aux.$(OBJEXT) \
-	HYPRE_LSI_Dsuperlu.$(OBJEXT) HYPRE_LSI_UZAWA.$(OBJEXT) \
-	HYPRE_LSI_blkprec.$(OBJEXT) HYPRE_LSI_ddict.$(OBJEXT) \
-	HYPRE_LSI_ddilut.$(OBJEXT) HYPRE_LSI_ml.$(OBJEXT) \
-	HYPRE_LSI_mli.$(OBJEXT) HYPRE_LSI_poly.$(OBJEXT) \
-	HYPRE_LSI_schwarz.$(OBJEXT) HYPRE_LinSysCore.$(OBJEXT) \
-	HYPRE_SlideReduction.$(OBJEXT) HYPRE_parcsr_TFQmr.$(OBJEXT) \
-	HYPRE_parcsr_bicgs.$(OBJEXT) HYPRE_parcsr_bicgstabl.$(OBJEXT) \
-	HYPRE_parcsr_fgmres.$(OBJEXT) HYPRE_parcsr_lsicg.$(OBJEXT) \
-	HYPRE_parcsr_symqmr.$(OBJEXT) SymQMR.$(OBJEXT) TFQmr.$(OBJEXT) \
-	bicgs.$(OBJEXT) bicgstabl.$(OBJEXT) cfei_hypre.$(OBJEXT) \
-	fgmres.$(OBJEXT) hypre_lsi_amge.$(OBJEXT) \
-	hypre_lsi_ddamg.$(OBJEXT) hypre_lsi_misc.$(OBJEXT) \
-	hypre_schur_reduce.$(OBJEXT) hypre_slide_reduce.$(OBJEXT) \
-	lsicg.$(OBJEXT)
-@STATICONLY_TRUE@am_libHYPRE_FEI_a_OBJECTS = $(am__objects_1)
-libHYPRE_FEI_a_OBJECTS = $(am_libHYPRE_FEI_a_OBJECTS)
-libLTLIBRARIES_INSTALL = $(INSTALL)
-LTLIBRARIES = $(lib_LTLIBRARIES)
-libHYPRE_FEI_la_LIBADD =
-am__libHYPRE_FEI_la_SOURCES_DIST = FEI_HYPRE_Impl.cxx \
-	HYPRE_LSC_aux.cxx HYPRE_LSI_Dsuperlu.c HYPRE_LSI_UZAWA.cxx \
-	HYPRE_LSI_blkprec.cxx HYPRE_LSI_ddict.c HYPRE_LSI_ddilut.c \
-	HYPRE_LSI_ml.c HYPRE_LSI_mli.cxx HYPRE_LSI_poly.c \
-	HYPRE_LSI_schwarz.c HYPRE_LinSysCore.cxx \
-	HYPRE_SlideReduction.cxx HYPRE_parcsr_TFQmr.c \
-	HYPRE_parcsr_bicgs.c HYPRE_parcsr_bicgstabl.c \
-	HYPRE_parcsr_fgmres.c HYPRE_parcsr_lsicg.c \
-	HYPRE_parcsr_symqmr.c SymQMR.c TFQmr.c bicgs.c bicgstabl.c \
-	cfei_hypre.cxx fgmres.c hypre_lsi_amge.c hypre_lsi_ddamg.c \
-	hypre_lsi_misc.c hypre_schur_reduce.cxx hypre_slide_reduce.cxx \
-	lsicg.c
-am__objects_2 = FEI_HYPRE_Impl.lo HYPRE_LSC_aux.lo \
-	HYPRE_LSI_Dsuperlu.lo HYPRE_LSI_UZAWA.lo HYPRE_LSI_blkprec.lo \
-	HYPRE_LSI_ddict.lo HYPRE_LSI_ddilut.lo HYPRE_LSI_ml.lo \
-	HYPRE_LSI_mli.lo HYPRE_LSI_poly.lo HYPRE_LSI_schwarz.lo \
-	HYPRE_LinSysCore.lo HYPRE_SlideReduction.lo \
-	HYPRE_parcsr_TFQmr.lo HYPRE_parcsr_bicgs.lo \
-	HYPRE_parcsr_bicgstabl.lo HYPRE_parcsr_fgmres.lo \
-	HYPRE_parcsr_lsicg.lo HYPRE_parcsr_symqmr.lo SymQMR.lo \
-	TFQmr.lo bicgs.lo bicgstabl.lo cfei_hypre.lo fgmres.lo \
-	hypre_lsi_amge.lo hypre_lsi_ddamg.lo hypre_lsi_misc.lo \
-	hypre_schur_reduce.lo hypre_slide_reduce.lo lsicg.lo
+am__objects_2 = FEI_HYPRE_Impl.lo LLNL_FEI_Impl.lo LLNL_FEI_Fei.lo \
+	LLNL_FEI_LSCore.lo LLNL_FEI_Solver.lo LLNL_FEI_Matrix.lo \
+	HYPRE_LSC_aux.lo HYPRE_LSI_Dsuperlu.lo HYPRE_LSI_UZAWA.lo \
+	HYPRE_LSI_blkprec.lo HYPRE_LSI_ddict.lo HYPRE_LSI_ddilut.lo \
+	HYPRE_LSI_ml.lo HYPRE_LSI_mli.lo HYPRE_LSI_poly.lo \
+	HYPRE_LSI_schwarz.lo HYPRE_LinSysCore.lo \
+	HYPRE_SlideReduction.lo HYPRE_parcsr_TFQmr.lo \
+	HYPRE_parcsr_bicgs.lo HYPRE_parcsr_bicgstabl.lo \
+	HYPRE_parcsr_fgmres.lo HYPRE_parcsr_lsicg.lo \
+	HYPRE_parcsr_symqmr.lo SymQMR.lo TFQmr.lo bicgs.lo \
+	bicgstabl.lo cfei_hypre.lo fgmres.lo hypre_lsi_amge.lo \
+	hypre_lsi_ddamg.lo hypre_lsi_misc.lo hypre_schur_reduce.lo \
+	hypre_slide_reduce.lo lsicg.lo
 @STATICONLY_FALSE@am_libHYPRE_FEI_la_OBJECTS = $(am__objects_2)
 libHYPRE_FEI_la_OBJECTS = $(am_libHYPRE_FEI_la_OBJECTS)
 am_driver_OBJECTS = driver.$(OBJEXT)
@@ -291,7 +298,12 @@ include_HEADERS = cfei-hypre.h cfei_hypre.h \
  $(BASE_DIR)/Lookup.h  \
  $(BASE_DIR)/LinearSystemCore.h \
  $(BASE_DIR)/fei_defs.h\
- snl_LinearSystemCore.h
+ snl_LinearSystemCore.h\
+ LLNL_FEI_Impl.h\
+ LLNL_FEI_Fei.h\
+ LLNL_FEI_LSCore.h\
+ LLNL_FEI_Solver.h\
+ LLNL_FEI_Matrix.h
 
 noinst_HEADERS = \
  FEI_HYPRE_Impl.h\
@@ -365,6 +377,11 @@ driver_LDADD = \
 #
 FILES = \
  FEI_HYPRE_Impl.cxx\
+ LLNL_FEI_Impl.cxx\
+ LLNL_FEI_Fei.cxx\
+ LLNL_FEI_LSCore.cxx\
+ LLNL_FEI_Solver.cxx\
+ LLNL_FEI_Matrix.cxx\
  HYPRE_LSC_aux.cxx\
  HYPRE_LSI_Dsuperlu.c\
  HYPRE_LSI_UZAWA.cxx\
