@@ -2,7 +2,7 @@
 #include <sys/times.h>
 #include <sys/time.h>
 #include <sys/param.h>
-#include <sys/unistd.h>
+#include <unistd.h>
 
 
 typedef long amg_Clock_t;
