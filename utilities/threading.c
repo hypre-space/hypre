@@ -27,8 +27,7 @@ int HYPRE_InitPthreads( int num_threads )
    int err;
    int i;
    hypre_qptr =
-          (hypre_workqueue_t) malloc(sizeof(struct hypre_workqueue_struct) +
-                                      (MAX_QUEUE * sizeof(void *)));
+          (hypre_workqueue_t) malloc(sizeof(struct hypre_workqueue_struct));
 
    hypre_NumThreads = num_threads;
    initial_thread = pthread_self();
