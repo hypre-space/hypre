@@ -572,7 +572,7 @@ mail_summary () {
     TotalTestCount=0
     TotalSuccessCount=0
     TotalFailureCount=0
-    for i in fei ij sstruct struct ; do
+    for i in fei ij ij_es sstruct struct ; do
       printf "%-15s: " ${i} >> $SUMFILE
       TestCaseSuccessCount=0; TestCaseFailedCount=0; TestCaseFailedFlag=0
       for j in ${SRC}/test/TEST_${i}/*.sh ; do
