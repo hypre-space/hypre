@@ -179,7 +179,8 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,
    P_start_col    = partition[mypid];
    P_global_ncols = partition[num_procs];
    free( partition );
-   if ( P_global_ncols < min_coarse_size || P_global_ncols < num_procs ) 
+   if ( P_global_ncols/nullspace_dim < min_coarse_size || 
+        P_global_ncols/nullspace_dim < num_procs ) 
    {
       (*Pmat_out) = NULL;
       delete [] node2aggr;
