@@ -25,6 +25,11 @@ manalyze.m
 matvec.m
 readysmp.m
 readvec.m
+readxy.m
+readxyz.m
 truncysmp.m
 writevec.m
+writexy.m
+writexyz.m
+
 writeysmp.m
