@@ -5821,7 +5821,7 @@ L180:
     static doublereal anrm;
     static integer imax;
     static doublereal rmin, rmax;
-    static integer lopt;
+/** static integer lopt;**/
     extern /* Subroutine */ int dscal_(integer *, doublereal *, doublereal *, 
 	    integer *);
     static doublereal sigma;
@@ -5952,7 +5952,7 @@ L180:
     llwork = *lwork - indwrk + 1;
     dsytrd_(uplo, n, &a[a_offset], lda, &w[1], &work[inde], &work[indtau], &
 	    work[indwrk], &llwork, &iinfo);
-    lopt = (integer) ((*n << 1) + work[indwrk]);
+/** lopt = (integer) ((*n << 1) + work[indwrk]);**/
 
 /*     For eigenvalues only, call DSTERF.  For eigenvectors, first call   
        DORGTR to generate the orthogonal matrix, then call DSTEQR. */
