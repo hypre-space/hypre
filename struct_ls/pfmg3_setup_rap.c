@@ -547,7 +547,7 @@ hypre_PFMG3BuildRAPSym_onebox_FSS07_CC0(
    }
    else
    {
-      zOffsetA_diag = hypre_CCBoxOffsetDistance(A_dbox,index);
+      zOffsetA_diag = hypre_BoxOffsetDistance(A_dbox,index);
       zOffsetA_offd = hypre_CCBoxOffsetDistance(A_dbox,index);
    }
 
@@ -1327,7 +1327,7 @@ hypre_PFMG3BuildRAPSym_onebox_FSS19_CC0(
    }
    else
    {
-      zOffsetA_diag = hypre_CCBoxOffsetDistance(A_dbox,index);
+      zOffsetA_diag = hypre_BoxOffsetDistance(A_dbox,index);
       zOffsetA_offd = hypre_CCBoxOffsetDistance(A_dbox,index);
    }
 
@@ -2365,7 +2365,7 @@ hypre_PFMG3BuildRAPSym_onebox_FSS27_CC0(
    }
    else
    {
-      zOffsetA_diag = hypre_CCBoxOffsetDistance(A_dbox,index);
+      zOffsetA_diag = hypre_BoxOffsetDistance(A_dbox,index);
       zOffsetA_offd = hypre_CCBoxOffsetDistance(A_dbox,index);
    }
 
@@ -3300,7 +3300,7 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS07_CC0(
    double                a_cn_offd, a_cn_offdm1, a_cn_offdp1;
    double                a_ce_offd, a_ce_offdm1, a_ce_offdp1;
    double                a_cs_offdp1, a_cw_offdp1;
-   double                a_ac_offdp1;
+   double                a_ac_offd, a_ac_offdp1;
    double               *rap_ce, *rap_cn;
    double               *rap_ac, *rap_aw, *rap_ae, *rap_as, *rap_an;
    double               *rap_cnw, *rap_cne;
@@ -3473,7 +3473,7 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS07_CC0(
    }
    else
    {
-      zOffsetA_diag = hypre_CCBoxOffsetDistance(A_dbox,index);
+      zOffsetA_diag = hypre_BoxOffsetDistance(A_dbox,index);
       zOffsetA_offd = hypre_CCBoxOffsetDistance(A_dbox,index);
    }
 
@@ -3561,6 +3561,7 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS07_CC0(
       a_ce_offdp1 = a_ce[iA_offdp1];
       a_cs_offdp1 = a_cs[iA_offdp1];
       a_cw_offdp1 = a_cw[iA_offdp1];
+      a_ac_offd   = a_ac[iA_offd];
       a_ac_offdp1 = a_ac[iA_offdp1];
 
       hypre_BoxLoop4Begin(loop_size,
@@ -3582,7 +3583,7 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS07_CC0(
             rap_ae[iAc] = ra[iR] * a_ce_offdp1 * pb[iP1];
  
             iP1 = iP + zOffsetP; 
-            rap_ac[iAc] =          a_ac[iA]   * pb[iP1]
+            rap_ac[iAc] =          a_ac_offd   * pb[iP1]
                +          ra[iR] * a_cc[iAp1] * pb[iP1]
                +          ra[iR] * a_ac_offdp1;
  
@@ -4192,7 +4193,7 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS19_CC0(
    }
    else
    {
-      zOffsetA_diag = hypre_CCBoxOffsetDistance(A_dbox,index);
+      zOffsetA_diag = hypre_BoxOffsetDistance(A_dbox,index);
       zOffsetA_offd = hypre_CCBoxOffsetDistance(A_dbox,index);
    }
 
@@ -5174,7 +5175,7 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS27_CC0(
    }
    else
    {
-      zOffsetA_diag = hypre_CCBoxOffsetDistance(A_dbox,index);
+      zOffsetA_diag = hypre_BoxOffsetDistance(A_dbox,index);
       zOffsetA_offd = hypre_CCBoxOffsetDistance(A_dbox,index);
    }
 
