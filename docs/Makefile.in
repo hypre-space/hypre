@@ -14,6 +14,8 @@ srcdir = @srcdir@
 VPATH = @srcdir@
 
 LATEX = latex -interaction=nonstopmode
+MAKEINDEX = makeindex -q
+DVIPS = dvips -q
 
 ONLINE_OPTS =\
  -split 2\
@@ -75,11 +77,11 @@ USR_FILES =\
  usr_manual.tex
 
 HYPRE_usr_manual/usr_manual.html: usr_manual.dvi
-	latex2html ${ONLINE_OPTS} -dir HYPRE_usr_manual usr_manual.tex
+	latex2html ${ONLINE_OPTS} -dir HYPRE_usr_manual usr_manual.tex 2>&1
 	@cp -f hypre_wiw.gif HYPRE_usr_manual/.
 
 HYPRE_usr_manual.ps: usr_manual.dvi
-	dvips -o HYPRE_usr_manual.ps usr_manual
+	${DVIPS} -o HYPRE_usr_manual.ps usr_manual
 
 usr_manual.dvi: version.tex usr_manual.idx
 	${LATEX} usr_manual
@@ -88,7 +90,7 @@ usr_manual.dvi: version.tex usr_manual.idx
 usr_manual.idx: ${USR_FILES} 
 	${LATEX} usr_manual
 	bibtex usr_manual
-	makeindex usr_manual.idx
+	${MAKEINDEX} usr_manual.idx
 
 ##########
 
@@ -108,11 +110,11 @@ DEV_FILES =\
  dev_manual.tex
 
 HYPRE_dev_manual/dev_manual.html: dev_manual.dvi
-	latex2html ${ONLINE_OPTS} -dir HYPRE_dev_manual dev_manual.tex
+	latex2html ${ONLINE_OPTS} -dir HYPRE_dev_manual dev_manual.tex 2>&1
 	@cp -f hypre_wiw.gif HYPRE_dev_manual/.
 
 HYPRE_dev_manual.ps: dev_manual.dvi
-	dvips -o HYPRE_dev_manual.ps dev_manual
+	${DVIPS} -o HYPRE_dev_manual.ps dev_manual
 
 dev_manual.dvi: version.tex dev_manual.idx
 	${LATEX} dev_manual
@@ -121,7 +123,7 @@ dev_manual.dvi: version.tex dev_manual.idx
 dev_manual.idx: ${DEV_FILES}
 	${LATEX} dev_manual
 	#bibtex dev_manual
-	makeindex dev_manual.idx
+	${MAKEINDEX} dev_manual.idx
 
 ##########
 
@@ -135,11 +137,11 @@ DXX_FILES =\
  ${DOCIFIED_FILES:.c=.dxx}
 
 HYPRE_code_ref/index.html: code_ref.dxx 
-	doc++ -d HYPRE_code_ref -B hypre_wiw.html code_ref.dxx
+	doc++ -d HYPRE_code_ref -B hypre_wiw.html code_ref.dxx 2>&1
 	cp -f hypre_wiw.gif HYPRE_code_ref
 
 HYPRE_code_ref.ps: code_ref.dvi
-	dvips -o HYPRE_code_ref.ps code_ref.dvi 		
+	${DVIPS} -o HYPRE_code_ref.ps code_ref.dvi 		
 
 code_ref.dvi: code_ref.tex
 	${LATEX} code_ref
