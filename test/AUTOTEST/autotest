@@ -206,14 +206,14 @@ do
         HYPRE_RUN_MACHINE="blue"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/powerpc-ibm-aix5.1.0.0/AUTOTEST"
         if [ "$AUTOMAKEMODE" = "yes" ] ; then
-	  HYPRE_MACHINE_COMMANDS="-mb 1 -nse 1 -a 1 -cfo 1 -l 2"
+	  HYPRE_MACHINE_COMMANDS="-mb 1 -ne 1 -a 1 -cfo 1 -l 2"
           HYPRE_MESSAGE='TEST[automake-ASCI-Blue]'
         elif [ "$1" = "-bluemp" ] ; then
           SUBMSG="from OpenMP"
-	  HYPRE_MACHINE_COMMANDS="-mnse 1 -a 1 -cfo 2"
+	  HYPRE_MACHINE_COMMANDS="-mne 1 -a 1 -cfo 2"
           HYPRE_MESSAGE='SECONDARY[OpenMP-ASCI-Blue]'
         else
-	  HYPRE_MACHINE_COMMANDS="-mb 1 -nse 1 -o 1 -a 2 -cf"
+	  HYPRE_MACHINE_COMMANDS="-mb 1 -ne 1 -o 1 -a 2 -cf"
           HYPRE_MESSAGE='SECONDARY[ASCI-Blue]'
         fi
 	perform_test
