@@ -1,7 +1,7 @@
 #include "HYPRE_structIJ_mv.h"
 #include "HYPRE_IJ_mv.h"
-#include "../IJ_matrix_vector/IJ_matrix_vector.h"
-#include "../CI_struct_matrix_vector/CI_struct_matrix_vector.h"
+#include "IJ_matrix_vector.h"
+#include "CI_struct_matrix_vector.h"
 #include "utilities.h"
 
 #ifndef hypre_structIJ_MV_HEADER
