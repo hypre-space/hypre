@@ -84,7 +84,6 @@ FILES =\
  src/ilu_seq.c\
  src/io_dh.c\
  src/krylov_dh.c\
- src/petsc_euclid.c\
  src/shellSort_dh.c\
  src/getRow_dh.c
 
