@@ -17,10 +17,7 @@ VPATH = @srcdir@
 CC = @CC@
 CXX = @CXX@
 
-#SUPERLU_INCLUDE = -I/g/g2/chtong/SUPERLU/WEST/SuperLU/SRC
-#SUPERLU_LIB     = -L/g/g2/chtong/SUPERLU/WEST/SuperLU
-#MLPACK_INCLUDE  = -I/g/g2/chtong/ML/WEST/ml/src
-#MLPACK_LIB      = -L/g/g2/chtong/ML/WEST/ml/src
+FEI_BASE_DIR    = $(srcdir)/../fei-base
 SUPERLU_INCLUDE = -I$(srcdir)/../SuperLU
 SUPERLU_LIB     = -L$(srcdir)/../SuperLU
 MLPACK_INCLUDE  = 
@@ -30,10 +27,8 @@ C_COMPILE_FLAGS=@CFLAGS@
 CXX_COMPILE_FLAGS=@CXXFLAGS@
 CINCLUDES=@INCLUDES@ @MPIINCLUDE@
 CXXINCLUDES=@INCLUDES@ @MPIINCLUDE@
-#CDEFS = -DSUPERLU -DMLPACK
-#CXXDEFS = -DSUPERLU -DMLPACK
-CDEFS = -DBOOL_NOT_SUPPORTED
-CXXDEFS = -DBOOL_NOT_SUPPORTED
+CDEFS = -DSUPERLU -DBOOL_NOT_SUPPORTED
+CXXDEFS = -DSUPERLU -DBOOL_NOT_SUPPORTED
 
 CFLAGS = -w ${C_COMPILE_FLAGS} ${CDEFS}\
  -I../..\
@@ -47,7 +42,7 @@ CFLAGS = -w ${C_COMPILE_FLAGS} ${CDEFS}\
  -I$(srcdir)/../../seq_mv\
  -I$(srcdir)/../../distributed_matrix\
  -I$(srcdir)/../../distributed_ls\
- -I$(srcdir)/../fei-base\
+ -I$(FEI_BASE_DIR)\
  ${SUPERLU_INCLUDE}\
  ${MLPACK_INCLUDE}\
  ${CINCLUDES}
@@ -62,7 +57,7 @@ CXXFLAGS = -w ${CXX_COMPILE_FLAGS} ${CXXDEFS}\
  -I$(srcdir)/../../parcsr_mv\
  -I$(srcdir)/../../parcsr_ls\
  -I$(srcdir)/../../seq_mv\
- -I$(srcdir)/../fei-base\
+ -I$(FEI_BASE_DIR)\
  ${SUPERLU_INCLUDE}\
  ${CXXINCLUDES}
 

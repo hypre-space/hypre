@@ -63,4 +63,9 @@
 07/19/01    2.0.1R3
             - fix a bug in the lower and upper bounds of MatrixCreate
             - fix problems with the projection methods 
+07/30/01    2.0.1R4
+            - this should couple with the bug fix in the new IJMatrix
+            - include automatically SuperLU
+            - a few more changes to new IJMatrix/Vectors in SuperLU/AMGe
+              part of the code
  

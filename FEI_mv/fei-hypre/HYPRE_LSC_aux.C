@@ -2817,7 +2817,7 @@ void HYPRE_LinSysCore::solveUsingSuperLU(int& status)
     //---old_IJ---------------------------------------------------------
     //HYPRE_IJVectorGetLocalComponents(currB_, nrows, ind_array, NULL, rhs);
     //---new_IJ---------------------------------------------------------
-    ierr = HYPRE_IJVectorGetValues(currB_, nrows, ind_array, NULL, rhs);
+    ierr = HYPRE_IJVectorGetValues(currB_, nrows, ind_array, rhs);
     //------------------------------------------------------------------
 
     assert(!ierr);
@@ -2873,8 +2873,15 @@ void HYPRE_LinSysCore::solveUsingSuperLU(int& status)
     if ( info == 0 )
     {
        soln = (double *) ((DNformat *) B.Store)->nzval;
-       ierr = HYPRE_IJVectorSetLocalComponents(currX_,nrows,ind_array,NULL,soln);
+       //---old_IJ------------------------------------------------------
+       //ierr = HYPRE_IJVectorSetLocalComponents(currX_,nrows,ind_array,
+       //                                        NULL,soln);
+       //---new_IJ------------------------------------------------------
+       ierr = HYPRE_IJVectorSetValues(currX_, nrows, (const int *) &ind_array,
+                    	       (const double *) soln);
+       //---------------------------------------------------------------
        assert(!ierr);
+
        //---old_IJ------------------------------------------------------
        //x_csr  = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(currX_);
        //b_csr  = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(currB_);
@@ -3023,7 +3030,7 @@ void HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
     //---new_IJ---------------------------------------------------------
     //ierr=HYPRE_IJVectorGetLocalComponents(currB_,nrows,ind_array,NULL,rhs);
     //---new_IJ---------------------------------------------------------
-    ierr = HYPRE_IJVectorGetValues(currB_, nrows, ind_array, NULL, rhs);
+    ierr = HYPRE_IJVectorGetValues(currB_, nrows, ind_array, rhs);
     //------------------------------------------------------------------
 
     assert(!ierr);
@@ -3101,8 +3108,15 @@ void HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
 
     if ( status == 1 )
     {
-       ierr = HYPRE_IJVectorSetLocalComponents(currX_,nrows,ind_array,NULL,soln);
+       //---old_IJ------------------------------------------------------
+       //ierr = HYPRE_IJVectorSetLocalComponents(currX_,nrows,ind_array,
+       //                                        NULL,soln);
+       //---new_IJ------------------------------------------------------
+       ierr = HYPRE_IJVectorSetValues(currX_, nrows, (const int *) &ind_array,
+                    	       (const double *) soln);
+       //---------------------------------------------------------------
        assert(!ierr);
+
        //---old_IJ------------------------------------------------------
        //x_csr  = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(currX_);
        //r_csr  = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(currR_);
@@ -3273,7 +3287,7 @@ void HYPRE_LinSysCore::solveUsingY12M(int& status)
     //---old_IJ---------------------------------------------------------
     //HYPRE_IJVectorGetLocalComponents(currB_,nrows,ind_array,NULL,rhs);
     //---new_IJ---------------------------------------------------------
-    ierr = HYPRE_IJVectorGetValues(currB_, nrows, ind_array, NULL, rhs);
+    ierr = HYPRE_IJVectorGetValues(currB_, nrows, ind_array, rhs);
     //------------------------------------------------------------------
     assert(!ierr);
 
@@ -3294,8 +3308,15 @@ void HYPRE_LinSysCore::solveUsingY12M(int& status)
 
     if ( ifail == 0 )
     {
-       ierr = HYPRE_IJVectorSetLocalComponents(currX_,nrows,ind_array,NULL,rhs);
+       //---old_IJ------------------------------------------------------
+       //ierr = HYPRE_IJVectorSetLocalComponents(currX_,nrows,ind_array,
+       //                                        NULL,rhs);
+       //---new_IJ------------------------------------------------------
+       ierr = HYPRE_IJVectorSetValues(currX_, nrows, (const int *) &ind_array,
+                    	       (const double *) rhs);
+       //---------------------------------------------------------------
        assert(!ierr);
+
        //---old_IJ------------------------------------------------------
        //x_csr  = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(currX_);
        //r_csr  = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(currR_);
@@ -3389,7 +3410,7 @@ void HYPRE_LinSysCore::solveUsingAMGe(int &iterations)
     //---old_IJ---------------------------------------------------------
     // HYPRE_IJVectorGetLocalComponents(currB_,nrows,ind_array,NULL,rhs);
     //---new_IJ---------------------------------------------------------
-    ierr = HYPRE_IJVectorGetValues(currB_, nrows, ind_array, NULL, rhs);
+    ierr = HYPRE_IJVectorGetValues(currB_, nrows, ind_array, rhs);
     //------------------------------------------------------------------
 
     assert(!ierr);
@@ -3405,7 +3426,12 @@ void HYPRE_LinSysCore::solveUsingAMGe(int &iterations)
     // postprocessing
     //------------------------------------------------------------------
 
-    ierr = HYPRE_IJVectorSetLocalComponents(currX_,nrows,ind_array,NULL,sol);
+    //---old_IJ---------------------------------------------------------
+    //ierr = HYPRE_IJVectorSetLocalComponents(currX_,nrows,ind_array,NULL,sol);
+    //---new_IJ---------------------------------------------------------
+    ierr = HYPRE_IJVectorSetValues(currX_, nrows, (const int *) &ind_array,
+                    	       (const double *) sol);
+    //------------------------------------------------------------------
     assert(!ierr);
 
     //---old_IJ---------------------------------------------------------
