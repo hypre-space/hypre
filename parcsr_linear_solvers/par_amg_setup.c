@@ -416,3 +416,13 @@ hypre_ParAMGSetup( void               *amg_vdata,
    return(Setup_err_flag);
 }  
 
+int
+hypre_ParAMGReinit( void *amg_vdata )
+{
+   hypre_ParAMGData *amg_data = amg_vdata;
+   int ierr = 0;
+
+   hypre_ParAMGDataNumLevels(amg_data) = 1;
+
+   return(ierr);
+}
