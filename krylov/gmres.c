@@ -554,8 +554,9 @@ hypre_GMRESSolve(void  *gmres_vdata,
                       break;
                    }
                 }
-		else if ( print_level>0 && my_id == 0)
-		{
+		else 
+                {
+                   if ( print_level>0 && my_id == 0)
                       printf("false convergence 2\n");
 		   (*(gmres_functions->CopyVector))(r,p[0]);
 		   i = 0;
