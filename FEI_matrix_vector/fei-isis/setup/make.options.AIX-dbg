@@ -1,0 +1,36 @@
+ISIS_ARCH=rs6000
+ISIS_TARGET=FEI_PLL
+HYPRE=disabled
+#HAVE_PILUT=pilut
+HAVE_PILUT=
+HYPRE_INCLUDE_PATH=-I.
+libraries_mpi=-lfei_isis -lisis_mpi       -llapack -lblas -lm -lxlf90
+C=mpcc
+CPP=mpCC
+OPT=-g -D__rs6000
+LD_OPT=-g -D__rs6000
+CFLAGS=-g -D__rs6000
+MPI_INCLUDE=.
+MPI_LIB=.
+LDFLAGS= -L$(FEI_ROOT)/lib/rs6000 -L$(ISIS_ROOT)/lib/rs6000 -L/usr/local/lib
+INSTALL_ROOT=/usr/local
+C++INCLUDES=-I$(FEI_ROOT) -I$(ISIS_ROOT)
+
+# std unixisms, we hope, that still need fixing sometimes
+CP=/bin/cp
+RM=/bin/rm
+LN=/bin/ln
+MKDIR=/bin/mkdir
+CHMOD=chmod
+RANLIB=ranlib
+
+# our dependency stuff for linux
+DEPEND_CPP=g++
+DEPEND_ALL=$(FEI_ROOT)/util/g++depinclude
+DEPEND_NOSYS=$(FEI_ROOT)/util/g++depinclude_nosys
+DEPEND_NONE=$(FEI_ROOT)/util/g++nodepinclude
+# DEPEND_FLAGS should be redefined in the applying makefile if needed
+DEPEND_FLAGS=$(CXXFLAGS) $(C++INCLUDES) $(C++DEFINES)
+# misc stuff that'll probably need fixing on some platforms:
+CXXFLAGS=$(OPT) -c
+CINCLUDES=${CINCLUDES--I/usr/local/include}
