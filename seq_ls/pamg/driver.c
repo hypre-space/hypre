@@ -131,6 +131,11 @@ main( int   argc,
          arg_index++;
          coarsen_type = 1;
       }
+      else if ( strcmp(argv[arg_index], "-rugeL") == 0 )
+      {
+         arg_index++;
+         coarsen_type = 2;
+      }
       else if ( strcmp(argv[arg_index], "-rlx") == 0 )
       {
          arg_index++;
