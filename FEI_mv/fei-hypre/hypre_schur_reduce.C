@@ -19,7 +19,7 @@
 #include "../../parcsr_ls/HYPRE_parcsr_ls.h"
 #include "HYPRE_LinSysCore.h"
 
-#define dabs(x) ((x > 0) ? x : -(x))
+#define habs(x) ((x > 0) ? x : -(x))
 
 //---------------------------------------------------------------------------
 // parcsr_mv.h is put here instead of in HYPRE_LinSysCore.h 
@@ -885,10 +885,10 @@ void HYPRE_LinSysCore::buildSchurReducedSystem()
        ncnt = 0;
        ddata = 0.0;
        for ( j = 0; j < newRowSize; j++ )
-          if ( dabs(newColVal[j]) > ddata ) ddata = dabs(newColVal[j]); 
+          if ( habs(newColVal[j]) > ddata ) ddata = habs(newColVal[j]); 
        for ( j = 0; j < newRowSize; j++ )
        {
-          if ( dabs(newColVal[j]) > ddata*1.0e-14 ) 
+          if ( habs(newColVal[j]) > ddata*1.0e-14 ) 
           {
              newColInd[ncnt] = newColInd[j];
              newColVal[ncnt++] = newColVal[j];
@@ -2028,10 +2028,10 @@ void HYPRE_LinSysCore::buildSchurReducedSystem2()
        ncnt = 0;
        rowmax = 0.0;
        for ( j = 0; j < newRowSize; j++ )
-          if ( dabs(newColVal[j]) > rowmax ) rowmax = dabs(newColVal[j]); 
+          if ( habs(newColVal[j]) > rowmax ) rowmax = habs(newColVal[j]); 
        for ( j = 0; j < newRowSize; j++ )
        {
-          if ( dabs(newColVal[j]) > rowmax*1.0e-14 ) 
+          if ( habs(newColVal[j]) > rowmax*1.0e-14 ) 
           {
              newColInd[ncnt] = newColInd[j];
              newColVal[ncnt++] = newColVal[j];

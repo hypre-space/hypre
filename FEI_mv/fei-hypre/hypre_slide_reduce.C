@@ -33,7 +33,7 @@
 // local defines and external functions
 //---------------------------------------------------------------------------
 
-#define dabs(x) (((x) > 0.0) ? x : -(x))
+#define habs(x) (((x) > 0.0) ? x : -(x))
 
 extern "C" 
 {
@@ -364,7 +364,7 @@ void HYPRE_LinSysCore::buildSlideReducedSystemPartA(int *ProcNRows,
              colIndex = hypre_BinarySearch(constrList_,colInd[j],nSlaves);
              if ( colIndex >= 0 && constrListAux[colIndex] != -1) 
              {
-                 if ( dabs(colVal[j]) > searchValue )
+                 if ( habs(colVal[j]) > searchValue )
                  {
                     if (i != constrListAux[colIndex]) 
                     {
@@ -375,7 +375,7 @@ void HYPRE_LinSysCore::buildSlideReducedSystemPartA(int *ProcNRows,
                           printf(" candidate does not have constr %d\n", i);
                        }
                     }
-                    searchValue = dabs(colVal[j]);
+                    searchValue = habs(colVal[j]);
                     searchIndex = colInd[j];
                  }
              }
@@ -711,7 +711,7 @@ void HYPRE_LinSysCore::buildSlideReducedSystemPartB(int *ProcNRows,
              else if ( colIndex > newEndRow && colIndex <= EndRow ) 
              {
                 if ( colVal[j] != 0.0 ) diagonal[diagCount++] = colVal[j];
-                if ( dabs(colVal[j]) < 1.0E-8 )
+                if ( habs(colVal[j]) < 1.0E-8 )
                 {
                    if ( HYOutputLevel_ & HYFEI_SLIDEREDUCE1 )
                    {
@@ -2024,7 +2024,7 @@ void HYPRE_LinSysCore::buildSlideReducedSystem2()
              else if ( colIndex > newEndRow && colIndex <= EndRow ) 
              {
                 if ( colVal[j] != 0.0 ) diagonal[diagCount++] = colVal[j];
-                if ( dabs(colVal[j]) < 1.0E-8 )
+                if ( habs(colVal[j]) < 1.0E-8 )
                 {
                    if (HYOutputLevel_ & HYFEI_SLIDEREDUCE1)
                    {

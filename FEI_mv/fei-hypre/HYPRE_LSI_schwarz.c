@@ -65,7 +65,7 @@ extern int  HYPRE_LSI_DDIlutComposeOverlappedMatrix(MH_Matrix *, int *,
 extern int  HYPRE_LSI_ILUTDecompose(HYPRE_LSI_Schwarz *sch_ptr);
 extern void qsort0(int *, int, int);
 extern int  HYPRE_LSI_SplitDSort(double*,int,int*,int);
-#define dabs(x) ((x) > 0 ? (x) : -(x))
+#define habs(x) ((x) > 0 ? (x) : -(x))
 
 /*--------------------------------------------------------------------------
  * HYPRE_LSI_SchwarzCreate - Return a Schwarz preconditioner object "solver"
@@ -877,7 +877,7 @@ int HYPRE_LSI_ILUTDecompose( HYPRE_LSI_Schwarz *sch_ptr )
          vals = &(mat_aa[index]);
          rleng = mat_ia[i+1] - index;
          ddata = 0.0;
-         for ( j = 0; j < rleng; j++ ) ddata += dabs( vals[j] ); 
+         for ( j = 0; j < rleng; j++ ) ddata += habs( vals[j] ); 
          rowNorms[i] = ddata;
       }
       printflag2 = nrows / 10 + 1;
@@ -914,7 +914,7 @@ int HYPRE_LSI_ILUTDecompose( HYPRE_LSI_Schwarz *sch_ptr )
          rel_tau = tau * rowNorms[i];
          for ( j = first; j < i; j++ )
          {
-            if ( dabs(dble_buf[j]) > rel_tau )
+            if ( habs(dble_buf[j]) > rel_tau )
             {
                ddata = dble_buf[j] / diagonal[j];
                for ( k = new_ia[j]; k < new_ia[j+1]; k++ )
@@ -947,7 +947,7 @@ int HYPRE_LSI_ILUTDecompose( HYPRE_LSI_Schwarz *sch_ptr )
             index = track_array[j];
             if ( index < i )
             {
-               absval = dabs( dble_buf[index] );
+               absval = habs( dble_buf[index] );
                if ( absval > rel_tau )
                {
                   sortcols[sortcnt] = index;
@@ -980,7 +980,7 @@ int HYPRE_LSI_ILUTDecompose( HYPRE_LSI_Schwarz *sch_ptr )
             }
          }
          diagonal[i] = dble_buf[i];
-         if ( dabs(diagonal[i]) < 1.0e-12 ) diagonal[i] = 1.0E-12;
+         if ( habs(diagonal[i]) < 1.0e-12 ) diagonal[i] = 1.0E-12;
          new_aa[nnz] = diagonal[i];
          new_ja[nnz++] = i;
          sortcnt = 0;
@@ -989,7 +989,7 @@ int HYPRE_LSI_ILUTDecompose( HYPRE_LSI_Schwarz *sch_ptr )
             index = track_array[j];
             if ( index > i )
             {
-               absval = dabs( dble_buf[index] );
+               absval = habs( dble_buf[index] );
                if ( absval > rel_tau )
                {
                   sortcols[sortcnt] = index;

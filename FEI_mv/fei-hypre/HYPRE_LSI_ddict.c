@@ -62,7 +62,7 @@ extern void HYPRE_LSI_qsort1a(int *, int *, int, int);
 extern int  HYPRE_LSI_DDICTFactorize(HYPRE_LSI_DDICT *ict_ptr, double *mat_aa, 
                  int *mat_ja, int *mat_ia, double *rowNorms);
 
-#define dabs(x) ((x) > 0 ? (x) : -(x))
+#define habs(x) ((x) > 0 ? (x) : -(x))
 
 /*****************************************************************************/
 /* HYPRE_LSI_DDICTCreate - Return a DDICT preconditioner object "solver".    */
@@ -754,7 +754,7 @@ int HYPRE_LSI_DDICTDecompose(HYPRE_LSI_DDICT *ict_ptr,MH_Matrix *Amat,
          vals = (double *) malloc(allocated_space * sizeof(double));
       }
       total_nnz += row_leng;
-      for ( j = 0; j < row_leng; j++ ) rowNorms[i] += dabs(vals[j]);
+      for ( j = 0; j < row_leng; j++ ) rowNorms[i] += habs(vals[j]);
       rowNorms[i] /= extNrows;
 rowNorms[i] = 1.0;
    }
@@ -775,7 +775,7 @@ rowNorms[i] = 1.0;
       MH_GetRow(context,1,&i,allocated_space,cols,vals,&row_leng);
       for ( j = 0; j < row_leng; j++ ) 
       {
-         if ( cols[j] <= i && dabs(vals[j]) > rel_tau ) 
+         if ( cols[j] <= i && habs(vals[j]) > rel_tau ) 
          {
             mat_aa[total_nnz] = vals[j];    
             mat_ja[total_nnz++] = cols[j];    
@@ -798,14 +798,14 @@ rowNorms[i] = 1.0;
             if ( ind2 >= 0 ) ext_ja[j] = map2[ind2] + Nrows;
             else             ext_ja[j] = -1;
          }
-         if ( ext_ja[j] != -1 ) rowNorms[i+Nrows] += dabs(ext_aa[j]);
+         if ( ext_ja[j] != -1 ) rowNorms[i+Nrows] += habs(ext_aa[j]);
       }
       rowNorms[i+Nrows] /= extNrows;
 rowNorms[i+Nrows] = 1.0;
       rel_tau = tau * rowNorms[i+Nrows];
       for ( j = offset; j < offset+recv_lengths[i]; j++ )
       {
-         if (ext_ja[j] != -1 && ext_ja[j] <= Nrows+i && dabs(ext_aa[j]) > rel_tau) 
+         if (ext_ja[j] != -1 && ext_ja[j] <= Nrows+i && habs(ext_aa[j]) > rel_tau) 
          {
             mat_aa[total_nnz] = ext_aa[j];    
             mat_ja[total_nnz++] = ext_ja[j];    
@@ -943,7 +943,7 @@ int HYPRE_LSI_DDICTFactorize(HYPRE_LSI_DDICT *ict_ptr, double *mat_aa,
 
       for ( j = first; j < i; j++ )
       {
-         if ( dabs(dble_buf[j]) > rel_tau )
+         if ( habs(dble_buf[j]) > rel_tau )
          {
             ddata = dble_buf[j] * msr_aptr[j];
 
@@ -975,7 +975,7 @@ int HYPRE_LSI_DDICTFactorize(HYPRE_LSI_DDICT *ict_ptr, double *mat_aa,
       for ( j = row_leng; j < track_leng; j++ )
       {
          index = track_array[j];
-         absval = dabs(dble_buf[index]);
+         absval = habs(dble_buf[index]);
          if ( absval > rel_tau )
          {
             sortcols[sortcnt] = index;
