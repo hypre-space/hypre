@@ -7,7 +7,7 @@
 #EHEADER***********************************************************************
 
 .SUFFIXES:
-.SUFFIXES: .C .c .o
+.SUFFIXES: .cxx .c .o
 
 srcdir = @srcdir@
 VPATH = @srcdir@
@@ -52,14 +52,14 @@ HEADERS =\
  mli_fedata.h
 
 FILES =\
- mli_fedata.C\
- mli_fedata_utils.C
+ mli_fedata.cxx\
+ mli_fedata_utils.cxx
 
-DRIVER_FILES = driver.C
+DRIVER_FILES = driver.cxx
 
-OBJS = ${FILES:.C=.o}
+OBJS = ${FILES:.cxx=.o}
 
-DRIVER_OBJS = ${DRIVER_FILES:.C=.o}
+DRIVER_OBJS = ${DRIVER_FILES:.cxx=.o}
 
 ##################################################################
 # Targets
@@ -92,6 +92,6 @@ ${OBJS}: ${HEADERS}
 
 .c.o:
 	${CC} -o $@ -c ${CFLAGS} $<
-.C.o:
+.cxx.o:
 	${CXX} -o $@ -c ${CXXFLAGS} $<
 

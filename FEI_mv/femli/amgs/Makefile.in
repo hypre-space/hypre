@@ -7,7 +7,7 @@
 #EHEADER***********************************************************************
 
 .SUFFIXES:
-.SUFFIXES: .C .c .o
+.SUFFIXES: .cxx .c .o
 
 srcdir = @srcdir@
 VPATH = @srcdir@
@@ -56,15 +56,15 @@ HEADERS =\
  mli_method_amgsa.h
 
 FILES =\
- mli_method.C\
- mli_method_amgrs.C\
- mli_method_amgsa.C\
- mli_amgsa_coarsen1.C\
- mli_amgsa_calib.C\
- mli_amgsa_substructure.C
+ mli_method.cxx\
+ mli_method_amgrs.cxx\
+ mli_method_amgsa.cxx\
+ mli_amgsa_coarsen1.cxx\
+ mli_amgsa_calib.cxx\
+ mli_amgsa_substructure.cxx
 
 TEMP = ${FILES:.c=.o}
-OBJS = ${TEMP:.C=.o}
+OBJS = ${TEMP:.cxx=.o}
 
 ##################################################################
 # Targets
@@ -94,6 +94,6 @@ ${OBJS}: ${HEADERS}
 
 .c.o:
 	${CC} -o $@ -c ${CFLAGS} $<
-.C.o:
+.cxx.o:
 	${CXX} -o $@ -c ${CXXFLAGS} $<
 
