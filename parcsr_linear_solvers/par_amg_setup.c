@@ -49,7 +49,7 @@ hypre_ParAMGSetup( void               *amg_vdata,
    hypre_ParCSRMatrix  *P;
    hypre_ParCSRMatrix  *A_H;
 
-   int       num_levels;
+   int       old_num_levels, num_levels;
    int       level;
    int       coarse_size;
    int       coarsen_type;
@@ -67,6 +67,7 @@ hypre_ParAMGSetup( void               *amg_vdata,
    MPI_Comm_size(comm, &num_procs);   
    MPI_Comm_rank(comm,&my_id);
 
+   old_num_levels = hypre_ParAMGDataNumLevels(amg_data);
    max_levels = hypre_ParAMGDataMaxLevels(amg_data);
    amg_ioutdat = hypre_ParAMGDataIOutDat(amg_data);
    coarsen_type = hypre_ParAMGDataCoarsenType(amg_data);
@@ -80,15 +81,13 @@ hypre_ParAMGSetup( void               *amg_vdata,
 
    if (A_array != NULL || P_array != NULL || CF_marker_array != NULL)
    {
-      num_levels = hypre_ParAMGDataNumLevels(amg_data);
-
-      for (j = 1; j < num_levels; j++)
+      for (j = 1; j < old_num_levels; j++)
       {
         if (A_array[j] != NULL)
            hypre_ParCSRMatrixDestroy(A_array[j]);
       }
 
-      for (j = 0; j < num_levels-1; j++)
+      for (j = 0; j < old_num_levels-1; j++)
       {
          if (P_array[j] != NULL)
             hypre_ParCSRMatrixDestroy(P_array[j]);
@@ -271,7 +270,7 @@ hypre_ParAMGSetup( void               *amg_vdata,
 
    if (F_array != NULL || U_array != NULL)
    {
-      for (j = 1; j < num_levels; j++)
+      for (j = 1; j < old_num_levels; j++)
       {
          if (F_array[j] != NULL)
             hypre_ParVectorDestroy(F_array[j]);
@@ -281,9 +280,9 @@ hypre_ParAMGSetup( void               *amg_vdata,
    }
 
    if (F_array == NULL)
-      F_array = hypre_CTAlloc(hypre_ParVector*, num_levels);
+      F_array = hypre_CTAlloc(hypre_ParVector*, max_levels);
    if (U_array == NULL)
-      U_array = hypre_CTAlloc(hypre_ParVector*, num_levels);
+      U_array = hypre_CTAlloc(hypre_ParVector*, max_levels);
 
    F_array[0] = f;
    U_array[0] = u;
