@@ -282,9 +282,9 @@ c     Generate a Dirichlet Laplacian
       call hypre_ParCSRMatrixRowStarts(A_storage, row_starts, ierr)
 
 
-      call Hypre_ParCSRMatrix__create_f( Hypre_parcsr_A )
+      call Hypre_IJParCSRMatrix__create_f( Hypre_parcsr_A )
 
-      call Hypre_ParCSRMatrix__cast_f
+      call Hypre_IJParCSRMatrix__cast_f
      1     ( Hypre_parcsr_A, "Hypre.IJBuildMatrix", Hypre_ij_A )
       if ( Hypre_ij_A .eq. 0 ) then
          write(6,*) 'Cast failed'
@@ -294,13 +294,13 @@ c     Generate a Dirichlet Laplacian
 c     The following will cancel each other out, but it is good practice
 c     to perform them.
       call Hypre_IJBuildMatrix_addref_f( Hypre_ij_A )
-      call Hypre_ParCSRMatrix_deleteref_f( Hypre_parcsr_A )
+      call Hypre_IJParCSRMatrix_deleteref_f( Hypre_parcsr_A )
 
       call Hypre_IJBuildMatrix_SetCommunicator_f( Hypre_ij_A,
      1     MPI_COMM_WORLD, ierrtmp )
       ierr = ierr + ierrtmp
 
-      call Hypre_IJBuildMatrix_Create_f( Hypre_ij_A,
+      call Hypre_IJBuildMatrix_SetLocalRange_f( Hypre_ij_A,
      1     first_local_row, last_local_row,
      1     first_local_col, last_local_col, ierrtmp )
       ierr = ierr + ierrtmp
@@ -391,21 +391,21 @@ c-----------------------------------------------------------------------
       call HYPRE_IJVectorSetValues(x,
      &     last_local_col - first_local_col + 1, indices, vals, ierr)
 
-      call Hypre_ParCSRVector__create_f( Hypre_parcsr_b )
-      call Hypre_ParCSRVector__cast_f
+      call Hypre_IJParCSRVector__create_f( Hypre_parcsr_b )
+      call Hypre_IJParCSRVector__cast_f
      1     ( Hypre_parcsr_b, "Hypre.IJBuildVector", Hypre_ij_b )
       if ( Hypre_ij_b .eq. 0 ) then
          write(6,*) 'Cast failed'
          stop
       endif
       call Hypre_IJBuildVector_addref_f( Hypre_ij_b )
-      call Hypre_ParCSRVector_deleteref_f( Hypre_parcsr_b )
+      call Hypre_IJParCSRVector_deleteref_f( Hypre_parcsr_b )
       call Hypre_IJBuildVector_SetCommunicator_f( Hypre_ij_b,
      1     MPI_COMM_WORLD, ierrtmp )
       ierr = ierr + ierrtmp
 
-      call Hypre_IJBuildVector_Create_f( Hypre_ij_b, MPI_COMM_WORLD,
-     1     first_local_row, last_local_row, ierrtmp )
+      call Hypre_IJBuildVector_SetLocalRange_f( Hypre_ij_b,
+     1      first_local_row, last_local_row, ierrtmp )
       ierr = ierr + ierrtmp
 
       call Hypre_IJBuildVector_Initialize_f( Hypre_ij_b, ierrtmp )
@@ -442,12 +442,12 @@ c-----------------------------------------------------------------------
       endif
 
 
-      call Hypre_ParCSRVector_print_f(
+      call Hypre_IJParCSRVector_print_f(
      1     Hypre_parcsr_b, "driver.out.b", ierrtmp )
       ierr = ierr + ierrtmp
 
-      call Hypre_ParCSRVector__create_f( Hypre_parcsr_x )
-      call Hypre_ParCSRVector__cast_f
+      call Hypre_IJParCSRVector__create_f( Hypre_parcsr_x )
+      call Hypre_IJParCSRVector__cast_f
      1     ( Hypre_parcsr_x, "Hypre.IJBuildVector", Hypre_ij_x )
       if ( Hypre_ij_x .eq. 0 ) then
          write(6,*) 'Cast failed'
@@ -458,7 +458,7 @@ c-----------------------------------------------------------------------
      1     MPI_COMM_WORLD, ierrtmp )
       ierr = ierr + ierrtmp
 
-      call Hypre_IJBuildVector_Create_f( Hypre_ij_x, MPI_COMM_WORLD,
+      call Hypre_IJBuildVector_SetLocalRange_f( Hypre_ij_x,
      1     first_local_row, last_local_row, ierrtmp )
       ierr = ierr + ierrtmp
 
@@ -495,7 +495,7 @@ c-----------------------------------------------------------------------
          stop
       endif
 
-      call Hypre_ParCSRVector_print_f(
+      call Hypre_IJParCSRVector_print_f(
      1     Hypre_parcsr_x, "driver.out.x0", ierrtmp )
       ierr = ierr + ierrtmp
 
@@ -532,34 +532,34 @@ c      print *, 'Solver: AMG'
      &     relax_weights,
      &     MAXLEVELS,ierr)
 
-      call Hypre_ParAMG__create_f( Hypre_AMG )
-      call Hypre_ParCSRVector__cast_f
+      call Hypre_BoomerAMG__create_f( Hypre_AMG )
+      call Hypre_IJParCSRVector__cast_f
      1     ( Hypre_parcsr_b, "Hypre.Vector", Hypre_Vector_b )
-      call Hypre_ParCSRVector__cast_f
+      call Hypre_IJParCSRVector__cast_f
      1     ( Hypre_parcsr_x, "Hypre.Vector", Hypre_Vector_x )
-      call Hypre_ParCSRVector__cast_f
+      call Hypre_IJParCSRVector__cast_f
      1     ( Hypre_parcsr_A, "Hypre.Operator", Hypre_op_A )
-      call Hypre_ParAMG_SetCommunicator_f(
+      call Hypre_BoomerAMG_SetCommunicator_f(
      1     Hypre_AMG, MPI_COMM_WORLD, ierrtmp )
       ierr = ierr + ierrtmp
-      call Hypre_ParAMG_SetOperator_f( Hypre_AMG, Hypre_op_A )
-      call Hypre_ParAMG_SetIntParameter_f(
+      call Hypre_BoomerAMG_SetOperator_f( Hypre_AMG, Hypre_op_A )
+      call Hypre_BoomerAMG_SetIntParameter_f(
      1     Hypre_AMG, "CoarsenType", hybrid*coarsen_type, ierrtmp )
       ierr = ierr + ierrtmp
-      call Hypre_ParAMG_SetIntParameter_f(
+      call Hypre_BoomerAMG_SetIntParameter_f(
      1     Hypre_AMG, "MeasureType", measure_type, ierrtmp )
       ierr = ierr + ierrtmp
-      call Hypre_ParAMG_SetDoubleParameter_f(
+      call Hypre_BoomerAMG_SetDoubleParameter_f(
      1     Hypre_AMG, "StrongThreshold", strong_threshold, ierrtmp )
       ierr = ierr + ierrtmp
-      call Hypre_ParAMG_SetDoubleParameter_f(
+      call Hypre_BoomerAMG_SetDoubleParameter_f(
      1     Hypre_AMG, "TruncFactor", trunc_factor, ierrtmp )
       ierr = ierr + ierrtmp
 c     /* note: log output not specified ... */
-      call Hypre_ParAMG_SetIntParameter_f(
+      call Hypre_BoomerAMG_SetIntParameter_f(
      1     Hypre_AMG, "PrintLevel", ioutdat, ierrtmp )
       ierr = ierr + ierrtmp
-      call Hypre_ParAMG_SetIntParameter_f(
+      call Hypre_BoomerAMG_SetIntParameter_f(
      1     Hypre_AMG, "CycleType", cycle_type, ierrtmp )
       ierr = ierr + ierrtmp
       dimsl(1) = 1
@@ -570,7 +570,7 @@ c     /* note: log output not specified ... */
          call SIDL_int__array_set1_deref_f(
      1        Hypre_num_grid_sweeps, i-1, num_grid_sweeps, i-1 )
       enddo
-      call Hypre_ParAMG_SetIntArrayParameter_f( Hypre_AMG,
+      call Hypre_BoomerAMG_SetIntArrayParameter_f( Hypre_AMG,
      1     "NumGridSweeps", Hypre_num_grid_sweeps, ierrtmp )
       ierr = ierr + ierrtmp
       dimsl(1) = 1
@@ -581,7 +581,7 @@ c     /* note: log output not specified ... */
         call SIDL_int__array_set1_deref_f(
      1        Hypre_grid_relax_type, i-1, grid_relax_type, i-1 )
       enddo
-      call Hypre_ParAMG_SetIntArrayParameter_f( Hypre_AMG,
+      call Hypre_BoomerAMG_SetIntArrayParameter_f( Hypre_AMG,
      1     "GridRelaxType", Hypre_grid_relax_type, ierrtmp )
       ierr = ierr + ierrtmp
 
@@ -597,30 +597,30 @@ c        relax_weight(i)=1.0: simple to set, fine for testing:
          call SIDL_double__array_set1_f(
      1        Hypre_relax_weight, i-1, relax_weight(i) )
       enddo
-      call Hypre_ParAMG_SetDoubleArrayParameter_f(
+      call Hypre_BoomerAMG_SetDoubleArrayParameter_f(
      1     Hypre_AMG, "RelaxWeight", Hypre_relax_weight, ierrtmp )
       ierr = ierr + ierrtmp
 
 c left at default: GridRelaxPoints
-      call Hypre_ParAMG_SetIntParameter_f(
+      call Hypre_BoomerAMG_SetIntParameter_f(
      1     Hypre_AMG, "MaxLevels", max_levels, ierrtmp )
       ierr = ierr + ierrtmp
-      call Hypre_ParAMG_SetIntParameter_f(
+      call Hypre_BoomerAMG_SetIntParameter_f(
      1     Hypre_AMG, "DebugFlag", debug_flag, ierrtmp )
       ierr = ierr + ierrtmp
-      call Hypre_ParAMG_SetDoubleParameter_f(
+      call Hypre_BoomerAMG_SetDoubleParameter_f(
      1     Hypre_AMG, "MaxRowSum", max_row_sum, ierrtmp )
       ierr = ierr + ierrtmp
 
-      call Hypre_ParCSRMatrix__cast_f(
+      call Hypre_IJParCSRMatrix__cast_f(
      1     Hypre_ParCSR_A, "Hypre.LinearOperator", linop )
-      call Hypre_ParAMG_Setup_f(
+      call Hypre_BoomerAMG_Setup_f(
      1     Hypre_AMG, Hypre_Vector_b, Hypre_Vector_x, ierrtmp )
       ierr = ierr + ierrtmp
-      call Hypre_ParCSRVector_print_f(
+      call Hypre_IJParCSRVector_print_f(
      1     Hypre_parcsr_x, "driver.out.x2", ierrtmp )
       ierr = ierr + ierrtmp
-      call Hypre_ParAMG_Apply_f(
+      call Hypre_BoomerAMG_Apply_f(
      1     Hypre_AMG, Hypre_Vector_b, Hypre_Vector_x, ierrtmp )
       ierr = ierr + ierrtmp
 
@@ -630,15 +630,15 @@ c-----------------------------------------------------------------------
 c     Print the solution and other info
 c-----------------------------------------------------------------------
 
-      call Hypre_ParCSRVector_print_f(
+      call Hypre_IJParCSRVector_print_f(
      1     Hypre_parcsr_x, "driver.out.x", ierrtmp )
       ierr = ierr + ierrtmp
 
       if (myid .eq. 0) then
-         call Hypre_ParAMG_GetIntValue_f(
+         call Hypre_BoomerAMG_GetIntValue_f(
      1        Hypre_AMG, "Iterations", num_iterations, ierrtmp )
          ierr = ierr + ierrtmp
-         call Hypre_ParAMG_GetDoubleValue_f(
+         call Hypre_BoomerAMG_GetDoubleValue_f(
      1        Hypre_AMG, "Final Relative Residual Norm", final_res_norm,
      1        ierrtmp )
          ierr = ierr + ierrtmp
@@ -651,7 +651,7 @@ c-----------------------------------------------------------------------
 c     Finalize things
 c-----------------------------------------------------------------------
 
-      call Hypre_ParCSRVector_deleteref_f( Hypre_parcsr_x )
+      call Hypre_IJParCSRVector_deleteref_f( Hypre_parcsr_x )
       call HYPRE_ParCSRMatrixDestroy(A_storage, ierr)
 c      call HYPRE_IJVectorDestroy(b, ierr)
       call HYPRE_IJVectorDestroy(x, ierr)
