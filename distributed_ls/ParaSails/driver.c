@@ -142,10 +142,16 @@ int main(int argc, char *argv[])
         time0 = MPI_Wtime();
         ps = ParaSailsCreate(A);
 
+#ifdef NONSYM
         ParaSailsSetSym(ps, 0);
+#else
+        ParaSailsSetSym(ps, 1);
+#endif
 
         thresh = ParaSailsSelectThresh(ps, selparam);
-/*thresh=10.0;*/
+#ifdef DIAG_PRECON
+        thresh=10.0;
+#endif
         if (mype == 0) 
             printf("thresh: %e\n", thresh);
         ParaSailsSetupPattern(ps, thresh, nlevels);
@@ -154,7 +160,11 @@ int main(int argc, char *argv[])
 	setup_time = time1-time0;
 
         i = MatrixNnz(ps->M);
+#ifdef NONSYM
+        j = MatrixNnz(A);
+#else
         j = (MatrixNnz(A) - n) / 2 + n;
+#endif
         if (mype == 0) 
         {
             printf("%s\n", argv[1]);
@@ -174,8 +184,11 @@ int main(int argc, char *argv[])
 	ParaSailsComplete(ps);
 
         time0 = MPI_Wtime();
-        /* PCG_ParaSails(A, ps, b, x, 1.e-8, 2); */
+#ifdef NONSYM
         FGMRES_ParaSails(A, ps, b, x, 50, 1.e-8, 1500);
+#else
+        PCG_ParaSails(A, ps, b, x, 1.e-8, 1500);
+#endif
         time1 = MPI_Wtime();
 	solve_time = time1-time0;
 
