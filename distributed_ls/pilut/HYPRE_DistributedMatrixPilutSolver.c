@@ -66,13 +66,66 @@ HYPRE_DistributedMatrixPilutSolver  HYPRE_NewDistributedMatrixPilutSolver(
 int HYPRE_FreeDistributedMatrixPilutSolver ( 
                   HYPRE_DistributedMatrixPilutSolver in_ptr )
 {
+  FactorMatType *ldu;
+  int i;
+
    hypre_DistributedMatrixPilutSolver *solver = 
       (hypre_DistributedMatrixPilutSolver *) in_ptr;
 
   hypre_TFree( DataDistTypeRowdist(hypre_DistributedMatrixPilutSolverDataDist(solver)));
   hypre_TFree( hypre_DistributedMatrixPilutSolverDataDist(solver) );
   
+  /* Free malloced members of the FactorMat member */
+  ldu = hypre_DistributedMatrixPilutSolverFactorMat(solver);
+
+  hypre_TFree( ldu->lcolind );
+  hypre_TFree( ldu->ucolind );
+
+  hypre_TFree( ldu->lvalues );
+  hypre_TFree( ldu->uvalues );
+
+  hypre_TFree( ldu->lrowptr );
+  hypre_TFree( ldu->urowptr );
+
+  hypre_TFree( ldu->dvalues );
+  hypre_TFree( ldu->nrm2s );
+  hypre_TFree( ldu->perm );
+  hypre_TFree( ldu->iperm );
+
+  hypre_TFree( ldu->gatherbuf );
+
+  hypre_TFree( ldu->lx );
+  hypre_TFree( ldu->ux );
+
+    /* Beginning of TriSolveCommType freeing */
+    hypre_TFree( ldu->lcomm.raddr );
+    hypre_TFree( ldu->ucomm.raddr );
+
+    hypre_TFree( ldu->lcomm.spes );
+    hypre_TFree( ldu->ucomm.spes );
+
+    hypre_TFree( ldu->lcomm.sptr );
+    hypre_TFree( ldu->ucomm.sptr );
+
+    hypre_TFree( ldu->lcomm.sind );
+    hypre_TFree( ldu->ucomm.sind );
+
+    hypre_TFree( ldu->lcomm.auxsptr );
+    hypre_TFree( ldu->ucomm.auxsptr );
+
+    hypre_TFree( ldu->lcomm.rpes );
+    hypre_TFree( ldu->ucomm.rpes );
+
+    hypre_TFree( ldu->lcomm.rdone );
+    hypre_TFree( ldu->ucomm.rdone );
+
+    hypre_TFree( ldu->lcomm.rnum );
+    hypre_TFree( ldu->ucomm.rnum );
+
+    /* End of TriSolveCommType freeing */
+
   hypre_TFree( hypre_DistributedMatrixPilutSolverFactorMat(solver) );
+  /* End of FactorMat member */
 
   hypre_TFree( hypre_DistributedMatrixPilutSolverGlobals(solver) );
 
