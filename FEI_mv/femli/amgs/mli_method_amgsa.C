@@ -7,6 +7,7 @@
  *********************************************************************EHEADER*/
 
 #include <string.h>
+#include <strings.h>
 #include <assert.h>
 #include "HYPRE.h"
 #include "util/mli_utils.h"
@@ -243,6 +244,8 @@ int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
            set_id = MLI_SOLVER_GS_ID;
       else if (!strcasecmp(param2, "SGS"))       
            set_id = MLI_SOLVER_SGS_ID;
+      else if (!strcasecmp(param2, "CGSGS"))       
+           set_id = MLI_SOLVER_CGSGS_ID;
       else if (!strcasecmp(param2, "BSGS"))   
            set_id = MLI_SOLVER_BSGS_ID;
       else if (!strcasecmp(param2, "MLS"))       
@@ -280,6 +283,8 @@ int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
            set_id = MLI_SOLVER_GS_ID;
       else if (!strcasecmp(param2, "SGS"))       
            set_id = MLI_SOLVER_SGS_ID;
+      else if (!strcasecmp(param2, "CGSGS"))       
+           set_id = MLI_SOLVER_CGSGS_ID;
       else if (!strcasecmp(param2, "BSGS"))   
            set_id = MLI_SOLVER_BSGS_ID;
       else if (!strcasecmp(param2, "MLS"))       
@@ -292,7 +297,7 @@ int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
       {
          printf("MLI_Method_AMGSA::setParams ERROR - setPostSmoother - \n");
          printf("invalid smoother. Valid options are : Jacobi, GS, SGS,");
-         printf(" BSGS, MLS, ParaSails\n");
+         printf(" CGSGS, BSGS, MLS, ParaSails\n");
          return 1;
       } 
       if ( argc != 2 )
@@ -317,6 +322,8 @@ int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
            set_id = MLI_SOLVER_GS_ID;
       else if (!strcasecmp(param2, "SGS"))       
            set_id = MLI_SOLVER_SGS_ID;
+      else if (!strcasecmp(param2, "CGSGS"))       
+           set_id = MLI_SOLVER_CGSGS_ID;
       else if (!strcasecmp(param2, "BSGS"))   
            set_id = MLI_SOLVER_BSGS_ID;
       else if (!strcasecmp(param2, "ParaSails")) 
@@ -327,7 +334,7 @@ int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
       {
          printf("MLI_Method_AMGSA::setParams ERROR - setCoarseSolver - \n");
          printf("invalid solver. Valid options are : Jacobi, GS, SGS,");
-         printf(" BSGS, ParaSails, SuperLU.\n");
+         printf(" CGSGS, BSGS, ParaSails, SuperLU.\n");
          return 1;
       } 
       if ( set_id != MLI_SOLVER_SUPERLU_ID && argc != 2 )
@@ -693,6 +700,8 @@ int MLI_Method_AMGSA::setSmoother(int prePost,int set_id,int num,double *wgt)
                                         break;
          case MLI_SOLVER_SGS_ID       : pre_smoother = MLI_SOLVER_SGS_ID;
                                         break;
+         case MLI_SOLVER_CGSGS_ID     : pre_smoother = MLI_SOLVER_CGSGS_ID;
+                                        break;
          case MLI_SOLVER_PARASAILS_ID : pre_smoother = MLI_SOLVER_PARASAILS_ID;
                                         break;
          case MLI_SOLVER_BSGS_ID      : pre_smoother = MLI_SOLVER_BSGS_ID;
@@ -722,6 +731,8 @@ int MLI_Method_AMGSA::setSmoother(int prePost,int set_id,int num,double *wgt)
          case MLI_SOLVER_GS_ID        : postsmoother = MLI_SOLVER_GS_ID;
                                         break;
          case MLI_SOLVER_SGS_ID       : postsmoother = MLI_SOLVER_SGS_ID;
+                                        break;
+         case MLI_SOLVER_CGSGS_ID     : postsmoother = MLI_SOLVER_CGSGS_ID;
                                         break;
          case MLI_SOLVER_PARASAILS_ID : postsmoother = MLI_SOLVER_PARASAILS_ID;
                                         break;
@@ -761,6 +772,8 @@ int MLI_Method_AMGSA::setCoarseSolver( int set_id, int num, double *wgt )
       case MLI_SOLVER_GS_ID        : coarse_solver = MLI_SOLVER_GS_ID;
                                      break;
       case MLI_SOLVER_SGS_ID       : coarse_solver = MLI_SOLVER_SGS_ID;
+                                     break;
+      case MLI_SOLVER_CGSGS_ID     : coarse_solver = MLI_SOLVER_CGSGS_ID;
                                      break;
       case MLI_SOLVER_PARASAILS_ID : coarse_solver = MLI_SOLVER_PARASAILS_ID;
                                      break;
@@ -1020,6 +1033,9 @@ int MLI_Method_AMGSA::print()
          case MLI_SOLVER_SGS_ID :
               printf("\t*** pre  smoother type      = symm Gauss Seidel\n"); 
               break;
+         case MLI_SOLVER_CGSGS_ID :
+              printf("\t*** pre  smoother type      = CG/symm Gauss Seidel\n"); 
+              break;
          case MLI_SOLVER_PARASAILS_ID :
               printf("\t*** pre  smoother type      = ParaSails\n"); break; 
          case MLI_SOLVER_BSGS_ID :
@@ -1039,6 +1055,9 @@ int MLI_Method_AMGSA::print()
          case MLI_SOLVER_SGS_ID :
               printf("\t*** post smoother type      = symm Gauss Seidel\n"); 
               break;
+         case MLI_SOLVER_CGSGS_ID :
+              printf("\t*** post smoother type      = CG/symm Gauss Seidel\n"); 
+              break;
          case MLI_SOLVER_PARASAILS_ID :
               printf("\t*** post smoother type      = ParaSails\n"); break; 
          case MLI_SOLVER_BSGS_ID :
@@ -1057,6 +1076,9 @@ int MLI_Method_AMGSA::print()
               printf("\t*** coarse solver type      = Gauss Seidel\n"); break;
          case MLI_SOLVER_SGS_ID :
               printf("\t*** coarse solver type      = symm Gauss Seidel\n"); 
+              break;
+         case MLI_SOLVER_CGSGS_ID :
+              printf("\t*** coarse solver type      = CG/symm Gauss Seidel\n"); 
               break;
          case MLI_SOLVER_PARASAILS_ID :
               printf("\t*** coarse solver type      = ParaSails\n"); break; 
