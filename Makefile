@@ -8,7 +8,7 @@
 #EHEADER***********************************************************************
 
 # Include all variables defined by configure
-include ${HYPRE_SRC_TOP_DIR}/config/Makefile.config
+include config/Makefile.config
 
 
 # These are the directories for internal blas, lapack and general utilities
