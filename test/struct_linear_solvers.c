@@ -10,7 +10,7 @@
 #endif
 
 #ifdef HYPRE_USE_PTHREADS
-#ifndef NO_PTHREAD_MANGLING
+#ifndef HYPRE_NO_PTHREAD_MANGLING
 #if 0
 #undef HYPRE_InitializeStructMatrix
 #undef HYPRE_StructSMGSetup
@@ -85,7 +85,7 @@ main( int   argc,
     *-----------------------------------------------------------*/
 
 #ifdef HYPRE_USE_PTHREADS
-   HYPRE_InitPthreads(MPI_COMM_WORLD);
+   HYPRE_InitPthreads(4);
 #endif  
 
  
@@ -566,7 +566,12 @@ main( int   argc,
       else if (solver_id == 2)
       {
          /* use diagonal scaling as preconditioner */
+#ifdef HYPRE_USE_PTHREADS
+         for (i = 0; i<hypre_NumThreads; i++)
+            pcg_precond[i] = NULL;
+#else
          pcg_precond = NULL;
+#endif
          HYPRE_StructPCGSetPrecond(pcg_solver,
                                    HYPRE_StructDiagScale,
                                    HYPRE_StructDiagScaleSetup,
