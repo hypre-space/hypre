@@ -30,6 +30,8 @@ main( int   argc,
 
    int                 num_procs, myid;
 
+   int		       time_index;
+
    /*-----------------------------------------------------------
     * Initialize some stuff
     *-----------------------------------------------------------*/
@@ -195,8 +197,8 @@ main( int   argc,
       num_grid_sweeps[0] = 2;
       grid_relax_type[0] = 0; 
       grid_relax_points[0] = hypre_CTAlloc(int, 2); 
-      grid_relax_points[0][0] = 1;
-      grid_relax_points[0][1] = -1;
+      grid_relax_points[0][0] = -1;
+      grid_relax_points[0][1] = 1;
 
       /* down cycle */
       num_grid_sweeps[1] = 2;
@@ -217,8 +219,6 @@ main( int   argc,
       grid_relax_type[3] = 9;
       grid_relax_points[3] = hypre_CTAlloc(int, 1);
       grid_relax_points[3][0] = 0;
-
-      amg_solver = HYPRE_ParAMGInitialize();
 
       arg_index = 0;
       while (arg_index < argc)
@@ -243,6 +243,11 @@ main( int   argc,
             arg_index++;
          }
       }
+
+      time_index = hypre_InitializeTiming("BoomerAMG Setup");
+      hypre_BeginTiming(time_index);
+
+      amg_solver = HYPRE_ParAMGInitialize();
       HYPRE_ParAMGSetStrongThreshold(amg_solver, strong_threshold);
       HYPRE_ParAMGSetLogging(amg_solver, ioutdat, "driver.out.log");
       HYPRE_ParAMGSetCycleType(amg_solver, cycle_type);
@@ -252,8 +257,20 @@ main( int   argc,
       HYPRE_ParAMGSetGridRelaxPoints(amg_solver, grid_relax_points);
       HYPRE_ParAMGSetMaxLevels(amg_solver, 25);
       HYPRE_ParAMGSetup(amg_solver, A, b, x);
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+ 
+      time_index = hypre_InitializeTiming("BoomerAMG Solve");
+      hypre_BeginTiming(time_index);
 
       HYPRE_ParAMGSolve(amg_solver, A, b, x);
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
 
       HYPRE_ParAMGFinalize(amg_solver);
    }
