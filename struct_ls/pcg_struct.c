@@ -33,7 +33,7 @@ hypre_PCGCAlloc( int count,
 void 
 hypre_PCGFree( char *ptr )
 {
-   return( hypre_Free( ptr ) );
+   hypre_Free( ptr );
 }
 
 /*--------------------------------------------------------------------------
