@@ -24,6 +24,19 @@
  *
  *****************************************************************************/
 
+extern void *hypre_LSICGCreate();
+extern int  hypre_LSICGDestroy(void *);
+extern int  hypre_LSICGSetup(void *, void *, void *, void *);
+extern int  hypre_LSICGSolve(void *, void  *, void  *, void  *);
+extern int  hypre_LSICGSetTol(void *, double);
+extern int  hypre_LSICGSetMaxIter(void *, int);
+extern int  hypre_LSICGSetStopCrit(void *, double);
+extern int  hypre_LSICGSetPrecond(void *, int (*precond)(),
+                                  int (*precond_setup)(), void *);
+extern int  hypre_LSICGSetLogging(void *, int);
+extern int  hypre_LSICGGetNumIterations(void *,int *);
+extern int hypre_LSICGGetFinalRelativeResidualNorm(void *, double *);
+
 /*--------------------------------------------------------------------------
  * HYPRE_ParCSRLSICGCreate
  *--------------------------------------------------------------------------*/

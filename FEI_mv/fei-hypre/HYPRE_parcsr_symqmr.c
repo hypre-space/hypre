@@ -24,6 +24,19 @@
  *
  *****************************************************************************/
 
+extern void *hypre_SymQMRCreate();
+extern int  hypre_SymQMRDestroy(void *);
+extern int  hypre_SymQMRSetup(void *, void *, void *, void *);
+extern int  hypre_SymQMRSolve(void *, void *, void *, void *);
+extern int  hypre_SymQMRSetTol(void *, double);
+extern int  hypre_SymQMRSetMaxIter(void *, int);
+extern int  hypre_SymQMRSetStopCrit(void *, double);
+extern int  hypre_SymQMRSetPrecond(void *, int (*precond)(),
+                                   int (*precond_setup)(), void *);
+extern int  hypre_SymQMRSetLogging(void *, int );
+extern int  hypre_SymQMRGetNumIterations(void *, int *);
+extern int  hypre_SymQMRGetFinalRelativeResidualNorm(void *, double *);
+
 /*--------------------------------------------------------------------------
  * HYPRE_ParCSRSymQMRCreate
  *--------------------------------------------------------------------------*/
