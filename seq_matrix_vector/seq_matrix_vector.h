@@ -3,8 +3,8 @@
 
 #include "HYPRE_seq_mv.h"
 
-#ifndef hypre_MV_HEADER
-#define hypre_MV_HEADER
+#ifndef hypre_SEQ_MV_HEADER
+#define hypre_SEQ_MV_HEADER
 
 #include "utilities.h"
 
