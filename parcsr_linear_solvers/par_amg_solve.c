@@ -28,8 +28,6 @@ hypre_ParAMGSolve( void               *amg_vdata,
 {
 
    MPI_Comm 	      comm = hypre_ParCSRMatrixComm(A);   
-   hypre_CommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
-   hypre_CommHandle  *comm_handle;
 
    hypre_ParAMGData   *amg_data = amg_vdata;
 
