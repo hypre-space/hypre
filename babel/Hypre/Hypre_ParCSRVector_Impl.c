@@ -3,8 +3,8 @@
  * Symbol:        Hypre.ParCSRVector-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.6.3
- * SIDL Created:  20020904 10:05:22 PDT
- * Generated:     20020904 10:05:32 PDT
+ * SIDL Created:  20021001 09:48:43 PDT
+ * Generated:     20021001 09:48:54 PDT
  * Description:   Server-side implementation for Hypre.ParCSRVector
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -46,7 +46,7 @@ impl_Hypre_ParCSRVector__ctor(
   /* Insert the implementation of the constructor method here... */
    struct Hypre_ParCSRVector__data * data;
    data = hypre_CTAlloc( struct Hypre_ParCSRVector__data, 1 );
-   data -> comm = NULL;
+   data -> comm = (MPI_Comm)NULL;
    data -> ij_b = NULL;
    Hypre_ParCSRVector__set_data( self, data );
   /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector._ctor) */
@@ -310,7 +310,7 @@ impl_Hypre_ParCSRVector_Clone(
    jupper = partitioning[ my_id+1 ];
 
    ij_x = data_x->ij_b;
-   ierr = HYPRE_IJVectorCreate( *(data_x->comm), jlower, jupper, &ij_x );
+   ierr = HYPRE_IJVectorCreate( data_x->comm, jlower, jupper, &ij_x );
    ierr += HYPRE_IJVectorSetObjectType( ij_x, HYPRE_PARCSR );
    ierr += HYPRE_IJVectorInitialize( ij_x );
    data_x->ij_b = ij_x;
@@ -432,9 +432,9 @@ impl_Hypre_ParCSRVector_Create(
    HYPRE_IJVector ij_b;
    data = Hypre_ParCSRVector__get_data( self );
    ij_b = data -> ij_b;
-   assert( data->comm != NULL ); /* SetCommunicator should be called before Create */
+   assert( data->comm != (MPI_Comm)NULL ); /* SetCommunicator should be called before Create */
 
-   ierr = HYPRE_IJVectorCreate( *(data->comm), jlower, jupper, &ij_b );
+   ierr = HYPRE_IJVectorCreate( data->comm, jlower, jupper, &ij_b );
    ierr += HYPRE_IJVectorSetObjectType( ij_b, HYPRE_PARCSR );
    data -> ij_b = ij_b;
 
@@ -623,7 +623,7 @@ impl_Hypre_ParCSRVector_Read(
    data = Hypre_ParCSRVector__get_data( self );
    ij_b = data->ij_b;
 
-   ierr = HYPRE_IJVectorRead( filename, *(data->comm),
+   ierr = HYPRE_IJVectorRead( filename, data->comm,
                               HYPRE_PARCSR, &ij_b );
    data->ij_b = ij_b;
    Hypre_ParCSRVector__set_data( self, data );
@@ -681,7 +681,7 @@ impl_Hypre_ParCSRVector_SetCommunicator(
    int ierr = 0;
    struct Hypre_ParCSRVector__data * data;
    data = Hypre_ParCSRVector__get_data( self );
-   data -> comm = (MPI_Comm *) mpi_comm;
+   data -> comm = (MPI_Comm) mpi_comm;
   /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector.SetCommunicator) */
 }
 

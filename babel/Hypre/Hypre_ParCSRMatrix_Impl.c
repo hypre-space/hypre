@@ -3,8 +3,8 @@
  * Symbol:        Hypre.ParCSRMatrix-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.6.3
- * SIDL Created:  20020904 10:05:22 PDT
- * Generated:     20020904 10:05:30 PDT
+ * SIDL Created:  20021001 09:48:43 PDT
+ * Generated:     20021001 09:48:52 PDT
  * Description:   Server-side implementation for Hypre.ParCSRMatrix
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -53,7 +53,7 @@ impl_Hypre_ParCSRMatrix__ctor(
    /* data = (struct Hypre_ParCSRMatrix__data *)
       malloc( sizeof ( struct Hypre_ParCSRMatrix__data ) ); */
 
-   data -> comm = NULL;
+   data -> comm = (MPI_Comm)NULL;
    data -> ij_A = NULL;
 
    Hypre_ParCSRMatrix__set_data( self, data );
@@ -278,7 +278,7 @@ impl_Hypre_ParCSRMatrix_Create(
    ij_A = data -> ij_A;
    printf("impl_Hypre_ParCSRMatrix_Create\n");
 
-   if ( data-> comm == NULL )    
+   if ( data-> comm == (MPI_Comm)NULL )    
    {
 #ifdef HYPRE_DEBUG
       printf("Set Communicator must be called before Create in IJBuilder\n");
@@ -287,7 +287,7 @@ impl_Hypre_ParCSRMatrix_Create(
    }
    else
    {
-      ierr = HYPRE_IJMatrixCreate( *(data -> comm),
+      ierr = HYPRE_IJMatrixCreate( data -> comm,
                           ilower,
                           iupper,
                           jlower,
@@ -513,7 +513,7 @@ impl_Hypre_ParCSRMatrix_Read(
    printf("impl_Hypre_ParCSRMatrix_Read\n");
 
    ierr = HYPRE_IJMatrixRead( filename,
-		              *(data -> comm),
+		              data -> comm,
 		              HYPRE_PARCSR,
 		              & ij_A );
 
@@ -535,6 +535,7 @@ impl_Hypre_ParCSRMatrix_SetCommunicator(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRMatrix.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
+   /* The data type of the last argument, mpi_comm, should be MPI_Comm */
    int ierr=0;
    struct Hypre_ParCSRMatrix__data * data;
    HYPRE_IJMatrix ij_A;
@@ -547,7 +548,7 @@ impl_Hypre_ParCSRMatrix_SetCommunicator(
    printf("impl_Hypre_ParCSRMatrix_SetCommunicator\n");
 #endif
    
-   data -> comm = (MPI_Comm *) mpi_comm;
+   data -> comm = (MPI_Comm) mpi_comm;
 
    return( ierr );
   /* DO-NOT-DELETE splicer.end(Hypre.ParCSRMatrix.SetCommunicator) */

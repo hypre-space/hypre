@@ -3,8 +3,8 @@
  * Symbol:        Hypre.Pilut-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.6.3
- * SIDL Created:  20020904 10:05:22 PDT
- * Generated:     20020904 10:05:24 PDT
+ * SIDL Created:  20021001 09:48:43 PDT
+ * Generated:     20021001 09:48:45 PDT
  * Description:   Intermediate Object Representation for Hypre.Pilut
  * 
  * WARNING: Automatically generated; changes will be lost

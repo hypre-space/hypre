@@ -3,8 +3,8 @@
  * Symbol:        Hypre-v0.1.5
  * Symbol Type:   package
  * Babel Version: 0.6.3
- * SIDL Created:  20020904 10:05:20 PDT
- * Generated:     20020904 10:05:29 PDT
+ * SIDL Created:  20021001 09:48:41 PDT
+ * Generated:     20021001 09:48:51 PDT
  * Description:   Client-side glue code for Hypre
  * 
  * WARNING: Automatically generated; changes will be lost

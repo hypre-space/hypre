@@ -3,8 +3,8 @@
  * Symbol:        Hypre.ParCSRVector-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.6.3
- * SIDL Created:  20020904 10:05:22 PDT
- * Generated:     20020904 10:05:32 PDT
+ * SIDL Created:  20021001 09:48:43 PDT
+ * Generated:     20021001 09:48:54 PDT
  * Description:   Server-side implementation for Hypre.ParCSRVector
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -42,7 +42,7 @@ struct Hypre_ParCSRVector__data {
   /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRVector._data) */
   /* Put private data members here... */
   HYPRE_IJVector ij_b;
-  MPI_Comm *comm;
+  MPI_Comm comm;
   /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector._data) */
 };
 
