@@ -57,10 +57,13 @@ int  impl_Hypre_StructVector_GetNumGhost
 ( Hypre_StructVector this, array1int values )
 {
    int  i;
-   int * num_ghost = &(values.data[*(values.lower)]);
+/*   int * num_ghost = &(values.data[*(values.lower)]);*/
+   int * num_ghost = values.data;
    HYPRE_StructVector *V = this->Hypre_StructVector_data->hsvec;
    hypre_StructVector * vector = (hypre_StructVector *) (*V);
 
+   (values.lower)[0] = 0;
+   (values.upper)[0] = 6;
    for (i = 0; i < 6; i++)
       num_ghost[i] = hypre_StructVectorNumGhost(vector)[i];
 
