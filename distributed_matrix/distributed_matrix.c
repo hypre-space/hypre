@@ -33,7 +33,6 @@ hypre_NewDistributedMatrix( MPI_Comm     context  )
    hypre_DistributedMatrixM(matrix)    = -1;
    hypre_DistributedMatrixN(matrix)    = -1;
    hypre_DistributedMatrixAuxiliaryData(matrix)    = NULL;
-   hypre_DistributedMatrixAuxiliaryData(matrix)    = NULL;
    hypre_DistributedMatrixLocalStorage(matrix) = NULL;
    hypre_DistributedMatrixTranslator(matrix) = NULL;
    hypre_DistributedMatrixLocalStorageType(matrix) = HYPRE_UNITIALIZED;
@@ -53,6 +52,8 @@ hypre_FreeDistributedMatrix( hypre_DistributedMatrix *matrix )
       hypre_FreeDistributedMatrixPETSc( matrix );
    else if ( hypre_DistributedMatrixLocalStorageType(matrix) == HYPRE_ISIS_MATRIX )
       hypre_FreeDistributedMatrixISIS( matrix );
+   else if ( hypre_DistributedMatrixLocalStorageType(matrix) == HYPRE_PARCSR_MATRIX )
+      hypre_FreeDistributedMatrixParcsr( matrix );
    else
       return(-1);
 
@@ -88,6 +89,8 @@ hypre_InitializeDistributedMatrix( hypre_DistributedMatrix *matrix )
       return( 0 );
    else if ( hypre_DistributedMatrixLocalStorageType(matrix) == HYPRE_ISIS_MATRIX )
       ret = hypre_InitializeDistributedMatrixISIS(matrix);
+   else if ( hypre_DistributedMatrixLocalStorageType(matrix) == HYPRE_PARCSR_MATRIX )
+      ret = hypre_InitializeDistributedMatrixParcsr(matrix);
    else
       return(-1);
 }
@@ -103,6 +106,7 @@ hypre_AssembleDistributedMatrix( hypre_DistributedMatrix *matrix )
    if( 
        (hypre_DistributedMatrixLocalStorageType(matrix) != HYPRE_PETSC_MATRIX )
     && (hypre_DistributedMatrixLocalStorageType(matrix) != HYPRE_ISIS_MATRIX )
+    && (hypre_DistributedMatrixLocalStorageType(matrix) != HYPRE_PARCSR_MATRIX )
      )
      return(-1);
 
@@ -129,9 +133,11 @@ int
 hypre_SetDistributedMatrixLocalStorageType( hypre_DistributedMatrix *matrix,
 				 int                type   )
 {
+   int ierr=0;
+
    hypre_DistributedMatrixLocalStorageType(matrix) = type;
 
-   return(0);
+   return(ierr);
 }
 
 /*--------------------------------------------------------------------------
@@ -141,9 +147,11 @@ hypre_SetDistributedMatrixLocalStorageType( hypre_DistributedMatrix *matrix,
 int 
 hypre_GetDistributedMatrixLocalStorageType( hypre_DistributedMatrix *matrix  )
 {
-   return( hypre_DistributedMatrixLocalStorageType(matrix) );
+   int ierr=0;
 
-   return(0);
+   ierr = hypre_DistributedMatrixLocalStorageType(matrix);
+
+   return(ierr);
 }
 
 /*--------------------------------------------------------------------------
@@ -154,6 +162,8 @@ int
 hypre_SetDistributedMatrixLocalStorage( hypre_DistributedMatrix *matrix,
 				 void                  *local_storage  )
 {
+   int ierr=0;
+
    hypre_DistributedMatrixLocalStorage(matrix) = local_storage;
 
    return(0);
@@ -168,7 +178,6 @@ hypre_GetDistributedMatrixLocalStorage( hypre_DistributedMatrix *matrix  )
 {
    return( hypre_DistributedMatrixLocalStorage(matrix) );
 
-   return(0);
 }
 
 
@@ -194,7 +203,6 @@ hypre_GetDistributedMatrixTranslator( hypre_DistributedMatrix *matrix  )
 {
    return( hypre_DistributedMatrixTranslator(matrix) );
 
-   return(0);
 }
 
 /*--------------------------------------------------------------------------
@@ -219,7 +227,6 @@ hypre_GetDistributedMatrixAuxiliaryData( hypre_DistributedMatrix *matrix  )
 {
    return( hypre_DistributedMatrixAuxiliaryData(matrix) );
 
-   return(0);
 }
 
 /*--------------------------------------------------------------------------
@@ -237,6 +244,8 @@ hypre_PrintDistributedMatrix( hypre_DistributedMatrix *matrix )
       return( hypre_PrintDistributedMatrixPETSc( matrix ) );
    else if ( hypre_DistributedMatrixLocalStorageType(matrix) == HYPRE_ISIS_MATRIX )
       return( hypre_PrintDistributedMatrixISIS( matrix ) );
+   else if ( hypre_DistributedMatrixLocalStorageType(matrix) == HYPRE_PARCSR_MATRIX )
+      return( hypre_PrintDistributedMatrixParcsr( matrix ) );
    else
       return(-1);
 }
@@ -254,6 +263,8 @@ hypre_GetDistributedMatrixLocalRange( hypre_DistributedMatrix *matrix,
       return( hypre_GetDistributedMatrixLocalRangePETSc( matrix, start, end ) );
    else if ( hypre_DistributedMatrixLocalStorageType(matrix) == HYPRE_ISIS_MATRIX )
       return( hypre_GetDistributedMatrixLocalRangeISIS( matrix, start, end ) );
+   else if ( hypre_DistributedMatrixLocalStorageType(matrix) == HYPRE_PARCSR_MATRIX )
+      return( hypre_GetDistributedMatrixLocalRangeParcsr( matrix, start, end ) );
    else
       return(-1);
 }
@@ -273,6 +284,8 @@ hypre_GetDistributedMatrixRow( hypre_DistributedMatrix *matrix,
       return( hypre_GetDistributedMatrixRowPETSc( matrix, row, size, col_ind, values ) );
    else if ( hypre_DistributedMatrixLocalStorageType(matrix) == HYPRE_ISIS_MATRIX )
       return( hypre_GetDistributedMatrixRowISIS( matrix, row, size, col_ind, values ) );
+   else if ( hypre_DistributedMatrixLocalStorageType(matrix) == HYPRE_PARCSR_MATRIX )
+      return( hypre_GetDistributedMatrixRowParcsr( matrix, row, size, col_ind, values ) );
    else
       return(-1);
 }
@@ -292,6 +305,8 @@ hypre_RestoreDistributedMatrixRow( hypre_DistributedMatrix *matrix,
       return( hypre_RestoreDistributedMatrixRowPETSc( matrix, row, size, col_ind, values ) );
    else if ( hypre_DistributedMatrixLocalStorageType(matrix) == HYPRE_ISIS_MATRIX )
       return( hypre_RestoreDistributedMatrixRowISIS( matrix, row, size, col_ind, values ) );
+   else if ( hypre_DistributedMatrixLocalStorageType(matrix) == HYPRE_PARCSR_MATRIX )
+      return( hypre_RestoreDistributedMatrixRowParcsr( matrix, row, size, col_ind, values ) );
    else
       return(-1);
 }
