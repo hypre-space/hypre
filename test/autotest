@@ -1,4 +1,4 @@
-    #!/bin/sh
+#!/bin/sh
 #BHEADER***********************************************************************
 # (c) 1998   The Regents of the University of California
 #
@@ -9,14 +9,9 @@
 #EHEADER***********************************************************************
 
 #==============================================================================
-# Define permission for autotest access
-#  -- give everyone read and execute permission
-#  -- give group write permissions
+# Environment variables
+# NOTE: this should be stripped down to something more minimal
 #==============================================================================
-
-HYPRE_AUTOTEST_PERMISSIONS="a+rX,ug+w"
-
-OPENWINHOME=/usr/openwin
 
 CVSROOT=/home/casc/repository
 export CVSROOT
@@ -25,36 +20,18 @@ PATH=/home/casc/bin:\
 /opt/SUNWspro/bin:/usr/ccs/bin:/usr/local/bin:\
 /usr/sbin:/usr/bin:/usr/ucb:\
 /sbin/bin:\
-$OPENWINHOME/bin:\
 /usr/local/scripts:\
-/usr/local/mpi/mpich/bin:\
-LD_LIBRARY_PATH=$OPENWINHOME/lib:\
-/usr/dt/lib:/usr/local/lib:/opt/SUNWspro/lib
+/usr/local/mpi/mpich/bin
 export PATH
 
 #==============================================================================
 # Set autotest directories
 #==============================================================================
 
-HYPRE_CASC_AUTOTEST_DIR="/home/casc/software/hypre"
-
-HYPRE_ARCH=""
+HYPRE_AUTOTEST_DIR="/home/casc/software/hypre/autotest"
 
 #=============================================================================
-# if on the CASC Cluster
-#=============================================================================
-
-if [ "$HYPRE_ARCH" = "" ]
-then
-	HYPRE_ARCH="opt"
-	HYPRE_AUTOTEST_DIR=$HYPRE_CASC_AUTOTEST_DIR/autotest
-else
-	echo "Error: must be on CASC cluster"
-	exit
-fi
-
-#=============================================================================
-#removes old autotest and creates new directory
+# Remove old autotest and create new directory
 #=============================================================================
 
 if [ -d $HYPRE_AUTOTEST_DIR ]
@@ -64,31 +41,36 @@ fi
 
 mkdir $HYPRE_AUTOTEST_DIR
 cd $HYPRE_AUTOTEST_DIR
-
 	
+#=============================================================================
+# Checks out repository, builds and installs in the AUTOTEST directory
+#=============================================================================
+
 if [ ! -d "$CVSROOT" ]
 then
 	echo "Error: no CVS repository, CVSROOT = $CVSROOT"
 	exit
 fi
 
-#=============================================================================
-# checks out repository, builds and installs in the AUTOTEST directory
-#=============================================================================
-
 cvs checkout -P linear_solvers
 
-echo "setting permissions...."
-chmod -fR $HYPRE_AUTOTEST_PERMISSIONS *
 cd linear_solvers
 ./configure
-./build -$HYPRE_ARCH
+make
 
 #=============================================================================
-# run script to test all driver programs 
+# Run script to test all driver programs 
 #=============================================================================
 
 cd test
 ./test_drivers.sh
 
+#==============================================================================
+# Set permissions so that all developers can access
+#  -- give everyone read and execute permission
+#  -- give group write permissions
+#==============================================================================
+
+echo "setting permissions...."
+chmod -fR a+rX,ug+w $HYPRE_AUTOTEST_DIR
 
