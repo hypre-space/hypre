@@ -214,7 +214,8 @@ HYPRE_STANDARD_DRIVERS_F77 =\
 HYPRE_BABEL_DRIVERS_CXX =
 
 HYPRE_BABEL_DRIVERS_F77 =\
- f77_struct_b.f
+ f77_struct_b.f\
+ f77_ij_b.f
 
 HYPRE_BETA_DRIVERS =
 
@@ -366,7 +367,7 @@ ${HYPRE_BABEL_DRIVER_EXECS}: ${HYPRE_BABEL_DRIVER_OBJS}
 
 ${HYPRE_BABEL_DRIVER_F77_EXECS}: ${HYPRE_BABEL_DRIVER_F77_OBJS}
 	@echo  "Building" $@ "... "
-	${F77} -o $@ $@.o ${FFLAGS} ${LFLAGS}
+	${F77} -o $@ $@.o ${FFLAGS} ${BABELLIBFLAGS} ${LFLAGS}
 
 ##################################################################
 # Beta rules
