@@ -330,7 +330,6 @@ int MLI_Method::getParams(char *in_name, int **int_vec, double **dble_vec)
 
 int MLI_Method::setName( char *str )
 {
-cout << "MLI_Method::setName : name = " << str << endl;
 #ifdef MLI_DEBUG_DETAILED
    cout << "MLI_Method::setName : name = " << str << endl;
    cout.flush();
