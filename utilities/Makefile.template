@@ -21,103 +21,103 @@ C_COMPILE_FLAGS =\
 ##################################################################
 # Lapack Header & Object Files
 ##################################################################
-${LAPACKINTERNAL}LAPACK_HEADERS = hypre_lapack.h f2c.h
-${LAPACKINTERNAL}LAPACK_FILES = \
-${LAPACKINTERNAL}dbdsqr.o\
-${LAPACKINTERNAL}dgebd2.o\
-${LAPACKINTERNAL}dgebrd.o\
-${LAPACKINTERNAL}dgelq2.o\
-${LAPACKINTERNAL}dgelqf.o\
-${LAPACKINTERNAL}dgels.o\
-${LAPACKINTERNAL}dgeqr2.o\
-${LAPACKINTERNAL}dgeqrf.o\
-${LAPACKINTERNAL}dgesvd.o\
-${LAPACKINTERNAL}dlabad.o\
-${LAPACKINTERNAL}dlabrd.o\
-${LAPACKINTERNAL}dlacpy.o\
-${LAPACKINTERNAL}dlae2.o\
-${LAPACKINTERNAL}dlaev2.o\
-${LAPACKINTERNAL}dlamch.o\
-${LAPACKINTERNAL}dlange.o\
-${LAPACKINTERNAL}dlanst.o\
-${LAPACKINTERNAL}dlansy.o\
-${LAPACKINTERNAL}dlapy2.o\
-${LAPACKINTERNAL}dlarfb.o\
-${LAPACKINTERNAL}dlarf.o\
-${LAPACKINTERNAL}dlarfg.o\
-${LAPACKINTERNAL}dlarft.o\
-${LAPACKINTERNAL}dlartg.o\
-${LAPACKINTERNAL}dlas2.o\
-${LAPACKINTERNAL}dlascl.o\
-${LAPACKINTERNAL}dlaset.o\
-${LAPACKINTERNAL}dlasq1.o\
-${LAPACKINTERNAL}dlasq2.o\
-${LAPACKINTERNAL}dlasq3.o\
-${LAPACKINTERNAL}dlasq4.o\
-${LAPACKINTERNAL}dlasq5.o\
-${LAPACKINTERNAL}dlasq6.o\
-${LAPACKINTERNAL}dlasr.o\
-${LAPACKINTERNAL}dlasrt.o\
-${LAPACKINTERNAL}dlassq.o\
-${LAPACKINTERNAL}dlasv2.o\
-${LAPACKINTERNAL}dlatrd.o\
-${LAPACKINTERNAL}dorg2l.o\
-${LAPACKINTERNAL}dorg2r.o\
-${LAPACKINTERNAL}dorgbr.o\
-${LAPACKINTERNAL}dorgl2.o\
-${LAPACKINTERNAL}dorglq.o\
-${LAPACKINTERNAL}dorgql.o\
-${LAPACKINTERNAL}dorgqr.o\
-${LAPACKINTERNAL}dorgtr.o\
-${LAPACKINTERNAL}dorm2r.o\
-${LAPACKINTERNAL}dormbr.o\
-${LAPACKINTERNAL}dorml2.o\
-${LAPACKINTERNAL}dormlq.o\
-${LAPACKINTERNAL}dormqr.o\
-${LAPACKINTERNAL}dpotf2.o\
-${LAPACKINTERNAL}dpotrf.o\
-${LAPACKINTERNAL}dpotrs.o\
-${LAPACKINTERNAL}dsteqr.o\
-${LAPACKINTERNAL}dsterf.o\
-${LAPACKINTERNAL}dsyev.o\
-${LAPACKINTERNAL}dsygs2.o\
-${LAPACKINTERNAL}dsygst.o\
-${LAPACKINTERNAL}dsygv.o\
-${LAPACKINTERNAL}dsytd2.o\
-${LAPACKINTERNAL}dsytrd.o\
-${LAPACKINTERNAL}ieeeck.o\
-${LAPACKINTERNAL}ilaenv.o\
-${LAPACKINTERNAL}lapack_utils.o\
-${LAPACKINTERNAL}lsame.o\
-${LAPACKINTERNAL}xerbla.o
+LAPACK_HEADERS = hypre_lapack.h f2c.h
+LAPACK_FILES = \
+dbdsqr.o\
+dgebd2.o\
+dgebrd.o\
+dgelq2.o\
+dgelqf.o\
+dgels.o\
+dgeqr2.o\
+dgeqrf.o\
+dgesvd.o\
+dlabad.o\
+dlabrd.o\
+dlacpy.o\
+dlae2.o\
+dlaev2.o\
+dlamch.o\
+dlange.o\
+dlanst.o\
+dlansy.o\
+dlapy2.o\
+dlarfb.o\
+dlarf.o\
+dlarfg.o\
+dlarft.o\
+dlartg.o\
+dlas2.o\
+dlascl.o\
+dlaset.o\
+dlasq1.o\
+dlasq2.o\
+dlasq3.o\
+dlasq4.o\
+dlasq5.o\
+dlasq6.o\
+dlasr.o\
+dlasrt.o\
+dlassq.o\
+dlasv2.o\
+dlatrd.o\
+dorg2l.o\
+dorg2r.o\
+dorgbr.o\
+dorgl2.o\
+dorglq.o\
+dorgql.o\
+dorgqr.o\
+dorgtr.o\
+dorm2r.o\
+dormbr.o\
+dorml2.o\
+dormlq.o\
+dormqr.o\
+dpotf2.o\
+dpotrf.o\
+dpotrs.o\
+dsteqr.o\
+dsterf.o\
+dsyev.o\
+dsygs2.o\
+dsygst.o\
+dsygv.o\
+dsytd2.o\
+dsytrd.o\
+ieeeck.o\
+ilaenv.o\
+lapack_utils.o\
+lsame.o\
+xerbla.o
 
 ##################################################################
 # Blas Header & Object Files
 ##################################################################
-${BLASINTERNAL}BLAS_HEADERS = hypre_blas.h f2c.h
-${BLASINTERNAL}BLAS_FILES = \
-${BLASINTERNAL}blas_utils.o\
-${BLASINTERNAL}dasum.o\
-${BLASINTERNAL}daxpy.o\
-${BLASINTERNAL}dcopy.o\
-${BLASINTERNAL}ddot.o\
-${BLASINTERNAL}dgemm.o\
-${BLASINTERNAL}dgemv.o\
-${BLASINTERNAL}dger.o\
-${BLASINTERNAL}dnrm2.o\
-${BLASINTERNAL}drot.o\
-${BLASINTERNAL}dscal.o\
-${BLASINTERNAL}dswap.o\
-${BLASINTERNAL}dsymm.o\
-${BLASINTERNAL}dsymv.o\
-${BLASINTERNAL}dsyr2.o\
-${BLASINTERNAL}dsyr2k.o\
-${BLASINTERNAL}dsyrk.o\
-${BLASINTERNAL}dtrmm.o\
-${BLASINTERNAL}dtrmv.o\
-${BLASINTERNAL}dtrsm.o\
-${BLASINTERNAL}dtrsv.o\
-${BLASINTERNAL}idamax.o
+BLAS_HEADERS = hypre_blas.h f2c.h
+BLAS_FILES = \
+blas_utils.o\
+dasum.o\
+daxpy.o\
+dcopy.o\
+ddot.o\
+dgemm.o\
+dgemv.o\
+dger.o\
+dnrm2.o\
+drot.o\
+dscal.o\
+dswap.o\
+dsymm.o\
+dsymv.o\
+dsyr2.o\
+dsyr2k.o\
+dsyrk.o\
+dtrmm.o\
+dtrmv.o\
+dtrsm.o\
+dtrsv.o\
+idamax.o
 
 ##################################################################
 # Utilities Header Files
@@ -165,8 +165,8 @@ OBJS = ${FILES:.c=.o}
 all: libHYPRE_utilities.a 
 	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
 	cp -fp $(srcdir)/utilities.h $(HYPRE_BUILD_DIR)/include
-	${BLASINTERNAL}cp -fp ${BLAS_HEADERS} $(HYPRE_BUILD_DIR)/include
-	${LAPACKINTERNAL}cp -fp ${LAPACK_HEADERS} $(HYPRE_BUILD_DIR)/include
+	cp -fp ${BLAS_HEADERS} $(HYPRE_BUILD_DIR)/include
+	cp -fp ${LAPACK_HEADERS} $(HYPRE_BUILD_DIR)/include
 	cp -fp libHYPRE* $(HYPRE_BUILD_DIR)/lib
 	@\
 	for file in ${OBJS}; \
@@ -177,16 +177,14 @@ all: libHYPRE_utilities.a
 install: libHYPRE_utilities.a 
 	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
 	cp -fp $(srcdir)/utilities.h $(HYPRE_INC_INSTALL)
-	${BLASINTERNAL}cp -fp ${BLAS_HEADERS} $(HYPRE_INC_INSTALL)
-	${LAPACKINTERNAL}cp -fp ${LAPACK_HEADERS} $(HYPRE_INC_INSTALL)
+	cp -fp ${BLAS_HEADERS} $(HYPRE_INC_INSTALL)
+	cp -fp ${LAPACK_HEADERS} $(HYPRE_INC_INSTALL)
 	cp -fp libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:
 	rm -f *.o libHYPRE* ${BLAS_HEADERS} ${LAPACK_HEADERS} 
 
 distclean: clean
-	rm -r Makefile
-
 
 ##################################################################
 # Rules
