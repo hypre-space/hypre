@@ -21,12 +21,12 @@ package Hypre {
 // ---------------- Interfaces ----------------
 
    interface Operator {
-      void Apply( in StructVector x, out StructVector b );
+      int Apply( in StructVector x, out StructVector b );
    };
    // ... Things which inherit from Operator include Matrix, Solver.
 
    interface LinearOperator extends Operator {
-      void Apply( in StructVector x, out StructVector b );
+      int Apply( in StructVector x, out StructVector b );
    };
 
    interface StructuredGridVectorBuilder {
@@ -70,17 +70,17 @@ package Hypre {
    };
 
    interface Solver extends LinearOperator {
-      void Apply( in StructVector b, out StructVector x );
+      int Apply( in StructVector b, out StructVector x );
       StructMatrix GetSystemOperator();
       StructVector GetResidual();
-      void GetConvergenceInfo( in string name, out double value );
+      int GetConvergenceInfo( in string name, out double value );
    };
 
    interface PreconditionedSolver extends Solver {
-      void Apply( in StructVector b, out StructVector x );
+      int Apply( in StructVector b, out StructVector x );
       StructMatrix GetSystemOperator();
       StructVector GetResidual();
-      void GetConvergenceInfo( in string name, out double value );
+      int GetConvergenceInfo( in string name, out double value );
 
       Solver GetPreconditioner();
    };
@@ -88,23 +88,23 @@ package Hypre {
    interface SolverBuilder {
       double GetDoubleParameter( in string name );
       int GetIntParameter( in string name );
-      void SetDoubleParameter( in string name, in double value );
-      void SetIntParameter( in string name, in int value );
-      void New( in MPI_Com comm );
-      void Setup( in StructMatrix A, in StructVector b, in StructVector x );
+      int SetDoubleParameter( in string name, in double value );
+      int SetIntParameter( in string name, in int value );
+      int New( in MPI_Com comm );
+      int Setup( in StructMatrix A, in StructVector b, in StructVector x );
       Solver GetConstructedObject();    
    };
 
    interface PreconditionedSolverBuilder extends SolverBuilder {
       double GetDoubleParameter( in string name );
       int GetIntParameter( in string name );
-      void SetDoubleParameter( in string name, in double value );
-      void SetIntParameter( in string name, in int value );
-      void New( in MPI_Com comm );
-      void Setup( in StructMatrix A, in StructVector b, in StructVector x );
+      int SetDoubleParameter( in string name, in double value );
+      int SetIntParameter( in string name, in int value );
+      int New( in MPI_Com comm );
+      int Setup( in StructMatrix A, in StructVector b, in StructVector x );
       Solver GetConstructedObject();    
 
-      void SetPreconditioner( in StructSolver precond );
+      int SetPreconditioner( in StructSolver precond );
    };
 
 
@@ -187,7 +187,7 @@ package Hypre {
       int SetStencil( in StructStencil stencil );
       int SetValues( in Box box, in array<int,1> stencil_indices,
                      in array<double,1> values );
-      void Apply( in StructVector b, out StructVector x );
+      int Apply( in StructVector b, out StructVector x );
       StructMatrix GetConstructedObject();
       void New( in StructuredGrid grid, in StructStencil stencil,
                 in int symmetric, in array<int,1> num_ghost  );
@@ -228,56 +228,56 @@ package Hypre {
    // to int but not vice versa.
 
    class StructJacobi extends StructSolver implements Solver, SolverBuilder {
-      void Apply( in StructVector b, out StructVector x );
+      int Apply( in StructVector b, out StructVector x );
       StructMatrix GetSystemOperator();
       StructVector GetResidual();
-      void GetConvergenceInfo( in string name, out double value );
+      int GetConvergenceInfo( in string name, out double value );
 
       double GetDoubleParameter( in string name );
       int GetIntParameter( in string name );
-      void SetDoubleParameter( in string name, in double value );
-      void SetIntParameter( in string name, in int value );
-      void New( in MPI_Com comm );
-      void Setup( in StructMatrix A, in StructVector b, in StructVector x );
+      int SetDoubleParameter( in string name, in double value );
+      int SetIntParameter( in string name, in int value );
+      int New( in MPI_Com comm );
+      int Setup( in StructMatrix A, in StructVector b, in StructVector x );
       static StructJacobi Constructor( in MPI_Com comm );
       Solver GetConstructedObject();
    };
 
    class StructSMG extends StructSolver implements Solver, SolverBuilder {
-      void Apply( in StructVector b, out StructVector x );
+      int Apply( in StructVector b, out StructVector x );
       StructMatrix GetSystemOperator();
       StructVector GetResidual();
-      void GetConvergenceInfo( in string name, out double value );
+      int GetConvergenceInfo( in string name, out double value );
 
       double GetDoubleParameter( in string name );
       int GetIntParameter( in string name );
-      void SetDoubleParameter( in string name, in double value );
-      void SetIntParameter( in string name, in int value );
-      void New( in MPI_Com comm );
-      void Setup( in StructMatrix A, in StructVector b, in StructVector x );
+      int SetDoubleParameter( in string name, in double value );
+      int SetIntParameter( in string name, in int value );
+      int New( in MPI_Com comm );
+      int Setup( in StructMatrix A, in StructVector b, in StructVector x );
       static StructSMG Constructor( in MPI_Com comm );
       Solver GetConstructedObject();
    };
 
    class PCG extends StructSolver implements PreconditionedSolver, PreconditionedSolverBuilder {
       // Preconditioned Conjugant Gradient
-      void Apply( in StructVector b, out StructVector x );
+      int Apply( in StructVector b, out StructVector x );
       StructMatrix GetSystemOperator();
       StructVector GetResidual();
-      void GetConvergenceInfo( in string name, out double value );
+      int GetConvergenceInfo( in string name, out double value );
 
       Solver GetPreconditioner();
 
       double GetDoubleParameter( in string name );
       int GetIntParameter( in string name );
-      void SetDoubleParameter( in string name, in double value );
-      void SetIntParameter( in string name, in int value );
-      void New( in MPI_Com comm );
+      int SetDoubleParameter( in string name, in double value );
+      int SetIntParameter( in string name, in int value );
+      int New( in MPI_Com comm );
       static PCG Constructor( in MPI_Com comm );
-      void Setup( in StructMatrix A, in StructVector b, in StructVector x );
+      int Setup( in StructMatrix A, in StructVector b, in StructVector x );
       Solver GetConstructedObject();    
 
-      void SetPreconditioner( in StructSolver precond );
+      int SetPreconditioner( in StructSolver precond );
 
    };
 
