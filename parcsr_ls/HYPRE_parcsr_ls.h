@@ -664,16 +664,16 @@ int HYPRE_ParCSREuclidSetParams(HYPRE_Solver solver,
 
 /**
  * Insert (name, value) pairs in Euclid's options database.
- * Each line of the file should either begin with a "#"
+ * Each line of the file should either begin with a ``\#,''
  * indicating a comment line, or contain a (name value)
  * pair, e.g:
  *
  * >cat optionsFile
- * #sample runtime parameter file
- * -blockJacobi 3
- * -matFile     /home/hysom/myfile.euclid
- * -doSomething true
- * -xx\_coeff -1.0
+ * #sample runtime parameter file \\
+ * -blockJacobi 3 \\
+ * -matFile     /home/hysom/myfile.euclid \\
+ * -doSomething true \\
+ * -xx\_coeff -1.0 \\
  *
  * See Euclid documentation for comprehensive listing
  * of settable parameters.
@@ -703,8 +703,7 @@ int HYPRE_ParCSREuclidReadRho(HYPRE_Solver solver, double *rho);
 
 /**
  * Prints settings used during factorization; also
- * prints info on preconditioner size, etc.  Best if called
- * after HYPRE\_ParCSRPilutSetup -- else, data may be incorrect.
+ * prints information on preconditioner size, etc.  
  * Euclid's reports can also be printed by including the
  * appropriate option on the command line; see the user
  * manual for details.
