@@ -75,8 +75,10 @@ hypre_F90_IFACE(hypre_printparcsrmatrix)( long int *matrix,
                                           char     *file_name,
                                           int      *ierr       )
 {
-   *ierr = (int) ( HYPRE_PrintParCSRMatrix ( (HYPRE_ParCSRMatrix) *matrix,
-                                             (char *)             file_name ) );
+   HYPRE_PrintParCSRMatrix ( (HYPRE_ParCSRMatrix) *matrix,
+                             (char *)              file_name );
+
+   *ierr = 0;
 }
 
 /*--------------------------------------------------------------------------
@@ -89,7 +91,7 @@ hypre_F90_IFACE(hypre_getcomparcsr)( long int *matrix,
                                      int      *ierr    )
 {
    *ierr = (int) ( HYPRE_GetCommParCSR( (HYPRE_ParCSRMatrix) *matrix,
-                                        (MPI_Comm *)         comm     ) );
+                                        (MPI_Comm *)          comm    ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -103,8 +105,8 @@ hypre_F90_IFACE(hypre_getdimsparcsr)( long int *matrix,
                                       int      *ierr    )
 {
    *ierr = (int) ( HYPRE_GetDimsParCSR( (HYPRE_ParCSRMatrix) *matrix,
-                                        (int *)              M,
-                                        (int *)              N        ) );
+                                        (int *)               M,
+                                        (int *)               N       ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -118,8 +120,8 @@ hypre_F90_IFACE(hypre_getlocalrangeparcsr)( long int *matrix,
                                             int      *ierr    )
 {
    *ierr = (int) ( HYPRE_GetLocalRangeParcsr( (HYPRE_ParCSRMatrix) *matrix,
-                                              (int *)              start,
-                                              (int *)              end      ) );
+                                              (int *)               start,
+                                              (int *)               end     ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -143,8 +145,8 @@ hypre_F90_IFACE(hypre_getrowparcsrmatrix)( long int *matrix,
                                              (int **)             col_ind,
                                              (double **)          values   ) );
 
-   *col_ind_ptr = *col_ind;
-   *values_ptr  = *values;
+   *col_ind_ptr = (long int) *col_ind;
+   *values_ptr  = (long int) *values;
 }
 
 /*--------------------------------------------------------------------------
@@ -164,11 +166,11 @@ hypre_F90_IFACE(hypre_restorerowparcsrmatrix)( long int *matrix,
 
    *ierr = (int) ( HYPRE_RestoreRowParCSRMatrix( (HYPRE_ParCSRMatrix) *matrix,
                                                  (int)                *row,
-                                                 (int *)              size,
-                                                 (int **)             col_ind,
-                                                 (double **)          values   ) );
+                                                 (int *)               size,
+                                                 (int **)              col_ind,
+                                                 (double **)           values   ) );
 
-   *col_ind_ptr = *col_ind;
-   *values_ptr  = *values;
+   *col_ind_ptr = (long int) *col_ind;
+   *values_ptr  = (long int) *values;
 
 }
