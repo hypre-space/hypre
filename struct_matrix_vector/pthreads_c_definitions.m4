@@ -83,24 +83,28 @@ define(PLOOP,
         $1 = ifetchadd(&$4, &$7) + $2) {\
       $9\
    }\
-   pthread_mutex_lock(&$7);\
-      $6++;\
-   if ($6 < NUM_THREADS) {\
-      pthread_mutex_unlock(&$7);\
-      while (!hypre_thread_release);\
+   if (pthread_equal(initial_thread, pthread_self())==0) {\
       pthread_mutex_lock(&$7);\
-      $6--;\
-      pthread_mutex_unlock(&$7);\
-      while (hypre_thread_release);\
+         $6++;\
+      if ($6 < NUM_THREADS) {\
+         pthread_mutex_unlock(&$7);\
+         while (!hypre_thread_release);\
+         pthread_mutex_lock(&$7);\
+         $6--;\
+         pthread_mutex_unlock(&$7);\
+         while (hypre_thread_release);\
+      }\
+      else if ($6 == NUM_THREADS) {\
+         $6--;\
+         $4 = 0;\
+         pthread_mutex_unlock(&$7);\
+         hypre_thread_release=1;\
+         while ($6);\
+         hypre_thread_release=0;\
+      }\
    }\
-   else if ($6 == NUM_THREADS) {\
-      $6--;\
-      $4 = 0;\
-      pthread_mutex_unlock(&$7);\
-      hypre_thread_release=1;\
-      while ($6);\
-      hypre_thread_release=0;\
-   }\>>)
+   else\
+      $4 = 0;\>>)
 
 
 >>,<<

@@ -12,11 +12,17 @@
  *
  *****************************************************************************/
 
-#include "headers.h"
-
 #ifdef HYPRE_USE_PTHREADS
-#include "box_pthreads.h"
+#undef HYPRE_USE_PTHREADS
+#include "headers.h"
+#define HYPRE_USE_PTHREADS
+#include <pthread.h>
+extern pthread_t  initial_thread;
+extern pthread_t *hypre_thread;
+#else
+#include "headers.h"
 #endif
+
 /*--------------------------------------------------------------------------
  * hypre_StructInnerProd
  *--------------------------------------------------------------------------*/
@@ -75,6 +81,10 @@ hypre_StructInnerProd(  hypre_StructVector *x,
    MPI_Allreduce(&local_result, &result, 1,
                  MPI_DOUBLE, MPI_SUM, hypre_StructVectorComm(x));
 
+#ifdef HYPRE_USE_PTHREADS
+   if (pthread_equal(pthread_self(), initial_thread) ||
+       pthread_equal(pthread_self(), hypre_thread[0]))
+#endif
    hypre_IncFLOPCount(2*hypre_StructVectorGlobalSize(x));
 
    return result;
