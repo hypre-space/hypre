@@ -530,32 +530,6 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *A,
       }
 
       /*------------------------------------------------
-       * Exchange boundary data, i.i. get measures and S_ext_data
-       *------------------------------------------------*/
-
-      if (debug_flag == 3) wall_time = time_getWallclockSeconds();
-
-      index = 0;
-      index_S = 0;
-      for (i = 0; i < num_sends; i++)
-      {
-        start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
-        for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
-        {
-            jrow = hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j);
-            buf_data[index++] = measure_array[jrow];
-         }
-      }
-
-      if (num_procs > 1)
-      { 
-         comm_handle = hypre_ParCSRCommHandleCreate(1, comm_pkg, buf_data, 
-        	&measure_array[num_variables]);
- 
-         hypre_ParCSRCommHandleDestroy(comm_handle);   
- 
-      } 
-      /*------------------------------------------------
        * Set F-pts and update subgraph
        *------------------------------------------------*/
  
@@ -596,6 +570,31 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *A,
          }
       }
  
+      /*------------------------------------------------
+       * Exchange boundary data, i.i. get measures 
+       *------------------------------------------------*/
+
+      if (debug_flag == 3) wall_time = time_getWallclockSeconds();
+
+      index = 0;
+      for (i = 0; i < num_sends; i++)
+      {
+        start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
+        for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
+        {
+            jrow = hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j);
+            buf_data[index++] = measure_array[jrow];
+         }
+      }
+
+      if (num_procs > 1)
+      { 
+         comm_handle = hypre_ParCSRCommHandleCreate(1, comm_pkg, buf_data, 
+        	&measure_array[num_variables]);
+ 
+         hypre_ParCSRCommHandleDestroy(comm_handle);   
+ 
+      } 
       /*------------------------------------------------
        * Debugging:
        *
@@ -991,6 +990,7 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
    int             *CF_marker;
    int             *CF_marker_offd;
    int              coarse_size;
+   int              coarse_size_2;
    int              ci_tilde = -1;
    int              ci_tilde_mark = -1;
    int              ci_tilde_offd = -1;
@@ -1182,7 +1182,7 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
          {
             for (jA = A_i[i]+1; jA < A_i[i+1]; jA++)
             {
-               if (A_data[jA] <= strength_threshold * row_scale)
+               if (A_data[jA] <= strength_threshold * row_scale) 
                {
                   ST_j[jA] = -1;
                   num_strong--;
@@ -1190,7 +1190,7 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
             }
             for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
             {
-               if (A_offd_data[jA] <= strength_threshold * row_scale)
+               if (A_offd_data[jA] <= strength_threshold * row_scale) 
                {
                   S_offd_j[jA] = -1;
                }
@@ -1200,7 +1200,7 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
          {
             for (jA = A_i[i]+1; jA < A_i[i+1]; jA++)
             {
-               if (A_data[jA] >= strength_threshold * row_scale)
+               if (A_data[jA] >= strength_threshold * row_scale) 
                {
                   ST_j[jA] = -1;
                   num_strong--;
@@ -1208,12 +1208,12 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
             }
             for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
             {
-               if (A_offd_data[jA] >= strength_threshold * row_scale)
+               if (A_offd_data[jA] >= strength_threshold * row_scale) 
                {
                   S_offd_j[jA] = -1;
                }
             }
-         }
+         } 
       }
    }
 
@@ -1504,6 +1504,7 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
     * Initialize the graph array
     *---------------------------------------------------*/
 
+   coarse_size_2 = 0;
    graph_array = hypre_CTAlloc(int, num_variables);
 
    for (i = 0; i < num_variables; i++)
@@ -1596,10 +1597,12 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
                      {
                         CF_marker[i] = 1;
                         coarse_size++;
+                        coarse_size_2++;
                         if (ci_tilde > -1)
                         {
                            CF_marker[ci_tilde] = -1;
                            coarse_size--;
+                           coarse_size_2--;
                            ci_tilde = -1;
                         }
                         if (ci_tilde_offd > -1)
@@ -1617,6 +1620,7 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
                         ci_tilde_mark = i;
                         CF_marker[j] = 1;
                         coarse_size++;
+                        coarse_size_2++;
                         C_i_nonempty = 1;
                         i--;
                         break_var = 0;
@@ -1663,10 +1667,12 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
                         {
                            CF_marker[i] = 1;
                            coarse_size++;
+                           coarse_size_2++;
                            if (ci_tilde > -1)
                            {
                               CF_marker[ci_tilde] = -1;
                               coarse_size--;
+                              coarse_size_2--;
                               ci_tilde = -1;
                            }
                            if (ci_tilde_offd > -1)
@@ -1727,10 +1733,12 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
    		     {
    		        CF_marker[i] = 1;
    		        coarse_size++;
+   		        coarse_size_2++;
    		        if (ci_tilde > -1)
    		        {
    			   CF_marker[ci_tilde] = -1;
    		           coarse_size--;
+   		           coarse_size_2--;
    		           ci_tilde = -1;
    		        }
    	    		C_i_nonempty = 0;
@@ -1742,6 +1750,7 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
    		        ci_tilde_mark = i;
    		        CF_marker[j] = 1;
    		        coarse_size++;
+   		        coarse_size_2++;
    		        C_i_nonempty = 1;
 		        i--;
 		        break;
@@ -1752,6 +1761,7 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
 	 }
       }
    }
+	printf (" 2nd pass coarse points: %d =n", coarse_size_2);
 
    if (debug_flag == 3 && coarsen_type != 2)
    {
@@ -2972,29 +2982,6 @@ hypre_BoomerAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
                         += buf_data[index++];
       }
 
-      /*------------------------------------------------
-       * Exchange boundary data, i.i. get measures and S_ext_data
-       *------------------------------------------------*/
-   if (debug_flag == 3) wall_time = time_getWallclockSeconds();
-      index = 0;
-      index_S = 0;
-      for (i = 0; i < num_sends; i++)
-      {
-	 start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
-         for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg,i+1); j++)
-         {
-            jrow = hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j);
-            buf_data[index++] = measure_array[jrow];
-         }
-      }
- 
-      if (num_procs > 1)
-      {
-      comm_handle = hypre_ParCSRCommHandleCreate( 1, comm_pkg, buf_data, 
-			&measure_array[num_variables]); 
- 
-      hypre_ParCSRCommHandleDestroy(comm_handle);   
-      }
  
       /*------------------------------------------------
        * Set F-pts and update subgraph
@@ -3039,6 +3026,29 @@ hypre_BoomerAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
             }
          }
       } 
+      /*------------------------------------------------
+       * Exchange boundary data, i.i. get measures and S_ext_data
+       *------------------------------------------------*/
+   if (debug_flag == 3) wall_time = time_getWallclockSeconds();
+      index = 0;
+      index_S = 0;
+      for (i = 0; i < num_sends; i++)
+      {
+	 start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
+         for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg,i+1); j++)
+         {
+            jrow = hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j);
+            buf_data[index++] = measure_array[jrow];
+         }
+      }
+ 
+      if (num_procs > 1)
+      {
+      comm_handle = hypre_ParCSRCommHandleCreate( 1, comm_pkg, buf_data, 
+			&measure_array[num_variables]); 
+ 
+      hypre_ParCSRCommHandleDestroy(comm_handle);   
+      }
       /*------------------------------------------------
        * Debugging:
        *
