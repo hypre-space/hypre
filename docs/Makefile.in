@@ -21,7 +21,8 @@ PSPDF = ps2pdf
 ONLINE_OPTS =\
  -split 4\
  -show_section_numbers\
- -bottom_navigation
+ -bottom_navigation\
+ -local_icons
 
 ##################################################################
 # Targets
