@@ -74,7 +74,7 @@ extern "C"
 
 extern "C" {
 
-#ifdef MLPACK
+#ifdef HAVE_ML
    int HYPRE_LSI_MLCreate( MPI_Comm, HYPRE_Solver *);
    int HYPRE_LSI_MLDestroy( HYPRE_Solver );
 #endif
@@ -389,7 +389,7 @@ HYPRE_LinSysCore::~HYPRE_LinSysCore()
        else if ( HYPreconID_ == HYBLOCK )
           HYPRE_LSI_BlockPrecondDestroy( HYPrecon_ );
 
-#ifdef MLPACK
+#ifdef HAVE_ML
        else if ( HYPreconID_ == HYML )
           HYPRE_LSI_MLDestroy( HYPrecon_ );
 #endif
@@ -2777,7 +2777,7 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
        else if ( HYPreconID_ == HYBLOCK )
           HYPRE_LSI_BlockPrecondDestroy( HYPrecon_ );
 
-#ifdef MLPACK
+#ifdef HAVE_ML
        else if ( HYPreconID_ == HYML )
           HYPRE_LSI_MLDestroy( HYPrecon_ );
 #endif
@@ -2844,7 +2844,7 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
     }
     else if ( !strcmp(name, "ml") )
     {
-#ifdef MLPACK
+#ifdef HAVE_ML
        strcpy( HYPreconName_, name );
        HYPreconID_ = HYML;
 #else
@@ -2931,7 +2931,7 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
             assert( !ierr );
             break;
 
-#ifdef MLPACK
+#ifdef HAVE_ML
        case HYML :
             ierr = HYPRE_LSI_MLCreate( comm_, &HYPrecon_ );
             break;

@@ -360,7 +360,7 @@ int MH_GetRow(void *obj, int N_requested_rows, int requested_rows[],
 
 int HYPRE_LSI_MLCreate( MPI_Comm comm, HYPRE_Solver *solver)
 {
-#ifdef MLPACK
+#ifdef HAVE_ML
     /* create an internal ML data structure */
 
     MH_Link *link = (MH_Link *) malloc( sizeof( MH_Link ) );
@@ -403,7 +403,7 @@ int HYPRE_LSI_MLCreate( MPI_Comm comm, HYPRE_Solver *solver)
 
 int HYPRE_LSI_MLDestroy( HYPRE_Solver solver )
 {
-#ifdef MLPACK
+#ifdef HAVE_ML
     int       i;
     MH_Matrix *Amat;
     MH_Link   *link = (MH_Link *) solver;
@@ -446,7 +446,7 @@ int HYPRE_LSI_MLDestroy( HYPRE_Solver solver )
 int HYPRE_LSI_MLSetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
                          HYPRE_ParVector b,   HYPRE_ParVector x      )
 {
-#ifdef MLPACK
+#ifdef HAVE_ML
     int        i, my_id, nprocs, coarsest_level, level, sweeps, nlevels;
     int        *row_partition, localEqns, length;
     int        Nblocks, *blockList;
@@ -739,7 +739,7 @@ int HYPRE_LSI_MLSetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
 int HYPRE_LSI_MLSolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
                        HYPRE_ParVector b, HYPRE_ParVector x )
 {
-#ifdef MLPACK
+#ifdef HAVE_ML
     double  *rhs, *sol;
     MH_Link *link = (MH_Link *) solver;
     ML      *ml = link->ml_ptr;

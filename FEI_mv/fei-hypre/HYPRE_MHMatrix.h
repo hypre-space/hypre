@@ -13,7 +13,7 @@
 #ifndef _MHMAT_
 #define _MHMAT_
 
-#ifdef MLPACK
+#ifdef HAVE_ML
 #include "ml_struct.h"
 #include "ml_aggregate.h"
 #include "ml_amg.h"
@@ -48,7 +48,7 @@ MH_Context;
 typedef struct
 {
     MPI_Comm     comm;
-#ifdef MLPACK
+#ifdef HAVE_ML
     ML           *ml_ptr;
 #endif
     int          nlevels;
@@ -61,7 +61,7 @@ typedef struct
     double       ag_threshold;
     int          coarse_solver;
     int          coarsen_scheme;
-#ifdef MLPACK
+#ifdef HAVE_ML
     ML_Aggregate *ml_ag;
     ML_AMG       *ml_amg;
 #endif

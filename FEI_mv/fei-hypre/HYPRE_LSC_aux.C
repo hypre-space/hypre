@@ -1375,7 +1375,7 @@ void HYPRE_LinSysCore::setupPCGPrecon()
             exit(1);
             break;
 
-#ifdef MLPACK
+#ifdef HAVE_ML
        case HYML :
             if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
             {
@@ -1667,7 +1667,7 @@ void HYPRE_LinSysCore::setupGMRESPrecon()
             exit(1);
             break;
 
-#ifdef MLPACK
+#ifdef HAVE_ML
        case HYML :
             if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
             {
@@ -1974,7 +1974,7 @@ void HYPRE_LinSysCore::setupFGMRESPrecon()
             }
             break;
 
-#ifdef MLPACK
+#ifdef HAVE_ML
        case HYML :
             if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
             {
@@ -2268,7 +2268,7 @@ void HYPRE_LinSysCore::setupBiCGSTABPrecon()
             exit(1);
             break;
 
-#ifdef MLPACK
+#ifdef HAVE_ML
        case HYML :
             if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
             {
@@ -2563,7 +2563,7 @@ void HYPRE_LinSysCore::setupBiCGSTABLPrecon()
             exit(1);
             break;
 
-#ifdef MLPACK
+#ifdef HAVE_ML
        case HYML :
             if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
             {
@@ -2854,7 +2854,7 @@ void HYPRE_LinSysCore::setupTFQmrPrecon()
             exit(1);
             break;
 
-#ifdef MLPACK
+#ifdef HAVE_ML
        case HYML :
             if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
             {
@@ -3145,7 +3145,7 @@ void HYPRE_LinSysCore::setupBiCGSPrecon()
             exit(1);
             break;
 
-#ifdef MLPACK
+#ifdef HAVE_ML
        case HYML :
             if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
             {
@@ -3382,7 +3382,7 @@ void HYPRE_LinSysCore::setupSymQMRPrecon()
             }
             break;
 
-#ifdef MLPACK
+#ifdef HAVE_ML
        case HYML :
             if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
             {

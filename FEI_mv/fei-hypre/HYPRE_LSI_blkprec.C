@@ -47,7 +47,7 @@
 #include "../../parcsr_ls/HYPRE_parcsr_ls.h"
 #include "HYPRE_LSI_ddilut.h"
 #include "HYPRE_LSI_blkprec.h"
-#ifdef MLPACK
+#ifdef HAVE_ML
 extern "C" {
    int HYPRE_LSI_MLCreate( MPI_Comm, HYPRE_Solver *);
    int HYPRE_LSI_MLDestroy( HYPRE_Solver );
@@ -1219,7 +1219,7 @@ int HYPRE_LSI_BlockP::destroySolverPrecond()
       else if (A11Params_.PrecondID_ == 3) HYPRE_BoomerAMGDestroy(A11Precond_);
       else if (A11Params_.PrecondID_ == 4) HYPRE_ParCSRPilutDestroy(A11Precond_);
       else if (A11Params_.PrecondID_ == 5) HYPRE_EuclidDestroy(A11Precond_);
-#ifdef MLPACK
+#ifdef HAVE_ML
       else if (A11Params_.PrecondID_ == 6) HYPRE_LSI_MLDestroy(A11Precond_);
 #endif
    }
@@ -1229,7 +1229,7 @@ int HYPRE_LSI_BlockP::destroySolverPrecond()
       else if (A22Params_.PrecondID_ == 3) HYPRE_BoomerAMGDestroy(A22Precond_);
       else if (A22Params_.PrecondID_ == 4) HYPRE_ParCSRPilutDestroy(A22Precond_);
       else if (A22Params_.PrecondID_ == 5) HYPRE_EuclidDestroy(A22Precond_);
-#ifdef MLPACK
+#ifdef HAVE_ML
       else if (A22Params_.PrecondID_ == 6) HYPRE_LSI_MLDestroy(A22Precond_);
 #endif
    }
@@ -1749,7 +1749,7 @@ int HYPRE_LSI_BlockP::setupPrecon(HYPRE_Solver *precon, HYPRE_IJMatrix Amat,
           HYPRE_LSI_DDIlutSetFillin(*precon, param_ptr.DDIlutFillin_);
           HYPRE_LSI_DDIlutSetDropTolerance(*precon, param_ptr.DDIlutDropTol_);
           break;
-#ifdef MLPACK
+#ifdef HAVE_ML
       case 7 :
           HYPRE_LSI_MLCreate( mpi_comm, precon );
           HYPRE_LSI_MLSetCoarseSolver(*precon, 0);
@@ -1825,7 +1825,7 @@ int HYPRE_LSI_BlockP::setupSolver(HYPRE_Solver *solver, HYPRE_IJMatrix Amat,
                   HYPRE_ParCSRPCGSetPrecond(*solver, HYPRE_LSI_DDIlutSolve,
                                             HYPRE_LSI_DDIlutSetup, precon);
                   break;
-#ifdef MLPACK
+#ifdef HAVE_ML
              case 7 : 
                   HYPRE_ParCSRPCGSetPrecond(*solver,HYPRE_LSI_MLSolve,
                                             HYPRE_LSI_MLSetup, precon);
@@ -1867,7 +1867,7 @@ int HYPRE_LSI_BlockP::setupSolver(HYPRE_Solver *solver, HYPRE_IJMatrix Amat,
                   HYPRE_ParCSRGMRESSetPrecond(*solver, HYPRE_LSI_DDIlutSolve,
                                             HYPRE_LSI_DDIlutSetup, precon);
                   break;
-#ifdef MLPACK
+#ifdef HAVE_ML
              case 7 : 
                   HYPRE_ParCSRGMRESSetPrecond(*solver,HYPRE_LSI_MLSolve,
                                               HYPRE_LSI_MLSetup, precon);
