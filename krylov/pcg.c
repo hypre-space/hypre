@@ -852,10 +852,10 @@ hypre_PCGGetFinalRelativeResidualNorm( void   *pcg_vdata,
 {
    hypre_PCGData *pcg_data = pcg_vdata;
 
+   int            ierr = 0;
+   
    double         rel_residual_norm = (pcg_data -> rel_residual_norm);
 
-   int            ierr = -1;
-   
   *relative_residual_norm = rel_residual_norm;
    
    return ierr;
