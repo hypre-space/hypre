@@ -1043,13 +1043,12 @@ int rr(Matx *U,Matx *LU,Matx *R,Matx *LR,Matx *P,Matx *LP,
 /*------------------------------------------------------------------------*/
 int myeig1(Matx *A, Matx *B, Matx *X,double *lambda)
 {
-  int i,j,n,lda,lwork,info,ldb;
+  int i,j,n,lwork,info;
   /*char jobz,uplo;*/
   double *a,*b,*work,temp;
 
    n=A->n;
-  lda=n;
-  ldb=n;
+  info = 0;
 
   lwork=10*n; 
 
@@ -1089,6 +1088,8 @@ int myeig1(Matx *A, Matx *B, Matx *X,double *lambda)
  char jobz='V';
  char uplo='U';
  int itype=1;
+ int lda=n;
+ int ldb=n;
     hypre_F90_NAME_BLAS(dsygv, DSYGV)(&itype, &jobz, &uplo, &n, a, &lda, b, &ldb,
      lambda, &work[0], &lwork, &info);
   if (info!=0) 
