@@ -147,17 +147,3 @@ HYPRE_ParCSRParaSailsSetParams(HYPRE_Solver solver,
 
    return 0;
 }
-
-/*--------------------------------------------------------------------------
- * HYPRE_ParCSRParaSailsSelectThresh
- *--------------------------------------------------------------------------*/
-
-int
-HYPRE_ParCSRParaSailsSelectThresh(HYPRE_Solver solver, 
-                    double *threshp)
-{
-   Secret *secret = (Secret *) solver;
-
-   return HYPRE_ParaSailsSelectThresh(secret->obj, threshp);
-}
-
