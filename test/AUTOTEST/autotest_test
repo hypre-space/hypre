@@ -598,7 +598,7 @@ mail_summary () {
         fi
       done
       if [ "$TestCaseFailedCount" != "0" ] ; then
-        printf "Failed:    %2d   :   %2d\n" $TestCaseSuccessCount $TestCaseFailedCount >> $SUMFILE
+        printf "Passed:    %2d  Failed:   %2d\n" $TestCaseSuccessCount $TestCaseFailedCount >> $SUMFILE
       elif [ "$TestCaseSuccessCount" != "0" ] ; then
         printf "Passed:    %2d\n" $TestCaseSuccessCount >> $SUMFILE
       else
