@@ -122,7 +122,8 @@ c
       if (n .eq. 1) go to 1001
 c
       do 100 i = 2, n
-  100 e(i-1) = e(i)
+      e(i-1) = e(i)
+  100 continue
 c
       f = 0.0d0
       tst1 = 0.0d0
@@ -165,7 +166,8 @@ c     .......... form shift ..........
          if (l2 .gt. n) go to 145
 c
          do 140 i = l2, n
-  140    d(i) = d(i) - h
+         d(i) = d(i) - h
+  140    continue
 c
   145    f = f + h
 c     .......... ql transformation ..........
@@ -286,7 +288,8 @@ c
       if (n .eq. 1) go to 1001
 c
       do 100 i = 2, n
-  100 e(i-1) = e(i)
+      e(i-1) = e(i)
+  100 continue
 c
       f = 0.0d0
       tst1 = 0.0d0
@@ -328,7 +331,8 @@ c     .......... form shift ..........
          if (l2 .gt. n) go to 145
 c
          do 140 i = l2, n
-  140    d(i) = d(i) - h
+         d(i) = d(i) - h
+  140    continue
 c
   145    f = f + h
 c     .......... ql transformation ..........
@@ -460,7 +464,8 @@ c     .......... for i=n step -1 until 1 do -- ..........
          if (l .lt. 1) go to 130
 c     .......... scale row (algol tol then not needed) ..........
          do 120 k = 1, l
-  120    scale = scale + dabs(d(k))
+           scale = scale + dabs(d(k))
+  120    continue
 c
          if (scale .ne. 0.0d0) go to 140
 c
@@ -495,7 +500,8 @@ c
          if (l .eq. 1) go to 285
 c     .......... form a*u ..........
          do 170 j = 1, l
-  170    e(j) = 0.0d0
+         e(j) = 0.0d0
+  170    continue
 c
          do 240 j = 1, l
             f = d(j)
@@ -521,14 +527,16 @@ c
          h = f / (h + h)
 c     .......... form q ..........
          do 250 j = 1, l
-  250    e(j) = e(j) - h * d(j)
+         e(j) = e(j) - h * d(j)
+  250    continue
 c     .......... form reduced a ..........
          do 280 j = 1, l
             f = d(j)
             g = e(j)
 c
             do 260 k = j, l
-  260       a(k,j) = a(k,j) - f * e(k) - g * d(k)
+            a(k,j) = a(k,j) - f * e(k) - g * d(k)
+  260       continue
 c
   280    continue
 c
@@ -593,7 +601,8 @@ C
       do 100 i = 1, n
 c
          do 80 j = i, n
-   80    z(j,i) = a(j,i)
+         z(j,i) = a(j,i)
+   80    continue
 c
          d(i) = a(n,i)
   100 continue
@@ -608,7 +617,8 @@ c     .......... for i=n step -1 until 2 do -- ..........
          if (l .lt. 2) go to 130
 c     .......... scale row (algol tol then not needed) ..........
          do 120 k = 1, l
-  120    scale = scale + dabs(d(k))
+         scale = scale + dabs(d(k))
+  120    continue
 c
          if (scale .ne. 0.0d0) go to 140
   130    e(i) = d(l)
@@ -640,7 +650,8 @@ c
          d(l) = f - g
 c     .......... form a*u ..........
          do 170 j = 1, l
-  170    e(j) = 0.0d0
+         e(j) = 0.0d0
+  170    continue
 c
          do 240 j = 1, l
             f = d(j)
@@ -667,14 +678,16 @@ c
          hh = f / (h + h)
 c     .......... form q ..........
          do 250 j = 1, l
-  250    e(j) = e(j) - hh * d(j)
+         e(j) = e(j) - hh * d(j)
+  250    continue
 c     .......... form reduced a ..........
          do 280 j = 1, l
             f = d(j)
             g = e(j)
 c
             do 260 k = j, l
-  260       z(k,j) = z(k,j) - f * e(k) - g * d(k)
+            z(k,j) = z(k,j) - f * e(k) - g * d(k)
+  260       continue
 c
             d(j) = z(l,j)
             z(i,j) = 0.0d0
@@ -691,20 +704,24 @@ c     .......... accumulation of transformation matrices ..........
          if (h .eq. 0.0d0) go to 380
 c
          do 330 k = 1, l
-  330    d(k) = z(k,i) / h
+         d(k) = z(k,i) / h
+  330    continue
 c
          do 360 j = 1, l
             g = 0.0d0
 c
             do 340 k = 1, l
-  340       g = g + z(k,i) * z(k,j)
+            g = g + z(k,i) * z(k,j)
+  340       continue
 c
-            do 360 k = 1, l
+            do 370 k = 1, l
                z(k,j) = z(k,j) - g * d(k)
+  370       continue
   360    continue
 c
   380    do 400 k = 1, l
-  400    z(k,i) = 0.0d0
+         z(k,i) = 0.0d0
+  400    continue
 c
   500 continue
 c
@@ -744,7 +761,7 @@ C
 C **********************************************************************
 
       double precision function mli_dsign(a,b)
-      real*8 a,b
+      double precision a,b
 
       if (b .ge. 0.e0) then
          mli_dsign = dabs(a)
