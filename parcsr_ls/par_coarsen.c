@@ -2982,7 +2982,7 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
     * Initialize the graph array
     *---------------------------------------------------*/
 
-/*   graph_array = hypre_CTAlloc(int, num_variables+num_cols_offd);
+   graph_array = hypre_CTAlloc(int, num_variables+num_cols_offd);
 
    for (i = 0; i < num_variables; i++)
    {
@@ -3047,7 +3047,7 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
 	 }
       }
    }
-*/
+
    if (debug_flag == 3 )
    {
       wall_time = time_getWallclockSeconds() - wall_time;
