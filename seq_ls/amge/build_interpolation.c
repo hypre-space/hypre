@@ -268,7 +268,7 @@ int hypre_AMGeBuildInterpolation(hypre_CSRMatrix     **P_pointer,
 
       if (int_dof_counter > 0)
 	{
-	  ierr = matinv(XE, AE, int_dof_counter);
+	  ierr = mat_inv(XE, AE, int_dof_counter);
 	  if (ierr == -1)
 	    {
 	      printf("============= build_interpolation: ===============\n");
@@ -354,10 +354,10 @@ int hypre_AMGeBuildInterpolation(hypre_CSRMatrix     **P_pointer,
 
 }
 /*---------------------------------------------------------------------
- matinv:  X <--  A**(-1) ;  A IS POSITIVE DEFINITE (non--symmetric);
+ mat_inv:  X <--  A**(-1) ;  A IS POSITIVE DEFINITE (non--symmetric);
  ---------------------------------------------------------------------*/
       
-int matinv(double *x, double *a, int k)
+int mat_inv(double *x, double *a, int k)
 {
   int i,j,l, ierr =0;
   double *b;
@@ -376,10 +376,10 @@ int matinv(double *x, double *a, int k)
 	  ierr = -1; 
 	  printf("                        diagonal entry: %e\n", a[i+k*i]);
 	    /*	  
-	    printf("matinv: ==========================================\n");
+	    printf("mat_inv: ==========================================\n");
 	    printf("size: %d, entry: %d, %f\n", k, i, a[i+i*k]);
 
-            printf("indefinite singular matrix in *** matinv ***:\n");
+            printf("indefinite singular matrix in *** mat_inv ***:\n");
             printf("i:%d;  diagonal entry: %e\n", i, a[i+k*i]);
 
 
