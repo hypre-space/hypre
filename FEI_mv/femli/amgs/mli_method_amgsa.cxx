@@ -587,6 +587,8 @@ int MLI_Method_AMGSA::setup( MLI *mli )
             case MLI_METHOD_AMGSA_LOCAL :
                  maxEigenT = genPLocal(mli_ATmat, &mli_Rmat, saCounts_[level], 
                                         saData_[level]); 
+                 if ( maxEigenT < 0.0 ) 
+                    printf("MLI_Method_AMGSA::setup ERROR : maxEigenT < 0.");
                  break;
          }
          delete mli_ATmat;
