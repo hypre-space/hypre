@@ -20,8 +20,7 @@
 #include "memory.h"
 #include <dmalloc.h>
 
-char *dmalloc_logpath;
-char  dmalloc_logpath_memory[256];
+char dmalloc_logpath_memory[256];
 
 /*--------------------------------------------------------------------------
  * hypre_InitMemoryDebugDML
@@ -30,8 +29,13 @@ char  dmalloc_logpath_memory[256];
 int
 hypre_InitMemoryDebugDML( int id  )
 {
-   dmalloc_logpath = dmalloc_logpath_memory;
+   int  *iptr;
 
+   /* do this to get the Debug Malloc Library started/initialized */
+   iptr = hypre_TAlloc(int, 1);
+   hypre_TFree(iptr);
+
+   dmalloc_logpath = dmalloc_logpath_memory;
    sprintf(dmalloc_logpath, "dmalloc.log.%04d", id);
 
    return 0;
