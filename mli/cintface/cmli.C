@@ -21,10 +21,7 @@
 #include "../vector/mli_vector.h"
 #include "../matrix/mli_matrix.h"
 #include "../solver/mli_solver.h"
-#include "../solver/mli_jacobi.h"
-#include "../solver/mli_gs.h"
 #include "../amgs/mli_method.h"
-#include "../amgs/mli_methodAgent.h"
 #include "../fedata/mli_fedata.h"
 #include "../fedata/mli_fedata_utils.h"
 
@@ -703,20 +700,12 @@ extern "C" int MLI_VectorDestroy( CMLI_Vector *cvector )
  * create a "C" solver object
  *---------------------------------------------------------------------------*/
 
-extern "C" CMLI_Solver *MLI_SolverCreate(MPI_Comm comm, char *name)
+extern "C" CMLI_Solver *MLI_SolverCreate(char *name)
 {
-   int         solver_id;
    MLI_Solver  *mli_solver;
-   CMLI_Solver *cmli_solver = (CMLI_Solver *) calloc( 1, sizeof(CMLI_Solver) );
+   CMLI_Solver *cmli_solver = (CMLI_Solver *) calloc(1,sizeof(CMLI_Solver));
 
-   if      ( !strcmp( name, "Jacobi" ) ) solver_id = MLI_SOLVER_JACOBI_ID;
-   else if ( !strcmp( name, "GS" ) )     solver_id = MLI_SOLVER_GS_ID;
-   else
-   {
-      cout << "ML_SolverCreate ERROR : smoother not recognized.\n";
-      exit(1);
-   }
-   mli_solver = MLI_Solver_Construct( solver_id );
+   mli_solver = MLI_Solver_CreateFromName( name );
    cmli_solver->solver_ = (void *) mli_solver;
    cmli_solver->owner_  = 1;
    return cmli_solver;
@@ -769,14 +758,11 @@ extern "C" int MLI_SolverSetParams(CMLI_Solver *solver, char *param_string,
 
 extern "C" CMLI_Method *MLI_MethodCreate(char *name, MPI_Comm comm)
 {
-   int              err=0;
-   MLI_MethodAgent  *mli_methodAgent;
-   MLI_Method       *mli_method;
-   CMLI_Method      *cmli_method;
+   int         err=0;
+   MLI_Method  *mli_method;
+   CMLI_Method *cmli_method;
 
-   mli_methodAgent = new MLI_MethodAgent( comm );
-   mli_methodAgent->createMethod( name );
-   mli_method = mli_methodAgent->takeMethod();
+   mli_method = MLI_Method_CreateFromName(name, comm);
    cmli_method = (CMLI_Method *) calloc( 1, sizeof(CMLI_Method) );
    if ( mli_method == NULL || cmli_method == NULL ) err = 1;
    else
@@ -784,7 +770,7 @@ extern "C" CMLI_Method *MLI_MethodCreate(char *name, MPI_Comm comm)
       cmli_method->method_ = (void *) mli_method;
       cmli_method->owner_  = 1;
    }
-   if ( err ) printf("MLI_MethodDestroy ERROR !!\n");
+   if ( err ) printf("MLI_MethodCreate ERROR !!\n");
    return cmli_method;
 }
 

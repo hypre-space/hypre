@@ -156,7 +156,7 @@ int MLI_VectorDestroy(CMLI_Vector *vector);
 /* functions for the "C" MLI solver object                          */
 /* ---------------------------------------------------------------- */
 
-CMLI_Solver *MLI_SolverCreate(MPI_Comm comm, char *name);
+CMLI_Solver *MLI_SolverCreate(char *name);
 
 int MLI_SolverDestroy(CMLI_Solver *solver);
 
