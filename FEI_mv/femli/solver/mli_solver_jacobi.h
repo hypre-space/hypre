@@ -26,7 +26,13 @@ class MLI_Solver_Jacobi : public MLI_Solver
    double      *diagonal_;
    double      maxEigen_;
    MLI_Vector  *auxVec_;
+   MLI_Vector  *auxVec2_;
+   MLI_Vector  *auxVec3_;
    int         zeroInitialGuess_;
+   int         numFpts_;
+   int         *FptList_;
+   int         ownAmat_;
+   int         modifiedD_;
 
 public :
 

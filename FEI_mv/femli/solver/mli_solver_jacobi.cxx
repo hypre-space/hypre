@@ -26,7 +26,13 @@ MLI_Solver_Jacobi::MLI_Solver_Jacobi(char *name) : MLI_Solver(name)
    zeroInitialGuess_ = 0;
    diagonal_         = NULL;
    auxVec_           = NULL;
+   auxVec2_          = NULL;
+   auxVec3_          = NULL;
    maxEigen_         = 0.0;
+   numFpts_          = 0;
+   FptList_          = NULL;
+   ownAmat_          = 0;
+   modifiedD_        = 0;
 }
 
 /******************************************************************************
@@ -38,6 +44,10 @@ MLI_Solver_Jacobi::~MLI_Solver_Jacobi()
    if ( relaxWeights_ != NULL ) delete [] relaxWeights_;
    if ( diagonal_     != NULL ) delete [] diagonal_;
    if ( auxVec_       != NULL ) delete auxVec_;
+   if ( auxVec2_      != NULL ) delete auxVec2_;
+   if ( auxVec3_      != NULL ) delete auxVec3_;
+   if ( FptList_      != NULL ) delete FptList_;
+   if ( ownAmat_ == 1 ) delete Amat_;
 }
 
 /******************************************************************************
@@ -82,10 +92,30 @@ int MLI_Solver_Jacobi::setup(MLI_Matrix *Amat)
       {
          if ( ADiagJ[j] == i && ADiagA[j] != 0.0 ) 
          {
-            diagonal_[i] = 1.0 / ADiagA[j];
+            diagonal_[i] = ADiagA[j];
             break;
          }
       }
+      if ((modifiedD_ & 1) == 1)
+      {
+         if (diagonal_[i] > 0)
+         {
+            for ( j = ADiagI[i]; j < ADiagI[i+1]; j++ )
+            {
+               if ( ADiagJ[j] != i && ADiagA[j] > 0.0 ) 
+                  diagonal_[i] += ADiagA[j];
+            }
+         }
+         else
+         {
+            for ( j = ADiagI[i]; j < ADiagI[i+1]; j++ )
+            {
+               if ( ADiagJ[j] != i && ADiagA[j] < 0.0 ) 
+                  diagonal_[i] += ADiagA[j];
+            }
+         }
+      }
+      diagonal_[i] = 1.0 / diagonal_[i];
    }
 
    /*-----------------------------------------------------------------
@@ -94,13 +124,26 @@ int MLI_Solver_Jacobi::setup(MLI_Matrix *Amat)
 
    funcPtr = (MLI_Function *) malloc( sizeof( MLI_Function ) );
    MLI_Utils_HypreParVectorGetDestroyFunc(funcPtr);
+   paramString = new char[20];
+   strcpy( paramString, "HYPRE_ParVector" );
+
    HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) A, &partition);
    hypreVec = hypre_ParVectorCreate(comm, globalNRows, partition);
    hypre_ParVectorInitialize(hypreVec);
-   paramString = new char[20];
-   strcpy( paramString, "HYPRE_ParVector" );
    auxVec_ = new MLI_Vector(hypreVec, paramString, funcPtr);
+
+   HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) A, &partition);
+   hypreVec = hypre_ParVectorCreate(comm, globalNRows, partition);
+   hypre_ParVectorInitialize(hypreVec);
+   auxVec2_ = new MLI_Vector(hypreVec, paramString, funcPtr);
+
+   HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) A, &partition);
+   hypreVec = hypre_ParVectorCreate(comm, globalNRows, partition);
+   hypre_ParVectorInitialize(hypreVec);
+   auxVec3_ = new MLI_Vector(hypreVec, paramString, funcPtr);
+
    delete [] paramString;
+
    free( funcPtr );
 
    /*-----------------------------------------------------------------
@@ -129,11 +172,12 @@ int MLI_Solver_Jacobi::setup(MLI_Matrix *Amat)
 
 int MLI_Solver_Jacobi::solve(MLI_Vector *fIn, MLI_Vector *uIn)
 {
-   int                i, is, localNRows;
-   double             *rData, *uData, weight;
+   int                i, j, is, localNRows, *ADiagI, *ADiagJ, index;
+   double             *rData, *uData, weight, *f2Data, *u2Data, *fData;
+   double             *ADiagA, dtemp, coeff;
    hypre_ParCSRMatrix *A;
    hypre_CSRMatrix    *ADiag;
-   hypre_ParVector    *f, *u, *r;
+   hypre_ParVector    *f, *u, *r, *f2, *u2;
 
    /*-----------------------------------------------------------------
     * fetch machine and matrix parameters
@@ -147,24 +191,81 @@ int MLI_Solver_Jacobi::solve(MLI_Vector *fIn, MLI_Vector *uIn)
    r          = (hypre_ParVector *) auxVec_->getVector();
    rData      = hypre_VectorData(hypre_ParVectorLocalVector(r));
    uData      = hypre_VectorData(hypre_ParVectorLocalVector(u));
+   ADiagI     = hypre_CSRMatrixI(ADiag);
+   ADiagJ     = hypre_CSRMatrixJ(ADiag);
+   ADiagA     = hypre_CSRMatrixData(ADiag);
    
    /*-----------------------------------------------------------------
     * loop 
     *-----------------------------------------------------------------*/
 
-   for ( is = 0; is < nSweeps_; is++ )
+   if (numFpts_ == 0)
    {
-      weight = relaxWeights_[is];
-      hypre_ParVectorCopy(f, r); 
-      if ( zeroInitialGuess_ == 0 )
-         hypre_ParCSRMatrixMatvec(-1.0, A, u, 1.0, r);
+      for ( is = 0; is < nSweeps_; is++ )
+      {
+         weight = relaxWeights_[is];
+         hypre_ParVectorCopy(f, r); 
+         if ( zeroInitialGuess_ == 0 )
+         {
+            if ((modifiedD_ & 2) == 0)
+               hypre_ParCSRMatrixMatvec(-1.0, A, u, 1.0, r);
+            else
+            {
+               for ( i = 0; i < localNRows; i++ ) 
+               {
+                  dtemp = rData[i];
+                  for ( j = ADiagI[i]; j < ADiagI[i+1]; j++ ) 
+                  {
+                     index = ADiagJ[j];
+                     coeff = ADiagA[j];
+                     if (coeff*diagonal_[i] < 0.0)
+                        dtemp -= coeff * uData[index];
+                     else
+                        dtemp -= coeff * uData[i];
+                  }
+                  rData[i] = dtemp;
+               }
+            }
+         }
 
 #define HYPRE_SMP_PRIVATE i
 #include "utilities/hypre_smp_forloop.h"
-      for ( i = 0; i < localNRows; i++ ) 
-         uData[i] += weight * rData[i] * diagonal_[i];
+         for ( i = 0; i < localNRows; i++ ) 
+            uData[i] += weight * rData[i] * diagonal_[i];
 
-      zeroInitialGuess_ = 0;
+         zeroInitialGuess_ = 0;
+      }
+   }
+   else
+   {
+      if (numFpts_ != localNRows)
+      {
+         printf("MLI_Solver_Jacobi::solve ERROR : length mismatch.\n");
+         exit(1);
+      }
+      f2 = (hypre_ParVector *) auxVec2_->getVector();
+      u2 = (hypre_ParVector *) auxVec3_->getVector();
+      fData  = hypre_VectorData(hypre_ParVectorLocalVector(f));
+      f2Data = hypre_VectorData(hypre_ParVectorLocalVector(f2));
+      u2Data = hypre_VectorData(hypre_ParVectorLocalVector(u2));
+      for (i = 0; i < numFpts_; i++) f2Data[i] = fData[FptList_[i]]; 
+      for (i = 0; i < numFpts_; i++) u2Data[i] = uData[FptList_[i]]; 
+
+      for ( is = 0; is < nSweeps_; is++ )
+      {
+         weight = relaxWeights_[is];
+         hypre_ParVectorCopy(f2, r); 
+         if ( zeroInitialGuess_ == 0 )
+            hypre_ParCSRMatrixMatvec(-1.0, A, u2, 1.0, r);
+ 
+#define HYPRE_SMP_PRIVATE i
+#include "utilities/hypre_smp_forloop.h"
+         for ( i = 0; i < localNRows; i++ ) 
+            u2Data[i] += weight * rData[i] * diagonal_[i];
+
+         zeroInitialGuess_ = 0;
+      }
+      for (i = 0; i < numFpts_; i++) uData[FptList_[i]] = u2Data[i]; 
    }
    return 0;
 }
@@ -175,7 +276,7 @@ int MLI_Solver_Jacobi::solve(MLI_Vector *fIn, MLI_Vector *uIn)
 
 int MLI_Solver_Jacobi::setParams( char *paramString, int argc, char **argv )
 {
-   int    i;
+   int    i, *fList;
    double *weights;
 
    if ( !strcmp(paramString, "numSweeps") )
@@ -222,6 +323,37 @@ int MLI_Solver_Jacobi::setParams( char *paramString, int argc, char **argv )
    else if ( !strcmp(paramString, "zeroInitialGuess") )
    {
       zeroInitialGuess_ = 1;
+      return 0;
+   }
+   else if ( !strcmp(paramString, "setModifiedDiag") )
+   {
+      modifiedD_ |= 1;
+      return 0;
+   }
+   else if ( !strcmp(paramString, "useModifiedDiag") )
+   {
+      modifiedD_ |= 2;
+      return 0;
+   }
+   else if ( !strcmp(paramString, "setFptList") )
+   {
+      if ( argc != 2 ) 
+      {
+         printf("MLI_Solver_Jacobi::setParams ERROR : needs 2 args.\n");
+         return 1;
+      }
+      numFpts_ = *(int*)  argv[0];
+      fList = (int*) argv[1];
+      if ( FptList_ != NULL ) delete [] FptList_;
+      FptList_ = NULL;
+      if (numFpts_ <= 0) return 0;
+      FptList_ = new int[numFpts_];;
+      for ( i = 0; i < numFpts_; i++ ) FptList_[i] = fList[i];
+      return 0;
+   }
+   else if ( !strcmp(paramString, "ownAmat") )
+   {
+      ownAmat_ = 1;
       return 0;
    }
 #if 0

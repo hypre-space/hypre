@@ -45,6 +45,11 @@ class MLI_Solver_ParaSails : public MLI_Solver
    int        transpose_;
    double     correction_;
    int        zeroInitialGuess_;
+   int        numFpts_;
+   int        *fpList_;
+   int        ownAmat_;
+   MLI_Vector *auxVec2_;
+   MLI_Vector *auxVec3_;
 
 public :
 
