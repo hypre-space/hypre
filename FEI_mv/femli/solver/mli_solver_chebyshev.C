@@ -11,6 +11,10 @@
 #include <stdio.h>
 #include <math.h>
 
+#ifdef WIN32
+#define strcasecmp _stricmp
+#endif
+
 #include "solver/mli_solver_jacobi.h"
 #include "solver/mli_solver_chebyshev.h"
 #include "parcsr_mv/parcsr_mv.h"
