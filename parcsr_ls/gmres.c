@@ -225,10 +225,14 @@ hypre_GMRESSolve(void  *gmres_vdata,
 
 	rs[0] = r_norm;
         if (r_norm == 0.0 || b_norm == 0)
-	{
-	   hypre_PCGCopyVector(b,x);
+        {
+           printf("Norm of b is zero. Exiting on residual norm.\n");
+           b_norm = 1;
+
+/*         hypre_PCGCopyVector(b,x);
 	   ierr = 0;
-	   return ierr;
+	   return ierr; */
+
 	}
       	t = 1.0 / r_norm;
 	hypre_PCGScaleVector(t,p[0]);
