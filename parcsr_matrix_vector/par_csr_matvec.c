@@ -63,8 +63,8 @@ hypre_ParCSRMatrixMatvec( double           alpha,
     if (num_cols != x_size && num_rows != y_size)
               ierr = 13;
 
-   x_tmp = hypre_VectorCreate(num_cols_offd);
-   hypre_VectorInitialize(x_tmp);
+   x_tmp = hypre_SeqVectorCreate(num_cols_offd);
+   hypre_SeqVectorInitialize(x_tmp);
    x_tmp_data = hypre_VectorData(x_tmp);
    
    /*---------------------------------------------------------------------
@@ -100,7 +100,7 @@ hypre_ParCSRMatrixMatvec( double           alpha,
 	
    if (num_cols_offd) hypre_CSRMatrixMatvec( alpha, offd, x_tmp, 1.0, y_local);    
 
-   hypre_VectorDestroy(x_tmp);
+   hypre_SeqVectorDestroy(x_tmp);
    x_tmp = NULL;
    hypre_TFree(x_buf_data);
   
@@ -163,8 +163,8 @@ hypre_ParCSRMatrixMatvecT( double           alpha,
    /*-----------------------------------------------------------------------
     *-----------------------------------------------------------------------*/
 
-   y_tmp = hypre_VectorCreate(num_cols_offd);
-   hypre_VectorInitialize(y_tmp);
+   y_tmp = hypre_SeqVectorCreate(num_cols_offd);
+   hypre_SeqVectorInitialize(y_tmp);
 
    /*---------------------------------------------------------------------
     * If there exists no CommPkg for A, a CommPkg is generated using
@@ -201,7 +201,7 @@ hypre_ParCSRMatrixMatvecT( double           alpha,
 			+= y_buf_data[index++];
    }
 	
-   hypre_VectorDestroy(y_tmp);
+   hypre_SeqVectorDestroy(y_tmp);
    y_tmp = NULL;
    hypre_TFree(y_buf_data);
 

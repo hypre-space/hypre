@@ -47,8 +47,8 @@ main( int   argc,
 /*
    hypre_ParVectorPrint(vector1, "Vector");
 */
-   local_vector2 = hypre_VectorCreate(global_size);
-   hypre_VectorInitialize(local_vector2);
+   local_vector2 = hypre_SeqVectorCreate(global_size);
+   hypre_SeqVectorInitialize(local_vector2);
    data2 = hypre_VectorData(local_vector2);
    for (i=0; i < global_size; i++)
 	data2[i] = i+1;
@@ -110,8 +110,8 @@ main( int   argc,
    hypre_ParVectorDestroy(vector1);
    hypre_ParVectorDestroy(vector2); 
    hypre_ParVectorDestroy(tmp_vector);
-   hypre_VectorDestroy(local_vector2); 
-   if (vector) hypre_VectorDestroy(vector); 
+   hypre_SeqVectorDestroy(local_vector2); 
+   if (vector) hypre_SeqVectorDestroy(vector); 
 
    /* Finalize MPI */
    MPI_Finalize();
