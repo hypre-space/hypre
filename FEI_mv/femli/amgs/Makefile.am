@@ -11,7 +11,8 @@ FILES = \
  mli_method_amgsa.cxx\
  mli_amgsa_coarsen1.cxx\
  mli_amgsa_calib.cxx\
- mli_amgsa_substructure.cxx\
+ mli_amgsa_dd_fedata.cxx\
+ mli_amgsa_dd_sfei.cxx\
  mli_method.h\
  mli_method_amgrs.h\
  mli_method_amgsa.h
