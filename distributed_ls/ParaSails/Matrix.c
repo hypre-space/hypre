@@ -217,7 +217,6 @@ static void MatrixReadMaster(Matrix *mat, char *filename)
     int len;
     int ind[10000];
     double val[10000];
-    int dummy;
 
     MPI_Request request;
     MPI_Status  status;
@@ -228,11 +227,14 @@ static void MatrixReadMaster(Matrix *mat, char *filename)
     file = fopen(filename, "r");
     assert(file != NULL);
 
-    ret = fscanf(file, "%d %d %d\n", &num_rows, &dummy, &dummy);
-    assert(ret == 3);
+#ifdef ISIS_FORMAT
+    ret = fscanf(file, "%d", &num_rows);
+#else
+    ret = fscanf(file, "%d %*d %*d", &num_rows);
+#endif
 
     offset = ftell(file);
-    fscanf(file, "%d %d %lf\n", &row, &col, &value);
+    fscanf(file, "%d %d %lf", &row, &col, &value);
 
     request = MPI_REQUEST_NULL;
     curr_proc = 1; /* proc for which we are looking for the beginning */
@@ -246,14 +248,19 @@ static void MatrixReadMaster(Matrix *mat, char *filename)
 	    curr_proc++;
 	}
         offset = ftell(file);
-        fscanf(file, "%d %d %lf\n", &row, &col, &value);
+        fscanf(file, "%d %d %lf", &row, &col, &value);
     }
 
     /* Now read our own part */
     rewind(file);
-    fscanf(file, "%d %d %d\n", &num_rows, &dummy, &dummy);
 
-    ret = fscanf(file, "%d %d %lf\n", &row, &col, &value);
+#ifdef ISIS_FORMAT
+    ret = fscanf(file, "%d", &num_rows);
+#else
+    ret = fscanf(file, "%d %*d %*d", &num_rows);
+#endif
+
+    ret = fscanf(file, "%d %d %lf", &row, &col, &value);
     curr_row = row;
     len = 0;
 
@@ -274,7 +281,7 @@ static void MatrixReadMaster(Matrix *mat, char *filename)
 	val[len] = value;
 	len++;
 
-        ret = fscanf(file, "%d %d %lf\n", &row, &col, &value);
+        ret = fscanf(file, "%d %d %lf", &row, &col, &value);
     }
 
     /* Store the final row */
@@ -319,7 +326,7 @@ static void MatrixReadSlave(Matrix *mat, char *filename)
     ret = fseek(file, offset, SEEK_SET);
     assert(ret == 0);
 
-    ret = fscanf(file, "%d %d %lf\n", &row, &col, &value);
+    ret = fscanf(file, "%d %d %lf", &row, &col, &value);
     curr_row = row;
     len = 0;
 
@@ -340,7 +347,7 @@ static void MatrixReadSlave(Matrix *mat, char *filename)
 	val[len] = value;
 	len++;
 
-        ret = fscanf(file, "%d %d %lf\n", &row, &col, &value);
+        ret = fscanf(file, "%d %d %lf", &row, &col, &value);
     }
 
     /* Store the final row */
@@ -387,7 +394,7 @@ void RhsRead(double *rhs, Matrix *mat, char *filename)
     FILE *file;
     MPI_Status status;
     int mype, npes;
-    int num_rows, dummy, num_local, pe, i;
+    int num_rows, num_local, pe, i;
     double *buffer = NULL;
     int buflen = 0;
 
@@ -405,13 +412,20 @@ void RhsRead(double *rhs, Matrix *mat, char *filename)
     file = fopen(filename, "r");
     assert(file != NULL);
 
-    i = fscanf(file, "%d %d\n", &num_rows, &dummy);
-    assert(i == 2);
+#ifdef ISIS_FORMAT
+    i = fscanf(file, "%d", &num_rows);
+#else
+    i = fscanf(file, "%d %*d", &num_rows);
+#endif
     assert(num_rows == mat->end_rows[npes-1]);
 
     /* Read own rows first */
     for (i=0; i<num_local; i++)
-        fscanf(file, "%lf\n", &rhs[i]);
+#ifdef ISIS_FORMAT
+        fscanf(file, "%*d %lf", &rhs[i]);
+#else
+        fscanf(file, "%lf", &rhs[i]);
+#endif
 
     for (pe=1; pe<npes; pe++)
     {
@@ -425,7 +439,11 @@ void RhsRead(double *rhs, Matrix *mat, char *filename)
 	}
 
         for (i=0; i<num_local; i++)
-            fscanf(file, "%lf\n", &buffer[i]);
+#ifdef ISIS_FORMAT
+            fscanf(file, "%*d %lf", &buffer[i]);
+#else
+            fscanf(file, "%lf", &buffer[i]);
+#endif
 
 	MPI_Send(buffer, num_local, MPI_DOUBLE, pe, 0, mat->comm);
     }
@@ -687,7 +705,7 @@ static void MatrixMatvecSetup(Matrix *mat)
     inlist  = (int *) calloc(npes, sizeof(int));
 
     mat->global_to_local = (int *) malloc(50021 * sizeof(int));
-    mat->local_to_global = (int *) malloc(10000 * sizeof(int));
+    mat->local_to_global = (int *) malloc(20000 * sizeof(int));
 
     mat->hash_numbering = HashCreate(50021);
 
