@@ -64,6 +64,7 @@ FILES =\
  par_vector.c\
  HYPRE_parcsr_matrix.c\
  HYPRE_parcsr_vector.c\
+ F90_par_matrix.c\
  F90_par_vector.c\
  F90_HYPRE_parcsr_matrix.c\
  F90_HYPRE_parcsr_vector.c
