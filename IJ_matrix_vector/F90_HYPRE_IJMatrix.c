@@ -81,13 +81,13 @@ hypre_F90_IFACE(hypre_distributeijmatrix)( long int *matrix,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SetIJMatrixLocalStorageType
+ * HYPRE_SetIJMatrixLocalStorageT
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_setijmatrixlocalstoragetype)( long int *matrix,
-                                                    int      *type,
-                                                    int      *ierr    )
+hypre_F90_IFACE(hypre_setijmatrixlocalstoraget)( long int *matrix,
+                                                 int      *type,
+                                                 int      *ierr    )
 {
    *ierr = (int) ( HYPRE_SetIJMatrixLocalStorageType( (HYPRE_IJMatrix) *matrix,
                                                       (int)            *type    ) );
@@ -123,13 +123,13 @@ hypre_F90_IFACE(hypre_setijmatrixdiagrowsizes)( long int *matrix,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SetIJMatrixOffDiagRowSizes
+ * HYPRE_SetIJMatrixOffDiagRowSiz
  *--------------------------------------------------------------------------*/
  
 void
-hypre_F90_IFACE(hypre_setijmatrixoffdiagrowsizes)( long int *matrix,
-                                                   int      *sizes,
-                                                   int      *ierr    )
+hypre_F90_IFACE(hypre_setijmatrixoffdiagrowsiz)( long int *matrix,
+                                                 int      *sizes,
+                                                 int      *ierr    )
 {
    *ierr = (int) ( HYPRE_SetIJMatrixOffDiagRowSizes( (HYPRE_IJMatrix) *matrix,
                                                      (int *)           sizes   ) );
@@ -151,13 +151,13 @@ hypre_F90_IFACE(hypre_setijmatrixtotalsize)( long int *matrix,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_QueryIJMatrixInsertionSem
+ * HYPRE_QueryIJMatrixInsertionSe
  *--------------------------------------------------------------------------*/
  
 void
-hypre_F90_IFACE(hypre_queryijmatrixinsertionsem)( long int *matrix,
-                                                  int      *level,
-                                                  int      *ierr    )
+hypre_F90_IFACE(hypre_queryijmatrixinsertionse)( long int *matrix,
+                                                 int      *level,
+                                                 int      *ierr    )
 {
    *ierr = (int) ( HYPRE_QueryIJMatrixInsertionSemantics(
                               (HYPRE_IJMatrix) *matrix,
