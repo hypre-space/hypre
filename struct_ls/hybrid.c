@@ -425,6 +425,16 @@ hypre_HybridSolve( void               *hybrid_vdata,
        *--------------------------------------------------------------------*/
       hypre_PCGDestroy(pcg_solver);
 
+      pcg_functions =
+         hypre_PCGFunctionsCreate(
+            hypre_CAlloc, hypre_StructKrylovFree,
+            hypre_StructKrylovCreateVector,
+            hypre_StructKrylovDestroyVector, hypre_StructKrylovMatvecCreate,
+            hypre_StructKrylovMatvec, hypre_StructKrylovMatvecDestroy,
+            hypre_StructKrylovInnerProd, hypre_StructKrylovCopyVector,
+            hypre_StructKrylovClearVector,
+            hypre_StructKrylovScaleVector, hypre_StructKrylovAxpy,
+            hypre_StructKrylovIdentitySetup, hypre_StructKrylovIdentity );
       pcg_solver = hypre_PCGCreate( pcg_functions );
 
       hypre_PCGSetMaxIter(pcg_solver, pcg_max_its);
