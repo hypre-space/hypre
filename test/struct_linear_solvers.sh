@@ -214,31 +214,31 @@ then cat ./$RunName.e${CmdPid[11]} >> $DRIVER.err
 fi
 tail -3 ./$RunName.o${CmdPid[11]} > $DRIVER.testdata.temp
 diff $DRIVER.testdata $DRIVER.testdata.temp >> $DRIVER.err
+rm -f $DRIVER.testdata $DRIVER.testdata.temp
 if test -f ./$RunName.e${CmdPid[12]}
 then cat ./$RunName.e${CmdPid[12]} >> $DRIVER.err
 fi
-tail -3 ./$RunName.o${CmdPid[12]} > $DRIVER.testdata.temp
-diff $DRIVER.testdata $DRIVER.testdata.temp >> $DRIVER.err
-rm -f $DRIVER.testdata $DRIVER.testdata.temp
+tail -3 ./$RunName.o${CmdPid[12]} > $DRIVER.testdata
 if test -f ./$RunName.e${CmdPid[13]}
 then cat ./$RunName.e${CmdPid[13]} >> $DRIVER.err
 fi
-tail -3 ./$RunName.o${CmdPid[13]} > $DRIVER.testdata
-if test -f ./$RunName.e${CmdPid[14]}
-then cat ./$RunName.e${CmdPid[14]} >> $DRIVER.err
-fi
-tail -3 ./$RunName.o${CmdPid[14]} > $DRIVER.testdata.temp
+tail -3 ./$RunName.o${CmdPid[13]} > $DRIVER.testdata.temp
 diff $DRIVER.testdata $DRIVER.testdata.temp >> $DRIVER.err
 rm -f $DRIVER.testdata $DRIVER.testdata.temp
-for i in 15 16 17 18
+for i in 14 15 16 17
 do if test -f ./$RunName.e${CmdPid[$i]}
   then cat ./$RunName.e${CmdPid[$i]} >> $DRIVER.err
   fi
 done
+if test -f ./$RunName.e${CmdPid[18]}
+then cat ./$RunName.e${CmdPid[18]} >> $DRIVER.err
+fi
+tail -3 ./$RunName.o${CmdPid[18]} > $DRIVER.testdata
 if test -f ./$RunName.e${CmdPid[19]}
 then cat ./$RunName.e${CmdPid[19]} >> $DRIVER.err
 fi
-tail -3 ./$RunName.o${CmdPid[19]} > $DRIVER.testdata
+tail -3 ./$RunName.o${CmdPid[19]} > $DRIVER.testdata.temp
+diff $DRIVER.testdata $DRIVER.testdata.temp >> $DRIVER.err
 if test -f ./$RunName.e${CmdPid[20]}
 then cat ./$RunName.e${CmdPid[20]} >> $DRIVER.err
 fi
@@ -259,29 +259,29 @@ then cat ./$RunName.e${CmdPid[23]} >> $DRIVER.err
 fi
 tail -3 ./$RunName.o${CmdPid[23]} > $DRIVER.testdata.temp
 diff $DRIVER.testdata $DRIVER.testdata.temp >> $DRIVER.err
+rm -f $DRIVER.testdata $DRIVER.testdata.temp
 if test -f ./$RunName.e${CmdPid[24]}
 then cat ./$RunName.e${CmdPid[24]} >> $DRIVER.err
 fi
-tail -3 ./$RunName.o${CmdPid[24]} > $DRIVER.testdata.temp
-diff $DRIVER.testdata $DRIVER.testdata.temp >> $DRIVER.err
-rm -f $DRIVER.testdata $DRIVER.testdata.temp
+tail -3 ./$RunName.o${CmdPid[24]} > $DRIVER.testdata
 if test -f ./$RunName.e${CmdPid[25]}
 then cat ./$RunName.e${CmdPid[25]} >> $DRIVER.err
 fi
-tail -3 ./$RunName.o${CmdPid[25]} > $DRIVER.testdata
+tail -3 ./$RunName.o${CmdPid[25]} > $DRIVER.testdata.temp
+diff $DRIVER.testdata $DRIVER.testdata.temp >> $DRIVER.err
+rm -f $DRIVER.testdata $DRIVER.testdata.temp
 if test -f ./$RunName.e${CmdPid[26]}
 then cat ./$RunName.e${CmdPid[26]} >> $DRIVER.err
 fi
-tail -3 ./$RunName.o${CmdPid[26]} > $DRIVER.testdata.temp
-diff $DRIVER.testdata $DRIVER.testdata.temp >> $DRIVER.err
-rm -f $DRIVER.testdata $DRIVER.testdata.temp
 if test -f ./$RunName.e${CmdPid[27]}
 then cat ./$RunName.e${CmdPid[27]} >> $DRIVER.err
 fi
+tail -3 ./$RunName.o${CmdPid[27]} > $DRIVER.testdata
 if test -f ./$RunName.e${CmdPid[28]}
 then cat ./$RunName.e${CmdPid[28]} >> $DRIVER.err
 fi
-tail -3 ./$RunName.o${CmdPid[28]} > $DRIVER.testdata
+tail -3 ./$RunName.o${CmdPid[28]} > $DRIVER.testdata.temp
+diff $DRIVER.testdata $DRIVER.testdata.temp >> $DRIVER.err
 if test -f ./$RunName.e${CmdPid[29]}
 then cat ./$RunName.e${CmdPid[29]} >> $DRIVER.err
 fi
@@ -307,16 +307,16 @@ then cat ./$RunName.e${CmdPid[33]} >> $DRIVER.err
 fi
 tail -3 ./$RunName.o${CmdPid[33]} > $DRIVER.testdata.temp
 diff $DRIVER.testdata $DRIVER.testdata.temp >> $DRIVER.err
+rm -f $DRIVER.testdata $DRIVER.testdata.temp
 if test -f ./$RunName.e${CmdPid[34]}
 then cat ./$RunName.e${CmdPid[34]} >> $DRIVER.err
 fi
-tail -3 ./$RunName.o${CmdPid[34]} > $DRIVER.testdata.temp
-diff $DRIVER.testdata $DRIVER.testdata.temp >> $DRIVER.err
-rm -f $DRIVER.testdata $DRIVER.testdata.temp
+tail -3 ./$RunName.o${CmdPid[34]} > $DRIVER.testdata
 if test -f ./$RunName.e${CmdPid[35]}
 then cat ./$RunName.e${CmdPid[35]} >> $DRIVER.err
 fi
-tail -3 ./$RunName.o${CmdPid[35]} > $DRIVER.testdata
+tail -3 ./$RunName.o${CmdPid[35]} > $DRIVER.testdata.temp
+diff $DRIVER.testdata $DRIVER.testdata.temp >> $DRIVER.err
 if test -f ./$RunName.e${CmdPid[36]}
 then cat ./$RunName.e${CmdPid[36]} >> $DRIVER.err
 fi
@@ -337,60 +337,55 @@ then cat ./$RunName.e${CmdPid[39]} >> $DRIVER.err
 fi
 tail -3 ./$RunName.o${CmdPid[39]} > $DRIVER.testdata.temp
 diff $DRIVER.testdata $DRIVER.testdata.temp >> $DRIVER.err
+rm -f $DRIVER.testdata $DRIVER.testdata.temp
 if test -f ./$RunName.e${CmdPid[40]}
 then cat ./$RunName.e${CmdPid[40]} >> $DRIVER.err
 fi
-tail -3 ./$RunName.o${CmdPid[40]} > $DRIVER.testdata.temp
-diff $DRIVER.testdata $DRIVER.testdata.temp >> $DRIVER.err
-rm -f $DRIVER.testdata $DRIVER.testdata.temp
+tail -3 ./$RunName.o${CmdPid[40]} > $DRIVER.testdata
 if test -f ./$RunName.e${CmdPid[41]}
 then cat ./$RunName.e${CmdPid[41]} >> $DRIVER.err
 fi
-tail -3 ./$RunName.o${CmdPid[41]} > $DRIVER.testdata
-if test -f ./$RunName.e${CmdPid[42]}
-then cat ./$RunName.e${CmdPid[42]} >> $DRIVER.err
-fi
-tail -3 ./$RunName.o${CmdPid[42]} > $DRIVER.testdata.temp
+tail -3 ./$RunName.o${CmdPid[41]} > $DRIVER.testdata.temp
 diff $DRIVER.testdata $DRIVER.testdata.temp >> $DRIVER.err
 rm -f $DRIVER.testdata $DRIVER.testdata.temp
-for i in 43 44 45
+for i in 42 43 44
 do if test -f ./$RunName.e${CmdPid[$i]}
   then cat ./$RunName.e${CmdPid[$i]} >> $DRIVER.err
   fi
 done
+if test -f ./$RunName.e${CmdPid[45]}
+then cat ./$RunName.e${CmdPid[45]} >> $DRIVER.err
+fi
+tail -3 ./$RunName.o${CmdPid[45]} > $DRIVER.testdata
 if test -f ./$RunName.e${CmdPid[46]}
 then cat ./$RunName.e${CmdPid[46]} >> $DRIVER.err
 fi
-tail -3 ./$RunName.o${CmdPid[46]} > $DRIVER.testdata
+tail -3 ./$RunName.o${CmdPid[46]} > $DRIVER.testdata.temp
+diff $DRIVER.testdata $DRIVER.testdata.temp >> $DRIVER.err
 if test -f ./$RunName.e${CmdPid[47]}
 then cat ./$RunName.e${CmdPid[47]} >> $DRIVER.err
 fi
 tail -3 ./$RunName.o${CmdPid[47]} > $DRIVER.testdata.temp
 diff $DRIVER.testdata $DRIVER.testdata.temp >> $DRIVER.err
-if test -f ./$RunName.e${CmdPid[48]}
-then cat ./$RunName.e${CmdPid[48]} >> $DRIVER.err
-fi
-tail -3 ./$RunName.o${CmdPid[48]} > $DRIVER.testdata.temp
-diff $DRIVER.testdata $DRIVER.testdata.temp >> $DRIVER.err
 rm -f $DRIVER.testdata $DRIVER.testdata.temp
-for i in 49 50
+for i in 48 49
 do if test -f ./$RunName.e${CmdPid[$i]}
   then cat ./$RunName.e${CmdPid[$i]} >> $DRIVER.err
   fi
 done
+if test -f ./$RunName.e${CmdPid[50]}
+then cat ./$RunName.e${CmdPid[50]} >> $DRIVER.err
+fi
+tail -3 ./$RunName.o${CmdPid[50]} > $DRIVER.testdata
 if test -f ./$RunName.e${CmdPid[51]}
 then cat ./$RunName.e${CmdPid[51]} >> $DRIVER.err
 fi
-tail -3 ./$RunName.o${CmdPid[51]} > $DRIVER.testdata
-if test -f ./$RunName.e${CmdPid[52]}
-then cat ./$RunName.e${CmdPid[52]} >> $DRIVER.err
-fi
-tail -3 ./$RunName.o${CmdPid[52]} > $DRIVER.testdata.temp
+tail -3 ./$RunName.o${CmdPid[51]} > $DRIVER.testdata.temp
 diff $DRIVER.testdata $DRIVER.testdata.temp >> $DRIVER.err
 rm -f $DRIVER.testdata $DRIVER.testdata.temp
 integer j=0
 for i in $PidList
-do if ((j>52))
+do if ((j>51))
   then if test -f ./$RunName.e\$i
     then cat ./$RunName.e\$i >> $DRIVER.err
     fi
@@ -448,7 +443,7 @@ cd \$PSUB_WORKDIR
 for i in $PidList
 do [[ -r ./$RunName.o\$i ]] && cat ./$RunName.o\$i >> $DRIVER.log
 done
-rm -f ./$RunName.\*
+rm -f ./$RunName.*
 EOF
 chmod +x $TmpLFile
 PrevPid=${CmdPid[((loop-1))]}
