@@ -34,7 +34,7 @@ MLI_Method_AMGSA::MLI_Method_AMGSA( MPI_Comm comm ) : MLI_Method( comm )
    output_level      = 1;
    node_dofs         = 3;
    threshold         = 0.0;
-   nullspace_dim     = 1;
+   nullspace_dim     = 3;
    nullspace_vec     = NULL;
    nullspace_len     = 0;
    P_weight          = 4.0/3.0;
@@ -1014,23 +1014,35 @@ int MLI_Method_AMGSA::getNullSpace(int &ndofs,int &ndim,double *&nullvec,
  * clone another object
  * --------------------------------------------------------------------- */
 
-int MLI_Method_AMGSA::copy( MLI_Method_AMGSA *new_obj )
+int MLI_Method_AMGSA::copy( MLI_Method *new_obj )
 {
-   new_obj->max_levels = max_levels;
-   new_obj->setOutputLevel( output_level );
-   new_obj->setNumLevels( num_levels );
-   new_obj->setSmoother( MLI_SMOOTHER_PRE, pre_smoother, pre_smoother_num, 
-                         pre_smoother_wgt );
-   new_obj->setSmoother( MLI_SMOOTHER_POST, postsmoother, postsmoother_num, 
-                         postsmoother_wgt );
-   new_obj->setCoarseSolver(coarse_solver,coarse_solver_num,coarse_solver_wgt); 
-   new_obj->setCoarsenScheme( coarsen_scheme );
-   new_obj->setMinCoarseSize( min_coarse_size );
-   if ( calc_norm_scheme ) new_obj->setCalcSpectralNorm();
-   new_obj->setPweight( P_weight );
-   new_obj->setPweight( P_weight );
-   new_obj->setNullSpace(node_dofs,nullspace_dim,nullspace_vec,nullspace_len);
-   new_obj->setStrengthThreshold( threshold );
+   MLI_Method_AMGSA *new_amgsa;
+
+   if ( ! strcmp(new_obj->getName(), "AMGSA" ) )
+   {
+      new_amgsa = (MLI_Method_AMGSA *) new_obj;
+      new_amgsa->max_levels = max_levels;
+      new_amgsa->setOutputLevel( output_level );
+      new_amgsa->setNumLevels( num_levels );
+      new_amgsa->setSmoother( MLI_SMOOTHER_PRE, pre_smoother, 
+                              pre_smoother_num, pre_smoother_wgt );
+      new_amgsa->setSmoother( MLI_SMOOTHER_POST, postsmoother, 
+                              postsmoother_num, postsmoother_wgt );
+      new_amgsa->setCoarseSolver(coarse_solver,coarse_solver_num,
+                                 coarse_solver_wgt); 
+      new_amgsa->setCoarsenScheme( coarsen_scheme );
+      new_amgsa->setMinCoarseSize( min_coarse_size );
+      if ( calc_norm_scheme ) new_amgsa->setCalcSpectralNorm();
+      new_amgsa->setPweight( P_weight );
+      new_amgsa->setNullSpace(node_dofs,nullspace_dim,nullspace_vec,
+                              nullspace_len);
+      new_amgsa->setStrengthThreshold( threshold );
+   }
+   else
+   {
+      cout << "MLI_Method_AMGSA::copy ERROR - incoming object not AMGSA.\n");
+      exit(1);
+   }
    return 0;
 }
 

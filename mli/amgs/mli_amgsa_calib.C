@@ -40,7 +40,6 @@ int MLI_Method_AMGSA::setupCalibration( MLI *mli )
    char         param_string[100], **targv;
    MLI_Matrix   *mli_Amat;
    MLI_Vector   *mli_rhs, *mli_sol;
-   MLI_OneLevel *single_level;
    MLI          *new_mli;
    MPI_Comm     comm;
    MLI_Method         *new_amgsa;
@@ -60,10 +59,9 @@ int MLI_Method_AMGSA::setupCalibration( MLI *mli )
    comm = getComm();
    MPI_Comm_rank( comm, &mypid );
    MPI_Comm_size( comm, &nprocs );
-   single_level = mli->getOneLevelObject( 0 );
-   mli_Amat     = single_level->getAmat();
-   hypreA       = (hypre_ParCSRMatrix *) mli_Amat->getMatrix();
-   targv         = new char*[4];
+   mli_Amat = mli->getSystemMatrix( 0 );
+   hypreA   = (hypre_ParCSRMatrix *) mli_Amat->getMatrix();
+   targv    = new char*[4];
 
    /* --------------------------------------------------------------- */
    /* create trial vectors for calibration (trial_sol, zero_rhs)      */
@@ -114,6 +112,7 @@ int MLI_Method_AMGSA::setupCalibration( MLI *mli )
    relax_wts = new double[relax_num];
    for ( i = 0; i < relax_num; i++ ) relax_wts[i] = 1.0;
    new_amgsa = MLI_Method_CreateFromID( MLI_METHOD_AMGSA_ID, comm );
+   copy( new_amgsa );
    sprintf( param_string, "setCoarseSolver SGS" );
    targc = 2;
    targv[0] = (char *) &relax_num;
@@ -151,7 +150,6 @@ int MLI_Method_AMGSA::setupCalibration( MLI *mli )
       mli_sol = new MLI_Vector( (void*) trial_sol, param_string, NULL );
       mli_rhs = new MLI_Vector( (void*) zero_rhs, param_string, NULL );
       new_mli->cycle( mli_sol, mli_rhs );
-
 
       for ( j = nrows*n_null; j < nrows*(n_null+1); j++ )
          nullspace_store[j] = sol_data[j-nrows*n_null];

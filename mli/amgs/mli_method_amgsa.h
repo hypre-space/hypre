@@ -85,7 +85,7 @@ public :
    int    print();
    int    printStatistics(MLI *mli);
    int    getNullSpace(int &node_dofs,int &num_ns,double *&null_vec, int &leng);
-   int    copy( MLI_Method_AMGSA * );
+   int    copy( MLI_Method * );
 
 private :
 
