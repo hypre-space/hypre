@@ -733,13 +733,17 @@ int MLI_Utils_HypreMatrixGetInfo(void *Amat, int *matInfo, double *valInfo)
    MPI_Allreduce( isum, ibuf, 2, MPI_INT, MPI_MAX, mpiComm );
    maxNnz  = ibuf[0];
    minNnz  = - ibuf[1];
-   MPI_Allreduce( &thisNnz, &totalNnz, 1, MPI_INT, MPI_SUM, mpiComm );
+   isum[0] = thisNnz % 16;
+   isum[1] = thisNnz >> 4;
+   MPI_Allreduce( isum, ibuf, 2, MPI_INT, MPI_SUM, mpiComm );
+   totalNnz = ibuf[1] * 16 + ibuf[0];
    matInfo[0] = globalNRows;
    matInfo[1] = maxNnz;
    matInfo[2] = minNnz;
    matInfo[3] = totalNnz;
    valInfo[0] = maxVal;
    valInfo[1] = minVal;
+   valInfo[2] = 16.0 * ((double) ibuf[1]) + ((double) ibuf[0]);
    return 0;
 }
 
