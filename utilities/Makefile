@@ -126,6 +126,7 @@ HEADERS =\
  amg_linklist.h\
  exchange_data.h\
  fortran.h\
+ fortran_matrix.h\
  general.h\
  hypre_memory.h\
  hypre_smp_forloop.h\
@@ -144,6 +145,7 @@ FILES =\
  amg_linklist.c\
  binsearch.c\
  exchange_data.c\
+ fortran_matrix.c\
  hypre_memory.c\
  hypre_qsort.c\
  memory_dmalloc.c\
