@@ -38,7 +38,7 @@ int HYPRE_ParAMGSetIOutDat P((HYPRE_Solver solver , int ioutdat ));
 int HYPRE_ParAMGSetLogFileName P((HYPRE_Solver solver , char *log_file_name ));
 int HYPRE_ParAMGSetLogging P((HYPRE_Solver solver , int ioutdat , char *log_file_name ));
 
-/* coarsen.c */
+/* par_coarsen.c */
 int hypre_ParAMGCoarsen P((hypre_ParCSRMatrix *parA , double strength_threshold , hypre_ParCSRMatrix **parS_ptr , int **CF_marker_ptr , int *coarse_size_ptr ));
 
 /* driver.c */
@@ -97,7 +97,6 @@ void swap P((int *v , int i , int j ));
 
 /* par_rap.c */
 int hypre_ParAMGBuildCoarseOperator P((hypre_ParCSRMatrix *RT , hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *P , hypre_ParCSRMatrix **RAP_ptr ));
-hypre_CSRMatrix *hypre_GeneratePExt P((hypre_ParCSRMatrix *P , hypre_ParCSRMatrix *A ));
 hypre_CSRMatrix *hypre_ExchangeRAPData P((hypre_CSRMatrix *RAP_int , hypre_CommPkg *comm_pkg_RT ));
 
 /* par_rap_communication.c */
@@ -105,6 +104,10 @@ int hypre_GetCommPkgRTFromCommPkgA P((hypre_ParCSRMatrix *RT , hypre_ParCSRMatri
 hypre_CommPkg *hypre_GenerateSendMapAndCommPkg P((MPI_Comm comm , int num_sends , int num_recvs , int *recv_procs , int *send_procs , int *recv_vec_starts , hypre_ParCSRMatrix *A ));
 int hypre_GenerateRAPCommPkg P((hypre_ParCSRMatrix *RAP , hypre_ParCSRMatrix *A ));
 
+/* par_relax.c */
+int hypre_ParAMGRelax P(( hypre_ParCSRMatrix *A , hypre_ParVector *f , int *cf_marker, int relax_type , int relax_points , hypre_ParVector *u , hypre_ParVector *Vtemp ));
+int gselim P(( double *A , double *x , int n ));
+ 
 /* random.c */
 void hypre_SeedRand P((int seed ));
 double hypre_Rand P((void ));
