@@ -16,6 +16,10 @@
 #include "memory.h"
 #include <stdio.h>
 
+#ifdef HYPRE_USE_PTHREADS
+#include "threading.h"
+#endif
+
 /******************************************************************************
  *
  * Standard routines
@@ -120,4 +124,125 @@ hypre_Free( char *ptr )
    }
 }
 
+
+/*--------------------------------------------------------------------------
+ * These Shared routines are for one thread to allocate memory for data
+ * will be visible to all threads.  The file-scope pointer
+ * global_alloc_ptr is used in these routines.
+ *--------------------------------------------------------------------------*/
+
+#ifdef HYPRE_USE_PTHREADS
+
+char *global_alloc_ptr;
+double *global_data_ptr;
+
+/*--------------------------------------------------------------------------
+ * hypre_SharedMAlloc
+ *--------------------------------------------------------------------------*/
+
+char *
+hypre_SharedMAlloc( int size )
+{
+   char *ptr;
+   int unthreaded = pthread_equal(initial_thread, pthread_self());
+   int I_call_malloc = unthreaded ||
+                       pthread_equal(hypre_thread[0],pthread_self());
+
+   if (I_call_malloc) {
+      global_alloc_ptr = hypre_MAlloc( size );
+   }
+
+   hypre_barrier(&talloc_mtx, unthreaded);
+   ptr = global_alloc_ptr;
+   hypre_barrier(&talloc_mtx, unthreaded);
+
+   return ptr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_SharedCAlloc
+ *--------------------------------------------------------------------------*/
+
+char *
+hypre_SharedCAlloc( int count,
+              int elt_size )
+{
+   char *ptr;
+   int unthreaded = pthread_equal(initial_thread, pthread_self());
+   int I_call_calloc = unthreaded ||
+                       pthread_equal(hypre_thread[0],pthread_self());
+
+   if (I_call_calloc) {
+      global_alloc_ptr = hypre_CAlloc( count, elt_size );
+   }
+
+   hypre_barrier(&talloc_mtx, unthreaded);
+   ptr = global_alloc_ptr;
+   hypre_barrier(&talloc_mtx, unthreaded);
+
+   return ptr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_SharedReAlloc
+ *--------------------------------------------------------------------------*/
+
+char *
+hypre_SharedReAlloc( char *ptr,
+                     int   size )
+{
+   int unthreaded = pthread_equal(initial_thread, pthread_self());
+   int I_call_realloc = unthreaded ||
+                       pthread_equal(hypre_thread[0],pthread_self());
+
+   if (I_call_realloc) {
+      global_alloc_ptr = hypre_ReAlloc( ptr, size );
+   }
+
+   hypre_barrier(&talloc_mtx, unthreaded);
+   ptr = global_alloc_ptr;
+   hypre_barrier(&talloc_mtx, unthreaded);
+
+   return ptr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_SharedFree
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_SharedFree( char *ptr )
+{
+   int unthreaded = pthread_equal(initial_thread, pthread_self());
+   int I_call_free = unthreaded ||
+                     pthread_equal(hypre_thread[0],pthread_self());
+
+   if (I_call_free) {
+      hypre_Free(ptr);
+   }
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_IncrementSharedDataPtr
+ *--------------------------------------------------------------------------*/
+
+double *
+hypre_IncrementSharedDataPtr( double *ptr, int size )
+{
+   int unthreaded = pthread_equal(initial_thread, pthread_self());
+   int I_increment = unthreaded ||
+                     pthread_equal(hypre_thread[0],pthread_self());
+
+   if (I_increment) {
+      global_data_ptr = ptr + size;
+   }
+
+   hypre_barrier(&talloc_mtx, unthreaded);
+   ptr = global_data_ptr;
+   hypre_barrier(&talloc_mtx, unthreaded);
+
+   return ptr;
+}
+
+#endif
 

@@ -70,7 +70,11 @@ hypre_FreeStructVector( hypre_StructVector *vector )
 
    if (vector)
    {
+#ifdef HYPRE_USE_PTHREADS
+      hypre_SharedTFree(hypre_StructVectorData(vector));
+#else
       hypre_TFree(hypre_StructVectorData(vector));
+#endif
       hypre_FreeStructVectorShell(vector);
    }
 
@@ -188,7 +192,12 @@ hypre_InitializeStructVector( hypre_StructVector *vector )
 
    ierr = hypre_InitializeStructVectorShell(vector);
 
+#ifdef HYPRE_USE_PTHREADS
+   data = hypre_SharedCTAlloc(double, hypre_StructVectorDataSize(vector));
+#else
    data = hypre_CTAlloc(double, hypre_StructVectorDataSize(vector));
+#endif
+
    hypre_InitializeStructVectorData(vector, data);
 
    return ierr;

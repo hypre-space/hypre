@@ -30,6 +30,11 @@
       body;\
    }
 
+#define hypre_BarrierThreadWrapper(body) \
+   body;\
+   hypre_barrier(&talloc_mtx, pthread_equal(pthread_self(), initial_thread))
+
+
 /* hypre_work_proc_t typedef'd to be a pointer to a function with a void*
    argument and a void return type */
 typedef void (*hypre_work_proc_t)(void *);
@@ -60,6 +65,7 @@ pthread_t initial_thread;
 pthread_t hypre_thread[NUM_THREADS];
 pthread_cond_t hypre_cond_boxloops;
 pthread_mutex_t hypre_mutex_boxloops;
+pthread_mutex_t talloc_mtx;
 hypre_workqueue_t hypre_qptr;
 pthread_mutex_t mpi_mtx;
 pthread_cond_t mpi_cnd;

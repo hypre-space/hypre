@@ -109,7 +109,11 @@ hypre_FreeStructMatrix( hypre_StructMatrix *matrix )
 
    if (matrix)
    {
+#ifdef HYPRE_USE_PTHREADS
+      hypre_SharedTFree(hypre_StructMatrixData(matrix));
+#else
       hypre_TFree(hypre_StructMatrixData(matrix));
+#endif
       hypre_FreeStructMatrixShell(matrix);
    }
 
@@ -361,7 +365,11 @@ hypre_InitializeStructMatrix( hypre_StructMatrix *matrix )
 
    ierr = hypre_InitializeStructMatrixShell(matrix);
 
+#ifdef HYPRE_USE_PTHREADS
+   data = hypre_SharedCTAlloc(double, hypre_StructMatrixDataSize(matrix));
+#else
    data = hypre_CTAlloc(double, hypre_StructMatrixDataSize(matrix));
+#endif
    hypre_InitializeStructMatrixData(matrix, data);
 
    return ierr;

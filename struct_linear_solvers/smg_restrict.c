@@ -42,6 +42,7 @@ hypre_SMGRestrictInitialize( )
    hypre_SMGRestrictData *restrict_data;
 
    restrict_data = hypre_CTAlloc(hypre_SMGRestrictData, 1);
+
 #ifdef HYPRE_USE_PTHREADS
    hypre_TimingThreadWrapper({
       (restrict_data -> time_index)  = hypre_InitializeTiming("SMGRestrict");

@@ -46,6 +46,7 @@ int HYPRE_InitPthreads( MPI_Comm comm )
 
    pthread_mutex_init(&hypre_mutex_boxloops, NULL);
    pthread_mutex_init(&mpi_mtx, NULL);
+   pthread_mutex_init(&talloc_mtx, NULL);
    pthread_cond_init(&hypre_cond_boxloops, NULL);
    pthread_cond_init(&mpi_cnd, NULL);
    hypre_thread_counter = 0;
@@ -65,6 +66,7 @@ void HYPRE_DestroyPthreads( void )
    pthread_mutex_destroy(&hypre_qptr->lock);
    pthread_mutex_destroy(&hypre_mutex_boxloops);
    pthread_mutex_destroy(&mpi_mtx);
+   pthread_mutex_destroy(&talloc_mtx);
    pthread_cond_destroy(&hypre_qptr->work_wait);
    pthread_cond_destroy(&hypre_qptr->finish_wait);
    pthread_cond_destroy(&hypre_cond_boxloops);

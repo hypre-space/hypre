@@ -77,7 +77,6 @@ hypre_SMGRelaxInitialize( MPI_Comm  comm )
    hypre_SMGRelaxData *relax_data;
 
    relax_data = hypre_CTAlloc(hypre_SMGRelaxData, 1);
-
    (relax_data -> setup_temp_vec) = 1;
    (relax_data -> setup_a_rem)    = 1;
    (relax_data -> setup_a_sol)    = 1;
@@ -528,6 +527,7 @@ hypre_SMGRelaxSetupARem( void               *relax_vdata,
 
    /* Set up residual_data */
    residual_data = hypre_TAlloc(void *, num_spaces);
+
    for (i = 0; i < num_spaces; i++)
    {
       hypre_IndexD(base_index,  (stencil_dim - 1)) = space_indices[i];
@@ -613,6 +613,7 @@ hypre_SMGRelaxSetupASol( void               *relax_vdata,
 
    /* Set up solve_data */
    solve_data    = hypre_TAlloc(void *, num_spaces);
+
    for (i = 0; i < num_spaces; i++)
    {
       hypre_IndexD(base_index,  (stencil_dim - 1)) = space_indices[i];

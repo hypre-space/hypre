@@ -70,6 +70,25 @@ extern "C" {
 
 #endif
 
+
+#ifdef HYPRE_USE_PTHREADS
+
+#define hypre_SharedTAlloc(type, count) \
+( (type *)hypre_SharedMAlloc((unsigned int)(sizeof(type) * (count))) )
+
+
+#define hypre_SharedCTAlloc(type, count) \
+( (type *)hypre_SharedCAlloc((unsigned int)(count),\
+                             (unsigned int)sizeof(type)) )
+
+#define hypre_SharedTReAlloc(ptr, type, count) \
+( (type *)hypre_SharedReAlloc((char *)ptr,\
+                              (unsigned int)(sizeof(type) * (count))) )
+
+#define hypre_SharedTFree(ptr) \
+( hypre_SharedFree((char *)ptr), ptr = NULL )
+
+#endif
 /*--------------------------------------------------------------------------
  * Prototypes
  *--------------------------------------------------------------------------*/
@@ -93,7 +112,11 @@ char *hypre_MAlloc P((int size ));
 char *hypre_CAlloc P((int count , int elt_size ));
 char *hypre_ReAlloc P((char *ptr , int size ));
 void hypre_Free P((char *ptr ));
-
+char *hypre_SharedMAlloc P((int size ));
+char *hypre_SharedCAlloc P((int count , int elt_size ));
+char *hypre_SharedReAlloc P((char *ptr , int size ));
+void hypre_SharedFree P((char *ptr ));
+double *hypre_IncrementSharedDataPtr P((double *ptr , int size ));
 #undef P
 
 #ifdef __cplusplus

@@ -108,7 +108,7 @@ hypre_CyclicReductionInitialize( MPI_Comm  comm )
    hypre_CyclicReductionData *cyc_red_data;
 
    cyc_red_data = hypre_CTAlloc(hypre_CyclicReductionData, 1);
-
+   
    (cyc_red_data -> comm) = comm;
    (cyc_red_data -> cdir) = 0;
 #ifdef HYPRE_USE_PTHREADS
@@ -597,17 +597,31 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
       data_size += hypre_StructVectorDataSize(x_l[l+1]);
    }
 
+#ifdef HYPRE_USE_PTHREADS
+   data = hypre_SharedCTAlloc(double, data_size);
+#else
    data = hypre_CTAlloc(double, data_size);
+#endif
+
    (cyc_red_data -> data) = data;
 
    for (l = 0; l < (num_levels - 1); l++)
    {
       hypre_InitializeStructMatrixData(A_l[l+1], data);
+#ifdef HYPRE_USE_PTHREADS
+      data = hypre_IncrementSharedDataPtr(data,
+                                          hypre_StructMatrixDataSize(A_l[l+1]));
+#else
       data += hypre_StructMatrixDataSize(A_l[l+1]);
-
+#endif
       hypre_InitializeStructVectorData(x_l[l+1], data);
       hypre_AssembleStructVector(x_l[l+1]);
+#ifdef HYPRE_USE_PTHREADS
+      data = hypre_IncrementSharedDataPtr(data,
+                                          hypre_StructVectorDataSize(x_l[l+1]));
+#else
       data += hypre_StructVectorDataSize(x_l[l+1]);
+#endif
    }
 
    (cyc_red_data -> A_l)  = A_l;
@@ -1146,7 +1160,11 @@ hypre_CyclicReductionFinalize( void *cyc_red_vdata )
          hypre_FreeComputePkg(cyc_red_data -> up_compute_pkg_l[l]);
       }
       hypre_FreeSBoxArray(cyc_red_data -> fine_points_l[l]);
-      hypre_TFree(cyc_red_data -> data);
+#ifdef HYPRE_USE_PTHREADS
+      hypre_SharedTFree(cyc_red_data -> data); 
+#else
+      hypre_TFree(cyc_red_data -> data); 
+#endif
       hypre_TFree(cyc_red_data -> grid_l);
       hypre_TFree(cyc_red_data -> fine_points_l);
       hypre_TFree(cyc_red_data -> coarse_points_l);

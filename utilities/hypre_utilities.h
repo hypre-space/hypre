@@ -262,6 +262,25 @@ extern "C" {
 
 #endif
 
+
+#ifdef HYPRE_USE_PTHREADS
+
+#define hypre_SharedTAlloc(type, count) \
+( (type *)hypre_SharedMAlloc((unsigned int)(sizeof(type) * (count))) )
+
+
+#define hypre_SharedCTAlloc(type, count) \
+( (type *)hypre_SharedCAlloc((unsigned int)(count),\
+                             (unsigned int)sizeof(type)) )
+
+#define hypre_SharedTReAlloc(ptr, type, count) \
+( (type *)hypre_SharedReAlloc((char *)ptr,\
+                              (unsigned int)(sizeof(type) * (count))) )
+
+#define hypre_SharedTFree(ptr) \
+( hypre_SharedFree((char *)ptr), ptr = NULL )
+
+#endif
 /*--------------------------------------------------------------------------
  * Prototypes
  *--------------------------------------------------------------------------*/
@@ -285,7 +304,11 @@ char *hypre_MAlloc P((int size ));
 char *hypre_CAlloc P((int count , int elt_size ));
 char *hypre_ReAlloc P((char *ptr , int size ));
 void hypre_Free P((char *ptr ));
-
+char *hypre_SharedMAlloc P((int size ));
+char *hypre_SharedCAlloc P((int count , int elt_size ));
+char *hypre_SharedReAlloc P((char *ptr , int size ));
+void hypre_SharedFree P((char *ptr ));
+double *hypre_IncrementSharedDataPtr P((double *ptr , int size ));
 #undef P
 
 #ifdef __cplusplus
@@ -428,6 +451,11 @@ int hypre_thread_MPI_Type_commit P((MPI_Datatype *datatype ));
       body;\
    }
 
+#define hypre_BarrierThreadWrapper(body) \
+   body;\
+   hypre_barrier(&talloc_mtx, pthread_equal(pthread_self(), initial_thread))
+
+
 /* hypre_work_proc_t typedef'd to be a pointer to a function with a void*
    argument and a void return type */
 typedef void (*hypre_work_proc_t)(void *);
@@ -458,6 +486,7 @@ pthread_t initial_thread;
 pthread_t hypre_thread[NUM_THREADS];
 pthread_cond_t hypre_cond_boxloops;
 pthread_mutex_t hypre_mutex_boxloops;
+pthread_mutex_t talloc_mtx;
 hypre_workqueue_t hypre_qptr;
 pthread_mutex_t mpi_mtx;
 pthread_cond_t mpi_cnd;
