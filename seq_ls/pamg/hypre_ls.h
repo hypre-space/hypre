@@ -5,7 +5,6 @@
 #define hypre_LS_HEADER
 
 #include "hypre_utilities.h"
-#include "mpe.h"
 #include "hypre_mv.h"
 
 #ifdef __cplusplus

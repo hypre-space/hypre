@@ -5,7 +5,6 @@
 #define hypre_PARCSR_LS_HEADER
 
 #include "hypre_utilities.h"
-#include "mpe.h"                   /* need to get rid of this */
 #include "hypre_mv.h"
 #include "hypre_parcsr_mv.h"
 
