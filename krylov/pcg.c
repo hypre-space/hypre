@@ -130,13 +130,26 @@ hypre_PCGDestroy( void *pcg_vdata )
          hypre_TFreeF( pcg_data -> rel_norms, pcg_functions );
          pcg_data -> rel_norms = NULL;
       }
-
-      (*(pcg_functions->MatvecDestroy))(pcg_data -> matvec_data);
-
-      (*(pcg_functions->DestroyVector))(pcg_data -> p);
-      (*(pcg_functions->DestroyVector))(pcg_data -> s);
-      (*(pcg_functions->DestroyVector))(pcg_data -> r);
-
+      if ( pcg_data -> matvec_data != NULL )
+      {
+         (*(pcg_functions->MatvecDestroy))(pcg_data -> matvec_data);
+         pcg_data -> matvec_data = NULL;
+      }
+      if ( pcg_data -> p != NULL )
+      {
+         (*(pcg_functions->DestroyVector))(pcg_data -> p);
+         pcg_data -> p = NULL;
+      }
+      if ( pcg_data -> s != NULL )
+      {
+         (*(pcg_functions->DestroyVector))(pcg_data -> s);
+         pcg_data -> s = NULL;
+      }
+      if ( pcg_data -> r != NULL )
+      {
+         (*(pcg_functions->DestroyVector))(pcg_data -> r);
+         pcg_data -> r = NULL;
+      }
       hypre_TFreeF( pcg_data, pcg_functions );
       hypre_TFreeF( pcg_functions, pcg_functions );
    }
@@ -182,13 +195,20 @@ hypre_PCGSetup( void *pcg_vdata,
     * compute phases of matvec and the preconditioner.
     *--------------------------------------------------*/
 
-   if ( (pcg_data -> p) == NULL )
-      (pcg_data -> p) = (*(pcg_functions->CreateVector))(x);
-   if ( (pcg_data -> s) == NULL )
-      (pcg_data -> s) = (*(pcg_functions->CreateVector))(x);
-   if ( (pcg_data -> r) == NULL )
-      (pcg_data -> r) = (*(pcg_functions->CreateVector))(b);
+   if ( pcg_data -> p != NULL )
+      (*(pcg_functions->DestroyVector))(pcg_data -> p);
+   (pcg_data -> p) = (*(pcg_functions->CreateVector))(x);
 
+   if ( pcg_data -> s != NULL )
+      (*(pcg_functions->DestroyVector))(pcg_data -> s);
+   (pcg_data -> s) = (*(pcg_functions->CreateVector))(x);
+
+   if ( pcg_data -> r != NULL )
+      (*(pcg_functions->DestroyVector))(pcg_data -> r);
+   (pcg_data -> r) = (*(pcg_functions->CreateVector))(b);
+
+   if ( pcg_data -> matvec_data != NULL )
+      (*(pcg_functions->MatvecDestroy))(pcg_data -> matvec_data);
    (pcg_data -> matvec_data) = (*(pcg_functions->MatvecCreate))(A, x);
 
    precond_setup(precond_data, A, b, x);
@@ -199,8 +219,13 @@ hypre_PCGSetup( void *pcg_vdata,
 
    if ( (pcg_data->log_level)>0  || (pcg_data->printlevel)>0 ) 
    {
+      if ( (pcg_data -> norms) != NULL )
+         hypre_TFreeF( pcg_data -> norms, pcg_functions );
       (pcg_data -> norms)     = hypre_CTAllocF( double, max_iter + 1,
                                                 pcg_functions);
+
+      if ( (pcg_data -> rel_norms) != NULL )
+         hypre_TFreeF( pcg_data -> rel_norms, pcg_functions );
       (pcg_data -> rel_norms) = hypre_CTAllocF( double, max_iter + 1,
                                                 pcg_functions );
    }
