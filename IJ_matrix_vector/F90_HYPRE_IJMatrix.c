@@ -118,7 +118,7 @@ hypre_F90_IFACE(hypre_ijmatrixsetrowsizes)( long int *matrix,
                                             int      *ierr    )
 {
    *ierr = (int) ( HYPRE_IJMatrixSetRowSizes( (HYPRE_IJMatrix) *matrix,
-                                              (int *)           sizes   ) );
+                                              (const int *)     sizes   ) );
 
 }
 
@@ -132,7 +132,7 @@ hypre_F90_IFACE(hypre_ijmatrixsetdiagrowsizes)( long int *matrix,
                                                 int      *ierr    )
 {
    *ierr = (int) ( HYPRE_IJMatrixSetDiagRowSizes( (HYPRE_IJMatrix) *matrix,
-                                                  (int *)           sizes   ) );
+                                                  (const int *)     sizes   ) );
 
 }
 
@@ -146,7 +146,7 @@ hypre_F90_IFACE(hypre_ijmatrixsetoffdiagrowsize)( long int *matrix,
                                                   int      *ierr    )
 {
    *ierr = (int) ( HYPRE_IJMatrixSetOffDiagRowSizes( (HYPRE_IJMatrix) *matrix,
-                                                     (int *)           sizes   ) );
+                                                     (const int *)     sizes   ) );
 
 }
 
