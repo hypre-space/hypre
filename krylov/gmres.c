@@ -114,18 +114,26 @@ hypre_GMRESDestroy( void *gmres_vdata )
    {
       if ( (gmres_data->log_level>0) || (gmres_data->printlevel) > 0 )
       {
-         hypre_TFreeF( gmres_data -> norms, gmres_functions );
+         if ( (gmres_data -> norms) != NULL )
+            hypre_TFreeF( gmres_data -> norms, gmres_functions );
       }
  
-      (*(gmres_functions->MatvecDestroy))(gmres_data -> matvec_data);
+      if ( (gmres_data -> matvec_data) != NULL )
+         (*(gmres_functions->MatvecDestroy))(gmres_data -> matvec_data);
  
-      (*(gmres_functions->DestroyVector))(gmres_data -> r);
-      (*(gmres_functions->DestroyVector))(gmres_data -> w);
-      for (i = 0; i < (gmres_data -> k_dim+1); i++)
+      if ( (gmres_data -> r) != NULL )
+         (*(gmres_functions->DestroyVector))(gmres_data -> r);
+      if ( (gmres_data -> w) != NULL )
+         (*(gmres_functions->DestroyVector))(gmres_data -> w);
+      if ( (gmres_data -> p) != NULL )
       {
-	 (*(gmres_functions->DestroyVector))( (gmres_data -> p) [i]);
+         for (i = 0; i < (gmres_data -> k_dim+1); i++)
+         {
+            if ( (gmres_data -> p)[i] != NULL )
+	       (*(gmres_functions->DestroyVector))( (gmres_data -> p) [i]);
+         }
+         hypre_TFreeF( gmres_data->p, gmres_functions );
       }
-      hypre_TFreeF( gmres_data->p, gmres_functions );
       hypre_TFreeF( gmres_data, gmres_functions );
       hypre_TFreeF( gmres_functions, gmres_functions );
    }
