@@ -54,6 +54,7 @@ FILES =\
  drot.c \
  dsymv.c \
  dsyr2.c \
+ dsygv.c \
  dtrsv.c \
  idamax.c
 
