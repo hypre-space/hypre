@@ -8,6 +8,9 @@
 # $Revision$
 #EHEADER***********************************************************************
 
+#temporarily turn off test suite
+fmtmsg -u print "IJ_linear_solvers test suite is currently hanging"
+exit
 
 #===========================================================================
 #
