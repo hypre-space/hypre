@@ -1,0 +1,34 @@
+FEI_ROOT=/home/abwilli/code/fei-isis-1.2.4
+ISIS_ROOT=/home/abwilli/code/fei-isis-1.2.4/../isis
+ISIS_ARCH=solaris
+FEI_TARGET=FEI_PLL
+libraries_mpi=-lfei_isis -lisis_mpi -llapack -lblas -lF77 -lM77 -lsunmath -lm -lsocket -lnsl -lmpi
+C=cc
+CPP=CC
+OPT=-g
+LD_OPT=-g
+CFLAGS=-g
+MPI_INCLUDE=/usr/local/mpi/include
+MPI_LIB=/usr/local/mpi/lib/solaris/ch_p4
+LDFLAGS=-L/opt/SUNWspro/SC4.2/lib -L$(FEI_ROOT)/lib/solaris -L$(ISIS_ROOT)/lib/solaris -L/usr/local/lib -L$(MPI_LIB)
+INSTALL_ROOT=/usr/local
+C++INCLUDES=-I$(FEI_ROOT) -I$(ISIS_ROOT)
+
+# std unixisms, we hope, that still need fixing sometimes
+CP=/bin/cp
+RM=/bin/rm
+LN=/bin/ln
+MKDIR=/bin/mkdir
+CHMOD=chmod
+RANLIB=ranlib
+
+# our dependency stuff for linux
+DEPEND_CPP=g++
+DEPEND_ALL=$(FEI_ROOT)/util/g++depinclude
+DEPEND_NOSYS=$(FEI_ROOT)/util/g++depinclude_nosys
+DEPEND_NONE=$(FEI_ROOT)/util/g++nodepinclude
+# DEPEND_FLAGS should be redefined in the applying makefile if needed
+DEPEND_FLAGS=$(CXXFLAGS) $(C++INCLUDES) $(C++DEFINES)
+# misc stuff that'll probably need fixing on some platforms:
+CXXFLAGS=$(OPT) -c
+CINCLUDES=${CINCLUDES--I/usr/local/include}

@@ -5,7 +5,7 @@
 #######################################################################
 
 SHELL 		= /bin/sh
-PACKAGE=fei-hypre-1.2
+PACKAGE=fei-isis
 
 #######################################################################
 # configure generates make.options, and the user
@@ -27,8 +27,8 @@ C++DEFINES      = $(ISIS_BOOL) $(IT_DEFINES)
 C++INCLUDES_MPI = -I$(MPI_INCLUDE) $(C++INCLUDES)
 
 # our primary targets defined
-SLIB = $(FEI_ROOT)/lib/$(HYPRE_ARCH)/libfei_hypre.a
-PLIB = $(FEI_ROOT)/lib/$(HYPRE_ARCH)/libfei_hypre.a
+SLIB = $(FEI_ROOT)/lib/$(ISIS_ARCH)/libfei_isis.a
+PLIB = $(FEI_ROOT)/lib/$(ISIS_ARCH)/libfei_isis.a
 
 #######################################################################
 #
@@ -59,6 +59,8 @@ FEI_OBJS = \
 	src/FEI_Implementation.mp.o \
 	src/cfei.mp.o
 
+#src/ISIS_LinSysCore.mp.o \
+
 FEI_SRCS        = $(FEI_OBJS:.o=.cc)
 
 #############################
@@ -84,7 +86,7 @@ MPI_DEPENDENT_SRCS=
 PACKAGE_DIR=$(INSTALL_ROOT)/fei-isis
 FEI_SUBDIRS= \
 	lib \
-	lib/$(HYPRE_ARCH) \
+	lib/$(ISIS_ARCH) \
 	src \
 	other
 
@@ -115,14 +117,17 @@ other: $(OTHER_OBJ)
 	ar rs $(PLIB) $(OTHER_OBJ)
 
 drivers driver fei-drivers:
-	cd drivers; make FEI_ROOT="$(FEI_ROOT)";
+	cd fei-drivers; make FEI_ROOT="$(FEI_ROOT)";
+
+test tests unit-tests:
+	cd unit-tests; make FEI_ROOT="$(FEI_ROOT)";
 
 subdirs:
 #   Create sub-directories if needed.
-	@if [ -d lib/$(HYPRE_ARCH) ] ; then \
-		echo "lib/$(HYPRE_ARCH) exists"; \
+	@if [ -d lib/$(ISIS_ARCH) ] ; then \
+		echo "lib/$(ISIS_ARCH) exists"; \
 	else \
-		$(MKDIR) lib/$(HYPRE_ARCH); \
+		$(MKDIR) lib/$(ISIS_ARCH); \
 	fi
 
 util utils:
@@ -214,18 +219,18 @@ install-header.$(PACKAGE): have-permission
 	done
 
 install-lib.$(PACKAGE): $(PLIB) have-permission
-	@$(CP) $(PLIB) $(PACKAGE_DIR)/lib/$(HYPRE_ARCH)
-	@$(RANLIB) $(PACKAGE_DIR)/lib/$(HYPRE_ARCH)/libfei_isis.a
-	@$(CHMOD) 644 $(PACKAGE_DIR)/lib/$(HYPRE_ARCH)/libfei_isis.a
+	@$(CP) $(PLIB) $(PACKAGE_DIR)/lib/$(ISIS_ARCH)
+	@$(RANLIB) $(PACKAGE_DIR)/lib/$(ISIS_ARCH)/libfei_isis.a
+	@$(CHMOD) 644 $(PACKAGE_DIR)/lib/$(ISIS_ARCH)/libfei_isis.a
 
 install-readme.$(PACKAGE): have-permission
 	-@$(RM) $(PACKAGE_DIR)/README.$(PACKAGE).txt
-	@echo "$(CPP) -I$(PACKAGE_DIR) -L$(PACKAGE_DIR)/lib/$(HYPRE_ARCH) -lfei_isis" \
+	@echo "$(CPP) -I$(PACKAGE_DIR) -L$(PACKAGE_DIR)/lib/$(ISIS_ARCH) -lfei_isis" \
 	> $(PACKAGE_DIR)/README.$(PACKAGE).txt
 	@echo "#include <fei-isis.h> in C++." \
 	>> $(PACKAGE_DIR)/README.$(PACKAGE).txt
 	@echo "$(CPP) -I$(PACKAGE_DIR) to compile with $(PACKAGE)"
-	@echo "$(CPP) -L$(PACKAGE_DIR)/lib/$(HYPRE_ARCH) -lfei_isis to link $(PACKAGE)."
+	@echo "$(CPP) -L$(PACKAGE_DIR)/lib/$(ISIS_ARCH) -lfei_isis to link $(PACKAGE)."
 
 have-permission:
 	@touch $(INSTALL_ROOT)/.fei.writable.install
@@ -239,10 +244,11 @@ clean cleandir:
 	@touch erase.this
 	-$(RM) -f PI* erase.* *.out #* *~ emake.log
 	@cd other; make clean FEI_ROOT="$(FEI_ROOT)"
-	cd lib; make clean FEI_ROOT="$(FEI_ROOT)" HYPRE_ARCH="$(HYPRE_ARCH)"
+	cd src; make clean FEI_ROOT="$(FEI_ROOT)"
+	cd lib; make clean FEI_ROOT="$(FEI_ROOT)" ISIS_ARCH="$(ISIS_ARCH)"
 	cd fei-drivers; make clean FEI_ROOT="$(FEI_ROOT)"
 	cd util; make clean FEI_ROOT="$(FEI_ROOT)"
-	cd src; make clean FEI_ROOT="$(FEI_ROOT)"
+	cd unit-tests; make clean FEI_ROOT="$(FEI_ROOT)"
 
 neat:
 	touch erase.this
@@ -259,7 +265,7 @@ clean.$(FEI_DIR):
 
 distclean:	clean
 	$(RM) -rf */ii_files make.options
-	
+
 #######################################################################
 #
 # help rules
@@ -267,10 +273,10 @@ distclean:	clean
 #######################################################################
 
 targets help:
-	@echo '### FEI-HYPRE top level build targets ###'
+	@echo '### FEI-ISIS top level build targets ###'
 	@echo 'default: builds libfei files'
 	@echo 'install: installs FEI, usually in /usr/local/fei-isis'
-	@echo 'uninstall: removes installed FEI-HYPRE (usually /usr/local/fei-isis) entirely
+	@echo 'uninstall: removes installed FEI-ISIS (usually /usr/local/fei-isis) entirely
 	@echo 'clean: removes .o and other intermediate files'
 	@echo 'distclean: removes configure generated files, template dirs, libs'
 	@echo 'test: runs some simple tests'
@@ -280,15 +286,6 @@ targets help:
 	@echo 'clean: removes .o and other intermediate files'
 	@echo '### FEI drivers subdirectory build targets ###'
 	@echo 'See subdirectory makefiles for more details'
-
-#######################################################################
-#
-# debugging and testing rules
-#
-#######################################################################
-
-test:
-	cd fei-drivers; make; make test
 
 # if tags targets are to exist, they should be here. etags ctags
 
@@ -311,14 +308,14 @@ Makefile.depends:
 
 #does require g++ or a CC which emits dependencies when properly flagged.
 depend-nosys depend-no-sys: $(DEPEND_SRCS) 
-	if [ $(HYPRE_ARCH) = LINUX ]; then \
+	if [ $(ISIS_ARCH) = LINUX ]; then \
 		$(DEPEND_NOSYS) $(DEPEND_FLAGS) $(DEPEND_INCLUDES) $? ; \
 	else \
 		echo 'depend-nosys requires the g++ compiler' ; \
 	fi
 
 depend: $(FEI_SRCS)
-	@if [ $(HYPRE_ARCH) = LINUX ]; then \
+	@if [ $(ISIS_ARCH) = LINUX ]; then \
 		$(DEPEND_ALL) $(DEPEND_FLAGS) $(DEPEND_INCLUDES) $? ; \
 	else \
 		echo 'depend requires the g++ compiler' ; \

@@ -2,6 +2,7 @@ FEI_ROOT=/g/g18/chtong/linear_solvers/FEI_matrix_vector/fei-hypre-1.2
 ISIS_ROOT=/g/g18/chtong/isis-1.2.0
 HYPRE_ROOT=/g/g18/chtong/linear_solvers
 HYPRE_ARCH=alpha
+ISIS_ARCH=alpha
 FEI_TARGET=FEI_PLL
 libraries_mpi=-lfei_hypre_1.2 -llapack -lblas -lF77 -lM77 -lsunmath -lm -lsocket -lnsl -lmpi
 C=cc
