@@ -55,14 +55,18 @@ hypre_NewStructStencil( int           dim,
  * hypre_FreeStructStencil
  *--------------------------------------------------------------------------*/
 
-void 
+int
 hypre_FreeStructStencil( hypre_StructStencil *stencil )
 {
+   int ierr = 0;
+
    if (stencil)
    {
       hypre_TFree(hypre_StructStencilShape(stencil));
       hypre_TFree(stencil);
    }
+
+   return ierr;
 }
 
 /*--------------------------------------------------------------------------

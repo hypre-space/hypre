@@ -21,13 +21,15 @@
  * hypre_PrintBoxArrayData
  *--------------------------------------------------------------------------*/
 
-void
+int
 hypre_PrintBoxArrayData( FILE            *file,
                          hypre_BoxArray  *box_array,
                          hypre_BoxArray  *data_space,
                          int              num_values,
                          double          *data       )
 {
+   int              ierr = 0;
+
    hypre_Box       *box;
    hypre_Box       *data_box;
                    
@@ -73,19 +75,23 @@ hypre_PrintBoxArrayData( FILE            *file,
 
          data += num_values*data_box_volume;
       }
+
+   return ierr;
 }
 
 /*--------------------------------------------------------------------------
  * hypre_ReadBoxArrayData
  *--------------------------------------------------------------------------*/
 
-void
+int
 hypre_ReadBoxArrayData( FILE            *file,
                         hypre_BoxArray  *box_array,
                         hypre_BoxArray  *data_space,
                         int              num_values,
                         double          *data       )
 {
+   int              ierr = 0;
+
    hypre_Box       *box;
    hypre_Box       *data_box;
                    
@@ -131,4 +137,6 @@ hypre_ReadBoxArrayData( FILE            *file,
 
          data += num_values*data_box_volume;
       }
+
+   return ierr;
 }

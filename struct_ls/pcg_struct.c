@@ -30,10 +30,14 @@ hypre_PCGCAlloc( int count,
  * hypre_PCGFree
  *--------------------------------------------------------------------------*/
 
-void 
+int
 hypre_PCGFree( char *ptr )
 {
+   int ierr = 0;
+
    hypre_Free( ptr );
+
+   return ierr;
 }
 
 /*--------------------------------------------------------------------------

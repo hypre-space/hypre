@@ -628,7 +628,7 @@ extern hypre_TimingType *hypre_global_timing;
  *-------------------------------------------------------*/
 
 #ifdef __STDC__
-# define	P(s) s
+# define        P(s) s
 #else
 # define P(s) ()
 #endif
@@ -636,12 +636,12 @@ extern hypre_TimingType *hypre_global_timing;
 
 /* timing.c */
 int hypre_InitializeTiming P((char *name ));
-void hypre_FinalizeTiming P((int time_index ));
-void hypre_IncFLOPCount P((int inc ));
-void hypre_BeginTiming P((int time_index ));
-void hypre_EndTiming P((int time_index ));
-void hypre_ClearTiming P((void ));
-void hypre_PrintTiming P((char *heading , MPI_Comm comm ));
+int hypre_FinalizeTiming P((int time_index ));
+int hypre_IncFLOPCount P((int inc ));
+int hypre_BeginTiming P((int time_index ));
+int hypre_EndTiming P((int time_index ));
+int hypre_ClearTiming P((void ));
+int hypre_PrintTiming P((char *heading , MPI_Comm comm ));
 
 #undef P
 

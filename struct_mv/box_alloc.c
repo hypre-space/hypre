@@ -37,9 +37,10 @@ static int               s_count     = 0;
  * the hypre_FinalizeBoxMemory() routine to remove memory leaks.
  *--------------------------------------------------------------------------*/
 
-static void
+static int
 hypre_AllocateBoxBlock()
 {
+   int               ierr = 0;
    union box_memory *ptr;
    int               i;
 
@@ -52,19 +53,25 @@ hypre_AllocateBoxBlock()
       ptr[i].d_next = s_free;
       s_free = &ptr[i];
    }
+
+   return ierr;
 }
 
 /*--------------------------------------------------------------------------
  * Set up the allocation block size and allocate the first memory block.
  *--------------------------------------------------------------------------*/
 
-void
+int
 hypre_InitializeBoxMemory( const int at_a_time )
 {
+   int ierr = 0;
+
    if (at_a_time > 0)
    {
       s_at_a_time = at_a_time;
    }
+
+   return ierr;
 }
    
 /*--------------------------------------------------------------------------
@@ -73,9 +80,10 @@ hypre_InitializeBoxMemory( const int at_a_time )
  * in the finalize list are freed.
  *--------------------------------------------------------------------------*/
 
-void
+int
 hypre_FinalizeBoxMemory()
 {
+   int               ierr = 0;
    union box_memory *byebye;
 
    while (s_finalize)
@@ -86,6 +94,8 @@ hypre_FinalizeBoxMemory()
    }
    s_finalize = NULL;
    s_free = NULL;
+
+   return ierr;
 }
       
 /*--------------------------------------------------------------------------
@@ -113,9 +123,10 @@ hypre_BoxAlloc()
  * Put a box back on the free list.
  *--------------------------------------------------------------------------*/
 
-void
+int
 hypre_BoxFree( hypre_Box *box )
 {
+   int               ierr = 0;
    union box_memory *ptr = (union box_memory *) box;
 
    (ptr -> d_next) = s_free;
@@ -126,5 +137,7 @@ hypre_BoxFree( hypre_Box *box )
    {
       hypre_FinalizeBoxMemory();
    }
+
+   return ierr;
 }
 

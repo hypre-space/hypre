@@ -36,11 +36,13 @@ HYPRE_NewStructStencil( int                  dim,
  * HYPRE_SetStructStencilElement
  *--------------------------------------------------------------------------*/
 
-void 
+int
 HYPRE_SetStructStencilElement( HYPRE_StructStencil  stencil,
                                int                  element_index,
                                int                 *offset        )
 {
+   int                   ierr = 0;
+
    hypre_StructStencil  *new_stencil = (hypre_StructStencil *) stencil;
    hypre_Index          *shape;
    int                   d;
@@ -51,15 +53,17 @@ HYPRE_SetStructStencilElement( HYPRE_StructStencil  stencil,
    {
       hypre_IndexD(shape[element_index], d) = offset[d];
    }
+
+   return ierr;
 }
 
 /*--------------------------------------------------------------------------
  * HYPRE_FreeStructStencil
  *--------------------------------------------------------------------------*/
 
-void 
+int
 HYPRE_FreeStructStencil( HYPRE_StructStencil stencil )
 {
-   hypre_FreeStructStencil( (hypre_StructStencil *) stencil );
+   return ( hypre_FreeStructStencil( (hypre_StructStencil *) stencil ) );
 }
 

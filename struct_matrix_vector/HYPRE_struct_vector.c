@@ -151,57 +151,6 @@ HYPRE_SetStructVectorBoxValues( HYPRE_StructVector  vector,
    return (ierr);
 }
 
-#ifdef HYPRE_USE_PTHREADS
-typedef struct {
-   HYPRE_StructVector  vector;
-   int                *ilower;
-   int                *iupper;
-   double             *values;
-   int                *returnvalue;
-} HYPRE_SetStructVectorBoxValuesArgs;
-
-void
-HYPRE_SetStructVectorBoxValuesVoidPtr( void *argptr )
-{
-   HYPRE_SetStructVectorBoxValuesArgs *localargs =
-                              (HYPRE_SetStructVectorBoxValuesArgs *) argptr;
-
-   *(localargs->returnvalue) = 
-                 HYPRE_SetStructVectorBoxValues( localargs->vector,
-                                                 localargs->ilower,
-                                                 localargs->iupper,
-                                                 localargs->values );
-}
-
-int
-HYPRE_SetStructVectorBoxValuesPush( HYPRE_StructVector  vector,
-                                    int                *ilower,
-                                    int                *iupper,
-                                    double             *values )
-{
-   HYPRE_SetStructVectorBoxValuesArgs  pushargs;
-   int                                 i;
-   int                                 returnvalue;
-
-   pushargs.vector = vector;
-   pushargs.ilower = ilower;
-   pushargs.iupper = iupper;
-   pushargs.values = values;
-   pushargs.returnvalue = (int *) malloc(sizeof(int));
-
-   for (i=0; i<hypre_NumThreads; i++)
-      hypre_work_put( HYPRE_SetStructVectorBoxValuesVoidPtr, (void *)&pushargs);
-
-   hypre_work_wait();
-
-   returnvalue = *(pushargs.returnvalue);
-
-   free( pushargs.returnvalue );
-
-   return returnvalue;
-}
-#endif
-
 /*--------------------------------------------------------------------------
  * HYPRE_GetStructVectorBoxValues
  *--------------------------------------------------------------------------*/
@@ -239,57 +188,6 @@ HYPRE_GetStructVectorBoxValues( HYPRE_StructVector  vector,
    return (ierr);
 }
 
-#ifdef HYPRE_USE_PTHREADS
-typedef struct {
-   HYPRE_StructVector  vector;
-   int                *ilower;
-   int                *iupper;
-   double            **values_ptr;
-   int                *returnvalue;
-} HYPRE_GetStructVectorBoxValuesArgs;
-
-void
-HYPRE_GetStructVectorBoxValuesVoidPtr( void *argptr )
-{
-   HYPRE_GetStructVectorBoxValuesArgs *localargs =
-                              (HYPRE_GetStructVectorBoxValuesArgs *) argptr;
-
-   *(localargs->returnvalue) = 
-                 HYPRE_GetStructVectorBoxValues( localargs->vector,
-                                                 localargs->ilower,
-                                                 localargs->iupper,
-                                                 localargs->values_ptr );
-}
-
-int
-HYPRE_GetStructVectorBoxValuesPush( HYPRE_StructVector  vector,
-                                    int                *ilower,
-                                    int                *iupper,
-                                    double            **values_ptr )
-{
-   HYPRE_GetStructVectorBoxValuesArgs  pushargs;
-   int                                 i;
-   int                                 returnvalue;
-
-   pushargs.vector     = vector;
-   pushargs.ilower     = ilower;
-   pushargs.iupper     = iupper;
-   pushargs.values_ptr = values_ptr;
-   pushargs.returnvalue = (int *) malloc(sizeof(int));
-
-   for (i=0; i<hypre_NumThreads; i++)
-      hypre_work_put( HYPRE_GetStructVectorBoxValuesVoidPtr, (void *)&pushargs);
-
-   hypre_work_wait();
-
-   returnvalue = *(pushargs.returnvalue);
-
-   free( pushargs.returnvalue );
-
-   return returnvalue;
-}
-#endif
-
 /*--------------------------------------------------------------------------
  * HYPRE_AssembleStructVector
  *--------------------------------------------------------------------------*/
@@ -304,23 +202,25 @@ HYPRE_AssembleStructVector( HYPRE_StructVector vector )
  * HYPRE_PrintStructVector
  *--------------------------------------------------------------------------*/
 
-void
+int
 HYPRE_PrintStructVector( char               *filename,
                          HYPRE_StructVector  vector,
                          int                 all )
 {
-   hypre_PrintStructVector( filename, (hypre_StructVector *) vector, all );
+   return ( hypre_PrintStructVector( filename,
+                                     (hypre_StructVector *) vector, all ) );
 }
 
 /*--------------------------------------------------------------------------
  * HYPRE_SetStructVectorNumGhost
  *--------------------------------------------------------------------------*/
  
-void
+int
 HYPRE_SetStructVectorNumGhost( HYPRE_StructVector  vector,
                                int                *num_ghost )
 {
-   hypre_SetStructVectorNumGhost( (hypre_StructVector *) vector, num_ghost);
+   return ( hypre_SetStructVectorNumGhost( (hypre_StructVector *) vector,
+                                           num_ghost) );
 }
 
 /*--------------------------------------------------------------------------
@@ -334,50 +234,6 @@ HYPRE_SetStructVectorConstantValues( HYPRE_StructVector  vector,
    return( hypre_SetStructVectorConstantValues( (hypre_StructVector *) vector,
                                                 values) );
 }
-
-#ifdef HYPRE_USE_PTHREADS
-typedef struct {
-   HYPRE_StructVector  vector;
-   double              values;
-   int                *returnvalue;
-} HYPRE_SetStructVectorConstantValuesArgs;
- 
-void
-HYPRE_SetStructVectorConstantValuesVoidPtr( void *argptr )
-{
-   HYPRE_SetStructVectorConstantValuesArgs *localargs =
-                           (HYPRE_SetStructVectorConstantValuesArgs *) argptr;
-
-   *(localargs->returnvalue) = 
-                 HYPRE_SetStructVectorConstantValues( localargs->vector,
-                                                      localargs->values );
-}
-
-int
-HYPRE_SetStructVectorConstantValuesPush( HYPRE_StructVector  vector,
-                                         double              values )
-{
-   HYPRE_SetStructVectorConstantValuesArgs  pushargs;
-   int                                 i;
-   int                                 returnvalue;
-
-   pushargs.vector = vector;
-   pushargs.values = values;
-   pushargs.returnvalue = (int *) malloc(sizeof(int));
-
-   for (i=0; i<hypre_NumThreads; i++)
-      hypre_work_put( HYPRE_SetStructVectorConstantValuesVoidPtr, 
-                      (void *)&pushargs );
-
-   hypre_work_wait();
-
-   returnvalue = *(pushargs.returnvalue);
-
-   free( pushargs.returnvalue );
-
-   return returnvalue;
-}
-#endif
 
 /*--------------------------------------------------------------------------
  * HYPRE_GetMigrateStructVectorCommPkg
@@ -411,10 +267,10 @@ HYPRE_MigrateStructVector( HYPRE_CommPkg      comm_pkg,
  * HYPRE_FreeCommPkg
  *--------------------------------------------------------------------------*/
 
-void 
+int
 HYPRE_FreeCommPkg( HYPRE_CommPkg comm_pkg )
 {
-  hypre_FreeCommPkg( (hypre_CommPkg *)comm_pkg );
+  return ( hypre_FreeCommPkg( (hypre_CommPkg *)comm_pkg ) );
 }
 
 

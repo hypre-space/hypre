@@ -77,6 +77,7 @@ FILES =\
  struct_scale.c\
  struct_stencil.c\
  struct_vector.c\
+ thread_wrappers.c\
  HYPRE_struct_grid.c\
  HYPRE_struct_matrix.c\
  HYPRE_struct_stencil.c\

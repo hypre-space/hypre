@@ -32,17 +32,17 @@ HYPRE_NewStructGrid( MPI_Comm          comm,
  * HYPRE_FreeStructGrid
  *--------------------------------------------------------------------------*/
 
-void 
+int
 HYPRE_FreeStructGrid( HYPRE_StructGrid grid )
 {
-   hypre_FreeStructGrid( (hypre_StructGrid *) grid );
+   return ( hypre_FreeStructGrid( (hypre_StructGrid *) grid ) );
 }
 
 /*--------------------------------------------------------------------------
  * HYPRE_SetStructGridExtents
  *--------------------------------------------------------------------------*/
 
-void 
+int
 HYPRE_SetStructGridExtents( HYPRE_StructGrid  grid,
                             int              *ilower,
                             int              *iupper )
@@ -60,16 +60,17 @@ HYPRE_SetStructGridExtents( HYPRE_StructGrid  grid,
       hypre_IndexD(new_iupper, d) = iupper[d];
    }
 
-   hypre_SetStructGridExtents( (hypre_StructGrid *) grid,
-                               new_ilower, new_iupper );
+   return ( hypre_SetStructGridExtents( (hypre_StructGrid *) grid,
+                                        new_ilower, new_iupper ) );
 }
 
 /*--------------------------------------------------------------------------
  * HYPRE_AssembleStructGrid
  *--------------------------------------------------------------------------*/
 
-void
+int
 HYPRE_AssembleStructGrid( HYPRE_StructGrid grid )
 {
-   hypre_AssembleStructGrid( (hypre_StructGrid *) grid, NULL, NULL, NULL );
+   return ( hypre_AssembleStructGrid( (hypre_StructGrid *) grid,
+                                      NULL, NULL, NULL ) );
 }

@@ -16,7 +16,7 @@
  * hypre_GetComputeInfo:
  *--------------------------------------------------------------------------*/
 
-void
+int
 hypre_GetComputeInfo( hypre_BoxArrayArray  **send_boxes_ptr,
                       hypre_BoxArrayArray  **recv_boxes_ptr,
                       int                 ***send_processes_ptr,
@@ -26,6 +26,8 @@ hypre_GetComputeInfo( hypre_BoxArrayArray  **send_boxes_ptr,
                       hypre_StructGrid      *grid,
                       hypre_StructStencil   *stencil            )
 {
+   int                      ierr = 0;
+
    /* output variables */
    hypre_BoxArrayArray     *send_boxes;
    hypre_BoxArrayArray     *recv_boxes;
@@ -179,6 +181,8 @@ hypre_GetComputeInfo( hypre_BoxArrayArray  **send_boxes_ptr,
    *recv_processes_ptr = recv_processes;
    *indt_boxes_ptr = indt_boxes;
    *dept_boxes_ptr = dept_boxes;
+
+   return ierr;
 }
 
 /*--------------------------------------------------------------------------
@@ -225,9 +229,11 @@ hypre_NewComputePkg( hypre_BoxArrayArray   *send_boxes,
  * hypre_FreeComputePkg:
  *--------------------------------------------------------------------------*/
 
-void
+int
 hypre_FreeComputePkg( hypre_ComputePkg *compute_pkg )
 {
+   int ierr = 0;
+
    if (compute_pkg)
    {
       hypre_FreeCommPkg(hypre_ComputePkgCommPkg(compute_pkg));
@@ -237,6 +243,8 @@ hypre_FreeComputePkg( hypre_ComputePkg *compute_pkg )
 
       hypre_TFree(compute_pkg);
    }
+
+   return ierr;
 }
 
 /*--------------------------------------------------------------------------
@@ -256,8 +264,12 @@ hypre_InitializeIndtComputations( hypre_ComputePkg *compute_pkg,
  * hypre_FinalizeIndtComputations:
  *--------------------------------------------------------------------------*/
 
-void
+int
 hypre_FinalizeIndtComputations( hypre_CommHandle *comm_handle )
 {
+   int ierr = 0;
+
    hypre_FinalizeCommunication(comm_handle);
+
+   return ierr;
 }

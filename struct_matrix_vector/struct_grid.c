@@ -40,26 +40,31 @@ hypre_NewStructGrid( MPI_Comm  comm,
  * hypre_FreeStructGrid
  *--------------------------------------------------------------------------*/
 
-void 
+int 
 hypre_FreeStructGrid( hypre_StructGrid *grid )
 {
+   int ierr = 0;
+
    if (grid)
    {
       hypre_FreeBoxNeighbors(hypre_StructGridNeighbors(grid));
       hypre_FreeBoxArray(hypre_StructGridBoxes(grid));
       hypre_TFree(grid);
    }
+
+   return ierr;
 }
 
 /*--------------------------------------------------------------------------
  * hypre_SetStructGridExtents
  *--------------------------------------------------------------------------*/
 
-void 
+int 
 hypre_SetStructGridExtents( hypre_StructGrid  *grid,
                             hypre_Index        ilower,
                             hypre_Index        iupper )
 {
+   int          ierr = 0;
    hypre_Box   *box;
 
    if (hypre_StructGridBoxes(grid) == NULL)
@@ -69,29 +74,37 @@ hypre_SetStructGridExtents( hypre_StructGrid  *grid,
 
    box = hypre_NewBox(ilower, iupper);
    hypre_AppendBox(box, hypre_StructGridBoxes(grid));
+
+   return ierr;
 }
 
 /*--------------------------------------------------------------------------
  * hypre_SetStructGridBoxes
  *--------------------------------------------------------------------------*/
 
-void 
+int 
 hypre_SetStructGridBoxes( hypre_StructGrid  *grid,
                           hypre_BoxArray    *boxes )
 {
+   int ierr = 0;
+
    hypre_StructGridBoxes(grid) = boxes;
+
+   return ierr;
 }
 
 /*--------------------------------------------------------------------------
  * hypre_AssembleStructGrid
  *--------------------------------------------------------------------------*/
 
-void 
+int 
 hypre_AssembleStructGrid( hypre_StructGrid *grid,
                           hypre_BoxArray   *all_boxes,
                           int              *processes,
                           int              *box_ranks )
 {
+   int                  ierr = 0;
+
    MPI_Comm             comm  = hypre_StructGridComm(grid);
    hypre_BoxArray      *boxes = hypre_StructGridBoxes(grid);
    int                  global_size;
@@ -143,6 +156,8 @@ hypre_AssembleStructGrid( hypre_StructGrid *grid,
       hypre_TFree(processes);
       hypre_TFree(box_ranks);
    }
+
+   return ierr;
 }
 
 /*--------------------------------------------------------------------------
@@ -285,10 +300,12 @@ hypre_GatherAllBoxes( MPI_Comm         comm,
  * hypre_PrintStructGrid
  *--------------------------------------------------------------------------*/
  
-void
+int
 hypre_PrintStructGrid( FILE             *file,
                        hypre_StructGrid *grid )
 {
+   int                ierr = 0;
+
    hypre_BoxArray    *boxes;
    hypre_Box         *box;
 
@@ -310,6 +327,8 @@ hypre_PrintStructGrid( FILE             *file,
                  hypre_BoxIMaxY(box),
                  hypre_BoxIMaxZ(box));
       }
+
+   return ierr;
 }
 
 /*--------------------------------------------------------------------------

@@ -301,10 +301,12 @@ hypre_InitializeStructMatrixShell( hypre_StructMatrix *matrix )
  * hypre_InitializeStructMatrixData
  *--------------------------------------------------------------------------*/
 
-void
+int
 hypre_InitializeStructMatrixData( hypre_StructMatrix *matrix,
                                   double             *data   )
 {
+   int             ierr = 0;
+
    hypre_BoxArray *data_boxes;
    hypre_Box      *data_box;
    hypre_Index     loop_size;
@@ -347,6 +349,8 @@ hypre_InitializeStructMatrixData( hypre_StructMatrix *matrix,
 
          }
       }
+
+   return ierr;
 }
 
 /*--------------------------------------------------------------------------
@@ -601,25 +605,30 @@ hypre_AssembleStructMatrix( hypre_StructMatrix *matrix )
  * hypre_SetStructMatrixNumGhost
  *--------------------------------------------------------------------------*/
 
-void
+int
 hypre_SetStructMatrixNumGhost( hypre_StructMatrix *matrix,
                                int                *num_ghost )
 {
+   int  ierr = 0;
    int  i;
 
    for (i = 0; i < 6; i++)
       hypre_StructMatrixNumGhost(matrix)[i] = num_ghost[i];
+
+   return ierr;
 }
 
 /*--------------------------------------------------------------------------
  * hypre_PrintStructMatrix
  *--------------------------------------------------------------------------*/
 
-void
+int
 hypre_PrintStructMatrix( char               *filename,
                          hypre_StructMatrix *matrix,
                          int                 all      )
 {
+   int                   ierr = 0;
+
    FILE                 *file;
    char                  new_filename[255];
 
@@ -715,6 +724,8 @@ hypre_PrintStructMatrix( char               *filename,
  
    fflush(file);
    fclose(file);
+
+   return ierr;
 }
 
 /*--------------------------------------------------------------------------

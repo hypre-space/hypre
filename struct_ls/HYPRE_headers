@@ -1,0 +1,54 @@
+#!/bin/sh
+#BHEADER***********************************************************************
+# (c) 1998   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+TEMP_FILE=HYPRE_headers.tmp
+TWRAPPER_FILE=thread_wrappers.c
+
+#===========================================================================
+# Create standard interface prototypes
+#===========================================================================
+
+mkproto HYPRE*.c > $TEMP_FILE
+
+#===========================================================================
+# Create thread wrapper routines
+#===========================================================================
+
+cat > $TWRAPPER_FILE <<@
+
+#ifdef HYPRE_USE_PTHREADS
+#define NO_PTHREAD_MANGLING
+#include "headers.h"
+#include "threading.h"
+
+@
+
+/usr/xpg4/bin/awk -f ../utilities/thread_wrappers.awk \
+    < $TEMP_FILE >> $TWRAPPER_FILE
+
+cat >> $TWRAPPER_FILE <<@
+
+#endif
+
+@
+
+#===========================================================================
+# Create thread wrapper prototypes
+#===========================================================================
+
+mkproto $TWRAPPER_FILE >> $TEMP_FILE
+
+#===========================================================================
+# Echo prototypes to stdout and clean up
+#===========================================================================
+
+cat $TEMP_FILE
+rm -f $TEMP_FILE
+

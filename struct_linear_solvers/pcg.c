@@ -23,7 +23,7 @@
  *--------------------------------------------------------------------------*/
 
 char  *hypre_PCGCAlloc( int count, int elt_size );
-void   hypre_PCGFree( char *ptr );
+int    hypre_PCGFree( char *ptr );
 void  *hypre_PCGNewVector( void *vector );
 int    hypre_PCGFreeVector( void *vector );
 void  *hypre_PCGMatvecInitialize( void *A, void *x );

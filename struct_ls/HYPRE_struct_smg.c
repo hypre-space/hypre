@@ -59,55 +59,6 @@ HYPRE_StructSMGSetup( HYPRE_StructSolver solver,
                            (hypre_StructVector *) x ) );
 }
 
-#ifdef HYPRE_USE_PTHREADS
-typedef struct {
-   HYPRE_StructSolver solver;
-   HYPRE_StructMatrix A;
-   HYPRE_StructVector b;
-   HYPRE_StructVector x;
-   int               *returnvalue;
-} HYPRE_StructSMGSetupArgs;
-
-void
-HYPRE_StructSMGSetupVoidPtr( void *argptr )
-{
-   HYPRE_StructSMGSetupArgs *localargs = (HYPRE_StructSMGSetupArgs *) argptr;
-
-   *(localargs->returnvalue) = HYPRE_StructSMGSetup( localargs->solver,
-                                                     localargs->A,
-                                                     localargs->b,
-                                                     localargs->x );
-}
-
-int 
-HYPRE_StructSMGSetupPush( HYPRE_StructSolver solver,
-                          HYPRE_StructMatrix A,
-                          HYPRE_StructVector b,
-                          HYPRE_StructVector x      )
-{
-   HYPRE_StructSMGSetupArgs  pushargs;
-   int                       i;
-   int                       returnvalue;
-
-   pushargs.solver = solver;
-   pushargs.A      = A;
-   pushargs.b      = b;
-   pushargs.x      = x;
-   pushargs.returnvalue = (int *) malloc(sizeof(int));
-
-   for (i=0; i<hypre_NumThreads; i++)
-      hypre_work_put( HYPRE_StructSMGSetupVoidPtr, (void *)&pushargs);
-
-   hypre_work_wait();
-
-   returnvalue = *(pushargs.returnvalue);
-
-   free( pushargs.returnvalue );
-
-   return returnvalue;
-}
-#endif
-
 /*--------------------------------------------------------------------------
  * HYPRE_StructSMGSolve
  *--------------------------------------------------------------------------*/
@@ -123,55 +74,6 @@ HYPRE_StructSMGSolve( HYPRE_StructSolver solver,
                            (hypre_StructVector *) b,
                            (hypre_StructVector *) x ) );
 }
-
-#ifdef HYPRE_USE_PTHREADS
-typedef struct {
-   HYPRE_StructSolver solver;
-   HYPRE_StructMatrix A;
-   HYPRE_StructVector b;
-   HYPRE_StructVector x;
-   int               *returnvalue;
-} HYPRE_StructSMGSolveArgs;
-
-void
-HYPRE_StructSMGSolveVoidPtr( void *argptr )
-{
-   HYPRE_StructSMGSolveArgs *localargs = (HYPRE_StructSMGSolveArgs *) argptr;
-
-   *(localargs->returnvalue) = HYPRE_StructSMGSolve( localargs->solver,
-                                                     localargs->A,
-                                                     localargs->b,
-                                                     localargs->x );
-}
-
-int 
-HYPRE_StructSMGSolvePush( HYPRE_StructSolver solver,
-                          HYPRE_StructMatrix A,
-                          HYPRE_StructVector b,
-                          HYPRE_StructVector x      )
-{
-   HYPRE_StructSMGSolveArgs  pushargs;
-   int                       i;
-   int                       returnvalue;
-
-   pushargs.solver = solver;
-   pushargs.A      = A;
-   pushargs.b      = b;
-   pushargs.x      = x;
-   pushargs.returnvalue = (int *) malloc(sizeof(int));
-
-   for (i=0; i<hypre_NumThreads; i++)
-      hypre_work_put( HYPRE_StructSMGSolveVoidPtr, (void *)&pushargs);
-
-   hypre_work_wait();
-
-   returnvalue = *(pushargs.returnvalue);
-
-   free( pushargs.returnvalue );
-
-   return returnvalue;
-}
-#endif
 
 /*--------------------------------------------------------------------------
  * HYPRE_StructSMGSetMemoryUse

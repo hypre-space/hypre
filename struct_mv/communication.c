@@ -161,7 +161,7 @@ Destroy a communication package.
 {\bf Input files:}
 headers.h
 
-@return Void.
+@return Int.
 
 @param comm_pkg [IN]
   communication package.
@@ -170,9 +170,10 @@ headers.h
 */
 /*--------------------------------------------------------------------------*/
 
-void
+int
 hypre_FreeCommPkg( hypre_CommPkg *comm_pkg )
 {
+   int ierr = 0;
 #if defined(HYPRE_COMM_SIMPLE) || defined(HYPRE_COMM_VOLATILE)
    int               i;
 #else
@@ -200,6 +201,8 @@ hypre_FreeCommPkg( hypre_CommPkg *comm_pkg )
 
       hypre_TFree(comm_pkg);
    }
+
+   return ierr;
 }
 
 /*==========================================================================*/
@@ -783,7 +786,7 @@ Destroy a communication type.
 {\bf Input files:}
 headers.h
 
-@return Void.
+@return Int.
 
 @param comm_type [IN]
   communication type.
@@ -792,9 +795,10 @@ headers.h
 */
 /*--------------------------------------------------------------------------*/
 
-void 
+int 
 hypre_FreeCommType( hypre_CommType *comm_type )
 {
+   int                   ierr = 0;
    hypre_CommTypeEntry  *comm_entry;
    int                   i;
 
@@ -812,6 +816,8 @@ hypre_FreeCommType( hypre_CommType *comm_type )
       hypre_TFree(hypre_CommTypeCommEntries(comm_type));
       hypre_TFree(comm_type);
    }
+
+   return ierr;
 }
 
 /*==========================================================================*/
@@ -944,7 +950,7 @@ Destroy a communication type entry.
 {\bf Input files:}
 headers.h
 
-@return Void.
+@return Int.
 
 @param comm_entry [IN]
   communication type entry.
@@ -953,13 +959,17 @@ headers.h
 */
 /*--------------------------------------------------------------------------*/
 
-void
+int
 hypre_FreeCommTypeEntry( hypre_CommTypeEntry *comm_entry )
 {
+   int ierr = 0;
+
    if (comm_entry)
    {
       hypre_TFree(comm_entry);
    }
+
+   return ierr;
 }
 
 /*==========================================================================*/

@@ -168,11 +168,15 @@ hypre_InitializeStructVectorShell( hypre_StructVector *vector )
  * hypre_InitializeStructVectorData
  *--------------------------------------------------------------------------*/
 
-void
+int
 hypre_InitializeStructVectorData( hypre_StructVector *vector,
                                   double             *data   )
 {
+   int ierr = 0;
+
    hypre_StructVectorData(vector) = data;
+
+   return ierr;
 }
 
 /*--------------------------------------------------------------------------
@@ -469,14 +473,17 @@ hypre_GetStructVectorBoxValues( hypre_StructVector *vector,
  * hypre_SetStructVectorNumGhost
  *--------------------------------------------------------------------------*/
  
-void
+int
 hypre_SetStructVectorNumGhost( hypre_StructVector *vector,
                                int                *num_ghost )
 {
+   int  ierr = 0;
    int  i;
  
    for (i = 0; i < 6; i++)
       hypre_StructVectorNumGhost(vector)[i] = num_ghost[i];
+
+   return ierr;
 }
 
 /*--------------------------------------------------------------------------
@@ -699,11 +706,13 @@ hypre_MigrateStructVector( hypre_CommPkg      *comm_pkg,
  * hypre_PrintStructVector
  *--------------------------------------------------------------------------*/
 
-void
+int
 hypre_PrintStructVector( char               *filename,
                          hypre_StructVector *vector,
                          int                 all      )
 {
+   int                ierr = 0;
+
    FILE              *file;
    char               new_filename[255];
 
@@ -767,6 +776,8 @@ hypre_PrintStructVector( char               *filename,
  
    fflush(file);
    fclose(file);
+
+   return ierr;
 }
 
 /*--------------------------------------------------------------------------

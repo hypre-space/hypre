@@ -150,9 +150,10 @@ hypre_InitializeTiming( char *name )
  * hypre_FinalizeTiming
  *--------------------------------------------------------------------------*/
 
-void
+int
 hypre_FinalizeTiming( int time_index )
 {
+   int  ierr = 0;
    int  i;
 
    if (hypre_global_timing == NULL)
@@ -186,28 +187,36 @@ hypre_FinalizeTiming( int time_index )
       hypre_TFree(hypre_global_timing);
       hypre_global_timing = NULL;
    }
+
+   return ierr;
 }
 
 /*--------------------------------------------------------------------------
  * hypre_IncFLOPCount
  *--------------------------------------------------------------------------*/
 
-void
+int
 hypre_IncFLOPCount( int inc )
 {
+   int  ierr = 0;
+
    if (hypre_global_timing == NULL)
       return;
 
    hypre_TimingFLOPCount += (double) (inc);
+
+   return ierr;
 }
 
 /*--------------------------------------------------------------------------
  * hypre_BeginTiming
  *--------------------------------------------------------------------------*/
 
-void
+int
 hypre_BeginTiming( int time_index )
 {
+   int  ierr = 0;
+
    if (hypre_global_timing == NULL)
       return;
 
@@ -220,15 +229,19 @@ hypre_BeginTiming( int time_index )
       hypre_StartTiming();
    }
    hypre_TimingState(time_index) ++;
+
+   return ierr;
 }
 
 /*--------------------------------------------------------------------------
  * hypre_EndTiming
  *--------------------------------------------------------------------------*/
 
-void
+int
 hypre_EndTiming( int time_index )
 {
+   int  ierr = 0;
+
    if (hypre_global_timing == NULL)
       return;
 
@@ -241,15 +254,18 @@ hypre_EndTiming( int time_index )
       hypre_TimingFLOPS(time_index)    += hypre_TimingFLOPCount;
       hypre_StartTiming();
    }
+
+   return ierr;
 }
 
 /*--------------------------------------------------------------------------
  * hypre_ClearTiming
  *--------------------------------------------------------------------------*/
 
-void
+int
 hypre_ClearTiming( )
 {
+   int  ierr = 0;
    int  i;
 
    if (hypre_global_timing == NULL)
@@ -261,16 +277,20 @@ hypre_ClearTiming( )
       hypre_TimingCPUTime(i)  = 0.0;
       hypre_TimingFLOPS(i)    = 0.0;
    }
+
+   return ierr;
 }
 
 /*--------------------------------------------------------------------------
  * hypre_PrintTiming
  *--------------------------------------------------------------------------*/
 
-void
+int
 hypre_PrintTiming( char     *heading,
                    MPI_Comm  comm  )
 {
+   int  ierr = 0;
+
    double  local_wall_time;
    double  local_cpu_time;
    double  wall_time;
@@ -327,6 +347,8 @@ hypre_PrintTiming( char     *heading,
          }
       }
    }
+
+   return ierr;
 }
 
 #else   /* below are timing routines for threads */
@@ -452,9 +474,11 @@ hypre_InitializeTiming( char *name )
  * hypre_FinalizeTiming
  *--------------------------------------------------------------------------*/
 
-void
+int
 hypre_FinalizeTiming( int time_index )
 {
+   int  ierr = 0;
+
    int  i;
    int  threadid = hypre_GetThreadID();
 
@@ -493,15 +517,19 @@ hypre_FinalizeTiming( int time_index )
       hypre_global_timing = NULL;
       pthread_mutex_unlock(&time_mtx);
    }
+
+   return ierr;
 }
 
 /*--------------------------------------------------------------------------
  * hypre_IncFLOPCount
  *--------------------------------------------------------------------------*/
 
-void
+int
 hypre_IncFLOPCount( int inc )
 {
+   int  ierr = 0;
+
    int threadid = hypre_GetThreadID();
 
    if (hypre_global_timing == NULL)
@@ -515,15 +543,19 @@ hypre_IncFLOPCount( int inc )
       hypre_TimingAllFLOPS += (double) (inc);
       pthread_mutex_unlock(&time_mtx);
    }
+
+   return ierr;
 }
 
 /*--------------------------------------------------------------------------
  * hypre_BeginTiming
  *--------------------------------------------------------------------------*/
 
-void
+int
 hypre_BeginTiming( int time_index )
 {
+   int  ierr = 0;
+
    int threadid = hypre_GetThreadID();
 
    if (hypre_global_timing == NULL)
@@ -541,15 +573,19 @@ hypre_BeginTiming( int time_index )
       hypre_StartTiming();
    }
    hypre_TimingState(time_index) ++;
+
+   return ierr;
 }
 
 /*--------------------------------------------------------------------------
  * hypre_EndTiming
  *--------------------------------------------------------------------------*/
 
-void
+int
 hypre_EndTiming( int time_index )
 {
+   int  ierr = 0;
+
    int threadid = hypre_GetThreadID();
 
    if (hypre_global_timing == NULL)
@@ -567,15 +603,19 @@ hypre_EndTiming( int time_index )
          hypre_TimingFLOPS(time_index)    += hypre_TimingAllFLOPS;
       hypre_StartTiming();
    }
+
+   return ierr;
 }
 
 /*--------------------------------------------------------------------------
  * hypre_ClearTiming
  *--------------------------------------------------------------------------*/
 
-void
+int
 hypre_ClearTiming( )
 {
+   int  ierr = 0;
+
    int threadid = hypre_GetThreadID();
 
    int  i;
@@ -589,6 +629,8 @@ hypre_ClearTiming( )
       hypre_TimingCPUTime(i)  = 0.0;
       hypre_TimingFLOPS(i)    = 0.0;
    }
+
+   return ierr;
 }
 
 /*--------------------------------------------------------------------------
@@ -603,10 +645,12 @@ hypre_ClearTiming( )
 #endif
 
 
-void
+int
 hypre_PrintTiming( char     *heading,
                    MPI_Comm  comm  )
 {
+   int  ierr = 0;
+
    double  local_wall_time;
    double  local_cpu_time;
    double  wall_time;
@@ -764,6 +808,8 @@ hypre_PrintTiming( char     *heading,
          }
       }
    }
+
+   return ierr;
 }
 
 #endif

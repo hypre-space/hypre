@@ -16,7 +16,7 @@
  * hypre_NewCommInfoFromStencil:
  *--------------------------------------------------------------------------*/
 
-void
+int
 hypre_NewCommInfoFromStencil( hypre_BoxArrayArray  **send_boxes_ptr,
                               hypre_BoxArrayArray  **recv_boxes_ptr,
                               int                 ***send_processes_ptr,
@@ -24,6 +24,8 @@ hypre_NewCommInfoFromStencil( hypre_BoxArrayArray  **send_boxes_ptr,
                               hypre_StructGrid      *grid,
                               hypre_StructStencil   *stencil            )
 {
+   int                      ierr = 0;
+
    /* output variables */
    hypre_BoxArrayArray     *send_boxes;
    hypre_BoxArrayArray     *recv_boxes;
@@ -273,13 +275,15 @@ hypre_NewCommInfoFromStencil( hypre_BoxArrayArray  **send_boxes_ptr,
    *recv_boxes_ptr = recv_boxes;
    *send_processes_ptr = send_processes;
    *recv_processes_ptr = recv_processes;
+
+   return ierr;
 }
 
 /*--------------------------------------------------------------------------
  * hypre_NewCommInfoFromGrids:
  *--------------------------------------------------------------------------*/
 
-void
+int
 hypre_NewCommInfoFromGrids( hypre_BoxArrayArray  **send_boxes_ptr,
                             hypre_BoxArrayArray  **recv_boxes_ptr,
                             int                 ***send_processes_ptr,
@@ -287,6 +291,8 @@ hypre_NewCommInfoFromGrids( hypre_BoxArrayArray  **send_boxes_ptr,
                             hypre_StructGrid      *from_grid,
                             hypre_StructGrid      *to_grid            )
 {
+   int                      ierr = 0;
+
    /* output variables */
    hypre_BoxArrayArray     *send_boxes;
    hypre_BoxArrayArray     *recv_boxes;
@@ -398,4 +404,6 @@ hypre_NewCommInfoFromGrids( hypre_BoxArrayArray  **send_boxes_ptr,
    *recv_boxes_ptr = recv_boxes;
    *send_processes_ptr = send_processes;
    *recv_processes_ptr = recv_processes;
+
+   return ierr;
 }

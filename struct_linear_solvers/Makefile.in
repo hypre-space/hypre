@@ -68,6 +68,7 @@ FILES =\
  smg_setup_rap.c\
  smg_setup_restrict.c\
  smg_solve.c\
+ thread_wrappers.c\
  HYPRE_struct_smg.c\
  HYPRE_struct_pcg.c 
 

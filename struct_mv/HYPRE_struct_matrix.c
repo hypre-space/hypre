@@ -58,45 +58,6 @@ HYPRE_InitializeStructMatrix( HYPRE_StructMatrix matrix )
    return ( hypre_InitializeStructMatrix( (hypre_StructMatrix *) matrix ) );
 }
 
-#ifdef HYPRE_USE_PTHREADS
-typedef struct {
-   HYPRE_StructMatrix matrix;
-   int *returnvalue;
-} HYPRE_InitializeStructMatrixArgs;
-
-void
-HYPRE_InitializeStructMatrixVoidPtr( void *argptr)
-{
-   HYPRE_InitializeStructMatrixArgs *localargs =
-                                (HYPRE_InitializeStructMatrixArgs *) argptr;
-
-   *(localargs->returnvalue) = 
-                 HYPRE_InitializeStructMatrix( localargs->matrix );
-}
-
-int
-HYPRE_InitializeStructMatrixPush( HYPRE_StructMatrix matrix )
-{
-   HYPRE_InitializeStructMatrixArgs  pushargs;
-   int                               i;
-   int                               returnvalue;
-
-   pushargs.matrix = matrix;
-   pushargs.returnvalue = (int *) malloc(sizeof(int));
-   for (i=0; i<hypre_NumThreads; i++)
-      hypre_work_put( HYPRE_InitializeStructMatrixVoidPtr, (void *)&pushargs);
-
-   hypre_work_wait();
-
-   returnvalue = *(pushargs.returnvalue);
-
-   free( pushargs.returnvalue );
-
-   return returnvalue;
-}
-#endif
-
-
 /*--------------------------------------------------------------------------
  * HYPRE_SetStructMatrixValues
  *--------------------------------------------------------------------------*/
@@ -171,65 +132,6 @@ HYPRE_SetStructMatrixBoxValues( HYPRE_StructMatrix  matrix,
    return (ierr);
 }
 
-#ifdef HYPRE_USE_PTHREADS
-typedef struct {
-   HYPRE_StructMatrix  matrix;
-   int                *ilower;
-   int                *iupper;
-   int                 num_stencil_indices;
-   int                *stencil_indices;
-   double             *values;
-   int                *returnvalue;
-} HYPRE_SetStructMatrixBoxValuesArgs;
-
-void
-HYPRE_SetStructMatrixBoxValuesVoidPtr( void *argptr)
-{
-   HYPRE_SetStructMatrixBoxValuesArgs *localargs =
-                                (HYPRE_SetStructMatrixBoxValuesArgs *) argptr;
-
-   *(localargs->returnvalue) = 
-                 HYPRE_SetStructMatrixBoxValues( localargs->matrix,
-                                                 localargs->ilower,
-                                                 localargs->iupper,
-                                                 localargs->num_stencil_indices,
-                                                 localargs->stencil_indices,
-                                                 localargs->values);
-}
-
-int
-HYPRE_SetStructMatrixBoxValuesPush( HYPRE_StructMatrix matrix,
-                                    int               *ilower,
-                                    int               *iupper,
-                                    int                num_stencil_indices,
-                                    int               *stencil_indices,
-                                    double            *values)
-{
-   HYPRE_SetStructMatrixBoxValuesArgs  pushargs;
-   int                                 i;
-   int                                 returnvalue;
-
-   pushargs.matrix              = matrix;
-   pushargs.ilower              = ilower;
-   pushargs.iupper              = iupper;
-   pushargs.num_stencil_indices = num_stencil_indices;
-   pushargs.stencil_indices     = stencil_indices;
-   pushargs.values              = values;
-   pushargs.returnvalue = (int *) malloc(sizeof(int));
-   for (i=0; i<hypre_NumThreads; i++)
-      hypre_work_put( HYPRE_SetStructMatrixBoxValuesVoidPtr, (void *)&pushargs);
-
-   hypre_work_wait();
-
-   returnvalue = *(pushargs.returnvalue);
-
-   free( pushargs.returnvalue );
-
-   return returnvalue;
-}
-#endif
-
-
 /*--------------------------------------------------------------------------
  * HYPRE_AssembleStructMatrix
  *--------------------------------------------------------------------------*/
@@ -244,11 +146,12 @@ HYPRE_AssembleStructMatrix( HYPRE_StructMatrix matrix )
  * HYPRE_SetStructMatrixNumGhost
  *--------------------------------------------------------------------------*/
  
-void
+int
 HYPRE_SetStructMatrixNumGhost( HYPRE_StructMatrix  matrix,
                                int                *num_ghost )
 {
-   hypre_SetStructMatrixNumGhost( (hypre_StructMatrix *) matrix, num_ghost);
+   return ( hypre_SetStructMatrixNumGhost( (hypre_StructMatrix *) matrix,
+                                           num_ghost) );
 }
 
 /*--------------------------------------------------------------------------
@@ -266,58 +169,27 @@ HYPRE_StructMatrixGrid( HYPRE_StructMatrix matrix )
  * HYPRE_SetStructMatrixSymmetric
  *--------------------------------------------------------------------------*/
  
-void
+int
 HYPRE_SetStructMatrixSymmetric( HYPRE_StructMatrix  matrix,
                                 int                 symmetric )
 {
+   int ierr  = 0;
+
    hypre_StructMatrixSymmetric( (hypre_StructMatrix *) matrix ) = symmetric;
+
+   return ierr;
 }
 
 /*--------------------------------------------------------------------------
  * HYPRE_PrintStructMatrix
  *--------------------------------------------------------------------------*/
 
-void 
+int
 HYPRE_PrintStructMatrix( char               *filename,
                          HYPRE_StructMatrix  matrix,
                          int                 all )
 {
-   hypre_PrintStructMatrix( filename, (hypre_StructMatrix *) matrix, all );
+   return ( hypre_PrintStructMatrix( filename,
+                                     (hypre_StructMatrix *) matrix, all ) );
 }
 
-#ifdef HYPRE_USE_PTHREADS
-typedef struct {
-   char *filename;
-   HYPRE_StructMatrix matrix;
-   int all;
-} HYPRE_PrintStructMatrixArgs;
-
-void
-HYPRE_PrintStructMatrixVoidPtr( void *argptr )
-{
-   HYPRE_PrintStructMatrixArgs *localargs = 
-                                    (HYPRE_PrintStructMatrixArgs *) argptr;
-
-   HYPRE_PrintStructMatrix( localargs->filename, 
-                            localargs->matrix,
-                            localargs->all );
-}
-
-void
-HYPRE_PrintStructMatrixPush( char               *filename,
-                             HYPRE_StructMatrix  matrix,
-                             int                 all )
-{
-   HYPRE_PrintStructMatrixArgs  pushargs;
-   int                          i;
-
-   pushargs.filename = filename;
-   pushargs.matrix   = matrix;
-   pushargs.all      = all;
-
-   for (i = 0; i < hypre_NumThreads; i++)
-      hypre_work_put( HYPRE_PrintStructMatrixVoidPtr, (void *)&pushargs );
-
-   hypre_work_wait();
-}
-#endif

@@ -432,13 +432,15 @@ hypre_SMGIntAddFinalize( void *intadd_vdata )
  *   Additionally create an appended version of processes.
  *--------------------------------------------------------------------------*/
  
-void
+int
 hypre_AppendBoxArrayArrayAndProcs( int                  **processes_0,
                                    int                  **processes_1,
                                    hypre_BoxArrayArray   *box_array_array_0,
                                    hypre_BoxArrayArray   *box_array_array_1,
                                    int                 ***processes_ptr     )
 {
+   int                ierr = 0;
+
    int              **processes;
    int                box_array_array_size; 
    hypre_BoxArray    *box_array_0;
@@ -468,5 +470,7 @@ hypre_AppendBoxArrayArrayAndProcs( int                  **processes_0,
       }
 
    *processes_ptr = processes;
+
+   return ierr;
 }
 
