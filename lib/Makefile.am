@@ -179,6 +179,11 @@ FILES = \
  $(top_srcdir)/FEI_mv/fei-hypre/bicgs.c\
  $(top_srcdir)/FEI_mv/fei-hypre/bicgstabl.c\
  $(top_srcdir)/FEI_mv/fei-hypre/FEI_HYPRE_Impl.cxx\
+ $(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Impl.cxx\
+ $(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Fei.cxx\
+ $(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_LSCore.cxx\
+ $(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Solver.cxx\
+ $(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Matrix.cxx\
  $(top_srcdir)/FEI_mv/fei-hypre/HYPRE_LSC_aux.cxx\
  $(top_srcdir)/FEI_mv/fei-hypre/HYPRE_LSI_Dsuperlu.c\
  $(top_srcdir)/FEI_mv/fei-hypre/HYPRE_LSI_UZAWA.cxx\

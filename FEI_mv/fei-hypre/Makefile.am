@@ -22,7 +22,12 @@ include_HEADERS = cfei-hypre.h cfei_hypre.h \
  $(BASE_DIR)/Lookup.h  \
  $(BASE_DIR)/LinearSystemCore.h \
  $(BASE_DIR)/fei_defs.h\
- snl_LinearSystemCore.h
+ snl_LinearSystemCore.h\
+ LLNL_FEI_Impl.h\
+ LLNL_FEI_Fei.h\
+ LLNL_FEI_LSCore.h\
+ LLNL_FEI_Solver.h\
+ LLNL_FEI_Matrix.h
 noinst_HEADERS = \
  FEI_HYPRE_Impl.h\
  FEI_HYPRE_include.h\
@@ -95,6 +100,11 @@ driver_LDADD = \
 #
 FILES = \
  FEI_HYPRE_Impl.cxx\
+ LLNL_FEI_Impl.cxx\
+ LLNL_FEI_Fei.cxx\
+ LLNL_FEI_LSCore.cxx\
+ LLNL_FEI_Solver.cxx\
+ LLNL_FEI_Matrix.cxx\
  HYPRE_LSC_aux.cxx\
  HYPRE_LSI_Dsuperlu.c\
  HYPRE_LSI_UZAWA.cxx\
