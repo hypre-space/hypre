@@ -205,6 +205,7 @@ am__libHYPRE_a_SOURCES_DIST = $(top_srcdir)/blas/dasum.c \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_jacobi.cxx \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_kaczmarz.cxx \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_mls.cxx \
+	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_mli.cxx \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_parasails.cxx \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_seqsuperlu.cxx \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_sgs.cxx \
@@ -288,14 +289,9 @@ am__libHYPRE_a_SOURCES_DIST = $(top_srcdir)/blas/dasum.c \
 	$(top_srcdir)/krylov/gmres.c $(top_srcdir)/krylov/pcg.c \
 	$(top_srcdir)/matrix_matrix/HYPRE_ConvertPETScMatrixToDistributedMatrix.c \
 	$(top_srcdir)/matrix_matrix/HYPRE_ConvertParCSRMatrixToDistributedMatrix.c \
-	$(top_srcdir)/eigensolvers/krylov/HYPRE_lobpcg.c \
-	$(top_srcdir)/eigensolvers/krylov/lobpcg.c \
-	$(top_srcdir)/eigensolvers/multivector/multivector.c \
-	$(top_srcdir)/eigensolvers/multivector/temp_multivector.c \
-	$(top_srcdir)/eigensolvers/parcsr_ls/HYPRE_parcsr_int.c \
-	$(top_srcdir)/eigensolvers/struct_ls/HYPRE_struct_int.c \
-	$(top_srcdir)/eigensolvers/sstruct_ls/HYPRE_sstruct_int.c \
-	$(top_srcdir)/eigensolvers/utilities/fortran_matrix.c \
+	$(top_srcdir)/parcsr_es/LOBPCG/lobpcg.c \
+	$(top_srcdir)/parcsr_es/LOBPCG/lobpcg_matrix.c \
+	$(top_srcdir)/parcsr_es/LOBPCG/lobpcg_utilities.c \
 	$(top_srcdir)/parcsr_ls/F90_HYPRE_parcsr_ParaSails.c \
 	$(top_srcdir)/parcsr_ls/F90_HYPRE_parcsr_amg.c \
 	$(top_srcdir)/parcsr_ls/F90_HYPRE_parcsr_bicgstab.c \
@@ -583,23 +579,23 @@ am__objects_4 = bicgs.$(OBJEXT) bicgstabl.$(OBJEXT) \
 	mli_solver_gmres.$(OBJEXT) mli_solver_gs.$(OBJEXT) \
 	mli_solver_hschwarz.$(OBJEXT) mli_solver_hsgs.$(OBJEXT) \
 	mli_solver_jacobi.$(OBJEXT) mli_solver_kaczmarz.$(OBJEXT) \
-	mli_solver_mls.$(OBJEXT) mli_solver_parasails.$(OBJEXT) \
-	mli_solver_seqsuperlu.$(OBJEXT) mli_solver_sgs.$(OBJEXT) \
-	mli_solver_superlu.$(OBJEXT) mli_vector.$(OBJEXT) \
-	mli_utils_fortran.$(OBJEXT) F90_HYPRE_IJMatrix.$(OBJEXT) \
-	F90_HYPRE_IJVector.$(OBJEXT) F90_IJMatrix.$(OBJEXT) \
-	HYPRE_IJMatrix.$(OBJEXT) HYPRE_IJVector.$(OBJEXT) \
-	IJMatrix.$(OBJEXT) IJMatrix_parcsr.$(OBJEXT) \
-	IJVector.$(OBJEXT) IJVector_parcsr.$(OBJEXT) \
-	aux_parcsr_matrix.$(OBJEXT) Euclid_apply.$(OBJEXT) \
-	Euclid_dh.$(OBJEXT) ExternalRows_dh.$(OBJEXT) \
-	Factor_dh.$(OBJEXT) Hash_dh.$(OBJEXT) Hash_i_dh.$(OBJEXT) \
-	MatGenFD.$(OBJEXT) Mat_dh.$(OBJEXT) Mem_dh.$(OBJEXT) \
-	Numbering_dh.$(OBJEXT) Parser_dh.$(OBJEXT) \
-	SortedList_dh.$(OBJEXT) SortedSet_dh.$(OBJEXT) \
-	SubdomainGraph_dh.$(OBJEXT) TimeLog_dh.$(OBJEXT) \
-	Timer_dh.$(OBJEXT) Vec_dh.$(OBJEXT) blas_dh.$(OBJEXT) \
-	getRow_dh.$(OBJEXT) globalObjects.$(OBJEXT) \
+	mli_solver_mls.$(OBJEXT) mli_solver_mli.$(OBJEXT) \
+	mli_solver_parasails.$(OBJEXT) mli_solver_seqsuperlu.$(OBJEXT) \
+	mli_solver_sgs.$(OBJEXT) mli_solver_superlu.$(OBJEXT) \
+	mli_vector.$(OBJEXT) mli_utils_fortran.$(OBJEXT) \
+	F90_HYPRE_IJMatrix.$(OBJEXT) F90_HYPRE_IJVector.$(OBJEXT) \
+	F90_IJMatrix.$(OBJEXT) HYPRE_IJMatrix.$(OBJEXT) \
+	HYPRE_IJVector.$(OBJEXT) IJMatrix.$(OBJEXT) \
+	IJMatrix_parcsr.$(OBJEXT) IJVector.$(OBJEXT) \
+	IJVector_parcsr.$(OBJEXT) aux_parcsr_matrix.$(OBJEXT) \
+	Euclid_apply.$(OBJEXT) Euclid_dh.$(OBJEXT) \
+	ExternalRows_dh.$(OBJEXT) Factor_dh.$(OBJEXT) \
+	Hash_dh.$(OBJEXT) Hash_i_dh.$(OBJEXT) MatGenFD.$(OBJEXT) \
+	Mat_dh.$(OBJEXT) Mem_dh.$(OBJEXT) Numbering_dh.$(OBJEXT) \
+	Parser_dh.$(OBJEXT) SortedList_dh.$(OBJEXT) \
+	SortedSet_dh.$(OBJEXT) SubdomainGraph_dh.$(OBJEXT) \
+	TimeLog_dh.$(OBJEXT) Timer_dh.$(OBJEXT) Vec_dh.$(OBJEXT) \
+	blas_dh.$(OBJEXT) getRow_dh.$(OBJEXT) globalObjects.$(OBJEXT) \
 	ilu_mpi_bj.$(OBJEXT) ilu_mpi_pilu.$(OBJEXT) ilu_seq.$(OBJEXT) \
 	io_dh.$(OBJEXT) krylov_dh.$(OBJEXT) mat_dh_private.$(OBJEXT) \
 	shellSort_dh.$(OBJEXT) sig_dh.$(OBJEXT) ConjGrad.$(OBJEXT) \
@@ -621,10 +617,9 @@ am__objects_4 = bicgs.$(OBJEXT) bicgstabl.$(OBJEXT) \
 	pcg.$(OBJEXT) \
 	HYPRE_ConvertPETScMatrixToDistributedMatrix.$(OBJEXT) \
 	HYPRE_ConvertParCSRMatrixToDistributedMatrix.$(OBJEXT) \
-	HYPRE_lobpcg.$(OBJEXT) lobpcg.$(OBJEXT) multivector.$(OBJEXT) \
-	temp_multivector.$(OBJEXT) HYPRE_parcsr_int.$(OBJEXT) \
-	HYPRE_struct_int.$(OBJEXT) HYPRE_sstruct_int.$(OBJEXT) \
-	fortran_matrix.$(OBJEXT) F90_HYPRE_parcsr_ParaSails.$(OBJEXT) \
+	lobpcg.$(OBJEXT) lobpcg_matrix.$(OBJEXT) \
+	lobpcg_utilities.$(OBJEXT) \
+	F90_HYPRE_parcsr_ParaSails.$(OBJEXT) \
 	F90_HYPRE_parcsr_amg.$(OBJEXT) \
 	F90_HYPRE_parcsr_bicgstab.$(OBJEXT) \
 	F90_HYPRE_parcsr_cgnr.$(OBJEXT) \
@@ -799,6 +794,7 @@ am__libHYPRE_LSI_a_SOURCES_DIST =  \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_jacobi.cxx \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_kaczmarz.cxx \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_mls.cxx \
+	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_mli.cxx \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_parasails.cxx \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_seqsuperlu.cxx \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_sgs.cxx \
@@ -882,14 +878,9 @@ am__libHYPRE_LSI_a_SOURCES_DIST =  \
 	$(top_srcdir)/krylov/gmres.c $(top_srcdir)/krylov/pcg.c \
 	$(top_srcdir)/matrix_matrix/HYPRE_ConvertPETScMatrixToDistributedMatrix.c \
 	$(top_srcdir)/matrix_matrix/HYPRE_ConvertParCSRMatrixToDistributedMatrix.c \
-	$(top_srcdir)/eigensolvers/krylov/HYPRE_lobpcg.c \
-	$(top_srcdir)/eigensolvers/krylov/lobpcg.c \
-	$(top_srcdir)/eigensolvers/multivector/multivector.c \
-	$(top_srcdir)/eigensolvers/multivector/temp_multivector.c \
-	$(top_srcdir)/eigensolvers/parcsr_ls/HYPRE_parcsr_int.c \
-	$(top_srcdir)/eigensolvers/struct_ls/HYPRE_struct_int.c \
-	$(top_srcdir)/eigensolvers/sstruct_ls/HYPRE_sstruct_int.c \
-	$(top_srcdir)/eigensolvers/utilities/fortran_matrix.c \
+	$(top_srcdir)/parcsr_es/LOBPCG/lobpcg.c \
+	$(top_srcdir)/parcsr_es/LOBPCG/lobpcg_matrix.c \
+	$(top_srcdir)/parcsr_es/LOBPCG/lobpcg_utilities.c \
 	$(top_srcdir)/parcsr_ls/F90_HYPRE_parcsr_ParaSails.c \
 	$(top_srcdir)/parcsr_ls/F90_HYPRE_parcsr_amg.c \
 	$(top_srcdir)/parcsr_ls/F90_HYPRE_parcsr_bicgstab.c \
@@ -1243,6 +1234,7 @@ am__libHYPRE_la_SOURCES_DIST = $(top_srcdir)/blas/dasum.c \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_jacobi.cxx \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_kaczmarz.cxx \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_mls.cxx \
+	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_mli.cxx \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_parasails.cxx \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_seqsuperlu.cxx \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_sgs.cxx \
@@ -1326,14 +1318,9 @@ am__libHYPRE_la_SOURCES_DIST = $(top_srcdir)/blas/dasum.c \
 	$(top_srcdir)/krylov/gmres.c $(top_srcdir)/krylov/pcg.c \
 	$(top_srcdir)/matrix_matrix/HYPRE_ConvertPETScMatrixToDistributedMatrix.c \
 	$(top_srcdir)/matrix_matrix/HYPRE_ConvertParCSRMatrixToDistributedMatrix.c \
-	$(top_srcdir)/eigensolvers/krylov/HYPRE_lobpcg.c \
-	$(top_srcdir)/eigensolvers/krylov/lobpcg.c \
-	$(top_srcdir)/eigensolvers/multivector/multivector.c \
-	$(top_srcdir)/eigensolvers/multivector/temp_multivector.c \
-	$(top_srcdir)/eigensolvers/parcsr_ls/HYPRE_parcsr_int.c \
-	$(top_srcdir)/eigensolvers/struct_ls/HYPRE_struct_int.c \
-	$(top_srcdir)/eigensolvers/sstruct_ls/HYPRE_sstruct_int.c \
-	$(top_srcdir)/eigensolvers/utilities/fortran_matrix.c \
+	$(top_srcdir)/parcsr_es/LOBPCG/lobpcg.c \
+	$(top_srcdir)/parcsr_es/LOBPCG/lobpcg_matrix.c \
+	$(top_srcdir)/parcsr_es/LOBPCG/lobpcg_utilities.c \
 	$(top_srcdir)/parcsr_ls/F90_HYPRE_parcsr_ParaSails.c \
 	$(top_srcdir)/parcsr_ls/F90_HYPRE_parcsr_amg.c \
 	$(top_srcdir)/parcsr_ls/F90_HYPRE_parcsr_bicgstab.c \
@@ -1586,7 +1573,7 @@ am__objects_10 = bicgs.lo bicgstabl.lo FEI_HYPRE_Impl.lo \
 	mli_solver_bsgs.lo mli_solver_cg.lo mli_solver_chebyshev.lo \
 	mli_solver_gmres.lo mli_solver_gs.lo mli_solver_hschwarz.lo \
 	mli_solver_hsgs.lo mli_solver_jacobi.lo mli_solver_kaczmarz.lo \
-	mli_solver_mls.lo mli_solver_parasails.lo \
+	mli_solver_mls.lo mli_solver_mli.lo mli_solver_parasails.lo \
 	mli_solver_seqsuperlu.lo mli_solver_sgs.lo \
 	mli_solver_superlu.lo mli_vector.lo mli_utils_fortran.lo \
 	F90_HYPRE_IJMatrix.lo F90_HYPRE_IJVector.lo F90_IJMatrix.lo \
@@ -1611,20 +1598,18 @@ am__objects_10 = bicgs.lo bicgstabl.lo FEI_HYPRE_Impl.lo \
 	distributed_matrix_parcsr.lo HYPRE_bicgstab.lo HYPRE_cgnr.lo \
 	HYPRE_gmres.lo HYPRE_pcg.lo bicgstab.lo cgnr.lo gmres.lo \
 	pcg.lo HYPRE_ConvertPETScMatrixToDistributedMatrix.lo \
-	HYPRE_ConvertParCSRMatrixToDistributedMatrix.lo \
-	HYPRE_lobpcg.lo lobpcg.lo multivector.lo temp_multivector.lo \
-	HYPRE_parcsr_int.lo HYPRE_struct_int.lo HYPRE_sstruct_int.lo \
-	fortran_matrix.lo F90_HYPRE_parcsr_ParaSails.lo \
-	F90_HYPRE_parcsr_amg.lo F90_HYPRE_parcsr_bicgstab.lo \
-	F90_HYPRE_parcsr_cgnr.lo F90_HYPRE_parcsr_gmres.lo \
-	F90_HYPRE_parcsr_pcg.lo F90_HYPRE_parcsr_pilut.lo \
-	F90_hypre_laplace.lo HYPRE_parcsr_Euclid.lo \
-	HYPRE_parcsr_ParaSails.lo HYPRE_parcsr_amg.lo \
-	HYPRE_parcsr_bicgstab.lo HYPRE_parcsr_cgnr.lo \
-	HYPRE_parcsr_gmres.lo HYPRE_parcsr_hybrid.lo \
-	HYPRE_parcsr_pcg.lo HYPRE_parcsr_pilut.lo \
-	HYPRE_parcsr_schwarz.lo amg_hybrid.lo par_amg.lo \
-	par_amg_setup.lo par_amg_solve.lo par_amg_solveT.lo \
+	HYPRE_ConvertParCSRMatrixToDistributedMatrix.lo lobpcg.lo \
+	lobpcg_matrix.lo lobpcg_utilities.lo \
+	F90_HYPRE_parcsr_ParaSails.lo F90_HYPRE_parcsr_amg.lo \
+	F90_HYPRE_parcsr_bicgstab.lo F90_HYPRE_parcsr_cgnr.lo \
+	F90_HYPRE_parcsr_gmres.lo F90_HYPRE_parcsr_pcg.lo \
+	F90_HYPRE_parcsr_pilut.lo F90_hypre_laplace.lo \
+	HYPRE_parcsr_Euclid.lo HYPRE_parcsr_ParaSails.lo \
+	HYPRE_parcsr_amg.lo HYPRE_parcsr_bicgstab.lo \
+	HYPRE_parcsr_cgnr.lo HYPRE_parcsr_gmres.lo \
+	HYPRE_parcsr_hybrid.lo HYPRE_parcsr_pcg.lo \
+	HYPRE_parcsr_pilut.lo HYPRE_parcsr_schwarz.lo amg_hybrid.lo \
+	par_amg.lo par_amg_setup.lo par_amg_solve.lo par_amg_solveT.lo \
 	par_cg_relax_wt.lo par_coarse_parms.lo par_coarsen.lo \
 	par_cycle.lo par_difconv.lo par_gsmg.lo par_indepset.lo \
 	par_interp.lo par_laplace.lo par_laplace_27pt.lo \
@@ -1760,6 +1745,7 @@ am__libHYPRE_LSI_la_SOURCES_DIST =  \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_jacobi.cxx \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_kaczmarz.cxx \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_mls.cxx \
+	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_mli.cxx \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_parasails.cxx \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_seqsuperlu.cxx \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_sgs.cxx \
@@ -1843,14 +1829,9 @@ am__libHYPRE_LSI_la_SOURCES_DIST =  \
 	$(top_srcdir)/krylov/gmres.c $(top_srcdir)/krylov/pcg.c \
 	$(top_srcdir)/matrix_matrix/HYPRE_ConvertPETScMatrixToDistributedMatrix.c \
 	$(top_srcdir)/matrix_matrix/HYPRE_ConvertParCSRMatrixToDistributedMatrix.c \
-	$(top_srcdir)/eigensolvers/krylov/HYPRE_lobpcg.c \
-	$(top_srcdir)/eigensolvers/krylov/lobpcg.c \
-	$(top_srcdir)/eigensolvers/multivector/multivector.c \
-	$(top_srcdir)/eigensolvers/multivector/temp_multivector.c \
-	$(top_srcdir)/eigensolvers/parcsr_ls/HYPRE_parcsr_int.c \
-	$(top_srcdir)/eigensolvers/struct_ls/HYPRE_struct_int.c \
-	$(top_srcdir)/eigensolvers/sstruct_ls/HYPRE_sstruct_int.c \
-	$(top_srcdir)/eigensolvers/utilities/fortran_matrix.c \
+	$(top_srcdir)/parcsr_es/LOBPCG/lobpcg.c \
+	$(top_srcdir)/parcsr_es/LOBPCG/lobpcg_matrix.c \
+	$(top_srcdir)/parcsr_es/LOBPCG/lobpcg_utilities.c \
 	$(top_srcdir)/parcsr_ls/F90_HYPRE_parcsr_ParaSails.c \
 	$(top_srcdir)/parcsr_ls/F90_HYPRE_parcsr_amg.c \
 	$(top_srcdir)/parcsr_ls/F90_HYPRE_parcsr_bicgstab.c \
@@ -2332,7 +2313,7 @@ HYPRE_SRC_DIRS = \
  distributed_matrix\
  krylov\
  matrix_matrix\
- eigensolvers/lib\
+ parcsr_es/LOBPCG\
  parcsr_ls\
  parcsr_mv\
  seq_mv\
@@ -2449,6 +2430,7 @@ MOSTFILES = \
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_jacobi.cxx\
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_kaczmarz.cxx\
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_mls.cxx\
+ $(top_srcdir)/FEI_mv/femli/solver/mli_solver_mli.cxx\
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_parasails.cxx\
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_seqsuperlu.cxx\
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_sgs.cxx\
@@ -2534,14 +2516,9 @@ MOSTFILES = \
  $(top_srcdir)/krylov/pcg.c\
  $(top_srcdir)/matrix_matrix/HYPRE_ConvertPETScMatrixToDistributedMatrix.c\
  $(top_srcdir)/matrix_matrix/HYPRE_ConvertParCSRMatrixToDistributedMatrix.c\
- $(top_srcdir)/eigensolvers/krylov/HYPRE_lobpcg.c\
- $(top_srcdir)/eigensolvers/krylov/lobpcg.c\
- $(top_srcdir)/eigensolvers/multivector/multivector.c\
- $(top_srcdir)/eigensolvers/multivector/temp_multivector.c\
- $(top_srcdir)/eigensolvers/parcsr_ls/HYPRE_parcsr_int.c\
- $(top_srcdir)/eigensolvers/struct_ls/HYPRE_struct_int.c\
- $(top_srcdir)/eigensolvers/sstruct_ls/HYPRE_sstruct_int.c\
- $(top_srcdir)/eigensolvers/utilities/fortran_matrix.c\
+ $(top_srcdir)/parcsr_es/LOBPCG/lobpcg.c\
+ $(top_srcdir)/parcsr_es/LOBPCG/lobpcg_matrix.c\
+ $(top_srcdir)/parcsr_es/LOBPCG/lobpcg_utilities.c\
  $(top_srcdir)/parcsr_ls/F90_HYPRE_parcsr_ParaSails.c\
  $(top_srcdir)/parcsr_ls/F90_HYPRE_parcsr_amg.c\
  $(top_srcdir)/parcsr_ls/F90_HYPRE_parcsr_bicgstab.c\
@@ -4874,77 +4851,32 @@ HYPRE_ConvertParCSRMatrixToDistributedMatrix.obj: $(top_srcdir)/matrix_matrix/HY
 HYPRE_ConvertParCSRMatrixToDistributedMatrix.lo: $(top_srcdir)/matrix_matrix/HYPRE_ConvertParCSRMatrixToDistributedMatrix.c
 	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o HYPRE_ConvertParCSRMatrixToDistributedMatrix.lo `test -f '$(top_srcdir)/matrix_matrix/HYPRE_ConvertParCSRMatrixToDistributedMatrix.c' || echo '$(srcdir)/'`$(top_srcdir)/matrix_matrix/HYPRE_ConvertParCSRMatrixToDistributedMatrix.c
 
-HYPRE_lobpcg.o: $(top_srcdir)/eigensolvers/krylov/HYPRE_lobpcg.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o HYPRE_lobpcg.o `test -f '$(top_srcdir)/eigensolvers/krylov/HYPRE_lobpcg.c' || echo '$(srcdir)/'`$(top_srcdir)/eigensolvers/krylov/HYPRE_lobpcg.c
+lobpcg.o: $(top_srcdir)/parcsr_es/LOBPCG/lobpcg.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o lobpcg.o `test -f '$(top_srcdir)/parcsr_es/LOBPCG/lobpcg.c' || echo '$(srcdir)/'`$(top_srcdir)/parcsr_es/LOBPCG/lobpcg.c
 
-HYPRE_lobpcg.obj: $(top_srcdir)/eigensolvers/krylov/HYPRE_lobpcg.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o HYPRE_lobpcg.obj `if test -f '$(top_srcdir)/eigensolvers/krylov/HYPRE_lobpcg.c'; then $(CYGPATH_W) '$(top_srcdir)/eigensolvers/krylov/HYPRE_lobpcg.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/eigensolvers/krylov/HYPRE_lobpcg.c'; fi`
+lobpcg.obj: $(top_srcdir)/parcsr_es/LOBPCG/lobpcg.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o lobpcg.obj `if test -f '$(top_srcdir)/parcsr_es/LOBPCG/lobpcg.c'; then $(CYGPATH_W) '$(top_srcdir)/parcsr_es/LOBPCG/lobpcg.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/parcsr_es/LOBPCG/lobpcg.c'; fi`
 
-HYPRE_lobpcg.lo: $(top_srcdir)/eigensolvers/krylov/HYPRE_lobpcg.c
-	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o HYPRE_lobpcg.lo `test -f '$(top_srcdir)/eigensolvers/krylov/HYPRE_lobpcg.c' || echo '$(srcdir)/'`$(top_srcdir)/eigensolvers/krylov/HYPRE_lobpcg.c
+lobpcg.lo: $(top_srcdir)/parcsr_es/LOBPCG/lobpcg.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o lobpcg.lo `test -f '$(top_srcdir)/parcsr_es/LOBPCG/lobpcg.c' || echo '$(srcdir)/'`$(top_srcdir)/parcsr_es/LOBPCG/lobpcg.c
 
-lobpcg.o: $(top_srcdir)/eigensolvers/krylov/lobpcg.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o lobpcg.o `test -f '$(top_srcdir)/eigensolvers/krylov/lobpcg.c' || echo '$(srcdir)/'`$(top_srcdir)/eigensolvers/krylov/lobpcg.c
+lobpcg_matrix.o: $(top_srcdir)/parcsr_es/LOBPCG/lobpcg_matrix.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o lobpcg_matrix.o `test -f '$(top_srcdir)/parcsr_es/LOBPCG/lobpcg_matrix.c' || echo '$(srcdir)/'`$(top_srcdir)/parcsr_es/LOBPCG/lobpcg_matrix.c
 
-lobpcg.obj: $(top_srcdir)/eigensolvers/krylov/lobpcg.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o lobpcg.obj `if test -f '$(top_srcdir)/eigensolvers/krylov/lobpcg.c'; then $(CYGPATH_W) '$(top_srcdir)/eigensolvers/krylov/lobpcg.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/eigensolvers/krylov/lobpcg.c'; fi`
+lobpcg_matrix.obj: $(top_srcdir)/parcsr_es/LOBPCG/lobpcg_matrix.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o lobpcg_matrix.obj `if test -f '$(top_srcdir)/parcsr_es/LOBPCG/lobpcg_matrix.c'; then $(CYGPATH_W) '$(top_srcdir)/parcsr_es/LOBPCG/lobpcg_matrix.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/parcsr_es/LOBPCG/lobpcg_matrix.c'; fi`
 
-lobpcg.lo: $(top_srcdir)/eigensolvers/krylov/lobpcg.c
-	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o lobpcg.lo `test -f '$(top_srcdir)/eigensolvers/krylov/lobpcg.c' || echo '$(srcdir)/'`$(top_srcdir)/eigensolvers/krylov/lobpcg.c
+lobpcg_matrix.lo: $(top_srcdir)/parcsr_es/LOBPCG/lobpcg_matrix.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o lobpcg_matrix.lo `test -f '$(top_srcdir)/parcsr_es/LOBPCG/lobpcg_matrix.c' || echo '$(srcdir)/'`$(top_srcdir)/parcsr_es/LOBPCG/lobpcg_matrix.c
 
-multivector.o: $(top_srcdir)/eigensolvers/multivector/multivector.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o multivector.o `test -f '$(top_srcdir)/eigensolvers/multivector/multivector.c' || echo '$(srcdir)/'`$(top_srcdir)/eigensolvers/multivector/multivector.c
+lobpcg_utilities.o: $(top_srcdir)/parcsr_es/LOBPCG/lobpcg_utilities.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o lobpcg_utilities.o `test -f '$(top_srcdir)/parcsr_es/LOBPCG/lobpcg_utilities.c' || echo '$(srcdir)/'`$(top_srcdir)/parcsr_es/LOBPCG/lobpcg_utilities.c
 
-multivector.obj: $(top_srcdir)/eigensolvers/multivector/multivector.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o multivector.obj `if test -f '$(top_srcdir)/eigensolvers/multivector/multivector.c'; then $(CYGPATH_W) '$(top_srcdir)/eigensolvers/multivector/multivector.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/eigensolvers/multivector/multivector.c'; fi`
+lobpcg_utilities.obj: $(top_srcdir)/parcsr_es/LOBPCG/lobpcg_utilities.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o lobpcg_utilities.obj `if test -f '$(top_srcdir)/parcsr_es/LOBPCG/lobpcg_utilities.c'; then $(CYGPATH_W) '$(top_srcdir)/parcsr_es/LOBPCG/lobpcg_utilities.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/parcsr_es/LOBPCG/lobpcg_utilities.c'; fi`
 
-multivector.lo: $(top_srcdir)/eigensolvers/multivector/multivector.c
-	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o multivector.lo `test -f '$(top_srcdir)/eigensolvers/multivector/multivector.c' || echo '$(srcdir)/'`$(top_srcdir)/eigensolvers/multivector/multivector.c
-
-temp_multivector.o: $(top_srcdir)/eigensolvers/multivector/temp_multivector.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o temp_multivector.o `test -f '$(top_srcdir)/eigensolvers/multivector/temp_multivector.c' || echo '$(srcdir)/'`$(top_srcdir)/eigensolvers/multivector/temp_multivector.c
-
-temp_multivector.obj: $(top_srcdir)/eigensolvers/multivector/temp_multivector.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o temp_multivector.obj `if test -f '$(top_srcdir)/eigensolvers/multivector/temp_multivector.c'; then $(CYGPATH_W) '$(top_srcdir)/eigensolvers/multivector/temp_multivector.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/eigensolvers/multivector/temp_multivector.c'; fi`
-
-temp_multivector.lo: $(top_srcdir)/eigensolvers/multivector/temp_multivector.c
-	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o temp_multivector.lo `test -f '$(top_srcdir)/eigensolvers/multivector/temp_multivector.c' || echo '$(srcdir)/'`$(top_srcdir)/eigensolvers/multivector/temp_multivector.c
-
-HYPRE_parcsr_int.o: $(top_srcdir)/eigensolvers/parcsr_ls/HYPRE_parcsr_int.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o HYPRE_parcsr_int.o `test -f '$(top_srcdir)/eigensolvers/parcsr_ls/HYPRE_parcsr_int.c' || echo '$(srcdir)/'`$(top_srcdir)/eigensolvers/parcsr_ls/HYPRE_parcsr_int.c
-
-HYPRE_parcsr_int.obj: $(top_srcdir)/eigensolvers/parcsr_ls/HYPRE_parcsr_int.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o HYPRE_parcsr_int.obj `if test -f '$(top_srcdir)/eigensolvers/parcsr_ls/HYPRE_parcsr_int.c'; then $(CYGPATH_W) '$(top_srcdir)/eigensolvers/parcsr_ls/HYPRE_parcsr_int.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/eigensolvers/parcsr_ls/HYPRE_parcsr_int.c'; fi`
-
-HYPRE_parcsr_int.lo: $(top_srcdir)/eigensolvers/parcsr_ls/HYPRE_parcsr_int.c
-	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o HYPRE_parcsr_int.lo `test -f '$(top_srcdir)/eigensolvers/parcsr_ls/HYPRE_parcsr_int.c' || echo '$(srcdir)/'`$(top_srcdir)/eigensolvers/parcsr_ls/HYPRE_parcsr_int.c
-
-HYPRE_struct_int.o: $(top_srcdir)/eigensolvers/struct_ls/HYPRE_struct_int.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o HYPRE_struct_int.o `test -f '$(top_srcdir)/eigensolvers/struct_ls/HYPRE_struct_int.c' || echo '$(srcdir)/'`$(top_srcdir)/eigensolvers/struct_ls/HYPRE_struct_int.c
-
-HYPRE_struct_int.obj: $(top_srcdir)/eigensolvers/struct_ls/HYPRE_struct_int.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o HYPRE_struct_int.obj `if test -f '$(top_srcdir)/eigensolvers/struct_ls/HYPRE_struct_int.c'; then $(CYGPATH_W) '$(top_srcdir)/eigensolvers/struct_ls/HYPRE_struct_int.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/eigensolvers/struct_ls/HYPRE_struct_int.c'; fi`
-
-HYPRE_struct_int.lo: $(top_srcdir)/eigensolvers/struct_ls/HYPRE_struct_int.c
-	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o HYPRE_struct_int.lo `test -f '$(top_srcdir)/eigensolvers/struct_ls/HYPRE_struct_int.c' || echo '$(srcdir)/'`$(top_srcdir)/eigensolvers/struct_ls/HYPRE_struct_int.c
-
-HYPRE_sstruct_int.o: $(top_srcdir)/eigensolvers/sstruct_ls/HYPRE_sstruct_int.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o HYPRE_sstruct_int.o `test -f '$(top_srcdir)/eigensolvers/sstruct_ls/HYPRE_sstruct_int.c' || echo '$(srcdir)/'`$(top_srcdir)/eigensolvers/sstruct_ls/HYPRE_sstruct_int.c
-
-HYPRE_sstruct_int.obj: $(top_srcdir)/eigensolvers/sstruct_ls/HYPRE_sstruct_int.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o HYPRE_sstruct_int.obj `if test -f '$(top_srcdir)/eigensolvers/sstruct_ls/HYPRE_sstruct_int.c'; then $(CYGPATH_W) '$(top_srcdir)/eigensolvers/sstruct_ls/HYPRE_sstruct_int.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/eigensolvers/sstruct_ls/HYPRE_sstruct_int.c'; fi`
-
-HYPRE_sstruct_int.lo: $(top_srcdir)/eigensolvers/sstruct_ls/HYPRE_sstruct_int.c
-	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o HYPRE_sstruct_int.lo `test -f '$(top_srcdir)/eigensolvers/sstruct_ls/HYPRE_sstruct_int.c' || echo '$(srcdir)/'`$(top_srcdir)/eigensolvers/sstruct_ls/HYPRE_sstruct_int.c
-
-fortran_matrix.o: $(top_srcdir)/eigensolvers/utilities/fortran_matrix.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fortran_matrix.o `test -f '$(top_srcdir)/eigensolvers/utilities/fortran_matrix.c' || echo '$(srcdir)/'`$(top_srcdir)/eigensolvers/utilities/fortran_matrix.c
-
-fortran_matrix.obj: $(top_srcdir)/eigensolvers/utilities/fortran_matrix.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fortran_matrix.obj `if test -f '$(top_srcdir)/eigensolvers/utilities/fortran_matrix.c'; then $(CYGPATH_W) '$(top_srcdir)/eigensolvers/utilities/fortran_matrix.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/eigensolvers/utilities/fortran_matrix.c'; fi`
-
-fortran_matrix.lo: $(top_srcdir)/eigensolvers/utilities/fortran_matrix.c
-	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fortran_matrix.lo `test -f '$(top_srcdir)/eigensolvers/utilities/fortran_matrix.c' || echo '$(srcdir)/'`$(top_srcdir)/eigensolvers/utilities/fortran_matrix.c
+lobpcg_utilities.lo: $(top_srcdir)/parcsr_es/LOBPCG/lobpcg_utilities.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o lobpcg_utilities.lo `test -f '$(top_srcdir)/parcsr_es/LOBPCG/lobpcg_utilities.c' || echo '$(srcdir)/'`$(top_srcdir)/parcsr_es/LOBPCG/lobpcg_utilities.c
 
 F90_HYPRE_parcsr_ParaSails.o: $(top_srcdir)/parcsr_ls/F90_HYPRE_parcsr_ParaSails.c
 	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o F90_HYPRE_parcsr_ParaSails.o `test -f '$(top_srcdir)/parcsr_ls/F90_HYPRE_parcsr_ParaSails.c' || echo '$(srcdir)/'`$(top_srcdir)/parcsr_ls/F90_HYPRE_parcsr_ParaSails.c
@@ -7159,6 +7091,15 @@ mli_solver_mls.obj: $(top_srcdir)/FEI_mv/femli/solver/mli_solver_mls.cxx
 
 mli_solver_mls.lo: $(top_srcdir)/FEI_mv/femli/solver/mli_solver_mls.cxx
 	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mli_solver_mls.lo `test -f '$(top_srcdir)/FEI_mv/femli/solver/mli_solver_mls.cxx' || echo '$(srcdir)/'`$(top_srcdir)/FEI_mv/femli/solver/mli_solver_mls.cxx
+
+mli_solver_mli.o: $(top_srcdir)/FEI_mv/femli/solver/mli_solver_mli.cxx
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mli_solver_mli.o `test -f '$(top_srcdir)/FEI_mv/femli/solver/mli_solver_mli.cxx' || echo '$(srcdir)/'`$(top_srcdir)/FEI_mv/femli/solver/mli_solver_mli.cxx
+
+mli_solver_mli.obj: $(top_srcdir)/FEI_mv/femli/solver/mli_solver_mli.cxx
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mli_solver_mli.obj `if test -f '$(top_srcdir)/FEI_mv/femli/solver/mli_solver_mli.cxx'; then $(CYGPATH_W) '$(top_srcdir)/FEI_mv/femli/solver/mli_solver_mli.cxx'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/FEI_mv/femli/solver/mli_solver_mli.cxx'; fi`
+
+mli_solver_mli.lo: $(top_srcdir)/FEI_mv/femli/solver/mli_solver_mli.cxx
+	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mli_solver_mli.lo `test -f '$(top_srcdir)/FEI_mv/femli/solver/mli_solver_mli.cxx' || echo '$(srcdir)/'`$(top_srcdir)/FEI_mv/femli/solver/mli_solver_mli.cxx
 
 mli_solver_parasails.o: $(top_srcdir)/FEI_mv/femli/solver/mli_solver_parasails.cxx
 	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mli_solver_parasails.o `test -f '$(top_srcdir)/FEI_mv/femli/solver/mli_solver_parasails.cxx' || echo '$(srcdir)/'`$(top_srcdir)/FEI_mv/femli/solver/mli_solver_parasails.cxx
