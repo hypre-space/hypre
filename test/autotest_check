@@ -9,6 +9,17 @@
 #EHEADER***********************************************************************
 
 #==============================================================================
+# This script should be scheduled to run automatically some time after
+# the 'autotest' script is scheduled to run.  It "checks up" on the
+# autotest script to ensure that it has finished running.  If it has
+# not, an email is sent out.
+#
+# The mechanism used to do this is simple.  The autotest script creates
+# a special file when it finishes running.  This script just checks for
+# the presence of this file.
+#==============================================================================
+
+#==============================================================================
 # Environment variables
 # NOTE: this should be stripped down to something more minimal
 #==============================================================================
