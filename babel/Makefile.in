@@ -7,7 +7,7 @@
 # $Revision$
 #EHEADER***********************************************************************
 
-include $(top_srcdir)/config/Makefile.config
+include ../config/Makefile.config
 
 HYPRE_BABEL_DIRS =\
  bHYPRE \
