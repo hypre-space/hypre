@@ -82,40 +82,48 @@ static void ExchangeDiagEntries(MPI_Comm comm, Matrix *mat, int reqlen,
  * comm   - MPI communicator (input)
  * mat    - matrix used to map row and column numbers to processors (input)
  * local_diags - local diagonal entries (input)
- * len - maximum length of incoming message, should be set to total 
- *       number of required indices (input)
  * num_requests - number of requests to be received (input)
  *--------------------------------------------------------------------------*/
 
 static void ExchangeDiagEntriesServer(MPI_Comm comm, Matrix *mat, 
-  double *local_diags, int len, int num_requests)
+  double *local_diags, int num_requests)
 {
     MPI_Request request;
     MPI_Status status;
-    int *recvbuf;
-    double *sendbuf;
+    int *recvbuf = NULL;
+    double *sendbuf = NULL;
     int i, j, source, count;
+    int buflen = 0;
 
     /* recvbuf contains requested indices */
     /* sendbuf contains corresponding diagonal entries */
-
-    recvbuf = (int *)    malloc(len * sizeof(int));
-    sendbuf = (double *) malloc(len * sizeof(double));
 
     /* Use this request handle to check that the send buffer is clear */
     request = MPI_REQUEST_NULL;
 
     for (i=0; i<num_requests; i++)
     {
-        MPI_Recv(recvbuf, len, MPI_INT, MPI_ANY_SOURCE, 
+        MPI_Probe(MPI_ANY_SOURCE, DIAG_INDS_TAG, comm, &status);
+        source = status.MPI_SOURCE;
+	MPI_Get_count(&status, MPI_INT, &count);
+
+        if (count > buflen)
+	{
+	    free(recvbuf);
+	    free(sendbuf);
+	    buflen = count;
+            recvbuf = (int *)    malloc(buflen * sizeof(int));
+            sendbuf = (double *) malloc(buflen * sizeof(double));
+	}
+
+        MPI_Recv(recvbuf, buflen, MPI_INT, MPI_ANY_SOURCE, 
 	    DIAG_INDS_TAG, comm, &status);
         source = status.MPI_SOURCE;
-
-        MPI_Get_count(&status, MPI_INT, &count);
 
 	/* Wait until send buffer is clear */
 	MPI_Wait(&request, &status);
 
+	/* Construct reply message of diagonal entries in sendbuf */
         for (j=0; j<count; j++)
 	    sendbuf[j] = local_diags[recvbuf[j] - mat->beg_row];
 
@@ -184,8 +192,7 @@ DiagScale *DiagScaleCreate(Matrix *mat)
     ExchangeDiagEntries(mat->comm, mat, len, ind, diags, &num_requests, 
         requests);
 
-    ExchangeDiagEntriesServer(mat->comm, mat, p->local_diags, len, 
-        num_requests);
+    ExchangeDiagEntriesServer(mat->comm, mat, p->local_diags, num_requests);
 
     /* Wait for all replies */
     MPI_Waitall(num_requests, requests, statuses);
