@@ -1,0 +1,267 @@
+%==========================================================================
+\section{Euclid}
+
+The Euclid library is a scalable implementation of the 
+Parallel ILU algorithm that was presented at SC99~\cite{hysom:sc99},
+and published in expanded form in the 
+SIAM Journal on Scientific Computing~\cite{hysomSIAM}.
+By {\em scalable} we mean that the factorization (setup)
+and application (triangular solve) timings remain nearly constant
+when the global problem size is scaled in proportion to the number of 
+processors.
+As with all ILU preconditioning methods, the number of iterations
+is expected to increase with global problem size.
+
+Experimental results have shown that PILU preconditioning is in general
+more effective than Block Jacobi preconditioning 
+for minimizing total solution time.
+For scaled problems, the relative advantage appears to increase 
+as the number of processors is scaled upwards.
+Euclid may also be used to good advantage as a smoother within 
+multigrid methods.
+
+
+%---------------------------------------------------------
+\subsection{Synopsis}
+
+%{\bf synopsis:} a condensed statement or outline.
+
+Euclid is best thought of as an ``extensible ILU preconditioning
+framework.''
+{\em Extensible} means that Euclid can (and eventually will, time and
+contributing agencies permitting) support many variants of ILU($k$)
+and ILUT preconditioning.
+(The current release includes Block Jacobi ILU($k$) and
+Parallel ILU($k$) methods.)
+Due to this extensibility, and also because Euclid was developed 
+independently of the \hypre{} project, the methods by which one
+passes runtime parameters to Euclid preconditioners
+differ in some respects from the \hypre{} norm.
+While users can directly set options within their code,
+options can also be passed to Euclid preconditioners via
+command line switches and/or small text-based configuration files.
+The latter strategies have the advantage that users will not need to
+alter their codes as Euclid's capabilities are extended.
+
+%Euclid subscribes to the philosophy that
+%the less coding required of the user (and the maintainer) the better.
+%Hence, rather than coding interface function calls for every settable 
+%parameter, 
+
+The following fragment illustrates the minimum coding %that is
+required to invoke Euclid preconditioning within \hypre{} application contexts.
+The next subsection provides examples of the various ways in which
+Euclid's options can be set. 
+The final subsection lists the options,
+and provides guidance as to the settings that (in our experience) 
+will likely prove effective for minimizing execution time.
+
+\begin{display}
+\begin{verbatim}
+#include "HYPRE_parcsr_ls.h"
+
+HYPRE_Solver eu;
+HYPRE_Solver pcg_solver;
+HYPRE_ParVector b, x;
+HYPRE_ParCSRMatrix A;
+
+//Instantiate the preconditioner.
+HYPRE_ParCSREuclidCreate(comm, &eu);
+
+//Optionally use either or both of the following two calls to set options.
+// 1. pass options from command line or string array.
+HYPRE_ParCSREuclidSetParams(eu, argc, argv);
+
+// 2. pass options from a configuration file.
+HYPRE_ParCSREuclidSetParamsFromFile(eu, "filename");
+
+//Set Euclid as the preconditioning method for some
+//other solver, using the function calls HYPRE_ParCSREuclidSetup
+//and HYPRE_ParCSREuclidSolve.  We assume that the pcg_solver
+//has been properly initialized.
+HYPRE_PCGSetPrecond(pcg_solver,
+                    (HYPRE_PtrToSolverFcn) HYPRE_ParCSREuclidSolve,
+                    (HYPRE_PtrToSolverFcn) HYPRE_ParCSREuclidSetup,
+                    eu);
+
+//Solve the system by calling the Setup and Solve methods for, 
+//in this case, the HYPRE_PCG solver.  We assume that A, b, and x
+//have been properly initialized.
+HYPRE_PCGSetup(pcg_solver, (HYPRE_Matrix)A, (HYPRE_Vector)b, (HYPRE_Vector)x);
+HYPRE_PCGSolve(pcg_solver, (HYPRE_Matrix)parcsr_A, (HYPRE_Vector)b, (HYPRE_Vector)x);
+
+//Destroy the Euclid preconditioning object.
+HYPRE_ParCSREuclidDestroy(eu);
+
+\end{verbatim}
+\end{display}
+
+%---------------------------------------------------------
+\subsection{Setting options: examples}
+
+For expositional purposes, assume you wish to set the ILU($k$)
+factorization level to the value $k = 3$.
+There are several methods of accomplishing this.
+
+{\bf Method 1.}
+By default, Euclid always looks for a file titled
+``database'' in the working directory. 
+If it finds such a file, it opens it and attempts to parse it as
+a configuration file.
+%In the directory in which you will execute the \hypre {}
+%program, open a text file named ``database'' and insert the
+Configuration files should be formatted as follows. 
+
+\vspace{0.1in}
+\indent {\tt >cat database} \\
+\indent {\tt \#this is an optional comment} \\
+\indent {\tt -level 3}
+\vspace{0.1in}
+
+Any line in a configuration file that contains a ``{\tt \#}''
+character in the first column is ignored.
+All other lines should begin with an option {\em name}, followed by
+one or more blanks, followed by the option {\em value}.
+Note that option names always begin with a ``-'' character.
+If you include an option name that is not recognized by Euclid,
+no harm should ensue.
+
+{\bf Method 2.}
+To pass options on the command line, you must call
+\begin{display}
+\begin{verbatim}
+HYPRE_ParCSREuclidSetParams(HYPRE_Solver solver,
+                                 int argc,
+                                 char *argv[]);
+\end{verbatim}
+\end{display}
+where {\tt argc} and {\tt argv} carry the usual connotation:
+{\tt main(int argc, char *argv[])}.
+If your \hypre{} application is called {\tt phoo}, you can
+then pass options on the command line per the following example.
+
+\begin{display}
+\begin{verbatim}
+mpirun -np 2 phoo -level 3
+\end{verbatim}
+\end{display}
+
+Since Euclid looks for the ``database'' file when 
+{\tt HYPRE\_ParCSREuclidCreate} is called, and parses the command line 
+when {\tt HYPRE\_ParCSREuclidSetParams} is called,
+option values passed on the command line will override 
+any similar settings that may be contained in the ``database'' file.
+Also, if same option name appears more than once on the command 
+line, the final appearance determines the setting.
+
+Some options, such as ``{\tt -bj}'' (see next subsection) are boolean.
+Euclid always treats these options as the value ``1'' (true)
+or ``0'' (false).  
+When passing boolean options from the command line
+the value may be committed, in which case it assumed to be ``1.''
+Note, however, that when boolean options are contained in a
+configuration file, either the ``1'' or ``0'' must
+stated explicitly.
+
+{\bf Method 3.}
+The preceding method can be modified to permit the setting of individual
+options within your \hypre{} code.  For example,
+
+\begin{display}
+\begin{verbatim}
+char name[2][80];
+strcpy( name[1], "-level");
+strcpy( name[2], "3");
+HYPRE_ParCSREuclidSetParams(solver, 2, name);
+\end{verbatim}
+\end{display}
+
+
+{\bf Method 4.}
+There are two ways in which you can read in options from a file
+whose name is other than ``database.''
+First, you can call {\tt HYPRE\_ParCSREuclidSetParamsFromFile}
+to specify a configuration filename.
+Second, if you have passed the command line arguments as 
+described above in Method 2, 
+you can then specify the configuration filename on the command
+line using the {\bf -db\_filename filename} option, e.g.,
+
+\begin{display}
+\begin{verbatim}
+mpirun -np 2 phoo -db_filename ../myConfigFile
+\end{verbatim}
+\end{display}
+
+
+%------------------------------------------------------------------
+\subsection{Options summary}
+
+\begin{description}
+\item[-level $\langle int \rangle$] Factorization level for ILU($k$).  Default: 1.
+                    Guidance: for 2D convection-diffusion and similar problems, 
+                    fastest solution time is typically obtained with levels 4 through
+                    8.  For 3D problems fastest solution time is typically 
+                    obtained with level 1.
+                    
+\item[-bj] Use Block Jacobi ILU preconditioning instead of PILU.
+           Default: 0 (false). Guidance: if subdomains contain
+           relatively few nodes (less than 1,000), or the problem is
+           not well partitioned, Block Jacobi ILU 
+           may give faster solution time than PILU.
+\item[-eu\_stats] When Euclid's destructor is called a summary of
+                 runtime settings and timing information is printed
+                 to stdout.  The same report is printed
+                 when {\tt HYPRE\_ParCSREuclidPrintParams()} is called.
+                 The timing marks in the report are the maximum over 
+                 all processors in the MPI communicator.
+\item[-eu\_mem] When Euclid's destructor is called a summary of
+               Euclid's memory usage is printed to stdout.
+               The statistics are for the processor whose rank 
+               in MPI\_COMM\_WORLD is 0.
+\item[-printTestData] This option is used in our autotest procedures,
+                 and should not normally be invoked by users.
+\end{description}
+
+The following options are partially implemented, but not
+yet fully functional (i.e, don't use them until further notice).
+
+\begin{description}
+\item[-sparseA $\langle float \rangle$] Drop-tolerance for ILU($k$) factorization.
+                        Default: 0 (no dropping).
+                        Entries are treated as zero if their absolute
+                        value is less than \mbox{(sparseA * max)}, where ``max''
+                        is the largest absolute value of any entry in the
+                        row. Guidance: try this in conjunction with 
+                        -rowScale.  CAUTION: If the coefficient matrix $A$ is 
+                        symmetric, this
+                        setting is likely to cause the filled matrix,
+                        $F = L+U-I$, to be unsymmetric.
+                        This setting has no effect when ILUT factorization
+                        is selected.
+\item[-rowScale] Scale values prior to factorization such that the
+                 largest value in any row is +1 or -1.
+                 Default: 0 (false).
+                 CAUTION: If the coefficient matrix $A$ is symmetric, this 
+                 setting is likely to cause the filled matrix,
+                 $F = L+U-I$, to be unsymmetric.
+                 Guidance: if the matrix is poorly scaled, turning on
+                 row scaling may help convergence.
+\item[-ilut $\langle float \rangle$] Use ILUT factorization instead
+                 of the default, ILU($k$).  Here, $\langle float \rangle$
+                 is the drop tolerance, which is relative to the largest 
+                 absolute value of any entry in the row being factored.
+                 CAUTION: If the coefficient matrix $A$ is symmetric, this 
+                 setting is likely to cause the filled matrix,
+                 $F = L+U-I$, to be unsymmetric.
+\item[-maxNzPerRow  $\langle int \rangle$] This sets the maximum number
+                 of nonzeros that is permitted in any row of $F$, in
+                 addition to the number that would result from an ILU(0)
+                 factorization.  A negative value %indicates that
+                 indicates infinity (no limit).
+                 %no limit should be imposed (equivalent to a setting
+                 %if infinity).  
+                 This setting is effective for both ILU($k$)
+                 and ILUT factorization methods.
+                 Default: infinity, for ILU($k$); 5, for ILUT.
+\end{description}
