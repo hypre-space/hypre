@@ -210,6 +210,77 @@ HYPRE_ParAMGSetNumGridSweeps( HYPRE_Solver  solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ParAMGInitGridRelaxation
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParAMGInitGridRelaxation( int  *num_grid_sweeps,
+                                int  *grid_relax_type,
+                                int **grid_relax_points,
+                                int   coarsen_type  )
+{
+
+   if (coarsen_type == 5)
+   {
+      /* fine grid */
+      num_grid_sweeps[0] = 3;
+      grid_relax_type[0] = 3;
+      grid_relax_points[0] = hypre_CTAlloc(int, 4);
+      grid_relax_points[0][0] = -2;
+      grid_relax_points[0][1] = -1;
+      grid_relax_points[0][2] = 1;
+
+      /* down cycle */
+      num_grid_sweeps[1] = 4;
+      grid_relax_type[1] = 3;
+      grid_relax_points[1] = hypre_CTAlloc(int, 4);
+      grid_relax_points[1][0] = -1;
+      grid_relax_points[1][1] = 1;
+      grid_relax_points[1][2] = -2;
+      grid_relax_points[1][3] = -2;
+
+      /* up cycle */
+      num_grid_sweeps[2] = 4;
+      grid_relax_type[2] = 3;
+      grid_relax_points[2] = hypre_CTAlloc(int, 4);
+      grid_relax_points[2][0] = -2;
+      grid_relax_points[2][1] = -2;
+      grid_relax_points[2][2] = 1;
+      grid_relax_points[2][3] = -1;
+   }
+   else
+   {  
+      /* fine grid */
+      num_grid_sweeps[0] = 2;
+      grid_relax_type[0] = 3;
+      grid_relax_points[0] = hypre_CTAlloc(int, 2);
+      grid_relax_points[0][0] = 1;
+      grid_relax_points[0][1] = -1;
+ 
+      /* down cycle */
+      num_grid_sweeps[1] = 2;
+      grid_relax_type[1] = 3;
+      grid_relax_points[1] = hypre_CTAlloc(int, 2);
+      grid_relax_points[1][0] = 1;
+      grid_relax_points[1][1] = -1;
+  
+      /* up cycle */
+      num_grid_sweeps[2] = 2;
+      grid_relax_type[2] = 3;
+      grid_relax_points[2] = hypre_CTAlloc(int, 2);
+      grid_relax_points[2][0] = -1;
+      grid_relax_points[2][1] = 1;
+   }
+   /* coarsest grid */
+   num_grid_sweeps[3] = 1;
+   grid_relax_type[3] = 9;
+   grid_relax_points[3] = hypre_CTAlloc(int, 1);
+   grid_relax_points[3][0] = 0;
+
+   return 0;
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_ParAMGSetGridRelaxType
  *--------------------------------------------------------------------------*/
 

@@ -236,6 +236,24 @@ hypre_F90_IFACE(hypre_paramgsetnumgridsweeps)( long int *solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ParAMGInitGridRelaxation
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_paramginitgridrelaxation)( int      *num_grid_sweeps,
+                                                 int      *grid_relax_type,
+                                                 long int *grid_relax_points,
+                                                 int      *coarsen_type,
+                                                 int      *ierr               )
+{
+   *ierr = (int) ( HYPRE_ParAMGInitGridRelaxation( (int *)   num_grid_sweeps,
+                                                   (int *)   grid_relax_type,
+                                                   (int **)  grid_relax_points,
+                                                   (int)    *coarsen_type       ) );
+
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_ParAMGSetGridRelaxType
  *--------------------------------------------------------------------------*/
 
@@ -255,9 +273,8 @@ hypre_F90_IFACE(hypre_paramgsetgridrelaxtype)( long int *solver,
 void
 hypre_F90_IFACE(hypre_paramgsetgridrelaxpoints)( long int *solver,
                                                  long int *grid_relax_points,
-                                                 int      *ierr                   )
+                                                 int      *ierr               )
 {
-
    *ierr = (int) ( HYPRE_ParAMGSetGridRelaxPoints( (HYPRE_Solver) *solver,
                                                    (int **)        grid_relax_points ) );
 
