@@ -52,7 +52,7 @@ MLI_Method_AMGSA::MLI_Method_AMGSA( MPI_Comm comm ) : MLI_Method( comm )
    scalar_        = 0;
    nodeDofs_      = 1;
    currNodeDofs_  = 1;
-   threshold_     = 0.08;
+   threshold_     = 0.0;
    nullspaceDim_  = 1;
    nullspaceVec_  = NULL;
    nullspaceLen_  = 0;
@@ -860,7 +860,7 @@ int MLI_Method_AMGSA::setSmoother(int prePost, char *stype, int num,
       delete [] preSmootherWgt_;
       preSmootherWgt_ = new double[preSmootherNum_];
       if ( wgt == NULL )
-         for (i = 0; i < preSmootherNum_; i++) preSmootherWgt_[i] = 0.;
+         for (i = 0; i < preSmootherNum_; i++) preSmootherWgt_[i] = 1.0;
       else
          for (i = 0; i < preSmootherNum_; i++) preSmootherWgt_[i] = wgt[i];
    }
@@ -871,7 +871,7 @@ int MLI_Method_AMGSA::setSmoother(int prePost, char *stype, int num,
       delete [] postSmootherWgt_;
       postSmootherWgt_ = new double[postSmootherNum_];
       if ( wgt == NULL )
-         for (i = 0; i < postSmootherNum_; i++) postSmootherWgt_[i] = 0.;
+         for (i = 0; i < postSmootherNum_; i++) postSmootherWgt_[i] = 1.0;
       else
          for (i = 0; i < postSmootherNum_; i++) postSmootherWgt_[i] = wgt[i];
    }
