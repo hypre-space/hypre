@@ -1372,9 +1372,12 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
    hypre_ParCSRMatrixSetColStartsOwner(P,0);
 
    RAP_diag = hypre_ParCSRMatrixDiag(RAP);
-   hypre_CSRMatrixData(RAP_diag) = RAP_diag_data; 
    hypre_CSRMatrixI(RAP_diag) = RAP_diag_i; 
-   hypre_CSRMatrixJ(RAP_diag) = RAP_diag_j; 
+   if (RAP_diag_size)
+   {
+      hypre_CSRMatrixData(RAP_diag) = RAP_diag_data; 
+      hypre_CSRMatrixJ(RAP_diag) = RAP_diag_j; 
+   }
 
    RAP_offd = hypre_ParCSRMatrixOffd(RAP);
    hypre_CSRMatrixI(RAP_offd) = RAP_offd_i; 
