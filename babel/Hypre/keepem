@@ -12,7 +12,7 @@
 
 # Add file name roots as new classes are added to the SIDL file ...
 
-foreach i ( Box MPI_Com PCG StructMatrix StructMatrixBldr StructStencil StructVector StructVectorBldr StructuredGrid StructJacobi StructSMG StructSolver Pilut GMRES ParAMG ParCSRVector ParCSRMatrix ParCSRVectorBuilder ParCSRMatrixBuilder)
+foreach i ( Box MPI_Com PCG StructMatrix StructMatrixBldr StructStencil StructVector StructVectorBldr StructuredGrid StructJacobi StructSMG Pilut GMRES ParAMG ParCSRVector ParCSRMatrix ParCSRVectorBuilder ParCSRMatrixBuilder)
 mv 'Hypre_'$i'.c' 'Hypre_'$i'.c.orig'
 mv 'Hypre_'$i'_Data.h' 'Hypre_'$i'_Data.h.orig'
 end
