@@ -32,11 +32,13 @@ typedef struct
    int                   relax_type;     /* type of relaxation to use */
    int                   num_pre_relax;  /* number of pre relaxation sweeps */
    int                   num_post_relax; /* number of post relaxation sweeps */
+   int                   skip_relax;     /* flag to allow skipping relaxation */
    double                dxyz[3];     /* parameters used to determine cdir */
 
    int                   num_levels;
                       
    int                  *cdir_l;  /* coarsening directions */
+   int                  *active_l;  /* flags to relax on level l*/
 
    hypre_StructGrid    **grid_l;
    hypre_StructGrid    **P_grid_l;

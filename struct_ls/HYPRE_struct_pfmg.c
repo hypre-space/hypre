@@ -155,6 +155,17 @@ HYPRE_StructPFMGSetNumPostRelax( HYPRE_StructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_StructPFMGSetSkipRelax
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_StructPFMGSetSkipRelax( HYPRE_StructSolver solver,
+                              int                skip_relax )
+{
+   return( hypre_PFMGSetSkipRelax( (void *) solver, skip_relax) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_StructPFMGSetDxyz
  *--------------------------------------------------------------------------*/
 

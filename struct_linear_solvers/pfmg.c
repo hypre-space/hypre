@@ -40,6 +40,7 @@ hypre_PFMGInitialize( MPI_Comm  comm )
    (pfmg_data -> relax_type)     = 1;       /* weighted Jacobi */
    (pfmg_data -> num_pre_relax)  = 1;
    (pfmg_data -> num_post_relax) = 1;
+   (pfmg_data -> skip_relax)     = 1;
    (pfmg_data -> logging)        = 0;
 
    /* initialize */
@@ -102,6 +103,7 @@ hypre_PFMGFinalize( void *pfmg_vdata )
          }
          hypre_SharedTFree(pfmg_data -> data);
          hypre_TFree(pfmg_data -> cdir_l);
+         hypre_TFree(pfmg_data -> active_l);
          hypre_TFree(pfmg_data -> grid_l);
          hypre_TFree(pfmg_data -> P_grid_l);
          hypre_TFree(pfmg_data -> A_l);
@@ -227,6 +229,22 @@ hypre_PFMGSetNumPostRelax( void *pfmg_vdata,
    int             ierr = 0;
  
    (pfmg_data -> num_post_relax) = num_post_relax;
+ 
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_PFMGSetNumSkipRelax
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_PFMGSetSkipRelax( void *pfmg_vdata,
+                        int  skip_relax )
+{
+   hypre_PFMGData *pfmg_data = pfmg_vdata;
+   int             ierr = 0;
+ 
+   (pfmg_data -> skip_relax) = skip_relax;
  
    return ierr;
 }

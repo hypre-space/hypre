@@ -49,6 +49,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
    int                   logging         = (pfmg_data -> logging);
    double               *norms           = (pfmg_data -> norms);
    double               *rel_norms       = (pfmg_data -> rel_norms);
+   int                  *active_l        = (pfmg_data -> active_l);
 
    double                b_dot_b, r_dot_r, eps;
    double                e_dot_e, x_dot_x;
@@ -176,16 +177,25 @@ hypre_PFMGSolve( void               *pfmg_vdata,
 #endif
          for (l = 1; l <= (num_levels - 2); l++)
          {
-            /* pre-relaxation */
-            hypre_PFMGRelaxSetPreRelax(relax_data_l[l]);
-            hypre_PFMGRelaxSetMaxIter(relax_data_l[l], num_pre_relax);
-            hypre_PFMGRelaxSetZeroGuess(relax_data_l[l], 1);
-            hypre_PFMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
+            if (active_l[l])
+            {
+               /* pre-relaxation */
+               hypre_PFMGRelaxSetPreRelax(relax_data_l[l]);
+               hypre_PFMGRelaxSetMaxIter(relax_data_l[l], num_pre_relax);
+               hypre_PFMGRelaxSetZeroGuess(relax_data_l[l], 1);
+               hypre_PFMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
 
-            /* compute residual (b - Ax) */
-            hypre_StructCopy(b_l[l], r_l[l]);
-            hypre_StructMatvecCompute(matvec_data_l[l],
-                                      -1.0, A_l[l], x_l[l], 1.0, r_l[l]);
+               /* compute residual (b - Ax) */
+               hypre_StructCopy(b_l[l], r_l[l]);
+               hypre_StructMatvecCompute(matvec_data_l[l],
+                                         -1.0, A_l[l], x_l[l], 1.0, r_l[l]);
+            }
+            else
+            {
+               /* inactive level, set x=0, so r=(b-Ax)=b */
+               hypre_SetStructVectorConstantValues(x_l[l], 0.0);
+               hypre_StructCopy(b_l[l], r_l[l]);
+            }
 
             /* restrict residual */
             hypre_PFMGRestrict(restrict_data_l[l], RT_l[l], r_l[l], b_l[l+1]);
@@ -225,11 +235,14 @@ hypre_PFMGSolve( void               *pfmg_vdata,
             sprintf(filename, "zout_xup.%02d", l);
             hypre_PrintStructVector(filename, x_l[l], 0);
 #endif
-            /* post-relaxation */
-            hypre_PFMGRelaxSetPostRelax(relax_data_l[l]);
-            hypre_PFMGRelaxSetMaxIter(relax_data_l[l], num_post_relax);
-            hypre_PFMGRelaxSetZeroGuess(relax_data_l[l], 0);
-            hypre_PFMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
+            if (active_l[l])
+            {
+               /* post-relaxation */
+               hypre_PFMGRelaxSetPostRelax(relax_data_l[l]);
+               hypre_PFMGRelaxSetMaxIter(relax_data_l[l], num_post_relax);
+               hypre_PFMGRelaxSetZeroGuess(relax_data_l[l], 0);
+               hypre_PFMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
+            }
          }
 
          /* interpolate error and correct on fine grid (x = x + Pe_c) */

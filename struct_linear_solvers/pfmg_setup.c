@@ -33,6 +33,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    int                   relax_type = (pfmg_data -> relax_type);
    int                   n_pre      = (pfmg_data -> num_pre_relax);
    int                   n_post     = (pfmg_data -> num_post_relax);
+   int                   skip_relax = (pfmg_data -> skip_relax);
    double               *dxyz       = (pfmg_data -> dxyz);
                      
    int                   max_iter;
@@ -46,7 +47,10 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    hypre_Index           findex;
    hypre_Index           stride;
 
+   hypre_Index           coarsen;
+
    int                  *cdir_l;
+   int                  *active_l;
    hypre_StructGrid    **grid_l;
    hypre_StructGrid    **P_grid_l;
                     
@@ -173,10 +177,12 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    }
 
    cdir_l = hypre_TAlloc(int, max_levels);
+   active_l = hypre_TAlloc(int, max_levels);
    grid_l = hypre_TAlloc(hypre_StructGrid *, max_levels);
    grid_l[0] = hypre_RefStructGrid(grid);
    P_grid_l = hypre_TAlloc(hypre_StructGrid *, max_levels);
    P_grid_l[0] = NULL;
+   hypre_SetIndex(coarsen, 1, 1, 1); /* forces relaxation on finest grid */
    for (l = 0; ; l++)
    {
       /* determine cdir */
@@ -197,7 +203,21 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       if ( (cdir == -1) || (l == (max_levels - 1)) )
       {
          /* stop coarsening */
+         active_l[l] = 1; /* forces relaxation on coarsest grid */
          break;
+      }
+
+      if (hypre_IndexD(coarsen, cdir) != 0)
+      {
+         /* coarsened previously in this direction, relax level l */
+         active_l[l] = 1;
+         hypre_SetIndex(coarsen, 0, 0, 0);
+         hypre_IndexD(coarsen, cdir) = 1;
+      }
+      else
+      {
+         active_l[l] = 0;
+         hypre_IndexD(coarsen, cdir) = 1;
       }
 
       cdir_l[l] = cdir;
@@ -296,8 +316,18 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    hypre_FreeBoxArray(P_all_boxes);
    hypre_FreeBox(cbox);
 
+   /* set all levels active if skip_relax = 0 */
+   if (!skip_relax)
+   {
+      for (l = 0; l < num_levels; l++)
+      {
+         active_l[l] = 1;
+      }
+   }
+
    (pfmg_data -> num_levels) = num_levels;
    (pfmg_data -> cdir_l)     = cdir_l;
+   (pfmg_data -> active_l)     = active_l;
    (pfmg_data -> grid_l)     = grid_l;
    (pfmg_data -> P_grid_l)   = P_grid_l;
 
