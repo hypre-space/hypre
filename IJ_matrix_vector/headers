@@ -1,0 +1,56 @@
+#!/bin/sh
+#BHEADER***********************************************************************
+# (c) 1998   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+INTERNAL_HEADER=IJ_matrix_vector.h
+
+#===========================================================================
+# Include guards and other includes
+#===========================================================================
+
+cat > $INTERNAL_HEADER <<@
+
+#include "HYPRE_IJMatrix.h"
+
+#ifndef hypre_IJ_HEADER
+#define hypre_IJ_HEADER
+
+#include "utilities.h"
+#include "seq_matrix_vector.h"
+#include "parcsr_matrix_vector.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+@
+
+#===========================================================================
+# Structures and prototypes
+#===========================================================================
+
+cat aux_parcsr_matrix.h  >> $INTERNAL_HEADER
+cat IJ_matrix.h          >> $INTERNAL_HEADER
+
+../utilities/protos *.c               >> $INTERNAL_HEADER
+
+#===========================================================================
+# Include guards
+#===========================================================================
+
+cat >> $INTERNAL_HEADER <<@
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif
+
+@
+
