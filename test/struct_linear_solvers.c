@@ -30,13 +30,16 @@ main( int   argc,
    double              cx, cy, cz;
    int                 solver_id;
 
-   int                 A_num_ghost[6] = { 0, 0, 0, 0, 0, 0};
+   double              dxyz[3];
+
+   int                 A_num_ghost[6] = {0, 0, 0, 0, 0, 0};
                      
    HYPRE_StructMatrix  A;
    HYPRE_StructVector  b;
    HYPRE_StructVector  x;
 
    HYPRE_StructSolver  smg_solver;
+   HYPRE_StructSolver  pfmg_solver;
    HYPRE_StructSolver  pcg_solver;
    HYPRE_StructSolver  hybrid_solver;
    HYPRE_StructSolver  pcg_precond;
@@ -54,7 +57,7 @@ main( int   argc,
    int               **iupper;
    int               **ilower;
 
-   int                *istart;
+   int                 istart[3];
 
    int               **offsets;
 
@@ -115,6 +118,10 @@ main( int   argc,
    n_post = 1;
 
    solver_id = 0;
+
+   istart[0] = -3;
+   istart[1] = -3;
+   istart[2] = -3;
 
    /*-----------------------------------------------------------
     * Parse command line
@@ -194,7 +201,14 @@ main( int   argc,
       printf("  -c <cx> <cy> <cz>    : diffusion coefficients\n");
       printf("  -v <n_pre> <n_post>  : number of pre and post relaxations\n");
       printf("  -d <dim>             : problem dimension (2 or 3)\n");
-      printf("  -solver <ID>         : solver ID\n");
+      printf("  -solver <ID>         : solver ID (default = 0)\n");
+      printf("                         0  - SMG\n");
+      printf("                         1  - PFMG\n");
+      printf("                         10 - CG with SMG precond\n");
+      printf("                         11 - CG with PFMG precond\n");
+      printf("                         18 - CG with diagonal scaling\n");
+      printf("                         19 - CG\n");
+      printf("                         20 - Hybrid\n");
       printf("\n");
 
       exit(1);
@@ -227,17 +241,22 @@ main( int   argc,
    }
 
    /*-----------------------------------------------------------
-    * Set up the grid structure
+    * Set up dxyz for PFMG solver
     *-----------------------------------------------------------*/
 
-   istart = hypre_CTAlloc(int, dim);
+   dxyz[0] = sqrt(1.0 / cx);
+   dxyz[1] = sqrt(1.0 / cy);
+   dxyz[2] = sqrt(1.0 / cz);
+
+   /*-----------------------------------------------------------
+    * Set up the grid structure
+    *-----------------------------------------------------------*/
 
    switch (dim)
    {
       case 1:
          volume  = nx;
          nblocks = bx;
-         istart[0] = -17;
          stencil_indices = hypre_CTAlloc(int, 2);
          offsets = hypre_CTAlloc(int*, 2);
          offsets[0] = hypre_CTAlloc(int, 1);
@@ -250,8 +269,6 @@ main( int   argc,
       case 2:
          volume  = nx*ny;
          nblocks = bx*by;
-         istart[0] = -17;
-         istart[1] = 0;
          stencil_indices = hypre_CTAlloc(int, 3);
          offsets = hypre_CTAlloc(int*, 3);
          offsets[0] = hypre_CTAlloc(int, 2);
@@ -270,9 +287,6 @@ main( int   argc,
       case 3:
          volume  = nx*ny*nz;
          nblocks = bx*by*bz;
-         istart[0] = -17;
-         istart[1] = 0;
-         istart[2] = 32;
          stencil_indices = hypre_CTAlloc(int, 4);
          offsets = hypre_CTAlloc(int*, 4);
          offsets[0] = hypre_CTAlloc(int, 3);
@@ -492,8 +506,8 @@ main( int   argc,
       HYPRE_StructSMGInitialize(MPI_COMM_WORLD, &smg_solver);
       HYPRE_StructSMGSetMemoryUse(smg_solver, 0);
       HYPRE_StructSMGSetMaxIter(smg_solver, 50);
-      HYPRE_StructSMGSetRelChange(smg_solver, 0);
       HYPRE_StructSMGSetTol(smg_solver, 1.0e-06);
+      HYPRE_StructSMGSetRelChange(smg_solver, 0);
       HYPRE_StructSMGSetNumPreRelax(smg_solver, n_pre);
       HYPRE_StructSMGSetNumPostRelax(smg_solver, n_post);
       HYPRE_StructSMGSetLogging(smg_solver, 1);
@@ -515,15 +529,58 @@ main( int   argc,
       hypre_ClearTiming();
    
       HYPRE_StructSMGGetNumIterations(smg_solver, &num_iterations);
-      HYPRE_StructSMGGetFinalRelativeResidualNorm(smg_solver, &final_res_norm);
+      HYPRE_StructSMGGetFinalRelativeResidualNorm(smg_solver,
+                                                  &final_res_norm);
       HYPRE_StructSMGFinalize(smg_solver);
    }
 
    /*-----------------------------------------------------------
-    * Solve the system using PCG
+    * Solve the system using PFMG
     *-----------------------------------------------------------*/
 
-   if (solver_id > 0 && solver_id < 19)
+   else if (solver_id == 1)
+   {
+      time_index = hypre_InitializeTiming("PFMG Setup");
+      hypre_BeginTiming(time_index);
+
+      HYPRE_StructPFMGInitialize(MPI_COMM_WORLD, &pfmg_solver);
+      HYPRE_StructPFMGSetMaxIter(pfmg_solver, 50);
+      HYPRE_StructPFMGSetTol(pfmg_solver, 1.0e-06);
+      HYPRE_StructPFMGSetRelChange(pfmg_solver, 0);
+      HYPRE_StructPFMGSetRelaxType(pfmg_solver, 1); /* weighted Jacobi */
+/*      HYPRE_StructPFMGSetRelaxType(pfmg_solver, 2); /* red-black GS */
+      HYPRE_StructPFMGSetNumPreRelax(pfmg_solver, n_pre);
+      HYPRE_StructPFMGSetNumPostRelax(pfmg_solver, n_post);
+      HYPRE_StructPFMGSetDxyz(pfmg_solver, dxyz);
+      HYPRE_StructPFMGSetLogging(pfmg_solver, 1);
+      HYPRE_StructPFMGSetup(pfmg_solver, A, b, x);
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+      time_index = hypre_InitializeTiming("PFMG Solve");
+      hypre_BeginTiming(time_index);
+
+      HYPRE_StructPFMGSolve(pfmg_solver, A, b, x);
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+   
+      HYPRE_StructPFMGGetNumIterations(pfmg_solver, &num_iterations);
+      HYPRE_StructPFMGGetFinalRelativeResidualNorm(pfmg_solver,
+                                                   &final_res_norm);
+      HYPRE_StructPFMGFinalize(pfmg_solver);
+   }
+
+   /*-----------------------------------------------------------
+    * Solve the system using CG
+    *-----------------------------------------------------------*/
+
+   if ((solver_id > 9) && (solver_id < 20))
    {
       time_index = hypre_InitializeTiming("PCG Setup");
       hypre_BeginTiming(time_index);
@@ -535,7 +592,7 @@ main( int   argc,
       HYPRE_StructPCGSetRelChange(pcg_solver, 0);
       HYPRE_StructPCGSetLogging(pcg_solver, 1);
 
-      if (solver_id == 1)
+      if (solver_id == 10)
       {
          /* use symmetric SMG as preconditioner */
          HYPRE_StructSMGInitialize(MPI_COMM_WORLD, &pcg_precond);
@@ -550,7 +607,26 @@ main( int   argc,
                                    HYPRE_StructSMGSetup,
                                    pcg_precond);
       }
-      else if (solver_id == 2)
+
+      if (solver_id == 11)
+      {
+         /* use symmetric PFMG as preconditioner */
+         HYPRE_StructPFMGInitialize(MPI_COMM_WORLD, &pcg_precond);
+         HYPRE_StructPFMGSetMaxIter(pcg_precond, 1);
+         HYPRE_StructPFMGSetTol(pcg_precond, 0.0);
+         HYPRE_StructPFMGSetRelaxType(pcg_precond, 1); /* weighted Jacobi */
+/*         HYPRE_StructPFMGSetRelaxType(pcg_precond, 2); /* red-black GS */
+         HYPRE_StructPFMGSetNumPreRelax(pcg_precond, n_pre);
+         HYPRE_StructPFMGSetNumPostRelax(pcg_precond, n_post);
+         HYPRE_StructPFMGSetDxyz(pcg_precond, dxyz);
+         HYPRE_StructPFMGSetLogging(pcg_precond, 0);
+         HYPRE_StructPCGSetPrecond(pcg_solver,
+                                   HYPRE_StructPFMGSolve,
+                                   HYPRE_StructPFMGSetup,
+                                   pcg_precond);
+      }
+
+      else if (solver_id == 18)
       {
          /* use diagonal scaling as preconditioner */
 #ifdef HYPRE_USE_PTHREADS
@@ -586,15 +662,20 @@ main( int   argc,
       HYPRE_StructPCGGetFinalRelativeResidualNorm(pcg_solver, &final_res_norm);
       HYPRE_StructPCGFinalize(pcg_solver);
 
-      if (solver_id == 1)
+      if (solver_id == 10)
       {
          HYPRE_StructSMGFinalize(pcg_precond);
+      }
+      else if (solver_id == 11)
+      {
+         HYPRE_StructPFMGFinalize(pcg_precond);
       }
    }
 
    /*-----------------------------------------------------------
     * Hybrid Solver
     *-----------------------------------------------------------*/
+
    if (solver_id > 19)
    {
       HYPRE_StructHybridInitialize(MPI_COMM_WORLD, &hybrid_solver);
@@ -611,7 +692,8 @@ main( int   argc,
       HYPRE_StructHybridSolve(hybrid_solver, A, b, x);
 
       HYPRE_StructHybridGetNumIterations(hybrid_solver, &num_iterations);
-      HYPRE_StructHybridGetFinalRelativeResidualNorm(hybrid_solver, &final_res_norm);
+      HYPRE_StructHybridGetFinalRelativeResidualNorm(hybrid_solver,
+                                                     &final_res_norm);
       HYPRE_StructHybridFinalize(hybrid_solver);
    }
 
@@ -648,7 +730,6 @@ main( int   argc,
    hypre_TFree(ilower);
    hypre_TFree(iupper);
    hypre_TFree(stencil_indices);
-   hypre_TFree(istart);
 
    for ( i = 0; i < (dim + 1); i++)
       hypre_TFree(offsets[i]);
