@@ -613,6 +613,7 @@ then
            AC_CHECK_PROGS(CXX,ompcc) 
            AC_CHECK_PROGS(F77,ompf77)
        CASC_CHECK_HEADER(omp.h, /usr/local/omni/lib/openmp/include)
+       CASC_CHECK_HEADER(mpi.h, /usr/local/mpich-1.2.1/include)
        CASC_ADD_LIB(ompc, main, /usr/local/omni/lib/openmp/lib)
          fi
         fi
@@ -1109,6 +1110,7 @@ CASC_CONFIG_OUTPUT_LIST(\
  distributed_matrix\
  docs\
  FEI_mv\
+ FEI_mv/SuperLU\
  FEI_mv/fei-hypre\
  FEI_mv/fei-isis\
  FEI_mv/fei-isis/src\
