@@ -168,7 +168,7 @@
 #define dgels_    dgels
 #define dpotrs_   dpotrs
 #define slulsame_    slulsame
-#define dlamch_   dlamch
+#define sludlamch_   sludlamch
 
 #define scasum_   scasum
 #define icamax_   icamax

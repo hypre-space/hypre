@@ -83,7 +83,7 @@ dlaqgs(SuperMatrix *A, double *r, double *c,
     double   *Aval;
     int i, j, irow;
     double large, small, cj;
-    extern double dlamch_(char *);
+    extern double sludlamch_(char *);
 
 
     /* Quick return if possible */
@@ -96,7 +96,7 @@ dlaqgs(SuperMatrix *A, double *r, double *c,
     Aval = Astore->nzval;
     
     /* Initialize LARGE and SMALL. */
-    small = dlamch_("Safe minimum") / dlamch_("Precision");
+    small = sludlamch_("Safe minimum") / sludlamch_("Precision");
     large = 1. / small;
 
     if (rowcnd >= THRESH && amax >= small && amax <= large) {
