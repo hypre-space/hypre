@@ -118,11 +118,19 @@ mv $HYPRE_DIR "hypre-${Version}"
 HYPRE_DIR="hypre-${Version}"
 HYPRE_DIST_INSTALL_DIR=`pwd`"/$HYPRE_DIR"
     
-(       # build documentation and tools and install
+(       # build documentation and install
   cd $HYPRE_DIST_INSTALL_DIR/src/linear_solvers
   ./configure --prefix=$HYPRE_DIST_INSTALL_DIR --with-babel
-  (make docs; cd docs;  make -i install; make clean)
-  make distclean
+  (cd docs; make all)
+  mkdir $HYPRE_DIST_INSTALL_DIR/docs
+  cp -fr HYPRE_usr_manual    $HYPRE_DIST_INSTALL_DIR/docs/.
+  cp -f  HYPRE_usr_manual.ps $HYPRE_DIST_INSTALL_DIR/docs/.
+  cp -fr HYPRE_ref_manual    $HYPRE_DIST_INSTALL_DIR/docs/.
+  cp -f  HYPRE_ref_manual.ps $HYPRE_DIST_INSTALL_DIR/docs/.
+  cp -fr bHYPRE_ref_manual    $HYPRE_DIST_INSTALL_DIR/docs/.
+  cp -f  bHYPRE_ref_manual.ps $HYPRE_DIST_INSTALL_DIR/docs/.
+  cd $HYPRE_DIST_INSTALL_DIR/src/linear_solvers
+  (cd docs; make distclean)
 )
     
 (       # store version info
