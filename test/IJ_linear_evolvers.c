@@ -96,7 +96,7 @@ main( int   argc,
    int    **grid_relax_points;
    int      relax_default;
    double  *relax_weight; 
-   double   tol = 1.0e-6;
+   double   tol = 1.0e-6, pc_tol = 0.;
 
    /* parameters for PILUT */
    double   drop_tol = -1;
@@ -922,9 +922,9 @@ main( int   argc,
       hypre_BeginTiming(time_index);
 
       HYPRE_BoomerAMGCreate(&amg_solver); 
+      HYPRE_BoomerAMGSetTol(amg_solver, tol);
       HYPRE_BoomerAMGSetCoarsenType(amg_solver, (hybrid*coarsen_type));
       HYPRE_BoomerAMGSetMeasureType(amg_solver, measure_type);
-      HYPRE_BoomerAMGSetTol(amg_solver, tol);
       HYPRE_BoomerAMGSetStrongThreshold(amg_solver, strong_threshold);
       HYPRE_BoomerAMGSetTruncFactor(amg_solver, trunc_factor);
 /* note: log is written to standard output, not to file */
@@ -985,7 +985,9 @@ main( int   argc,
       {
          /* use BoomerAMG as preconditioner */
          if (myid == 0) printf("Solver: AMG-PCG\n");
+
          HYPRE_BoomerAMGCreate(&pcg_precond); 
+         HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);
          HYPRE_BoomerAMGSetCoarsenType(pcg_precond, (hybrid*coarsen_type));
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
@@ -1109,10 +1111,8 @@ main( int   argc,
          /* use BoomerAMG as preconditioner */
          if (myid == 0) printf("Solver: AMG-GMRES\n");
 
-         trunc_factor = 0.95;
-         max_row_sum  = 0.05;
-
          HYPRE_BoomerAMGCreate(&pcg_precond); 
+         HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);
          HYPRE_BoomerAMGSetCoarsenType(pcg_precond, (hybrid*coarsen_type));
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
@@ -1261,6 +1261,7 @@ main( int   argc,
          if (myid == 0) printf("Solver: AMG-BiCGSTAB\n");
 
          HYPRE_BoomerAMGCreate(&pcg_precond); 
+         HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);
          HYPRE_BoomerAMGSetCoarsenType(pcg_precond, (hybrid*coarsen_type));
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
@@ -1380,6 +1381,7 @@ main( int   argc,
          if (myid == 0) printf("Solver: AMG-CGNR\n");
 
          HYPRE_BoomerAMGCreate(&pcg_precond); 
+         HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);
          HYPRE_BoomerAMGSetCoarsenType(pcg_precond, (hybrid*coarsen_type));
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
