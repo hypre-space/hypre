@@ -2,9 +2,9 @@
 # Process this file with autoconf to produce a configure script.
 # Set VERSION so we only need to edit in one place (i.e., here)
 m4_define(HYPRE_NAME, hypre)
-m4_define(HYPRE_VERSION, 1.8.3a)
-m4_define(HYPRE_DATE, 2004/01/21)
-m4_define(HYPRE_TIME, 05:08:16)
+m4_define(HYPRE_VERSION, 1.8.3b)
+m4_define(HYPRE_DATE, 2004/02/14)
+m4_define(HYPRE_TIME, 10:35:00)
 m4_define(HYPRE_DATETIME, [HYPRE_DATE HYPRE_TIME])
 m4_define(HYPRE_BUGS,http://www-casc.llnl.gov/bugs/enter_bug.cgi?product=HYPRE)
 m4_define(HYPRE_TOP_SRC_DIR, `pwd`)
@@ -151,6 +151,7 @@ AC_HELP_STRING([--with-FEI_INC_DIR],
 )
 AM_CONDITIONAL([USE_FEI_INC_DIR_DEFAULT], [test "$FEI_INC_DIR_DEFINED" = "no"])
 
+# select compilers (unless strict_checking)
 if test "$casc_user_chose_compilers" != "yes" ; then
   if test "$casc_using_openmp" = "yes" ; then
     AC_CHECK_PROGS(CC, mpguidec icc pgcc xlc cc)
@@ -158,11 +159,11 @@ if test "$casc_user_chose_compilers" != "yes" ; then
     AC_CHECK_PROGS(F77, mpguidef77 ifc pgf77 xlf f77)
   elif test "$casc_using_mpi" = "no" ; then
     AC_CHECK_PROGS(CC, icc pgcc xlc cc kcc c89 gcc)
-    AC_CHECK_PROGS(CXX, icc pgCC xlC c++ cxx CC KCC cl g++ gcc)
+    AC_CHECK_PROGS(CXX, icc pgCC xlC cxx CC c++ KCC cl g++ gcc)
     AC_CHECK_PROGS(F77, ifc pgf77 xlf f77 kf77 fort77 fort g77)
   else
     AC_CHECK_PROGS(CC, mpcc mpikcc mpicc hcc icc pgcc xlc cc kcc c89 gcc)
-    AC_CHECK_PROGS(CXX, mpCC mpiKCC mpicxx mpiCC hcp icc pgCC xlC c++ cxx CC KCC g++)
+    AC_CHECK_PROGS(CXX, mpCC mpiKCC mpicxx mpiCC hcp icc pgCC xlC cxx CC c++ KCC g++)
     AC_CHECK_PROGS(F77, mpxlf mpf77 mpikf77 mpif77 ifc pgf77 xlf f77 kf77 fort77 f90 g77)
   fi
 fi
@@ -247,12 +248,12 @@ AC_SUBST(LIBTOOL_DEPS)
 # Checks for header files.
 #AC_PATH_X
 #AC_HEADER_DIRENT
-AC_HEADER_STDC
-AC_HEADER_SYS_WAIT
-AC_CHECK_HEADERS([float.h inttypes.h limits.h malloc.h memory.h stddef.h stdlib.h string.h strings.h sys/param.h sys/time.h unistd.h])
+#AC_HEADER_STDC
+#AC_HEADER_SYS_WAIT
+AC_CHECK_HEADERS([float.h limits.h malloc.h memory.h stddef.h stdlib.h string.h strings.h sys/param.h sys/time.h unistd.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
-AC_HEADER_STDBOOL
+#AC_HEADER_STDBOOL
 AC_C_CONST
 AC_TYPE_SIZE_T
 AC_HEADER_TIME
@@ -260,15 +261,15 @@ AC_C_VOLATILE
 AC_CHECK_TYPES([ptrdiff_t])
 
 # Checks for library functions.
-AC_FUNC_CLOSEDIR_VOID
-AC_FUNC_ERROR_AT_LINE
+#AC_FUNC_CLOSEDIR_VOID
+#AC_FUNC_ERROR_AT_LINE
 #AC_FUNC_MALLOC
-#AC_FUNC_REALLOC
+AC_FUNC_REALLOC
 AC_TYPE_SIGNAL
-AC_FUNC_STAT
+#AC_FUNC_STAT
 AC_FUNC_STRTOD
-AC_FUNC_VPRINTF
-AC_CHECK_FUNCS([atexit bzero floor getcwd gethrtime gettimeofday memset pow rint sqrt strcasecmp strchr strcspn strdup strrchr strspn strtol])
+#AC_FUNC_VPRINTF
+AC_CHECK_FUNCS([bzero floor gethrtime gettimeofday memset pow sqrt strcspn strdup strspn strtol])
 
 AC_ARG_WITH(COMM_SIMPLE,
 AC_HELP_STRING([--with-COMM_SIMPLE],
