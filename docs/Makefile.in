@@ -8,7 +8,7 @@
 #EHEADER***********************************************************************
 
 .SUFFIXES:
-.SUFFIXES: .dxx .html .tex
+.SUFFIXES: .c .dxx .html .tex
 
 srcdir = @srcdir@
 VPATH = @srcdir@
@@ -16,6 +16,10 @@ VPATH = @srcdir@
 ONLINE_OPTS =\
  -show_section_numbers\
  -bottom_navigation
+
+#DOCIFIED_DIRS =\
+# struct_linear_solvers\
+# struct_matrix_vector
 
 ##################################################################
 # Targets
@@ -35,6 +39,7 @@ veryclean: clean
 	@/bin/rm -fr dev_manual
 	@/bin/rm -f  dev_manual.ps
 
+
 ##################################################################
 # Rules
 ##################################################################
@@ -53,9 +58,22 @@ dev_ps: dev_manual.ps
 
 ##########
 
+DOCIFIED_FILES =\
+ ../struct_linear_solvers/HYPRE_struct_pcg.c\
+ ../struct_matrix_vector/communication.c
+
+DXX = ${DOCIFIED_FILES:.c=.dxx}
+
+TEX = ${DXX:.dxx=.tex}
+
+${DXX}: ${DOCIFIED_FILES}
+
+${TEX}: ${DXX}
+
 USR_FILES =\
  usr_building_code.tex\
- usr_manual.tex
+ usr_manual.tex\
+ ${TEX}
 
 usr_manual/usr_manual.html: usr_manual.dvi
 	latex2html ${ONLINE_OPTS} usr_manual.tex
@@ -112,3 +130,8 @@ version.tex:
 # Generic rules
 ##################################################################
 
+.c.dxx:
+	docify $< $@
+
+.dxx.tex:
+	doc++ -t -o $@ $<
