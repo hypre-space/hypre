@@ -137,6 +137,11 @@ void ParILUT(DataDistType *ddist, FactorMatType *ldu,
              cinfo.incolind,  cinfo.invalues, 
              newperm, newiperm, vrowdist, -1);
 
+  jr = NULL;
+  jw = NULL;
+  lr = NULL;
+  w  = NULL;
+
 #ifdef HYPRE_DEBUG
   PrintLine("ParILUT done", globals);
 #endif
