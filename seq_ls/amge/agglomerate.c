@@ -48,10 +48,10 @@ int hypre_AMGeAgglomerate(int *i_AE_element, int *j_AE_element,
 
   int weight, weight_max;
 
-  max_weight = 0;
+  max_weight = 1;
   for (i=0; i < num_faces; i++)
     {
-      weight = 0;
+      weight = 1;
       for (j=i_face_face[i]; j < i_face_face[i+1]; j++)
 	weight+= w_face_face[j];
       if (max_weight < weight) max_weight = weight;
