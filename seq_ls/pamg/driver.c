@@ -239,6 +239,11 @@ main( int   argc,
          arg_index++;
          agg_coarsen_type = 4;
       }
+      else if ( strcmp(argv[arg_index], "-wLJP2") == 0 )
+      {
+         arg_index++;
+         agg_coarsen_type = 12;
+      }
       else if ( strcmp(argv[arg_index], "-ruge1p") == 0 )
       {
          arg_index++;
@@ -348,12 +353,17 @@ main( int   argc,
       printf("  -9pt                   : build laplacian 9pt operator\n");
       printf("  -27pt                  : build laplacian 27pt operator\n");
       printf("  -difconv               : build 7pt diffusion-convection\n");
-      /* begin HANS added */
-      printf("  -wLJP                  : use wLJP coarsening \n");
+      printf("  -agg <numlev>          : defines no. levels of aggr. coars. and interp.\n");
+      printf("  -a1                    : use A1 coarsening (agg.)\n");
+      printf("  -a2                    : use A2 coarsening (agg.)\n");
+      printf("  -cljp1                 : use CLJP1 coarsening (agg.)\n");
+      printf("  -cljp2                 : use CLJP2 coarsening (agg.)\n");
+      printf("  -wLJP                  : use wLJP coarsening (agg.)\n");
+      printf("  -wLJP2                 : use wLJP coarsening applied twice (agg.)\n");
       printf("  -ruge1p                : use classical coarsening with only one pass\n");
-      printf("  -mp                    : use multipass interpolation\n");
-      printf("  -jac                   : use multipass interpolation with 1 Jacobi iteration\n");
-      /* end HANS added */
+      printf("  -mp                    : use multipass interpolation (agg.)\n");
+      printf("  -jac                   : use multipass interpolation with Jacobi iteration(agg.)\n");
+      printf("  -nj <njac>             : defines no. of its of Jacobi interpolation\n");
       printf("  -ruge                  : use classical coarsening \n");
       printf("  -rugeL                 : use classical coarsening \n");
       printf("                           (more efficient version) \n");

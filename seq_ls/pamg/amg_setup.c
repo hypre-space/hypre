@@ -336,6 +336,7 @@ hypre_AMGSetup( void            *amg_vdata,
                        S2, &new_CF_marker, &coarse_size); 
          hypre_CSRMatrixDestroy(S2);
          hypre_AMGCorrectCFMarker(CF_marker, fine_size, new_CF_marker); 
+	 hypre_TFree(new_CF_marker);
 	 /* if (mode == 1 || mode == 2) S_mode = 1;
 	 hypre_AMGCreateS(A_array[level], strong_threshold, 
 			S_mode, dof_func_array[level], &S2);
@@ -359,6 +360,7 @@ hypre_AMGSetup( void            *amg_vdata,
                        S2, &new_CF_marker, &coarse_size); 
          hypre_CSRMatrixDestroy(S2);
          hypre_AMGCorrectCFMarker(CF_marker, fine_size, new_CF_marker); 
+	 hypre_TFree(new_CF_marker);
 	 /*if (mode == 1 || mode == 2) S_mode = 1;
 	 hypre_AMGCreateS(A_array[level], strong_threshold, 
 			S_mode, dof_func_array[level], &S2);
@@ -383,6 +385,7 @@ hypre_AMGSetup( void            *amg_vdata,
                        S2, &new_CF_marker, &coarse_size); 
          hypre_CSRMatrixDestroy(S2);
          hypre_AMGCorrectCFMarker(CF_marker, fine_size, new_CF_marker); 
+	 hypre_TFree(new_CF_marker);
 	 /* if (mode == 1 || mode == 2) S_mode = 1;
 	 hypre_AMGCreateS(A_array[level], strong_threshold, 
 			S_mode, dof_func_array[level], &S2);
@@ -411,6 +414,7 @@ hypre_AMGSetup( void            *amg_vdata,
                        S2, &new_CF_marker, &coarse_size); 
          hypre_CSRMatrixDestroy(S2);
          hypre_AMGCorrectCFMarker(CF_marker, fine_size, new_CF_marker); 
+	 hypre_TFree(new_CF_marker);
 	 /* if (mode == 1 || mode == 2) S_mode = 1;
 	 hypre_AMGCreateS(A_array[level], strong_threshold, 
 			S_mode, dof_func_array[level], &S2);
@@ -439,6 +443,7 @@ hypre_AMGSetup( void            *amg_vdata,
                        S2, &new_CF_marker, &coarse_size); 
          hypre_CSRMatrixDestroy(S2);
          hypre_AMGCorrectCFMarker(CF_marker, fine_size, new_CF_marker); 
+	 hypre_TFree(new_CF_marker);
       }
       else if (coarsen_type == 3)
       {

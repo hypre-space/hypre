@@ -55,6 +55,10 @@ hypre_AMGSetupStats( void *amg_vdata )
    double    sparse;
    double    min_weight;
    double    max_weight;
+   double    op_complxty=0;
+   double    grid_complxty=0;
+   double    num_nz0;
+   double    num_var0;
 
    A_array = hypre_AMGDataAArray(amg_data);
    P_array = hypre_AMGDataPArray(amg_data);
@@ -81,6 +85,9 @@ hypre_AMGSetupStats( void *amg_vdata )
     *  Enter Statistics Loop
     *-----------------------------------------------------*/
 
+   num_var0 = (double) hypre_CSRMatrixNumRows(A_array[0]);
+   num_nz0 = (double) hypre_CSRMatrixNumNonzeros(A_array[0]);
+ 
    for (level = 0; level < num_levels; level++)
    {
        A_i = hypre_CSRMatrixI(A_array[level]);
@@ -89,6 +96,8 @@ hypre_AMGSetupStats( void *amg_vdata )
        fine_size = hypre_CSRMatrixNumRows(A_array[level]);
        num_nonzeros = hypre_CSRMatrixNumNonzeros(A_array[level]);
        sparse = num_nonzeros /((double) fine_size * (double) fine_size);
+       op_complxty += ((double)num_nonzeros/num_nz0);
+       grid_complxty += ((double)fine_size/num_var0);
 
        min_entries = A_i[1]-A_i[0];
        max_entries = 0;
@@ -190,7 +199,9 @@ hypre_AMGSetupStats( void *amg_vdata )
        printf("  %5.3e  %5.3e %5.3e  %5.3e\n",
                  min_weight, max_weight, min_rowsum, max_rowsum);
    }
-      
+     
+   printf("\n Operator Complexity: %8.3f\n", op_complxty); 
+   printf(" Grid Complexity:     %8.3f\n", grid_complxty); 
    hypre_WriteSolverParams(amg_data);  
    
    return(0);
