@@ -216,8 +216,8 @@ do
   case $1 in
     -achilles)
         HYPRE_ARCH="casc"
-        HYPRE_COMPILE_MACHINE="sunup"
-        HYPRE_RUN_MACHINE="sunup"
+        HYPRE_COMPILE_MACHINE="achilles"
+        HYPRE_RUN_MACHINE="achilles"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/sparc-sun-solaris2.8/AUTOTEST"
         if [ "$AUTOMAKEMODE" = "yes" ] ; then
 	  HYPRE_MACHINE_COMMANDS="-mne 1 -a 1 -cfl 2"
