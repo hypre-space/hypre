@@ -18,15 +18,15 @@ c
 c     
 c---------------------------------------------------------------------
 c     
-      write(6,'(1x)')
-      write(6,'(''     Filename: '',a)') prtfile
-      write(6,'(1x)')
+      write(9,'(1x)')
+      write(9,'(''     Filename: '',a)') prtfile
+      write(9,'(1x)')
       open(9,file=prtfile,status='old')
  1    read(9,1000,end=99) line
-      write(6,2000) line
+      write(9,2000) line
       go to 1
  99   close(9)
-      write(6,'(1x)')
+      write(9,'(1x)')
       return
  1000 format(a70)
  2000 format(5x,a70)
@@ -44,11 +44,11 @@ c
 c---------------------------------------------------------------------
 c     
       if(iout.lt.6) return
-      write(6,1000) k
+      write(9,1000) k
       ilo=imin(k)
       ihi=imax(k)
-      write(6,2000) (f(i),i=ilo,ihi)
-      write(6,3000)
+      write(9,2000) (f(i),i=ilo,ihi)
+      write(9,3000)
       return
  1000 format(/' f for k=',i2/)
  2000 format(13(1x,d9.3))
@@ -105,14 +105,14 @@ c
       iv1=iv(ip1)
       iv2=iv(ip2+1)-1
       np=imax(k)-imin(k)+1
-      write(6,999) k,np,imin(k),imax(k),ia1,ia2,ip1,ip2,iv1,iv2
+      write(9,999) k,np,imin(k),imax(k),ia1,ia2,ip1,ip2,iv1,iv2
       if(iout.le.1) return
       ilo=imin(k)
       ihi=imax(k)
       do 90 i=ilo,ihi
          ipt=ip(i)
          if(iout.gt.6) go to 30
-         write(6,1000) i,ia(i),icg(i),ifg(i),iu(i),ipt,iv(ipt)
+         write(9,1000) i,ia(i),icg(i),ifg(i),iu(i),ipt,iv(ipt)
          if(iout.le.2) go to 80
          nn=(ia(i+1)-ia(i)-1)/nr+1
          jlo=ia(i)-nr
@@ -134,15 +134,15 @@ c
                aa(nmx)  = a(j)
  10         continue
 c     
-            write(6,2010) (jja(n),ippt(n),iiu(n),n=1,nmx)
-            write(6,2020) (aa(n),n=1,nmx)
+            write(9,2010) (jja(n),ippt(n),iiu(n),n=1,nmx)
+            write(9,2020) (aa(n),n=1,nmx)
  20      continue
 c     
 c     print b
 c     
  30      if(iout.le.4) go to 80
          ibb=ib(i+1)-1
-         write(6,3000) i,ib(i),ibb
+         write(9,3000) i,ib(i),ibb
          if(iout.le.5) go to 80
          nn=(ib(i+1)-ib(i)-1)/nr+1
          jlo=ib(i)-nr
@@ -163,10 +163,10 @@ c
                aa(nmx)  = b(j)
  60         continue
 c     
-            write(6,3010) (jja(n),ippt(n),iiu(n),n=1,nmx)
-            write(6,3020) (aa(n),n=1,nmx)
+            write(9,3010) (jja(n),ippt(n),iiu(n),n=1,nmx)
+            write(9,3020) (aa(n),n=1,nmx)
  70      continue
- 80      write(6,4000)
+ 80      write(9,4000)
  90   continue
       return
  999  format(/2x,'k=',i2,'  np=',i5,'  imin=',i5,'  imax=',i5,
@@ -227,7 +227,7 @@ c
       iv2=iv(ipmx+1)-1
       nv=imax-imin+1
       np=ipmx-ipmn+1
-      write(6,999) nv,imin,imax,ia1,ia2,np,ipmn,ipmx,iv1,iv2
+      write(9,999) nv,imin,imax,ia1,ia2,np,ipmn,ipmx,iv1,iv2
 c     
 c     loop over points
 c     
@@ -235,10 +235,10 @@ c
          ivlo=iv(ipt)
          ivhi=iv(ipt+1)-1
          if(iout.ge.3)
-     *        write(6,7000) ipt,ipb(ipt),xp(ipt),yp(ipt),ivlo,ivhi
+     *        write(9,7000) ipt,ipb(ipt),xp(ipt),yp(ipt),ivlo,ivhi
          do 30 i=ivlo,ivhi
             iipt=ip(i)
-            write(6,1000) i,ia(i),iu(i),iipt,iv(iipt),xp(iipt),yp(iipt)
+            write(9,1000) i,ia(i),iu(i),iipt,iv(iipt),xp(iipt),yp(iipt)
             nn=(ia(i+1)-ia(i)-1)/nr+1
             jlo=ia(i)-nr
 c     
@@ -257,11 +257,11 @@ c
                   aa(nmx)  = a(j)
  10            continue
 c     
-               write(6,2010) (jja(n),iip(n),iiu(n),n=1,nmx)
-               write(6,2020) (aa(n),n=1,nmx)
+               write(9,2010) (jja(n),iip(n),iiu(n),n=1,nmx)
+               write(9,2020) (aa(n),n=1,nmx)
  20         continue
  30      continue
-         write(6,4000)
+         write(9,4000)
  50   continue
       return
  999  format(/'  nv=',i5,'  imin=',i5,'  imax=',i5,
@@ -318,23 +318,23 @@ c
       iv2=iv(ipmx+1)-1
       nv=imax-imin+1
       np=ipmx-ipmn+1
-      write(6,999) nv,imin,imax,ia1,ia2,np,ipmn,ipmx,iv1,iv2
+      write(9,999) nv,imin,imax,ia1,ia2,np,ipmn,ipmx,iv1,iv2
 c     
 c     loop over points
 c     
       do 70 iip=ipmn,ipmx
          ivlo=iv(iip)
          ivhi=iv(iip+1)-1
-         write(6,7000) iip,ipb(iip),xp(iip),yp(iip),ivlo,ivhi
+         write(9,7000) iip,ipb(iip),xp(iip),yp(iip),ivlo,ivhi
 
          do 60 i=ivlo,ivhi
             ipt=ip(i)
-            write(6,1000) i,ia(i),iu(i),ipt,iv(ipt),xp(ipt),yp(ipt)
+            write(9,1000) i,ia(i),iu(i),ipt,iv(ipt),xp(ipt),yp(ipt)
 c     
 c     loop over unknowns
 c     
             do 40 iun=1,nun
-               write(6,2000) iu(i),iun
+               write(9,2000) iu(i),iun
 c     
 c     load unknowns into temporary row
 c     
@@ -357,10 +357,10 @@ c
                   do 10 j=jlo,jhi
                      nnn=nnn+1
  10               continue
-                  write(6,2011) n,(jaa(j),aa(j),j=jlo,jhi)
+                  write(9,2011) n,(jaa(j),aa(j),j=jlo,jhi)
  20            continue
  40         continue
-            write(6,4000)
+            write(9,4000)
  60      continue
  70   continue
       return
@@ -417,7 +417,7 @@ c
       iv2=iv(ipmx+1)-1
       nv=imax-imin+1
       np=ipmx-ipmn+1
-      write(6,999) np,nv
+      write(9,999) np,nv
 c     
 c     loop over points
 c     
@@ -426,12 +426,12 @@ c
          yr=yp(iip)
          ivlo=iv(iip)
          ivhi=iv(iip+1)-1
-         write(6,7000) iip,xp(iip),yp(iip)
+         write(9,7000) iip,xp(iip),yp(iip)
 
          do 60 i=ivlo,ivhi
             ipt=ip(i)
             iu_row=iu(i)
-            write(6,1000) iu_row,ipt,i
+            write(9,1000) iu_row,ipt,i
 c     
 c     loop over unknowns
 c     
@@ -464,13 +464,13 @@ c
                      if(xc.gt.xr.and.yc.gt.yr) st( 1, 1) = a(j)
                   endif
  5             continue
-               write(6,2000) iu_row,iu_col,st(-1, 1),st( 0, 1),st( 1, 1)
-               write(6,2001) st(-1, 0),st( 0, 0),st( 1, 0)
-               write(6,2001) st(-1,-1),st( 0,-1),st( 1,-1)
-               write(6,4000)
+               write(9,2000) iu_row,iu_col,st(-1, 1),st( 0, 1),st( 1, 1)
+               write(9,2001) st(-1, 0),st( 0, 0),st( 1, 0)
+               write(9,2001) st(-1,-1),st( 0,-1),st( 1,-1)
+               write(9,4000)
  20            continue
  40         continue
-            write(6,4000)
+            write(9,4000)
  60      continue
  70   continue
       return
@@ -507,12 +507,12 @@ c
       ia1=ia(imin)
       ia2=ia(imax+1)-1
       np=imax-imin+1
-      write(6,999) np,imin,imax,ia1,ia2
+      write(9,999) np,imin,imax,ia1,ia2
 c     
 c     loop over points
 c     
       do 60 i=imin,imax
-         write(6,1000) i,ia(i),iu(i)
+         write(9,1000) i,ia(i),iu(i)
          nn=(ia(i+1)-ia(i)-1)/nr+1
          jlo=ia(i)-nr
          do 20 n=1,nn
@@ -522,9 +522,9 @@ c
             do 10 j=jlo,jhi
                nnn=nnn+1
  10         continue
-            write(6,2011) n,(ja(j),iu(ja(j)),a(j),j=jlo,jhi)
+            write(9,2011) n,(ja(j),iu(ja(j)),a(j),j=jlo,jhi)
  20      continue
-         write(6,4000)
+         write(9,4000)
  60   continue
  70   continue
       return
@@ -560,12 +560,12 @@ c
       ia1=ia(imin)
       ia2=ia(imax+1)-1
       np=imax-imin+1
-      write(6,999) np,imin,imax,ia1,ia2
+      write(9,999) np,imin,imax,ia1,ia2
 c     
 c     loop over points
 c     
       do 60 i=imin,imax
-         write(6,1000) i,ia(i),iu(i)
+         write(9,1000) i,ia(i),iu(i)
          nn=(ia(i+1)-ia(i)-1)/nr+1
          jlo=ia(i)-nr
          do 20 n=1,nn
@@ -575,16 +575,16 @@ c
             do 10 j=jlo,jhi
                nnn=nnn+1
  10         continue
-            write(6,2011) n,(ja(j),iu(ja(j)),a(j),j=jlo,jhi)
+            write(9,2011) n,(ja(j),iu(ja(j)),a(j),j=jlo,jhi)
  20      continue
-         write(6,4000)
+         write(9,4000)
 c>>>>>
 c     
 c     print shifted row info
 c     
          ishift=imax-imin+2
          ii=i+ishift
-         write(6,1001) ii,ia(ii)
+         write(9,1001) ii,ia(ii)
          nn=(ia(ii+1)-ia(ii)-1)/nr+1
          jlo=ia(ii)-nr
          do 40 n=1,nn
@@ -594,9 +594,9 @@ c
             do 30 j=jlo,jhi
                nnn=nnn+1
  30         continue
-            write(6,2011) n,(ja(j),iu(ja(j)),a(j),j=jlo,jhi)
+            write(9,2011) n,(ja(j),iu(ja(j)),a(j),j=jlo,jhi)
  40      continue
-         write(6,4000)
+         write(9,4000)
  1001    format(' shifted  i=',i4,'  ia(ii)=',i5)
 c<<<<<
  60   continue
@@ -636,21 +636,21 @@ c
       ib1=ib(imin(k))
       ib2=ib(imax(k)+1)-1
       np=imax(k)-imin(k)+1
-      write(6,999) np,imin(k),imax(k),ib1,ib2
+      write(9,999) np,imin(k),imax(k),ib1,ib2
 c     
 c     loop over points
 c     
       do 60 i=imin(k),imax(k)
-         write(6,1000) i,ib(i),ib(i+1)-1,icg(i)
+         write(9,1000) i,ib(i),ib(i+1)-1,icg(i)
          nn=(ib(i+1)-ib(i)-1)/nr+1
          jlo=ib(i)-nr
          do 20 n=1,nn
             jlo=jlo+nr
             jhi=min0(ib(i+1)-1,jlo+nr-1)
-c     write(6,2011) (jb(j),icg(jb(j)),b(j),j=jlo,jhi)
-            write(6,2011) (jb(j),b(j),j=jlo,jhi)
+c     write(9,2011) (jb(j),icg(jb(j)),b(j),j=jlo,jhi)
+            write(9,2011) (jb(j),b(j),j=jlo,jhi)
  20      continue
-         write(6,4000)
+         write(9,4000)
  60   continue
  70   continue
       return
