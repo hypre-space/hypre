@@ -15,7 +15,7 @@
 #ifndef HYPRE_MV_HEADER
 #define HYPRE_MV_HEADER
 
-#include "utilities.h"
+#include "HYPRE_utilities.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -146,6 +146,10 @@ int HYPRE_MigrateStructVector P((HYPRE_CommPkg comm_pkg , HYPRE_StructVector fro
 int HYPRE_FreeCommPkg P((HYPRE_CommPkg comm_pkg ));
 
 #undef P
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
 
