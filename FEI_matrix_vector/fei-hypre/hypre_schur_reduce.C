@@ -30,8 +30,6 @@
 #include "../../parcsr_linear_solvers/HYPRE_parcsr_ls.h"
 #include "HYPRE_LinSysCore.h"
 
-#define abs(x) (((x) > 0.0) ? x : -(x))
-
 //---------------------------------------------------------------------------
 // parcsr_matrix_vector.h is put here instead of in HYPRE_LinSysCore.h 
 // because it gives warning when compiling cfei.cc

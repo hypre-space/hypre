@@ -63,7 +63,7 @@ extern int HYPRE_LSI_DDIlutDecompose(HYPRE_LSI_DDIlut *ilut_ptr,MH_Matrix *Amat,
 extern void HYPRE_LSI_Sort(int *, int, int *, double *);
 extern int  HYPRE_LSI_SplitDSort(double*,int,int*,int);
 
-#define abs(x) ((x) > 0 ? (x) : -(x))
+#define dabs(x) ((x) > 0 ? (x) : -(x))
 
 /*--------------------------------------------------------------------------
  * HYPRE_LSI_DDIlutCreate - Return a DDIlut preconditioner object "solver".  
@@ -779,7 +779,7 @@ int HYPRE_LSI_DDIlutDecompose(HYPRE_LSI_DDIlut *ilut_ptr,MH_Matrix *Amat,
          vals = (double *) malloc(allocated_space * sizeof(double));
       }
       total_nnz += m;
-      for ( j = 0; j < m; j++ ) rowNorms[i] += abs(vals[j]);
+      for ( j = 0; j < m; j++ ) rowNorms[i] += dabs(vals[j]);
       rowNorms[i] /= extNrows;
    }
    for ( i = 0; i < total_recv_leng; i++ ) total_nnz += recv_lengths[i];
@@ -806,7 +806,7 @@ int HYPRE_LSI_DDIlutDecompose(HYPRE_LSI_DDIlut *ilut_ptr,MH_Matrix *Amat,
             if ( m >= 0 ) ext_ja[j] = map2[m] + Nrows;
             else          ext_ja[j] = -1;
          }
-         if ( ext_ja[j] != -1 ) rowNorms[i+Nrows] += abs(ext_aa[j]);
+         if ( ext_ja[j] != -1 ) rowNorms[i+Nrows] += dabs(ext_aa[j]);
       }
       rowNorms[i+Nrows] /= extNrows;
       offset += recv_lengths[i];
@@ -860,7 +860,7 @@ int HYPRE_LSI_DDIlutDecompose(HYPRE_LSI_DDIlut *ilut_ptr,MH_Matrix *Amat,
       rel_tau = tau * rowNorms[i];
       for ( j = first; j < i; j++ )
       {
-         if ( abs(dble_buf[j]) > rel_tau )
+         if ( dabs(dble_buf[j]) > rel_tau )
          {
             ddata = dble_buf[j] / diagonal[j];
             for ( k = mat_ia[j]; k < mat_ia[j+1]; k++ )
@@ -933,7 +933,7 @@ int HYPRE_LSI_DDIlutDecompose(HYPRE_LSI_DDIlut *ilut_ptr,MH_Matrix *Amat,
          }
       }
       diagonal[i] = dble_buf[i];
-      if ( abs(diagonal[i]) < 1.0e-16 ) 
+      if ( dabs(diagonal[i]) < 1.0e-16 ) 
       {
          diagonal[i] = 1.0E-6;
          num_small_pivot++;
@@ -1026,7 +1026,7 @@ int HYPRE_LSI_DDIlutDecompose(HYPRE_LSI_DDIlut *ilut_ptr,MH_Matrix *Amat,
       rel_tau = tau * rowNorms[i+Nrows];
       for ( j = first; j < i+Nrows; j++ )
       {
-         if ( abs(dble_buf[j]) > rel_tau )
+         if ( dabs(dble_buf[j]) > rel_tau )
          {
             ddata = dble_buf[j] / diagonal[j];
             for ( k = mat_ia[j]; k < mat_ia[j+1]; k++ )
@@ -1099,7 +1099,7 @@ int HYPRE_LSI_DDIlutDecompose(HYPRE_LSI_DDIlut *ilut_ptr,MH_Matrix *Amat,
          }
       }
       diagonal[i+Nrows] = dble_buf[i+Nrows];
-      if ( abs(diagonal[i+Nrows]) < 1.0e-16 ) 
+      if ( dabs(diagonal[i+Nrows]) < 1.0e-16 ) 
       {
          diagonal[i+Nrows] = 1.0E-6;
          num_small_pivot++;
@@ -1236,7 +1236,7 @@ int HYPRE_LSI_DDIlutDecompose2(HYPRE_LSI_DDIlut *ilut_ptr,MH_Matrix *Amat,
          cols = (int *) malloc(allocated_space * sizeof(int));
          vals = (double *) malloc(allocated_space * sizeof(double));
       }
-      for ( j = 0; j < m; j++ ) rowNorms[i] += abs(vals[j]);
+      for ( j = 0; j < m; j++ ) rowNorms[i] += dabs(vals[j]);
       rowNorms[i] /= extNrows;
    }
    total_nnz = 0;
@@ -1316,7 +1316,7 @@ if ( (mat_ia[i+1]-mat_ia[i]) != track_leng) ndisc++;
       rel_tau = tau * rowNorms[i];
       for ( j = first; j < i; j++ )
       {
-         if ( abs(dble_buf[j]) > rel_tau )
+         if ( dabs(dble_buf[j]) > rel_tau )
          {
             ddata = dble_buf[j] / diagonal[j];
             for ( k = mat_ia[j]; k < mat_ia[j+1]; k++ )
@@ -1340,7 +1340,7 @@ if ( (mat_ia[i+1]-mat_ia[i]) != track_leng) ndisc++;
       }
 
       diagonal[i] = dble_buf[i];
-      if ( abs(diagonal[i]) < 1.0e-16 ) 
+      if ( dabs(diagonal[i]) < 1.0e-16 ) 
       {
          diagonal[i] = dble_buf[i] = 1.0E-6;
          num_small_pivot++;
@@ -1392,7 +1392,7 @@ if ( (mat_ia[i+1]-mat_ia[i]) != track_leng) ndisc++;
             else          ext_ja[j] = -1;
             if ( ext_ja[j] >= extNrows ) ext_ja[j] = -1;
          }
-         if ( ext_ja[j] != -1 ) rowNorms[i+Nrows] += abs(ext_aa[j]);
+         if ( ext_ja[j] != -1 ) rowNorms[i+Nrows] += dabs(ext_aa[j]);
       }
       rowNorms[i+Nrows] /= extNrows;
       offset += recv_lengths[i];
@@ -1439,7 +1439,7 @@ if ( (mat_ia[i+1]-mat_ia[i]) != track_leng) ndisc++;
       rel_tau = tau * rowNorms[i+Nrows];
       for ( j = first; j < i+Nrows; j++ )
       {
-         if ( abs(dble_buf[j]) > rel_tau )
+         if ( dabs(dble_buf[j]) > rel_tau )
          {
             ddata = dble_buf[j] / diagonal[j];
             for ( k = mat_ia[j]; k < mat_ia[j+1]; k++ )
@@ -1473,7 +1473,7 @@ if ( (mat_ia[i+1]-mat_ia[i]) != track_leng) ndisc++;
          index = track_array[j];
          if ( index < i+Nrows )
          {
-            absval = abs( dble_buf[index] );
+            absval = dabs( dble_buf[index] );
             if ( absval > rel_tau )
             {
                sortcols[sortcnt] = index;
@@ -1506,7 +1506,7 @@ if ( (mat_ia[i+1]-mat_ia[i]) != track_leng) ndisc++;
          }
       }
       diagonal[i+Nrows] = dble_buf[i+Nrows];
-      if ( abs(diagonal[i+Nrows]) < 1.0e-16 ) 
+      if ( dabs(diagonal[i+Nrows]) < 1.0e-16 ) 
       {
          diagonal[i+Nrows] = 1.0E-6;
          num_small_pivot++;
@@ -1520,7 +1520,7 @@ if ( (mat_ia[i+1]-mat_ia[i]) != track_leng) ndisc++;
          index = track_array[j];
          if ( index > i+Nrows )
          {
-            absval = abs( dble_buf[index] );
+            absval = dabs( dble_buf[index] );
             if ( absval > rel_tau )
             {
                sortcols[sortcnt] = index;
@@ -1639,7 +1639,7 @@ int HYPRE_LSI_DDIlutDecompose3(HYPRE_LSI_DDIlut *ilut_ptr,MH_Matrix *Amat,
          vals = (double *) malloc(allocated_space * sizeof(double));
       }
       total_nnz += m;
-      for ( j = 0; j < m; j++ ) rowNorms[i] += abs(vals[j]);
+      for ( j = 0; j < m; j++ ) rowNorms[i] += dabs(vals[j]);
       rowNorms[i] /= extNrows;
    }
    for ( i = 0; i < total_recv_leng; i++ ) total_nnz += recv_lengths[i];
@@ -1666,7 +1666,7 @@ int HYPRE_LSI_DDIlutDecompose3(HYPRE_LSI_DDIlut *ilut_ptr,MH_Matrix *Amat,
             if ( m >= 0 ) ext_ja[j] = map2[m] + Nrows;
             else          ext_ja[j] = -1;
          }
-         if ( ext_ja[j] != -1 ) rowNorms[i+Nrows] += abs(ext_aa[j]);
+         if ( ext_ja[j] != -1 ) rowNorms[i+Nrows] += dabs(ext_aa[j]);
       }
       rowNorms[i+Nrows] /= extNrows;
       offset += recv_lengths[i];
@@ -1719,7 +1719,7 @@ int HYPRE_LSI_DDIlutDecompose3(HYPRE_LSI_DDIlut *ilut_ptr,MH_Matrix *Amat,
       rel_tau = tau * rowNorms[i];
       for ( j = first; j < i; j++ )
       {
-         if ( abs(dble_buf[j]) > rel_tau )
+         if ( dabs(dble_buf[j]) > rel_tau )
          {
             ddata = dble_buf[j] / diagonal[j];
             for ( k = mat_ia[j]; k < mat_ia[j+1]; k++ )
@@ -1777,7 +1777,7 @@ int HYPRE_LSI_DDIlutDecompose3(HYPRE_LSI_DDIlut *ilut_ptr,MH_Matrix *Amat,
          }
       }
       diagonal[i] = dble_buf[i];
-      if ( abs(diagonal[i]) < 1.0e-16 ) 
+      if ( dabs(diagonal[i]) < 1.0e-16 ) 
       {
          diagonal[i] = 1.0E-6;
          num_small_pivot++;
@@ -1860,7 +1860,7 @@ int HYPRE_LSI_DDIlutDecompose3(HYPRE_LSI_DDIlut *ilut_ptr,MH_Matrix *Amat,
       rel_tau = tau * rowNorms[i+Nrows];
       for ( j = first; j < i+Nrows; j++ )
       {
-         if ( abs(dble_buf[j]) > rel_tau )
+         if ( dabs(dble_buf[j]) > rel_tau )
          {
             ddata = dble_buf[j] / diagonal[j];
             for ( k = mat_ia[j]; k < mat_ia[j+1]; k++ )
@@ -1916,7 +1916,7 @@ int HYPRE_LSI_DDIlutDecompose3(HYPRE_LSI_DDIlut *ilut_ptr,MH_Matrix *Amat,
          }
       }
       diagonal[i+Nrows] = dble_buf[i+Nrows];
-      if ( abs(diagonal[i+Nrows]) < 1.0e-16 ) 
+      if ( dabs(diagonal[i+Nrows]) < 1.0e-16 ) 
       {
          diagonal[i+Nrows] = 1.0E-6;
          num_small_pivot++;
@@ -2044,7 +2044,7 @@ int HYPRE_LSI_DDIlutDecomposeNew(HYPRE_LSI_DDIlut *ilut_ptr,MH_Matrix *Amat,
          vals = (double *) malloc(allocated_space * sizeof(double));
       }
       total_nnz += m;
-      for ( j = 0; j < m; j++ ) rowNorms[i] += abs(vals[j]);
+      for ( j = 0; j < m; j++ ) rowNorms[i] += dabs(vals[j]);
       rowNorms[i] /= extNrows;
    }
    for ( i = 0; i < total_recv_leng; i++ ) total_nnz += recv_lengths[i];
@@ -2086,7 +2086,7 @@ int HYPRE_LSI_DDIlutDecomposeNew(HYPRE_LSI_DDIlut *ilut_ptr,MH_Matrix *Amat,
          }
          if ( ext_ja[j] != -1 && ext_aa[j] != 0.0 ) 
          {
-            rowNorms[i+Nrows] += abs(ext_aa[j]);
+            rowNorms[i+Nrows] += dabs(ext_aa[j]);
             mat_ja[ncnt] = ext_ja[j];
             mat_aa[ncnt++] = ext_aa[j];
          }
@@ -2177,7 +2177,7 @@ int HYPRE_LSI_DDIlutDecomposeNew(HYPRE_LSI_DDIlut *ilut_ptr,MH_Matrix *Amat,
       rel_tau = tau * rowNorms[i];
       for ( j = first; j < i; j++ )
       {
-         if ( abs(dble_buf[j]) > rel_tau )
+         if ( dabs(dble_buf[j]) > rel_tau )
          {
             ddata = dble_buf[j] / diagonal[j];
             for ( k = mat_ia2[j]; k < mat_ia2[j+1]; k++ )
@@ -2200,7 +2200,7 @@ int HYPRE_LSI_DDIlutDecomposeNew(HYPRE_LSI_DDIlut *ilut_ptr,MH_Matrix *Amat,
          else dble_buf[j] = 0.0;
       }
       diagonal[i] = dble_buf[i];
-      if ( abs(diagonal[i]) < 1.0e-16 ) 
+      if ( dabs(diagonal[i]) < 1.0e-16 ) 
       {
          diagonal[i] = dble_buf[i] = 1.0E-6;
          num_small_pivot++;
