@@ -225,7 +225,7 @@ c
 30    continue
 c
 c     Set last entry for i. If distribution to the diagonal
-c     is wanted (iddst=0), set ifg(i)=kb.
+c     is wanted (iddst=1), set ifg(i)=kb.
 c
       b(kb)=a(ia(i))
       if(iddst.ne.0) ifg(i)=kb
@@ -258,9 +258,7 @@ c
       jjhi=ia(ii+1)-1
       do 110 jj=jjlo,jjhi
       if(ifg(ja(jj)).le.0) go to 110
-c>>>>> test - 8/19/96
-c     if(a(jj)/a(jjlo).le.0.e0) go to 110
-c<<<<<
+      if(a(jj)/a(jjlo).le.0.e0) go to 110
       s=s+a(jj)
 110   continue
 c
@@ -275,9 +273,7 @@ c
         w=a(j)/s
         do 150 jj=jjlo,jjhi
         if(ifg(ja(jj)).le.0) go to 150
-c>>>>> test - 8/19/96
-c       if(a(jj)/a(jjlo).le.0.e0) go to 150
-c<<<<<
+        if(a(jj)/a(jjlo).le.0.e0) go to 150
         b(ifg(ja(jj)))=b(ifg(ja(jj)))+a(jj)*w
 150     continue
       endif
