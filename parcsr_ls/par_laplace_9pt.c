@@ -14,14 +14,14 @@
  *--------------------------------------------------------------------------*/
 
 hypre_ParCSRMatrix *
-hypre_GenerateLaplacian9pt( MPI_Comm comm,
-                            int      nx,
-                            int      ny,
-                            int      P,
-                            int      Q,
-                            int      p,
-                            int      q,
-                            double  *value )
+GenerateLaplacian9pt( MPI_Comm comm,
+                      int      nx,
+                      int      ny,
+                      int      P,
+                      int      Q,
+                      int      p,
+                      int      q,
+                      double  *value )
 {
    hypre_ParCSRMatrix *A;
    hypre_CSRMatrix *diag;

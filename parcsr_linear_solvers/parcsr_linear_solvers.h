@@ -30,8 +30,8 @@ void hypre_F90_IFACE P((int hypre_paramgsetcoarsentype ));
 void hypre_F90_IFACE P((int hypre_paramgsetmeasuretype ));
 void hypre_F90_IFACE P((int hypre_paramgsetcycletype ));
 void hypre_F90_IFACE P((int hypre_paramgsettol ));
-void hypre_F90_IFACE P((int hypre_paramginitgridrelaxation ));
 void hypre_F90_IFACE P((int hypre_paramgsetnumgridsweeps ));
+void hypre_F90_IFACE P((int hypre_paramginitgridrelaxation ));
 void hypre_F90_IFACE P((int hypre_paramgsetgridrelaxtype ));
 void hypre_F90_IFACE P((int hypre_paramgsetgridrelaxpoints ));
 void hypre_F90_IFACE P((int hypre_paramgsetrelaxweight ));
@@ -67,7 +67,7 @@ void hypre_F90_IFACE P((int hypre_parcsrgmressetlogging ));
 void hypre_F90_IFACE P((int hypre_parcsrgmresgetnumiteratio ));
 void hypre_F90_IFACE P((int hypre_parcsrgmresgetfinalrelati ));
 
-/* F90_HYPRE_parcsr_pcg.c
+/* F90_HYPRE_parcsr_pcg.c */
 void hypre_F90_IFACE P((int hypre_parcsrpcginitialize ));
 void hypre_F90_IFACE P((int hypre_parcsrpcgfinalize ));
 void hypre_F90_IFACE P((int hypre_parcsrpcgsetup ));
@@ -111,8 +111,8 @@ int HYPRE_ParAMGSetCoarsenType P((HYPRE_Solver solver , int coarsen_type ));
 int HYPRE_ParAMGSetMeasureType P((HYPRE_Solver solver , int measure_type ));
 int HYPRE_ParAMGSetCycleType P((HYPRE_Solver solver , int cycle_type ));
 int HYPRE_ParAMGSetTol P((HYPRE_Solver solver , double tol ));
-int HYPRE_ParAMGInitGridRelaxation P((int *num_grid_sweeps , int *grid_relax_type , int **grid_relax_points , int coarsen_type ));
 int HYPRE_ParAMGSetNumGridSweeps P((HYPRE_Solver solver , int *num_grid_sweeps ));
+int HYPRE_ParAMGInitGridRelaxation P((int *num_grid_sweeps , int *grid_relax_type , int **grid_relax_points , int coarsen_type ));
 int HYPRE_ParAMGSetGridRelaxType P((HYPRE_Solver solver , int *grid_relax_type ));
 int HYPRE_ParAMGSetGridRelaxPoints P((HYPRE_Solver solver , int **grid_relax_points ));
 int HYPRE_ParAMGSetRelaxWeight P((HYPRE_Solver solver , double *relax_weight ));
@@ -121,6 +121,7 @@ int HYPRE_ParAMGSetLogFileName P((HYPRE_Solver solver , char *log_file_name ));
 int HYPRE_ParAMGSetLogging P((HYPRE_Solver solver , int ioutdat , char *log_file_name ));
 int HYPRE_ParAMGSetDebugFlag P((HYPRE_Solver solver , int debug_flag ));
 int HYPRE_ParAMGGetNumIterations P((HYPRE_Solver solver , int *num_iterations ));
+int HYPRE_ParAMGGetFinalRelativeResidualNorm P((HYPRE_Solver solver , double *rel_resid_norm ));
 
 /* HYPRE_parcsr_cgnr.c */
 int HYPRE_ParCSRCGNRInitialize P((MPI_Comm comm , HYPRE_Solver *solver ));
@@ -186,13 +187,13 @@ int hypre_CGNRGetFinalRelativeResidualNorm P((void *cgnr_vdata , double *relativ
 
 /* driver.c */
 int main P((int argc , char *argv []));
-int BuildParFromFile P((int argc , char *argv [], int arg_index , hypre_ParCSRMatrix **A_ptr ));
-int BuildParLaplacian P((int argc , char *argv [], int arg_index , hypre_ParCSRMatrix **A_ptr ));
-int BuildParDifConv P((int argc , char *argv [], int arg_index , hypre_ParCSRMatrix **A_ptr ));
-int BuildParFromOneFile P((int argc , char *argv [], int arg_index , hypre_ParCSRMatrix **A_ptr ));
-int BuildRhsParFromOneFile P((int argc , char *argv [], int arg_index , hypre_ParCSRMatrix *A , hypre_ParVector **b_ptr ));
-int BuildParLaplacian9pt P((int argc , char *argv [], int arg_index , hypre_ParCSRMatrix **A_ptr ));
-int BuildParLaplacian27pt P((int argc , char *argv [], int arg_index , hypre_ParCSRMatrix **A_ptr ));
+int BuildParFromFile P((int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr ));
+int BuildParLaplacian P((int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr ));
+int BuildParDifConv P((int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr ));
+int BuildParFromOneFile P((int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr ));
+int BuildRhsParFromOneFile P((int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix A , HYPRE_ParVector *b_ptr ));
+int BuildParLaplacian9pt P((int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr ));
+int BuildParLaplacian27pt P((int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr ));
 
 /* driver_interp.c */
 int main P((int argc , char *argv []));
@@ -230,9 +231,9 @@ int hypre_ParAMGSetNumGridSweeps P((void *data , int *num_grid_sweeps ));
 int hypre_ParAMGSetGridRelaxType P((void *data , int *grid_relax_type ));
 int hypre_ParAMGSetGridRelaxPoints P((void *data , int **grid_relax_points ));
 int hypre_ParAMGSetRelaxWeight P((void *data , double *relax_weight ));
-int hypre_ParAMGSetNumIterations P((void *data , int num_iterations ));
 int hypre_ParAMGSetIOutDat P((void *data , int ioutdat ));
 int hypre_ParAMGSetLogFileName P((void *data , char *log_file_name ));
+int hypre_ParAMGSetNumIterations P((void *data , int num_iterations ));
 int hypre_ParAMGSetLogging P((void *data , int ioutdat , char *log_file_name ));
 int hypre_ParAMGSetDebugFlag P((void *data , int debug_flag ));
 int hypre_ParAMGSetNumUnknowns P((void *data , int num_unknowns ));
@@ -263,7 +264,7 @@ int hypre_ParAMGCoarsenFalgout P((hypre_ParCSRMatrix *A , double strength_thresh
 int hypre_ParAMGCycle P((void *amg_vdata , hypre_ParVector **F_array , hypre_ParVector **U_array ));
 
 /* par_difconv.c */
-hypre_ParCSRMatrix *hypre_GenerateDifConv P((MPI_Comm comm , int nx , int ny , int nz , int P , int Q , int R , int p , int q , int r , double *value ));
+hypre_ParCSRMatrix *GenerateDifConv P((MPI_Comm comm , int nx , int ny , int nz , int P , int Q , int R , int p , int q , int r , double *value ));
 
 /* par_indepset.c */
 int hypre_InitParAMGIndepSet P((hypre_ParCSRMatrix *S , double *measure_array ));
@@ -273,17 +274,17 @@ int hypre_ParAMGIndepSet P((hypre_ParCSRMatrix *S , hypre_CSRMatrix *S_ext , dou
 int hypre_ParAMGBuildInterp P((hypre_ParCSRMatrix *A , int *CF_marker , hypre_ParCSRMatrix *S , int debug_flag , double trunc_factor , hypre_ParCSRMatrix **P_ptr ));
 
 /* par_laplace.c */
-hypre_ParCSRMatrix *hypre_GenerateLaplacian P((MPI_Comm comm , int nx , int ny , int nz , int P , int Q , int R , int p , int q , int r , double *value ));
+hypre_ParCSRMatrix *GenerateLaplacian P((MPI_Comm comm , int nx , int ny , int nz , int P , int Q , int R , int p , int q , int r , double *value ));
 int map P((int ix , int iy , int iz , int p , int q , int r , int P , int Q , int R , int *nx_part , int *ny_part , int *nz_part , int *global_part ));
 void qsort0 P((int *v , int left , int right ));
 void swap P((int *v , int i , int j ));
 
 /* par_laplace_27pt.c */
-hypre_ParCSRMatrix *hypre_GenerateLaplacian27pt P((MPI_Comm comm , int nx , int ny , int nz , int P , int Q , int R , int p , int q , int r , double *value ));
+hypre_ParCSRMatrix *GenerateLaplacian27pt P((MPI_Comm comm , int nx , int ny , int nz , int P , int Q , int R , int p , int q , int r , double *value ));
 int map3 P((int ix , int iy , int iz , int p , int q , int r , int P , int Q , int R , int *nx_part , int *ny_part , int *nz_part , int *global_part ));
 
 /* par_laplace_9pt.c */
-hypre_ParCSRMatrix *hypre_GenerateLaplacian9pt P((MPI_Comm comm , int nx , int ny , int P , int Q , int p , int q , double *value ));
+hypre_ParCSRMatrix *GenerateLaplacian9pt P((MPI_Comm comm , int nx , int ny , int P , int Q , int p , int q , double *value ));
 int map2 P((int ix , int iy , int p , int q , int P , int Q , int *nx_part , int *ny_part , int *global_part ));
 
 /* par_rap.c */
@@ -295,12 +296,12 @@ int hypre_GetCommPkgRTFromCommPkgA P((hypre_ParCSRMatrix *RT , hypre_ParCSRMatri
 hypre_CommPkg *hypre_GenerateSendMapAndCommPkg P((MPI_Comm comm , int num_sends , int num_recvs , int *recv_procs , int *send_procs , int *recv_vec_starts , hypre_ParCSRMatrix *A ));
 int hypre_GenerateRAPCommPkg P((hypre_ParCSRMatrix *RAP , hypre_ParCSRMatrix *A ));
 
-/* par_scaled_matnorm.c */
-double hypre_ParScaledMatNorm P((hypre_ParCSRMatrix *A));
-
 /* par_relax.c */
 int hypre_ParAMGRelax P((hypre_ParCSRMatrix *A , hypre_ParVector *f , int *cf_marker , int relax_type , int relax_points , double relax_weight , hypre_ParVector *u , hypre_ParVector *Vtemp ));
 int gselim P((double *A , double *x , int n ));
+
+/* par_scaled_matnorm.c */
+double hypre_ParScaledMatNorm P((hypre_ParCSRMatrix *A ));
 
 /* par_stats.c */
 int hypre_ParAMGSetupStats P((void *amg_vdata , hypre_ParCSRMatrix *A ));

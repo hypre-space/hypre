@@ -14,17 +14,17 @@
  *--------------------------------------------------------------------------*/
 
 hypre_ParCSRMatrix *
-hypre_GenerateDifConv( MPI_Comm comm,
-                         int      nx,
-                         int      ny,
-                         int      nz, 
-                         int      P,
-                         int      Q,
-                         int      R,
-                         int      p,
-                         int      q,
-                         int      r,
-                         double  *value )
+GenerateDifConv( MPI_Comm comm,
+                 int      nx,
+                 int      ny,
+                 int      nz, 
+                 int      P,
+                 int      Q,
+                 int      R,
+                 int      p,
+                 int      q,
+                 int      r,
+                 double  *value )
 {
    hypre_ParCSRMatrix *A;
    hypre_CSRMatrix *diag;
