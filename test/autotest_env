@@ -21,10 +21,6 @@ PATH=${PATH}:/usr/sbin:/usr/ucb:/usr/local/bin:/usr/local/scripts
 PATH=${PATH}:/usr/local/mpi/mpich/bin:/home/casc/bin
 export PATH
 
-MPICH_CCLINKER=CC
-MPICH_CCC=CC
-export MPICH_CCLINKER MPICH_CCC
-
 #==============================================================================
 # Set autotest directory to current directory
 #==============================================================================
