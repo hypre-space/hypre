@@ -396,7 +396,7 @@ int HYPRE_IJVectorGetLocalComponents(HYPRE_IJVector  vector,
                                      const int      *value_indices,
                                      double         *values);
 
-/**
+/*
  * RE-VISIT
  **/
 int HYPRE_IJVectorGetLocalComponentsInBlock(HYPRE_IJVector  vector,
