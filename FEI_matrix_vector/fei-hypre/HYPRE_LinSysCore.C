@@ -1076,13 +1076,15 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
        {
           sscanf(params[i],"%s %s", param, param2);
           rtype = 1;
-          if      ( !strcmp(param2, "jacobi" ) ) rtype = 0;
-          else if ( !strcmp(param2, "gs") )      rtype = 1;
-          else if ( !strcmp(param2, "sgs") )     rtype = 2;
-          else if ( !strcmp(param2, "vbjacobi")) rtype = 3;
-          else if ( !strcmp(param2, "vbsgs") )   rtype = 4;
-          else if ( !strcmp(param2, "vbsgsseq")) rtype = 5;
-          else if ( !strcmp(param2, "ilut") )    rtype = 6;
+          if      ( !strcmp(param2, "jacobi" ) )  rtype = 0;
+          else if ( !strcmp(param2, "gs") )       rtype = 1;
+          else if ( !strcmp(param2, "sgs") )      rtype = 2;
+          else if ( !strcmp(param2, "vbjacobi"))  rtype = 3;
+          else if ( !strcmp(param2, "vbsgs") )    rtype = 4;
+          else if ( !strcmp(param2, "vbsgsseq"))  rtype = 5;
+          else if ( !strcmp(param2, "ilut") )     rtype = 6;
+          else if ( !strcmp(param2, "aSchwarz") ) rtype = 7;
+          else if ( !strcmp(param2, "mSchwarz") ) rtype = 8;
           mlPresmootherType_  = rtype;
           if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
           {
@@ -1117,7 +1119,6 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
           else if ( !strcmp(param2, "vbjacobi")) rtype = 3;
           else if ( !strcmp(param2, "vbsgs") )   rtype = 4;
           else if ( !strcmp(param2, "vbsgsseq")) rtype = 5;
-          else if ( !strcmp(param2, "ilut") )    rtype = 6;
           mlPresmootherType_  = rtype;
           mlPostsmootherType_ = rtype;
           if ( rtype == 6 ) mlPostsmootherType_ = 1;
