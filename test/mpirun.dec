@@ -8,6 +8,6 @@
 # $Revision$
 #EHEADER***********************************************************************
 
-echo "(dmpirun $*)"
-dmpirun $*
+echo "(mpirun $*)"
+mpirun $*
 
