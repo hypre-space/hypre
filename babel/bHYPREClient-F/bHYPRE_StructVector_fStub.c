@@ -3,8 +3,8 @@
  * Symbol:        bHYPRE.StructVector-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * sidl Created:  20050208 15:29:13 PST
- * Generated:     20050208 15:29:17 PST
+ * sidl Created:  20050225 15:45:46 PST
+ * Generated:     20050225 15:45:50 PST
  * Description:   Client-side glue code for bHYPRE.StructVector
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -35,7 +35,6 @@
 #include "sidl_BaseInterface_IOR.h"
 #include "bHYPRE_Vector_IOR.h"
 #include "sidl_ClassInfo_IOR.h"
-#include "bHYPRE_StructStencil_IOR.h"
 
 /*
  * Return pointer to internal IOR functions.
@@ -668,31 +667,31 @@ SIDLFortran77Symbol(bhypre_structvector_setgrid_f,BHYPRE_STRUCTVECTOR_SETGRID_F,
 }
 
 /*
- * Method:  SetStencil[]
+ * Method:  SetNumGhost[]
  */
 
 void
-SIDLFortran77Symbol(bhypre_structvector_setstencil_f,BHYPRE_STRUCTVECTOR_SETSTENCIL_F,bHYPRE_StructVector_SetStencil_f)
+SIDLFortran77Symbol(bhypre_structvector_setnumghost_f,BHYPRE_STRUCTVECTOR_SETNUMGHOST_F,bHYPRE_StructVector_SetNumGhost_f)
 (
   int64_t *self,
-  int64_t *stencil,
+  int64_t *num_ghost,
   int32_t *retval
 )
 {
   struct bHYPRE_StructVector__epv *_epv = NULL;
   struct bHYPRE_StructVector__object* _proxy_self = NULL;
-  struct bHYPRE_StructStencil__object* _proxy_stencil = NULL;
+  struct sidl_int__array* _proxy_num_ghost = NULL;
   _proxy_self =
     (struct bHYPRE_StructVector__object*)
     (ptrdiff_t)(*self);
-  _proxy_stencil =
-    (struct bHYPRE_StructStencil__object*)
-    (ptrdiff_t)(*stencil);
+  _proxy_num_ghost =
+    (struct sidl_int__array*)
+    (ptrdiff_t)(*num_ghost);
   _epv = _proxy_self->d_epv;
   *retval = 
-    (*(_epv->f_SetStencil))(
+    (*(_epv->f_SetNumGhost))(
       _proxy_self,
-      _proxy_stencil
+      _proxy_num_ghost
     );
 }
 

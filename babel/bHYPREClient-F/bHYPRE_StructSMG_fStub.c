@@ -1,27 +1,21 @@
 /*
- * File:          bHYPRE_Operator_fStub.c
- * Symbol:        bHYPRE.Operator-v1.0.0
- * Symbol Type:   interface
+ * File:          bHYPRE_StructSMG_fStub.c
+ * Symbol:        bHYPRE.StructSMG-v1.0.0
+ * Symbol Type:   class
  * Babel Version: 0.9.8
  * sidl Created:  20050225 15:45:46 PST
- * Generated:     20050225 15:45:48 PST
- * Description:   Client-side glue code for bHYPRE.Operator
+ * Generated:     20050225 15:45:49 PST
+ * Description:   Client-side glue code for bHYPRE.StructSMG
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.9.8
- * source-line   = 590
+ * source-line   = 1251
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 /*
- * Symbol "bHYPRE.Operator" (version 1.0.0)
- * 
- * An Operator is anything that maps one Vector to another.  The
- * terms {\tt Setup} and {\tt Apply} are reserved for Operators.
- * The implementation is allowed to assume that supplied parameter
- * arrays will not be destroyed.
- * 
+ * Symbol "bHYPRE.StructSMG" (version 1.0.0)
  */
 
 #include <stddef.h>
@@ -36,17 +30,75 @@
 #ifdef SIDL_DYNAMIC_LIBRARY
 #include "sidl_Loader.h"
 #endif
-#include "bHYPRE_Operator_IOR.h"
+#include "bHYPRE_StructSMG_IOR.h"
 #include "sidl_BaseInterface_IOR.h"
+#include "bHYPRE_Operator_IOR.h"
 #include "bHYPRE_Vector_IOR.h"
 #include "sidl_ClassInfo_IOR.h"
+
+/*
+ * Return pointer to internal IOR functions.
+ */
+
+static const struct bHYPRE_StructSMG__external* _getIOR(void)
+{
+  static const struct bHYPRE_StructSMG__external *_ior = NULL;
+  if (!_ior) {
+#ifdef SIDL_STATIC_LIBRARY
+    _ior = bHYPRE_StructSMG__externals();
+#else
+    sidl_DLL dll = sidl_DLL__create();
+    const struct bHYPRE_StructSMG__external*(*dll_f)(void);
+    /* check global namespace for symbol first */
+    if (dll && sidl_DLL_loadLibrary(dll, "main:", TRUE, FALSE)) {
+      dll_f =
+        (const struct bHYPRE_StructSMG__external*(*)(void)) 
+          sidl_DLL_lookupSymbol(
+          dll, "bHYPRE_StructSMG__externals");
+      _ior = (dll_f ? (*dll_f)() : NULL);
+    }
+    if (dll) sidl_DLL_deleteRef(dll);
+    if (!_ior) {
+      dll = sidl_Loader_findLibrary("bHYPRE.StructSMG",
+        "ior/impl", sidl_Scope_SCLSCOPE,
+        sidl_Resolve_SCLRESOLVE);
+      if (dll) {
+        dll_f =
+          (const struct bHYPRE_StructSMG__external*(*)(void)) 
+            sidl_DLL_lookupSymbol(
+            dll, "bHYPRE_StructSMG__externals");
+        _ior = (dll_f ? (*dll_f)() : NULL);
+        sidl_DLL_deleteRef(dll);
+      }
+    }
+    if (!_ior) {
+      fputs("Unable to find the implementation for bHYPRE.StructSMG; please set SIDL_DLL_PATH\n", stderr);
+      exit(-1);
+    }
+#endif
+  }
+  return _ior;
+}
+
+/*
+ * Constructor for the class.
+ */
+
+void
+SIDLFortran77Symbol(bhypre_structsmg__create_f,BHYPRE_STRUCTSMG__CREATE_F,bHYPRE_StructSMG__create_f)
+(
+  int64_t *self
+)
+{
+  *self = (ptrdiff_t) (*(_getIOR()->createObject))();
+}
 
 /*
  * Cast method for interface and type conversions.
  */
 
 void
-SIDLFortran77Symbol(bhypre_operator__cast_f,BHYPRE_OPERATOR__CAST_F,bHYPRE_Operator__cast_f)
+SIDLFortran77Symbol(bhypre_structsmg__cast_f,BHYPRE_STRUCTSMG__CAST_F,bHYPRE_StructSMG__cast_f)
 (
   int64_t *ref,
   int64_t *retval
@@ -58,7 +110,7 @@ SIDLFortran77Symbol(bhypre_operator__cast_f,BHYPRE_OPERATOR__CAST_F,bHYPRE_Opera
     *retval = (ptrdiff_t)(
       *_base->d_epv->f__cast)(
       _base->d_object,
-      "bHYPRE.Operator");
+      "bHYPRE.StructSMG");
   }
   else {
     *retval = 0;
@@ -70,7 +122,7 @@ SIDLFortran77Symbol(bhypre_operator__cast_f,BHYPRE_OPERATOR__CAST_F,bHYPRE_Opera
  */
 
 void
-SIDLFortran77Symbol(bhypre_operator__cast2_f,BHYPRE_OPERATOR__CAST2_F,bHYPRE_Operator__cast2_f)
+SIDLFortran77Symbol(bhypre_structsmg__cast2_f,BHYPRE_STRUCTSMG__CAST2_F,bHYPRE_StructSMG__cast2_f)
 (
   int64_t *self,
   SIDL_F77_String name
@@ -79,12 +131,12 @@ SIDLFortran77Symbol(bhypre_operator__cast2_f,BHYPRE_OPERATOR__CAST2_F,bHYPRE_Ope
   SIDL_F77_STR_FAR_LEN_DECL(name)
 )
 {
-  struct bHYPRE_Operator__epv *_epv = NULL;
-  struct bHYPRE_Operator__object* _proxy_self = NULL;
+  struct bHYPRE_StructSMG__epv *_epv = NULL;
+  struct bHYPRE_StructSMG__object* _proxy_self = NULL;
   char* _proxy_name = NULL;
   void* _proxy_retval = NULL;
   _proxy_self =
-    (struct bHYPRE_Operator__object*)
+    (struct bHYPRE_StructSMG__object*)
     (ptrdiff_t)(*self);
   _proxy_name =
     sidl_copy_fortran_str(SIDL_F77_STR(name),
@@ -92,7 +144,7 @@ SIDLFortran77Symbol(bhypre_operator__cast2_f,BHYPRE_OPERATOR__CAST2_F,bHYPRE_Ope
   _epv = _proxy_self->d_epv;
   _proxy_retval = 
     (*(_epv->f__cast))(
-      _proxy_self->d_object,
+      _proxy_self,
       _proxy_name
     );
   *retval = (ptrdiff_t)_proxy_retval;
@@ -115,19 +167,19 @@ SIDLFortran77Symbol(bhypre_operator__cast2_f,BHYPRE_OPERATOR__CAST2_F,bHYPRE_Ope
  */
 
 void
-SIDLFortran77Symbol(bhypre_operator_addref_f,BHYPRE_OPERATOR_ADDREF_F,bHYPRE_Operator_addRef_f)
+SIDLFortran77Symbol(bhypre_structsmg_addref_f,BHYPRE_STRUCTSMG_ADDREF_F,bHYPRE_StructSMG_addRef_f)
 (
   int64_t *self
 )
 {
-  struct bHYPRE_Operator__epv *_epv = NULL;
-  struct bHYPRE_Operator__object* _proxy_self = NULL;
+  struct bHYPRE_StructSMG__epv *_epv = NULL;
+  struct bHYPRE_StructSMG__object* _proxy_self = NULL;
   _proxy_self =
-    (struct bHYPRE_Operator__object*)
+    (struct bHYPRE_StructSMG__object*)
     (ptrdiff_t)(*self);
   _epv = _proxy_self->d_epv;
   (*(_epv->f_addRef))(
-    _proxy_self->d_object
+    _proxy_self
   );
 }
 
@@ -140,19 +192,19 @@ SIDLFortran77Symbol(bhypre_operator_addref_f,BHYPRE_OPERATOR_ADDREF_F,bHYPRE_Ope
  */
 
 void
-SIDLFortran77Symbol(bhypre_operator_deleteref_f,BHYPRE_OPERATOR_DELETEREF_F,bHYPRE_Operator_deleteRef_f)
+SIDLFortran77Symbol(bhypre_structsmg_deleteref_f,BHYPRE_STRUCTSMG_DELETEREF_F,bHYPRE_StructSMG_deleteRef_f)
 (
   int64_t *self
 )
 {
-  struct bHYPRE_Operator__epv *_epv = NULL;
-  struct bHYPRE_Operator__object* _proxy_self = NULL;
+  struct bHYPRE_StructSMG__epv *_epv = NULL;
+  struct bHYPRE_StructSMG__object* _proxy_self = NULL;
   _proxy_self =
-    (struct bHYPRE_Operator__object*)
+    (struct bHYPRE_StructSMG__object*)
     (ptrdiff_t)(*self);
   _epv = _proxy_self->d_epv;
   (*(_epv->f_deleteRef))(
-    _proxy_self->d_object
+    _proxy_self
   );
 }
 
@@ -162,19 +214,19 @@ SIDLFortran77Symbol(bhypre_operator_deleteref_f,BHYPRE_OPERATOR_DELETEREF_F,bHYP
  */
 
 void
-SIDLFortran77Symbol(bhypre_operator_issame_f,BHYPRE_OPERATOR_ISSAME_F,bHYPRE_Operator_isSame_f)
+SIDLFortran77Symbol(bhypre_structsmg_issame_f,BHYPRE_STRUCTSMG_ISSAME_F,bHYPRE_StructSMG_isSame_f)
 (
   int64_t *self,
   int64_t *iobj,
   SIDL_F77_Bool *retval
 )
 {
-  struct bHYPRE_Operator__epv *_epv = NULL;
-  struct bHYPRE_Operator__object* _proxy_self = NULL;
+  struct bHYPRE_StructSMG__epv *_epv = NULL;
+  struct bHYPRE_StructSMG__object* _proxy_self = NULL;
   struct sidl_BaseInterface__object* _proxy_iobj = NULL;
   sidl_bool _proxy_retval;
   _proxy_self =
-    (struct bHYPRE_Operator__object*)
+    (struct bHYPRE_StructSMG__object*)
     (ptrdiff_t)(*self);
   _proxy_iobj =
     (struct sidl_BaseInterface__object*)
@@ -182,7 +234,7 @@ SIDLFortran77Symbol(bhypre_operator_issame_f,BHYPRE_OPERATOR_ISSAME_F,bHYPRE_Ope
   _epv = _proxy_self->d_epv;
   _proxy_retval = 
     (*(_epv->f_isSame))(
-      _proxy_self->d_object,
+      _proxy_self,
       _proxy_iobj
     );
   *retval = ((_proxy_retval == TRUE) ? SIDL_F77_TRUE : SIDL_F77_FALSE);
@@ -199,7 +251,7 @@ SIDLFortran77Symbol(bhypre_operator_issame_f,BHYPRE_OPERATOR_ISSAME_F,bHYPRE_Ope
  */
 
 void
-SIDLFortran77Symbol(bhypre_operator_queryint_f,BHYPRE_OPERATOR_QUERYINT_F,bHYPRE_Operator_queryInt_f)
+SIDLFortran77Symbol(bhypre_structsmg_queryint_f,BHYPRE_STRUCTSMG_QUERYINT_F,bHYPRE_StructSMG_queryInt_f)
 (
   int64_t *self,
   SIDL_F77_String name
@@ -208,12 +260,12 @@ SIDLFortran77Symbol(bhypre_operator_queryint_f,BHYPRE_OPERATOR_QUERYINT_F,bHYPRE
   SIDL_F77_STR_FAR_LEN_DECL(name)
 )
 {
-  struct bHYPRE_Operator__epv *_epv = NULL;
-  struct bHYPRE_Operator__object* _proxy_self = NULL;
+  struct bHYPRE_StructSMG__epv *_epv = NULL;
+  struct bHYPRE_StructSMG__object* _proxy_self = NULL;
   char* _proxy_name = NULL;
   struct sidl_BaseInterface__object* _proxy_retval = NULL;
   _proxy_self =
-    (struct bHYPRE_Operator__object*)
+    (struct bHYPRE_StructSMG__object*)
     (ptrdiff_t)(*self);
   _proxy_name =
     sidl_copy_fortran_str(SIDL_F77_STR(name),
@@ -221,7 +273,7 @@ SIDLFortran77Symbol(bhypre_operator_queryint_f,BHYPRE_OPERATOR_QUERYINT_F,bHYPRE
   _epv = _proxy_self->d_epv;
   _proxy_retval = 
     (*(_epv->f_queryInt))(
-      _proxy_self->d_object,
+      _proxy_self,
       _proxy_name
     );
   *retval = (ptrdiff_t)_proxy_retval;
@@ -236,7 +288,7 @@ SIDLFortran77Symbol(bhypre_operator_queryint_f,BHYPRE_OPERATOR_QUERYINT_F,bHYPRE
  */
 
 void
-SIDLFortran77Symbol(bhypre_operator_istype_f,BHYPRE_OPERATOR_ISTYPE_F,bHYPRE_Operator_isType_f)
+SIDLFortran77Symbol(bhypre_structsmg_istype_f,BHYPRE_STRUCTSMG_ISTYPE_F,bHYPRE_StructSMG_isType_f)
 (
   int64_t *self,
   SIDL_F77_String name
@@ -245,12 +297,12 @@ SIDLFortran77Symbol(bhypre_operator_istype_f,BHYPRE_OPERATOR_ISTYPE_F,bHYPRE_Ope
   SIDL_F77_STR_FAR_LEN_DECL(name)
 )
 {
-  struct bHYPRE_Operator__epv *_epv = NULL;
-  struct bHYPRE_Operator__object* _proxy_self = NULL;
+  struct bHYPRE_StructSMG__epv *_epv = NULL;
+  struct bHYPRE_StructSMG__object* _proxy_self = NULL;
   char* _proxy_name = NULL;
   sidl_bool _proxy_retval;
   _proxy_self =
-    (struct bHYPRE_Operator__object*)
+    (struct bHYPRE_StructSMG__object*)
     (ptrdiff_t)(*self);
   _proxy_name =
     sidl_copy_fortran_str(SIDL_F77_STR(name),
@@ -258,7 +310,7 @@ SIDLFortran77Symbol(bhypre_operator_istype_f,BHYPRE_OPERATOR_ISTYPE_F,bHYPRE_Ope
   _epv = _proxy_self->d_epv;
   _proxy_retval = 
     (*(_epv->f_isType))(
-      _proxy_self->d_object,
+      _proxy_self,
       _proxy_name
     );
   *retval = ((_proxy_retval == TRUE) ? SIDL_F77_TRUE : SIDL_F77_FALSE);
@@ -270,22 +322,22 @@ SIDLFortran77Symbol(bhypre_operator_istype_f,BHYPRE_OPERATOR_ISTYPE_F,bHYPRE_Ope
  */
 
 void
-SIDLFortran77Symbol(bhypre_operator_getclassinfo_f,BHYPRE_OPERATOR_GETCLASSINFO_F,bHYPRE_Operator_getClassInfo_f)
+SIDLFortran77Symbol(bhypre_structsmg_getclassinfo_f,BHYPRE_STRUCTSMG_GETCLASSINFO_F,bHYPRE_StructSMG_getClassInfo_f)
 (
   int64_t *self,
   int64_t *retval
 )
 {
-  struct bHYPRE_Operator__epv *_epv = NULL;
-  struct bHYPRE_Operator__object* _proxy_self = NULL;
+  struct bHYPRE_StructSMG__epv *_epv = NULL;
+  struct bHYPRE_StructSMG__object* _proxy_self = NULL;
   struct sidl_ClassInfo__object* _proxy_retval = NULL;
   _proxy_self =
-    (struct bHYPRE_Operator__object*)
+    (struct bHYPRE_StructSMG__object*)
     (ptrdiff_t)(*self);
   _epv = _proxy_self->d_epv;
   _proxy_retval = 
     (*(_epv->f_getClassInfo))(
-      _proxy_self->d_object
+      _proxy_self
     );
   *retval = (ptrdiff_t)_proxy_retval;
 }
@@ -296,18 +348,18 @@ SIDLFortran77Symbol(bhypre_operator_getclassinfo_f,BHYPRE_OPERATOR_GETCLASSINFO_
  */
 
 void
-SIDLFortran77Symbol(bhypre_operator_setcommunicator_f,BHYPRE_OPERATOR_SETCOMMUNICATOR_F,bHYPRE_Operator_SetCommunicator_f)
+SIDLFortran77Symbol(bhypre_structsmg_setcommunicator_f,BHYPRE_STRUCTSMG_SETCOMMUNICATOR_F,bHYPRE_StructSMG_SetCommunicator_f)
 (
   int64_t *self,
   int64_t *mpi_comm,
   int32_t *retval
 )
 {
-  struct bHYPRE_Operator__epv *_epv = NULL;
-  struct bHYPRE_Operator__object* _proxy_self = NULL;
+  struct bHYPRE_StructSMG__epv *_epv = NULL;
+  struct bHYPRE_StructSMG__object* _proxy_self = NULL;
   void* _proxy_mpi_comm = NULL;
   _proxy_self =
-    (struct bHYPRE_Operator__object*)
+    (struct bHYPRE_StructSMG__object*)
     (ptrdiff_t)(*self);
   _proxy_mpi_comm =
     (void*)
@@ -315,7 +367,7 @@ SIDLFortran77Symbol(bhypre_operator_setcommunicator_f,BHYPRE_OPERATOR_SETCOMMUNI
   _epv = _proxy_self->d_epv;
   *retval = 
     (*(_epv->f_SetCommunicator))(
-      _proxy_self->d_object,
+      _proxy_self,
       _proxy_mpi_comm
     );
 }
@@ -326,7 +378,7 @@ SIDLFortran77Symbol(bhypre_operator_setcommunicator_f,BHYPRE_OPERATOR_SETCOMMUNI
  */
 
 void
-SIDLFortran77Symbol(bhypre_operator_setintparameter_f,BHYPRE_OPERATOR_SETINTPARAMETER_F,bHYPRE_Operator_SetIntParameter_f)
+SIDLFortran77Symbol(bhypre_structsmg_setintparameter_f,BHYPRE_STRUCTSMG_SETINTPARAMETER_F,bHYPRE_StructSMG_SetIntParameter_f)
 (
   int64_t *self,
   SIDL_F77_String name
@@ -336,11 +388,11 @@ SIDLFortran77Symbol(bhypre_operator_setintparameter_f,BHYPRE_OPERATOR_SETINTPARA
   SIDL_F77_STR_FAR_LEN_DECL(name)
 )
 {
-  struct bHYPRE_Operator__epv *_epv = NULL;
-  struct bHYPRE_Operator__object* _proxy_self = NULL;
+  struct bHYPRE_StructSMG__epv *_epv = NULL;
+  struct bHYPRE_StructSMG__object* _proxy_self = NULL;
   char* _proxy_name = NULL;
   _proxy_self =
-    (struct bHYPRE_Operator__object*)
+    (struct bHYPRE_StructSMG__object*)
     (ptrdiff_t)(*self);
   _proxy_name =
     sidl_copy_fortran_str(SIDL_F77_STR(name),
@@ -348,7 +400,7 @@ SIDLFortran77Symbol(bhypre_operator_setintparameter_f,BHYPRE_OPERATOR_SETINTPARA
   _epv = _proxy_self->d_epv;
   *retval = 
     (*(_epv->f_SetIntParameter))(
-      _proxy_self->d_object,
+      _proxy_self,
       _proxy_name,
       *value
     );
@@ -361,7 +413,7 @@ SIDLFortran77Symbol(bhypre_operator_setintparameter_f,BHYPRE_OPERATOR_SETINTPARA
  */
 
 void
-SIDLFortran77Symbol(bhypre_operator_setdoubleparameter_f,BHYPRE_OPERATOR_SETDOUBLEPARAMETER_F,bHYPRE_Operator_SetDoubleParameter_f)
+SIDLFortran77Symbol(bhypre_structsmg_setdoubleparameter_f,BHYPRE_STRUCTSMG_SETDOUBLEPARAMETER_F,bHYPRE_StructSMG_SetDoubleParameter_f)
 (
   int64_t *self,
   SIDL_F77_String name
@@ -371,11 +423,11 @@ SIDLFortran77Symbol(bhypre_operator_setdoubleparameter_f,BHYPRE_OPERATOR_SETDOUB
   SIDL_F77_STR_FAR_LEN_DECL(name)
 )
 {
-  struct bHYPRE_Operator__epv *_epv = NULL;
-  struct bHYPRE_Operator__object* _proxy_self = NULL;
+  struct bHYPRE_StructSMG__epv *_epv = NULL;
+  struct bHYPRE_StructSMG__object* _proxy_self = NULL;
   char* _proxy_name = NULL;
   _proxy_self =
-    (struct bHYPRE_Operator__object*)
+    (struct bHYPRE_StructSMG__object*)
     (ptrdiff_t)(*self);
   _proxy_name =
     sidl_copy_fortran_str(SIDL_F77_STR(name),
@@ -383,7 +435,7 @@ SIDLFortran77Symbol(bhypre_operator_setdoubleparameter_f,BHYPRE_OPERATOR_SETDOUB
   _epv = _proxy_self->d_epv;
   *retval = 
     (*(_epv->f_SetDoubleParameter))(
-      _proxy_self->d_object,
+      _proxy_self,
       _proxy_name,
       *value
     );
@@ -396,7 +448,7 @@ SIDLFortran77Symbol(bhypre_operator_setdoubleparameter_f,BHYPRE_OPERATOR_SETDOUB
  */
 
 void
-SIDLFortran77Symbol(bhypre_operator_setstringparameter_f,BHYPRE_OPERATOR_SETSTRINGPARAMETER_F,bHYPRE_Operator_SetStringParameter_f)
+SIDLFortran77Symbol(bhypre_structsmg_setstringparameter_f,BHYPRE_STRUCTSMG_SETSTRINGPARAMETER_F,bHYPRE_StructSMG_SetStringParameter_f)
 (
   int64_t *self,
   SIDL_F77_String name
@@ -408,12 +460,12 @@ SIDLFortran77Symbol(bhypre_operator_setstringparameter_f,BHYPRE_OPERATOR_SETSTRI
   SIDL_F77_STR_FAR_LEN_DECL(value)
 )
 {
-  struct bHYPRE_Operator__epv *_epv = NULL;
-  struct bHYPRE_Operator__object* _proxy_self = NULL;
+  struct bHYPRE_StructSMG__epv *_epv = NULL;
+  struct bHYPRE_StructSMG__object* _proxy_self = NULL;
   char* _proxy_name = NULL;
   char* _proxy_value = NULL;
   _proxy_self =
-    (struct bHYPRE_Operator__object*)
+    (struct bHYPRE_StructSMG__object*)
     (ptrdiff_t)(*self);
   _proxy_name =
     sidl_copy_fortran_str(SIDL_F77_STR(name),
@@ -424,7 +476,7 @@ SIDLFortran77Symbol(bhypre_operator_setstringparameter_f,BHYPRE_OPERATOR_SETSTRI
   _epv = _proxy_self->d_epv;
   *retval = 
     (*(_epv->f_SetStringParameter))(
-      _proxy_self->d_object,
+      _proxy_self,
       _proxy_name,
       _proxy_value
     );
@@ -438,7 +490,7 @@ SIDLFortran77Symbol(bhypre_operator_setstringparameter_f,BHYPRE_OPERATOR_SETSTRI
  */
 
 void
-SIDLFortran77Symbol(bhypre_operator_setintarray1parameter_f,BHYPRE_OPERATOR_SETINTARRAY1PARAMETER_F,bHYPRE_Operator_SetIntArray1Parameter_f)
+SIDLFortran77Symbol(bhypre_structsmg_setintarray1parameter_f,BHYPRE_STRUCTSMG_SETINTARRAY1PARAMETER_F,bHYPRE_StructSMG_SetIntArray1Parameter_f)
 (
   int64_t *self,
   SIDL_F77_String name
@@ -448,12 +500,12 @@ SIDLFortran77Symbol(bhypre_operator_setintarray1parameter_f,BHYPRE_OPERATOR_SETI
   SIDL_F77_STR_FAR_LEN_DECL(name)
 )
 {
-  struct bHYPRE_Operator__epv *_epv = NULL;
-  struct bHYPRE_Operator__object* _proxy_self = NULL;
+  struct bHYPRE_StructSMG__epv *_epv = NULL;
+  struct bHYPRE_StructSMG__object* _proxy_self = NULL;
   char* _proxy_name = NULL;
   struct sidl_int__array* _proxy_value = NULL;
   _proxy_self =
-    (struct bHYPRE_Operator__object*)
+    (struct bHYPRE_StructSMG__object*)
     (ptrdiff_t)(*self);
   _proxy_name =
     sidl_copy_fortran_str(SIDL_F77_STR(name),
@@ -464,7 +516,7 @@ SIDLFortran77Symbol(bhypre_operator_setintarray1parameter_f,BHYPRE_OPERATOR_SETI
   _epv = _proxy_self->d_epv;
   *retval = 
     (*(_epv->f_SetIntArray1Parameter))(
-      _proxy_self->d_object,
+      _proxy_self,
       _proxy_name,
       _proxy_value
     );
@@ -477,7 +529,7 @@ SIDLFortran77Symbol(bhypre_operator_setintarray1parameter_f,BHYPRE_OPERATOR_SETI
  */
 
 void
-SIDLFortran77Symbol(bhypre_operator_setintarray2parameter_f,BHYPRE_OPERATOR_SETINTARRAY2PARAMETER_F,bHYPRE_Operator_SetIntArray2Parameter_f)
+SIDLFortran77Symbol(bhypre_structsmg_setintarray2parameter_f,BHYPRE_STRUCTSMG_SETINTARRAY2PARAMETER_F,bHYPRE_StructSMG_SetIntArray2Parameter_f)
 (
   int64_t *self,
   SIDL_F77_String name
@@ -487,12 +539,12 @@ SIDLFortran77Symbol(bhypre_operator_setintarray2parameter_f,BHYPRE_OPERATOR_SETI
   SIDL_F77_STR_FAR_LEN_DECL(name)
 )
 {
-  struct bHYPRE_Operator__epv *_epv = NULL;
-  struct bHYPRE_Operator__object* _proxy_self = NULL;
+  struct bHYPRE_StructSMG__epv *_epv = NULL;
+  struct bHYPRE_StructSMG__object* _proxy_self = NULL;
   char* _proxy_name = NULL;
   struct sidl_int__array* _proxy_value = NULL;
   _proxy_self =
-    (struct bHYPRE_Operator__object*)
+    (struct bHYPRE_StructSMG__object*)
     (ptrdiff_t)(*self);
   _proxy_name =
     sidl_copy_fortran_str(SIDL_F77_STR(name),
@@ -503,7 +555,7 @@ SIDLFortran77Symbol(bhypre_operator_setintarray2parameter_f,BHYPRE_OPERATOR_SETI
   _epv = _proxy_self->d_epv;
   *retval = 
     (*(_epv->f_SetIntArray2Parameter))(
-      _proxy_self->d_object,
+      _proxy_self,
       _proxy_name,
       _proxy_value
     );
@@ -516,7 +568,7 @@ SIDLFortran77Symbol(bhypre_operator_setintarray2parameter_f,BHYPRE_OPERATOR_SETI
  */
 
 void
-SIDLFortran77Symbol(bhypre_operator_setdoublearray1parameter_f,BHYPRE_OPERATOR_SETDOUBLEARRAY1PARAMETER_F,bHYPRE_Operator_SetDoubleArray1Parameter_f)
+SIDLFortran77Symbol(bhypre_structsmg_setdoublearray1parameter_f,BHYPRE_STRUCTSMG_SETDOUBLEARRAY1PARAMETER_F,bHYPRE_StructSMG_SetDoubleArray1Parameter_f)
 (
   int64_t *self,
   SIDL_F77_String name
@@ -526,12 +578,12 @@ SIDLFortran77Symbol(bhypre_operator_setdoublearray1parameter_f,BHYPRE_OPERATOR_S
   SIDL_F77_STR_FAR_LEN_DECL(name)
 )
 {
-  struct bHYPRE_Operator__epv *_epv = NULL;
-  struct bHYPRE_Operator__object* _proxy_self = NULL;
+  struct bHYPRE_StructSMG__epv *_epv = NULL;
+  struct bHYPRE_StructSMG__object* _proxy_self = NULL;
   char* _proxy_name = NULL;
   struct sidl_double__array* _proxy_value = NULL;
   _proxy_self =
-    (struct bHYPRE_Operator__object*)
+    (struct bHYPRE_StructSMG__object*)
     (ptrdiff_t)(*self);
   _proxy_name =
     sidl_copy_fortran_str(SIDL_F77_STR(name),
@@ -542,7 +594,7 @@ SIDLFortran77Symbol(bhypre_operator_setdoublearray1parameter_f,BHYPRE_OPERATOR_S
   _epv = _proxy_self->d_epv;
   *retval = 
     (*(_epv->f_SetDoubleArray1Parameter))(
-      _proxy_self->d_object,
+      _proxy_self,
       _proxy_name,
       _proxy_value
     );
@@ -555,7 +607,7 @@ SIDLFortran77Symbol(bhypre_operator_setdoublearray1parameter_f,BHYPRE_OPERATOR_S
  */
 
 void
-SIDLFortran77Symbol(bhypre_operator_setdoublearray2parameter_f,BHYPRE_OPERATOR_SETDOUBLEARRAY2PARAMETER_F,bHYPRE_Operator_SetDoubleArray2Parameter_f)
+SIDLFortran77Symbol(bhypre_structsmg_setdoublearray2parameter_f,BHYPRE_STRUCTSMG_SETDOUBLEARRAY2PARAMETER_F,bHYPRE_StructSMG_SetDoubleArray2Parameter_f)
 (
   int64_t *self,
   SIDL_F77_String name
@@ -565,12 +617,12 @@ SIDLFortran77Symbol(bhypre_operator_setdoublearray2parameter_f,BHYPRE_OPERATOR_S
   SIDL_F77_STR_FAR_LEN_DECL(name)
 )
 {
-  struct bHYPRE_Operator__epv *_epv = NULL;
-  struct bHYPRE_Operator__object* _proxy_self = NULL;
+  struct bHYPRE_StructSMG__epv *_epv = NULL;
+  struct bHYPRE_StructSMG__object* _proxy_self = NULL;
   char* _proxy_name = NULL;
   struct sidl_double__array* _proxy_value = NULL;
   _proxy_self =
-    (struct bHYPRE_Operator__object*)
+    (struct bHYPRE_StructSMG__object*)
     (ptrdiff_t)(*self);
   _proxy_name =
     sidl_copy_fortran_str(SIDL_F77_STR(name),
@@ -581,7 +633,7 @@ SIDLFortran77Symbol(bhypre_operator_setdoublearray2parameter_f,BHYPRE_OPERATOR_S
   _epv = _proxy_self->d_epv;
   *retval = 
     (*(_epv->f_SetDoubleArray2Parameter))(
-      _proxy_self->d_object,
+      _proxy_self,
       _proxy_name,
       _proxy_value
     );
@@ -594,7 +646,7 @@ SIDLFortran77Symbol(bhypre_operator_setdoublearray2parameter_f,BHYPRE_OPERATOR_S
  */
 
 void
-SIDLFortran77Symbol(bhypre_operator_getintvalue_f,BHYPRE_OPERATOR_GETINTVALUE_F,bHYPRE_Operator_GetIntValue_f)
+SIDLFortran77Symbol(bhypre_structsmg_getintvalue_f,BHYPRE_STRUCTSMG_GETINTVALUE_F,bHYPRE_StructSMG_GetIntValue_f)
 (
   int64_t *self,
   SIDL_F77_String name
@@ -604,11 +656,11 @@ SIDLFortran77Symbol(bhypre_operator_getintvalue_f,BHYPRE_OPERATOR_GETINTVALUE_F,
   SIDL_F77_STR_FAR_LEN_DECL(name)
 )
 {
-  struct bHYPRE_Operator__epv *_epv = NULL;
-  struct bHYPRE_Operator__object* _proxy_self = NULL;
+  struct bHYPRE_StructSMG__epv *_epv = NULL;
+  struct bHYPRE_StructSMG__object* _proxy_self = NULL;
   char* _proxy_name = NULL;
   _proxy_self =
-    (struct bHYPRE_Operator__object*)
+    (struct bHYPRE_StructSMG__object*)
     (ptrdiff_t)(*self);
   _proxy_name =
     sidl_copy_fortran_str(SIDL_F77_STR(name),
@@ -616,7 +668,7 @@ SIDLFortran77Symbol(bhypre_operator_getintvalue_f,BHYPRE_OPERATOR_GETINTVALUE_F,
   _epv = _proxy_self->d_epv;
   *retval = 
     (*(_epv->f_GetIntValue))(
-      _proxy_self->d_object,
+      _proxy_self,
       _proxy_name,
       value
     );
@@ -629,7 +681,7 @@ SIDLFortran77Symbol(bhypre_operator_getintvalue_f,BHYPRE_OPERATOR_GETINTVALUE_F,
  */
 
 void
-SIDLFortran77Symbol(bhypre_operator_getdoublevalue_f,BHYPRE_OPERATOR_GETDOUBLEVALUE_F,bHYPRE_Operator_GetDoubleValue_f)
+SIDLFortran77Symbol(bhypre_structsmg_getdoublevalue_f,BHYPRE_STRUCTSMG_GETDOUBLEVALUE_F,bHYPRE_StructSMG_GetDoubleValue_f)
 (
   int64_t *self,
   SIDL_F77_String name
@@ -639,11 +691,11 @@ SIDLFortran77Symbol(bhypre_operator_getdoublevalue_f,BHYPRE_OPERATOR_GETDOUBLEVA
   SIDL_F77_STR_FAR_LEN_DECL(name)
 )
 {
-  struct bHYPRE_Operator__epv *_epv = NULL;
-  struct bHYPRE_Operator__object* _proxy_self = NULL;
+  struct bHYPRE_StructSMG__epv *_epv = NULL;
+  struct bHYPRE_StructSMG__object* _proxy_self = NULL;
   char* _proxy_name = NULL;
   _proxy_self =
-    (struct bHYPRE_Operator__object*)
+    (struct bHYPRE_StructSMG__object*)
     (ptrdiff_t)(*self);
   _proxy_name =
     sidl_copy_fortran_str(SIDL_F77_STR(name),
@@ -651,7 +703,7 @@ SIDLFortran77Symbol(bhypre_operator_getdoublevalue_f,BHYPRE_OPERATOR_GETDOUBLEVA
   _epv = _proxy_self->d_epv;
   *retval = 
     (*(_epv->f_GetDoubleValue))(
-      _proxy_self->d_object,
+      _proxy_self,
       _proxy_name,
       value
     );
@@ -665,7 +717,7 @@ SIDLFortran77Symbol(bhypre_operator_getdoublevalue_f,BHYPRE_OPERATOR_GETDOUBLEVA
  */
 
 void
-SIDLFortran77Symbol(bhypre_operator_setup_f,BHYPRE_OPERATOR_SETUP_F,bHYPRE_Operator_Setup_f)
+SIDLFortran77Symbol(bhypre_structsmg_setup_f,BHYPRE_STRUCTSMG_SETUP_F,bHYPRE_StructSMG_Setup_f)
 (
   int64_t *self,
   int64_t *b,
@@ -673,12 +725,12 @@ SIDLFortran77Symbol(bhypre_operator_setup_f,BHYPRE_OPERATOR_SETUP_F,bHYPRE_Opera
   int32_t *retval
 )
 {
-  struct bHYPRE_Operator__epv *_epv = NULL;
-  struct bHYPRE_Operator__object* _proxy_self = NULL;
+  struct bHYPRE_StructSMG__epv *_epv = NULL;
+  struct bHYPRE_StructSMG__object* _proxy_self = NULL;
   struct bHYPRE_Vector__object* _proxy_b = NULL;
   struct bHYPRE_Vector__object* _proxy_x = NULL;
   _proxy_self =
-    (struct bHYPRE_Operator__object*)
+    (struct bHYPRE_StructSMG__object*)
     (ptrdiff_t)(*self);
   _proxy_b =
     (struct bHYPRE_Vector__object*)
@@ -689,7 +741,7 @@ SIDLFortran77Symbol(bhypre_operator_setup_f,BHYPRE_OPERATOR_SETUP_F,bHYPRE_Opera
   _epv = _proxy_self->d_epv;
   *retval = 
     (*(_epv->f_Setup))(
-      _proxy_self->d_object,
+      _proxy_self,
       _proxy_b,
       _proxy_x
     );
@@ -701,7 +753,7 @@ SIDLFortran77Symbol(bhypre_operator_setup_f,BHYPRE_OPERATOR_SETUP_F,bHYPRE_Opera
  */
 
 void
-SIDLFortran77Symbol(bhypre_operator_apply_f,BHYPRE_OPERATOR_APPLY_F,bHYPRE_Operator_Apply_f)
+SIDLFortran77Symbol(bhypre_structsmg_apply_f,BHYPRE_STRUCTSMG_APPLY_F,bHYPRE_StructSMG_Apply_f)
 (
   int64_t *self,
   int64_t *b,
@@ -709,12 +761,12 @@ SIDLFortran77Symbol(bhypre_operator_apply_f,BHYPRE_OPERATOR_APPLY_F,bHYPRE_Opera
   int32_t *retval
 )
 {
-  struct bHYPRE_Operator__epv *_epv = NULL;
-  struct bHYPRE_Operator__object* _proxy_self = NULL;
+  struct bHYPRE_StructSMG__epv *_epv = NULL;
+  struct bHYPRE_StructSMG__object* _proxy_self = NULL;
   struct bHYPRE_Vector__object* _proxy_b = NULL;
   struct bHYPRE_Vector__object* _proxy_x = NULL;
   _proxy_self =
-    (struct bHYPRE_Operator__object*)
+    (struct bHYPRE_StructSMG__object*)
     (ptrdiff_t)(*self);
   _proxy_b =
     (struct bHYPRE_Vector__object*)
@@ -725,17 +777,211 @@ SIDLFortran77Symbol(bhypre_operator_apply_f,BHYPRE_OPERATOR_APPLY_F,bHYPRE_Opera
   _epv = _proxy_self->d_epv;
   *retval = 
     (*(_epv->f_Apply))(
-      _proxy_self->d_object,
+      _proxy_self,
       _proxy_b,
       &_proxy_x
     );
   *x = (ptrdiff_t)_proxy_x;
 }
 
+/*
+ * Set the operator for the linear system being solved.
+ * 
+ */
+
 void
-SIDLFortran77Symbol(bhypre_operator__array_createcol_f,
-                  BHYPRE_OPERATOR__ARRAY_CREATECOL_F,
-                  bHYPRE_Operator__array_createCol_f)
+SIDLFortran77Symbol(bhypre_structsmg_setoperator_f,BHYPRE_STRUCTSMG_SETOPERATOR_F,bHYPRE_StructSMG_SetOperator_f)
+(
+  int64_t *self,
+  int64_t *A,
+  int32_t *retval
+)
+{
+  struct bHYPRE_StructSMG__epv *_epv = NULL;
+  struct bHYPRE_StructSMG__object* _proxy_self = NULL;
+  struct bHYPRE_Operator__object* _proxy_A = NULL;
+  _proxy_self =
+    (struct bHYPRE_StructSMG__object*)
+    (ptrdiff_t)(*self);
+  _proxy_A =
+    (struct bHYPRE_Operator__object*)
+    (ptrdiff_t)(*A);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_SetOperator))(
+      _proxy_self,
+      _proxy_A
+    );
+}
+
+/*
+ * (Optional) Set the convergence tolerance.
+ * 
+ */
+
+void
+SIDLFortran77Symbol(bhypre_structsmg_settolerance_f,BHYPRE_STRUCTSMG_SETTOLERANCE_F,bHYPRE_StructSMG_SetTolerance_f)
+(
+  int64_t *self,
+  double *tolerance,
+  int32_t *retval
+)
+{
+  struct bHYPRE_StructSMG__epv *_epv = NULL;
+  struct bHYPRE_StructSMG__object* _proxy_self = NULL;
+  _proxy_self =
+    (struct bHYPRE_StructSMG__object*)
+    (ptrdiff_t)(*self);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_SetTolerance))(
+      _proxy_self,
+      *tolerance
+    );
+}
+
+/*
+ * (Optional) Set maximum number of iterations.
+ * 
+ */
+
+void
+SIDLFortran77Symbol(bhypre_structsmg_setmaxiterations_f,BHYPRE_STRUCTSMG_SETMAXITERATIONS_F,bHYPRE_StructSMG_SetMaxIterations_f)
+(
+  int64_t *self,
+  int32_t *max_iterations,
+  int32_t *retval
+)
+{
+  struct bHYPRE_StructSMG__epv *_epv = NULL;
+  struct bHYPRE_StructSMG__object* _proxy_self = NULL;
+  _proxy_self =
+    (struct bHYPRE_StructSMG__object*)
+    (ptrdiff_t)(*self);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_SetMaxIterations))(
+      _proxy_self,
+      *max_iterations
+    );
+}
+
+/*
+ * (Optional) Set the {\it logging level}, specifying the degree
+ * of additional informational data to be accumulated.  Does
+ * nothing by default (level = 0).  Other levels (if any) are
+ * implementation-specific.  Must be called before {\tt Setup}
+ * and {\tt Apply}.
+ * 
+ */
+
+void
+SIDLFortran77Symbol(bhypre_structsmg_setlogging_f,BHYPRE_STRUCTSMG_SETLOGGING_F,bHYPRE_StructSMG_SetLogging_f)
+(
+  int64_t *self,
+  int32_t *level,
+  int32_t *retval
+)
+{
+  struct bHYPRE_StructSMG__epv *_epv = NULL;
+  struct bHYPRE_StructSMG__object* _proxy_self = NULL;
+  _proxy_self =
+    (struct bHYPRE_StructSMG__object*)
+    (ptrdiff_t)(*self);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_SetLogging))(
+      _proxy_self,
+      *level
+    );
+}
+
+/*
+ * (Optional) Set the {\it print level}, specifying the degree
+ * of informational data to be printed either to the screen or
+ * to a file.  Does nothing by default (level=0).  Other levels
+ * (if any) are implementation-specific.  Must be called before
+ * {\tt Setup} and {\tt Apply}.
+ * 
+ */
+
+void
+SIDLFortran77Symbol(bhypre_structsmg_setprintlevel_f,BHYPRE_STRUCTSMG_SETPRINTLEVEL_F,bHYPRE_StructSMG_SetPrintLevel_f)
+(
+  int64_t *self,
+  int32_t *level,
+  int32_t *retval
+)
+{
+  struct bHYPRE_StructSMG__epv *_epv = NULL;
+  struct bHYPRE_StructSMG__object* _proxy_self = NULL;
+  _proxy_self =
+    (struct bHYPRE_StructSMG__object*)
+    (ptrdiff_t)(*self);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_SetPrintLevel))(
+      _proxy_self,
+      *level
+    );
+}
+
+/*
+ * (Optional) Return the number of iterations taken.
+ * 
+ */
+
+void
+SIDLFortran77Symbol(bhypre_structsmg_getnumiterations_f,BHYPRE_STRUCTSMG_GETNUMITERATIONS_F,bHYPRE_StructSMG_GetNumIterations_f)
+(
+  int64_t *self,
+  int32_t *num_iterations,
+  int32_t *retval
+)
+{
+  struct bHYPRE_StructSMG__epv *_epv = NULL;
+  struct bHYPRE_StructSMG__object* _proxy_self = NULL;
+  _proxy_self =
+    (struct bHYPRE_StructSMG__object*)
+    (ptrdiff_t)(*self);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_GetNumIterations))(
+      _proxy_self,
+      num_iterations
+    );
+}
+
+/*
+ * (Optional) Return the norm of the relative residual.
+ * 
+ */
+
+void
+SIDLFortran77Symbol(bhypre_structsmg_getrelresidualnorm_f,BHYPRE_STRUCTSMG_GETRELRESIDUALNORM_F,bHYPRE_StructSMG_GetRelResidualNorm_f)
+(
+  int64_t *self,
+  double *norm,
+  int32_t *retval
+)
+{
+  struct bHYPRE_StructSMG__epv *_epv = NULL;
+  struct bHYPRE_StructSMG__object* _proxy_self = NULL;
+  _proxy_self =
+    (struct bHYPRE_StructSMG__object*)
+    (ptrdiff_t)(*self);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_GetRelResidualNorm))(
+      _proxy_self,
+      norm
+    );
+}
+
+void
+SIDLFortran77Symbol(bhypre_structsmg__array_createcol_f,
+                  BHYPRE_STRUCTSMG__ARRAY_CREATECOL_F,
+                  bHYPRE_StructSMG__array_createCol_f)
   (int32_t *dimen,
    int32_t lower[],
    int32_t upper[],
@@ -746,9 +992,9 @@ SIDLFortran77Symbol(bhypre_operator__array_createcol_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_operator__array_createrow_f,
-                  BHYPRE_OPERATOR__ARRAY_CREATEROW_F,
-                  bHYPRE_Operator__array_createRow_f)
+SIDLFortran77Symbol(bhypre_structsmg__array_createrow_f,
+                  BHYPRE_STRUCTSMG__ARRAY_CREATEROW_F,
+                  bHYPRE_StructSMG__array_createRow_f)
   (int32_t *dimen,
    int32_t lower[],
    int32_t upper[],
@@ -759,36 +1005,36 @@ SIDLFortran77Symbol(bhypre_operator__array_createrow_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_operator__array_create1d_f,
-                  BHYPRE_OPERATOR__ARRAY_CREATE1D_F,
-                  bHYPRE_Operator__array_create1d_f)
+SIDLFortran77Symbol(bhypre_structsmg__array_create1d_f,
+                  BHYPRE_STRUCTSMG__ARRAY_CREATE1D_F,
+                  bHYPRE_StructSMG__array_create1d_f)
   (int32_t *len, int64_t *result)
 {
   *result = (ptrdiff_t)sidl_interface__array_create1d(*len);
 }
 
 void
-SIDLFortran77Symbol(bhypre_operator__array_create2dcol_f,
-                  BHYPRE_OPERATOR__ARRAY_CREATE2DCOL_F,
-                  bHYPRE_Operator__array_create2dCol_f)
+SIDLFortran77Symbol(bhypre_structsmg__array_create2dcol_f,
+                  BHYPRE_STRUCTSMG__ARRAY_CREATE2DCOL_F,
+                  bHYPRE_StructSMG__array_create2dCol_f)
   (int32_t *m, int32_t *n, int64_t *result)
 {
   *result = (ptrdiff_t)sidl_interface__array_create2dCol(*m, *n);
 }
 
 void
-SIDLFortran77Symbol(bhypre_operator__array_create2drow_f,
-                  BHYPRE_OPERATOR__ARRAY_CREATE2DROW_F,
-                  bHYPRE_Operator__array_create2dRow_f)
+SIDLFortran77Symbol(bhypre_structsmg__array_create2drow_f,
+                  BHYPRE_STRUCTSMG__ARRAY_CREATE2DROW_F,
+                  bHYPRE_StructSMG__array_create2dRow_f)
   (int32_t *m, int32_t *n, int64_t *result)
 {
   *result = (ptrdiff_t)sidl_interface__array_create2dRow(*m, *n);
 }
 
 void
-SIDLFortran77Symbol(bhypre_operator__array_addref_f,
-                  BHYPRE_OPERATOR__ARRAY_ADDREF_F,
-                  bHYPRE_Operator__array_addRef_f)
+SIDLFortran77Symbol(bhypre_structsmg__array_addref_f,
+                  BHYPRE_STRUCTSMG__ARRAY_ADDREF_F,
+                  bHYPRE_StructSMG__array_addRef_f)
   (int64_t *array)
 {
   sidl_interface__array_addRef((struct sidl_interface__array 
@@ -796,9 +1042,9 @@ SIDLFortran77Symbol(bhypre_operator__array_addref_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_operator__array_deleteref_f,
-                  BHYPRE_OPERATOR__ARRAY_DELETEREF_F,
-                  bHYPRE_Operator__array_deleteRef_f)
+SIDLFortran77Symbol(bhypre_structsmg__array_deleteref_f,
+                  BHYPRE_STRUCTSMG__ARRAY_DELETEREF_F,
+                  bHYPRE_StructSMG__array_deleteRef_f)
   (int64_t *array)
 {
   sidl_interface__array_deleteRef((struct sidl_interface__array 
@@ -806,9 +1052,9 @@ SIDLFortran77Symbol(bhypre_operator__array_deleteref_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_operator__array_get1_f,
-                  BHYPRE_OPERATOR__ARRAY_GET1_F,
-                  bHYPRE_Operator__array_get1_f)
+SIDLFortran77Symbol(bhypre_structsmg__array_get1_f,
+                  BHYPRE_STRUCTSMG__ARRAY_GET1_F,
+                  bHYPRE_StructSMG__array_get1_f)
   (int64_t *array, 
    int32_t *i1, 
    int64_t *result)
@@ -820,9 +1066,9 @@ SIDLFortran77Symbol(bhypre_operator__array_get1_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_operator__array_get2_f,
-                  BHYPRE_OPERATOR__ARRAY_GET2_F,
-                  bHYPRE_Operator__array_get2_f)
+SIDLFortran77Symbol(bhypre_structsmg__array_get2_f,
+                  BHYPRE_STRUCTSMG__ARRAY_GET2_F,
+                  bHYPRE_StructSMG__array_get2_f)
   (int64_t *array, 
    int32_t *i1, 
    int32_t *i2, 
@@ -835,9 +1081,9 @@ SIDLFortran77Symbol(bhypre_operator__array_get2_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_operator__array_get3_f,
-                  BHYPRE_OPERATOR__ARRAY_GET3_F,
-                  bHYPRE_Operator__array_get3_f)
+SIDLFortran77Symbol(bhypre_structsmg__array_get3_f,
+                  BHYPRE_STRUCTSMG__ARRAY_GET3_F,
+                  bHYPRE_StructSMG__array_get3_f)
   (int64_t *array, 
    int32_t *i1, 
    int32_t *i2, 
@@ -851,9 +1097,9 @@ SIDLFortran77Symbol(bhypre_operator__array_get3_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_operator__array_get4_f,
-                  BHYPRE_OPERATOR__ARRAY_GET4_F,
-                  bHYPRE_Operator__array_get4_f)
+SIDLFortran77Symbol(bhypre_structsmg__array_get4_f,
+                  BHYPRE_STRUCTSMG__ARRAY_GET4_F,
+                  bHYPRE_StructSMG__array_get4_f)
   (int64_t *array, 
    int32_t *i1, 
    int32_t *i2, 
@@ -868,9 +1114,9 @@ SIDLFortran77Symbol(bhypre_operator__array_get4_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_operator__array_get5_f,
-                  BHYPRE_OPERATOR__ARRAY_GET5_F,
-                  bHYPRE_Operator__array_get5_f)
+SIDLFortran77Symbol(bhypre_structsmg__array_get5_f,
+                  BHYPRE_STRUCTSMG__ARRAY_GET5_F,
+                  bHYPRE_StructSMG__array_get5_f)
   (int64_t *array, 
    int32_t *i1, 
    int32_t *i2, 
@@ -886,9 +1132,9 @@ SIDLFortran77Symbol(bhypre_operator__array_get5_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_operator__array_get6_f,
-                  BHYPRE_OPERATOR__ARRAY_GET6_F,
-                  bHYPRE_Operator__array_get6_f)
+SIDLFortran77Symbol(bhypre_structsmg__array_get6_f,
+                  BHYPRE_STRUCTSMG__ARRAY_GET6_F,
+                  bHYPRE_StructSMG__array_get6_f)
   (int64_t *array, 
    int32_t *i1, 
    int32_t *i2, 
@@ -905,9 +1151,9 @@ SIDLFortran77Symbol(bhypre_operator__array_get6_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_operator__array_get7_f,
-                  BHYPRE_OPERATOR__ARRAY_GET7_F,
-                  bHYPRE_Operator__array_get7_f)
+SIDLFortran77Symbol(bhypre_structsmg__array_get7_f,
+                  BHYPRE_STRUCTSMG__ARRAY_GET7_F,
+                  bHYPRE_StructSMG__array_get7_f)
   (int64_t *array, 
    int32_t *i1, 
    int32_t *i2, 
@@ -925,9 +1171,9 @@ SIDLFortran77Symbol(bhypre_operator__array_get7_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_operator__array_get_f,
-                  BHYPRE_OPERATOR__ARRAY_GET_F,
-                  bHYPRE_Operator__array_get_f)
+SIDLFortran77Symbol(bhypre_structsmg__array_get_f,
+                  BHYPRE_STRUCTSMG__ARRAY_GET_F,
+                  bHYPRE_StructSMG__array_get_f)
   (int64_t *array,
    int32_t indices[],
    int64_t *result)
@@ -938,9 +1184,9 @@ SIDLFortran77Symbol(bhypre_operator__array_get_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_operator__array_set1_f,
-                  BHYPRE_OPERATOR__ARRAY_SET1_F,
-                  bHYPRE_Operator__array_set1_f)
+SIDLFortran77Symbol(bhypre_structsmg__array_set1_f,
+                  BHYPRE_STRUCTSMG__ARRAY_SET1_F,
+                  bHYPRE_StructSMG__array_set1_f)
   (int64_t *array,
    int32_t *i1,
    int64_t *value)
@@ -950,9 +1196,9 @@ SIDLFortran77Symbol(bhypre_operator__array_set1_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_operator__array_set2_f,
-                  BHYPRE_OPERATOR__ARRAY_SET2_F,
-                  bHYPRE_Operator__array_set2_f)
+SIDLFortran77Symbol(bhypre_structsmg__array_set2_f,
+                  BHYPRE_STRUCTSMG__ARRAY_SET2_F,
+                  bHYPRE_StructSMG__array_set2_f)
   (int64_t *array,
    int32_t *i1,
    int32_t *i2,
@@ -963,9 +1209,9 @@ SIDLFortran77Symbol(bhypre_operator__array_set2_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_operator__array_set3_f,
-                  BHYPRE_OPERATOR__ARRAY_SET3_F,
-                  bHYPRE_Operator__array_set3_f)
+SIDLFortran77Symbol(bhypre_structsmg__array_set3_f,
+                  BHYPRE_STRUCTSMG__ARRAY_SET3_F,
+                  bHYPRE_StructSMG__array_set3_f)
   (int64_t *array,
    int32_t *i1,
    int32_t *i2,
@@ -977,9 +1223,9 @@ SIDLFortran77Symbol(bhypre_operator__array_set3_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_operator__array_set4_f,
-                  BHYPRE_OPERATOR__ARRAY_SET4_F,
-                  bHYPRE_Operator__array_set4_f)
+SIDLFortran77Symbol(bhypre_structsmg__array_set4_f,
+                  BHYPRE_STRUCTSMG__ARRAY_SET4_F,
+                  bHYPRE_StructSMG__array_set4_f)
   (int64_t *array,
    int32_t *i1,
    int32_t *i2,
@@ -992,9 +1238,9 @@ SIDLFortran77Symbol(bhypre_operator__array_set4_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_operator__array_set5_f,
-                  BHYPRE_OPERATOR__ARRAY_SET5_F,
-                  bHYPRE_Operator__array_set5_f)
+SIDLFortran77Symbol(bhypre_structsmg__array_set5_f,
+                  BHYPRE_STRUCTSMG__ARRAY_SET5_F,
+                  bHYPRE_StructSMG__array_set5_f)
   (int64_t *array,
    int32_t *i1,
    int32_t *i2,
@@ -1009,9 +1255,9 @@ SIDLFortran77Symbol(bhypre_operator__array_set5_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_operator__array_set6_f,
-                  BHYPRE_OPERATOR__ARRAY_SET6_F,
-                  bHYPRE_Operator__array_set6_f)
+SIDLFortran77Symbol(bhypre_structsmg__array_set6_f,
+                  BHYPRE_STRUCTSMG__ARRAY_SET6_F,
+                  bHYPRE_StructSMG__array_set6_f)
   (int64_t *array,
    int32_t *i1,
    int32_t *i2,
@@ -1027,9 +1273,9 @@ SIDLFortran77Symbol(bhypre_operator__array_set6_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_operator__array_set7_f,
-                  BHYPRE_OPERATOR__ARRAY_SET7_F,
-                  bHYPRE_Operator__array_set7_f)
+SIDLFortran77Symbol(bhypre_structsmg__array_set7_f,
+                  BHYPRE_STRUCTSMG__ARRAY_SET7_F,
+                  bHYPRE_StructSMG__array_set7_f)
   (int64_t *array,
    int32_t *i1,
    int32_t *i2,
@@ -1046,9 +1292,9 @@ SIDLFortran77Symbol(bhypre_operator__array_set7_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_operator__array_set_f,
-                  BHYPRE_OPERATOR__ARRAY_SET_F,
-                  bHYPRE_Operator__array_set_f)
+SIDLFortran77Symbol(bhypre_structsmg__array_set_f,
+                  BHYPRE_STRUCTSMG__ARRAY_SET_F,
+                  bHYPRE_StructSMG__array_set_f)
   (int64_t *array,
   int32_t indices[],
   int64_t *value)
@@ -1058,9 +1304,9 @@ SIDLFortran77Symbol(bhypre_operator__array_set_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_operator__array_dimen_f,
-                  BHYPRE_OPERATOR__ARRAY_DIMEN_F,
-                  bHYPRE_Operator__array_dimen_f)
+SIDLFortran77Symbol(bhypre_structsmg__array_dimen_f,
+                  BHYPRE_STRUCTSMG__ARRAY_DIMEN_F,
+                  bHYPRE_StructSMG__array_dimen_f)
   (int64_t *array, int32_t *result)
 {
   *result =
@@ -1069,9 +1315,9 @@ SIDLFortran77Symbol(bhypre_operator__array_dimen_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_operator__array_lower_f,
-                  BHYPRE_OPERATOR__ARRAY_LOWER_F,
-                  bHYPRE_Operator__array_lower_f)
+SIDLFortran77Symbol(bhypre_structsmg__array_lower_f,
+                  BHYPRE_STRUCTSMG__ARRAY_LOWER_F,
+                  bHYPRE_StructSMG__array_lower_f)
   (int64_t *array,
    int32_t *ind,
    int32_t *result)
@@ -1082,9 +1328,9 @@ SIDLFortran77Symbol(bhypre_operator__array_lower_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_operator__array_upper_f,
-                  BHYPRE_OPERATOR__ARRAY_UPPER_F,
-                  bHYPRE_Operator__array_upper_f)
+SIDLFortran77Symbol(bhypre_structsmg__array_upper_f,
+                  BHYPRE_STRUCTSMG__ARRAY_UPPER_F,
+                  bHYPRE_StructSMG__array_upper_f)
   (int64_t *array,
    int32_t *ind,
    int32_t *result)
@@ -1095,9 +1341,9 @@ SIDLFortran77Symbol(bhypre_operator__array_upper_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_operator__array_length_f,
-                  BHYPRE_OPERATOR__ARRAY_LENGTH_F,
-                  bHYPRE_Operator__array_length_f)
+SIDLFortran77Symbol(bhypre_structsmg__array_length_f,
+                  BHYPRE_STRUCTSMG__ARRAY_LENGTH_F,
+                  bHYPRE_StructSMG__array_length_f)
   (int64_t *array,
    int32_t *ind,
    int32_t *result)
@@ -1108,9 +1354,9 @@ SIDLFortran77Symbol(bhypre_operator__array_length_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_operator__array_stride_f,
-                  BHYPRE_OPERATOR__ARRAY_STRIDE_F,
-                  bHYPRE_Operator__array_stride_f)
+SIDLFortran77Symbol(bhypre_structsmg__array_stride_f,
+                  BHYPRE_STRUCTSMG__ARRAY_STRIDE_F,
+                  bHYPRE_StructSMG__array_stride_f)
   (int64_t *array,
    int32_t *ind,
    int32_t *result)
@@ -1121,9 +1367,9 @@ SIDLFortran77Symbol(bhypre_operator__array_stride_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_operator__array_iscolumnorder_f,
-                  BHYPRE_OPERATOR__ARRAY_ISCOLUMNORDER_F,
-                  bHYPRE_Operator__array_isColumnOrder_f)
+SIDLFortran77Symbol(bhypre_structsmg__array_iscolumnorder_f,
+                  BHYPRE_STRUCTSMG__ARRAY_ISCOLUMNORDER_F,
+                  bHYPRE_StructSMG__array_isColumnOrder_f)
   (int64_t *array,
    SIDL_F77_Bool *result)
 {
@@ -1132,9 +1378,9 @@ SIDLFortran77Symbol(bhypre_operator__array_iscolumnorder_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_operator__array_isroworder_f,
-                  BHYPRE_OPERATOR__ARRAY_ISROWORDER_F,
-                  bHYPRE_Operator__array_isRowOrder_f)
+SIDLFortran77Symbol(bhypre_structsmg__array_isroworder_f,
+                  BHYPRE_STRUCTSMG__ARRAY_ISROWORDER_F,
+                  bHYPRE_StructSMG__array_isRowOrder_f)
   (int64_t *array,
    SIDL_F77_Bool *result)
 {
@@ -1143,9 +1389,9 @@ SIDLFortran77Symbol(bhypre_operator__array_isroworder_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_operator__array_copy_f,
-                  BHYPRE_OPERATOR__ARRAY_COPY_F,
-                  bHYPRE_Operator__array_copy_f)
+SIDLFortran77Symbol(bhypre_structsmg__array_copy_f,
+                  BHYPRE_STRUCTSMG__ARRAY_COPY_F,
+                  bHYPRE_StructSMG__array_copy_f)
   (int64_t *src,
    int64_t *dest)
 {
@@ -1155,9 +1401,9 @@ SIDLFortran77Symbol(bhypre_operator__array_copy_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_operator__array_smartcopy_f,
-                  BHYPRE_OPERATOR__ARRAY_SMARTCOPY_F,
-                  bHYPRE_Operator__array_smartCopy_f)
+SIDLFortran77Symbol(bhypre_structsmg__array_smartcopy_f,
+                  BHYPRE_STRUCTSMG__ARRAY_SMARTCOPY_F,
+                  bHYPRE_StructSMG__array_smartCopy_f)
   (int64_t *src)
 {
   sidl_interface__array_smartCopy((struct sidl_interface__array 
@@ -1165,9 +1411,9 @@ SIDLFortran77Symbol(bhypre_operator__array_smartcopy_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_operator__array_slice_f,
-                  BHYPRE_OPERATOR__ARRAY_SLICE_F,
-                  bHYPRE_Operator__array_slice_f)
+SIDLFortran77Symbol(bhypre_structsmg__array_slice_f,
+                  BHYPRE_STRUCTSMG__ARRAY_SLICE_F,
+                  bHYPRE_StructSMG__array_slice_f)
   (int64_t *src,
    int32_t *dimen,
    int32_t numElem[],
@@ -1182,9 +1428,9 @@ SIDLFortran77Symbol(bhypre_operator__array_slice_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_operator__array_ensure_f,
-                  BHYPRE_OPERATOR__ARRAY_ENSURE_F,
-                  bHYPRE_Operator__array_ensure_f)
+SIDLFortran77Symbol(bhypre_structsmg__array_ensure_f,
+                  BHYPRE_STRUCTSMG__ARRAY_ENSURE_F,
+                  bHYPRE_StructSMG__array_ensure_f)
   (int64_t *src,
    int32_t *dimen,
    int     *ordering,

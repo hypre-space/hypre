@@ -1,13 +1,13 @@
 /*
- * File:          sidl_BaseClass_fStub.c
- * Symbol:        sidl.BaseClass-v0.9.0
+ * File:          sidl_SIDLException_fStub.c
+ * Symbol:        sidl.SIDLException-v0.9.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
  * sidl Created:  20050204 10:21:31 PST
  * Generated:     20050225 15:45:48 PST
  * Release:       $Name$
  * Revision:      @(#) $Id$
- * Description:   Client-side glue code for sidl.BaseClass
+ * Description:   Client-side glue code for sidl.SIDLException
  * 
  * Copyright (c) 2000-2002, The Regents of the University of California.
  * Produced at the Lawrence Livermore National Laboratory.
@@ -35,15 +35,16 @@
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.9.8
- * source-line   = 109
+ * source-line   = 206
  * source-url    = file:/home/painter/babel-0.9.8/share/../runtime/sidl/sidl.sidl
  */
 
 /*
- * Symbol "sidl.BaseClass" (version 0.9.0)
+ * Symbol "sidl.SIDLException" (version 0.9.0)
  * 
- * Every class implicitly inherits from <code>BaseClass</code>.  This
- * class implements the methods in <code>BaseInterface</code>.
+ * <code>SIDLException</code> provides the basic functionality of the
+ * <code>BaseException</code> interface for getting and setting error
+ * messages and stack traces.
  */
 
 #include <stddef.h>
@@ -54,7 +55,7 @@
 #include "sidl_interface_IOR.h"
 #endif
 #include <stdio.h>
-#include "sidl_BaseClass_IOR.h"
+#include "sidl_SIDLException_IOR.h"
 #include "sidl_BaseInterface_IOR.h"
 #include "sidl_ClassInfo_IOR.h"
 
@@ -62,11 +63,11 @@
  * Return pointer to internal IOR functions.
  */
 
-static const struct sidl_BaseClass__external* _getIOR(void)
+static const struct sidl_SIDLException__external* _getIOR(void)
 {
-  static const struct sidl_BaseClass__external *_ior = NULL;
+  static const struct sidl_SIDLException__external *_ior = NULL;
   if (!_ior) {
-    _ior = sidl_BaseClass__externals();
+    _ior = sidl_SIDLException__externals();
   }
   return _ior;
 }
@@ -76,7 +77,7 @@ static const struct sidl_BaseClass__external* _getIOR(void)
  */
 
 void
-SIDLFortran77Symbol(sidl_baseclass__create_f,SIDL_BASECLASS__CREATE_F,sidl_BaseClass__create_f)
+SIDLFortran77Symbol(sidl_sidlexception__create_f,SIDL_SIDLEXCEPTION__CREATE_F,sidl_SIDLException__create_f)
 (
   int64_t *self
 )
@@ -89,7 +90,7 @@ SIDLFortran77Symbol(sidl_baseclass__create_f,SIDL_BASECLASS__CREATE_F,sidl_BaseC
  */
 
 void
-SIDLFortran77Symbol(sidl_baseclass__cast_f,SIDL_BASECLASS__CAST_F,sidl_BaseClass__cast_f)
+SIDLFortran77Symbol(sidl_sidlexception__cast_f,SIDL_SIDLEXCEPTION__CAST_F,sidl_SIDLException__cast_f)
 (
   int64_t *ref,
   int64_t *retval
@@ -101,7 +102,7 @@ SIDLFortran77Symbol(sidl_baseclass__cast_f,SIDL_BASECLASS__CAST_F,sidl_BaseClass
     *retval = (ptrdiff_t)(
       *_base->d_epv->f__cast)(
       _base->d_object,
-      "sidl.BaseClass");
+      "sidl.SIDLException");
   }
   else {
     *retval = 0;
@@ -113,7 +114,7 @@ SIDLFortran77Symbol(sidl_baseclass__cast_f,SIDL_BASECLASS__CAST_F,sidl_BaseClass
  */
 
 void
-SIDLFortran77Symbol(sidl_baseclass__cast2_f,SIDL_BASECLASS__CAST2_F,sidl_BaseClass__cast2_f)
+SIDLFortran77Symbol(sidl_sidlexception__cast2_f,SIDL_SIDLEXCEPTION__CAST2_F,sidl_SIDLException__cast2_f)
 (
   int64_t *self,
   SIDL_F77_String name
@@ -122,12 +123,12 @@ SIDLFortran77Symbol(sidl_baseclass__cast2_f,SIDL_BASECLASS__CAST2_F,sidl_BaseCla
   SIDL_F77_STR_FAR_LEN_DECL(name)
 )
 {
-  struct sidl_BaseClass__epv *_epv = NULL;
-  struct sidl_BaseClass__object* _proxy_self = NULL;
+  struct sidl_SIDLException__epv *_epv = NULL;
+  struct sidl_SIDLException__object* _proxy_self = NULL;
   char* _proxy_name = NULL;
   void* _proxy_retval = NULL;
   _proxy_self =
-    (struct sidl_BaseClass__object*)
+    (struct sidl_SIDLException__object*)
     (ptrdiff_t)(*self);
   _proxy_name =
     sidl_copy_fortran_str(SIDL_F77_STR(name),
@@ -158,15 +159,15 @@ SIDLFortran77Symbol(sidl_baseclass__cast2_f,SIDL_BASECLASS__CAST2_F,sidl_BaseCla
  */
 
 void
-SIDLFortran77Symbol(sidl_baseclass_addref_f,SIDL_BASECLASS_ADDREF_F,sidl_BaseClass_addRef_f)
+SIDLFortran77Symbol(sidl_sidlexception_addref_f,SIDL_SIDLEXCEPTION_ADDREF_F,sidl_SIDLException_addRef_f)
 (
   int64_t *self
 )
 {
-  struct sidl_BaseClass__epv *_epv = NULL;
-  struct sidl_BaseClass__object* _proxy_self = NULL;
+  struct sidl_SIDLException__epv *_epv = NULL;
+  struct sidl_SIDLException__object* _proxy_self = NULL;
   _proxy_self =
-    (struct sidl_BaseClass__object*)
+    (struct sidl_SIDLException__object*)
     (ptrdiff_t)(*self);
   _epv = _proxy_self->d_epv;
   (*(_epv->f_addRef))(
@@ -183,15 +184,15 @@ SIDLFortran77Symbol(sidl_baseclass_addref_f,SIDL_BASECLASS_ADDREF_F,sidl_BaseCla
  */
 
 void
-SIDLFortran77Symbol(sidl_baseclass_deleteref_f,SIDL_BASECLASS_DELETEREF_F,sidl_BaseClass_deleteRef_f)
+SIDLFortran77Symbol(sidl_sidlexception_deleteref_f,SIDL_SIDLEXCEPTION_DELETEREF_F,sidl_SIDLException_deleteRef_f)
 (
   int64_t *self
 )
 {
-  struct sidl_BaseClass__epv *_epv = NULL;
-  struct sidl_BaseClass__object* _proxy_self = NULL;
+  struct sidl_SIDLException__epv *_epv = NULL;
+  struct sidl_SIDLException__object* _proxy_self = NULL;
   _proxy_self =
-    (struct sidl_BaseClass__object*)
+    (struct sidl_SIDLException__object*)
     (ptrdiff_t)(*self);
   _epv = _proxy_self->d_epv;
   (*(_epv->f_deleteRef))(
@@ -205,19 +206,19 @@ SIDLFortran77Symbol(sidl_baseclass_deleteref_f,SIDL_BASECLASS_DELETEREF_F,sidl_B
  */
 
 void
-SIDLFortran77Symbol(sidl_baseclass_issame_f,SIDL_BASECLASS_ISSAME_F,sidl_BaseClass_isSame_f)
+SIDLFortran77Symbol(sidl_sidlexception_issame_f,SIDL_SIDLEXCEPTION_ISSAME_F,sidl_SIDLException_isSame_f)
 (
   int64_t *self,
   int64_t *iobj,
   SIDL_F77_Bool *retval
 )
 {
-  struct sidl_BaseClass__epv *_epv = NULL;
-  struct sidl_BaseClass__object* _proxy_self = NULL;
+  struct sidl_SIDLException__epv *_epv = NULL;
+  struct sidl_SIDLException__object* _proxy_self = NULL;
   struct sidl_BaseInterface__object* _proxy_iobj = NULL;
   sidl_bool _proxy_retval;
   _proxy_self =
-    (struct sidl_BaseClass__object*)
+    (struct sidl_SIDLException__object*)
     (ptrdiff_t)(*self);
   _proxy_iobj =
     (struct sidl_BaseInterface__object*)
@@ -242,7 +243,7 @@ SIDLFortran77Symbol(sidl_baseclass_issame_f,SIDL_BASECLASS_ISSAME_F,sidl_BaseCla
  */
 
 void
-SIDLFortran77Symbol(sidl_baseclass_queryint_f,SIDL_BASECLASS_QUERYINT_F,sidl_BaseClass_queryInt_f)
+SIDLFortran77Symbol(sidl_sidlexception_queryint_f,SIDL_SIDLEXCEPTION_QUERYINT_F,sidl_SIDLException_queryInt_f)
 (
   int64_t *self,
   SIDL_F77_String name
@@ -251,12 +252,12 @@ SIDLFortran77Symbol(sidl_baseclass_queryint_f,SIDL_BASECLASS_QUERYINT_F,sidl_Bas
   SIDL_F77_STR_FAR_LEN_DECL(name)
 )
 {
-  struct sidl_BaseClass__epv *_epv = NULL;
-  struct sidl_BaseClass__object* _proxy_self = NULL;
+  struct sidl_SIDLException__epv *_epv = NULL;
+  struct sidl_SIDLException__object* _proxy_self = NULL;
   char* _proxy_name = NULL;
   struct sidl_BaseInterface__object* _proxy_retval = NULL;
   _proxy_self =
-    (struct sidl_BaseClass__object*)
+    (struct sidl_SIDLException__object*)
     (ptrdiff_t)(*self);
   _proxy_name =
     sidl_copy_fortran_str(SIDL_F77_STR(name),
@@ -279,7 +280,7 @@ SIDLFortran77Symbol(sidl_baseclass_queryint_f,SIDL_BASECLASS_QUERYINT_F,sidl_Bas
  */
 
 void
-SIDLFortran77Symbol(sidl_baseclass_istype_f,SIDL_BASECLASS_ISTYPE_F,sidl_BaseClass_isType_f)
+SIDLFortran77Symbol(sidl_sidlexception_istype_f,SIDL_SIDLEXCEPTION_ISTYPE_F,sidl_SIDLException_isType_f)
 (
   int64_t *self,
   SIDL_F77_String name
@@ -288,12 +289,12 @@ SIDLFortran77Symbol(sidl_baseclass_istype_f,SIDL_BASECLASS_ISTYPE_F,sidl_BaseCla
   SIDL_F77_STR_FAR_LEN_DECL(name)
 )
 {
-  struct sidl_BaseClass__epv *_epv = NULL;
-  struct sidl_BaseClass__object* _proxy_self = NULL;
+  struct sidl_SIDLException__epv *_epv = NULL;
+  struct sidl_SIDLException__object* _proxy_self = NULL;
   char* _proxy_name = NULL;
   sidl_bool _proxy_retval;
   _proxy_self =
-    (struct sidl_BaseClass__object*)
+    (struct sidl_SIDLException__object*)
     (ptrdiff_t)(*self);
   _proxy_name =
     sidl_copy_fortran_str(SIDL_F77_STR(name),
@@ -313,17 +314,17 @@ SIDLFortran77Symbol(sidl_baseclass_istype_f,SIDL_BASECLASS_ISTYPE_F,sidl_BaseCla
  */
 
 void
-SIDLFortran77Symbol(sidl_baseclass_getclassinfo_f,SIDL_BASECLASS_GETCLASSINFO_F,sidl_BaseClass_getClassInfo_f)
+SIDLFortran77Symbol(sidl_sidlexception_getclassinfo_f,SIDL_SIDLEXCEPTION_GETCLASSINFO_F,sidl_SIDLException_getClassInfo_f)
 (
   int64_t *self,
   int64_t *retval
 )
 {
-  struct sidl_BaseClass__epv *_epv = NULL;
-  struct sidl_BaseClass__object* _proxy_self = NULL;
+  struct sidl_SIDLException__epv *_epv = NULL;
+  struct sidl_SIDLException__object* _proxy_self = NULL;
   struct sidl_ClassInfo__object* _proxy_retval = NULL;
   _proxy_self =
-    (struct sidl_BaseClass__object*)
+    (struct sidl_SIDLException__object*)
     (ptrdiff_t)(*self);
   _epv = _proxy_self->d_epv;
   _proxy_retval = 
@@ -333,10 +334,175 @@ SIDLFortran77Symbol(sidl_baseclass_getclassinfo_f,SIDL_BASECLASS_GETCLASSINFO_F,
   *retval = (ptrdiff_t)_proxy_retval;
 }
 
+/*
+ * Return the message associated with the exception.
+ */
+
 void
-SIDLFortran77Symbol(sidl_baseclass__array_createcol_f,
-                  SIDL_BASECLASS__ARRAY_CREATECOL_F,
-                  sidl_BaseClass__array_createCol_f)
+SIDLFortran77Symbol(sidl_sidlexception_getnote_f,SIDL_SIDLEXCEPTION_GETNOTE_F,sidl_SIDLException_getNote_f)
+(
+  int64_t *self,
+  SIDL_F77_String retval
+  SIDL_F77_STR_NEAR_LEN_DECL(retval)
+  SIDL_F77_STR_FAR_LEN_DECL(retval)
+)
+{
+  struct sidl_SIDLException__epv *_epv = NULL;
+  struct sidl_SIDLException__object* _proxy_self = NULL;
+  char* _proxy_retval = NULL;
+  _proxy_self =
+    (struct sidl_SIDLException__object*)
+    (ptrdiff_t)(*self);
+  _epv = _proxy_self->d_epv;
+  _proxy_retval = 
+    (*(_epv->f_getNote))(
+      _proxy_self
+    );
+  sidl_copy_c_str(
+    SIDL_F77_STR(retval),
+    SIDL_F77_STR_LEN(retval),
+    _proxy_retval);
+  free((void *)_proxy_retval);
+}
+
+/*
+ * Set the message associated with the exception.
+ */
+
+void
+SIDLFortran77Symbol(sidl_sidlexception_setnote_f,SIDL_SIDLEXCEPTION_SETNOTE_F,sidl_SIDLException_setNote_f)
+(
+  int64_t *self,
+  SIDL_F77_String message
+  SIDL_F77_STR_NEAR_LEN_DECL(message)
+  SIDL_F77_STR_FAR_LEN_DECL(message)
+)
+{
+  struct sidl_SIDLException__epv *_epv = NULL;
+  struct sidl_SIDLException__object* _proxy_self = NULL;
+  char* _proxy_message = NULL;
+  _proxy_self =
+    (struct sidl_SIDLException__object*)
+    (ptrdiff_t)(*self);
+  _proxy_message =
+    sidl_copy_fortran_str(SIDL_F77_STR(message),
+      SIDL_F77_STR_LEN(message));
+  _epv = _proxy_self->d_epv;
+  (*(_epv->f_setNote))(
+    _proxy_self,
+    _proxy_message
+  );
+  free((void *)_proxy_message);
+}
+
+/*
+ * Returns formatted string containing the concatenation of all 
+ * tracelines.
+ */
+
+void
+SIDLFortran77Symbol(sidl_sidlexception_gettrace_f,SIDL_SIDLEXCEPTION_GETTRACE_F,sidl_SIDLException_getTrace_f)
+(
+  int64_t *self,
+  SIDL_F77_String retval
+  SIDL_F77_STR_NEAR_LEN_DECL(retval)
+  SIDL_F77_STR_FAR_LEN_DECL(retval)
+)
+{
+  struct sidl_SIDLException__epv *_epv = NULL;
+  struct sidl_SIDLException__object* _proxy_self = NULL;
+  char* _proxy_retval = NULL;
+  _proxy_self =
+    (struct sidl_SIDLException__object*)
+    (ptrdiff_t)(*self);
+  _epv = _proxy_self->d_epv;
+  _proxy_retval = 
+    (*(_epv->f_getTrace))(
+      _proxy_self
+    );
+  sidl_copy_c_str(
+    SIDL_F77_STR(retval),
+    SIDL_F77_STR_LEN(retval),
+    _proxy_retval);
+  free((void *)_proxy_retval);
+}
+
+/*
+ * Adds a stringified entry/line to the stack trace.
+ */
+
+void
+SIDLFortran77Symbol(sidl_sidlexception_addline_f,SIDL_SIDLEXCEPTION_ADDLINE_F,sidl_SIDLException_addLine_f)
+(
+  int64_t *self,
+  SIDL_F77_String traceline
+  SIDL_F77_STR_NEAR_LEN_DECL(traceline)
+  SIDL_F77_STR_FAR_LEN_DECL(traceline)
+)
+{
+  struct sidl_SIDLException__epv *_epv = NULL;
+  struct sidl_SIDLException__object* _proxy_self = NULL;
+  char* _proxy_traceline = NULL;
+  _proxy_self =
+    (struct sidl_SIDLException__object*)
+    (ptrdiff_t)(*self);
+  _proxy_traceline =
+    sidl_copy_fortran_str(SIDL_F77_STR(traceline),
+      SIDL_F77_STR_LEN(traceline));
+  _epv = _proxy_self->d_epv;
+  (*(_epv->f_addLine))(
+    _proxy_self,
+    _proxy_traceline
+  );
+  free((void *)_proxy_traceline);
+}
+
+/*
+ * Formats and adds an entry to the stack trace based on the 
+ * file name, line number, and method name.
+ */
+
+void
+SIDLFortran77Symbol(sidl_sidlexception_add_f,SIDL_SIDLEXCEPTION_ADD_F,sidl_SIDLException_add_f)
+(
+  int64_t *self,
+  SIDL_F77_String filename
+  SIDL_F77_STR_NEAR_LEN_DECL(filename),
+  int32_t *lineno,
+  SIDL_F77_String methodname
+  SIDL_F77_STR_NEAR_LEN_DECL(methodname)
+  SIDL_F77_STR_FAR_LEN_DECL(filename)
+  SIDL_F77_STR_FAR_LEN_DECL(methodname)
+)
+{
+  struct sidl_SIDLException__epv *_epv = NULL;
+  struct sidl_SIDLException__object* _proxy_self = NULL;
+  char* _proxy_filename = NULL;
+  char* _proxy_methodname = NULL;
+  _proxy_self =
+    (struct sidl_SIDLException__object*)
+    (ptrdiff_t)(*self);
+  _proxy_filename =
+    sidl_copy_fortran_str(SIDL_F77_STR(filename),
+      SIDL_F77_STR_LEN(filename));
+  _proxy_methodname =
+    sidl_copy_fortran_str(SIDL_F77_STR(methodname),
+      SIDL_F77_STR_LEN(methodname));
+  _epv = _proxy_self->d_epv;
+  (*(_epv->f_add))(
+    _proxy_self,
+    _proxy_filename,
+    *lineno,
+    _proxy_methodname
+  );
+  free((void *)_proxy_filename);
+  free((void *)_proxy_methodname);
+}
+
+void
+SIDLFortran77Symbol(sidl_sidlexception__array_createcol_f,
+                  SIDL_SIDLEXCEPTION__ARRAY_CREATECOL_F,
+                  sidl_SIDLException__array_createCol_f)
   (int32_t *dimen,
    int32_t lower[],
    int32_t upper[],
@@ -347,9 +513,9 @@ SIDLFortran77Symbol(sidl_baseclass__array_createcol_f,
 }
 
 void
-SIDLFortran77Symbol(sidl_baseclass__array_createrow_f,
-                  SIDL_BASECLASS__ARRAY_CREATEROW_F,
-                  sidl_BaseClass__array_createRow_f)
+SIDLFortran77Symbol(sidl_sidlexception__array_createrow_f,
+                  SIDL_SIDLEXCEPTION__ARRAY_CREATEROW_F,
+                  sidl_SIDLException__array_createRow_f)
   (int32_t *dimen,
    int32_t lower[],
    int32_t upper[],
@@ -360,36 +526,36 @@ SIDLFortran77Symbol(sidl_baseclass__array_createrow_f,
 }
 
 void
-SIDLFortran77Symbol(sidl_baseclass__array_create1d_f,
-                  SIDL_BASECLASS__ARRAY_CREATE1D_F,
-                  sidl_BaseClass__array_create1d_f)
+SIDLFortran77Symbol(sidl_sidlexception__array_create1d_f,
+                  SIDL_SIDLEXCEPTION__ARRAY_CREATE1D_F,
+                  sidl_SIDLException__array_create1d_f)
   (int32_t *len, int64_t *result)
 {
   *result = (ptrdiff_t)sidl_interface__array_create1d(*len);
 }
 
 void
-SIDLFortran77Symbol(sidl_baseclass__array_create2dcol_f,
-                  SIDL_BASECLASS__ARRAY_CREATE2DCOL_F,
-                  sidl_BaseClass__array_create2dCol_f)
+SIDLFortran77Symbol(sidl_sidlexception__array_create2dcol_f,
+                  SIDL_SIDLEXCEPTION__ARRAY_CREATE2DCOL_F,
+                  sidl_SIDLException__array_create2dCol_f)
   (int32_t *m, int32_t *n, int64_t *result)
 {
   *result = (ptrdiff_t)sidl_interface__array_create2dCol(*m, *n);
 }
 
 void
-SIDLFortran77Symbol(sidl_baseclass__array_create2drow_f,
-                  SIDL_BASECLASS__ARRAY_CREATE2DROW_F,
-                  sidl_BaseClass__array_create2dRow_f)
+SIDLFortran77Symbol(sidl_sidlexception__array_create2drow_f,
+                  SIDL_SIDLEXCEPTION__ARRAY_CREATE2DROW_F,
+                  sidl_SIDLException__array_create2dRow_f)
   (int32_t *m, int32_t *n, int64_t *result)
 {
   *result = (ptrdiff_t)sidl_interface__array_create2dRow(*m, *n);
 }
 
 void
-SIDLFortran77Symbol(sidl_baseclass__array_addref_f,
-                  SIDL_BASECLASS__ARRAY_ADDREF_F,
-                  sidl_BaseClass__array_addRef_f)
+SIDLFortran77Symbol(sidl_sidlexception__array_addref_f,
+                  SIDL_SIDLEXCEPTION__ARRAY_ADDREF_F,
+                  sidl_SIDLException__array_addRef_f)
   (int64_t *array)
 {
   sidl_interface__array_addRef((struct sidl_interface__array 
@@ -397,9 +563,9 @@ SIDLFortran77Symbol(sidl_baseclass__array_addref_f,
 }
 
 void
-SIDLFortran77Symbol(sidl_baseclass__array_deleteref_f,
-                  SIDL_BASECLASS__ARRAY_DELETEREF_F,
-                  sidl_BaseClass__array_deleteRef_f)
+SIDLFortran77Symbol(sidl_sidlexception__array_deleteref_f,
+                  SIDL_SIDLEXCEPTION__ARRAY_DELETEREF_F,
+                  sidl_SIDLException__array_deleteRef_f)
   (int64_t *array)
 {
   sidl_interface__array_deleteRef((struct sidl_interface__array 
@@ -407,9 +573,9 @@ SIDLFortran77Symbol(sidl_baseclass__array_deleteref_f,
 }
 
 void
-SIDLFortran77Symbol(sidl_baseclass__array_get1_f,
-                  SIDL_BASECLASS__ARRAY_GET1_F,
-                  sidl_BaseClass__array_get1_f)
+SIDLFortran77Symbol(sidl_sidlexception__array_get1_f,
+                  SIDL_SIDLEXCEPTION__ARRAY_GET1_F,
+                  sidl_SIDLException__array_get1_f)
   (int64_t *array, 
    int32_t *i1, 
    int64_t *result)
@@ -421,9 +587,9 @@ SIDLFortran77Symbol(sidl_baseclass__array_get1_f,
 }
 
 void
-SIDLFortran77Symbol(sidl_baseclass__array_get2_f,
-                  SIDL_BASECLASS__ARRAY_GET2_F,
-                  sidl_BaseClass__array_get2_f)
+SIDLFortran77Symbol(sidl_sidlexception__array_get2_f,
+                  SIDL_SIDLEXCEPTION__ARRAY_GET2_F,
+                  sidl_SIDLException__array_get2_f)
   (int64_t *array, 
    int32_t *i1, 
    int32_t *i2, 
@@ -436,9 +602,9 @@ SIDLFortran77Symbol(sidl_baseclass__array_get2_f,
 }
 
 void
-SIDLFortran77Symbol(sidl_baseclass__array_get3_f,
-                  SIDL_BASECLASS__ARRAY_GET3_F,
-                  sidl_BaseClass__array_get3_f)
+SIDLFortran77Symbol(sidl_sidlexception__array_get3_f,
+                  SIDL_SIDLEXCEPTION__ARRAY_GET3_F,
+                  sidl_SIDLException__array_get3_f)
   (int64_t *array, 
    int32_t *i1, 
    int32_t *i2, 
@@ -452,9 +618,9 @@ SIDLFortran77Symbol(sidl_baseclass__array_get3_f,
 }
 
 void
-SIDLFortran77Symbol(sidl_baseclass__array_get4_f,
-                  SIDL_BASECLASS__ARRAY_GET4_F,
-                  sidl_BaseClass__array_get4_f)
+SIDLFortran77Symbol(sidl_sidlexception__array_get4_f,
+                  SIDL_SIDLEXCEPTION__ARRAY_GET4_F,
+                  sidl_SIDLException__array_get4_f)
   (int64_t *array, 
    int32_t *i1, 
    int32_t *i2, 
@@ -469,9 +635,9 @@ SIDLFortran77Symbol(sidl_baseclass__array_get4_f,
 }
 
 void
-SIDLFortran77Symbol(sidl_baseclass__array_get5_f,
-                  SIDL_BASECLASS__ARRAY_GET5_F,
-                  sidl_BaseClass__array_get5_f)
+SIDLFortran77Symbol(sidl_sidlexception__array_get5_f,
+                  SIDL_SIDLEXCEPTION__ARRAY_GET5_F,
+                  sidl_SIDLException__array_get5_f)
   (int64_t *array, 
    int32_t *i1, 
    int32_t *i2, 
@@ -487,9 +653,9 @@ SIDLFortran77Symbol(sidl_baseclass__array_get5_f,
 }
 
 void
-SIDLFortran77Symbol(sidl_baseclass__array_get6_f,
-                  SIDL_BASECLASS__ARRAY_GET6_F,
-                  sidl_BaseClass__array_get6_f)
+SIDLFortran77Symbol(sidl_sidlexception__array_get6_f,
+                  SIDL_SIDLEXCEPTION__ARRAY_GET6_F,
+                  sidl_SIDLException__array_get6_f)
   (int64_t *array, 
    int32_t *i1, 
    int32_t *i2, 
@@ -506,9 +672,9 @@ SIDLFortran77Symbol(sidl_baseclass__array_get6_f,
 }
 
 void
-SIDLFortran77Symbol(sidl_baseclass__array_get7_f,
-                  SIDL_BASECLASS__ARRAY_GET7_F,
-                  sidl_BaseClass__array_get7_f)
+SIDLFortran77Symbol(sidl_sidlexception__array_get7_f,
+                  SIDL_SIDLEXCEPTION__ARRAY_GET7_F,
+                  sidl_SIDLException__array_get7_f)
   (int64_t *array, 
    int32_t *i1, 
    int32_t *i2, 
@@ -526,9 +692,9 @@ SIDLFortran77Symbol(sidl_baseclass__array_get7_f,
 }
 
 void
-SIDLFortran77Symbol(sidl_baseclass__array_get_f,
-                  SIDL_BASECLASS__ARRAY_GET_F,
-                  sidl_BaseClass__array_get_f)
+SIDLFortran77Symbol(sidl_sidlexception__array_get_f,
+                  SIDL_SIDLEXCEPTION__ARRAY_GET_F,
+                  sidl_SIDLException__array_get_f)
   (int64_t *array,
    int32_t indices[],
    int64_t *result)
@@ -539,9 +705,9 @@ SIDLFortran77Symbol(sidl_baseclass__array_get_f,
 }
 
 void
-SIDLFortran77Symbol(sidl_baseclass__array_set1_f,
-                  SIDL_BASECLASS__ARRAY_SET1_F,
-                  sidl_BaseClass__array_set1_f)
+SIDLFortran77Symbol(sidl_sidlexception__array_set1_f,
+                  SIDL_SIDLEXCEPTION__ARRAY_SET1_F,
+                  sidl_SIDLException__array_set1_f)
   (int64_t *array,
    int32_t *i1,
    int64_t *value)
@@ -551,9 +717,9 @@ SIDLFortran77Symbol(sidl_baseclass__array_set1_f,
 }
 
 void
-SIDLFortran77Symbol(sidl_baseclass__array_set2_f,
-                  SIDL_BASECLASS__ARRAY_SET2_F,
-                  sidl_BaseClass__array_set2_f)
+SIDLFortran77Symbol(sidl_sidlexception__array_set2_f,
+                  SIDL_SIDLEXCEPTION__ARRAY_SET2_F,
+                  sidl_SIDLException__array_set2_f)
   (int64_t *array,
    int32_t *i1,
    int32_t *i2,
@@ -564,9 +730,9 @@ SIDLFortran77Symbol(sidl_baseclass__array_set2_f,
 }
 
 void
-SIDLFortran77Symbol(sidl_baseclass__array_set3_f,
-                  SIDL_BASECLASS__ARRAY_SET3_F,
-                  sidl_BaseClass__array_set3_f)
+SIDLFortran77Symbol(sidl_sidlexception__array_set3_f,
+                  SIDL_SIDLEXCEPTION__ARRAY_SET3_F,
+                  sidl_SIDLException__array_set3_f)
   (int64_t *array,
    int32_t *i1,
    int32_t *i2,
@@ -578,9 +744,9 @@ SIDLFortran77Symbol(sidl_baseclass__array_set3_f,
 }
 
 void
-SIDLFortran77Symbol(sidl_baseclass__array_set4_f,
-                  SIDL_BASECLASS__ARRAY_SET4_F,
-                  sidl_BaseClass__array_set4_f)
+SIDLFortran77Symbol(sidl_sidlexception__array_set4_f,
+                  SIDL_SIDLEXCEPTION__ARRAY_SET4_F,
+                  sidl_SIDLException__array_set4_f)
   (int64_t *array,
    int32_t *i1,
    int32_t *i2,
@@ -593,9 +759,9 @@ SIDLFortran77Symbol(sidl_baseclass__array_set4_f,
 }
 
 void
-SIDLFortran77Symbol(sidl_baseclass__array_set5_f,
-                  SIDL_BASECLASS__ARRAY_SET5_F,
-                  sidl_BaseClass__array_set5_f)
+SIDLFortran77Symbol(sidl_sidlexception__array_set5_f,
+                  SIDL_SIDLEXCEPTION__ARRAY_SET5_F,
+                  sidl_SIDLException__array_set5_f)
   (int64_t *array,
    int32_t *i1,
    int32_t *i2,
@@ -610,9 +776,9 @@ SIDLFortran77Symbol(sidl_baseclass__array_set5_f,
 }
 
 void
-SIDLFortran77Symbol(sidl_baseclass__array_set6_f,
-                  SIDL_BASECLASS__ARRAY_SET6_F,
-                  sidl_BaseClass__array_set6_f)
+SIDLFortran77Symbol(sidl_sidlexception__array_set6_f,
+                  SIDL_SIDLEXCEPTION__ARRAY_SET6_F,
+                  sidl_SIDLException__array_set6_f)
   (int64_t *array,
    int32_t *i1,
    int32_t *i2,
@@ -628,9 +794,9 @@ SIDLFortran77Symbol(sidl_baseclass__array_set6_f,
 }
 
 void
-SIDLFortran77Symbol(sidl_baseclass__array_set7_f,
-                  SIDL_BASECLASS__ARRAY_SET7_F,
-                  sidl_BaseClass__array_set7_f)
+SIDLFortran77Symbol(sidl_sidlexception__array_set7_f,
+                  SIDL_SIDLEXCEPTION__ARRAY_SET7_F,
+                  sidl_SIDLException__array_set7_f)
   (int64_t *array,
    int32_t *i1,
    int32_t *i2,
@@ -647,9 +813,9 @@ SIDLFortran77Symbol(sidl_baseclass__array_set7_f,
 }
 
 void
-SIDLFortran77Symbol(sidl_baseclass__array_set_f,
-                  SIDL_BASECLASS__ARRAY_SET_F,
-                  sidl_BaseClass__array_set_f)
+SIDLFortran77Symbol(sidl_sidlexception__array_set_f,
+                  SIDL_SIDLEXCEPTION__ARRAY_SET_F,
+                  sidl_SIDLException__array_set_f)
   (int64_t *array,
   int32_t indices[],
   int64_t *value)
@@ -659,9 +825,9 @@ SIDLFortran77Symbol(sidl_baseclass__array_set_f,
 }
 
 void
-SIDLFortran77Symbol(sidl_baseclass__array_dimen_f,
-                  SIDL_BASECLASS__ARRAY_DIMEN_F,
-                  sidl_BaseClass__array_dimen_f)
+SIDLFortran77Symbol(sidl_sidlexception__array_dimen_f,
+                  SIDL_SIDLEXCEPTION__ARRAY_DIMEN_F,
+                  sidl_SIDLException__array_dimen_f)
   (int64_t *array, int32_t *result)
 {
   *result =
@@ -670,9 +836,9 @@ SIDLFortran77Symbol(sidl_baseclass__array_dimen_f,
 }
 
 void
-SIDLFortran77Symbol(sidl_baseclass__array_lower_f,
-                  SIDL_BASECLASS__ARRAY_LOWER_F,
-                  sidl_BaseClass__array_lower_f)
+SIDLFortran77Symbol(sidl_sidlexception__array_lower_f,
+                  SIDL_SIDLEXCEPTION__ARRAY_LOWER_F,
+                  sidl_SIDLException__array_lower_f)
   (int64_t *array,
    int32_t *ind,
    int32_t *result)
@@ -683,9 +849,9 @@ SIDLFortran77Symbol(sidl_baseclass__array_lower_f,
 }
 
 void
-SIDLFortran77Symbol(sidl_baseclass__array_upper_f,
-                  SIDL_BASECLASS__ARRAY_UPPER_F,
-                  sidl_BaseClass__array_upper_f)
+SIDLFortran77Symbol(sidl_sidlexception__array_upper_f,
+                  SIDL_SIDLEXCEPTION__ARRAY_UPPER_F,
+                  sidl_SIDLException__array_upper_f)
   (int64_t *array,
    int32_t *ind,
    int32_t *result)
@@ -696,9 +862,9 @@ SIDLFortran77Symbol(sidl_baseclass__array_upper_f,
 }
 
 void
-SIDLFortran77Symbol(sidl_baseclass__array_length_f,
-                  SIDL_BASECLASS__ARRAY_LENGTH_F,
-                  sidl_BaseClass__array_length_f)
+SIDLFortran77Symbol(sidl_sidlexception__array_length_f,
+                  SIDL_SIDLEXCEPTION__ARRAY_LENGTH_F,
+                  sidl_SIDLException__array_length_f)
   (int64_t *array,
    int32_t *ind,
    int32_t *result)
@@ -709,9 +875,9 @@ SIDLFortran77Symbol(sidl_baseclass__array_length_f,
 }
 
 void
-SIDLFortran77Symbol(sidl_baseclass__array_stride_f,
-                  SIDL_BASECLASS__ARRAY_STRIDE_F,
-                  sidl_BaseClass__array_stride_f)
+SIDLFortran77Symbol(sidl_sidlexception__array_stride_f,
+                  SIDL_SIDLEXCEPTION__ARRAY_STRIDE_F,
+                  sidl_SIDLException__array_stride_f)
   (int64_t *array,
    int32_t *ind,
    int32_t *result)
@@ -722,9 +888,9 @@ SIDLFortran77Symbol(sidl_baseclass__array_stride_f,
 }
 
 void
-SIDLFortran77Symbol(sidl_baseclass__array_iscolumnorder_f,
-                  SIDL_BASECLASS__ARRAY_ISCOLUMNORDER_F,
-                  sidl_BaseClass__array_isColumnOrder_f)
+SIDLFortran77Symbol(sidl_sidlexception__array_iscolumnorder_f,
+                  SIDL_SIDLEXCEPTION__ARRAY_ISCOLUMNORDER_F,
+                  sidl_SIDLException__array_isColumnOrder_f)
   (int64_t *array,
    SIDL_F77_Bool *result)
 {
@@ -733,9 +899,9 @@ SIDLFortran77Symbol(sidl_baseclass__array_iscolumnorder_f,
 }
 
 void
-SIDLFortran77Symbol(sidl_baseclass__array_isroworder_f,
-                  SIDL_BASECLASS__ARRAY_ISROWORDER_F,
-                  sidl_BaseClass__array_isRowOrder_f)
+SIDLFortran77Symbol(sidl_sidlexception__array_isroworder_f,
+                  SIDL_SIDLEXCEPTION__ARRAY_ISROWORDER_F,
+                  sidl_SIDLException__array_isRowOrder_f)
   (int64_t *array,
    SIDL_F77_Bool *result)
 {
@@ -744,9 +910,9 @@ SIDLFortran77Symbol(sidl_baseclass__array_isroworder_f,
 }
 
 void
-SIDLFortran77Symbol(sidl_baseclass__array_copy_f,
-                  SIDL_BASECLASS__ARRAY_COPY_F,
-                  sidl_BaseClass__array_copy_f)
+SIDLFortran77Symbol(sidl_sidlexception__array_copy_f,
+                  SIDL_SIDLEXCEPTION__ARRAY_COPY_F,
+                  sidl_SIDLException__array_copy_f)
   (int64_t *src,
    int64_t *dest)
 {
@@ -756,9 +922,9 @@ SIDLFortran77Symbol(sidl_baseclass__array_copy_f,
 }
 
 void
-SIDLFortran77Symbol(sidl_baseclass__array_smartcopy_f,
-                  SIDL_BASECLASS__ARRAY_SMARTCOPY_F,
-                  sidl_BaseClass__array_smartCopy_f)
+SIDLFortran77Symbol(sidl_sidlexception__array_smartcopy_f,
+                  SIDL_SIDLEXCEPTION__ARRAY_SMARTCOPY_F,
+                  sidl_SIDLException__array_smartCopy_f)
   (int64_t *src)
 {
   sidl_interface__array_smartCopy((struct sidl_interface__array 
@@ -766,9 +932,9 @@ SIDLFortran77Symbol(sidl_baseclass__array_smartcopy_f,
 }
 
 void
-SIDLFortran77Symbol(sidl_baseclass__array_slice_f,
-                  SIDL_BASECLASS__ARRAY_SLICE_F,
-                  sidl_BaseClass__array_slice_f)
+SIDLFortran77Symbol(sidl_sidlexception__array_slice_f,
+                  SIDL_SIDLEXCEPTION__ARRAY_SLICE_F,
+                  sidl_SIDLException__array_slice_f)
   (int64_t *src,
    int32_t *dimen,
    int32_t numElem[],
@@ -783,9 +949,9 @@ SIDLFortran77Symbol(sidl_baseclass__array_slice_f,
 }
 
 void
-SIDLFortran77Symbol(sidl_baseclass__array_ensure_f,
-                  SIDL_BASECLASS__ARRAY_ENSURE_F,
-                  sidl_BaseClass__array_ensure_f)
+SIDLFortran77Symbol(sidl_sidlexception__array_ensure_f,
+                  SIDL_SIDLEXCEPTION__ARRAY_ENSURE_F,
+                  sidl_SIDLException__array_ensure_f)
   (int64_t *src,
    int32_t *dimen,
    int     *ordering,

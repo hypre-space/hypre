@@ -3,8 +3,8 @@
  * Symbol:        bHYPRE.IJParCSRVector-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * sidl Created:  20050208 15:29:13 PST
- * Generated:     20050208 15:29:15 PST
+ * sidl Created:  20050225 15:45:46 PST
+ * Generated:     20050225 15:45:48 PST
  * Description:   Intermediate Object Representation for bHYPRE.IJParCSRVector
  * 
  * WARNING: Automatically generated; changes will be lost

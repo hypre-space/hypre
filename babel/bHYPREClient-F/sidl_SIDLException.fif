@@ -1,13 +1,13 @@
 C       
-C       File:          sidl_DLL_Impl.f
-C       Symbol:        sidl.DLL-v0.9.0
+C       File:          sidl_SIDLException_Impl.f
+C       Symbol:        sidl.SIDLException-v0.9.0
 C       Symbol Type:   class
 C       Babel Version: 0.9.8
 C       sidl Created:  20050204 10:21:31 PST
 C       Generated:     20050225 15:45:49 PST
 C       Release:       $Name$
 C       Revision:      @(#) $Id$
-C       Description:   Client-side documentation text for sidl.DLL
+C       Description:   Client-side documentation text for sidl.SIDLException
 C       
 C       Copyright (c) 2000-2002, The Regents of the University of California.
 C       Produced at the Lawrence Livermore National Laboratory.
@@ -35,33 +35,30 @@ C
 C       WARNING: Automatically generated; changes will be lost
 C       
 C       babel-version = 0.9.8
-C       source-line   = 243
+C       source-line   = 206
 C       source-url    = file:/home/painter/babel-0.9.8/share/../runtime/sidl/sidl.sidl
 C       
 
         THIS FILE IS DOCUMENTATION - DO NOT COMPILE IT!
 
 C       
-C       Symbol "sidl.DLL" (version 0.9.0)
+C       Symbol "sidl.SIDLException" (version 0.9.0)
 C       
-C       The <code>DLL</code> class encapsulates access to a single
-C       dynamically linked library.  DLLs are loaded at run-time using
-C       the <code>loadLibrary</code> method and later unloaded using
-C       <code>unloadLibrary</code>.  Symbols in a loaded library are
-C       resolved to an opaque pointer by method <code>lookupSymbol</code>.
-C       Class instances are created by <code>createClass</code>.
+C       <code>SIDLException</code> provides the basic functionality of the
+C       <code>BaseException</code> interface for getting and setting error
+C       messages and stack traces.
 C       
 
 
 
 
 C       
-C       Create an instance of class sidl.DLL
+C       Create an instance of class sidl.SIDLException
 C       
 
-        subroutine sidl_DLL__create_f(retval)
+        subroutine sidl_SIDLException__create_f(retval)
         implicit none
-C       out sidl.DLL retval
+C       out sidl.SIDLException retval
         integer*8 retval
         end
 
@@ -70,11 +67,11 @@ C
 C       Cast method for interface and type conversions.
 C       
 
-        subroutine sidl_DLL__cast_f(ref, retval)
+        subroutine sidl_SIDLException__cast_f(ref, retval)
         implicit none
 C       in opaque ref
         integer*8 ref
-C       out sidl.DLL retval
+C       out sidl.SIDLException retval
         integer*8 retval
         end
 
@@ -83,9 +80,9 @@ C
 C       Cast method for interface and class type conversions.
 C       
 
-        subroutine sidl_DLL__cast2_f(self, name, retval)
+        subroutine sidl_SIDLException__cast2_f(self, name, retval)
         implicit none
-C       in sidl.DLL self
+C       in sidl.SIDLException self
         integer*8 self
 C       in string name
         character*(*) name
@@ -109,9 +106,9 @@ C       class.
 C       </p>
 C       
 
-        subroutine sidl_DLL_addRef_f(self)
+        subroutine sidl_SIDLException_addRef_f(self)
         implicit none
-C       in sidl.DLL self
+C       in sidl.SIDLException self
         integer*8 self
         end
 
@@ -124,9 +121,9 @@ C       Clients should call this method whenever they remove a
 C       reference to an object or interface.
 C       
 
-        subroutine sidl_DLL_deleteRef_f(self)
+        subroutine sidl_SIDLException_deleteRef_f(self)
         implicit none
-C       in sidl.DLL self
+C       in sidl.SIDLException self
         integer*8 self
         end
 
@@ -136,9 +133,9 @@ C       Return true if and only if <code>obj</code> refers to the same
 C       object as this object.
 C       
 
-        subroutine sidl_DLL_isSame_f(self, iobj, retval)
+        subroutine sidl_SIDLException_isSame_f(self, iobj, retval)
         implicit none
-C       in sidl.DLL self
+C       in sidl.SIDLException self
         integer*8 self
 C       in sidl.BaseInterface iobj
         integer*8 iobj
@@ -157,9 +154,9 @@ C       the specified type is not supported, then a null reference is
 C       returned.
 C       
 
-        subroutine sidl_DLL_queryInt_f(self, name, retval)
+        subroutine sidl_SIDLException_queryInt_f(self, name, retval)
         implicit none
-C       in sidl.DLL self
+C       in sidl.SIDLException self
         integer*8 self
 C       in string name
         character*(*) name
@@ -175,9 +172,9 @@ C       routine will return <code>true</code> if and only if a cast to
 C       the string type name would succeed.
 C       
 
-        subroutine sidl_DLL_isType_f(self, name, retval)
+        subroutine sidl_SIDLException_isType_f(self, name, retval)
         implicit none
-C       in sidl.DLL self
+C       in sidl.SIDLException self
         integer*8 self
 C       in string name
         character*(*) name
@@ -190,9 +187,9 @@ C
 C       Return the meta-data about the class implementing this interface.
 C       
 
-        subroutine sidl_DLL_getClassInfo_f(self, retval)
+        subroutine sidl_SIDLException_getClassInfo_f(self, retval)
         implicit none
-C       in sidl.DLL self
+C       in sidl.SIDLException self
         integer*8 self
 C       out sidl.ClassInfo retval
         integer*8 retval
@@ -200,64 +197,12 @@ C       out sidl.ClassInfo retval
 
 
 C       
-C       Load a dynamic link library using the specified URI.  The
-C       URI may be of the form "main:", "lib:", "file:", "ftp:", or
-C       "http:".  A URI that starts with any other protocol string
-C       is assumed to be a file name.  The "main:" URI creates a
-C       library that allows access to global symbols in the running
-C       program's main address space.  The "lib:X" URI converts the
-C       library "X" into a platform-specific name (e.g., libX.so) and
-C       loads that library.  The "file:" URI opens the DLL from the
-C       specified file path.  The "ftp:" and "http:" URIs copy the
-C       specified library from the remote site into a local temporary
-C       file and open that file.  This method returns true if the
-C       DLL was loaded successfully and false otherwise.  Note that
-C       the "ftp:" and "http:" protocols are valid only if the W3C
-C       WWW library is available.
-C       
-C       @param uri          the URI to load. This can be a .la file
-C                           (a metadata file produced by libtool) or
-C                           a shared library binary (i.e., .so,
-C                           .dll or whatever is appropriate for your
-C                           OS)
-C       @param loadGlobally <code>true</code> means that the shared
-C                           library symbols will be loaded into the
-C                           global namespace; <code>false</code> 
-C                           means they will be loaded into a 
-C                           private namespace. Some operating systems
-C                           may not be able to honor the value presented
-C                           here.
-C       @param loadLazy     <code>true</code> instructs the loader to
-C                           that symbols can be resolved as needed (lazy)
-C                           instead of requiring everything to be resolved
-C                           now (at load time).
+C       Return the message associated with the exception.
 C       
 
-        subroutine sidl_DLL_loadLibrary_f(self, uri, loadGlobally,
-     &     loadLazy, retval)
+        subroutine sidl_SIDLException_getNote_f(self, retval)
         implicit none
-C       in sidl.DLL self
-        integer*8 self
-C       in string uri
-        character*(*) uri
-C       in bool loadGlobally
-        logical loadGlobally
-C       in bool loadLazy
-        logical loadLazy
-C       out bool retval
-        logical retval
-        end
-
-
-C       
-C       Get the library name.  This is the name used to load the
-C       library in <code>loadLibrary</code> except that all file names
-C       contain the "file:" protocol.
-C       
-
-        subroutine sidl_DLL_getName_f(self, retval)
-        implicit none
-C       in sidl.DLL self
+C       in sidl.SIDLException self
         integer*8 self
 C       out string retval
         character*(*) retval
@@ -265,46 +210,59 @@ C       out string retval
 
 
 C       
-C       Unload the dynamic link library.  The library may no longer
-C       be used to access symbol names.  When the library is actually
-C       unloaded from the memory image depends on details of the operating
-C       system.
+C       Set the message associated with the exception.
 C       
 
-        subroutine sidl_DLL_unloadLibrary_f(self)
+        subroutine sidl_SIDLException_setNote_f(self, message)
         implicit none
-C       in sidl.DLL self
+C       in sidl.SIDLException self
         integer*8 self
+C       in string message
+        character*(*) message
         end
 
 
 C       
-C       Lookup a symbol from the DLL and return the associated pointer.
-C       A null value is returned if the name does not exist.
+C       Returns formatted string containing the concatenation of all 
+C       tracelines.
 C       
 
-        subroutine sidl_DLL_lookupSymbol_f(self, linker_name, retval)
+        subroutine sidl_SIDLException_getTrace_f(self, retval)
         implicit none
-C       in sidl.DLL self
+C       in sidl.SIDLException self
         integer*8 self
-C       in string linker_name
-        character*(*) linker_name
-C       out opaque retval
-        integer*8 retval
+C       out string retval
+        character*(*) retval
         end
 
 
 C       
-C       Create an instance of the sidl class.  If the class constructor
-C       is not defined in this DLL, then return null.
+C       Adds a stringified entry/line to the stack trace.
 C       
 
-        subroutine sidl_DLL_createClass_f(self, sidl_name, retval)
+        subroutine sidl_SIDLException_addLine_f(self, traceline)
         implicit none
-C       in sidl.DLL self
+C       in sidl.SIDLException self
         integer*8 self
-C       in string sidl_name
-        character*(*) sidl_name
-C       out sidl.BaseClass retval
-        integer*8 retval
+C       in string traceline
+        character*(*) traceline
+        end
+
+
+C       
+C       Formats and adds an entry to the stack trace based on the 
+C       file name, line number, and method name.
+C       
+
+        subroutine sidl_SIDLException_add_f(self, filename, lineno,
+     &     methodname)
+        implicit none
+C       in sidl.SIDLException self
+        integer*8 self
+C       in string filename
+        character*(*) filename
+C       in int lineno
+        integer*4 lineno
+C       in string methodname
+        character*(*) methodname
         end

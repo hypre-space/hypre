@@ -3,8 +3,8 @@ C       File:          bHYPRE_StructBuildVector_Impl.f
 C       Symbol:        bHYPRE.StructBuildVector-v1.0.0
 C       Symbol Type:   interface
 C       Babel Version: 0.9.8
-C       sidl Created:  20050208 15:29:13 PST
-C       Generated:     20050208 15:29:16 PST
+C       sidl Created:  20050225 15:45:46 PST
+C       Generated:     20050225 15:45:49 PST
 C       Description:   Client-side documentation text for bHYPRE.StructBuildVector
 C       
 C       WARNING: Automatically generated; changes will be lost
@@ -248,16 +248,16 @@ C       out int retval
 
 
 C       
-C       Method:  SetStencil[]
+C       Method:  SetNumGhost[]
 C       
 
-        subroutine bHYPRE_StructBuildVector_SetStencil_f(self, stencil,
-     &     retval)
+        subroutine bHYPRE_StructBuildVector_SetNumGhost_f(self,
+     &     num_ghost, retval)
         implicit none
 C       in bHYPRE.StructBuildVector self
         integer*8 self
-C       in bHYPRE.StructStencil stencil
-        integer*8 stencil
+C       in array<int,column-major> num_ghost
+        integer*8 num_ghost
 C       out int retval
         integer*4 retval
         end

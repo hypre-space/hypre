@@ -3,8 +3,8 @@
  * Symbol:        bHYPRE.SStructBuildMatrix-v1.0.0
  * Symbol Type:   interface
  * Babel Version: 0.9.8
- * sidl Created:  20050208 15:29:13 PST
- * Generated:     20050208 15:29:16 PST
+ * sidl Created:  20050225 15:45:46 PST
+ * Generated:     20050225 15:45:49 PST
  * Description:   Client-side glue code for bHYPRE.SStructBuildMatrix
  * 
  * WARNING: Automatically generated; changes will be lost

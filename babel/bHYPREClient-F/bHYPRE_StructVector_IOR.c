@@ -3,8 +3,8 @@
  * Symbol:        bHYPRE.StructVector-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * sidl Created:  20050208 15:29:13 PST
- * Generated:     20050208 15:29:15 PST
+ * sidl Created:  20050225 15:45:46 PST
+ * Generated:     20050225 15:45:48 PST
  * Description:   Intermediate Object Representation for bHYPRE.StructVector
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -178,7 +178,7 @@ static void bHYPRE_StructVector__init_epv(
   epv->f_Assemble        = NULL;
   epv->f_GetObject       = NULL;
   epv->f_SetGrid         = NULL;
-  epv->f_SetStencil      = NULL;
+  epv->f_SetNumGhost     = NULL;
   epv->f_SetValue        = NULL;
   epv->f_SetBoxValues    = NULL;
 
@@ -219,8 +219,8 @@ static void bHYPRE_StructVector__init_epv(
     struct sidl_BaseInterface__object**)) epv->f_GetObject;
   e1->f_SetGrid         = (int32_t (*)(void*,
     struct bHYPRE_StructGrid__object*)) epv->f_SetGrid;
-  e1->f_SetStencil      = (int32_t (*)(void*,
-    struct bHYPRE_StructStencil__object*)) epv->f_SetStencil;
+  e1->f_SetNumGhost     = (int32_t (*)(void*,
+    struct sidl_int__array*)) epv->f_SetNumGhost;
   e1->f_SetValue        = (int32_t (*)(void*,struct sidl_int__array*,
     double)) epv->f_SetValue;
   e1->f_SetBoxValues    = (int32_t (*)(void*,struct sidl_int__array*,
@@ -649,13 +649,13 @@ remote_bHYPRE_StructVector_SetGrid(
 }
 
 /*
- * REMOTE METHOD STUB:SetStencil
+ * REMOTE METHOD STUB:SetNumGhost
  */
 
 static int32_t
-remote_bHYPRE_StructVector_SetStencil(
+remote_bHYPRE_StructVector_SetNumGhost(
   struct bHYPRE_StructVector__object* self,
-  struct bHYPRE_StructStencil__object* stencil)
+  struct sidl_int__array* num_ghost)
 {
   return 0;
 }
@@ -721,7 +721,7 @@ static void bHYPRE_StructVector__init_remote_epv(void)
   epv->f_Assemble        = remote_bHYPRE_StructVector_Assemble;
   epv->f_GetObject       = remote_bHYPRE_StructVector_GetObject;
   epv->f_SetGrid         = remote_bHYPRE_StructVector_SetGrid;
-  epv->f_SetStencil      = remote_bHYPRE_StructVector_SetStencil;
+  epv->f_SetNumGhost     = remote_bHYPRE_StructVector_SetNumGhost;
   epv->f_SetValue        = remote_bHYPRE_StructVector_SetValue;
   epv->f_SetBoxValues    = remote_bHYPRE_StructVector_SetBoxValues;
 
@@ -760,8 +760,8 @@ static void bHYPRE_StructVector__init_remote_epv(void)
     struct sidl_BaseInterface__object**)) epv->f_GetObject;
   e1->f_SetGrid         = (int32_t (*)(void*,
     struct bHYPRE_StructGrid__object*)) epv->f_SetGrid;
-  e1->f_SetStencil      = (int32_t (*)(void*,
-    struct bHYPRE_StructStencil__object*)) epv->f_SetStencil;
+  e1->f_SetNumGhost     = (int32_t (*)(void*,
+    struct sidl_int__array*)) epv->f_SetNumGhost;
   e1->f_SetValue        = (int32_t (*)(void*,struct sidl_int__array*,
     double)) epv->f_SetValue;
   e1->f_SetBoxValues    = (int32_t (*)(void*,struct sidl_int__array*,

@@ -1,23 +1,23 @@
 /*
- * File:          bHYPRE_ParCSRDiagScale_IOR.c
- * Symbol:        bHYPRE.ParCSRDiagScale-v1.0.0
+ * File:          bHYPRE_StructSMG_IOR.c
+ * Symbol:        bHYPRE.StructSMG-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
  * sidl Created:  20050225 15:45:46 PST
- * Generated:     20050225 15:45:47 PST
- * Description:   Intermediate Object Representation for bHYPRE.ParCSRDiagScale
+ * Generated:     20050225 15:45:48 PST
+ * Description:   Intermediate Object Representation for bHYPRE.StructSMG
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.9.8
- * source-line   = 1140
+ * source-line   = 1251
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #include <stdlib.h>
 #include <stddef.h>
 #include <string.h>
-#include "bHYPRE_ParCSRDiagScale_IOR.h"
+#include "bHYPRE_StructSMG_IOR.h"
 #ifndef included_sidl_BaseClass_Impl_h
 #include "sidl_BaseClass_Impl.h"
 #endif
@@ -55,8 +55,8 @@ static int s_classInfo_init = 1;
 static int s_method_initialized = 0;
 static int s_remote_initialized = 0;
 
-static struct bHYPRE_ParCSRDiagScale__epv s_new__bhypre_parcsrdiagscale;
-static struct bHYPRE_ParCSRDiagScale__epv s_rem__bhypre_parcsrdiagscale;
+static struct bHYPRE_StructSMG__epv s_new__bhypre_structsmg;
+static struct bHYPRE_StructSMG__epv s_rem__bhypre_structsmg;
 
 static struct bHYPRE_Operator__epv s_new__bhypre_operator;
 static struct bHYPRE_Operator__epv s_rem__bhypre_operator;
@@ -80,8 +80,8 @@ static struct sidl_BaseInterface__epv  s_rem__sidl_baseinterface;
 extern "C" {
 #endif
 
-extern void bHYPRE_ParCSRDiagScale__set_epv(
-  struct bHYPRE_ParCSRDiagScale__epv* epv);
+extern void bHYPRE_StructSMG__set_epv(
+  struct bHYPRE_StructSMG__epv* epv);
 #ifdef __cplusplus
 }
 #endif
@@ -90,16 +90,16 @@ extern void bHYPRE_ParCSRDiagScale__set_epv(
  * CAST: dynamic type casting support.
  */
 
-static void* ior_bHYPRE_ParCSRDiagScale__cast(
-  struct bHYPRE_ParCSRDiagScale__object* self,
+static void* ior_bHYPRE_StructSMG__cast(
+  struct bHYPRE_StructSMG__object* self,
   const char* name)
 {
   void* cast = NULL;
 
-  struct bHYPRE_ParCSRDiagScale__object* s0 = self;
-  struct sidl_BaseClass__object*         s1 = &s0->d_sidl_baseclass;
+  struct bHYPRE_StructSMG__object* s0 = self;
+  struct sidl_BaseClass__object*   s1 = &s0->d_sidl_baseclass;
 
-  if (!strcmp(name, "bHYPRE.ParCSRDiagScale")) {
+  if (!strcmp(name, "bHYPRE.StructSMG")) {
     cast = (void*) s0;
   } else if (!strcmp(name, "bHYPRE.Operator")) {
     cast = (void*) &s0->d_bhypre_operator;
@@ -118,11 +118,11 @@ static void* ior_bHYPRE_ParCSRDiagScale__cast(
  * DELETE: call destructor and free object memory.
  */
 
-static void ior_bHYPRE_ParCSRDiagScale__delete(
-  struct bHYPRE_ParCSRDiagScale__object* self)
+static void ior_bHYPRE_StructSMG__delete(
+  struct bHYPRE_StructSMG__object* self)
 {
-  bHYPRE_ParCSRDiagScale__fini(self);
-  memset((void*)self, 0, sizeof(struct bHYPRE_ParCSRDiagScale__object));
+  bHYPRE_StructSMG__fini(self);
+  memset((void*)self, 0, sizeof(struct bHYPRE_StructSMG__object));
   free((void*) self);
 }
 
@@ -130,39 +130,38 @@ static void ior_bHYPRE_ParCSRDiagScale__delete(
  * EPV: create method entry point vector (EPV) structure.
  */
 
-static void bHYPRE_ParCSRDiagScale__init_epv(
-  struct bHYPRE_ParCSRDiagScale__object* self)
+static void bHYPRE_StructSMG__init_epv(
+  struct bHYPRE_StructSMG__object* self)
 {
-  struct bHYPRE_ParCSRDiagScale__object* s0 = self;
-  struct sidl_BaseClass__object*         s1 = &s0->d_sidl_baseclass;
+  struct bHYPRE_StructSMG__object* s0 = self;
+  struct sidl_BaseClass__object*   s1 = &s0->d_sidl_baseclass;
 
-  struct bHYPRE_ParCSRDiagScale__epv* epv = &s_new__bhypre_parcsrdiagscale;
-  struct bHYPRE_Operator__epv*        e0  = &s_new__bhypre_operator;
-  struct bHYPRE_Solver__epv*          e1  = &s_new__bhypre_solver;
-  struct sidl_BaseClass__epv*         e2  = &s_new__sidl_baseclass;
-  struct sidl_BaseInterface__epv*     e3  = &s_new__sidl_baseinterface;
+  struct bHYPRE_StructSMG__epv*   epv = &s_new__bhypre_structsmg;
+  struct bHYPRE_Operator__epv*    e0  = &s_new__bhypre_operator;
+  struct bHYPRE_Solver__epv*      e1  = &s_new__bhypre_solver;
+  struct sidl_BaseClass__epv*     e2  = &s_new__sidl_baseclass;
+  struct sidl_BaseInterface__epv* e3  = &s_new__sidl_baseinterface;
 
   s_old__sidl_baseinterface = s1->d_sidl_baseinterface.d_epv;
   s_old__sidl_baseclass     = s1->d_epv;
 
-  epv->f__cast                    = ior_bHYPRE_ParCSRDiagScale__cast;
-  epv->f__delete                  = ior_bHYPRE_ParCSRDiagScale__delete;
+  epv->f__cast                    = ior_bHYPRE_StructSMG__cast;
+  epv->f__delete                  = ior_bHYPRE_StructSMG__delete;
   epv->f__ctor                    = NULL;
   epv->f__dtor                    = NULL;
   epv->f_addRef                   = (void (*)(struct 
-    bHYPRE_ParCSRDiagScale__object*)) s1->d_epv->f_addRef;
+    bHYPRE_StructSMG__object*)) s1->d_epv->f_addRef;
   epv->f_deleteRef                = (void (*)(struct 
-    bHYPRE_ParCSRDiagScale__object*)) s1->d_epv->f_deleteRef;
+    bHYPRE_StructSMG__object*)) s1->d_epv->f_deleteRef;
   epv->f_isSame                   = (sidl_bool (*)(struct 
-    bHYPRE_ParCSRDiagScale__object*,
+    bHYPRE_StructSMG__object*,
     struct sidl_BaseInterface__object*)) s1->d_epv->f_isSame;
   epv->f_queryInt                 = (struct sidl_BaseInterface__object* 
-    (*)(struct bHYPRE_ParCSRDiagScale__object*,
-    const char*)) s1->d_epv->f_queryInt;
+    (*)(struct bHYPRE_StructSMG__object*,const char*)) s1->d_epv->f_queryInt;
   epv->f_isType                   = (sidl_bool (*)(struct 
-    bHYPRE_ParCSRDiagScale__object*,const char*)) s1->d_epv->f_isType;
+    bHYPRE_StructSMG__object*,const char*)) s1->d_epv->f_isType;
   epv->f_getClassInfo             = (struct sidl_ClassInfo__object* (*)(struct 
-    bHYPRE_ParCSRDiagScale__object*)) s1->d_epv->f_getClassInfo;
+    bHYPRE_StructSMG__object*)) s1->d_epv->f_getClassInfo;
   epv->f_SetCommunicator          = NULL;
   epv->f_SetIntParameter          = NULL;
   epv->f_SetDoubleParameter       = NULL;
@@ -183,7 +182,7 @@ static void bHYPRE_ParCSRDiagScale__init_epv(
   epv->f_GetNumIterations         = NULL;
   epv->f_GetRelResidualNorm       = NULL;
 
-  bHYPRE_ParCSRDiagScale__set_epv(epv);
+  bHYPRE_StructSMG__set_epv(epv);
 
   e0->f__cast                    = (void* (*)(void*,const char*)) epv->f__cast;
   e0->f__delete                  = (void (*)(void*)) epv->f__delete;
@@ -308,7 +307,7 @@ static void bHYPRE_ParCSRDiagScale__init_epv(
  * SUPER: return's parent's non-overrided EPV
  */
 
-static struct sidl_BaseClass__epv* bHYPRE_ParCSRDiagScale__super(void) {
+static struct sidl_BaseClass__epv* bHYPRE_StructSMG__super(void) {
   return s_old__sidl_baseclass;
 }
 
@@ -325,7 +324,7 @@ initClassInfo(sidl_ClassInfo *info)
     impl = sidl_ClassInfoI__create();
     s_classInfo = sidl_ClassInfo__cast(impl);
     if (impl) {
-      sidl_ClassInfoI_setName(impl, "bHYPRE.ParCSRDiagScale");
+      sidl_ClassInfoI_setName(impl, "bHYPRE.StructSMG");
       sidl_ClassInfoI_setIORVersion(impl, s_IOR_MAJOR_VERSION,
         s_IOR_MINOR_VERSION);
     }
@@ -344,7 +343,7 @@ initClassInfo(sidl_ClassInfo *info)
  */
 
 static void
-initMetadata(struct bHYPRE_ParCSRDiagScale__object* self)
+initMetadata(struct bHYPRE_StructSMG__object* self)
 {
   if (self) {
     struct sidl_BaseClass__data *data = 
@@ -361,13 +360,13 @@ initMetadata(struct bHYPRE_ParCSRDiagScale__object* self)
  * NEW: allocate object and initialize it.
  */
 
-struct bHYPRE_ParCSRDiagScale__object*
-bHYPRE_ParCSRDiagScale__new(void)
+struct bHYPRE_StructSMG__object*
+bHYPRE_StructSMG__new(void)
 {
-  struct bHYPRE_ParCSRDiagScale__object* self =
-    (struct bHYPRE_ParCSRDiagScale__object*) malloc(
-      sizeof(struct bHYPRE_ParCSRDiagScale__object));
-  bHYPRE_ParCSRDiagScale__init(self);
+  struct bHYPRE_StructSMG__object* self =
+    (struct bHYPRE_StructSMG__object*) malloc(
+      sizeof(struct bHYPRE_StructSMG__object));
+  bHYPRE_StructSMG__init(self);
   initMetadata(self);
   return self;
 }
@@ -376,16 +375,16 @@ bHYPRE_ParCSRDiagScale__new(void)
  * INIT: initialize a new instance of the class object.
  */
 
-void bHYPRE_ParCSRDiagScale__init(
-  struct bHYPRE_ParCSRDiagScale__object* self)
+void bHYPRE_StructSMG__init(
+  struct bHYPRE_StructSMG__object* self)
 {
-  struct bHYPRE_ParCSRDiagScale__object* s0 = self;
-  struct sidl_BaseClass__object*         s1 = &s0->d_sidl_baseclass;
+  struct bHYPRE_StructSMG__object* s0 = self;
+  struct sidl_BaseClass__object*   s1 = &s0->d_sidl_baseclass;
 
   sidl_BaseClass__init(s1);
 
   if (!s_method_initialized) {
-    bHYPRE_ParCSRDiagScale__init_epv(s0);
+    bHYPRE_StructSMG__init_epv(s0);
   }
 
   s1->d_sidl_baseinterface.d_epv = &s_new__sidl_baseinterface;
@@ -393,7 +392,7 @@ void bHYPRE_ParCSRDiagScale__init(
 
   s0->d_bhypre_operator.d_epv = &s_new__bhypre_operator;
   s0->d_bhypre_solver.d_epv   = &s_new__bhypre_solver;
-  s0->d_epv                   = &s_new__bhypre_parcsrdiagscale;
+  s0->d_epv                   = &s_new__bhypre_structsmg;
 
   s0->d_bhypre_operator.d_object = self;
 
@@ -408,11 +407,11 @@ void bHYPRE_ParCSRDiagScale__init(
  * FINI: deallocate a class instance (destructor).
  */
 
-void bHYPRE_ParCSRDiagScale__fini(
-  struct bHYPRE_ParCSRDiagScale__object* self)
+void bHYPRE_StructSMG__fini(
+  struct bHYPRE_StructSMG__object* self)
 {
-  struct bHYPRE_ParCSRDiagScale__object* s0 = self;
-  struct sidl_BaseClass__object*         s1 = &s0->d_sidl_baseclass;
+  struct bHYPRE_StructSMG__object* s0 = self;
+  struct sidl_BaseClass__object*   s1 = &s0->d_sidl_baseclass;
 
   (*(s0->d_epv->f__dtor))(s0);
 
@@ -427,16 +426,16 @@ void bHYPRE_ParCSRDiagScale__fini(
  */
 
 void
-bHYPRE_ParCSRDiagScale__IOR_version(int32_t *major, int32_t *minor)
+bHYPRE_StructSMG__IOR_version(int32_t *major, int32_t *minor)
 {
   *major = s_IOR_MAJOR_VERSION;
   *minor = s_IOR_MINOR_VERSION;
 }
-static const struct bHYPRE_ParCSRDiagScale__external
+static const struct bHYPRE_StructSMG__external
 s_externalEntryPoints = {
-  bHYPRE_ParCSRDiagScale__new,
-  bHYPRE_ParCSRDiagScale__remote,
-  bHYPRE_ParCSRDiagScale__super
+  bHYPRE_StructSMG__new,
+  bHYPRE_StructSMG__remote,
+  bHYPRE_StructSMG__super
 };
 
 /*
@@ -445,8 +444,8 @@ s_externalEntryPoints = {
  * one-stop shopping for loading DLLs.
  */
 
-const struct bHYPRE_ParCSRDiagScale__external*
-bHYPRE_ParCSRDiagScale__externals(void)
+const struct bHYPRE_StructSMG__external*
+bHYPRE_StructSMG__externals(void)
 {
   return &s_externalEntryPoints;
 }
@@ -455,8 +454,8 @@ bHYPRE_ParCSRDiagScale__externals(void)
  * REMOTE CAST: dynamic type casting for remote objects.
  */
 
-static void* remote_bHYPRE_ParCSRDiagScale__cast(
-  struct bHYPRE_ParCSRDiagScale__object* self,
+static void* remote_bHYPRE_StructSMG__cast(
+  struct bHYPRE_StructSMG__object* self,
   const char* name)
 {
   return NULL;
@@ -466,8 +465,8 @@ static void* remote_bHYPRE_ParCSRDiagScale__cast(
  * REMOTE DELETE: call the remote destructor for the object.
  */
 
-static void remote_bHYPRE_ParCSRDiagScale__delete(
-  struct bHYPRE_ParCSRDiagScale__object* self)
+static void remote_bHYPRE_StructSMG__delete(
+  struct bHYPRE_StructSMG__object* self)
 {
   free((void*) self);
 }
@@ -477,8 +476,8 @@ static void remote_bHYPRE_ParCSRDiagScale__delete(
  */
 
 static void
-remote_bHYPRE_ParCSRDiagScale_addRef(
-  struct bHYPRE_ParCSRDiagScale__object* self)
+remote_bHYPRE_StructSMG_addRef(
+  struct bHYPRE_StructSMG__object* self)
 {
 }
 
@@ -487,8 +486,8 @@ remote_bHYPRE_ParCSRDiagScale_addRef(
  */
 
 static void
-remote_bHYPRE_ParCSRDiagScale_deleteRef(
-  struct bHYPRE_ParCSRDiagScale__object* self)
+remote_bHYPRE_StructSMG_deleteRef(
+  struct bHYPRE_StructSMG__object* self)
 {
 }
 
@@ -497,8 +496,8 @@ remote_bHYPRE_ParCSRDiagScale_deleteRef(
  */
 
 static sidl_bool
-remote_bHYPRE_ParCSRDiagScale_isSame(
-  struct bHYPRE_ParCSRDiagScale__object* self,
+remote_bHYPRE_StructSMG_isSame(
+  struct bHYPRE_StructSMG__object* self,
   struct sidl_BaseInterface__object* iobj)
 {
   return 0;
@@ -509,8 +508,8 @@ remote_bHYPRE_ParCSRDiagScale_isSame(
  */
 
 static struct sidl_BaseInterface__object*
-remote_bHYPRE_ParCSRDiagScale_queryInt(
-  struct bHYPRE_ParCSRDiagScale__object* self,
+remote_bHYPRE_StructSMG_queryInt(
+  struct bHYPRE_StructSMG__object* self,
   const char* name)
 {
   return (struct sidl_BaseInterface__object*) 0;
@@ -521,8 +520,8 @@ remote_bHYPRE_ParCSRDiagScale_queryInt(
  */
 
 static sidl_bool
-remote_bHYPRE_ParCSRDiagScale_isType(
-  struct bHYPRE_ParCSRDiagScale__object* self,
+remote_bHYPRE_StructSMG_isType(
+  struct bHYPRE_StructSMG__object* self,
   const char* name)
 {
   return 0;
@@ -533,8 +532,8 @@ remote_bHYPRE_ParCSRDiagScale_isType(
  */
 
 static struct sidl_ClassInfo__object*
-remote_bHYPRE_ParCSRDiagScale_getClassInfo(
-  struct bHYPRE_ParCSRDiagScale__object* self)
+remote_bHYPRE_StructSMG_getClassInfo(
+  struct bHYPRE_StructSMG__object* self)
 {
   return (struct sidl_ClassInfo__object*) 0;
 }
@@ -544,8 +543,8 @@ remote_bHYPRE_ParCSRDiagScale_getClassInfo(
  */
 
 static int32_t
-remote_bHYPRE_ParCSRDiagScale_SetCommunicator(
-  struct bHYPRE_ParCSRDiagScale__object* self,
+remote_bHYPRE_StructSMG_SetCommunicator(
+  struct bHYPRE_StructSMG__object* self,
   void* mpi_comm)
 {
   return 0;
@@ -556,8 +555,8 @@ remote_bHYPRE_ParCSRDiagScale_SetCommunicator(
  */
 
 static int32_t
-remote_bHYPRE_ParCSRDiagScale_SetIntParameter(
-  struct bHYPRE_ParCSRDiagScale__object* self,
+remote_bHYPRE_StructSMG_SetIntParameter(
+  struct bHYPRE_StructSMG__object* self,
   const char* name,
   int32_t value)
 {
@@ -569,8 +568,8 @@ remote_bHYPRE_ParCSRDiagScale_SetIntParameter(
  */
 
 static int32_t
-remote_bHYPRE_ParCSRDiagScale_SetDoubleParameter(
-  struct bHYPRE_ParCSRDiagScale__object* self,
+remote_bHYPRE_StructSMG_SetDoubleParameter(
+  struct bHYPRE_StructSMG__object* self,
   const char* name,
   double value)
 {
@@ -582,8 +581,8 @@ remote_bHYPRE_ParCSRDiagScale_SetDoubleParameter(
  */
 
 static int32_t
-remote_bHYPRE_ParCSRDiagScale_SetStringParameter(
-  struct bHYPRE_ParCSRDiagScale__object* self,
+remote_bHYPRE_StructSMG_SetStringParameter(
+  struct bHYPRE_StructSMG__object* self,
   const char* name,
   const char* value)
 {
@@ -595,8 +594,8 @@ remote_bHYPRE_ParCSRDiagScale_SetStringParameter(
  */
 
 static int32_t
-remote_bHYPRE_ParCSRDiagScale_SetIntArray1Parameter(
-  struct bHYPRE_ParCSRDiagScale__object* self,
+remote_bHYPRE_StructSMG_SetIntArray1Parameter(
+  struct bHYPRE_StructSMG__object* self,
   const char* name,
   struct sidl_int__array* value)
 {
@@ -608,8 +607,8 @@ remote_bHYPRE_ParCSRDiagScale_SetIntArray1Parameter(
  */
 
 static int32_t
-remote_bHYPRE_ParCSRDiagScale_SetIntArray2Parameter(
-  struct bHYPRE_ParCSRDiagScale__object* self,
+remote_bHYPRE_StructSMG_SetIntArray2Parameter(
+  struct bHYPRE_StructSMG__object* self,
   const char* name,
   struct sidl_int__array* value)
 {
@@ -621,8 +620,8 @@ remote_bHYPRE_ParCSRDiagScale_SetIntArray2Parameter(
  */
 
 static int32_t
-remote_bHYPRE_ParCSRDiagScale_SetDoubleArray1Parameter(
-  struct bHYPRE_ParCSRDiagScale__object* self,
+remote_bHYPRE_StructSMG_SetDoubleArray1Parameter(
+  struct bHYPRE_StructSMG__object* self,
   const char* name,
   struct sidl_double__array* value)
 {
@@ -634,8 +633,8 @@ remote_bHYPRE_ParCSRDiagScale_SetDoubleArray1Parameter(
  */
 
 static int32_t
-remote_bHYPRE_ParCSRDiagScale_SetDoubleArray2Parameter(
-  struct bHYPRE_ParCSRDiagScale__object* self,
+remote_bHYPRE_StructSMG_SetDoubleArray2Parameter(
+  struct bHYPRE_StructSMG__object* self,
   const char* name,
   struct sidl_double__array* value)
 {
@@ -647,8 +646,8 @@ remote_bHYPRE_ParCSRDiagScale_SetDoubleArray2Parameter(
  */
 
 static int32_t
-remote_bHYPRE_ParCSRDiagScale_GetIntValue(
-  struct bHYPRE_ParCSRDiagScale__object* self,
+remote_bHYPRE_StructSMG_GetIntValue(
+  struct bHYPRE_StructSMG__object* self,
   const char* name,
   int32_t* value)
 {
@@ -660,8 +659,8 @@ remote_bHYPRE_ParCSRDiagScale_GetIntValue(
  */
 
 static int32_t
-remote_bHYPRE_ParCSRDiagScale_GetDoubleValue(
-  struct bHYPRE_ParCSRDiagScale__object* self,
+remote_bHYPRE_StructSMG_GetDoubleValue(
+  struct bHYPRE_StructSMG__object* self,
   const char* name,
   double* value)
 {
@@ -673,8 +672,8 @@ remote_bHYPRE_ParCSRDiagScale_GetDoubleValue(
  */
 
 static int32_t
-remote_bHYPRE_ParCSRDiagScale_Setup(
-  struct bHYPRE_ParCSRDiagScale__object* self,
+remote_bHYPRE_StructSMG_Setup(
+  struct bHYPRE_StructSMG__object* self,
   struct bHYPRE_Vector__object* b,
   struct bHYPRE_Vector__object* x)
 {
@@ -686,8 +685,8 @@ remote_bHYPRE_ParCSRDiagScale_Setup(
  */
 
 static int32_t
-remote_bHYPRE_ParCSRDiagScale_Apply(
-  struct bHYPRE_ParCSRDiagScale__object* self,
+remote_bHYPRE_StructSMG_Apply(
+  struct bHYPRE_StructSMG__object* self,
   struct bHYPRE_Vector__object* b,
   struct bHYPRE_Vector__object** x)
 {
@@ -699,8 +698,8 @@ remote_bHYPRE_ParCSRDiagScale_Apply(
  */
 
 static int32_t
-remote_bHYPRE_ParCSRDiagScale_SetOperator(
-  struct bHYPRE_ParCSRDiagScale__object* self,
+remote_bHYPRE_StructSMG_SetOperator(
+  struct bHYPRE_StructSMG__object* self,
   struct bHYPRE_Operator__object* A)
 {
   return 0;
@@ -711,8 +710,8 @@ remote_bHYPRE_ParCSRDiagScale_SetOperator(
  */
 
 static int32_t
-remote_bHYPRE_ParCSRDiagScale_SetTolerance(
-  struct bHYPRE_ParCSRDiagScale__object* self,
+remote_bHYPRE_StructSMG_SetTolerance(
+  struct bHYPRE_StructSMG__object* self,
   double tolerance)
 {
   return 0;
@@ -723,8 +722,8 @@ remote_bHYPRE_ParCSRDiagScale_SetTolerance(
  */
 
 static int32_t
-remote_bHYPRE_ParCSRDiagScale_SetMaxIterations(
-  struct bHYPRE_ParCSRDiagScale__object* self,
+remote_bHYPRE_StructSMG_SetMaxIterations(
+  struct bHYPRE_StructSMG__object* self,
   int32_t max_iterations)
 {
   return 0;
@@ -735,8 +734,8 @@ remote_bHYPRE_ParCSRDiagScale_SetMaxIterations(
  */
 
 static int32_t
-remote_bHYPRE_ParCSRDiagScale_SetLogging(
-  struct bHYPRE_ParCSRDiagScale__object* self,
+remote_bHYPRE_StructSMG_SetLogging(
+  struct bHYPRE_StructSMG__object* self,
   int32_t level)
 {
   return 0;
@@ -747,8 +746,8 @@ remote_bHYPRE_ParCSRDiagScale_SetLogging(
  */
 
 static int32_t
-remote_bHYPRE_ParCSRDiagScale_SetPrintLevel(
-  struct bHYPRE_ParCSRDiagScale__object* self,
+remote_bHYPRE_StructSMG_SetPrintLevel(
+  struct bHYPRE_StructSMG__object* self,
   int32_t level)
 {
   return 0;
@@ -759,8 +758,8 @@ remote_bHYPRE_ParCSRDiagScale_SetPrintLevel(
  */
 
 static int32_t
-remote_bHYPRE_ParCSRDiagScale_GetNumIterations(
-  struct bHYPRE_ParCSRDiagScale__object* self,
+remote_bHYPRE_StructSMG_GetNumIterations(
+  struct bHYPRE_StructSMG__object* self,
   int32_t* num_iterations)
 {
   return 0;
@@ -771,8 +770,8 @@ remote_bHYPRE_ParCSRDiagScale_GetNumIterations(
  */
 
 static int32_t
-remote_bHYPRE_ParCSRDiagScale_GetRelResidualNorm(
-  struct bHYPRE_ParCSRDiagScale__object* self,
+remote_bHYPRE_StructSMG_GetRelResidualNorm(
+  struct bHYPRE_StructSMG__object* self,
   double* norm)
 {
   return 0;
@@ -782,55 +781,47 @@ remote_bHYPRE_ParCSRDiagScale_GetRelResidualNorm(
  * REMOTE EPV: create remote entry point vectors (EPVs).
  */
 
-static void bHYPRE_ParCSRDiagScale__init_remote_epv(void)
+static void bHYPRE_StructSMG__init_remote_epv(void)
 {
-  struct bHYPRE_ParCSRDiagScale__epv* epv = &s_rem__bhypre_parcsrdiagscale;
-  struct bHYPRE_Operator__epv*        e0  = &s_rem__bhypre_operator;
-  struct bHYPRE_Solver__epv*          e1  = &s_rem__bhypre_solver;
-  struct sidl_BaseClass__epv*         e2  = &s_rem__sidl_baseclass;
-  struct sidl_BaseInterface__epv*     e3  = &s_rem__sidl_baseinterface;
+  struct bHYPRE_StructSMG__epv*   epv = &s_rem__bhypre_structsmg;
+  struct bHYPRE_Operator__epv*    e0  = &s_rem__bhypre_operator;
+  struct bHYPRE_Solver__epv*      e1  = &s_rem__bhypre_solver;
+  struct sidl_BaseClass__epv*     e2  = &s_rem__sidl_baseclass;
+  struct sidl_BaseInterface__epv* e3  = &s_rem__sidl_baseinterface;
 
-  epv->f__cast                    = remote_bHYPRE_ParCSRDiagScale__cast;
-  epv->f__delete                  = remote_bHYPRE_ParCSRDiagScale__delete;
+  epv->f__cast                    = remote_bHYPRE_StructSMG__cast;
+  epv->f__delete                  = remote_bHYPRE_StructSMG__delete;
   epv->f__ctor                    = NULL;
   epv->f__dtor                    = NULL;
-  epv->f_addRef                   = remote_bHYPRE_ParCSRDiagScale_addRef;
-  epv->f_deleteRef                = remote_bHYPRE_ParCSRDiagScale_deleteRef;
-  epv->f_isSame                   = remote_bHYPRE_ParCSRDiagScale_isSame;
-  epv->f_queryInt                 = remote_bHYPRE_ParCSRDiagScale_queryInt;
-  epv->f_isType                   = remote_bHYPRE_ParCSRDiagScale_isType;
-  epv->f_getClassInfo             = remote_bHYPRE_ParCSRDiagScale_getClassInfo;
-  epv->f_SetCommunicator          = 
-    remote_bHYPRE_ParCSRDiagScale_SetCommunicator;
-  epv->f_SetIntParameter          = 
-    remote_bHYPRE_ParCSRDiagScale_SetIntParameter;
-  epv->f_SetDoubleParameter       = 
-    remote_bHYPRE_ParCSRDiagScale_SetDoubleParameter;
-  epv->f_SetStringParameter       = 
-    remote_bHYPRE_ParCSRDiagScale_SetStringParameter;
+  epv->f_addRef                   = remote_bHYPRE_StructSMG_addRef;
+  epv->f_deleteRef                = remote_bHYPRE_StructSMG_deleteRef;
+  epv->f_isSame                   = remote_bHYPRE_StructSMG_isSame;
+  epv->f_queryInt                 = remote_bHYPRE_StructSMG_queryInt;
+  epv->f_isType                   = remote_bHYPRE_StructSMG_isType;
+  epv->f_getClassInfo             = remote_bHYPRE_StructSMG_getClassInfo;
+  epv->f_SetCommunicator          = remote_bHYPRE_StructSMG_SetCommunicator;
+  epv->f_SetIntParameter          = remote_bHYPRE_StructSMG_SetIntParameter;
+  epv->f_SetDoubleParameter       = remote_bHYPRE_StructSMG_SetDoubleParameter;
+  epv->f_SetStringParameter       = remote_bHYPRE_StructSMG_SetStringParameter;
   epv->f_SetIntArray1Parameter    = 
-    remote_bHYPRE_ParCSRDiagScale_SetIntArray1Parameter;
+    remote_bHYPRE_StructSMG_SetIntArray1Parameter;
   epv->f_SetIntArray2Parameter    = 
-    remote_bHYPRE_ParCSRDiagScale_SetIntArray2Parameter;
+    remote_bHYPRE_StructSMG_SetIntArray2Parameter;
   epv->f_SetDoubleArray1Parameter = 
-    remote_bHYPRE_ParCSRDiagScale_SetDoubleArray1Parameter;
+    remote_bHYPRE_StructSMG_SetDoubleArray1Parameter;
   epv->f_SetDoubleArray2Parameter = 
-    remote_bHYPRE_ParCSRDiagScale_SetDoubleArray2Parameter;
-  epv->f_GetIntValue              = remote_bHYPRE_ParCSRDiagScale_GetIntValue;
-  epv->f_GetDoubleValue           = 
-    remote_bHYPRE_ParCSRDiagScale_GetDoubleValue;
-  epv->f_Setup                    = remote_bHYPRE_ParCSRDiagScale_Setup;
-  epv->f_Apply                    = remote_bHYPRE_ParCSRDiagScale_Apply;
-  epv->f_SetOperator              = remote_bHYPRE_ParCSRDiagScale_SetOperator;
-  epv->f_SetTolerance             = remote_bHYPRE_ParCSRDiagScale_SetTolerance;
-  epv->f_SetMaxIterations         = 
-    remote_bHYPRE_ParCSRDiagScale_SetMaxIterations;
-  epv->f_SetLogging               = remote_bHYPRE_ParCSRDiagScale_SetLogging;
-  epv->f_SetPrintLevel            = remote_bHYPRE_ParCSRDiagScale_SetPrintLevel;
-  epv->f_GetNumIterations         = 
-    remote_bHYPRE_ParCSRDiagScale_GetNumIterations;
-  epv->f_GetRelResidualNorm       = 
-    remote_bHYPRE_ParCSRDiagScale_GetRelResidualNorm;
+    remote_bHYPRE_StructSMG_SetDoubleArray2Parameter;
+  epv->f_GetIntValue              = remote_bHYPRE_StructSMG_GetIntValue;
+  epv->f_GetDoubleValue           = remote_bHYPRE_StructSMG_GetDoubleValue;
+  epv->f_Setup                    = remote_bHYPRE_StructSMG_Setup;
+  epv->f_Apply                    = remote_bHYPRE_StructSMG_Apply;
+  epv->f_SetOperator              = remote_bHYPRE_StructSMG_SetOperator;
+  epv->f_SetTolerance             = remote_bHYPRE_StructSMG_SetTolerance;
+  epv->f_SetMaxIterations         = remote_bHYPRE_StructSMG_SetMaxIterations;
+  epv->f_SetLogging               = remote_bHYPRE_StructSMG_SetLogging;
+  epv->f_SetPrintLevel            = remote_bHYPRE_StructSMG_SetPrintLevel;
+  epv->f_GetNumIterations         = remote_bHYPRE_StructSMG_GetNumIterations;
+  epv->f_GetRelResidualNorm       = remote_bHYPRE_StructSMG_GetRelResidualNorm;
 
   e0->f__cast                    = (void* (*)(void*,const char*)) epv->f__cast;
   e0->f__delete                  = (void (*)(void*)) epv->f__delete;
@@ -955,18 +946,18 @@ static void bHYPRE_ParCSRDiagScale__init_remote_epv(void)
  * REMOTE: generate remote instance given URL string.
  */
 
-struct bHYPRE_ParCSRDiagScale__object*
-bHYPRE_ParCSRDiagScale__remote(const char *url)
+struct bHYPRE_StructSMG__object*
+bHYPRE_StructSMG__remote(const char *url)
 {
-  struct bHYPRE_ParCSRDiagScale__object* self =
-    (struct bHYPRE_ParCSRDiagScale__object*) malloc(
-      sizeof(struct bHYPRE_ParCSRDiagScale__object));
+  struct bHYPRE_StructSMG__object* self =
+    (struct bHYPRE_StructSMG__object*) malloc(
+      sizeof(struct bHYPRE_StructSMG__object));
 
-  struct bHYPRE_ParCSRDiagScale__object* s0 = self;
-  struct sidl_BaseClass__object*         s1 = &s0->d_sidl_baseclass;
+  struct bHYPRE_StructSMG__object* s0 = self;
+  struct sidl_BaseClass__object*   s1 = &s0->d_sidl_baseclass;
 
   if (!s_remote_initialized) {
-    bHYPRE_ParCSRDiagScale__init_remote_epv();
+    bHYPRE_StructSMG__init_remote_epv();
   }
 
   s1->d_sidl_baseinterface.d_epv    = &s_rem__sidl_baseinterface;
@@ -982,7 +973,7 @@ bHYPRE_ParCSRDiagScale__remote(const char *url)
   s0->d_bhypre_solver.d_object = NULL; /* FIXME */
 
   s0->d_data = NULL; /* FIXME */
-  s0->d_epv  = &s_rem__bhypre_parcsrdiagscale;
+  s0->d_epv  = &s_rem__bhypre_structsmg;
 
   return self;
 }

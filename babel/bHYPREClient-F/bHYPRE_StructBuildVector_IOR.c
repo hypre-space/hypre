@@ -3,8 +3,8 @@
  * Symbol:        bHYPRE.StructBuildVector-v1.0.0
  * Symbol Type:   interface
  * Babel Version: 0.9.8
- * sidl Created:  20050208 15:29:13 PST
- * Generated:     20050208 15:29:14 PST
+ * sidl Created:  20050225 15:45:46 PST
+ * Generated:     20050225 15:45:47 PST
  * Description:   Intermediate Object Representation for bHYPRE.StructBuildVector
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -184,13 +184,13 @@ remote_bHYPRE_StructBuildVector_SetGrid(
 }
 
 /*
- * REMOTE METHOD STUB:SetStencil
+ * REMOTE METHOD STUB:SetNumGhost
  */
 
 static int32_t
-remote_bHYPRE_StructBuildVector_SetStencil(
+remote_bHYPRE_StructBuildVector_SetNumGhost(
   void* self,
-  struct bHYPRE_StructStencil__object* stencil)
+  struct sidl_int__array* num_ghost)
 {
   return 0;
 }
@@ -243,7 +243,7 @@ static void bHYPRE_StructBuildVector__init_remote_epv(void)
   epv->f_Assemble        = remote_bHYPRE_StructBuildVector_Assemble;
   epv->f_GetObject       = remote_bHYPRE_StructBuildVector_GetObject;
   epv->f_SetGrid         = remote_bHYPRE_StructBuildVector_SetGrid;
-  epv->f_SetStencil      = remote_bHYPRE_StructBuildVector_SetStencil;
+  epv->f_SetNumGhost     = remote_bHYPRE_StructBuildVector_SetNumGhost;
   epv->f_SetValue        = remote_bHYPRE_StructBuildVector_SetValue;
   epv->f_SetBoxValues    = remote_bHYPRE_StructBuildVector_SetBoxValues;
   s_remote_initialized = 1;
