@@ -1597,7 +1597,6 @@ main( int   argc,
       }
       else if (solver_id == 43)
       {
-        HYPRE_EuclidPrintParams(pcg_precond);
         HYPRE_EuclidDestroy(pcg_precond);
       }
 
@@ -1788,7 +1787,6 @@ main( int   argc,
       }
       else if (solver_id == 44)
       {
-        HYPRE_EuclidPrintParams(pcg_precond);
         HYPRE_EuclidDestroy(pcg_precond);
       }
 
@@ -1943,7 +1941,6 @@ main( int   argc,
       }
       else if (solver_id == 45)
       {
-        HYPRE_EuclidPrintParams(pcg_precond);
         HYPRE_EuclidDestroy(pcg_precond);
       }
 
