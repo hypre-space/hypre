@@ -968,8 +968,10 @@ main( int   argc,
         return(-1);
       }
       else 
+      {
         if (myid == 0)
           printf("HYPRE_ParCSRPCGGetPrecond got good precond\n");
+      }
       HYPRE_ParCSRPCGSetup(pcg_solver, A, b, x);
  
       hypre_EndTiming(time_index);
@@ -1113,8 +1115,10 @@ main( int   argc,
         return(-1);
       }
       else
+      {
         if (myid == 0)
           printf("HYPRE_ParCSRGMRESGetPrecond got good precond\n");
+      }
       HYPRE_ParCSRGMRESSetup(pcg_solver, A, b, x);
  
       hypre_EndTiming(time_index);
@@ -1343,8 +1347,10 @@ main( int   argc,
         return(-1);
       }
       else
+      {
         if (myid == 0)
           printf("HYPRE_ParCSRCGNRGetPrecond got good precond\n");
+      }
       HYPRE_ParCSRCGNRSetup(pcg_solver, A, b, x);
  
       hypre_EndTiming(time_index);
@@ -1571,10 +1577,11 @@ BuildParLaplacian( int                  argc,
  
    if (myid == 0)
    {
-      printf("  Laplacian:\n");
+      printf("  Backward Euler Laplacian diffusion operator:\n");
       printf("    (nx, ny, nz) = (%d, %d, %d)\n", nx, ny, nz);
       printf("    (Px, Py, Pz) = (%d, %d, %d)\n", P,  Q,  R);
       printf("    (cx, cy, cz) = (%f, %f, %f)\n", cx, cy, cz);
+      printf("    dt = %f\n",dt);
    }
 
    /*-----------------------------------------------------------
