@@ -101,6 +101,7 @@ int hypre_CGNRGetFinalRelativeResidualNorm P((void *cgnr_vdata , double *relativ
 int main P((int argc , char *argv []));
 int BuildParFromFile P((int argc , char *argv [], int arg_index , hypre_ParCSRMatrix **A_ptr ));
 int BuildParLaplacian P((int argc , char *argv [], int arg_index , hypre_ParCSRMatrix **A_ptr ));
+int BuildParDifConv P((int argc , char *argv [], int arg_index , hypre_ParCSRMatrix **A_ptr ));
 int BuildParFromOneFile P((int argc , char *argv [], int arg_index , hypre_ParCSRMatrix **A_ptr ));
 int BuildRhsParFromOneFile P((int argc , char *argv [], int arg_index , hypre_ParCSRMatrix *A , hypre_ParVector **b_ptr ));
 int BuildParLaplacian9pt P((int argc , char *argv [], int arg_index , hypre_ParCSRMatrix **A_ptr ));
@@ -170,6 +171,9 @@ int hypre_ParAMGCoarsenFalgout P((hypre_ParCSRMatrix *A , double strength_thresh
 
 /* par_cycle.c */
 int hypre_ParAMGCycle P((void *amg_vdata , hypre_ParVector **F_array , hypre_ParVector **U_array ));
+
+/* par_difconv.c */
+hypre_ParCSRMatrix *hypre_GenerateDifConv P((MPI_Comm comm , int nx , int ny , int nz , int P , int Q , int R , int p , int q , int r , double *value ));
 
 /* par_indepset.c */
 int hypre_InitParAMGIndepSet P((hypre_ParCSRMatrix *S , double *measure_array ));
