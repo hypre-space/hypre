@@ -1,3 +1,3 @@
-mpirun -np 2 ./ij_es -lobpcg -vrand 2 -seed 1 -tol 1e-4 -vout 1 $RUNPARM > in_out.out.vout.1
+mpirun -np 2 ./ij_es -lobpcg -vrand 2 -seed 1 -tol 1e-4 -vout 1  > in_out.out.vout.1
 # use vectors computed by previous run as the initial
-mpirun -np 2 ./ij_es -lobpcg -vfromfile $RUNPARM > in_out.out.vfromfile
+mpirun -np 2 ./ij_es -lobpcg -vfromfile  > in_out.out.vfromfile
