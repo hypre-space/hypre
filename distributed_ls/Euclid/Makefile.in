@@ -69,7 +69,6 @@ FILES =\
  src/Euclid_seq.c\
  src/Euclid_apply.c\
  src/Hash_dh.c\
- src/MatGenFD.c\
  src/Mat_dh.c\
  src/Mem_dh.c\
  src/Numbering_dh.c\
@@ -83,7 +82,6 @@ FILES =\
  src/ilu_mpi.c\
  src/ilu_seq.c\
  src/io_dh.c\
- src/krylov_dh.c\
  src/shellSort_dh.c\
  src/getRow_dh.c
 
