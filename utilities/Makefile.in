@@ -69,6 +69,7 @@ UTILITIES_FILES =\
  timer.c\
  timing.c\
  amg_linklist.c\
+ binsearch.c\
  umalloc_local.c\
  random.c
 
