@@ -133,9 +133,15 @@ then
 	exit 1
     fi
 
-    # create install directories
+    # Check that the install directory exists
+    if [ ! -d $HYPRE_INSTALL_DIR ]
+    then
+	echo "Error: HYPRE_INSTALL_DIR=$HYPRE_INSTALL_DIR does not exist"
+	exit
+    fi
+
+    # create install subdirectories
     DIRS="\
-	$HYPRE_INSTALL_DIR\
 	$HYPRE_INSTALL_DIR/bin\
 	$HYPRE_INSTALL_DIR/docs\
 	$HYPRE_INSTALL_DIR/include\
@@ -163,10 +169,5 @@ then
 	cp -f HYPRE_ls.h hypre_ls.h $HYPRE_INSTALL_DIR/include
 	cp -f *.a $HYPRE_INSTALL_DIR/lib
     )
-
-    # Set permissions: give everybody `rx', and give user/group `w'
-    cd $HYPRE_INSTALL_DIR
-    chmod -fR a+rX,ug+w .
-
 fi
 

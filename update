@@ -75,10 +75,11 @@ fi
 # Update the source
 #===========================================================================
 
-# Create install directory
+# Check that the install directory exists
 if [ ! -d $HYPRE_INSTALL_DIR ]
 then
-    mkdir $HYPRE_INSTALL_DIR
+    echo "Error: HYPRE_INSTALL_DIR=$HYPRE_INSTALL_DIR does not exist"
+    exit
 fi
 
 (
@@ -120,6 +121,7 @@ fi
 	fi
 
 	# create the UPDATE.tar file for updating on non-CASC machines
+	echo "creating the UPDATE.tar file ..."
 	tar cf UPDATE.tar UPDATE
     fi
 
@@ -151,15 +153,17 @@ HYPRE_INSTALL_DIR=$DIR
 # Complete the install
 #===========================================================================
 
-if [ "HYPRE_INSTALL" ]
+if [ "$HYPRE_INSTALL" ]
 then
     (
 	cd $HYPRE_INSTALL_DIR
 
 	# set permissions: give everybody `rx', and give user/group `w'
+	echo "setting permissions ..."
 	chmod -fR a+rX,ug+w UPDATE/*
 
 	# move the current installed version into an "old" directory
+	echo "saving the current installed version ..."
 	if [ -f VERSION_NAME ]
 	then
 	    OLD=`cat VERSION_NAME`
@@ -178,10 +182,12 @@ then
 	fi
 
 	# move the updated version into the install directory
+	echo "installing the updated version ..."
 	mv UPDATE/* .
 	rmdir UPDATE
 
 	# don't keep any old copies of the library
+	echo "removing old installations ..."
 	if [ "$HYPRE_INSTALL_TYPE" = "internal" ]
 	then
 	    if [ -d $OLD ]
@@ -189,7 +195,6 @@ then
 		rm -fr $OLD
 	    fi
 	fi
-
 	# keep 3 old copies of the library
 	# (note: * will expand alphabetically in the Bourne shell)
 	if [ "$HYPRE_INSTALL_TYPE" = "external" ]
@@ -201,6 +206,13 @@ then
 		rm -fr $*
 	    fi
 	fi
+
+	# clean the source directory
+	echo "cleaning the source directories ..."
+	(
+	    cd src/linear_solvers
+	    ./build -$HYPRE_ARCH veryclean
+	)
     )
 fi
 
