@@ -203,7 +203,6 @@ package Hypre {
    };
 
    class StructMatrixBldr implements StructuredGridMatrixBuilder {
-      void print();
       int SetStencil( in StructStencil stencil );
       int SetValues( in Box box, in array<int,1> stencil_indices,
                      in array<double,1> values );
@@ -218,6 +217,7 @@ package Hypre {
    };
 
    class StructMatrix implements LinearOperator {
+      void print();
       int Apply( in Vector x, out Vector b );
    };
 
