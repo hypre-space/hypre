@@ -68,6 +68,7 @@ main( int   argc,
    array1int intvals_lo;
    array1int intvals_hi;
    array1double doubvals;
+   array1int num_ghost;
 
 /*    HYPRE_StructMatrix  A; */
 /*    HYPRE_StructVector  b; */
@@ -119,7 +120,7 @@ main( int   argc,
    MPI_Comm_size(MPI_COMM_WORLD, &num_procs );
    MPI_Comm_rank(MPI_COMM_WORLD, &myid );
    /* Make a MPI_Com object. */
-   comm = Hypre_MPI_Com_new();
+   comm = Hypre_MPI_Com_Constructor( MPI_COMM_WORLD );
 
 
 #ifdef HYPRE_DEBUG
@@ -541,7 +542,10 @@ main( int   argc,
     Note that HYPRE has an Assemble function too. */
 
    symmetric = 1;
-   A = Hypre_StructMatrix_Constructor( grid, stencil, symmetric, A_num_ghost );
+   num_ghost.lower[0] = 0;
+   num_ghost.upper[0] = 2*dim;
+   num_ghost.data = A_num_ghost;
+   A = Hypre_StructMatrix_Constructor( grid, stencil, symmetric, num_ghost );
 
    /*-----------------------------------------------------------
     * Fill in the matrix elements
