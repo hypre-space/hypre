@@ -410,6 +410,9 @@ impl_bHYPRE_IJParCSRMatrix_Apply(
 
    ierr += HYPRE_ParCSRMatrixMatvec( 1.0, A, bb, 0.0, xx );
 
+   bHYPRE_Vector_deleteRef( bHYPREP_b ); /* ref was created by queryInt */
+   bHYPRE_Vector_deleteRef( bHYPREP_x ); /* ref was created by queryInt */
+
    return( ierr );
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.Apply) */

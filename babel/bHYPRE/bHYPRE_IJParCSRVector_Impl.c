@@ -507,6 +507,7 @@ impl_bHYPRE_IJParCSRVector_Copy(
 
    data_y = bHYPRE_IJParCSRVector__get_data( self );
    data_x = bHYPRE_IJParCSRVector__get_data( bHYPREP_x );
+   bHYPRE_IJParCSRVector_deleteRef( bHYPREP_x ); /* extra reference from queryInt */
 
    data_y->comm = data_x->comm;
 

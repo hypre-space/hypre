@@ -333,6 +333,7 @@ impl_bHYPRE_ParCSRDiagScale_Apply(
    bHYPREP_b = bHYPRE_IJParCSRVector__cast
       ( bHYPRE_Vector_queryInt( b, "bHYPRE.IJParCSRVector") );
    datab = bHYPRE_IJParCSRVector__get_data( bHYPREP_b );
+   bHYPRE_IJParCSRVector_deleteRef( bHYPREP_b ); /* extra reference from queryInt */
    ij_b = datab -> ij_b;
    ierr += HYPRE_IJVectorGetObject( ij_b, &objectb );
    bb = (HYPRE_ParVector) objectb;
@@ -342,6 +343,7 @@ impl_bHYPRE_ParCSRDiagScale_Apply(
       ( bHYPRE_Vector_queryInt( *x, "bHYPRE.IJParCSRVector") );
    datax = bHYPRE_IJParCSRVector__get_data( bHYPREP_x );
    ij_x = datax -> ij_b;
+   bHYPRE_IJParCSRVector_deleteRef( bHYPREP_x ); /* extra reference from queryInt */
    ierr += HYPRE_IJVectorGetObject( ij_x, &objectx );
    xx = (HYPRE_ParVector) objectx;
    /* not used HYPRE_b = (HYPRE_Vector) xx;*/
@@ -349,6 +351,7 @@ impl_bHYPRE_ParCSRDiagScale_Apply(
    bHYPREP_A = bHYPRE_IJParCSRMatrix__cast
       ( bHYPRE_Operator_queryInt( mat, "bHYPRE.IJParCSRMatrix") );
    dataA = bHYPRE_IJParCSRMatrix__get_data( bHYPREP_A );
+   bHYPRE_IJParCSRMatrix_deleteRef( bHYPREP_A ); /* extra reference from queryInt */
    ij_A = dataA -> ij_A;
    ierr += HYPRE_IJMatrixGetObject( ij_A, &objectA );
    AA = (HYPRE_ParCSRMatrix) objectA;

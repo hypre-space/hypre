@@ -493,6 +493,7 @@ impl_bHYPRE_PCG_Setup(
        * vector.  So we are ready to create the bHYPRE PCG object. */
       if ( bHYPRE_Vector_queryInt( b, "bHYPRE.IJParCSRVector") )
       {
+         bHYPRE_Vector_deleteRef( b );  /* extra ref created by queryInt */
          data -> vector_type = "ParVector";
          HYPRE_ParCSRPCGCreate( comm, psolver );
          assert( solver != NULL );
@@ -521,6 +522,7 @@ impl_bHYPRE_PCG_Setup(
       bHYPREP_b = bHYPRE_IJParCSRVector__cast
          ( bHYPRE_Vector_queryInt( b, "bHYPRE.IJParCSRVector") );
       datab = bHYPRE_IJParCSRVector__get_data( bHYPREP_b );
+      bHYPRE_IJParCSRVector_deleteRef( bHYPREP_b ); /* extra reference from queryInt */
       ij_b = datab -> ij_b;
       ierr += HYPRE_IJVectorGetObject( ij_b, &objectb );
       bb = (HYPRE_ParVector) objectb;
@@ -529,6 +531,7 @@ impl_bHYPRE_PCG_Setup(
       bHYPREP_x = bHYPRE_IJParCSRVector__cast
          ( bHYPRE_Vector_queryInt( x, "bHYPRE.IJParCSRVector") );
       datax = bHYPRE_IJParCSRVector__get_data( bHYPREP_x );
+      bHYPRE_IJParCSRVector_deleteRef( bHYPREP_x ); /* extra reference from queryInt */
       ij_x = datax -> ij_b;
       ierr += HYPRE_IJVectorGetObject( ij_x, &objectx );
       xx = (HYPRE_ParVector) objectx;
@@ -538,6 +541,7 @@ impl_bHYPRE_PCG_Setup(
          ( bHYPRE_Operator_queryInt( mat, "bHYPRE.IJParCSRMatrix") );
       assert( bHYPREP_A != NULL );
       dataA = bHYPRE_IJParCSRMatrix__get_data( bHYPREP_A );
+      bHYPRE_IJParCSRMatrix_deleteRef( bHYPREP_A ); /* extra reference from queryInt */
       ij_A = dataA -> ij_A;
       ierr += HYPRE_IJMatrixGetObject( ij_A, &objectA );
       AA = (HYPRE_ParCSRMatrix) objectA;
@@ -611,6 +615,7 @@ impl_bHYPRE_PCG_Apply(
        * vector.  So we are ready to create the bHYPRE PCG object. */
       if ( bHYPRE_Vector_queryInt( b, "bHYPRE.IJParCSRVector") )
       {
+         bHYPRE_Vector_deleteRef( b ); /* extra ref created by queryInt */
          data -> vector_type = "ParVector";
          HYPRE_ParCSRPCGCreate( comm, psolver );
          assert( solver != NULL );
@@ -639,6 +644,7 @@ impl_bHYPRE_PCG_Apply(
       bHYPREP_b = bHYPRE_IJParCSRVector__cast
          ( bHYPRE_Vector_queryInt( b, "bHYPRE.IJParCSRVector") );
       datab = bHYPRE_IJParCSRVector__get_data( bHYPREP_b );
+      bHYPRE_Vector_deleteRef( bHYPREP_b ); /* extra ref created by queryInt */
       ij_b = datab -> ij_b;
       ierr += HYPRE_IJVectorGetObject( ij_b, &objectb );
       bb = (HYPRE_ParVector) objectb;
@@ -647,6 +653,7 @@ impl_bHYPRE_PCG_Apply(
       bHYPREP_x = bHYPRE_IJParCSRVector__cast
          ( bHYPRE_Vector_queryInt( *x, "bHYPRE.IJParCSRVector") );
       datax = bHYPRE_IJParCSRVector__get_data( bHYPREP_x );
+      bHYPRE_Vector_deleteRef( bHYPREP_x ); /* extra ref created by queryInt */
       ij_x = datax -> ij_b;
       ierr += HYPRE_IJVectorGetObject( ij_x, &objectx );
       xx = (HYPRE_ParVector) objectx;
@@ -656,6 +663,7 @@ impl_bHYPRE_PCG_Apply(
          ( bHYPRE_Operator_queryInt( mat, "bHYPRE.IJParCSRMatrix") );
       assert( bHYPREP_A != NULL );
       dataA = bHYPRE_IJParCSRMatrix__get_data( bHYPREP_A );
+      bHYPRE_IJParCSRMatrix_deleteRef( bHYPREP_A ); /* extra ref created by queryInt */
       ij_A = dataA -> ij_A;
       ierr += HYPRE_IJMatrixGetObject( ij_A, &objectA );
       AA = (HYPRE_ParCSRMatrix) objectA;
@@ -924,9 +932,11 @@ impl_bHYPRE_PCG_SetPreconditioner(
       assert( solverprecond != NULL );
       precond = (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve;
       precond_setup = (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup;
+      bHYPRE_BoomerAMG_deleteRef( AMG_s ); /* extra reference from queryInt */
    }
    else if ( bHYPRE_Solver_queryInt( s, "bHYPRE.ParCSRDiagScale" ) )
    {
+      bHYPRE_Solver_deleteRef( s ); /* extra reference from queryInt */
       solverprecond = (HYPRE_Solver *) hypre_CTAlloc( double, 1 );
       /* ... HYPRE diagonal scaling needs no solver object, but we
        * must provide a HYPRE_Solver object.  It will be totally
