@@ -99,10 +99,10 @@ HYPRE_StructPCGSetup( HYPRE_StructSolver solver,
                       HYPRE_StructVector b,
                       HYPRE_StructVector x      )
 {
-   return( hypre_PCGSetup( (void *) solver,
-                           (void *) A,
-                           (void *) b,
-                           (void *) x ) );
+   return( HYPRE_PCGSetup( (HYPRE_Solver) solver,
+                           (HYPRE_Matrix) A,
+                           (HYPRE_Vector) b,
+                           (HYPRE_Vector) x ) );
 }
 
 /*==========================================================================*/
@@ -132,10 +132,10 @@ HYPRE_StructPCGSolve( HYPRE_StructSolver solver,
                       HYPRE_StructVector b,
                       HYPRE_StructVector x      )
 {
-   return( hypre_PCGSolve( (void *) solver,
-                           (void *) A,
-                           (void *) b,
-                           (void *) x ) );
+   return( HYPRE_PCGSolve( (HYPRE_Solver) solver,
+                           (HYPRE_Matrix) A,
+                           (HYPRE_Vector) b,
+                           (HYPRE_Vector) x ) );
 }
 
 /*==========================================================================*/

@@ -97,10 +97,10 @@ HYPRE_StructGMRESSetup( HYPRE_StructSolver solver,
                       HYPRE_StructVector b,
                       HYPRE_StructVector x      )
 {
-   return( hypre_GMRESSetup( (void *) solver,
-                           (void *) A,
-                           (void *) b,
-                           (void *) x ) );
+   return( HYPRE_GMRESSetup( (HYPRE_Solver) solver,
+                             (HYPRE_Matrix) A,
+                             (HYPRE_Vector) b,
+                             (HYPRE_Vector) x ) );
 }
 
 /*==========================================================================*/
@@ -130,10 +130,10 @@ HYPRE_StructGMRESSolve( HYPRE_StructSolver solver,
                       HYPRE_StructVector b,
                       HYPRE_StructVector x      )
 {
-   return( hypre_GMRESSolve( (void *) solver,
-                           (void *) A,
-                           (void *) b,
-                           (void *) x ) );
+   return( HYPRE_GMRESSolve( (HYPRE_Solver) solver,
+                             (HYPRE_Matrix) A,
+                             (HYPRE_Vector) b,
+                             (HYPRE_Vector) x ) );
 }
 
 /*==========================================================================*/
