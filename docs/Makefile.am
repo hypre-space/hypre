@@ -287,14 +287,14 @@ version.tex:
 dist-hook:
 	@ \
 	$(MAKE) $(AM_MAKEFLAGS); \
-	cp -fr HYPRE_usr_manual     ${distdir}/docs/.; \
-	cp -f  HYPRE_usr_manual.ps  ${distdir}/docs/.; \
-	cp -f  HYPRE_usr_manual.pdf ${distdir}/docs/.; \
-	cp -fr HYPRE_ref_manual     ${distdir}/docs/.; \
-	cp -f  HYPRE_ref_manual.ps  ${distdir}/docs/.; \
-	cp -f  HYPRE_ref_manual.pdf ${distdir}/docs/.; \
-	cp -fr bHYPRE_ref_manual     ${distdir}/docs/.; \
-	cp -f  bHYPRE_ref_manual.ps  ${distdir}/docs/.; \
-	cp -f  bHYPRE_ref_manual.pdf ${distdir}/docs/.; \
-	cp -f  V[1-9]* ${distdir}/docs/.
+	cp -fr HYPRE_usr_manual     ${distdir}/.; \
+	cp -f  HYPRE_usr_manual.ps  ${distdir}/.; \
+	cp -f  HYPRE_usr_manual.pdf ${distdir}/.; \
+	cp -fr HYPRE_ref_manual     ${distdir}/.; \
+	cp -f  HYPRE_ref_manual.ps  ${distdir}/.; \
+	cp -f  HYPRE_ref_manual.pdf ${distdir}/.; \
+	cp -fr bHYPRE_ref_manual     ${distdir}/.; \
+	cp -f  bHYPRE_ref_manual.ps  ${distdir}/.; \
+	cp -f  bHYPRE_ref_manual.pdf ${distdir}/.; \
+	cp -f  V[1-9]* ${distdir}/.
 	
