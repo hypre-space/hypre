@@ -2,8 +2,10 @@
 \label{chapter-FEI}
 
 The finite element interface (FEI) defines a linear solver interface 
-for finite element applications.  This interface is described in 
-\cite{FEI-ref}.  This chapter describes the \hypre{} implementation
+for finite element applications.  For information on how to use this
+interface, see \cite{FEI-ref}.  
+This chapter describes the iterative methods and 
+preconditioners in the \hypre{} implementation
 of this interface.
 
 Solving a linear system from a finite element problem consists of
@@ -15,10 +17,6 @@ four steps in the FEI:
 \item Set solver parameters and solve the linear system
 \item Retrieve the solution to the linear system
 \end{enumerate}
-
-For information on how to use the FEI, see \cite{FEI-ref}.
-This chapter describes how to set the parameters for solving a
-linear system with \hypre{}.
 
 Parameters to the \hypre{} solvers are specified by calling
 \begin{display}
@@ -39,6 +37,8 @@ strcpy(paramStrings[0], "preconditioner parasails");
 FEI_parameters(sysHandle, 1, paramStrings);
 \end{verbatim}
 \end{display}
+All possible parameters are listed in section \ref{sec:fei-param} below.
+
 
 A linear system is then solved by calling 
 \begin{display}
@@ -47,12 +47,9 @@ void FEI_iterateToSolve(int sysHandle);
 \end{verbatim}
 \end{display}
 
-\section{Solvers and preconditioners available}
+\section{Iterative methods and preconditioners available}
 
-\subsection{Solvers}
-
-Several direct and iterative solvers are
-currently available to users:
+\subsection{Iterative methods}
 
 \begin{enumerate}
 \item conjugate gradient (CG)
@@ -75,15 +72,10 @@ currently available to users:
 %\begin{enumerate}
 %\item to form and solve a reduced linear system (in view of constraints), and
 %\item a link to the ML's parallel smoothed aggregation method.
-
-\end{enumerate}
-
-To choose between these solvers and
-preconditioners as well as the parameters specific to them,
-the {\tt FEI\_parameters} function is used, as described
-above.
+%\end{enumerate}
 
 \section{Parameters}
+\label{sec:fei-param}
 
 \begin{description}
 \item[solver XXX] - where XXX specifies one of {\sf cg}, {\sf gmres},

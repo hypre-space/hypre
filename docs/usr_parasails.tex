@@ -38,55 +38,31 @@ int HYPRE_ParCSRParaSailsDestroy(HYPRE_Solver solver);
 \end{verbatim}
 \end{display}
 
-\subsection{Sparsity pattern}
-\label{sparsity}
-Mathematically, given a matrix $A$ and two parameters $m \ge 0$ and
-{\em thresh}$\ge 0$,
-the sparsity pattern for the preconditioner is the pattern of $\tilde{A}^m$
-where $\tilde{A}$ is a binary matrix defined as
-\[
-\tilde{A}_{ij} = \left\{ \begin{array}{ll}
-   1 & \mbox{if $i=j$ or $|(D^{-1/2} A D^{-1/2})_{ij}| >$ {\em thresh}} \\
-   0 & \mbox{otherwise}
-                 \end{array} \right.
-\]
-where the matrix
-\[
-D_{ii} = \left\{ \begin{array}{ll}
-    |A_{ii}| & \mbox{if $|A_{ii}| > 0$} \\
-    1 & \mbox{otherwise}
-    \end{array} \right.
-\]
-and {\em thresh} is a nonnegative threshold.
+The accuracy and cost of ParaSails are parameterized by the real {\em thresh}
+and integer {\em nlevels} parameters,
+$0 \le {\it thresh} \le 1$, $0 \le {\it nlevels}$.
+Lower values of {\em thresh}
+and higher values of {\em nlevels} lead to more accurate, but more expensive
+preconditioners.  More accurate preconditioners are also more expensive
+per iteration.  The default values are ${\it thresh} = 0.1$
+and ${\it nlevels} = 1$.  The parameters are set using
+{\tt HYPRE\_ParCSRParaSailsSetParams}.
 
-\subsection{Minimization}
-In a nonsymmetric matrix $A$, the approximate inverse $M$ is computed by
-minimizing
-\begin{equation}
-\| I - M A \|_F
-\label{eq:1}
-\end{equation}
-given a sparsity pattern for $M$.  If $A$ is symmetric, then a lower
-triangular approximate inverse factor $G$ is computed by minimizing
-\[
-\| I - G L \|_F
-\]
-where $A=LL^T$ is the Cholesky factorization of $A$, and $G$ has
-a lower triangularized sparsity pattern.
+Mathematically, given a symmetric matrix $A$, the pattern of the
+approximate inverse is the pattern of $\tilde{A}^m$ where $\tilde{A}$
+is a matrix that has been sparsified from $A$.  The sparsification
+is performed by dropping all entries in a symmetrically diagonally scaled $A$
+whose values are less than {\em thresh} in magnitude.  The parameter
+{\em nlevel} is equivalent to $m+1$.
+Filtering is a post-thresholding procedure.
+For more details about the algorithm, see \cite{Chow:1999:APS}.
 
-\subsection{Filtering}
-After the values of $M$ have
-been computed, small entries of $M$
-may be dropped to reduce the cost of multiplying by $M$.
-Entries in a matrix $\tilde{M}$ are dropped if they are smaller in
-magnitude than a threshold, called the {\em filter value}.
-The matrix $\tilde{M}$ is
-scaled version of $M$ that makes the filter value independent of
-the scaling of the original matrix $A$.  ($\tilde{M}$
-is the approximate inverse that would have been computed if
-the original $A$ was symmetrically diagonally scaled to have
-a diagonal of all ones.)
-In the SPD case, the factor $\tilde{M}$ is also rescaled.
+The storage required for the ParaSails preconditioner depends on
+the parameters {\em thresh} and {\em nlevels}.  The default parameters
+often produce a preconditioner that can be stored in less than the
+space required to store the original matrix.
+ParaSails does not need a large amount of intermediate storage in
+order to construct the preconditioner.
 
 \subsection{Interface functions}
 
@@ -149,56 +125,6 @@ $-{\tt filter}$ represents the fraction of the nonzero elements
 that are dropped.  For example, if ${\tt filter} = -0.9$ then
 approximately 90 percent of the entries in the computed approximate 
 inverse are dropped.
-
-The ParaSails preconditioner is constructed with
-\begin{display}
-\begin{verbatim}
-int HYPRE_ParCSRParaSailsSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
-  HYPRE_ParVector b, HYPRE_ParVector x);
-\end{verbatim}
-\end{display}
-where {\tt A} is a {\tt HYPRE\_ParCSRMatrix} that has been 
-previously constructed.  The vectors {\tt b} and {\tt x} are
-not used by this function.
-
-A call to
-\begin{display}
-\begin{verbatim}
-int HYPRE_ParCSRParaSailsSolve(HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
-  HYPRE_ParVector b, HYPRE_ParVector x);
-\end{verbatim}
-\end{display}
-applies the ParaSails preconditioner to vector {\tt b}
-and returns the result in {\tt x}.  The matrix {\tt A}
-is not used by this function.
-
-Statistics about the setup procedure can be printed to stdout using
-\begin{display}
-\begin{verbatim}
-int HYPRE_ParCSRParaSailsStats(HYPRE_Solver solver);
-\end{verbatim}
-\end{display}
-This is particularly useful to determine the actual values of 
-{\tt thresh} and {\tt filter} used.
-
-A call to
-\begin{display}
-\begin{verbatim}
-int HYPRE_ParCSRParaSailsDestroy(HYPRE_Solver solver);
-\end{verbatim}
-\end{display}
-deallocates the ParaSails solver.
-
-\subsection{Choosing parameters}
-
-The approximate inverse preconditioner is more accurate but more expensive
-to construct and apply if there is a greater number of nonzeros in the
-sparsity pattern, i.e., larger
-values of {\tt nlevel} and smaller values of {\tt thresh}.  The default
-parameters often produce a preconditioner that can be stored in less than
-the space required to store the original matrix.
-ParaSails does not need a large amount of intermediate storage in
-order to construct the preconditioner.
 
 \subsection{Preconditioning nearly symmetric matrices}
 \label{nearly}
