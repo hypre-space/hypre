@@ -42,7 +42,12 @@ fi
 
 cd $HYPRE_AUTOTEST_DIR
 rm -fR linear_solvers
-cvs checkout -P linear_solvers
+cvs checkout -P linear_solvers 1> $0.checkout.log 2> $0.checkout.err
+if [ -s "$0.checkout.err" ]
+then
+   RECIPIENTS="dwalker@llnl.gov rfalgout@llnl.gov"
+   $HYPRE_MAIL -s "Error(s) in checkout" $RECIPIENTS < $0.checkout.err
+fi
 
 #=============================================================================
 # Make libraries and test drivers (using configure)
@@ -50,12 +55,45 @@ cvs checkout -P linear_solvers
 
 cd $HYPRE_AUTOTEST_DIR/linear_solvers
 rm config.cache
-./configure
-make struct
+./configure> $0.configure.log 2> $0.configure.err
+if [ -s "$0.configure.err" ]
+then
+   RECIPIENTS="dwalker@llnl.gov rfalgout@llnl.gov elliott22@llnl.gov"
+   $HYPRE_MAIL -s "Error(s) in configure" $RECIPIENTS < $0.configure.err
+fi
+
+make veryclean
+
+make struct> $0.struct.log 2> $0.struct.err
+if [ -s "$0.struct.err" ]
+then
+   RECIPIENTS="dwalker@llnl.gov rfalgout@llnl.gov jones97@llnl.gov"
+   $HYPRE_MAIL -s "Error(s) in make struct" $RECIPIENTS < $0.struct.err
+fi
+
 make
-make parcsr
-#make ci_struct
-make seq
+
+make parcsr> $0.parcsr.log 2> $0.parcsr.err
+if [ -s "$0.parcsr.err" ]
+then
+   RECIPIENTS="dwalker@llnl.gov yang11@llnl.gov vhenson@llnl.gov"
+   $HYPRE_MAIL -s "Error(s) in make parcsr" $RECIPIENTS < $0.parcsr.err
+fi
+
+#make ci_struct> $0.ci_struct.log 2> $0.ci_struct.err
+#if [ -s "$0.ci_struct.err" ]
+#then
+#   RECIPIENTS="dwalker@llnl.gov cleary1@llnl.gov"
+#   $HYPRE_MAIL -s "Error(s) in make ci_struct" $RECIPIENTS < $0.ci_struct.err
+#fi
+
+make seq> $0.seq.log 2> $0.seq.err
+if [ -s "$0.seq.err" ]
+then
+   RECIPIENTS="dwalker@llnl.gov yang11@llnl.gov vhenson@llnl.gov rfalgout@llnl.gov"
+   $HYPRE_MAIL -s "Error(s) in make seq" $RECIPIENTS < $0.seq.err
+fi
+
 make beta
 
 # make documentation
@@ -83,18 +121,50 @@ cd $HYPRE_AUTOTEST_DIR/linear_solvers/test
 #./test_drivers.sh -mail
 
 #=============================================================================
-# Make libraries and test drivers (using configure --with-pthreads)
+# Make libraries and test drivers (using configure--with-pthreads)
 #=============================================================================
 
 cd $HYPRE_AUTOTEST_DIR/linear_solvers
 rm config.cache
-./configure --with-pthreads
+./configure --with-pthreads> $0.configure_threads.log 2> $0.configure_threads.err
+if [ -s "$0.configure_threads.err" ]
+then
+   RECIPIENTS="dwalker@llnl.gov rfalgout@llnl.gov elliott22@llnl.gov"
+   $HYPRE_MAIL -s "Error(s) in configure --with -pthreads" $RECIPIENTS < $0.configure_threads.err
+fi
+
 make veryclean
-make struct
+
+make struct> $0.struct_threads.log 2> $0.struct_threads.err
+if [ -s "$0.struct_threads.err" ]
+then
+   RECIPIENTS="dwalker@llnl.gov rfalgout@llnl.gov jones97@llnl.gov elliott22@llnl.gov"
+   $HYPRE_MAIL -s "Error(s) in make struct (with pthreads)" $RECIPIENTS < $0.struct_threads.err
+fi
+
 make
-make parcsr
-#make ci_struct
-make seq
+
+make parcsr> $0.parcsr_threads.log 2> $0.parcsr_threads.err
+if [ -s "$0.parcsr_threads.err" ]
+then
+   RECIPIENTS="dwalker@llnl.gov yang11@llnl.gov vhenson@llnl.gov"
+   $HYPRE_MAIL -s "Error(s) in make parcsr (with pthreads)" $RECIPIENTS < $0.parcsr_threads.err
+fi
+
+#make ci_struct> $0.ci_struct_threads.log 2> $0.ci_struct_threads.err
+#if [ -s "$0.parcsr_ci_struct.err" ]
+#then
+#   RECIPIENTS="dwalker@llnl.gov cleary1@llnl.gov"
+#   $HYPRE_MAIL -s "Error(s) in make ci_struct (with pthreads)" $RECIPIENTS < $0.ci_struct_threads.err
+#fi
+
+make seq> $0.seq_threads.log 2> $0.seq_threads.err
+if [ -s "$0.seq_threads.err" ]
+then
+   RECIPIENTS="dwalker@llnl.gov yang11@llnl.gov vhenson@llnl.gov rfalgout@llnl.gov"
+   $HYPRE_MAIL -s "Error(s) in make seq (with threads)" $RECIPIENTS < $0.seq_threads.err
+fi
+
 make beta
 
 #==============================
@@ -104,20 +174,62 @@ make beta
 #cd $HYPRE_AUTOTEST_DIR/linear_solvers/test
 #./test_drivers.sh -mail
 
-
 #=============================================================================
-# Make libraries and test drivers (using configure --without-MPI)
+# Make libraries and test drivers (using configure --without_MPI)
 #=============================================================================
 
 cd $HYPRE_AUTOTEST_DIR/linear_solvers
 rm config.cache
-./configure --without-MPI
+./configure --without-MPI> $0.configure_no_mpi.log 2> $0.configure_no_mpi.err
+if [ -s "$0.configure_no_mpi.err" ]
+then
+   RECIPIENTS="dwalker@llnl.gov rfalgout@llnl.gov elliott22@llnl.gov"
+   $HYPRE_MAIL -s "Error(s) in configure --without-MPI" $RECIPIENTS < $0.configure_no_mpi.err
+fi
+
 make veryclean
-make struct
+
+make struct> $0.struct_no_mpi.log 2> $0.struct_no_mpi.err
+if [ -s "$0.struct_no_mpi.err" ]
+then
+   RECIPIENTS="dwalker@llnl.gov rfalgout@llnl.gov jones97@llnl.gov"
+   $HYPRE_MAIL -s "Error(s) in make struct without MPI" $RECIPIENTS < $0.struct_no_mpi.err
+fi
+
 make
-make parcsr
-#make ci_struct
-make seq
+
+make parcsr> $0.parcsr_no_mpi.log 2> $0.parcsr_no_mpi.err
+if [ -s "$0.parcsr_no_mpi.err" ]
+then
+   RECIPIENTS="dwalker@llnl.gov yang11@llnl.gov vhenson@llnl.gov"
+   $HYPRE_MAIL -s "Error(s) in make parcsr without MPI" $RECIPIENTS < $0.parcsr_no_mpi.err
+fi
+
+
+#make ci_struct> $0.ci_struct_no_mpi.log 2> $0.ci_struct_no_mpi.err
+#if [ -s "$0.ci_struct_no_mpi.err" ]
+#then
+#   RECIPIENTS="dwalker@llnl.gov cleary1@llnl.gov"
+#   $HYPRE_MAIL -s "Error(s) in make ci_struct without MPI" $RECIPIENTS < $0.ci_struct_no_mpi.err
+#fi
+
+make seq> $0.seq_no_mpi.log 2> $0.seq_no_mpi.err
+if [ -s "$0.seq_no_mpi.err" ]
+then
+   RECIPIENTS="dwalker@llnl.gov yang11@llnl.gov vhenson@llnl.gov rfalgout@llnl.gov"
+   $HYPRE_MAIL -s "Error(s) in make seq without MPI" $RECIPIENTS < $0.seq_no_mpi.err
+fi
+
+make docs
+
+cd $HYPRE_AUTOTEST_DIR/linear_solvers/test
+make> $0.test_no_mpi.log 2> $0.test_no_mpi.err
+if [ -s "$0.test_no_mpi.err" ]
+then
+   RECIPIENTS="dwalker@llnl.gov rfalgout@llnl.gov"
+   $HYPRE_MAIL -s "Error(s) in make test without MPI" $RECIPIENTS < $0.test_no_mpi.err
+fi
+
 make beta
 
 #==============================
