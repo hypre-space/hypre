@@ -107,19 +107,6 @@ hypre_F90_IFACE(hypre_setijvectorlocalstoragety)( long int *vector,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SetIJVectorLocalSize
- *--------------------------------------------------------------------------*/
-
-void 
-hypre_F90_IFACE(hypre_setijvectorlocalsize)( long int *vector,
-                                             int      *local_n,
-                                             int      *ierr     )
-{
-   *ierr = (int) ( HYPRE_SetIJVectorLocalSize( (HYPRE_IJVector) *vector,
-                                               (int)            *local_n  ) );
-}
-
-/*--------------------------------------------------------------------------
  * HYPRE_ZeroIJVectorLocalComponents
  *--------------------------------------------------------------------------*/
 

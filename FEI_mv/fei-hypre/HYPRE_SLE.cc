@@ -34,7 +34,7 @@
 // include the Hypre package header here
 
 #include "HYPRE_IJ_mv.h"
-#include "HYPRE.h" // needed for HYPRE_PARCSR_MATRIX
+#include "HYPRE.h" // needed for HYPRE_PARCSR
 
 #include "HYPRE_parcsr_mv.h"
 #include "HYPRE_parcsr_ls.h"
@@ -198,7 +198,7 @@ void HYPRE_SLE::createLinearAlgebraCore(int globalNumEqns,
 
     ierr = HYPRE_NewIJMatrix(comm, &A, globalNumEqns, globalNumEqns);
     assert(!ierr);
-    ierr = HYPRE_SetIJMatrixLocalStorageType(A, HYPRE_PARCSR_MATRIX);
+    ierr = HYPRE_SetIJMatrixLocalStorageType(A, HYPRE_PARCSR);
     assert(!ierr);
     ierr = HYPRE_SetIJMatrixLocalSize(A, localEndRow-localStartRow+1, 
       globalNumEqns);

@@ -151,20 +151,6 @@ hypre_F90_IFACE(hypre_setijmatrixoffdiagrowsize)( long int *matrix,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SetIJMatrixTotalSize
- *--------------------------------------------------------------------------*/
- 
-void
-hypre_F90_IFACE(hypre_setijmatrixtotalsize)( long int *matrix,
-                                             int      *size,
-                                             int      *ierr    )
-{
-   *ierr = (int) ( HYPRE_SetIJMatrixTotalSize( (HYPRE_IJMatrix) *matrix,
-                                               (int)            *size    ) );
-
-}
-
-/*--------------------------------------------------------------------------
  * HYPRE_QueryIJMatrixInsertionSem
  *--------------------------------------------------------------------------*/
  

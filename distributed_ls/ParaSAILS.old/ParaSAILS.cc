@@ -27,7 +27,7 @@
 #include "HYPRE_distributed_matrix_types.h"
 #include "HYPRE_distributed_matrix_protos.h"
 #include "HYPRE_IJ_mv.h"
-#include "HYPRE.h" // needed for HYPRE_PARCSR_MATRIX
+#include "HYPRE.h" // needed for HYPRE_PARCSR
 
 //#include "BlasLapack.h"
 #include "HYPRE_ParaSAILS.h"
@@ -87,7 +87,7 @@ ParaSAILS::ParaSAILS(const HYPRE_DistributedMatrix& mat)
 
     ierr = HYPRE_NewIJMatrix(comm, &M, n, n); // store matrix in object
     assert(!ierr);
-    ierr = HYPRE_SetIJMatrixLocalStorageType(M, HYPRE_PARCSR_MATRIX);
+    ierr = HYPRE_SetIJMatrixLocalStorageType(M, HYPRE_PARCSR);
     assert(!ierr);
     ierr = HYPRE_SetIJMatrixLocalSize(M, my_end_row-my_start_row+1, n);
     assert(!ierr);
