@@ -292,9 +292,9 @@ void HYPRE_LinSysCore::buildSchurReducedSystem()
           {
              if ( HYOutputLevel_ & HYFEI_SCHURREDUCE3 )
              {
-                printf("buildSchurSystem WARNING : lower diag block != 0.\n");
-                printf("%4d : Cmat[%4d,%4d] = %e\n", rowIndex, colIndex,
-                       colVal[j]);
+                printf("%4d : buildSchurSystem WARNING : A22 block != 0\n",
+                       mypid_);
+                printf(" Cmat[%4d,%4d] = %e\n",rowIndex,colIndex,colVal[j]);
              }
           }
        }
@@ -1822,8 +1822,9 @@ void HYPRE_LinSysCore::buildSchurReducedSystem2()
     {
        if ( HYOutputLevel_ & HYFEI_SCHURREDUCE1 )
        {
-          printf("%4d : buildSchurSystem WARNING - A11 not diagonal\n");
-          printf("%4d : buildSchurSystem WARNING - reduction not performed\n");
+          printf("%4d : buildSchurSystem WARNING - A11 not diagonal\n",mypid_);
+          printf("%4d : buildSchurSystem WARNING - reduction not performed\n",
+                 mypid_);
        }
        schurReduction_ = 0;
        delete [] ProcNRows;

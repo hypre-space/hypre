@@ -1524,7 +1524,7 @@ void HYPRE_LinSysCore::buildSlideReducedSystemPartC(int *ProcNRows,
                    {
                       printf("%4d : SlideReductionC WARNING - A12 col index ",
                              mypid_);
-                      printf("out of range %d %d(%d)\n", mypid_, i, 
+                      printf("out of range %d %d(%d)\n", i, 
                               newColInd[newRowSize], A12GlobalNCols);
                    }
                 }
@@ -1543,8 +1543,8 @@ void HYPRE_LinSysCore::buildSlideReducedSystemPartC(int *ProcNRows,
                    {
                       if ( HYOutputLevel_ & HYFEI_SLIDEREDUCE1 )
                       {
-                         printf("%4d : SlideReductionC WARNING - \n");
-                         printf("      A12(%d,%d,%d))\n", mypid_, i, 
+                         printf("%4d : SlideReductionC WARNING - \n",mypid_);
+                         printf("      A12(%d,%d,%d))\n", i, 
                                 newColInd[newRowSize], A12GlobalNCols);
                       }
                    }
@@ -1999,8 +1999,8 @@ void HYPRE_LinSysCore::buildSlideReducedSystem2()
                    {
                       if (HYOutputLevel_ & HYFEI_SLIDEREDUCE1)
                       {
-                         printf("%4d : SlideReduction2 WARNING - ");
-                         printf(" A21(%d,%d(%d))\n", mypid_, rowCount, 
+                         printf("%4d : SlideReduction2 WARNING - ",mypid_);
+                         printf(" A21(%d,%d(%d))\n", rowCount, 
                                 colIndex, A21GlobalNCols);
                       } 
                    } 
@@ -2102,8 +2102,8 @@ void HYPRE_LinSysCore::buildSlideReducedSystem2()
                    {
                       if (HYOutputLevel_ & HYFEI_SLIDEREDUCE1)
                       {
-                         printf("%4d : SlideReduction2 WARNING - ");
-                         printf(" A21(%d,%d(%d))\n", mypid_, rowCount, 
+                         printf("%4d : SlideReduction2 WARNING - ",mypid_);
+                         printf(" A21(%d,%d(%d))\n", rowCount, 
                                 colIndex, A21GlobalNCols);
                       } 
                    } 
@@ -2831,7 +2831,7 @@ void HYPRE_LinSysCore::buildSlideReducedSystem2()
                       {
                          printf("%4d : SlideReduction WARNING - A12 col index",
                                 mypid_);
-                         printf(" out of range %d %d(%d)\n", mypid_, i, 
+                         printf(" out of range %d %d(%d)\n", i, 
                               newColInd[newRowSize], A12GlobalNCols);
                       }
                    }
@@ -2863,7 +2863,7 @@ void HYPRE_LinSysCore::buildSlideReducedSystem2()
                          {
                             printf("%4d : SlideReduction WARNING - A12 col ",
                                    mypid_);
-                            printf(" index out of range %d %d(%d)\n",mypid_,i,
+                            printf(" index out of range %d %d(%d)\n",i,
                                 newColInd[newRowSize], A12GlobalNCols);
                          }
                       }

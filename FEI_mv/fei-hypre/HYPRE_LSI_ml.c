@@ -1279,8 +1279,8 @@ int HYPRE_LSI_MLConstructMHMatrix(HYPRE_ParCSRMatrix A, MH_Matrix *mh_mat,
              index = sendList[i][j] - startRow;
              if ( index < 0 || index >= localEqns )
              {
-                printf("%d : Construct MH matrix Error - index out ");
-                printf("of range%d\n", my_id, index);
+                printf("%d : Construct MH matrix Error - index out ",my_id);
+                printf("of range %d\n", index);
              }
              sendList[i][j] = index;
           }
