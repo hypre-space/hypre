@@ -590,9 +590,6 @@ then
       CASC_SET_CXXDEBUG(-g)
       CASC_SET_FOPT(-O -silent)
       CASC_SET_FDEBUG(-g -silent)
-
-      AC_DEFINE(HYPRE_SOLARIS)
-
    ;;
 
     LINUX | Linux )
@@ -627,9 +624,6 @@ then
       CASC_SET_CXXDEBUG(-g)
       CASC_SET_FOPT(-O)
       CASC_SET_FDEBUG(-g)
-
-      AC_DEFINE(HYPRE_LINUX)
-
    ;;
 
    alpha)
@@ -704,9 +698,6 @@ then
      then
        casc_using_blas=yes
      fi
-
-     AC_DEFINE(HYPRE_ALPHA)
-
    ;;
 
    rs6000)
@@ -771,9 +762,6 @@ then
      then
        casc_using_blas=yes
      fi
-
-     AC_DEFINE(HYPRE_RS6000)
-
    ;;
 
    IRIX64)
@@ -824,16 +812,29 @@ then
      CASC_SET_CXXDEBUG(-g)
      CASC_SET_FOPT(-O)
      CASC_SET_FDEBUG(-g)
-
-     AC_DEFINE(HYPRE_IRIX64)
-
    ;;
    
   esac
 
 fi
 
-
+case $ARCH in
+  sun4 | solaris )
+    AC_DEFINE(HYPRE_SOLARIS)
+  ;;
+  LINUX | Linux )
+    AC_DEFINE(HYPRE_LINUX)
+  ;;
+  alpha)
+    AC_DEFINE(HYPRE_ALPHA)
+  ;;
+  rs6000)
+    AC_DEFINE(HYPRE_RS6000)
+  ;;
+  IRIX64)
+    AC_DEFINE(HYPRE_IRIX64)
+  ;;
+esac
 
 if test -z "$CC"
 then
