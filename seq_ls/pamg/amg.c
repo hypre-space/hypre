@@ -28,12 +28,14 @@ hypre_AMGInitialize()
    /* setup params */
    int      max_levels;
    double   strong_threshold;
+   int      coarsen_type;
    int      interp_type;
 
    /* solve params */
    int      max_iter;
    int      cycle_type;    
  
+   double   relax_weight;
    double   tol;
 
    int     *num_grid_sweeps;  
@@ -55,12 +57,14 @@ hypre_AMGInitialize()
    /* setup params */
    max_levels = 25;
    strong_threshold = 0.25;
+   coarsen_type = 0;
    interp_type = 200;
 
    /* solve params */
    max_iter  = 20;
    cycle_type = 1;
    tol = 1.0e-7;
+   relax_weight = 1.0;
 
    num_grid_sweeps = hypre_CTAlloc(int,4);
    grid_relax_type = hypre_CTAlloc(int,4);
@@ -69,7 +73,7 @@ hypre_AMGInitialize()
    for (j = 0; j < 3; j++)
    {
       num_grid_sweeps[j] = 2;
-      grid_relax_type[j] = 1; 
+      grid_relax_type[j] = 0; 
       grid_relax_points[j] = hypre_CTAlloc(int,2); 
       grid_relax_points[j][0] = 1;
       grid_relax_points[j][1] = -1;
@@ -92,6 +96,7 @@ hypre_AMGInitialize()
 
    hypre_AMGSetMaxLevels(amg_data, max_levels);
    hypre_AMGSetStrongThreshold(amg_data, strong_threshold);
+   hypre_AMGSetCoarsenType(amg_data, coarsen_type);
    hypre_AMGSetInterpType(amg_data, interp_type);
 
    hypre_AMGSetMaxIter(amg_data, max_iter);
@@ -100,6 +105,7 @@ hypre_AMGInitialize()
    hypre_AMGSetNumGridSweeps(amg_data, num_grid_sweeps);
    hypre_AMGSetGridRelaxType(amg_data, grid_relax_type);
    hypre_AMGSetGridRelaxPoints(amg_data, grid_relax_points);
+   hypre_AMGSetRelaxWeight(amg_data, relax_weight);
 
    hypre_AMGSetIOutDat(amg_data, ioutdat);
    hypre_AMGSetLogFileName(amg_data, log_file_name); 
@@ -146,6 +152,18 @@ hypre_AMGSetStrongThreshold( void     *data,
    hypre_AMGData  *amg_data = data;
  
    hypre_AMGDataStrongThreshold(amg_data) = strong_threshold;
+
+   return (ierr);
+}
+
+int
+hypre_AMGSetCoarsenType( void     *data,
+                        int       coarsen_type )
+{
+   int ierr = 0;
+   hypre_AMGData  *amg_data = data;
+
+   hypre_AMGDataCoarsenType(amg_data) = coarsen_type;
 
    return (ierr);
 }
@@ -232,6 +250,18 @@ hypre_AMGSetGridRelaxPoints( void     *data,
    hypre_AMGData  *amg_data = data;
 
    hypre_AMGDataGridRelaxPoints(amg_data) = grid_relax_points; 
+
+   return (ierr);
+}
+
+int
+hypre_AMGSetRelaxWeight( void     *data,
+                         double    relax_weight )
+{
+   int ierr = 0;
+   hypre_AMGData  *amg_data = data;
+
+   hypre_AMGDataRelaxWeight(amg_data) = relax_weight; 
 
    return (ierr);
 }
