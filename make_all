@@ -1,0 +1,36 @@
+#!/bin/csh -f
+#
+pushd distributed_matrix
+rm *.o
+make lib
+popd
+#
+pushd distributed_linear_solvers/pilut
+rm *.o
+make lib
+popd
+#
+pushd matrix_matrix
+rm *.o
+make lib
+popd
+#
+pushd PETScMat_linear_solvers/pilut
+rm *.o
+make lib
+popd
+#
+pushd PETSc_linear_solvers/ParILUT
+rm *.o
+make lib
+popd
+#
+pushd struct_matrix_vector_andy
+rm *.o
+make lib
+popd
+#
+pushd struct_linear_solvers_andy
+rm *.o
+make lib
+popd
