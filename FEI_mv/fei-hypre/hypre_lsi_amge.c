@@ -40,7 +40,7 @@ int    rowLeng=0;
 int    *i_element_node_0;
 int    *j_element_node_0;
 int    num_nodes, num_elements;
-int    *i_node_on_boundary;
+int    *i_dof_on_boundary;
 int    system_size=1, num_dofs;
 int    element_count=0;
 int    temp_elemat_cnt;
@@ -65,7 +65,7 @@ int HYPRE_LSI_AMGeCreate()
    temp_elem_node     = NULL;
    temp_elem_node_cnt = NULL;
    temp_elem_data     = NULL;
-   i_node_on_boundary = NULL;
+   i_dof_on_boundary  = NULL;
    return 0;
 }
 
@@ -80,7 +80,7 @@ int HYPRE_LSI_AMGeDestroy()
    printf("LSI_AMGe destructor\n");
    if ( i_element_node_0   != NULL ) free( i_element_node_0 );
    if ( j_element_node_0   != NULL ) free( j_element_node_0 );
-   if ( i_node_on_boundary != NULL ) free( i_node_on_boundary );
+   if ( i_dof_on_boundary  != NULL ) free( i_dof_on_boundary );
    if ( temp_elem_node_cnt != NULL ) free( temp_elem_node_cnt );
    for ( i = 0; i < num_elements; i++ )
    {
@@ -103,8 +103,6 @@ int HYPRE_LSI_AMGeSetNNodes(int nNodes)
 
    printf("LSI_AMGe NNodes = %d\n", nNodes);
    num_nodes = nNodes;
-   i_node_on_boundary = (int *) malloc(nNodes * sizeof(int));
-   for ( i = 0; i < nNodes; i++ ) i_node_on_boundary[i] = -1;
    return 0;
 }
 
@@ -149,9 +147,17 @@ int HYPRE_LSI_AMGeSetBoundary(int size, int *list)
    int i;
 
    printf("LSI_AMGe SetBoundary = %d\n", size);
+
+   if ( i_dof_on_boundary == NULL )
+      i_dof_on_boundary = (int *) malloc(num_nodes * system_size * sizeof(int));
+   for ( i = 0; i < num_nodes*system_size; i++ ) i_dof_on_boundary[i] = -1;
+
    for ( i = 0; i < size; i++ ) 
-      if (list[i] >= 0 && list[i] < num_nodes) i_node_on_boundary[list[i]] = 0;
-      else printf("AMGeSetBoundary ERROR : %d\n", list[i]);
+   {
+      if (list[i] >= 0 && list[i] < num_nodes*system_size) 
+         i_dof_on_boundary[list[i]] = 0;
+      else printf("AMGeSetBoundary ERROR : %d(%d)\n", list[i],num_nodes*system_size);
+   }
    return 0;
 }
 
@@ -170,19 +176,17 @@ int HYPRE_LSI_AMGePutRow(int row, int length, const double *colVal,
          printf("LSI_AMGe PutRow %d\n", element_count);
       if ( element_count < 0 || element_count >= num_elements )
          printf("ERROR : element count too large %d\n",element_count);
+
       temp_elem_node_cnt[element_count] = length / system_size;
       nbytes = length / system_size * sizeof(int);
       temp_elem_node[element_count] = (int *) malloc( nbytes );
       for ( i = 0; i < length; i+=system_size ) 
-         temp_elem_node[element_count][i/system_size] = (colInd[i]-1) / system_size;
+         temp_elem_node[element_count][i/system_size] = (colInd[i]-1)/system_size;
       nbytes = length * length * sizeof(double);
       temp_elem_data[element_count] = (double *) malloc(nbytes);
       temp_elemat_cnt = 0;
       rowLeng = length;
    }
-   if ( row != temp_elem_node[element_count][temp_elemat_cnt*system_size/rowLeng]+1 )
-      printf("AMGePutRow discrepancy : %d versus %d\n",row,
-              temp_elem_node[element_count][temp_elemat_cnt*system_size/rowLeng]+1);
    for ( i = 0; i < length; i++ ) 
       temp_elem_data[element_count][temp_elemat_cnt++] = colVal[i];
    if ( temp_elemat_cnt == rowLeng * rowLeng )
@@ -221,7 +225,7 @@ int HYPRE_LSI_AMGeSolve(double *rhs, double *x)
 
    /* Dirichlet boundary conditions information: ------------------- */
 
-   int *i_dof_on_boundary;
+   /* int *i_dof_on_boundary; */
 
    /* nested dissection blocks: ------------------------------------ */
 
@@ -270,7 +274,7 @@ int HYPRE_LSI_AMGeSolve(double *rhs, double *x)
    /* set num_nodes, num_elements                                    */
    /* fill up element_data                                           */
    /* fill up i_element_node_0 and j_element_node_0                  */
-   /* fill up i_node_on_boundary (0 - boundary, -1 otherwise)        */
+   /* fill up i_dof_on_boundary (0 - boundary, 1 - otherwise)        */
    /* ===============================================================*/
 
    num_elements = element_count;
@@ -367,6 +371,7 @@ int HYPRE_LSI_AMGeSolve(double *rhs, double *x)
 
    Num_dofs[0] = num_dofs;
 
+   /*
    if (system_size == 1) i_dof_on_boundary = i_node_on_boundary;
    else
    {
@@ -375,6 +380,7 @@ int HYPRE_LSI_AMGeSolve(double *rhs, double *x)
       free(i_node_on_boundary);
       i_node_on_boundary = NULL;
    }
+   */
 
    /* -------------------------------------------------------------- */
    /* get element_dof information                                    */
@@ -426,6 +432,7 @@ int HYPRE_LSI_AMGeSolve(double *rhs, double *x)
                 Num_elements, Num_nodes, Num_dofs);
 
    hypre_TFree(i_dof_on_boundary);
+   i_dof_on_boundary = NULL;
    hypre_TFree(i_dof_node_0);
    hypre_TFree(j_dof_node_0);
 
@@ -669,9 +676,9 @@ int HYPRE_LSI_AMGeWriteToFile()
 
    fp = fopen("node_bc", "w");
 
-   for (i = 0; i < num_nodes; i++) 
+   for (i = 0; i < num_nodes*system_size; i++) 
    {
-      fprintf(fp, "%d\n", i_node_on_boundary[i]);
+      fprintf(fp, "%d\n", i_dof_on_boundary[i]);
    }
    fclose(fp);
 
