@@ -55,17 +55,7 @@ dev_ps: dev_manual.ps
 
 USR_FILES =\
  usr_building_code.tex\
- usr_code_description.tex\
- usr_data.tex\
- usr_expected_results.tex\
- usr_files_included.tex\
- usr_manual.tex\
- usr_memory.tex\
- usr_optimization.tex\
- usr_release_record.tex\
- usr_running_code.tex\
- usr_scalability.tex\
- usr_timing.tex
+ usr_manual.tex
 
 usr_manual/usr_manual.html: usr_manual.dvi
 	latex2html ${ONLINE_OPTS} usr_manual.tex
