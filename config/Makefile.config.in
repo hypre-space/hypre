@@ -1,0 +1,46 @@
+#BHEADER***********************************************************************
+# (c) 1998   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+@SET_MAKE@
+
+SHELL = /bin/sh
+
+srcdir = @srcdir@
+VPATH = @srcdir@
+
+
+.SUFFIXES:
+.SUFFIXES: .o .f .c .C .cxx
+
+.f.o:
+	$(F77) $(FFLAGS) -c $< 
+.c.o:
+	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< 
+.C.o:
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c $<
+.cxx.o:
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c $<
+
+
+F77       = @F77@
+FFLAGS    = @FFLAGS@ @F77FLAGS@ $(FFLAGS_EXTRA)
+
+CC        = @CC@
+CFLAGS    = @CFLAGS@ $(CFLAGS_EXTRA)
+
+CXX       = @CXX@
+CXXFLAGS  = @CXX_FLAGS@ $(CXXFLAGS_EXTRA)
+
+CPPFLAGS  = -DHAVE_CONFIG_H -I. $(CPPFLAGS_EXTRA)
+
+AR	  = @AR@ -rcu
+RANLIB    = @RANLIB@
+
+LDFLAGS   = @LDFLAGS@ $(LDFLAGS_EXTRA)
+LDLIBS    = $(LDLIBS_EXTRA) @LDLIBS@

@@ -1,4 +1,4 @@
-/* config/HYPRE_config.h.in.  Generated from configure.ac by autoheader.  */
+/* config/HYPRE_config.h.in.  Generated from configure.in by autoheader.  */
 
 /* Define to dummy `main' function (if any) required to link to the Fortran
    libraries. */
@@ -14,7 +14,7 @@
 /* Define if F77 and FC dummy `main' functions are identical. */
 #undef FC_DUMMY_MAIN_EQ_F77
 
-/* Define if you have a BLAS library. */
+/* BLAS library is system or user provided. */
 #undef HAVE_BLAS
 
 /* Define to 1 if you have the `bzero' function. */
@@ -38,7 +38,7 @@
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
-/* Define if you have LAPACK library. */
+/* LAPACK library is system or user provided. */
 #undef HAVE_LAPACK
 
 /* Define to 1 if you have the <limits.h> header file. */
@@ -110,26 +110,20 @@
 /* HYPRE timing routines are being used */
 #undef HYPRE_TIMING
 
-/* Using Hypre lsame and xerbla */
-#undef HYPRE_USING_BLAS_WRAPPERS
-
 /* Using dxml for Blas */
 #undef HYPRE_USING_DXML
 
 /* Using essl for Blas */
 #undef HYPRE_USING_ESSL
 
-/* Using Hypre Blas Library */
+/* Using internal Hypre routines. */
 #undef HYPRE_USING_HYPRE_BLAS
 
-/* Using Hypre LAPACK Library */
+/* Using internal Hypre routines. */
 #undef HYPRE_USING_HYPRE_LAPACK
 
 /* Enable OpenMP support */
 #undef HYPRE_USING_OPENMP
-
-/* Name of package */
-#undef PACKAGE
 
 /* Define to the address where bug reports for this package should be sent. */
 #undef PACKAGE_BUGREPORT
@@ -163,9 +157,6 @@
 
 /* Define to 1 if you can safely include both <sys/time.h> and <time.h>. */
 #undef TIME_WITH_SYS_TIME
-
-/* Version number of package */
-#undef VERSION
 
 /* Define to empty if `const' does not conform to ANSI C. */
 #undef const
