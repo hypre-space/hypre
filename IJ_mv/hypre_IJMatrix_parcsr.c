@@ -617,7 +617,7 @@ hypre_AddIJMatrixRowParCSR(hypre_IJMatrix *matrix,
 	    }
 	    if (local_j[i] == tmp_j[indx])
 	    {
-	       local_j[i] += tmp_j[indx];
+	       local_j[i] = tmp_j[indx];
 	       local_data[i] += tmp_data[indx++];
 	    }
 	 }
@@ -690,7 +690,7 @@ hypre_AddIJMatrixRowParCSR(hypre_IJMatrix *matrix,
 	    }
 	    if (diag_j[i] == tmp_diag_j[indx])
 	    {
-	       diag_j[i] += tmp_diag_j[indx];
+	       diag_j[i] = tmp_diag_j[indx];
 	       diag_data[i] += tmp_diag_data[indx++];
 	    }
 	 }
@@ -722,7 +722,7 @@ hypre_AddIJMatrixRowParCSR(hypre_IJMatrix *matrix,
 	    }
 	    if (offd_j[i] == tmp_offd_j[indx])
 	    {
-	       offd_j[i] += tmp_offd_j[indx];
+	       offd_j[i] = tmp_offd_j[indx];
 	       offd_data[i] += tmp_offd_data[indx++];
 	    }
 	 }
