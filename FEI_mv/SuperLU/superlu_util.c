@@ -407,8 +407,8 @@ int PrintInt10(char *name, int len, int *x)
 #define HYPRE_USING_BLAS_WRAPPERS 1
 #endif
 #endif
-#ifdef HYPRE_USING_BLAS_WRAPPERS
-int lsame_(char *ca, char *cb)
+/*#ifdef HYPRE_USING_BLAS_WRAPPERS*/
+int slulsame_(char *ca, char *cb)
 {
 /*  -- LAPACK auxiliary routine (version 2.0) --   
        Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,   
@@ -477,9 +477,9 @@ int lsame_(char *ca, char *cb)
     ret_val = inta == intb;
     return ret_val;
     
-} /* lsame_ */
+} /* slulsame_ */
 
-/* Subroutine */ int xerbla_(char *srname, int *info)
+/* Subroutine */ int sluxerbla_(char *srname, int *info)
 {
 /*  -- LAPACK auxiliary routine (version 2.0) --   
        Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,   
@@ -517,7 +517,9 @@ int lsame_(char *ca, char *cb)
 /*     End of XERBLA */
 
     return 0;
-} /* xerbla_ */
+} /* sluxerbla_ */
+
+#ifdef HYPRE_USING_BLAS_WRAPPERS
 
 #define TRUE_ (1)
 #define FALSE_ (0)
@@ -623,25 +625,25 @@ double dlamch_(char *cmach)
 	}
     }
 
-    if (lsame_(cmach, "E")) {
+    if (slulsame_(cmach, "E")) {
 	rmach = eps;
-    } else if (lsame_(cmach, "S")) {
+    } else if (slulsame_(cmach, "S")) {
 	rmach = sfmin;
-    } else if (lsame_(cmach, "B")) {
+    } else if (slulsame_(cmach, "B")) {
 	rmach = base;
-    } else if (lsame_(cmach, "P")) {
+    } else if (slulsame_(cmach, "P")) {
 	rmach = prec;
-    } else if (lsame_(cmach, "N")) {
+    } else if (slulsame_(cmach, "N")) {
 	rmach = t;
-    } else if (lsame_(cmach, "R")) {
+    } else if (slulsame_(cmach, "R")) {
 	rmach = rnd;
-    } else if (lsame_(cmach, "M")) {
+    } else if (slulsame_(cmach, "M")) {
 	rmach = emin;
-    } else if (lsame_(cmach, "U")) {
+    } else if (slulsame_(cmach, "U")) {
 	rmach = rmin;
-    } else if (lsame_(cmach, "L")) {
+    } else if (slulsame_(cmach, "L")) {
 	rmach = emax;
-    } else if (lsame_(cmach, "O")) {
+    } else if (slulsame_(cmach, "O")) {
 	rmach = rmax;
     }
 

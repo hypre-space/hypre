@@ -163,11 +163,11 @@
 #define dgemm_    dgemm
 #define dtrsm_    dtrsm
 
-#define xerbla_   xerbla
+#define sluxerbla_   sluxerbla
 #define dpotrf_   dpotrf
 #define dgels_    dgels
 #define dpotrs_   dpotrs
-#define lsame_    lsame
+#define slulsame_    slulsame
 #define dlamch_   dlamch
 
 #define scasum_   scasum

@@ -103,14 +103,14 @@ sp_dtrsv(char *uplo, char *trans, char *diag, SuperMatrix *L,
 
     /* Test the input parameters */
     *info = 0;
-    if ( !lsame_(uplo,"L") && !lsame_(uplo, "U") ) *info = -1;
-    else if ( !lsame_(trans, "N") && !lsame_(trans, "T") ) *info = -2;
-    else if ( !lsame_(diag, "U") && !lsame_(diag, "N") ) *info = -3;
+    if ( !slulsame_(uplo,"L") && !slulsame_(uplo, "U") ) *info = -1;
+    else if ( !slulsame_(trans, "N") && !slulsame_(trans, "T") ) *info = -2;
+    else if ( !slulsame_(diag, "U") && !slulsame_(diag, "N") ) *info = -3;
     else if ( L->nrow != L->ncol || L->nrow < 0 ) *info = -4;
     else if ( U->nrow != U->ncol || U->nrow < 0 ) *info = -5;
     if ( *info ) {
 	i = -(*info);
-	xerbla_("sp_dtrsv ", &i);
+	sluxerbla_("sp_dtrsv ", &i);
 	return 0;
     }
 
@@ -123,9 +123,9 @@ sp_dtrsv(char *uplo, char *trans, char *diag, SuperMatrix *L,
     if ( !(work = doubleCalloc(L->nrow)) )
 	ABORT("Malloc fails for work in sp_dtrsv().");
     
-    if ( lsame_(trans, "N") ) {	/* Form x := inv(A)*x. */
+    if ( slulsame_(trans, "N") ) {	/* Form x := inv(A)*x. */
 	
-	if ( lsame_(uplo, "L") ) {
+	if ( slulsame_(uplo, "L") ) {
 	    /* Form x := inv(L)*x */
     	    if ( L->nrow == 0 ) return 0; /* Quick return */
 	    
@@ -224,7 +224,7 @@ sp_dtrsv(char *uplo, char *trans, char *diag, SuperMatrix *L,
 	}
     } else { /* Form x := inv(A')*x */
 	
-	if ( lsame_(uplo, "L") ) {
+	if ( slulsame_(uplo, "L") ) {
 	    /* Form x := inv(L')*x */
     	    if ( L->nrow == 0 ) return 0; /* Quick return */
 	    
@@ -377,18 +377,18 @@ sp_dgemv(char *trans, double alpha, SuperMatrix *A, double *x,
     int iy, jx, jy, kx, ky;
     int notran;
 
-    notran = lsame_(trans, "N");
+    notran = slulsame_(trans, "N");
     Astore = A->Store;
     Aval = Astore->nzval;
     
     /* Test the input parameters */
     info = 0;
-    if ( !notran && !lsame_(trans, "T") && !lsame_(trans, "C")) info = 1;
+    if ( !notran && !slulsame_(trans, "T") && !slulsame_(trans, "C")) info = 1;
     else if ( A->nrow < 0 || A->ncol < 0 ) info = 3;
     else if (incx == 0) info = 5;
     else if (incy == 0)	info = 8;
     if (info != 0) {
-	xerbla_("sp_dgemv ", &info);
+	sluxerbla_("sp_dgemv ", &info);
 	return 0;
     }
 
@@ -398,7 +398,7 @@ sp_dgemv(char *trans, double alpha, SuperMatrix *A, double *x,
 
     /* Set  LENX  and  LENY, the lengths of the vectors x and y, and set 
        up the start points in  X  and  Y. */
-    if (lsame_(trans, "N")) {
+    if (slulsame_(trans, "N")) {
 	lenx = A->ncol;
 	leny = A->nrow;
     } else {

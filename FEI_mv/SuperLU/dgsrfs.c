@@ -167,8 +167,9 @@ dgsrfs(char *trans, SuperMatrix *A, SuperMatrix *L, SuperMatrix *U,
     
     /* Test the input parameters */
     *info = 0;
-    notran = lsame_(trans, "N");
-    if ( !notran && !lsame_(trans, "T") && !lsame_(trans, "C"))	*info = -1;
+    notran = slulsame_(trans, "N");
+    if ( !notran && !slulsame_(trans, "T") && !slulsame_(trans, "C"))	
+        *info = -1;
     else if ( A->nrow != A->ncol || A->nrow < 0 ||
 	      A->Stype != NC || A->Dtype != D_D || A->Mtype != GE )
 	*info = -2;
@@ -186,7 +187,7 @@ dgsrfs(char *trans, SuperMatrix *A, SuperMatrix *L, SuperMatrix *U,
 	*info = -11;
     if (*info != 0) {
 	i = -(*info);
-	xerbla_("dgsrfs", &i);
+	sluxerbla_("dgsrfs", &i);
 	return;
     }
 
@@ -199,8 +200,8 @@ dgsrfs(char *trans, SuperMatrix *A, SuperMatrix *L, SuperMatrix *U,
 	return;
     }
 
-    rowequ = lsame_(equed, "R") || lsame_(equed, "B");
-    colequ = lsame_(equed, "C") || lsame_(equed, "B");
+    rowequ = slulsame_(equed, "R") || slulsame_(equed, "B");
+    colequ = slulsame_(equed, "C") || slulsame_(equed, "B");
     
     /* Allocate working space */
     work = doubleMalloc(2*A->nrow);

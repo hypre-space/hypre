@@ -79,8 +79,8 @@ dgscon(char *norm, SuperMatrix *L, SuperMatrix *U,
     
     /* Test the input parameters. */
     *info = 0;
-    onenrm = *(unsigned char *)norm == '1' || lsame_(norm, "O");
-    if (! onenrm && ! lsame_(norm, "I")) *info = -1;
+    onenrm = *(unsigned char *)norm == '1' || slulsame_(norm, "O");
+    if (! onenrm && ! slulsame_(norm, "I")) *info = -1;
     else if (L->nrow < 0 || L->nrow != L->ncol ||
              L->Stype != SC || L->Dtype != D_D || L->Mtype != TRLU)
 	 *info = -2;
@@ -89,7 +89,7 @@ dgscon(char *norm, SuperMatrix *L, SuperMatrix *U,
 	*info = -3;
     if (*info != 0) {
 	i = -(*info);
-	xerbla_("dgscon", &i);
+	sluxerbla_("dgscon", &i);
 	return;
     }
 

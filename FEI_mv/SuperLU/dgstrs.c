@@ -113,8 +113,9 @@ dgstrs (char *trans, SuperMatrix *L, SuperMatrix *U,
     Bstore = B->Store;
     ldb = Bstore->lda;
     nrhs = B->ncol;
-    notran = lsame_(trans, "N");
-    if ( !notran && !lsame_(trans, "T") && !lsame_(trans, "C") ) *info = -1;
+    notran = slulsame_(trans, "N");
+    if ( !notran && !slulsame_(trans, "T") && !slulsame_(trans, "C") ) 
+        *info = -1;
     else if ( L->nrow != L->ncol || L->nrow < 0 ||
 	      L->Stype != SC || L->Dtype != D_D || L->Mtype != TRLU )
 	*info = -2;
@@ -126,7 +127,7 @@ dgstrs (char *trans, SuperMatrix *L, SuperMatrix *U,
 	*info = -6;
     if ( *info ) {
 	i = -(*info);
-	xerbla_("dgstrs", &i);
+	sluxerbla_("dgstrs", &i);
 	return;
     }
 

@@ -1,6 +1,6 @@
 #include "dsp_defs.h"
 
-extern int xerbla_(char *srname, int *info);
+extern int sluxerbla_(char *srname, int *info);
 
 /* local prototype */
 int sp_ienv ( int ispec );
@@ -61,7 +61,7 @@ sp_ienv(int ispec)
 
     /* Invalid value for ISPEC */
     i = 1;
-    xerbla_("sp_ienv ", &i);
+    sluxerbla_("sp_ienv ", &i);
     return 0;
 
 } /* sp_ienv_ */

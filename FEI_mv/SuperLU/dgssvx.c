@@ -400,29 +400,30 @@ printf("dgssvx: fact=%c, trans=%c, refact=%c, equed=%c\n",
 #endif
     
     *info = 0;
-    nofact = lsame_(fact, "N");
-    equil = lsame_(fact, "E");
-    notran = lsame_(trans, "N");
+    nofact = slulsame_(fact, "N");
+    equil = slulsame_(fact, "E");
+    notran = slulsame_(trans, "N");
     if (nofact || equil) {
 	*(unsigned char *)equed = 'N';
 	rowequ = FALSE;
 	colequ = FALSE;
     } else {
-	rowequ = lsame_(equed, "R") || lsame_(equed, "B");
-	colequ = lsame_(equed, "C") || lsame_(equed, "B");
+	rowequ = slulsame_(equed, "R") || slulsame_(equed, "B");
+	colequ = slulsame_(equed, "C") || slulsame_(equed, "B");
 	smlnum = dlamch_("Safe minimum");
 	bignum = 1. / smlnum;
     }
 
     /* Test the input parameters */
-    if (!nofact && !equil && !lsame_(fact, "F")) *info = -1;
-    else if (!notran && !lsame_(trans, "T") && !lsame_(trans, "C")) *info = -2;
-    else if ( !(lsame_(refact,"Y") || lsame_(refact, "N")) ) *info = -3;
+    if (!nofact && !equil && !slulsame_(fact, "F")) *info = -1;
+    else if (!notran && !slulsame_(trans, "T") && !slulsame_(trans, "C")) 
+       *info = -2;
+    else if ( !(slulsame_(refact,"Y") || slulsame_(refact, "N")) ) *info = -3;
     else if ( A->nrow != A->ncol || A->nrow < 0 ||
 	      (A->Stype != NC && A->Stype != NR) ||
 	      A->Dtype != D_D || A->Mtype != GE )
 	*info = -4;
-    else if (lsame_(fact, "F") && !(rowequ || colequ || lsame_(equed, "N")))
+    else if (slulsame_(fact, "F") && !(rowequ || colequ || slulsame_(equed, "N")))
 	*info = -9;
     else {
 	if (rowequ) {
@@ -463,7 +464,7 @@ printf("dgssvx: fact=%c, trans=%c, refact=%c, equed=%c\n",
     }
     if (*info != 0) {
 	i = -(*info);
-	xerbla_("dgssvx", &i);
+	sluxerbla_("dgssvx", &i);
 	return;
     }
     
@@ -512,8 +513,8 @@ printf("dgssvx: fact=%c, trans=%c, refact=%c, equed=%c\n",
 	if ( info1 == 0 ) {
 	    /* Equilibrate matrix A. */
 	    dlaqgs(AA, R, C, rowcnd, colcnd, amax, equed);
-	    rowequ = lsame_(equed, "R") || lsame_(equed, "B");
-	    colequ = lsame_(equed, "C") || lsame_(equed, "B");
+	    rowequ = slulsame_(equed, "R") || slulsame_(equed, "B");
+	    colequ = slulsame_(equed, "C") || slulsame_(equed, "B");
 	}
 	utime[EQUIL] = SuperLU_timer_() - t0;
     }

@@ -92,7 +92,7 @@ dgsequ(SuperMatrix *A, double *r, double *c, double *rowcnd,
 	*info = -1;
     if (*info != 0) {
 	i = -(*info);
-	xerbla_("dgsequ", &i);
+	sluxerbla_("dgsequ", &i);
 	return;
     }
 

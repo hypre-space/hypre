@@ -140,7 +140,7 @@ dgssv(SuperMatrix *A, int *perm_c, int *perm_r, SuperMatrix *L,
 	*info = -6;
     if ( *info != 0 ) {
 	i = -(*info);
-	xerbla_("dgssv", &i);
+	sluxerbla_("dgssv", &i);
 	return;
     }
     
