@@ -39,6 +39,8 @@ ac_help="$ac_help
                           than -l and -L are needed to link with mpi libraries"
 ac_help="$ac_help
   --with-MPICC=ARG        ARG is mpicc or similar MPI C compiling tool"
+ac_help="$ac_help
+  --with-dmalloc          use dmalloc package"
 
 # Initialize some variables set by options.
 # The variables have the same names as the options, with
@@ -634,7 +636,7 @@ else
   yes;
 #endif
 EOF
-if { ac_try='${CC-cc} -E conftest.c'; { (eval echo configure:638: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }; } | egrep yes >/dev/null 2>&1; then
+if { ac_try='${CC-cc} -E conftest.c'; { (eval echo configure:640: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }; } | egrep yes >/dev/null 2>&1; then
   ac_cv_prog_gcc=yes
 else
   ac_cv_prog_gcc=no
@@ -722,7 +724,7 @@ else
   yes;
 #endif
 EOF
-if { ac_try='${CXX-g++} -E conftest.C'; { (eval echo configure:726: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }; } | egrep yes >/dev/null 2>&1; then
+if { ac_try='${CXX-g++} -E conftest.C'; { (eval echo configure:728: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }; } | egrep yes >/dev/null 2>&1; then
   ac_cv_prog_gxx=yes
 else
   ac_cv_prog_gxx=no
@@ -777,13 +779,13 @@ else
   # On the NeXT, cc -E runs the code through the compiler's parser,
   # not just through cpp.
   cat > conftest.$ac_ext <<EOF
-#line 781 "configure"
+#line 783 "configure"
 #include "confdefs.h"
 #include <assert.h>
 Syntax Error
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:787: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:789: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out`
 if test -z "$ac_err"; then
   :
@@ -792,13 +794,13 @@ else
   rm -rf conftest*
   CPP="${CC-cc} -E -traditional-cpp"
   cat > conftest.$ac_ext <<EOF
-#line 796 "configure"
+#line 798 "configure"
 #include "confdefs.h"
 #include <assert.h>
 Syntax Error
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:802: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:804: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out`
 if test -z "$ac_err"; then
   :
@@ -897,22 +899,12 @@ case $ARCH in
    fi
    
 
-      if test "$CC" = "gcc"
-      then
-         
-   if test -z "$CDEBUG"; then
-      CDEBUG="-g -Wall"
-   fi
-   
-
-      else
-         
+      
    if test -z "$CDEBUG"; then
       CDEBUG="-g"
    fi
    
 
-      fi
    ;;
 
    rs6000)
@@ -1006,7 +998,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS=" $LIBS -lpthread"
 cat > conftest.$ac_ext <<EOF
-#line 1010 "configure"
+#line 1002 "configure"
 #include "confdefs.h"
 /* Override any gcc2 internal prototype to avoid an error.  */
 /* We use char because int might match the return type of a gcc2
@@ -1018,7 +1010,7 @@ int t() {
 pthread_create()
 ; return 0; }
 EOF
-if { (eval echo configure:1022: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
+if { (eval echo configure:1014: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -1050,7 +1042,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS=" $LIBS -lpthreads"
 cat > conftest.$ac_ext <<EOF
-#line 1054 "configure"
+#line 1046 "configure"
 #include "confdefs.h"
 /* Override any gcc2 internal prototype to avoid an error.  */
 /* We use char because int might match the return type of a gcc2
@@ -1062,7 +1054,7 @@ int t() {
 pthread_create()
 ; return 0; }
 EOF
-if { (eval echo configure:1066: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
+if { (eval echo configure:1058: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -1237,7 +1229,7 @@ if test "${with_MPICC+set}" = set; then
   withval="$with_MPICC"
   MPICC=$withval
 else
-  for ac_prog in mpicc mpcc tmcc hcc
+  for ac_prog in mpicc mpcc tmcc hcc cicc
 do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -1318,12 +1310,12 @@ if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1322 "configure"
+#line 1314 "configure"
 #include "confdefs.h"
 #include <$casc_mpi_include_dir/mpi.h>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:1327: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:1319: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -1355,12 +1347,12 @@ if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1359 "configure"
+#line 1351 "configure"
 #include "confdefs.h"
 #include <$casc_mpi_include_dir/mpi.h>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:1364: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:1356: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -1397,12 +1389,12 @@ if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1401 "configure"
+#line 1393 "configure"
 #include "confdefs.h"
 #include <$casc_mpi_include_dir/mpi.h>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:1406: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:1398: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -1440,12 +1432,12 @@ if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1444 "configure"
+#line 1436 "configure"
 #include "confdefs.h"
 #include <$casc_mpi_include_dir/mpi.h>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:1449: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:1441: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -1482,12 +1474,12 @@ if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1486 "configure"
+#line 1478 "configure"
 #include "confdefs.h"
 #include <$casc_mpi_include_dir/mpi.h>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:1491: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:1483: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -1529,7 +1521,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="$MPILIBDIRS $MPILIBS $LIBS -l$casc_lib"
 cat > conftest.$ac_ext <<EOF
-#line 1533 "configure"
+#line 1525 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1537,7 +1529,7 @@ int t() {
 main()
 ; return 0; }
 EOF
-if { (eval echo configure:1541: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
+if { (eval echo configure:1533: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -1569,7 +1561,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-L$casc_lib_dir $MPILIBDIRS $MPILIBS -l$casc_lib $LIBS -l$casc_lib"
 cat > conftest.$ac_ext <<EOF
-#line 1573 "configure"
+#line 1565 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1577,7 +1569,7 @@ int t() {
 main()
 ; return 0; }
 EOF
-if { (eval echo configure:1581: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
+if { (eval echo configure:1573: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -1837,12 +1829,12 @@ if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1841 "configure"
+#line 1833 "configure"
 #include "confdefs.h"
 #include <mpi.h>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:1846: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:1838: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -1892,7 +1884,7 @@ fi
                
 
                                                             cat > conftest.$ac_ext <<EOF
-#line 1896 "configure"
+#line 1888 "configure"
 #include "confdefs.h"
 #include "mpi.h"
 
@@ -1908,7 +1900,7 @@ int rank, size;
 
 ; return 0; }
 EOF
-if { (eval echo configure:1912: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
+if { (eval echo configure:1904: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
   rm -rf conftest*
   casc_result=yes
 fi
@@ -1935,7 +1927,7 @@ rm -f conftest*
                LIBS_SAVE=$LIBS
                LIBS="$MPIINCLUDE $MPIFLAGS $MPILIBDIRS $MPILIBS -lpthread"
                cat > conftest.$ac_ext <<EOF
-#line 1939 "configure"
+#line 1931 "configure"
 #include "confdefs.h"
 #include "mpi.h"
 
@@ -1951,7 +1943,7 @@ int rank, size;
 
 ; return 0; }
 EOF
-if { (eval echo configure:1955: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
+if { (eval echo configure:1947: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
   rm -rf conftest*
   MPILIBS="$MPILIBS -lpthread"
 fi
@@ -1985,12 +1977,174 @@ rm -f conftest*
    else
       TIMERDEFS="$TIMERDEFS -DTIMER_USE_MPI"
    fi
+   if test -z "$with_CC"
+   then
+      CC=$MPICC
+   fi
 fi
+
+
+# Check whether --with-dmalloc or --without-dmalloc was given.
+if test "${with_dmalloc+set}" = set; then
+  withval="$with_dmalloc"
+  
+   # define some macros to hopefully improve readability
+   
+   
+
+   # check for the library from first argument.  If linking is successful
+   # the first time, the job is done, otherwise loop through DIRECTORY-LIST
+   echo $ac_n "checking for -ldmalloc""... $ac_c" 1>&6
+ac_lib_var=`echo dmalloc'_'malloc | tr './+\055' '__p_'`
+if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  ac_save_LIBS="$LIBS"
+LIBS="$LDLIBDIRS $LDLIBS $LIBS -ldmalloc"
+cat > conftest.$ac_ext <<EOF
+#line 2006 "configure"
+#include "confdefs.h"
+/* Override any gcc2 internal prototype to avoid an error.  */
+/* We use char because int might match the return type of a gcc2
+    builtin and then its argument prototype would still apply.  */
+char malloc();
+
+int main() { return 0; }
+int t() {
+malloc()
+; return 0; }
+EOF
+if { (eval echo configure:2018: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
+  rm -rf conftest*
+  eval "ac_cv_lib_$ac_lib_var=yes"
+else
+  rm -rf conftest*
+  eval "ac_cv_lib_$ac_lib_var=no"
+fi
+rm -f conftest*
+LIBS="$ac_save_LIBS"
+
+fi
+if eval "test \"`echo '$ac_cv_lib_'$ac_lib_var`\" = yes"; then
+  echo "$ac_t""yes" 1>&6  
+  
+unset ac_cv_lib_$ac_lib_var
+LDLIBS="$LDLIBS -ldmalloc"
+                          casc_lib_found=yes 
+                          HYPREDEFS="$HYPREDEFS -DHYPRE_MEMORY_DMALLOC"
+   
+else
+  echo "$ac_t""no" 1>&6 
+
+unset ac_cv_lib_$ac_lib_var
+      for casc_lib_dir in /home/casc/lib /usr/local/lib; do
+
+         echo $ac_n "checking for -ldmalloc""... $ac_c" 1>&6
+ac_lib_var=`echo dmalloc'_'malloc | tr './+\055' '__p_'`
+if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  ac_save_LIBS="$LIBS"
+LIBS="-L$casc_lib_dir $LDLIBDIRS $LDLIBS -ldmalloc $LIBS -ldmalloc"
+cat > conftest.$ac_ext <<EOF
+#line 2051 "configure"
+#include "confdefs.h"
+/* Override any gcc2 internal prototype to avoid an error.  */
+/* We use char because int might match the return type of a gcc2
+    builtin and then its argument prototype would still apply.  */
+char malloc();
+
+int main() { return 0; }
+int t() {
+malloc()
+; return 0; }
+EOF
+if { (eval echo configure:2063: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
+  rm -rf conftest*
+  eval "ac_cv_lib_$ac_lib_var=yes"
+else
+  rm -rf conftest*
+  eval "ac_cv_lib_$ac_lib_var=no"
+fi
+rm -f conftest*
+LIBS="$ac_save_LIBS"
+
+fi
+if eval "test \"`echo '$ac_cv_lib_'$ac_lib_var`\" = yes"; then
+  echo "$ac_t""yes" 1>&6  
+  
+unset ac_cv_lib_$ac_lib_var
+LDLIBDIRS="-L$casc_lib_dir $LDLIBDIRS"
+            LDLIBS="$LDLIBS -ldmalloc"
+            casc_lib_found=yes
+            HYPREDEFS="$HYPREDEFS -DHYPRE_MEMORY_DMALLOC"
+   
+            break
+            
+else
+  echo "$ac_t""no" 1>&6 
+fi
+unset ac_cv_lib_$ac_lib_var
+
+      done
+      
+fi
+unset ac_cv_lib_$ac_lib_var
+                                               
+   # ACTION-IF-NOT_FOUND for when the library is found nowhere
+   
+
+   unset casc_lib_found
+
+   
+   
+
+
+
+fi
+
 
 
 if test "$OPTCHOICE" = "g"
 then
    
+            for casc_dir in '' /home/casc/include ; do
+      if test -n "$casc_dir"; then
+         casc_header=$casc_dir/cegdb.h
+      else
+         casc_header=cegdb.h
+      fi
+
+            ac_safe=`echo "$casc_header" | tr './\055' '___'`
+echo $ac_n "checking for $casc_header""... $ac_c" 1>&6
+if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  cat > conftest.$ac_ext <<EOF
+#line 2125 "configure"
+#include "confdefs.h"
+#include <$casc_header>
+EOF
+ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
+{ (eval echo configure:2130: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+ac_err=`grep -v '^ *+' conftest.out`
+if test -z "$ac_err"; then
+  rm -rf conftest*
+  eval "ac_cv_header_$ac_safe=yes"
+else
+  echo "$ac_err" >&5
+  rm -rf conftest*
+  eval "ac_cv_header_$ac_safe=no"
+fi
+rm -f conftest*
+fi
+if eval "test \"`echo '$ac_cv_header_'$ac_safe`\" = yes"; then
+  echo "$ac_t""yes" 1>&6
+  if test -n "$casc_dir"; then
+            INCLUDES="$INCLUDES -I$casc_dir"
+         fi
+         casc_header_found=yes
+         
    # define some macros to hopefully improve readability
    
    
@@ -2005,7 +2159,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="$LDLIBDIRS $LDLIBS $LIBS -lcegdb"
 cat > conftest.$ac_ext <<EOF
-#line 2009 "configure"
+#line 2163 "configure"
 #include "confdefs.h"
 /* Override any gcc2 internal prototype to avoid an error.  */
 /* We use char because int might match the return type of a gcc2
@@ -2017,7 +2171,7 @@ int t() {
 cegdb()
 ; return 0; }
 EOF
-if { (eval echo configure:2021: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
+if { (eval echo configure:2175: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -2049,7 +2203,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-L$casc_lib_dir $LDLIBDIRS $LDLIBS -lcegdb $LIBS -lcegdb"
 cat > conftest.$ac_ext <<EOF
-#line 2053 "configure"
+#line 2207 "configure"
 #include "confdefs.h"
 /* Override any gcc2 internal prototype to avoid an error.  */
 /* We use char because int might match the return type of a gcc2
@@ -2061,7 +2215,7 @@ int t() {
 cegdb()
 ; return 0; }
 EOF
-if { (eval echo configure:2065: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
+if { (eval echo configure:2219: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -2101,161 +2255,7 @@ unset ac_cv_lib_$ac_lib_var
    
 
 
-
-   if test "$ARCH" != "alpha" && test "$CC" != "cc";
-   then
-      
-            for casc_dir in '' /usr/include /usr/local/include \
-                                   /home/casc/include ; do
-      if test -n "$casc_dir"; then
-         casc_header=$casc_dir/dmalloc.h
-      else
-         casc_header=dmalloc.h
-      fi
-
-            ac_safe=`echo "$casc_header" | tr './\055' '___'`
-echo $ac_n "checking for $casc_header""... $ac_c" 1>&6
-if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
-  echo $ac_n "(cached) $ac_c" 1>&6
-else
-  cat > conftest.$ac_ext <<EOF
-#line 2123 "configure"
-#include "confdefs.h"
-#include <$casc_header>
-EOF
-ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:2128: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
-ac_err=`grep -v '^ *+' conftest.out`
-if test -z "$ac_err"; then
-  rm -rf conftest*
-  eval "ac_cv_header_$ac_safe=yes"
-else
-  echo "$ac_err" >&5
-  rm -rf conftest*
-  eval "ac_cv_header_$ac_safe=no"
-fi
-rm -f conftest*
-fi
-if eval "test \"`echo '$ac_cv_header_'$ac_safe`\" = yes"; then
-  echo "$ac_t""yes" 1>&6
-  if test -n "$casc_dir"; then
-            INCLUDES="$INCLUDES -I$casc_dir"
-         fi
-         casc_header_found=yes
-         
-   # define some macros to hopefully improve readability
    
-   
-
-   # check for the library from first argument.  If linking is successful
-   # the first time, the job is done, otherwise loop through DIRECTORY-LIST
-   echo $ac_n "checking for -ldmalloc""... $ac_c" 1>&6
-ac_lib_var=`echo dmalloc'_'malloc | tr './+\055' '__p_'`
-if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
-  echo $ac_n "(cached) $ac_c" 1>&6
-else
-  ac_save_LIBS="$LIBS"
-LIBS="$LDLIBDIRS $LDLIBS $LIBS -ldmalloc"
-cat > conftest.$ac_ext <<EOF
-#line 2161 "configure"
-#include "confdefs.h"
-/* Override any gcc2 internal prototype to avoid an error.  */
-/* We use char because int might match the return type of a gcc2
-    builtin and then its argument prototype would still apply.  */
-char malloc();
-
-int main() { return 0; }
-int t() {
-malloc()
-; return 0; }
-EOF
-if { (eval echo configure:2173: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
-  rm -rf conftest*
-  eval "ac_cv_lib_$ac_lib_var=yes"
-else
-  rm -rf conftest*
-  eval "ac_cv_lib_$ac_lib_var=no"
-fi
-rm -f conftest*
-LIBS="$ac_save_LIBS"
-
-fi
-if eval "test \"`echo '$ac_cv_lib_'$ac_lib_var`\" = yes"; then
-  echo "$ac_t""yes" 1>&6  
-  
-unset ac_cv_lib_$ac_lib_var
-LDLIBS="$LDLIBS -ldmalloc"
-                          casc_lib_found=yes 
-                          HYPREDEFS="$HYPREDEFS -DHYPRE_MEMORY_DMALLOC"
-         
-else
-  echo "$ac_t""no" 1>&6 
-
-unset ac_cv_lib_$ac_lib_var
-      for casc_lib_dir in /home/casc/lib /usr/local/lib; do
-
-         echo $ac_n "checking for -ldmalloc""... $ac_c" 1>&6
-ac_lib_var=`echo dmalloc'_'malloc | tr './+\055' '__p_'`
-if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
-  echo $ac_n "(cached) $ac_c" 1>&6
-else
-  ac_save_LIBS="$LIBS"
-LIBS="-L$casc_lib_dir $LDLIBDIRS $LDLIBS -ldmalloc $LIBS -ldmalloc"
-cat > conftest.$ac_ext <<EOF
-#line 2206 "configure"
-#include "confdefs.h"
-/* Override any gcc2 internal prototype to avoid an error.  */
-/* We use char because int might match the return type of a gcc2
-    builtin and then its argument prototype would still apply.  */
-char malloc();
-
-int main() { return 0; }
-int t() {
-malloc()
-; return 0; }
-EOF
-if { (eval echo configure:2218: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
-  rm -rf conftest*
-  eval "ac_cv_lib_$ac_lib_var=yes"
-else
-  rm -rf conftest*
-  eval "ac_cv_lib_$ac_lib_var=no"
-fi
-rm -f conftest*
-LIBS="$ac_save_LIBS"
-
-fi
-if eval "test \"`echo '$ac_cv_lib_'$ac_lib_var`\" = yes"; then
-  echo "$ac_t""yes" 1>&6  
-  
-unset ac_cv_lib_$ac_lib_var
-LDLIBDIRS="-L$casc_lib_dir $LDLIBDIRS"
-            LDLIBS="$LDLIBS -ldmalloc"
-            casc_lib_found=yes
-            HYPREDEFS="$HYPREDEFS -DHYPRE_MEMORY_DMALLOC"
-         
-            break
-            
-else
-  echo "$ac_t""no" 1>&6 
-fi
-unset ac_cv_lib_$ac_lib_var
-
-      done
-      
-fi
-unset ac_cv_lib_$ac_lib_var
-                                               
-   # ACTION-IF-NOT_FOUND for when the library is found nowhere
-   
-
-   unset casc_lib_found
-
-   
-   
-
-
-      
          break 
 else
   echo "$ac_t""no" 1>&6
@@ -2268,7 +2268,6 @@ fi
 
    unset casc_header_found
 
-   fi
 fi
 
 
@@ -2287,7 +2286,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="$LIBDIRS $LIBS $LIBS -lm"
 cat > conftest.$ac_ext <<EOF
-#line 2291 "configure"
+#line 2290 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -2295,7 +2294,7 @@ int t() {
 main()
 ; return 0; }
 EOF
-if { (eval echo configure:2299: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
+if { (eval echo configure:2298: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -2327,7 +2326,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-L$casc_lib_dir $LIBDIRS $LIBS -lm $LIBS -lm"
 cat > conftest.$ac_ext <<EOF
-#line 2331 "configure"
+#line 2330 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -2335,7 +2334,7 @@ int t() {
 main()
 ; return 0; }
 EOF
-if { (eval echo configure:2339: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
+if { (eval echo configure:2338: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else

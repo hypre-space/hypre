@@ -21,7 +21,7 @@ dnl ********************************************************************
 
 AC_DEFUN(CASC_PROG_MPICC,
 [
-   AC_CHECK_PROGS(MPICC, mpicc mpcc tmcc hcc)
+   AC_CHECK_PROGS(MPICC, mpicc mpcc tmcc hcc cicc)
    test -z "$MPICC" && AC_MSG_ERROR([no acceptable mpicc found in \$PATH])
 ])dnl
 
@@ -33,7 +33,7 @@ dnl ********************************************************************
 
 AC_DEFUN(CASC_PROG_MPICXX,
 [
-   AC_CHECK_PROGS(MPICXX, mpCC mpig++ mpiCC hcp)
+   AC_CHECK_PROGS(MPICXX, mpCC mpig++ mpiCC hcp ciCC)
    test -z "$MPICXX" && AC_MSG_ERROR([no acceptable mpic++ found in \$PATH])
 ])dnl
 
@@ -45,7 +45,7 @@ dnl **********************************************************************
 
 AC_DEFUN(CASC_PROG_MPIF77,
 [
-   AC_CHECK_PROGS(MPIF77, mpif77 mpf77 mpixlf mpxlf tmf77 hf77)
+   AC_CHECK_PROGS(MPIF77, mpif77 mpf77 mpixlf mpxlf tmf77 hf77 cif77)
    test -z "$MPIF77" && AC_MSG_ERROR([no acceptable mpif77 found in \$PATH])
 ])dnl
 
@@ -706,7 +706,7 @@ AC_DEFUN(CASC_FIND_MPI,
       AC_ARG_WITH(MPICC,
 [  --with-MPICC=ARG        ARG is mpicc or similar MPI C compiling tool],
          MPICC=$withval,
-         [AC_CHECK_PROGS(MPICC, mpicc mpcc tmcc hcc)])
+         [AC_CHECK_PROGS(MPICC, mpicc mpcc tmcc hcc cicc)])
 
       if test -z "$MPICC"; then
          AC_MSG_WARN([no acceptable mpicc found in \$PATH])

@@ -49,12 +49,7 @@ dnl *********************************************************************
 case $ARCH in
    sun4 | solaris)
       CASC_SET_COPT(-O)
-      if test "$CC" = "gcc"
-      then
-         CASC_SET_CDEBUG(-g -Wall)
-      else
-         CASC_SET_CDEBUG(-g)
-      fi
+      CASC_SET_CDEBUG(-g)
    ;;
 
    rs6000)
@@ -129,7 +124,22 @@ then
    else
       TIMERDEFS="$TIMERDEFS -DTIMER_USE_MPI"
    fi
+   if test -z "$with_CC"
+   then
+      CC=$MPICC
+   fi
 fi
+
+dnl *********************************************************************
+dnl * Dmalloc stuff
+dnl *********************************************************************
+
+AC_ARG_WITH(dmalloc,
+   [  --with-dmalloc          use dmalloc package],
+   CASC_ADD_LIB(dmalloc, malloc, /home/casc/lib /usr/local/lib,
+      LD, HYPREDEFS="$HYPREDEFS -DHYPRE_MEMORY_DMALLOC"
+   )
+)
 
 dnl *********************************************************************
 dnl * When debugging was chosen, look for debugging libraries and headers,
@@ -140,17 +150,9 @@ dnl *********************************************************************
 
 if test "$OPTCHOICE" = "g"
 then
-   CASC_ADD_LIB(cegdb, cegdb, /home/casc/lib, LD)
-
-   if test "$ARCH" != "alpha" && test "$CC" != "cc";
-   then
-      CASC_CHECK_HEADER(dmalloc.h, /usr/include /usr/local/include \
-                                   /home/casc/include,
-         CASC_ADD_LIB(dmalloc, malloc, /home/casc/lib /usr/local/lib, LD,
-            HYPREDEFS="$HYPREDEFS -DHYPRE_MEMORY_DMALLOC"
-         )
-      )
-   fi
+   CASC_CHECK_HEADER(cegdb.h, /home/casc/include,
+      CASC_ADD_LIB(cegdb, cegdb, /home/casc/lib, LD)
+   )
 fi
 
 dnl *********************************************************************
