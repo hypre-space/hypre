@@ -26,6 +26,7 @@ hypre_StructMapCreate( hypre_StructGrid   *sgrid,
 
    MPI_Comm                    comm = hypre_StructGridComm(sgrid);
    int                         ndim = hypre_StructGridDim(sgrid);
+   int                         myproc;
 
    hypre_StructMap            *map;
                           
@@ -59,22 +60,25 @@ hypre_StructMapCreate( hypre_StructGrid   *sgrid,
     * Compute box_offsets for neighborhood boxes
     *------------------------------------------------------*/
 
+   MPI_Comm_rank(comm, &myproc);
+
    /* NOTE: With neighborhood info from the user, don't need all gather */
    sgrid_boxes = hypre_StructGridBoxes(sgrid);
    hypre_GatherAllBoxes(comm, sgrid_boxes, &boxes, &procs, &first_local);
 
    box_offsets = hypre_CTAlloc(int, hypre_BoxArraySize(boxes));
    box_offset  = 0;
+   start_rank = 0;
    for (b = 0; b < hypre_BoxArraySize(boxes); b++)
    {
       box = hypre_BoxArrayBox(boxes, b);
 
       box_offsets[b] = box_offset;
-      if (b == first_local)
+      box_offset += hypre_BoxVolume(box);
+      if (myproc > procs[b])
       {
          start_rank = box_offset;
       }
-      box_offset += hypre_BoxVolume(box);
    }
 
    /*------------------------------------------------------

@@ -53,8 +53,10 @@ main( int   argc,
    int                  dim;
    int                  nblocks;
 
-   int                  Cvolume, Nvolume;
+   int                  on_part[2] = {1, 1};
+   int                  partP[2] = {1, 1};
 
+   int                  Cvolume, Nvolume;
    int                **Cilower;
    int                **Ciupper;
    int                **Nilower;
@@ -307,6 +309,23 @@ main( int   argc,
    q = (( myid - p)/P) % Q;
    r = ( myid - p - P*q)/( P*Q );
 
+   /* insure that parts are distributed on different processors */
+   if (P > 1)
+   {
+      partP[0] = (P+1)/2;
+      partP[1] = P - partP[0];
+      if (p < partP[0])
+      {
+         on_part[1] = 0;
+      }
+      else
+      {
+         on_part[0] = 0;
+         p -= partP[0];
+      }
+      
+   }
+
    /* compute ilower and iupper from (p,q,r), (bx,by,bz), and (nx,ny,nz) */
    block = 0;
    switch (dim)
@@ -361,10 +380,13 @@ main( int   argc,
    HYPRE_SStructGridCreate(MPI_COMM_WORLD, dim, 2, &grid);
    for (part = 0; part < 2; part++)
    {
-      for (block = 0; block < nblocks; block++)
+      if (on_part[part])
       {
-         HYPRE_SStructGridSetExtents(grid, part,
-                                     Cilower[block], Ciupper[block]);
+         for (block = 0; block < nblocks; block++)
+         {
+            HYPRE_SStructGridSetExtents(grid, part,
+                                        Cilower[block], Ciupper[block]);
+         }
       }
       HYPRE_SStructGridSetVariables(grid, part, 2, vtypes);
    }
@@ -437,12 +459,18 @@ main( int   argc,
             index0[0] = Ciupper[block + bx - 1][0];
             index1[0] = Cilower[block][0];
             
-            /* glue part 0 to part 1 */
-            HYPRE_SStructGraphAddEntries(graph, 0, index0, 0,
-                                         1, 1, &index1, 0);
-            /* glue part 1 to part 0 */
-            HYPRE_SStructGraphAddEntries(graph, 1, index1, 0,
-                                         1, 0, &index0, 0);
+            if (on_part[0])
+            {
+               /* glue part 0 to part 1 */
+               HYPRE_SStructGraphAddEntries(graph, 0, index0, 0,
+                                            1, 1, &index1, 0);
+            }
+            if (on_part[1])
+            {
+               /* glue part 1 to part 0 */
+               HYPRE_SStructGraphAddEntries(graph, 1, index1, 0,
+                                            1, 0, &index0, 0);
+            }
             break;
 
             case 2:
@@ -453,12 +481,18 @@ main( int   argc,
                index0[1] = iy;
                index1[1] = iy;
                
-               /* glue part 0 to part 1 */
-               HYPRE_SStructGraphAddEntries(graph, 0, index0, 0,
-                                            1, 1, &index1, 0);
-               /* glue part 1 to part 0 */
-               HYPRE_SStructGraphAddEntries(graph, 1, index1, 0,
-                                            1, 0, &index0, 0);
+               if (on_part[0])
+               {
+                  /* glue part 0 to part 1 */
+                  HYPRE_SStructGraphAddEntries(graph, 0, index0, 0,
+                                               1, 1, &index1, 0);
+               }
+               if (on_part[1])
+               {
+                  /* glue part 1 to part 0 */
+                  HYPRE_SStructGraphAddEntries(graph, 1, index1, 0,
+                                               1, 0, &index0, 0);
+               }
             }
             break;
 
@@ -474,12 +508,18 @@ main( int   argc,
                   index0[2] = iz;
                   index1[2] = iz;
 
-                  /* glue part 0 to part 1 */
-                  HYPRE_SStructGraphAddEntries(graph, 0, index0, 0,
-                                               1, 1, &index1, 0);
-                  /* glue part 1 to part 0 */
-                  HYPRE_SStructGraphAddEntries(graph, 1, index1, 0,
-                                               1, 0, &index0, 0);
+                  if (on_part[0])
+                  {
+                     /* glue part 0 to part 1 */
+                     HYPRE_SStructGraphAddEntries(graph, 0, index0, 0,
+                                                  1, 1, &index1, 0);
+                  }
+                  if (on_part[1])
+                  {
+                     /* glue part 1 to part 0 */
+                     HYPRE_SStructGraphAddEntries(graph, 1, index1, 0,
+                                                  1, 0, &index0, 0);
+                  }
                }
             }
             break;
@@ -538,77 +578,80 @@ main( int   argc,
 
    for (part = 0; part < 2; part++)
    {
-      for (block = 0; block < nblocks; block++)
+      if (on_part[part])
       {
+         for (block = 0; block < nblocks; block++)
+         {
 #if 1
-         HYPRE_SStructMatrixSetBoxValues(A, part,
-                                         Cilower[block], Ciupper[block], 0,
-                                         CCstencil_size, CCstencil_indexes,
-                                         CCvalues);
-         HYPRE_SStructMatrixSetBoxValues(A, part,
-                                         Cilower[block], Ciupper[block], 0,
-                                         CNstencil_size, CNstencil_indexes,
-                                         CNvalues);
-         HYPRE_SStructMatrixSetBoxValues(A, part,
-                                         Nilower[block], Niupper[block], 1,
-                                         NNstencil_size, NNstencil_indexes,
-                                         NNvalues);
-         HYPRE_SStructMatrixSetBoxValues(A, part,
-                                         Nilower[block], Niupper[block], 1,
-                                         NCstencil_size, NCstencil_indexes,
-                                         NCvalues);
+            HYPRE_SStructMatrixSetBoxValues(A, part,
+                                            Cilower[block], Ciupper[block], 0,
+                                            CCstencil_size, CCstencil_indexes,
+                                            CCvalues);
+            HYPRE_SStructMatrixSetBoxValues(A, part,
+                                            Cilower[block], Ciupper[block], 0,
+                                            CNstencil_size, CNstencil_indexes,
+                                            CNvalues);
+            HYPRE_SStructMatrixSetBoxValues(A, part,
+                                            Nilower[block], Niupper[block], 1,
+                                            NNstencil_size, NNstencil_indexes,
+                                            NNvalues);
+            HYPRE_SStructMatrixSetBoxValues(A, part,
+                                            Nilower[block], Niupper[block], 1,
+                                            NCstencil_size, NCstencil_indexes,
+                                            NCvalues);
 #else
-         i = 0;
-         j = 0;
-         for (iz = Cilower[block][2]; iz <= Ciupper[block][2]; iz++)
-         {
-            for (iy = Cilower[block][1]; iy <= Ciupper[block][1]; iy++)
+            i = 0;
+            j = 0;
+            for (iz = Cilower[block][2]; iz <= Ciupper[block][2]; iz++)
             {
-               for (ix = Cilower[block][0]; ix <= Ciupper[block][0]; ix++)
+               for (iy = Cilower[block][1]; iy <= Ciupper[block][1]; iy++)
                {
-                  index0[0] = ix;
-                  index0[1] = iy;
-                  index0[2] = iz;
-
-                  HYPRE_SStructMatrixSetValues(A, part, index0, 0,
-                                               CCstencil_size,
-                                               CCstencil_indexes,
-                                               &CCvalues[i]);
-                  HYPRE_SStructMatrixSetValues(A, part, index0, 0,
-                                               CNstencil_size,
-                                               CNstencil_indexes,
-                                               &CNvalues[j]);
-                  i += CCstencil_size;
-                  j += CNstencil_size;
+                  for (ix = Cilower[block][0]; ix <= Ciupper[block][0]; ix++)
+                  {
+                     index0[0] = ix;
+                     index0[1] = iy;
+                     index0[2] = iz;
+                     
+                     HYPRE_SStructMatrixSetValues(A, part, index0, 0,
+                                                  CCstencil_size,
+                                                  CCstencil_indexes,
+                                                  &CCvalues[i]);
+                     HYPRE_SStructMatrixSetValues(A, part, index0, 0,
+                                                  CNstencil_size,
+                                                  CNstencil_indexes,
+                                                  &CNvalues[j]);
+                     i += CCstencil_size;
+                     j += CNstencil_size;
+                  }
                }
             }
-         }
-         i = 0;
-         j = 0;
-         for (iz = Nilower[block][2]; iz <= Niupper[block][2]; iz++)
-         {
-            for (iy = Nilower[block][1]; iy <= Niupper[block][1]; iy++)
+            i = 0;
+            j = 0;
+            for (iz = Nilower[block][2]; iz <= Niupper[block][2]; iz++)
             {
-               for (ix = Nilower[block][0]; ix <= Niupper[block][0]; ix++)
+               for (iy = Nilower[block][1]; iy <= Niupper[block][1]; iy++)
                {
-                  index0[0] = ix;
-                  index0[1] = iy;
-                  index0[2] = iz;
-
-                  HYPRE_SStructMatrixSetValues(A, part, index0, 1,
-                                               NNstencil_size,
-                                               NNstencil_indexes,
-                                               &NNvalues[i]);
-                  HYPRE_SStructMatrixSetValues(A, part, index0, 1,
-                                               NCstencil_size,
-                                               NCstencil_indexes,
-                                               &NCvalues[j]);
-                  i += NNstencil_size;
-                  j += NCstencil_size;
+                  for (ix = Nilower[block][0]; ix <= Niupper[block][0]; ix++)
+                  {
+                     index0[0] = ix;
+                     index0[1] = iy;
+                     index0[2] = iz;
+                     
+                     HYPRE_SStructMatrixSetValues(A, part, index0, 1,
+                                                  NNstencil_size,
+                                                  NNstencil_indexes,
+                                                  &NNvalues[i]);
+                     HYPRE_SStructMatrixSetValues(A, part, index0, 1,
+                                                  NCstencil_size,
+                                                  NCstencil_indexes,
+                                                  &NCvalues[j]);
+                     i += NNstencil_size;
+                     j += NCstencil_size;
+                  }
                }
             }
-         }
 #endif
+         }
       }
    }
 
@@ -641,25 +684,31 @@ main( int   argc,
    {
       for (jb = 0; jb < by; jb++)
       {
-         /* glue part 0 to part 1 */
-         part = 0;
-         block = (bx-1) + jb*bx + kb*bx*by;
-         i = Cilower[block][0];
-         Cilower[block][0] = Ciupper[block][0];
-         HYPRE_SStructMatrixSetBoxValues(A, part,
-                                         Cilower[block], Ciupper[block], 0,
-                                         1, &CAstencil_index, CAvalues);
-         Cilower[block][0] = i;
+         if (on_part[0])
+         {
+            /* glue part 0 to part 1 */
+            part = 0;
+            block = (bx-1) + jb*bx + kb*bx*by;
+            i = Cilower[block][0];
+            Cilower[block][0] = Ciupper[block][0];
+            HYPRE_SStructMatrixSetBoxValues(A, part,
+                                            Cilower[block], Ciupper[block], 0,
+                                            1, &CAstencil_index, CAvalues);
+            Cilower[block][0] = i;
+         }
 
-         /* glue part 1 to part 0 */
-         part = 1;
-         block = jb*bx + kb*bx*by;
-         i = Ciupper[block][0];
-         Ciupper[block][0] = Cilower[block][0];
-         HYPRE_SStructMatrixSetBoxValues(A, part,
-                                         Cilower[block], Ciupper[block], 0,
-                                         1, &CAstencil_index, CAvalues);
-         Ciupper[block][0] = i;
+         if (on_part[1])
+         {
+            /* glue part 1 to part 0 */
+            part = 1;
+            block = jb*bx + kb*bx*by;
+            i = Ciupper[block][0];
+            Ciupper[block][0] = Cilower[block][0];
+            HYPRE_SStructMatrixSetBoxValues(A, part,
+                                            Cilower[block], Ciupper[block], 0,
+                                            1, &CAstencil_index, CAvalues);
+            Ciupper[block][0] = i;
+         }
       }
    }
 
@@ -684,14 +733,17 @@ main( int   argc,
    }
    for (part = 0; part < 2; part++)
    {
-      for (block = 0; block < nblocks; block++)
+      if (on_part[part])
       {
-         HYPRE_SStructVectorSetBoxValues(b, part,
-                                         Cilower[block], Ciupper[block], 0,
-                                         CCvalues);
-         HYPRE_SStructVectorSetBoxValues(b, part,
-                                         Nilower[block], Niupper[block], 1,
-                                         NNvalues);
+         for (block = 0; block < nblocks; block++)
+         {
+            HYPRE_SStructVectorSetBoxValues(b, part,
+                                            Cilower[block], Ciupper[block], 0,
+                                            CCvalues);
+            HYPRE_SStructVectorSetBoxValues(b, part,
+                                            Nilower[block], Niupper[block], 1,
+                                            NNvalues);
+         }
       }
    }
    HYPRE_SStructVectorAssemble(b);
@@ -711,14 +763,17 @@ main( int   argc,
    }
    for (part = 0; part < 2; part++)
    {
-      for (block = 0; block < nblocks; block++)
+      if (on_part[part])
       {
-         HYPRE_SStructVectorSetBoxValues(x, part,
-                                         Cilower[block], Ciupper[block], 0,
-                                         CCvalues);
-         HYPRE_SStructVectorSetBoxValues(x, part,
-                                         Nilower[block], Niupper[block], 1,
-                                         NNvalues);
+         for (block = 0; block < nblocks; block++)
+         {
+            HYPRE_SStructVectorSetBoxValues(x, part,
+                                            Cilower[block], Ciupper[block], 0,
+                                            CCvalues);
+            HYPRE_SStructVectorSetBoxValues(x, part,
+                                            Nilower[block], Niupper[block], 1,
+                                            NNvalues);
+         }
       }
    }
    HYPRE_SStructVectorAssemble(x);
@@ -749,23 +804,28 @@ main( int   argc,
    file = fopen(filename, "w");
    for (part = 0; part < 2; part++)
    {
-      for (block = 0; block < nblocks; block++)
+      if (on_part[part])
       {
-         HYPRE_SStructVectorGetBoxValues(x, part,
-                                         Cilower[block], Ciupper[block], 0,
-                                         CCvalues);
-         fprintf(file, "\nPart %d, block %d, cell variables:\n", part, block);
-         for (i = 0; i < Cvolume; i++)
+         for (block = 0; block < nblocks; block++)
          {
-            fprintf(file, "%e\n", CCvalues[i]);
-         }
-         HYPRE_SStructVectorGetBoxValues(x, part,
-                                         Nilower[block], Niupper[block], 1,
-                                         NNvalues);
-         fprintf(file, "\nPart %d, block %d, node variables:\n", part, block);
-         for (i = 0; i < Nvolume; i++)
-         {
-            fprintf(file, "%e\n", NNvalues[i]);
+            HYPRE_SStructVectorGetBoxValues(x, part,
+                                            Cilower[block], Ciupper[block], 0,
+                                            CCvalues);
+            fprintf(file, "\nPart %d, block %d, cell variables:\n",
+                    part, block);
+            for (i = 0; i < Cvolume; i++)
+            {
+               fprintf(file, "%e\n", CCvalues[i]);
+            }
+            HYPRE_SStructVectorGetBoxValues(x, part,
+                                            Nilower[block], Niupper[block], 1,
+                                            NNvalues);
+            fprintf(file, "\nPart %d, block %d, node variables:\n",
+                    part, block);
+            for (i = 0; i < Nvolume; i++)
+            {
+               fprintf(file, "%e\n", NNvalues[i]);
+            }
          }
       }
    }
@@ -777,23 +837,28 @@ main( int   argc,
    file = fopen(filename, "w");
    for (part = 0; part < 2; part++)
    {
-      for (block = 0; block < nblocks; block++)
+      if (on_part[part])
       {
-         HYPRE_SStructVectorGetBoxValues(x, part,
-                                         Cilower[block], Ciupper[block], 0,
-                                         CCvalues);
-         fprintf(file, "\nPart %d, block %d, cell variables:\n", part, block);
-         for (i = 0; i < Cvolume; i++)
+         for (block = 0; block < nblocks; block++)
          {
-            fprintf(file, "%e\n", CCvalues[i]);
-         }
-         HYPRE_SStructVectorGetBoxValues(x, part,
-                                         Nilower[block], Niupper[block], 1,
-                                         NNvalues);
-         fprintf(file, "\nPart %d, block %d, node variables:\n", part, block);
-         for (i = 0; i < Nvolume; i++)
-         {
-            fprintf(file, "%e\n", NNvalues[i]);
+            HYPRE_SStructVectorGetBoxValues(x, part,
+                                            Cilower[block], Ciupper[block], 0,
+                                            CCvalues);
+            fprintf(file, "\nPart %d, block %d, cell variables:\n",
+                    part, block);
+            for (i = 0; i < Cvolume; i++)
+            {
+               fprintf(file, "%e\n", CCvalues[i]);
+            }
+            HYPRE_SStructVectorGetBoxValues(x, part,
+                                            Nilower[block], Niupper[block], 1,
+                                            NNvalues);
+            fprintf(file, "\nPart %d, block %d, node variables:\n",
+                    part, block);
+            for (i = 0; i < Nvolume; i++)
+            {
+               fprintf(file, "%e\n", NNvalues[i]);
+            }
          }
       }
    }

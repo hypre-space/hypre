@@ -61,29 +61,41 @@ typedef struct
                            
 } hypre_SStructPGrid;
 
+typedef struct
+{
+   hypre_BoxArray *boxes;
+   hypre_Index    *ilowers;
+   hypre_Index     coord;
+   hypre_Index     dir;
+
+} hypre_SStructNeighbor;
+
 typedef struct hypre_SStructGrid_struct
 {
-   MPI_Comm                comm;
-   int                     ndim;
-   int                     nparts;
+   MPI_Comm                 comm;
+   int                      ndim;
+   int                      nparts;
 
    /* s-variable info */
-   hypre_SStructPGrid    **pgrids;
+   hypre_SStructPGrid     **pgrids;
+
+   /* neighbor info */
+   hypre_SStructNeighbor ***neighbors; /* nparts x nparts array */
 
    /* u-variables info: During construction, array entries are consecutive.
     * After 'Assemble', entries are referenced via local cell rank. */
-   int                     nucvars;
-   hypre_SStructUCVar    **ucvars;
+   int                      nucvars;
+   hypre_SStructUCVar     **ucvars;
 
    /* info for mapping (part, index, var) --> rank */
-   int                    *offsets;     /* offset for each part */
-   int                     uoffset;     /* offset for u-variables */
-   int                     start_rank;
+   int                     *offsets;     /* offset for each part */
+   int                      uoffset;     /* offset for u-variables */
+   int                      start_rank;
 
-   int                     local_size;  /* Number of variables locally */
-   int                     global_size; /* Total number of variables */
+   int                      local_size;  /* Number of variables locally */
+   int                      global_size; /* Total number of variables */
                            
-   int                     ref_count;
+   int                      ref_count;
 
 } hypre_SStructGrid;
 
@@ -96,6 +108,7 @@ typedef struct hypre_SStructGrid_struct
 #define hypre_SStructGridNParts(grid)        ((grid) -> nparts)
 #define hypre_SStructGridPGrids(grid)        ((grid) -> pgrids)
 #define hypre_SStructGridPGrid(grid, part)   ((grid) -> pgrids[part])
+#define hypre_SStructGridNeighbors(grid)     ((grid) -> neighbors)
 #define hypre_SStructGridNUCVars(grid)       ((grid) -> nucvars)
 #define hypre_SStructGridUCVars(grid)        ((grid) -> ucvars)
 #define hypre_SStructGridUCVar(grid, i)      ((grid) -> ucvars[i])
@@ -144,6 +157,17 @@ typedef struct hypre_SStructGrid_struct
 #define hypre_SStructPGridStartRank(pgrid)        ((pgrid) -> start_rank)
 #define hypre_SStructPGridLocalSize(pgrid)        ((pgrid) -> local_size)
 #define hypre_SStructPGridGlobalSize(pgrid)       ((pgrid) -> global_size)
+
+/*--------------------------------------------------------------------------
+ * Accessor macros: hypre_SStructNeighbor
+ *--------------------------------------------------------------------------*/
+
+#define hypre_SStructNeighborBoxes(neighbor)     ((neighbor) -> boxes)
+#define hypre_SStructNeighborBox(neighbor, i)    ((neighbor) -> boxes[i])
+#define hypre_SStructNeighborILowers(neighbor)   ((neighbor) -> ilowers)
+#define hypre_SStructNeighborILower(neighbor, i) ((neighbor) -> ilowers[i])
+#define hypre_SStructNeighborCoord(neighbor)     ((neighbor) -> coord)
+#define hypre_SStructNeighborDir(neighbor)       ((neighbor) -> dir)
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_SStructUCVar
