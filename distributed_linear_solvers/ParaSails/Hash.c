@@ -8,12 +8,20 @@
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
- * Hash - Hash table.  This is an open addressing hash table with linear
- * probing.  The keys are nonnegative integers.  The lookup function 
- * returns the index in the hash table of the key, or HASH_NOTFOUND.  
- * The user may want to map a returned index to a pointer that contains 
- * the user's data associated with the key.  The modulus function is 
- * used as the hash function.
+ * Hash - Open addressing hash table with linear probing.  The keys are stored
+ * in the table (also known as a closed table).  Conflicts are resolved with
+ * linear probing, which may be faster in an environment with cache memory.
+ *
+ * We allow rehashing the data into a larger or smaller table, and thus
+ * allow a data item (an integer, but a pointer would be more general)
+ * to be stored with each key in the table.  (If we only return the 
+ * storage location of the key in the table (the implied index), then 
+ * rehashing would change the implied indices.)
+ *
+ * The modulus function is used as the hash function.
+ * The keys must not equal HASH_EMPTY, which is -1.
+ * The integer data associated with a key must not equal HASH_NOTFOUND,
+ * which is -1.
  *
  *****************************************************************************/
 
@@ -33,11 +41,14 @@ Hash *HashCreate(int size)
 
     Hash *h = (Hash *) malloc(sizeof(Hash));
 
-    h->size = size;
-    h->keys = (int *) malloc(size * sizeof(int));
+    h->size  = size;
+    h->num   = 0;
+    h->keys  = (int *) malloc(size * sizeof(int));
+    h->table = (int *) malloc(size * sizeof(int));
+    h->data  = (int *) malloc(size * sizeof(int));
 
     /* Initialize the table to empty */
-    p = h->keys;
+    p = h->table;
     for (i=0; i<size; i++)
         *p++ = HASH_EMPTY;
 
@@ -51,50 +62,14 @@ Hash *HashCreate(int size)
 void HashDestroy(Hash *h)
 {
     free(h->keys);
+    free(h->table);
+    free(h->data);
     free(h);
 }
 
 /*--------------------------------------------------------------------------
- * HashInsert - Insert "key" into hash table "h" and return the index
- * of the location where it was inserted.  Keys are nonnegative integers,
- * as are returned indices.  If the key is already in the hash table,
- * the key is not inserted but the index is still returned.  The returned
- * parameter "inserted" indicates whether or not the key was inserted.
- *--------------------------------------------------------------------------*/
-
-int HashInsert(Hash *h, int key, int *inserted)
-{
-    int loc, initloc;
-
-    initloc = key % h->size;
-    loc = initloc;
-
-    *inserted = 0;
-
-    while (h->keys[loc] != key)
-    {
-        if (h->keys[loc] == HASH_EMPTY)
-        {
-            h->keys[loc] = key;  /* insert the key */
-            *inserted = 1;
-            break; /* break to return statement */
-        }
-
-        loc = (loc + 1) % h->size;
-
-        if (loc == initloc)
-        {
-	    printf("HashInsert: hash table of size %d is full.\n", h->size);
-	    PARASAILS_EXIT;
-	}
-    }
-
-    return loc;
-}
-
-/*--------------------------------------------------------------------------
- * HashLookup - Look up the "key" in hash table "h" and return the index
- * of its location in the hash table, or return HASH_NOTFOUND.
+ * HashLookup - Look up the "key" in hash table "h" and return the data 
+ * associated with the key, or return HASH_NOTFOUND.
  *--------------------------------------------------------------------------*/
 
 int HashLookup(Hash *h, int key)
@@ -103,53 +78,71 @@ int HashLookup(Hash *h, int key)
 
     loc = key % h->size;
 
-    while (h->keys[loc] != key)
+    while (h->table[loc] != key)
     {
-        if (h->keys[loc] == HASH_EMPTY)
+        if (h->table[loc] == HASH_EMPTY)
             return HASH_NOTFOUND;
 
         loc = (loc + 1) % h->size;
     }
 
-    return loc;
+    return h->data[loc];
 }
 
 /*--------------------------------------------------------------------------
- * HashLookup2 - Look up the "key" in hash table "h" and return the index
- * of its location in the hash table, or return HASH_NOTFOUND.
- * Also return the number of comparisons.
+ * HashInsert - Insert "key" with data "data" into hash table "h".
+ * If the key is already in the hash table, the data item is replaced.
  *--------------------------------------------------------------------------*/
 
-int HashLookup2(Hash *h, int key, int *nhops)
+void HashInsert(Hash *h, int key, int data)
 {
     int loc;
 
-    *nhops = 1;
     loc = key % h->size;
 
-    while (h->keys[loc] != key)
+    while (h->table[loc] != key)
     {
-        if (h->keys[loc] == HASH_EMPTY)
-            return HASH_NOTFOUND;
+        if (h->table[loc] == HASH_EMPTY)
+        {
+            assert(h->num < h->size);
+
+	    h->keys[h->num++] = key;
+            h->table[loc] = key;
+            break;
+        }
 
         loc = (loc + 1) % h->size;
-
-        (*nhops)++;
     }
 
-    return loc;
+    h->data[loc] = data;
 }
 
 /*--------------------------------------------------------------------------
- * HashReset - Empty the contents of the hash table "h" by reseting the 
- * "len" locations in the array "ind".  This is useful if the location
- * indices have been saved by the user and a hash table needs to be reused.
+ * HashRehash - Given two hash tables, put the entries in one table into
+ * the other.
  *--------------------------------------------------------------------------*/
 
-void HashReset(Hash *h, int len, int *ind)
+void HashRehash(Hash *old, Hash *new)
 {
-    int i;
+    int i, data;
 
-    for (i=0; i<len; i++)
-        h->keys[ind[i]] = HASH_EMPTY;
+    for (i=0; i<old->num; i++)
+    {
+	data = HashLookup(old, old->keys[i]);
+	HashInsert(new, old->keys[i], data);
+    }
+}
+
+/*--------------------------------------------------------------------------
+ * HashReset -
+ *--------------------------------------------------------------------------*/
+
+void HashReset(Hash *h)
+{
+    int i, *p;
+
+    h->num = 0;
+    p = h->table;
+    for (i=0; i<h->size; i++)
+	*p++ = HASH_EMPTY;
 }

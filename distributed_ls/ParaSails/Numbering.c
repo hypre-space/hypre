@@ -17,7 +17,6 @@
 #include <assert.h>
 #include "Common.h"
 #include "Numbering.h"
-#include "Matrix.h"
 
 /* design options:
 - should local indices be converted through the arrays as well?
@@ -66,7 +65,6 @@ Numbering *NumberingCreate(int size, int beg_row, int end_row)
     numb->num_ext = -1; /* not set yet */
 
     numb->local_to_global = (int *) malloc(size * sizeof(int));
-    numb->global_to_local = (int *) malloc(size * sizeof(int));
     numb->hash            = HashCreate(size);
 
     /* Set up the local part of local_to_global */
@@ -83,7 +81,6 @@ Numbering *NumberingCreate(int size, int beg_row, int end_row)
 void NumberingDestroy(Numbering *numb)
 {
     free(numb->local_to_global);
-    free(numb->global_to_local);
     HashDestroy(numb->hash);
 
     free(numb);
@@ -104,29 +101,33 @@ void NumberingLocalToGlobal(Numbering *numb, int len, int *local, int *global)
 /*--------------------------------------------------------------------------
  * NumberingGlobalToLocal -
  * global indices are added this way...
+ *** new : no longer need a global to local, since this is done by hash tab **
+ *** ALLOW in place conversion
  *--------------------------------------------------------------------------*/
 
 void NumberingGlobalToLocal(Numbering *numb, int len, int *global, int *local)
 {
-    int i, index, inserted;
+    int i, l;
 
     for (i=0; i<len; i++)
     {
         if (global[i] < numb->beg_row || global[i] > numb->end_row)
         {
-            index = HashInsert(numb->hash, global[i], &inserted);
+	    l = HashLookup(numb->hash, global[i]);
 
-	    if (inserted)
+	    if (l == HASH_NOTFOUND)
 	    {
-		/* stop if no more space */
                 assert(numb->num_ind < numb->size); 
 
-                numb->global_to_local[index] = numb->num_ind;
-                numb->local_to_global[numb->num_ind] = global[i];
-                numb->num_ind++;
+		HashInsert(numb->hash, global[i], numb->num_ind);
+		numb->local_to_global[numb->num_ind] = global[i];
+		local[i] = numb->num_ind;
+		numb->num_ind++;
 	    }
-
-            local[i] = numb->global_to_local[index];
+	    else
+	    {
+	        local[i] = l;
+	    }
         }
         else
         {

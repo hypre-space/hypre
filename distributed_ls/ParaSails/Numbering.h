@@ -30,7 +30,6 @@ typedef struct
     int   num_ext; /* number of neighbor nodes */
 
     int  *local_to_global;
-    int  *global_to_local;
     Hash *hash;
 }
 Numbering;

@@ -16,9 +16,7 @@
 #include <assert.h>
 #include "math.h"
 #include "Common.h"
-#include "Hash.h"
 #include "Matrix.h"
-#include "Numbering.h"
 #include "RowPatt.h"
 #include "DiagScale.h"
 #include "OrderStat.h"
@@ -223,7 +221,6 @@ double DiagScaleGet(DiagScale *p, int index)
     }
     else
     {
-        /* NumberingGlobalToLocal(p->mat->numb, 1, &index, &index); */
         return 1.0 / sqrt(ABS(p->ext_diags[index - offset]));
     }
 }

@@ -17,22 +17,24 @@
 #ifndef _HASH_H
 #define _HASH_H
 
-/* keys cannot be equal to HASH_EMPTY */
-#define HASH_EMPTY    -1
-#define HASH_NOTFOUND -1
+#define HASH_EMPTY    -1 /* keys cannot equal HASH_EMPTY */
+#define HASH_NOTFOUND -1 /* data items cannot equal HASH_NOTFOUND */
 
 typedef struct
 {
-    int  size;
-    int *keys;
+    int  size;  /* size of hash table */
+    int  num;   /* number of entries in hash table */
+    int *keys;  /* list of keys, used for rehashing */
+    int *table; /* the hash table storing the keys */
+    int *data;  /* data associated with each entry in the table */
 }
 Hash;
 
 Hash *HashCreate(int size);
 void  HashDestroy(Hash *h);
-int   HashInsert(Hash *h, int key, int *inserted);
 int   HashLookup(Hash *h, int key);
-int   HashLookup2(Hash *h, int key, int *nhops);
-void  HashReset(Hash *h, int len, int *ind);
+void  HashInsert(Hash *h, int key, int data);
+void  HashRehash(Hash *old, Hash *new);
+void  HashReset(Hash *h);
 
 #endif /* _HASH_H */

@@ -843,7 +843,7 @@ IS THERE ANY other way of doing this?
 Numbering *MatrixNumberingCreate(Matrix *mat, int size)
 {
     Numbering *numb = (Numbering *) malloc(sizeof(Numbering));
-    int row, i, len, *ind, index, inserted;
+    int row, i, len, *ind;
     double *val;
     int num_external = 0;
     int *local_to_global; /* temp pointer */
@@ -856,7 +856,6 @@ Numbering *MatrixNumberingCreate(Matrix *mat, int size)
     numb->num_ext = -1; /* not set yet */
 
     numb->local_to_global = (int *) malloc(size * sizeof(int));
-    numb->global_to_local = (int *) malloc(size * sizeof(int));
     numb->hash            = HashCreate(size);
 
     /* Set up the local part of local_to_global */
@@ -876,10 +875,12 @@ Numbering *MatrixNumberingCreate(Matrix *mat, int size)
             /* Only interested in external indices */
 	    if (ind[i] < mat->beg_row || ind[i] > mat->end_row)
             {
-                index = HashInsert(numb->hash, ind[i], &inserted);
-
-                if (inserted)
-                    local_to_global[num_external++] = ind[i];
+		if (HashLookup(numb->hash, ind[i]) == HASH_NOTFOUND)
+		{
+                    HashInsert(numb->hash, ind[i], num_external);
+                    local_to_global[num_external] = ind[i];
+		    num_external++;
+		}
             }
         }
     }
@@ -888,14 +889,10 @@ Numbering *MatrixNumberingCreate(Matrix *mat, int size)
     shell_sort(num_external, local_to_global);
 
     /* Redo the hash table for the sorted indices */
-    for (i=0; i<numb->hash->size; i++)
-        numb->hash->keys[i] = HASH_EMPTY;
+    HashReset(numb->hash);
 
     for (i=0; i<num_external; i++)
-    {
-        index = HashInsert(numb->hash, local_to_global[i], &inserted);
-        numb->global_to_local[index] = i + numb->num_loc;
-    }
+        HashInsert(numb->hash, local_to_global[i], i + numb->num_loc);
 
     numb->num_ind += num_external;
     numb->num_ext = num_external;
