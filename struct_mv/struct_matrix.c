@@ -135,7 +135,7 @@ zzz_InitializeStructMatrixShell( zzz_StructMatrix *matrix )
 
    /*-----------------------------------------------------------------------
     * Set up stencil:
-    *    An array called `symm_coeff' is also set up.  A non-zero value
+    *    An array called `symm_coeff' is also set up.  A value != -1
     *    of `symm_coeff[i]' indicates that the `i'th stencil element
     *    is a "symmetric element".  That is, the data associated with
     *    stencil element `i' is not explicitely stored, but is instead
@@ -172,6 +172,8 @@ zzz_InitializeStructMatrixShell( zzz_StructMatrix *matrix )
       stencil_size = user_stencil_size;
 
       symm_coeff = zzz_CTAlloc(int, stencil_size);
+      for (i = 0; i < stencil_size; i++)
+         symm_coeff[i] = -1;
       num_values = stencil_size;
    }
 
@@ -188,10 +190,12 @@ zzz_InitializeStructMatrixShell( zzz_StructMatrix *matrix )
 
       /* create symmetric stencil elements and `symm_coeff' */
       symm_coeff = zzz_CTAlloc(int, 2*user_stencil_size);
+      for (i = 0; i < 2*user_stencil_size; i++)
+         symm_coeff[i] = -1;
       stencil_size = user_stencil_size;
       for (i = 0; i < user_stencil_size; i++)
       {
-	 if (!symm_coeff[i])
+	 if (symm_coeff[i] == -1)
 	 {
             /* note: start at i to handle "center" element correctly */
             no_symmetric_stencil_element = 1;
@@ -245,7 +249,7 @@ zzz_InitializeStructMatrixShell( zzz_StructMatrix *matrix )
 
    for (i = 0; i < stencil_size; i++)
    {
-      if (symm_coeff[i])
+      if (symm_coeff[i] != -1)
       {
          j = 0;
          for (d = 0; d < 3; d++)
@@ -302,7 +306,7 @@ zzz_InitializeStructMatrixShell( zzz_StructMatrix *matrix )
       /* set pointers for "stored" coefficients */
       for (j = 0; j < stencil_size; j++)
       {
-         if (!symm_coeff[j])
+         if (symm_coeff[j] == -1)
          {
             data_indices[i][j] = data_size;
             data_size += data_box_volume;
@@ -312,7 +316,7 @@ zzz_InitializeStructMatrixShell( zzz_StructMatrix *matrix )
       /* set pointers for "symmetric" coefficients */
       for (j = 0; j < stencil_size; j++)
       {
-         if (symm_coeff[j])
+         if (symm_coeff[j] != -1)
          {
             data_indices[i][j] = data_indices[i][symm_coeff[j]] +
                zzz_BoxOffsetDistance(data_box, stencil_shape[j]);
@@ -741,7 +745,7 @@ zzz_PrintStructMatrix( char             *filename,
    j = 0;
    for (i = 0; i < zzz_StructStencilSize(stencil); i++)
    {
-      if (!symm_coeff[i])
+      if (symm_coeff[i] == -1)
       {
          fprintf(file, "%d: %d %d %d\n", j++,
                  zzz_IndexX(stencil_shape[i]),
