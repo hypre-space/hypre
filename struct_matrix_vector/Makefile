@@ -26,8 +26,7 @@ LFLAGS =\
  -L.\
  -L../utilities\
  -lHYPRE_mv\
- -lHYPRE_timing\
- -lHYPRE_memory\
+ -lHYPRE_utilities\
  -lnsl -lsocket -lmpi\
  -lf2c\
  -lcegdb\

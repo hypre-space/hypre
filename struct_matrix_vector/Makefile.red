@@ -21,8 +21,7 @@ LFLAGS =\
  -L.\
  -L../utilities\
  -lHYPRE_mv\
- -lHYPRE_timing\
- -lHYPRE_memory\
+ -lHYPRE_utilities\
  -lmpi\
  -lm
 

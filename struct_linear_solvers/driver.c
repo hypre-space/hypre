@@ -3,8 +3,7 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "../utilities/memory.h"
-#include "../utilities/timing.h"
+#include "../utilities/hypre_utilities.h"
 #include "../struct_matrix_vector/HYPRE_mv.h"
 #include "HYPRE_ls.h"
  
