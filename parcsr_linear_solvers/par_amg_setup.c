@@ -34,6 +34,7 @@ hypre_ParAMGSetup( void               *amg_vdata,
    hypre_ParCSRMatrix **P_array;
    int                **CF_marker_array;   
    double               strong_threshold;
+   double               trunc_factor;
 
    int      num_variables;
    int      max_levels; 
@@ -87,6 +88,7 @@ hypre_ParAMGSetup( void               *amg_vdata,
    level = 0;
   
    strong_threshold = hypre_ParAMGDataStrongThreshold(amg_data);
+   trunc_factor = hypre_ParAMGDataTruncFactor(amg_data);
 
    /*-----------------------------------------------------
     *  Enter Coarsening Loop
@@ -118,7 +120,7 @@ hypre_ParAMGSetup( void               *amg_vdata,
          wall_time = time_getWallclockSeconds() - wall_time;
          printf("Proc = %d    Level = %d    Coarsen Time = %f\n",
                        my_id,level, wall_time); 
-	 fflush();
+	 fflush(NULL);
       }
 
       CF_marker_array[level] = CF_marker;
@@ -129,14 +131,14 @@ hypre_ParAMGSetup( void               *amg_vdata,
       if (debug_flag) wall_time = time_getWallclockSeconds();
 
       hypre_ParAMGBuildInterp(A_array[level], CF_marker_array[level], S,
-                              debug_flag, &P);
+                              debug_flag, trunc_factor, &P);
 
       if (debug_flag)
       {
          wall_time = time_getWallclockSeconds() - wall_time;
          printf("Proc = %d    Level = %d    Build Interp Time = %f\n",
                        my_id,level, wall_time);
-	 fflush();
+	 fflush(NULL);
       }
 
       P_array[level] = P; 
@@ -161,7 +163,7 @@ hypre_ParAMGSetup( void               *amg_vdata,
          wall_time = time_getWallclockSeconds() - wall_time;
          printf("Proc = %d    Level = %d    Build Coarse Operator Time = %f\n",
                        my_id,level, wall_time);
-	 fflush();
+	 fflush(NULL);
       }
 
       ++level;
