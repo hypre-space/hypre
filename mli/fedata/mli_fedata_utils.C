@@ -643,140 +643,508 @@ void MLI_FEDataConstructNodeFaceMatrix(MPI_Comm comm, MLI_FEData *fedata,
  *-----------------------------------------------------------------------*/
 
 void MLI_FEDataAgglomerateElemsLocal(MLI_Matrix *elemMatrix, 
-                                     int **macro_labels_out)
+                                     int **macroLabelsOut)
 {
-   hypre_ParCSRMatrix  *hypre_EEMat;
+   int                 mypid, nprocs, startElem, endElem, localNElems;
+   int                 ii, jj, *partition, nextElem, neighCnt, minNeighs;
+   int                 *macroLabels, *denseRow, *denseRow2, *noRoot;
+   int                 *macroIA, *macroJA, *macroAA, nMacros, *macroLists;
+   int                 parent, macroNnz, loopFlag, curWeight, curIndex;
+   int                 rowNum, rowLeng, *cols, index, count, colIndex;
+   int                 maxWeight, elemCount, elemIndex, macroNumber;
+   int                 connects, secondChance;
+   double              *vals;
    MPI_Comm            comm;
-   int                 mypid, num_procs, *partition, start_elem, end_elem;
-   int                 local_nElems, nmacros, *macro_labels, *macro_sizes;
-   int                 *macro_list, ielem, jj, col_index, *dense_row;
-   int                 max_weight, cur_weight, cur_index, row_leng, row_num;
-   int                 elem_count, elem_index, macro_number, *cols;
+   hypre_ParCSRMatrix  *hypreEE;
+
+   /*-----------------------------------------------------------------
+    * fetch machine and matrix parameters
+    *-----------------------------------------------------------------*/
+
+   hypreEE = (hypre_ParCSRMatrix *) elemMatrix->getMatrix();
+   comm    = hypre_ParCSRMatrixComm(hypreEE);
+   MPI_Comm_rank(comm,&mypid);
+   MPI_Comm_size(comm,&nprocs);
+   HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) hypreEE, 
+                                        &partition);
+   startElem   = partition[mypid];
+   endElem     = partition[mypid+1] - 1;
+   localNElems = endElem - startElem + 1;
+   free( partition );
+
+   /* ------------------------------------------------------------------- */
+   /* this array is used to determine which element has been agglomerated */
+   /* and which macroelement the current element belongs to               */
+   /* ------------------------------------------------------------------- */
+
+   macroLabels = (int *) malloc( localNElems * sizeof(int) );
+   for ( ii = 0; ii < localNElems; ii++ ) macroLabels[ii] = -1;
+
+   /* ------------------------------------------------------------------- */
+   /* this array is used to indicate which element has been used as root  */
+   /* for agglomeration so that no duplication will be done.              */
+   /* ------------------------------------------------------------------- */
+
+   noRoot = (int *) malloc( localNElems * sizeof(int) );
+   for ( ii = 0; ii < localNElems; ii++ ) noRoot[ii] = 0;
+
+   /* ------------------------------------------------------------------- */
+   /* These array are used to expand a sparse row into a full row         */
+   /* (denseRow is used to register information for already agglomerated  */
+   /* elements while denseRow2 is used to register information for        */
+   /* possible macroelement).                                             */
+   /* ------------------------------------------------------------------- */
+
+   denseRow   = (int *) malloc( localNElems * sizeof(int) );
+   denseRow2  = (int *) malloc( localNElems * sizeof(int) );
+   for ( ii = 0; ii < localNElems; ii++ ) denseRow[ii] = denseRow2[ii] = 0;
+
+   /* ------------------------------------------------------------------- */
+   /* These arrays are needed to find neighbor element for agglomeration  */
+   /* that preserves nice geometric shapes                                */
+   /* ------------------------------------------------------------------- */
+
+   macroIA = (int *) malloc( (localNElems/8+1) * sizeof(int) );
+   macroJA = (int *) malloc( (localNElems/8+1) * 216 * sizeof(int) );
+   macroAA = (int *) malloc( (localNElems/8+1) * 216 * sizeof(int) );
+
+   /* ------------------------------------------------------------------- */
+   /* allocate memory for the output data (assume no more than 60 elements*/
+   /* in any macroelements                                                */
+   /* ------------------------------------------------------------------- */
+
+   nMacros = 0;
+   macroLists = (int *) malloc( 60 * sizeof(int) );
+
+   /* ------------------------------------------------------------------- */
+   /* search for initial element (one with least number of neighbors)     */
+   /* ------------------------------------------------------------------- */
+
+   nextElem   = -1;
+   minNeighs = 10000;
+   for ( ii = 0; ii < localNElems; ii++ )
+   {
+      rowNum = startElem + ii;
+      hypre_ParCSRMatrixGetRow(hypreEE,rowNum,&neighCnt,NULL,NULL);
+      if ( neighCnt < minNeighs )
+      {
+         minNeighs = neighCnt;
+         nextElem = ii;
+      }
+   }
+
+   /* ------------------------------------------------------------------- */
+   /* loop through all elements for agglomeration                         */
+   /* ------------------------------------------------------------------- */
+
+   if ( nextElem == -1 ) loopFlag = 0; else loopFlag = 1;
+   parent     = -1;
+   macroIA[0] = 0;
+   macroNnz   = 0;
+
+   while ( loopFlag )
+   {
+      if ( macroLabels[nextElem] < 0 )
+      {
+         /* ------------------------------------------------------------- */
+         /* update the current macroelement connectivity row              */
+         /* ------------------------------------------------------------- */
+
+         for ( ii = 0; ii < localNElems; ii++ ) denseRow2[ii] = denseRow[ii];
+
+         /* ------------------------------------------------------------- */
+         /* load row nextElem into denseRow, keeping track of max weight  */
+         /* ------------------------------------------------------------- */
+
+         curWeight = 0;
+         curIndex  = -1;
+         hypre_ParCSRMatrixGetRow(hypreEE,nextElem,&rowLeng,&cols,&vals);
+         for ( ii = 0; ii < rowLeng; ii++ )
+         {
+            colIndex = cols[ii] - startElem;
+            if ( colIndex >= 0 && colIndex < localNElems &&
+                 denseRow2[colIndex] >= 0 )
+            {
+               denseRow2[colIndex] = (int) vals[ii];
+               if ( ((int) vals[ii]) > curWeight )
+               {
+                  curWeight = (int) vals[ii];
+                  curIndex  = cols[ii];
+               }
+            }
+         }
+
+         /* ------------------------------------------------------------- */
+         /* if there is a parent macroelement to the root element, do the */
+         /* following :                                                   */
+         /* 1. find how many links between the selected neighbor element  */
+         /*    and the parent element (there  may be none)                */
+         /* 2. search for other neighbor elements to see if they have the */
+         /*    same links to the root element but which is more connected */
+         /*    to the parent element, and select it                       */
+         /* ------------------------------------------------------------- */
+
+         if ( parent >= 0 )
+         {
+            connects = 0;
+            for ( jj = macroIA[parent]; jj < macroIA[parent+1]; jj++ )
+               if ( macroJA[jj] == curIndex ) {connects = macroAA[jj]; break;}
+            for ( ii = 0; ii < rowLeng; ii++ )
+            {
+               colIndex = cols[ii] - startElem;
+               if ( ((int) vals[ii]) == curWeight && colIndex != curIndex )
+               {
+                  for ( jj = macroIA[parent]; jj < macroIA[parent+1]; jj++ )
+                  {
+                     if ( macroJA[jj] == colIndex && macroAA[jj] > connects )
+                     {
+                        curWeight = (int) vals[ii];
+                        curIndex  = cols[ii];
+                        break;
+                     }
+                  }
+               }
+            }
+         }
+         hypre_ParCSRMatrixRestoreRow(hypreEE,nextElem,&rowLeng,&cols,&vals);
+
+         /* store the element on the macroelement list */
+
+         elemCount = 0;
+         maxWeight = 0;
+         macroLists[elemCount++] = nextElem;
+         denseRow2[nextElem] = -1;
+
+         /* grab the neighboring elements */
+
+         /*while ( elemCount < 8 || curWeight > maxWeight )*/
+         secondChance = 0;
+         while ( curWeight > maxWeight || secondChance == 0 )
+         {
+            /* if decent macroelement is unlikely to be formed, exit */
+            if ( elemCount == 1 && curWeight <  4 ) break;
+            if ( elemCount == 2 && curWeight <  6 ) break;
+            if ( elemCount >  2 && curWeight <= 6 ) break;
+
+            /* otherwise include this element in the list */
+
+            if ( curWeight <= maxWeight ) secondChance = 1;
+            maxWeight = curWeight;
+            macroLists[elemCount++] = curIndex;
+            denseRow2[curIndex] = - 1;
+
+            /* update the macroelement connectivity */
+
+            rowNum = startElem + curIndex;
+            hypre_ParCSRMatrixGetRow(hypreEE,rowNum,&rowLeng,&cols,&vals);
+            for ( ii = 0; ii < rowLeng; ii++ )
+            {
+               colIndex = cols[ii] - startElem;
+               if (denseRow2[colIndex] >= 0)
+                  denseRow2[colIndex] += (int) vals[ii];
+            }
+            hypre_ParCSRMatrixRestoreRow(hypreEE,rowNum,&rowLeng,&cols,&vals);
+
+            /* search for next element to agglomerate (max connectivity) */
+
+            curWeight = 0;
+            curIndex  = -1;
+            for ( ii = 0; ii < localNElems; ii++ )
+            {
+               if (denseRow2[ii] > curWeight)
+               {
+                  curWeight = denseRow2[ii];
+                  curIndex = ii;
+               }
+            }
+
+            /* if more than one with same weight, use other criterion */
+
+            if ( curIndex >= 0 && parent >= 0 )
+            {
+               for ( jj = macroIA[parent]; jj < macroIA[parent+1]; jj++ )
+                  if ( macroJA[jj] == curIndex ) connects = macroAA[jj];
+               for ( ii = 0; ii < localNElems; ii++ )
+               {
+                  if (denseRow2[ii] == curWeight && ii != curIndex )
+                  {
+                     for ( jj = macroIA[parent]; jj < macroIA[parent+1]; jj++ )
+                     {
+                        if ( macroJA[jj] == ii && macroAA[jj] > connects )
+                        {
+                           curWeight = denseRow2[ii];
+                           curIndex = ii;
+                           break;
+                        }
+                     }
+                  }
+               }
+            }
+         }
+
+         /* if decent macroelement has been found, validate it */
+
+         if ( elemCount >= 4 )
+         {
+            for ( jj = 0; jj < elemCount; jj++ )
+            {
+               elemIndex = macroLists[jj];
+               macroLabels[elemIndex] = nMacros;
+               denseRow2[elemIndex] = -1;
+               noRoot[elemIndex] = 1;
+            }
+            for ( jj = 0; jj < localNElems; jj++ ) 
+               denseRow[jj] = denseRow2[jj];
+            for ( jj = 0; jj < localNElems; jj++ )
+            {
+               if ( denseRow[jj] > 0 )
+               {
+                  macroJA[macroNnz] = jj;
+                  macroAA[macroNnz++] = denseRow[jj];
+               }
+            }
+            parent = nMacros++;
+            macroIA[nMacros] = macroNnz;
+         }
+         else
+         {
+            noRoot[nextElem] = 1;
+            denseRow[nextElem] = 0;
+            if ( parent >= 0 )
+            {
+               for ( ii = macroIA[parent]; ii < macroIA[parent+1]; ii++ )
+               {
+                  jj = macroJA[ii];
+                  if (noRoot[jj] == 0) denseRow[jj] = macroAA[ii];
+               }
+            }
+         }
+
+         /* search for the root of the next macroelement */
+
+         maxWeight = 0;
+         nextElem = -1;
+         for ( jj = 0; jj < localNElems; jj++ )
+         {
+            if ( denseRow[jj] > 0 )
+            {
+               if ( denseRow[jj] > maxWeight )
+               {
+                  maxWeight = denseRow[jj];
+                  nextElem = jj;
+               }
+               denseRow[jj] = 0;
+            }
+         }
+         if ( nextElem == -1 )
+         {
+            parent = -1;
+            for ( jj = 0; jj < localNElems; jj++ )
+               if (macroLabels[jj] < 0 && noRoot[jj] == 0) 
+                  { nextElem = jj; break; }
+         }
+         if ( nextElem == -1 ) loopFlag = 0;
+      }
+   }
+
+   /* if there are still leftovers, put them into adjacent macroelement
+    * or form their own, if neighbor macroelement not found */
+
+   loopFlag = 1;
+   while ( loopFlag )
+   {
+      count = 0;
+      for ( ii = 0; ii < localNElems; ii++ )
+      {
+         if ( macroLabels[ii] < 0 )
+         {
+            rowNum = startElem + ii;
+            hypre_ParCSRMatrixGetRow(hypreEE,rowNum,&rowLeng,&cols,&vals);
+            for ( jj = 0; jj < rowLeng; jj++ )
+            {
+               colIndex    = cols[jj] - startElem;
+               macroNumber = macroLabels[colIndex];
+               if ( ((int) vals[jj]) >= 4 && macroNumber >= 0 )
+               {
+                  macroLabels[ii] = - macroNumber - 10;
+                  count++;
+                  break;
+               }
+            }
+         }
+      }
+      for ( ii = 0; ii < localNElems; ii++ )
+      {
+         if ( macroLabels[ii] <= -10 ) 
+            macroLabels[ii] = - macroLabels[ii] - 10;
+      }
+      if ( count == 0 ) loopFlag = 0;
+   }
+
+   /* finally lone zones will be all by themselves */
+
+   for ( ii = 0; ii < localNElems; ii++ )
+   {
+      if ( macroLabels[ii] < 0 ) /* element still has not been agglomerated */
+         macroLabels[ii] = nMacros++;
+   }
+
+   /* initialize the output arrays */
+
+   printf("number of macroelements = %d (%d) : %e\n", nMacros, localNElems,
+            (double) localNElems/nMacros);
+   for ( ii = 0; ii < localNElems; ii++ )
+      printf("macroLabel %6d = %6d\n", ii, macroLabels[ii]);
+
+   (*macroLabelsOut) = macroLabels;
+   free( macroLists );
+   free( macroIA );
+   free( macroJA );
+   free( macroAA );
+   free( denseRow );
+   free( denseRow2 );
+   free( noRoot );
+}
+
+/*************************************************************************
+ * Function  : MLI_FEDataAgglomerateElemsLocalOld (Old version)
+ * Purpose   : Form macroelements
+ * Inputs    : element-element matrix 
+ * Outputs   : macro-element labels
+ *-----------------------------------------------------------------------*/
+
+void MLI_FEDataAgglomerateElemsLocalOld(MLI_Matrix *elemMatrix, 
+                                     int **macroLabelsOut)
+{
+   hypre_ParCSRMatrix  *hypreEE;
+   MPI_Comm            comm;
+   int                 mypid, nprocs, *partition, startElem, endElem;
+   int                 localNElems, nMacros, *macroLabels, *macroSizes;
+   int                 *macroList, ielem, jj, colIndex, *denseRow;
+   int                 maxWeight, curWeight, curIndex, rowLeng, rowNum;
+   int                 elemCount, elemIndex, macroNumber, *cols;
    double              *vals;
 
    /*-----------------------------------------------------------------
     * fetch machine and matrix parameters
     *-----------------------------------------------------------------*/
 
-   hypre_EEMat = (hypre_ParCSRMatrix *) elemMatrix->getMatrix();
-   comm        = hypre_ParCSRMatrixComm(hypre_EEMat);
+   hypreEE = (hypre_ParCSRMatrix *) elemMatrix->getMatrix();
+   comm    = hypre_ParCSRMatrixComm(hypreEE);
    MPI_Comm_rank(comm,&mypid);
-   MPI_Comm_size(comm,&num_procs);
-   HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) hypre_EEMat, 
+   MPI_Comm_size(comm,&nprocs);
+   HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) hypreEE, 
                                         &partition);
-   start_elem   = partition[mypid];
-   end_elem     = partition[mypid+1] - 1;
-   local_nElems = end_elem - start_elem + 1;
+   startElem   = partition[mypid];
+   endElem     = partition[mypid+1] - 1;
+   localNElems = endElem - startElem + 1;
+   free( partition );
 
    /*-----------------------------------------------------------------
     * this array is used to determine which element has been agglomerated
     *-----------------------------------------------------------------*/
 
-   macro_labels = (int *) malloc( local_nElems * sizeof(int) );
-   for ( ielem = 0; ielem < local_nElems; ielem++ ) macro_labels[ielem] = -1;
+   macroLabels = (int *) malloc( localNElems * sizeof(int) );
+   for ( ielem = 0; ielem < localNElems; ielem++ ) macroLabels[ielem] = -1;
 
    /*-----------------------------------------------------------------
     * this array is used to expand a sparse row into a full row 
     *-----------------------------------------------------------------*/
 
-   dense_row = (int *) malloc( local_nElems * sizeof(int) );
-   for ( ielem = 0; ielem < local_nElems; ielem++ ) dense_row[ielem] = 0;
+   denseRow = (int *) malloc( localNElems * sizeof(int) );
+   for ( ielem = 0; ielem < localNElems; ielem++ ) denseRow[ielem] = 0;
 
    /*-----------------------------------------------------------------
     * allocate memory for the output data (assume no more than 
     * 100 elements in any macroelements 
     *-----------------------------------------------------------------*/
 
-   nmacros = 0;
-   macro_sizes = (int *) malloc( local_nElems/2 * sizeof(int) );
-   macro_list  = (int *) malloc( 100 * sizeof(int) );
+   nMacros = 0;
+   macroSizes = (int *) malloc( localNElems/2 * sizeof(int) );
+   macroList  = (int *) malloc( 100 * sizeof(int) );
 
    /*-----------------------------------------------------------------
     * loop through all elements for agglomeration
     *-----------------------------------------------------------------*/
 
-   for ( ielem = 0; ielem < local_nElems; ielem++ )
+   for ( ielem = 0; ielem < localNElems; ielem++ )
    {
-      if ( macro_labels[ielem] < 0 ) /* element has not been agglomerated */
+      if ( macroLabels[ielem] < 0 ) /* element has not been agglomerated */
       {
-         max_weight = 0;
-         cur_weight = 0;
-         cur_index  = -1;
+         maxWeight = 0;
+         curWeight = 0;
+         curIndex  = -1;
 
-         /* load row ielem into dense_row, keeping track of maximum weight */
+         /* load row ielem into denseRow, keeping track of maximum weight */
 
-         row_num = start_elem + ielem;
-         hypre_ParCSRMatrixGetRow(hypre_EEMat,row_num,&row_leng,&cols,&vals);
-         for ( jj = 0; jj < row_leng; jj++ )
+         rowNum = startElem + ielem;
+         hypre_ParCSRMatrixGetRow(hypreEE,rowNum,&rowLeng,&cols,&vals);
+         for ( jj = 0; jj < rowLeng; jj++ )
          {
-            col_index = cols[jj] - start_elem;
-printf("element %5d has neighbor = %5d %e\n", ielem, col_index, vals[jj]);
-            if ( col_index >= 0 && col_index < local_nElems )
+            colIndex = cols[jj] - startElem;
+            if ( colIndex >= 0 && colIndex < localNElems )
             {
-               if ( dense_row[col_index] >= 0 && col_index != ielem )
+               if ( denseRow[colIndex] >= 0 && colIndex != ielem )
                {
-                  dense_row[col_index] = (int) vals[jj];
-                  if ( ((int) vals[jj]) > cur_weight )
+                  denseRow[colIndex] = (int) vals[jj];
+                  if ( ((int) vals[jj]) > curWeight )
                   {
-                     cur_weight = (int) vals[jj];
-                     cur_index  = col_index;
+                     curWeight = (int) vals[jj];
+                     curIndex  = colIndex;
                   }
                }
             }    
          }    
-         hypre_ParCSRMatrixRestoreRow(hypre_EEMat,row_num,&row_leng,&cols,&vals);
+         hypre_ParCSRMatrixRestoreRow(hypreEE,rowNum,&rowLeng,&cols,&vals);
 
          /* begin agglomeration using element ielem as root */
 
-         elem_count = 0;
-         macro_list[elem_count++] = ielem;
-         dense_row[ielem] = -1;
-printf("current weight = %5d %5d\n", cur_weight, max_weight);
-         while ( cur_weight >= 4 && cur_weight > max_weight && elem_count < 100 )
+         elemCount = 0;
+         macroList[elemCount++] = ielem;
+         denseRow[ielem] = -1;
+         while (curWeight >= 4 && curWeight > maxWeight && elemCount < 100)
          { 
-printf("current index and weight = %5d %5d\n", cur_index, cur_weight);
-            max_weight = cur_weight;
-            macro_list[elem_count++] = cur_index;
-            dense_row[cur_index] = -1;
-            row_num = start_elem + cur_index;
-            hypre_ParCSRMatrixGetRow(hypre_EEMat,row_num,&row_leng,&cols,&vals);
-            for ( jj = 0; jj < row_leng; jj++ )
+            maxWeight = curWeight;
+            macroList[elemCount++] = curIndex;
+            denseRow[curIndex] = -1;
+            rowNum = startElem + curIndex;
+            hypre_ParCSRMatrixGetRow(hypreEE,rowNum,&rowLeng,&cols,&vals);
+            for ( jj = 0; jj < rowLeng; jj++ )
             {
-               col_index = cols[jj] - start_elem;
-               if ( col_index >= 0 && col_index < local_nElems )
+               colIndex = cols[jj] - startElem;
+               if ( colIndex >= 0 && colIndex < localNElems )
                {
-                  if ( dense_row[col_index] >= 0 ) 
+                  if ( denseRow[colIndex] >= 0 ) 
                   {
-                     dense_row[col_index] += (int) vals[jj];
-                     if ( ((int) dense_row[col_index]) > cur_weight )
+                     denseRow[colIndex] += (int) vals[jj];
+                     if ( ((int) denseRow[colIndex]) > curWeight )
                      {
-                        cur_weight = dense_row[col_index];
-                        cur_index  = col_index;
+                        curWeight = denseRow[colIndex];
+                        curIndex  = colIndex;
                      }
                   }
                }
             }
-            hypre_ParCSRMatrixRestoreRow(hypre_EEMat,row_num,&row_leng,&cols,
-                                         &vals);
+            hypre_ParCSRMatrixRestoreRow(hypreEE,rowNum,&rowLeng,&cols,&vals);
          } 
 
-         /* if macroelement has size > 1, register it and reset dense_row */
+         /* if macroelement has size > 1, register it and reset denseRow */
 
-         if ( elem_count > 1 ) 
+         if ( elemCount > 1 ) 
          {
-            for ( jj = 0; jj < elem_count; jj++ )
+            for ( jj = 0; jj < elemCount; jj++ )
             {
-               elem_index = macro_list[jj];
-               macro_labels[elem_index] = nmacros;
+               elemIndex = macroList[jj];
+               macroLabels[elemIndex] = nMacros;
 #if 1
-               printf("Macroelement %4d has element %4d\n", nmacros, elem_index);
+               printf("Macroelement %4d has element %4d\n",nMacros,elemIndex);
 #endif
             }
-            for ( jj = 0; jj < local_nElems; jj++ )
-               if ( dense_row[jj] > 0 ) dense_row[jj] = 0;
-            macro_sizes[nmacros++] = elem_count;
+            for ( jj = 0; jj < localNElems; jj++ )
+               if ( denseRow[jj] > 0 ) denseRow[jj] = 0;
+            macroSizes[nMacros++] = elemCount;
          } 
-         else dense_row[ielem] = 0;
+         else denseRow[ielem] = 0;
       }
    }
 
@@ -784,29 +1152,29 @@ printf("current index and weight = %5d %5d\n", cur_index, cur_weight);
     * if there are still leftovers, put them into adjacent macroelement
     *-----------------------------------------------------------------*/
 
-   for ( ielem = 0; ielem < local_nElems; ielem++ )
+   for ( ielem = 0; ielem < localNElems; ielem++ )
    {
-      if ( macro_labels[ielem] < 0 ) /* not been agglomerated */
+      if ( macroLabels[ielem] < 0 ) /* not been agglomerated */
       {
-         row_num = start_elem + ielem;
-         hypre_ParCSRMatrixGetRow(hypre_EEMat,row_num,&row_leng,&cols,&vals);
-         cur_index = -1;
-         max_weight = 3;
-         for ( jj = 0; jj < row_leng; jj++ )
+         rowNum = startElem + ielem;
+         hypre_ParCSRMatrixGetRow(hypreEE,rowNum,&rowLeng,&cols,&vals);
+         curIndex  = -1;
+         maxWeight = 3;
+         for ( jj = 0; jj < rowLeng; jj++ )
          {
-            col_index   = cols[jj] - start_elem;
-            if ( col_index >= 0 && col_index < local_nElems )
+            colIndex   = cols[jj] - startElem;
+            if ( colIndex >= 0 && colIndex < localNElems )
             {
-               macro_number = macro_labels[col_index];
-               if ( macro_number > 0 && vals[jj] > max_weight )
+               macroNumber = macroLabels[colIndex];
+               if ( macroNumber > 0 && vals[jj] > maxWeight )
                {
-                  max_weight = (int) vals[jj];
-                  cur_index  = macro_number;
+                  maxWeight = (int) vals[jj];
+                  curIndex  = macroNumber;
                }
             }
          } 
-         hypre_ParCSRMatrixRestoreRow(hypre_EEMat,row_num,&row_leng,&cols,&vals);
-         if ( cur_index >= 0 ) macro_labels[ielem] = cur_index;
+         hypre_ParCSRMatrixRestoreRow(hypreEE,rowNum,&rowLeng,&cols,&vals);
+         if ( curIndex >= 0 ) macroLabels[ielem] = curIndex;
       } 
    } 
 
@@ -814,12 +1182,12 @@ printf("current index and weight = %5d %5d\n", cur_index, cur_weight);
     * finally lone zones will be all by themselves 
     *-----------------------------------------------------------------*/
 
-   for ( ielem = 0; ielem < local_nElems; ielem++ )
+   for ( ielem = 0; ielem < localNElems; ielem++ )
    {
-      if ( macro_labels[ielem] < 0 ) /* still has not been agglomerated */
+      if ( macroLabels[ielem] < 0 ) /* still has not been agglomerated */
       {
-         macro_sizes[nmacros] = 1;
-         macro_labels[ielem]  = nmacros++;
+         macroSizes[nMacros] = 1;
+         macroLabels[ielem]  = nMacros++;
       }
    }
 
@@ -827,10 +1195,9 @@ printf("current index and weight = %5d %5d\n", cur_index, cur_weight);
     * initialize the output arrays 
     *-----------------------------------------------------------------*/
 
-   (*macro_labels_out) = macro_labels;
-   free( macro_list );
-   free( macro_sizes );
-   free( dense_row );
-
+   (*macroLabelsOut) = macroLabels;
+   free( macroList );
+   free( macroSizes );
+   free( denseRow );
 }
 
