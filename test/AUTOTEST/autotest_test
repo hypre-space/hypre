@@ -153,33 +153,33 @@ usage () {
   printf "  1=configure and make, and\n"
   printf "  2=configure, make and run.\n"
   printf "\n"
-  printf "-a opt   All; the (default) configure, make, and execute. Also\n"
+  printf "%s\n" "-a opt   All; the (default) configure, make, and execute. Also"
   printf "         performs make struct, IJ, fei, all, beta, nofei, and\n"
-  printf "         fei++, followed by the test_drivers script (when opt=2).\n"
-  printf "-b opt   Beta; perform the (default) configure, make beta, nofei,\n"
-  printf "         fei++, followed by the test_drivers script (when opt=2).\n"
-  printf "-c       C++; make all++ (no configure, or execute).\n"
-  printf "-d       Docs; make the documentation directory.\n"
-  printf "-f       F77; make all77 (no configure, or execute).\n"
-  printf "-i opt   Insure++; perform configure --with-insure. Output \n"
+  printf "         fei++, followed by the runtest script (when opt=2).\n"
+  printf "%s\n" "-b opt   Beta; perform the (default) configure, make beta,"
+  printf "         nofei, fei++, followed by the runtest script (when opt=2).\n"
+  printf "%s\n" "-c       C++; make all++ (no configure, or execute)."
+  printf "%s\n" "-d       Docs; make the documentation directory."
+  printf "%s\n" "-f       F77; make all77 (no configure, or execute)."
+  printf "%s\n" "-i opt   Insure++; perform configure --with-insure. Output"
   printf "         is appended to a file called insure.log.\n"
-  printf "-l       use DPCS Scheduling.\n"
-  printf "-h       Help; display this help message.\n"
-  printf "-m       Mail; mail error summary to developers.\n"
-  printf "+m       Mail+; mail error logs to developers.\n"
-  printf "-n       NoMPI; configure --without-MPI, make struct, IJ,\n"
+  printf "%s\n" "-l       use DPCS Scheduling."
+  printf "%s\n" "-h       Help; display this help message."
+  printf "%s\n" "-m       Mail; mail error summary to developers."
+  printf "%s\n" "+m       Mail+; mail error logs to developers."
+  printf "%s\n" "-n       NoMPI; configure --without-MPI, make struct, IJ,"
   printf "         all, and beta (no execute option).\n"
-  printf "-o opt   openMP; configure --with-openmp, make beta.\n"
-  printf "-p opt   PETSc; perform configure --with-petsc, make all.\n"
-  printf "-q opt   Purify; perform configure --with-purify-to-file. Output \n"
-  printf "         is appended to a file called purify.log.\n"
-  printf "+q opt   Purify; no file output option (interactive).\n"
-  printf "-r host  Remote; remote exection is performed on "host".\n"
-  printf "-s       Strict; configure --with-strict-checking,\n"
+  printf "%s\n" "-o opt   openMP; configure --with-openmp, make beta."
+  printf "%s\n" "-p opt   PETSc; perform configure --with-petsc, make all."
+  printf "%s\n" "-q opt   Purify; perform configure --with-purify-to-file."
+  printf "         Output is appended to a file called purify.log.\n"
+  printf "%s\n" "+q opt   Purify; no file output option (interactive)."
+  printf "%s\n" "-r host  Remote; remote exection is performed on "host"."
+  printf "%s\n" "-s       Strict; configure --with-strict-checking,"
   printf "         followed by make struct, IJ, all, beta(no execute option).\n"
-  printf "-t opt   Thread; perform configure --with-pthreads, make struct.\n"
-  printf "-x       BetaC++; make beta++ (no configure, or execute).\n"
-  printf "-y       BetaF77; make beta77 (no configure, or execute).\n"
+  printf "%s\n" "-t opt   Thread; perform configure --with-pthreads, make struct."
+  printf "%s\n" "-x       BetaC++; make beta++ (no configure, or execute)."
+  printf "%s\n" "-y       BetaF77; make beta77 (no configure, or execute)."
 }
 
 #=============================================================================
@@ -188,12 +188,19 @@ usage () {
 
 apply_error_filters () {
   ErrorFile=$1
-  if [ "$HYPRE_ARCH" = "blue" ] ; then
-    if (egrep -v "=== End of Compilation|Compilation successful" $ErrorFile >/dev/null)
-    then                          # cleanup the problem with the xlf compiler
-      mv $ErrorFile $ErrorFile.orig
-      egrep -v "=== End of Compilation|Compilation successful" $ErrorFile.orig > $ErrorFile
-    fi
+  if [ -s "${EFILE}" ] ; then
+    if [ "$HYPRE_ARCH" = "blue" ] ; then
+      if (egrep "=== End of Compilation|Compilation successful" $ErrorFile >/dev/null)
+      then                          # cleanup the problem with the xlf compiler
+        mv $ErrorFile $ErrorFile.orig
+        egrep -v "=== End of Compilation|Compilation successful" $ErrorFile.orig > $ErrorFile
+      fi
+      if (egrep "^ Guide   |: 0 errors in file" $ErrorFile >/dev/null)
+      then                          # cleanup the problem with the GuideC compiler
+        mv $ErrorFile $ErrorFile.orig
+        egrep -v "^ Guide   |: 0 errors in file" $ErrorFile.orig > $ErrorFile
+      fi
+    fi   # blue
   fi
 }
 

@@ -90,7 +90,7 @@ do
         HYPRE_ARCH="blue"
         HYPRE_COMPILE_MACHINE="blue"
         HYPRE_RUN_MACHINE="blue"
-        HYPRE_REMOTE_DIR="/usr/gapps/hypre/powerpc-ibm-aix4.3.3.0/AUTOTEST"
+        HYPRE_REMOTE_DIR="/usr/gapps/hypre/powerpc-ibm-aix5.1.0.0/AUTOTEST"
         if [ "$1" = "-blue" ] ; then
 	  HYPRE_MACHINE_COMMANDS="-m -l -o 1 -a 2 -cf"
         else
@@ -103,7 +103,7 @@ do
         HYPRE_ARCH="blue"
         HYPRE_COMPILE_MACHINE="frost"
         HYPRE_RUN_MACHINE="frost"
-        HYPRE_REMOTE_DIR="/usr/gapps/hypre/powerpc-ibm-aix5.1.0.0/AUTOTEST"
+        HYPRE_REMOTE_DIR="/usr/gapps/hypre/powerpcll-ibm-aix5.1.0.0/AUTOTEST"
         if [ "$1" = "-frost" ] ; then
 	HYPRE_MACHINE_COMMANDS="-m -l -o 1 -a 2 -cf"
         else

@@ -16,9 +16,9 @@
 CVSROOT=/home/casc/repository
 export CVSROOT
 
-PATH=/usr/xpg4/bin:/opt/SUNWspro/bin:/usr/ccs/bin:/usr/bin:/bin
-PATH=${PATH}:/usr/sbin:/usr/ucb:/usr/apps/bin:/usr/local/scripts
-PATH=${PATH}:/usr/local/bin:/home/casc/bin
+PATH=/usr/xpg4/bin:/opt/SUNWspro/bin:/usr/bin:/bin
+PATH=${PATH}:/usr/sbin:/usr/ucb:/usr/ccs/bin:/usr/local/scripts
+PATH=${PATH}:/usr/local/bin:/home/casc/bin:/usr/apps/bin
 export PATH
 
 #==============================================================================
