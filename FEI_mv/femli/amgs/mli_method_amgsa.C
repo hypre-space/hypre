@@ -143,8 +143,8 @@ MLI_Method_AMGSA::~MLI_Method_AMGSA()
       dnstev_(NULL, NULL, paramString, NULL, NULL, NULL, NULL, NULL, NULL, 
               NULL, NULL, NULL, &info);
 #else
-   printf("FATAL ERROR : ARPACK not installed.\n");
-   exit(1);
+      printf("FATAL ERROR : ARPACK not installed.\n");
+      exit(1);
 #endif
    }
 }
@@ -244,8 +244,6 @@ int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
            set_id = MLI_SOLVER_GS_ID;
       else if (!strcasecmp(param2, "SGS"))       
            set_id = MLI_SOLVER_SGS_ID;
-      else if (!strcasecmp(param2, "CGSGS"))       
-           set_id = MLI_SOLVER_CGSGS_ID;
       else if (!strcasecmp(param2, "BSGS"))   
            set_id = MLI_SOLVER_BSGS_ID;
       else if (!strcasecmp(param2, "MLS"))       
@@ -254,11 +252,16 @@ int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
            set_id = MLI_SOLVER_PARASAILS_ID;
       else if (!strcasecmp(param2, "ArpackSLU")) 
            set_id = MLI_SOLVER_ARPACKSUPERLU_ID;
+      else if (!strcasecmp(param2, "Chebyshev")) 
+           set_id = MLI_SOLVER_CHEBYSHEV_ID;
+      else if (!strcasecmp(param2, "CG")) 
+           set_id = MLI_SOLVER_CG_ID;
       else 
       {
-         printf("MLI_Method_AMGSA::setParams ERROR - setPreSmoother - \n");
+         printf("MLI_Method_AMGSA::setParams ERROR - setPreSmoother (%s) -\n",
+                param2);
          printf("invalid smoother. Valid options are : Jacobi, GS, SGS,");
-         printf(" BSGS, MLS, ParaSails\n");
+         printf(" BSGS, MLS, ParaSails, Chebyshev, CG\n");
          return 1;
       } 
       if ( argc != 2 )
@@ -283,8 +286,6 @@ int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
            set_id = MLI_SOLVER_GS_ID;
       else if (!strcasecmp(param2, "SGS"))       
            set_id = MLI_SOLVER_SGS_ID;
-      else if (!strcasecmp(param2, "CGSGS"))       
-           set_id = MLI_SOLVER_CGSGS_ID;
       else if (!strcasecmp(param2, "BSGS"))   
            set_id = MLI_SOLVER_BSGS_ID;
       else if (!strcasecmp(param2, "MLS"))       
@@ -293,11 +294,15 @@ int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
            set_id = MLI_SOLVER_PARASAILS_ID;
       else if (!strcasecmp(param2, "ArpackSLU")) 
            set_id = MLI_SOLVER_ARPACKSUPERLU_ID;
+      else if (!strcasecmp(param2, "Chebyshev")) 
+           set_id = MLI_SOLVER_CHEBYSHEV_ID;
+      else if (!strcasecmp(param2, "CG")) 
+           set_id = MLI_SOLVER_CG_ID;
       else 
       {
          printf("MLI_Method_AMGSA::setParams ERROR - setPostSmoother - \n");
          printf("invalid smoother. Valid options are : Jacobi, GS, SGS,");
-         printf(" CGSGS, BSGS, MLS, ParaSails\n");
+         printf(" BSGS, MLS, ParaSails, CG\n");
          return 1;
       } 
       if ( argc != 2 )
@@ -322,19 +327,21 @@ int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
            set_id = MLI_SOLVER_GS_ID;
       else if (!strcasecmp(param2, "SGS"))       
            set_id = MLI_SOLVER_SGS_ID;
-      else if (!strcasecmp(param2, "CGSGS"))       
-           set_id = MLI_SOLVER_CGSGS_ID;
       else if (!strcasecmp(param2, "BSGS"))   
            set_id = MLI_SOLVER_BSGS_ID;
       else if (!strcasecmp(param2, "ParaSails")) 
            set_id = MLI_SOLVER_PARASAILS_ID;
+      else if (!strcasecmp(param2, "Chebyshev")) 
+           set_id = MLI_SOLVER_CHEBYSHEV_ID;
+      else if (!strcasecmp(param2, "CG"))   
+           set_id = MLI_SOLVER_CG_ID;
       else if (!strcasecmp(param2, "SuperLU"))   
            set_id = MLI_SOLVER_SUPERLU_ID;
       else 
       {
          printf("MLI_Method_AMGSA::setParams ERROR - setCoarseSolver - \n");
          printf("invalid solver. Valid options are : Jacobi, GS, SGS,");
-         printf(" CGSGS, BSGS, ParaSails, SuperLU.\n");
+         printf(" BSGS, ParaSails, SuperLU, CG.\n");
          return 1;
       } 
       if ( set_id != MLI_SOLVER_SUPERLU_ID && argc != 2 )
@@ -582,24 +589,6 @@ int MLI_Method_AMGSA::setup( MLI *mli )
       mli_Rmat = new MLI_Matrix(mli_Pmat->getMatrix(), param_string, NULL);
       mli->setRestriction(level, mli_Rmat);
 
-      /* ------if MLS smoother, need to give the spectral radius-------- */
-
-      if (pre_smoother == MLI_SOLVER_MLS_ID) pre_smoother_wgt[0] = max_eigen;
-      if (postsmoother == MLI_SOLVER_MLS_ID) postsmoother_wgt[0] = max_eigen;
-      if (pre_smoother==MLI_SOLVER_SGS_ID || pre_smoother==MLI_SOLVER_CGSGS_ID)
-      {
-         dtemp = -999.0;
-         MLI_Utils_ComputeSpectralRadius((hypre_ParCSRMatrix *) 
-                                         mli_Amat->getMatrix(), &dtemp);
-         for ( i = 0; i < pre_smoother_num; i++ )
-            pre_smoother_wgt[i] = 4.0 / ( 3.0 * dtemp );
-      }
-      if (postsmoother==MLI_SOLVER_SGS_ID || postsmoother==MLI_SOLVER_CGSGS_ID)
-      {
-         for ( i = 0; i < postsmoother_num; i++ )
-            postsmoother_wgt[i] = 4.0 / ( 3.0 * dtemp );
-      }
-
       /* ------set the smoothers---------------------------------------- */
 
       if ( useSAMGDDFlag_ && num_levels == 2 && 
@@ -625,6 +614,12 @@ int MLI_Method_AMGSA::setup( MLI *mli )
       targv[1] = (char *) pre_smoother_wgt;
       sprintf( param_string, "relaxWeight" );
       smoother_ptr->setParams(param_string, 2, targv);
+      if ( pre_smoother == MLI_SOLVER_MLS_ID ) 
+      {
+         sprintf( param_string, "maxEigen" );
+         targv[0] = (char *) &max_eigen;
+         smoother_ptr->setParams(param_string, 1, targv);
+      }
       smoother_ptr->setup(mli_Amat);
       mli->setSmoother( level, MLI_SMOOTHER_PRE, smoother_ptr );
 
@@ -635,6 +630,12 @@ int MLI_Method_AMGSA::setup( MLI *mli )
          targv[1] = (char *) postsmoother_wgt;
          sprintf( param_string, "relaxWeight" );
          smoother_ptr->setParams(param_string, 2, targv);
+         if ( postsmoother == MLI_SOLVER_MLS_ID ) 
+         {
+            sprintf( param_string, "maxEigen" );
+            targv[0] = (char *) &max_eigen;
+            smoother_ptr->setParams(param_string, 1, targv);
+         }
          smoother_ptr->setup(mli_Amat);
       }
       mli->setSmoother( level, MLI_SMOOTHER_POST, smoother_ptr );
@@ -643,7 +644,6 @@ int MLI_Method_AMGSA::setup( MLI *mli )
    /* ------set the coarse grid solver---------------------------------- */
 
    if (mypid == 0 && output_level > 0) printf("\tCoarse level = %d\n",level);
-   if (coarse_solver == MLI_SOLVER_MLS_ID) coarse_solver_wgt[0] = max_eigen;
    csolve_ptr = MLI_Solver_CreateFromID( coarse_solver );
    if (coarse_solver != MLI_SOLVER_SUPERLU_ID) 
    {
@@ -651,6 +651,12 @@ int MLI_Method_AMGSA::setup( MLI *mli )
       targv[1] = (char *) coarse_solver_wgt;
       sprintf( param_string, "relaxWeight" );
       csolve_ptr->setParams(param_string, 2, targv);
+      if (coarse_solver == MLI_SOLVER_MLS_ID) 
+      {
+         sprintf( param_string, "maxEigen" );
+         targv[0] = (char *) &max_eigen;
+         csolve_ptr->setParams(param_string, 1, targv);
+      }
    }
    mli_Amat = mli->getSystemMatrix(level);
    csolve_ptr->setup(mli_Amat);
@@ -713,8 +719,6 @@ int MLI_Method_AMGSA::setSmoother(int prePost,int set_id,int num,double *wgt)
                                         break;
          case MLI_SOLVER_SGS_ID       : pre_smoother = MLI_SOLVER_SGS_ID;
                                         break;
-         case MLI_SOLVER_CGSGS_ID     : pre_smoother = MLI_SOLVER_CGSGS_ID;
-                                        break;
          case MLI_SOLVER_PARASAILS_ID : pre_smoother = MLI_SOLVER_PARASAILS_ID;
                                         break;
          case MLI_SOLVER_BSGS_ID      : pre_smoother = MLI_SOLVER_BSGS_ID;
@@ -724,6 +728,10 @@ int MLI_Method_AMGSA::setSmoother(int prePost,int set_id,int num,double *wgt)
          case MLI_SOLVER_ARPACKSUPERLU_ID : 
                                     pre_smoother = MLI_SOLVER_ARPACKSUPERLU_ID;
                                     break;
+         case MLI_SOLVER_CHEBYSHEV_ID : pre_smoother = MLI_SOLVER_CHEBYSHEV_ID;
+                                        break;
+         case MLI_SOLVER_CG_ID        : pre_smoother = MLI_SOLVER_CG_ID;
+                                        break;
          default : printf("MLI_Method_AMGSA::setSmoother ERROR(2)\n");
                    exit(1);
       }
@@ -731,7 +739,7 @@ int MLI_Method_AMGSA::setSmoother(int prePost,int set_id,int num,double *wgt)
       delete [] pre_smoother_wgt;
       pre_smoother_wgt = new double[pre_smoother_num];
       if ( wgt == NULL )
-         for (i = 0; i < pre_smoother_num; i++) pre_smoother_wgt[i] = 1.;
+         for (i = 0; i < pre_smoother_num; i++) pre_smoother_wgt[i] = 0.;
       else
          for (i = 0; i < pre_smoother_num; i++) pre_smoother_wgt[i] = wgt[i];
    }
@@ -745,8 +753,6 @@ int MLI_Method_AMGSA::setSmoother(int prePost,int set_id,int num,double *wgt)
                                         break;
          case MLI_SOLVER_SGS_ID       : postsmoother = MLI_SOLVER_SGS_ID;
                                         break;
-         case MLI_SOLVER_CGSGS_ID     : postsmoother = MLI_SOLVER_CGSGS_ID;
-                                        break;
          case MLI_SOLVER_PARASAILS_ID : postsmoother = MLI_SOLVER_PARASAILS_ID;
                                         break;
          case MLI_SOLVER_BSGS_ID      : postsmoother = MLI_SOLVER_BSGS_ID;
@@ -756,6 +762,10 @@ int MLI_Method_AMGSA::setSmoother(int prePost,int set_id,int num,double *wgt)
          case MLI_SOLVER_ARPACKSUPERLU_ID : 
                                     postsmoother = MLI_SOLVER_ARPACKSUPERLU_ID;
                                     break;
+         case MLI_SOLVER_CHEBYSHEV_ID : postsmoother = MLI_SOLVER_CHEBYSHEV_ID;
+                                        break;
+         case MLI_SOLVER_CG_ID        : postsmoother = MLI_SOLVER_CG_ID;
+                                        break;
          default : printf("MLI_Method_AMGSA::setSmoother ERROR(3)\n");
                    exit(1);
       }
@@ -763,7 +773,7 @@ int MLI_Method_AMGSA::setSmoother(int prePost,int set_id,int num,double *wgt)
       delete [] postsmoother_wgt;
       postsmoother_wgt = new double[postsmoother_num];
       if ( wgt == NULL )
-         for (i = 0; i < postsmoother_num; i++) postsmoother_wgt[i] = 1.;
+         for (i = 0; i < postsmoother_num; i++) postsmoother_wgt[i] = 0.;
       else
          for (i = 0; i < postsmoother_num; i++) postsmoother_wgt[i] = wgt[i];
    }
@@ -786,8 +796,6 @@ int MLI_Method_AMGSA::setCoarseSolver( int set_id, int num, double *wgt )
                                      break;
       case MLI_SOLVER_SGS_ID       : coarse_solver = MLI_SOLVER_SGS_ID;
                                      break;
-      case MLI_SOLVER_CGSGS_ID     : coarse_solver = MLI_SOLVER_CGSGS_ID;
-                                     break;
       case MLI_SOLVER_PARASAILS_ID : coarse_solver = MLI_SOLVER_PARASAILS_ID;
                                      break;
       case MLI_SOLVER_BSGS_ID      : coarse_solver = MLI_SOLVER_BSGS_ID;
@@ -795,6 +803,10 @@ int MLI_Method_AMGSA::setCoarseSolver( int set_id, int num, double *wgt )
       case MLI_SOLVER_MLS_ID       : coarse_solver = MLI_SOLVER_MLS_ID;
                                      break;
       case MLI_SOLVER_SUPERLU_ID   : coarse_solver = MLI_SOLVER_SUPERLU_ID;
+                                     break;
+      case MLI_SOLVER_CHEBYSHEV_ID : coarse_solver = MLI_SOLVER_CHEBYSHEV_ID;
+                                     break;
+      case MLI_SOLVER_CG_ID        : coarse_solver = MLI_SOLVER_CG_ID;
                                      break;
       default : printf("MLI_Method_AMGSA::setCoarseSolver ERROR - invalid");
                 printf(" solver = %d\n", set_id);
@@ -1040,67 +1052,94 @@ int MLI_Method_AMGSA::print()
       switch ( pre_smoother )
       {
          case MLI_SOLVER_JACOBI_ID :
-              printf("\t*** pre  smoother type      = Jacobi\n"); break;
+              printf("\t*** pre  smoother type      = Jacobi\n"); 
+              break;
          case MLI_SOLVER_GS_ID :
-              printf("\t*** pre  smoother type      = Gauss Seidel\n"); break;
+              printf("\t*** pre  smoother type      = Gauss Seidel\n"); 
+              break;
          case MLI_SOLVER_SGS_ID :
               printf("\t*** pre  smoother type      = symm Gauss Seidel\n"); 
               break;
-         case MLI_SOLVER_CGSGS_ID :
-              printf("\t*** pre  smoother type      = CG/symm Gauss Seidel\n"); 
-              break;
          case MLI_SOLVER_PARASAILS_ID :
-              printf("\t*** pre  smoother type      = ParaSails\n"); break; 
+              printf("\t*** pre  smoother type      = ParaSails\n"); 
+              break; 
          case MLI_SOLVER_BSGS_ID :
-              printf("\t*** pre  smoother type      = BSGS\n"); break; 
+              printf("\t*** pre  smoother type      = BSGS\n"); 
+              break; 
          case MLI_SOLVER_MLS_ID :
-              printf("\t*** pre  smoother type      = MLS\n"); break; 
+              printf("\t*** pre  smoother type      = MLS\n"); 
+              break; 
          case MLI_SOLVER_SUPERLU_ID :
-              printf("\t*** pre  smoother type      = SuperLU\n"); break; 
+              printf("\t*** pre  smoother type      = SuperLU\n"); 
+              break; 
+         case MLI_SOLVER_CHEBYSHEV_ID :
+              printf("\t*** pre  smoother type      = Chebyshev\n"); 
+              break; 
+         case MLI_SOLVER_CG_ID :
+              printf("\t*** pre  smoother type      = CG\n"); 
+              break; 
       }
       printf("\t*** pre  smoother nsweeps   = %d\n", pre_smoother_num);
       switch ( postsmoother )
       {
          case MLI_SOLVER_JACOBI_ID :
-              printf("\t*** post smoother type      = Jacobi\n"); break;
+              printf("\t*** post smoother type      = Jacobi\n"); 
+              break;
          case MLI_SOLVER_GS_ID :
-              printf("\t*** post smoother type      = Gauss Seidel\n"); break;
+              printf("\t*** post smoother type      = Gauss Seidel\n"); 
+              break;
          case MLI_SOLVER_SGS_ID :
               printf("\t*** post smoother type      = symm Gauss Seidel\n"); 
               break;
-         case MLI_SOLVER_CGSGS_ID :
-              printf("\t*** post smoother type      = CG/symm Gauss Seidel\n"); 
-              break;
          case MLI_SOLVER_PARASAILS_ID :
-              printf("\t*** post smoother type      = ParaSails\n"); break; 
+              printf("\t*** post smoother type      = ParaSails\n"); 
+              break; 
          case MLI_SOLVER_BSGS_ID :
-              printf("\t*** post smoother type      = BSGS\n"); break; 
+              printf("\t*** post smoother type      = BSGS\n"); 
+              break; 
          case MLI_SOLVER_MLS_ID :
-              printf("\t*** post smoother type      = MLS\n"); break; 
+              printf("\t*** post smoother type      = MLS\n"); 
+              break; 
          case MLI_SOLVER_SUPERLU_ID :
-              printf("\t*** post smoother type      = SuperLU\n"); break; 
+              printf("\t*** post smoother type      = SuperLU\n"); 
+              break; 
+         case MLI_SOLVER_CHEBYSHEV_ID :
+              printf("\t*** post smoother type      = Chebyshev\n"); 
+              break; 
+         case MLI_SOLVER_CG_ID :
+              printf("\t*** post smoother type      = CG\n"); 
+              break; 
       }
       printf("\t*** post smoother nsweeps   = %d\n", postsmoother_num);
       switch ( coarse_solver )
       {
          case MLI_SOLVER_JACOBI_ID :
-              printf("\t*** coarse solver type      = Jacobi\n"); break;
+              printf("\t*** coarse solver type      = Jacobi\n"); 
+              break;
          case MLI_SOLVER_GS_ID :
-              printf("\t*** coarse solver type      = Gauss Seidel\n"); break;
+              printf("\t*** coarse solver type      = Gauss Seidel\n"); 
+              break;
          case MLI_SOLVER_SGS_ID :
               printf("\t*** coarse solver type      = symm Gauss Seidel\n"); 
               break;
-         case MLI_SOLVER_CGSGS_ID :
-              printf("\t*** coarse solver type      = CG/symm Gauss Seidel\n"); 
-              break;
          case MLI_SOLVER_PARASAILS_ID :
-              printf("\t*** coarse solver type      = ParaSails\n"); break; 
+              printf("\t*** coarse solver type      = ParaSails\n"); 
+              break; 
          case MLI_SOLVER_BSGS_ID :
-              printf("\t*** coarse solver type      = BSGS\n"); break; 
+              printf("\t*** coarse solver type      = BSGS\n"); 
+              break; 
          case MLI_SOLVER_MLS_ID :
-              printf("\t*** coarse solver type      = MLS\n"); break; 
+              printf("\t*** coarse solver type      = MLS\n"); 
+              break; 
          case MLI_SOLVER_SUPERLU_ID :
-              printf("\t*** coarse solver type      = SuperLU\n"); break; 
+              printf("\t*** coarse solver type      = SuperLU\n"); 
+              break; 
+         case MLI_SOLVER_CHEBYSHEV_ID :
+              printf("\t*** coarse solver type      = Chebyshev\n"); 
+              break; 
+         case MLI_SOLVER_CG_ID :
+              printf("\t*** coarse solver type      = CG\n"); 
+              break; 
       }
       printf("\t*** coarse solver nsweeps   = %d\n", coarse_solver_num);  
       printf("\t*** calibration size        = %d\n", calibration_size);
