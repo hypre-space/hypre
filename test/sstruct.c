@@ -1158,6 +1158,8 @@ GetVariableBox( Index  cell_ilower,
       case HYPRE_SSTRUCT_VARIABLE_ZEDGE:
       var_ilower[0] -= 1; var_ilower[1] -= 1; var_ilower[2] -= 0;
       break;
+      case HYPRE_SSTRUCT_VARIABLE_UNDEFINED:
+      break;
    }
 
    return ierr;
