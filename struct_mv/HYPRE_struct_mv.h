@@ -179,6 +179,13 @@ int HYPRE_StructMatrixSetBoxValues(HYPRE_StructMatrix  matrix,
                                    int                *entries,
                                    double             *values);
 /**
+ * Set matrix coefficients which are constant over the grid.
+ **/
+int HYPRE_StructMatrixSetConstantValues(HYPRE_StructMatrix  matrix,
+                                   int                 nentries,
+                                   int                *entries,
+                                   double             *values);
+/**
  * Add to matrix coefficients index by index.
  **/
 int HYPRE_StructMatrixAddToValues(HYPRE_StructMatrix  matrix,
@@ -198,6 +205,14 @@ int HYPRE_StructMatrixAddToBoxValues(HYPRE_StructMatrix  matrix,
                                      double             *values);
 
 /**
+ * Add to matrix coefficients which are constant over the grid.
+ **/
+int HYPRE_StructMatrixAddToConstantValues(HYPRE_StructMatrix  matrix,
+                                     int                 nentries,
+                                     int                *entries,
+                                     double             *values);
+
+/**
  * Finalize the construction of the matrix before using.
  **/
 int HYPRE_StructMatrixAssemble(HYPRE_StructMatrix matrix);
@@ -209,6 +224,17 @@ int HYPRE_StructMatrixAssemble(HYPRE_StructMatrix matrix);
  **/
 int HYPRE_StructMatrixSetSymmetric(HYPRE_StructMatrix  matrix,
                                    int                 symmetric);
+
+/**
+ * Specifiy which stencil entries are constant over the grid.
+ * Presently supported:
+ * - no entries constant (this function need not be called)
+ * - all entries constant
+ * - all but the diagonal entry constant
+ **/
+int HYPRE_StructMatrixSetConstantEntries( HYPRE_StructMatrix matrix,
+                                          int                nentries,
+                                          int               *entries );
 
 /**
  * Print the matrix to file.  This is mainly for debugging purposes.

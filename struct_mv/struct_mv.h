@@ -1742,13 +1742,12 @@ int HYPRE_StructMatrixSetBoxValues( HYPRE_StructMatrix matrix , int *ilower , in
 int HYPRE_StructMatrixSetConstantValues( HYPRE_StructMatrix matrix , int num_stencil_indices , int *stencil_indices , double *values );
 int HYPRE_StructMatrixAddToValues( HYPRE_StructMatrix matrix , int *grid_index , int num_stencil_indices , int *stencil_indices , double *values );
 int HYPRE_StructMatrixAddToBoxValues( HYPRE_StructMatrix matrix , int *ilower , int *iupper , int num_stencil_indices , int *stencil_indices , double *values );
-int HYPRE_StructMatrixAddToConstantValues( HYPRE_StructMatrix matrix , int num_stencil_indices , int *stencil_indices , double *values , int action );
+int HYPRE_StructMatrixAddToConstantValues( HYPRE_StructMatrix matrix , int num_stencil_indices , int *stencil_indices , double *values );
 int HYPRE_StructMatrixAssemble( HYPRE_StructMatrix matrix );
 int HYPRE_StructMatrixSetNumGhost( HYPRE_StructMatrix matrix , int *num_ghost );
 int HYPRE_StructMatrixGetGrid( HYPRE_StructMatrix matrix , HYPRE_StructGrid *grid );
 int HYPRE_StructMatrixSetSymmetric( HYPRE_StructMatrix matrix , int symmetric );
 int HYPRE_StructMatrixSetConstantEntries( HYPRE_StructMatrix matrix , int nentries , int *entries );
-int HYPRE_StructMatrixSetConstantCoefficient( HYPRE_StructMatrix matrix , int constant_coefficient );
 int HYPRE_StructMatrixPrint( const char *filename , HYPRE_StructMatrix matrix , int all );
 
 /* HYPRE_struct_stencil.c */

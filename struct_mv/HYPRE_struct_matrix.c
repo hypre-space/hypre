@@ -208,8 +208,7 @@ int
 HYPRE_StructMatrixAddToConstantValues( HYPRE_StructMatrix matrix,
                                        int             num_stencil_indices,
                                        int            *stencil_indices,
-                                       double         *values,
-                                       int             action )
+                                       double         *values )
 {
    return hypre_StructMatrixSetConstantValues( matrix,
                                                num_stencil_indices,
