@@ -80,6 +80,7 @@ hypre_ParCSRMatrixCreate( MPI_Comm comm,
    hypre_ParCSRMatrixRowStarts(matrix) = row_starts;
    hypre_ParCSRMatrixColStarts(matrix) = col_starts;
    hypre_ParCSRMatrixCommPkg(matrix) = NULL;
+   hypre_ParCSRMatrixCommPkgT(matrix) = NULL;
 
    /* set defaults */
    hypre_ParCSRMatrixOwnsData(matrix) = 1;
@@ -114,6 +115,8 @@ hypre_ParCSRMatrixDestroy( hypre_ParCSRMatrix *matrix )
               hypre_TFree(hypre_ParCSRMatrixColMapOffd(matrix));
          if (hypre_ParCSRMatrixCommPkg(matrix))
               hypre_MatvecCommPkgDestroy(hypre_ParCSRMatrixCommPkg(matrix));
+         if (hypre_ParCSRMatrixCommPkgT(matrix))
+              hypre_MatvecCommPkgDestroy(hypre_ParCSRMatrixCommPkgT(matrix));
       }
       if ( hypre_ParCSRMatrixOwnsRowStarts(matrix) )
               hypre_TFree(hypre_ParCSRMatrixRowStarts(matrix));
