@@ -8,7 +8,7 @@
 # $Revision$
 #EHEADER***********************************************************************
 
-POE_ARGS=""
+DRIVER_ARGS=""
 POE_NUM_PROCS="1"
 while [ "$*" != "" ]
 do
@@ -18,10 +18,10 @@ case $1 in
 	shift
         shift;;
     *)
-        POE_ARGS="$POE_ARGS $1"
+        DRIVER_ARGS="$DRIVER_ARGS $1"
         shift;;
 esac
 done
 
-poe $*
+poe $DRIVER_ARGS -procs $POE_NUM_PROCS
 
