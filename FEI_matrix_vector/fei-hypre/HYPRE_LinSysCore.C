@@ -857,11 +857,11 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
        else if ( !strcmp(param1, "amgRelaxType") )
        {
           sscanf(params[i],"%s %s", param, param2);
-          if      ( !strcmp(param2, "jacobi" ) ) rtype = 2;
+          if      ( !strcmp(param2, "jacobi" ) ) rtype = 0;
           else if ( !strcmp(param2, "gsSlow") )  rtype = 1;
           else if ( !strcmp(param2, "gsFast") )  rtype = 4;
           else if ( !strcmp(param2, "hybrid" ) ) rtype = 3;
-          else if ( !strcmp(param2, "hybridsym" ) ) rtype = 5;
+          else if ( !strcmp(param2, "hybridsym" ) ) rtype = 6;
           else                                   rtype = 4;
           for ( k = 0; k < 3; k++ ) amgRelaxType_[k] = rtype;
           if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
@@ -3541,6 +3541,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   }
                   if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 && mypid_ == 0)
                   {
+                     HYPRE_BoomerAMGSetDebugFlag(HYPrecon_, 3);
                      HYPRE_BoomerAMGSetIOutDat(HYPrecon_, 1);
                   }
                   if ( HYPreconReuse_ == 1 )
@@ -3767,8 +3768,10 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                      printf("AMG relax weight = %e\n", amgRelaxWeight_[0]);
                   }
                   if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 && mypid_ == 0)
+                  {
+                     HYPRE_BoomerAMGSetDebugFlag(HYPrecon_, 3);
                      HYPRE_BoomerAMGSetIOutDat(HYPrecon_, 1);
-
+                  }
                   if ( HYPreconReuse_ == 1 )
                   {
                      HYPRE_ParCSRGMRESSetPrecond(HYSolver_,HYPRE_BoomerAMGSolve,
@@ -3991,8 +3994,10 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                      printf("AMG relax weight = %e\n", amgRelaxWeight_[0]);
                   }
                   if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 && mypid_ == 0)
+                  {
+                     HYPRE_BoomerAMGSetDebugFlag(HYPrecon_, 3);
                      HYPRE_BoomerAMGSetIOutDat(HYPrecon_, 1);
-
+                  }
                   if ( HYPreconReuse_ == 1 )
                   {
                      HYPRE_ParCSRBiCGSTABSetPrecond(HYSolver_,
@@ -4214,8 +4219,10 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                      printf("AMG relax weight = %e\n", amgRelaxWeight_[0]);
                   }
                   if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 && mypid_ == 0)
+                  {
+                     HYPRE_BoomerAMGSetDebugFlag(HYPrecon_, 3);
                      HYPRE_BoomerAMGSetIOutDat(HYPrecon_, 1);
-
+                  }
                   if ( HYPreconReuse_ == 1 )
                   {
                      HYPRE_ParCSRBiCGSTABLSetPrecond(HYSolver_,
