@@ -105,7 +105,7 @@ hypre_ParCSRMatrixMatvec( double           alpha,
       {
          start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
          for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
-            x_buf_data[jv][index++] 
+            x_buf_data[0][index++] 
                = x_local_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
       }
    }
@@ -262,7 +262,7 @@ hypre_ParCSRMatrixMatvecT( double           alpha,
          start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
          for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
             y_local_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)]
-               += y_buf_data[jv][index++];
+               += y_buf_data[0][index++];
       }
    }
    else
