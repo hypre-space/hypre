@@ -55,6 +55,7 @@ int main(int argc, char *argv[])
     int i, j;
     double thresh;
     double selparam;
+    double filter;
     int nlevels;
 
     MPI_Init(&argc, &argv);
@@ -105,15 +106,15 @@ int main(int argc, char *argv[])
 
         if (mype == 0)
         {
-            printf("Enter parameters selparam (0.75), nlevels (1), beta: ");
-            scanf("%lf %d %lf", &selparam, &nlevels, &beta);
-            printf("selparam %f, nlevels %d, beta %f\n", selparam, nlevels, beta);
+            printf("Enter parameters selparam (0.75), nlevels (1), filter (0.1): ");
+            scanf("%lf %d %lf", &selparam, &nlevels, &filter);
+            printf("selparam %f, nlevels %d, filter %f\n", selparam, nlevels, filter);
             fflush(stdout);
 	}
 
 	MPI_Bcast(&selparam, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 	MPI_Bcast(&nlevels,  1, MPI_INT,    0, MPI_COMM_WORLD);
-	MPI_Bcast(&beta,     1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	MPI_Bcast(&filter,   1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
         if (nlevels < 0)
             break;
@@ -137,6 +138,12 @@ int main(int argc, char *argv[])
             printf("Inumber of nonzeros: %d (%.2f)\n", i, i/(double)j);
         }
         /*MatrixPrint(ps->M, "M");*/
+
+        /* filtration step */
+	ParaSailsFilterValues(ps, filter);
+        i = MatrixNnz(ps->M);
+        if (mype == 0) 
+            printf("nonz after filter : %d (%.2f)\n", i, i/(double)j);
 
         time0 = MPI_Wtime();
         PCG_ParaSails(A, ps, b, x, 1.e-8, 1500);
