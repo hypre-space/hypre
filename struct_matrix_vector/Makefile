@@ -83,6 +83,10 @@ one_to_many: one_to_many.o libZZZ_mv.a
 	@echo  "Linking" $@ "... "
 	${CC} -o one_to_many one_to_many.o ${LFLAGS}
 
+one_to_many_vector: one_to_many_vector.o libZZZ_mv.a
+	@echo  "Linking" $@ "... "
+	${CC} -o one_to_many_vector one_to_many_vector.o ${LFLAGS}
+
 create_2d_laplacian: create_2d_laplacian.o libZZZ_mv.a
 	@echo  "Linking" $@ "... "
 	${CC} -o create_2d_laplacian create_2d_laplacian.o ${LFLAGS}

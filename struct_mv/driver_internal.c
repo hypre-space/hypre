@@ -53,7 +53,7 @@ main( int   argc,
 
    matrix = zzz_ReadStructMatrix(comm, "zin_matrix", matrix_num_ghost);
  
-   zzz_PrintStructMatrix(comm, "zout_matrix", matrix, 0);
+   zzz_PrintStructMatrix("zout_matrix", matrix, 0);
 
    /*-----------------------------------------------------------
     * Read in the vector
@@ -61,7 +61,7 @@ main( int   argc,
 
    vector = zzz_ReadStructVector(comm, "zin_vector", vector_num_ghost);
  
-   zzz_PrintStructVector(comm, "zout_vector", vector, 0);
+   zzz_PrintStructVector("zout_vector", vector, 0);
 
    /*-----------------------------------------------------------
     * Do a matvec
@@ -74,7 +74,7 @@ main( int   argc,
 
    zzz_StructMatvec(1.0, matrix, vector, 0.0, tmp_vector);
 
-   zzz_PrintStructVector(comm, "zout_matvec", tmp_vector, 0);
+   zzz_PrintStructVector("zout_matvec", tmp_vector, 0);
 
    /*-----------------------------------------------------------
     * Copy the vector into tmp_vector
@@ -82,7 +82,7 @@ main( int   argc,
 
    zzz_StructCopy(vector, tmp_vector);
 
-   zzz_PrintStructVector(comm, "zout_copy", tmp_vector, 0);
+   zzz_PrintStructVector("zout_copy", tmp_vector, 0);
 
    /*-----------------------------------------------------------
     * Scale tmp_vector
@@ -90,7 +90,7 @@ main( int   argc,
 
    zzz_StructScale(2.0, tmp_vector);
 
-   zzz_PrintStructVector(comm, "zout_scale", tmp_vector, 0);
+   zzz_PrintStructVector("zout_scale", tmp_vector, 0);
 
    /*-----------------------------------------------------------
     * Do an Axpy (2*vector - vector) = vector
@@ -98,7 +98,7 @@ main( int   argc,
 
    zzz_StructAxpy(-1.0, vector, tmp_vector);
 
-   zzz_PrintStructVector(comm, "zout_axpy", tmp_vector, 0);
+   zzz_PrintStructVector("zout_axpy", tmp_vector, 0);
 
    /*-----------------------------------------------------------
     * Finalize things

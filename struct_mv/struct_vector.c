@@ -386,6 +386,71 @@ zzz_SetStructVectorConstantValues( zzz_StructVector *vector,
 }
 
 /*--------------------------------------------------------------------------
+ * zzz_ClearStructVectorGhostValues
+ *--------------------------------------------------------------------------*/
+
+int 
+zzz_ClearStructVectorGhostValues( zzz_StructVector *vector )
+{
+   int    ierr;
+
+   zzz_Box          *v_data_box;
+                    
+   int               vi;
+   double           *vp;
+
+   zzz_BoxArray     *boxes;
+   zzz_Box          *box;
+   zzz_BoxArray     *diff_boxes;
+   zzz_Box          *diff_box;
+   zzz_Index        *loop_index;
+   zzz_Index        *loop_size;
+   zzz_Index        *start;
+   zzz_Index        *unit_stride;
+
+   int               i, j;
+
+   /*-----------------------------------------------------------------------
+    * Set the vector coefficients
+    *-----------------------------------------------------------------------*/
+
+   loop_index = zzz_NewIndex();
+   loop_size  = zzz_NewIndex();
+ 
+   unit_stride = zzz_NewIndex();
+   zzz_SetIndex(unit_stride, 1, 1, 1);
+ 
+   boxes = zzz_StructGridBoxes(zzz_StructVectorGrid(vector));
+   zzz_ForBoxI(i, boxes)
+   {
+      box        = zzz_BoxArrayBox(boxes, i);
+
+      v_data_box = zzz_BoxArrayBox(zzz_StructVectorDataSpace(vector), i);
+      vp = zzz_StructVectorBoxData(vector, i);
+
+      diff_boxes = zzz_SubtractBoxes(v_data_box, box);
+      zzz_ForBoxI(j, diff_boxes)
+      {
+         diff_box = zzz_BoxArrayBox(diff_boxes, j);
+         start = zzz_BoxIMin(diff_box);
+
+         zzz_GetBoxSize(diff_box, loop_size);
+         zzz_BoxLoop1(loop_index, loop_size,
+                      v_data_box, start, unit_stride, vi,
+                      {
+                         vp[vi] = 0.0;
+                      });
+      }
+   }
+
+   zzz_FreeIndex(loop_index);
+   zzz_FreeIndex(loop_size);
+   zzz_FreeIndex(unit_stride);
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
  * zzz_AssembleStructVector
  *--------------------------------------------------------------------------*/
 
@@ -416,8 +481,7 @@ zzz_SetStructVectorNumGhost( zzz_StructVector *vector,
  *--------------------------------------------------------------------------*/
 
 void
-zzz_PrintStructVector( MPI_Comm         *comm,
-		       char             *filename,
+zzz_PrintStructVector( char             *filename,
                        zzz_StructVector *vector,
                        int               all      )
 {
@@ -435,7 +499,7 @@ zzz_PrintStructVector( MPI_Comm         *comm,
     * Open file
     *----------------------------------------*/
  
-   MPI_Comm_rank(*comm, &myid );
+   MPI_Comm_rank(*zzz_StructVectorComm(vector), &myid );
    sprintf(new_filename, "%s.%05d", filename, myid);
  
    if ((file = fopen(new_filename, "w")) == NULL)

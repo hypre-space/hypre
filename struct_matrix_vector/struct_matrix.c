@@ -685,8 +685,7 @@ zzz_SetStructMatrixNumGhost( zzz_StructMatrix *matrix,
  *--------------------------------------------------------------------------*/
 
 void
-zzz_PrintStructMatrix( MPI_Comm         *comm,
-		       char             *filename,
+zzz_PrintStructMatrix( char             *filename,
                        zzz_StructMatrix *matrix,
                        int               all      )
 {
@@ -714,7 +713,7 @@ zzz_PrintStructMatrix( MPI_Comm         *comm,
     * Open file
     *----------------------------------------*/
  
-   MPI_Comm_rank(*comm, &myid );
+   MPI_Comm_rank(*zzz_StructMatrixComm(matrix), &myid );
    sprintf(new_filename, "%s.%05d", filename, myid);
  
    if ((file = fopen(new_filename, "w")) == NULL)
