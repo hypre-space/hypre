@@ -21,8 +21,6 @@
 #include "parcsr_mv/parcsr_mv.h"
 #include "parcsr_ls/HYPRE_parcsr_ls.h"
 
-int qsort0( int *, int, int );
-int qsort1( int *, double *, int, int );
 int hypre_BinarySearch( int *, int, int );
 
 /*---------------------------------------------------------------------------

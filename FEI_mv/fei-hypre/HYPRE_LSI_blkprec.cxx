@@ -82,8 +82,6 @@ extern "C" {
                                           hypre_ParCSRMatrix*,
                                           hypre_ParCSRMatrix**);
    int HYPRE_LSI_Search(int *, int, int);
-   int qsort0(int *, int, int);
-   int qsort1(int *, double *, int, int);
 }
 
 //******************************************************************************
