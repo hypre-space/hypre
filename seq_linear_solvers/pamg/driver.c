@@ -361,7 +361,7 @@ main( int   argc,
    {
       BuildFuncsFromFile(argc, argv, build_funcs_arg_index, &dof_func);    
    }
-   else if (num_functions > 1)
+   else /* if (num_functions > 1) */ 
    {
       printf("\n Number of unknown functions = %d\n\n",num_functions);
       dof_func = hypre_CTAlloc(int,hypre_CSRMatrixNumRows(A));
@@ -443,6 +443,11 @@ main( int   argc,
          {
             arg_index++;
             ioutdat  = atoi(argv[arg_index++]);
+         }
+         else if (strcmp(argv[arg_index], "-mu") == 0 )
+         {
+            arg_index++;
+            cycle_type = atoi(argv[arg_index++]);
          }
          else
          {
