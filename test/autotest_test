@@ -1,0 +1,244 @@
+#!/usr/bin/sh
+#BHEADER***********************************************************************
+# (c) 2000   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+#=============================================================================
+# Create a few temporary variables, and assign default values to any
+# unexported environment variables.
+#=============================================================================
+initialize_variables ()
+{
+  MAKE="make -k"
+  Hdr="autotest"
+  Skip=0
+  Build=1
+  Run=2
+  
+  if test ! "${HYPRE_AUTOTEST_DIR}"
+  then
+    HYPRE_AUTOTEST_DIR=`pwd`
+  else
+    if [ ! -d ${HYPRE_AUTOTEST_DIR} ]
+    then
+      if [ ! -d ../linear_solvers ]
+      then
+        echo "$0: no HYPRE_AUTOTEST_DIR environment variable"
+        exit 2
+      fi
+    fi
+  fi
+  StdBuildDir=${HYPRE_AUTOTEST_DIR}/linear_solvers
+  StdTestDir=${HYPRE_AUTOTEST_DIR}/linear_solvers/test
+  if test ! "$HYPRE_MAIL"
+  then
+    HYPRE_MAIL=mailx
+  fi
+  if test ! "$HYPRE_DEFAULT_EMAIL"
+  then
+    User=`who am I|cut -f 1 -d \ `
+    HYPRE_DEFAULT_EMAIL=$User
+    HYPRE_CHECKOUT_EMAIL=$User
+    HYPRE_CONFIGURE_EMAIL=$User
+    HYPRE_STRUCT_EMAIL=$User
+    HYPRE_IJ_EMAIL=$User
+    HYPRE_FEI_EMAIL=$User
+    HYPRE_ALL_EMAIL=$User
+    HYPRE_BETA_EMAIL=$User
+  fi
+}
+
+#=============================================================================
+# Function for parsing of input arguments
+#=============================================================================
+
+parse_arguments () { 
+  while getopts :a:b:cdfhmno:p:st:xy arg
+  do
+    case $arg in
+      a) confbuildtest $OPTARG  " "             "default"   1 1 1 1 1 1;;
+      b) confbuildtest $OPTARG  " "             "beta"      0 0 0 0 1 1;;
+      c) build $Build   "all++"  "all++"  "test";;
+      d) build $Build   " "      "docs"   "docs";;
+      f) build $Build   "all77"  "all77"  "test";;
+      h) usage; exit 2;;
+      m) HYPRE_SEND_MAIL="yes"; MailOpt="-mail";;
+     +m) HYPRE_SEND_MAIL="no"; MailOpt="";;
+      n) confbuildtest $Build   "--without-MPI" "no_mip"    1 1 0 1 1 0;;
+      o) confbuildtest $OPTARG  "--with-openmp" "openmp"    0 0 0 0 1 0;;
+      p) confbuildtest $OPTARG  "--with-petac"  "petac"	    0 0 0 1 0 0;;
+      s) confbuildtest $Build   "--with-strict-checking" \
+					 "strict_checking"  1 1 0 1 1 0;;
+      t) confbuildtest $OPTARG "--with-pthreads" "pthreads" 1 0 0 0 0 0;;
+      x) build $Build   "beta++" "beta++" "test";;
+      y) build $Build   "beta77" "beta77" "test";;
+      :) echo "$0: \"$OPTARG\" requires a value"; exit 2;;
+     \?) echo "$0: INVALID option \"$OPTARG\" at $OPTIND"; exit 2;;
+    esac
+  done
+  shift `expr $OPTIND - 1`
+  #printf "Remaining arguments are: %s\n" "$*"
+}
+
+#=============================================================================
+# Function for display of help/usage
+#=============================================================================
+usage () {
+  printf "Usage: %s [-cdfhmns] [-a opt] [-b opt]\n" $0
+  printf "       [-o opt] [-p opt] [-t opt]\n"
+  printf "\n"
+  printf "Hypre autotest (Note: all options executed in the same\n"
+  prinf  "left-to-right order as entered).\n"
+  printf "\n"
+  printf "Options for the "opt" argument are "0", "1", or "2" where:\n"
+  printf "  1=skip (ignore this test),\n"
+  printf "  2=configure and make, and\n"
+  printf "  3=configure, make and run.\n"
+  printf "\n"
+  printf "-a opt   All; perform the (default) configure, make, and execute.\n"
+  printf "         Performs make struct, IJ, fei, all, beta, nofei, and\n"
+  printf "         fei++, followed by the test_drivers script (when opt=2).\n"
+  printf "-b opt   Beta; perform the (default) configure, make beta, nofei,\n"
+  printf "         fei++, followed by the test_drivers script (when opt=2).\n"
+  printf "-c       C++; perform make all++ (no configure, or execute).\n"
+  printf "-d       Docs; makes the documentation directory.\n"
+  printf "-f       F77; perform make all77 (no configure, or execute).\n"
+  printf "-h       Help; display this help message.\n"
+  printf "-m       Mail; mail errors to developers.\n"
+  printf "+m       NoMail; Don\'t send any mail.\n"
+  printf "-n       Beta; perform configure --without-MPI, make struct, IJ,\n"
+  printf "         all, and beta (no execute option).\n"
+  printf "-o opt   openMP; perform configure --with-openmp, make beta.\n"
+  printf "-p opt   PETSc; perform configure --with-petsc, make all.\n"
+  printf "-s       Strict; perform configure --with-strict-checking,\n"
+  printf "         followed by make struct, IJ, all, beta(no execute option).\n"
+  printf "-t opt   Thread; perform configure --with-pthreads, make struct.\n"
+  printf "-x       BetaC++; perform make beta++ (no configure, or execute).\n"
+  printf "-y       BetaF77; perform make beta77 (no configure, or execute).\n"
+}
+
+#=============================================================================
+# Function for mailing error messages
+#=============================================================================
+
+mail_errors () { 
+  if [ "$HYPRE_SEND_MAIL" = "yes" ]
+  then
+    cd $HYPRE_AUTOTEST_DIR
+    for i in *.err linear_solvers/*.err linear_solvers/test/*.err
+    do 
+      if test -s "$i"
+      then 
+        if test -r "${i}.email"
+        then
+          RECIPIENTS=`cat ${i}.email` 
+        else
+          RECIPIENTS=$HYPRE_DEFAULT_EMAIL
+        fi
+        ${HYPRE_MAIL} -s "Autotest error: $i" $RECIPIENTS < $i 
+      fi 
+    done 
+  fi
+}
+
+cleanup () { 
+  echo "in cleanup"
+}
+#=============================================================================
+# General purpose function for configure, make and execute
+#=============================================================================
+
+confbuildtest () 
+{
+BuildOpt=$1	 ConfigOption=$2	 MessageStr=$3
+StructOpt=$4	 IJOpt=$5	 FeiOpt=$6
+MakeOpt=$7	 BetaOpt=$8	 NoFeiOpt=$9
+if [ ${BuildOpt} -ne $Skip ]
+then
+  echo "Starting configure and make of $MessageStr"
+  if [ ${BuildOpt} -eq $Build -o ${BuildOpt} -eq $Run ]
+  then
+    cd $StdBuildDir
+    ./configure $ConfigOption 1> ${Hdr}.configure.${MessageStr}.log \
+	2> ${Hdr}.configure.${MessageStr}.err
+    echo "$HYPRE_CONFIGURE_EMAIL" > ${Hdr}.configure.${MessageStr}.err.email
+
+    $MAKE veryclean
+
+    if [ $StructOpt -ne $Skip ]
+    then
+      $MAKE struct 1> ${Hdr}.struct.${MessageStr}.log \
+	2> ${Hdr}.struct.${MessageStr}.err
+      echo "$HYPRE_STRUCT_EMAIL" > ${Hdr}.struct.${MessageStr}.err.email
+    fi
+
+    if [ $IJOpt -ne $Skip ]
+    then
+      $MAKE IJ 1> ${Hdr}.IJ.${MessageStr}.log \
+	2> ${Hdr}.IJ.${MessageStr}.err
+      echo "$HYPRE_IJ_EMAIL" > ${Hdr}.IJ.${MessageStr}.err.email
+    fi
+
+    if [ $FeiOpt -ne $Skip ]
+    then
+      $MAKE fei 1> ${Hdr}.fei.${MessageStr}.log \
+	2> ${Hdr}.fei.${MessageStr}.err
+      echo "$HYPRE_FEI_EMAIL" > ${Hdr}.fei.${MessageStr}.err.email
+    fi
+
+    if [ $MakeOpt -ne $Skip ]
+    then
+      $MAKE
+    fi
+
+    if [ $BetaOpt -ne $Skip ]
+    then
+      $MAKE beta 1> ${Hdr}.beta.${MessageStr}.log \
+	2> ${Hdr}.beta.${MessageStr}.err
+      echo "$HYPRE_BETA_EMAIL" > ${Hdr}.beta.${MessageStr}.err.email
+    fi
+  fi
+  if [ ${BuildOpt} -eq $Run ]
+  then
+    echo "Starting execution of $MessageStr"
+    if [ $NoFeiOpt -ne $Skip ]
+    then
+      $MAKE nofei
+      cd $HYPRE_AUTOTEST_DIR/linear_solvers/test
+      $MAKE fei++
+    fi
+    cd $HYPRE_AUTOTEST_DIR/linear_solvers/test
+    ./test_drivers.sh $MailOpt
+  fi
+fi
+}
+#=============================================================================
+# General purpose make function
+#=============================================================================
+
+build () 
+{
+BuildOpt=$1	 MakeOption=$2	 MessageStr=$3	MakeDir=$4
+if [ $BuildOpt -ne $Skip ]
+then
+  echo "Starting make of $MessageStr"
+  cd $StdBuildDir/$MakeDir
+  $MAKE $MakeOption 1> ${Hdr}.${MessageStr}.log \
+	2> ${Hdr}.${MessageStr}.err
+  echo "$HYPRE_DEFAULT_EMAIL" > ${Hdr}.${MessageStr}.err.email
+fi
+}
+
+#==============================================================================
+# This script is the implementation script used to regression test hypre.
+#==============================================================================
+
+initialize_variables
+parse_arguments $*
+mail_errors
+#cleanup
