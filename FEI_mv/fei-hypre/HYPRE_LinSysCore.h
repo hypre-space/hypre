@@ -571,6 +571,7 @@ class HYPRE_LinSysCore
    char            superluScale_[1];
    double          ddilutFillin_;
    double          ddilutDropTol_;
+   int             ddilutReorder_;
    double          ddictFillin_;
    double          ddictDropTol_;
    double          schwarzFillin_;

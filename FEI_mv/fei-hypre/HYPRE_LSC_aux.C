@@ -481,6 +481,20 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
        }
 
        //----------------------------------------------------------------
+       // DDILUT preconditioner : reorder based on Cuthill McKee
+       //----------------------------------------------------------------
+
+       else if ( !strcmp(param1, "ddilutReorder") )
+       {
+          ddilutReorder_ = 1;
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+          {
+             printf("       HYPRE_LSC::parameters ddilutReorder = %d\n",
+                    ddilutReorder_);
+          }
+       }
+
+       //----------------------------------------------------------------
        // DDICT preconditioner : amount of fillin (0 == same as A)
        //----------------------------------------------------------------
 
@@ -1394,6 +1408,7 @@ void HYPRE_LinSysCore::setupGMRESPrecon()
             }
             else
             {
+               if ( ddilutReorder_ ) HYPRE_LSI_DDIlutSetReorder(HYPrecon_);
                HYPRE_LSI_DDIlutSetFillin(HYPrecon_,ddilutFillin_);
                HYPRE_LSI_DDIlutSetDropTolerance(HYPrecon_,ddilutDropTol_);
                HYPRE_ParCSRGMRESSetPrecond(HYSolver_, HYPRE_LSI_DDIlutSolve,
@@ -1566,6 +1581,11 @@ void HYPRE_LinSysCore::setupGMRESPrecon()
             break;
 
        case HYBLOCK :
+            HYPRE_Lookup *newLookup = (HYPRE_Lookup *) 
+                                      malloc(sizeof(HYPRE_Lookup));
+            newLookup->object = (void *) lookup_;
+            HYPRE_LSI_BlockPrecondSetLookup( HYPrecon_, newLookup );
+            free( newLookup );
             if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
             {
                HYPRE_ParCSRGMRESSetPrecond(HYSolver_, 
@@ -1697,6 +1717,7 @@ void HYPRE_LinSysCore::setupBiCGSTABPrecon()
             }
             else
             {
+               if ( ddilutReorder_ ) HYPRE_LSI_DDIlutSetReorder(HYPrecon_);
                HYPRE_LSI_DDIlutSetFillin(HYPrecon_,ddilutFillin_);
                HYPRE_LSI_DDIlutSetDropTolerance(HYPrecon_,ddilutDropTol_);
                HYPRE_ParCSRBiCGSTABSetPrecond(HYSolver_, HYPRE_LSI_DDIlutSolve,
@@ -1872,6 +1893,11 @@ void HYPRE_LinSysCore::setupBiCGSTABPrecon()
             break;
 
        case HYBLOCK :
+            HYPRE_Lookup *newLookup = (HYPRE_Lookup *) 
+                                      malloc(sizeof(HYPRE_Lookup));
+            newLookup->object = (void *) lookup_;
+            HYPRE_LSI_BlockPrecondSetLookup( HYPrecon_, newLookup );
+            free( newLookup );
             if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
             {
                HYPRE_ParCSRBiCGSTABSetPrecond(HYSolver_, 
@@ -2003,6 +2029,7 @@ void HYPRE_LinSysCore::setupBiCGSTABLPrecon()
             }
             else
             {
+               if ( ddilutReorder_ ) HYPRE_LSI_DDIlutSetReorder(HYPrecon_);
                HYPRE_LSI_DDIlutSetFillin(HYPrecon_,ddilutFillin_);
                HYPRE_LSI_DDIlutSetDropTolerance(HYPrecon_,ddilutDropTol_);
                HYPRE_ParCSRBiCGSTABLSetPrecond(HYSolver_, HYPRE_LSI_DDIlutSolve,
@@ -2179,6 +2206,11 @@ void HYPRE_LinSysCore::setupBiCGSTABLPrecon()
             break;
 
        case HYBLOCK :
+            HYPRE_Lookup *newLookup = (HYPRE_Lookup *) 
+                                      malloc(sizeof(HYPRE_Lookup));
+            newLookup->object = (void *) lookup_;
+            HYPRE_LSI_BlockPrecondSetLookup( HYPrecon_, newLookup );
+            free( newLookup );
             if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
             {
                HYPRE_ParCSRBiCGSTABLSetPrecond(HYSolver_, 
@@ -2310,6 +2342,7 @@ void HYPRE_LinSysCore::setupTFQmrPrecon()
             }
             else
             {
+               if ( ddilutReorder_ ) HYPRE_LSI_DDIlutSetReorder(HYPrecon_);
                HYPRE_LSI_DDIlutSetFillin(HYPrecon_,ddilutFillin_);
                HYPRE_LSI_DDIlutSetDropTolerance(HYPrecon_,ddilutDropTol_);
                HYPRE_ParCSRTFQmrSetPrecond(HYSolver_, HYPRE_LSI_DDIlutSolve,
@@ -2482,6 +2515,11 @@ void HYPRE_LinSysCore::setupTFQmrPrecon()
             break;
 
        case HYBLOCK :
+            HYPRE_Lookup *newLookup = (HYPRE_Lookup *) 
+                                      malloc(sizeof(HYPRE_Lookup));
+            newLookup->object = (void *) lookup_;
+            HYPRE_LSI_BlockPrecondSetLookup( HYPrecon_, newLookup );
+            free( newLookup );
             if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
             {
                HYPRE_ParCSRTFQmrSetPrecond(HYSolver_, 
@@ -2613,6 +2651,7 @@ void HYPRE_LinSysCore::setupBiCGSPrecon()
             }
             else
             {
+               if ( ddilutReorder_ ) HYPRE_LSI_DDIlutSetReorder(HYPrecon_);
                HYPRE_LSI_DDIlutSetFillin(HYPrecon_,ddilutFillin_);
                HYPRE_LSI_DDIlutSetDropTolerance(HYPrecon_,ddilutDropTol_);
                HYPRE_ParCSRBiCGSSetPrecond(HYSolver_, HYPRE_LSI_DDIlutSolve,
@@ -2785,6 +2824,11 @@ void HYPRE_LinSysCore::setupBiCGSPrecon()
             break;
 
        case HYBLOCK :
+            HYPRE_Lookup *newLookup = (HYPRE_Lookup *) 
+                                      malloc(sizeof(HYPRE_Lookup));
+            newLookup->object = (void *) lookup_;
+            HYPRE_LSI_BlockPrecondSetLookup( HYPrecon_, newLookup );
+            free( newLookup );
             if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
             {
                HYPRE_ParCSRBiCGSSetPrecond(HYSolver_, 
@@ -3019,6 +3063,11 @@ void HYPRE_LinSysCore::setupSymQMRPrecon()
             break;
 
        case HYBLOCK :
+            HYPRE_Lookup *newLookup = (HYPRE_Lookup *) 
+                                      malloc(sizeof(HYPRE_Lookup));
+            newLookup->object = (void *) lookup_;
+            HYPRE_LSI_BlockPrecondSetLookup( HYPrecon_, newLookup );
+            free( newLookup );
             if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
             {
                HYPRE_ParCSRSymQMRSetPrecond(HYSolver_, 

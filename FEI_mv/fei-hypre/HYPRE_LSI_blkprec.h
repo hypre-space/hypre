@@ -36,6 +36,23 @@
 #define HYPRE_INCFLOW_BAI    3
 
 // *************************************************************************
+// local defines 
+// -------------------------------------------------------------------------
+
+#include "fei_defs.h"
+#include "Data.h"
+#include "basicTypes.h"
+#ifndef NOFEI
+#include "Lookup.h"
+#endif
+
+typedef struct HYPRE_Lookup_Struct
+{
+   void *object;
+}
+HYPRE_Lookup;
+
+// *************************************************************************
 // class definition
 // -------------------------------------------------------------------------
 
@@ -65,6 +82,7 @@ class HYPRE_LSI_BlockP
    HYPRE_Solver   A11Precond_;       // preconditioner for velocity matrix
    HYPRE_Solver   A22Solver_;        // solver for pressure Poisson 
    HYPRE_Solver   A22Precond_;       // preconditioner for pressure Poisson
+   Lookup         *lookup_;          // FEI lookup object
 
  public:
 
@@ -74,6 +92,7 @@ class HYPRE_LSI_BlockP
    int     setSchemeBlockTriangular() {scheme_ = HYPRE_INCFLOW_BTRI;  return 0;}
    int     setSchemeBlockInverse()    {scheme_ = HYPRE_INCFLOW_BAI;   return 0;}
    int     setLumpedMasses( int length, double *Mdiag );
+   int     setLookup( Lookup *lookup );
    int     setup(HYPRE_ParCSRMatrix Amat);
    int     solve( HYPRE_ParVector fvec, HYPRE_ParVector xvec );
 
@@ -84,8 +103,6 @@ class HYPRE_LSI_BlockP
                         HYPRE_IJVector f1, HYPRE_IJVector f2 );
    int     solveBISolve(HYPRE_IJVector x1, HYPRE_IJVector x2,
                         HYPRE_IJVector f1, HYPRE_IJVector f2 );
-   int     solveUsingSuperLU(HYPRE_IJMatrix Amat, HYPRE_IJVector f,
-                             HYPRE_IJVector x );
 };
 
 #endif

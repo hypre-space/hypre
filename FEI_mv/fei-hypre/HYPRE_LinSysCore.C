@@ -225,6 +225,7 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
 
     ddilutFillin_       = 1.0;  // additional fillin other than A
     ddilutDropTol_      = 1.0e-8;
+    ddilutReorder_      = 0;
 
     ddictFillin_        = 1.0;  // additional fillin other than A
     ddictDropTol_       = 1.0e-8;

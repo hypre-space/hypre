@@ -176,107 +176,6 @@ int HYPRE_LSI_Search2(int key, int nlist, int *list)
 }
 
 /* ************************************************************************ */
-/* sort a double array                                                      */
-/* (borrowed from the search routine in ML)                                 */
-/* ------------------------------------------------------------------------ */
-
-void HYPRE_LSI_DSort(double dlist[], int N, int list2[])
-{
-   int    l, r, j, i, flag, RR2;
-   double dRR, dK;
-
-   if (N <= 1) return;
-
-   l    = N / 2 + 1;
-   r    = N - 1;
-   l    = l - 1;
-   dRR  = dlist[l - 1];
-   dK   = dlist[l - 1];
-
-   if (list2 != NULL) {
-      RR2 = list2[l - 1];
-      while (r != 0) {
-         j = l;
-         flag = 1;
-
-         while (flag == 1) {
-            i = j;
-            j = j + j;
-
-            if (j > r + 1)
-               flag = 0;
-            else {
-               if (j < r + 1)
-                  if (dlist[j] > dlist[j - 1]) j = j + 1;
- 
-               if (dlist[j - 1] > dK) {
-                  dlist[ i - 1] = dlist[ j - 1];
-                  list2[i - 1] = list2[j - 1];
-               }
-               else {
-                  flag = 0;
-               }
-            }
-         }
-         dlist[ i - 1] = dRR;
-         list2[i - 1] = RR2;
-
-         if (l == 1) {
-            dRR  = dlist [r];
-            RR2 = list2[r];
-            dK = dlist[r];
-            dlist[r ] = dlist[0];
-            list2[r] = list2[0];
-            r = r - 1;
-          }
-          else {
-             l   = l - 1;
-             dRR  = dlist[ l - 1];
-             RR2 = list2[l - 1];
-             dK   = dlist[l - 1];
-          }
-       }
-       dlist[ 0] = dRR;
-       list2[0] = RR2;
-   }
-   else {
-      while (r != 0) {
-         j = l;
-         flag = 1;
-         while (flag == 1) {
-            i = j;
-            j = j + j;
-            if (j > r + 1)
-               flag = 0;
-            else {
-               if (j < r + 1)
-                  if (dlist[j] > dlist[j - 1]) j = j + 1;
-               if (dlist[j - 1] > dK) {
-                  dlist[ i - 1] = dlist[ j - 1];
-               }
-               else {
-                  flag = 0;
-               }
-            }
-         }
-         dlist[ i - 1] = dRR;
-         if (l == 1) {
-            dRR  = dlist [r];
-            dK = dlist[r];
-            dlist[r ] = dlist[0];
-            r = r - 1;
-         }
-         else {
-            l   = l - 1;
-            dRR  = dlist[ l - 1];
-            dK   = dlist[l - 1];
-         }
-      }
-      dlist[ 0] = dRR;
-   }
-}
-
-/* ************************************************************************ */
 /* this function extracts the matrix in a CSR format                        */
 /* ------------------------------------------------------------------------ */
 
@@ -531,7 +430,7 @@ int HYPRE_LSI_SolveIdentity(HYPRE_Solver solver, HYPRE_ParCSRMatrix Amat,
 }
 
 /* ******************************************************************** */
-/* solve using SuperLU (sequential)
+/* solve using SuperLU (sequential)                                     */
 /* -------------------------------------------------------------------- */
 
 int HYPRE_LSI_SolveUsingSuperLU(HYPRE_IJMatrix Amat,
@@ -674,4 +573,91 @@ int HYPRE_LSI_SolveUsingSuperLU(HYPRE_IJMatrix Amat,
    return 1;
 #endif
 }
+
+/* ******************************************************************** */
+/* Cuthill McKee reordering algorithm                                   */
+/* -------------------------------------------------------------------- */
+
+int HYPRE_LSI_Cuthill(int n, int *ia, int *ja, double *aa, int *order_array,
+                      int *reorder_array)
+{
+   int    nnz, *nz_array, cnt, i, j, *tag_array, *queue, nqueue, qhead;
+   int    root, norder, mindeg, *ia2, *ja2;
+   double *aa2;
+
+   nz_array = (int *) malloc( n * sizeof(int) );
+   nnz      = ia[n];
+   for ( i = 0; i < n; i++ ) nz_array[i] = ia[i+1] - ia[i];
+   tag_array = (int *) malloc( n * sizeof(int) );
+   queue     = (int *) malloc( n * sizeof(int) );
+   for ( i = 0; i < n; i++ ) tag_array[i] = 0;
+   norder = 0;
+   mindeg = 10000000;
+   root   = -1;
+   for ( i = 0; i < n; i++ )
+   {
+      if ( nz_array[i] == 1 ) 
+      {
+         tag_array[i] = 1;
+         order_array[norder++] = i;
+         reorder_array[i] = norder-1;
+      }
+      else if ( nz_array[i] < mindeg ) 
+      {
+         mindeg = nz_array[i];
+         root = i;
+      } 
+   }
+   if ( root == -1 )
+   {
+      printf("HYPRE_LSI_Cuthill ERROR : Amat is diagonal\n");
+      exit(1);
+   }
+   nqueue = 0;
+   queue[nqueue++] = root;
+   qhead = 0;
+   tag_array[root] = 1;
+   while ( qhead < nqueue )
+   {
+      root = queue[qhead++];
+      order_array[norder++] = root;
+      reorder_array[root] = norder - 1;
+      for ( j = ia[root]; j < ia[root+1]; j++ )
+      {
+         if ( tag_array[ja[j]] == 0 ) 
+         {
+            tag_array[ja[j]] = 1;
+            queue[nqueue++] = ja[j];
+         }
+      }
+      if ( qhead == nqueue && norder < n )
+         for ( j = 0; j < n; j++ )
+            if ( tag_array[j] == 0 ) queue[nqueue++] = j;
+   }   
+   ia2 = (int *) malloc( (n+1) * sizeof(int) );
+   ja2 = (int *) malloc( nnz * sizeof(int) );
+   aa2 = (double *) malloc( nnz * sizeof(double) );
+   ia2[0] = 0;
+   nnz = 0;
+   for ( i = 0; i < n; i++ )
+   {
+      cnt = order_array[i];
+      for ( j = ia[cnt]; j < ia[cnt+1]; j++ )
+      {
+         ja2[nnz] = ja[j]; 
+         aa2[nnz++] = aa[j]; 
+      }
+      ia2[i+1] = nnz;
+   }
+   for ( i = 0; i < nnz; i++ ) ja[i] = reorder_array[ja2[i]]; 
+   for ( i = 0; i < nnz; i++ ) aa[i] = aa2[i]; 
+   for ( i = 0; i <= n; i++ )  ia[i] = ia2[i];
+   free( ia2 );
+   free( ja2 );
+   free( aa2 );
+   free( nz_array );
+   free( tag_array );
+   free( queue );
+   return 0;
+}   
 

@@ -280,7 +280,8 @@ int hypre_SymQMRSolve(void  *symqmr_vdata, void  *A, void  *b, void  *x)
          norms[iter] = r_norm;
 
          if ( my_id == 0 && logging )
-            printf(" SymQMR : iter %4d - res. norm = %e \n", iter, r_norm);
+            printf(" SymQMR : iteration %4d - residual norm = %e \n", 
+                   iter, r_norm);
       }
 
       /* compute true residual */

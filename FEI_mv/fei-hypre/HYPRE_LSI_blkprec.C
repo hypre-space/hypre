@@ -62,6 +62,8 @@ extern "C" {
                                           hypre_ParCSRMatrix*,
                                           hypre_ParCSRMatrix**);
    int HYPRE_LSI_Search(int *, int, int);
+   int qsort0(int *, int, int);
+   int qsort1(int *, double *, int, int);
 }
 #define dabs(x) ((x > 0) ? x : -(x))
 
@@ -95,7 +97,7 @@ int HYPRE_LSI_BlockPrecondCreate(MPI_Comm mpi_comm, HYPRE_Solver *solver)
 
 //------------------------------------------------------------------------------
 
-extern "C" int HYPRE_LSI_BlockPrecondDestroy(HYPRE_Solver *solver)
+extern "C" int HYPRE_LSI_BlockPrecondDestroy(HYPRE_Solver solver)
 {
    int err=0;
 
@@ -114,7 +116,7 @@ extern "C" int HYPRE_LSI_BlockPrecondDestroy(HYPRE_Solver *solver)
 //------------------------------------------------------------------------------
 
 extern "C"
-int HYPRE_LSI_BlockPrecondSetLumpedMasses(HYPRE_Solver *solver, int length, 
+int HYPRE_LSI_BlockPrecondSetLumpedMasses(HYPRE_Solver solver, int length, 
                                           double *mass_v)
 {
    int err=0;
@@ -131,7 +133,7 @@ int HYPRE_LSI_BlockPrecondSetLumpedMasses(HYPRE_Solver *solver, int length,
    
 //------------------------------------------------------------------------------
 
-extern "C" int HYPRE_LSI_BlockPrecondSetSchemeBDiag(HYPRE_Solver *solver)
+extern "C" int HYPRE_LSI_BlockPrecondSetSchemeBDiag(HYPRE_Solver solver)
 {
    int err=0;
 
@@ -147,7 +149,7 @@ extern "C" int HYPRE_LSI_BlockPrecondSetSchemeBDiag(HYPRE_Solver *solver)
 
 //------------------------------------------------------------------------------
 
-extern "C" int HYPRE_LSI_BlockPrecondSetSchemeBTri(HYPRE_Solver *solver)
+extern "C" int HYPRE_LSI_BlockPrecondSetSchemeBTri(HYPRE_Solver solver)
 {
    int err=0;
 
@@ -163,7 +165,7 @@ extern "C" int HYPRE_LSI_BlockPrecondSetSchemeBTri(HYPRE_Solver *solver)
 
 //------------------------------------------------------------------------------
 
-extern "C" int HYPRE_LSI_BlockPrecondSetSchemeBInv(HYPRE_Solver *solver)
+extern "C" int HYPRE_LSI_BlockPrecondSetSchemeBInv(HYPRE_Solver solver)
 {
    int err=0;
 
@@ -173,6 +175,23 @@ extern "C" int HYPRE_LSI_BlockPrecondSetSchemeBInv(HYPRE_Solver *solver)
    {
       HYPRE_LSI_BlockP *precon = (HYPRE_LSI_BlockP *) cprecon->precon;
       err = precon->setSchemeBlockInverse();
+   }
+   return err;
+}
+
+//------------------------------------------------------------------------------
+
+extern "C" int HYPRE_LSI_BlockPrecondSetLookup(HYPRE_Solver solver, 
+                                               HYPRE_Lookup *lookup)
+{
+   int err=0;
+
+   HYPRE_LSI_BlockPrecond *cprecon = (HYPRE_LSI_BlockPrecond *) solver;
+   if ( cprecon == NULL ) err = 1;
+   else
+   {
+      HYPRE_LSI_BlockP *precon = (HYPRE_LSI_BlockP *) cprecon->precon;
+      err = precon->setLookup((Lookup *)lookup->object);
    }
    return err;
 }
@@ -298,14 +317,27 @@ int HYPRE_LSI_BlockP::setLumpedMasses(int length, double *Mdata)
 }
 
 //******************************************************************************
+// set lookup object
+//------------------------------------------------------------------------------
+
+int HYPRE_LSI_BlockP::setLookup(Lookup *object)
+{
+   lookup_ = object;
+   return 0;
+}
+
+//******************************************************************************
+// Given a matrix A, compute the sizes and indices of the 2 x 2 blocks
+//******************************************************************************
 // Given a matrix A, compute the sizes and indices of the 2 x 2 blocks
 // (P22Size_,P22GSize_,P22LocalInds_,P22GlobalInds_,P22Offsets_,APartition_)
 //------------------------------------------------------------------------------
 
 int HYPRE_LSI_BlockP::computeBlockInfo()
 {
-   int      mypid, nprocs, start_row, end_row, local_nrows, irow;
-   int      j, row_size, *col_ind, *disp_array, index;
+   int      mypid, nprocs, start_row, end_row, local_nrows, irow, last_node_num;
+   int      j, row_size, *col_ind, *disp_array, index, global_nrows, count;
+   int      node_num;
    double   *col_val;
    MPI_Comm mpi_comm;
 
@@ -332,26 +364,42 @@ int HYPRE_LSI_BlockP::computeBlockInfo()
    HYPRE_ParCSRMatrixGetComm( Amat_, &mpi_comm );
    MPI_Comm_rank( mpi_comm, &mypid );
    MPI_Comm_size( mpi_comm, &nprocs );
-   start_row   = APartition_[mypid];
-   end_row     = APartition_[mypid+1] - 1;
-   local_nrows = end_row - start_row + 1;
+   start_row    = APartition_[mypid];
+   end_row      = APartition_[mypid+1] - 1;
+   local_nrows  = end_row - start_row + 1;
+   global_nrows = APartition_[nprocs];
     
    //------------------------------------------------------------------
    // find the local size of the (2,2) block
    //------------------------------------------------------------------
 
-   P22Size_ = 0;
-   for ( irow = start_row; irow <= end_row; irow++ ) 
+   P22Size_      = count = 0;
+   last_node_num = -1;
+   for ( irow = start_row; irow <= end_row; irow++ )
    {
-      HYPRE_ParCSRMatrixGetRow(Amat_, irow, &row_size, &col_ind, &col_val);
-      for ( j = 0; j < row_size; j++ ) 
+      node_num = lookup_->getAssociatedNodeNumber(irow);
+      if ( node_num != last_node_num ) 
       {
-         index = col_ind[j];
-         if ( index == irow ) break;
+         if (count == 1) break; 
+         last_node_num = node_num; 
+         count = 1;
       }
-      if ( j == row_size ) P22Size_++;
-      HYPRE_ParCSRMatrixRestoreRow(Amat_, irow, &row_size, &col_ind, &col_val);
+      else count++;
    }
+   index = irow - 1;
+   for ( irow = index; irow <= end_row; irow++ ) P22Size_++;
+
+   //for ( irow = start_row; irow <= end_row; irow++ ) 
+   //{
+   //   HYPRE_ParCSRMatrixGetRow(Amat_, irow, &row_size, &col_ind, &col_val);
+   //   for ( j = 0; j < row_size; j++ ) 
+   //   {
+   //      index = col_ind[j];
+   //      if ( index == irow ) break;
+   //   }
+   //   if ( j == row_size ) P22Size_++;
+   //   HYPRE_ParCSRMatrixRestoreRow(Amat_, irow, &row_size, &col_ind, &col_val);
+   //}
 
    if ( outputLevel_ > 0 )
    {
@@ -369,57 +417,73 @@ int HYPRE_LSI_BlockP::computeBlockInfo()
    // compose a local list of rows for the (2,2) block
    //------------------------------------------------------------------
 
-   P22Size_ = 0;
-   for ( irow = start_row; irow <= end_row; irow++ ) 
+   P22Size_      = count = 0;
+   last_node_num = -1;
+   for ( irow = start_row; irow <= end_row; irow++ )
    {
-      HYPRE_ParCSRMatrixGetRow(Amat_, irow, &row_size, &col_ind, &col_val);
-      for ( j = 0; j < row_size; j++ ) 
+      node_num = lookup_->getAssociatedNodeNumber(irow);
+      if ( node_num != last_node_num ) 
       {
-         index = col_ind[j];
-         if ( index == irow ) break;
+         if (count == 1) break; 
+         last_node_num = node_num; 
+         count = 1;
       }
-      if ( j == row_size ) P22LocalInds_[P22Size_++] = irow;
-      HYPRE_ParCSRMatrixRestoreRow(Amat_, irow, &row_size, &col_ind, &col_val);
+      else count++;
    }
+   index = irow - 1;
+   for ( irow = index; irow <= end_row; irow++ ) 
+      P22LocalInds_[P22Size_++] = irow;
+
+   //for ( irow = start_row; irow <= end_row; irow++ ) 
+   //{
+   //   HYPRE_ParCSRMatrixGetRow(Amat_, irow, &row_size, &col_ind, &col_val);
+   //   for ( j = 0; j < row_size; j++ ) 
+   //   {
+   //      index = col_ind[j];
+   //      if ( index == irow ) break;
+   //   }
+   //   if ( j == row_size ) P22LocalInds_[P22Size_++] = irow;
+   //   HYPRE_ParCSRMatrixRestoreRow(Amat_, irow, &row_size, &col_ind, &col_val);
+   //}
 
    //------------------------------------------------------------------
    // compose a global list of rows for the (2,2) block
    //------------------------------------------------------------------
 
-    MPI_Allreduce(&P22Size_, &P22GSize_, 1, MPI_INT, MPI_SUM, mpi_comm);
+   MPI_Allreduce(&P22Size_, &P22GSize_, 1, MPI_INT, MPI_SUM, mpi_comm);
 
-    if ( outputLevel_ > 0 )
-    {
-       if ( P22GSize_ == 0 && mypid == 0 )
-          printf("computeBlockInfo WARNING : P22Size = 0 on all processors.\n");
-    }
-    if ( P22GSize_ == 0 )
-    {
-       if ( APartition_ != NULL ) free( APartition_ );
-       APartition_ = NULL;
-       return 1;
-    }
+   if ( outputLevel_ > 0 )
+   {
+      if ( P22GSize_ == 0 && mypid == 0 )
+         printf("computeBlockInfo WARNING : P22Size = 0 on all processors.\n");
+   }
+   if ( P22GSize_ == 0 )
+   {
+      if ( APartition_ != NULL ) free( APartition_ );
+      APartition_ = NULL;
+      return 1;
+   }
 
-    if ( P22GSize_ > 0 ) P22GlobalInds_ = new int[P22GSize_];
-    else                 P22GlobalInds_ = NULL;
-    disp_array     = new int[nprocs];
-    P22Offsets_    = new int[nprocs];
-    MPI_Allgather(&P22Size_, 1, MPI_INT, P22Offsets_, 1, MPI_INT, mpi_comm);
-    disp_array[0] = 0;
-    for ( j = 1; j < nprocs; j++ ) 
-       disp_array[j] = disp_array[j-1] + P22Offsets_[j-1];
-    MPI_Allgatherv(P22LocalInds_, P22Size_, MPI_INT, P22GlobalInds_,
-                   P22Offsets_, disp_array, MPI_INT, mpi_comm);
-    delete [] P22Offsets_;
-    P22Offsets_ = disp_array;
+   if ( P22GSize_ > 0 ) P22GlobalInds_ = new int[P22GSize_];
+   else                 P22GlobalInds_ = NULL;
+   disp_array     = new int[nprocs];
+   P22Offsets_    = new int[nprocs];
+   MPI_Allgather(&P22Size_, 1, MPI_INT, P22Offsets_, 1, MPI_INT, mpi_comm);
+   disp_array[0] = 0;
+   for ( j = 1; j < nprocs; j++ ) 
+      disp_array[j] = disp_array[j-1] + P22Offsets_[j-1];
+   MPI_Allgatherv(P22LocalInds_, P22Size_, MPI_INT, P22GlobalInds_,
+                  P22Offsets_, disp_array, MPI_INT, mpi_comm);
+   delete [] P22Offsets_;
+   P22Offsets_ = disp_array;
 
-    if ( outputLevel_ > 1 )
-    {
-       for ( j = 0; j < P22Size_; j++ )
-          printf("%4d computeBlockInfo : P22Inds %8d = %d\n", mypid,
-                 j, P22LocalInds_[j]);
-    }
-    return 0;
+   if ( outputLevel_ > 1 )
+   {
+      for ( j = 0; j < P22Size_; j++ )
+         printf("%4d computeBlockInfo : P22Inds %8d = %d\n", mypid,
+                j, P22LocalInds_[j]);
+   }
+   return 0;
 } 
 
 //******************************************************************************
@@ -671,6 +735,7 @@ int HYPRE_LSI_BlockP::buildBlocks()
          HYPRE_IJMatrixSetValues(A22mat_, 1, &A22NewSize, 
 	                    (const int *) &A22RowCnt, (const int *) A22_inds,
                             (const double *) A22_vals);
+         A22RowCnt++;
       }
       HYPRE_ParCSRMatrixRestoreRow(Amat_, irow, &rowSize, &inds, &vals);
    }
@@ -751,12 +816,13 @@ int HYPRE_LSI_BlockP::setup(HYPRE_ParCSRMatrix Amat)
 {
    int      i, j, irow, checkZeros, mypid, nprocs, AStart, AEnd, ANRows; 
    int      rowSize, *colInd, searchInd, newRow, one=1, maxRowSize;
+   int      *colInd2, newRowSize, count, *newColInd, rowSize2;
    int      MNRows, MStartRow, *MRowLengs, SNRows, SStartRow, *SRowLengs;
    int      V1Leng, V1Start, V2Leng, V2Start, ierr;
-   double   dtemp, *colVal;
+   double   dtemp, *colVal, *colVal2, *newColVal;
    MPI_Comm mpi_comm;
-   HYPRE_IJMatrix     Mmat;
-   HYPRE_ParCSRMatrix Cmat_csr, Mmat_csr, Smat_csr, A22mat_csr;
+   HYPRE_IJMatrix     Mmat, B22mat;
+   HYPRE_ParCSRMatrix Cmat_csr, Mmat_csr, Smat_csr, A22mat_csr, B22mat_csr;
    char     fname[100];
    FILE     *fp;
 
@@ -840,9 +906,16 @@ int HYPRE_LSI_BlockP::setup(HYPRE_ParCSRMatrix Amat)
    if (outputLevel_ >= 1) printf("BlockPrecond setup : C^T M^{-1} C ends\n");
 
    //------------------------------------------------------------------
-   // construct new A22 = S, assuming original A22 = 0 
+   // construct new A22 = A22 - S
    //------------------------------------------------------------------
 
+   if ( A22mat_ != NULL )
+   {
+      B22mat = A22mat_;
+      HYPRE_IJMatrixGetObject(B22mat, (void **) &B22mat_csr);
+   } 
+   else B22mat = NULL;
+      
    SNRows    = P22Size_;
    SStartRow = P22Offsets_[mypid];
    ierr  = HYPRE_IJMatrixCreate(mpi_comm, SStartRow, SStartRow+SNRows-1,
@@ -855,8 +928,31 @@ int HYPRE_LSI_BlockP::setup(HYPRE_ParCSRMatrix Amat)
    for ( irow = SStartRow; irow < SStartRow+SNRows; irow++ ) 
    {
       HYPRE_ParCSRMatrixGetRow(Smat_csr,irow,&rowSize,&colInd,NULL);
-      SRowLengs[irow-SStartRow] = rowSize;
-      maxRowSize = ( rowSize > maxRowSize ) ? rowSize : maxRowSize;
+      newRowSize = rowSize;
+      if ( B22mat != NULL )
+      {
+         HYPRE_ParCSRMatrixGetRow(B22mat_csr,irow,&rowSize2,&colInd2,NULL);
+         newRowSize += rowSize2;
+         newColInd = new int[newRowSize];
+         for (j = 0; j < rowSize;  j++) newColInd[j] = colInd[j];
+         for (j = 0; j < rowSize2; j++) newColInd[j+rowSize] = colInd2[j];
+         qsort0(newColInd, 0, newRowSize-1);
+         count = 0;
+         for ( j = 1; j < newRowSize; j++ )
+         {
+            if ( newColInd[j] != newColInd[count] )
+            {
+               count++;
+               newColInd[count] = newColInd[j];
+            }
+         }
+         if ( newRowSize > 0 ) count++;
+         newRowSize = count;
+         HYPRE_ParCSRMatrixRestoreRow(B22mat_csr,irow,&rowSize2,&colInd2,NULL);
+         delete [] newColInd;
+      }
+      SRowLengs[irow-SStartRow] = newRowSize;
+      maxRowSize = ( newRowSize > maxRowSize ) ? newRowSize : maxRowSize;
       HYPRE_ParCSRMatrixRestoreRow(Smat_csr,irow,&rowSize,&colInd,NULL);
    }
    ierr  = HYPRE_IJMatrixSetRowSizes(A22mat_, SRowLengs);
@@ -867,12 +963,59 @@ int HYPRE_LSI_BlockP::setup(HYPRE_ParCSRMatrix Amat)
    for ( irow = SStartRow; irow < SStartRow+SNRows; irow++ ) 
    {
       HYPRE_ParCSRMatrixGetRow(Smat_csr,irow,&rowSize,&colInd,&colVal);
-      HYPRE_IJMatrixSetValues(A22mat_, 1, &rowSize, (const int *) &irow,
-	                  (const int *) colInd, (const double *) colVal);
+      if ( B22mat == NULL )
+      {
+         newRowSize = rowSize;
+         newColInd  = new int[newRowSize];
+         newColVal  = new double[newRowSize];
+         for (j = 0; j < rowSize; j++) 
+         {
+            newColInd[j] = colInd[j];
+            newColVal[j] = - colVal[j];
+         }
+      }
+      else
+      {
+         HYPRE_ParCSRMatrixGetRow(B22mat_csr,irow,&rowSize2,&colInd2,&colVal2);
+         newRowSize = rowSize + rowSize2;
+         newColInd = new int[newRowSize];
+         newColVal = new double[newRowSize];
+         for (j = 0; j < rowSize; j++) 
+         {
+            newColInd[j] = colInd[j];
+            newColVal[j] = - colVal[j];
+         }
+         for (j = 0; j < rowSize2; j++) 
+         {
+            newColInd[j+rowSize] = colInd2[j];
+            newColVal[j+rowSize] = colVal2[j];
+         }
+         qsort1(newColInd, newColVal, 0, newRowSize-1);
+         count = 0;
+         for ( j = 1; j < newRowSize; j++ )
+         {
+            if ( newColInd[j] != newColInd[count] )
+            {
+               count++;
+               newColInd[count] = newColInd[j];
+               newColVal[count] = newColVal[j];
+            }
+            else newColVal[count] += newColVal[j];
+         }
+         if ( newRowSize > 0 ) count++;
+         newRowSize = count;
+         HYPRE_ParCSRMatrixRestoreRow(B22mat_csr,irow,&rowSize2,
+                                      &colInd2,&colVal2);
+      }
+      HYPRE_IJMatrixSetValues(A22mat_, 1, &newRowSize, (const int *) &irow,
+	                  (const int *) newColInd, (const double *) newColVal);
       HYPRE_ParCSRMatrixRestoreRow(Smat_csr,irow,&rowSize,&colInd,&colVal);
+      delete [] newColInd;
+      delete [] newColVal;
    }
    HYPRE_IJMatrixAssemble(A22mat_);
    HYPRE_IJMatrixGetObject(A22mat_, (void **) &A22mat_csr);
+   if ( B22mat != NULL ) HYPRE_IJMatrixDestroy(B22mat);
 
    if ( outputLevel_ > 1 && A22mat_csr != NULL )
    {
@@ -1095,7 +1238,7 @@ int HYPRE_LSI_BlockP::solveBSolve(HYPRE_IJVector x1,HYPRE_IJVector x2,
       relaxType[3] = 9;
       HYPRE_BoomerAMGSetGridRelaxType(A11Precond_, relaxType);
       relaxWt = (double *) malloc( 25 * sizeof(double) );
-      for ( i = 0; i < 25; i++ ) relaxWt[i] = 0.0;
+      for ( i = 0; i < 25; i++ ) relaxWt[i] = 1.0;
       HYPRE_BoomerAMGSetRelaxWeight(A11Precond_, relaxWt);
       if ( scheme_ == HYPRE_INCFLOW_BTRI )
       {
@@ -1146,7 +1289,7 @@ int HYPRE_LSI_BlockP::solveBSolve(HYPRE_IJVector x1,HYPRE_IJVector x2,
       relaxType[3] = 9;
       HYPRE_BoomerAMGSetGridRelaxType(A22Precond_, relaxType);
       relaxWt = (double *) malloc( 25 * sizeof(double) );
-      for ( i = 0; i < 25; i++ ) relaxWt[i] = 0.0;
+      for ( i = 0; i < 25; i++ ) relaxWt[i] = 1.0;
       HYPRE_BoomerAMGSetRelaxWeight(A22Precond_, relaxWt);
       HYPRE_ParCSRPCGSetPrecond(A22Solver_,
                        HYPRE_BoomerAMGSolve,
@@ -1183,7 +1326,7 @@ int HYPRE_LSI_BlockP::solveBSolve(HYPRE_IJVector x1,HYPRE_IJVector x2,
 int HYPRE_LSI_BlockP::solveBISolve(HYPRE_IJVector x1,HYPRE_IJVector x2,
                                    HYPRE_IJVector f1,HYPRE_IJVector f2)
 {
-   int                irow, ierr, max_iter=3, mypid, A22Start, A22NRows;
+   int                irow, ierr, max_iter=10, mypid, A22Start, A22NRows;
    int                i, *nsweeps, *relaxType, *inds;
    double             tol=1.0e-3, *vals, alpha, *relaxWt;
    MPI_Comm           mpi_comm;
@@ -1232,7 +1375,7 @@ int HYPRE_LSI_BlockP::solveBISolve(HYPRE_IJVector x1,HYPRE_IJVector x2,
       relaxType[3] = 9;
       HYPRE_BoomerAMGSetGridRelaxType(A11Precond_, relaxType);
       relaxWt = (double *) malloc( 25 * sizeof(double) );
-      for ( i = 0; i < 25; i++ ) relaxWt[i] = 0.0;
+      for ( i = 0; i < 25; i++ ) relaxWt[i] = 1.0;
       HYPRE_BoomerAMGSetRelaxWeight(A11Precond_, relaxWt);
       if ( scheme_ == HYPRE_INCFLOW_BTRI )
       {
@@ -1282,7 +1425,7 @@ int HYPRE_LSI_BlockP::solveBISolve(HYPRE_IJVector x1,HYPRE_IJVector x2,
       relaxType[3] = 9;
       HYPRE_BoomerAMGSetGridRelaxType(A22Precond_, relaxType);
       relaxWt = (double *) malloc( 25 * sizeof(double) );
-      for ( i = 0; i < 25; i++ ) relaxWt[i] = 0.0;
+      for ( i = 0; i < 25; i++ ) relaxWt[i] = 1.0;
       HYPRE_BoomerAMGSetRelaxWeight(A22Precond_, relaxWt);
       HYPRE_ParCSRPCGSetPrecond(A22Solver_,
                        HYPRE_BoomerAMGSolve,
