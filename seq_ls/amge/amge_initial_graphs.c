@@ -60,17 +60,42 @@ int hypre_AMGeInitialGraphs(int **i_element_node_pointer,
 
   i_element_node = hypre_CTAlloc(int, num_elements+1);
 
-  j_element_node = hypre_CTAlloc(int, 3*num_elements);
+  /* j_element_node = hypre_CTAlloc(int, 3*num_elements); */
+
+  j_element_node = hypre_CTAlloc(int, 24*num_elements); 
 
   element_node_counter = 0;
   for (i=0; i < num_elements; i++)
     {
       i_element_node[i] = element_node_counter;
-      fscanf(f, "%d %d %d\n", 
+      /*      fscanf(f, "%d %d %d\n", */
+      fscanf(f, "%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n",
 	     &j_element_node[element_node_counter],
 	     &j_element_node[element_node_counter+1],
-	     &j_element_node[element_node_counter+2]);
-      element_node_counter+=3;
+	     &j_element_node[element_node_counter+2],
+	     &j_element_node[element_node_counter+3],
+	     &j_element_node[element_node_counter+4],
+	     &j_element_node[element_node_counter+5],
+	     &j_element_node[element_node_counter+6],
+	     &j_element_node[element_node_counter+7],
+	     &j_element_node[element_node_counter+8],
+	     &j_element_node[element_node_counter+9],
+	     &j_element_node[element_node_counter+10],
+	     &j_element_node[element_node_counter+11],
+	     &j_element_node[element_node_counter+12],
+	     &j_element_node[element_node_counter+13],
+	     &j_element_node[element_node_counter+14],
+	     &j_element_node[element_node_counter+15],
+	     &j_element_node[element_node_counter+16],
+	     &j_element_node[element_node_counter+17],
+	     &j_element_node[element_node_counter+18],
+	     &j_element_node[element_node_counter+19],
+	     &j_element_node[element_node_counter+20],
+	     &j_element_node[element_node_counter+21],
+	     &j_element_node[element_node_counter+22],
+	     &j_element_node[element_node_counter+23]);
+      /* element_node_counter+=3; */
+      element_node_counter+=24;
     }
 
   i_element_node[num_elements] = element_node_counter;
