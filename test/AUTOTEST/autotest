@@ -341,6 +341,7 @@ do
         HYPRE_MACHINE_COMMANDS="$HYPRE_MACHINE_COMMANDS -v $HYPRE_MESSAGE"
 ## 	print_header
 ## 	./autotest_test $HYPRE_MACHINE_COMMANDS
+        COMPILERSELECT="gcc2"
    	perform_test
         shift;;
     -lx) 
@@ -494,6 +495,7 @@ do
           HYPRE_MESSAGE='PRIMARY[gcc-2.96]'
         fi
 ##      ./autotest_test $HYPRE_MACHINE_COMMANDS -v $HYPRE_MESSAGE
+        COMPILERSELECT="gcc2"
 	perform_test
         shift;;
     -tuxgcc2)
@@ -670,6 +672,7 @@ do
           HYPRE_MESSAGE='SECONDARY[pgi-3.3]'
         fi
 ##      ./autotest_test $HYPRE_MACHINE_COMMANDS -v $HYPRE_MESSAGE
+        COMPILERSELECT="pgi"
 	perform_test
         shift;;
     -vivid)
