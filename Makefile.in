@@ -300,3 +300,4 @@ veryclean:
 	(cd test; $(MAKE) veryclean)
 
 distclean: veryclean
+	rm -f HYPRE_config.h
