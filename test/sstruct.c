@@ -19,7 +19,52 @@
 char infile_default[50] = "sstruct.in.default";
 
 typedef int Index[3];
-typedef int ProblemIndex[6];  /* last 3 digits are shifts */
+
+/*------------------------------------------------------------
+ * ProblemIndex:
+ *
+ * The index has extra information stored in entries 3-8 that
+ * determine how the index gets "mapped" to finer index spaces.
+ *
+ * NOTE: For implementation convenience, the index is "pre-shifted"
+ * according to the values in entries 6,7,8.  The following discussion
+ * describes how "un-shifted" indexes are mapped, because that is a
+ * more natural way to think about this mapping problem, and because
+ * that is the convention used in the input file for this code.  The
+ * reason that pre-shifting is convenient is because it makes the true
+ * value of the index on the unrefined index space readily available
+ * in entries 0-2, hence, all operations on that unrefined space are
+ * straightforward.  Also, the only time that the extra mapping
+ * information is needed is when an index is mapped to a new refined
+ * index space, allowing us to isolate the mapping details to the
+ * routine MapProblemIndex.  The only other effected routine is
+ * SScanProblemIndex, which takes the user input and pre-shifts it.
+ *
+ * - Entries 3,4,5 have values of either 0 or 1 that indicate
+ *   whether to map an index "to the left" or "to the right".
+ *   Here is a 1D diagram:
+ *
+ *    --  |     *     |    unrefined index space
+ *   |
+ *    --> | * | . | * |    refined index space (factor = 3)
+ *          0       1
+ *
+ *   The '*' index on the unrefined index space gets mapped to one of
+ *   the '*' indexes on the refined space based on the value (0 or 1)
+ *   of the relevent entry (3,4, or 5).  The actual mapping formula is
+ *   as follows (with refinement factor, r):
+ *
+ *   mapped_index[i] = r*index[i] + (r-1)*index[i+3]
+ *
+ * - Entries 6,7,8 contain "shift" information.  The shift is
+ *   simply added to the mapped index just described.  So, the
+ *   complete mapping formula is as follows:
+ *
+ *   mapped_index[i] = r*index[i] + (r-1)*index[i+3] + index[i+6]
+ *
+ *------------------------------------------------------------*/
+
+typedef int ProblemIndex[9];
 
 typedef struct
 {
@@ -138,6 +183,12 @@ SScanProblemIndex( char          *sdata_ptr,
    int  i;
    char sign[3];
 
+   /* initialize index array */
+   for (i = 0; i < 9; i++)
+   {
+      index[i]   = 0;
+   }
+
    sdata_ptr += strspn(sdata_ptr, " \t\n(");
    switch (ndim)
    {
@@ -156,22 +207,39 @@ SScanProblemIndex( char          *sdata_ptr,
              &index[0], &sign[0], &index[1], &sign[1], &index[2], &sign[2]);
       break;
    }
+   sdata_ptr += strcspn(sdata_ptr, ":)");
+   if ( *sdata_ptr == ':' )
+   {
+      /* read in optional shift */
+      sdata_ptr += 1;
+      switch (ndim)
+      {
+         case 1:
+            sscanf(sdata_ptr, "%d", &index[6]);
+            break;
+            
+         case 2:
+            sscanf(sdata_ptr, "%d%d", &index[6], &index[7]);
+            break;
+            
+         case 3:
+            sscanf(sdata_ptr, "%d%d%d", &index[6], &index[7], &index[8]);
+            break;
+      }
+      /* pre-shift the index */
+      for (i = 0; i < ndim; i++)
+      {
+         index[i] += index[i+6];
+      }
+   }
    sdata_ptr += strcspn(sdata_ptr, ")") + 1;
+
    for (i = 0; i < ndim; i++)
    {
       if (sign[i] == '+')
       {
          index[i+3] = 1;
       }
-      else
-      {
-         index[i+3] = 0;
-      }
-   }
-   for (i = ndim; i < 3; i++)
-   {
-      index[i]   = 0;
-      index[i+3] = 1;
    }
 
    *sdata_ptr_ptr = sdata_ptr;
@@ -614,9 +682,18 @@ int
 MapProblemIndex( ProblemIndex index,
                  Index        m )
 {
+   /* un-shift the index */
+   index[0] -= index[6];
+   index[1] -= index[7];
+   index[2] -= index[8];
+   /* map the index */
    index[0] = m[0]*index[0] + (m[0]-1)*index[3];
    index[1] = m[1]*index[1] + (m[1]-1)*index[4];
    index[2] = m[2]*index[2] + (m[2]-1)*index[5];
+   /* pre-shift the new mapped index */
+   index[0] += index[6];
+   index[1] += index[7];
+   index[2] += index[8];
 
    return 0;
 }
