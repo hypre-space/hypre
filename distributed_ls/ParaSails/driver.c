@@ -37,7 +37,7 @@ void report_times(MPI_Comm comm, double setup_time, double solve_time)
     printf("*** bal: %10.3f ***\n", tot / (double) npes / m);
     printf("***********************\n");
     printf("***      Setup      Solve      Total\n");
-    printf("*** %10.3f %10.3f %10.3f\n", m, max_solve_time, m+max_solve_time);
+    printf("III %10.3f %10.3f %10.3f\n", m, max_solve_time, m+max_solve_time);
     printf("***********************\n");
 }
 
@@ -123,6 +123,7 @@ int main(int argc, char *argv[])
         time0 = MPI_Wtime();
         ps = ParaSailsCreate(A);
         thresh = ParaSailsSelectThresh(ps, selparam);
+/*thresh=10.0;*/
         ParaSailsSetupPattern(ps, thresh, nlevels);
         ParaSailsSetupValues(ps, A);
         time1 = MPI_Wtime();
@@ -131,7 +132,10 @@ int main(int argc, char *argv[])
         i = MatrixNnz(ps->M);
         j = (MatrixNnz(A) - n) / 2 + n;
         if (mype == 0) 
-            printf("number of nonzeros: %d (%.2f)\n", i, i/(double)j);
+        {
+            printf("%s\n", argv[1]);
+            printf("Inumber of nonzeros: %d (%.2f)\n", i, i/(double)j);
+        }
         /*MatrixPrint(ps->M, "M");*/
 
         time0 = MPI_Wtime();
