@@ -381,9 +381,11 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
       if (debug_flag==1) wall_time = time_getWallclockSeconds();
 
+/*
       hypre_BoomerAMGBuildInterp(A_array[level], CF_marker_array[level], S,
                  coarse_pnts_global, num_functions, dof_func_array[level], 
 		 debug_flag, trunc_factor, &P);
+*/
 
       if (hypre_ParAMGDataGSMG(amg_data) == 1)
       {
@@ -401,8 +403,16 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       } 
       else if (hypre_ParAMGDataGSMG(amg_data) == 4) 
       {
+printf("Calling hypre_BoomerAMGBuildInterpGSMG\n");
+
+          hypre_BoomerAMGBuildInterpGSMG(A_array[level], 
+                 CF_marker_array[level], S,
+                 coarse_pnts_global, num_functions, dof_func_array[level], 
+		 debug_flag, trunc_factor, &P);
+/*
           hypre_BoomerAMGBuildInterpWithSmoothnessFactor(amg_vdata, 
               A_array[level], CF_marker_array[level], S, P);
+*/
       }
 
       if (debug_flag==1)
