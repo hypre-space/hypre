@@ -17,6 +17,8 @@ void RowsWithColumn
    mat_j = hypre_CSRMatrixJ(diag);
    num_rows = hypre_CSRMatrixNumRows(diag);
    firstColDiag = hypre_ParCSRMatrixFirstColDiag(A);
+   *rowmin = num_rows;
+   *rowmax = -1;
 
    for ( i=0; i<num_rows; ++i ) {
       /* global number: row = i + firstRowIndex;*/
@@ -306,12 +308,12 @@ hypre_MatTCommPkgCreate ( hypre_ParCSRMatrix *A)
    MPI_Allgatherv of communication sizes, only for pairs of procs. that communicate
      good: less data than above   bad: need extra commun. step to get recvcounts
    MPI_ISend,MPI_IRecv of each size, separately between each pair of procs.
-     good: no excess data send   bad: lots of little messages
+     good: no excess data sent   bad: lots of little messages
                                  but: Allgather might be done the same under the hood
      may be much slower than Allgather or may be a bit faster depending on
      implementations
 */
-   send_buf = hypre_CTAlloc( int, num_sends );
+   send_buf = hypre_CTAlloc( int, 2*num_sends );
    recv_sz_buf = hypre_CTAlloc( int, num_procs*num_sends );
    all_num_sends2 = hypre_CTAlloc( int, num_procs );
 
@@ -331,6 +333,9 @@ hypre_MatTCommPkgCreate ( hypre_ParCSRMatrix *A)
       /* ... sizes of info to send */
    };
 #if 0
+      printf("send_map_starts (%i):",num_sends+1);
+      for( i=0; i<=num_sends; ++i ) printf(" %i", send_map_starts[i] );
+      printf("\n");
       printf("my_id=%i num_sends=%i send_buf[0,1]=%i %i",
              my_id, num_sends, send_buf[0], send_buf[1] );
       printf(" all_num_sends2[0]=%i\n", all_num_sends2[0] );
@@ -349,7 +354,6 @@ hypre_MatTCommPkgCreate ( hypre_ParCSRMatrix *A)
          j++;
       };
    };
-   
 
    comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg, 1);
 

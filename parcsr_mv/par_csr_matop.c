@@ -579,11 +579,11 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
 */
 
 void hypre_ParCSRMatrixExtractBExt_Arrays
-( int ** pB_ext_i, int ** pB_ext_j, double ** pB_ext_data,
+( int ** pB_ext_i, int ** pB_ext_j, double ** pB_ext_data, int ** pB_ext_row_map,
   int * num_nonzeros,
-  int data, MPI_Comm comm, hypre_ParCSRCommPkg * comm_pkg,
+  int data, int find_row_map, MPI_Comm comm, hypre_ParCSRCommPkg * comm_pkg,
   int num_cols_B, int num_recvs, int num_sends,
-  int first_col_diag,
+  int first_col_diag, int first_row_index,
   int * recv_vec_starts, int * send_map_starts, int * send_map_elmts,
   int * diag_i, int * diag_j, int * offd_i, int * offd_j, int * col_map_offd,
   double * diag_data, double * offd_data
@@ -591,7 +591,7 @@ void hypre_ParCSRMatrixExtractBExt_Arrays
 {
 /* begin generic part.
  inputs:
-    int data
+    int data, find_row_map
     MPI_Comm comm
     hypre_ParCSRCommPkg *comm_pkg
     int num_cols_B, num_rows_B_ext, num_recvs, num_sends
@@ -605,6 +605,9 @@ void hypre_ParCSRMatrixExtractBExt_Arrays
     int* B_ext_i, B_ext_j
  outputs if data!=0:
     double* B_ext_data;
+ inputs if find_row_map!=0: first_row_index
+ outputs if find_row_map!=0:
+    int* B_ext_row_map  (B_ext_row_map[i] is global row no. of row i of B_ext)
 */
 
    hypre_ParCSRCommHandle *comm_handle;
@@ -616,6 +619,8 @@ void hypre_ParCSRMatrixExtractBExt_Arrays
    int * B_ext_j;
    double * B_ext_data;
    double * B_int_data;
+   int * B_int_row_map;
+   int * B_ext_row_map;
 
    int num_procs, my_id;
 
@@ -634,9 +639,22 @@ void hypre_ParCSRMatrixExtractBExt_Arrays
    MPI_Comm_rank(comm,&my_id);
 
    num_rows_B_ext = recv_vec_starts[num_recvs];
+   if ( num_rows_B_ext < 0 ) {  /* no B_ext, no communication */
+      *pB_ext_i = NULL;
+      *pB_ext_j = NULL;
+      if ( data ) *pB_ext_data = NULL;
+      if ( find_row_map ) *pB_ext_row_map = NULL;
+      *num_nonzeros = 0;
+      return;
+   };
    B_int_i = hypre_CTAlloc(int, send_map_starts[num_sends]+1);
-   *pB_ext_i = hypre_CTAlloc(int, num_rows_B_ext+1);
-   B_ext_i = *pB_ext_i;
+   B_ext_i = hypre_CTAlloc(int, num_rows_B_ext+1);
+   *pB_ext_i = B_ext_i;
+   if ( find_row_map ) {
+      B_int_row_map = hypre_CTAlloc( int, send_map_starts[num_sends]+1 );
+      B_ext_row_map = hypre_CTAlloc( int, num_rows_B_ext+1 );
+      *pB_ext_row_map = B_ext_row_map;
+   };
 /*   send_matrix_types = hypre_CTAlloc(MPI_Datatype, num_sends);
    recv_matrix_types = hypre_CTAlloc(MPI_Datatype, num_recvs);
 */  
@@ -657,13 +675,26 @@ void hypre_ParCSRMatrixExtractBExt_Arrays
 			  + diag_i[jrow+1] - diag_i[jrow];
 	    *num_nonzeros += B_int_i[j_cnt];
 	}
+        if ( find_row_map ) {
+           j_cnt = 0;
+           for (j = send_map_starts[i]; j < send_map_starts[i+1]; j++) {
+              jrow = send_map_elmts[j];
+              B_int_row_map[j_cnt++] = jrow + first_row_index;
+           }
+        }
    }
 
 /*--------------------------------------------------------------------------
  * initialize communication 
  *--------------------------------------------------------------------------*/
    comm_handle = hypre_ParCSRCommHandleCreate(11,comm_pkg,
-		&B_int_i[1],&(*pB_ext_i)[1]);
+		&B_int_i[1],&(B_ext_i[1]) );
+   if ( find_row_map ) {
+      /* scatter/gather B_int row numbers to form array of B_ext row numbers */
+      hypre_ParCSRCommHandleDestroy(comm_handle);
+      comm_handle = hypre_ParCSRCommHandleCreate
+         (11,comm_pkg, B_int_row_map, B_ext_row_map );
+   };
 
    B_int_j = hypre_CTAlloc(int, *num_nonzeros);
    if (data) B_int_data = hypre_CTAlloc(double, *num_nonzeros);
@@ -804,6 +835,7 @@ void hypre_ParCSRMatrixExtractBExt_Arrays
    hypre_TFree(B_int_i);
    hypre_TFree(B_int_j);
    if (data) hypre_TFree(B_int_data);
+   if ( find_row_map ) hypre_TFree(B_int_row_map);
 
 /* end generic part */
 }
@@ -820,6 +852,7 @@ hypre_ParCSRMatrixExtractBExt( hypre_ParCSRMatrix *B, hypre_ParCSRMatrix *A, int
 {
    MPI_Comm comm = hypre_ParCSRMatrixComm(B);
    int first_col_diag = hypre_ParCSRMatrixFirstColDiag(B);
+   int first_row_index = hypre_ParCSRMatrixFirstRowIndex(B);
    int *col_map_offd = hypre_ParCSRMatrixColMapOffd(B);
 
    hypre_ParCSRCommPkg *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
@@ -849,16 +882,17 @@ hypre_ParCSRMatrixExtractBExt( hypre_ParCSRMatrix *B, hypre_ParCSRMatrix *A, int
    int *B_ext_i;
    int *B_ext_j;
    double *B_ext_data;
+   int *idummy;
  
    num_cols_B = hypre_ParCSRMatrixGlobalNumCols(B);
    num_rows_B_ext = recv_vec_starts[num_recvs];
 
    hypre_ParCSRMatrixExtractBExt_Arrays
-      ( &B_ext_i, &B_ext_j, &B_ext_data,
+      ( &B_ext_i, &B_ext_j, &B_ext_data, &idummy,
         &num_nonzeros,
-        data, comm, comm_pkg,
+        data, 0, comm, comm_pkg,
         num_cols_B, num_recvs, num_sends,
-        first_col_diag,
+        first_col_diag, first_row_index,
         recv_vec_starts, send_map_starts, send_map_elmts,
         diag_i, diag_j, offd_i, offd_j, col_map_offd,
         diag_data, offd_data
