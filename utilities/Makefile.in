@@ -41,8 +41,7 @@ POST_UNINSTALL = :
 host_triplet = @host@
 subdir = utilities
 DIST_COMMON = $(include_HEADERS) $(noinst_HEADERS) \
-	$(srcdir)/HYPRE_utilities.h.in $(srcdir)/Makefile.am \
-	$(srcdir)/Makefile.in
+	$(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/config/acinclude.m4 \
 	$(top_srcdir)/config/acx_blas.m4 \
@@ -52,7 +51,7 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/HYPRE_config.h
-CONFIG_CLEAN_FILES = HYPRE_utilities.h
+CONFIG_CLEAN_FILES =
 ARFLAGS = cru
 am__installdirs = $(DESTDIR)$(libdir) $(DESTDIR)$(libdir) $(DESTDIR)$(includedir)
 libLIBRARIES_INSTALL = $(INSTALL_DATA)
@@ -308,8 +307,6 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
-HYPRE_utilities.h: $(top_builddir)/config.status $(srcdir)/HYPRE_utilities.h.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 install-libLIBRARIES: $(lib_LIBRARIES)
 	@$(NORMAL_INSTALL)
 	$(mkdir_p) $(DESTDIR)$(libdir)

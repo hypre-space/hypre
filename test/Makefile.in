@@ -273,6 +273,10 @@ sharedstatedir = @sharedstatedir@
 subdirs = @subdirs@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
+
+# hopefully these will be auto-generated with >automake-1.8.0
+abs_top_srcdir = @abs_top_srcdir@
+abs_srcdir = @abs_srcdir@
 DIST_SUBDIRS = \
  AUTOTEST\
  TEST_fei\
@@ -1104,6 +1108,8 @@ info-am:
 install-data-am:
 
 install-exec-am: install-binPROGRAMS
+	@$(NORMAL_INSTALL)
+	$(MAKE) $(AM_MAKEFLAGS) install-exec-hook
 
 install-info: install-info-recursive
 
@@ -1174,9 +1180,23 @@ clean-local:
 	for i in fei f77_ij f77_ij_mv f77_struct \
 		f77_ij_b ij_b *.C++* driver.out.* ; \
 	do \
-	  if [ -e $$i ]; \
+	  if [ -e $$i ] ; \
 	  then \
 	    rm -f $$i; \
+	  fi; \
+	done
+
+install-exec-hook:
+	@ \
+	for i in fei ij sstruct struct ; \
+	do \
+	if [ -x $$i$(EXEEXT) ] ; \
+	  then \
+	    if [ -d $(abs_srcdir)/TEST_$$i ] ; \
+	    then \
+	      echo $(INSTALL_PROGRAM_ENV) $(LIBTOOL) --mode=install $(binPROGRAMS_INSTALL) $$i$(EXEEXT) $(abs_srcdir)/TEST_$$i/$$i$(EXEEXT); \
+	      $(INSTALL_PROGRAM_ENV) $(LIBTOOL) --mode=install $(binPROGRAMS_INSTALL) $$i$(EXEEXT) $(abs_srcdir)/TEST_$$i/$$i$(EXEEXT); \
+	    fi; \
 	  fi; \
 	done
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
