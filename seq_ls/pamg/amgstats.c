@@ -33,8 +33,6 @@ hypre_AMGSetupStats( void *amg_vdata )
  
    /* Local variables */
 
-   FILE      *fp;
-
    int      *A_i;
    int      *A_j;
    double   *A_data;
@@ -64,21 +62,19 @@ hypre_AMGSetupStats( void *amg_vdata )
    num_levels = hypre_AMGDataNumLevels(amg_data);
    amg_ioutdat = hypre_AMGDataIOutDat(amg_data);
    log_file_name = hypre_AMGDataLogFileName(amg_data);
-   
-   fp = fopen(hypre_AMGDataLogFileName(amg_data),"a");
- 
-   fprintf(fp,"\n  AMG SETUP PARAMETERS:\n\n");
-   fprintf(fp," Max levels = %d\n",hypre_AMGDataMaxLevels(amg_data));
-   fprintf(fp," Num levels = %d\n\n",num_levels);
+    
+   printf("\n  AMG SETUP PARAMETERS:\n\n");
+   printf(" Max levels = %d\n",hypre_AMGDataMaxLevels(amg_data));
+   printf(" Num levels = %d\n\n",num_levels);
 
-   fprintf(fp, "\nOperator Matrix Information:\n\n");
+   printf( "\nOperator Matrix Information:\n\n");
 
-   fprintf(fp,"         nonzero         entries p");
-   fprintf(fp,"er row        row sums\n");
-   fprintf(fp,"lev rows entries  sparse  min max  ");
-   fprintf(fp,"avg       min         max\n");
-   fprintf(fp,"=======================================");
-   fprintf(fp,"==========================\n");
+   printf("         nonzero         entries p");
+   printf("er row        row sums\n");
+   printf("lev rows entries  sparse  min max  ");
+   printf("avg       min         max\n");
+   printf("=======================================");
+   printf("==========================\n");
 
   
    /*-----------------------------------------------------
@@ -123,21 +119,21 @@ hypre_AMGSetupStats( void *amg_vdata )
 
        avg_entries = ((double) total_entries) / ((double) fine_size);
 
-       fprintf(fp, "%2d %5d %7d  %0.3f  %3d %3d",
+       printf( "%2d %5d %7d  %0.3f  %3d %3d",
                  level, fine_size, num_nonzeros, sparse, min_entries, 
                  max_entries);
-       fprintf(fp,"  %4.1f  %10.3e  %10.3e\n", avg_entries,
+       printf("  %4.1f  %10.3e  %10.3e\n", avg_entries,
                                  min_rowsum, max_rowsum);
    }
        
-   fprintf(fp, "\n\nInterpolation Matrix Information:\n\n");
+   printf( "\n\nInterpolation Matrix Information:\n\n");
 
-   fprintf(fp,"                 entries/row    min     max");
-   fprintf(fp,"         row sums\n");
-   fprintf(fp,"lev  rows cols    min max  ");
-   fprintf(fp,"   weight   weight     min       max \n");
-   fprintf(fp,"=======================================");
-   fprintf(fp,"==========================\n");
+   printf("                 entries/row    min     max");
+   printf("         row sums\n");
+   printf("lev  rows cols    min max  ");
+   printf("   weight   weight     min       max \n");
+   printf("=======================================");
+   printf("==========================\n");
 
   
    /*-----------------------------------------------------
@@ -191,14 +187,13 @@ hypre_AMGSetupStats( void *amg_vdata )
            max_rowsum = hypre_max(rowsum, max_rowsum);
        }
 
-       fprintf(fp, "%2d %5d x %-5d %3d %3d",
+       printf( "%2d %5d x %-5d %3d %3d",
              level, fine_size, coarse_size,  min_entries, max_entries);
-       fprintf(fp,"  %5.3e  %5.3e %5.3e  %5.3e\n",
+       printf("  %5.3e  %5.3e %5.3e  %5.3e\n",
                  min_weight, max_weight, min_rowsum, max_rowsum);
    }
        
    
-   fclose(fp);
    return(0);
 }  
 
@@ -213,7 +208,6 @@ void     hypre_WriteSolverParams(data)
 void    *data;
  
 {
-   FILE    *fp;
    char    *file_name;
  
    hypre_AMGData  *amg_data = data;
@@ -254,50 +248,47 @@ void    *data;
  
    if (amg_ioutdat == 1 || amg_ioutdat == 3)
    { 
-      fp = fopen(file_name, "a");
- 
-      fprintf(fp,"\n\nAMG SOLVER PARAMETERS:\n\n");
+      printf("\n\nAMG SOLVER PARAMETERS:\n\n");
    
    /*----------------------------------------------------------
     * AMG info
     *----------------------------------------------------------*/
  
-      fprintf(fp, "  Maximum number of cycles:         %d \n",max_iter);
-      fprintf(fp, "  Stopping Tolerance:               %e \n",tol); 
-      fprintf(fp, "  Cycle type (1 = V, 2 = W, etc.):  %d\n\n", cycle_type);
-      fprintf(fp, "  Relaxation Parameters:\n");
-      fprintf(fp, "   Visiting Grid:            fine  down   up  coarse\n");
-      fprintf(fp, "   Number of partial sweeps:%4d  %4d   %2d  %4d \n",
+      printf( "  Maximum number of cycles:         %d \n",max_iter);
+      printf( "  Stopping Tolerance:               %e \n",tol); 
+      printf( "  Cycle type (1 = V, 2 = W, etc.):  %d\n\n", cycle_type);
+      printf( "  Relaxation Parameters:\n");
+      printf( "   Visiting Grid:            fine  down   up  coarse\n");
+      printf( "   Number of partial sweeps:%4d  %4d   %2d  %4d \n",
               num_grid_sweeps[0],num_grid_sweeps[2],
               num_grid_sweeps[2],num_grid_sweeps[3]);
-      fprintf(fp, "   Type 0=Jac, 1=GS, 9=GE:  %4d  %4d   %2d  %4d \n",
+      printf( "   Type 0=Jac, 1=GS, 9=GE:  %4d  %4d   %2d  %4d \n",
               grid_relax_type[0],grid_relax_type[2],
               grid_relax_type[2],grid_relax_type[3]);
-      fprintf(fp, "   Point types, partial sweeps (1=C, -1=F):\n");
-      fprintf(fp, "                               Finest grid:");
+      printf( "   Point types, partial sweeps (1=C, -1=F):\n");
+      printf( "                               Finest grid:");
       for (j = 0; j < num_grid_sweeps[0]; j++)
-              fprintf(fp,"  %2d", grid_relax_points[0][j]);
-      fprintf(fp, "\n");
-      fprintf(fp, "                  Pre-CG relaxation (down):");
+              printf("  %2d", grid_relax_points[0][j]);
+      printf( "\n");
+      printf( "                  Pre-CG relaxation (down):");
       for (j = 0; j < num_grid_sweeps[1]; j++)
-              fprintf(fp,"  %2d", grid_relax_points[1][j]);
-      fprintf(fp, "\n");
-      fprintf(fp, "                   Post-CG relaxation (up):");
+              printf("  %2d", grid_relax_points[1][j]);
+      printf( "\n");
+      printf( "                   Post-CG relaxation (up):");
       for (j = 0; j < num_grid_sweeps[2]; j++)
-              fprintf(fp,"  %2d", grid_relax_points[2][j]);
-      fprintf(fp, "\n");
-      fprintf(fp, "                             Coarsest grid:");
+              printf("  %2d", grid_relax_points[2][j]);
+      printf( "\n");
+      printf( "                             Coarsest grid:");
       for (j = 0; j < num_grid_sweeps[3]; j++)
-              fprintf(fp,"  %2d", grid_relax_points[3][j]);
-      fprintf(fp, "\n\n");
+              printf("  %2d", grid_relax_points[3][j]);
+      printf( "\n\n");
 
-      fprintf(fp, " Output flag (ioutdat): %d \n", amg_ioutdat);
+      printf( " Output flag (ioutdat): %d \n", amg_ioutdat);
  
    /*----------------------------------------------------------
     * Close the output file
     *----------------------------------------------------------*/
  
-      fclose(fp);
    }
  
    return;

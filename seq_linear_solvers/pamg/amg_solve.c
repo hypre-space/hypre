@@ -45,8 +45,6 @@ hypre_AMGSolve( void            *amg_vdata,
 
    /*  Local variables  */
 
-   FILE    *fp;
-
    int      j;
    int      Solve_err_flag;
    int      max_iter;
@@ -124,9 +122,8 @@ hypre_AMGSolve( void            *amg_vdata,
 
    if (amg_ioutdat >= 0)
    { 
-      fp = fopen(file_name, "a");
 
-      fprintf(fp,"\n\nAMG SOLUTION INFO:\n");
+      printf("\n\nAMG SOLUTION INFO:\n");
 
    }
 
@@ -148,10 +145,10 @@ hypre_AMGSolve( void            *amg_vdata,
 
    if (amg_ioutdat == 1 || amg_ioutdat == 3)
    {     
-      fprintf(fp,"                                            relative\n");
-      fprintf(fp,"               residual        factor       residual\n");
-      fprintf(fp,"               --------        ------       --------\n");
-      fprintf(fp,"    Initial    %e                 %e\n",resid_nrm_init,
+      printf("                                            relative\n");
+      printf("               residual        factor       residual\n");
+      printf("               --------        ------       --------\n");
+      printf("    Initial    %e                 %e\n",resid_nrm_init,
               relative_resid);
    }
 
@@ -188,7 +185,7 @@ hypre_AMGSolve( void            *amg_vdata,
 
       if (amg_ioutdat == 1 || amg_ioutdat == 3)
       { 
-         fprintf(fp,"    Cycle %2d   %e    %f     %e \n",cycle_count,
+         printf("    Cycle %2d   %e    %f     %e \n",cycle_count,
                  resid_nrm,conv_factor,relative_resid);
       }
    }
@@ -218,25 +215,20 @@ hypre_AMGSolve( void            *amg_vdata,
    {
       if (Solve_err_flag == 1)
       {
-         fprintf(fp,"\n\n==============================================");
-         fprintf(fp,"\n NOTE: Convergence tolerance was not achieved\n");
-         fprintf(fp,"      within the allowed %d V-cycles\n",max_iter);
-         fprintf(fp,"==============================================");
+         printf("\n\n==============================================");
+         printf("\n NOTE: Convergence tolerance was not achieved\n");
+         printf("      within the allowed %d V-cycles\n",max_iter);
+         printf("==============================================");
       }
-      fprintf(fp,"\n\n Average Convergence Factor = %f",conv_factor);
-      fprintf(fp,"\n\n     Complexity:    grid = %f\n",grid_cmplxty);
-      fprintf(fp,"                operator = %f\n",operat_cmplxty);
-      fprintf(fp,"                   cycle = %f\n\n",cycle_cmplxty);
+      printf("\n\n Average Convergence Factor = %f",conv_factor);
+      printf("\n\n     Complexity:    grid = %f\n",grid_cmplxty);
+      printf("                operator = %f\n",operat_cmplxty);
+      /*  printf("                   cycle = %f\n\n",cycle_cmplxty); */
    }
 
    /*----------------------------------------------------------
     * Close the output file (if open)
     *----------------------------------------------------------*/
-
-   if (amg_ioutdat >= 0)
-   { 
-      fclose(fp); 
-   }
 
    return(Solve_err_flag);
 }
