@@ -604,27 +604,24 @@ hypre_SStructGridFindMapEntry( hypre_SStructGrid  *grid,
  *--------------------------------------------------------------------------*/
 
 int
-hypre_SStructMapEntryGetGlobalRank( hypre_BoxMapEntry *entry,
-                                    hypre_Index        index,
-                                    int               *rank_ptr )
+hypre_SStructMapEntryGetStrides( hypre_BoxMapEntry *entry,
+                                 hypre_Index        strides )
 {
    int ierr = 0;
 
-   hypre_Index              imin;
-   hypre_Index              imax;
-   hypre_SStructMapInfo    *entry_info;
-   int                      offset, s[3];
+   hypre_SStructMapInfo *entry_info;
+   hypre_Index           imin;
+   hypre_Index           imax;
 
    hypre_BoxMapEntryGetInfo(entry, (void **) &entry_info);
    hypre_BoxMapEntryGetExtents(entry, imin, imax);
-   offset = hypre_SStructMapInfoOffset(entry_info);
 
    if (hypre_SStructMapInfoType(entry_info) == hypre_SSTRUCT_MAP_INFO_DEFAULT)
    {
-      s[0] = 1;
-      s[1] = hypre_IndexD(imax, 0) - hypre_IndexD(imin, 0) + 1;
-      s[2] = hypre_IndexD(imax, 1) - hypre_IndexD(imin, 1) + 1;
-      s[2] *= s[1];
+      strides[0] = 1;
+      strides[1] = hypre_IndexD(imax, 0) - hypre_IndexD(imin, 0) + 1;
+      strides[2] = hypre_IndexD(imax, 1) - hypre_IndexD(imin, 1) + 1;
+      strides[2] *= strides[1];
    }
    else
    {
@@ -635,19 +632,44 @@ hypre_SStructMapEntryGetGlobalRank( hypre_BoxMapEntry *entry,
       hypre_CopyIndex(hypre_SStructNMapInfoCoord(entry_ninfo), c);
       hypre_CopyIndex(hypre_SStructNMapInfoDir(entry_ninfo), d);
 
-      s[c[0]] = 1;
-      s[c[1]] = hypre_IndexD(imax, c[0]) - hypre_IndexD(imin, c[0]) + 1;
-      s[c[2]] = hypre_IndexD(imax, c[1]) - hypre_IndexD(imin, c[1]) + 1;
-      s[c[2]] *= s[c[1]];
-      s[0] *= d[c[0]];
-      s[1] *= d[c[1]];
-      s[2] *= d[c[2]];
+      strides[c[0]] = 1;
+      strides[c[1]] = hypre_IndexD(imax, c[0]) - hypre_IndexD(imin, c[0]) + 1;
+      strides[c[2]] = hypre_IndexD(imax, c[1]) - hypre_IndexD(imin, c[1]) + 1;
+      strides[c[2]] *= strides[c[1]];
+      strides[0] *= d[c[0]];
+      strides[1] *= d[c[1]];
+      strides[2] *= d[c[2]];
    }
 
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_SStructMapEntryGetGlobalRank( hypre_BoxMapEntry *entry,
+                                    hypre_Index        index,
+                                    int               *rank_ptr )
+{
+   int ierr = 0;
+
+   hypre_SStructMapInfo *entry_info;
+   hypre_Index           imin;
+   hypre_Index           imax;
+   hypre_Index           strides;
+   int                   offset;
+
+   hypre_BoxMapEntryGetInfo(entry, (void **) &entry_info);
+   hypre_BoxMapEntryGetExtents(entry, imin, imax);
+   offset = hypre_SStructMapInfoOffset(entry_info);
+
+   hypre_SStructMapEntryGetStrides(entry, strides);
+
    *rank_ptr = offset +
-      (hypre_IndexD(index, 2) - hypre_IndexD(imin, 2)) * s[2] +
-      (hypre_IndexD(index, 1) - hypre_IndexD(imin, 1)) * s[1] +
-      (hypre_IndexD(index, 0) - hypre_IndexD(imin, 0)) * s[0];
+      (hypre_IndexD(index, 2) - hypre_IndexD(imin, 2)) * strides[2] +
+      (hypre_IndexD(index, 1) - hypre_IndexD(imin, 1)) * strides[1] +
+      (hypre_IndexD(index, 0) - hypre_IndexD(imin, 0)) * strides[0];
 
    return ierr;
 }

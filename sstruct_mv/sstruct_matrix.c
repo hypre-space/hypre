@@ -585,7 +585,7 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructUMatrixSetBoxValues TODO (optimize)
+ * Note: Entries must all be of type stencil or non-stencil, but not both.
  *--------------------------------------------------------------------------*/
 
 int 
@@ -601,25 +601,191 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
 {
    int ierr = 0;
 
+   HYPRE_IJMatrix        ijmatrix = hypre_SStructMatrixIJMatrix(matrix);
+   hypre_SStructGraph   *graph   = hypre_SStructMatrixGraph(matrix);
+   hypre_SStructGrid    *grid    = hypre_SStructGraphGrid(graph);
+   hypre_SStructStencil *stencil = hypre_SStructGraphStencil(graph, part, var);
+   int                  *vars    = hypre_SStructStencilVars(stencil);
+   hypre_Index          *shape   = hypre_SStructStencilShape(stencil);
+   int                   size    = hypre_SStructStencilSize(stencil);
+   hypre_IndexRef        offset;
+   hypre_Index           to_index;
+   hypre_SStructUVEntry *Uventry;
+   hypre_BoxMap         *map;
+   hypre_BoxMapEntry   **map_entries;
+   int                   nmap_entries;
+   hypre_BoxMapEntry   **map_to_entries;
+   int                   nmap_to_entries;
+   int                   nrows;
+   int                  *ncols;
+   int                  *rows;
+   int                  *cols;
+   double               *ijvalues;
    hypre_Box            *box;
+   hypre_Box            *to_box;
+   hypre_Box            *map_box;
+   hypre_Box            *int_box;
    hypre_Index           index;
-   int                   i, j, k;
+   hypre_Index           rs, cs;
+   int                   sy, sz;
+   int                   row_base, col_base, val_base;
+   int                   e, entry, ii, jj, i, j, k;
 
    box = hypre_BoxCreate();
-   hypre_CopyIndex(ilower, hypre_BoxIMin(box));
-   hypre_CopyIndex(iupper, hypre_BoxIMax(box));
 
-   for (k = hypre_BoxIMinZ(box); k <= hypre_BoxIMaxZ(box); k++)
+   /*------------------------------------------
+    * all stencil entries
+    *------------------------------------------*/
+
+   if (entries[0] < size)
    {
-      for (j = hypre_BoxIMinY(box); j <= hypre_BoxIMaxY(box); j++)
+      to_box  = hypre_BoxCreate();
+      map_box = hypre_BoxCreate();
+      int_box = hypre_BoxCreate();
+
+      hypre_CopyIndex(ilower, hypre_BoxIMin(box));
+      hypre_CopyIndex(iupper, hypre_BoxIMax(box));
+      nrows    = hypre_BoxVolume(box);
+      ncols    = hypre_CTAlloc(int, nrows);
+      for (i = 0; i < nrows; i++)
       {
-         for (i = hypre_BoxIMinX(box); i <= hypre_BoxIMaxX(box); i++)
+         ncols[i] = 1;
+      }
+      rows     = hypre_CTAlloc(int, nrows);
+      cols     = hypre_CTAlloc(int, nrows);
+      ijvalues = hypre_CTAlloc(double, nrows);
+
+      sy = (hypre_IndexY(iupper) - hypre_IndexY(ilower));
+      sz = (hypre_IndexZ(iupper) - hypre_IndexZ(ilower)) * sy;
+
+      map = hypre_SStructGridMap(grid, part, var);
+      hypre_BoxMapIntersect(map, ilower, iupper, &map_entries, &nmap_entries);
+         
+      for (ii = 0; ii < nmap_entries; ii++)
+      {
+         hypre_SStructMapEntryGetStrides(map_entries[ii], rs);
+
+         hypre_CopyIndex(ilower, hypre_BoxIMin(box));
+         hypre_CopyIndex(iupper, hypre_BoxIMax(box));
+         hypre_BoxMapEntryGetExtents(map_entries[ii],
+                                     hypre_BoxIMin(map_box),
+                                     hypre_BoxIMax(map_box));
+         hypre_IntersectBoxes(box, map_box, int_box);
+         hypre_CopyBox(int_box, box);
+
+         nrows = 0;
+         for (e = 0; e < nentries; e++)
          {
-            hypre_SetIndex(index, i, j, k);
-            ierr += hypre_SStructUMatrixSetValues(matrix, part, index, var,
-                                                  nentries, entries, values,
-                                                  add_to);
-            values += nentries;
+            entry = entries[e];
+
+            hypre_CopyBox(box, to_box);
+
+            offset = shape[entry];
+            hypre_BoxIMinX(to_box) += hypre_IndexX(offset);
+            hypre_BoxIMinY(to_box) += hypre_IndexY(offset);
+            hypre_BoxIMinZ(to_box) += hypre_IndexZ(offset);
+            hypre_BoxIMaxX(to_box) += hypre_IndexX(offset);
+            hypre_BoxIMaxY(to_box) += hypre_IndexY(offset);
+            hypre_BoxIMaxZ(to_box) += hypre_IndexZ(offset);
+
+            map = hypre_SStructGridMap(grid, part, vars[entry]);
+            hypre_BoxMapIntersect(map, hypre_BoxIMin(to_box),
+                                  hypre_BoxIMax(to_box),
+                                  &map_to_entries, &nmap_to_entries );
+         
+            for (jj = 0; jj < nmap_to_entries; jj++)
+            {
+               hypre_SStructMapEntryGetStrides(map_to_entries[jj], cs);
+
+               hypre_BoxMapEntryGetExtents(map_to_entries[jj],
+                                           hypre_BoxIMin(map_box),
+                                           hypre_BoxIMax(map_box));
+               hypre_IntersectBoxes(to_box, map_box, int_box);
+
+               hypre_CopyIndex(hypre_BoxIMin(int_box), index);
+               hypre_SStructMapEntryGetGlobalRank(map_to_entries[jj],
+                                                  index, &col_base);
+               hypre_IndexX(index) -= hypre_IndexX(offset);
+               hypre_IndexY(index) -= hypre_IndexY(offset);
+               hypre_IndexZ(index) -= hypre_IndexZ(offset);
+               hypre_SStructMapEntryGetGlobalRank(map_entries[ii],
+                                                  index, &row_base);
+               val_base = (hypre_IndexX(index) +
+                           hypre_IndexY(index)*sy +
+                           hypre_IndexZ(index)*sz) * e;
+
+               for (k = 0; k < hypre_BoxSizeZ(int_box); k++)
+               {
+                  for (j = 0; j < hypre_BoxSizeY(int_box); j++)
+                  {
+                     for (i = 0; i < hypre_BoxSizeX(int_box); i++)
+                     {
+                        rows[nrows] = row_base + i*rs[0] + j*rs[1] + k*rs[2];
+                        cols[nrows] = col_base + i*cs[0] + j*cs[1] + k*cs[2];
+                        ijvalues[nrows] =
+                           values[val_base + (i + j*sy + k*sz)*e];
+                        nrows++;
+                     }
+                  }
+               }
+            }
+
+            hypre_TFree(map_to_entries);
+         }
+
+         /*------------------------------------------
+          * set IJ values one stencil entry at a time
+          *------------------------------------------*/
+
+         if (add_to)
+         {
+            ierr = HYPRE_IJMatrixAddToValues(ijmatrix, nrows, ncols,
+                                             (const int *) rows,
+                                             (const int *) cols,
+                                             (const double *) ijvalues);
+         }
+         else
+         {
+            ierr = HYPRE_IJMatrixSetValues(ijmatrix, nrows, ncols,
+                                           (const int *) rows,
+                                           (const int *) cols,
+                                           (const double *) ijvalues);
+         }
+      }
+
+      hypre_TFree(map_entries);
+
+      hypre_TFree(ncols);
+      hypre_TFree(rows);
+      hypre_TFree(cols);
+      hypre_TFree(ijvalues);
+
+      hypre_BoxDestroy(to_box);
+      hypre_BoxDestroy(map_box);
+      hypre_BoxDestroy(int_box);
+   }
+
+   /*------------------------------------------
+    * non-stencil entries
+    *------------------------------------------*/
+
+   else
+   {
+      hypre_CopyIndex(ilower, hypre_BoxIMin(box));
+      hypre_CopyIndex(iupper, hypre_BoxIMax(box));
+
+      for (k = hypre_BoxIMinZ(box); k <= hypre_BoxIMaxZ(box); k++)
+      {
+         for (j = hypre_BoxIMinY(box); j <= hypre_BoxIMaxY(box); j++)
+         {
+            for (i = hypre_BoxIMinX(box); i <= hypre_BoxIMaxX(box); i++)
+            {
+               hypre_SetIndex(index, i, j, k);
+               ierr += hypre_SStructUMatrixSetValues(matrix, part, index, var,
+                                                     nentries, entries, values,
+                                                     add_to);
+               values += nentries;
+            }
          }
       }
    }
