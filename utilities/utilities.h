@@ -134,7 +134,7 @@ extern "C" {
  * Types, etc.
  *--------------------------------------------------------------------------*/
 
-typedef struct {int dummy;}  hypre_MPI_Comm;
+/* typedef struct {int dummy;}  hypre_MPI_Comm;*/
 
 typedef struct { int MPI_SOURCE; } hypre_MPI_Status;
 typedef int  hypre_MPI_Request;
