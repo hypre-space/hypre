@@ -43,7 +43,7 @@ LFLAGS =\
 
 HEADERS =\
  HYPRE_mv.h\
- mv.h\
+ seq_matrix_vector.h\
  csr_matrix.h\
  headers.h\
  mapped_matrix.h\
