@@ -138,6 +138,7 @@ hypre_BoomerAMGCreate()
    hypre_BoomerAMGSetTruncFactor(amg_data, trunc_factor);
    hypre_BoomerAMGSetInterpType(amg_data, interp_type);
    hypre_BoomerAMGSetMeasureType(amg_data, measure_type);
+   hypre_BoomerAMGSetCoarsenType(amg_data, coarsen_type);
    hypre_BoomerAMGSetSetupType(amg_data, setup_type);
    hypre_BoomerAMGSetNumFunctions(amg_data, num_functions);
    hypre_BoomerAMGSetVariant(amg_data, variant);
