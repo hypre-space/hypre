@@ -1153,7 +1153,7 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
 }
 
 /*==========================================================================*/
-/* Ruge's coarsening algorithm 
+ * Ruge's coarsening algorithm 
 /*==========================================================================*/
 
 #define CPOINT 1
