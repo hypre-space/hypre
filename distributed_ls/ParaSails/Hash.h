@@ -34,7 +34,7 @@ Hash *HashCreate(int size);
 void  HashDestroy(Hash *h);
 int   HashLookup(Hash *h, int key);
 void  HashInsert(Hash *h, int key, int data);
-void  HashRehash(Hash *old, Hash *new);
+void  HashRehash(Hash *old, Hash *);
 void  HashReset(Hash *h);
 void  HashPrint(Hash *h);
 
