@@ -221,19 +221,16 @@ then
 	then
 	    mkdir UPDATE_OLD
 	    chmod $HYPRE_INSTALL_PERMISSIONS UPDATE_OLD
-	    for i in [!U]*
+	    for i in [!UV]* VER*
 	    do
 		mv $i UPDATE_OLD
 	    done
-	    OLD=`cat VERSION_NAME`
-	    mv UPDATE_OLD $OLD
-
-	    # don't keep an old copy if the new version is "the same"
-	    NEW=`cat UPDATE/VERSION_NAME`
-	    if [ "$NEW" = "$OLD" ]
+	    OLD=`cat UPDATE_OLD/VERSION_NAME`
+	    if [ -d "$OLD" ]
 	    then
 		rm -fr $OLD
 	    fi
+	    mv UPDATE_OLD $OLD
 	fi
 
 	# move the updated version into the install directory
@@ -243,11 +240,7 @@ then
 
 	# keep some number of old copies of the library
 	echo "removing old installations ..."
-	NUM_COPIES=1
-	if [ "$HYPRE_INSTALL_TYPE" = "external" ]
-	then
-	    NUM_COPIES=3
-	fi
+	NUM_COPIES=3
 	# note: `*' will expand alphabetically in the Bourne shell
 	set - V[0-9]*
 	COUNT=`expr $# - $NUM_COPIES`
