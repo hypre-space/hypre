@@ -782,7 +782,7 @@ main( int   argc,
    time_index = hypre_InitializeTiming("Spatial operator");
    hypre_BeginTiming(time_index);
 
-   if (build_matrix_type < 2)
+   if (build_matrix_type < 0)
    {
      ierr += HYPRE_IJMatrixGetObject( ij_A, &object);
      parcsr_A = (HYPRE_ParCSRMatrix) object;
