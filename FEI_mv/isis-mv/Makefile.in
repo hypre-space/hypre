@@ -24,27 +24,25 @@ CXXFLAGS = \
   -I../fei-isis
 
 
-#Headers
-HEADERS =		\
-  CommInfo.h		\
-  GlobalIDArray.h	\
-  IntArray.h		\
-  Map.h			\
-  Matrix.h		\
-  RealArray.h		\
-  Vector.h		\
-  mpiuni.h 
-
+HEADERS =\
+ CommInfo.h\
+ GlobalIDArray.h\
+ IntArray.h\
+ Map.h\
+ Matrix.\
+ RealArray.h\
+ Vector.h\
+ mpiuni.h
  
-HYPREFILES =		\
-  CommInfo.cc		\
-  GlobalIDArray.cc	\
-  IntArray.cc		\
-  Map.cc		\
-  Matrix.cc		\
-  RealArray.cc		\
-  Vector.cc		\
-  mpiuni.c 
+HYPREFILES =\
+ CommInfo.cc\
+ GlobalIDArray.cc\
+ IntArray.cc\
+ Map.cc\
+ Matrix.cc\
+ RealArray.cc\
+ Vector.cc\
+ mpiuni.c
 
 LOCALFILES =
 

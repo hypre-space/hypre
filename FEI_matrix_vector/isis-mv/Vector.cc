@@ -29,7 +29,7 @@
 #undef NDEBUG             // make sure asserts are enabled
 #include <assert.h>
 #include <math.h>         // needed for definition of sqrt
-#include <unistd.h>
+//#include <unistd.h>
 #include <stdlib.h>
 #include <iostream.h>
 #include <string.h>
