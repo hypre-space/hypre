@@ -183,6 +183,21 @@ usage () {
 }
 
 #=============================================================================
+# Function for filtering misleading error messages
+#=============================================================================
+
+apply_error_filters () {
+  ErrorFile=$1
+  if [ "$HYPRE_ARCH" = "blue" ] ; then
+    if (egrep -v "=== End of Compilation|Compilation successful" $ErrorFile >/dev/null)
+    then                          # cleanup the problem with the xlf compiler
+      mv $ErrorFile $ErrorFile.orig
+      egrep -v "=== End of Compilation|Compilation successful" $ErrorFile.orig > $ErrorFile
+    fi
+  fi
+}
+
+#=============================================================================
 # Function for mailing error messages
 #=============================================================================
 
@@ -229,6 +244,7 @@ mail_summary () {
         if [ -r "${i}" ] ; then
           CTOTCNT=`expr $CTOTCNT + 1`
           EFILE=`echo $i|sed -e 's/log$//'`err
+          apply_error_filters ${EFILE}
           if [ -s "${EFILE}" ] ; then
             AutotestFailureCount=`expr $AutotestFailureCount + 1`
             CERRCNT=`expr $CERRCNT + 1`
