@@ -1028,6 +1028,12 @@ typedef struct hypre_StructGrid_struct
 
    int                  ref_count;
 
+ /* GEC0902 additions for ghost expansion of boxes */
+
+   int                 ghlocal_size;   /* Number of vars in box including ghosts */
+   int                 num_ghost[6];   /* ghost layer size for each box  */  
+
+
 } hypre_StructGrid;
 
 /*--------------------------------------------------------------------------
@@ -1045,6 +1051,8 @@ typedef struct hypre_StructGrid_struct
 #define hypre_StructGridGlobalSize(grid)    ((grid) -> global_size)
 #define hypre_StructGridPeriodic(grid)      ((grid) -> periodic)
 #define hypre_StructGridRefCount(grid)      ((grid) -> ref_count)
+#define hypre_StructGridGhlocalSize(grid)   ((grid) -> ghlocal_size)
+#define hypre_StructGridNumGhost(grid)      ((grid) -> num_ghost)
 
 #define hypre_StructGridBox(grid, i) \
 (hypre_BoxArrayBox(hypre_StructGridBoxes(grid), i))
@@ -1451,6 +1459,8 @@ typedef struct hypre_StructVector_struct
 
    int                   ref_count;
 
+   
+
 } hypre_StructVector;
 
 /*--------------------------------------------------------------------------
@@ -1509,6 +1519,7 @@ int hypre_DeleteBox( hypre_BoxArray *box_array , int index );
 int hypre_AppendBoxArray( hypre_BoxArray *box_array_0 , hypre_BoxArray *box_array_1 );
 int hypre_BoxGetSize( hypre_Box *box , hypre_Index size );
 int hypre_BoxGetStrideSize( hypre_Box *box , hypre_Index stride , hypre_Index size );
+int hypre_BoxExpand(hypre_Box *box, int *numexp);
 
 /* box_neighbors.c */
 int hypre_RankLinkCreate( int rank , hypre_RankLink **rank_link_ptr );
@@ -1562,6 +1573,7 @@ int HYPRE_StructGridDestroy( HYPRE_StructGrid grid );
 int HYPRE_StructGridSetExtents( HYPRE_StructGrid grid , int *ilower , int *iupper );
 int HYPRE_StructGridSetPeriodic( HYPRE_StructGrid grid , int *periodic );
 int HYPRE_StructGridAssemble( HYPRE_StructGrid grid );
+int HYPRE_StructGridSetNumGhost(HYPRE_StructGrid grid, int *num_ghost);
 
 /* HYPRE_struct_matrix.c */
 int HYPRE_StructMatrixCreate( MPI_Comm comm , HYPRE_StructGrid grid , HYPRE_StructStencil stencil , HYPRE_StructMatrix *matrix );
@@ -1625,6 +1637,7 @@ int hypre_GatherAllBoxes( MPI_Comm comm , hypre_BoxArray *boxes , hypre_BoxArray
 int hypre_StructGridPrint( FILE *file , hypre_StructGrid *grid );
 int hypre_StructGridRead( MPI_Comm comm , FILE *file , hypre_StructGrid **grid_ptr );
 int hypre_StructGridPeriodicAllBoxes( hypre_StructGrid *grid , hypre_BoxArray **all_boxes_ptr , int **all_procs_ptr , int *first_local_ptr , int *num_periodic_ptr );
+int hypre_StructGridSetNumGhost( hypre_StructGrid *grid , int *num_ghost );
 
 /* struct_innerprod.c */
 double hypre_StructInnerProd( hypre_StructVector *x , hypre_StructVector *y );
