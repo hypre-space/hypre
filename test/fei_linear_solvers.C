@@ -217,29 +217,19 @@ int main( int   argc, char *argv[] )
     * Solve the system using PCG 
     *-----------------------------------------------------------*/
 
-   if (solver_id == 0 || solver_id == 1 || solver_id == 2)
+   if ( solver_id == 0 ) 
    {
       strcpy(paramString, "solver cg");
       H.parameters(1, &paramString);
-   }
-   if (solver_id == 3 || solver_id == 4 || solver_id == 5)
-   {
-      strcpy(paramString, "solver gmres");
-      H.parameters(1, &paramString);
-      sprintf(paramString, "gmresDim %d", k_dim);
-      H.parameters(1, &paramString);
-   }
-
-   if (solver_id == 0 || solver_id == 3)
-   {
-      if (myid == 0 && solver_id == 0) printf("Solver: DS-PCG\n");
-      if (myid == 0 && solver_id == 3) printf("Solver: DS-GMRES\n");
+      if (myid == 0) printf("Solver: DS-PCG\n");
 
       strcpy(paramString, "preconditioner diagonal");
       H.parameters(1, &paramString);
-   }
-   else if (solver_id == 1) 
+   } 
+   else if ( solver_id == 1 )
    {
+      strcpy(paramString, "solver cg");
+      H.parameters(1, &paramString);
       if (myid == 0) printf("Solver: ParaSails-PCG\n");
 
       strcpy(paramString, "preconditioner parasails");
@@ -249,21 +239,11 @@ int main( int   argc, char *argv[] )
       strcpy(paramString, "parasailsThreshold 0.1");
       H.parameters(1, &paramString);
    }
-   else if (solver_id == 4) 
+   else if ( solver_id == 2 )
    {
-      if (myid == 0) printf("Solver: PILUT-GMRES\n");
-
-      strcpy(paramString, "preconditioner pilut");
+      strcpy(paramString, "solver cg");
       H.parameters(1, &paramString);
-      strcpy(paramString, "pilutRowSize 0");
-      H.parameters(1, &paramString);
-      strcpy(paramString, "pilutDropTol 0.0");
-      H.parameters(1, &paramString);
-   }
-   else if (solver_id == 2 || solver_id == 5)
-   {
-      if (myid == 0 && solver_id == 2) printf("Solver: AMG-PCG\n");
-      if (myid == 0 && solver_id == 5) printf("Solver: AMG-GMRES\n");
+      if (myid == 0) printf("Solver: AMG-PCG\n");
 
       strcpy(paramString, "preconditioner boomeramg");
       H.parameters(1, &paramString);
@@ -278,7 +258,93 @@ int main( int   argc, char *argv[] )
       sprintf(paramString, "amgRelaxWeight %e", relax_weight);
       H.parameters(1, &paramString);
    }
-   
+   else if ( solver_id == 3 )
+   {
+      strcpy(paramString, "solver cg");
+      H.parameters(1, &paramString);
+      if (myid == 0) printf("Solver: Poly-PCG\n");
+
+      strcpy(paramString, "preconditioner poly");
+      H.parameters(1, &paramString);
+      strcpy(paramString, "polyOrder 9");
+      H.parameters(1, &paramString);
+   }
+   else if ( solver_id == 4 )
+   {
+      strcpy(paramString, "solver gmres");
+      H.parameters(1, &paramString);
+      sprintf(paramString, "gmresDim %d", k_dim);
+      H.parameters(1, &paramString);
+      if (myid == 0) printf("Solver: DS-GMRES\n");
+
+      strcpy(paramString, "preconditioner diagonal");
+      H.parameters(1, &paramString);
+   }
+   else if ( solver_id == 5 ) 
+   {
+      strcpy(paramString, "solver gmres");
+      H.parameters(1, &paramString);
+      sprintf(paramString, "gmresDim %d", k_dim);
+      H.parameters(1, &paramString);
+      if (myid == 0) printf("Solver: PILUT-GMRES\n");
+
+      strcpy(paramString, "preconditioner pilut");
+      H.parameters(1, &paramString);
+      strcpy(paramString, "pilutRowSize 0");
+      H.parameters(1, &paramString);
+      strcpy(paramString, "pilutDropTol 0.0");
+      H.parameters(1, &paramString);
+   }
+   else if ( solver_id == 6 )
+   {
+      strcpy(paramString, "solver gmres");
+      H.parameters(1, &paramString);
+      sprintf(paramString, "gmresDim %d", k_dim);
+      H.parameters(1, &paramString);
+      if (myid == 0) printf("Solver: AMG-GMRES\n");
+
+      strcpy(paramString, "preconditioner boomeramg");
+      H.parameters(1, &paramString);
+      strcpy(paramString, "amgCoarsenType falgout");
+      H.parameters(1, &paramString);
+      sprintf(paramString, "amgStrongThreshold %e", strong_threshold);
+      H.parameters(1, &paramString);
+      sprintf(paramString, "amgNumSweeps %d", num_grid_sweeps);
+      H.parameters(1, &paramString);
+      strcpy(paramString, "amgRelaxType jacobi");
+      H.parameters(1, &paramString);
+      sprintf(paramString, "amgRelaxWeight %e", relax_weight);
+      H.parameters(1, &paramString);
+   }
+   else if ( solver_id == 7 )
+   {
+      strcpy(paramString, "solver gmres");
+      H.parameters(1, &paramString);
+      sprintf(paramString, "gmresDim %d", k_dim);
+      H.parameters(1, &paramString);
+      if (myid == 0) printf("Solver: DDILUT-GMRES\n");
+
+      strcpy(paramString, "preconditioner ddilut");
+      H.parameters(1, &paramString);
+      strcpy(paramString, "ddilutFillin 5.0");
+      H.parameters(1, &paramString);
+      strcpy(paramString, "ddilutDropTol 0.0");
+      H.parameters(1, &paramString);
+   }
+   else if ( solver_id == 8 )
+   {
+      strcpy(paramString, "solver gmres");
+      H.parameters(1, &paramString);
+      sprintf(paramString, "gmresDim %d", k_dim);
+      H.parameters(1, &paramString);
+      if (myid == 0) printf("Solver: POLY-GMRES\n");
+
+      strcpy(paramString, "preconditioner poly");
+      H.parameters(1, &paramString);
+      strcpy(paramString, "polyOrder 5");
+      H.parameters(1, &paramString);
+   }
+ 
    strcpy(paramString, "Krylov Solve");
    time_index = hypre_InitializeTiming(paramString);
    hypre_BeginTiming(time_index);
@@ -338,9 +404,9 @@ BuildParLaplacian27pt( int                  argc,
     * Set defaults
     *-----------------------------------------------------------*/
  
-   nx = 10;
-   ny = 10;
-   nz = 10;
+   nx = 20;
+   ny = 20;
+   nz = 20;
 
    P  = 1;
    Q  = num_procs;

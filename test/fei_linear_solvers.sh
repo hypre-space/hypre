@@ -42,15 +42,15 @@ $MPIRUN -np 1 $DRIVER -solver 2
 tail -21 $DRIVER.log > $DRIVER.testdata.tmp0
 head $DRIVER.testdata.tmp0 > $DRIVER.testdata
 
-$MPIRUN -np 1 $DRIVER -solver 3 
-tail -21 $DRIVER.log > $DRIVER.testdata.tmp0
-head $DRIVER.testdata.tmp0 > $DRIVER.testdata
-
 $MPIRUN -np 1 $DRIVER -solver 4 
 tail -21 $DRIVER.log > $DRIVER.testdata.tmp0
 head $DRIVER.testdata.tmp0 > $DRIVER.testdata
 
 $MPIRUN -np 1 $DRIVER -solver 5 
+tail -21 $DRIVER.log > $DRIVER.testdata.tmp0
+head $DRIVER.testdata.tmp0 > $DRIVER.testdata
+
+$MPIRUN -np 1 $DRIVER -solver 6 
 tail -21 $DRIVER.log > $DRIVER.testdata.tmp0
 head $DRIVER.testdata.tmp0 > $DRIVER.testdata
 
