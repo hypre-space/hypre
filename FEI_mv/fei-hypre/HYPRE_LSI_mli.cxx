@@ -1103,7 +1103,7 @@ int HYPRE_LSI_MLISetSFEI(HYPRE_Solver solver, void *object)
 /* (The nodal coordinates loaded in here conforms to the nodal labeling in  */
 /* FEI, so the lookup object can be used to find the equation number.       */
 /* In addition, node numbers and coordinates need to be shuffled between    */
-/* processors)
+/* processors)                                                              */
 /*--------------------------------------------------------------------------*/
 
 /*
