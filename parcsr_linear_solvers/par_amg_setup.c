@@ -113,18 +113,18 @@ hypre_ParAMGSetup( void               *amg_vdata,
       if (coarsen_type == 6)
       {
 	 hypre_ParAMGCoarsenFalgout(A_array[level], strong_threshold,
-                          debug_flag, &S, &CF_marker, &coarse_size); 
+                                    debug_flag, &S, &CF_marker, &coarse_size); 
       }
       else if (coarsen_type)
       {
 	 hypre_ParAMGCoarsenRuge(A_array[level], strong_threshold,
-                          measure_type, coarsen_type, debug_flag,
-			  &S, &CF_marker, &coarse_size); 
+                                 measure_type, coarsen_type, debug_flag,
+                                 &S, &CF_marker, &coarse_size); 
       }
       else
       {
 	 hypre_ParAMGCoarsen(A_array[level], strong_threshold,
-                          &S, &CF_marker, &coarse_size); 
+                             debug_flag, &S, &CF_marker, &coarse_size); 
       }
       if (debug_flag==1)
       {
