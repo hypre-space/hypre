@@ -140,7 +140,10 @@ public :
                               const int* const *nGlobalIDLists,
                               int spaceDim, const double* const *coord);
 
-   int initSharedNodes(int nNodes, int *nGlobalIDs, const int *numProcs,
+   int initElemNodeList(int eGlobalIDs, int nNodesPerElem, const int *nGlobalIDs,
+                        int spaceDim, const double *coord);
+
+   int initSharedNodes(int nNodes, const int *nGlobalIDs, const int *numProcs,
                        const int * const *procLists);
 
    int initElemBlockFaceLists(int nElems, int nFaces,
@@ -187,9 +190,7 @@ public :
    // These functions allows elements to be loaded individually.
    // -------------------------------------------------------------------------
 
-   int loadElemMatrix(int eGlobalID, int nNodesPerElem, 
-                      const int *nGlobalIDs, int sMatDim, 
-                      const double *stiffMat);
+   int loadElemMatrix(int eGlobalID, int sMatDim, const double *stiffMat);
 
    int loadElemNullSpace(int eGlobalID, int nNSpace, int sMatDim, 
                          const double *nSpace);

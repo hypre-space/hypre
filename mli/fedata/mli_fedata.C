@@ -217,10 +217,14 @@ int MLI_FEData::initElemBlock(int nElems, int nNodesPerElem,
    currBlock = elemBlockList_[currentElemBlock_];
 
    // -------------------------------------------------------------
-   // --- store information on number of elements in this block
+   // --- allocate space for element IDs and node lists
    // -------------------------------------------------------------
 
    currBlock->numLocalElems_ = nElems;
+   currBlock->elemGlobalIDs_ = new int[nElems];
+   for ( i = 0; i < nElems; i++ ) currBlock->elemGlobalIDs_[i] = -1;
+   currBlock->elemNodeIDList_ = new int*[nElems];
+   for ( i = 0; i < nElems; i++ ) currBlock->elemNodeIDList_[i] = NULL;
 
    // -------------------------------------------------------------
    // --- store number of nodes per element information
@@ -265,7 +269,7 @@ int MLI_FEData::initElemBlockNodeLists(int nElems,
                         const int* const *nGlobalIDLists,
                         int spaceDim, const double* const *coord)
 {
-   int           i, j, length, index, *intArray;
+   int           i, j, length, *intArray;
    MLI_ElemBlock *currBlock;
 
    // -------------------------------------------------------------
@@ -306,57 +310,27 @@ int MLI_FEData::initElemBlockNodeLists(int nElems,
    cout << "initElemBlockNodeLists Diagnostics : passed the segFault test.\n";
 #endif
 
-
    // -------------------------------------------------------------
    // --- allocate storage and load for storing element global IDs
    // -------------------------------------------------------------
 
-   if ( currBlock->elemGlobalIDs_ != NULL )
+   if ( currBlock->elemGlobalIDs_ == NULL )
    {
-      cout << "initElemBlockNodeLists WARNING : globalIDs should not have ";
-      cout << "been allocated.\n";
+      cout << "initElemBlockNodeLists ERROR : have not called initElemBlock.";
+      exit(1);
    }
-   currBlock->elemGlobalIDs_ = new int[nElems];
    for (i = 0; i < nElems; i++) currBlock->elemGlobalIDs_[i] = eGlobalIDs[i];
-
-   // -------------------------------------------------------------
-   // --- sort elemGlobalIDs in increasing order
-   // -------------------------------------------------------------
-
-   currBlock->elemGlobalIDAux_ = new int[nElems];
-   for ( i = 0; i < nElems; i++ ) currBlock->elemGlobalIDAux_[i] = i;
-   intQSort2(currBlock->elemGlobalIDs_,currBlock->elemGlobalIDAux_,0,nElems-1);
-
-   // -------------------------------------------------------------
-   // --- error checking (for duplicate element IDs)
-   // -------------------------------------------------------------
-
-   for ( i = 1; i < nElems; i++ ) 
-   { 
-      if ( currBlock->elemGlobalIDs_[i] < 0 )
-      {
-         cout << "initElemBlockNodeLists ERROR : element ID < 0.\n";
-         exit(1);
-      }
-      if ( currBlock->elemGlobalIDs_[i] == currBlock->elemGlobalIDs_[i-1] )
-      {
-         cout << "initElemBlockNodeLists ERROR : duplicate elemIDs.\n";
-         exit(1);
-      }
-   }
 
    // -------------------------------------------------------------
    // --- allocate storage and load for element node connectivities 
    // -------------------------------------------------------------
 
-   currBlock->elemNodeIDList_ = new int*[nElems];
    for ( i = 0; i < nElems; i++ ) 
    {
       currBlock->elemNodeIDList_[i] = new int[nNodesPerElem];
-      index = currBlock->elemGlobalIDAux_[i];
       intArray = currBlock->elemNodeIDList_[i];
       for ( j = 0; j < nNodesPerElem; j++ ) 
-         intArray[j] = nGlobalIDLists[index][j]; 
+         intArray[j] = nGlobalIDLists[i][j]; 
    }   
    if ( coord == NULL ) return 1;
 
@@ -370,11 +344,79 @@ int MLI_FEData::initElemBlockNodeLists(int nElems,
    for ( i = 0; i < nElems; i++ ) 
    {
       for ( j = 0; j < length; j++ ) 
-      {
-         index = currBlock->elemGlobalIDAux_[i];
-         currBlock->nodeCoordinates_[i*length+j] = coord[index][j];
-      }
+         currBlock->nodeCoordinates_[i*length+j] = coord[i][j];
    }
+   return 1;
+}
+
+//*************************************************************************
+// initialize the element connectivities
+//-------------------------------------------------------------------------
+
+int MLI_FEData::initElemNodeList( int eGlobalID, int nNodesPerElem,
+                                  const int* nGlobalIDs, int spaceDim, 
+                                  const double *coord)
+{
+   int           i, j, length, index, *intArray, nElems;
+   MLI_ElemBlock *currBlock;
+
+   // -------------------------------------------------------------
+   // --- initial checking
+   // -------------------------------------------------------------
+
+   currBlock = elemBlockList_[currentElemBlock_];
+   if ( nNodesPerElem != currBlock->elemNumNodes_ )
+   {
+      cout << "initElemNodeList ERROR : nNodesPerElem invalid.\n";
+      exit(1);
+   }
+   if ( spaceDimension_ != spaceDim && coord != NULL )
+   {
+      cout << "initElemNodeList ERROR : spaceDim invalid.\n";
+      exit(1);
+   }
+
+#ifdef MLI_DEBUG_DETAILED
+   cout << "initElemNodeList Diagnostics: segFault test.\n";
+   double ddata;
+   for (i = 0; i < nNodesPerElem; i++) index = nGlobalIDs[i];
+   if ( coord != NULL )
+      for (i = 0; i < nNodesPerElem*spaceDim; i++) ddata = coord[i];
+   cout << "initElemNodeList Diagnostics : passed the segFault test.\n";
+#endif
+
+   // -------------------------------------------------------------
+   // --- allocate storage and load for storing element global IDs
+   // -------------------------------------------------------------
+
+   if ( currBlock->elemGlobalIDs_ == NULL )
+   {
+      cout << "initElemNodeList ERROR : have not called initElemBlock.";
+      exit(1);
+   }
+   index = currBlock->elemOffset_++;
+   currBlock->elemGlobalIDs_[index] = eGlobalID;
+
+   // -------------------------------------------------------------
+   // --- allocate storage and load for element node connectivities 
+   // -------------------------------------------------------------
+
+   currBlock->elemNodeIDList_[index] = new int[nNodesPerElem];
+   intArray = currBlock->elemNodeIDList_[index];
+   for ( j = 0; j < nNodesPerElem; j++ ) intArray[j] = nGlobalIDs[j]; 
+   if ( coord == NULL ) return 1;
+
+   // -------------------------------------------------------------
+   // --- temporarily store away nodal coordinates
+   // -------------------------------------------------------------
+
+   nElems = currBlock->numLocalElems_;
+   length = nNodesPerElem * spaceDimension_ * nElems;
+   if ( currBlock->nodeCoordinates_ == NULL )
+      currBlock->nodeCoordinates_ =  new double[length];
+   length = nNodesPerElem * spaceDimension_;
+   for ( i = 0; i < length; i++ ) 
+      currBlock->nodeCoordinates_[index*length+i] = coord[i];
    return 1;
 }
 
@@ -382,7 +424,7 @@ int MLI_FEData::initElemBlockNodeLists(int nElems,
 // initialize shared node list 
 //-------------------------------------------------------------------------
 
-int MLI_FEData::initSharedNodes(int nNodes, int *nGlobalIDs, 
+int MLI_FEData::initSharedNodes(int nNodes, const int *nGlobalIDs, 
                     const int *numProcs, const int * const *procLists)
 {
    int           i, j, length, index, *intArray;
@@ -666,6 +708,7 @@ int MLI_FEData::initComplete()
    int           **elemFaceList, *procArray2, *ownerP, *sndrcvReg, nProcs;
    int           nRecv, nSend, *recvProcs, *sendProcs, *recvLengs, *sendLengs;
    int           nNodes, pnum, **sendBuf, **recvBuf, *iauxArray, index2; 
+   int           *intArray, **intArray2, nNodesPerElem, length;
    double        *dtemp_array, *nodeCoords; 
    MPI_Request   *request;
    MPI_Status    status;
@@ -707,6 +750,65 @@ int MLI_FEData::initComplete()
             exit(1);
          }
       }
+   }
+
+   // -------------------------------------------------------------
+   // --- sort elemGlobalIDs in increasing order and shuffle
+   // -------------------------------------------------------------
+
+   currBlock->elemGlobalIDAux_ = new int[nElems];
+   for ( i = 0; i < nElems; i++ ) currBlock->elemGlobalIDAux_[i] = i;
+   intQSort2(currBlock->elemGlobalIDs_,currBlock->elemGlobalIDAux_,0,nElems-1);
+
+   // -------------------------------------------------------------
+   // --- error checking (for duplicate element IDs)
+   // -------------------------------------------------------------
+
+   for ( i = 1; i < nElems; i++ ) 
+   { 
+      if ( currBlock->elemGlobalIDs_[i] < 0 )
+      {
+         cout << "initComplete ERROR : element ID < 0.\n";
+         exit(1);
+      }
+      if ( currBlock->elemGlobalIDs_[i] == currBlock->elemGlobalIDs_[i-1] )
+      {
+         cout << "initComplete ERROR : duplicate elemIDs.\n";
+         exit(1);
+      }
+   }
+
+   // -------------------------------------------------------------
+   // --- allocate storage and load for element node connectivities 
+   // -------------------------------------------------------------
+
+   nNodesPerElem = currBlock->elemNumNodes_;
+   intArray2 = new int*[nElems];
+   for ( i = 0; i < nElems; i++ ) intArray2[i] = new int[nNodesPerElem];
+   for ( i = 0; i < nElems; i++ ) 
+   {
+      index = currBlock->elemGlobalIDAux_[i];
+      intArray = currBlock->elemNodeIDList_[index];
+      for ( j = 0; j < nNodesPerElem; j++ ) intArray2[i][j] = intArray[j]; 
+   }   
+   for ( i = 0; i < nElems; i++ ) delete [] currBlock->elemNodeIDList_[i];
+   delete [] currBlock->elemNodeIDList_;
+   currBlock->elemNodeIDList_ = intArray2;
+   length = nNodesPerElem * spaceDimension_;
+   if ( currBlock->nodeCoordinates_ != NULL )
+   {
+      nodeCoords = new double[length];
+      for ( i = 0; i < nElems; i++ ) 
+      {
+         for ( j = 0; j < length; j++ ) 
+         {
+            index = currBlock->elemGlobalIDAux_[i];
+            nodeCoords[i*length+j] =
+               currBlock->nodeCoordinates_[index*length+j];
+         }
+      }
+      delete [] currBlock->nodeCoordinates_;
+      currBlock->nodeCoordinates_ = nodeCoords;
    }
 
    // -------------------------------------------------------------
@@ -800,6 +902,9 @@ int MLI_FEData::initComplete()
 
    MPI_Comm_size( mpiComm_, &nProcs );
 
+   ownerP = NULL;
+   iauxArray = NULL;
+   sndrcvReg = NULL;
    if ( nExtNodes > 0 ) ownerP = new int[nExtNodes];
    if ( nExtNodes > 0 ) iauxArray = new int[nExtNodes];
    if ( numSharedNodes > 0 ) sndrcvReg = new int[numSharedNodes];
@@ -825,7 +930,7 @@ int MLI_FEData::initComplete()
    recvLengs = NULL;
    recvBuf   = NULL;
    intQSort2( iauxArray, NULL, 0, nExtNodes-1);
-   nRecv = 1;
+   if ( nExtNodes > 0 ) nRecv = 1;
    for ( i = 1; i < nExtNodes; i++ )
       if (iauxArray[i] != iauxArray[i-1]) iauxArray[nRecv++] = iauxArray[i];
    if ( nRecv > 0 )
@@ -927,8 +1032,6 @@ int MLI_FEData::initComplete()
    }
    if ( nExtNodes > 0 ) delete [] ownerP;
    if ( numSharedNodes > 0 ) delete [] sndrcvReg;
-   delete [] ownerP;
-   delete [] sndrcvReg;
    delete [] recvLengs;
    delete [] recvProcs;
    for ( i = 0; i < nRecv; i++ ) delete [] recvBuf[i];
@@ -937,7 +1040,7 @@ int MLI_FEData::initComplete()
    delete [] sendProcs;
    for ( i = 0; i < nSend; i++ ) delete [] sendBuf[i];
    delete [] sendBuf;
-   delete [] request;
+   if ( nRecv > 0 ) delete [] request;
 
    // -------------------------------------------------------------
    // --- now that the node list if finalized, shuffle the coordinates
@@ -1560,8 +1663,7 @@ int MLI_FEData::loadElemBCs(int nElems, const int *eGlobalIDs,
 // load element node list and stiffness matrix 
 //-------------------------------------------------------------------------
 
-int MLI_FEData::loadElemMatrix(int eGlobalID, int nNodesPerElem,
-                               const int *nGlobalIDs, int eMatDim, 
+int MLI_FEData::loadElemMatrix(int eGlobalID, int eMatDim, 
                                const double *elemMat)
 {
    int           i, j, index;
