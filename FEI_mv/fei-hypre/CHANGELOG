@@ -147,5 +147,11 @@
             - fix a bug with fgmres variable preconditioning
             - change normal equation to construct it in launch stage
             - put null detection in gmres
+01/08/03    2.5.0R2
+            - take out strings.h include file from fei-hypre and femli
+            - move HYPRE_LSI_Uzawa.h to HYPRE_LSI_Uzawa_c.h to avoid
+              compile problems on Microsoft windows.
+            - fix SGS problem with relaxation parameter
+            - add diagnostics (print rnorm) tool to SGS
 
 
