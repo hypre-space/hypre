@@ -153,7 +153,7 @@ int MLI_Utils_HypreMatrixFormJacobi(void *A, double alpha, void **J)
     * ----------------------------------------------------------------------*/
 
    HYPRE_IJMatrixGetObject(IJmat, (void **) &Jmat);
-   HYPRE_IJMatrixSetObjectType(IJmat, -16);
+   HYPRE_IJMatrixSetObjectType(IJmat, -1);
    HYPRE_IJMatrixDestroy(IJmat);
    hypre_MatvecCommPkgCreate((hypre_ParCSRMatrix *) Jmat);
    (*J) = (void *) Jmat;
@@ -509,7 +509,7 @@ int MLI_Utils_HypreMatrixCompress(void *Amat, int blksize, void **Amat2)
    assert( !ierr );
    HYPRE_IJMatrixGetObject(IJAmat2, (void **) &hypreA2);
    /*hypre_MatvecCommPkgCreate((hypre_ParCSRMatrix *) hypreA2);*/
-   HYPRE_IJMatrixSetObjectType( IJAmat2, -16 );
+   HYPRE_IJMatrixSetObjectType( IJAmat2, -1 );
    HYPRE_IJMatrixDestroy( IJAmat2 );
    if ( row_lengths != NULL ) free( row_lengths );
    (*Amat2) = (void *) hypreA2;
@@ -606,7 +606,7 @@ int MLI_Utils_HypreMatrixRead(char *filename, MPI_Comm mpi_comm, int blksize,
             printf("MLI_Utils_HypreMatrixRead ERROR : file not found.\n");
             exit(1);
          }
-         fscanf( fp, "%ld", &global_nrows );
+         fscanf( fp, "%d", &global_nrows );
          if ( global_nrows < 0 || global_nrows > 1000000000 )
          {
             printf("MLI_Utils_HypreMatrixRead ERROR : invalid nrows %d.\n",
@@ -625,11 +625,11 @@ int MLI_Utils_HypreMatrixRead(char *filename, MPI_Comm mpi_comm, int blksize,
          if (scale_flag) diag = (double *) malloc(sizeof(double)*global_nrows);
          for ( irow = 0; irow < start_row; irow++ )
          {
-            fscanf( fp, "%ld", &col_num );
+            fscanf( fp, "%d", &col_num );
             while ( col_num != -1 )
             {
                fscanf( fp, "%lg", &col_val );
-               fscanf( fp, "%ld", &col_num );
+               fscanf( fp, "%d", &col_num );
                if ( scale_flag && col_num == irow ) diag[irow] = col_val;
             } 
          } 
@@ -642,7 +642,7 @@ int MLI_Utils_HypreMatrixRead(char *filename, MPI_Comm mpi_comm, int blksize,
          mat_ia[0] = nnz;
          for ( irow = start_row; irow < start_row+local_nrows; irow++ )
          {
-            fscanf( fp, "%ld", &col_num );
+            fscanf( fp, "%d", &col_num );
             while ( col_num != -1 )
             {
                fscanf( fp, "%lg", &col_val );
@@ -664,17 +664,17 @@ int MLI_Utils_HypreMatrixRead(char *filename, MPI_Comm mpi_comm, int blksize,
                   free( temp_ja );
                   free( temp_aa );
                }
-               fscanf( fp, "%ld", &col_num );
+               fscanf( fp, "%d", &col_num );
             } 
             mat_ia[irow-start_row+1] = nnz;
          }
          for ( irow = start_row+local_nrows; irow < global_nrows; irow++ )
          {
-            fscanf( fp, "%ld", &col_num );
+            fscanf( fp, "%d", &col_num );
             while ( col_num != -1 )
             {
                fscanf( fp, "%lg", &col_val );
-               fscanf( fp, "%ld", &col_num );
+               fscanf( fp, "%d", &col_num );
                if ( scale_flag && col_num == irow ) diag[irow] = col_val;
             } 
          } 
@@ -720,7 +720,7 @@ int MLI_Utils_HypreMatrixRead(char *filename, MPI_Comm mpi_comm, int blksize,
    ierr = HYPRE_IJMatrixAssemble(IJmat);
    assert( !ierr );
    HYPRE_IJMatrixGetObject(IJmat, (void**) &hypreA);
-   HYPRE_IJMatrixSetObjectType(IJmat, -16);
+   HYPRE_IJMatrixSetObjectType(IJmat, -1);
    HYPRE_IJMatrixDestroy(IJmat);
    (*Amat) = (void *) hypreA;
    if ( scale_flag )
@@ -759,7 +759,7 @@ int MLI_Utils_DoubleVectorRead(char *filename, MPI_Comm mpi_comm,
             printf("MLI_Utils_DbleVectorRead ERROR : file not found.\n");
             exit(1);
          }
-         fscanf( fp, "%ld", &global_nrows );
+         fscanf( fp, "%d", &global_nrows );
          if ( global_nrows < 0 || global_nrows > 1000000000 )
          {
             printf("MLI_Utils_DoubleVectorRead ERROR : invalid nrows %d.\n",
@@ -772,24 +772,24 @@ int MLI_Utils_DoubleVectorRead(char *filename, MPI_Comm mpi_comm,
                    start, length);
             exit(1);
          }
-         fscanf( fp, "%ld %lg %ld", &k, &value, &k2 );
+         fscanf( fp, "%d %lg %d", &k, &value, &k2 );
          if ( k2 != 1 ) numparams = 3;
          fclose( fp );
          fp = fopen( filename, "r" );
-         fscanf( fp, "%ld", &global_nrows );
+         fscanf( fp, "%d", &global_nrows );
          for ( irow = 0; irow < start; irow++ )
          {
-            fscanf( fp, "%ld", &k );
+            fscanf( fp, "%d", &k );
             fscanf( fp, "%lg", &value );
-            if ( numparams == 3 ) fscanf( fp, "%ld", &k2 );
+            if ( numparams == 3 ) fscanf( fp, "%d", &k2 );
          } 
          for ( irow = start; irow < start+length; irow++ )
          {
-            fscanf( fp, "%ld", &k );
+            fscanf( fp, "%d", &k );
             if ( irow != k )
                printf("Utils::VectorRead Warning : index mismatch.\n");
             fscanf( fp, "%lg", &value );
-            if ( numparams == 3 ) fscanf( fp, "%ld", &k2 );
+            if ( numparams == 3 ) fscanf( fp, "%d", &k2 );
             vec[irow-start] = value;
          }
          fclose( fp );
@@ -809,7 +809,7 @@ int MLI_Utils_DoubleVectorRead(char *filename, MPI_Comm mpi_comm,
 int MLI_Utils_ParCSRMLISetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
                               HYPRE_ParVector b, HYPRE_ParVector x )
 {
-   int  ierr;
+   int  ierr=0;
    CMLI *cmli;
    (void) A;
    (void) b;
