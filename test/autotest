@@ -8,6 +8,8 @@
 # $Revision$
 #EHEADER***********************************************************************
 
+MAKE="make -k"
+
 #==============================================================================
 # Environment variables
 # NOTE: this should be stripped down to something more minimal
@@ -76,25 +78,24 @@ echo "$HYPRE_CHECKOUT_EMAIL" > $0.checkout.err.email
 #=============================================================================
 
 cd $HYPRE_AUTOTEST_DIR/linear_solvers
-rm config.cache
 ./configure  1> $0.configure.log 2> $0.configure.err
 echo "$HYPRE_CONFIGURE_EMAIL" > $0.configure.err.email 
 
-make veryclean
+$MAKE veryclean
 
-make struct 1> $0.struct.log 2> $0.struct.err
+$MAKE struct 1> $0.struct.log 2> $0.struct.err
 echo "$HYPRE_STRUCT_EMAIL" > $0.struct.err.email 
 
-make IJ 1> $0.IJ.log 2> $0.IJ.err
+$MAKE IJ 1> $0.IJ.log 2> $0.IJ.err
 echo "$HYPRE_IJ_EMAIL" > $0.IJ.err.email 
 
-make
+$MAKE
 
-make beta 1> $0.beta.log 2> $0.beta.err
+$MAKE beta 1> $0.beta.log 2> $0.beta.err
 echo "$HYPRE_BETA_EMAIL" > $0.beta.err.email 
 
 # make documentation
-(cd docs; make)
+(cd docs; $MAKE)
 
 #==============================
 # Run test suites
@@ -108,11 +109,11 @@ cd $HYPRE_AUTOTEST_DIR/linear_solvers/test
 #==============================
 
 cd $HYPRE_AUTOTEST_DIR/linear_solvers/test
-make all++ 1> $0.all++.log 2> $0.all++.err
+$MAKE all++ 1> $0.all++.log 2> $0.all++.err
 echo "$HYPRE_ALL_EMAIL" > $0.all++.err.email 
 
 cd $HYPRE_AUTOTEST_DIR/linear_solvers/test
-make beta++ 1> $0.beta++.log 2> $0.beta++.err
+$MAKE beta++ 1> $0.beta++.log 2> $0.beta++.err
 echo "$HYPRE_BETA_EMAIL" > $0.beta++.err.email 
 
 #==============================
@@ -127,11 +128,11 @@ echo "$HYPRE_BETA_EMAIL" > $0.beta++.err.email
 #==============================
 
 cd $HYPRE_AUTOTEST_DIR/linear_solvers/test
-make all77 1> $0.all77.log 2> $0.all77.err
+$MAKE all77 1> $0.all77.log 2> $0.all77.err
 echo "$HYPRE_ALL_EMAIL" > $0.all77.err.email 
 
 cd $HYPRE_AUTOTEST_DIR/linear_solvers/test
-make beta77 1> $0.beta77.log 2> $0.beta77.err
+$MAKE beta77 1> $0.beta77.log 2> $0.beta77.err
 echo "$HYPRE_BETA_EMAIL" > $0.beta77.err.email 
 
 #==============================
@@ -146,21 +147,20 @@ echo "$HYPRE_BETA_EMAIL" > $0.beta77.err.email
 #=============================================================================
 
 cd $HYPRE_AUTOTEST_DIR/linear_solvers
-rm config.cache
 ./configure  --with-pthreads 1> $0.configure_threads.log 2> $0.configure_threads.err
 echo "$HYPRE_CONFIGURE_EMAIL" > $0.configure_threads.err.email 
 
-make veryclean
+$MAKE veryclean
 
-make struct 1> $0.struct_threads.log 2> $0.struct_threads.err
+$MAKE struct 1> $0.struct_threads.log 2> $0.struct_threads.err
 echo "$HYPRE_STRUCT_EMAIL" > $0.struct_threads.err.email 
 
-make IJ 1> $0.IJ_threads.log 2> $0.IJ_threads.err
+$MAKE IJ 1> $0.IJ_threads.log 2> $0.IJ_threads.err
 echo "$HYPRE_IJ_EMAIL" > $0.IJ_threads.err.email 
 
-make
+$MAKE
 
-make beta 1> $0.beta_threads.log 2> $0.beta_threads.err
+$MAKE beta 1> $0.beta_threads.log 2> $0.beta_threads.err
 echo "$HYPRE_BETA_EMAIL" > $0.beta_threads.err.email 
 
 #==============================
@@ -175,21 +175,20 @@ echo "$HYPRE_BETA_EMAIL" > $0.beta_threads.err.email
 #=============================================================================
 
 cd $HYPRE_AUTOTEST_DIR/linear_solvers
-rm config.cache
 ./configure  --without-MPI 1> $0.configure_no_mpi.log 2> $0.configure_no_mpi.err
 echo "$HYPRE_CONFIGURE_EMAIL" > $0.configure_no_mpi.err.email 
 
-make veryclean
+$MAKE veryclean
 
-make struct 1> $0.struct_no_mpi.log 2> $0.struct_no_mpi.err
+$MAKE struct 1> $0.struct_no_mpi.log 2> $0.struct_no_mpi.err
 echo "$HYPRE_STRUCT_EMAIL" > $0.struct_no_mpi.err.email 
 
-make IJ 1> $0.IJ_no_mpi.log 2> $0.IJ_no_mpi.err
+$MAKE IJ 1> $0.IJ_no_mpi.log 2> $0.IJ_no_mpi.err
 echo "$HYPRE_IJ_EMAIL" > $0.IJ_no_mpi.err.email 
 
-make
+$MAKE
 
-make beta 1> $0.beta_no_mpi.log 2> $0.beta_no_mpi.err
+$MAKE beta 1> $0.beta_no_mpi.log 2> $0.beta_no_mpi.err
 echo "$HYPRE_BETA_EMAIL" > $0.beta_no_mpi.err.email 
 
 #==============================
@@ -204,7 +203,7 @@ echo "$HYPRE_BETA_EMAIL" > $0.beta_no_mpi.err.email
 #=============================================================================
 
 cd $HYPRE_AUTOTEST_DIR/linear_solvers
-make veryclean
+$MAKE veryclean
 
 #==============================================================================
 # Set permissions so that all developers can access
@@ -281,7 +280,7 @@ ssh ${HYPRE_COMPILE_MACHINE} "\
         cd ${HYPRE_REMOTE_DIR}/linear_solvers;\
 	source test/env.${HYPRE_COMPILE_MACHINE};\
         ./configure ;\
-        make beta;\
+        make -k beta;\
     )"
 
 # run test suite
@@ -298,7 +297,7 @@ ssh ${HYPRE_COMPILE_MACHINE} "\
 	source test/env.${HYPRE_COMPILE_MACHINE};\
         ./configure --with-openmp;\
 	make veryclean;\
-        make beta;\
+        make -k beta;\
     )"
 
 
