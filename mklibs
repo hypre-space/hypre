@@ -1,0 +1,217 @@
+#!/bin/ksh
+#BHEADER***********************************************************************
+# (c) 2000   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+
+
+help ()
+{
+  printf "$0: [-help] | {-g|-b|-a} HypreArchiveFile [install]\n"
+  printf "  -g general release\n"
+  printf "  -b beta release\n"
+  printf "  -a alpha release\n"
+  printf "  HypreArchiveFile, the name of the tar file produced by\n"
+  printf "  mkdist (e.g., hypre-1.3.0.tar.gz) assumed to exist in\n"
+  printf "  the current working directory.\n"
+  printf "  install will replace the symbolic links.\n"
+}
+
+usage ()
+{
+  printf "usage: $0 {-g|-b|-a} HypreArchiveFile [install]\n"
+}
+
+# Define install permissions:
+#   - give everybody read/execute permission
+#   - give user/group write permission
+#=============================================================================
+
+HYPRE_INSTALL_PERMISSIONS="a+rX,ug+w"
+
+#=============================================================================
+# Set install directories:
+#=============================================================================
+
+HYPRE_CASC_INSTALL_DIR="/home/casc/software/hypre"
+HYPRE_DEC_INSTALL_DIR="/usr/apps/hypre"
+HYPRE_BLUE_INSTALL_DIR="/usr/apps/hypre"
+HYPRE_RED_INSTALL_DIR="/usr/apps/hypre"
+
+#=============================================================================
+# Parse arguments
+#=============================================================================
+
+case $1 in
+    -h|-help) 
+        help
+        exit;;
+esac
+
+if [ $# -gt 1 ]
+then
+  if [ "$1" = "-g" ] || [ "$1 = "-b" ] || [ "$1 = "-a" ]
+  then
+    OPTION=$1
+    TAR_FILE=$2
+  else
+    usage
+    exit
+  fi
+else
+  usage
+  exit
+fi
+
+#===========================================================================
+# Check that the install directory exists
+#===========================================================================
+
+##if [ ! -d $HYPRE_INSTALL_DIR ]
+##then
+##    echo "Error: HYPRE_INSTALL_DIR=$HYPRE_INSTALL_DIR does not exist"
+##    exit
+##fi
+
+#===========================================================================
+# Update the source
+#===========================================================================
+
+if [ -f $TAR_FILE ]
+then
+  gunzip $TAR_FILE
+  tar xof ${TAR_FILE%.gz}
+fi
+
+DIST_DIR=`pwd`/${TAR_FILE%.tar.gz}
+
+#if [ "$OPTION" = "-b" ]
+#then
+#  mv $DIST_DIR ${DIST_DIR}b
+#  DIST_DIR=${DIST_DIR}b
+#fi
+#
+#if [ "$OPTION" = "-a" ]
+#then
+#  mv $DIST_DIR ${DIST_DIR}a
+#  DIST_DIR=${DIST_DIR}a
+#fi
+
+#===========================================================================
+# Build and do a temporary install in the UPDATE subdirectory
+#===========================================================================
+
+cd $DIST_DIR
+
+# MPI version. (Do this only once)
+if [ ! -d lib ]
+then
+    (
+        HYPRE_INSTALL_DIR=$DIST_DIR
+        export HYPRE_INSTALL_DIR
+        cd src
+        ./configure
+        make install
+        make veryclean
+    )
+    (
+        HYPRE_INSTALL_DIR=$DIST_DIR/debug
+        export HYPRE_INSTALL_DIR
+	mkdir -p $HYPRE_INSTALL_DIR
+        
+        cd src
+        ./configure --enable-debug
+        make install
+        make veryclean
+    )
+fi
+
+# MPI + threads version. (Do this only once)
+if [ "`/bin/uname -s`" != "SunOS" ] &&
+   [ ! -d threads/lib ]
+then
+    (
+        HYPRE_INSTALL_DIR=$DIST_DIR/threads
+        export HYPRE_INSTALL_DIR
+	mkdir -p $HYPRE_INSTALL_DIR
+        
+        cd src
+        ./configure $HYPRE_INSTALL_THREADS
+        make install
+        make veryclean
+    )
+    (
+        HYPRE_INSTALL_DIR=$DIST_DIR/threads/debug
+        export HYPRE_INSTALL_DIR
+	mkdir -p $HYPRE_INSTALL_DIR
+        
+        cd src
+        ./configure $HYPRE_INSTALL_THREADS --enable-debug
+        make install
+        make veryclean
+    )
+fi
+
+chmod -fR $HYPRE_INSTALL_PERMISSIONS $DIST_DIR
+chgrp -fR hypre $DIST_DIR
+
+if [ "$3" = "install" ]
+then
+  if [ "$OPTION" = "-g" ]
+  then
+    HYPRE_INSTALL_DIR=$DIST_DIR/..
+    for i in bin debug doc include lib src
+    do
+      rm -fR $HYPRE_INSTALL_DIR/$i
+      ln -s $DIST_DIR/$i ../$i
+    done
+    for i in threads
+    do
+      if [ -d $DIST_DIR/$i ]
+      then
+        rm -fR $HYPRE_INSTALL_DIR/$i
+        ln -s $DIST_DIR/$i $HYPRE_INSTALL_DIR/$i
+      fi
+    done
+  fi
+  if [ "$OPTION" = "-g" ] || [ "$OPTION" = "-b" ]
+  then
+    HYPRE_INSTALL_DIR=$DIST_DIR/../beta
+    for i in bin debug doc include lib src
+    do
+      rm -fR $HYPRE_INSTALL_DIR/$i
+      ln -s $DIST_DIR/$i $HYPRE_INSTALL_DIR/$i
+    done
+    for i in threads
+    do
+      if [ -d $DIST_DIR/$i ]
+      then
+        rm -fR $HYPRE_INSTALL_DIR/$i
+        ln -s $DIST_DIR/$i $HYPRE_INSTALL_DIR/$i
+      fi
+    done
+  fi
+  if [ "$OPTION" = "-g" ] || [ "$OPTION" = "-b" ] || [ "$OPTION" = "-a" ]
+  then
+    HYPRE_INSTALL_DIR=$DIST_DIR/../alpha
+    for i in bin debug doc include lib src
+    do
+      rm -fR $HYPRE_INSTALL_DIR/$i
+      ln -s $DIST_DIR/$i $HYPRE_INSTALL_DIR/$i
+    done
+    for i in threads
+    do
+      if [ -d $DIST_DIR/$i ]
+      then
+        rm -fR $HYPRE_INSTALL_DIR/$i
+        ln -s $DIST_DIR/$i $HYPRE_INSTALL_DIR/$i
+      fi
+    done
+  fi
+fi
+
