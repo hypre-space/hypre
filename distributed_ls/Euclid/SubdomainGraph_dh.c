@@ -418,6 +418,7 @@ void partition_metis_private(SubdomainGraph_dh s, void *A)
 void allocate_storage_private(SubdomainGraph_dh s, int blocks, int m, bool bj)
 {
   START_FUNC_DH
+
   if (!bj) {
     s->ptrs = (int*)MALLOC_DH((blocks+1)*sizeof(int)); CHECK_V_ERROR;
     s->ptrs[0] = 0;

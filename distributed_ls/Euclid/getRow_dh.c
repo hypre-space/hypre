@@ -43,32 +43,17 @@ void EuclidRestoreRow(void *A, int row, int *len, int **ind, double **val)
 void EuclidGetDimensions(void *A, int *beg_row, int *rowsLocal, int *rowsGlobal)
 {
   START_FUNC_DH
-/*  if (ignoreMe) SET_V_ERROR("not implemented"); */
-
-printf("\n\n@@@@@@@@@@@@@@@@@@@@@@@@@@@ [%i] starting EuclidGetDimensions\n\n", myid_dh);
-{
   int ierr, m, n;
+  int row_start, row_end, col_start, col_end;
 
-
- /* HYPRE_ParCSRMatrix mat = (HYPRE_ParCSRMatrix) A;
-*/
- HYPRE_DistributedMatrix mat = (HYPRE_DistributedMatrix) A;
- HYPRE_DistributedMatrixGetDims (mat, &m , &n);
-
- printf("[%i]  m= %i  n= %i\n", myid_dh, m, n);
-
-}
-
-
-/*
-int HYPRE_DistributedMatrixGetLocalRange (HYPRE_DistributedMatrix matrix , int *
-row_start , int *row_end, int *col_start, int *col_end );
-
-int HYPRE_DistributedMatrixGetDims (HYPRE_DistributedMatrix matrix , int *M , in
-t *N );
-*/
-
-
+  HYPRE_DistributedMatrix mat = (HYPRE_DistributedMatrix) A;
+  HYPRE_DistributedMatrixGetDims(mat, &m , &n);
+  HYPRE_DistributedMatrixGetDims(mat, &m , &n);
+  HYPRE_DistributedMatrixGetLocalRange(mat, &row_start, &row_end, 
+                                            &col_start, &col_end);
+  *beg_row = row_start;
+  *rowsLocal = m;
+  *rowsGlobal = n;
   END_FUNC_DH
 }
 
