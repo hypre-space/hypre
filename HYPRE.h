@@ -24,12 +24,6 @@
  * Constants
  *--------------------------------------------------------------------------*/
 
-#define HYPRE_ISIS_MATRIX 11
-
-#define HYPRE_PETSC_MATRIX 12
-
-#define HYPRE_PARCSR_MATRIX 13
-
 #define HYPRE_PETSC_VECTOR 33
 
 #define HYPRE_PETSC_MAT_PARILUT_SOLVER 22
@@ -38,5 +32,10 @@
 
 #define HYPRE_UNITIALIZED -47
 
+#define HYPRE_ISIS 197983
+
+#define HYPRE_PETSC 497967
+
+#define HYPRE_PARCSR 797997
 
 #endif

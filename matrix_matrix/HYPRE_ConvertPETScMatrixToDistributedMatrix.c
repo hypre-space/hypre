@@ -51,7 +51,7 @@ HYPRE_ConvertPETScMatrixToDistributedMatrix(
    *DistributedMatrix = HYPRE_NewDistributedMatrix( MPI_Comm );
 
    ierr = HYPRE_SetDistributedMatrixLocalStorageType( *DistributedMatrix,
-                                                     HYPRE_PETSC_MATRIX );
+                                                     HYPRE_PETSC );
    if(ierr) return(ierr);
 
    ierr = HYPRE_InitializeDistributedMatrix( *DistributedMatrix );

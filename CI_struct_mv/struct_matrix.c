@@ -37,7 +37,7 @@ hypre_NewStructInterfaceMatrix( MPI_Comm     context,
    hypre_StructInterfaceMatrixTranslator(matrix) = NULL;
    hypre_StructInterfaceMatrixData(matrix) = NULL;
 
-   hypre_SetStructInterfaceMatrixStorageType(matrix, HYPRE_PETSC_MATRIX);
+   hypre_SetStructInterfaceMatrixStorageType(matrix, HYPRE_PETSC );
 
    return matrix;
 }
@@ -50,10 +50,10 @@ int
 hypre_FreeStructInterfaceMatrix( hypre_StructInterfaceMatrix *matrix )
 {
 
-   if ( hypre_StructInterfaceMatrixStorageType(matrix) == HYPRE_PETSC_MATRIX )
+   if ( hypre_StructInterfaceMatrixStorageType(matrix) == HYPRE_PETSC )
       hypre_FreeStructInterfaceMatrixPETSc( matrix );
    else
-   if ( hypre_StructInterfaceMatrixStorageType(matrix) == HYPRE_PARCSR_MATRIX )
+   if ( hypre_StructInterfaceMatrixStorageType(matrix) == HYPRE_PARCSR )
       hypre_FreeStructInterfaceMatrixParCSR( matrix );
    else
       return(-1);
@@ -79,10 +79,10 @@ hypre_SetStructInterfaceMatrixCoeffs( hypre_StructInterfaceMatrix *matrix,
 {
    int    ierr;
 
-   if ( hypre_StructInterfaceMatrixStorageType(matrix) == HYPRE_PETSC_MATRIX )
+   if ( hypre_StructInterfaceMatrixStorageType(matrix) == HYPRE_PETSC )
       return( hypre_SetStructInterfaceMatrixPETScCoeffs( matrix, grid_index, coeffs ) );
    else
-   if ( hypre_StructInterfaceMatrixStorageType(matrix) == HYPRE_PARCSR_MATRIX )
+   if ( hypre_StructInterfaceMatrixStorageType(matrix) == HYPRE_PARCSR )
       return( hypre_SetStructInterfaceMatrixParCSRCoeffs( matrix, grid_index, coeffs ) );
    else
       return(-1);
@@ -169,10 +169,10 @@ hypre_SetStructInterfaceMatrixBoxValues( hypre_StructInterfaceMatrix *matrix,
 int 
 hypre_AssembleStructInterfaceMatrix( hypre_StructInterfaceMatrix *matrix )
 {
-   if ( hypre_StructInterfaceMatrixStorageType(matrix) == HYPRE_PETSC_MATRIX )
+   if ( hypre_StructInterfaceMatrixStorageType(matrix) == HYPRE_PETSC )
       return( hypre_AssembleStructInterfaceMatrixPETSc( matrix ) );
    else
-   if ( hypre_StructInterfaceMatrixStorageType(matrix) == HYPRE_PARCSR_MATRIX )
+   if ( hypre_StructInterfaceMatrixStorageType(matrix) == HYPRE_PARCSR )
       return( hypre_AssembleStructInterfaceMatrixParCSR( matrix ) );
    else
       return(-1);
@@ -186,10 +186,10 @@ hypre_AssembleStructInterfaceMatrix( hypre_StructInterfaceMatrix *matrix )
 int 
 hypre_PrintStructInterfaceMatrix( hypre_StructInterfaceMatrix *matrix )
 {
-   if ( hypre_StructInterfaceMatrixStorageType(matrix) == HYPRE_PETSC_MATRIX )
+   if ( hypre_StructInterfaceMatrixStorageType(matrix) == HYPRE_PETSC )
       return( hypre_PrintStructInterfaceMatrixPETSc( matrix ) );
    else
-   if ( hypre_StructInterfaceMatrixStorageType(matrix) == HYPRE_PARCSR_MATRIX )
+   if ( hypre_StructInterfaceMatrixStorageType(matrix) == HYPRE_PARCSR)
       return( hypre_PrintStructInterfaceMatrixParCSR( matrix ) );
    else
       return(-1);

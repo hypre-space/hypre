@@ -50,7 +50,7 @@ HYPRE_ConvertParCSRMatrixToDistributedMatrix(
    *DistributedMatrix = HYPRE_NewDistributedMatrix( comm );
 
    ierr = HYPRE_SetDistributedMatrixLocalStorageType( *DistributedMatrix,
-                                                     HYPRE_PARCSR_MATRIX );
+                                                     HYPRE_PARCSR );
    if(ierr) return(ierr);
 
    ierr = HYPRE_InitializeDistributedMatrix( *DistributedMatrix );

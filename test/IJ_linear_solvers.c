@@ -38,7 +38,7 @@ main( int   argc,
    HYPRE_IJVector      ij_b;
    HYPRE_IJVector      ij_x;
    /* concrete underlying type for ij_matrix defaults to parcsr. AJC. */
-   int                 ij_matrix_storage_type=HYPRE_PARCSR_MATRIX;
+   int                 ij_matrix_storage_type=HYPRE_PARCSR;
    int                 ij_vector_storage_type=HYPRE_PARCSR;
 
    HYPRE_ParCSRMatrix  parcsr_A;
@@ -174,7 +174,7 @@ main( int   argc,
       else if ( strcmp(argv[arg_index], "-concrete_parcsr") == 0 )
       {
          arg_index++;
-         ij_matrix_storage_type      = HYPRE_PARCSR_MATRIX;
+         ij_matrix_storage_type      = HYPRE_PARCSR;
          build_matrix_arg_index = arg_index;
       }
       else if ( strcmp(argv[arg_index], "-solver") == 0 )
@@ -521,7 +521,7 @@ main( int   argc,
    ierr += HYPRE_NewIJMatrix( comm, &ij_matrix, M, N );
 
    ierr += HYPRE_SetIJMatrixLocalStorageType(
-                 ij_matrix, HYPRE_PARCSR_MATRIX );
+                 ij_matrix, HYPRE_PARCSR );
 
    ierr = HYPRE_GetLocalRangeParcsr( parcsr_A,
              &first_local_row, &last_local_row ,
