@@ -106,6 +106,7 @@ typedef struct HYPRE_LSI_MLI_Struct
    int      *matLabels_;
    int      printNullSpace_;
    int      symmetric_;
+   int      injectionForR_;
    HYPRE_ParCSRMatrix correctionMatrix_; /* for nullspace correction */
 } 
 HYPRE_LSI_MLI;
@@ -172,6 +173,7 @@ int HYPRE_LSI_MLICreate( MPI_Comm comm, HYPRE_Solver *solver )
    mli_object->matLabels_           = NULL;
    mli_object->printNullSpace_      = 0;
    mli_object->symmetric_           = 1;
+   mli_object->injectionForR_       = 0;
 #ifdef HAVE_MLI
    mli_object->mli_                 = NULL;
    mli_object->feData_              = NULL;
@@ -269,6 +271,11 @@ int HYPRE_LSI_MLISetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
    if ( mli_object->symmetric_ == 0 )
    {
       strcpy(paramString, "nonsymmetric");
+      method->setParams( paramString, 0, NULL );
+   }
+   if ( mli_object->injectionForR_ == 1 )
+   {
+      strcpy(paramString, "useInjectionForR");
       method->setParams( paramString, 0, NULL );
    }
    if ( mli_object->smootherPrintRNorm_ == 1 )
@@ -582,6 +589,7 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
          printf("\t      useNodalCoord <on,off> \n");
          printf("\t      saAMGCalibrationSize <d> \n");
          printf("\t      rsAMGSymmetric <d> \n");
+         printf("\t      rsAMGInjectionForR\n");
          printf("\t      printNullSpace <d> \n");
          printf("\t      paramFile <s> \n");
       }
@@ -717,6 +725,10 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
       sscanf(paramString,"%s %s %d",param1,param2, &(mli_object->symmetric_));
       if ( mli_object->symmetric_ < 0 ) mli_object->symmetric_ = 0; 
       if ( mli_object->symmetric_ > 1 ) mli_object->symmetric_ = 1; 
+   }
+   else if ( !strcasecmp(param2, "rsAMGInjectionForR") )
+   {
+      mli_object->injectionForR_ = 1;
    }
    else if ( !strcasecmp(param2, "printNullSpace") )
    {

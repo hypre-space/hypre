@@ -198,11 +198,11 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
 
    if ( precon_index >= 0 )
    {
-      sscanf(params[precon_index],"%s %s", param, HYPreconName_);
-      selectPreconditioner(HYPreconName_);
+      sscanf(params[precon_index],"%s %s", param, param1);
+      selectPreconditioner(param1);
       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
          printf("       HYPRE_LSC::parameters preconditioner = %s\n",
-                HYPreconName_);
+                param1);
    }
 
    //-------------------------------------------------------------------
