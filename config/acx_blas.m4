@@ -144,7 +144,7 @@ if test x"$acx_blas_ok" = xyes; then
         ifelse([$1],,AC_DEFINE(HAVE_BLAS,1,[Define if you have a BLAS library.]),[$1])
         :
 else
-    if test x"$acx_blas_ok" = xdisabled; then
+    if test x"$acx_blas_ok" = xdisable; then
         :
     else
         acx_blas_ok=no
