@@ -70,6 +70,7 @@ HYPRE_DIRS =\
 HYPRE_EXTRA_DIRS =\
  ${HYPRE_DOCS_DIRS}\
  ${HYPRE_TEST_DIRS}\
+ releases\
  seq_ls 
 
 #################################################################
