@@ -142,6 +142,7 @@ echo "creating $HYPRE_DIR.tar file ..."
 tar cf $HYPRE_DIR.tar \
     $HYPRE_DIR/CHANGELOG \
     $HYPRE_DIR/COPYRIGHT_and_DISCLAIMER \
+    $HYPRE_DIR/README \
     $HYPRE_DIR/docs \
     $HYPRE_DIR/bin \
     $HYPRE_DIR/src/configure \
