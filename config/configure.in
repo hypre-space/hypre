@@ -486,8 +486,9 @@ AC_ARG_WITH(fei-libs,
 [for fei_lib in $withval; do
    FEILIBS="$FEILIBS -l$fei_lib"
  done;
+ FEINEEDED="#";
  casc_user_chose_fei=yes],
- [FEILIBS=""]
+ [FEINEEDED=""; FEILIBS=""]
 )
 
 AC_ARG_WITH(fei-lib-dir,
@@ -500,8 +501,9 @@ AC_ARG_WITH(fei-lib-dir,
 [for fei_lib_dir in $withval; do
    FEILIBDIRS="-L$fei_lib_dir $FEILIBDIRS"
  done;
+ FEINEEDED="#";
  casc_user_chose_fei=yes],
- [FEILIBDIRS=""]
+ [FEINEEDED=""; FEILIBDIRS=""]
 )
 
 AC_ARG_WITH(fei-inc-dir,
@@ -512,10 +514,11 @@ AC_ARG_WITH(fei-inc-dir,
                    --with-fei-libs, --with-fei-inc-dir and --with-fei-lib-dir
                    must be used together.]),
 [for fei_inc in $withval; do
-   FEIINCLUDE="$FEIINCLUDE -I$fei_inc"
+   FEIINCLUDE="$FEIINCLUDE $fei_inc"
  done;
+ FEINEEDED="#";
  casc_user_chose_fei=yes],
- [FEIINCLUDE=""]
+ [FEINEEDED=""; FEIINCLUDE=""]
 )
 
 dnl *********************************************************************
@@ -819,6 +822,7 @@ dnl * FEI-related files, libraries and directories
 AC_SUBST(FEILIBS)
 AC_SUBST(FEILIBDIRS)
 AC_SUBST(FEIINCLUDE)
+AC_SUBST(FEINEEDED)
 
 dnl *MLI-related header files, libraries and directories for those
 dnl * libraries

@@ -84,8 +84,6 @@ all: krylov struct sstruct IJ eigen fei hyprelibs docs
 
 beta: all
 	@ \
-	HYPRE_INSTALL_DIR=`pwd`/hypre; \
-	export HYPRE_INSTALL_DIR; \
 	for i in ${HYPRE_EXTRA_DIRS}; \
 	do \
 	  if [ -d $$i ]; \
@@ -101,8 +99,6 @@ beta: all
 
 krylov: base
 	@ \
-	HYPRE_INSTALL_DIR=`pwd`/hypre; \
-	export HYPRE_INSTALL_DIR; \
 	for i in ${HYPRE_KRYLOV_DIRS}; \
 	do \
 	  if [ -d $$i ]; \
@@ -115,8 +111,6 @@ krylov: base
 
 struct: base
 	@ \
-	HYPRE_INSTALL_DIR=`pwd`/hypre; \
-	export HYPRE_INSTALL_DIR; \
 	for i in ${HYPRE_STRUCT_DIRS}; \
 	do \
 	  if [ -d $$i ]; \
@@ -129,8 +123,6 @@ struct: base
 
 sstruct: struct IJ
 	@ \
-	HYPRE_INSTALL_DIR=`pwd`/hypre; \
-	export HYPRE_INSTALL_DIR; \
 	for i in ${HYPRE_SSTRUCT_DIRS}; \
 	do \
 	  if [ -d $$i ]; \
@@ -143,8 +135,6 @@ sstruct: struct IJ
 
 IJ: base
 	@ \
-	HYPRE_INSTALL_DIR=`pwd`/hypre; \
-	export HYPRE_INSTALL_DIR; \
 	for i in ${HYPRE_IJ_DIRS}; \
 	do \
 	  if [ -d $$i ]; \
@@ -157,8 +147,6 @@ IJ: base
 
 eigen: base
 	@ \
-	HYPRE_INSTALL_DIR=`pwd`/hypre; \
-	export HYPRE_INSTALL_DIR; \
 	for i in ${HYPRE_EIGEN_DIRS}; \
 	do \
 	  if [ -d $$i ]; \
@@ -171,8 +159,6 @@ eigen: base
 
 hyprelibs:
 	@ \
-	HYPRE_INSTALL_DIR=`pwd`; \
-	export HYPRE_INSTALL_DIR; \
 	for i in ${HYPRE_LIBS_DIRS}; \
 	do \
 	  if [ -d $$i ]; \
@@ -185,8 +171,6 @@ hyprelibs:
 
 docs:
 	@ \
-	HYPRE_INSTALL_DIR=`pwd`/hypre; \
-	export HYPRE_INSTALL_DIR; \
 	for i in ${HYPRE_DOCS_DIRS}; \
 	do \
 	  if [ -d $$i ]; \
@@ -199,8 +183,6 @@ docs:
 
 fei: IJ krylov
 	@ \
-	HYPRE_INSTALL_DIR=`pwd`/hypre; \
-	export HYPRE_INSTALL_DIR; \
 	for i in ${HYPRE_FEI_DIRS}; \
 	do \
 	  if [ -d $$i ]; \
@@ -226,8 +208,6 @@ base:
 	@ \
 	mkdir -p hypre/include; \
 	mkdir -p hypre/lib; \
-	HYPRE_INSTALL_DIR=`pwd`/hypre; \
-	export HYPRE_INSTALL_DIR; \
 	cp -f HYPRE_config.h $$HYPRE_INSTALL_DIR/include/.; \
 	cp -f $(srcdir)/HYPRE.h $$HYPRE_INSTALL_DIR/include/.; \
 	for i in ${HYPRE_BASIC_DIRS}; \

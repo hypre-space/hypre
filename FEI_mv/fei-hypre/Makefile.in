@@ -10,7 +10,7 @@
 include ../../config/Makefile.config
 
 BASE_DIR = @FEIINCLUDE@
-BASE_DIR@FEILIBS@ = $(srcdir)/../fei-base
+@FEINEEDED@BASE_DIR = $(srcdir)/../fei-base
 
 CC = @CC@
 CXX = @CXX@

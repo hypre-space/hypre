@@ -322,7 +322,7 @@ ac_includes_default="\
 #endif"
 
 ac_subdirs_all="$ac_subdirs_all babel-runtime"
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os PACKAGE_DATETIME CC CXX F77 RANLIB ac_ct_RANLIB INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA AWK CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP LN_S SET_MAKE CXXFLAGS ac_ct_CXX FFLAGS ac_ct_F77 FLIBS CXXCPP FPP EGREP POW_LIB LIBOBJS MPILIBS subdirs BABELDIR LIBM INCLUDES LIBDIRS MPIINCLUDE MPILIBDIRS MPIFLAGS TIMERDEFS LDLIBS LDLIBDIRS F77FLAGS PREPEND FEILIBS FEILIBDIRS FEIINCLUDE MLI_DIR MLILIBS MLILIBDIRS MLIINCLUDE BLASLIBDIRS BLASLIBS BLASNEEDED LAPACKLIBDIRS LAPACKLIBS LAPACKNEEDED `pwd` LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os PACKAGE_DATETIME CC CXX F77 RANLIB ac_ct_RANLIB INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA AWK CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP LN_S SET_MAKE CXXFLAGS ac_ct_CXX FFLAGS ac_ct_F77 FLIBS CXXCPP FPP EGREP POW_LIB LIBOBJS MPILIBS subdirs BABELDIR LIBM INCLUDES LIBDIRS MPIINCLUDE MPILIBDIRS MPIFLAGS TIMERDEFS LDLIBS LDLIBDIRS F77FLAGS PREPEND FEILIBS FEILIBDIRS FEIINCLUDE FEINEEDED MLI_DIR MLILIBS MLILIBDIRS MLIINCLUDE BLASLIBDIRS BLASLIBS BLASNEEDED LAPACKLIBDIRS LAPACKLIBS LAPACKNEEDED `pwd` LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -2111,9 +2111,10 @@ if test "${with_fei_libs+set}" = set; then
   for fei_lib in $withval; do
    FEILIBS="$FEILIBS -l$fei_lib"
  done;
+ FEINEEDED="#";
  casc_user_chose_fei=yes
 else
-  FEILIBS=""
+  FEINEEDED=""; FEILIBS=""
 
 fi;
 
@@ -2124,9 +2125,10 @@ if test "${with_fei_lib_dir+set}" = set; then
   for fei_lib_dir in $withval; do
    FEILIBDIRS="-L$fei_lib_dir $FEILIBDIRS"
  done;
+ FEINEEDED="#";
  casc_user_chose_fei=yes
 else
-  FEILIBDIRS=""
+  FEINEEDED=""; FEILIBDIRS=""
 
 fi;
 
@@ -2135,11 +2137,12 @@ fi;
 if test "${with_fei_inc_dir+set}" = set; then
   withval="$with_fei_inc_dir"
   for fei_inc in $withval; do
-   FEIINCLUDE="$FEIINCLUDE -I$fei_inc"
+   FEIINCLUDE="$FEIINCLUDE $fei_inc"
  done;
+ FEINEEDED="#";
  casc_user_chose_fei=yes
 else
-  FEIINCLUDE=""
+  FEINEEDED=""; FEIINCLUDE=""
 
 fi;
 
@@ -5165,7 +5168,7 @@ fi
 
 
 # Provide some information about the compiler.
-echo "$as_me:5168:" \
+echo "$as_me:5171:" \
      "checking for Fortran 77 compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -5361,7 +5364,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_verb"
-(eval echo $as_me:5364: \"$ac_link\") >&5
+(eval echo $as_me:5367: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -5439,7 +5442,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_cv_prog_f77_v"
-(eval echo $as_me:5442: \"$ac_link\") >&5
+(eval echo $as_me:5445: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -10561,6 +10564,7 @@ CXX="$PREPEND $CXX"
 
 
 
+
 if test -d docs; then
    cat >>confdefs.h <<\_ACEOF
 #define DOCSDIR 1
@@ -11310,6 +11314,7 @@ s,@PREPEND@,$PREPEND,;t t
 s,@FEILIBS@,$FEILIBS,;t t
 s,@FEILIBDIRS@,$FEILIBDIRS,;t t
 s,@FEIINCLUDE@,$FEIINCLUDE,;t t
+s,@FEINEEDED@,$FEINEEDED,;t t
 s,@MLI_DIR@,$MLI_DIR,;t t
 s,@MLILIBS@,$MLILIBS,;t t
 s,@MLILIBDIRS@,$MLILIBDIRS,;t t
