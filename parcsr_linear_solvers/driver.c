@@ -130,6 +130,12 @@ main( int   argc,
          build_rhs_type      = 3;
          build_rhs_arg_index = arg_index;
       }    
+      else if ( strcmp(argv[arg_index], "-xisone") == 0 )
+      {
+         arg_index++;
+         build_rhs_type      = 4;
+         build_rhs_arg_index = arg_index;
+      }    
       else if ( strcmp(argv[arg_index], "-rlx") == 0 )
       {
          arg_index++;
@@ -143,6 +149,10 @@ main( int   argc,
          arg_index++;
       }
    }
+
+   /* for CGNR preconditioned with Boomeramg, only relaxation scheme 2 is
+      implemented, i.e. Jacobi relaxation with Matvec */
+   if (solver_id == 5) relax_default = 2;
 
    /* defaults for BoomerAMG */
    strong_threshold = 0.25;
@@ -331,6 +341,25 @@ main( int   argc,
                                 hypre_ParCSRMatrixRowStarts(A));
       hypre_SetParVectorPartitioningOwner(x, 0);
       hypre_InitializeParVector(x);
+      hypre_SetParVectorConstantValues(x, 0.0);      
+   }
+   else if ( build_rhs_type == 4 )
+   {
+
+      x = hypre_CreateParVector(MPI_COMM_WORLD,
+                                hypre_ParCSRMatrixGlobalNumRows(A),
+                                hypre_ParCSRMatrixRowStarts(A));
+      hypre_SetParVectorPartitioningOwner(x, 0);
+      hypre_InitializeParVector(x);
+      hypre_SetParVectorConstantValues(x, 1.0);      
+
+      b = hypre_CreateParVector(MPI_COMM_WORLD,
+                                hypre_ParCSRMatrixGlobalNumRows(A),
+                                hypre_ParCSRMatrixRowStarts(A));
+      hypre_SetParVectorPartitioningOwner(b, 0);
+      hypre_InitializeParVector(b);
+      hypre_ParMatvec(1.0,A,x,0.0,b);
+
       hypre_SetParVectorConstantValues(x, 0.0);      
    }
    else /* if ( build_rhs_type == 0 ) */
@@ -534,6 +563,85 @@ main( int   argc,
       HYPRE_ParCSRGMRESFinalize(pcg_solver);
  
       if (solver_id == 3)
+      {
+         HYPRE_ParAMGFinalize(pcg_precond);
+      }
+      if (myid == 0)
+      {
+         printf("\n");
+         printf("Iterations = %d\n", num_iterations);
+         printf("Final Relative Residual Norm = %e\n", final_res_norm);
+         printf("\n");
+      }
+   }
+   /*-----------------------------------------------------------
+    * Solve the system using CGNR 
+    *-----------------------------------------------------------*/
+
+   if (solver_id == 5 || solver_id == 6)
+   {
+      time_index = hypre_InitializeTiming("CGNR Setup");
+      hypre_BeginTiming(time_index);
+ 
+      HYPRE_ParCSRCGNRInitialize(MPI_COMM_WORLD, &pcg_solver);
+      HYPRE_ParCSRCGNRSetMaxIter(pcg_solver, 1000);
+      HYPRE_ParCSRCGNRSetTol(pcg_solver, 1.0e-08);
+      HYPRE_ParCSRCGNRSetLogging(pcg_solver, 1);
+ 
+      if (solver_id == 5)
+      {
+         /* use BoomerAMG as preconditioner */
+         pcg_precond = HYPRE_ParAMGInitialize(); 
+         HYPRE_ParAMGSetStrongThreshold(pcg_precond, strong_threshold);
+         HYPRE_ParAMGSetLogging(pcg_precond, ioutdat, "driver.out.log");
+         HYPRE_ParAMGSetMaxIter(pcg_precond, 1);
+         HYPRE_ParAMGSetCycleType(pcg_precond, cycle_type);
+         HYPRE_ParAMGSetNumGridSweeps(pcg_precond, num_grid_sweeps);
+         HYPRE_ParAMGSetGridRelaxType(pcg_precond, grid_relax_type);
+         HYPRE_ParAMGSetRelaxWeight(pcg_precond, relax_weight);
+         HYPRE_ParAMGSetGridRelaxPoints(pcg_precond, grid_relax_points);
+         HYPRE_ParAMGSetMaxLevels(pcg_precond, 25);
+         HYPRE_ParCSRCGNRSetPrecond(pcg_solver,
+                                   HYPRE_ParAMGSolve,
+                                   HYPRE_ParAMGSolveT,
+                                   HYPRE_ParAMGSetup,
+                                   pcg_precond);
+      }
+      else if (solver_id == 6)
+      {
+         /* use diagonal scaling as preconditioner */
+
+         pcg_precond = NULL;
+
+         HYPRE_ParCSRCGNRSetPrecond(pcg_solver,
+                                   HYPRE_ParCSRDiagScale,
+                                   HYPRE_ParCSRDiagScale,
+                                   HYPRE_ParCSRDiagScaleSetup,
+                                   pcg_precond);
+      }
+ 
+      HYPRE_ParCSRCGNRSetup(pcg_solver, A, b, x);
+ 
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+   
+      time_index = hypre_InitializeTiming("CGNR Solve");
+      hypre_BeginTiming(time_index);
+ 
+      HYPRE_ParCSRCGNRSolve(pcg_solver, A, b, x);
+ 
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+ 
+      HYPRE_ParCSRCGNRGetNumIterations(pcg_solver, &num_iterations);
+      HYPRE_ParCSRCGNRGetFinalRelativeResidualNorm(pcg_solver,&final_res_norm);
+      HYPRE_ParCSRCGNRFinalize(pcg_solver);
+ 
+      if (solver_id == 5)
       {
          HYPRE_ParAMGFinalize(pcg_precond);
       }
