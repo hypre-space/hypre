@@ -46,11 +46,11 @@ perform_test()
   echo "copying test results to CASC machine..."
   scp -r  ${HYPRE_COMPILE_MACHINE}:${HYPRE_REMOTE_DIR}/linear_solvers/autotest.${HYPRE_RUN_MACHINE}.tar $HYPRE_AUTOTEST_DIR/.
 
-  echo "cleaning up...."
-  ssh ${HYPRE_COMPILE_MACHINE} "\
-    (\
-         rm -fR ${HYPRE_REMOTE_DIR}\
-    )"
+# echo "cleaning up...."
+# ssh ${HYPRE_COMPILE_MACHINE} "\
+#   (\
+#        rm -fR ${HYPRE_REMOTE_DIR}\
+#   )"
 }
 
 #==============================================================================
@@ -85,21 +85,24 @@ echo "$HYPRE_CHECKOUT_EMAIL" > $0.checkout.err.email
 while [ "$*" != "" ]
 do
   case $1 in
-    -dec)
-        HYPRE_ARCH="dec"
-        HYPRE_COMPILE_MACHINE="west"
-        HYPRE_RUN_MACHINE="southeast"
-        HYPRE_REMOTE_DIR="/usr/apps/hypre/AUTOTEST"
-	HYPRE_MACHINE_COMMANDS="-m -r $HYPRE_RUN_MACHINE -a 2 -cf -o 1"
-	perform_test
-	HYPRE_MACHINE_COMMANDS="-m -a 2 -dcxfy -t 1 -ns"
-        shift;;
     -blue)
         HYPRE_ARCH="blue"
         HYPRE_COMPILE_MACHINE="blue"
         HYPRE_RUN_MACHINE="blue"
         HYPRE_REMOTE_DIR="/usr/apps/hypre/AUTOTEST"
 	HYPRE_MACHINE_COMMANDS="-m -a 2 -cf -o 1"
+	perform_test
+	HYPRE_MACHINE_COMMANDS="-m -a 2 -dcxfy -t 1 -ns"
+        shift;;
+    -casc)
+	HYPRE_MACHINE_COMMANDS="-m -a 2 -dcxfy -t 1 -ns"
+        shift;;
+    -dec)
+        HYPRE_ARCH="dec"
+        HYPRE_COMPILE_MACHINE="west"
+        HYPRE_RUN_MACHINE="southeast"
+        HYPRE_REMOTE_DIR="/usr/gapps/hypre/alphaev56-dec-osf4.0f/AUTOTEST"
+	HYPRE_MACHINE_COMMANDS="-m -r $HYPRE_RUN_MACHINE -a 2 -cf -o 1"
 	perform_test
 	HYPRE_MACHINE_COMMANDS="-m -a 2 -dcxfy -t 1 -ns"
         shift;;
@@ -112,14 +115,8 @@ do
 	perform_test
 	HYPRE_MACHINE_COMMANDS="-m -a 2 -dcxfy -t 1 -ns"
         shift;;
-    -tc)
-        HYPRE_ARCH="dec"
-        HYPRE_COMPILE_MACHINE="tc04"
-        HYPRE_RUN_MACHINE="tc10"
-        HYPRE_REMOTE_DIR="/usr/apps/hypre/AUTOTEST"
-	HYPRE_MACHINE_COMMANDS="-m -a 2 -cf -o 1"
-	perform_test
-	HYPRE_MACHINE_COMMANDS="-m -a 2 -dcxfy -t 1 -ns"
+    -purify)
+	HYPRE_MACHINE_COMMANDS="-m -q 2 -a 1 -dcxfy -t 1 -ns"
         shift;;
     -red)
         HYPRE_ARCH="red"
@@ -130,11 +127,23 @@ do
 	perform_test
 	HYPRE_MACHINE_COMMANDS="-m -a 2 -dcxfy -t 1 -ns"
         shift;;
-    -casc)
+    -tc2k)
+        HYPRE_ARCH="dec"
+        HYPRE_COMPILE_MACHINE="tckk126"
+        HYPRE_RUN_MACHINE="tckk100"
+        HYPRE_REMOTE_DIR="/usr/gapps/hypre/alphaev57-dec-osf5.0/AUTOTEST"
+	HYPRE_MACHINE_COMMANDS="-m -a 2 -cf -o 1"
+	perform_test
 	HYPRE_MACHINE_COMMANDS="-m -a 2 -dcxfy -t 1 -ns"
         shift;;
-    -purify)
-	HYPRE_MACHINE_COMMANDS="-m -q 2 -a 1 -dcxfy -t 1 -ns"
+    -tc)
+        HYPRE_ARCH="dec"
+        HYPRE_COMPILE_MACHINE="tc04"
+        HYPRE_RUN_MACHINE="tc10"
+        HYPRE_REMOTE_DIR="/usr/gapps/hypre/alphaev56-dec-osf4.0f/AUTOTEST"
+	HYPRE_MACHINE_COMMANDS="-m -a 2 -cf -o 1"
+	perform_test
+	HYPRE_MACHINE_COMMANDS="-m -a 2 -dcxfy -t 1 -ns"
         shift;;
   esac
 
