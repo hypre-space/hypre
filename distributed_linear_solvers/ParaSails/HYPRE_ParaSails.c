@@ -27,7 +27,29 @@ typedef struct
 hypre_ParaSails;
 
 /*--------------------------------------------------------------------------
- * convert_matrix -  Create and convert distributed matrix to native 
+ * balance_info - Dump out information about the partitioning of the 
+ * matrix, which affects load balance
+ *--------------------------------------------------------------------------*/
+
+static void balance_info(MPI_Comm comm, Matrix *mat)
+{
+    int mype, num_local, i, total;
+
+    MPI_Comm_rank(comm, &mype);
+    num_local = mat->end_row - mat->beg_row + 1;
+
+    /* compute number of nonzeros on local matrix */
+    total = 0;
+    for (i=0; i<num_local; i++)
+        total += mat->lens[i];
+
+    /* each processor prints out its own info */
+    printf("%4d: nrows %d, nnz %d, send %d (%d), recv %d (%d)\n", mype, 
+    num_local, total, mat->num_send, mat->sendlen, mat->num_recv, mat->recvlen);
+}
+
+/*--------------------------------------------------------------------------
+ * convert_matrix - Create and convert distributed matrix to native 
  * data structure of ParaSails
  *--------------------------------------------------------------------------*/
 
@@ -51,6 +73,10 @@ static Matrix *convert_matrix(MPI_Comm comm, HYPRE_DistributedMatrix *distmat)
     }
 
     MatrixComplete(mat);
+
+#if 0
+    balance_info(comm, mat);
+#endif
 
     return mat;
 }
