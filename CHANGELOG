@@ -14,7 +14,8 @@
 #
 #=============================================================================
 
-Version 1.7.5b released, 2002/01/16.
+
+Version 1.7.6b released, 2002/01/27.
 
 - SStruct: Changed SetNeighborBox function to allow the case where the
   NeighborBox does not even intersect the grid.  This functionality
@@ -23,6 +24,10 @@ Version 1.7.5b released, 2002/01/16.
   allow NeighborBox information to be redundantly declared by users.
   This functionality is also convenient in some application situations.
 - SStruct: Optimized the implementation of MatrixSetBoxValues.
+
+Version 1.7.5b released, 2002/01/16.
+
+- SStruct: Modified SetNeighborBox boxes to reach off of the global grid.
 - krylov solvers (PCG, GMRES, BiCGSTAB and CGNR ) are the first
   solvers to use the new definitions for logging, which are 
   logging = 0: no printout,  no storing of norms or rel. res. norms 
