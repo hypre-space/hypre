@@ -129,10 +129,10 @@ do
         shift;;
     -sgi)
         HYPRE_ARCH="sgi"
-        HYPRE_COMPILE_MACHINE="wicked"
-        HYPRE_RUN_MACHINE="wicked"
-        HYPRE_REMOTE_DIR="/home/treadway/AUTOTEST"
-	HYPRE_MACHINE_COMMANDS="-m -a 2 -cf -o 1"
+        HYPRE_COMPILE_MACHINE="riptide"
+        HYPRE_RUN_MACHINE="riptide"
+        HYPRE_REMOTE_DIR="/usr/gapps/hypre/mips-sgi-irix6.5/AUTOTEST"
+	HYPRE_MACHINE_COMMANDS="-m -a 2 -cf"
 	perform_test
 	HYPRE_MACHINE_COMMANDS="-m -a 2 -dcxfy -t 1 -ns"
         shift;;
