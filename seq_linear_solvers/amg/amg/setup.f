@@ -8,7 +8,7 @@ c=====================================================================
 c     
       subroutine setup(levels,nstr,ecg,ncg,ewt,nwt,icdep,idump,
      *     nun,imin,imax,u,f,a,ia,ja,iu,ip,icg,ifg,
-     *     b,ib,jb,ipmn,ipmx,iv,xp,yp,ifc,
+     *     b,ib,jb,ipmn,ipmx,iv,xp,yp,
      *     ndimu,ndimp,ndima,ndimb,lfname)
 c     
 c---------------------------------------------------------------------
@@ -42,11 +42,6 @@ c
       dimension jb (*)
 c     
       dimension icdep(10,10)
-c     
-c     RDF  Not used, eliminate
-c     vector used for forced coarse grid points (formerly icgfix)
-c     
-      dimension ifc(*)
 c     
       character*(*)  lfname
 

@@ -45,7 +45,6 @@ setup_(&AMGS01DataNumLevels(amgs01_data),\
        ProblemIV(problem),\
        ProblemXP(problem),\
        ProblemYP(problem),\
-       AMGS01DataIFC(amgs01_data),\
        &AMGS01DataNDIMU(amgs01_data),\
        &AMGS01DataNDIMP(amgs01_data),\
        &AMGS01DataNDIMA(amgs01_data),\
@@ -60,7 +59,7 @@ void setup_(int *, int *, double *, int *, double *, int *,
 	    int *, int *, int *, int *,
 	    double *, int *, int *,
 	    int *, int *, int *,
-	    double *, double *, int *,
+	    double *, double *,
             int *, int *, int *, int *,
 	    char *, long);
 
@@ -99,6 +98,15 @@ void setup_(int *, int *, double *, int *, double *, int *,
           &AMGS01DataNDIMP(amgs01_data),\
           &AMGS01DataNDIMA(amgs01_data),\
           &AMGS01DataNDIMB(amgs01_data),\
+	  AMGS01DataLevA(amgs01_data),\
+	  AMGS01DataLevB(amgs01_data),\
+	  AMGS01DataLevV(amgs01_data),\
+	  AMGS01DataLevP(amgs01_data),\
+	  AMGS01DataLevI(amgs01_data),\
+	  AMGS01DataNumA(amgs01_data),\
+	  AMGS01DataNumB(amgs01_data),\
+	  AMGS01DataNumV(amgs01_data),\
+	  AMGS01DataNumP(amgs01_data),\
 	  AMGS01DataLogFileName(amgs01_data),\
 	  strlen(AMGS01DataLogFileName(amgs01_data)));\
 }
@@ -111,6 +119,8 @@ void solve_(int *, int *, int *, int *, int *, int *, int *,
 	    double *, int *, int *,
 	    int *, int *, int *, int *,
 	    double *, double *,
+            int *, int *, int *, int *,
+            int *, int *, int *, int *, int *,
             int *, int *, int *, int *,
 	    char *, long);
 

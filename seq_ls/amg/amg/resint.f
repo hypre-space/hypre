@@ -1,30 +1,28 @@
-c=====================================================================
-c     
-c     interpolation/restriction routines
-c     
-c=====================================================================
 
-c---------------------------------------------------------------------
+c=====================================================================
 c     interpolation routine (with V* option)
-c---------------------------------------------------------------------
+c=====================================================================
 
-      subroutine intad(kc,kf,ivstar,nun,imin,imax,
-     *     u,f,a,ia,ja,iu,icg,b,ib,jb)
+      subroutine intad(
+     *     u, icg, b, ib, jb, n,
+     *     uc, fc, ac, iac, jac, iuc, nc,
+     *     ivstar, nun)
 
       implicit real*8 (a-h,o-z)
 
-      dimension imin(25),imax(25)
       dimension u  (*)
-      dimension f  (*)
-      dimension ia (*)
-      dimension a  (*)
-      dimension ja (*)
-      dimension iu (*)
       dimension icg(*)
 
-      dimension ib (*)
       dimension b  (*)
+      dimension ib (*)
       dimension jb (*)
+
+      dimension uc (*)
+      dimension fc (*)
+      dimension ac (*)
+      dimension iac(*)
+      dimension jac(*)
+      dimension iuc(*)
 
       dimension d(10,10),s(10)
 
@@ -40,17 +38,15 @@ c     perform v* step (minimize energy)
             d(n1,n2)=0.e0
  10      continue
  20   continue
-      iclo=imin(kc)
-      ichi=imax(kc)
-      do 40 ic=iclo,ichi
-         n1=iu(ic)
-         s(n1)=s(n1)+f(ic)*u(ic)
-         jclo=ia(ic)
-         jchi=ia(ic+1)-1
+      do 40 ic=1,nc
+         n1=iuc(ic)
+         s(n1)=s(n1)+fc(ic)*uc(ic)
+         jclo=iac(ic)
+         jchi=iac(ic+1)-1
          do 30 jc=jclo,jchi
-            ii=ja(jc)
-            n2=iu(ii)
-            if(n2.ge.n1) d(n1,n2)=d(n1,n2)+a(jc)*u(ii)*u(ic)
+            ii=jac(jc)
+            n2=iuc(ii)
+            if(n2.ge.n1) d(n1,n2)=d(n1,n2)+ac(jc)*uc(ii)*uc(ic)
  30      continue
  40   continue
 
@@ -60,16 +56,15 @@ c     perform v* step (minimize energy)
  55      continue
  50   continue
       call gselim(d,s,nun)
-      do 60 ic=iclo,ichi
-         n=iu(ic)
-         u(ic)=u(ic)*s(n)
+      do 60 ic=1,nc
+         n2=iuc(ic)
+         uc(ic)=uc(ic)*s(n2)
  60   continue
 
 c     perform interpolation
 
- 70   ilo=imin(kf)
-      ihi=imax(kf)
-      do 90 i=ilo,ihi
+ 70   continue
+      do 90 i=1,n
          jlo=ib(i)
          jhi=ib(i+1)-1
          if(icg(i).gt.0) jhi=jlo
@@ -77,44 +72,43 @@ c     perform interpolation
          do 80 j=jlo,jhi
             i2=jb(j)
             ic=icg(i2)
-            u(i)=u(i)+b(j)*u(ic)
+            u(i)=u(i)+b(j)*uc(ic)
  80      continue
  90   continue
       return
       end
 
-c---------------------------------------------------------------------
+c=====================================================================
 c     restriction routine:
 c     compute residual & restrict to coarse grid
 c     transpose of interpolation is used for restriction
-c---------------------------------------------------------------------
+c=====================================================================
 
-      subroutine rscali(k,kc,imin,imax,u,f,a,ia,ja,icg,b,ib,jb)
+      subroutine rscali(
+     *     fc, nc,
+     *     u, f, a, ia, ja, icg, b, ib, jb, n)
 
       implicit real*8 (a-h,o-z)
 
-      dimension imin(25),imax(25)
+      dimension fc (*)
+
       dimension u  (*)
       dimension f  (*)
-      dimension ia (*)
       dimension a  (*)
+      dimension ia (*)
       dimension ja (*)
       dimension icg(*)
 
-      dimension ib (*)
       dimension b  (*)
+      dimension ib (*)
       dimension jb (*)
 
 c---------------------------------------------------------------------
 
-      ilo=imin(k)
-      ihi=imax(k)
-      iclo=imin(kc)
-      ichi=imax(kc)
-      do 10 ic=iclo,ichi
-         f(ic)=0.e0
+      do 10 ic=1,nc
+         fc(ic)=0.e0
  10   continue
-      do 60 i=ilo,ihi
+      do 60 i=1,n
          r=f(i)
          jlo=ia(i)
          jhi=ia(i+1)-1
@@ -127,28 +121,29 @@ c---------------------------------------------------------------------
          if(jlo.gt.jhi) go to 60
          do 50 j=jlo,jhi
             ic=icg(jb(j))
-            f(ic)=f(ic)+r*b(j)
+            fc(ic)=fc(ic)+r*b(j)
  50      continue
  60   continue
       return
       end
 
-c---------------------------------------------------------------------
+c=====================================================================
 c     compute (and print) residual
-c---------------------------------------------------------------------
+c=====================================================================
 
-      subroutine rsdl(k,enrg,res,resv,aip,fu,ru,
-     *     uu,iprt,imin,imax,u,f,a,ia,ja,iu)
+      subroutine rsdl(k,enrg,res,resv,aip,fu,ru,uu,
+     *     imin,imax,u,f,a,ia,ja,iu)
 
       implicit real*8 (a-h,o-z)
 
-      dimension imin(25),imax(25)
       dimension u  (*)
       dimension f  (*)
       dimension ia (*)
       dimension a  (*)
       dimension ja (*)
       dimension iu (*)
+
+      dimension imin(25),imax(25)
 
       dimension resv(10)
 
@@ -192,11 +187,6 @@ c     veh
          res=res+resv(i)
  40   continue
       res=sqrt(res)
-      if(iprt.eq.0) return
-      rate=res/resp
 
-      write(6,9997) k,enrg,res,rate
       return
- 9997 format('  k :',i2,'  a norm :',1p,e9.2,'  residual :',e9.2,
-     *     '  factor :',e9.2)
       end

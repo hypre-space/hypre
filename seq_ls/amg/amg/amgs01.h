@@ -66,9 +66,17 @@ typedef struct
    int     *ipmx;
    int     *icg;
    int     *ifg;
-   int     *ifc;
-   Matrix  **A_array;
-   Matrix  **P_array;
+   Matrix **A_array;
+   Matrix **P_array;
+   int     *leva;
+   int     *levb;
+   int     *levv;
+   int     *levp;
+   int     *levi;
+   int     *numa;
+   int     *numb;
+   int     *numv;
+   int     *nump;
 
    char    *log_file_name;
 
@@ -114,10 +122,18 @@ typedef struct
 #define AMGS01DataIPMX(amgs01_data)        ((amgs01_data) -> ipmx)
 #define AMGS01DataICG(amgs01_data)         ((amgs01_data) -> icg)
 #define AMGS01DataIFG(amgs01_data)         ((amgs01_data) -> ifg)
-#define AMGS01DataIFC(amgs01_data)         ((amgs01_data) -> ifc)
 
 #define AMGS01DataAArray(amgs01_data)      ((amgs01_data) -> A_array)
 #define AMGS01DataPArray(amgs01_data)      ((amgs01_data) -> P_array)
+#define AMGS01DataLevA(amgs01_data)        ((amgs01_data) -> leva)
+#define AMGS01DataLevB(amgs01_data)        ((amgs01_data) -> levb)
+#define AMGS01DataLevV(amgs01_data)        ((amgs01_data) -> levv)
+#define AMGS01DataLevP(amgs01_data)        ((amgs01_data) -> levp)
+#define AMGS01DataLevI(amgs01_data)        ((amgs01_data) -> levi)
+#define AMGS01DataNumA(amgs01_data)        ((amgs01_data) -> numa)
+#define AMGS01DataNumB(amgs01_data)        ((amgs01_data) -> numb)
+#define AMGS01DataNumV(amgs01_data)        ((amgs01_data) -> numv)
+#define AMGS01DataNumP(amgs01_data)        ((amgs01_data) -> nump)
 
 #define AMGS01DataLogFileName(amgs01_data) ((amgs01_data) -> log_file_name)
 

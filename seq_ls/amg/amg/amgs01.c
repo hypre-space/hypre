@@ -42,14 +42,14 @@ Problem     *problem;
 Data        *data;
 {
    AMGS01Data  *amgs01_data = data;
-
+   
    int      levmax        = AMGS01DataLevMax(amgs01_data);
    int      num_variables = ProblemNumVariables(problem);
    int      num_points    = ProblemNumPoints(problem);
-
+   
    Matrix  *A;
    Matrix  *P;
-
+   
    int      num_levels;
    int      ndimu;
    int      ndimp;
@@ -62,54 +62,54 @@ Data        *data;
    int     *ipmx;
    int     *icg;
    int     *ifg;
-   int     *ifc;
-   Matrix  **A_array;
-   Matrix  **P_array;
-
+   Matrix **A_array;
+   Matrix **P_array;
+   int     *leva;
+   int     *levb;
+   int     *levv;
+   int     *levp;
+   int     *levi;
+   int     *numa;
+   int     *numb;
+   int     *numv;
+   int     *nump;
+   
    double  *a;
    int     *ia;
    int     *ja; 
-
+   
    double  *b;
    int     *ib;
    int     *jb;
-
+   
    int     *ip;
    int     *iv;
 
-   int     *leva;
-   int     *numa;
-   int     *levb;
-   int     *numb;
-   int     *levv;
-   int     *numv;
-   int     *levp;
-   int     *nump;
-   int     *levi;
-
-
-
+   int      j, k;
+   int      decr;
+   
+   
    /*----------------------------------------------------------
     * Set new variables
     *----------------------------------------------------------*/
-
+   
    num_levels = levmax;
-
+   
    A  = ProblemA(problem);
    ia = MatrixIA(A);
-
+   
    /* set size variables */
    ndimu = NDIMU(num_variables);
    ndimp = NDIMP(num_points);
    ndima = NDIMA(ia[num_variables]-1);
    ndimb = NDIMB(ia[num_variables]-1);
-
-
+   
+   
    b  = ctalloc(double, ndimb);
    ib = ctalloc(int, ndimu);
    jb = ctalloc(int, ndimb);
    P  = NewMatrix(b, ib, jb, num_variables);
-
+   
    icdep      = ctalloc(int, levmax*levmax);
    imin       = ctalloc(int, levmax);
    imax       = ctalloc(int, levmax);
@@ -117,30 +117,19 @@ Data        *data;
    ipmx       = ctalloc(int, levmax);
    icg        = ctalloc(int, ndimu);
    ifg        = ctalloc(int, ndimu);
-   ifc        = ctalloc(int, ndimu);
-
-   leva       = ctalloc(int, levmax);
-   numa       = ctalloc(int, levmax);
-   levb       = ctalloc(int, levmax);
-   numb       = ctalloc(int, levmax);
-   levv       = ctalloc(int, levmax);
-   numv       = ctalloc(int, levmax);
-   levp       = ctalloc(int, levmax);
-   nump       = ctalloc(int, levmax);
-   levi       = ctalloc(int, levmax);
-
+   
    /* set fine level point and variable bounds */
    ipmn[0] = 1;
    ipmx[0] = num_points;
    imin[0] = 1;
    imax[0] = num_variables;
-
+   
    /*----------------------------------------------------------
     * Fill in the remainder of the AMGS01Data structure
     *----------------------------------------------------------*/
-
+   
    AMGS01DataProblem(amgs01_data)   = problem;
-
+   
    AMGS01DataNumLevels(amgs01_data) = num_levels;
    AMGS01DataA(amgs01_data)         = A;
    AMGS01DataP(amgs01_data)         = P;   
@@ -155,191 +144,208 @@ Data        *data;
    AMGS01DataIPMX(amgs01_data)      = ipmx;
    AMGS01DataICG(amgs01_data)       = icg;
    AMGS01DataIFG(amgs01_data)       = ifg;
-   AMGS01DataIFC(amgs01_data)       = ifc;
-
+   
    /*----------------------------------------------------------
     * Call the setup phase code
     *----------------------------------------------------------*/
-
+   
    CALL_SETUP(problem, amgs01_data);
-
-       
-{
-   int      index, size;
-   int     *data;
-   int      decr;
-
-   FILE    *fp;
-   int      j;
-   int      k;
-   int      num_cols;
-   int      num_coefs;
-   char     fnam[255];
-   char    *fnam_num;
-
+   
+   /*----------------------------------------------------------
+    * Set some local variables
+    *----------------------------------------------------------*/
+   
    num_levels = AMGS01DataNumLevels(amgs01_data);
-   A_array = talloc(Matrix*, num_levels);
-   P_array = talloc(Matrix*, num_levels-1);
-
+   
+   a  = MatrixData(A);
    ia = MatrixIA(A);
    ja = MatrixJA(A);
-   a = MatrixData(A);
+   b  = MatrixData(P);
    ib = MatrixIA(P);
    jb = MatrixJA(P);
-   b = MatrixData(P);
    ip = ProblemIP(problem);
    iv = ProblemIV(problem);
-
-   A_array[0] = A;
-   P_array[0] = P;
-
-/* Shifting indices */
-
-#if 0
+   
+   /*----------------------------------------------------------
+    * Create `lev' and `num' arrays
+    *----------------------------------------------------------*/
+   
+   leva       = ctalloc(int, num_levels);
+   levb       = ctalloc(int, num_levels);
+   levv       = ctalloc(int, num_levels);
+   levp       = ctalloc(int, num_levels);
+   levi       = ctalloc(int, num_levels);
+   numa       = ctalloc(int, num_levels);
+   numb       = ctalloc(int, num_levels);
+   numv       = ctalloc(int, num_levels);
+   nump       = ctalloc(int, num_levels);
    for (j = 0; j < num_levels; j++)
    {
-       leva[j] = ia[imin[j]-1];
-       numa[j] = ia[imax[j]+1-1]-ia[imin[j]-1];
-       levb[j] = ib[imin[j]-1];
-       numb[j] = ib[imax[j]+1-1]-ib[imin[j]-1];
-       levv[j] = imin[j];
-       numv[j] = imax[j] - imin[j] + 1;
-       levp[j] = ipmn[j];
-       nump[j] = ipmx[j] - ipmn[j] + 1;
-       levi[j] = imin[j] + j;
+      leva[j] = ia[imin[j]-1];
+      levb[j] = ib[imin[j]-1];
+      levv[j] = imin[j];
+      levp[j] = ipmn[j];
+      levi[j] = imin[j] + j;
+      numa[j] = ia[imax[j]+1-1]-ia[imin[j]-1];
+      numb[j] = ib[imax[j]+1-1]-ib[imin[j]-1];
+      numv[j] = imax[j] - imin[j] + 1;
+      nump[j] = ipmx[j] - ipmn[j] + 1;
    }
 
+   AMGS01DataAArray(amgs01_data) = A_array;
+   AMGS01DataPArray(amgs01_data) = P_array;
+   AMGS01DataLevA(amgs01_data)   = leva;
+   AMGS01DataLevB(amgs01_data)   = levb;
+   AMGS01DataLevV(amgs01_data)   = levv;
+   AMGS01DataLevP(amgs01_data)   = levp;
+   AMGS01DataLevI(amgs01_data)   = levi;
+   AMGS01DataNumA(amgs01_data)   = numa;
+   AMGS01DataNumB(amgs01_data)   = numb;
+   AMGS01DataNumV(amgs01_data)   = numv;
+   AMGS01DataNumP(amgs01_data)   = nump;
+
+   /*----------------------------------------------------------
+    * Shift index arrays
+    *----------------------------------------------------------*/
+   
+   /* make room for `num(j)+1' entry in `ia' and `ib' */
    for (j = num_levels-1; j > 0; j--)
    {
-       for (k = numv[j]; k >= 0; k--)
-       {
-           ia[levi[j]+k-1] = ia[levv[j]+k-1];
-           ib[levi[j]+k-1] = ib[levv[j]+k-1];
-       }
+      for (k = numv[j]; k >= 0; k--)
+      {
+	 ia[levi[j]+k-1] = ia[levv[j]+k-1];
+	 ib[levi[j]+k-1] = ib[levv[j]+k-1];
+      }
    }
-
+   
+   /* shift `ja' and `jb' */
    decr = numv[0];
    for (j = 1; j < num_levels; j++)
    {
-       for (k = leva[j]; k < leva[j] + numa[j]; k++)
-       {
-           ja[k-1] -= decr;
-       }
-       decr += numv[j];
+      for (k = leva[j]; k < leva[j] + numa[j]; k++)
+      {
+	 ja[k-1] -= decr;
+      }
+      decr += numv[j];
    }
    decr = numv[0];
    for (j = 1; j < num_levels; j++)
    {
-       for (k = levb[j]; k < levb[j] + numb[j]; k++)
-       {
-           jb[k-1] -= decr;
-       }
-       decr += numv[j];
+      for (k = levb[j]; k < levb[j] + numb[j]; k++)
+      {
+	 jb[k-1] -= decr;
+      }
+      decr += numv[j];
    }
-
+   
+   /* shift `ia' and `ib' */
    decr = numa[0];
    for (j = 1; j < num_levels; j++)
    {
-       for (k = levi[j]; k < levi[j] + numv[j] + 1; k++)
-       {
-           ia[k-1] -= decr;
-       }
-       decr += numa[j];
+      for (k = levi[j]; k < levi[j] + numv[j] + 1; k++)
+      {
+	 ia[k-1] -= decr;
+      }
+      decr += numa[j];
    }
    decr = numb[0];
    for (j = 1; j < num_levels; j++)
    {
-       for (k = levi[j]; k < levi[j] + numv[j] + 1; k++)
-       {
-           ib[k-1] -= decr;
-       }
-       decr += numb[j];
+      for (k = levi[j]; k < levi[j] + numv[j] + 1; k++)
+      {
+	 ib[k-1] -= decr;
+      }
+      decr += numb[j];
    }
-
+   
+   /* shift `iv' */
    decr = numv[0];
    for (j = 1; j < num_levels; j++)
    {
-       for (k = levp[j]; k < levp[j] + nump[j]; k++)
-       {
-           iv[k-1] -= decr;
-       }
-       decr += numv[j];
+      for (k = levp[j]; k < levp[j] + nump[j]; k++)
+      {
+	 iv[k-1] -= decr;
+      }
+      decr += numv[j];
    }
-
+   
+   /* shift `ip' */
    decr = nump[0];
    for (j = 1; j < num_levels; j++)
    {
-       for (k = levv[j]; k < levv[j] + numv[j]; k++)
-       {
-           ip[k-1] -= decr;
-       }
-       decr += nump[j];
+      for (k = levv[j]; k < levv[j] + numv[j]; k++)
+      {
+	 ip[k-1] -= decr;
+      }
+      decr += nump[j];
    }
- 
+   
+   /* shift `icg' */
+   decr = numv[0];
+   for (j = 0; j < num_levels - 1; j++)
+   {
+      for (k = levv[j]; k < levv[j] + numv[j]; k++)
+      {
+	 icg[k-1] -= decr;
+      }
+      decr += numv[j+1];
+   }
+   
+   /* shift `imin' and `imax' */
    decr = numv[0];  
    for (j = 1; j < num_levels; j++)
    {
-       imin[j] -= decr;
-       imax[j] -= decr;
-       decr += numv[j];
+      imin[j] -= decr;
+      imax[j] -= decr;
+      decr += numv[j];
    }
- 
+   
+   /* shift `ipmn' and `ipmx' */
    decr = nump[0];  
    for (j = 1; j < num_levels; j++)
    {
-       ipmn[j] -= decr;
-       ipmx[j] -= decr;
-       decr += nump[j];
+      ipmn[j] -= decr;
+      ipmx[j] -= decr;
+      decr += nump[j];
    }
-
-#endif
-
+   
+   /*----------------------------------------------------------
+    * Set up A_array and P_array
+    *----------------------------------------------------------*/
+   
+   A_array = talloc(Matrix*, num_levels);
+   P_array = talloc(Matrix*, num_levels-1);
+   
+   A_array[0] = A;
+   P_array[0] = P;
+   
    for (j = 1; j < num_levels; j++)
    {
-        A_array[j] = NewMatrix(&a[ia[ipmn[j]-1]-1],&ia[ipmn[j]-1], \
-                              &ja[ia[ipmn[j]-1]-1],ipmx[j]-ipmn[j]+1);
+      A_array[j] =
+	 NewMatrix(&a[leva[j]-1], &ia[levi[j]-1], &ja[leva[j]-1], numv[j]);
    }
-
+   
    for (j = 1; j < num_levels-1; j++)
    {
-        P_array[j] = NewMatrix(&b[ib[ipmn[j]-1]-1],&ib[ipmn[j]-1], \
-                              &jb[ib[ipmn[j]-1]-1],ipmx[j]-ipmn[j]+1);
+      P_array[j] =
+	 NewMatrix(&b[levb[j]-1], &ib[levi[j]-1], &jb[levb[j]-1], numv[j]);
    }
-
+   
    AMGS01DataAArray(amgs01_data) = A_array;
    AMGS01DataPArray(amgs01_data) = P_array;   
-
+   
 #if 0
+{
+   char     fnam[255];
+
    for (j = 1; j < num_levels; j++)
    {
-          sprintf(fnam,"level_%d.ysmp",j);
-          WriteYSMP(fnam, A_array[j]);
+      sprintf(fnam,"level_%d.ysmp",j);
+      WriteYSMP(fnam, A_array[j]);
    }
-/*   fclose(fp); */
-
-/*   WriteYSMP("zP.ysmp", AMGS01DataP(amgs01_data)); */
-
-   index = AMGS01DataIMin(amgs01_data)[0] - 1;
-   size = AMGS01DataIMax(amgs01_data)[0] - index;
-   data = AMGS01DataICG(amgs01_data) + index;
-   fp = fopen("zC.vec", "w");
-   fprintf(fp, "1 1\n");
-   fprintf(fp, "%d\n", size);
-   for (j = 0; j < size; j++)
-      fprintf(fp, "%d\n", data[j]);
-   fclose(fp);
-
-/* veh 
-   data = AMGS01DataIFG(amgs01_data) + index;
-   fp = fopen("zF.vec", "w");
-   fprintf(fp, "1 1\n");
-   fprintf(fp, "%d\n", size);
-   for (j = 0; j < size; j++)
-      fprintf(fp, "%d\n", data[j]);
-   fclose(fp);
-*/
-#endif
 }
+#endif
+
 }
 
 /*--------------------------------------------------------------------------

@@ -1,29 +1,20 @@
-C     C### filename: solvr.f
-c     
-c========================================================
-c     
-c     SOLVE: solve for systems
-c     
+
 c=====================================================================
-c     
+c     main solver routine
+c=====================================================================
+
       subroutine solve(levels,ncyc,mu,ntrlx,iprlx,ierlx,iurlx,iprtc,
      *     nun,imin,imax,u,f,a,ia,ja,iu,icg,b,ib,jb,
      *     ipmn,ipmx,iv,ip,xp,yp,
-     *     ndimu,ndimp,ndima,ndimb,lfname)
-c     
-c---------------------------------------------------------------------
-c     
-c     this version uses a predefined restriction operator
-c     rather than the transpose of interpolation.
-c     
-c---------------------------------------------------------------------
-c     
+     *     ndimu,ndimp,ndima,ndimb,
+     *     leva, levb, levv, levp, levi,
+     *     numa, numb, numv, nump,
+     *     lfname)
+
       implicit real*8 (a-h,o-z)
-c     veh next added
+
       integer told,tnew,ttot
-c     
-c     include 'params.amg'
-c     
+
       dimension imin(25),imax(25)
       dimension u  (*)
       dimension f  (*)
@@ -33,7 +24,7 @@ c
       dimension iu (*)
       dimension icg(*)
       dimension iv (*)
-c     
+
       dimension ip (*)
       dimension xp (*)
       dimension yp (*)
@@ -43,24 +34,36 @@ c
       dimension ib (*)
       dimension b  (*)
       dimension jb (*)
-c     
-c     =>   solution parameters (u/d/f/c)
-c     
+
+c     solution parameters (u/d/f/c)
+
       dimension mu (25)
 
       dimension ntrlx(4)
       dimension iprlx(4)
       dimension ierlx(4)
       dimension iurlx(4)
-c     
+
+c     level arrays
+
+      dimension leva(*)
+      dimension levb(*)
+      dimension levv(*)
+      dimension levp(*)
+      dimension levi(*)
+      dimension numa(*)
+      dimension numb(*)
+      dimension numv(*)
+      dimension nump(*)
+
       character*(*)  lfname
-c     
+
 c     storage for convergence data
-c     
+
       dimension resv(20)
-c     
+
 c     work space
-c     
+
       dimension iarr(10)
 
 c---------------------------------------------------------------------
@@ -72,11 +75,10 @@ c---------------------------------------------------------------------
       write(6,9000)
  9000 format(/'AMG SOLUTION INFO:'/)
 
-c     
 c---------------------------------------------------------------------
-c     
+
 c===  > decode ncyc
-c     
+
       call idec(ncyc,3,ndig,iarr)
       ivstar=iarr(1)-1
       ifcycl=iarr(2)
@@ -85,20 +87,21 @@ c
          close(6)
          return
       endif
-c     
+
 c===  > find initial residual
-c     
+
       if(iprtc.ge.0) then
-         call rsdl(1,enrg,res,resv,aip,fu,ru,uu,0,
+         call rsdl(1,enrg,res,resv,aip,fu,ru,uu,
      *        imin,imax,u,f,a,ia,ja,iu)
          resi = res
          write(6,1000)
          write(6,1100) res,enrg
       endif
+
 c     veh ------------------------------------------------------------
 c     veh  test: compute 2-norm of rhs for relative residual
 c     veh
-      nv = imax(1)
+      nv = numv(1)
       fnorm = 0.0
       do 11, i=1,nv
          fnorm = fnorm + f(i)*f(i)
@@ -108,27 +111,29 @@ c     veh
 c     veh
 c     veh  end test: compute 2-norm of rhs for relative residual
 c     veh ------------------------------------------------------------
-c     
+
 c===  > cycling
-c     
+
       call ctime(told)
       do 100 ncy=1,ncycle
-c     
+
          icycmp=0
-c     
+
          call cycle(levels,mu,ifcycl,ivstar,
      *        ntrlx,iprlx,ierlx,iurlx,iprtc,icycmp,
      *        nun,imin,imax,u,f,a,ia,ja,iu,icg,
      *        b,ib,jb,ipmn,ipmx,iv,ip,xp,yp,
-     *        ndimu,ndimp,ndima,ndimb)
+     *        ndimu,ndimp,ndima,ndimb,
+     *        leva, levb, levv, levp, levi,
+     *        numa, numb, numv, nump)
 
          if(iprtc.ge.0) then
-c     veh
+
 c     veh relative residual temporarily added: relres,
-c     veh
+
             engold = enrg
             resold=res
-            call rsdl(1,enrg,res,resv,aip,fu,ru,uu,0,
+            call rsdl(1,enrg,res,resv,aip,fu,ru,uu,
      *           imin,imax,u,f,a,ia,ja,iu)
             factor=res/resold
             relres = res/fnorm
@@ -145,9 +150,15 @@ c     veh
       ttot=ttot+tnew-told
       tcyc=float(ttot)/float(ncycle)
       write(6,2000) tcyc,ttot
-      cmpcy=float(icycmp)/float(ia(imax(1)+1)-1)
-      cmpop=float(ia(imax(levels)+1)-1)/float(ia(imax(1)+1)-1)
-      cmpgr=float(imax(levels))/float(imax(1))
+      ntotv=0
+      ntota=0
+      do 500 k=1,levels
+         ntotv=ntotv+numv(k)
+         ntota=ntota+numa(k)
+ 500  continue
+      cmpgr=float(ntotv)/numv(1)
+      cmpop=float(ntota)/numa(1)
+      cmpcy=float(icycmp)/numa(1)
       write(6,3000) cmpgr,cmpop,cmpcy
 
       close(6)
@@ -170,16 +181,9 @@ c     veh
      *     5x,'             cycle    = ',f10.5)
 
       end
-c     
-      subroutine cycle(levels,mu,ifcycl,ivstar,
-     *     ntrlx,iprlx,ierlx,iurlx,iprtc,icomp,
-     *     nun,imin,imax,u,f,a,ia,ja,iu,icg,
-     *     b,ib,jb,ipmn,ipmx,iv,ip,xp,yp,
-     *     ndimu,ndimp,ndima,ndimb)
-c     
-c---------------------------------------------------------------------
-c     
-c     cycling routine
+
+c=====================================================================
+c     cycling routine:
 c     
 c     1. ntrf can have several meanings (nr1,nr2)
 c     nr1 defines the first fine grid sweep
@@ -204,13 +208,18 @@ c     b. nc(k) is initialized to mu(k-1)+ifcycl for k>1.
 c     
 c     c. During cycling, when going down to level k,
 c     nc(k) is set to max0(nc(k),mu(k-1))
-c     
-c---------------------------------------------------------------------
-c     
+c=====================================================================
+
+      subroutine cycle(levels,mu,ifcycl,ivstar,
+     *     ntrlx,iprlx,ierlx,iurlx,iprtc,icomp,
+     *     nun,imin,imax,u,f,a,ia,ja,iu,icg,
+     *     b,ib,jb,ipmn,ipmx,iv,ip,xp,yp,
+     *     ndimu,ndimp,ndima,ndimb,
+     *     leva, levb, levv, levp, levi,
+     *     numa, numb, numv, nump)
+
       implicit real*8 (a-h,o-z)
-c     
-c     include 'params.amg'
-c     
+
       dimension imin(25),imax(25)
       dimension u  (*)
       dimension f  (*)
@@ -219,7 +228,7 @@ c
       dimension ja (*)
       dimension iu (*)
       dimension icg(*)
-c     
+
       dimension ip (*)
       dimension xp (*)
       dimension yp (*)
@@ -230,37 +239,47 @@ c
       dimension ib (*)
       dimension b  (*)
       dimension jb (*)
-c     
+
+c     level arrays
+
+      dimension leva(*)
+      dimension levb(*)
+      dimension levv(*)
+      dimension levp(*)
+      dimension levi(*)
+      dimension numa(*)
+      dimension numb(*)
+      dimension numv(*)
+      dimension nump(*)
+
 c     =>   solution parameters (u/d/f/c)
-c     
+
       dimension mu (25)
 
       dimension ntrlx(4)
       dimension iprlx(4)
       dimension ierlx(4)
       dimension iurlx(4)
-c     
+
 c     storage for convergence/output data
-c     
+
       dimension resv(20),enrgf(20)
       dimension ll(45),nc(25),ity(10),ipt(10),ieq(10),iun(10)
-c     
+
       dimension iarr(10)
-c     
+
 c---------------------------------------------------------------------
-c     
-c===  > set cycling parameters
-c     
+
 c     initialize level counter for all levels
-c     
+
       m=levels
       nc(1)=1
       do 10 k=2,m
          nc(k)=mu(k-1)+ifcycl
  10   continue
-c     
+
 c     set relaxation parameters
-c     
+
       ntrf=ntrlx(1)
       ntrd=ntrlx(2)
       ntru=ntrlx(3)
@@ -280,23 +299,19 @@ c
       iurd=iurlx(2)
       iuru=iurlx(3)
       iurc=iurlx(4)
-c     
+
 c     set finer level energy correction to zero
-c     
+
       enrgf(1)=0.e0
-c     
-c     set level
-c     
-      k=1
-c     
+
 c     initialize output quantities
-c     
+
       nun1=min0(nun,4)
       lltop=0
       if(iprtc.gt.0) write(6,3999)
-c     
+
 c     set initial cycling parameters
-c     
+
       k=1
       ntrx=ntrf
       iuns=iurf
@@ -308,13 +323,13 @@ c
          ieqs=ierd
          ipts=iprd
       endif
-c     
+
 c     decode cycling parameters
-c     
+
  100  if(ntrx.le.9) go to 140
-c     
+
 c     decode ntrx (number & type of relaxation sweeps)
-c     
+
       call idec(ntrx,9,ndig,iarr)
       nrelax=iarr(1)
       ii=0
@@ -326,9 +341,9 @@ c
             ity(ii)=iarr(i)
          endif
  110  continue
-c     
+
 c===  > decode and test additional relaxation parameters
-c     
+
       call idec(iuns,9,ndig,iun)
       if(ndig.lt.ii) stop 'iuns'
 
@@ -337,9 +352,9 @@ c
 
       call idec(ipts,9,ndig,ipt)
       if(ndig.lt.ii) stop 'ipts'
-c     
+
 c     compute & print residuals
-c     
+
       if(iprtc.ge.k) then
 
          if(lltop.ne.0) then
@@ -347,28 +362,39 @@ c
             lltop=0
          endif
 
-         call rsdl(k,enrg,res,resv,aip,0,imin,imax,u,f,a,ia,ja,iu)
+         call rsdl(1,enrg,res,resv,aip,fu,ru,uu,
+     *        imin(k),imax(k),
+     *        u(levv(k)),f(levv(k)),
+     *        a(leva(k)),ia(levi(k)),ja(leva(k)),iu(levv(k)))
          enrgt=enrg+enrgf(k)
          write(6,6001) k,res,enrgt,(resv(i),i=1,nun)
 
       endif
-c     
+
 c===  > relaxation
-c     
+
       do 130 n=1,nrelax
 
-         icomp=icomp+ia(imax(k)+1)-ia(imin(k))
-c     
+         icomp=icomp+numa(k)
+
 c     perform partial sweeps
-c     
+
          do 120 i=1,ii
-            call relax(k,ity(i),ipt(i),ieq(i),iun(i),
-     *           imin,imax,u,f,a,ia,ja,iu,icg,ipmn,ipmx,iv)
-c     
+            call relax(1,ity(i),ipt(i),ieq(i),iun(i),
+     *           imin(k),imax(k),
+     *           u(levv(k)),f(levv(k)),
+     *           a(leva(k)),ia(levi(k)),ja(leva(k)),iu(levv(k)),
+     *           icg(levv(k)),
+     *           ipmn(k),ipmx(k),
+     *           iv(levp(k)))
+
 c     compute & print residuals
-c     
+
             if(iprtc.ge.k) then
-               call rsdl(k,enrg,res,resv,aip,0,imin,imax,u,f,a,ia,ja,iu)
+               call rsdl(1,enrg,res,resv,aip,fu,ru,uu,
+     *              imin(k),imax(k),
+     *              u(levv(k)),f(levv(k)),
+     *              a(leva(k)),ia(levi(k)),ja(leva(k)),iu(levv(k)))
                enrgt=enrg+enrgf(k)
                write(6,6000) k,ity(i),ipt(i),ieq(i),iun(i),res,enrgt,
      *              (resv(iii),iii=1,nun)
@@ -377,7 +403,7 @@ c
  120     continue
 
  130  continue
-c     
+
       if(iprtc.gt.0.and.iprtc.lt.k) then
          lltop=lltop+1
          ll(lltop)=k
@@ -390,15 +416,23 @@ c
  140  nc(k)=nc(k)-1
       if(nc(k).ge.0.and.k.ne.m) go to 300
       if(k.eq.1) go to 400
-c     
+
 c===  > go to next finer grid
-c     
- 200  k=k-1
-      call intad(k+1,k,ivstar,nun,imin,imax,
-     *     u,f,a,ia,ja,iu,icg,b,ib,jb)
-c     
+
+ 200  kc=k
+      kf=k-1
+      call intad(
+     *     u(levv(kf)), icg(levv(kf)),
+     *     b(levb(kf)), ib(levi(kf)), jb(levb(kf)),
+     *     numv(kf),
+     *     u(levv(kc)), f(levv(kc)),
+     *     a(leva(kc)), ia(levi(kc)), ja(leva(kc)), iu(levv(kc)),
+     *     numv(kc),
+     *     ivstar, nun)
+      k=k-1
+
 c     set cycling parameters
-c     
+
       ntrx=ntru
       iuns=iuru
       ieqs=ieru
@@ -410,20 +444,29 @@ c
          ipts=iprf
       endif
       go to 100
-c     
+
 c===  > go to next coarser grid
-c     
- 300  k=k+1
-      enrgf(k)=enrgt
-      call putz(k,imin,imax,u)
-      call rscali(k-1,k,imin,imax,u,f,a,ia,ja,icg,b,ib,jb)
-c     
+
+ 300  kf=k
+      kc=k+1
+      enrgf(kc)=enrgt
+      call putz(1,imin(kc),imax(kc),u(levv(kc)))
+      call rscali(
+     *     f(levv(kc)),
+     *     numv(kc),
+     *     u(levv(kf)), f(levv(kf)),
+     *     a(leva(kf)), ia(levi(kf)), ja(leva(kf)),
+     *     icg(levv(kf)),
+     *     b(levb(kf)), ib(levi(kf)), jb(levb(kf)),
+     *     numv(kf))
+      k=k+1
+
 c     reset level counters for coarser level
-c     
+
       nc(k)=max0(nc(k),mu(k-1))
-c     
+
 c     set cycling parameters
-c     
+
       ntrx=ntrd
       iuns=iurd
       ieqs=ierd
@@ -435,7 +478,7 @@ c
          ipts=iprc
       endif
       go to 100
-c     
+
  400  continue
 
  3999 format(/'    k  tpeu  residual    energy  res 1,2,...')
@@ -445,4 +488,3 @@ c
 
       return
       end
-c     
