@@ -15,7 +15,11 @@ HEADERS =\
  protos.h
 
 FILES =\
+ coarsen.c\
+ indepset.c\
  par_rap.c\
+ par_rap_communication.c\
+ random.c\
  transpose.c
 
 OBJS = ${FILES:.c=.o}

@@ -12,8 +12,7 @@
 #include <math.h>
 
 #include "mpi.h"
-#include "../utilities/memory.h"
-/* #include "utilities/timing.h" */
+#include "../utilities/hypre_utilities.h"
 
 #include "../parcsr_matrix_vector/communication.h"
 #include "../seq_matrix_vector/HYPRE_mv.h"
