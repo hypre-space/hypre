@@ -10,6 +10,13 @@
 #ifndef hypre_THREADING_HEADER
 #define hypre_THREADING_HEADER
 
+#ifdef HYPRE_USING_OPENMP
+#define hypre_NumThreads 4
+#endif
+#ifdef HYPRE_USING_PGCC_SMP
+#define hypre_NumThreads 2
+#endif
+
 #ifdef HYPRE_USE_PTHREADS
 
 #ifndef MAX_QUEUE
@@ -17,7 +24,6 @@
 #endif
 
 #include<pthread.h>
-#include "utilities.h"
 
 /* hypre_work_proc_t typedef'd to be a pointer to a function with a void*
    argument and a void return type */
