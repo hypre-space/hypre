@@ -25,6 +25,7 @@ define([AC_CACHE_SAVE], )dnl
 
 AC_INIT(utilities/memory.c)
 AC_CONFIG_HEADER(HYPRE_config.h)
+AC_CONFIG_AUX_DIR(config)
 AC_PREFIX_DEFAULT("..")
 
 
@@ -53,9 +54,9 @@ casc_using_babel=no
 casc_using_mli=no
 casc_using_petsc=no
 casc_using_openmp=no   
-casc_using_ibm_smp=no
-casc_using_sgi_smp=no
-casc_using_pgcc_smp=no
+#casc_using_ibm_smp=no
+#casc_using_sgi_smp=no
+#casc_using_pgcc_smp=no
 
 
 AC_ARG_WITH(CC,
@@ -167,34 +168,11 @@ AC_ARG_WITH(insure,
    casc_user_chose_compilers=yes
  fi
  case "${withval}" in
-   yes) PREPEND="" ;;
+   yes) PREPEND="insure" ;;
    no)  PREPEND="" ;;
-   *)   PREPEND="" 
-      CFLAGS="$CFLAGS -g $withval"
-      CXXFLAGS="$CXXFLAGS -g $withval"
-      ;;
+   *)   PREPEND="insure $withval" ;;
  esac],
 [PREPEND=""]
-)
-
-AC_ARG_WITH(insure-to-file,
-[  --with-insure-to-file   direct insure output to the file \"insure.log\"],
-[if test "$casc_user_chose_compilers" = "no"
- then
-   CC=insure
-   CXX=insure
-   CFLAGS="$CFLAGS -Zoi \"report_file insure.log\""
-   CXXFLAGS="$CXXFLAGS -Zoi \"report_file insure.log\""
-   casc_user_chose_compilers=yes
- fi
- case "${withval}" in
-   yes) PREPEND="";;
-   no)  PREPEND="" ;;
-   *)   PREPEND=""
-      CFLAGS="$CFLAGS -g $withval"
-      CXXFLAGS="$CXXFLAGS -g $withval"
-      ;;
- esac]
 )
 
 AC_ARG_WITH(purify,
@@ -220,6 +198,23 @@ AC_ARG_WITH(purify,
    *)   PREPEND="purify $withval" ;;
  esac],
 [PREPEND=""]
+)
+
+AC_ARG_WITH(insure-to-file,
+[  --with-insure-to-file   direct insure output to the file \"insure.log\"],
+[if test "$casc_user_chose_compilers" = "no"
+ then
+   CC=insure
+   CXX=insure
+   CFLAGS="$CFLAGS -Zoi \"report_file insure.log\""
+   CXXFLAGS="$CXXFLAGS -Zoi \"report_file insure.log\""
+   casc_user_chose_compilers=yes
+ fi
+ case "${withval}" in
+   yes) PREPEND="insure -Zoi \"report_file insure.log\"";;
+   no)  PREPEND="" ;;
+   *)   PREPEND="insure $withval" ;;
+ esac]
 )
 
 AC_ARG_WITH(purify-to-file,
@@ -421,35 +416,35 @@ AC_ARG_WITH(openmp,
 [casc_using_openmp=no]
 )
 
-AC_ARG_WITH(IBM_smp,
-[  --with-IBM_smp          use IBM SMP--not yet supported],
-[case "${withval}" in
-   yes) casc_using_ibm_smp=yes
-     AC_DEFINE(HYPRE_USING_IBM_SMP) ;;
-   no)  casc_using_ibm_smp=no ;;
- esac],
-[casc_using_ibm_smp=no]
-)
+#AC_ARG_WITH(IBM_smp,
+#[  --with-IBM_smp          use IBM SMP--not yet supported],
+#[case "${withval}" in
+#   yes) casc_using_ibm_smp=yes
+#     AC_DEFINE(HYPRE_USING_IBM_SMP) ;;
+#   no)  casc_using_ibm_smp=no ;;
+# esac],
+#[casc_using_ibm_smp=no]
+#)
 
-AC_ARG_WITH(SGI_smp,
-[  --with-SGI_smp          use SGI SMP--not yet supported],
-[case "${withval}" in
-   yes) casc_using_sgi_smp=yes
-     AC_DEFINE(HYPRE_USING_SGI_SMP) ;;
-   no)  casc_using_sgi_smp=no ;;
- esac],
-[casc_using_sgi_smp=no]
-)
+#AC_ARG_WITH(SGI_smp,
+#[  --with-SGI_smp          use SGI SMP--not yet supported],
+#[case "${withval}" in
+#   yes) casc_using_sgi_smp=yes
+#     AC_DEFINE(HYPRE_USING_SGI_SMP) ;;
+#   no)  casc_using_sgi_smp=no ;;
+# esac],
+#[casc_using_sgi_smp=no]
+#)
 
-AC_ARG_WITH(pgcc_smp,
-[  --with-pgcc_smp         use pgcc SMP (Red)--not yet supported],
-[case "${withval}" in
-   yes) casc_using_pgcc_smp=yes 
-     AC_DEFINE(HYPRE_USING_PGCC_SMP) ;;
-   no)  casc_using_sgi_smp=no ;;
- esac],
-[casc_using_pgcc_smp=no]
-)
+#AC_ARG_WITH(pgcc_smp,
+#[  --with-pgcc_smp         use pgcc SMP (Red)--not yet supported],
+#[case "${withval}" in
+#   yes) casc_using_pgcc_smp=yes 
+#     AC_DEFINE(HYPRE_USING_PGCC_SMP) ;;
+#   no)  casc_using_sgi_smp=no ;;
+# esac],
+#[casc_using_pgcc_smp=no]
+#)
 
 AC_ARG_WITH(blas,
 [  --with-blas             search for and use the BLAS], 
@@ -496,7 +491,38 @@ $HYPRE_TOP_SRC_DIR/PETSc_ls/ParILUT "
 [casc_using_petsc=no]
 )
 
-AC_PROG_RANLIB
+AC_ARG_WITH(FEI_BASE_DIR,
+[  --with-FEI_BASE_DIR     specify the directory where the fei header
+                          files live.], 
+[case "${withval}" in
+   yes) FEI_BASE_DIR="" ;;
+   no)  FEI_BASE_DIR="" ;;
+   *)   FEI_BASE_DIR=$wddithval ;;
+ esac],
+[FEI_BASE_DIR=""]
+)
+
+AC_ARG_WITH(FEI_LIB_DIR,
+[  --with-FEI_LIB_DIR      specify an additional directory for fei library
+                          intalls.], 
+[case "${withval}" in
+   yes) FEI_LIB_DIR="" ;;
+   no)  FEI_LIB_DIR="" ;;
+   *)   FEI_LIB_DIR=$withval ;;
+ esac],
+[FEI_LIB_DIR=""]
+)
+
+AC_ARG_WITH(FEI_INC_DIR,
+[  --with-FEI_INC_DIR     specify an additional directory for fei include
+                          installs.], 
+[case "${withval}" in
+   yes) FEI_INC_DIR="" ;;
+   no)  FEI_INC_DIR="" ;;
+   *)   FEI_INC_DIR=$withval ;;
+ esac],
+[FEI_INC_DIR=""]
+)
 
 dnl *********************************************************************
 dnl * For each ARCH (6 supported platforms and 1 default) the "best" 
@@ -687,12 +713,12 @@ case $ARCH in
       if test "$casc_using_mpi" = "no" &&
         test "$casc_using_openmp" = "no"
       then
-        AC_CHECK_PROGS(CC, ccc cc gcc kcc)
+        AC_CHECK_PROGS(CC, ccc icc pgcc cc gcc kcc)
       else
         if test "$casc_using_openmp" = "no" ; then
-          AC_CHECK_PROGS(CC, mpicc)
+          AC_CHECK_PROGS(CC, icc mpicc)
         else
-          AC_CHECK_PROGS(CC,pgcc) 
+          AC_CHECK_PROGS(CC, icc pgcc) 
         fi
       fi
     fi
@@ -700,12 +726,12 @@ case $ARCH in
       if test "$casc_using_mpi" = "no" &&
         test "$casc_using_openmp" = "no"
       then
-        AC_CHECK_PROGS(CXX, CC g++)
+        AC_CHECK_PROGS(CXX, icc pgCC CC g++)
       else
         if test "$casc_using_openmp" = "no" ; then
-          AC_CHECK_PROGS(CXX, mpiCC)
+          AC_CHECK_PROGS(CXX, icc mpiCC)
         else
-          AC_CHECK_PROGS(CXX,pgCC) 
+          AC_CHECK_PROGS(CXX, icc pgCC) 
         fi
       fi
     fi
@@ -713,47 +739,80 @@ case $ARCH in
       if test "$casc_using_mpi" = "no" &&
         test "$casc_using_openmp" = "no"
       then
-        AC_CHECK_PROGS(F77, fort f77 g77)
+        AC_CHECK_PROGS(F77, ifc pgf77 fort f77 g77)
       else
         if test "$casc_using_openmp" = "no" ; then
-          AC_CHECK_PROGS(F77, mpif77)
+          AC_CHECK_PROGS(F77, ifc mpif77)
         else
-          AC_CHECK_PROGS(F77,pgf77)
+          AC_CHECK_PROGS(F77, ifc pgf77)
         fi
+      fi
+    fi
+    if test "$casc_using_mpi" = "yes" &&
+       test "$casc_user_chose_mpi" = "no"
+    then
+      if test "$CC" = "icc" ; then
+         MPIINCLUDE="-I/usr/lib/mpi_ifc/include"
+         MPILIBS="-lmpi -lelan -lmpif -lelan3 -lrmscall"
+         MPILIBDIRS="-L/usr/lib/mpi_ifc/lib"
       fi
     fi
 
     if test "$casc_using_openmp" = "no" ; then
       if test -z "$CFLAGS"; then
-        if test "$CC" = "pgcc ; then
+        if test "$CC" = "pgcc" ; then
           CASC_SET_COPT(-fast)
+        elif test "$CC" = "icc" ; then
+          CASC_SET_COPT(-O3 -xW -tpp7 -prefetch -Zp16)
         else
           CASC_SET_COPT(-O)
         fi
       fi
       if test -z "$CXXFLAGS"; then
-        if test "$CXX" = "pgCC ; then
+        if test "$CXX" = "pgCC" ; then
           CASC_SET_CXXOPT(-fast)
+        elif test "$CXX" = "icc" ; then
+          CASC_SET_CXXOPT(-O3 -xW -tpp7 -prefetch -Zp16)
         else
           CASC_SET_CXXOPT(-O)
         fi
       fi
       if test -z "$F77FLAGS"; then
-        if test "$F77" = "pgf77 ; then
+        if test "$F77" = "pgf77" ; then
           CASC_SET_FOPT(-fast)
+        elif test "$F77" = "ifc" ; then
+          CASC_SET_FOPT(-O3 -xW -tpp7 -prefetch -Zp16)
         else
           CASC_SET_FOPT(-O)
         fi
       fi
     else
       if test -z "$CFLAGS"; then
-        CASC_SET_COPT(-fast -mp -I/usr/include -I/usr/apps/pgi/3.2/linux86/include)
+        if test "$CC" = "pgcc" ; then
+          CASC_SET_COPT(-fast -mp)
+        elif test "$CC" = "icc" ; then
+          CASC_SET_COPT(-O3 -openmp -xW -tpp7 -prefetch -Zp16)
+        else
+          CASC_SET_COPT(-O)
+        fi
       fi
       if test -z "$CXXFLAGS"; then
-        CASC_SET_CXXOPT(-fast -mp -I/usr/include -I/usr/apps/pgi/3.2/linux86/include -I/usr/apps/pgi/3.2/linux86/include/CC)
+        if test "$CXX" = "pgCC" ; then
+          CASC_SET_CXXOPT(-fast -mp)
+        elif test "$CXX" = "icc" ; then
+          CASC_SET_CXXOPT(-O3 -openmp -xW -tpp7 -prefetch -Zp16)
+        else
+          CASC_SET_CXXOPT(-O)
+        fi
       fi
       if test -z "$F77FLAGS"; then
-        CASC_SET_FOPT(-fast -mp)
+        if test "$F77" = "pgf77" ; then
+          CASC_SET_FOPT(-fast -mp)
+        elif test "$F77" = "ifc" ; then
+          CASC_SET_FOPT(-O3 -openmp -xW -tpp7 -prefetch -Zp16)
+        else
+          CASC_SET_FOPT(-O)
+        fi
       fi
     fi
     CASC_SET_CDEBUG(-g)
@@ -1170,6 +1229,11 @@ dnl * a check to find out how to use the preprocessors.  This must
 dnl * be done AFTER compilers are set.
 dnl * ******************************************************************
 
+
+AC_PROG_RANLIB
+#AC_PROG_CC
+#AC_PROG_CXX
+#AC_PROG_F77
 AC_PROG_CPP
 AC_PROG_CXXCPP
 CASC_PROG_FPP
@@ -1208,7 +1272,7 @@ BABELLIBFLAGS="-L../babel/Hypre -lhypre_class -L${BABEL_DIR}/babel -lbabel"
 
 dnl   CASC_FIND_BABEL
 
-  AM_INIT_AUTOMAKE()
+  AM_INIT_AUTOMAKE(hypre,1.7,FALSE)
 fi
 
 if test "$casc_using_mli" = "yes"
@@ -1351,6 +1415,11 @@ AC_SUBST(HYPRE_PETSCDEFS)
 AC_SUBST(HYPRE_PETSCLIBS)
 AC_SUBST(HYPRE_PETSCLIBDIRS)
 
+dnl *FEI-helper variables for installing libraries, and includes, and
+dnl * build options
+AC_SUBST(FEI_BASE_DIR)
+AC_SUBST(FEI_LIB_DIR)
+AC_SUBST(FEI_INC_DIR)
 
 AC_SUBST(HYPRE_TOP_SRC_DIR)
 

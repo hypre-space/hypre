@@ -15,7 +15,8 @@ VPATH = @srcdir@
 CC = @CC@
 CXX = @CXX@
 
-FEI_BASE_DIR    = $(srcdir)/../fei-base
+#FEI_BASE_DIR = @FEI_BASE_DIR@
+FEI_BASE_DIR    = $$HYPRE_FEI_BASE_DIR
 SUPERLU_INCLUDE = -I$(srcdir)/../SuperLU
 SUPERLU_LIB     = -L$(srcdir)/../SuperLU
 MLPACK_INCLUDE  = 
@@ -116,8 +117,8 @@ lib: all
 install: all
 	@cp -f $(srcdir)/HYPRE_LinSysCore.h $$HYPRE_INSTALL_DIR/include
 	@cp -f $(srcdir)/../fei-base/Lookup.h $$HYPRE_INSTALL_DIR/include
-	@cp -f $(srcdir)/cfei_hypre.h $$HYPRE_INSTALL_DIR/include
-	@cp -f $(srcdir)/cfei-hypre.h $$HYPRE_INSTALL_DIR/include
+	@cp -f $(srcdir)/cfei_hypre.h $$HYPRE_FEI_INC_DIR/include
+	@cp -f $(srcdir)/cfei-hypre.h $$HYPRE_FEI_INC_DIR/include
 	@cp -f libHYPRE_FEI.a $$HYPRE_INSTALL_DIR/lib
 
 driver: driver.o libHYPRE_FEI.a

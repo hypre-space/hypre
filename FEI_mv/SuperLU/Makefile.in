@@ -13,6 +13,8 @@
 srcdir = @srcdir@
 VPATH = @srcdir@
 
+fei_lib_directory = @FEI_LIB_DIR@
+hypre_fei_lib_directory = ${fei_lib_directory:=$$HYPRE_INSTALL_DIR/lib}
 
 CC = @CC@
 
@@ -88,8 +90,8 @@ OBJS = ${FILES:.c=.o}
 all: libHYPRE_superlu.a 
 
 install: all
-	@cp -f *.h $$HYPRE_INSTALL_DIR/include/.
-	@cp -f libHYPRE_*.a $$HYPRE_INSTALL_DIR/lib/.
+#	@cp -f *.h $$HYPRE_INSTALL_DIR/include/.
+	@cp -f libHYPRE_*.a $$HYPRE_FEI_LIB_DIR/.
 
 clean:
 	@rm -f *.o

@@ -12,6 +12,10 @@ SHELL = /bin/sh
 srcdir = @srcdir@
 VPATH = @srcdir@
 
+FEI_BASE_DIR = @FEI_BASE_DIR@
+FEI_LIB_DIR = @FEI_LIB_DIR@
+FEI_INC_DIR = @FEI_INC_DIR@
+
 HYPRE_BASIC_DIRS =\
  blas\
  utilities
@@ -149,7 +153,22 @@ IJ: base
 fei: IJ krylov
 	@ \
 	HYPRE_INSTALL_DIR=`pwd`/hypre; \
+	HYPRE_FEI_BASE_DIR=$$FEI_BASE_DIR; \
+	HYPRE_FEI_LIB_DIR=$$FEI_LIB_DIR; \
+	HYPRE_FEI_INC_DIR=$$FEI_INC_DIR; \
+	if [ ! "$$FEI_BASE_DIR" ]; then \
+	  HYPRE_FEI_BASE_DIR=$(srcdir)/../fei-base; \
+	fi; \
+	if [ ! "$$FEI_LIB_DIR" ]; then \
+	  HYPRE_FEI_LIB_DIR=`pwd`/hypre/lib; \
+	fi; \
+	if [ ! "$$FEI_INC_DIR" ]; then \
+	  HYPRE_FEI_INC_DIR=`pwd`/hypre/include; \
+	fi; \
 	export HYPRE_INSTALL_DIR; \
+	export HYPRE_FEI_BASE_DIR; \
+	export HYPRE_FEI_LIB_DIR; \
+	export HYPRE_FEI_INC_DIR; \
 	for i in ${HYPRE_FEI_DIRS}; \
 	do \
 	  if [ -d $$i ]; \
@@ -168,14 +187,29 @@ fei: IJ krylov
 	      (cd hypre/tmp; mv -f qsort_si.o psort_si.o;); \
 	   fi; \
 	done; \
-	(cd hypre/tmp; ar rcu ../lib/libHYPRE_LSI.a *.o;); \
+	(cd hypre/tmp; ar rcu $$HYPRE_FEI_LIB_DIR/libHYPRE_LSI.a *.o;); \
 	rm -rf hypre/tmp
 
 # special autotest target
 nofei: IJ krylov
 	@ \
 	HYPRE_INSTALL_DIR=`pwd`/hypre; \
+	HYPRE_FEI_BASE_DIR=$$FEI_BASE_DIR; \
+	HYPRE_FEI_LIB_DIR=$$FEI_LIB_DIR; \
+	HYPRE_FEI_INC_DIR=$$FEI_INC_DIR; \
+	if [ ! "$$FEI_BASE_DIR" ]; then \
+	  HYPRE_FEI_BASE_DIR=$(srcdir)/../fei-base; \
+	fi; \
+	if [ ! "$$FEI_LIB_DIR" ]; then \
+	  HYPRE_FEI_LIB_DIR=`pwd`/hypre/lib; \
+	fi; \
+	if [ ! "$$FEI_INC_DIR" ]; then \
+	  HYPRE_FEI_INC_DIR=`pwd`/hypre/include; \
+	fi; \
 	export HYPRE_INSTALL_DIR; \
+	export HYPRE_FEI_BASE_DIR; \
+	export HYPRE_FEI_LIB_DIR; \
+	export HYPRE_FEI_INC_DIR; \
 	for i in ${HYPRE_FEI_DIRS}; \
 	do \
 	  if [ -d $$i ]; \
@@ -195,7 +229,7 @@ nofei: IJ krylov
 	      (cd hypre/tmp; mv -f qsort_si.o psort_si.o;); \
 	   fi; \
 	done; \
-	(cd hypre/tmp; ar rcu ../lib/libHYPRE_LSI.a *.o;); \
+	(cd hypre/tmp; ar rcu $$HYPRE_FEI_LIB_DIR/libHYPRE_LSI.a *.o;); \
 	rm -rf hypre/tmp
 
 base:
