@@ -15,6 +15,20 @@
 #=============================================================================
 
 
+Version 1.8.2b released, 2003/10/22.
+
+- Performance improvements for Struct solvers when there are many
+  boxes per processor in the grid.  For 125 boxes or more in 3D,
+  the speedup in the setup phases of PFMG and SMG can be significant
+  (we have seen as much as a factor of 30).
+- New non-Galerkin option in PFMG can improve convergence and memory
+  usage.  This option maintains either a 5-pt stencil in 2D or a 7-pt
+  stencil in 3D on all grid levels.
+- New non-symmetric red/black smoother in PFMG can improve
+  convergence on some problems.
+- New optimizations in the smoothers in PFMG lead to as much as 30%
+  faster times.
+
 Version 1.8.1b released, 2003/05/21.
 
 - Minor bug fixes and performance improvements.
