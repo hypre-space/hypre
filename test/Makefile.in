@@ -90,7 +90,7 @@ ij_b_OBJECTS = $(am_ij_b_OBJECTS)
 ij_b_DEPENDENCIES = $(am__DEPENDENCIES_3)
 am_ij_es_OBJECTS = ij_es.$(OBJEXT)
 ij_es_OBJECTS = $(am_ij_es_OBJECTS)
-ij_es_DEPENDENCIES = $(am__DEPENDENCIES_2)
+ij_es_DEPENDENCIES = $(am__DEPENDENCIES_3)
 am_ij_mv_OBJECTS = ij_mv-ij_mv.$(OBJEXT)
 ij_mv_OBJECTS = $(am_ij_mv_OBJECTS)
 ij_mv_DEPENDENCIES = $(am__DEPENDENCIES_3)
@@ -359,23 +359,10 @@ ij_es_SOURCES = ij_es.c
 ij_es_libraries = \
  -L$(libdir)\
  -lHYPRE_lobpcg\
- -lHYPRE_parcsr_ls\
- -lHYPRE_DistributedMatrixPilutSolver\
- -lHYPRE_ParaSails\
- -lHYPRE_Euclid\
- -lHYPRE_IJ_mv\
- -lHYPRE_MatrixMatrix\
- -lHYPRE_DistributedMatrix\
- -lHYPRE_parcsr_mv\
- -lHYPRE_seq_mv\
- -lHYPRE_krylov\
- -lHYPRE_utilities\
- $(LAPACKLIBFLAGS)\
- $(BLASLIBFLAGS)\
- $(LIBM)
+ $(ij_libraries) 
 
 ij_es_LDADD = \
- $(ij_libraries) \
+ $(ij_es_libraries) \
  @FLIBS@
 
 #ij_es_LDFLAGS = -static

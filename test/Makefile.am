@@ -89,22 +89,9 @@ ij_es_SOURCES = ij_es.c
 ij_es_libraries = \
  -L$(libdir)\
  -lHYPRE_lobpcg\
- -lHYPRE_parcsr_ls\
- -lHYPRE_DistributedMatrixPilutSolver\
- -lHYPRE_ParaSails\
- -lHYPRE_Euclid\
- -lHYPRE_IJ_mv\
- -lHYPRE_MatrixMatrix\
- -lHYPRE_DistributedMatrix\
- -lHYPRE_parcsr_mv\
- -lHYPRE_seq_mv\
- -lHYPRE_krylov\
- -lHYPRE_utilities\
- $(LAPACKLIBFLAGS)\
- $(BLASLIBFLAGS)\
- $(LIBM)
+ $(ij_libraries) 
 ij_es_LDADD = \
- $(ij_libraries) \
+ $(ij_es_libraries) \
  @FLIBS@
 #ij_es_LDFLAGS = -static
 # ij, dependencies rules needed because automatic dependency checking is off
