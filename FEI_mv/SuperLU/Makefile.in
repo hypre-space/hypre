@@ -71,7 +71,7 @@ FILES =\
  dsp_blas3.c \
  dutil.c \
  get_perm_c.c \
- memory.c \
+ superlu_memory.c \
  mmd.c \
  relax_snode.c \
  sp_coletree.c \
