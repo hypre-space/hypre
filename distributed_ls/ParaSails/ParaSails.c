@@ -113,15 +113,6 @@ static void SendRequests(MPI_Comm comm, Matrix *mat, int reqlen, int *reqind,
 
         if (replies_list != NULL)
             replies_list[this_pe] = 1;
-
-#ifdef DEBUG
-        {
-        int mype;
-        MPI_Comm_rank(comm, &mype);
-        printf("%d: sent request for %d indices to %d\n", mype, j-i, this_pe);
-        fflush(NULL);
-        }
-#endif
     }
 }
 
@@ -159,15 +150,6 @@ static void ReceiveRequest(MPI_Comm comm, int *source, int **buffer,
     }
 
     MPI_Recv(*buffer, *count, MPI_INT, *source, ROW_REQ_TAG, comm, &status);
-
-#ifdef DEBUG
-    {
-    int mype;
-    MPI_Comm_rank(comm, &mype);
-    printf("%d: received req for %d indices from %d\n", mype, *count, *source);
-    fflush(NULL);
-    }
-#endif
 }
 
 /*--------------------------------------------------------------------------
@@ -416,6 +398,7 @@ static void ExchangePrunedRows(MPI_Comm comm, Matrix *M, Numbering *numb,
 {
     RowPatt *patt;
     int *ind_global;
+    int  ind_global_size = 1000;
     int row, len, *ind;
 
     int num_requests;
@@ -441,8 +424,8 @@ static void ExchangePrunedRows(MPI_Comm comm, Matrix *M, Numbering *numb,
 
     /* Merged pattern of pruned rows on this processor */
 
-    patt = RowPattCreate(ROWPATT_MAXLEN);
-    ind_global = (int *) malloc(ROWPATT_MAXLEN * sizeof(int));
+    patt = RowPattCreate(PARASAILS_MAXLEN);
+    ind_global = (int *) malloc(ind_global_size * sizeof(int));
 
     for (row=0; row<=M->end_row - M->beg_row; row++)
     {
@@ -463,6 +446,12 @@ static void ExchangePrunedRows(MPI_Comm comm, Matrix *M, Numbering *numb,
         RowPattPrevLevel(patt, &len, &ind);
 
 	/* Convert local row numbers to global row numbers */
+        if (len > ind_global_size)
+        {
+	    free(ind_global);
+	    ind_global_size = len;
+            ind_global = (int *) malloc(ind_global_size * sizeof(int));
+        }
         NumberingLocalToGlobal(numb, len, ind, ind_global);
 
         replies_list = (int *) calloc(npes, sizeof(int));
@@ -507,6 +496,7 @@ static void ExchangeStoredRows(MPI_Comm comm, Matrix *A, Matrix *M,
 {
     RowPatt *patt;
     int *ind_global;
+    int  ind_global_size = 1000;
     int row, len, *ind;
     double *val;
 
@@ -530,8 +520,8 @@ static void ExchangeStoredRows(MPI_Comm comm, Matrix *A, Matrix *M,
     /* Merge the patterns of all the rows of M on this processor */
     /* The merged pattern is not already known, since M is triangular */
 
-    patt = RowPattCreate(ROWPATT_MAXLEN);
-    ind_global = (int *) malloc(ROWPATT_MAXLEN * sizeof(int));
+    patt = RowPattCreate(PARASAILS_MAXLEN);
+    ind_global = (int *) malloc(ind_global_size * sizeof(int));
 
     for (row=load_bal->beg_row; row<=M->end_row; row++)
     {
@@ -554,6 +544,12 @@ static void ExchangeStoredRows(MPI_Comm comm, Matrix *A, Matrix *M,
     RowPattGet(patt, &len, &ind);
 
     /* Convert local row numbers to global row numbers */
+    if (len > ind_global_size)
+    {
+	free(ind_global);
+	ind_global_size = len;
+        ind_global = (int *) malloc(ind_global_size * sizeof(int));
+    }
     NumberingLocalToGlobal(numb, len, ind, ind_global);
 
     replies_list = (int *) calloc(npes, sizeof(int));
@@ -615,7 +611,7 @@ static void ConstructPatternForEachRow(int symmetric, PrunedRows *pruned_rows,
     MPI_Comm_size(M->comm, &npes);
     *costp = 0.0;
 
-    row_patt = RowPattCreate(ROWPATT_MAXLEN);
+    row_patt = RowPattCreate(PARASAILS_MAXLEN);
 
     for (row=0; row<=M->end_row - M->beg_row; row++)
     {
@@ -1070,7 +1066,7 @@ ParaSails *ParaSailsCreate(Matrix *A)
 
     ps->M = NULL;
 
-    ps->numb = A->numb;
+    ps->numb = A->numb; /* UNDONE - should make a copy of A's numbering?? */
 
     ps->pruned_rows = NULL;
 
@@ -1140,7 +1136,7 @@ void ParaSailsSetupPattern(ParaSails *ps, double thresh, int num_levels)
     if (ps->pruned_rows)
         PrunedRowsDestroy(ps->pruned_rows);
 
-    ps->pruned_rows = PrunedRowsCreate(ps->A, 100000,
+    ps->pruned_rows = PrunedRowsCreate(ps->A, PARASAILS_NROWS,
         ps->diag_scale, ps->thresh);
 
     ExchangePrunedRows(ps->A->comm, ps->A, ps->numb, ps->pruned_rows, 
@@ -1173,7 +1169,7 @@ void ParaSailsSetupValues(ParaSails *ps, Matrix *A)
     if (ps->stored_rows)
         StoredRowsDestroy(ps->stored_rows);
 
-    ps->stored_rows = StoredRowsCreate(A, 100000);
+    ps->stored_rows = StoredRowsCreate(A, PARASAILS_NROWS);
 
     ExchangeStoredRows(ps->A->comm, A, ps->M, ps->numb,
         ps->stored_rows, ps->load_bal);
@@ -1384,7 +1380,7 @@ void ParaSailsComplete(ParaSails *ps)
     for (row=0; row<=ps->M->end_row - ps->M->beg_row; row++)
     {
 	MatrixGetRow(ps->M, row, &len, &ind, &val);
-	NumberingLocalToGlobal(ps->A->numb, len, ind, ind);
+	NumberingLocalToGlobal(ps->numb, len, ind, ind);
     }
 
     MatrixComplete(ps->M);

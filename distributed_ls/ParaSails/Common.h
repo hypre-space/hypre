@@ -36,8 +36,9 @@
 #define ROW_REPV_TAG       224
 #define DIAG_VALS_TAG      225
 #define DIAG_INDS_TAG      226
-/*#define ROWPATT_MAXLEN   50021*/
-#define ROWPATT_MAXLEN   100000
+
+#define PARASAILS_MAXLEN   1000 /* maximum nz in a pattern - can grow */
+#define PARASAILS_NROWS   50000 /* maximum rows stored per proc - can grow */
 
 #ifndef ABS
 #define ABS(x) (((x)<0)?(-(x)):(x))
