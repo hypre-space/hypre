@@ -88,17 +88,26 @@ int hypre_FGMRESDestroy( void *fgmres_vdata )
  
    if (fgmres_data)
    {
-      if ( (fgmres_data->logging) > 0 ) hypre_TFree( fgmres_data -> norms );
-      hypre_ParKrylovMatvecDestroy(fgmres_data -> matvec_data);
-      hypre_ParKrylovDestroyVector(fgmres_data -> r);
-      hypre_ParKrylovDestroyVector(fgmres_data -> w);
-      for (i = 0; i < (fgmres_data -> k_dim+1); i++)
+      if ( (fgmres_data->logging) > 0 && (fgmres_data->norms != NULL) )
+         hypre_TFree( fgmres_data -> norms );
+      if ( (fgmres_data->matvec_data) != NULL )
+         hypre_ParKrylovMatvecDestroy(fgmres_data -> matvec_data);
+      if ( (fgmres_data-> r) != NULL )
+         hypre_ParKrylovDestroyVector(fgmres_data -> r);
+      if ( (fgmres_data-> w) != NULL )
+         hypre_ParKrylovDestroyVector(fgmres_data -> w);
+      if ( (fgmres_data-> p) != NULL )
       {
-         hypre_ParKrylovDestroyVector((fgmres_data -> p)[i]);
-         hypre_ParKrylovDestroyVector((fgmres_data -> z)[i]);
+         for (i = 0; i < (fgmres_data -> k_dim+1); i++)
+            hypre_ParKrylovDestroyVector((fgmres_data -> p)[i]);
+         hypre_TFree( fgmres_data -> p );
       }
-      hypre_TFree( fgmres_data -> p );
-      hypre_TFree( fgmres_data -> z );
+      if ( (fgmres_data-> z) != NULL )
+      {
+         for (i = 0; i < (fgmres_data -> k_dim+1); i++)
+            hypre_ParKrylovDestroyVector((fgmres_data -> z)[i]);
+         hypre_TFree( fgmres_data -> z );
+      }
       hypre_TFree( fgmres_data );
    }
    return(ierr);
@@ -123,8 +132,10 @@ int hypre_FGMRESSetup( void *fgmres_vdata, void *A, void *b, void *x )
       (fgmres_data -> r) = hypre_ParKrylovCreateVector(b);
    if ((fgmres_data -> w) == NULL)
       (fgmres_data -> w) = hypre_ParKrylovCreateVector(b);
-    (fgmres_data -> p) = hypre_ParKrylovCreateVectorArray(k_dim+1,b);
-    (fgmres_data -> z) = hypre_ParKrylovCreateVectorArray(k_dim+1,b);
+   if ((fgmres_data -> p) == NULL)
+      (fgmres_data -> p) = hypre_ParKrylovCreateVectorArray(k_dim+1,b);
+   if ((fgmres_data -> z) == NULL)
+      (fgmres_data -> z) = hypre_ParKrylovCreateVectorArray(k_dim+1,b);
 
    if ((fgmres_data -> matvec_data) == NULL)
       (fgmres_data -> matvec_data) = hypre_ParKrylovMatvecCreate(A, x);
