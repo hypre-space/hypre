@@ -43,14 +43,16 @@ HYPRE_ConvertPETScMatrixToDistributedMatrix(
    int ierr;
    MPI_Comm MPI_Comm;
    int M, N;
+#ifdef HYPRE_TIMING
+   int           timer;
+#endif
 
 
 
    if (!PETSc_matrix) return(-1);
 
 #ifdef HYPRE_TIMING
-   int           timer;
-   timer = hypre_InitializeTiming( "ConvertPETScMatrisToDistributedMatrix");
+   timer = hypre_InitializeTiming( "ConvertPETScMatrixToDistributedMatrix");
    hypre_BeginTiming( timer );
 #endif
 
