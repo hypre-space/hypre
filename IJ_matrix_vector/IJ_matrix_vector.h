@@ -22,6 +22,35 @@ extern "C" {
 
 /******************************************************************************
  *
+ * Fortran <-> C interface macros
+ *
+ *****************************************************************************/
+
+#ifndef HYPRE_FORTRAN_HEADER
+#define HYPRE_FORTRAN_HEADER
+
+#if defined(IRIX) || defined(DEC)
+#define hypre_NAME_C_FOR_FORTRAN(name) name##_
+#define hypre_NAME_FORTRAN_FOR_C(name) name##_
+#else
+#define hypre_NAME_C_FOR_FORTRAN(name) name##__
+#define hypre_NAME_FORTRAN_FOR_C(name) name##_
+#endif
+
+#define hypre_F90_IFACE(iface_name) hypre_NAME_FORTRAN_FOR_C(iface_name)
+
+#endif
+/*BHEADER**********************************************************************
+ * (c) 1996   The Regents of the University of California
+ *
+ * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+ * notice, contact person, and disclaimer.
+ *
+ * $Revision$
+ *********************************************************************EHEADER*/
+
+/******************************************************************************
+ *
  * Header info for Auxiliary Parallel CSR Matrix data structures
  *
  * Note: this matrix currently uses 0-based indexing.
@@ -125,30 +154,6 @@ typedef struct
 } hypre_IJMatrix;
 
 /*--------------------------------------------------------------------------
- * hypre_IJVector:
- *--------------------------------------------------------------------------*/
-
-typedef struct
-{
-   MPI_Comm      context;
-
-   int N;                                  /* number of rows in column vector */
-
-
-   void         *local_storage;            /* Structure for storing local portion */
-   int      	 local_storage_type;       /* Indicates the type of "local storage" */
-   void         *translator;               /* optional storage_type specfic structure
-                                              for holding additional local info */
-
-   int           insertion_semantics;      /* Flag that indicates for the current
-                                              object to what extent values can be set
-                                              from different processors than the one that
-                                              stores the row. */
-                                           /* 0: minimum definition, values can only be set on-processor. */
-   int           ref_count;                /* reference count for memory management */
-} hypre_IJVector;
-
-/*--------------------------------------------------------------------------
  * Accessor macros: hypre_IJMatrix
  *--------------------------------------------------------------------------*/
 
@@ -162,20 +167,6 @@ typedef struct
 
 #define hypre_IJMatrixInsertionSemantics(matrix)   ((matrix) -> insertion_semantics)
 #define hypre_IJMatrixReferenceCount(matrix)       ((matrix) -> ref_count)
-
-/*--------------------------------------------------------------------------
- * Accessor macros: hypre_IJVector
- *--------------------------------------------------------------------------*/
-
-#define hypre_IJVectorContext(matrix)              ((vector) -> context)
-#define hypre_IJVectorN(matrix)                    ((vector) -> N)
-
-#define hypre_IJVectorLocalStorageType(matrix)     ((vector) -> local_storage_type)
-#define hypre_IJVectorTranslator(matrix)           ((vector) -> translator)
-#define hypre_IJVectorLocalStorage(matrix)         ((vector) -> local_storage)
-
-#define hypre_IJVectorInsertionSemantics(matrix)   ((vector) -> insertion_semantics)
-#define hypre_IJVectorReferenceCount(matrix)       ((vector) -> ref_count)
 
 /*--------------------------------------------------------------------------
  * prototypes for operations on local objects
@@ -201,7 +192,6 @@ void hypre_F90_IFACE P((int hypre_queryijmatrixinsertionsem ));
 void hypre_F90_IFACE P((int hypre_insertijmatrixblock ));
 void hypre_F90_IFACE P((int hypre_addblocktoijmatrix ));
 void hypre_F90_IFACE P((int hypre_insertijmatrixrow ));
-void hypre_F90_IFACE P((void *hypre_getijmatrixlocalstorage ));
 
 /* F90_HYPRE_IJVector.c */
 void hypre_F90_IFACE P((int hypre_newijvector ));
@@ -211,11 +201,10 @@ void hypre_F90_IFACE P((int hypre_assembleijvector ));
 void hypre_F90_IFACE P((int hypre_distributeijvector ));
 void hypre_F90_IFACE P((int hypre_setijvectorlocalstoragety ));
 void hypre_F90_IFACE P((int hypre_setijvectorlocalsize ));
-void hypre_F90_IFACE P((int hypre_setijvectortotalsize ));
 void hypre_F90_IFACE P((int hypre_queryijvectorinsertionsem ));
 void hypre_F90_IFACE P((int hypre_insertijvectorrows ));
 void hypre_F90_IFACE P((int hypre_addrowstoijvector ));
-void hypre_F90_IFACE P((void *hypre_getijvectorlocalstorage ));
+void hypre_F90_IFACE P((int hypre_getijvectorrows ));
 
 /* HYPRE_IJMatrix.c */
 int HYPRE_NewIJMatrix P((MPI_Comm comm , HYPRE_IJMatrix *in_matrix_ptr , int global_m , int global_n ));
@@ -241,9 +230,10 @@ int HYPRE_NewIJVector P((MPI_Comm comm , HYPRE_IJVector *in_vector_ptr , int glo
 int HYPRE_FreeIJVector P((HYPRE_IJVector IJvector ));
 int HYPRE_InitializeIJVector P((HYPRE_IJVector IJvector ));
 int HYPRE_AssembleIJVector P((HYPRE_IJVector IJvector ));
-int HYPRE_DistributeIJVector P((HYPRE_IJVector IJvector , int *col_starts ));
+int HYPRE_DistributeIJVector P((HYPRE_IJVector IJvector , int *row_starts , int *col_starts ));
 int HYPRE_SetIJVectorLocalStorageType P((HYPRE_IJVector IJvector , int type ));
-int HYPRE_SetIJVectorLocalSize P((HYPRE_IJVector IJvector , int local_n ));
+int HYPRE_SetIJVectorLocalSize P((HYPRE_IJVector IJvector , int local_m , int local_n ));
+int HYPRE_SetIJVectorRowSizes P((HYPRE_IJVector IJvector , int *sizes ));
 int HYPRE_SetIJVectorTotalSize P((HYPRE_IJVector IJvector , int size ));
 int HYPRE_QueryIJVectorInsertionSemantics P((HYPRE_IJVector IJvector , int *level ));
 int HYPRE_InsertIJVectorRows P((HYPRE_IJVector IJvector , int n , int *rows , double *values ));
@@ -254,13 +244,33 @@ void *hypre_GetIJVectorLocalStorage P((HYPRE_IJVector IJvector ));
 /* IJMatrix_isis.c */
 int hypre_GetIJMatrixParCSRMatrix P((HYPRE_IJMatrix IJmatrix , HYPRE_ParCSRMatrix *reference ));
 
+/* IJMatrix_parcsr.c */
+int hypre_GetIJMatrixParCSRMatrix P((HYPRE_IJMatrix IJmatrix , HYPRE_ParCSRMatrix *reference ));
+
 /* IJMatrix_petsc.c */
 int hypre_GetIJMatrixParCSRMatrix P((HYPRE_IJMatrix IJmatrix , HYPRE_ParCSRMatrix *reference ));
+
+/* IJVector_parcsr.c */
+int hypre_GetIJVectorParVector P((HYPRE_IJVector IJvector , HYPRE_ParVector *reference ));
+
+/* IJ_par_laplace_9pt.c */
+int IJMatrixBuildParLaplacian9pt P((int argc , char *argv [], int arg_index , hypre_ParCSRMatrix **A_ptr , HYPRE_IJMatrix **ij_matrix , int ij_matrix_storage_type ));
+int map2 P((int ix , int iy , int p , int q , int P , int Q , int *nx_part , int *ny_part , int *global_part ));
 
 /* aux_parcsr_matrix.c */
 hypre_AuxParCSRMatrix *hypre_CreateAuxParCSRMatrix P((int local_num_rows , int local_num_cols , int *sizes ));
 int hypre_DestroyAuxParCSRMatrix P((hypre_AuxParCSRMatrix *matrix ));
 int hypre_InitializeAuxParCSRMatrix P((hypre_AuxParCSRMatrix *matrix ));
+
+/* driver.c */
+int main P((int argc , char *argv []));
+int BuildParFromFile P((int argc , char *argv [], int arg_index , hypre_ParCSRMatrix **A_ptr ));
+int BuildParLaplacian P((int argc , char *argv [], int arg_index , hypre_ParCSRMatrix **A_ptr ));
+int BuildParDifConv P((int argc , char *argv [], int arg_index , hypre_ParCSRMatrix **A_ptr ));
+int BuildParFromOneFile P((int argc , char *argv [], int arg_index , hypre_ParCSRMatrix **A_ptr ));
+int BuildRhsParFromOneFile P((int argc , char *argv [], int arg_index , hypre_ParCSRMatrix *A , hypre_ParVector **b_ptr ));
+int BuildParLaplacian9pt P((int argc , char *argv [], int arg_index , hypre_ParCSRMatrix **A_ptr ));
+int BuildParLaplacian27pt P((int argc , char *argv [], int arg_index , hypre_ParCSRMatrix **A_ptr ));
 
 /* hypre_IJMatrix_isis.c */
 int hypre_SetIJMatrixLocalSizeISIS P((hypre_IJMatrix *matrix , int local_m , int local_n ));
@@ -282,7 +292,7 @@ int hypre_SetIJMatrixTotalSizeISIS P((hypre_IJMatrix *matrix , int size ));
 /* hypre_IJMatrix_parcsr.c */
 int hypre_SetIJMatrixLocalSizeParCSR P((hypre_IJMatrix *matrix , int local_m , int local_n ));
 int hypre_NewIJMatrixParCSR P((hypre_IJMatrix *matrix ));
-int hypre_SetIJMatrixRowSizesParcsr P((hypre_IJMatrix *matrix , int *sizes ));
+int hypre_SetIJMatrixRowSizesParCSR P((hypre_IJMatrix *matrix , int *sizes ));
 int hypre_SetIJMatrixDiagRowSizesParCSR P((hypre_IJMatrix *matrix , int *sizes ));
 int hypre_SetIJMatrixOffDiagRowSizesParCSR P((hypre_IJMatrix *matrix , int *sizes ));
 int hypre_InitializeIJMatrixParCSR P((hypre_IJMatrix *matrix ));
