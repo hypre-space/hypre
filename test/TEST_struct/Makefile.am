@@ -22,6 +22,10 @@ FILES = \
  pfmgtest1d.sh\
  pfmgvcycle.jobs\
  pfmgvcycle.sh\
+ vcpfmgRedBlackGS.jobs\
+ vcpfmgRedBlackGS.sh\
+ vdpfmgRedBlackGS.jobs\
+ vdpfmgRedBlackGS.sh\
  psmgbase3d.jobs\
  psmgbase3d.sh\
  psmgtest3d.jobs\
