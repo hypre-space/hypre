@@ -32,6 +32,8 @@ int BuildParLaplacian9pt P((int argc , char *argv [], int arg_index , HYPRE_ParC
 int BuildParLaplacian27pt P((int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr ));
 
 #undef P
+
+#define SECOND_TIME 0
  
 int
 main( int   argc,
@@ -807,6 +809,13 @@ main( int   argc,
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
+#if SECOND_TIME
+      /* run a second time to check for memory leaks */
+      HYPRE_ParVectorSetRandomValues(x, 775);
+      HYPRE_ParAMGSetup(amg_solver, A, b, x);
+      HYPRE_ParAMGSolve(amg_solver, A, b, x);
+#endif
+
       HYPRE_ParAMGDestroy(amg_solver);
    }
 
@@ -892,6 +901,14 @@ main( int   argc,
  
       HYPRE_ParCSRPCGGetNumIterations(pcg_solver, &num_iterations);
       HYPRE_ParCSRPCGGetFinalRelativeResidualNorm(pcg_solver, &final_res_norm);
+
+#if SECOND_TIME
+      /* run a second time to check for memory leaks */
+      HYPRE_ParVectorSetRandomValues(x, 775);
+      HYPRE_ParCSRPCGSetup(pcg_solver, A, b, x);
+      HYPRE_ParCSRPCGSolve(pcg_solver, A, b, x);
+#endif
+
       HYPRE_ParCSRPCGDestroy(pcg_solver);
  
       if (solver_id == 1)
@@ -1004,6 +1021,13 @@ main( int   argc,
  
       HYPRE_ParCSRGMRESGetNumIterations(pcg_solver, &num_iterations);
       HYPRE_ParCSRGMRESGetFinalRelativeResidualNorm(pcg_solver,&final_res_norm);
+#if SECOND_TIME
+      /* run a second time to check for memory leaks */
+      HYPRE_ParVectorSetRandomValues(x, 775);
+      HYPRE_ParCSRGMRESSetup(pcg_solver, A, b, x);
+      HYPRE_ParCSRGMRESSolve(pcg_solver, A, b, x);
+#endif
+
       HYPRE_ParCSRGMRESDestroy(pcg_solver);
  
       if (solver_id == 3)
@@ -1093,6 +1117,14 @@ main( int   argc,
  
       HYPRE_ParCSRCGNRGetNumIterations(pcg_solver, &num_iterations);
       HYPRE_ParCSRCGNRGetFinalRelativeResidualNorm(pcg_solver,&final_res_norm);
+
+#if SECOND_TIME
+      /* run a second time to check for memory leaks */
+      HYPRE_ParVectorSetRandomValues(x, 775);
+      HYPRE_ParCSRCGNRSetup(pcg_solver, A, b, x);
+      HYPRE_ParCSRCGNRSolve(pcg_solver, A, b, x);
+#endif
+
       HYPRE_ParCSRCGNRDestroy(pcg_solver);
  
       if (solver_id == 5)
