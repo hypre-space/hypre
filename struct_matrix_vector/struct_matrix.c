@@ -649,20 +649,18 @@ hypre_PrintStructMatrix( char               *filename,
    int                   i, j;
                    
    int                   myid;
-   int                  *myid_ptr;
 
    /*----------------------------------------
     * Open file
     *----------------------------------------*/
- 
-#ifdef HYPRE_USE_PTHREADS
-   myid_ptr = hypre_SharedTAlloc(int, i);
-   MPI_Comm_rank(hypre_StructMatrixComm(matrix), myid_ptr );
-   myid = *myid_ptr;
-   hypre_SharedTFree(myid_ptr);
-#else
-   MPI_Comm_rank(hypre_StructMatrixComm(matrix), &myid);
+
+#ifdef HYPRE_USE_PTHREADS 
+#if MPI_Comm_rank == hypre_thread_MPI_Comm_rank
+#undef MPI_Comm_rank
 #endif
+#endif
+
+   MPI_Comm_rank(hypre_StructMatrixComm(matrix), &myid);
 
    sprintf(new_filename, "%s.%05d", filename, myid);
  
@@ -813,20 +811,18 @@ hypre_ReadStructMatrix( MPI_Comm   comm,
    int                   i, idummy;
                        
    int                   myid;
-   int                  *myid_ptr;
 
    /*----------------------------------------
     * Open file
     *----------------------------------------*/
 
 #ifdef HYPRE_USE_PTHREADS
-   myid_ptr = hypre_SharedTAlloc(int, i);
-   MPI_Comm_rank(comm, myid_ptr );
-   myid = *myid_ptr;
-   hypre_SharedTFree(myid_ptr);
-#else
-   MPI_Comm_rank(comm, &myid );
+#if MPI_Comm_rank == hypre_thread_MPI_Comm_rank
+#undef MPI_Comm_rank
 #endif
+#endif
+
+   MPI_Comm_rank(comm, &myid );
 
    sprintf(new_filename, "%s.%05d", filename, myid);
  

@@ -21,22 +21,24 @@
 #include "threading.h"
 
 
-extern int hypre_thread_counter;
+extern volatile int hypre_thread_counter;
 extern int iteration_counter;
 
 /*--------------------------------------------------------------------------
  * Threaded Looping macros:
  *--------------------------------------------------------------------------*/
 
-#ifndef MAX_ISIZE
-#define MAX_ISIZE 5
+#ifndef CHUNK_GOAL
+#define CHUNK_GOAL (hypre_NumThreads*1)
 #endif
-#ifndef MAX_JSIZE
-#define MAX_JSIZE 5
+#ifndef MIN_VOL
+#define MIN_VOL 125
 #endif
-#ifndef MAX_KSIZE
-#define MAX_KSIZE 5
+#ifndef MAX_VOL
+#define MAX_VOL 256000
 #endif
+
+#define vol_cbrt(vol) (int) pow((double)(vol), 1. / 3.) 
 
 #define hypre_ThreadLoop(local_counter, init_val, stop_val, tl_index,\
                          tl_count, tl_release, tl_mtx, tl_body)\
@@ -75,23 +77,38 @@ extern int iteration_counter;
 }
 
 #define hypre_ChunkLoopExternalSetup(hypre__nx, hypre__ny, hypre__nz)\
-   int hypre__cx = min(hypre__nx / 4 + !!(hypre__nx % 4), MAX_ISIZE);\
-   int hypre__cy = min(hypre__ny / 4 + !!(hypre__ny % 4), MAX_JSIZE);\
-   int hypre__cz = min(hypre__nz / 4 + !!(hypre__nz % 4), MAX_KSIZE);\
-   int znumchunk = hypre__nz / hypre__cz + !!(hypre__nz % hypre__cz);\
-   int ynumchunk = hypre__ny / hypre__cy + !!(hypre__ny % hypre__cy);\
-   int xnumchunk = hypre__nx / hypre__cx + !!(hypre__nx % hypre__cx);\
-   int numchunks = znumchunk * ynumchunk * xnumchunk;\
+   int target_vol, target_area, target_len;\
+   int cbrt_tar_vol, sqrt_tar_area;\
+   int edge_divisor;\
+   int znumchunk, ynumchunk, xnumchunk;\
+   int hypre__cz, hypre__cy, hypre__cx;\
+   int numchunks;\
    int clfreq[3], clreset[3];\
    int clstart[3];\
    int clfinish[3];\
    int chunkcount;\
-   clfreq[0] = 1;\
-   clreset[0] = xnumchunk;\
-   clfreq[1] = clreset[0];\
-   clreset[1] = ynumchunk * xnumchunk;\
-   clfreq[2] = clreset[1];\
-   clreset[2] = znumchunk * ynumchunk * xnumchunk
+   target_vol    = min(max((hypre__nx * hypre__ny * hypre__nz) / CHUNK_GOAL,\
+                           MIN_VOL), MAX_VOL);\
+   cbrt_tar_vol  = (int) (pow ((double)target_vol, 1./3.));\
+   edge_divisor  = hypre__nz / cbrt_tar_vol + !!(hypre__nz % cbrt_tar_vol);\
+   hypre__cz     = hypre__nz / edge_divisor + !!(hypre__nz % edge_divisor);\
+   znumchunk     = hypre__nz / hypre__cz + !!(hypre__nz % hypre__cz);\
+   target_area   = target_vol / hypre__cz;\
+   sqrt_tar_area = (int) (sqrt((double)target_area));\
+   edge_divisor  = hypre__ny / sqrt_tar_area + !!(hypre__ny % sqrt_tar_area);\
+   hypre__cy     = hypre__ny / edge_divisor + !!(hypre__ny % edge_divisor);\
+   ynumchunk     = hypre__ny / hypre__cy + !!(hypre__ny % hypre__cy);\
+   target_len    = target_area / hypre__cy;\
+   edge_divisor  = hypre__nx / target_len + !!(hypre__nx % target_len);\
+   hypre__cx     = hypre__nx / edge_divisor + !!(hypre__nx % edge_divisor);\
+   xnumchunk     = hypre__nx / hypre__cx + !!(hypre__nx % hypre__cx);\
+   numchunks     = znumchunk * ynumchunk * xnumchunk;\
+   clfreq[0]     = 1;\
+   clreset[0]    = xnumchunk;\
+   clfreq[1]     = clreset[0];\
+   clreset[1]    = ynumchunk * xnumchunk;\
+   clfreq[2]     = clreset[1];\
+   clreset[2]    = znumchunk * ynumchunk * xnumchunk
  
 #define hypre_ChunkLoopInternalSetup(clstart, clfinish, clreset, clfreq,\
                                      hypre__nx, hypre__ny, hypre__nz,\
@@ -121,27 +138,29 @@ extern int iteration_counter;
    int hypre__nx = hypre_IndexX(loop_size);\
    int hypre__ny = hypre_IndexY(loop_size);\
    int hypre__nz = hypre_IndexZ(loop_size);\
-   hypre_ChunkLoopExternalSetup(hypre__nx, hypre__ny, hypre__nz);\
-   hypre_ThreadLoop(chunkcount, 0, numchunks, iteration_counter,\
-                    hypre_thread_counter, hypre_thread_release,\
-                    hypre_mutex_boxloops,\
+   if (hypre__nx && hypre__ny && hypre__nz )\
    {\
-      hypre_ChunkLoopInternalSetup(clstart, clfinish, clreset, clfreq,\
-                                   hypre__nx, hypre__ny, hypre__nz,\
-                                   hypre__cx, hypre__cy, hypre__cz,\
-                                   chunkcount);\
-      for (k = clstart[2]; k < clfinish[2]; k++) {\
-         for (j = clstart[1]; j < clfinish[1]; j++)\
-         {\
-            for (i = clstart[0]; i < clfinish[0]; i++)\
+      hypre_ChunkLoopExternalSetup(hypre__nx, hypre__ny, hypre__nz);\
+      hypre_ThreadLoop(chunkcount, 0, numchunks, iteration_counter,\
+                       hypre_thread_counter, hypre_thread_release,\
+                       hypre_mutex_boxloops,\
+      {\
+         hypre_ChunkLoopInternalSetup(clstart, clfinish, clreset, clfreq,\
+                                      hypre__nx, hypre__ny, hypre__nz,\
+                                      hypre__cx, hypre__cy, hypre__cz,\
+                                      chunkcount);\
+         for (k = clstart[2]; k < clfinish[2]; k++) {\
+            for (j = clstart[1]; j < clfinish[1]; j++)\
             {\
-                body;\
+               for (i = clstart[0]; i < clfinish[0]; i++)\
+               {\
+                   body;\
+               }\
             }\
          }\
-      }\
-   });\
+      });\
+   }\
 }
-
 
 
 #define hypre_BoxLoop1(i, j, k, loop_size,\
@@ -154,28 +173,31 @@ extern int iteration_counter;
    int hypre__ny = hypre_IndexY(loop_size);\
    int hypre__nz = hypre_IndexZ(loop_size);\
    int orig_i1 = hypre_BoxIndexRank(data_box1, start1);\
-   hypre_ChunkLoopExternalSetup(hypre__nx, hypre__ny, hypre__nz);\
-   hypre_ThreadLoop(chunkcount, 0, numchunks, iteration_counter,\
-                    hypre_thread_counter, hypre_thread_release,\
-                    hypre_mutex_boxloops,\
+   if (hypre__nx && hypre__ny && hypre__nz )\
    {\
-      hypre_ChunkLoopInternalSetup(clstart, clfinish, clreset, clfreq,\
-                                   hypre__nx, hypre__ny, hypre__nz,\
-                                   hypre__cx, hypre__cy, hypre__cz,\
-                                   chunkcount);\
-      for (k = clstart[2]; k < clfinish[2]; k++) {\
-         for (j = clstart[1]; j < clfinish[1]; j++)\
-         {\
-            for (i = clstart[0]; i < clfinish[0]; i++)\
+      hypre_ChunkLoopExternalSetup(hypre__nx, hypre__ny, hypre__nz);\
+      hypre_ThreadLoop(chunkcount, 0, numchunks, iteration_counter,\
+                       hypre_thread_counter, hypre_thread_release,\
+                       hypre_mutex_boxloops,\
+      {\
+         hypre_ChunkLoopInternalSetup(clstart, clfinish, clreset, clfreq,\
+                                      hypre__nx, hypre__ny, hypre__nz,\
+                                      hypre__cx, hypre__cy, hypre__cz,\
+                                      chunkcount);\
+         for (k = clstart[2]; k < clfinish[2]; k++) {\
+            for (j = clstart[1]; j < clfinish[1]; j++)\
             {\
-               i1 = orig_i1 +\
-                    (i + hypre__nx*j + hypre__nx*hypre__ny*k)*hypre__iinc1 +\
-                    (j + hypre__ny*k)*hypre__jinc1 + k*hypre__kinc1;\
-               body;\
+               for (i = clstart[0]; i < clfinish[0]; i++)\
+               {\
+                  i1 = orig_i1 +\
+                      (i + hypre__nx*j + hypre__nx*hypre__ny*k)*hypre__iinc1 +\
+                      (j + hypre__ny*k)*hypre__jinc1 + k*hypre__kinc1;\
+                  body;\
+               }\
             }\
          }\
-      }\
-   });\
+      });\
+   }\
 }
 
 
@@ -194,31 +216,34 @@ extern int iteration_counter;
    int hypre__nz = hypre_IndexZ(loop_size);\
    int orig_i1 = hypre_BoxIndexRank(data_box1, start1);\
    int orig_i2 = hypre_BoxIndexRank(data_box2, start2);\
-   hypre_ChunkLoopExternalSetup(hypre__nx, hypre__ny, hypre__nz);\
-   hypre_ThreadLoop(chunkcount, 0, numchunks, iteration_counter,\
-                    hypre_thread_counter, hypre_thread_release,\
-                    hypre_mutex_boxloops,\
+   if (hypre__nx && hypre__ny && hypre__nz )\
    {\
-      hypre_ChunkLoopInternalSetup(clstart, clfinish, clreset, clfreq,\
-                                   hypre__nx, hypre__ny, hypre__nz,\
-                                   hypre__cx, hypre__cy, hypre__cz,\
-                                   chunkcount);\
-      for (k = clstart[2]; k < clfinish[2]; k++) {\
-         for (j = clstart[1]; j < clfinish[1]; j++)\
-         {\
-            for (i = clstart[0]; i < clfinish[0]; i++)\
+      hypre_ChunkLoopExternalSetup(hypre__nx, hypre__ny, hypre__nz);\
+      hypre_ThreadLoop(chunkcount, 0, numchunks, iteration_counter,\
+                       hypre_thread_counter, hypre_thread_release,\
+                       hypre_mutex_boxloops,\
+      {\
+         hypre_ChunkLoopInternalSetup(clstart, clfinish, clreset, clfreq,\
+                                      hypre__nx, hypre__ny, hypre__nz,\
+                                      hypre__cx, hypre__cy, hypre__cz,\
+                                      chunkcount);\
+         for (k = clstart[2]; k < clfinish[2]; k++) {\
+            for (j = clstart[1]; j < clfinish[1]; j++)\
             {\
-               i1 = orig_i1 +\
-                    (i + hypre__nx*j + hypre__nx*hypre__ny*k)*hypre__iinc1 +\
-                    (j + hypre__ny*k)*hypre__jinc1 + k*hypre__kinc1;\
-               i2 = orig_i2 +\
-                    (i + hypre__nx*j + hypre__nx*hypre__ny*k)*hypre__iinc2 +\
-                    (j + hypre__ny*k)*hypre__jinc2 + k*hypre__kinc2;\
-               body;\
+               for (i = clstart[0]; i < clfinish[0]; i++)\
+               {\
+                  i1 = orig_i1 +\
+                      (i + hypre__nx*j + hypre__nx*hypre__ny*k)*hypre__iinc1 +\
+                      (j + hypre__ny*k)*hypre__jinc1 + k*hypre__kinc1;\
+                  i2 = orig_i2 +\
+                      (i + hypre__nx*j + hypre__nx*hypre__ny*k)*hypre__iinc2 +\
+                      (j + hypre__ny*k)*hypre__jinc2 + k*hypre__kinc2;\
+                  body;\
+               }\
             }\
          }\
-      }\
-   });\
+      });\
+   }\
 }
 
 
@@ -240,35 +265,38 @@ extern int iteration_counter;
    int orig_i1 = hypre_BoxIndexRank(data_box1, start1);\
    int orig_i2 = hypre_BoxIndexRank(data_box2, start2);\
    int orig_i3 = hypre_BoxIndexRank(data_box3, start3);\
-   hypre_ChunkLoopExternalSetup(hypre__nx, hypre__ny, hypre__nz);\
-   hypre_ThreadLoop(chunkcount, 0, numchunks, iteration_counter,\
-                    hypre_thread_counter, hypre_thread_release,\
-                    hypre_mutex_boxloops,\
+   if (hypre__nx && hypre__ny && hypre__nz )\
    {\
-      hypre_ChunkLoopInternalSetup(clstart, clfinish, clreset, clfreq,\
-                                   hypre__nx, hypre__ny, hypre__nz,\
-                                   hypre__cx, hypre__cy, hypre__cz,\
-                                   chunkcount);\
-      for (k = clstart[2]; k < clfinish[2]; k++)\
+      hypre_ChunkLoopExternalSetup(hypre__nx, hypre__ny, hypre__nz);\
+      hypre_ThreadLoop(chunkcount, 0, numchunks, iteration_counter,\
+                       hypre_thread_counter, hypre_thread_release,\
+                       hypre_mutex_boxloops,\
       {\
-         for (j = clstart[1]; j < clfinish[1]; j++)\
+         hypre_ChunkLoopInternalSetup(clstart, clfinish, clreset, clfreq,\
+                                      hypre__nx, hypre__ny, hypre__nz,\
+                                      hypre__cx, hypre__cy, hypre__cz,\
+                                      chunkcount);\
+         for (k = clstart[2]; k < clfinish[2]; k++)\
          {\
-            for (i = clstart[0]; i < clfinish[0]; i++)\
+            for (j = clstart[1]; j < clfinish[1]; j++)\
             {\
-               i1 = orig_i1 +\
-                    (i + hypre__nx*j + hypre__nx*hypre__ny*k)*hypre__iinc1 +\
-                    (j + hypre__ny*k)*hypre__jinc1 + k*hypre__kinc1;\
-               i2 = orig_i2 +\
-                    (i + hypre__nx*j + hypre__nx*hypre__ny*k)*hypre__iinc2 +\
-                    (j + hypre__ny*k)*hypre__jinc2 + k*hypre__kinc2;\
-               i3 = orig_i3 +\
-                    (i + hypre__nx*j + hypre__nx*hypre__ny*k)*hypre__iinc3 +\
-                    (j + hypre__ny*k)*hypre__jinc3 + k*hypre__kinc3;\
-               body;\
+               for (i = clstart[0]; i < clfinish[0]; i++)\
+               {\
+                  i1 = orig_i1 +\
+                      (i + hypre__nx*j + hypre__nx*hypre__ny*k)*hypre__iinc1 +\
+                      (j + hypre__ny*k)*hypre__jinc1 + k*hypre__kinc1;\
+                  i2 = orig_i2 +\
+                      (i + hypre__nx*j + hypre__nx*hypre__ny*k)*hypre__iinc2 +\
+                      (j + hypre__ny*k)*hypre__jinc2 + k*hypre__kinc2;\
+                  i3 = orig_i3 +\
+                      (i + hypre__nx*j + hypre__nx*hypre__ny*k)*hypre__iinc3 +\
+                      (j + hypre__ny*k)*hypre__jinc3 + k*hypre__kinc3;\
+                  body;\
+               }\
             }\
          }\
-      }\
-   })\
+      })\
+   }\
 }
 
 
@@ -295,37 +323,40 @@ extern int iteration_counter;
    int orig_i2 = hypre_BoxIndexRank(data_box2, start2);\
    int orig_i3 = hypre_BoxIndexRank(data_box3, start3);\
    int orig_i4 = hypre_BoxIndexRank(data_box4, start4);\
-   hypre_ChunkLoopExternalSetup(hypre__nx, hypre__ny, hypre__nz);\
-   hypre_ThreadLoop(chunkcount, 0, numchunks, iteration_counter,\
-                    hypre_thread_counter, hypre_thread_release,\
-                    hypre_mutex_boxloops,\
+   if (hypre__nx && hypre__ny && hypre__nz )\
    {\
-      hypre_ChunkLoopInternalSetup(clstart, clfinish, clreset, clfreq,\
-                                   hypre__nx, hypre__ny, hypre__nz,\
-                                   hypre__cx, hypre__cy, hypre__cz,\
-                                   chunkcount);\
-      for (k = clstart[2]; k < clfinish[2]; k++) {\
-         for (j = clstart[1]; j < clfinish[1]; j++)\
-         {\
-            for (i = clstart[0]; i < clfinish[0]; i++)\
+      hypre_ChunkLoopExternalSetup(hypre__nx, hypre__ny, hypre__nz);\
+      hypre_ThreadLoop(chunkcount, 0, numchunks, iteration_counter,\
+                       hypre_thread_counter, hypre_thread_release,\
+                       hypre_mutex_boxloops,\
+      {\
+         hypre_ChunkLoopInternalSetup(clstart, clfinish, clreset, clfreq,\
+                                      hypre__nx, hypre__ny, hypre__nz,\
+                                      hypre__cx, hypre__cy, hypre__cz,\
+                                      chunkcount);\
+         for (k = clstart[2]; k < clfinish[2]; k++) {\
+            for (j = clstart[1]; j < clfinish[1]; j++)\
             {\
-               i1 = orig_i1 +\
-                    (i + hypre__nx*j + hypre__nx*hypre__ny*k)*hypre__iinc1 +\
-                    (j + hypre__ny*k)*hypre__jinc1 + k*hypre__kinc1;\
-               i2 = orig_i2 +\
-                    (i + hypre__nx*j + hypre__nx*hypre__ny*k)*hypre__iinc2 +\
-                    (j + hypre__ny*k)*hypre__jinc2 + k*hypre__kinc2;\
-               i3 = orig_i3 +\
-                    (i + hypre__nx*j + hypre__nx*hypre__ny*k)*hypre__iinc3 +\
-                    (j + hypre__ny*k)*hypre__jinc3 + k*hypre__kinc3;\
-               i4 = orig_i4 +\
-                    (i + hypre__nx*j + hypre__nx*hypre__ny*k)*hypre__iinc4 +\
-                    (j + hypre__ny*k)*hypre__jinc4 + k*hypre__kinc4;\
-               body;\
+               for (i = clstart[0]; i < clfinish[0]; i++)\
+               {\
+                  i1 = orig_i1 +\
+                      (i + hypre__nx*j + hypre__nx*hypre__ny*k)*hypre__iinc1 +\
+                      (j + hypre__ny*k)*hypre__jinc1 + k*hypre__kinc1;\
+                  i2 = orig_i2 +\
+                      (i + hypre__nx*j + hypre__nx*hypre__ny*k)*hypre__iinc2 +\
+                      (j + hypre__ny*k)*hypre__jinc2 + k*hypre__kinc2;\
+                  i3 = orig_i3 +\
+                      (i + hypre__nx*j + hypre__nx*hypre__ny*k)*hypre__iinc3 +\
+                      (j + hypre__ny*k)*hypre__jinc3 + k*hypre__kinc3;\
+                  i4 = orig_i4 +\
+                      (i + hypre__nx*j + hypre__nx*hypre__ny*k)*hypre__iinc4 +\
+                      (j + hypre__ny*k)*hypre__jinc4 + k*hypre__kinc4;\
+                  body;\
+               }\
             }\
          }\
-      }\
-   });\
+      });\
+   }\
 }
 
 

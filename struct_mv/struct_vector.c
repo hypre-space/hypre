@@ -636,6 +636,10 @@ hypre_ClearStructVectorAllValues( hypre_StructVector *vector )
    for ( i=0; i < data_size; i++)
       data[i] = 0.0;
 
+#ifdef HYPRE_USE_PTHREADS
+   hypre_barrier(&hypre_mutex_boxloops, 0);
+#endif
+
    return ierr;
 }
 
@@ -726,19 +730,17 @@ hypre_PrintStructVector( char               *filename,
    hypre_BoxArray    *data_space;
 
    int                myid;
-   int               *myid_ptr;
 
    /*----------------------------------------
     * Open file
     *----------------------------------------*/
 #ifdef HYPRE_USE_PTHREADS
-   myid_ptr = hypre_SharedTAlloc(int, 1);
-   MPI_Comm_rank(hypre_StructVectorComm(vector), myid_ptr );
-   myid = *myid_ptr;
-   hypre_SharedTFree(myid_ptr);
-#else
-   MPI_Comm_rank(hypre_StructVectorComm(vector), &myid );
+#if MPI_Comm_rank == hypre_thread_MPI_Comm_rank
+#undef MPI_Comm_rank
 #endif
+#endif
+
+   MPI_Comm_rank(hypre_StructVectorComm(vector), &myid );
 
    sprintf(new_filename, "%s.%05d", filename, myid);
  
@@ -804,21 +806,18 @@ hypre_ReadStructVector( MPI_Comm   comm,
    hypre_BoxArray       *data_space;
 
    int                   myid;
-   int                  *myid_ptr;
  
    /*----------------------------------------
     * Open file
     *----------------------------------------*/
 
-
 #ifdef HYPRE_USE_PTHREADS
-   myid_ptr = hypre_SharedTAlloc(int, 1);
-   MPI_Comm_rank(comm, myid_ptr );
-   myid = *myid_ptr;
-   hypre_SharedTFree(myid_ptr);
-#else
-   MPI_Comm_rank(comm, &myid );
+#if MPI_Comm_rank == hypre_thread_MPI_Comm_rank
+#undef MPI_Comm_rank
 #endif
+#endif
+
+   MPI_Comm_rank(comm, &myid );
 
    sprintf(new_filename, "%s.%05d", filename, myid);
  

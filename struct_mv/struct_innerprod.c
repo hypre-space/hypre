@@ -22,7 +22,7 @@
  *--------------------------------------------------------------------------*/
 
 #ifdef HYPRE_USE_PTHREADS
-double           global_result[hypre_MAX_THREADS];
+double          *local_result_ref[hypre_MAX_THREADS];
 #endif
 
 double           final_innerprod_result;
@@ -33,6 +33,7 @@ hypre_StructInnerProd(  hypre_StructVector *x,
                         hypre_StructVector *y )
 {
    double           local_result;
+   double           process_result;
                    
    hypre_Box       *x_data_box;
    hypre_Box       *y_data_box;
@@ -56,10 +57,7 @@ hypre_StructInnerProd(  hypre_StructVector *x,
 #endif
 
    local_result = 0.0;
-
-#ifdef HYPRE_USE_PTHREADS
-   global_result[threadid] = 0.0;
-#endif
+   process_result = 0.0;
 
    hypre_SetIndex(unit_stride, 1, 1, 1);
 
@@ -78,34 +76,30 @@ hypre_StructInnerProd(  hypre_StructVector *x,
          hypre_GetBoxSize(box, loop_size);
 
 #ifdef HYPRE_USE_PTHREADS
-         hypre_BoxLoop2(loopi, loopj, loopk, loop_size,
-                        x_data_box, start, unit_stride, xi,
-                        y_data_box, start, unit_stride, yi,
-                        {
-                           global_result[threadid] += xp[xi] * yp[yi];
-                        });
-#else
+   local_result_ref[threadid] = &local_result;
+#endif
          hypre_BoxLoop2(loopi, loopj, loopk, loop_size,
                         x_data_box, start, unit_stride, xi,
                         y_data_box, start, unit_stride, yi,
                         {
                            local_result += xp[xi] * yp[yi];
                         });
-#endif
       }
 
 #ifdef HYPRE_USE_PTHREADS
-   if (threadid == 0)
+   if (threadid != hypre_NumThreads)
    {
       for (i = 0; i < hypre_NumThreads; i++)
-         local_result += global_result[i];
+         process_result += *local_result_ref[i];
    }
-   else if (threadid == hypre_NumThreads)
-      local_result = global_result[threadid];
+   else
+      process_result = *local_result_ref[threadid];
+#else
+   process_result = local_result;
 #endif
 
 
-   MPI_Allreduce(&local_result, &final_innerprod_result, 1,
+   MPI_Allreduce(&process_result, &final_innerprod_result, 1,
                  MPI_DOUBLE, MPI_SUM, hypre_StructVectorComm(x));
 
 
