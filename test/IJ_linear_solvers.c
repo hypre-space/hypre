@@ -543,6 +543,9 @@ main( int   argc,
     * Copy the parcsr matrix into the IJMatrix through interface calls
     *-----------------------------------------------------------*/
 
+   time_index = hypre_InitializeTiming("IJ Interface");
+   hypre_BeginTiming(time_index);
+
    ierr = HYPRE_ParCSRMatrixGetComm( parcsr_A, &comm );
    ierr += HYPRE_ParCSRMatrixGetDims( parcsr_A, &M, &N );
 
@@ -766,6 +769,12 @@ main( int   argc,
       HYPRE_IJVectorZeroLocalComponents(ij_x); 
       x = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage( ij_x );
    }
+
+   hypre_EndTiming(time_index);
+   hypre_PrintTiming("IJ Interface", MPI_COMM_WORLD);
+   hypre_FinalizeTiming(time_index);
+   hypre_ClearTiming();
+ 
    /*-----------------------------------------------------------
     * Solve the system using AMG
     *-----------------------------------------------------------*/

@@ -293,6 +293,9 @@ main( int   argc,
     * Set up periodic flags and set istart = 0 for periodic dims
     *-----------------------------------------------------------*/
 
+   time_index = hypre_InitializeTiming("Struct Interface");
+   hypre_BeginTiming(time_index);
+
    periodic[0] = px;
    periodic[1] = py;
    periodic[2] = pz;
@@ -589,6 +592,11 @@ main( int   argc,
 #endif
  
    hypre_TFree(values);
+
+   hypre_EndTiming(time_index);
+   hypre_PrintTiming("Struct Interface", MPI_COMM_WORLD);
+   hypre_FinalizeTiming(time_index);
+   hypre_ClearTiming();
 
    /*-----------------------------------------------------------
     * Solve the system using SMG
