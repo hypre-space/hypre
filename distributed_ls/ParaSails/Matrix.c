@@ -92,7 +92,7 @@ Matrix *MatrixCreateLocal(int beg_row, int end_row)
 
     Matrix *mat = (Matrix *) malloc(sizeof(Matrix));
 
-    mat->comm = NULL;
+    mat->comm = MPI_COMM_NULL;
 
     mat->beg_row = beg_row;
     mat->end_row = end_row;
