@@ -76,7 +76,8 @@ hypre_SparseMSGFinalize( void *SparseMSG_vdata )
 
          for (l = 0; l < (3*(SparseMSG_data -> num_grids)); l++)
          {
-            hypre_PFMGRestrictFinalize(SparseMSG_data -> restrict_data_array[l]);
+            hypre_PFMGRestrictFinalize(SparseMSG_data ->
+                                       restrict_data_array[l]);
             hypre_PFMGInterpFinalize(SparseMSG_data -> interp_data_array[l]);
          }
 
@@ -90,7 +91,6 @@ hypre_SparseMSGFinalize( void *SparseMSG_vdata )
          for (l = 0; l < SparseMSG_data -> num_grids; l++)
          {
             hypre_FreeStructGrid(SparseMSG_data -> grid_array[l]);
-/*	    hypre_FreeStructGrid(SparseMSG_data -> P_grid_array[l]); */
             hypre_FreeStructMatrix(SparseMSG_data -> A_array[l]);
             hypre_FreeStructVector(SparseMSG_data -> b_array[l]);
             hypre_FreeStructVector(SparseMSG_data -> x_array[l]);
