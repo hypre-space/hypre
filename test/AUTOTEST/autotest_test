@@ -209,6 +209,18 @@ apply_error_filters () {
           egrep -v "^[A-Za-z0-9_]\.[cCf]$| remark: " $ErrorFile.orig > $ErrorFile
         fi
       ;;
+      tux*)
+        if (egrep "(autoconf|automake|autoheader) has been disabled" $ErrorFile >/dev/null)
+        then                          # cleanup the problem with the GuideC compiler
+          mv $ErrorFile $ErrorFile.orig
+          egrep -v "(autoconf|automake|autoheader) has been disabled" $ErrorFile.orig > $ErrorFile
+        fi
+        if (egrep "configure: WARNING: Configuration for" $ErrorFile >/dev/null)
+        then                          # cleanup the problem with the GuideC compiler
+          mv $ErrorFile $ErrorFile.orig
+          egrep -v "configure: WARNING: Configuration for" $ErrorFile.orig > $ErrorFile
+        fi
+      ;;
       achi*)
         if (egrep "Option -fexceptions passed to ld" $ErrorFile >/dev/null)
         then                          # cleanup the problem with the xlf compiler
