@@ -197,7 +197,7 @@ int hypre_SymQMRSolve(void  *symqmr_vdata, void  *A, void  *b, void  *x)
    char             *log_file_name = (symqmr_data -> log_file_name);
    
    int               j, m, ierr=0, my_id, num_procs, iter, flag;
-   double            theta, tau, rhom1, rho, dtmp, r_norm, b_norm;
+   double            theta, tau, rhom1, rho, dtmp, r_norm;
    double            thetam1, c, epsmac = 1.e-16, epsilon; 
    double            sigma, alpha, beta;
 
@@ -216,30 +216,14 @@ int hypre_SymQMRSolve(void  *symqmr_vdata, void  *A, void  *b, void  *x)
 
    hypre_ParKrylovMatvec(matvec_data,-1.0, A, x, 1.0, r);
    r_norm = sqrt(hypre_ParKrylovInnerProd(r,r));
-   b_norm = sqrt(hypre_ParKrylovInnerProd(b,b));
    if (logging > 0)
    {
       norms[0] = r_norm;
       if (my_id == 0)
-      {
-  	 printf("SymQMR : L2 norm of b = %e\n", b_norm);
-         if (b_norm == 0.0)
-            printf("Rel_resid_norm actually contains the residual norm\n");
          printf("SymQMR : Initial L2 norm of residual = %e\n", r_norm);
-      }
    }
    iter = 0;
-
-   if (b_norm > 0.0)
-   {
-      /* convergence criterion |r_i| <= accuracy*|b| if |b| > 0 */
-      epsilon = accuracy * b_norm;
-   }
-   else
-   {
-      /* convergence criterion |r_i| <= accuracy*|r0| if |b| = 0 */
-      epsilon = accuracy * r_norm;
-   }
+   epsilon = accuracy * r_norm;
 
    /* convergence criterion |r_i| <= accuracy , absolute residual norm*/
    if (stop_crit) epsilon = accuracy;
@@ -306,11 +290,8 @@ int hypre_SymQMRSolve(void  *symqmr_vdata, void  *A, void  *b, void  *x)
       r_norm = sqrt(hypre_ParKrylovInnerProd(r,r));
    }
 
-   (symqmr_data -> num_iterations) = iter;
-   if (b_norm > 0.0)
-      (symqmr_data -> rel_residual_norm) = r_norm/b_norm;
-   if (b_norm == 0.0)
-      (symqmr_data -> rel_residual_norm) = r_norm;
+   (symqmr_data -> num_iterations)    = iter;
+   (symqmr_data -> rel_residual_norm) = r_norm;
 
    if (iter >= max_iter && r_norm > epsilon) ierr = 1;
 
