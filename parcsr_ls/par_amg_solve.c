@@ -130,7 +130,7 @@ hypre_ParAMGSolve( void               *amg_vdata,
     *     write some initial info
     *-----------------------------------------------------------------------*/
 
-   if (my_id == 0 && amg_ioutdat >= 1) printf("\n\nAMG SOLUTION INFO:\n");
+   if (my_id == 0 && amg_ioutdat > 1) printf("\n\nAMG SOLUTION INFO:\n");
 
    /*-----------------------------------------------------------------------
     *    Compute initial fine-grid residual and print 
@@ -220,7 +220,7 @@ hypre_ParAMGSolve( void               *amg_vdata,
       cycle_cmplxty = ((double) cycle_op_count) / ((double) num_coeffs[0]);
    }
 
-   if (my_id == 0 && amg_ioutdat >= 1)
+   if (my_id == 0 && amg_ioutdat > 1)
    {
       if (Solve_err_flag == 1)
       {
