@@ -603,10 +603,16 @@ GenerateDiagAndOffd(hypre_CSRMatrix *A,
 		diag_data[i] = a_data[i];
 		diag_j[i] = a_j[i];
        	}
+        offd_i = hypre_CTAlloc(int, num_rows+1);
+
 	for (i=0; i < num_rows+1; i++)
+	{
 		diag_i[i] = a_i[i];
+		offd_i[i] = 0;
+ 	}
 
 	hypre_CSRMatrixNumCols(offd) = 0;
+	hypre_CSRMatrixI(offd) = offd_i;
    }
    
    return ierr;
