@@ -805,7 +805,7 @@ ParaSails *ParaSailsCreate(Matrix *A)
 
     ps->pruned_rows = NULL;
 
-    ps->stored_rows = StoredRowsCreate(A, ps->max_num_external_rows);
+    ps->stored_rows = NULL;
 
     ps->diag_scale = DiagScaleCreate(A);
 
@@ -821,7 +821,8 @@ void ParaSailsDestroy(ParaSails *ps)
     if (ps->pruned_rows)
         PrunedRowsDestroy(ps->pruned_rows);
 
-    StoredRowsDestroy(ps->stored_rows);
+    if (ps->stored_rows)
+        StoredRowsDestroy(ps->stored_rows);
 
     DiagScaleDestroy(ps->diag_scale);
 
@@ -888,6 +889,13 @@ void ParaSailsSetupValues(ParaSails *ps, Matrix *A)
     double time0, time1;
 
     MPI_Comm_rank(A->comm, &mype);
+
+    time0 = MPI_Wtime();
+    ps->stored_rows = StoredRowsCreate(A, ps->max_num_external_rows);
+    time1 = MPI_Wtime();
+#ifdef PARASAILS_TIME
+    printf("%d: Time for creating stored rows: %f\n", mype, time1-time0);
+#endif
 
     time0 = MPI_Wtime();
     ExchangeStoredRows(ps->A->comm, A, ps->M, ps->stored_rows, ps->num_replies);
