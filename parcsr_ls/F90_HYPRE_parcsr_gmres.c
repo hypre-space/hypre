@@ -89,7 +89,7 @@ hypre_F90_IFACE(hypre_parcsrgmressetkdim)( long int *solver,
 void
 hypre_F90_IFACE(hypre_parcsrgmressettol)( long int *solver,
                                           double   *tol,
-                                          int      *ierr   )
+                                          int      *ierr    )
 {
    *ierr = (int) ( HYPRE_ParCSRGMRESSetTol( (HYPRE_Solver) *solver,
                                             (double)       *tol     ) );
@@ -116,7 +116,7 @@ void
 hypre_F90_IFACE(hypre_parcsrgmressetprecond)( long int *solver,
                                               int      *precond_id,
                                               long int *precond_data,
-                                              int      *ierr         )
+                                              int      *ierr          )
 {
    /*------------------------------------------------------------
     * The precond_id flags mean :
@@ -131,14 +131,15 @@ hypre_F90_IFACE(hypre_parcsrgmressetprecond)( long int *solver,
    *ierr = (int) ( HYPRE_ParCSRGMRESSetPrecond( (HYPRE_Solver) *solver,
                                                 HYPRE_ParAMGSolve,
                                                 HYPRE_ParAMGSetup,
-                                                (void *)       precond_data ) );
+                                                (void *)        precond_data ) );
    }
    else if (*precond_id == 8)
    {
-      *ierr = (int) ( HYPRE_ParCSRGMRESSetPrecond( (HYPRE_Solver) *solver,
-                                                   HYPRE_ParCSRDiagScale,
-                                                   HYPRE_ParCSRDiagScaleSetup,
-                                                   (void *)       precond_data ) );
+      *ierr = (int)
+              ( HYPRE_ParCSRGMRESSetPrecond( (HYPRE_Solver) *solver,
+                                             HYPRE_ParCSRDiagScale,
+                                             HYPRE_ParCSRDiagScaleSetup,
+                                             (void *)        precond_data ) );
    }
    else if (*precond_id == 9)
    {
@@ -157,7 +158,7 @@ hypre_F90_IFACE(hypre_parcsrgmressetprecond)( long int *solver,
 void
 hypre_F90_IFACE(hypre_parcsrgmressetlogging)( long int *solver,
                                               int      *logging,
-                                              int      *ierr    )
+                                              int      *ierr     )
 {
    *ierr = (int) ( HYPRE_ParCSRGMRESSetLogging( (HYPRE_Solver) *solver,
                                                 (int)          *logging ) );
@@ -170,10 +171,11 @@ hypre_F90_IFACE(hypre_parcsrgmressetlogging)( long int *solver,
 void
 hypre_F90_IFACE(hypre_parcsrgmresgetnumiter)( long int *solver,
                                               int      *num_iterations,
-                                              int      *ierr   )
+                                              int      *ierr            )
 {
-   *ierr = (int) ( HYPRE_ParCSRGMRESGetNumIterations( (HYPRE_Solver) *solver,
-                                                      (int *)        num_iterations ) );
+   *ierr = (int) ( HYPRE_ParCSRGMRESGetNumIterations(
+                            (HYPRE_Solver) *solver,
+                            (int *)         num_iterations ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -183,9 +185,9 @@ hypre_F90_IFACE(hypre_parcsrgmresgetnumiter)( long int *solver,
 void
 hypre_F90_IFACE(hypre_parcsrgmresgetfinalrel)( long int *solver,
                                                double   *norm,
-                                               int      *ierr   )
+                                               int      *ierr    )
 {
    *ierr = (int) ( HYPRE_ParCSRGMRESGetFinalRelativeResidualNorm(
-                       (HYPRE_Solver) *solver,
-                       (double *)           norm ) );
+                            (HYPRE_Solver) *solver,
+                            (double *)      norm    ) );
 }

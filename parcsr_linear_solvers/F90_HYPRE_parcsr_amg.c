@@ -15,10 +15,13 @@
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_paramginitialize)( long int *solver )
+hypre_F90_IFACE(hypre_paramginitialize)( long int *solver,
+                                         int      *ierr    )
 
 {
    *solver = (long int) ( HYPRE_ParAMGInitialize( ) );
+
+   *ierr = 0;
 }
 
 /*--------------------------------------------------------------------------
@@ -27,7 +30,7 @@ hypre_F90_IFACE(hypre_paramginitialize)( long int *solver )
 
 void 
 hypre_F90_IFACE(hypre_paramgfinalize)( long int *solver,
-                                       int      *ierr   )
+                                       int      *ierr    )
 {
    *ierr = (int) ( HYPRE_ParAMGFinalize( (HYPRE_Solver) *solver ) );
 }
@@ -41,12 +44,12 @@ hypre_F90_IFACE(hypre_paramgsetup)( long int *solver,
                                     long int *A,
                                     long int *b,
                                     long int *x,
-                                    int      *ierr   )
+                                    int      *ierr    )
 {
    *ierr = (int) ( HYPRE_ParAMGSetup( (HYPRE_Solver)       *solver,
                                       (HYPRE_ParCSRMatrix) *A,
                                       (HYPRE_ParVector)    *b,
-                                      (HYPRE_ParVector)    *x ) );
+                                      (HYPRE_ParVector)    *x       ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -58,12 +61,12 @@ hypre_F90_IFACE(hypre_paramgsolve)( long int *solver,
                                     long int *A,
                                     long int *b,
                                     long int *x,
-                                    int      *ierr   )
+                                    int      *ierr    )
 {
    *ierr = (int) ( HYPRE_ParAMGSolve( (HYPRE_Solver)       *solver,
                                       (HYPRE_ParCSRMatrix) *A,
                                       (HYPRE_ParVector)    *b,
-                                      (HYPRE_ParVector)    *x ) );
+                                      (HYPRE_ParVector)    *x       ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -75,12 +78,12 @@ hypre_F90_IFACE(hypre_paramgsolvet)( long int *solver,
                                      long int *A,
                                      long int *b,
                                      long int *x,
-                                     int      *ierr   )
+                                     int      *ierr    )
 {
    *ierr = (int) ( HYPRE_ParAMGSolveT( (HYPRE_Solver)       *solver,
                                        (HYPRE_ParCSRMatrix) *A,
                                        (HYPRE_ParVector)    *b,
-                                       (HYPRE_ParVector)    *x ) );
+                                       (HYPRE_ParVector)    *x       ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -90,7 +93,7 @@ hypre_F90_IFACE(hypre_paramgsolvet)( long int *solver,
 void
 hypre_F90_IFACE(hypre_paramgsetrestriction)( long int *solver,
                                              int      *restr_par,
-                                             int      *ierr   )
+                                             int      *ierr       )
 {
    *ierr = (int) ( HYPRE_ParAMGSetRestriction( (HYPRE_Solver) *solver,
                                                (int)          *restr_par ) );
@@ -103,10 +106,11 @@ hypre_F90_IFACE(hypre_paramgsetrestriction)( long int *solver,
 void
 hypre_F90_IFACE(hypre_paramgsetstrongthreshold)( long int *solver,
                                                  long int *strong_threshold,
-                                                 int      *ierr   )
+                                                 int      *ierr              )
 {
-   *ierr = (int) ( HYPRE_ParAMGSetStrongThreshold( (HYPRE_Solver) *solver,
-                                                   (double)       *strong_threshold ) );
+   *ierr = (int)
+           ( HYPRE_ParAMGSetStrongThreshold( (HYPRE_Solver) *solver,
+                                             (double)       *strong_threshold ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -116,7 +120,7 @@ hypre_F90_IFACE(hypre_paramgsetstrongthreshold)( long int *solver,
 void
 hypre_F90_IFACE(hypre_paramgsettruncfactor)( long int *solver,
                                              long int *trunc_factor,
-                                             int      *ierr   )
+                                             int      *ierr          )
 {
    *ierr = (int) ( HYPRE_ParAMGSetTruncFactor( (HYPRE_Solver) *solver,
                                                (double)       *trunc_factor ) );
@@ -129,7 +133,7 @@ hypre_F90_IFACE(hypre_paramgsettruncfactor)( long int *solver,
 void
 hypre_F90_IFACE(hypre_paramgsetinterptype)( long int *solver,
                                             int      *interp_type,
-                                            int      *ierr   )
+                                            int      *ierr         )
 {
    *ierr = (int) ( HYPRE_ParAMGSetInterpType( (HYPRE_Solver) *solver,
                                               (int)          *interp_type ) );
@@ -142,7 +146,7 @@ hypre_F90_IFACE(hypre_paramgsetinterptype)( long int *solver,
 void
 hypre_F90_IFACE(hypre_paramgsetmaxiter)( long int *solver,
                                          int      *max_iter,
-                                         int      *ierr   )
+                                         int      *ierr      )
 {
    *ierr = (int) ( HYPRE_ParAMGSetMaxIter( (HYPRE_Solver) *solver,
                                            (int)          *max_iter ) );
@@ -155,7 +159,7 @@ hypre_F90_IFACE(hypre_paramgsetmaxiter)( long int *solver,
 void
 hypre_F90_IFACE(hypre_paramgsetcoarsentype)( long int *solver,
                                              int      *coarsen_type,
-                                             int      *ierr   )
+                                             int      *ierr          )
 {
    *ierr = (int) ( HYPRE_ParAMGSetCoarsenType( (HYPRE_Solver) *solver,
                                                (int)          *coarsen_type ) );
@@ -168,7 +172,7 @@ hypre_F90_IFACE(hypre_paramgsetcoarsentype)( long int *solver,
 void
 hypre_F90_IFACE(hypre_paramgsetmeasuretype)( long int *solver,
                                              int      *measure_type,
-                                             int      *ierr   )
+                                             int      *ierr          )
 {
    *ierr = (int) ( HYPRE_ParAMGSetMeasureType( (HYPRE_Solver) *solver,
                                                (int)          *measure_type ) );
@@ -181,7 +185,7 @@ hypre_F90_IFACE(hypre_paramgsetmeasuretype)( long int *solver,
 void
 hypre_F90_IFACE(hypre_paramgsetcycletype)( long int *solver,
                                            int      *cycle_type,
-                                           int      *ierr   )
+                                           int      *ierr        )
 {
    *ierr = (int) ( HYPRE_ParAMGSetCycleType( (HYPRE_Solver) *solver,
                                              (int)          *cycle_type ) );
@@ -194,10 +198,10 @@ hypre_F90_IFACE(hypre_paramgsetcycletype)( long int *solver,
 void
 hypre_F90_IFACE(hypre_paramgsettol)( long int *solver,
                                      long int *tol,
-                                     int      *ierr   )
+                                     int      *ierr    )
 {
    *ierr = (int) ( HYPRE_ParAMGSetTol( (HYPRE_Solver) *solver,
-                                       (double)       *tol ) );
+                                       (double)       *tol     ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -207,10 +211,10 @@ hypre_F90_IFACE(hypre_paramgsettol)( long int *solver,
 void
 hypre_F90_IFACE(hypre_paramgsetnumgridsweeps)( long int *solver,
                                                int      *num_grid_sweeps,
-                                               int      *ierr   )
+                                               int      *ierr             )
 {
    *ierr = (int) ( HYPRE_ParAMGSetNumGridSweeps( (HYPRE_Solver) *solver,
-                                                 (int *)        num_grid_sweeps ) );
+                                                 (int *)         num_grid_sweeps ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -223,7 +227,7 @@ hypre_F90_IFACE(hypre_paramgsetgridrelaxtype)( long int *solver,
                                                int      *ierr   )
 {
    *ierr = (int) ( HYPRE_ParAMGSetGridRelaxType( (HYPRE_Solver) *solver,
-                                                 (int *)        grid_relax_type ) );
+                                                 (int *)         grid_relax_type ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -232,11 +236,13 @@ hypre_F90_IFACE(hypre_paramgsetgridrelaxtype)( long int *solver,
 
 void
 hypre_F90_IFACE(hypre_paramgsetgridrelaxpoints)( long int *solver,
-                                                 int      **grid_relax_points,
-                                                 int      *ierr   )
+                                                 long int *grid_relax_points,
+                                                 int      *ierr                   )
 {
+
    *ierr = (int) ( HYPRE_ParAMGSetGridRelaxPoints( (HYPRE_Solver) *solver,
-                                                   (int **)       grid_relax_points ) );
+                                                   (int **)        grid_relax_points ) );
+
 }
 
 /*--------------------------------------------------------------------------

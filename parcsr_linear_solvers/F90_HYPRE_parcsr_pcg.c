@@ -21,7 +21,7 @@ hypre_F90_IFACE(hypre_parcsrpcginitialize)( int      *comm,
 
 {
    *ierr = (int) ( HYPRE_ParCSRPCGInitialize( (MPI_Comm)       *comm,
-                                              (HYPRE_Solver *) solver ) );
+                                              (HYPRE_Solver *)  solver ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -141,17 +141,19 @@ hypre_F90_IFACE(hypre_parcsrpcgsetprecond)( long int *solver,
 
    if (*precond_id == 2)
    {
-      *ierr = (int) ( HYPRE_ParCSRPCGSetPrecond( (HYPRE_Solver) *solver,
-                                                 HYPRE_ParAMGSolve,
-                                                 HYPRE_ParAMGSetup,
-                                                 (HYPRE_Solver) *precond_solver) );
+      *ierr = (int) ( HYPRE_ParCSRPCGSetPrecond(
+                               (HYPRE_Solver) *solver,
+                               HYPRE_ParAMGSolve,
+                               HYPRE_ParAMGSetup,
+                               (HYPRE_Solver) *precond_solver) );
    }
    else if (*precond_id == 8)
    {
-      *ierr = (int) ( HYPRE_ParCSRPCGSetPrecond( (HYPRE_Solver) *solver,
-                                                 HYPRE_ParCSRDiagScale,
-                                                 HYPRE_ParCSRDiagScaleSetup,
-                                                 (HYPRE_Solver) *precond_solver) );
+      *ierr = (int) ( HYPRE_ParCSRPCGSetPrecond(
+                               (HYPRE_Solver) *solver,
+                               HYPRE_ParCSRDiagScale,
+                               HYPRE_ParCSRDiagScaleSetup,
+                               (HYPRE_Solver) *precond_solver) );
    }
    else if (*precond_id == 9)
    {
@@ -185,8 +187,9 @@ hypre_F90_IFACE(hypre_parcsrpcggetnumiterations)( long int *solver,
                                                   int      *num_iterations,
                                                   int      *ierr            )
 {
-   *ierr = (int) ( HYPRE_ParCSRPCGGetNumIterations( (HYPRE_Solver) *solver,
-                                                    (int *)        num_iterations ) );
+   *ierr = (int) ( HYPRE_ParCSRPCGGetNumIterations(
+                            (HYPRE_Solver) *solver,
+                            (int *)         num_iterations ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -198,8 +201,9 @@ hypre_F90_IFACE(hypre_parcsrpcggetfinalrelative)( long int *solver,
                                                   double   *norm,
                                                   int      *ierr    )
 {
-   *ierr = (int) ( HYPRE_ParCSRPCGGetFinalRelativeResidualNorm( (HYPRE_Solver) *solver,
-                                                                (double *)     norm     ) );
+   *ierr = (int) ( HYPRE_ParCSRPCGGetFinalRelativeResidualNorm(
+                            (HYPRE_Solver) *solver,
+                            (double *)      norm    ) );
 }
 
 /*--------------------------------------------------------------------------
