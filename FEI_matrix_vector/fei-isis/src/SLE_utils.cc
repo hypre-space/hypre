@@ -1,8 +1,8 @@
 #include <stdlib.h>
 #include <iostream.h>
 #include "other/basicTypes.h"
-#include "mv/IntArray.h"
-#include "mv/GlobalIDArray.h"
+#include "isis-mv/IntArray.h"
+#include "isis-mv/GlobalIDArray.h"
 
 /**=========================================================================**/
 int GID_insert_orderedID(GlobalID value, GlobalIDArray* list) {

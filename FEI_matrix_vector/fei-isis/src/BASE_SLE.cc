@@ -12,14 +12,14 @@
 
 #include "other/basicTypes.h"
 
-#include "mv/RealArray.h"
-#include "mv/IntArray.h"
-#include "mv/GlobalIDArray.h"
+#include "isis-mv/RealArray.h"
+#include "isis-mv/IntArray.h"
+#include "isis-mv/GlobalIDArray.h"
 
-#include "mv/CommInfo.h"
-#include "mv/Map.h"
-#include "mv/Vector.h"
-#include "mv/Matrix.h"
+#include "isis-mv/CommInfo.h"
+#include "isis-mv/Map.h"
+#include "isis-mv/Vector.h"
+#include "isis-mv/Matrix.h"
 
 #include "fei.h"
 
