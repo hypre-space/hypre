@@ -194,14 +194,31 @@ void F_T_ID( int *ithread, int *istatus )
 /*pthread version of SPPM routine */
 /***************************************************************************/
 
-int IFETCHADD( int *w)
+
+
+int hypre_fetch_and_add( int *w)
 {
    int temp;
-   
+
    temp = *w;
    *w += 1;
+
    return temp;
 }
+
+int IFETCHADD( int *w, pthread_mutex_t *mutex_fetchadd)
+{
+   int n;
+
+
+   pthread_mutex_lock(mutex_fetchadd);
+   n = hypre_fetch_and_add(w);
+   pthread_mutex_unlock(mutex_fetchadd);
+
+   return n;
+/*   return (hypre_fetch_and_add(w));*/
+}
+
 
 /***************************************************************************/
 /* This spinning barrier sychronization is a pthread implementation of the
@@ -213,7 +230,7 @@ void FBARRIER( int num_threads)
    int my_parity;
 
    my_parity = barrier_parity;
-   IFETCHADD(&barrier_nwaiting);
+   hypre_fetch_and_add(&barrier_nwaiting);
    if (barrier_nwaiting == num_threads)
    {
       barrier_nwaiting = 0;

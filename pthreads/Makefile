@@ -1,5 +1,5 @@
 M4 = m4
-CC = cc
+CC = cc -g
 CLINKER = ${CC}
 M4FLAGS = -DTHREADED=1
 LDFLAGS = -lpthread

@@ -79,13 +79,14 @@ $5
          enddo
          if ( $1 .eq. $3+msg_nthreads ) indx($4)=0
 */
+   pthread_mutex_init(&$7, NULL);
 
-
-   for ($1 = ifetchadd(&$4[$5]) + $2; 
+   for ($1 = ifetchadd(&$4[$5], &$7) + $2; 
         $1 <  $3;
-        $1 = ifetchadd(&$4[$5]) + $2) {
+        $1 = ifetchadd(&$4[$5], &$7) + $2) {
       $6
    }
+   pthread_mutex_destroy(&$7);
 
    if ($1 == $3)
       $4[$5] =0;
