@@ -51,8 +51,8 @@ DIRS=""
 
 DIRS="$DIRS \
   amg \
+  amgdriver \
   config \
-  lib \
   port \
   tools"
 

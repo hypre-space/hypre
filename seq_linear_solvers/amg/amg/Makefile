@@ -17,10 +17,10 @@ AMG_OBJS  = ${AMG_OBJS1:.f=.${AMG_ARCH}.o}
 # Rules
 ##################################################################
 
-${AMG_PROGRAM}.${AMG_ARCH}: ${AMG_OBJS}
-	@echo  "Linking" ${AMG_PROGRAM} "... "
-	@${AMG_LINK} -o ${AMG_PROGRAM}.${AMG_ARCH} \
-		${LFLAGS} ${AMG_OBJS} ${AMG_LIBS}
+${AMG_LIBRARY}.${AMG_ARCH}.a: ${AMG_OBJS}
+	@echo  "Building ${AMG_LIBRARY}.${AMG_ARCH}.a ... "
+	@${AMG_AR} ${AMG_LIBRARY}.${AMG_ARCH}.a ${AMG_OBJS}
+	@${AMG_RANLIB} ${AMG_LIBRARY}.${AMG_ARCH}.a
 
 .c.${AMG_ARCH}.o:
 	@echo "Making (c) " $@

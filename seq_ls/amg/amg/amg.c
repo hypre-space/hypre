@@ -7,139 +7,121 @@
  * $Revision$
  *********************************************************************EHEADER*/
 
-#include "amg.h"
+/******************************************************************************
+ *
+ * AMG functions
+ *
+ *****************************************************************************/
+
+#include "headers.h"
 
 
 /*--------------------------------------------------------------------------
- * Main driver for AMG
+ * amg_Initialize
  *--------------------------------------------------------------------------*/
 
-int   main(argc, argv)
-int   argc;
-char *argv[];
+void  *amg_Initialize(port_data)
+void  *port_data;
 {
-   char    *run_name;
+   AMGData  *amg_data;
 
-   char     file_name[255];
-   FILE    *fp;
+   /* setup params */
+   int      levmax;
+   int      ncg;
+   double   ecg;
+   int      nwt;
+   double   ewt;
+   int      nstr;
 
-   Problem *problem;
-   Solver  *solver;
+   /* solve params */
+   int      ncyc;
+   int     *mu;
+   int     *ntrlx;
+   int     *iprlx;
+   int     *ierlx;
+   int     *iurlx;
 
-   Vector      *u;
-   Vector      *f;
-   double       stop_tolerance;
-   Data        *amgs01_data;
-   Data        *wjacobi_data;
-   Data        *pcg_data;
+   /* output params */
+   int      ioutdat;
+   int      ioutgrd;
+   int      ioutmat;
+   int      ioutres;
+   int      ioutsol;
+
+   /* log file name */
+   char    *log_file_name;
+
+   int      i;
 
 
-   /*-------------------------------------------------------
-    * Check that the number of command args is correct
-    *-------------------------------------------------------*/
+   /*-----------------------------------------------------------------------
+    * Setup default values for parameters
+    *-----------------------------------------------------------------------*/
 
-   if (argc < 2)
-   {
-      fprintf(stderr, "Usage:  amg <run name>\n");
-      exit(1);
-   }
+   /* setup params */
+   levmax = 25;
+   ncg    = 30012;
+   ecg    = 0.25;
+   nwt    = 200;
+   ewt    = 0.35;
+   nstr   = 11;
 
-   /*-------------------------------------------------------
-    * Set up globals
-    *-------------------------------------------------------*/
+   /* solve params */
+   ncyc  = 1020;
+   mu = ctalloc(int, levmax);
+   for (i = 0; i < levmax; i++)
+      mu[i] = 1;
+   ntrlx = ctalloc(int, 4);
+   ntrlx[0] = 133;
+   ntrlx[1] = 133;
+   ntrlx[2] = 133;
+   ntrlx[3] = 19;
+   iprlx = ctalloc(int, 4);
+   iprlx[0] = 31;
+   iprlx[1] = 31;
+   iprlx[2] = 13;
+   iprlx[3] = 2;
+   ierlx = ctalloc(int, 4);
+   ierlx[0] = 99;
+   ierlx[1] = 99;
+   ierlx[2] = 99;
+   ierlx[3] = 9;
+   iurlx = ctalloc(int, 4);
+   iurlx[0] = 99;
+   iurlx[1] = 99;
+   iurlx[2] = 99;
+   iurlx[3] = 9;
 
-   run_name = argv[1];
-   NewGlobals(run_name);
+   /* output params */
+   ioutdat = 1;
+   ioutgrd = 0;
+   ioutmat = 1;
+   ioutres = 0;
+   ioutsol = 0;
 
-   /*-------------------------------------------------------
-    * Set up the problem
-    *-------------------------------------------------------*/
 
-   sprintf(file_name, "%s.problem.strp", GlobalsInFileName);
-   problem = NewProblem(file_name);
+   /*-----------------------------------------------------------------------
+    * Create the AMGData structure and return
+    *-----------------------------------------------------------------------*/
 
-   /*-------------------------------------------------------
-    * Set up the solver
-    *-------------------------------------------------------*/
+   amg_data = amg_NewData(levmax, ncg, ecg, nwt, ewt, nstr,
+			  ncyc, mu, ntrlx, iprlx, ierlx, iurlx,
+			  ioutdat, ioutgrd, ioutmat, ioutres, ioutsol,
+			  "amg.out.log");
+   
+   return (void *)amg_data;
+}
 
-   sprintf(file_name, "%s.solver.strp", GlobalsInFileName);
-   solver = NewSolver(file_name);
+/*--------------------------------------------------------------------------
+ * amg_Finalize
+ *--------------------------------------------------------------------------*/
 
-   /*-------------------------------------------------------
-    * Debugging prints
-    *-------------------------------------------------------*/
-#if 0
-   sprintf(file_name, "%s.ysmp", GlobalsOutFileName);
-   WriteYSMP(file_name, ProblemA(problem));
+void   amg_Finalize(data)
+void  *data;
+{
+   AMGData  *amg_data = data;
 
-   sprintf(file_name, "%s.initu", GlobalsOutFileName);
-   WriteVec(file_name, ProblemU(problem));
 
-   sprintf(file_name, "%s.rhs", GlobalsOutFileName);
-   WriteVec(file_name, ProblemF(problem));
-#endif
-
-   /*-------------------------------------------------------
-    * Write initial logging info
-    *-------------------------------------------------------*/
-
-   fp = fopen(GlobalsLogFileName, "w");
-   sprintf(file_name, "%s.problem.strp", GlobalsInFileName);
-   WriteProblem(file_name,GlobalsLogFileName);
-   WriteSolver(GlobalsLogFileName, solver);
-
-   fclose(fp);
-
-   /*-------------------------------------------------------
-    * Call the solver
-    *-------------------------------------------------------*/
-
-   u = ProblemU(problem);
-   f = ProblemF(problem);
-
-   stop_tolerance = SolverStopTolerance(solver);
-   amgs01_data    = SolverAMGS01Data(solver);
-   wjacobi_data   = SolverWJacobiData(solver);
-   pcg_data       = SolverPCGData(solver);
-
-   /* call AMGS01 */
-   if (SolverType(solver) == 0)
-   {
-      AMGS01Setup(problem, amgs01_data);
-
-      AMGS01(u, f, stop_tolerance, amgs01_data);
-   }
-
-   /* call AMGCG */
-   else if (SolverType(solver) == 1)
-   {
-      AMGS01Setup(problem, amgs01_data);
-      PCGSetup(problem, AMGS01, amgs01_data, pcg_data);
-
-      PCG(u, f, stop_tolerance, pcg_data);
-   }
-
-   /* call JCG */
-   else if (SolverType(solver) == 2)
-   {
-      WJacobiSetup(problem, wjacobi_data);
-      PCGSetup(problem, WJacobi, wjacobi_data, pcg_data);
-
-      PCG(u, f, stop_tolerance, pcg_data);
-   }
-
-   /*-------------------------------------------------------
-    * Debugging prints
-    *-------------------------------------------------------*/
-#if 0
-   sprintf(file_name, "%s.lastu", GlobalsOutFileName);
-   WriteVec(file_name, ProblemU(problem));
-
-   Matvec(-1.0, ProblemA(problem), ProblemU(problem), 1.0, ProblemF(problem));
-   sprintf(file_name, "%s.res", GlobalsOutFileName);
-   WriteVec(file_name, ProblemF(problem));
-#endif
-
-   return 0;
+   amg_FreeData(amg_data);
 }
 

@@ -13,48 +13,47 @@
  *
  *****************************************************************************/
 
-#include "amgs01.h"
+#ifndef _AMG_FORTRAN_HEADER
+#define _AMG_FORTRAN_HEADER
+
 
 /* setup */
-#define CALL_SETUP(problem, amgs01_data) \
-setup_(&AMGS01DataNumLevels(amgs01_data),\
-       &AMGS01DataNSTR(amgs01_data),\
-       &AMGS01DataECG(amgs01_data),\
-       &AMGS01DataNCG(amgs01_data),\
-       &AMGS01DataEWT(amgs01_data),\
-       &AMGS01DataNWT(amgs01_data),\
-       AMGS01DataICDep(amgs01_data),\
-       &AMGS01DataIOutMat(amgs01_data),\
-       &ProblemNumUnknowns(problem),\
-       AMGS01DataIMin(amgs01_data),\
-       AMGS01DataIMax(amgs01_data),\
-       VectorData(ProblemU(problem)),\
-       VectorData(ProblemF(problem)),\
-       MatrixData(AMGS01DataA(amgs01_data)),\
-       MatrixIA(AMGS01DataA(amgs01_data)),\
-       MatrixJA(AMGS01DataA(amgs01_data)),\
-       ProblemIU(problem),\
-       ProblemIP(problem),\
-       AMGS01DataICG(amgs01_data),\
-       AMGS01DataIFG(amgs01_data),\
-       MatrixData(AMGS01DataP(amgs01_data)),\
-       MatrixIA(AMGS01DataP(amgs01_data)),\
-       MatrixJA(AMGS01DataP(amgs01_data)),\
-       AMGS01DataIPMN(amgs01_data),\
-       AMGS01DataIPMX(amgs01_data),\
-       ProblemIV(problem),\
-       ProblemXP(problem),\
-       ProblemYP(problem),\
-       &AMGS01DataNDIMU(amgs01_data),\
-       &AMGS01DataNDIMP(amgs01_data),\
-       &AMGS01DataNDIMA(amgs01_data),\
-       &AMGS01DataNDIMB(amgs01_data),\
-       AMGS01DataLogFileName(amgs01_data),\
-       strlen(AMGS01DataLogFileName(amgs01_data)))
+#define CALL_SETUP(A, amg_data) \
+setup_(&AMGDataNumLevels(amg_data),\
+       &AMGDataNSTR(amg_data),\
+       &AMGDataECG(amg_data),\
+       &AMGDataNCG(amg_data),\
+       &AMGDataEWT(amg_data),\
+       &AMGDataNWT(amg_data),\
+       AMGDataICDep(amg_data),\
+       &AMGDataIOutMat(amg_data),\
+       &AMGDataNumUnknowns(amg_data),\
+       AMGDataIMin(amg_data),\
+       AMGDataIMax(amg_data),\
+       MatrixData(A),\
+       MatrixIA(A),\
+       MatrixJA(A),\
+       AMGDataIU(amg_data),\
+       AMGDataIP(amg_data),\
+       AMGDataICG(amg_data),\
+       AMGDataIFG(amg_data),\
+       MatrixData(AMGDataP(amg_data)),\
+       MatrixIA(AMGDataP(amg_data)),\
+       MatrixJA(AMGDataP(amg_data)),\
+       AMGDataIPMN(amg_data),\
+       AMGDataIPMX(amg_data),\
+       AMGDataIV(amg_data),\
+       AMGDataXP(amg_data),\
+       AMGDataYP(amg_data),\
+       &AMGDataNDIMU(amg_data),\
+       &AMGDataNDIMP(amg_data),\
+       &AMGDataNDIMA(amg_data),\
+       &AMGDataNDIMB(amg_data),\
+       AMGDataLogFileName(amg_data),\
+       strlen(AMGDataLogFileName(amg_data)))
 
 void setup_(int *, int *, double *, int *, double *, int *,
 	    int *, int *, int *, int *, int *,
-	    double *, double *,
 	    double *, int *, int *,
 	    int *, int *, int *, int *,
 	    double *, int *, int *,
@@ -64,52 +63,49 @@ void setup_(int *, int *, double *, int *, double *, int *,
 	    char *, long);
 
 /* solve */
-#define CALL_SOLVE(u, f, tol, amgs01_data) \
-{\
-   Problem  *problem = AMGS01DataProblem(amgs01_data);\
-   solve_(&AMGS01DataNumLevels(amgs01_data),\
-	  &AMGS01DataNCyc(amgs01_data),\
-	  AMGS01DataMU(amgs01_data),\
-	  AMGS01DataNTRLX(amgs01_data),\
-	  AMGS01DataIPRLX(amgs01_data),\
-	  AMGS01DataIERLX(amgs01_data),\
-	  AMGS01DataIURLX(amgs01_data),\
-	  &AMGS01DataIOutRes(amgs01_data),\
-	  &ProblemNumUnknowns(problem),\
-	  AMGS01DataIMin(amgs01_data),\
-	  AMGS01DataIMax(amgs01_data),\
-	  VectorData(u),\
-	  VectorData(f),\
-	  MatrixData(AMGS01DataA(amgs01_data)),\
-	  MatrixIA(AMGS01DataA(amgs01_data)),\
-	  MatrixJA(AMGS01DataA(amgs01_data)),\
-	  ProblemIU(problem),\
-	  AMGS01DataICG(amgs01_data),\
-	  MatrixData(AMGS01DataP(amgs01_data)),\
-	  MatrixIA(AMGS01DataP(amgs01_data)),\
-	  MatrixJA(AMGS01DataP(amgs01_data)),\
-	  AMGS01DataIPMN(amgs01_data),\
-	  AMGS01DataIPMX(amgs01_data),\
-	  ProblemIV(problem),\
-	  ProblemIP(problem),\
-	  ProblemXP(problem),\
-	  ProblemYP(problem),\
-          &AMGS01DataNDIMU(amgs01_data),\
-          &AMGS01DataNDIMP(amgs01_data),\
-          &AMGS01DataNDIMA(amgs01_data),\
-          &AMGS01DataNDIMB(amgs01_data),\
-	  AMGS01DataLevA(amgs01_data),\
-	  AMGS01DataLevB(amgs01_data),\
-	  AMGS01DataLevV(amgs01_data),\
-	  AMGS01DataLevPI(amgs01_data),\
-	  AMGS01DataLevI(amgs01_data),\
-	  AMGS01DataNumA(amgs01_data),\
-	  AMGS01DataNumB(amgs01_data),\
-	  AMGS01DataNumV(amgs01_data),\
-	  AMGS01DataNumP(amgs01_data),\
-	  AMGS01DataLogFileName(amgs01_data),\
-	  strlen(AMGS01DataLogFileName(amgs01_data)));\
-}
+#define CALL_SOLVE(u, f, tol, amg_data) \
+solve_(&AMGDataNumLevels(amg_data),\
+       &AMGDataNCyc(amg_data),\
+       AMGDataMU(amg_data),\
+       AMGDataNTRLX(amg_data),\
+       AMGDataIPRLX(amg_data),\
+       AMGDataIERLX(amg_data),\
+       AMGDataIURLX(amg_data),\
+       &AMGDataIOutRes(amg_data),\
+       &AMGDataNumUnknowns(amg_data),\
+       AMGDataIMin(amg_data),\
+       AMGDataIMax(amg_data),\
+       VectorData(u),\
+       VectorData(f),\
+       MatrixData(AMGDataA(amg_data)),\
+       MatrixIA(AMGDataA(amg_data)),\
+       MatrixJA(AMGDataA(amg_data)),\
+       AMGDataIU(amg_data),\
+       AMGDataICG(amg_data),\
+       MatrixData(AMGDataP(amg_data)),\
+       MatrixIA(AMGDataP(amg_data)),\
+       MatrixJA(AMGDataP(amg_data)),\
+       AMGDataIPMN(amg_data),\
+       AMGDataIPMX(amg_data),\
+       AMGDataIV(amg_data),\
+       AMGDataIP(amg_data),\
+       AMGDataXP(amg_data),\
+       AMGDataYP(amg_data),\
+       &AMGDataNDIMU(amg_data),\
+       &AMGDataNDIMP(amg_data),\
+       &AMGDataNDIMA(amg_data),\
+       &AMGDataNDIMB(amg_data),\
+       AMGDataLevA(amg_data),\
+       AMGDataLevB(amg_data),\
+       AMGDataLevV(amg_data),\
+       AMGDataLevPI(amg_data),\
+       AMGDataLevI(amg_data),\
+       AMGDataNumA(amg_data),\
+       AMGDataNumB(amg_data),\
+       AMGDataNumV(amg_data),\
+       AMGDataNumP(amg_data),\
+       AMGDataLogFileName(amg_data),\
+       strlen(AMGDataLogFileName(amg_data)));
 
 void solve_(int *, int *, int *, int *, int *, int *, int *,
 	    int *, int *, int *, int *,
@@ -124,3 +120,5 @@ void solve_(int *, int *, int *, int *, int *, int *, int *,
             int *, int *, int *, int *,
 	    char *, long);
 
+
+#endif

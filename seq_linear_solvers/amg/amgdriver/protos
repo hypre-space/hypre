@@ -1,0 +1,49 @@
+#!/bin/sh
+#BHEADER***********************************************************************
+# (c) 1996   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+################################################################################
+#
+# Shell script that uses `mkproto' to create a prototype header files.
+#
+################################################################################
+
+################################################################################
+# Use `rcs_files' to create the `protos.h' file
+################################################################################
+ 
+PROTOS="protos.h"
+ 
+cat > $PROTOS <<@
+ 
+#ifndef _PROTOS_HEADER
+#define _PROTOS_HEADER
+ 
+@
+ 
+mkproto -s `cat rcs_files | \
+awk '
+   BEGIN {STR = " "}
+   {
+      for (i = 1; i <= NF; i++) {
+         if (($i  ~ /[^\ ]*\.c/) && \
+             ($i !~ /amgdriver\.c/) )
+            STR = STR $i " "
+      }
+   }
+   END {print STR}
+'` >> $PROTOS
+ 
+ 
+cat >> $PROTOS <<@
+ 
+#endif
+ 
+@
+
