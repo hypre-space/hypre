@@ -73,21 +73,21 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
    MPI_Comm_size(comm, &num_procs);   
    MPI_Comm_rank(comm,&my_id);
 
-   amg_ioutdat   = hypre_ParAMGDataIOutDat(amg_data);
+   amg_ioutdat      = hypre_ParAMGDataIOutDat(amg_data);
    /* num_unknowns  = hypre_ParAMGDataNumUnknowns(amg_data); */
-   num_levels    = hypre_ParAMGDataNumLevels(amg_data);
-   A_array       = hypre_ParAMGDataAArray(amg_data);
-   F_array       = hypre_ParAMGDataFArray(amg_data);
-   U_array       = hypre_ParAMGDataUArray(amg_data);
+   num_levels       = hypre_ParAMGDataNumLevels(amg_data);
+   A_array          = hypre_ParAMGDataAArray(amg_data);
+   F_array          = hypre_ParAMGDataFArray(amg_data);
+   U_array          = hypre_ParAMGDataUArray(amg_data);
 
-   tol           = hypre_ParAMGDataTol(amg_data);
-   min_iter      = hypre_ParAMGDataMinIter(amg_data);
-   max_iter      = hypre_ParAMGDataMaxIter(amg_data);
+   tol              = hypre_ParAMGDataTol(amg_data);
+   min_iter         = hypre_ParAMGDataMinIter(amg_data);
+   max_iter         = hypre_ParAMGDataMaxIter(amg_data);
 
-   num_coeffs = hypre_CTAlloc(int, num_levels);
-   num_variables = hypre_CTAlloc(int, num_levels);
-   num_coeffs[0]    = hypre_ParCSRMatrixNumNonzeros(A_array[0]);
-   num_variables[0] = hypre_ParCSRMatrixGlobalNumRows(A_array[0]);
+   num_coeffs       = hypre_CTAlloc(int, num_levels);
+   num_variables    = hypre_CTAlloc(int, num_levels);
+   num_coeffs[0]    = hypre_ParCSRMatrixNumNonzeros(A);
+   num_variables[0] = hypre_ParCSRMatrixGlobalNumRows(A);
  
    A_array[0] = A;
    F_array[0] = f;
