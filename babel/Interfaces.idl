@@ -32,11 +32,11 @@ package Hypre {
    
 
    interface Operator {
-      vector Apply( in vector b );
+      void Apply( in StructVector x, out StructVector b );
    };
 
    interface LinearOperator extends Operator {
-      vector Apply( in vector b );
+      void Apply( in StructVector x, out StructVector b );
    };
 
    interface StructuredGridMatrixBuilder {
@@ -62,7 +62,7 @@ package Hypre {
       int SetStencil( in StructStencil stencil );
       int SetValues( in Box box, in array<int,1> stencil_indices,
                      in array<double,1> values );
-      vector Apply( in vector b );
+      void Apply( in StructVector x, out StructVector b );
       StructMatrix GetConstructedObject();
       };
 
@@ -79,7 +79,8 @@ package Hypre {
                      in array<double,1> values );
       // ... stencil_indices not needed; here for compatibility with
       // StructuredGridMatrixBuilder
-      vector Apply( in vector b );
+      void Apply( in StructVector x, out StructVector b );
+      // ... not implemented, doesn't make much sense to use
       StructMatrix GetConstructedObject();
    };
 
@@ -112,14 +113,14 @@ package Hypre {
    };
    
   interface Solver extends LinearOperator {
-     vector Apply( in vector b );
+     void Apply( in StructVector b, out StructVector x );
      StructMatrix GetSystemOperator();
      StructVector GetResidual();
      void GetConvergenceInfo(); /* not finished */
   };
 
   interface PreconditionedSolver {
-     vector Apply( in vector b );
+     void Apply( in StructVector b, out StructVector x );
      StructMatrix GetSystemOperator();
      StructVector GetResidual();
      void GetConvergenceInfo(); /* not finished */
@@ -131,37 +132,36 @@ package Hypre {
      // looks like a factory object, except for the inheritance relationship
      // Discuss with Andy Cleary what he is thinking.
      void SetSystemOperator( in StructMatrix op );
-     void SetParameters(); /* not finished */
-     // ... a bit of a problem, as every solver needs this, but they
-     // will all work differently
-     void Setup();         /* not finished */
+     void SetParameter( in string name, in double value );
+     // ... int parameters input as double, will be converted back to real
+     void Setup( in StructMatrix A, in StructVector b, in StructVector x, in MPI_Com comm );
      SolverBuilder GetConstructedObject();    
   };
 
   interface PreconditionedSolverBuilder extends SolverBuilder {
      void SetSystemOperator( in StructMatrix op );
-     void SetParameters(); /* not finished */
-     void Setup();         /* not finished */
+     void SetParameter( in string name, in double value );
+     void Setup( in StructMatrix A, in StructVector b, in StructVector x, in MPI_Com comm );
      SolverBuilder GetConstructedObject();    
 
      void SetPreconditioner( in Solver precond );
   };
 
   class StructJacobi implements Solver, SolverBuilder {
-     vector Apply( in vector b );
+     void Apply( in StructVector b, out StructVector x );
      StructMatrix GetSystemOperator();
      StructVector GetResidual();
      void GetConvergenceInfo(); /* not finished */
 
      void SetSystemOperator( in StructMatrix op );
-     void SetParameters(); /* not finished */
-     void Setup();         /* not finished */
+     void SetParameter( in string name, in double value );
+     void Setup( in StructMatrix A, in StructVector b, in StructVector x, in MPI_Com comm );
      SolverBuilder GetConstructedObject();    
   };
 
   class PCG implements PreconditionedSolver, PreconditionedSolverBuilder {
      // Preconditioned Conjugant Gradient
-     vector Apply( in vector b );
+     void Apply( in StructVector b, out StructVector x );
      StructMatrix GetSystemOperator();
      StructVector GetResidual();
      void GetConvergenceInfo(); /* not finished */
@@ -169,8 +169,8 @@ package Hypre {
      Solver GetPreconditioner();
 
      void SetSystemOperator( in StructMatrix op );
-     void SetParameters(); /* not finished */
-     void Setup();         /* not finished */
+     void SetParameter( in string name, in double value );
+     void Setup( in StructMatrix A, in StructVector b, in StructVector x, in MPI_Com comm );
      SolverBuilder GetConstructedObject();    
 
      void SetPreconditioner( in Solver precond );
