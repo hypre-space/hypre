@@ -310,18 +310,18 @@ HYPRE_SetIJVectorLocalStorageType( HYPRE_IJVector IJvector, int type )
  *--------------------------------------------------------------------------*/
 
 /** 
-Inserts a block of coefficients into an IJVector, overwriting any coefficients
-in the event of a collision.
+Inserts one value into an indexed set of local vector components, overwriting
+all indexed coefficients.
 
 Not collective.
 
 @return integer error code
-@param HYPRE_IJVector &vector [IN]
-the vector to be operated on.
+@param HYPRE_IJVector &vector
+vector, some components of which are to be set
 @param int *glob_vec_indices [IN]
-pointer to indices of local vector to be set 
-@param double value {IN]
-value to which the local vector values are set
+pointer to global indices of local vector components to be set 
+@param double value [IN]
+value to which the local vector components are to be set
 
 */
 
@@ -360,20 +360,20 @@ HYPRE_SetIJVectorLocalComponents( HYPRE_IJVector  IJvector,
  *--------------------------------------------------------------------------*/
 
 /** 
-Inserts a block of coefficients into an IJVector, overwriting any coefficients
-in the event of a collision.
+Inserts a value into a block of local vector components, 
+overwriting all components in the block.
 
 Not collective.
 
 @return integer error code
-@param HYPRE_IJVector &vector [IN]
-the vector to be operated on.
+@param HYPRE_IJVector &vector
+vector, the components of which are to be set
 @param int glob_vec_index_start [IN]
 global index of first vector component in block to be set 
 @param int glob_vec_index_stop [IN]
 global index of last vector component in block to be set 
-@param double value {IN]
-value to which the local vector values are set
+@param double value [IN]
+value to which the local vector components are to be set
 
 */
 
@@ -413,19 +413,19 @@ HYPRE_SetIJVectorLocalComponentsInBlock( HYPRE_IJVector IJvector,
 
 /** 
 Inserts indexed values of an array into indexed components of an IJVector, 
-overwriting any components in the event of a collision.
+overwriting all indexed components.
 
 Not collective.
 
 @return integer error code
 @param HYPRE_IJVector &vector [IN]
-the vector to be operated on.
-@param int *glob_vec_indices {IN]
+vector, some components of which are to be inserted to
+@param int *glob_vec_indices [IN]
 pointer to indices of local vector specifying which local vector components
 to be overwritten
-@param int *value_indices {IN]
+@param int *value_indices [IN]
 pointer to indices of values array specifying values from which to insert 
-@param double *values {IN]
+@param double *values [IN]
 pointer to array from which vector values are inserted
 
 */
@@ -470,7 +470,7 @@ HYPRE_InsertIJVectorLocalComponents( HYPRE_IJVector  IJvector,
 
 /** 
 Inserts indexed values of an array into a block of components of an IJVector,
-overwriting any components in the event of a collision.
+overwriting all components of the block.
 
 Not collective.
 
@@ -478,7 +478,9 @@ Not collective.
 @param HYPRE_IJVector IJvector
 the vector to be operated on
 @param int glob_vec_index_start [IN]
+global index of first vector component in block to be inserted 
 @param int glob_vec_index_stop [IN]
+global index of last vector component in block to be set 
 @param int *value_indices [IN]
 pointer to indices of values array specifying values from which to insert 
 @param double *values [IN]
@@ -525,17 +527,21 @@ HYPRE_InsertIJVectorLocalComponentsInBlock( HYPRE_IJVector  IJvector,
  *--------------------------------------------------------------------------*/
 
 /** 
-Modifies the values stored in vector by adding in a block.
-If there is no value already in a particular vector position, the structure is augmented
-with a new entry. In the event of a collision, the corresponding values are summed.
+Adds indexed values of an array to an indexed set of components of
+an IJVector, overwriting all indexed components.
 
 Not collective.
 
 @return integer error code
 @param HYPRE_IJVector &vector [IN]
-vector to be operated on
+vector, some components of which are to be summed to
+@param int *glob_vec_indices [IN]
+pointer to global indices of local vector components to be set 
+@param int *value_indices [IN]
+pointer to indices of value array members to be summed to local vector
+components
 @param double *values [IN]
-pointer to array from which vector values are added
+pointer to array from which values are taken for summing
 
 */
 
@@ -578,20 +584,23 @@ HYPRE_AddToIJVectorLocalComponents( HYPRE_IJVector  IJvector,
  *--------------------------------------------------------------------------*/
 
 /** 
-Adds to indexed values of an array into a block of components of an IJVector,
-overwriting any components in the event of a collision.
+Adds indexed values of an array into a block of components of an IJVector,
+overwriting all components in the block.
 
 Not collective.
 
 @return integer error code
-@param HYPRE_IJVector &vector [IN]
-vector with components specified for summing to 
+@param HYPRE_IJVector &vector
+vector, the components of which are to be summed to
 @param int glob_vec_index_start [IN]
+global index of first vector component in block to be summed to
 @param int glob_vec_index_stop [IN]
+global index of last vector component in block to be summed to
 @param int *value_indices [IN]
-pointer to indices of values array specifying values from which to insert 
+pointer to indices of value array members to be summed to local vector
+components
 @param double *values [IN]
-pointer to array from which vector values are added
+pointer to array from which values are taken for summing
 
 */
 
