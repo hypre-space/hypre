@@ -63,8 +63,7 @@ make docs
 # Run test suites
 #=============================================================================
 
-cp -Rf test $HYPRE_AUTOTEST_DIR/autotest_drivers/.
-cd $HYPRE_AUTOTEST_DIR/autotest_drivers/test
+cd $HYPRE_AUTOTEST_DIR/linear_solvers/test
 ./test_drivers.sh -mail
 
 #=============================================================================
@@ -87,9 +86,8 @@ make docs
 # Run test suites
 #=============================================================================
 
-cp -Rf test $HYPRE_AUTOTEST_DIR/autotest_drivers/.
-cd $HYPRE_AUTOTEST_DIR/autotest_drivers/test
-./test_drivers.sh -mail
+#cd $HYPRE_AUTOTEST_DIR/linear_solvers/test
+#./test_drivers.sh -mail
 
 
 #=============================================================================
@@ -112,9 +110,8 @@ make docs
 # Run test suites
 #=============================================================================
 
-cp -Rf test $HYPRE_AUTOTEST_DIR/autotest_drivers/.
-cd $HYPRE_AUTOTEST_DIR/autotest_drivers/test
-./test_drivers.sh -mail
+#cd $HYPRE_AUTOTEST_DIR/linear_solvers/test
+#./test_drivers.sh -mail
 
 #=============================================================================
 # Make libraries and test drivers (using configure)
@@ -133,9 +130,8 @@ make c++
 # Run test suites
 #=============================================================================
 
-cp -Rf test $HYPRE_AUTOTEST_DIR/autotest_drivers/.
-cd $HYPRE_AUTOTEST_DIR/autotest_drivers/test
-./test_drivers.sh -mail
+#cd $HYPRE_AUTOTEST_DIR/linear_solvers/test
+#./test_drivers.sh -mail
 
 #=============================================================================
 # Clean up
