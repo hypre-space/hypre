@@ -4,7 +4,7 @@
 #include <math.h>
 
 #include "utilities.h"
-#include "hypre_parcsr_ls.h"
+#include "parcsr_ls.h"
 
 /*--------------------------------------------------------------------------
  * Test driver for unstructured matrix interface (parcsr storage).
@@ -82,6 +82,12 @@ main( int   argc,
          build_matrix_type      = 1;
          build_matrix_arg_index = arg_index;
       }
+      else if ( strcmp(argv[arg_index], "-laplacian9pt") == 0 )
+      {
+         arg_index++;
+         build_matrix_type      = 3;
+         build_matrix_arg_index = arg_index;
+      }
       else if ( strcmp(argv[arg_index], "-solver") == 0 )
       {
          arg_index++;
@@ -148,6 +154,10 @@ main( int   argc,
    else if ( build_matrix_type == 2 )
    {
       BuildParFromOneFile(argc, argv, build_matrix_arg_index, &A);
+   }
+   else if ( build_matrix_type == 3 )
+   {
+      BuildParLaplacian9pt(argc, argv, build_matrix_arg_index, &A);
    }
 
    /*-----------------------------------------------------------
@@ -561,6 +571,128 @@ BuildParFromOneFile( int                  argc,
    *A_ptr = A;
 
    hypre_DestroyCSRMatrix(A_CSR);
+
+   return (0);
+}
+
+/*----------------------------------------------------------------------
+ * Build standard 9-point laplacian in 2D with grid and anisotropy.
+ * Parameters given in command line.
+ *----------------------------------------------------------------------*/
+
+int
+BuildParLaplacian9pt( int                  argc,
+                      char                *argv[],
+                      int                  arg_index,
+                      hypre_ParCSRMatrix **A_ptr     )
+{
+   int                 nx, ny;
+   int                 P, Q;
+
+   hypre_ParCSRMatrix *A;
+
+   int                 num_procs, myid;
+   int                 p, q;
+   double             *values;
+
+   /*-----------------------------------------------------------
+    * Initialize some stuff
+    *-----------------------------------------------------------*/
+
+   MPI_Comm_size(MPI_COMM_WORLD, &num_procs );
+   MPI_Comm_rank(MPI_COMM_WORLD, &myid );
+
+   /*-----------------------------------------------------------
+    * Set defaults
+    *-----------------------------------------------------------*/
+ 
+   nx = 10;
+   ny = 10;
+
+   P  = 1;
+   Q  = num_procs;
+
+   /*-----------------------------------------------------------
+    * Parse command line
+    *-----------------------------------------------------------*/
+   arg_index = 0;
+   while (arg_index < argc)
+   {
+      if ( strcmp(argv[arg_index], "-n") == 0 )
+      {
+         arg_index++;
+         nx = atoi(argv[arg_index++]);
+         ny = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-P") == 0 )
+      {
+         arg_index++;
+         P  = atoi(argv[arg_index++]);
+         Q  = atoi(argv[arg_index++]);
+      }
+      else
+      {
+         arg_index++;
+      }
+   }
+
+   /*-----------------------------------------------------------
+    * Check a few things
+    *-----------------------------------------------------------*/
+
+   if ((P*Q) != num_procs)
+   {
+      printf("Error: Invalid number of processors or processor topology \n");
+      exit(1);
+   }
+
+   /*-----------------------------------------------------------
+    * Print driver parameters
+    *-----------------------------------------------------------*/
+ 
+   if (myid == 0)
+   {
+      printf("  Laplacian 9pt:\n");
+      printf("    (nx, ny) = (%d, %d)\n", nx, ny);
+      printf("    (Px, Py) = (%d, %d)\n", P,  Q);
+   }
+
+   /*-----------------------------------------------------------
+    * Set up the grid structure
+    *-----------------------------------------------------------*/
+
+   /* compute p,q from P,Q and myid */
+   p = myid % P;
+   q = ( myid - p)/P;
+
+   /*-----------------------------------------------------------
+    * Generate the matrix 
+    *-----------------------------------------------------------*/
+ 
+   values = hypre_CTAlloc(double, 2);
+
+   values[1] = -1.0;
+
+   values[0] = 0.0;
+   if (nx > 1)
+   {
+      values[0] += 2.0;
+   }
+   if (ny > 1)
+   {
+      values[0] += 2.0;
+   }
+   if (nx > 1 && ny > 1)
+   {
+      values[0] += 4.0;
+   }
+
+   A = hypre_GenerateLaplacian9pt(MPI_COMM_WORLD,
+                                  nx, ny, P, Q, p, q, values);
+
+   hypre_TFree(values);
+
+   *A_ptr = A;
 
    return (0);
 }
