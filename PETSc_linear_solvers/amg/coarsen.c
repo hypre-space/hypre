@@ -62,7 +62,6 @@
 
 int hypre_AMGCoarsen(A, strong_threshold, CF_marker)
 
-hypre_CSRMatrix    *S;
 hypre_CSRMatrix    *A;
 int                *CF_marker;
 double              strong_threshold;
