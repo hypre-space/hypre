@@ -32,9 +32,9 @@ MLI_Method_AMGSA::MLI_Method_AMGSA( MPI_Comm comm ) : MLI_Method( comm )
    num_levels        = 40;
    curr_level        = 0;
    output_level      = 1;
-   node_dofs         = 3;
+   node_dofs         = 1;
    threshold         = 0.08;
-   nullspace_dim     = 3;
+   nullspace_dim     = 1;
    nullspace_vec     = NULL;
    nullspace_len     = 0;
    P_weight          = 4.0/3.0;
