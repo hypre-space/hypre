@@ -352,10 +352,20 @@ main( int   argc,
          arg_index++;
          coarsen_type      = 9;
       }    
+      else if ( strcmp(argv[arg_index], "-hmis") == 0 )
+      {
+         arg_index++;
+         coarsen_type      = 10;
+      }    
       else if ( strcmp(argv[arg_index], "-ruge") == 0 )
       {
          arg_index++;
          coarsen_type      = 1;
+      }    
+      else if ( strcmp(argv[arg_index], "-ruge1p") == 0 )
+      {
+         arg_index++;
+         coarsen_type      = 11;
       }    
       else if ( strcmp(argv[arg_index], "-ruge2b") == 0 )
       {
@@ -710,8 +720,12 @@ main( int   argc,
       printf("       45=Euclid-BICGSTAB\n");
       printf("\n");
       printf("  -cljp                 : CLJP coarsening \n");
+      printf("  -cljp1                : CLJP coarsening, fixed random \n");
       printf("  -pmis                 : PMIS coarsening \n");
+      printf("  -pmis1                : PMIS coarsening, fixed random \n");
+      printf("  -hmis                 : HMIS coarsening \n");
       printf("  -ruge                 : Ruge coarsening (local)\n");
+      printf("  -ruge1p               : Ruge coarsening 1st pass only(local)\n");
       printf("  -ruge3                : third pass on boundary\n");
       printf("  -ruge3c               : third pass on boundary, keep c-points\n");
       printf("  -ruge2b               : 2nd pass is global\n");
