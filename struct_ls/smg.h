@@ -32,6 +32,9 @@ typedef struct
                     
    int                 num_levels;
 
+   int                 num_pre_relax;  /* number of pre relaxation sweeps */
+   int                 num_post_relax; /* number of post relaxation sweeps */
+
    /* base coarsening info */
    int                 cdir;    /* coarsening direction */
    int                 ci;      /* 1st coarse index in coarsening direction */

@@ -99,8 +99,10 @@ char *argv[];
 
    smg_data = zzz_SMGInitialize(comm);
    zzz_SMGSetMemoryUse(smg_data, 0);
-   zzz_SMGSetMaxIter(smg_data, 30);
+   zzz_SMGSetMaxIter(smg_data, 50);
    zzz_SMGSetTol(smg_data, 1.0e-06);
+   zzz_SMGSetNumPreRelax(smg_data, 1);
+   zzz_SMGSetNumPostRelax(smg_data, 1);
    zzz_SMGSetLogging(smg_data, 0);
    zzz_SMGSetup(smg_data, A, b, x);
 

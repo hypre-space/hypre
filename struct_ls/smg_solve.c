@@ -58,6 +58,8 @@ zzz_SMGSolve( void             *smg_vdata,
    double              tol             = (smg_data -> tol);
    int                 max_iter        = (smg_data -> max_iter);
    int                 num_levels      = (smg_data -> num_levels);
+   int                 num_pre_relax   = (smg_data -> num_pre_relax);
+   int                 num_post_relax  = (smg_data -> num_post_relax);
    zzz_StructMatrix  **A_l             = (smg_data -> A_l);
    zzz_StructMatrix  **PT_l            = (smg_data -> PT_l);
    zzz_StructMatrix  **R_l             = (smg_data -> R_l);
@@ -99,7 +101,7 @@ zzz_SMGSolve( void             *smg_vdata,
        * Down cycle
        *--------------------------------------------------*/
 
-      zzz_SMGRelaxSetMaxIter(relax_data_l[0], 1);
+      zzz_SMGRelaxSetMaxIter(relax_data_l[0], num_pre_relax);
       zzz_SMGRelaxSetRegSpaceRank(relax_data_l[0], 0, 0);
       zzz_SMGRelaxSetRegSpaceRank(relax_data_l[0], 1, 1);
       if (i == 0)
@@ -138,7 +140,7 @@ zzz_SMGSolve( void             *smg_vdata,
       {
          if (l > 0)
          {
-            zzz_SMGRelaxSetMaxIter(relax_data_l[l], 1);
+            zzz_SMGRelaxSetMaxIter(relax_data_l[l], num_pre_relax);
             zzz_SMGRelaxSetRegSpaceRank(relax_data_l[l], 0, 0);
             zzz_SMGRelaxSetRegSpaceRank(relax_data_l[l], 1, 1);
             zzz_SMGRelaxSetZeroGuess(relax_data_l[l]);
@@ -186,7 +188,7 @@ zzz_SMGSolve( void             *smg_vdata,
             zzz_PrintStructVector(filename, x_l[l], 0);
          }
 #endif
-         zzz_SMGRelaxSetMaxIter(relax_data_l[l], 1);
+         zzz_SMGRelaxSetMaxIter(relax_data_l[l], num_post_relax);
          zzz_SMGRelaxSetRegSpaceRank(relax_data_l[l], 0, 1);
          zzz_SMGRelaxSetRegSpaceRank(relax_data_l[l], 1, 0);
          zzz_SMGRelaxSetNonZeroGuess(relax_data_l[l]);

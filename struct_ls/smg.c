@@ -36,6 +36,8 @@ zzz_SMGInitialize( MPI_Comm *comm )
    (smg_data -> max_iter)   = 200;
    (smg_data -> zero_guess) = 0;
    (smg_data -> max_levels) = 0;
+   (smg_data -> num_pre_relax)  = 1;
+   (smg_data -> num_post_relax) = 1;
    (smg_data -> cdir) = 2;
    (smg_data -> ci) = 0;
    (smg_data -> fi) = 1;
@@ -184,6 +186,39 @@ zzz_SMGSetZeroGuess( void *smg_vdata )
    int          ierr = 0;
  
    (smg_data -> zero_guess) = 1;
+ 
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * zzz_SMGSetNumPreRelax
+ * Note that we require at least 1 pre-relax sweep. 
+ *--------------------------------------------------------------------------*/
+
+int
+zzz_SMGSetNumPreRelax( void *smg_vdata,
+                    int   num_pre_relax )
+{
+   zzz_SMGData *smg_data = smg_vdata;
+   int          ierr = 0;
+ 
+   (smg_data -> num_pre_relax) = max(num_pre_relax,1);
+ 
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * zzz_SMGSetNumPostRelax
+ *--------------------------------------------------------------------------*/
+
+int
+zzz_SMGSetNumPostRelax( void *smg_vdata,
+                     int   num_post_relax )
+{
+   zzz_SMGData *smg_data = smg_vdata;
+   int          ierr = 0;
+ 
+   (smg_data -> num_post_relax) = num_post_relax;
  
    return ierr;
 }

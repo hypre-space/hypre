@@ -34,6 +34,8 @@ FILES =\
  smg_solve.c\
  ZZZ_struct_smg.c
 
+#smg1_setup_rap.c\
+
 OBJS = ${FILES:.c=.o}
 
 CC = gcc

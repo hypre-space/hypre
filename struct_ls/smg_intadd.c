@@ -63,15 +63,24 @@ zzz_SMGIntAddSetup( void             *intadd_vdata,
    zzz_SMGIntAddData    *intadd_data = intadd_vdata;
 
    zzz_StructGrid       *grid;
+   zzz_StructStencil    *stencil_PT;
+   zzz_Index           **stencil_PT_shape;
    zzz_StructStencil    *stencil;
+   zzz_Index           **stencil_shape;
+   int                   stencil_size;
+   int                   stencil_dim;
                        
    zzz_BoxArrayArray    *send_boxes;
    zzz_BoxArrayArray    *recv_boxes;
+   int                 **temp_send_box_ranks;
+   int                 **temp_recv_box_ranks;
    int                 **send_box_ranks;
    int                 **recv_box_ranks;
    zzz_BoxArrayArray    *indt_boxes;
    zzz_BoxArrayArray    *dept_boxes;
                        
+   zzz_SBoxArrayArray   *f_send_sboxes;
+   zzz_SBoxArrayArray   *f_recv_sboxes;
    zzz_SBoxArrayArray   *send_sboxes;
    zzz_SBoxArrayArray   *recv_sboxes;
    zzz_SBoxArrayArray   *indt_sboxes;
@@ -87,15 +96,33 @@ zzz_SMGIntAddSetup( void             *intadd_vdata,
     *----------------------------------------------------------*/
 
    grid    = zzz_StructVectorGrid(x);
-   stencil = zzz_StructMatrixStencil(PT);
+
+   /*----------------------------------------------------------
+    * Use PT-stencil-element-1 to set up the compute package
+    *----------------------------------------------------------*/
+
+   stencil_PT = zzz_StructMatrixStencil(PT);
+   stencil_PT_shape = zzz_StructStencilShape(stencil_PT);
+   stencil_size = 1;
+   stencil_dim = zzz_StructStencilDim(stencil_PT);
+   stencil_shape = zzz_CTAlloc(zzz_Index *, stencil_size);
+   stencil_shape[0] = zzz_NewIndex();
+   zzz_CopyIndex(stencil_PT_shape[1], stencil_shape[0]);
+   stencil = zzz_NewStructStencil(stencil_dim, stencil_size, stencil_shape);
 
    zzz_GetComputeInfo(&send_boxes, &recv_boxes,
-                      &send_box_ranks, &recv_box_ranks,
+                      &temp_send_box_ranks, &temp_recv_box_ranks,
                       &indt_boxes, &dept_boxes,
                       grid, stencil);
 
-   send_sboxes = zzz_ProjectBoxArrayArray(send_boxes, findex, fstride);
-   recv_sboxes = zzz_ProjectBoxArrayArray(recv_boxes, findex, fstride);
+   /*----------------------------------------------------------
+    * Project sends and recieves to fine and coarse points
+    *----------------------------------------------------------*/
+
+   f_send_sboxes = zzz_ProjectBoxArrayArray(send_boxes, findex, fstride);
+   f_recv_sboxes = zzz_ProjectBoxArrayArray(recv_boxes, findex, fstride);
+   send_sboxes = zzz_ProjectBoxArrayArray(send_boxes, cindex, cstride);
+   recv_sboxes = zzz_ProjectBoxArrayArray(recv_boxes, cindex, cstride);
    indt_sboxes = zzz_ProjectBoxArrayArray(indt_boxes, findex, fstride);
    dept_sboxes = zzz_ProjectBoxArrayArray(dept_boxes, findex, fstride);
 
@@ -103,10 +130,28 @@ zzz_SMGIntAddSetup( void             *intadd_vdata,
    zzz_FreeBoxArrayArray(recv_boxes);
    zzz_FreeBoxArrayArray(indt_boxes);
    zzz_FreeBoxArrayArray(dept_boxes);
+   zzz_FreeStructStencil(stencil);
 
-   /* reverse send and recv info */
-   compute_pkg = zzz_NewComputePkg(recv_sboxes, send_sboxes,
-                                   recv_box_ranks, send_box_ranks,
+   /*----------------------------------------------------------
+    * Reverse sends and recieves for fine points, append to
+    * sends and recieves for coarse points. 
+    *----------------------------------------------------------*/
+
+   zzz_AppendSBoxArrayArrayAndRanks(temp_recv_box_ranks, temp_send_box_ranks,
+                                    f_recv_sboxes, send_sboxes,
+                                    &send_box_ranks);
+   zzz_AppendSBoxArrayArrayAndRanks(temp_send_box_ranks, temp_recv_box_ranks,
+                                    f_send_sboxes, recv_sboxes,
+                                    &recv_box_ranks);
+
+   zzz_FreeSBoxArrayArrayShell(f_send_sboxes);
+   zzz_FreeSBoxArrayArrayShell(f_recv_sboxes);
+
+   zzz_TFree(temp_send_box_ranks);
+   zzz_TFree(temp_recv_box_ranks);
+
+   compute_pkg = zzz_NewComputePkg(send_sboxes, recv_sboxes,
+                                   send_box_ranks, recv_box_ranks,
                                    indt_sboxes, dept_sboxes,
                                    grid, zzz_StructVectorDataSpace(e), 1);
 
@@ -227,6 +272,8 @@ zzz_SMGIntAdd( void             *intadd_vdata,
     * Compute e = (P^T)_off x_c, where (P^T)_off corresponds to the
     * off-diagonal coefficients of P^T.  Interleave the results.
     *--------------------------------------------------------------------*/
+
+   zzz_ClearStructVectorGhostValues(e);
 
    compute_sbox_a = coarse_points;
    zzz_ForSBoxI(i, compute_sbox_a)
@@ -380,5 +427,52 @@ zzz_SMGIntAddFinalize( void *intadd_vdata )
    }
 
    return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * zzz_AppendSBoxArrayArrayAndRanks:
+ *   Append sbox_array_array_0 to sbox_array_array_1.
+ *   The two SBoxArrayArrays must be the same length.
+ *   Additionally create an appended version of box
+ *   ranks.
+ *--------------------------------------------------------------------------*/
+ 
+void
+zzz_AppendSBoxArrayArrayAndRanks( int                **box_ranks_0,
+                                  int                **box_ranks_1,
+                                  zzz_SBoxArrayArray *sbox_array_array_0,
+                                  zzz_SBoxArrayArray *sbox_array_array_1,
+                                  int                ***box_ranks_ptr)
+{
+   int            **box_ranks;
+   int              sbox_array_array_size; 
+   zzz_SBoxArray   *sbox_array_0;
+   zzz_SBoxArray   *sbox_array_1;
+   int              sbox_array_size_0; 
+   int              sbox_array_size_1; 
+   int              i;
+   int              j;
+   int              k;
+ 
+   sbox_array_array_size = zzz_SBoxArrayArraySize(sbox_array_array_0);
+   box_ranks = zzz_CTAlloc(int *, sbox_array_array_size);
+
+   zzz_ForSBoxArrayI(i, sbox_array_array_0)
+   {
+      sbox_array_0 = zzz_SBoxArrayArraySBoxArray(sbox_array_array_0, i);  
+      sbox_array_1 = zzz_SBoxArrayArraySBoxArray(sbox_array_array_1, i);  
+      sbox_array_size_0 = zzz_SBoxArraySize(sbox_array_0);
+      sbox_array_size_1 = zzz_SBoxArraySize(sbox_array_1);
+      box_ranks[i] = zzz_CTAlloc(int, sbox_array_size_0 + sbox_array_size_1);
+      for ( j=0 ; j < sbox_array_size_1; j++)
+         box_ranks[i][j] = box_ranks_1[i][j];
+      for ( k=0 ; k < sbox_array_size_0; k++)
+         box_ranks[i][k+sbox_array_size_1] = box_ranks_0[i][k];
+      zzz_AppendSBoxArray(zzz_SBoxArrayArraySBoxArray(sbox_array_array_0, i),
+                          zzz_SBoxArrayArraySBoxArray(sbox_array_array_1, i));
+
+   }
+
+   *box_ranks_ptr = box_ranks;
 }
 
