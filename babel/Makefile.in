@@ -85,7 +85,7 @@ HYPRE_BABEL_DRIVER_CXX_OBJS=${HYPRE_BABEL_DRIVERS_CXX:.C=.o}
 HYPRE_BABEL_DRIVER_EXECS=${HYPRE_BABEL_DRIVERS:.c=}
 HYPRE_BABEL_DRIVER_CXX_EXECS=${HYPRE_BABEL_DRIVERS_CXX:.C=}
 
-all: babel-driver babel-interfaces
+all: babel-interfaces babel-driver
 
 babel-driver: ${HYPRE_BABEL_DRIVER_EXECS} ${HYPRE_BABEL_DRIVER_F77_EXECS}
 
@@ -167,7 +167,7 @@ veryclean: clean
 	if [ -d HypreClient-F ]; \
 	then \
 	  echo "Making Hypre Fortran Client very clean ..."; \
-	  (cd HypreClient-C; $(MAKE) veryclean); \
+	  (cd HypreClient-F; $(MAKE) veryclean); \
 	  echo ""; \
 	fi; \
 
