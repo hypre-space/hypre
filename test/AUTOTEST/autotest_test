@@ -68,10 +68,13 @@ initialize_variables ()
 # defined) default mail to UID only.
 #
   if test ! "$HYPRE_MAIL" ; then
-    [ -x /usr/bin/Mail ] && HYPRE_MAIL=/usr/bin/Mail
-    [ -x /usr/bin/mailx ] && HYPRE_MAIL=/usr/bin/mailx
-    [ -x /usr/sbin/mailx ] && HYPRE_MAIL=/usr/sbin/mailx
-    [ -x /usr/bin/mailto ] && HYPRE_MAIL=/usr/bin/mailto
+    if [ "$HYPRE_ARCH" = "linux" ] ; then
+      [ -x /usr/bin/mhmail ] && HYPRE_MAIL=/usr/bin/mhmail
+    else
+      [ -x /usr/bin/Mail ] && HYPRE_MAIL=/usr/bin/Mail
+      [ -x /usr/bin/mailx ] && HYPRE_MAIL=/usr/bin/mailx
+      [ -x /usr/sbin/mailx ] && HYPRE_MAIL=/usr/sbin/mailx
+    fi
   fi
   if test ! "${HYPRE_DEFAULT_EMAIL}" ; then
     if test ! "${USER_EMAIL}" ; then
@@ -392,10 +395,18 @@ mail_summary () {
   if test "${HYPRE_MESSAGE}" ; then
     SUBJECT="$HYPRE_MESSAGE $SUBJECT"
   fi
-  if [ "$DEBUG_MODE" = "yes" ] ; then
-    ${HYPRE_MAIL} -s "$SUBJECT" -r Treadway1@LLNL.gov $USER_EMAIL < $SUMFILE 
+  if [ "$HYPRE_ARCH" = "linux" ] ; then
+    if [ "$DEBUG_MODE" = "yes" ] ; then
+      ${HYPRE_MAIL} -s "$SUBJECT" -f Treadway1@LLNL.gov $USER_EMAIL < $SUMFILE 
+    else
+      ${HYPRE_MAIL} -s "$SUBJECT" -f Treadway1@LLNL.gov $HYPRE_ALL_EMAIL < $SUMFILE 
+    fi
   else
-    ${HYPRE_MAIL} -s "$SUBJECT" -r Treadway1@LLNL.gov $HYPRE_ALL_EMAIL < $SUMFILE 
+    if [ "$DEBUG_MODE" = "yes" ] ; then
+      ${HYPRE_MAIL} -s "$SUBJECT" -r Treadway1@LLNL.gov $USER_EMAIL < $SUMFILE 
+    else
+      ${HYPRE_MAIL} -s "$SUBJECT" -r Treadway1@LLNL.gov $HYPRE_ALL_EMAIL < $SUMFILE 
+    fi
   fi
   echo "Autotest mail sent"
 }
@@ -414,10 +425,18 @@ mail_errors () {
           if [ -r "${i}.email" ] ; then
             RECIPIENTS=`cat ${i}.email` 
             SUBJECT="Autotest error: ${i} ($HYPRE_ARCH)"
-            if [ "$DEBUG_MODE" = "yes" ] ; then
-              ${HYPRE_MAIL} -s "$SUBJECT" -r Treadway1@LLNL.gov $USER_EMAIL < $i 
+            if [ "$HYPRE_ARCH" = "linux" ] ; then
+              if [ "$DEBUG_MODE" = "yes" ] ; then
+                ${HYPRE_MAIL} -s "$SUBJECT" -f Treadway1@LLNL.gov $USER_EMAIL < $i 
+              else
+                ${HYPRE_MAIL} -s "$SUBJECT" -f Treadway1@LLNL.gov $RECIPIENTS < $i 
+              fi
             else
-              ${HYPRE_MAIL} -s "$SUBJECT" -r Treadway1@LLNL.gov $RECIPIENTS < $i 
+              if [ "$DEBUG_MODE" = "yes" ] ; then
+                ${HYPRE_MAIL} -s "$SUBJECT" -r Treadway1@LLNL.gov $USER_EMAIL < $i 
+              else
+                ${HYPRE_MAIL} -s "$SUBJECT" -r Treadway1@LLNL.gov $RECIPIENTS < $i 
+              fi
             fi
           fi
         fi 
