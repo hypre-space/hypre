@@ -8,11 +8,12 @@
 char malloc_logpath_memory[256];
  
 /*--------------------------------------------------------------------------
- * Driver to convert an input matrix file that matlab can read into 
+ * Driver to convert an input matrix file for the parallel smg code into
  * several input matrix files for the parallel smg code to use.
  *
  * Original Version:  12-16-97
  * Author: pnb
+ * 12-19-97 pnb   cleaned up comments
  *
  * Assume only one box in the input file.
  *--------------------------------------------------------------------------*/
@@ -25,7 +26,6 @@ main( int   argc,
       char *argv[] )
 {
    int                 matrix_num_ghost[6] = { 0, 0, 0, 0, 0, 0};
-   int                 vector_num_ghost[6] = { 0, 0, 0, 0, 0, 0};
 
    zzz_StructMatrix   *matrix_root, **sub_matrices;
 
@@ -280,11 +280,11 @@ main( int   argc,
 
        fprintf(file, "\nSymmetric: %d\n", symmetric);
 
-       /* read grid info */
+       /* write grid info */
        fprintf(file, "\nGrid:\n");
        zzz_PrintStructGrid(file, sub_grids[i_file]);
 
-       /* read stencil info */
+       /* write stencil info */
        fprintf(file, "\nStencil:\n");
        fprintf(file, "%d\n", stencil_size);
        for (i = 0; i < stencil_size; i++)
@@ -295,6 +295,7 @@ main( int   argc,
 		  zzz_IndexZ(stencil_shape[i]));
 	 }
 
+       /* write data info */
        fprintf(file, "\nData:\n");
        boxes_2      = zzz_StructGridBoxes(sub_grids[i_file]);
        data_space_2 = zzz_StructMatrixDataSpace(sub_matrices[i_file]);
@@ -314,9 +315,6 @@ main( int   argc,
    zzz_FreeStructGrid(zzz_StructMatrixGrid(matrix_root));
    zzz_FreeStructStencil(zzz_StructMatrixUserStencil(matrix_root));
    zzz_FreeStructMatrix(matrix_root);
-   /* zzz_FreeStructGrid(zzz_StructVectorGrid(vector)); */
-   /* zzz_FreeStructVector(vector); */
-   /* zzz_FreeStructVector(tmp_vector); */
 
    /* malloc debug stuff */
    malloc_verify(0);
