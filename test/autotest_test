@@ -1,4 +1,4 @@
-#!/bin/sh -x
+#!/bin/sh
 #BHEADER***********************************************************************
 # (c) 2000   The Regents of the University of California
 #
@@ -203,16 +203,16 @@ cleanup () {
 
 makeit ()
 {
-MakeOpt=$1	 MessageStr=$2
+MakeStr=$1	 MessageStr=$2
 MailGroup=$3
 if [ "$MessageStr" = "purify" ]
 then				# don't need extra purify status messages
-  $MAKE $MakeOpt 1> ${Hdr}.${MessageStr}.${MakeOpt}.log 2>&1
+  $MAKE $MakeStr 1> ${Hdr}.${MessageStr}.${MakeStr}.log 2>&1
 else
-  $MAKE $MakeOpt 1> ${Hdr}.${MessageStr}.${MakeOpt}.log \
-        2> ${Hdr}.${MessageStr}.${MakeOpt}.err
+  $MAKE $MakeStr 1> ${Hdr}.${MessageStr}.${MakeStr}.log \
+        2> ${Hdr}.${MessageStr}.${MakeStr}.err
 fi
-echo "$MailGroup" > ${Hdr}.${MessageStr}.${MakeOpt}.err.email
+echo "$MailGroup" > ${Hdr}.${MessageStr}.${MakeStr}.err.email
 }
 #=============================================================================
 # General purpose function for configure, make and execute
