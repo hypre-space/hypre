@@ -18,6 +18,9 @@
   Permission to modify the code and to distribute modified code is
   granted, provided the above notices are retained, and a notice that
   the code was modified is included with the above copyright notice.
+
+  Changes made to this file corresponding to calls to blas/lapack functions
+  in Nov 2003 at LLNL
 */
 
 #include <stdio.h>

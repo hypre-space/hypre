@@ -2,6 +2,11 @@
 #include "supermatrix.h"
 #include "superlu_util.h"
 
+/*************************************************************************
+ * Changes made to this file corresponding to calls to blas/lapack functions
+ * in Nov 2003 at LLNL
+ *************************************************************************/
+
 void
 sp_preorder(char *refact,  SuperMatrix *A, int *perm_c, 
 	    int *etree, SuperMatrix *AC)

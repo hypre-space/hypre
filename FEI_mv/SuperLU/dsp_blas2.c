@@ -6,6 +6,8 @@
  * and Lawrence Berkeley National Lab.
  * November 15, 1997
  *
+ * Changes made at LLNL : change names of some blas/lapack functions.
+ * (Nov 2003)
  */
 /*
  * File name:		sp_blas2.c

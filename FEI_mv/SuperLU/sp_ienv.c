@@ -1,5 +1,10 @@
 #include "dsp_defs.h"
 
+/* ************************************************************************
+ * Changes made to this file corresponding to calls to blas/lapack functions
+ * in Nov 2003 at LLNL
+ * ***********************************************************************/
+
 extern int sluxerbla_(char *srname, int *info);
 
 /* local prototype */
