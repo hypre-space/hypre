@@ -122,8 +122,8 @@ int HYPRE_ParCSRGMRESGetFinalRelativeResidualNorm( HYPRE_Solver solver , double 
 /* HYPRE_parcsr_pcg.c */
 int HYPRE_ParCSRPCGCreate( MPI_Comm comm , HYPRE_Solver *solver );
 int HYPRE_ParCSRPCGDestroy( HYPRE_Solver solver );
-int HYPRE_ParCSRPCGSetup( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x );
-int HYPRE_ParCSRPCGSolve( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x );
+int HYPRE_ParCSRPCGSetup( HYPRE_Solver solver , HYPRE_Matrix A , HYPRE_ParVector b , HYPRE_ParVector x );
+int HYPRE_ParCSRPCGSolve( HYPRE_Solver solver , HYPRE_Matrix A , HYPRE_ParVector b , HYPRE_ParVector x );
 int HYPRE_ParCSRPCGSetTol( HYPRE_Solver solver , double tol );
 int HYPRE_ParCSRPCGSetMaxIter( HYPRE_Solver solver , int max_iter );
 int HYPRE_ParCSRPCGSetStopCrit( HYPRE_Solver solver , int stop_crit );
@@ -134,8 +134,8 @@ int HYPRE_ParCSRPCGGetPrecond( HYPRE_Solver solver , HYPRE_Solver *precond_data_
 int HYPRE_ParCSRPCGSetLogging( HYPRE_Solver solver , int logging );
 int HYPRE_ParCSRPCGGetNumIterations( HYPRE_Solver solver , int *num_iterations );
 int HYPRE_ParCSRPCGGetFinalRelativeResidualNorm( HYPRE_Solver solver , double *norm );
-int HYPRE_ParCSRDiagScaleSetup( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector y , HYPRE_ParVector x );
-int HYPRE_ParCSRDiagScale( HYPRE_Solver solver , HYPRE_ParCSRMatrix HA , HYPRE_ParVector Hy , HYPRE_ParVector Hx );
+int HYPRE_ParCSRDiagScaleSetup( HYPRE_Solver solver , HYPRE_Matrix A , HYPRE_ParVector y , HYPRE_ParVector x );
+int HYPRE_ParCSRDiagScale( HYPRE_Solver solver , HYPRE_Matrix HA , HYPRE_ParVector Hy , HYPRE_ParVector Hx );
 
 /* HYPRE_parcsr_pilut.c */
 int HYPRE_ParCSRPilutCreate( MPI_Comm comm , HYPRE_Solver *solver );
@@ -277,7 +277,7 @@ int hypre_ParKrylovIdentitySetup( void *vdata , void *A , void *b , void *x );
 int hypre_ParKrylovIdentity( void *vdata , void *A , void *b , void *x );
 
 /* schwarz.c */
-int hypre_AMGNodalSchwarzSmoother( hypre_CSRMatrix *A , int *dof_func , int num_functions , int option , int **i_domain_dof_pointer , int **j_domain_dof_pointer , double **domain_matrixinverse_pointer , int *num_domains_pointer );
+void hypre_F90_NAME_BLAS( int dpotrf , int DPOTRF );
 int hypre_SchwarzSolve( hypre_CSRMatrix *A , hypre_Vector *rhs_vector , int num_domains , int *i_domain_dof , int *j_domain_dof , double *domain_matrixinverse , hypre_Vector *x_vector , hypre_Vector *aux_vector );
 int transpose_matrix_create( int **i_face_element_pointer , int **j_face_element_pointer , int *i_element_face , int *j_element_face , int num_elements , int num_faces );
 int matrix_matrix_product( int **i_element_edge_pointer , int **j_element_edge_pointer , int *i_element_face , int *j_element_face , int *i_face_edge , int *j_face_edge , int num_elements , int num_faces , int num_edges );

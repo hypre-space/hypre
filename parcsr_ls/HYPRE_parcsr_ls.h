@@ -54,6 +54,9 @@ struct hypre_Solver_struct;
 #define HYPRE_SOLVER_STRUCT
 struct hypre_Solver_struct;
 typedef struct hypre_Solver_struct *HYPRE_Solver;
+#endif
+#ifndef HYPRE_MATRIX_STRUCT
+#define HYPRE_MATRIX_STRUCT
 struct hypre_Matrix_struct;
 typedef struct hypre_Matrix_struct *HYPRE_Matrix;
 #endif
