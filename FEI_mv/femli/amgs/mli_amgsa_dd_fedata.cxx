@@ -58,7 +58,7 @@ extern "C"
 
 int MLI_Method_AMGSA::setupFEDataBasedNullSpaces( MLI *mli ) 
 {
-   int          i, j, k, j1, k1, level, mypid, nElems, nodeNumFields;
+   int          i, j, k, jj, k1, level, mypid, nElems, nodeNumFields;
    int          nodeFieldID, elemNNodes, **elemNodeLists, *elemNodeList1D;
    int          blockSize, *nodeEqnList, eMatDim, *partition, localStartRow;
    int          localNRows, rowInd1, rowInd2, colInd1, colInd2;
@@ -198,10 +198,10 @@ int MLI_Method_AMGSA::setupFEDataBasedNullSpaces( MLI *mli )
       {
          colInd1 = newNodeEqnList[i*elemNNodes+j];
          colInd2 = j * blockSize;
-         for ( j1 = 0; j1 < blockSize; j1++ )
+         for ( jj = 0; jj < blockSize; jj++ )
          {
-            colOffset1 = colInd1 + j1;
-            colOffset2 = eMatDim * ( colInd2 + j1 );
+            colOffset1 = colInd1 + jj;
+            colOffset2 = eMatDim * ( colInd2 + jj );
             for ( k = 0; k < elemNNodes; k++ )
             {
                rowInd1 = newNodeEqnList[i*elemNNodes+k];
@@ -225,7 +225,7 @@ int MLI_Method_AMGSA::setupFEDataBasedNullSpaces( MLI *mli )
    /* compress the CSR matrix                                         */
    /* --------------------------------------------------------------- */
 
-   j1 = 0;
+   jj = 0;
    csrIA[csrNrows] = 0;
    for ( i = 0; i <= csrNrows; i++ )
    {
@@ -264,14 +264,14 @@ int MLI_Method_AMGSA::setupFEDataBasedNullSpaces( MLI *mli )
             csrAA[k1++] = csrAA[j];
          }
          k1 = k1 - sInd1;
-         for ( j = j1; j < j1+k1; j++ )
+         for ( j = jj; j < jj+k1; j++ )
          {
-            csrJA[j] = csrJA[sInd1+j-j1];
-            csrAA[j] = csrAA[sInd1+j-j1];
+            csrJA[j] = csrJA[sInd1+j-jj];
+            csrAA[j] = csrAA[sInd1+j-jj];
          }
       }
-      csrIA[i] = j1;
-      j1 += k1;
+      csrIA[i] = jj;
+      jj += k1;
    }
 
 #if 0
@@ -361,13 +361,13 @@ int MLI_Method_AMGSA::setupFEDataBasedNullSpaces( MLI *mli )
 
    for ( i = 0; i < totalNNodes; i++ )
    {
-      j1 = orderArray[i]; 
-      k1 = elemNodeList1D[j1];   /* get node number */
-      rowInd1 = nodeEqnList[j1]; /* get equation number for the node */
+      jj = orderArray[i]; 
+      k1 = elemNodeList1D[jj];   /* get node number */
+      rowInd1 = nodeEqnList[jj]; /* get equation number for the node */
       rowInd1 -= localStartRow;
       if ( rowInd1 >= 0 && rowInd1 < localNRows )
       {
-         rowInd2 = newNodeEqnList[j1];
+         rowInd2 = newNodeEqnList[jj];
          for ( j = 0; j < blockSize; j++ )
             for ( k = 0; k < nullspaceDim_; k++ )
                nullspaceVec_[rowInd1+j+k*nullspaceLen_] = 
