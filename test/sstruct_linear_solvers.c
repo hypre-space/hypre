@@ -54,10 +54,12 @@ typedef struct
    int                    graph_nentries;
    ProblemIndex          *graph_ilowers;
    ProblemIndex          *graph_iuppers;
+   Index                 *graph_strides;
    int                   *graph_vars;
    int                   *graph_to_parts;
    ProblemIndex          *graph_to_ilowers;
    ProblemIndex          *graph_to_iuppers;
+   Index                 *graph_to_strides;
    int                   *graph_to_vars;
    Index                 *graph_index_maps;
    Index                 *graph_index_signs;
@@ -353,6 +355,8 @@ ReadData( char         *filename,
                   hypre_TReAlloc(pdata.graph_ilowers, ProblemIndex, size);
                pdata.graph_iuppers =
                   hypre_TReAlloc(pdata.graph_iuppers, ProblemIndex, size);
+               pdata.graph_strides =
+                  hypre_TReAlloc(pdata.graph_strides, Index, size);
                pdata.graph_vars =
                   hypre_TReAlloc(pdata.graph_vars, int, size);
                pdata.graph_to_parts =
@@ -361,6 +365,8 @@ ReadData( char         *filename,
                   hypre_TReAlloc(pdata.graph_to_ilowers, ProblemIndex, size);
                pdata.graph_to_iuppers =
                   hypre_TReAlloc(pdata.graph_to_iuppers, ProblemIndex, size);
+               pdata.graph_to_strides =
+                  hypre_TReAlloc(pdata.graph_to_strides, Index, size);
                pdata.graph_to_vars =
                   hypre_TReAlloc(pdata.graph_to_vars, int, size);
                pdata.graph_index_maps =
@@ -378,6 +384,12 @@ ReadData( char         *filename,
                               pdata.graph_ilowers[pdata.graph_nentries]);
             SScanProblemIndex(sdata_ptr, &sdata_ptr, data.ndim,
                               pdata.graph_iuppers[pdata.graph_nentries]);
+            SScanIntArray(sdata_ptr, &sdata_ptr, data.ndim,
+                          pdata.graph_strides[pdata.graph_nentries]);
+            for (i = data.ndim; i < 3; i++)
+            {
+               pdata.graph_strides[pdata.graph_nentries][i] = 1;
+            }
             pdata.graph_vars[pdata.graph_nentries] =
                strtol(sdata_ptr, &sdata_ptr, 10);
             pdata.graph_to_parts[pdata.graph_nentries] =
@@ -386,6 +398,12 @@ ReadData( char         *filename,
                               pdata.graph_to_ilowers[pdata.graph_nentries]);
             SScanProblemIndex(sdata_ptr, &sdata_ptr, data.ndim,
                               pdata.graph_to_iuppers[pdata.graph_nentries]);
+            SScanIntArray(sdata_ptr, &sdata_ptr, data.ndim,
+                          pdata.graph_to_strides[pdata.graph_nentries]);
+            for (i = data.ndim; i < 3; i++)
+            {
+               pdata.graph_to_strides[pdata.graph_nentries][i] = 1;
+            }
             pdata.graph_to_vars[pdata.graph_nentries] =
                strtol(sdata_ptr, &sdata_ptr, 10);
             SScanIntArray(sdata_ptr, &sdata_ptr, data.ndim,
@@ -624,6 +642,10 @@ DistributeData( ProblemData   global_data,
                            (int_ilower[d] - pdata.graph_ilowers[entry][d]);
                         pdata.graph_ilowers[i][d] = int_ilower[d];
                         pdata.graph_iuppers[i][d] = int_iupper[d];
+                        pdata.graph_strides[i][d] =
+                           pdata.graph_strides[entry][d];
+                        pdata.graph_to_strides[i][d] =
+                           pdata.graph_to_strides[entry][d];
                         pdata.graph_index_maps[i][d]  = dmap;
                         pdata.graph_index_signs[i][d] = sign;
                      }
@@ -750,10 +772,12 @@ DistributeData( ProblemData   global_data,
       {
          hypre_TFree(pdata.graph_ilowers);
          hypre_TFree(pdata.graph_iuppers);
+         hypre_TFree(pdata.graph_strides);
          hypre_TFree(pdata.graph_vars);
          hypre_TFree(pdata.graph_to_parts);
          hypre_TFree(pdata.graph_to_ilowers);
          hypre_TFree(pdata.graph_to_iuppers);
+         hypre_TFree(pdata.graph_to_strides);
          hypre_TFree(pdata.graph_to_vars);
          hypre_TFree(pdata.graph_index_maps);
          hypre_TFree(pdata.graph_index_signs);
@@ -829,10 +853,12 @@ DestroyData( ProblemData   data )
       {
          hypre_TFree(pdata.graph_ilowers);
          hypre_TFree(pdata.graph_iuppers);
+         hypre_TFree(pdata.graph_strides);
          hypre_TFree(pdata.graph_vars);
          hypre_TFree(pdata.graph_to_parts);
          hypre_TFree(pdata.graph_to_ilowers);
          hypre_TFree(pdata.graph_to_iuppers);
+         hypre_TFree(pdata.graph_to_strides);
          hypre_TFree(pdata.graph_to_vars);
          hypre_TFree(pdata.graph_index_maps);
          hypre_TFree(pdata.graph_index_signs);
@@ -1216,20 +1242,25 @@ main( int   argc,
       for (entry = 0; entry < pdata.graph_nentries; entry++)
       {
          for (index[2] = pdata.graph_ilowers[entry][2];
-              index[2] <= pdata.graph_iuppers[entry][2]; index[2]++)
+              index[2] <= pdata.graph_iuppers[entry][2];
+              index[2] += pdata.graph_strides[entry][2])
          {
             for (index[1] = pdata.graph_ilowers[entry][1];
-                 index[1] <= pdata.graph_iuppers[entry][1]; index[1]++)
+                 index[1] <= pdata.graph_iuppers[entry][1];
+                 index[1] += pdata.graph_strides[entry][1])
             {
                for (index[0] = pdata.graph_ilowers[entry][0];
-                    index[0] <= pdata.graph_iuppers[entry][0]; index[0]++)
+                    index[0] <= pdata.graph_iuppers[entry][0];
+                    index[0] += pdata.graph_strides[entry][0])
                {
                   for (i = 0; i < 3; i++)
                   {
                      j = pdata.graph_index_maps[entry][i];
                      k = pdata.graph_index_signs[entry][i];
                      to_index[j] = pdata.graph_to_ilowers[entry][j] + k *
-                        (index[i] - pdata.graph_ilowers[entry][i]);
+                        (index[i] - pdata.graph_ilowers[entry][i]) *
+                        (pdata.graph_to_strides[entry][j] /
+                         pdata.graph_strides[entry][i]);
                   }
                   to_index_ptr[0] = to_index;
                   HYPRE_SStructGraphAddEntries(graph, part, index,
@@ -1288,6 +1319,17 @@ main( int   argc,
       /* set non-stencil entries */
       for (entry = 0; entry < pdata.graph_nentries; entry++)
       {
+/*
+ * RDF: Add a separate interface routine for setting non-stencil entries?
+ * It would be more efficient to set boundary values a box at a time,
+ * but AMR may require striding, and some codes may already have a natural
+ * values array to pass in, but can't because it uses ghost values.
+ *
+ * Example new interface routine:
+ *   SetNSBoxValues(matrix, part, ilower, iupper, stride, entry
+ *                  values_ilower, values_iupper, values);
+ */
+#if 0
          for (j = 0; j < pdata.graph_boxsizes[entry]; j++)
          {
             values[j] = pdata.graph_values[entry];
@@ -1295,9 +1337,29 @@ main( int   argc,
          HYPRE_SStructMatrixSetBoxValues(A, part,
                                          pdata.graph_ilowers[entry],
                                          pdata.graph_iuppers[entry],
-                                         pdata.graph_vars[entry], 1,
-                                         &pdata.graph_entries[entry],
+                                         pdata.graph_vars[entry],
+                                         1, &pdata.graph_entries[entry],
                                          values);
+#endif
+         for (index[2] = pdata.graph_ilowers[entry][2];
+              index[2] <= pdata.graph_iuppers[entry][2];
+              index[2] += pdata.graph_strides[entry][2])
+         {
+            for (index[1] = pdata.graph_ilowers[entry][1];
+                 index[1] <= pdata.graph_iuppers[entry][1];
+                 index[1] += pdata.graph_strides[entry][1])
+            {
+               for (index[0] = pdata.graph_ilowers[entry][0];
+                    index[0] <= pdata.graph_iuppers[entry][0];
+                    index[0] += pdata.graph_strides[entry][0])
+               {
+                  HYPRE_SStructMatrixSetValues(A, part, index,
+                                               pdata.graph_vars[entry],
+                                               1, &pdata.graph_entries[entry],
+                                               &pdata.graph_values[entry]);
+               }
+            }
+         }
       }
    }
 
