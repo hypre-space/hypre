@@ -78,6 +78,8 @@ OBJS = ${FILES:.c=.o}
 all: libHYPRE_parcsr_mv.a
  
 install: all
+	@cp -f HYPRE_*.h parcsr_matrix_vector.h $$HYPRE_INSTALL_DIR/include/.
+	@cp -f libHYPRE_*.a $$HYPRE_INSTALL_DIR/lib/.
  
 clean:
 	@rm -f *.o
