@@ -190,12 +190,12 @@ int MLI_Matrix::apply(double alpha, MLI_Vector *vec1, double beta,
       }
       if (!strcmp(name_, "HYPRE_ParCSR"))
       {
-         status += hypre_ParCSRMatrixMatvec(alpha,hypreA,hypreV1S,
+         status = hypre_ParCSRMatrixMatvec(alpha,hypreA,hypreV1S,
                                             beta,hypreV3S);
       }
       else
       {
-         status += hypre_ParCSRMatrixMatvecT(alpha,hypreA,hypreV1S,
+         status = hypre_ParCSRMatrixMatvecT(alpha,hypreA,hypreV1S,
                                              beta,hypreV3S);
       }
       for (irow = 0; irow < subMatrixLength_; irow++)
