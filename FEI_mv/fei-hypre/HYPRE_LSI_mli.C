@@ -130,7 +130,7 @@ int HYPRE_LSI_MLIDestroy( HYPRE_Solver solver )
    HYPRE_LSI_MLI *mli_object = (HYPRE_LSI_MLI *) solver;
 
 #ifdef HAVE_MLI
-   if ( mli_object->mli_ != NULL ) delete [] mli_object->mli_;
+   if ( mli_object->mli_ != NULL ) delete mli_object->mli_;
 #endif
  
    if ( mli_object->preSmootherWts_ != NULL ) 
