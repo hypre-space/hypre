@@ -332,8 +332,8 @@ do
         shift;;
     -insure)
         HYPRE_ARCH="linux"
-        HYPRE_COMPILE_MACHINE="tux83"
-        HYPRE_RUN_MACHINE="tux83"
+        HYPRE_COMPILE_MACHINE="tux71"
+        HYPRE_RUN_MACHINE="tux71"
         HYPRE_REMOTE_DIR="/tmp"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST"
 	HYPRE_MACHINE_COMMANDS="-mnsde 1 -a 1 -cf -i 2"
@@ -480,10 +480,10 @@ do
         fi
 	perform_test
         shift;;
-    -tux83)
+    -tux71)
         HYPRE_ARCH="linux"
-        HYPRE_COMPILE_MACHINE="tux83"
-        HYPRE_RUN_MACHINE="tux83"
+        HYPRE_COMPILE_MACHINE="tux71"
+        HYPRE_RUN_MACHINE="tux71"
         HYPRE_REMOTE_DIR="/tmp"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST"
         if [ "$AUTOMAKEMODE" = "yes" ] ; then
@@ -498,8 +498,8 @@ do
         shift;;
     -tuxgcc2)
         HYPRE_ARCH="linux"
-        HYPRE_COMPILE_MACHINE="tux71"
-        HYPRE_RUN_MACHINE="tux71"
+        HYPRE_COMPILE_MACHINE="tux83"
+        HYPRE_RUN_MACHINE="tux83"
         HYPRE_REMOTE_DIR="/tmp"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-gcc3.x/AUTOTEST"
         if [ "$AUTOMAKEMODE" = "yes" ] ; then
@@ -514,8 +514,8 @@ do
         shift;;
     -tuxgcc30)
         HYPRE_ARCH="linux"
-        HYPRE_COMPILE_MACHINE="tux71"
-        HYPRE_RUN_MACHINE="tux71"
+        HYPRE_COMPILE_MACHINE="tux83"
+        HYPRE_RUN_MACHINE="tux83"
         HYPRE_REMOTE_DIR="/tmp"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-gcc3.x/AUTOTEST"
         if [ "$AUTOMAKEMODE" = "yes" ] ; then
@@ -530,8 +530,8 @@ do
         shift;;
     -tuxgcc31)
         HYPRE_ARCH="linux"
-        HYPRE_COMPILE_MACHINE="tux71"
-        HYPRE_RUN_MACHINE="tux71"
+        HYPRE_COMPILE_MACHINE="tux83"
+        HYPRE_RUN_MACHINE="tux83"
         HYPRE_REMOTE_DIR="/tmp"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-gcc3.x/AUTOTEST"
         if [ "$AUTOMAKEMODE" = "yes" ] ; then
@@ -546,8 +546,8 @@ do
         shift;;
     -tuxgcc32)
         HYPRE_ARCH="linux"
-        HYPRE_COMPILE_MACHINE="tux71"
-        HYPRE_RUN_MACHINE="tux71"
+        HYPRE_COMPILE_MACHINE="tux83"
+        HYPRE_RUN_MACHINE="tux83"
         HYPRE_REMOTE_DIR="/tmp"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-gcc3.x/AUTOTEST"
         if [ "$AUTOMAKEMODE" = "yes" ] ; then
@@ -562,8 +562,8 @@ do
         shift;;
     -tuxgcc33)
         HYPRE_ARCH="linux"
-        HYPRE_COMPILE_MACHINE="tux71"
-        HYPRE_RUN_MACHINE="tux71"
+        HYPRE_COMPILE_MACHINE="tux83"
+        HYPRE_RUN_MACHINE="tux83"
         HYPRE_REMOTE_DIR="/tmp"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-gcc3.x/AUTOTEST"
         if [ "$AUTOMAKEMODE" = "yes" ] ; then
@@ -578,8 +578,8 @@ do
         shift;;
     -tuxpgi)
         HYPRE_ARCH="linux"
-        HYPRE_COMPILE_MACHINE="tux71"
-        HYPRE_RUN_MACHINE="tux71"
+        HYPRE_COMPILE_MACHINE="tux83"
+        HYPRE_RUN_MACHINE="tux83"
         HYPRE_REMOTE_DIR="/tmp"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-pgi3.x/AUTOTEST"
         if [ "$AUTOMAKEMODE" = "yes" ] ; then
@@ -594,8 +594,8 @@ do
         shift;;
     -tuxabsoft)
         HYPRE_ARCH="linux"
-        HYPRE_COMPILE_MACHINE="tux71"
-        HYPRE_RUN_MACHINE="tux71"
+        HYPRE_COMPILE_MACHINE="tux83"
+        HYPRE_RUN_MACHINE="tux83"
         HYPRE_REMOTE_DIR="/tmp"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-gcc3.x/AUTOTEST"
         if [ "$AUTOMAKEMODE" = "yes" ] ; then
@@ -610,8 +610,8 @@ do
         shift;;
     -tuxlahey)
         HYPRE_ARCH="linux"
-        HYPRE_COMPILE_MACHINE="tux71"
-        HYPRE_RUN_MACHINE="tux71"
+        HYPRE_COMPILE_MACHINE="tux83"
+        HYPRE_RUN_MACHINE="tux83"
         HYPRE_REMOTE_DIR="/tmp"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-gcc3.x/AUTOTEST"
         if [ "$AUTOMAKEMODE" = "yes" ] ; then
@@ -626,8 +626,8 @@ do
         shift;;
     -tuxintel)
         HYPRE_ARCH="linux"
-        HYPRE_COMPILE_MACHINE="tux71"
-        HYPRE_RUN_MACHINE="tux71"
+        HYPRE_COMPILE_MACHINE="tux83"
+        HYPRE_RUN_MACHINE="tux83"
         HYPRE_REMOTE_DIR="/tmp"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-gcc3.x/AUTOTEST"
         if [ "$AUTOMAKEMODE" = "yes" ] ; then
@@ -642,8 +642,8 @@ do
         shift;;
     -tuxkai)
         HYPRE_ARCH="linux"
-        HYPRE_COMPILE_MACHINE="tux71"
-        HYPRE_RUN_MACHINE="tux71"
+        HYPRE_COMPILE_MACHINE="tux83"
+        HYPRE_RUN_MACHINE="tux83"
         HYPRE_REMOTE_DIR="/tmp"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-gcc3.x/AUTOTEST"
         if [ "$AUTOMAKEMODE" = "yes" ] ; then
@@ -656,10 +656,10 @@ do
         COMPILERSELECT="kai"
 	perform_test
         shift;;
-    -tux71)
+    -tux83)
         HYPRE_ARCH="linux"
-        HYPRE_COMPILE_MACHINE="tux71"
-        HYPRE_RUN_MACHINE="tux71"
+        HYPRE_COMPILE_MACHINE="tux83"
+        HYPRE_RUN_MACHINE="tux83"
         HYPRE_REMOTE_DIR="/tmp"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-pgi3.x/AUTOTEST"
         if [ "$AUTOMAKEMODE" = "yes" ] ; then
