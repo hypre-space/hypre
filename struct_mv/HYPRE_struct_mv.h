@@ -82,6 +82,12 @@ int HYPRE_StructGridAssemble(HYPRE_StructGrid grid);
 int HYPRE_StructGridSetPeriodic(HYPRE_StructGrid  grid,
                                 int              *periodic);
 
+/**
+ * (Optional) Set the ghost layer in the grid object
+ **/
+int HYPRE_StructGridSetNumGhost(HYPRE_StructGrid  grid,
+                                int              *num_ghost);
+
 /*@}*/
 
 /*--------------------------------------------------------------------------
