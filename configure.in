@@ -108,7 +108,7 @@ AC_ARG_WITH(mpi-include, [\
 
 AC_ARG_WITH(mpi-libs, [\
   --with-mpi-libs=LIBS    LIBS is space-separated list of library names 
-                          needed for MPI, e.g. \"nsl socket mpi\".  The 
+			  needed for MPI, e.g. \"nsl socket mpi\".  The 
 			  options --with-mpi-include --with-mpi-libs and 
 			  --with-mpi-lib-dirs must be used together.],  
   for mpi_lib in $withval; do
@@ -141,11 +141,11 @@ AC_ARG_WITH(mpi-flags, [\
 
 AC_ARG_WITH(purify, [\
   --with-purify=FLAGS     FLAGS are optional to pass to purify, e.g.
-                          \"-log-file=struct_linear_solvers.purify 
-                          -append-logfile=yes\" will send output to a file.
-                          assign cc and CC as the C and C++ compilers 
+			  \"-log-file=struct_linear_solvers.purify 
+			  -append-logfile=yes\" will send output to a file.
+			  assign cc and CC as the C and C++ compilers 
 			  if not already set by user and 
-                          prepends "purify" to compile/link line-- no 
+			  prepends "purify" to compile/link line-- no 
 			  checking is done to ensure purify is present on 
 			  the machine],
   if test "$casc_user_chose_compilers" = "no"
@@ -193,7 +193,7 @@ AC_ARG_WITH(strict-checking, [\
   --with-strict-checking  compiles with out MPI ('--without-MPI') and
 			  assigns kcc and KCC as the c and c++ compilers 
 			  and --c --strict as the compiler flag this 
-                          enforces syntax described by ISO 9899-1990, 
+			  enforces syntax described by ISO 9899-1990, 
 			  the C language standard. Additional compiler
 			  flags, --display_error_number --lint are enabled
 			  for lint-type checking. Individual types of 
@@ -231,8 +231,8 @@ fi
 
 AC_ARG_WITH(COMM_SIMPLE, [\
   --with-COMM_SIMPLE      Do not use MPI derived data types.  This option
-                          is automatically chosen for IBM, but may be
-                          selected for other platforms as well.],
+			  is automatically chosen for IBM, but may be
+			  selected for other platforms as well.],
   CFLAGS="$CFLAGS -DHYPRE_COMM_SIMPLE"
 )
 
