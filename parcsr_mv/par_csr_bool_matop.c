@@ -48,8 +48,8 @@ hypre_ParCSRBooleanMatrix *hypre_ParBooleanMatmul
    int             *C_diag_j;
 
    hypre_CSRBooleanMatrix *C_offd;
-   int             *C_offd_i;
-   int             *C_offd_j;
+   int             *C_offd_i=NULL;
+   int             *C_offd_j=NULL;
 
    int              C_diag_size;
    int              C_offd_size;
@@ -519,8 +519,8 @@ hypre_ParCSRBooleanMatrix * hypre_ParBooleanAAt( hypre_ParCSRBooleanMatrix  * A 
 
    hypre_CSRBooleanMatrix *C_offd;
 
-   int             *C_offd_i;
-   int             *C_offd_j;
+   int             *C_offd_i=NULL;
+   int             *C_offd_j=NULL;
    int             *new_C_offd_j;
 
    int              C_diag_size;

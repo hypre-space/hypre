@@ -261,9 +261,9 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
 
    hypre_CSRMatrix *C_offd;
 
-   double          *C_offd_data;
-   int             *C_offd_i;
-   int             *C_offd_j;
+   double          *C_offd_data=NULL;
+   int             *C_offd_i=NULL;
+   int             *C_offd_j=NULL;
 
    int              C_diag_size;
    int              C_offd_size;
