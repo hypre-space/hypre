@@ -45,7 +45,7 @@ void hypre_ParAat_RowSizes
       the existing diag*offd .  But for a first cut it looks simpler to just
       do it over again.
    */
-   int i1, i2, i3, j3, jj2, jj3;
+   int i1, i2, i3, jj2, jj3;
    int jj_count_diag, jj_count_offd, jj_row_begin_diag, jj_row_begin_offd;
    int last_col_diag_C;
    int start_indexing = 0; /* start indexing for C_data at 0 */
@@ -348,7 +348,7 @@ hypre_ParCSRMatrix *hypre_ParCSRAAt( hypre_ParCSRMatrix  *A )
    int	first_col_diag_A = hypre_ParCSRMatrixFirstColDiag(A);
    int		   *B_marker;
 
-   int              i, it;
+   int              i;
    int              i1, i2, i3;
    int              jj2, jj3;
    

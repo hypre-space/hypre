@@ -10,14 +10,13 @@ void RowsWithColumn
    hypre_CSRMatrix * offd = hypre_ParCSRMatrixOffd(A);
    int * mat_i, * mat_j;
    int i, j, num_rows;
-   int firstColDiag, firstRowIndex;
+   int firstColDiag;
    int * colMapOffd;
 
    mat_i = hypre_CSRMatrixI(diag);
    mat_j = hypre_CSRMatrixJ(diag);
    num_rows = hypre_CSRMatrixNumRows(diag);
    firstColDiag = hypre_ParCSRMatrixFirstColDiag(A);
-   firstRowIndex = hypre_ParCSRMatrixFirstRowIndex(A);
 
    for ( i=0; i<num_rows; ++i ) {
       /* global number: row = i + firstRowIndex;*/
@@ -34,7 +33,6 @@ void RowsWithColumn
    mat_j = hypre_CSRMatrixJ(offd);
    num_rows = hypre_CSRMatrixNumRows(offd);
    colMapOffd = hypre_ParCSRMatrixColMapOffd(A);
-   firstRowIndex = hypre_ParCSRMatrixFirstRowIndex(A);
    for ( i=0; i<num_rows; ++i ) {
       /* global number: row = i + firstRowIndex;*/
       for ( j=mat_i[i]; j<mat_i[i+1]; ++j ) {
@@ -85,8 +83,8 @@ hypre_MatTCommPkgCreate ( hypre_ParCSRMatrix *A)
 
    int	i, j, j2, k, ir, rowmin, rowmax;
    int	*tmp, *recv_buf, *displs, *info, *send_buf, *all_num_sends2;
-   int	num_procs, my_id, proc_num, num_elmts;
-   int	local_info, index, index2, offset, offd_col;
+   int	num_procs, my_id, num_elmts;
+   int	local_info, index, index2;
    int	ierr = 0;
    int pmatch, col, kc, p;
    int * recv_sz_buf;
@@ -223,7 +221,6 @@ hypre_MatTCommPkgCreate ( hypre_ParCSRMatrix *A)
    send_map_starts[0] = 0;
    for (i=0; i < num_procs; i++) {
       send_map_starts[index+1] = send_map_starts[index];
-      offset = first_col_diag;
       j = displs[i];
       pmatch = 0;
       while ( j < displs[i+1])
@@ -237,6 +234,7 @@ hypre_MatTCommPkgCreate ( hypre_ParCSRMatrix *A)
                   pmatch = 1;
                   send_procs[index] = i;
                   /* this would be right if we could send columns, but we can't ...
+                     offset = first_col_diag;
                      ++send_map_starts[index+1];
                      send_map_elmts[index2++] = col - offset; */
                   /* Plan to send all of my rows which use this column... */
