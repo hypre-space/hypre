@@ -77,4 +77,6 @@
 10/17/01    2.0.1R7
             - add flexible GMRES
             - fix SuperLU problems for HP machines
+10/25/01    2.0.1R8
+            - major reorganization of the block preconditioning module
  

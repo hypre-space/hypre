@@ -247,7 +247,6 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
     strcpy(euclidargv_[1], "0");   
     strcpy(euclidargv_[2], "-sparseA");   
     strcpy(euclidargv_[3], "0.0");   
-    blockScheme_        = 0;    // block diagonal (1-block triangular)
 
     superluOrdering_    = 0;    // natural ordering in SuperLU
     superluScale_[0]    = 'N';  // no scaling in SuperLUX
@@ -1767,12 +1766,14 @@ int HYPRE_LinSysCore::matrixLoadComplete()
 int HYPRE_LinSysCore::putNodalFieldData(int fieldID, int fieldSize,
                        int* nodeNumbers, int numNodes, const double* data)
 {
-    (void) fieldID;
-    (void) fieldSize;
-    (void) nodeNumbers;
-    (void) numNodes;
-    (void) data;
-
+    if ( fieldID < 0 )
+    {
+       printf("putNodalFieldData : fieldSize = %d\n", fieldSize);
+       printf("putNodalFieldData : numNodes  = %d\n", numNodes);
+       for ( int i = 0; i < numNodes; i++ )
+          for ( int j = 0; j < fieldSize; j++ )
+             printf("putNodalFieldData : %4d %2d = %e\n",i,j,data[i*fieldSize+j]);
+    }    
     if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) > 2 )
        printf("%4d : HYPRE_LSC::putNodalFieldData not implemented.\n",mypid_);
     return (0);
@@ -2825,23 +2826,10 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
        strcpy( HYPreconName_, name );
        HYPreconID_ = HYEUCLID;
     }
-    else if ( !strcmp(name, "blockD") )
+    else if ( !strcmp(name, "blockP") )
     {
        strcpy( HYPreconName_, name );
-       HYPreconID_  = HYBLOCK;
-       blockScheme_ = 0;
-    }
-    else if ( !strcmp(name, "blockT") )
-    {
-       strcpy( HYPreconName_, name );
-       HYPreconID_  = HYBLOCK;
-       blockScheme_ = 1;
-    }
-    else if ( !strcmp(name, "blockLU") )
-    {
-       strcpy( HYPreconName_, name );
-       HYPreconID_  = HYBLOCK;
-       blockScheme_ = 2;
+       HYPreconID_ = HYBLOCK;
     }
     else if ( !strcmp(name, "ml") )
     {

@@ -13,7 +13,7 @@
 #ifndef _HYPRE_LinSysCore_h_
 #define _HYPRE_LinSysCore_h_
 
-#define HYPRE_FEI_Version() "FEI/HYPRE 2.0.1R7"
+#define HYPRE_FEI_Version() "FEI/HYPRE 2.0.1R8"
 
 // *************************************************************************
 // system libraries used
@@ -575,7 +575,6 @@ class HYPRE_LinSysCore
    int             polyOrder_;
    int             euclidargc_;
    char            **euclidargv_;
-   int             blockScheme_;
 
    // ----------------------------------------------------------------------
    // map and others

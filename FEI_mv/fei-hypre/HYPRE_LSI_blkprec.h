@@ -33,7 +33,7 @@
 
 #define HYPRE_INCFLOW_BDIAG  1
 #define HYPRE_INCFLOW_BTRI   2
-#define HYPRE_INCFLOW_BAI    3
+#define HYPRE_INCFLOW_BLU    3
 
 // *************************************************************************
 // local defines 
@@ -45,11 +45,41 @@
 #define  GlobalID int
 #include "Lookup.h"
 
+// *************************************************************************
+// C-wrapper for the FEI Lookup class 
+// -------------------------------------------------------------------------
+
 typedef struct HYPRE_Lookup_Struct
 {
    void *object;
 }
 HYPRE_Lookup;
+
+// *************************************************************************
+// Solver-Preconditioner parameter data structure
+// -------------------------------------------------------------------------
+
+typedef struct HYPRE_LSI_BLOCKP_PARAMS_Struct
+{
+   int            SolverID_;      // solver ID
+   int            PrecondID_;     // preconditioner ID
+   double         Tol_;           // tolerance for Krylov solver
+   int            MaxIter_;       // max iterations for Krylov solver
+   int            PSNLevels_;     // Nlevels for ParaSails
+   double         PSThresh_;      // threshold for ParaSails
+   double         PSFilter_;      // filter for ParaSails
+   double         AMGThresh_;     // threshold for BoomerAMG
+   int            AMGNSweeps_;    // no. of relaxations for BoomerAMG
+   int            PilutFillin_;   // Fillin for Pilut
+   double         PilutDropTol_;  // drop tolerance for Pilut
+   int            EuclidNLevels_; // nlevels for Euclid
+   double         EuclidThresh_;  // threshold for Euclid
+   double         DDIlutFillin_;  // fill-in for DDIlut
+   double         DDIlutDropTol_; // drop tolerance for DDIlut
+   double         MLThresh_;      // threshold for SA AMG
+   int            MLNSweeps_;     // no. of relaxations for SA AMG
+}
+HYPRE_LSI_BLOCKP_PARAMS;
 
 // *************************************************************************
 // class definition
@@ -77,31 +107,41 @@ class HYPRE_LSI_BlockP
    int            lumpedMassLength_; // length of M_v and M_p
    double         *lumpedMassDiag_;  // M_v and M_p lumped
    int            scheme_;           // which preconditioning ?
+   int            printFlag_;        // for diagnostics
    HYPRE_Solver   A11Solver_;        // solver for velocity matrix
    HYPRE_Solver   A11Precond_;       // preconditioner for velocity matrix
    HYPRE_Solver   A22Solver_;        // solver for pressure Poisson 
    HYPRE_Solver   A22Precond_;       // preconditioner for pressure Poisson
+   HYPRE_LSI_BLOCKP_PARAMS A11Params_;
+   HYPRE_LSI_BLOCKP_PARAMS A22Params_;
    Lookup         *lookup_;          // FEI lookup object
 
  public:
 
    HYPRE_LSI_BlockP();
    virtual ~HYPRE_LSI_BlockP();
-   int     setSchemeBlockDiagonal()   {scheme_ = HYPRE_INCFLOW_BDIAG; return 0;}
-   int     setSchemeBlockTriangular() {scheme_ = HYPRE_INCFLOW_BTRI;  return 0;}
-   int     setSchemeBlockInverse()    {scheme_ = HYPRE_INCFLOW_BAI;   return 0;}
    int     setLumpedMasses( int length, double *Mdiag );
+   int     setParams(char *param);
    int     setLookup( Lookup *lookup );
    int     setup(HYPRE_ParCSRMatrix Amat);
    int     solve( HYPRE_ParVector fvec, HYPRE_ParVector xvec );
+   int     print();
 
  private:
+   int     destroySolverPrecond();
    int     computeBlockInfo();
    int     buildBlocks();
-   int     solveBSolve (HYPRE_IJVector x1, HYPRE_IJVector x2,
-                        HYPRE_IJVector f1, HYPRE_IJVector f2 );
-   int     solveBISolve(HYPRE_IJVector x1, HYPRE_IJVector x2,
-                        HYPRE_IJVector f1, HYPRE_IJVector f2 );
+   int     setupPrecon(HYPRE_Solver *precon, HYPRE_IJMatrix Amat,
+                       HYPRE_LSI_BLOCKP_PARAMS);
+   int     setupSolver(HYPRE_Solver *solver, HYPRE_IJMatrix Amat,
+                       HYPRE_IJVector f, HYPRE_IJVector x,
+                       HYPRE_Solver precon, HYPRE_LSI_BLOCKP_PARAMS);
+   int     solveBDSolve (HYPRE_IJVector x1, HYPRE_IJVector x2,
+                         HYPRE_IJVector f1, HYPRE_IJVector f2 );
+   int     solveBTSolve (HYPRE_IJVector x1, HYPRE_IJVector x2,
+                         HYPRE_IJVector f1, HYPRE_IJVector f2 );
+   int     solveBLUSolve(HYPRE_IJVector x1, HYPRE_IJVector x2,
+                         HYPRE_IJVector f1, HYPRE_IJVector f2 );
 };
 
 #endif

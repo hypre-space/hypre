@@ -111,7 +111,7 @@ extern "C" {
 int HYPRE_LinSysCore::parameters(int numParams, char **params)
 {
     int    i, k, nsweeps, rtype, olevel, reuse=0, precon_override=0;
-    int    solver_override=0;
+    int    solver_override=0, blockP_leng, *blockP_ind;
     double weight, dtemp;
     char   param[256], param1[256], param2[80];
 
@@ -134,6 +134,8 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
     // parse all parameters
     //-------------------------------------------------------------------
 
+    blockP_ind  = (int *) malloc( sizeof(int) * numParams ); 
+    blockP_leng = 0;
     for ( i = 0; i < numParams; i++ )
     {
 
@@ -884,6 +886,21 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
        }
 
        //---------------------------------------------------------------
+       // Euclid preconditoner : threshold 
+       //---------------------------------------------------------------
+
+       else if ( !strcmp(param1, "blockP") )
+       {
+          if (HYPreconID_ == HYBLOCK && HYPrecon_ != NULL )
+          {
+             HYPRE_LSI_BlockPrecondSetParams(HYPrecon_, params[i]); 
+             if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+                printf("       HYPRE_LSC::set blockP parameter.\n");
+          }
+          else if (HYPreconID_ != HYBLOCK ) blockP_ind[blockP_leng++] = i;
+       }
+
+       //---------------------------------------------------------------
        // mlpack preconditoner : no of relaxation sweeps per level
        //---------------------------------------------------------------
 
@@ -1081,8 +1098,18 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
           }
        }
     }
-    if ( reuse == 1 ) HYPreconReuse_ = 1; 
 
+    //-------------------------------------------------------------------
+    // This part is done in case the order of parameters has been permuted
+    //-------------------------------------------------------------------
+
+    if (HYPreconID_ == HYBLOCK && blockP_leng > 0 )
+    {
+       for ( i = 0; i < blockP_leng; i++ )
+          HYPRE_LSI_BlockPrecondSetParams(HYPrecon_, params[blockP_ind[i]]); 
+    }
+
+    if ( reuse == 1 ) HYPreconReuse_ = 1; 
     if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
     {
        printf("%4d : HYPRE_LSC::leaving  parameters function.\n",mypid_);
@@ -1887,12 +1914,6 @@ void HYPRE_LinSysCore::setupFGMRESPrecon()
             }
             else
             {
-               if ( blockScheme_ == 1 )
-                  HYPRE_LSI_BlockPrecondSetSchemeBTri(HYPrecon_);
-               else if ( blockScheme_ == 2 )
-                  HYPRE_LSI_BlockPrecondSetSchemeBInv(HYPrecon_);
-               else
-                  HYPRE_LSI_BlockPrecondSetSchemeBDiag(HYPrecon_);
                HYPRE_ParCSRFGMRESSetPrecond(HYSolver_, 
                                        HYPRE_LSI_BlockPrecondSolve, 
                                        HYPRE_LSI_BlockPrecondSetup, HYPrecon_);
@@ -3281,12 +3302,6 @@ void HYPRE_LinSysCore::setupSymQMRPrecon()
             }
             else
             {
-               if ( blockScheme_ == 1 )
-                  HYPRE_LSI_BlockPrecondSetSchemeBTri(HYPrecon_);
-               else if ( blockScheme_ == 2 )
-                  HYPRE_LSI_BlockPrecondSetSchemeBInv(HYPrecon_);
-               else
-                  HYPRE_LSI_BlockPrecondSetSchemeBDiag(HYPrecon_);
                HYPRE_ParCSRSymQMRSetPrecond(HYSolver_, 
                                        HYPRE_LSI_BlockPrecondSolve, 
                                        HYPRE_LSI_BlockPrecondSetup, HYPrecon_);
