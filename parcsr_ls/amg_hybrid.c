@@ -612,6 +612,7 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
 
    int                dscg_num_its;
    int                pcg_num_its;
+   int                converged;
 
    double             res_norm;
 
@@ -667,7 +668,9 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
    /*-----------------------------------------------------------------------
     * If converged, done... 
     *-----------------------------------------------------------------------*/
-   if( res_norm < tol )
+   hypre_PCGGetConverged(pcg_solver, &converged);
+
+   if( converged)
    {
       (AMGhybrid_data -> final_rel_res_norm) = res_norm;
       hypre_PCGDestroy(pcg_solver);
