@@ -13,7 +13,6 @@
 #include <assert.h>
 #include <stdio.h>
 #include <signal.h>
-#include <semaphore.h>
 #include "mpi.h"
 #include "threading.h"
 
@@ -45,7 +44,7 @@ int HYPRE_InitPthreads( MPI_Comm comm )
    pthread_mutex_init(&mpi_mtx, NULL);
    pthread_cond_init(&hypre_cond_boxloops, NULL);
    pthread_cond_init(&mpi_cnd, NULL);
-   sem_init(&hypre_sem, 0, 0);
+   hypre_thread_release = 0;
 
    return (err);
 }   
@@ -65,7 +64,6 @@ void HYPRE_DestroyPthreads( void )
    pthread_cond_destroy(&hypre_qptr->finish_wait);
    pthread_cond_destroy(&hypre_cond_boxloops);
    pthread_cond_destroy(&mpi_cnd); 
-   sem_destroy(&hypre_sem);
    free (hypre_qptr);
 }
 

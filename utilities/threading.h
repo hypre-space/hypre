@@ -21,7 +21,6 @@
 
 
 #include<pthread.h>
-#include<semaphore.h>
 #include "mpi.h"
 
 
@@ -57,7 +56,7 @@ pthread_mutex_t hypre_mutex_boxloops;
 hypre_workqueue_t hypre_qptr;
 pthread_mutex_t mpi_mtx;
 pthread_cond_t mpi_cnd;
-sem_t hypre_sem;
+int hypre_thread_release;
 
 #endif
 
