@@ -437,6 +437,8 @@ MOSTFILES = \
  $(top_srcdir)/struct_ls/pfmg_setup_rap7.o\
  $(top_srcdir)/struct_ls/pfmg_solve.o\
  $(top_srcdir)/struct_ls/point_relax.o\
+ $(top_srcdir)/struct_ls/red_black_gs.o\
+ $(top_srcdir)/struct_ls/red_black_constantcoef_gs.o\
  $(top_srcdir)/struct_ls/semi_interp.o\
  $(top_srcdir)/struct_ls/semi_restrict.o\
  $(top_srcdir)/struct_ls/semi_setup_rap.o\
