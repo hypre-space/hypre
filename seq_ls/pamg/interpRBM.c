@@ -57,9 +57,6 @@ hypre_AMGBuildRBMInterp( hypre_CSRMatrix     *A,
                          
   int *fine_to_coarse;
 
-  double *RBM[6];
-  int num_RBM = 1;
-  int system_size = 1;
 
 
   int num_dofs = hypre_CSRMatrixNumRows(A);
@@ -104,13 +101,6 @@ hypre_AMGBuildRBMInterp( hypre_CSRMatrix     *A,
 
 
 
-  for (k=0; k < num_RBM; k++)
-    RBM[k]= hypre_CTAlloc(double, num_dofs);
-
-
-  for (i=0; i < num_dofs; i++)
-    for (k=0; k < num_RBM; k++)
-      RBM[k][i]=1.e0;
 
 
 
@@ -396,25 +386,38 @@ hypre_AMGBuildRBMInterp( hypre_CSRMatrix     *A,
 		{
 		  /* find the neighbors of i_local_to_global[i_loc] */
 
+		  if (num_functions > 1)
+		    k = dof_func[i_local_to_global[i_loc]];
 		  diag = 0.e0;
-		  for (k=0; k < num_RBM; k++)
-		    if (RBM[k][i_local_to_global[i_loc]] != 0.e0) break;
 		  
 		  for (j=i_dof_dof[i_local_to_global[i_loc]];
 		       j<i_dof_dof[i_local_to_global[i_loc]+1]; j++)
 		    {
 		      j_dof = j_dof_dof[j];
 		      if (i_global_to_local[j_dof] >= 0)
-			if (i_int[i_global_to_local[j_dof]] >= 0 &&
-			    RBM[k][j_dof] != 0.e0)
+			if (i_int[i_global_to_local[j_dof]] >= 0)
 			  {
-			    j_ext_int[ext_int_counter]= 
-			      i_global_to_local[j_dof];
-			    ext_int_counter++;
-			    P_ext_int[i_loc + i_int[i_global_to_local[j_dof]]
-				     *local_dof_counter]= fabs(a_dof_dof[j]);
+			    if (num_functions > 1) 
+			      if (dof_func[j_dof] == k) 
+				{
+				  j_ext_int[ext_int_counter]= 
+				    i_global_to_local[j_dof];
+				  ext_int_counter++;
+				  P_ext_int[i_loc + i_int[i_global_to_local[j_dof]]
+					   *local_dof_counter]= fabs(a_dof_dof[j]);
 
-			    diag +=fabs(a_dof_dof[j]);
+				  diag +=fabs(a_dof_dof[j]);
+				}
+			    if (num_functions== 1) 
+			      {
+				j_ext_int[ext_int_counter]= 
+				  i_global_to_local[j_dof];
+				ext_int_counter++;
+				P_ext_int[i_loc + i_int[i_global_to_local[j_dof]]
+					 *local_dof_counter]= fabs(a_dof_dof[j]);
+
+				diag +=fabs(a_dof_dof[j]);
+			      }
 			  }
 		    }
 
@@ -547,6 +550,22 @@ hypre_AMGBuildRBMInterp( hypre_CSRMatrix     *A,
    *P_ptr = P;
 
 
+   if (num_functions > 1)
+     {
+       coarse_dof_func = hypre_CTAlloc(int, coarsedof_counter);
+
+       coarsedof_counter=0;
+       for (i=0; i < num_dofs; i++)
+	 if (CF_marker[i] >=0)
+	   {
+	     coarse_dof_func[coarsedof_counter] = dof_func[i];
+	     coarsedof_counter++;
+	   }
+
+       /* return coarse_dof_func array: ---------------------------------------*/
+
+       *coarse_dof_func_ptr = coarse_dof_func;
+     }
 
   hypre_TFree(i_int);
 
@@ -570,8 +589,6 @@ hypre_AMGBuildRBMInterp( hypre_CSRMatrix     *A,
   hypre_TFree(i_global_to_local);
   hypre_TFree(i_local_to_global);
 
-  for (k=0; k < num_RBM; k++)
-    hypre_TFree(RBM[k]);
 
 
   return ierr;
