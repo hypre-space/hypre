@@ -45,7 +45,7 @@ HYPRE_IJ_DIRS =\
  parcsr_ls
 
 HYPRE_ES_DIRS =\
- parcsr_es/LOBPCG
+ parcsr_es
 
 #These are the directories for the FEI
 HYPRE_FEI_DIRS =\
