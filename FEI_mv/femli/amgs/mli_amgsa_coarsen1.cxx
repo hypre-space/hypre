@@ -131,7 +131,7 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,
    if ( scalar_ == 0 )
    {
       minAggrSize_ = nullspaceDim_ / currNodeDofs_;
-      if ( minAggrSize_ <= 1 ) minAggrSize_ == 2;
+      if ( minAggrSize_ <= 1 ) minAggrSize_ = 2;
       if ( currLevel_ == (numLevels_-1) ) minAggrSize_ = 2;
    }
    else minAggrSize_ = nullspaceDim_;
