@@ -918,7 +918,7 @@ main( int   argc,
                                    pcg_precond);
       }
          /* use PILUT as preconditioner */
-/*      else if (solver_id == 7)
+      else if (solver_id == 7)
       {
          ierr = HYPRE_ParCSRPilutCreate( MPI_COMM_WORLD, &pcg_precond ); 
          if (ierr) {
@@ -938,7 +938,7 @@ main( int   argc,
             HYPRE_ParCSRPilutSetFactorRowSize( pcg_precond,
                nonzeros_to_keep );
       }
-*/ 
+ 
       HYPRE_ParCSRGMRESSetup(pcg_solver, A, b, x);
  
       hypre_EndTiming(time_index);
