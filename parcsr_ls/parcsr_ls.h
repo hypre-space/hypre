@@ -338,9 +338,6 @@ int hypre_ParAdSchwarzSolve( hypre_ParCSRMatrix *A , hypre_ParVector *F , hypre_
 int hypre_ParAMGCreateDomainDof( hypre_ParCSRMatrix *A , int domain_type , int overlap , int num_functions , int *dof_func , hypre_CSRMatrix **domain_structure_pointer );
 int hypre_ParGenerateScale( hypre_ParCSRMatrix *A , hypre_CSRMatrix *domain_structure , double relaxation_weight , double **scale_pointer );
 
-/* transpose.c */
-int hypre_CSRMatrixTranspose( hypre_CSRMatrix *A , hypre_CSRMatrix **AT );
-
 
 #ifdef __cplusplus
 }

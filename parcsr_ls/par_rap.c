@@ -359,10 +359,10 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
         send_map_elmts_RT = hypre_ParCSRCommPkgSendMapElmts(comm_pkg_RT);
    }
 
-   hypre_CSRMatrixTranspose(RT_diag,&R_diag); 
+   hypre_CSRMatrixTranspose(RT_diag,&R_diag,1); 
    if (num_cols_offd_RT) 
    {
-        hypre_CSRMatrixTranspose(RT_offd,&R_offd); 
+        hypre_CSRMatrixTranspose(RT_offd,&R_offd,1); 
         R_offd_data = hypre_CSRMatrixData(R_offd);
         R_offd_i    = hypre_CSRMatrixI(R_offd);
         R_offd_j    = hypre_CSRMatrixJ(R_offd);

@@ -106,7 +106,6 @@ FILES =\
  pcg_par.c\
  par_schwarz.c\
  schwarz.c\
- transpose.c\
  HYPRE_parcsr_amg.c\
  HYPRE_parcsr_bicgstab.c\
  HYPRE_parcsr_cgnr.c\
