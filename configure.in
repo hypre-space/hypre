@@ -24,6 +24,8 @@ define([AC_CACHE_LOAD], )dnl
 define([AC_CACHE_SAVE], )dnl
 
 AC_INIT(utilities/memory.c)
+AC_CONFIG_HEADER(./HYPRE_config.h)
+
 
 dnl *********************************************************************
 dnl * Set the variable ARCH, (CASC_GUESS_ARCH uses tarch).  ARCH will
@@ -181,6 +183,7 @@ AC_ARG_WITH(MPI, [\
   if test "$withval" = "no"
   then
     casc_using_mpi=no
+    AC_DEFINE(HYPRE_SEQUENTIAL)
     HYPREDEFS="$HYPREDEFS -DHYPRE_SEQUENTIAL"
   else
     casc_using_mpi=yes
@@ -192,56 +195,60 @@ AC_ARG_WITH(MPI, [\
 AC_ARG_WITH(dmalloc, [\
   --with-dmalloc          use dmalloc package],
   CASC_ADD_LIB(dmalloc, malloc, /home/casc/lib /usr/local/lib,
-    LD, HYPREDEFS="$HYPREDEFS -DHYPRE_MEMORY_DMALLOC"
-  )
+    LD,  AC_DEFINE(HYPRE_MEMORY_DMALLOC) HYPREDEFS="$HYPREDEFS -DHYPRE_MEMORY_DMALLOC" )
 )
 
 
 AC_ARG_WITH(timing, [\
   --with-timing           use timing routines],
+  AC_DEFINE(HYPRE_TIMING)
   HYPREDEFS="$HYPREDEFS -DHYPRE_TIMING"
 )
-
-AC_ARG_WITH(openmp,
-   [  --with-openmp        use openMP],
-   HYPREDEFS="$HYPREDEFS -DHYPRE_USING_OPENMP"
-   casc_using_openmp=yes
-)
-
-AC_ARG_WITH(IBM_smp,
-   [  --with-IBM_smp          use IBM SMP],
-   HYPREDEFS="$HYPREDEFS -DHYPRE_USING_IBM_SMP"
-   casc_using_ibm_smp=yes
-)
-
-AC_ARG_WITH(SGI_smp,
-   [  --with-SGI_smp          use SGI SMP],
-   HYPREDEFS="$HYPREDEFS -DHYPRE_USING_SGI_SMP"
-   casc_using_sgi_smp=yes
-)
-
-AC_ARG_WITH(pgcc_smp,
-   [  --with-pgcc_smp          use pgcc SMP (Red)],
-   HYPREDEFS="$HYPREDEFS -DHYPRE_USING_PGCC_SMP"
-dnl   CFLAGS="$CFLAGS -mp"
-   casc_using_pgcc_smp=yes 
-)
-
 
 AC_ARG_WITH(pthreads, [\
   --with-pthreads         use pthreads],
   if test "$withval" != "no"
   then
     casc_using_pthreads=yes
-    CASC_CHECK_LIB(pthread, pthread_create, ,
+    CASC_CHECK_LIB(pthread, pthread_create, /opt/intel/tflop/TF99_2.6.1/tflops/lib ,
       [CASC_CHECK_LIB(pthreads, pthread_create)])
   
     if test "$ac_cv_lib_pthread_pthread_create" = "yes" ||
        test "$ac_cv_lib_pthreads_pthread_create" = "yes"
     then
+      AC_DEFINE(HYPRE_USE_PTHREADS)
       HYPREDEFS="$HYPREDEFS -DHYPRE_USE_PTHREADS"
     fi
   fi
+)
+
+
+AC_ARG_WITH(openmp,
+   [  --with-openmp        use openMP],
+   casc_using_openmp=yes
+   AC_DEFINE(HYPRE_USING_OPENMP)
+   HYPREDEFS="$HYPREDEFS -DHYPRE_USING_OPENMP"
+)
+
+AC_ARG_WITH(IBM_smp,
+   [  --with-IBM_smp          use IBM SMP],
+   casc_using_ibm_smp=yes
+   AC_DEFINE(HYPRE_USING_IBM_SMP)
+   HYPREDEFS="$HYPREDEFS -DHYPRE_USING_IBM_SMP"
+)
+
+AC_ARG_WITH(SGI_smp,
+   [  --with-SGI_smp          use SGI SMP],
+   casc_using_sgi_smp=yes
+   AC_DEFINE(HYPRE_USING_SGI_SMP)
+   HYPREDEFS="$HYPREDEFS -DHYPRE_USING_SGI_SMP"
+)
+
+AC_ARG_WITH(pgcc_smp,
+   [  --with-pgcc_smp          use pgcc SMP (Red)],
+   casc_using_pgcc_smp=yes 
+   AC_DEFINE(HYPRE_USING_PGCC_SMP)
+   HYPREDEFS="$HYPREDEFS -DHYPRE_USING_PGCC_SMP"
 )
 
 
@@ -296,9 +303,9 @@ case $HOSTNAME in
      then       
         if test "$casc_using_mpi" = "yes"
         then
-           CASC_CHECK_HEADER(mpi.h, /opt/intel/tflop/TF98_2.4.1/tflops/cougar/include)
+           CASC_CHECK_HEADER(mpi.h, /opt/intel/tflop/TF99_2.6.1/tflops/cougar/include)
            MPIINCLUDE="$MPIINCLUDE $INCLUDES"
-           CASC_ADD_LIB(mpi, main, /opt/intel/tflop/TF98_2.4.1/tflops/cougar/lib/puma, MPI)
+           CASC_ADD_LIB(mpi, main, /opt/intel/tflop/TF99_2.6.1/tflops/cougar/lib/puma, MPI)
            if test -z "$MPILIBS"
            then
                 AC_MSG_WARN([MPI not found-- must set manually using --with-flags])
@@ -350,7 +357,7 @@ case $HOSTNAME in
       
    ;;
 
-   n0* )
+   nirvana )
 
      if  test "$casc_user_chose_compilers" = "no"
      then
@@ -606,6 +613,8 @@ AC_PROG_CPP
 
 fi
 
+
+
 if test -z "$CC"
 then
   if  test "$casc_user_chose_compilers" = "no"
@@ -690,6 +699,8 @@ then
    CASC_FIND_PETSC
 fi
 
+CC="$PREPEND $CC"
+
 dnl *********************************************************************
 dnl * This macro uses the values assigned to CASC_SET_COPT and 
 dnl * CASC_SET_CDEBUG (and C++ and Fortan counterparts) to set either
@@ -729,8 +740,6 @@ dnl *********************************************************************
 dnl ********************************************************************
 dnl * The following macros are exported and may be used in Makefile.in's
 dnl ********************************************************************
-
-CC="$PREPEND $CC"
 
 dnl * General purpose header files and libraries and directories for
 dnl * those libraries.  
