@@ -90,9 +90,6 @@ hypre_SMGSetupRAPOp( hypre_StructMatrix *R,
 {
    int ierr = 0;
  
-   int                    cdir;
-   int                    P_stored_as_transpose;
-
 #if NEWRAP
    int                    cdir;
    int                    P_stored_as_transpose = 1;

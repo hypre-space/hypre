@@ -70,7 +70,6 @@ hypre_SemiCreateRAPOp( hypre_StructMatrix *R,
    hypre_Index            indexRAP;
    int                    Rloop, Aloop;
 
-   hypre_Index            index_temp;
    int                    j, i;
    int                    d;
    int                    stencil_rank;
