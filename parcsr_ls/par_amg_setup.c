@@ -94,6 +94,9 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    relax_weight = hypre_ParAMGDataRelaxWeight(amg_data);
    dof_func = hypre_ParAMGDataDofFunc(amg_data);
    
+   hypre_ParCSRMatrixSetNumNonzeros(A);
+   hypre_ParAMGDataNumVariables(amg_data) = hypre_ParCSRMatrixNumRows(A);
+
    if (setup_type == 0) return Setup_err_flag;
 
    A_array = hypre_ParAMGDataAArray(amg_data);
@@ -138,16 +141,14 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    if (dof_func_array == NULL)
       dof_func_array = hypre_CTAlloc(int*, max_levels);
 
-   hypre_ParCSRMatrixSetNumNonzeros(A);
    A_array[0] = A;
    dof_func_array[0] = dof_func;
+
    /*----------------------------------------------------------
     * Initialize hypre_ParAMGData
     *----------------------------------------------------------*/
 
    num_variables = hypre_ParCSRMatrixNumRows(A);
-
-   hypre_ParAMGDataNumVariables(amg_data) = num_variables;
 
    not_finished_coarsening = 1;
    level = 0;
