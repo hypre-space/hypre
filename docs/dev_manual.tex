@@ -1,4 +1,9 @@
-\documentstyle[11pt,makeidx,html,hypre]{book}
+\documentclass[11pt]{book}
+
+\usepackage{html}
+\usepackage{hypre}
+\usepackage{makeidx}
+\usepackage{graphicx}
 
 %=============================================================================
 % Preamble:
@@ -34,8 +39,12 @@
 \Title{\hypre{} Developer's Manual: Draft}
 \SubTitle{Software \HYPREVersion}
 \SubTitle{\today}
+\vfill
+\begin{center}
+\InsertGraphics{hypre_wiw}{width=.7\textwidth}
+\end{center}
+\vfill
 \Author{%
-Scalable Linear Solvers Project\\
 Center for Applied Scientific Computing\\
 Lawrence Livermore National Laboratory
 }
