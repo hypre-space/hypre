@@ -1,4 +1,5 @@
 Makefile
+amgmvio
 amgstrip
 build
 convert_icf3d.c
@@ -8,6 +9,7 @@ matrix.c
 matrix.h
 read.c
 readysmp.m
+readvec.m
 vector.c
 vector.h
 write.c
