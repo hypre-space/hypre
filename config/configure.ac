@@ -42,9 +42,6 @@ AC_SUBST([PACKAGE_DATETIME])
 
 ACX_RT_ARGS
 
-ACX_LIBG2C
-AC_SUBST(LIBG2C)
-
 ACX_DEBUG
 
 ACX_MPI
@@ -168,6 +165,11 @@ AC_LIBTOOL_WIN32_DLL
 AC_PROG_LIBTOOL
 ##AC_LIBTOOL_SETUP
 AC_SUBST(LIBTOOL_DEPS)
+
+
+# Check for g2c library.
+AC_CHECK_LIB(g2c, e_wsfe, LIBS="$LIBS -lg2c")
+AC_SUBST(LIBS)
 
 # Checks for libraries.
 ## FIXME: Replace `main' with a function in `-lamg':
