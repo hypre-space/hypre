@@ -72,6 +72,9 @@ typedef struct hypre_SStructMatrix_struct
 
    int                     ref_count;
 
+  /* GEC0902   adding an object type to the matrix  */
+   int                     object_type;
+
 } hypre_SStructMatrix;
 
 /*--------------------------------------------------------------------------
@@ -98,6 +101,7 @@ typedef struct hypre_SStructMatrix_struct
 #define hypre_SStructMatrixComplex(mat)        ((mat) -> complex)
 #define hypre_SStructMatrixGlobalSize(mat)     ((mat) -> global_size)
 #define hypre_SStructMatrixRefCount(mat)       ((mat) -> ref_count)
+#define hypre_SStructMatrixObjectType(mat)       ((mat) -> object_type)
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_SStructPMatrix

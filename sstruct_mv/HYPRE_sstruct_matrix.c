@@ -43,7 +43,6 @@ HYPRE_SStructMatrixCreate( MPI_Comm              comm,
    HYPRE_SStructVariable   vitype, vjtype;
    int                     part, vi, vj, i;
    int                     size;
-   int                     ilower, iupper;
 
    matrix = hypre_TAlloc(hypre_SStructMatrix, 1);
 
@@ -95,10 +94,13 @@ HYPRE_SStructMatrixCreate( MPI_Comm              comm,
       }
    }
 
-   ilower = hypre_SStructGridStartRank(grid);
-   iupper = ilower + hypre_SStructGridLocalSize(grid) - 1;
-   HYPRE_IJMatrixCreate(comm, ilower, iupper, ilower, iupper,
-                        &hypre_SStructMatrixIJMatrix(matrix));
+   /* GEC0902 move the IJ creation to the initialization phase  
+    * ilower = hypre_SStructGridGhstartRank(grid);
+    * iupper = ilower + hypre_SStructGridGhlocalSize(grid) - 1; 
+    * HYPRE_IJMatrixCreate(comm, ilower, iupper, ilower, iupper,
+    *                    &hypre_SStructMatrixIJMatrix(matrix)); */
+   
+   hypre_SStructMatrixIJMatrix(matrix)     = NULL;
    hypre_SStructMatrixParCSRMatrix(matrix) = NULL;
 
    size = 0;
@@ -120,6 +122,10 @@ HYPRE_SStructMatrixCreate( MPI_Comm              comm,
    hypre_SStructMatrixNSSymmetric(matrix) = 0;
    hypre_SStructMatrixGlobalSize(matrix)  = 0;
    hypre_SStructMatrixRefCount(matrix)    = 1;
+  
+   /* GEC0902 setting the default of the object_type to 3333 HYPRE_SSTRUCT for now */ 
+
+   hypre_SStructMatrixObjectType(matrix) = 3333;
 
    *matrix_ptr = matrix;
 
@@ -210,6 +216,12 @@ HYPRE_SStructMatrixInitialize( HYPRE_SStructMatrix matrix )
 
    int                     part, var, i;
 
+   /* GEC0902 addition of variables for ilower and iupper   */
+   int                     comm;
+   hypre_SStructGrid       *grid;
+   int                     ilower, iupper;
+   int                   matrix_type = hypre_SStructMatrixObjectType(matrix);
+
    /* S-matrix */
    for (part = 0; part < nparts; part++)
    {
@@ -255,6 +267,30 @@ HYPRE_SStructMatrixInitialize( HYPRE_SStructMatrix matrix )
       }
       hypre_SStructPMatrixInitialize(pmatrices[part]);
    }
+
+      /* U-matrix */
+
+   /* GEC0902  knowing the kind of matrix we can create the IJMATRIX with the 
+    *  the right dimension (HYPRE_PARCSR without ghosts) */
+
+   grid  = hypre_SStructGraphGrid(graph); 
+   comm  =  hypre_SStructMatrixComm(matrix); 
+
+   if(matrix_type == HYPRE_PARCSR)
+   {
+     ilower = hypre_SStructGridStartRank(grid);
+     iupper = ilower + hypre_SStructGridLocalSize(grid) - 1;
+   }
+   
+    if(matrix_type == HYPRE_SSTRUCT)
+   {
+     ilower = hypre_SStructGridGhstartRank(grid);
+     iupper = ilower + hypre_SStructGridGhlocalSize(grid) - 1;
+   }
+    
+     HYPRE_IJMatrixCreate(comm, ilower, iupper, ilower, iupper,
+                        &hypre_SStructMatrixIJMatrix(matrix)); 
+
 
    /* U-matrix */
    hypre_SStructUMatrixInitialize(matrix);
@@ -683,7 +719,11 @@ HYPRE_SStructMatrixSetObjectType( HYPRE_SStructMatrix  matrix,
          }
       }
    }
+   
+   /* GEC0902 Injecting the type into the matrix data structure   */
 
+   hypre_SStructMatrixObjectType(matrix) = type ;   
+ 
    return ierr;
 }
 
