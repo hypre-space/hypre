@@ -47,6 +47,8 @@ include ../bmakes/base
 # Main rules
 ##################################################################
 
+lib: libHYPRE_CI_mv.a
+
 driver: driver.o lib
 	@echo  "Linking" $@ "... "
 	${LD} -o driver driver.o ${LFLAGS} 
@@ -55,12 +57,10 @@ link:
 	rm driver
 	make driver
 
-lib: libHYPRE_StructMatrix.a
-
-libHYPRE_StructMatrix.a: $(PROTOS) ${OBJS}
+libHYPRE_CI_mv.a: $(PROTOS) ${OBJS}
 	@echo  "Building $@ ... "
-	@ar -ru libHYPRE_StructMatrix.a ${OBJS}
-	@ranlib libHYPRE_StructMatrix.a
+	@ar -ru libHYPRE_CI_mv.a ${OBJS}
+	@ranlib libHYPRE_CI_mv.a
 
 ${OBJS}: ${HEADERS}
 

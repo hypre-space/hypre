@@ -86,7 +86,7 @@ hypre_SetStructInterfaceMatrixPETScCoeffs( hypre_StructInterfaceMatrix *struct_m
 			      hypre_StructGridGlobalSize(grid),
 			      hypre_StructGridGlobalSize(grid), 
 			      hypre_StructStencilSize(stencil), PETSC_NULL,
-			      hypre_StructStencilSize(stencil), PETSC_NULL,
+			      0, PETSC_NULL,
 			      &PETSc_matrix );
 
       hypre_StructInterfaceMatrixTranslator(struct_matrix) =
@@ -131,13 +131,13 @@ hypre_SetStructInterfaceMatrixPETScCoeffs( hypre_StructInterfaceMatrix *struct_m
 					    grid_to_coord_table_entry );
 
 	    ierr = MatSetValues ( PETSc_matrix, 1, &row_coord, 1, &col_coord,
-				  &(coeffs[i]), INSERT_VALUES );   
+				  &(coeffs[i]), ADD_VALUES );   
  
             /*The following line is for symmetric matrices   */
             if ( hypre_StructInterfaceMatrixSymmetric(struct_matrix) &&
                 (row_coord != col_coord) )
 	       ierr = MatSetValues ( PETSc_matrix, 1, &col_coord, 1, &row_coord,
-				  &(coeffs[i]), INSERT_VALUES );    
+				  &(coeffs[i]), ADD_VALUES );    
 	 }
 
       } /*End of "if coeff not equal to zero" */

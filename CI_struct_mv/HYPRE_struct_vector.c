@@ -71,6 +71,42 @@ HYPRE_SetStructInterfaceVectorCoeffs( HYPRE_StructInterfaceVector  vector,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_SetStructInterfaceVectorBoxValues
+ *--------------------------------------------------------------------------*/
+
+int 
+HYPRE_SetStructInterfaceVectorBoxValues( HYPRE_StructInterfaceVector  vector,
+			    int               *lower_grid_index,
+			    int               *upper_grid_index,
+			    double            *coeffs      )
+{
+   hypre_StructInterfaceVector *new_vector;
+   hypre_Index         *new_lower_grid_index;
+   hypre_Index         *new_upper_grid_index;
+
+   int                d;
+   int                ierr;
+
+   new_vector = (hypre_StructInterfaceVector *) vector;
+   new_lower_grid_index = hypre_NewIndex();
+   new_upper_grid_index = hypre_NewIndex();
+   for (d = 0;
+	d < hypre_StructGridDim(hypre_StructInterfaceVectorStructGrid(new_vector));
+	d++)
+   {
+      hypre_IndexD(new_lower_grid_index, d) = lower_grid_index[d];
+      hypre_IndexD(new_upper_grid_index, d) = upper_grid_index[d];
+   }
+
+   ierr = hypre_SetStructInterfaceVectorBoxValues( new_vector, new_lower_grid_index, new_upper_grid_index, coeffs );
+
+   hypre_FreeIndex(new_lower_grid_index);
+   hypre_FreeIndex(new_upper_grid_index);
+
+   return (ierr);
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_SetStructInterfaceVector
  *--------------------------------------------------------------------------*/
 
@@ -87,6 +123,17 @@ HYPRE_SetStructInterfaceVector( HYPRE_StructInterfaceVector  vector,
    ierr = hypre_SetStructInterfaceVector( new_vector, val );
 
    return (ierr);
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_InitializeStructInterfaceVector
+ *--------------------------------------------------------------------------*/
+
+int 
+HYPRE_InitializeStructInterfaceVector( HYPRE_StructInterfaceVector vector )
+{
+  /* Currently a no-op */
+   return( 0 );
 }
 
 /*--------------------------------------------------------------------------

@@ -84,6 +84,44 @@ hypre_SetStructInterfaceVectorCoeffs( hypre_StructInterfaceVector *vector,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_SetStructInterfaceVectorBoxValues
+ *--------------------------------------------------------------------------*/
+int 
+hypre_SetStructInterfaceVectorBoxValues( hypre_StructInterfaceVector *vector,
+			    hypre_Index         *lower_grid_index,
+			    hypre_Index         *upper_grid_index,
+			    double            *coeffs     )
+{
+   hypre_Index *loop_index;
+   int         ierr=0;
+   int         i, j, k, coeffs_index;
+
+   /* Allocate loop_index */
+   loop_index = hypre_CTAlloc( hypre_Index, 3); 
+
+   /* Insert coefficients one grid point at a time */
+   for (k = hypre_IndexZ(lower_grid_index), coeffs_index = 0; k <= hypre_IndexZ(upper_grid_index); k++)
+      for (j = hypre_IndexY(lower_grid_index); j <= hypre_IndexY(upper_grid_index); j++)
+         for (i = hypre_IndexX(lower_grid_index); i <= hypre_IndexX(upper_grid_index); i++, coeffs_index ++)
+         /* Loop over grid dimensions specified in input arguments */
+         {
+            hypre_SetIndex(loop_index, i, j, k);
+
+            /* Insert coefficients in coeffs_buffer */
+            ierr = hypre_SetStructInterfaceVectorCoeffs( 
+                            vector,
+			    loop_index,
+			    &(coeffs[ coeffs_index ])  );
+
+         }
+   /* End Loop from lower_grid_index to upper_grid index */
+
+   hypre_TFree( loop_index );
+
+   return( ierr );
+}
+
+/*--------------------------------------------------------------------------
  * hypre_SetStructInterfaceVector
  *   Storage independent routine for setting a vector to a value.
  *--------------------------------------------------------------------------*/

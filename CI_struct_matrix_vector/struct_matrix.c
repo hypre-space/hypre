@@ -83,6 +83,79 @@ hypre_SetStructInterfaceMatrixCoeffs( hypre_StructInterfaceMatrix *matrix,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_SetStructInterfaceMatrixBoxValues
+ *--------------------------------------------------------------------------*/
+
+int 
+hypre_SetStructInterfaceMatrixBoxValues( hypre_StructInterfaceMatrix *matrix,
+			    hypre_Index         *lower_grid_index,
+			    hypre_Index         *upper_grid_index,
+                            int                 num_stencil_indices,
+                            int                 *stencil_indices,
+			    double            *coeffs      )
+     /* 
+        USES: hypre_SetStructInterfaceMatrixCoeffs
+        ASSUMES: that hypre_SetStructInterfaceMatrixCoeffs is used in an
+                 ADD mode, that is, coefficients sent to this function are added
+                 to any (if any) previously entered values for the same coefficient  
+     */
+{
+   hypre_Index *loop_index;
+   hypre_StructStencil *stencil;
+   int         ierr=0;
+   int         stencil_size;
+   int         i, j, k, l, coeffs_index;
+   double      *coeffs_buffer;
+
+   /* Allocate loop_index */
+   loop_index = hypre_CTAlloc( hypre_Index, 3); 
+
+   /* Get stencil object out of matrix object */
+   stencil = hypre_StructInterfaceMatrixStructStencil( matrix );
+
+   /* Get size of stencil */
+   stencil_size = hypre_StructStencilSize( stencil );
+
+   /* Allocate coeffs_buffer to be size of stencil and zero it out */
+   coeffs_buffer = hypre_CTAlloc( double, stencil_size );
+
+   /* Insert coefficients one grid point at a time */
+   for (k = hypre_IndexZ(lower_grid_index), coeffs_index = 0; k <= hypre_IndexZ(upper_grid_index); k++)
+      for (j = hypre_IndexY(lower_grid_index); j <= hypre_IndexY(upper_grid_index); j++)
+         for (i = hypre_IndexX(lower_grid_index); i <= hypre_IndexX(upper_grid_index); i++, coeffs_index += num_stencil_indices)
+         /* Loop over grid dimensions specified in input arguments */
+         {
+            hypre_SetIndex(loop_index, i, j, k);
+
+            /* Get non-zero coefficients out of coeffs and into form for call
+               to hypre_SetStructInterfaceMatrixCoeffs */
+
+            for ( l=0; l < num_stencil_indices; l++ )
+            /* Loop over stencil_indices */
+            {
+               /* Copy coefficient from coeffs to coeffs_buffer */
+               coeffs_buffer[ stencil_indices[ l ] ] = coeffs[ coeffs_index + l ];
+
+            }
+            /* End Loop over stencil_indices */
+
+            /* Insert coefficients in coeffs_buffer */
+            ierr = hypre_SetStructInterfaceMatrixCoeffs( 
+                            matrix,
+			    loop_index,
+			    coeffs_buffer     );
+
+         }
+   /* End Loop from lower_grid_index to upper_grid index */
+
+
+   hypre_TFree( loop_index );
+   hypre_TFree( coeffs_buffer );
+
+   return( ierr );
+}
+
+/*--------------------------------------------------------------------------
  * hypre_AssembleStructInterfaceMatrix
  *   User-level routine for assembling hypre_StructInterfaceMatrix.
  *--------------------------------------------------------------------------*/

@@ -63,6 +63,7 @@ typedef struct
 #define hypre_NewIndex()       hypre_CTAlloc(hypre_Index, 3)
 #define hypre_FreeIndex(index) hypre_TFree(index)
 
+
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_Index
  *--------------------------------------------------------------------------*/
@@ -72,6 +73,11 @@ typedef struct
 #define hypre_IndexX(index)     hypre_IndexD(index, 0)
 #define hypre_IndexY(index)     hypre_IndexD(index, 1)
 #define hypre_IndexZ(index)     hypre_IndexD(index, 2)
+
+#define hypre_SetIndex(index, ix, iy, iz) \
+( hypre_IndexX(index) = ix,\
+  hypre_IndexY(index) = iy,\
+  hypre_IndexZ(index) = iz )
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_Box

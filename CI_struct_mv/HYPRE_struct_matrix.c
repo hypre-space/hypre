@@ -15,7 +15,7 @@
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * HYPRE_NewStructMatrix
+ * HYPRE_NewStructInterfaceMatrix
  *--------------------------------------------------------------------------*/
 
 HYPRE_StructInterfaceMatrix 
@@ -71,6 +71,63 @@ HYPRE_SetStructInterfaceMatrixCoeffs( HYPRE_StructInterfaceMatrix  matrix,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_SetStructInterfaceMatrixBoxValues
+ *--------------------------------------------------------------------------*/
+
+int 
+HYPRE_SetStructInterfaceMatrixBoxValues( HYPRE_StructInterfaceMatrix  matrix,
+			    int               *lower_grid_index,
+			    int               *upper_grid_index,
+                            int                num_stencil_indices,
+                            int               *stencil_indices,
+			    double            *coeffs      )
+
+{
+   hypre_StructInterfaceMatrix *new_matrix;
+   hypre_Index         *new_lower_grid_index;
+   hypre_Index         *new_upper_grid_index;
+
+   int                d;
+   int                ierr;
+
+   new_matrix = (hypre_StructInterfaceMatrix *) matrix;
+   new_lower_grid_index = hypre_NewIndex();
+   new_upper_grid_index = hypre_NewIndex();
+   for (d = 0;
+	d < hypre_StructGridDim(hypre_StructInterfaceMatrixStructGrid(new_matrix));
+	d++)
+   {
+      hypre_IndexD(new_lower_grid_index, d) = lower_grid_index[d];
+      hypre_IndexD(new_upper_grid_index, d) = upper_grid_index[d];
+   }
+
+   ierr = hypre_SetStructInterfaceMatrixBoxValues( (hypre_StructInterfaceMatrix *) matrix ,
+                              new_lower_grid_index,
+                              new_upper_grid_index,
+                              num_stencil_indices,
+                              stencil_indices,
+                              coeffs );
+
+
+   hypre_FreeIndex(new_lower_grid_index);
+   hypre_FreeIndex(new_upper_grid_index);
+
+   return (ierr);
+
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_InitializeStructInterfaceMatrix
+ *--------------------------------------------------------------------------*/
+
+int 
+HYPRE_InitializeStructInterfaceMatrix( HYPRE_StructInterfaceMatrix matrix )
+     /* No-op */
+{
+   return( 0 );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_AssembleStructInterfaceMatrix
  *--------------------------------------------------------------------------*/
 
@@ -122,5 +179,18 @@ HYPRE_SetStructInterfaceMatrixSymmetric( HYPRE_StructInterfaceMatrix struct_matr
 {
    return( hypre_SetStructInterfaceMatrixSymmetric(
       (hypre_StructInterfaceMatrix *) struct_matrix, type ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_SetStructInterfaceMatrixNumGhost
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_SetStructInterfaceMatrixNumGhost( HYPRE_StructInterfaceMatrix struct_matrix,
+				 int               num_ghost         )
+     /* This does not mean anything for a PETSc matrix under the hood,
+        so this is a no-op for now */
+{
+   return( 0 );
 }
 
