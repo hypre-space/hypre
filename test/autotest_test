@@ -62,18 +62,14 @@ initialize_variables ()
 # If NOT started by autotest (hence no HYPRE_*_EMAIL variable
 # defined) default mail to UID only.
 #
-  if test ! "$HYPRE_DEFAULT_EMAIL"
-  then
-    User=`who am I|cut -f 1 -d \ `
-    HYPRE_DEFAULT_EMAIL=$User
-    HYPRE_CHECKOUT_EMAIL=$User
-    HYPRE_CONFIGURE_EMAIL=$User
-    HYPRE_STRUCT_EMAIL=$User
-    HYPRE_IJ_EMAIL=$User
-    HYPRE_FEI_EMAIL=$User
-    HYPRE_ALL_EMAIL=$User
-    HYPRE_BETA_EMAIL=$User
-  fi
+  User=`who am I|cut -f 1 -d \ `
+  {HYPRE_DEFAULT_EMAIL:=$User}
+  {HYPRE_CHECKOUT_EMAIL:=$User}
+  {HYPRE_CONFIGURE_EMAIL:=$User}
+  {HYPRE_STRUCT_EMAIL:=$User}
+  {HYPRE_IJ_EMAIL:=$User}
+  {HYPRE_FEI_EMAIL:=$User}
+  {HYPRE_ALL_EMAIL:=$User}
 }
 
 #=============================================================================
@@ -200,15 +196,10 @@ cleanup () {
 makeit ()
 {
 MakeOpt=$1	 MessageStr=$2
-MailStdGroup=$3	 MailOptGroup=$4
+MailGroup=$3
 $MAKE $MakeOpt 1> ${Hdr}.${MessageStr}.${MakeOpt}.log \
         2> ${Hdr}.${MessageStr}.${MakeOpt}.err
-if [ "$MessageStr" = "strict_checking" ]
-then
-        echo "$MailOptGroup" > ${Hdr}.${MessageStr}.${MakeOpt}.err.email
-else
-        echo "$MailStdGroup" > ${Hdr}.${MessageStr}.${MakeOpt}.err.email
-fi
+echo "$MailGroup" > ${Hdr}.${MessageStr}.${MakeOpt}.err.email
 }
 #=============================================================================
 # General purpose function for configure, make and execute
@@ -233,27 +224,27 @@ then
 
     if [ $StructOpt -ne $Skip ]
     then
-      makeit "struct" $MessageStr "$HYPRE_STRUCT_EMAIL" "$HYPRE_STRUCT_EMAIL"
+      makeit "struct" $MessageStr "$HYPRE_STRUCT_EMAIL"
     fi
 
     if [ $IJOpt -ne $Skip ]
     then
-      makeit "IJ" $MessageStr "$HYPRE_IJ_EMAIL" "$HYPRE_IJ_EMAIL"
+      makeit "IJ" $MessageStr "$HYPRE_IJ_EMAIL"
     fi
 
     if [ $FeiOpt -ne $Skip ]
     then
-      makeit "fei" $MessageStr "$HYPRE_FEI_EMAIL" "$HYPRE_FEI_EMAIL"
+      makeit "fei" $MessageStr "$HYPRE_FEI_EMAIL"
     fi
 
     if [ $MakeOpt -ne $Skip ]
     then
-      makeit "all" $MessageStr "$HYPRE_BETA_EMAIL" "$HYPRE_ALL_EMAIL"
+      makeit "all" $MessageStr "$HYPRE_ALL_EMAIL"
     fi
 
     if [ $BetaOpt -ne $Skip ]
     then
-      makeit "beta" $MessageStr "$HYPRE_BETA_EMAIL" "$HYPRE_ALL_EMAIL"
+      makeit "beta" $MessageStr "$HYPRE_ALL_EMAIL"
     fi
   fi
   if [ ${BuildOpt} -eq $Run ]
@@ -261,9 +252,9 @@ then
     echo "Autotest starting execution of $MessageStr"
     if [ $NoFeiOpt -ne $Skip ]
     then
-      $MAKE nofei
-      cd $HYPRE_AUTOTEST_DIR/${SRC}/test
-      $MAKE fei++
+      makeit "nofei" $MessageStr "$HYPRE_FEI_EMAIL"
+      cd $HYPRE _AUTOTEST_DIR/${SRC}/test
+      makeit "fei++" $MessageStr "$HYPRE_FEI_EMAIL"
     fi
     if test ! "${HYPRE_RUN_MACHINE}"
     then
@@ -294,7 +285,7 @@ then
   cd $StdBuildDir/$MakeDir
   $MAKE $MakeOption 1> ${Hdr}.${MessageStr}.log \
 	2> ${Hdr}.${MessageStr}.err
-  echo "$HYPRE_DEFAULT_EMAIL" > ${Hdr}.${MessageStr}.err.email
+  echo "$HYPRE_ALL_EMAIL" > ${Hdr}.${MessageStr}.err.email
   echo "Autotest finished $MessageStr"
 fi
 }
