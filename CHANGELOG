@@ -14,6 +14,10 @@
 #
 #=============================================================================
 
+-added new parallel coarsening schemes PMIS and HMIS with reduced complexities
+ as well as the option of using one pass of Ruge-Stueben only
+
+-added capability to set values from any processor for IJ matrices and vectors
 
 Version 1.8.3a released, 2004/01/21.
 
