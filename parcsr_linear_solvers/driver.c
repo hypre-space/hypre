@@ -39,6 +39,7 @@ main( int   argc,
    /* parameters for BoomerAMG */
    double   strong_threshold;
    int      cycle_type;
+   int      coarsen_type = 0;
    int     *num_grid_sweeps;  
    int     *grid_relax_type;   
    int    **grid_relax_points;
@@ -129,6 +130,11 @@ main( int   argc,
          arg_index++;
          build_rhs_type      = 3;
          build_rhs_arg_index = arg_index;
+      }    
+      else if ( strcmp(argv[arg_index], "-ruge") == 0 )
+      {
+         arg_index++;
+         coarsen_type      = 1;
       }    
       else if ( strcmp(argv[arg_index], "-xisone") == 0 )
       {
@@ -245,6 +251,7 @@ main( int   argc,
       printf("  -solver <ID>           : solver ID\n");
       printf("    1=AMG-PCG    2=DS-PCG   \n");
       printf("    3=AMG-GMRES  4=DS-GMRES  \n");     
+      printf("    5=AMG-CGNR   6=DS-CGNR  \n");     
       printf("\n");
       printf("  -th <val>              : set AMG threshold Theta = val \n");
       printf("\n");
@@ -388,6 +395,7 @@ main( int   argc,
       hypre_BeginTiming(time_index);
 
       amg_solver = HYPRE_ParAMGInitialize(); 
+      HYPRE_ParAMGSetCoarsenType(amg_solver, coarsen_type);
       HYPRE_ParAMGSetStrongThreshold(amg_solver, strong_threshold);
       HYPRE_ParAMGSetLogging(amg_solver, ioutdat, "driver.out.log");
       HYPRE_ParAMGSetCycleType(amg_solver, cycle_type);
