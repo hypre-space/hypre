@@ -1,12 +1,13 @@
 
 /******************************************************
  *
- *  File:  Hypre_StructVectorBldr.c
+ *  File:  Hypre_StructVectorBuilder.c
  *
  *********************************************************/
 
-#include "Hypre_StructVectorBldr_Skel.h" 
-#include "Hypre_StructVectorBldr_Data.h" 
+#include "Hypre_StructVectorBuilder_Skel.h" 
+#include "Hypre_StructVectorBuilder_Data.h" 
+
 
 #include "Hypre_StructVector_Skel.h" 
 #include "Hypre_StructVector_Data.h" 
@@ -20,9 +21,9 @@
  *    Allocate Memory for private data
  *    and initialize here
  ***************************************************/
-void Hypre_StructVectorBldr_constructor(Hypre_StructVectorBldr this) {
-   this->d_table = (struct Hypre_StructVectorBldr_private_type *)
-      malloc( sizeof( struct Hypre_StructVectorBldr_private_type ) );
+void Hypre_StructVectorBuilder_constructor(Hypre_StructVectorBuilder this) {
+   this->d_table = (struct Hypre_StructVectorBuilder_private_type *)
+      malloc( sizeof( struct Hypre_StructVectorBuilder_private_type ) );
    this->d_table->newvec = NULL;
    this->d_table->vecgood = 0;
 } /* end constructor */
@@ -31,7 +32,7 @@ void Hypre_StructVectorBldr_constructor(Hypre_StructVectorBldr this) {
  *  Destructor
  *      deallocate memory for private data here.
  ***************************************************/
-void Hypre_StructVectorBldr_destructor(Hypre_StructVectorBldr this) {
+void Hypre_StructVectorBuilder_destructor(Hypre_StructVectorBuilder this) {
    if ( this->d_table->newvec != NULL ) {
       Hypre_StructVector_deleteReference( this->d_table->newvec );
       /* ... will delete newvec if there are no other references to it */
@@ -40,17 +41,26 @@ void Hypre_StructVectorBldr_destructor(Hypre_StructVectorBldr this) {
 } /* end destructor */
 
 /* ********************************************************
- * impl_Hypre_StructVectorBldrprint
+ * impl_Hypre_StructVectorBuilderprint
  **********************************************************/
-void  impl_Hypre_StructVectorBldr_print(Hypre_StructVectorBldr this) {
-   printf( "StructVectorBldr\n" );
-} /* end impl_Hypre_StructVectorBldrprint */
+void  impl_Hypre_StructVectorBuilder_print(Hypre_StructVectorBuilder this) {
+   printf( "StructVectorBuilder\n" );
+} /* end impl_Hypre_StructVectorBuilderprint */
 
 /* ********************************************************
- * impl_Hypre_StructVectorBldrSetValues
+ * impl_Hypre_StructVectorBuilderSetValue
  **********************************************************/
-int  impl_Hypre_StructVectorBldr_SetValues
-(Hypre_StructVectorBldr this, Hypre_Box box, array1double values) {
+int  impl_Hypre_StructVectorBuilder_SetValue
+(Hypre_StructVectorBuilder this, array1int where, double value) {
+   printf("not implemented as of 5/5/2000.");
+   return 1;
+} /* end impl_Hypre_StructVectorBuilderSetValue */
+
+/* ********************************************************
+ * impl_Hypre_StructVectorBuilderSetBoxValues
+ **********************************************************/
+int  impl_Hypre_StructVectorBuilder_SetBoxValues
+(Hypre_StructVectorBuilder this, Hypre_Box box, array1double values) {
    int i, ssize, lower[3], upper[3];
    struct Hypre_StructVector_private_type * SVp;
    HYPRE_StructVector * V;
@@ -72,14 +82,14 @@ int  impl_Hypre_StructVectorBldr_SetValues
 
    return HYPRE_StructVectorSetBoxValues( *V, lower, upper,
                                           &(values.data[*(values.lower)]) );
-} /* end impl_Hypre_StructVectorBldrSetValues */
+
+} /* end impl_Hypre_StructVectorBuilderSetBoxValues */
 
 /* ********************************************************
- * impl_Hypre_StructVectorBldrSetNumGhost
+ * impl_Hypre_StructVectorBuilderSetNumGhost
  **********************************************************/
-int  impl_Hypre_StructVectorBldr_SetNumGhost
-( Hypre_StructVectorBldr this, array1int values )
-{
+int  impl_Hypre_StructVectorBuilder_SetNumGhost
+(Hypre_StructVectorBuilder this, array1int values) {
    HYPRE_StructVector  vector;
    int * num_ghost = &(values.data[*(values.lower)]);
    HYPRE_StructVector * V;
@@ -88,30 +98,28 @@ int  impl_Hypre_StructVectorBldr_SetNumGhost
    V = SV->d_table->hsvec;
 
    return HYPRE_StructVectorSetNumGhost( *V, num_ghost );
-
-} /* end impl_Hypre_StructVectorBldrSetNumGhost */
-
+} /* end impl_Hypre_StructVectorBuilderSetNumGhost */
 
 /* ********************************************************
- * impl_Hypre_StructVectorBldrGetConstructedObject
+ * impl_Hypre_StructVectorBuilderGetConstructedObject
  **********************************************************/
-Hypre_Vector
-impl_Hypre_StructVectorBldr_GetConstructedObject(Hypre_StructVectorBldr this) {
+int  impl_Hypre_StructVectorBuilder_GetConstructedObject
+(Hypre_StructVectorBuilder this, Hypre_Vector* obj) {
    Hypre_StructVector newvec = this->d_table->newvec;
    if ( newvec==NULL || this->d_table->vecgood==0 ) {
-      printf( "Hypre_StructVectorBldr: object not constructed yet\n");
+      printf( "Hypre_StructVectorBuilder: object not constructed yet\n");
       return (Hypre_Vector) NULL;
    };
    return (Hypre_Vector) Hypre_StructVector_castTo( newvec, "Hypre_Vector" );
-} /* end impl_Hypre_StructVectorBldrGetConstructedObject */
+} /* end impl_Hypre_StructVectorBuilderGetConstructedObject */
 
 /* ********************************************************
- * impl_Hypre_StructVectorBldrNew
+ * impl_Hypre_StructVectorBuilderNew
  **********************************************************/
-int  impl_Hypre_StructVectorBldr_New
-(Hypre_StructVectorBldr this, Hypre_StructuredGrid grid) {
+int  impl_Hypre_StructVectorBuilder_New
+(Hypre_StructVectorBuilder this, Hypre_StructGrid grid) {
 
-   struct Hypre_StructuredGrid_private_type *Gp = grid->d_table;
+   struct Hypre_StructGrid_private_type *Gp = grid->d_table;
    HYPRE_StructGrid *G = Gp->hsgrid;
    hypre_StructGrid *g = (hypre_StructGrid *) *G;
 
@@ -140,26 +148,25 @@ int  impl_Hypre_StructVectorBldr_New
 
    return HYPRE_StructVectorInitialize( *V );
 
-} /* end impl_Hypre_StructVectorBldrNew */
+} /* end impl_Hypre_StructVectorBuilderNew */
 
 /* ********************************************************
- * impl_Hypre_StructVectorBldrConstructor
- *
+ * impl_Hypre_StructVectorBuilderConstructor
  * The argument is ignored; it really belongs in the New function
  * which is separately called.
- * However, the argument must be in the interface because if a matrix
+ * However, the argument must be in the interface because if a vector
  * class be its own builder, then the Constructor will call New directly,
  * and it needs the argument for that call.
  **********************************************************/
-Hypre_StructVectorBldr
-impl_Hypre_StructVectorBldr_Constructor(Hypre_StructuredGrid grid) {
-   return Hypre_StructVectorBldr_new();
-} /* end impl_Hypre_StructVectorBldrConstructor */
+Hypre_StructVectorBuilder  impl_Hypre_StructVectorBuilder_Constructor
+(Hypre_StructGrid grid) {
+   return Hypre_StructVectorBuilder_new();
+} /* end impl_Hypre_StructVectorBuilderConstructor */
 
 /* ********************************************************
- * impl_Hypre_StructVectorBldrSetup
+ * impl_Hypre_StructVectorBuilderSetup
  **********************************************************/
-int  impl_Hypre_StructVectorBldr_Setup(Hypre_StructVectorBldr this) {
+int  impl_Hypre_StructVectorBuilder_Setup(Hypre_StructVectorBuilder this) {
    int ierr;
    struct Hypre_StructVector_private_type * SVp;
    HYPRE_StructVector * V;
@@ -174,5 +181,5 @@ int  impl_Hypre_StructVectorBldr_Setup(Hypre_StructVectorBldr this) {
 
    if ( ierr==0 ) this->d_table->vecgood = 1;
    return ierr;
-} /* end impl_Hypre_StructVectorBldrSetup */
+} /* end impl_Hypre_StructVectorBuilderSetup */
 
