@@ -59,6 +59,7 @@ FILES =\
  amg_solve.c \
  coarsen.c\
  cycle.c\
+ difconv.c\
  indepset.c\
  interp.c\
  laplace.c\
