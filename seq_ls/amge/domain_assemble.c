@@ -33,6 +33,9 @@ int hypre_AMGeDomainElementSparseAssemble(int *i_domain_element,
   int *i_domain_chord, *j_domain_chord;
   double *a_domain_chord;
 
+  int *i_chord_domain_index;
+
+  i_chord_domain_index =  hypre_CTAlloc(int, num_chords);
   
   ierr = matrix_matrix_product(&i_domain_chord,
 			       &j_domain_chord,
@@ -45,23 +48,38 @@ int hypre_AMGeDomainElementSparseAssemble(int *i_domain_element,
 
   a_domain_chord = hypre_CTAlloc(double, i_domain_chord[num_domains]);
 
+  for (i=0; i < num_chords; i++)
+   i_chord_domain_index[i] = -1; 
 
   for (i=0; i < i_domain_chord[num_domains]; i++)
     a_domain_chord[i] = 0.e0;
 
   for (i=0; i < num_domains; i++)
+    {
+      for (j=i_domain_chord[i]; j < i_domain_chord[i+1]; j++)
+	i_chord_domain_index[j_domain_chord[j]] = j;
+
     for (j=i_domain_element[i]; j < i_domain_element[i+1]; j++)
       for (k=i_element_chord[j_domain_element[j]];
 	   k<i_element_chord[j_domain_element[j]+1]; k++)
 	{
+	  a_domain_chord[i_chord_domain_index[j_element_chord[k]]]
+	    += a_element_chord[k];
+
+	  /*
 	  for (l=i_domain_chord[i]; l < i_domain_chord[i+1]; l++)
 	    if (j_domain_chord[l] == j_element_chord[k])
 	      {
 		a_domain_chord[l] += a_element_chord[k];
 		break;
 	      }
+	      */
 	}
-
+      for (j=i_domain_chord[i]; j < i_domain_chord[i+1]; j++)
+	i_chord_domain_index[j_domain_chord[j]] = -1;
+    }
+  
+  hypre_TFree(i_chord_domain_index);
 
   *i_domain_chord_pointer = i_domain_chord;
   *j_domain_chord_pointer = j_domain_chord;
