@@ -109,7 +109,9 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
    int             *int_buf_data;
 
    double           max_coef;
+   double           row_sum, scale;
    int              next_open,now_checking,num_lost,start_j;
+   int              next_open_offd,now_checking_offd,num_lost_offd;
 
    int col_1 = hypre_ParCSRMatrixFirstRowIndex(A);
    int local_numrows = hypre_CSRMatrixNumRows(A_diag);
@@ -652,7 +654,6 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
 
                else
                {
-/*                  diagonal += A_diag_data[jj]; */
                     diagonal += A_offd_data[jj];
                } 
 
@@ -683,28 +684,35 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
    }
    P_diag_i[i] = jj_counter; 
 
-   /* Test: Compress S, removing coefficients smaller than 10% of Max */
+   /* Test: Compress P, removing coefficients smaller than 25% of Max */
 
    if (debug_flag == 2)
    {
       next_open = 0;
       now_checking = 0;
       num_lost = 0;
+      next_open_offd = 0;
+      now_checking_offd = 0;
+      num_lost_offd = 0;
 
       for (i = 0; i < n_fine; i++)
       {
-/*         if (CF_marker[i] < 0) */
+       /*  if (CF_marker[i] < 0) */
          {
             max_coef = P_diag_data[P_diag_i[i]];
             for (j = P_diag_i[i]; j < P_diag_i[i+1]; j++)
               max_coef = (max_coef<P_diag_data[j]) ? P_diag_data[j] : max_coef;
+            for (j = P_offd_i[i]; j < P_offd_i[i+1]; j++)
+              max_coef = (max_coef<P_offd_data[j]) ? P_offd_data[j] : max_coef;
             max_coef *= 0.25;
 
             start_j = P_diag_i[i];
             P_diag_i[i] -= num_lost;
-
+	    row_sum = 0;
+	    scale = 0;
             for (j = start_j; j < P_diag_i[i+1]; j++)
             {
+	       row_sum += P_diag_data[now_checking];
                if (P_diag_data[now_checking] < max_coef)
                {
                   num_lost++;
@@ -712,15 +720,45 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
                }
                else
                {
+		  scale += P_diag_data[now_checking];
                   P_diag_data[next_open] = P_diag_data[now_checking];
                   P_diag_j[next_open] = P_diag_j[now_checking];
                   now_checking++;
                   next_open++;
                }
             }
+
+            start_j = P_offd_i[i];
+            P_offd_i[i] -= num_lost_offd;
+
+            for (j = start_j; j < P_offd_i[i+1]; j++)
+            {
+	       row_sum += P_offd_data[now_checking_offd];
+               if (P_offd_data[now_checking_offd] < max_coef)
+               {
+                  num_lost_offd++;
+                  now_checking_offd++;
+               }
+               else
+               {
+		  scale += P_offd_data[now_checking_offd];
+                  P_offd_data[next_open_offd] = P_offd_data[now_checking_offd];
+                  P_offd_j[next_open_offd] = P_offd_j[now_checking_offd];
+                  now_checking_offd++;
+                  next_open_offd++;
+               }
+            }
+	    /* normalize row of P */
+
+   	    scale = row_sum/scale;
+   	    for (j = P_diag_i[i]; j < (P_diag_i[i+1]-num_lost); j++)
+      	       P_diag_data[j] *= scale;
+   	    for (j = P_offd_i[i]; j < (P_offd_i[i+1]-num_lost_offd); j++)
+      	       P_offd_data[j] *= scale;
          }
       }
       P_diag_i[n_fine] -= num_lost;
+      P_offd_i[n_fine] -= num_lost_offd;
    }
 
    /* End of Compression Test */
