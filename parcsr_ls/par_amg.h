@@ -20,7 +20,9 @@ typedef struct
    /* setup params */
    int      max_levels;
    double   strong_threshold;
+   int      coarsen_type;
    int      interp_type;
+   int      restr_par;
 
    /* solve params */
    int      max_iter;
@@ -45,6 +47,7 @@ typedef struct
    hypre_ParVector    **F_array;
    hypre_ParVector    **U_array;
    hypre_ParCSRMatrix **P_array;
+   hypre_ParCSRMatrix **R_array;
    int                **CF_marker_array;
    int                **unknown_map_array;
    int                **point_map_array;
@@ -69,10 +72,12 @@ typedef struct
 
 /* setup params */
 		  		      
+#define hypre_ParAMGDataRestriction(amg_data) ((amg_data)->restr_par)
 #define hypre_ParAMGDataMaxLevels(amg_data) ((amg_data)->max_levels)
 #define hypre_ParAMGDataStrongThreshold(amg_data) \
 ((amg_data)->strong_threshold)
 #define hypre_ParAMGDataInterpType(amg_data) ((amg_data)->interp_type)
+#define hypre_ParAMGDataCoarsenType(amg_data) ((amg_data)->coarsen_type)
 
 /* solve params */
 
@@ -99,6 +104,7 @@ typedef struct
 #define hypre_ParAMGDataFArray(amg_data) ((amg_data)->F_array)
 #define hypre_ParAMGDataUArray(amg_data) ((amg_data)->U_array)
 #define hypre_ParAMGDataPArray(amg_data) ((amg_data)->P_array)
+#define hypre_ParAMGDataRArray(amg_data) ((amg_data)->R_array)
 #define hypre_ParAMGDataUnknownMapArray(amg_data) \
 ((amg_data)->unknown_map_array) 
 #define hypre_ParAMGDataPointMapArray(amg_data) ((amg_data)->point_map_array) 
