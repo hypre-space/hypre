@@ -43,17 +43,18 @@ LFLAGS =\
 
 HEADERS =\
  HYPRE_mv.h\
+ hypre_mv.h\
  csr_matrix.h\
  headers.h\
  mapped_matrix.h\
  multiblock_matrix.h\
- protos.h\
  vector.h
 
 FILES =\
  HYPRE_csr_matrix.c\
  HYPRE_mapped_matrix.c\
  HYPRE_multiblock_matrix.c\
+ HYPRE_vector.c\
  csr_matop.c\
  csr_matrix.c\
  csr_matvec.c\
