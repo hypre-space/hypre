@@ -213,10 +213,10 @@ HYPRE_ParCSRDiagScale( HYPRE_Solver solver,
    double *y_data = hypre_VectorData(hypre_ParVectorLocalVector(y));
    double *A_data = hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(A));
    int *A_i = hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(A));
-
+   int local_size = hypre_VectorSize(hypre_ParVectorLocalVector(x));
    int i, ierr = 0;
 
-   for (i=0; i < hypre_VectorSize(hypre_ParVectorLocalVector(x)); i++)
+   for (i=0; i < local_size; i++)
    {
 	x_data[i] = y_data[i]/A_data[A_i[i]];
    } 
