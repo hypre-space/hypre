@@ -443,6 +443,12 @@ int HYPRE_ParCSRParaSailsSetReuse(HYPRE_Solver solver,
 int HYPRE_ParCSRParaSailsSetLogging(HYPRE_Solver solver,
                                     int          logging);
 
+/*@}*/
+
+/*--------------------------------------------------------------------------
+ * Why is this in the ParCSR header file?  -RDF
+ *--------------------------------------------------------------------------*/
+
 /**
  * @name ParaSails Preconditioner
  *
@@ -596,7 +602,6 @@ int HYPRE_ParaSailsSetLogging(HYPRE_Solver solver,
  * OpenMP and MPI Parallel ILU preconditioner 
  * for the ParCSR matrix format.
  **/
-/*@{*/
 
 /*
  * Create a Euclid object.
@@ -713,8 +718,6 @@ int HYPRE_ParCSREuclidPrintParams(HYPRE_Solver solver);
  **/
 int HYPRE_ParCSREuclidSetLogging(HYPRE_Solver solver,
                                  int          logging);
-
-/*@}*/
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
@@ -1017,8 +1020,6 @@ int HYPRE_SchwarzSetNumFunctions(HYPRE_Solver solver, int num_functions);
 
 int HYPRE_SchwarzSetDofFunc(HYPRE_Solver solver, int *dof_func);
 
-/*@}*/
-
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
@@ -1069,8 +1070,6 @@ int HYPRE_ParCSRBiCGSTABGetNumIterations(HYPRE_Solver  solver,
 
 int HYPRE_ParCSRBiCGSTABGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
                                  		     double       *norm);
-
-/*@}*/
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
