@@ -362,6 +362,7 @@ MOSTFILES = \
  $(top_srcdir)/parcsr_ls/par_laplace.c\
  $(top_srcdir)/parcsr_ls/par_laplace_27pt.c\
  $(top_srcdir)/parcsr_ls/par_laplace_9pt.c\
+ $(top_srcdir)/parcsr_ls/par_nodal_systems.c\
  $(top_srcdir)/parcsr_ls/par_rap.c\
  $(top_srcdir)/parcsr_ls/par_rap_communication.c\
  $(top_srcdir)/parcsr_ls/par_relax.c\
