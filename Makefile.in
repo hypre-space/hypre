@@ -68,7 +68,7 @@ all:
 	  fi; \
 	done; \
 	echo "Making test drivers ..."; \
-	(cd test; make); \
+	(cd test; make veryclean; make); \
 	echo ""
 
 beta: all
