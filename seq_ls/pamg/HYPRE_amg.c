@@ -91,6 +91,50 @@ HYPRE_AMGSetStrongThreshold( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_AMGSetATruncFactor
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_AMGSetATruncFactor( HYPRE_Solver solver,
+                          double       A_trunc_factor)
+{
+   return( hypre_AMGSetATruncFactor( (void *) solver, A_trunc_factor ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_AMGSetAMaxElmts
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_AMGSetAMaxElmts( HYPRE_Solver solver,
+                       int          A_max_elmts)
+{
+   return( hypre_AMGSetAMaxElmts( (void *) solver, A_max_elmts ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_AMGSetPTruncFactor
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_AMGSetPTruncFactor( HYPRE_Solver solver,
+                          double       P_trunc_factor)
+{
+   return( hypre_AMGSetPTruncFactor( (void *) solver, P_trunc_factor ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_AMGSetPMaxElmts
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_AMGSetPMaxElmts( HYPRE_Solver solver,
+                       int          P_max_elmts)
+{
+   return( hypre_AMGSetPMaxElmts( (void *) solver, P_max_elmts ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_AMGSetCoarsenType
  *--------------------------------------------------------------------------*/
 

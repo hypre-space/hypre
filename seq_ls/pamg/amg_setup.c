@@ -38,9 +38,13 @@ hypre_AMGSetup( void            *amg_vdata,
    int             **CF_marker_array;   
    double           *relax_weight;
    double            strong_threshold;
+   double            A_trunc_factor;
+   double            P_trunc_factor;
 
    int      num_variables;
    int      max_levels; 
+   int      A_max_elmts;
+   int      P_max_elmts;
    int      amg_ioutdat;
    int      interp_type;
    int      num_functions;
@@ -78,6 +82,10 @@ hypre_AMGSetup( void            *amg_vdata,
    num_functions = hypre_AMGDataNumFunctions(amg_data);
    relax_type = grid_relax_type[0];
    schwarz_option = hypre_AMGDataSchwarzOption(amg_data);
+   A_trunc_factor = hypre_AMGDataATruncFactor(amg_data);
+   P_trunc_factor = hypre_AMGDataPTruncFactor(amg_data);
+   P_max_elmts = hypre_AMGDataPMaxElmts(amg_data);
+   A_max_elmts = hypre_AMGDataAMaxElmts(amg_data);
  
    dof_func = hypre_AMGDataDofFunc(amg_data);
 
@@ -241,6 +249,9 @@ hypre_AMGSetup( void            *amg_vdata,
                              dof_func_array[level], &coarse_dof_func, &P);
       }
 
+      if (P_trunc_factor > 0 || P_max_elmts > 0)
+         hypre_AMGTruncation(P,P_trunc_factor,P_max_elmts);
+
       printf("END computing level %d interpolation matrix; =======\n", level);
 
       dof_func_array[level+1] = coarse_dof_func;
@@ -258,6 +269,8 @@ hypre_AMGSetup( void            *amg_vdata,
 
       hypre_AMGBuildCoarseOperator(P_array[level], A_array[level] , 
                                    P_array[level], &A_H);
+      if (A_trunc_factor > 0 || A_max_elmts > 0)
+         hypre_AMGOpTruncation(A_H,A_trunc_factor,A_max_elmts);
 
       ++level;
       A_array[level] = A_H;

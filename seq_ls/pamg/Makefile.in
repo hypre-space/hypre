@@ -18,7 +18,6 @@ CC = @CC@
 C_COMPILE_FLAGS=@CFLAGS@
 CXX_COMPILE_FLAGS=@CXXFLAGS@
 F77_COMPILE_FLAGS=@F77FLAGS@ 
-LD_LINK_FLAGS=@LDFLAGS@
 CINCLUDES=@INCLUDES@ @MPIINCLUDE@
 CDEFS =
 
@@ -40,7 +39,6 @@ LIBFLAGS = @LIBDIRS@ @LIBS@
 LDLIBFLAGS = @LDLIBDIRS@ @LDLIBS@
  
 LFLAGS =\
- ${LD_LINK_FLAGS}\
  -L.\
  -L../../seq_mv\
  -L../../utilities\
@@ -82,6 +80,8 @@ FILES =\
  schwarz.c\
  scaled_matnorm.c\
  transpose.c\
+ trunc.c\
+ Atrunc.c\
  HYPRE_amg.c\
  HYPRE_csr_pcg.c\
  HYPRE_csr_gmres.c

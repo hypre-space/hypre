@@ -20,6 +20,10 @@ typedef struct
    /* setup params */
    int      max_levels;
    double   strong_threshold;
+   double   A_trunc_factor;
+   double   P_trunc_factor;
+   int      A_max_elmts;
+   int      P_max_elmts;
    int      coarsen_type;
    int      interp_type;
    int      num_relax_steps;  
@@ -77,6 +81,10 @@ typedef struct
 		  		      
 #define hypre_AMGDataMaxLevels(amg_data) ((amg_data)->max_levels)
 #define hypre_AMGDataStrongThreshold(amg_data) ((amg_data)->strong_threshold)
+#define hypre_AMGDataATruncFactor(amg_data) ((amg_data)->A_trunc_factor)
+#define hypre_AMGDataPTruncFactor(amg_data) ((amg_data)->P_trunc_factor)
+#define hypre_AMGDataAMaxElmts(amg_data) ((amg_data)->A_max_elmts)
+#define hypre_AMGDataPMaxElmts(amg_data) ((amg_data)->P_max_elmts)
 #define hypre_AMGDataCoarsenType(amg_data) ((amg_data)->coarsen_type)
 #define hypre_AMGDataInterpType(amg_data) ((amg_data)->interp_type)
 #define hypre_AMGDataNumRelaxSteps(amg_data) ((amg_data)->num_relax_steps)

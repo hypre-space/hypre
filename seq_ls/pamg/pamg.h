@@ -15,6 +15,9 @@ extern "C" {
 #endif
 
 
+/* Atrunc.c */
+int hypre_AMGOpTruncation( hypre_CSRMatrix *A , double trunc_factor , int max_elmts );
+
 /* HYPRE_amg.c */
 HYPRE_Solver HYPRE_AMGInitialize( void );
 int HYPRE_AMGFinalize( HYPRE_Solver solver );
@@ -22,6 +25,10 @@ int HYPRE_AMGSetup( HYPRE_Solver solver , HYPRE_CSRMatrix A , HYPRE_Vector b , H
 int HYPRE_AMGSolve( HYPRE_Solver solver , HYPRE_CSRMatrix A , HYPRE_Vector b , HYPRE_Vector x );
 int HYPRE_AMGSetMaxLevels( HYPRE_Solver solver , int max_levels );
 int HYPRE_AMGSetStrongThreshold( HYPRE_Solver solver , double strong_threshold );
+int HYPRE_AMGSetATruncFactor( HYPRE_Solver solver , double A_trunc_factor );
+int HYPRE_AMGSetAMaxElmts( HYPRE_Solver solver , int A_max_elmts );
+int HYPRE_AMGSetPTruncFactor( HYPRE_Solver solver , double P_trunc_factor );
+int HYPRE_AMGSetPMaxElmts( HYPRE_Solver solver , int P_max_elmts );
 int HYPRE_AMGSetCoarsenType( HYPRE_Solver solver , int coarsen_type );
 int HYPRE_AMGSetInterpType( HYPRE_Solver solver , int interp_type );
 int HYPRE_AMGSetMaxIter( HYPRE_Solver solver , int max_iter );
@@ -80,6 +87,10 @@ void *hypre_AMGInitialize( void );
 int hypre_AMGFinalize( void *data );
 int hypre_AMGSetMaxLevels( void *data , int max_levels );
 int hypre_AMGSetStrongThreshold( void *data , double strong_threshold );
+int hypre_AMGSetATruncFactor( void *data , double A_trunc_factor );
+int hypre_AMGSetPTruncFactor( void *data , double P_trunc_factor );
+int hypre_AMGSetAMaxElmts( void *data , int A_max_elmts );
+int hypre_AMGSetPMaxElmts( void *data , int P_max_elmts );
 int hypre_AMGSetCoarsenType( void *data , int coarsen_type );
 int hypre_AMGSetInterpType( void *data , int interp_type );
 int hypre_AMGSetMaxIter( void *data , int max_iter );
@@ -211,6 +222,11 @@ int move_entry( int weight , int *weight_max , int *previous , int *next , int *
 
 /* transpose.c */
 int hypre_CSRMatrixTranspose( hypre_CSRMatrix *A , hypre_CSRMatrix **AT );
+
+/* trunc.c */
+int hypre_AMGTruncation( hypre_CSRMatrix *A , double trunc_factor , int max_elmts );
+void swap3( int *v , double *w , int i , int j );
+void qsort2( int *v , double *w , int left , int right );
 
 
 #ifdef __cplusplus

@@ -28,6 +28,10 @@ hypre_AMGInitialize()
    /* setup params */
    int      max_levels;
    double   strong_threshold;
+   double   A_trunc_factor;
+   double   P_trunc_factor;
+   int      A_max_elmts;
+   int      P_max_elmts;
    int      coarsen_type;
    int      interp_type;
    int      num_functions;
@@ -59,6 +63,10 @@ hypre_AMGInitialize()
    /* setup params */
    max_levels = 25;
    strong_threshold = 0.25;
+   A_trunc_factor = 0;
+   P_trunc_factor = 0;
+   A_max_elmts = 0;
+   P_max_elmts = 0;
    coarsen_type = 0;
    interp_type = 200;
    num_functions = 1;
@@ -211,6 +219,54 @@ hypre_AMGSetStrongThreshold( void     *data,
    hypre_AMGData  *amg_data = data;
  
    hypre_AMGDataStrongThreshold(amg_data) = strong_threshold;
+
+   return (ierr);
+}
+
+int
+hypre_AMGSetATruncFactor( void     *data,
+                          double    A_trunc_factor)
+{
+   int ierr = 0;
+   hypre_AMGData  *amg_data = data;
+ 
+   hypre_AMGDataATruncFactor(amg_data) = A_trunc_factor;
+
+   return (ierr);
+}
+
+int
+hypre_AMGSetPTruncFactor( void     *data,
+                          double    P_trunc_factor)
+{
+   int ierr = 0;
+   hypre_AMGData  *amg_data = data;
+ 
+   hypre_AMGDataPTruncFactor(amg_data) = P_trunc_factor;
+
+   return (ierr);
+}
+
+int
+hypre_AMGSetAMaxElmts( void     *data,
+                       int       A_max_elmts)
+{
+   int ierr = 0;
+   hypre_AMGData  *amg_data = data;
+
+   hypre_AMGDataAMaxElmts(amg_data) = A_max_elmts;
+
+   return (ierr);
+}
+
+int
+hypre_AMGSetPMaxElmts( void     *data,
+                       int       P_max_elmts)
+{
+   int ierr = 0;
+   hypre_AMGData  *amg_data = data;
+
+   hypre_AMGDataPMaxElmts(amg_data) = P_max_elmts;
 
    return (ierr);
 }

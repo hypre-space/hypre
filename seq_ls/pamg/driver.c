@@ -54,6 +54,10 @@ main( int   argc,
 #endif
 
       double   strong_threshold;
+      double   A_trunc_factor = 0;
+      double   P_trunc_factor = 0;
+      int      A_max_elmts = 0;
+      int      P_max_elmts = 0;
       int      cycle_type;
       int      ioutdat;
       int      num_iterations;  
@@ -268,6 +272,10 @@ main( int   argc,
       printf("                           (default C/F down, F/C up, F/C fine\n");
       printf("  -mu <val>              : sets cycle type, 1=V, 2=W, etc\n");
       printf("  -th <threshold>        : defines threshold for coarsenings\n");
+      printf("  -Atr <truncfactor>     : defines operator truncation factor\n");
+      printf("  -Amx <max_elmts>       : defines max coeffs per row in operator\n");
+      printf("  -Pmx <max_elmts>       : defines max coeffs per row in interpolation\n");
+      printf("  -Ptr <truncfactor>     : defines interpolation truncation factor\n");
       printf("  -maxlev <ml>           : defines max. no. of levels\n");
       printf("    -n <nx> <ny> <nz>    : problem size per processor\n");
       printf("    -P <Px> <Py> <Pz>    : processor topology\n");
@@ -425,6 +433,26 @@ main( int   argc,
             arg_index++;
             strong_threshold  = atof(argv[arg_index++]);
          }
+         else if ( strcmp(argv[arg_index], "-Atr") == 0 )
+         {
+            arg_index++;
+            A_trunc_factor  = atof(argv[arg_index++]);
+         }
+         else if ( strcmp(argv[arg_index], "-Amx") == 0 )
+         {
+            arg_index++;
+            A_max_elmts  = atoi(argv[arg_index++]);
+         }
+         else if ( strcmp(argv[arg_index], "-Ptr") == 0 )
+         {
+            arg_index++;
+            P_trunc_factor  = atof(argv[arg_index++]);
+         }
+         else if ( strcmp(argv[arg_index], "-Pmx") == 0 )
+         {
+            arg_index++;
+            P_max_elmts  = atoi(argv[arg_index++]);
+         }
          else if ( strcmp(argv[arg_index], "-iout") == 0 )
          {
             arg_index++;
@@ -503,6 +531,10 @@ main( int   argc,
       amg_solver = HYPRE_AMGInitialize();
       HYPRE_AMGSetCoarsenType(amg_solver, coarsen_type);
       HYPRE_AMGSetStrongThreshold(amg_solver, strong_threshold);
+      HYPRE_AMGSetATruncFactor(amg_solver, A_trunc_factor);
+      HYPRE_AMGSetAMaxElmts(amg_solver, A_max_elmts);
+      HYPRE_AMGSetPTruncFactor(amg_solver, P_trunc_factor);
+      HYPRE_AMGSetPMaxElmts(amg_solver, P_max_elmts);
       HYPRE_AMGSetNumRelaxSteps(amg_solver, num_relax_steps);
       HYPRE_AMGSetLogging(amg_solver, ioutdat, "driver.out.log");
       HYPRE_AMGSetCycleType(amg_solver, cycle_type);
@@ -560,6 +592,10 @@ main( int   argc,
          pcg_precond = HYPRE_AMGInitialize();
          HYPRE_AMGSetCoarsenType(pcg_precond, coarsen_type);
          HYPRE_AMGSetStrongThreshold(pcg_precond, strong_threshold);
+         HYPRE_AMGSetATruncFactor(pcg_precond, A_trunc_factor);
+         HYPRE_AMGSetAMaxElmts(pcg_precond, A_max_elmts);
+         HYPRE_AMGSetPTruncFactor(pcg_precond, P_trunc_factor);
+         HYPRE_AMGSetPMaxElmts(pcg_precond, P_max_elmts);
          HYPRE_AMGSetNumRelaxSteps(pcg_precond, num_relax_steps);
          HYPRE_AMGSetLogging(pcg_precond, ioutdat, "driver.out.log");
          HYPRE_AMGSetMaxIter(pcg_precond, 1);
@@ -643,6 +679,10 @@ main( int   argc,
          pcg_precond = HYPRE_AMGInitialize();
          HYPRE_AMGSetCoarsenType(pcg_precond, coarsen_type);
          HYPRE_AMGSetStrongThreshold(pcg_precond, strong_threshold);
+         HYPRE_AMGSetATruncFactor(pcg_precond, A_trunc_factor);
+         HYPRE_AMGSetAMaxElmts(pcg_precond, A_max_elmts);
+         HYPRE_AMGSetPTruncFactor(pcg_precond, P_trunc_factor);
+         HYPRE_AMGSetPMaxElmts(pcg_precond, P_max_elmts);
          HYPRE_AMGSetNumRelaxSteps(pcg_precond, num_relax_steps);
          HYPRE_AMGSetLogging(pcg_precond, ioutdat, "driver.out.log");
          HYPRE_AMGSetMaxIter(pcg_precond, 1);
