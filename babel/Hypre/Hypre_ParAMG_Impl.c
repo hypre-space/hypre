@@ -152,13 +152,32 @@ impl_Hypre_ParAMG_GetResidual(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.ParAMG.GetResidual) */
   /* Insert the implementation of the GetResidual method here... */
-   /* The existence of this function assumes that a residual vector is available
-      from many solvers.  BoomerAMG computes the residual in a temporary vector,
-      with no provision for saving it.  See parcsr_ls/par_amg_solve.c, line 194.
-      For this function we could recompute the residual.  That requires the
-      solution and rhs.  Or we can change par_amg_solve.c  Both options require
-      saving data which usually isn't needed, on the chance that GetResidual
-      may be called. */
+   /* The residual must be available for this to work.
+      log level >2 will do it if implemented.
+    */
+   int ierr = 0;
+   void * objectr;
+   HYPRE_Solver solver;
+   struct Hypre_ParAMG__data * data;
+   struct Hypre_ParCSRVector__data * datar;
+   Hypre_ParCSRVector HypreP_r;
+   HYPRE_ParVector rr;
+   HYPRE_IJVector ij_r;
+
+   data = Hypre_ParAMG__get_data( self );
+   solver = data->solver;
+
+   HypreP_r = Hypre_Vector__cast2
+      ( Hypre_Vector_queryInterface( *r, "Hypre.ParCSRVector"), "Hypre.ParCSRVector" );
+   assert( HypreP_r!=NULL );
+   datar = Hypre_ParCSRVector__get_data( HypreP_r );
+   ij_r = datar -> ij_b;
+   ierr += HYPRE_IJVectorGetObject( ij_r, &objectr );
+   rr = (HYPRE_ParVector) objectr;
+
+   ierr += HYPRE_BoomerAMGGetResidual( solver, rr );
+
+   return ierr;
   /* DO-NOT-DELETE splicer.end(Hypre.ParAMG.GetResidual) */
 }
 
@@ -209,7 +228,7 @@ impl_Hypre_ParAMG_SetDoubleArrayParameter(
 /* strides don't seem to be supported in babel 0.6:   stride = SIDL_double__array_stride( value, 0 );
    assert( stride==1 );*/
 
-   if ( name=="RelaxWeight" || name=="Relax Weight" ) {
+   if ( strcmp(name,"RelaxWeight")==0 || strcmp(name,"Relax Weight")==0 ) {
       assert( dim==1 );
       HYPRE_BoomerAMGSetRelaxWeight( solver, value->d_firstElement );
    }
@@ -241,21 +260,21 @@ impl_Hypre_ParAMG_SetDoubleParameter(
    data = Hypre_ParAMG__get_data( self );
    solver = data->solver;
 
-   if ( name=="Tolerance" || name=="Tol" ) {
+   if ( strcmp(name,"Tolerance")==0 || strcmp(name,"Tol")==0 ) {
       HYPRE_BoomerAMGSetTol( solver, value );
    }
-   else if ( name=="StrongThreshold" || name=="Strong Threshold" ) {
+   else if ( strcmp(name,"StrongThreshold")==0 || strcmp(name,"Strong Threshold")==0 ) {
       HYPRE_BoomerAMGSetStrongThreshold( solver, value );
    }
-   else if ( name=="TruncFactor" || name=="Trunc Factor" || name=="Truncation Factor" ) {
+   else if ( strcmp(name,"TruncFactor")==0 || strcmp(name,"Trunc Factor")==0 || strcmp(name,"Truncation Factor")==0 ) {
       HYPRE_BoomerAMGSetTruncFactor( solver, value );
    }
-   else if ( name=="SchwarzRlxWeight" || name=="Schwarz Rlx Weight" ||
-             name=="SchwarzRelaxWeight" || name=="Schwarz Relax Weight" ||
-             name=="SchwarzRelaxationWeight" || name=="Schwarz Relaxation Weight" ){
+   else if ( strcmp(name,"SchwarzRlxWeight")==0 || strcmp(name,"Schwarz Rlx Weight")==0 ||
+             strcmp(name,"SchwarzRelaxWeight")==0 || strcmp(name,"Schwarz Relax Weight")==0 ||
+             strcmp(name,"SchwarzRelaxationWeight")==0 || strcmp(name,"Schwarz Relaxation Weight")==0 ){
       HYPRE_BoomerAMGSetSchwarzRlxWeight( solver, value );
    }
-   else if ( name=="MaxRowSum" || name=="Max Row Sum" ) {
+   else if ( strcmp(name,"MaxRowSum")==0 || strcmp(name,"Max Row Sum")==0 ) {
       HYPRE_BoomerAMGSetMaxRowSum( solver, value );
    }
    else ierr=1;
@@ -291,24 +310,25 @@ impl_Hypre_ParAMG_SetIntArrayParameter(
    data1_c = value->d_firstElement;
 
    dim = SIDL_int__array_dimen( value );
+
 /* strides don't seem to be supported in babel 0.6:   stride = SIDL_int__array_stride( value, 0 );
    assert( stride==1 );*/
 
-   if ( name=="NumGridSweeps" || name=="Num Grid Sweeps" ||
-             name=="NumberGridSweeps" || name=="Number Grid Sweeps" ||
-             name=="Number of Grid Sweeps" ) {
+   if ( strcmp(name,"NumGridSweeps")==0 || strcmp(name,"Num Grid Sweeps")==0 ||
+             strcmp(name,"NumberGridSweeps")==0 || strcmp(name,"Number Grid Sweeps")==0 ||
+             strcmp(name,"Number of Grid Sweeps")==0 ) {
       assert( dim==1 );
       HYPRE_BoomerAMGSetNumGridSweeps( solver, data1_c );
    }
-   else if ( name=="GridRelaxType" || name=="Grid Relax Type" ) {
+   else if ( strcmp(name,"GridRelaxType")==0 || strcmp(name,"Grid Relax Type")==0 ) {
       assert( dim==1 );
       HYPRE_BoomerAMGSetGridRelaxType( solver, data1_c );
    }
-   else if ( name=="SmoothOption" || name=="Smooth Option" ) {
+   else if ( strcmp(name,"SmoothOption")==0 || strcmp(name,"Smooth Option")==0 ) {
       assert( dim==1 );
       HYPRE_BoomerAMGSetSmoothOption( solver, data1_c );
    }
-   else if ( name=="GridRelaxPoints" || name=="Grid Relax Points" ) {
+   else if ( strcmp(name,"GridRelaxPoints")==0 || strcmp(name,"Grid Relax Points")==0 ) {
       assert( dim==2 );
 /* strides don't seem to be supported in babel 0.6:      stride = SIDL_int__array_stride( value, 1 );
    assert( stride==1 );*/
@@ -318,14 +338,14 @@ impl_Hypre_ParAMG_SetIntArrayParameter(
       ub1 = SIDL_int__array_upper( value, 1 );
       assert( lb0==0 );
       assert( lb1==0 );
-      data2_c = hypre_CTAlloc(int *,ub0+1);
+      data2_c = hypre_CTAlloc(int *,ub0);
       for ( i=0; i<4; ++i ) {
-         data2_c[i] = hypre_CTAlloc(int,ub1+1);
-         for ( j=0; j<ub1+1; ++j ) data2_c[i][j] == SIDL_int__array_get2( value, i, j );
+         data2_c[i] = hypre_CTAlloc(int,ub1);
+         for ( j=0; j<ub1; ++j ) data2_c[i][j] = SIDL_int__array_get2( value, i, j );
       };
       HYPRE_BoomerAMGSetGridRelaxPoints( solver, data2_c );
    }
-   else if ( name=="DofFunc" || name=="Dof Func" || name=="DOF Func" ) {
+   else if ( strcmp(name,"DofFunc")==0 || strcmp(name,"Dof Func")==0 || strcmp(name,"DOF Func")==0 ) {
       assert( dim==1 );
       HYPRE_BoomerAMGSetDofFunc( solver, data1_c );
    }
@@ -357,38 +377,39 @@ impl_Hypre_ParAMG_SetIntParameter(
    data = Hypre_ParAMG__get_data( self );
    solver = data->solver;
 
-   if ( name=="CoarsenType" || name=="Coarsen Type" ) {
+   if ( strcmp(name,"CoarsenType")==0 || strcmp(name,"Coarsen Type")==0 ) {
       HYPRE_BoomerAMGSetCoarsenType( solver, value );      
    }
-   else if ( name=="MeasureType" || name=="Measure Type" ) {
+   else if ( strcmp(name,"MeasureType")==0 || strcmp(name,"Measure Type")==0 ) {
       HYPRE_BoomerAMGSetMeasureType( solver, value );
    }
-   else if ( name=="Logging" ) {  /* >>> need a way to set the filename */
-      HYPRE_BoomerAMGSetLogging( solver, value, "driver.out.log");
+   else if ( strcmp(name,"Print Level")==0 || strcmp(name,"PrintLevel")==0 ) {
+      /* BoomerAMG ignores the filename arg, uses SetPrintFileName instead ...*/
+      HYPRE_BoomerAMGSetPrintLevel( solver, value, "driver.out.log");
    }
-   else if ( name=="CycleType" || name=="Cycle Type" ) {
+   else if ( strcmp(name,"CycleType")==0 || strcmp(name,"Cycle Type")==0 ) {
       HYPRE_BoomerAMGSetCycleType( solver, value );
    }
-   else if ( name=="SmothNumSweep" || name=="Smooth Num Sweep" ) {
+   else if ( strcmp(name,"SmothNumSweep")==0 || strcmp(name,"Smooth Num Sweep")==0 ) {
       HYPRE_BoomerAMGSetSmoothNumSweep( solver, value );
    }
-   else if ( name=="MaxLevels" || name=="Max Levels" ) {
+   else if ( strcmp(name,"MaxLevels")==0 || strcmp(name,"Max Levels")==0 ) {
       HYPRE_BoomerAMGSetMaxLevels( solver, value );
    }
-   else if ( name=="DebugFlag" || name=="Debug Flag" ) {
+   else if ( strcmp(name,"DebugFlag")==0 || strcmp(name,"Debug Flag")==0 ) {
       HYPRE_BoomerAMGSetDebugFlag( solver, value );
    }
-   else if ( name=="Variant" ) {
+   else if ( strcmp(name,"Variant")==0 ) {
       HYPRE_BoomerAMGSetVariant( solver, value );
    }
-   else if ( name=="Overlap" ) {
+   else if ( strcmp(name,"Overlap")==0 ) {
       HYPRE_BoomerAMGSetOverlap( solver, value );
    }
-   else if ( name=="DomainType" || name=="Domain Type" ) {
+   else if ( strcmp(name,"DomainType")==0 || strcmp(name,"Domain Type")==0 ) {
       HYPRE_BoomerAMGSetDomainType( solver, value );
    }
-   else if ( name=="NumFunctions" || name=="Num Functions" ||
-             name=="NumberFunctions" || name=="Number Functions" ) {
+   else if ( strcmp(name,"NumFunctions")==0 || strcmp(name,"Num Functions")==0 ||
+             strcmp(name,"NumberFunctions")==0 || strcmp(name,"Number Functions")==0 ) {
       HYPRE_BoomerAMGSetNumFunctions( solver, value );
    }
    else ierr=1;
@@ -411,6 +432,23 @@ impl_Hypre_ParAMG_SetLogging(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.ParAMG.SetLogging) */
   /* Insert the implementation of the SetLogging method here... */
+   /* same effect as SetIntParameter(..."Logging", 1 ) */
+   /* This function should be called before Setup.  Log level changes
+      may require allocation or freeing of arrays, which is presently
+      only done there.
+      It may be possible to support log_level changes at other times,
+      but there is little need.
+   */
+   int ierr = 0;
+   HYPRE_Solver solver;
+   struct Hypre_ParAMG__data * data;
+
+   data = Hypre_ParAMG__get_data( self );
+   solver = data->solver;
+
+   ierr += HYPRE_BoomerAMGSetLogLevel( solver, level );
+
+   return ierr;
   /* DO-NOT-DELETE splicer.end(Hypre.ParAMG.SetLogging) */
 }
 
@@ -459,6 +497,16 @@ impl_Hypre_ParAMG_SetPrintLevel(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.ParAMG.SetPrintLevel) */
   /* Insert the implementation of the SetPrintLevel method here... */
+   int ierr = 0;
+   HYPRE_Solver solver;
+   struct Hypre_ParAMG__data * data;
+
+   data = Hypre_ParAMG__get_data( self );
+   solver = data->solver;
+
+   HYPRE_BoomerAMGSetPrintLevel( solver, level, "driver.out.log");
+
+   return ierr;
   /* DO-NOT-DELETE splicer.end(Hypre.ParAMG.SetPrintLevel) */
 }
 
@@ -484,7 +532,11 @@ impl_Hypre_ParAMG_SetStringParameter(
    data = Hypre_ParAMG__get_data( self );
    solver = data->solver;
 
-   ierr=1; /* There is no string parameter */
+   if ( strcmp(name,"PrintFileName")==0 || strcmp(name,"Print File Name")==0 ||
+        strcmp(name,"PrintFile")==0 || strcmp(name,"Print File")==0 ) {
+      ierr += hypre_BoomerAMGSetPrintFileName( solver, value );
+   }
+   else ierr=1;
 
    return ierr;
   /* DO-NOT-DELETE splicer.end(Hypre.ParAMG.SetStringParameter) */
