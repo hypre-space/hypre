@@ -855,6 +855,7 @@ CASC_CONFIG_OUTPUT_LIST(\
  distributed_linear_solvers/pilut\
  parcsr_linear_solvers\
  seq_linear_solvers/pamg\
+ seq_linear_solvers/amge\
  CI_struct_linear_solvers\
  CI_struct_matrix_vector\
  structIJ_matrix_vector\
