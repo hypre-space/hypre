@@ -1539,6 +1539,7 @@ hypre_GenerateLaplacian27pt(int      nx,
    hypre_TFree(nx_part);
    hypre_TFree(ny_part);
    hypre_TFree(nz_part);
+   hypre_TFree(global_part);
 
    return A;
 }

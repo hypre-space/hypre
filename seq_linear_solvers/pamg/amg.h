@@ -22,6 +22,7 @@ typedef struct
    double   strong_threshold;
    int      coarsen_type;
    int      interp_type;
+   int      num_relax_steps;  
 
    /* solve params */
    int      max_iter;
@@ -29,7 +30,7 @@ typedef struct
    int     *num_grid_sweeps;  
    int     *grid_relax_type;   
    int    **grid_relax_points; 
-   double   relax_weight;
+   double  *relax_weight;
    double   tol;
 
    /* problem data */
@@ -73,6 +74,7 @@ typedef struct
 #define hypre_AMGDataStrongThreshold(amg_data) ((amg_data)->strong_threshold)
 #define hypre_AMGDataCoarsenType(amg_data) ((amg_data)->coarsen_type)
 #define hypre_AMGDataInterpType(amg_data) ((amg_data)->interp_type)
+#define hypre_AMGDataNumRelaxSteps(amg_data) ((amg_data)->num_relax_steps)
 
 /* solve params */
 

@@ -26,9 +26,10 @@ main( int   argc,
    int                 coarsen_type;
    int                 max_levels;
    int                 num_functions;
+   int                 num_relax_steps;
    int                 func_type;
    double	       norm;
-   int                 j, k;
+   int                 i, j, k;
    int		       ierr = 0;
 
 #if 0
@@ -79,6 +80,7 @@ main( int   argc,
    relax_default = 0;
    interp_type = 0;
    num_functions = 1;
+   num_relax_steps = 1;
    build_funcs_type = 0;
    build_funcs_arg_index = argc;
 
@@ -156,6 +158,16 @@ main( int   argc,
       {
          arg_index++;
          coarsen_type = 2;
+      }
+      else if ( strcmp(argv[arg_index], "-cr") == 0 )
+      {
+         arg_index++;
+         coarsen_type = 3;
+      }
+      else if ( strcmp(argv[arg_index], "-nrlx") == 0 )
+      {
+         arg_index++;
+         num_relax_steps = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-rlx") == 0 )
       {
@@ -351,16 +363,18 @@ main( int   argc,
       int     *num_grid_sweeps;  
       int     *grid_relax_type;   
       int    **grid_relax_points; 
-      double   relax_weight;
+      double  *relax_weight;
 
       strong_threshold = 0.25;
       cycle_type       = 1;
-      relax_weight = 1.0;
       ioutdat = 3;
 
       num_grid_sweeps = hypre_CTAlloc(int,4);
       grid_relax_type = hypre_CTAlloc(int,4);
       grid_relax_points = hypre_CTAlloc(int *,4);
+      relax_weight = hypre_CTAlloc(double,max_levels);
+      for (i=0; i < max_levels; i++)
+	 relax_weight[i] = 1.0;
 
       /* fine grid */
       num_grid_sweeps[0] = 2;
@@ -395,7 +409,9 @@ main( int   argc,
          if ( strcmp(argv[arg_index], "-w") == 0 )
          {
             arg_index++;
-            relax_weight = atof(argv[arg_index++]);
+            relax_weight[0] = atof(argv[arg_index++]);
+	    for (i=1; i < max_levels; i++)
+		relax_weight[i] = relax_weight[0];
          }
          else if ( strcmp(argv[arg_index], "-th") == 0 )
          {
@@ -419,6 +435,7 @@ main( int   argc,
       amg_solver = HYPRE_AMGInitialize();
       HYPRE_AMGSetCoarsenType(amg_solver, coarsen_type);
       HYPRE_AMGSetStrongThreshold(amg_solver, strong_threshold);
+      HYPRE_AMGSetNumRelaxSteps(amg_solver, num_relax_steps);
       HYPRE_AMGSetLogging(amg_solver, ioutdat, "driver.out.log");
       HYPRE_AMGSetCycleType(amg_solver, cycle_type);
       HYPRE_AMGSetNumGridSweeps(amg_solver, num_grid_sweeps);

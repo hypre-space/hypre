@@ -48,7 +48,7 @@ int HYPRE_AMGSetTol( HYPRE_Solver solver , double tol );
 int HYPRE_AMGSetNumGridSweeps( HYPRE_Solver solver , int *num_grid_sweeps );
 int HYPRE_AMGSetGridRelaxType( HYPRE_Solver solver , int *grid_relax_type );
 int HYPRE_AMGSetGridRelaxPoints( HYPRE_Solver solver , int **grid_relax_points );
-int HYPRE_AMGSetRelaxWeight( HYPRE_Solver solver , double relax_weight );
+int HYPRE_AMGSetRelaxWeight( HYPRE_Solver solver , double *relax_weight );
 int HYPRE_AMGSetIOutDat( HYPRE_Solver solver , int ioutdat );
 int HYPRE_AMGSetLogFileName( HYPRE_Solver solver , char *log_file_name );
 int HYPRE_AMGSetLogging( HYPRE_Solver solver , int ioutdat , char *log_file_name );

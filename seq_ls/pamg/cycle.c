@@ -62,7 +62,7 @@ hypre_AMGCycle( void           *amg_vdata,
    int       num_sweep;
    int       relax_type;
    int       relax_points;
-   double    relax_weight;
+   double   *relax_weight;
 
    double    alpha;
    double    beta;
@@ -176,7 +176,7 @@ hypre_AMGCycle( void           *amg_vdata,
                                          CF_marker_array[level],
                                          relax_type,
                                          relax_points,
-                                         relax_weight,
+                                         relax_weight[level],
                                          U_array[level],
                                          Vtemp);
  
@@ -253,6 +253,7 @@ hypre_AMGCycle( void           *amg_vdata,
    hypre_AMGDataCycleOpCount(amg_data) = cycle_op_count;
 
    hypre_TFree(lev_counter);
+   hypre_TFree(num_coeffs);
 
    return(Solve_err_flag);
 }

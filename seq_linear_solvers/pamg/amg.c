@@ -31,12 +31,13 @@ hypre_AMGInitialize()
    int      coarsen_type;
    int      interp_type;
    int      num_functions;
+   int      num_relax_steps;
 
    /* solve params */
    int      max_iter;
    int      cycle_type;    
  
-   double   relax_weight;
+   double  *relax_weight;
    double   tol;
 
    int     *num_grid_sweeps;  
@@ -61,12 +62,15 @@ hypre_AMGInitialize()
    coarsen_type = 0;
    interp_type = 200;
    num_functions = 1;
+   num_relax_steps = 1;
 
    /* solve params */
    max_iter  = 20;
    cycle_type = 1;
    tol = 1.0e-7;
-   relax_weight = 1.0;
+   relax_weight = hypre_CTAlloc(double, max_levels);
+   for (j = 0; j < max_levels; j++)
+      relax_weight[j] = 1.0;
 
    num_grid_sweeps = hypre_CTAlloc(int,4);
    grid_relax_type = hypre_CTAlloc(int,4);
@@ -101,6 +105,7 @@ hypre_AMGInitialize()
    hypre_AMGSetCoarsenType(amg_data, coarsen_type);
    hypre_AMGSetInterpType(amg_data, interp_type);
    hypre_AMGSetNumFunctions(amg_data, num_functions);
+   hypre_AMGSetNumRelaxSteps(amg_data, num_relax_steps);
 
    hypre_AMGSetMaxIter(amg_data, max_iter);
    hypre_AMGSetCycleType(amg_data, cycle_type);
@@ -124,10 +129,39 @@ int
 hypre_AMGFinalize( void *data )
 {
    int ierr = 0;
-/*   hypre_AMGData  *amg_data = data;*/
+   int i;
+   hypre_AMGData  *amg_data = data;
+   int num_levels = hypre_AMGDataNumLevels(amg_data);
 
-/*   hypre_AMGFreeData(amg_data);*/
+   if (hypre_AMGDataNumGridSweeps(amg_data))
+      hypre_TFree (hypre_AMGDataNumGridSweeps(amg_data));
+   if (hypre_AMGDataGridRelaxType(amg_data))
+      hypre_TFree (hypre_AMGDataGridRelaxType(amg_data));
+   if (hypre_AMGDataRelaxWeight(amg_data))
+      hypre_TFree (hypre_AMGDataRelaxWeight(amg_data));
+   if (hypre_AMGDataGridRelaxPoints(amg_data))
+   {
+      for (i=0; i < 4; i++)
+        hypre_TFree (hypre_AMGDataGridRelaxPoints(amg_data)[i]);
+      hypre_TFree (hypre_AMGDataGridRelaxPoints(amg_data));
+   }
 
+   for (i=1; i < num_levels; i++)
+   {
+      hypre_VectorDestroy(hypre_AMGDataFArray(amg_data)[i]);
+      hypre_VectorDestroy(hypre_AMGDataUArray(amg_data)[i]);
+      hypre_CSRMatrixDestroy(hypre_AMGDataAArray(amg_data)[i]);
+      hypre_CSRMatrixDestroy(hypre_AMGDataPArray(amg_data)[i-1]);
+      hypre_TFree(hypre_AMGDataCFMarkerArray(amg_data)[i-1]);
+   }
+   hypre_VectorDestroy(hypre_AMGDataVtemp(amg_data));
+   hypre_TFree(hypre_AMGDataFArray(amg_data));
+   hypre_TFree(hypre_AMGDataUArray(amg_data));
+   hypre_TFree(hypre_AMGDataAArray(amg_data));
+   hypre_TFree(hypre_AMGDataPArray(amg_data));
+   hypre_TFree(hypre_AMGDataCFMarkerArray(amg_data));
+
+   hypre_TFree(amg_data);
    return (ierr);
 }
 
@@ -220,6 +254,18 @@ hypre_AMGSetTol( void     *data,
 }
 
 int
+hypre_AMGSetNumRelaxSteps( void     *data,
+                           int      num_relax_steps )
+{
+   int ierr = 0;
+   hypre_AMGData  *amg_data = data;
+
+   hypre_AMGDataNumRelaxSteps(amg_data) = num_relax_steps;
+
+   return (ierr);
+}
+ 
+int
 hypre_AMGSetNumGridSweeps( void     *data,
                            int      *num_grid_sweeps )
 {
@@ -250,8 +296,16 @@ hypre_AMGSetGridRelaxPoints( void     *data,
                              int      **grid_relax_points )
 {
    int ierr = 0;
+   int i;
    hypre_AMGData  *amg_data = data;
 
+   
+   if (hypre_AMGDataGridRelaxPoints(amg_data))
+   {
+      for (i=0; i < 4; i++)
+         hypre_TFree(hypre_AMGDataGridRelaxPoints(amg_data)[i]);
+      hypre_TFree(hypre_AMGDataGridRelaxPoints(amg_data));
+   }
    hypre_AMGDataGridRelaxPoints(amg_data) = grid_relax_points; 
 
    return (ierr);
@@ -259,11 +313,12 @@ hypre_AMGSetGridRelaxPoints( void     *data,
 
 int
 hypre_AMGSetRelaxWeight( void     *data,
-                         double    relax_weight )
+                         double   *relax_weight )
 {
    int ierr = 0;
    hypre_AMGData  *amg_data = data;
 
+   hypre_TFree(hypre_AMGDataRelaxWeight(amg_data));
    hypre_AMGDataRelaxWeight(amg_data) = relax_weight; 
 
    return (ierr);

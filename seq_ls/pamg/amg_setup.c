@@ -36,6 +36,7 @@ hypre_AMGSetup( void            *amg_vdata,
    int              *coarse_dof_func;
 
    int             **CF_marker_array;   
+   double           *relax_weight;
    double            strong_threshold;
 
    int      num_variables;
@@ -57,22 +58,28 @@ hypre_AMGSetup( void            *amg_vdata,
    int       not_finished_coarsening = 1;
    int       Setup_err_flag;
    int       coarse_threshold = 9;
-   int       j;
+   int       i, j;
    int	     coarsen_type;
+   int	    *grid_relax_type;
+   int	     relax_type;
+   int	     num_relax_steps;
 
-
+   relax_weight = hypre_AMGDataRelaxWeight(amg_data);
+   num_relax_steps = hypre_AMGDataNumRelaxSteps(amg_data);
+   grid_relax_type = hypre_AMGDataGridRelaxType(amg_data);
    max_levels = hypre_AMGDataMaxLevels(amg_data);
    amg_ioutdat = hypre_AMGDataIOutDat(amg_data);
    interp_type = hypre_AMGDataInterpType(amg_data);
    num_functions = hypre_AMGDataNumFunctions(amg_data);
+   relax_type = grid_relax_type[0];
  
    dof_func = hypre_AMGDataDofFunc(amg_data);
+   coarse_dof_func = NULL;
 
    A_array = hypre_CTAlloc(hypre_CSRMatrix*, max_levels);
    P_array = hypre_CTAlloc(hypre_CSRMatrix*, max_levels-1);
    CF_marker_array = hypre_CTAlloc(int*, max_levels-1);
    dof_func_array = hypre_CTAlloc(int*, max_levels);
-
 
    if (num_functions > 1) dof_func_array[0] = dof_func;
    A_array[0] = A;
@@ -106,6 +113,15 @@ hypre_AMGSetup( void            *amg_vdata,
        * for the level.  Returns strength matrix, S  
        *--------------------------------------------------------------*/
 
+      if (relax_weight[level] == 0.0)
+      {
+	 hypre_CSRMatrixScaledNorm(A_array[level], &relax_weight[level]);
+	 if (relax_weight[level] != 0.0)
+            relax_weight[level] = (4.0/3.0)/relax_weight[level];
+         else
+           printf (" Warning ! Matrix norm is zero !!!");
+      }
+
       if (coarsen_type == 1)
       {
 	 hypre_AMGCoarsenRuge(A_array[level], strong_threshold,
@@ -115,6 +131,12 @@ hypre_AMGSetup( void            *amg_vdata,
       {
 	 hypre_AMGCoarsenRugeLoL(A_array[level], strong_threshold,
                        &S, &CF_marker, &coarse_size); 
+      }
+      else if (coarsen_type == 3)
+      {
+         hypre_AMGCoarsenCR(A_array[level], strong_threshold,
+			relax_weight[level], relax_type, 
+			num_relax_steps, &CF_marker, &coarse_size); 
       }
       else
       {
@@ -133,7 +155,16 @@ hypre_AMGSetup( void            *amg_vdata,
 
       if (interp_type == 1)
       {
-          hypre_AMGBuildRBMInterp(A_array[level], 
+	  if (coarsen_type == 3)
+             hypre_AMGBuildRBMInterp(A_array[level], 
+                                  CF_marker_array[level], 
+                                  A_array[level], 
+                                  dof_func_array[level],
+                                  num_functions,
+                                  &coarse_dof_func,
+                                  &P);
+          else
+             hypre_AMGBuildRBMInterp(A_array[level], 
                                   CF_marker_array[level], 
                                   S, 
                                   dof_func_array[level],
@@ -143,7 +174,12 @@ hypre_AMGSetup( void            *amg_vdata,
           /* this will need some cleanup, to make sure we do the right thing 
              when it is a scalar function */ 
       }
-      else
+      else if (coarsen_type == 3)
+      {
+          hypre_AMGBuildInterp(A_array[level], CF_marker_array[level], 
+					A_array[level], &P);
+      }
+      else 
       {
           hypre_AMGBuildInterp(A_array[level], CF_marker_array[level], S, &P);
       }
@@ -156,7 +192,7 @@ hypre_AMGSetup( void            *amg_vdata,
       {
          hypre_CSRMatrixPrint(S,"S_mat");
       }
-      hypre_CSRMatrixDestroy(S);
+      if (coarsen_type != 3) hypre_CSRMatrixDestroy(S);
  
       /*-------------------------------------------------------------
        * Build coarse-grid operator, A_array[level+1] by R*A*P
@@ -233,6 +269,8 @@ hypre_AMGSetup( void            *amg_vdata,
          hypre_CSRMatrixPrint(P_array[j],fnam);
       }   
    } 
+
+   hypre_TFree(dof_func_array);
                      
    Setup_err_flag = 0;
    return(Setup_err_flag);

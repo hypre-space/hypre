@@ -146,6 +146,17 @@ HYPRE_AMGSetTol( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_AMGSetNumRelaxSteps
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_AMGSetNumRelaxSteps( HYPRE_Solver  solver,
+                           int           num_relax_steps  )
+{
+   return( hypre_AMGSetNumRelaxSteps( (void *) solver, num_relax_steps ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_AMGSetNumGridSweeps
  *--------------------------------------------------------------------------*/
 
@@ -184,7 +195,7 @@ HYPRE_AMGSetGridRelaxPoints( HYPRE_Solver   solver,
 
 int
 HYPRE_AMGSetRelaxWeight( HYPRE_Solver   solver,
-                         double         relax_weight  )
+                         double        *relax_weight  )
 {
    return( hypre_AMGSetRelaxWeight( (void *) solver, relax_weight ) );
 }

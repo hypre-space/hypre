@@ -59,6 +59,7 @@ FILES =\
  amg_setup.c\
  amg_solve.c \
  coarsen.c\
+ coarsenCR.c\
  cycle.c\
  difconv.c\
  indepset.c\
@@ -70,6 +71,7 @@ FILES =\
  random.c\
  rap.c \
  relax.c\
+ scaled_matnorm.c\
  transpose.c\
  HYPRE_amg.c
 

@@ -41,7 +41,7 @@ hypre_InitAMGIndepSet( hypre_CSRMatrix *S,
    hypre_SeedRand(2747);
    for (i = 0; i < S_num_nodes; i++)
    {
-      measure_array[i] += hypre_Rand();
+      measure_array[i] += hypre_Rand()*0.001;
    }
 
    return (ierr);
@@ -108,7 +108,7 @@ hypre_AMGIndepSet( hypre_CSRMatrix *S,
    for (ig = 0; ig < graph_array_size; ig++)
    {
       i = graph_array[ig];
-      if (measure_array[i] > 1)
+      if (measure_array[i] > 0.001) 
       {
          IS_marker[i] = 1;
       }
@@ -122,14 +122,14 @@ hypre_AMGIndepSet( hypre_CSRMatrix *S,
    {
       i = graph_array[ig];
 
-      if (measure_array[i] > 1)
+      if (measure_array[i] > 0.001)
       {
          for (jS = S_i[i]; jS < S_i[i+1]; jS++)
          {
             j = S_j[jS];
             
             /* only consider valid graph edges */
-            if ( (measure_array[j] > 1) && (S_data[jS]) )
+            if ( (measure_array[j] > 0.001) && (S_data[jS]) ) 
             {
                if (measure_array[i] > measure_array[j])
                {

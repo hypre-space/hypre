@@ -230,6 +230,9 @@ hypre_AMGSolve( void            *amg_vdata,
     * Close the output file (if open)
     *----------------------------------------------------------*/
 
+   hypre_TFree(num_coeffs);
+   hypre_TFree(num_variables);
+
    return(Solve_err_flag);
 }
 
