@@ -25,7 +25,7 @@ mpirun -np 2 ./ij -solver 1 -rhsrand > solvers.out.0
 mpirun -np 2 ./ij -solver 2 -rhsrand > solvers.out.1
 mpirun -np 2 ./ij -solver 3 -rhsrand > solvers.out.2
 mpirun -np 2 ./ij -solver 4 -rhsrand > solvers.out.3
-mpirun -np 2 ./ij -solver 5 -rhsrand > solvers.out.4
+mpirun -np 2 ./ij -solver 5 -rhsrand -w 0.67 -ns 2 > solvers.out.4
 mpirun -np 2 ./ij -solver 6 -rhsrand > solvers.out.5
 mpirun -np 2 ./ij -solver 7 -rhsrand > solvers.out.6
 mpirun -np 2 ./ij -solver 8 -rhsrand > solvers.out.7
