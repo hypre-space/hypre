@@ -106,12 +106,7 @@ help:
 	@echo "install:"
 	@echo "     compile the program and copy executables, libraries, etc"
 	@echo "        to the file names where they reside for actual use"
-	@echo "     executes installdirs target to create directories needed"
-	@echo "     "
-	@echo "installdirs:"
-	@echo "     creates all directories in which files are to be installed,"
-	@echo "        if they don't already exist, including those specified"
-	@echo "        by prefix and exec_prefix"
+	@echo "     executes mkinstalldirs script to create directories needed"
 	@echo "     "
 	@echo "uninstall:"
 	@echo "     deletes all files that the install target creates"
@@ -132,9 +127,6 @@ help:
 	@echo "     builds the test drivers; linking to the temporary installation"
 	@echo "        directories to simulate how application codes will link to HYPRE"
 	@echo "     "
-	@echo "docs:"
-	@echo "     creates documentation in the docs sub-directory"
-	@echo "     "
 	@echo "************************************************************"
 
 test: all
@@ -143,29 +135,21 @@ test: all
 	(cd test; $(MAKE) distclean; $(MAKE) all); \
 	echo ""
 
-docs:
-	@ \
-	for i in ${HYPRE_DOCS_DIRS}; \
-	do \
-	  if [ -d $$i ]; \
-	  then \
-	    echo "Making $$i ..."; \
-	    (cd $$i; $(MAKE) distclean; $(MAKE) all); \
-	    echo ""; \
-	  fi; \
-	done
-
 install: all
-	@ \
-	echo "Installing hypre ..."; \
-	cp -fr ${HYPRE_BUILD_DIR}/lib/* $(HYPRE_LIB_INSTALL)/.; \
-	cp -fr ${HYPRE_BUILD_DIR}/include/* $(HYPRE_INC_INSTALL)/.
+	@echo "Installing hypre ..."
+	@echo "lib-install: ${HYPRE_LIB_INSTALL}"
+	${HYPRE_SRC_TOP_DIR}/config/mkinstalldirs ${HYPRE_LIB_INSTALL} ${HYPRE_INC_INSTALL}
+	cp -fr ${HYPRE_BUILD_DIR}/lib/* ${HYPRE_LIB_INSTALL}/.
+	cp -fr ${HYPRE_BUILD_DIR}/include/* ${HYPRE_INC_INSTALL}/.
+	chgrp -fR hypre ${HYPRE_LIB_INSTALL}
+	chgrp -fR hypre ${HYPRE_INC_INSTALL}
+	chmod -R a+rX,u+w,go-w ${HYPRE_LIB_INSTALL}
+	chmod -R a+rX,u+w,go-w ${HYPRE_INC_INSTALL}
 
-uninstall: install
-	@ \
-	echo "Un-installing hypre ..."; \
-	(cd $(HYPRE_LIB_INSTALL); rm -rf *); \
-	(cd $(HYPRE_INC_INSTALL); rm -rf *)
+uninstall:
+	@echo "Un-installing hypre ..."
+	rm -rf ${HYPRE_LIB_INSTALL}
+	rm -rf ${HYPRE_INC_INSTALL}
 
 clean:
 	@ \
@@ -189,4 +173,4 @@ distclean:
 	    (cd $$i &&  $(MAKE) $@); \
 	  fi; \
 	done
-	@rm -rf ./config/Makefile.config
+	rm -rf ./config/Makefile.config
