@@ -200,6 +200,16 @@ apply_error_filters () {
           mv $ErrorFile $ErrorFile.orig
           egrep -v "^ Guide   |: 0 errors in file" $ErrorFile.orig > $ErrorFile
         fi
+        if (egrep "1500-030: (I) INFORMATION:" $ErrorFile >/dev/null)
+        then                          # cleanup the problem with the GuideC compiler
+          mv $ErrorFile $ErrorFile.orig
+          egrep -v "1500-030: (I) INFORMATION:" $ErrorFile.orig > $ErrorFile
+        fi
+        if (egrep "configure: WARNING: " $ErrorFile >/dev/null)
+        then                          # cleanup the problem with the GuideC compiler
+          mv $ErrorFile $ErrorFile.orig
+          egrep -v "configure: WARNING: " $ErrorFile.orig > $ErrorFile
+        fi
 ###   fi   # blue
         ;;
       peng*)
