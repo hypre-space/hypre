@@ -56,11 +56,10 @@ main( int   argc,
    row_starts = NULL;
    col_starts = NULL; 
    par_matrix = hypre_CSRMatrixToParCSRMatrix(MPI_COMM_WORLD, matrix, 
-		&row_starts, &col_starts);
+		row_starts, col_starts);
    printf(" converted\n");
 
-   matrix1 = hypre_ParCSRMatrixToCSRMatrixAll(MPI_COMM_WORLD,par_matrix,
-	row_starts);
+   matrix1 = hypre_ParCSRMatrixToCSRMatrixAll(MPI_COMM_WORLD,par_matrix);
 
    sprintf(file_name,"matrix1.%d",my_id);
 
@@ -71,6 +70,7 @@ main( int   argc,
    printf(" global_num_cols %d\n", global_num_cols);
    global_num_rows = hypre_ParCSRMatrixGlobalNumRows(par_matrix);
  
+   col_starts = hypre_ParCSRMatrixColStarts(par_matrix);
    first_index = col_starts[my_id];
    local_size = col_starts[my_id+1] - first_index;
 
@@ -87,6 +87,7 @@ main( int   argc,
    hypre_InitializeParVector(x2);
    hypre_SetParVectorConstantValues(x2,2.0);
 
+   row_starts = hypre_ParCSRMatrixRowStarts(par_matrix);
    first_index = row_starts[my_id];
    local_size = row_starts[my_id+1] - first_index;
    y = hypre_CreateParVector(MPI_COMM_WORLD,global_num_rows,
@@ -106,7 +107,7 @@ main( int   argc,
    hypre_SetParVectorConstantValues(y,1.0);
    printf(" initialized vectors\n");
 
-   hypre_GenerateMatvecCommunicationInfo(par_matrix, row_starts, col_starts);
+   hypre_GenerateMatvecCommunicationInfo(par_matrix);
 
    hypre_ParMatvec ( 1.0, par_matrix, x, 1.0, y);
    printf(" did matvec\n");
@@ -123,8 +124,6 @@ main( int   argc,
    hypre_DestroyParVector(x2);
    hypre_DestroyParVector(y);
    hypre_DestroyParVector(y2);
-   hypre_TFree(row_starts);
-   hypre_TFree(col_starts);
    if (my_id == 0) hypre_DestroyCSRMatrix(matrix);
    if (matrix1) hypre_DestroyCSRMatrix(matrix1);
 
