@@ -37,6 +37,9 @@ extern "C" {
 
 #define MPI_COMM_WORLD     hypre_MPI_COMM_WORLD       
 
+#define MPI_BOTTOM  hypre_MPI_BOTTOM
+#define hypre_MPI_BOTTOM  0x0
+
 #define MPI_DOUBLE         hypre_MPI_DOUBLE           
 #define MPI_INT            hypre_MPI_INT              
 #define MPI_CHAR           hypre_MPI_CHAR             
