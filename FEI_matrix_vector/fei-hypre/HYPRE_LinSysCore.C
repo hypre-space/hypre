@@ -5328,7 +5328,7 @@ void HYPRE_LinSysCore::solveUsingBoomeramg(int& status)
     x_csr = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(currX_);
 
     HYPRE_BoomerAMGSetCoarsenType(HYSolver_, amgCoarsenType_);
-    HYPRE_BoomerAMGSetMeasureType(HYPrecon_, amgMeasureType_);
+    HYPRE_BoomerAMGSetMeasureType(HYSolver_, amgMeasureType_);
     HYPRE_BoomerAMGSetStrongThreshold(HYSolver_, amgStrongThreshold_);
 
     num_sweeps = hypre_CTAlloc(int,4);
