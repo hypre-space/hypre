@@ -15,6 +15,7 @@
 
 typedef struct MLI_AMG_SA_Struct
 {
+   char     method_name[80];         /* store name of the AMG method     */
    MPI_Comm mpi_comm;                /* parallel communicator            */
    int      max_levels;              /* the finest level is max_levels-1 */
    int      curr_level;              /* current level being processed    */

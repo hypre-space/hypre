@@ -10,12 +10,14 @@
  * Function   : MLI_AMG_SA_Create                                        *
  * --------------------------------------------------------------------- */
 
-MLI_AMG_SA *ML_Aggregate_Create()
+MLI_AMG_SA *ML_AMG_SA_Create( MPI_Comm mpi_comm )
 {
    MLI_AMG_SA *object;
 
+   strcpy(method_name, "smoothed aggregation");
    object = (MLI_AMG_SA *) calloc( MLI_AMG_SA, 1);
-   object->max_levels        = 1;
+   if ( max_levels < 0 ) object->max_levels = 40;
+   else                  object->max_levels = max_levels;
    object->debug_level       = 0;
    object->node_dofs         = 1;
    object->threshold         = 0.08;
@@ -40,6 +42,7 @@ MLI_AMG_SA *ML_Aggregate_Create()
    object->coarse_solver     = 0;
    object->coarse_solver_num = 1;
    object->coarse_solver_wgt = 1.0;
+   object->mpi_comm          = mpi_comm;
    return object;
 }
 
@@ -150,7 +153,7 @@ int MLI_AMG_SA_Set_Pweight( MLI_AMG_SA *object, double weight )
  * Function   : MLI_AMG_SA_Set_CalcSpectralNorm                          *
  * --------------------------------------------------------------------- */
 
-int ML_Aggregate_Set_CalcSpectralNorm( MLI_AMG_SA *object )
+int ML_AMG_SA_Set_CalcSpectralNorm( MLI_AMG_SA *object )
 {
    object->spectral_radius_scheme = 1;
    return 0;
@@ -160,8 +163,8 @@ int ML_Aggregate_Set_CalcSpectralNorm( MLI_AMG_SA *object )
  * Function   : MLI_AMG_SA_Set_NullSpace                                 *
  * --------------------------------------------------------------------- */
 
-int ML_Aggregate_Set_NullSpace( MLI_AMG_SA *object, int node_dofs,
-                                int null_dim, double *null_vec, int leng )
+int ML_AMG_SA_Set_NullSpace( MLI_AMG_SA *object, int node_dofs,
+                             int null_dim, double *null_vec, int leng )
 {
    int i;
 
@@ -169,6 +172,7 @@ int ML_Aggregate_Set_NullSpace( MLI_AMG_SA *object, int node_dofs,
    {
       printf("WARNING:  When no nullspace vector is specified, the nodal\n");
       printf("DOFS must be equal to the nullspace dimension.\n");
+      null_dim = node_dofs;
    }
    object->node_dofs     = node_dofs;
    object->nullspace_dim = null_dim;
@@ -190,8 +194,8 @@ int ML_Aggregate_Set_NullSpace( MLI_AMG_SA *object, int node_dofs,
  **********************************************************************/
 
 int MLI_AMG_SA_Gen_Prolongators(MLI_AMG_SA *mli_aggr, 
-                               MLI_Matrix **Amat_array)
-                               MLI_Matrix **Pmat_array)
+                                MLI_Matrix **Amat_array)
+                                MLI_Matrix **Pmat_array)
 {
    hypre_ParCSRMatrix *curr_Amat;
    int                coarsen_scheme;
