@@ -148,7 +148,8 @@ HYPRE_SStructGraphSetStencil( HYPRE_SStructGraph   graph,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructGraphAddEntries
+ * HYPRE_SStructGraphAddEntries-
+ *   THIS IS FOR A NON-OVERLAPPING GRID GRAPH.
  *--------------------------------------------------------------------------*/
 
 int
@@ -178,6 +179,7 @@ HYPRE_SStructGraphAddEntries( HYPRE_SStructGraph   graph,
    hypre_BoxMapEntry     *map_entry;
    hypre_Index            cindex;
    int                    rank, i, startrank;
+   int                    box, to_box, to_proc;
 
    if (!nUventries)
    {
@@ -223,7 +225,7 @@ HYPRE_SStructGraphAddEntries( HYPRE_SStructGraph   graph,
     
    rank -= startrank;
 
-    iUventries[nUventries] = rank;
+   iUventries[nUventries] = rank;
 
    if (Uventries[rank] == NULL)
    {
@@ -231,6 +233,8 @@ HYPRE_SStructGraphAddEntries( HYPRE_SStructGraph   graph,
       hypre_SStructUVEntryPart(Uventry) = part;
       hypre_CopyToCleanIndex(index, ndim, hypre_SStructUVEntryIndex(Uventry));
       hypre_SStructUVEntryVar(Uventry) = var;
+      hypre_SStructMapEntryGetBox(map_entry, &box);
+      hypre_SStructUVEntryBox(Uventry)= box;
       nUentries = 1;
       Uentries = hypre_TAlloc(hypre_SStructUEntry, nUentries);
    }
@@ -249,6 +253,13 @@ HYPRE_SStructGraphAddEntries( HYPRE_SStructGraph   graph,
    hypre_CopyToCleanIndex(to_index, ndim,
                           hypre_SStructUVEntryToIndex(Uventry, i));
    hypre_SStructUVEntryToVar(Uventry, i) = to_var;
+
+   hypre_CopyToCleanIndex(to_index, ndim, cindex);
+   hypre_SStructGridFindMapEntry(grid, to_part, cindex, to_var, &map_entry);
+   hypre_SStructMapEntryGetBox(map_entry, &to_box);
+   hypre_SStructUVEntryToBox(Uventry, i)= to_box;
+   hypre_SStructMapEntryGetProcess(map_entry, &to_proc);
+   hypre_SStructUVEntryToProc(Uventry, i)= to_proc;
 
    Uventries[rank] = Uventry; /* GEC1102 where rank labels Uventries */
 
@@ -300,6 +311,8 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
    int                    to_part;
    hypre_IndexRef         to_index;
    int                    to_var;
+   int                    to_box;
+   int                    to_proc;
    int                    proc, rank;
    hypre_BoxMapEntry     *map_entry;
 
@@ -379,8 +392,19 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
          to_part  = hypre_SStructUVEntryToPart(Uventry, j);
          to_index = hypre_SStructUVEntryToIndex(Uventry, j);
          to_var   = hypre_SStructUVEntryToVar(Uventry, j);
-         hypre_SStructGridFindMapEntry(grid, to_part, to_index, to_var,
+         /*
+           hypre_SStructGridFindMapEntry(grid, to_part, to_index, to_var,
                                        &map_entry);
+          */
+
+         /*---------------------------------------------------------
+          * used in future? The to_box corresponds to the first
+          * map_entry on the map_entry link list.
+          *---------------------------------------------------------*/
+         to_box   = hypre_SStructUVEntryToBox(Uventry, j);
+         to_proc  = hypre_SStructUVEntryToProc(Uventry, j);
+         hypre_SStructGridBoxProcFindMapEntry(grid, to_part, to_var, to_box,
+                                              to_proc, &map_entry);
          if (map_entry != NULL)
          {
             /* compute ranks locally */
@@ -453,7 +477,7 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
       hypre_TFree(t1lists);
 
       t1sendbufs    = hypre_TAlloc(int *, t1ncomms);
-      t1sendbufs[0] = hypre_TAlloc(int, t1totsize*5);
+      t1sendbufs[0] = hypre_TAlloc(int, t1totsize*6);
       t1recvbufs    = hypre_TAlloc(int *, t1ncomms);
       t1recvbufs[0] = hypre_TAlloc(int, t1totsize);
 
@@ -463,15 +487,17 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
          to_part  = hypre_SStructUEntryToPart(Uentry);
          to_index = hypre_SStructUEntryToIndex(Uentry);
          to_var   = hypre_SStructUEntryToVar(Uentry);
-         t1sendbufs[0][5*j  ] = to_part;
-         t1sendbufs[0][5*j+1] = hypre_IndexD(to_index, 0);
-         t1sendbufs[0][5*j+2] = hypre_IndexD(to_index, 1);
-         t1sendbufs[0][5*j+3] = hypre_IndexD(to_index, 2);
-         t1sendbufs[0][5*j+4] = to_var;
+         to_box   = hypre_SStructUEntryToBox(Uentry);
+         t1sendbufs[0][6*j  ] = to_part;
+         t1sendbufs[0][6*j+1] = hypre_IndexD(to_index, 0);
+         t1sendbufs[0][6*j+2] = hypre_IndexD(to_index, 1);
+         t1sendbufs[0][6*j+3] = hypre_IndexD(to_index, 2);
+         t1sendbufs[0][6*j+4] = to_var;
+         t1sendbufs[0][6*j+5] = to_box;
       }
 
       /* GEC1002 commenting this out to replace it by something else  
-       * since I think that a 5 is missing in sending buffer 
+       * since I think that a 6 is missing in sending buffer 
        * 
        * for (i = 1; i < t1ncomms; i++)
        * {
@@ -482,7 +508,7 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
 
       for (i = 1; i < t1ncomms; i++)
       {
-         t1sendbufs[i] = t1sendbufs[i-1] + 5*t1bufsizes[i-1];
+         t1sendbufs[i] = t1sendbufs[i-1] + 6*t1bufsizes[i-1];
          t1recvbufs[i] = t1sendbufs[i-1] + t1bufsizes[i-1];
          t1Uentries[i] = t1Uentries[i-1] + t1bufsizes[i-1];
       }  
@@ -508,7 +534,7 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
       for (i = 0; i < t1ncomms; i++)
       {
          /* Note: No need to check below that these have completed */
-         MPI_Isend(t1sendbufs[i], t1bufsizes[i]*5, MPI_INT, t1bufprocs[i],
+         MPI_Isend(t1sendbufs[i], t1bufsizes[i]*6, MPI_INT, t1bufprocs[i],
                    1, comm, &tmprequest);
       }
 
@@ -575,14 +601,15 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
          }
          MPI_Recv(t2commbuf, t2bufsize, MPI_INT, proc, 1, comm, &t2status);
 
-         t2bufsize /= 5;
+         t2bufsize /= 6;
          for (j = 0; j < t2bufsize; j++)
          {
-            to_part                   = t2commbuf[5*j];
-            hypre_IndexD(to_index, 0) = t2commbuf[5*j+1];
-            hypre_IndexD(to_index, 1) = t2commbuf[5*j+2];
-            hypre_IndexD(to_index, 2) = t2commbuf[5*j+3];
-            to_var                    = t2commbuf[5*j+4];
+            to_part                   = t2commbuf[6*j];
+            hypre_IndexD(to_index, 0) = t2commbuf[6*j+1];
+            hypre_IndexD(to_index, 1) = t2commbuf[6*j+2];
+            hypre_IndexD(to_index, 2) = t2commbuf[6*j+3];
+            to_var                    = t2commbuf[6*j+4];
+            to_box                    = t2commbuf[6*j+5]; /* future use? */
             hypre_SStructGridFindMapEntry(grid, to_part, to_index, to_var,
                                           &map_entry);
 
