@@ -55,6 +55,8 @@ typedef struct hypre_SStructMatrix_struct
    /* temporary storage for SetValues routines */
    int                    *Sentries;
    int                    *Uentries;
+   int                    *tmp_col_coords;
+   double                 *tmp_coeffs;
 
    int                     symmetric;    /* Is the matrix symmetric */
    int                     complex;      /* Is the matrix complex */
@@ -80,6 +82,8 @@ typedef struct hypre_SStructMatrix_struct
 #define hypre_SStructMatrixParCSRMatrix(mat)   ((mat) -> parcsrmatrix)
 #define hypre_SStructMatrixSEntries(mat)       ((mat) -> Sentries)
 #define hypre_SStructMatrixUEntries(mat)       ((mat) -> Uentries)
+#define hypre_SStructMatrixTmpColCoords(mat)   ((mat) -> tmp_col_coords)
+#define hypre_SStructMatrixTmpCoeffs(mat)      ((mat) -> tmp_coeffs)
 #define hypre_SStructMatrixSymmetric(mat)      ((mat) -> symmetric)
 #define hypre_SStructMatrixComplex(mat)        ((mat) -> complex)
 #define hypre_SStructMatrixGlobalSize(mat)     ((mat) -> global_size)

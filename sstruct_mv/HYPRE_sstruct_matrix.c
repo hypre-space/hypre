@@ -102,6 +102,8 @@ HYPRE_SStructMatrixCreate( MPI_Comm              comm,
    }
    hypre_SStructMatrixSEntries(matrix) = hypre_TAlloc(int, size);
    hypre_SStructMatrixUEntries(matrix) = hypre_TAlloc(int, size);
+   hypre_SStructMatrixTmpColCoords(matrix) = NULL;
+   hypre_SStructMatrixTmpCoeffs(matrix)    = NULL;
 
    hypre_SStructMatrixSymmetric(matrix)  = 0;
    hypre_SStructMatrixGlobalSize(matrix) = 0;
@@ -154,6 +156,8 @@ HYPRE_SStructMatrixDestroy( HYPRE_SStructMatrix matrix )
          HYPRE_IJMatrixDestroy(hypre_SStructMatrixIJMatrix(matrix));
          hypre_TFree(hypre_SStructMatrixSEntries(matrix));
          hypre_TFree(hypre_SStructMatrixUEntries(matrix));
+         hypre_TFree(hypre_SStructMatrixTmpColCoords(matrix));
+         hypre_TFree(hypre_SStructMatrixTmpCoeffs(matrix));
          hypre_TFree(matrix);
       }
    }

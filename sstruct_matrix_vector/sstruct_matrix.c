@@ -383,6 +383,7 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
    int                     nrows, ncols, nnzs;
    int                     part, var, entry, i, j;
    int                    *row_sizes;
+   int                     max_row_size;
 
    ierr = HYPRE_IJMatrixSetLocalStorageType(ijmatrix, HYPRE_PARCSR);
 
@@ -393,6 +394,7 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
    /* set row sizes */
    i = 0;
    row_sizes = hypre_CTAlloc(int, nrows);
+   max_row_size = 0;
    for (part = 0; part < nparts; part++)
    {
       nvars = hypre_SStructPGridNVars(pgrids[part]);
@@ -416,7 +418,9 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
          }
          for (j = 0; j < nrows; j++)
          {
-            row_sizes[i++] = nnzs;
+            row_sizes[i] = nnzs;
+            max_row_size = hypre_max(max_row_size, row_sizes[i]);
+            i++;
          }
       }
    }
@@ -424,9 +428,14 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
    {
       i = iUventries[entry];
       row_sizes[i] += hypre_SStructUVEntryNUEntries(Uventries[i]);
+      max_row_size = hypre_max(max_row_size, row_sizes[i]);
    }
    ierr += HYPRE_IJMatrixSetRowSizes (ijmatrix, (const int *) row_sizes);
    hypre_TFree(row_sizes);
+   hypre_SStructMatrixTmpColCoords(matrix) =
+      hypre_CTAlloc(int, max_row_size);
+   hypre_SStructMatrixTmpCoeffs(matrix) =
+      hypre_CTAlloc(double, max_row_size);
 
    ierr += HYPRE_IJMatrixInitialize(ijmatrix);
 
@@ -479,8 +488,8 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
    }
    hypre_SStructBoxMapEntryGetGlobalRank(map_entry, index, &row_coord);
 
-   col_coords = hypre_CTAlloc(int,    nentries);
-   coeffs     = hypre_CTAlloc(double, nentries);
+   col_coords = hypre_SStructMatrixTmpColCoords(matrix);
+   coeffs     = hypre_SStructMatrixTmpCoeffs(matrix);
    ncoeffs = 0;
    for (i = 0; i < nentries; i++)
    {
@@ -528,9 +537,6 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
                                      (const int *) col_coords,
                                      (const double *) coeffs);
    }
-
-   hypre_TFree(col_coords);
-   hypre_TFree(coeffs);
 
    return ierr;
 }
