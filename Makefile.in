@@ -42,7 +42,8 @@ host_triplet = @host@
 subdir = .
 DIST_COMMON = README $(am__configure_deps) $(include_HEADERS) \
 	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
-	$(top_srcdir)/config/HYPRE_config.h.in $(top_srcdir)/configure
+	$(top_srcdir)/config/HYPRE_config.h.in $(top_srcdir)/configure \
+	INSTALL
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/config/acinclude.m4 \
 	$(top_srcdir)/config/acx_blas.m4 \

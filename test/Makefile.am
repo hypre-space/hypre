@@ -88,6 +88,7 @@ ij_dependencies = \
 ij_es_SOURCES = ij.c
 ij_es_libraries = \
  -L$(libdir)\
+ -lHYPRE_parcsr_es\
  -lHYPRE_parcsr_ls\
  -lHYPRE_DistributedMatrixPilutSolver\
  -lHYPRE_ParaSails\

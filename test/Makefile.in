@@ -17,7 +17,7 @@
 #
 # Makefile.am --- automake input file for Hypre test drivers
 #
-SOURCES = $(f77_ij_SOURCES) $(f77_ij_b_SOURCES) $(f77_ij_mv_SOURCES) $(f77_struct_SOURCES) $(fei_SOURCES) $(ij_SOURCES) $(nodist_ij_C___SOURCES) $(ij_b_SOURCES) $(ij_mv_SOURCES) $(nodist_ij_mv_C___SOURCES) $(new_ij_SOURCES) $(nodist_new_ij_C___SOURCES) $(sstruct_SOURCES) $(nodist_sstruct_C___SOURCES) $(struct_SOURCES) $(nodist_struct_C___SOURCES)
+SOURCES = $(f77_ij_SOURCES) $(f77_ij_b_SOURCES) $(f77_ij_mv_SOURCES) $(f77_struct_SOURCES) $(fei_SOURCES) $(ij_SOURCES) $(nodist_ij_C___SOURCES) $(ij_b_SOURCES) $(ij_es_SOURCES) $(ij_mv_SOURCES) $(nodist_ij_mv_C___SOURCES) $(new_ij_SOURCES) $(nodist_new_ij_C___SOURCES) $(sstruct_SOURCES) $(nodist_sstruct_C___SOURCES) $(struct_SOURCES) $(nodist_struct_C___SOURCES)
 
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
@@ -40,11 +40,12 @@ NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
 host_triplet = @host@
-EXTRA_PROGRAMS = ij$(EXEEXT) ij_mv$(EXEEXT) new_ij$(EXEEXT) \
-	sstruct$(EXEEXT) struct$(EXEEXT) f77_ij$(EXEEXT) \
-	f77_ij_b$(EXEEXT) f77_ij_mv$(EXEEXT) f77_struct$(EXEEXT) \
-	fei$(EXEEXT) ij_b$(EXEEXT) ij.C++$(EXEEXT) new_ij.C++$(EXEEXT) \
-	ij_mv.C++$(EXEEXT) struct.C++$(EXEEXT) sstruct.C++$(EXEEXT)
+EXTRA_PROGRAMS = ij$(EXEEXT) ij_es$(EXEEXT) ij_mv$(EXEEXT) \
+	new_ij$(EXEEXT) sstruct$(EXEEXT) struct$(EXEEXT) \
+	f77_ij$(EXEEXT) f77_ij_b$(EXEEXT) f77_ij_mv$(EXEEXT) \
+	f77_struct$(EXEEXT) fei$(EXEEXT) ij_b$(EXEEXT) ij.C++$(EXEEXT) \
+	new_ij.C++$(EXEEXT) ij_mv.C++$(EXEEXT) struct.C++$(EXEEXT) \
+	sstruct.C++$(EXEEXT)
 subdir = test
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -87,6 +88,9 @@ ij_C___DEPENDENCIES = $(am__DEPENDENCIES_2)
 am_ij_b_OBJECTS = ij_b-ij_b.$(OBJEXT)
 ij_b_OBJECTS = $(am_ij_b_OBJECTS)
 ij_b_DEPENDENCIES = $(am__DEPENDENCIES_3)
+am_ij_es_OBJECTS = ij.$(OBJEXT)
+ij_es_OBJECTS = $(am_ij_es_OBJECTS)
+ij_es_DEPENDENCIES = $(am__DEPENDENCIES_2)
 am_ij_mv_OBJECTS = ij_mv-ij_mv.$(OBJEXT)
 ij_mv_OBJECTS = $(am_ij_mv_OBJECTS)
 ij_mv_DEPENDENCIES = $(am__DEPENDENCIES_3)
@@ -135,15 +139,16 @@ F77LINK = $(LIBTOOL) --mode=link $(F77LD) $(AM_FFLAGS) $(FFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
 SOURCES = $(f77_ij_SOURCES) $(f77_ij_b_SOURCES) $(f77_ij_mv_SOURCES) \
 	$(f77_struct_SOURCES) $(fei_SOURCES) $(ij_SOURCES) \
-	$(nodist_ij_C___SOURCES) $(ij_b_SOURCES) $(ij_mv_SOURCES) \
-	$(nodist_ij_mv_C___SOURCES) $(new_ij_SOURCES) \
+	$(nodist_ij_C___SOURCES) $(ij_b_SOURCES) $(ij_es_SOURCES) \
+	$(ij_mv_SOURCES) $(nodist_ij_mv_C___SOURCES) $(new_ij_SOURCES) \
 	$(nodist_new_ij_C___SOURCES) $(sstruct_SOURCES) \
 	$(nodist_sstruct_C___SOURCES) $(struct_SOURCES) \
 	$(nodist_struct_C___SOURCES)
 DIST_SOURCES = $(f77_ij_SOURCES) $(f77_ij_b_SOURCES) \
 	$(f77_ij_mv_SOURCES) $(f77_struct_SOURCES) $(fei_SOURCES) \
-	$(ij_SOURCES) $(ij_b_SOURCES) $(ij_mv_SOURCES) \
-	$(new_ij_SOURCES) $(sstruct_SOURCES) $(struct_SOURCES)
+	$(ij_SOURCES) $(ij_b_SOURCES) $(ij_es_SOURCES) \
+	$(ij_mv_SOURCES) $(new_ij_SOURCES) $(sstruct_SOURCES) \
+	$(struct_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	html-recursive info-recursive install-data-recursive \
 	install-exec-recursive install-info-recursive \
@@ -345,6 +350,44 @@ ij_dependencies = \
  $(includedir)/HYPRE_IJ_mv.h\
  $(includedir)/HYPRE_parcsr_mv.h\
  $(includedir)/HYPRE_parcsr_ls.h\
+ $(includedir)/parcsr_mv.h\
+ $(includedir)/krylov.h
+
+
+# ij, build 
+ij_es_SOURCES = ij.c
+ij_es_libraries = \
+ -L$(libdir)\
+ -lHYPRE_parcsr_es\
+ -lHYPRE_parcsr_ls\
+ -lHYPRE_DistributedMatrixPilutSolver\
+ -lHYPRE_ParaSails\
+ -lHYPRE_Euclid\
+ -lHYPRE_IJ_mv\
+ -lHYPRE_MatrixMatrix\
+ -lHYPRE_DistributedMatrix\
+ -lHYPRE_parcsr_mv\
+ -lHYPRE_seq_mv\
+ -lHYPRE_krylov\
+ -lHYPRE_utilities\
+ $(LAPACKLIBFLAGS)\
+ $(BLASLIBFLAGS)\
+ $(LIBM)
+
+ij_es_LDADD = \
+ $(ij_libraries) \
+ @FLIBS@
+
+#ij_es_LDFLAGS = -static
+# ij, dependencies rules needed because automatic dependency checking is off
+ij_es_dependencies = \
+ $(includedir)/utilities.h\
+ $(includedir)/HYPRE.h\
+ $(includedir)/HYPRE_IJ_mv.h\
+ $(includedir)/HYPRE_parcsr_mv.h\
+ $(includedir)/HYPRE_parcsr_ls.h\
+ $(includedir)/HYPRE_lobpcg.h\
+ $(includedir)/lobpcg.h\
  $(includedir)/parcsr_mv.h\
  $(includedir)/krylov.h
 
@@ -622,6 +665,9 @@ ij.C++$(EXEEXT): $(ij_C___OBJECTS) $(ij_C___DEPENDENCIES)
 ij_b$(EXEEXT): $(ij_b_OBJECTS) $(ij_b_DEPENDENCIES) 
 	@rm -f ij_b$(EXEEXT)
 	$(LINK) $(ij_b_LDFLAGS) $(ij_b_OBJECTS) $(ij_b_LDADD) $(LIBS)
+ij_es$(EXEEXT): $(ij_es_OBJECTS) $(ij_es_DEPENDENCIES) 
+	@rm -f ij_es$(EXEEXT)
+	$(LINK) $(ij_es_LDFLAGS) $(ij_es_OBJECTS) $(ij_es_LDADD) $(LIBS)
 ij_mv$(EXEEXT): $(ij_mv_OBJECTS) $(ij_mv_DEPENDENCIES) 
 	@rm -f ij_mv$(EXEEXT)
 	$(LINK) $(ij_mv_LDFLAGS) $(ij_mv_OBJECTS) $(ij_mv_LDADD) $(LIBS)
