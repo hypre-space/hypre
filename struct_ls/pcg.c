@@ -261,8 +261,19 @@ hypre_PCGSolve( void *pcg_vdata,
    double          cf_ave_1 = 0.0;
    double          weight;
 
+   double          guard_zero_residual; 
+
    int             i = 0;
    int             ierr = 0;
+
+   /*-----------------------------------------------------------------------
+    * With relative change convergence test on, it is possible to attempt
+    * another iteration with a zero residual. This causes the parameter
+    * alpha to go NaN. The guard_zero_residual parameter is to circumvent
+    * this. Perhaps it should be set to something non-zero (but small).
+    *-----------------------------------------------------------------------*/
+
+   guard_zero_residual = 0.0;
 
    /*-----------------------------------------------------------------------
     * Start pcg solve
@@ -365,7 +376,7 @@ hypre_PCGSolve( void *pcg_vdata,
       /* check for convergence */
       if (i_prod < eps)
       {
-         if (rel_change)
+         if (rel_change && i_prod > guard_zero_residual)
          {
             pi_prod = hypre_PCGInnerProd(p,p);
             xi_prod = hypre_PCGInnerProd(x,x);
