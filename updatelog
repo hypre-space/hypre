@@ -52,5 +52,11 @@ New internal installation: V2000-03-30
 
 - Various BoomerAMG optimizations.
 
+New internal installation: V2000-05-31
+
+- Added support for the FEI
+
+- Using a new version numbering scheme.  The C macro HYPRE_Version()
+  may be used to retrieve version information.
 
 
