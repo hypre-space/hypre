@@ -125,6 +125,8 @@ int main(int argc, char *argv[])
         ps = ParaSailsCreate(A);
         thresh = ParaSailsSelectThresh(ps, selparam);
 /*thresh=10.0;*/
+        if (mype == 0) 
+            printf("thresh: %f\n", thresh);
         ParaSailsSetupPattern(ps, thresh, nlevels);
         ParaSailsSetupValues(ps, A);
         time1 = MPI_Wtime();
@@ -140,6 +142,9 @@ int main(int argc, char *argv[])
         /*MatrixPrint(ps->M, "M");*/
 
         /* filtration step */
+        filter = ParaSailsSelectFilter(ps, filter);
+        if (mype == 0) 
+            printf("filter: %f\n", filter);
 	ParaSailsFilterValues(ps, filter);
         i = MatrixNnz(ps->M);
         if (mype == 0) 
