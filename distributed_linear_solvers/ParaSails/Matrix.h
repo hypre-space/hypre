@@ -62,6 +62,7 @@ typedef struct
 Matrix;
 
 Matrix *MatrixCreate(MPI_Comm comm, int beg_row, int end_row);
+Matrix *MatrixCreateLocal(int beg_row, int end_row);
 void MatrixDestroy(Matrix *mat);
 void MatrixSetRow(Matrix *mat, int row, int len, int *ind, double *val);
 void MatrixGetRow(Matrix *mat, int row, int *lenp, int **indp, double **valp);

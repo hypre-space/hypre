@@ -35,8 +35,18 @@ typedef struct
 }
 RecipData;
 
-void LoadBalDonate(MPI_Comm comm, ParaSails *ps, double local_cost, 
+typedef struct
+{
+    int         num_given;
+    int         num_taken;
+    DonorData  *donor_data;
+    RecipData  *recip_data;
+    int         beg_row;    /* local beginning row, after all donated rows */
+}
+LoadBal;
+
+LoadBal *LoadBalDonate(MPI_Comm comm, Matrix *mat, double local_cost, 
   double beta);
-void LoadBalReturn(MPI_Comm comm, ParaSails *ps);
+void LoadBalReturn(LoadBal *p, MPI_Comm comm, Matrix *mat);
 
 #endif /* _LOADBAL_H */

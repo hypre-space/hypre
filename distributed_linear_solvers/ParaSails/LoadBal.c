@@ -15,7 +15,6 @@
 #include <assert.h>
 #include <stdlib.h>
 #include "Common.h"
-#include "ParaSails.h"
 #include "Matrix.h"
 #include "LoadBal.h"
 
@@ -123,7 +122,7 @@ void LoadBalInit(MPI_Comm comm, double local_cost, double beta,
 
 void LoadBalDonorSend(MPI_Comm comm, Matrix *mat, int num_given, 
   const int *donor_data_pe, const double *donor_data_cost, 
-  DonorData *donor_data, MPI_Request *request)
+  DonorData *donor_data, int *local_beg_row, MPI_Request *request)
 {
     int send_beg_row, send_end_row;
     int i, row;
@@ -180,6 +179,8 @@ void LoadBalDonorSend(MPI_Comm comm, Matrix *mat, int num_given,
         MPI_Isend(donor_data[i].buffer, buflen, MPI_INT, donor_data[i].pe,
             LOADBAL_REQ_TAG, comm, &request[i]);
     }
+
+    *local_beg_row = send_end_row + 1;
 }
 
 /*--------------------------------------------------------------------------
@@ -210,7 +211,7 @@ void LoadBalRecipRecv(MPI_Comm comm, int num_taken, RecipData *recip_data)
         beg_row = *bufferp++;
         end_row = *bufferp++;
 
-        recip_data[i].mat = MatrixCreate(comm, beg_row, end_row);
+        recip_data[i].mat = MatrixCreateLocal(beg_row, end_row);
 
 	/* Set the indices of the local matrix containing donated rows */
 
@@ -322,69 +323,76 @@ void LoadBalDonorRecv(MPI_Comm comm, Matrix *mat,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-void LoadBalDonate(MPI_Comm comm, ParaSails *ps, double local_cost, double beta)
+LoadBal *LoadBalDonate(MPI_Comm comm, Matrix *mat, double local_cost, 
+  double beta)
 {
+    LoadBal *p;
     int i, npes;
-
+    int    *donor_data_pe;
+    double *donor_data_cost;
     MPI_Request *requests;
     MPI_Status  *statuses;
 
-    int    *donor_data_pe   = (int *)    malloc(npes * sizeof(int));
-    double *donor_data_cost = (double *) malloc(npes * sizeof(double));
+    p = (LoadBal *) malloc(sizeof(LoadBal));
 
     MPI_Comm_size(comm, &npes);
 
-    LoadBalInit(comm, local_cost, beta, &ps->num_given, 
-        donor_data_pe, donor_data_cost, &ps->num_taken);
+    donor_data_pe   = (int *)    malloc(npes * sizeof(int));
+    donor_data_cost = (double *) malloc(npes * sizeof(double));
 
-    ps->donor_data = (DonorData *) malloc(ps->num_given * sizeof(DonorData));
-    ps->recip_data = (RecipData *) malloc(ps->num_taken * sizeof(RecipData));
+    LoadBalInit(comm, local_cost, beta, &p->num_given, 
+        donor_data_pe, donor_data_cost, &p->num_taken);
 
-    requests = (MPI_Request *) malloc(ps->num_given * sizeof(MPI_Request));
-    statuses = (MPI_Status  *) malloc(ps->num_given * sizeof(MPI_Status));
+    p->donor_data = (DonorData *) malloc(p->num_given * sizeof(DonorData));
+    p->recip_data = (RecipData *) malloc(p->num_taken * sizeof(RecipData));
 
-    LoadBalDonorSend(comm, ps->M, ps->num_given,
-        donor_data_pe, donor_data_cost, ps->donor_data, requests);
+    requests = (MPI_Request *) malloc(p->num_given * sizeof(MPI_Request));
+    statuses = (MPI_Status  *) malloc(p->num_given * sizeof(MPI_Status));
+
+    LoadBalDonorSend(comm, mat, p->num_given,
+        donor_data_pe, donor_data_cost, p->donor_data, &p->beg_row, requests);
 
     free(donor_data_pe);
     free(donor_data_cost);
 
-    LoadBalRecipRecv(comm, ps->num_taken, ps->recip_data);
+    LoadBalRecipRecv(comm, p->num_taken, p->recip_data);
 
-    MPI_Waitall(ps->num_given, requests, statuses);
+    MPI_Waitall(p->num_given, requests, statuses);
 
     free(requests);
     free(statuses);
 
     /* Free the send buffers which were allocated by LoadBalDonorSend */
-    for (i=0; i<ps->num_given; i++)
-	free(ps->donor_data[i].buffer);
+    for (i=0; i<p->num_given; i++)
+	free(p->donor_data[i].buffer);
+
+    return p;
 }
 
-void LoadBalReturn(MPI_Comm comm, ParaSails *ps)
+void LoadBalReturn(LoadBal *p, MPI_Comm comm, Matrix *mat)
 {
     int i;
 
     MPI_Request *requests;
     MPI_Status  *statuses;
 
-    requests = (MPI_Request *) malloc(ps->num_given * sizeof(MPI_Request));
-    statuses = (MPI_Status  *) malloc(ps->num_given * sizeof(MPI_Status));
+    requests = (MPI_Request *) malloc(p->num_given * sizeof(MPI_Request));
+    statuses = (MPI_Status  *) malloc(p->num_given * sizeof(MPI_Status));
 
-    LoadBalRecipSend(comm, ps->num_taken, ps->recip_data, requests);
+    LoadBalRecipSend(comm, p->num_taken, p->recip_data, requests);
 
-    LoadBalDonorRecv(comm, ps->M, ps->num_given, ps->donor_data);
+    LoadBalDonorRecv(comm, mat, p->num_given, p->donor_data);
 
-    MPI_Waitall(ps->num_given, requests, statuses);
+    MPI_Waitall(p->num_taken, requests, statuses);
 
     free(requests);
     free(statuses);
 
     /* Free the send buffers which were allocated by LoadBalRecipSend */
-    for (i=0; i<ps->num_taken; i++)
-	free(ps->recip_data[i].buffer);
+    for (i=0; i<p->num_taken; i++)
+	free(p->recip_data[i].buffer);
 
-    free(ps->donor_data);
-    free(ps->recip_data);
+    free(p->donor_data);
+    free(p->recip_data);
 }
 

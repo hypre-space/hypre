@@ -16,6 +16,7 @@
 #include "PrunedRows.h"
 #include "StoredRows.h"
 #include "RowPatt.h"
+#include "LoadBal.h"
 
 #ifndef _PARASAILS_H
 #define _PARASAILS_H
@@ -36,6 +37,8 @@ typedef struct
     int         max_num_external_rows;
 
     int         apply_setup;
+
+    LoadBal    *load_bal;
 }
 ParaSails;
 

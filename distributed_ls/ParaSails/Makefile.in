@@ -47,6 +47,7 @@ HEADERS =\
  DiagScale.h\
  HYPRE_ParaSails.h\
  Hash.h\
+ LoadBal.h\
  Matrix.h\
  Mem.h\
  OrderStat.h\
@@ -60,6 +61,7 @@ FILES =\
  DiagScale.c\
  HYPRE_ParaSails.c\
  Hash.c\
+ LoadBal.c\
  Matrix.c\
  Mem.c\
  OrderStat.c\

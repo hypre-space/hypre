@@ -22,6 +22,7 @@
 #include "StoredRows.h"
 #include "PrunedRows.h"
 #include "OrderStat.h"
+#include "LoadBal.h"
 #include "ParaSails.h"
 
 #ifdef ESSL
@@ -33,6 +34,23 @@
  * ParaSails private functions
  *
  *****************************************************************************/
+
+int FindNumReplies(MPI_Comm comm, int *replies_list)
+{
+    int num_replies;
+    int npes, mype;
+    int *replies_list2 = (int *) malloc(npes * sizeof(int));
+
+    MPI_Comm_rank(comm, &mype);
+    MPI_Comm_size(comm, &npes);
+
+    MPI_Allreduce(replies_list, replies_list2, npes, MPI_INT, MPI_SUM, comm);
+    num_replies = replies_list2[mype];
+    free(replies_list2);
+
+    return num_replies;
+}
+
 
 /*--------------------------------------------------------------------------
  * SendRequests - Given a list of indices "reqind" of length "reqlen",
@@ -382,12 +400,11 @@ static void ExchangePrunedRows(MPI_Comm comm, Matrix *M,
     int count;
     MPI_Request *requests;
     MPI_Status *statuses;
-    int mype, npes;
-    int num_replies, *replies_list, *replies_list2;
+    int npes;
+    int num_replies, *replies_list;
 
     Mem *mem;
 
-    MPI_Comm_rank(comm, &mype);
     MPI_Comm_size(comm, &npes);
     requests = (MPI_Request *) malloc(npes * sizeof(MPI_Request));
     statuses = (MPI_Status *) malloc(npes * sizeof(MPI_Status));
@@ -414,16 +431,12 @@ static void ExchangePrunedRows(MPI_Comm comm, Matrix *M,
         /* Get list of indices that were just merged */
         RowPattPrevLevel(patt, &len, &ind);
 
-        /* Find the number of replies */
         replies_list = (int *) calloc(npes, sizeof(int));
-        replies_list2 = (int *) malloc(npes * sizeof(int));
 
         SendRequests(comm, M, len, ind, &num_requests, replies_list);
 
-        MPI_Allreduce(replies_list,replies_list2, npes, MPI_INT, MPI_SUM, comm);
-        num_replies = replies_list2[mype];
+        num_replies = FindNumReplies(comm, replies_list);
         free(replies_list);
-        free(replies_list2);
 
         for (i=0; i<num_replies; i++)
         {
@@ -455,7 +468,7 @@ static void ExchangePrunedRows(MPI_Comm comm, Matrix *M,
  *--------------------------------------------------------------------------*/
 
 static void ExchangeStoredRows(MPI_Comm comm, Matrix *A, Matrix *M, 
-  StoredRows *stored_rows, int num_replies)
+  StoredRows *stored_rows, LoadBal *load_bal)
 {
     RowPatt *patt;
     int row, len, *ind;
@@ -471,26 +484,53 @@ static void ExchangeStoredRows(MPI_Comm comm, Matrix *A, Matrix *M,
     int count;
     MPI_Request *requests;
     MPI_Status *statuses;
+    int npes;
+    int num_replies, *replies_list;
 
     Mem *mem = (Mem *) MemCreate();
 
-    requests = (MPI_Request *) malloc(num_replies * sizeof(MPI_Request));
-    statuses = (MPI_Status *) malloc(num_replies * sizeof(MPI_Status));
+    MPI_Comm_size(comm, &npes);
 
     /* Merge the patterns of all the rows of M on this processor */
     /* The merged pattern is not already known, since M is triangular */
 
     patt = RowPattCreate(ROWPATT_MAXLEN);
 
+#ifdef PARASAILS_NO_LOADBAL
     for (row=M->beg_row; row<=M->end_row; row++)
     {
         MatrixGetRow(M, row, &len, &ind, &val);
         RowPattMergeExt(patt, len, ind, M->beg_row, M->end_row);
     }
+#else
+    for (row=load_bal->beg_row; row<=M->end_row; row++)
+    {
+        MatrixGetRow(M, row, &len, &ind, &val);
+        RowPattMergeExt(patt, len, ind, M->beg_row, M->end_row);
+    }
+
+    for (i=0; i<load_bal->num_taken; i++)
+    {
+      for (row  = load_bal->recip_data[i].mat->beg_row; 
+	   row <= load_bal->recip_data[i].mat->end_row; row++)
+      {
+        MatrixGetRow(load_bal->recip_data[i].mat, row, &len, &ind, &val);
+        RowPattMergeExt(patt, len, ind, M->beg_row, M->end_row);
+      }
+    }
+#endif
 
     RowPattGet(patt, &len, &ind);
 
-    SendRequests(comm, A, len, ind, &num_requests, NULL);
+    replies_list = (int *) calloc(npes, sizeof(int));
+
+    SendRequests(comm, A, len, ind, &num_requests, replies_list);
+
+    num_replies = FindNumReplies(comm, replies_list);
+    free(replies_list);
+
+    requests = (MPI_Request *) malloc(num_replies * sizeof(MPI_Request));
+    statuses = (MPI_Status *) malloc(num_replies * sizeof(MPI_Status));
 
     bufferlen = 10; /* size will grow if get a long msg */
     buffer = (int *) malloc(bufferlen * sizeof(int));
@@ -530,19 +570,18 @@ static void ExchangeStoredRows(MPI_Comm comm, Matrix *A, Matrix *M,
  *--------------------------------------------------------------------------*/
 
 static void ConstructPatternForEachRow(PrunedRows *pruned_rows,
-  int num_levels, Matrix *M, int *num_replies)
+  int num_levels, Matrix *M, int *num_replies, double *costp)
 {
     int row, len, *ind, level, lenprev, *indprev;
     int i, j;
     RowPatt *row_patt;
-    double cost = 0.0;
     int nnz = 0;
-    int *marker, mype, npes, pe;
+    int *marker, npes, pe;
 
-    MPI_Comm_rank(M->comm, &mype);
     MPI_Comm_size(M->comm, &npes);
     marker = (int *) calloc(npes, sizeof(int));
     *num_replies = 0;
+    *costp = 0.0;
 
     row_patt = RowPattCreate(ROWPATT_MAXLEN);
 
@@ -596,14 +635,14 @@ static void ConstructPatternForEachRow(PrunedRows *pruned_rows,
         MatrixSetRow(M, row, j, ind, NULL);
 
         nnz += j;
-        cost += (double) j*j*j; /* long may be only 4 bytes on blue */
+        (*costp) += (double) j*j*j; /* long may be only 4 bytes on blue */
     }
 
 #ifdef PARASAILS_TIME
     {
     int mype;
     MPI_Comm_rank(MPI_COMM_WORLD, &mype);
-    printf("%d: nnz: %10d  ********* cost %f\n", mype, nnz, cost);
+    printf("%d: nnz: %10d  ********* cost %f\n", mype, nnz, *costp);
     fflush(NULL);
     }
 #endif
@@ -616,7 +655,8 @@ static void ConstructPatternForEachRow(PrunedRows *pruned_rows,
  * ComputeValues
  *--------------------------------------------------------------------------*/
 
-static void ComputeValues(StoredRows *stored_rows, Matrix *mat)
+static void ComputeValues(StoredRows *stored_rows, Matrix *mat,
+  int local_beg_row)
 {
     int maxlen, row, len, *ind;
     double *val;
@@ -640,21 +680,12 @@ static void ComputeValues(StoredRows *stored_rows, Matrix *mat)
     double time0, time1, timet = 0.0, timea = 0.0;
 
     /* Determine the length of the longest row of M on this processor */
-#if 1
     maxlen = 0;
-    for (row=mat->beg_row; row<=mat->end_row; row++)
+    for (row=local_beg_row; row<=mat->end_row; row++)
     {
         MatrixGetRow(mat, row, &len, &ind, &val);
         maxlen = (len > maxlen ? len : maxlen);
     }
-#else
-    maxlen = 0;
-    for (row=0; row<=mat->end_row-mat->beg_row; row++)
-    {
-        i = mat->lens[row];
-        maxlen = (i > maxlen ? i : maxlen);
-    }
-#endif
 
     /* Create hash table and array of local indices */
     hash = HashCreate(4*maxlen+1);
@@ -668,7 +699,7 @@ static void ComputeValues(StoredRows *stored_rows, Matrix *mat)
 #endif
 
     /* Compute values for row "row" of approximate inverse */
-    for (row=mat->beg_row; row<=mat->end_row; row++)
+    for (row=local_beg_row; row<=mat->end_row; row++)
     {
         MatrixGetRow(mat, row, &len, &ind, &val);
 
@@ -854,6 +885,7 @@ void ParaSailsDestroy(ParaSails *ps)
 void ParaSailsSetupPattern(ParaSails *ps, double thresh, int num_levels)
 {
     int mype;
+    double cost;
     double time0, time1;
 
     MPI_Comm_rank(ps->A->comm, &mype);
@@ -887,11 +919,13 @@ void ParaSailsSetupPattern(ParaSails *ps, double thresh, int num_levels)
     /* set structure in approx inverse */
     time0 = MPI_Wtime();
     ConstructPatternForEachRow(ps->pruned_rows, ps->num_levels, ps->M,
-	&ps->num_replies);
+	&ps->num_replies, &cost); /* returned num_replies is no longer used */
     time1 = MPI_Wtime();
 #ifdef PARASAILS_TIME
     printf("%d: Time cons patt each for each row: %f\n", mype, time1-time0);
 #endif
+
+    ps->load_bal = LoadBalDonate(ps->A->comm, ps->M, cost, 0.9);
 }
 
 /*--------------------------------------------------------------------------
@@ -905,6 +939,7 @@ void ParaSailsSetupPattern(ParaSails *ps, double thresh, int num_levels)
 void ParaSailsSetupValues(ParaSails *ps, Matrix *A)
 {
     int mype;
+    int i;
     double time0, time1;
 
     MPI_Comm_rank(A->comm, &mype);
@@ -920,18 +955,27 @@ void ParaSailsSetupValues(ParaSails *ps, Matrix *A)
 #endif
 
     time0 = MPI_Wtime();
-    ExchangeStoredRows(ps->A->comm, A, ps->M, ps->stored_rows, ps->num_replies);
+    ExchangeStoredRows(ps->A->comm, A, ps->M, ps->stored_rows, ps->load_bal);
     time1 = MPI_Wtime();
 #ifdef PARASAILS_TIME
     printf("%d: Time for exchanging rows: %f\n", mype, time1-time0);
 #endif
 
     time0 = MPI_Wtime();
-    ComputeValues(ps->stored_rows, ps->M);
+    ComputeValues(ps->stored_rows, ps->M, ps->load_bal->beg_row);
+
+    for (i=0; i<ps->load_bal->num_taken; i++)
+    {
+        ComputeValues(ps->stored_rows, ps->load_bal->recip_data[i].mat,
+	    ps->load_bal->recip_data[i].mat->beg_row);
+    }
     time1 = MPI_Wtime();
 #ifdef PARASAILS_TIME
-    printf("%d: Time for computing values: %f\n", mype, time1-time0);
+    printf("%d: Total Time for computing values: %f\n", mype, time1-time0);
 #endif
+
+/* load bal affects code in ExchangeStoredRows and ComputeValues */
+    LoadBalReturn(ps->load_bal, ps->A->comm, ps->M);
 }
 
 /*--------------------------------------------------------------------------

@@ -69,6 +69,41 @@ Matrix *MatrixCreate(MPI_Comm comm, int beg_row, int end_row)
 }
 
 /*--------------------------------------------------------------------------
+ * MatrixCreateLocal - Return (a pointer to) a matrix object.
+ * The matrix created by this call is a local matrix, not a global matrix.
+ *--------------------------------------------------------------------------*/
+
+Matrix *MatrixCreateLocal(int beg_row, int end_row)
+{
+    int num_rows;
+
+    Matrix *mat = (Matrix *) malloc(sizeof(Matrix));
+
+    mat->comm = NULL;
+
+    mat->beg_row = beg_row;
+    mat->end_row = end_row;
+
+    mat->mem = (Mem *) MemCreate();
+
+    num_rows = mat->end_row - mat->beg_row + 1;
+
+    mat->lens = (int *)     MemAlloc(mat->mem, num_rows * sizeof(int));
+    mat->inds = (int **)    MemAlloc(mat->mem, num_rows * sizeof(int *));
+    mat->vals = (double **) MemAlloc(mat->mem, num_rows * sizeof(double *));
+
+    /* Send beg_row and end_row to all processors */
+    /* This is needed in order to map row numbers to processors */
+
+    mat->beg_rows = NULL;
+    mat->end_rows = NULL;
+
+    mat->matvec_setup = 0;
+
+    return mat;
+}
+
+/*--------------------------------------------------------------------------
  * MatrixDestroy - Destroy a matrix object "mat".
  *--------------------------------------------------------------------------*/
 
@@ -104,7 +139,7 @@ void MatrixSetRow(Matrix *mat, int row, int len, int *ind, double *val)
 }
 
 /*--------------------------------------------------------------------------
- * MatrixSetRow - Get a *local* row in a matrix.  
+ * MatrixGetRow - Get a *local* row in a matrix.  
  *--------------------------------------------------------------------------*/
 
 void MatrixGetRow(Matrix *mat, int row, int *lenp, int **indp, double **valp)
