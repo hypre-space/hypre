@@ -17,22 +17,22 @@ install:all
 CC = @CC@
 CXX = @CXX@
 
-CFLAGS = \
-  -I../fei-isis
+CFLAGS =\
+ @MPIINCLUDE@\
+ -I../fei-isis
 
-CXXFLAGS = \
-  -I../fei-isis
-
+CXXFLAGS =\
+ @MPIINCLUDE@\
+ -I../fei-isis
 
 HEADERS =\
  CommInfo.h\
  GlobalIDArray.h\
  IntArray.h\
  Map.h\
- Matrix.\
+ Matrix.h\
  RealArray.h\
- Vector.h\
- mpiuni.h
+ Vector.h
  
 HYPREFILES =\
  CommInfo.cc\
@@ -41,8 +41,7 @@ HYPREFILES =\
  Map.cc\
  Matrix.cc\
  RealArray.cc\
- Vector.cc\
- mpiuni.c
+ Vector.cc
 
 LOCALFILES =
 
@@ -59,11 +58,17 @@ ${OBJS}: ${HEADERS}
 # Main rules
 ##################################################################
 
-lib: $(PROTOS) ${OBJS}
+lib: ${OBJS}
 	@echo  "Building $@ ... "
 	@echo  "Building ${OBJS} ... "
-	@ar -rcu libHYPRE_FEI_needed.a ${OBJS}
-	@ranlib libHYPRE_FEI_needed.a 
+	@ar -rcu libHYPRE_FEI_isismv.a ${OBJS}
+	@ranlib libHYPRE_FEI_isismv.a 
+
+clean:
+	@rm -rf *.o ti_files
+
+veryclean: clean
+	@rm -f libHYPRE_*.a
 
 ##################################################################
 # Generic rules
