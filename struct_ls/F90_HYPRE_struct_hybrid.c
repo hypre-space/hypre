@@ -208,6 +208,20 @@ hypre_F90_IFACE(hypre_structhybridsetlogging, HYPRE_STRUCTHYBRIDSETLOGGING)( lon
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_StructHybridSetPrintLevel
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_structhybridsetprintlevel, HYPRE_STRUCTHYBRIDSETPRINTLEVEL)( long int *solver,
+                                               int      *print_level,
+                                               int      *ierr    )
+{
+   *ierr = (int)
+      ( HYPRE_StructHybridSetPrintLevel(
+         (HYPRE_StructSolver) *solver,
+         (int)                *print_level  ) );
+}
+/*--------------------------------------------------------------------------
  * HYPRE_StructHybridGetNumIterations
  *--------------------------------------------------------------------------*/
 

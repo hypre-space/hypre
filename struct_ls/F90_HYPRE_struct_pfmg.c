@@ -206,6 +206,20 @@ hypre_F90_IFACE(hypre_structpfmgsetlogging, HYPRE_STRUCTPFMGSETLOGGING)( long in
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_StructPFMGSetPrintLevel
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_structpfmgsetprintlevel, HYPRE_STRUCTPFMGSETPRINTLEVEL)( long int *solver,
+                                             int      *print_level,
+                                             int      *ierr    )
+{
+   *ierr = (int)
+      ( HYPRE_StructPFMGSetPrintLevel( (HYPRE_StructSolver) *solver,
+                                        (int)             *print_level ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_StructPFMGGetNumIterations
  *--------------------------------------------------------------------------*/
 
