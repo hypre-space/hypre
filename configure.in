@@ -803,6 +803,7 @@ CASC_CONFIG_OUTPUT_LIST(\
  PETScMat_linear_solvers/pilut\
  PETSc_linear_solvers/ParILUT\
  distributed_linear_solvers/pilut\
+ distributed_linear_solvers/ParaSAILS\
  distributed_matrix\
  matrix_matrix\
  bmakes\
