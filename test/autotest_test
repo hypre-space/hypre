@@ -253,7 +253,7 @@ then
     if [ $NoFeiOpt -ne $Skip ]
     then
       makeit "nofei" $MessageStr "$HYPRE_FEI_EMAIL"
-      cd $HYPRE _AUTOTEST_DIR/${SRC}/test
+      cd ${HYPRE_AUTOTEST_DIR}/${SRC}/test
       makeit "fei++" $MessageStr "$HYPRE_FEI_EMAIL"
     fi
     if test ! "${HYPRE_RUN_MACHINE}"
