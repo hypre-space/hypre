@@ -253,9 +253,9 @@ c    &      A_storage, ierr)
 
 c        call HYPRE_ParCSRMatrixInitialize(A_storage, ierr)
 
-         call GenerateLaplacian(MPI_COMM_WORLD, nx, ny, nz,
-     &                          Px, Py, Pz, p, q, r, values,
-     &                          A_storage, ierr)
+         call HYPRE_GenerateLaplacian(MPI_COMM_WORLD, nx, ny, nz,
+     &                                Px, Py, Pz, p, q, r, values,
+     &                                A_storage, ierr)
       else
          call HYPRE_ParCSRMatrixRead(MPI_COMM_WORLD, A_storage,
      &                               matfile, ierr)
