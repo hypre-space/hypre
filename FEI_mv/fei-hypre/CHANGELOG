@@ -90,4 +90,7 @@
 01/08/02    2.0.1R12
             - add functions to directly transfer element information from FEI
             - fix a bug in mli_fedata.C
+03/18/02    2.0.1R13
+            - debug the schurReduction version 2
+            - update with respect to FEI 2.x.12
  
