@@ -294,6 +294,9 @@ int hypre_ZeroDiagonal( hypre_StructMatrix *A );
 /* pfmg_setup_interp.c */
 hypre_StructMatrix *hypre_PFMGCreateInterpOp( hypre_StructMatrix *A , hypre_StructGrid *cgrid , int cdir , int rap_type );
 int hypre_PFMGSetupInterpOp( hypre_StructMatrix *A , int cdir , hypre_Index findex , hypre_Index stride , hypre_StructMatrix *P , int rap_type );
+int hypre_PFMGSetupInterpOp_CC0( int i , hypre_StructMatrix *A , hypre_Box *A_dbox , int cdir , hypre_Index stride , hypre_Index stridec , hypre_Index start , hypre_IndexRef startc , hypre_Index loop_size , hypre_Box *P_dbox , int Pstenc0 , int Pstenc1 , double *Pp0 , double *Pp1 , int rap_type , int si0 , int si1 );
+int hypre_PFMGSetupInterpOp_CC1( int i , hypre_StructMatrix *A , hypre_Box *A_dbox , int cdir , hypre_Index stride , hypre_Index stridec , hypre_Index start , hypre_IndexRef startc , hypre_Index loop_size , hypre_Box *P_dbox , int Pstenc0 , int Pstenc1 , double *Pp0 , double *Pp1 , int rap_type , int si0 , int si1 );
+int hypre_PFMGSetupInterpOp_CC2( int i , hypre_StructMatrix *A , hypre_Box *A_dbox , int cdir , hypre_Index stride , hypre_Index stridec , hypre_Index start , hypre_IndexRef startc , hypre_Index loop_size , hypre_Box *P_dbox , int Pstenc0 , int Pstenc1 , double *Pp0 , double *Pp1 , int rap_type , int si0 , int si1 );
 
 /* pfmg_setup_rap5.c */
 hypre_StructMatrix *hypre_PFMGCreateCoarseOp5( hypre_StructMatrix *R , hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructGrid *coarse_grid , int cdir );
