@@ -201,9 +201,13 @@ f77_struct_LDADD = \
 # ij_b
 ij_b_SOURCES = ij_b.c
 ij_b_CPPFLAGS = $(AM_CPPFLAGS)
-ij_b_LDADD = \
- @BABELLIBFLAGS@\
- $(ij_libraries)
+ij_b_libraries = \
+ $(ij_libraries)\
+ -lbHYPREClient-C\
+ -lbHYPREClient-F\
+ -lbHYPRE\
+ -lsidl
+ij_b_LDADD = $(ij_b_libraries)
 #ij_b_LDFLAGS = -static
 ij_b_dependencies = \
  $(ij_dependencies)\
@@ -216,15 +220,18 @@ ij_b_dependencies = \
 f77_ij_b_SOURCES = f77_ij_b.f
 f77_ij_b_FFLAGS = $(AM_FFLAGS)
 f77_ij_b_LDADD = \
- @BABELLIBFLAGS@\
- $(ij_libraries)\
+ $(ij_b_libraries)\
  @FLIBS@
 #f77_ij_b_LDFLAGS = -static
 
 # struct_b
 #EXTRA_struct_b_SOURCES = struct_b.c
 #struct_b_CPPFLAGS = $(AM_CPPFLAGS)
-#struct_b_LDADD = $(struct_libraries)
+#struct_b_LDADD = $(struct_libraries)\
+# -lbHYPREClient-C\
+# -lbHYPREClient-F\
+# -lbHYPRE\
+# -lsidl
 ##struct_b_LDFLAGS = -static
 #struct_b_dependencies = \
 #$(struct_dependencies)\
@@ -246,6 +253,10 @@ f77_ij_b_LDADD = \
 #f77_struct_b_FFLAGS = $(AM_FFLAGS)
 #f77_struct_b_LDADD = \
 # $(struct_libraries)\
+# -lbHYPREClient-C\
+# -lbHYPREClient-F\
+# -lbHYPRE\
+# -lsidl\
 # @FLIBS@
 ##f77_struct_b_LDFLAGS = -static
 
@@ -277,11 +288,13 @@ nodist_struct_C___SOURCES = struct.C++.cxx
 struct_C___CXXFLAGS = $(AM_CXXFLAGS)
 struct_C___LDADD = $(struct_libraries)
 
-all: ij$(EXEEXT) ij_mv$(EXEEXT) new_ij$(EXEEXT) struct$(EXEEXT) sstruct$(EXEEXT)
+all-local: ij$(EXEEXT) ij_mv$(EXEEXT) new_ij$(EXEEXT) \
+		struct$(EXEEXT) sstruct$(EXEEXT)
 
 fei++: fei$(EXEEXT)
 
-all++: ij.C++$(EXEEXT) ij_mv.C++$(EXEEXT) struct.C++$(EXEEXT) sstruct.C++$(EXEEXT)
+all++: ij.C++$(EXEEXT) ij_mv.C++$(EXEEXT) \
+		struct.C++$(EXEEXT) sstruct.C++$(EXEEXT)
 
 all77: f77_ij$(EXEEXT) f77_ij_mv$(EXEEXT) f77_struct$(EXEEXT)
 
@@ -322,7 +335,7 @@ struct.C++.cxx:
 
 clean-local:
 	@ \
-	for i in $(EXTRA_PROGRAMS) *.C++* driver.out.* ; \
+	for i in $(EXTRA_PROGRAMS) *.C++* driver.out.* test.* ; \
 	do \
 	  if [ -e $$i ] ; \
 	  then \

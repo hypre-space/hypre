@@ -15,7 +15,8 @@
 @SET_MAKE@
 
 
-SOURCES = $(libbHYPRE_la_SOURCES)
+
+SOURCES = $(libbHYPRE_a_SOURCES) $(libbHYPRE_la_SOURCES)
 
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
@@ -51,11 +52,214 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/HYPRE_config.h
 CONFIG_CLEAN_FILES =
-am__installdirs = $(DESTDIR)$(libdir) $(DESTDIR)$(includedir)
+ARFLAGS = cru
+am__installdirs = $(DESTDIR)$(libdir) $(DESTDIR)$(libdir) $(DESTDIR)$(includedir)
+libLIBRARIES_INSTALL = $(INSTALL_DATA)
+LIBRARIES = $(lib_LIBRARIES)
+libbHYPRE_a_AR = $(AR) $(ARFLAGS)
+libbHYPRE_a_LIBADD =
+am__libbHYPRE_a_SOURCES_DIST = bHYPRE_BoomerAMG_Impl.c \
+	bHYPRE_GMRES_Impl.c bHYPRE_IJParCSRMatrix_Impl.c \
+	bHYPRE_IJParCSRVector_Impl.c bHYPRE_PCG_Impl.c \
+	bHYPRE_ParCSRDiagScale_Impl.c bHYPRE_Pilut_Impl.c \
+	bHYPRE_SStructGraph_Impl.c bHYPRE_SStructGrid_Impl.c \
+	bHYPRE_SStructMatrix_Impl.c bHYPRE_SStructParCSRMatrix_Impl.c \
+	bHYPRE_SStructParCSRVector_Impl.c bHYPRE_SStructStencil_Impl.c \
+	bHYPRE_SStructVector_Impl.c bHYPRE_StructGrid_Impl.c \
+	bHYPRE_StructMatrix_Impl.c bHYPRE_StructStencil_Impl.c \
+	bHYPRE_StructVector_Impl.c bHYPRE_BoomerAMG_IOR.c \
+	bHYPRE_CoefficientAccess_IOR.c bHYPRE_GMRES_IOR.c \
+	bHYPRE_IJBuildMatrix_IOR.c bHYPRE_IJBuildVector_IOR.c \
+	bHYPRE_IJParCSRMatrix_IOR.c bHYPRE_IJParCSRVector_IOR.c \
+	bHYPRE_Operator_IOR.c bHYPRE_PCG_IOR.c \
+	bHYPRE_ParCSRDiagScale_IOR.c bHYPRE_Pilut_IOR.c \
+	bHYPRE_PreconditionedSolver_IOR.c \
+	bHYPRE_ProblemDefinition_IOR.c bHYPRE_SStructBuildMatrix_IOR.c \
+	bHYPRE_SStructBuildVector_IOR.c bHYPRE_SStructGraph_IOR.c \
+	bHYPRE_SStructGrid_IOR.c bHYPRE_SStructMatrix_IOR.c \
+	bHYPRE_SStructParCSRMatrix_IOR.c \
+	bHYPRE_SStructParCSRVector_IOR.c bHYPRE_SStructStencil_IOR.c \
+	bHYPRE_SStructVector_IOR.c bHYPRE_Solver_IOR.c \
+	bHYPRE_StructBuildMatrix_IOR.c bHYPRE_StructBuildVector_IOR.c \
+	bHYPRE_StructGrid_IOR.c bHYPRE_StructMatrix_IOR.c \
+	bHYPRE_StructStencil_IOR.c bHYPRE_StructVector_IOR.c \
+	bHYPRE_Vector_IOR.c bHYPRE_BoomerAMG_Skel.c \
+	bHYPRE_GMRES_Skel.c bHYPRE_IJParCSRMatrix_Skel.c \
+	bHYPRE_IJParCSRVector_Skel.c bHYPRE_PCG_Skel.c \
+	bHYPRE_ParCSRDiagScale_Skel.c bHYPRE_Pilut_Skel.c \
+	bHYPRE_SStructGraph_Skel.c bHYPRE_SStructGrid_Skel.c \
+	bHYPRE_SStructMatrix_Skel.c bHYPRE_SStructParCSRMatrix_Skel.c \
+	bHYPRE_SStructParCSRVector_Skel.c bHYPRE_SStructStencil_Skel.c \
+	bHYPRE_SStructVector_Skel.c bHYPRE_StructGrid_Skel.c \
+	bHYPRE_StructMatrix_Skel.c bHYPRE_StructStencil_Skel.c \
+	bHYPRE_StructVector_Skel.c bHYPRE_BoomerAMG_Stub.c \
+	bHYPRE_CoefficientAccess_Stub.c bHYPRE_GMRES_Stub.c \
+	bHYPRE_IJBuildMatrix_Stub.c bHYPRE_IJBuildVector_Stub.c \
+	bHYPRE_IJParCSRMatrix_Stub.c bHYPRE_IJParCSRVector_Stub.c \
+	bHYPRE_Operator_Stub.c bHYPRE_PCG_Stub.c \
+	bHYPRE_ParCSRDiagScale_Stub.c bHYPRE_Pilut_Stub.c \
+	bHYPRE_PreconditionedSolver_Stub.c \
+	bHYPRE_ProblemDefinition_Stub.c \
+	bHYPRE_SStructBuildMatrix_Stub.c \
+	bHYPRE_SStructBuildVector_Stub.c bHYPRE_SStructGraph_Stub.c \
+	bHYPRE_SStructGrid_Stub.c bHYPRE_SStructMatrix_Stub.c \
+	bHYPRE_SStructParCSRMatrix_Stub.c \
+	bHYPRE_SStructParCSRVector_Stub.c bHYPRE_SStructStencil_Stub.c \
+	bHYPRE_SStructVariable_Stub.c bHYPRE_SStructVector_Stub.c \
+	bHYPRE_Solver_Stub.c bHYPRE_StructBuildMatrix_Stub.c \
+	bHYPRE_StructBuildVector_Stub.c bHYPRE_StructGrid_Stub.c \
+	bHYPRE_StructMatrix_Stub.c bHYPRE_StructStencil_Stub.c \
+	bHYPRE_StructVector_Stub.c bHYPRE_Vector_Stub.c \
+	bHYPRE_Extensions.c
+am__objects_1 = bHYPRE_BoomerAMG_Impl.$(OBJEXT) \
+	bHYPRE_GMRES_Impl.$(OBJEXT) \
+	bHYPRE_IJParCSRMatrix_Impl.$(OBJEXT) \
+	bHYPRE_IJParCSRVector_Impl.$(OBJEXT) bHYPRE_PCG_Impl.$(OBJEXT) \
+	bHYPRE_ParCSRDiagScale_Impl.$(OBJEXT) \
+	bHYPRE_Pilut_Impl.$(OBJEXT) bHYPRE_SStructGraph_Impl.$(OBJEXT) \
+	bHYPRE_SStructGrid_Impl.$(OBJEXT) \
+	bHYPRE_SStructMatrix_Impl.$(OBJEXT) \
+	bHYPRE_SStructParCSRMatrix_Impl.$(OBJEXT) \
+	bHYPRE_SStructParCSRVector_Impl.$(OBJEXT) \
+	bHYPRE_SStructStencil_Impl.$(OBJEXT) \
+	bHYPRE_SStructVector_Impl.$(OBJEXT) \
+	bHYPRE_StructGrid_Impl.$(OBJEXT) \
+	bHYPRE_StructMatrix_Impl.$(OBJEXT) \
+	bHYPRE_StructStencil_Impl.$(OBJEXT) \
+	bHYPRE_StructVector_Impl.$(OBJEXT)
+am__objects_2 = bHYPRE_BoomerAMG_IOR.$(OBJEXT) \
+	bHYPRE_CoefficientAccess_IOR.$(OBJEXT) \
+	bHYPRE_GMRES_IOR.$(OBJEXT) bHYPRE_IJBuildMatrix_IOR.$(OBJEXT) \
+	bHYPRE_IJBuildVector_IOR.$(OBJEXT) \
+	bHYPRE_IJParCSRMatrix_IOR.$(OBJEXT) \
+	bHYPRE_IJParCSRVector_IOR.$(OBJEXT) \
+	bHYPRE_Operator_IOR.$(OBJEXT) bHYPRE_PCG_IOR.$(OBJEXT) \
+	bHYPRE_ParCSRDiagScale_IOR.$(OBJEXT) \
+	bHYPRE_Pilut_IOR.$(OBJEXT) \
+	bHYPRE_PreconditionedSolver_IOR.$(OBJEXT) \
+	bHYPRE_ProblemDefinition_IOR.$(OBJEXT) \
+	bHYPRE_SStructBuildMatrix_IOR.$(OBJEXT) \
+	bHYPRE_SStructBuildVector_IOR.$(OBJEXT) \
+	bHYPRE_SStructGraph_IOR.$(OBJEXT) \
+	bHYPRE_SStructGrid_IOR.$(OBJEXT) \
+	bHYPRE_SStructMatrix_IOR.$(OBJEXT) \
+	bHYPRE_SStructParCSRMatrix_IOR.$(OBJEXT) \
+	bHYPRE_SStructParCSRVector_IOR.$(OBJEXT) \
+	bHYPRE_SStructStencil_IOR.$(OBJEXT) \
+	bHYPRE_SStructVector_IOR.$(OBJEXT) bHYPRE_Solver_IOR.$(OBJEXT) \
+	bHYPRE_StructBuildMatrix_IOR.$(OBJEXT) \
+	bHYPRE_StructBuildVector_IOR.$(OBJEXT) \
+	bHYPRE_StructGrid_IOR.$(OBJEXT) \
+	bHYPRE_StructMatrix_IOR.$(OBJEXT) \
+	bHYPRE_StructStencil_IOR.$(OBJEXT) \
+	bHYPRE_StructVector_IOR.$(OBJEXT) bHYPRE_Vector_IOR.$(OBJEXT)
+am__objects_3 = bHYPRE_BoomerAMG_Skel.$(OBJEXT) \
+	bHYPRE_GMRES_Skel.$(OBJEXT) \
+	bHYPRE_IJParCSRMatrix_Skel.$(OBJEXT) \
+	bHYPRE_IJParCSRVector_Skel.$(OBJEXT) bHYPRE_PCG_Skel.$(OBJEXT) \
+	bHYPRE_ParCSRDiagScale_Skel.$(OBJEXT) \
+	bHYPRE_Pilut_Skel.$(OBJEXT) bHYPRE_SStructGraph_Skel.$(OBJEXT) \
+	bHYPRE_SStructGrid_Skel.$(OBJEXT) \
+	bHYPRE_SStructMatrix_Skel.$(OBJEXT) \
+	bHYPRE_SStructParCSRMatrix_Skel.$(OBJEXT) \
+	bHYPRE_SStructParCSRVector_Skel.$(OBJEXT) \
+	bHYPRE_SStructStencil_Skel.$(OBJEXT) \
+	bHYPRE_SStructVector_Skel.$(OBJEXT) \
+	bHYPRE_StructGrid_Skel.$(OBJEXT) \
+	bHYPRE_StructMatrix_Skel.$(OBJEXT) \
+	bHYPRE_StructStencil_Skel.$(OBJEXT) \
+	bHYPRE_StructVector_Skel.$(OBJEXT)
+am__objects_4 = bHYPRE_BoomerAMG_Stub.$(OBJEXT) \
+	bHYPRE_CoefficientAccess_Stub.$(OBJEXT) \
+	bHYPRE_GMRES_Stub.$(OBJEXT) \
+	bHYPRE_IJBuildMatrix_Stub.$(OBJEXT) \
+	bHYPRE_IJBuildVector_Stub.$(OBJEXT) \
+	bHYPRE_IJParCSRMatrix_Stub.$(OBJEXT) \
+	bHYPRE_IJParCSRVector_Stub.$(OBJEXT) \
+	bHYPRE_Operator_Stub.$(OBJEXT) bHYPRE_PCG_Stub.$(OBJEXT) \
+	bHYPRE_ParCSRDiagScale_Stub.$(OBJEXT) \
+	bHYPRE_Pilut_Stub.$(OBJEXT) \
+	bHYPRE_PreconditionedSolver_Stub.$(OBJEXT) \
+	bHYPRE_ProblemDefinition_Stub.$(OBJEXT) \
+	bHYPRE_SStructBuildMatrix_Stub.$(OBJEXT) \
+	bHYPRE_SStructBuildVector_Stub.$(OBJEXT) \
+	bHYPRE_SStructGraph_Stub.$(OBJEXT) \
+	bHYPRE_SStructGrid_Stub.$(OBJEXT) \
+	bHYPRE_SStructMatrix_Stub.$(OBJEXT) \
+	bHYPRE_SStructParCSRMatrix_Stub.$(OBJEXT) \
+	bHYPRE_SStructParCSRVector_Stub.$(OBJEXT) \
+	bHYPRE_SStructStencil_Stub.$(OBJEXT) \
+	bHYPRE_SStructVariable_Stub.$(OBJEXT) \
+	bHYPRE_SStructVector_Stub.$(OBJEXT) \
+	bHYPRE_Solver_Stub.$(OBJEXT) \
+	bHYPRE_StructBuildMatrix_Stub.$(OBJEXT) \
+	bHYPRE_StructBuildVector_Stub.$(OBJEXT) \
+	bHYPRE_StructGrid_Stub.$(OBJEXT) \
+	bHYPRE_StructMatrix_Stub.$(OBJEXT) \
+	bHYPRE_StructStencil_Stub.$(OBJEXT) \
+	bHYPRE_StructVector_Stub.$(OBJEXT) \
+	bHYPRE_Vector_Stub.$(OBJEXT)
+am__objects_5 = $(am__objects_1) $(am__objects_2) $(am__objects_3) \
+	$(am__objects_4) bHYPRE_Extensions.$(OBJEXT)
+@STATICONLY_TRUE@am_libbHYPRE_a_OBJECTS = $(am__objects_5)
+libbHYPRE_a_OBJECTS = $(am_libbHYPRE_a_OBJECTS)
 libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libbHYPRE_la_LIBADD =
-am__objects_1 = bHYPRE_BoomerAMG_Impl.lo bHYPRE_GMRES_Impl.lo \
+am__libbHYPRE_la_SOURCES_DIST = bHYPRE_BoomerAMG_Impl.c \
+	bHYPRE_GMRES_Impl.c bHYPRE_IJParCSRMatrix_Impl.c \
+	bHYPRE_IJParCSRVector_Impl.c bHYPRE_PCG_Impl.c \
+	bHYPRE_ParCSRDiagScale_Impl.c bHYPRE_Pilut_Impl.c \
+	bHYPRE_SStructGraph_Impl.c bHYPRE_SStructGrid_Impl.c \
+	bHYPRE_SStructMatrix_Impl.c bHYPRE_SStructParCSRMatrix_Impl.c \
+	bHYPRE_SStructParCSRVector_Impl.c bHYPRE_SStructStencil_Impl.c \
+	bHYPRE_SStructVector_Impl.c bHYPRE_StructGrid_Impl.c \
+	bHYPRE_StructMatrix_Impl.c bHYPRE_StructStencil_Impl.c \
+	bHYPRE_StructVector_Impl.c bHYPRE_BoomerAMG_IOR.c \
+	bHYPRE_CoefficientAccess_IOR.c bHYPRE_GMRES_IOR.c \
+	bHYPRE_IJBuildMatrix_IOR.c bHYPRE_IJBuildVector_IOR.c \
+	bHYPRE_IJParCSRMatrix_IOR.c bHYPRE_IJParCSRVector_IOR.c \
+	bHYPRE_Operator_IOR.c bHYPRE_PCG_IOR.c \
+	bHYPRE_ParCSRDiagScale_IOR.c bHYPRE_Pilut_IOR.c \
+	bHYPRE_PreconditionedSolver_IOR.c \
+	bHYPRE_ProblemDefinition_IOR.c bHYPRE_SStructBuildMatrix_IOR.c \
+	bHYPRE_SStructBuildVector_IOR.c bHYPRE_SStructGraph_IOR.c \
+	bHYPRE_SStructGrid_IOR.c bHYPRE_SStructMatrix_IOR.c \
+	bHYPRE_SStructParCSRMatrix_IOR.c \
+	bHYPRE_SStructParCSRVector_IOR.c bHYPRE_SStructStencil_IOR.c \
+	bHYPRE_SStructVector_IOR.c bHYPRE_Solver_IOR.c \
+	bHYPRE_StructBuildMatrix_IOR.c bHYPRE_StructBuildVector_IOR.c \
+	bHYPRE_StructGrid_IOR.c bHYPRE_StructMatrix_IOR.c \
+	bHYPRE_StructStencil_IOR.c bHYPRE_StructVector_IOR.c \
+	bHYPRE_Vector_IOR.c bHYPRE_BoomerAMG_Skel.c \
+	bHYPRE_GMRES_Skel.c bHYPRE_IJParCSRMatrix_Skel.c \
+	bHYPRE_IJParCSRVector_Skel.c bHYPRE_PCG_Skel.c \
+	bHYPRE_ParCSRDiagScale_Skel.c bHYPRE_Pilut_Skel.c \
+	bHYPRE_SStructGraph_Skel.c bHYPRE_SStructGrid_Skel.c \
+	bHYPRE_SStructMatrix_Skel.c bHYPRE_SStructParCSRMatrix_Skel.c \
+	bHYPRE_SStructParCSRVector_Skel.c bHYPRE_SStructStencil_Skel.c \
+	bHYPRE_SStructVector_Skel.c bHYPRE_StructGrid_Skel.c \
+	bHYPRE_StructMatrix_Skel.c bHYPRE_StructStencil_Skel.c \
+	bHYPRE_StructVector_Skel.c bHYPRE_BoomerAMG_Stub.c \
+	bHYPRE_CoefficientAccess_Stub.c bHYPRE_GMRES_Stub.c \
+	bHYPRE_IJBuildMatrix_Stub.c bHYPRE_IJBuildVector_Stub.c \
+	bHYPRE_IJParCSRMatrix_Stub.c bHYPRE_IJParCSRVector_Stub.c \
+	bHYPRE_Operator_Stub.c bHYPRE_PCG_Stub.c \
+	bHYPRE_ParCSRDiagScale_Stub.c bHYPRE_Pilut_Stub.c \
+	bHYPRE_PreconditionedSolver_Stub.c \
+	bHYPRE_ProblemDefinition_Stub.c \
+	bHYPRE_SStructBuildMatrix_Stub.c \
+	bHYPRE_SStructBuildVector_Stub.c bHYPRE_SStructGraph_Stub.c \
+	bHYPRE_SStructGrid_Stub.c bHYPRE_SStructMatrix_Stub.c \
+	bHYPRE_SStructParCSRMatrix_Stub.c \
+	bHYPRE_SStructParCSRVector_Stub.c bHYPRE_SStructStencil_Stub.c \
+	bHYPRE_SStructVariable_Stub.c bHYPRE_SStructVector_Stub.c \
+	bHYPRE_Solver_Stub.c bHYPRE_StructBuildMatrix_Stub.c \
+	bHYPRE_StructBuildVector_Stub.c bHYPRE_StructGrid_Stub.c \
+	bHYPRE_StructMatrix_Stub.c bHYPRE_StructStencil_Stub.c \
+	bHYPRE_StructVector_Stub.c bHYPRE_Vector_Stub.c \
+	bHYPRE_Extensions.c
+am__objects_6 = bHYPRE_BoomerAMG_Impl.lo bHYPRE_GMRES_Impl.lo \
 	bHYPRE_IJParCSRMatrix_Impl.lo bHYPRE_IJParCSRVector_Impl.lo \
 	bHYPRE_PCG_Impl.lo bHYPRE_ParCSRDiagScale_Impl.lo \
 	bHYPRE_Pilut_Impl.lo bHYPRE_SStructGraph_Impl.lo \
@@ -65,7 +269,7 @@ am__objects_1 = bHYPRE_BoomerAMG_Impl.lo bHYPRE_GMRES_Impl.lo \
 	bHYPRE_SStructStencil_Impl.lo bHYPRE_SStructVector_Impl.lo \
 	bHYPRE_StructGrid_Impl.lo bHYPRE_StructMatrix_Impl.lo \
 	bHYPRE_StructStencil_Impl.lo bHYPRE_StructVector_Impl.lo
-am__objects_2 = bHYPRE_BoomerAMG_IOR.lo \
+am__objects_7 = bHYPRE_BoomerAMG_IOR.lo \
 	bHYPRE_CoefficientAccess_IOR.lo bHYPRE_GMRES_IOR.lo \
 	bHYPRE_IJBuildMatrix_IOR.lo bHYPRE_IJBuildVector_IOR.lo \
 	bHYPRE_IJParCSRMatrix_IOR.lo bHYPRE_IJParCSRVector_IOR.lo \
@@ -83,7 +287,7 @@ am__objects_2 = bHYPRE_BoomerAMG_IOR.lo \
 	bHYPRE_StructBuildVector_IOR.lo bHYPRE_StructGrid_IOR.lo \
 	bHYPRE_StructMatrix_IOR.lo bHYPRE_StructStencil_IOR.lo \
 	bHYPRE_StructVector_IOR.lo bHYPRE_Vector_IOR.lo
-am__objects_3 = bHYPRE_BoomerAMG_Skel.lo bHYPRE_GMRES_Skel.lo \
+am__objects_8 = bHYPRE_BoomerAMG_Skel.lo bHYPRE_GMRES_Skel.lo \
 	bHYPRE_IJParCSRMatrix_Skel.lo bHYPRE_IJParCSRVector_Skel.lo \
 	bHYPRE_PCG_Skel.lo bHYPRE_ParCSRDiagScale_Skel.lo \
 	bHYPRE_Pilut_Skel.lo bHYPRE_SStructGraph_Skel.lo \
@@ -93,7 +297,7 @@ am__objects_3 = bHYPRE_BoomerAMG_Skel.lo bHYPRE_GMRES_Skel.lo \
 	bHYPRE_SStructStencil_Skel.lo bHYPRE_SStructVector_Skel.lo \
 	bHYPRE_StructGrid_Skel.lo bHYPRE_StructMatrix_Skel.lo \
 	bHYPRE_StructStencil_Skel.lo bHYPRE_StructVector_Skel.lo
-am__objects_4 = bHYPRE_BoomerAMG_Stub.lo \
+am__objects_9 = bHYPRE_BoomerAMG_Stub.lo \
 	bHYPRE_CoefficientAccess_Stub.lo bHYPRE_GMRES_Stub.lo \
 	bHYPRE_IJBuildMatrix_Stub.lo bHYPRE_IJBuildVector_Stub.lo \
 	bHYPRE_IJParCSRMatrix_Stub.lo bHYPRE_IJParCSRVector_Stub.lo \
@@ -112,9 +316,9 @@ am__objects_4 = bHYPRE_BoomerAMG_Stub.lo \
 	bHYPRE_StructBuildVector_Stub.lo bHYPRE_StructGrid_Stub.lo \
 	bHYPRE_StructMatrix_Stub.lo bHYPRE_StructStencil_Stub.lo \
 	bHYPRE_StructVector_Stub.lo bHYPRE_Vector_Stub.lo
-am__objects_5 = $(am__objects_1) $(am__objects_2) $(am__objects_3) \
-	$(am__objects_4) bHYPRE_Extensions.lo
-am_libbHYPRE_la_OBJECTS = $(am__objects_5)
+am__objects_10 = $(am__objects_6) $(am__objects_7) $(am__objects_8) \
+	$(am__objects_9) bHYPRE_Extensions.lo
+@STATICONLY_FALSE@am_libbHYPRE_la_OBJECTS = $(am__objects_10)
 libbHYPRE_la_OBJECTS = $(am_libbHYPRE_la_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp =
@@ -126,8 +330,9 @@ LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) \
 	$(AM_CFLAGS) $(CFLAGS)
 LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = $(libbHYPRE_la_SOURCES)
-DIST_SOURCES = $(libbHYPRE_la_SOURCES)
+SOURCES = $(libbHYPRE_a_SOURCES) $(libbHYPRE_la_SOURCES)
+DIST_SOURCES = $(am__libbHYPRE_a_SOURCES_DIST) \
+	$(am__libbHYPRE_la_SOURCES_DIST)
 includeHEADERS_INSTALL = $(INSTALL_HEADER)
 HEADERS = $(include_HEADERS)
 ETAGS = etags
@@ -142,9 +347,6 @@ AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
 BABELDIR = @BABELDIR@
-BABELLIBFLAGS = @BABELLIBFLAGS@
-BABEL_DIR = @BABEL_DIR@
-BABEL_HYPRE_INCLUDES = @BABEL_HYPRE_INCLUDES@
 BLASLIBFLAGS = @BLASLIBFLAGS@
 BLASNEEDED_FALSE = @BLASNEEDED_FALSE@
 BLASNEEDED_TRUE = @BLASNEEDED_TRUE@
@@ -175,7 +377,6 @@ FEI_INC_DIR = @FEI_INC_DIR@
 FEI_LIB_DIR = @FEI_LIB_DIR@
 FFLAGS = @FFLAGS@
 FLIBS = @FLIBS@
-HYPRE_BABELLIBDIR = @HYPRE_BABELLIBDIR@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
@@ -239,7 +440,6 @@ ac_ct_OBJDUMP = @ac_ct_OBJDUMP@
 ac_ct_RANLIB = @ac_ct_RANLIB@
 ac_ct_STRIP = @ac_ct_STRIP@
 am__leading_dot = @am__leading_dot@
-babeldir = @babeldir@
 bindir = @bindir@
 build = @build@
 build_alias = @build_alias@
@@ -269,27 +469,6 @@ sharedstatedir = @sharedstatedir@
 subdirs = @subdirs@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
-lib_LTLIBRARIES = libbHYPRE.la
-libbHYPRE_la_SOURCES = $(FILES)
-OBJECTS = libbHYPRE_la_OBJECTS
-libbHYPRE_la_LDFLAGS = -avoid-version
-C_COMPILE_FLAGS = @CFLAGS@
-# new configure won't fill in: CINCLUDES=@INCLUDES@ @MPIINCLUDE@ @BABEL_HYPRE_INCLUDES@
-CINCLUDES = -I$(includedir)
-BABEL_RUNTIME_INCLUDES = -I$(top_builddir)/babel-runtime/sidl
-AM_CPPFLAGS = \
- ${C_COMPILE_FLAGS}\
- -I$(top_srcdir)/utilities\
- -I$(top_srcdir)/krylov\
- -I$(top_srcdir)/IJ_mv\
- -I$(top_srcdir)/parcsr_mv\
- -I$(top_srcdir)/parcsr_ls\
- -I$(top_srcdir)/seq_mv\
- ${BABEL_RUNTIME_INCLUDES}\
- ${CINCLUDES}\
- ${CDEFS}
-
-EXTRA_DIST = 
 IMPLHDRS = bHYPRE_BoomerAMG_Impl.h bHYPRE_GMRES_Impl.h                        \
   bHYPRE_IJParCSRMatrix_Impl.h bHYPRE_IJParCSRVector_Impl.h bHYPRE_PCG_Impl.h \
   bHYPRE_ParCSRDiagScale_Impl.h bHYPRE_Pilut_Impl.h                           \
@@ -378,6 +557,28 @@ STUBSRCS = bHYPRE_BoomerAMG_Stub.c bHYPRE_CoefficientAccess_Stub.c            \
   bHYPRE_StructGrid_Stub.c bHYPRE_StructMatrix_Stub.c                         \
   bHYPRE_StructStencil_Stub.c bHYPRE_StructVector_Stub.c bHYPRE_Vector_Stub.c
 
+@STATICONLY_TRUE@lib_LIBRARIES = libbHYPRE.a
+@STATICONLY_TRUE@libbHYPRE_a_SOURCES = $(FILES)
+@STATICONLY_FALSE@OBJECTS = libbHYPRE_la_OBJECTS
+@STATICONLY_TRUE@OBJECTS = libbHYPRE_a_OBJECTS
+@STATICONLY_FALSE@lib_LTLIBRARIES = libbHYPRE.la
+@STATICONLY_FALSE@libbHYPRE_la_SOURCES = $(FILES)
+@STATICONLY_FALSE@libbHYPRE_la_LDFLAGS = -avoid-version
+BABEL_RUNTIME_INCLUDES = \
+ -I$(top_srcdir)/babel-runtime/sidl\
+ -I$(top_builddir)/babel-runtime/sidl
+
+AM_CPPFLAGS = \
+ -I$(top_srcdir)\
+ -I$(top_srcdir)/utilities\
+ -I$(top_srcdir)/krylov\
+ -I$(top_srcdir)/IJ_mv\
+ -I$(top_srcdir)/parcsr_mv\
+ -I$(top_srcdir)/parcsr_ls\
+ -I$(top_srcdir)/seq_mv\
+ ${BABEL_RUNTIME_INCLUDES}
+
+EXTRA_DIST = 
 include_HEADERS = ${STUBHDRS} ${IORHDRS} ${IMPLHDRS}
 FILES = ${IMPLSRCS} ${IORSRCS} ${SKELSRCS} ${STUBSRCS} \
  bHYPRE_Extensions.c
@@ -415,6 +616,39 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
+install-libLIBRARIES: $(lib_LIBRARIES)
+	@$(NORMAL_INSTALL)
+	$(mkdir_p) $(DESTDIR)$(libdir)
+	@list='$(lib_LIBRARIES)'; for p in $$list; do \
+	  if test -f $$p; then \
+	    f="`echo $$p | sed -e 's|^.*/||'`"; \
+	    echo " $(libLIBRARIES_INSTALL) $$p $(DESTDIR)$(libdir)/$$f"; \
+	    $(libLIBRARIES_INSTALL) $$p $(DESTDIR)$(libdir)/$$f; \
+	  else :; fi; \
+	done
+	@$(POST_INSTALL)
+	@list='$(lib_LIBRARIES)'; for p in $$list; do \
+	  if test -f $$p; then \
+	    p="`echo $$p | sed -e 's|^.*/||'`"; \
+	    echo " $(RANLIB) $(DESTDIR)$(libdir)/$$p"; \
+	    $(RANLIB) $(DESTDIR)$(libdir)/$$p; \
+	  else :; fi; \
+	done
+
+uninstall-libLIBRARIES:
+	@$(NORMAL_UNINSTALL)
+	@list='$(lib_LIBRARIES)'; for p in $$list; do \
+	  p="`echo $$p | sed -e 's|^.*/||'`"; \
+	  echo " rm -f $(DESTDIR)$(libdir)/$$p"; \
+	  rm -f $(DESTDIR)$(libdir)/$$p; \
+	done
+
+clean-libLIBRARIES:
+	-test -z "$(lib_LIBRARIES)" || rm -f $(lib_LIBRARIES)
+libbHYPRE.a: $(libbHYPRE_a_OBJECTS) $(libbHYPRE_a_DEPENDENCIES) 
+	-rm -f libbHYPRE.a
+	$(libbHYPRE_a_AR) libbHYPRE.a $(libbHYPRE_a_OBJECTS) $(libbHYPRE_a_LIBADD)
+	$(RANLIB) libbHYPRE.a
 install-libLTLIBRARIES: $(lib_LTLIBRARIES)
 	@$(NORMAL_INSTALL)
 	$(mkdir_p) $(DESTDIR)$(libdir)
@@ -562,9 +796,9 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(LTLIBRARIES) $(HEADERS)
+all-am: Makefile $(LIBRARIES) $(LTLIBRARIES) $(HEADERS)
 installdirs:
-	$(mkdir_p) $(DESTDIR)$(libdir) $(DESTDIR)$(includedir)
+	$(mkdir_p) $(DESTDIR)$(libdir) $(DESTDIR)$(libdir) $(DESTDIR)$(includedir)
 install: install-am
 install-exec: install-exec-am
 install-data: install-data-am
@@ -591,8 +825,8 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-generic clean-libLTLIBRARIES clean-libtool \
-	mostlyclean-am
+clean-am: clean-generic clean-libLIBRARIES clean-libLTLIBRARIES \
+	clean-libtool mostlyclean-am
 
 distclean: distclean-am
 	-rm -f Makefile
@@ -611,7 +845,7 @@ info-am:
 
 install-data-am: install-includeHEADERS
 
-install-exec-am: install-libLTLIBRARIES
+install-exec-am: install-libLIBRARIES install-libLTLIBRARIES
 
 install-info: install-info-am
 
@@ -636,21 +870,23 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-includeHEADERS uninstall-libLTLIBRARIES
+uninstall-am: uninstall-includeHEADERS uninstall-libLIBRARIES \
+	uninstall-libLTLIBRARIES
 
 .PHONY: CTAGS GTAGS all all-am check check-am clean clean-generic \
-	clean-libLTLIBRARIES clean-libtool ctags distclean \
-	distclean-compile distclean-generic distclean-libtool \
-	distclean-tags distdir dvi dvi-am html html-am info info-am \
-	install install-am install-data install-data-am install-exec \
-	install-exec-am install-includeHEADERS install-info \
-	install-info-am install-libLTLIBRARIES install-man \
+	clean-libLIBRARIES clean-libLTLIBRARIES clean-libtool ctags \
+	distclean distclean-compile distclean-generic \
+	distclean-libtool distclean-tags distdir dvi dvi-am html \
+	html-am info info-am install install-am install-data \
+	install-data-am install-exec install-exec-am \
+	install-includeHEADERS install-info install-info-am \
+	install-libLIBRARIES install-libLTLIBRARIES install-man \
 	install-strip installcheck installcheck-am installdirs \
 	maintainer-clean maintainer-clean-generic mostlyclean \
 	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
 	pdf pdf-am ps ps-am tags uninstall uninstall-am \
 	uninstall-includeHEADERS uninstall-info-am \
-	uninstall-libLTLIBRARIES
+	uninstall-libLIBRARIES uninstall-libLTLIBRARIES
 
 
 $(OBJECTS): $(include_HEADERS)

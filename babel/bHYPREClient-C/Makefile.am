@@ -1,23 +1,26 @@
 include babel.make
 # ...defines: IORHDRS IORSRCS STUBHDRS STUBSRCS
 
-lib_LTLIBRARIES = libbHYPREClient-C.la
-libbHYPREClient_C_la_SOURCES = $(FILES)
-OBJECTS = libbHYPREClient_C_la_OBJECTS
-libbHYPREClient_C_la_LDFLAGS = -avoid-version
+if STATICONLY
+ lib_LIBRARIES = libbHYPREClient-C.a
+ libbHYPREClient_C_a_SOURCES = $(FILES)
+ OBJECTS = libbHYPREClient_C_a_OBJECTS
+else !STATICONLY
+ lib_LTLIBRARIES = libbHYPREClient-C.la
+ libbHYPREClient_C_la_SOURCES = $(FILES)
+ OBJECTS = libbHYPREClient_C_la_OBJECTS
+ libbHYPREClient_C_la_LDFLAGS = -avoid-version
+endif !STATICONLY
 
-C_COMPILE_FLAGS=@CFLAGS@
-# new configure won't fill in: CINCLUDES=@INCLUDES@ @MPIINCLUDE@ @BABEL_HYPRE_INCLUDES@
-CINCLUDES=-I$(includedir)
-BABEL_RUNTIME_INCLUDES=-I$(top_builddir)/babel-runtime/sidl
+BABEL_RUNTIME_INCLUDES=\
+ -I$(top_srcdir)/babel-runtime/sidl\
+ -I$(top_builddir)/babel-runtime/sidl
 
 AM_CPPFLAGS = \
- ${C_COMPILE_FLAGS}\
- -I$(top_srcdir)/../../utilities\
- -I$(top_srcdir)/../../seq_mv\
- ${BABEL_RUNTIME_INCLUDES}\
- ${CINCLUDES}\
- ${CDEFS}
+ -I$(top_srcdir)\
+ -I$(top_srcdir)/utilities\
+ -I$(top_srcdir)/seq_mv\
+ ${BABEL_RUNTIME_INCLUDES}
 
 EXTRA_DIST = 
 

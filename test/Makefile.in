@@ -65,10 +65,10 @@ am__DEPENDENCIES_2 = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 f77_ij_DEPENDENCIES = $(am__DEPENDENCIES_2)
 am_f77_ij_b_OBJECTS = f77_ij_b-f77_ij_b.$(OBJEXT)
 f77_ij_b_OBJECTS = $(am_f77_ij_b_OBJECTS)
-f77_ij_b_DEPENDENCIES = $(am__DEPENDENCIES_2)
+am__DEPENDENCIES_3 = $(am__DEPENDENCIES_2)
+f77_ij_b_DEPENDENCIES = $(am__DEPENDENCIES_3)
 am_f77_ij_mv_OBJECTS = f77_ij_mv-f77_ij_mv.$(OBJEXT)
 f77_ij_mv_OBJECTS = $(am_f77_ij_mv_OBJECTS)
-am__DEPENDENCIES_3 = $(am__DEPENDENCIES_2)
 f77_ij_mv_DEPENDENCIES = $(am__DEPENDENCIES_3)
 am_f77_struct_OBJECTS = f77_struct-f77_struct.$(OBJEXT)
 f77_struct_OBJECTS = $(am_f77_struct_OBJECTS)
@@ -86,7 +86,7 @@ ij_C___OBJECTS = $(nodist_ij_C___OBJECTS)
 ij_C___DEPENDENCIES = $(am__DEPENDENCIES_2)
 am_ij_b_OBJECTS = ij_b-ij_b.$(OBJEXT)
 ij_b_OBJECTS = $(am_ij_b_OBJECTS)
-ij_b_DEPENDENCIES = $(am__DEPENDENCIES_2)
+ij_b_DEPENDENCIES = $(am__DEPENDENCIES_3)
 am_ij_mv_OBJECTS = ij_mv-ij_mv.$(OBJEXT)
 ij_mv_OBJECTS = $(am_ij_mv_OBJECTS)
 ij_mv_DEPENDENCIES = $(am__DEPENDENCIES_3)
@@ -163,9 +163,6 @@ AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
 BABELDIR = @BABELDIR@
-BABELLIBFLAGS = @BABELLIBFLAGS@
-BABEL_DIR = @BABEL_DIR@
-BABEL_HYPRE_INCLUDES = @BABEL_HYPRE_INCLUDES@
 BLASLIBFLAGS = @BLASLIBFLAGS@
 BLASNEEDED_FALSE = @BLASNEEDED_FALSE@
 BLASNEEDED_TRUE = @BLASNEEDED_TRUE@
@@ -196,7 +193,6 @@ FEI_INC_DIR = @FEI_INC_DIR@
 FEI_LIB_DIR = @FEI_LIB_DIR@
 FFLAGS = @FFLAGS@
 FLIBS = @FLIBS@
-HYPRE_BABELLIBDIR = @HYPRE_BABELLIBDIR@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
@@ -260,7 +256,6 @@ ac_ct_OBJDUMP = @ac_ct_OBJDUMP@
 ac_ct_RANLIB = @ac_ct_RANLIB@
 ac_ct_STRIP = @ac_ct_STRIP@
 am__leading_dot = @am__leading_dot@
-babeldir = @babeldir@
 bindir = @bindir@
 build = @build@
 build_alias = @build_alias@
@@ -483,10 +478,14 @@ f77_struct_LDADD = \
 # ij_b
 ij_b_SOURCES = ij_b.c
 ij_b_CPPFLAGS = $(AM_CPPFLAGS)
-ij_b_LDADD = \
- @BABELLIBFLAGS@\
- $(ij_libraries)
+ij_b_libraries = \
+ $(ij_libraries)\
+ -lbHYPREClient-C\
+ -lbHYPREClient-F\
+ -lbHYPRE\
+ -lsidl
 
+ij_b_LDADD = $(ij_b_libraries)
 #ij_b_LDFLAGS = -static
 ij_b_dependencies = \
  $(ij_dependencies)\
@@ -500,8 +499,7 @@ ij_b_dependencies = \
 f77_ij_b_SOURCES = f77_ij_b.f
 f77_ij_b_FFLAGS = $(AM_FFLAGS)
 f77_ij_b_LDADD = \
- @BABELLIBFLAGS@\
- $(ij_libraries)\
+ $(ij_b_libraries)\
  @FLIBS@
 
 #f77_ij_b_LDFLAGS = -static
@@ -509,7 +507,11 @@ f77_ij_b_LDADD = \
 # struct_b
 #EXTRA_struct_b_SOURCES = struct_b.c
 #struct_b_CPPFLAGS = $(AM_CPPFLAGS)
-#struct_b_LDADD = $(struct_libraries)
+#struct_b_LDADD = $(struct_libraries)\
+# -lbHYPREClient-C\
+# -lbHYPREClient-F\
+# -lbHYPRE\
+# -lsidl
 #struct_b_dependencies = \
 #$(struct_dependencies)\
 #$(includedir)/HYPRE_struct_ls.h\
@@ -530,6 +532,10 @@ f77_ij_b_LDADD = \
 #f77_struct_b_FFLAGS = $(AM_FFLAGS)
 #f77_struct_b_LDADD = \
 # $(struct_libraries)\
+# -lbHYPREClient-C\
+# -lbHYPREClient-F\
+# -lbHYPRE\
+# -lsidl\
 # @FLIBS@
 
 # optiontional targets, all++
@@ -977,7 +983,7 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-recursive
-all-am: Makefile
+all-am: Makefile all-local
 installdirs: installdirs-recursive
 installdirs-am:
 install: install-recursive
@@ -1058,26 +1064,28 @@ uninstall-am:
 
 uninstall-info: uninstall-info-recursive
 
-.PHONY: $(RECURSIVE_TARGETS) CTAGS GTAGS all all-am check check-am \
-	clean clean-generic clean-libtool clean-local clean-recursive \
-	ctags ctags-recursive distclean distclean-compile \
-	distclean-generic distclean-libtool distclean-recursive \
-	distclean-tags distdir dvi dvi-am html html-am info info-am \
-	install install-am install-data install-data-am install-exec \
-	install-exec-am install-info install-info-am install-man \
-	install-strip installcheck installcheck-am installdirs \
-	installdirs-am maintainer-clean maintainer-clean-generic \
-	maintainer-clean-recursive mostlyclean mostlyclean-compile \
-	mostlyclean-generic mostlyclean-libtool mostlyclean-recursive \
-	pdf pdf-am ps ps-am tags tags-recursive uninstall uninstall-am \
-	uninstall-info-am
+.PHONY: $(RECURSIVE_TARGETS) CTAGS GTAGS all all-am all-local check \
+	check-am clean clean-generic clean-libtool clean-local \
+	clean-recursive ctags ctags-recursive distclean \
+	distclean-compile distclean-generic distclean-libtool \
+	distclean-recursive distclean-tags distdir dvi dvi-am html \
+	html-am info info-am install install-am install-data \
+	install-data-am install-exec install-exec-am install-info \
+	install-info-am install-man install-strip installcheck \
+	installcheck-am installdirs installdirs-am maintainer-clean \
+	maintainer-clean-generic maintainer-clean-recursive \
+	mostlyclean mostlyclean-compile mostlyclean-generic \
+	mostlyclean-libtool mostlyclean-recursive pdf pdf-am ps ps-am \
+	tags tags-recursive uninstall uninstall-am uninstall-info-am
 
 
-all: ij$(EXEEXT) ij_mv$(EXEEXT) new_ij$(EXEEXT) struct$(EXEEXT) sstruct$(EXEEXT)
+all-local: ij$(EXEEXT) ij_mv$(EXEEXT) new_ij$(EXEEXT) \
+		struct$(EXEEXT) sstruct$(EXEEXT)
 
 fei++: fei$(EXEEXT)
 
-all++: ij.C++$(EXEEXT) ij_mv.C++$(EXEEXT) struct.C++$(EXEEXT) sstruct.C++$(EXEEXT)
+all++: ij.C++$(EXEEXT) ij_mv.C++$(EXEEXT) \
+		struct.C++$(EXEEXT) sstruct.C++$(EXEEXT)
 
 all77: f77_ij$(EXEEXT) f77_ij_mv$(EXEEXT) f77_struct$(EXEEXT)
 
@@ -1118,7 +1126,7 @@ struct.C++.cxx:
 
 clean-local:
 	@ \
-	for i in $(EXTRA_PROGRAMS) *.C++* driver.out.* ; \
+	for i in $(EXTRA_PROGRAMS) *.C++* driver.out.* test.* ; \
 	do \
 	  if [ -e $$i ] ; \
 	  then \
