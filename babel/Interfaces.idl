@@ -1112,6 +1112,8 @@ package bHYPRE version 1.0.0
 
       int SetPeriodic(in array<int,1,column-major> periodic);
 
+      int SetNumGhost(in array<int,1,column-major> num_ghost);
+
       int Assemble();
    }
 
