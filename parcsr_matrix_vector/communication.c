@@ -21,7 +21,28 @@ hypre_InitializeCommunication( int 	      job,
    int			ip, vec_start, vec_len;
                   
    /*--------------------------------------------------------------------
-    * post receives and initiate sends
+    * hypre_Initialize sets up a communication handle,
+    * posts receives and initiates sends. It always requires num_sends, 
+    * num_recvs, recv_procs and send_procs to be set in comm_pkg.
+    * There are different options for job:
+    * job = 1 : is used to initialize communication exchange for the parts
+    *		of vector needed to perform a Matvec,  it requires send_data 
+    *		and recv_data to be doubles, recv_vec_starts and 
+    *		send_map_starts need to be set in comm_pkg.
+    * job = 2 : is used to initialize communication exchange for the parts
+    *		of vector needed to perform a MatvecT,  it requires send_data 
+    *		and recv_data to be doubles, recv_vec_starts and 
+    *		send_map_starts need to be set in comm_pkg.
+    * job = 11: similar to job = 1, but exchanges data of type int (not double),
+    *		requires send_data and recv_data to be ints
+    *		recv_vec_starts and send_map_starts need to be set in comm_pkg.
+    * job = 12: similar to job = 1, but exchanges data of type int (not double),
+    *		requires send_data and recv_data to be ints
+    *		recv_vec_starts and send_map_starts need to be set in comm_pkg.
+    * default: ignores send_data and recv_data, requires send_mpi_types
+    *		and recv_mpi_types to be set in comm_pkg.
+    *		datatypes need to point to absolute
+    *		addresses, e.g. generated using MPI_Address . 
     *--------------------------------------------------------------------*/
 
    num_requests = num_sends + num_recvs;
