@@ -55,8 +55,7 @@ extern int  HYPRE_LSI_MLIGetNullSpace( HYPRE_Solver, int *, int *, double ** );
 extern int  HYPRE_LSI_MLIAdjustNullSpace( HYPRE_Solver, int, int *,
                                           HYPRE_ParCSRMatrix );
 extern int  HYPRE_LSI_MLISetFEData( HYPRE_Solver, void * );
-extern int  HYPRE_LSI_MLISetStrengthThreshold( HYPRE_Solver, double );
-extern int  HYPRE_LSI_MLISetMethod( HYPRE_Solver, char * );
+extern int  HYPRE_LSI_MLISetSFEI( HYPRE_Solver, void * );
 
 extern int  HYPRE_LSI_MLILoadNodalCoordinates( HYPRE_Solver, int, int, int *, 
                                    int, double *, int );
@@ -73,6 +72,12 @@ extern int  HYPRE_LSI_MLIFEDataInitComplete( void * );
 extern int  HYPRE_LSI_MLIFEDataLoadElemMatrix(void *, int, int, int *, int,
                                               double **);
 extern int  HYPRE_LSI_MLIFEDataWriteToFile( void *, char * );
+
+extern void *HYPRE_LSI_MLISFEICreate( MPI_Comm );
+extern int  HYPRE_LSI_MLISFEIDestroy( void * );
+extern int  HYPRE_LSI_MLISFEILoadElemMatrices(void *, int, int, int *,
+                                      double ***, int, int **);
+extern int  HYPRE_LSI_MLISFEIAddNumElems(void *, int, int, int);
 
 #ifdef __cplusplus
 }

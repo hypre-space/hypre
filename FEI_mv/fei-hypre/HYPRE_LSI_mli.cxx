@@ -20,8 +20,6 @@
  *        HYPRE_LSI_MLIAdjustNodeEqnMap
  *        HYPRE_LSI_MLIAdjustNullSpace
  *        HYPRE_LSI_MLISetFEData
- *        HYPRE_LSI_MLISetStrengthThreshold
- *        HYPRE_LSI_MLISetMethod
  *        HYPRE_LSI_MLILoadNodalCoordinates
  *        HYPRE_LSI_MLILoadMatrixScalings
  *        HYPRE_LSI_MLILoadMaterialLabels
@@ -35,6 +33,11 @@
  *        HYPRE_LSI_MLIFEDataInitComplete
  *        HYPRE_LSI_MLIFEDataLoadElemMatrix
  *        HYPRE_LSI_MLIFEDataWriteToFile
+ *--------------------------------------------------------------------------
+ *        HYPRE_LSI_MLISFEICreate
+ *        HYPRE_LSI_MLISFEIDestroy
+ *        HYPRE_LSI_MLISFEILoadElemMatrices
+ *        HYPRE_LSI_MLISFEIAddNumElems
  ****************************************************************************/
 
 /****************************************************************************/ 
@@ -68,6 +71,7 @@ typedef struct HYPRE_LSI_MLI_Struct
 #ifdef HAVE_MLI
    MLI        *mli_;
    MLI_FEData *feData_;           /* holds FE information */
+   MLI_SFEI   *sfei_;             /* holds FE information */
    MLI_Mapper *mapper_;           /* holds mapping information */
 #endif
    MPI_Comm mpiComm_;
@@ -112,7 +116,7 @@ typedef struct HYPRE_LSI_MLI_Struct
 HYPRE_LSI_MLI;
 
 /****************************************************************************/ 
-/* HYPRE_LSI_MLI data structure                                             */
+/* HYPRE_MLI_FEData data structure                                          */
 /*--------------------------------------------------------------------------*/
 
 typedef struct HYPRE_MLI_FEData_Struct
@@ -126,6 +130,20 @@ typedef struct HYPRE_MLI_FEData_Struct
 #endif
 }
 HYPRE_MLI_FEData;
+
+/****************************************************************************/ 
+/* HYPRE_MLI_SFEI data structure                                            */
+/*--------------------------------------------------------------------------*/
+
+typedef struct HYPRE_MLI_SFEI_Struct
+{
+#ifdef HAVE_MLI
+   MPI_Comm   comm_;            /* MPI communicator */
+   MLI_SFEI   *sfei_;           /* holds FE information */
+   int        sfeiOwn_;         /* flag to indicate ownership */
+#endif
+}
+HYPRE_MLI_SFEI;
 
 /****************************************************************************/
 /* HYPRE_LSI_MLICreate                                                      */
@@ -254,6 +272,9 @@ int HYPRE_LSI_MLISetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
    /* set general parameters                                   */
    /* -------------------------------------------------------- */ 
 
+   if (!strcmp(mli_object->method_,"AMGSADD") ||
+       !strcmp(mli_object->method_,"AMGSADDe")) mli_object->nLevels_ = 2;
+   
    mli->setNumLevels( mli_object->nLevels_ );
    mli->setTolerance( tol );
 
@@ -339,7 +360,9 @@ int HYPRE_LSI_MLISetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
    /* load FEData, if there is any                             */
    /* -------------------------------------------------------- */ 
 
-   mli->setFEData( 0, mli_object->feData_, mli_object->mapper_ );
+   if ( mli_object->feData_ != NULL )
+      mli->setFEData( 0, mli_object->feData_, mli_object->mapper_ );
+   if ( mli_object->sfei_ != NULL ) mli->setSFEI(0, mli_object->sfei_);
    mli_object->mapper_ = NULL;
    mli_object->feData_ = NULL;
 
@@ -747,6 +770,7 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
          printf("\t    offending request = %s.\n", paramString);
          printf("\tAvailable options for MLI are : \n");
          printf("\t      outputLevel <d> \n");
+         printf("\t      numLevels <d> \n");
          printf("\t      maxIterations <d> \n");
          printf("\t      cycleType <'V','W'> \n");
          printf("\t      strengthThreshold <f> \n");
@@ -755,13 +779,18 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
          printf("\t      coarseSolver <Jacobi,GS,...> \n");
          printf("\t      numSweeps <d> \n");
          printf("\t      smootherWeight <f> \n");
+         printf("\t      smootherPrintRNorm\n");
+         printf("\t      smootherFindOmega\n");
          printf("\t      minCoarseSize <d> \n");
+         printf("\t      Pweight <d> \n");
          printf("\t      nodeDOF <d> \n");
          printf("\t      nullSpaceDim <d> \n");
          printf("\t      useNodalCoord <on,off> \n");
-         printf("\t      saAMGCalibrationSize <d> \n");
-         printf("\t      paramFile <s> \n");
+         printf("\t      saAMGCalibrationSize <d> \n"); 
+         printf("\t      rsAMGSymmetric <d> \n"); 
+         printf("\t      rsAMGInjectionForR\n"); 
          printf("\t      printNullSpace\n");
+         printf("\t      paramFile <s> \n");
          exit(1);
       }
    }
@@ -1037,34 +1066,24 @@ int HYPRE_LSI_MLISetFEData(HYPRE_Solver solver, void *object)
 }
 
 /****************************************************************************/
-/* HYPRE_LSI_MLISetStrengthThreshold                                        */
+/* HYPRE_LSI_MLISetSFEI                                                   */
 /*--------------------------------------------------------------------------*/
 
 extern "C"
-int HYPRE_LSI_MLISetStrengthThreshold(HYPRE_Solver solver,
-                                      double strengthThreshold)
+int HYPRE_LSI_MLISetSFEI(HYPRE_Solver solver, void *object)
 {
+#ifdef HAVE_MLI
    HYPRE_LSI_MLI *mli_object = (HYPRE_LSI_MLI *) solver;
-  
-   if ( strengthThreshold < 0.0 )
-   {
-      printf("HYPRE_LSI_MLISetStrengthThreshold ERROR : reset to 0.\n");
-      mli_object->strengthThreshold_ = 0.0;
-   } 
-   else mli_object->strengthThreshold_ = strengthThreshold;
+   HYPRE_MLI_SFEI *hypre_sfei = (HYPRE_MLI_SFEI *) object;
+   mli_object->sfei_    = hypre_sfei->sfei_; 
+   hypre_sfei->sfei_    = NULL; 
+   hypre_sfei->sfeiOwn_ = 0;
    return 0;
-}
-
-/****************************************************************************/
-/* HYPRE_LSI_MLISetMethod                                                   */
-/*--------------------------------------------------------------------------*/
-
-extern "C"
-int HYPRE_LSI_MLI_SetMethod( HYPRE_Solver solver, char *paramString )
-{
-   HYPRE_LSI_MLI *mli_object = (HYPRE_LSI_MLI *) solver;
-   strcpy( mli_object->method_, paramString );
-   return 0;
+#else
+   (void) solver;
+   (void) object;
+   return 1;
+#endif
 }
 
 /****************************************************************************/
@@ -1704,6 +1723,118 @@ int HYPRE_LSI_MLIFEDataWriteToFile( void *object, char *filename )
 #else
    (void) object;
    (void) filename;
+   return 1;
+#endif
+}
+
+/****************************************************************************/
+/* HYPRE_LSI_MLISFEICreate                                                  */
+/*--------------------------------------------------------------------------*/
+
+extern "C"
+void *HYPRE_LSI_MLISFEICreate( MPI_Comm mpiComm )
+{
+#ifdef HAVE_MLI
+   HYPRE_MLI_SFEI *hypre_sfei;
+   hypre_sfei = (HYPRE_MLI_SFEI *) malloc( sizeof(HYPRE_MLI_SFEI) );  
+   hypre_sfei->comm_    = mpiComm;
+   hypre_sfei->sfei_    = new MLI_SFEI(mpiComm);;
+   hypre_sfei->sfeiOwn_ = 1;
+   return ((void *) hypre_sfei);
+#else
+   return NULL;
+#endif 
+}
+
+/****************************************************************************/
+/* HYPRE_LSI_MLISFEIDestroy                                                 */
+/*--------------------------------------------------------------------------*/
+
+extern "C"
+int HYPRE_LSI_MLISFEIDestroy( void *object )
+{
+#ifdef HAVE_MLI
+   HYPRE_MLI_SFEI *hypre_sfei = (HYPRE_MLI_SFEI *) object;
+   if ( hypre_sfei == NULL ) return 1;
+   if ( hypre_sfei->sfeiOwn_ && hypre_sfei->sfei_ != NULL ) 
+      delete hypre_sfei->sfei_;
+   hypre_sfei->sfei_ = NULL;
+   free( hypre_sfei );
+   return 0;
+#else
+   return 1;
+#endif 
+}
+
+/****************************************************************************/
+/* HYPRE_LSI_MLISFEILoadElemMatrices                                      */
+/*--------------------------------------------------------------------------*/
+
+extern "C"
+int HYPRE_LSI_MLISFEILoadElemMatrices(void *object, int elemBlk, int nElems,
+              int *elemIDs, double ***inMat, int elemNNodes, int **nodeLists)
+{
+#ifdef HAVE_MLI
+   HYPRE_MLI_SFEI *hypre_sfei = (HYPRE_MLI_SFEI *) object;
+   MLI_SFEI       *sfei;
+
+   /* -------------------------------------------------------- */ 
+   /* error checking                                           */
+   /* -------------------------------------------------------- */ 
+
+   if ( hypre_sfei == NULL ) return 1;
+   sfei = (MLI_SFEI *) hypre_sfei->sfei_;
+   if ( sfei == NULL ) return 1;
+
+   /* -------------------------------------------------------- */ 
+   /* load the element matrix                                  */
+   /* -------------------------------------------------------- */ 
+
+   sfei->loadElemBlock(elemBlk,nElems,elemIDs,inMat,elemNNodes,nodeLists);
+   return 0;
+#else
+   (void) object;
+   (void) elemBlk;
+   (void) nElems;
+   (void) elemIDs;
+   (void) inMat;
+   (void) elemNNodes;
+   (void) nodeLists;
+   return 1;
+#endif
+}
+
+/****************************************************************************/
+/* HYPRE_LSI_MLISFEIAddNumElems                                             */
+/*--------------------------------------------------------------------------*/
+
+extern "C"
+int HYPRE_LSI_MLISFEIAddNumElems(void *object, int elemBlk, int nElems,
+                                 int elemNNodes)
+{
+#ifdef HAVE_MLI
+   HYPRE_MLI_SFEI *hypre_sfei = (HYPRE_MLI_SFEI *) object;
+   MLI_SFEI       *sfei;
+
+   /* -------------------------------------------------------- */ 
+   /* error checking                                           */
+   /* -------------------------------------------------------- */ 
+
+   if ( hypre_sfei == NULL ) return 1;
+   sfei = (MLI_SFEI *) hypre_sfei->sfei_;
+   if ( sfei == NULL ) return 1;
+
+   /* -------------------------------------------------------- */ 
+   /* send information to sfei object                          */
+   /* -------------------------------------------------------- */ 
+
+   sfei->addNumElems(elemBlk,nElems,elemNNodes);
+   return 0;
+#else
+   (void) object;
+   (void) elemBlk;
+   (void) nElems;
+   (void) elemNNodes;
    return 1;
 #endif
 }
