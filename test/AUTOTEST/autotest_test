@@ -129,7 +129,7 @@ parse_arguments () {
     argcur=$arg
     case $arg in
       a) confbuildtest $OPTARG  " "             "default";;
-      b) confbuildtest $OPTARG  "--with-babel"  "babel";;
+      b) confbuildtest $OPTARG  "--with-babel --disable-fortran90"  "babel";;
       c) build $Build "all++"   "all++"         "test";;
       D) DEBUG_MODE="yes";;
       d) build $Build "all"     "docs"          "docs";;
@@ -171,7 +171,7 @@ usage () {
   printf "  2=configure, make and execute.\n"
   printf "\n"
   printf "%s\n" "-a opt   All; (default)."
-  printf "%s\n" "-b opt   Babel; configure --with-babel."
+  printf "%s\n" "-b opt   Babel; configure --with-babel --disable-fortran90."
   printf "%s\n" "-c       C++; make all++."
   printf "%s\n" "-D       Turn on debug messages."
   printf "%s\n" "-d       Docs; make the documentation directory."
