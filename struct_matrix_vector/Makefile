@@ -112,6 +112,17 @@ libHYPRE_mv.a: ${OBJS}
 
 ${OBJS}: ${HEADERS}
 
+docs: docs_html docs_tex
+
+docs_html: 
+	@doc++ -d Docs DevManual.dxx
+
+docs_tex: 
+	@doc++ -t -o DevManual.tex DevManual.dxx
+	latex DevManual
+	latex DevManual
+	dvips DevManual
+
 ##################################################################
 # Generic rules
 ##################################################################

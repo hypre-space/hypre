@@ -78,17 +78,20 @@ hypre_BoxNeighbors *hypre_NewBoxNeighbors P((hypre_BoxArray *boxes , int box_ran
 int hypre_FreeBoxNeighbors P((hypre_BoxNeighbors *neighbors ));
 
 /* communication.c */
-hypre_CommDataType *hypre_NewCommDataType P((hypre_SBox *sbox , hypre_Box *data_box , int data_offset ));
-void hypre_FreeCommDataType P((hypre_CommDataType *comm_data_type ));
-void hypre_NewSBoxType P((hypre_SBox *comm_sbox , hypre_Box *data_box , int num_values , MPI_Datatype *comm_sbox_type ));
-int hypre_SortCommDataTypes P((hypre_CommDataType **comm_data_types , int num_comm_data_types ));
-int hypre_NewCommTypes P((hypre_SBoxArrayArray *sboxes , hypre_BoxArray *data_space , int **processes , int num_values , MPI_Comm comm , int *num_comms_ptr , int **comm_processes_ptr , MPI_Datatype **comm_types_ptr , int *num_copies_ptr , hypre_CommDataType ***copy_types_ptr ));
+hypre_CommTypeEntry *hypre_NewCommTypeEntry P((hypre_SBox *sbox , hypre_Box *data_box , int num_values , int sbox_offset , int data_box_offset ));
+void hypre_FreeCommTypeEntry P((hypre_CommTypeEntry *comm_entry ));
+hypre_CommType *hypre_NewCommType P((hypre_CommTypeEntry **comm_entries , int num_entries ));
+void hypre_FreeCommType P((hypre_CommType *comm_type ));
+int hypre_SortCommType P((hypre_CommType *comm_type ));
 hypre_CommPkg *hypre_NewCommPkg P((hypre_SBoxArrayArray *send_sboxes , hypre_SBoxArrayArray *recv_sboxes , hypre_BoxArray *send_data_space , hypre_BoxArray *recv_data_space , int **send_processes , int **recv_processes , int num_values , MPI_Comm comm ));
 void hypre_FreeCommPkg P((hypre_CommPkg *comm_pkg ));
-hypre_CommHandle *hypre_NewCommHandle P((int num_requests , MPI_Request *requests ));
-void hypre_FreeCommHandle P((hypre_CommHandle *comm_handle ));
+int hypre_NewCommPkgInfo P((hypre_SBoxArrayArray *sboxes , hypre_BoxArray *data_space , int **processes , int num_values , MPI_Comm comm , int *num_comms_ptr , int **comm_processes_ptr , hypre_CommType ***comm_types_ptr , hypre_CommType **copy_type_ptr ));
+int hypre_CommitCommPkg P((hypre_CommPkg *comm_pkg ));
+int hypre_UnCommitCommPkg P((hypre_CommPkg *comm_pkg ));
+int hypre_BuildCommMPITypes P((int num_comms , int *comm_procs , hypre_CommType **comm_types , MPI_Datatype *comm_mpi_types ));
+int hypre_BuildCommEntryMPIType P((hypre_CommTypeEntry *comm_entry , MPI_Datatype *comm_entry_mpi_type ));
 hypre_CommHandle *hypre_InitializeCommunication P((hypre_CommPkg *comm_pkg , double *send_data , double *recv_data ));
-void hypre_FinalizeCommunication P((hypre_CommHandle *comm_handle ));
+int hypre_FinalizeCommunication P((hypre_CommHandle *comm_handle ));
 
 /* communication_info.c */
 void hypre_NewCommInfoFromStencil P((hypre_BoxArrayArray **send_boxes_ptr , hypre_BoxArrayArray **recv_boxes_ptr , int ***send_processes_ptr , int ***recv_processes_ptr , hypre_StructGrid *grid , hypre_StructStencil *stencil ));
@@ -101,9 +104,27 @@ void hypre_FreeComputePkg P((hypre_ComputePkg *compute_pkg ));
 hypre_CommHandle *hypre_InitializeIndtComputations P((hypre_ComputePkg *compute_pkg , double *data ));
 void hypre_FinalizeIndtComputations P((hypre_CommHandle *comm_handle ));
 
+/* create_2d_laplacian.c */
+int main P((int argc , char *argv []));
+
+/* create_3d_laplacian.c */
+int main P((int argc , char *argv []));
+
+/* driver.c */
+int main P((int argc , char *argv []));
+
+/* driver_internal.c */
+int main P((int argc , char *argv []));
+
 /* grow.c */
 hypre_BoxArray *hypre_GrowBoxByStencil P((hypre_Box *box , hypre_StructStencil *stencil , int transpose ));
 hypre_BoxArrayArray *hypre_GrowBoxArrayByStencil P((hypre_BoxArray *box_array , hypre_StructStencil *stencil , int transpose ));
+
+/* one_to_many.c */
+int main P((int argc , char *argv []));
+
+/* one_to_many_vector.c */
+int main P((int argc , char *argv []));
 
 /* project.c */
 hypre_SBox *hypre_ProjectBox P((hypre_Box *box , hypre_Index index , hypre_Index stride ));
@@ -211,31 +232,5 @@ hypre_CommPkg *hypre_GetMigrateStructVectorCommPkg P((hypre_StructVector *from_v
 int hypre_MigrateStructVector P((hypre_CommPkg *comm_pkg , hypre_StructVector *from_vector , hypre_StructVector *to_vector ));
 void hypre_PrintStructVector P((char *filename , hypre_StructVector *vector , int all ));
 hypre_StructVector *hypre_ReadStructVector P((MPI_Comm comm , char *filename , int *num_ghost ));
-
-/* HYPRE_mv.h */
-
-/* box.h */
-
-/* box_neighbors.h */
-
-/* communication.h */
-
-/* computation.h */
-
-/* general.h */
-
-/* headers.h */
-
-/* protos.h */
-
-/* sbox.h */
-
-/* struct_grid.h */
-
-/* struct_matrix.h */
-
-/* struct_stencil.h */
-
-/* struct_vector.h */
 
 #undef P

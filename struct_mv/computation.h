@@ -39,16 +39,6 @@ typedef struct
  
 #define hypre_ComputePkgCommPkg(compute_pkg)      (compute_pkg -> comm_pkg)
 
-#define hypre_ComputePkgSendSBoxes(compute_pkg) \
-hypre_CommPkgSendSBoxes(hypre_ComputePkgCommPkg(compute_pkg))
-#define hypre_ComputePkgRecvSBoxes(compute_pkg) \
-hypre_CommPkgRecvSBoxes(hypre_ComputePkgCommPkg(compute_pkg))
-
-#define hypre_ComputePkgSendBoxRanks(compute_pkg) \
-hypre_CommPkgSendBoxRanks(hypre_ComputePkgCommPkg(compute_pkg))
-#define hypre_ComputePkgRecvBoxRanks(compute_pkg) \
-hypre_CommPkgRecvBoxRanks(hypre_ComputePkgCommPkg(compute_pkg))
-
 #define hypre_ComputePkgIndtSBoxes(compute_pkg)   (compute_pkg -> indt_sboxes)
 #define hypre_ComputePkgDeptSBoxes(compute_pkg)   (compute_pkg -> dept_sboxes)
 

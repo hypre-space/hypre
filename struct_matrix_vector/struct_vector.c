@@ -691,8 +691,6 @@ hypre_MigrateStructVector( hypre_CommPkg      *comm_pkg,
                                     hypre_StructVectorData(to_vector));
    hypre_FinalizeCommunication(comm_handle);
 
-   hypre_FreeCommHandle(comm_handle);
-
    return ierr;
 }
 
