@@ -1463,6 +1463,7 @@ int HYPRE_SlideReduction::buildReducedRHSVector(HYPRE_IJVector b)
    // get machine and matrix information
    //------------------------------------------------------------------
 
+   if ( reducedAmat_ == NULL ) return 0;
    MPI_Comm_rank( mpiComm_, &mypid );
    MPI_Comm_size( mpiComm_, &nprocs );
    HYPRE_IJMatrixGetObject(Amat_, (void **) &A_csr);
@@ -1616,6 +1617,7 @@ int HYPRE_SlideReduction::buildReducedSolnVector(HYPRE_IJVector x,
    // get machine and matrix information
    //------------------------------------------------------------------
 
+   if ( reducedAmat_ == NULL ) return 0;
    MPI_Comm_rank( mpiComm_, &mypid );
    MPI_Comm_size( mpiComm_, &nprocs );
    HYPRE_IJMatrixGetObject(Amat_, (void **) &A_csr);
