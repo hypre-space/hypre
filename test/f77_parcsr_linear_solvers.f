@@ -37,6 +37,8 @@ c-----------------------------------------------------------------------
 
       integer             i, zero, one, maxiter, num_iterations
       integer             num_grid_sweeps(4), grid_relax_type(4)
+      integer             generate_matrix, generate_rhs
+      character           matfile(32), rhsfile(32)
 
       double precision    tol, convtol
       double precision    final_res_norm, relax_weight(MAXLEVELS)
@@ -100,7 +102,7 @@ c-----------------------------------------------------------------------
       n_pre  = 1
       n_post = 1
 
-      solver_id = 0
+      solver_id = 3
 
 c-----------------------------------------------------------------------
 c     Read options
@@ -129,8 +131,35 @@ c
 c     read( 5, *) n_pre
 c     read( 5, *) n_post
 c
-c     read( 5, *) solver_id
-c
+      write(6,*) 'Generate matrix? !0 yes, 0 no (from file)'
+      read(5,*) generate_matrix
+
+      if (generate_matrix .eq. 0) then
+        write(6,*) 'What file to use for matrix (32 chars or less)?'
+        read(5,*) matfile
+      endif
+
+      write(6,*) 'Generate right-hand side? !0 yes, 0 no (from file)'
+      read(5,*) generate_rhs
+
+      if (generate_rhs .eq. 0) then
+        write(6,*) 'What file to use for right-hand side
+     &              (32 chars or less)?'
+        read(5,*) rhsfile
+      endif
+
+      write(6,*) 'What solver_id?'
+      write(6,*) '0 AMG, 2 GMRES, 3 AMGGMRES, 4 DSGMRES, 7 PILUTGMRES'
+      read(5,*) solver_id
+
+      if (solver_id .eq. 7) then
+        write(6,*) 'What drop tolerance?  <0 do not drop'
+        read(5,*) drop_tol
+      endif
+ 
+      write(6,*) 'What relative residual norm tolerance?'
+      read(5,*) tol
+
 c     close( 5 )
 
 c-----------------------------------------------------------------------
@@ -209,8 +238,12 @@ c-----------------------------------------------------------------------
       if (nz .gt. 1) values(1) = values(1) + 2d0*cz
 
 c Generate a Dirichlet Laplacian
-      call GenerateLaplacian(MPI_COMM_WORLD, nx, ny, nz,
-     &                       Px, Py, Pz, p, q, r, values, A, ierr)
+      if (generate_matrix) then
+         call GenerateLaplacian(MPI_COMM_WORLD, nx, ny, nz,
+     &                          Px, Py, Pz, p, q, r, values, A, ierr)
+      else
+         call HYPRE_ReadParCSRMatrix(MPI_COMM_WORLD, A, matfile, ierr)
+      endif
 
       call HYPRE_PrintParCSRMatrix(A, "driver.out.A", ierr)
 
@@ -226,13 +259,17 @@ c-----------------------------------------------------------------------
 c     Set up the rhs and initial guess
 c-----------------------------------------------------------------------
 
-      call HYPRE_NewParVector(MPI_COMM_WORLD, num_rows, row_starts,
-     &                        b, ierr)
-      call hypre_SetParVectorPartitioningO(b, 0, ierr)
-      call HYPRE_InitializeParVector(b, ierr)
+      if (generate_rhs) then
+        call HYPRE_NewParVector(MPI_COMM_WORLD, num_rows, row_starts,
+     &                          b, ierr)
+        call hypre_SetParVectorPartitioningO(b, 0, ierr)
+        call HYPRE_InitializeParVector(b, ierr)
 c Set up a Dirichlet 0 problem
-      call hypre_SetParVectorConstantValue(b, 0d0, ierr)
-      call HYPRE_PrintParVector(b, "driver.out.b", ierr)
+        call hypre_SetParVectorConstantValue(b, 0d0, ierr)
+        call HYPRE_PrintParVector(b, "driver.out.b", ierr)
+      else
+        call HYPRE_ReadParVector(MPI_COMM_WORLD, b, rhsfile, ierr)
+      endif
 
       call HYPRE_NewParVector(MPI_COMM_WORLD, num_rows, row_starts,
      &                        x, ierr)
@@ -249,14 +286,14 @@ c-----------------------------------------------------------------------
 c     General solver parameters, passing hard coded constants
 c     will break the interface.
 
-      maxiter = 50
-      tol = 0.000001
+      maxiter = 100
       convtol = 0.9
       debug_flag = 0
 
       if (solver_id .eq. 0) then
 
 c Set defaults for BoomerAMG
+        maxiter = 400
         coarsen_type = 0
         hybrid = 1
         measure_type = 0
@@ -304,6 +341,7 @@ c Set defaults for BoomerAMG
       if (solver_id .eq. 2 .or. solver_id .eq. 3 .or.
      &    solver_id .eq. 4 .or. solver_id .eq. 7) then
 
+        maxiter = 100
         k_dim = 5
 
 c       Solve the system using preconditioned GMRES
@@ -397,8 +435,6 @@ c         call HYPRE_ParAMGSetTruncFactor(precond, trunc_factor, ierr)
      &                                     precond, ierr) 
 
           if (ierr .ne. 0) write(6,*) 'ParCSRPilutInitialize error'
-
-          drop_tol = -1.
 
           call HYPRE_ParCSRGMRESSetPrecond(solver, precond_id,
      &                                     precond, ierr)
