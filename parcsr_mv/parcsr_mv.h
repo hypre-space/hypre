@@ -7,7 +7,7 @@
 #define hypre_PARCSR_MV_HEADER
 
 #include "utilities.h"
-#include "seq_matrix_vector.h"
+#include "seq_mv.h"
 
 #ifdef __cplusplus
 extern "C" {

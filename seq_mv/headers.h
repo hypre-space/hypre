@@ -11,6 +11,6 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "seq_matrix_vector.h"
+#include "seq_mv.h"
 
 

@@ -8,7 +8,7 @@
 # $Revision$
 #EHEADER***********************************************************************
 
-INTERNAL_HEADER=seq_matrix_vector.h
+INTERNAL_HEADER=seq_mv.h
 
 #===========================================================================
 # Include guards and other includes

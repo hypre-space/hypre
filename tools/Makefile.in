@@ -25,7 +25,7 @@ CDEFS = @HYPREDEFS@ -DHYPRE_TIMING
 CFLAGS =\
  ${C_COMPILE_FLAGS}\
  -I$(srcdir)/../utilities\
- -I$(srcdir)/../struct_matrix_vector\
+ -I$(srcdir)/../struct_mv\
  ${CINCLUDES} ${CDEFS}
 
 RANLIB= @RANLIB@
@@ -35,7 +35,7 @@ LIBFLAGS = @LIBDIRS@ @LIBS@
 LDLIBFLAGS = @LDLIBDIRS@ @LDLIBS@
 
 LFLAGS =\
- -L../struct_matrix_vector\
+ -L../struct_mv\
  -L../utilities\
  -lHYPRE_mv\
  -lHYPRE_utilities\

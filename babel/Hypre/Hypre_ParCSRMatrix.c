@@ -11,7 +11,7 @@
 #include <assert.h>
 #include "Hypre_ParCSRVector_Skel.h" 
 #include "Hypre_ParCSRVector_Data.h" 
-#include "IJ_matrix_vector.h"
+#include "IJ_mv.h"
 #include "Hypre_Partition_Skel.h"
 #include "Hypre_PartitionBuilder_Skel.h"
 #include "Hypre_Map_Stub.h"

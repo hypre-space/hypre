@@ -5,8 +5,8 @@
 #define hypre_IJ_HEADER
 
 #include "utilities.h"
-#include "seq_matrix_vector.h"
-#include "parcsr_matrix_vector.h"
+#include "seq_mv.h"
+#include "parcsr_mv.h"
 #include "HYPRE_IJ_mv.h"
 
 #ifdef __cplusplus

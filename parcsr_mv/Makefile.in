@@ -27,7 +27,7 @@ CFLAGS =\
  -I$(srcdir)\
  -I$(srcdir)/..\
  -I$(srcdir)/../utilities\
- -I$(srcdir)/../seq_matrix_vector\
+ -I$(srcdir)/../seq_mv\
  ${CINCLUDES}\
  ${CDEFS}
  
@@ -39,7 +39,7 @@ LDLIBFLAGS = @LDLIBDIRS@ @LDLIBS@
  
 LFLAGS =\
  -L.\
- -L../seq_matrix_vector\
+ -L../seq_mv\
  -L../utilities\
  -lHYPRE_parcsr_mv\
  -lHYPRE_seq_mv\
@@ -51,7 +51,7 @@ HEADERS =\
  headers.h\
  par_csr_matrix.h\
  par_vector.h\
- parcsr_matrix_vector.h\
+ parcsr_mv.h\
  HYPRE_parcsr_mv.h
 
 FILES =\
@@ -95,7 +95,7 @@ driver_matmul: driver_matmul.o libHYPRE_parcsr_mv.a
 
 install: all
 	@cp -f $(srcdir)/HYPRE_*.h $$HYPRE_INSTALL_DIR/include/.
-	@cp -f $(srcdir)/parcsr_matrix_vector.h $$HYPRE_INSTALL_DIR/include/.
+	@cp -f $(srcdir)/parcsr_mv.h $$HYPRE_INSTALL_DIR/include/.
 	@cp -f libHYPRE_*.a $$HYPRE_INSTALL_DIR/lib/.
  
 clean:

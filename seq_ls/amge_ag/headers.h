@@ -18,7 +18,7 @@
 #define hypre_LS_HEADER
 
 #include "utilities.h"
-#include "seq_matrix_vector.h"
+#include "seq_mv.h"
 
 #include "AMGe_matrix_topology.h"
 

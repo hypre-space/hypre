@@ -7,7 +7,7 @@
 #define hypre_STRUCT_LS_HEADER
 
 #include "utilities.h"
-#include "struct_matrix_vector.h"
+#include "struct_mv.h"
 #include "krylov.h"
 
 #ifdef __cplusplus

@@ -7,8 +7,8 @@
 #define hypre_SSTRUCT_MV_HEADER
 
 #include "utilities.h"
-#include "struct_matrix_vector.h"
-#include "IJ_matrix_vector.h"
+#include "struct_mv.h"
+#include "IJ_mv.h"
 #include "HYPRE.h"
 
 #ifdef __cplusplus

@@ -25,17 +25,17 @@ CFLAGS =\
  -I$(srcdir)\
  -I$(srcdir)/..\
  -I$(srcdir)/../utilities\
- -I$(srcdir)/../struct_matrix_vector\
- -I$(srcdir)/../seq_matrix_vector\
- -I$(srcdir)/../parcsr_matrix_vector\
- -I$(srcdir)/../IJ_matrix_vector\
+ -I$(srcdir)/../struct_mv\
+ -I$(srcdir)/../seq_mv\
+ -I$(srcdir)/../parcsr_mv\
+ -I$(srcdir)/../IJ_mv\
  ${CINCLUDES}
 
 RANLIB= @RANLIB@
 
 HEADERS =\
  HYPRE_sstruct_mv.h\
- sstruct_matrix_vector.h\
+ sstruct_mv.h\
  headers.h\
  sstruct_graph.h\
  sstruct_grid.h\
@@ -72,7 +72,7 @@ all: libHYPRE_sstruct_mv.a
 
 install: all
 	@cp -f $(srcdir)/HYPRE_*.h $$HYPRE_INSTALL_DIR/include/.
-	@cp -f $(srcdir)/sstruct_matrix_vector.h $$HYPRE_INSTALL_DIR/include/.
+	@cp -f $(srcdir)/sstruct_mv.h $$HYPRE_INSTALL_DIR/include/.
 	@cp -f libHYPRE_*.a $$HYPRE_INSTALL_DIR/lib/.
 
 clean:

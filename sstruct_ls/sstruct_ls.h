@@ -8,7 +8,7 @@
 
 #include "utilities.h"
 #include "krylov.h"
-#include "sstruct_matrix_vector.h"
+#include "sstruct_mv.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -128,7 +128,7 @@ lib_LIBRARIES = libhypre_class.a
 libhypre_class_a_SOURCES = ${PREBUILT_SRCS} ${GENERATED_SRCS} ${PREBUILT_HDRS} ${GENERATED_HDRS}
 #libhypre_class_a_HEADERS = 
 
-HYPRE_INCLUDES = -I../../hypre/include -I../../struct_matrix_vector -I../babel_stubs_c -I../babel
+HYPRE_INCLUDES = -I../../hypre/include -I../../struct_mv -I../babel_stubs_c -I../babel
 # BABEL_INCLUDES  = -I${BABELDIR}/include -I${BABELDIR}/include/babel
 BABEL_INCLUDES = -I${BABELDIR}/babel-0.4.1/source/runtime/  -I${BABELDIR}/babel-0.4.1/source/runtime/babel
 INCLUDES = -I.. ${HYPRE_INCLUDES} ${BABEL_INCLUDES} 

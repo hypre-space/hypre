@@ -9,7 +9,7 @@
 #define DEBUG 0
 
 #if DEBUG
-#include "sstruct_matrix_vector.h"
+#include "sstruct_mv.h"
 #endif
 
 /*--------------------------------------------------------------------------

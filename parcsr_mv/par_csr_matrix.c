@@ -14,13 +14,13 @@
 
 #include "headers.h"
 
-#include "../seq_matrix_vector/HYPRE_seq_mv.h"
+#include "../seq_mv/HYPRE_seq_mv.h"
 /* In addition to publically accessible interface in HYPRE_mv.h, the implementation
    in this file uses accessor macros into the sequential matrix structure, and
    so includes the .h that defines that structure. Should those accessor functions
    become proper functions at some later date, this will not be necessary. AJC 4/99
 */
-#include "../seq_matrix_vector/csr_matrix.h"
+#include "../seq_mv/csr_matrix.h"
 
 /*--------------------------------------------------------------------------
  * hypre_ParCSRMatrixCreate

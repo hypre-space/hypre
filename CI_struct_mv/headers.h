@@ -11,4 +11,4 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "CI_struct_matrix_vector.h"
+#include "CI_struct_mv.h"

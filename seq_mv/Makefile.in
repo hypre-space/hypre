@@ -45,7 +45,7 @@ LFLAGS =\
 
 HEADERS =\
  HYPRE_seq_mv.h\
- seq_matrix_vector.h\
+ seq_mv.h\
  csr_matrix.h\
  headers.h\
  mapped_matrix.h\
@@ -75,7 +75,7 @@ all: libHYPRE_seq_mv.a
  
 install: all
 	@cp -f $(srcdir)/HYPRE_*.h $$HYPRE_INSTALL_DIR/include/.
-	@cp -f $(srcdir)/seq_matrix_vector.h $$HYPRE_INSTALL_DIR/include/.
+	@cp -f $(srcdir)/seq_mv.h $$HYPRE_INSTALL_DIR/include/.
 	@cp -f libHYPRE_*.a $$HYPRE_INSTALL_DIR/lib/.
 
 clean:

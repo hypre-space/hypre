@@ -46,7 +46,7 @@ LFLAGS =\
  -L/home/casc/g77/lib\
  -L/usr/local/mpi/mpich/lib/solaris/ch_p4\
  -L.\
- -L../../seq_matrix_vector\
+ -L../../seq_mv\
  -L../../utilities\
  -lHYPRE_ls\
  -lHYPRE_mv\

@@ -11,4 +11,4 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "sstruct_matrix_vector.h"
+#include "sstruct_mv.h"

@@ -1,4 +1,4 @@
-#include "../struct_matrix_vector/struct_matrix_vector.h"
+#include "../struct_mv/struct_mv.h"
 
 #ifndef HYPRE_structIJ_MV_HEADER
 #define HYPRE_structIJ_MV_HEADER

@@ -14,7 +14,7 @@
 #include "Hypre_MPI_Com_Skel.h" 
 #include "Hypre_MPI_Com_Data.h" 
 #include "HYPRE_IJ_mv.h"
-#include "IJ_matrix_vector.h"
+#include "IJ_mv.h"
 #include "Hypre_Partition_Skel.h"
 #include "Hypre_PartitionBuilder_Skel.h"
 #include "Hypre_Map_Stub.h"

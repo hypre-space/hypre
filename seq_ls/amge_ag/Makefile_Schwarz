@@ -25,7 +25,7 @@ CFLAGS =\
  ${C_COMPILE_FLAGS}\
  -I../..\
  -I../../utilities\
- -I../../seq_matrix_vector\
+ -I../../seq_mv\
  ${CINCLUDES}\
  ${CDEFS}
  
@@ -38,7 +38,7 @@ LDLIBFLAGS =
 LFLAGS =\
  -L.\
  -lX11\
- -L../../seq_matrix_vector\
+ -L../../seq_mv\
  -L../../utilities\
  -lHYPRE_amge_ls\
  -lHYPRE_seq_mv\

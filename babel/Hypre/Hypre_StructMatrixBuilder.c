@@ -16,7 +16,7 @@
 */
 
 #include "HYPRE_struct_mv.h"
-#include "struct_matrix_vector.h"
+#include "struct_mv.h"
 #include "Hypre_Box_Skel.h"
 #include "Hypre_StructGrid_Skel.h"
 #include "Hypre_StructStencil_Skel.h"

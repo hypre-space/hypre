@@ -88,8 +88,8 @@ int impl_Hypre_ParCSRVectorBuilder_Start
  * set and storage allocated, this just resets the partitioning vector.
  * But that could invalidate the already-set local storage and indices.
  * For some hints about this issue, look at
- * IJ_matrix_vector/hypre_IJVector_parcsr.c:hypre_IJVectorSetPartitioningPar
- * and parcsr_matrix_vector/par_vector.c:hypre_ParVectorCreate .
+ * IJ_mv/hypre_IJVector_parcsr.c:hypre_IJVectorSetPartitioningPar
+ * and parcsr_mv/par_vector.c:hypre_ParVectorCreate .
  **********************************************************/
 /*  int  impl_Hypre_ParCSRVectorBuilder_SetPartitioning */
 /*  ( Hypre_ParCSRVectorBuilder this, array1int partitioning ) { */

@@ -25,7 +25,7 @@ CFLAGS = \
  -I$(srcdir)\
  -I$(srcdir)/..\
  -I$(srcdir)/../utilities\
- -I$(srcdir)/../struct_matrix_vector\
+ -I$(srcdir)/../struct_mv\
  @PETSCINCLUDE@ \
  ${CINCLUDES} ${CDEFS}
 
@@ -33,7 +33,7 @@ RANLIB = @RANLIB@
 
 HEADERS =\
  headers.h\
- CI_struct_matrix_vector.h\
+ CI_struct_mv.h\
  HYPRE_CI_mv.h
  
 FILES =\

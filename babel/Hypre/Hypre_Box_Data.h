@@ -7,7 +7,7 @@
 #ifndef Hypre_Box_DataMembers_
 #define Hypre_Box_DataMembers_
 
-#include "struct_matrix_vector.h"
+#include "struct_mv.h"
 
 struct Hypre_Box_private_type
 {

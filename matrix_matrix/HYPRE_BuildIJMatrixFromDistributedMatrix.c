@@ -28,7 +28,7 @@
 #include "HYPRE_distributed_matrix_protos.h"
 
 /* Matrix prototypes for IJMatirx */
-#include "IJ_matrix_vector/HYPRE_IJ_mv.h"
+#include "IJ_mv/HYPRE_IJ_mv.h"
 
 /*--------------------------------------------------------------------------
  * HYPRE_BuildIJMatrixFromDistributedMatrix

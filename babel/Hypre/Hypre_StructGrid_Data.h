@@ -8,7 +8,7 @@
 #define Hypre_StructGrid_DataMembers_
 
 #include "HYPRE_struct_mv.h"
-#include "struct_matrix_vector.h"
+#include "struct_mv.h"
 #include "Hypre_MPI_Com_Skel.h"
 #include "Hypre_MPI_Com_Data.h"
 

@@ -8,7 +8,7 @@
 # $Revision$
 #EHEADER***********************************************************************
 
-INTERNAL_HEADER=struct_matrix_vector.h
+INTERNAL_HEADER=struct_mv.h
 
 #===========================================================================
 # Include guards and other includes

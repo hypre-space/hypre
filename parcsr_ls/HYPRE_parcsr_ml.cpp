@@ -42,8 +42,8 @@
 
 #include "../matrix_matrix/HYPRE_matrix_matrix_protos.h"
 
-#include "../seq_matrix_vector/vector.h"
-#include "../parcsr_matrix_vector/par_vector.h"
+#include "../seq_mv/vector.h"
+#include "../parcsr_mv/par_vector.h"
 
 #ifdef MLPACK
 

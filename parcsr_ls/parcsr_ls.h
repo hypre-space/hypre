@@ -8,8 +8,8 @@
 
 #include "utilities.h"
 #include "krylov.h"
-#include "seq_matrix_vector.h"
-#include "parcsr_matrix_vector.h"
+#include "seq_mv.h"
+#include "parcsr_mv.h"
 
 #ifdef __cplusplus
 extern "C" {

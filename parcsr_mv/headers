@@ -8,7 +8,7 @@
 # $Revision$
 #EHEADER***********************************************************************
 
-INTERNAL_HEADER=parcsr_matrix_vector.h
+INTERNAL_HEADER=parcsr_mv.h
 
 #===========================================================================
 # Include guards and other includes
@@ -24,7 +24,7 @@ cat > $INTERNAL_HEADER <<@
 #define hypre_PARCSR_MV_HEADER
 
 #include "utilities.h"
-#include "seq_matrix_vector.h"
+#include "seq_mv.h"
 
 #ifdef __cplusplus
 extern "C" {

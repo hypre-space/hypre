@@ -14,7 +14,7 @@
 #include "Hypre_ParCSRMatrix_Data.h"
 #include "HYPRE_parcsr_ls.h"
 #include "HYPRE_IJ_mv.h"
-#include "IJ_matrix_vector.h"
+#include "IJ_mv.h"
 
 /* *************************************************
  * Constructor

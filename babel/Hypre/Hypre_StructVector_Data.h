@@ -8,7 +8,7 @@
 #define Hypre_StructVector_DataMembers_
 
 #include "HYPRE_struct_mv.h"
-#include "struct_matrix_vector.h"
+#include "struct_mv.h"
 #include "Hypre_StructGrid_IOR.h"
 
 struct Hypre_StructVector_private_type

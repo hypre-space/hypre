@@ -11,5 +11,5 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "IJ_matrix_vector.h"
+#include "IJ_mv.h"
 #include "HYPRE_IJ_mv.h"

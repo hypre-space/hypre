@@ -62,8 +62,8 @@ CFLAGS = \
  -I$(srcdir)/..\
  -I$(srcdir)/../utilities\
  -I$(srcdir)/../distributed_matrix\
- -I$(srcdir)/../seq_matrix_vector\
- -I$(srcdir)/../parcsr_matrix_vector\
+ -I$(srcdir)/../seq_mv\
+ -I$(srcdir)/../parcsr_mv\
  @PETSCINCLUDE@ \
  ${C_COMPILE_FLAGS}\
  ${CINCLUDES} ${CDEFS}

@@ -19,7 +19,7 @@ PACKAGE=fei-isis
 #######################################################################
 
 HYPRE_ROOT = @HYPRE_TOP_SRC_DIR@
-FEI_ROOT= ${HYPRE_ROOT}/FEI_matrix_vector/fei-base
+FEI_ROOT= ${HYPRE_ROOT}/FEI_mv/fei-base
 HYPRE_ARCH=@ARCH@
 FEI_TARGET=FEI_PLL
 
@@ -39,8 +39,8 @@ C++INCLUDES=-I$(FEI_ROOT) -I$(HYPRE_ROOT) \
             -I$(FEI_ROOT)/../fei-hypre \
             -I$(HYPRE_ROOT)/hypre/include \
             -I$(HYPRE_ROOT)/utilities \
-            -I$(HYPRE_ROOT)/parcsr_matrix_vector \
-            -I$(HYPRE_ROOT)/seq_matrix_vector \
+            -I$(HYPRE_ROOT)/parcsr_mv \
+            -I$(HYPRE_ROOT)/seq_mv \
             ${CINCLUDES}
 CXXFLAGS=${CXX_COMPILE_FLAGS} $(OPT) -c
 

@@ -26,7 +26,7 @@ CFLAGS =\
  -I$(srcdir)\
  -I$(srcdir)/../..\
  -I$(srcdir)/../../utilities\
- -I$(srcdir)/../../seq_matrix_vector\
+ -I$(srcdir)/../../seq_mv\
  ${CINCLUDES}\
  ${CDEFS}
  
@@ -39,7 +39,7 @@ LDLIBFLAGS = @LDLIBDIRS@ @LDLIBS@
 LFLAGS =\
  -L.\
  -lX11\
- -L../../seq_matrix_vector\
+ -L../../seq_mv\
  -L../../utilities\
  -lHYPRE_amge_ls\
  -lHYPRE_seq_mv\

@@ -7,7 +7,7 @@
 #define hypre_CI_LS_HEADER
 
 #include "utilities.h"
-#include "CI_struct_matrix_vector.h"
+#include "CI_struct_mv.h"
 #include "HYPRE.h"
 
 /*BHEADER**********************************************************************
