@@ -326,6 +326,11 @@ hypre_GMRESSolve(void  *gmres_vdata,
                 if (logging > 0 && my_id == 0)
                    printf("Final L2 norm of residual: %e\n\n", r_norm);
 		if (r_norm <= epsilon) break;
+		else
+		{
+		   hypre_KrylovCopyVector(r,p[0]);
+		   i = 0;
+		}
 	}
 /* compute residual vector and continue loop */
 
@@ -335,7 +340,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
 		rs[j] = c[j-1]*rs[j];
 	}
 
-	hypre_KrylovAxpy(rs[0]-1.0,p[0],p[0]);
+	if (i) hypre_KrylovAxpy(rs[0]-1.0,p[0],p[0]);
 	for (j=1; j < i+1; j++)
 		hypre_KrylovAxpy(rs[j],p[j],p[0]);	
    }
