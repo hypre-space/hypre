@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -x
 #BHEADER***********************************************************************
 # (c) 2000   The Regents of the University of California
 #
@@ -220,9 +220,9 @@ echo "$MailGroup" > ${Hdr}.${MessageStr}.${MakeOpt}.err.email
 
 confbuildtest () 
 {
-BuildOpt=$1	 ConfigOption=$2	 MessageStr=$3
-IJOpt=$4	 FeiOpt=$5	StructOpt=$6	 SstructOpt=$7	 
-MakeOpt=$8	 BetaOpt=$9
+BuildOpt=$1	 ConfigOption=$2  MessageStr=$3
+IJOpt=$4	 FeiOpt=$5	  StructOpt=$6
+SstructOpt=$7	 MakeOpt=$8	  BetaOpt=$9
 shift
 NoFeiOpt=$9
 if [ ${BuildOpt} -ne $Skip ]
