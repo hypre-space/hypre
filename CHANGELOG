@@ -16,7 +16,8 @@
 
 Version 1.7.0b released, 2001/11/12.
 
-- Mostly bug fixes
+- Bug fixes: SStruct interface under threads was producing incorrect
+  results. That is now fixed.
 
 Version 1.6.0 released, 2001/07/27.
 
