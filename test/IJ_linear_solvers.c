@@ -1081,7 +1081,7 @@ main( int   argc,
 	 HYPRE_ParCSRParaSailsSetParams(pcg_precond, 0.1, 1);
 	 HYPRE_ParCSRParaSailsSetSym(pcg_precond, 0);
 
-         HYPRE_ParCSRPCGSetPrecond(pcg_solver,
+         HYPRE_ParCSRGMRESSetPrecond(pcg_solver,
                                    HYPRE_ParCSRParaSailsSolve,
                                    HYPRE_ParCSRParaSailsSetup,
                                    pcg_precond);
