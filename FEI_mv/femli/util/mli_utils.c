@@ -1129,6 +1129,11 @@ int MLI_Utils_SVD(double *uArray, double *sArray, double *vtArray,
 #define MIN(a,b) ((a)<(b)?(a):(b))
 #endif
 
+#ifdef HYPRE_USING_ESSL
+    // undone
+    int info;
+    info = -1;
+#else
     void hypre_F90_NAME_BLAS(dgesvd, DGESVD)(char *, char *, int *, 
         int *, double *, int *, double *, double *, int *, 
         double *, int *, double *, int *, int *);
@@ -1140,6 +1145,7 @@ int MLI_Utils_SVD(double *uArray, double *sArray, double *vtArray,
 
     hypre_F90_NAME_BLAS(dgesvd, DGESVD)(&jobu, &jobvt, &m, &n, uArray,
         &m, sArray, NULL, &m, vtArray, &dim, workArray, &workLen, &info);
+#endif
 
     return info;
 }
