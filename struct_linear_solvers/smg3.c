@@ -19,11 +19,11 @@
  *--------------------------------------------------------------------------*/
 
 zzz_SMG3Data *
-zzz_SMG3Initialize( MPI_Comm *context )
+zzz_SMG3Initialize( MPI_Comm *comm )
 {
    zzz_SMG3Data *smg3_data;
 
-   smg3_data = ctalloc(zzz_SMG3Data, 1);
+   smg3_data = zzz_CTAlloc(zzz_SMG3Data, 1);
 
    /* set default parameters ... */
 

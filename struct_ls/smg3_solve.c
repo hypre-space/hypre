@@ -19,10 +19,12 @@
  *--------------------------------------------------------------------------*/
 
 int
-zzz_SMG3Solve( zzz_SMG3Data     *smg3_data,
+zzz_SMG3Solve( void             *smg3_vdata,
                zzz_StructVector *b,
-               zzz_StructVector *x         )
+               zzz_StructVector *x          )
 {
+   zzz_SMG3Data *smg3_data = smg3_vdata;
+
    int ierr;
 
    /*-----------------------------------------------------
@@ -50,50 +52,48 @@ zzz_SMG3Solve( zzz_SMG3Data     *smg3_data,
        * Down cycle
        *--------------------------------------------------*/
 
-      /* relax (tol = 0.0) */
-      if (i == 0)
-         zzz_SMG3Relax(relax_data_initial, x_l[0], b_l[0]); /* (zero = zero) */
-      else
-         zzz_SMG3Relax(relax_data_l[0], x_l[0], b_l[0]);    /* (zero = 0) */
-
-      /* compute residual (b - Ax) (use r_l[0] = temp_vec_l[0]) */
-      zzz_SMGResidual(A_l[0], x_l[0], b_l[0], residual_compute_pkg[0], r_l[0]);
-
-      /* do convergence check */
-      if (tol > 0.0)
+      for (l = 0; l <= (num_levels - 2); l++)
       {
-         r_dot_r = zzz_StructInnerProd(r_l[0], r_l[0]);
-         if (r_dot_r < eps)
-            break;
-
-         if (logging > 0)
+         /* pre-relax */
+         if (l == 0)
          {
-            norm_log[i]     = sqrt(r_dot_r);
-            rel_norm_log[i] = b_dot_b ? sqrt(r_dot_r/b_dot_b) : 0.0;
+            if (i == 0)
+            {
+               /* (tol = 0.0; zero = zero) */
+               zzz_SMG3Relax(pre_relax_data_initial, x_l[0], b_l[0]);
+            }
+            else
+            {
+               /* (tol = 0.0; zero = 0) */
+               zzz_SMG3Relax(pre_relax_data_l[0], x_l[0], b_l[0]);
+            }
          }
-#if 0
-   if(!amps_Rank(amps_CommWorld))
-      amps_Printf("Iteration (%d): ||r||_2 = %e, ||r||_2/||b||_2 = %e\n",
-		  i, sqrt(r_dot_r), (b_dot_b ? sqrt(r_dot_r/b_dot_b) : 0.0));
-#endif
-      }
-
-      /* restrict residual */
-      zzz_SMGRestrict(restrict_data_l[0], R_l[0], r_l[0], b_l[1]);
-
-#if 0
-      /* for debugging purposes */
-      PrintVector("b.01", b_l[1]);
-#endif
-
-      for (l = 1; l <= (num_levels - 2); l++)
-      {
-         /* relax (tol = 0.0; zero = 1) */
-         zzz_SMG3Relax(relax_data_l[l], x_l[l], b_l[l]);
+         else
+         {
+            /* (tol = 0.0; zero = 1) */
+            zzz_SMG3Relax(pre_relax_data_l[l], x_l[l], b_l[l]);
+         }
 
 	 /* compute residual (b - Ax) (use r_l[l] = temp_vec_l[l]) */
          zzz_SMGResidual(A_l[l], x_l[l], b_l[l],
                          residual_compute_pkg[l], r_l[l]);
+
+         /* do convergence check */
+         if (l == 0)
+         {
+            if (tol > 0.0)
+            {
+               r_dot_r = zzz_StructInnerProd(r_l[l], r_l[l]);
+               if (logging > 0)
+               {
+                  norm_log[i]     = sqrt(r_dot_r);
+                  rel_norm_log[i] = b_dot_b ? sqrt(r_dot_r/b_dot_b) : 0.0;
+               }
+
+               if (r_dot_r < eps)
+                  return ierr;
+            }
+         }
 
 	 /* restrict residual */
          zzz_SMGRestrict(restrict_data_l[l], R_l[l], r_l[l], b_l[l+1]);
@@ -114,13 +114,13 @@ zzz_SMG3Solve( zzz_SMG3Data     *smg3_data,
        *--------------------------------------------------*/
 
       /* solve the coarsest system (tol = 0.0; zero = 1) */
-      zzz_SMG3Relax(relax_data_coarsest, x_l[l], b_l[l]);
+      zzz_SMG3Relax(coarse_relax_data, x_l[l], b_l[l]);
 
       /*--------------------------------------------------
        * Up cycle
        *--------------------------------------------------*/
 
-      for (l = (num_levels - 2); l >= 1; l--)
+      for (l = (num_levels - 2); l >= 0; l--)
       {
 	 /* interpolate error and update solution */
 	 zzz_SMGIntAdd(intadd_data_l[l], PT_l[l], x_l[l+1], x_l[l]);
@@ -135,18 +135,8 @@ zzz_SMG3Solve( zzz_SMG3Data     *smg3_data,
 #endif
 
          /* relax (tol = 0.0; zero = 0) */
-         zzz_SMG3Relax(relax_data_l[l], x_l[l], b_l[l]);
+         zzz_SMG3Relax(post_relax_data_l[l], x_l[l], b_l[l]);
       }
-
-      /* interpolate error and update solution */
-      zzz_SMGIntAdd(intadd_data_l[0], PT_l[0], x_l[1], x_l[0]);
-#if 0
-      /* for debugging purposes */
-      PrintVector("e.00", temp_vec_l[0]);
-#endif
-
-      /* relax (tol = 0.0; zero = 0) */
-      zzz_SMG3Relax(relax_data_l[0], x_l[0], b_l[0]);
    }
 
 #if 1

@@ -37,7 +37,7 @@ zzz_SMGResidualInitialize( )
 {
    zzz_SMGResidualData *residual_data;
 
-   residual_data = ctalloc(zzz_SMGResidualData, 1);
+   residual_data = zzz_CTAlloc(zzz_SMGResidualData, 1);
 
    return (void *) residual_data;
 }
@@ -288,7 +288,7 @@ zzz_SMGResidualFinalize( void *residual_vdata )
    if (residual_data)
    {
       zzz_FreeComputePkg(residual_data -> compute_pkg );
-      tfree(residual_data);
+      zzz_TFree(residual_data);
    }
 
    return ierr;

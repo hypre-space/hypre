@@ -22,38 +22,33 @@
 
 typedef struct
 {
-   int        max_iter;
-   int        max_levels;
-   int        min_NX, min_NY, min_NZ;
-	     
-   int        time_index;
+   MPI_Comm           *comm;
 
-   PFModule  	   **smooth_l;
-   PFModule  	    *solve;
+   int                 max_iter;
+   int                 max_levels;  /* max_level <= 0 means no limit */
+                    
+   int                 num_levels;
+                    
+   zzz_StructGrid    **grid_l;
+                    
+   zzz_StructMatrix  **A_l;
+   zzz_StructMatrix  **PT_l;
+   zzz_StructMatrix  **R_l;
+                    
+   zzz_StructVector  **b_l;
+   zzz_StructVector  **x_l;
+   zzz_StructVector  **r_l;
 
-   /* InitInstanceXtra arguments */
-   double           *temp_data;
+   zzz_SBoxArrayArray *coarse_points_l;
+   zzz_SBoxArrayArray *fine_points_l;
 
-   /* instance data */
-   int               num_levels;
-
-   int              *coarsen_l;
-
-   Grid            **grid_l;
-
-   SubregionArray  **f_sra_l;
-   SubregionArray  **c_sra_l;
-
-   ComputePkg      **restrict_compute_pkg_l;
-   ComputePkg      **prolong_compute_pkg_l;
-
-   Matrix          **A_l;
-   Matrix          **P_l;
-
-   /* temp data */
-   Vector          **x_l;
-   Vector          **b_l;
-   Vector          **temp_vec_l;
+   void               *pre_relax_data_initial;
+   void              **pre_relax_data_l;
+   void               *coarse_relax_data;
+   void              **post_relax_data_l;
+   void              **residual_data_l;
+   void              **restrict_data_l;
+   void              **intadd_data_l;
 
 } zzz_SMG3Data;
 
@@ -61,7 +56,9 @@ typedef struct
  * Accessor macros:
  *--------------------------------------------------------------------------*/
 
-#define zzz_SMG3Data(smg3_data)      ((smg3_data) -> )
+#define zzz_SMG3DataComm(smg3_data)         ((smg3_data) -> comm)
+#define zzz_SMG3DataMaxIter(smg3_data)      ((smg3_data) -> max_iter)
+#define zzz_SMG3DataMaxLevels(smg3_data)    ((smg3_data) -> max_levels)
 
 /*--------------------------------------------------------------------------
  * Utility routines:

@@ -15,6 +15,28 @@
 #include "smg3.h"
 
 /*--------------------------------------------------------------------------
+ * zzz_SMG3NewRAPOp
+ *--------------------------------------------------------------------------*/
+
+zzz_StructMatrix *
+zzz_SMG3NewRAPOp( zzz_StructMatrix *R,
+                  zzz_StructMatrix *A,
+                  zzz_StructMatrix *PT )
+{
+   zzz_StructMatrix *RAP;
+
+   coarse_grid = zzz_StructMatrixGrid(R);
+
+   RAP = zzz_NewStructMatrix(coarse_grid, RAP_stencil);
+   zzz_SetStructMatrixNumGhost(RAP, RAP_num_ghost);
+   zzz_StructMatrixSymmetric(RAP) = 1;
+   zzz_InitializeStructMatrix(RAP);
+   zzz_AssembleStructMatrix(RAP);
+
+   return RAP;
+}
+
+/*--------------------------------------------------------------------------
  * 
  *--------------------------------------------------------------------------*/
 
