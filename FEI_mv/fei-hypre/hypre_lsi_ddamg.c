@@ -102,9 +102,8 @@ int HYPRE_LocalAMGSolve(HYPRE_Solver solver, HYPRE_ParVector x_csr,
    {
       if (remap_array[i] >= 0) temp_vect[remap_array[i]] = x_par_data[i];
    }
-   HYPRE_IJVectorSetLocalComponents(localb,interior_nrows,temp_list,
-                                    NULL,temp_vect);
-   HYPRE_IJVectorZeroLocalComponents(localx);
+   HYPRE_IJVectorSetValues(localb,interior_nrows,(const int *) temp_list,
+                           temp_vect);
    free( temp_list );
    free( temp_vect );
 
@@ -112,15 +111,9 @@ int HYPRE_LocalAMGSolve(HYPRE_Solver solver, HYPRE_ParVector x_csr,
    /* perform one cycle of AMG to subdomain (internal nodes)  */
    /* --------------------------------------------------------*/
 
-   /* ---old_IJ-----------------------------------------------*/
-   /*LA_csr = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(localA);*/
-   /*Lx_csr = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(localx);*/
-   /*Lb_csr = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(localb);*/
-   /* ---new_IJ-----------------------------------------------*/
    HYPRE_IJMatrixGetObject(localA, (void**) &LA_csr);
    HYPRE_IJVectorGetObject(localx, (void**) &Lx_csr);
    HYPRE_IJVectorGetObject(localb, (void**) &Lb_csr);
-   /* --------------------------------------------------------*/
 
    HYPRE_BoomerAMGSolve( solver, LA_csr, Lb_csr, Lx_csr );
 
@@ -208,9 +201,8 @@ int HYPRE_ApplyExtension(HYPRE_Solver solver, HYPRE_ParVector x_csr,
       } else if ( remap_array[i] >= interior_nrows) 
         printf("WARNING : index out of range.\n");
    }
-   HYPRE_IJVectorSetLocalComponents(localb,interior_nrows,temp_list,
-                                    NULL,temp_vect);
-   HYPRE_IJVectorZeroLocalComponents(localx);
+   HYPRE_IJVectorSetValues(localb,interior_nrows,(const int*) temp_list,
+                           temp_vect);
    free( temp_list );
    free( temp_vect );
 
@@ -218,16 +210,9 @@ int HYPRE_ApplyExtension(HYPRE_Solver solver, HYPRE_ParVector x_csr,
    /* perform one cycle of AMG to subdomain (internal nodes)  */
    /* --------------------------------------------------------*/
 
-   /* ---old_IJ-----------------------------------------------*/
-   /*LA_csr = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(localA);*/
-   /*Lx_csr = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(localx);*/
-   /*Lb_csr = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(localb);*/
-   /* ---new_IJ-----------------------------------------------*/
    HYPRE_IJMatrixGetObject(localA, (void**) &LA_csr);
    HYPRE_IJVectorGetObject(localx, (void**) &Lx_csr);
    HYPRE_IJVectorGetObject(localb, (void**) &Lb_csr);
-   /* --------------------------------------------------------*/
-
    HYPRE_BoomerAMGSolve( solver, LA_csr, Lb_csr, Lx_csr );
 
    /* --------------------------------------------------------*/
@@ -282,21 +267,11 @@ int HYPRE_ApplyExtensionTranspose(HYPRE_Solver solver, HYPRE_ParVector x_csr,
    /* create a temporary long vector                          */
    /* --------------------------------------------------------*/
 
-   /* ---old_IJ----------------------------------------------------
-   HYPRE_IJVectorCreate(parComm, &tvec, global_nrows);
-   HYPRE_IJVectorSetLocalStorageType(tvec, HYPRE_PARCSR);
-   HYPRE_IJVectorSetLocalPartitioning(tvec,myBegin,myEnd+1);
-   HYPRE_IJVectorAssemble(tvec);
-   HYPRE_IJVectorInitialize(tvec);
-   HYPRE_IJVectorZeroLocalComponents(tvec);
-   t_csr       = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(tvec);
-      ---new_IJ----------------------------------------------------*/
    HYPRE_IJVectorCreate(parComm, myBegin, myEnd, &tvec);
    HYPRE_IJVectorSetObjectType(tvec, HYPRE_PARCSR);
    HYPRE_IJVectorInitialize(tvec);
    HYPRE_IJVectorAssemble(tvec);
    HYPRE_IJVectorGetObject(tvec, (void **) &t_csr);
-   /* -------------------------------------------------------------*/
    t_par       = (hypre_ParVector *) t_csr;
    t_par_local = hypre_ParVectorLocalVector(t_par);
    t_par_data  = hypre_VectorData(t_par_local);
@@ -324,9 +299,8 @@ int HYPRE_ApplyExtensionTranspose(HYPRE_Solver solver, HYPRE_ParVector x_csr,
       if (remap_array[i] >= 0 && remap_array[i] < interior_nrows) 
          temp_vect[remap_array[i]] = x_par_data[i];
    }
-   HYPRE_IJVectorSetLocalComponents(localb,interior_nrows,temp_list,
-                                    NULL,temp_vect);
-   HYPRE_IJVectorZeroLocalComponents(localx);
+   HYPRE_IJVectorSetValues(localb,interior_nrows,(const int*) temp_list,
+                           temp_vect);
    free( temp_list );
    free( temp_vect );
 
@@ -334,15 +308,9 @@ int HYPRE_ApplyExtensionTranspose(HYPRE_Solver solver, HYPRE_ParVector x_csr,
    /* perform one cycle of AMG to subdomain (internal nodes)  */
    /* --------------------------------------------------------*/
 
-   /* ---old_IJ-----------------------------------------------*/
-   /*LA_csr = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(localA);*/
-   /*Lx_csr = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(localx);*/
-   /*Lb_csr = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(localb);*/
-   /* ---new_IJ-----------------------------------------------*/
    HYPRE_IJMatrixGetObject(localA, (void**) &LA_csr);
    HYPRE_IJVectorGetObject(localx, (void**) &Lx_csr);
    HYPRE_IJVectorGetObject(localb, (void**) &Lb_csr);
-   /* --------------------------------------------------------*/
 
    HYPRE_BoomerAMGSolve( solver, LA_csr, Lb_csr, Lx_csr );
 
@@ -448,9 +416,8 @@ int HYPRE_ApplyTransform( HYPRE_Solver solver, HYPRE_ParVector x_csr,
       } else if ( remap_array[i] >= interior_nrows) 
         printf("WARNING : index out of range.\n");
    }
-   HYPRE_IJVectorSetLocalComponents(localb,interior_nrows,temp_list,
-                                    NULL,temp_vect);
-   HYPRE_IJVectorZeroLocalComponents(localx);
+   HYPRE_IJVectorSetValues(localb,interior_nrows,(const int*) temp_list,
+                           temp_vect);
    free( temp_list );
    free( temp_vect );
 
@@ -458,15 +425,9 @@ int HYPRE_ApplyTransform( HYPRE_Solver solver, HYPRE_ParVector x_csr,
    /* perform one cycle of AMG to subdomain (internal nodes)  */
    /* --------------------------------------------------------*/
 
-   /* ---old_IJ-----------------------------------------------*/
-   /*LA_csr = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(localA);*/
-   /*Lx_csr = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(localx);*/
-   /*Lb_csr = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(localb);*/
-   /* ---new_IJ-----------------------------------------------*/
    HYPRE_IJMatrixGetObject(localA, (void**) &LA_csr);
    HYPRE_IJVectorGetObject(localx, (void**) &Lx_csr);
    HYPRE_IJVectorGetObject(localb, (void**) &Lb_csr);
-   /* --------------------------------------------------------*/
 
    HYPRE_BoomerAMGSolve( solver, LA_csr, Lb_csr, Lx_csr );
 
@@ -541,9 +502,8 @@ int HYPRE_ApplyTransformTranspose(HYPRE_Solver solver, HYPRE_ParVector x_csr,
       if (remap_array[i] >= 0 && remap_array[i] < interior_nrows) 
          temp_vect[remap_array[i]] = x_par_data[i];
    }
-   HYPRE_IJVectorSetLocalComponents(localb,interior_nrows,temp_list,
-                                    NULL,temp_vect);
-   HYPRE_IJVectorZeroLocalComponents(localx);
+   HYPRE_IJVectorSetValues(localb,interior_nrows,(const int*) temp_list,
+                           temp_vect);
    free( temp_list );
    free( temp_vect );
 
@@ -551,15 +511,9 @@ int HYPRE_ApplyTransformTranspose(HYPRE_Solver solver, HYPRE_ParVector x_csr,
    /* perform one cycle of AMG to subdomain (internal nodes)  */
    /* --------------------------------------------------------*/
 
-   /* ---old_IJ-----------------------------------------------*/
-   /*LA_csr = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(localA);*/
-   /*Lx_csr = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(localx);*/
-   /*Lb_csr = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(localb);*/
-   /* ---new_IJ-----------------------------------------------*/
    HYPRE_IJMatrixGetObject(localA, (void**) &LA_csr);
    HYPRE_IJVectorGetObject(localx, (void**) &Lx_csr);
    HYPRE_IJVectorGetObject(localb, (void**) &Lb_csr);
-   /* --------------------------------------------------------*/
 
    HYPRE_BoomerAMGSolve( solver, LA_csr, Lb_csr, Lx_csr );
 
@@ -647,57 +601,6 @@ int HYPRE_IntfaceSolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
    /* create temporary vectors for GMRES                      */
    /* --------------------------------------------------------*/
 
-   /* ---old_IJ----------------------------------------------------
-   HYPRE_IJVectorCreate(parComm, &pvec, global_intface_nrows);
-   HYPRE_IJVectorSetLocalStorageType(pvec, HYPRE_PARCSR);
-   HYPRE_IJVectorSetLocalPartitioning(pvec,myBegin_int,myEnd_int+1);
-   HYPRE_IJVectorAssemble(pvec);
-   HYPRE_IJVectorInitialize(pvec);
-   HYPRE_IJVectorZeroLocalComponents(pvec);
-
-   HYPRE_IJVectorCreate(parComm, &rvec, global_intface_nrows);
-   HYPRE_IJVectorSetLocalStorageType(rvec, HYPRE_PARCSR);
-   HYPRE_IJVectorSetLocalPartitioning(rvec,myBegin_int,myEnd_int+1);
-   HYPRE_IJVectorAssemble(rvec);
-   HYPRE_IJVectorInitialize(rvec);
-   HYPRE_IJVectorZeroLocalComponents(rvec);
-
-   HYPRE_IJVectorCreate(parComm, &uvec, global_intface_nrows);
-   HYPRE_IJVectorSetLocalStorageType(uvec, HYPRE_PARCSR);
-   HYPRE_IJVectorSetLocalPartitioning(uvec,myBegin_int,myEnd_int+1);
-   HYPRE_IJVectorAssemble(uvec);
-   HYPRE_IJVectorInitialize(uvec);
-   HYPRE_IJVectorZeroLocalComponents(uvec);
-
-   HYPRE_IJVectorCreate(parComm, &fvec, global_intface_nrows);
-   HYPRE_IJVectorSetLocalStorageType(fvec, HYPRE_PARCSR);
-   HYPRE_IJVectorSetLocalPartitioning(fvec,myBegin_int,myEnd_int+1);
-   HYPRE_IJVectorAssemble(fvec);
-   HYPRE_IJVectorInitialize(fvec);
-   HYPRE_IJVectorZeroLocalComponents(fvec);
-
-   HYPRE_IJVectorCreate(parComm, &tvec, global_intface_nrows);
-   HYPRE_IJVectorSetLocalStorageType(tvec, HYPRE_PARCSR);
-   HYPRE_IJVectorSetLocalPartitioning(tvec,myBegin_int,myEnd_int+1);
-   HYPRE_IJVectorAssemble(tvec);
-   HYPRE_IJVectorInitialize(tvec);
-   HYPRE_IJVectorZeroLocalComponents(tvec);
-
-   HYPRE_IJVectorCreate(parComm, &Tvec, global_nrows);
-   HYPRE_IJVectorSetLocalStorageType(Tvec, HYPRE_PARCSR);
-   HYPRE_IJVectorSetLocalPartitioning(Tvec,myBegin,myEnd+1);
-   HYPRE_IJVectorAssemble(Tvec);
-   HYPRE_IJVectorInitialize(Tvec);
-   HYPRE_IJVectorZeroLocalComponents(Tvec);
-
-   HYPRE_IJVectorCreate(parComm, &T2vec, global_nrows);
-   HYPRE_IJVectorSetLocalStorageType(T2vec, HYPRE_PARCSR);
-   HYPRE_IJVectorSetLocalPartitioning(T2vec,myBegin,myEnd+1);
-   HYPRE_IJVectorAssemble(T2vec);
-   HYPRE_IJVectorInitialize(T2vec);
-   HYPRE_IJVectorZeroLocalComponents(T2vec);
-    --new_IJ--------------------------------------------------------*/
-
    HYPRE_IJVectorCreate(parComm, myBegin_int, myEnd_int, &pvec);
    HYPRE_IJVectorSetObjectType(pvec, HYPRE_PARCSR);
    HYPRE_IJVectorInitialize(pvec);
@@ -738,11 +641,7 @@ int HYPRE_IntfaceSolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
    /* copy from x (long vector) to u (short vector)           */
    /* --------------------------------------------------------*/
 
-   /* ---old_IJ----------------------------------------------------
-   f_csr       = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(fvec);
-    --new_IJ--------------------------------------------------------*/
    HYPRE_IJVectorGetObject(fvec, (void **) &f_csr);
-   /* ----------------------------------------------------------*/
    f_par       = (hypre_ParVector *) f_csr;
    f_par_local = hypre_ParVectorLocalVector(f_par);
    f_par_data  = hypre_VectorData(f_par_local);
@@ -757,21 +656,12 @@ int HYPRE_IntfaceSolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
    /* get parcsr pointers for GMRES                           */
    /* --------------------------------------------------------*/
 
-   /* ---old_IJ----------------------------------------------------
-   r_csr  = (HYPRE_ParVector)   HYPRE_IJVectorGetLocalStorage(rvec);
-   T_csr  = (HYPRE_ParVector)   HYPRE_IJVectorGetLocalStorage(Tvec);
-   T2_csr = (HYPRE_ParVector)   HYPRE_IJVectorGetLocalStorage(T2vec);
-   t_csr  = (HYPRE_ParVector)   HYPRE_IJVectorGetLocalStorage(tvec);
-   p_csr  = (HYPRE_ParVector)   HYPRE_IJVectorGetLocalStorage(pvec);
-   u_csr  = (HYPRE_ParVector)   HYPRE_IJVectorGetLocalStorage(uvec);
-    --new_IJ--------------------------------------------------------*/
    HYPRE_IJVectorGetObject(rvec, (void **) &r_csr);
    HYPRE_IJVectorGetObject(Tvec, (void **) &T_csr);
    HYPRE_IJVectorGetObject(T2vec, (void **) &T2_csr);
    HYPRE_IJVectorGetObject(tvec, (void **) &t_csr);
    HYPRE_IJVectorGetObject(pvec, (void **) &p_csr);
    HYPRE_IJVectorGetObject(uvec, (void **) &u_csr);
-   /* ----------------------------------------------------------*/
 
    p_par  = (hypre_ParVector *) p_csr;
    u_par  = (hypre_ParVector *) u_csr;
@@ -825,7 +715,8 @@ int HYPRE_IntfaceSolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
          icnt++;
          its++;
          icnt2 = icnt + 1;
-         for (i = 0; i < local_intface_nrows; i++) t_par_data[i] = ws[icnt-1][i];
+         for (i = 0; i < local_intface_nrows; i++) 
+            t_par_data[i] = ws[icnt-1][i];
          HYPRE_ApplyExtension( solver, t_csr, T_csr );
          HYPRE_ParCSRMatrixMatvec( 1.0, A_csr, T_csr, 0.0, T2_csr );
          HYPRE_ApplyExtensionTranspose( solver, T2_csr, t_csr );
@@ -837,7 +728,8 @@ int HYPRE_IntfaceSolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
             HYPRE_ParVectorInnerProd(t_csr, p_csr, &darray[j-1]);
             t = darray[j-1];
             HH[j][icnt] = t;  t = - t;
-            for (i=0; i<local_intface_nrows; i++) ws[icnt2-1][i] += (t*ws[j-1][i]);
+            for (i=0; i<local_intface_nrows; i++) 
+               ws[icnt2-1][i] += (t*ws[j-1][i]);
          }
          for (i=0; i<local_intface_nrows; i++) t_par_data[i] = ws[icnt2-1][i];
          HYPRE_ParVectorInnerProd(t_csr, t_csr, &t);
@@ -949,21 +841,11 @@ int HYPRE_DDAMGSolve(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
 
    local_nrows = myEnd - myBegin + 1;
    MPI_Allreduce(&local_nrows, &global_nrows,1,MPI_INT,MPI_SUM,parComm);
-   /* ---old_IJ----------------------------------------------------
-   HYPRE_IJVectorCreate(parComm, &tvec, global_nrows);
-   HYPRE_IJVectorSetLocalStorageType(tvec, HYPRE_PARCSR);
-   HYPRE_IJVectorSetLocalPartitioning(tvec,myBegin,myEnd+1);
-   HYPRE_IJVectorAssemble(tvec);
-   HYPRE_IJVectorInitialize(tvec);
-   HYPRE_IJVectorZeroLocalComponents(tvec);
-   t_csr = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(tvec);
-      ---new_IJ----------------------------------------------------*/
    HYPRE_IJVectorCreate(parComm, myBegin, myEnd, &tvec);
    HYPRE_IJVectorSetObjectType(tvec, HYPRE_PARCSR);
    HYPRE_IJVectorInitialize(tvec);
    HYPRE_IJVectorAssemble(tvec);
    HYPRE_IJVectorGetObject(tvec, (void **) &t_csr);
-   /* --------------------------------------------------------*/
 
    /* --------------------------------------------------------*/
    /* apply E^T                                               */
@@ -1065,18 +947,10 @@ int HYPRE_LSI_DDAMGSolve(HYPRE_ParCSRMatrix A_csr, HYPRE_ParVector x_csr,
    /* construct the local matrix (only the border nodes)      */
    /* --------------------------------------------------------*/
 
-   /* ---old_IJ----------------------------------------------------
-   HYPRE_IJMatrixCreate(newComm,&localA,interior_nrows,interior_nrows);
-   HYPRE_IJMatrixSetLocalStorageType(localA, HYPRE_PARCSR);
-   HYPRE_IJMatrixSetLocalSize(localA, interior_nrows, interior_nrows);
-      ---new_IJ----------------------------------------------------*/
-   /* -????????????--------------------------------------------*/
-   HYPRE_IJMatrixCreate(newComm,
-			0, 0+interior_nrows-1,
-			0, 0+interior_nrows-1,
-			&localA);
+   HYPRE_IJMatrixCreate(newComm, 0, 0+interior_nrows-1,
+			0, 0+interior_nrows-1, &localA);
    HYPRE_IJMatrixSetObjectType(localA, HYPRE_PARCSR);
-   /* --------------------------------------------------------*/
+
    rowLengths = (int *) malloc(interior_nrows * sizeof(int));
    offRowLengths = (int *) malloc(local_nrows * sizeof(int));
    rowCnt = 0;
@@ -1150,7 +1024,7 @@ int HYPRE_LSI_DDAMGSolve(HYPRE_ParCSRMatrix A_csr, HYPRE_ParVector x_csr,
          if ( k != offRowLengths[i] )
             printf("WARNING : k != offRowLengths[i]\n");
          HYPRE_ParCSRMatrixRestoreRow(A_csr,eqnNum,&rowSize,&colInd,&colVal);
-         HYPRE_IJMatrixInsertRow(localA,nnz,rowCnt,newColInd,newColVal);
+         HYPRE_IJMatrixSetValues(localA,1,&nnz,&rowCnt,newColInd,newColVal);
          rowCnt++;
       }
    }
@@ -1162,20 +1036,6 @@ int HYPRE_LSI_DDAMGSolve(HYPRE_ParCSRMatrix A_csr, HYPRE_ParVector x_csr,
    /* create and load local vectors                           */
    /* --------------------------------------------------------*/
 
-   /* ---old_IJ----------------------------------------------------
-   HYPRE_IJVectorCreate(newComm, &localx, interior_nrows);
-   HYPRE_IJVectorSetLocalStorageType(localx, HYPRE_PARCSR);
-   HYPRE_IJVectorSetLocalPartitioning(localx, 0, interior_nrows);
-   HYPRE_IJVectorAssemble(localx);
-   HYPRE_IJVectorInitialize(localx);
-   HYPRE_IJVectorZeroLocalComponents(localx);
-   HYPRE_IJVectorCreate(newComm, &localb, interior_nrows);
-   HYPRE_IJVectorSetLocalStorageType(localb, HYPRE_PARCSR);
-   HYPRE_IJVectorSetLocalPartitioning(localb, 0, interior_nrows);
-   HYPRE_IJVectorAssemble(localb);
-   HYPRE_IJVectorInitialize(localb);
-   HYPRE_IJVectorZeroLocalComponents(localb);
-      ---new_IJ----------------------------------------------------*/
    HYPRE_IJVectorCreate(newComm, 0, interior_nrows-1, &localx);
    HYPRE_IJVectorSetObjectType(localx, HYPRE_PARCSR);
    HYPRE_IJVectorInitialize(localx);
@@ -1184,7 +1044,6 @@ int HYPRE_LSI_DDAMGSolve(HYPRE_ParCSRMatrix A_csr, HYPRE_ParVector x_csr,
    HYPRE_IJVectorSetObjectType(localb, HYPRE_PARCSR);
    HYPRE_IJVectorInitialize(localb);
    HYPRE_IJVectorAssemble(localb);
-   /* --------------------------------------------------------*/
 
    /* --------------------------------------------------------*/
    /* create an AMG context                                   */
@@ -1200,15 +1059,9 @@ int HYPRE_LSI_DDAMGSolve(HYPRE_ParCSRMatrix A_csr, HYPRE_ParVector x_csr,
    HYPRE_BoomerAMGSetTol(SeqPrecon, 1.0E-16);
    HYPRE_BoomerAMGSetMeasureType(SeqPrecon, 0);
 
-   /* ---old_IJ-----------------------------------------------*/
-   /*LA_csr = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(localA);*/
-   /*Lx_csr = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(localx);*/
-   /*Lb_csr = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(localb);*/
-   /* ---new_IJ-----------------------------------------------*/
    HYPRE_IJMatrixGetObject(localA, (void**) &LA_csr);
    HYPRE_IJVectorGetObject(localx, (void**) &Lx_csr);
    HYPRE_IJVectorGetObject(localb, (void**) &Lb_csr);
-   /* --------------------------------------------------------*/
 
    /*HYPRE_BoomerAMGSetIOutDat(SeqPrecon, 2);*/
    /*HYPRE_BoomerAMGSetDebugFlag(SeqPrecon, 1);*/
@@ -1245,32 +1098,6 @@ printf("CHECK 2 = %e\n", ddata);
    free( itemp_vec );
    free( itemp_vec2 );
 
-   /* ---old_IJ----------------------------------------------------
-   HYPRE_IJVectorCreate(parComm, &tvec, global_intface_nrows);
-   HYPRE_IJVectorSetLocalStorageType(tvec, HYPRE_PARCSR);
-   HYPRE_IJVectorSetLocalPartitioning(tvec,myBegin_int,myEnd_int+1);
-   HYPRE_IJVectorAssemble(tvec);
-   HYPRE_IJVectorInitialize(tvec);
-   HYPRE_IJVectorZeroLocalComponents(tvec);
-
-   HYPRE_IJVectorCreate(parComm, &Tvec, global_nrows);
-   HYPRE_IJVectorSetLocalStorageType(Tvec, HYPRE_PARCSR);
-   HYPRE_IJVectorSetLocalPartitioning(Tvec,myBegin,myEnd+1);
-   HYPRE_IJVectorAssemble(Tvec);
-   HYPRE_IJVectorInitialize(Tvec);
-   HYPRE_IJVectorZeroLocalComponents(Tvec);
-
-   HYPRE_IJVectorCreate(parComm, &T2vec, global_nrows);
-   HYPRE_IJVectorSetLocalStorageType(T2vec, HYPRE_PARCSR);
-   HYPRE_IJVectorSetLocalPartitioning(T2vec,myBegin,myEnd+1);
-   HYPRE_IJVectorAssemble(T2vec);
-   HYPRE_IJVectorInitialize(T2vec);
-   HYPRE_IJVectorZeroLocalComponents(T2vec);
-
-   T_csr  = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(Tvec);
-   T2_csr = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(T2vec);
-   t_csr  = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(tvec);
-      ---new_IJ----------------------------------------------------*/
    HYPRE_IJVectorCreate(parComm, myBegin_int, myEnd_int, &tvec);
    HYPRE_IJVectorSetObjectType(tvec, HYPRE_PARCSR);
    HYPRE_IJVectorInitialize(tvec);
@@ -1289,7 +1116,7 @@ printf("CHECK 2 = %e\n", ddata);
    HYPRE_IJVectorGetObject(Tvec, (void **) &T_csr);
    HYPRE_IJVectorGetObject(T2vec, (void **) &T2_csr);
    HYPRE_IJVectorGetObject(tvec, (void **) &t_csr);
-   /*-------------------------------------------------------*/
+
    t_par       = (hypre_ParVector *) t_csr;
    t_par_local = hypre_ParVectorLocalVector(t_par);
    t_par_data  = hypre_VectorData(t_par_local);
