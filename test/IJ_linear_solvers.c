@@ -428,7 +428,7 @@ main( int   argc,
       printf("       1=AMG-PCG    2=DS-PCG   \n");
       printf("       3=AMG-GMRES  4=DS-GMRES  \n");     
       printf("       5=AMG-CGNR   6=DS-CGNR  \n");     
-      printf("       7=PILUT-GMRES (currently not working!) \n");     
+      printf("       7=PILUT-GMRES \n");     
       printf("\n");
       printf("   -ruge                 : Ruge coarsening (local)\n");
       printf("   -ruge3                : third pass on boundary\n");
