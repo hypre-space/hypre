@@ -137,20 +137,8 @@ int  impl_Hypre_StructMatrix_GetDims(Hypre_StructMatrix this, int* m, int* n) {
 } /* end impl_Hypre_StructMatrixGetDims */
 
 /* ********************************************************
- * impl_Hypre_StructMatrixGetLocalRange
-/* This should _not_ be implemented unless we decide to provide (really,
- * generate) all kinds of row and column information for a StructMatrix
- **********************************************************/
-int  impl_Hypre_StructMatrix_GetLocalRange
-( Hypre_StructMatrix this, int* row_start, int* row_end,
-  int* col_start, int* col_end ) {
-   printf("Hypre_StructMatrix_GetLocalRange has not been implemented!\n");
-   return 1;
-} /* end impl_Hypre_StructMatrixGetLocalRange */
-
-/* ********************************************************
  * impl_Hypre_StructMatrixGetRow
-/* >>>>>>> TO DO: implement this
+/* >>>>>>> taken out of interface; delete after next Babel run
  **********************************************************/
 int  impl_Hypre_StructMatrix_GetRow
 ( Hypre_StructMatrix this, int row, int* size, array1int* col_ind,
@@ -165,7 +153,7 @@ int  impl_Hypre_StructMatrix_GetRow
 
 /* ********************************************************
  * impl_Hypre_StructMatrixRestoreRow
-/* >>>>>>> TO DO: implement this
+/* >>>>>>> taken out of interface; delete after next Babel run
  **********************************************************/
 int  impl_Hypre_StructMatrix_RestoreRow
 ( Hypre_StructMatrix this, int row, int size, array1int col_ind,

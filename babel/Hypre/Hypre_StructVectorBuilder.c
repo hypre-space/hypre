@@ -41,23 +41,23 @@ void Hypre_StructVectorBuilder_destructor(Hypre_StructVectorBuilder this) {
 } /* end destructor */
 
 /* ********************************************************
- * impl_Hypre_StructVectorBuilderprint
+ * impl_Hypre_StructVectorBuilder_print
  **********************************************************/
 void  impl_Hypre_StructVectorBuilder_print(Hypre_StructVectorBuilder this) {
    printf( "StructVectorBuilder\n" );
-} /* end impl_Hypre_StructVectorBuilderprint */
+} /* end impl_Hypre_StructVectorBuilder_print */
 
 /* ********************************************************
- * impl_Hypre_StructVectorBuilderSetValue
+ * impl_Hypre_StructVectorBuilder_SetValue
  **********************************************************/
 int  impl_Hypre_StructVectorBuilder_SetValue
 (Hypre_StructVectorBuilder this, array1int where, double value) {
-   printf("not implemented as of 5/5/2000.");
+   printf("not implemented as of 5/5/2000.");/* TO DO: implement this */
    return 1;
-} /* end impl_Hypre_StructVectorBuilderSetValue */
+} /* end impl_Hypre_StructVectorBuilder_SetValue */
 
 /* ********************************************************
- * impl_Hypre_StructVectorBuilderSetBoxValues
+ * impl_Hypre_StructVectorBuilder_SetBoxValues
  **********************************************************/
 int  impl_Hypre_StructVectorBuilder_SetBoxValues
 (Hypre_StructVectorBuilder this, Hypre_Box box, array1double values) {
@@ -83,10 +83,10 @@ int  impl_Hypre_StructVectorBuilder_SetBoxValues
    return HYPRE_StructVectorSetBoxValues( *V, lower, upper,
                                           &(values.data[*(values.lower)]) );
 
-} /* end impl_Hypre_StructVectorBuilderSetBoxValues */
+} /* end impl_Hypre_StructVectorBuilder_SetBoxValues */
 
 /* ********************************************************
- * impl_Hypre_StructVectorBuilderSetNumGhost
+ * impl_Hypre_StructVectorBuilder_SetNumGhost
  **********************************************************/
 int  impl_Hypre_StructVectorBuilder_SetNumGhost
 (Hypre_StructVectorBuilder this, array1int values) {
@@ -98,7 +98,7 @@ int  impl_Hypre_StructVectorBuilder_SetNumGhost
    V = SV->Hypre_StructVector_data->hsvec;
 
    return HYPRE_StructVectorSetNumGhost( *V, num_ghost );
-} /* end impl_Hypre_StructVectorBuilderSetNumGhost */
+} /* end impl_Hypre_StructVectorBuilder_SetNumGhost */
 
 
 /* ********************************************************
@@ -118,7 +118,7 @@ int  impl_Hypre_StructVectorBuilder_GetMap(Hypre_StructVectorBuilder this, Hypre
 } /* end impl_Hypre_StructVectorBuilder_GetMap */
 
 /* ********************************************************
- * impl_Hypre_StructVectorBuilderGetConstructedObject
+ * impl_Hypre_StructVectorBuilder_GetConstructedObject
  **********************************************************/
 int  impl_Hypre_StructVectorBuilder_GetConstructedObject
 (Hypre_StructVectorBuilder this, Hypre_Vector* obj) {
@@ -130,7 +130,7 @@ int  impl_Hypre_StructVectorBuilder_GetConstructedObject
    };
    *obj = (Hypre_Vector) Hypre_StructVector_castTo( newvec, "Hypre.Vector" );
    return 0;
-} /* end impl_Hypre_StructVectorBuilderGetConstructedObject */
+} /* end impl_Hypre_StructVectorBuilder_GetConstructedObject */
 
 /* ********************************************************
  * impl_Hypre_StructVectorBuilder_Start
@@ -183,7 +183,7 @@ Hypre_StructVectorBuilder  impl_Hypre_StructVectorBuilder_Constructor
 } /* end impl_Hypre_StructVectorBuilderConstructor */
 
 /* ********************************************************
- * impl_Hypre_StructVectorBuilderSetup
+ * impl_Hypre_StructVectorBuilder_Setup
  **********************************************************/
 int  impl_Hypre_StructVectorBuilder_Setup(Hypre_StructVectorBuilder this) {
    int ierr;
@@ -200,5 +200,5 @@ int  impl_Hypre_StructVectorBuilder_Setup(Hypre_StructVectorBuilder this) {
 
    if ( ierr==0 ) this->Hypre_StructVectorBuilder_data->vecgood = 1;
    return ierr;
-} /* end impl_Hypre_StructVectorBuilderSetup */
+} /* end impl_Hypre_StructVectorBuilder_Setup */
 

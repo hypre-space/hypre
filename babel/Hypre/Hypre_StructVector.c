@@ -51,7 +51,7 @@ void Hypre_StructVector_destructor(Hypre_StructVector this) {
 } /* end destructor */
 
 /* ********************************************************
- * impl_Hypre_StructVectorGetNumGhost
+ * impl_Hypre_StructVector_GetNumGhost
  **********************************************************/
 int  impl_Hypre_StructVector_GetNumGhost
 ( Hypre_StructVector this, array1int values )
@@ -66,10 +66,10 @@ int  impl_Hypre_StructVector_GetNumGhost
 
    return 0;
 
-} /* end impl_Hypre_StructVectorGetNumGhost */
+} /* end impl_Hypre_StructVector_GetNumGhost */
 
 /* ********************************************************
- * impl_Hypre_StructVectorprint
+ * impl_Hypre_StructVector_print
  **********************************************************/
 void  impl_Hypre_StructVector_print(Hypre_StructVector this) {
    int boxarray_size;
@@ -95,10 +95,10 @@ void  impl_Hypre_StructVector_print(Hypre_StructVector this) {
       hypre_StructVectorData(v) );
    fflush(file);
    fclose(file);
-} /* end impl_Hypre_StructVectorprint */
+} /* end impl_Hypre_StructVector_print */
 
 /* ********************************************************
- * impl_Hypre_StructVectorClear
+ * impl_Hypre_StructVector_Clear
  *    int Clear ();                          // y <- 0 (where y=self)
  **********************************************************/
 int  impl_Hypre_StructVector_Clear(Hypre_StructVector this) {
@@ -109,10 +109,10 @@ int  impl_Hypre_StructVector_Clear(Hypre_StructVector this) {
 
    return hypre_StructVectorClearAllValues( v );
 
-} /* end impl_Hypre_StructVectorClear */
+} /* end impl_Hypre_StructVector_Clear */
 
 /* ********************************************************
- * impl_Hypre_StructVectorCopy
+ * impl_Hypre_StructVector_Copy
  *    int Copy (in Vector x);                // y <- x 
  **********************************************************/
 int  impl_Hypre_StructVector_Copy(Hypre_StructVector this, Hypre_Vector x) {
@@ -133,10 +133,10 @@ int  impl_Hypre_StructVector_Copy(Hypre_StructVector this, Hypre_Vector x) {
 
    return hypre_StructCopy( vx, vy );
 
-} /* end impl_Hypre_StructVectorCopy */
+} /* end impl_Hypre_StructVector_Copy */
 
 /* ********************************************************
- * impl_Hypre_StructVectorClone
+ * impl_Hypre_StructVector_Clone
  *    int Clone (out Vector x);              // create an x compatible with y
  **********************************************************/
 int  impl_Hypre_StructVector_Clone(Hypre_StructVector this, Hypre_Vector* x) {
@@ -168,7 +168,7 @@ int  impl_Hypre_StructVector_Clone(Hypre_StructVector this, Hypre_Vector* x) {
 
 /* TO DO: change get/set numghost to get/set parameter. */
 
-} /* end impl_Hypre_StructVectorClone */
+} /* end impl_Hypre_StructVector_Clone */
 
 
 
@@ -221,7 +221,7 @@ hypre_StructVectorScaleAllValues( hypre_StructVector *vector, double a )
 }
 
 /* ********************************************************
- * impl_Hypre_StructVectorScale
+ * impl_Hypre_StructVector_Scale
  *    int Scale (in double a);               // y <- a*y 
  **********************************************************/
 int  impl_Hypre_StructVector_Scale(Hypre_StructVector this, double a) {
@@ -231,10 +231,10 @@ int  impl_Hypre_StructVector_Scale(Hypre_StructVector this, double a) {
 
    return hypre_StructVectorScaleAllValues( vy, a );
 
-} /* end impl_Hypre_StructVectorScale */
+} /* end impl_Hypre_StructVector_Scale */
 
 /* ********************************************************
- * impl_Hypre_StructVectorDot
+ * impl_Hypre_StructVector_Dot
  *    int Dot (in Vector x, out double d);   // d <- (y,x)
  **********************************************************/
 int  impl_Hypre_StructVector_Dot(Hypre_StructVector this, Hypre_Vector x, double* d) {
@@ -256,10 +256,10 @@ int  impl_Hypre_StructVector_Dot(Hypre_StructVector this, Hypre_Vector x, double
    *d = hypre_StructInnerProd(  vx, vy );
    return 0;
 
-} /* end impl_Hypre_StructVectorDot */
+} /* end impl_Hypre_StructVector_Dot */
 
 /* ********************************************************
- * impl_Hypre_StructVectorAxpy
+ * impl_Hypre_StructVector_Axpy
  *    int Axpy (in double a, in Vector x);   // y <- a*x + y
  **********************************************************/
 int  impl_Hypre_StructVector_Axpy(Hypre_StructVector this, double a, Hypre_Vector x) {
@@ -280,15 +280,18 @@ int  impl_Hypre_StructVector_Axpy(Hypre_StructVector this, double a, Hypre_Vecto
 
    return hypre_StructAxpy( a, vx, vy );
 
-} /* end impl_Hypre_StructVectorAxpy */
+} /* end impl_Hypre_StructVector_Axpy */
 
 
 /* ********************************************************
  * impl_Hypre_StructVector_GetGlobalSize
  **********************************************************/
 int  impl_Hypre_StructVector_GetGlobalSize(Hypre_StructVector this, int* size) {
-   printf("Hypre_StructVector_GetGlobalSize doesn't work. TO DO: implement this\n");
-   return 1;
+   struct Hypre_StructVector_private_type *SVyp = this->Hypre_StructVector_data;
+   HYPRE_StructVector *Vy = SVyp->hsvec;
+   hypre_StructVector *vy = (hypre_StructVector *) *Vy;
+   *size = hypre_StructVectorGlobalSize(vy);
+   return 0;
 } /* end impl_Hypre_StructVector_GetGlobalSize */
 
 /* ********************************************************
