@@ -79,7 +79,7 @@ hypre_SMGSolve( void               *smg_vdata,
                     
    int                   i, l;
                     
-   int                   ierr;
+   int                   ierr = 0;
 
    hypre_BeginTiming(smg_data -> time_index);
 

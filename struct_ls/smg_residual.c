@@ -66,7 +66,7 @@ hypre_SMGResidualSetup( void               *residual_vdata,
                         hypre_StructVector *b,
                         hypre_StructVector *r              )
 {
-   int ierr;
+   int ierr = 0;
 
    hypre_SMGResidualData  *residual_data = residual_vdata;
 
@@ -156,7 +156,7 @@ hypre_SMGResidual( void               *residual_vdata,
                    hypre_StructVector *b,
                    hypre_StructVector *r              )
 {
-   int ierr;
+   int ierr = 0;
 
    hypre_SMGResidualData  *residual_data = residual_vdata;
 
@@ -332,7 +332,7 @@ hypre_SMGResidualSetBase( void        *residual_vdata,
 int
 hypre_SMGResidualFinalize( void *residual_vdata )
 {
-   int ierr;
+   int ierr = 0;
 
    hypre_SMGResidualData *residual_data = residual_vdata;
 

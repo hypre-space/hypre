@@ -90,7 +90,7 @@ hypre_SMGIntAddSetup( void               *intadd_vdata,
    hypre_SBoxArray        *coarse_points;
 
    int                     i;
-   int                     ierr;
+   int                     ierr = 0;
 
    /*----------------------------------------------------------
     * Set up the compute package
@@ -213,7 +213,7 @@ hypre_SMGIntAdd( void               *intadd_vdata,
                  hypre_StructVector *e,
                  hypre_StructVector *x           )
 {
-   int ierr;
+   int ierr = 0;
 
    hypre_SMGIntAddData    *intadd_data = intadd_vdata;
 
@@ -415,7 +415,7 @@ hypre_SMGIntAdd( void               *intadd_vdata,
 int
 hypre_SMGIntAddFinalize( void *intadd_vdata )
 {
-   int ierr;
+   int ierr = 0;
 
    hypre_SMGIntAddData *intadd_data = intadd_vdata;
 

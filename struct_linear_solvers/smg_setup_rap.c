@@ -60,7 +60,7 @@ hypre_SMGSetupRAPOp( hypre_StructMatrix *R,
                      hypre_Index         cindex,
                      hypre_Index         cstride )
 {
-   int ierr;
+   int ierr = 0;
  
    hypre_StructStencil   *stencil;
 

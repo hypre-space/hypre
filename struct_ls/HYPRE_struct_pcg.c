@@ -183,7 +183,7 @@ HYPRE_PCGSMGPrecond( Vector *x,
    hypre_StructVector   *b_l;
    hypre_StructVector   *x_l;
 
-   int               ierr;
+   int               ierr = 0;
   
    smg_data = (hypre_SMGData *) HYPRE_PCGPrecondDataPCData(precond_data);
    A = HYPRE_PCGPrecondDataMatrix(precond_data);
@@ -201,7 +201,7 @@ HYPRE_PCGSMGPrecond( Vector *x,
 
 #if 0
    {
-      int    num_iterations, ierr;
+      int    num_iterations, ierr = 0;
       double rel_norm;
 
       HYPRE_SMGGetNumIterations(smg_data, &num_iterations);
@@ -299,7 +299,7 @@ HYPRE_PCGDiagScalePrecond( Vector *vx,
    int                   i;
    int                   loopi, loopj, loopk;
 
-   int                   ierr;
+   int                   ierr = 0;
   
    A = HYPRE_PCGPrecondDataMatrix(precond_data);
 

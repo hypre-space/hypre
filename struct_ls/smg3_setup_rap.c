@@ -276,7 +276,7 @@ hypre_SMG3BuildRAPSym( hypre_StructMatrix *A,
    int                  yOffsetP; 
    int                  zOffsetP; 
 
-   int                  ierr;
+   int                  ierr = 0;
 
    fine_stencil = hypre_StructMatrixStencil(A);
    fine_stencil_size = hypre_StructStencilSize(fine_stencil);
@@ -963,7 +963,7 @@ hypre_SMG3BuildRAPNoSym( hypre_StructMatrix *A,
    int                  yOffsetP;
    int                  zOffsetP;
 
-   int                  ierr;
+   int                  ierr = 0;
 
    fine_stencil = hypre_StructMatrixStencil(A);
    fine_stencil_size = hypre_StructStencilSize(fine_stencil);

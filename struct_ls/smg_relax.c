@@ -119,7 +119,7 @@ int
 hypre_SMGRelaxFreeTempVec( void *relax_vdata )
 {
    hypre_SMGRelaxData  *relax_data = relax_vdata;
-   int                  ierr;
+   int                  ierr = 0;
 
    if (relax_data -> temp_vec_allocated)
    {
@@ -139,7 +139,7 @@ hypre_SMGRelaxFreeARem( void *relax_vdata )
 {
    hypre_SMGRelaxData  *relax_data = relax_vdata;
    int                  i;
-   int                  ierr;
+   int                  ierr = 0;
 
    if (relax_data -> A_rem)
    {
@@ -166,7 +166,7 @@ hypre_SMGRelaxFreeASol( void *relax_vdata )
    hypre_SMGRelaxData  *relax_data = relax_vdata;
    int                  stencil_dim;
    int                  i;
-   int                  ierr;
+   int                  ierr = 0;
 
    if (relax_data -> A_sol)
    {
@@ -195,7 +195,7 @@ int
 hypre_SMGRelaxFinalize( void *relax_vdata )
 {
    hypre_SMGRelaxData *relax_data = relax_vdata;
-   int                 ierr;
+   int                 ierr = 0;
 
    if (relax_data)
    {
@@ -245,7 +245,7 @@ hypre_SMGRelax( void               *relax_vdata,
                     
    int                   i, j, k, is;
                     
-   int                   ierr;
+   int                   ierr = 0;
 
    /*----------------------------------------------------------
     * Note: The zero_guess stuff is not handled correctly
@@ -355,7 +355,7 @@ hypre_SMGRelaxSetup( void               *relax_vdata,
    hypre_SMGRelaxData  *relax_data = relax_vdata;
    int                  stencil_dim;
    int                  a_sol_test;
-   int                  ierr;
+   int                  ierr = 0;
 
    stencil_dim = hypre_StructStencilDim(hypre_StructMatrixStencil(A));
    (relax_data -> stencil_dim) = stencil_dim;
@@ -420,7 +420,7 @@ hypre_SMGRelaxSetupTempVec( void               *relax_vdata,
 {
    hypre_SMGRelaxData  *relax_data = relax_vdata;
    hypre_StructVector  *temp_vec   = (relax_data -> temp_vec);
-   int                  ierr;
+   int                  ierr = 0;
 
    /*----------------------------------------------------------
     * Set up data
@@ -474,7 +474,7 @@ hypre_SMGRelaxSetupARem( void               *relax_vdata,
                        
    int                   i;
 
-   int                   ierr;
+   int                   ierr = 0;
 
    /*----------------------------------------------------------
     * Free up old data before putting new data into structure
@@ -558,7 +558,7 @@ hypre_SMGRelaxSetupASol( void               *relax_vdata,
                        
    int                   i;
 
-   int                   ierr;
+   int                   ierr = 0;
 
    /*----------------------------------------------------------
     * Free up old data before putting new data into structure
@@ -980,7 +980,7 @@ hypre_SMGRelaxSetupBaseSBoxArray( void               *relax_vdata,
    hypre_BoxArray      *boxes;
    hypre_SBoxArray     *sboxes;
                        
-   int                  ierr;
+   int                  ierr = 0;
 
    grid  = hypre_StructVectorGrid(x);
    boxes = hypre_StructGridBoxes(grid);

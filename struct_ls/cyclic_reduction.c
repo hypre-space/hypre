@@ -246,7 +246,7 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
                          
    int                     xOffsetA; 
                          
-   int                     ierr;
+   int                     ierr = 0;
 
    stridef = cstride;
    hypre_SetIndex(stridec, 1, 1, 1);
@@ -427,7 +427,7 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
                          
    int                     x_num_ghost[] = {0, 0, 0, 0, 0, 0};
                          
-   int                     ierr;
+   int                     ierr = 0;
 
    /*-----------------------------------------------------
     * Compute a preliminary num_levels value based on the grid
@@ -741,7 +741,7 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
    int                   compute_i, i, j, l;
    int                   loopi, loopj, loopk;
                       
-   int                   ierr;
+   int                   ierr = 0;
 
    hypre_BeginTiming(cyc_red_data -> time_index);
 
@@ -1061,7 +1061,7 @@ hypre_CyclicReductionFinalize( void *cyc_red_vdata )
    hypre_CyclicReductionData *cyc_red_data = cyc_red_vdata;
 
    int l;
-   int ierr;
+   int ierr = 0;
 
    if (cyc_red_data)
    {

@@ -40,7 +40,7 @@ hypre_SMGSetupRestrictOp( hypre_StructMatrix *A,
                           hypre_Index         cindex,
                           hypre_Index         cstride  )
 {
-   int ierr;
+   int ierr = 0;
 
    return ierr;
 }

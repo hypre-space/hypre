@@ -57,7 +57,7 @@ hypre_SMGFinalize( void *smg_vdata )
    hypre_SMGData *smg_data = smg_vdata;
 
    int l;
-   int ierr;
+   int ierr = 0;
 
    if (smg_data)
    {
@@ -262,7 +262,7 @@ hypre_SMGGetNumIterations( void *smg_vdata,
                            int  *num_iterations )
 {
    hypre_SMGData *smg_data = smg_vdata;
-   int            ierr;
+   int            ierr = 0;
 
    *num_iterations = (smg_data -> num_iterations);
 
@@ -334,7 +334,7 @@ hypre_SMGSetStructVectorConstantValues( hypre_StructVector *vector,
                                         double              values,
                                         hypre_SBoxArray    *sbox_array )
 {
-   int    ierr;
+   int    ierr = 0;
 
    hypre_Box          *v_data_box;
 

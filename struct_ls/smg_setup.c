@@ -84,7 +84,7 @@ hypre_SMGSetup( void               *smg_vdata,
    int                   b_num_ghost[]  = {0, 0, 0, 0, 0, 0};
    int                   x_num_ghost[]  = {0, 0, 0, 0, 0, 0};
                        
-   int                   ierr;
+   int                   ierr = 0;
 
    /*-----------------------------------------------------
     * Compute a new max_levels value based on the grid

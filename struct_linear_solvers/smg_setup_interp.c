@@ -140,7 +140,7 @@ hypre_SMGSetupInterpOp( void               *relax_data,
    int                   compute_i, i, j;
    int                   loopi, loopj, loopk;
                         
-   int                   ierr;
+   int                   ierr = 0;
 
    /*--------------------------------------------------------
     * Initialize some things

@@ -77,7 +77,7 @@ hypre_SMGRestrictSetup( void               *restrict_vdata,
                        
    hypre_ComputePkg       *compute_pkg;
 
-   int                     ierr;
+   int                     ierr = 0;
 
    /*----------------------------------------------------------
     * Set up the compute package
@@ -132,7 +132,7 @@ hypre_SMGRestrict( void               *restrict_vdata,
                    hypre_StructVector *r,
                    hypre_StructVector *rc             )
 {
-   int ierr;
+   int ierr = 0;
 
    hypre_SMGRestrictData  *restrict_data = restrict_vdata;
 
@@ -263,7 +263,7 @@ hypre_SMGRestrict( void               *restrict_vdata,
 int
 hypre_SMGRestrictFinalize( void *restrict_vdata )
 {
-   int ierr;
+   int ierr = 0;
 
    hypre_SMGRestrictData *restrict_data = restrict_vdata;
 
