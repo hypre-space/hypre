@@ -1,0 +1,69 @@
+#BHEADER***********************************************************************
+# (c) 1998   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+.SUFFIXES:
+.SUFFIXES: .dxx .html
+
+srcdir = @srcdir@
+VPATH = @srcdir@
+
+CC = @CC@
+
+CINCLUDES=@INCLUDES@ @MPIINCLUDE@
+COPT= @COPT@
+CDEBUG = @CDEBUG@
+CDEFS = @HYPREDEFS@ -DHYPRE_TIMING
+
+CFLAGS = \
+ -I../utilities\
+ -I../struct_matrix_vector\
+ -I../struct_linear_solvers\
+ ${CINCLUDES}\
+ ${COPT}\
+ ${CDEBUG}\
+ ${CDEFS}
+ 
+MPILIBFLAGS = @MPILIBDIRS@ @MPILIBS@ @MPIFLAGS@ 
+LIBFLAGS = @LIBDIRS@ @LIBS@
+LDLIBFLAGS = @LDLIBDIRS@ @LDLIBS@
+
+LFLAGS =\
+ -L.\
+ -L../struct_matrix_vector\
+ -L../struct_linear_solvers\
+ -L../utilities\
+ -lHYPRE_ls\
+ -lHYPRE_mv\
+ -lHYPRE_utilities\
+ ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
+
+##################################################################
+# Targets
+##################################################################
+
+all: html
+
+install: all
+
+clean:
+	@rm -f *.html
+
+veryclean: clean
+	@rm -r html 
+
+##################################################################
+# Rules
+##################################################################
+
+html: 
+	doc++ -d html developers_manual.dxx
+##################################################################
+# Generic rules
+##################################################################
+
