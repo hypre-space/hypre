@@ -432,9 +432,12 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 	    /* printf (" schwarz weight %f \n", schwarz_relax_wt); */
 	    HYPRE_SchwarzSetRelaxWeight(smoother[level], schwarz_relax_wt);
  	    if (hypre_ParAMGDataVariant(amg_data) > 0)
-            local_size = hypre_CSRMatrixNumRows
-		(hypre_ParCSRMatrixDiag(A_array[level]));
- 	    hypre_SchwarzReScale(smoother[level], local_size, schwarz_relax_wt);
+            {
+               local_size = hypre_CSRMatrixNumRows
+			(hypre_ParCSRMatrixDiag(A_array[level]));
+ 	       hypre_SchwarzReScale(smoother[level], local_size, 
+				schwarz_relax_wt);
+            }
 	    schwarz_relax_wt = 1;
          }
          if (debug_flag==1)
