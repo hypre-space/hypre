@@ -57,6 +57,7 @@ HEADERS =\
 FILES =\
  HYPRE_IJMatrix.c\
  aux_parcsr_matrix.c\
+ IJ_par_laplace_9pt.c \
  hypre_IJMatrix_parcsr.c
 
 OBJS = ${FILES:.c=.o}
