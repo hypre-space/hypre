@@ -230,7 +230,7 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
 
     euclidargc_         = 2;    // parameters information for Euclid
     euclidargv_         = new char*[euclidargc_*2];
-    for (int j = 0; j < euclidargc_; j++) euclidargv_[j] = new char[50];
+    for (int j = 0; j < euclidargc_*2; j++) euclidargv_[j] = new char[50];
     strcpy(euclidargv_[0], "-level");   
     strcpy(euclidargv_[1], "0");   
     strcpy(euclidargv_[2], "-sparseA");   
