@@ -141,7 +141,7 @@ int hypre_CGIdentitySetup( void *vdata , void *A , void *b , void *x );
 int hypre_CGIdentity( void *vdata , void *A , void *b , void *x );
 
 /* coarsen.c */
-int hypre_AMGCoarsen( hypre_CSRMatrix *A , double strength_threshold , hypre_CSRMatrix **S_ptr , int **CF_marker_ptr , int *coarse_size_ptr );
+int hypre_AMGCoarsen( hypre_CSRMatrix *A , double strength_threshold , int *dof_func , hypre_CSRMatrix **S_ptr , int **CF_marker_ptr , int *coarse_size_ptr );
 int hypre_AMGCoarsenRuge( hypre_CSRMatrix *A , double strength_threshold , hypre_CSRMatrix **S_ptr , int **CF_marker_ptr , int *coarse_size_ptr );
 int hypre_AMGCoarsenRugeLoL( hypre_CSRMatrix *A , double strength_threshold , int *dof_func , hypre_CSRMatrix **S_ptr , int **CF_marker_ptr , int *coarse_size_ptr );
 
@@ -228,7 +228,6 @@ hypre_CSRMatrix *hypre_GenerateStencilMatrix( int nx, int ny, int nz, char *infi
 int hypre_AMGTruncation( hypre_CSRMatrix *A , double trunc_factor , int max_elmts );
 void swap3( int *v , double *w , int i , int j );
 void qsort2( int *v , double *w , int left , int right );
-
 
 #ifdef __cplusplus
 }

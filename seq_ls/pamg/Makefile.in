@@ -52,6 +52,8 @@ LFLAGS =\
 HEADERS =\
  headers.h\
  amg.h\
+ bcsr_matrix.h\
+ bcsr_matrix_dense_block.h\
  pcg.h\
  pamg.h\
  HYPRE_ls.h
@@ -62,6 +64,10 @@ FILES =\
  amgstats.c\
  amg_setup.c\
  amg_solve.c \
+ bcsr_interp.c\
+ bcsr_matrix.c\
+ bcsr_matrix_dense_block.c\
+ bcsr_relax.c\
  cg_fun.c\
  coarsen.c\
  coarsenCR.c\

@@ -190,7 +190,8 @@ hypre_AMGSetupStats( void *amg_vdata )
        printf("  %5.3e  %5.3e %5.3e  %5.3e\n",
                  min_weight, max_weight, min_rowsum, max_rowsum);
    }
-       
+      
+   hypre_WriteSolverParams(amg_data);  
    
    return(0);
 }  

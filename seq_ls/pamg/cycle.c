@@ -30,6 +30,7 @@ hypre_AMGCycle( void           *amg_vdata,
    /* Data Structure variables */
 
    hypre_CSRMatrix    **A_array;
+   hypre_BCSRMatrix    **B_array;
    hypre_CSRMatrix    **P_array;
    hypre_Vector    *Vtemp;
 
@@ -63,6 +64,7 @@ hypre_AMGCycle( void           *amg_vdata,
    int       relax_type;
    int       relax_points;
    double   *relax_weight;
+   int use_block_flag;
 
    double    alpha;
    double    beta;
@@ -74,6 +76,7 @@ hypre_AMGCycle( void           *amg_vdata,
    /* Acquire data and allocate storage */
 
    A_array           = hypre_AMGDataAArray(amg_data);
+   B_array           = hypre_AMGDataBArray(amg_data);
    P_array           = hypre_AMGDataPArray(amg_data);
    CF_marker_array   = hypre_AMGDataCFMarkerArray(amg_data);
    /* dof_func_array    = hypre_AMGDataDofFuncArray(amg_data); */
@@ -88,6 +91,7 @@ hypre_AMGCycle( void           *amg_vdata,
    grid_relax_type     = hypre_AMGDataGridRelaxType(amg_data);
    grid_relax_points   =  hypre_AMGDataGridRelaxPoints(amg_data); 
    relax_weight        =  hypre_AMGDataRelaxWeight(amg_data); 
+   use_block_flag = hypre_AMGDataUseBlockFlag(amg_data);
 
    cycle_op_count = hypre_AMGDataCycleOpCount(amg_data);
 
@@ -184,6 +188,13 @@ hypre_AMGCycle( void           *amg_vdata,
                               hypre_AMGDataDomainMatrixInverse(amg_data)[level],
                               U_array[level],
                               Vtemp);
+	 }
+	 else if (use_block_flag && relax_type != 9) {
+	   Solve_err_flag = hypre_BCSRMatrixRelax(B_array[level],
+						  F_array[level],
+						  CF_marker_array[level],
+						  relax_points,
+						  U_array[level]);
 	 }
 	 else
 	 {

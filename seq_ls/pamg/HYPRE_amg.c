@@ -306,3 +306,14 @@ HYPRE_AMGSetDofFunc( HYPRE_Solver solver,
 {
    return( hypre_AMGSetDofFunc( (void *) solver, dof_func ) );
 }
+
+/*--------------------------------------------------------------------------
+ * HYPRE_AMGSetUseBlockFlag
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_AMGSetUseBlockFlag( HYPRE_Solver solver,
+                       int          use_block_flag  )
+{
+   return( hypre_AMGSetUseBlockFlag( (void *) solver, use_block_flag ) );
+}

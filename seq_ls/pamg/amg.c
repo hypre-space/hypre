@@ -36,6 +36,7 @@ hypre_AMGInitialize()
    int      interp_type;
    int      num_functions;
    int      num_relax_steps;
+   int use_block_flag;
 
    /* solve params */
    int      max_iter;
@@ -71,6 +72,7 @@ hypre_AMGInitialize()
    interp_type = 200;
    num_functions = 1;
    num_relax_steps = 1;
+   use_block_flag = 0;
 
    /* solve params */
    max_iter  = 100;
@@ -121,6 +123,7 @@ hypre_AMGInitialize()
    hypre_AMGSetPTruncFactor(amg_data, P_trunc_factor);
    hypre_AMGSetAMaxElmts(amg_data, A_max_elmts);
    hypre_AMGSetPMaxElmts(amg_data, P_max_elmts);
+   hypre_AMGSetUseBlockFlag(amg_data, use_block_flag);
 
    hypre_AMGSetMaxIter(amg_data, max_iter);
    hypre_AMGSetCycleType(amg_data, cycle_type);
@@ -182,6 +185,10 @@ hypre_AMGFinalize( void *data )
       hypre_SeqVectorDestroy(hypre_AMGDataFArray(amg_data)[i]);
       hypre_SeqVectorDestroy(hypre_AMGDataUArray(amg_data)[i]);
       hypre_CSRMatrixDestroy(hypre_AMGDataAArray(amg_data)[i]);
+      if(hypre_AMGDataUseBlockFlag(amg_data)) {
+	hypre_BCSRMatrixDestroy(hypre_AMGDataBArray(amg_data)[i]);
+	hypre_BCSRMatrixDestroy(hypre_AMGDataPBArray(amg_data)[i]);
+      }
       hypre_CSRMatrixDestroy(hypre_AMGDataPArray(amg_data)[i-1]);
       hypre_TFree(hypre_AMGDataCFMarkerArray(amg_data)[i-1]);
       hypre_TFree(hypre_AMGDataDofFuncArray(amg_data)[i-1]);
@@ -190,7 +197,9 @@ hypre_AMGFinalize( void *data )
    hypre_TFree(hypre_AMGDataFArray(amg_data));
    hypre_TFree(hypre_AMGDataUArray(amg_data));
    hypre_TFree(hypre_AMGDataAArray(amg_data));
+   hypre_TFree(hypre_AMGDataBArray(amg_data));
    hypre_TFree(hypre_AMGDataPArray(amg_data));
+   hypre_TFree(hypre_AMGDataPBArray(amg_data));
    hypre_TFree(hypre_AMGDataCFMarkerArray(amg_data));
    hypre_TFree(hypre_AMGDataDofFuncArray(amg_data)[num_levels-1]);
    hypre_TFree(hypre_AMGDataDofFuncArray(amg_data));
@@ -468,6 +477,18 @@ hypre_AMGSetLogging( void     *data,
 /*--------------------------------------------------------------------------
  * Routines to set the problem data parameters
  *--------------------------------------------------------------------------*/
+
+int
+hypre_AMGSetUseBlockFlag( void     *data,
+                          int       use_block_flag )
+{
+   int ierr = 0;
+   hypre_AMGData  *amg_data = data;
+ 
+   hypre_AMGDataUseBlockFlag(amg_data) = use_block_flag;
+
+   return (ierr);
+}
 
 int
 hypre_AMGSetNumFunctions( void     *data,

@@ -100,8 +100,8 @@ hypre_AMGSolve( void            *amg_vdata,
     *    Write the solver parameters
     *-----------------------------------------------------------------------*/
 
-   if (amg_ioutdat > 1)
-      hypre_WriteSolverParams(amg_data); 
+   /*if (amg_ioutdat > 0)
+      hypre_WriteSolverParams(amg_data); */
 
 
    /*-----------------------------------------------------------------------
@@ -120,7 +120,7 @@ hypre_AMGSolve( void            *amg_vdata,
     *     open the log file and write some initial info
     *-----------------------------------------------------------------------*/
 
-   if (amg_ioutdat >= 0)
+   if (amg_ioutdat > 1)
    { 
 
       printf("\n\nAMG SOLUTION INFO:\n");
@@ -143,7 +143,7 @@ hypre_AMGSolve( void            *amg_vdata,
       relative_resid = resid_nrm_init / rhs_norm;
    }
 
-   if (amg_ioutdat == 1 || amg_ioutdat == 3)
+   if (amg_ioutdat == 2 || amg_ioutdat == 3)
    {     
       printf("                                            relative\n");
       printf("               residual        factor       residual\n");
@@ -183,7 +183,7 @@ hypre_AMGSolve( void            *amg_vdata,
 
       ++cycle_count;
 
-      if (amg_ioutdat == 1 || amg_ioutdat == 3)
+      if (amg_ioutdat == 2 || amg_ioutdat == 3)
       { 
          printf("    Cycle %2d   %e    %f     %e \n",cycle_count,
                  resid_nrm,conv_factor,relative_resid);
@@ -211,7 +211,7 @@ hypre_AMGSolve( void            *amg_vdata,
    operat_cmplxty = ((double) total_coeffs) / ((double) num_coeffs[0]);
    /* cycle_cmplxty = ((double) cycle_op_count) / ((double) num_coeffs[0]); */
 
-   if (amg_ioutdat >= 0)
+   if (amg_ioutdat > 1)
    {
       if (Solve_err_flag == 1)
       {

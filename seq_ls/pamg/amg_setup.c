@@ -27,9 +27,11 @@ hypre_AMGSetup( void            *amg_vdata,
    /* Data Structure variables */
 
    hypre_CSRMatrix **A_array;
+   hypre_BCSRMatrix **B_array;
    hypre_Vector    **F_array;
    hypre_Vector    **U_array;
    hypre_CSRMatrix **P_array;
+   hypre_BCSRMatrix **PB_array;
 
    int             **dof_func_array;
    int              *dof_func;
@@ -48,12 +50,16 @@ hypre_AMGSetup( void            *amg_vdata,
    int      amg_ioutdat;
    int      interp_type;
    int      num_functions;
+   int use_block_flag;
  
    /* Local variables */
    int              *CF_marker;
    hypre_CSRMatrix  *S;
    hypre_CSRMatrix  *P;
    hypre_CSRMatrix  *A_H;
+   hypre_CSRMatrix  *A_tilde;
+   hypre_BCSRMatrix *B;
+   hypre_BCSRMatrix *PB;
 
    int       num_levels;
    int       level;
@@ -73,6 +79,11 @@ hypre_AMGSetup( void            *amg_vdata,
    int      *j_domain_dof;
    double   *domain_matrixinverse;
 
+   int* fake_dof_func;
+
+   char f_name[256];
+   FILE* f_out;
+
    relax_weight = hypre_AMGDataRelaxWeight(amg_data);
    num_relax_steps = hypre_AMGDataNumRelaxSteps(amg_data);
    grid_relax_type = hypre_AMGDataGridRelaxType(amg_data);
@@ -86,11 +97,14 @@ hypre_AMGSetup( void            *amg_vdata,
    P_trunc_factor = hypre_AMGDataPTruncFactor(amg_data);
    P_max_elmts = hypre_AMGDataPMaxElmts(amg_data);
    A_max_elmts = hypre_AMGDataAMaxElmts(amg_data);
+   use_block_flag = hypre_AMGDataUseBlockFlag(amg_data);
  
    dof_func = hypre_AMGDataDofFunc(amg_data);
 
    A_array = hypre_CTAlloc(hypre_CSRMatrix*, max_levels);
+   B_array = hypre_CTAlloc(hypre_BCSRMatrix*, max_levels);
    P_array = hypre_CTAlloc(hypre_CSRMatrix*, max_levels-1);
+   PB_array = hypre_CTAlloc(hypre_BCSRMatrix*, max_levels-1);
    CF_marker_array = hypre_CTAlloc(int*, max_levels-1);
    dof_func_array = hypre_CTAlloc(int*, max_levels);
    coarse_dof_func = NULL;
@@ -109,17 +123,32 @@ hypre_AMGSetup( void            *amg_vdata,
          hypre_AMGDataDomainMatrixInverse(amg_data)[i] = NULL;
       }
    }
-      
+
    if (num_functions > 0) dof_func_array[0] = dof_func;
 
    A_array[0] = A;
+
+   use_block_flag = use_block_flag && (num_functions > 1);
+   hypre_AMGDataUseBlockFlag(amg_data) = use_block_flag;
+   if(use_block_flag) {
+     A_tilde = hypre_CSRMatrixDeleteZeros(A, 0.0);
+     if(A_tilde) {
+       B = hypre_BCSRMatrixFromCSRMatrix(A_tilde, num_functions,
+					 num_functions);
+       hypre_CSRMatrixDestroy(A_tilde);
+     }
+     else {
+       B = hypre_BCSRMatrixFromCSRMatrix(A, num_functions,
+					 num_functions);
+     }
+     B_array[0] = B;
+   }
 
    /*----------------------------------------------------------
     * Initialize hypre_AMGData
     *----------------------------------------------------------*/
 
    num_variables = hypre_CSRMatrixNumRows(A);
-
 
    hypre_AMGDataNumVariables(amg_data) = num_variables;
 
@@ -136,6 +165,54 @@ hypre_AMGSetup( void            *amg_vdata,
 
    while (not_finished_coarsening)
    {
+     /*****************************************************************/
+
+      if(use_block_flag) {
+	A_tilde = hypre_BCSRMatrixCompress(B_array[level]);
+	fine_size = hypre_CSRMatrixNumRows(A_tilde);
+	fake_dof_func = hypre_CTAlloc(int, fine_size);
+	hypre_AMGCoarsen(A_tilde, strong_threshold, fake_dof_func, &S,
+			 &CF_marker, &coarse_size);
+	hypre_TFree(fake_dof_func);
+	hypre_CSRMatrixDestroy(A_tilde);
+
+	CF_marker_array[level] = CF_marker;
+
+	PB = hypre_BCSRMatrixBuildInterpD(B_array[level], CF_marker,
+					  S, coarse_size);
+	P_array[level] = hypre_BCSRMatrixToCSRMatrix(PB);
+	if(P_trunc_factor > 0 || P_max_elmts > 0) {
+	  hypre_AMGTruncation(P_array[level], P_trunc_factor, P_max_elmts);
+	}
+
+	hypre_BCSRMatrixDestroy(PB);
+	PB_array[level] = hypre_BCSRMatrixFromCSRMatrix(P_array[level],
+							num_functions,
+							num_functions); 
+
+	hypre_AMGBuildCoarseOperator(P_array[level], A_array[level],
+				     P_array[level], &A_array[level + 1]);
+	if(A_trunc_factor > 0 || A_max_elmts > 0) {
+	  hypre_AMGOpTruncation(A_array[level + 1], 
+				A_trunc_factor, A_max_elmts);
+	}
+
+	B_array[level + 1] = hypre_BCSRMatrixFromCSRMatrix(A_array[level + 1],
+							   num_functions,
+							   num_functions);
+
+	level++;
+
+	if (level+1 >= max_levels ||
+	    coarse_size == fine_size || 
+	    coarse_size <= coarse_threshold) {
+	  not_finished_coarsening = 0;
+	}
+
+	continue;
+      }
+      /*****************************************************************/
+
       fine_size = hypre_CSRMatrixNumRows(A_array[level]);
 
       /*-------------------------------------------------------------
@@ -193,7 +270,7 @@ hypre_AMGSetup( void            *amg_vdata,
       else
       {
          hypre_AMGCoarsen(A_array[level], strong_threshold,
-                       &S, &CF_marker, &coarse_size); 
+                       dof_func_array[level], &S, &CF_marker, &coarse_size); 
       }
       /* if no coarse-grid, stop coarsening */
       if (coarse_size == 0)
@@ -252,7 +329,8 @@ hypre_AMGSetup( void            *amg_vdata,
       if (P_trunc_factor > 0 || P_max_elmts > 0)
          hypre_AMGTruncation(P,P_trunc_factor,P_max_elmts);
 
-      printf("END computing level %d interpolation matrix; =======\n", level);
+      /*printf("END computing level %d interpolation matrix; =======\n", level);
+      */
 
       dof_func_array[level+1] = coarse_dof_func;
       P_array[level] = P; 
@@ -291,6 +369,8 @@ hypre_AMGSetup( void            *amg_vdata,
    hypre_AMGDataCFMarkerArray(amg_data) = CF_marker_array;
    hypre_AMGDataAArray(amg_data) = A_array;
    hypre_AMGDataPArray(amg_data) = P_array;
+   hypre_AMGDataBArray(amg_data) = B_array;
+   hypre_AMGDataPBArray(amg_data) = PB_array;
 
    hypre_AMGDataDofFuncArray(amg_data) = dof_func_array;
    hypre_AMGDataNumFunctions(amg_data) = num_functions;	
@@ -306,11 +386,11 @@ hypre_AMGSetup( void            *amg_vdata,
 
    for (j = 1; j < num_levels; j++)
    {
-      F_array[j] = hypre_SeqVectorCreate(hypre_CSRMatrixNumRows(A_array[j]));
-      hypre_SeqVectorInitialize(F_array[j]);
+     F_array[j] = hypre_SeqVectorCreate(hypre_CSRMatrixNumRows(A_array[j]));
+     hypre_SeqVectorInitialize(F_array[j]);
 
-      U_array[j] = hypre_SeqVectorCreate(hypre_CSRMatrixNumRows(A_array[j]));
-      hypre_SeqVectorInitialize(U_array[j]);
+     U_array[j] = hypre_SeqVectorCreate(hypre_CSRMatrixNumRows(A_array[j]));
+     hypre_SeqVectorInitialize(U_array[j]);
    }
 
    hypre_AMGDataFArray(amg_data) = F_array;
@@ -321,7 +401,7 @@ hypre_AMGSetup( void            *amg_vdata,
     *-----------------------------------------------------------------------*/
 
    if (amg_ioutdat == 1 || amg_ioutdat == 3)
-      hypre_AMGSetupStats(amg_data);
+	hypre_AMGSetupStats(amg_data);
 
    if (amg_ioutdat == -3)
    {  
@@ -346,5 +426,3 @@ hypre_AMGSetup( void            *amg_vdata,
    Setup_err_flag = 0;
    return(Setup_err_flag);
 }  
-
-

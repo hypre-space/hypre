@@ -28,6 +28,7 @@ main( int   argc,
    int                 max_levels;
    int                 num_functions;
    int                 num_relax_steps;
+   int use_block_flag;
    double	       norm;
    double	       tol;
    int                 i, j, k;
@@ -59,7 +60,8 @@ main( int   argc,
       int      A_max_elmts = 0;
       int      P_max_elmts = 0;
       int      cycle_type;
-      int      ioutdat;
+      int      ioutdat = 1;
+      int      print_level = 2;
       int      num_iterations;  
       int      num_sweep;  
       int     *num_grid_sweeps;  
@@ -101,6 +103,7 @@ main( int   argc,
    relax_default = 0;
    interp_type = 0;
    num_functions = 1;
+   use_block_flag = 0;
    num_relax_steps = 1;
    build_funcs_type = 0;
    build_funcs_arg_index = argc;
@@ -170,6 +173,12 @@ main( int   argc,
       {
          arg_index++;
          build_rhs_type      = 3;
+         build_rhs_arg_index = arg_index;
+      }    
+      else if ( strcmp(argv[arg_index], "-rhsiszero") == 0 )
+      {
+         arg_index++;
+         build_rhs_type      = 5;
          build_rhs_arg_index = arg_index;
       }    
       else if ( strcmp(argv[arg_index], "-xisone") == 0 )
@@ -242,6 +251,11 @@ main( int   argc,
       else if ( strcmp(argv[arg_index], "-help") == 0 )
       {
          print_usage = 1;
+      }
+      else if ( strcmp(argv[arg_index], "-useblock") == 0 )
+      {
+         arg_index++;
+	 use_block_flag = 1;
       }
       else
       {
@@ -377,15 +391,25 @@ main( int   argc,
  
       hypre_SeqVectorSetConstantValues(x, 0.0);      
    }
-   else
+   else if (build_rhs_type == 5 )
    {
       b = hypre_SeqVectorCreate(hypre_CSRMatrixNumRows(A));
       hypre_SeqVectorInitialize(b);
-      hypre_SeqVectorSetConstantValues(b, 0.0);
+      hypre_SeqVectorSetConstantValues(b,0.0);
 
       x = hypre_SeqVectorCreate(hypre_CSRMatrixNumRows(A));
       hypre_SeqVectorInitialize(x);
       hypre_SeqVectorSetConstantValues(x, 1.0);
+   }
+   else 
+   {
+      b = hypre_SeqVectorCreate(hypre_CSRMatrixNumRows(A));
+      hypre_SeqVectorInitialize(b);
+      hypre_SeqVectorSetConstantValues(b,1.0);
+
+      x = hypre_SeqVectorCreate(hypre_CSRMatrixNumRows(A));
+      hypre_SeqVectorInitialize(x);
+      hypre_SeqVectorSetConstantValues(x, 0.0);
    }
    if ( build_funcs_type == 1 )
    {
@@ -408,7 +432,6 @@ main( int   argc,
 
       strong_threshold = 0.25;
       cycle_type       = 1;
-      ioutdat = 3;
       num_sweep = 1;
 
       num_grid_sweeps = hypre_CTAlloc(int,4);
@@ -469,6 +492,11 @@ main( int   argc,
             arg_index++;
             ioutdat  = atoi(argv[arg_index++]);
          }
+         else if ( strcmp(argv[arg_index], "-pl") == 0 )
+         {
+            arg_index++;
+            print_level = atoi(argv[arg_index++]);
+         }
          else if (strcmp(argv[arg_index], "-mu") == 0 )
          {
             arg_index++;
@@ -496,13 +524,13 @@ main( int   argc,
 
      
       /* fine grid */
-      num_grid_sweeps[0] = 2*num_sweep;
+     num_grid_sweeps[0] = 2*num_sweep;
       grid_relax_type[0] = relax_default; 
       grid_relax_points[0] = hypre_CTAlloc(int, 2*num_sweep); 
       for (i=0; i<2*num_sweep; i+=2)
       {
-         grid_relax_points[0][i] = 1;
-         grid_relax_points[0][i+1] = -1;
+	grid_relax_points[0][i] = 1;
+	  grid_relax_points[0][i+1] = -1;
       }
 
       /* down cycle */
@@ -511,8 +539,8 @@ main( int   argc,
       grid_relax_points[1] = hypre_CTAlloc(int, 2*num_sweep); 
       for (i=0; i<2*num_sweep; i+=2)
       {
-         grid_relax_points[1][i] = 1;
-         grid_relax_points[1][i+1] = -1;
+	grid_relax_points[1][i] = 1;
+	grid_relax_points[1][i+1] = -1;
       }
 
       /* up cycle */
@@ -521,8 +549,8 @@ main( int   argc,
       grid_relax_points[2] = hypre_CTAlloc(int, 2*num_sweep); 
       for (i=0; i<2*num_sweep; i+=2)
       {
-         grid_relax_points[2][i] = -1;
-         grid_relax_points[2][i+1] = 1;
+	grid_relax_points[2][i] = -1;
+	grid_relax_points[2][i+1] = 1;
       }
 
 
@@ -548,7 +576,7 @@ main( int   argc,
       HYPRE_AMGSetPTruncFactor(amg_solver, P_trunc_factor);
       HYPRE_AMGSetPMaxElmts(amg_solver, P_max_elmts);
       HYPRE_AMGSetNumRelaxSteps(amg_solver, num_relax_steps);
-      HYPRE_AMGSetLogging(amg_solver, ioutdat, "driver.out.log");
+      HYPRE_AMGSetIOutDat(amg_solver, print_level);
       HYPRE_AMGSetCycleType(amg_solver, cycle_type);
       HYPRE_AMGSetNumGridSweeps(amg_solver, num_grid_sweeps);
       HYPRE_AMGSetGridRelaxType(amg_solver, grid_relax_type);
@@ -559,6 +587,7 @@ main( int   argc,
       HYPRE_AMGSetInterpType(amg_solver, interp_type);
       HYPRE_AMGSetNumFunctions(amg_solver, num_functions);
       HYPRE_AMGSetDofFunc(amg_solver, dof_func);
+      HYPRE_AMGSetUseBlockFlag(amg_solver, use_block_flag);
 
       HYPRE_AMGSetup(amg_solver, (HYPRE_CSRMatrix) A, (HYPRE_Vector) b, 
 			(HYPRE_Vector) x);
@@ -595,7 +624,7 @@ main( int   argc,
       HYPRE_PCGSetTol(pcg_solver, tol);
       HYPRE_PCGSetTwoNorm(pcg_solver, 1);
       HYPRE_PCGSetRelChange(pcg_solver, 0);
-      HYPRE_PCGSetLogging(pcg_solver, 1);
+      HYPRE_PCGSetPrintLevel(pcg_solver, print_level);
 
       if (solver_id == 1)
       {
@@ -609,7 +638,7 @@ main( int   argc,
          HYPRE_AMGSetPTruncFactor(pcg_precond, P_trunc_factor);
          HYPRE_AMGSetPMaxElmts(pcg_precond, P_max_elmts);
          HYPRE_AMGSetNumRelaxSteps(pcg_precond, num_relax_steps);
-         HYPRE_AMGSetLogging(pcg_precond, ioutdat, "driver.out.log");
+         HYPRE_AMGSetIOutDat(pcg_precond, ioutdat);
          HYPRE_AMGSetMaxIter(pcg_precond, 1);
          HYPRE_AMGSetCycleType(pcg_precond, cycle_type);
          HYPRE_AMGSetNumGridSweeps(pcg_precond, num_grid_sweeps);
@@ -621,6 +650,7 @@ main( int   argc,
          HYPRE_AMGSetInterpType(pcg_precond, interp_type);
          HYPRE_AMGSetNumFunctions(pcg_precond, num_functions);
          HYPRE_AMGSetDofFunc(pcg_precond, dof_func);
+	 HYPRE_AMGSetUseBlockFlag(pcg_precond, use_block_flag);
          HYPRE_PCGSetPrecond( pcg_solver, (HYPRE_PtrToSolverFcn) HYPRE_AMGSolve,
                               (HYPRE_PtrToSolverFcn) HYPRE_AMGSetup, 
                               pcg_precond);
@@ -682,7 +712,7 @@ main( int   argc,
       HYPRE_GMRESSetMaxIter(pcg_solver, 500);
       HYPRE_GMRESSetTol(pcg_solver, tol);
       HYPRE_GMRESSetKDim(pcg_solver, k_dim);
-      HYPRE_GMRESSetLogging(pcg_solver, 1);
+      HYPRE_GMRESSetPrintLevel(pcg_solver, print_level);
 
       if (solver_id == 3)
       {
@@ -696,7 +726,7 @@ main( int   argc,
          HYPRE_AMGSetPTruncFactor(pcg_precond, P_trunc_factor);
          HYPRE_AMGSetPMaxElmts(pcg_precond, P_max_elmts);
          HYPRE_AMGSetNumRelaxSteps(pcg_precond, num_relax_steps);
-         HYPRE_AMGSetLogging(pcg_precond, ioutdat, "driver.out.log");
+         HYPRE_AMGSetIOutDat(pcg_precond, ioutdat);
          HYPRE_AMGSetMaxIter(pcg_precond, 1);
          HYPRE_AMGSetCycleType(pcg_precond, cycle_type);
          HYPRE_AMGSetNumGridSweeps(pcg_precond, num_grid_sweeps);

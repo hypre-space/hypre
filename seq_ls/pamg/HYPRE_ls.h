@@ -57,6 +57,7 @@ int HYPRE_AMGSetLogFileName( HYPRE_Solver solver , char *log_file_name );
 int HYPRE_AMGSetLogging( HYPRE_Solver solver , int ioutdat , char *log_file_name );
 int HYPRE_AMGSetNumFunctions( HYPRE_Solver solver , int num_functions );
 int HYPRE_AMGSetDofFunc( HYPRE_Solver solver , int *dof_func );
+int HYPRE_AMGSetUseBlockFlag( HYPRE_Solver solver , int use_block_flag );
 
 #ifdef __cplusplus
 }

@@ -102,6 +102,7 @@
 int
 hypre_AMGCoarsen( hypre_CSRMatrix    *A,
                   double              strength_threshold,
+                  int		     *dof_func,
                   hypre_CSRMatrix   **S_ptr,
                   int               **CF_marker_ptr,
                   int                *coarse_size_ptr     )
@@ -177,6 +178,7 @@ hypre_AMGCoarsen( hypre_CSRMatrix    *A,
       {
          for (jA = A_i[i]+1; jA < A_i[i+1]; jA++)
          {
+	   if (dof_func[i] == dof_func[A_j[jA]])
             row_scale = hypre_max(row_scale, A_data[jA]);
          }
       }
@@ -184,6 +186,7 @@ hypre_AMGCoarsen( hypre_CSRMatrix    *A,
       {
          for (jA = A_i[i]+1; jA < A_i[i+1]; jA++)
          {
+	   if (dof_func[i] == dof_func[A_j[jA]])
             row_scale = hypre_min(row_scale, A_data[jA]);
          }
       }
@@ -195,8 +198,8 @@ hypre_AMGCoarsen( hypre_CSRMatrix    *A,
          for (jA = A_i[i]+1; jA < A_i[i+1]; jA++)
          {
             S_data[jA] = 0;
-            if (A_data[jA] > strength_threshold * row_scale)
-            {
+            if (A_data[jA] > strength_threshold * row_scale
+		&& dof_func[i] == dof_func[A_j[jA]])            {
                S_data[jA] = -1;
             }
          }
@@ -206,7 +209,8 @@ hypre_AMGCoarsen( hypre_CSRMatrix    *A,
          for (jA = A_i[i]+1; jA < A_i[i+1]; jA++)
          {
             S_data[jA] = 0;
-            if (A_data[jA] < strength_threshold * row_scale)
+            if (A_data[jA] < strength_threshold * row_scale
+		&&dof_func[i] == dof_func[A_j[jA]])
             {
                S_data[jA] = -1;
             }

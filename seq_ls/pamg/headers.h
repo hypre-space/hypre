@@ -15,3 +15,4 @@
 
 #include "general.h" 
 
+#include "bcsr_matrix.h"
