@@ -91,7 +91,7 @@ int hypre_p_vprintf(DataDistType *ddist, double *x,
   for (pe=0; pe<npes; pe++) {
     if (mype == pe) {
       for (i=0; i<ddist->ddist_lnrows; i++)
-        printf("%d:%lf, ", ddist->ddist_rowdist[mype]+i, x[i]);
+        printf("%d:%f, ", ddist->ddist_rowdist[mype]+i, x[i]);
       if (pe == npes-1)
         printf("\n");
     }
