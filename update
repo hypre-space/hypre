@@ -165,16 +165,16 @@ then
             cvs checkout -P linear_solvers
         )
     
-        # build the documentation and install in UPDATE subdirectory
+        # build documentation and tools and install in UPDATE subdirectory
         (
             HYPRE_INSTALL_DIR=$HYPRE_INSTALL_DIR/UPDATE
             export HYPRE_INSTALL_DIR
             mkdir UPDATE/docs
+            mkdir UPDATE/bin
             cd UPDATE/src/linear_solvers
             ./configure
-            cd docs
-            make install
-            make veryclean
+            (cd docs;  make install; make veryclean)
+            (cd tools; make install; make veryclean)
         )
     
         # store a representative date for this version of the source
