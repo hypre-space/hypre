@@ -32,7 +32,7 @@ extern int  hypre_FGMRESGetPrecond(void *, HYPRE_Solver *);
 extern int  hypre_FGMRESSetLogging(void *, int);
 extern int  hypre_FGMRESGetNumIterations(void *, int *);
 extern int  hypre_FGMRESGetFinalRelativeResidualNorm(void *,double *);
-extern int  hypre_FGMRESUpdaterecondTolerance(void *, int (*update_tol)());
+extern int  hypre_FGMRESUpdatePrecondTolerance(void *, int (*update_tol)());
 
 /******************************************************************************
  *
