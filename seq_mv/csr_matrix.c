@@ -54,7 +54,8 @@ hypre_CSRMatrixDestroy( hypre_CSRMatrix *matrix )
    if (matrix)
    {
       hypre_TFree(hypre_CSRMatrixI(matrix));
-      hypre_TFree(hypre_CSRMatrixRownnz(matrix));
+      if (hypre_CSRMatrixRownnz(matrix))
+         hypre_TFree(hypre_CSRMatrixRownnz(matrix));
       if ( hypre_CSRMatrixOwnsData(matrix) )
       {
          hypre_TFree(hypre_CSRMatrixData(matrix));
@@ -83,8 +84,8 @@ hypre_CSRMatrixInitialize( hypre_CSRMatrix *matrix )
       hypre_CSRMatrixData(matrix) = hypre_CTAlloc(double, num_nonzeros);
    if ( ! hypre_CSRMatrixI(matrix) )
       hypre_CSRMatrixI(matrix)    = hypre_CTAlloc(int, num_rows + 1);
-   if ( ! hypre_CSRMatrixRownnz(matrix) )
-      hypre_CSRMatrixRownnz(matrix)    = hypre_CTAlloc(int, num_rownnz);
+/*   if ( ! hypre_CSRMatrixRownnz(matrix) )
+      hypre_CSRMatrixRownnz(matrix)    = hypre_CTAlloc(int, num_rownnz);*/
    if ( ! hypre_CSRMatrixJ(matrix) && num_nonzeros )
       hypre_CSRMatrixJ(matrix)    = hypre_CTAlloc(int, num_nonzeros);
 

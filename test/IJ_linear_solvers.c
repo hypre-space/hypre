@@ -1540,6 +1540,7 @@ main( int   argc,
       /* fine grid */
       num_grid_sweeps[0] = num_sweep;
       grid_relax_type[0] = relax_default;
+      hypre_TFree (grid_relax_points[0]);
       grid_relax_points[0] = hypre_CTAlloc(int, num_sweep);
       for (i=0; i<num_sweep; i++)
          grid_relax_points[0][i] = 0;
@@ -1547,6 +1548,7 @@ main( int   argc,
       /* down cycle */
       num_grid_sweeps[1] = num_sweep;
       grid_relax_type[1] = relax_default;
+      hypre_TFree (grid_relax_points[1]);
       grid_relax_points[1] = hypre_CTAlloc(int, num_sweep);
       for (i=0; i<num_sweep; i++)
          grid_relax_points[1][i] = 0;
@@ -1554,6 +1556,7 @@ main( int   argc,
       /* up cycle */
       num_grid_sweeps[2] = num_sweep;
       grid_relax_type[2] = relax_default;
+      hypre_TFree (grid_relax_points[2]);
       grid_relax_points[2] = hypre_CTAlloc(int, num_sweep);
       for (i=0; i<num_sweep; i++)
          grid_relax_points[2][i] = 0;
@@ -1561,6 +1564,7 @@ main( int   argc,
       /* coarsest grid */
       num_grid_sweeps[3] = 1;
       grid_relax_type[3] = 9;
+      hypre_TFree (grid_relax_points[3]);
       grid_relax_points[3] = hypre_CTAlloc(int, 1);
       grid_relax_points[3][0] = 0;
  
@@ -1756,6 +1760,7 @@ main( int   argc,
       /* fine grid */
       num_grid_sweeps[0] = num_sweep;
       grid_relax_type[0] = relax_default;
+      hypre_TFree (grid_relax_points[0]);
       grid_relax_points[0] = hypre_CTAlloc(int, num_sweep);
       for (i=0; i<num_sweep; i++)
          grid_relax_points[0][i] = 0;
@@ -1763,6 +1768,7 @@ main( int   argc,
       /* down cycle */
       num_grid_sweeps[1] = num_sweep;
       grid_relax_type[1] = relax_default;
+      hypre_TFree (grid_relax_points[1]);
       grid_relax_points[1] = hypre_CTAlloc(int, num_sweep);
       for (i=0; i<num_sweep; i++)
          grid_relax_points[1][i] = 0;
@@ -1770,6 +1776,7 @@ main( int   argc,
       /* up cycle */
       num_grid_sweeps[2] = num_sweep;
       grid_relax_type[2] = relax_default;
+      hypre_TFree (grid_relax_points[2]);
       grid_relax_points[2] = hypre_CTAlloc(int, num_sweep);
       for (i=0; i<num_sweep; i++)
          grid_relax_points[2][i] = 0;
@@ -1777,6 +1784,7 @@ main( int   argc,
       /* coarsest grid */
       num_grid_sweeps[3] = 1;
       grid_relax_type[3] = 9;
+      hypre_TFree (grid_relax_points[3]);
       grid_relax_points[3] = hypre_CTAlloc(int, 1);
       grid_relax_points[3][0] = 0;
  
