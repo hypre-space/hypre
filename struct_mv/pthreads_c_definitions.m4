@@ -86,14 +86,17 @@ define(PLOOP,
    }\
    ifetchadd(&$6, &$7);\
    pthread_mutex_lock(&$7);\
-   if ($6 < NUM_THREADS)\
-      pthread_cond_wait(&$8, &$7);\
+   if ($6 < NUM_THREADS) {\
+      pthread_mutex_unlock(&$7);\
+      sem_wait(&hypre_sem);\
+   }\
    else if ($6 == NUM_THREADS) {\
-      pthread_cond_broadcast(&$8);\
+      for(i=1;i<NUM_THREADS;i++)\
+         sem_post(&hypre_sem);\
       $4[$5] = 0;\
       $6 = 0;\
-   }\
-   pthread_mutex_unlock(&$7);\>>)
+      pthread_mutex_unlock(&$7);\
+   }\>>)
 
 
 >>,<<

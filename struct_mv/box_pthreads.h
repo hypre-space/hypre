@@ -92,6 +92,7 @@ Arguments:  $1 -- the name of the increment variable for the loop
 #ifndef hypre_BOX_PTHREADS_HEADER
 #define hypre_BOX_PTHREADS_HEADER
 #include <pthread.h>
+#include <semaphore.h>
 #include "threading.h"
 
 /*--------------------------------------------------------------------------
@@ -114,7 +115,9 @@ int iteration_counter[3]={0,0,0};
    int xnumchunk = hypre__nx / hypre__cx + !!(hypre__nx % hypre__cx);\
    int numchunks = znumchunk * ynumchunk * xnumchunk;\
    int freq[3], reset[3];\
-   int xfreq = 1;\
+   int start[3];\
+   int finish[3];\
+   int chunkcount;\
    freq[0] = 1;\
    reset[0] = xnumchunk;\
    freq[1] = reset[0];\
@@ -149,9 +152,6 @@ int iteration_counter[3]={0,0,0};
    int hypre__ny = hypre_IndexY(loop_size);\
    int hypre__nz = hypre_IndexZ(loop_size);\
    hypre_ChunkLoopExternalSetup(hypre__nx, hypre__ny, hypre__nz);\
-   int chunkcount;\
-   int start[3];\
-   int finish[3];\
    for (chunkcount = ifetchadd(&iteration_counter[0], &hypre_mutex_boxloops) + 0;\
         chunkcount <  numchunks;\
         chunkcount = ifetchadd(&iteration_counter[0], &hypre_mutex_boxloops) + 0) {\
@@ -172,14 +172,17 @@ int iteration_counter[3]={0,0,0};
    }\
    ifetchadd(&hypre_thread_counter, &hypre_mutex_boxloops);\
    pthread_mutex_lock(&hypre_mutex_boxloops);\
-   if (hypre_thread_counter < NUM_THREADS)\
-      pthread_cond_wait(&hypre_cond_boxloops, &hypre_mutex_boxloops);\
+   if (hypre_thread_counter < NUM_THREADS) {\
+      pthread_mutex_unlock(&hypre_mutex_boxloops);\
+      sem_wait(&hypre_sem);\
+   }\
    else if (hypre_thread_counter == NUM_THREADS) {\
-      pthread_cond_broadcast(&hypre_cond_boxloops);\
+      for(i=1;i<NUM_THREADS;i++)\
+         sem_post(&hypre_sem);\
       iteration_counter[0] = 0;\
       hypre_thread_counter = 0;\
+      pthread_mutex_unlock(&hypre_mutex_boxloops);\
    }\
-   pthread_mutex_unlock(&hypre_mutex_boxloops);\
 }
 
 
@@ -195,9 +198,6 @@ int iteration_counter[3]={0,0,0};
    int hypre__nz = hypre_IndexZ(loop_size);\
    int orig_i1 = hypre_BoxIndexRank(data_box1, start1);\
    hypre_ChunkLoopExternalSetup(hypre__nx, hypre__ny, hypre__nz);\
-   int chunkcount;\
-   int start[3];\
-   int finish[3];\
    for (chunkcount = ifetchadd(&iteration_counter[0], &hypre_mutex_boxloops) + 0;\
         chunkcount <  numchunks;\
         chunkcount = ifetchadd(&iteration_counter[0], &hypre_mutex_boxloops) + 0) {\
@@ -224,14 +224,17 @@ int iteration_counter[3]={0,0,0};
    }\
    ifetchadd(&hypre_thread_counter, &hypre_mutex_boxloops);\
    pthread_mutex_lock(&hypre_mutex_boxloops);\
-   if (hypre_thread_counter < NUM_THREADS)\
-      pthread_cond_wait(&hypre_cond_boxloops, &hypre_mutex_boxloops);\
+   if (hypre_thread_counter < NUM_THREADS) {\
+      pthread_mutex_unlock(&hypre_mutex_boxloops);\
+      sem_wait(&hypre_sem);\
+   }\
    else if (hypre_thread_counter == NUM_THREADS) {\
-      pthread_cond_broadcast(&hypre_cond_boxloops);\
+      for(i=1;i<NUM_THREADS;i++)\
+         sem_post(&hypre_sem);\
       iteration_counter[0] = 0;\
       hypre_thread_counter = 0;\
+      pthread_mutex_unlock(&hypre_mutex_boxloops);\
    }\
-   pthread_mutex_unlock(&hypre_mutex_boxloops);\
 }
 
 
@@ -251,13 +254,10 @@ int iteration_counter[3]={0,0,0};
    int orig_i1 = hypre_BoxIndexRank(data_box1, start1);\
    int orig_i2 = hypre_BoxIndexRank(data_box2, start2);\
    hypre_ChunkLoopExternalSetup(hypre__nx, hypre__ny, hypre__nz);\
-   int chunkcount;\
-   int start[3];\
-   int finish[3];\
    for (chunkcount = ifetchadd(&iteration_counter[0], &hypre_mutex_boxloops) + 0;\
         chunkcount <  numchunks;\
         chunkcount = ifetchadd(&iteration_counter[0], &hypre_mutex_boxloops) + 0) {\
-      hypre_ChunkLoopInternalSetup(start, finish, zreset, zfreq,\
+      hypre_ChunkLoopInternalSetup(start, finish, reset, freq,\
                                    hypre__nx, hypre__ny, hypre__nz,\
                                    hypre__cx, hypre__cy, hypre__cz,\
                                    chunkcount);\
@@ -288,14 +288,17 @@ int iteration_counter[3]={0,0,0};
    }\
    ifetchadd(&hypre_thread_counter, &hypre_mutex_boxloops);\
    pthread_mutex_lock(&hypre_mutex_boxloops);\
-   if (hypre_thread_counter < NUM_THREADS)\
-      pthread_cond_wait(&hypre_cond_boxloops, &hypre_mutex_boxloops);\
+   if (hypre_thread_counter < NUM_THREADS) {\
+      pthread_mutex_unlock(&hypre_mutex_boxloops);\
+      sem_wait(&hypre_sem);\
+   }\
    else if (hypre_thread_counter == NUM_THREADS) {\
-      pthread_cond_broadcast(&hypre_cond_boxloops);\
+      for(i=1;i<NUM_THREADS;i++)\
+         sem_post(&hypre_sem);\
       iteration_counter[0] = 0;\
       hypre_thread_counter = 0;\
+      pthread_mutex_unlock(&hypre_mutex_boxloops);\
    }\
-   pthread_mutex_unlock(&hypre_mutex_boxloops);\
 }
 
 
@@ -319,9 +322,6 @@ int iteration_counter[3]={0,0,0};
    int orig_i2 = hypre_BoxIndexRank(data_box2, start2);\
    int orig_i3 = hypre_BoxIndexRank(data_box3, start3);\
    hypre_ChunkLoopExternalSetup(hypre__nx, hypre__ny, hypre__nz);\
-   int chunkcount;\
-   int start[3];\
-   int finish[3];\
    for (chunkcount = ifetchadd(&iteration_counter[0], &hypre_mutex_boxloops) + 0;\
         chunkcount <  numchunks;\
         chunkcount = ifetchadd(&iteration_counter[0], &hypre_mutex_boxloops) + 0) {\
@@ -363,14 +363,17 @@ int iteration_counter[3]={0,0,0};
    }\
    ifetchadd(&hypre_thread_counter, &hypre_mutex_boxloops);\
    pthread_mutex_lock(&hypre_mutex_boxloops);\
-   if (hypre_thread_counter < NUM_THREADS)\
-      pthread_cond_wait(&hypre_cond_boxloops, &hypre_mutex_boxloops);\
+   if (hypre_thread_counter < NUM_THREADS) {\
+      pthread_mutex_unlock(&hypre_mutex_boxloops);\
+      sem_wait(&hypre_sem);\
+   }\
    else if (hypre_thread_counter == NUM_THREADS) {\
-      pthread_cond_broadcast(&hypre_cond_boxloops);\
+      for(i=1;i<NUM_THREADS;i++)\
+         sem_post(&hypre_sem);\
       iteration_counter[0] = 0;\
       hypre_thread_counter = 0;\
+      pthread_mutex_unlock(&hypre_mutex_boxloops);\
    }\
-   pthread_mutex_unlock(&hypre_mutex_boxloops);\
 }
 
 
@@ -398,9 +401,6 @@ int iteration_counter[3]={0,0,0};
    int orig_i3 = hypre_BoxIndexRank(data_box3, start3);\
    int orig_i4 = hypre_BoxIndexRank(data_box4, start4);\
    hypre_ChunkLoopExternalSetup(hypre__nx, hypre__ny, hypre__nz);\
-   int chunkcount;\
-   int start[3];\
-   int finish[3];\
    for (chunkcount = ifetchadd(&iteration_counter[0], &hypre_mutex_boxloops) + 0;\
         chunkcount <  numchunks;\
         chunkcount = ifetchadd(&iteration_counter[0], &hypre_mutex_boxloops) + 0) {\
@@ -449,14 +449,17 @@ int iteration_counter[3]={0,0,0};
    }\
    ifetchadd(&hypre_thread_counter, &hypre_mutex_boxloops);\
    pthread_mutex_lock(&hypre_mutex_boxloops);\
-   if (hypre_thread_counter < NUM_THREADS)\
-      pthread_cond_wait(&hypre_cond_boxloops, &hypre_mutex_boxloops);\
+   if (hypre_thread_counter < NUM_THREADS) {\
+      pthread_mutex_unlock(&hypre_mutex_boxloops);\
+      sem_wait(&hypre_sem);\
+   }\
    else if (hypre_thread_counter == NUM_THREADS) {\
-      pthread_cond_broadcast(&hypre_cond_boxloops);\
+      for(i=1;i<NUM_THREADS;i++)\
+         sem_post(&hypre_sem);\
       iteration_counter[0] = 0;\
       hypre_thread_counter = 0;\
+      pthread_mutex_unlock(&hypre_mutex_boxloops);\
    }\
-   pthread_mutex_unlock(&hypre_mutex_boxloops);\
 }
 
 

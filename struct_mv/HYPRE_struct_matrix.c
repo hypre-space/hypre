@@ -211,6 +211,7 @@ HYPRE_SetStructMatrixBoxValuesPush( HYPRE_StructMatrix matrix,
    pushargs.iupper              = iupper;
    pushargs.num_stencil_indices = num_stencil_indices;
    pushargs.stencil_indices     = stencil_indices;
+   pushargs.values              = values;
    pushargs.returnvalue = (int *) malloc(sizeof(int));
    for (i=0; i<NUM_THREADS; i++)
       hypre_work_put( HYPRE_SetStructMatrixBoxValuesVoidPtr, (void *)&pushargs);
