@@ -8,7 +8,7 @@
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
- * Header file for HYPRE_IJMatrix library
+ * Header file for HYPRE_IJMatrix and HYPRE_IJVector libraries
  *
  *****************************************************************************/
 
@@ -50,8 +50,22 @@ int HYPRE_InsertIJMatrixBlock P((HYPRE_IJMatrix IJmatrix , int m , int n , int *
 int HYPRE_AddBlockToIJMatrix P((HYPRE_IJMatrix IJmatrix , int m , int n , int *rows , int *cols , double *values ));
 int HYPRE_InsertIJMatrixRow P((HYPRE_IJMatrix IJmatrix , int n , int row , int *cols , double *values ));
 int hypre_RefIJMatrix P((HYPRE_IJMatrix IJmatrix , HYPRE_IJMatrix *reference ));
+void *hypre_GetIJMatrixLocalStorage P((HYPRE_IJMatrix IJmatrix ));
 
-void *hypre_GetIJMatrixLocalStorage P((HYPRE_IJMatrix IJMatrix));
+/* HYPRE_IJVector.c */
+int HYPRE_NewIJVector P((MPI_Comm comm, HYPRE_IJVector *in_vector_ptr , int global_n ));
+int HYPRE_FreeIJVector P((HYPRE_IJVector IJvector ));
+int HYPRE_InitializeIJVector P((HYPRE_IJVector IJvector ));
+int HYPRE_AssembleIJVector P((HYPRE_IJVector IJvector ));
+int HYPRE_DistributeIJVector P((HYPRE_IJVector IJvector , int *row_starts ));
+int HYPRE_SetIJVectorLocalStorageType P((HYPRE_IJVector IJvector , int type ));
+int HYPRE_SetIJVectorLocalSize P((HYPRE_IJVector IJvector , int local_n ));
+int HYPRE_QueryIJVectorInsertionSemantics P((HYPRE_IJVector IJvector , int *level ));
+int HYPRE_InsertIJVectorRows P((HYPRE_IJVector IJvector , int n , int *rows , double *values ));
+int HYPRE_AddRowsToIJVector P((HYPRE_IJVector IJvector , int n , int *rows , double *values ));
+int HYPRE_GetIJVectorRows P((HYPRE_IJVector IJvector , int row_start, int row_stop, double *values )); 
+int hypre_RefIJVector P((HYPRE_IJVector IJvector , HYPRE_IJVector *reference ));
+void *hypre_GetIJVectorLocalStorage P((HYPRE_IJVector IJvector ));
 
 #undef P
 
