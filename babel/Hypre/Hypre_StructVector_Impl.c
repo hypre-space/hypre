@@ -74,6 +74,7 @@ impl_Hypre_StructVector_Clear(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructVector.Clear) */
   /* Insert the implementation of the Clear method here... */
+   return 1; /* not implemented */
   /* DO-NOT-DELETE splicer.end(Hypre.StructVector.Clear) */
 }
 
@@ -90,6 +91,7 @@ impl_Hypre_StructVector_Copy(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructVector.Copy) */
   /* Insert the implementation of the Copy method here... */
+   return 1; /* not implemented */
   /* DO-NOT-DELETE splicer.end(Hypre.StructVector.Copy) */
 }
 
@@ -106,6 +108,7 @@ impl_Hypre_StructVector_Clone(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructVector.Clone) */
   /* Insert the implementation of the Clone method here... */
+   return 1; /* not implemented */
   /* DO-NOT-DELETE splicer.end(Hypre.StructVector.Clone) */
 }
 
@@ -122,6 +125,7 @@ impl_Hypre_StructVector_Scale(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructVector.Scale) */
   /* Insert the implementation of the Scale method here... */
+   return 1; /* not implemented */
   /* DO-NOT-DELETE splicer.end(Hypre.StructVector.Scale) */
 }
 
@@ -138,6 +142,7 @@ impl_Hypre_StructVector_Dot(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructVector.Dot) */
   /* Insert the implementation of the Dot method here... */
+   return 1; /* not implemented */
   /* DO-NOT-DELETE splicer.end(Hypre.StructVector.Dot) */
 }
 
@@ -154,6 +159,7 @@ impl_Hypre_StructVector_Axpy(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructVector.Axpy) */
   /* Insert the implementation of the Axpy method here... */
+   return 1; /* not implemented */
   /* DO-NOT-DELETE splicer.end(Hypre.StructVector.Axpy) */
 }
 
@@ -170,6 +176,7 @@ impl_Hypre_StructVector_SetCommunicator(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructVector.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
+   return 1; /* not implemented */
   /* DO-NOT-DELETE splicer.end(Hypre.StructVector.SetCommunicator) */
 }
 
@@ -189,6 +196,7 @@ impl_Hypre_StructVector_Initialize(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructVector.Initialize) */
   /* Insert the implementation of the Initialize method here... */
+   return 1; /* not implemented */
   /* DO-NOT-DELETE splicer.end(Hypre.StructVector.Initialize) */
 }
 
@@ -210,6 +218,7 @@ impl_Hypre_StructVector_Assemble(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructVector.Assemble) */
   /* Insert the implementation of the Assemble method here... */
+   return 1; /* not implemented */
   /* DO-NOT-DELETE splicer.end(Hypre.StructVector.Assemble) */
 }
 
@@ -234,6 +243,7 @@ impl_Hypre_StructVector_GetObject(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructVector.GetObject) */
   /* Insert the implementation of the GetObject method here... */
+   return 1; /* not implemented */
   /* DO-NOT-DELETE splicer.end(Hypre.StructVector.GetObject) */
 }
 
@@ -250,6 +260,7 @@ impl_Hypre_StructVector_SetGrid(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructVector.SetGrid) */
   /* Insert the implementation of the SetGrid method here... */
+   return 1; /* not implemented */
   /* DO-NOT-DELETE splicer.end(Hypre.StructVector.SetGrid) */
 }
 
@@ -266,6 +277,7 @@ impl_Hypre_StructVector_SetStencil(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructVector.SetStencil) */
   /* Insert the implementation of the SetStencil method here... */
+   return 1; /* not implemented */
   /* DO-NOT-DELETE splicer.end(Hypre.StructVector.SetStencil) */
 }
 
@@ -282,6 +294,7 @@ impl_Hypre_StructVector_SetValue(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructVector.SetValue) */
   /* Insert the implementation of the SetValue method here... */
+   return 1; /* not implemented */
   /* DO-NOT-DELETE splicer.end(Hypre.StructVector.SetValue) */
 }
 
@@ -299,5 +312,6 @@ impl_Hypre_StructVector_SetBoxValues(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructVector.SetBoxValues) */
   /* Insert the implementation of the SetBoxValues method here... */
+   return 1; /* not implemented */
   /* DO-NOT-DELETE splicer.end(Hypre.StructVector.SetBoxValues) */
 }

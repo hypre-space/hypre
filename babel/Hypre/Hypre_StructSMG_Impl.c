@@ -74,6 +74,7 @@ impl_Hypre_StructSMG_SetCommunicator(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructSMG.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
+   return 1; /* not implemented */
   /* DO-NOT-DELETE splicer.end(Hypre.StructSMG.SetCommunicator) */
 }
 
@@ -90,6 +91,7 @@ impl_Hypre_StructSMG_GetDoubleValue(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructSMG.GetDoubleValue) */
   /* Insert the implementation of the GetDoubleValue method here... */
+   return 1; /* not implemented */
   /* DO-NOT-DELETE splicer.end(Hypre.StructSMG.GetDoubleValue) */
 }
 
@@ -106,6 +108,7 @@ impl_Hypre_StructSMG_GetIntValue(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructSMG.GetIntValue) */
   /* Insert the implementation of the GetIntValue method here... */
+   return 1; /* not implemented */
   /* DO-NOT-DELETE splicer.end(Hypre.StructSMG.GetIntValue) */
 }
 
@@ -122,6 +125,7 @@ impl_Hypre_StructSMG_SetDoubleParameter(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructSMG.SetDoubleParameter) */
   /* Insert the implementation of the SetDoubleParameter method here... */
+   return 1; /* not implemented */
   /* DO-NOT-DELETE splicer.end(Hypre.StructSMG.SetDoubleParameter) */
 }
 
@@ -138,6 +142,7 @@ impl_Hypre_StructSMG_SetIntParameter(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructSMG.SetIntParameter) */
   /* Insert the implementation of the SetIntParameter method here... */
+   return 1; /* not implemented */
   /* DO-NOT-DELETE splicer.end(Hypre.StructSMG.SetIntParameter) */
 }
 
@@ -154,6 +159,7 @@ impl_Hypre_StructSMG_SetStringParameter(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructSMG.SetStringParameter) */
   /* Insert the implementation of the SetStringParameter method here... */
+   return 1; /* not implemented */
   /* DO-NOT-DELETE splicer.end(Hypre.StructSMG.SetStringParameter) */
 }
 
@@ -170,6 +176,7 @@ impl_Hypre_StructSMG_SetIntArrayParameter(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructSMG.SetIntArrayParameter) */
   /* Insert the implementation of the SetIntArrayParameter method here... */
+   return 1; /* not implemented */
   /* DO-NOT-DELETE splicer.end(Hypre.StructSMG.SetIntArrayParameter) */
 }
 
@@ -186,6 +193,7 @@ impl_Hypre_StructSMG_SetDoubleArrayParameter(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructSMG.SetDoubleArrayParameter) */
   /* Insert the implementation of the SetDoubleArrayParameter method here... */
+   return 1; /* not implemented */
   /* DO-NOT-DELETE splicer.end(Hypre.StructSMG.SetDoubleArrayParameter) */
 }
 
@@ -202,6 +210,7 @@ impl_Hypre_StructSMG_Setup(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructSMG.Setup) */
   /* Insert the implementation of the Setup method here... */
+   return 1; /* not implemented */
   /* DO-NOT-DELETE splicer.end(Hypre.StructSMG.Setup) */
 }
 
@@ -218,6 +227,7 @@ impl_Hypre_StructSMG_Apply(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructSMG.Apply) */
   /* Insert the implementation of the Apply method here... */
+   return 1; /* not implemented */
   /* DO-NOT-DELETE splicer.end(Hypre.StructSMG.Apply) */
 }
 
@@ -234,6 +244,7 @@ impl_Hypre_StructSMG_SetOperator(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructSMG.SetOperator) */
   /* Insert the implementation of the SetOperator method here... */
+   return 1; /* not implemented */
   /* DO-NOT-DELETE splicer.end(Hypre.StructSMG.SetOperator) */
 }
 
@@ -250,6 +261,7 @@ impl_Hypre_StructSMG_GetResidual(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructSMG.GetResidual) */
   /* Insert the implementation of the GetResidual method here... */
+   return 1; /* not implemented */
   /* DO-NOT-DELETE splicer.end(Hypre.StructSMG.GetResidual) */
 }
 
@@ -266,6 +278,7 @@ impl_Hypre_StructSMG_SetLogging(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructSMG.SetLogging) */
   /* Insert the implementation of the SetLogging method here... */
+   return 1; /* not implemented */
   /* DO-NOT-DELETE splicer.end(Hypre.StructSMG.SetLogging) */
 }
 
@@ -282,6 +295,7 @@ impl_Hypre_StructSMG_SetPrintLevel(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructSMG.SetPrintLevel) */
   /* Insert the implementation of the SetPrintLevel method here... */
+   return 1; /* not implemented */
   /* DO-NOT-DELETE splicer.end(Hypre.StructSMG.SetPrintLevel) */
 }
 

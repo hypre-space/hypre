@@ -46,7 +46,7 @@ impl_Hypre_ParAMG__ctor(
   /* DO-NOT-DELETE splicer.begin(Hypre.ParAMG._ctor) */
   /* Insert the implementation of the constructor method here... */
    int ierr=0;
-   HYPRE_Solver * solver;
+   HYPRE_Solver * solver = NULL; /* will really be initialized by Create call */
    struct Hypre_ParAMG__data * data;
    data = hypre_CTAlloc( struct Hypre_ParAMG__data, 1 );
    data -> comm = NULL;
@@ -314,7 +314,7 @@ impl_Hypre_ParAMG_SetIntArrayParameter(
   /* DO-NOT-DELETE splicer.begin(Hypre.ParAMG.SetIntArrayParameter) */
   /* Insert the implementation of the SetIntArrayParameter method here... */
    int ierr = 0;
-   int stride, dim, lb0, ub0, lb1, ub1, i, j;
+   int dim, lb0, ub0, lb1, ub1, i, j;
    int * data1_c;  /* the data in a C 1d array */
    int ** data2_c; /* the data in a C 2d array */
    HYPRE_Solver solver;
@@ -326,7 +326,7 @@ impl_Hypre_ParAMG_SetIntArrayParameter(
 
    dim = SIDL_int__array_dimen( value );
 
-/* strides don't seem to be supported in babel 0.6:   stride = SIDL_int__array_stride( value, 0 );
+/* strides don't seem to be supported in babel 0.6:   int stride = SIDL_int__array_stride( value, 0 );
    assert( stride==1 );*/
 
    if ( strcmp(name,"NumGridSweeps")==0 || strcmp(name,"Num Grid Sweeps")==0 ||
@@ -382,7 +382,7 @@ impl_Hypre_ParAMG_SetDoubleArrayParameter(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.ParAMG.SetDoubleArrayParameter) */
   /* Insert the implementation of the SetDoubleArrayParameter method here... */
-   int ierr = 0, stride, dim;
+   int ierr = 0, dim;
    HYPRE_Solver solver;
    struct Hypre_ParAMG__data * data;
 
@@ -390,7 +390,7 @@ impl_Hypre_ParAMG_SetDoubleArrayParameter(
    solver = data->solver;
 
    dim = SIDL_double__array_dimen( value );
-/* strides don't seem to be supported in babel 0.6:   stride = SIDL_double__array_stride( value, 0 );
+/* strides don't seem to be supported in babel 0.6:   int stride = SIDL_double__array_stride( value, 0 );
    assert( stride==1 );*/
 
    if ( strcmp(name,"RelaxWeight")==0 || strcmp(name,"Relax Weight")==0 ) {
@@ -578,8 +578,6 @@ impl_Hypre_ParAMG_SetOperator(
   /* DO-NOT-DELETE splicer.begin(Hypre.ParAMG.SetOperator) */
   /* Insert the implementation of the SetOperator method here... */
    int ierr = 0;
-   void * objectA;
-   HYPRE_Solver solver;
    struct Hypre_ParAMG__data * data;
    Hypre_ParCSRMatrix Amat;
 
