@@ -63,7 +63,7 @@ am_driver_commpkg_OBJECTS = driver_commpkg.$(OBJEXT)
 driver_commpkg_OBJECTS = $(am_driver_commpkg_OBJECTS)
 am__DEPENDENCIES_1 =
 am__DEPENDENCIES_2 = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 driver_commpkg_DEPENDENCIES = $(am__DEPENDENCIES_2)
 am_f77_ij_OBJECTS = f77_ij-f77_ij.$(OBJEXT)
 f77_ij_OBJECTS = $(am_f77_ij_OBJECTS)
@@ -77,12 +77,12 @@ f77_ij_mv_OBJECTS = $(am_f77_ij_mv_OBJECTS)
 f77_ij_mv_DEPENDENCIES = $(am__DEPENDENCIES_3)
 am_f77_struct_OBJECTS = f77_struct-f77_struct.$(OBJEXT)
 f77_struct_OBJECTS = $(am_f77_struct_OBJECTS)
-am__DEPENDENCIES_4 = $(am__DEPENDENCIES_1)
+am__DEPENDENCIES_4 = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 f77_struct_DEPENDENCIES = $(am__DEPENDENCIES_4)
 am_fei_OBJECTS = fei-fei.$(OBJEXT)
 fei_OBJECTS = $(am_fei_OBJECTS)
 fei_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_ij_OBJECTS = ij.$(OBJEXT)
 ij_OBJECTS = $(am_ij_OBJECTS)
 ij_DEPENDENCIES = $(am__DEPENDENCIES_2)
@@ -213,6 +213,7 @@ LAPACK_LIBS = @LAPACK_LIBS@
 LDFLAGS = @LDFLAGS@
 LIBDIRNEEDED_FALSE = @LIBDIRNEEDED_FALSE@
 LIBDIRNEEDED_TRUE = @LIBDIRNEEDED_TRUE@
+LIBG2C = @LIBG2C@
 LIBM = @LIBM@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
@@ -343,6 +344,7 @@ ij_libraries = \
  -lHYPRE_utilities\
  $(LAPACKLIBFLAGS)\
  $(BLASLIBFLAGS)\
+ $(LIBG2C)\
  $(LIBM)
 
 ij_LDADD = $(ij_libraries)
@@ -412,6 +414,7 @@ driver_commpkg_libraries = \
  -lHYPRE_utilities\
  $(LAPACKLIBFLAGS)\
  $(BLASLIBFLAGS)\
+ $(LIBG2C)\
  $(LIBM)
 
 driver_commpkg_LDADD = $(driver_commpkg_libraries)
@@ -443,6 +446,7 @@ sstruct_libraries = \
  -lHYPRE_utilities\
  $(LAPACKLIBFLAGS)\
  $(BLASLIBFLAGS)\
+ $(LIBG2C)\
  $(LIBM)
 
 sstruct_LDADD = $(sstruct_libraries)
@@ -461,6 +465,7 @@ struct_libraries = \
  -lHYPRE_struct_mv\
  -lHYPRE_krylov\
  -lHYPRE_utilities\
+ $(LIBG2C)\
  $(LIBM)
 
 struct_LDADD = $(struct_libraries)
@@ -486,6 +491,7 @@ fei_LDADD = \
  -lHYPRE_superlu\
  $(LAPACKLIBFLAGS)\
  $(BLASLIBFLAGS)\
+ $(LIBG2C)\
  $(LIBM)
 
 #fei_LDFLAGS = -static
