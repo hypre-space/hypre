@@ -28,25 +28,20 @@ initialize_variables ()
 # a "cd ${HYPRE_AUTOTEST_DIR}", however as long as we are
 # above a "linear_solvers" directory we should be ok.
 #
-  if test ! "${HYPRE_AUTOTEST_DIR}"
-  then
+  if test ! "${HYPRE_AUTOTEST_DIR}" ; then
     HYPRE_AUTOTEST_DIR=`pwd`
   else			# assume we're executing from autotest
-    if [ ! -d ${HYPRE_AUTOTEST_DIR} ]
-    then
-      if [ ! -d ./linear_solvers ]
-      then
+    if [ ! -d ${HYPRE_AUTOTEST_DIR} ] ; then
+      if [ ! -d ./linear_solvers ] ; then
         echo "$0: no HYPRE_AUTOTEST_DIR environment variable"
         exit 2
       fi
     fi
   fi
-  if [ -d ${HYPRE_AUTOTEST_DIR}/linear_solvers/test ]
-  then
+  if [ -d ${HYPRE_AUTOTEST_DIR}/linear_solvers/test ] ; then
     SRC=linear_solvers
   fi
-  if [ -d ${HYPRE_AUTOTEST_DIR}/src/test ]
-  then
+  if [ -d ${HYPRE_AUTOTEST_DIR}/src/test ] ; then
     SRC=src
   fi
   StdBuildDir=${HYPRE_AUTOTEST_DIR}/${SRC}
@@ -55,20 +50,23 @@ initialize_variables ()
 # Define HYPRE_ARCH
 #
   . $StdTestDir/hypre_arch.sh
+  if [ -z "$HYPRE_COMPILE_MACHINE" -o "$HYPRE_COMPILE_MACHINE" = "" ] ; then
+    HYPRE_COMPILE_MACHINE=$(hostname)
+  fi
+  if [ -z "$HYPRE_RUN_MACHINE" -o "$HYPRE_RUN_MACHINE" = "" ] ; then
+    HYPRE_RUN_MACHINE=$(hostname)
+  fi
 #
 # If NOT started by autotest (hence no HYPRE_*_EMAIL variable
 # defined) default mail to UID only.
 #
-  if test ! "$HYPRE_MAIL"
-  then
+  if test ! "$HYPRE_MAIL" ; then
     [ -x /usr/bin/Mail ] && HYPRE_MAIL=/usr/bin/Mail
     [ -x /usr/bin/mailx ] && HYPRE_MAIL=/usr/bin/mailx
     [ -x /usr/sbin/mailx ] && HYPRE_MAIL=/usr/sbin/mailx
   fi
-  if test ! "${HYPRE_DEFAULT_EMAIL}"
-  then
-    if test ! "${USER}"
-    then
+  if test ! "${HYPRE_DEFAULT_EMAIL}" ; then
+    if test ! "${USER}" ; then
       USER=`who am I|cut -f 1 -d \ `
     fi
     HYPRE_DEFAULT_EMAIL=${HYPRE_DEFAULT_EMAIL:=$USER}
@@ -149,8 +147,8 @@ usage () {
   printf "-d       Docs; make the documentation directory.\n"
   printf "-f       F77; make all77 (no configure, or execute).\n"
   printf "-h       Help; display this help message.\n"
-  printf "-m       Mail; mail errors to developers.\n"
-  printf "+m       NoMail; Don\'t send any mail.\n"
+  printf "-m       Mail; mail error summary to developers.\n"
+  printf "+m       Mail+; mail error logs to developers.\n"
   printf "-n       NoMPI; configure --without-MPI, make struct, IJ,\n"
   printf "         all, and beta (no execute option).\n"
   printf "-o opt   openMP; configure --with-openmp, make beta.\n"
@@ -402,7 +400,7 @@ then
       ssh ${HYPRE_RUN_MACHINE} "\
       (\
         cd ${HYPRE_AUTOTEST_DIR}/${SRC}/test;\
-        . ./env.${HYPRE_ARCH};\
+        [ -f ./env.${HYPRE_ARCH} ] &&. ./env.${HYPRE_ARCH};\
         ./test_drivers.sh $MailOpt\
     )"
     fi
