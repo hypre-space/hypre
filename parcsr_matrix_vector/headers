@@ -8,7 +8,7 @@
 # $Revision$
 #EHEADER***********************************************************************
 
-INTERNAL_HEADER=hypre_parcsr_mv.h
+INTERNAL_HEADER=parcsr_matrix_vector.h
 
 #===========================================================================
 # Include guards and other includes
