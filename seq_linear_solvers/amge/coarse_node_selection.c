@@ -59,7 +59,7 @@ int hypre_AMGeCoarseNodeSelection(int *i_AEface_node, int *j_AEface_node,
 
   coarsenode_counter = 0;
   for (i=0; i < num_nodes; i++)
-    if (i_node_coarsenode[i] > 1)
+    if (i_node_coarsenode[i] > 1) /*  || num_AEfaces < 3)  */
       coarsenode_counter++;
 
 
@@ -67,7 +67,7 @@ int hypre_AMGeCoarseNodeSelection(int *i_AEface_node, int *j_AEface_node,
 
   coarsenode_counter = 0;
   for (i=0; i < num_nodes; i++)
-    if (i_node_coarsenode[i] > 1)
+    if (i_node_coarsenode[i] > 1) /* || num_AEfaces < 3 )  */
       {
 	i_node_coarsenode[i] = 1;
 	j_node_coarsenode[coarsenode_counter] = coarsenode_counter;
