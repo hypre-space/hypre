@@ -63,7 +63,7 @@ am__libHYPRE_parcsr_mv_a_SOURCES_DIST = F90_HYPRE_parcsr_matrix.c \
 	HYPRE_parcsr_matrix.c HYPRE_parcsr_vector.c communicationT.c \
 	numbers.c par_csr_aat.c par_csr_bool_matop.c \
 	par_csr_bool_matrix.c par_csr_communication.c par_csr_matop.c \
-	par_csr_matrix.c par_csr_matvec.c par_vector.c
+	par_csr_matrix.c par_csr_matvec.c par_vector.c new_commpkg.c
 am__objects_1 = F90_HYPRE_parcsr_matrix.$(OBJEXT) \
 	F90_HYPRE_parcsr_vector.$(OBJEXT) F90_par_vector.$(OBJEXT) \
 	F90_parcsr_matrix.$(OBJEXT) HYPRE_parcsr_matrix.$(OBJEXT) \
@@ -72,7 +72,7 @@ am__objects_1 = F90_HYPRE_parcsr_matrix.$(OBJEXT) \
 	par_csr_bool_matop.$(OBJEXT) par_csr_bool_matrix.$(OBJEXT) \
 	par_csr_communication.$(OBJEXT) par_csr_matop.$(OBJEXT) \
 	par_csr_matrix.$(OBJEXT) par_csr_matvec.$(OBJEXT) \
-	par_vector.$(OBJEXT)
+	par_vector.$(OBJEXT) new_commpkg.$(OBJEXT)
 @STATICONLY_TRUE@am_libHYPRE_parcsr_mv_a_OBJECTS = $(am__objects_1)
 libHYPRE_parcsr_mv_a_OBJECTS = $(am_libHYPRE_parcsr_mv_a_OBJECTS)
 libLTLIBRARIES_INSTALL = $(INSTALL)
@@ -83,13 +83,13 @@ am__libHYPRE_parcsr_mv_la_SOURCES_DIST = F90_HYPRE_parcsr_matrix.c \
 	HYPRE_parcsr_matrix.c HYPRE_parcsr_vector.c communicationT.c \
 	numbers.c par_csr_aat.c par_csr_bool_matop.c \
 	par_csr_bool_matrix.c par_csr_communication.c par_csr_matop.c \
-	par_csr_matrix.c par_csr_matvec.c par_vector.c
+	par_csr_matrix.c par_csr_matvec.c par_vector.c new_commpkg.c
 am__objects_2 = F90_HYPRE_parcsr_matrix.lo F90_HYPRE_parcsr_vector.lo \
 	F90_par_vector.lo F90_parcsr_matrix.lo HYPRE_parcsr_matrix.lo \
 	HYPRE_parcsr_vector.lo communicationT.lo numbers.lo \
 	par_csr_aat.lo par_csr_bool_matop.lo par_csr_bool_matrix.lo \
 	par_csr_communication.lo par_csr_matop.lo par_csr_matrix.lo \
-	par_csr_matvec.lo par_vector.lo
+	par_csr_matvec.lo par_vector.lo new_commpkg.lo
 @STATICONLY_FALSE@am_libHYPRE_parcsr_mv_la_OBJECTS = $(am__objects_2)
 libHYPRE_parcsr_mv_la_OBJECTS = $(am_libHYPRE_parcsr_mv_la_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
@@ -255,7 +255,8 @@ noinst_HEADERS = \
  numbers.h\
  par_csr_communication.h\
  par_csr_matrix.h\
- par_vector.h
+ par_vector.h\
+ new_commpkg.h
 
 dependent_includes = $(include_HEADERS) $(noinst_HEADERS)
 AM_CPPFLAGS = \
@@ -291,7 +292,8 @@ FILES = \
  par_csr_matop.c\
  par_csr_matrix.c\
  par_csr_matvec.c\
- par_vector.c
+ par_vector.c\
+ new_commpkg.c
 
 all: all-am
 

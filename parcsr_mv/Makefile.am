@@ -17,7 +17,8 @@ noinst_HEADERS = \
  numbers.h\
  par_csr_communication.h\
  par_csr_matrix.h\
- par_vector.h
+ par_vector.h\
+ new_commpkg.h
 dependent_includes = $(include_HEADERS) $(noinst_HEADERS)
 
 AM_CPPFLAGS = \
@@ -52,7 +53,8 @@ FILES = \
  par_csr_matop.c\
  par_csr_matrix.c\
  par_csr_matvec.c\
- par_vector.c
+ par_vector.c\
+ new_commpkg.c
 
 $(OBJECTS): $(dependent_includes)
 
