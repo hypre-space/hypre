@@ -79,9 +79,10 @@
 
 int
 hypre_BoomerAMGCreateS(hypre_ParCSRMatrix    *A,
-                       int                   *dof_func,
                        double                 strength_threshold,
                        double                 max_row_sum,
+                       int                    num_functions,
+                       int                   *dof_func,
                        hypre_ParCSRMatrix   **S_ptr)
 {
    MPI_Comm 	       comm            = hypre_ParCSRMatrixComm(A);
@@ -168,7 +169,8 @@ hypre_BoomerAMGCreateS(hypre_ParCSRMatrix    *A,
         hypre_CSRMatrixJ(S_offd) = hypre_CTAlloc(int, num_nonzeros_offd);
         S_offd_j = hypre_CSRMatrixJ(S_offd);
         hypre_ParCSRMatrixColMapOffd(S) = hypre_CTAlloc(int, num_cols_offd);
-        dof_func_offd = hypre_CTAlloc(int, num_cols_offd);
+        if (num_functions > 1)
+	   dof_func_offd = hypre_CTAlloc(int, num_cols_offd);
    }
 
 
@@ -185,20 +187,22 @@ hypre_BoomerAMGCreateS(hypre_ParCSRMatrix    *A,
    num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
    int_buf_data = hypre_CTAlloc(int, hypre_ParCSRCommPkgSendMapStart(comm_pkg,
 						num_sends));
-
-   index = 0;
-   for (i = 0; i < num_sends; i++)
+   if (num_functions > 1)
    {
-	start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
-	for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
+      index = 0;
+      for (i = 0; i < num_sends; i++)
+      {
+	 start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
+	 for (j=start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
 		int_buf_data[index++] 
 		 = dof_func[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
-   }
+      }
 	
-   comm_handle = hypre_ParCSRCommHandleCreate( 11, comm_pkg, int_buf_data, 
+      comm_handle = hypre_ParCSRCommHandleCreate( 11, comm_pkg, int_buf_data, 
 	dof_func_offd);
 
-   hypre_ParCSRCommHandleDestroy(comm_handle);   
+      hypre_ParCSRCommHandleDestroy(comm_handle);   
+   }
 
    /* give S same nonzero structure as A */
    hypre_ParCSRMatrixCopy(A,S,0);
@@ -212,38 +216,70 @@ hypre_BoomerAMGCreateS(hypre_ParCSRMatrix    *A,
       /* compute scaling factor and row sum */
       row_scale = 0.0;
       row_sum = diag;
-      if (diag < 0)
+      if (num_functions > 1)
       {
-         for (jA = A_diag_i[i]+1; jA < A_diag_i[i+1]; jA++)
-         {
-            if (dof_func[i] == dof_func[A_diag_j[jA]])
+         if (diag < 0)
+	 {
+            for (jA = A_diag_i[i]+1; jA < A_diag_i[i+1]; jA++)
             {
-               row_scale = hypre_max(row_scale, A_diag_data[jA]);
-               row_sum += A_diag_data[jA];
+               if (dof_func[i] == dof_func[A_diag_j[jA]])
+               {
+                  row_scale = hypre_max(row_scale, A_diag_data[jA]);
+                  row_sum += A_diag_data[jA];
+               }
+            }
+            for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
+            {
+               if (dof_func[i] == dof_func_offd[A_offd_j[jA]])
+               {
+                  row_scale = hypre_max(row_scale, A_offd_data[jA]);
+                  row_sum += A_offd_data[jA];
+               }
             }
          }
-         for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
+         else
          {
-            if (dof_func[i] == dof_func_offd[A_offd_j[jA]])
+            for (jA = A_diag_i[i]+1; jA < A_diag_i[i+1]; jA++)
             {
-               row_scale = hypre_max(row_scale, A_offd_data[jA]);
-               row_sum += A_offd_data[jA];
+               if (dof_func[i] == dof_func[A_diag_j[jA]])
+               {
+                  row_scale = hypre_min(row_scale, A_diag_data[jA]);
+                  row_sum += A_diag_data[jA];
+               }
+            }
+            for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
+            {
+               if (dof_func[i] == dof_func_offd[A_offd_j[jA]])
+               {
+                  row_scale = hypre_min(row_scale, A_offd_data[jA]);
+                  row_sum += A_offd_data[jA];
+               }
             }
          }
       }
       else
       {
-         for (jA = A_diag_i[i]+1; jA < A_diag_i[i+1]; jA++)
+         if (diag < 0)
+	 {
+            for (jA = A_diag_i[i]+1; jA < A_diag_i[i+1]; jA++)
+            {
+               row_scale = hypre_max(row_scale, A_diag_data[jA]);
+               row_sum += A_diag_data[jA];
+            }
+            for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
+            {
+               row_scale = hypre_max(row_scale, A_offd_data[jA]);
+               row_sum += A_offd_data[jA];
+            }
+         }
+         else
          {
-            if (dof_func[i] == dof_func[A_diag_j[jA]])
+            for (jA = A_diag_i[i]+1; jA < A_diag_i[i+1]; jA++)
             {
                row_scale = hypre_min(row_scale, A_diag_data[jA]);
                row_sum += A_diag_data[jA];
             }
-         }
-         for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
-         {
-            if (dof_func[i] == dof_func_offd[A_offd_j[jA]])
+            for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
             {
                row_scale = hypre_min(row_scale, A_offd_data[jA]);
                row_sum += A_offd_data[jA];
@@ -268,41 +304,81 @@ hypre_BoomerAMGCreateS(hypre_ParCSRMatrix    *A,
       }
       else
       {
-         if (diag < 0) 
+         if (num_functions > 1)
          { 
-            for (jA = A_diag_i[i]+1; jA < A_diag_i[i+1]; jA++)
-            {
-               if (A_diag_data[jA] <= strength_threshold * row_scale
-                   || dof_func[i] != dof_func[A_diag_j[jA]])
+            if (diag < 0) 
+            { 
+               for (jA = A_diag_i[i]+1; jA < A_diag_i[i+1]; jA++)
                {
-                  S_diag_j[jA] = -1;
+                  if (A_diag_data[jA] <= strength_threshold * row_scale
+                      || dof_func[i] != dof_func[A_diag_j[jA]])
+                  {
+                     S_diag_j[jA] = -1;
+                  }
+               }
+               for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
+               {
+                  if (A_offd_data[jA] <= strength_threshold * row_scale
+                      || dof_func[i] != dof_func_offd[A_offd_j[jA]])
+                  {
+                     S_offd_j[jA] = -1;
+                  }
                }
             }
-            for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
+            else
             {
-               if (A_offd_data[jA] <= strength_threshold * row_scale
-                   || dof_func[i] != dof_func_offd[A_offd_j[jA]])
+               for (jA = A_diag_i[i]+1; jA < A_diag_i[i+1]; jA++)
                {
-                  S_offd_j[jA] = -1;
+                  if (A_diag_data[jA] >= strength_threshold * row_scale
+                      || dof_func[i] != dof_func[A_diag_j[jA]])
+                  {
+                     S_diag_j[jA] = -1;
+                  }
+               }
+               for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
+               {
+                  if (A_offd_data[jA] >= strength_threshold * row_scale
+                      || dof_func[i] != dof_func_offd[A_offd_j[jA]])
+                  {
+                     S_offd_j[jA] = -1;
+                  }
                }
             }
          }
          else
          {
-            for (jA = A_diag_i[i]+1; jA < A_diag_i[i+1]; jA++)
-            {
-               if (A_diag_data[jA] >= strength_threshold * row_scale
-                   || dof_func[i] != dof_func[A_diag_j[jA]])
+            if (diag < 0) 
+            { 
+               for (jA = A_diag_i[i]+1; jA < A_diag_i[i+1]; jA++)
                {
-                  S_diag_j[jA] = -1;
+                  if (A_diag_data[jA] <= strength_threshold * row_scale)
+                  {
+                     S_diag_j[jA] = -1;
+                  }
+               }
+               for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
+               {
+                  if (A_offd_data[jA] <= strength_threshold * row_scale)
+                  {
+                     S_offd_j[jA] = -1;
+                  }
                }
             }
-            for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
+            else
             {
-               if (A_offd_data[jA] >= strength_threshold * row_scale
-                   || dof_func[i] != dof_func_offd[A_offd_j[jA]])
+               for (jA = A_diag_i[i]+1; jA < A_diag_i[i+1]; jA++)
                {
-                  S_offd_j[jA] = -1;
+                  if (A_diag_data[jA] >= strength_threshold * row_scale)
+                  {
+                     S_diag_j[jA] = -1;
+                  }
+               }
+               for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
+               {
+                  if (A_offd_data[jA] >= strength_threshold * row_scale)
+                  {
+                     S_offd_j[jA] = -1;
+                  }
                }
             }
          }

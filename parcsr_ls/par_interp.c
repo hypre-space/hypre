@@ -17,6 +17,7 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
                          int                  *CF_marker,
                          hypre_ParCSRMatrix   *S,
                          int                  *num_cpts_global,
+                         int                   num_functions,
                          int                  *dof_func,
                          int                   debug_flag,
                          double                trunc_factor,
@@ -51,7 +52,7 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
    int		      *col_map_offd_P;
 
    int             *CF_marker_offd;
-   int             *dof_func_offd;
+   int             *dof_func_offd = NULL;
 
    hypre_CSRMatrix *A_ext;
    
@@ -134,7 +135,8 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
    if (debug_flag==4) wall_time = time_getWallclockSeconds();
 
    CF_marker_offd = hypre_CTAlloc(int, num_cols_A_offd);
-   dof_func_offd = hypre_CTAlloc(int, num_cols_A_offd);
+   if (num_functions > 1 && num_cols_A_offd)
+	dof_func_offd = hypre_CTAlloc(int, num_cols_A_offd);
 
    if (!comm_pkg)
    {
@@ -159,20 +161,22 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
 	CF_marker_offd);
 
    hypre_ParCSRCommHandleDestroy(comm_handle);   
-
-   index = 0;
-   for (i = 0; i < num_sends; i++)
+   if (num_functions > 1)
    {
-	start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
-	for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
+      index = 0;
+      for (i = 0; i < num_sends; i++)
+      {
+	 start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
+	 for (j=start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
 		int_buf_data[index++] 
 		 = dof_func[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
-   }
+      }
 	
-   comm_handle = hypre_ParCSRCommHandleCreate( 11, comm_pkg, int_buf_data, 
+      comm_handle = hypre_ParCSRCommHandleCreate( 11, comm_pkg, int_buf_data, 
 	dof_func_offd);
 
-   hypre_ParCSRCommHandleDestroy(comm_handle);   
+      hypre_ParCSRCommHandleDestroy(comm_handle);   
+   }
 
    if (debug_flag==4)
    {
@@ -665,7 +669,7 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
                }
                else
                {
-		  if (dof_func[i] == dof_func[i1])
+		  if (num_functions == 1 || dof_func[i] == dof_func[i1])
                      diagonal += A_diag_data[jj];
                }
             }
@@ -677,7 +681,7 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
 
             else
             {
-	       if (dof_func[i] == dof_func[i1])
+	       if (num_functions == 1 || dof_func[i] == dof_func[i1])
                   diagonal += A_diag_data[jj];
             } 
 
@@ -794,7 +798,7 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
                   }
 		  else
                   {
-                     if (dof_func[i] == dof_func_offd[i1])
+	             if (num_functions == 1 || dof_func[i] == dof_func_offd[i1])
                         diagonal += A_offd_data[jj];
                   }
                }
@@ -806,7 +810,7 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
 
                else
                {
-                  if (dof_func[i] == dof_func_offd[i1])
+	          if (num_functions == 1 || dof_func[i] == dof_func_offd[i1])
                      diagonal += A_offd_data[jj];
                } 
 

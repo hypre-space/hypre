@@ -235,6 +235,18 @@ int HYPRE_BoomerAMGSetDebugFlag(HYPRE_Solver solver,
                                 int          debug_flag);
 
 /**
+ * (Optional)
+ **/
+int HYPRE_BoomerAMGSetNumFunctions(HYPRE_Solver solver,
+                                int          num_functions);
+
+/**
+ * (Optional)
+ **/
+int HYPRE_BoomerAMGSetDofFunc(HYPRE_Solver solver,
+                              int         *dof_func);
+
+/**
  * Return the number of iterations taken.
  **/
 int HYPRE_BoomerAMGGetNumIterations(HYPRE_Solver  solver,

@@ -16,6 +16,17 @@ extern "C" {
 #endif
 
 
+/* HYPRE_parcsr_Euclid.c */
+int HYPRE_ParCSREuclidCreate( MPI_Comm comm , HYPRE_Solver *solver );
+int HYPRE_ParCSREuclidDestroy( HYPRE_Solver solver );
+int HYPRE_ParCSREuclidSetup( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x );
+int HYPRE_ParCSREuclidSolve( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector bb , HYPRE_ParVector xx );
+int HYPRE_ParCSREuclidSetParams( HYPRE_Solver solver , int argc , char *argv []);
+int HYPRE_ParCSREuclidSetParamsFromFile( HYPRE_Solver solver , char *filename );
+int HYPRE_ParCSREuclidPrintParams( HYPRE_Solver solver );
+int HYPRE_ParCSREuclidReadRho( HYPRE_Solver solver , double *rho );
+int HYPRE_ParCSREuclidSetLogging( HYPRE_Solver solver , int logging );
+
 /* HYPRE_parcsr_ParaSails.c */
 int HYPRE_ParCSRParaSailsCreate( MPI_Comm comm , HYPRE_Solver *solver );
 int HYPRE_ParCSRParaSailsDestroy( HYPRE_Solver solver );
@@ -189,7 +200,7 @@ int hypre_BoomerAMGCycleT( void *amg_vdata , hypre_ParVector **F_array , hypre_P
 int hypre_BoomerAMGRelaxT( hypre_ParCSRMatrix *A , hypre_ParVector *f , int *cf_marker , int relax_type , int relax_points , double relax_weight , hypre_ParVector *u , hypre_ParVector *Vtemp );
 
 /* par_coarse_parms.c */
-int hypre_BoomerAMGCoarseParms( MPI_Comm comm , int local_num_variables , int local_coarse_size , int *dof_func , int *CF_marker , int **coarse_dof_func_ptr , int **coarse_pnts_global_ptr );
+int hypre_BoomerAMGCoarseParms( MPI_Comm comm , int local_num_variables , int local_coarse_size , int num_functions , int *dof_func , int *CF_marker , int **coarse_dof_func_ptr , int **coarse_pnts_global_ptr );
 
 /* par_coarsen.c */
 int hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *A , int CF_init , int debug_flag , int **CF_marker_ptr , int *coarse_size_ptr );
@@ -207,7 +218,7 @@ int hypre_BoomerAMGIndepSetInit( hypre_ParCSRMatrix *S , double *measure_array )
 int hypre_BoomerAMGIndepSet( hypre_ParCSRMatrix *S , hypre_CSRMatrix *S_ext , double *measure_array , int *graph_array , int graph_array_size , int *graph_array_offd , int graph_array_offd_size , int *IS_marker , int *IS_marker_offd );
 
 /* par_interp.c */
-int hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix *A , int *CF_marker , hypre_ParCSRMatrix *S , int *num_cpts_global , int *dof_func , int debug_flag , double trunc_factor , hypre_ParCSRMatrix **P_ptr );
+int hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix *A , int *CF_marker , hypre_ParCSRMatrix *S , int *num_cpts_global , int num_functions , int *dof_func , int debug_flag , double trunc_factor , hypre_ParCSRMatrix **P_ptr );
 
 /* par_laplace.c */
 HYPRE_ParCSRMatrix GenerateLaplacian( MPI_Comm comm , int nx , int ny , int nz , int P , int Q , int R , int p , int q , int r , double *value );
@@ -242,7 +253,7 @@ int hypre_BoomerAMGSetupStats( void *amg_vdata , hypre_ParCSRMatrix *A );
 int hypre_BoomerAMGWriteSolverParams( void *data );
 
 /* par_strength.c */
-int hypre_BoomerAMGCreateS( hypre_ParCSRMatrix *A , int *dof_func , double strength_threshold , double max_row_sum , hypre_ParCSRMatrix **S_ptr );
+int hypre_BoomerAMGCreateS( hypre_ParCSRMatrix *A , double strength_threshold , double max_row_sum , int num_functions , int *dof_func , hypre_ParCSRMatrix **S_ptr );
 
 /* pcg_par.c */
 char *hypre_ParKrylovCAlloc( int count , int elt_size );

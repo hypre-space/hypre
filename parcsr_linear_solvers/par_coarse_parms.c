@@ -59,6 +59,7 @@ int
 hypre_BoomerAMGCoarseParms(MPI_Comm comm,
 		           int      local_num_variables,
 		           int      local_coarse_size,
+		           int      num_functions,
 		           int     *dof_func,
 		           int     *CF_marker, 
                       	   int    **coarse_dof_func_ptr, 
@@ -77,15 +78,20 @@ hypre_BoomerAMGCoarseParms(MPI_Comm comm,
 
    MPI_Comm_size(comm,&num_procs);
 
-   coarse_dof_func = hypre_CTAlloc(int,local_coarse_size);
-   coarse_pnts_global = hypre_CTAlloc(int,num_procs+1);
-
-   cnt = 0;
-   for (i=0; i < local_num_variables; i++)
+   if (num_functions > 1)
    {
-      if (CF_marker[i] == 1)
-         coarse_dof_func[cnt++] = dof_func[i];
+      coarse_dof_func = hypre_CTAlloc(int,local_coarse_size);
+
+      cnt = 0;
+      for (i=0; i < local_num_variables; i++)
+      {
+         if (CF_marker[i] == 1)
+            coarse_dof_func[cnt++] = dof_func[i];
+      }
+      *coarse_dof_func_ptr    = coarse_dof_func;
    }
+
+   coarse_pnts_global = hypre_CTAlloc(int,num_procs+1);
 
    MPI_Allgather(&local_coarse_size,1,MPI_INT,&coarse_pnts_global[1],
 		1,MPI_INT,comm);
@@ -94,6 +100,6 @@ hypre_BoomerAMGCoarseParms(MPI_Comm comm,
       coarse_pnts_global[i] += coarse_pnts_global[i-1];
 
    *coarse_pnts_global_ptr = coarse_pnts_global;
-   *coarse_dof_func_ptr    = coarse_dof_func;
+
    return (ierr);
 }

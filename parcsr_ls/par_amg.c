@@ -155,6 +155,7 @@ hypre_BoomerAMGCreate()
    hypre_ParAMGDataVtemp(amg_data)  = NULL;
    hypre_ParAMGDataFArray(amg_data) = NULL;
    hypre_ParAMGDataUArray(amg_data) = NULL;
+   hypre_ParAMGDataDofFunc(amg_data) = NULL;
    hypre_ParAMGDataDofFuncArray(amg_data) = NULL;
    hypre_ParAMGDataDofPointArray(amg_data) = NULL;
    hypre_ParAMGDataDofPointArray(amg_data) = NULL;
