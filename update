@@ -123,6 +123,9 @@ fi
 	# create the UPDATE.tar file for updating on non-CASC machines
 	echo "creating the UPDATE.tar file ..."
 	tar cf UPDATE.tar \
+	    UPDATE/VER* \
+	    UPDATE/src/linear_solvers/build \
+	    UPDATE/src/linear_solvers/update \
 	    UPDATE/src/linear_solvers/utilities \
 	    UPDATE/src/linear_solvers/struct_matrix_vector \
 	    UPDATE/src/linear_solvers/struct_linear_solvers
