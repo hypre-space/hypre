@@ -205,7 +205,7 @@ int MLI_Utils_GenPartition(MPI_Comm comm, int nlocal, int **row_part)
 int MLI_Utils_ComputeSpectralRadius(hypre_ParCSRMatrix *Amat, double *max_eigen)
 {
    int             mypid, nprocs, *partition, start_row, end_row;
-   int             it, maxits=50, ierr;
+   int             it, maxits=20, ierr;
    double          norm2, lambda;
    MPI_Comm        comm;
    HYPRE_IJVector  IJvec1, IJvec2;
@@ -1246,7 +1246,7 @@ int MLI_Utils_IntTreeUpdate(int treeLeng, int *tree, int *treeInd)
 }
 
 /* ******************************************************************** */
-/* matrix of a dense matrix                                             */
+/* inverse of a dense matrix                                             */
 /* -------------------------------------------------------------------- */
 
 int MLI_Utils_MatrixInverse( double **Amat, int ndim, double ***Bmat )
@@ -1314,7 +1314,7 @@ int MLI_Utils_MatrixInverse( double **Amat, int ndim, double ***Bmat )
             }
          }
       }
-     for ( i = 0; i < ndim; i++ )
+      for ( i = 0; i < ndim; i++ )
       {
          denom = Amat[i][i];
          if ( habs(denom) < 1.0e-16 ) return -1;
@@ -1334,5 +1334,25 @@ int MLI_Utils_MatrixInverse( double **Amat, int ndim, double ***Bmat )
       if ( dmax > 1.0e6 ) return 1;
       else                return 0;
    }
+   return 0;
+}
+
+/* ******************************************************************** */
+/* matvec given a dense matrix                                          */
+/* -------------------------------------------------------------------- */
+
+int MLI_Utils_Matvec( double **Amat, int ndim, double *x, double *Ax )
+{
+   int    i, j;
+   double ddata, *matLocal;
+
+   for ( i = 0; i < ndim; i++ )
+   {
+      matLocal = Amat[i];
+      ddata = 0.0;
+      for ( j = 0; j < ndim; j++ ) ddata += *matLocal++ * x[j];
+      Ax[i] = ddata;
+   }
+   return 0;
 }
 
