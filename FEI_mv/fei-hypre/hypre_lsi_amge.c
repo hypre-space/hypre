@@ -685,5 +685,10 @@ int HYPRE_LSI_AMGeWriteToFile()
    return 0;
 }
 
+#else
+
+/* this is used only to eliminate compiler warnings */
+int hypre_empty;
+
 #endif
 

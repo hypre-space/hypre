@@ -227,7 +227,7 @@ HYPRE_SStructGridSetNeighborBox( HYPRE_SStructGrid  grid,
    hypre_Index              ciupper;
    hypre_Box                box;
    int                      memchunk = 10;
-   int                      i, d;
+   int                      d;
 
    if (neighbors[part] == NULL)
    {
@@ -305,9 +305,9 @@ HYPRE_SStructGridAssemble( HYPRE_SStructGrid grid )
    int                      nparts    = hypre_SStructGridNParts(grid);
    hypre_SStructPGrid     **pgrids    = hypre_SStructGridPGrids(grid);
    hypre_SStructNeighbor ***neighbors = hypre_SStructGridNeighbors(grid);
-   hypre_SStructNeighbor   *neighbor;
-   hypre_BoxArray          *neighbor_boxes;
-   hypre_Index             *neighbor_ilowers;
+   /*hypre_SStructNeighbor   *neighbor;*/
+   /*hypre_BoxArray          *neighbor_boxes;*/
+   /*hypre_Index             *neighbor_ilowers;*/
    int                     *offsets = hypre_SStructGridOffsets(grid);
    int                      uoffset;
    int                      start_rank;
