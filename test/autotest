@@ -259,6 +259,7 @@ scp -r linear_solvers ${HYPRE_COMPILE_MACHINE}:${HYPRE_REMOTE_DIR}
 # compile
 ssh ${HYPRE_COMPILE_MACHINE} "\
     (\
+        chmod -fR ug+rwX ${HYPRE_REMOTE_DIR};\
         cd ${HYPRE_REMOTE_DIR}/linear_solvers;\
 	. test/env.${HYPRE_ARCH};\
         ./configure ;\
