@@ -720,6 +720,9 @@ fi
 if test "$casc_using_petsc" = "yes"
 then
    CASC_FIND_PETSC
+dnl *** this is a hack; should go in above macro ***
+   PETSCLIBDIRS="$PETSCLIBDIRS -L/usr/openwin/lib"
+   PETSCLIBS="$PETSCLIBS -lX11"
 fi
 
 dnl *********************************************************************
