@@ -1379,8 +1379,8 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
    }
    if (num_procs > 1)
    {
-   	hypre_GenerateRAPCommPkg(RAP, A); 
-   	/* hypre_MatvecCommPkgCreate(RAP); */
+   	/* hypre_GenerateRAPCommPkg(RAP, A); */
+   	hypre_MatvecCommPkgCreate(RAP); 
    }
 
    *RAP_ptr = RAP;
