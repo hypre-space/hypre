@@ -244,7 +244,7 @@ impl_Hypre_ParCSRVector_Clone(
    hypre_ij_y = (hypre_IJVector *) ij_y;
    partitioning = hypre_IJVectorPartitioning( hypre_ij_y );
    jlower = partitioning[ my_id ];
-   jupper = partitioning[ my_id+1 ];
+   jupper = partitioning[ my_id+1 ]-1;
 
    ij_x = data_x->ij_b;
    ierr = HYPRE_IJVectorCreate( data_x->comm, jlower, jupper, &ij_x );
