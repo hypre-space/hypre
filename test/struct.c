@@ -1175,7 +1175,6 @@ main( int   argc,
       HYPRE_StructPFMGCreate(MPI_COMM_WORLD, &solver);
       HYPRE_StructPFMGSetMaxIter(solver, 50);
       HYPRE_StructPFMGSetTol(solver, 1.0e-06);
-      HYPRE_StructPFMGSetNormType(solver, 0);
       HYPRE_StructPFMGSetRelChange(solver, 0);
       HYPRE_StructPFMGSetRAPType(solver, rap);
       HYPRE_StructPFMGSetRelaxType(solver, relax);
