@@ -193,6 +193,11 @@ the name of that MPI version's C compiler wrapper, if it has one.
 configure will then automatically find the necessary libraries and
 headers.
 
+--with-pthreads 
+
+This option should be used if POSIX threads are to be used in SMG98.  The
+default is to use MPI only without POSIX threads.
+
 %==========================================================================
 %==========================================================================
 
