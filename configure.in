@@ -968,9 +968,6 @@ case $ARCH in
   ;;
   IRIX64)
     AC_DEFINE(HYPRE_IRIX64)
-    if test -z "$casc_using_blas" ; then
-      casc_using_blas=yes
-    fi
   ;;
 esac
 
