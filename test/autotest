@@ -26,24 +26,27 @@ perform_test()
   echo "copying new source...."
   scp -r linear_solvers ${HYPRE_COMPILE_MACHINE}:${HYPRE_REMOTE_DIR}
 
+  echo "running autotest...."
   ssh ${HYPRE_COMPILE_MACHINE} "\
     (\
         cd ${HYPRE_REMOTE_DIR};\
 	. linear_solvers/test/autotest_env;\
 	. linear_solvers/test/env.${HYPRE_ARCH};\
-        . linear_solvers/test/autotest_test ${HYPRE_MACHINE_COMMANDS} ;\
+        . linear_solvers/test/autotest_test ${HYPRE_MACHINE_COMMANDS}\
     )"
 
-  echo "cleaning up...."
+  echo "save the test results...."
   ssh ${HYPRE_COMPILE_MACHINE} "\
     (\
-         cd  ${HYPRE_REMOTE_DIR}/linear_solvers;\
-         tar -cvf autotest.${HYPRE_RUN_MACHINE}.tar test\
+        cd ${HYPRE_REMOTE_DIR};\
+        cd  linear_solvers;\
+        tar -cvf autotest.${HYPRE_RUN_MACHINE}.tar test\
     )"
 
   echo "copying test results to CASC machine..."
   scp -r  ${HYPRE_COMPILE_MACHINE}:${HYPRE_REMOTE_DIR}/linear_solvers/autotest.${HYPRE_RUN_MACHINE}.tar $HYPRE_AUTOTEST_DIR/.
 
+  echo "cleaning up...."
   ssh ${HYPRE_COMPILE_MACHINE} "\
     (\
          rm -fR ${HYPRE_REMOTE_DIR}\
