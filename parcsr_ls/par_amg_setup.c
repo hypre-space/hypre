@@ -736,7 +736,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 	 }
          else
          {
-            CFN_marker = CF_marker_array[level],
+            CFN_marker = CF_marker_array[level];
             hypre_BoomerAMGBuildInterp(AN, CFN_marker,
                  SN, coarse_pnts_global, 1, NULL,
                  debug_flag, trunc_factor, col_offd_SN_to_AN, &PN);

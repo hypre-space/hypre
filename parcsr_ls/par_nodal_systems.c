@@ -781,19 +781,19 @@ hypre_BoomerAMGCreateScalarCFS(hypre_ParCSRMatrix    *SN,
       for (i=0; i < num_sends; i++)
       {
          send_procs_S[i] = send_procs[i];
-         send_map_starts_S[i+1] = num_functions*send_map_starts[i];
+         send_map_starts_S[i+1] = num_functions*send_map_starts[i+1];
       }
       recv_vec_starts_S[0] = 0;
       for (i=0; i < num_recvs; i++)
       {
          recv_procs_S[i] = recv_procs[i];
-         recv_vec_starts_S[i+1] = num_functions*recv_vec_starts[i];
+         recv_vec_starts_S[i+1] = num_functions*recv_vec_starts[i+1];
       }
 
       cnt = 0;
       for (i=0; i < send_map_starts[num_sends]; i++)
       {
-	 k1 = num_functions*i;
+	 k1 = num_functions*send_map_elmts[i];
          for (j=0; j < num_functions; j++)
          {
 	    send_map_elmts_S[cnt++] = k1+j;
