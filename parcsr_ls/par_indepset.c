@@ -43,6 +43,7 @@ hypre_BoomerAMGIndepSetInit( hypre_ParCSRMatrix *S,
 
    MPI_Comm_rank(comm,&my_id);
    i = 2747+my_id;
+   if (seq_rand) i = 2747;
    hypre_SeedRand(i);
    if (seq_rand)
    {
