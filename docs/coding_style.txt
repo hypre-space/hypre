@@ -1,6 +1,6 @@
 
 These guidelines are based on those provided by the ISE project in CASC.
-See /home/casc/software_development/docs for more info.
+See `file:/home/casc/software_development/html/index.html' for more info.
 
 --------------------------------------------------------------------------
 
