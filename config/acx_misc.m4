@@ -511,7 +511,7 @@ then
             CXXFLAGS="-D_HPUX_SOURCE -O"
             ;;
           mips-sgi-irix6.[[4-9]]*)
-            CXXFLAGS="-O -64"
+            CXXFLAGS="-O -64 -OPT:Olimit=0"
             if test "$casc_using_openmp" = "yes" ; then
               CXXFLAGS="$CXXFLAGS -mp"
             fi
@@ -739,7 +739,7 @@ then
             CXXFLAGS="-D_HPUX_SOURCE -g"
             ;;
           mips-sgi-irix6.[[4-9]]*)
-            CXXFLAGS="-g -64"
+            CXXFLAGS="-g -64 -OPT:Olimit=0"
             if test "$casc_using_openmp" = "yes" ; then
               CXXFLAGS="$CXXFLAGS -mp"
             fi
