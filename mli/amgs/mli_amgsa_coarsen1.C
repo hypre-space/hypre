@@ -120,7 +120,7 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,MLI_Matrix **Pmat_out,
     * perform coarsening
     *-----------------------------------------------------------------*/
   
-   if ( init_aggr != NULL ) coarsenLocal(Gmat, &naggr, &node2aggr);
+   if ( init_aggr == NULL ) coarsenLocal(Gmat, &naggr, &node2aggr);
    else 
    {
       blk_size = 1;
@@ -284,7 +284,8 @@ printf("\n");
          info = MLI_Utils_QR(q_array, r_array, agg_size, nullspace_dim); 
          if (info != 0)
          {
-            cout << "Aggregation ERROR : QR returned a non-zero " << i << endl;
+            cout << mypid << " : Aggregation ERROR : QR returned a non-zero " 
+                 << i << endl;
             for ( j = 0; j < agg_size; j++ ) 
             {
                for ( k = 0; k < nullspace_dim; k++ ) 
