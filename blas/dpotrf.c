@@ -293,7 +293,8 @@ L40:
     integer i__1, i__2, i__3;
     doublereal d__1;
     /* Builtin functions */
-    double sqrt(doublereal);
+    /*orig: double sqrt(doublereal);*/
+    double sqrt(double);
     /* Local variables */
     extern doublereal ddot_(integer *, doublereal *, integer *, doublereal *, 
 	    integer *);

@@ -1461,7 +1461,8 @@ tor
        If it looks like we're on a Cray, take the square root of   
        SMALL and LARGE to avoid overflow and underflow problems. */
     /* Builtin functions */
-    double d_lg10(doublereal *), sqrt(doublereal);
+    /* orig: double d_lg10(doublereal *), sqrt(doublereal);*/
+    double d_lg10(doublereal *), sqrt(double);
 
 
     if (d_lg10(large) > 2e3) {
@@ -2501,7 +2502,8 @@ doublereal dlange_(char *norm, integer *m, integer *n, doublereal *a, integer
     /* System generated locals */
     doublereal ret_val, d__1, d__2, d__3;
     /* Builtin functions */
-    double sqrt(doublereal);
+    /*orig: double sqrt(doublereal);*/
+    double sqrt(double);
     /* Local variables */
     static integer i, j;
     static doublereal scale;
@@ -2619,7 +2621,8 @@ doublereal dlapy2_(doublereal *x, doublereal *y)
        System generated locals */
     doublereal ret_val, d__1;
     /* Builtin functions */
-    double sqrt(doublereal);
+    /*orig: double sqrt(doublereal);*/
+    double sqrt(double);
     /* Local variables */
     static doublereal xabs, yabs, w, z;
 
