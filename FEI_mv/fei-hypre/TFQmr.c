@@ -100,7 +100,7 @@ void * hypre_TFQmrCreate( )
 int hypre_TFQmrDestroy( void *tfqmr_vdata )
 {
    hypre_TFQmrData *tfqmr_data = tfqmr_vdata;
-   int i, ierr = 0;
+   int ierr = 0;
  
    if (tfqmr_data)
    {
@@ -218,9 +218,9 @@ int hypre_TFQmrSolve(void  *tfqmr_vdata, void  *A, void  *b, void  *x)
    double           *norms         = (tfqmr_data -> norms);
    char             *log_file_name = (tfqmr_data -> log_file_name);
    
-   int               j, m, ierr=0, my_id, num_procs, iter, flag;
+   int               ierr=0, my_id, num_procs, iter;
    double            eta, theta, tau, rhom1, rho, dtmp, r_norm, b_norm;
-   double            rnbnd, etam1, thetam1, c, epsmac = 1.e-16, epsilon; 
+   double            rnbnd, etam1, thetam1, c, epsilon; 
    double            sigma, alpha, beta;
 
    hypre_ParKrylovCommInfo(A,&my_id,&num_procs);
