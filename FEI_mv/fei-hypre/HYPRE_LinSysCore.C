@@ -14,19 +14,15 @@
 #include <math.h>
 
 #include "utilities/utilities.h"
+
 #ifndef NOFEI
 #include "Data.h"
 #include "basicTypes.h"
-#if defined(FEI_V13) 
-#include "LinearSystemCore.1.3.h"
-#elseif defined(FEI_V14)
-#include "LinearSystemCore.1.4.h"
-#else
 #include "Lookup.h"
 #include "LinearSystemCore.h"
 #include "LSC.h"
 #endif
-#endif
+
 #include "HYPRE.h"
 #include "../../IJ_mv/HYPRE_IJ_mv.h"
 #include "../../parcsr_mv/HYPRE_parcsr_mv.h"
@@ -1366,7 +1362,6 @@ void HYPRE_LinSysCore::setLookup(Lookup& lookup)
       //let's test the shared-node lookup functions.
 
 #ifndef NOFEI
-#if (!defined(FEI_V14)) && (!defined(FEI_V13))
       int numSharedNodes = lookup_->getNumSharedNodes();
       printf("setLookup: numSharedNodes: %d\n", numSharedNodes);
 
@@ -1390,9 +1385,6 @@ void HYPRE_LinSysCore::setLookup(Lookup& lookup)
       }
       printf("\n");
       fflush(stdout);
-#else
-      printf("HYPRE_LSC::setLookup : function not implemented.\n");
-#endif
 #endif
    }
 }
@@ -2131,7 +2123,7 @@ void HYPRE_LinSysCore::sumIntoRHSVector(int num, const double* values,
     local_ind = new int[num];
     for ( i = 0; i < num; i++ ) // change to 0-based
     {
-#if defined(FEI_V13) || defined(FEI_V14) || defined(NOFEI)
+#if defined(NOFEI)
        if ( indices[i] >= localStartRow_  && indices[i] <= localEndRow_ )
           local_ind[i] = indices[i] - 1;
 #else
@@ -2335,11 +2327,7 @@ void HYPRE_LinSysCore::enforceEssentialBC(int* globalEqn, double* alpha,
 
     for( i = 0; i < leng; i++ ) 
     {
-#if defined(FEI_V13) || defined(FEI_V14)
-       localEqnNum = globalEqn[i] - localStartRow_;
-#else
        localEqnNum = globalEqn[i] + 1 - localStartRow_;
-#endif
        if ( localEqnNum >= 0 && localEqnNum < numLocalRows )
        {
           rowSize = rowLengths_[localEqnNum];
@@ -2349,21 +2337,12 @@ void HYPRE_LinSysCore::enforceEssentialBC(int* globalEqn, double* alpha,
           for ( j = 0; j < rowSize; j++ ) 
           {
              colIndex = colInd[j];
-#if defined(FEI_V13) || defined(FEI_V14)
-             if ( colIndex == globalEqn[i] ) colVal[j] = 1.0;
-             else                            colVal[j] = 0.0;
-#else
              if ( colIndex-1 == globalEqn[i] ) colVal[j] = 1.0;
              else                              colVal[j] = 0.0;
-#endif
 
              if ( colIndex >= localStartRow_ && colIndex <= localEndRow_) 
              {
-#if defined(FEI_V13) || defined(FEI_V14)
-                if ( colIndex != globalEqn[i]) 
-#else
                 if ( (colIndex-1) != globalEqn[i]) 
-#endif
                 {
                    rowSize2 = rowLengths_[colIndex-localStartRow_];
                    colInd2  = colIndices_[colIndex-localStartRow_];
@@ -2371,11 +2350,7 @@ void HYPRE_LinSysCore::enforceEssentialBC(int* globalEqn, double* alpha,
 
                    for( k = 0; k < rowSize2; k++ ) 
                    {
-#if defined(FEI_V13) || defined(FEI_V14)
-                      if ( colInd2[k] == globalEqn[i] ) 
-#else
                       if ( colInd2[k]-1 == globalEqn[i] ) 
-#endif
                       {
                          rhs_term = gamma[i] / alpha[i] * colVal2[k];
                          eqnNum = colIndex - 1;
@@ -2394,11 +2369,7 @@ void HYPRE_LinSysCore::enforceEssentialBC(int* globalEqn, double* alpha,
 
           // Set rhs for boundary point
           rhs_term = gamma[i] / alpha[i];
-#if defined(FEI_V13) || defined(FEI_V14)
-          eqnNum = globalEqn[i] - 1;
-#else
           eqnNum = globalEqn[i];
-#endif
           HYPRE_IJVectorSetLocalComponents(HYb_,1,&eqnNum,NULL,&rhs_term);
        }
     }
@@ -2409,11 +2380,7 @@ void HYPRE_LinSysCore::enforceEssentialBC(int* globalEqn, double* alpha,
 
 #ifdef HAVE_AMGE
     colInd = new int[leng];
-#if defined(FEI_V13) || defined(FEI_V14)
-    for( i = 0; i < leng; i++ ) colInd[i] = globalEqn[i] - 1;
-#else
     for( i = 0; i < leng; i++ ) colInd[i] = globalEqn[i];
-#endif
     HYPRE_LSI_AMGeSetBoundary( leng, colInd );
     delete [] colInd;
 #endif
@@ -2458,11 +2425,7 @@ void HYPRE_LinSysCore::enforceRemoteEssBCs(int numEqns, int* globalEqns,
 
     for( i = 0; i < numEqns; i++ ) 
     {
-#if defined(FEI_V13) || defined(FEI_V14)
-       localEqnNum = globalEqns[i] - localStartRow_;
-#else
        localEqnNum = globalEqns[i] + 1 - localStartRow_;
-#endif
        if ( localEqnNum < 0 || localEqnNum >= numLocalRows )
        {
           continue;
@@ -2472,21 +2435,13 @@ void HYPRE_LinSysCore::enforceRemoteEssBCs(int numEqns, int* globalEqns,
        colInd = colIndices_[localEqnNum];
        colVal = colValues_[localEqnNum];
 
-#if defined(FEI_V13) || defined(FEI_V14)
-       eqnNum = globalEqns[i] - 1;
-#else
        eqnNum = globalEqns[i];
-#endif
 
        for ( j = 0; j < colIndLen[i]; j++) 
        {
           for ( k = 0; k < rowLen; k++ ) 
           {
-#if defined(FEI_V13) || defined(FEI_V14)
-             if (colInd[k] == colIndices[i][j]) 
-#else
              if (colInd[k]-1 == colIndices[i][j]) 
-#endif
              {
                 HYPRE_IJVectorGetLocalComponents(HYb_,1,&eqnNum,NULL,&bval);
                 bval -= ( colVal[k] * coefs[i][j] );
@@ -2541,11 +2496,7 @@ void HYPRE_LinSysCore::enforceOtherBC(int* globalEqn, double* alpha,
 
     for( i = 0; i < leng; i++ ) 
     {
-#if defined(FEI_V13) || defined(FEI_V14)
-       localEqnNum = globalEqn[i] - localStartRow_;
-#else
        localEqnNum = globalEqn[i] + 1 - localStartRow_;
-#endif
        if ( localEqnNum < 0 || localEqnNum >= numLocalRows )
        {
           continue;
@@ -2557,11 +2508,7 @@ void HYPRE_LinSysCore::enforceOtherBC(int* globalEqn, double* alpha,
 
        for ( j = 0; j < rowSize; j++) 
        {
-#if defined(FEI_V13) || defined(FEI_V14)
-          if ( colInd[j] == globalEqn[i]) 
-#else
           if ((colInd[j]-1) == globalEqn[i]) 
-#endif
           {
              colVal[j] += alpha[i]/beta[i];
              break;
@@ -2571,11 +2518,7 @@ void HYPRE_LinSysCore::enforceOtherBC(int* globalEqn, double* alpha,
        //now make the rhs modification.
        // need to fetch matrix and put it back before assembled
 
-#if defined(FEI_V13) || defined(FEI_V14)
-       eqnNum = globalEqn[i] - 1;
-#else
        eqnNum = globalEqn[i];
-#endif
 
        HYPRE_IJVectorGetLocalComponents(HYb_,1,&eqnNum,NULL,&val);
        val += ( gamma[i] / beta[i] );
@@ -2931,13 +2874,8 @@ void HYPRE_LinSysCore::putInitialGuess(const int* eqnNumbers,
     for ( i = 0; i < leng; i++ ) // change to 0-based
     {
 
-#if defined(FEI_V13) || defined(FEI_V14)
-       if (eqnNumbers[i] >= localStartRow_ && eqnNumbers[i] <= localEndRow_)
-          local_ind[i] = eqnNumbers[i] - 1;
-#else
        if ((eqnNumbers[i]+1) >= localStartRow_ && (eqnNumbers[i]+1) <= localEndRow_)
           local_ind[i] = eqnNumbers[i];
-#endif
        else
        {
           printf("%d : putInitialGuess ERROR - index %d out of range\n",
@@ -3046,11 +2984,7 @@ void HYPRE_LinSysCore::getSolnEntry(int eqnNumber, double& answer)
        printf("%4d : HYPRE_LSC::entering getSolnEntry.\n",mypid_);
     }
 
-#if defined(FEI_V13) || defined(FEI_V14)
-    equation = eqnNumber - 1; // construct 0-based index
-#else
     equation = eqnNumber; // incoming 0-based index
-#endif
 
     if ( equation < localStartRow_-1 && equation > localEndRow_ )
     {
@@ -3676,11 +3610,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
     //-------------------------------------------------------------------
 
     MPI_Barrier(comm_);
-#if defined(FEI_V13) || defined(FEI_V14)
-    status = 0;
-#else
     status = 1;
-#endif
     stime  = MPI_Wtime();
     ptime  = stime;
 
@@ -3933,11 +3863,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
           }
           HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
           rnorm = sqrt( rnorm );
-#if defined(FEI_V13) || defined(FEI_V14)
-          if ( num_iterations >= maxIterations_ ) status = 0; else status = 1;
-#else
           if ( num_iterations >= maxIterations_ ) status = 1; else status = 0;
-#endif
           break;
 
        //----------------------------------------------------------------
@@ -4213,11 +4139,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
           }
           HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
           rnorm = sqrt( rnorm );
-#if defined(FEI_V13) || defined(FEI_V14)
-          if ( num_iterations >= maxIterations_ ) status = 0; else status = 1;
-#else
           if ( num_iterations >= maxIterations_ ) status = 1; else status = 0;
-#endif
           break;
 
        //----------------------------------------------------------------
@@ -4489,11 +4411,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
           }
           HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
           rnorm = sqrt( rnorm );
-#if defined(FEI_V13) || defined(FEI_V14)
-          if ( num_iterations >= maxIterations_ ) status = 0; else status = 1;
-#else
           if ( num_iterations >= maxIterations_ ) status = 1; else status = 0;
-#endif
           break;
 
        //----------------------------------------------------------------
@@ -4765,11 +4683,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
           }
           HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
           rnorm = sqrt( rnorm );
-#if defined(FEI_V13) || defined(FEI_V14)
-          if ( num_iterations >= maxIterations_ ) status = 0; else status = 1;
-#else
           if ( num_iterations >= maxIterations_ ) status = 1; else status = 0;
-#endif
           break;
 
        //----------------------------------------------------------------
@@ -5036,11 +4950,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
           }
           HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
           rnorm = sqrt( rnorm );
-#if defined(FEI_V13) || defined(FEI_V14)
-          if ( num_iterations >= maxIterations_ ) status = 0; else status = 1;
-#else
           if ( num_iterations >= maxIterations_ ) status = 1; else status = 0;
-#endif
           break;
 
        //----------------------------------------------------------------
@@ -5307,11 +5217,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
           }
           HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
           rnorm = sqrt( rnorm );
-#if defined(FEI_V13) || defined(FEI_V14)
-          if ( num_iterations >= maxIterations_ ) status = 0; else status = 1;
-#else
           if ( num_iterations >= maxIterations_ ) status = 1; else status = 0;
-#endif
           break;
 
        //----------------------------------------------------------------
@@ -5328,11 +5234,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
           HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
           HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
           rnorm = sqrt( rnorm );
-#if defined(FEI_V13) || defined(FEI_V14)
-          if ( num_iterations >= maxIterations_ ) status = 0; else status = 1;
-#else
           if ( num_iterations >= maxIterations_ ) status = 1; else status = 0;
-#endif
           ptime  = stime;
           //printf("Boomeramg solver - return status = %d\n",status);
           break;
@@ -5347,9 +5249,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
              printf("%4d : launchSolver(SuperLU)\n",mypid_);
           solveUsingSuperLU(status);
 #ifndef NOFEI
-#if (!defined(FEI_V13)) || (!defined(FEI_V14))
           if ( status == 1 ) status = 0; 
-#endif      
 #endif      
           num_iterations = 1;
           ptime  = stime;
@@ -5366,9 +5266,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
              printf("%4d : launchSolver(SuperLUX)\n",mypid_);
           solveUsingSuperLUX(status);
 #ifndef NOFEI
-#if (!defined(FEI_V13)) || (!defined(FEI_V14))
           if ( status == 1 ) status = 0; 
-#endif      
 #endif      
           num_iterations = 1;
           //printf("SuperLUX solver - return status = %d\n",status);
@@ -5385,9 +5283,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
              printf("%4d : launchSolver(Y12M)\n",mypid_);
           solveUsingY12M(status);
 #ifndef NOFEI
-#if (!defined(FEI_V13)) || (!defined(FEI_V14))
           if ( status == 1 ) status = 0; 
-#endif      
 #endif      
           num_iterations = 1;
           ptime  = stime;
@@ -5410,11 +5306,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
           if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
              printf("%4d : launchSolver(AMGe)\n",mypid_);
           solveUsingAMGe(num_iterations);
-#if defined(FEI_V13) || defined(FEI_V14)
-          if ( num_iterations >= maxIterations_ ) status = 0;
-#else
           if ( num_iterations >= maxIterations_ ) status = 1;
-#endif
           ptime  = stime;
           break;
 #endif
@@ -6258,11 +6150,7 @@ void HYPRE_LinSysCore::loadConstraintNumbers(int nConstr, int *constrList)
 // this function extracts the matrix in a CSR format
 //---------------------------------------------------------------------------
 
-#ifdef FEI_V13
-void HYPRE_LinSysCore::writeSystem(char *name)
-#else
 void HYPRE_LinSysCore::writeSystem(const char *name)
-#endif
 {
     printf("HYPRE_LinsysCore : writeSystem not implemented.\n");
     return;

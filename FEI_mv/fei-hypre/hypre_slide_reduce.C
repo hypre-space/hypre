@@ -13,23 +13,24 @@
 #include <assert.h>
 
 #include "utilities/utilities.h"
+
+//############### 1.5 includes #################
+#ifndef NOFEI 
 #include "Data.h"
 #include "basicTypes.h"
-
-#define FEI_V15 1
-
-#if defined(FEI_V13)
-#include "LinearSystemCore.1.3.h"
-#elseif defined(FEI_V14)
-#include "LinearSystemCore.1.4.h"
-#elseif defined(FEI_V15)
 #include "LinearSystemCore.h"
 #include "LSC.h"
-#else
-#ifndef NOFEI
-#include "LinearSystemCore.h"
 #endif
-#endif
+//##############################################
+
+//############### 2.0 includes #################
+//#ifndef NOFEI 
+//#include "fei_defs.h"
+//#include "Data.h"
+//#include "basicTypes.h"
+//#include "LinearSystemCore.h"
+//#endif
+//##############################################
 
 #include "HYPRE.h"
 #include "../../IJ_mv/HYPRE_IJ_mv.h"
