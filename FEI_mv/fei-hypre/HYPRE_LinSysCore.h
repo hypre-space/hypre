@@ -32,6 +32,8 @@ class Lookup
 };
 #endif
 
+#define HYPRE_FEI_Version() "FEI/HYPRE 1.5.0"
+
 // *************************************************************************
 // local enumerations and defines
 // -------------------------------------------------------------------------
@@ -367,7 +369,7 @@ class HYPRE_LinSysCore
    void   computeMinResProjection(HYPRE_ParCSRMatrix A_csr, HYPRE_ParVector x, 
                                   HYPRE_ParVector b, double& nrm1, double& nrm2);
    void   addToProjectionSpace(HYPRE_IJVector x, HYPRE_IJVector b);
-   void   getVersion(char**);
+   char  *getVersion();
    void   beginCreateMapFromSoln();
    void   endCreateMapFromSoln();
    void   putIntoMappedMatrix(int row, int numValues, const double* values,

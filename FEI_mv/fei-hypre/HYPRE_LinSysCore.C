@@ -6121,10 +6121,11 @@ void HYPRE_LinSysCore::writeSystem(const char *name)
 // this function extracts the the version number from HYPRE
 //---------------------------------------------------------------------------
 
-void HYPRE_LinSysCore::getVersion(char **name)
+char *HYPRE_LinSysCore::getVersion()
 {
-    printf("HYPRE_LSC : this function hasn't been implemented yet.\n");
-    return;
+    char *name = (char *) malloc( 200 * sizeof(char) );
+    sprintf(name, "%s %s", HYPRE_FEI_Version(), HYPRE_Version());
+    return name;
 }
 
 //***************************************************************************
