@@ -1,4 +1,4 @@
-dnl *********************************************************************
+nl *********************************************************************
 dnl * configure.in, when autoconf is run, this file is read and 
 dnl * the script configure is generated.  Configure.in is structured
 dnl * as follows:  initialization, the current architecture is determined,
@@ -180,6 +180,11 @@ AC_ARG_WITH(dmalloc,
    )
 )
 
+
+AC_ARG_WITH(timing,
+   [  --with-timing          use timing routines],
+   HYPREDEFS="$HYPREDEFS -DHYPRE_TIMING"
+)
 
 AC_ARG_WITH(pthreads,
    [  --with-pthreads		use pthreads],
@@ -411,6 +416,7 @@ then
      CASC_SET_FDEBUG(-g) 
      CASC_SET_CXXOPT(-0)
      CASC_SET_CXXDEBUG(-g)
+     CFLAGS="$CFLAGS -qmaxmem=8192"
 
    ;;
 
