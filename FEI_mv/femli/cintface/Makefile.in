@@ -7,7 +7,7 @@
 #EHEADER***********************************************************************
 
 .SUFFIXES:
-.SUFFIXES: .C .c .o
+.SUFFIXES: .cxx .c .o
 
 srcdir = @srcdir@
 VPATH = @srcdir@
@@ -52,9 +52,9 @@ HEADERS =\
  cmli.h
 
 FILES =\
- cmli.C
+ cmli.cxx
 
-OBJS = ${FILES:.C=.o}
+OBJS = ${FILES:.cxx=.o}
 
 ##################################################################
 # Targets
@@ -83,6 +83,6 @@ ${OBJS}: ${HEADERS}
 
 .c.o:
 	${CC} -o $@ -c ${CFLAGS} $<
-.C.o:
+.cxx.o:
 	${CXX} -o $@ -c ${CXXFLAGS} $<
 
