@@ -70,10 +70,10 @@ ParaSAILS::ParaSAILS(const HYPRE_DistributedMatrix& mat)
 
     A = mat; // store matrix in object
 
-    ierr = HYPRE_GetDistributedMatrixDims(A, &n, &n); // assumes square matrix
+    ierr = HYPRE_DistributedMatrixGetDims(A, &n, &n); // assumes square matrix
     assert(!ierr);
-    comm = HYPRE_GetDistributedMatrixContext(A);
-    ierr = HYPRE_GetDistributedMatrixLocalRange(A, &my_start_row, &my_end_row);
+    comm = HYPRE_DistributedMatrixGetContext(A);
+    ierr = HYPRE_DistributedMatrixGetLocalRange(A, &my_start_row, &my_end_row);
     assert(!ierr);
     my_start_row++; // convert to 1-based indexing
     my_end_row++;
@@ -621,7 +621,7 @@ void *server(void *local)
             val = shared->sails->A.getPointerToCoef(len, rows[i]);
 #endif
             int ierr;
-            ierr = HYPRE_GetDistributedMatrixRow(shared->sails->A, 
+            ierr = HYPRE_DistributedMatrixGetRow(shared->sails->A, 
               rows[i], &len, (int **) &ind, (double **) &val); // kludge
             assert(!ierr);
 
@@ -682,7 +682,7 @@ void prune_local_rows(int threadid, SharedData *shared,
         rec->val = shared->sails->A.getPointerToCoef(len, row);
 #else
         int ierr;
-        ierr = HYPRE_GetDistributedMatrixRow(shared->sails->A, row, &len, 
+        ierr = HYPRE_DistributedMatrixGetRow(shared->sails->A, row, &len, 
           (int **) &rec->ind, (double **) &rec->val); //kludge
         assert(!ierr);
 #endif

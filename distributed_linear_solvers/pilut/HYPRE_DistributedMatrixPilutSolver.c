@@ -273,12 +273,12 @@ int HYPRE_DistributedMatrixPilutSolverSetup( HYPRE_DistributedMatrixPilutSolver 
 
    /* Set up the DataDist structure */
 
-   HYPRE_GetDistributedMatrixDims(
+   HYPRE_DistributedMatrixGetDims(
       hypre_DistributedMatrixPilutSolverMatrix(solver), &m, &n);
 
    DataDistTypeNrows( hypre_DistributedMatrixPilutSolverDataDist( solver ) ) = m;
 
-   HYPRE_GetDistributedMatrixLocalRange(
+   HYPRE_DistributedMatrixGetLocalRange(
       hypre_DistributedMatrixPilutSolverMatrix(solver), &start, &end, &col0, &coln);
 
    DataDistTypeLnrows(hypre_DistributedMatrixPilutSolverDataDist( solver )) = 

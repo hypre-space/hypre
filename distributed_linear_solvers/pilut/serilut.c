@@ -98,7 +98,7 @@ int SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
     rtol = nrm2s[i]*tol;  /* Compute relative tolerance */
 
     /* Initialize work space  */
-    ierr = HYPRE_GetDistributedMatrixRow( matrix, firstrow+i, &row_size,
+    ierr = HYPRE_DistributedMatrixGetRow( matrix, firstrow+i, &row_size,
                &col_ind, &values);
     if (ierr) return(ierr);
 
@@ -127,7 +127,7 @@ int SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
       w[0] = 0.0;
     }
 
-    ierr = HYPRE_RestoreDistributedMatrixRow( matrix, firstrow+i, &row_size,
+    ierr = HYPRE_DistributedMatrixRestoreRow( matrix, firstrow+i, &row_size,
                &col_ind, &values);
 
     k = -1;
@@ -187,7 +187,7 @@ int SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
     rtol = nrm2s[i]*tol;  /* Compute relative tolerance */
 
     /* Initialize work space */
-    ierr = HYPRE_GetDistributedMatrixRow( matrix, firstrow+i, &row_size,
+    ierr = HYPRE_DistributedMatrixGetRow( matrix, firstrow+i, &row_size,
                &col_ind, &values);
     if (ierr) return(ierr);
 
@@ -218,7 +218,7 @@ int SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
       w[0] = 0.0;
     }
 
-    ierr = HYPRE_RestoreDistributedMatrixRow( matrix, firstrow+i, &row_size,
+    ierr = HYPRE_DistributedMatrixRestoreRow( matrix, firstrow+i, &row_size,
                &col_ind, &values);
 
     k = -1;
@@ -294,7 +294,7 @@ int SelectInterior( int local_num_rows,
       nbnd++;
     } else
     {
-      ierr = HYPRE_GetDistributedMatrixRow( matrix, firstrow+i, &row_size,
+      ierr = HYPRE_DistributedMatrixGetRow( matrix, firstrow+i, &row_size,
                &col_ind, &values);
       if (ierr) return(ierr);
 
@@ -309,7 +309,7 @@ int SelectInterior( int local_num_rows,
         }
       }
 
-      ierr = HYPRE_RestoreDistributedMatrixRow( matrix, firstrow+i, &row_size,
+      ierr = HYPRE_DistributedMatrixRestoreRow( matrix, firstrow+i, &row_size,
                &col_ind, &values);
 
       if ( break_loop == 0 ) 
@@ -343,7 +343,7 @@ int FindStructuralUnion( HYPRE_DistributedMatrix matrix,
   for ( i=0; i< lnrows; i++ )
   {
     /* Get row structure; no values needed */
-    ierr = HYPRE_GetDistributedMatrixRow( matrix, firstrow+i, &row_size,
+    ierr = HYPRE_DistributedMatrixGetRow( matrix, firstrow+i, &row_size,
                &col_ind, NULL );
     if (ierr) return(ierr);
 
@@ -357,7 +357,7 @@ int FindStructuralUnion( HYPRE_DistributedMatrix matrix,
     }
 
     /* Restore row structure */
-    ierr = HYPRE_RestoreDistributedMatrixRow( matrix, firstrow+i, &row_size,
+    ierr = HYPRE_DistributedMatrixRestoreRow( matrix, firstrow+i, &row_size,
                &col_ind, NULL );
     if (ierr) return(ierr);
 

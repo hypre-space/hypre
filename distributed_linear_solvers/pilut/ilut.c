@@ -54,12 +54,12 @@ int ILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix, FactorMatType *ldu
       ldu->usrowptr[i] =
       ldu->uerowptr[i] = maxnz*i;
 
-    ierr = HYPRE_GetDistributedMatrixRow( matrix, firstrow+i, &size,
+    ierr = HYPRE_DistributedMatrixGetRow( matrix, firstrow+i, &size,
                NULL, &values);
     if (ierr) return(ierr);
     dummy_row_ptr[ 1 ] = size;
     ComputeAdd2Nrms( 1, dummy_row_ptr, values, &(ldu->nrm2s[i]) );
-    ierr = HYPRE_RestoreDistributedMatrixRow( matrix, firstrow+i, &size,
+    ierr = HYPRE_DistributedMatrixRestoreRow( matrix, firstrow+i, &size,
                NULL, &values);
   }
 

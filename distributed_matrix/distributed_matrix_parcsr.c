@@ -23,12 +23,12 @@ typedef struct
 } hypre_DistributedMatrixParcsrAuxiliaryData;
 
 /*--------------------------------------------------------------------------
- * hypre_FreeDistributedMatrixParcsr
+ * hypre_DistributedMatrixDestroyParCSR
  *   Internal routine for freeing a matrix stored in Parcsr form.
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_FreeDistributedMatrixParcsr( hypre_DistributedMatrix *distributed_matrix )
+hypre_DistributedMatrixDestroyParCSR( hypre_DistributedMatrix *distributed_matrix )
 {
    HYPRE_ParCSRMatrix Parcsr_matrix = (HYPRE_ParCSRMatrix) hypre_DistributedMatrixLocalStorage(distributed_matrix);
 
@@ -40,13 +40,13 @@ hypre_FreeDistributedMatrixParcsr( hypre_DistributedMatrix *distributed_matrix )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_InitializeDistributedMatrixParcsr
+ * hypre_DistributedMatrixInitializeParCSR
  *--------------------------------------------------------------------------*/
 
   /* matrix must be set before calling this function*/
 
 int 
-hypre_InitializeDistributedMatrixParcsr(hypre_DistributedMatrix *matrix)
+hypre_DistributedMatrixInitializeParCSR(hypre_DistributedMatrix *matrix)
 {
    
    hypre_DistributedMatrixAuxiliaryData( matrix ) = 
@@ -60,12 +60,12 @@ hypre_InitializeDistributedMatrixParcsr(hypre_DistributedMatrix *matrix)
  *--------------------------------------------------------------------------*/
 
 /*--------------------------------------------------------------------------
- * hypre_PrintDistributedMatrixParcsr
+ * hypre_DistributedMatrixPrintParCSR
  *   Internal routine for printing a matrix stored in Parcsr form.
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_PrintDistributedMatrixParcsr( hypre_DistributedMatrix *matrix )
+hypre_DistributedMatrixPrintParCSR( hypre_DistributedMatrix *matrix )
 {
    int  ierr=0;
    HYPRE_ParCSRMatrix Parcsr_matrix = (HYPRE_ParCSRMatrix) hypre_DistributedMatrixLocalStorage(matrix);
@@ -75,11 +75,11 @@ hypre_PrintDistributedMatrixParcsr( hypre_DistributedMatrix *matrix )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_GetDistributedMatrixLocalRangeParcsr
+ * hypre_DistributedMatrixGetLocalRangeParCSR
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_GetDistributedMatrixLocalRangeParcsr( hypre_DistributedMatrix *matrix,
+hypre_DistributedMatrixGetLocalRangeParCSR( hypre_DistributedMatrix *matrix,
                              int *row_start,
                              int *row_end,
                              int *col_start,
@@ -98,11 +98,11 @@ hypre_GetDistributedMatrixLocalRangeParcsr( hypre_DistributedMatrix *matrix,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_GetDistributedMatrixRowParcsr
+ * hypre_DistributedMatrixGetRowParCSR
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_GetDistributedMatrixRowParcsr( hypre_DistributedMatrix *matrix,
+hypre_DistributedMatrixGetRowParCSR( hypre_DistributedMatrix *matrix,
                              int row,
                              int *size,
                              int **col_ind,
@@ -119,11 +119,11 @@ hypre_GetDistributedMatrixRowParcsr( hypre_DistributedMatrix *matrix,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_RestoreDistributedMatrixRowParcsr
+ * hypre_DistributedMatrixRestoreRowParCSR
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_RestoreDistributedMatrixRowParcsr( hypre_DistributedMatrix *matrix,
+hypre_DistributedMatrixRestoreRowParCSR( hypre_DistributedMatrix *matrix,
                              int row,
                              int *size,
                              int **col_ind,

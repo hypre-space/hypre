@@ -60,7 +60,7 @@ HYPRE_ParCSRPilutDestroy( HYPRE_Solver solver )
 {
    int ierr = 0;
 
-   ierr = HYPRE_LimitedFreeDistributedMatrix( 
+   ierr = HYPRE_DistributedMatrixDestroy( 
       HYPRE_DistributedMatrixPilutSolverGetMatrix(
          (HYPRE_DistributedMatrixPilutSolver) solver ) );
    if (ierr) return(ierr);

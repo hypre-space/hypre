@@ -20,12 +20,12 @@
 #endif
 
 /*--------------------------------------------------------------------------
- * hypre_FreeDistributedMatrixPETSc
+ * hypre_DistributedMatrixDestroyPETSc
  *   Internal routine for freeing a matrix stored in PETSc form.
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_FreeDistributedMatrixPETSc( hypre_DistributedMatrix *distributed_matrix )
+hypre_DistributedMatrixDestroyPETSc( hypre_DistributedMatrix *distributed_matrix )
 {
 #ifdef PETSC_AVAILABLE
    Mat PETSc_matrix = (Mat) hypre_DistributedMatrixLocalStorage(distributed_matrix);
@@ -41,12 +41,12 @@ hypre_FreeDistributedMatrixPETSc( hypre_DistributedMatrix *distributed_matrix )
  *--------------------------------------------------------------------------*/
 
 /*--------------------------------------------------------------------------
- * hypre_PrintDistributedMatrixPETSc
+ * hypre_DistributedMatrixPrintPETSc
  *   Internal routine for printing a matrix stored in PETSc form.
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_PrintDistributedMatrixPETSc( hypre_DistributedMatrix *matrix )
+hypre_DistributedMatrixPrintPETSc( hypre_DistributedMatrix *matrix )
 {
    int  ierr=0;
 #ifdef PETSC_AVAILABLE
@@ -58,11 +58,11 @@ hypre_PrintDistributedMatrixPETSc( hypre_DistributedMatrix *matrix )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_GetDistributedMatrixLocalRangePETSc
+ * hypre_DistributedMatrixGetLocalRangePETSc
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_GetDistributedMatrixLocalRangePETSc( hypre_DistributedMatrix *matrix,
+hypre_DistributedMatrixGetLocalRangePETSc( hypre_DistributedMatrix *matrix,
                              int *start,
                              int *end )
 {
@@ -80,11 +80,11 @@ hypre_GetDistributedMatrixLocalRangePETSc( hypre_DistributedMatrix *matrix,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_GetDistributedMatrixRowPETSc
+ * hypre_DistributedMatrixGetRowPETSc
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_GetDistributedMatrixRowPETSc( hypre_DistributedMatrix *matrix,
+hypre_DistributedMatrixGetRowPETSc( hypre_DistributedMatrix *matrix,
                              int row,
                              int *size,
                              int **col_ind,
@@ -103,11 +103,11 @@ hypre_GetDistributedMatrixRowPETSc( hypre_DistributedMatrix *matrix,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_RestoreDistributedMatrixRowPETSc
+ * hypre_DistributedMatrixRestoreRowPETSc
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_RestoreDistributedMatrixRowPETSc( hypre_DistributedMatrix *matrix,
+hypre_DistributedMatrixRestoreRowPETSc( hypre_DistributedMatrix *matrix,
                              int row,
                              int *size,
                              int **col_ind,

@@ -16,167 +16,171 @@
 
 
 /*--------------------------------------------------------------------------
- * HYPRE_NewDistributedMatrix
- *--------------------------------------------------------------------------*/
-
-HYPRE_DistributedMatrix 
-HYPRE_NewDistributedMatrix( MPI_Comm    context )
-{
-   return ( (HYPRE_DistributedMatrix)
-	    hypre_NewDistributedMatrix( context ) );
-}
-
-/*--------------------------------------------------------------------------
- * HYPRE_FreeDistributedMatrix
+ * HYPRE_DistributedMatrixCreate
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_FreeDistributedMatrix( HYPRE_DistributedMatrix matrix )
+HYPRE_DistributedMatrixCreate( MPI_Comm context, HYPRE_DistributedMatrix *matrix )
 {
-   return( hypre_FreeDistributedMatrix( (hypre_DistributedMatrix *) matrix ) );
+   int ierr = 0;
+
+   *matrix = (HYPRE_DistributedMatrix)
+	    hypre_DistributedMatrixCreate( context );
+
+   return ( ierr );
 }
 
-
 /*--------------------------------------------------------------------------
- * HYPRE_LimitedFreeDistributedMatrix
+ * HYPRE_DistributedMatrixDestroy
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_LimitedFreeDistributedMatrix( HYPRE_DistributedMatrix matrix )
+HYPRE_DistributedMatrixDestroy( HYPRE_DistributedMatrix matrix )
 {
-   return( hypre_LimitedFreeDistributedMatrix( (hypre_DistributedMatrix *) matrix ) );
+   return( hypre_DistributedMatrixDestroy( (hypre_DistributedMatrix *) matrix ) );
 }
 
 
 /*--------------------------------------------------------------------------
- * HYPRE_InitializeDistributedMatrix
+ * HYPRE_DistributedMatrixLimitedDestroy
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_InitializeDistributedMatrix( HYPRE_DistributedMatrix matrix )
+HYPRE_DistributedMatrixLimitedDestroy( HYPRE_DistributedMatrix matrix )
 {
-   return( hypre_InitializeDistributedMatrix( (hypre_DistributedMatrix *) matrix ) );
+   return( hypre_DistributedMatrixLimitedDestroy( (hypre_DistributedMatrix *) matrix ) );
 }
 
+
 /*--------------------------------------------------------------------------
- * HYPRE_AssembleDistributedMatrix
+ * HYPRE_DistributedMatrixInitialize
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_AssembleDistributedMatrix( HYPRE_DistributedMatrix matrix )
+HYPRE_DistributedMatrixInitialize( HYPRE_DistributedMatrix matrix )
 {
-   return( hypre_AssembleDistributedMatrix( (hypre_DistributedMatrix *) matrix ) );
+   return( hypre_DistributedMatrixInitialize( (hypre_DistributedMatrix *) matrix ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SetDistributedMatrixLocalStorageType
+ * HYPRE_DistributedMatrixAssemble
+ *--------------------------------------------------------------------------*/
+
+int 
+HYPRE_DistributedMatrixAssemble( HYPRE_DistributedMatrix matrix )
+{
+   return( hypre_DistributedMatrixAssemble( (hypre_DistributedMatrix *) matrix ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_DistributedMatrixSetLocalStorageType
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_SetDistributedMatrixLocalStorageType( HYPRE_DistributedMatrix matrix,
+HYPRE_DistributedMatrixSetLocalStorageType( HYPRE_DistributedMatrix matrix,
 				 int               type           )
 {
-   return( hypre_SetDistributedMatrixLocalStorageType(
+   return( hypre_DistributedMatrixSetLocalStorageType(
       (hypre_DistributedMatrix *) matrix, type ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_GetDistributedMatrixLocalStorageType
+ * HYPRE_DistributedMatrixGetLocalStorageType
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_GetDistributedMatrixLocalStorageType( HYPRE_DistributedMatrix matrix )
+HYPRE_DistributedMatrixGetLocalStorageType( HYPRE_DistributedMatrix matrix )
 {
-   return( hypre_GetDistributedMatrixLocalStorageType(
+   return( hypre_DistributedMatrixGetLocalStorageType(
       (hypre_DistributedMatrix *) matrix ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SetDistributedMatrixLocalStorage
+ * HYPRE_DistributedMatrixSetLocalStorage
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_SetDistributedMatrixLocalStorage( HYPRE_DistributedMatrix matrix,
+HYPRE_DistributedMatrixSetLocalStorage( HYPRE_DistributedMatrix matrix,
 				      void                 *LocalStorage )
 {
-   return( hypre_SetDistributedMatrixLocalStorage(
+   return( hypre_DistributedMatrixSetLocalStorage(
       (hypre_DistributedMatrix *) matrix, LocalStorage ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_GetDistributedMatrixLocalStorage
+ * HYPRE_DistributedMatrixGetLocalStorage
  *--------------------------------------------------------------------------*/
 
 void *
-HYPRE_GetDistributedMatrixLocalStorage( HYPRE_DistributedMatrix matrix )
+HYPRE_DistributedMatrixGetLocalStorage( HYPRE_DistributedMatrix matrix )
 {
-   return( hypre_GetDistributedMatrixLocalStorage(
+   return( hypre_DistributedMatrixGetLocalStorage(
       (hypre_DistributedMatrix *) matrix ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SetDistributedMatrixTranslator
+ * HYPRE_DistributedMatrixSetTranslator
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_SetDistributedMatrixTranslator( HYPRE_DistributedMatrix matrix,
+HYPRE_DistributedMatrixSetTranslator( HYPRE_DistributedMatrix matrix,
 				      void                 *Translator )
 {
-   return( hypre_SetDistributedMatrixTranslator(
+   return( hypre_DistributedMatrixSetTranslator(
       (hypre_DistributedMatrix *) matrix, Translator ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_GetDistributedMatrixTranslator
+ * HYPRE_DistributedMatrixGetTranslator
  *--------------------------------------------------------------------------*/
 
 void *
-HYPRE_GetDistributedMatrixTranslator( HYPRE_DistributedMatrix matrix )
+HYPRE_DistributedMatrixGetTranslator( HYPRE_DistributedMatrix matrix )
 {
-   return( hypre_GetDistributedMatrixTranslator(
+   return( hypre_DistributedMatrixGetTranslator(
       (hypre_DistributedMatrix *) matrix ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SetDistributedMatrixAuxiliaryData
+ * HYPRE_DistributedMatrixSetAuxiliaryData
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_SetDistributedMatrixAuxiliaryData( HYPRE_DistributedMatrix matrix,
+HYPRE_DistributedMatrixSetAuxiliaryData( HYPRE_DistributedMatrix matrix,
 				      void                 *AuxiliaryData )
 {
-   return( hypre_SetDistributedMatrixAuxiliaryData(
+   return( hypre_DistributedMatrixSetAuxiliaryData(
       (hypre_DistributedMatrix *) matrix, AuxiliaryData ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_GetDistributedMatrixAuxiliaryData
+ * HYPRE_DistributedMatrixGetAuxiliaryData
  *--------------------------------------------------------------------------*/
 
 void *
-HYPRE_GetDistributedMatrixAuxiliaryData( HYPRE_DistributedMatrix matrix )
+HYPRE_DistributedMatrixGetAuxiliaryData( HYPRE_DistributedMatrix matrix )
 {
    return( hypre_DistributedMatrixAuxiliaryData(
       (hypre_DistributedMatrix *) matrix ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_GetDistributedMatrixContext
+ * HYPRE_DistributedMatrixGetContext
  *--------------------------------------------------------------------------*/
 
 MPI_Comm
-HYPRE_GetDistributedMatrixContext( HYPRE_DistributedMatrix matrix )
+HYPRE_DistributedMatrixGetContext( HYPRE_DistributedMatrix matrix )
 {
    return( hypre_DistributedMatrixContext(
       (hypre_DistributedMatrix *) matrix ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_GetDistributedMatrixDims
+ * HYPRE_DistributedMatrixGetDims
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_GetDistributedMatrixDims( HYPRE_DistributedMatrix matrix, 
+HYPRE_DistributedMatrixGetDims( HYPRE_DistributedMatrix matrix, 
                                int *M, int *N )
 {
    int ierr=0;
@@ -188,11 +192,11 @@ HYPRE_GetDistributedMatrixDims( HYPRE_DistributedMatrix matrix,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SetDistributedMatrixDims
+ * HYPRE_DistributedMatrixSetDims
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_SetDistributedMatrixDims( HYPRE_DistributedMatrix matrix, 
+HYPRE_DistributedMatrixSetDims( HYPRE_DistributedMatrix matrix, 
                                int M, int N )
 {
    int ierr=0;
@@ -208,40 +212,40 @@ HYPRE_SetDistributedMatrixDims( HYPRE_DistributedMatrix matrix,
  *--------------------------------------------------------------------------*/
 
 /*--------------------------------------------------------------------------
- * HYPRE_PrintDistributedMatrix
+ * HYPRE_DistributedMatrixPrint
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_PrintDistributedMatrix( HYPRE_DistributedMatrix matrix )
+HYPRE_DistributedMatrixPrint( HYPRE_DistributedMatrix matrix )
 {
-   return( hypre_PrintDistributedMatrix( (hypre_DistributedMatrix *) matrix ) );
+   return( hypre_DistributedMatrixPrint( (hypre_DistributedMatrix *) matrix ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_GetDistributedMatrixLocalRange
+ * HYPRE_DistributedMatrixGetLocalRange
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_GetDistributedMatrixLocalRange( HYPRE_DistributedMatrix matrix, 
+HYPRE_DistributedMatrixGetLocalRange( HYPRE_DistributedMatrix matrix, 
                                int *row_start, int *row_end ,
                                int *col_start, int *col_end )
 {
-   return( hypre_GetDistributedMatrixLocalRange( (hypre_DistributedMatrix *) matrix,
+   return( hypre_DistributedMatrixGetLocalRange( (hypre_DistributedMatrix *) matrix,
                              row_start, row_end, col_start, col_end ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_GetDistributedMatrixRow
+ * HYPRE_DistributedMatrixGetRow
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_GetDistributedMatrixRow( HYPRE_DistributedMatrix matrix,
+HYPRE_DistributedMatrixGetRow( HYPRE_DistributedMatrix matrix,
                              int row,
                              int *size,
                              int **col_ind,
                              double **values )
 {
-   return( hypre_GetDistributedMatrixRow( (hypre_DistributedMatrix *) matrix,
+   return( hypre_DistributedMatrixGetRow( (hypre_DistributedMatrix *) matrix,
                              row,
                              size,
                              col_ind,
@@ -249,17 +253,17 @@ HYPRE_GetDistributedMatrixRow( HYPRE_DistributedMatrix matrix,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_RestoreDistributedMatrixRow
+ * HYPRE_DistributedMatrixRestoreRow
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_RestoreDistributedMatrixRow( HYPRE_DistributedMatrix matrix,
+HYPRE_DistributedMatrixRestoreRow( HYPRE_DistributedMatrix matrix,
                              int row,
                              int *size,
                              int **col_ind,
                              double **values )
 {
-   return( hypre_RestoreDistributedMatrixRow( (hypre_DistributedMatrix *) matrix,
+   return( hypre_DistributedMatrixRestoreRow( (hypre_DistributedMatrix *) matrix,
                              row,
                              size,
                              col_ind,
