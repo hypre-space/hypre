@@ -102,14 +102,14 @@ hypre_ParAMGIndepSet( hypre_ParCSRMatrix *S,
    hypre_CSRMatrix *S_diag      = hypre_ParCSRMatrixDiag(S);
    int             *S_diag_i    = hypre_CSRMatrixI(S_diag);
    int             *S_diag_j    = hypre_CSRMatrixJ(S_diag);
-   double          *S_diag_data = hypre_CSRMatrixData(S_diag);
+   /* double          *S_diag_data = hypre_CSRMatrixData(S_diag); */
    hypre_CSRMatrix *S_offd      = hypre_ParCSRMatrixOffd(S);
    int             *S_offd_i    = hypre_CSRMatrixI(S_offd);
    int             *S_offd_j;
-   double          *S_offd_data;
+   /* double          *S_offd_data; */
    int             *S_ext_i;
    int             *S_ext_j;
-   double          *S_ext_data;
+   /* double          *S_ext_data; */
 
    int		    local_num_vars = hypre_CSRMatrixNumRows(S_diag);
    int		    num_cols_offd = hypre_CSRMatrixNumCols(S_offd);
@@ -128,10 +128,10 @@ hypre_ParAMGIndepSet( hypre_ParCSRMatrix *S,
    if (hypre_CSRMatrixNumCols(S_offd))
    {
 	S_offd_j = hypre_CSRMatrixJ(S_offd);
-	S_offd_data = hypre_CSRMatrixData(S_offd);
+	/* S_offd_data = hypre_CSRMatrixData(S_offd); */
 	S_ext_i = hypre_CSRMatrixI(S_ext);
 	S_ext_j = hypre_CSRMatrixJ(S_ext);
-	S_ext_data = hypre_CSRMatrixData(S_ext);
+	/* S_ext_data = hypre_CSRMatrixData(S_ext); */
    }
 
    for (ig = 0; ig < graph_array_size; ig++)
@@ -165,9 +165,11 @@ hypre_ParAMGIndepSet( hypre_ParCSRMatrix *S,
          for (jS = S_diag_i[i]; jS < S_diag_i[i+1]; jS++)
          {
             j = S_diag_j[jS];
+	    if (j < 0) j = -j-1;
             
             /* only consider valid graph edges */
-            if ( (measure_array[j] > 1) && (S_diag_data[jS]) )
+            /* if ( (measure_array[j] > 1) && (S_diag_data[jS]) ) */
+            if (measure_array[j] > 1) 
             {
                if (measure_array[i] > measure_array[j])
                {
@@ -182,10 +184,12 @@ hypre_ParAMGIndepSet( hypre_ParCSRMatrix *S,
          for (jS = S_offd_i[i]; jS < S_offd_i[i+1]; jS++)
          {
             jj = S_offd_j[jS];
+            if (jj < 0) jj = -jj-1;
             j = local_num_vars+jj;
             
             /* only consider valid graph edges */
-            if ( (measure_array[j] > 1) && (S_offd_data[jS]) )
+            /* if ( (measure_array[j] > 1) && (S_offd_data[jS]) ) */
+            if (measure_array[j] > 1) 
             {
                if (measure_array[i] > measure_array[j])
                {
@@ -207,11 +211,13 @@ hypre_ParAMGIndepSet( hypre_ParCSRMatrix *S,
          for (jS = S_ext_i[ic]; jS < S_ext_i[ic+1]; jS++)
          {
           j = S_ext_j[jS];
+          if (j < 0) j = -j-1;
           if (j >= col_1 && j < col_n)
 	  {
 	    jc = j - col_1; 
             /* only consider valid graph edges */
-            if ( (measure_array[jc] > 1) && (S_ext_data[jS]) )
+            /* if ( (measure_array[jc] > 1) && (S_ext_data[jS]) ) */
+            if (measure_array[jc] > 1) 
             {
                if (measure_array[i] > measure_array[jc])
                {
@@ -230,7 +236,8 @@ hypre_ParAMGIndepSet( hypre_ParCSRMatrix *S,
 	     {
 		jc += local_num_vars;  
             /* only consider valid graph edges */
-                if ((measure_array[jc] > 1) && (S_ext_data[jS]))
+                /* if ((measure_array[jc] > 1) && (S_ext_data[jS])) */
+                if (measure_array[jc] > 1)
                 {
                    if (measure_array[i] > measure_array[jc])
                    {
