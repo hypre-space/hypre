@@ -163,12 +163,7 @@ AC_ARG_WITH(insure,
    CFLAGS="$CFLAGS -g"
    CXXFLAGS="$CXXFLAGS -g"
    casc_user_chose_compilers=yes
- fi
- case "${withval}" in
-   yes) PREPEND="" ;;
-   no)  PREPEND="" ;;
-   *)   PREPEND="" ;;
- esac],
+ fi],
 [PREPEND=""]
 )
 
@@ -206,12 +201,7 @@ AC_ARG_WITH(insure-to-file,
    CFLAGS="$CFLAGS -Zoi \"report_file insure.log\""
    CXXFLAGS="$CXXFLAGS -Zoi \"report_file insure.log\""
    casc_user_chose_compilers=yes
- fi
- case "${withval}" in
-   yes) PREPEND=""";;
-   no)  PREPEND="" ;;
-   *)   PREPEND="" ;;
- esac]
+ fi]
 )
 
 AC_ARG_WITH(purify-to-file,
