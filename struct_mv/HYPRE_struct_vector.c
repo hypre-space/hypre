@@ -118,7 +118,7 @@ int
 HYPRE_SetStructVectorBoxValues( HYPRE_StructVector  vector,
                                 int                *ilower,
                                 int                *iupper,
-                                double             *values              )
+                                double             *values )
 {
    hypre_StructVector *new_vector = (hypre_StructVector *) vector;
    hypre_Index         new_ilower;
@@ -155,7 +155,7 @@ int
 HYPRE_GetStructVectorBoxValues( HYPRE_StructVector  vector,
                                 int                *ilower,
                                 int                *iupper,
-                                double            **values_ptr          )
+                                double             *values )
 {
    hypre_StructVector *new_vector = (hypre_StructVector *) vector;
    hypre_Index         new_ilower;
@@ -177,8 +177,7 @@ HYPRE_GetStructVectorBoxValues( HYPRE_StructVector  vector,
    new_value_box = hypre_NewBox();
    hypre_SetBoxExtents(new_value_box, new_ilower, new_iupper);
 
-   ierr = hypre_GetStructVectorBoxValues( new_vector, new_value_box,
-                                          values_ptr );
+   ierr = hypre_GetStructVectorBoxValues( new_vector, new_value_box, values );
 
    hypre_FreeBox(new_value_box);
 
@@ -202,7 +201,7 @@ HYPRE_AssembleStructVector( HYPRE_StructVector vector )
 int
 HYPRE_PrintStructVector( char               *filename,
                          HYPRE_StructVector  vector,
-                         int                 all )
+                         int                 all      )
 {
    return ( hypre_PrintStructVector( filename,
                                      (hypre_StructVector *) vector, all ) );

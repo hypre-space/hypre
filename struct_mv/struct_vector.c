@@ -375,11 +375,9 @@ hypre_SetStructVectorBoxValues( hypre_StructVector *vector,
 int 
 hypre_GetStructVectorBoxValues( hypre_StructVector *vector,
                                 hypre_Box          *value_box,
-                                double            **values_ptr )
+                                double             *values    )
 {
    int    ierr = 0;
-
-   double             *values;
 
    hypre_BoxArray     *grid_boxes;
    hypre_Box          *grid_box;
@@ -402,12 +400,6 @@ hypre_GetStructVectorBoxValues( hypre_StructVector *vector,
 
    int                 i;
    int                 loopi, loopj, loopk;
-
-   /*-----------------------------------------------------------------------
-    * Allocate values array
-    *-----------------------------------------------------------------------*/
-
-   values = hypre_CTAlloc(double, hypre_BoxVolume(value_box));
 
    /*-----------------------------------------------------------------------
     * Set up `box_array' by intersecting `box' with the grid boxes
@@ -463,8 +455,6 @@ hypre_GetStructVectorBoxValues( hypre_StructVector *vector,
    }
  
    hypre_FreeBoxArray(box_array);
-
-   *values_ptr = values;
 
    return ierr;
 }

@@ -1140,7 +1140,7 @@ typedef struct {
    HYPRE_StructVectorArray *vector;
    int *ilower;
    int *iupper;
-   double **values_ptr;
+   double *values;
    int  returnvalue[hypre_MAX_THREADS];
 } HYPRE_GetStructVectorBoxValuesArgs;
 
@@ -1157,7 +1157,7 @@ HYPRE_GetStructVectorBoxValuesVoidPtr( void *argptr )
          (*(localargs -> vector))[threadid],
          localargs -> ilower,
          localargs -> iupper,
-         localargs -> values_ptr );
+         localargs -> values );
 }
 
 int 
@@ -1165,7 +1165,7 @@ HYPRE_GetStructVectorBoxValuesPush(
    HYPRE_StructVectorArray vector,
    int *ilower,
    int *iupper,
-   double **values_ptr )
+   double *values )
 {
    HYPRE_GetStructVectorBoxValuesArgs pushargs;
    int i;
@@ -1174,7 +1174,7 @@ HYPRE_GetStructVectorBoxValuesPush(
    pushargs.vector = (HYPRE_StructVectorArray *)vector;
    pushargs.ilower = ilower;
    pushargs.iupper = iupper;
-   pushargs.values_ptr = values_ptr;
+   pushargs.values = values;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_GetStructVectorBoxValuesVoidPtr, (void *)&pushargs );
 
