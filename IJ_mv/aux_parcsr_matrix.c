@@ -17,7 +17,7 @@
 #include "aux_parcsr_matrix.h"
 
 /*--------------------------------------------------------------------------
- * hypre_CreateParCSRMatrix
+ * hypre_CreateAuxParCSRMatrix
  *--------------------------------------------------------------------------*/
 
 hypre_AuxParCSRMatrix *
