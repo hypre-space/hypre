@@ -25,6 +25,10 @@
 #include <assert.h>
 #include <math.h>
 
+#ifdef NOFEI
+#undef NOFEI
+#endif
+
 // *************************************************************************
 // FEI-specific include files
 // -------------------------------------------------------------------------
@@ -59,10 +63,6 @@ enum HYpreconID {HYIDENTITY,HYDIAGONAL,HYPILUT,HYPARASAILS,HYBOOMERAMG,HYML,
 #define HYFEI_STOPAFTERPRINT       1048576
 #define HYFEI_PRINTPARCSRMAT       2097152
 #define HYFEI_IMPOSENOBC           4194304
-
-#ifdef NOFEI
-#undef NOFEI
-#endif
 
 // *************************************************************************
 // class definition
