@@ -3912,10 +3912,11 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
            else                    HYPRE_ParCSRGMRESSetStopCrit(HYSolver_,1);
            if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )
            {
+              HYPRE_ParCSRGMRESSetPrintLevel(HYSolver_, 1);
               if ( mypid_ == 0 )
                 printf("***************************************************\n");
               if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
-                 HYPRE_ParCSRGMRESSetLogging(HYSolver_, 2);
+                 HYPRE_ParCSRGMRESSetPrintLevel(HYSolver_, 2);
            }
            HYPRE_ParCSRGMRESSetup(HYSolver_, A_csr, b_csr, x_csr);
            MPI_Barrier( comm_ );
@@ -4003,9 +4004,11 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
            else                    HYPRE_ParCSRBiCGSTABSetStopCrit(HYSolver_,1);
            if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )
            {
+              HYPRE_ParCSRBiCGSTABSetPrintLevel(HYSolver_, 1);
               if ( mypid_ == 0 )
                 printf("***************************************************\n");
-              HYPRE_ParCSRBiCGSTABSetLogging(HYSolver_, 1);
+              if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+                 HYPRE_ParCSRBiCGSTABSetPrintLevel(HYSolver_, 2);
            }
            HYPRE_ParCSRBiCGSTABSetup(HYSolver_, A_csr, b_csr, x_csr);
            MPI_Barrier( comm_ );
