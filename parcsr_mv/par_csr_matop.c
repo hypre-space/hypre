@@ -12,6 +12,8 @@
 /*--------------------------------------------------------------------------
  * hypre_ParMatmul : multiplies two ParCSRMatrices A and B and returns
  * the product in ParCSRMatrix C
+ * Note that C does not own the partitionings since its row_starts
+ * is owned by A and col_starts by B.
  *--------------------------------------------------------------------------*/
 
 hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
@@ -482,6 +484,9 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
 
    C = hypre_CreateParCSRMatrix(comm, n_rows_A, n_cols_B, row_starts_A,
 	col_starts_B, num_cols_offd_C, C_diag_size, C_offd_size);
+
+/* Note that C does not own the partitionings */
+   hypre_SetParCSRMatrixPartitioningOwner(C,0);
 
    C_diag = hypre_ParCSRMatrixDiag(C);
    hypre_CSRMatrixData(C_diag) = C_diag_data; 
