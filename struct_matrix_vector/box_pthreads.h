@@ -35,7 +35,7 @@ extern int iteration_counter;
 #define MIN_VOL 125
 #endif
 #ifndef MAX_VOL
-#define MAX_VOL 256000
+#define MAX_VOL 64000
 #endif
 
 #define vol_cbrt(vol) (int) pow((double)(vol), 1. / 3.) 

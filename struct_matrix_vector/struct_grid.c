@@ -239,7 +239,6 @@ hypre_GatherAllBoxes( MPI_Comm         comm,
    hypre_Index        imax;
                      
    int                num_procs, my_rank;
-   int               *nproc_ptr, *rank_ptr;
                      
    int               *sendbuf;
    int                sendcount;
@@ -255,14 +254,8 @@ hypre_GatherAllBoxes( MPI_Comm         comm,
     * Accumulate the box info
     *-----------------------------------------------------*/
    
-   nproc_ptr = hypre_SharedTAlloc(int, 1);
-   rank_ptr = hypre_SharedTAlloc(int, 1);
-   MPI_Comm_size(comm, nproc_ptr);
-   MPI_Comm_rank(comm, rank_ptr);
-   num_procs = *nproc_ptr;
-   my_rank = *rank_ptr;
-   hypre_SharedTFree(nproc_ptr);
-   hypre_SharedTFree(rank_ptr);
+   MPI_Comm_size(comm, &num_procs);
+   MPI_Comm_rank(comm, &my_rank);
 
    /* compute recvcounts and displs */
    sendcount = 7*hypre_BoxArraySize(boxes);

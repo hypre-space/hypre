@@ -746,11 +746,6 @@ hypre_PrintStructVector( char               *filename,
    /*----------------------------------------
     * Open file
     *----------------------------------------*/
-#ifdef HYPRE_USE_PTHREADS
-#if MPI_Comm_rank == hypre_thread_MPI_Comm_rank
-#undef MPI_Comm_rank
-#endif
-#endif
 
    MPI_Comm_rank(hypre_StructVectorComm(vector), &myid );
 

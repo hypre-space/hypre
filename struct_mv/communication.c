@@ -1055,7 +1055,6 @@ hypre_NewCommPkgInfo( hypre_BoxArrayArray   *boxes,
                         
    int                    i, j, p, m;
    int                    num_procs, my_proc;
-   int                   *nprocs_ptr, *myproc_ptr;
                         
    int                    ierr = 0;
                 
@@ -1063,17 +1062,8 @@ hypre_NewCommPkgInfo( hypre_BoxArrayArray   *boxes,
     * Misc stuff
     *---------------------------------------------------------*/
 
-   nprocs_ptr = hypre_SharedTAlloc(int, 1);
-   myproc_ptr = hypre_SharedTAlloc(int, 1);
-
-   MPI_Comm_size(comm, nprocs_ptr );
-   MPI_Comm_rank(comm, myproc_ptr );
-
-   num_procs = *nprocs_ptr;
-   my_proc = *myproc_ptr;
-
-   hypre_SharedTFree(nprocs_ptr);
-   hypre_SharedTFree(myproc_ptr);
+   MPI_Comm_size(comm, &num_procs );
+   MPI_Comm_rank(comm, &my_proc );
 
    /*------------------------------------------------------
     * Loop over boxes and compute num_entries.
