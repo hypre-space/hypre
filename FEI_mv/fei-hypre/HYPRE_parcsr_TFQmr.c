@@ -24,8 +24,8 @@
  *
  *****************************************************************************/
 
+extern void *hypre_TFQmrCreate();
 extern int hypre_TFQmrDestroy(void *);
-extern HYPRE_Solver *hypre_TFQmrCreate();
 extern int hypre_TFQmrSetup(void *, void *, void *, void *);
 extern int hypre_TFQmrSolve(void *, void *, void *, void *);
 extern int hypre_TFQmrSetTol(void *, double);
