@@ -1,9 +1,9 @@
 include babel.make
 # ...defines: IORHDRS IORSRCS STUBHDRS STUBSRCS
 
-lib_LTLIBRARIES = libbHYPREClientF.la
-libbHYPREClientF_la_SOURCES = $(FILES)
-libbHYPREClientF_la_LDFLAGS = -avoid-version
+lib_LTLIBRARIES = libbHYPREClient-F.la
+libbHYPREClient_F_la_SOURCES = $(FILES)
+libbHYPREClient_F_la_LDFLAGS = -avoid-version
 
 C_COMPILE_FLAGS=@CFLAGS@
 # new configure won't fill in: CINCLUDES=@INCLUDES@ @MPIINCLUDE@ @BABEL_HYPRE_INCLUDES@
