@@ -7,6 +7,40 @@
 
 extern double beta;
 
+void report_times(MPI_Comm comm, double setup_time, double solve_time)
+{
+    int mype, npes;
+    double setup_times[1024];
+    double max_solve_time;
+    double m = 0.0, tot = 0.0;
+    int i;
+
+    MPI_Comm_rank(comm, &mype);
+    MPI_Comm_size(comm, &npes);
+
+    MPI_Gather(&setup_time, 1, MPI_DOUBLE, setup_times, 1, MPI_DOUBLE, 0, comm);
+
+    MPI_Reduce(&solve_time, &max_solve_time, 1, MPI_DOUBLE, MPI_MAX, 0, comm);
+
+    if (mype != 0)
+	return;
+
+    printf("***********************\n");
+    for (i=0; i<npes; i++)
+    {
+	printf("*** %2d * %10.3f ***\n", i, setup_times[i]);
+	m = MAX(m, setup_times[i]);
+	tot += setup_times[i];
+    }
+    printf("***********************\n");
+    printf("*** ave: %10.3f ***\n", tot / (double) npes);
+    printf("*** bal: %10.3f ***\n", tot / (double) npes / m);
+    printf("***********************\n");
+    printf("***      Setup      Solve      Total\n");
+    printf("*** %10.3f %10.3f %10.3f\n", m, max_solve_time, m+max_solve_time);
+    printf("***********************\n");
+}
+
 int main(int argc, char *argv[])
 {
     int mype, npes;
@@ -15,6 +49,7 @@ int main(int argc, char *argv[])
     FILE *file;
     int n, beg_row, end_row;
     double time0, time1;
+    double setup_time, solve_time;
 
     double *x, *y, *b;
     int i, j;
@@ -62,8 +97,8 @@ int main(int argc, char *argv[])
             x[i] = 0.0;
 
 #if ONE_TIME
-        selparam = 1.0;
-	nlevels = 0;
+        selparam = 0.75;
+	nlevels = 1;
 #else
 	fflush(NULL);
         MPI_Barrier(MPI_COMM_WORLD);
@@ -84,22 +119,27 @@ int main(int argc, char *argv[])
             break;
 #endif
 
+        MPI_Barrier(MPI_COMM_WORLD);
         time0 = MPI_Wtime();
         ps = ParaSailsCreate(A);
         thresh = ParaSailsSelectThresh(ps, selparam);
         ParaSailsSetupPattern(ps, thresh, nlevels);
         ParaSailsSetupValues(ps, A);
         time1 = MPI_Wtime();
-        printf("%d: Total time for ParaSails: %f\n", mype, time1-time0);
+	setup_time = time1-time0;
+
         i = MatrixNnz(ps->M);
         j = (MatrixNnz(A) - n) / 2 + n;
-        if (mype == 0) printf("number of nonzeros: %d (%.2f)\n", i, i/(double)j);
+        if (mype == 0) 
+            printf("number of nonzeros: %d (%.2f)\n", i, i/(double)j);
         /*MatrixPrint(ps->M, "M");*/
 
         time0 = MPI_Wtime();
         PCG_ParaSails(A, ps, b, x, 1.e-8, 1500);
         time1 = MPI_Wtime();
-        printf("%d: Total time for it sol: %f\n", mype, time1-time0);
+	solve_time = time1-time0;
+
+	report_times(MPI_COMM_WORLD, setup_time, solve_time);
 
         MatrixMatvecComplete(A); /* convert matrix back to global numbering */
         ParaSailsDestroy(ps);
