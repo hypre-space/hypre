@@ -536,13 +536,13 @@ hypre_GMRESSetPrecond( void  *gmres_vdata,
  *--------------------------------------------------------------------------*/
  
 int
-hypre_GMRESGetPrecond( void     *gmres_vdata,
-                       long int *precond_data_ptr )
+hypre_GMRESGetPrecond( void         *gmres_vdata,
+                       HYPRE_Solver *precond_data_ptr )
 {
    hypre_GMRESData *gmres_data = gmres_vdata;
    int              ierr = 0;
  
-   *precond_data_ptr = (long int)(gmres_data -> precond_data);
+   *precond_data_ptr = (HYPRE_Solver)(gmres_data -> precond_data);
  
    return ierr;
 }

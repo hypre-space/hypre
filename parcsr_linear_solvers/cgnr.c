@@ -427,6 +427,22 @@ hypre_CGNRSetPrecond(void  *cgnr_vdata,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_CGNRGetPrecond
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_CGNRGetPrecond( void         *cgnr_vdata,
+                      HYPRE_Solver *precond_data_ptr )
+{
+   hypre_CGNRData *cgnr_data = cgnr_vdata;
+   int             ierr = 0;
+
+   *precond_data_ptr = (HYPRE_Solver)(cgnr_data -> precond_data);
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_CGNRSetLogging
  *--------------------------------------------------------------------------*/
 

@@ -133,7 +133,19 @@ HYPRE_ParCSRCGNRSetPrecond( HYPRE_Solver  solver,
                              void                *precond_data )
 {
    return( hypre_CGNRSetPrecond( (void *) solver, precond,
-                                precondT, precond_setup, precond_data ) );
+                                 precondT, precond_setup, precond_data ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRCGNRGetPrecond
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParCSRCGNRGetPrecond( HYPRE_Solver   solver,
+                            HYPRE_Solver  *precond_data_ptr )
+{
+   return( hypre_CGNRGetPrecond( (void *)         solver,
+                                 (HYPRE_Solver *) precond_data_ptr ) );
 }
 
 /*--------------------------------------------------------------------------

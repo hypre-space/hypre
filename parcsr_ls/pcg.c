@@ -13,9 +13,7 @@
  *
  *****************************************************************************/
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
+#include "headers.h"
 
 /*--------------------------------------------------------------------------
  * Prototypes:
@@ -541,9 +539,9 @@ hypre_KrylovSetRelChange( void *pcg_vdata,
 
 int
 hypre_KrylovSetPrecond( void  *pcg_vdata,
-                     int  (*precond)(),
-                     int  (*precond_setup)(),
-                     void  *precond_data )
+                        int  (*precond)(),
+                        int  (*precond_setup)(),
+                        void  *precond_data )
 {
    hypre_PCGData *pcg_data = pcg_vdata;
    int            ierr = 0;
@@ -551,6 +549,22 @@ hypre_KrylovSetPrecond( void  *pcg_vdata,
    (pcg_data -> precond)       = precond;
    (pcg_data -> precond_setup) = precond_setup;
    (pcg_data -> precond_data)  = precond_data;
+ 
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_KrylovGetPrecond
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_KrylovGetPrecond( void         *pcg_vdata,
+                        HYPRE_Solver *precond_data_ptr )
+{
+   hypre_PCGData *pcg_data = pcg_vdata;
+   int            ierr = 0;
+
+   *precond_data_ptr = (HYPRE_Solver)(pcg_data -> precond_data);
  
    return ierr;
 }

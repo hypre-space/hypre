@@ -133,6 +133,18 @@ HYPRE_ParCSRPCGSetPrecond( HYPRE_Solver  solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ParCSRPCGGetPrecond
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParCSRPCGGetPrecond( HYPRE_Solver  solver,
+                           HYPRE_Solver *precond_data_ptr )
+{
+   return( hypre_KrylovGetPrecond( (void *)     solver,
+                                   (HYPRE_Solver *) precond_data_ptr ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_ParCSRPCGSetLogging
  *--------------------------------------------------------------------------*/
 

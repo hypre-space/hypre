@@ -194,11 +194,11 @@ hypre_F90_IFACE(hypre_parcsrgmressetprecond)( long int *solver,
 void
 hypre_F90_IFACE(hypre_parcsrgmresgetprecond)( long int *solver,
                                               long int *precond_solver_ptr,
-                                              int      *ierr          )
+                                              int      *ierr                )
 {
     *ierr = (int)
-            ( HYPRE_ParCSRGMRESGetPrecond( (HYPRE_Solver) *solver,
-                                           (long int *)   precond_solver_ptr ) );
+            ( HYPRE_ParCSRGMRESGetPrecond( (HYPRE_Solver)   *solver,
+                                           (HYPRE_Solver *)  precond_solver_ptr ) );
 
 }
 
