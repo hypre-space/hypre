@@ -24,12 +24,12 @@
 void MLI_Matrix_MatMatMult( MLI_Matrix *Amat, MLI_Matrix *Bmat, 
                             MLI_Matrix **Cmat)
 {
-   int    ir, ic, is, ia, ia2, ib, index, ierr, length, offset, iTemp;
+   int    ir, ic, is, ia, ia2, ib, index, length, offset, iTemp;
    int    *iArray, ibegin, sortFlag, tempCnt, nprocs, mypid;  
    int    BExtNumUniqueCols, BExtNRows, *BExtRowLengs, *BExtCols, BExtNnz;
-   int    *BExtRowInds, *BExtRowOffsets, *extColList, *extColListAux;
+   int    *extColList, *extColListAux;
    int    *BRowStarts, *BColStarts, BNRows, BNCols, BStartCol, BEndCol;
-   int    *ARowStarts, *AColStarts, ANRows, ANCols, AStartRow;
+   int    *ARowStarts, *AColStarts, ANRows, ANCols;
    int    *ADiagIA, *AOffdIA, *ADiagJA, *AOffdJA, *CDiagIA, *CDiagJA;
    int    *BDiagIA, *BOffdIA, *BDiagJA, *BOffdJA, *COffdIA, *COffdJA;
    int    *diagCols, *BColMap, BColMapInd, iTempDiag, iTempOffd;
@@ -38,7 +38,7 @@ void MLI_Matrix_MatMatMult( MLI_Matrix *Amat, MLI_Matrix *Bmat,
    int    CNRows, CNCols, *CDiagReg, *COffdReg, COffdNCols;
    int    *CRowStarts, *CColStarts, CExtNCols, colIndA, colIndB;
    int    *CColMap, *CColMapAux, CDiagNnz, COffdNnz;
-   double *BDiagAA, *BOffdAA, *diagVals, *ADiagAA, *AOffdAA, dTemp;
+   double *BDiagAA, *BOffdAA, *ADiagAA, *AOffdAA, dTemp;
    double *BExtVals, *CDiagAA, dTempA, dTempB;
    double *COffdAA;
    char   paramString[50];
@@ -46,7 +46,6 @@ void MLI_Matrix_MatMatMult( MLI_Matrix *Amat, MLI_Matrix *Bmat,
    MLI_Function        *funcPtr;
    hypre_CSRMatrix     *BDiag, *BOffd, *ADiag, *AOffd, *CDiag, *COffd;
    hypre_ParCSRMatrix  *hypreA, *hypreB, *hypreC;
-   hypre_ParCSRCommPkg *ACommPkg, *BCommPkg;
  
    /* -----------------------------------------------------------------------
     * check to make sure both matrices are ParCSR matrices
@@ -237,7 +236,6 @@ void MLI_Matrix_MatMatMult( MLI_Matrix *Amat, MLI_Matrix *Bmat,
     * ----------------------------------------------------------------------*/
 
    if (!hypre_ParCSRMatrixCommPkg(hypreA)) hypre_MatvecCommPkgCreate(hypreA);
-   ACommPkg   = hypre_ParCSRMatrixCommPkg(hypreA);
    ADiag      = hypre_ParCSRMatrixDiag(hypreA);
    ADiagIA    = hypre_CSRMatrixI(ADiag);
    ADiagJA    = hypre_CSRMatrixJ(ADiag);
@@ -250,9 +248,7 @@ void MLI_Matrix_MatMatMult( MLI_Matrix *Amat, MLI_Matrix *Bmat,
    AColStarts = hypre_ParCSRMatrixColStarts(hypreA);
    ANRows     = ARowStarts[mypid+1] - ARowStarts[mypid];
    ANCols     = AColStarts[mypid+1] - AColStarts[mypid];
-   AStartRow  = ARowStarts[mypid];
    if (!hypre_ParCSRMatrixCommPkg(hypreB)) hypre_MatvecCommPkgCreate(hypreB);
-   BCommPkg   = hypre_ParCSRMatrixCommPkg(hypreB);
    BDiag      = hypre_ParCSRMatrixDiag(hypreB);
    BDiagIA    = hypre_CSRMatrixI(BDiag);
    BDiagJA    = hypre_CSRMatrixJ(BDiag);
@@ -628,14 +624,14 @@ void MLI_Matrix_GetExtRows( MLI_Matrix *Amat, MLI_Matrix *Bmat, int *extNRowsP,
    hypre_CSRMatrix     *BDiag, *BOffd;
    int                 nprocs, mypid, nSends, *sendProcs, *sendStarts;
    int                 *sendMap, nRecvs, *recvProcs, *recvStarts;
-   int                 ip, jp, kp, rowIndex, length, *sendLengs, *recvLengs;
+   int                 ip, jp, kp, rowIndex, length;
    int                 recvNRows, sendNRows, totalSendNnz, totalRecvNnz;
-   int                 curNnz, *cols, rowLeng, sendIndex, proc;
+   int                 curNnz, sendIndex, proc;
    int                 ir, offset, upper, requestCnt, *recvCols, *iSendBuf;
    int                 *BDiagIA, *BOffdIA, *BDiagJA, *BOffdJA, *colMapOffd;
-   int                 BNRows, BStartRow, *BRowStarts, *BColStarts;
+   int                 *BRowStarts, *BColStarts;
    int                 *recvRowLengs, BStartCol;
-   double              *vals, *BDiagAA, *BOffdAA, *recvVals, *dSendBuf;
+   double              *BDiagAA, *BOffdAA, *recvVals, *dSendBuf;
    MPI_Request         *requests;
    MPI_Status          *statuses;
    MPI_Comm            mpiComm;
@@ -655,7 +651,6 @@ void MLI_Matrix_GetExtRows( MLI_Matrix *Amat, MLI_Matrix *Bmat, int *extNRowsP,
    MPI_Comm_rank(mpiComm, &mypid);
    BRowStarts = hypre_ParCSRMatrixRowStarts(hypreB);
    BColStarts = hypre_ParCSRMatrixColStarts(hypreB);
-   BNRows     = BRowStarts[mypid+1] - BRowStarts[mypid];
    BStartCol  = BColStarts[mypid];
    if ( nprocs == 1 ) 
    {
