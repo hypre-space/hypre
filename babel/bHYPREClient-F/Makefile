@@ -10,6 +10,9 @@
 include ../../config/Makefile.config
 include babel.make
 
+IORSRCS_NONNULL = $(filter-out bHYPRE_SStructVariable_IOR.c, ${IORSRCS})
+# ... ignore zero-length file because it will confuse the gcc/ar interaction
+
 CINCLUDES=${INCLUDES} ${MPIINCLUDE}
 CDEFS = 
  
@@ -43,7 +46,7 @@ LFLAGS =\
 
 HEADERS = ${STUBHDRS} ${IORHDRS} ${IMPLHDRS}
 
-FILES = ${IMPLSRCS} ${IORSRCS} ${SKELSRCS} ${STUBSRCS} 
+FILES = ${IMPLSRCS} ${IORSRCS_NONNULL} ${SKELSRCS} ${STUBSRCS} 
 
 OBJS = ${FILES:.c=.o}
 
