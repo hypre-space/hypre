@@ -84,6 +84,10 @@ GraphAddEntries: 1 ( 1- 1- 1-) ( 1- 10+ 10+) [1 1 1] 0 0 (10+ 1- 1-) (10+ 10+ 10
 
 # MatrixCreate:
 
+# MatrixSetValues: \
+#   part ilower(ndim) iupper(ndim) stride[ndim] var entry value
+#MatrixSetValues: 0 (10+ 1- 1-) (10+ 10+ 10+) [1 1 1] 0 15 -1.0
+
 ###########################################################
 
 # VectorCreate:
