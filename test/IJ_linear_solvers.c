@@ -134,6 +134,7 @@ main( int   argc,
 
    /* parameters for GSMG */
    int      gsmg_samples = 5;
+   int      interp_type  = 200; /* default value */
 
    int      print_system = 0;
 
@@ -674,6 +675,11 @@ main( int   argc,
          arg_index++;
          gsmg_samples  = atoi(argv[arg_index++]);
       }
+      else if ( strcmp(argv[arg_index], "-interptype") == 0 )
+      {
+         arg_index++;
+         interp_type  = atoi(argv[arg_index++]);
+      }
       else if ( strcmp(argv[arg_index], "-print") == 0 )
       {
          arg_index++;
@@ -774,6 +780,7 @@ main( int   argc,
       printf("  -mxrs <val>            : set AMG maximum row sum threshold for dependency weakening \n");
       printf("  -nf <val>              : set number of functions for systems AMG\n");
       printf("  -numsamp <val>         : set number of sample vectors for GSMG\n");
+      printf("  -interptype <val>      : set to 1 to get LS interpolation\n");
      
       printf("  -w   <val>             : set Jacobi relax weight = val\n");
       printf("  -k   <val>             : dimension Krylov space for GMRES\n");
@@ -1531,6 +1538,8 @@ main( int   argc,
       hypre_BeginTiming(time_index);
 
       HYPRE_BoomerAMGCreate(&amg_solver); 
+      HYPRE_BoomerAMGSetInterpType(amg_solver, interp_type);
+      HYPRE_BoomerAMGSetNumSamples(amg_solver, gsmg_samples);
       HYPRE_BoomerAMGSetCoarsenType(amg_solver, (hybrid*coarsen_type));
       HYPRE_BoomerAMGSetMeasureType(amg_solver, measure_type);
       HYPRE_BoomerAMGSetTol(amg_solver, tol);
@@ -1630,7 +1639,8 @@ main( int   argc,
  
       HYPRE_BoomerAMGCreate(&amg_solver);
       HYPRE_BoomerAMGSetGSMG(amg_solver, 4); /* specify GSMG */
-      HYPRE_BoomerAMGSetGSMGNumSamples(amg_solver, gsmg_samples);
+      HYPRE_BoomerAMGSetInterpType(amg_solver, interp_type);
+      HYPRE_BoomerAMGSetNumSamples(amg_solver, gsmg_samples);
       HYPRE_BoomerAMGSetCoarsenType(amg_solver, (hybrid*coarsen_type));
       HYPRE_BoomerAMGSetMeasureType(amg_solver, measure_type);
       HYPRE_BoomerAMGSetTol(amg_solver, tol);
@@ -1734,6 +1744,8 @@ main( int   argc,
          /* use BoomerAMG as preconditioner */
          if (myid == 0) printf("Solver: AMG-PCG\n");
          HYPRE_BoomerAMGCreate(&pcg_precond); 
+         HYPRE_BoomerAMGSetInterpType(pcg_precond, interp_type);
+         HYPRE_BoomerAMGSetNumSamples(pcg_precond, gsmg_samples);
          HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);
          HYPRE_BoomerAMGSetCoarsenType(pcg_precond, (hybrid*coarsen_type));
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
@@ -1850,7 +1862,8 @@ main( int   argc,
          if (myid == 0) printf("Solver: GSMG-PCG\n");
          HYPRE_BoomerAMGCreate(&pcg_precond); 
          HYPRE_BoomerAMGSetGSMG(pcg_precond, 4); 
-         HYPRE_BoomerAMGSetGSMGNumSamples(pcg_precond, gsmg_samples);
+         HYPRE_BoomerAMGSetInterpType(pcg_precond, interp_type);
+         HYPRE_BoomerAMGSetNumSamples(pcg_precond, gsmg_samples);
          HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);
          HYPRE_BoomerAMGSetCoarsenType(pcg_precond, (hybrid*coarsen_type));
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
@@ -1994,6 +2007,8 @@ main( int   argc,
          if (myid == 0) printf("Solver: AMG-GMRES\n");
 
          HYPRE_BoomerAMGCreate(&pcg_precond); 
+         HYPRE_BoomerAMGSetInterpType(pcg_precond, interp_type);
+         HYPRE_BoomerAMGSetNumSamples(pcg_precond, gsmg_samples);
          HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);
          HYPRE_BoomerAMGSetCoarsenType(pcg_precond, (hybrid*coarsen_type));
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
@@ -2099,7 +2114,8 @@ main( int   argc,
          if (myid == 0) printf("Solver: GSMG-GMRES\n");
          HYPRE_BoomerAMGCreate(&pcg_precond); 
          HYPRE_BoomerAMGSetGSMG(pcg_precond, 4); 
-         HYPRE_BoomerAMGSetGSMGNumSamples(pcg_precond, gsmg_samples);
+         HYPRE_BoomerAMGSetInterpType(pcg_precond, interp_type);
+         HYPRE_BoomerAMGSetNumSamples(pcg_precond, gsmg_samples);
          HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);
          HYPRE_BoomerAMGSetCoarsenType(pcg_precond, (hybrid*coarsen_type));
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
@@ -2253,6 +2269,8 @@ main( int   argc,
          /* use BoomerAMG as preconditioner */
          if (myid == 0) printf("Solver: AMG-BiCGSTAB\n");
          HYPRE_BoomerAMGCreate(&pcg_precond); 
+         HYPRE_BoomerAMGSetInterpType(pcg_precond, interp_type);
+         HYPRE_BoomerAMGSetNumSamples(pcg_precond, gsmg_samples);
          HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);
          HYPRE_BoomerAMGSetCoarsenType(pcg_precond, (hybrid*coarsen_type));
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
@@ -2409,6 +2427,8 @@ main( int   argc,
          /* use BoomerAMG as preconditioner */
          if (myid == 0) printf("Solver: AMG-CGNR\n");
          HYPRE_BoomerAMGCreate(&pcg_precond); 
+         HYPRE_BoomerAMGSetInterpType(pcg_precond, interp_type);
+         HYPRE_BoomerAMGSetNumSamples(pcg_precond, gsmg_samples);
          HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);
          HYPRE_BoomerAMGSetCoarsenType(pcg_precond, (hybrid*coarsen_type));
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
