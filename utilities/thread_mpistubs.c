@@ -18,7 +18,7 @@
 
 #include "thread_mpistubs.h"
 #include "hypre_utilities.h"
-#include <mpi.h>
+#include "mpi.h"
 #include "threading.h"
 
 int th_sem;
@@ -37,20 +37,20 @@ thread_MPI_Init( int    *argc,
     returnval=0;
   }
 
-  returnval;
+  return returnval;
 }
 
 double
 thread_MPI_Wtime( )
 {
-  double=returnval;
+  double returnval;
   if (pthread_equal(pthread_self(),hypre_thread[0]))
   {
     returnval=MPI_Wtime();
   }
   else
   {
-    returnval=0.0
+    returnval=0.0;
   }
 
   return returnval;
@@ -229,7 +229,7 @@ thread_MPI_Allgather( void        *sendbuf,
    returnval=0;
   }
   hypre_barrier(&mpi_mtx,&mpi_cnd,&th_sem);
-  reutrn returnval;
+  return returnval;
 }
 
 int
@@ -416,7 +416,7 @@ thread_MPI_Wait( MPI_Request *request,
   hypre_barrier(&mpi_mtx,&mpi_cnd,&th_sem);
   if (pthread_equal(pthread_self(),hypre_thread[0]))
   {
-    returnval=MPI_Wait;
+    returnval=MPI_Wait(request,status);
   }
   else
   {
