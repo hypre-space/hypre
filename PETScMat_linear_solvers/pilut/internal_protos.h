@@ -1,9 +1,4 @@
-#ifdef __STDC__
 # define	P(s) s
-#else
-# define P(s) ()
-#endif
-
 
 /* HYPRE_PETScMatPilutSolver.c */
 HYPRE_PETScMatPilutSolver HYPRE_NewPETScMatPilutSolver P((MPI_Comm comm , Mat matrix ));

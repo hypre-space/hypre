@@ -1,9 +1,4 @@
-#ifdef __STDC__
 # define	P(s) s
-#else
-# define P(s) ()
-#endif
-
 
 /* HYPRE_struct_grid.c */
 HYPRE_StructGrid HYPRE_NewStructGrid P((MPI_Comm context, int dim ));

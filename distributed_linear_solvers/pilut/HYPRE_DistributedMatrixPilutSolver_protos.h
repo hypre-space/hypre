@@ -1,9 +1,4 @@
-#ifdef __STDC__
 # define        P(s) s
-#else
-# define P(s) ()
-#endif
- 
  
 /* HYPRE_DistributedMatrixPilutSolver.c */
 HYPRE_DistributedMatrixPilutSolver HYPRE_NewDistributedMatrixPilutSolver P((MPI_Comm comm , HYPRE_DistributedMatrix matrix ));

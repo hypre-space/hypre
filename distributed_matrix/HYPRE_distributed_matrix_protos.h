@@ -1,9 +1,4 @@
-#ifdef __STDC__
 # define	P(s) s
-#else
-# define P(s) ()
-#endif
-
 
 /* HYPRE_distributed_matrix.c */
 HYPRE_DistributedMatrix HYPRE_NewDistributedMatrix P((MPI_Comm context ));

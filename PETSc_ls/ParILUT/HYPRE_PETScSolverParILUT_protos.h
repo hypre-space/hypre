@@ -1,9 +1,4 @@
-#ifdef __STDC__
 # define	P(s) s
-#else
-# define P(s) ()
-#endif
-
 
 /* HYPRE_PETScSolverParILUT.c */
 HYPRE_PETScSolverParILUT HYPRE_NewPETScSolverParILUT P((MPI_Comm comm ));

@@ -1,9 +1,4 @@
-#ifdef __STDC__
 # define	P(s) s
-#else
-# define P(s) ()
-#endif
-
 
 /* HYPRE_struct_solver.c */
 HYPRE_StructInterfaceSolver HYPRE_NewStructInterfaceSolver P((MPI_Comm context , HYPRE_StructGrid grid , HYPRE_StructStencil stencil ));

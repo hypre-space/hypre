@@ -1,9 +1,4 @@
-#ifdef __STDC__
 # define	P(s) s
-#else
-# define P(s) ()
-#endif
-
 
 #ifdef PETSC_AVAILABLE
 /* HYPRE_ConvertPETScMatrixToDistributedMatrix.c */

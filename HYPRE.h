@@ -44,11 +44,7 @@
 
 #include "utilities/HYPRE_utilities.h"
 
-#ifdef __STDC__
 # define	P(s) s
-#else
-# define P(s) ()
-#endif
 
 #undef P
 
