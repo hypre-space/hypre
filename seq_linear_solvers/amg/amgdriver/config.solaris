@@ -22,5 +22,5 @@ AMG_F77_DEBUG="-g"
 AMG_F90_FLAGS="-silent"
 
 AMG_LINK="gcc"
-AMG_LINK_FLAGS="-L${AMG_DIR}/lib -lamg \
+AMG_LINK_FLAGS="-L${AMG_DIR}/lib -lamg -L$AMG_DIR/lib/cvode -lcvode \
                 -L/usr/local/lib -L/home/casc/g77/lib -lf2c -lm"
