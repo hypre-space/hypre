@@ -29,8 +29,8 @@
 #include "../../IJ_mv/HYPRE_IJ_mv.h"
 #include "../../parcsr_mv/HYPRE_parcsr_mv.h"
 #include "../../parcsr_ls/HYPRE_parcsr_ls.h"
-#include "HYPRE_LinSysCore.h"
 #include "HYPRE_FEI_includes.h"
+#include "HYPRE_LinSysCore.h"
 
 //**************************************************************************
 // local defines and local and external functions
@@ -164,7 +164,7 @@ void fei_hypre_test(int argc, char *argv[])
 
     for ( i = mybegin; i <= myend; i++ ) 
     {
-       index = i + 1;
+       index = i;
        H.sumIntoRHSVector(1, &rhs[i], &index);
     }
     free( rhs );
