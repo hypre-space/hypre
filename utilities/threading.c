@@ -152,22 +152,29 @@ ifetchadd( int *w, pthread_mutex_t *mutex_fetchadd )
    return n;
 }
 
+static int thb_count = 0;
+static int thb_release = 0;
 
-void hypre_barrier(pthread_mutex_t *mpi_mtx, 
-                   pthread_cond_t *mpi_cnd,
-                   int *th_sem)
+void hypre_barrier(pthread_mutex_t *mtx)
 {
-  ifetchadd(th_sem, mpi_mtx);
-  pthread_mutex_lock(mpi_mtx);
+  pthread_mutex_lock(mtx);
+  thb_count++;
 
-  if (*th_sem < NUM_THREADS)
-    pthread_cond_wait(mpi_cnd,mpi_mtx);
-  else if (*th_sem == NUM_THREADS)
-    {
-      pthread_cond_broadcast(mpi_cnd);
-      *th_sem=0;
-    }
-  pthread_mutex_unlock(mpi_mtx);
+  if (thb_count < NUM_THREADS) {
+    pthread_mutex_unlock(mtx);
+    while (!thb_release);
+    pthread_mutex_lock(mtx);
+    (thb_count)--;
+    pthread_mutex_unlock(mtx);
+    while (thb_release);
+  }
+  else if (thb_count == NUM_THREADS) {
+    (thb_count)--;
+    pthread_mutex_unlock(mtx);
+    (thb_release)++;
+    while (thb_count);
+    thb_release = 0;
+  }
 }
 
 

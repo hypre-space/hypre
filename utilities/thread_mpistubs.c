@@ -21,7 +21,6 @@
 #include "mpi.h"
 #include "threading.h"
 
-int th_sem;
 
 int
 thread_MPI_Init( int    *argc,
@@ -75,7 +74,7 @@ int
 thread_MPI_Barrier( MPI_Comm comm )
 {
   int returnval;
-  hypre_barrier(&mpi_mtx,&mpi_cnd,&th_sem);
+  hypre_barrier(&mpi_mtx);
   if (pthread_equal(pthread_self(),hypre_thread[0]))
   {
     returnval=MPI_Barrier(comm);
@@ -84,7 +83,7 @@ thread_MPI_Barrier( MPI_Comm comm )
   {
   returnval=0;
   }
-  hypre_barrier(&mpi_mtx,&mpi_cnd,&th_sem);
+  hypre_barrier(&mpi_mtx);
   return returnval;
 }
 
@@ -92,7 +91,7 @@ int
 thread_MPI_Finalize( )
 {
   int returnval;
-  hypre_barrier(&mpi_mtx,&mpi_cnd,&th_sem);
+  hypre_barrier(&mpi_mtx);
   if (pthread_equal(pthread_self(),hypre_thread[0]))
   {
     returnval=MPI_Finalize();
@@ -182,7 +181,7 @@ thread_MPI_Allgather( void        *sendbuf,
 {
   int returnval;
   int i;
-  hypre_barrier(&mpi_mtx,&mpi_cnd,&th_sem);
+  hypre_barrier(&mpi_mtx);
   if (pthread_equal(pthread_self(),hypre_thread[0]))
   {
      returnval=MPI_Allgather(sendbuf,sendcount,sendtype,recvbuf,recvcount,
@@ -228,7 +227,7 @@ thread_MPI_Allgather( void        *sendbuf,
 
    returnval=0;
   }
-  hypre_barrier(&mpi_mtx,&mpi_cnd,&th_sem);
+  hypre_barrier(&mpi_mtx);
   return returnval;
 }
 
@@ -243,7 +242,7 @@ thread_MPI_Allgatherv( void        *sendbuf,
                 MPI_Comm     comm       ) 
 { 
   int i,returnval;
-  hypre_barrier(&mpi_mtx,&mpi_cnd,&th_sem);
+  hypre_barrier(&mpi_mtx);
   if(pthread_equal(pthread_self(),hypre_thread[0]))
   {
     returnval=MPI_Allgatherv(sendbuf,sendcount,sendtype,recvbuf,recvcounts,
@@ -291,7 +290,7 @@ thread_MPI_Allgatherv( void        *sendbuf,
    returnval=0;
 
   }
-  hypre_barrier(&mpi_mtx,&mpi_cnd,&th_sem);
+  hypre_barrier(&mpi_mtx);
   return returnval;
 }
 
@@ -303,7 +302,7 @@ thread_MPI_Bcast( void        *buffer,
            MPI_Comm     comm     ) 
 { 
   int returnval;
-  hypre_barrier(&mpi_mtx,&mpi_cnd,&th_sem);
+  hypre_barrier(&mpi_mtx);
   if (pthread_equal(pthread_self(),hypre_thread[0]))
   {
     returnval=MPI_Bcast(buffer,count,datatype,root,comm);
@@ -313,7 +312,7 @@ thread_MPI_Bcast( void        *buffer,
    returnval=0;
   }
 
-  hypre_barrier(&mpi_mtx,&mpi_cnd,&th_sem);
+  hypre_barrier(&mpi_mtx);
   return returnval;
 }
 
@@ -326,7 +325,7 @@ thread_MPI_Send( void        *buf,
           MPI_Comm     comm     ) 
 { 
   int returnval;
-  hypre_barrier(&mpi_mtx,&mpi_cnd,&th_sem); 
+  hypre_barrier(&mpi_mtx); 
   if (pthread_equal(pthread_self(),hypre_thread[0]))
   {
     returnval=MPI_Send(buf,count,datatype,dest,tag,comm);
@@ -335,7 +334,7 @@ thread_MPI_Send( void        *buf,
   {
    returnval=0;
   }
-  hypre_barrier(&mpi_mtx,&mpi_cnd,&th_sem); 
+  hypre_barrier(&mpi_mtx); 
   return returnval;
 }
 
@@ -349,7 +348,7 @@ thread_MPI_Recv( void        *buf,
           MPI_Status  *status   )
 { 
   int returnval;
-  hypre_barrier(&mpi_mtx,&mpi_cnd,&th_sem); 
+  hypre_barrier(&mpi_mtx); 
   if (pthread_equal(pthread_self(),hypre_thread[0]))
   {
     returnval=MPI_Recv(buf,count,datatype,source,tag,comm,status);
@@ -358,7 +357,7 @@ thread_MPI_Recv( void        *buf,
   {
     returnval=0;
   }
-  hypre_barrier(&mpi_mtx,&mpi_cnd,&th_sem);
+  hypre_barrier(&mpi_mtx);
   return returnval;
 }
 
@@ -372,7 +371,7 @@ thread_MPI_Isend( void        *buf,
            MPI_Request *request  )
 { 
   int returnval;
-  hypre_barrier(&mpi_mtx,&mpi_cnd,&th_sem);
+  hypre_barrier(&mpi_mtx);
   if (pthread_equal(pthread_self(),hypre_thread[0]))
   {
     returnval=MPI_Isend(buf,count,datatype,dest,tag,comm,request);
@@ -381,7 +380,7 @@ thread_MPI_Isend( void        *buf,
   {
     returnval=0;
   }
-  hypre_barrier(&mpi_mtx,&mpi_cnd,&th_sem);
+  hypre_barrier(&mpi_mtx);
   return returnval;
 }
 
@@ -395,7 +394,7 @@ thread_MPI_Irecv( void        *buf,
            MPI_Request *request  )
 { 
   int returnval;
-  hypre_barrier(&mpi_mtx,&mpi_cnd,&th_sem);
+  hypre_barrier(&mpi_mtx);
   if (pthread_equal(pthread_self(),hypre_thread[0]))
   {
     returnval=MPI_Irecv(buf,count,datatype,source,tag,comm,request);
@@ -412,7 +411,7 @@ thread_MPI_Wait( MPI_Request *request,
           MPI_Status  *status  )
 {
   int returnval;
-  hypre_barrier(&mpi_mtx,&mpi_cnd,&th_sem);
+  hypre_barrier(&mpi_mtx);
   if (pthread_equal(pthread_self(),hypre_thread[0]))
   {
     returnval=MPI_Wait(request,status);
@@ -421,7 +420,7 @@ thread_MPI_Wait( MPI_Request *request,
   {
    returnval=0;
   }
-  hypre_barrier(&mpi_mtx,&mpi_cnd,&th_sem);
+  hypre_barrier(&mpi_mtx);
   return returnval;
 }
 
@@ -439,7 +438,7 @@ thread_MPI_Waitall( int          count,
   {
    returnval=0;
   }
-  hypre_barrier(&mpi_mtx,&mpi_cnd,&th_sem);
+  hypre_barrier(&mpi_mtx);
   return returnval;
 }
 
@@ -450,7 +449,7 @@ thread_MPI_Waitany( int          count,
              MPI_Status  *status            )
 {
   int returnval;
-  hypre_barrier(&mpi_mtx,&mpi_cnd,&th_sem);
+  hypre_barrier(&mpi_mtx);
  if (pthread_equal(pthread_self(),hypre_thread[0]))
  {
    returnval=MPI_Waitany(count,array_of_requests,index,status);
@@ -459,7 +458,7 @@ thread_MPI_Waitany( int          count,
   {
    returnval=0;
   }
-  hypre_barrier(&mpi_mtx,&mpi_cnd,&th_sem);
+  hypre_barrier(&mpi_mtx);
   return returnval;
 }
 
@@ -506,7 +505,7 @@ thread_MPI_Allreduce( void        *sendbuf,
                MPI_Comm     comm     )
 { 
   int returnval;
-  hypre_barrier(&mpi_mtx,&mpi_cnd,&th_sem);
+  hypre_barrier(&mpi_mtx);
   if (pthread_equal(pthread_self(),hypre_thread[0]))
   {
     returnval=MPI_Allreduce(sendbuf,recvbuf,count,datatype,op,comm);
@@ -542,7 +541,7 @@ thread_MPI_Allreduce( void        *sendbuf,
 
    returnval=0;
   }
-  hypre_barrier(&mpi_mtx,&mpi_cnd,&th_sem);
+  hypre_barrier(&mpi_mtx);
   return returnval;
 }
 
@@ -562,7 +561,7 @@ thread_MPI_Type_hvector( int           count,
   {
    returnval=0;
   }
-  hypre_barrier(&mpi_mtx,&mpi_cnd,&th_sem);
+  hypre_barrier(&mpi_mtx);
   return returnval;
 }
 
@@ -583,7 +582,7 @@ thread_MPI_Type_struct( int           count,
   {
    returnval=0;
   }
-  hypre_barrier(&mpi_mtx,&mpi_cnd,&th_sem);
+  hypre_barrier(&mpi_mtx);
   return returnval;
 }
 
@@ -591,7 +590,7 @@ int
 thread_MPI_Type_free( MPI_Datatype *datatype )
 {
   int returnval;
-  hypre_barrier(&mpi_mtx,&mpi_cnd,&th_sem);
+  hypre_barrier(&mpi_mtx);
   if (pthread_equal(pthread_self(),hypre_thread[0]))
   {
     returnval=MPI_Type_free(datatype);
@@ -615,7 +614,7 @@ thread_MPI_Type_commit( MPI_Datatype *datatype )
   {
    returnval=0;
   }
-  hypre_barrier(&mpi_mtx,&mpi_cnd,&th_sem);
+  hypre_barrier(&mpi_mtx);
   return returnval;
 }
 
