@@ -47,6 +47,7 @@ main( int   argc,
    int                 ierr,i,j; 
    int                 max_levels = 25;
    int                 num_iterations; 
+   int                 num_sweep = 1;
    double              max_row_sum = 1.0;
    double              norm;
    double              final_res_norm;
@@ -282,6 +283,11 @@ main( int   argc,
          arg_index++;
          debug_flag = atoi(argv[arg_index++]);
       }
+      else if ( strcmp(argv[arg_index], "-ns") == 0 )
+      {
+         arg_index++;
+         num_sweep = atoi(argv[arg_index++]);
+      }
       else if ( strcmp(argv[arg_index], "-help") == 0 )
       {
          print_usage = 1;
@@ -317,7 +323,7 @@ main( int   argc,
       /* fine grid */
       num_grid_sweeps[0] = 3;
       grid_relax_type[0] = relax_default; 
-      grid_relax_points[0] = hypre_CTAlloc(int, 4); 
+      grid_relax_points[0] = hypre_CTAlloc(int, 3); 
       grid_relax_points[0][0] = -2;
       grid_relax_points[0][1] = -1;
       grid_relax_points[0][2] = 1;
@@ -343,32 +349,43 @@ main( int   argc,
    else
    {   
       /* fine grid */
-      num_grid_sweeps[0] = 2;
+      num_grid_sweeps[0] = 2*num_sweep;
       grid_relax_type[0] = relax_default; 
-      grid_relax_points[0] = hypre_CTAlloc(int, 2); 
-      grid_relax_points[0][0] = 1;
-      grid_relax_points[0][1] = -1;
-  
+      grid_relax_points[0] = hypre_CTAlloc(int, 2*num_sweep); 
+      for (i=0; i<2*num_sweep; i+=2)
+      {
+         grid_relax_points[0][i] = -1;
+         grid_relax_points[0][i+1] = 1;
+      }
+
       /* down cycle */
-      num_grid_sweeps[1] = 2;
+      num_grid_sweeps[1] = 2*num_sweep;
       grid_relax_type[1] = relax_default; 
-      grid_relax_points[1] = hypre_CTAlloc(int, 2); 
-      grid_relax_points[1][0] = 1;
-      grid_relax_points[1][1] = -1;
-   
+      grid_relax_points[1] = hypre_CTAlloc(int, 2*num_sweep); 
+      for (i=0; i<2*num_sweep; i+=2)
+      {
+         grid_relax_points[1][i] = -1;
+         grid_relax_points[1][i+1] = 1;
+      }
+
       /* up cycle */
-      num_grid_sweeps[2] = 2;
+      num_grid_sweeps[2] = 2*num_sweep;
       grid_relax_type[2] = relax_default; 
-      grid_relax_points[2] = hypre_CTAlloc(int, 2); 
-      grid_relax_points[2][0] = -1;
-      grid_relax_points[2][1] = 1;
+      grid_relax_points[2] = hypre_CTAlloc(int, 2*num_sweep); 
+      for (i=0; i<2*num_sweep; i+=2)
+      {
+         grid_relax_points[2][i] = -1;
+         grid_relax_points[2][i+1] = 1;
+      }
    }
+
    /* coarsest grid */
    num_grid_sweeps[3] = 1;
    grid_relax_type[3] = 9;
    grid_relax_points[3] = hypre_CTAlloc(int, 1);
    grid_relax_points[3][0] = 0;
    }
+
    /* defaults for GMRES */
 
    k_dim = 5;
@@ -426,6 +443,11 @@ main( int   argc,
       {
          arg_index++;
          ioutdat  = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-mu") == 0 )
+      {
+         arg_index++;
+         cycle_type  = atoi(argv[arg_index++]);
       }
       else
       {
@@ -487,8 +509,11 @@ main( int   argc,
       printf("       0=Weighted Jacobi  \n");
       printf("       1=Gauss-Seidel (very slow!)  \n");
       printf("       3=Hybrid Jacobi/Gauss-Seidel  \n");
+      printf("  -ns <val>              : Use <val> sweeps on each level\n");
+      printf("                           (default C/F down, F/C up, F/C fine\n");
       printf("  -mxl  <val>            : maximum number of AMG levels\n");
-      printf("\n");  
+      printf("\n"); 
+      printf("  -mu   <val>            : set AMG cycles (1=V, 2=W, etc.)\n"); 
       printf("  -th   <val>            : set AMG threshold Theta = val \n");
       printf("  -tr   <val>            : set AMG interpolation truncation factor = val \n");
       printf("  -tol  <val>            : set AMG convergence tolerance to val\n");
