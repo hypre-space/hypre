@@ -51,6 +51,7 @@ DIRS=""
 
 DIRS="$DIRS \
   amg \
+  amg_fdrive \
   amgdriver \
   config \
   port \
