@@ -1,6 +1,3 @@
-
-#include <HYPRE_config.h>
-
 #include "HYPRE_utilities.h"
 
 #ifndef hypre_UTILITIES_HEADER
