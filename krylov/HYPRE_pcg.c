@@ -185,7 +185,6 @@ int
 HYPRE_PCGSetLogging( HYPRE_Solver solver,
                      int          level )
 {
-   int ierr = 0;
    return ( hypre_PCGSetLogging( (void *) solver, level ) );
 }
 
