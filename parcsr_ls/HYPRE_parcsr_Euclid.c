@@ -10,8 +10,8 @@
 
 
   /* These are what we need from Euclid */
-#include "../distributed_ls/Euclid/include/Euclid_dh.h"
-#include "../distributed_ls/Euclid/include/Mem_dh.h"
+#include "../distributed_ls/Euclid/Euclid_dh.h"
+#include "../distributed_ls/Euclid/Mem_dh.h"
 
 /*------------------------------------------------------------------
  * Error checking
@@ -249,7 +249,7 @@ HYPRE_ParCSREuclidPrintParams(HYPRE_Solver solver)
 {
   START_FUNC_DH
   Euclid_dh eu = (Euclid_dh)solver;
-  Euclid_dhPrintParams(eu, stdout); HYPRE_EUCLID_ERRCHKA;
+  Euclid_dhPrintHypreReport(eu, stdout); HYPRE_EUCLID_ERRCHKA;
   END_FUNC_VAL(0)
 }
 
