@@ -486,7 +486,8 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
 	col_starts_B, num_cols_offd_C, C_diag_size, C_offd_size);
 
 /* Note that C does not own the partitionings */
-   hypre_SetParCSRMatrixPartitioningOwner(C,0);
+   hypre_SetParCSRMatrixRowStartsOwner(C,0);
+   hypre_SetParCSRMatrixColStartsOwner(C,0);
 
    C_diag = hypre_ParCSRMatrixDiag(C);
    hypre_CSRMatrixData(C_diag) = C_diag_data; 
