@@ -1839,6 +1839,7 @@ int hypre_PrintBoxArrayData( FILE *file , hypre_BoxArray *box_array , hypre_BoxA
 int hypre_PrintCCVDBoxArrayData( FILE *file , hypre_BoxArray *box_array , hypre_BoxArray *data_space , int num_values , int center_rank , int stencil_size , int *symm_elements , double *data );
 int hypre_PrintCCBoxArrayData( FILE *file , hypre_BoxArray *box_array , hypre_BoxArray *data_space , int num_values , double *data );
 int hypre_ReadBoxArrayData( FILE *file , hypre_BoxArray *box_array , hypre_BoxArray *data_space , int num_values , double *data );
+int hypre_ReadBoxArrayData_CC( FILE *file , hypre_BoxArray *box_array , hypre_BoxArray *data_space , int stencil_size , int real_stencil_size , int constant_coefficient , double *data );
 
 /* struct_matrix.c */
 double *hypre_StructMatrixExtractPointerByIndex( hypre_StructMatrix *matrix , int b , hypre_Index index );

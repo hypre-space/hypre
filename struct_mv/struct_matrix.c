@@ -137,7 +137,7 @@ hypre_StructMatrixInitializeShell( hypre_StructMatrix *matrix )
    int                   stencil_size;
    int                   num_values;
    int                  *symm_elements;
-  int                  constant_coefficient;
+   int                  constant_coefficient;
                     
    int                  *num_ghost;
    int                   extra_ghost[] = {0, 0, 0, 0, 0, 0};
@@ -1361,8 +1361,6 @@ hypre_StructMatrixPrint( const char         *filename,
    {
       hypre_SetIndex(center_index, 0, 0, 0);
       center_rank = hypre_StructStencilElementRank( stencil, center_index );
-      stencil = hypre_StructMatrixStencil(matrix);
-      stencil_size  = hypre_StructStencilSize(stencil);
 
       hypre_PrintCCVDBoxArrayData(file, boxes, data_space, num_values,
                                   center_rank, stencil_size, symm_elements,
@@ -1400,7 +1398,6 @@ hypre_StructMatrixMigrate( hypre_StructMatrix *from_matrix,
    int                    constant_coefficient, comm_num_values;
    int                    stencil_size, mat_num_values;
    hypre_StructStencil   *stencil;
-   hypre_Index            diag_index;
    int                    data_initial_offset = 0;
    double                *matrix_data_from = hypre_StructMatrixData(from_matrix);
    double                *matrix_data_to = hypre_StructMatrixData(to_matrix);
@@ -1483,7 +1480,7 @@ hypre_StructMatrixRead( MPI_Comm    comm,
 
    hypre_StructStencil  *stencil;
    hypre_Index          *stencil_shape;
-   int                   stencil_size;
+   int                   stencil_size, real_stencil_size;
 
    int                   num_values;
 
@@ -1533,6 +1530,11 @@ hypre_StructMatrixRead( MPI_Comm    comm,
    fscanf(file, "\nStencil:\n");
    dim = hypre_StructGridDim(grid);
    fscanf(file, "%d\n", &stencil_size);
+   if (symmetric) { real_stencil_size = 2*stencil_size-1; }
+   else { real_stencil_size = stencil_size; }
+   /* ... real_stencil_size is the stencil size of the matrix after it's fixed up
+      by the call (if any) of hypre_StructStencilSymmetrize from
+      hypre_StructMatrixInitializeShell.*/
    stencil_shape = hypre_CTAlloc(hypre_Index, stencil_size);
    for (i = 0; i < stencil_size; i++)
    {
@@ -1562,8 +1564,19 @@ hypre_StructMatrixRead( MPI_Comm    comm,
    num_values = hypre_StructMatrixNumValues(matrix);
  
    fscanf(file, "\nData:\n");
-   hypre_ReadBoxArrayData(file, boxes, data_space, num_values,
-                          hypre_StructMatrixData(matrix));
+   if ( constant_coefficient==0 )
+   {
+      hypre_ReadBoxArrayData(file, boxes, data_space, num_values,
+                             hypre_StructMatrixData(matrix));
+   }
+   else
+   {
+      assert( constant_coefficient<=2 );
+      hypre_ReadBoxArrayData_CC( file, boxes, data_space,
+                                 stencil_size, real_stencil_size,
+                                 constant_coefficient,
+                                 hypre_StructMatrixData(matrix));
+   }
 
    /*----------------------------------------
     * Assemble the matrix

@@ -129,8 +129,8 @@ hypre_PrintCCVDBoxArrayData( FILE            *file,
       {
          fprintf( file, "*: (*, *, *; %d) %e\n",
                   j, data[0] );
-         ++data;
       }
+      ++data;
    }
    
 
@@ -202,13 +202,8 @@ hypre_PrintCCBoxArrayData( FILE            *file,
 
          for (j = 0; j < num_values; j++)
          {
-            fprintf(file, "%d: (%d, %d, %d; %d) %e\n",
-                    i,
-                    hypre_IndexX(start),
-                    hypre_IndexY(start),
-                    hypre_IndexZ(start),
-                    j,
-                    data[datai + j]);
+         fprintf( file, "*: (*, *, *; %d) %e\n",
+                  j, data[datai + j] );
          }
 
          data += num_values;
@@ -218,8 +213,7 @@ hypre_PrintCCBoxArrayData( FILE            *file,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_ReadBoxArrayData
- * >>> This does not work for constant_coefficient = 1 or 2
+ * hypre_ReadBoxArrayData  (for non-constant coefficients)
  *--------------------------------------------------------------------------*/
 
 int
@@ -284,3 +278,90 @@ hypre_ReadBoxArrayData( FILE            *file,
 
    return ierr;
 }
+
+
+/*--------------------------------------------------------------------------
+ * hypre_ReadBoxArrayData_CC  (for when there are some constant coefficients)
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_ReadBoxArrayData_CC( FILE            *file,
+                           hypre_BoxArray  *box_array,
+                           hypre_BoxArray  *data_space,
+                           int              stencil_size,
+                           int              real_stencil_size,
+                           int              constant_coefficient,
+                           double          *data       )
+{
+   int              ierr = 0;
+
+   hypre_Box       *box;
+   hypre_Box       *data_box;
+                   
+   int              data_box_volume, constant_stencil_size;
+   int              datai;
+                   
+   hypre_Index      loop_size;
+   hypre_IndexRef   start;
+   hypre_Index      stride;
+                   
+   int              i, j, idummy;
+   int              loopi, loopj, loopk;
+
+   /*----------------------------------------
+    * Read data
+    *----------------------------------------*/
+
+   if ( constant_coefficient==1 ) constant_stencil_size = stencil_size;
+   if ( constant_coefficient==2 ) constant_stencil_size = stencil_size - 1;
+
+   hypre_SetIndex(stride, 1, 1, 1);
+
+   hypre_ForBoxI(i, box_array)
+      {
+         box      = hypre_BoxArrayBox(box_array, i);
+         data_box = hypre_BoxArrayBox(data_space, i);
+
+         start = hypre_BoxIMin(box);
+         data_box_volume = hypre_BoxVolume(data_box);
+
+         hypre_BoxGetSize(box, loop_size);
+
+         /* First entries will be the constant part of the matrix.
+            There is one entry for each constant stencil element,
+            excluding ones which are redundant due to symmetry.*/
+         for (j=0; j <constant_stencil_size; j++)
+         {
+            fscanf(file, "*: (*, *, *; %d) %le\n",
+                   &idummy,
+                   &data[j]);
+         }
+
+         /* Next entries, if any, will be for a variable diagonal: */
+         data += real_stencil_size;
+
+         if ( constant_coefficient==2 )
+         {
+            hypre_BoxLoop1Begin(loop_size,
+                                data_box, start, stride, datai);
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,datai
+#include "hypre_box_smp_forloop.h"
+            hypre_BoxLoop1For(loopi, loopj, loopk, datai)
+               {
+                  fscanf(file, "%d: (%d, %d, %d; %d) %le\n",
+                         &idummy,
+                         &idummy,
+                         &idummy,
+                         &idummy,
+                         &idummy,
+                         &data[datai]);
+               }
+            hypre_BoxLoop1End(datai);
+            data += data_box_volume;
+         }
+
+      }
+
+   return ierr;
+}
+
