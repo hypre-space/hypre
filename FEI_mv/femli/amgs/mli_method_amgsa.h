@@ -65,6 +65,7 @@ class MLI_Method_AMGSA : public MLI_Method
    int      numSmoothVec_;           /* if nonzero, use smooth vectors   */
    int      numSmoothVecSteps_;      /* steps for generating smooth vecs */
    double   Pweight_;                /* weight for prolongator smoother  */
+   int      SPLevel_;                /* start level for P smoother       */
    double   dropTolForP_  ;          /* tolerance for sparsifying P      */
    int      *saCounts_;              /* store aggregation information at */
    int      **saData_;               /* each level                       */
@@ -117,6 +118,7 @@ public :
    int    setSmoothVec(int);
    int    setSmoothVecSteps(int);
    int    setPweight(double);
+   int    setSPLevel(int);
    int    setCalcSpectralNorm();
    int    setAggregateInfo(int, int, int, int *);
    int    setNullSpace(int, int, double *, int);

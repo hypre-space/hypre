@@ -61,6 +61,7 @@ MLI_Method_AMGSA::MLI_Method_AMGSA( MPI_Comm comm ) : MLI_Method( comm )
    numSmoothVec_  = 0;              /* smooth vectors instead of null vectors */
    numSmoothVecSteps_ = 0;
    Pweight_       = 0.0;
+   SPLevel_       = 0;
    dropTolForP_   = 0.0;            /* tolerance to sparsify P*/
    saCounts_      = new int[40];    /* number of aggregates   */
    saData_        = new int*[40];   /* node to aggregate data */
@@ -252,6 +253,11 @@ int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
    {
       sscanf(in_name,"%s %lg", param1, &pweight);
       return ( setPweight( pweight ) );
+   }
+   else if ( !strcmp(param1, "setSPLevel" ))
+   {
+      sscanf(in_name,"%s %d", param1, &level);
+      return ( setSPLevel( level ) );
    }
    else if ( !strcmp(param1, "setCalcSpectralNorm" ))
    {
@@ -718,7 +724,7 @@ int MLI_Method_AMGSA::setup( MLI *mli )
       /* then set restriction operator                      */
       /* -------------------------------------------------- */
 
-      if (symmetric_ == 0 && Pweight_ != 0.0)
+      if (symmetric_ == 0 && Pweight_ == 0.0)
       {
          MLI_Matrix_Transpose(mli_Amat, &mli_ATmat);
          switch (coarsenScheme_)
@@ -1092,6 +1098,16 @@ int MLI_Method_AMGSA::setPweight( double weight )
 }
 
 /* ********************************************************************* *
+ * set starting level for smoother prolongator
+ * --------------------------------------------------------------------- */
+
+int MLI_Method_AMGSA::setSPLevel( int level )
+{
+   if ( level > 0 ) SPLevel_ = level;
+   return 0;
+}
+
+/* ********************************************************************* *
  * indicate spectral norm is to be calculated
  * --------------------------------------------------------------------- */
 
@@ -1224,7 +1240,7 @@ int MLI_Method_AMGSA::setNodalCoordinates(int num_nodes, int nDOF, int nsDim,
       currNodeDofs_ = 3;
       nullspaceLen_ = num_nodes * 3;
       nullspaceDim_ = numNS;
-      if ( useSAMGeFlag_ == 0 ) nullspaceDim_ = 6;
+      if (useSAMGeFlag_ == 0 && numNS != 6 && numNS != 12) nullspaceDim_ = 6;
    }
    else
    {
@@ -1265,96 +1281,71 @@ int MLI_Method_AMGSA::setNodalCoordinates(int num_nodes, int nDOF, int nsDim,
       }
       else if ( nodeDofs_ == 3 )
       {
-         voffset = i * nodeDofs_;
-         for ( j = 0; j < 3; j++ )
+         if ( nullspaceDim_ == 6 ) 
          {
-            for( k = 0; k < 3; k++ )
-            {
-               offset = k * nullspaceLen_ + voffset + j;
-               if ( j == k ) nullspaceVec_[offset] = 1.0;
-               else          nullspaceVec_[offset] = 0.0;
-            }
-         }
-         for ( j = 0; j < 3; j++ )
-         { 
-            for ( k = 3; k < 6; k++ )
-            {
-               offset = k * nullspaceLen_ + voffset + j;
-               if ( j == k-3 ) nullspaceVec_[offset] = 0.0;
-               else 
-               {
-                  if      (j+k == 4) nullspaceVec_[offset] = coords[i*3+2];
-                  else if (j+k == 5) nullspaceVec_[offset] = coords[i*3+1];
-                  else if (j+k == 6) nullspaceVec_[offset] = coords[i*3];
-                  else nullspaceVec_[offset] = 0.0;
-               }
-            }
-         }
-         j = 0; k = 5; offset = k * nullspaceLen_ + voffset + j; 
-         nullspaceVec_[offset] *= -1.0;
-         j = 1; k = 3; offset = k * nullspaceLen_ + voffset + j; 
-         nullspaceVec_[offset] *= -1.0;
-         j = 2; k = 4; offset = k * nullspaceLen_ + voffset + j; 
-         nullspaceVec_[offset] *= -1.0;
-#if 0
-         if ( nullspaceDim_ == 9 ) 
-         {
+            voffset = i * nodeDofs_;
             for ( j = 0; j < 3; j++ )
-            { 
-               for ( k = 6; k < 9; k++ )
+            {
+               for( k = 0; k < 3; k++ )
                {
                   offset = k * nullspaceLen_ + voffset + j;
-                  if ( j == k-6 ) nullspaceVec_[offset] = 0.0;
+                  if ( j == k ) nullspaceVec_[offset] = 1.0;
+                  else          nullspaceVec_[offset] = 0.0;
+               }
+            }
+            for ( j = 0; j < 3; j++ )
+            {
+               for ( k = 3; k < 6; k++ )
+               {
+                  offset = k * nullspaceLen_ + voffset + j;
+                  if ( j == k-3 ) nullspaceVec_[offset] = 0.0;
                   else 
                   {
-                     if (j+k == 7) 
-                        nullspaceVec_[offset] = coords[i*3+2] * coords[i*3+2];
-                     else if (j+k == 8) 
-                        nullspaceVec_[offset] = coords[i*3+1] * coords[i*3+1];
-                     else if (j+k == 9) 
-                        nullspaceVec_[offset] = coords[i*3] * coords[i*3];
+                     if      (j+k == 4) nullspaceVec_[offset] = coords[i*3+2];
+                     else if (j+k == 5) nullspaceVec_[offset] = coords[i*3+1];
+                     else if (j+k == 6) nullspaceVec_[offset] = coords[i*3];
                      else nullspaceVec_[offset] = 0.0;
                   }
                }
             }
-            j = 0; k = 8; offset = k * nullspaceLen_ + voffset + j; 
+            j = 0; k = 5; offset = k * nullspaceLen_ + voffset + j; 
             nullspaceVec_[offset] *= -1.0;
-            j = 1; k = 6; offset = k * nullspaceLen_ + voffset + j; 
+            j = 1; k = 3; offset = k * nullspaceLen_ + voffset + j; 
             nullspaceVec_[offset] *= -1.0;
-            j = 2; k = 7; offset = k * nullspaceLen_ + voffset + j; 
+            j = 2; k = 4; offset = k * nullspaceLen_ + voffset + j; 
             nullspaceVec_[offset] *= -1.0;
          }
-         if ( nullspaceDim_ == 12 ) 
+         else if ( nullspaceDim_ == 12 && useSAMGeFlag_ == 0 )
          {
+            voffset = i * nodeDofs_;
             for ( j = 0; j < 3; j++ )
-            { 
-               for ( k = 9; k < 12; k++ )
+            {
+               for( k = 0; k < 3; k++ )
                {
                   offset = k * nullspaceLen_ + voffset + j;
-                  if ( j == k-9 ) nullspaceVec_[offset] = 0.0;
-                  else 
-                  {
-                     if (j+k == 10) 
-                        nullspaceVec_[offset] = 
-                           coords[i*3+2] * coords[i*3+2] * coords[i*3+2];
-                     else if (j+k == 11) 
-                        nullspaceVec_[offset] = 
-                           coords[i*3+1] * coords[i*3+1] * coords[i*3+1];
-                     else if (j+k == 12) 
-                        nullspaceVec_[offset] = 
-                           coords[i*3] * coords[i*3] * coords[i*3];
-                     else nullspaceVec_[offset] = 0.0;
-                  }
+                  if ( j == k ) nullspaceVec_[offset] = 1.0;
+                  else          nullspaceVec_[offset] = 0.0;
+               }
+               for( k = 3; k < 6; k++ )
+               {
+                  offset = k * nullspaceLen_ + voffset + j;
+                  if ( j == (k-3) ) nullspaceVec_[offset] = coords[i*3];
+                  else              nullspaceVec_[offset] = 0.0;
+               }
+               for( k = 6; k < 9; k++ )
+               {
+                  offset = k * nullspaceLen_ + voffset + j;
+                  if ( j == (k-6) ) nullspaceVec_[offset] = coords[i*3+1];
+                  else              nullspaceVec_[offset] = 0.0;
+               }
+               for( k = 9; k < 12; k++ )
+               {
+                  offset = k * nullspaceLen_ + voffset + j;
+                  if ( j == (k-9) ) nullspaceVec_[offset] = coords[i*3+2];
+                  else              nullspaceVec_[offset] = 0.0;
                }
             }
-            j = 0; k = 11; offset = k * nullspaceLen_ + voffset + j; 
-            nullspaceVec_[offset] *= -1.0;
-            j = 1; k = 9; offset = k * nullspaceLen_ + voffset + j; 
-            nullspaceVec_[offset] *= -1.0;
-            j = 2; k = 10; offset = k * nullspaceLen_ + voffset + j; 
-            nullspaceVec_[offset] *= -1.0;
          }
-#endif
       }
    }
    if ( scalings != NULL )
@@ -1398,6 +1389,7 @@ int MLI_Method_AMGSA::print()
       printf("\t*** Smooth vector steps     = %d\n", numSmoothVecSteps_);
       printf("\t*** strength threshold      = %e\n", threshold_);
       printf("\t*** Prolongator factor      = %e\n", Pweight_);
+      printf("\t*** S Prolongator level     = %d\n", SPLevel_);
       printf("\t*** drop tolerance for P    = %e\n", dropTolForP_);
       printf("\t*** A-norm scheme           = %d\n", calcNormScheme_);
       printf("\t*** minimum coarse size     = %d\n", minCoarseSize_);
@@ -1578,6 +1570,7 @@ int MLI_Method_AMGSA::copy( MLI_Method *new_obj )
       new_amgsa->setMinCoarseSize( minCoarseSize_ );
       if ( calcNormScheme_ ) new_amgsa->setCalcSpectralNorm();
       new_amgsa->setPweight( Pweight_ );
+      new_amgsa->setSPLevel( SPLevel_ );
       new_amgsa->setNullSpace(nodeDofs_,nullspaceDim_,nullspaceVec_,
                               nullspaceLen_);
       new_amgsa->setSmoothVec( numSmoothVec_ );
