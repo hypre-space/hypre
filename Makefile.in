@@ -83,6 +83,8 @@ all:
 
 beta: all
 	@ \
+	HYPRE_INSTALL_DIR=`pwd`/hypre; \
+	export HYPRE_INSTALL_DIR; \
 	for i in ${HYPRE_EXTRA_DIRS}; \
 	do \
 	  if [ -d $$i ]; \
