@@ -60,7 +60,7 @@ then
     OPTION=$1
     TAR_FILE=$2
   else
-    usage
+    echo "Error: Invalid argument = $1, expecting -g, -b or -a"
     exit
   fi
 else
@@ -69,38 +69,19 @@ else
 fi
 
 #===========================================================================
-# Check that the install directory exists
-#===========================================================================
-
-##if [ ! -d $HYPRE_INSTALL_DIR ]
-##then
-##    echo "Error: HYPRE_INSTALL_DIR=$HYPRE_INSTALL_DIR does not exist"
-##    exit
-##fi
-
-#===========================================================================
 # Update the source
 #===========================================================================
 
 if [ -f $TAR_FILE ]
 then
-  gunzip $TAR_FILE
-  tar xof ${TAR_FILE%.gz}
+  gzip -cd $TAR_FILE | tar xof -
+else
+  echo "Error: HypreArchiveFile does not exist"
+  exit
 fi
 
 DIST_DIR=`pwd`/${TAR_FILE%.tar.gz}
-
-#if [ "$OPTION" = "-b" ]
-#then
-#  mv $DIST_DIR ${DIST_DIR}b
-#  DIST_DIR=${DIST_DIR}b
-#fi
-#
-#if [ "$OPTION" = "-a" ]
-#then
-#  mv $DIST_DIR ${DIST_DIR}a
-#  DIST_DIR=${DIST_DIR}a
-#fi
+SYS_TYPE=`uname -s`
 
 #===========================================================================
 # Build and do a temporary install in the UPDATE subdirectory
@@ -132,7 +113,7 @@ then
 fi
 
 # MPI + threads version. (Do this only once)
-if [ "`/bin/uname -s`" != "SunOS" ] &&
+if [ "$SYS_TYPE" != "SunOS" ] &&
    [ ! -d threads/lib ]
 then
     (
@@ -141,7 +122,7 @@ then
 	mkdir -p $HYPRE_INSTALL_DIR
         
         cd src
-        ./configure $HYPRE_INSTALL_THREADS
+        ./configure --with-openmp
         make install
         make veryclean
     )
@@ -151,21 +132,18 @@ then
 	mkdir -p $HYPRE_INSTALL_DIR
         
         cd src
-        ./configure $HYPRE_INSTALL_THREADS --enable-debug
+        ./configure --with-openmp --enable-debug
         make install
         make veryclean
     )
 fi
-
-chmod -fR $HYPRE_INSTALL_PERMISSIONS $DIST_DIR
-chgrp -fR hypre $DIST_DIR
 
 if [ "$3" = "install" ]
 then
   if [ "$OPTION" = "-g" ]
   then
     HYPRE_INSTALL_DIR=$DIST_DIR/..
-    for i in bin debug doc include lib src
+    for i in bin debug docs include lib src
     do
       rm -fR $HYPRE_INSTALL_DIR/$i
       ln -s $DIST_DIR/$i ../$i
@@ -182,7 +160,7 @@ then
   if [ "$OPTION" = "-g" ] || [ "$OPTION" = "-b" ]
   then
     HYPRE_INSTALL_DIR=$DIST_DIR/../beta
-    for i in bin debug doc include lib src
+    for i in bin debug docs include lib src
     do
       rm -fR $HYPRE_INSTALL_DIR/$i
       ln -s $DIST_DIR/$i $HYPRE_INSTALL_DIR/$i
@@ -196,10 +174,10 @@ then
       fi
     done
   fi
-  if [ "$OPTION" = "-g" ] || [ "$OPTION" = "-b" ] || [ "$OPTION" = "-a" ]
+  if [ "$SYS_TYPE" = "SunOS" ]
   then
     HYPRE_INSTALL_DIR=$DIST_DIR/../alpha
-    for i in bin debug doc include lib src
+    for i in bin debug docs include lib src
     do
       rm -fR $HYPRE_INSTALL_DIR/$i
       ln -s $DIST_DIR/$i $HYPRE_INSTALL_DIR/$i
@@ -215,3 +193,5 @@ then
   fi
 fi
 
+chmod -fR $HYPRE_INSTALL_PERMISSIONS $DIST_DIR
+chgrp -fR hypre $DIST_DIR
