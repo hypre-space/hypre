@@ -71,6 +71,12 @@ hypre_BoxArray *hypre_IntersectBoxArrays P((hypre_BoxArray *box_array1 , hypre_B
 hypre_BoxArray *hypre_SubtractBoxes P((hypre_Box *box1 , hypre_Box *box2 ));
 hypre_BoxArray *hypre_UnionBoxArray P((hypre_BoxArray *boxes ));
 
+/* box_alloc.c */
+void hypre_InitializeBoxMemory P((const int at_a_time ));
+void hypre_FinalizeBoxMemory P((void ));
+hypre_Box *hypre_BoxAlloc P((void ));
+void hypre_BoxFree P((hypre_Box *box ));
+
 /* box_neighbors.c */
 hypre_RankLink *hypre_NewRankLink P((int rank ));
 int hypre_FreeRankLink P((hypre_RankLink *rank_link ));
@@ -107,27 +113,9 @@ void hypre_FreeComputePkg P((hypre_ComputePkg *compute_pkg ));
 hypre_CommHandle *hypre_InitializeIndtComputations P((hypre_ComputePkg *compute_pkg , double *data ));
 void hypre_FinalizeIndtComputations P((hypre_CommHandle *comm_handle ));
 
-/* create_2d_laplacian.c */
-int main P((int argc , char *argv []));
-
-/* create_3d_laplacian.c */
-int main P((int argc , char *argv []));
-
-/* driver.c */
-int main P((int argc , char *argv []));
-
-/* driver_internal.c */
-int main P((int argc , char *argv []));
-
 /* grow.c */
 hypre_BoxArray *hypre_GrowBoxByStencil P((hypre_Box *box , hypre_StructStencil *stencil , int transpose ));
 hypre_BoxArrayArray *hypre_GrowBoxArrayByStencil P((hypre_BoxArray *box_array , hypre_StructStencil *stencil , int transpose ));
-
-/* one_to_many.c */
-int main P((int argc , char *argv []));
-
-/* one_to_many_vector.c */
-int main P((int argc , char *argv []));
 
 /* project.c */
 hypre_SBox *hypre_ProjectBox P((hypre_Box *box , hypre_Index index , hypre_Index stride ));

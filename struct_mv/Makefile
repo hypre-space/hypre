@@ -28,6 +28,7 @@ HEADERS =\
 FILES =\
  box.c\
  box_algebra.c\
+ box_alloc.c\
  box_neighbors.c\
  communication.c\
  communication_info.c\
