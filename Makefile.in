@@ -22,9 +22,9 @@ all:
 	@ \
 	for i in ${HYPRE_DIRS}; \
 	do \
-	echo "Making $$i ..."; \
-	(cd $$i; make); \
-	echo ""; \
+	  echo "Making $$i ..."; \
+	  (cd $$i; make); \
+	  echo ""; \
 	done
 
 install:
@@ -54,24 +54,24 @@ install:
 	# install the libraries; \
 	for i in ${HYPRE_DIRS}; \
 	do \
-	echo "Installing $$i ..."; \
-	(cd $$i; make install); \
-	echo ""; \
+	  echo "Installing $$i ..."; \
+	  (cd $$i; make install); \
+	  echo ""; \
 	done
 
 clean:
 	@ \
 	for i in ${HYPRE_DIRS}; \
 	do \
-	echo "Cleaning $$i ..."; \
-	(cd $$i; make clean); \
+	  echo "Cleaning $$i ..."; \
+	  (cd $$i; make clean); \
 	done
 
 veryclean:
 	@ \
 	for i in ${HYPRE_DIRS}; \
 	do \
-	echo "Very-cleaning $$i ..."; \
-	(cd $$i; make veryclean); \
+	  echo "Very-cleaning $$i ..."; \
+	  (cd $$i; make veryclean); \
 	done
 
