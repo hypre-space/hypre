@@ -1979,13 +1979,13 @@ hypre_parCorrRes( hypre_ParCSRMatrix *A,
    comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    offd = hypre_ParCSRMatrixOffd(A);
    num_cols_offd = hypre_CSRMatrixNumCols(offd);
+
+   x_local = hypre_ParVectorLocalVector(x);
+   x_local_data = hypre_VectorData(x_local);
    local_size = hypre_VectorSize(x_local);
 
    if (num_cols_offd)
    {
-      x_local = hypre_ParVectorLocalVector(x);
-      x_local_data = hypre_VectorData(x_local);
-
       num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
       x_buf_data = hypre_CTAlloc(double, 
 			hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends));
