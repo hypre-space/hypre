@@ -27,8 +27,8 @@ esac
 
 # NOTE: In order to call this script from other directories,
 # we need to get the path info from the command line
-VPATH=`echo $0 | awk 'BEGIN {FS = "[^/]*$"} {print $1}'`
-VFILE="${VPATH}HYPRE_utilities.h"
+VPATH=`dirname $0`
+VFILE="${VPATH}/HYPRE_utilities.h"
 VINFO=`grep HYPRE_Version $VFILE`; \
 
 # this is the no-option print line
