@@ -19,7 +19,7 @@ headers.h
 
 @param comm [IN]
   MPI communicator
-@param *solver [OUT]
+@param solver [OUT]
   solver structure
 
 @see HYPRE_StructPCGFinalize */
