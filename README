@@ -19,8 +19,8 @@ An overview of the differences between releases of hypre can be found
 in the file `CHANGELOG'.
 
 To subscribe to the mailing list "New Release Announcements (hypre-
-announce)" or "New Beta Release Announcements (hypre-beta-announce),
-use the `Mailing Lists' link on the HYPRE home page.
+announce)", "New Beta Release Announcements (hypre-beta-announce), or
+"Hypre Users (hypre-users)" use the `Mailing Lists' link on the HYPRE home page.
 
 We appreciate feedback from users of this package. Please submit
 comments, suggestions, and bug reports via:
