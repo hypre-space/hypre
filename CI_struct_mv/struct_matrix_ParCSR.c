@@ -66,7 +66,7 @@ hypre_SetStructInterfaceMatrixParCSRCoeffs( hypre_StructInterfaceMatrix *struct_
 
 
    printf("unimplemented function\n");
-   return(-1);
+   ierr = -1;
 
 #if 0
    new_index = hypre_NewIndex();
@@ -146,7 +146,7 @@ hypre_SetStructInterfaceMatrixParCSRCoeffs( hypre_StructInterfaceMatrix *struct_
    hypre_FreeIndex(new_index);
 
 #endif
-   return(0);
+   return(ierr);
 }
 
 /*--------------------------------------------------------------------------
@@ -160,7 +160,7 @@ hypre_PrintStructInterfaceMatrixParCSR( hypre_StructInterfaceMatrix *struct_matr
    int  ierr=0;
 
    printf("unimplemented function\n");
-   return(-1);
+   ierr = -1;
    return( ierr );
 }
 
@@ -175,7 +175,7 @@ hypre_AssembleStructInterfaceMatrixParCSR( hypre_StructInterfaceMatrix *struct_m
    int  ierr=0;
 
    printf("unimplemented function\n");
-   return(-1);
+   ierr = -1;
    return( ierr );
 }
 

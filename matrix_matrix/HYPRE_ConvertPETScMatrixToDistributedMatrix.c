@@ -11,13 +11,14 @@
  * Routine for building a DistributedMatrix from a MPIAIJ Mat, i.e. PETSc matrix
  *
  *****************************************************************************/
-#ifdef PETSC_AVAILABLE
 
 #ifdef HYPRE_DEBUG
 #include <gmalloc.h>
 #endif
 
 #include "general.h"
+
+#ifdef PETSC_AVAILABLE
 
 #include "../HYPRE.h"
 
