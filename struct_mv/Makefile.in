@@ -33,7 +33,7 @@ RANLIB= @RANLIB@
 HEADERS =\
  box.h\
  box_neighbors.h\
- communication.h\
+ struct_communication.h\
  computation.h\
  headers.h\
  struct_grid.h\
@@ -48,7 +48,7 @@ FILES =\
  box_algebra.c\
  box_alloc.c\
  box_neighbors.c\
- communication.c\
+ struct_communication.c\
  communication_info.c\
  computation.c\
  grow.c\

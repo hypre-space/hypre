@@ -1528,7 +1528,7 @@ int hypre_BoxNeighborsCreate( hypre_BoxArray *boxes , int *procs , int *ids , in
 int hypre_BoxNeighborsAssemble( hypre_BoxNeighbors *neighbors , int max_distance , int prune );
 int hypre_BoxNeighborsDestroy( hypre_BoxNeighbors *neighbors );
 
-/* communication.c */
+/* struct_communication.c */
 hypre_CommPkg *hypre_CommPkgCreate( hypre_BoxArrayArray *send_boxes , hypre_BoxArrayArray *recv_boxes , hypre_Index send_stride , hypre_Index recv_stride , hypre_BoxArray *send_data_space , hypre_BoxArray *recv_data_space , int **send_processes , int **recv_processes , int num_values , MPI_Comm comm , hypre_Index periodic );
 int hypre_CommPkgDestroy( hypre_CommPkg *comm_pkg );
 int hypre_InitializeCommunication( hypre_CommPkg *comm_pkg , double *send_data , double *recv_data , hypre_CommHandle **comm_handle_ptr );
