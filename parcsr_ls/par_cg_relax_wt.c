@@ -51,22 +51,17 @@ hypre_BoomerAMGCGRelaxWt( void              *amg_vdata,
    int     **point_map_array;
    int     **v_at_point_array; */
 
-   int       num_levels;
-   int       max_levels;
 
-   int      *num_grid_sweeps;   
    int      *grid_relax_type;   
    int     **grid_relax_points;  
  
    /* Local variables  */
 
    int       Solve_err_flag;
-   int       k;
    int       i, j, jj;
    int       fine_grid;
    int       num_sweep;
    int       relax_type;
-   int       relax_points;
    int       local_size;
    int       old_size;
    int       my_id = 0;
@@ -84,7 +79,6 @@ hypre_BoomerAMGCGRelaxWt( void              *amg_vdata,
    double    rlx_wt = 0;
    double    rlx_wt_old = 0;
    double    lambda_min, lambda_max;
-   double    p0, p1, p2;
    double    lambda_min_old, lambda_max_old;
 
 #if 0
@@ -124,7 +118,6 @@ hypre_BoomerAMGCGRelaxWt( void              *amg_vdata,
 
    grid_relax_type     = hypre_ParAMGDataGridRelaxType(amg_data);
    grid_relax_points   = hypre_ParAMGDataGridRelaxPoints(amg_data);
-   num_grid_sweeps     = hypre_ParAMGDataNumGridSweeps(amg_data);
    smooth_option       = hypre_ParAMGDataSmoothOption(amg_data)[level]; 
 
    /* Initialize */
@@ -189,11 +182,6 @@ hypre_BoomerAMGCGRelaxWt( void              *amg_vdata,
       hypre_ParVectorSetConstantValues(Ztemp, 0.0);
       for (j = 0; j < num_sweep; j++)
       {
-         /*if (num_levels == 1 && max_levels > 1)
-            relax_points = 0;
-         else*/
-            relax_points = grid_relax_points[1][j]; 
-
          if (smooth_option > 6 && smooth_option < 10)
          {
     
