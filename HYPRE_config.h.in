@@ -42,8 +42,8 @@
 #undef HYPRE_RS6000
 #endif
 
-#ifndef HYPRE_BLAS
-#undef HYPRE_BLAS
+#ifndef HYPRE_USING_HYPRE_BLAS
+#undef HYPRE_USING_HYPRE_BLAS
 #endif
 
 #ifndef HYPRE_USING_ESSL

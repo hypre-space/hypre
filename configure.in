@@ -58,7 +58,7 @@ casc_using_openmp=no
 casc_using_ibm_smp=no
 casc_using_sgi_smp=no
 casc_using_pgcc_smp=no
-casc_using_HYPRE_blas=no
+casc_using_system_blas=no
 
 
 AC_ARG_WITH(CC, \[
@@ -155,7 +155,6 @@ AC_ARG_WITH(purify, [\
     casc_user_chose_compilers=yes
   fi
   PREPEND=purify
-  casc_using_HYPRE_blas=yes
 )
 
 AC_ARG_WITH(cegdb, [\
@@ -236,36 +235,34 @@ AC_ARG_WITH(pthreads, [\
   fi
 )
 
-AC_ARG_WITH(openmp,
-   [  --with-openmp           use openMP--this may affect which compiler is 
-			      chosen.  Supported on IBM and DECS only.],
-   casc_using_openmp=yes
-   AC_DEFINE(HYPRE_USING_OPENMP)
+AC_ARG_WITH(openmp, [\
+  --with-openmp           use openMP--this may affect which compiler is 
+                          chosen.  Supported on IBM and DECS only.],
+  casc_using_openmp=yes
+  AC_DEFINE(HYPRE_USING_OPENMP)
 )
 
-AC_ARG_WITH(IBM_smp,
-   [  --with-IBM_smp          use IBM SMP--not yet supported],
-   casc_using_ibm_smp=yes
-   AC_DEFINE(HYPRE_USING_IBM_SMP)
+AC_ARG_WITH(IBM_smp, [\
+  --with-IBM_smp          use IBM SMP--not yet supported],
+  casc_using_ibm_smp=yes
+  AC_DEFINE(HYPRE_USING_IBM_SMP)
 )
 
-AC_ARG_WITH(SGI_smp,
-   [  --with-SGI_smp          use SGI SMP--not yet supported],
-   casc_using_sgi_smp=yes
-   AC_DEFINE(HYPRE_USING_SGI_SMP)
+AC_ARG_WITH(SGI_smp, [\
+  --with-SGI_smp          use SGI SMP--not yet supported],
+  casc_using_sgi_smp=yes
+  AC_DEFINE(HYPRE_USING_SGI_SMP)
 )
 
-AC_ARG_WITH(pgcc_smp,
-   [  --with-pgcc_smp         use pgcc SMP (Red)--not yet supported],
-   casc_using_pgcc_smp=yes 
-   AC_DEFINE(HYPRE_USING_PGCC_SMP)
+AC_ARG_WITH(pgcc_smp, [\
+  --with-pgcc_smp         use pgcc SMP (Red)--not yet supported],
+  casc_using_pgcc_smp=yes 
+  AC_DEFINE(HYPRE_USING_PGCC_SMP)
 )
 
-AC_ARG_WITH(HYPRE_blas,
-   [  --with-HYPRE_blas       locate BLAS internal to hypre library **THIS 
-			      OPTION MUST BE NOT BE USED FOR IJ_MATRIX_VECTOR
-                              CODE ON THE DECS], 
-   casc_using_HYPRE_blas=yes
+AC_ARG_WITH(system_blas, [\
+  --with-system-blas      search for and use system BLAS], 
+  casc_using_system_blas=yes
 )
 
 dnl top level source directory
@@ -328,7 +325,8 @@ case $HOSTNAME in
      CASC_SET_CXXDEBUG(-g) 
      CASC_SET_FOPT(-O)
      CASC_SET_FDEBUG(-g)
-      
+     casc_using_system_blas=yes
+
    ;;
 
    janus )
@@ -362,6 +360,7 @@ case $HOSTNAME in
      CASC_SET_CXXDEBUG(-g) 
      CASC_SET_FOPT(-O)
      CASC_SET_FDEBUG(-g)
+     casc_using_system_blas=yes
       
    ;;
 
@@ -392,6 +391,7 @@ case $HOSTNAME in
      CASC_SET_CXXDEBUG(-g)
      CASC_SET_FOPT(-O)
      CASC_SET_FDEBUG(-g)
+     casc_using_system_blas=yes
       
    ;;
         
@@ -426,8 +426,6 @@ then
       CASC_SET_FDEBUG(-g -silent)
 
       AC_DEFINE(HYPRE_SOLARIS)
-
-      casc_using_HYPRE_blas=yes
 
    ;;
 
@@ -492,6 +490,7 @@ then
       
      CASC_SET_CXXOPT(-O)
      CASC_SET_CXXDEBUG(-g)
+     casc_using_system_blas=yes
 
      AC_DEFINE(HYPRE_ALPHA)
 
@@ -555,6 +554,7 @@ then
      CASC_SET_CXXOPT(-O3 -qstrict)
      CASC_SET_CXXDEBUG(-g)
      CFLAGS="$CFLAGS -qmaxmem=8192 -DHYPRE_COMM_SIMPLE"
+     casc_using_system_blas=yes
 
      AC_DEFINE(HYPRE_RS6000)
 
@@ -720,7 +720,7 @@ CFLAGS="$CFLAGS $COPT $CDEBUG"
 CXXFLAGS="$CXXFLAGS $CXXOPT $CXXDEBUG"
 F77FLAGS="$F77FLAGS $FOPT $FDEBUG"
 
-if test "$casc_using_HYPRE_blas" = "no"
+if test "$casc_using_system_blas" = "yes"
 then
  CASC_FIND_BLAS
  if test "$BLASLIBFLAGS" = "-lessl"
@@ -731,10 +731,12 @@ then
    AC_DEFINE(HYPRE_USING_DXML)
  elif test "$BLASLIBFLAGS" = ""
  then
-   BLASLIBFLAGS=-lHYPRE_blas
-   AC_DEFINE(HYPRE_USING_HYPRE_BLAS)
+   casc_using_system_blas=no
  fi
-else
+fi
+
+if test "$casc_using_system_blas" = "no"
+then
  BLASLIBFLAGS=-lHYPRE_blas
  AC_DEFINE(HYPRE_USING_HYPRE_BLAS)
 fi
