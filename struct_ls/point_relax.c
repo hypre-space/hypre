@@ -547,6 +547,8 @@ hypre_PointRelax( void               *relax_vdata,
       compute_pkg = compute_pkgs[pointset];
       stride = pointset_strides[pointset];
 
+      hypre_StructCopy(x, t);
+
       for (compute_i = 0; compute_i < 2; compute_i++)
       {
          switch(compute_i)
