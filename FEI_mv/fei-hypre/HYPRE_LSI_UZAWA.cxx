@@ -1040,7 +1040,7 @@ int HYPRE_LSI_Uzawa::solve(HYPRE_ParVector b, HYPRE_ParVector x)
 
 int HYPRE_LSI_Uzawa::findA22BlockSize()
 {
-   int    mypid, nprocs, *procNRows, startRow, endRow, localNRows;
+   int    mypid, nprocs, *procNRows, startRow, endRow;
    int    A22LocalSize, irow, zeroDiag, jcol, rowSize, *colInd;
    int    *iTempList, ip, ncnt, A22GlobalSize; 
    double *colVal;
@@ -1054,7 +1054,6 @@ int HYPRE_LSI_Uzawa::findA22BlockSize()
    HYPRE_ParCSRMatrixGetRowPartitioning( Amat_, &procNRows );
    startRow     = procNRows[mypid];
    endRow       = procNRows[mypid+1] - 1;
-   localNRows   = endRow - startRow + 1;
    free( procNRows );
 
    //------------------------------------------------------------------
@@ -1445,7 +1444,10 @@ int HYPRE_LSI_Uzawa::setupPrecon(HYPRE_Solver *precon,HYPRE_ParCSRMatrix Amat,
                                  HYPRE_Uzawa_PARAMS paramPtr)
 {
    int  i, *nsweeps, *relaxType;
-   char **targv, paramString[100];;
+   char **targv;
+#ifdef HAVE_MLI
+   char paramString[100];
+#endif
 
    (void) Amat;
    if ( paramPtr.SolverID_ == 0 ) return 0;

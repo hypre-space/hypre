@@ -1273,7 +1273,7 @@ int HYPRE_LSI_BlockP::setup(HYPRE_ParCSRMatrix Amat)
 int HYPRE_LSI_BlockP::solve(HYPRE_ParVector fvec, HYPRE_ParVector xvec)
 {
    int       AStart, ANRows, AEnd, irow, searchInd, ierr;
-   int       mypid, nprocs, V1Leng, V1Start, V2Leng, V2Start, V1Cnt, V2Cnt;
+   int       mypid, nprocs, V1Start, V2Start, V1Cnt, V2Cnt;
    double    *fvals, *xvals, ddata;
    MPI_Comm  mpi_comm;
 
@@ -1302,9 +1302,7 @@ int HYPRE_LSI_BlockP::solve(HYPRE_ParVector fvec, HYPRE_ParVector xvec)
    // extract subvectors for the right hand side
    //------------------------------------------------------------------
 
-   V1Leng  = ANRows - P22Size_;
    V1Start = AStart - P22Offsets_[mypid];
-   V2Leng  = P22Size_;
    V2Start = P22Offsets_[mypid];
    fvals = hypre_VectorData(hypre_ParVectorLocalVector((hypre_ParVector*)fvec));
    V1Cnt   = V1Start;
@@ -1536,9 +1534,9 @@ int HYPRE_LSI_BlockP::destroySolverPrecond()
 
 int HYPRE_LSI_BlockP::computeBlockInfo()
 {
-   int      mypid, nprocs, start_row, end_row, local_nrows, irow;
-   int      j, row_size, *col_ind, *disp_array, index, global_nrows;
-   int      node_num, field_id, jcol, zero_diag;
+   int      mypid, nprocs, start_row, end_row, irow;
+   int      j, row_size, *col_ind, *disp_array;
+   int      field_id, jcol, zero_diag;
    double   *col_val;
    MPI_Comm mpi_comm;
 
@@ -1567,8 +1565,6 @@ int HYPRE_LSI_BlockP::computeBlockInfo()
    MPI_Comm_size( mpi_comm, &nprocs );
    start_row    = APartition_[mypid];
    end_row      = APartition_[mypid+1] - 1;
-   local_nrows  = end_row - start_row + 1;
-   global_nrows = APartition_[nprocs];
     
    //------------------------------------------------------------------
    // find the local size of the (2,2) block
@@ -1685,14 +1681,14 @@ int HYPRE_LSI_BlockP::computeBlockInfo()
 int HYPRE_LSI_BlockP::buildBlocks()
 {
    int    mypid, nprocs, *partition, index, searchInd;
-   int    ANRows, ANCols, AGNRows, AGNCols, AStartRow, AStartCol;
+   int    ANRows, AGNRows, AStartRow;
    int    A11NRows, A11NCols, A11GNRows, A11GNCols, A11StartRow, A11StartCol;
    int    A12NRows, A12NCols, A12GNRows, A12GNCols, A12StartRow, A12StartCol;
    int    A22NRows, A22NCols, A22GNRows, A22GNCols, A22StartRow, A22StartCol;
    int    *A11RowLengs, A11MaxRowLeng, A11RowCnt, A11NewSize, *A11_inds;
    int    *A12RowLengs, A12MaxRowLeng, A12RowCnt, A12NewSize, *A12_inds;
    int    *A22RowLengs, A22MaxRowLeng, A22RowCnt, A22NewSize, *A22_inds;
-   int    irow, j, k, rowSize, *inds, ierr;
+   int    irow, j, rowSize, *inds, ierr;
    double *vals, *A11_vals, *A12_vals, *A22_vals;
    char   fname[200];
    FILE   *fp;
@@ -1708,11 +1704,8 @@ int HYPRE_LSI_BlockP::buildBlocks()
    MPI_Comm_rank( mpi_comm, &mypid );
    MPI_Comm_size( mpi_comm, &nprocs );
    AStartRow = partition[mypid];
-   AStartCol = AStartRow;
    ANRows    = partition[mypid+1] - AStartRow;
-   ANCols    = ANRows;
    AGNRows   = partition[nprocs];
-   AGNCols   = AGNRows;
 
    //------------------------------------------------------------------
    // calculate the dimensions of the 2 x 2 blocks
@@ -2003,7 +1996,10 @@ int HYPRE_LSI_BlockP::setupPrecon(HYPRE_Solver *precon, HYPRE_IJMatrix Amat,
                                   HYPRE_LSI_BLOCKP_PARAMS param_ptr)
 {
    int                i, *nsweeps, *relaxType;
-   char               **targv, paramString[100];
+   char               **targv;
+#ifdef HAVE_MLI
+   char               paramString[100];
+#endif
    MPI_Comm           mpi_comm;
    HYPRE_ParCSRMatrix Amat_csr;
 
