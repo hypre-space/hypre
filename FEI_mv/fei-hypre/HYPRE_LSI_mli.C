@@ -32,7 +32,6 @@
 #include <stdio.h>
 #include <assert.h>
 #include <math.h>
-#include <mpi.h>
 
 /****************************************************************************/ 
 /* MLI include files                                                        */
