@@ -935,6 +935,9 @@ case $ARCH in
       if test "$CC" = "cc" ||
         test "$CC" = "mpicc" ; then
         CASC_SET_COPT(-fast)
+        if test "$casc_using_openmp" = "yes"; then
+          CASC_SET_COPT(-fast -omp)
+        fi
       elif test "$CC" = "kcc" ; then
         CASC_SET_COPT(-o=5)
       else 
@@ -945,6 +948,9 @@ case $ARCH in
       if test "$CXX" = "cxx" ||
         test "$CXX" = "mpicxx" ; then
         CASC_SET_CXXOPT(-fast)
+        if test "$casc_using_openmp" = "yes"; then
+          CASC_SET_CXXOPT(-fast -omp)
+        fi
       else 
         CASC_SET_CXXOPT(-O)
       fi

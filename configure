@@ -4868,6 +4868,9 @@ unset ac_cv_lib_$ac_lib_var
         
    if test -z "$COPT"; then
       COPT="-fast"
+      if test "$casc_using_openmp" = "yes"; then
+        COPT="-fast -omp"
+      fi
    fi
    
 
@@ -4893,6 +4896,9 @@ unset ac_cv_lib_$ac_lib_var
         
    if test -z "$CXXOPT"; then
       CXXOPT="-fast"
+      if test "$casc_using_openmp" = "yes"; then
+        CXXOPT="-fast -omp"
+      fi
    fi
    
 
