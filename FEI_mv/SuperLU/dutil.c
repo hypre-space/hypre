@@ -362,7 +362,7 @@ dFillRHS(char *trans, int nrhs, double *x, int ldx,
 		SuperMatrix *A, SuperMatrix *B)
 {
     NCformat *Astore;
-    double   *Aval;
+/*  double   *Aval; */
     DNformat *Bstore;
     double   *rhs;
     double one = 1.0;
@@ -370,7 +370,7 @@ dFillRHS(char *trans, int nrhs, double *x, int ldx,
     int      ldc;
 
     Astore = A->Store;
-    Aval   = (double *) Astore->nzval;
+/*  Aval   = (double *) Astore->nzval; */
     Bstore = B->Store;
     rhs    = Bstore->nzval;
     ldc    = Bstore->lda;

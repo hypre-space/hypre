@@ -72,7 +72,7 @@ dgscon(char *norm, SuperMatrix *L, SuperMatrix *U,
     double ainvnm;
     double *work;
     int    *iwork;
-    extern int drscl_(int *, double *, double *, int *);
+/*  extern int drscl_(int *, double *, double *, int *);*/
 
     extern int dlacon_(int *, double *, double *, int *, double *, int *);
 

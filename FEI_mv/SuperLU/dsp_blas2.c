@@ -88,8 +88,11 @@ sp_dtrsv(char *uplo, char *trans, char *diag, SuperMatrix *L,
     SCformat *Lstore;
     NCformat *Ustore;
     double   *Lval, *Uval;
-    int incx = 1, incy = 1;
+    int incx = 1;
+#ifdef USE_VENDOR_BLAS
+    int incy = 1;
     double alpha = 1.0, beta = 1.0;
+#endif
     int nrow;
     int fsupc, nsupr, nsupc, luptr, istart, irow;
     int i, k, iptr, jcol;

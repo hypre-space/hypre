@@ -62,8 +62,10 @@ dcolumn_bmod (
          ftcs2 = _cptofcd("N", strlen("N")),
          ftcs3 = _cptofcd("U", strlen("U"));
 #endif
+#ifdef USE_VENDOR_BLAS
     int         incx = 1, incy = 1;
     double      alpha, beta;
+#endif
     
     /* krep = representative of current k-th supernode
      * fsupc = first supernodal column
@@ -91,8 +93,10 @@ dcolumn_bmod (
     int          nzlumax;
     double       *tempv1;
     double      zero = 0.0;
+#ifdef USE_VENDOR_BLAS
     double      one = 1.0;
     double      none = -1.0;
+#endif
     int          mem_error;
     extern SuperLUStat_t SuperLUStat;
     flops_t  *ops = SuperLUStat.ops;
@@ -268,7 +272,7 @@ dcolumn_bmod (
     /* Copy the SPA dense into L\U[*,j] */
     new_next = nextlu + xlsub[fsupc+1] - xlsub[fsupc];
     while ( new_next > nzlumax ) {
-	if (mem_error = dLUMemXpand(jcol, nextlu, LUSUP, &nzlumax, Glu))
+	if ((mem_error = dLUMemXpand(jcol, nextlu, LUSUP, &nzlumax, Glu)) != 0)
 	    return (mem_error);
 	lusup = Glu->lusup;
 	lsub = Glu->lsub;

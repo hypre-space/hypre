@@ -87,8 +87,9 @@ dgstrs (char *trans, SuperMatrix *L, SuperMatrix *U,
 #ifdef _CRAY
     _fcd ftcs1, ftcs2, ftcs3, ftcs4;
 #endif
-    int      incx = 1, incy = 1;
+#ifdef USE_VENDOR_BLAS
     double   alpha = 1.0, beta = 1.0;
+#endif
     DNformat *Bstore;
     double   *Bmat;
     SCformat *Lstore;
@@ -97,10 +98,15 @@ dgstrs (char *trans, SuperMatrix *L, SuperMatrix *U,
     int      nrow, notran;
     int      fsupc, nsupr, nsupc, luptr, istart, irow;
     int      i, j, k, iptr, jcol, n, ldb, nrhs;
-    double   *work, *work_col, *rhs_work, *soln;
+    double   *work, *rhs_work, *soln;
+#ifdef USE_VENDOR_BLAS
+    double   *work_col;
+#endif
     flops_t  solve_ops;
     extern SuperLUStat_t SuperLUStat;
+#ifdef DEBUG
     void dprint_soln();
+#endif
 
     /* Test input parameters ... */
     *info = 0;

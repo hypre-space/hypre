@@ -92,7 +92,9 @@ dpanel_bmod (
     double       *tempv1;             /* Used in 1-D update */
     double       *TriTmp, *MatvecTmp; /* used in 2-D update */
     double      zero = 0.0;
+#ifdef USE_VENDOR_BLAS
     double      one = 1.0;
+#endif
     register int ldaTmp;
     register int r_ind, r_hi;
     static   int first = 1, maxsuper, rowblk, colblk;

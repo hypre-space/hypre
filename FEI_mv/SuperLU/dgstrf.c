@@ -291,7 +291,7 @@ dgstrf (char *refact, SuperMatrix *A, double diag_pivot_thresh,
 	    new_next = nextlu + (xlsub[fsupc+1]-xlsub[fsupc])*(kcol-jcol+1);
 	    nzlumax = Glu.nzlumax;
 	    while ( new_next > nzlumax ) {
-		if ( *info = dLUMemXpand(jcol, nextlu, LUSUP, &nzlumax, &Glu) )
+		if ((*info = dLUMemXpand(jcol, nextlu,LUSUP,&nzlumax,&Glu))!=0)
 		    return;
 	    }
     
@@ -305,8 +305,8 @@ dgstrf (char *refact, SuperMatrix *A, double diag_pivot_thresh,
 	       	/* Numeric update within the snode */
 	        dsnode_bmod(icol, jsupno, fsupc, dense, tempv, &Glu);
 
-		if ( *info = dpivotL(icol, diag_pivot_thresh, &usepr, perm_r,
-				    iperm_r, iperm_c, &pivrow, &Glu) )
+		if ((*info = dpivotL(icol, diag_pivot_thresh, &usepr, perm_r,
+				    iperm_r, iperm_c, &pivrow, &Glu)) != 0)
 		    if ( iinfo == 0 ) iinfo = *info;
 		
 #ifdef DEBUG
@@ -360,8 +360,8 @@ dgstrf (char *refact, SuperMatrix *A, double diag_pivot_thresh,
 					  perm_r, &dense[k], &Glu)) != 0)
 		    return;
 
-	    	if ( *info = dpivotL(jj, diag_pivot_thresh, &usepr, perm_r,
-				    iperm_r, iperm_c, &pivrow, &Glu) )
+	    	if ((*info = dpivotL(jj, diag_pivot_thresh, &usepr, perm_r,
+				    iperm_r, iperm_c, &pivrow, &Glu)) != 0 )
 		    if ( iinfo == 0 ) iinfo = *info;
 
 		/* Prune columns (0:jj-1) using column jj */
