@@ -195,24 +195,27 @@ int LLNL_FEI_Solver::solve(int *status)
                (*status) = solveUsingSuperLU();
                break;
    }
-   if ( outputLevel_ >= 1 && mypid_ == 0 )
-      printf("\tnumIterations     = %d\n",krylovIterations_);
    TimerSolve_ = MPI_Wtime() - TimerSolveStart_;
-   dArray[0] = TimerSolve_;
-   dArray[1] = TimerSolve_;
-   MPI_Allreduce(dArray,dArray2,1,MPI_DOUBLE,MPI_SUM,mpiComm_);
-   MPI_Allreduce(&dArray[1],&dArray2[1],1,MPI_DOUBLE,MPI_MAX,mpiComm_);
-
-   if ( outputLevel_ >= 1 && mypid_ == 0 )
+   if (outputLevel_ >= 2)
+   {
+      dArray[0] = TimerSolve_;
+      dArray[1] = TimerSolve_;
+      MPI_Allreduce(dArray,dArray2,1,MPI_DOUBLE,MPI_SUM,mpiComm_);
+      MPI_Allreduce(&dArray[1],&dArray2[1],1,MPI_DOUBLE,MPI_MAX,mpiComm_);
+   }
+   if (outputLevel_ >= 1 && mypid_ == 0)
    {
       printf("\tLLNL_FEI local solver : number of iterations = %d\n",
              krylovIterations_);
-      printf("\tLLNL_FEI local solver : final residual norm  = %e\n",
-             krylovResidualNorm_);
-      printf("\tLLNL_FEI local solver    : average solve time   = %e\n",
-             dArray2[0]/(double) nprocs);
-      printf("\tLLNL_FEI local solver    : maximum solve time   = %e\n",
-             dArray2[1]);
+      if (outputLevel_ >= 2)
+      {
+         printf("\tLLNL_FEI local solver : final residual norm  = %e\n",
+                krylovResidualNorm_);
+         printf("\tLLNL_FEI local solver    : average solve time   = %e\n",
+                dArray2[0]/(double) nprocs);
+         printf("\tLLNL_FEI local solver    : maximum solve time   = %e\n",
+                dArray2[1]);
+      }
       printf("\t**************************************************\n");
    }
    return (*status);
@@ -355,7 +358,7 @@ int LLNL_FEI_Solver::solveUsingCG()
       dArray[0] = rnorm;
       MPI_Allreduce(dArray, dArray2, 1, MPI_DOUBLE, MPI_SUM, mpiComm_);
       rnorm = sqrt( dArray2[0] );
-      if ( outputLevel_ >= 1 && mypid_ == 0 )
+      if ( outputLevel_ >= 2 && mypid_ == 0 )
          printf("\tLLNL_FEI_Solver_CG actual rnorm = %e \n",rnorm);
       if ( (rnorm < eps1 || rnorm < 1.0e-16) || 
             iterations >= krylovMaxIterations_ ) converged = 1;
@@ -580,7 +583,7 @@ int LLNL_FEI_Solver::solveUsingGMRES()
       rnorm = sqrt(dArray2[0]);
    }
    if ( rnorm < eps1 ) converged = 1; 
-   if ( outputLevel_ >= 1 && mypid_ == 0 )
+   if ( outputLevel_ >= 2 && mypid_ == 0 )
       printf("\tLLNL_FEI_Solver_GMRES : final rnorm = %e\n", rnorm);
 
    krylovIterations_   = iterations;
@@ -641,7 +644,7 @@ int LLNL_FEI_Solver::solveUsingCGS()
    MPI_Allreduce(dArray, dArray2, 2, MPI_DOUBLE, MPI_SUM, mpiComm_);
    rnorm0 = sqrt(dArray2[1]);
    rnorm  = sqrt(dArray2[0]);
-   if ( outputLevel_ >= 1 && mypid_ == 0 )
+   if ( outputLevel_ >= 2 && mypid_ == 0 )
       printf("\tLLNL_FEI_Solver_CGS initial rnorm = %e (%e)\n",rnorm,rnorm0);
    if ( rnorm0 == 0.0 ) 
    {
@@ -742,7 +745,7 @@ int LLNL_FEI_Solver::solveUsingCGS()
          rho2 = dArray2[0];
          beta = rho2 / rho1;
          rnorm = sqrt(dArray2[1]);
-         if ( outputLevel_ >= 1 && iterations % 1 == 0 && mypid_ == 0 )
+         if ( outputLevel_ >= 2 && iterations % 1 == 0 && mypid_ == 0 )
             printf("\tLLNL_FEI_Solver_CGS : iteration %d - rnorm = %e (%e)\n",
                    iterations, rnorm, eps1);
       }
@@ -754,7 +757,7 @@ int LLNL_FEI_Solver::solveUsingCGS()
          rnorm += rVec[irow] * rVec[irow];
       MPI_Allreduce(&rnorm, dArray, 1, MPI_DOUBLE, MPI_SUM, mpiComm_);
       rnorm = sqrt( dArray[0] );
-      if ( outputLevel_ >= 1 && mypid_ == 0 )
+      if ( outputLevel_ >= 2 && mypid_ == 0 )
          printf("\tLLNL_FEI_Solver_CGS actual rnorm = %e \n",rnorm);
       if ( rnorm < eps1 || iterations >= krylovMaxIterations_ ) break;
       numTrials++;
@@ -817,7 +820,7 @@ int LLNL_FEI_Solver::solveUsingBicgstab()
    MPI_Allreduce(dArray, dArray2, 2, MPI_DOUBLE, MPI_SUM, mpiComm_);
    rnorm0 = sqrt(dArray2[1]);
    rnorm  = sqrt(dArray2[0]);
-   if ( outputLevel_ >= 1 && mypid_ == 0 )
+   if ( outputLevel_ >= 2 && mypid_ == 0 )
       printf("\tLLNL_FEI_Solver_Bicgstab initial rnorm = %e (%e)\n",
              rnorm,rnorm0);
    if ( rnorm0 == 0.0 ) 
@@ -1034,7 +1037,7 @@ int LLNL_FEI_Solver::solveUsingBicgstab()
          rnorm += rVec[irow] * rVec[irow];
       MPI_Allreduce(&rnorm, dArray, 1, MPI_DOUBLE, MPI_SUM, mpiComm_);
       rnorm = sqrt( dArray[0] );
-      if ( outputLevel_ >= 1 && mypid_ == 0 )
+      if ( outputLevel_ >= 2 && mypid_ == 0 )
          printf("\tLLNL_FEI_Solver_Bicgstab actual rnorm = %e \n",rnorm);
       if ( rnorm < eps1 || iterations >= krylovMaxIterations_ ) break;
       numTrials++;
