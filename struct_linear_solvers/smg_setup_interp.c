@@ -49,7 +49,6 @@ hypre_SMGNewInterpOp( hypre_StructMatrix *A,
    /* set up matrix */
    PT = hypre_NewStructMatrix(hypre_StructMatrixComm(A), cgrid, stencil);
    hypre_SetStructMatrixNumGhost(PT, num_ghost);
-   hypre_InitializeStructMatrixShell(PT);
 
    hypre_FreeStructStencil(stencil);
  

@@ -143,8 +143,6 @@ hypre_PFMG2NewRAPOp( hypre_StructMatrix *R,
     *-----------------------------------------------------------------------*/
    hypre_SetStructMatrixNumGhost(RAP, RAP_num_ghost);
 
-   hypre_InitializeStructMatrixShell(RAP);
- 
    return RAP;
 }
 

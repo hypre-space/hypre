@@ -328,6 +328,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       cdir = cdir_l[l];
 
       P_l[l]  = hypre_PFMGNewInterpOp(A_l[l], P_grid_l[l+1], cdir);
+      hypre_InitializeStructMatrixShell(P_l[l]);
       data_size += hypre_StructMatrixDataSize(P_l[l]);
 
       if (hypre_StructMatrixSymmetric(A))
@@ -340,12 +341,14 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 #if 0
          /* Allow RT != P for non symmetric case */
          RT_l[l]   = hypre_PFMGNewRestrictOp(A_l[l], grid_l[l+1], cdir);
+         hypre_InitializeStructMatrixShell(RT_l[l]);
          data_size += hypre_StructMatrixDataSize(RT_l[l]);
 #endif
       }
 
       A_l[l+1] = hypre_PFMGNewRAPOp(RT_l[l], A_l[l], P_l[l],
                                     grid_l[l+1], cdir);
+      hypre_InitializeStructMatrixShell(A_l[l+1]);
       data_size += hypre_StructMatrixDataSize(A_l[l+1]);
 
       b_l[l+1] = hypre_NewStructVector(comm, grid_l[l+1]);

@@ -254,6 +254,7 @@ hypre_SMGSetup( void               *smg_vdata,
    for (l = 0; l < (num_levels - 1); l++)
    {
       PT_l[l]  = hypre_SMGNewInterpOp(A_l[l], grid_l[l+1], cdir);
+      hypre_InitializeStructMatrixShell(PT_l[l]);
       data_size += hypre_StructMatrixDataSize(PT_l[l]);
 
       if (hypre_StructMatrixSymmetric(A))
@@ -266,11 +267,13 @@ hypre_SMGSetup( void               *smg_vdata,
 #if 0
          /* Allow R != PT for non symmetric case */
          R_l[l]   = hypre_SMGNewRestrictOp(A_l[l], grid_l[l+1], cdir);
+         hypre_InitializeStructMatrixShell(R_l[l]);
          data_size += hypre_StructMatrixDataSize(R_l[l]);
 #endif
       }
 
       A_l[l+1] = hypre_SMGNewRAPOp(R_l[l], A_l[l], PT_l[l]);
+      hypre_InitializeStructMatrixShell(A_l[l+1]);
       data_size += hypre_StructMatrixDataSize(A_l[l+1]);
 
       b_l[l+1] = hypre_NewStructVector(comm, grid_l[l+1]);
