@@ -123,6 +123,8 @@ hypre_ParAMGSetup( void               *amg_vdata,
       hypre_SetParCSRMatrixNumNonzeros(A_H);
       A_array[level] = A_H;
 
+      
+
       if ( (level+1 >= max_levels) || 
            (coarse_size == fine_size) || 
            (coarse_size <= coarse_threshold) )
@@ -176,7 +178,7 @@ hypre_ParAMGSetup( void               *amg_vdata,
     * Print some stuff
     *-----------------------------------------------------------------------*/
 
-   if (amg_ioutdat >= 2)
+   if (amg_ioutdat == 1 || amg_ioutdat == 3)
       hypre_ParAMGSetupStats(amg_data,A);
 
 #if 0 /* add later */
