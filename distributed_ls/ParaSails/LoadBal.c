@@ -40,6 +40,9 @@ void LoadBalInit(MPI_Comm comm, double local_cost, double beta,
     double *cost, average, upper, move, accept;
     int i, jj, j;
 
+    *num_given = 0;
+    *num_taken = 0;
+
     if (beta == 0.0)
 	return;
 
@@ -58,9 +61,6 @@ void LoadBalInit(MPI_Comm comm, double local_cost, double beta,
 
     /* Maximum cost allowed by load balancer */
     upper = average / beta;
-
-    *num_given = 0;
-    *num_taken = 0;
 
     for (i=0; i<npes; i++)
     {
