@@ -812,6 +812,7 @@ int HYPRE_BiCGSTABSetStopCrit( HYPRE_Solver solver , int stop_crit );
 int HYPRE_BiCGSTABSetPrecond( HYPRE_Solver solver , HYPRE_PtrToSolverFcn precond , HYPRE_PtrToSolverFcn precond_setup , HYPRE_Solver precond_solver );
 int HYPRE_BiCGSTABGetPrecond( HYPRE_Solver solver , HYPRE_Solver *precond_data_ptr );
 int HYPRE_BiCGSTABSetLogging( HYPRE_Solver solver , int logging );
+int HYPRE_BiCGSTABSetPrintLevel( HYPRE_Solver solver , int logging );
 int HYPRE_BiCGSTABGetNumIterations( HYPRE_Solver solver , int *num_iterations );
 int HYPRE_BiCGSTABGetFinalRelativeResidualNorm( HYPRE_Solver solver , double *norm );
 int HYPRE_BiCGSTABGetResidual( HYPRE_Solver solver , void **residual );
