@@ -207,7 +207,7 @@ base:
 	mkdir -p hypre/lib; \
 	HYPRE_INSTALL_DIR=`pwd`/hypre; \
 	export HYPRE_INSTALL_DIR; \
-	cp -f $(srcdir)/HYPRE_config.h $$HYPRE_INSTALL_DIR/include/.; \
+	cp -f HYPRE_config.h $$HYPRE_INSTALL_DIR/include/.; \
 	cp -f $(srcdir)/HYPRE.h $$HYPRE_INSTALL_DIR/include/.; \
 	for i in ${HYPRE_BASIC_DIRS}; \
 	do \
