@@ -214,8 +214,10 @@ hypre_GMRESSolve(void  *gmres_vdata,
    if (logging > 0)
    {
       norms[0] = r_norm;
-      printf("L2 norm of b: %f", b_norm);
-      printf("Initial L2 norm of residual: %f", r_norm);
+      printf("L2 norm of b: %f\n", b_norm);
+      if (b_norm == 0.0)
+         printf("Rel_resid_norm actually contains the residual norm\n");
+      printf("Initial L2 norm of residual: %f\n", r_norm);
       
    }
    iter = 0;
@@ -228,19 +230,10 @@ hypre_GMRESSolve(void  *gmres_vdata,
    /* initialize first term of hessenberg system */
 
 	rs[0] = r_norm;
-        if (r_norm == 0.0 || b_norm == 0)
+        if (r_norm == 0.0)
         {
-           printf("Norm of b is zero, ...\n");
-           printf("so rel_resid_norm actually contains the residual norm.\n");
-
-/* I repeat! DO NOT hard-wire the zero-vector answer for the
-   zero-vector right-hand side!  I need to test this algorithm, so let
-   the thing converge to it, please!   - MAL
-
-           hypre_KrylovCopyVector(b,x);
 	   ierr = 0;
-	   return ierr; */
-
+	   return ierr;
 	}
       	t = 1.0 / r_norm;
 	hypre_KrylovScaleVector(t,p[0]);
@@ -318,7 +311,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
           	hypre_KrylovMatvec(matvec_data,-1.0,A,x,1.0,r);
 		r_norm = sqrt(hypre_KrylovInnerProd(r,r));
                 if (logging > 0)
-                   printf("Final L2 norm of residual: %f", r_norm);
+                   printf("Final L2 norm of residual: %f\n\n", r_norm);
 		if (r_norm <= epsilon) break;
 	}
 /* compute residual vector and continue loop */
@@ -347,7 +340,6 @@ hypre_GMRESSolve(void  *gmres_vdata,
  	             norms[j]/b_norm);
           }
           printf("\n\n"); };
-       /* fclose(fp); };  */
 
       if (b_norm == 0.0)
          {printf("=============================================\n\n");
@@ -359,7 +351,6 @@ hypre_GMRESSolve(void  *gmres_vdata,
              printf("% 5d    %e    %f\n", j, norms[j],norms[j]/norms[j-1]);
           }
           printf("\n\n"); };
-       /* fclose(fp); };  */
    }
 
    (gmres_data -> num_iterations) = iter;
