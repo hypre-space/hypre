@@ -84,7 +84,7 @@ void ParILUT(DataDistType *ddist, FactorMatType *ldu,
   /* Copy the old perm into new perm vectors at the begining.
    * After that this is done more or less automatically */
   newperm  = idx_malloc(lnrows, "ParILUT: newperm");
-  newiperm = idx_malloc(lnrows, "ParILUT: newiperm");
+  newiperm = idx_malloc(lnrows, "ParILUT: newiperm"); 
 
   memcpy_idx(newperm,   perm, lnrows);
   memcpy_idx(newiperm, iperm, lnrows);
@@ -232,8 +232,8 @@ void ComputeCommInfo(ReduceMatType *rmat, CommInfoType *cinfo, int *rowdist,
   if (cinfo->maxnrecv < maxnrecv) {
     if (cinfo->incolind) { free(cinfo->incolind); cinfo->incolind = NULL; }
     if (cinfo->invalues) { free(cinfo->invalues); cinfo->invalues = NULL; }
-    cinfo->incolind = idx_malloc(maxnrecv*(global_maxnz+2), "ComputeCommInfo: cinfo->incolind");
-    cinfo->invalues =  fp_malloc(maxnrecv*(global_maxnz+2), "ComputeCommInfo: cinfo->invalues");
+    cinfo->incolind = idx_malloc(maxnrecv*(global_maxnz+2)+1, "ComputeCommInfo: cinfo->incolind");
+    cinfo->invalues =  fp_malloc(maxnrecv*(global_maxnz+2)+1, "ComputeCommInfo: cinfo->invalues");
     cinfo->maxnrecv = maxnrecv;
   }
   assert( cinfo->incolind != NULL );
@@ -601,9 +601,13 @@ void ComputeRmat(FactorMatType *ldu, ReduceMatType *rmat,
     k = iperm[i]-ndone;
     CheckBounds(0, k, ntogo, globals);
     nnz     = rmat->rmat_rnz[k];
+              rmat->rmat_rnz[k] = 0;
     rcolind = rmat->rmat_rcolind[k];
+              rmat->rmat_rcolind[k] = NULL;
     rvalues = rmat->rmat_rvalues[k];
+              rmat->rmat_rvalues[k] = NULL;
     rrowlen = rmat->rmat_rrowlen[k];
+              rmat->rmat_rrowlen[k] = 0;
 
     /* Initialize workspace and determine the L indices (ie., MIS).
      * The L indices are stored as either the row's new local permutation
@@ -1173,11 +1177,7 @@ void FormNRmat(int rrow, int first, ReduceMatType *nrmat,
   /* link the reused storage to the new reduced system */
   nrmat->rmat_rnz[rrow]     = nz;
   nrmat->rmat_rrowlen[rrow] = out_rowlen;
-  if (nrmat->rmat_rcolind[rrow]) 
-     { free(nrmat->rmat_rcolind[rrow]); nrmat->rmat_rcolind[rrow] = NULL; }
   nrmat->rmat_rcolind[rrow] = rcolind;
-  if (nrmat->rmat_rvalues[rrow]) 
-     { free(nrmat->rmat_rvalues[rrow]); nrmat->rmat_rvalues[rrow] = NULL; }
   nrmat->rmat_rvalues[rrow] = rvalues;
 
 #ifdef HYPRE_TIMING

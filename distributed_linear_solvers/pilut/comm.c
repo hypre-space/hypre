@@ -50,6 +50,7 @@ int GlobalSEMin(int value, MPI_Comm MPI_Context)
 int GlobalSESum(int value, MPI_Comm MPI_Context)
 {
   int sum;
+
   MPI_Allreduce( &value, &sum, 1, MPI_INT, MPI_SUM, MPI_Context );
 
   return sum;
