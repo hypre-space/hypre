@@ -190,10 +190,10 @@ int HYPRE_BoomerAMGSetRelaxWeight( HYPRE_Solver solver, double* relax_weight);
 defines the relaxation weights used on each level, if weighted Jacobi is used
 as relaxation method. The default relaxation weight is 1.0 on each level.
 
-\subsubsection*{HYPRE\_BoomerAMGSetIOutDat}
+\subsubsection*{HYPRE\_BoomerAMGSetPrintLevel}
 \begin{display}
 \begin{verbatim}
-int HYPRE_BoomerAMGSetIOutDat( HYPRE_Solver solver, int ioutdat);
+int HYPRE_BoomerAMGSetPrintLevel( HYPRE_Solver solver, int print_level);
 \end{verbatim}
 \end{display}
 where ioutdat determines whether statistics information is generated and 
