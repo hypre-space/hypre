@@ -224,7 +224,7 @@ void MLI_FEDataConstructElemFaceMatrix(MPI_Comm comm, MLI_FEData *fedata,
 void MLI_FEDataConstructFaceNodeMatrix(MPI_Comm comm, MLI_FEData *fedata, 
 			               MLI_Matrix **mli_mat )
 {
-   int                nfaces, lfaces, efaces, nlocal, i, j, rows, length;
+   int                nfaces, lfaces, efaces, nlocal, i, j, rows;
    int                faceOffset, nodeOffset, *elemIDs, *rowLengs, ncols;
    int                cols[8], nNodesExt;
    double             values[8];
@@ -314,7 +314,7 @@ void MLI_FEDataConstructFaceNodeMatrix(MPI_Comm comm, MLI_FEData *fedata,
 void MLI_FEDataConstructNodeElemMatrix(MPI_Comm comm, MLI_FEData *fedata, 
 			               MLI_Matrix **mli_mat )
 {
-   int                i, j, k, nElems, nNodes, nLocal, nNodesExt, rows;
+   int                i, j, k, nElems, nNodes, nLocal, nNodesExt;
    int                **cols, elemOffset, nodeOffset, *elemIDs, *ncols;
    int                *nodeList, mypid, elemNNodes, *rowLengs, rowInd;
    double             values[100];
@@ -679,7 +679,7 @@ void MLI_FEDataAgglomerateElemsLocal(MLI_Matrix *elemMatrix,
    int                 *macroLabels, *denseRow, *denseRow2, *noRoot;
    int                 *macroIA, *macroJA, *macroAA, nMacros, *macroLists;
    int                 parent, macroNnz, loopFlag, curWeight, curIndex;
-   int                 rowNum, rowLeng, *cols, index, count, colIndex;
+   int                 rowNum, rowLeng, *cols, count, colIndex;
    int                 maxWeight, elemCount, elemIndex, macroNumber;
    int                 connects, secondChance;
    double              *vals;

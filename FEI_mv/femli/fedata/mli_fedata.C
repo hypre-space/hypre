@@ -4479,8 +4479,7 @@ int MLI_FEData::createElemBlock(int blockID)
 
 int MLI_FEData::deleteElemBlock(int blockID)
 {
-   int           i;
-   MLI_ElemBlock **tempBlocks, *currBlock;
+   MLI_ElemBlock *currBlock;
 
    // -------------------------------------------------------------
    // --- error checking
