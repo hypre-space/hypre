@@ -11,7 +11,7 @@
 
 typedef enum {
   UNDEFINED_SolverLib = -1,
-  HYPRE =2,
+  HYPRE =2
 } SolverLib_t;
 
 /******************************************************************************
