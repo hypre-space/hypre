@@ -25,11 +25,14 @@
 typedef struct
 {
     int        symmetric;
-    int        num_levels;
     double     thresh;
+    int        num_levels;
     double     filter;
-    double     cost;          /* cost for this processor */
     double     loadbal_beta;
+
+    double     cost;          /* cost for this processor */
+    double     setup_pattern_time;
+    double     setup_values_time;
 
     Numbering *numb;
     Matrix    *M;             /* preconditioner */
@@ -48,5 +51,6 @@ void ParaSailsSetupPattern(ParaSails *ps, Matrix *A,
   double thresh, int num_levels);
 void ParaSailsSetupValues(ParaSails *ps, Matrix *A, double filter);
 void ParaSailsApply(ParaSails *ps, double *u, double *v);
+void ParaSailsStats(ParaSails *ps, Matrix *A);
 
 #endif /* _PARASAILS_H */

@@ -1208,13 +1208,19 @@ ParaSails *ParaSailsCreate(MPI_Comm comm, int beg_row, int end_row, int sym)
     ParaSails *ps = (ParaSails *) malloc(sizeof(ParaSails));
     int npes;
 
-    ps->symmetric = sym;
-    ps->numb      = NULL;
-    ps->M         = NULL;
-
-    ps->comm      = comm;
-    ps->beg_row   = beg_row;
-    ps->end_row   = end_row;
+    ps->symmetric          = sym;
+    ps->thresh             = 0.1;
+    ps->num_levels         = 1;
+    ps->filter             = 0.0;
+    ps->loadbal_beta       = 0.0;
+    ps->cost               = 0.0;
+    ps->setup_pattern_time = 0.0;
+    ps->setup_values_time  = 0.0;
+    ps->numb               = NULL;
+    ps->M                  = NULL;
+    ps->comm               = comm;
+    ps->beg_row            = beg_row;
+    ps->end_row            = end_row;
 
     MPI_Comm_size(comm, &npes);
 
@@ -1256,6 +1262,9 @@ void ParaSailsSetupPattern(ParaSails *ps, Matrix *A,
 {
     DiagScale  *diag_scale;
     PrunedRows *pruned_rows;
+    double time0, time1;
+
+    time0 = MPI_Wtime();
 
     ps->thresh     = thresh;
     ps->num_levels = num_levels;
@@ -1280,6 +1289,9 @@ void ParaSailsSetupPattern(ParaSails *ps, Matrix *A,
 
     DiagScaleDestroy(diag_scale);
     PrunedRowsDestroy(pruned_rows);
+
+    time1 = MPI_Wtime();
+    ps->setup_pattern_time = time1 - time0;
 }
 
 /*--------------------------------------------------------------------------
@@ -1297,6 +1309,9 @@ void ParaSailsSetupValues(ParaSails *ps, Matrix *A, double filter)
     int row, len, *ind;
     double *val;
     int i;
+    double time0, time1;
+
+    time0 = MPI_Wtime();
 
     /* 
      * If the preconditioner matrix has its own numbering object, then we
@@ -1400,6 +1415,13 @@ void ParaSailsSetupValues(ParaSails *ps, Matrix *A, double filter)
     }
 
     StoredRowsDestroy(stored_rows);
+
+    time1 = MPI_Wtime();
+    ps->setup_values_time = time1 - time0;
+
+#ifdef PARASAILS_DEBUG
+    ParaSailsStats(ps, A);
+#endif
 }
 
 /*--------------------------------------------------------------------------
@@ -1425,4 +1447,49 @@ void ParaSailsApply(ParaSails *ps, double *u, double *v)
     {
         MatrixMatvec(ps->M, u, v);
     }
+}
+
+/*--------------------------------------------------------------------------
+ * ParaSailsStats - 
+ *--------------------------------------------------------------------------*/
+
+void ParaSailsStats(ParaSails *ps, Matrix *A)
+{
+    int mype, npes;
+    int n, nnzm, nnza;
+    MPI_Comm comm = ps->comm;
+    double max_pattern_time, max_values_time, max_cost;
+
+    MPI_Comm_rank(comm, &mype);
+    MPI_Comm_size(comm, &npes);
+
+    nnzm = MatrixNnz(ps->M);
+    nnza = MatrixNnz(A);
+    if (ps->symmetric)
+    {
+        n = ps->end_rows[npes-1] - ps->beg_rows[0] + 1;
+	nnza = (nnza - n) / 2 + n;
+    }
+
+    MPI_Reduce(&ps->setup_pattern_time, &max_pattern_time, 
+	1, MPI_DOUBLE, MPI_MAX, 0, comm);
+    MPI_Reduce(&ps->setup_values_time, &max_values_time, 
+	1, MPI_DOUBLE, MPI_MAX, 0, comm);
+    MPI_Reduce(&ps->cost, &max_cost, 1, MPI_DOUBLE, MPI_MAX, 0, comm);
+
+    if (mype)
+	return;
+
+    printf("******************* ParaSails *******************\n");
+    printf("symmetric : %d\n", ps->symmetric);
+    printf("thresh    : %e\n", ps->thresh);
+    printf("num_levels: %d\n", ps->num_levels);
+    printf("filter    : %e\n", ps->filter);
+    printf("loadbal   : %f\n", ps->loadbal_beta);
+    printf("Max cost  : %7.1e\n", max_cost);
+    printf("Nnz (pct) : %d (%.2f %%)\n", nnzm, nnzm/(double)nnza);
+    printf("Max setup pattern time: %8.1f\n", max_pattern_time);
+    printf("Max setup values time : %8.1f\n", max_values_time);
+    printf("*************************************************\n");
+    fflush(NULL);
 }
