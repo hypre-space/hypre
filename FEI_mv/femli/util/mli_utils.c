@@ -43,6 +43,8 @@ int  MLI_Utils_IntTreeUpdate(int treeLeng, int *tree,int *treeInd);
 }
 #endif
 
+#define habs(x) (((x) > 0) ? x : -(x))
+
 /*****************************************************************************
  * destructor for hypre_ParCSRMatrix conforming to MLI requirements 
  *--------------------------------------------------------------------------*/
@@ -1251,4 +1253,95 @@ int MLI_Utils_IntTreeUpdate(int treeLeng, int *tree, int *treeInd)
    return 0;
 }
 
+/* ******************************************************************** */
+/* matrix of a dense matrix                                             */
+/* -------------------------------------------------------------------- */
+
+int MLI_Utils_MatrixInverse( double **Amat, int ndim, double ***Bmat )
+{
+   int    i, j, k;
+   double denom, **Cmat, dmax;
+
+   (*Bmat) = NULL;
+   if ( ndim == 1 )
+   {
+      if ( habs(Amat[0][0]) <= 1.0e-16 ) return -1;
+      Cmat = (double **) malloc( ndim * sizeof(double*) );
+      for ( i = 0; i < ndim; i++ )
+         Cmat[i] = (double *) malloc( ndim * sizeof(double) );
+      Cmat[0][0] = 1.0 / Amat[0][0];
+      (*Bmat) = Cmat;
+      return 0;
+   }
+   else if ( ndim == 2 )
+   {
+      denom = Amat[0][0] * Amat[1][1] - Amat[0][1] * Amat[1][0];
+      if ( habs( denom ) <= 1.0e-16 ) return -1;
+      Cmat = (double **) malloc( ndim * sizeof(double*) );
+      for ( i = 0; i < ndim; i++ )
+         Cmat[i] = (double *) malloc( ndim * sizeof(double) );
+      Cmat[0][0] = Amat[1][1] / denom;
+      Cmat[1][1] = Amat[0][0] / denom;
+      Cmat[0][1] = - ( Amat[0][1] / denom );
+      Cmat[1][0] = - ( Amat[1][0] / denom );
+      (*Bmat) = Cmat;
+      return 0;
+   }
+   else
+   {
+      Cmat = (double **) malloc( ndim * sizeof(double*) );
+      for ( i = 0; i < ndim; i++ )
+      {
+         Cmat[i] = (double *) malloc( ndim * sizeof(double) );
+         for ( j = 0; j < ndim; j++ ) Cmat[i][j] = 0.0;
+         Cmat[i][i] = 1.0;
+      }
+      for ( i = 1; i < ndim; i++ )
+      {
+         for ( j = 0; j < i; j++ )
+         {
+            if ( habs(Amat[j][j]) < 1.0e-16 ) return -1;
+            denom = Amat[i][j] / Amat[j][j];
+            for ( k = 0; k < ndim; k++ )
+            {
+               Amat[i][k] -= denom * Amat[j][k];
+               Cmat[i][k] -= denom * Cmat[j][k];
+            }
+         }
+      }
+      for ( i = ndim-2; i >= 0; i-- )
+      {
+         for ( j = ndim-1; j >= i+1; j-- )
+         {
+            if ( habs(Amat[j][j]) < 1.0e-16 ) return -1;
+            denom = Amat[i][j] / Amat[j][j];
+            for ( k = 0; k < ndim; k++ )
+            {
+               Amat[i][k] -= denom * Amat[j][k];
+               Cmat[i][k] -= denom * Cmat[j][k];
+            }
+         }
+      }
+     for ( i = 0; i < ndim; i++ )
+      {
+         denom = Amat[i][i];
+         if ( habs(denom) < 1.0e-16 ) return -1;
+         for ( j = 0; j < ndim; j++ ) Cmat[i][j] /= denom;
+      }
+
+      for ( i = 0; i < ndim; i++ )
+         for ( j = 0; j < ndim; j++ )
+            if ( habs(Cmat[i][j]) < 1.0e-17 ) Cmat[i][j] = 0.0;
+      dmax = 0.0;
+      for ( i = 0; i < ndim; i++ )
+      {
+         for ( j = 0; j < ndim; j++ )
+            if ( habs(Cmat[i][j]) > dmax ) dmax = habs(Cmat[i][j]);
+      }
+      (*Bmat) = Cmat;
+      if ( dmax > 1.0e6 ) return 1;
+      else                return 0;
+   }
+   return -1;
+}
 

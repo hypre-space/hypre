@@ -71,6 +71,7 @@ int    MLI_Utils_IntQSort2(int *, int *, int, int);
 int    MLI_Utils_IntQSort2a(int *, double *, int, int);
 int    MLI_Utils_IntMergeSort(int nlist, int *listLengs, int **lists,
                               int **list2, int *newNList, int **newList); 
+int    MLI_Utils_MatrixInverse(double **Amat, int ndim, double ***Bmat);
 
 #ifdef __cplusplus
 }
