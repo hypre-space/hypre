@@ -18,13 +18,13 @@
 
 #include "general.h"
 
-#ifdef PETSC_AVAILABLE
-
 #include "../HYPRE.h"
 
 /* Prototypes for DistributedMatrix */
 #include "../distributed_matrix/HYPRE_distributed_matrix_types.h"
 #include "../distributed_matrix/HYPRE_distributed_matrix_protos.h"
+
+#ifdef PETSC_AVAILABLE
 
 /* Matrix structure from PETSc */
 #include "sles.h"
