@@ -331,12 +331,14 @@ int getMatrixCSR(HYPRE_IJMatrix Amat, int nrows, int nnz, int *ia_ptr,
        ierr = HYPRE_ParCSRMatrixRestoreRow(A_csr,i,&rowSize,&colInd,&colVal);
        assert(!ierr);
     }   
+    /*
     if ( nnz != nz_ptr )
     {
        printf("getMatrixCSR note : matrix sparsity has been changed since\n");
        printf("             matConfigure - %d > %d ?\n", nnz, nz_ptr);
        printf("             number of zeros            = %d \n", nz );
     }
+    */
     return nz_ptr;
 }
 

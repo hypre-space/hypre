@@ -5115,6 +5115,26 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
     }
 
     //*******************************************************************
+    // recover solution for reduced system
+    //-------------------------------------------------------------------
+
+    if ( slideReduction_ == 1 )
+    {
+       newnorm = rnorm;
+       rnorm   = buildSlideReducedSoln();
+    }
+    else if ( slideReduction_ == 2 )
+    {
+       newnorm = rnorm;
+       rnorm   = buildSlideReducedSoln2();
+    }
+    else if ( schurReduction_ == 1 )
+    {
+       newnorm = rnorm;
+       rnorm   = buildSchurReducedSoln();
+    }
+
+    //*******************************************************************
     // register solver return information and print timing information
     //-------------------------------------------------------------------
 
@@ -5128,33 +5148,16 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
        printf("***************************************************\n");
        printf("*                Solver Statistics                *\n");
        printf("*-------------------------------------------------*\n");
-       if ( schurReduction_ )
-          printf("** HYPRE Schur reduction time      = %e\n",rtime2-rtime1);
-       if ( slideReduction_ )
-          printf("** HYPRE slide reduction time      = %e\n",rtime2-rtime1);
+       if ( slideReduction_ || schurReduction_ )
+          printf("** HYPRE matrix reduction time     = %e\n",rtime2-rtime1);
        printf("** HYPRE preconditioner setup time = %e\n", ptime - stime);
        printf("** HYPRE solution time             = %e\n", etime - ptime);
        printf("** HYPRE total time                = %e\n", etime - stime);
        printf("** HYPRE number of iterations      = %d\n", num_iterations);
+       if ( slideReduction_ || schurReduction_ )
+          printf("** HYPRE reduced residual norm     = %e\n", newnorm);
        printf("** HYPRE final residual norm       = %e\n", rnorm);
        printf("***************************************************\n");
-    }
-
-    //*******************************************************************
-    // recover solution for reduced system
-    //-------------------------------------------------------------------
-
-    if ( slideReduction_ == 1 )
-    {
-       buildSlideReducedSoln();
-    }
-    else if ( slideReduction_ == 2 )
-    {
-       buildSlideReducedSoln2();
-    }
-    else if ( schurReduction_ == 1 )
-    {
-       buildSchurReducedSoln();
     }
 
     //*******************************************************************
@@ -5277,12 +5280,12 @@ void HYPRE_LinSysCore::solveUsingSuperLU(int& status)
     // have been stored in colIndices and rowLengths
     //------------------------------------------------------------------
       
-    if ( colIndices_ == NULL || rowLengths_ == NULL )
-    {
-       printf("solveUsingSuperLU ERROR - allocateMatrix not called.\n");
-       status = -1;
-       return;
-    }
+    //if ( colIndices_ == NULL || rowLengths_ == NULL )
+    //{
+    //   printf("solveUsingSuperLU ERROR - allocateMatrix not called.\n");
+    //   status = -1;
+    //   return;
+    //}
     if ( localStartRow_ != 1 )
     {
        printf("solveUsingSuperLU ERROR - row does not start at 1\n");
@@ -5297,13 +5300,20 @@ void HYPRE_LinSysCore::solveUsingSuperLU(int& status)
          nrows = localEndRow_ - localStartRow_ + 1 - A21NRows_;
     else nrows = localEndRow_;
 
+    //nnz   = 0;
+    //for ( i = 0; i < nrows; i++ ) nnz += rowLengths_[i];
+    A_csr  = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(currA_);
     nnz   = 0;
-    for ( i = 0; i < nrows; i++ ) nnz += rowLengths_[i];
+    for ( i = localStartRow_-1; i <= localEndRow_-1; i++ )
+    {
+       HYPRE_ParCSRMatrixGetRow(A_csr,i,&rowSize,&colInd,&colVal);
+       nnz += rowSize;
+       HYPRE_ParCSRMatrixRestoreRow(A_csr,i,&rowSize,&colInd,&colVal);
+    }
 
     new_ia = new int[nrows+1];
     new_ja = new int[nnz];
     new_a  = new double[nnz];
-    A_csr  = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(currA_);
 
     nz_ptr = getMatrixCSR(currA_, nrows, nnz, new_ia, new_ja, new_a);
 
@@ -5461,12 +5471,12 @@ void HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
     // have been stored in colIndices and rowLengths
     //------------------------------------------------------------------
       
-    if ( colIndices_ == NULL || rowLengths_ == NULL )
-    {
-       printf("solveUsingSuperLUX ERROR - Configure not called\n");
-       status = -1;
-       return;
-    }
+    //if ( colIndices_ == NULL || rowLengths_ == NULL )
+    //{
+    //   printf("solveUsingSuperLUX ERROR - Configure not called\n");
+    //   status = -1;
+    //   return;
+    //}
     if ( localStartRow_ != 1 )
     {
        printf("solveUsingSuperLUX ERROR - row not start at 1\n");
@@ -5674,12 +5684,12 @@ void HYPRE_LinSysCore::solveUsingY12M(int& status)
     // have been stored in colIndices and rowLengths
     //------------------------------------------------------------------
       
-    if ( colIndices_ == NULL || rowLengths_ == NULL )
-    {
-       printf("solveUsingY12M ERROR - Configure not called\n");
-       status = -1;
-       return;
-    }
+    //if ( colIndices_ == NULL || rowLengths_ == NULL )
+    //{
+    //   printf("solveUsingY12M ERROR - Configure not called\n");
+    //   status = -1;
+    //   return;
+    //}
     if ( localStartRow_ != 1 )
     {
        printf("solveUsingY12M ERROR - row does not start at 1.\n");

@@ -3555,7 +3555,7 @@ void HYPRE_LinSysCore::buildSlideReducedSystem2()
 // it in place.  Additional information given are :
 //------------------------------------------------------------------------------
 
-void HYPRE_LinSysCore::buildSlideReducedSoln()
+double HYPRE_LinSysCore::buildSlideReducedSoln()
 {
     int                i, j, *int_array, *gint_array, x2NRows, x2GlobalNRows;
     int                ierr, rowNum, startRow, startRow2, index, localNRows;
@@ -3708,6 +3708,7 @@ void HYPRE_LinSysCore::buildSlideReducedSoln()
     //HYinvA22_ = NULL;
     HYPRE_IJVectorDestroy(R1); 
     HYPRE_IJVectorDestroy(x2); 
+    return rnorm;
 }
 
 //******************************************************************************
@@ -3715,7 +3716,7 @@ void HYPRE_LinSysCore::buildSlideReducedSoln()
 // it in place.  Additional information given are :
 //------------------------------------------------------------------------------
 
-void HYPRE_LinSysCore::buildSlideReducedSoln2()
+double HYPRE_LinSysCore::buildSlideReducedSoln2()
 {
     int                i, j, *int_array, *gint_array, x2NRows, x2GlobalNRows;
     int                ierr, rowNum, startRow, startRow2, index, localNRows;
@@ -3867,5 +3868,6 @@ void HYPRE_LinSysCore::buildSlideReducedSoln2()
     //HYinvA22_ = NULL;
     HYPRE_IJVectorDestroy(R1); 
     HYPRE_IJVectorDestroy(x2); 
+    return rnorm;
 }
 

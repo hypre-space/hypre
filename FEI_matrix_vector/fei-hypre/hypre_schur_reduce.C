@@ -855,7 +855,7 @@ void HYPRE_LinSysCore::buildSchurReducedSystem()
 // build the solution vector for Schur-reduced systems 
 //------------------------------------------------------------------------------
 
-void HYPRE_LinSysCore::buildSchurReducedSoln()
+double HYPRE_LinSysCore::buildSchurReducedSoln()
 {
     int                i, j, *int_array, *gint_array, x2NRows, x2GlobalNRows;
     int                ierr, rowNum, startRow, startRow2, index, localNRows;
@@ -983,6 +983,7 @@ void HYPRE_LinSysCore::buildSchurReducedSoln()
     //HYinvA22_ = NULL;
     HYPRE_IJVectorDestroy(R1); 
     HYPRE_IJVectorDestroy(x2); 
+    return rnorm;
 }
 
 //******************************************************************************

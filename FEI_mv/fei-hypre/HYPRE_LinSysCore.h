@@ -356,23 +356,23 @@ class HYPRE_LinSysCore
    // HYPRE-specific public functions
    // ----------------------------------------------------------------------
 
-   void  loadConstraintNumbers(int length, int *list);
-   void  buildSlideReducedSystem();
-   void  buildSlideReducedSystem2();
-   void  buildSlideReducedSoln();
-   void  buildSlideReducedSoln2();
-   void  buildSchurReducedSystem();
-   void  buildSchurReducedRHS();
-   void  buildSchurReducedSoln();
-   void  computeMinResProjection(HYPRE_ParCSRMatrix A_csr, HYPRE_ParVector x, 
-                              HYPRE_ParVector b, double& nrm1, double& nrm2);
-   void  addToProjectionSpace(HYPRE_IJVector x, HYPRE_IJVector b);
-   void  getVersion(char**);
-   void  beginCreateMapFromSoln();
-   void  endCreateMapFromSoln();
-   void  putIntoMappedMatrix(int row, int numValues, const double* values,
-                             const int* scatterIndices);
-   void  getFEGridObject(void **object) { (*object) = fegrid; }
+   void   loadConstraintNumbers(int length, int *list);
+   void   buildSlideReducedSystem();
+   void   buildSlideReducedSystem2();
+   double buildSlideReducedSoln();
+   double buildSlideReducedSoln2();
+   void   buildSchurReducedSystem();
+   void   buildSchurReducedRHS();
+   double buildSchurReducedSoln();
+   void   computeMinResProjection(HYPRE_ParCSRMatrix A_csr, HYPRE_ParVector x, 
+                                  HYPRE_ParVector b, double& nrm1, double& nrm2);
+   void   addToProjectionSpace(HYPRE_IJVector x, HYPRE_IJVector b);
+   void   getVersion(char**);
+   void   beginCreateMapFromSoln();
+   void   endCreateMapFromSoln();
+   void   putIntoMappedMatrix(int row, int numValues, const double* values,
+                              const int* scatterIndices);
+   void   getFEGridObject(void **object) { (*object) = fegrid; }
 
  private:        //functions
 
