@@ -8,517 +8,490 @@
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
- * Routine for automatic coarsening in unstructured multigrid codes
- *
- * Notes:
- *
- *   - The underlying matrix storage scheme is a PETSc AIJ matrix.
- *
- *   - We define the following temporary storage:
- *
- *     ST            - a CSR matrix representing the transpose of
- *                     the "strength matrix", S.
- *     measure_array - a double array containing the "measures" for
- *                     each of the fine-grid points
- *     IS_array      - an integer array containing the list of points
- *                     in the independent sets (it also naturally
- *                     contains the list of C-points)
- *
- *   - The graph of the "strength matrix" for A is a subgraph of
- *     the graph of A, but requires nonsymmetric storage even if
- *     A is symmetric.  This is because of the directional nature of
- *     the "strengh of dependence" notion (see below).  Since we are
- *     using nonsymmetric storage for A right now, this is not a problem.
- *     If we ever add the ability to store A symmetrically, then we
- *     could store the strength graph as floats instead of doubles to
- *     save space.
- *
- * Terminology:
- *  
- *   Ruge's terminology: A point is is "strongly connected to" j, or
- *   "strongly depends on" j, if -a_ij >= \theta max_(l != j) {-a_il}.
- *  
- *   Here, we retain some of this terminology, but with a more generalized
- *   notion of "strength".  We also retain the "natural" graph notation
- *   for representing the directed graph of a matrix.  That is, the
- *   nonzero entry a_ij is represented as:
- *  
- *       x --------> x
- *       i           j
- *  
- *   In the strength matrix, S, the entry s_ij is also graphically denoted
- *   as above, and means both of the following:
- *  
- *     - i "strongly depends on" j with "strength" s_ij
- *     - j "strongly influences" i with "strength" s_ij
- * 
  *****************************************************************************/
 
 #include "headers.h"
 
-/*--------------------------------------------------------------------------
- * hypre_AMGCoarsen
- *--------------------------------------------------------------------------*/
+/*==========================================================================*/
+/*==========================================================================*/
+/**
+  Selects a coarse "grid" based on the graph of a matrix.
 
-int hypre_AMGCoarsen(A, strong_threshold, CF_marker_ptr, S_ptr)
+  Notes:
+  \begin{itemize}
+  \item The underlying matrix storage scheme is a hypre_CSR matrix.
+  \item The routine returns the following:
+  \begin{itemize}
+  \item S - a CSR matrix representing the "strength matrix".  This is
+  used in the "build interpolation" routine.
+  \item CF\_marker - an array indicating both C-pts (value = 1) and
+  F-pts (value = -1)
+  \end{itemize}
+  \item We define the following temporary storage:
+  \begin{itemize}
+  \item measure\_array - an array containing the "measures" for each
+  of the fine-grid points
+  \item graph\_array - an array containing the list of points in the
+  "current subgraph" being considered in the coarsening process.
+  \end{itemize}
+  \item The graph of the "strength matrix" for A is a subgraph of the
+  graph of A, but requires nonsymmetric storage even if A is
+  symmetric.  This is because of the directional nature of the
+  "strengh of dependence" notion (see below).  Since we are using
+  nonsymmetric storage for A right now, this is not a problem.  If we
+  ever add the ability to store A symmetrically, then we could store
+  the strength graph as floats instead of doubles to save space.
+  \item This routine currently "compresses" the strength matrix.  We
+  should consider the possibility of defining this matrix to have the
+  same "nonzero structure" as A.  To do this, we could use the same
+  A\_i and A\_j arrays, and would need only define the S\_data array.
+  There are several pros and cons to discuss.
+  \end{itemize}
 
-hypre_CSRMatrix    *A;
-int               **CF_marker_ptr;
-double              strong_threshold;
-hypre_CSRMatrix   **S_ptr;
+  Terminology:
+  \begin{itemize}
+  \item Ruge's terminology: A point is "strongly connected to" $j$, or
+  "strongly depends on" $j$, if $-a_ij >= \theta max_{l != j} \{-a_il\}$.
+  \item Here, we retain some of this terminology, but with a more
+  generalized notion of "strength".  We also retain the "natural"
+  graph notation for representing the directed graph of a matrix.
+  That is, the nonzero entry $a_ij$ is represented as: i --> j.  In
+  the strength matrix, S, the entry $s_ij$ is also graphically denoted
+  as above, and means both of the following:
+  \begin{itemize}
+  \item $i$ "depends on" $j$ with "strength" $s_ij$
+  \item $j$ "influences" $i$ with "strength" $s_ij$
+  \end{itemize}
+  \end{itemize}
 
+  {\bf Input files:}
+  headers.h
+
+  @return Error code.
+  
+  @param A [IN]
+  coefficient matrix
+  @param strength_threshold [IN]
+  threshold parameter used to define strength
+  @param S_ptr [OUT]
+  strength matrix
+  @param CF_marker_ptr [OUT]
+  array indicating C/F points
+  @param coarse_size_ptr [OUT]
+  size of the coarse grid
+  
+  @see */
+/*--------------------------------------------------------------------------*/
+
+#define C_PT  1
+#define F_PT -1
+#define COMMON_C_PT  2
+
+int
+hypre_AMGCoarsen( hypre_CSRMatrix    *A,
+                  double              strength_threshold,
+                  hypre_CSRMatrix   **S_ptr,
+                  int               **CF_marker_ptr,
+                  int                *coarse_size_ptr     )
 {
-   double       *A_data = hypre_CSRMatrixData(A);
-   int          *A_i = hypre_CSRMatrixI(A);
-   int          *A_j = hypre_CSRMatrixJ(A);
-   int           num_variables = hypre_CSRMatrixNumRows(A);
-
-   int          *CF_marker;
-
+   int             *A_i           = hypre_CSRMatrixI(A);
+   int             *A_j           = hypre_CSRMatrixJ(A);
+   double          *A_data        = hypre_CSRMatrixData(A);
+   int              num_variables = hypre_CSRMatrixNumRows(A);
+                  
    hypre_CSRMatrix *S;
+   int             *S_i;
+   int             *S_j;
+   double          *S_data;
+                 
+   int             *CF_marker;
+   int              coarse_size;
 
-   hypre_CSRMatrix *ST;
-   double  *matx_data;
+   double          *measure_array;
+   int             *graph_array;
+   int              graph_size;
+
+   double           diag, row_scale;
+   int              i, j, k, jA, jS, kS, ig;
+
+   int              ierr = 0;
+
+#if 0 /* debugging */
+   char  filename[256];
+   FILE *fp;
+   int   iter = 0;
+#endif
 
    /*--------------------------------------------------------------
-    * CSR components of the transpose of the "strength matrix", S,
-    * are stored in the hypre_Matrix ST. ***NOTE*** this matrix
-    * violates the convention, in that there is *NO DIAGONAL ELEMENT*
-    * on any row.  Caveat Emptor!
+    * Compute a CSR strength matrix, S.
     *
     * For now, the "strength" of dependence/influence is defined in
-    * the traditional way, e.g., i strongly depends on j if |aij| >
-    * max (k != i ) |aik|. Then ST_ji = 1, else ST_ji = 0.
+    * the following way: i depends on j if
+    *     aij > max (k != i) aik,    aii < 0
+    * or
+    *     aij < min (k != i) aik,    aii >= 0
+    * Then S_ij = 1, else S_ij = 0.
     *
-    * For more sophistocated uses in future, ST_data will be of type
-    * double.  For now, it is type int.
+    * NOTE: the entries are negative initially, corresponding
+    * to "unaccounted-for" dependence.
     *----------------------------------------------------------------*/
 
-   int          *ST_data;  /* ST_data will be type double in future */
-   int          *ST_i;
-   int          *ST_j;   
- 
-   int          *S_i;
-   int          *S_j;
+   S = hypre_CreateCSRMatrix(num_variables, num_variables,
+                             A_i[num_variables]);
+   hypre_InitializeCSRMatrix(S);
 
-   double       *measure_array;
+   S_i           = hypre_CSRMatrixI(S);
+   S_j           = hypre_CSRMatrixJ(S);
+   S_data        = hypre_CSRMatrixData(S);
 
-   int          *IS_array;
-   int           IS_start, IS_size;
+   /* give S same nonzero structure as A */
+   for (i = 0; i < num_variables; i++)
+   {
+      S_i[i] = A_i[i];
+      for (jA = A_i[i]; jA < A_i[i+1]; jA++)
+      {
+         S_j[jA] = A_j[jA];
+      }
+   }
+   S_i[num_variables] = A_i[num_variables];
+
+   for (i = 0; i < num_variables; i++)
+   {
+      diag = A_data[A_i[i]];
+
+      /* compute scaling factor */
+      row_scale = 0.0;
+      if (diag < 0)
+      {
+         for (jA = A_i[i]+1; jA < A_i[i+1]; jA++)
+         {
+            row_scale = max(row_scale, A_data[jA]);
+         }
+      }
+      else
+      {
+         for (jA = A_i[i]+1; jA < A_i[i+1]; jA++)
+         {
+            row_scale = min(row_scale, A_data[jA]);
+         }
+      }
+
+      /* compute row entries of S */
+      S_data[A_i[i]] = 0;
+      if (diag < 0) 
+      { 
+         for (jA = A_i[i]+1; jA < A_i[i+1]; jA++)
+         {
+            S_data[jA] = 0;
+            if (A_data[jA] > strength_threshold * row_scale)
+            {
+               S_data[jA] = -1;
+            }
+         }
+      }
+      else
+      {
+         for (jA = A_i[i]+1; jA < A_i[i+1]; jA++)
+         {
+            S_data[jA] = 0;
+            if (A_data[jA] < strength_threshold * row_scale)
+            {
+               S_data[jA] = -1;
+            }
+         }
+      }
+   }
+
+   /*--------------------------------------------------------------
+    * "Compress" the strength matrix.
+    *
+    * NOTE: S has *NO DIAGONAL ELEMENT* on any row.  Caveat Emptor!
+    *
+    * NOTE: This "compression" section of code may be removed, and
+    * coarsening will still be done correctly.  However, the routine
+    * that builds interpolation would have to be modified first.
+    *----------------------------------------------------------------*/
+
+   jS = 0;
+   for (i = 0; i < num_variables; i++)
+   {
+      S_i[i] = jS;
+      for (jA = A_i[i]; jA < A_i[i+1]; jA++)
+      {
+         if (S_data[jA])
+         {
+            S_j[jS]    = S_j[jA];
+            S_data[jS] = S_data[jA];
+            jS++;
+         }
+      }
+   }
+   S_i[num_variables] = jS;
+   hypre_CSRMatrixNumNonzeros(S) = jS;
+
+   /*----------------------------------------------------------
+    * Compute the measures
+    *
+    * The measures are currently given by the column sums of S.
+    * Hence, measure_array[i] is the number of influences
+    * of variable i.
+    *
+    * The measures are augmented by a random number
+    * between 0 and 1.
+    *----------------------------------------------------------*/
+
+   measure_array = hypre_CTAlloc(double, num_variables);
+
+   for (i = 0; i < num_variables; i++)
+   {
+      for (jS = S_i[i]; jS < S_i[i+1]; jS++)
+      {
+         j = S_j[jS];
+         measure_array[j] -= S_data[jS];
+      }
+   }
+
+   /* this augments the measures */
+   hypre_InitAMGIndepSet(S, measure_array);
 
    /*---------------------------------------------------
-    * Variables I've added to be declared, or passed, etc.
-    *--------------------------------------------------*/
+    * Initialize the graph array
+    *---------------------------------------------------*/
 
-   /*-------------
-      int      num_unknowns;
-      int      num_points;
-      int     *iu;
-      int     *ip;
-      int     *iv;
-    *-------------*/
+   graph_array   = hypre_CTAlloc(int, num_variables);
 
-   int      i, j, k, m, n;
-   int      num_connections = 0;
-   int      num_lost;
-   int      next_open;
-   int      now_checking;
-   int      start_j;
-   int      num_pts_not_assigned;
-   int      Cpoint;
-   int      nabor, nabor_two;
-   double   RowMaxAbs;
+   /* intialize measure array and graph array */
+   for (i = 0; i < num_variables; i++)
+   {
+      graph_array[i] = i;
+   }
+
+   /*---------------------------------------------------
+    * Initialize the C/F marker array
+    *---------------------------------------------------*/
 
    CF_marker = hypre_CTAlloc(int, num_variables);
-   IS_array = hypre_CTAlloc(int, num_variables);
-   ST_i = hypre_CTAlloc(int, num_variables+1);
-   measure_array = hypre_CTAlloc(double, num_variables);
-   num_pts_not_assigned = num_variables; /* will rewrite as num_points for
-                                            systems */
-
-   /*---------------------------------------------------
-    * Compute a column-based strength matrix, S.
-    * - No diagonal entry is stored.
-    *
-    * The first implementation will just use a 0 or
-    * a 1 for the entries of S as defined by the
-    * standard AMG definition of "strongly depends on".
-    *---------------------------------------------------*/
-
-   for (i = 0; i < num_variables; ++i)
-   {
-      RowMaxAbs = 0.0;
-      for (j = A_i[i]+1; j < A_i[i+1]; j++)
-      {
-         ST_i[A_j[j]]++;
-
-/*       RowMaxAbs = max(RowMaxAbs, fabs(A_data[j]));  */
-                       /* assumes correct sign of off-diagonal. 
-                          fix later */
-
-         if (A_data[A_i[i]] < 0 ) 
-         { 
-            RowMaxAbs = max(RowMaxAbs, A_data[j]);
-         }
-         else
-         {
-            RowMaxAbs = min(RowMaxAbs, A_data[j]);
-         }
-
-         ++num_connections;
-      }
-      measure_array[i] = RowMaxAbs;
-   }
-
-   /*---------------------------------------------------
-    * Build first cut at ST_i
-    *---------------------------------------------------*/
-
-   for (i = num_variables; i > 0; i--)
-   {
-      ST_i[i] = num_connections;
-      num_connections -= ST_i[i-1];
-   }
-   ST_i[0] = 0;
-
-                                /* ST_data will be type double in future */
-   ST_data = hypre_CTAlloc(int, ST_i[num_variables]);
-   ST_j = hypre_CTAlloc(int, ST_i[num_variables]);
-
-   /*-------------------------------------------------
-    * Check each connection for strong dependence.
-    * If true, make entry indicating strong influence
-    * in ST.
-    *-------------------------------------------------*/
-
-   for (i = 0; i < num_variables; ++i)
-   {
-      for (j = A_i[i]+1; j < A_i[i+1]; ++j)
-      {
-         ST_j[ST_i[A_j[j]]] = i;
-         
-         if (measure_array[i] >= 0)
-         {
-            if (A_data[j] > strong_threshold * measure_array[i])
-            {
-               ST_data[ST_i[A_j[j]]] = 1;
-            }
-         }
-         else
-         {
-            if (A_data[j] < strong_threshold * measure_array[i])
-            {
-               ST_data[ST_i[A_j[j]]] = 1;
-            }
-         }
-         ST_i[A_j[j]]++; 
-      }
-   }
-
-   /*------------------------------------------------------------
-    * ST_i[j] now points to the *end* of the jth row of entries
-    * instead of the beginning.  Restore ST_i to front of row.
-    *------------------------------------------------------------*/
-
-   for (i = num_variables; i > 0; i--)
-   {
-      ST_i[i] = ST_i[i-1]; 
-   }
-   ST_i[0] = 0;
-
-   /*----------------------------------------------------------
-    * Compress ST to remove non-strong influences
-    *----------------------------------------------------------*/
-
-   next_open = 0;
-   now_checking = 0;
-   num_lost = 0;
-
-   for (i = 0; i < num_variables; i++)
-   {
-      start_j = ST_i[i];
-      ST_i[i] -= num_lost;
-
-      for (j = start_j; j < ST_i[i+1]; j++)
-      {
-         if (ST_data[now_checking] == 0)
-         {
-            num_lost++;
-            now_checking++;
-         }
-         else
-         {
-            ST_data[next_open] = 1;
-            ST_j[next_open] = ST_j[now_checking];
-            now_checking++;
-            next_open++;
-         }
-      }
-   }
-   ST_i[num_variables] -= num_lost;
-
-   /*------------------------------------------------------------
-    * Create and load the ST array, which will be used to find
-    * the transpose, S, which is returned.
-    *-----------------------------------------------------------*/
-
-   ST = hypre_CreateCSRMatrix(num_variables, num_variables, NULL);
-
-   matx_data = hypre_CTAlloc(double,ST_i[num_variables]);
-   for (i=0;i<ST_i[num_variables];i++)
-   {
-      matx_data[i] = (double) ST_data[i];
-   }
-
-   hypre_CSRMatrixData(ST) = matx_data;
-   hypre_CSRMatrixI(ST)    = ST_i;
-   hypre_CSRMatrixJ(ST)    = ST_j;
-   hypre_CSRMatrixOwnsData(ST) = 1; 
-
-   hypre_CSRMatrixTranspose(ST, S_ptr);
-   S = *S_ptr;
-
-   S_i = hypre_CSRMatrixI(S);
-   S_j = hypre_CSRMatrixJ(S);
-
-
-   /*----------------------------------------------------------
-    * Compute "measures" for the fine-grid points,
-    * and store in measure_array.
-    *
-    * The first implementation of this will just sum
-    * the columns of S (rows of ST). Hence, measure_array[j]
-    * is the *number* of strong influences variable j has.
-    *----------------------------------------------------------*/
-
-   for (i = 0; i < num_variables; i++)
-   {
-      measure_array[i] = ST_i[i+1] - ST_i[i];
-      if (measure_array[i] == 0) 
-      {
-         /*mark points with no influences as fine points */
-         CF_marker[i] = -1;
-         --num_pts_not_assigned;
-      }
-   }
 
    /*---------------------------------------------------
     * Loop until all points are either fine or coarse.
     *---------------------------------------------------*/
 
-   IS_start = 0;
-
-   while (num_pts_not_assigned > 0)
+   coarse_size = 0;
+   graph_size = num_variables;
+   while (1)
    {
       /*------------------------------------------------
-       * Pick an independent set (maybe maximal) of
-       * points with maximal measure.
-       * - Each independent set is tacked onto the end
-       *   of the array, IS_array.  This is how we
-       *   keep a running list of C-points.
+       * Compute the subgraph used to pick the
+       * next independent set.
+       *
+       * Take marked points out of the subgraph,
+       * and set to be C-pts.
+       *
+       * Take points with measure less than 1 out of the
+       * subgraph, and set to be F-pts.
+       *
+       * To take points out of the subgraph, they are
+       * simply moved to the end of the graph array.
        *------------------------------------------------*/
 
-      IS_size = 0;
-      hypre_AMGIndepSet(ST_i, ST_j, S_i, S_j, num_variables, 
-                        measure_array, &IS_array[IS_start], &IS_size);
+      for (ig = 0; ig < graph_size; ig++)
+      {
+         i = graph_array[ig];
 
-      /* check to see whether there are any points left */
-/* printf("%d\n", IS_size); */
+         /* marked */
+         if (CF_marker[i])
+         {
+            /* set to be a C-pt */
+            CF_marker[i] = C_PT;
+            measure_array[i] = 0;
+            coarse_size++;
+         }
 
-      if (IS_size == 0)  
+         /* not marked */
+         else if (measure_array[i] < 1)
+         {
+            /* set to be an F-pt */
+            CF_marker[i] = F_PT;
+            measure_array[i] = 0;
+         }
+
+         /* take point out of the subgraph */
+         if ( (CF_marker[i] == C_PT) || (CF_marker[i] == F_PT) )
+         {
+            graph_size--;
+            graph_array[ig] = graph_array[graph_size];
+            graph_array[graph_size] = i;
+            ig--;
+         }
+      }
+
+      /*------------------------------------------------
+       * Debugging:
+       *
+       * Uncomment the sections of code labeled
+       * "debugging" to generate several files that
+       * can be visualized using the `coarsen.m'
+       * matlab routine.
+       *------------------------------------------------*/
+
+#if 0 /* debugging */
+      /* print out measures */
+      sprintf(filename, "coarsen.out.measures.%04d", iter);
+      fp = fopen(filename, "w");
+      for (i = 0; i < num_variables; i++)
+      {
+         fprintf(fp, "%f\n", measure_array[i]);
+      }
+      fclose(fp);
+
+      /* print out strength matrix */
+      sprintf(filename, "coarsen.out.strength.%04d", iter);
+      hypre_PrintCSRMatrix(S, filename);
+
+      /* print out C/F marker */
+      sprintf(filename, "coarsen.out.CF.%04d", iter);
+      fp = fopen(filename, "w");
+      for (i = 0; i < num_variables; i++)
+      {
+         fprintf(fp, "%d\n", CF_marker[i]);
+      }
+      fclose(fp);
+
+      iter++;
+#endif
+
+      /*------------------------------------------------
+       * Test for convergence
+       *------------------------------------------------*/
+
+      if (graph_size == 0)
          break;
 
       /*------------------------------------------------
-       * For each new IS point, update the strength
-       * matrix and the measure array.
+       * Pick an independent set of points with
+       * maximal measure.
        *------------------------------------------------*/
 
-      for (i = IS_start; i < IS_start + IS_size; i++)
+      hypre_AMGIndepSet(S, measure_array,
+                        graph_array, graph_size, CF_marker);
+
+      /*------------------------------------------------
+       * Apply heuristics.
+       *------------------------------------------------*/
+
+      for (ig = 0; ig < graph_size; ig++)
       {
-         Cpoint = IS_array[i];
-         if (CF_marker[Cpoint] <= 0) /* point isn't already C */
+         i = graph_array[ig];
+
+         /*---------------------------------------------
+          * Heuristic 1: C-pts don't interpolate from
+          * neighbors they depend on.
+          *---------------------------------------------*/
+
+         if (CF_marker[i])
          {
-            if (CF_marker[Cpoint] == 0)
-                --num_pts_not_assigned;
-            
-            CF_marker[Cpoint] = 1;
-                   
-            /*---------------------------------------------
-             * Heuristic: C-pts don't need to interpolate
-             * from neighbors they strongly depend on.
-             *
-             * for each S(Cpoint,nabor) in the Cpoint row of S
-             *    (i.e., points that Cpoint strongly depends on)
-             * {
-             *   subtract 1 from measure_array[nabor] and
-             *   remove edge S(Cpoint,nabor)
-             * }
-             *
-             * Notes:
-             * - Since S is stored by columns, in order
-             *   to loop through a row of S, we need to loop
-             *   through rows of A, then check that there is
-             *   a corresponding nonzero entry in S.
-             *
-             * TO BE IMPLEMENTED LATER:
-             * - To remove edge s_ij from S, we can replace
-             *   it with the last column entry in the jth
-             *   column, and decrement the size of this
-             *   column (we need to keep an extra vector
-             *   around with the column sizes to do this).
-             *---------------------------------------------*/
-
-            for (j = A_i[Cpoint]+1; j < A_i[Cpoint+1]; j++)
+            for (jS = S_i[i]; jS < S_i[i+1]; jS++)
             {
-               nabor = A_j[j];
-
-               for (k = ST_i[nabor]; k < ST_i[nabor+1]; k++)
+               if (S_data[jS] < 0)
                {
-                                   /* Cpoint depends on nabor */
-                  if(ST_j[k] == Cpoint && ST_data[k] != -1)
+                  j = S_j[jS];
+               
+                  /* "remove" edge from S */
+                  S_data[jS] = -S_data[jS];
+               
+                  /* decrement measures of unmarked neighbors */
+                  if (!CF_marker[j])
                   {
-                     measure_array[nabor]--;
-                     if (measure_array[nabor] == 0 && CF_marker[nabor] != 1)
-                     {
-                                       /* mark as fine point */
-                        CF_marker[nabor] = -1;
-                        --num_pts_not_assigned; 
-                     }
-                  ST_data[k] = -1;   /* change sign when ST_data is double */
-                  break;                /* useable since ST_j are ordered */
-
-                  }
-               }
-            }            
-            
-         /*-------------------------------------------------------------------
-          * Heuristic: neighbors that depend strongly on
-          * a C-pt can get good interpolation data from
-          * that C-pt, and hence are less dependent on
-          * each other.
-          *
-          * for nabor that Cpoint influences, i.e S(nabor,Cpoint) not zero
-          * (in the Cpoint column of S, or Cpoint row of ST,
-          * {
-          *    remove edge S(nabor,Cpoint)
-          * 
-          *    for each S(nabor,nabor_two) in the nabor row of S (points
-          *                        that point nabor strongly depends on)
-          *    {
-          *        if point S(nabor_two,Cpoint) is nonzero (Cpoint  also
-          *                             strongly influences point nabor_two),
-          *       {
-          *           subtract 1 from measure_array[nabor] and remove 
-          *           edge S(nabor,nabor_two)
-          *       }
-          *    } 
-          *    set measure_array[Cpoint] to 0
-          *  }
-          *
-          *------------------------------------------------------------------*/
-
-            for (n = ST_i[Cpoint]; n < ST_i[Cpoint+1]; ++n)
-            {
-               {
-                  nabor = ST_j[n];
-                  ST_data[n] = -1;     
-                                                   
-                  for (j = ST_i[nabor]; j < ST_i[nabor+1]; j++)
-                  {
-                                     /* nabor influences nabor_two. */
-                      nabor_two = ST_j[j];
-
-                                     /* see if nabor_two depends on Cpoint */
-                      for (m = ST_i[Cpoint]; m < ST_i[Cpoint+1]; m++)
-                      {
-                          if (ST_j[m] == nabor_two)
-                          {
-                                     /* nabor_two DOES depend on Cpoint */
-                             if (ST_data[j] != -1)
-                             {
-                                ST_data[j] = -1;
-                                --measure_array[nabor];
-                                /* if (measure_array[nabor] == 0) */
-                                if (measure_array[nabor] == 0 \
-                                        && CF_marker[nabor] != 1) 
-                                {
-                                        /* new fine point */
-                                   CF_marker[nabor] = -1;
-                                   --num_pts_not_assigned; 
-                                }        
-                             }
-                             break;  /* possible since ST is ordered */
-                          }
-                       }    
+                     measure_array[j]--;
                   }
                }
             }
          }
-         measure_array[Cpoint] = 0;
-      } /* end loop over IS_array points */
 
-      IS_start += IS_size;
+         /*---------------------------------------------
+          * Heuristic 2: points that interpolate from a
+          * common C-pt are less dependent on each other.
+          *
+          * NOTE: CF_marker is used to help check for
+          * common C-pt's in the heuristic.
+          *---------------------------------------------*/
+
+         else
+         {
+            /* marked dependences */
+            for (jS = S_i[i]; jS < S_i[i+1]; jS++)
+            {
+               j = S_j[jS];
+
+               if (CF_marker[j])
+               {
+                  if (S_data[jS] < 0)
+                  {
+                     /* "remove" edge from S */
+                     S_data[jS] = -S_data[jS];
+                  }
+
+                  /* IMPORTANT: consider all dependencies */
+                  if (S_data[jS])
+                  {
+                     /* temporarily modify CF_marker */
+                     CF_marker[j] = COMMON_C_PT;
+                  }
+               }
+            }
+
+            /* unmarked dependences */
+            for (jS = S_i[i]; jS < S_i[i+1]; jS++)
+            {
+               if (S_data[jS] < 0)
+               {
+                  j = S_j[jS];
+
+                  /* check for common C-pt */
+                  for (kS = S_i[j]; kS < S_i[j+1]; kS++)
+                  {
+                     k = S_j[kS];
+
+                     /* IMPORTANT: consider all dependencies */
+                     if (S_data[kS])
+                     {
+                        if (CF_marker[k] == COMMON_C_PT)
+                        {
+                           /* "remove" edge from S and update measure*/
+                           S_data[jS] = -S_data[jS];
+                           measure_array[j]--;
+                           break;
+                        }
+                     }
+                  }
+               }
+            }
+
+            /* reset CF_marker */
+            for (jS = S_i[i]; jS < S_i[i+1]; jS++)
+            {
+               j = S_j[jS];
+
+               if (CF_marker[j] == COMMON_C_PT)
+               {
+                  CF_marker[j] = C_PT;
+               }
+            }
+         }
+      }
    }
 
-#if 0
-/* Prints st.matx, st.coarse files, so that Matlab can display them */
-   {
+   /*---------------------------------------------------
+    * Clean up and return
+    *---------------------------------------------------*/
 
-      FILE    *fp;
-      char    fname[256];
+   hypre_TFree(measure_array);
+   hypre_TFree(graph_array);
 
-      debug_out(ST_data,ST_i,ST_j,num_variables);
+   *S_ptr           = S;
+   *CF_marker_ptr   = CF_marker;
+   *coarse_size_ptr = coarse_size;
 
-      sprintf(fname,"st.coarse");
-      fp = fopen(fname, "w");
-
-      for (j=0; j<IS_start;j++)
-      {
-         fprintf(fp, "%d\n", IS_array[j]);
-      }
-      fclose(fp);
-   }
-#endif
-
-   hypre_DestroyCSRMatrix(ST);
-   *CF_marker_ptr = CF_marker;
-
-   return(0);
+   return (ierr);
 }
-
-
-
-void debug_out(ST_data,ST_i,ST_j,num_variables)
-
-int   *ST_data;
-int   *ST_i;
-int   *ST_j;
-int    num_variables;
-
-{
-      hypre_CSRMatrix *ST;
-      double  *matx_data;
-      int      i;
-
-      ST = hypre_CreateCSRMatrix(num_variables, num_variables, NULL);
-
-      matx_data = hypre_CTAlloc(double,ST_i[num_variables]);
-      for (i=0;i<ST_i[num_variables];i++)
-      {
-         matx_data[i] = (double) ST_data[i];
-      }
-
-      hypre_CSRMatrixData(ST) = matx_data;
-      hypre_CSRMatrixI(ST)    = ST_i;
-      hypre_CSRMatrixJ(ST)    = ST_j;
-      hypre_CSRMatrixOwnsData(ST) = 0;  /* matrix does NOT own data */
-
-      hypre_PrintCSRMatrix(ST,"st.matx");
-
-      hypre_DestroyCSRMatrix(ST);
-      hypre_TFree(matx_data);
-
-}
-
-
 

@@ -8,161 +8,137 @@
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
- * Routine for picking independent set.
- *
  *****************************************************************************/
-
 
 #include "headers.h"
 
-/*--------------------------------------------------------------------------
- * hypre_AMGIndepSet
- *--------------------------------------------------------------------------*/
+/*==========================================================================*/
+/*==========================================================================*/
+/**
+  Augments measures by some random value between 0 and 1.
 
-int hypre_AMGIndepSet(ST_i, ST_j, S_i, S_j, num_variables,
-                      measure_array, IS_array, IS_size)
+  {\bf Input files:}
+  headers.h
 
-/*--------------------------------------------------
+  @return Error code.
 
-  hypre_PickIndependentSet(ST, measure_array,
-                               &IS_array[IS_start], &IS_size);
+  @param S [IN]
+  parent graph matrix in CSR format
+  @param measure_array [IN/OUT]
+  measures assigned to each node of the parent graph
 
-  ----------------------------------------------------- */
+  @see hypre_AMGIndepSet */
+/*--------------------------------------------------------------------------*/
 
-
-
-int             *ST_i;
-int             *ST_j;
-
-int             *S_i;
-int             *S_j;
-
-int              num_variables;
-double          *measure_array;
-int             *IS_array;
-int             *IS_size;
-
+int
+hypre_InitAMGIndepSet( hypre_CSRMatrix *S,
+                       double          *measure_array )
 {
+   int     S_num_nodes = hypre_CSRMatrixNumRows(S);
+   int     i;
+   int     ierr = 0;
 
-  /*------------------------------
-   * Variables I've added to be declared, or passed, etc.
-   *--------------------------------------------------*/
+   hypre_SeedRand(2747);
+   for (i = 0; i < S_num_nodes; i++)
+   {
+      measure_array[i] += hypre_Rand();
+   }
 
-   double       *local_measure;
-   double        my_measure;
-   double        s;
-   int          *not_marked;
+   return (ierr);
+}
 
- 
-   int          i, j;
-   int          mine_is_bigger;
-   int          previous_num_indep_pts;
-   int          num_points_in_graph;
-   int          next_indep_point;
-   int          point;
-   int          nabor;
+/*==========================================================================*/
+/*==========================================================================*/
+/**
+  Select an independent set from a graph.  This graph is actually a
+  subgraph of some parent graph.  The parent graph is described as a
+  matrix in compressed sparse row format, where edges in the graph are
+  represented by nonzero matrix coefficients (zero coefficients are
+  ignored).  A positive measure is given for each node in the
+  subgraph, and this is used to pick the independent set.  A measure
+  of zero must be given for all other nodes in the parent graph.  The
+  subgraph is a collection of nodes in the parent graph.
 
-   not_marked = hypre_CTAlloc(int, num_variables);
-   local_measure = hypre_CTAlloc(double, num_variables);
-                      /*should use the number of remaining points
-                        to be examined, rather than num_variables */
+  Positive entries in the `IS\_marker' array indicate nodes in the
+  independent set.  All other entries are zero.
+
+  The algorithm proceeds by first setting all nodes in `graph\_array'
+  to be in the independent set.  Nodes are then removed from the
+  independent set by simply comparing the measures of adjacent nodes.
+
+  {\bf Input files:}
+  headers.h
+
+  @return Error code.
+
+  @param S [IN]
+  parent graph matrix in CSR format
+  @param measure_array [IN]
+  measures assigned to each node of the parent graph
+  @param graph_array [IN]
+  node numbers in the subgraph to be partitioned
+  @param graph_array_size [IN]
+  number of nodes in the subgraph to be partitioned
+  @param IS_marker [IN/OUT]
+  marker array for independent set
+
+  @see hypre_InitAMGIndepSet */
+/*--------------------------------------------------------------------------*/
+
+int
+hypre_AMGIndepSet( hypre_CSRMatrix *S,
+                   double          *measure_array,
+                   int             *graph_array,
+                   int              graph_array_size,
+                   int             *IS_marker        )
+{
+   int    *S_i         = hypre_CSRMatrixI(S);
+   int    *S_j         = hypre_CSRMatrixJ(S);
+   double *S_data      = hypre_CSRMatrixData(S);
+         
+   int     i, j, ig, jS;
+
+   int     ierr = 0;
 
    /*-------------------------------------------------------
-    * Copy measure array and add random value
-    * Then find a set of nodes whose new measure value
-    * is greater than that of all their neighbors.  This
-    * is an independent set.
+    * Initialize IS_marker by putting all nodes in
+    * the independent set.
     *-------------------------------------------------------*/
 
-   previous_num_indep_pts = 0;
-   next_indep_point = 0;
-   num_points_in_graph = num_variables;
-
-  hypre_SeedRand(2747);
-
-   for (i = 0; i < num_variables; i++)
+   for (ig = 0; ig < graph_array_size; ig++)
    {
-      /* eliminate vertices already set as C or F points */
-      if (measure_array[i] > 0)
-      { 
-         not_marked[i] = 1;
-      }
-      else
-      {
-         not_marked[i] = 0;
-         --num_points_in_graph;
-      } 
-
-      s = hypre_Rand();
-      local_measure[i] = measure_array[i] + s;
+      i = graph_array[ig];
+      IS_marker[i] = 1;
    }
 
- 
-  while (num_points_in_graph > 0)
+   /*-------------------------------------------------------
+    * Remove nodes from the initial independent set
+    *-------------------------------------------------------*/
+
+   for (ig = 0; ig < graph_array_size; ig++)
    {
-       for (i = 0; i < num_variables; i++)
-       {
-         if (not_marked[i])
-         {
-            my_measure = local_measure[i];
-            mine_is_bigger = 1;
-            if (ST_i[i] < ST_i[i+1] || S_i[i] < S_i[i+1])
-            {
-               for (j = ST_i[i]; j < ST_i[i+1]; j++)
-               {
-                  nabor = ST_j[j];
-                  if (not_marked[nabor] && local_measure[nabor] > my_measure) 
-                  {
-                     mine_is_bigger = 0;
-		     break;
-                  }
-               }
+      i = graph_array[ig];
 
-               for (j = S_i[i]; j < S_i[i+1]; j++)
-               {
-                  nabor = S_j[j];
-                  if (not_marked[nabor] && local_measure[nabor] > my_measure) 
-                  {
-                     mine_is_bigger = 0;
-		     break;
-                  }
-               }
-
-               if (mine_is_bigger)
-               {
-                  IS_array[next_indep_point] = i;
-                  ++*IS_size;
-                  ++next_indep_point;
-               }
-            }
-         }
-       }
-      
-
-      /*-----------------------------------------------------------
-       * Mark points found and their neighbors
-       *-----------------------------------------------------------*/
-
-      for (i = previous_num_indep_pts; i < next_indep_point; i++)
+      for (jS = S_i[i]; jS < S_i[i+1]; jS++)
       {
-         point = IS_array[i];
-         not_marked[point] = 0;
-         --num_points_in_graph;
-         for (j = ST_i[point]; j < ST_i[point+1]; j++)
+         j = S_j[jS];
+                  
+         /* only consider valid graph edges */
+         if ( S_data[jS] && measure_array[j] )
          {
-            nabor = ST_j[j];
-            if (not_marked[nabor]) 
+            if (measure_array[i] > measure_array[j])
             {
-               not_marked[nabor] = 0;
-               --num_points_in_graph;
+               IS_marker[j] = 0;
+            }
+            else if (measure_array[j] > measure_array[i])
+            {
+               IS_marker[i] = 0;
+               break;
             }
          }
       }
-
-      previous_num_indep_pts = next_indep_point;
    }
-
-  return(0);
+            
+   return (ierr);
 }
          
-

@@ -5,9 +5,6 @@
 #endif
 
 
-/* SPamg.c */
-int main P((int argc , char *argv []));
-
 /* amg.c */
 void *hypre_AMGInitialize P((void ));
 hypre_AMGData *hypre_AMGNewData P((int max_levels , double strong_threshold , int interp_type , int max_iter , int cycle_type , double tol , int *num_grid_sweeps , int *grid_relax_type , int *grid_relax_points [4 ], int ioutdat , char log_file_name [256 ]));
@@ -36,18 +33,26 @@ int hypre_AMGSetup P((hypre_AMGData *amg_data , hypre_CSRMatrix *A ));
 /* amg_solve.c */
 int hypre_AMGSolve P((hypre_AMGData *amg_data , hypre_Vector *f , hypre_Vector *u ));
 
+/* amgstats.c */
+int hypre_AMGSetupStats P((hypre_AMGData *amg_data ));
+void hypre_WriteSolverParams P((void *data ));
+
 /* coarsen.c */
-int hypre_AMGCoarsen P((hypre_CSRMatrix *A , double strong_threshold , int **CF_marker_ptr , hypre_CSRMatrix **S_ptr ));
-void debug_out P((int *ST_data , int *ST_i , int *ST_j , int num_variables ));
+int hypre_AMGCoarsen P((hypre_CSRMatrix *A , double strength_threshold , hypre_CSRMatrix **S_ptr , int **CF_marker_ptr , int *coarse_size_ptr ));
 
 /* cycle.c */
 int hypre_AMGCycle P((hypre_AMGData *amg_data , hypre_Vector **F_array , hypre_Vector **U_array ));
 
 /* indepset.c */
-int hypre_AMGIndepSet P((int *ST_i , int *ST_j , int *S_i , int *S_j , int num_variables , double *measure_array , int *IS_array , int *IS_size ));
+int hypre_InitAMGIndepSet P((hypre_CSRMatrix *S , double *measure_array ));
+int hypre_AMGIndepSet P((hypre_CSRMatrix *S , double *measure_array , int *graph_array , int graph_array_size , int *IS_marker ));
 
 /* interp.c */
 int hypre_AMGBuildInterp P((hypre_CSRMatrix *A , int *CF_marker , hypre_CSRMatrix *S , hypre_CSRMatrix **P_ptr ));
+
+/* pcg.c */
+void PCG P((hypre_Vector *x , hypre_Vector *b , double tol , void *data ));
+void PCGSetup P((hypre_CSRMatrix *A , int (*precond )(), void *precond_data , void *data ));
 
 /* random.c */
 void hypre_SeedRand P((int seed ));
@@ -56,23 +61,11 @@ double hypre_Rand P((void ));
 /* rap.c */
 int hypre_AMGBuildCoarseOperator P((hypre_CSRMatrix *RT , hypre_CSRMatrix *A , hypre_CSRMatrix *P , hypre_CSRMatrix **RAP_ptr ));
 
-/* transpose.c */
-int hypre_CSRMatrixTranspose P((hypre_CSRMatrix *A , hypre_CSRMatrix **AT ));
-
 /* relax.c */
 int hypre_AMGRelax P((hypre_CSRMatrix *A , hypre_Vector *f , int *cf_marker , int relax_type , int relax_points , hypre_Vector *u , hypre_Vector *Vtemp ));
 int gselim P((double *A , double *x , int n ));
 
-/* amgstats.c */
-int hypre_AMGSetupStats P((hypre_AMGData *amg_data ));
-void hypre_WriteSolverParams P((void *data ));
-
-/* pcg.c */
-void PCG P((hypre_Vector *x , hypre_Vector *b , double tol , void *data ));
-void PCGSetup P((hypre_CSRMatrix *A , int (*precond )(), void *precond_data , void *data ));
-void FreePCGData P((void *data ));
-
-/* SPamg-pcg.c */
-int main P((int argc , char *argv []));
+/* transpose.c */
+int hypre_CSRMatrixTranspose P((hypre_CSRMatrix *A , hypre_CSRMatrix **AT ));
 
 #undef P

@@ -84,17 +84,22 @@ int hypre_AMGSetup(hypre_AMGData *amg_data,
           * for the level.  Returns strength matrix, S  
           *--------------------------------------------------------------*/
 
-         hypre_AMGCoarsen(A_array[level], strong_threshold, &CF_marker, &S); 
+         hypre_AMGCoarsen(A_array[level], strong_threshold,
+                          &S, &CF_marker, &coarse_size); 
+
+         /* if no coarse-grid, stop coarsening */
+         if (coarse_size == 0)
+            break;
+
          CF_marker_array[level] = CF_marker;
       
          /*-------------------------------------------------------------
           * Build prolongation matrix, P, and place in P_array[level] 
           *--------------------------------------------------------------*/
 
-
          hypre_AMGBuildInterp(A_array[level], CF_marker_array[level], S, &P);
          P_array[level] = P; 
-   
+
          /*-------------------------------------------------------------
           * Build coarse-grid operator, A_array[level+1] by R*A*P
           *--------------------------------------------------------------*/
@@ -104,13 +109,6 @@ int hypre_AMGSetup(hypre_AMGData *amg_data,
 
          ++level;
          A_array[level] = A_H;
-         coarse_size = hypre_CSRMatrixNumRows(A_array[level]);
-
-         if (coarse_size <= 0)
-         {
-            --level;
-            break;
-         }
 
          if (level+1 >= max_levels || 
                      coarse_size == fine_size || 
