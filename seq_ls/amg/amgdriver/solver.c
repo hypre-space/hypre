@@ -360,7 +360,7 @@ Solver  *solver;
 	      amg_nwt, amg_ewt);
       fprintf(fp, "    Strong connection definition (nstr): %d \n", amg_nstr);
       fprintf(fp, "    Number and type of cycles (ncyc):    %d \n", amg_ncyc);
-      fprintf(fp, "    Stopping Tolerance                   %d \n",
+      fprintf(fp, "    Stopping Tolerance                   %e \n",
                    stop_tolerance); 
       fprintf(fp, "    W-cycling parameter (mu): ");
       for (j = 0; j < 10; j++)
