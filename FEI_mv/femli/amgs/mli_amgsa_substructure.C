@@ -302,8 +302,13 @@ int MLI_Method_AMGSA::setupSubdomainNullSpaceUsingFEData( MLI *mli )
    eigenV = new double[csrNrows*(nullspace_dim+1)];
    assert((long) eigenV);
 
+#ifdef MLI_ARPACK
    dnstev_(&csrNrows, &nullspace_dim, which, &sigmaR, &sigmaI, 
            csrIA, csrJA, csrAA, eigenR, eigenI, eigenV, &csrNrows, &info);
+#else
+   printf("FATAL ERROR : ARPACK not installed.\n";
+   exit(1);
+#endif
 
    if ( useSAMGDDFlag_ ) ARPACKSuperLUExists_ = 1; 
    else 
