@@ -53,6 +53,7 @@ hypre_SMGSolve( void               *smg_vdata,
                 hypre_StructVector *b,
                 hypre_StructVector *x         )
 {
+
    hypre_SMGData        *smg_data = smg_vdata;
 
    double                tol             = (smg_data -> tol);

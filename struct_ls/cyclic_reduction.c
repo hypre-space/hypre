@@ -606,20 +606,10 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
    for (l = 0; l < (num_levels - 1); l++)
    {
       hypre_InitializeStructMatrixData(A_l[l+1], data);
-#ifdef HYPRE_USE_PTHREADS
-      data = hypre_IncrementSharedDataPtr(data,
-                                          hypre_StructMatrixDataSize(A_l[l+1]));
-#else
       data += hypre_StructMatrixDataSize(A_l[l+1]);
-#endif
       hypre_InitializeStructVectorData(x_l[l+1], data);
       hypre_AssembleStructVector(x_l[l+1]);
-#ifdef HYPRE_USE_PTHREADS
-      data = hypre_IncrementSharedDataPtr(data,
-                                          hypre_StructVectorDataSize(x_l[l+1]));
-#else
       data += hypre_StructVectorDataSize(x_l[l+1]);
-#endif
    }
 
    (cyc_red_data -> A_l)  = A_l;

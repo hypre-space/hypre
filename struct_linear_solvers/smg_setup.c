@@ -281,71 +281,36 @@ hypre_SMGSetup( void               *smg_vdata,
 
    hypre_InitializeStructVectorData(tb_l[0], data);
    hypre_AssembleStructVector(tb_l[0]);
-#ifdef HYPRE_USE_PTHREADS
-   data = hypre_IncrementSharedDataPtr(data,
-                                       hypre_StructVectorDataSize(tb_l[0]));
-#else
    data += hypre_StructVectorDataSize(tb_l[0]);
-#endif
 
    hypre_InitializeStructVectorData(tx_l[0], data);
    hypre_AssembleStructVector(tx_l[0]);
-#ifdef HYPRE_USE_PTHREADS
-   data = hypre_IncrementSharedDataPtr(data,
-                                       hypre_StructVectorDataSize(tx_l[0]));
-#else
    data += hypre_StructVectorDataSize(tx_l[0]);
-#endif
 
    for (l = 0; l < (num_levels - 1); l++)
    {
       hypre_InitializeStructMatrixData(PT_l[l], data);
-#ifdef HYPRE_USE_PTHREADS
-      data = hypre_IncrementSharedDataPtr(data,
-                                          hypre_StructMatrixDataSize(PT_l[l]));
-#else
       data += hypre_StructMatrixDataSize(PT_l[l]);
-#endif
 
 #if 0
       /* Allow R != PT for non symmetric case */
       if (!hypre_StructMatrixSymmetric(A))
       {
          hypre_InitializeStructMatrixData(R_l[l], data);
-#ifdef HYPRE_USE_PTHREADS
-         data = hypre_IncrementSharedDataPtr(data,
-                                          hypre_StructVectorDataSize(R_l[l]));
-#else
          data += hypre_StructMatrixDataSize(R_l[l]);
-#endif
       }
 #endif
 
       hypre_InitializeStructMatrixData(A_l[l+1], data);
-#ifdef HYPRE_USE_PTHREADS
-      data = hypre_IncrementSharedDataPtr(data,
-                                          hypre_StructMatrixDataSize(A_l[l+1]));
-#else
       data += hypre_StructMatrixDataSize(A_l[l+1]);
-#endif
 
       hypre_InitializeStructVectorData(b_l[l+1], data);
       hypre_AssembleStructVector(b_l[l+1]);
-#ifdef HYPRE_USE_PTHREADS
-      data = hypre_IncrementSharedDataPtr(data,
-                                          hypre_StructVectorDataSize(b_l[l+1]));
-#else
       data += hypre_StructVectorDataSize(b_l[l+1]);
-#endif
 
       hypre_InitializeStructVectorData(x_l[l+1], data);
       hypre_AssembleStructVector(x_l[l+1]);
-#ifdef HYPRE_USE_PTHREADS
-      data = hypre_IncrementSharedDataPtr(data,
-                                          hypre_StructVectorDataSize(x_l[l+1]));
-#else
       data += hypre_StructVectorDataSize(x_l[l+1]);
-#endif
 
       hypre_InitializeStructVectorData(tb_l[l+1],
                                        hypre_StructVectorData(tb_l[0]));
