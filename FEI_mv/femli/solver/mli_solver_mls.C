@@ -34,7 +34,7 @@ MLI_Solver_MLS::MLI_Solver_MLS() : MLI_Solver(MLI_SOLVER_MLS_ID)
    mlsOver   = 1.1;
    for ( int i = 0; i < 5; i++ ) mlsOm[i] = 0.0;
    mlsOm2    = 1.8;
-   for ( int i = 0; i < 5; i++ ) mlsCf[i] = 0.0;
+   for ( int j = 0; j < 5; j++ ) mlsCf[j] = 0.0;
    zeroInitialGuess = 0;
 }
 

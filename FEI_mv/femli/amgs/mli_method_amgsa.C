@@ -53,11 +53,14 @@ MLI_Method_AMGSA::MLI_Method_AMGSA( MPI_Comm comm ) : MLI_Method( comm )
    P_weight          = 4.0/3.0;
    drop_tol_for_P    = 0.0;            /* tolerance to sparsify P*/
    sa_counts         = new int[40];    /* number of aggregates   */
-   for ( int i = 0; i < 40; i++ ) sa_counts[i] = 0;
    sa_data           = new int*[40];   /* node to aggregate data */
-   for ( int i = 0; i < 40; i++ ) sa_data[i] = NULL;
    spectral_norms    = new double[40]; /* calculated max eigen   */
-   for ( int k = 0; k < 40; k++ ) spectral_norms[k] = 0.0;
+   for ( int i = 0; i < 40; i++ ) 
+   {
+      sa_counts[i] = 0;
+      sa_data[i]   = NULL;
+      spectral_norms[i] = 0.0;
+   }
    calc_norm_scheme  = 0;              /* use matrix rowsum norm */
    min_coarse_size   = 5;              /* smallest coarse grid   */
    coarsen_scheme    = MLI_METHOD_AMGSA_LOCAL;
