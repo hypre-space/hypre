@@ -36,6 +36,7 @@ typedef struct
 
    int    (*precond)();
    int    (*precond_setup)();
+   int    (*precond_reinit)();
    void    *precond_data;
 
    /* log info (always logged) */
@@ -60,21 +61,22 @@ hypre_GMRESCreate( )
    gmres_data = hypre_CTAlloc(hypre_GMRESData, 1);
  
    /* set defaults */
-   (gmres_data -> k_dim)         = 5;
-   (gmres_data -> tol)           = 1.0e-06;
-   (gmres_data -> min_iter)      = 0;
-   (gmres_data -> max_iter)      = 1000;
-   (gmres_data -> stop_crit)     = 0; /* rel. residual norm */
-   (gmres_data -> precond)       = hypre_KrylovIdentity;
-   (gmres_data -> precond_setup) = hypre_KrylovIdentitySetup;
-   (gmres_data -> precond_data)  = NULL;
-   (gmres_data -> logging)       = 0;
-   (gmres_data -> p)             = NULL;
-   (gmres_data -> r)             = NULL;
-   (gmres_data -> w)             = NULL;
-   (gmres_data -> matvec_data)   = NULL;
-   (gmres_data -> norms)         = NULL;
-   (gmres_data -> log_file_name) = NULL;
+   (gmres_data -> k_dim)          = 5;
+   (gmres_data -> tol)            = 1.0e-06;
+   (gmres_data -> min_iter)       = 0;
+   (gmres_data -> max_iter)       = 1000;
+   (gmres_data -> stop_crit)      = 0; /* rel. residual norm */
+   (gmres_data -> precond)        = hypre_KrylovIdentity;
+   (gmres_data -> precond_setup)  = hypre_KrylovIdentitySetup;
+   (gmres_data -> precond_reinit) = NULL;
+   (gmres_data -> precond_data)   = NULL;
+   (gmres_data -> logging)        = 0;
+   (gmres_data -> p)              = NULL;
+   (gmres_data -> r)              = NULL;
+   (gmres_data -> w)              = NULL;
+   (gmres_data -> matvec_data)    = NULL;
+   (gmres_data -> norms)          = NULL;
+   (gmres_data -> log_file_name)  = NULL;
  
    return (void *) gmres_data;
 }
@@ -519,18 +521,37 @@ int
 hypre_GMRESSetPrecond( void  *gmres_vdata,
                        int  (*precond)(),
                        int  (*precond_setup)(),
+                       int  (*precond_reinit)(),
                        void  *precond_data )
 {
    hypre_GMRESData *gmres_data = gmres_vdata;
    int              ierr = 0;
  
-   (gmres_data -> precond)       = precond;
-   (gmres_data -> precond_setup) = precond_setup;
-   (gmres_data -> precond_data)  = precond_data;
+   (gmres_data -> precond)        = precond;
+   (gmres_data -> precond_setup)  = precond_setup;
+   (gmres_data -> precond_reinit) = precond_reinit;
+   (gmres_data -> precond_data)   = precond_data;
  
    return ierr;
 }
  
+/*--------------------------------------------------------------------------
+ * hypre_GMRESReinitPrecond
+ *--------------------------------------------------------------------------*/
+ 
+int
+hypre_GMRESReinitPrecond( void *gmres_vdata )
+{
+   hypre_GMRESData  *gmres_data      = gmres_vdata;
+   int             (*precond_reinit)() = (gmres_data -> precond_reinit);
+   void             *precond_data      = (gmres_data -> precond_data);
+   int               ierr = 0;
+ 
+   ierr = precond_reinit(precond_data);
+
+   return(ierr);
+}
+
 /*--------------------------------------------------------------------------
  * hypre_GMRESSetLogging
  *--------------------------------------------------------------------------*/
