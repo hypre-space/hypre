@@ -55,14 +55,13 @@ esac
 
 if [ $# -gt 1 ]
 then
-  if [ "$1" = "-g" ] || [ "$1 = "-b" ] || [ "$1 = "-a" ]
-  then
-    OPTION=$1
-    TAR_FILE=$2
-  else
-    echo "Error: Invalid argument = $1, expecting -g, -b or -a"
-    exit
-  fi
+  case "$1"
+  in
+    -g|-b|-a) OPTION=$1
+      TAR_FILE=$2 ;;
+    *) echo "Error: Invalid argument = $1, expecting -g, -b or -a"
+      exit ;;
+   esac
 else
   usage
   exit
