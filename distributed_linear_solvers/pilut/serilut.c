@@ -35,7 +35,7 @@ int SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
 	     ReduceMatType *rmat, int maxnz, double tol, 
              hypre_PilutSolverGlobals *globals)
 {
-  int i, ii, j, k, kk, l, m, ierr;
+  int i, ii, j, k, kk, l, m, ierr, diag_present;
   int *perm, *iperm, 
           *usrowptr, *uerowptr, *ucolind,
           *rnz, **rcolind;
@@ -85,7 +85,7 @@ int SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
                &col_ind, &values);
     if (ierr) return(ierr);
 
-    for (lastjr=1, lastlr=0, j=0; j<row_size; j++) {
+    for (lastjr=1, lastlr=0, j=0, diag_present=0; j<row_size; j++) {
       if (iperm[ col_ind[j] - firstrow ] < iperm[i]) 
         lr[lastlr++] = iperm[ col_ind[j]-firstrow]; /* Copy the L elements separately */
 
@@ -96,10 +96,18 @@ int SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
         lastjr++;
       }
       else { /* Put the diagonal element at the begining */
+        diag_present = 1;
         jr[i+firstrow] = 0;
         jw[0] = i+firstrow;
         w[0] = values[j];
       }
+    }
+
+    if( !diag_present ) /* No diagonal element was found; insert a zero */
+    {
+      jr[i+firstrow] = 0;
+      jw[0] = i+firstrow;
+      w[0] = 0.0;
     }
 
     ierr = HYPRE_RestoreDistributedMatrixRow( matrix, firstrow+ii, &row_size,
@@ -166,7 +174,7 @@ int SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
                &col_ind, &values);
     if (ierr) return(ierr);
 
-    for (lastjr=1, lastlr=0, j=0; j<row_size; j++) {
+    for (lastjr=1, lastlr=0, j=0, diag_present=0; j<row_size; j++) {
       if (col_ind[j] >= firstrow  &&
 	  col_ind[j] < lastrow    &&
 	  iperm[col_ind[j]-firstrow] < nlocal) 
@@ -179,10 +187,18 @@ int SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
         lastjr++;
       }
       else { /* Put the diagonal element at the begining */
+        diag_present = 1;
         jr[i+firstrow] = 0;
         jw[0] = i+firstrow;
         w[0] = values[j];
       }
+    }
+
+     if( !diag_present ) /* No diagonal element was found; insert a zero */
+    {
+      jr[i+firstrow] = 0;
+      jw[0] = i+firstrow;
+      w[0] = 0.0;
     }
 
     ierr = HYPRE_RestoreDistributedMatrixRow( matrix, firstrow+ii, &row_size,
