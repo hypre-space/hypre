@@ -6,18 +6,17 @@
 #include "HYPRE_ls.h"
  
 #include "HYPRE_ls.h"
-#include "Hypre_Box.h"
-#include "Hypre_StructStencil.h"
-#include "Hypre_StructGrid.h"
-#include "Hypre_StructMatrix.h"
-#include "Hypre_StructMatrixBuilder.h"
-#include "Hypre_StructVector.h"
-#include "Hypre_StructVectorBuilder.h"
-#include "Hypre_MPI_Com.h"
-#include "Hypre_StructJacobi.h"
-#include "Hypre_StructSMG.h"
-#include "Hypre_PCG.h"
-#include "Hypre_Solver.h"
+#include "Hypre_Box_Stub.h"
+#include "Hypre_StructStencil_Stub.h"
+#include "Hypre_StructGrid_Stub.h"
+#include "Hypre_StructMatrix_Stub.h"
+#include "Hypre_StructMatrixBuilder_Stub.h"
+#include "Hypre_StructVector_Stub.h"
+#include "Hypre_StructVectorBuilder_Stub.h"
+#include "Hypre_MPI_Com_Stub.h"
+#include "Hypre_StructJacobi_Stub.h"
+#include "Hypre_StructSMG_Stub.h"
+#include "Hypre_PCG_Stub.h"
 
 #ifdef HYPRE_DEBUG
 #include <cegdb.h>
@@ -37,6 +36,7 @@ int
 main( int   argc,
       char *argv[] )
 {
+   int                 ierr;
    int                 arg_index;
    int                 print_usage;
    int                 nx, ny, nz;
@@ -559,7 +559,7 @@ main( int   argc,
    num_ghost.data = A_num_ghost;
    MatBldr = Hypre_StructMatrixBuilder_Constructor
       ( grid, stencil, symmetric, num_ghost );
-   Hypre_StructMatrixBuilder_New( MatBldr, grid, stencil, symmetric, num_ghost );
+   Hypre_StructMatrixBuilder_Start( MatBldr, grid, stencil, symmetric, num_ghost );
 
    /*-----------------------------------------------------------
     * Fill in the matrix elements
@@ -651,10 +651,10 @@ main( int   argc,
       }
    }
 
-   Hypre_StructMatrixBuilder_Setup( MatBldr );
-   Hypre_StructMatrixBuilder_GetConstructedObject( MatBldr, &A_LO );
+   ierr += Hypre_StructMatrixBuilder_Setup( MatBldr );
+   ierr += Hypre_StructMatrixBuilder_GetConstructedObject( MatBldr, &A_LO );
    A_SM = (Hypre_StructMatrix) Hypre_LinearOperator_castTo
-      ( A_LO, "Hypre_StructMatrix" );
+      ( A_LO, "Hypre.StructMatrix" );
 
 #if 0
    Hypre_StructMatrix_print( A_SM );
@@ -670,7 +670,7 @@ main( int   argc,
    values = hypre_CTAlloc(double, volume);
 
    VecBldr = Hypre_StructVectorBuilder_Constructor( grid );
-   Hypre_StructVectorBuilder_New( VecBldr, grid );
+   Hypre_StructVectorBuilder_Start( VecBldr, grid );
 /*    HYPRE_StructVectorCreate(MPI_COMM_WORLD, grid, stencil, &b); */
 /*    HYPRE_StructVectorInitialize(b); */
 
@@ -708,14 +708,14 @@ main( int   argc,
    Hypre_StructVectorBuilder_Setup( VecBldr );
    Hypre_StructVectorBuilder_GetConstructedObject( VecBldr, &b_V );
    b_SV = (Hypre_StructVector) Hypre_Vector_castTo
-      ( b_V, "Hypre_StructVector" );
+      ( b_V, "Hypre.StructVector" );
 
 #if 0
    Hypre_StructVector_Print( b_SV );
 /*   HYPRE_StructVectorPrint("driver.out.b", b, 0); */
 #endif
 
-   Hypre_StructVectorBuilder_New( VecBldr, grid );
+   Hypre_StructVectorBuilder_Start( VecBldr, grid );
 /*    HYPRE_StructVectorCreate(MPI_COMM_WORLD, grid, stencil, &x); */
 /*    HYPRE_StructVectorInitialize(x); */
    for (i = 0; i < volume; i++)
@@ -732,7 +732,7 @@ main( int   argc,
    Hypre_StructVectorBuilder_Setup( VecBldr );
    Hypre_StructVectorBuilder_GetConstructedObject( VecBldr, &x_V );
    x_SV = (Hypre_StructVector) Hypre_Vector_castTo
-      ( x_V, "Hypre_StructVector" );
+      ( x_V, "Hypre.StructVector" );
 
 #if 0
    Hypre_StructVector_Print( x_SV );
@@ -785,7 +785,7 @@ main( int   argc,
    Hypre_StructJacobi object.
    */
       solver = (Hypre_Solver) Hypre_StructJacobi_castTo( solver_SJ,
-                                                         "Hypre_Solver" ); 
+                                                         "Hypre.Solver" ); 
       Hypre_Solver_GetSystemOperator( solver, &lo_test );
 
       Hypre_StructJacobi_destructor( solver_SJ );
@@ -811,7 +811,7 @@ main( int   argc,
          /* use symmetric SMG as preconditioner */
          solver_SMG = Hypre_StructSMG_Constructor( comm );
          precond = (Hypre_Solver) Hypre_StructSMG_castTo
-            ( solver_SMG, "Hypre_Solver" ); 
+            ( solver_SMG, "Hypre.Solver" ); 
 
          Hypre_StructSMG_SetParameterInt( solver_SMG, "memory use", 0 );
          Hypre_StructSMG_SetParameterInt( solver_SMG, "max iter", 1 );
@@ -829,7 +829,7 @@ main( int   argc,
          /* use two-step Jacobi as preconditioner */
          solver_SJ = Hypre_StructJacobi_Constructor( comm );
          precond = (Hypre_Solver) Hypre_StructJacobi_castTo
-            ( solver_SJ, "Hypre_Solver" ); 
+            ( solver_SJ, "Hypre.Solver" ); 
          Hypre_StructJacobi_SetParameterDouble( solver_SJ, "tol", 0.0 );
          Hypre_StructJacobi_SetParameterInt( solver_SJ, "max_iter", 2 );
          Hypre_StructJacobi_SetParameterInt( solver_SJ, "zero guess", 0 );
