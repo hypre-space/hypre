@@ -8,6 +8,7 @@
  *********************************************************************EHEADER*/
 
 #include "headers.h"
+#include "Common.h"
 
 /* -------------------------------------------------------------------------
    dof_domain: for each dof defines neighborhood to build interpolation,
@@ -19,8 +20,13 @@
 
    B can be used to define strength matrix;
    ----------------------------------------------------------------------- */
-     
 
+#ifdef ESSL
+#include <essl.h>
+#else
+void hypre_F90_NAME_BLAS(dpotrf, DPOTRF)(char *, int *, double *, int *, int *);
+void hypre_F90_NAME_BLAS(dpotrs, DPOTRS)(char *, int *, int *, double *, int *, double *, int *, int *);
+#endif
 
 /*--------------------------------------------------------------------------
  * hypre_AMGNodalSchwarzSmoother:
@@ -33,6 +39,7 @@ hypre_AMGNodalSchwarzSmoother( hypre_CSRMatrix    *A,
 
 			       int                *dof_func,
 			       int                 num_functions,
+
 			       int		   option,
 			       int               **i_domain_dof_pointer,
 			       int               **j_domain_dof_pointer,
@@ -79,8 +86,10 @@ hypre_AMGNodalSchwarzSmoother( hypre_CSRMatrix    *A,
   int domain_dof_counter = 0, domain_matrixinverse_counter = 0;
 
 
-  double *AE, *XE;
+  double *AE;
 
+  char uplo = 'L';
+  int cnt;
 
   /* PCG arrays: --------------------------------------------------- 
   double *x, *rhs, *v, *w, *d, *aux;
@@ -169,7 +178,15 @@ hypre_AMGNodalSchwarzSmoother( hypre_CSRMatrix    *A,
 	      }
 
 	  }
+#ifdef ESSL
+      if (i == num_nodes-1)
+	 domain_matrixinverse_counter += local_dof_counter*local_dof_counter;
+      else
+	 domain_matrixinverse_counter += 
+		local_dof_counter*(local_dof_counter+1)/2;
+#else
       domain_matrixinverse_counter += local_dof_counter*local_dof_counter;
+#endif
       domain_dof_counter += local_dof_counter;
 
       if (local_dof_counter > max_local_dof_counter)
@@ -205,14 +222,6 @@ hypre_AMGNodalSchwarzSmoother( hypre_CSRMatrix    *A,
 
   i_local_to_global = hypre_CTAlloc(int, max_local_dof_counter);
 
-
-  AE = hypre_CTAlloc(double, max_local_dof_counter *
-		     max_local_dof_counter);
-
-
-
-  XE = hypre_CTAlloc(double, max_local_dof_counter *
-		     max_local_dof_counter);
 
   i_int_to_local = hypre_CTAlloc(int, max_local_dof_counter);
   i_int          = hypre_CTAlloc(int, max_local_dof_counter);
@@ -265,9 +274,11 @@ hypre_AMGNodalSchwarzSmoother( hypre_CSRMatrix    *A,
 
       if (option == 1)
 	{
+	  AE = &domain_matrixinverse[domain_matrixinverse_counter];
+	  cnt = 0;
 	  for (i_loc=0; i_loc < local_dof_counter; i_loc++)
 	    for (j_loc=0; j_loc < local_dof_counter; j_loc++)
-	      AE[i_loc + j_loc * local_dof_counter] = 0.e0;
+	      AE[cnt++] = 0.e0;
 	  
 	  for (i_loc=0; i_loc < local_dof_counter; i_loc++)
 	    {
@@ -282,28 +293,29 @@ hypre_AMGNodalSchwarzSmoother( hypre_CSRMatrix    *A,
 
 
 	  /* get block for Schwarz smoother: ============================= */
-	  ierr = matinv(XE, AE, local_dof_counter); 
-
+	  /* ierr = matinv(XE, AE, local_dof_counter); */
 	  /* printf("ierr_AE_inv: %d\n", ierr); */
-  
-	}
+#ifdef ESSL
+ 	cnt = local_dof_counter;
+        for (j_loc=1; j_loc < local_dof_counter; j_loc++)
+	   for (i_loc=j_loc; i_loc < local_dof_counter; i_loc++)
+	      AE[cnt++] = AE[i_loc + j_loc * local_dof_counter];
+	dppf(AE, local_dof_counter, 1);
+#else  
+	hypre_F90_NAME_BLAS(dpotrf,DPOTRF)(&uplo, &local_dof_counter, AE,
+		&local_dof_counter, &ierr); 
+#endif  
 
-      if (option == 1)
 	for (i_loc=0; i_loc < local_dof_counter; i_loc++)
 	      j_domain_dof[domain_dof_counter+i_loc] 
 		= i_local_to_global[i_loc]; 
+      }
 
-
-      if (option == 1)
-	for (i_loc=0; i_loc < local_dof_counter; i_loc++)
-	  for (j_loc=0; j_loc < local_dof_counter; j_loc++)
-	    domain_matrixinverse[domain_matrixinverse_counter
-				+ i_loc + j_loc * local_dof_counter]
-	      = XE[i_loc + j_loc * local_dof_counter];
 
       if (option == 0)
 	{
 
+	  AE = &domain_matrixinverse[domain_matrixinverse_counter];
 	  for (i_loc=0; i_loc < int_dof_counter; i_loc++)
 	    for (j_loc=0; j_loc < int_dof_counter; j_loc++)
 	      AE[i_loc + j_loc * int_dof_counter] = 0.e0;
@@ -324,8 +336,20 @@ hypre_AMGNodalSchwarzSmoother( hypre_CSRMatrix    *A,
 		}
 	    }
 
-	  ierr = matinv(XE, AE, int_dof_counter);
+	  /* ierr = matinv(XE, AE, int_dof_counter); */
+#ifdef ESSL
+ 	cnt = local_dof_counter;
+        for (j_loc=1; j_loc < local_dof_counter; j_loc++)
+	   for (i_loc=j_loc; i_loc < local_dof_counter; i_loc++)
+	      AE[cnt++] = AE[i_loc + j_loc * local_dof_counter];
+	dppf(AE, local_dof_counter, 1);
+#else
+	hypre_F90_NAME_BLAS(dpotrf,DPOTRF)(&uplo, &local_dof_counter, AE, 
+		&local_dof_counter, &ierr);
+/*	dpotrf_(&uplo, &local_dof_counter, AE, &local_dof_counter, &ierr);*/
+#endif 
 
+      if (ierr) printf (" error in dpotrf !!!\n");
 
 	  for (i_loc=0; i_loc < int_dof_counter; i_loc++)
 	    {
@@ -335,7 +359,7 @@ hypre_AMGNodalSchwarzSmoother( hypre_CSRMatrix    *A,
 	      for (j_loc=0; j_loc < int_dof_counter; j_loc++)
 		domain_matrixinverse[domain_matrixinverse_counter
 				    + i_loc + j_loc * int_dof_counter]
-		  = XE[i_loc + j_loc * int_dof_counter];
+		  = AE[i_loc + j_loc * int_dof_counter];
 	    }
 
 	  domain_dof_counter+=int_dof_counter;
@@ -344,7 +368,11 @@ hypre_AMGNodalSchwarzSmoother( hypre_CSRMatrix    *A,
       else
 	{
 	  domain_dof_counter+=local_dof_counter;
+#ifdef ESSL
+	  domain_matrixinverse_counter+=local_dof_counter*(local_dof_counter+1)/2;
+#else
 	  domain_matrixinverse_counter+=local_dof_counter*local_dof_counter;
+#endif
 	}
 
 
@@ -372,10 +400,6 @@ hypre_AMGNodalSchwarzSmoother( hypre_CSRMatrix    *A,
   hypre_TFree(i_int_to_local);
 
   hypre_TFree(i_local_to_global);
-
-
-  hypre_TFree(AE);
-  hypre_TFree(XE);
 
 
   *i_domain_dof_pointer = i_domain_dof;
@@ -424,7 +448,6 @@ hypre_AMGNodalSchwarzSmoother( hypre_CSRMatrix    *A,
 
 			   num_dofs);
 
-
    printf("\n\n=======================================================\n");
    printf("             END test PCG solve:                           \n");
    printf("===========================================================\n");
@@ -462,8 +485,10 @@ int hypre_SchwarzSolve(hypre_CSRMatrix *A,
   double *x;
   double *rhs;
   double *aux;
+  char uplo = 'L';
+  int one = 1;
 
-  int i,j,k, j_loc, k_loc;
+  int jj,i,j,k, j_loc, k_loc;
 
 
   int matrix_size, matrix_size_counter = 0;
@@ -489,16 +514,25 @@ int hypre_SchwarzSolve(hypre_CSRMatrix *A,
 
       /* compute residual: ---------------------------------------- */
 
-      for (j=i_domain_dof[i]; j < i_domain_dof[i+1]; j++)
+   /*   for (j=i_domain_dof[i]; j < i_domain_dof[i+1]; j++)
 	{
 	  aux[j_domain_dof[j]] = rhs[j_domain_dof[j]];
 	  for (k=i_dof_dof[j_domain_dof[j]];
 	       k<i_dof_dof[j_domain_dof[j]+1]; k++)
 	    aux[j_domain_dof[j]] -= a_dof_dof[k] * x[j_dof_dof[k]];
 	}
-
+   */
+      jj = 0;
+      for (j=i_domain_dof[i]; j < i_domain_dof[i+1]; j++)
+	{
+	  aux[jj] = rhs[j_domain_dof[j]];
+	  for (k=i_dof_dof[j_domain_dof[j]];
+	       k<i_dof_dof[j_domain_dof[j]+1]; k++)
+	    aux[jj] -= a_dof_dof[k] * x[j_dof_dof[k]];
+	  jj++;
+	}
       /* solve for correction: ------------------------------------- */
-      
+  /*    
       for (j=i_domain_dof[i]; j < i_domain_dof[i+1]; j++)
 	{
 	  j_loc = j-i_domain_dof[i];
@@ -512,19 +546,43 @@ int hypre_SchwarzSolve(hypre_CSRMatrix *A,
 		* aux[j_domain_dof[k]];
 	    }
 	}
-
-      matrix_size_counter += matrix_size * matrix_size;  
+   */
+#ifdef ESSL
+	dpps(&domain_matrixinverse[matrix_size_counter], matrix_size, aux, 1);
+#else
+        /* dpotrs_(&uplo, &matrix_size, &one,  
+	&domain_matrixinverse[matrix_size_counter], &matrix_size, aux,
+	&matrix_size, &ierr); */
+        hypre_F90_NAME_BLAS(dpotrs, DPOTRS)(&uplo, &matrix_size, &one, 
+	&domain_matrixinverse[matrix_size_counter], &matrix_size, aux,
+	&matrix_size, &ierr); 
+#endif
+      if (ierr) printf (" error in dpotrs !!!\n");
+      jj = 0;
+      for (j=i_domain_dof[i]; j < i_domain_dof[i+1]; j++)
+	{
+	   x[j_domain_dof[j]]+=  aux[jj++];
+	}
+#ifdef ESSL
+      matrix_size_counter += matrix_size * (matrix_size+1)/2;  
+#else
+      matrix_size_counter += matrix_size * matrix_size;
+#endif
 
     }
 
   /* backward solve: ------------------------------------------------ */
-  for (i=num_domains-1; i > -1; i--)
+    for (i=num_domains-1; i > -1; i--)
     {
       matrix_size = i_domain_dof[i+1] - i_domain_dof[i];
+#ifdef ESSL
+      matrix_size_counter -= matrix_size * (matrix_size+1)/2;  
+#else
       matrix_size_counter -= matrix_size * matrix_size;
-      
+#endif
+ 
       /* compute residual: ---------------------------------------- */
-
+/*
       for (j=i_domain_dof[i]; j < i_domain_dof[i+1]; j++)
 	{
 	  aux[j_domain_dof[j]] = rhs[j_domain_dof[j]];
@@ -532,10 +590,19 @@ int hypre_SchwarzSolve(hypre_CSRMatrix *A,
 	       k<i_dof_dof[j_domain_dof[j]+1]; k++)
 	    aux[j_domain_dof[j]] -= a_dof_dof[k] * x[j_dof_dof[k]];
 	}
-
+*/
+      jj = 0;
+      for (j=i_domain_dof[i]; j < i_domain_dof[i+1]; j++)
+	{
+	  aux[jj] = rhs[j_domain_dof[j]];
+	  for (k=i_dof_dof[j_domain_dof[j]];
+	       k<i_dof_dof[j_domain_dof[j]+1]; k++)
+	    aux[jj] -= a_dof_dof[k] * x[j_dof_dof[k]];
+	  jj++;
+	}
 
       /* solve for correction: ------------------------------------- */
-      
+ /*     
       for (j=i_domain_dof[i]; j < i_domain_dof[i+1]; j++)
 	{
 	  j_loc = j-i_domain_dof[i];
@@ -549,7 +616,23 @@ int hypre_SchwarzSolve(hypre_CSRMatrix *A,
 		* aux[j_domain_dof[k]];
 	    }
 	}
-      
+  */    
+#ifdef ESSL
+	dpps(&domain_matrixinverse[matrix_size_counter], matrix_size, aux, 1);
+#else
+        /* dpotrs_(&uplo, &matrix_size, &one,  
+	&domain_matrixinverse[matrix_size_counter], &matrix_size, aux,
+	&matrix_size, &ierr); */
+        hypre_F90_NAME_BLAS(dpotrs, DPOTRS)(&uplo, &matrix_size, &one, 
+	&domain_matrixinverse[matrix_size_counter], &matrix_size, aux,
+	&matrix_size, &ierr); 
+#endif
+      if (ierr) printf (" error in dpotrs !!!\n");
+      jj = 0;
+      for (j=i_domain_dof[i]; j < i_domain_dof[i+1]; j++)
+	{
+	   x[j_domain_dof[j]]+=  aux[jj++];
+	}
     }			      
 
   return ierr;
@@ -810,12 +893,10 @@ hypre_AMGCreateDomainDof(hypre_CSRMatrix     *A,
   int domain_dof_counter = 0, domain_matrixinverse_counter = 0;
 
 
-  double *AE, *XE;
+  double *AE;
 
-  /* PCG arrays: --------------------------------------------------- */
-  /* double *x, *rhs, *v, *w, *d, *aux;
-
-  int max_iter; */
+  char uplo = 'L';
+  int cnt;
 
   /* --------------------------------------------------------------------- */
 
@@ -965,7 +1046,14 @@ hypre_AMGCreateDomainDof(hypre_CSRMatrix     *A,
   for (i=0; i < num_domains; i++)
     {
       local_dof_counter = i_domain_dof[i+1]-i_domain_dof[i];
+#ifdef ESSL
+      if (i == num_domains-1)
+       domain_matrixinverse_counter+= local_dof_counter*local_dof_counter;
+      else
+       domain_matrixinverse_counter+= local_dof_counter*(local_dof_counter+1)/2;
+#else
       domain_matrixinverse_counter+= local_dof_counter * local_dof_counter;
+#endif
 
       if (local_dof_counter > max_local_dof_counter)
 	max_local_dof_counter = local_dof_counter;
@@ -976,12 +1064,6 @@ hypre_AMGCreateDomainDof(hypre_CSRMatrix     *A,
 
   i_local_to_global = hypre_CTAlloc(int, max_local_dof_counter);
 
-
-  AE = hypre_CTAlloc(double, max_local_dof_counter *
-		     max_local_dof_counter);
-
-  XE = hypre_CTAlloc(double, max_local_dof_counter *
-		     max_local_dof_counter);
 
   /* i_dof_index = (int *) malloc(num_dofs * sizeof(int)); */
   i_global_to_local = i_dof_index;
@@ -1002,10 +1084,11 @@ hypre_AMGCreateDomainDof(hypre_CSRMatrix     *A,
 
 
       /* get local matrix in AE: ======================================== */
-  
+      AE = &domain_matrixinverse[domain_matrixinverse_counter];
+      cnt = 0;  
       for (i_loc=0; i_loc < local_dof_counter; i_loc++)
 	for (j_loc=0; j_loc < local_dof_counter; j_loc++)
-	  AE[i_loc + j_loc * local_dof_counter] = 0.e0;
+	  AE[cnt++] = 0.e0;
 
       
 
@@ -1021,21 +1104,24 @@ hypre_AMGCreateDomainDof(hypre_CSRMatrix     *A,
 	}
 
       /* get block for Schwarz smoother: ============================= */
-      ierr = matinv(XE, AE, local_dof_counter);
-
-
+      /* ierr = matinv(XE, AE, local_dof_counter); */
       /* printf("ierr_AE_inv: %d\n", ierr); */
-  
+#ifdef ESSL
+ 	cnt = local_dof_counter;
+        for (j_loc=1; j_loc < local_dof_counter; j_loc++)
+	   for (i_loc=j_loc; i_loc < local_dof_counter; i_loc++)
+	      AE[cnt++] = AE[i_loc + j_loc * local_dof_counter];
+   	dppf(AE, local_dof_counter, 1);
+#else
+    	hypre_F90_NAME_BLAS(dpotrf,DPOTRF)(&uplo,&local_dof_counter, AE,
+		&local_dof_counter, &ierr);
+#endif	  
 
-      for (i_loc=0; i_loc < local_dof_counter; i_loc++)
-	for (j_loc=0; j_loc < local_dof_counter; j_loc++)
-	  domain_matrixinverse[domain_matrixinverse_counter
-			      + i_loc + j_loc * local_dof_counter]
-	    = XE[i_loc + j_loc * local_dof_counter];
-
-
+#ifdef ESSL
+      domain_matrixinverse_counter+=local_dof_counter*(local_dof_counter+1)/2;
+#else
       domain_matrixinverse_counter+=local_dof_counter*local_dof_counter;
-
+#endif
 
       for (l_loc=0; l_loc < local_dof_counter; l_loc++)
 	i_global_to_local[i_local_to_global[l_loc]] = -1;
@@ -1043,10 +1129,6 @@ hypre_AMGCreateDomainDof(hypre_CSRMatrix     *A,
     }
 
   hypre_TFree(i_local_to_global);
-
-
-  hypre_TFree(AE);
-  hypre_TFree(XE);
 
 
   hypre_TFree(i_dof_index);
@@ -1689,7 +1771,8 @@ int update_entry(int weight, int *weight_max,
 
 	  previous[i] = previous[tail];
 	  next[i] = tail;
-	  next[previous[tail]] = i;
+	  if (previous[tail] > head)
+	     next[previous[tail]] = i;
 	  previous[tail] = i;
 
     }
@@ -1762,7 +1845,11 @@ int move_entry(int weight, int *weight_max,
     }
 
   return ierr;
+
 }
+
+
+
 /*---------------------------------------------------------------------
  matinv:  X <--  A**(-1) ;  A IS POSITIVE DEFINITE (non--symmetric);
  ---------------------------------------------------------------------*/
