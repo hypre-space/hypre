@@ -718,6 +718,34 @@ extern "C" {
 #endif
 
 
+/* HYPRE_bicgstab.c */
+int HYPRE_BiCGSTABDestroy( HYPRE_Solver solver );
+int HYPRE_BiCGSTABSetup( HYPRE_Solver solver , HYPRE_Matrix A , HYPRE_Vector b , HYPRE_Vector x );
+int HYPRE_BiCGSTABSolve( HYPRE_Solver solver , HYPRE_Matrix A , HYPRE_Vector b , HYPRE_Vector x );
+int HYPRE_BiCGSTABSetTol( HYPRE_Solver solver , double tol );
+int HYPRE_BiCGSTABSetMinIter( HYPRE_Solver solver , int min_iter );
+int HYPRE_BiCGSTABSetMaxIter( HYPRE_Solver solver , int max_iter );
+int HYPRE_BiCGSTABSetStopCrit( HYPRE_Solver solver , int stop_crit );
+int HYPRE_BiCGSTABSetPrecond( HYPRE_Solver solver , HYPRE_PtrToSolverFcn precond , HYPRE_PtrToSolverFcn precond_setup , HYPRE_Solver precond_solver );
+int HYPRE_BiCGSTABGetPrecond( HYPRE_Solver solver , HYPRE_Solver *precond_data_ptr );
+int HYPRE_BiCGSTABSetLogging( HYPRE_Solver solver , int logging );
+int HYPRE_BiCGSTABGetNumIterations( HYPRE_Solver solver , int *num_iterations );
+int HYPRE_BiCGSTABGetFinalRelativeResidualNorm( HYPRE_Solver solver , double *norm );
+
+/* HYPRE_cgnr.c */
+int HYPRE_CGNRDestroy( HYPRE_Solver solver );
+int HYPRE_CGNRSetup( HYPRE_Solver solver , HYPRE_Matrix A , HYPRE_Vector b , HYPRE_Vector x );
+int HYPRE_CGNRSolve( HYPRE_Solver solver , HYPRE_Matrix A , HYPRE_Vector b , HYPRE_Vector x );
+int HYPRE_CGNRSetTol( HYPRE_Solver solver , double tol );
+int HYPRE_CGNRSetMinIter( HYPRE_Solver solver , int min_iter );
+int HYPRE_CGNRSetMaxIter( HYPRE_Solver solver , int max_iter );
+int HYPRE_CGNRSetStopCrit( HYPRE_Solver solver , int stop_crit );
+int HYPRE_CGNRSetPrecond( HYPRE_Solver solver , HYPRE_PtrToSolverFcn precond , HYPRE_PtrToSolverFcn precondT , HYPRE_PtrToSolverFcn precond_setup , HYPRE_Solver precond_solver );
+int HYPRE_CGNRGetPrecond( HYPRE_Solver solver , HYPRE_Solver *precond_data_ptr );
+int HYPRE_CGNRSetLogging( HYPRE_Solver solver , int logging );
+int HYPRE_CGNRGetNumIterations( HYPRE_Solver solver , int *num_iterations );
+int HYPRE_CGNRGetFinalRelativeResidualNorm( HYPRE_Solver solver , double *norm );
+
 /* HYPRE_gmres.c */
 int HYPRE_GMRESSetup( HYPRE_Solver solver , HYPRE_Matrix A , HYPRE_Vector b , HYPRE_Vector x );
 int HYPRE_GMRESSolve( HYPRE_Solver solver , HYPRE_Matrix A , HYPRE_Vector b , HYPRE_Vector x );

@@ -33,10 +33,12 @@ HEADERS =\
  krylov.h
 
 FILES =\
- gmres.c\
- pcg.c\
  bicgstab.c\
  cgnr.c\
+ gmres.c\
+ pcg.c\
+ HYPRE_bicgstab.c\
+ HYPRE_cgnr.c\
  HYPRE_gmres.c\
  HYPRE_pcg.c
 
