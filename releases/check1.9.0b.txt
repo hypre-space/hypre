@@ -27,7 +27,7 @@ available to users.
 
  5. Requests for delay in release must be made within 24 hours of notification 
 
-    --->> _________________________________________
+    --->> ____N/A emh 2/11/05_____________________________________
 
  6. Update CHANGELOG file with information regarding contents of this release
 
@@ -47,16 +47,16 @@ available to users.
 
 10. Tag repository with release number
 
-    --->> _________________________________________
+    --->> ______emh 2/10/2005___________________________________
 
 11. Checkout tagged version
 
-    --->> _________________________________________
+    --->> ______emh 2/10/2005___________________________________
 
 12. Manually run the autotest script with the following options on the checked
         out version: -tux149 -insure -frost -gpsmp -pengra
 
-    --->> _________________________________________
+    --->> _emh 2/10/2005________________________________________
 
 13. If the test runs properly, proceed to step 14
     Otherwise, untag the repository, make necessary corrections, return
@@ -66,16 +66,16 @@ available to users.
 
 14. Create tar file of checked out version by running the mkdist script
 
-    --->> _________________________________________
+    --->> ___emh 2/11/2005______________________________________
 
 15. Manually untar the file that was created in step 14
 
-    --->> _________________________________________
+    --->> ____emh 2/11/2005_____________________________________
 
 16. Manually run the autotest script with the following options on the checked
         out version: -tux149 -insure -frost -gpsmp -pengra
 
-    --->> _________________________________________
+    --->> ____emh 2/11/2005_____________________________________
 
 17. If the tests run properly, proceed to step 18
     Otherwise, untag the repository, make necessary corrections, return
@@ -85,59 +85,59 @@ available to users.
 
 18. Copy tar file to any closed (SCF) computer system, using FIS 
 
-    --->> _________________________________________
+    --->> ____emh 2/11/2005_____________________________________
 
 19. Copy tar file to /usr/casc/hypre/i686-pc-linux-gnu directory
 
-    --->> _________________________________________
+    --->> ____emh 2/11/2005_____________________________________
 
 20. Run the mkdistlinks script to create symbolic links to the tar file 
 
-    --->> _________________________________________
+    --->> ____emh 2/11/2005_____________________________________
 
 21. Run the mklibs script with the '-b install' option to create
        and install the release
 
-    --->> _________________________________________
+    --->> ____emh 2/11/2005_____install done 2/22/2005___________
 
 22. Log onto any closed (SCF) computer system
 
-    --->> _________________________________________
+    --->> ____emh 2/11/2005______________
 
 23. Retrieve the tar file from the FIS system
 
-    --->> _________________________________________
+    --->> ____emh 2/11/2005______________
 
 24. Manually untar the file that was retrieved in step 23
 
-    --->> _________________________________________
+    --->> ____emh 2/11/2005______________
 
 25. Manually run the autotest script with the following options on the checked
         out version: -sc -white -emperor
 
-    --->> _________________________________________
+    --->> ____emh 2/11/2005______________
 
 26. Copy tar file to the appropriate sub-directory (based on SYS_TYPE) of
        /usr/gapps/hypre and /usr/casc/hypre
 
-    --->> _________________________________________
+    --->> ____emh 2/11/2005______________
 
 27. Run the mkdistlinks script to create symbolic links to the tar file 
 
-    --->> _________________________________________
+    --->> ____emh 2/11/2005______________
 
 28. Run the mklibs script with the '-b install' option to create
        and install the release
 
-    --->> _________________________________________
+    --->> ____emh 2/11/2005_____install done 2/22/2005___________
 
 29. If there are no errors in steps 16-30; inform project team and other
        appropriate users of availability
 
-    --->> _________________________________________
+    --->> ____emh 2/22/2005___________
 
 30. FINAL SIGN-OFF
     Verify that all steps have been signed off and commit this file to
        the repository
 
-    --->> _________________________________________
+    --->> ____emh 2/23/2005___________
