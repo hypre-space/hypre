@@ -377,6 +377,8 @@ int MLI_Solver_Schwarz::setParams(char *param_string, int argc, char **argv)
 {
    char   param1[200];
 
+   (void) argc;
+   (void) argv;
    if ( !strcmp(param_string, "nblocks") )
    {
       sscanf(param_string, "%s %d", param1, &nBlocks_);
@@ -623,6 +625,8 @@ int MLI_Solver_Schwarz::buildBlocks(int offNRows,
    /*-----------------------------------------------------------------
     * clean up first 
     *-----------------------------------------------------------------*/
+
+   (void) offRowNumbers;
 
    if ( nBlocks_ > 0 ) 
    {

@@ -109,6 +109,7 @@ int MLI_Solver_ParaSails::setup(MLI_Matrix *Amat_in)
    MatrixDestroy(mat);
    return 0;
 #else
+   (void) Amat_in;
    cout << "ParaSails smoother not available.\n";
    exit(1);
    return 1;
@@ -243,6 +244,8 @@ int MLI_Solver_ParaSails::applyParaSails(MLI_Vector *f_in, MLI_Vector *u_in)
 
    return(relax_error); 
 #else
+   (void) f_in;
+   (void) u_in;
    cout << "ParaSails smoother not available.\n";
    exit(1);
    return 1;
@@ -322,6 +325,8 @@ int MLI_Solver_ParaSails::applyParaSailsTrans(MLI_Vector *f_in,
 
    return(relax_error); 
 #else
+   (void) f_in;
+   (void) u_in;
    cout << "ParaSails smoother not available.\n";
    exit(1);
    return 1;
