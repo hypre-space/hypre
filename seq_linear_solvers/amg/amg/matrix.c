@@ -169,6 +169,9 @@ hypre_Vector         *y;
 
    double      temp;
 
+   int         xlen = hypre_VectorSize(x);
+   int         ylen = hypre_VectorSize(y);
+
    int         i, j, jj;
 
 
@@ -178,7 +181,7 @@ hypre_Vector         *y;
 
    if (alpha == 0.0)
    {
-      for (i = 0; i < n; i++)
+      for (i = 0; i < ylen; i++)
 	 yp[i] *= beta;
 
       return;
@@ -194,12 +197,12 @@ hypre_Vector         *y;
    {
       if (temp == 0.0)
       {
-	 for (i = 0; i < n; i++)
+	 for (i = 0; i < ylen; i++)
 	    yp[i] = 0.0;
       }
       else
       {
-	 for (i = 0; i < n; i++)
+	 for (i = 0; i < ylen; i++)
 	    yp[i] *= temp;
       }
    }
