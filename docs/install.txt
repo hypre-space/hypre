@@ -15,7 +15,7 @@ maintained by members of the Scalable Linear Solvers project:
     - may be relatively unstable.
     - one old installation is retained.
     - installed on:
-        CASC workstation cluster
+        CASC Sun workstation cluster
 
   2. The "external" installation:
 
@@ -24,9 +24,11 @@ maintained by members of the Scalable Linear Solvers project:
     - should be relatively stable.
     - a few old installations are retained.
     - installed on:
-        CASC workstation cluster
-        LC Compass cluster
+        CASC Sun workstation cluster
+        Compass DEC cluster
         Blue-Pacific
+        Forest DEC cluster  (classified)
+        Blue(Sky)-Pacific   (classified)
 
 Rob Falgout is maintaining two lists of users who want to receive
 notification of installation updates: one for "internal" updates and
@@ -45,16 +47,22 @@ Internal installation:
 
   (on CASC cluster only)
 
-  1. Do `update internal' - this checks out the current version of
-     the repository, tags it with a date (file VERSION_DATE), and
-     compiles it.  This also creates the tar file `UPDATE.tar', which
-     is currently only used in the external installation.
+  1. Do `update internal' - this checks out the current version of the
+     repository, tags it with a date (file `VERSION_DATE'), compiles it,
+     temporarily installs it, and sets the permissions of the temporary
+     installation to appropriate values.  This also creates the tar file
+     `UPDATE.tar', currently only used in the external installation.
+
   2. Do `update internal install' - this saves the previously
-     installed version, installs the new version, and possibly
-     deletes some older installations.  Permissions are set to
-     appropriate values.  Note that step 1 is not actually
-     needed, but is recommended in case something doesn't work
-     as planned (e.g., failed checkout, failed compile, ...).
+     installed version, moves the temporary installation into its
+     correct location, and possibly deletes some older installations.
+
+     Note that step 1 is not actually needed, but is recommended in case
+     something doesn't work as planned (e.g., failed checkout, failed
+     compile, ...).  Also, step 1 provides the opportunity to test the
+     library in non-CASC codes such as ARES or ALE3D via the temporary
+     installation in the `UPDATE' subdirectory.
+
   3. Send email to appropriate users indicating the update.
 
 External installation:
