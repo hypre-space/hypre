@@ -121,6 +121,18 @@ HYPRE_ParAMGSetStrongThreshold( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ParAMGSetTruncFactor
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParAMGSetTruncFactor( HYPRE_Solver solver,
+                            double       trunc_factor  )
+{
+   return( hypre_ParAMGSetTruncFactor( (void *) solver,
+                                           trunc_factor ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_ParAMGSetInterpType
  *--------------------------------------------------------------------------*/
 
