@@ -48,7 +48,7 @@ HEADERS =\
  headers.h\
  amg.h\
  pcg.h\
- ls.h\
+ pamg.h\
  HYPRE_ls.h
 
 FILES =\

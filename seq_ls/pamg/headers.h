@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "ls.h"
+#include "pamg.h"
 
 #include "general.h" 
 
