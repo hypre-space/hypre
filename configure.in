@@ -360,7 +360,7 @@ AC_ARG_WITH(pthreads,
 
 AC_ARG_WITH(openmp,
 [  --with-openmp           use openMP--this may affect which compiler is 
-                          chosen.  Supported on IBM and DECS only.],
+                          chosen.  Supported on IBM and DECS, test on Linux.],
 [case "${withval}" in
    yes) casc_using_openmp=yes
    AC_DEFINE(HYPRE_USING_OPENMP) ;;
@@ -472,9 +472,9 @@ case $HOSTNAME in
 
      if  test "$casc_user_chose_mpi" = "no" && test "$casc_using_mpi" = "yes"
      then
-        CASC_CHECK_HEADER(mpi.h, /opt/intel/tflop/TF99_2.6.1/tflops/cougar/include)
+        CASC_CHECK_HEADER(mpi.h, /opt/intel/tflop/current/tflops/cougar/include)
         MPIINCLUDE="$MPIINCLUDE $INCLUDES"
-        CASC_ADD_LIB(mpi, main, /opt/intel/tflop/TF99_2.6.1/tflops/cougar/lib/puma, MPI)
+        CASC_ADD_LIB(mpi, main, /opt/intel/tflop/current/tflops/cougar/lib/puma, MPI)
         if test -z "$MPILIBS"
         then
            AC_MSG_WARN([MPI not found--in sasn100 test-must set manually using --with-flags])
@@ -599,15 +599,25 @@ then
 
       if test "$casc_user_chose_compilers" = "no"
       then
-        if test "$casc_using_mpi" = "no"
+        if test "$casc_using_mpi" = "no" &&
+	  test "$casc_using_openmp" = "no"
         then
           AC_CHECK_PROGS(CC, cc gcc kcc)
           AC_CHECK_PROGS(CXX, CC g++)
           AC_CHECK_PROGS(F77, f77 g77)
         else
+	 if test "$casc_using_openmp" = "no"
+         then
           AC_CHECK_PROGS(CC, mpicc)
           AC_CHECK_PROGS(CXX, mpiCC)
           AC_CHECK_PROGS(F77, mpif77)
+         else
+	   AC_CHECK_PROGS(CC,ompcc) 
+           AC_CHECK_PROGS(CXX,ompcc) 
+           AC_CHECK_PROGS(F77,ompf77)
+       CASC_CHECK_HEADER(omp.h, /usr/local/omni/lib/openmp/include)
+       CASC_ADD_LIB(ompc, main, /usr/local/omni/lib/openmp/lib)
+         fi
         fi
       fi
 
