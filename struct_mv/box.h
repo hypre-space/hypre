@@ -84,20 +84,6 @@ typedef struct
 #define zzz_NewIndex()       zzz_CTAlloc(zzz_Index, 3)
 #define zzz_FreeIndex(index) zzz_TFree(index)
 
-#define zzz_SetIndex(index, ix, iy, iz) \
-{\
-   zzz_IndexX(index) = ix;\
-   zzz_IndexY(index) = iy;\
-   zzz_IndexZ(index) = iz;\
-}
-
-#define zzz_CopyIndex(index1, index2) \
-{\
-   zzz_IndexX(index2) = zzz_IndexX(index1);\
-   zzz_IndexY(index2) = zzz_IndexY(index1);\
-   zzz_IndexZ(index2) = zzz_IndexZ(index1);\
-}
-
 /*--------------------------------------------------------------------------
  * Accessor macros: zzz_Box
  *--------------------------------------------------------------------------*/
@@ -123,13 +109,6 @@ typedef struct
 
 #define zzz_BoxVolume(box) \
 (zzz_BoxSizeX(box) * zzz_BoxSizeY(box) * zzz_BoxSizeZ(box))
-
-#define zzz_GetBoxSize(box, size) \
-{\
-   zzz_IndexX(size) = zzz_BoxSizeX(box);\
-   zzz_IndexY(size) = zzz_BoxSizeY(box);\
-   zzz_IndexZ(size) = zzz_BoxSizeZ(box);\
-}
 
 #define zzz_BoxIndexRank(box, index) \
 ((zzz_IndexX(index) - zzz_BoxIMinX(box)) + \

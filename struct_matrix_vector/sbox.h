@@ -90,13 +90,6 @@ typedef struct
 #define zzz_SBoxVolume(sbox) \
 (zzz_SBoxSizeX(sbox) * zzz_SBoxSizeY(sbox) * zzz_SBoxSizeZ(sbox))
 
-#define zzz_GetSBoxSize(sbox, size) \
-{\
-   zzz_IndexX(size) = zzz_SBoxSizeX(sbox);\
-   zzz_IndexY(size) = zzz_SBoxSizeY(sbox);\
-   zzz_IndexZ(size) = zzz_SBoxSizeZ(sbox);\
-}
-
 /*--------------------------------------------------------------------------
  * Accessor macros: zzz_SBoxArray
  *--------------------------------------------------------------------------*/

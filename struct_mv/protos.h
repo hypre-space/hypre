@@ -6,6 +6,8 @@
 
 
 /* box.c */
+int zzz_SetIndex P((zzz_Index *index , int ix , int iy , int iz ));
+int zzz_CopyIndex P((zzz_Index *index1 , zzz_Index *index2 ));
 zzz_Box *zzz_NewBox P((zzz_Index *imin , zzz_Index *imax ));
 zzz_BoxArray *zzz_NewBoxArray P((void ));
 zzz_BoxArrayArray *zzz_NewBoxArrayArray P((int size ));
@@ -21,7 +23,7 @@ void zzz_AppendBox P((zzz_Box *box , zzz_BoxArray *box_array ));
 void zzz_DeleteBox P((zzz_BoxArray *box_array , int index ));
 void zzz_AppendBoxArray P((zzz_BoxArray *box_array_0 , zzz_BoxArray *box_array_1 ));
 void zzz_AppendBoxArrayArray P((zzz_BoxArrayArray *box_array_array_0 , zzz_BoxArrayArray *box_array_array_1 ));
-void zzz_CopyBoxArrayData P((zzz_BoxArray *box_array_in , zzz_BoxArray *data_space_in , int num_values_in , double *data_in , zzz_BoxArray *box_array_out , zzz_BoxArray *data_space_out , int num_values_out , double *data_out ));
+int zzz_GetBoxSize P((zzz_Box *box , zzz_Index *size ));
 void zzz_CopyBoxArrayData P((zzz_BoxArray *box_array_in , zzz_BoxArray *data_space_in , int num_values_in , double *data_in , zzz_BoxArray *box_array_out , zzz_BoxArray *data_space_out , int num_values_out , double *data_out ));
 
 /* box_algebra.c */
@@ -46,6 +48,18 @@ zzz_ComputePkg *zzz_NewComputePkg P((zzz_SBoxArrayArray *send_sboxes , zzz_SBoxA
 void zzz_FreeComputePkg P((zzz_ComputePkg *compute_pkg ));
 zzz_CommHandle *zzz_InitializeIndtComputations P((zzz_ComputePkg *compute_pkg , double *data ));
 void zzz_FinalizeIndtComputations P((zzz_CommHandle *comm_handle ));
+
+/* create_2d_laplacian.c */
+int main P((int argc , char *argv []));
+
+/* create_3d_laplacian.c */
+int main P((int argc , char *argv []));
+
+/* driver.c */
+int main P((int argc , char *argv []));
+
+/* driver_internal.c */
+int main P((int argc , char *argv []));
 
 /* grow.c */
 zzz_BoxArray *zzz_GrowBoxByStencil P((zzz_Box *box , zzz_StructStencil *stencil , int transpose ));
@@ -85,6 +99,7 @@ void zzz_AppendSBox P((zzz_SBox *sbox , zzz_SBoxArray *sbox_array ));
 void zzz_DeleteSBox P((zzz_SBoxArray *sbox_array , int index ));
 void zzz_AppendSBoxArray P((zzz_SBoxArray *sbox_array_0 , zzz_SBoxArray *sbox_array_1 ));
 void zzz_AppendSBoxArrayArray P((zzz_SBoxArrayArray *sbox_array_array_0 , zzz_SBoxArrayArray *sbox_array_array_1 ));
+int zzz_GetSBoxSize P((zzz_SBox *sbox , zzz_Index *size ));
 
 /* struct_axpy.c */
 int zzz_StructAxpy P((double alpha , zzz_StructVector *x , zzz_StructVector *y ));

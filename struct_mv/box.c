@@ -16,6 +16,38 @@
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
+ * zzz_SetIndex
+ *--------------------------------------------------------------------------*/
+
+int
+zzz_SetIndex( zzz_Index *index,
+              int        ix,
+              int        iy,
+              int        iz    )
+{
+   zzz_IndexX(index) = ix;
+   zzz_IndexY(index) = iy;
+   zzz_IndexZ(index) = iz;
+
+   return 0;
+}
+
+/*--------------------------------------------------------------------------
+ * zzz_CopyIndex
+ *--------------------------------------------------------------------------*/
+
+int
+zzz_CopyIndex( zzz_Index *index1,
+               zzz_Index *index2 )
+{
+   zzz_IndexX(index2) = zzz_IndexX(index1);
+   zzz_IndexY(index2) = zzz_IndexY(index1);
+   zzz_IndexZ(index2) = zzz_IndexZ(index1);
+
+   return 0;
+}
+
+/*--------------------------------------------------------------------------
  * zzz_NewBox
  *--------------------------------------------------------------------------*/
 
@@ -338,6 +370,21 @@ zzz_AppendBoxArrayArray( zzz_BoxArrayArray *box_array_array_0,
    zzz_ForBoxArrayI(i, box_array_array_0)
       zzz_AppendBoxArray(zzz_BoxArrayArrayBoxArray(box_array_array_0, i),
                          zzz_BoxArrayArrayBoxArray(box_array_array_1, i));
+}
+
+/*--------------------------------------------------------------------------
+ * zzz_GetBoxSize:
+ *--------------------------------------------------------------------------*/
+
+int
+zzz_GetBoxSize( zzz_Box   *box,
+                zzz_Index *size )
+{
+   zzz_IndexX(size) = zzz_BoxSizeX(box);
+   zzz_IndexY(size) = zzz_BoxSizeY(box);
+   zzz_IndexZ(size) = zzz_BoxSizeZ(box);
+
+   return 0;
 }
 
 /*--------------------------------------------------------------------------

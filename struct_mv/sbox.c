@@ -412,3 +412,18 @@ zzz_AppendSBoxArrayArray( zzz_SBoxArrayArray *sbox_array_array_0,
                           zzz_SBoxArrayArraySBoxArray(sbox_array_array_1, i));
 }
 
+/*--------------------------------------------------------------------------
+ * zzz_GetSBoxSize:
+ *--------------------------------------------------------------------------*/
+
+int 
+zzz_GetSBoxSize( zzz_SBox  *sbox,
+                 zzz_Index *size )
+{
+   zzz_IndexX(size) = zzz_SBoxSizeX(sbox);
+   zzz_IndexY(size) = zzz_SBoxSizeY(sbox);
+   zzz_IndexZ(size) = zzz_SBoxSizeZ(sbox);
+
+   return 0;
+}
+
