@@ -20,6 +20,7 @@ main( int   argc,
    int                 build_matrix_type;
    int                 build_matrix_arg_index;
    int                 solver_id;
+   int                 ioutdat;
 
    hypre_ParCSRMatrix *A;
    hypre_ParVector    *b;
@@ -49,6 +50,8 @@ main( int   argc,
    build_matrix_arg_index = argc;
 
    solver_id = 0;
+
+   ioutdat = 3;
 
    /*-----------------------------------------------------------
     * Parse command line
@@ -217,26 +220,31 @@ main( int   argc,
 
       amg_solver = HYPRE_ParAMGInitialize();
 
-   arg_index = 0;
-   while (arg_index < argc)
-   {
-      if ( strcmp(argv[arg_index], "-w") == 0 )
+      arg_index = 0;
+      while (arg_index < argc)
       {
-         arg_index++;
-         relax_weight = atof(argv[arg_index++]);
+         if ( strcmp(argv[arg_index], "-w") == 0 )
+         {
+            arg_index++;
+            relax_weight = atof(argv[arg_index++]);
+         }
+         else if ( strcmp(argv[arg_index], "-th") == 0 )
+         {
+            arg_index++;
+            strong_threshold  = atof(argv[arg_index++]);
+         }
+         else if ( strcmp(argv[arg_index], "-iout") == 0 )
+         {
+            arg_index++;
+            ioutdat  = atoi(argv[arg_index++]);
+         }
+         else
+         {
+            arg_index++;
+         }
       }
-      else if ( strcmp(argv[arg_index], "-th") == 0 )
-      {
-         arg_index++;
-         strong_threshold  = atof(argv[arg_index++]);
-      }
-      else
-      {
-         arg_index++;
-      }
-   }
       HYPRE_ParAMGSetStrongThreshold(amg_solver, strong_threshold);
-      HYPRE_ParAMGSetLogging(amg_solver, 3, "driver.out.log");
+      HYPRE_ParAMGSetLogging(amg_solver, ioutdat, "driver.out.log");
       HYPRE_ParAMGSetCycleType(amg_solver, cycle_type);
       HYPRE_ParAMGSetNumGridSweeps(amg_solver, num_grid_sweeps);
       HYPRE_ParAMGSetGridRelaxType(amg_solver, grid_relax_type);
