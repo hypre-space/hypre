@@ -87,7 +87,7 @@ void Hypre_PCG_destructor(Hypre_PCG this) {
  * where we let (for the time being) kappa_A(CA) = 1.
  * We implement the test as:
  *
- *       gamma = <C*r,r>  <  (tol^2)*<C*b,b> = eps
+ *       gamma = <C*r,r>/<C*b,b>  <  (tol^2) = eps
  *
  **********************************************************/
 
@@ -157,7 +157,7 @@ impl_Hypre_PCG_Apply(Hypre_PCG this, Hypre_Vector b, Hypre_Vector* xp)
       ierr += Hypre_Solver_Apply (precond, b, &p);
       ierr += Hypre_Vector_Dot (p, b, &bi_prod);
    }
-   eps = (tol*tol)*bi_prod;
+   eps = tol*tol;
 
    /* Check to see if the rhs vector b is zero */
    if (bi_prod == 0.0)
@@ -247,13 +247,13 @@ impl_Hypre_PCG_Apply(Hypre_PCG this, Hypre_Vector b, Hypre_Vector* xp)
       }
 
       /* check for convergence */
-      if (i_prod < eps)
+      if (i_prod / bi_prod < eps)
       {
          if (rel_change && i_prod > guard_zero_residual)
          {
             ierr += Hypre_Vector_Dot (p, p, &pi_prod);
             ierr += Hypre_Vector_Dot (x, x, &xi_prod);
-            if ((alpha*alpha*pi_prod/xi_prod) < (eps/bi_prod))
+            if ((alpha*alpha*pi_prod/xi_prod) < eps)
                break;
          }
          else
