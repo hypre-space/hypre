@@ -686,7 +686,7 @@ void MatrixComplete(Matrix *mat)
 
     /* Create Numbering object */
     mat->numb = MatrixNumberingCreate(mat, 
-        num_external + mat->end_row - mat->beg_row + 1000);
+        num_external + mat->end_row - mat->beg_row + 20000);
 
     SetupReceives(mat, mat->numb->num_ind - mat->numb->num_loc,
         &mat->numb->local_to_global[mat->numb->num_loc], outlist);
