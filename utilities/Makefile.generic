@@ -11,10 +11,10 @@
 .SUFFIXES: .c .f .o
 
 ##################################################################
-# Make all utilities
+# Default targets
 ##################################################################
 
-all: libHYPRE_memory.a libHYPRE_timing.a 
+default: libHYPRE_memory.a libHYPRE_timing.a 
 
 ##################################################################
 # Memory rules

@@ -43,7 +43,7 @@ OBJS = ${FILES:.c=.o}
 # Main rules
 ##################################################################
 
-all: driver driver_internal
+default: libHYPRE_ls.a driver
 
 driver: driver.o libHYPRE_ls.a
 	@echo  "Linking" $@ "... "
