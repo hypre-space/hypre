@@ -24,6 +24,7 @@
 % 
 % Original Version:  12-17-97
 % Author: pnb
+% 12-22-97  pnb  modified to use matlab 4.2
 % --------------------------------------------------------------------------
 % 
 function [ierr] = write_matrix(fid,A,symmetric,dim,grid,stencil);
@@ -63,15 +64,6 @@ for i = 1:stencil_size,
              stencil(i,1),stencil(i,2),stencil(i,3));
 end
 % write matrix data values 
-l = zeros(nx,ny,nz);
-for kz = kmin:kmax,
-  for jy = jmin:jmax,
-    for ix = imin:imax,
-      l(ix,jy,kz) = (ix-imin+1) + (jy-jmin)*(imax-imin+1) + ...
-	  (kz-kmin)*(jmax-jmin+1)*(imax-imin+1);
-    end
-  end
-end
 fprintf(fid, '\nData:\n');
 for kz = 1:nz,
   for jy = 1:ny,
@@ -81,8 +73,10 @@ for kz = 1:nz,
 	      (kz+stencil(j,3) > 0) & ...
 	      (ix+stencil(j,1) <= nx) & (jy+stencil(j,2) <= ny) & ...
 	      (kz+stencil(j,3) <= nz)),
-	  data = A(l(ix,jy,kz),...
-	      l(ix+stencil(j,1),jy+stencil(j,2),kz+stencil(j,3)));
+	  l = ix + (jy-1)*nx + (kz-1)*ny*nx;
+	  m = ix+stencil(j,1) + (jy+stencil(j,2)-1)*nx + ...
+	      (kz+stencil(j,3)-1)*ny*nx;
+	  data = A(l,m);
 	else
 	  data = 0;
 	end

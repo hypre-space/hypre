@@ -20,6 +20,7 @@
 % 
 % Original Version:  12-18-97
 % Author: pnb
+% 12-22-97  pnb  modified to use matlab 4.2
 % --------------------------------------------------------------------------
 % 
 function [ierr] = write_vector(fid,v,dim,grid);
@@ -48,20 +49,12 @@ else
 end
 
 % write vector data values 
-l = zeros(nx,ny,nz);
-for kz = kmin:kmax,
-  for jy = jmin:jmax,
-    for ix = imin:imax,
-      l(ix,jy,kz) = (ix-imin+1) + (jy-jmin)*(imax-imin+1) + ...
-	  (kz-kmin)*(jmax-jmin+1)*(imax-imin+1);
-    end
-  end
-end
 fprintf(fid, '\nData:\n');
 for kz = 1:nz,
   for jy = 1:ny,
     for ix = 1:nx,
-      data = v(l(ix,jy,kz));
+      l = ix + (jy-1)*nx + (kz-1)*ny*nx;
+      data = v(l);
       if (dim == 2),
 	fprintf(fid, '0: (%d, %d, %d; %d) %e\n',ix-1,jy-1,0,0,data);
       else
