@@ -721,9 +721,12 @@ uninstall-info: uninstall-info-recursive
 	uninstall-includeHEADERS uninstall-info-am
 
 
-test:
+test-local:
+	echo "no automated test suite available yet."
+	echo "To compile test drivers enter: make tests"
+
+tests:
 	@ \
-	$(MAKE) $(AM_MAKEFLAGS) all; \
 	$(MAKE) $(AM_MAKEFLAGS) install; \
 	(cd test && $(MAKE) $(AM_MAKEFLAGS) all)
 

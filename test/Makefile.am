@@ -196,18 +196,6 @@ f77_ij_mv_DEPENDENCIES = \
  $(includedir)/HYPRE_parcsr_mv.h\
  $(includedir)/HYPRE_parcsr_ls.h\
  $(includedir)/krylov.h
-f77_new_ij_DEPENDENCIES = \
- $(includedir)/utilities.h\
- $(includedir)/HYPRE.h\
- $(includedir)/HYPRE_IJ_mv.h\
- $(includedir)/HYPRE_parcsr_mv.h\
- $(includedir)/HYPRE_parcsr_ls.h\
- $(includedir)/parcsr_mv.h\
- $(includedir)/krylov.h
-f77_sstruct_DEPENDENCIES = \
- $(includedir)/utilities.h\
- $(includedir)/HYPRE_sstruct_ls.h\
- $(includedir)/krylov.h
 f77_struct_DEPENDENCIES = \
  $(includedir)/utilities.h\
  $(includedir)/HYPRE_struct_ls.h\
