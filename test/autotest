@@ -100,6 +100,24 @@ echo "dwalker@llnl.gov rfalgout@llnl.gov" > $0.beta++.err.email
 #cd $HYPRE_AUTOTEST_DIR/linear_solvers/test
 #./test_drivers.sh -mail
 
+#==============================
+# Make F77 test drivers
+#==============================
+
+cd $HYPRE_AUTOTEST_DIR/linear_solvers/test
+make all77 1> $0.all77.log 2> $0.all77.err
+echo "dwalker@llnl.gov rfalgout@llnl.gov baldwin5@llnl.gov" > $0.all77.err.email 
+cd $HYPRE_AUTOTEST_DIR/linear_solvers/test
+make beta77 1> $0.beta77.log 2> $0.beta77.err
+echo "dwalker@llnl.gov rfalgout@llnl.govv baldwin5@llnl.gov" > $0.beta77.err.email 
+
+#==============================
+# Run test suites
+#==============================
+
+#cd $HYPRE_AUTOTEST_DIR/linear_solvers/test
+#./test_drivers.sh -mail
+
 #=============================================================================
 # Make libraries and test drivers (using configure--with-pthreads)
 #=============================================================================
