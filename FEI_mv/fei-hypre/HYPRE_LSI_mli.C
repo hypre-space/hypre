@@ -658,7 +658,7 @@ int HYPRE_LSI_MLICreateNodeEqnMap(HYPRE_Solver solver, int nNodes,
    mli_object->mapper_ = mapper;
    return 0;
 #else
-   (void) mli_object;
+   (void) solver;
    return 1;
 #endif
 }
