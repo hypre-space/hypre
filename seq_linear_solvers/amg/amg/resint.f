@@ -151,7 +151,7 @@ c=====================================================================
       dimension ja (*)
       dimension iu (*)
 
-      dimension imin(*),imax(*)
+c      dimension imin(*),imax(*)
 
       dimension resv(*)
 
@@ -166,8 +166,8 @@ cveh   new residual routine, using matvec
 cveh   here vtmp = Au-f
 
       r2=0.e0
-      ilo=imin(1)
-      ihi=imax(1)
+      ilo=imin
+      ihi=imax
       nv = ihi-ilo+1
 
       call vcopy(f,vtmp,nv)
@@ -183,7 +183,6 @@ cveh   here vtmp = Au-f
          enrg=enrg+vtmp(j)*u(j)-u(j)*f(j)
 31    continue
       res = sqrt(r2)
-
 
       return
       end
