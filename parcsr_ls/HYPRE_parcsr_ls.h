@@ -18,7 +18,6 @@
 #include "HYPRE_utilities.h"
 #include "HYPRE_seq_mv.h"
 #include "HYPRE_parcsr_mv.h"
-#include <stdio.h>  /* D.Hysom Nov/2K needed for HYPRE_EuclidPrintParams */
 
 #ifdef __cplusplus
 extern "C" {
@@ -532,49 +531,6 @@ int HYPRE_EuclidSetParams(HYPRE_Solver solver,
  * @param filename[IN] Pathname/filename to read
  **/
 int HYPRE_EuclidSetParamsFromFile(HYPRE_Solver solver, char *filename);
-
-#if 0
-/*
- * Returns returns rho, which is the number of nonzeros in
- * the preconditioner (ILU factors) divided by the number of
- * of nonzeros in the input matrix.  This can be used in
- * solutions to optimize memory usage, via the setting
- * "-rho <double>".  This setting determines the amount of
- * storage initially allocated for the ILU factors; if too
- * small, storage will be reallocated, thereby possibly 
- * fragmenting memory; if too large, memory is wasted.
- * Call after factorization (Setup) has completed.
- *
- * @param rho[OUT] rho, also called preconditioner density
- **/
-int HYPRE_EuclidReadRho(HYPRE_Solver solver, double *rho);
-#endif
-
-
-/**
- * Prints settings used during factorization; also
- * prints information on preconditioner size, etc.  
- * Euclid's reports can also be printed by including the
- * appropriate option on the command line; see the user
- * manual for details.  This function should be called
- * after the solve phase has completed.
- **/
-int HYPRE_EuclidPrintParams(HYPRE_Solver solver);
-
-#if 0
-
-/**
- * Set the logging parameter for the Euclid object.
- *
- * @param solver [IN] Preconditioner object for which to set the logging
- *                    parameter.
- * @param logging [IN] Value of the logging parameter.  A nonzero value
- *                     sends statistics of the setup procedure to stdout.
- *                     The default value is 0.
- **/
-int HYPRE_EuclidSetLogging(HYPRE_Solver solver,
-                                 int          logging);
-#endif
 
 /*@}*/
 /*--------------------------------------------------------------------------
