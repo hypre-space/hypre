@@ -1,9 +1,0 @@
-#!/bin/sh
-
-MPI_ROOT=/usr/local/mpich
-prob=beam
-p=2
-
-echo ${prob}.dat
-${MPI_ROOT}/bin/mpirun -np $p distExtBeamDriver.x ${prob}.dat
-

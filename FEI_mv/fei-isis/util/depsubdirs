@@ -1,4 +1,0 @@
-# removes leading spaces from lines and
-# adds subdirectory names to the object files based on a nasty lookup table.
-# fixes ^foo.o: to be ^mv/foo.o: for example.
-s/^ *//g

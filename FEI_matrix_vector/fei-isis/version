@@ -1,8 +1,0 @@
-This is kind of a change log.
-
-Most recent released version: 1.1.2, Sept 16, 1999
-
-changes currently underway:
-   enable the FEI to re-use the structural information from a
-   single initialization pass, for the loading of multiple matrices
-   for an aggregate (linear-combination of systems) solve.
