@@ -14,6 +14,10 @@
 #
 #=============================================================================
 
+- BiCGSTAB has been added to struct and sstruct interface
+- added automatic determination of relaxation parameters for use with symmetric
+  smoothers in BoomerAMG
+
 Version 1.7.10b released, 2002/12/02.
 
 - New Hybrid solvers available for ParCSR and Struct.
