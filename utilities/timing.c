@@ -204,26 +204,29 @@ hypre_FinalizeTiming( int time_index )
    if (free_global_timing)
    {   
       pthread_mutex_lock(&time_mtx);
-      for (i = 0; i <= hypre_NumThreads; i++)  
+      if(hypre_global_timing)
+      {
+         for (i = 0; i <= hypre_NumThreads; i++)  
 #else
    if ((hypre_global_timing -> num_names) == 0)
    {
       for (i = 0; i < (hypre_global_timing -> size); i++)
 #endif
 
-      {  
-         hypre_TFree(hypre_global_timing_ref(i, wall_time));
-         hypre_TFree(hypre_global_timing_ref(i, cpu_time));
-         hypre_TFree(hypre_global_timing_ref(i, flops));
-         hypre_TFree(hypre_global_timing_ref(i, name));
-         hypre_TFree(hypre_global_timing_ref(i, state));
-         hypre_TFree(hypre_global_timing_ref(i, num_regs));
-      }
+         {  
+            hypre_TFree(hypre_global_timing_ref(i, wall_time));
+            hypre_TFree(hypre_global_timing_ref(i, cpu_time));
+            hypre_TFree(hypre_global_timing_ref(i, flops));
+            hypre_TFree(hypre_global_timing_ref(i, name));
+            hypre_TFree(hypre_global_timing_ref(i, state));
+            hypre_TFree(hypre_global_timing_ref(i, num_regs));
+         }
       
-      hypre_TFree(hypre_global_timing);
-      hypre_global_timing = NULL;
+         hypre_TFree(hypre_global_timing);
+         hypre_global_timing = NULL;
 
 #ifdef HYPRE_USE_PTHREADS
+      }
       pthread_mutex_unlock(&time_mtx);
 #endif
 

@@ -423,17 +423,10 @@ hypre_thread_MPI_Comm_size( MPI_Comm comm,
                int     *size )
 { 
   int returnval;
-  int unthreaded = pthread_equal(initial_thread,pthread_self());
-  int I_call_mpi = unthreaded || pthread_equal(hypre_thread[0],pthread_self());
-  if (I_call_mpi)
-  {
-    returnval=MPI_Comm_size(comm,size);
-  }
-  else
-  {
-   returnval=0;
-  }
-  hypre_barrier(&mpi_mtx, unthreaded);
+
+  pthread_mutex_lock(&mpi_mtx);
+  returnval=MPI_Comm_size(comm,size);
+  pthread_mutex_unlock(&mpi_mtx);
   return returnval;
 }
 
@@ -442,17 +435,11 @@ hypre_thread_MPI_Comm_rank( MPI_Comm comm,
                int     *rank )
 { 
   int returnval;
-  int unthreaded = pthread_equal(initial_thread,pthread_self());
-  int I_call_mpi = unthreaded || pthread_equal(hypre_thread[0],pthread_self());
-  if (I_call_mpi)
-  {
-    returnval=MPI_Comm_rank(comm,rank);
-  }
-  else
-  {
-    returnval=0;
-  }
-  hypre_barrier(&mpi_mtx, unthreaded);
+  
+  pthread_mutex_lock(&mpi_mtx);
+  returnval=MPI_Comm_rank(comm,rank);
+  pthread_mutex_unlock(&mpi_mtx);
+
   return returnval;
 }
 

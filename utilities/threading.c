@@ -1,6 +1,4 @@
 /*BHEADER********************************************************************** 
- * (c) 1997   The Regents of the University of California
- *
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
@@ -16,6 +14,10 @@
 #include <signal.h>
 #include "mpi.h"
 #include "threading.h"
+
+#ifdef HYPRE_USE_UMALLOC
+#include "umalloc_local.h"
+#endif
 
 int iteration_counter = 0;
 volatile int hypre_thread_counter;
@@ -39,6 +41,18 @@ int HYPRE_InitPthreads( int num_threads )
       hypre_qptr->n_working = hypre_qptr->n_waiting = hypre_qptr->n_queue = 0;
       hypre_qptr->inp = hypre_qptr->outp = 0;
       for (i=0; i < hypre_NumThreads; i++) {
+#ifdef HYPRE_USE_UMALLOC
+         /* Get initial area to start heap */
+         assert ((_uinitial_block[i] = malloc(INITIAL_HEAP_SIZE))!=NULL);
+ 
+         /* Create a user heap */
+         assert ((_uparam[i].myheap = _ucreate(initial_block[i],
+                                    INITIAL_HEAP_SIZE,
+                                    _BLOCK_CLEAN,
+                                    _HEAP_REGULAR,
+                                    _uget_fn,
+                                    _urelease_fn)) != NULL);
+#endif
          err=pthread_create(&hypre_thread[i], NULL, 
                             (void *(*)(void *))hypre_pthread_worker,
                             (void *)i);
@@ -65,11 +79,21 @@ void hypre_StopWorker(void *i)
 void HYPRE_DestroyPthreads( void )
 {
    int i;
+   void *status;
 
    for (i=0; i < hypre_NumThreads; i++) {
       hypre_work_put(hypre_StopWorker, (void *) &i);
    }
 
+#ifdef HYPRE_USE_UMALLOC
+   for (i=0; i<hypre_NumThreads; i++)
+   {
+     _udestroy (_uparam[i].myheap, _FORCE);
+   }
+#endif
+
+   for (i=0; i<hypre_NumThreads; i++)
+      pthread_join(hypre_thread[i], &status);
    pthread_mutex_destroy(&hypre_qptr->lock);
    pthread_mutex_destroy(&hypre_mutex_boxloops);
    pthread_mutex_destroy(&mpi_mtx);

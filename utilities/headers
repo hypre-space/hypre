@@ -44,6 +44,8 @@ cat thread_mpistubs.h          >> $INTERNAL_HEADER
 cat threading.h                >> $INTERNAL_HEADER		          
 
 cat timing.h                   >> $INTERNAL_HEADER
+
+cat umalloc_local.h            >> $INTERNAL_HEADER
 		          
 #===========================================================================
 # Include guards

@@ -59,6 +59,7 @@ UTILITIES_HEADERS =\
  thread_mpistubs.h\
  threading.h\
  timing.h\
+ umalloc_local.h\
  utilities.h\
  HYPRE_utilities.h
 
@@ -70,6 +71,7 @@ UTILITIES_FILES =\
  threading.c\
  timer.c\
  timing.c\
+ umalloc_local.c\
  random.c
 
 UTILITIES_OBJS = ${UTILITIES_FILES:.c=.o}

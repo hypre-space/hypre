@@ -18,6 +18,27 @@
 
 #ifdef HYPRE_USE_PTHREADS
 #include "threading.h"
+
+#ifdef HYPRE_USE_UMALLOC
+#include "umalloc_local.h"
+
+#define _umalloc_(size) (threadid == hypre_NumThreads) ? \
+                        (char *) malloc(size) : \
+                        (char *) _umalloc(_uparam[threadid].myheap, size)
+#define _ucalloc_(count, size) (threadid == hypre_NumThreads) ? \
+                               (char *) calloc(count, size) : \
+                               (char *) _ucalloc(_uparam[threadid].myheap,\
+                                                 count, size)
+#define _urealloc_(ptr, size) (threadid == hypre_NumThreads) ? \
+                              (char *) realloc(ptr, size) : \
+                              (char *) _urealloc(ptr, size)
+#define _ufree_(ptr)          (threadid == hypre_NumThreads) ? \
+                              free(ptr) : _ufree(ptr)
+#endif
+#else
+#ifdef HYPRE_USE_UMALLOC
+#undef HYPRE_USE_UMALLOC
+#endif
 #endif
 
 /******************************************************************************
@@ -50,7 +71,13 @@ hypre_MAlloc( int size )
 
    if (size > 0)
    {
+#ifdef HYPRE_USE_UMALLOC
+      int threadid = hypre_GetThreadID();
+
+      ptr = _umalloc_(size);
+#else
       ptr = malloc(size);
+#endif
 
 #if 0
       if (ptr == NULL)
@@ -78,7 +105,13 @@ hypre_CAlloc( int count,
 
    if (size > 0)
    {
+#ifdef HYPRE_USE_UMALLOC
+      int threadid = hypre_GetThreadID();
+
+      ptr = _ucalloc_(count, elt_size);
+#else
       ptr = calloc(count, elt_size);
+#endif
 
 #if 0
       if (ptr == NULL)
@@ -101,7 +134,24 @@ char *
 hypre_ReAlloc( char *ptr,
                int   size )
 {
+
+#ifdef HYPRE_USE_UMALLOC
+   if (ptr == NULL)
+   {
+      ptr = hypre_MAlloc(size);
+   }
+   else if (size == 0)
+   {
+      hypre_Free(ptr);
+   }
+   else
+   {
+      int threadid = hypre_GetThreadID();
+      ptr = _urealloc_(ptr, size);
+   }
+#else
    ptr = realloc(ptr, size);
+#endif
 
 #if 0
    if (ptr == NULL)
@@ -120,7 +170,13 @@ hypre_Free( char *ptr )
 {
    if (ptr)
    {
+#ifdef HYPRE_USE_UMALLOC
+      int threadid = hypre_GetThreadID();
+
+      _ufree_(ptr);
+#else
       free(ptr);
+#endif
    }
 }
 
