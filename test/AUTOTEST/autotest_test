@@ -108,9 +108,10 @@ parse_arguments () {
       d) build $Build " "       "docs"          "docs";;
       f) build $Build "all77"   "all77"         "test";;
       h) usage; exit 2;;
-      i) confbuildtest $OPTARG  "--with-insure-to-file" \
+      i) confbuildtest 1        "--enable-debug" "debug"    0 0 0 0 1 0 1
+         confbuildtest $OPTARG  "--with-insure" "insure"    0 0 0 0 1 0 1;;
+     +i) confbuildtest $OPTARG  "--with-insure-to-file" \
                                                 "insure"    0 0 0 0 1 0 1;;
-     +i) confbuildtest $OPTARG  "--with-insure" "insure"    0 0 0 0 1 0 1;;
 #     l) HYPRE_BATCH_MODE="yes"; MailOpt="-mail"; BatchOpt="-batch";;
       l) HYPRE_BATCH_MODE="yes"; BatchOpt="-batch";;
      +l) HYPRE_BATCH_MODE="yes"; BatchOpt="-batch";;
@@ -393,6 +394,9 @@ MailGroup=$3
 if [ "$MessageStr" = "purify" ]
 then				# don't need extra purify status messages
   $MAKE $MakeStr 1> ${Hdr}.${MessageStr}.${MakeStr}.log 2>&1
+elif [ "$MessageStr" = "insure" ]
+then				# don't need extra insure status messages
+  $MAKE $MakeStr 1> ${Hdr}.${MessageStr}.${MakeStr}.log 2>&1
 else
   $MAKE $MakeStr 1> ${Hdr}.${MessageStr}.${MakeStr}.log \
         2> ${Hdr}.${MessageStr}.${MakeStr}.err
@@ -419,7 +423,10 @@ if [ ${BuildOpt} -ne $Skip ] ; then
 	2> ${Hdr}.${MessageStr}.configure.err
     echo "$HYPRE_CONFIGURE_EMAIL" > ${Hdr}.${MessageStr}.configure.err.email
 
-    $MAKE veryclean
+    if [ "$MessageStr" != "insure" ]
+    then				# don't need extra purify status messages
+      $MAKE veryclean
+    fi
 
     if [ $IJOpt -ne $Skip ] ; then
       makeit "IJ" $MessageStr "$HYPRE_IJ_EMAIL"
