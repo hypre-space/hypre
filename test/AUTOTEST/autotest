@@ -510,8 +510,8 @@ do
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST"
 	  HYPRE_MACHINE_COMMANDS="-mndse 1 -l 1 -a 2 -cf"
           HYPRE_MESSAGE='SECONDARY[gcc]'
+          COMPILERSELECT="default"
         ./autotest_test $HYPRE_MACHINE_COMMANDS -v $HYPRE_MESSAGE
-        COMPILERSELECT="default"
 ##      perform_test
         shift;;
     -vivid)
@@ -531,6 +531,24 @@ do
 
 
 done
+
+#==============================================================================
+#     07/29/04 -- emh
+#     Build documents in directory:
+#        /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/linear_solvers/docs
+#     so that the latest autotested docs are accessible through the HYPRE 
+#     internal website
+#==============================================================================
+HYPRE_ARCH="linux"
+HYPRE_COMPILE_MACHINE="tux149"
+HYPRE_RUN_MACHINE="tux149"
+HYPRE_REMOTE_DIR="/usr/tmp"
+HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST"
+HYPRE_MACHINE_COMMANDS=" -a 1 -d"
+HYPRE_MESSAGE='SECONDARY[Building Docs Only]'
+COMPILERSELECT="default"
+./autotest_test $HYPRE_MACHINE_COMMANDS -v $HYPRE_MESSAGE
+
 
 #==============================================================================
 # Autotest completion check: create "autotest finished" file
