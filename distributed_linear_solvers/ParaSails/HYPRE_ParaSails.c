@@ -101,17 +101,18 @@ int HYPRE_ParaSailsSelectThresh(HYPRE_ParaSails ps, double *threshp)
  * input parameters "thresh" and "nlevels".
  *--------------------------------------------------------------------------*/
 
-int HYPRE_ParaSailsSetup(HYPRE_ParaSails ps, double thresh, int nlevels)
+int HYPRE_ParaSailsSetup(HYPRE_ParaSails ps, int sym, double thresh, 
+  int nlevels, double filter)
 {
     hypre_ParaSails *internal = (hypre_ParaSails *) ps;
 
-    ParaSailsSetSym(internal->ps, 1);
+    ParaSailsSetSym(internal->ps, sym);
 
     ParaSailsSetupPattern(internal->ps, thresh, nlevels);
 
     ParaSailsSetupValues(internal->ps, internal->A);
 
-    /* ParaSailsFilterValues(internal->ps, filter); */
+    ParaSailsFilterValues(internal->ps, filter);
 
     ParaSailsComplete(internal->ps);
 
