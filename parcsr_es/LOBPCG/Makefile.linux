@@ -8,6 +8,7 @@ HYPRE_DIR = ..
 
 # This is for Linux
 CC= mpicc
+CPP= mpiCC
 FORTRAN_LIB    = -lg2c
 LIBS           = 
 C_COMPILE_FLAGS= -O -O3 -D_REENTRANT -Wall 
@@ -50,7 +51,7 @@ clean:
 ${HYPRE_DRIVER_OBJS}: ${INCS} Makefile.linux
 
 ${CTARGET}: ${HYPRE_DRIVER_OBJS}
-	${CC} -O ${CFLAGS} -o ${CTARGET} ${HYPRE_DRIVER_OBJS}\
+	${CPP} -O ${CFLAGS} -o ${CTARGET} ${HYPRE_DRIVER_OBJS}\
 	${LIBS} ${LAPACK_LIB} ${BLAS_LIB} ${HYPRE_LIB} -lHYPRE_LSI  ${FORTRAN_LIB} 
 
 ##################################################################
