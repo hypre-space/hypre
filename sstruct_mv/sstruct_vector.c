@@ -19,6 +19,20 @@
  *==========================================================================*/
 
 /*--------------------------------------------------------------------------
+ * hypre_SStructVectorRef
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_SStructPVectorRef( hypre_SStructPVector  *vector,
+                         hypre_SStructPVector **vector_ref )
+{
+   hypre_SStructPVectorRefCount(vector) ++;
+   *vector_ref = vector;
+
+   return 0;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_SStructPVectorCreate
  *--------------------------------------------------------------------------*/
 
@@ -55,6 +69,7 @@ hypre_SStructPVectorCreate( MPI_Comm               comm,
       comm_pkgs[var] = NULL;
    }
    hypre_SStructPVectorCommPkgs(pvector) = comm_pkgs;
+   hypre_SStructPVectorRefCount(pvector) = 1;
 
    *pvector_ptr = pvector;
 
@@ -77,17 +92,21 @@ hypre_SStructPVectorDestroy( hypre_SStructPVector *pvector )
 
    if (pvector)
    {
-      nvars     = hypre_SStructPVectorNVars(pvector);
-      svectors = hypre_SStructPVectorSVectors(pvector);
-      comm_pkgs = hypre_SStructPVectorCommPkgs(pvector);
-      for (var = 0; var < nvars; var++)
+      hypre_SStructPVectorRefCount(pvector) --;
+      if (hypre_SStructPVectorRefCount(pvector) == 0)
       {
-         hypre_StructVectorDestroy(svectors[var]);
-         hypre_CommPkgDestroy(comm_pkgs[var]);
+         nvars     = hypre_SStructPVectorNVars(pvector);
+         svectors = hypre_SStructPVectorSVectors(pvector);
+         comm_pkgs = hypre_SStructPVectorCommPkgs(pvector);
+         for (var = 0; var < nvars; var++)
+         {
+            hypre_StructVectorDestroy(svectors[var]);
+            hypre_CommPkgDestroy(comm_pkgs[var]);
+         }
+         hypre_TFree(svectors);
+         hypre_TFree(comm_pkgs);
+         hypre_TFree(pvector);
       }
-      hypre_TFree(svectors);
-      hypre_TFree(comm_pkgs);
-      hypre_TFree(pvector);
    }
 
    return ierr;

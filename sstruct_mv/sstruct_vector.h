@@ -30,6 +30,8 @@ typedef struct
 
    int                     complex;      /* Is the vector complex */
 
+   int                     ref_count;
+
 } hypre_SStructPVector;
 
 typedef struct hypre_SStructVector_struct
@@ -83,5 +85,6 @@ typedef struct hypre_SStructVector_struct
 #define hypre_SStructPVectorCommPkgs(pvec)    ((pvec) -> comm_pkgs)
 #define hypre_SStructPVectorCommPkg(pvec, v)  ((pvec) -> comm_pkgs[v])
 #define hypre_SStructPVectorComplex(pvec)     ((pvec) -> complex)
+#define hypre_SStructPVectorRefCount(vec)     ((vec) -> ref_count)
 
 #endif

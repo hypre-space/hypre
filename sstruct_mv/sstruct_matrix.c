@@ -19,6 +19,20 @@
  *==========================================================================*/
 
 /*--------------------------------------------------------------------------
+ * hypre_SStructPMatrixRef
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_SStructPMatrixRef( hypre_SStructPMatrix  *matrix,
+                         hypre_SStructPMatrix **matrix_ref )
+{
+   hypre_SStructPMatrixRefCount(matrix) ++;
+   *matrix_ref = matrix;
+
+   return 0;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_SStructPMatrixCreate
  *--------------------------------------------------------------------------*/
 
@@ -139,6 +153,8 @@ hypre_SStructPMatrixCreate( MPI_Comm               comm,
 
    hypre_SStructPMatrixSEntries(pmatrix) = hypre_TAlloc(int, size);
 
+   hypre_SStructPMatrixRefCount(pmatrix)   = 1;
+
    *pmatrix_ptr = pmatrix;
 
    return ierr;
@@ -162,29 +178,33 @@ hypre_SStructPMatrixDestroy( hypre_SStructPMatrix *pmatrix )
 
    if (pmatrix)
    {
-      stencils  = hypre_SStructPMatrixStencils(pmatrix);
-      nvars     = hypre_SStructPMatrixNVars(pmatrix);
-      smaps     = hypre_SStructPMatrixSMaps(pmatrix);
-      sstencils = hypre_SStructPMatrixSStencils(pmatrix);
-      smatrices = hypre_SStructPMatrixSMatrices(pmatrix);
-      for (vi = 0; vi < nvars; vi++)
+      hypre_SStructPMatrixRefCount(pmatrix) --;
+      if (hypre_SStructPMatrixRefCount(pmatrix) == 0)
       {
-         HYPRE_SStructStencilDestroy(stencils[vi]);
-         hypre_TFree(smaps[vi]);
-         for (vj = 0; vj < nvars; vj++)
+         stencils  = hypre_SStructPMatrixStencils(pmatrix);
+         nvars     = hypre_SStructPMatrixNVars(pmatrix);
+         smaps     = hypre_SStructPMatrixSMaps(pmatrix);
+         sstencils = hypre_SStructPMatrixSStencils(pmatrix);
+         smatrices = hypre_SStructPMatrixSMatrices(pmatrix);
+         for (vi = 0; vi < nvars; vi++)
          {
-            hypre_StructStencilDestroy(sstencils[vi][vj]);
-            hypre_StructMatrixDestroy(smatrices[vi][vj]);
+            HYPRE_SStructStencilDestroy(stencils[vi]);
+            hypre_TFree(smaps[vi]);
+            for (vj = 0; vj < nvars; vj++)
+            {
+               hypre_StructStencilDestroy(sstencils[vi][vj]);
+               hypre_StructMatrixDestroy(smatrices[vi][vj]);
+            }
+            hypre_TFree(sstencils[vi]);
+            hypre_TFree(smatrices[vi]);
          }
-         hypre_TFree(sstencils[vi]);
-         hypre_TFree(smatrices[vi]);
+         hypre_TFree(stencils);
+         hypre_TFree(smaps);
+         hypre_TFree(sstencils);
+         hypre_TFree(smatrices);
+         hypre_TFree(hypre_SStructPMatrixSEntries(pmatrix));
+         hypre_TFree(pmatrix);
       }
-      hypre_TFree(stencils);
-      hypre_TFree(smaps);
-      hypre_TFree(sstencils);
-      hypre_TFree(smatrices);
-      hypre_TFree(hypre_SStructPMatrixSEntries(pmatrix));
-      hypre_TFree(pmatrix);
    }
 
    return ierr;

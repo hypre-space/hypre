@@ -469,6 +469,8 @@ typedef struct
 
    int                     complex;      /* Is the matrix complex */
 
+   int                     ref_count;
+
 } hypre_SStructPMatrix;
 
 typedef struct hypre_SStructMatrix_struct
@@ -543,6 +545,7 @@ typedef struct hypre_SStructMatrix_struct
 #define hypre_SStructPMatrixNSEntries(pmat)         ((pmat) -> nsentries)
 #define hypre_SStructPMatrixSEntries(pmat)          ((pmat) -> sentries)
 #define hypre_SStructPMatrixComplex(pmat)           ((pmat) -> complex)
+#define hypre_SStructPMatrixRefCount(pmat)          ((pmat) -> ref_count)
 
 #endif
 /*BHEADER**********************************************************************
@@ -576,6 +579,8 @@ typedef struct
    hypre_CommPkg         **comm_pkgs;    /* nvar array of comm pkgs */
 
    int                     complex;      /* Is the vector complex */
+
+   int                     ref_count;
 
 } hypre_SStructPVector;
 
@@ -630,6 +635,7 @@ typedef struct hypre_SStructVector_struct
 #define hypre_SStructPVectorCommPkgs(pvec)    ((pvec) -> comm_pkgs)
 #define hypre_SStructPVectorCommPkg(pvec, v)  ((pvec) -> comm_pkgs[v])
 #define hypre_SStructPVectorComplex(pvec)     ((pvec) -> complex)
+#define hypre_SStructPVectorRefCount(vec)     ((vec) -> ref_count)
 
 #endif
 
@@ -726,6 +732,7 @@ int hypre_SStructPInnerProd( hypre_SStructPVector *px , hypre_SStructPVector *py
 int hypre_SStructInnerProd( hypre_SStructVector *x , hypre_SStructVector *y , double *result_ptr );
 
 /* sstruct_matrix.c */
+int hypre_SStructPMatrixRef( hypre_SStructPMatrix *matrix , hypre_SStructPMatrix **matrix_ref );
 int hypre_SStructPMatrixCreate( MPI_Comm comm , hypre_SStructPGrid *pgrid , hypre_SStructStencil **stencils , hypre_SStructPMatrix **pmatrix_ptr );
 int hypre_SStructPMatrixDestroy( hypre_SStructPMatrix *pmatrix );
 int hypre_SStructPMatrixInitialize( hypre_SStructPMatrix *pmatrix );
@@ -760,6 +767,7 @@ int hypre_SStructScale( double alpha , hypre_SStructVector *y );
 int hypre_SStructStencilRef( hypre_SStructStencil *stencil , hypre_SStructStencil **stencil_ref );
 
 /* sstruct_vector.c */
+int hypre_SStructPVectorRef( hypre_SStructPVector *vector , hypre_SStructPVector **vector_ref );
 int hypre_SStructPVectorCreate( MPI_Comm comm , hypre_SStructPGrid *pgrid , hypre_SStructPVector **pvector_ptr );
 int hypre_SStructPVectorDestroy( hypre_SStructPVector *pvector );
 int hypre_SStructPVectorInitialize( hypre_SStructPVector *pvector );

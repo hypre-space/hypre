@@ -35,6 +35,8 @@ typedef struct
 
    int                     complex;      /* Is the matrix complex */
 
+   int                     ref_count;
+
 } hypre_SStructPMatrix;
 
 typedef struct hypre_SStructMatrix_struct
@@ -109,5 +111,6 @@ typedef struct hypre_SStructMatrix_struct
 #define hypre_SStructPMatrixNSEntries(pmat)         ((pmat) -> nsentries)
 #define hypre_SStructPMatrixSEntries(pmat)          ((pmat) -> sentries)
 #define hypre_SStructPMatrixComplex(pmat)           ((pmat) -> complex)
+#define hypre_SStructPMatrixRefCount(pmat)          ((pmat) -> ref_count)
 
 #endif
