@@ -53,6 +53,7 @@ FILES =\
  dgstrf.c \
  dgstrs.c \
  dlacon.c \
+ dlamch.c \
  dlangs.c \
  dlaqgs.c \
  dmemory.c \
@@ -68,6 +69,7 @@ FILES =\
  dsp_blas3.c \
  dutil.c \
  get_perm_c.c \
+ lsame.c \ 
  memory.c \
  mmd.c \
  relax_snode.c \
@@ -75,7 +77,8 @@ FILES =\
  sp_ienv.c \
  sp_preorder.c \
  superlu_timer.c \
- util.c
+ util.c \
+ xerbla.c
 
 OBJS = ${FILES:.c=.o}
 
