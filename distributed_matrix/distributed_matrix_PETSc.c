@@ -74,6 +74,15 @@ hypre_DistributedMatrixGetLocalRangePETSc( hypre_DistributedMatrix *matrix,
 
 
    ierr = MatGetOwnershipRange( PETSc_matrix, start, end ); CHKERRA(ierr);
+/*
+
+  Since PETSc's MatGetOwnershipRange actually returns 
+  end = "one more than the global index of the last local row",
+  we need to subtract one; hypre assumes we return the index
+  of the last row itself.
+
+*/
+   *end = *end - 1;
 #endif
 
    return(ierr);
