@@ -18,6 +18,7 @@ sinclude(pthreads_c_definitions.m4)
 #ifndef hypre_BOX_PTHREADS_HEADER
 #define hypre_BOX_PTHREADS_HEADER
 #include <pthread.h>
+#include "threading.h"
 
 /*--------------------------------------------------------------------------
  * Threaded Looping macros:
@@ -27,21 +28,8 @@ sinclude(pthreads_c_definitions.m4)
 #define NUM_THREADS 4
 #endif
 
-pthread_cond_t hypre_cond_threads_sync;
-pthread_mutex_t hypre_mutex_boxloops;
 int hypre_thread_counter;
 int iteration_counter[3]={0,0,0};
-
-pthread_cond_t hypre_cond_BoxLoopO;
-pthread_mutex_t hypre_mutex_BoxLoop0;
-pthread_cond_t hypre_cond_BoxLoop1;
-pthread_mutex_t hypre_mutex_BoxLoop1;
-pthread_cond_t hypre_cond_BoxLoop2;
-pthread_mutex_t hypre_mutex_BoxLoop2;
-pthread_cond_t hypre_cond_BoxLoop3;
-pthread_mutex_t hypre_mutex_BoxLoop3;
-pthread_cond_t hypre_cond_BoxLoop4;
-pthread_mutex_t hypre_mutex_BoxLoop4;
 
 #define hypre_BoxLoop0_pthread(i, j, k, loop_size,\
                        body)\
@@ -50,7 +38,7 @@ pthread_mutex_t hypre_mutex_BoxLoop4;
    int hypre__ny = hypre_IndexY(loop_size);\
    int hypre__nz = hypre_IndexZ(loop_size);\
    PLOOP(k, 0, hypre__nz, iteration_counter, 0, hypre_thread_counter,
-         hypre_mutex_boxloops, hypre_cond_threads_sync,
+         hypre_mutex_boxloops, hypre_cond_boxloops,
       <<for (j = 0; j < hypre__ny; j++ )\
         {\
            for (i = 0; i < hypre__nx; i++ )\
@@ -72,7 +60,7 @@ pthread_mutex_t hypre_mutex_BoxLoop4;
    int hypre__nz = hypre_IndexZ(loop_size);\
    i1 = hypre_BoxIndexRank(data_box1, start1);\
    PLOOP(k, 0, hypre__nz, iteration_counter, 0, hypre_thread_counter,
-         hypre_mutex_boxloops, hypre_cond_threads_sync,
+         hypre_mutex_boxloops, hypre_cond_boxloops,
       <<for (j = 0; j < hypre__ny; j++ )\
       {\
          for (i = 0; i < hypre__nx; i++ )\
@@ -101,7 +89,7 @@ pthread_mutex_t hypre_mutex_BoxLoop4;
    i1 = hypre_BoxIndexRank(data_box1, start1);\
    i2 = hypre_BoxIndexRank(data_box2, start2);\
    PLOOP(k, 0, hypre__nz, iteration_counter, 0, hypre_thread_counter,
-         hypre_mutex_boxloops, hypre_cond_threads_sync,
+         hypre_mutex_boxloops, hypre_cond_boxloops,
       <<for (j = 0; j < hypre__ny; j++ )\
       {\
          for (i = 0; i < hypre__nx; i++ )\  
@@ -137,7 +125,7 @@ pthread_mutex_t hypre_mutex_BoxLoop4;
    i2 = hypre_BoxIndexRank(data_box2, start2);\
    i3 = hypre_BoxIndexRank(data_box3, start3);\
    PLOOP(k, 0, hypre__nz, iteration_counter, 0, hypre_thread_counter,
-         hypre_mutex_boxloops, hypre_cond_threads_sync,
+         hypre_mutex_boxloops, hypre_cond_boxloops,
       <<for (j = 0; j < hypre__ny; j++ )\
       {\
          for (i = 0; i < hypre__nx; i++ )\
@@ -180,7 +168,7 @@ pthread_mutex_t hypre_mutex_BoxLoop4;
    i3 = hypre_BoxIndexRank(data_box3, start3);\
    i4 = hypre_BoxIndexRank(data_box4, start4);\
    PLOOP(k, 0, hypre__nz, iteration_counter, 0, hypre_thread_counter,
-         hypre_mutex_boxloops, hypre_cond_threads_sync,
+         hypre_mutex_boxloops, hypre_cond_boxloops,
       <<for (j = 0; j < hypre__ny; j++ )\
       {\
          for (i = 0; i < hypre__nx; i++ )\

@@ -24,10 +24,10 @@ Argument:  $1 -- integer containing the number of threads being used
 
 
 
-/* PLOOPEND waits until the last proc. resets the loop -1 to zero.
+/* PLOOPEND waits until the last proc. resets the loop index to zero.
 Usage:  PLOOPEND(index_array_name, array_index)
 Arguments:  $1 -- the name of the array of indices
-            $2 -- an -1 of the given array
+            $2 -- an index of the given array
 To wait until element n of array "indx" is set to zero, enter 
    PLOOPEND(indx,n)
 */
@@ -38,7 +38,7 @@ To wait until element n of array "indx" is set to zero, enter
  If there is only one thread, this is a noop.
 Usage:  IWAIT(flag_array_name, array_index)
 Arguments:  $1 -- the name of an array of flags
-            $2 -- an -1 of the given array
+            $2 -- an index of the given array
 */
 
 
@@ -61,7 +61,7 @@ Arguments:  $1 -- the name of the increment variable for the loop
             $3 -- the stopping value for the increment variable
                   (loop will not be entered when increment reaches this value)
             $4 -- the name of an array of indices
-            $5 -- an -1 of the given array
+            $5 -- an index of the given array
             $6 -- an integer counter to count each thread as it passes
             $7 -- a pthread_mutex_t object (must be initialized
                   externally)
@@ -92,6 +92,7 @@ Arguments:  $1 -- the name of the increment variable for the loop
 #ifndef hypre_BOX_PTHREADS_HEADER
 #define hypre_BOX_PTHREADS_HEADER
 #include <pthread.h>
+#include "threading.h"
 
 /*--------------------------------------------------------------------------
  * Threaded Looping macros:
@@ -101,21 +102,8 @@ Arguments:  $1 -- the name of the increment variable for the loop
 #define NUM_THREADS 4
 #endif
 
-pthread_cond_t hypre_cond_threads_sync;
-pthread_mutex_t hypre_mutex_boxloops;
 int hypre_thread_counter;
 int iteration_counter[3]={0,0,0};
-
-pthread_cond_t hypre_cond_BoxLoopO;
-pthread_mutex_t hypre_mutex_BoxLoop0;
-pthread_cond_t hypre_cond_BoxLoop1;
-pthread_mutex_t hypre_mutex_BoxLoop1;
-pthread_cond_t hypre_cond_BoxLoop2;
-pthread_mutex_t hypre_mutex_BoxLoop2;
-pthread_cond_t hypre_cond_BoxLoop3;
-pthread_mutex_t hypre_mutex_BoxLoop3;
-pthread_cond_t hypre_cond_BoxLoop4;
-pthread_mutex_t hypre_mutex_BoxLoop4;
 
 #define hypre_BoxLoop0_pthread(i, j, k, loop_size,\
                        body)\
@@ -143,15 +131,14 @@ pthread_mutex_t hypre_mutex_BoxLoop4;
    pthread_mutex_lock(&hypre_mutex_boxloops);\
 \
    if (hypre_thread_counter < NUM_THREADS)\
-      pthread_cond_wait(&hypre_cond_threads_sync, &hypre_mutex_boxloops);\
+      pthread_cond_wait(&hypre_cond_boxloops, &hypre_mutex_boxloops);\
    else if (hypre_thread_counter == NUM_THREADS) {\
-      pthread_cond_broadcast(&hypre_cond_threads_sync);\
-      iteration_counter[0] =0;\
+      pthread_cond_broadcast(&hypre_cond_boxloops);\
+      iteration_counter[0] = 0;\
+      hypre_thread_counter = 0;\
    }\
 \
    pthread_mutex_unlock(&hypre_mutex_boxloops);\
-\
-   hypre_thread_counter = 0;\
 }
 
 #define hypre_BoxLoop1_pthread(i, j, k, loop_size,\
@@ -187,15 +174,14 @@ pthread_mutex_t hypre_mutex_BoxLoop4;
    pthread_mutex_lock(&hypre_mutex_boxloops);\
 \
    if (hypre_thread_counter < NUM_THREADS)\
-      pthread_cond_wait(&hypre_cond_threads_sync, &hypre_mutex_boxloops);\
+      pthread_cond_wait(&hypre_cond_boxloops, &hypre_mutex_boxloops);\
    else if (hypre_thread_counter == NUM_THREADS) {\
-      pthread_cond_broadcast(&hypre_cond_threads_sync);\
-      iteration_counter[0] =0;\
+      pthread_cond_broadcast(&hypre_cond_boxloops);\
+      iteration_counter[0] = 0;\
+      hypre_thread_counter = 0;\
    }\
 \
    pthread_mutex_unlock(&hypre_mutex_boxloops);\
-\
-   hypre_thread_counter = 0;\
 }
 
 #define hypre_BoxLoop2_pthread(i, j, k, loop_size,\
@@ -238,15 +224,14 @@ pthread_mutex_t hypre_mutex_BoxLoop4;
    pthread_mutex_lock(&hypre_mutex_boxloops);\
 \
    if (hypre_thread_counter < NUM_THREADS)\
-      pthread_cond_wait(&hypre_cond_threads_sync, &hypre_mutex_boxloops);\
+      pthread_cond_wait(&hypre_cond_boxloops, &hypre_mutex_boxloops);\
    else if (hypre_thread_counter == NUM_THREADS) {\
-      pthread_cond_broadcast(&hypre_cond_threads_sync);\
-      iteration_counter[0] =0;\
+      pthread_cond_broadcast(&hypre_cond_boxloops);\
+      iteration_counter[0] = 0;\
+      hypre_thread_counter = 0;\
    }\
 \
    pthread_mutex_unlock(&hypre_mutex_boxloops);\
-\
-   hypre_thread_counter = 0;\
 }
 
 #define hypre_BoxLoop3_pthread(i, j, k, loop_size,\
@@ -296,15 +281,14 @@ pthread_mutex_t hypre_mutex_BoxLoop4;
    pthread_mutex_lock(&hypre_mutex_boxloops);\
 \
    if (hypre_thread_counter < NUM_THREADS)\
-      pthread_cond_wait(&hypre_cond_threads_sync, &hypre_mutex_boxloops);\
+      pthread_cond_wait(&hypre_cond_boxloops, &hypre_mutex_boxloops);\
    else if (hypre_thread_counter == NUM_THREADS) {\
-      pthread_cond_broadcast(&hypre_cond_threads_sync);\
-      iteration_counter[0] =0;\
+      pthread_cond_broadcast(&hypre_cond_boxloops);\
+      iteration_counter[0] = 0;\
+      hypre_thread_counter = 0;\
    }\
 \
    pthread_mutex_unlock(&hypre_mutex_boxloops);\
-\
-   hypre_thread_counter = 0;\
 }
 
 #define hypre_BoxLoop4_pthread(i, j, k, loop_size,\
@@ -361,15 +345,14 @@ pthread_mutex_t hypre_mutex_BoxLoop4;
    pthread_mutex_lock(&hypre_mutex_boxloops);\
 \
    if (hypre_thread_counter < NUM_THREADS)\
-      pthread_cond_wait(&hypre_cond_threads_sync, &hypre_mutex_boxloops);\
+      pthread_cond_wait(&hypre_cond_boxloops, &hypre_mutex_boxloops);\
    else if (hypre_thread_counter == NUM_THREADS) {\
-      pthread_cond_broadcast(&hypre_cond_threads_sync);\
-      iteration_counter[0] =0;\
+      pthread_cond_broadcast(&hypre_cond_boxloops);\
+      iteration_counter[0] = 0;\
+      hypre_thread_counter = 0;\
    }\
 \
    pthread_mutex_unlock(&hypre_mutex_boxloops);\
-\
-   hypre_thread_counter = 0;\
 }
 
 #endif
