@@ -9,20 +9,6 @@
 #include <cegdb.h>
 #endif
 
-#ifdef HYPRE_USE_PTHREADS
-#ifndef HYPRE_NO_PTHREAD_MANGLING
-#if 0
-#undef HYPRE_InitializeStructMatrix
-#undef HYPRE_StructSMGSetup
-#undef HYPRE_StructSMGSolve
-#undef HYPRE_SetStructMatrixBoxValues
-#undef HYPRE_SetStructVectorBoxValues
-#undef HYPRE_StructPCGInitialize
-#undef HYPRE_StructPCGSolve
-#undef HYPRE_StructDiagScale
-#endif
-#endif
-#endif
 /*--------------------------------------------------------------------------
  * Test driver for structured matrix interface (structured storage)
  *--------------------------------------------------------------------------*/
