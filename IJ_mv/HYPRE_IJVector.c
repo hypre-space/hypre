@@ -113,7 +113,7 @@ HYPRE_IJVectorDestroy( HYPRE_IJVector vector )
 
       ierr = hypre_IJVectorDestroyPar(vec) ;
 
-   else
+   else if ( hypre_IJVectorObjectType(vec) != -1 )
    {
       printf("Unrecognized object type -- HYPRE_IJVectorDestroy\n");
       exit(1);
