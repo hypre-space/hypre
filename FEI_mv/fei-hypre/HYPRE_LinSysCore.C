@@ -1737,8 +1737,8 @@ void HYPRE_LinSysCore::resetMatrixAndVector(double s)
     ierr = HYPRE_IJMatrixSetLocalStorageType(HYA_, HYPRE_PARCSR);
     size = localEndRow_ - localStartRow_ + 1;
     ierr = HYPRE_IJMatrixSetLocalSize(HYA_, size, size);
-    ierr = HYPRE_IJMatrixSetRowSizes(HYA_, rowLengths_);
-    ierr = HYPRE_IJMatrixInitialize(HYA_);
+    //ierr = HYPRE_IJMatrixSetRowSizes(HYA_, rowLengths_);
+    //ierr = HYPRE_IJMatrixInitialize(HYA_);
     assert(!ierr);
 
     //-------------------------------------------------------------------
@@ -1817,8 +1817,8 @@ void HYPRE_LinSysCore::resetMatrix(double s)
     ierr = HYPRE_IJMatrixSetLocalStorageType(HYA_, HYPRE_PARCSR);
     size = localEndRow_ - localStartRow_ + 1;
     ierr = HYPRE_IJMatrixSetLocalSize(HYA_, size, size);
-    ierr = HYPRE_IJMatrixSetRowSizes(HYA_, rowLengths_);
-    ierr = HYPRE_IJMatrixInitialize(HYA_);
+    //ierr = HYPRE_IJMatrixSetRowSizes(HYA_, rowLengths_);
+    //ierr = HYPRE_IJMatrixInitialize(HYA_);
     assert(!ierr);
 
     //-------------------------------------------------------------------
