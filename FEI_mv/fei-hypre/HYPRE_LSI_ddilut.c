@@ -850,6 +850,11 @@ int HYPRE_LSI_DDIlutDecompose(HYPRE_LSI_DDIlut *ilut_ptr,MH_Matrix *Amat,
       free( rowNorms );
       rowNorms = Norm2;
    }
+   /*
+   for ( i = 0; i < Nrows; i++ ) 
+      for ( j = Amat_ia[i]; j < Amat_ia[i+1]; j++ ) 
+         printf("%10d %10d %25.16e\n", i+1, Amat_ja[j]+1, Amat_aa[j]);
+   */
 
    /* ---------------------------------------------------------------- */
    /* allocate space                                                   */
