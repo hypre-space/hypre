@@ -91,9 +91,9 @@ HYPRE_EuclidCreate( MPI_Comm comm, HYPRE_Solver *solver )
   MPI_Comm_size(comm_dh, &np_dh);    HYPRE_EUCLID_ERRCHKA;
   MPI_Comm_rank(comm_dh, &myid_dh);  HYPRE_EUCLID_ERRCHKA;
 
-  #ifdef ENABLE_EUCLID_LOGGING
+#ifdef ENABLE_EUCLID_LOGGING
   openLogfile_dh(0, NULL); HYPRE_EUCLID_ERRCHKA;
-  #endif
+#endif
 
   if (mem_dh == NULL) {
     Mem_dhCreate(&mem_dh);  HYPRE_EUCLID_ERRCHKA;
@@ -206,9 +206,9 @@ HYPRE_EuclidDestroy( HYPRE_Solver solver )
     mem_dh = NULL;
   }
 
-  #ifdef ENABLE_EUCLID_LOGGING
+#ifdef ENABLE_EUCLID_LOGGING
   closeLogfile_dh(); HYPRE_EUCLID_ERRCHKA;
-  #endif
+#endif
 
   END_FUNC_VAL(0)
 }
