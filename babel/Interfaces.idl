@@ -1,5 +1,7 @@
 package Hypre {
 
+   // Version designed to allow a generic PCG solver to be defined.
+   //
    // Definition of Hypre interface.  JfP dec99 - feb00
    // Sources: partial design chart from Andy Cleary,
    // an earlier IDL file given me by Brent Smolinski
@@ -14,19 +16,25 @@ package Hypre {
    class Box;
    class StructStencil;
    class StructuredGrid;
-   class StructVector;
-   class StructMatrix;
-   class StructSolver;
    
 // ---------------- Interfaces ----------------
 
+  interface Vector {
+     int Clear ();                          // y <- 0 (where y=self)
+     int Copy (in Vector x);                // y <- x 
+     int Clone (out Vector x);              // create an x compatible with y
+     int Scale (in double a);               // y <- a*y 
+     int Dot (in Vector x, out double d);   // d <- (y,x)
+     int Axpy (in double a, in Vector x);   // y <- a*x + y
+  };
+
    interface Operator {
-      int Apply( in StructVector x, out StructVector b );
+      int Apply( in Vector x, out Vector b );
    };
    // ... Things which inherit from Operator include Matrix, Solver.
 
    interface LinearOperator extends Operator {
-      int Apply( in StructVector x, out StructVector b );
+      int Apply( in Vector x, out Vector b );
    };
 
    interface StructuredGridVectorBuilder {
@@ -35,9 +43,9 @@ package Hypre {
       // ilower, iupper, and dim are combined into a Box object.  Probably
       // it would be better to encode the "values" data structure in a more
       // natural form.
-      void New( in StructuredGrid grid );
+      int New( in StructuredGrid grid );
       int Setup();
-      StructVector GetConstructedObject();
+      Vector GetConstructedObject();
    };
 
    interface StructuredGridMatrixBuilder {
@@ -48,20 +56,20 @@ package Hypre {
       // ilower, iupper, and dim are combined into a Box object.  Probably
       // it would be better to encode the "values" data structure in a more
       // natural form.
-      void New( in StructuredGrid grid, in StructStencil stencil,
+      int New( in StructuredGrid grid, in StructStencil stencil,
                 in int symmetric, in array<int,1> num_ghost );
       int Setup();
-      StructMatrix GetConstructedObject();
+      LinearOperator GetConstructedObject();
    };
 
    interface StructuredGridBuilder 
    {
       int SetGridExtents( in Box box );
-      void SetDoubleParameter( in string name, in double value );
-      void SetIntParameter( in string name, in int value );
-      void SetIntArrayParameter( in string name, in array<int,1> value );
+      int SetDoubleParameter( in string name, in double value );
+      int SetIntParameter( in string name, in int value );
+      int SetIntArrayParameter( in string name, in array<int,1> value );
       StructuredGrid GetConstructedObject();
-      void New( in MPI_Com com, in int dimension );
+      int New( in MPI_Com com, in int dimension );
       int Setup();
    };
    
@@ -70,16 +78,16 @@ package Hypre {
    };
 
    interface Solver extends LinearOperator {
-      int Apply( in StructVector b, out StructVector x );
-      StructMatrix GetSystemOperator();
-      StructVector GetResidual();
+      int Apply( in Vector b, out Vector x );
+      LinearOperator GetSystemOperator();
+      Vector GetResidual();
       int GetConvergenceInfo( in string name, out double value );
    };
 
    interface PreconditionedSolver extends Solver {
-      int Apply( in StructVector b, out StructVector x );
-      StructMatrix GetSystemOperator();
-      StructVector GetResidual();
+      int Apply( in Vector b, out Vector x );
+      LinearOperator GetSystemOperator();
+      Vector GetResidual();
       int GetConvergenceInfo( in string name, out double value );
 
       Solver GetPreconditioner();
@@ -91,7 +99,7 @@ package Hypre {
       int SetDoubleParameter( in string name, in double value );
       int SetIntParameter( in string name, in int value );
       int New( in MPI_Com comm );
-      int Setup( in StructMatrix A, in StructVector b, in StructVector x );
+      int Setup( in LinearOperator A, in Vector b, in Vector x );
       Solver GetConstructedObject();    
    };
 
@@ -101,10 +109,10 @@ package Hypre {
       int SetDoubleParameter( in string name, in double value );
       int SetIntParameter( in string name, in int value );
       int New( in MPI_Com comm );
-      int Setup( in StructMatrix A, in StructVector b, in StructVector x );
+      int Setup( in LinearOperator A, in Vector b, in Vector x );
       Solver GetConstructedObject();    
 
-      int SetPreconditioner( in StructSolver precond );
+      int SetPreconditioner( in Solver precond );
    };
 
 
@@ -144,7 +152,7 @@ package Hypre {
       // upon construction.
       // The problem is that I have to build into this the "secret"
       // knowledge that an MPI communicator handle is really an integer.
-      void New( in int comm );
+      int New( in int comm );
       static MPI_Com Constructor( in int comm );
    };
    
@@ -156,11 +164,11 @@ package Hypre {
    // contents to a file.
 
    class Box {
-      void New( in array<int,1> lower, in array<int,1> upper,
+      int New( in array<int,1> lower, in array<int,1> upper,
                 in int dimension );
       static Box Constructor( in array<int,1> lower, in array<int,1> upper,
                               in int dimension );
-      void Setup();
+      int Setup();
       void print();
    };
 
@@ -168,44 +176,57 @@ package Hypre {
    {
       void print();
       int SetElement( in int element_index, inout array<int,1> element_offset );
-      void New( in int dimension, in int size );
+      int New( in int dimension, in int size );
       static StructStencil Constructor( in int dimension, in int size );
-      void Setup();
+      int Setup();
    };
    
-   class StructVector implements StructuredGridVectorBuilder {
+   class StructVectorBldr implements StructuredGridVectorBuilder {
       void print();
       int SetValues( in Box box, in array<double,1> values );
-      StructVector GetConstructedObject();
-      void New( in StructuredGrid grid );
-      static StructVector Constructor( in StructuredGrid grid );
+      Vector GetConstructedObject();
+      int New( in StructuredGrid grid );
+      static StructVectorBldr Constructor( in StructuredGrid grid );
       int Setup();
    };
 
-   class StructMatrix implements StructuredGridMatrixBuilder, LinearOperator {
+   class StructVector implements Vector {
+     int Clear ();                    
+     int Copy (in Vector x);         
+     int Clone (out Vector x);       
+     int Scale (in double a);        
+     int Dot (in Vector x, out double d);
+     int Axpy (in double a, in Vector x);
+   };
+
+   class StructMatrixBldr implements StructuredGridMatrixBuilder {
       void print();
       int SetStencil( in StructStencil stencil );
       int SetValues( in Box box, in array<int,1> stencil_indices,
                      in array<double,1> values );
       int Apply( in StructVector b, out StructVector x );
-      StructMatrix GetConstructedObject();
-      void New( in StructuredGrid grid, in StructStencil stencil,
+      LinearOperator GetConstructedObject();
+      int New( in StructuredGrid grid, in StructStencil stencil,
                 in int symmetric, in array<int,1> num_ghost  );
-      static StructMatrix Constructor
+      static StructMatrixBldr Constructor
       ( in StructuredGrid grid, in StructStencil stencil, in int symmetric,
         in array<int,1> num_ghost );
       int Setup();
+   };
+
+   class StructMatrix implements LinearOperator {
+      int Apply( in Vector x, out Vector b );
    };
 
    class StructuredGrid implements StructuredGridBuilder
    {
       void print();
       int SetGridExtents( in Box box );
-      void SetDoubleParameter( in string name, in double value );
-      void SetIntParameter( in string name, in int value );
-      void SetIntArrayParameter( in string name, in array<int,1> value );
+      int SetDoubleParameter( in string name, in double value );
+      int SetIntParameter( in string name, in int value );
+      int SetIntArrayParameter( in string name, in array<int,1> value );
       StructuredGrid GetConstructedObject();
-      void New( in MPI_Com com, in int dimension );
+      int New( in MPI_Com com, in int dimension );
       static StructuredGrid Constructor( in MPI_Com com, in int dimension );
       int Setup();
    };
@@ -213,24 +234,16 @@ package Hypre {
          
    // ---------------- Solver and related classes
 
-   class StructSolver
-      // This is the data type of the argument of the PCG SetPreconditioner
-      // function.  The function needs to get a class, not an interface -
-      // because it needs actual data to pass on to HYPRE_StructPCGSetPrecond.
-      // The data type of the argument must be shared by all the solvers
-      // which might be used as preconditioners.
-   { };
-   
 
    // Some "standard" functions can be expected to work differently on different
    // solvers, hence have keyword strings in their argument lists.
    // The generic parameter type is a double because that's easily converted
    // to int but not vice versa.
 
-   class StructJacobi extends StructSolver implements Solver, SolverBuilder {
-      int Apply( in StructVector b, out StructVector x );
-      StructMatrix GetSystemOperator();
-      StructVector GetResidual();
+   class StructJacobi implements Solver, SolverBuilder {
+      int Apply( in Vector b, out Vector x );
+      LinearOperator GetSystemOperator();
+      Vector GetResidual();
       int GetConvergenceInfo( in string name, out double value );
 
       double GetDoubleParameter( in string name );
@@ -238,15 +251,15 @@ package Hypre {
       int SetDoubleParameter( in string name, in double value );
       int SetIntParameter( in string name, in int value );
       int New( in MPI_Com comm );
-      int Setup( in StructMatrix A, in StructVector b, in StructVector x );
+      int Setup( in LinearOperator A, in Vector b, in Vector x );
       static StructJacobi Constructor( in MPI_Com comm );
       Solver GetConstructedObject();
    };
 
-   class StructSMG extends StructSolver implements Solver, SolverBuilder {
-      int Apply( in StructVector b, out StructVector x );
-      StructMatrix GetSystemOperator();
-      StructVector GetResidual();
+   class StructSMG implements Solver, SolverBuilder {
+      int Apply( in Vector b, out Vector x );
+      LinearOperator GetSystemOperator();
+      Vector GetResidual();
       int GetConvergenceInfo( in string name, out double value );
 
       double GetDoubleParameter( in string name );
@@ -254,16 +267,15 @@ package Hypre {
       int SetDoubleParameter( in string name, in double value );
       int SetIntParameter( in string name, in int value );
       int New( in MPI_Com comm );
-      int Setup( in StructMatrix A, in StructVector b, in StructVector x );
+      int Setup( in LinearOperator A, in Vector b, in Vector x );
       static StructSMG Constructor( in MPI_Com comm );
       Solver GetConstructedObject();
    };
 
-   class PCG extends StructSolver implements PreconditionedSolver, PreconditionedSolverBuilder {
-      // Preconditioned Conjugant Gradient
-      int Apply( in StructVector b, out StructVector x );
-      StructMatrix GetSystemOperator();
-      StructVector GetResidual();
+   class PCG implements PreconditionedSolver, PreconditionedSolverBuilder {
+      int Apply( in Vector b, out Vector x );
+      LinearOperator GetSystemOperator();
+      Vector GetResidual();
       int GetConvergenceInfo( in string name, out double value );
 
       Solver GetPreconditioner();
@@ -274,14 +286,12 @@ package Hypre {
       int SetIntParameter( in string name, in int value );
       int New( in MPI_Com comm );
       static PCG Constructor( in MPI_Com comm );
-      int Setup( in StructMatrix A, in StructVector b, in StructVector x );
+      int Setup( in LinearOperator A, in Vector b, in Vector x );
       Solver GetConstructedObject();    
 
-      int SetPreconditioner( in StructSolver precond );
+      int SetPreconditioner( in Solver precond );
 
    };
-
-
 
 
 
