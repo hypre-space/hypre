@@ -293,11 +293,35 @@ int MLI_SolverParaSails::applyParaSailsTrans(MLI_Vector *f_in,
 
 int MLI_SolverParaSails::setParams(char *param_string, int argc, char **argv)
 {
-   (void) param_string;
-   (void) argc;
-   (void) argv;
-   cout << "MLI_SolverParaSails::setParams - not implemented yet.\n";
-   return 1;
+   char param1[100];
+
+   if ( !strcmp(param_string, "nLevels") )
+   {
+      sscanf(param_string, "%s %d", param1, &nlevels);
+      if ( nlevels < 0 ) nlevels = 0;
+   }
+   else if ( !strcmp(param_string, "symmetric") )   symmetric = 1;
+   else if ( !strcmp(param_string, "unsymmetric") ) symmetric = 0;
+   else if ( !strcmp(param_string, "factorized") )  factorized = 0;
+   else if ( !strcmp(param_string, "transpose") )   transpose = 0;
+   else if ( !strcmp(param_string, "loadbal") )     loadbal = 0;
+   else if ( !strcmp(param_string, "threshold") )
+   {
+      sscanf(param_string, "%s %lg", param1, &threshold);
+      if ( threshold < 0 || threshold > 1. ) threshold = 0.;
+   }
+   else if ( !strcmp(param_string, "filter") )
+   {
+      sscanf(param_string, "%s %lg", param1, &filter);
+      if ( filter < 0 || filter > 1. ) filter = 0.;
+   }
+   else
+   {   
+      cout << "MLI_SolverParaSails::setParams - parameter not recognized.\n";
+      cout << "              Params = " << param_string << endl;
+      return 1;
+   }
+   return 0;
 }
 
 /******************************************************************************
