@@ -36,8 +36,8 @@ PILUT_LIBFLAGS =\
  -L${HYPRE_DIR}/distributed_matrix\
  -L${HYPRE_DIR}/matrix_matrix\
  -l_HYPRE_DistributedMatrixPilutSolver \
- -l_HYPRE_DistributedMatrix \
  -l_HYPRE_MatrixMatrix \
+ -l_HYPRE_DistributedMatrix \
  $(BLAS_LIB)
 
 CFLAGS =\
@@ -59,8 +59,8 @@ LFLAGS =\
  -L../parcsr_matrix_vector\
  -L../seq_matrix_vector\
  -L../utilities\
- $(PILUT_LIBFLAGS)\
  -lHYPRE_parcsr_ls\
+ $(PILUT_LIBFLAGS)\
  -lHYPRE_parcsr_mv\
  -lHYPRE_mv\
  -lHYPRE_utilities\
