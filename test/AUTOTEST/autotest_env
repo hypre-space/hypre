@@ -48,7 +48,6 @@ HYPRE_STRUCT_EMAIL="$HYPRE_DEFAULT_EMAIL\
 
 HYPRE_IJ_EMAIL="$HYPRE_DEFAULT_EMAIL\
  painter1@llnl.gov\
- castilla1@llnl.gov\
  hysom1@llnl.gov\
  jones97@llnl.gov\
  yang11@llnl.gov\
@@ -63,7 +62,6 @@ HYPRE_FEI_EMAIL="$HYPRE_DEFAULT_EMAIL\
 
 HYPRE_ALL_EMAIL="$HYPRE_DEFAULT_EMAIL\
  painter1@llnl.gov\
- castilla1@llnl.gov\
  hysom1@llnl.gov\
  lee123@llnl.gov\
  jones97@llnl.gov\

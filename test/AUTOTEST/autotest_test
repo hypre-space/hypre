@@ -371,7 +371,9 @@ apply_error_filters () {
         for ii in \
           '(autoconf|automake|autoheader)\ has\ been\ disabled'\
           'configure:\ WARNING:\ Configuration\ for'\
-          'sed:\ Couldn.t\ close\ {standard\ output}'
+          'Insure\ messages\ will\ be\ written\ to\ insure'\
+          'TCA\ log\ data\ will\ be\ merged\ with\ tca'\
+          'sed:\ Couldn.t\ close\ '
         do process_filter $ErrorFile "${ii}"
         done
       ;;
