@@ -49,6 +49,7 @@ hypre_AMGInitialize()
    int     *grid_relax_type;   
    int    **grid_relax_points; 
    int     *schwarz_option;
+   int      mode;
 
 
    /* output params */
@@ -73,6 +74,7 @@ hypre_AMGInitialize()
    num_functions = 1;
    num_relax_steps = 1;
    use_block_flag = 0;
+   mode = 0;
 
    /* solve params */
    max_iter  = 100;
@@ -133,6 +135,7 @@ hypre_AMGInitialize()
    hypre_AMGSetGridRelaxPoints(amg_data, grid_relax_points);
    hypre_AMGSetRelaxWeight(amg_data, relax_weight);
    hypre_AMGSetSchwarzOption(amg_data, schwarz_option);
+   hypre_AMGSetMode(amg_data, mode);
 
    hypre_AMGSetIOutDat(amg_data, ioutdat);
    hypre_AMGSetLogFileName(amg_data, log_file_name); 
@@ -232,6 +235,18 @@ hypre_AMGSetStrongThreshold( void     *data,
    hypre_AMGData  *amg_data = data;
  
    hypre_AMGDataStrongThreshold(amg_data) = strong_threshold;
+
+   return (ierr);
+}
+
+int
+hypre_AMGSetMode( void     *data,
+                             int    mode )
+{
+   int ierr = 0;
+   hypre_AMGData  *amg_data = data;
+ 
+   hypre_AMGDataMode(amg_data) = mode;
 
    return (ierr);
 }

@@ -28,6 +28,7 @@ main( int   argc,
    int                 max_levels;
    int                 num_functions;
    int                 num_relax_steps;
+   int                 mode = 0;
    int use_block_flag;
    double	       norm;
    double	       tol;
@@ -187,11 +188,59 @@ main( int   argc,
          build_rhs_type      = 4;
          build_rhs_arg_index = arg_index;
       }    
+      else if ( strcmp(argv[arg_index], "-cljp") == 0 )
+      {
+         arg_index++;
+         coarsen_type = 0;
+      }
       else if ( strcmp(argv[arg_index], "-ruge") == 0 )
       {
          arg_index++;
          coarsen_type = 1;
       }
+      else if ( strcmp(argv[arg_index], "-a1") == 0 )
+      {
+         arg_index++;
+         coarsen_type = 11;
+      }
+      else if ( strcmp(argv[arg_index], "-a2") == 0 )
+      {
+         arg_index++;
+         coarsen_type = 9;
+      }
+      else if ( strcmp(argv[arg_index], "-cljp2") == 0 )
+      {
+         arg_index++;
+         coarsen_type = 8;
+      }
+      else if ( strcmp(argv[arg_index], "-cljp1") == 0 )
+      {
+         arg_index++;
+         coarsen_type = 10;
+      }
+      /* begin HANS added */
+      else if ( strcmp(argv[arg_index], "-wLJP") == 0 )
+      {
+         arg_index++;
+         coarsen_type = 4;
+      }
+      else if ( strcmp(argv[arg_index], "-ruge1p") == 0 )
+      {
+         arg_index++;
+         coarsen_type = 5;
+      }
+      else if ( strcmp(argv[arg_index], "-mp") == 0 )
+      {
+         arg_index++;
+         interp_type = 5;
+      }
+      else if ( strcmp(argv[arg_index], "-jac") == 0 )
+      {
+         arg_index++;
+         interp_type = 6;
+      }
+      /* end HANS added */
+
       else if ( strcmp(argv[arg_index], "-rugeL") == 0 )
       {
          arg_index++;
@@ -226,6 +275,11 @@ main( int   argc,
       {
          arg_index++;
          max_levels = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-pou") == 0 )
+      {
+         arg_index++;
+         interp_type      = 3;
       }
       else if ( strcmp(argv[arg_index], "-rbm") == 0 )
       {
@@ -279,6 +333,12 @@ main( int   argc,
       printf("  -9pt                   : build laplacian 9pt operator\n");
       printf("  -27pt                  : build laplacian 27pt operator\n");
       printf("  -difconv               : build 7pt diffusion-convection\n");
+      /* begin HANS added */
+      printf("  -wLJP                  : use wLJP coarsening \n");
+      printf("  -ruge1p                : use classical coarsening with only one pass\n");
+      printf("  -mp                    : use multipass interpolation\n");
+      printf("  -jac                   : use multipass interpolation with 1 Jacobi iteration\n");
+      /* end HANS added */
       printf("  -ruge                  : use classical coarsening \n");
       printf("  -rugeL                 : use classical coarsening \n");
       printf("                           (more efficient version) \n");
@@ -467,6 +527,11 @@ main( int   argc,
             arg_index++;
             strong_threshold  = atof(argv[arg_index++]);
          }
+         else if ( strcmp(argv[arg_index], "-mode") == 0 )
+         {
+            arg_index++;
+            mode  = atof(argv[arg_index++]);
+         }
          else if ( strcmp(argv[arg_index], "-Atr") == 0 )
          {
             arg_index++;
@@ -557,8 +622,8 @@ main( int   argc,
       /* coarsest grid */
       num_grid_sweeps[3] = 1;
       grid_relax_type[3] = 9;
-      grid_relax_points[3] = hypre_CTAlloc(int, 1);
-      grid_relax_points[3][0] = 0;
+      grid_relax_points[3] = hypre_CTAlloc(int, 20);
+      for (i=0; i < 20; i++) grid_relax_points[3][i] = 0;
    }
 
    if (solver_id == 0)
@@ -571,6 +636,7 @@ main( int   argc,
       HYPRE_AMGSetMaxIter(amg_solver, 20);
       HYPRE_AMGSetCoarsenType(amg_solver, coarsen_type);
       HYPRE_AMGSetStrongThreshold(amg_solver, strong_threshold);
+      HYPRE_AMGSetMode(amg_solver, mode);
       HYPRE_AMGSetATruncFactor(amg_solver, A_trunc_factor);
       HYPRE_AMGSetAMaxElmts(amg_solver, A_max_elmts);
       HYPRE_AMGSetPTruncFactor(amg_solver, P_trunc_factor);
@@ -633,6 +699,7 @@ main( int   argc,
          pcg_precond = HYPRE_AMGInitialize();
          HYPRE_AMGSetCoarsenType(pcg_precond, coarsen_type);
          HYPRE_AMGSetStrongThreshold(pcg_precond, strong_threshold);
+         HYPRE_AMGSetMode(pcg_precond, mode);
          HYPRE_AMGSetATruncFactor(pcg_precond, A_trunc_factor);
          HYPRE_AMGSetAMaxElmts(pcg_precond, A_max_elmts);
          HYPRE_AMGSetPTruncFactor(pcg_precond, P_trunc_factor);
@@ -721,6 +788,7 @@ main( int   argc,
          pcg_precond = HYPRE_AMGInitialize();
          HYPRE_AMGSetCoarsenType(pcg_precond, coarsen_type);
          HYPRE_AMGSetStrongThreshold(pcg_precond, strong_threshold);
+         HYPRE_AMGSetMode(pcg_precond, mode);
          HYPRE_AMGSetATruncFactor(pcg_precond, A_trunc_factor);
          HYPRE_AMGSetAMaxElmts(pcg_precond, A_max_elmts);
          HYPRE_AMGSetPTruncFactor(pcg_precond, P_trunc_factor);

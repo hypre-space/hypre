@@ -63,7 +63,7 @@ typedef struct
    int     	   **i_domain_dof;
    int     	   **j_domain_dof;
    double  	   **domain_matrixinverse;
-
+   int		     mode;
 
    /* data generated in the solve phase */
    hypre_Vector   *Vtemp;
@@ -128,6 +128,7 @@ typedef struct
 #define hypre_AMGDataIDomainDof(amg_data) ((amg_data)->i_domain_dof)
 #define hypre_AMGDataJDomainDof(amg_data) ((amg_data)->j_domain_dof)
 #define hypre_AMGDataDomainMatrixInverse(amg_data) ((amg_data)->domain_matrixinverse)
+#define hypre_AMGDataMode(amg_data) ((amg_data)->mode)
 
 /* data generated in the solve phase */
 #define hypre_AMGDataVtemp(amg_data) ((amg_data)->Vtemp)

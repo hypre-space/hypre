@@ -91,6 +91,17 @@ HYPRE_AMGSetStrongThreshold( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_AMGSetMode
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_AMGSetMode( HYPRE_Solver solver,
+                       int          mode  )
+{
+   return( hypre_AMGSetMode( (void *) solver, mode ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_AMGSetATruncFactor
  *--------------------------------------------------------------------------*/
 

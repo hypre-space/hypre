@@ -25,6 +25,7 @@ int HYPRE_AMGSetup( HYPRE_Solver solver , HYPRE_CSRMatrix A , HYPRE_Vector b , H
 int HYPRE_AMGSolve( HYPRE_Solver solver , HYPRE_CSRMatrix A , HYPRE_Vector b , HYPRE_Vector x );
 int HYPRE_AMGSetMaxLevels( HYPRE_Solver solver , int max_levels );
 int HYPRE_AMGSetStrongThreshold( HYPRE_Solver solver , double strong_threshold );
+int HYPRE_AMGSetMode( HYPRE_Solver solver , int mode );
 int HYPRE_AMGSetATruncFactor( HYPRE_Solver solver , double A_trunc_factor );
 int HYPRE_AMGSetAMaxElmts( HYPRE_Solver solver , int A_max_elmts );
 int HYPRE_AMGSetPTruncFactor( HYPRE_Solver solver , double P_trunc_factor );
@@ -87,6 +88,7 @@ void *hypre_AMGInitialize( void );
 int hypre_AMGFinalize( void *data );
 int hypre_AMGSetMaxLevels( void *data , int max_levels );
 int hypre_AMGSetStrongThreshold( void *data , double strong_threshold );
+int hypre_AMGSetMode( void *data , int mode );
 int hypre_AMGSetATruncFactor( void *data , double A_trunc_factor );
 int hypre_AMGSetPTruncFactor( void *data , double P_trunc_factor );
 int hypre_AMGSetAMaxElmts( void *data , int A_max_elmts );
@@ -141,9 +143,11 @@ int hypre_CGIdentitySetup( void *vdata , void *A , void *b , void *x );
 int hypre_CGIdentity( void *vdata , void *A , void *b , void *x );
 
 /* coarsen.c */
-int hypre_AMGCoarsen( hypre_CSRMatrix *A , double strength_threshold , int *dof_func , hypre_CSRMatrix **S_ptr , int **CF_marker_ptr , int *coarse_size_ptr );
-int hypre_AMGCoarsenRuge( hypre_CSRMatrix *A , double strength_threshold , hypre_CSRMatrix **S_ptr , int **CF_marker_ptr , int *coarse_size_ptr );
-int hypre_AMGCoarsenRugeLoL( hypre_CSRMatrix *A , double strength_threshold , int *dof_func , hypre_CSRMatrix **S_ptr , int **CF_marker_ptr , int *coarse_size_ptr );
+int hypre_AMGCoarsen( hypre_CSRMatrix *A , double strength_threshold , hypre_CSRMatrix *S , int **CF_marker_ptr , int *coarse_size_ptr );
+int hypre_AMGCoarsenRuge( hypre_CSRMatrix *A , double strength_threshold , hypre_CSRMatrix *S , int **CF_marker_ptr , int *coarse_size_ptr );
+int hypre_AMGCoarsenRugeLoL( hypre_CSRMatrix *A , double strength_threshold , hypre_CSRMatrix *S , int **CF_marker_ptr , int *coarse_size_ptr );
+int hypre_AMGCoarsenwLJP( hypre_CSRMatrix *A, double strength_threshold, int *dof_func, hypre_CSRMatrix **S_ptr, int **CF_marker_ptr, int *coarse_size_ptr);
+int hypre_AMGCoarsenRugeOnePass( hypre_CSRMatrix *A, double strength_threshold, hypre_CSRMatrix **S_ptr, int **CF_marker_ptr, int *coarse_size_ptr);
 
 /* coarsenCR.c */
 int hypre_AMGCoarsenCR( hypre_CSRMatrix *A , double strength_threshold , double relax_weight , int relax_type , int num_relax_steps , int **CF_marker_ptr , int *coarse_size_ptr );
@@ -171,6 +175,8 @@ int hypre_AMGIndepSet( hypre_CSRMatrix *S , double *measure_array , double ccons
 
 /* interp.c */
 int hypre_AMGBuildInterp( hypre_CSRMatrix *A , int *CF_marker , hypre_CSRMatrix *S , int *dof_func , int **coarse_dof_func_ptr , hypre_CSRMatrix **P_ptr );
+int hypre_AMGBuildMultipass( hypre_CSRMatrix *A , int *CF_marker , hypre_CSRMatrix *S , int *dof_func , int **coarse_dof_func_ptr , hypre_CSRMatrix **P_ptr );
+int hypre_AMGJacobiIterate( hypre_CSRMatrix *A , int *CF_marker , hypre_CSRMatrix *S , int *dof_func , int **coarse_dof_func_ptr , hypre_CSRMatrix **P_ptr );
 
 /* interpCR.c */
 int hypre_AMGBuildCRInterp( hypre_CSRMatrix *A , int *CF_marker , int n_coarse , int num_relax_steps , int relax_type , double relax_weight , hypre_CSRMatrix **P_ptr );
@@ -179,6 +185,10 @@ int hypre_AMGBuildCRInterp( hypre_CSRMatrix *A , int *CF_marker , int n_coarse ,
 int hypre_AMGBuildRBMInterp( hypre_CSRMatrix *A , int *CF_marker , hypre_CSRMatrix *S , int *dof_func , int num_functions , int **coarse_dof_func_ptr , hypre_CSRMatrix **P_ptr );
 int row_mat_rectmat_prod( double *a1 , double *a2 , double *a3 , int i_row , int m , int n );
 int matinv( double *x , double *a , int k );
+
+/* inx_part_of_u_interp.c */
+int hypre_CreateDomain (int *CF_marker, hypre_CSRMatrix *A, int num_coarse, int *dof_func, int **coarse_dof_ptr, int **domain_i_ptr, int **domain_j_ptr);
+int hypre_InexactPartitionOfUnityInterpolation (hypre_CSRMatrix **P_pointer, int *i_dof_dof, int *j_dof_dof, double *a_dof_dof, double *unit_vector, int *i_domain_dof, int *j_domain_dof, int num_domains, int num_dofs);
 
 /* laplace.c */
 hypre_CSRMatrix *hypre_GenerateLaplacian( int nx , int ny , int nz , int P , int Q , int R , double *value );
@@ -220,6 +230,10 @@ int hypre_AMGeAgglomerate( int *i_AE_element , int *j_AE_element , int *i_face_f
 int update_entry( int weight , int *weight_max , int *previous , int *next , int *first , int *last , int head , int tail , int i );
 int remove_entry( int weight , int *weight_max , int *previous , int *next , int *first , int *last , int head , int tail , int i );
 int move_entry( int weight , int *weight_max , int *previous , int *next , int *first , int *last , int head , int tail , int i );
+
+/* strength.c */
+int hypre_AMGCreateS(hypre_CSRMatrix *A, double strength_threshold, int mode, int *dof_func, hypre_CSRMatrix **S_ptr );
+int hypre_AMGCompressS(hypre_CSRMatrix *S, int num_path );
 
 /* stencil_matrix.c */
 hypre_CSRMatrix *hypre_GenerateStencilMatrix( int nx, int ny, int nz, char *infile );

@@ -77,6 +77,7 @@ FILES =\
  interp.c\
  interpCR.c\
  interpRBM.c\
+ inx_part_of_u_interp.c\
  laplace.c\
  laplace_9pt.c\
  laplace_27pt.c\
@@ -86,6 +87,7 @@ FILES =\
  schwarz.c\
  scaled_matnorm.c\
  stencil_matrix.c\
+ strength.c\
  trunc.c\
  Atrunc.c\
  HYPRE_amg.c\
