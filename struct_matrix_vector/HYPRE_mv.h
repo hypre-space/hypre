@@ -54,7 +54,7 @@ void HYPRE_AssembleStructGrid P((HYPRE_StructGrid grid ));
 HYPRE_StructMatrix HYPRE_NewStructMatrix P((MPI_Comm comm , HYPRE_StructGrid grid , HYPRE_StructStencil stencil ));
 int HYPRE_FreeStructMatrix P((HYPRE_StructMatrix matrix ));
 int HYPRE_InitializeStructMatrix P((HYPRE_StructMatrix matrix ));
-void HYPRE_InitializeStructMatrixVoidARGS P((void *argptr ));
+void HYPRE_InitializeStructMatrixVoidArgs P((void *argptr ));
 int HYPRE_InitializeStructMatrixPush P((HYPRE_StructMatrix matrix ));
 int HYPRE_SetStructMatrixValues P((HYPRE_StructMatrix matrix , int *grid_index , int num_stencil_indices , int *stencil_indices , double *values ));
 int HYPRE_SetStructMatrixBoxValues P((HYPRE_StructMatrix matrix , int *ilower , int *iupper , int num_stencil_indices , int *stencil_indices , double *values ));

@@ -12,11 +12,10 @@
  *
  *****************************************************************************/
 
+#define NO_PTHREAD_MANGLING
+
 #include "headers.h"
 #include "threading.h"
-
-
-#define NO_PTHREAD_MANGLING
 
 /*--------------------------------------------------------------------------
  * HYPRE_NewStructMatrix
