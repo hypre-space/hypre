@@ -82,6 +82,9 @@ typedef struct
    int     *numv;
    int     *nump;
 
+   /* data generated in the solve phase */
+   double   *rsid;
+
 } AMGData;
 
 /*--------------------------------------------------------------------------
@@ -153,5 +156,7 @@ typedef struct
 #define AMGDataNumV(amg_data)         ((amg_data) -> numv)
 #define AMGDataNumP(amg_data)         ((amg_data) -> nump)
 				      
+/* data generated in the solve phase */
+#define AMGDataResid(amg_data)        ((amg_data) -> rsid)
 
 #endif

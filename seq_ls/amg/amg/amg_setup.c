@@ -72,6 +72,8 @@ void    *data;
    
    int      i, j, k;
    int      decr;
+
+   double  *rsid;
    
    
    /*----------------------------------------------------------
@@ -174,6 +176,7 @@ void    *data;
    ipmx  = ctalloc(int, num_levels);
    icg   = ctalloc(int, ndimu);
    ifg   = ctalloc(int, ndimu);
+   rsid  = ctalloc(double, num_variables);
    
    /* set fine level point and variable bounds */
    ipmn[0] = 1;
@@ -194,6 +197,8 @@ void    *data;
    AMGDataIPMX(amg_data)      = ipmx;
    AMGDataICG(amg_data)       = icg;
    AMGDataIFG(amg_data)       = ifg;
+
+   AMGDataResid(amg_data)     = rsid;
    
    /*----------------------------------------------------------
     * Call the setup phase code

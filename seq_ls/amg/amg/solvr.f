@@ -4,7 +4,7 @@ c     main solver routine
 c=====================================================================
 
       subroutine solve(levels,ncyc,mu,ntrlx,iprlx,ierlx,iurlx,iprtc,
-     *     nun,imin,imax,u,f,a,ia,ja,iu,icg,b,ib,jb,
+     *     nun,imin,imax,u,f,r,a,ia,ja,iu,icg,b,ib,jb,
      *     ipmn,ipmx,iv,ip,xp,yp,
      *     ndimu,ndimp,ndima,ndimb,
      *     leva, levb, levv, levp, levi,
@@ -15,11 +15,14 @@ c=====================================================================
 
       integer told,tnew,ttot
 
+
+
       dimension imin(*),imax(*)
       dimension u  (*)
       dimension f  (*)
-      dimension ia (*)
+      dimension r  (*)
       dimension a  (*)
+      dimension ia (*)
       dimension ja (*)
       dimension iu (*)
       dimension icg(*)
@@ -91,7 +94,7 @@ c===  > decode ncyc
 c===  > find initial residual
 
       if(iprtc.ge.0) then
-         call rsdl(1,enrg,res,resv,aip,fu,ru,uu,
+         call rsdl(1,enrg,res,resv,r,
      *        imin,imax,u,f,a,ia,ja,iu)
          resi = res
          write(6,1000)
@@ -121,7 +124,7 @@ c===  > cycling
 
          call cycle(levels,mu,ifcycl,ivstar,
      *        ntrlx,iprlx,ierlx,iurlx,iprtc,icycmp,
-     *        nun,imin,imax,u,f,a,ia,ja,iu,icg,
+     *        nun,imin,imax,u,f,r,a,ia,ja,iu,icg,
      *        b,ib,jb,ipmn,ipmx,iv,ip,xp,yp,
      *        ndimu,ndimp,ndima,ndimb,
      *        leva, levb, levv, levp, levi,
@@ -133,15 +136,11 @@ c     veh relative residual temporarily added: relres,
 
             engold = enrg
             resold=res
-            call rsdl(1,enrg,res,resv,aip,fu,ru,uu,
+            call rsdl(1,enrg,res,resv,r,
      *           imin,imax,u,f,a,ia,ja,iu)
             factor=res/resold
             relres = res/fnorm
             delteng=enrg-engold
-cveh extraneous debugging printout
-c           write(6,1200) ncy,res,enrg,factor,relres,
-c    *           aip,delteng,fu,ru,uu
-cveh
             write(6,1200) ncy,res,enrg,factor,relres
          endif
 
@@ -215,7 +214,7 @@ c=====================================================================
 
       subroutine cycle(levels,mu,ifcycl,ivstar,
      *     ntrlx,iprlx,ierlx,iurlx,iprtc,icomp,
-     *     nun,imin,imax,u,f,a,ia,ja,iu,icg,
+     *     nun,imin,imax,u,f,r,a,ia,ja,iu,icg,
      *     b,ib,jb,ipmn,ipmx,iv,ip,xp,yp,
      *     ndimu,ndimp,ndima,ndimb,
      *     leva, levb, levv, levp, levi,
@@ -224,6 +223,8 @@ c=====================================================================
       implicit real*8 (a-h,o-z)
 
       dimension imin(*),imax(*)
+      
+      dimension r  (*)
       dimension u  (*)
       dimension f  (*)
       dimension ia (*)
@@ -365,7 +366,7 @@ c     compute & print residuals
             lltop=0
          endif
 
-         call rsdl(1,enrg,res,resv,aip,fu,ru,uu,
+         call rsdl(1,enrg,res,resv,r,
      *        imin(k),imax(k),
      *        u(levv(k)),f(levv(k)),
      *        a(leva(k)),ia(levi(k)),ja(leva(k)),iu(levv(k)))
@@ -394,7 +395,7 @@ c     perform partial sweeps
 c     compute & print residuals
 
             if(iprtc.ge.k) then
-               call rsdl(1,enrg,res,resv,aip,fu,ru,uu,
+               call rsdl(1,enrg,res,resv,r,
      *              imin(k),imax(k),
      *              u(levv(k)),f(levv(k)),
      *              a(leva(k)),ia(levi(k)),ja(leva(k)),iu(levv(k)))
@@ -457,7 +458,7 @@ c===  > go to next coarser grid
       call rscali(
      *     f(levv(kc)),
      *     numv(kc),
-     *     u(levv(kf)), f(levv(kf)),
+     *     u(levv(kf)), f(levv(kf)), r,
      *     a(leva(kf)), ia(levi(kf)), ja(leva(kf)),
      *     icg(levv(kf)),
      *     b(levb(kf)), ib(levi(kf)), jb(levb(kf)),

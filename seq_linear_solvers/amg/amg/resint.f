@@ -86,10 +86,11 @@ c=====================================================================
 
       subroutine rscali(
      *     fc, nc,
-     *     u, f, a, ia, ja, icg, b, ib, jb, n)
+     *     u, f, r, a, ia, ja, icg, b, ib, jb, n)
 
       implicit real*8 (a-h,o-z)
 
+      dimension r  (*)
       dimension fc (*)
 
       dimension u  (*)
@@ -108,20 +109,24 @@ c---------------------------------------------------------------------
       do 10 ic=1,nc
          fc(ic)=0.e0
  10   continue
+
+cveh      compute residual by using matvec
+cveh      here r = f-Au
+ 
+      alpha = -1.0
+      beta = 1.0
+      call matvec(n,r,alpha,a,ia,ja,u,beta,f)
+
+cveh      perform restriction
+
       do 60 i=1,n
-         r=f(i)
-         jlo=ia(i)
-         jhi=ia(i+1)-1
-         do 20 j=jlo,jhi
-            r=r-a(j)*u(ja(j))
- 20      continue
          jlo=ib(i)
          jhi=ib(i+1)-1
          if(icg(i).gt.0) jhi=jlo
          if(jlo.gt.jhi) go to 60
          do 50 j=jlo,jhi
             ic=icg(jb(j))
-            fc(ic)=fc(ic)+r*b(j)
+            fc(ic)=fc(ic)+r(i)*b(j)
  50      continue
  60   continue
       return
@@ -131,10 +136,12 @@ c=====================================================================
 c     compute (and print) residual
 c=====================================================================
 
-      subroutine rsdl(k,enrg,res,resv,aip,fu,ru,uu,
+      subroutine rsdl(k,enrg,res,resv,r,
      *     imin,imax,u,f,a,ia,ja,iu)
 
       implicit real*8 (a-h,o-z)
+  
+      dimension r  (*)
 
       dimension u  (*)
       dimension f  (*)
@@ -145,48 +152,39 @@ c=====================================================================
 
       dimension imin(*),imax(*)
 
-      dimension resv(10)
+      dimension resv(20)
 
 c---------------------------------------------------------------------
 
-      do 10 i=1,10
+      do 10 i=1,20
          resv(i)=0.e0
  10   continue
-      resp=res
       enrg=0.e0
-c     veh  test. compute <Au,u>, <r,u>, <f,u>
-      aip=0.e0
-      fu=0.e0
-      ru=0.e0
-      uu=0.e0
-c     veh
+
+cveh   new residual routine, using matvec
+cveh   here r = Au-f
+
       r2=0.e0
       ilo=imin(k)
       ihi=imax(k)
-      do 30 i=ilo,ihi
-         s=0.e0
-         jlo=ia(i)
-         jhi=ia(i+1)-1
-         do 20 j=jlo,jhi
-            s=s+a(j)*u(ja(j))
- 20      continue
-         r=s-f(i)
-         r2=r*r
-c     veh
-         aip = aip + s*u(i)
-         fu = fu + f(i)*u(i)
-         ru = ru + r*u(i)
-         uu = uu + u(i)*u(i)
-c     veh
-         enrg=enrg+r*u(i)-u(i)*f(i)
-         resv(iu(i))=resv(iu(i))+r2
- 30   continue
+      nv = ihi-ilo+1
+      alpha = 1.0
+      beta = -1.0
+      call matvec(nv,r,alpha,a,ia,ja,u,beta,f)
+     
+      do 31 j = 1,nv
+         rtmp = r(j)*r(j)
+         r2 = r2 + rtmp
+         resv(iu(j)) = resv(iu(j)) + rtmp
+         enrg=enrg+r(j)*u(j)-u(j)*f(j)
+31    continue
+      res = sqrt(r2)
 
-      res=0.e0
-      do 40 i=1,9
-         res=res+resv(i)
- 40   continue
-      res=sqrt(res)
 
       return
       end
+
+
+
+
+
