@@ -402,30 +402,30 @@ printf("dgssvx: fact=%c, trans=%c, refact=%c, equed=%c\n",
 #endif
     
     *info = 0;
-    nofact = hypre_F90_NAME_BLAS(lsame,LSAME)(fact, "N");
-    equil = hypre_F90_NAME_BLAS(lsame,LSAME)(fact, "E");
-    notran = hypre_F90_NAME_BLAS(lsame,LSAME)(trans, "N");
+    nofact = superlu_lsame(fact, "N");
+    equil = superlu_lsame(fact, "E");
+    notran = superlu_lsame(trans, "N");
     if (nofact || equil) {
 	*(unsigned char *)equed = 'N';
 	rowequ = FALSE;
 	colequ = FALSE;
     } else {
-	rowequ = hypre_F90_NAME_BLAS(lsame,LSAME)(equed, "R") || hypre_F90_NAME_BLAS(lsame,LSAME)(equed, "B");
-	colequ = hypre_F90_NAME_BLAS(lsame,LSAME)(equed, "C") || hypre_F90_NAME_BLAS(lsame,LSAME)(equed, "B");
+	rowequ = superlu_lsame(equed, "R") || superlu_lsame(equed, "B");
+	colequ = superlu_lsame(equed, "C") || superlu_lsame(equed, "B");
 	smlnum = hypre_F90_NAME_BLAS(dlamch,DLAMCH)("Safe minimum");
 	bignum = 1. / smlnum;
     }
 
     /* Test the input parameters */
-    if (!nofact && !equil && !hypre_F90_NAME_BLAS(lsame,LSAME)(fact, "F")) *info = -1;
-    else if (!notran && !hypre_F90_NAME_BLAS(lsame,LSAME)(trans, "T") && !hypre_F90_NAME_BLAS(lsame,LSAME)(trans, "C")) 
+    if (!nofact && !equil && !superlu_lsame(fact, "F")) *info = -1;
+    else if (!notran && !superlu_lsame(trans, "T") && !superlu_lsame(trans, "C")) 
        *info = -2;
-    else if ( !(hypre_F90_NAME_BLAS(lsame,LSAME)(refact,"Y") || hypre_F90_NAME_BLAS(lsame,LSAME)(refact, "N")) ) *info = -3;
+    else if ( !(superlu_lsame(refact,"Y") || superlu_lsame(refact, "N")) ) *info = -3;
     else if ( A->nrow != A->ncol || A->nrow < 0 ||
 	      (A->Stype != NC && A->Stype != NR) ||
 	      A->Dtype != D_D || A->Mtype != GE )
 	*info = -4;
-    else if (hypre_F90_NAME_BLAS(lsame,LSAME)(fact, "F") && !(rowequ || colequ || hypre_F90_NAME_BLAS(lsame,LSAME)(equed, "N")))
+    else if (superlu_lsame(fact, "F") && !(rowequ || colequ || superlu_lsame(equed, "N")))
 	*info = -9;
     else {
 	if (rowequ) {
@@ -466,7 +466,7 @@ printf("dgssvx: fact=%c, trans=%c, refact=%c, equed=%c\n",
     }
     if (*info != 0) {
 	i = -(*info);
-	hypre_F90_NAME_BLAS(xerbla,XERBLA)("dgssvx", &i);
+	superlu_xerbla("dgssvx", &i);
 	return;
     }
     
@@ -515,8 +515,8 @@ printf("dgssvx: fact=%c, trans=%c, refact=%c, equed=%c\n",
 	if ( info1 == 0 ) {
 	    /* Equilibrate matrix A. */
 	    dlaqgs(AA, R, C, rowcnd, colcnd, amax, equed);
-	    rowequ = hypre_F90_NAME_BLAS(lsame,LSAME)(equed, "R") || hypre_F90_NAME_BLAS(lsame,LSAME)(equed, "B");
-	    colequ = hypre_F90_NAME_BLAS(lsame,LSAME)(equed, "C") || hypre_F90_NAME_BLAS(lsame,LSAME)(equed, "B");
+	    rowequ = superlu_lsame(equed, "R") || superlu_lsame(equed, "B");
+	    colequ = superlu_lsame(equed, "C") || superlu_lsame(equed, "B");
 	}
 	utime[EQUIL] = SuperLU_timer_() - t0;
     }

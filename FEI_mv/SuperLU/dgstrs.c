@@ -26,6 +26,9 @@
 #include "dsp_defs.h"
 #include "superlu_util.h"
 
+#ifndef HYPRE_USING_HYPRE_BLAS
+#define USE_VENDOR_BLAS
+#endif
 
 /* 
  * Function prototypes 
@@ -116,8 +119,8 @@ dgstrs (char *trans, SuperMatrix *L, SuperMatrix *U,
     Bstore = B->Store;
     ldb = Bstore->lda;
     nrhs = B->ncol;
-    notran = hypre_F90_NAME_BLAS(lsame,LSAME)(trans, "N");
-    if ( !notran && !hypre_F90_NAME_BLAS(lsame,LSAME)(trans, "T") && !hypre_F90_NAME_BLAS(lsame,LSAME)(trans, "C") ) 
+    notran = superlu_lsame(trans, "N");
+    if ( !notran && !superlu_lsame(trans, "T") && !superlu_lsame(trans, "C") ) 
         *info = -1;
     else if ( L->nrow != L->ncol || L->nrow < 0 ||
 	      L->Stype != SC || L->Dtype != D_D || L->Mtype != TRLU )
@@ -130,7 +133,7 @@ dgstrs (char *trans, SuperMatrix *L, SuperMatrix *U,
 	*info = -6;
     if ( *info ) {
 	i = -(*info);
-	hypre_F90_NAME_BLAS(xerbla,XERBLA)("dgstrs", &i);
+	superlu_xerbla("dgstrs", &i);
 	return;
     }
 

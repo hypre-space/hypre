@@ -142,7 +142,7 @@ dgssv(SuperMatrix *A, int *perm_c, int *perm_r, SuperMatrix *L,
 	*info = -6;
     if ( *info != 0 ) {
 	i = -(*info);
-	hypre_F90_NAME_BLAS(xerbla,XERBLA)("dgssv", &i);
+	superlu_xerbla("dgssv", &i);
 	return;
     }
     

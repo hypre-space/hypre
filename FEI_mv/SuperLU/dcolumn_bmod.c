@@ -28,6 +28,10 @@
 #include "dsp_defs.h"
 #include "superlu_util.h"
 
+#ifndef HYPRE_USING_HYPRE_BLAS
+#define USE_VENDOR_BLAS
+#endif
+
 /* 
  * Function prototypes 
 void sludusolve(int, int, double*, double*);

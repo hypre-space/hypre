@@ -5,7 +5,7 @@
  * in Nov 2003 at LLNL
  * ***********************************************************************/
 
-extern int hypre_F90_NAME_BLAS(xerbla,XERBLA)(char *srname, int *info);
+extern int superlu_xerbla(char *srname, int *info);
 
 /* local prototype */
 int sp_ienv ( int ispec );
@@ -66,7 +66,7 @@ sp_ienv(int ispec)
 
     /* Invalid value for ISPEC */
     i = 1;
-    hypre_F90_NAME_BLAS(xerbla,XERBLA)("sp_ienv ", &i);
+    superlu_xerbla("sp_ienv ", &i);
     return 0;
 
 } /* sp_ienv_ */

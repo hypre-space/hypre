@@ -81,8 +81,8 @@ dgscon(char *norm, SuperMatrix *L, SuperMatrix *U,
     
     /* Test the input parameters. */
     *info = 0;
-    onenrm = *(unsigned char *)norm == '1' || hypre_F90_NAME_BLAS(lsame,LSAME)(norm, "O");
-    if (! onenrm && ! hypre_F90_NAME_BLAS(lsame,LSAME)(norm, "I")) *info = -1;
+    onenrm = *(unsigned char *)norm == '1' || superlu_lsame(norm, "O");
+    if (! onenrm && ! superlu_lsame(norm, "I")) *info = -1;
     else if (L->nrow < 0 || L->nrow != L->ncol ||
              L->Stype != SC || L->Dtype != D_D || L->Mtype != TRLU)
 	 *info = -2;
@@ -91,7 +91,7 @@ dgscon(char *norm, SuperMatrix *L, SuperMatrix *U,
 	*info = -3;
     if (*info != 0) {
 	i = -(*info);
-	hypre_F90_NAME_BLAS(xerbla,XERBLA)("dgscon", &i);
+	superlu_xerbla("dgscon", &i);
 	return;
     }
 

@@ -169,8 +169,8 @@ dgsrfs(char *trans, SuperMatrix *A, SuperMatrix *L, SuperMatrix *U,
     
     /* Test the input parameters */
     *info = 0;
-    notran = hypre_F90_NAME_BLAS(lsame,LSAME)(trans, "N");
-    if ( !notran && !hypre_F90_NAME_BLAS(lsame,LSAME)(trans, "T") && !hypre_F90_NAME_BLAS(lsame,LSAME)(trans, "C"))	
+    notran = superlu_lsame(trans, "N");
+    if ( !notran && !superlu_lsame(trans, "T") && !superlu_lsame(trans, "C"))	
         *info = -1;
     else if ( A->nrow != A->ncol || A->nrow < 0 ||
 	      A->Stype != NC || A->Dtype != D_D || A->Mtype != GE )
@@ -189,7 +189,7 @@ dgsrfs(char *trans, SuperMatrix *A, SuperMatrix *L, SuperMatrix *U,
 	*info = -11;
     if (*info != 0) {
 	i = -(*info);
-	hypre_F90_NAME_BLAS(xerbla,XERBLA)("dgsrfs", &i);
+	superlu_xerbla("dgsrfs", &i);
 	return;
     }
 
@@ -202,8 +202,8 @@ dgsrfs(char *trans, SuperMatrix *A, SuperMatrix *L, SuperMatrix *U,
 	return;
     }
 
-    rowequ = hypre_F90_NAME_BLAS(lsame,LSAME)(equed, "R") || hypre_F90_NAME_BLAS(lsame,LSAME)(equed, "B");
-    colequ = hypre_F90_NAME_BLAS(lsame,LSAME)(equed, "C") || hypre_F90_NAME_BLAS(lsame,LSAME)(equed, "B");
+    rowequ = superlu_lsame(equed, "R") || superlu_lsame(equed, "B");
+    colequ = superlu_lsame(equed, "C") || superlu_lsame(equed, "B");
     
     /* Allocate working space */
     work = doubleMalloc(2*A->nrow);

@@ -403,18 +403,7 @@ int PrintInt10(char *name, int len, int *x)
     return 0;
 }
 
-#ifdef USE_VENDOR_BLAS
-#ifndef HYPRE_USING_BLAS_WRAPPERS
-#define HYPRE_USING_BLAS_WRAPPERS 1
-#endif
-#endif
-#ifndef HYPRE_USING_HYPRE_BLAS
-#ifndef HYPRE_USING_BLAS_WRAPPERS
-#define HYPRE_USING_BLAS_WRAPPERS 1
-#endif
-#endif
-#ifdef HYPRE_USING_BLAS_WRAPPERS
-int hypre_F90_NAME_BLAS(lsame,LSAME)(char *ca, char *cb)
+int superlu_lsame(char *ca, char *cb)
 {
 /*  -- LAPACK auxiliary routine (version 2.0) --   
        Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,   
@@ -483,9 +472,9 @@ int hypre_F90_NAME_BLAS(lsame,LSAME)(char *ca, char *cb)
     ret_val = inta == intb;
     return ret_val;
     
-} /* hypre_F90_NAME_BLAS(lsame,LSAME) */
+} /* superlu_lsame */
 
-/* Subroutine */ int hypre_F90_NAME_BLAS(xerbla,XERBLA)(char *srname, int *info)
+/* Subroutine */ int superlu_xerbla(char *srname, int *info)
 {
 /*  -- LAPACK auxiliary routine (version 2.0) --   
        Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,   
@@ -523,12 +512,11 @@ int hypre_F90_NAME_BLAS(lsame,LSAME)(char *ca, char *cb)
 /*     End of XERBLA */
 
     return 0;
-} /* hypre_F90_NAME_BLAS(xerbla,XERBLA) */
+} /* superlu_xerbla */
 
-/*
-#ifdef HYPRE_USING_BLAS_WRAPPERS
-*/
+/* #ifndef HYPRE_USING_HYPRE_LAPACK */
 
+#if 0
 #define TRUE_ (1)
 #define FALSE_ (0)
 #ifndef abs
@@ -540,8 +528,6 @@ int hypre_F90_NAME_BLAS(lsame,LSAME)(char *ca, char *cb)
 #ifndef max
 #define max(a,b) ((a) >= (b) ? (a) : (b))
 #endif
-
-/* #endif */ /*HYPRE_USING_HYPRE_WRAPPERS*/
 
 double hypre_F90_NAME_BLAS(dlamch,DLAMCH)(char *cmach)
 {
@@ -635,25 +621,25 @@ double hypre_F90_NAME_BLAS(dlamch,DLAMCH)(char *cmach)
 	}
     }
 
-    if (hypre_F90_NAME_BLAS(lsame,LSAME)(cmach, "E")) {
+    if (superlu_lsame(cmach, "E")) {
 	rmach = eps;
-    } else if (hypre_F90_NAME_BLAS(lsame,LSAME)(cmach, "S")) {
+    } else if (superlu_lsame(cmach, "S")) {
 	rmach = sfmin;
-    } else if (hypre_F90_NAME_BLAS(lsame,LSAME)(cmach, "B")) {
+    } else if (superlu_lsame(cmach, "B")) {
 	rmach = base;
-    } else if (hypre_F90_NAME_BLAS(lsame,LSAME)(cmach, "P")) {
+    } else if (superlu_lsame(cmach, "P")) {
 	rmach = prec;
-    } else if (hypre_F90_NAME_BLAS(lsame,LSAME)(cmach, "N")) {
+    } else if (superlu_lsame(cmach, "N")) {
 	rmach = t;
-    } else if (hypre_F90_NAME_BLAS(lsame,LSAME)(cmach, "R")) {
+    } else if (superlu_lsame(cmach, "R")) {
 	rmach = rnd;
-    } else if (hypre_F90_NAME_BLAS(lsame,LSAME)(cmach, "M")) {
+    } else if (superlu_lsame(cmach, "M")) {
 	rmach = emin;
-    } else if (hypre_F90_NAME_BLAS(lsame,LSAME)(cmach, "U")) {
+    } else if (superlu_lsame(cmach, "U")) {
 	rmach = rmin;
-    } else if (hypre_F90_NAME_BLAS(lsame,LSAME)(cmach, "L")) {
+    } else if (superlu_lsame(cmach, "L")) {
 	rmach = emax;
-    } else if (hypre_F90_NAME_BLAS(lsame,LSAME)(cmach, "O")) {
+    } else if (superlu_lsame(cmach, "O")) {
 	rmach = rmax;
     }
 
@@ -1491,7 +1477,7 @@ double slupow_di(double *ap, int *bp)
     }
     return(pow);
 }
-#endif
+#endif /* if 0 (line 519) */
 
 /*
  * -- SuperLU routine (version 2.0) --

@@ -94,7 +94,7 @@ dgsequ(SuperMatrix *A, double *r, double *c, double *rowcnd,
 	*info = -1;
     if (*info != 0) {
 	i = -(*info);
-	hypre_F90_NAME_BLAS(xerbla,XERBLA)("dgsequ", &i);
+	superlu_xerbla("dgsequ", &i);
 	return;
     }
 
