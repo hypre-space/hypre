@@ -351,6 +351,10 @@ printf("\n");
       HYPRE_IJMatrixDestroy( IJPmat );
       delete [] col_ind;
       delete [] col_val;
+printf("psmoother = 5d %d\n", pre_smoother, postsmoother);
+      if ( pre_smoother == MLI_SOLVER_MLS_ID ||
+           postsmoother == MLI_SOLVER_MLS_ID )
+         MLI_Utils_ComputeSpectralRadius(Amat, &max_eigen);
    }
 
    /*-----------------------------------------------------------------

@@ -37,7 +37,7 @@ MLI_Method_AMGSA::MLI_Method_AMGSA( MPI_Comm comm ) : MLI_Method( comm )
    nullspace_dim     = 3;
    nullspace_vec     = NULL;
    nullspace_len     = 0;
-   P_weight          = 4.0/3.0;
+   P_weight          = 0.0/3.0;
    drop_tol_for_P    = 0.0;            /* tolerance to sparsify P*/
    sa_counts         = new int[40];    /* number of aggregates   */
    sa_data           = new int*[40];   /* node to aggregate data */
@@ -435,10 +435,8 @@ int MLI_Method_AMGSA::setup( MLI *mli )
 
       /* ------if MLS smoother, need to give the spectral radius-------- */
 
-      if ( pre_smoother == MLI_SOLVER_MLS_ID ) 
-         pre_smoother_wgt[0] = max_eigen;
-      if ( postsmoother == MLI_SOLVER_MLS_ID ) 
-         postsmoother_wgt[0] = max_eigen;
+      if (pre_smoother == MLI_SOLVER_MLS_ID) pre_smoother_wgt[0] = max_eigen;
+      if (postsmoother == MLI_SOLVER_MLS_ID) postsmoother_wgt[0] = max_eigen;
 
       /* ------set the smoothers---------------------------------------- */
 
