@@ -313,7 +313,7 @@ c     to perform them.
       size = 7
 
       do i = 1, local_num_rows
-         call SIDL_int__array_set1_f( bHYPRE_row_sizes, i, size )
+         call SIDL_int__array_set1_f( bHYPRE_row_sizes, i-1, size )
       enddo
       call bHYPRE_IJBuildMatrix_SetRowSizes_f(
      1     bHYPRE_ij_A, bHYPRE_row_sizes, ierrtmp )
@@ -566,7 +566,8 @@ c      print *, 'Solver: AMG'
       ierr = ierr + ierrtmp
 c     /* note: log output not specified ... */
       call bHYPRE_BoomerAMG_SetPrintLevel_f(
-     1     bHYPRE_AMG, ioutdat )
+     1     bHYPRE_AMG, ioutdat, ierrtmp )
+      ierr = ierr + ierrtmp
       call bHYPRE_BoomerAMG_SetIntParameter_f(
      1     bHYPRE_AMG, "CycleType", cycle_type, ierrtmp )
       ierr = ierr + ierrtmp
@@ -640,10 +641,12 @@ c-----------------------------------------------------------------------
 
       if (myid .eq. 0) then
          call bHYPRE_BoomerAMG_GetNumIterations_f(
-     1        bHYPRE_AMG, num_iterations )
+     1        bHYPRE_AMG, num_iterations, ierrtmp )
+         ierr = ierr + ierrtmp
          call bHYPRE_BoomerAMG_GetRelResidualNorm_f(
      1        bHYPRE_AMG,
-     1        final_res_norm )
+     1        final_res_norm, ierrtmp )
+         ierr = ierr + ierrtmp
          print *, 'Iterations = ', num_iterations
          print *, 'Final Residual Norm = ', final_res_norm
          print *, 'Error Flag = ', ierr
