@@ -29,7 +29,7 @@ hypre_CreateParCSRMatrix( MPI_Comm comm,
 			  int num_nonzeros_offd)
 {
    hypre_ParCSRMatrix  *matrix;
-   int	num_procs, my_id, i, start;
+   int	num_procs, my_id;
    int local_num_rows, local_num_cols;
    int first_row_index, first_col_diag;
    
@@ -40,10 +40,7 @@ hypre_CreateParCSRMatrix( MPI_Comm comm,
 
    if (!row_starts)
    {
-	row_starts = hypre_CTAlloc(int, num_procs+1);
-	row_starts[0] = 0;
-	for (i=0; i < num_procs; i++)
-	   MPE_Decomp1d(global_num_rows,num_procs,i,&start,&row_starts[i+1]);
+	hypre_GeneratePartitioning(global_num_rows,num_procs,&row_starts);
    }
 
    if (!col_starts)
@@ -54,10 +51,7 @@ hypre_CreateParCSRMatrix( MPI_Comm comm,
       }
       else
       {
-	col_starts = hypre_CTAlloc(int, num_procs+1);
-	col_starts[0] = 0;
-	for (i=0; i < num_procs; i++)
-	   MPE_Decomp1d(global_num_cols,num_procs,i,&start,&col_starts[i+1]);
+	hypre_GeneratePartitioning(global_num_cols,num_procs,&col_starts);
       }
    }
 
