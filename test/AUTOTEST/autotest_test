@@ -69,6 +69,7 @@ initialize_variables ()
 #
   if test ! "$HYPRE_MAIL" ; then
     if [ "$HYPRE_ARCH" = "linux" ] ; then
+      [ -x /usr/bin/Mail ] && HYPRE_MAIL=/usr/bin/Mail
       [ -x /usr/bin/mhmail ] && HYPRE_MAIL=/usr/bin/mhmail
     else
       [ -x /usr/bin/Mail ] && HYPRE_MAIL=/usr/bin/Mail
@@ -398,10 +399,18 @@ mail_summary () {
     SUBJECT="$HYPRE_MESSAGE $SUBJECT"
   fi
   if [ "$HYPRE_ARCH" = "linux" ] ; then
-    if [ "$DEBUG_MODE" = "yes" ] ; then
-      ${HYPRE_MAIL} -s "$SUBJECT" -f Treadway1@LLNL.gov $USER_EMAIL < $SUMFILE 
+    if (echo ${HYPRE_MAIL}|grep "Mail" > /dev/null) ; then
+      if [ "$DEBUG_MODE" = "yes" ] ; then
+        ${HYPRE_MAIL} -s "$SUBJECT" $USER_EMAIL < $SUMFILE 
+      else
+        ${HYPRE_MAIL} -s "$SUBJECT" $HYPRE_ALL_EMAIL < $SUMFILE 
+      fi
     else
-      ${HYPRE_MAIL} -s "$SUBJECT" -f Treadway1@LLNL.gov $HYPRE_ALL_EMAIL < $SUMFILE 
+      if [ "$DEBUG_MODE" = "yes" ] ; then
+        ${HYPRE_MAIL} -s "$SUBJECT" -f Treadway1@LLNL.gov $USER_EMAIL < $SUMFILE 
+      else
+        ${HYPRE_MAIL} -s "$SUBJECT" -f Treadway1@LLNL.gov $HYPRE_ALL_EMAIL < $SUMFILE 
+      fi
     fi
   else
     if [ "$DEBUG_MODE" = "yes" ] ; then
@@ -428,10 +437,18 @@ mail_errors () {
             RECIPIENTS=`cat ${i}.email` 
             SUBJECT="Autotest error: ${i} ($HYPRE_ARCH)"
             if [ "$HYPRE_ARCH" = "linux" ] ; then
-              if [ "$DEBUG_MODE" = "yes" ] ; then
-                ${HYPRE_MAIL} -s "$SUBJECT" -f Treadway1@LLNL.gov $USER_EMAIL < $i 
+              if (echo ${HYPRE_MAIL}|grep "Mail" > /dev/null) ; then
+                if [ "$DEBUG_MODE" = "yes" ] ; then
+                  ${HYPRE_MAIL} -s "$SUBJECT" $USER_EMAIL < $i 
+                else
+                  ${HYPRE_MAIL} -s "$SUBJECT" $RECIPIENTS < $i 
+                fi
               else
-                ${HYPRE_MAIL} -s "$SUBJECT" -f Treadway1@LLNL.gov $RECIPIENTS < $i 
+                if [ "$DEBUG_MODE" = "yes" ] ; then
+                  ${HYPRE_MAIL} -s "$SUBJECT" -f Treadway1@LLNL.gov $USER_EMAIL < $i 
+                else
+                  ${HYPRE_MAIL} -s "$SUBJECT" -f Treadway1@LLNL.gov $RECIPIENTS < $i 
+                fi
               fi
             else
               if [ "$DEBUG_MODE" = "yes" ] ; then
