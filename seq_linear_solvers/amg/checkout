@@ -106,18 +106,18 @@ done
 #=======================================================
 
 if [ -f "$AMG_SRC/RCS/rcs_files,v" ]; then
-  (cd $AMG_SRC/; co $* -q rcs_files; co $* -q `cat rcs_files`)
+  (cd $AMG_SRC/; rcsco $* -q rcs_files; rcsco $* -q `cat rcs_files`)
 else
-  (cd $AMG_SRC/; co $* -q RCS/*)
+  (cd $AMG_SRC/; rcsco $* -q RCS/*)
 fi
 
 for i in $DIRS
 do
   echo "Checking out $i"
   if [ -f "$AMG_SRC/$i/RCS/rcs_files,v" ]; then
-    (cd $AMG_SRC/$i; co $* -q rcs_files; co $* -q `cat rcs_files`)
+    (cd $AMG_SRC/$i; rcsco $* -q rcs_files; rcsco $* -q `cat rcs_files`)
   else
-    (cd $AMG_SRC/$i; co $* -q RCS/*)
+    (cd $AMG_SRC/$i; rcsco $* -q RCS/*)
   fi
 done
 
