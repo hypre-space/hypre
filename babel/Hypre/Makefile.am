@@ -1,8 +1,11 @@
 AUTOMAKE_OPTIONS = foreign no-dependencies
 
+prefix = $$HYPRE_INSTALL_DIR
+
 BABELDIR = @babeldir@
 
-noinst_LIBRARIES = libhypre_class.a
+# noinst_LIBRARIES = libhypre_class.a
+lib_LIBRARIES = libhypre_class.a
 
 libhypre_class_a_SOURCES = ${PREBUILT_SRCS} ${GENERATED_SRCS} ${PREBUILT_HDRS} ${GENERATED_HDRS}
 #libhypre_class_a_HEADERS = 
