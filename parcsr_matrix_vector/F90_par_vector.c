@@ -16,23 +16,6 @@
 #include "fortran.h"
 
 /*--------------------------------------------------------------------------
- * hypre_ParVectorCreate
- *--------------------------------------------------------------------------*/
-
-void 
-hypre_F90_IFACE(hypre_createparvector)( int      *comm,
-                                        int      *global_size,
-                                        long int *partitioning,
-                                        long int *vector,
-                                        int      *ierr          )
-{
-   *vector = (long int) ( hypre_ParVectorCreate ( (MPI_Comm) *comm,
-                                                  (int)      *global_size,
-                                                  (int *)    *partitioning ) );
-   *ierr = 0;
-}
-
-/*--------------------------------------------------------------------------
  * hypre_ParVectorSetDataOwner
  *--------------------------------------------------------------------------*/
 
