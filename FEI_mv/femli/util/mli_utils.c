@@ -226,6 +226,45 @@ int MLI_Utils_GenPartition(MPI_Comm comm, int nlocal, int **rowPart)
 }
 
 /***************************************************************************
+ * Given matrix A and vector v, scale the vector by v'*A*v.
+ *--------------------------------------------------------------------------*/
+
+int MLI_Utils_ScaleVec(hypre_ParCSRMatrix *Amat, hypre_ParVector *vec)
+{
+   MPI_Comm        comm;
+   int             mypid, nprocs, *partition;
+   hypre_ParVector *temp;
+   double          norm2;
+
+   /* -----------------------------------------------------------------
+    * fetch matrix parameters
+    * ----------------------------------------------------------------*/
+
+   comm = hypre_ParCSRMatrixComm(Amat);
+   MPI_Comm_rank(comm, &mypid);
+   MPI_Comm_size(comm, &nprocs);
+   HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix)Amat,&partition);
+
+   /* -----------------------------------------------------------------
+    * create temporary vector
+    * ----------------------------------------------------------------*/
+
+   temp = hypre_ParVectorCreate(comm, partition[nprocs], partition);
+   hypre_ParVectorInitialize(temp);
+
+   /* -----------------------------------------------------------------
+    * multiply by matrix, perform inner product, and scale
+    * ----------------------------------------------------------------*/
+ 
+   hypre_ParCSRMatrixMatvec(1.0, Amat, vec, 0.0, temp);
+   norm2 = hypre_ParVectorInnerProd(vec, temp);
+   hypre_ParVectorScale(norm2, vec);
+
+   hypre_ParVectorDestroy(temp);
+   return 0;
+} 
+
+/***************************************************************************
  * Given a matrix, find its maximum eigenvalue
  *--------------------------------------------------------------------------*/
 
@@ -1082,7 +1121,6 @@ int MLI_Utils_SVD(double *uArray, double *sArray, double *vtArray,
 #define MIN(a,b) ((a)<(b)?(a):(b))
 #endif
 
-#ifdef HAVE_LAPACK
     void hypre_F90_NAME_BLAS(dgesvd, DGESVD)(char *, char *, int *, 
         int *, double *, int *, double *, double *, int *, 
         double *, int *, double *, int *, int *);
@@ -1096,11 +1134,6 @@ int MLI_Utils_SVD(double *uArray, double *sArray, double *vtArray,
         &m, sArray, NULL, &m, vtArray, &dim, workArray, &workLen, &info);
 
     return info;
-#else
-    printf("MLI_Utils_SVD::dgesvd not available.\n");
-    exit(1);
-    return 1;
-#endif
 }
 
 /***************************************************************************

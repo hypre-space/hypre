@@ -60,6 +60,7 @@ int    MLI_Utils_HypreParVectorGetDestroyFunc(MLI_Function *funcPtr);
 int    MLI_Utils_HypreVectorGetDestroyFunc(MLI_Function *funcPtr);
 int    MLI_Utils_HypreMatrixFormJacobi(void *A, double, void **J);
 int    MLI_Utils_GenPartition(MPI_Comm comm, int n, int **part);
+int    MLI_Utils_ScaleVec(hypre_ParCSRMatrix *Amat, hypre_ParVector *vec);
 int    MLI_Utils_ComputeSpectralRadius(hypre_ParCSRMatrix *, double *);
 int    MLI_Utils_ComputeExtremeRitzValues(hypre_ParCSRMatrix *, double *, int);
 int    MLI_Utils_ComputeMatrixMaxNorm(hypre_ParCSRMatrix *, double *, int);
