@@ -1529,6 +1529,9 @@ void ParaSailsStats(ParaSails *ps, Matrix *A)
     if (mype)
 	return;
 
+    if (ps->symmetric == 0)
+        max_cost *= 8.0;  /* nonsymmetric method is harder */
+
     printf("******************* ParaSails *******************\n");
     printf("Setup times:\n");
 
