@@ -22,6 +22,9 @@ Version 1.8.3a released, 2004/01/21.
   library support. with the addition of other GNU tools; autoheader, 
   libtoolize, and aclocal, the flexibility, and platform support
   should be better than ever, and more closely follow GNU standards. 
+- Divided up lapack, and Blas support library routines into respective
+  directories. Hypre Blas/lapack support determined by configure, and
+  can be over-ridden --with-blas=<lib> and --with-lapack=<lib>.
 
 Version 1.8.2b released, 2003/10/22.
 
