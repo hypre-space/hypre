@@ -1156,6 +1156,7 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
                          double                 strength_threshold,
                          int                    measure_type,
                          int                    coarsen_type,
+                         int                    debug_flag,
                          hypre_ParCSRMatrix   **S_ptr,
                          int                  **CF_marker_ptr,
                          int                   *coarse_size_ptr     )
@@ -1216,13 +1217,14 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
    int		    C_i_nonempty = 0;
    int		    num_strong;
    int		    num_nonzeros;
-   int		    num_procs;
+   int		    num_procs, my_id;
    int		    num_sends = 0;
    int		    first_col, start;
    int		    col_0, col_n;
 
    int              ierr = 0;
    int              break_var = 0;
+   double	    wall_time;
 
 #if 0 /* debugging */
    char  filename[256];
@@ -1244,7 +1246,10 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
     * to "unaccounted-for" dependence.
     *----------------------------------------------------------------*/
 
+   if (debug_flag == 3) wall_time = time_getWallclockSeconds();
+
    MPI_Comm_size(comm,&num_procs);
+   MPI_Comm_rank(comm,&my_id);
 
    if (!comm_pkg)
    {
@@ -1460,7 +1465,7 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
       measure_array[i] = ST_i[i+1]-ST_i[i];
    }
 
-   if ((measure_type || coarsen_type > 1) && num_procs > 1)
+   if ((measure_type || coarsen_type != 1) && num_procs > 1)
    {
       S_ext      = hypre_ExtractBExt(S,A,0);
       S_ext_i    = hypre_CSRMatrixI(S_ext);
@@ -1503,9 +1508,18 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
       CF_marker[i] = 0;
    }
 
+   if (debug_flag == 3)
+   {
+      wall_time = time_getWallclockSeconds() - wall_time;
+      printf("Proc = %d    Coarsen Setup = %f\n",
+                      my_id, wall_time); 
+   }
+
    /*---------------------------------------------------
     * Loop until all points are either fine or coarse.
     *---------------------------------------------------*/
+
+   if (debug_flag == 3) wall_time = time_getWallclockSeconds();
 
    coarse_size = 0;
    graph_size = num_variables;
@@ -1571,9 +1585,18 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
    hypre_TFree(measure_array);
    hypre_DestroyCSRMatrix(ST);
 
+   if (debug_flag == 3)
+   {
+      wall_time = time_getWallclockSeconds() - wall_time;
+      printf("Proc = %d    Coarsen 1st pass = %f\n",
+                     my_id, wall_time); 
+   }
+
    /* second pass, check fine points for coarse neighbors 
       for coarsen_type = 2, the second pass includes
       off-processore boundary points */
+
+   if (debug_flag == 3) wall_time = time_getWallclockSeconds();
 
    if (coarsen_type == 2)
    {
@@ -1810,10 +1833,19 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
       }
    }
 
+   if (debug_flag == 3 && coarsen_type != 2)
+   {
+      wall_time = time_getWallclockSeconds() - wall_time;
+      printf("Proc = %d    Coarsen 2nd pass = %f\n",
+                       my_id, wall_time); 
+   }
+
    /* third pass, check boundary fine points for coarse neighbors */
 
    if (coarsen_type == 3)
    {
+      if (debug_flag == 3) wall_time = time_getWallclockSeconds();
+
       CF_marker_offd = hypre_CTAlloc(int, num_cols_offd);
       int_buf_data = hypre_CTAlloc(int, hypre_CommPkgSendMapStart(comm_pkg,
                                                 num_sends));
@@ -2022,20 +2054,147 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
                 CF_marker[hypre_CommPkgSendMapElmt(comm_pkg,j)] =
                    int_buf_data[index++]; 
       }
+      if (debug_flag == 3)
+      {
+         wall_time = time_getWallclockSeconds() - wall_time;
+         if (coarsen_type == 3)
+		printf("Proc = %d    Coarsen 3rd pass = %f\n",
+                my_id, wall_time); 
+         if (coarsen_type == 2)
+		printf("Proc = %d    Coarsen 2nd pass = %f\n",
+                my_id, wall_time); 
+      }
+   }
+   if (coarsen_type == -2)
+   {
+      /*------------------------------------------------
+       * Exchange boundary data for CF_marker
+       *------------------------------------------------*/
+
+      if (debug_flag == 3) wall_time = time_getWallclockSeconds();
     
+      CF_marker_offd = hypre_CTAlloc(int, num_cols_offd);
+      int_buf_data = hypre_CTAlloc(int, hypre_CommPkgSendMapStart(comm_pkg,
+                                                   num_sends));
+    
+      index = 0;
+      for (i = 0; i < num_sends; i++)
+      {
+        start = hypre_CommPkgSendMapStart(comm_pkg, i);
+        for (j = start; j < hypre_CommPkgSendMapStart(comm_pkg, i+1); j++)
+                int_buf_data[index++]
+                 = CF_marker[hypre_CommPkgSendMapElmt(comm_pkg,j)];
+      }
+    
+      comm_handle = hypre_InitializeCommunication(11, comm_pkg, int_buf_data,
+        CF_marker_offd);
+    
+      hypre_FinalizeCommunication(comm_handle);
+    
+      ci_array = hypre_CTAlloc(int,num_cols_offd);
+      citilde_array = hypre_CTAlloc(int,num_cols_offd);
+
+      for (i=0; i < num_variables; i++)
+      {
+         if (CF_marker[i] == -1 && (S_offd_i[i+1]-S_offd_i[i]) > 0)
+         {
+            ci_size = 0;
+            ci_size_offd = 0;
+            break_var = 1;
+            for (ji = S_i[i]; ji < S_i[i+1]; ji++)
+            {
+               j = S_j[ji];
+               if (CF_marker[j] > 0)
+                  graph_array[ci_size++] = j;
+            }
+            for (ji = S_offd_i[i]; ji < S_offd_i[i+1]; ji++)
+            {
+               j = S_offd_j[ji];
+               if (CF_marker_offd[j] > 0)
+                  ci_array[ci_size_offd++] = j;
+            }
+            for (ji = S_offd_i[i]; ji < S_offd_i[i+1]; ji++)
+            {
+               j = S_offd_j[ji];
+               if (CF_marker_offd[j] == -1)
+               {
+                  set_empty = 1;
+                  for (jj = S_ext_i[j]; jj < S_ext_i[j+1]; jj++)
+                  {
+                     index = S_ext_j[jj];
+                     if (index > col_0 && index < col_n) /* index interior */
+                     {
+                        for (jl=0; jl < ci_size; jl++)
+                        {
+                           if (graph_array[jl] == index)
+                           {
+                              set_empty = 0;
+                              break;
+                           }
+                        }
+                        if (!set_empty) break;
+                     }
+                     else
+                     {
+                        for (jk = 0; jk < num_cols_offd; jk++)
+                        {
+                           if (col_map_offd[jk] == index)
+                           {
+                              for (jl=0; jl < ci_size_offd; jl++)
+                              {
+                                 if (ci_array[jl] == jk)
+                                 {
+                                    set_empty = 0;
+                                    break;
+                                 }
+                              }
+                           }
+                           if (!set_empty) break;
+                        }
+                        if (!set_empty) break;
+                     }
+                  }
+                  if (set_empty)
+                  {
+                     if (C_i_nonempty)
+                     {
+                        CF_marker[i] = -2;
+                        break;
+                     }
+                     else
+                     {
+                        C_i_nonempty = 1;
+                        i--;
+                        break;
+                     }
+                  }
+               }
+            }
+         }
+      }
+      if (debug_flag == 3)
+      {
+         wall_time = time_getWallclockSeconds() - wall_time;
+         printf("Proc = %d    Coarsen special points = %f\n",
+                       my_id, wall_time); 
+      }
+
+   }
+   /*---------------------------------------------------
+    * Clean up and return
+    *---------------------------------------------------*/
+
+   if (coarsen_type != 1)
+   {   
       hypre_TFree(CF_marker_offd);
-   
-      /*---------------------------------------------------
-       * Clean up and return
-       *---------------------------------------------------*/
-   
       hypre_TFree(int_buf_data);
       hypre_TFree(ci_array);
       hypre_TFree(citilde_array);
-   }
+   }   
    hypre_TFree(graph_array);
    hypre_TFree(graph_ptr);
-   if (num_procs > 1) hypre_DestroyCSRMatrix(S_ext); 
+   if ((measure_type || coarsen_type != 1) && num_procs > 1)
+   	hypre_DestroyCSRMatrix(S_ext); 
    
    *S_ptr           = S;
    *CF_marker_ptr   = CF_marker;
