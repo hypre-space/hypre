@@ -3,7 +3,8 @@
 ########################################################################
 CC        = mpiicc
 F77       = mpif77
-CXX       = mpicxx
+#CXX       = mpicxx
+CXX       = mpiicpc
 F90       = mpif90
 HYPRE_DIR = ../hypre
 
@@ -18,17 +19,17 @@ FOPTS     = -g
 FINCLUDES = $(CINCLUDES)
 FFLAGS    = $(FOPTS) $(FINCLUDES)
 CXXOPTS   = $(COPTS) -Wno-deprecated
-CXXINCLUDES = $(CINCLUDES) -I..
+CXXINCLUDES = $(CINCLUDES) -I.. -I$(HOME)
 CXXDEFS   = $(CDEFS)
 IFLAGS_BXX = -I../babel-runtime/sidl
-CXXFLAGS  = $(CXXOPTS) $(CXXINCLUDES) $(CXXDEFS) $(IFLAGS_BXX)
+CXXFLAGS  = $(CXXOPTS) $(CXXINCLUDES) $(CXXDEFS) $(IFLAGS_BXX) -fopenmp -std=c++11
 IF90FLAGS = -I../babel/bHYPREClient-F90
 F90FLAGS = $(FFLAGS) $(IF90FLAGS)
 
 
 LINKOPTS  = $(COPTS)
-LIBS      = -L$(HYPRE_DIR)/lib -lHYPRE -lm
-LFLAGS    = $(LINKOPTS) $(LIBS) -lstdc++
+LIBS      = -L$(HYPRE_DIR)/lib -lHYPRE -lm -L$(HOME)/SpMP -lspmp
+LFLAGS    = $(LINKOPTS) $(LIBS) -lstdc++ -fopenmp -mkl
 LFLAGS_B =\
  -L${HYPRE_DIR}/lib\
  -lbHYPREClient-C\
@@ -75,7 +76,7 @@ FORTRANPROGS = ex5f ex12f
 MAXDIMPROGS = ex17 ex18
 COMPLEXPROGS = ex18comp
 
-all: $(ALLPROGS)
+all: pclamg.exe # $(ALLPROGS)
 
 default: all
 
@@ -88,6 +89,12 @@ fortran: $(FORTRANPROGS)
 maxdim: $(MAXDIMPROGS)
 
 complex: $(COMPLEXPROGS)
+
+########################################################################
+# Example for SC15 paper
+########################################################################
+pclamg.exe: pclamg.o $(HYPRE_DIR)/lib/libHYPRE.a $(HOME)/SpMP/libspmp.a
+	$(CC) -o $@ $^ $(LFLAGS)
 
 ########################################################################
 # Example 1
