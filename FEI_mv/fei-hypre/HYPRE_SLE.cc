@@ -115,7 +115,7 @@ void HYPRE_SLE::selectPreconditioner(char *name)
     }
     else if (!strcmp(name, "boomeramg")) 
     {
-         pcg_precond = HYPRE_ParAMGCreate();
+         // pcg_precond = HYPRE_ParAMGCreate();
 
          HYPRE_ParCSRPCGSetPrecond(pcg_solver,
                                    HYPRE_ParAMGSolve,
