@@ -41,7 +41,7 @@ c-----------------------------------------------------------------------
 
       integer             num_iterations
       double precision    final_res_norm, relax_weight
-      double precision    strong_threshold, drop_tol
+      double precision    strong_threshold, trunc_factor, drop_tol
                      
 c     HYPRE_ParCSRMatrix  A
 c     HYPRE_ParVector     b
@@ -171,7 +171,6 @@ c-----------------------------------------------------------------------
          print *, '  (cx, cy, cz)    = (', cx, ',', cy, ',', cz, ')'
          print *, '  (n_pre, n_post) = (', n_pre, ',', n_post, ')'
          print *, '  dim             = ', dim
-         print *, '  solver ID       = ', solver_id
       endif
 
 c-----------------------------------------------------------------------
@@ -211,6 +210,7 @@ c-----------------------------------------------------------------------
       if (ny .gt. 1) values(1) = values(1) + 2d0*cy
       if (nz .gt. 1) values(1) = values(1) + 2d0*cz
 
+c Generate a Dirichlet Laplacian
       call hypre_GenerateLaplacian(MPI_COMM_WORLD, nx, ny, nz,
      &                             Px, Py, Pz, p, q, r, values, A, ierr)
 
@@ -221,25 +221,27 @@ c    &   rstarts, cstarts, ncoloffdg, nonzsdg, nonzsoffdg, A, ierr)
 
 c     call HYPRE_InitializeParCSRMatrix(A, ierr)
 
+      call hypre_ParCSRMatrixGlobalNumRows(A, num_rows, ierr)
+      call hypre_ParCSRMatrixRowStarts(A, row_starts, ierr)
+
 c-----------------------------------------------------------------------
 c     Set up the rhs and initial guess
 c-----------------------------------------------------------------------
-
-      call hypre_ParCSRMatrixGlobalNumRows(A, num_rows, ierr)
-      call hypre_ParCSRMatrixRowStarts(A, row_starts, ierr)
 
       call HYPRE_NewParVector(MPI_COMM_WORLD, num_rows, row_starts,
      &                        b, ierr)
       call hypre_SetParVectorPartitioningO(b, 0, ierr)
       call HYPRE_InitializeParVector(b, ierr)
-      call hypre_SetParVectorConstantValue(b, 1d0, ierr)
+c Set up a Dirichlet 0 problem
+      call hypre_SetParVectorConstantValue(b, 0d0, ierr)
       call HYPRE_PrintParVector(b, "driver.out.b", ierr)
 
       call HYPRE_NewParVector(MPI_COMM_WORLD, num_rows, row_starts,
      &                        x, ierr)
       call hypre_SetParVectorPartitioningO(x, 0, ierr)
       call HYPRE_InitializeParVector(x, ierr)
-      call hypre_SetParVectorConstantValue(x, 0d0, ierr)
+c Choose a nonzero initial guess
+      call hypre_SetParVectorConstantValue(x, 1d0, ierr)
       call HYPRE_PrintParVector(x, "driver.out.x0", ierr)
 
 c-----------------------------------------------------------------------
@@ -254,8 +256,8 @@ c     will break the interface.
       tol = 0.000001
       convtol = 0.9
 
-      if (solver_id .eq. 0 .or. solver_id .eq. 3
-     &                     .or. solver_id .eq. 7) then
+      if (solver_id .eq. 0 .or. solver_id .eq. 3 .or.
+     &    solver_id .eq. 4 .or. solver_id .eq. 7) then
 c       Solve the system using preconditioned GMRES
 
         call HYPRE_ParCSRGMRESInitialize(MPI_COMM_WORLD, solver, ierr)
@@ -263,8 +265,22 @@ c       Solve the system using preconditioned GMRES
         call HYPRE_ParCSRGMRESSetTol(solver, tol, ierr)
         call HYPRE_ParCSRGMRESSetLogging(solver, solver, one, ierr)
 
-        if (solver_id .eq. 3) then
-c         Use BoomerAMG as preconditioner
+        if (solver_id .eq. 0) then
+
+          print *, 'GMRES'
+
+        else if (solver_id .eq. 3) then
+
+c Set defaults for BoomerAMG
+          coarsen_type = 0
+          hybrid = 1
+          measure_type = 0
+          strong_threshold = 0.25
+          trunc_factor = 0.0
+          cycle_type = 1
+
+          print *, 'AMG preconditioned GMRES'
+
           precond_id = 2
 
           call HYPRE_ParAMGInitialize(precond, ierr)
@@ -276,6 +292,8 @@ c         Use BoomerAMG as preconditioner
 
           call HYPRE_ParAMGSetStrongThreshold(precond,
      &                                        strong_threshold, ierr)
+
+          call HYPRE_ParAMGSetTruncFactor(precond, trunc_factor, ierr)
 
           call HYPRE_ParAMGSetLogging(precond, ioutdat,
      &                                "test.out.log", ierr)
@@ -303,6 +321,9 @@ c         Use BoomerAMG as preconditioner
      &                                     precond, ierr)
 
         else if (solver_id .eq. 4) then
+
+          print *, 'diagonally scaled GMRES'
+
           precond_id = 8
 
           call HYPRE_ParCSRGMRESSetPrecond(solver, precond_id,
@@ -310,12 +331,16 @@ c         Use BoomerAMG as preconditioner
 
         else if (solver_id .eq. 7) then
 
+          print *, 'PILUT preconditioned GMRES'
+
           precond_id = 7
 
           call HYPRE_ParCSRPilutInitialize(MPI_COMM_WORLD,
      &                                     precond, ierr) 
 
           if (ierr .ne. 0) write(6,*) 'ParCSRPilutInitialize error'
+
+          drop_tol = -1.
 
           call HYPRE_ParCSRGMRESSetPrecond(solver, precond_id,
      &                                     precond, ierr)
@@ -348,7 +373,7 @@ c-----------------------------------------------------------------------
 
       if (myid .eq. 0) then
          print *, 'Iterations = ', num_iterations
-         print *, 'Final Relative Residual Norm = ', final_res_norm
+         print *, 'Final Residual Norm = ', final_res_norm
       endif
 
 c-----------------------------------------------------------------------
