@@ -727,7 +727,8 @@ else
   ac_cv_prog_CPP="$CPP"
 fi
 echo "$ac_t""$CPP" 1>&6
-                               
+
+
 # Extract the first word of "ranlib", so it can be a program name with args.
 set dummy ranlib; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
@@ -799,7 +800,6 @@ fi
 
 
 case $ARCH in
-
    sun4 | solaris)
       
    if test -z "$COPT"; then
@@ -807,7 +807,8 @@ case $ARCH in
    fi
    
 
-      if test "$CC" = "gcc"; then
+      if test "$CC" = "gcc"
+      then
          
    if test -z "$CDEBUG"; then
       CDEBUG="-g -Wall"
@@ -905,7 +906,8 @@ fi
 # Check whether --with-pthreads or --without-pthreads was given.
 if test "${with_pthreads+set}" = set; then
   withval="$with_pthreads"
-  if test "$withval" != "no"; then
+  if test "$withval" != "no"
+   then
       echo $ac_n "checking for -lpthread""... $ac_c" 1>&6
 ac_lib_var=`echo pthread'_'pthread_create | tr './+\055' '__p_'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
@@ -914,7 +916,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS=" $LIBS -lpthread"
 cat > conftest.$ac_ext <<EOF
-#line 918 "configure"
+#line 920 "configure"
 #include "confdefs.h"
 /* Override any gcc2 internal prototype to avoid an error.  */
 /* We use char because int might match the return type of a gcc2
@@ -926,7 +928,7 @@ int t() {
 pthread_create()
 ; return 0; }
 EOF
-if { (eval echo configure:930: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
+if { (eval echo configure:932: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -958,7 +960,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS=" $LIBS -lpthreads"
 cat > conftest.$ac_ext <<EOF
-#line 962 "configure"
+#line 964 "configure"
 #include "confdefs.h"
 /* Override any gcc2 internal prototype to avoid an error.  */
 /* We use char because int might match the return type of a gcc2
@@ -970,7 +972,7 @@ int t() {
 pthread_create()
 ; return 0; }
 EOF
-if { (eval echo configure:974: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
+if { (eval echo configure:976: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -999,12 +1001,13 @@ fi
 
 
 
-      if test "$ac_cv_lib_pthread_pthread_create" = "yes" ||
-         test "$ac_cv_lib_pthreads_pthread_create" = "yes"; then
-            HYPREDEFS="$HYPREDEFS -DHYPRE_USE_PTHREADS"
-            UTILITIESEXTRAFILES="$UTILITIESEXTRAFILES threading.c thread_mpistubs.c"
-             
-            for ac_prog in cc_r xlc_r
+      if test "$ac_cv_lib_pthread_pthread_create"  = "yes" ||
+         test "$ac_cv_lib_pthreads_pthread_create" = "yes"
+      then
+         HYPREDEFS="$HYPREDEFS -DHYPRE_USE_PTHREADS"
+         UTILITIESEXTRAFILES="$UTILITIESEXTRAFILES threading.c thread_mpistubs.c"
+          
+         for ac_prog in cc_r xlc_r
 do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -1037,7 +1040,7 @@ s%@CC_R@%$CC_R%g
 test -n "$CC_R" && break
 done
 
-            # Extract the first word of "mpcc_r", so it can be a program name with args.
+         # Extract the first word of "mpcc_r", so it can be a program name with args.
 set dummy mpcc_r; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
 if eval "test \"`echo '$''{'ac_cv_prog_MPICC_R'+set}'`\" = set"; then
@@ -1065,13 +1068,13 @@ else
 fi
 s%@MPICC_R@%$MPICC_R%g
 
-
-            if test -n "$CC_R"; then
-               CC=$CC_R
-            fi
-            if test -n "$MPICC_R"; then
-               MPICC=$MPICC_R
-            fi
+	 
+         if test -n "$CC_R"; then
+            CC=$CC_R
+         fi
+         if test -n "$MPICC_R"; then
+            MPICC=$MPICC_R
+         fi
       fi      
    fi
 
@@ -1079,15 +1082,11 @@ fi
 
 
 
-
-
-
-
-
 # Check whether --with-MPI or --without-MPI was given.
 if test "${with_MPI+set}" = set; then
   withval="$with_MPI"
-  if test "$withval" = "no"; then
+  if test "$withval" = "no"
+   then
       casc_using_mpi=no
       HYPREDEFS="$HYPREDEFS -DHYPRE_SEQUENTIAL"
    else
@@ -1098,7 +1097,8 @@ else
 fi
 
 
-if test "$casc_using_mpi" = "yes"; then
+if test "$casc_using_mpi" = "yes"
+then
    
 
       
@@ -1889,7 +1889,8 @@ rm -f conftest*
    
 
 
-   if test -z "$MPIINCLUDE"; then
+   if test -z "$MPIINCLUDE"
+   then
       echo "configure: warning: configuring to not use MPI" 1>&2
       HYPREDEFS="$HYPREDEFS -DHYPRE_SEQUENTIAL"
    else
@@ -1898,8 +1899,8 @@ rm -f conftest*
 fi
 
 
-if test "$OPTCHOICE" = "g"; then
-
+if test "$OPTCHOICE" = "g"
+then
    
    # define some macros to hopefully improve readability
    
@@ -1915,7 +1916,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="$LDLIBDIRS $LDLIBS $LIBS -lcegdb"
 cat > conftest.$ac_ext <<EOF
-#line 1919 "configure"
+#line 1920 "configure"
 #include "confdefs.h"
 /* Override any gcc2 internal prototype to avoid an error.  */
 /* We use char because int might match the return type of a gcc2
@@ -1927,7 +1928,7 @@ int t() {
 cegdb()
 ; return 0; }
 EOF
-if { (eval echo configure:1931: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
+if { (eval echo configure:1932: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -1959,7 +1960,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-L$casc_lib_dir $LDLIBDIRS $LDLIBS -lcegdb $LIBS -lcegdb"
 cat > conftest.$ac_ext <<EOF
-#line 1963 "configure"
+#line 1964 "configure"
 #include "confdefs.h"
 /* Override any gcc2 internal prototype to avoid an error.  */
 /* We use char because int might match the return type of a gcc2
@@ -1971,7 +1972,7 @@ int t() {
 cegdb()
 ; return 0; }
 EOF
-if { (eval echo configure:1975: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
+if { (eval echo configure:1976: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -2012,7 +2013,8 @@ unset ac_cv_lib_$ac_lib_var
 
 
 
-   if test "$ARCH" != "alpha"; then
+   if test "$ARCH" != "alpha"
+   then
       
             for casc_dir in '' /usr/include /usr/local/include \
                                    /home/casc/include ; do
@@ -2028,12 +2030,12 @@ if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 2032 "configure"
+#line 2034 "configure"
 #include "confdefs.h"
 #include <$casc_header>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:2037: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:2039: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -2066,7 +2068,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="$LDLIBDIRS $LDLIBS $LIBS -ldmalloc"
 cat > conftest.$ac_ext <<EOF
-#line 2070 "configure"
+#line 2072 "configure"
 #include "confdefs.h"
 /* Override any gcc2 internal prototype to avoid an error.  */
 /* We use char because int might match the return type of a gcc2
@@ -2078,7 +2080,7 @@ int t() {
 malloc()
 ; return 0; }
 EOF
-if { (eval echo configure:2082: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
+if { (eval echo configure:2084: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -2096,7 +2098,6 @@ unset ac_cv_lib_$ac_lib_var
 LDLIBS="$LDLIBS -ldmalloc"
                           casc_lib_found=yes 
                           HYPREDEFS="$HYPREDEFS -DHYPRE_MEMORY_DMALLOC"
-            UTILITIESEXTRAFILES="$UTILITIESEXTRAFILES memory_dmalloc.c"
          
 else
   echo "$ac_t""no" 1>&6 
@@ -2112,7 +2113,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-L$casc_lib_dir $LDLIBDIRS $LDLIBS -ldmalloc $LIBS -ldmalloc"
 cat > conftest.$ac_ext <<EOF
-#line 2116 "configure"
+#line 2117 "configure"
 #include "confdefs.h"
 /* Override any gcc2 internal prototype to avoid an error.  */
 /* We use char because int might match the return type of a gcc2
@@ -2124,7 +2125,7 @@ int t() {
 malloc()
 ; return 0; }
 EOF
-if { (eval echo configure:2128: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
+if { (eval echo configure:2129: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -2143,7 +2144,6 @@ LDLIBDIRS="-L$casc_lib_dir $LDLIBDIRS"
             LDLIBS="$LDLIBS -ldmalloc"
             casc_lib_found=yes
             HYPREDEFS="$HYPREDEFS -DHYPRE_MEMORY_DMALLOC"
-            UTILITIESEXTRAFILES="$UTILITIESEXTRAFILES memory_dmalloc.c"
          
             break
             

@@ -24,13 +24,14 @@ AC_ARG_WITH(CC,
    CC=$withval,
    [AC_PROG_CC])
 
-AC_PROG_CPP          dnl * usually will give you $CC -E.  Should be called
-                     dnl * before calling AC_CHECK_HEADER or CASC_CHECK_HEADER
+dnl * Next line will usually give you $CC -E.  Should be called
+dnl * before calling AC_CHECK_HEADER or CASC_CHECK_HEADER.
+AC_PROG_CPP
 
 AC_PROG_RANLIB
 
 dnl *********************************************************************
-dnl * set the variable ARCH
+dnl * Set the variable ARCH
 dnl *********************************************************************
 
 CASC_GUESS_ARCH
@@ -41,10 +42,10 @@ dnl * architectures and/or compilers.
 dnl *********************************************************************
 
 case $ARCH in
-
    sun4 | solaris)
       CASC_SET_COPT(-O)
-      if test "$CC" = "gcc"; then
+      if test "$CC" = "gcc"
+      then
          CASC_SET_CDEBUG(-g -Wall)
       else
          CASC_SET_CDEBUG(-g)
@@ -63,48 +64,50 @@ case $ARCH in
 esac
 
 dnl *********************************************************************
-dnl * checks flag '--enable-opt-debug' to decide which compiler flags
+dnl * Checks flag '--enable-opt-debug' to decide which compiler flags
 dnl * to leave on.  Default is opt, if flag not invoked.
 dnl *********************************************************************
 
 CASC_CHOOSE_OPT_OR_DEBUG
 
 dnl *********************************************************************
+dnl * Pthreads stuff.
+dnl *********************************************************************
 
 AC_ARG_WITH(pthreads,
    [  --with-pthreads         use pthreads],
-   if test "$withval" != "no"; then
+   if test "$withval" != "no"
+   then
       CASC_CHECK_LIB(pthread, pthread_create, ,
          [CASC_CHECK_LIB(pthreads, pthread_create)])
 
-      if test "$ac_cv_lib_pthread_pthread_create" = "yes" ||
-         test "$ac_cv_lib_pthreads_pthread_create" = "yes"; then
-            HYPREDEFS="$HYPREDEFS -DHYPRE_USE_PTHREADS"
-            UTILITIESEXTRAFILES="$UTILITIESEXTRAFILES threading.c thread_mpistubs.c"
-             
-            AC_CHECK_PROGS(CC_R, cc_r xlc_r)
-            AC_CHECK_PROG(MPICC_R, mpcc_r, mpcc_r)
-
-            if test -n "$CC_R"; then
-               CC=$CC_R
-            fi
-            if test -n "$MPICC_R"; then
-               MPICC=$MPICC_R
-            fi
+      if test "$ac_cv_lib_pthread_pthread_create"  = "yes" ||
+         test "$ac_cv_lib_pthreads_pthread_create" = "yes"
+      then
+         HYPREDEFS="$HYPREDEFS -DHYPRE_USE_PTHREADS"
+         UTILITIESEXTRAFILES="$UTILITIESEXTRAFILES threading.c thread_mpistubs.c"
+          
+         AC_CHECK_PROGS(CC_R, cc_r xlc_r)
+         AC_CHECK_PROG(MPICC_R, mpcc_r, mpcc_r)
+	 
+         if test -n "$CC_R"; then
+            CC=$CC_R
+         fi
+         if test -n "$MPICC_R"; then
+            MPICC=$MPICC_R
+         fi
       fi      
    fi
 )
 
-
-
-
 dnl *********************************************************************
-dnl * sets MPIINCLUDE, MPILIBDIRS, MPILIBS, MPIFLAGS
+dnl * Sets MPIINCLUDE, MPILIBDIRS, MPILIBS, MPIFLAGS
 dnl *********************************************************************
 
 AC_ARG_WITH(MPI,
    [  --without-MPI           do not use MPI],
-   if test "$withval" = "no"; then
+   if test "$withval" = "no"
+   then
       casc_using_mpi=no
       HYPREDEFS="$HYPREDEFS -DHYPRE_SEQUENTIAL"
    else
@@ -112,9 +115,11 @@ AC_ARG_WITH(MPI,
    fi ,
    casc_using_mpi=yes )
 
-if test "$casc_using_mpi" = "yes"; then
+if test "$casc_using_mpi" = "yes"
+then
    CASC_FIND_MPI
-   if test -z "$MPIINCLUDE"; then
+   if test -z "$MPIINCLUDE"
+   then
       AC_MSG_WARN(configuring to not use MPI)
       HYPREDEFS="$HYPREDEFS -DHYPRE_SEQUENTIAL"
    else
@@ -123,29 +128,29 @@ if test "$casc_using_mpi" = "yes"; then
 fi
 
 dnl *********************************************************************
-dnl * when debugging was chosen, look for debugging libraries and headers,
+dnl * When debugging was chosen, look for debugging libraries and headers,
 dnl * if they are available
 dnl * 
 dnl * adds -l flags to LDLIBS, adds -L flags to LDLIBDIRS, if necessary
 dnl *********************************************************************
 
-if test "$OPTCHOICE" = "g"; then
-
+if test "$OPTCHOICE" = "g"
+then
    CASC_ADD_LIB(cegdb, cegdb, /home/casc/lib, LD)
 
-   if test "$ARCH" != "alpha"; then
+   if test "$ARCH" != "alpha"
+   then
       CASC_CHECK_HEADER(dmalloc.h, /usr/include /usr/local/include \
                                    /home/casc/include,
          CASC_ADD_LIB(dmalloc, malloc, /home/casc/lib /usr/local/lib, LD,
             HYPREDEFS="$HYPREDEFS -DHYPRE_MEMORY_DMALLOC"
-            UTILITIESEXTRAFILES="$UTILITIESEXTRAFILES memory_dmalloc.c"
          )
       )
    fi
 fi
 
 dnl *********************************************************************
-dnl * add flags to LIBS and LIBDIRS
+dnl * Add flags to LIBS and LIBDIRS
 dnl *********************************************************************
 
 CASC_ADD_LIB(m, main, /usr/lib /usr/ccs/lib)
