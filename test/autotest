@@ -190,31 +190,26 @@ echo "$HYPRE_BETA_EMAIL" > $0.beta_no_mpi.err.email
 # Make libraries using kcc for more verbose C compiler syntax messages
 #=============================================================================
 
-if [ -x $(whence kcc) ]
-then
-
 cd $HYPRE_AUTOTEST_DIR/linear_solvers
-./configure --with-CFLAGS="--c --strict" --with-CC="kcc" --without-MPI \
-  1> $0.configure_strict_ansi_c.log 2> $0.configure_strict_ansi_c.err
-echo "$HYPRE_CONFIGURE_EMAIL" > $0.configure_strict_ansi_c.err.email 
+./configure --with-strict-checking \
+  1> $0.configure_strict_checking.log 2> $0.configure_strict_checking.err
+echo "$HYPRE_CONFIGURE_EMAIL" > $0.configure_strict_checking.err.email 
 
 $MAKE veryclean
 
-$MAKE -i struct 1> $0.struct_strict_ansi_c.log 2> $0.struct_strict_ansi_c.err
-#echo "$HYPRE_STRUCT_EMAIL" > $0.struct_strict_ansi_c.err.email 
-echo "$HYPRE_CONFIGURE_EMAIL" > $0.struct_strict_ansi_c.err.email 
+$MAKE struct 1> $0.struct_strict_checking.log 2> $0.struct_strict_checking.err
+#echo "$HYPRE_STRUCT_EMAIL" > $0.struct_strict_checking.err.email 
+echo "$HYPRE_CONFIGURE_EMAIL" > $0.struct_strict_checking.err.email 
 
-$MAKE -i IJ 1> $0.IJ_strict_ansi_c.log 2> $0.IJ_strict_ansi_c.err
-#echo "$HYPRE_IJ_EMAIL" > $0.IJ_strict_ansi_c.err.email 
-echo "$HYPRE_CONFIGURE_EMAIL" > $0.IJ_strict_ansi_c.err.email 
+$MAKE IJ 1> $0.IJ_strict_checking.log 2> $0.IJ_strict_checking.err
+#echo "$HYPRE_IJ_EMAIL" > $0.IJ_strict_checking.err.email 
+echo "$HYPRE_CONFIGURE_EMAIL" > $0.IJ_strict_checking.err.email 
 
-$MAKE -i
+$MAKE 
 
-$MAKE -i beta 1> $0.beta_strict_ansi_c.log 2> $0.beta_strict_ansi_c.err
-#echo "$HYPRE_BETA_EMAIL" > $0.beta_strict_ansi_c.err.email 
-echo "$HYPRE_CONFIGURE_EMAIL" > $0.beta_strict_ansi_c.err.email 
-
-fi
+$MAKE beta 1> $0.beta_strict_checking.log 2> $0.beta_strict_checking.err
+#echo "$HYPRE_BETA_EMAIL" > $0.beta_strict_checking.err.email 
+echo "$HYPRE_CONFIGURE_EMAIL" > $0.beta_strict_checking.err.email 
 
 #==============================
 # Run test suites
