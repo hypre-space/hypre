@@ -368,6 +368,17 @@ HYPRE_BoomerAMGSetRelaxWeight( HYPRE_Solver  solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetSmoothOption
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_BoomerAMGSetSmoothOption( HYPRE_Solver  solver,
+                            int       *smooth_option  )
+{
+   return( hypre_BoomerAMGSetSmoothOption( (void *) solver, smooth_option ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetIOutDat
  *--------------------------------------------------------------------------*/
 

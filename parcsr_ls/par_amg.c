@@ -47,7 +47,7 @@ hypre_BoomerAMGCreate()
    int     *grid_relax_type;   
    int    **grid_relax_points; 
    double  *relax_weight;
-/*   int     *smooth_option;  */
+   int     *smooth_option;  
 
    /* log info */
    int      num_iterations;
@@ -85,12 +85,12 @@ hypre_BoomerAMGCreate()
    grid_relax_type = hypre_CTAlloc(int,4);
    grid_relax_points = hypre_CTAlloc(int *,4);
    relax_weight = hypre_CTAlloc(double,max_levels);
-   /* smooth_option = hypre_CTAlloc(int,max_levels);*/
+   smooth_option = hypre_CTAlloc(int,max_levels);
 
    for (j = 0; j < max_levels; j++)
    {
       relax_weight[j] = 1.0;
-      /* smooth_option[j] = -1; */
+      smooth_option[j] = -1; 
    }
 
    for (j = 0; j < 3; j++)
@@ -140,6 +140,7 @@ hypre_BoomerAMGCreate()
    hypre_BoomerAMGSetGridRelaxType(amg_data, grid_relax_type);
    hypre_BoomerAMGSetGridRelaxPoints(amg_data, grid_relax_points);
    hypre_BoomerAMGSetRelaxWeight(amg_data, relax_weight);
+   hypre_BoomerAMGSetSmoothOption(amg_data, smooth_option);
 
    hypre_BoomerAMGSetNumIterations(amg_data, num_iterations);
    hypre_BoomerAMGSetIOutDat(amg_data, ioutdat);
@@ -160,14 +161,11 @@ hypre_BoomerAMGCreate()
    hypre_ParAMGDataDofPointArray(amg_data) = NULL;
    hypre_ParAMGDataDofPointArray(amg_data) = NULL;
    hypre_ParAMGDataPointDofMapArray(amg_data) = NULL;
-/*
-   hypre_BoomerAMGSetSmoothOption(amg_data, smooth_option); 
+   hypre_ParAMGDataSmoother(amg_data) = NULL;
    hypre_ParAMGDataNumDomains(amg_data) = NULL;
    hypre_ParAMGDataIDomainDof(amg_data) = NULL;
    hypre_ParAMGDataJDomainDof(amg_data) = NULL;
    hypre_ParAMGDataDomainMatrixInverse(amg_data) = NULL;
-   hypre_ParAMGDataSmoother(amg_data) = NULL;
-*/   
 
    return (void *) amg_data;
 }
@@ -182,6 +180,8 @@ hypre_BoomerAMGDestroy( void *data )
    int ierr = 0;
    hypre_ParAMGData  *amg_data = data;
    int num_levels = hypre_ParAMGDataNumLevels(amg_data);
+   int *smooth_option = hypre_ParAMGDataSmoothOption(amg_data);
+   HYPRE_Solver *smoother = hypre_ParAMGDataSmoother(amg_data);
    int i;
 
    if (hypre_ParAMGDataNumGridSweeps(amg_data))
@@ -233,37 +233,40 @@ hypre_BoomerAMGDestroy( void *data )
 	 hypre_TFree(hypre_ParAMGDataPointDofMapArray(amg_data)[i]);
       hypre_TFree(hypre_ParAMGDataPointDofMapArray(amg_data));
    }
-/*
    if (hypre_ParAMGDataSmoothOption(amg_data)[0] > -1)
    {
       for (i=0; i < num_levels; i++)
       {
-         if (hypre_ParAMGDataSmoothOption(amg_data)[i] == 6)
+         if (hypre_ParAMGDataSmoothOption(amg_data)[i] == 7)
+         {
+	    HYPRE_ParCSRPilutDestroy(smoother[i]);
+         }
+         else if (hypre_ParAMGDataSmoothOption(amg_data)[i] == 8)
+	 {
+	    HYPRE_ParCSRParaSailsDestroy(smoother[i]);
+         }
+         else if (hypre_ParAMGDataSmoothOption(amg_data)[i] > 4)
 	 {
 	    hypre_TFree (hypre_ParAMGDataIDomainDof(amg_data)[i]);
 	    hypre_TFree (hypre_ParAMGDataJDomainDof(amg_data)[i]);
 	    hypre_TFree (hypre_ParAMGDataDomainMatrixInverse(amg_data)[i]);
-         }
-         else if (hypre_ParAMGDataSmoothOption(amg_data)[i] > -1)
-         {
-	    hypre_TFree (hypre_ParAMGDataSmoother(amg_data)[i]);
-         }
+         } 
       }
-      if (hypre_ParAMGDataSmoothOption(amg_data)[i] == 6)
+      if (hypre_ParAMGDataSmoothOption(amg_data)[0] > 6)
+      {
+         hypre_TFree (hypre_ParAMGDataSmoother(amg_data));
+      }
+      else if (hypre_ParAMGDataSmoothOption(amg_data)[0] > 4)
       {
 	 hypre_TFree (hypre_ParAMGDataNumDomains(amg_data));
 	 hypre_TFree (hypre_ParAMGDataIDomainDof(amg_data));
 	 hypre_TFree (hypre_ParAMGDataJDomainDof(amg_data));
 	 hypre_TFree (hypre_ParAMGDataDomainMatrixInverse(amg_data));
-      }
-      else if (hypre_ParAMGDataSmoothOption(amg_data)[i] > -1)
-      {
-         hypre_TFree (hypre_ParAMGDataSmoother(amg_data));
-      }
+      } 
    }
    if (hypre_ParAMGDataSmoothOption(amg_data))
-      hypre_TFree(hypre_ParAMGDataSmoothOption);
-*/
+      hypre_TFree(hypre_ParAMGDataSmoothOption(amg_data));
+
    hypre_TFree(amg_data);
    return (ierr);
 }
@@ -485,6 +488,19 @@ hypre_BoomerAMGSetRelaxWeight( void     *data,
    if (hypre_ParAMGDataRelaxWeight(amg_data))
       hypre_TFree(hypre_ParAMGDataRelaxWeight(amg_data));
    hypre_ParAMGDataRelaxWeight(amg_data) = relax_weight;
+   
+   return (ierr);
+}
+
+hypre_BoomerAMGSetSmoothOption( void     *data,
+                            int   *smooth_option )
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+               
+   if (hypre_ParAMGDataSmoothOption(amg_data))
+      hypre_TFree(hypre_ParAMGDataSmoothOption(amg_data));
+   hypre_ParAMGDataSmoothOption(amg_data) = smooth_option;
    
    return (ierr);
 }

@@ -212,6 +212,12 @@ int HYPRE_BoomerAMGSetRelaxWeight(HYPRE_Solver  solver,
 /**
  * (Optional)
  **/
+int HYPRE_BoomerAMGSetSmoothOption(HYPRE_Solver  solver,
+                                  int       *smooth_option);
+
+/**
+ * (Optional)
+ **/
 int HYPRE_BoomerAMGSetIOutDat(HYPRE_Solver solver,
                               int          ioutdat);
 

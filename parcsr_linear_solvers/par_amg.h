@@ -59,13 +59,13 @@ typedef struct
    int                **dof_point_array;
    int                **point_dof_map_array;
    int                  num_levels;
-/*   int                 *smooth_option;
+   int                 *smooth_option;
+   HYPRE_Solver        *smoother;
    int                 *num_domains;
    int                **i_domain_dof;
    int                **j_domain_dof;
    double             **domain_matrixinverse;
-   HYPRE_Solver        *smoother;
-*/
+
    /* data generated in the solve phase */
    hypre_ParVector   *Vtemp;
    hypre_Vector      *Vtemp_local;
@@ -132,15 +132,14 @@ typedef struct
 #define hypre_ParAMGDataPointDofMapArray(amg_data) \
 ((amg_data)->point_dof_map_array) 
 #define hypre_ParAMGDataNumLevels(amg_data) ((amg_data)->num_levels)	
-/*
-#define hypre_ParAMGDataSmoothOption(amg_data) ((amg_data)->smooth_option)	
+#define hypre_ParAMGDataSmoothOption(amg_data) ((amg_data)->smooth_option)
+#define hypre_ParAMGDataSmoother(amg_data) ((amg_data)->smoother)	
+
 #define hypre_ParAMGDataNumDomains(amg_data) ((amg_data)->num_domains)	
 #define hypre_ParAMGDataIDomainDof(amg_data) ((amg_data)->i_domain_dof)	
 #define hypre_ParAMGDataJDomainDof(amg_data) ((amg_data)->j_domain_dof)	
 #define hypre_ParAMGDataDomainMatrixInverse(amg_data) \
 ((amg_data)->domain_matrixinverse) 
-#define hypre_ParAMGDataSmoother(amg_data) ((amg_data)->smoother)	
-*/
       
 /* data generated in the solve phase */
 #define hypre_ParAMGDataVtemp(amg_data) ((amg_data)->Vtemp)

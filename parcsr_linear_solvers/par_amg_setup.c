@@ -47,6 +47,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    int      max_levels; 
    int      amg_ioutdat;
    int      debug_flag;
+
  
    /* Local variables */
    int                 *CF_marker;
@@ -72,6 +73,13 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    int       num_functions = hypre_ParAMGDataNumFunctions(amg_data);
    int	    *coarse_dof_func;
    int	    *coarse_pnts_global;
+   int       num_domains;
+   int      *i_domain_dof;
+   int      *j_domain_dof;
+   double   *domain_matrixinverse;
+
+   HYPRE_Solver *smoother;
+   int      *smooth_option = hypre_ParAMGDataSmoothOption(amg_data);
 
    double    wall_time;   /* for debugging instrumentation */
 
@@ -396,6 +404,58 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    F_array[0] = f;
    U_array[0] = u;
 
+   if (smooth_option[0] == 8)
+   {
+      smoother = hypre_CTAlloc(HYPRE_Solver, num_levels);
+      hypre_ParAMGDataSmoother(amg_data) = smoother;
+      HYPRE_ParCSRParaSailsCreate(comm, &smoother[0]);
+      HYPRE_ParCSRParaSailsSetParams(smoother[0],0,0);
+      HYPRE_ParCSRParaSailsSetFilter(smoother[0],0);
+      HYPRE_ParCSRParaSailsSetSym(smoother[0],0);
+      HYPRE_ParCSRParaSailsSetLogging(smoother[0],1);
+      HYPRE_ParCSRParaSailsSetup(smoother[0],
+                        (HYPRE_ParCSRMatrix) A_array[0],
+                        (HYPRE_ParVector) F_array[0],
+                        (HYPRE_ParVector) U_array[0]);
+   }
+   else if (smooth_option[0] == 7)
+   {
+      smoother = hypre_CTAlloc(HYPRE_Solver, num_levels);
+      hypre_ParAMGDataSmoother(amg_data) = smoother;
+      HYPRE_ParCSRPilutCreate(comm, &smoother[0]);
+      HYPRE_ParCSRPilutSetup(smoother[0],
+                        (HYPRE_ParCSRMatrix) A_array[0],
+                        (HYPRE_ParVector) F_array[0],
+                        (HYPRE_ParVector) U_array[0]);
+      HYPRE_ParCSRPilutSetDropTolerance(smoother[0],1.e-6);
+      HYPRE_ParCSRPilutSetFactorRowSize(smoother[0],20);
+   }
+   else if (smooth_option[0] > 4)
+   {
+      hypre_ParAMGDataNumDomains(amg_data) = hypre_CTAlloc(int, max_levels);
+      hypre_ParAMGDataIDomainDof(amg_data) = hypre_CTAlloc(int*, max_levels);
+      hypre_ParAMGDataJDomainDof(amg_data) = hypre_CTAlloc(int*, max_levels);
+      hypre_ParAMGDataDomainMatrixInverse(amg_data) = 	
+			hypre_CTAlloc(double*, max_levels);
+      if (smooth_option[0] == 6)
+         hypre_AMGNodalSchwarzSmoother (hypre_ParCSRMatrixDiag(A_array[0]),
+					dof_func_array[0],
+                                        num_functions,
+                                        1,
+                                        &i_domain_dof, &j_domain_dof,
+                                        &domain_matrixinverse,
+                                        &num_domains);
+      if (smooth_option[0] == 5)
+         hypre_AMGCreateDomainDof (hypre_ParCSRMatrixDiag(A_array[0]),
+                                        &i_domain_dof, &j_domain_dof,
+                                        &domain_matrixinverse,
+                                        &num_domains);
+      hypre_ParAMGDataNumDomains(amg_data)[0] = num_domains;
+      hypre_ParAMGDataIDomainDof(amg_data)[0] = i_domain_dof;
+      hypre_ParAMGDataJDomainDof(amg_data)[0] = j_domain_dof;
+      hypre_ParAMGDataDomainMatrixInverse(amg_data)[0] = domain_matrixinverse;
+   }
+      
    for (j = 1; j < num_levels; j++)
    {
       F_array[j] =
@@ -411,6 +471,55 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                hypre_ParCSRMatrixRowStarts(A_array[j]));
       hypre_ParVectorInitialize(U_array[j]);
       hypre_ParVectorSetPartitioningOwner(U_array[j],0);
+      if (smooth_option[j] == 8)
+      {
+         HYPRE_ParCSRParaSailsCreate(comm, &smoother[j]);
+         HYPRE_ParCSRParaSailsSetParams(smoother[j],0.1,1);
+         HYPRE_ParCSRParaSailsSetFilter(smoother[j],0.05);
+         HYPRE_ParCSRParaSailsSetLogging(smoother[j],1);
+         HYPRE_ParCSRParaSailsSetSym(smoother[0],0);
+         HYPRE_ParCSRParaSailsSetup(smoother[j],
+                        (HYPRE_ParCSRMatrix) A_array[j],
+                        (HYPRE_ParVector) F_array[j],
+                        (HYPRE_ParVector) U_array[j]);
+      }
+      else if (smooth_option[j] == 7)
+      {
+         HYPRE_ParCSRPilutCreate(comm, &smoother[j]);
+         HYPRE_ParCSRPilutSetup(smoother[j],
+                        (HYPRE_ParCSRMatrix) A_array[j],
+                        (HYPRE_ParVector) F_array[j],
+                        (HYPRE_ParVector) U_array[j]);
+         HYPRE_ParCSRPilutSetDropTolerance(smoother[j],1.e-6);
+         HYPRE_ParCSRPilutSetFactorRowSize(smoother[j],20);
+      }
+      else if (smooth_option[j] == 6)
+      {
+         hypre_AMGNodalSchwarzSmoother (hypre_ParCSRMatrixDiag(A_array[j]),
+					dof_func_array[j],
+                                        num_functions,
+                                        1,
+                                        &i_domain_dof, &j_domain_dof,
+                                        &domain_matrixinverse,
+                                        &num_domains);
+         hypre_ParAMGDataIDomainDof(amg_data)[j] = i_domain_dof;
+         hypre_ParAMGDataJDomainDof(amg_data)[j] = j_domain_dof;
+         hypre_ParAMGDataNumDomains(amg_data)[j] = num_domains;
+         hypre_ParAMGDataDomainMatrixInverse(amg_data)[j] = 
+                        domain_matrixinverse;
+      }
+      else if (smooth_option[j] == 5)
+      {
+         hypre_AMGCreateDomainDof (hypre_ParCSRMatrixDiag(A_array[j]),
+                                        &i_domain_dof, &j_domain_dof,
+                                        &domain_matrixinverse,
+                                        &num_domains);
+         hypre_ParAMGDataIDomainDof(amg_data)[j] = i_domain_dof;
+         hypre_ParAMGDataJDomainDof(amg_data)[j] = j_domain_dof;
+         hypre_ParAMGDataNumDomains(amg_data)[j] = num_domains;
+         hypre_ParAMGDataDomainMatrixInverse(amg_data)[j] = 
+                        domain_matrixinverse;
+      }
    }
 
    hypre_ParAMGDataFArray(amg_data) = F_array;
