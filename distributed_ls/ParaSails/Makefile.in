@@ -51,7 +51,7 @@ HEADERS =\
  Common.h\
  ConjGrad.h\
  DiagScale.h\
- HYPRE_ParaSails.h\
+ hypre_ParaSails.h\
  Hash.h\
  LoadBal.h\
  Matrix.h\
@@ -67,7 +67,7 @@ FILES =\
  ConjGrad.c\
  DiagScale.c\
  FlexGmres.c\
- HYPRE_ParaSails.c\
+ hypre_ParaSails.c\
  Hash.c\
  LoadBal.c\
  Matrix.c\
@@ -94,9 +94,13 @@ driver: driver.o libHYPRE_ParaSails.a
 convert: convert.o
 	${CC} -o $@ convert.o
 
+#install: all
+#	@cp -f $(srcdir)/hypre_*.h $$HYPRE_INSTALL_DIR/include/.
+#	@cp -f libHYPRE_*.a $$HYPRE_INSTALL_DIR/lib/.
+
 install: all
-	@cp -f $(srcdir)/HYPRE_*.h $$HYPRE_INSTALL_DIR/include/.
 	@cp -f libHYPRE_*.a $$HYPRE_INSTALL_DIR/lib/.
+
 clean:
 	@rm -f *.o
 

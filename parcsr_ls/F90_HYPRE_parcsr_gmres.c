@@ -149,13 +149,13 @@ hypre_F90_IFACE(hypre_parcsrgmressetprecond, HYPRE_PARCSRGMRESSETPRECOND)( long 
    {
       *ierr = 0;
    }
-   if (*precond_id == 1)
+   else if (*precond_id == 1)
    {
       *ierr = (int)
               ( HYPRE_ParCSRGMRESSetPrecond( (HYPRE_Solver) *solver,
                                              HYPRE_ParCSRDiagScale,
                                              HYPRE_ParCSRDiagScaleSetup,
-                                             NULL                         ) );
+                                             NULL                        ) );
    }
    else if (*precond_id == 2)
    {

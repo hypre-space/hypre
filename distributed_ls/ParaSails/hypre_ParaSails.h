@@ -8,24 +8,24 @@
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
- * HYPRE_ParaSails.h header file.
+ * hypre_ParaSails.h header file.
  *
  *****************************************************************************/
 
 #include "HYPRE_distributed_matrix_protos.h"
 
-typedef void *HYPRE_ParaSails;
+typedef void *hypre_ParaSails;
 
-int HYPRE_ParaSailsCreate(MPI_Comm comm, HYPRE_ParaSails *obj);
-int HYPRE_ParaSailsDestroy(HYPRE_ParaSails ps);
-int HYPRE_ParaSailsSetup(HYPRE_ParaSails obj,
+int hypre_ParaSailsCreate(MPI_Comm comm, hypre_ParaSails *obj);
+int hypre_ParaSailsDestroy(hypre_ParaSails ps);
+int hypre_ParaSailsSetup(hypre_ParaSails obj,
   HYPRE_DistributedMatrix *distmat, int sym, double thresh, int nlevels,
   double filter, double loadbal, int logging);
-int HYPRE_ParaSailsSetupPattern(HYPRE_ParaSails obj,
+int hypre_ParaSailsSetupPattern(hypre_ParaSails obj,
   HYPRE_DistributedMatrix *distmat, int sym, double thresh, int nlevels, 
   int logging);
-int HYPRE_ParaSailsSetupValues(HYPRE_ParaSails obj,
+int hypre_ParaSailsSetupValues(hypre_ParaSails obj,
   HYPRE_DistributedMatrix *distmat, double filter, double loadbal, 
   int logging);
-int HYPRE_ParaSailsApply(HYPRE_ParaSails ps, double *u, double *v);
-int HYPRE_ParaSailsApplyTrans(HYPRE_ParaSails ps, double *u, double *v);
+int hypre_ParaSailsApply(hypre_ParaSails ps, double *u, double *v);
+int hypre_ParaSailsApplyTrans(hypre_ParaSails ps, double *u, double *v);

@@ -139,13 +139,25 @@ hypre_F90_IFACE(hypre_parcsrpcgsetprecond, HYPRE_PARCSRPCGSETPRECOND)( long int 
 
    /*------------------------------------------------------------
     * The precond_id flags mean :
+    * 0 - do not set up a preconditioner
+    * 1 - set up a ds preconditioner
     * 2 - set up an amg preconditioner
-    * 7 - set up a pilut preconditioner
-    * 8 - set up a ds preconditioner
-    * 9 - do not set up a preconditioner
+    * 3 - set up a pilut preconditioner
     *------------------------------------------------------------*/
 
-   if (*precond_id == 2)
+   if (*precond_id == 0)
+   {
+      *ierr = 0;
+   }
+   else if (*precond_id == 1)
+   {
+      *ierr = (int) ( HYPRE_ParCSRPCGSetPrecond(
+                               (HYPRE_Solver) *solver,
+                               HYPRE_ParCSRDiagScale,
+                               HYPRE_ParCSRDiagScaleSetup,
+                               NULL                        ) );
+   }
+   else if (*precond_id == 2)
    {
       *ierr = (int) ( HYPRE_ParCSRPCGSetPrecond(
                                (HYPRE_Solver) *solver,
@@ -153,25 +165,13 @@ hypre_F90_IFACE(hypre_parcsrpcgsetprecond, HYPRE_PARCSRPCGSETPRECOND)( long int 
                                HYPRE_BoomerAMGSetup,
                                (void *)       *precond_solver) );
    }
-   else if (*precond_id == 7)
+   else if (*precond_id == 3)
    {
       *ierr = (int) ( HYPRE_ParCSRPCGSetPrecond(
                                (HYPRE_Solver) *solver,
                                HYPRE_ParCSRPilutSolve,
                                HYPRE_ParCSRPilutSetup,
                                (void *)       *precond_solver) );
-   }
-   else if (*precond_id == 8)
-   {
-      *ierr = (int) ( HYPRE_ParCSRPCGSetPrecond(
-                               (HYPRE_Solver) *solver,
-                               HYPRE_ParCSRDiagScale,
-                               HYPRE_ParCSRDiagScaleSetup,
-                               (void *)       *precond_solver) );
-   }
-   else if (*precond_id == 9)
-   {
-      *ierr = 0;
    }
    else
    {
