@@ -42,6 +42,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    int       cycle_op_count;   
    int       cycle_type;
    int       num_levels;
+   int       max_levels;
    /* int       num_unknowns; */
 
    int      *num_coeffs;
@@ -84,6 +85,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    v_at_point_array  = hypre_ParAMGDataVatPointArray(amg_data); */
    Vtemp             = hypre_ParAMGDataVtemp(amg_data);
    num_levels        = hypre_ParAMGDataNumLevels(amg_data);
+   max_levels        = hypre_ParAMGDataMaxLevels(amg_data);
    cycle_type        = hypre_ParAMGDataCycleType(amg_data);
    /* num_unknowns      =  hypre_ParCSRMatrixNumRows(A_array[0]); */
 
@@ -141,8 +143,17 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
   
    while (Not_Finished)
    {
-      num_sweep = num_grid_sweeps[cycle_param];
-      relax_type = grid_relax_type[cycle_param];
+      if (num_levels > 1) 
+      {
+        num_sweep = num_grid_sweeps[cycle_param];
+        relax_type = grid_relax_type[cycle_param];
+      }
+      else if (max_levels > 1)
+      {
+        /* If no coarsening occurred, apply a simple smoother once */
+        num_sweep = 1;
+        relax_type = 0;
+      }
 
       /*------------------------------------------------------------------
        * Do the relaxation num_sweep times
