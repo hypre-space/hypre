@@ -12,7 +12,5 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "HYPRE_IJMatrix.h"
 #include "IJ_matrix_vector.h"
-
-
+#include "HYPRE_IJMatrix.h"

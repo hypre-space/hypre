@@ -15,7 +15,7 @@ The assembled HYPRE_IJMatrix.
 The pointer to be set to point to IJMatrix.
 */
 int 
-hypre_RefIJMatrix( HYPRE_IJMatrix IJmatrix, HYPRE_IJMatrix *reference )
+hypre_GetIJMatrixParCSRMatrix( HYPRE_IJMatrix IJmatrix, HYPRE_ParCSRMatrix *reference )
 {
    int ierr = 0;
    hypre_IJMatrix *matrix = (hypre_IJMatrix *) IJmatrix;

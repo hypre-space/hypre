@@ -1,6 +1,4 @@
 
-#include "HYPRE_IJMatrix.h"
-
 #ifndef hypre_IJ_HEADER
 #define hypre_IJ_HEADER
 
@@ -8,6 +6,7 @@
 #include "seq_matrix_vector.h"
 #include "parcsr_matrix_vector.h"
 #include "parcsr_linear_solvers.h"
+#include "HYPRE_IJMatrix.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -188,6 +187,9 @@ int HYPRE_AddBlockToIJMatrix P((HYPRE_IJMatrix IJmatrix , int m , int n , int *r
 int HYPRE_InsertIJMatrixRow P((HYPRE_IJMatrix IJmatrix , int n , int row , int *cols , double *values ));
 int hypre_RefIJMatrix P((HYPRE_IJMatrix IJmatrix , HYPRE_IJMatrix *reference ));
 int hypre_GetIJMatrixLocalStorage P((HYPRE_IJMatrix IJmatrix , void **local_storage ));
+
+/* IJMatrix_parcsr.c */
+int hypre_GetIJMatrixParCSRMatrix P((HYPRE_IJMatrix IJmatrix, HYPRE_ParCSRMatrix *reference ));
 
 /* IJ_par_laplace_9pt.c */
 int IJMatrixBuildParLaplacian9pt P((int argc , char *argv [], int arg_index , hypre_ParCSRMatrix **A_ptr , HYPRE_IJMatrix **ij_matrix , int ij_matrix_storage_type ));
