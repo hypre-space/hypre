@@ -26,3 +26,4 @@ mpirun -np 2 ./sstruct -P 1 1 2 -solver 39 > solvers.out.10
 mpirun -np 2 ./sstruct -P 1 1 2 -solver 40 > solvers.out.11
 mpirun -np 2 ./sstruct -P 1 1 2 -solver 41 > solvers.out.12
 mpirun -np 2 ./sstruct -P 1 1 2 -solver 42 > solvers.out.13
+mpirun -np 2 ./sstruct -in sstruct.in.laps -P 2 1 1 -solver 3 > solvers.out.14

@@ -16,4 +16,4 @@
 #rm -f solvers.out.3 solvers.out.4 solvers.out.5
 #rm -f solvers.out.6 solvers.out.7 solvers.out.8
 #rm -f solvers.out.9 solvers.out.10 solvers.out.11
-#rm -f solvers.out.12 solvers.out.13
+#rm -f solvers.out.12 solvers.out.13 solvers.out.14
