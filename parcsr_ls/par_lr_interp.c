@@ -93,17 +93,14 @@ hypre_BoomerAMGBuildStdInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
   
   HYPRE_Int             *fine_to_coarse = NULL;
   HYPRE_Int             *fine_to_coarse_offd = NULL;
-  HYPRE_Int             *found = NULL;
 
   HYPRE_Int              num_cols_P_offd;
-  HYPRE_Int              newoff, loc_col;
-  HYPRE_Int              A_ext_rows, full_off_procNodes;
+  HYPRE_Int              loc_col;
+  HYPRE_Int              full_off_procNodes;
   
   hypre_CSRMatrix *Sop;
   HYPRE_Int             *Sop_i;
   HYPRE_Int             *Sop_j;
-  
-  HYPRE_Int              Soprows;
   
   /* Variables to keep count of interpolatory points */
   HYPRE_Int              jj_counter, jj_counter_offd;
@@ -165,56 +162,24 @@ hypre_BoomerAMGBuildStdInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
    
    /* Set up off processor information (specifically for neighbors of 
     * neighbors */
-   newoff = 0;
    full_off_procNodes = 0;
    if (num_procs > 1)
    {
-     /*----------------------------------------------------------------------
-      * Get the off processors rows for A and S, associated with columns in 
-      * A_offd and S_offd.
-      *---------------------------------------------------------------------*/
-     A_ext         = hypre_ParCSRMatrixExtractBExt(A,A,1);
+     if (exchange_interp_data(
+       &CF_marker_offd, &dof_func_offd, &A_ext, &full_off_procNodes, &Sop, &extend_comm_pkg,
+       A, CF_marker, S, num_functions, dof_func, 0))
+     {
+       hypre_profile_times[HYPRE_TIMER_ID_EXTENDED_I_INTERP] += hypre_MPI_Wtime();
+       return hypre_error_flag;
+     }
+
      A_ext_i       = hypre_CSRMatrixI(A_ext);
      A_ext_j       = hypre_CSRMatrixJ(A_ext);
      A_ext_data    = hypre_CSRMatrixData(A_ext);
-     A_ext_rows    = hypre_CSRMatrixNumRows(A_ext);
-     
-     Sop           = hypre_ParCSRMatrixExtractBExt(S,A,0);
+
      Sop_i         = hypre_CSRMatrixI(Sop);
      Sop_j         = hypre_CSRMatrixJ(Sop);
-     Soprows       = hypre_CSRMatrixNumRows(Sop);
-
-     /* Find nodes that are neighbors of neighbors, not found in offd */
-     newoff = new_offd_nodes(&found, A_ext_rows, A_ext_i, A_ext_j, 
-			     Soprows, col_map_offd, col_1, col_n, 
-			     Sop_i, Sop_j, CF_marker, comm_pkg);
-     if(newoff >= 0)
-       full_off_procNodes = newoff + num_cols_A_offd;
-     else
-       return hypre_error_flag;
-
-     /* Possibly add new points and new processors to the comm_pkg, all
-      * processors need new_comm_pkg */
-
-     /* AHB - create a new comm package just for extended info -
-        this will work better with the assumed partition*/
-     hypre_ParCSRFindExtendCommPkg(A, newoff, found, 
-                                   &extend_comm_pkg);
-     
-     if (full_off_procNodes)
-	CF_marker_offd = hypre_CTAlloc(HYPRE_Int, full_off_procNodes);
-     
-     if (num_functions > 1 && full_off_procNodes > 0)
-        dof_func_offd = hypre_CTAlloc(HYPRE_Int, full_off_procNodes);
-     
-     alt_insert_new_nodes(comm_pkg, extend_comm_pkg, CF_marker, 
-                          full_off_procNodes, CF_marker_offd);
-     
-     if(num_functions > 1)
-        alt_insert_new_nodes(comm_pkg, extend_comm_pkg, dof_func, 
-                             full_off_procNodes, dof_func_offd);
    }
-
 
    /*-----------------------------------------------------------------------
     *  First Pass: Determine size of P and fill in fine_to_coarse mapping.
@@ -1073,7 +1038,6 @@ hypre_BoomerAMGBuildStdInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
 
      if(num_functions > 1)
        hypre_TFree(dof_func_offd);
-     hypre_TFree(found);
 
      hypre_MatvecCommPkgDestroy(extend_comm_pkg);
 
@@ -1159,17 +1123,16 @@ hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
   
   HYPRE_Int             *fine_to_coarse = NULL;
   HYPRE_Int             *fine_to_coarse_offd = NULL;
-  HYPRE_Int             *found = NULL;
 
   HYPRE_Int              num_cols_P_offd;
-  HYPRE_Int              newoff, loc_col;
-  HYPRE_Int              A_ext_rows, full_off_procNodes;
+  HYPRE_Int              loc_col;
+  HYPRE_Int              full_off_procNodes;
   
   hypre_CSRMatrix *Sop;
   HYPRE_Int             *Sop_i;
   HYPRE_Int             *Sop_j;
   
-  HYPRE_Int              Soprows, sgn = 1;
+  HYPRE_Int              sgn = 1;
   
   /* Variables to keep count of interpolatory points */
   HYPRE_Int              jj_counter, jj_counter_offd;
@@ -1225,59 +1188,24 @@ hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
 
    /* Set up off processor information (specifically for neighbors of 
     * neighbors */
-   newoff = 0;
    full_off_procNodes = 0;
    if (num_procs > 1)
    {
-     /*----------------------------------------------------------------------
-      * Get the off processors rows for A and S, associated with columns in 
-      * A_offd and S_offd.
-      *---------------------------------------------------------------------*/
-     A_ext         = hypre_ParCSRMatrixExtractBExt(A,A,1);
-     A_ext_i       = hypre_CSRMatrixI(A_ext);
-     A_ext_j       = hypre_CSRMatrixJ(A_ext);
-     A_ext_data    = hypre_CSRMatrixData(A_ext);
-     A_ext_rows    = hypre_CSRMatrixNumRows(A_ext);
-     
-     Sop           = hypre_ParCSRMatrixExtractBExt(S,A,0);
-     Sop_i         = hypre_CSRMatrixI(Sop);
-     Sop_j         = hypre_CSRMatrixJ(Sop);
-     Soprows       = hypre_CSRMatrixNumRows(Sop);
-
-     /* Find nodes that are neighbors of neighbors, not found in offd */
-     newoff = new_offd_nodes(&found, A_ext_rows, A_ext_i, A_ext_j, 
-                 Soprows, col_map_offd, col_1, col_n, 
-                 Sop_i, Sop_j, CF_marker, comm_pkg);
-     if(newoff >= 0)
-       full_off_procNodes = newoff + num_cols_A_offd;
-     else
+     if (exchange_interp_data(
+       &CF_marker_offd, &dof_func_offd, &A_ext, &full_off_procNodes, &Sop, &extend_comm_pkg,
+       A, CF_marker, S, num_functions, dof_func, 1))
      {
        hypre_profile_times[HYPRE_TIMER_ID_EXTENDED_I_INTERP] += hypre_MPI_Wtime();
        return hypre_error_flag;
      }
 
-     /* Possibly add new points and new processors to the comm_pkg, all
-      * processors need new_comm_pkg */
-    
-     /* AHB - create a new comm package just for extended info -
-        this will work better with the assumed partition*/
-     hypre_ParCSRFindExtendCommPkg(A, newoff, found, 
-                                   &extend_comm_pkg);
-     
-     if (full_off_procNodes)
-        CF_marker_offd = hypre_CTAlloc(HYPRE_Int, full_off_procNodes);
-     
-     if (num_functions > 1 && full_off_procNodes > 0)
-        dof_func_offd = hypre_CTAlloc(HYPRE_Int, full_off_procNodes);
-     
-     alt_insert_new_nodes(comm_pkg, extend_comm_pkg, CF_marker, 
-                          full_off_procNodes, CF_marker_offd);
-     
-     if(num_functions > 1)
-        alt_insert_new_nodes(comm_pkg, extend_comm_pkg, dof_func, 
-                             full_off_procNodes, dof_func_offd);
+     A_ext_i       = hypre_CSRMatrixI(A_ext);
+     A_ext_j       = hypre_CSRMatrixJ(A_ext);
+     A_ext_data    = hypre_CSRMatrixData(A_ext);
+
+     Sop_i         = hypre_CSRMatrixI(Sop);
+     Sop_j         = hypre_CSRMatrixJ(Sop);
    }
-  
 
    /*-----------------------------------------------------------------------
     *  First Pass: Determine size of P and fill in fine_to_coarse mapping.
@@ -1466,26 +1394,20 @@ hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
                    if(k1 >= col_1 && k1 < col_n)
                    { /* In S_diag */
                      loc_col = k1-col_1;
-                     if(CF_marker[loc_col] >= 0)
+                     if(P_marker[loc_col] < P_diag_i[i])
                      {
-                       if(P_marker[loc_col] < P_diag_i[i])
-                       {
-                         P_marker[loc_col] = jj_counter;
-                         jj_counter++;
-                       }
+                       P_marker[loc_col] = jj_counter;
+                       jj_counter++;
                      }
                    }
                    else
                    {
                      loc_col = -k1 - 1; 
-                     if(CF_marker_offd[loc_col] >= 0)
+                     if(P_marker_offd[loc_col] < P_offd_i[i])
                      {
-                       if(P_marker_offd[loc_col] < P_offd_i[i])
-                       {
-                         P_marker_offd[loc_col] = jj_counter_offd;
-                         tmp_CF_marker_offd[loc_col] = 1;
-                         jj_counter_offd++;
-                       }
+                       P_marker_offd[loc_col] = jj_counter_offd;
+                       tmp_CF_marker_offd[loc_col] = 1;
+                       jj_counter_offd++;
                      }
                    }
                  }
@@ -1715,29 +1637,23 @@ hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
                    if(k1 >= col_1 && k1 < col_n)
                    {
                      loc_col = k1-col_1;
-                     if(CF_marker[loc_col] >= 0)
+                     if(P_marker[loc_col] < jj_begin_row)
                      {
-                       if(P_marker[loc_col] < jj_begin_row)
-                       {
-                         P_marker[loc_col] = jj_counter;
-                         P_diag_j[jj_counter] = fine_to_coarse[loc_col];
-                         P_diag_data[jj_counter] = zero;
-                         jj_counter++;
-                       }
+                       P_marker[loc_col] = jj_counter;
+                       P_diag_j[jj_counter] = fine_to_coarse[loc_col];
+                       P_diag_data[jj_counter] = zero;
+                       jj_counter++;
                      }
                    }
                    else
                    { 
                      loc_col = -k1 - 1;
-                     if(CF_marker_offd[loc_col] >= 0)
+                     if(P_marker_offd[loc_col] < jj_begin_row_offd)
                      {
-                       if(P_marker_offd[loc_col] < jj_begin_row_offd)
-                       {
-                         P_marker_offd[loc_col] = jj_counter_offd;
-                         P_offd_j[jj_counter_offd]=loc_col;
-                         P_offd_data[jj_counter_offd] = zero;
-                         jj_counter_offd++;
-                       }
+                       P_marker_offd[loc_col] = jj_counter_offd;
+                       P_offd_j[jj_counter_offd]=loc_col;
+                       P_offd_data[jj_counter_offd] = zero;
+                       jj_counter_offd++;
                      }
                    }
                  }
@@ -1764,7 +1680,7 @@ hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
                sgn = 1;
                if(A_diag_data[A_diag_i[i1]] < 0) sgn = -1;
                /* Loop over row of A for point i1 and calculate the sum
-                * of the connections to c-points that strongly incluence i. */
+                * of the connections to c-points that strongly influence i. */
                for(jj1 = A_diag_i[i1]+1; jj1 < A_diag_i[i1+1]; jj1++)
                {
                  i2 = A_diag_j[jj1];
@@ -1829,47 +1745,41 @@ hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
                else if(P_marker_offd[i1] == strong_f_marker)
                {
                  sum = zero;
-                 sgn = 1;
-                 if(A_ext_data[A_ext_i[i1]] < 0) sgn = -1;
-                 for(jj1 = A_ext_i[i1]+1; jj1 < A_ext_i[i1+1]; jj1++)
+                 for(jj1 = A_ext_i[i1]; jj1 < A_ext_i[i1+1]; jj1++)
                  {
                    k1 = A_ext_j[jj1];
                    if(k1 >= col_1 && k1 < col_n)
                    { /* diag */
                      loc_col = k1 - col_1;
-                     if((P_marker[loc_col] >= jj_begin_row || loc_col == i)
-                        && (sgn*A_ext_data[jj1]) < 0)
+                     if(P_marker[loc_col] >= jj_begin_row || loc_col == i)
                        sum += A_ext_data[jj1];
                    }
                    else
                    { 
                      loc_col = -k1 - 1;
-                     if(P_marker_offd[loc_col] >= jj_begin_row_offd &&
-                                (sgn*A_ext_data[jj1]) < 0)
+                     if(P_marker_offd[loc_col] >= jj_begin_row_offd)
                        sum += A_ext_data[jj1];
                    }
                  }
                  if(sum != 0)
                  {
                    distribute = A_offd_data[jj] / sum;
-                   for(jj1 = A_ext_i[i1]+1; jj1 < A_ext_i[i1+1]; jj1++)
+                   for(jj1 = A_ext_i[i1]; jj1 < A_ext_i[i1+1]; jj1++)
                    {
                      k1 = A_ext_j[jj1];
                      if(k1 >= col_1 && k1 < col_n)
                      { /* diag */
                        loc_col = k1 - col_1;
-                       if(P_marker[loc_col] >= jj_begin_row &&
-                                  (sgn*A_ext_data[jj1]) < 0)
+                       if(P_marker[loc_col] >= jj_begin_row)
                          P_diag_data[P_marker[loc_col]] += distribute*
                           A_ext_data[jj1];
-                               if(loc_col == i && (sgn*A_ext_data[jj1]) < 0)
+                               if(loc_col == i)
                                  diagonal += distribute*A_ext_data[jj1];
                      }
                      else
                      { 
                        loc_col = -k1 - 1;
-                       if(P_marker_offd[loc_col] >= jj_begin_row_offd &&
-                                  (sgn*A_ext_data[jj1]) < 0)
+                       if(P_marker_offd[loc_col] >= jj_begin_row_offd)
                          P_offd_data[P_marker_offd[loc_col]] += distribute*
                            A_ext_data[jj1];
                      }
@@ -2084,7 +1994,6 @@ hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
      hypre_TFree(tmp_CF_marker_offd);
      if(num_functions > 1)
        hypre_TFree(dof_func_offd);
-     hypre_TFree(found);
 
 
      hypre_MatvecCommPkgDestroy(extend_comm_pkg);
@@ -2175,17 +2084,16 @@ hypre_BoomerAMGBuildExtPICCInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
   
   HYPRE_Int             *fine_to_coarse = NULL;
   HYPRE_Int             *fine_to_coarse_offd = NULL;
-  HYPRE_Int             *found = NULL;
 
   HYPRE_Int              num_cols_P_offd;
-  HYPRE_Int              newoff, loc_col;
-  HYPRE_Int              A_ext_rows, full_off_procNodes;
+  HYPRE_Int              loc_col;
+  HYPRE_Int              full_off_procNodes;
   
   hypre_CSRMatrix *Sop;
   HYPRE_Int             *Sop_i;
   HYPRE_Int             *Sop_j;
   
-  HYPRE_Int              Soprows, sgn = 1;
+  HYPRE_Int              sgn = 1;
   
   /* Variables to keep count of interpolatory points */
   HYPRE_Int              jj_counter, jj_counter_offd;
@@ -2232,56 +2140,23 @@ hypre_BoomerAMGBuildExtPICCInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
 
    /* Set up off processor information (specifically for neighbors of 
     * neighbors */
-   newoff = 0;
    full_off_procNodes = 0;
    if (num_procs > 1)
    {
-     /*----------------------------------------------------------------------
-      * Get the off processors rows for A and S, associated with columns in 
-      * A_offd and S_offd.
-      *---------------------------------------------------------------------*/
-     A_ext         = hypre_ParCSRMatrixExtractBExt(A,A,1);
+     if (exchange_interp_data(
+       &CF_marker_offd, &dof_func_offd, &A_ext, &full_off_procNodes, &Sop, &extend_comm_pkg,
+       A, CF_marker, S, num_functions, dof_func, 1))
+     {
+       hypre_profile_times[HYPRE_TIMER_ID_EXTENDED_I_INTERP] += hypre_MPI_Wtime();
+       return hypre_error_flag;
+     }
+
      A_ext_i       = hypre_CSRMatrixI(A_ext);
      A_ext_j       = hypre_CSRMatrixJ(A_ext);
      A_ext_data    = hypre_CSRMatrixData(A_ext);
-     A_ext_rows    = hypre_CSRMatrixNumRows(A_ext);
-     
-     Sop           = hypre_ParCSRMatrixExtractBExt(S,A,0);
+
      Sop_i         = hypre_CSRMatrixI(Sop);
      Sop_j         = hypre_CSRMatrixJ(Sop);
-     Soprows       = hypre_CSRMatrixNumRows(Sop);
-
-     /* Find nodes that are neighbors of neighbors, not found in offd */
-     newoff = new_offd_nodes(&found, A_ext_rows, A_ext_i, A_ext_j, 
-			     Soprows, col_map_offd, col_1, col_n, 
-			     Sop_i, Sop_j, CF_marker, comm_pkg);
-     if(newoff >= 0)
-       full_off_procNodes = newoff + num_cols_A_offd;
-     else
-       return hypre_error_flag;
-
-     /* Possibly add new points and new processors to the comm_pkg, all
-      * processors need new_comm_pkg */
-
-     /* AHB - create a new comm package just for extended info -
-        this will work better with the assumed partition*/
-     hypre_ParCSRFindExtendCommPkg(A, newoff, found, 
-                                   &extend_comm_pkg);
-     
-     if (full_off_procNodes)
-	CF_marker_offd = hypre_CTAlloc(HYPRE_Int, full_off_procNodes);
-     
-     if (num_functions > 1 && full_off_procNodes > 0)
-        dof_func_offd = hypre_CTAlloc(HYPRE_Int, full_off_procNodes);
-     
-     alt_insert_new_nodes(comm_pkg, extend_comm_pkg, CF_marker, 
-                          full_off_procNodes, CF_marker_offd);
-     
-     if(num_functions > 1)
-        alt_insert_new_nodes(comm_pkg, extend_comm_pkg, dof_func, 
-                             full_off_procNodes, dof_func_offd);
-   
-
    }
 
    /*-----------------------------------------------------------------------
@@ -2518,29 +2393,23 @@ hypre_BoomerAMGBuildExtPICCInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
 		 if(k1 >= col_1 && k1 < col_n)
 		 { /* In S_diag */
 		   loc_col = k1-col_1;
-		   if(CF_marker[loc_col] >  0)
-		   {
-		     if(P_marker[loc_col] < P_diag_i[i])
-		     {
-		       P_marker[loc_col] = jj_counter;
-		       jj_counter++;
-		       /*break;*/
-		     }
-		   }
+                   if(P_marker[loc_col] < P_diag_i[i])
+                   {
+                     P_marker[loc_col] = jj_counter;
+                     jj_counter++;
+                     /*break;*/
+                   }
 		 }
 		 else
 		 { 
 		   loc_col = -k1 - 1;
-		   if(CF_marker_offd[loc_col] >  0)
-		   {
-		     if(P_marker_offd[loc_col] < P_offd_i[i])
-		     {
-		       P_marker_offd[loc_col] = jj_counter_offd;
-		       tmp_CF_marker_offd[loc_col] = 1;
-		       jj_counter_offd++;
-		       /*break;*/
-		     }
-		   }
+                   if(P_marker_offd[loc_col] < P_offd_i[i])
+                   {
+                     P_marker_offd[loc_col] = jj_counter_offd;
+                     tmp_CF_marker_offd[loc_col] = 1;
+                     jj_counter_offd++;
+                     /*break;*/
+                   }
 		 }
 	       }
 	     }
@@ -2826,32 +2695,26 @@ hypre_BoomerAMGBuildExtPICCInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
 		 if(k1 >= col_1 && k1 < col_n)
 		 {
 		   loc_col = k1-col_1;
-		   if(CF_marker[loc_col] > 0)
-		   {
-		     if(P_marker[loc_col] < jj_begin_row)
-		     {		
-		       P_marker[loc_col] = jj_counter;
-		       P_diag_j[jj_counter] = fine_to_coarse[loc_col];
-		       P_diag_data[jj_counter] = zero;
-		       jj_counter++;
-		       /*break;*/
-		     }
-		   }
+                   if(P_marker[loc_col] < jj_begin_row)
+                   {		
+                     P_marker[loc_col] = jj_counter;
+                     P_diag_j[jj_counter] = fine_to_coarse[loc_col];
+                     P_diag_data[jj_counter] = zero;
+                     jj_counter++;
+                     /*break;*/
+                   }
 		 }
 		 else
 		 { 
 		   loc_col = -k1 - 1;
-		   if(CF_marker_offd[loc_col] > 0)
-		   {
-		     if(P_marker_offd[loc_col] < jj_begin_row_offd)
-		     {
-		       P_marker_offd[loc_col] = jj_counter_offd;
-		       P_offd_j[jj_counter_offd]=loc_col;
-		       P_offd_data[jj_counter_offd] = zero;
-		       jj_counter_offd++;
-		       /*break;*/
-		     }
-		   }
+                   if(P_marker_offd[loc_col] < jj_begin_row_offd)
+                   {
+                     P_marker_offd[loc_col] = jj_counter_offd;
+                     P_offd_j[jj_counter_offd]=loc_col;
+                     P_offd_data[jj_counter_offd] = zero;
+                     jj_counter_offd++;
+                     /*break;*/
+                   }
 		 }
 	       }
 	     }
@@ -2968,46 +2831,41 @@ hypre_BoomerAMGBuildExtPICCInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
 	   {
 	     sum = zero;
              sgn = 1;
-             if(A_ext_data[A_ext_i[i1]] < 0) sgn = -1;
-	     for(jj1 = A_ext_i[i1]+1; jj1 < A_ext_i[i1+1]; jj1++)
+	     for(jj1 = A_ext_i[i1]; jj1 < A_ext_i[i1+1]; jj1++)
 	     {
 	       k1 = A_ext_j[jj1];
 	       if(k1 >= col_1 && k1 < col_n)
 	       { /* diag */
 		 loc_col = k1 - col_1;
-		 if((P_marker[loc_col] >= jj_begin_row || loc_col == i)
-                        && (sgn*A_ext_data[jj1]) < 0)
+		 if(P_marker[loc_col] >= jj_begin_row || loc_col == i)
                    sum += A_ext_data[jj1];
 	       }
 	       else
 	       { 
 		 loc_col = -k1 - 1;
-		 if(P_marker_offd[loc_col] >= jj_begin_row_offd &&
-                    (sgn*A_ext_data[jj1]) < 0)
+		 if(P_marker_offd[loc_col] >= jj_begin_row_offd)
                    sum += A_ext_data[jj1];
 	       }
 	     }
 	     if(sum != 0)
 	     {
 	       distribute = A_offd_data[jj] / sum;
-	       for(jj1 = A_ext_i[i1]+1; jj1 < A_ext_i[i1+1]; jj1++)
+	       for(jj1 = A_ext_i[i1]; jj1 < A_ext_i[i1+1]; jj1++)
 	       {
 		 k1 = A_ext_j[jj1];
 		 if(k1 >= col_1 && k1 < col_n)
 		 { /* diag */
 		   loc_col = k1 - col_1;
-                   if(P_marker[loc_col] >= jj_begin_row &&
-                        (sgn*A_ext_data[jj1]) < 0)
+                   if(P_marker[loc_col] >= jj_begin_row)
                      P_diag_data[P_marker[loc_col]] += distribute*
                       A_ext_data[jj1];
-                   if(loc_col == i && (sgn*A_ext_data[jj1]) < 0)
+                   if(loc_col == i)
                      diagonal += distribute*A_ext_data[jj1];
 		 }
 		 else
 		 { 
 		   loc_col = -k1 - 1;
-		   if(P_marker_offd[loc_col] >= jj_begin_row_offd &&
-                     (sgn*A_ext_data[jj1]) < 0)
+		   if(P_marker_offd[loc_col] >= jj_begin_row_offd)
                      P_offd_data[P_marker_offd[loc_col]] += distribute*
                        A_ext_data[jj1];
 		 }
@@ -3162,7 +3020,6 @@ hypre_BoomerAMGBuildExtPICCInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
      hypre_TFree(tmp_CF_marker_offd);
      if(num_functions > 1)
        hypre_TFree(dof_func_offd);
-     hypre_TFree(found);
      
      hypre_MatvecCommPkgDestroy(extend_comm_pkg);
    }
@@ -3245,17 +3102,14 @@ hypre_BoomerAMGBuildFFInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
   
   HYPRE_Int             *fine_to_coarse = NULL;
   HYPRE_Int             *fine_to_coarse_offd = NULL;
-  HYPRE_Int             *found = NULL;
 
   HYPRE_Int              num_cols_P_offd;
-  HYPRE_Int              newoff, loc_col;
-  HYPRE_Int              A_ext_rows, full_off_procNodes;
+  HYPRE_Int              loc_col;
+  HYPRE_Int              full_off_procNodes;
   
   hypre_CSRMatrix *Sop;
   HYPRE_Int             *Sop_i;
   HYPRE_Int             *Sop_j;
-  
-  HYPRE_Int              Soprows;
   
   /* Variables to keep count of interpolatory points */
   HYPRE_Int              jj_counter, jj_counter_offd;
@@ -3303,56 +3157,23 @@ hypre_BoomerAMGBuildFFInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
 
    /* Set up off processor information (specifically for neighbors of 
     * neighbors */
-   newoff = 0;
    full_off_procNodes = 0;
    if (num_procs > 1)
    {
-     /*----------------------------------------------------------------------
-      * Get the off processors rows for A and S, associated with columns in 
-      * A_offd and S_offd.
-      *---------------------------------------------------------------------*/
-     A_ext         = hypre_ParCSRMatrixExtractBExt(A,A,1);
+     if (exchange_interp_data(
+       &CF_marker_offd, &dof_func_offd, &A_ext, &full_off_procNodes, &Sop, &extend_comm_pkg,
+       A, CF_marker, S, num_functions, dof_func, 1))
+     {
+       hypre_profile_times[HYPRE_TIMER_ID_EXTENDED_I_INTERP] += hypre_MPI_Wtime();
+       return hypre_error_flag;
+     }
+
      A_ext_i       = hypre_CSRMatrixI(A_ext);
      A_ext_j       = hypre_CSRMatrixJ(A_ext);
      A_ext_data    = hypre_CSRMatrixData(A_ext);
-     A_ext_rows    = hypre_CSRMatrixNumRows(A_ext);
-     
-     Sop           = hypre_ParCSRMatrixExtractBExt(S,A,0);
+
      Sop_i         = hypre_CSRMatrixI(Sop);
      Sop_j         = hypre_CSRMatrixJ(Sop);
-     Soprows       = hypre_CSRMatrixNumRows(Sop);
-
-     /* Find nodes that are neighbors of neighbors, not found in offd */
-     newoff = new_offd_nodes(&found, A_ext_rows, A_ext_i, A_ext_j, 
-			     Soprows, col_map_offd, col_1, col_n, 
-			     Sop_i, Sop_j, CF_marker, comm_pkg);
-     if(newoff >= 0)
-       full_off_procNodes = newoff + num_cols_A_offd;
-     else
-       return hypre_error_flag;
-
-     /* Possibly add new points and new processors to the comm_pkg, all
-      * processors need new_comm_pkg */
-    
-     /* AHB - create a new comm package just for extended info -
-        this will work better with the assumed partition*/
-     hypre_ParCSRFindExtendCommPkg(A, newoff, found, 
-                                   &extend_comm_pkg);
-     
-     if (full_off_procNodes)
-	CF_marker_offd = hypre_CTAlloc(HYPRE_Int, full_off_procNodes);
-     
-     if (num_functions > 1 && full_off_procNodes > 0)
-        dof_func_offd = hypre_CTAlloc(HYPRE_Int, full_off_procNodes);
-     
-     alt_insert_new_nodes(comm_pkg, extend_comm_pkg, CF_marker, 
-                          full_off_procNodes, CF_marker_offd);
-     
-     if(num_functions > 1)
-        alt_insert_new_nodes(comm_pkg, extend_comm_pkg, dof_func, 
-                             full_off_procNodes, dof_func_offd);
-
-
    }
    
    /*-----------------------------------------------------------------------
@@ -3556,27 +3377,21 @@ hypre_BoomerAMGBuildFFInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
 		 if(k1 >= col_1 && k1 < col_n)
 		 { /* In S_diag */
 		   loc_col = k1-col_1;
-		   if(CF_marker[loc_col] >  0)
-		   {
-		     if(P_marker[loc_col] < P_diag_i[i])
-		     {
-		       P_marker[loc_col] = jj_counter;
-		       jj_counter++;
-		     }
-		   }
+                   if(P_marker[loc_col] < P_diag_i[i])
+                   {
+                     P_marker[loc_col] = jj_counter;
+                     jj_counter++;
+                   }
 		 }
 		 else
 		 { 
 		   loc_col = -k1 - 1;
-		   if(CF_marker_offd[loc_col] >  0)
-		   {
-		     if(P_marker_offd[loc_col] < P_offd_i[i])
-		     {
-		       P_marker_offd[loc_col] = jj_counter_offd;
-		       tmp_CF_marker_offd[loc_col] = 1;
-		       jj_counter_offd++;
-		     }
-		   }
+                   if(P_marker_offd[loc_col] < P_offd_i[i])
+                   {
+                     P_marker_offd[loc_col] = jj_counter_offd;
+                     tmp_CF_marker_offd[loc_col] = 1;
+                     jj_counter_offd++;
+                   }
 		 }
 	       }
 	     }
@@ -3840,30 +3655,24 @@ hypre_BoomerAMGBuildFFInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
 		 if(k1 >= col_1 && k1 < col_n)
 		 {
 		   loc_col = k1-col_1;
-		   if(CF_marker[loc_col] > 0)
-		   {
-		     if(P_marker[loc_col] < jj_begin_row)
-		     {		
-		       P_marker[loc_col] = jj_counter;
-		       P_diag_j[jj_counter] = fine_to_coarse[loc_col];
-		       P_diag_data[jj_counter] = zero;
-		       jj_counter++;
-		     }
-		   }
+                   if(P_marker[loc_col] < jj_begin_row)
+                   {		
+                     P_marker[loc_col] = jj_counter;
+                     P_diag_j[jj_counter] = fine_to_coarse[loc_col];
+                     P_diag_data[jj_counter] = zero;
+                     jj_counter++;
+                   }
 		 }
 		 else
 		 { 
 		   loc_col = -k1 - 1;
-		   if(CF_marker_offd[loc_col] > 0)
-		   {
-		     if(P_marker_offd[loc_col] < jj_begin_row_offd)
-		     {
-		       P_marker_offd[loc_col] = jj_counter_offd;
-		       P_offd_j[jj_counter_offd]=loc_col;
-		       P_offd_data[jj_counter_offd] = zero;
-		       jj_counter_offd++;
-		     }
-		   }
+                   if(P_marker_offd[loc_col] < jj_begin_row_offd)
+                   {
+                     P_marker_offd[loc_col] = jj_counter_offd;
+                     P_offd_j[jj_counter_offd]=loc_col;
+                     P_offd_data[jj_counter_offd] = zero;
+                     jj_counter_offd++;
+                   }
 		 }
 	       }
 	     }
@@ -3978,44 +3787,39 @@ hypre_BoomerAMGBuildFFInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
 	   else if(P_marker_offd[i1] == strong_f_marker)
 	   {
 	     sum = zero;
-	     sgn = 1;
-	     if(A_ext_data[A_ext_i[i1]] < 0) sgn = -1;
-	     for(jj1 = A_ext_i[i1]+1; jj1 < A_ext_i[i1+1]; jj1++)
+	     for(jj1 = A_ext_i[i1]; jj1 < A_ext_i[i1+1]; jj1++)
 	     {
 	       k1 = A_ext_j[jj1];
 	       if(k1 >= col_1 && k1 < col_n)
 	       { /* diag */
 		 loc_col = k1 - col_1;
-		 if(P_marker[loc_col] >= jj_begin_row && (sgn*A_ext_data[jj1])<0)
+		 if(P_marker[loc_col] >= jj_begin_row)
 		   sum += A_ext_data[jj1];
 	       }
 	       else
 	       { 
 		 loc_col = -k1 - 1;
-		 if(P_marker_offd[loc_col] >= jj_begin_row_offd &&
-		    (sgn*A_ext_data[jj1]) < 0)
+		 if(P_marker_offd[loc_col] >= jj_begin_row_offd)
 		   sum += A_ext_data[jj1];
 	       }
 	     }
 	     if(sum != 0)
 	     {
 	       distribute = A_offd_data[jj] / sum;
-	       for(jj1 = A_ext_i[i1]+1; jj1 < A_ext_i[i1+1]; jj1++)
+	       for(jj1 = A_ext_i[i1]; jj1 < A_ext_i[i1+1]; jj1++)
 	       {
 		 k1 = A_ext_j[jj1];
 		 if(k1 >= col_1 && k1 < col_n)
 		 { /* diag */
 		   loc_col = k1 - col_1;
-		   if(P_marker[loc_col] >= jj_begin_row &&
-                      (sgn*A_ext_data[jj1]) < 0)
+		   if(P_marker[loc_col] >= jj_begin_row)
 		     P_diag_data[P_marker[loc_col]] += distribute*
 		      A_ext_data[jj1];
 		 }
 		 else
 		 { 
 		   loc_col = -k1 - 1;
-		   if(P_marker_offd[loc_col] >= jj_begin_row_offd &&
-                      (sgn*A_ext_data[jj1]) < 0)
+		   if(P_marker_offd[loc_col] >= jj_begin_row_offd)
 		     P_offd_data[P_marker_offd[loc_col]] += distribute*
 		       A_ext_data[jj1];
 		 }
@@ -4168,7 +3972,6 @@ hypre_BoomerAMGBuildFFInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
      hypre_TFree(tmp_CF_marker_offd);
      if(num_functions > 1)
        hypre_TFree(dof_func_offd);
-     hypre_TFree(found);
 
      hypre_MatvecCommPkgDestroy(extend_comm_pkg);
  
@@ -4251,17 +4054,14 @@ hypre_BoomerAMGBuildFF1Interp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
   
   HYPRE_Int             *fine_to_coarse = NULL;
   HYPRE_Int             *fine_to_coarse_offd = NULL;
-  HYPRE_Int             *found = NULL;
 
   HYPRE_Int              num_cols_P_offd;
-  HYPRE_Int              newoff, loc_col;
-  HYPRE_Int              A_ext_rows, full_off_procNodes;
+  HYPRE_Int              loc_col;
+  HYPRE_Int              full_off_procNodes;
   
   hypre_CSRMatrix *Sop;
   HYPRE_Int             *Sop_i;
   HYPRE_Int             *Sop_j;
-  
-  HYPRE_Int              Soprows;
   
   /* Variables to keep count of interpolatory points */
   HYPRE_Int              jj_counter, jj_counter_offd;
@@ -4308,54 +4108,23 @@ hypre_BoomerAMGBuildFF1Interp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
 
    /* Set up off processor information (specifically for neighbors of 
     * neighbors */
-   newoff = 0;
    full_off_procNodes = 0;
    if (num_procs > 1)
    {
-     /*----------------------------------------------------------------------
-      * Get the off processors rows for A and S, associated with columns in 
-      * A_offd and S_offd.
-      *---------------------------------------------------------------------*/
-     A_ext         = hypre_ParCSRMatrixExtractBExt(A,A,1);
+     if (exchange_interp_data(
+       &CF_marker_offd, &dof_func_offd, &A_ext, &full_off_procNodes, &Sop, &extend_comm_pkg,
+       A, CF_marker, S, num_functions, dof_func, 1))
+     {
+       hypre_profile_times[HYPRE_TIMER_ID_EXTENDED_I_INTERP] += hypre_MPI_Wtime();
+       return hypre_error_flag;
+     }
+
      A_ext_i       = hypre_CSRMatrixI(A_ext);
      A_ext_j       = hypre_CSRMatrixJ(A_ext);
      A_ext_data    = hypre_CSRMatrixData(A_ext);
-     A_ext_rows    = hypre_CSRMatrixNumRows(A_ext);
-     
-     Sop           = hypre_ParCSRMatrixExtractBExt(S,A,0);
+
      Sop_i         = hypre_CSRMatrixI(Sop);
      Sop_j         = hypre_CSRMatrixJ(Sop);
-     Soprows       = hypre_CSRMatrixNumRows(Sop);
-
-     /* Find nodes that are neighbors of neighbors, not found in offd */
-     newoff = new_offd_nodes(&found, A_ext_rows, A_ext_i, A_ext_j, 
-			     Soprows, col_map_offd, col_1, col_n, 
-			     Sop_i, Sop_j, CF_marker, comm_pkg);
-     if(newoff >= 0)
-       full_off_procNodes = newoff + num_cols_A_offd;
-     else
-       return hypre_error_flag;
-
-     /* Possibly add new points and new processors to the comm_pkg, all
-      * processors need new_comm_pkg */
-
-     /* AHB - create a new comm package just for extended info -
-        this will work better with the assumed partition*/
-     hypre_ParCSRFindExtendCommPkg(A, newoff, found, 
-                                   &extend_comm_pkg);
-     
-     if (full_off_procNodes)
-	CF_marker_offd = hypre_CTAlloc(HYPRE_Int, full_off_procNodes);
-     
-     if (num_functions > 1 && full_off_procNodes > 0)
-        dof_func_offd = hypre_CTAlloc(HYPRE_Int, full_off_procNodes);
-     
-     alt_insert_new_nodes(comm_pkg, extend_comm_pkg, CF_marker, 
-                          full_off_procNodes, CF_marker_offd);
-     
-     if(num_functions > 1)
-        alt_insert_new_nodes(comm_pkg, extend_comm_pkg, dof_func, 
-                             full_off_procNodes, dof_func_offd);
    }
 
    /*-----------------------------------------------------------------------
@@ -4563,29 +4332,23 @@ hypre_BoomerAMGBuildFF1Interp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
 		 if(k1 >= col_1 && k1 < col_n)
 		 { /* In S_diag */
 		   loc_col = k1-col_1;
-		   if(CF_marker[loc_col] >  0)
-		   {
-		     if(P_marker[loc_col] < P_diag_i[i])
-		     {
-		       P_marker[loc_col] = jj_counter;
-		       jj_counter++;
-		       break;
-		     }
-		   }
+                   if(P_marker[loc_col] < P_diag_i[i])
+                   {
+                     P_marker[loc_col] = jj_counter;
+                     jj_counter++;
+                     break;
+                   }
 		 }
 		 else
 		 { 
 		   loc_col = -k1 - 1;
-		   if(CF_marker_offd[loc_col] >  0)
-		   {
-		     if(P_marker_offd[loc_col] < P_offd_i[i])
-		     {
-		       P_marker_offd[loc_col] = jj_counter_offd;
-		       tmp_CF_marker_offd[loc_col] = 1;
-		       jj_counter_offd++;
-		       break;
-		     }
-		   }
+                   if(P_marker_offd[loc_col] < P_offd_i[i])
+                   {
+                     P_marker_offd[loc_col] = jj_counter_offd;
+                     tmp_CF_marker_offd[loc_col] = 1;
+                     jj_counter_offd++;
+                     break;
+                   }
 		 }
 	       }
 	     }
@@ -4853,32 +4616,26 @@ hypre_BoomerAMGBuildFF1Interp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
 		 if(k1 >= col_1 && k1 < col_n)
 		 {
 		   loc_col = k1-col_1;
-		   if(CF_marker[loc_col] > 0)
-		   {
-		     if(P_marker[loc_col] < jj_begin_row)
-		     {		
-		       P_marker[loc_col] = jj_counter;
-		       P_diag_j[jj_counter] = fine_to_coarse[loc_col];
-		       P_diag_data[jj_counter] = zero;
-		       jj_counter++;
-		       break;
-		     }
-		   }
+                   if(P_marker[loc_col] < jj_begin_row)
+                   {		
+                     P_marker[loc_col] = jj_counter;
+                     P_diag_j[jj_counter] = fine_to_coarse[loc_col];
+                     P_diag_data[jj_counter] = zero;
+                     jj_counter++;
+                     break;
+                   }
 		 }
 		 else
 		 { 
 		   loc_col = -k1 - 1;
-		   if(CF_marker_offd[loc_col] > 0)
-		   {
-		     if(P_marker_offd[loc_col] < jj_begin_row_offd)
-		     {
-		       P_marker_offd[loc_col] = jj_counter_offd;
-		       P_offd_j[jj_counter_offd]=loc_col;
-		       P_offd_data[jj_counter_offd] = zero;
-		       jj_counter_offd++;
-		       break;
-		     }
-		   }
+                   if(P_marker_offd[loc_col] < jj_begin_row_offd)
+                   {
+                     P_marker_offd[loc_col] = jj_counter_offd;
+                     P_offd_j[jj_counter_offd]=loc_col;
+                     P_offd_data[jj_counter_offd] = zero;
+                     jj_counter_offd++;
+                     break;
+                   }
 		 }
 	       }
 	     }
@@ -4993,44 +4750,39 @@ hypre_BoomerAMGBuildFF1Interp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
 	   else if(P_marker_offd[i1] == strong_f_marker)
 	   {
 	     sum = zero;
-	     sgn = 1;
-	     if(A_ext_data[A_ext_i[i1]] < 0) sgn = -1;
-	     for(jj1 = A_ext_i[i1]+1; jj1 < A_ext_i[i1+1]; jj1++)
+	     for(jj1 = A_ext_i[i1]; jj1 < A_ext_i[i1+1]; jj1++)
 	     {
 	       k1 = A_ext_j[jj1];
 	       if(k1 >= col_1 && k1 < col_n)
 	       { /* diag */
 		 loc_col = k1 - col_1;
-		 if(P_marker[loc_col] >= jj_begin_row && (sgn*A_ext_data[jj1])<0)
+		 if(P_marker[loc_col] >= jj_begin_row)
 		   sum += A_ext_data[jj1];
 	       }
 	       else
 	       { 
 		 loc_col = -k1 - 1;
-		 if(P_marker_offd[loc_col] >= jj_begin_row_offd &&
-		    (sgn*A_ext_data[jj1]) < 0)
+		 if(P_marker_offd[loc_col] >= jj_begin_row_offd)
 		   sum += A_ext_data[jj1];
 	       }
 	     }
 	     if(sum != 0)
 	     {
 	       distribute = A_offd_data[jj] / sum;
-	       for(jj1 = A_ext_i[i1]+1; jj1 < A_ext_i[i1+1]; jj1++)
+	       for(jj1 = A_ext_i[i1]; jj1 < A_ext_i[i1+1]; jj1++)
 	       {
 		 k1 = A_ext_j[jj1];
 		 if(k1 >= col_1 && k1 < col_n)
 		 { /* diag */
 		   loc_col = k1 - col_1;
-		   if(P_marker[loc_col] >= jj_begin_row &&
-                      (sgn*A_ext_data[jj1]) < 0)
+		   if(P_marker[loc_col] >= jj_begin_row)
 		     P_diag_data[P_marker[loc_col]] += distribute*
 		      A_ext_data[jj1];
 		 }
 		 else
 		 { 
 		   loc_col = -k1 - 1;
-		   if(P_marker_offd[loc_col] >= jj_begin_row_offd &&
-                      (sgn*A_ext_data[jj1]) < 0)
+		   if(P_marker_offd[loc_col] >= jj_begin_row_offd)
 		     P_offd_data[P_marker_offd[loc_col]] += distribute*
 		       A_ext_data[jj1];
 		 }
@@ -5186,7 +4938,6 @@ hypre_BoomerAMGBuildFF1Interp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
      hypre_TFree(tmp_CF_marker_offd);
      if(num_functions > 1)
        hypre_TFree(dof_func_offd);
-     hypre_TFree(found);
      
      hypre_MatvecCommPkgDestroy(extend_comm_pkg);
 
@@ -5269,17 +5020,16 @@ hypre_BoomerAMGBuildExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
   
   HYPRE_Int             *fine_to_coarse = NULL;
   HYPRE_Int             *fine_to_coarse_offd = NULL;
-  HYPRE_Int             *found = NULL;
 
   HYPRE_Int              num_cols_P_offd;
-  HYPRE_Int              newoff, loc_col;
-  HYPRE_Int              A_ext_rows, full_off_procNodes;
+  HYPRE_Int              loc_col;
+  HYPRE_Int              full_off_procNodes;
   
   hypre_CSRMatrix *Sop;
   HYPRE_Int             *Sop_i;
   HYPRE_Int             *Sop_j;
   
-  HYPRE_Int              Soprows, sgn = 1;
+  HYPRE_Int              sgn = 1;
   
   /* Variables to keep count of interpolatory points */
   HYPRE_Int              jj_counter, jj_counter_offd;
@@ -5328,54 +5078,23 @@ hypre_BoomerAMGBuildExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
 
    /* Set up off processor information (specifically for neighbors of 
     * neighbors */
-   newoff = 0;
    full_off_procNodes = 0;
    if (num_procs > 1)
    {
-     /*----------------------------------------------------------------------
-      * Get the off processors rows for A and S, associated with columns in 
-      * A_offd and S_offd.
-      *---------------------------------------------------------------------*/
-     A_ext         = hypre_ParCSRMatrixExtractBExt(A,A,1);
+     if (exchange_interp_data(
+       &CF_marker_offd, &dof_func_offd, &A_ext, &full_off_procNodes, &Sop, &extend_comm_pkg,
+       A, CF_marker, S, num_functions, dof_func, 1))
+     {
+       hypre_profile_times[HYPRE_TIMER_ID_EXTENDED_I_INTERP] += hypre_MPI_Wtime();
+       return hypre_error_flag;
+     }
+
      A_ext_i       = hypre_CSRMatrixI(A_ext);
      A_ext_j       = hypre_CSRMatrixJ(A_ext);
      A_ext_data    = hypre_CSRMatrixData(A_ext);
-     A_ext_rows    = hypre_CSRMatrixNumRows(A_ext);
-     
-     Sop           = hypre_ParCSRMatrixExtractBExt(S,A,0);
+
      Sop_i         = hypre_CSRMatrixI(Sop);
      Sop_j         = hypre_CSRMatrixJ(Sop);
-     Soprows       = hypre_CSRMatrixNumRows(Sop);
-
-     /* Find nodes that are neighbors of neighbors, not found in offd */
-     newoff = new_offd_nodes(&found, A_ext_rows, A_ext_i, A_ext_j, 
-			     Soprows, col_map_offd, col_1, col_n, 
-			     Sop_i, Sop_j, CF_marker, comm_pkg);
-     if(newoff >= 0)
-       full_off_procNodes = newoff + num_cols_A_offd;
-     else
-       return hypre_error_flag;
-
-     /* Possibly add new points and new processors to the comm_pkg, all
-      * processors need new_comm_pkg */
-    
-     /* AHB - create a new comm package just for extended info -
-        this will work better with the assumed partition*/
-     hypre_ParCSRFindExtendCommPkg(A, newoff, found, 
-                                   &extend_comm_pkg);
-     
-     if (full_off_procNodes)
-	CF_marker_offd = hypre_CTAlloc(HYPRE_Int, full_off_procNodes);
-     
-     if (num_functions > 1 && full_off_procNodes > 0)
-        dof_func_offd = hypre_CTAlloc(HYPRE_Int, full_off_procNodes);
-     
-     alt_insert_new_nodes(comm_pkg, extend_comm_pkg, CF_marker, 
-                          full_off_procNodes, CF_marker_offd);
-     
-     if(num_functions > 1)
-        alt_insert_new_nodes(comm_pkg, extend_comm_pkg, dof_func, 
-                             full_off_procNodes, dof_func_offd);
    }
   
 
@@ -5507,27 +5226,21 @@ hypre_BoomerAMGBuildExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
 	       if(k1 >= col_1 && k1 < col_n)
 	       { /* In S_diag */
 		 loc_col = k1-col_1;
-		 if(CF_marker[loc_col] >= 0)
-		 {
-		   if(P_marker[loc_col] < P_diag_i[i])
-		   {
-		     P_marker[loc_col] = jj_counter;
-		     jj_counter++;
-		   }
-		 }
+                 if(P_marker[loc_col] < P_diag_i[i])
+                 {
+                   P_marker[loc_col] = jj_counter;
+                   jj_counter++;
+                 }
 	       }
 	       else
 	       {
 		 loc_col = -k1 - 1; 
-		 if(CF_marker_offd[loc_col] >= 0)
-		 {
-		   if(P_marker_offd[loc_col] < P_offd_i[i])
-		   {
-		     P_marker_offd[loc_col] = jj_counter_offd;
-		     tmp_CF_marker_offd[loc_col] = 1;
-		     jj_counter_offd++;
-		   }
-		 }
+                 if(P_marker_offd[loc_col] < P_offd_i[i])
+                 {
+                   P_marker_offd[loc_col] = jj_counter_offd;
+                   tmp_CF_marker_offd[loc_col] = 1;
+                   jj_counter_offd++;
+                 }
 	       }
 	     }
 	   }
@@ -5702,30 +5415,24 @@ hypre_BoomerAMGBuildExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
 	       if(k1 >= col_1 && k1 < col_n)
 	       {
 		 loc_col = k1-col_1;
-		 if(CF_marker[loc_col] >= 0)
-		 {
-		   if(P_marker[loc_col] < jj_begin_row)
-		   {		
-		     P_marker[loc_col] = jj_counter;
-		     P_diag_j[jj_counter] = fine_to_coarse[loc_col];
-		     P_diag_data[jj_counter] = zero;
-		     jj_counter++;
-		   }
-		 }
+                 if(P_marker[loc_col] < jj_begin_row)
+                 {		
+                   P_marker[loc_col] = jj_counter;
+                   P_diag_j[jj_counter] = fine_to_coarse[loc_col];
+                   P_diag_data[jj_counter] = zero;
+                   jj_counter++;
+                 }
 	       }
 	       else
 	       { 
 		 loc_col = -k1 - 1;
-		 if(CF_marker_offd[loc_col] >= 0)
-		 {
-		   if(P_marker_offd[loc_col] < jj_begin_row_offd)
-		   {
-		     P_marker_offd[loc_col] = jj_counter_offd;
-		     P_offd_j[jj_counter_offd]=loc_col;
-		     P_offd_data[jj_counter_offd] = zero;
-		     jj_counter_offd++;
-		   }
-		 }
+                 if(P_marker_offd[loc_col] < jj_begin_row_offd)
+                 {
+                   P_marker_offd[loc_col] = jj_counter_offd;
+                   P_offd_j[jj_counter_offd]=loc_col;
+                   P_offd_data[jj_counter_offd] = zero;
+                   jj_counter_offd++;
+                 }
 	       }
 	     }
 	   }
@@ -5814,45 +5521,39 @@ hypre_BoomerAMGBuildExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
 	   else if(P_marker_offd[i1] == strong_f_marker)
 	   {
 	     sum = zero;
-             sgn = 1;
-             if(A_ext_data[A_ext_i[i1]] < 0) sgn = -1;
-	     for(jj1 = A_ext_i[i1]+1; jj1 < A_ext_i[i1+1]; jj1++)
+	     for(jj1 = A_ext_i[i1]; jj1 < A_ext_i[i1+1]; jj1++)
 	     {
 	       k1 = A_ext_j[jj1];
 	       if(k1 >= col_1 && k1 < col_n)
 	       { /* diag */
 		 loc_col = k1 - col_1;
-		 if((P_marker[loc_col] >= jj_begin_row )
-			&& (sgn*A_ext_data[jj1]) < 0)
+		 if(P_marker[loc_col] >= jj_begin_row )
 		   sum += A_ext_data[jj1];
 	       }
 	       else
 	       { 
 		 loc_col = -k1 - 1;
-		 if(P_marker_offd[loc_col] >= jj_begin_row_offd &&
-                    (sgn*A_ext_data[jj1]) < 0)
+		 if(P_marker_offd[loc_col] >= jj_begin_row_offd)
 		   sum += A_ext_data[jj1];
 	       }
 	     }
 	     if(sum != 0)
 	     {
 	       distribute = A_offd_data[jj] / sum;
-	       for(jj1 = A_ext_i[i1]+1; jj1 < A_ext_i[i1+1]; jj1++)
+	       for(jj1 = A_ext_i[i1]; jj1 < A_ext_i[i1+1]; jj1++)
 	       {
 		 k1 = A_ext_j[jj1];
 		 if(k1 >= col_1 && k1 < col_n)
 		 { /* diag */
 		   loc_col = k1 - col_1;
-		   if(P_marker[loc_col] >= jj_begin_row &&
-                      (sgn*A_ext_data[jj1]) < 0)
+		   if(P_marker[loc_col] >= jj_begin_row)
 		     P_diag_data[P_marker[loc_col]] += distribute*
 		      A_ext_data[jj1];
 		 }
 		 else
 		 { 
 		   loc_col = -k1 - 1;
-		   if(P_marker_offd[loc_col] >= jj_begin_row_offd &&
-                      (sgn*A_ext_data[jj1]) < 0)
+		   if(P_marker_offd[loc_col] >= jj_begin_row_offd)
 		     P_offd_data[P_marker_offd[loc_col]] += distribute*
 		       A_ext_data[jj1];
 		 }
@@ -6019,7 +5720,6 @@ hypre_BoomerAMGBuildExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
      hypre_TFree(tmp_CF_marker_offd);
      if(num_functions > 1)
        hypre_TFree(dof_func_offd);
-     hypre_TFree(found);
 
 
      hypre_MatvecCommPkgDestroy(extend_comm_pkg);

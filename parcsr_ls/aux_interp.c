@@ -14,7 +14,6 @@
 
 #include "_hypre_parcsr_ls.h"
 #include "aux_interp.h"
-#include <assert.h>
 
 /*---------------------------------------------------------------------------
  * Auxilary routines for the long range interpolation methods.
@@ -108,8 +107,6 @@ HYPRE_Int alt_insert_new_nodes(hypre_ParCSRCommPkg *comm_pkg,
     
   return hypre_error_flag;
 } 
-
-
 
 /* AHB 11/06 : alternate to the extend function below - creates a
  * second comm pkg based on found - this makes it easier to use the
@@ -311,10 +308,10 @@ void initialize_vecs(HYPRE_Int diag_n, HYPRE_Int offd_n, HYPRE_Int *diag_ftc, HY
 
 /* Find nodes that are offd and are not contained in original offd
  * (neighbors of neighbors) */
-HYPRE_Int new_offd_nodes(HYPRE_Int **found, HYPRE_Int num_cols_A_offd, HYPRE_Int *A_ext_i, HYPRE_Int *A_ext_j, 
+static HYPRE_Int new_offd_nodes(HYPRE_Int **found, HYPRE_Int num_cols_A_offd, HYPRE_Int *A_ext_i, HYPRE_Int *A_ext_j, 
 		   HYPRE_Int num_cols_S_offd, HYPRE_Int *col_map_offd, HYPRE_Int col_1, 
 		   HYPRE_Int col_n, HYPRE_Int *Sop_i, HYPRE_Int *Sop_j,
-		   HYPRE_Int *CF_marker, hypre_ParCSRCommPkg *comm_pkg)
+		   HYPRE_Int *CF_marker_offd)
 {
   HYPRE_Int i, i1, ii, j, ifound, kk, k1;
   HYPRE_Int got_loc, loc_col;
@@ -324,40 +321,16 @@ HYPRE_Int new_offd_nodes(HYPRE_Int **found, HYPRE_Int num_cols_A_offd, HYPRE_Int
   HYPRE_Int size_offP;
 
   HYPRE_Int *tmp_found;
-  HYPRE_Int *CF_marker_offd = NULL;
   HYPRE_Int *int_buf_data;
   HYPRE_Int newoff = 0;
   HYPRE_Int full_off_procNodes = 0;
   hypre_ParCSRCommHandle *comm_handle;
-                                                                                                                                         
-  CF_marker_offd = hypre_CTAlloc(HYPRE_Int, num_cols_A_offd);
-  int_buf_data = hypre_CTAlloc(HYPRE_Int, hypre_ParCSRCommPkgSendMapStart(comm_pkg,
-                hypre_ParCSRCommPkgNumSends(comm_pkg)));
-  ii = 0;
-
-  HYPRE_Int num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-  HYPRE_Int begin = hypre_ParCSRCommPkgSendMapStart(comm_pkg, 0);
-  HYPRE_Int end = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends);
-
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for HYPRE_SMP_SCHEDULE
-#endif
-  for (i = begin; i < end; ++i)
-  {
-      HYPRE_Int elmt = hypre_ParCSRCommPkgSendMapElmt(comm_pkg, i);
-      int_buf_data[i - begin] = CF_marker[elmt];
-  }
-  comm_handle = hypre_ParCSRCommHandleCreate(11, comm_pkg,int_buf_data,
-        CF_marker_offd);
 
   HYPRE_Int2Int *col_map_offd_inverse = hypre_Int2IntCreate();
   for (i = 0; i < num_cols_A_offd; i++)
   {
      hypre_Int2IntInsert(col_map_offd_inverse, col_map_offd[i], i);
   }
-
-  hypre_ParCSRCommHandleDestroy(comm_handle);
-  hypre_TFree(int_buf_data);
 
   size_offP = A_ext_i[num_cols_A_offd]+Sop_i[num_cols_A_offd];
   tmp_found = hypre_TAlloc(HYPRE_Int, size_offP);
@@ -480,13 +453,127 @@ HYPRE_Int new_offd_nodes(HYPRE_Int **found, HYPRE_Int num_cols_A_offd, HYPRE_Int
   }
   hypre_Int2IntDestroy(tmp_found_inverse);
 
-
-  hypre_TFree(CF_marker_offd);
-  
-
   *found = tmp_found;
  
-
-
   return newoff;
 }
+
+HYPRE_Int exchange_marker(hypre_ParCSRCommPkg *comm_pkg,
+                          HYPRE_Int *IN_marker, 
+                          HYPRE_Int *OUT_marker)
+{   
+  HYPRE_Int num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
+  HYPRE_Int begin = hypre_ParCSRCommPkgSendMapStart(comm_pkg, 0);
+  HYPRE_Int end = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends);
+  HYPRE_Int *int_buf_data = hypre_CTAlloc(HYPRE_Int, end);
+
+  HYPRE_Int i;
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for HYPRE_SMP_SCHEDULE
+#endif
+  for (i = begin; i < end; ++i) {
+     int_buf_data[i - begin] =
+           IN_marker[hypre_ParCSRCommPkgSendMapElmt(comm_pkg, i)];
+  }
+   
+  hypre_ParCSRCommHandle *comm_handle = hypre_ParCSRCommHandleCreate( 11, comm_pkg, int_buf_data, 
+					      OUT_marker);
+   
+  hypre_ParCSRCommHandleDestroy(comm_handle);
+  hypre_TFree(int_buf_data);
+    
+  return hypre_error_flag;
+} 
+
+HYPRE_Int exchange_interp_data(
+    HYPRE_Int **CF_marker_offd,
+    HYPRE_Int **dof_func_offd,
+    hypre_CSRMatrix **A_ext,
+    HYPRE_Int *full_off_procNodes,
+    hypre_CSRMatrix **Sop,
+    hypre_ParCSRCommPkg **extend_comm_pkg,
+    hypre_ParCSRMatrix *A, 
+    HYPRE_Int *CF_marker,
+    hypre_ParCSRMatrix *S,
+    HYPRE_Int num_functions,
+    HYPRE_Int *dof_func,
+    HYPRE_Int skip_fine_or_same_sign) // skip_fine_or_same_sign if we want to skip fine points in S and nnz with the same sign as diagonal in A
+{
+  hypre_ParCSRCommPkg   *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
+  hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A); 
+  hypre_CSRMatrix *A_offd = hypre_ParCSRMatrixOffd(A);   
+  HYPRE_Int              num_cols_A_offd = hypre_CSRMatrixNumCols(A_offd);
+  HYPRE_Int             *col_map_offd = hypre_ParCSRMatrixColMapOffd(A);
+  HYPRE_Int              col_1 = hypre_ParCSRMatrixFirstRowIndex(A);
+  HYPRE_Int              local_numrows = hypre_CSRMatrixNumRows(A_diag);
+  HYPRE_Int              col_n = col_1 + local_numrows;
+  HYPRE_Int             *found = NULL;
+
+  /*----------------------------------------------------------------------
+   * Get the off processors rows for A and S, associated with columns in 
+   * A_offd and S_offd.
+   *---------------------------------------------------------------------*/
+  *CF_marker_offd = hypre_TAlloc(HYPRE_Int, num_cols_A_offd);
+  exchange_marker(comm_pkg, CF_marker, *CF_marker_offd);
+
+  hypre_ParCSRCommHandle *comm_handle_a_idx, *comm_handle_a_data;
+  *A_ext         = hypre_ParCSRMatrixExtractBExt_Overlap(A,A,1,&comm_handle_a_idx,&comm_handle_a_data,CF_marker,*CF_marker_offd,0,skip_fine_or_same_sign);
+  HYPRE_Int *A_ext_i        = hypre_CSRMatrixI(*A_ext);
+  HYPRE_Int *A_ext_j        = hypre_CSRMatrixJ(*A_ext);
+  HYPRE_Int  A_ext_rows     = hypre_CSRMatrixNumRows(*A_ext);
+
+  hypre_ParCSRCommHandle *comm_handle_s_idx;
+  *Sop           = hypre_ParCSRMatrixExtractBExt_Overlap(S,A,0,&comm_handle_s_idx,NULL,CF_marker,*CF_marker_offd,skip_fine_or_same_sign,0);
+  HYPRE_Int *Sop_i          = hypre_CSRMatrixI(*Sop);
+  HYPRE_Int *Sop_j          = hypre_CSRMatrixJ(*Sop);
+  HYPRE_Int  Soprows        = hypre_CSRMatrixNumRows(*Sop);
+
+  HYPRE_Int *send_idx = (HYPRE_Int *)comm_handle_s_idx->send_data;
+  hypre_ParCSRCommHandleDestroy(comm_handle_s_idx);
+  hypre_TFree(send_idx);
+
+  send_idx = (HYPRE_Int *)comm_handle_a_idx->send_data;
+  hypre_ParCSRCommHandleDestroy(comm_handle_a_idx);
+  hypre_TFree(send_idx);
+
+  /* Find nodes that are neighbors of neighbors, not found in offd */
+  HYPRE_Int newoff = new_offd_nodes(&found, A_ext_rows, A_ext_i, A_ext_j, 
+      Soprows, col_map_offd, col_1, col_n, 
+      Sop_i, Sop_j, *CF_marker_offd);
+  if(newoff >= 0)
+    *full_off_procNodes = newoff + num_cols_A_offd;
+  else
+  {
+    return hypre_error_flag;
+  }
+
+  /* Possibly add new points and new processors to the comm_pkg, all
+   * processors need new_comm_pkg */
+
+  /* AHB - create a new comm package just for extended info -
+     this will work better with the assumed partition*/
+  hypre_ParCSRFindExtendCommPkg(A, newoff, found, 
+      extend_comm_pkg);
+
+  *CF_marker_offd = hypre_TReAlloc(*CF_marker_offd, HYPRE_Int, *full_off_procNodes);
+  exchange_marker(*extend_comm_pkg, CF_marker, *CF_marker_offd + A_ext_rows);
+
+  if(num_functions > 1)
+  {
+    if (*full_off_procNodes > 0)
+      *dof_func_offd = hypre_CTAlloc(HYPRE_Int, *full_off_procNodes);
+
+    alt_insert_new_nodes(comm_pkg, *extend_comm_pkg, dof_func, 
+        *full_off_procNodes, *dof_func_offd);
+  }
+
+  hypre_TFree(found);
+
+  HYPRE_Real *send_data = (HYPRE_Real *)comm_handle_a_data->send_data;
+  hypre_ParCSRCommHandleDestroy(comm_handle_a_data);
+  hypre_TFree(send_data);
+
+  return hypre_error_flag;
+}
+
+

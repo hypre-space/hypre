@@ -597,7 +597,6 @@ HYPRE_Int hypre_ssort ( HYPRE_Int *data , HYPRE_Int n );
 HYPRE_Int index_of_minimum ( HYPRE_Int *data , HYPRE_Int n );
 void swap_int ( HYPRE_Int *data , HYPRE_Int a , HYPRE_Int b );
 void initialize_vecs ( HYPRE_Int diag_n , HYPRE_Int offd_n , HYPRE_Int *diag_ftc , HYPRE_Int *offd_ftc , HYPRE_Int *diag_pm , HYPRE_Int *offd_pm , HYPRE_Int *tmp_CF );
-HYPRE_Int new_offd_nodes ( HYPRE_Int **found , HYPRE_Int num_cols_A_offd , HYPRE_Int *A_ext_i , HYPRE_Int *A_ext_j , HYPRE_Int num_cols_S_offd , HYPRE_Int *col_map_offd , HYPRE_Int col_1 , HYPRE_Int col_n , HYPRE_Int *Sop_i , HYPRE_Int *Sop_j , HYPRE_Int *CF_marker , hypre_ParCSRCommPkg *comm_pkg );
 
 /* block_tridiag.c */
 void *hypre_BlockTridiagCreate ( void );
