@@ -115,8 +115,20 @@ zzz_SMGSetBase( void      *smg_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * zzz_SMGGet ...
+ * zzz_SMGGetNumIterations
  *--------------------------------------------------------------------------*/
+
+int
+zzz_SMGGetNumIterations( void *smg_vdata,
+                         int  *num_iterations )
+{
+   zzz_SMGData *smg_data = smg_vdata;
+   int ierr;
+
+   *num_iterations = (smg_data -> num_iterations);
+
+   return ierr;
+}
 
 /*--------------------------------------------------------------------------
  * zzz_SMGFinalize
@@ -173,6 +185,7 @@ zzz_SMGFinalize( void *smg_vdata )
       zzz_TFree(smg_data -> b_l);
       zzz_TFree(smg_data -> x_l);
       zzz_TFree(smg_data -> r_l);
+      zzz_TFree(smg_data -> e_l);
  
       for (l = 0; l < 2; l++)
       {

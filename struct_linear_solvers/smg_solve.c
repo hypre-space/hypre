@@ -60,6 +60,7 @@ zzz_SMGSolve( void             *smg_vdata,
    zzz_StructVector  **b_l        = (smg_data -> b_l);
    zzz_StructVector  **x_l        = (smg_data -> x_l);
    zzz_StructVector  **r_l        = (smg_data -> r_l);
+   zzz_StructVector  **e_l        = (smg_data -> e_l);
    void               *pre_relax_data_initial =
       (smg_data -> pre_relax_data_initial);
    void              **pre_relax_data_l =
@@ -134,14 +135,16 @@ zzz_SMGSolve( void             *smg_vdata,
             zzz_SMGResidual(residual_data_l[l], x_l[l], b_l[l], r_l[l]);
          }
          zzz_SMGRestrict(restrict_data_l[l], r_l[l], b_l[l+1]);
-#if 0
-	 /* for debugging purposes */
-	 {
-	    char  filename[255];
+#if 1
+      /* for debugging purposes */
+   {
+      char  filename[255];
 
-	    sprintf(filename, "b.%02d", l+1);
-	    zzz_PrintStructVector(filename, b_l[l+1], 0);
-	 }
+      sprintf(filename, "zout_xbefore.%02d", l);
+      zzz_PrintStructVector(filename, x_l[l], 0);
+      sprintf(filename, "zout_b.%02d", l+1);
+      zzz_PrintStructVector(filename, b_l[l+1], 0);
+   }
 #endif
       }
 
@@ -160,20 +163,25 @@ zzz_SMGSolve( void             *smg_vdata,
 
       for (l = (num_levels - 2); l >= 0; l--)
       {
-#if 0
-	 /* for debugging purposes */
-	 {
-	    char  filename[255];
+	 zzz_SMGIntAdd(intadd_data_l[l], x_l[l+1], e_l[l], x_l[l]);
+#if 1
+      /* for debugging purposes */
+   {
+      char  filename[255];
 
-	    sprintf(filename, "x.%02d", l+1);
-	    zzz_PrintStructVector(filename, x_l[l+1], 0);
-	 }
+      sprintf(filename, "zout_xafter.%02d", l);
+      zzz_PrintStructVector(filename, x_l[l], 0);
+   }
 #endif
-	 zzz_SMGIntAdd(intadd_data_l[l], x_l[l+1], x_l[l]);
          zzz_SMGRelax(post_relax_data_l[l], b_l[l], x_l[l]);
       }
 
-      (smg_data -> num_iterations) = (i + 1);
+      (smg_data -> num_iterations) = i;
+   }
+
+   if (i == max_iter)
+   {
+      (smg_data -> num_iterations) = max_iter;
    }
 
    return ierr;

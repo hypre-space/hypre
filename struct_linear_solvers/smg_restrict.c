@@ -101,7 +101,7 @@ zzz_SMGRestrictSetup( void             *restrict_vdata,
    compute_pkg = zzz_NewComputePkg(send_sboxes, recv_sboxes,
                                    send_box_ranks, recv_box_ranks,
                                    indt_sboxes, dept_sboxes,
-                                   grid, zzz_StructVectorDataSpace(rc), 1);
+                                   grid, zzz_StructVectorDataSpace(r), 1);
 
    /*----------------------------------------------------------
     * Set up the intadd data structure

@@ -22,6 +22,8 @@ int   main(argc, argv)
 int   argc;
 char *argv[];
 {
+   MPI_Comm           *comm;
+
    int                 A_num_ghost[6] = { 1, 1, 1, 1, 1, 1};
    int                 b_num_ghost[6] = { 0, 0, 0, 0, 0, 0};
    int                 x_num_ghost[6] = { 1, 1, 1, 1, 1, 1};
@@ -31,8 +33,11 @@ char *argv[];
    zzz_StructVector   *x;
 
    void               *smg_data;
+   int                 num_iterations;
 
    int                 num_procs, myid;
+
+   char                filename[255];
 
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -41,8 +46,9 @@ char *argv[];
    /* Initialize MPI */
    MPI_Init(&argc, &argv);
 
-   MPI_Comm_size(MPI_COMM_WORLD, &num_procs );
-   MPI_Comm_rank(MPI_COMM_WORLD, &myid );
+   MPI_Comm_dup(MPI_COMM_WORLD, comm);
+   MPI_Comm_size(*comm, &num_procs );
+   MPI_Comm_rank(*comm, &myid );
 
    cegdb(&argc, &argv, myid);
 
@@ -50,19 +56,30 @@ char *argv[];
    malloc_logpath = malloc_logpath_memory;
    sprintf(malloc_logpath, "malloc.log.%04d", myid);
 
+   if (argc > 1)
+   {
+      sprintf(filename, argv[1]);
+   }
+   else
+   {
+      printf("Usage: mpirun -np %d %s <input_problem>\n\n",
+             num_procs, argv[0]);
+      exit(1);
+   }
+
    /*-----------------------------------------------------------
     * Set up the linear system
     *-----------------------------------------------------------*/
 
-   A = zzz_ReadStructMatrix("zin_A", A_num_ghost);
+   A = zzz_ReadStructMatrix(comm, filename, A_num_ghost);
 
-   b = zzz_NewStructVector(&MPI_COMM_WORLD, zzz_StructMatrixGrid(A));
+   b = zzz_NewStructVector(comm, zzz_StructMatrixGrid(A));
    zzz_SetStructVectorNumGhost(b, b_num_ghost);
    zzz_InitializeStructVector(b);
    zzz_AssembleStructVector(b);
    zzz_SetStructVectorConstantValues(b, 1.0);
 
-   x = zzz_NewStructVector(&MPI_COMM_WORLD, zzz_StructMatrixGrid(A));
+   x = zzz_NewStructVector(comm, zzz_StructMatrixGrid(A));
    zzz_SetStructVectorNumGhost(x, x_num_ghost);
    zzz_InitializeStructVector(x);
    zzz_AssembleStructVector(x);
@@ -72,15 +89,22 @@ char *argv[];
     * Solve the system
     *-----------------------------------------------------------*/
 
-   smg_data = zzz_SMGInitialize(&MPI_COMM_WORLD);
+   smg_data = zzz_SMGInitialize(comm);
+   zzz_SMGSetMaxIter(smg_data, 10);
    zzz_SMGSetup(smg_data, A, b, x);
    zzz_SMGSolve(smg_data, b, x);
 
    /*-----------------------------------------------------------
-    * Print the solution
+    * Print the solution and other info
     *-----------------------------------------------------------*/
 
    zzz_PrintStructVector("zout_x", x, 0);
+
+   zzz_SMGGetNumIterations(smg_data, &num_iterations);
+   if (myid == 0)
+   {
+      printf("Iterations = %d\n", num_iterations);
+   }
 
    /*-----------------------------------------------------------
     * Finalize things

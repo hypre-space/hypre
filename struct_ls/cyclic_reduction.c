@@ -373,6 +373,8 @@ zzz_CycRedSetupCoarseOp( zzz_StructMatrix *A,
    zzz_FreeIndex(loop_size);
    zzz_FreeIndex(fstart);
 
+   zzz_AssembleStructMatrix(Ac);
+
    return ierr;
 }
 
@@ -521,7 +523,7 @@ zzz_CyclicReductionSetup( void             *cyc_red_vdata,
    base_points = zzz_ProjectBoxArray(zzz_StructGridBoxes(grid_l[0]),
                                      base_index, base_stride);
 
-   (cyc_red_data -> base_points)   = base_points;
+   (cyc_red_data -> base_points) = base_points;
 
    /*-----------------------------------------------------
     * Set up fine and coarse points

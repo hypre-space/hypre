@@ -27,6 +27,7 @@ typedef struct
    zzz_StructVector  *x;
    zzz_StructVector  *b;
    zzz_StructVector  *r;
+   zzz_SBoxArray     *base_points;
    zzz_ComputePkg    *compute_pkg;
 
 } zzz_SMGResidualData;
@@ -85,27 +86,29 @@ zzz_SMGResidualSetup( void             *residual_vdata,
    zzz_SBoxArrayArray   *indt_sboxes;
    zzz_SBoxArrayArray   *dept_sboxes;
                        
+   zzz_SBoxArray        *base_points;
    zzz_ComputePkg       *compute_pkg;
 
    /*----------------------------------------------------------
-    * Set up the compute package
+    * Set up base points and the compute package
     *----------------------------------------------------------*/
 
    grid    = zzz_StructMatrixGrid(A);
    stencil = zzz_StructMatrixStencil(A);
+
+   base_points = zzz_ProjectBoxArray(zzz_StructGridBoxes(grid),
+                                     base_index, base_stride);
 
    zzz_GetComputeInfo(&send_boxes, &recv_boxes,
                       &send_box_ranks, &recv_box_ranks,
                       &indt_boxes, &dept_boxes,
                       grid, stencil);
 
-   send_sboxes = zzz_ProjectBoxArrayArray(send_boxes, base_index, base_stride);
-   recv_sboxes = zzz_ProjectBoxArrayArray(recv_boxes, base_index, base_stride);
+   send_sboxes = zzz_ConvertToSBoxArrayArray(send_boxes);
+   recv_sboxes = zzz_ConvertToSBoxArrayArray(recv_boxes);
    indt_sboxes = zzz_ProjectBoxArrayArray(indt_boxes, base_index, base_stride);
    dept_sboxes = zzz_ProjectBoxArrayArray(dept_boxes, base_index, base_stride);
 
-   zzz_FreeBoxArrayArray(send_boxes);
-   zzz_FreeBoxArrayArray(recv_boxes);
    zzz_FreeBoxArrayArray(indt_boxes);
    zzz_FreeBoxArrayArray(dept_boxes);
 
@@ -122,6 +125,7 @@ zzz_SMGResidualSetup( void             *residual_vdata,
    (residual_data -> x)           = x;
    (residual_data -> b)           = b;
    (residual_data -> r)           = r;
+   (residual_data -> base_points) = base_points;
    (residual_data -> compute_pkg) = compute_pkg;
 
    return ierr;
@@ -143,6 +147,7 @@ zzz_SMGResidual( void             *residual_vdata,
 
    zzz_Index            *base_stride = (residual_data -> base_stride);
    zzz_StructMatrix     *A           = (residual_data -> A);
+   zzz_SBoxArray        *base_points = (residual_data -> base_points);
    zzz_ComputePkg       *compute_pkg = (residual_data -> compute_pkg);
 
    zzz_CommHandle       *comm_handle;
@@ -166,8 +171,6 @@ zzz_SMGResidual( void             *residual_vdata,
    double               *bp;
    double               *rp;
                        
-   zzz_BoxArray         *boxes;
-   zzz_Box              *box;
    zzz_Index            *loop_index;
    zzz_Index            *loop_size;
    zzz_Index            *start;
@@ -207,11 +210,11 @@ zzz_SMGResidual( void             *residual_vdata,
              * Copy b into r
              *----------------------------------------*/
 
-            boxes = zzz_StructGridBoxes(zzz_StructMatrixGrid(A));
-            zzz_ForBoxI(i, boxes)
+            compute_sbox_a = base_points;
+            zzz_ForSBoxI(i, compute_sbox_a)
             {
-               box   = zzz_BoxArrayBox(boxes, i);
-               start = zzz_BoxIMin(box);
+               compute_sbox = zzz_SBoxArraySBox(compute_sbox_a, i);
+               start = zzz_SBoxIMin(compute_sbox);
 
                b_data_box = zzz_BoxArrayBox(zzz_StructVectorDataSpace(b), i);
                r_data_box = zzz_BoxArrayBox(zzz_StructVectorDataSpace(r), i);
@@ -219,7 +222,7 @@ zzz_SMGResidual( void             *residual_vdata,
                bp = zzz_StructVectorBoxData(b, i);
                rp = zzz_StructVectorBoxData(r, i);
 
-               zzz_GetBoxSize(box, loop_size);
+               zzz_GetSBoxSize(compute_sbox, loop_size);
                zzz_BoxLoop2(loop_index, loop_size,
                             b_data_box, start, base_stride, bi,
                             r_data_box, start, base_stride, ri,
@@ -326,6 +329,7 @@ zzz_SMGResidualFinalize( void *residual_vdata )
    {
       zzz_FreeIndex(residual_data -> base_index);
       zzz_FreeIndex(residual_data -> base_stride);
+      zzz_FreeSBoxArray(residual_data -> base_points);
       zzz_FreeComputePkg(residual_data -> compute_pkg );
       zzz_TFree(residual_data);
    }

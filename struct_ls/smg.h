@@ -61,6 +61,7 @@ typedef struct
    zzz_StructVector  **b_l;
    zzz_StructVector  **x_l;
    zzz_StructVector  **r_l;
+   zzz_StructVector  **e_l;
 
    void               *pre_relax_data_initial;
    void              **pre_relax_data_l;

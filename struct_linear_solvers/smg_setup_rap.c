@@ -101,6 +101,8 @@ zzz_SMGSetupRAPOp( zzz_StructMatrix *R,
 
    }
 
+   zzz_AssembleStructMatrix(Ac);
+
    return ierr;
 }
 

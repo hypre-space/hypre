@@ -72,7 +72,7 @@ zzz_SMGSetPostRelaxParams( void *smg_vdata,
    int ierr = 0;
 
    zzz_SMGRelaxSetTol(post_relax_data, 0.0);
-   zzz_SMGRelaxSetMaxIter(post_relax_data, 0);
+   zzz_SMGRelaxSetMaxIter(post_relax_data, 1);
 
    zzz_SMGRelaxSetNumSpaces(post_relax_data, 2);
    /* relax fine points */
@@ -122,6 +122,7 @@ zzz_SMGSetup( void             *smg_vdata,
    zzz_StructVector  **b_l;
    zzz_StructVector  **x_l;
    zzz_StructVector  **r_l;
+   zzz_StructVector  **e_l;
 
    void               *pre_relax_data_initial;
    void              **pre_relax_data_l;
@@ -298,6 +299,7 @@ zzz_SMGSetup( void             *smg_vdata,
    x_l  = zzz_TAlloc(zzz_StructVector *, num_levels);
    b_l  = zzz_TAlloc(zzz_StructVector *, num_levels);
    r_l  = zzz_TAlloc(zzz_StructVector *, num_levels);
+   e_l  = zzz_TAlloc(zzz_StructVector *, num_levels);
 
    A_l[0] = A;
    x_l[0] = x;
@@ -307,6 +309,7 @@ zzz_SMGSetup( void             *smg_vdata,
    zzz_SetStructVectorNumGhost(r_l[0], r_num_ghost);
    zzz_InitializeStructVector(r_l[0]);
    zzz_AssembleStructVector(r_l[0]);
+   e_l[0] = r_l[0];
    for (l = 0; l < (num_levels - 1); l++)
    {
       PT_l[l]  = zzz_SMGNewInterpOp(A_l[l], grid_l[l+1], cdir);
@@ -333,6 +336,7 @@ zzz_SMGSetup( void             *smg_vdata,
       zzz_InitializeStructVectorShell(r_l[l+1]);
       zzz_InitializeStructVectorData(r_l[l+1], zzz_StructVectorData(r_l[0]));
       zzz_AssembleStructVector(r_l[l+1]);
+      e_l[l+1] = r_l[l+1];
    }
 
    (smg_data -> A_l)  = A_l;
@@ -341,6 +345,7 @@ zzz_SMGSetup( void             *smg_vdata,
    (smg_data -> x_l)  = x_l;
    (smg_data -> b_l)  = b_l;
    (smg_data -> r_l)  = r_l;
+   (smg_data -> e_l)  = e_l;
 
    /*-----------------------------------------------------
     * Set up coarse grid operators and transfer operators
@@ -412,7 +417,7 @@ zzz_SMGSetup( void             *smg_vdata,
    for (l = (num_levels - 2); l >= 0; l--)
    {
       intadd_data_l[l] = zzz_SMGIntAddInitialize();
-      zzz_SMGIntAddSetup(intadd_data_l[l], PT_l[l], x_l[l+1], x_l[l],
+      zzz_SMGIntAddSetup(intadd_data_l[l], PT_l[l], x_l[l+1], e_l[l], x_l[l],
                          cindex_l[l], cstride_l[l],
                          findex_l[l], fstride_l[l]);
 

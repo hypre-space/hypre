@@ -153,6 +153,7 @@ zzz_SMGSetupInterpOp( zzz_StructMatrix *A,
 
    loop_index = zzz_NewIndex();
    loop_size  = zzz_NewIndex();
+   start = zzz_NewIndex();
    startc = zzz_NewIndex();
    stridec = zzz_NewIndex();
    zzz_SetIndex(stridec, 1, 1, 1);
@@ -216,6 +217,7 @@ zzz_SMGSetupInterpOp( zzz_StructMatrix *A,
        *-----------------------------------------------------*/
 
       zzz_SMGRelaxSetup(relax_data, A_mask, b, x, b);
+      zzz_ClearStructVectorGhostValues(x);
       zzz_SetStructVectorConstantValues(x, 1.0);
       zzz_SetStructVectorConstantValues(b, 0.0);
       zzz_SMGRelax(relax_data, b, x);
@@ -291,7 +293,7 @@ zzz_SMGSetupInterpOp( zzz_StructMatrix *A,
             {
                compute_sbox = zzz_SBoxArraySBox(compute_sbox_a, j);
 
-               start  = zzz_SBoxIMin(compute_sbox);
+               zzz_CopyIndex(zzz_SBoxIMin(compute_sbox), start);
                zzz_SMGMapFineToCoarse(start, startc, cindex, cstride);
 
                /* shift start index to appropriate F-point */
@@ -324,6 +326,7 @@ zzz_SMGSetupInterpOp( zzz_StructMatrix *A,
    zzz_SMGRelaxFinalize(relax_data);
    zzz_FreeStructStencil(compute_pkg_stencil);
    zzz_FreeStructVector(b);
+   zzz_FreeIndex(start);
    zzz_FreeIndex(startc);
    zzz_FreeIndex(stridec);
    zzz_FreeIndex(loop_index);

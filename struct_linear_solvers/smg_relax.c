@@ -260,7 +260,7 @@ zzz_SMGRelax( void             *relax_vdata,
       if (stencil_dim > 2)
          zzz_SMGSolve(solve_data[is], temp_vec, x);
       else
-         zzz_CyclicReduction(solve_data[i], temp_vec, x);
+         zzz_CyclicReduction(solve_data[is], temp_vec, x);
    }
 
    /*----------------------------------------------------------
@@ -275,7 +275,7 @@ zzz_SMGRelax( void             *relax_vdata,
          if (stencil_dim > 2)
             zzz_SMGSolve(solve_data[is], temp_vec, x);
          else
-            zzz_CyclicReduction(solve_data[i], temp_vec, x);
+            zzz_CyclicReduction(solve_data[is], temp_vec, x);
       }
 
       (relax_data -> num_iterations) = (i + 1);
