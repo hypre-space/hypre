@@ -2,7 +2,7 @@
  * lobpcg.c
  *
  * $Revision$
- * Date: 10/7/2002
+ * Date:03/11/2004
  * Authors: M. Argentati and A. Knyazev
  *********************************************************************EHEADER*/
 
@@ -15,18 +15,14 @@
 #include <float.h>
 #include "lobpcg.h"
 
-/*------------------------------------------------------------------------*/
-/* HYPRE includes                                                         */
-/*------------------------------------------------------------------------*/
-#include <utilities/fortran.h>
-
-/* function prototypes for functions that are passed to lobpcg */
-/*void dsygv_(int *itype, char *jobz, char *uplo, int *n,
-        double *a, int *lda, double *b, int *ldb, double *w, 
-        double *work, int *lwork, int *info);*/
+#ifdef HYPRE_USING_ESSL
+#include <essl.h>
+#else
+#include "fortran.h"
 void hypre_F90_NAME_BLAS(dsygv, DSYGV)(int *itype, char *jobz, char *uplo, int *n,
         double *a, int *lda, double *b, int *ldb, double *w, 
         double *work, int *lwork, /*@out@*/ int *info);
+#endif
 
 int Func_AMult(Matx *B,Matx *C,int *idx); /* added by MEA 9/23/02 */
 int Func_TPrec(Matx *R,int *idx);
@@ -1047,24 +1043,15 @@ int rr(Matx *U,Matx *LU,Matx *R,Matx *LR,Matx *P,Matx *LP,
 /*------------------------------------------------------------------------*/
 int myeig1(Matx *A, Matx *B, Matx *X,double *lambda)
 {
-/*--------------------------------------------------------------------------
- * We deal with a blas portability issue (it's actually a 
- * C-calling-fortran issue) by using the following macro to call the blas:
- * hypre_F90_NAME_BLAS(name, NAME)();
- * So, for dsygv, we use:
- *
- *  hypre_F90_NAME_BLAS(dsygv, DSYGV)();
- *
- * This helps to get portability on some other platforms that 
- * such as on Cray computers.
- * The include file fortran.h is needed.
- *--------------------------------------------------------------------------*/
-
-  int i,j,n,lda,lwork,info,itype,ldb;
-  char jobz,uplo;
+  int i,j,n,lda,lwork,info,ldb;
+  /*char jobz,uplo;*/
   double *a,*b,*work,temp;
 
+   n=A->n;
+  lda=n;
+  ldb=n;
 
+  lwork=10*n; 
 
   /* do some checks */
   assert(A->m==A->n);
@@ -1073,14 +1060,6 @@ int myeig1(Matx *A, Matx *B, Matx *X,double *lambda)
   assert(A->mat_storage_type==DENSE);
   assert(B->mat_storage_type==DENSE);
   
-  n=A->n; 
-  lda=n;
-  ldb=n;
-  jobz='V';
-  uplo='U';
-  lwork=10*n;
-  itype=1;
-
   Mat_Init_Dense(X,n,n,GENERAL);
 
   /* allocate memory */
@@ -1092,7 +1071,7 @@ int myeig1(Matx *A, Matx *B, Matx *X,double *lambda)
     abort();
   }
 
-  /* convert C-style to Fortran-style storage */
+/* convert C-style to Fortran-style storage */
   /* column major order */
   for(i=0;i<n;++i){
     for(j=0;j<n;++j){
@@ -1103,12 +1082,28 @@ int myeig1(Matx *A, Matx *B, Matx *X,double *lambda)
   assert(a!=NULL);assert(b!=NULL);
   
   /* compute generalized eigenvalues and eigenvectors of A*x=lambda*B*x */
-  /*dsygv_(&itype, &jobz, &uplo, &n, a, &lda, b, &ldb,
-     lambda, &work[0], &lwork, &info);a */
-  hypre_F90_NAME_BLAS(dsygv, DSYGV)(&itype, &jobz, &uplo, &n, a, &lda, b, &ldb,
+  #ifdef HYPRE_USING_ESSL
+  dsygv (1, a, n, b, n, lambda, a, n, n, &work[0], lwork);  
+ #else 
+ { 
+ char jobz='V';
+ char uplo='U';
+ int itype=1;
+    hypre_F90_NAME_BLAS(dsygv, DSYGV)(&itype, &jobz, &uplo, &n, a, &lda, b, &ldb,
      lambda, &work[0], &lwork, &info);
-
-  /* compute transpose of A */
+  if (info!=0) 
+	{
+	fprintf(stderr, "problem in dsygv eigensolver, info=%d\n",info);
+        fprintf(stderr, "Sorry, the lobpcg became unstable and crashed.\n");
+	fprintf(stderr, "Try to restart with a smaller tolerance.\n");        
+	fprintf(stderr, "The instability of lobpcg will be fixed in a future release.\n");
+        abort();
+	}
+  Trouble_Check(0,info);
+ }
+ #endif 
+ 
+ /* compute transpose of A */
   for (i=0;i<n;i++){
     for (j=0;j<i;j++){
     temp=A->val[i][j];
@@ -1125,10 +1120,6 @@ int myeig1(Matx *A, Matx *B, Matx *X,double *lambda)
       X->val[i][j]=a[i+n*j];
     }
   }
-
-  /* check error condition */
-  if (info!=0) fprintf(stderr, "problem in dsygv eigensolver, info=%d\n",info);
-  Trouble_Check(0,info);
 
   free(a);
   free(b);
@@ -1245,6 +1236,97 @@ int myeig1(Matx *A, Matx *B, Matx *X,double *lambda)
 *
 *  =====================================================================
 ******************************************************************************/
+/*************************************************************************
+ IBM ESSL library: dsygv (iopt, a, lda, b, ldb, w, z, ldz, n, aux, naux);
+
+  iopt
+    indicates the type of computation to be performed, where:
+
+    If iopt = 0, eigenvalues only are computed.
+
+    If iopt = 1, eigenvalues and eigenvectors are computed.
+
+    Specified as: a fullword integer; iopt = 0 or 1.
+
+a
+    is the real symmetric matrix A of order n. It is stored in lower storage mode. Specified as: an lda by (at least) n array, containing numbers of the data type indicated in Table 127. On output, the data in the lower triangle of A is overwritten; that is, the original input is not preserved.
+
+lda
+    is the leading dimension of the array specified for a. Specified as: a fullword integer; lda > 0 and lda >= n.
+
+b
+    is the real positive definite symmetric matrix B of order n. It is stored in lower storage mode. Specified as: an ldb by (at least) n array, containing numbers of the data type indicated in Table 127. On output, the data in the lower triangle of B is overwritten; that is, the original input is not preserved.
+
+ldb
+    is the leading dimension of the array specified for b. Specified as: a fullword integer; ldb > 0 and ldb >= n.
+
+w
+    See On Return.
+
+z
+    See On Return.
+
+ldz
+    has the following meaning, where:
+
+    If iopt = 0, it is not used in the computation.
+
+    If iopt = 1, it is the leading dimension of the output array specified for z.
+
+    Specified as: a fullword integer. It must have the following value, where:
+
+    If iopt = 0, ldz > 0.
+
+    If iopt = 1, ldz > 0 and ldz >= n.
+
+n
+    is the order of matrices A and B. Specified as: a fullword integer; n >= 0.
+
+aux
+    has the following meaning:
+
+    If naux = 0 and error 2015 is unrecoverable, aux is ignored.
+
+    Otherwise, it is a storage work area used by this subroutine. Its size is specified by naux.
+
+    Specified as: an area of storage, containing numbers of the data type indicated in Table 127. On output, the contents are overwritten.
+
+naux
+    is the size of the work area specified by aux--that is, the number of elements in aux. Specified as: a fullword integer, where:
+
+    If naux = 0 and error 2015 is unrecoverable, SSYGV and DSYGV dynamically allocate the work area used by the subroutine. The work area is deallocated before control is returned to the calling program.
+
+    Otherwise, It must have the following value, where:
+
+    If iopt = 0, naux >= n.
+
+    If iopt = 1, naux >= 2n. 
+
+On Return
+
+w
+    is the vector w of length n, containing the eigenvalues of the generalized real symmetric eigensystem Az = wBz in ascending order. Returned as: a one-dimensional array of (at least) length n, containing numbers of the data type indicated in Table 127.
+
+z
+    has the following meaning, where:
+
+    If iopt = 0, it is not used in the computation.
+
+    If iopt = 1, it is the matrix Z of order n, containing the eigenvectors of the generalized real symmetric eigensystem, Az = wBz. The eigenvectors are normalized so that ZTBZ = I. The eigenvector in column i of matrix Z corresponds to the eigenvalue wi.
+
+    Returned as: an ldz by (at least) n array, containing numbers of the data type indicated in Table 127. 
+
+Notes
+
+   1. When you specify iopt = 0, you must specify:
+          * A positive value for ldz
+          * A dummy argument for z (see Example 1) 
+   2. Matrices A and Z may coincide. Matrices A and B, vector w, and the data area specified for aux must have no common elements; otherwise, results are unpredictable. Matrices Z and B, vector w, and the data area specified for aux must also have no common elements; otherwise, results are unpredictable. See Concepts.
+  3. For a description of how real symmetric matrices are stored in lower storage mode, see Lower Storage Mode.
+*   4. You have the option of having the minimum required value for naux dynamically returned to your program. For details, see Using Auxiliary Storage in ESSL. 
+*******************************************************************/
+
+
 
 /*****************************************************************************/
 int Trouble_Check(int mode,int test)

@@ -2,13 +2,9 @@
  * HYPRE_lobpcg.h
  *
  * $Revision$
- * Date: 10/7/2002
+ * Date: 03/12/2004
  * Authors: M. Argentati and A. Knyazev
  *********************************************************************EHEADER*/
-
-/* Constants */
-#define LOBPCG_PCG_SOLVE_MAXITR   3
-#define LOBPCG_PCG_SOLVE_TOL      1E-6
 
 /*  matrix types */
 enum en1 {NONE1,DENSE,HYPRE_MATRIX,HYPRE_VECTORS};
