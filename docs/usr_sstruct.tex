@@ -92,8 +92,8 @@ sets the variables on a grid part, and the \code{AddVariables()}
 routine adds variables to a grid part index (in the above example,
 there are two cell-centered variables at index (1,2)).  The
 \code{Assemble()} routine is a collective call (i.e., must be called
-on all processes), and finalizes the grid assembly, making the grid
-``ready to use''.
+on all processes from a common synchronization point), and finalizes
+the grid assembly, making the grid ``ready to use''.
 
 %==========================================================================
 

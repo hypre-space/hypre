@@ -3,12 +3,12 @@
 
 %==========================================================================
 
-\section{Building the Code}
+\section{Building the Library}
 
 Usually, \hypre{} can be built by simply typing \kbd{configure}
 followed by \kbd{make} in the top-level source directory.
 
-\subsection{Code configuration}
+\subsection{Library configuration}
 
 To automatically generate machine specific makefiles, type
 \kbd{configure} in the top level directory.  The configure
@@ -56,11 +56,10 @@ that you choose all (C, C++, Fortran) compilers.
 \kbd{--enable-opt} (default) or \kbd{--enable-debug}.
 For other compiler flags use the \kbd{--with-CFLAGS} option.
 
-\item[BLAS] The optimum BLAS for the platform should be obtained
-without specification of a configure option.  In other words, by
-default, the systems native optimized BLAS library will the
-automatically chosen.  To specify another BLAS library available on a
-platform, use \kbd{--with-BLAS=}{\it pathname} or
+\item[BLAS] By default, configure attempts to find the systems native
+optimized BLAS library.  The path for this library must be in the
+user's \code{PATH}.  To specify another BLAS library available, use
+\kbd{--with-BLAS=}{\it pathname} or
 \kbd{--with-BLAS=}{\it link list}.  To configure and compile without
 BLAS use the \kbd{--without-BLAS} option.
 \end{description}
@@ -70,7 +69,7 @@ includes all the header files found to be necessary by configure.
 This file may be used to see how a compiled version of the library was
 configured and may also be included by the user in his/her own code.
 
-\subsection{Linking into another program}
+\subsection{Linking to the Library}
 
 A program linking with \hypre{} must be compiled with
 \kbd{-I\$HYPRE_DIR/include} and linked with
@@ -93,131 +92,203 @@ exported to this file by the \file{configure} script.
 \section{Calling \hypre{} from Fortran}
 \label{Calling hypre from Fortran}
 
-Fortran 77 subroutine arguments always pass copies of the argument
-addresses upon execution of the subroutine call.  This is referred to
-as call-by-address or call-by-reference.  In the called subroutine,
-the memory space at the argument address can be altered, but the
-calling address cannot be altered.
+Although \hypre{} is written in C, a Fortran interface is provided.
+The Fortran interface is very similar to the C interface, and can be
+determined from the C interface by a few simple conversion rules.
+These conversion rules are described below.
 
-C function parameters, whether pointers (addresses) or not, are
-directly copied upon entry to the function. This is referred to as
-call-by-value.  Altering the copied C parameter in the called function
-has no effect on the parameter in the calling function.  A pointer
-parameter in C can achieve the same effect as call-by-reference, and
-by this mechanism the languages can interoperate in a straightforward
-manner.
+Let us start out with a simple example.  Consider the following
+\hypre{} prototype:
+\begin{display}
+\begin{verbatim}
+int HYPRE_IJMatrixSetValues(HYPRE_IJMatrix  matrix,
+                            int  nrows, int  *ncols,
+                            const int *rows, const int  *cols,
+                            const double  *values);
+\end{verbatim}
+\end{display}
+The corresponding Fortran code for calling this routine is as follows:
+\begin{display}
+\begin{verbatim}
+      integer*8         matrix, 
+      integer           nrows, ncols(MAX_NCOLS)
+      integer           rows(MAX_ROWS), cols(MAX_COLS)
+      double precision  values(MAX_COLS)
+      integer           ierr
 
-Portability across typical platforms is currently achieved with the
-specific Fortran-calling-C mapping:
+      call HYPRE_IJMatrixSetValues(matrix, nrows, ncols, rows, cols,
+     &                             values, ierr)
+\end{verbatim}
+\end{display}
+The Fortran subroutine name is the same, unless the name is longer
+than 31 characters.  In these situations, the name is condensed to 31
+characters, usually by simple truncation.  For now, users should look
+at the Fortran drivers in the \code{test} directory for the correct
+condensed names.  In the future, this aspect of the interface conversion
+will be made consistent and straightforward.
 
-\vspace{0.2in}
-
-\begin{tabular}{lcl}
-
-\underline{calling Fortran argument type} & &
-\underline{called C function parameter type} \\
-                              &                   &   \\
-\hspace{0.1in} (addr of) \code{integer*8}        & $\longrightarrow$ &
-\hspace{0.5in} \code{long int*} \\
-\hspace{0.1in} (addr of) \code{integer}          & $\longrightarrow$ &
-\hspace{0.5in} \code{int*} \\
-\hspace{0.1in} (addr of) \code{character}        & $\longrightarrow$ &
-\hspace{0.5in} \code{char*} \\
-\hspace{0.1in} (addr of) \code{double precision} & $\longrightarrow$ &
-\hspace{0.5in} \code{double*} \\
-
+The Fortran subroutine argument list is always the same as the
+corresponding C routine, except that the error return code \code{ierr}
+is always last.  Conversion from C parameter types to Fortran argument
+type is summarized in Table \ref{table-fortran-interface-types}.
+\begin{table}
+\center
+\begin{tabular}{|l|l|}
+\hline
+C parameter & Fortran argument \\
+\hline\hline
+\code{int i} & \code{integer i} \\
+\code{double d} & \code{double precision d} \\
+\code{int *array} & \code{integer array(*)} \\
+\code{double *array} & \code{double precision array(*)} \\
+\code{char *string} & \code{character string(*)} \\
+\code{HYPRE_Type object} & \code{integer*8 object} \\
+\code{HYPRE_Type *object} & \code{integer*8 object} \\
+\hline
 \end{tabular}
-
-\vspace{0.2in}
-
-In particular, C-type
-\code{long int*} points to a space that can hold an address, a space
-which happens to be the size of that allocated by a Fortran
-\code{integer*8} declaration.
-In orther words, C can hold an address in a \code{long int} and
-assign that address to a Fortran \code{integer*8} memory space
-(using \code{long int*} call-by-value).
-
-Addresses in \code{integer*8} variables might not have originated
-in a Fortran call, and if they address inhomogeneously typed collections
-of data (e.g. C structures), Fortran might not have enough information to
-dereference them.  But Fortran can still pass around such addresses, and in
-particular hand them back and forth between various C functions.  The
-\hypre{} Fortran interface makes extensive use of this technique,
-as with the \code{addr} variable in the following general example:
-
-\vspace{0.1in}
-
-\noindent Generalized example:
-
-\vspace{0.1in}
-
-  Fortran calling:
+\caption{%
+Conversion from C parameters to Fortran arguments
+}
+\label{table-fortran-interface-types}
+\end{table}
+Arrays arguments in \hypre{} are always of type \code{(int *)} or
+\code{(double *)}, and the corresponding Fortran types are simply
+\code{integer} or \code{double precision} arrays.  Note that the
+Fortran arrays may be indexed in any manner.  For example, an integer
+array of length \code{N} may be declared in fortran as either of the
+following:
+\begin{display}
 \begin{verbatim}
-      integer*8        addr
-      integer          intg, ierr
-      character        charact
-      double precision double_precis
-
-      call subroutine_name(addr, intg, charact, double_precis, ierr)
+      integer  array(N)
+      integer  array(0:N-1)
 \end{verbatim}
+\end{display}
 
-The interface is designed so that the label \code{subroutine_name} is
-exactly the label of the \hypre{} C-function\footnote{For C function
-names under 32 characters in length, the Fortran name is the same as
-the C name.  For C function names over 31 characters, the Fortran name
-is condensed to less than 32 characters (see reference manual for
-Fortran name in such a case).}.  \hypre{} interlanguage C-wrappers
-currently account for interlanguage linking issues involving appended
-underscores.  The C-wrappers also accomodate Fortran subroutine name
-length limitations.  Fortran variable
-\code{ierr} allows error handling through the interface.
+\hypre{} objects can usually be declared as in the table because
+\code{integer*8} usually corresponds to the length of a pointer.
+However, there may be some machines where this is not the case
+(although we are not aware of any at this time).  On such machines,
+the Fortran type for a \hypre{} object should be an \code{integer} of
+the appropriate length.
 
-\vspace{0.1in}
-
-\noindent Specific example:
-
-\vspace{0.1in}
-
-  Fortran calling:
-\begin{verbatim}
-      integer*8        IJmatrix, 
-      integer          num_nonzero_coefs, row_index
-      integer          col_indices(MAX_NUM_COLS), ierr
-      double precision coefs(MAX_NUM_COLS)
-             .
-             .
-             .
-
-      call HYPRE_IJMatrixInsertRow(IJmatrix, num_nonzero_coefs, row_index,
-                                   col_indices, coefs, ierr)
-\end{verbatim}
-
-\vspace{0.1in}
-
-  C called:
-\begin{verbatim}
-      int HYPRE_IJMatrixInsertRow( HYPRE_IJMatrix IJmatrix, int n,
-                                   int row, const int *cols,
-                                   const double *values)     
-
-      { int ierr = 0;
-              .
-              .
-              .
-
-        return(ierr); }
-\end{verbatim}
-
-\noindent Since the C function name has less than 32 characters, Fortran
-uses the same name in the subroutine call.
-
-The typical implementation above might not have the portability needed
-over a larger set of platforms.  The previous mapping might
-not be universal.  Furthermore,
-the implementation is hand-programmed, slow, and prone to human error.
-It will probably be replaced by a more automated implementation in accordance
-with the {\sl Babel} project. 
+%Fortran 77 subroutine arguments always pass copies of the argument
+%addresses upon execution of the subroutine call.  This is referred to
+%as call-by-address or call-by-reference.  In the called subroutine,
+%the memory space at the argument address can be altered, but the
+%calling address cannot be altered.
+%
+%C function parameters, whether pointers (addresses) or not, are
+%directly copied upon entry to the function. This is referred to as
+%call-by-value.  Altering the copied C parameter in the called function
+%has no effect on the parameter in the calling function.  A pointer
+%parameter in C can achieve the same effect as call-by-reference, and
+%by this mechanism the languages can interoperate in a straightforward
+%manner.
+%
+%Portability across typical platforms is currently achieved with the
+%specific Fortran-calling-C mapping:
+%
+%\vspace{0.2in}
+%
+%\begin{tabular}{lcl}
+%
+%\underline{calling Fortran argument type} & &
+%\underline{called C function parameter type} \\
+%                              &                   &   \\
+%\hspace{0.1in} (addr of) \code{integer*8}        & $\longrightarrow$ &
+%\hspace{0.5in} \code{long int*} \\
+%\hspace{0.1in} (addr of) \code{integer}          & $\longrightarrow$ &
+%\hspace{0.5in} \code{int*} \\
+%\hspace{0.1in} (addr of) \code{character}        & $\longrightarrow$ &
+%\hspace{0.5in} \code{char*} \\
+%\hspace{0.1in} (addr of) \code{double precision} & $\longrightarrow$ &
+%\hspace{0.5in} \code{double*} \\
+%
+%\end{tabular}
+%
+%\vspace{0.2in}
+%
+%In particular, C-type
+%\code{long int*} points to a space that can hold an address, a space
+%which happens to be the size of that allocated by a Fortran
+%\code{integer*8} declaration.
+%In orther words, C can hold an address in a \code{long int} and
+%assign that address to a Fortran \code{integer*8} memory space
+%(using \code{long int*} call-by-value).
+%
+%Addresses in \code{integer*8} variables might not have originated
+%in a Fortran call, and if they address inhomogeneously typed collections
+%of data (e.g. C structures), Fortran might not have enough information to
+%dereference them.  But Fortran can still pass around such addresses, and in
+%particular hand them back and forth between various C functions.  The
+%\hypre{} Fortran interface makes extensive use of this technique,
+%as with the \code{addr} variable in the following general example:
+%
+%\vspace{0.1in}
+%
+%\noindent Generalized example:
+%
+%\vspace{0.1in}
+%
+%  Fortran calling:
+%\begin{verbatim}
+%      integer*8        addr
+%      integer          intg, ierr
+%      character        charact
+%      double precision double_precis
+%
+%      call subroutine_name(addr, intg, charact, double_precis, ierr)
+%\end{verbatim}
+%
+%The interface is designed so that the label \code{subroutine_name} is
+%exactly the label of the \hypre{} C-function\footnote{For C function
+%names under 32 characters in length, the Fortran name is the same as
+%the C name.  For C function names over 31 characters, the Fortran name
+%is condensed to less than 32 characters (see reference manual for
+%Fortran name in such a case).}.  \hypre{} interlanguage C-wrappers
+%currently account for interlanguage linking issues involving appended
+%underscores.  The C-wrappers also accomodate Fortran subroutine name
+%length limitations.  Fortran variable
+%\code{ierr} allows error handling through the interface.
+%
+%\vspace{0.1in}
+%
+%\noindent Specific example:
+%
+%\vspace{0.1in}
+%
+%  Fortran calling:
+%\begin{verbatim}
+%      integer*8        IJmatrix, 
+%      integer          num_nonzero_coefs, row_index
+%      integer          col_indices(MAX_NUM_COLS), ierr
+%      double precision coefs(MAX_NUM_COLS)
+%             .
+%             .
+%             .
+%
+%      call HYPRE_IJMatrixInsertRow(IJmatrix, num_nonzero_coefs, row_index,
+%                                   col_indices, coefs, ierr)
+%\end{verbatim}
+%
+%\vspace{0.1in}
+%
+%  C called:
+%\begin{verbatim}
+%      int HYPRE_IJMatrixInsertRow( HYPRE_IJMatrix IJmatrix, int n,
+%                                   int row, const int *cols,
+%                                   const double *values)     
+%
+%      { int ierr = 0;
+%              .
+%              .
+%              .
+%
+%        return(ierr); }
+%\end{verbatim}
+%
+%\noindent Since the C function name has less than 32 characters, Fortran
+%uses the same name in the subroutine call.
 
 %==========================================================================
 

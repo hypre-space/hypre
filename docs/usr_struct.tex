@@ -82,8 +82,9 @@ HYPRE_StructGridAssemble(grid);
 The \code{Create()} routine creates an empty 2D grid object that lives
 on the \code{MPI_COMM_WORLD} communicator.  The \code{SetExtents()}
 routine adds a new box to the grid.  The \code{Assemble()} routine is
-a collective call (i.e., must be called on all processes), and
-finalizes the grid assembly, making the grid ``ready to use''.
+a collective call (i.e., must be called on all processes from a common
+synchronization point), and finalizes the grid assembly, making the
+grid ``ready to use''.
 
 %==========================================================================
 
@@ -206,9 +207,8 @@ step.  The \code{SetBoxValues()} routine sets the matrix coefficients
 for some set of stencil entries over the gridpoints in some box.  Note
 that the box need not correspond to any of the boxes used to create
 the grid, but values should be set for all gridpoints that this
-process ``owns''.  The \code{Assemble()} routine is a collective call
-(i.e., must be called on all processes), and finalizes the matrix
-assembly, making the matrix ``ready to use''.
+process ``owns''.  The \code{Assemble()} routine is a collective call,
+and finalizes the matrix assembly, making the matrix ``ready to use''.
 
 Matrix coefficients that reach outside of the boundary should be set
 to zero.  For efficiency reasons, \hypre{} does not do this
@@ -286,9 +286,8 @@ The \code{Create()} routine creates an empty vector object.  The
 as its corresponding \code{Matrix} routine.  The \code{SetBoxValues()}
 routine sets the vector coefficients over the gridpoints in some box,
 and again, follows the same rules as its corresponding \code{Matrix}
-routine.  The \code{Assemble()} routine is a collective call (i.e.,
-must be called on all processes), and finalizes the vector assembly,
-making the vector ``ready to use''.
+routine.  The \code{Assemble()} routine is a collective call, and
+finalizes the vector assembly, making the vector ``ready to use''.
 
 %==========================================================================
 

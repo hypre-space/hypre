@@ -25,9 +25,10 @@ SMG        & X &   &   &   \\
 PFMG       & X &   &   &   \\
 BoomerAMG  &   & X & X & X \\
 ParaSails  &   & X & X & X \\
+Euclid     &   & X & X & X \\
 PILUT      &   & X & X & X \\
-PCG        & X &   & X & X \\
-GMRES      &   & X & X & X \\
+PCG        & X & X & X & X \\
+GMRES      & X & X & X & X \\
 \hline
 \end{tabular}
 \caption{%
@@ -52,29 +53,22 @@ solver. As described before, the matrix and solver must be compatible,
 in that the matrix must provide the services needed by the
 solver. Krylov solvers, for example, need only a matrix-vector
 multiplication.  Most preconditioners, on the other hand, have
-additional requirements such as access to the coefficients of the
-matrix, e.g. the GetRow function in the
-\code{HYPRE\_DistributedMatrix} class.
+additional requirements such as access to the matrix coefficients.
 
 \item
-{\bf Choose parameters that control construction of the
-preconditioner/solver.}  Parameters are chosen through the \code{Set}
-calls provided by the solver.  As is true throughout \hypre{}, all
-parameters have reasonable defaults if not chosen.  Note that in
-\hypre{}, convergence criteria can be chosen after the
-preconditioner/solver has been setup.
+{\bf Choose parameters for the preconditioner and/or solver.}
+Parameters are chosen through the \code{Set()} calls provided by the
+solver.  As is true throughout \hypre{}, all parameters have
+reasonable defaults if not chosen.  Note that in \hypre{}, convergence
+criteria can be chosen after the preconditioner/solver has been setup.
 
 \item
 {\bf Pass the preconditioner to the solver.} For solvers that are not
-preconditioned, this step is omitted. The preconditioner is passed
-through the \code{SetPreconditioner} call. The object passed in as the
-preconditioner must be a fully constructed \code{Solver}.
+preconditioned, this step is omitted.  The preconditioner is passed
+through the \code{SetPreconditioner()} call.
 
 \item
-{\bf Set up the solver.} In the procedural C interface for \hypre{},
-this is the \code{Setup} call.  In the ESI-compliant interface for
-\hypre{}, this is the \code{GetConstructedObject} from the solver
-builder interface.
+{\bf Set up the solver.} This is just the \code{Setup()} routine.
 
 \end{enumerate}
 
@@ -88,22 +82,15 @@ ready for use.
 \begin{enumerate}
 
 \item
-{\bf Set convergence criteria.} Convergence can be controlled by the
+{\bf Set convergence criteria.}  Convergence can be controlled by the
 number of iterations, as well as various tolerances such as relative
 residual, preconditioned residual, etc.  Like all parameters,
-reasonable defaults are used. Generally speaking, Krylov solvers
-default to a tolerance-based convergence criteria, while solvers used
-traditionally as preconditioners default to convergence based on the
-number of iterations (usually a single iteration). Users are free to
-change these, though care must be taken. Some Krylov solvers, for
-example, are not guaranteed to converge unless the preconditioner is a
-constant operator, which is only satisfied for iterative methods if a
-fixed number of iterations (typically one) is taken.  For these
-solvers, a preconditioner with a tolerance-based convergence criteria
-will not usually work.
+reasonable defaults are used.  Users are free to change these, though
+care must be taken.  For example, if an iterative method is used as a
+preconditioner for a Krylov method, a constant number of iterations is
+usually required.
 
 \item
-{\bf Apply the solver to the right hand side.} For the procedural C
-interface, this is the \code{Solve} function. 
+{\bf Solve the system.}  This is just the \code{Solve()} routine.
 
 \end{enumerate}

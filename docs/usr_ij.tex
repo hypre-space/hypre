@@ -12,34 +12,24 @@ to the specialized solvers that require more problem information.
 \section{IJ Matrix Interface}
 
 As with the other interfaces in \hypre{}, the \code{IJ} interface
-expects to get data in distributed form.  Matrices are assumed to be
-distributed by blocks of rows as follows:
+expects to get data in distributed form because this is the only
+scalable approach for assembling matrices on thousands of processes.
+Matrices are assumed to be distributed by blocks of rows as follows:
 \begin{equation}
 \left[
 \begin{array}{c}
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ \\
-\mbox{rows \code{ilower}$_0$ through \code{iupper}$_0$} \\
- \\
-\hline
- \\
-\mbox{rows \code{ilower}$_1$ through \code{iupper}$_1$} \\
- \\
-\hline
- \\
+~~~~~~~~~~ A_0 ~~~~~~~~~~ \\
+A_1 \\
 \vdots \\
- \\
-\hline
- \\
-\mbox{rows \code{ilower}$_{P-1}$ through \code{iupper}$_{P-1}$} \\
- \\
+A_{P-1}
 \end{array}
 \right]
 \end{equation}
 In the above example, the matrix is distributed accross the $P$
-processes, $0, 1, ..., P-1$.  The indices \code{ilower} and
-\code{iupper} are the global row numbers for the first and last rows
-in each block, and the subscripts indicate the process that ``owns''
-the block.
+processes, $0, 1, ..., P-1$ by blocks of rows.  Each submatrix $A_p$
+is ``owned'' by a single process and its first and last row numbers
+are given by the global indices \code{ilower} and \code{iupper} in the
+\code{Create()} call below.
 
 The following example code illustrates the basic usage of the
 \code{IJ} interface for building matrices:
@@ -64,6 +54,7 @@ HYPRE_IJMatrixInitialize(ij_matrix);
 /* set matrix coefficients */
 HYPRE_IJMatrixSetValues(ij_matrix, nrows, ncols, rows, cols, values);
 ...
+/* add-to matrix cofficients, if desired */
 HYPRE_IJMatrixAddToValues(ij_matrix, nrows, ncols, rows, cols, values);
 ...
 
@@ -74,20 +65,24 @@ HYPRE_IJMatrixGetObject(ij_matrix, (void **) &parcsr_matrix);
 \end{display}
 The \code{Create()} routine creates an empty matrix object that lives
 on the \code{comm} communicator.  This is a collective call (i.e.,
-must be called on all processes), with each process passing its own
-row extents, \code{ilower} and \code{iupper}.  The row partitioning
-must be contiguous, i.e., \code{iupper} for process \code{i} must
-equal \code{ilower}$-1$ for process \code{i}$+1$.  Note that this
-allows matrices to have 0- or 1-based indexing.
+must be called on all processes from a common synchronization point),
+with each process passing its own row extents, \code{ilower} and
+\code{iupper}.  The row partitioning must be contiguous, i.e.,
+\code{iupper} for process \code{i} must equal \code{ilower}$-1$ for
+process \code{i}$+1$.  Note that this allows matrices to have 0- or
+1-based indexing.  The parameters \code{jlower} and \code{jupper}
+define a column partitioning, and should match \code{ilower} and
+\code{iupper} when solving square linear systems.  See the Reference
+Manual for more information.
 
 The \code{SetObjectType()} routine sets the underlying matrix object
 type to \code{HYPRE_PARCSR} (this is the only object type currently
 supported).  The \code{Initialize()} routine indicates that the matrix
 coefficients (or values) are ready to be set.  This routine may or may
 not involve the allocation of memory for the coefficient data,
-depending on the implementation.  The optional \code{Set} routines
+depending on the implementation.  The optional \code{Set()} routines
 mentioned later in this chapter and in the Reference Manual, should be
-called before this step.  These routines are all collective calls.
+called before this step.
 
 The \code{SetValues()} routine sets matrix values for some number of
 rows (\code{nrows}) and some number of columns in each row
@@ -123,6 +118,15 @@ HYPRE_IJMatrixSetDiagOffdSizes(matrix, diag_sizes, offdiag_sizes);
 
 \end{verbatim}
 \end{display}
+
+Once the matrix has been assembled, the sparsity pattern cannot be
+altered without completely destroying the matrix object and starting
+from scratch.  However, one can modify the matrix values of an already
+assembled matrix.  To do this, first call the \code{Initialize()}
+routine to re-initialize the matrix, then set or add-to values as
+before, and call the \code{Assemble()} routine to re-assemble before
+using the matrix.  Re-initialization and re-assembly are very cheap,
+essentially a no-op in the current implementation of the code.
 
 %\begin{figure}
 %\begin{center}
@@ -230,15 +234,21 @@ HYPRE_IJVectorGetObject(ij_vector, (void **) &par_vector);
 \end{display}
 The \code{Create()} routine creates an empty vector object that lives
 on the \code{comm} communicator.  This is a collective call, with each
-process passing its own index extents, \code{jlower} and \code{jupper}.
+process passing its own index extents, \code{jlower} and
+\code{jupper}.  The names of these extent parameters begin with a
+\code{j} because we typically think of matrix-vector multiplies as
+the fundamental operation involving both matrices and vectors.  For
+matrix-vector multiplies, the vector partitioning should match the
+column partitioning of the matrix (which also uses the \code{j}
+notation).  For linear system solves, these extents will typically
+match the row partitioning of the matrix as well.
 
 The \code{SetObjectType()} routine sets the underlying vector storage
 type to \code{HYPRE_PARCSR} (this is the only storage type currently
 supported).  The \code{Initialize()} routine indicates that the vector
 coefficients (or values) are ready to be set.  This routine may or may
 not involve the allocation of memory for the coefficient data,
-depending on the implementation.  These routines are all collective
-calls.
+depending on the implementation.
 
 The \code{SetValues()} routine sets the vector \code{values} for some
 number (\code{nvalues}) of \code{indices}.  Each process should set
@@ -249,3 +259,6 @@ finalizes the vector assembly, making the vector ``ready to use''.
 The \code{GetObject()} routine retrieves the built vector object so
 that it can be passed on to \hypre{} solvers that use the
 \code{ParVector} internal storage format.
+
+Vector values can be modified in much the same way as with matrices by
+first re-initializing the vector with the \code{Initialize()} routine.

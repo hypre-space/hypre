@@ -37,7 +37,7 @@ strcpy(paramStrings[0], "preconditioner parasails");
 FEI_parameters(sysHandle, 1, paramStrings);
 \end{verbatim}
 \end{display}
-All possible parameters are listed in section \ref{sec:fei-param} below.
+All possible parameters are listed in Table \ref{table-fei-param}.
 
 
 A linear system is then solved by calling 
@@ -74,82 +74,166 @@ void FEI_iterateToSolve(int sysHandle);
 %\item a link to the ML's parallel smoothed aggregation method.
 %\end{enumerate}
 
-\section{Parameters}
-\label{sec:fei-param}
+\begin{table}[h]
+\center
+\begin{tabular}{|l|p{4.5in}|}
+\hline
+Parameter Name & Parameter Values \\
+\hline\hline
+solver &
+\code{cg}, \code{gmres} (default), \code{superlu}, \code{superlux}
+\\
+preconditioner &
+\code{diagonal} (default), \code{pilut}, \code{parasails}, \code{boomeramg}
+\\
+gmres-dim &
+an integer specifying the value of \code{m} in restarted GMRES(m).
+The default value is 50.
+\\
+maxIterations &
+an integer specifying the maximum number of iterations permitted for
+CG or GMRES.  The default value is 1000.
+\\
+tolerance &
+a floating point number specifying the termination criterion for CG or
+GMRES.  The default value is 1.0E-10.
+\\
+pilut-row-size &
+\mbox[4.0i]{%
+an integer specifying the maximum number of nonzeros kept in the
+formation of incomplete L and U.  If this is not called, a value will
+be selected based on the sparsity of the matrix.
+}
+\\
+pilut-drop-tol &
+a floating point number specifying the threshold to drop small entries
+in L and U.  The default value is 0.0.
+\\
+superlu-ordering &
+\code{natural} (default) or \code{mmd} (minimum degree ordering).  This
+ordering is used to minimize the number of nonzeros generated in the
+LU decomposition.  The default is natural ordering.
+\\
+superlu-scale &
+\code{y} (yes; perform row and column scalings before decomposition) or
+\code{n} (no; default).
+\\
+amg-coarsen-type &
+\code{falgout}, \code{ruge}, or \code{default} coarsening for BOOMERAMG.
+\\
+amg-num-sweeps &
+an integer specifying the number of pre- and post-smoothing at each
+level of BoomerAMG.  The default is one pre- and one post-smoothings.
+\\
+amg-relax-type &
+\code{jacobi} (Damped Jacobi), \code{gs-slow} (sequential Gauss-Seidel),
+\code{gs-fast} (Gauss-Seidel on interior nodes), \code{hybrid}, or
+\code{direct}. The default is \code{hybrid}.
+\\
+amg-relax-weight &
+a floating point number between 0 and 1 specifying the damping factor
+for BoomerAMG's damped Jacobi smoother.  The default value is 0.5.
+\\
+amg-strong-threshold &
+a floating point number between 0 and 1 specifying the threshold used
+to determine strong coupling in BoomerAMG's coasening.  The default
+value is 0.25.
+\\
+parasails-threshold &
+a floating point number between 0 and 1 specifying the threshold used
+to prune small entries in setting up the sparse approximate inverse.
+The default value is 0.0.
+\\
+parasails-nlevels &
+an integer larger than 0 specifying the desired sparsity of the
+approximate inverse.  The default value is 1.
+\\
+\hline
+\end{tabular}
+\caption{%
+Parameters.
+}
+\label{table-fei-param}
+\end{table}
 
-\begin{description}
-\item[solver XXX] - where XXX specifies one of {\sf cg}, {\sf gmres},
-                    {\sf superlu}, or {\sf superlux}.  The default is {\sf gmres}.
-\item[preconditioner XXX] - where XXX is one of {\sf diagonal}, {\sf pilut},
-                    {\sf parasails}, or {\sf boomeramg}. The default 
-                    is {\sf diagonal}.
-\item[gmres-dim XXX] - where XXX is an integer specifying the value of m in
-                       restarted GMRES(m).  The default value is 50.
-\item[maxIterations XXX] - where XXX is an integer specifying the maximum number
-                           of iterations permitted for CG or GMRES.
-                           The default value is 1000.
-\item[tolerance XXX] - where XXX is a floating point number specifying the 
-                       termination criterion for CG or GMRES.  The default value is
-                       1.0E-10.
-\item[pilut-row-size XXX] - where XXX is an integer specifying the maximum
-                       number of nonzeros kept in the formation of imcomplete L
-                       and U).  If this is not called, a value will be selected
-                       based on the sparsity of the matrix.
-\item[pilut-drop-tol XXX] - where XXX is a floating point number specifying the 
-                       threshold to drop small entries in L and U.  The default
-                       value is 0.0.
-\item[superlu-ordering XXX] - where XXX specifies on of {\sf natural} or
-                       {\sf mmd} (minimum degree ordering).  This ordering
-                       is used to minimize the number of nonzeros generated
-                       in the LU decomposition.  The default is natural ordering.
-\item[superlu-scale XXX] - where XXX specifies on of {\sf y} (perform row
-                       and column scalings before decomposition) or {\sf n}.
-                       The default is no scaling.
-\item[amg-coarsen-type XXX] - where XXX specifies one of {\sf falgout},
-                       {\sf ruge}, or {\sf default} coarsening for BOOMERAMG.
-\item[amg-num-sweeps XXX] - where XXX is an integer specifying the number of
-                       pre- and post-smoothing at each level of BOOMERAMG.
-                       The default is one pre- and one post-smoothings.
-\item[amg-relax-type XXX] - where XXX is one of {\sf jacobi} (Damped Jacobi),
-                       {\sf gs-slow} (sequential Gauss-Seidel), {\sf gs-fast}
-                       (Gauss-Seidel on interior nodes), {\sf hybrid},
-                       or {\sf direct}. The default is {\sf hybrid}.
-\item[amg-relax-weight XXX] - where XXX is a floating point number between 0 and 1
-                       specifying the damping factor for BOOMERAMG's damped
-                       Jacobi smoother.  The default value is 0.5.
-\item[amg-strong-threshold XXX] - where XXX is a floating point number between 0 
-                       and 1 specifying the threshold used to determine
-                       strong coupling in BOOMERAMG's coasening.  The default 
-                       value is 0.25.
-\item[parasails-threshold XXX] - where XXX is a floating point number between 0 
-                       and 1 specifying the threshold used to prune small entries
-                       in setting up the sparse approximate inverse.  The default
-                       value is 0.0.
-\item[parasails-nlevels XXX] - where XXX is an integer larger than 0 specifying 
-                       the desired sparsity of the approximate inverse.  The
-                       default value is 1.
-\end{description}
 
 
-%\section{HYPRE-FEI Extensions}
-%
-%In order to support the reduced system formulation for applications
-%with slide surface constraints,
-%two additional functions are provided via HYPRE-FEI
-%on top of the base FEI specification :
+
+%\label{sec:fei-param}
 %
 %\begin{description}
-%\item[loadSlaveList(int,int*)] - this function is used to load information
-%                        about which unknowns are the slave nodes in the
-%                        slide surfaces.  This information is useful for
-%                        the construction of reduced linear system.
-%\item[buildReducedSystem() ] - this function can be called to reduced a linear
-%                        system with constraints to a better-conditioned reduced
-%                        form.
+%\item[solver XXX] - where XXX specifies one of {\sf cg}, {\sf gmres},
+%                    {\sf superlu}, or {\sf superlux}.  The default is {\sf gmres}.
+%\item[preconditioner XXX] - where XXX is one of {\sf diagonal}, {\sf pilut},
+%                    {\sf parasails}, or {\sf boomeramg}. The default 
+%                    is {\sf diagonal}.
+%\item[gmres-dim XXX] - where XXX is an integer specifying the value of m in
+%                       restarted GMRES(m).  The default value is 50.
+%\item[maxIterations XXX] - where XXX is an integer specifying the maximum number
+%                           of iterations permitted for CG or GMRES.
+%                           The default value is 1000.
+%\item[tolerance XXX] - where XXX is a floating point number specifying the 
+%                       termination criterion for CG or GMRES.  The default value is
+%                       1.0E-10.
+%\item[pilut-row-size XXX] - where XXX is an integer specifying the maximum
+%                       number of nonzeros kept in the formation of imcomplete L
+%                       and U).  If this is not called, a value will be selected
+%                       based on the sparsity of the matrix.
+%\item[pilut-drop-tol XXX] - where XXX is a floating point number specifying the 
+%                       threshold to drop small entries in L and U.  The default
+%                       value is 0.0.
+%\item[superlu-ordering XXX] - where XXX specifies on of {\sf natural} or
+%                       {\sf mmd} (minimum degree ordering).  This ordering
+%                       is used to minimize the number of nonzeros generated
+%                       in the LU decomposition.  The default is natural ordering.
+%\item[superlu-scale XXX] - where XXX specifies on of {\sf y} (perform row
+%                       and column scalings before decomposition) or {\sf n}.
+%                       The default is no scaling.
+%\item[amg-coarsen-type XXX] - where XXX specifies one of {\sf falgout},
+%                       {\sf ruge}, or {\sf default} coarsening for BOOMERAMG.
+%\item[amg-num-sweeps XXX] - where XXX is an integer specifying the number of
+%                       pre- and post-smoothing at each level of BOOMERAMG.
+%                       The default is one pre- and one post-smoothings.
+%\item[amg-relax-type XXX] - where XXX is one of {\sf jacobi} (Damped Jacobi),
+%                       {\sf gs-slow} (sequential Gauss-Seidel), {\sf gs-fast}
+%                       (Gauss-Seidel on interior nodes), {\sf hybrid},
+%                       or {\sf direct}. The default is {\sf hybrid}.
+%\item[amg-relax-weight XXX] - where XXX is a floating point number between 0 and 1
+%                       specifying the damping factor for BOOMERAMG's damped
+%                       Jacobi smoother.  The default value is 0.5.
+%\item[amg-strong-threshold XXX] - where XXX is a floating point number between 0 
+%                       and 1 specifying the threshold used to determine
+%                       strong coupling in BOOMERAMG's coasening.  The default 
+%                       value is 0.25.
+%\item[parasails-threshold XXX] - where XXX is a floating point number between 0 
+%                       and 1 specifying the threshold used to prune small entries
+%                       in setting up the sparse approximate inverse.  The default
+%                       value is 0.0.
+%\item[parasails-nlevels XXX] - where XXX is an integer larger than 0 specifying 
+%                       the desired sparsity of the approximate inverse.  The
+%                       default value is 1.
 %\end{description}
-
-%\section{HYPRE-FEI Comments and Contacts}
 %
-%Any comments about this HYPRE-FEI interface can be directed to Charles Tong
-%(X23411 or chtong@llnl.gov) or Edmond Chow (X31915 or chow8@llnl.gov).
+%
+%%\section{HYPRE-FEI Extensions}
+%%
+%%In order to support the reduced system formulation for applications
+%%with slide surface constraints,
+%%two additional functions are provided via HYPRE-FEI
+%%on top of the base FEI specification :
+%%
+%%\begin{description}
+%%\item[loadSlaveList(int,int*)] - this function is used to load information
+%%                        about which unknowns are the slave nodes in the
+%%                        slide surfaces.  This information is useful for
+%%                        the construction of reduced linear system.
+%%\item[buildReducedSystem() ] - this function can be called to reduced a linear
+%%                        system with constraints to a better-conditioned reduced
+%%                        form.
+%%\end{description}
+%
+%%\section{HYPRE-FEI Comments and Contacts}
+%%
+%%Any comments about this HYPRE-FEI interface can be directed to Charles Tong
+%%(X23411 or chtong@llnl.gov) or Edmond Chow (X31915 or chow8@llnl.gov).
 

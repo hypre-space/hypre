@@ -20,19 +20,20 @@ involve much more user work and prevent access to some
 grid-type-specific preconditioners.
 
 \item 
-{\bf Choose your desired solver strategy. } For the typical user, this
+{\bf Choose your desired solver strategy.}  For the typical user, this
 will mean a single Krylov method and a single preconditioner.
 
 \item 
 {\bf Look up matrix requirements for each solver and preconditioner.}
 Each specific solver and preconditioner has requirements from the
-input matrix. This information is provided in several places: Chapter
+input matrix.  This information is provided in several places: Chapter
 \ref{Solvers and Preconditioners}, the \hypre{} Reference Manual, and
-\hypre{} header files).
+the \hypre{} header files.
 
 \item 
 {\bf Choose a matrix class that is compatible with your solvers and
-preconditioners and your conceptual interface.}
+preconditioners and your conceptual interface.}  Note that some of the
+interfaces currently only support one matrix class choice.
 
 \end{enumerate}
 Once the previous decisions have been made, it is time to code your
@@ -45,19 +46,15 @@ conceptual interface.} This includes, e.g., the grid and stencil
 structures for the structured-grid interface.
 
 \item
-{\bf Build the matrix and vectors through your chosen conceptual
-interface.} Each conceptual interface provides a series of calls for
-entering information about your problem into
-\hypre{}.
+{\bf Build the matrix, solution vector, and right-hand-side vector
+through your chosen conceptual interface.}  Each conceptual interface
+provides a series of calls for entering information about your problem
+into \hypre{}.
 
 \item
-{\bf Build solvers and preconditioners by giving them the input
-matrix.}
-
-\item
-{\bf Set solver parameters (this is optional).}  Some parameters like
-convergence tolerance are the same across solvers, while others are
-solver specific.
+{\bf Build solvers and preconditioners and set solver parameters
+(optional).}  Some parameters like convergence tolerance are the same
+across solvers, while others are solver specific.
 
 \item
 {\bf Call the solve function for the solver.}
@@ -65,7 +62,7 @@ solver specific.
 \item
 {\bf Retrieve desired information from solver.} Depending on your
 application, there may be different things you may want to do with the
-solution vector. Also, performance information such as number of
+solution vector.  Also, performance information such as number of
 iterations is typically available, though it may differ from solver to
 solver.
 
@@ -74,12 +71,18 @@ solver.
 %==========================================================================
 
 \section{A Simple Example}
+\label{A Simple Example}
 
 The following code serves as a simple example of the usage of
 \hypre{}.  In this example, the structured-grid interface
 (discussed in Chapter ~\ref{Structured-Grid System Interface}) is used
 to enter the problem into \hypre{}, and the \code{PFMG} Multigrid
-solver is used to solve the system.
+solver is used to solve the system.  Since the structured-grid
+interface currently only supports one underlying matrix class, there
+are no choices to make here.  If we were using the semi-structured
+grid interface instead, then we would have to choose between the
+\code{SStruct} and \code{ParCSR} matrix classes, depending on the
+solver we want to use.
 
 This example and all other examples in this manual are written in C,
 but \hypre{} also supports Fortran.  See Section
@@ -89,7 +92,7 @@ but \hypre{} also supports Fortran.  See Section
 \begin{verbatim}
 
 /*-----------------------------------------------------------
- * Set up the matrix
+ * Set up the grid and stencil
  *-----------------------------------------------------------*/
 
 HYPRE_StructGridCreate(MPI_COMM_WORLD, dim, &grid);
@@ -101,15 +104,15 @@ HYPRE_StructStencilCreate(dim, stencil_size, &stencil);
 HYPRE_StructStencilSetElement(stencil, 0, offset0);
 ...
 
+/*-----------------------------------------------------------
+ * Set up the matrix, right-hand side, and initial guess
+ *-----------------------------------------------------------*/
+
 HYPRE_StructMatrixCreate(MPI_COMM_WORLD, grid, stencil, &A);
 HYPRE_StructMatrixInitialize(A);
 HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, nelts, elts, Avalues);
 ...
 HYPRE_StructMatrixAssemble(A);
-
-/*-----------------------------------------------------------
- * Set up the right-hand side and initial guess
- *-----------------------------------------------------------*/
 
 HYPRE_StructVectorCreate(MPI_COMM_WORLD, grid, &b);
 HYPRE_StructVectorInitialize(b);
@@ -124,7 +127,7 @@ HYPRE_StructVectorSetBoxValues(x, ilower, iupper, xvalues);
 HYPRE_StructVectorAssemble(x);
 
 /*-----------------------------------------------------------
- * Set up solver
+ * Set up the solver
  *-----------------------------------------------------------*/
 
 HYPRE_StructPFMGCreate(MPI_COMM_WORLD, &solver);
@@ -139,15 +142,11 @@ HYPRE_StructPFMGSetup(solver, A, b, x);
 HYPRE_StructPFMGSolve(solver, A, b, x);
 
 /*-----------------------------------------------------------
- * Get solution info
+ * Get solution info and free up memory
  *-----------------------------------------------------------*/
 
 HYPRE_StructVectorGetBoxValues(x, ilower, iupper, xvalues);
 ...
-
-/*-----------------------------------------------------------
- * Free up memory
- *-----------------------------------------------------------*/
 
 HYPRE_StructPFMGDestroy(solver);
 HYPRE_StructGridDestroy(grid);
@@ -230,7 +229,7 @@ block-structured grids, composite grids in structured adaptive mesh
 refinement (AMR) applications, and overset grids.  This interface
 supports multiple unknowns per cell.
 See Chapter \ref{Semi-Structured-Grid System Interface} for details.
-{\bf NOTE:} This is a very new interface and should be used with
+{\bf NOTE:} This is a somewhat new interface and should be used with
 caution as it matures.
 
 \item
