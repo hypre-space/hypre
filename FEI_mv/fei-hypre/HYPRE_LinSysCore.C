@@ -405,6 +405,12 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
              HYOutputLevel_ |= HYFEI_SLIDEREDUCE2;
           if (!strcmp(param2, "slideReduction3")) 
              HYOutputLevel_ |= HYFEI_SLIDEREDUCE3;
+          if (!strcmp(param2, "schurReduction1")) 
+             HYOutputLevel_ |= HYFEI_SCHURREDUCE1;
+          if (!strcmp(param2, "schurReduction2")) 
+             HYOutputLevel_ |= HYFEI_SCHURREDUCE2;
+          if (!strcmp(param2, "schurReduction3")) 
+             HYOutputLevel_ |= HYFEI_SCHURREDUCE3;
           if (!strcmp(param2, "printMat")) HYOutputLevel_ |= HYFEI_PRINTMAT;
           if (!strcmp(param2, "printSol")) HYOutputLevel_ |= HYFEI_PRINTSOL;
           if (!strcmp(param2, "printReducedMat")) 
@@ -2313,8 +2319,7 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
 
 void HYPRE_LinSysCore::formResidual(int* eqnNumbers, double* values, int leng)
 {
-    int                i, index, nrows, startRow, endRow;
-    int                *int_array, *gint_array;
+    int                i, index, nrows;
     HYPRE_ParCSRMatrix A_csr;
     HYPRE_ParVector    x_csr;
     HYPRE_ParVector    b_csr;
@@ -2329,56 +2334,12 @@ void HYPRE_LinSysCore::formResidual(int* eqnNumbers, double* values, int leng)
     // error checking
     //-------------------------------------------------------------------
 
-    if (slideReduction_  == 1) 
-    {
-       nrows = localEndRow_ - localStartRow_ + 1 - 2 * nConstraints_;
-       int_array = new int[numProcs_];
-       gint_array = new int[numProcs_];
-       for ( i = 0; i < numProcs_; i++ ) int_array[i] = 0;
-       int_array[mypid_] = 2 * nConstraints_;
-       MPI_Allreduce(int_array,gint_array,numProcs_,MPI_INT,MPI_SUM,comm_);
-       startRow = 0;
-       for ( i = 0; i < mypid_; i++ ) startRow += gint_array[i];
-       startRow = localStartRow_ - 1 - startRow;
-       endRow   = startRow + nrows;
-       delete [] int_array;
-       delete [] gint_array;
-    }
-    else if (slideReduction_  == 2) 
-    {
-       nrows = localEndRow_ - localStartRow_ + 1 - nConstraints_;
-       int_array = new int[numProcs_];
-       gint_array = new int[numProcs_];
-       for ( i = 0; i < numProcs_; i++ ) int_array[i] = 0;
-       int_array[mypid_] = nConstraints_;
-       MPI_Allreduce(int_array,gint_array,numProcs_,MPI_INT,MPI_SUM,comm_);
-       startRow = 0;
-       for ( i = 0; i < mypid_; i++ ) startRow += gint_array[i];
-       startRow = localStartRow_ - 1 - startRow;
-       endRow   = startRow + nrows;
-       delete [] int_array;
-       delete [] gint_array;
-    }
-    else if (schurReduction_ == 1) 
-    {
-       nrows = localEndRow_ - localStartRow_ + 1 - A21NRows_;
-       int_array = new int[numProcs_];
-       gint_array = new int[numProcs_];
-       for ( i = 0; i < numProcs_; i++ ) int_array[i] = 0;
-       int_array[mypid_] = nrows;
-       MPI_Allreduce(int_array,gint_array,numProcs_,MPI_INT,MPI_SUM,comm_);
-       startRow = 0;
-       for ( i = 0; i < mypid_; i++ ) startRow += gint_array[i];
-       endRow   = startRow + nrows;
-       delete [] int_array;
-       delete [] gint_array;
-    }
-
+    nrows = localEndRow_ - localStartRow_ + 1;
     if (leng != nrows)
     {
-       printf("%4d : HYPRE_LinSysCore::formResidual ERROR - leng != numLocalRows");
-       printf("                        numLocalRows, leng = %d %d",nrows,leng);
-       exit(1);
+       printf("%4d : HYPRE_LinSysCore::formResidual ERROR - inleng != numLocalRows");
+       printf("                        numLocalRows, inleng = %d %d",nrows,leng);
+       return;
     }
     if ( ! systemAssembled_ )
     {
@@ -2390,10 +2351,10 @@ void HYPRE_LinSysCore::formResidual(int* eqnNumbers, double* values, int leng)
     // fetch matrix and vector pointers
     //-------------------------------------------------------------------
 
-    A_csr  = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(currA_);
-    x_csr  = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(currX_);
-    b_csr  = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(currB_);
-    r_csr  = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(currR_);
+    A_csr  = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(HYA_);
+    x_csr  = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(HYx_);
+    b_csr  = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(HYb_);
+    r_csr  = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(HYr_);
 
     //*******************************************************************
     // form residual vector
@@ -2406,10 +2367,10 @@ void HYPRE_LinSysCore::formResidual(int* eqnNumbers, double* values, int leng)
     // fetch residual vector
     //-------------------------------------------------------------------
 
-    for ( i = startRow; i < endRow; i++ )
+    for ( i = localStartRow_-1; i < localEndRow_; i++ )
     {
-       index = i - startRow;
-       HYPRE_IJVectorGetLocalComponents(currR_, 1, &i, NULL, &values[index]);
+       index = i - localStartRow_ + 1;
+       HYPRE_IJVectorGetLocalComponents(HYr_, 1, &i, NULL, &values[index]);
        eqnNumbers[index] = i + 1;
     }
 
