@@ -92,6 +92,7 @@ then
     (cd utilities;             make -f $SMG_MAKEFILE)
     (cd struct_matrix_vector;  make -f $SMG_MAKEFILE)
     (cd struct_linear_solvers; make -f $SMG_MAKEFILE)
+    (cd test;                  make)
 
 fi
 
@@ -106,6 +107,8 @@ then
     (cd utilities;             make -f $SMG_MAKEFILE clean)
     (cd struct_matrix_vector;  make -f $SMG_MAKEFILE clean)
     (cd struct_linear_solvers; make -f $SMG_MAKEFILE clean)
+    (cd test;                  make clean)
+
 
 fi
 
@@ -120,6 +123,7 @@ then
     (cd utilities;             make -f $SMG_MAKEFILE veryclean)
     (cd struct_matrix_vector;  make -f $SMG_MAKEFILE veryclean)
     (cd struct_linear_solvers; make -f $SMG_MAKEFILE veryclean)
+    (cd test;                  make veryclean)
 
 fi
 

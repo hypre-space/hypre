@@ -169,7 +169,7 @@ dnl * non-standard names for your output files.
 dnl *********************************************************************
 
 dnl * AC_OUTPUT(utilities/Makefile struct_matrix_vector/Makefile \
-dnl *          struct_linear_solvers/Makefile)
+dnl *          struct_linear_solvers/Makefile test/Makefile)
 
 
 dnl *********************************************************************
@@ -193,4 +193,5 @@ dnl *********************************************************************
 dnl AC_OUTPUT(
 dnl utilities/Makefile.$ARCH:utilities/Makefile.in \
 dnl struct_matrix_vector/Makefile.$ARCH:struct_matrix_vector/Makefile.in \
-dnl struct_linear_solvers/Makefile.$ARCH:struct_linear_solvers/Makefile.in)
+dnl struct_linear_solvers/Makefile.$ARCH:struct_linear_solvers/Makefile.in\
+dnl test/Makefile.$ARCH:test/Makefile.in)
