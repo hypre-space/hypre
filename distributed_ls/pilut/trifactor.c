@@ -42,8 +42,6 @@ void LDUSolve(DataDistType *ddist, FactorMatType *ldu, double *x, double *b,
   double *lx, *ux, *values, *dvalues, *gatherbuf, **raddr, xx;
   MPI_Status Status;
 
-  int ntemp;
-
   PrintLine("LDUSolve start", globals);
 
   lnrows    = ddist->ddist_lnrows;
@@ -78,12 +76,10 @@ void LDUSolve(DataDistType *ddist, FactorMatType *ldu, double *x, double *b,
   colind = ldu->lcolind;
   values = ldu->lvalues;
 
-  ntemp = nnodes[1];
-  if (nlevels == 0) ntemp = nnodes[0];
 
   /* Do the local first.
    * For forward substitution we do local+1st MIS == nnodes[1] (NOT [0]!) */
-  for (i=0; i<ntemp; i++) {
+  for (i=0; i<nnodes[max(0,min(1,nlevels))]; i++) {
     xx = 0.0;
     for (j=rowptr[i]; j<rowptr[i+1]; j++) 
       xx += values[j]*lx[colind[j]];
