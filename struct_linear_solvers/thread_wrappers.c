@@ -1,6 +1,7 @@
 
 #ifdef HYPRE_USE_PTHREADS
 #include "HYPRE_ls.h"
+#include "utilities.h"
 
 
 /*----------------------------------------------------------------
@@ -1068,9 +1069,9 @@ HYPRE_StructPCGSetRelChangePush(
 
 typedef struct {
    HYPRE_StructSolverArray *solver;
-   ;
-   ;
-   void *precond_data;
+   int               (*precond)();
+   int               (*precond_setup)();
+   HYPRE_StructSolverArray *precond_solver;
    int  returnvalue[hypre_MAX_THREADS];
 } HYPRE_StructPCGSetPrecondArgs;
 
@@ -1085,26 +1086,26 @@ HYPRE_StructPCGSetPrecondVoidPtr( void *argptr )
    (localargs -> returnvalue[threadid]) =
       HYPRE_StructPCGSetPrecond(
          (*(localargs -> solver))[threadid],
-         localargs -> ,
-         localargs -> ,
-         localargs -> precond_data );
+         localargs -> precond,
+         localargs -> precond_setup,
+         (*(localargs -> precond_solver))[threadid] );
 }
 
 int 
 HYPRE_StructPCGSetPrecondPush(
    HYPRE_StructSolverArray solver,
-   ,
-   ,
-   void *precond_data )
+   int (*precond)(),
+   int (*precond_setup)(),
+   HYPRE_StructSolverArray precond_solver )
 {
    HYPRE_StructPCGSetPrecondArgs pushargs;
    int i;
    int  returnvalue;
 
    pushargs.solver = (HYPRE_StructSolverArray *)solver;
-   pushargs. = ;
-   pushargs. = ;
-   pushargs.precond_data = precond_data;
+   pushargs.precond = precond;
+   pushargs.precond_setup = precond_setup;
+   pushargs.precond_solver = (HYPRE_StructSolverArray *)precond_solver;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_StructPCGSetPrecondVoidPtr, (void *)&pushargs );
 

@@ -44,7 +44,7 @@ int HYPRE_StructPCGSetTol P((HYPRE_StructSolver solver , double tol ));
 int HYPRE_StructPCGSetMaxIter P((HYPRE_StructSolver solver , int max_iter ));
 int HYPRE_StructPCGSetTwoNorm P((HYPRE_StructSolver solver , int two_norm ));
 int HYPRE_StructPCGSetRelChange P((HYPRE_StructSolver solver , int rel_change ));
-int HYPRE_StructPCGSetPrecond P((HYPRE_StructSolver solver , int (*precond )(), int (*precond_setup )(), void *precond_data ));
+int HYPRE_StructPCGSetPrecond P((HYPRE_StructSolver solver , int (*precond )(), int (*precond_setup )(), HYPRE_StructSolver precond_solver ));
 int HYPRE_StructPCGSetLogging P((HYPRE_StructSolver solver , int logging ));
 int HYPRE_StructPCGGetNumIterations P((HYPRE_StructSolver solver , int *num_iterations ));
 int HYPRE_StructPCGGetFinalRelativeResidualNorm P((HYPRE_StructSolver solver , double *norm ));
@@ -94,9 +94,6 @@ int hypre_CyclicReductionSetup P((void *cyc_red_vdata , hypre_StructMatrix *A , 
 int hypre_CyclicReduction P((void *cyc_red_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x ));
 int hypre_CyclicReductionSetBase P((void *cyc_red_vdata , hypre_Index base_index , hypre_Index base_stride ));
 int hypre_CyclicReductionFinalize P((void *cyc_red_vdata ));
-
-/* driver_internal.c */
-int main P((int argc , char *argv []));
 
 /* general.c */
 int hypre_Log2 P((int p ));
@@ -330,6 +327,36 @@ int hypre_SMGSetupRestrictOp P((hypre_StructMatrix *A , hypre_StructMatrix *R , 
 int hypre_SMGSolve P((void *smg_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x ));
 
 /* thread_wrappers.c */
+void HYPRE_StructHybridInitializeVoidPtr P((void *argptr ));
+int HYPRE_StructHybridInitializePush P((MPI_Comm comm , HYPRE_StructSolverArray *solver ));
+void HYPRE_StructHybridFinalizeVoidPtr P((void *argptr ));
+int HYPRE_StructHybridFinalizePush P((HYPRE_StructSolverArray solver ));
+void HYPRE_StructHybridSetupVoidPtr P((void *argptr ));
+int HYPRE_StructHybridSetupPush P((HYPRE_StructSolverArray solver , HYPRE_StructMatrixArray A , HYPRE_StructVectorArray b , HYPRE_StructVectorArray x ));
+void HYPRE_StructHybridSolveVoidPtr P((void *argptr ));
+int HYPRE_StructHybridSolvePush P((HYPRE_StructSolverArray solver , HYPRE_StructMatrixArray A , HYPRE_StructVectorArray b , HYPRE_StructVectorArray x ));
+void HYPRE_StructHybridSetTolVoidPtr P((void *argptr ));
+int HYPRE_StructHybridSetTolPush P((HYPRE_StructSolverArray solver , double tol ));
+void HYPRE_StructHybridSetConvergenceTolVoidPtr P((void *argptr ));
+int HYPRE_StructHybridSetConvergenceTolPush P((HYPRE_StructSolverArray solver , double cf_tol ));
+void HYPRE_StructHybridSetMaxDSIterationsVoidPtr P((void *argptr ));
+int HYPRE_StructHybridSetMaxDSIterationsPush P((HYPRE_StructSolverArray solver , int max_ds_its ));
+void HYPRE_StructHybridSetMaxMGIterationsVoidPtr P((void *argptr ));
+int HYPRE_StructHybridSetMaxMGIterationsPush P((HYPRE_StructSolverArray solver , int max_mg_its ));
+void HYPRE_StructHybridSetTwoNormVoidPtr P((void *argptr ));
+int HYPRE_StructHybridSetTwoNormPush P((HYPRE_StructSolverArray solver , int two_norm ));
+void HYPRE_StructHybridSetRelChangeVoidPtr P((void *argptr ));
+int HYPRE_StructHybridSetRelChangePush P((HYPRE_StructSolverArray solver , int rel_change ));
+void HYPRE_StructHybridSetLoggingVoidPtr P((void *argptr ));
+int HYPRE_StructHybridSetLoggingPush P((HYPRE_StructSolverArray solver , int logging ));
+void HYPRE_StructHybridGetNumIterationsVoidPtr P((void *argptr ));
+int HYPRE_StructHybridGetNumIterationsPush P((HYPRE_StructSolverArray solver , int *num_its ));
+void HYPRE_StructHybridGetNumDSIterationsVoidPtr P((void *argptr ));
+int HYPRE_StructHybridGetNumDSIterationsPush P((HYPRE_StructSolverArray solver , int *num_ds_its ));
+void HYPRE_StructHybridGetNumMGIterationsVoidPtr P((void *argptr ));
+int HYPRE_StructHybridGetNumMGIterationsPush P((HYPRE_StructSolverArray solver , int *num_mg_its ));
+void HYPRE_StructHybridGetFinalRelativeResidualNormVoidPtr P((void *argptr ));
+int HYPRE_StructHybridGetFinalRelativeResidualNormPush P((HYPRE_StructSolverArray solver , double *norm ));
 void HYPRE_StructPCGInitializeVoidPtr P((void *argptr ));
 int HYPRE_StructPCGInitializePush P((MPI_Comm comm , HYPRE_StructSolverArray *solver ));
 void HYPRE_StructPCGFinalizeVoidPtr P((void *argptr ));
@@ -347,7 +374,7 @@ int HYPRE_StructPCGSetTwoNormPush P((HYPRE_StructSolverArray solver , int two_no
 void HYPRE_StructPCGSetRelChangeVoidPtr P((void *argptr ));
 int HYPRE_StructPCGSetRelChangePush P((HYPRE_StructSolverArray solver , int rel_change ));
 void HYPRE_StructPCGSetPrecondVoidPtr P((void *argptr ));
-int HYPRE_StructPCGSetPrecondPush P((HYPRE_StructSolverArray solver , int , int , void *precond_data ));
+int HYPRE_StructPCGSetPrecondPush P((HYPRE_StructSolverArray solver , void *precond , void *precond_setup , HYPRE_StructSolverArray precond_solver ));
 void HYPRE_StructPCGSetLoggingVoidPtr P((void *argptr ));
 int HYPRE_StructPCGSetLoggingPush P((HYPRE_StructSolverArray solver , int logging ));
 void HYPRE_StructPCGGetNumIterationsVoidPtr P((void *argptr ));

@@ -146,7 +146,7 @@ int HYPRE_StructPCGSetTol P((HYPRE_StructSolver solver , double tol ));
 int HYPRE_StructPCGSetMaxIter P((HYPRE_StructSolver solver , int max_iter ));
 int HYPRE_StructPCGSetTwoNorm P((HYPRE_StructSolver solver , int two_norm ));
 int HYPRE_StructPCGSetRelChange P((HYPRE_StructSolver solver , int rel_change ));
-int HYPRE_StructPCGSetPrecond P((HYPRE_StructSolver solver , int (*precond )(), int (*precond_setup )(), void *precond_data ));
+int HYPRE_StructPCGSetPrecond P((HYPRE_StructSolver solver , int (*precond )(), int (*precond_setup )(), HYPRE_StructSolver precond_solver ));
 int HYPRE_StructPCGSetLogging P((HYPRE_StructSolver solver , int logging ));
 int HYPRE_StructPCGGetNumIterations P((HYPRE_StructSolver solver , int *num_iterations ));
 int HYPRE_StructPCGGetFinalRelativeResidualNorm P((HYPRE_StructSolver solver , double *norm ));

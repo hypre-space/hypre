@@ -247,10 +247,11 @@ int
 HYPRE_StructPCGSetPrecond( HYPRE_StructSolver  solver,
                            int               (*precond)(),
                            int               (*precond_setup)(),
-                           void               *precond_data )
+                           HYPRE_StructSolver  precond_solver   )
 {
    return( hypre_PCGSetPrecond( (void *) solver,
-                                precond, precond_setup, precond_data ) );
+                                precond, precond_setup,
+                                (void *) precond_solver ) );
 }
 
 /*==========================================================================*/

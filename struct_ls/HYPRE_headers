@@ -25,6 +25,7 @@ cat > $TWRAPPER_FILE <<@
 
 #ifdef HYPRE_USE_PTHREADS
 #include "HYPRE_ls.h"
+#include "utilities.h"
 
 @
 
