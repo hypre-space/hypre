@@ -192,7 +192,7 @@ hypre_ParAMGSolve( void               *amg_vdata,
       relative_resid = 9999;
       if (rhs_norm)
       {
-         relative_resid = resid_nrm_init / rhs_norm;
+         relative_resid = resid_nrm / rhs_norm;
       }
 
       ++cycle_count;
