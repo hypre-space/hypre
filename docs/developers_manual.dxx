@@ -1,0 +1,35 @@
+/**@name Hypre Developer's Manual
+
+@version 1.0
+
+\begin{center}
+Linear Solvers Group
+\end{center}
+
+\begin{center}
+Center for Applied Scientific Computing
+\end{center}
+
+\begin{center}
+Lawrence Livermore National Laboratory
+\end{center}
+
+\begin{center}
+\today
+\end{center}
+
+*/
+
+//@{
+	//@Include:hypre_requirements.dxx
+	//@Include:hypre_design.dxx
+	//@Include:hypre_error_handle.dxx
+	//@Include:hypre_makefile.dxx
+	//@Include:hypre_documentation.dxx
+	//@Include:hypre_coding.dxx
+	//@Include:hypre_language_interop.dxx
+	//@Include:hypre_autotest.dxx
+	//@Include:hypre_QA.dxx
+	//@Include:hypre_install.dxx
+	//@Include:hypre_code_reference.dxx
+//@}
