@@ -193,9 +193,17 @@ then
             UPDATE/src/linear_solvers/configure \
             UPDATE/src/linear_solvers/tarch \
             UPDATE/src/linear_solvers/Makefile.in \
+            UPDATE/src/linear_solvers/blas \
             UPDATE/src/linear_solvers/utilities \
             UPDATE/src/linear_solvers/struct_matrix_vector \
             UPDATE/src/linear_solvers/struct_linear_solvers \
+            UPDATE/src/linear_solvers/seq_matrix_vector \
+            UPDATE/src/linear_solvers/parcsr_matrix_vector \
+            UPDATE/src/linear_solvers/distributed_matrix \
+            UPDATE/src/linear_solvers/matrix_matrix \
+            UPDATE/src/linear_solvers/IJ_matrix_vector \
+            UPDATE/src/linear_solvers/distributed_linear_solvers/pilut \
+            UPDATE/src/linear_solvers/parcsr_linear_solvers \
             UPDATE/src/linear_solvers/test
         rm -f update
     fi
