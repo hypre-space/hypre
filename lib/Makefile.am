@@ -449,19 +449,19 @@ hypre-stamp:
 	mkdir .libs; \
 	for i in ${HYPRE_SRC_DIRS}; \
 	do \
-	  if [ -d ../$$i ]; \
+	  if [ -d $(top_srcdir)/$$i ]; \
 	  then \
-	    for j1 in ../$$i/*.lo; \
+	    for j1 in $(top_srcdir)/$$i/*.lo; \
 	    do \
-	      test -f $$j1 || cp -f ../$$j1 .; \
+	      test -f $$j1 && cp -f $$j1 .; \
 	    done; \
-	    for j2 in ../$$i/.libs/*.o; \
+	    for j2 in $(top_srcdir)/$$i/.libs/*.o; \
 	    do \
-	      test -f $$j2 || cp -f ../$$j2 .libs; \
+	      test -f $$j2 && cp -f $$j2 .libs; \
 	    done; \
-	    for j3 in ../$$i/*.o; \
+	    for j3 in $(top_srcdir)/$$i/*.o; \
 	    do \
-	      test -f $$j3 || cp -f ../$$j3 .; \
+	      test -f $$j3 && cp -f $$j3 .; \
 	    done; \
 	  fi; \
 	done
