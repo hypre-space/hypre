@@ -247,7 +247,7 @@ c Generate a Dirichlet Laplacian
 
       call HYPRE_PrintParCSRMatrix(A, "driver.out.A", ierr)
 
-c     call HYPRE_NewParCSRMatrix(MPI_COMM_WORLD, gnrows, gncols,
+c     call HYPRE_CreateParCSRMatrix(MPI_COMM_WORLD, gnrows, gncols,
 c    &   rstarts, cstarts, ncoloffdg, nonzsdg, nonzsoffdg, A, ierr)
 
 c     call HYPRE_InitializeParCSRMatrix(A, ierr)
@@ -260,7 +260,7 @@ c     Set up the rhs and initial guess
 c-----------------------------------------------------------------------
 
       if (generate_rhs) then
-        call HYPRE_NewParVector(MPI_COMM_WORLD, num_rows, row_starts,
+        call HYPRE_CreateParVector(MPI_COMM_WORLD, num_rows, row_starts,
      &                          b, ierr)
         call hypre_SetParVectorPartitioningO(b, 0, ierr)
         call HYPRE_InitializeParVector(b, ierr)
@@ -271,7 +271,7 @@ c Set up a Dirichlet 0 problem
         call HYPRE_ReadParVector(MPI_COMM_WORLD, b, rhsfile, ierr)
       endif
 
-      call HYPRE_NewParVector(MPI_COMM_WORLD, num_rows, row_starts,
+      call HYPRE_CreateParVector(MPI_COMM_WORLD, num_rows, row_starts,
      &                        x, ierr)
       call hypre_SetParVectorPartitioningO(x, 0, ierr)
       call HYPRE_InitializeParVector(x, ierr)
@@ -303,7 +303,7 @@ c Set defaults for BoomerAMG
 
         print *, 'AMG'
 
-        call HYPRE_ParAMGInitialize(solver, ierr)
+        call HYPRE_ParAMGCreate(solver, ierr)
         call HYPRE_ParAMGSetCoarsenType(solver,
      &                                  (hybrid*coarsen_type), ierr)
         call HYPRE_ParAMGSetMeasureType(solver, measure_type, ierr)
@@ -334,7 +334,7 @@ c Set defaults for BoomerAMG
         call HYPRE_ParAMGGetNumIterations(solver, num_iterations, ierr)
         call HYPRE_ParAMGGetFinalRelativeRes(solver,
      &                                       final_res_norm, ierr)
-        call HYPRE_ParAMGFinalize(solver, ierr)
+        call HYPRE_ParAMGDestroy(solver, ierr)
 
       endif
 
@@ -346,7 +346,7 @@ c Set defaults for BoomerAMG
 
 c       Solve the system using preconditioned GMRES
 
-        call HYPRE_ParCSRGMRESInitialize(MPI_COMM_WORLD, solver, ierr)
+        call HYPRE_ParCSRGMRESCreate(MPI_COMM_WORLD, solver, ierr)
         call HYPRE_ParCSRGMRESSetKDim(solver, k_dim, ierr)
         call HYPRE_ParCSRGMRESSetMaxIter(solver, maxiter, ierr)
         call HYPRE_ParCSRGMRESSetTol(solver, tol, ierr)
@@ -374,7 +374,7 @@ c Set defaults for BoomerAMG
             relax_weight(i) = 0.0
           enddo
 
-          call HYPRE_ParAMGInitialize(precond, ierr)
+          call HYPRE_ParAMGCreate(precond, ierr)
 
           call HYPRE_ParAMGSetCoarsenType(precond,
      &                                    (hybrid*coarsen_type), ierr)
@@ -431,10 +431,10 @@ c         call HYPRE_ParAMGSetTruncFactor(precond, trunc_factor, ierr)
 
           precond_id = 7
 
-          call HYPRE_ParCSRPilutInitialize(MPI_COMM_WORLD,
+          call HYPRE_ParCSRPilutCreate(MPI_COMM_WORLD,
      &                                     precond, ierr) 
 
-          if (ierr .ne. 0) write(6,*) 'ParCSRPilutInitialize error'
+          if (ierr .ne. 0) write(6,*) 'ParCSRPilutCreate error'
 
           call HYPRE_ParCSRGMRESSetPrecond(solver, precond_id,
      &                                     precond, ierr)
@@ -455,7 +455,7 @@ c         call HYPRE_ParAMGSetTruncFactor(precond, trunc_factor, ierr)
         call HYPRE_ParCSRGMRESGetFinalRelati(solver,
      &                                       final_res_norm, ierr)
 
-        call HYPRE_ParCSRGMRESFinalize(solver, ierr)
+        call HYPRE_ParCSRGMRESDestroy(solver, ierr)
 
       endif
 
