@@ -148,6 +148,7 @@ tar cf $HYPRE_DIR.tar \
     $HYPRE_DIR/docs \
     $HYPRE_DIR/bin \
     $HYPRE_DIR/src/configure \
+    $HYPRE_DIR/src/install-sh \
     $HYPRE_DIR/src/tarch \
     $HYPRE_DIR/src/Makefile.in \
     $HYPRE_DIR/src/HYPRE.h \
