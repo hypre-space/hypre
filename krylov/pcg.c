@@ -87,13 +87,14 @@ hypre_PCGCreate( hypre_PCGFunctions *pcg_functions )
 
    /* set defaults */
    (pcg_data -> tol)          = 1.0e-06;
-   (pcg_data -> cf_tol)      = 0.0;
+   (pcg_data -> cf_tol)       = 0.0;
    (pcg_data -> max_iter)     = 1000;
    (pcg_data -> two_norm)     = 0;
    (pcg_data -> rel_change)   = 0;
    (pcg_data -> stop_crit)    = 0;
+   (pcg_data -> converged)    = 0;
    (pcg_data -> matvec_data)  = NULL;
-   (pcg_data -> precond_data)  = NULL;
+   (pcg_data -> precond_data) = NULL;
    (pcg_data -> logging)      = 0;
    (pcg_data -> norms)        = NULL;
    (pcg_data -> rel_norms)    = NULL;
@@ -220,6 +221,7 @@ hypre_PCGSolve( void *pcg_vdata,
    int             two_norm     = (pcg_data -> two_norm);
    int             rel_change   = (pcg_data -> rel_change);
    int             stop_crit    = (pcg_data -> stop_crit);
+   int             converged    = (pcg_data -> converged);
    void           *p            = (pcg_data -> p);
    void           *s            = (pcg_data -> s);
    void           *r            = (pcg_data -> r);
@@ -418,10 +420,14 @@ hypre_PCGSolve( void *pcg_vdata,
             pi_prod = (*(pcg_functions->InnerProd))(p,p);
             xi_prod = (*(pcg_functions->InnerProd))(x,x);
             if ((alpha*alpha*pi_prod/xi_prod) < eps)
+ 	    {
+               (pcg_data -> converged) = 1;
                break;
+ 	    }
          }
          else
          {
+            (pcg_data -> converged) = 1;
             break;
          }
       }
@@ -646,6 +652,22 @@ hypre_PCGGetNumIterations( void *pcg_vdata,
    int            ierr = 0;
 
    *num_iterations = (pcg_data -> num_iterations);
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_PCGGetConverged
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_PCGGetConverged( void *pcg_vdata,
+                       int  *converged)
+{
+   hypre_PCGData *pcg_data = pcg_vdata;
+   int            ierr = 0;
+
+   *converged = (pcg_data -> converged);
 
    return ierr;
 }

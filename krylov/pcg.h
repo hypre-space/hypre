@@ -89,6 +89,7 @@ typedef struct
    int      two_norm;
    int      rel_change;
    int      stop_crit;
+   int      converged;
 
    void    *A;
    void    *p;

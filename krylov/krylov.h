@@ -646,6 +646,7 @@ typedef struct
    int      two_norm;
    int      rel_change;
    int      stop_crit;
+   int      converged;
 
    void    *A;
    void    *p;
@@ -852,6 +853,7 @@ int hypre_PCGGetPrecond( void *pcg_vdata , HYPRE_Solver *precond_data_ptr );
 int hypre_PCGSetPrecond( void *pcg_vdata , int (*precond )(), int (*precond_setup )(), void *precond_data );
 int hypre_PCGSetLogging( void *pcg_vdata , int logging );
 int hypre_PCGGetNumIterations( void *pcg_vdata , int *num_iterations );
+int hypre_PCGGetConverged( void *pcg_vdata , int *converged );
 int hypre_PCGPrintLogging( void *pcg_vdata , int myid );
 int hypre_PCGGetFinalRelativeResidualNorm( void *pcg_vdata , double *relative_residual_norm );
 
