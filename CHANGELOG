@@ -14,6 +14,10 @@
 #
 #=============================================================================
 
+Version 1.7.1a released, 2001/11/20.
+
+- More SStruct bug fixes
+
 Version 1.7.0b released, 2001/11/12.
 
 - Bug fixes: SStruct interface under threads was producing incorrect
