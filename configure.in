@@ -49,6 +49,7 @@ unset F77
 casc_user_chose_compilers=no
 casc_user_chose_mpi=no
 casc_using_pthreads=no
+casc_using_purify=no
 
 AC_ARG_WITH(CC,
    [  --with-CC=ARG           manually set C compiler to ARG],
@@ -107,7 +108,7 @@ AC_ARG_WITH(MPICXX,
 	   CC=$withval
 	   if test "$CXX" = "yes"
 	   then	      
-              echo "why does not this work c++=$CXX"   
+           echo "why does this not work"   
            dnl *   AC_CHECK_PROGS(CXX, mpiCC)
            fi)
 
@@ -115,10 +116,21 @@ AC_ARG_WITH(MPIF77,
 [  --with-MPIF77=ARG        ARG mpif77 or similar MPI fortran compiling tool],
 	   CC=$withval
 	   if test "$F77" = "yes"
-	   then	      
-              echo "why does not this work f77=$F77"   
+	   then	       
+           echo "why dopes this not work"
            dnl *   AC_CHECK_PROGS(F77, mpif77)
            fi)
+
+AC_ARG_WITH(purify,
+   [  --with-purify          use purify-- finds mpi for use with non MPICH compiler],
+	casc_using_purify=yes
+	CC=gcc
+	MPIINCLUDE="$MPIINCLUDE -I/usr/local/mpi/mpich/lib/solaris/ch_p4 -I/usr/local/mpi/mpich/include"
+	MPILIBS="$MPILIBS -lpmpich -lmpich -lsocket -lnsl -lpthread"
+	MPILIBDIRS="-L/usr/local/mpi/mpich/lib/solaris/ch_p4 $MPILIBDIRS"
+   
+)
+
 
 dnl *********************************************************************
 dnl * If the user has specified any other command line options (without-MPI, 

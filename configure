@@ -38,6 +38,8 @@ ac_help="$ac_help
 ac_help="$ac_help
   --with-MPIF77=ARG        ARG mpif77 or similar MPI fortran compiling tool"
 ac_help="$ac_help
+  --with-purify          use purify-- finds mpi for use with non MPICH compiler"
+ac_help="$ac_help
   --without-MPI           do not use MPI"
 ac_help="$ac_help
   --with-dmalloc          use dmalloc package"
@@ -562,7 +564,7 @@ fi
 
 
    echo $ac_n "checking the hostname""... $ac_c" 1>&6
-echo "configure:566: checking the hostname" >&5
+echo "configure:568: checking the hostname" >&5
    casc_hostname=hostname
    HOSTNAME="`$casc_hostname`"
 
@@ -576,7 +578,7 @@ echo "configure:566: checking the hostname" >&5
    
 
    echo $ac_n "checking the architecture""... $ac_c" 1>&6
-echo "configure:580: checking the architecture" >&5
+echo "configure:582: checking the architecture" >&5
 
          if test -z "$ARCH"; then
 
@@ -624,6 +626,7 @@ unset F77
 casc_user_chose_compilers=no
 casc_user_chose_mpi=no
 casc_using_pthreads=no
+casc_using_purify=no
 
 # Check whether --with-CC or --without-CC was given.
 if test "${with_CC+set}" = set; then
@@ -701,7 +704,7 @@ if test "${with_MPICXX+set}" = set; then
   CC=$withval
 	   if test "$CXX" = "yes"
 	   then	      
-              echo "why does not this work c++=$CXX"   
+           echo "why does this not work"   
                       fi
 fi
 
@@ -711,10 +714,24 @@ if test "${with_MPIF77+set}" = set; then
   withval="$with_MPIF77"
   CC=$withval
 	   if test "$F77" = "yes"
-	   then	      
-              echo "why does not this work f77=$F77"   
+	   then	       
+           echo "why dopes this not work"
                       fi
 fi
+
+
+# Check whether --with-purify or --without-purify was given.
+if test "${with_purify+set}" = set; then
+  withval="$with_purify"
+  casc_using_purify=yes
+	CC=gcc
+	MPIINCLUDE="$MPIINCLUDE -I/usr/local/mpi/mpich/lib/solaris/ch_p4 -I/usr/local/mpi/mpich/include"
+	MPILIBS="$MPILIBS -lpmpich -lmpich -lsocket -lnsl -lpthread"
+	MPILIBDIRS="-L/usr/local/mpi/mpich/lib/solaris/ch_p4 $MPILIBDIRS"
+   
+
+fi
+
 
 
 
@@ -748,7 +765,7 @@ if test "${with_dmalloc+set}" = set; then
    # check for the library from first argument.  If linking is successful
    # the first time, the job is done, otherwise loop through DIRECTORY-LIST
    echo $ac_n "checking for malloc in -ldmalloc""... $ac_c" 1>&6
-echo "configure:752: checking for malloc in -ldmalloc" >&5
+echo "configure:769: checking for malloc in -ldmalloc" >&5
 ac_lib_var=`echo dmalloc'_'malloc | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -756,7 +773,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="$LDLIBDIRS $LDLIBS $LIBS -ldmalloc"
 cat > conftest.$ac_ext <<EOF
-#line 760 "configure"
+#line 777 "configure"
 #include "confdefs.h"
 /* Override any gcc2 internal prototype to avoid an error.  */
 /* We use char because int might match the return type of a gcc2
@@ -767,7 +784,7 @@ int main() {
 malloc()
 ; return 0; }
 EOF
-if { (eval echo configure:771: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:788: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -793,7 +810,7 @@ unset ac_cv_lib_$ac_lib_var
       for casc_lib_dir in /home/casc/lib /usr/local/lib; do
 
          echo $ac_n "checking for malloc in -ldmalloc""... $ac_c" 1>&6
-echo "configure:797: checking for malloc in -ldmalloc" >&5
+echo "configure:814: checking for malloc in -ldmalloc" >&5
 ac_lib_var=`echo dmalloc'_'malloc | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -801,7 +818,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-L$casc_lib_dir $LDLIBDIRS $LDLIBS -ldmalloc $LIBS -ldmalloc"
 cat > conftest.$ac_ext <<EOF
-#line 805 "configure"
+#line 822 "configure"
 #include "confdefs.h"
 /* Override any gcc2 internal prototype to avoid an error.  */
 /* We use char because int might match the return type of a gcc2
@@ -812,7 +829,7 @@ int main() {
 malloc()
 ; return 0; }
 EOF
-if { (eval echo configure:816: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:833: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -865,7 +882,7 @@ if test "${with_pthreads+set}" = set; then
    then
       casc_using_pthreads=yes
       echo $ac_n "checking for pthread_create in -lpthread""... $ac_c" 1>&6
-echo "configure:869: checking for pthread_create in -lpthread" >&5
+echo "configure:886: checking for pthread_create in -lpthread" >&5
 ac_lib_var=`echo pthread'_'pthread_create | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -873,7 +890,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS=" $LIBS -lpthread"
 cat > conftest.$ac_ext <<EOF
-#line 877 "configure"
+#line 894 "configure"
 #include "confdefs.h"
 /* Override any gcc2 internal prototype to avoid an error.  */
 /* We use char because int might match the return type of a gcc2
@@ -884,7 +901,7 @@ int main() {
 pthread_create()
 ; return 0; }
 EOF
-if { (eval echo configure:888: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:905: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -912,7 +929,7 @@ else
 
   
 echo $ac_n "checking for pthread_create in -lpthreads""... $ac_c" 1>&6
-echo "configure:916: checking for pthread_create in -lpthreads" >&5
+echo "configure:933: checking for pthread_create in -lpthreads" >&5
 ac_lib_var=`echo pthreads'_'pthread_create | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -920,7 +937,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS=" $LIBS -lpthreads"
 cat > conftest.$ac_ext <<EOF
-#line 924 "configure"
+#line 941 "configure"
 #include "confdefs.h"
 /* Override any gcc2 internal prototype to avoid an error.  */
 /* We use char because int might match the return type of a gcc2
@@ -931,7 +948,7 @@ int main() {
 pthread_create()
 ; return 0; }
 EOF
-if { (eval echo configure:935: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:952: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -977,7 +994,7 @@ fi
 # Extract the first word of "ranlib", so it can be a program name with args.
 set dummy ranlib; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:981: checking for $ac_word" >&5
+echo "configure:998: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_RANLIB'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -1016,7 +1033,7 @@ do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:1020: checking for $ac_word" >&5
+echo "configure:1037: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_CC'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -1050,7 +1067,7 @@ do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:1054: checking for $ac_word" >&5
+echo "configure:1071: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_CXX'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -1084,7 +1101,7 @@ do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:1088: checking for $ac_word" >&5
+echo "configure:1105: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_F77'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -1120,7 +1137,7 @@ done
 	if test "$casc_using_mpi" = "yes"
 	then
            echo $ac_n "checking how to run the C preprocessor""... $ac_c" 1>&6
-echo "configure:1124: checking how to run the C preprocessor" >&5
+echo "configure:1141: checking how to run the C preprocessor" >&5
 # On Suns, sometimes $CPP names a directory.
 if test -n "$CPP" && test -d "$CPP"; then
   CPP=
@@ -1134,23 +1151,6 @@ else
   CPP="${CC-cc} -E"
   # On the NeXT, cc -E runs the code through the compiler's parser,
   # not just through cpp.
-  cat > conftest.$ac_ext <<EOF
-#line 1139 "configure"
-#include "confdefs.h"
-#include <assert.h>
-Syntax Error
-EOF
-ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:1145: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
-ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
-if test -z "$ac_err"; then
-  :
-else
-  echo "$ac_err" >&5
-  echo "configure: failed program was:" >&5
-  cat conftest.$ac_ext >&5
-  rm -rf conftest*
-  CPP="${CC-cc} -E -traditional-cpp"
   cat > conftest.$ac_ext <<EOF
 #line 1156 "configure"
 #include "confdefs.h"
@@ -1167,7 +1167,7 @@ else
   echo "configure: failed program was:" >&5
   cat conftest.$ac_ext >&5
   rm -rf conftest*
-  CPP="${CC-cc} -nologo -E"
+  CPP="${CC-cc} -E -traditional-cpp"
   cat > conftest.$ac_ext <<EOF
 #line 1173 "configure"
 #include "confdefs.h"
@@ -1176,6 +1176,23 @@ Syntax Error
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
 { (eval echo configure:1179: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
+if test -z "$ac_err"; then
+  :
+else
+  echo "$ac_err" >&5
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  CPP="${CC-cc} -nologo -E"
+  cat > conftest.$ac_ext <<EOF
+#line 1190 "configure"
+#include "confdefs.h"
+#include <assert.h>
+Syntax Error
+EOF
+ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
+{ (eval echo configure:1196: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
 if test -z "$ac_err"; then
   :
@@ -1209,17 +1226,17 @@ echo "$ac_t""$CPP" 1>&6
 
             ac_safe=`echo "$casc_header" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for $casc_header""... $ac_c" 1>&6
-echo "configure:1213: checking for $casc_header" >&5
+echo "configure:1230: checking for $casc_header" >&5
 if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1218 "configure"
+#line 1235 "configure"
 #include "confdefs.h"
 #include <$casc_header>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:1223: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:1240: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -1261,7 +1278,7 @@ fi
    # check for the library from first argument.  If linking is successful
    # the first time, the job is done, otherwise loop through DIRECTORY-LIST
    echo $ac_n "checking for main in -lmpi""... $ac_c" 1>&6
-echo "configure:1265: checking for main in -lmpi" >&5
+echo "configure:1282: checking for main in -lmpi" >&5
 ac_lib_var=`echo mpi'_'main | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -1269,14 +1286,14 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="$MPILIBDIRS $MPILIBS $LIBS -lmpi"
 cat > conftest.$ac_ext <<EOF
-#line 1273 "configure"
+#line 1290 "configure"
 #include "confdefs.h"
 
 int main() {
 main()
 ; return 0; }
 EOF
-if { (eval echo configure:1280: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:1297: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -1301,7 +1318,7 @@ unset ac_cv_lib_$ac_lib_var
       for casc_lib_dir in /opt/intel/tflop/TF98_2.4.1/tflops/cougar/lib/puma; do
 
          echo $ac_n "checking for main in -lmpi""... $ac_c" 1>&6
-echo "configure:1305: checking for main in -lmpi" >&5
+echo "configure:1322: checking for main in -lmpi" >&5
 ac_lib_var=`echo mpi'_'main | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -1309,14 +1326,14 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-L$casc_lib_dir $MPILIBDIRS $MPILIBS -lmpi $LIBS -lmpi"
 cat > conftest.$ac_ext <<EOF
-#line 1313 "configure"
+#line 1330 "configure"
 #include "confdefs.h"
 
 int main() {
 main()
 ; return 0; }
 EOF
-if { (eval echo configure:1320: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:1337: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -1411,7 +1428,7 @@ do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:1415: checking for $ac_word" >&5
+echo "configure:1432: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_CC'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -1445,7 +1462,7 @@ do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:1449: checking for $ac_word" >&5
+echo "configure:1466: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_CXX'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -1479,7 +1496,7 @@ do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:1483: checking for $ac_word" >&5
+echo "configure:1500: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_F77'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -1522,7 +1539,7 @@ done
    # check for the library from first argument.  If linking is successful
    # the first time, the job is done, otherwise loop through DIRECTORY-LIST
    echo $ac_n "checking for main in -lmpi""... $ac_c" 1>&6
-echo "configure:1526: checking for main in -lmpi" >&5
+echo "configure:1543: checking for main in -lmpi" >&5
 ac_lib_var=`echo mpi'_'main | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -1530,14 +1547,14 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="$MPILIBDIRS $MPILIBS $LIBS -lmpi"
 cat > conftest.$ac_ext <<EOF
-#line 1534 "configure"
+#line 1551 "configure"
 #include "confdefs.h"
 
 int main() {
 main()
 ; return 0; }
 EOF
-if { (eval echo configure:1541: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:1558: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -1562,7 +1579,7 @@ unset ac_cv_lib_$ac_lib_var
       for casc_lib_dir in /usr/lib; do
 
          echo $ac_n "checking for main in -lmpi""... $ac_c" 1>&6
-echo "configure:1566: checking for main in -lmpi" >&5
+echo "configure:1583: checking for main in -lmpi" >&5
 ac_lib_var=`echo mpi'_'main | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -1570,14 +1587,14 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-L$casc_lib_dir $MPILIBDIRS $MPILIBS -lmpi $LIBS -lmpi"
 cat > conftest.$ac_ext <<EOF
-#line 1574 "configure"
+#line 1591 "configure"
 #include "confdefs.h"
 
 int main() {
 main()
 ; return 0; }
 EOF
-if { (eval echo configure:1581: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:1598: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -1681,7 +1698,7 @@ do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:1685: checking for $ac_word" >&5
+echo "configure:1702: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_CC'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -1715,7 +1732,7 @@ do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:1719: checking for $ac_word" >&5
+echo "configure:1736: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_CXX'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -1749,7 +1766,7 @@ do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:1753: checking for $ac_word" >&5
+echo "configure:1770: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_F77'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -1784,7 +1801,7 @@ do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:1788: checking for $ac_word" >&5
+echo "configure:1805: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_CC'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -1818,7 +1835,7 @@ do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:1822: checking for $ac_word" >&5
+echo "configure:1839: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_CXX'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -1852,7 +1869,7 @@ do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:1856: checking for $ac_word" >&5
+echo "configure:1873: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_F77'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -1934,7 +1951,7 @@ do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:1938: checking for $ac_word" >&5
+echo "configure:1955: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_CC'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -1968,7 +1985,7 @@ do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:1972: checking for $ac_word" >&5
+echo "configure:1989: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_CXX'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -2002,7 +2019,7 @@ do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:2006: checking for $ac_word" >&5
+echo "configure:2023: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_F77'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -2037,7 +2054,7 @@ do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:2041: checking for $ac_word" >&5
+echo "configure:2058: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_CC'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -2071,7 +2088,7 @@ do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:2075: checking for $ac_word" >&5
+echo "configure:2092: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_CXX'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -2105,7 +2122,7 @@ do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:2109: checking for $ac_word" >&5
+echo "configure:2126: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_F77'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -2152,17 +2169,17 @@ done
 
             ac_safe=`echo "$casc_header" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for $casc_header""... $ac_c" 1>&6
-echo "configure:2156: checking for $casc_header" >&5
+echo "configure:2173: checking for $casc_header" >&5
 if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 2161 "configure"
+#line 2178 "configure"
 #include "confdefs.h"
 #include <$casc_header>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:2166: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:2183: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -2204,7 +2221,7 @@ fi
    # check for the library from first argument.  If linking is successful
    # the first time, the job is done, otherwise loop through DIRECTORY-LIST
    echo $ac_n "checking for main in -lrt""... $ac_c" 1>&6
-echo "configure:2208: checking for main in -lrt" >&5
+echo "configure:2225: checking for main in -lrt" >&5
 ac_lib_var=`echo rt'_'main | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -2212,14 +2229,14 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="$LIBDIRS $LIBS $LIBS -lrt"
 cat > conftest.$ac_ext <<EOF
-#line 2216 "configure"
+#line 2233 "configure"
 #include "confdefs.h"
 
 int main() {
 main()
 ; return 0; }
 EOF
-if { (eval echo configure:2223: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:2240: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -2244,7 +2261,7 @@ unset ac_cv_lib_$ac_lib_var
       for casc_lib_dir in /usr/lib; do
 
          echo $ac_n "checking for main in -lrt""... $ac_c" 1>&6
-echo "configure:2248: checking for main in -lrt" >&5
+echo "configure:2265: checking for main in -lrt" >&5
 ac_lib_var=`echo rt'_'main | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -2252,14 +2269,14 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-L$casc_lib_dir $LIBDIRS $LIBS -lrt $LIBS -lrt"
 cat > conftest.$ac_ext <<EOF
-#line 2256 "configure"
+#line 2273 "configure"
 #include "confdefs.h"
 
 int main() {
 main()
 ; return 0; }
 EOF
-if { (eval echo configure:2263: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:2280: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -2307,7 +2324,7 @@ unset ac_cv_lib_$ac_lib_var
       for casc_lib_dir in /usr/opt/MPI170/lib; do
 
          echo $ac_n "checking for main in -lmpi""... $ac_c" 1>&6
-echo "configure:2311: checking for main in -lmpi" >&5
+echo "configure:2328: checking for main in -lmpi" >&5
 ac_lib_var=`echo mpi'_'main | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -2315,14 +2332,14 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-L$casc_lib_dir $MPILIBDIRS $MPILIBS -lmpi $LIBS -lmpi"
 cat > conftest.$ac_ext <<EOF
-#line 2319 "configure"
+#line 2336 "configure"
 #include "confdefs.h"
 
 int main() {
 main()
 ; return 0; }
 EOF
-if { (eval echo configure:2326: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:2343: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -2360,7 +2377,7 @@ unset ac_cv_lib_$ac_lib_var
    # check for the library from first argument.  If linking is successful
    # the first time, the job is done, otherwise loop through DIRECTORY-LIST
    echo $ac_n "checking for main in -lmpi""... $ac_c" 1>&6
-echo "configure:2364: checking for main in -lmpi" >&5
+echo "configure:2381: checking for main in -lmpi" >&5
 ac_lib_var=`echo mpi'_'main | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -2368,14 +2385,14 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="$MPILIBDIRS $MPILIBS $LIBS -lmpi"
 cat > conftest.$ac_ext <<EOF
-#line 2372 "configure"
+#line 2389 "configure"
 #include "confdefs.h"
 
 int main() {
 main()
 ; return 0; }
 EOF
-if { (eval echo configure:2379: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:2396: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -2400,7 +2417,7 @@ unset ac_cv_lib_$ac_lib_var
       for casc_lib_dir in /usr/lib; do
 
          echo $ac_n "checking for main in -lmpi""... $ac_c" 1>&6
-echo "configure:2404: checking for main in -lmpi" >&5
+echo "configure:2421: checking for main in -lmpi" >&5
 ac_lib_var=`echo mpi'_'main | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -2408,14 +2425,14 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-L$casc_lib_dir $MPILIBDIRS $MPILIBS -lmpi $LIBS -lmpi"
 cat > conftest.$ac_ext <<EOF
-#line 2412 "configure"
+#line 2429 "configure"
 #include "confdefs.h"
 
 int main() {
 main()
 ; return 0; }
 EOF
-if { (eval echo configure:2419: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:2436: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -2555,7 +2572,7 @@ do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:2559: checking for $ac_word" >&5
+echo "configure:2576: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_CC'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -2589,7 +2606,7 @@ do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:2593: checking for $ac_word" >&5
+echo "configure:2610: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_CXX'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -2623,7 +2640,7 @@ do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:2627: checking for $ac_word" >&5
+echo "configure:2644: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_F77'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -2658,7 +2675,7 @@ do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:2662: checking for $ac_word" >&5
+echo "configure:2679: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_CC'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -2692,7 +2709,7 @@ do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:2696: checking for $ac_word" >&5
+echo "configure:2713: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_CXX'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -2726,7 +2743,7 @@ do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:2730: checking for $ac_word" >&5
+echo "configure:2747: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_F77'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -2764,7 +2781,7 @@ do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:2768: checking for $ac_word" >&5
+echo "configure:2785: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_CC'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -2798,7 +2815,7 @@ do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:2802: checking for $ac_word" >&5
+echo "configure:2819: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_CXX'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -2832,7 +2849,7 @@ do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:2836: checking for $ac_word" >&5
+echo "configure:2853: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_F77'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -2867,7 +2884,7 @@ do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:2871: checking for $ac_word" >&5
+echo "configure:2888: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_CC'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -2901,7 +2918,7 @@ do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:2905: checking for $ac_word" >&5
+echo "configure:2922: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_CXX'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -2935,7 +2952,7 @@ do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:2939: checking for $ac_word" >&5
+echo "configure:2956: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_F77'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -3018,7 +3035,7 @@ do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:3022: checking for $ac_word" >&5
+echo "configure:3039: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_CC'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -3052,7 +3069,7 @@ do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:3056: checking for $ac_word" >&5
+echo "configure:3073: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_CXX'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -3086,7 +3103,7 @@ do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:3090: checking for $ac_word" >&5
+echo "configure:3107: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_F77'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -3121,7 +3138,7 @@ do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:3125: checking for $ac_word" >&5
+echo "configure:3142: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_CC'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -3155,7 +3172,7 @@ do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:3159: checking for $ac_word" >&5
+echo "configure:3176: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_CXX'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -3189,7 +3206,7 @@ do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:3193: checking for $ac_word" >&5
+echo "configure:3210: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_F77'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -3225,7 +3242,7 @@ do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:3229: checking for $ac_word" >&5
+echo "configure:3246: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_CC'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -3262,7 +3279,7 @@ do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:3266: checking for $ac_word" >&5
+echo "configure:3283: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_CXX'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -3299,7 +3316,7 @@ do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:3303: checking for $ac_word" >&5
+echo "configure:3320: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_F77'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -3347,17 +3364,17 @@ done
 
             ac_safe=`echo "$casc_header" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for $casc_header""... $ac_c" 1>&6
-echo "configure:3351: checking for $casc_header" >&5
+echo "configure:3368: checking for $casc_header" >&5
 if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 3356 "configure"
+#line 3373 "configure"
 #include "confdefs.h"
 #include <$casc_header>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:3361: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:3378: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -3399,7 +3416,7 @@ fi
    # check for the library from first argument.  If linking is successful
    # the first time, the job is done, otherwise loop through DIRECTORY-LIST
    echo $ac_n "checking for main in -lmpi""... $ac_c" 1>&6
-echo "configure:3403: checking for main in -lmpi" >&5
+echo "configure:3420: checking for main in -lmpi" >&5
 ac_lib_var=`echo mpi'_'main | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -3407,14 +3424,14 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="$MPILIBDIRS $MPILIBS $LIBS -lmpi"
 cat > conftest.$ac_ext <<EOF
-#line 3411 "configure"
+#line 3428 "configure"
 #include "confdefs.h"
 
 int main() {
 main()
 ; return 0; }
 EOF
-if { (eval echo configure:3418: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:3435: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -3439,7 +3456,7 @@ unset ac_cv_lib_$ac_lib_var
       for casc_lib_dir in /usr/local/mpi/lib; do
 
          echo $ac_n "checking for main in -lmpi""... $ac_c" 1>&6
-echo "configure:3443: checking for main in -lmpi" >&5
+echo "configure:3460: checking for main in -lmpi" >&5
 ac_lib_var=`echo mpi'_'main | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -3447,14 +3464,14 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-L$casc_lib_dir $MPILIBDIRS $MPILIBS -lmpi $LIBS -lmpi"
 cat > conftest.$ac_ext <<EOF
-#line 3451 "configure"
+#line 3468 "configure"
 #include "confdefs.h"
 
 int main() {
 main()
 ; return 0; }
 EOF
-if { (eval echo configure:3458: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:3475: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -3553,7 +3570,7 @@ do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:3557: checking for $ac_word" >&5
+echo "configure:3574: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_CC'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -3587,7 +3604,7 @@ do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:3591: checking for $ac_word" >&5
+echo "configure:3608: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_CXX'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -3621,7 +3638,7 @@ do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:3625: checking for $ac_word" >&5
+echo "configure:3642: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_F77'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -3656,7 +3673,7 @@ do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:3660: checking for $ac_word" >&5
+echo "configure:3677: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_CC'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -3690,7 +3707,7 @@ do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:3694: checking for $ac_word" >&5
+echo "configure:3711: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_CXX'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -3724,7 +3741,7 @@ do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:3728: checking for $ac_word" >&5
+echo "configure:3745: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_F77'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -3760,7 +3777,7 @@ do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:3764: checking for $ac_word" >&5
+echo "configure:3781: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_CC'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -3797,7 +3814,7 @@ do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:3801: checking for $ac_word" >&5
+echo "configure:3818: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_CXX'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -3834,7 +3851,7 @@ do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:3838: checking for $ac_word" >&5
+echo "configure:3855: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_F77'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -3883,17 +3900,17 @@ done
 
             ac_safe=`echo "$casc_header" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for $casc_header""... $ac_c" 1>&6
-echo "configure:3887: checking for $casc_header" >&5
+echo "configure:3904: checking for $casc_header" >&5
 if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 3892 "configure"
+#line 3909 "configure"
 #include "confdefs.h"
 #include <$casc_header>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:3897: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:3914: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -3935,7 +3952,7 @@ fi
    # check for the library from first argument.  If linking is successful
    # the first time, the job is done, otherwise loop through DIRECTORY-LIST
    echo $ac_n "checking for main in -lmpi""... $ac_c" 1>&6
-echo "configure:3939: checking for main in -lmpi" >&5
+echo "configure:3956: checking for main in -lmpi" >&5
 ac_lib_var=`echo mpi'_'main | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -3943,14 +3960,14 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="$MPILIBDIRS $MPILIBS $LIBS -lmpi"
 cat > conftest.$ac_ext <<EOF
-#line 3947 "configure"
+#line 3964 "configure"
 #include "confdefs.h"
 
 int main() {
 main()
 ; return 0; }
 EOF
-if { (eval echo configure:3954: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:3971: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -3975,7 +3992,7 @@ unset ac_cv_lib_$ac_lib_var
       for casc_lib_dir in /usr/local/mpi/lib; do
 
          echo $ac_n "checking for main in -lmpi""... $ac_c" 1>&6
-echo "configure:3979: checking for main in -lmpi" >&5
+echo "configure:3996: checking for main in -lmpi" >&5
 ac_lib_var=`echo mpi'_'main | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -3983,14 +4000,14 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-L$casc_lib_dir $MPILIBDIRS $MPILIBS -lmpi $LIBS -lmpi"
 cat > conftest.$ac_ext <<EOF
-#line 3987 "configure"
+#line 4004 "configure"
 #include "confdefs.h"
 
 int main() {
 main()
 ; return 0; }
 EOF
-if { (eval echo configure:3994: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:4011: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -4097,7 +4114,7 @@ fi
 
 
 echo $ac_n "checking how to run the C preprocessor""... $ac_c" 1>&6
-echo "configure:4101: checking how to run the C preprocessor" >&5
+echo "configure:4118: checking how to run the C preprocessor" >&5
 # On Suns, sometimes $CPP names a directory.
 if test -n "$CPP" && test -d "$CPP"; then
   CPP=
@@ -4111,23 +4128,6 @@ else
   CPP="${CC-cc} -E"
   # On the NeXT, cc -E runs the code through the compiler's parser,
   # not just through cpp.
-  cat > conftest.$ac_ext <<EOF
-#line 4116 "configure"
-#include "confdefs.h"
-#include <assert.h>
-Syntax Error
-EOF
-ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:4122: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
-ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
-if test -z "$ac_err"; then
-  :
-else
-  echo "$ac_err" >&5
-  echo "configure: failed program was:" >&5
-  cat conftest.$ac_ext >&5
-  rm -rf conftest*
-  CPP="${CC-cc} -E -traditional-cpp"
   cat > conftest.$ac_ext <<EOF
 #line 4133 "configure"
 #include "confdefs.h"
@@ -4144,7 +4144,7 @@ else
   echo "configure: failed program was:" >&5
   cat conftest.$ac_ext >&5
   rm -rf conftest*
-  CPP="${CC-cc} -nologo -E"
+  CPP="${CC-cc} -E -traditional-cpp"
   cat > conftest.$ac_ext <<EOF
 #line 4150 "configure"
 #include "confdefs.h"
@@ -4153,6 +4153,23 @@ Syntax Error
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
 { (eval echo configure:4156: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
+if test -z "$ac_err"; then
+  :
+else
+  echo "$ac_err" >&5
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  CPP="${CC-cc} -nologo -E"
+  cat > conftest.$ac_ext <<EOF
+#line 4167 "configure"
+#include "confdefs.h"
+#include <assert.h>
+Syntax Error
+EOF
+ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
+{ (eval echo configure:4173: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
 if test -z "$ac_err"; then
   :
@@ -4177,7 +4194,7 @@ fi
 echo "$ac_t""$CPP" 1>&6
 
 echo $ac_n "checking how to run the C++ preprocessor""... $ac_c" 1>&6
-echo "configure:4181: checking how to run the C++ preprocessor" >&5
+echo "configure:4198: checking how to run the C++ preprocessor" >&5
 if test -z "$CXXCPP"; then
 if eval "test \"`echo '$''{'ac_cv_prog_CXXCPP'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -4190,12 +4207,12 @@ ac_link='${CXX-g++} -o conftest${ac_exeext} $CXXFLAGS $CPPFLAGS $LDFLAGS conftes
 cross_compiling=$ac_cv_prog_cxx_cross
   CXXCPP="${CXX-g++} -E"
   cat > conftest.$ac_ext <<EOF
-#line 4194 "configure"
+#line 4211 "configure"
 #include "confdefs.h"
 #include <stdlib.h>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:4199: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:4216: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
 if test -z "$ac_err"; then
   :
@@ -4225,7 +4242,7 @@ do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:4229: checking for $ac_word" >&5
+echo "configure:4246: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_FPP'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -4318,17 +4335,17 @@ then
 
             ac_safe=`echo "$casc_header" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for $casc_header""... $ac_c" 1>&6
-echo "configure:4322: checking for $casc_header" >&5
+echo "configure:4339: checking for $casc_header" >&5
 if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 4327 "configure"
+#line 4344 "configure"
 #include "confdefs.h"
 #include <$casc_header>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:4332: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:4349: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -4356,7 +4373,7 @@ if eval "test \"`echo '$ac_cv_header_'$ac_safe`\" = yes"; then
    # check for the library from first argument.  If linking is successful
    # the first time, the job is done, otherwise loop through DIRECTORY-LIST
    echo $ac_n "checking for cegdb in -lcegdb""... $ac_c" 1>&6
-echo "configure:4360: checking for cegdb in -lcegdb" >&5
+echo "configure:4377: checking for cegdb in -lcegdb" >&5
 ac_lib_var=`echo cegdb'_'cegdb | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -4364,7 +4381,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="$LDLIBDIRS $LDLIBS $LIBS -lcegdb"
 cat > conftest.$ac_ext <<EOF
-#line 4368 "configure"
+#line 4385 "configure"
 #include "confdefs.h"
 /* Override any gcc2 internal prototype to avoid an error.  */
 /* We use char because int might match the return type of a gcc2
@@ -4375,7 +4392,7 @@ int main() {
 cegdb()
 ; return 0; }
 EOF
-if { (eval echo configure:4379: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:4396: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -4400,7 +4417,7 @@ unset ac_cv_lib_$ac_lib_var
       for casc_lib_dir in /home/casc/lib; do
 
          echo $ac_n "checking for cegdb in -lcegdb""... $ac_c" 1>&6
-echo "configure:4404: checking for cegdb in -lcegdb" >&5
+echo "configure:4421: checking for cegdb in -lcegdb" >&5
 ac_lib_var=`echo cegdb'_'cegdb | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -4408,7 +4425,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-L$casc_lib_dir $LDLIBDIRS $LDLIBS -lcegdb $LIBS -lcegdb"
 cat > conftest.$ac_ext <<EOF
-#line 4412 "configure"
+#line 4429 "configure"
 #include "confdefs.h"
 /* Override any gcc2 internal prototype to avoid an error.  */
 /* We use char because int might match the return type of a gcc2
@@ -4419,7 +4436,7 @@ int main() {
 cegdb()
 ; return 0; }
 EOF
-if { (eval echo configure:4423: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:4440: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -4484,7 +4501,7 @@ fi
    # check for the library from first argument.  If linking is successful
    # the first time, the job is done, otherwise loop through DIRECTORY-LIST
    echo $ac_n "checking for main in -lm""... $ac_c" 1>&6
-echo "configure:4488: checking for main in -lm" >&5
+echo "configure:4505: checking for main in -lm" >&5
 ac_lib_var=`echo m'_'main | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -4492,14 +4509,14 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="$LIBDIRS $LIBS $LIBS -lm"
 cat > conftest.$ac_ext <<EOF
-#line 4496 "configure"
+#line 4513 "configure"
 #include "confdefs.h"
 
 int main() {
 main()
 ; return 0; }
 EOF
-if { (eval echo configure:4503: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:4520: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -4524,7 +4541,7 @@ unset ac_cv_lib_$ac_lib_var
       for casc_lib_dir in /usr/lib /usr/ccs/lib; do
 
          echo $ac_n "checking for main in -lm""... $ac_c" 1>&6
-echo "configure:4528: checking for main in -lm" >&5
+echo "configure:4545: checking for main in -lm" >&5
 ac_lib_var=`echo m'_'main | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -4532,14 +4549,14 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-L$casc_lib_dir $LIBDIRS $LIBS -lm $LIBS -lm"
 cat > conftest.$ac_ext <<EOF
-#line 4536 "configure"
+#line 4553 "configure"
 #include "confdefs.h"
 
 int main() {
 main()
 ; return 0; }
 EOF
-if { (eval echo configure:4543: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:4560: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
