@@ -44,23 +44,27 @@ cd $HYPRE_AUTOTEST_DIR
 rm -fR linear_solvers
 cvs checkout -P linear_solvers
 
+
 #=============================================================================
 # Make libraries and test drivers (using configure)
 #=============================================================================
 
 cd $HYPRE_AUTOTEST_DIR/linear_solvers
+rm config.cache
 ./configure
-make
+make beta
 make struct
 make parcsr
 #make ci_struct
+make seq
 make docs
 
 #=============================================================================
 # Run test suites
 #=============================================================================
 
-cd $HYPRE_AUTOTEST_DIR/linear_solvers/test
+cp -Rf test $HYPRE_AUTOTEST_DIR/autotest_drivers/.
+cd $HYPRE_AUTOTEST_DIR/autotest_drivers/test
 ./test_drivers.sh -mail
 
 #=============================================================================
@@ -69,12 +73,13 @@ cd $HYPRE_AUTOTEST_DIR/linear_solvers/test
 
 cd $HYPRE_AUTOTEST_DIR/linear_solvers
 rm config.cache
-./configure
+./configure --with-pthreads
 make veryclean
-make
+make beta
 make struct
 make parcsr
 #make ci_struct
+make seq
 make docs
 
 
@@ -82,7 +87,8 @@ make docs
 # Run test suites
 #=============================================================================
 
-cd $HYPRE_AUTOTEST_DIR/linear_solvers/test
+cp -Rf test $HYPRE_AUTOTEST_DIR/autotest_drivers/.
+cd $HYPRE_AUTOTEST_DIR/autotest_drivers/test
 ./test_drivers.sh -mail
 
 
@@ -92,12 +98,13 @@ cd $HYPRE_AUTOTEST_DIR/linear_solvers/test
 
 cd $HYPRE_AUTOTEST_DIR/linear_solvers
 rm config.cache
-./configure
+./configure --without-MPI
 make veryclean
-make
+make beta
 make struct
 make parcsr
 #make ci_struct
+make seq
 make docs
 
 
@@ -105,15 +112,38 @@ make docs
 # Run test suites
 #=============================================================================
 
-cd $HYPRE_AUTOTEST_DIR/linear_solvers/test
+cp -Rf test $HYPRE_AUTOTEST_DIR/autotest_drivers/.
+cd $HYPRE_AUTOTEST_DIR/autotest_drivers/test
 ./test_drivers.sh -mail
 
+#=============================================================================
+# Make libraries and test drivers (using configure)
+#=============================================================================
+
+cd $HYPRE_AUTOTEST_DIR/linear_solvers
+rm config.cache
+./configure
+make struct
+make parcsr
+#make ci_struct
+cd $HYPRE_AUTOTEST_DIR/linear_solvers/test
+make c++
+
+#=============================================================================
+# Run test suites
+#=============================================================================
+
+cp -Rf test $HYPRE_AUTOTEST_DIR/autotest_drivers/.
+cd $HYPRE_AUTOTEST_DIR/autotest_drivers/test
+./test_drivers.sh -mail
 
 #=============================================================================
 # Clean up
 #=============================================================================
 
 cd $HYPRE_AUTOTEST_DIR/linear_solvers
+make clean
+cd $HYPRE_AUTOTEST_DIR/autotest_drivers/test
 make clean
 
 #==============================================================================
