@@ -715,6 +715,33 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 		 debug_flag, trunc_factor, col_offd_S_to_A, &P);
 	  hypre_TFree(col_offd_S_to_A);
       }
+      else if (hypre_ParAMGDataInterpType(amg_data) == 3)
+      {
+	 if (nodal > -1)
+	 {
+            hypre_BoomerAMGBuildDirInterp(A_array[level], CF_marker_array[level], 
+                 S, coarse_pnts_global, num_functions, dof_func_array[level], 
+		 debug_flag, trunc_factor, col_offd_S_to_A, &P);
+	    hypre_TFree(col_offd_S_to_A);
+         }
+         else
+         {
+            CFN_marker = CF_marker_array[level];
+            hypre_BoomerAMGBuildDirInterp(AN, CFN_marker,
+                 SN, coarse_pnts_global, 1, NULL,
+                 debug_flag, trunc_factor, col_offd_SN_to_AN, &PN);
+	    hypre_TFree(col_offd_SN_to_AN);
+            hypre_BoomerAMGCreateScalarCFS(PN, CFN_marker, NULL,
+                num_functions, nodal, 1, &dof_func1,
+                &CF_marker, NULL, &P);
+            dof_func_array[level+1] = dof_func1;
+            CF_marker_array[level] = CF_marker;
+            hypre_TFree (CFN_marker);
+            hypre_ParCSRMatrixDestroy(AN);
+            hypre_ParCSRMatrixDestroy(PN);
+            hypre_ParCSRMatrixDestroy(SN);
+         }
+      }
       else if (hypre_ParAMGDataGSMG(amg_data) == 0)
       {
 	 if (nodal > -1)
