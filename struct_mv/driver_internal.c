@@ -103,7 +103,6 @@ main( int   argc,
     *-----------------------------------------------------------*/
 
    zzz_FreeStructGrid(zzz_StructMatrixGrid(matrix));
-   zzz_FreeStructStencil(zzz_StructMatrixUserStencil(matrix));
    zzz_FreeStructMatrix(matrix);
    zzz_FreeStructGrid(zzz_StructVectorGrid(vector));
    zzz_FreeStructVector(vector);

@@ -88,6 +88,7 @@ zzz_FreeStructMatrix( zzz_StructMatrix *matrix )
       zzz_FreeBoxArray(zzz_StructMatrixDataSpace(matrix));
 
       zzz_TFree(zzz_StructMatrixSymmCoeff(matrix));
+      zzz_FreeStructStencil(zzz_StructMatrixUserStencil(matrix));
       zzz_FreeStructStencil(zzz_StructMatrixStencil(matrix));
 
       zzz_TFree(matrix);
