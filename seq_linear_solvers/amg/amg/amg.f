@@ -13,7 +13,7 @@ C
       IMPLICIT REAL*8 (A-H,O-Z)
       integer TOLD,TNEW,TAMG
 C
-      include `params.amg'
+      include 'params.amg'
       COMMON /SCONN/  KSTRNG,ISTRNG,NSWEEP
       DIMENSION A(ndima),JA(ndima),IA(ndimu),
      *          U(ndimu),F(ndimu)
