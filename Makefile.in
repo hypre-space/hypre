@@ -39,6 +39,7 @@ HYPRE_IJ_DIRS =\
  IJ_matrix_vector\
  distributed_linear_solvers/pilut\
  distributed_linear_solvers/ParaSails\
+ distributed_linear_solvers/Euclid\
  parcsr_linear_solvers
 
 #These are the directories for the FEI
@@ -52,7 +53,8 @@ HYPRE_FEI_LIBFILES =\
  libHYPRE_parcsr_mv.a  libHYPRE_FEI.a \
  libHYPRE_seq_mv.a     libHYPRE_IJ_mv.a libkrylov.a \
  libHYPRE_DistributedMatrixPilutSolver.a \
- libHYPRE_utilities.a  libHYPRE_MatrixMatrix.a libHYPRE_ParaSails.a
+ libHYPRE_utilities.a  libHYPRE_MatrixMatrix.a libHYPRE_ParaSails.a\
+ libHYPRE_Euclid.a
 
 # These are directories that are officially in HYPRE
 HYPRE_DIRS =\
