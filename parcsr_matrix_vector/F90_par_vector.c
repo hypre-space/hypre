@@ -60,22 +60,6 @@ hypre_F90_IFACE(hypre_setparvectorpartitioningo)( long int *vector,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_ReadParVector
- *--------------------------------------------------------------------------*/
-
-void 
-hypre_F90_IFACE(hypre_readparvector)( long int *vector,
-                                      int  *comm,
-                                      char *file_name,
-                                      int  *ierr       )
-{
-   *vector = (long int) ( hypre_ReadParVector ( (MPI_Comm) *comm,
-                                                (char *)    file_name ) );
-
-   *ierr = 0;
-}
-
-/*--------------------------------------------------------------------------
  * hypre_SetParVectorConstantValue 
  *--------------------------------------------------------------------------*/
 
