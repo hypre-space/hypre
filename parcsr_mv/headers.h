@@ -15,7 +15,7 @@
 #include "mpe.h"
 
 #include "communication.h"
-#include "../utilities/memory.h"
+#include "../utilities/hypre_utilities.h"
 #include "../seq_matrix_vector/HYPRE_mv.h"
  
 #include "../seq_matrix_vector/csr_matrix.h"
