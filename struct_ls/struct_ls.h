@@ -226,12 +226,32 @@ int hypre_StructKrylovCommInfo( void *A , int *my_id , int *num_procs );
 /* pfmg2_setup_rap.c */
 hypre_StructMatrix *hypre_PFMG2CreateRAPOp( hypre_StructMatrix *R , hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructGrid *coarse_grid , int cdir );
 int hypre_PFMG2BuildRAPSym( hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix *R , int cdir , hypre_Index cindex , hypre_Index cstride , hypre_StructMatrix *RAP );
+int hypre_PFMG2BuildRAPSym_onebox_FSS5_CC0( int ci , int fi , hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix *R , int cdir , hypre_Index cindex , hypre_Index cstride , hypre_StructMatrix *RAP );
+int hypre_PFMG2BuildRAPSym_onebox_FSS5_CC1( int ci , int fi , hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix *R , int cdir , hypre_Index cindex , hypre_Index cstride , hypre_StructMatrix *RAP );
+int hypre_PFMG2BuildRAPSym_onebox_FSS9_CC0( int ci , int fi , hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix *R , int cdir , hypre_Index cindex , hypre_Index cstride , hypre_StructMatrix *RAP );
+int hypre_PFMG2BuildRAPSym_onebox_FSS9_CC1( int ci , int fi , hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix *R , int cdir , hypre_Index cindex , hypre_Index cstride , hypre_StructMatrix *RAP );
 int hypre_PFMG2BuildRAPNoSym( hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix *R , int cdir , hypre_Index cindex , hypre_Index cstride , hypre_StructMatrix *RAP );
+int hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC0( int ci , int fi , hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix *R , int cdir , hypre_Index cindex , hypre_Index cstride , hypre_StructMatrix *RAP );
+int hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC1( int ci , int fi , hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix *R , int cdir , hypre_Index cindex , hypre_Index cstride , hypre_StructMatrix *RAP );
+int hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC0( int ci , int fi , hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix *R , int cdir , hypre_Index cindex , hypre_Index cstride , hypre_StructMatrix *RAP );
+int hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC1( int ci , int fi , hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix *R , int cdir , hypre_Index cindex , hypre_Index cstride , hypre_StructMatrix *RAP );
 
 /* pfmg3_setup_rap.c */
 hypre_StructMatrix *hypre_PFMG3CreateRAPOp( hypre_StructMatrix *R , hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructGrid *coarse_grid , int cdir );
 int hypre_PFMG3BuildRAPSym( hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix *R , int cdir , hypre_Index cindex , hypre_Index cstride , hypre_StructMatrix *RAP );
+int hypre_PFMG3BuildRAPSym_onebox_FSS07_CC0( int ci , int fi , hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix *R , int cdir , hypre_Index cindex , hypre_Index cstride , hypre_StructMatrix *RAP );
+int hypre_PFMG3BuildRAPSym_onebox_FSS07_CC1( int ci , int fi , hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix *R , int cdir , hypre_Index cindex , hypre_Index cstride , hypre_StructMatrix *RAP );
+int hypre_PFMG3BuildRAPSym_onebox_FSS19_CC0( int ci , int fi , hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix *R , int cdir , hypre_Index cindex , hypre_Index cstride , hypre_StructMatrix *RAP );
+int hypre_PFMG3BuildRAPSym_onebox_FSS19_CC1( int ci , int fi , hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix *R , int cdir , hypre_Index cindex , hypre_Index cstride , hypre_StructMatrix *RAP );
+int hypre_PFMG3BuildRAPSym_onebox_FSS27_CC0( int ci , int fi , hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix *R , int cdir , hypre_Index cindex , hypre_Index cstride , hypre_StructMatrix *RAP );
+int hypre_PFMG3BuildRAPSym_onebox_FSS27_CC1( int ci , int fi , hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix *R , int cdir , hypre_Index cindex , hypre_Index cstride , hypre_StructMatrix *RAP );
 int hypre_PFMG3BuildRAPNoSym( hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix *R , int cdir , hypre_Index cindex , hypre_Index cstride , hypre_StructMatrix *RAP );
+int hypre_PFMG3BuildRAPNoSym_onebox_FSS07_CC0( int ci , int fi , hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix *R , int cdir , hypre_Index cindex , hypre_Index cstride , hypre_StructMatrix *RAP );
+int hypre_PFMG3BuildRAPNoSym_onebox_FSS07_CC1( int ci , int fi , hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix *R , int cdir , hypre_Index cindex , hypre_Index cstride , hypre_StructMatrix *RAP );
+int hypre_PFMG3BuildRAPNoSym_onebox_FSS19_CC0( int ci , int fi , hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix *R , int cdir , hypre_Index cindex , hypre_Index cstride , hypre_StructMatrix *RAP );
+int hypre_PFMG3BuildRAPNoSym_onebox_FSS19_CC1( int ci , int fi , hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix *R , int cdir , hypre_Index cindex , hypre_Index cstride , hypre_StructMatrix *RAP );
+int hypre_PFMG3BuildRAPNoSym_onebox_FSS27_CC0( int ci , int fi , hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix *R , int cdir , hypre_Index cindex , hypre_Index cstride , hypre_StructMatrix *RAP );
+int hypre_PFMG3BuildRAPNoSym_onebox_FSS27_CC1( int ci , int fi , hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix *R , int cdir , hypre_Index cindex , hypre_Index cstride , hypre_StructMatrix *RAP );
 
 /* pfmg.c */
 void *hypre_PFMGCreate( MPI_Comm comm );
