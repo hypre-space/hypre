@@ -39,7 +39,6 @@ MLI_Solver_SuperLU::~MLI_Solver_SuperLU()
 {
    if ( perm_r != NULL ) 
    {
-      Destroy_CompCol_Matrix(&superLU_Amat);
       Destroy_SuperNode_Matrix(&superLU_Lmat);
       Destroy_CompCol_Matrix(&superLU_Umat);
       StatFree();
@@ -226,6 +225,7 @@ int MLI_Solver_SuperLU::setup( MLI_Matrix *Amat )
    dgstrf(refact, &AC, diag_pivot_thresh, drop_tol, relax, panel_size,
           etree,NULL,lwork,perm_r,perm_c,&superLU_Lmat,&superLU_Umat,&info);
    Destroy_CompCol_Permuted(&AC);
+   Destroy_CompCol_Matrix(&superLU_Amat);
    delete [] etree;
    factorized = 1;
    return 0;
