@@ -4,14 +4,15 @@ c     interpolation routine (with V* option)
 c=====================================================================
 
       subroutine intad(
-     *     u, icg, b, ib, jb, n,
+     *     u, icg, b, ib, jb, n, vtmp,
      *     uc, fc, ac, iac, jac, iuc, nc,
      *     ivstar, nun)
 
       implicit real*8 (a-h,o-z)
 
-      dimension u  (*)
-      dimension icg(*)
+      dimension vtmp (*)
+      dimension u    (*)
+      dimension icg  (*)
 
       dimension b  (*)
       dimension ib (*)
@@ -64,17 +65,18 @@ c     perform v* step (minimize energy)
 c     perform interpolation
 
  70   continue
-      do 90 i=1,n
-         jlo=ib(i)
-         jhi=ib(i+1)-1
-         if(icg(i).gt.0) jhi=jlo
-         if(jlo.gt.jhi) go to 90
-         do 80 j=jlo,jhi
-            i2=jb(j)
-            ic=icg(i2)
-            u(i)=u(i)+b(j)*uc(ic)
- 80      continue
- 90   continue
+
+      call vcopy(u,vtmp,n)
+      
+c      do 101 i=1,n
+c         vtmp(i) = u(i)
+c101   continue
+
+
+      alpha = 1.0
+      beta = 1.0
+      call matvec(n,u,alpha,b,ib,jb,uc,beta,vtmp,0)
+
       return
       end
 
@@ -86,12 +88,12 @@ c=====================================================================
 
       subroutine rscali(
      *     fc, nc,
-     *     u, f, r, a, ia, ja, icg, b, ib, jb, n)
+     *     u, f, vtmp, a, ia, ja, icg, b, ib, jb, n)
 
       implicit real*8 (a-h,o-z)
 
-      dimension r  (*)
-      dimension fc (*)
+      dimension vtmp(*)
+      dimension fc  (*)
 
       dimension u  (*)
       dimension f  (*)
@@ -111,24 +113,25 @@ c---------------------------------------------------------------------
  10   continue
 
 cveh      compute residual by using matvec
-cveh      here r = f-Au
+cveh      here vtmp = f-Au
+
+c      do 11 ic=1,nv
+c         vtmp(ic)=f(ic)
+c 11   continue
+
  
       alpha = -1.0
       beta = 1.0
-      call matvec(n,r,alpha,a,ia,ja,u,beta,f)
+      call matvec(n,vtmp,alpha,a,ia,ja,u,beta,f,0)
 
-cveh      perform restriction
+cveh      perform restriction using matvec
 
-      do 60 i=1,n
-         jlo=ib(i)
-         jhi=ib(i+1)-1
-         if(icg(i).gt.0) jhi=jlo
-         if(jlo.gt.jhi) go to 60
-         do 50 j=jlo,jhi
-            ic=icg(jb(j))
-            fc(ic)=fc(ic)+r(i)*b(j)
- 50      continue
- 60   continue
+      alpha = 1.0
+      beta = 0.0
+      jtrans = 1
+      call matvec(n,fc,alpha,b,ib,jb,vtmp,beta,f,jtrans)
+
+
       return
       end
 
@@ -136,12 +139,12 @@ c=====================================================================
 c     compute (and print) residual
 c=====================================================================
 
-      subroutine rsdl(k,enrg,res,resv,r,
+      subroutine rsdl(k,enrg,res,resv,vtmp,
      *     imin,imax,u,f,a,ia,ja,iu)
 
       implicit real*8 (a-h,o-z)
   
-      dimension r  (*)
+      dimension vtmp (*)
 
       dimension u  (*)
       dimension f  (*)
@@ -162,7 +165,7 @@ c---------------------------------------------------------------------
       enrg=0.e0
 
 cveh   new residual routine, using matvec
-cveh   here r = Au-f
+cveh   here vtmp = Au-f
 
       r2=0.e0
       ilo=imin(k)
@@ -170,13 +173,13 @@ cveh   here r = Au-f
       nv = ihi-ilo+1
       alpha = 1.0
       beta = -1.0
-      call matvec(nv,r,alpha,a,ia,ja,u,beta,f)
+      call matvec(nv,vtmp,alpha,a,ia,ja,u,beta,f,0)
      
       do 31 j = 1,nv
-         rtmp = r(j)*r(j)
+         rtmp = vtmp(j)*vtmp(j)
          r2 = r2 + rtmp
          resv(iu(j)) = resv(iu(j)) + rtmp
-         enrg=enrg+r(j)*u(j)-u(j)*f(j)
+         enrg=enrg+vtmp(j)*u(j)-u(j)*f(j)
 31    continue
       res = sqrt(r2)
 

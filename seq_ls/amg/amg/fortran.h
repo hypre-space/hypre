@@ -77,7 +77,7 @@ solve_(&AMGDataNumLevels(amg_data),\
        AMGDataIMax(amg_data),\
        VectorData(u),\
        VectorData(f),\
-       AMGDataResid(amg_data),\
+       AMGDataVecTemp(amg_data),\
        MatrixData(AMGDataA(amg_data)),\
        MatrixIA(AMGDataA(amg_data)),\
        MatrixJA(AMGDataA(amg_data)),\

@@ -73,7 +73,7 @@ void    *data;
    int      i, j, k;
    int      decr;
 
-   double  *rsid;
+   double  *vtmp;
    
    
    /*----------------------------------------------------------
@@ -176,7 +176,7 @@ void    *data;
    ipmx  = ctalloc(int, num_levels);
    icg   = ctalloc(int, ndimu);
    ifg   = ctalloc(int, ndimu);
-   rsid  = ctalloc(double, num_variables);
+   vtmp  = ctalloc(double, num_variables);
    
    /* set fine level point and variable bounds */
    ipmn[0] = 1;
@@ -198,7 +198,7 @@ void    *data;
    AMGDataICG(amg_data)       = icg;
    AMGDataIFG(amg_data)       = ifg;
 
-   AMGDataResid(amg_data)     = rsid;
+   AMGDataVecTemp(amg_data)     = vtmp;
    
    /*----------------------------------------------------------
     * Call the setup phase code
@@ -277,7 +277,7 @@ void    *data;
 	 iv[levpi[j]+k-1] = iv[levp[j]+k-1];
       }
    }
-   
+  
    /* shift `ja' and `jb' */
    decr = numv[0];
    for (j = 1; j < num_levels; j++)
@@ -368,6 +368,21 @@ void    *data;
       ipmx[j] -= decr;
       decr += nump[j];
    }
+
+   /* shift `jb' array to allow use of matvec  */
+
+   for (j = 0; j < num_levels; j++)
+   {
+     for (k = levb[j]; k < levb[j] + numb[j]; k++)
+     {
+         jb[k-1] = icg[jb[k-1]+levv[j]-2];
+     }
+   }  
+  
+   
+
+ 
+ 
    
    /*----------------------------------------------------------
     * Set up A_array and P_array
@@ -403,6 +418,15 @@ void    *data;
       sprintf(fnam,"level_%d.ysmp",j);
       WriteYSMP(fnam, A_array[j]);
    }
+}
+#endif
+
+#if 1
+{
+   char     fnam[255];
+
+   sprintf(fnam,"P_0.ysmp",j);
+   WriteYSMP(fnam, P_array[0]);
 }
 #endif
 

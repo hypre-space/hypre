@@ -4,7 +4,7 @@ c     main solver routine
 c=====================================================================
 
       subroutine solve(levels,ncyc,mu,ntrlx,iprlx,ierlx,iurlx,iprtc,
-     *     nun,imin,imax,u,f,r,a,ia,ja,iu,icg,b,ib,jb,
+     *     nun,imin,imax,u,f,vtmp,a,ia,ja,iu,icg,b,ib,jb,
      *     ipmn,ipmx,iv,ip,xp,yp,
      *     ndimu,ndimp,ndima,ndimb,
      *     leva, levb, levv, levp, levi,
@@ -18,15 +18,15 @@ c=====================================================================
 
 
       dimension imin(*),imax(*)
-      dimension u  (*)
-      dimension f  (*)
-      dimension r  (*)
-      dimension a  (*)
-      dimension ia (*)
-      dimension ja (*)
-      dimension iu (*)
-      dimension icg(*)
-      dimension iv (*)
+      dimension u   (*)
+      dimension f   (*)
+      dimension vtmp(*)
+      dimension a   (*)
+      dimension ia  (*)
+      dimension ja  (*)
+      dimension iu  (*)
+      dimension icg (*)
+      dimension iv  (*)
 
       dimension ip (*)
       dimension xp (*)
@@ -94,7 +94,7 @@ c===  > decode ncyc
 c===  > find initial residual
 
       if(iprtc.ge.0) then
-         call rsdl(1,enrg,res,resv,r,
+         call rsdl(1,enrg,res,resv,vtmp,
      *        imin,imax,u,f,a,ia,ja,iu)
          resi = res
          write(6,1000)
@@ -124,7 +124,7 @@ c===  > cycling
 
          call cycle(levels,mu,ifcycl,ivstar,
      *        ntrlx,iprlx,ierlx,iurlx,iprtc,icycmp,
-     *        nun,imin,imax,u,f,r,a,ia,ja,iu,icg,
+     *        nun,imin,imax,u,f,vtmp,a,ia,ja,iu,icg,
      *        b,ib,jb,ipmn,ipmx,iv,ip,xp,yp,
      *        ndimu,ndimp,ndima,ndimb,
      *        leva, levb, levv, levp, levi,
@@ -136,7 +136,7 @@ c     veh relative residual temporarily added: relres,
 
             engold = enrg
             resold=res
-            call rsdl(1,enrg,res,resv,r,
+            call rsdl(1,enrg,res,resv,vtmp,
      *           imin,imax,u,f,a,ia,ja,iu)
             factor=res/resold
             relres = res/fnorm
@@ -214,7 +214,7 @@ c=====================================================================
 
       subroutine cycle(levels,mu,ifcycl,ivstar,
      *     ntrlx,iprlx,ierlx,iurlx,iprtc,icomp,
-     *     nun,imin,imax,u,f,r,a,ia,ja,iu,icg,
+     *     nun,imin,imax,u,f,vtmp,a,ia,ja,iu,icg,
      *     b,ib,jb,ipmn,ipmx,iv,ip,xp,yp,
      *     ndimu,ndimp,ndima,ndimb,
      *     leva, levb, levv, levp, levi,
@@ -224,14 +224,14 @@ c=====================================================================
 
       dimension imin(*),imax(*)
       
-      dimension r  (*)
-      dimension u  (*)
-      dimension f  (*)
-      dimension ia (*)
-      dimension a  (*)
-      dimension ja (*)
-      dimension iu (*)
-      dimension icg(*)
+      dimension vtmp(*)
+      dimension u   (*)
+      dimension f   (*)
+      dimension ia  (*)
+      dimension a   (*)
+      dimension ja  (*)
+      dimension iu  (*)
+      dimension icg (*)
 
       dimension ip (*)
       dimension xp (*)
@@ -366,7 +366,7 @@ c     compute & print residuals
             lltop=0
          endif
 
-         call rsdl(1,enrg,res,resv,r,
+         call rsdl(1,enrg,res,resv,vtmp,
      *        imin(k),imax(k),
      *        u(levv(k)),f(levv(k)),
      *        a(leva(k)),ia(levi(k)),ja(leva(k)),iu(levv(k)))
@@ -395,7 +395,7 @@ c     perform partial sweeps
 c     compute & print residuals
 
             if(iprtc.ge.k) then
-               call rsdl(1,enrg,res,resv,r,
+               call rsdl(1,enrg,res,resv,vtmp,
      *              imin(k),imax(k),
      *              u(levv(k)),f(levv(k)),
      *              a(leva(k)),ia(levi(k)),ja(leva(k)),iu(levv(k)))
@@ -428,7 +428,7 @@ c===  > go to next finer grid
       call intad(
      *     u(levv(kf)), icg(levv(kf)),
      *     b(levb(kf)), ib(levi(kf)), jb(levb(kf)),
-     *     numv(kf),
+     *     numv(kf), vtmp,
      *     u(levv(kc)), f(levv(kc)),
      *     a(leva(kc)), ia(levi(kc)), ja(leva(kc)), iu(levv(kc)),
      *     numv(kc),
@@ -458,7 +458,7 @@ c===  > go to next coarser grid
       call rscali(
      *     f(levv(kc)),
      *     numv(kc),
-     *     u(levv(kf)), f(levv(kf)), r,
+     *     u(levv(kf)), f(levv(kf)), vtmp,
      *     a(leva(kf)), ia(levi(kf)), ja(leva(kf)),
      *     icg(levv(kf)),
      *     b(levb(kf)), ib(levi(kf)), jb(levb(kf)),

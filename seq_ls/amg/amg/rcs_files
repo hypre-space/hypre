@@ -39,5 +39,6 @@ strong.f
 tests.f
 testsB.f
 trunc.f
+vcopy.f
 vector.c
 vector.h

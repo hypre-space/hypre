@@ -83,7 +83,7 @@ typedef struct
    int     *nump;
 
    /* data generated in the solve phase */
-   double   *rsid;
+   double   *vtmp;
 
 } AMGData;
 
@@ -157,6 +157,6 @@ typedef struct
 #define AMGDataNumP(amg_data)         ((amg_data) -> nump)
 				      
 /* data generated in the solve phase */
-#define AMGDataResid(amg_data)        ((amg_data) -> rsid)
+#define AMGDataVecTemp(amg_data)        ((amg_data) -> vtmp)
 
 #endif
