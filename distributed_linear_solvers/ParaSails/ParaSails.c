@@ -1275,7 +1275,7 @@ void ParaSailsSetupPattern(ParaSails *ps, Matrix *A,
     if (ps->M) MatrixDestroy(ps->M);
     ps->M = MatrixCreate(ps->comm, ps->beg_row, ps->end_row);
 
-    diag_scale = DiagScaleCreate(A);
+    diag_scale = DiagScaleCreate(A, A->numb);
 
     if (ps->thresh < 0.0)
 	ps->thresh = SelectThresh(ps->comm, A, diag_scale, -ps->thresh);
@@ -1367,7 +1367,7 @@ void ParaSailsSetupValues(ParaSails *ps, Matrix *A, double filter)
 
     if (ps->filter != 0.0)
     {
-        DiagScale *diag_scale = DiagScaleCreate(A);
+        DiagScale *diag_scale = DiagScaleCreate(A, ps->numb);
         Matrix    *filtered_matrix = MatrixCreate(ps->comm, 
 	                                 ps->beg_row, ps->end_row);
 
@@ -1481,13 +1481,13 @@ void ParaSailsStats(ParaSails *ps, Matrix *A)
 	return;
 
     printf("******************* ParaSails *******************\n");
-    printf("symmetric : %d\n", ps->symmetric);
-    printf("thresh    : %e\n", ps->thresh);
-    printf("num_levels: %d\n", ps->num_levels);
-    printf("filter    : %e\n", ps->filter);
-    printf("loadbal   : %f\n", ps->loadbal_beta);
-    printf("Max cost  : %7.1e\n", max_cost);
-    printf("Nnz (pct) : %d (%.2f %%)\n", nnzm, nnzm/(double)nnza);
+    printf("symmetric             : %d\n", ps->symmetric);
+    printf("thresh                : %f\n", ps->thresh);
+    printf("num_levels            : %d\n", ps->num_levels);
+    printf("filter                : %f\n", ps->filter);
+    printf("loadbal               : %f\n", ps->loadbal_beta);
+    printf("Max cost              : %7.1e\n", max_cost);
+    printf("Nnz (ratio)           : %d (%.2f)\n", nnzm, nnzm/(double)nnza);
     printf("Max setup pattern time: %8.1f\n", max_pattern_time);
     printf("Max setup values time : %8.1f\n", max_values_time);
     printf("*************************************************\n");

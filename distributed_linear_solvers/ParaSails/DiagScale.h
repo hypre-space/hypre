@@ -28,7 +28,7 @@ typedef struct
 }
 DiagScale;
 
-DiagScale *DiagScaleCreate(Matrix *mat);
+DiagScale *DiagScaleCreate(Matrix *A, Numbering *numb);
 void DiagScaleDestroy(DiagScale *p);
 double DiagScaleGet(DiagScale *p, int index);
 

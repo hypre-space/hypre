@@ -46,7 +46,7 @@ static void ExchangeDiagEntries(MPI_Comm comm, Matrix *mat, int reqlen,
     MPI_Request request;
     int i, j, this_pe;
 
-    /*shell_sort(reqlen, reqind);*/
+    shell_sort(reqlen, reqind);
 
     *num_requests = 0;
 
@@ -145,9 +145,11 @@ static void ExchangeDiagEntriesServer(MPI_Comm comm, Matrix *mat,
 
 /*--------------------------------------------------------------------------
  * DiagScaleCreate - Return (a pointer to) a diagonal scaling object.
+ * Scale using the diagonal of A.  Use the list of external indices
+ * from the numbering object "numb".
  *--------------------------------------------------------------------------*/
 
-DiagScale *DiagScaleCreate(Matrix *mat)
+DiagScale *DiagScaleCreate(Matrix *A, Numbering *numb)
 {
     MPI_Request *requests;
     MPI_Status  *statuses;
@@ -159,12 +161,12 @@ DiagScale *DiagScaleCreate(Matrix *mat)
 
     /* Storage for local diagonal entries */
     p->local_diags = (double *) 
-        malloc((mat->end_row - mat->beg_row + 1) * sizeof(double));
+        malloc((A->end_row - A->beg_row + 1) * sizeof(double));
 
     /* Extract the local diagonal entries */
-    for (row=0; row<=mat->end_row - mat->beg_row; row++)
+    for (row=0; row<=A->end_row - A->beg_row; row++)
     {
-	MatrixGetRow(mat, row, &len, &ind, &val);
+	MatrixGetRow(A, row, &len, &ind, &val);
 
         p->local_diags[row] = 1.0; /* in case no diag entry */
 
@@ -180,31 +182,34 @@ DiagScale *DiagScaleCreate(Matrix *mat)
 
     /* Get the list of diagonal indices that we need.
        This is simply the external indices */
-    len = mat->numb->num_ind - mat->numb->num_loc;
-    ind = &mat->numb->local_to_global[mat->numb->num_loc];
+    /* ExchangeDiagEntries will sort the list - so give it a copy */
+    len = numb->num_ind - numb->num_loc;
+    ind = (int *) malloc(len * sizeof(int));
+    memcpy(ind, &numb->local_to_global[numb->num_loc], len * sizeof(int));
 
     /* buffer for receiving diagonal values from other processors */
     p->ext_diags = (double *) malloc(len * sizeof(double));
 
-    MPI_Comm_size(mat->comm, &npes);
+    MPI_Comm_size(A->comm, &npes);
     requests = (MPI_Request *) malloc(npes * sizeof(MPI_Request));
     statuses = (MPI_Status  *) malloc(npes * sizeof(MPI_Status));
     replies_list = (int *) calloc(npes, sizeof(int));
 
-    ExchangeDiagEntries(mat->comm, mat, len, ind, p->ext_diags, &num_requests, 
+    ExchangeDiagEntries(A->comm, A, len, ind, p->ext_diags, &num_requests, 
         requests, replies_list);
 
-    num_replies = FindNumReplies(mat->comm, replies_list);
+    num_replies = FindNumReplies(A->comm, replies_list);
     free(replies_list);
 
-    ExchangeDiagEntriesServer(mat->comm, mat, p->local_diags, num_replies);
+    ExchangeDiagEntriesServer(A->comm, A, p->local_diags, num_replies);
 
     /* Wait for all replies */
     MPI_Waitall(num_requests, requests, statuses);
     free(requests);
     free(statuses);
+    free(ind);
 
-    p->offset = mat->end_row - mat->beg_row + 1;
+    p->offset = A->end_row - A->beg_row + 1;
 
     return p;
 }
