@@ -117,14 +117,6 @@ int HYPRE_IJMatrixInitialize(HYPRE_IJMatrix IJmatrix);
  **/
 int HYPRE_IJMatrixAssemble(HYPRE_IJMatrix IJmatrix);
 
-/**
- * Used only in test drivers.
- *
- * @param param [IN] ...
- **/
-int HYPRE_IJMatrixDistribute(HYPRE_IJMatrix  IJmatrix,
-                             const int      *row_starts,
-                             const int      *col_starts);
 
 /**
  * Tells the builder which storage type it should build from the
@@ -529,26 +521,14 @@ int HYPRE_IJMatrixAddToBlockValues(HYPRE_IJMatrix IJmatrix,
                                    const int      *cols,
                                    const double   *values);
 
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
+int HYPRE_IJMatrixDistribute(HYPRE_IJMatrix  IJmatrix,
+                             const int      *row_starts,
+                             const int      *col_starts);
+
 void *HYPRE_IJMatrixGetLocalStorage(HYPRE_IJMatrix IJmatrix);
 
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
 int HYPRE_IJMatrixGetRowPartitioning(HYPRE_IJMatrix IJmatrix,
                                      const int **row_partitioning);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
 int HYPRE_IJMatrixGetColPartitioning(HYPRE_IJMatrix   IJmatrix,
                                      const int      **col_partitioning);
 
@@ -574,73 +554,137 @@ struct hypre_IJVector_struct;
 typedef struct hypre_IJVector_struct *HYPRE_IJVector;
 
 /**
- * Description...
+ * Create a vector builder that implements the IJ interface.
+ * Collective.
  *
- * @param param [IN] ...
+ * {\bf Note:} Must be the first function called using "vector" as an
+ * actual argument.
+ *
+ * @return Error code.
+ *
+ * @param IJvector the vector to be initialized.
+ *
+ * @param comm a single MPI communicator that contains exactly the
+ * MPI processes that are to participate in any collective operations.
+ *
+ * @param global_m [IN] global number of rows.
+ *
+ * @param global_n [IN] global number of columns.
+ *
+ * @param local_m [IN] local number of rows.
+ *
+ * @param local_n [IN] local number of columns.
  **/
 int HYPRE_IJVectorCreate(MPI_Comm        comm,
-                         HYPRE_IJVector *in_vector_ptr,
+                         HYPRE_IJVector *IJvector,
                          int             global_n);
 
 /**
- * Description...
+ * Destroy a vector builder object. An object should be explicitly
+ * destroyed using this destructor when the user's code no longer
+ * needs direct access to the grid description.  Once destroyed, the
+ * object must not be referenced again.  Note that the object may not
+ * be deallocated at the completion of this call, since there may be
+ * internal package references to the object.  The object will then be
+ * destroyed when all internal reference counts go to zero.
  *
- * @param param [IN] ...
+ * @return Error code.
+ *
+ * @param IJvector the vector to be destroyed.
  **/
 int HYPRE_IJVectorDestroy(HYPRE_IJVector IJvector);
 
 /**
- * Description...
+ * Indicate the number of elements of the vector assigned to each processor.
  *
- * @param param [IN] ...
+ * @param HYPRE_IJVector IJvector [IN] The vector to be operated on.
+ *
+ * @param int *partitioning [IN]
+ * pointer to array of integers specifying vector decomposition across processors
+ * @note HYPRE_IJVectorSetLocalStorageType needs to be called before this function.
  **/
 int HYPRE_IJVectorSetPartitioning(HYPRE_IJVector  IJvector,
                                   const int      *partitioning);
 
 /**
- * Description...
+ * Sets information about which rows are stored on this processor
  *
- * @param param [IN] ...
+ * @param HYPRE_IJVector IJvector [IN] The vector to be operated on.
+ * @param int vec_start_this_proc [IN]
+ * integer specifying local index to first data element on calling processor
+ * @param int vec_start_next_proc [IN]
+ * integer specifying local index to first data element on next processor in
+ * decomposition
  **/
 int HYPRE_IJVectorSetLocalPartitioning(HYPRE_IJVector IJvector,
                                        int            vec_start_this_proc,
                                        int            vec_start_next_proc);
 
 /**
- * Description...
+ * Initialize an {\tt IJ\_Vector} object.  Must be called before any
+ * of the {\tt Insert} or {\tt Add} routines are called.
  *
- * @param param [IN] ...
+ * @return Error code.
+ *
  **/
 int HYPRE_IJVectorInitialize(HYPRE_IJVector IJvector);
 
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_IJVectorDistribute(HYPRE_IJVector  IJvector,
-                             const int      *vec_starts);
 
 /**
- * Description...
  *
- * @param param [IN] ...
+ * Tells "vector" which underlying "storage type" it should build from
+ * the IJVector interface calls. Conceptually, "IJVector" is just an
+ * "interface" (an abstract base class in C++-speak), with no
+ * implementation. Specific concrete classes implement this
+ * interface, and this function chooses which one.
+
+Not collective, but must be same on all processors in group that stores vector.
+@return integer error code
+@param HYPRE_IJVector IJvector
+vector for which the type is to be set
+@param int type [IN]
+Possible types should be documented with each implementation. The first HYPRE implementation
+will list its possible values in HYPRE.h (at least for now). Note that this function is optional,
+as all implementations must have a default. Eventually the plan is to let solvers choose a storage
+type that they can work with automatically, but this is in the future.
  **/
 int HYPRE_IJVectorSetLocalStorageType(HYPRE_IJVector IJvector,
                                       int            type);
 
 /**
- * Description...
- *
- * @param param [IN] ...
- **/
+zeros all of the local vector components, overwriting
+all indexed coefficients.
+
+Not collective.
+
+@return integer error code
+@param HYPRE_IJVector &vector
+vector, some components of which are to be set
+@param int *glob_vec_indices [IN]
+pointer to global indices of local vector components to be set
+@param double value [IN]
+value to which the local vector components are to be set
+**/
 int HYPRE_IJVectorZeroLocalComponents(HYPRE_IJVector IJvector);
 
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
+/** 
+From indexed values of an array, sets indexed components of an IJVector, 
+overwriting all indexed components.
+
+Not collective.
+
+@return integer error code
+@param HYPRE_IJVector &vector [IN]
+vector, some components of which are to be inserted to
+@param int *glob_vec_indices [IN]
+pointer to indices of local vector specifying which local vector components
+to be overwritten
+@param int *value_indices [IN]
+pointer to indices of values array specifying values from which to insert 
+@param double *values [IN]
+pointer to array from which vector values are inserted
+
+**/
 int HYPRE_IJVectorSetLocalComponents(HYPRE_IJVector  IJvector,
                                      int             num_values,
                                      const int      *glob_indices,
@@ -648,9 +692,23 @@ int HYPRE_IJVectorSetLocalComponents(HYPRE_IJVector  IJvector,
                                      const double   *values);
 
 /**
- * Description...
  *
- * @param param [IN] ...
+From indexed values of an array, sets a block of components of an IJVector,
+overwriting all components of the block.
+
+Not collective.
+
+@return integer error code
+@param HYPRE_IJVector IJvector
+the vector to be operated on
+@param int glob_vec_index_start [IN]
+global index of first vector component in block to be inserted 
+@param int glob_vec_index_stop [IN]
+global index of last vector component in block to be set 
+@param int *value_indices [IN]
+pointer to indices of values array specifying values from which to insert 
+@param double *values [IN]
+pointer to array from which vector values are inserted
  **/
 int HYPRE_IJVectorSetLocalComponentsInBlock(HYPRE_IJVector  IJvector,
                                             int             glob_index_start,
@@ -659,9 +717,22 @@ int HYPRE_IJVectorSetLocalComponentsInBlock(HYPRE_IJVector  IJvector,
                                             const double   *values);
 
 /**
- * Description...
  *
- * @param param [IN] ...
+Adds indexed values of an array to an indexed set of components of
+an IJVector, overwriting all indexed components.
+
+Not collective.
+
+@return integer error code
+@param HYPRE_IJVector &vector [IN]
+vector, some components of which are to be summed to
+@param int *glob_vec_indices [IN]
+pointer to global indices of local vector components to be set 
+@param int *value_indices [IN]
+pointer to indices of value array members to be summed to local vector
+components
+@param double *values [IN]
+pointer to array from which values are taken for summing
  **/
 int HYPRE_IJVectorAddToLocalComponents(HYPRE_IJVector  IJvector,
                                        int             num_values,
@@ -670,10 +741,25 @@ int HYPRE_IJVectorAddToLocalComponents(HYPRE_IJVector  IJvector,
                                        const double   *values);
 
 /**
- * Description...
  *
- * @param param [IN] ...
- **/
+Adds indexed values of an array into a block of components of an IJVector,
+overwriting all components in the block.
+
+Not collective.
+
+@return integer error code
+@param HYPRE_IJVector &vector
+vector, the components of which are to be summed to
+@param int glob_vec_index_start [IN]
+global index of first vector component in block to be summed to
+@param int glob_vec_index_stop [IN]
+global index of last vector component in block to be summed to
+@param int *value_indices [IN]
+pointer to indices of value array members to be summed to local vector
+components
+@param double *values [IN]
+pointer to array from which values are taken for summing
+**/
 int HYPRE_IJVectorAddToLocalComponentsInBlock(HYPRE_IJVector  IJvector,
                                               int             glob_index_start,
                                               int             glob_index_stop,
@@ -681,6 +767,14 @@ int HYPRE_IJVectorAddToLocalComponentsInBlock(HYPRE_IJVector  IJvector,
                                               const double   *values);
 
 /**
+ * Assemble an {\tt IJ\_Vector} object.  Must be called after all of
+ * the Insert or add routines are called.  After assemble completes,
+ * the builder has constructed a vector that can be used as the
+ * righthand side in a linear solve, etc.
+ *
+ * @return Error code.
+ *
+ * @param IJvector the vector to be assembled.
  * Description...
  *
  * @param param [IN] ...
@@ -688,9 +782,15 @@ int HYPRE_IJVectorAddToLocalComponentsInBlock(HYPRE_IJVector  IJvector,
 int HYPRE_IJVectorAssemble(HYPRE_IJVector IJvector);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+Puts indexed components of IJVector into indexed array of values,
+overwriting any values in the event of a collision.
+
+Not collective.
+
+@return integer error code
+@param HYPRE_IJVector &vector [IN]
+vector from which components are to be fetched
+@param double *values
  **/
 int HYPRE_IJVectorGetLocalComponents(HYPRE_IJVector  IJvector,
                                      int             num_values,
@@ -699,9 +799,19 @@ int HYPRE_IJVectorGetLocalComponents(HYPRE_IJVector  IJvector,
                                      double         *values);
 
 /**
- * Description...
  *
- * @param param [IN] ...
+Puts components in specified local block of IJVector into indexed array of values, overwriti
+ng any values in the event of a collision.
+
+Not collective.
+
+@return integer error code
+@param HYPRE_IJVector &vector [IN]
+the vector from which components are to be fetched
+@param int glob_vec_index_start [IN]
+@param int glob_vec_index_stop [IN]
+@param int *value_indices [IN]
+@param double *values
  **/
 int HYPRE_IJVectorGetLocalComponentsInBlock(HYPRE_IJVector  IJvector,
                                             int             glob_index_start,
@@ -709,20 +819,7 @@ int HYPRE_IJVectorGetLocalComponentsInBlock(HYPRE_IJVector  IJvector,
                                             const int      *value_indices,
                                             double         *values);
 
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_IJVectorGetLocalStorageType(HYPRE_IJVector  IJvector,
-                                      int            *type);
 
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-void *HYPRE_IJVectorGetLocalStorage(HYPRE_IJVector IJvector);
 
 /*@}*/
 /*@}*/
@@ -730,6 +827,15 @@ void *HYPRE_IJVectorGetLocalStorage(HYPRE_IJVector IJvector);
 /*--------------------------------------------------------------------------
  * Miscellaneous
  *--------------------------------------------------------------------------*/
+
+int HYPRE_IJVectorGetLocalStorageType(HYPRE_IJVector  IJvector,
+                                      int            *type);
+
+void *HYPRE_IJVectorGetLocalStorage(HYPRE_IJVector IJvector);
+
+/* Internal routine only. */
+int HYPRE_IJVectorDistribute(HYPRE_IJVector  IJvector,
+                             const int      *vec_starts);
 
 /* Internal routine only. */
 int hypre_RefIJMatrix(HYPRE_IJMatrix  IJmatrix,
