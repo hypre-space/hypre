@@ -120,7 +120,7 @@ HYPRE_SetIJVectorLocalStorageType needs to be called before this function.
 
 int 
 HYPRE_SetIJVectorPartitioning( HYPRE_IJVector  IJvector,
-                               int            *partitioning )
+                               const int      *partitioning )
 {
    int ierr = 0;
    hypre_IJVector *vector = (hypre_IJVector *) IJvector;
@@ -254,7 +254,7 @@ pointer to array of integers specifying vector decomposition across processors
 */
 
 int 
-HYPRE_DistributeIJVector( HYPRE_IJVector IJvector, int *vec_starts )
+HYPRE_DistributeIJVector( HYPRE_IJVector IJvector, const int *vec_starts )
 {
    int ierr = 0;
    hypre_IJVector *vector = (hypre_IJVector *) IJvector;
@@ -369,9 +369,9 @@ pointer to array from which vector values are inserted
 int 
 HYPRE_SetIJVectorLocalComponents( HYPRE_IJVector  IJvector,
                                   int             num_values,
-                                  int            *glob_vec_indices,
-                                  int            *value_indices,
-                                  double         *values            )
+                                  const int      *glob_vec_indices,
+                                  const int      *value_indices,
+                                  const double   *values            )
 {
    int ierr = 0;
    hypre_IJVector *vector = (hypre_IJVector *) IJvector;
@@ -428,8 +428,8 @@ int
 HYPRE_SetIJVectorLocalComponentsInBlock( HYPRE_IJVector  IJvector,
                                          int             glob_vec_index_start, 
                                          int             glob_vec_index_stop,
-                                         int            *value_indices,
-                                         double         *values                )
+                                         const int      *value_indices,
+                                         const double   *values                )
 {
    int ierr = 0;
    hypre_IJVector *vector = (hypre_IJVector *) IJvector;
@@ -484,9 +484,9 @@ pointer to array from which values are taken for summing
 int 
 HYPRE_AddToIJVectorLocalComponents( HYPRE_IJVector  IJvector,
                                     int             num_values,
-                                    int            *glob_vec_indices,
-                                    int            *value_indices,
-                                    double         *values            )
+                                    const int      *glob_vec_indices,
+                                    const int      *value_indices,
+                                    const double   *values            )
 {
    int ierr = 0;
    hypre_IJVector *vector = (hypre_IJVector *) IJvector;
@@ -544,8 +544,8 @@ int
 HYPRE_AddToIJVectorLocalComponentsInBlock( HYPRE_IJVector  IJvector,
                                            int             glob_vec_index_start, 
                                            int             glob_vec_index_stop,
-                                           int            *value_indices,
-                                           double         *values                )
+                                           const int      *value_indices,
+                                           const double   *values                )
 {
    int ierr = 0;
    hypre_IJVector *vector = (hypre_IJVector *) IJvector;
@@ -594,8 +594,8 @@ vector from which components are to be fetched
 int 
 HYPRE_GetIJVectorLocalComponents( HYPRE_IJVector  IJvector,
                                   int             num_values,
-                                  int            *glob_vec_indices,
-                                  int            *value_indices,
+                                  const int      *glob_vec_indices,
+                                  const int      *value_indices,
                                   double         *values            )
 {
    int ierr = 0;
@@ -648,7 +648,7 @@ int
 HYPRE_GetIJVectorLocalComponentsInBlock( HYPRE_IJVector  IJvector,
                                          int             glob_vec_index_start, 
                                          int             glob_vec_index_stop,
-                                         int            *value_indices,
+                                         const int      *value_indices,
                                          double         *values                )
 {
    int ierr = 0;

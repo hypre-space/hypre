@@ -66,14 +66,14 @@ hypre_FreeIJVectorPar(hypre_IJVector *vector)
 
 int
 hypre_SetIJVectorParPartitioning(hypre_IJVector *vector,
-                                 int            *partitioning )
+                                 const int      *partitioning )
 {
    int ierr = 0;
    hypre_ParVector *par_vector = hypre_IJVectorLocalStorage(vector);
 
    if (!partitioning) ++ierr;
 
-   hypre_ParVectorPartitioning(par_vector) = partitioning;
+   hypre_ParVectorPartitioning(par_vector) = (int *) partitioning;
 
    return ierr;
 }
@@ -164,7 +164,7 @@ hypre_InitializeIJVectorPar(hypre_IJVector *vector)
  *****************************************************************************/
 int
 hypre_DistributeIJVectorPar(hypre_IJVector *vector,
-			    int	           *vec_starts)
+			    const int	   *vec_starts)
 {
    int ierr = 0;
 
@@ -175,7 +175,7 @@ hypre_DistributeIJVectorPar(hypre_IJVector *vector,
 
    par_vector = hypre_VectorToParVector(hypre_ParVectorComm(old_vector),
 		                        hypre_ParVectorLocalVector(old_vector),
-                                        vec_starts);
+                                        (int *)vec_starts);
    if (!par_vector) ++ierr;
 
    ierr = hypre_DestroyParVector(old_vector);
@@ -238,9 +238,9 @@ hypre_ZeroIJVectorParLocalComponents(hypre_IJVector *vector)
 int
 hypre_SetIJVectorParLocalComponents(hypre_IJVector *vector,
                                     int             num_values,
-                                    int            *glob_vec_indices,
-                                    int            *value_indices,
-                                    double         *values      )
+                                    const int      *glob_vec_indices,
+                                    const int      *value_indices,
+                                    const double   *values            )
 {
    int ierr = 0;
    int my_id, num_procs;
@@ -319,8 +319,8 @@ int
 hypre_SetIJVectorParLocalComponentsInBlock(hypre_IJVector *vector,
                                            int             glob_vec_index_start,
                                            int             glob_vec_index_stop,
-                                           int            *value_indices,
-                                           double         *values   )
+                                           const int      *value_indices,
+                                           const double   *values                )
 {
    int ierr = 0;
    int my_id, num_procs;
@@ -378,9 +378,9 @@ hypre_SetIJVectorParLocalComponentsInBlock(hypre_IJVector *vector,
 int
 hypre_AddToIJVectorParLocalComponents(hypre_IJVector *vector,
                                       int             num_values,
-                                      int            *glob_vec_indices,
-                                      int            *value_indices,
-                                      double         *values            )
+                                      const int      *glob_vec_indices,
+                                      const int      *value_indices,
+                                      const double   *values            )
 {
    int ierr = 0;
    int my_id, num_procs;
@@ -460,8 +460,8 @@ int
 hypre_AddToIJVectorParLocalComponentsInBlock(hypre_IJVector *vector,
                                              int             glob_vec_index_start,
                                              int             glob_vec_index_stop,
-                                             int            *value_indices,
-                                             double         *values   )
+                                             const int      *value_indices,
+                                             const double   *values                ) 
 {
    int ierr = 0;
    int my_id, num_procs;
@@ -517,11 +517,12 @@ hypre_AddToIJVectorParLocalComponentsInBlock(hypre_IJVector *vector,
  * get a potentially noncontiguous set of IJVectorPar components
  *
  *****************************************************************************/
+
 int
 hypre_GetIJVectorParLocalComponents(hypre_IJVector *vector,
                                     int             num_values,
-                                    int            *glob_vec_indices,
-                                    int            *value_indices,
+                                    const int      *glob_vec_indices,
+                                    const int      *value_indices,
                                     double         *values            )
 {
    int ierr = 0;
@@ -603,8 +604,8 @@ int
 hypre_GetIJVectorParLocalComponentsInBlock(hypre_IJVector *vector,
                                            int             glob_vec_index_start,
                                            int             glob_vec_index_stop,
-                                           int            *value_indices,
-                                           double         *values   )
+                                           const int      *value_indices,
+                                           double         *values                )
 {
    int ierr = 0;
    int my_id, num_procs;
