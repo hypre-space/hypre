@@ -32,7 +32,7 @@ sp_preorder(char *refact,  SuperMatrix *A, int *perm_c,
  * A       (input) SuperMatrix*
  *         Matrix A in A*X=B, of dimension (A->nrow, A->ncol). The number
  *         of the linear equations is A->nrow. Currently, the type of A can be:
- *         Stype = NC or NCP; Dtype = _D; Mtype = GE. In the future,
+ *         Stype = NC or NCP; Dtype = D_D; Mtype = GE. In the future,
  *         more general A can be handled.
  *
  * perm_c  (input/output) int*

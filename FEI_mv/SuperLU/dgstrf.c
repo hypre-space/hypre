@@ -117,12 +117,12 @@ dgstrf (char *refact, SuperMatrix *A, double diag_pivot_thresh,
  * L        (output) SuperMatrix*
  *          The factor L from the factorization Pr*A=L*U; use compressed row 
  *          subscripts storage for supernodes, i.e., L has type: 
- *          Stype = SC, Dtype = _D, Mtype = TRLU.
+ *          Stype = SC, Dtype = D_D, Mtype = TRLU.
  *
  * U        (output) SuperMatrix*
  *	    The factor U from the factorization Pr*A*Pc=L*U. Use column-wise
  *          storage scheme, i.e., U has types: Stype = NC, 
- *          Dtype = _D, Mtype = TRU.
+ *          Dtype = D_D, Mtype = TRU.
  *
  * info     (output) int*
  *          = 0: successful exit
@@ -408,9 +408,9 @@ dgstrf (char *refact, SuperMatrix *A, double diag_pivot_thresh,
     } else {
         dCreate_SuperNode_Matrix(L, A->nrow, A->ncol, nnzL, Glu.lusup, 
 	                         Glu.xlusup, Glu.lsub, Glu.xlsub, Glu.supno,
-			         Glu.xsup, SC, _D, TRLU);
+			         Glu.xsup, SC, D_D, TRLU);
     	dCreate_CompCol_Matrix(U, min_mn, min_mn, nnzU, Glu.ucol, 
-			       Glu.usub, Glu.xusub, NC, _D, TRU);
+			       Glu.usub, Glu.xusub, NC, D_D, TRU);
     }
     
     ops[FACT] += ops[TRSV] + ops[GEMV];	

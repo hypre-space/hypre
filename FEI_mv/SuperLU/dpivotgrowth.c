@@ -32,17 +32,17 @@ dPivotGrowth(int ncols, SuperMatrix *A, int *perm_c,
  * A        (input) SuperMatrix*
  *	    Original matrix A, permuted by columns, of dimension
  *          (A->nrow, A->ncol). The type of A can be:
- *          Stype = NC; Dtype = _D; Mtype = GE.
+ *          Stype = NC; Dtype = D_D; Mtype = GE.
  *
  * L        (output) SuperMatrix*
  *          The factor L from the factorization Pr*A=L*U; use compressed row 
  *          subscripts storage for supernodes, i.e., L has type: 
- *          Stype = SC; Dtype = _D; Mtype = TRLU.
+ *          Stype = SC; Dtype = D_D; Mtype = TRLU.
  *
  * U        (output) SuperMatrix*
  *	    The factor U from the factorization Pr*A*Pc=L*U. Use column-wise
  *          storage scheme, i.e., U has types: Stype = NC;
- *          Dtype = _D; Mtype = TRU.
+ *          Dtype = D_D; Mtype = TRU.
  *
  */
     NCformat *Astore;

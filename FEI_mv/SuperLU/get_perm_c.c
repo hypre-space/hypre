@@ -350,7 +350,7 @@ get_perm_c(int ispec, SuperMatrix *A, int *perm_c)
  * A       (input) SuperMatrix*
  *         Matrix A in A*X=B, of dimension (A->nrow, A->ncol). The number
  *         of the linear equations is A->nrow. Currently, the type of A 
- *         can be: Stype = NC; Dtype = _D; Mtype = GE. In the future,
+ *         can be: Stype = NC; Dtype = D_D; Mtype = GE. In the future,
  *         more general A can be handled.
  *
  * perm_c  (output) int*

@@ -58,7 +58,7 @@ dgssv(SuperMatrix *A, int *perm_c, int *perm_r, SuperMatrix *L,
  * A       (input) SuperMatrix*
  *         Matrix A in A*X=B, of dimension (A->nrow, A->ncol). The number
  *         of linear equations is A->nrow. Currently, the type of A can be:
- *         Stype = NC or NR; Dtype = _D; Mtype = GE. In the future, more
+ *         Stype = NC or NR; Dtype = D_D; Mtype = GE. In the future, more
  *         general A will be handled.
  *
  * perm_c  (input/output) int*
@@ -89,17 +89,17 @@ dgssv(SuperMatrix *A, int *perm_c, int *perm_r, SuperMatrix *L,
  *             Pr*A*Pc=L*U              (if A->Stype = NC) or
  *             Pr*transpose(A)*Pc=L*U   (if A->Stype = NR).
  *         Uses compressed row subscripts storage for supernodes, i.e.,
- *         L has types: Stype = SC, Dtype = _D, Mtype = TRLU.
+ *         L has types: Stype = SC, Dtype = D_D, Mtype = TRLU.
  *         
  * U       (output) SuperMatrix*
  *	   The factor U from the factorization 
  *             Pr*A*Pc=L*U              (if A->Stype = NC) or
  *             Pr*transpose(A)*Pc=L*U   (if A->Stype = NR).
  *         Uses column-wise storage scheme, i.e., U has types:
- *         Stype = NC, Dtype = _D, Mtype = TRU.
+ *         Stype = NC, Dtype = D_D, Mtype = TRU.
  *
  * B       (input/output) SuperMatrix*
- *         B has types: Stype = DN, Dtype = _D, Mtype = GE.
+ *         B has types: Stype = DN, Dtype = D_D, Mtype = GE.
  *         On entry, the right hand side matrix.
  *         On exit, the solution matrix if info = 0;
  *
@@ -133,10 +133,10 @@ dgssv(SuperMatrix *A, int *perm_c, int *perm_r, SuperMatrix *L,
     Bstore = B->Store;
     if ( A->nrow != A->ncol || A->nrow < 0 ||
 	 (A->Stype != NC && A->Stype != NR) ||
-	 A->Dtype != _D || A->Mtype != GE )
+	 A->Dtype != D_D || A->Mtype != GE )
 	*info = -1;
     else if ( B->ncol < 0 || Bstore->lda < MAX(0, A->nrow) ||
-	B->Stype != DN || B->Dtype != _D || B->Mtype != GE )
+	B->Stype != DN || B->Dtype != D_D || B->Mtype != GE )
 	*info = -6;
     if ( *info != 0 ) {
 	i = -(*info);

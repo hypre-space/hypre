@@ -34,7 +34,7 @@ dlaqgs(SuperMatrix *A, double *r, double *c,
     A       (input/output) SuperMatrix*
             On exit, the equilibrated matrix.  See EQUED for the form of 
             the equilibrated matrix. The type of A can be:
-	    Stype = NC; Dtype = _D; Mtype = GE.
+	    Stype = NC; Dtype = D_D; Mtype = GE.
 	    
     R       (input) double*, dimension (A->nrow)
             The row scale factors for A.
