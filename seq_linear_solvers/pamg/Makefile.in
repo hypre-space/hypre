@@ -23,7 +23,6 @@ CDEFS = @HYPREDEFS@ -DHYPRE_TIMING
 CFLAGS =\
  -I../../utilities\
  -I../../seq_matrix_vector\
- -I../../parcsr_matrix_vector\
  ${CINCLUDES}\
  ${COPT}\
  ${CDEBUG}\
@@ -37,14 +36,11 @@ LDLIBFLAGS = @LDLIBDIRS@ @LDLIBS@
  
 LFLAGS =\
  -L.\
- -L../../parcsr_matrix_vector\
  -L../../seq_matrix_vector\
  -L../../utilities\
  -lHYPRE_ls\
- -lHYPRE_parcsr_mv\
  -lHYPRE_mv\
  -lHYPRE_utilities\
- -lmpe\
  ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
  
 
