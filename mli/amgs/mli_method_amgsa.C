@@ -41,6 +41,7 @@ MLI_Method_AMGSA::MLI_Method_AMGSA( MPI_Comm comm ) : MLI_Method( comm )
    P_weight          = 4.0/3.0;
    drop_tol_for_P    = 0.0;            /* tolerance to sparsify P*/
    sa_counts         = new int[40];    /* number of aggregates   */
+   for ( int i = 0; i < 40; i++ ) sa_counts[i] = 0;
    sa_data           = new int*[40];   /* node to aggregate data */
    for ( int i = 0; i < 40; i++ ) sa_data[i] = NULL;
    spectral_norms    = new double[40]; /* calculated max eigen   */
@@ -120,8 +121,8 @@ MLI_Method_AMGSA::~MLI_Method_AMGSA()
 
 int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
 {
-   int        level, size, ndofs, num_ns, length, nsweeps=1, set_id;
-   int        pre_post, nnodes;
+   int        level, size, nDOF, numNS, length, nSweeps=1, set_id;
+   int        prePost, nnodes, nAggr, *aggrInfo;
    double     thresh, pweight, *nullspace, *weights=NULL, *coords, *scales;
    char       param1[256], param2[256];
 
@@ -167,6 +168,23 @@ int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
    {
       return ( setCalcSpectralNorm() );
    }
+   else if ( !strcmp(param1, "setAggregateInfo" ))
+   {
+      if ( argc != 4 )
+      {
+         cout << "MLI_Method_AMGSA ERROR : setAggregateInfo needs 4 arguments.\n";
+         cout << "     argument[0] : level number \n";
+         cout << "     argument[1] : number of aggregates \n";
+         cout << "     argument[2] : total degree of freedom \n";
+         cout << "     argument[3] : aggregate information \n";
+         return 1;
+      } 
+      level    = *(int *) argv[0];
+      nAggr    = *(int *) argv[1];
+      length   = *(int *) argv[2];
+      aggrInfo = (int *)  argv[3];
+      return ( setAggregateInfo(level,nAggr,length,aggrInfo) );
+   }
    else if ( !strcmp(param1, "setCalibrationSize" ))
    {
       sscanf(in_name,"%s %d", param1, &size);
@@ -195,10 +213,10 @@ int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
          cout << "     argument[1] : relaxation weights\n";
          return 1;
       } 
-      pre_post = MLI_SMOOTHER_PRE;
-      nsweeps   = *(int *)   argv[0];
-      weights   = (double *) argv[1];
-      return ( setSmoother(pre_post,set_id,nsweeps,weights) );
+      prePost = MLI_SMOOTHER_PRE;
+      nSweeps = *(int *)   argv[0];
+      weights = (double *) argv[1];
+      return ( setSmoother(prePost,set_id,nSweeps,weights) );
    }
    else if ( !strcmp(param1, "setPostSmoother" ))
    {
@@ -223,10 +241,10 @@ int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
          cout << "     argument[1] : relaxation weights\n";
          return 1;
       } 
-      pre_post = MLI_SMOOTHER_POST;
-      nsweeps  = *(int *)   argv[0];
-      weights  = (double *) argv[1];
-      return ( setSmoother(pre_post,set_id,nsweeps,weights) );
+      prePost = MLI_SMOOTHER_POST;
+      nSweeps = *(int *)   argv[0];
+      weights = (double *) argv[1];
+      return ( setSmoother(prePost,set_id,nSweeps,weights) );
    }
    else if ( !strcmp(param1, "setCoarseSolver" ))
    {
@@ -253,15 +271,15 @@ int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
       } 
       else if ( set_id != MLI_SOLVER_SUPERLU_ID )
       {
-         nsweeps   = *(int *)   argv[0];
+         nSweeps   = *(int *)   argv[0];
          weights   = (double *) argv[1];
       }
       else if ( set_id == MLI_SOLVER_SUPERLU_ID )
       {
-         nsweeps = 1;
+         nSweeps = 1;
          weights = NULL;
       }
-      return ( setCoarseSolver(set_id,nsweeps,weights) );
+      return ( setCoarseSolver(set_id,nSweeps,weights) );
    }
    else if ( !strcmp(param1, "setNullSpace" ))
    {
@@ -274,11 +292,11 @@ int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
          cout << "     argument[3] : vector length\n";
          return 1;
       } 
-      ndofs     = *(int *)   argv[0];
-      num_ns    = *(int *)   argv[1];
+      nDOF      = *(int *)   argv[0];
+      numNS     = *(int *)   argv[1];
       nullspace = (double *) argv[2];
       length    = *(int *)   argv[3];
-      return ( setNullSpace(ndofs,num_ns,nullspace,length) );
+      return ( setNullSpace(nDOF,numNS,nullspace,length) );
    }
    else if ( !strcmp(param1, "setNodalCoord" ))
    {
@@ -292,10 +310,10 @@ int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
          return 1;
       } 
       nnodes = *(int *)   argv[0];
-      ndofs  = *(int *)   argv[1];
+      nDOF   = *(int *)   argv[1];
       coords = (double *) argv[2];
       if ( argc == 4 ) scales = (double *) argv[3]; else scales = NULL;
-      return ( setNodalCoordinates(nnodes,ndofs,coords,scales) );
+      return ( setNodalCoordinates(nnodes,nDOF,coords,scales) );
    }
    else if ( !strcmp(param1, "print" ))
    {
@@ -310,7 +328,7 @@ int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
 
 int MLI_Method_AMGSA::getParams(char *in_name, int *argc, char *argv[])
 {
-   int    ndofs, num_ns, length;
+   int    nDOF, numNS, length;
    double *nullspace;
 
    if ( !strcmp(in_name, "getNullSpace" ))
@@ -320,9 +338,9 @@ int MLI_Method_AMGSA::getParams(char *in_name, int *argc, char *argv[])
          cout << "MLI_Method_AMGSA ERROR : getNullSpace needs 4 args.\n";
          exit(1);
       }
-      getNullSpace(node_dofs,num_ns,nullspace,length);
-      argv[0] = (char *) &ndofs;
-      argv[1] = (char *) &num_ns;
+      getNullSpace(node_dofs,numNS,nullspace,length);
+      argv[0] = (char *) &nDOF;
+      argv[1] = (char *) &numNS;
       argv[2] = (char *) nullspace;
       argv[3] = (char *) &length;
       (*argc) = 4;
@@ -341,7 +359,7 @@ int MLI_Method_AMGSA::getParams(char *in_name, int *argc, char *argv[])
 
 int MLI_Method_AMGSA::setup( MLI *mli ) 
 {
-   int             level, nsweeps, mypid;
+   int             level, nSweeps, mypid;
    double          start_time, elapsed_time, max_eigen;
    char            param_string[100], *targv[10];
    MLI_Matrix      *mli_Pmat, *mli_Rmat, *mli_Amat, *mli_cAmat;
@@ -359,7 +377,7 @@ int MLI_Method_AMGSA::setup( MLI *mli )
 
    if ( sa_data != NULL )
    {
-      for ( level = 0; level < max_levels; level++ )
+      for ( level = 1; level < max_levels; level++ )
       {
          if ( sa_data[level] != NULL ) delete [] sa_data[level];
          sa_data[level] = NULL;
@@ -404,7 +422,11 @@ int MLI_Method_AMGSA::setup( MLI *mli )
       switch ( coarsen_scheme )
       {
          case MLI_METHOD_AMGSA_LOCAL :
-              max_eigen = genPLocal(mli_Amat, &mli_Pmat); 
+              if ( level == 0 )
+                 max_eigen = genPLocal(mli_Amat, &mli_Pmat, sa_counts[0], 
+                                       sa_data[0]); 
+              else
+                 max_eigen = genPLocal(mli_Amat, &mli_Pmat, 0, NULL); 
               break;
       }
       if ( max_eigen != 0.0 ) spectral_norms[level] = max_eigen;
@@ -512,18 +534,18 @@ int MLI_Method_AMGSA::setNumLevels( int nlevels )
  * set smoother
  * --------------------------------------------------------------------- */
 
-int MLI_Method_AMGSA::setSmoother(int pre_post,int set_id,int num,double *wgt)
+int MLI_Method_AMGSA::setSmoother(int prePost,int set_id,int num,double *wgt)
 {
    int i;
 
-   if ( pre_post != MLI_SMOOTHER_PRE && pre_post != MLI_SMOOTHER_BOTH &&
-        pre_post != MLI_SMOOTHER_POST )
+   if ( prePost != MLI_SMOOTHER_PRE && prePost != MLI_SMOOTHER_BOTH &&
+        prePost != MLI_SMOOTHER_POST )
    {
       cout << "MLI_Method_AMGSA:setSmoother ERROR - invalid info (1).\n";
       cout.flush();
       return 1;
    }
-   if ( pre_post == MLI_SMOOTHER_PRE || pre_post == MLI_SMOOTHER_BOTH )
+   if ( prePost == MLI_SMOOTHER_PRE || prePost == MLI_SMOOTHER_BOTH )
    {
       switch ( set_id )
       {
@@ -550,7 +572,7 @@ int MLI_Method_AMGSA::setSmoother(int pre_post,int set_id,int num,double *wgt)
       else
          for (i = 0; i < pre_smoother_num; i++) pre_smoother_wgt[i] = wgt[i];
    }
-   if ( pre_post == MLI_SMOOTHER_POST || pre_post == MLI_SMOOTHER_BOTH )
+   if ( prePost == MLI_SMOOTHER_POST || prePost == MLI_SMOOTHER_BOTH )
    {
       switch ( set_id )
       {
@@ -679,21 +701,40 @@ int MLI_Method_AMGSA::setCalcSpectralNorm()
 }
 
 /* ********************************************************************* *
+ * load the initial aggregate information 
+ * --------------------------------------------------------------------- */
+
+int MLI_Method_AMGSA::setAggregateInfo(int level, int aggrCnt, int length,
+                                       int *aggrInfo) 
+{
+   if ( level != 0 )
+   {
+      cout << "setAggregateInfo ERROR : invalid level number." << endl;
+      return 1;
+   }
+   sa_counts[level] = aggrCnt;
+   if ( sa_data[level] != NULL ) delete [] sa_data[level];
+   sa_data[level] = new int[length];
+   for ( int i = 0; i < length; i++ ) sa_data[level][i] = aggrInfo[i];
+   return 0;
+}
+
+/* ********************************************************************* *
  * load the null space
  * --------------------------------------------------------------------- */
 
-int MLI_Method_AMGSA::setNullSpace( int ndofs, int ndim, double *nullvec, 
+int MLI_Method_AMGSA::setNullSpace( int nDOF, int ndim, double *nullvec, 
                                     int length ) 
 {
-   if ( (nullvec == NULL) && (ndofs != ndim) )
+   if ( (nullvec == NULL) && (nDOF != ndim) )
    {
       cout << "WARNING:  When no nullspace vector is specified, the nodal\n";
       cout << "DOFS must be equal to the nullspace dimension.\n";
       cout.flush();
-      ndim = ndofs;
+      ndim = nDOF;
    }
-   node_dofs      = ndofs;
-   curr_node_dofs = ndofs;
+   node_dofs      = nDOF;
+   curr_node_dofs = nDOF;
    nullspace_dim  = ndim;
    nullspace_len  = length;
    if ( nullspace_vec != NULL ) delete [] nullspace_vec;
@@ -712,19 +753,19 @@ int MLI_Method_AMGSA::setNullSpace( int ndofs, int ndim, double *nullvec,
  * (abridged from similar function in ML)
  * --------------------------------------------------------------------- */
 
-int MLI_Method_AMGSA::setNodalCoordinates( int num_nodes, int ndofs, 
+int MLI_Method_AMGSA::setNodalCoordinates( int num_nodes, int nDOF, 
                                            double *coords, double *scalings)
 {
    int i, j, k, offset, voffset;
 
-   if ( ndofs == 1 )
+   if ( nDOF == 1 )
    {
       node_dofs      = 1;
       curr_node_dofs = 1;
       nullspace_len  = num_nodes;
       nullspace_dim  = 1;
    }
-   else if ( ndofs == 3 )
+   else if ( nDOF == 3 )
    {
       node_dofs      = 3;
       curr_node_dofs = 3;
@@ -733,7 +774,7 @@ int MLI_Method_AMGSA::setNodalCoordinates( int num_nodes, int ndofs,
    }
    else
    {
-      printf("setNodalCoordinates: ndofs = %d not supported\n",ndofs);
+      printf("setNodalCoordinates: nDOF = %d not supported\n",nDOF);
       exit(1);
    }
    if ( nullspace_vec != NULL ) delete [] nullspace_vec;
@@ -1002,10 +1043,10 @@ int MLI_Method_AMGSA::printStatistics(MLI *mli)
  * get the null space
  * --------------------------------------------------------------------- */
 
-int MLI_Method_AMGSA::getNullSpace(int &ndofs,int &ndim,double *&nullvec,
+int MLI_Method_AMGSA::getNullSpace(int &nDOF,int &ndim,double *&nullvec,
                                    int &leng) 
 {
-   ndofs   = curr_node_dofs;
+   nDOF    = curr_node_dofs;
    ndim    = nullspace_dim;
    nullvec = nullspace_vec;
    leng    = nullspace_len;

@@ -50,7 +50,8 @@ extern "C"
  *             corresponding Pmat using the local aggregation scheme 
  * ------------------------------------------------------------------- */
 
-double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,MLI_Matrix **Pmat_out)
+double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,MLI_Matrix **Pmat_out,
+                                   int init_count, int *init_aggr)
 {
    HYPRE_IJMatrix         IJPmat;
    hypre_CSRMatrix        *A_offd, *J_diag, *J_offd;
@@ -101,30 +102,43 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,MLI_Matrix **Pmat_out)
     * reduce Amat based on the block size information (if node_dofs > 1)
     *-----------------------------------------------------------------*/
 
-   blk_size = curr_node_dofs;
-   if (blk_size > 1) MLI_Matrix_Compress(mli_Amat, blk_size, &mli_A2mat);
-   else              mli_A2mat = mli_Amat;
-   A2mat = (hypre_ParCSRMatrix *) mli_A2mat->getMatrix();
+   if ( init_aggr != NULL )
+   {
+      blk_size = curr_node_dofs;
+      if (blk_size > 1) MLI_Matrix_Compress(mli_Amat, blk_size, &mli_A2mat);
+      else              mli_A2mat = mli_Amat;
+      A2mat = (hypre_ParCSRMatrix *) mli_A2mat->getMatrix();
+   }
 
    /*-----------------------------------------------------------------
     * form aggregation graph by taking out weak edges
     *-----------------------------------------------------------------*/
 
-   formLocalGraph(A2mat, &Gmat);
+   if ( init_aggr != NULL ) formLocalGraph(A2mat, &Gmat);
 
    /*-----------------------------------------------------------------
     * perform coarsening
     *-----------------------------------------------------------------*/
-
-   coarsenLocal(Gmat, &naggr, &node2aggr);
+  
+   if ( init_aggr != NULL ) coarsenLocal(Gmat, &naggr, &node2aggr);
+   else 
+   {
+      blk_size = 1;
+      naggr = init_count;
+      node2aggr = new int[A_local_nrows];
+      for ( i = 0; i < A_local_nrows; i++ ) node2aggr[i] = init_aggr[i];
+   }
 
    /*-----------------------------------------------------------------
     * clean up graph and clean up duplicate matrix if block size > 1
     *-----------------------------------------------------------------*/
 
-   if ( blk_size > 1 ) delete mli_A2mat;
-   ierr = hypre_ParCSRMatrixDestroy(Gmat);
-   assert( !ierr );
+   if ( init_aggr != NULL )
+   {
+      if ( blk_size > 1 ) delete mli_A2mat;
+      ierr = hypre_ParCSRMatrixDestroy(Gmat);
+      assert( !ierr );
+   }
 
    /*-----------------------------------------------------------------
     * fetch the coarse grid information and instantiate P
@@ -1018,7 +1032,7 @@ int MLI_Method_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
          if ( node_stat[irow] != MLI_METHOD_AMGSA_SELECTED )
          {
             node2aggr[irow] = -1;
-            node_stat[irow] = MLI_METHOD_AMGSA_SELECTED;
+            node_stat[irow] != MLI_METHOD_AMGSA_SELECTED;
          }
    }
 

@@ -70,29 +70,30 @@ public :
    int    setParams(char *name, int argc, char *argv[]);
    int    getParams(char *name, int *argc, char *argv[]);
 
-   int    setOutputLevel( int output_level );
+   int    setOutputLevel( int outputLevel );
    int    setNumLevels( int nlevels );
-   int    setSmoother( int pre_post, int set_id, int num, double *wgt );
-   int    setCoarseSolver( int set_id, int num, double *wgt );
+   int    setSmoother( int prePost, int setID, int num, double *wgt );
+   int    setCoarseSolver( int setID, int num, double *wgt );
    int    setCoarsenScheme( int scheme );
-   int    setMinCoarseSize( int min_size );
+   int    setMinCoarseSize( int minSize );
    int    setStrengthThreshold( double thresh );
    int    setPweight( double weight );
    int    setCalcSpectralNorm();
-   int    setNullSpace(int node_dofs, int num_ns, double *null_vec, int length);
-   int    setNodalCoordinates(int nnodes,int ndofs,double *coor,double *scale);
+   int    setAggregateInfo(int level, int naggr, int leng, int *aggrInfo);
+   int    setNullSpace(int nodeDOF, int numNS, double *nullVec, int length);
+   int    setNodalCoordinates(int nNodes,int nDOF,double *coor,double *scale);
    int    setCalibrationSize(int size);
    int    setupCalibration( MLI *mli );
    int    print();
    int    printStatistics(MLI *mli);
-   int    getNullSpace(int &node_dofs,int &num_ns,double *&null_vec, int &leng);
+   int    getNullSpace(int &nodeDOF,int &numNS,double *&nullVec, int &leng);
    int    copy( MLI_Method * );
 
 private :
 
-   double genPLocal( MLI_Matrix *Amat, MLI_Matrix **Pmat );
+   double genPLocal( MLI_Matrix *Amat, MLI_Matrix **Pmat, int, int * );
    int    formLocalGraph( hypre_ParCSRMatrix *Amat, hypre_ParCSRMatrix **graph);
-   int    coarsenLocal( hypre_ParCSRMatrix *graph, int *naggr, int **aggr_info);
+   int    coarsenLocal( hypre_ParCSRMatrix *graph, int *nAggr, int **aggrInfo);
 };
 
 #endif
