@@ -6,6 +6,8 @@
 % 
 % Author: Peter Brown, 12-17-97
 % 12-18-97  PNB  Added capability to write out vectors
+% 12-19-97  PNB  Fixed error with output vector (was multiplying by only
+%                the lower triangular part of the matrix)
 
 % Set up stencil, grid extents, and coefficient information based on dim.
 dim = 2;
@@ -103,8 +105,8 @@ ierr = write_vector(fid,v,dim,grid);
 
 % Full matrix and output vector calculation.
 D = spdiags(A,0); B = A + A'; B = spdiags(D,0,B);
-w = A*v; % Matrix vector product
-% w = A\v; % Matrix solve
+w = B*v; % Matrix vector product
+% w = B\v; % Matrix solve
 
 % Open output file for vector
 fid = fopen('test_vector_out.out', 'wt');
