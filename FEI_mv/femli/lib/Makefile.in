@@ -107,7 +107,6 @@ FILES = \
  ../amgs/mli_method.cxx\
  ../amgs/mli_method_amgrs.cxx\
  ../amgs/mli_method_amgsa.cxx\
- ../amgs/mli_method_amgcr.cxx\
  ../amgs/mli_amgsa_coarsen1.cxx\
  ../amgs/mli_amgsa_calib.cxx\
  ../amgs/mli_amgsa_dd_fedata.cxx\
