@@ -99,9 +99,10 @@ Hypre_Vector
 impl_Hypre_StructVectorBldr_GetConstructedObject(Hypre_StructVectorBldr this) {
    Hypre_StructVector newvec = this->d_table->newvec;
    if ( newvec==NULL || this->d_table->vecgood==0 ) {
+      printf( "Hypre_StructVectorBldr: object not constructed yet\n");
       return (Hypre_Vector) NULL;
    };
-   return (Hypre_Vector) Hypre_StructVector_castTo( newvec, "HypreVector" );
+   return (Hypre_Vector) Hypre_StructVector_castTo( newvec, "Hypre_Vector" );
 } /* end impl_Hypre_StructVectorBldrGetConstructedObject */
 
 /* ********************************************************
@@ -118,7 +119,8 @@ int  impl_Hypre_StructVectorBldr_New
 
    struct Hypre_StructVector_private_type * SVp;
    HYPRE_StructVector * V;
-   Hypre_StructVector_deleteReference( this->d_table->newvec );
+   if ( this->d_table->newvec != NULL )
+      Hypre_StructVector_deleteReference( this->d_table->newvec );
    this->d_table->newvec = Hypre_StructVector_new();
    this->d_table->vecgood = 0;
    Hypre_StructVector_addReference( this->d_table->newvec );
@@ -147,7 +149,7 @@ int  impl_Hypre_StructVectorBldr_New
  **********************************************************/
 Hypre_StructVectorBldr
 impl_Hypre_StructVectorBldr_Constructor(Hypre_StructuredGrid grid) {
-   Hypre_StructVectorBldr_new();
+   return Hypre_StructVectorBldr_new();
 } /* end impl_Hypre_StructVectorBldrConstructor */
 
 /* ********************************************************
