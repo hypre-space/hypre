@@ -54,102 +54,114 @@ casc_user_chose_mpi=no
 casc_using_pthreads=no
 casc_using_petsc=no
 
-AC_ARG_WITH(CC,
-   [  --with-CC=ARG		manually set C compiler to ARG],
-   CC=$withval
-   casc_user_chose_compilers=yes)
+AC_ARG_WITH(CC, \[
+  --with-CC=ARG           manually set C compiler to ARG],
+  CC=$withval
+  casc_user_chose_compilers=yes
+)
 
-AC_ARG_WITH(CXX,
-   [  --with-CXX=ARG		manually set C++ compiler to ARG],
-   CXX=$withval
-   casc_user_chose_compilers=yes)
+AC_ARG_WITH(CXX, [\
+  --with-CXX=ARG          manually set C++ compiler to ARG],
+  CXX=$withval
+  casc_user_chose_compilers=yes
+)
 
-AC_ARG_WITH(F77,
-   [  --with-f77=ARG		manually set f77 compiler to ARG],
-   F77=$withval
-   casc_user_chose_compilers=yes)
+AC_ARG_WITH(F77, [\
+  --with-f77=ARG          manually set f77 compiler to ARG],
+  F77=$withval
+  casc_user_chose_compilers=yes
+)
 
-AC_ARG_WITH(CFLAGS,
-   [  --with-CFLAGS=ARG         manually set c compiler flags],
-   CFLAGS=$withval)
+AC_ARG_WITH(CFLAGS, [\
+  --with-CFLAGS=ARG       manually set c compiler flags],
+  CFLAGS=$withval
+)
 
-AC_ARG_WITH(CXXFLAGS,
-   [  --with-CXXFLAGS=ARG	manually set c++ compiler flags],
-   CXXFLAGS=$withval)
+AC_ARG_WITH(CXXFLAGS, [\
+  --with-CXXFLAGS=ARG     manually set c++ compiler flags],
+  CXXFLAGS=$withval
+)
 
-AC_ARG_WITH(F77FLAGS,
-   [  --with-F77FLAGS=ARG       manually set f77 compiler flags],
-   F77FLAGS=$withval)
+AC_ARG_WITH(F77FLAGS, [\
+  --with-F77FLAGS=ARG     manually set f77 compiler flags],
+  F77FLAGS=$withval
+)
 
 
-AC_ARG_WITH(mpi-include, 
-   [  --with-mpi-include=DIR    mpi.h is in DIR],
-            for mpi_dir in $withval; do
-               MPIINCLUDE="$MPIINCLUDE -I$withval"
-            done; casc_user_chose_mpi=yes)
+AC_ARG_WITH(mpi-include, [\
+  --with-mpi-include=DIR  mpi.h is in DIR],
+  for mpi_dir in $withval; do
+    MPIINCLUDE="$MPIINCLUDE -I$withval"
+  done; casc_user_chose_mpi=yes
+)
 
-AC_ARG_WITH(mpi-libs,
-[  --with-mpi-libs=LIBS		LIBS is space-separated list of library names 
+AC_ARG_WITH(mpi-libs, [\
+  --with-mpi-libs=LIBS    LIBS is space-separated list of library names 
                           needed for MPI, e.g. \"nsl socket mpi\"],  
-            for mpi_lib in $withval; do
-               MPILIBS="$MPILIBS -l$mpi_lib"
-            done; casc_user_chose_mpi=yes)
+  for mpi_lib in $withval; do
+    MPILIBS="$MPILIBS -l$mpi_lib"
+  done; casc_user_chose_mpi=yes
+)
 
-AC_ARG_WITH(mpi-lib-dirs,
-[  --with-mpi-lib-dirs=DIRS
-                      		DIRS is space-separated list of directories
-                      containing the libraries specified by
-                      \`--with-mpi-libs', e.g \"/usr/lib /usr/local/mpi/lib\"],
-            for mpi_lib_dir in $withval; do
-               MPILIBDIRS="-L$mpi_lib_dir $MPILIBDIRS"
-            done; casc_user_chose_mpi=yes)
+AC_ARG_WITH(mpi-lib-dirs, [\
+  --with-mpi-lib-dirs=DIRS 
+                          DIRS is space-separated list of directories
+                          containing the libraries specified by
+                          \`--with-mpi-libs',
+                          e.g \"/usr/lib /usr/local/mpi/lib\"],
+  for mpi_lib_dir in $withval; do
+    MPILIBDIRS="-L$mpi_lib_dir $MPILIBDIRS"
+  done; casc_user_chose_mpi=yes
+)
 
-AC_ARG_WITH(mpi-flags,
-[  --with-mpi-flags=FLAGS	FLAGS is a space seperated list of whatever
-			flags other than -l and -L are needed to link with
-			MPI libraries-- Does not de-activate auto search
-			for other MPI information],
- 	MPIFLAGS=$withval)
+AC_ARG_WITH(mpi-flags, [\
+  --with-mpi-flags=FLAGS  FLAGS is a space seperated list of whatever
+                       	  flags other than -l and -L are needed to link
+                          with MPI libraries-- Does not de-activate auto
+                          search for other MPI information],
+  MPIFLAGS=$withval
+)
+
+AC_ARG_WITH(purify, [\
+  --with-purify           assign gcc if not already set by user and 
+                          prepends "purify" to compile/link line],
+  if test "$casc_user_chose_compilers" = "no"
+  then
+    CC=gcc
+    CXX=g++
+    CFLAGS="$CFLAGS -g"
+    CXXFLAGS="$CXXFLAGS -g"
+    casc_user_chose_compilers=yes
+  fi
+  PREPEND=purify
+)
+
+AC_ARG_WITH(cegdb, [\
+  --with-cegdb            assign gcc and -g and link in -lcegdb and
+                          include cegdb.h],
+  CC=gcc
+  CXX=g++
+  casc_users_chose_compilers=yes
+  CFLAGS="$CFLAGS -g"
+  CXXFLAGS="$CXXFLAGS -g"
+  CASC_CHECK_HEADER(cegdb.h, /home/casc/include,
+    CASC_ADD_LIB(cegdb, cegdb, /home/casc/lib, LD)
+  )
+)
 
 
-AC_ARG_WITH(purify,
-   [  --with-purify          	assign gcc if not already set by user and 
-				prepends "purify" to compile/link line],
-	if test "$casc_user_chose_compilers" = "no"
-	then
-  	  CC=gcc
-	  CXX=g++
-	  CFLAGS="$CFLAGS -g"
-	  CXXFLAGS="$CXXFLAGS -g"
-	  casc_user_chose_compilers=yes
-	fi
-	PREPEND=purify)
-      
-
-
-AC_ARG_WITH(cegdb,
-   [  --with-cegdb          	assign gcc and -g and link in -lcegdb and include cegdb.h],
-  	CC=gcc
-	CXX=g++
-	casc_users_chose_compilers=yes
-	CFLAGS="$CFLAGS -g"
-	CXXFLAGS="$CXXFLAGS -g"
-	CASC_CHECK_HEADER(cegdb.h, /home/casc/include,
-	  CASC_ADD_LIB(cegdb, cegdb, /home/casc/lib, LD)
-	))
-
-
-AC_ARG_WITH(gdb,
-   [  --with-gdb          assign gcc and -g and link in -lgdb and include
-			gdb.h],
-  	CC=gcc
-	CXX=g++
-	casc_users_chose_compilers=yes
-	CFLAGS="$CFLAGS -g"
-	CXXFLAGS="$CXXFLAGS -g"
-	CASC_CHECK_HEADER(gdb.h, /usr/local/include /usr/include,
-	  CASC_ADD_LIB(gdb, gdb, /usr/local/lib /usr/lib, LD)
-	))
+AC_ARG_WITH(gdb, [\
+  --with-gdb              assign gcc and -g and link in -lgdb and
+                          include gdb.h],
+  CC=gcc
+  CXX=g++
+  casc_users_chose_compilers=yes
+  CFLAGS="$CFLAGS -g"
+  CXXFLAGS="$CXXFLAGS -g"
+  CASC_CHECK_HEADER(gdb.h, /usr/local/include /usr/include,
+    CASC_ADD_LIB(gdb, gdb, /usr/local/lib /usr/lib, LD)
+  )
+)
 
 dnl *********************************************************************
 dnl * If the user has specified any other command line options (without-MPI, 
@@ -159,47 +171,47 @@ dnl * values will be used to determine compilers, flags and libraries needed.
 dnl *********************************************************************
 
 
-AC_ARG_WITH(MPI,
-   [  --without-MPI           do not use MPI],
-   if test "$withval" = "no"
-   then
-      casc_using_mpi=no
-      HYPREDEFS="$HYPREDEFS -DHYPRE_SEQUENTIAL"
-   else
-      casc_using_mpi=yes
-   fi,
-   casc_using_mpi=yes
-   )
-
-
-
-AC_ARG_WITH(dmalloc,
-   [  --with-dmalloc          use dmalloc package],
-   CASC_ADD_LIB(dmalloc, malloc, /home/casc/lib /usr/local/lib,
-      LD, HYPREDEFS="$HYPREDEFS -DHYPRE_MEMORY_DMALLOC"
-   )
+AC_ARG_WITH(MPI, [\
+  --without-MPI           do not use MPI],
+  if test "$withval" = "no"
+  then
+    casc_using_mpi=no
+    HYPREDEFS="$HYPREDEFS -DHYPRE_SEQUENTIAL"
+  else
+    casc_using_mpi=yes
+  fi,
+  casc_using_mpi=yes
 )
 
 
-AC_ARG_WITH(timing,
-   [  --with-timing          use timing routines],
-   HYPREDEFS="$HYPREDEFS -DHYPRE_TIMING"
+
+AC_ARG_WITH(dmalloc, [\
+  --with-dmalloc          use dmalloc package],
+  CASC_ADD_LIB(dmalloc, malloc, /home/casc/lib /usr/local/lib,
+    LD, HYPREDEFS="$HYPREDEFS -DHYPRE_MEMORY_DMALLOC"
+  )
 )
 
-AC_ARG_WITH(pthreads,
-   [  --with-pthreads		use pthreads],
-   if test "$withval" != "no"
-   then
-      casc_using_pthreads=yes
-      CASC_CHECK_LIB(pthread, pthread_create, ,
-	 [CASC_CHECK_LIB(pthreads, pthread_create)])
 
-      if test "$ac_cv_lib_pthread_pthread_create" = "yes" ||
-         test "$ac_cv_lib_pthreads_pthread_create" = "yes"
-      then
-	 HYPREDEFS="$HYPREDEFS -DHYPRE_USE_PTHREADS"
-      fi
-   fi
+AC_ARG_WITH(timing, [\
+  --with-timing           use timing routines],
+  HYPREDEFS="$HYPREDEFS -DHYPRE_TIMING"
+)
+
+AC_ARG_WITH(pthreads, [\
+  --with-pthreads         use pthreads],
+  if test "$withval" != "no"
+  then
+    casc_using_pthreads=yes
+    CASC_CHECK_LIB(pthread, pthread_create, ,
+      [CASC_CHECK_LIB(pthreads, pthread_create)])
+  
+    if test "$ac_cv_lib_pthread_pthread_create" = "yes" ||
+       test "$ac_cv_lib_pthreads_pthread_create" = "yes"
+    then
+      HYPREDEFS="$HYPREDEFS -DHYPRE_USE_PTHREADS"
+    fi
+  fi
 )
 
 
@@ -207,21 +219,21 @@ dnl top level source directory
 
 HYPRE_TOP_SRC_DIR=`pwd`
 
-AC_ARG_WITH(petsc,
-   [  --with-petsc		use petsc],
-   if test "$withval" != "no"
-   then
-      casc_using_petsc=yes
-      HYPRE_PETSCDEFS="$HYPRE_PETSCDEFS -DPETSC_AVAILABLE"
-      HYPRE_PETSCLIBDIRS="$HYPRE_TOP_SRC_DIR/PETScMat_linear_solvers/pilut \
- $HYPRE_TOP_SRC_DIR/PETSc_linear_solvers/ParILUT "
-      HYPRE_PETSCLIBS=" -l_HYPRE_PETScSolverParILUT \
- -l_HYPRE_PETScMatPilutSolver "
-   else
-      HYPRE_PETSCDEFS=""
-      HYPRE_PETSCLIBDIRS=""
-      HYPRE_PETSCLIBS=""
-   fi
+AC_ARG_WITH(petsc, [\
+  --with-petsc            use petsc],
+  if test "$withval" != "no"
+  then
+    casc_using_petsc=yes
+    HYPRE_PETSCDEFS="$HYPRE_PETSCDEFS -DPETSC_AVAILABLE"
+    HYPRE_PETSCLIBDIRS="$HYPRE_TOP_SRC_DIR/PETScMat_linear_solvers/pilut \
+$HYPRE_TOP_SRC_DIR/PETSc_linear_solvers/ParILUT "
+    HYPRE_PETSCLIBS=" -l_HYPRE_PETScSolverParILUT \
+-l_HYPRE_PETScMatPilutSolver "
+  else
+    HYPRE_PETSCDEFS=""
+    HYPRE_PETSCLIBDIRS=""
+    HYPRE_PETSCLIBS=""
+  fi
 )
 
 AC_PROG_RANLIB
@@ -245,31 +257,31 @@ case $HOSTNAME in
 
      if  test "$casc_user_chose_compilers" = "no"
      then
-	AC_CHECK_PROGS(CC, cicc cc)
-	AC_CHECK_PROGS(CXX, ciCC CC) 
-	AC_CHECK_PROGS(F77, cif77 f77)
+        AC_CHECK_PROGS(CC, cicc cc)
+        AC_CHECK_PROGS(CXX, ciCC CC) 
+        AC_CHECK_PROGS(F77, cif77 f77)
      fi
 
      if  test "$casc_user_chose_mpi" = "no" 
-     then  	
-	if test "$casc_using_mpi" = "yes"
-	then
+     then       
+        if test "$casc_using_mpi" = "yes"
+        then
            CASC_CHECK_HEADER(mpi.h, /opt/intel/tflop/TF98_2.4.1/tflops/cougar/include)
-	   MPIINCLUDE="$MPIINCLUDE $INCLUDES"
-	   CASC_ADD_LIB(mpi, main, /opt/intel/tflop/TF98_2.4.1/tflops/cougar/lib/puma, MPI)
-	   if test -z "$MPILIBS"
- 	   then
-		AC_MSG_WARN([MPI not found-- must set manually using --with-flags])
-	   fi
-	fi
+           MPIINCLUDE="$MPIINCLUDE $INCLUDES"
+           CASC_ADD_LIB(mpi, main, /opt/intel/tflop/TF98_2.4.1/tflops/cougar/lib/puma, MPI)
+           if test -z "$MPILIBS"
+           then
+                AC_MSG_WARN([MPI not found-- must set manually using --with-flags])
+           fi
+        fi
      fi
 
-       CASC_SET_COPT(-O)
-       CASC_SET_CDEBUG(-g)
-       CASC_SET_CXXOPT(-O)
-       CASC_SET_CXXDEBUG(-g) 
-       CASC_SET_FOPT(-O)
-       CASC_SET_FDEBUG(-g)
+     CASC_SET_COPT(-O)
+     CASC_SET_CDEBUG(-g)
+     CASC_SET_CXXOPT(-O)
+     CASC_SET_CXXDEBUG(-g) 
+     CASC_SET_FOPT(-O)
+     CASC_SET_FDEBUG(-g)
       
    ;;
 
@@ -277,32 +289,32 @@ case $HOSTNAME in
 
      if  test "$casc_user_chose_compilers" = "no"
      then
-	AC_CHECK_PROGS(CC, cc kcc gcc)
-	AC_CHECK_PROGS(CXX, CC KCC g++) 
-	AC_CHECK_PROGS(F77, f77 g77)
+        AC_CHECK_PROGS(CC, cc kcc gcc)
+        AC_CHECK_PROGS(CXX, CC KCC g++) 
+        AC_CHECK_PROGS(F77, f77 g77)
      fi
 
      if  test "$casc_user_chose_mpi" = "no" 
-     then  	
-	if test "$casc_using_mpi" = "yes"
-	then
-	   CASC_ADD_LIB(mpi, main, /usr/lib, MPI)
-	   if test -z "$MPILIBS"
- 	   then
-		AC_MSG_WARN([MPI not found-- must set manually using --with-flags])
-	   fi
-	fi
+     then       
+        if test "$casc_using_mpi" = "yes"
+        then
+           CASC_ADD_LIB(mpi, main, /usr/lib, MPI)
+           if test -z "$MPILIBS"
+           then
+                AC_MSG_WARN([MPI not found-- must set manually using --with-flags])
+           fi
+        fi
      fi
 
-       CASC_SET_COPT(-O)
-       CASC_SET_CDEBUG(-g)
-       CASC_SET_CXXOPT(-O)
-       CASC_SET_CXXDEBUG(-g)
-       CASC_SET_FOPT(-O)
-       CASC_SET_FDEBUG(-g)
+     CASC_SET_COPT(-O)
+     CASC_SET_CDEBUG(-g)
+     CASC_SET_CXXOPT(-O)
+     CASC_SET_CXXDEBUG(-g)
+     CASC_SET_FOPT(-O)
+     CASC_SET_FDEBUG(-g)
       
    ;;
-	
+        
 esac
 fi   
 
@@ -352,18 +364,18 @@ then
      fi
 
      if test "$CC" = "cc" ||
-	test "$CC" = "kcc" &&
+        test "$CC" = "kcc" &&
         test "$casc_user_chose_mpi" = "no" &&
- 	test "$casc_using_mpi" = "yes"
+        test "$casc_using_mpi" = "yes"
      then
        CASC_CHECK_HEADER(mpi.h, /usr/include)
        MPIINCLUDE="$MPIINCLUDE $INCLUDES"
        CASC_ADD_LIB(rt, main, /usr/lib)
        HYPRE_ADD_LIB(mpi, main, /usr/opt/MPI170/lib, MPI, ,
-	 CASC_ADD_LIB(mpi, main, /usr/lib, MPI) )
+         CASC_ADD_LIB(mpi, main, /usr/lib, MPI) )
        if test -z "$MPILIBS"
        then
-	 AC_MSG_WARN([MPI not found-- must set manually using --with-flags])
+         AC_MSG_WARN([MPI not found-- must set manually using --with-flags])
        fi
      fi
 
@@ -400,14 +412,14 @@ then
            AC_CHECK_PROGS(CC,xlc gcc cc c89)
            AC_CHECK_PROGS(CXX,xlC KCC g++)
            AC_CHECK_PROGS(F77,xlf g77)
-	 else
+         else
            AC_CHECK_PROGS(CC,xlc_r gcc)
            AC_CHECK_PROGS(CXX,xlC_r g++)
-           AC_CHECK_PROGS(F77,xlf_r g77)	
+           AC_CHECK_PROGS(F77,xlf_r g77)        
          fi
        else
-	 if test "$casc_using_pthreads" = "no"
-	 then
+         if test "$casc_using_pthreads" = "no"
+         then
            AC_CHECK_PROGS(CC,mpcc mpicc) 
            AC_CHECK_PROGS(CXX,mpCC mpiCC) 
            AC_CHECK_PROGS(F77,mpxlf mpif77)
@@ -435,39 +447,39 @@ then
      then
        if test "$casc_using_mpi" = "no"
        then
-	 AC_CHECK_PROGS(CC, cc gcc c89)
-	 AC_CHECK_PROGS(CXX, cxx CC g++) 
-	 AC_CHECK_PROGS(F77, f77 g77)
+         AC_CHECK_PROGS(CC, cc gcc c89)
+         AC_CHECK_PROGS(CXX, cxx CC g++) 
+         AC_CHECK_PROGS(F77, f77 g77)
        else 
-	 AC_CHECK_PROGS(CC, mpicc mpcc tmcc hcc)
-	 AC_CHECK_PROGS(CXX, mpiCC)
+         AC_CHECK_PROGS(CC, mpicc mpcc tmcc hcc)
+         AC_CHECK_PROGS(CXX, mpiCC)
          AC_CHECK_PROGS(F77, mpif77)
-	 if test -z "$CC"
-	 then
-	   AC_CHECK_PROGS(CC, cc gcc)
+         if test -z "$CC"
+         then
+           AC_CHECK_PROGS(CC, cc gcc)
          fi
-	 if test -z "$CXX"
-	 then
-	   AC_CHECK_PROGS(CXX, cxx CC g++)
+         if test -z "$CXX"
+         then
+           AC_CHECK_PROGS(CXX, cxx CC g++)
          fi
-	 if test -z "$F77"
-	 then
-	   AC_CHECK_PROGS(F77, f77 g77)
+         if test -z "$F77"
+         then
+           AC_CHECK_PROGS(F77, f77 g77)
          fi
        fi
      fi
 
      if test "$CC" = "cc" ||
-	test "$CC" = "gcc" &&
+        test "$CC" = "gcc" &&
         test "$casc_user_chose_mpi" = "no" &&
- 	test "$casc_using_mpi" = "yes"
+        test "$casc_using_mpi" = "yes"
      then
        CASC_CHECK_HEADER(mpi.h, /usr/local/mpi/include)
        MPIINCLUDE="$MPIINCLUDE -I$INCLUDES"
        CASC_ADD_LIB(mpi, main, /usr/local/mpi/lib, MPI)
        if test -z "$MPILIBS"
        then
-	 AC_MSG_WARN([MPI not found-- must set manually using --with-flags])
+         AC_MSG_WARN([MPI not found-- must set manually using --with-flags])
        fi
      fi
 
@@ -498,15 +510,15 @@ then
       AC_CHECK_PROGS(F77, mpif77)
       if test -z "$CC"
       then
-	AC_CHECK_PROGS(CC, cc kcc gcc)
+        AC_CHECK_PROGS(CC, cc kcc gcc)
       fi
       if test -z "$CXX"
       then
-	AC_CHECK_PROGS(CXX, cxx CC g++)
+        AC_CHECK_PROGS(CXX, cxx CC g++)
       fi
       if test -z "$F77" 
       then
-	AC_CHECK_PROGS(F77, f77 g77)
+        AC_CHECK_PROGS(F77, f77 g77)
       fi
     fi
   fi
