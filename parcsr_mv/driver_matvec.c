@@ -26,7 +26,7 @@ main( int   argc,
    int		first_index, last_index;	
    int 		i, ierr=0;
    double 	*data, *data2;
-
+   int 		*row_starts, *col_starts;
    /* Initialize MPI */
    MPI_Init(&argc, &argv);
 
@@ -40,8 +40,10 @@ main( int   argc,
 	matrix = hypre_ReadCSRMatrix("input");
    	printf(" read input\n");
    }
-   par_matrix = hypre_CSRMatrixToParCSRMatrix(MPI_COMM_WORLD, matrix, NULL,
-		NULL);
+   row_starts = NULL;
+   col_starts = NULL;
+   par_matrix = hypre_CSRMatrixToParCSRMatrix(MPI_COMM_WORLD, matrix, 
+		&row_starts, &col_starts);
    printf(" converted\n");
 
    hypre_PrintParCSRMatrix(par_matrix,"matrix");
@@ -99,6 +101,8 @@ main( int   argc,
    hypre_DestroyParVector(x2);
    hypre_DestroyParVector(y);
    hypre_DestroyParVector(y2);
+   hypre_TFree(row_starts);
+   hypre_TFree(col_starts);
    if (my_id == 0) hypre_DestroyCSRMatrix(matrix);
 
 
