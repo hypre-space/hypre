@@ -57,6 +57,7 @@ void        *data;
    int      *levi;
    int      *levp;
    int       num_levels;
+   int       num_unknowns;
 
 
 /* Local variables  */
@@ -80,6 +81,8 @@ void        *data;
 
    double    alpha;
    double    beta;
+   double   *D_mat;
+   double   *S_vec;
    
 /* Acquire data and allocate storage */
 
@@ -108,6 +111,7 @@ void        *data;
    levp = AMGDataLevP(amg_data);
    levi = AMGDataLevI(amg_data);
    num_coeffs = AMGDataNumA(amg_data);
+   num_unknowns = AMGDataNumUnknowns(amg_data);
    numv = AMGDataNumV(amg_data);
    cycle_op_count = AMGDataCycleOpCount(amg_data);
 
@@ -120,6 +124,9 @@ void        *data;
    ieq  = ctalloc(int, 10);
    iun  = ctalloc(int, 10);
    ipt  = ctalloc(int, 10);
+
+   D_mat = ctalloc(double, num_unknowns * num_unknowns);
+   S_vec = ctalloc(double, num_unknowns);
 
 /* Initialize */
 
@@ -173,7 +180,7 @@ void        *data;
 /*------------------------------------------------------------------------
  * Main loop of cycling
  *-----------------------------------------------------------------------*/
- 
+  
    while (Not_Finished)
    {
       if (ntrlx[cycle_param] > 9)
@@ -182,7 +189,8 @@ void        *data;
 /*------------------------------------------------------------------------
  * Decode relaxation parameters. error flag set to 7 if error occurs
  *-----------------------------------------------------------------------*/
-
+ 
+ 
          idec_(&ntrlx[cycle_param],&num_integers,&num_digits,iarr);
          num_sweep = iarr[0];
          ii = 0;
@@ -213,7 +221,7 @@ void        *data;
             return(Solve_err_flag);
          }
 
-
+ 
 /*------------------------------------------------------------------------
  * Do the relaxation num_sweep times, looping over partial sweeps.
  *-----------------------------------------------------------------------*/
@@ -224,9 +232,12 @@ void        *data;
 
              for (k = 0; k < ii; k++) 
              {
+               Solve_err_flag = RelaxC(U_array[level],F_array[level],
+                                      A_array[level], ICG_array[level],
+                                      IV_array[level],ipmn[level],
+                                      ipmx[level],ipt[k],ity[k],
+                                      D_mat,S_vec);
 
-               CALL_RELAX(Solve_err_flag, u, f, tol, amg_data);
- 
                if (Solve_err_flag != 0) return(Solve_err_flag);
 
              }
