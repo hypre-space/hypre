@@ -576,6 +576,15 @@ impl_Hypre_GMRES_Apply(Hypre_GMRES this, Hypre_Vector b, Hypre_Vector* xp)
 
 
 /* ********************************************************
+ * impl_Hypre_GMRESGetDims
+ **********************************************************/
+int  impl_Hypre_GMRES_GetDims(Hypre_GMRES this, int* m, int* n) {
+   Hypre_GMRES_Private GMRES_data = Hypre_GMRES_getPrivate(this);
+   Hypre_LinearOperator matvec = (GMRES_data->matvec);
+   return Hypre_LinearOperator_GetDims( matvec, m, n );
+} /* end impl_Hypre_GMRESGetDims */
+
+/* ********************************************************
  * impl_Hypre_GMRESGetSystemOperator
  **********************************************************/
 int impl_Hypre_GMRES_GetSystemOperator

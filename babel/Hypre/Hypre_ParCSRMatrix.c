@@ -93,3 +93,26 @@ int  impl_Hypre_ParCSRMatrix_Apply
    return ierr;
 } /* end impl_Hypre_ParCSRMatrixApply */
 
+/* ********************************************************
+ * impl_Hypre_ParCSRMatrixGetDims
+ **********************************************************/
+int impl_Hypre_ParCSRMatrix_GetDims(Hypre_ParCSRMatrix this, int* m, int* n) {
+   struct Hypre_ParCSRMatrix_private_type * Mp = this->d_table;
+   HYPRE_IJMatrix * MIJ = Mp->Hmat;
+   hypre_IJMatrix * Mij = (hypre_IJMatrix *) (*MIJ);
+   hypre_ParCSRMatrix *parM = hypre_IJMatrixLocalStorage(Mij);
+   HYPRE_ParCSRMatrix HYPRE_mat = (HYPRE_ParCSRMatrix) parM;
+   return HYPRE_ParCSRMatrixGetDims( HYPRE_mat, m, n );
+} /* end impl_Hypre_ParCSRMatrixGetDims */
+
+/* ********************************************************
+ * impl_Hypre_ParCSRMatrixGetLocalRange
+/* >>>>>>> TO DO: implement this
+ **********************************************************/
+int impl_Hypre_ParCSRMatrix_GetLocalRange
+( Hypre_ParCSRMatrix this, int* row_start, int* row_end,
+  int* col_start, int* col_end ) {
+   printf("Hypre_ParCSRMatrix_GetLocalRange has not been implemented!\n");
+   return 1;
+} /* end impl_Hypre_ParCSRMatrixGetLocalRange */
+

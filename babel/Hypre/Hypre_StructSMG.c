@@ -76,6 +76,14 @@ int  impl_Hypre_StructSMG_Apply
 } /* end impl_Hypre_StructSMGApply */
 
 /* ********************************************************
+ * impl_Hypre_StructSMGGetDims
+ **********************************************************/
+int  impl_Hypre_StructSMG_GetDims(Hypre_StructSMG this, int* m, int* n) {
+   Hypre_StructMatrix hsmatrix = this->d_table->hsmatrix;
+   return Hypre_StructMatrix_GetDims( hsmatrix, m, n );
+} /* end impl_Hypre_StructSMGGetDims */
+
+/* ********************************************************
  * impl_Hypre_StructSMGGetSystemOperator
  **********************************************************/
 int impl_Hypre_StructSMG_GetSystemOperator
@@ -218,9 +226,20 @@ int impl_Hypre_StructSMG_SetParameterInt
    if ( !strcmp(name,"logging") ) {
       return HYPRE_StructSMGSetLogging( *S, value );
    };
+   printf( "Hypre_StructJacobi_SetParameterInt does not recognize name %s\n", name );
    return 1;
 
 } /* end impl_Hypre_StructSMGSetParameterInt */
+
+/* ********************************************************
+ * impl_Hypre_StructSMGSetParameterString
+ *       insert the library code below
+ **********************************************************/
+int  impl_Hypre_StructSMG_SetParameterString
+( Hypre_StructSMG this, char* name, char* value ) {
+   printf( "Hypre_StructJacobi_SetParameterString does not recognize name %s\n", name );
+   return 1;
+} /* end impl_Hypre_StructSMGSetParameterString */
 
 /* ********************************************************
  * impl_Hypre_StructSMGNew

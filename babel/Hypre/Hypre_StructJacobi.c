@@ -94,6 +94,14 @@ int  impl_Hypre_StructJacobi_Apply
 } /* end impl_Hypre_StructJacobiApply */
 
 /* ********************************************************
+ * impl_Hypre_StructJacobiGetDims
+ **********************************************************/
+int  impl_Hypre_StructJacobi_GetDims(Hypre_StructJacobi this, int* m, int* n) {
+   Hypre_StructMatrix hsmatrix = this->d_table->hsmatrix;
+   return Hypre_StructMatrix_GetDims( hsmatrix, m, n );
+} /* end impl_Hypre_StructJacobiGetDims */
+
+/* ********************************************************
  * impl_Hypre_StructJacobiGetSystemOperator
  **********************************************************/
 int impl_Hypre_StructJacobi_GetSystemOperator
@@ -203,6 +211,7 @@ int impl_Hypre_StructJacobi_SetParameterDouble
    if (  !strcmp(name,"nonzero guess") ) {
       return HYPRE_StructJacobiSetNonZeroGuess( *S );
    };
+   printf( "Hypre_StructJacobi_SetParameterDouble does not recognize name %s\n", name );
    return 1;
 
 } /* end impl_Hypre_StructJacobiSetParameterDouble */
@@ -230,9 +239,19 @@ int  impl_Hypre_StructJacobi_SetParameterInt
       HYPRE_StructJacobiSetNonZeroGuess( *S );
       return;
    };
+   printf( "Hypre_StructJacobi_SetParameterInt does not recognize name %s\n", name );
    return 1;
 
 } /* end impl_Hypre_StructJacobiSetParameterInt */
+
+/* ********************************************************
+ * impl_Hypre_StructJacobiSetParameterString
+ **********************************************************/
+int impl_Hypre_StructJacobi_SetParameterString
+( Hypre_StructJacobi this, char* name, char* value ) {
+   printf( "Hypre_StructJacobi_SetParameterString does not recognize name %s\n", name );
+   return 1;
+} /* end impl_Hypre_StructJacobiSetParameterString */
 
 /* ********************************************************
  * impl_Hypre_StructJacobiNew

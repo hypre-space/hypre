@@ -115,3 +115,27 @@ int impl_Hypre_StructMatrix_Apply
 
 } /* end impl_Hypre_StructMatrixApply */
 
+/* ********************************************************
+ * impl_Hypre_StructMatrixGetDims
+ **********************************************************/
+int  impl_Hypre_StructMatrix_GetDims(Hypre_StructMatrix this, int* m, int* n) {
+   struct Hypre_StructMatrix_private_type *SMp = this->d_table;
+   HYPRE_StructMatrix *Hmat = SMp->hsmat;
+   hypre_StructMatrix *hmat = (hypre_StructMatrix *) *Hmat;
+   int size = hypre_StructMatrixGlobalSize(hmat);
+   *m = size;
+   *n = size;
+   return 0;
+} /* end impl_Hypre_StructMatrixGetDims */
+
+/* ********************************************************
+ * impl_Hypre_StructMatrixGetLocalRange
+/* >>>>>>> TO DO: implement this
+ **********************************************************/
+int  impl_Hypre_StructMatrix_GetLocalRange
+( Hypre_StructMatrix this, int* row_start, int* row_end,
+  int* col_start, int* col_end ) {
+   printf("Hypre_StructMatrix_GetLocalRange has not been implemented!\n");
+   return 1;
+} /* end impl_Hypre_StructMatrixGetLocalRange */
+

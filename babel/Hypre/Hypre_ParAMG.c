@@ -326,6 +326,14 @@ int impl_Hypre_ParAMG_GetConstructedObject
 } /* end impl_Hypre_ParAMGGetConstructedObject */
 
 /* ********************************************************
+ * impl_Hypre_ParAMGGetDims
+ **********************************************************/
+int  impl_Hypre_ParAMG_GetDims(Hypre_ParAMG this, int* m, int* n) {
+   Hypre_ParCSRMatrix Hmatrix = this->d_table->Hmatrix;
+   return Hypre_ParCSRMatrix_GetDims( Hmatrix, m, n );
+} /* end impl_Hypre_ParAMGGetDims */
+
+/* ********************************************************
  * impl_Hypre_ParAMGApply
  *       solves Mx=b for x, where this=M
  **********************************************************/

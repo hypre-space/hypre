@@ -335,6 +335,15 @@ impl_Hypre_PCG_Apply(Hypre_PCG this, Hypre_Vector b, Hypre_Vector* xp)
 
 
 /* ********************************************************
+ * impl_Hypre_PCGGetDims
+ **********************************************************/
+int  impl_Hypre_PCG_GetDims(Hypre_PCG this, int* m, int* n) {
+   Hypre_PCG_Private pcg_data = Hypre_PCG_getPrivate(this);
+   Hypre_LinearOperator matvec = (pcg_data->matvec);
+   return Hypre_LinearOperator_GetDims( matvec, m, n );
+} /* end impl_Hypre_PCGGetDims */
+
+/* ********************************************************
  * impl_Hypre_PCG_GetSystemOperator
  **********************************************************/
 int
@@ -446,7 +455,7 @@ int  impl_Hypre_PCG_GetParameterInt( Hypre_PCG this, char* name, int *value ) {
       return 0;
    }
    else {
-      printf( "Don't understand keyword %s to Hypre_PCG_GetIntParameter\n",
+      printf( "Don't understand keyword %s to Hypre_PCG_GetParameterInt\n",
               name );
       *value = -123456;
       return 1;
