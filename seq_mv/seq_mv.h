@@ -45,6 +45,10 @@ typedef struct
    int      num_cols;
    int      num_nonzeros;
 
+  /* for compressing rows when possible (to be used in matvec)  */
+   int     *rownnz;
+   int      num_rownnz;
+
    /* Does the CSRMatrix create/destroy `data', `i', `j'? */
    int      owns_data;
 
@@ -60,6 +64,8 @@ typedef struct
 #define hypre_CSRMatrixNumRows(matrix)      ((matrix) -> num_rows)
 #define hypre_CSRMatrixNumCols(matrix)      ((matrix) -> num_cols)
 #define hypre_CSRMatrixNumNonzeros(matrix)  ((matrix) -> num_nonzeros)
+#define hypre_CSRMatrixRownnz(matrix)       ((matrix) -> rownnz)
+#define hypre_CSRMatrixNumRownnz(matrix)    ((matrix) -> num_rownnz)
 #define hypre_CSRMatrixOwnsData(matrix)     ((matrix) -> owns_data)
 
 
@@ -271,6 +277,7 @@ int hypre_CSRMatrixSetDataOwner( hypre_CSRMatrix *matrix , int owns_data );
 hypre_CSRMatrix *hypre_CSRMatrixRead( char *file_name );
 int hypre_CSRMatrixPrint( hypre_CSRMatrix *matrix , char *file_name );
 int hypre_CSRMatrixCopy( hypre_CSRMatrix *A , hypre_CSRMatrix *B , int copy_data );
+int hypre_CSRMatrixSetRownnz( hypre_CSRMatrix *matrix );
 
 /* csr_matvec.c */
 int hypre_CSRMatrixMatvec( double alpha , hypre_CSRMatrix *A , hypre_Vector *x , double beta , hypre_Vector *y );
