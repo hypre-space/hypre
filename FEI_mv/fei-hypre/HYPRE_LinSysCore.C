@@ -275,7 +275,7 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
    feData_             = NULL;
    haveFEData_         = 0;
 #ifdef HAVE_MLI
-   feData_             = HYPRE_LSI_MLIFEDataCreate(comm);
+   feData_             = (void *) HYPRE_LSI_MLIFEDataCreate(comm);
 #endif
 }
 
@@ -936,7 +936,7 @@ int HYPRE_LinSysCore::setMatrixStructure(int** ptColIndices, int* ptRowLengths,
    //-------------------------------------------------------------------
 
 #ifdef HAVE_MLI
-   if ( haveFEData_ )
+   if ( haveFEData_ && feData_ != NULL )
    {
       int status = HYPRE_LSI_MLIFEDataInitComplete( feData_ );
       if ( status )
@@ -1762,7 +1762,7 @@ int HYPRE_LinSysCore::matrixLoadComplete()
 
       HYPRE_LSI_MLIFEDataConstructNullSpace( feData_ );
       HYPRE_LSI_MLIFEDataGetNullSpacePtr( feData_, &nSpaces, &leng, &nDim );
-      if ( nSpaces != NULL )
+      if ( HYPreconID_ == HYMLI && nSpaces != NULL )
          HYPRE_LSI_MLISetNullSpace( HYPrecon_, 3, nDim, nSpaces, leng );
       if ( (HYOutputLevel_ & HYFEI_PRINTFEINFO) )
       {
@@ -2982,7 +2982,7 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
    //-------------------------------------------------------------------
 
    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
-      printf("%4d : HYPRE_LSC::entering *selectPreconditioner = %s.\n",
+      printf("%4d : HYPRE_LSC::entering selectPreconditioner = %s.\n",
              mypid_, name);
 
    //-------------------------------------------------------------------
@@ -3474,6 +3474,11 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
       computeMinResProjection(A_csr, x_csr, b_csr);
    } 
    
+#ifdef HAVE_MLI
+   if ( HYPreconID_ == HYMLI && feData_ != NULL )
+      HYPRE_LSI_MLISetFEData( HYPrecon_, feData_ );
+#endif
+
    switch ( HYSolverID_ )
    {
       //----------------------------------------------------------------
