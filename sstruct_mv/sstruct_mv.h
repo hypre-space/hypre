@@ -39,6 +39,10 @@ typedef struct
 {
    hypre_Index  imin;
    hypre_Index  imax;
+
+  /* GEC0902 additional information for ghost calculation in the offset */
+   int   num_ghost[6];
+
    void        *info;
 
 } hypre_BoxMapEntry;
@@ -48,6 +52,10 @@ typedef struct
    int                 max_nentries;
    hypre_Index         global_imin;
    hypre_Index         global_imax;
+
+  /* GEC0902 additional information for ghost calculation in the offset */
+   int                num_ghost[6];
+
    int                 nentries;
    hypre_BoxMapEntry  *entries;
    hypre_BoxMapEntry **table; /* this points into 'entries' array */
@@ -71,6 +79,7 @@ typedef struct
 #define hypre_BoxMapIndexes(map)        ((map) -> indexes)
 #define hypre_BoxMapSize(map)           ((map) -> size)
 #define hypre_BoxMapLastIndex(map)      ((map) -> last_index)
+#define hypre_BoxMapNumGhost(map)       ((map) -> num_ghost)
 
 #define hypre_BoxMapIndexesD(map, d)    hypre_BoxMapIndexes(map)[d]
 #define hypre_BoxMapSizeD(map, d)       hypre_BoxMapSize(map)[d]
@@ -87,6 +96,7 @@ hypre_BoxMapTable(map)[((k*hypre_BoxMapSizeD(map, 1) + j)*\
 #define hypre_BoxMapEntryIMin(entry)  ((entry) -> imin)
 #define hypre_BoxMapEntryIMax(entry)  ((entry) -> imax)
 #define hypre_BoxMapEntryInfo(entry)  ((entry) -> info)
+#define hypre_BoxMapEntryNumGhost(entry) ((entry) -> num_ghost)
 
 #endif
 /*BHEADER**********************************************************************
@@ -120,6 +130,7 @@ typedef struct
 {
    HYPRE_SStructVariable  type;
    int                    rank;     /* local rank */
+  int                     ghrank;  /* GEC0902 ghostrank */
    int                    proc;
 
 } hypre_SStructUVar;
@@ -148,6 +159,10 @@ typedef struct
    int                     global_size;   /* Total number of variables */
 
    hypre_Index             periodic;      /* Indicates if pgrid is periodic */
+
+  /* GEC0902 additions for ghost expansion of boxes */
+
+   int                     ghlocal_size;   /* Number of vars including ghosts */
                            
 } hypre_SStructPGrid;
 
@@ -172,6 +187,8 @@ typedef struct
    int  type;
    int  proc;
    int  offset;
+   /* GEC0902 ghost offset   */
+   int  ghoffset;
 
 } hypre_SStructMapInfo;
 
@@ -180,11 +197,13 @@ typedef struct
    int          type;
    int          proc;
    int          offset;  /* minimum offset for this box */
+  int          ghoffset;  /* GEC0902 minimum offset ghost for this box */
    int          part;    /* part the box lives on */
    hypre_Index  ilower;  /* local ilower on neighbor index-space */
    hypre_Index  coord;   /* lives on local index-space */
    hypre_Index  dir;     /* lives on neighbor index-space */
    hypre_Index  stride;  /* lives on local index-space */
+   hypre_Index  ghstride; /* GEC0902 the ghost equivalent  */ 
 
 } hypre_SStructNMapInfo;
 
@@ -216,6 +235,11 @@ typedef struct hypre_SStructGrid_struct
 
    int                        local_size;  /* Number of variables locally */
    int                        global_size; /* Total number of variables */
+
+ /* GEC0902 additions for ghost expansion of boxes */
+
+   int                     ghlocal_size;  /* GEC0902 Number of vars including ghosts */
+   int                     ghstart_rank;  /* GEC0902 start rank including ghosts  */
                               
    int                        ref_count;
 
@@ -245,6 +269,8 @@ typedef struct hypre_SStructGrid_struct
 #define hypre_SStructGridLocalSize(grid)      ((grid) -> local_size)
 #define hypre_SStructGridGlobalSize(grid)     ((grid) -> global_size)
 #define hypre_SStructGridRefCount(grid)       ((grid) -> ref_count)
+#define hypre_SStructGridGhlocalSize(grid)    ((grid) -> ghlocal_size)
+#define hypre_SStructGridGhstartRank(grid)    ((grid) -> ghstart_rank)
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_SStructPGrid
@@ -275,6 +301,8 @@ typedef struct hypre_SStructGrid_struct
 #define hypre_SStructPGridLocalSize(pgrid)        ((pgrid) -> local_size)
 #define hypre_SStructPGridGlobalSize(pgrid)       ((pgrid) -> global_size)
 #define hypre_SStructPGridPeriodic(pgrid)         ((pgrid) -> periodic)
+#define hypre_SStructPGridGhlocalSize(pgrid)      ((pgrid) -> ghlocal_size)
+
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_SStructMapInfo
@@ -283,6 +311,7 @@ typedef struct hypre_SStructGrid_struct
 #define hypre_SStructMapInfoType(info)   ((info) -> type)
 #define hypre_SStructMapInfoProc(info)   ((info) -> proc)
 #define hypre_SStructMapInfoOffset(info) ((info) -> offset)
+#define hypre_SStructMapInfoGhoffset(info) ((info) -> ghoffset)
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_SStructMapInfo
@@ -291,11 +320,14 @@ typedef struct hypre_SStructGrid_struct
 #define hypre_SStructNMapInfoType(info)   ((info) -> type)
 #define hypre_SStructNMapInfoProc(info)   ((info) -> proc)
 #define hypre_SStructNMapInfoOffset(info) ((info) -> offset)
+#define hypre_SStructNMapInfoGhoffset(info) ((info) -> ghoffset)
 #define hypre_SStructNMapInfoPart(info)   ((info) -> part)
 #define hypre_SStructNMapInfoILower(info) ((info) -> ilower)
 #define hypre_SStructNMapInfoCoord(info)  ((info) -> coord)
 #define hypre_SStructNMapInfoDir(info)    ((info) -> dir)
 #define hypre_SStructNMapInfoStride(info) ((info) -> stride)
+#define hypre_SStructNMapInfoGhstride(info)  ((info) -> ghstride)
+
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_SStructNeighbor
@@ -317,6 +349,7 @@ typedef struct hypre_SStructGrid_struct
 #define hypre_SStructUCVarUVars(uc)    ((uc) -> uvars)
 #define hypre_SStructUCVarType(uc, i)  ((uc) -> uvars[i].type)
 #define hypre_SStructUCVarRank(uc, i)  ((uc) -> uvars[i].rank)
+#define hypre_SStructUCVarGhrank(uc, i) ((uc) -> uvars[i].ghrank)
 #define hypre_SStructUCVarProc(uc, i)  ((uc) -> uvars[i].proc)
 
 #endif
@@ -399,6 +432,7 @@ typedef struct
    hypre_Index   to_index;
    int           to_var;
    int           rank;
+  int          ghrank;     /* GEC0902 adding the ghost rank  */
 
 } hypre_SStructUEntry;
 
@@ -425,6 +459,7 @@ typedef struct hypre_SStructGraph_struct
    int                     nUventries;  /* number of iUventries */
    int                     aUventries;  /* alloc size of iUventries */
    int                    *iUventries;
+
    hypre_SStructUVEntry  **Uventries;
    int                     totUentries;
 
@@ -453,6 +488,7 @@ typedef struct hypre_SStructGraph_struct
 #define hypre_SStructGraphTotUEntries(graph)    ((graph) -> totUentries)
 #define hypre_SStructGraphRefCount(graph)       ((graph) -> ref_count)
 
+
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_SStructUVEntry
  *--------------------------------------------------------------------------*/
@@ -467,6 +503,7 @@ typedef struct hypre_SStructGraph_struct
 #define hypre_SStructUVEntryToIndex(Uv, i)  ((Uv) -> Uentries[i].to_index)
 #define hypre_SStructUVEntryToVar(Uv, i)    ((Uv) -> Uentries[i].to_var)
 #define hypre_SStructUVEntryRank(Uv, i)     ((Uv) -> Uentries[i].rank)
+#define hypre_SStructUVEntryGhrank(Uv, i)     ((Uv) -> Uentries[i].ghrank)
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_SStructUEntry
@@ -476,6 +513,7 @@ typedef struct hypre_SStructGraph_struct
 #define hypre_SStructUEntryToIndex(U)  ((U) -> to_index)
 #define hypre_SStructUEntryToVar(U)    ((U) -> to_var)
 #define hypre_SStructUEntryRank(U)     ((U) -> rank)
+#define hypre_SStructUEntryGhrank(U)     ((U) -> ghrank)
 
 #endif
 
@@ -553,6 +591,9 @@ typedef struct hypre_SStructMatrix_struct
 
    int                     ref_count;
 
+     /* GEC0902   adding an object type to the matrix  */
+   int                     object_type;
+
 } hypre_SStructMatrix;
 
 /*--------------------------------------------------------------------------
@@ -579,6 +620,7 @@ typedef struct hypre_SStructMatrix_struct
 #define hypre_SStructMatrixComplex(mat)        ((mat) -> complex)
 #define hypre_SStructMatrixGlobalSize(mat)     ((mat) -> global_size)
 #define hypre_SStructMatrixRefCount(mat)       ((mat) -> ref_count)
+#define hypre_SStructMatrixObjectType(mat)       ((mat) -> object_type)
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_SStructPMatrix
@@ -638,6 +680,11 @@ typedef struct
 
    int                     ref_count;
 
+   int                    *dataindices;  /* GEC1002 array for starting index of the 
+                                         *   svector. pdataindices[varx] */
+   int                     datasize;     /* Size of the pvector = sums size of svectors */
+
+
 } hypre_SStructPVector;
 
 typedef struct hypre_SStructVector_struct
@@ -655,6 +702,13 @@ typedef struct hypre_SStructVector_struct
    /* u-vector info */
    HYPRE_IJVector          ijvector;
    hypre_ParVector        *parvector;
+
+  /* GEC10020902 pointer to big chunk of memory and auxiliary information   */
+
+   double                  *data;        /* GEC1002 pointer to chunk data  */
+   int                     *dataindices; /* GEC1002 dataindices[partx] is the starting index
+                                          of vector data for the part=partx    */
+   int                     datasize    ;  /* GEC1002 size of all data = ghlocalsize */
 
    int                     complex;      /* Is the vector complex */
    int                     global_size;  /* Total number coefficients */
@@ -679,6 +733,9 @@ typedef struct hypre_SStructVector_struct
 #define hypre_SStructVectorComplex(vec)        ((vec) -> complex)
 #define hypre_SStructVectorGlobalSize(vec)     ((vec) -> global_size)
 #define hypre_SStructVectorRefCount(vec)       ((vec) -> ref_count)
+#define hypre_SStructVectorData(vec)           ((vec) -> data )
+#define hypre_SStructVectorDataIndices(vec)    ((vec) -> dataindices)
+#define hypre_SStructVectorDataSize(vec)       ((vec) -> datasize)
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_SStructPVector
@@ -693,6 +750,8 @@ typedef struct hypre_SStructVector_struct
 #define hypre_SStructPVectorCommPkg(pvec, v)  ((pvec) -> comm_pkgs[v])
 #define hypre_SStructPVectorComplex(pvec)     ((pvec) -> complex)
 #define hypre_SStructPVectorRefCount(vec)     ((vec) -> ref_count)
+#define hypre_SStructPVectorDataIndices(pvec) ((pvec) -> dataindices  )
+#define hypre_SStructPVectorDataSize(pvec)    ((pvec) -> datasize  )
 
 #endif
 
@@ -707,6 +766,7 @@ int HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph );
 int HYPRE_SStructGridCreate( MPI_Comm comm , int ndim , int nparts , HYPRE_SStructGrid *grid_ptr );
 int HYPRE_SStructGridDestroy( HYPRE_SStructGrid grid );
 int HYPRE_SStructGridSetExtents( HYPRE_SStructGrid grid , int part , int *ilower , int *iupper );
+int HYPRE_SStructGridSetNumGhost( HYPRE_SStructGrid grid , int *num_ghost );
 int HYPRE_SStructGridSetVariables( HYPRE_SStructGrid grid , int part , int nvars , HYPRE_SStructVariable *vartypes );
 int HYPRE_SStructGridAddVariables( HYPRE_SStructGrid grid , int part , int *index , int nvars , HYPRE_SStructVariable *vartypes );
 int HYPRE_SStructGridSetNeighborBox( HYPRE_SStructGrid grid , int part , int *ilower , int *iupper , int nbor_part , int *nbor_ilower , int *nbor_iupper , int *index_map );
@@ -759,6 +819,8 @@ int hypre_BoxMapIncSize( hypre_BoxMap *map , int inc_nentries );
 int hypre_BoxMapAddEntry( hypre_BoxMap *map , hypre_Index imin , hypre_Index imax , void *info );
 int hypre_BoxMapAssemble( hypre_BoxMap *map );
 int hypre_BoxMapDestroy( hypre_BoxMap *map );
+/* GEC0902 new function for the boxmapghosts   */
+int hypre_BoxMapSetNumGhost( hypre_BoxMap *map, int *num_ghost);
 int hypre_BoxMapFindEntry( hypre_BoxMap *map , hypre_Index index , hypre_BoxMapEntry **entry_ptr );
 int hypre_BoxMapIntersect( hypre_BoxMap *map , hypre_Index ilower , hypre_Index iupper , hypre_BoxMapEntry ***entries_ptr , int *nentries_ptr );
 
@@ -779,6 +841,7 @@ int hypre_SStructVariableGetOffset( HYPRE_SStructVariable vartype , int ndim , h
 int hypre_SStructPGridCreate( MPI_Comm comm , int ndim , hypre_SStructPGrid **pgrid_ptr );
 int hypre_SStructPGridDestroy( hypre_SStructPGrid *pgrid );
 int hypre_SStructPGridSetExtents( hypre_SStructPGrid *pgrid , hypre_Index ilower , hypre_Index iupper );
+int hypre_SStructGridSetNumGhosts(hypre_SStructGrid *grid, int *num_ghost);
 int hypre_SStructPGridSetVariables( hypre_SStructPGrid *pgrid , int nvars , HYPRE_SStructVariable *vartypes );
 int hypre_SStructPGridSetPNeighbor( hypre_SStructPGrid *pgrid , hypre_Box *pneighbor_box );
 int hypre_SStructPGridAssemble( hypre_SStructPGrid *pgrid );
@@ -786,8 +849,16 @@ int hypre_SStructGridRef( hypre_SStructGrid *grid , hypre_SStructGrid **grid_ref
 int hypre_SStructGridAssembleMaps( hypre_SStructGrid *grid );
 int hypre_SStructGridAssembleNBorMaps( hypre_SStructGrid *grid );
 int hypre_SStructGridFindMapEntry( hypre_SStructGrid *grid , int part , hypre_Index index , int var , hypre_BoxMapEntry **entry_ptr );
-int hypre_SStructMapEntryGetStrides( hypre_BoxMapEntry *entry , hypre_Index strides );
-int hypre_SStructMapEntryGetGlobalRank( hypre_BoxMapEntry *entry , hypre_Index index , int *rank_ptr );
+
+int hypre_SStructMapEntryGetGlobalCSRank( hypre_BoxMapEntry *entry , hypre_Index index , int *rank_ptr );
+int hypre_SStructMapEntryGetCSRstrides( hypre_BoxMapEntry *entry , hypre_Index strides );
+
+int hypre_SStructMapEntryGetGlobalGhrank( hypre_BoxMapEntry *entry , hypre_Index index , int *rank_ptr );
+int hypre_SStructMapEntryGetGhstrides( hypre_BoxMapEntry *entry , hypre_Index strides );
+
+int hypre_SStructMapEntryGetGlobalRank( hypre_BoxMapEntry *entry , hypre_Index index , int *rank_ptr, int type );  
+int hypre_SStructMapEntryGetStrides( hypre_BoxMapEntry *entry , hypre_Index strides, int type ); 
+
 int hypre_SStructMapEntryGetProcess( hypre_BoxMapEntry *entry , int *proc_ptr );
 int hypre_SStructBoxToNBorBox( hypre_Box *box , hypre_Index index , hypre_Index nbor_index , hypre_Index coord , hypre_Index dir );
 int hypre_SStructNBorBoxToBox( hypre_Box *nbor_box , hypre_Index index , hypre_Index nbor_index , hypre_Index coord , hypre_Index dir );
@@ -849,6 +920,8 @@ int hypre_SStructVectorRef( hypre_SStructVector *vector , hypre_SStructVector **
 int hypre_SStructVectorSetConstantValues( hypre_SStructVector *vector , double value );
 int hypre_SStructVectorConvert( hypre_SStructVector *vector , hypre_ParVector **parvector_ptr );
 int hypre_SStructVectorRestore( hypre_SStructVector *vector , hypre_ParVector *parvector );
+int hypre_SStructVectorInitializeShell( hypre_SStructVector *vector);
+int hypre_SStructPVectorInitializeShell( hypre_SStructPVector *pvector);
 
 
 #ifdef __cplusplus
