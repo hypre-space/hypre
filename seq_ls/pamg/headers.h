@@ -15,6 +15,3 @@
 
 #include "general.h" 
 
-#include "amg.h"
-#include "pcg.h"
-
