@@ -1077,24 +1077,9 @@ int hypre_FreeComputePkg P((hypre_ComputePkg *compute_pkg ));
 int hypre_InitializeIndtComputations P((hypre_ComputePkg *compute_pkg , double *data , hypre_CommHandle **comm_handle_ptr ));
 int hypre_FinalizeIndtComputations P((hypre_CommHandle *comm_handle ));
 
-/* create_2d_laplacian.c */
-int main P((int argc , char *argv []));
-
-/* create_3d_laplacian.c */
-int main P((int argc , char *argv []));
-
-/* driver_internal.c */
-int main P((int argc , char *argv []));
-
 /* grow.c */
 hypre_BoxArray *hypre_GrowBoxByStencil P((hypre_Box *box , hypre_StructStencil *stencil , int transpose ));
 hypre_BoxArrayArray *hypre_GrowBoxArrayByStencil P((hypre_BoxArray *box_array , hypre_StructStencil *stencil , int transpose ));
-
-/* one_to_many.c */
-int main P((int argc , char *argv []));
-
-/* one_to_many_vector.c */
-int main P((int argc , char *argv []));
 
 /* project.c */
 int hypre_ProjectBox P((hypre_Box *box , hypre_Index index , hypre_Index stride ));
@@ -1190,6 +1175,8 @@ void HYPRE_FreeStructGridVoidPtr P((void *argptr ));
 int HYPRE_FreeStructGridPush P((HYPRE_StructGridArray grid ));
 void HYPRE_SetStructGridExtentsVoidPtr P((void *argptr ));
 int HYPRE_SetStructGridExtentsPush P((HYPRE_StructGridArray grid , int *ilower , int *iupper ));
+void HYPRE_SetStructGridPeriodicVoidPtr P((void *argptr ));
+int HYPRE_SetStructGridPeriodicPush P((HYPRE_StructGridArray grid , int *periodic ));
 void HYPRE_AssembleStructGridVoidPtr P((void *argptr ));
 int HYPRE_AssembleStructGridPush P((HYPRE_StructGridArray grid ));
 void HYPRE_NewStructMatrixVoidPtr P((void *argptr ));

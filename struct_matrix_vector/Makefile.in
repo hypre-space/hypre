@@ -16,9 +16,6 @@ VPATH = @srcdir@
 
 CC = @CC@
 
-M4 = m4
-
-
 C_COMPILE_FLAGS=@CFLAGS@
 CXX_COMPILE_FLAGS=@CXXFLAGS@
 F77_COMPILE_FLAGS=@F77FLAGS@
@@ -98,33 +95,14 @@ install: all
 	@cp -f libHYPRE_*.a $$HYPRE_INSTALL_DIR/lib
 
 clean:
-	@rm -f *.o *.dxx
+	@rm -f *.o
 
 veryclean: clean
 	@rm -f libHYPRE_*.a
-	@rm -fr Docs
-	@rm -f DevManual.tex DevManual.ps
-	@rm -f DevManual.dvi DevManual.aux DevManual.log
 
 ##################################################################
 # Rules
 ##################################################################
-
-one_to_many: one_to_many.o libHYPRE_mv.a
-	@echo  "Linking" $@ "... "
-	${CC} -o one_to_many one_to_many.o ${LFLAGS}
-
-one_to_many_vector: one_to_many_vector.o libHYPRE_mv.a
-	@echo  "Linking" $@ "... "
-	${CC} -o one_to_many_vector one_to_many_vector.o ${LFLAGS}
-
-create_2d_laplacian: create_2d_laplacian.o libHYPRE_mv.a
-	@echo  "Linking" $@ "... "
-	${CC} -o create_2d_laplacian create_2d_laplacian.o ${LFLAGS}
-
-create_3d_laplacian: create_3d_laplacian.o libHYPRE_mv.a
-	@echo  "Linking" $@ "... "
-	${CC} -o create_3d_laplacian create_3d_laplacian.o ${LFLAGS}
 
 libHYPRE_mv.a: ${OBJS}
 	@echo  "Building $@ ... "
@@ -132,20 +110,6 @@ libHYPRE_mv.a: ${OBJS}
 	${RANLIB} $@
 
 ${OBJS}: ${HEADERS}
-
-box_pthreads.h: box_pthreads.m4 pthreads_c_definitions.m4
-	${M4} -DTHREADED=1 box_pthreads.m4 > box_pthreads.h
-
-docs: docs_html docs_tex
-
-docs_html: 
-	@doc++ -d Docs DevManual.dxx
-
-docs_tex: 
-	@doc++ -t -o DevManual.tex DevManual.dxx
-	@latex DevManual
-	@latex DevManual
-	@dvips DevManual -o
 
 ##################################################################
 # Generic rules
