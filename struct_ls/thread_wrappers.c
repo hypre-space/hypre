@@ -1,7 +1,7 @@
 
 #ifdef HYPRE_USE_PTHREADS
 #include "HYPRE_ls.h"
-
+#include "utilities.h"
 
 /*----------------------------------------------------------------
  * HYPRE_StructPCGInitialize thread wrappers
