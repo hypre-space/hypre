@@ -254,7 +254,7 @@ static void MatrixReadMaster(Matrix *mat, char *filename)
     double val[10000];
 
     char line[100];
-    int dummy, oldrow;
+    int oldrow;
 
     MPI_Request request;
     MPI_Status  status;
@@ -266,7 +266,13 @@ static void MatrixReadMaster(Matrix *mat, char *filename)
     assert(file != NULL);
 
     fgets(line, 100, file);
-    ret = sscanf(line, "%d %d %d", &num_rows, &dummy, &dummy); 
+#ifdef EMSOLVE
+    ret = sscanf(line, "%*d %d %*d %*d", &num_rows);
+    for (row=0; row<num_rows; row++)
+        fscanf(file, "%*d");
+#else
+    ret = sscanf(line, "%d %*d %*d", &num_rows);
+#endif
 
     offset = ftell(file);
     fscanf(file, "%d %d %lf", &row, &col, &value);
@@ -292,7 +298,13 @@ static void MatrixReadMaster(Matrix *mat, char *filename)
     rewind(file);
 
     fgets(line, 100, file);
-    ret = sscanf(line, "%d %d %d", &num_rows, &dummy, &dummy); 
+#ifdef EMSOLVE
+    ret = sscanf(line, "%*d %d %*d %*d", &num_rows);
+    for (row=0; row<num_rows; row++)
+        fscanf(file, "%*d");
+#else
+    ret = sscanf(line, "%d %*d %*d", &num_rows);
+#endif
 
     ret = fscanf(file, "%d %d %lf", &row, &col, &value);
     curr_row = row;
@@ -428,7 +440,7 @@ void RhsRead(double *rhs, Matrix *mat, char *filename)
     FILE *file;
     MPI_Status status;
     int mype, npes;
-    int num_rows, num_local, pe, i, dummy, converted;
+    int num_rows, num_local, pe, i, converted;
     double *buffer = NULL;
     int buflen = 0;
     char line[100];
@@ -448,7 +460,7 @@ void RhsRead(double *rhs, Matrix *mat, char *filename)
     assert(file != NULL);
 
     fgets(line, 100, file);
-    converted = sscanf(line, "%d %d", &num_rows, &dummy);
+    converted = sscanf(line, "%d %*d", &num_rows);
     assert(num_rows == mat->end_rows[npes-1]);
 
     /* Read own rows first */
@@ -524,7 +536,10 @@ static void GetExternalIndices(Matrix *mat, int *lenp,
     shell_sort(num_external, local_to_global);
 
     /* Redo the hash table for the sorted indices */
-    HashReset(hash, num_external, local_to_global);
+    /* HashReset(hash, num_external, local_to_global); */
+    for (i=0; i<hash->size; i++)
+        hash->keys[i] = HASH_EMPTY;
+
     for (i=0; i<num_external; i++)
     {
         index = HashInsert(hash, local_to_global[i], &inserted);
