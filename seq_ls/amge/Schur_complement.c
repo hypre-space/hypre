@@ -67,7 +67,7 @@ int hypre_AMGeSchurComplement(int *i_domain_chord,
 
   i_dof_index = hypre_CTAlloc(int, num_dofs);
 
-  for (i=0; i < num_domains; i++)
+  for (i=0; i < num_dofs; i++)
     i_dof_index[i] = -1;
   for (i=0; i < num_domains; i++)
     {
