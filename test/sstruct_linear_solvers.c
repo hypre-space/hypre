@@ -291,10 +291,10 @@ main( int   argc,
    Niupper = hypre_CTAlloc(int*, nblocks);
    for (i = 0; i < nblocks; i++)
    {
-      Cilower[i] = hypre_CTAlloc(int, dim);
-      Ciupper[i] = hypre_CTAlloc(int, dim);
-      Nilower[i] = hypre_CTAlloc(int, dim);
-      Niupper[i] = hypre_CTAlloc(int, dim);
+      Cilower[i] = hypre_CTAlloc(int, 3);
+      Ciupper[i] = hypre_CTAlloc(int, 3);
+      Nilower[i] = hypre_CTAlloc(int, 3);
+      Niupper[i] = hypre_CTAlloc(int, 3);
    }
 
    /* compute p,q,r from P,Q,R and myid */
@@ -553,6 +553,56 @@ main( int   argc,
                                          NCstencil_size, NCstencil_indexes,
                                          NCvalues);
 #else
+         i = 0;
+         j = 0;
+         for (iz = Cilower[block][2]; iz <= Ciupper[block][2]; iz++)
+         {
+            for (iy = Cilower[block][1]; iy <= Ciupper[block][1]; iy++)
+            {
+               for (ix = Cilower[block][0]; ix <= Ciupper[block][0]; ix++)
+               {
+                  index0[0] = ix;
+                  index0[1] = iy;
+                  index0[2] = iz;
+
+                  HYPRE_SStructMatrixSetValues(A, part, index0, 0,
+                                               CCstencil_size,
+                                               CCstencil_indexes,
+                                               &CCvalues[i]);
+                  HYPRE_SStructMatrixSetValues(A, part, index0, 0,
+                                               CNstencil_size,
+                                               CNstencil_indexes,
+                                               &CNvalues[j]);
+                  i += CCstencil_size;
+                  j += CNstencil_size;
+               }
+            }
+         }
+         i = 0;
+         j = 0;
+         for (iz = Nilower[block][2]; iz <= Niupper[block][2]; iz++)
+         {
+            for (iy = Nilower[block][1]; iy <= Niupper[block][1]; iy++)
+            {
+               for (ix = Nilower[block][0]; ix <= Niupper[block][0]; ix++)
+               {
+                  index0[0] = ix;
+                  index0[1] = iy;
+                  index0[2] = iz;
+
+                  HYPRE_SStructMatrixSetValues(A, part, index0, 1,
+                                               NNstencil_size,
+                                               NNstencil_indexes,
+                                               &NNvalues[i]);
+                  HYPRE_SStructMatrixSetValues(A, part, index0, 1,
+                                               NCstencil_size,
+                                               NCstencil_indexes,
+                                               &NCvalues[j]);
+                  i += NNstencil_size;
+                  j += NCstencil_size;
+               }
+            }
+         }
 #endif
       }
    }
