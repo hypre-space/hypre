@@ -2961,7 +2961,7 @@ unset ac_cv_lib_$ac_lib_var
       
      
    if test -z "$CXXOPT"; then
-      CXXOPT="-0"
+      CXXOPT="-O"
    fi
    
 
@@ -3401,7 +3401,7 @@ done
 
      
    if test -z "$COPT"; then
-      COPT="-O"
+      COPT="-O3 -qstrict"
    fi
    
 
@@ -3413,7 +3413,7 @@ done
 
      
    if test -z "$FOPT"; then
-      FOPT="-O"
+      FOPT="-O3 -qstrict"
    fi
    
 
@@ -3425,7 +3425,7 @@ done
  
      
    if test -z "$CXXOPT"; then
-      CXXOPT="-0"
+      CXXOPT="-O3 -qstrict"
    fi
    
 

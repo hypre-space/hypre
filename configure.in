@@ -387,7 +387,7 @@ then
        CASC_SET_FDEBUG()
      fi
       
-     CASC_SET_CXXOPT(-0)
+     CASC_SET_CXXOPT(-O)
      CASC_SET_CXXDEBUG(-g)
    ;;
 
@@ -421,11 +421,11 @@ then
        fi
      fi
 
-     CASC_SET_COPT(-O)
+     CASC_SET_COPT(-O3 -qstrict)
      CASC_SET_CDEBUG(-g)
-     CASC_SET_FOPT(-O)
+     CASC_SET_FOPT(-O3 -qstrict)
      CASC_SET_FDEBUG(-g) 
-     CASC_SET_CXXOPT(-0)
+     CASC_SET_CXXOPT(-O3 -qstrict)
      CASC_SET_CXXDEBUG(-g)
      CFLAGS="$CFLAGS -qmaxmem=8192"
 
