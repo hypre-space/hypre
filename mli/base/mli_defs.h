@@ -32,9 +32,8 @@
 #define   MLI_SOLVER_MLS_ID       306
 #define   MLI_SOLVER_SUPERLU_ID   307
 
-#define   MLI_AMGSA_ID            701
-#define   MLI_AMGRS_ID            702
-#define   MLI_AMGSA_CALIB_ID      703
+#define   MLI_METHOD_AMGSA_ID     701
+#define   MLI_METHOD_AMGRS_ID     702
 
 #endif
 

@@ -50,10 +50,9 @@ class MLI
    double         tolerance;        /* for convergence check              */
    int            max_iterations;   /* termination criterion              */
    int            curr_iter;        /* current iteration (within ML)      */
-   int            method;           /* which multilevel method to use     */
    MLI_OneLevel   **one_levels;     /* store information for each level   */
    MLI_Solver     *coarse_solver;   /* temporarily store the coarse solver*/
-   MLI_Method     *method_data;     /* data object for a given method     */
+   MLI_Method     *method_ptr;      /* data object for a given method     */
    int            assembled;        /* indicate MG hierarchy is assembled */
    double         solve_time;
    double         build_time;
@@ -83,8 +82,7 @@ public :
    MLI_OneLevel *getOneLevelObject( int level );
    MLI_Matrix   *getSystemMatrix( int level );
    int          resetSystemMatrix( int level );
-   int          resetMethod();
-   MLI_Method   *getMethod()           { return method_data; }
+   MLI_Method   *getMethod()           { return method_ptr; }
 };
 
 #endif

@@ -34,7 +34,6 @@ MLI::MLI( MPI_Comm comm )
    num_levels     = 40;
    coarsest_level = 0;
    output_level   = 1;
-   method         = MLI_NONE;
    assembled      = MLI_FALSE;
    tolerance      = 1.0e-6;
    max_iterations = 20;
@@ -48,7 +47,7 @@ MLI::MLI( MPI_Comm comm )
       if ( i > 0 )              one_levels[i]->setPrevLevel(one_levels[i-1]);
    }
    coarse_solver = NULL;
-   method_data   = NULL;
+   method_ptr    = NULL;
    solve_time    = 0.0;
    build_time    = 0.0;
 } 
@@ -66,7 +65,7 @@ MLI::~MLI()
    for ( int i = 0; i < max_levels; i++ ) delete one_levels[i];
    delete [] one_levels;
    if ( coarse_solver != NULL ) delete coarse_solver;
-   if ( method_data   != NULL ) delete method_data;
+   if ( method_ptr    != NULL ) delete method_ptr;
 }
 
 /*****************************************************************************
@@ -217,25 +216,8 @@ int MLI::setMethod( MLI_Method *object )
    cout << "MLI::setMethod = " << object->getName() << endl;
    cout.flush();
 #endif
-   if ( !strcmp( object->getName(), "MLI_AMGSA" ) )
-   {
-      method      = MLI_AMGSA_ID;
-      method_data = object;
-      return 0;
-   }
-   else if ( !strcmp( object->getName(), "MLI_AMGSA_CALIB" ) )
-   {
-      method      = MLI_AMGSA_CALIB_ID;
-      method_data = object;
-      return 0;
-   }
-   else
-   {
-      cout << "MLI::setMethod : method not supported." << endl;
-      method      = -1; 
-      method_data = NULL; 
-      return 1;
-   }
+   method_ptr = object;
+   return 0;
 }
 
 /*****************************************************************************
@@ -244,31 +226,11 @@ int MLI::setMethod( MLI_Method *object )
 
 int MLI::setup()
 {
-   int nlevels, status=1;
-
-#ifdef MLI_DEBUG_DETAILED
-   cout << "MLI::setup - method = " << method << endl;
-   cout.flush();
-#endif
+   int nlevels, status=0;
 
    curr_iter  = 0;
    build_time = MLI_Utils_WTime();
-   switch ( method )
-   {
-      case MLI_AMGSA_ID : 
-           nlevels = method_data->setup(this);
-           status  = 0;
-           break;
-      case MLI_AMGSA_CALIB_ID : 
-           nlevels = method_data->setup(this);
-           status  = 0;
-           break;
-      default :        
-           cout << "MLI::setup : method not supported." << endl;
-           cout.flush();
-           status = 1;
-           break;
-   }
+   nlevels    = method_ptr->setup(this);
    build_time = MLI_Utils_WTime() - build_time;
    for (int i = 0; i < nlevels; i++) status += one_levels[i]->setup();
    return status;
@@ -409,21 +371,6 @@ int MLI::resetSystemMatrix( int level  )
       cout << "MLI::resetSystemMatrix ERROR : wrong level = " << level << endl;
       exit(1);
    }
-   return 0;
-}
-
-/*****************************************************************************
- * reset ML method 
- *---------------------------------------------------------------------------*/
-
-int MLI::resetMethod()
-{
-#ifdef MLI_DEBUG_DETAILED
-   cout << "MLI::resetMethod" << endl;
-   cout.flush();
-#endif
-   method      = -1;
-   method_data = NULL; 
    return 0;
 }
 
