@@ -500,7 +500,7 @@ hypre_DestroyMatvecCommPkg(hypre_CommPkg *comm_pkg)
 }
 
 int
-BuildCSRMatrixMPIDataType(int num_nonzeros, int num_rows,
+hypre_BuildCSRMatrixMPIDataType(int num_nonzeros, int num_rows,
 			double *a_data, int *a_i, int *a_j, 
 			MPI_Datatype *csr_matrix_datatype)
 {
@@ -523,5 +523,30 @@ BuildCSRMatrixMPIDataType(int num_nonzeros, int num_rows,
    MPI_Type_struct(3,block_lens,displ,types,csr_matrix_datatype);
    MPI_Type_commit(csr_matrix_datatype);
 
+   return ierr;
+}
+
+int
+hypre_BuildCSRJDataType(int num_nonzeros,
+                  double *a_data, int *a_j,
+                  MPI_Datatype *csr_jdata_datatype)
+{
+   int          block_lens[2];
+   MPI_Aint     displs[2];
+   MPI_Datatype types[2];
+   int          ierr = 0;
+ 
+   block_lens[0] = num_nonzeros;
+   block_lens[1] = num_nonzeros;
+ 
+   types[0] = MPI_DOUBLE;
+   types[1] = MPI_INT;
+ 
+   MPI_Address(a_data, &displs[0]);
+   MPI_Address(a_j, &displs[1]);
+ 
+   MPI_Type_struct(2,block_lens,displs,types,csr_jdata_datatype);
+   MPI_Type_commit(csr_jdata_datatype);
+ 
    return ierr;
 }
