@@ -175,6 +175,12 @@ int  kinc = (hypre_IndexZ(stride)*\
              hypre_IndexY(loop_size)*\
              hypre_IndexY(stride)*hypre_BoxSizeX(data_box))
 
+/*-------------------------------------------------------------------------
+ * Threaded versions of looping macros are in box_pthreads.h.
+ *-------------------------------------------------------------------------*/
+
+#ifndef HYPRE_USE_PTHREADS
+
 #define hypre_BoxLoop0(i, j, k, loop_size,\
                        body)\
 {\
@@ -334,5 +340,7 @@ int  kinc = (hypre_IndexZ(stride)*\
       i4 += hypre__kinc4;\
    }\
 }
+
+#endif  /* ifndef HYPRE_USE_PTHREADS */
 
 #endif

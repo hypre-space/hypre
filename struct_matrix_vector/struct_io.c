@@ -11,6 +11,9 @@
  * Functions for scanning and printing "box-dimensioned" data.
  *
  *****************************************************************************/
+#ifdef HYPRE_USE_PTHREADS
+#undef HYPRE_USE_PTHREADS
+#endif
 
 #include "headers.h"
 

@@ -17,8 +17,15 @@ sinclude(pthreads_c_definitions.m4)
 
 #ifndef hypre_BOX_PTHREADS_HEADER
 #define hypre_BOX_PTHREADS_HEADER
+
+#ifdef HYPRE_USE_PTHREADS
+
 #include <pthread.h>
 #include "threading.h"
+
+
+extern int hypre_thread_counter;
+extern int iteration_counter[3];
 
 /*--------------------------------------------------------------------------
  * Threaded Looping macros:
@@ -36,9 +43,6 @@ sinclude(pthreads_c_definitions.m4)
 #ifndef MAX_KSIZE
 #define MAX_KSIZE 5
 #endif
-
-int hypre_thread_counter;
-int iteration_counter[3]={0,0,0};
 
 #define hypre_ChunkLoopExternalSetup(hypre__nx, hypre__ny, hypre__nz)\
    int hypre__cx = min(hypre__nx / 4 + !!(hypre__nx % 4), MAX_ISIZE);\
@@ -79,7 +83,7 @@ int iteration_counter[3]={0,0,0};
       else\
          finish[2] = hypre__nz
 
-#define hypre_BoxLoop0_pthread(i, j, k,loop_size,\
+#define hypre_BoxLoop0(i, j, k,loop_size,\
                        body)\
 {\
    int hypre__nx = hypre_IndexX(loop_size);\
@@ -124,7 +128,7 @@ ifelse(<<
 }
 >>)
 
-#define hypre_BoxLoop1_pthread(i, j, k, loop_size,\
+#define hypre_BoxLoop1(i, j, k, loop_size,\
                        data_box1, start1, stride1, i1,\
                        body)\
 {\
@@ -186,7 +190,7 @@ ifelse(<<
 }
 >>)
 
-#define hypre_BoxLoop2_pthread(i, j, k, loop_size,\
+#define hypre_BoxLoop2(i, j, k, loop_size,\
                        data_box1, start1, stride1, i1,\
                        data_box2, start2, stride2, i2,\
                        body)\
@@ -267,7 +271,7 @@ ifelse(<<
 }
 >>)
 
-#define hypre_BoxLoop3_pthread(i, j, k, loop_size,\
+#define hypre_BoxLoop3(i, j, k, loop_size,\
                        data_box1, start1, stride1, i1,\
                        data_box2, start2, stride2, i2,\
                        data_box3, start3, stride3, i3,\
@@ -366,7 +370,7 @@ ifelse(<<
 }
 >>)
 
-#define hypre_BoxLoop4_pthread(i, j, k, loop_size,\
+#define hypre_BoxLoop4(i, j, k, loop_size,\
                        data_box1, start1, stride1, i1,\
                        data_box2, start2, stride2, i2,\
                        data_box3, start3, stride3, i3,\
@@ -483,6 +487,7 @@ ifelse(<<
 }
 >>)
 
+#endif
 
 #endif
 

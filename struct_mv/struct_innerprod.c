@@ -14,6 +14,9 @@
 
 #include "headers.h"
 
+#ifdef HYPRE_USE_PTHREADS
+#include "box_pthreads.h"
+#endif
 /*--------------------------------------------------------------------------
  * hypre_StructInnerProd
  *--------------------------------------------------------------------------*/
@@ -60,6 +63,7 @@ hypre_StructInnerProd(  hypre_StructVector *x,
          yp = hypre_StructVectorBoxData(y, i);
 
          hypre_GetBoxSize(box, loop_size);
+
          hypre_BoxLoop2(loopi, loopj, loopk, loop_size,
                         x_data_box, start, unit_stride, xi,
                         y_data_box, start, unit_stride, yi,

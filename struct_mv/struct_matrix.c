@@ -339,19 +339,11 @@ hypre_InitializeStructMatrixData( hypre_StructMatrix *matrix,
             start = hypre_BoxIMin(data_box);
 
             hypre_GetBoxSize(data_box, loop_size);
-#ifdef HYPRE_USE_PTHREADS
-            hypre_BoxLoop1_pthread(loopi, loopj, loopk, loop_size,
-                           data_box, start, stride, datai,
-                           {
-                              datap[datai] = 1.0;
-                           });
-#else
             hypre_BoxLoop1(loopi, loopj, loopk, loop_size,
                            data_box, start, stride, datai,
                            {
                               datap[datai] = 1.0;
                            });
-#endif
 
          }
       }
@@ -499,21 +491,12 @@ hypre_SetStructMatrixBoxValues( hypre_StructMatrix *matrix,
                                                     stencil_indices[s]);
 
                   hypre_GetBoxSize(box, loop_size);
-#ifdef HYPRE_USE_PTHREADS
-                  hypre_BoxLoop2_pthread(loopi, loopj, loopk, loop_size,
-                                 data_box, data_start, data_stride, datai,
-                                 dval_box, dval_start, dval_stride, dvali,
-                                 {
-                                    datap[datai] = values[dvali];
-                                 });
-#else
                   hypre_BoxLoop2(loopi, loopj, loopk, loop_size,
                                  data_box, data_start, data_stride, datai,
                                  dval_box, dval_start, dval_stride, dvali,
                                  {
                                     datap[datai] = values[dvali];
                                  });
-#endif
                   hypre_IndexD(dval_start, 0) ++;
                }
             }
