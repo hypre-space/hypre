@@ -5,10 +5,9 @@
 somewhat blurry (discussed 
 below), and \hypre{} takes advantage of this property
 to unify them into a single type: "Operator".
-We can unify much of 
-the discussion of solvers and preconditioners under the heading of Operators,
-and then specialize those 
-discussions.
+We will discuss the common aspects of
+solvers and preconditioners under the heading of Operators,
+and then consider special characteristics of each separately.
 
 The defining characteristics of Operators are that they take a vector as input
 and return another vector as 
@@ -27,7 +26,28 @@ Thus,
 use of matrices, solvers, and 
 preconditioners is done through the \code{Apply} function.
 
-\section{Preconditioners are Solvers}
+Operators also have auxiliary uses that are available for more
+expert users.
+Operators can be "multiplied" or "composed" to form a new operator.
+For example, given Operator A and Operator B, the result of composing
+them is an operator C whose action on a vector x is equivalent to
+applying B to x, and then applying A to the result, i.e. C(x)=A(B(x)).
+All Operators support the Compose function. 
+Most support it simply by chaining \code{Apply} functions together according
+to the definition, though it is possible that the equivalent of matrix 
+multiplication is implemented in certain cases.
+
+The converse of the composition function for Operators is the Split function.
+Only the Operators that also support the OperatorSplittable interface support
+this function.
+The Split function returns two Operators whose composition is equal to 
+the original Operator.
+Typically, Operators that are formed through a Compose function are Splittable.
+The other major use of Splittable Operators is for preconditioners that can be 
+used as ``split preconditioners'', such as incomplete factorization methods and
+factorized sparse approximate inverse functions.
+
+\note{Preconditioners are Solvers}
 
 Users of \hypre{} will quickly notice that there is
 no class or interface called 
@@ -50,17 +70,20 @@ solvers and matrices, it is
 straightforward to use matrices as preconditioners, should a direct
 approximation to the inverse exist. 
 
-\section{Setup}
+\section{Setup of Solvers}
 
 Most components that correspond to the traditional "matrix", as well as
 some solvers in which the 
 construction of the underlying matrix is handled by the solver for the user,
 are set up through one or more 
 of the conceptual interfaces discussed in a later chapter. Here we will
-concentrate on other ways to 
-construct Operators.
+concentrate on other interfaces for
+constructing Operators.
 
-\subsection{Building a Krylov Solver with an Operator}
+\subsection{The SolverBuilder interface}
+
+The main function in the SolverBuilder interface
+
 
 Various Krylov solvers are included in \hypre{}.
 Such methods are very flexible in that they can be used to attempt
