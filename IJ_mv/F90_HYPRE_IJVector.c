@@ -142,11 +142,11 @@ hypre_F90_IFACE(hypre_setijveclocalcomps)( long int *vector,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_setijveclocalcompsinbk)( long int *vector,
-                                               int      *glob_vec_start,
-                                               int      *glob_vec_stop,
-                                               double   *value,
-                                               int      *ierr            )
+hypre_F90_IFACE(hypre_setijveclocalcompsinblock)( long int *vector,
+                                                  int      *glob_vec_start,
+                                                  int      *glob_vec_stop,
+                                                  double   *value,
+                                                  int      *ierr            )
 {
    *ierr = (int) ( HYPRE_SetIJVectorLocalComponentsInBlock(
                          (HYPRE_IJVector) *vector,
@@ -180,12 +180,12 @@ hypre_F90_IFACE(hypre_insertijveclocalcomps)( long int *vector,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_insertijveclocalcompsinblk)( long int *vector,
-                                                   int      *glob_vec_start,
-                                                   int      *glob_vec_stop,
-                                                   int      *value_indices,
-                                                   double   *values,
-                                                   int      *ierr            )
+hypre_F90_IFACE(hypre_insertijveclocalcompsinbl)( long int *vector,
+                                                  int      *glob_vec_start,
+                                                  int      *glob_vec_stop,
+                                                  int      *value_indices,
+                                                  double   *values,
+                                                  int      *ierr            )
 {
    *ierr = (int) ( HYPRE_InsertIJVectorLocalComponentsInBlock(
                           (HYPRE_IJVector) *vector,
@@ -220,7 +220,7 @@ hypre_F90_IFACE(hypre_addtoijveclocalcomps)( long int *vector,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_addtoijveclocalcompsinblk)( long int *vector,
+hypre_F90_IFACE(hypre_addtoijveclocalcompsinblo)( long int *vector,
                                                   int      *glob_vec_start,
                                                   int      *glob_vec_stop,
                                                   int      *value_indices,
@@ -275,4 +275,37 @@ hypre_F90_IFACE(hypre_getijveclocalcompsinblock)( long int *vector,
                         (double *)        values          ) );
 
 }
+
+/*--------------------------------------------------------------------------
+ * HYPRE_GetIJVectorLocalStorageType
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_getijveclocalstoragetype)( long int *vector,
+                                                 int      *type,
+                                                 int      *ierr    )
+{
+   *ierr = (int) (HYPRE_GetIJVectorLocalStorageType(
+                        (HYPRE_IJVector) *vector,
+                        (int *)           type    ) );
+
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_GetIJVectorLocalStorage
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_getijveclocalstorage)( long int *vector,
+                                             long int *local_storage,
+                                             int      *ierr           )
+{
+   *ierr = 0;
+
+   *local_storage = (long int) (HYPRE_GetIJVectorLocalStorage(
+                                      (HYPRE_IJVector) *vector ) );
+
+   if (!(*local_storage)) *ierr = 1;
+}
+
 

@@ -264,13 +264,15 @@ void hypre_F90_IFACE P((int hypre_distributeijvector ));
 void hypre_F90_IFACE P((int hypre_setijvectorlocalstoragety ));
 void hypre_F90_IFACE P((int hypre_setijvectorlocalsize ));
 void hypre_F90_IFACE P((int hypre_setijveclocalcomps ));
-void hypre_F90_IFACE P((int hypre_setijveclocalcompsinbk ));
+void hypre_F90_IFACE P((int hypre_setijveclocalcompsinblock ));
 void hypre_F90_IFACE P((int hypre_insertijveclocalcomps ));
-void hypre_F90_IFACE P((int hypre_insertijveclocalcompsinblk ));
+void hypre_F90_IFACE P((int hypre_insertijveclocalcompsinbl ));
 void hypre_F90_IFACE P((int hypre_addtoijveclocalcomps ));
-void hypre_F90_IFACE P((int hypre_addtoijveclocalcompsinblk ));
+void hypre_F90_IFACE P((int hypre_addtoijveclocalcompsinblo ));
 void hypre_F90_IFACE P((int hypre_getijveclocalcomps ));
 void hypre_F90_IFACE P((int hypre_getijveclocalcompsinblock ));
+void hypre_F90_IFACE P((int hypre_getijveclocalstoragetype ));
+void hypre_F90_IFACE P((int hypre_getijveclocalstorage ));
 
 /* HYPRE_IJMatrix.c */
 int HYPRE_NewIJMatrix P((MPI_Comm comm , HYPRE_IJMatrix *in_matrix_ptr , int global_m , int global_n ));
@@ -386,9 +388,11 @@ int hypre_SetIJMatrixTotalSizePETSc P((hypre_IJMatrix *matrix , int size ));
 
 /* hypre_IJVector_parcsr.c */
 int hypre_NewIJVectorPar P((hypre_IJVector *vector ));
+int hypre_FreeIJVectorPar P((hypre_IJVector *vector ));
 int hypre_SetIJVectorParPartitioning P((hypre_IJVector *vector , int *partitioning ));
 int hypre_SetIJVectorParLocalPartitioning P((hypre_IJVector *vector , int vec_start , int vec_stop ));
 int hypre_InitializeIJVectorPar P((hypre_IJVector *vector ));
+int hypre_DistributeIJVectorPar P((hypre_IJVector *vector , int *vec_starts ));
 int hypre_SetIJVectorParLocalComponents P((hypre_IJVector *vector , int num_values , int *glob_vec_indices , double value ));
 int hypre_SetIJVectorParLocalComponentsInBlock P((hypre_IJVector *vector , int glob_vec_index_start , int glob_vec_index_stop , double value ));
 int hypre_InsertIJVectorParLocalComponents P((hypre_IJVector *vector , int num_values , int *glob_vec_indices , int *value_indices , double *values ));
@@ -397,8 +401,6 @@ int hypre_AddToIJVectorParLocalComponents P((hypre_IJVector *vector , int num_va
 int hypre_AddToIJVectorParLocalComponentsInBlock P((hypre_IJVector *vector , int glob_vec_index_start , int glob_vec_index_stop , int *value_indices , double *values ));
 int hypre_GetIJVectorParLocalComponents P((hypre_IJVector *vector , int num_values , int *glob_vec_indices , int *value_indices , double *values ));
 int hypre_GetIJVectorParLocalComponentsInBlock P((hypre_IJVector *vector , int glob_vec_index_start , int glob_vec_index_stop , int *value_indices , double *values ));
-int hypre_DistributeIJVectorPar P((hypre_IJVector *vector , int *vec_starts ));
-int hypre_FreeIJVectorPar P((hypre_IJVector *vector ));
 
 /* qsort.c */
 void swap P((int *v , int i , int j ));

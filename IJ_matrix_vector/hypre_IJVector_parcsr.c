@@ -19,7 +19,8 @@
  *
  * hypre_NewIJVectorPar
  *
- * creates ParVector if necessary,
+ * creates ParVector if necessary, and leaves a pointer to it in the
+ * hypre_IJVector local_storage
  *
  *****************************************************************************/
 int
@@ -44,6 +45,19 @@ hypre_NewIJVectorPar(hypre_IJVector *vector)
 
 /******************************************************************************
  *
+ * hypre_FreeIJVectorPar
+ *
+ * frees ParVector local storage of an IJVectorPar 
+ *
+ *****************************************************************************/
+int
+hypre_FreeIJVectorPar(hypre_IJVector *vector)
+{
+   return hypre_DestroyParVector(hypre_IJVectorLocalStorage(vector));
+}
+
+/******************************************************************************
+ *
  * hypre_SetIJVectorParPartitioning
  *
  * initializes IJVectorPar ParVector partitioning
@@ -56,6 +70,8 @@ hypre_SetIJVectorParPartitioning(hypre_IJVector *vector,
 {
    int ierr = 0;
    hypre_ParVector *par_vector = hypre_IJVectorLocalStorage(vector);
+
+   if (!partitioning) ++ierr;
 
    hypre_ParVectorPartitioning(par_vector) = partitioning;
 
@@ -84,15 +100,23 @@ hypre_SetIJVectorParLocalPartitioning(hypre_IJVector *vector,
    MPI_Comm_size(comm, &num_procs);
    MPI_Comm_rank(comm, &my_id);
 
-   if (!partitioning)
+   if (vec_start > vec_stop) ++ierr;
+
+   if (!ierr)
    {
-      partitioning = hypre_CTAlloc(int, num_procs);
+      if (!partitioning)
+         partitioning = hypre_CTAlloc(int, num_procs);
+
+      if (partitioning)
+      {   
+         partitioning[my_id] = vec_start;
+         partitioning[my_id+1] = vec_stop + 1;
+
+         hypre_ParVectorPartitioning(par_vector) = partitioning;
+      }
+      else
+         ++ierr;
    };
-
-   partitioning[my_id] = vec_start;
-   partitioning[my_id+1] = vec_stop + 1;
-
-   hypre_ParVectorPartitioning(par_vector) = partitioning;
 
    return ierr;
 }
@@ -117,10 +141,46 @@ hypre_InitializeIJVectorPar(hypre_IJVector *vector)
 
    MPI_Comm_rank(comm,&my_id);
   
-   hypre_VectorSize(local_vector) = partitioning[my_id+1] -
-                                    partitioning[my_id];
+   if (partitioning)
+   {
+      hypre_VectorSize(local_vector) = partitioning[my_id+1] -
+                                       partitioning[my_id];
+      ierr += hypre_InitializeParVector(par_vector);
+   }
+   else
+      ++ierr;
 
-   ierr += hypre_InitializeParVector(par_vector);
+   return ierr;
+}
+
+/******************************************************************************
+ *
+ * hypre_DistributeIJVectorPar
+ *
+ * takes an IJVector generated for one processor and distributes it
+ * across many processors according to vec_starts,
+ * if vec_starts is NULL, it distributes them evenly?
+ *
+ *****************************************************************************/
+int
+hypre_DistributeIJVectorPar(hypre_IJVector *vector,
+			    int	           *vec_starts)
+{
+   int ierr = 0;
+
+   hypre_ParVector *old_vector = hypre_IJVectorLocalStorage(vector);
+   hypre_ParVector *par_vector;
+   
+   if (!old_vector) ++ierr;
+
+   par_vector = hypre_VectorToParVector(hypre_ParVectorComm(old_vector),
+		                        hypre_ParVectorLocalVector(old_vector),
+                                        vec_starts);
+   if (!par_vector) ++ierr;
+
+   ierr = hypre_DestroyParVector(old_vector);
+
+   hypre_IJVectorLocalStorage(vector) = par_vector;
 
    return ierr;
 }
@@ -150,14 +210,21 @@ hypre_SetIJVectorParLocalComponents(hypre_IJVector *vector,
 
    MPI_Comm_rank(comm, &my_id);
 
+   if (!par_vector) ++ierr;
+   if (!partitioning) ++ierr;
+   if (!local_vector) ++ierr;
+
    vec_start = partitioning[my_id];
    vec_stop  = partitioning[my_id+1];
    
+   if (vec_start > vec_stop) ++ierr;
+
 /* Determine whether *glob_vec_indices points to local indices only */
    for (i = 0; i < num_values; i++)
-   { ierr += (glob_vec_indices[i] >= vec_start);
-     ierr += (glob_vec_indices[i] <  vec_stop);
-   }
+   {
+      ierr += (glob_vec_indices[i] >= vec_start);
+      ierr += (glob_vec_indices[i] <  vec_stop);
+   };
     
    if (!ierr)
    {
@@ -196,6 +263,10 @@ hypre_SetIJVectorParLocalComponentsInBlock(hypre_IJVector *vector,
    hypre_Vector *local_vector = hypre_ParVectorLocalVector(par_vector);
 
    MPI_Comm_rank(comm, &my_id);
+
+   if (!par_vector) ++ierr;
+   if (!partitioning) ++ierr;
+   if (!local_vector) ++ierr;
 
    vec_start = partitioning[my_id];
    vec_stop  = partitioning[my_id+1];
@@ -245,6 +316,10 @@ hypre_InsertIJVectorParLocalComponents(hypre_IJVector *vector,
    hypre_Vector *local_vector = hypre_ParVectorLocalVector(par_vector);
 
    MPI_Comm_rank(comm, &my_id);
+
+   if (!par_vector) ++ierr;
+   if (!partitioning) ++ierr;
+   if (!local_vector) ++ierr;
 
    vec_start = partitioning[my_id];
    vec_stop  = partitioning[my_id+1];
@@ -322,6 +397,10 @@ hypre_InsertIJVectorParLocalComponentsInBlock(hypre_IJVector *vector,
 
    MPI_Comm_rank(comm, &my_id);
 
+   if (!par_vector) ++ierr;
+   if (!partitioning) ++ierr;
+   if (!local_vector) ++ierr;
+
    vec_start = partitioning[my_id];
    vec_stop  = partitioning[my_id+1];
 
@@ -377,6 +456,10 @@ hypre_AddToIJVectorParLocalComponents(hypre_IJVector *vector,
    hypre_Vector *local_vector = hypre_ParVectorLocalVector(par_vector);
 
    MPI_Comm_rank(comm, &my_id);
+
+   if (!par_vector) ++ierr;
+   if (!partitioning) ++ierr;
+   if (!local_vector) ++ierr;
 
    vec_start = partitioning[my_id];
    vec_stop  = partitioning[my_id+1];
@@ -455,6 +538,10 @@ hypre_AddToIJVectorParLocalComponentsInBlock(hypre_IJVector *vector,
 
    MPI_Comm_rank(comm, &my_id);
 
+   if (!par_vector) ++ierr;
+   if (!partitioning) ++ierr;
+   if (!local_vector) ++ierr;
+
    vec_start = partitioning[my_id];
    vec_stop  = partitioning[my_id+1];
 
@@ -511,6 +598,10 @@ hypre_GetIJVectorParLocalComponents(hypre_IJVector *vector,
    hypre_Vector *local_vector = hypre_ParVectorLocalVector(par_vector);
 
    MPI_Comm_rank(comm, &my_id);
+
+   if (!par_vector) ++ierr;
+   if (!partitioning) ++ierr;
+   if (!local_vector) ++ierr;
 
    vec_start = partitioning[my_id];
    vec_stop  = partitioning[my_id+1];
@@ -569,6 +660,10 @@ hypre_GetIJVectorParLocalComponentsInBlock(hypre_IJVector *vector,
 
    MPI_Comm_rank(comm, &my_id);
 
+   if (!par_vector) ++ierr;
+   if (!partitioning) ++ierr;
+   if (!local_vector) ++ierr;
+
    vec_start = partitioning[my_id];
    vec_stop  = partitioning[my_id+1];
 
@@ -599,43 +694,3 @@ hypre_GetIJVectorParLocalComponentsInBlock(hypre_IJVector *vector,
    return ierr;
 
 }
-/******************************************************************************
- *
- * hypre_DistributeIJVectorPar
- *
- * takes an IJVector generated for one processor and distributes it
- * across many processors according to vec_starts,
- * if vec_starts is NULL, it distributes them evenly.
- *
- *****************************************************************************/
-int
-hypre_DistributeIJVectorPar(hypre_IJVector *vector,
-			    int	           *vec_starts)
-{
-   int ierr = 0;
-
-   hypre_ParVector *old_vector = hypre_IJVectorLocalStorage(vector);
-   hypre_ParVector *par_vector;
-   hypre_Vector *local_vector = hypre_ParVectorLocalVector(par_vector);
-   par_vector = hypre_VectorToParVector(hypre_ParVectorComm(old_vector),
-		                        hypre_ParVectorLocalVector(old_vector),
-                                        vec_starts);
-   ierr = hypre_DestroyParVector(old_vector);
-   hypre_IJVectorLocalStorage(vector) = par_vector;
-
-   return ierr;
-}
-
-/******************************************************************************
- *
- * hypre_FreeIJVectorPar
- *
- * frees ParVector local storage of an IJVectorPar 
- *
- *****************************************************************************/
-int
-hypre_FreeIJVectorPar(hypre_IJVector *vector)
-{
-   return hypre_DestroyParVector(hypre_IJVectorLocalStorage(vector));
-}
-

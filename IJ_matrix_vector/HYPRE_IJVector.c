@@ -18,7 +18,6 @@
  * HYPRE_NewIJVector
  *--------------------------------------------------------------------------*/
 
-/*---------------------------------------------------------------------- */
 /** 
 "IJ" represents the "linear algebraic" conceptual view of a vector. 
 The "I" and "J" in the name
@@ -29,12 +28,15 @@ Collective.
 
 {\bf Note:} Must be the first function called using "vector" as an actual argument.
 @return integer error code
-@param HYPRE_IJVector &IJvector: the vector to be initialized.
-@param MPI_Comm comm: a single MPI_Communicator that contains exactly the MPI processes that are to
+@param HYPRE_IJVector *in_vector_ptr [IN]
+the vector to be initialized.
+@param MPI_Comm comm [IN]
+a single MPI_Communicator that contains exactly the MPI processes that are to
 participate in any collective operations.
-@param int global_n: the dimensions of the entire, global vector.
+@param int global_n [IN]
+the dimensions of the entire, global vector.
+
 */
-/*---------------------------------------------------------------------- */
 
 int HYPRE_NewIJVector( MPI_Comm comm,
                        HYPRE_IJVector *in_vector_ptr, 
@@ -61,6 +63,13 @@ int HYPRE_NewIJVector( MPI_Comm comm,
 /*--------------------------------------------------------------------------
  * HYPRE_FreeIJVector
  *--------------------------------------------------------------------------*/
+
+/**
+@return integer error code
+@param HYPRE_IJVector IJvector [IN]
+the vector to be freed.
+
+*/
 
 int 
 HYPRE_FreeIJVector( HYPRE_IJVector IJvector )
@@ -99,6 +108,16 @@ HYPRE_FreeIJVector( HYPRE_IJVector IJvector )
  * HYPRE_SetIJVectorPartitioning
  *--------------------------------------------------------------------------*/
 
+/**
+@return integer error code
+@param HYPRE_IJVector IJvector
+vector for which partitioning is to be set
+@param int *partitioning [IN]
+pointer to array of integers specifying vector decomposition across processors
+HYPRE_SetIJVectorLocalStorageType needs to be called before this function.
+
+*/
+
 int 
 HYPRE_SetIJVectorPartitioning( HYPRE_IJVector  IJvector,
                                int            *partitioning )
@@ -135,6 +154,19 @@ HYPRE_SetIJVectorPartitioning( HYPRE_IJVector  IJvector,
 /*--------------------------------------------------------------------------
  * HYPRE_SetIJVectorLocalPartitioning
  *--------------------------------------------------------------------------*/
+
+/**
+@return integer error code
+@param HYPRE_IJVector IJvector
+vector for which the local part of the partitioning is to be set
+@param int vec_start [IN]
+integer specifying local index to first data element on calling processor
+@param int vec_stop [IN]
+integer specifying local index to first data element on next processor in
+decomposition
+HYPRE_SetIJVectorLocalStorageType needs to be called before this function.
+
+*/
 
 int 
 HYPRE_SetIJVectorLocalPartitioning( HYPRE_IJVector IJvector,
@@ -178,6 +210,14 @@ HYPRE_SetIJVectorLocalPartitioning( HYPRE_IJVector IJvector,
  * HYPRE_InitializeIJVector
  *--------------------------------------------------------------------------*/
 
+/**
+@return integer error code
+@param HYPRE_IJVector IJvector
+vector to be initialized
+HYPRE_SetIJVectorLocalStorageType needs to be called before this function.
+
+*/
+
 int 
 HYPRE_InitializeIJVector( HYPRE_IJVector IJvector )
 {
@@ -203,6 +243,15 @@ HYPRE_InitializeIJVector( HYPRE_IJVector IJvector )
 /*--------------------------------------------------------------------------
  * HYPRE_DistributeIJVector
  *--------------------------------------------------------------------------*/
+
+/**
+@return integer error code
+@param HYPRE_IJVector IJvector
+vector to be distributed
+@param int *vec_starts [IN]
+pointer to array of integers specifying vector decomposition across processors
+
+*/
 
 int 
 HYPRE_DistributeIJVector( HYPRE_IJVector IJvector, int *vec_starts )
@@ -235,13 +284,14 @@ function.
 
 Not collective, but must be same on all processors in group that stores vector.
 @return integer error code
-@param HYPRE_IJVector &vector [IN]
- the vector to be operated on. 
+@param HYPRE_IJVector IJvector
+vector for which the type is to be set
 @param int type [IN]
-possible types should be documented with each implementation. The first HYPRE implementation
+Possible types should be documented with each implementation. The first HYPRE implementation
 will list its possible values in HYPRE.h (at least for now). Note that this function is optional,
 as all implementations must have a default. Eventually the plan is to let solvers choose a storage
 type that they can work with automatically, but this is in the future.
+
 */
 
 int 
@@ -262,11 +312,12 @@ HYPRE_SetIJVectorLocalStorageType( HYPRE_IJVector IJvector, int type )
 /**
 Tells "vector" local size
 @return integer error code
-@param HYPRE_IJVector &vector [IN]
- the vector to be operated on. 
+@param HYPRE_IJVector IJvector
+vector for which local size is to be set 
 @param int local_n [IN]
- local number of components
-HYPRE_SetIJVectorLocalStorageType needs to be called before this routine
+local number of components
+HYPRE_SetIJVectorLocalStorageType needs to be called before this function.
+
 */
 
 int 
@@ -458,13 +509,13 @@ overwriting any components in the event of a collision.
 Not collective.
 
 @return integer error code
-@param HYPRE_IJVector &vector [IN]
-the vector to be operated on.
-@param int glob_vec_index_start {IN]
-@param int glob_vec_index_stop {IN]
-@param int *value_indices {IN]
+@param HYPRE_IJVector IJvector
+the vector to be operated on
+@param int glob_vec_index_start [IN]
+@param int glob_vec_index_stop [IN]
+@param int *value_indices [IN]
 pointer to indices of values array specifying values from which to insert 
-@param double *values {IN]
+@param double *values [IN]
 pointer to array from which vector values are inserted
 
 */
@@ -516,8 +567,9 @@ Not collective.
 
 @return integer error code
 @param HYPRE_IJVector &vector [IN]
-the vector to be operated on.
-@param double *values {IN]
+vector to be operated on
+@param double *values [IN]
+pointer to array from which vector values are added
 
 */
 
@@ -567,13 +619,13 @@ Not collective.
 
 @return integer error code
 @param HYPRE_IJVector &vector [IN]
-the vector to be operated on.
-@param int glob_vec_index_start {IN]
-@param int glob_vec_index_stop {IN]
-@param int *value_indices {IN]
+vector with components specified for summing to 
+@param int glob_vec_index_start [IN]
+@param int glob_vec_index_stop [IN]
+@param int *value_indices [IN]
 pointer to indices of values array specifying values from which to insert 
-@param double *values {IN]
-pointer to array from which vector values are inserted
+@param double *values [IN]
+pointer to array from which vector values are added
 
 */
 
@@ -623,8 +675,8 @@ Not collective.
 
 @return integer error code
 @param HYPRE_IJVector &vector [IN]
-the vector to be operated on.
-@param double *values {IN]
+vector from which components are to be fetched
+@param double *values
 
 */
 
@@ -667,18 +719,17 @@ HYPRE_GetIJVectorLocalComponents( HYPRE_IJVector  IJvector,
  *--------------------------------------------------------------------------*/
 
 /** 
-Puts components in specified local block of IJVector into indexed array of values,
-overwriting any values in the event of a collision.
+Puts components in specified local block of IJVector into indexed array of values, overwriting any values in the event of a collision.
 
 Not collective.
 
 @return integer error code
 @param HYPRE_IJVector &vector [IN]
-the vector to be operated on.
-@param int glob_vec_index_start {IN]
-@param int glob_vec_index_stop {IN]
-@param int *value_indices {IN]
-@param double *values {IN]
+the vector from which components are to be fetched 
+@param int glob_vec_index_start [IN]
+@param int glob_vec_index_stop [IN]
+@param int *value_indices [IN]
+@param double *values
 
 */
 
@@ -743,9 +794,9 @@ Returns a pointer to an underlying vector type used to implement IJVector.
 Assumes that the implementation has an underlying vector, so it would not
 work with a direct implementation of IJVector. 
 
-@return integer error code
+@return void pointer to local storage
 @param IJVector [IN]
-The vector to be pointed to.
+
 */
 
 void *
@@ -757,7 +808,7 @@ HYPRE_GetIJVectorLocalStorage( HYPRE_IJVector IJvector )
 }
 
 /*********************************************************************************/
-/* The following are routines that are not generally used by or supported for users */
+/* The following are functions not generally used by or supported for users */
 
 
 /*--------------------------------------------------------------------------
@@ -769,9 +820,10 @@ Sets a reference to point to an IJVector.
 
 @return integer error code
 @param IJVector [IN]
-The vector to be pointed to.
+vector to be pointed at
 @param reference [OUT]
-The pointer to be set to point to IJVector.
+pointer to IJVector
+
 */
 
 int 
