@@ -48,8 +48,7 @@ LFLAGS =\
 all: 
 
 install: all
-	@cp -f hypre_convert $$HYPRE_INSTALL_DIR/bin/.
-	@cp -f hypre_convert_boomeramg $$HYPRE_INSTALL_DIR/bin/.
+	@cp -f V[1-9]* $$HYPRE_INSTALL_DIR/bin/.
 
 clean:
 	@rm -f *.o

@@ -33,6 +33,7 @@ install: all
 	@cp -f  HYPRE_usr_manual.ps $$HYPRE_INSTALL_DIR/docs/.
 	@cp -fr HYPRE_ref_manual    $$HYPRE_INSTALL_DIR/docs/.
 	@cp -f  HYPRE_ref_manual.ps $$HYPRE_INSTALL_DIR/docs/.
+	@cp -f  V[1-9]* $$HYPRE_INSTALL_DIR/docs/.
 
 clean:
 	@/bin/rm -f *.aux *.bbl *.blg *.dvi *.log *.dlog *.toc
