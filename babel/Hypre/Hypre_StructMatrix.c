@@ -111,7 +111,7 @@ int impl_Hypre_StructMatrix_Apply
    Vb = SVbp->hsvec;
    hb = (hypre_StructVector *) *Vb;
 
-   return hypre_StructMatvec( 1.0, hA, hb, 1.0, hx );  /* x = A*b */
+   return hypre_StructMatvec( 1.0, hA, hb, 0.0, hx );  /* x = A*b */
 
 } /* end impl_Hypre_StructMatrixApply */
 
