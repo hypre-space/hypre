@@ -343,20 +343,27 @@ hypre_GenerateRAPCommPkg( hypre_ParCSRMatrix *RAP,
    }
    else	
    {
-      for (i=0; i < num_recvs_RAP ; i++)
+      for (i=0; i < num_recvs_RAP; i++)
       {
-	 if (recv_procs_A[j] == recv_procs_RAP[i])
-	    j++;
-	 else
+	 if (j < num_recvs_A)
 	 {
-	    if (recv_procs_A[j] > recv_procs_RAP[i])
-		work[change++] = recv_procs_RAP[i]+1;
+	    if (recv_procs_A[j] == recv_procs_RAP[i])
+	       j++;
 	    else
 	    {
-		work[change++] = -recv_procs_A[j]-1;
-		j++;
-		i--;
+	       if (recv_procs_A[j] > recv_procs_RAP[i])
+		  work[change++] = recv_procs_RAP[i]+1;
+	       else
+	       {
+		  work[change++] = -recv_procs_A[j]-1;
+		  j++;
+		  i--;
+	       }
 	    }
+	 }
+	 else
+	 {
+	    work[change++] = recv_procs_RAP[i]+1;
 	 }
       }
       for (i=j; i < num_recvs_A; i++)
