@@ -37,14 +37,12 @@ HYPRE_IJ_DIRS =\
  distributed_matrix\
  matrix_matrix\
  IJ_matrix_vector\
- distributed_linear_solvers/pilut\
- distributed_linear_solvers/ParaSails\
- distributed_linear_solvers/Euclid\
+ distributed_linear_solvers\
  parcsr_linear_solvers
 
 #These are the directories for the FEI
 HYPRE_FEI_DIRS =\
- FEI_matrix_vector/fei-hypre
+ FEI_matrix_vector
 # FEI_matrix_vector/fei-base\
 # FEI_matrix_vector/isis-mv 
 
@@ -67,7 +65,7 @@ HYPRE_DIRS =\
 
 # These are directories that are not yet officially in HYPRE
 HYPRE_EXTRA_DIRS =\
- seq_linear_solvers/pamg\
+ seq_linear_solvers\
  structIJ_matrix_vector\
  CI_struct_matrix_vector\
  CI_struct_linear_solvers @HYPRE_PETSCLIBDIRS@ @HYPRE_BABELLIBDIR@
@@ -209,8 +207,8 @@ base:
 	mkdir -p hypre/lib; \
 	HYPRE_INSTALL_DIR=`pwd`/hypre; \
 	export HYPRE_INSTALL_DIR; \
-	cp -f HYPRE_config.h $$HYPRE_INSTALL_DIR/include/.; \
-	cp -f HYPRE.h $$HYPRE_INSTALL_DIR/include/.; \
+	cp -f $(srcdir)/HYPRE_config.h $$HYPRE_INSTALL_DIR/include/.; \
+	cp -f $(srcdir)/HYPRE.h $$HYPRE_INSTALL_DIR/include/.; \
 	for i in ${HYPRE_BASIC_DIRS}; \
 	do \
 	  if [ -d $$i ]; \

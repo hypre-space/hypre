@@ -18,10 +18,11 @@ CDEFS = @HYPRE_PETSCDEFS@
 
 CFLAGS = \
  ${C_COMPILE_FLAGS}\
- -I..\
- -I../utilities\
- -I../CI_struct_matrix_vector\
- -I../PETSc_linear_solvers/ParILUT\
+ -I$(srcdir)\
+ -I$(srcdir)/..\
+ -I$(srcdir)/../utilities\
+ -I$(srcdir)/../CI_struct_matrix_vector\
+ -I$(srcdir)/../PETSc_linear_solvers/ParILUT\
  @PETSCINCLUDE@ \
  ${CINCLUDES} ${CDEFS}
 

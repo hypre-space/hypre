@@ -12,6 +12,7 @@
 HYPRE_ARCH = @ARCH@
 
 srcdir = @srcdir@
+VPATH = @srcdir@
 
 CC = @CC@
 CXX = @CXX@
@@ -35,30 +36,31 @@ CDEFS = -DBOOL_NOT_SUPPORTED
 CXXDEFS = -DBOOL_NOT_SUPPORTED
 
 CFLAGS = -w ${C_COMPILE_FLAGS} ${CDEFS}\
- -I../..\
- -I../../IJ_matrix_vector\
- -I../../utilities\
- -I../../krylov\
- -I../../parcsr_matrix_vector\
- -I../../parcsr_linear_solvers\
- -I../../seq_matrix_vector\
- -I../../distributed_matrix\
- -I../../distributed_linear_solvers\
- -I../fei-base\
+ -I$(srcdir)\
+ -I$(srcdir)/../..\
+ -I$(srcdir)/../../IJ_matrix_vector\
+ -I$(srcdir)/../../utilities\
+ -I$(srcdir)/../../krylov\
+ -I$(srcdir)/../../parcsr_matrix_vector\
+ -I$(srcdir)/../../parcsr_linear_solvers\
+ -I$(srcdir)/../../seq_matrix_vector\
+ -I$(srcdir)/../../distributed_matrix\
+ -I$(srcdir)/../../distributed_linear_solvers\
+ -I$(srcdir)/../fei-base\
  ${SUPERLU_INCLUDE}\
  ${MLPACK_INCLUDE}\
  ${CINCLUDES}
 
 MPILIBFLAGS = @MPILIBDIRS@ @MPILIBS@ @MPIFLAGS@
 CXXFLAGS = -w ${CXX_COMPILE_FLAGS} ${CXXDEFS}\
- -I../..\
- -I../../IJ_matrix_vector\
- -I../../utilities\
- -I../../krylov\
- -I../../parcsr_matrix_vector\
- -I../../parcsr_linear_solvers\
- -I../../seq_matrix_vector\
- -I../fei-base\
+ -I$(srcdir)/../..\
+ -I$(srcdir)/../../IJ_matrix_vector\
+ -I$(srcdir)/../../utilities\
+ -I$(srcdir)/../../krylov\
+ -I$(srcdir)/../../parcsr_matrix_vector\
+ -I$(srcdir)/../../parcsr_linear_solvers\
+ -I$(srcdir)/../../seq_matrix_vector\
+ -I$(srcdir)/../fei-base\
  ${SUPERLU_INCLUDE}\
  ${CXXINCLUDES}
 
@@ -120,9 +122,9 @@ all: libHYPRE_FEI.a
 lib: all
 
 install: all
-	@cp -f HYPRE_LinSysCore.h $$HYPRE_INSTALL_DIR/include
-	@cp -f cfei_hypre.h $$HYPRE_INSTALL_DIR/include
-	@cp -f cfei-hypre.h $$HYPRE_INSTALL_DIR/include
+	@cp -f $(srcdir)/HYPRE_LinSysCore.h $$HYPRE_INSTALL_DIR/include
+	@cp -f $(srcdir)/cfei_hypre.h $$HYPRE_INSTALL_DIR/include
+	@cp -f $(srcdir)/cfei-hypre.h $$HYPRE_INSTALL_DIR/include
 	@cp -f libHYPRE_FEI.a $$HYPRE_INSTALL_DIR/lib
 
 driver: driver.o libHYPRE_FEI.a

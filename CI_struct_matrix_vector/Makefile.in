@@ -18,9 +18,10 @@ CDEFS = @HYPRE_PETSCDEFS@
 
 CFLAGS = \
  ${C_COMPILE_FLAGS}\
- -I..\
- -I../utilities\
- -I../struct_matrix_vector\
+ -I$(srcdir)\
+ -I$(srcdir)/..\
+ -I$(srcdir)/../utilities\
+ -I$(srcdir)/../struct_matrix_vector\
  @PETSCINCLUDE@ \
  ${CINCLUDES} ${CDEFS}
 
