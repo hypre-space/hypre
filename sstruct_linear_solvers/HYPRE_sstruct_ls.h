@@ -131,7 +131,7 @@ int HYPRE_SStructGMRESSetStopCrit(HYPRE_SStructSolver solver,
 int HYPRE_SStructGMRESSetPrecond(HYPRE_SStructSolver          solver,
                                  HYPRE_PtrToSStructSolverFcn  precond,
                                  HYPRE_PtrToSStructSolverFcn  precond_setup,
-                                 HYPRE_SStructSolver          precond_solver);
+                                 void *          precond_solver);
 
 /**
  * (Optional) Set the amount of logging to do.

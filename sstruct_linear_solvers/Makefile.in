@@ -24,6 +24,7 @@ CFLAGS =\
  ${C_COMPILE_FLAGS}\
  -I..\
  -I../utilities\
+ -I../krylov\
  -I../struct_matrix_vector\
  -I../seq_matrix_vector\
  -I../parcsr_matrix_vector\
@@ -43,7 +44,6 @@ HEADERS =\
 FILES =\
  HYPRE_sstruct_gmres.c\
  HYPRE_sstruct_split.c\
- gmres.c\
  krylov.c\
  krylov_sstruct.c
 

@@ -7,6 +7,7 @@
 #define hypre_SSTRUCT_LS_HEADER
 
 #include "utilities.h"
+#include "krylov.h"
 #include "sstruct_matrix_vector.h"
 
 #ifdef __cplusplus
@@ -24,7 +25,7 @@ int HYPRE_SStructGMRESSetTol( HYPRE_SStructSolver solver , double tol );
 int HYPRE_SStructGMRESSetMinIter( HYPRE_SStructSolver solver , int min_iter );
 int HYPRE_SStructGMRESSetMaxIter( HYPRE_SStructSolver solver , int max_iter );
 int HYPRE_SStructGMRESSetStopCrit( HYPRE_SStructSolver solver , int stop_crit );
-int HYPRE_SStructGMRESSetPrecond( HYPRE_SStructSolver solver , HYPRE_PtrToSStructSolverFcn precond , HYPRE_PtrToSStructSolverFcn precond_setup , HYPRE_SStructSolver precond_solver );
+int HYPRE_SStructGMRESSetPrecond( HYPRE_SStructSolver solver , HYPRE_PtrToSStructSolverFcn precond , HYPRE_PtrToSStructSolverFcn precond_setup , void *precond_data );
 int HYPRE_SStructGMRESSetLogging( HYPRE_SStructSolver solver , int logging );
 int HYPRE_SStructGMRESGetNumIterations( HYPRE_SStructSolver solver , int *num_iterations );
 int HYPRE_SStructGMRESGetFinalRelativeResidualNorm( HYPRE_SStructSolver solver , double *norm );
@@ -41,21 +42,6 @@ int HYPRE_SStructSplitSetNonZeroGuess( HYPRE_SStructSolver solver );
 int HYPRE_SStructSplitSetStructSolver( HYPRE_SStructSolver solver , int ssolver );
 int HYPRE_SStructSplitGetNumIterations( HYPRE_SStructSolver solver , int *num_iterations );
 int HYPRE_SStructSplitGetFinalRelativeResidualNorm( HYPRE_SStructSolver solver , double *norm );
-
-/* gmres.c */
-void *hypre_XGMRESCreate( void );
-int hypre_XGMRESDestroy( void *gmres_vdata );
-int hypre_XGMRESSetup( void *gmres_vdata , void *A , void *b , void *x );
-int hypre_XGMRESSolve( void *gmres_vdata , void *A , void *b , void *x );
-int hypre_XGMRESSetKDim( void *gmres_vdata , int k_dim );
-int hypre_XGMRESSetTol( void *gmres_vdata , double tol );
-int hypre_XGMRESSetMinIter( void *gmres_vdata , int min_iter );
-int hypre_XGMRESSetMaxIter( void *gmres_vdata , int max_iter );
-int hypre_XGMRESSetStopCrit( void *gmres_vdata , double stop_crit );
-int hypre_XGMRESSetPrecond( void *gmres_vdata , int (*precond )(), int (*precond_setup )(), void *precond_data );
-int hypre_XGMRESSetLogging( void *gmres_vdata , int logging );
-int hypre_XGMRESGetNumIterations( void *gmres_vdata , int *num_iterations );
-int hypre_XGMRESGetFinalRelativeResidualNorm( void *gmres_vdata , double *relative_residual_norm );
 
 /* krylov.c */
 int hypre_SStructKrylovIdentitySetup( void *vdata , void *A , void *b , void *x );
