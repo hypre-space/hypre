@@ -20,7 +20,8 @@
  * amg_Solve
  *--------------------------------------------------------------------------*/
 
-void      amg_solve__(Solve_err_flag, u_data, f_data, n, tol, data)
+void      NAME_C_FOR_FORTRAN(amg_solve)(Solve_err_flag, u_data, f_data,
+					n, tol, data)
 int      *Solve_err_flag;
 double   *u_data;
 double   *f_data;

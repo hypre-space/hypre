@@ -11,5 +11,7 @@
 # Configuration file for Irix systems
 #=============================================================================
 
+AMG_CC_FLAGS="-DIRIX"
+
 AMG_MAKE="gmake"
 

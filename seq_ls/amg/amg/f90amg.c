@@ -20,7 +20,7 @@
  * amg_Initialize
  *--------------------------------------------------------------------------*/
 
-void   amg_initialize__(data, port_data)
+void   NAME_C_FOR_FORTRAN(amg_initialize)(data, port_data)
 int   *data;
 int   *port_data;
 {
@@ -31,7 +31,7 @@ int   *port_data;
  * amg_Finalize
  *--------------------------------------------------------------------------*/
 
-void   amg_finalize__(data)
+void   NAME_C_FOR_FORTRAN(amg_finalize)(data)
 int   *data;
 {
    amg_Finalize((void *) *data);

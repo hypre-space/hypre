@@ -20,7 +20,7 @@
  * amg_Setup
  *--------------------------------------------------------------------------*/
 
-void     amg_setup__(Setup_err_flag, a_data, ia, ja, n, data)
+void     NAME_C_FOR_FORTRAN(amg_setup)(Setup_err_flag, a_data, ia, ja, n, data)
 int     *Setup_err_flag;
 double  *a_data;
 int     *ia;
