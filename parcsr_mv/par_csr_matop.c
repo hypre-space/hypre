@@ -1284,8 +1284,8 @@ hypre_ParCSRMatrixTranspose( hypre_ParCSRMatrix *A,
    hypre_ParCSRMatrixRowStarts(AT) = row_starts_AT;
    hypre_ParCSRMatrixColStarts(AT) = col_starts_AT;
    hypre_ParCSRMatrixColMapOffd(AT) = col_map_offd_AT;
-   hypre_ParCSRMatrixFirstRowIndex(AT) = row_starts[my_id];
-   hypre_ParCSRMatrixFirstColDiag(AT) = col_starts[my_id];
+   hypre_ParCSRMatrixFirstRowIndex(AT) = row_starts_AT[my_id];
+   hypre_ParCSRMatrixFirstColDiag(AT) = col_starts_AT[my_id];
 
    hypre_ParCSRMatrixOwnsData(AT) = 1;
    hypre_ParCSRMatrixOwnsRowStarts(AT) = 1;
