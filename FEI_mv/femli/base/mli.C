@@ -311,7 +311,7 @@ int MLI::solve( MLI_Vector *sol, MLI_Vector *rhs )
       sol->setConstantValue(zero);
       strcpy( paramString, "zeroInitialGuess" );
       preSmoother = one_levels[0]->getPreSmoother();
-      preSmoother->setParams(paramString, 0, NULL);
+      if (preSmoother != NULL) preSmoother->setParams(paramString, 0, NULL);
    }
    else
    {
