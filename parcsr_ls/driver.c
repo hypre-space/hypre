@@ -22,9 +22,9 @@ main( int   argc,
    int                 solver_id;
 
    hypre_ParCSRMatrix  *A;
-/*   hypre_ParVector     *b;
+   hypre_ParVector     *b;
    hypre_ParVector     *x;
-*/
+
    int                 num_procs, myid, volume;
 
    int                 p, q, r;
@@ -167,7 +167,9 @@ main( int   argc,
    values[0] = 2.0*(cx+cy+cz);
    
    A = hypre_GenerateLaplacian(MPI_COMM_WORLD,nx,ny,nz,P,Q,R,p,q,r,
-	values,&global_part);
+	values);
+
+   global_part = hypre_ParCSRMatrixRowStarts(A);
 
    hypre_PrintParCSRMatrix(A, "Laplace");
 
@@ -177,7 +179,7 @@ main( int   argc,
     * Set up the linear system
     *-----------------------------------------------------------*/
 
-/*   b = hypre_CreateParVector(MPI_COMM_WORLD, volume, global_part[myid],
+   b = hypre_CreateParVector(MPI_COMM_WORLD, volume, global_part[myid],
 	global_part[myid+1]-global_part[myid]);
    hypre_InitializeParVector(b);
    hypre_SetParVectorConstantValues(b,1.0);
@@ -186,15 +188,15 @@ main( int   argc,
 	global_part[myid+1]-global_part[myid]);
    hypre_InitializeParVector(x);
    hypre_SetParVectorConstantValues(x,0.0);
-*/
+
    /*-----------------------------------------------------------
     * Finalize things
     *-----------------------------------------------------------*/
 
    hypre_DestroyParCSRMatrix(A);
-/*   hypre_DestroyParVector(b);
+   hypre_DestroyParVector(b);
    hypre_DestroyParVector(x);
-*/
+
    hypre_TFree(global_part);
    hypre_TFree(values);
    /* Finalize MPI */
