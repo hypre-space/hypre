@@ -30,10 +30,12 @@ ONLINE_OPTS =\
 all: html ps pdf
 
 install: all
-	@cp -fr HYPRE_usr_manual    $$HYPRE_INSTALL_DIR/docs/.
-	@cp -f  HYPRE_usr_manual.ps $$HYPRE_INSTALL_DIR/docs/.
-	@cp -fr HYPRE_ref_manual    $$HYPRE_INSTALL_DIR/docs/.
-	@cp -f  HYPRE_ref_manual.ps $$HYPRE_INSTALL_DIR/docs/.
+	@cp -fr HYPRE_usr_manual     $$HYPRE_INSTALL_DIR/docs/.
+	@cp -f  HYPRE_usr_manual.ps  $$HYPRE_INSTALL_DIR/docs/.
+	@cp -f  HYPRE_usr_manual.pdf $$HYPRE_INSTALL_DIR/docs/.
+	@cp -fr HYPRE_ref_manual     $$HYPRE_INSTALL_DIR/docs/.
+	@cp -f  HYPRE_ref_manual.ps  $$HYPRE_INSTALL_DIR/docs/.
+	@cp -f  HYPRE_ref_manual.pdf $$HYPRE_INSTALL_DIR/docs/.
 	@cp -f  V[1-9]* $$HYPRE_INSTALL_DIR/docs/.
 
 clean:
