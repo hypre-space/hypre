@@ -155,7 +155,10 @@ code_ref.dxx: ${DXX_FILES}
 ##########
 
 version.tex:
-	echo "\def\HYPREVersion{Revision: 0.00}" > version.tex
+	@ \
+	VINFO=`grep HYPRE_Version ../utilities/HYPRE_utilities.h`; \
+	VNUM=`echo $$VINFO | awk '{print $$4}'`; \
+	echo "\def\HYPREVersion{Revision: $$VNUM}" > version.tex
 
 ##################################################################
 # Generic rules
