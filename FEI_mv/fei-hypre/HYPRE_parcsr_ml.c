@@ -28,6 +28,7 @@
  *        HYPRE_ParCSRMLSetPostSmoother
  *        HYPRE_ParCSRMLSetDampingFactor
  *        HYPRE_ParCSRMLSetCoarseSolver
+ *        HYPRE_ParCSRMLSetCoarsenScheme
  *        HYPRE_ParCSRMLConstructMHMatrix
  ****************************************************************************/
 
@@ -529,6 +530,21 @@ int HYPRE_ParCSRMLSetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
        ML_Aggregate_Create(&(link->ml_ag));
        ML_Aggregate_Set_MaxLevels( link->ml_ag, link->nlevels );
        ML_Aggregate_Set_Threshold( link->ml_ag, link->ag_threshold );
+       switch (link->coarsen_scheme)
+       {
+          case 1 : ML_Aggregate_Set_CoarsenScheme_Uncoupled(link->ml_ag);
+                   break;
+          case 2 : ML_Aggregate_Set_CoarsenScheme_Coupled(link->ml_ag);
+                   break;
+          case 3 : ML_Aggregate_Set_CoarsenScheme_MIS(link->ml_ag);
+                   break;
+          case 5 : ML_Aggregate_Set_CoarsenScheme_UncoupledMIS(link->ml_ag);
+                   break;
+          case 6 : ML_Aggregate_Set_CoarsenScheme_UncoupledCoupled(link->ml_ag);
+                   break;
+          default: ML_Aggregate_Set_CoarsenScheme_Uncoupled(link->ml_ag);
+                   break;
+       }
        coarsest_level = ML_Gen_MGHierarchy_UsingAggregation(ml, nlevels-1, 
                                         ML_DECREASING, link->ml_ag);
     }
@@ -918,6 +934,26 @@ int HYPRE_ParCSRMLSetCoarseSolver( HYPRE_Solver solver, int solver_id  )
     else
     {
        link->coarse_solver = solver_id;
+    } 
+    return( 0 );
+}
+
+/****************************************************************************/
+/* HYPRE_ParCSRMLSetCoarsenScheme                                           */
+/*--------------------------------------------------------------------------*/
+
+int HYPRE_ParCSRMLSetCoarsenScheme( HYPRE_Solver solver, int scheme  )
+{
+    MH_Link *link = (MH_Link *) solver;
+
+    if ( scheme < 1 || scheme > 6 )
+    {
+       printf("HYPRE_ParCSRMLSetCoarsenScheme error : reset to uncoupled\n");
+       link->coarsen_scheme = 1;
+    } 
+    else
+    {
+       link->coarsen_scheme = scheme;
     } 
     return( 0 );
 }

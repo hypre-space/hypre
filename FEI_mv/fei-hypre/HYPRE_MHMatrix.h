@@ -60,6 +60,7 @@ typedef struct
     double       jacobi_wt;
     double       ag_threshold;
     int          coarse_solver;
+    int          coarsen_scheme;
 #ifdef MLPACK
     ML_Aggregate *ml_ag;
     ML_AMG       *ml_amg;

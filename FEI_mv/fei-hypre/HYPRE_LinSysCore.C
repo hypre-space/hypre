@@ -241,7 +241,8 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
     mlPostsmootherType_ = 1;    // default Gauss-Seidel
     mlRelaxWeight_      = 0.5;
     mlStrongThreshold_  = 0.08; // one suggested by Vanek/Brezina/Mandel
-    mlCoarseSolver_     = 0;    // coarse solver default = SuperLU
+    mlCoarseSolver_     = 0;    // default coarse solver = SuperLU
+    mlCoarsenScheme_    = 1;    // default coarsening scheme = uncoupled
 
     rhsIDs_             = new int[1];
     rhsIDs_[0]          = 0;
@@ -1266,6 +1267,26 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
           {
              printf("       HYPRE_LSC::parameters mlCoarseSolver = %d\n",
                     mlCoarseSolver_);
+          }
+       }
+
+       //---------------------------------------------------------------
+       // mlpack preconditoner : coarsening scheme to use
+       //---------------------------------------------------------------
+
+       else if ( !strcmp(param1, "mlCoarsenScheme") )
+       {
+          sscanf(params[i],"%s %s", param, param2);
+          if      ( !strcmp(param2, "uncoupled" ) ) mlCoarsenScheme_ = 1;
+          else if ( !strcmp(param2, "coupled" ) )   mlCoarsenScheme_ = 2;
+          else if ( !strcmp(param2, "mis" ) )       mlCoarsenScheme_ = 3;
+          else if ( !strcmp(param2, "hybridum" ) )  mlCoarsenScheme_ = 5;
+          else if ( !strcmp(param2, "hybriduc" ) )  mlCoarsenScheme_ = 6;
+          else                                      mlCoarsenScheme_ = 1;
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+          {
+             printf("       HYPRE_LSC::parameters mlCoarsenScheme = %d\n",
+                    mlCoarsenScheme_);
           }
        }
 
@@ -3795,6 +3816,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
 
                   HYPRE_ParCSRMLSetMethod(HYPrecon_,mlMethod_);
                   HYPRE_ParCSRMLSetCoarseSolver(HYPrecon_,mlCoarseSolver_);
+                  HYPRE_ParCSRMLSetCoarsenScheme(HYPrecon_,mlCoarsenScheme_);
                   HYPRE_ParCSRMLSetStrongThreshold(HYPrecon_,mlStrongThreshold_);
                   HYPRE_ParCSRMLSetNumPreSmoothings(HYPrecon_,mlNumPreSweeps_);
                   HYPRE_ParCSRMLSetNumPostSmoothings(HYPrecon_,mlNumPostSweeps_);
@@ -4068,6 +4090,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
 
                   HYPRE_ParCSRMLSetMethod(HYPrecon_,mlMethod_);
                   HYPRE_ParCSRMLSetCoarseSolver(HYPrecon_,mlCoarseSolver_);
+                  HYPRE_ParCSRMLSetCoarsenScheme(HYPrecon_,mlCoarsenScheme_);
                   HYPRE_ParCSRMLSetStrongThreshold(HYPrecon_,mlStrongThreshold_);
                   HYPRE_ParCSRMLSetNumPreSmoothings(HYPrecon_,mlNumPreSweeps_);
                   HYPRE_ParCSRMLSetNumPostSmoothings(HYPrecon_,mlNumPostSweeps_);
@@ -4337,6 +4360,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
 
                   HYPRE_ParCSRMLSetMethod(HYPrecon_,mlMethod_);
                   HYPRE_ParCSRMLSetCoarseSolver(HYPrecon_,mlCoarseSolver_);
+                  HYPRE_ParCSRMLSetCoarsenScheme(HYPrecon_,mlCoarsenScheme_);
                   HYPRE_ParCSRMLSetStrongThreshold(HYPrecon_,mlStrongThreshold_);
                   HYPRE_ParCSRMLSetNumPreSmoothings(HYPrecon_,mlNumPreSweeps_);
                   HYPRE_ParCSRMLSetNumPostSmoothings(HYPrecon_,mlNumPostSweeps_);
@@ -4605,6 +4629,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
 
                   HYPRE_ParCSRMLSetMethod(HYPrecon_,mlMethod_);
                   HYPRE_ParCSRMLSetCoarseSolver(HYPrecon_,mlCoarseSolver_);
+                  HYPRE_ParCSRMLSetCoarsenScheme(HYPrecon_,mlCoarsenScheme_);
                   HYPRE_ParCSRMLSetStrongThreshold(HYPrecon_,mlStrongThreshold_);
                   HYPRE_ParCSRMLSetNumPreSmoothings(HYPrecon_,mlNumPreSweeps_);
                   HYPRE_ParCSRMLSetNumPostSmoothings(HYPrecon_,mlNumPostSweeps_);
@@ -4868,6 +4893,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
 
                   HYPRE_ParCSRMLSetMethod(HYPrecon_,mlMethod_);
                   HYPRE_ParCSRMLSetCoarseSolver(HYPrecon_,mlCoarseSolver_);
+                  HYPRE_ParCSRMLSetCoarsenScheme(HYPrecon_,mlCoarsenScheme_);
                   HYPRE_ParCSRMLSetStrongThreshold(HYPrecon_,mlStrongThreshold_);
                   HYPRE_ParCSRMLSetNumPreSmoothings(HYPrecon_,mlNumPreSweeps_);
                   HYPRE_ParCSRMLSetNumPostSmoothings(HYPrecon_,mlNumPostSweeps_);
@@ -5131,6 +5157,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
 
                   HYPRE_ParCSRMLSetMethod(HYPrecon_,mlMethod_);
                   HYPRE_ParCSRMLSetCoarseSolver(HYPrecon_,mlCoarseSolver_);
+                  HYPRE_ParCSRMLSetCoarsenScheme(HYPrecon_,mlCoarsenScheme_);
                   HYPRE_ParCSRMLSetStrongThreshold(HYPrecon_,mlStrongThreshold_);
                   HYPRE_ParCSRMLSetNumPreSmoothings(HYPrecon_,mlNumPreSweeps_);
                   HYPRE_ParCSRMLSetNumPostSmoothings(HYPrecon_,mlNumPostSweeps_);
