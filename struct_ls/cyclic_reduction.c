@@ -300,7 +300,7 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
 
          if(!hypre_StructMatrixSymmetric(A))
          {
-            hypre_SetIndex(index_temp,0,1,0);
+            hypre_SetIndex(index_temp,1,0,0);
             ac_ce = hypre_StructMatrixExtractPointerByIndex(Ac, i, index_temp);
          }
 
