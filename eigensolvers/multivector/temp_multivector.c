@@ -122,11 +122,14 @@ hypre_TempMultiVectorSetRandom( void* x_, int seed ) {
 
   assert( x != NULL );
 
-  srand( seed );
+  /* srand( seed ); */
+  hypre_SeedRand(seed);
+  
   for ( i = 0; i < x->numVectors; i++ ) {
     if ( x->mask == NULL || (x->mask)[i] ) {
       /*      seed = rand();*/
-      (x->interpreter->SetRandomValues)(x->vector[i], seed+i);
+      seed=hypre_Rand()*2147483647; /* here were assign double to int, roundoff occurs */
+      (x->interpreter->SetRandomValues)(x->vector[i], seed);
     }
   }
 }
@@ -254,7 +257,7 @@ hypre_TempMultiVectorByMultiVector( void* x_, void* y_,
 
 void 
 hypre_TempMultiVectorByMultiVectorDiag( void* x_, void* y_,
-					 int* mask, int n, double* diag ) {
+					int* mask, int n, double* diag ) {
 /* diag = diag(x'*y) */	
 
   int i, mx, my, m;
@@ -380,8 +383,8 @@ hypre_TempMultiVectorXapy( void* x_,
 
 void 
 hypre_TempMultiVectorByDiagonal( void* x_, 
-				 int* mask, int n, double* diag,
-				 void* y_ ) {
+				int* mask, int n, double* diag,
+				void* y_ ) {
 
   int j;
   int mx, my, m;
@@ -563,5 +566,3 @@ aux_indexFromMask( int n, int* mask, int* index ) {
       index[i] = i + 1;
 
 }
-
-
