@@ -229,3 +229,19 @@ hypre_F90_IFACE(hypre_insertijmatrixrow)( long int *matrix,
 
 } 
 
+/*--------------------------------------------------------------------------
+ * HYPRE_GetIJMatrixLocalStorage
+ *--------------------------------------------------------------------------*/
+
+void 
+hypre_F90_IFACE(hypre_getijmatrixlocalstorage)( long int *matrix,
+                                                long int *local_storage,
+                                                int      *ierr    )
+{
+   *ierr = 0;
+
+   *local_storage = (long int) ( HYPRE_GetIJMatrixLocalStorage(
+                                       (HYPRE_IJMatrix) *matrix ) );
+
+   if (!(*local_storage)) ++(*ierr); 
+}

@@ -395,6 +395,7 @@ void hypre_F90_IFACE P((int hypre_queryijmatrixinsertionsem ));
 void hypre_F90_IFACE P((int hypre_insertijmatrixblock ));
 void hypre_F90_IFACE P((int hypre_addblocktoijmatrix ));
 void hypre_F90_IFACE P((int hypre_insertijmatrixrow ));
+void hypre_F90_IFACE P((int hypre_getijmatrixlocalstorage ));
 
 /* F90_HYPRE_IJVector.c */
 void hypre_F90_IFACE P((int hypre_newijvector ));
@@ -412,8 +413,8 @@ void hypre_F90_IFACE P((int hypre_addtoijveclocalcompsinblo ));
 void hypre_F90_IFACE P((int hypre_assembleijvector ));
 void hypre_F90_IFACE P((int hypre_getijveclocalcomps ));
 void hypre_F90_IFACE P((int hypre_getijveclocalcompsinblock ));
-void hypre_F90_IFACE P((int hypre_getijveclocalstoragetype ));
-void hypre_F90_IFACE P((int hypre_getijveclocalstorage ));
+void hypre_F90_IFACE P((int hypre_getijvectorlocalstoragety ));
+void hypre_F90_IFACE P((int hypre_getijvectorlocalstorage ));
 
 #undef P
 
