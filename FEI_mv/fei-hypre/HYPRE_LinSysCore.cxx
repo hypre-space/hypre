@@ -127,7 +127,7 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
                   HYbs_(NULL),
                   HYx_(NULL),
                   HYr_(NULL),
-                  HYpbs_(NULL)
+                  HYpbs_(NULL),
                   HYpxs_(NULL),
                   numGlobalRows_(0),
                   localStartRow_(0),
@@ -178,7 +178,7 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
                   HYPreconReuse_(0), 
                   HYPreconSetup_(0),
                   lookup_(NULL),
-                  haveLookup_(0),
+                  haveLookup_(0)
 {
    //-------------------------------------------------------------------
    // find my processor ID 
