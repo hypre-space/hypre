@@ -90,42 +90,6 @@ hypre_BoxArraySubtractAdjacentBoxArrayD( hypre_BoxArray *boxes1,
 }
 
 /*--------------------------------------------------------------------------
- * Find the parts of the given box which lie on a (physical) boundary.
- * Stick them into the user-provided box array boundary (any input contents
- * of this box array may get changed).
- * The second input argument is a list of all neighbor boxes.
- * The last argument has 6 values to denote the boundary thickness in each direction.
- *--------------------------------------------------------------------------*/
-
-int
-hypre_BoxBoundaryNT( hypre_Box *box, hypre_BoxArray *neighbor_boxes,
-                    hypre_BoxArray *boundary, int* thickness )
-{
-   int i;
-   int numexp[6];
-   int ierr = 0;
-   hypre_Box *boxe = hypre_BoxDuplicate( box );
-   int thick = 1;
-   for ( i=0; i<6; ++i ) {
-      numexp[i] = -thickness[i];
-      thick = thickness[i]>thick ? thickness[i] : thick;
-   }
-
-   ierr += hypre_BoxExpand( boxe, numexp );  /* shrink box away from boundary */
-   ierr += hypre_SubtractBoxes( box, boxe, boundary );
-
-   /* Now boundary contains the surface of the original box.
-      Subtract out the neighbor boxes, and anything adjacent to a neighbor box.
-      Anything left will belong to the physical boundary. */
-
-   ierr += hypre_BoxArraySubtractAdjacentBoxArray( boundary, neighbor_boxes, box, thick );
-
-   ierr += hypre_BoxDestroy( boxe );
-
-   return ierr;
-}
-
-/*--------------------------------------------------------------------------
  * Find the parts of the given box which lie on a (physical) boundary, in
  * the supplied signed direction (ds=0,1,2,3,4,5; for unsigned directions
  * d=0,0,1,1,2,2).  Boundary thickness is provided.
@@ -177,6 +141,37 @@ hypre_BoxBoundaryDNT( hypre_Box *box, hypre_BoxArray *neighbor_boxes,
       boundary, neighbor_boxes, box, ds, thick );
 
    ierr += hypre_BoxDestroy( boxe );
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * Find the parts of the given box which lie on a (physical) boundary.
+ * Stick them into the user-provided box array boundary (it is recommended that
+ * this box array be empty on input).
+ * The second input argument is a list of all neighbor boxes.
+ * The last argument has 6 values to denote the boundary thickness in each direction.
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_BoxBoundaryNT( hypre_Box *box, hypre_BoxArray *neighbor_boxes,
+                    hypre_BoxArray *boundary, int* thickness )
+{
+   int ds;
+   int ierr = 0;
+   hypre_BoxArray *boundary_d;
+
+   /* We'll find the physical boundary in one direction at a time.
+      This is so that we don't lose boundary points which are adjacent
+      to boundary points of the neighbor boxes. */
+   for ( ds=0; ds<6; ++ds )
+   {
+      boundary_d = hypre_BoxArrayCreate( 0 );
+      ierr += hypre_BoxBoundaryDNT( box, neighbor_boxes, boundary_d,
+                                    ds, thickness[ds] );
+      ierr += hypre_AppendBoxArray( boundary_d, boundary );
+      hypre_BoxArrayDestroy( boundary_d );
+   }
 
    return ierr;
 }
