@@ -113,8 +113,6 @@ int
 HYPRE_SetStructVectorBoxValues( HYPRE_StructVector  vector,
                                 int                *ilower,
                                 int                *iupper,
-                                int                 num_stencil_indices,
-                                int                *stencil_indices,
                                 double             *values              )
 {
    hypre_StructVector *new_vector = (hypre_StructVector *) vector;
@@ -151,8 +149,6 @@ int
 HYPRE_GetStructVectorBoxValues( HYPRE_StructVector  vector,
                                 int                *ilower,
                                 int                *iupper,
-                                int                 num_stencil_indices,
-                                int                *stencil_indices,
                                 double            **values_ptr          )
 {
    hypre_StructVector *new_vector = (hypre_StructVector *) vector;
