@@ -83,7 +83,7 @@ dgsequ(SuperMatrix *A, double *r, double *c, double *rowcnd,
     int i, j, irow;
     double rcmin, rcmax;
     double bignum, smlnum;
-    extern double dlamch_(char *);
+    extern double sludlamch_(char *);
     
     /* Test the input parameters. */
     *info = 0;
@@ -108,7 +108,7 @@ dgsequ(SuperMatrix *A, double *r, double *c, double *rowcnd,
     Aval = Astore->nzval;
     
     /* Get machine constants. */
-    smlnum = dlamch_("S");
+    smlnum = sludlamch_("S");
     bignum = 1. / smlnum;
 
     /* Compute row scale factors. */
