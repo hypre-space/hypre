@@ -114,7 +114,7 @@ int HYPRE_ParAMGSetMeasureType P((HYPRE_Solver solver , int measure_type ));
 int HYPRE_ParAMGSetCycleType P((HYPRE_Solver solver , int cycle_type ));
 int HYPRE_ParAMGSetTol P((HYPRE_Solver solver , double tol ));
 int HYPRE_ParAMGSetNumGridSweeps P((HYPRE_Solver solver , int *num_grid_sweeps ));
-int HYPRE_ParAMGInitGridRelaxation P((int *num_grid_sweeps , int *grid_relax_type , int **grid_relax_points , int coarsen_type ));
+int HYPRE_ParAMGInitGridRelaxation P((int **num_grid_sweeps_ptr , int **grid_relax_type_ptr , int ***grid_relax_points_ptr , int coarsen_type , double **relax_weights_ptr , int max_levels ));
 int HYPRE_ParAMGSetGridRelaxType P((HYPRE_Solver solver , int *grid_relax_type ));
 int HYPRE_ParAMGSetGridRelaxPoints P((HYPRE_Solver solver , int **grid_relax_points ));
 int HYPRE_ParAMGSetRelaxWeight P((HYPRE_Solver solver , double *relax_weight ));
@@ -132,7 +132,7 @@ int HYPRE_ParCSRCGNRSetup P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_
 int HYPRE_ParCSRCGNRSolve P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x ));
 int HYPRE_ParCSRCGNRSetTol P((HYPRE_Solver solver , double tol ));
 int HYPRE_ParCSRCGNRSetMaxIter P((HYPRE_Solver solver , int max_iter ));
-int HYPRE_ParCSRCGNRSetPrecond P((HYPRE_Solver solver , int (*precond )(), int (*precondT )(), int (*precond_setup )(), void *precond_data ));
+int HYPRE_ParCSRCGNRSetPrecond P((HYPRE_Solver solver , int (*precond )(HYPRE_Solver sol ,HYPRE_ParCSRMatrix matrix ,HYPRE_ParVector b ,HYPRE_ParVector x ), int (*precondT )(HYPRE_Solver sol ,HYPRE_ParCSRMatrix matrix ,HYPRE_ParVector b ,HYPRE_ParVector x ), int (*precond_setup )(HYPRE_Solver sol ,HYPRE_ParCSRMatrix matrix ,HYPRE_ParVector b ,HYPRE_ParVector x ), void *precond_data ));
 int HYPRE_ParCSRCGNRSetLogging P((HYPRE_Solver solver , int logging ));
 int HYPRE_ParCSRCGNRGetNumIterations P((HYPRE_Solver solver , int *num_iterations ));
 int HYPRE_ParCSRCGNRGetFinalRelativeResidualNorm P((HYPRE_Solver solver , double *norm ));
@@ -145,7 +145,7 @@ int HYPRE_ParCSRGMRESSolve P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE
 int HYPRE_ParCSRGMRESSetKDim P((HYPRE_Solver solver , int k_dim ));
 int HYPRE_ParCSRGMRESSetTol P((HYPRE_Solver solver , double tol ));
 int HYPRE_ParCSRGMRESSetMaxIter P((HYPRE_Solver solver , int max_iter ));
-int HYPRE_ParCSRGMRESSetPrecond P((HYPRE_Solver solver , int (*precond )(), int (*precond_setup )(), void *precond_data ));
+int HYPRE_ParCSRGMRESSetPrecond P((HYPRE_Solver solver , int (*precond )(HYPRE_Solver sol ,HYPRE_ParCSRMatrix matrix ,HYPRE_ParVector b ,HYPRE_ParVector x ), int (*precond_setup )(HYPRE_Solver sol ,HYPRE_ParCSRMatrix matrix ,HYPRE_ParVector b ,HYPRE_ParVector x ), void *precond_data ));
 int HYPRE_ParCSRGMRESSetLogging P((HYPRE_Solver solver , int logging ));
 int HYPRE_ParCSRGMRESGetNumIterations P((HYPRE_Solver solver , int *num_iterations ));
 int HYPRE_ParCSRGMRESGetFinalRelativeResidualNorm P((HYPRE_Solver solver , double *norm ));
@@ -159,7 +159,7 @@ int HYPRE_ParCSRPCGSetTol P((HYPRE_Solver solver , double tol ));
 int HYPRE_ParCSRPCGSetMaxIter P((HYPRE_Solver solver , int max_iter ));
 int HYPRE_ParCSRPCGSetTwoNorm P((HYPRE_Solver solver , int two_norm ));
 int HYPRE_ParCSRPCGSetRelChange P((HYPRE_Solver solver , int rel_change ));
-int HYPRE_ParCSRPCGSetPrecond P((HYPRE_Solver solver , int (*precond )(), int (*precond_setup )(), void *precond_data ));
+int HYPRE_ParCSRPCGSetPrecond P((HYPRE_Solver solver , int (*precond )(HYPRE_Solver sol ,HYPRE_ParCSRMatrix matrix ,HYPRE_ParVector b ,HYPRE_ParVector x ), int (*precond_setup )(HYPRE_Solver sol ,HYPRE_ParCSRMatrix matrix ,HYPRE_ParVector b ,HYPRE_ParVector x ), void *precond_data ));
 int HYPRE_ParCSRPCGSetLogging P((HYPRE_Solver solver , int logging ));
 int HYPRE_ParCSRPCGGetNumIterations P((HYPRE_Solver solver , int *num_iterations ));
 int HYPRE_ParCSRPCGGetFinalRelativeResidualNorm P((HYPRE_Solver solver , double *norm ));
@@ -333,7 +333,7 @@ int hypre_KrylovCopyVector P((void *x , void *y ));
 int hypre_KrylovClearVector P((void *x ));
 int hypre_KrylovScaleVector P((double alpha , void *x ));
 int hypre_KrylovAxpy P((double alpha , void *x , void *y ));
-int hypre_KrylovCommInfo P(( void *A , int *my_id, int *num_procs ));
+int hypre_KrylovCommInfo P((void *A , int *my_id , int *num_procs ));
 
 /* transpose.c */
 int hypre_CSRMatrixTranspose P((hypre_CSRMatrix *A , hypre_CSRMatrix **AT ));
