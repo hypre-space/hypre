@@ -298,10 +298,10 @@ zzz_SetStructVectorBoxValues( zzz_StructVector *vector,
    zzz_Index        *dval_stride;
    int               dvali;
 
-   zzz_Index        *loop_index;
    zzz_Index        *loop_size;
 
    int               i;
+   int               loopi, loopj, loopk;
 
    /*-----------------------------------------------------------------------
     * Set up `box_array' by intersecting `box' with the grid boxes
@@ -322,7 +322,6 @@ zzz_SetStructVectorBoxValues( zzz_StructVector *vector,
 
    if (box_array)
    {
-      loop_index = zzz_NewIndex();
       loop_size  = zzz_NewIndex();
  
       data_space = zzz_StructVectorDataSpace(vector);
@@ -348,7 +347,7 @@ zzz_SetStructVectorBoxValues( zzz_StructVector *vector,
             datap = zzz_StructVectorBoxData(vector, i);
  
             zzz_GetBoxSize(box, loop_size);
-            zzz_BoxLoop2(loop_index, loop_size,
+            zzz_BoxLoop2(loopi, loopj, loopk, loop_size,
                          data_box, data_start, data_stride, datai,
                          dval_box, dval_start, dval_stride, dvali,
                          {
@@ -361,7 +360,6 @@ zzz_SetStructVectorBoxValues( zzz_StructVector *vector,
       zzz_FreeIndex(dval_start);
       zzz_FreeIndex(dval_stride);
       zzz_FreeIndex(data_stride);
-      zzz_FreeIndex(loop_index);
       zzz_FreeIndex(loop_size);
    }
  
@@ -387,18 +385,17 @@ zzz_SetStructVectorConstantValues( zzz_StructVector *vector,
 
    zzz_BoxArray     *boxes;
    zzz_Box          *box;
-   zzz_Index        *loop_index;
    zzz_Index        *loop_size;
    zzz_Index        *start;
    zzz_Index        *unit_stride;
 
    int               i;
+   int               loopi, loopj, loopk;
 
    /*-----------------------------------------------------------------------
     * Set the vector coefficients
     *-----------------------------------------------------------------------*/
 
-   loop_index = zzz_NewIndex();
    loop_size  = zzz_NewIndex();
  
    unit_stride = zzz_NewIndex();
@@ -414,14 +411,13 @@ zzz_SetStructVectorConstantValues( zzz_StructVector *vector,
       vp = zzz_StructVectorBoxData(vector, i);
  
       zzz_GetBoxSize(box, loop_size);
-      zzz_BoxLoop1(loop_index, loop_size,
+      zzz_BoxLoop1(loopi, loopj, loopk, loop_size,
                    v_data_box, start, unit_stride, vi,
                    {
                       vp[vi] = values;
                    });
    }
 
-   zzz_FreeIndex(loop_index);
    zzz_FreeIndex(loop_size);
    zzz_FreeIndex(unit_stride);
 
@@ -446,18 +442,17 @@ zzz_ClearStructVectorGhostValues( zzz_StructVector *vector )
    zzz_Box          *box;
    zzz_BoxArray     *diff_boxes;
    zzz_Box          *diff_box;
-   zzz_Index        *loop_index;
    zzz_Index        *loop_size;
    zzz_Index        *start;
    zzz_Index        *unit_stride;
 
    int               i, j;
+   int               loopi, loopj, loopk;
 
    /*-----------------------------------------------------------------------
     * Set the vector coefficients
     *-----------------------------------------------------------------------*/
 
-   loop_index = zzz_NewIndex();
    loop_size  = zzz_NewIndex();
  
    unit_stride = zzz_NewIndex();
@@ -478,7 +473,7 @@ zzz_ClearStructVectorGhostValues( zzz_StructVector *vector )
          start = zzz_BoxIMin(diff_box);
 
          zzz_GetBoxSize(diff_box, loop_size);
-         zzz_BoxLoop1(loop_index, loop_size,
+         zzz_BoxLoop1(loopi, loopj, loopk, loop_size,
                       v_data_box, start, unit_stride, vi,
                       {
                          vp[vi] = 0.0;
@@ -487,7 +482,6 @@ zzz_ClearStructVectorGhostValues( zzz_StructVector *vector )
       zzz_FreeBoxArray(diff_boxes);
    }
 
-   zzz_FreeIndex(loop_index);
    zzz_FreeIndex(loop_size);
    zzz_FreeIndex(unit_stride);
 

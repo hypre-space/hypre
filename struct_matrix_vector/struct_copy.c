@@ -35,14 +35,13 @@ zzz_StructCopy( zzz_StructVector *x,
 
    zzz_BoxArray         *boxes;
    zzz_Box              *box;
-   zzz_Index            *loop_index;
    zzz_Index            *loop_size;
    zzz_Index            *start;
    zzz_Index            *unit_stride;
 
    int                   i;
+   int                   loopi, loopj, loopk;
 
-   loop_index = zzz_NewIndex();
    loop_size  = zzz_NewIndex();
 
    unit_stride = zzz_NewIndex();
@@ -61,7 +60,7 @@ zzz_StructCopy( zzz_StructVector *x,
       yp = zzz_StructVectorBoxData(y, i);
 
       zzz_GetBoxSize(box, loop_size);
-      zzz_BoxLoop2(loop_index, loop_size,
+      zzz_BoxLoop2(loopi, loopj, loopk, loop_size,
                    x_data_box, start, unit_stride, xi,
                    y_data_box, start, unit_stride, yi,
                    {
@@ -69,7 +68,6 @@ zzz_StructCopy( zzz_StructVector *x,
                    });
    }
 
-   zzz_FreeIndex(loop_index);
    zzz_FreeIndex(loop_size);
    zzz_FreeIndex(unit_stride);
 

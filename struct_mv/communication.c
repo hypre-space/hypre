@@ -378,29 +378,40 @@ zzz_GetSBoxType( zzz_SBox     *comm_sbox,
     * Compute comm_sbox_type
     *------------------------------------------------------*/
 
-   old_type = zzz_CTAlloc(MPI_Datatype, 1);
-   new_type = zzz_CTAlloc(MPI_Datatype, 1);
-
-   MPI_Type_contiguous(1, MPI_DOUBLE, old_type);
-   for (i = 0; i < (dim - 1); i++)
+   if (dim == 1)
    {
+      MPI_Type_hvector(length_array[0], 1,
+                       (MPI_Aint)(stride_array[0]*sizeof(double)),
+                       MPI_DOUBLE, comm_sbox_type);
+   }
+   else
+   {
+      old_type = zzz_CTAlloc(MPI_Datatype, 1);
+      new_type = zzz_CTAlloc(MPI_Datatype, 1);
+
+      MPI_Type_hvector(length_array[0], 1,
+                       (MPI_Aint)(stride_array[0]*sizeof(double)),
+                       MPI_DOUBLE, old_type);
+      for (i = 1; i < (dim - 1); i++)
+      {
+         MPI_Type_hvector(length_array[i], 1,
+                          (MPI_Aint)(stride_array[i]*sizeof(double)),
+                          *old_type, new_type);
+
+         MPI_Type_free(old_type);
+         tmp_type = old_type;
+         old_type = new_type;
+         new_type = tmp_type;
+
+      }
       MPI_Type_hvector(length_array[i], 1,
                        (MPI_Aint)(stride_array[i]*sizeof(double)),
-                       *old_type, new_type);
-
+                       *old_type, comm_sbox_type);
       MPI_Type_free(old_type);
-      tmp_type = old_type;
-      old_type = new_type;
-      new_type = tmp_type;
 
+      zzz_TFree(old_type);
+      zzz_TFree(new_type);
    }
-   MPI_Type_hvector(length_array[i], 1,
-                    (MPI_Aint)(stride_array[i]*sizeof(double)),
-                    *old_type, comm_sbox_type);
-   MPI_Type_free(old_type);
-
-   zzz_TFree(old_type);
-   zzz_TFree(new_type);
 }
 
 /*--------------------------------------------------------------------------

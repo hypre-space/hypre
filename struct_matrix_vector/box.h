@@ -160,95 +160,86 @@ int  jinc = (zzz_IndexY(stride)*zzz_BoxSizeX(data_box)\
 int  kinc = (zzz_IndexZ(stride)*zzz_BoxSizeX(data_box)*zzz_BoxSizeY(data_box)\
              - zzz_IndexY(loop_size)*zzz_IndexY(stride)*zzz_BoxSizeX(data_box))
 
-#define zzz_BoxLoop0(loop_index, loop_size,\
-		     body)\
+#define zzz_BoxLoop0(i, j, k, loop_size,\
+                     body)\
 {\
-   for (zzz_IndexZ(loop_index) = 0;\
-	zzz_IndexZ(loop_index) < zzz_IndexZ(loop_size);\
-	zzz_IndexZ(loop_index)++)\
+   int zzz__nx = zzz_IndexX(loop_size);\
+   int zzz__ny = zzz_IndexY(loop_size);\
+   int zzz__nz = zzz_IndexZ(loop_size);\
+   for (k = 0; k < zzz__nz; k++ )\
    {\
-      for (zzz_IndexY(loop_index) = 0;\
-	   zzz_IndexY(loop_index) < zzz_IndexY(loop_size);\
-	   zzz_IndexY(loop_index)++)\
+      for (j = 0; j < zzz__ny; j++ )\
       {\
-	 for (zzz_IndexX(loop_index) = 0;\
-	      zzz_IndexX(loop_index) < zzz_IndexX(loop_size);\
-	      zzz_IndexX(loop_index)++)\
-	 {\
-	    body;\
-	 }\
+         for (i = 0; i < zzz__nx; i++ )\
+         {\
+            body;\
+         }\
       }\
    }\
 }
 
-#define zzz_BoxLoop1(loop_index, loop_size,\
-		     data_box1, start1, stride1, i1,\
-		     body)\
+#define zzz_BoxLoop1(i, j, k, loop_size,\
+                     data_box1, start1, stride1, i1,\
+                     body)\
 {\
    zzz_BoxLoopDeclare(loop_size, data_box1, stride1,\
                       zzz__iinc1, zzz__jinc1, zzz__kinc1);\
+   int zzz__nx = zzz_IndexX(loop_size);\
+   int zzz__ny = zzz_IndexY(loop_size);\
+   int zzz__nz = zzz_IndexZ(loop_size);\
    i1 = zzz_BoxIndexRank(data_box1, start1);\
-   for (zzz_IndexZ(loop_index) = 0;\
-	zzz_IndexZ(loop_index) < zzz_IndexZ(loop_size);\
-	zzz_IndexZ(loop_index)++)\
+   for (k = 0; k < zzz__nz; k++ )\
    {\
-      for (zzz_IndexY(loop_index) = 0;\
-	   zzz_IndexY(loop_index) < zzz_IndexY(loop_size);\
-	   zzz_IndexY(loop_index)++)\
+      for (j = 0; j < zzz__ny; j++ )\
       {\
-	 for (zzz_IndexX(loop_index) = 0;\
-	      zzz_IndexX(loop_index) < zzz_IndexX(loop_size);\
-	      zzz_IndexX(loop_index)++)\
-	 {\
-	    body;\
-	    i1 += zzz__iinc1;\
-	 }\
-	 i1 += zzz__jinc1;\
+         for (i = 0; i < zzz__nx; i++ )\
+         {\
+            body;\
+            i1 += zzz__iinc1;\
+         }\
+         i1 += zzz__jinc1;\
       }\
       i1 += zzz__kinc1;\
    }\
 }
 
-#define zzz_BoxLoop2(loop_index, loop_size,\
-		     data_box1, start1, stride1, i1,\
-		     data_box2, start2, stride2, i2,\
-		     body)\
+#define zzz_BoxLoop2(i, j, k, loop_size,\
+                     data_box1, start1, stride1, i1,\
+                     data_box2, start2, stride2, i2,\
+                     body)\
 {\
    zzz_BoxLoopDeclare(loop_size, data_box1, stride1,\
                       zzz__iinc1, zzz__jinc1, zzz__kinc1);\
    zzz_BoxLoopDeclare(loop_size, data_box2, stride2,\
                       zzz__iinc2, zzz__jinc2, zzz__kinc2);\
+   int zzz__nx = zzz_IndexX(loop_size);\
+   int zzz__ny = zzz_IndexY(loop_size);\
+   int zzz__nz = zzz_IndexZ(loop_size);\
    i1 = zzz_BoxIndexRank(data_box1, start1);\
    i2 = zzz_BoxIndexRank(data_box2, start2);\
-   for (zzz_IndexZ(loop_index) = 0;\
-	zzz_IndexZ(loop_index) < zzz_IndexZ(loop_size);\
-	zzz_IndexZ(loop_index)++)\
+   for (k = 0; k < zzz__nz; k++ )\
    {\
-      for (zzz_IndexY(loop_index) = 0;\
-	   zzz_IndexY(loop_index) < zzz_IndexY(loop_size);\
-	   zzz_IndexY(loop_index)++)\
+      for (j = 0; j < zzz__ny; j++ )\
       {\
-	 for (zzz_IndexX(loop_index) = 0;\
-	      zzz_IndexX(loop_index) < zzz_IndexX(loop_size);\
-	      zzz_IndexX(loop_index)++)\
-	 {\
-	    body;\
-	    i1 += zzz__iinc1;\
-	    i2 += zzz__iinc2;\
-	 }\
-	 i1 += zzz__jinc1;\
-	 i2 += zzz__jinc2;\
+         for (i = 0; i < zzz__nx; i++ )\
+         {\
+            body;\
+            i1 += zzz__iinc1;\
+            i2 += zzz__iinc2;\
+         }\
+         i1 += zzz__jinc1;\
+         i2 += zzz__jinc2;\
       }\
       i1 += zzz__kinc1;\
       i2 += zzz__kinc2;\
    }\
 }
 
-#define zzz_BoxLoop3(loop_index, loop_size,\
-		     data_box1, start1, stride1, i1,\
-		     data_box2, start2, stride2, i2,\
-		     data_box3, start3, stride3, i3,\
-		     body)\
+#define zzz_BoxLoop3(i, j, k, loop_size,\
+                     data_box1, start1, stride1, i1,\
+                     data_box2, start2, stride2, i2,\
+                     data_box3, start3, stride3, i3,\
+                     body)\
 {\
    zzz_BoxLoopDeclare(loop_size, data_box1, stride1,\
                       zzz__iinc1, zzz__jinc1, zzz__kinc1);\
@@ -256,29 +247,26 @@ int  kinc = (zzz_IndexZ(stride)*zzz_BoxSizeX(data_box)*zzz_BoxSizeY(data_box)\
                       zzz__iinc2, zzz__jinc2, zzz__kinc2);\
    zzz_BoxLoopDeclare(loop_size, data_box3, stride3,\
                       zzz__iinc3, zzz__jinc3, zzz__kinc3);\
+   int zzz__nx = zzz_IndexX(loop_size);\
+   int zzz__ny = zzz_IndexY(loop_size);\
+   int zzz__nz = zzz_IndexZ(loop_size);\
    i1 = zzz_BoxIndexRank(data_box1, start1);\
    i2 = zzz_BoxIndexRank(data_box2, start2);\
    i3 = zzz_BoxIndexRank(data_box3, start3);\
-   for (zzz_IndexZ(loop_index) = 0;\
-	zzz_IndexZ(loop_index) < zzz_IndexZ(loop_size);\
-	zzz_IndexZ(loop_index)++)\
+   for (k = 0; k < zzz__nz; k++ )\
    {\
-      for (zzz_IndexY(loop_index) = 0;\
-	   zzz_IndexY(loop_index) < zzz_IndexY(loop_size);\
-	   zzz_IndexY(loop_index)++)\
+      for (j = 0; j < zzz__ny; j++ )\
       {\
-	 for (zzz_IndexX(loop_index) = 0;\
-	      zzz_IndexX(loop_index) < zzz_IndexX(loop_size);\
-	      zzz_IndexX(loop_index)++)\
-	 {\
-	    body;\
-	    i1 += zzz__iinc1;\
-	    i2 += zzz__iinc2;\
-	    i3 += zzz__iinc3;\
-	 }\
-	 i1 += zzz__jinc1;\
-	 i2 += zzz__jinc2;\
-	 i3 += zzz__jinc3;\
+         for (i = 0; i < zzz__nx; i++ )\
+         {\
+            body;\
+            i1 += zzz__iinc1;\
+            i2 += zzz__iinc2;\
+            i3 += zzz__iinc3;\
+         }\
+         i1 += zzz__jinc1;\
+         i2 += zzz__jinc2;\
+         i3 += zzz__jinc3;\
       }\
       i1 += zzz__kinc1;\
       i2 += zzz__kinc2;\
@@ -286,12 +274,12 @@ int  kinc = (zzz_IndexZ(stride)*zzz_BoxSizeX(data_box)*zzz_BoxSizeY(data_box)\
    }\
 }
 
-#define zzz_BoxLoop4(loop_index, loop_size,\
-		     data_box1, start1, stride1, i1,\
-		     data_box2, start2, stride2, i2,\
-		     data_box3, start3, stride3, i3,\
-		     data_box4, start4, stride4, i4,\
-		     body)\
+#define zzz_BoxLoop4(i, j, k, loop_size,\
+                     data_box1, start1, stride1, i1,\
+                     data_box2, start2, stride2, i2,\
+                     data_box3, start3, stride3, i3,\
+                     data_box4, start4, stride4, i4,\
+                     body)\
 {\
    zzz_BoxLoopDeclare(loop_size, data_box1, stride1,\
                       zzz__iinc1, zzz__jinc1, zzz__kinc1);\
@@ -301,32 +289,29 @@ int  kinc = (zzz_IndexZ(stride)*zzz_BoxSizeX(data_box)*zzz_BoxSizeY(data_box)\
                       zzz__iinc3, zzz__jinc3, zzz__kinc3);\
    zzz_BoxLoopDeclare(loop_size, data_box4, stride4,\
                       zzz__iinc4, zzz__jinc4, zzz__kinc4);\
+   int zzz__nx = zzz_IndexX(loop_size);\
+   int zzz__ny = zzz_IndexY(loop_size);\
+   int zzz__nz = zzz_IndexZ(loop_size);\
    i1 = zzz_BoxIndexRank(data_box1, start1);\
    i2 = zzz_BoxIndexRank(data_box2, start2);\
    i3 = zzz_BoxIndexRank(data_box3, start3);\
    i4 = zzz_BoxIndexRank(data_box4, start4);\
-   for (zzz_IndexZ(loop_index) = 0;\
-	zzz_IndexZ(loop_index) < zzz_IndexZ(loop_size);\
-	zzz_IndexZ(loop_index)++)\
+   for (k = 0; k < zzz__nz; k++ )\
    {\
-      for (zzz_IndexY(loop_index) = 0;\
-	   zzz_IndexY(loop_index) < zzz_IndexY(loop_size);\
-	   zzz_IndexY(loop_index)++)\
+      for (j = 0; j < zzz__ny; j++ )\
       {\
-	 for (zzz_IndexX(loop_index) = 0;\
-	      zzz_IndexX(loop_index) < zzz_IndexX(loop_size);\
-	      zzz_IndexX(loop_index)++)\
-	 {\
-	    body;\
-	    i1 += zzz__iinc1;\
-	    i2 += zzz__iinc2;\
-	    i3 += zzz__iinc3;\
-	    i4 += zzz__iinc4;\
-	 }\
-	 i1 += zzz__jinc1;\
-	 i2 += zzz__jinc2;\
-	 i3 += zzz__jinc3;\
-	 i4 += zzz__jinc4;\
+         for (i = 0; i < zzz__nx; i++ )\
+         {\
+            body;\
+            i1 += zzz__iinc1;\
+            i2 += zzz__iinc2;\
+            i3 += zzz__iinc3;\
+            i4 += zzz__iinc4;\
+         }\
+         i1 += zzz__jinc1;\
+         i2 += zzz__jinc2;\
+         i3 += zzz__jinc3;\
+         i4 += zzz__jinc4;\
       }\
       i1 += zzz__kinc1;\
       i2 += zzz__kinc2;\

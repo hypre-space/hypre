@@ -274,7 +274,6 @@ zzz_InitializeStructMatrixData( zzz_StructMatrix *matrix,
 {
    zzz_BoxArray *data_boxes;
    zzz_Box      *data_box;
-   zzz_Index    *loop_index;
    zzz_Index    *loop_size;
    zzz_Index    *index;
    zzz_Index    *start;
@@ -282,6 +281,7 @@ zzz_InitializeStructMatrixData( zzz_StructMatrix *matrix,
    double       *datap;
    int           datai;
    int           i;
+   int           loopi, loopj, loopk;
 
    zzz_StructMatrixData(matrix) = data;
 
@@ -292,7 +292,6 @@ zzz_InitializeStructMatrixData( zzz_StructMatrix *matrix,
     * in the ghost region.
     *-------------------------------------------------*/
 
-   loop_index = zzz_NewIndex();
    loop_size = zzz_NewIndex();
 
    index = zzz_NewIndex();
@@ -311,7 +310,7 @@ zzz_InitializeStructMatrixData( zzz_StructMatrix *matrix,
          start = zzz_BoxIMin(data_box);
 
          zzz_GetBoxSize(data_box, loop_size);
-         zzz_BoxLoop1(loop_index, loop_size,
+         zzz_BoxLoop1(loopi, loopj, loopk, loop_size,
                       data_box, start, stride, datai,
                       {
                          datap[datai] = 1.0;
@@ -323,7 +322,6 @@ zzz_InitializeStructMatrixData( zzz_StructMatrix *matrix,
    zzz_FreeIndex(index);
    zzz_FreeIndex(stride);
 
-   zzz_FreeIndex(loop_index);
    zzz_FreeIndex(loop_size);
 }
 
@@ -425,10 +423,10 @@ zzz_SetStructMatrixBoxValues( zzz_StructMatrix *matrix,
    zzz_Index        *dval_stride;
    int               dvali;
 
-   zzz_Index        *loop_index;
    zzz_Index        *loop_size;
 
    int               i, s;
+   int               loopi, loopj, loopk;
 
    /*-----------------------------------------------------------------------
     * Set up `box_array' by intersecting `box' with the grid boxes
@@ -449,7 +447,6 @@ zzz_SetStructMatrixBoxValues( zzz_StructMatrix *matrix,
 
    if (box_array)
    {
-      loop_index = zzz_NewIndex();
       loop_size  = zzz_NewIndex();
 
       data_space = zzz_StructMatrixDataSpace(matrix);
@@ -479,7 +476,7 @@ zzz_SetStructMatrixBoxValues( zzz_StructMatrix *matrix,
                datap = zzz_StructMatrixBoxData(matrix, i, stencil_indices[s]);
 
                zzz_GetBoxSize(box, loop_size);
-               zzz_BoxLoop2(loop_index, loop_size,
+               zzz_BoxLoop2(loopi, loopj, loopk, loop_size,
                             data_box, data_start, data_stride, datai,
                             dval_box, dval_start, dval_stride, dvali,
                             {
@@ -495,7 +492,6 @@ zzz_SetStructMatrixBoxValues( zzz_StructMatrix *matrix,
       zzz_FreeIndex(dval_start);
       zzz_FreeIndex(dval_stride);
       zzz_FreeIndex(data_stride);
-      zzz_FreeIndex(loop_index);
    }
 
    zzz_FreeBoxArray(box_array);
