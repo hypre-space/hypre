@@ -109,11 +109,19 @@ int main(int argc, char *argv[])
 	{
             if (mype == 0)
             {
+#if PARASAILS_EXT_PATTERN
                 printf("Enter parameters threshg, thresh, nlevels, "
 	            "filter, beta:\n");
 	        fflush(NULL);
                 scanf("%lf %lf %d %lf %lf", &threshg, &thresh, &nlevels, 
 		    &filter, &loadbal);
+#else
+                printf("Enter parameters thresh, nlevels, "
+	            "filter, beta:\n");
+	        fflush(NULL);
+                scanf("%lf %d %lf %lf", &thresh, &nlevels, 
+		    &filter, &loadbal);
+#endif
 	    }
 
 	    MPI_Bcast(&threshg, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
@@ -137,8 +145,11 @@ int main(int argc, char *argv[])
 
         ps->loadbal_beta = loadbal;
 
-        /*ParaSailsSetupPattern(ps, A, thresh, nlevels);*/
+#if PARASAILS_EXT_PATTERN
         ParaSailsSetupPatternExt(ps, A, threshg, thresh, nlevels);
+#else
+        ParaSailsSetupPattern(ps, A, thresh, nlevels);
+#endif
 
         time1 = MPI_Wtime();
 	setup_time = time1-time0;
