@@ -20,7 +20,7 @@ Lawrence Livermore National Laboratory
 //@{
 	//@Include:dev_requirements.dxx
 	//@Include:dev_design.dxx
-	//@Include:dev_error_handle.dxx
+	//@Include:dev_error_handling.dxx
 	//@Include:dev_makefile.dxx
 	//@Include:dev_documentation.dxx
 	//@Include:dev_coding.dxx

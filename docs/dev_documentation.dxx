@@ -1,16 +1,13 @@
-/** @name	Documentation Standards
-  DOC++ is to be used for documentation.
+/** @name Documentation Standards
+DOC++ is to be used for documentation.
 
-  Example documentation for C routines can be found in the directory
-  `struct_matrix_vector' in the files:
-
-     DevManual.dxx
-     communication.c
-
-  Initial user's and developer's manuals need to be constructed in
-  DOC++ to get things started.
-
-  The above `.dxx' file could serve as a beginning developer's manual.
+Example documentation for C routines can be found in the directory
+#struct_matrix_vector# in the files:
+\begin{verbatim}
+   communication.c
+   communication_info.c
+   computation.c
+\end{verbatim}
 
 */
 

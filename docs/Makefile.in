@@ -13,62 +13,62 @@
 srcdir = @srcdir@
 VPATH = @srcdir@
 
-CC = @CC@
-
-CINCLUDES=@INCLUDES@ @MPIINCLUDE@
-COPT= @COPT@
-CDEBUG = @CDEBUG@
-CDEFS = @HYPREDEFS@ -DHYPRE_TIMING
-
-CFLAGS = \
- -I../utilities\
- -I../struct_matrix_vector\
- -I../struct_linear_solvers\
- ${CINCLUDES}\
- ${COPT}\
- ${CDEBUG}\
- ${CDEFS}
- 
-MPILIBFLAGS = @MPILIBDIRS@ @MPILIBS@ @MPIFLAGS@ 
-LIBFLAGS = @LIBDIRS@ @LIBS@
-LDLIBFLAGS = @LDLIBDIRS@ @LDLIBS@
-
-LFLAGS =\
- -L.\
- -L../struct_matrix_vector\
- -L../struct_linear_solvers\
- -L../utilities\
- -lHYPRE_ls\
- -lHYPRE_mv\
- -lHYPRE_utilities\
- ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
-
 ##################################################################
 # Targets
 ##################################################################
 
-all: html
+all: html ps
 
 install: all
 
 clean:
-	@rm -f *.html
-	@rm -f developers_manual.tex
+	@rm -f users_manual.dvi
+	@rm -f developers_manual.dvi
 
 veryclean: clean
-	@rm -r html 
+	@rm -fr users_manual
+	@rm -f users_manual.tex
+	@rm -f users_manual.ps
+	@rm -fr developers_manual
 	@rm -f developers_manual.tex
-	@rm -f developers_manual.dvi
 	@rm -f developers_manual.ps
 
 ##################################################################
 # Rules
 ##################################################################
 
-html: 
-	doc++ -d html developers_manual.dxx
+html: users_html developers_html
 
-developers_manual.tex:
+ps: users_ps developers_ps
+
+##########
+
+users: users_html users_ps
+
+users_html:
+	doc++ -d users_manual users_manual.dxx
+
+users_ps: users_tex
+	latex users_manual
+	latex users_manual
+	dvips -o users_manual.ps users_manual
+
+users_tex:
+	doc++ -t -o users_manual.tex users_manual.dxx
+
+##########
+
+developers: developers_html developers_ps
+
+developers_html:
+	doc++ -d developers_manual developers_manual.dxx
+
+developers_ps: developers_tex
+	latex developers_manual
+	latex developers_manual
+	dvips -o developers_manual.ps developers_manual
+
+developers_tex:
 	doc++ -t -o developers_manual.tex developers_manual.dxx
 
 ##################################################################

@@ -15,22 +15,22 @@ test daily code changes.
 /*==========================================================================*/
 /** @name How is autotest structured?
 
-The {\tt linear_solvers/test/} subdirectory (in the repository) contains
+The #linear_solvers/test/# subdirectory (in the repository) contains
 \begin{enumerate}
-\item various driver programs ({\tt .c} files)
+\item various driver programs (#.c# files)
 \item bourne shell scripts to run the driver programs
-\item {\tt test_drivers.sh} script calls all other scripts and writes their
-results and errors to appropriate {\tt .log} files.
-\item the {\tt autotest} script (note: this copy is not used by the cron job).
+\item #test_drivers.sh# script calls all other scripts and writes their
+results and errors to appropriate #.log# files.
+\item the #autotest# script (note: this copy is not used by the cron job).
 \end{enumerate}
 
-The {\tt /home/casc/software/hypre/autotest} directory contains
+The #/home/casc/software/hypre/autotest# directory contains
 \begin{enumerate}
-\item the {\tt autotest} script which is used by the cron job.
-\item the {\tt linear_solvers} directory which {\tt autotest} checks
+\item the #autotest# script which is used by the cron job.
+\item the #linear_solvers# directory which #autotest# checks
 out of the repository
-\item the {\tt autotest} script checks out the repository, configures,
-makes the library, calls the {\tt test_drivers.sh} script in the newly
+\item the #autotest# script checks out the repository, configures,
+makes the library, calls the #test_drivers.sh# script in the newly
 checked out directory structure, and sets permissions.
 This file should seldom change.
 \end{enumerate}
@@ -53,18 +53,18 @@ This file should seldom change.
 /** @name How to modify autotest
 
 \begin{enumerate}
-\item create and test a driver program, e.g. {\tt somedriver.c}
+\item create and test a driver program, e.g. #somedriver.c#
 \item create and test a Bourne shell script to run the driver,
-{\tt somedriver.sh}
+#somedriver.sh#
 \item create a file with the email addresses of the appropriate
-developers in it, {\tt somedriver.email}
-\item add {\tt somedriver} to the {\tt TEST_DRIVERS} variable
-in the {\tt test_drivers.sh} file
+developers in it, #somedriver.email#
+\item add #somedriver# to the #TEST_DRIVERS# variable
+in the #test_drivers.sh# file
 \item modify the Makefile.in file in the test subdirectory as follows:
   \begin{itemize}
-  \item add the necessary information to the {\tt LFLAGS} variable
-  \item add the necessary target information to the {\tt Targets} section
-  \item add the necessary rules to the {\tt Rules} section
+  \item add the necessary information to the #LFLAGS# variable
+  \item add the necessary target information to the #Targets# section
+  \item add the necessary rules to the #Rules# section
   \end{itemize}
 \item commit all added and modified files (there is no need to
 modify autotest or the crontab file)
