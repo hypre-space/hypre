@@ -185,8 +185,10 @@ int
 HYPRE_PCGSetLogging( HYPRE_Solver solver,
                      int          level )
 {
-   return( hypre_PCGSetPrintLevel( (void *) solver, level ) );
-   return( hypre_PCGSetLogLevel( (void *) solver, level ) );
+   int ierr = 0;
+   ierr += hypre_PCGSetPrintLevel( (void *) solver, level );
+   ierr += hypre_PCGSetLogLevel( (void *) solver, level );
+   return ierr;
 }
 
 /*--------------------------------------------------------------------------

@@ -120,7 +120,7 @@ hypre_PCGDestroy( void *pcg_vdata )
 
    if (pcg_data)
    {
-      if ((pcg_data -> printlevel) > 0)
+      if ( (pcg_data->log_level>0) || (pcg_data->printlevel) > 0 )
       {
          hypre_TFreeF( pcg_data -> norms, pcg_functions );
          hypre_TFreeF( pcg_data -> rel_norms, pcg_functions );
@@ -192,7 +192,7 @@ hypre_PCGSetup( void *pcg_vdata,
     * Allocate space for log info
     *-----------------------------------------------------*/
 
-   if ( (pcg_data -> log_level) > 0  || (pcg_data->printlevel)>0 ) 
+   if ( (pcg_data->log_level)>0  || (pcg_data->printlevel)>0 ) 
    {
       (pcg_data -> norms)     = hypre_CTAllocF( double, max_iter + 1,
                                                 pcg_functions);
@@ -316,7 +316,7 @@ hypre_PCGSolve( void *pcg_vdata,
    {
       /* Set x equal to zero and return */
       (*(pcg_functions->CopyVector))(b, x);
-      if (printlevel > 0)
+      if (log_level>0 || printlevel>0)
       {
          norms[0]     = 0.0;
          rel_norms[i] = 0.0;
@@ -339,14 +339,14 @@ hypre_PCGSolve( void *pcg_vdata,
    gamma = (*(pcg_functions->InnerProd))(r,p);
 
    /* Set initial residual norm */
-   if (printlevel > 0 || cf_tol > 0.0)
+   if ( log_level>0 || printlevel > 0 || cf_tol > 0.0 )
    {
       if (two_norm)
          i_prod_0 = (*(pcg_functions->InnerProd))(r,r);
       else
          i_prod_0 = gamma;
 
-      if (printlevel > 0) norms[0] = sqrt(i_prod_0);
+      if ( log_level>0 || printlevel>0 ) norms[0] = sqrt(i_prod_0);
    }
    if ( printlevel > 1 && my_id==0 )  /* formerly for par_csr only */
    {
@@ -412,7 +412,7 @@ hypre_PCGSolve( void *pcg_vdata,
 #endif
  
       /* print norm info */
-      if (printlevel > 0)
+      if ( log_level>0 || printlevel>0 )
       {
          norms[i]     = sqrt(i_prod);
          rel_norms[i] = bi_prod ? sqrt(i_prod/bi_prod) : 0;
