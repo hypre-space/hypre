@@ -29,6 +29,7 @@ CFLAGS = \
  ${EUCLID_CFLAGS} \
  ${EUCLID_INCLUDES} \
  ${C_COMPILE_FLAGS}\
+ -I../..\
  -I$(srcdir)\
  -I$(srcdir)/../..\
  -I$(srcdir)/../../utilities\
