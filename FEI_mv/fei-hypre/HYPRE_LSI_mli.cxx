@@ -93,6 +93,7 @@ typedef struct HYPRE_LSI_MLI_Struct
    int      coarseSolverNSweeps_; /* number of sweeps (if iterative used) */
    double   *coarseSolverWts_;    /* relaxation weight (if Jacobi used) */
    int      minCoarseSize_;       /* minimum coarse grid size */
+   int      scalar_;              /* aggregate in a scalar manner */
    int      nodeDOF_;             /* node degree of freedom */
    int      spaceDim_;            /* 2D or 3D */
    int      nSpaceDim_;           /* number of null vectors */
@@ -173,6 +174,7 @@ int HYPRE_LSI_MLICreate( MPI_Comm comm, HYPRE_Solver *solver )
    mli_object->coarseSolverNSweeps_ = 0;
    mli_object->coarseSolverWts_     = NULL;
    mli_object->minCoarseSize_       = 1;
+   mli_object->scalar_              = 0;
    mli_object->nodeDOF_             = 1;
    mli_object->spaceDim_            = 1;
    mli_object->nSpaceDim_           = 1;
@@ -289,6 +291,11 @@ int HYPRE_LSI_MLISetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
    sprintf(paramString, "setStrengthThreshold %f",
            mli_object->strengthThreshold_);
    method->setParams( paramString, 0, NULL );
+   if ( mli_object->scalar_ == 1 )
+   {
+      strcpy(paramString, "scalar");
+      method->setParams( paramString, 0, NULL );
+   }
    if ( mli_object->symmetric_ == 0 )
    {
       strcpy(paramString, "nonsymmetric");
@@ -473,8 +480,8 @@ int HYPRE_LSI_MLISetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
    {
       targc    = 4;
       targv[0] = (char *) &(mli_object->nodeDOF_);
-      if ( mli_object->nSpaceDim_ > mli_object->nodeDOF_ ) 
-         mli_object->nSpaceDim_ = mli_object->nodeDOF_; 
+      //if ( mli_object->nSpaceDim_ > mli_object->nodeDOF_ ) 
+      //   mli_object->nSpaceDim_ = mli_object->nodeDOF_; 
       targv[1] = (char *) &(mli_object->nSpaceDim_);
       targv[2] = (char *) NULL;
       targv[3] = (char *) &iZero;
@@ -607,6 +614,7 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
          printf("\t      smootherFindOmega \n");
          printf("\t      minCoarseSize <d> \n");
          printf("\t      Pweight <f> \n");
+         printf("\t      scalar\n");
          printf("\t      nodeDOF <d> \n");
          printf("\t      nullSpaceDim <d> \n");
          printf("\t      useNodalCoord <on,off> \n");
@@ -720,6 +728,10 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
    {
       sscanf(paramString,"%s %s %lg",param1,param2, &(mli_object->Pweight_));
       if ( mli_object->Pweight_ < 0. ) mli_object->Pweight_ = 1.333;
+   }
+   else if ( !strcasecmp(param2, "scalar") )
+   {
+      mli_object->scalar_ = 1;
    }
    else if ( !strcasecmp(param2, "nodeDOF") )
    {
@@ -1188,9 +1200,6 @@ int HYPRE_LSI_MLILoadNodalCoordinates(HYPRE_Solver solver, int nNodes,
    procNRows = new int[nprocs+1];
    iTempArray = new int[nprocs];
    for ( iP = 0; iP <= nprocs; iP++ ) procNRows[iP] = 0;
-/*
-procNRows[mypid] = nNodes * nodeDOF;
-*/
    procNRows[mypid] = localNRows;
    MPI_Allreduce(procNRows,iTempArray,nprocs,MPI_INT,MPI_SUM,mpiComm);
    procNRows[0] = 0;

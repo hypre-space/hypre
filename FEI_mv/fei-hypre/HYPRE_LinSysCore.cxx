@@ -211,6 +211,7 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
    gmresDim_           = 100;  // restart size in GMRES
    fgmresUpdateTol_    = 0;
 
+   amgMaxLevels_       = 30;   // default max number of levels
    amgCoarsenType_     = 0;    // default coarsening
    amgMeasureType_     = 0;    // local measure
    amgSystemSize_      = 1;    // system size

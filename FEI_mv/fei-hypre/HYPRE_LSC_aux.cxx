@@ -252,6 +252,7 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
          printf("    - polyorder <d>\n");
          printf("    - superluOrdering <natural,mmd>\n");
          printf("    - superluScale <y,n>\n");
+         printf("    - amgMaxLevels <d>\n");
          printf("    - amgCoarsenType <cljp,falgout,ruge,ruge3c>\n");
          printf("    - amgMeasureType <global,local>\n");
          printf("    - amgRelaxType <jacobi,gsFast,hybrid,hybridsym>\n");
@@ -823,6 +824,19 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
             printf("       HYPRE_LSC::parameters superluScale = %s\n",
                    param2);
+      }
+
+      //----------------------------------------------------------------
+      // amg preconditoner : coarsening type 
+      //----------------------------------------------------------------
+
+      else if ( !strcasecmp(param1, "amgMaxLevels") )
+      {
+         sscanf(params[i],"%s %d", param, &amgMaxLevels_);
+         if ( amgMaxLevels_ <= 0 ) amgMaxLevels_ = 30;
+         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+            printf("       HYPRE_LSC::parameters amgMaxLevels = %d\n",
+                   amgMaxLevels_);
       }
 
       //----------------------------------------------------------------
@@ -3071,6 +3085,7 @@ void HYPRE_LinSysCore::setupPreconBoomerAMG()
 
    if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
    {
+      printf("AMG max levels   = %d\n", amgMaxLevels_);
       printf("AMG coarsen type = %d\n", amgCoarsenType_);
       printf("AMG measure type = %d\n", amgMeasureType_);
       printf("AMG threshold    = %e\n", amgStrongThreshold_);
@@ -3095,6 +3110,7 @@ void HYPRE_LinSysCore::setupPreconBoomerAMG()
    }
    if ( amgSystemSize_ > 1 )
       HYPRE_BoomerAMGSetNumFunctions(HYPrecon_, amgSystemSize_);
+   HYPRE_BoomerAMGSetMaxLevels(HYPrecon_, amgMaxLevels_);
    HYPRE_BoomerAMGSetCoarsenType(HYPrecon_, amgCoarsenType_);
    HYPRE_BoomerAMGSetMeasureType(HYPrecon_, amgMeasureType_);
    HYPRE_BoomerAMGSetStrongThreshold(HYPrecon_,amgStrongThreshold_);

@@ -585,6 +585,7 @@ class HYPRE_LinSysCore
    // preconditioner specific variables
    // ----------------------------------------------------------------------
 
+   int             amgMaxLevels_;
    int             amgCoarsenType_;
    int             amgMaxIter_;
    int             amgMeasureType_;
