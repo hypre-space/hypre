@@ -5,12 +5,9 @@
 #include "utilities.h"
 #include "HYPRE_sstruct_ls.h"
 #include "krylov.h"
+#include "sstruct_mv.h"
  
 #define DEBUG 0
-
-#if DEBUG
-#include "sstruct_mv.h"
-#endif
 
 /*--------------------------------------------------------------------------
  * Data structures
@@ -1270,6 +1267,34 @@ GetVariableBox( Index  cell_ilower,
    return ierr;
 }
  
+/*--------------------------------------------------------------------------
+ * Routine to load cosine function
+ *--------------------------------------------------------------------------*/
+
+int
+SetCosineVector(   double  scale,
+                   Index   ilower,
+                   Index   iupper,
+                   double *values)
+{
+   int          i,j,k;
+   int          count = 0;
+
+   for (k = ilower[2]; k <= iupper[2]; k++)
+   {
+      for (j = ilower[1]; j <= iupper[1]; j++)
+      {
+         for (i = ilower[0]; i <= iupper[0]; i++)
+         {
+            values[count] = scale * cos((i+j+k)/10.0);
+            count++;
+         }
+      }
+   }
+
+   return(0);
+}
+
 /*--------------------------------------------------------------------------
  * Print usage info
  *--------------------------------------------------------------------------*/
@@ -2675,32 +2700,4 @@ main( int   argc,
    MPI_Finalize();
 
    return (0);
-}
-
-/*--------------------------------------------------------------------------
- * Routine to load cosine function
- *--------------------------------------------------------------------------*/
-
-int
-SetCosineVector(   double  scale,
-                   Index   ilower,
-                   Index   iupper,
-                   double *values)
-{
-   int          i,j,k;
-   int          count = 0;
-
-   for (k = ilower[2]; k <= iupper[2]; k++)
-   {
-      for (j = ilower[1]; j <= iupper[1]; j++)
-      {
-         for (i = ilower[0]; i <= iupper[0]; i++)
-         {
-            values[count] = scale * cos((i+j+k)/10.0);
-            count++;
-         }
-      }
-   }
-
-   return(0);
 }
