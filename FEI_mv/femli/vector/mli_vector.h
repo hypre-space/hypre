@@ -12,8 +12,8 @@
  *
  *****************************************************************************/
 
-#ifndef __MLIVECTORH__
-#define __MLIVECTORH__
+#ifndef __MLIVECTOR_H__
+#define __MLIVECTOR_H__
 
 class MLI_Vector;
 class MLI_Matrix;
