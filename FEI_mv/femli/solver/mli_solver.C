@@ -49,6 +49,10 @@ MLI_Solver::MLI_Solver( int sid )
            strcpy( solver_name, "SGS" );
            solver_id  = MLI_SOLVER_SGS_ID;
            break;
+      case MLI_SOLVER_CGSGS_ID :
+           strcpy( solver_name, "CGSGS" );
+           solver_id  = MLI_SOLVER_CGSGS_ID;
+           break;
       case MLI_SOLVER_PARASAILS_ID :
 #ifdef MLI_PARASAILS
            strcpy( solver_name, "ParaSails" );
@@ -114,6 +118,11 @@ MLI_Solver::MLI_Solver( char *str )
       strcpy( solver_name, str );
       solver_id  = MLI_SOLVER_SGS_ID;
    }
+   else if ( !strcasecmp(str, "CGSGS" ) )
+   {
+      strcpy( solver_name, str );
+      solver_id  = MLI_SOLVER_CGSGS_ID;
+   }
    else if ( !strcasecmp(str, "ParaSails" ) )
    {
 #ifdef MLI_PARASAILS
@@ -167,11 +176,18 @@ MLI_Solver::MLI_Solver( char *str )
 
 MLI_Solver *MLI_Solver_CreateFromName( char *str )
 {
+   char       param_string[20];
    MLI_Solver *solver_ptr=NULL;
 
    if      (!strcasecmp(str, "Jacobi")) solver_ptr = new MLI_Solver_Jacobi();
    else if (!strcasecmp(str, "GS"))     solver_ptr = new MLI_Solver_GS();
    else if (!strcasecmp(str, "SGS"))    solver_ptr = new MLI_Solver_SGS();
+   else if (!strcasecmp(str, "CGSGS"))
+   {
+      solver_ptr = new MLI_Solver_SGS();
+      strcpy( param_string, "useCG" );
+      solver_ptr->setParams( param_string, 0, NULL );
+   }
    else if (!strcasecmp(str, "ParaSails")) 
    {
 #ifdef MLI_PARASAILS
@@ -216,6 +232,7 @@ MLI_Solver *MLI_Solver_CreateFromName( char *str )
 
 MLI_Solver *MLI_Solver_CreateFromID( int solver_id )
 {
+   char       param_string[20];
    MLI_Solver *solver_ptr=NULL;
 
    switch ( solver_id )
@@ -228,6 +245,11 @@ MLI_Solver *MLI_Solver_CreateFromID( int solver_id )
            break;
       case MLI_SOLVER_SGS_ID :
            solver_ptr = new MLI_Solver_SGS();
+           break;
+      case MLI_SOLVER_CGSGS_ID :
+           solver_ptr = new MLI_Solver_SGS();
+           strcpy( param_string, "useCG" );
+           solver_ptr->setParams( param_string, 0, NULL );
            break;
       case MLI_SOLVER_PARASAILS_ID :
 #ifdef MLI_PARASAILS
@@ -265,6 +287,7 @@ MLI_Solver *MLI_Solver_CreateFromID( int solver_id )
            printf("\t %5d (Jacobi)       \n", MLI_SOLVER_JACOBI_ID);
            printf("\t %5d (GS)           \n", MLI_SOLVER_GS_ID);
            printf("\t %5d (SGS)          \n", MLI_SOLVER_SGS_ID);
+           printf("\t %5d (CGSGS)        \n", MLI_SOLVER_CGSGS_ID);
            printf("\t %5d (ParaSails)    \n", MLI_SOLVER_PARASAILS_ID);
            printf("\t %5d (BSGS)         \n", MLI_SOLVER_BSGS_ID);
            printf("\t %5d (MLS)          \n", MLI_SOLVER_MLS_ID);
