@@ -21,6 +21,8 @@ CXXFLAGS = \
  -I../isis-mv\
  -I../../IJ_matrix_vector\
  -I../../utilities\
+ -I../../parcsr_matrix_vector\
+ -I../../parcsr_linear_solvers\
  -I../..
 
 HEADERS =\

@@ -62,12 +62,20 @@ class HYPRE_SLE : public BASE_SLE {
 
 private:
 
+    MPI_Comm        comm;
+
+    int first_row;
+    int last_row;
+
     HYPRE_IJMatrix  A;
     HYPRE_IJVector  b;
     HYPRE_IJVector  x;
 
-    MPI_Comm        comm;
+    HYPRE_Solver pcg_solver;
+    HYPRE_Solver pcg_precond;
 
+    int num_iterations;
+    double final_res_norm;
 };
 
 #endif

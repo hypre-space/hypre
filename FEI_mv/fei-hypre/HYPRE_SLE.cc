@@ -7,6 +7,7 @@
  * $Revision$
  *********************************************************************EHEADER*/
 
+
 #include <iostream.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,12 +17,7 @@
 #include <fstream.h>
 #include <math.h>
 
-
-#if 0 // was ifdef SER
-#include "mpiuni.h" // was mpiuni/mpi.h
-#else
 #include "mpi.h"
-#endif
 
 // include matrix-vector files from ISIS++
 
@@ -40,8 +36,10 @@
 #include "HYPRE_IJ_mv.h"
 #include "HYPRE.h" // needed for HYPRE_PARCSR_MATRIX
 
+#include "HYPRE_parcsr_mv.h"
+#include "HYPRE_parcsr_ls.h"
 
-// includes needed for FEI
+// includes needed in order to be able to include BASE_SLE.h
 
 #include "other/basicTypes.h"
 #include "fei.h"
@@ -64,11 +62,15 @@
 
 #include "HYPRE_SLE.h"
 
+
 //------------------------------------------------------------------------------
 HYPRE_SLE::HYPRE_SLE(MPI_Comm PASSED_COMM_WORLD, int masterRank) : 
-    BASE_SLE(PASSED_COMM_WORLD, masterRank) {
-
+  BASE_SLE(PASSED_COMM_WORLD, masterRank)
+{
     comm = PASSED_COMM_WORLD;
+
+    pcg_solver = NULL;
+    pcg_precond = NULL;
 }
 
 //------------------------------------------------------------------------------
@@ -76,70 +78,123 @@ HYPRE_SLE::~HYPRE_SLE() {
 //
 //  Destructor function. Free allocated memory, etc.
 //
-
-    // needed here
     deleteLinearAlgebraCore();
-
 }
 
 
 //------------------------------------------------------------------------------
 void HYPRE_SLE::selectSolver(char *name)
 {
-   
+    if (!strcmp(name, "pcg")) 
+    {
+      HYPRE_ParCSRPCGInitialize(MPI_COMM_WORLD, &pcg_solver);
+      HYPRE_ParCSRPCGSetMaxIter(pcg_solver, 500);
+      HYPRE_ParCSRPCGSetTol(pcg_solver, 1.e-10);
+      HYPRE_ParCSRPCGSetTwoNorm(pcg_solver, 1);
+      HYPRE_ParCSRPCGSetRelChange(pcg_solver, 0);
+      HYPRE_ParCSRPCGSetLogging(pcg_solver, 1);
+    }
+    else // if (!strcmp(name, "gmres")) 
+    {
+      HYPRE_ParCSRGMRESInitialize(MPI_COMM_WORLD, &pcg_solver);
+      HYPRE_ParCSRGMRESSetKDim(pcg_solver, 50);
+      HYPRE_ParCSRGMRESSetMaxIter(pcg_solver, 100);
+      HYPRE_ParCSRGMRESSetTol(pcg_solver, 1.e-10);
+      HYPRE_ParCSRGMRESSetLogging(pcg_solver, 1);
+    }
 }
 
 //------------------------------------------------------------------------------
 void HYPRE_SLE::selectPreconditioner(char *name)
 {
+    // selectSolver must be called first
+    assert(pcg_solver != NULL);
 
     if (!strcmp(name, "identity")) 
     {
     }
-    else if (!strcmp(name, "diagonal")) 
+    else if (!strcmp(name, "boomeramg")) 
+    {
+         pcg_precond = HYPRE_ParAMGInitialize();
+#if 0
+         HYPRE_ParAMGSetCoarsenType(pcg_precond, (hybrid*coarsen_type));
+         HYPRE_ParAMGSetMeasureType(pcg_precond, measure_type);
+         HYPRE_ParAMGSetStrongThreshold(pcg_precond, strong_threshold);
+         HYPRE_ParAMGSetLogging(pcg_precond, ioutdat, "driver.out.log");
+         HYPRE_ParAMGSetMaxIter(pcg_precond, 1);
+         HYPRE_ParAMGSetCycleType(pcg_precond, cycle_type);
+         HYPRE_ParAMGSetNumGridSweeps(pcg_precond, num_grid_sweeps);
+         HYPRE_ParAMGSetGridRelaxType(pcg_precond, grid_relax_type);
+         HYPRE_ParAMGSetRelaxWeight(pcg_precond, relax_weight);
+         HYPRE_ParAMGSetGridRelaxPoints(pcg_precond, grid_relax_points);
+         HYPRE_ParAMGSetMaxLevels(pcg_precond, max_levels);
+#endif
+
+/* prototype for this function needs to be declared properly
+         HYPRE_ParCSRPCGSetPrecond(pcg_solver,
+                                   HYPRE_ParAMGSolve,
+                                   HYPRE_ParAMGSetup,
+                                   pcg_precond);
+*/
+
+    }
+    else if (!strcmp(name, "parasails")) 
     {
     }
-    else
+    else if (!strcmp(name, "pilut")) 
     {
+    }
+    else // if (!strcmp(name, "diagonal")) 
+    {
+         pcg_precond = NULL;
+
+/* prototype for this function needs to be declared properly
+         HYPRE_ParCSRPCGSetPrecond(pcg_solver,
+                                   HYPRE_ParCSRDiagScale,
+                                   HYPRE_ParCSRDiagScaleSetup,
+                                   pcg_precond);
+*/
+
     }
 }
 
 //------------------------------------------------------------------------------
-void HYPRE_SLE::initLinearAlgebraCore(){
-//
 // This function is called by the constructor, just initializes
 // the pointers and other variables associated with the linear
 // algebra core to NULL or appropriate initial values.
 
+void HYPRE_SLE::initLinearAlgebraCore()
+{
+    A = (HYPRE_IJMatrix) NULL;
+    x = (HYPRE_IJVector) NULL;
+    b = (HYPRE_IJVector) NULL;
 }
 
 //------------------------------------------------------------------------------
-void HYPRE_SLE::deleteLinearAlgebraCore(){
-//
+//This is a destructor-type function.
 //This function deletes allocated memory associated with
 //the linear algebra core objects/data structures.
-//This is a destructor-type function.
-//
+
+void HYPRE_SLE::deleteLinearAlgebraCore()
+{
 
     HYPRE_FreeIJMatrix(A);
-
     HYPRE_FreeIJVector(x);
     HYPRE_FreeIJVector(b);
-
 }
 
 //------------------------------------------------------------------------------
-void HYPRE_SLE::createLinearAlgebraCore(int globalNumEqns,
-                                       int localStartRow,
-                                       int localEndRow,
-                                       int localStartCol,
-                                       int localEndCol){
-//
 //This function is where we establish the structures/objects associated
 //with the linear algebra library. i.e., do initial allocations, etc.
-//
 
+void HYPRE_SLE::createLinearAlgebraCore(int globalNumEqns,
+  int localStartRow, int localEndRow, int localStartCol, int localEndCol)
+{
     int ierr;
+    int *partitioning;
+
+    first_row = localStartRow;
+    last_row = localEndRow;
 
     ierr = HYPRE_NewIJMatrix(comm, &A, globalNumEqns, globalNumEqns);
     assert(!ierr);
@@ -151,117 +206,137 @@ void HYPRE_SLE::createLinearAlgebraCore(int globalNumEqns,
     ierr = HYPRE_InitializeIJMatrix(A);
     assert(!ierr);
 
+    // UNDONE: this function does not exist yet
+    // HYPRE_GetIJMatrixRowPartitioning(A, &partitioning);
+
     ierr = HYPRE_NewIJVector(comm, &b, globalNumEqns);
     assert(!ierr);
-    ierr = HYPRE_SetIJVectorLocalStorageType(b, /*UNDONE*/ 0);
+    ierr = HYPRE_SetIJVectorLocalStorageType(b, HYPRE_PARCSR);
     assert(!ierr);
-    ierr = HYPRE_SetIJVectorLocalSize(b, localEndRow-localStartRow+1);
+    ierr = HYPRE_SetIJVectorPartitioning(b, partitioning);
     assert(!ierr);
     ierr = HYPRE_InitializeIJVector(b);
     assert(!ierr);
 
     ierr = HYPRE_NewIJVector(comm, &x, globalNumEqns);
     assert(!ierr);
-    ierr = HYPRE_SetIJVectorLocalStorageType(x, /*UNDONE*/ 0);
+    ierr = HYPRE_SetIJVectorLocalStorageType(x, HYPRE_PARCSR);
     assert(!ierr);
-    ierr = HYPRE_SetIJVectorLocalSize(x, localEndRow-localStartRow+1);
+    ierr = HYPRE_SetIJVectorPartitioning(x, partitioning);
     assert(!ierr);
     ierr = HYPRE_InitializeIJVector(x);
     assert(!ierr);
 }
 
 //------------------------------------------------------------------------------
-void HYPRE_SLE::matrixConfigure(IntArray* sysRowLengths){
+void HYPRE_SLE::matrixConfigure(IntArray* rows)
+{
+    int *sizes1 = new int[last_row-first_row+1];
+    int *sizes2 = new int[last_row-first_row+1];
 
-#if 0
-    //first, store the system row-lengths in an ISIS++ Dist_IntVector,
-    //to be used in the 'configure' function on the matrix A_.
-    for (int i = 0; i < storeNumProcEqns; i++) {
-        (*rowLengths_)[localStartRow_ + i] = sysRowLengths[i].size();
+    int i, j;
+
+    for (i=0; i<last_row-first_row+1; i++)
+    {
+	int  num_indices = rows[i].size();
+	int *indices = &((rows[i])[0]);
+
+	int  num1 = 0;
+	int  num2 = 0;
+
+	for (j=0; j<num_indices; j++)
+	{
+	    if (first_row <= indices[j] && indices[j] <= last_row)
+		num1++;
+	    else
+		num2++;
+	}
+
+	sizes1[i] = num1;
+	sizes2[i] = num2;
     }
 
-    // so now we know all the row lengths, and have them in an IntVector,
-    // so we can configure our matrix (not necessary if it is a resizable
-    // matrix).
+    HYPRE_SetIJMatrixDiagRowSizes(A, sizes1);
+    HYPRE_SetIJMatrixOffDiagRowSizes(A, sizes2);
 
-    A_ptr_->configure(*rowLengths_);
-#endif
+    delete sizes1;
+    delete sizes2;
 }
 
 //------------------------------------------------------------------------------
-void HYPRE_SLE::resetMatrixAndVector(double s){
+// This function is needed in order to construct a new problem with the 
+// same sparsity pattern.
 
+void HYPRE_SLE::resetMatrixAndVector(double s)
+{
+    assert(s == 0.0);
+
+    HYPRE_ZeroIJVectorLocalComponents(b);
+
+    // UNDONE: set matrix to 0
+    assert(0);
 }
 
 //------------------------------------------------------------------------------
 void HYPRE_SLE::sumIntoRHSVector(int num, const int* indices, 
-                                const double* values){
-//
-//This function scatters (accumulates) values into the linear-system's
-//currently selected RHS vector.
-//
-// num is how many values are being passed,
-// indices holds the global 'row-numbers' into which the values go,
-// and values holds the actual coefficients to be scattered.
-//
+  const double* values)
+{
+    int i;
 
-#if 0
-    if ((numRHSs_ == 0) && (b_ptr_ == NULL))return;
+    int *ind = (int *) indices; // cast away const-ness
 
-    for(int i=0; i<num; i++){
-        (*b_ptr_)[indices[i]] += values[i];
-    }
-#endif
+    for (i=0; i<num; i++)
+	ind[i]--;               // change indices to 0-based
+
+    HYPRE_AddToIJVectorLocalComponents(b, num, ind, NULL, values);
+
+    for (i=0; i<num; i++)
+	ind[i]++;               // change indices back to 1-based
 }
 
 //------------------------------------------------------------------------------
 void HYPRE_SLE::putIntoSolnVector(int num, const int* indices,
-                                 const double* values){
-//
-//This function scatters (puts) values into the linear-system's soln vector.
-//
-// num is how many values are being passed,
-// indices holds the global 'row-numbers' into which the values go,
-// and values holds the actual coefficients to be scattered.
-//
+  const double* values)
+{
+    int i;
 
-#if 0
-    for(int i=0; i<num; i++){
-        (*x_)[indices[i]] = values[i];
-    }
-#endif
+    int *ind = (int *) indices; // cast away const-ness
+
+    for (i=0; i<num; i++)
+	ind[i]--;               // change indices to 0-based
+
+    HYPRE_SetIJVectorLocalComponents(b, num, ind, NULL, values);
+
+    for (i=0; i<num; i++)
+	ind[i]++;               // change indices back to 1-based
 }
 
 //------------------------------------------------------------------------------
-double HYPRE_SLE::accessSolnVector(int equation){
-//
-//This function provides access to the solution vector -- the
-//return value is the coefficient at equation 'equation'.
-//
-// 'equation' must be a 1-based global equation-number.
-//
-#if 0
-    return((*x_)[equation]);
-#endif
-    return 0.0;
+double HYPRE_SLE::accessSolnVector(int equation)
+{
+    double val;
+
+    HYPRE_GetIJVectorLocalComponents(x, 1, &equation, NULL, &val);
+
+    return val;
 }
 
 //------------------------------------------------------------------------------
 void HYPRE_SLE::sumIntoSystemMatrix(int row, int numValues, 
-                                   const double* values,
-                                   const int* scatterIndices){
-//
-//This function scatters a row of an element-stiffness array into
-//the global system matrix.
-//
-//row is a global 1-based row-number.
-//numValues is how many 'non-zeros' are being passed in.
-//values holds the coefficients,
-//scatterIndices holds the 1-based global column-indices.
-//
-#if 0
-    A_ptr_->sumIntoRow(row, numValues, values, scatterIndices);
-#endif
+  const double* values, const int* scatterIndices)
+{
+    int i;
+
+    int *ind = (int *) scatterIndices; // cast away const-ness
+
+    for (i=0; i<numValues; i++)
+	ind[i]--;               // change indices to 0-based
+
+    HYPRE_InsertIJMatrixRow(A, numValues, row, ind, (double *) values);
+
+    for (i=0; i<numValues; i++)
+	ind[i]++;               // change indices back to 1-based
+
 }
 
 //------------------------------------------------------------------------------
@@ -295,37 +370,29 @@ void HYPRE_SLE::enforceOtherBC(int* globalEqn, double* alpha, double* beta,
 }
 
 //------------------------------------------------------------------------------
-void HYPRE_SLE::matrixLoadComplete(){
-//
-//This function simply tells the matrix that it's done being
-//loaded. Now the matrix can do internal calculations related to
-//inter-processor communications, etc.
-//
+void HYPRE_SLE::matrixLoadComplete()
+{
+    int ierr;
+    ierr = HYPRE_AssembleIJMatrix(A);
 }
 
 //------------------------------------------------------------------------------
-void HYPRE_SLE::launchSolver(int* solveStatus){
-//
-//This function does any last-second setup required for the
-//linear solver, then goes ahead and launches the solver to get
-//the solution vector.
-//Also, if possible, the number of iterations that were performed
-//is stored in the iterations_ variable.
-//
+void HYPRE_SLE::launchSolver(int* solveStatus)
+{
+    HYPRE_ParCSRMatrix A_csr;
+    HYPRE_ParVector    x_csr;
+    HYPRE_ParVector    b_csr;
 
-#if 0
-    LinearEquations lse(*A_ptr_, *x_, *b_ptr_);
+    A_csr = (HYPRE_ParCSRMatrix) HYPRE_GetIJMatrixLocalStorage(A);
+    x_csr = (HYPRE_ParVector)    HYPRE_GetIJVectorLocalStorage(x);
+    b_csr = (HYPRE_ParVector)    HYPRE_GetIJVectorLocalStorage(b);
 
-    if (colScale_) lse.colScale();
-    if (rowScale_) lse.rowScale();
+    HYPRE_ParCSRPCGSetup(pcg_solver, A_csr, b_csr, x_csr);
+    HYPRE_ParCSRPCGSolve(pcg_solver, A_csr, b_csr, x_csr);
 
-    lse.setSolver(*pSolver_);
-    lse.setPreconditioner(*pPrecond_);
+    HYPRE_ParCSRPCGGetNumIterations(pcg_solver, &num_iterations);
+    HYPRE_ParCSRPCGGetFinalRelativeResidualNorm(pcg_solver, &final_res_norm);
+    HYPRE_ParCSRPCGFinalize(pcg_solver);
 
-    *solveStatus = lse.solve();
-
-    iterations_ = pSolver_->iterations();
-#endif
-
+    *solveStatus = 0; // return code
 }
-
