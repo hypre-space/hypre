@@ -120,6 +120,14 @@ int HYPRE_ParCSRPilutSetMaxIter P((HYPRE_Solver solver , int max_iter ));
 int HYPRE_ParCSRPilutSetDropTolerance P((HYPRE_Solver solver , double tol ));
 int HYPRE_ParCSRPilutSetFactorRowSize P((HYPRE_Solver solver , int size ));
 
+/* HYPRE_parcsr_ParaSails.c */
+int HYPRE_ParCSRParaSailsCreate P((MPI_Comm comm , HYPRE_Solver *solver ));
+int HYPRE_ParCSRParaSailsDestroy P((HYPRE_Solver solver ));
+int HYPRE_ParCSRParaSailsSetup P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x ));
+int HYPRE_ParCSRParaSailsSolve P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x ));
+int HYPRE_ParCSRParaSailsSetParams P((HYPRE_Solver solver , double thresh , int nlevels ));
+int HYPRE_ParCSRParaSailsSelectThresh P((HYPRE_Solver solver , double *threshp ));
+
 /* par_laplace.c */
 HYPRE_ParCSRMatrix GenerateLaplacian P((MPI_Comm comm , int nx , int ny , int nz
  , int P , int Q , int R , int p , int q , int r , double *value ));
