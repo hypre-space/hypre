@@ -93,28 +93,28 @@ int LLNL_FEI_Elem_Block::initialize(int numElements, int numNodesPerElement,
    if ( elemIDs_ != NULL ) delete [] elemIDs_;
    if ( elemNodeLists_ != NULL )
    {
-      for ( int iE = 0; iE < numElems_; iE++ ) 
+      for ( iE = 0; iE < numElems_; iE++ ) 
          if ( elemNodeLists_[iE] != NULL ) 
             delete [] elemNodeLists_[iE];
       delete [] elemNodeLists_;
    }
    if ( elemMatrices_ != NULL )
    {
-      for ( int iE = 0; iE < numElems_; iE++ ) 
+      for ( iE = 0; iE < numElems_; iE++ ) 
          if ( elemMatrices_[iE] != NULL ) 
             delete [] elemMatrices_[iE];
       delete [] elemMatrices_;
    }
    if ( rhsVectors_ != NULL )
    {
-      for ( int iE = 0; iE < numElems_; iE++ ) 
+      for ( iE = 0; iE < numElems_; iE++ ) 
          if ( rhsVectors_[iE] != NULL ) 
             delete [] rhsVectors_[iE];
       delete [] rhsVectors_;
    }
    if ( solnVectors_ != NULL )
    {
-      for ( int iE = 0; iE < numElems_; iE++ ) 
+      for ( iE = 0; iE < numElems_; iE++ ) 
          if ( solnVectors_[iE] != NULL ) 
             delete [] solnVectors_[iE];
       delete [] solnVectors_;

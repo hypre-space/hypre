@@ -119,7 +119,7 @@ int LLNL_FEI_Impl::solve(int *status)
    {
       int    localNRows, *diagIA, *diagJA, *indices, *offsets, rowSize;
       int    extNRows, *offdIA, *offdJA, *colMap, maxRowSize, *colInds;
-      int    i, j, rowInd, one=1, iterations, status, mypid;
+      int    i, j, rowInd, one=1, iter, , mypid;
       double *diagAA, *offdAA, *colVals;
       char   format[20];
 
@@ -173,7 +173,7 @@ int LLNL_FEI_Impl::solve(int *status)
       lscPtr_->putInitialGuess((const int *) indices, 
                                (const double *) solnVector, localNRows);
       lscPtr_->matrixLoadComplete();
-      lscPtr_->solve(&status,&iterations);
+      lscPtr_->solve(status,&iter);
       lscPtr_->getSolution(solnVector, localNRows);
       if (localNRows > 0) delete [] indices;
    }
