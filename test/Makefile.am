@@ -7,6 +7,9 @@
 abs_top_srcdir = @abs_top_srcdir@
 abs_srcdir = @abs_srcdir@
 abs_builddir = @abs_builddir@
+EXTRA_bindir = $(bindir)
+binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
+
 
 SUBDIRS = \
  .\
@@ -17,6 +20,7 @@ SUBDIRS = \
  TEST_struct\
  TEST_timing
 
+# list of possible build objects, (no automake install rule generation) 
 EXTRA_PROGRAMS = \
  ij\
  ij_mv\
@@ -37,6 +41,7 @@ EXTRA_PROGRAMS = \
 # f77_struct_b\
 # struct_b
 
+# default preprocessor flags for C, C++, and Fortran
 AM_CPPFLAGS = \
  -DHYPRE_TIMING\
  -I$(includedir)
@@ -46,43 +51,12 @@ AM_CXXFLAGS = -DMPICH_SKIP_MPICXX
 AM_FFLAGS = \
  -I$(includedir)
 
+EXTRA_DIST = \
+ funcs.sh\
+ runtest.sh
+
+# ij, build 
 ij_SOURCES = ij.c
-ij_mv_SOURCES = ij_mv.c
-new_ij_SOURCES = new_ij.c
-sstruct_SOURCES = sstruct.c
-struct_SOURCES = struct.c
-ij_dependencies = \
- $(includedir)/utilities.h\
- $(includedir)/HYPRE.h\
- $(includedir)/HYPRE_IJ_mv.h\
- $(includedir)/HYPRE_parcsr_mv.h\
- $(includedir)/HYPRE_parcsr_ls.h\
- $(includedir)/parcsr_mv.h\
- $(includedir)/krylov.h
-ij_mv_dependencies = \
- $(includedir)/utilities.h\
- $(includedir)/HYPRE.h\
- $(includedir)/HYPRE_IJ_mv.h\
- $(includedir)/HYPRE_parcsr_mv.h\
- $(includedir)/HYPRE_parcsr_ls.h\
- $(includedir)/krylov.h
-new_ij_dependencies = \
- $(includedir)/utilities.h\
- $(includedir)/HYPRE.h\
- $(includedir)/HYPRE_IJ_mv.h\
- $(includedir)/HYPRE_parcsr_mv.h\
- $(includedir)/HYPRE_parcsr_ls.h\
- $(includedir)/parcsr_mv.h\
- $(includedir)/krylov.h
-sstruct_dependencies = \
- $(includedir)/utilities.h\
- $(includedir)/HYPRE_sstruct_ls.h\
- $(includedir)/krylov.h
-struct_dependencies = \
- $(includedir)/utilities.h\
- $(includedir)/HYPRE_struct_ls.h\
- $(includedir)/struct_mv.h\
- $(includedir)/krylov.h
 ij_LDADD = \
  -L$(libdir)\
  -lHYPRE_parcsr_ls\
@@ -99,6 +73,21 @@ ij_LDADD = \
  $(LAPACKLIBFLAGS)\
  $(BLASLIBFLAGS)\
  $(LIBM)
+#ij_LDFLAGS = -static
+# ij, dependencies rules needed because automatic dependency checking is off
+ij_dependencies = \
+ $(includedir)/utilities.h\
+ $(includedir)/HYPRE.h\
+ $(includedir)/HYPRE_IJ_mv.h\
+ $(includedir)/HYPRE_parcsr_mv.h\
+ $(includedir)/HYPRE_parcsr_ls.h\
+ $(includedir)/parcsr_mv.h\
+ $(includedir)/krylov.h
+# automake will reorder
+$(ij_OBJECTS): $(ij_dependencies)
+
+# ij_mv, build
+ij_mv_SOURCES = ij_mv.c
 ij_mv_LDADD = \
  -L$(libdir)\
  -lHYPRE_parcsr_ls\
@@ -115,6 +104,17 @@ ij_mv_LDADD = \
  $(LAPACKLIBFLAGS)\
  $(BLASLIBFLAGS)\
  $(LIBM)
+ij_mv_dependencies = \
+ $(includedir)/utilities.h\
+ $(includedir)/HYPRE.h\
+ $(includedir)/HYPRE_IJ_mv.h\
+ $(includedir)/HYPRE_parcsr_mv.h\
+ $(includedir)/HYPRE_parcsr_ls.h\
+ $(includedir)/krylov.h
+$(ij_mv_OBJECTS): $(ij_mv_dependencies)
+
+# new_ij, build
+new_ij_SOURCES = new_ij.c
 new_ij_LDADD = \
  -L$(libdir)\
  -lHYPRE_parcsr_ls\
@@ -131,6 +131,18 @@ new_ij_LDADD = \
  $(LAPACKLIBFLAGS)\
  $(BLASLIBFLAGS)\
  $(LIBM)
+new_ij_dependencies = \
+ $(includedir)/utilities.h\
+ $(includedir)/HYPRE.h\
+ $(includedir)/HYPRE_IJ_mv.h\
+ $(includedir)/HYPRE_parcsr_mv.h\
+ $(includedir)/HYPRE_parcsr_ls.h\
+ $(includedir)/parcsr_mv.h\
+ $(includedir)/krylov.h
+$(new_ij_OBJECTS): $(new_ij_dependencies)
+
+# sstruct, build
+sstruct_SOURCES = sstruct.c
 sstruct_LDADD = \
  -L$(libdir)\
  -lHYPRE_sstruct_ls\
@@ -151,6 +163,14 @@ sstruct_LDADD = \
  $(LAPACKLIBFLAGS)\
  $(BLASLIBFLAGS)\
  $(LIBM)
+sstruct_dependencies = \
+ $(includedir)/utilities.h\
+ $(includedir)/HYPRE_sstruct_ls.h\
+ $(includedir)/krylov.h
+$(sstruct_OBJECTS): $(sstruct_dependencies)
+
+# struct, build
+struct_SOURCES = struct.c
 struct_LDADD = \
  -L$(libdir)\
  -lHYPRE_struct_ls\
@@ -158,57 +178,28 @@ struct_LDADD = \
  -lHYPRE_krylov\
  -lHYPRE_utilities\
  $(LIBM)
+struct_dependencies = \
+ $(includedir)/utilities.h\
+ $(includedir)/HYPRE_struct_ls.h\
+ $(includedir)/struct_mv.h\
+ $(includedir)/krylov.h
+$(struct_OBJECTS): $(struct_dependencies)
 
-#ij_LDFLAGS = -no-undefined -rpath $(libdir)
-#ij_mv_LDFLAGS = -no-undefined -rpath $(libdir)
-#new_ij_LDFLAGS = -no-undefined -rpath $(libdir)
-#sstruct_LDFLAGS = -no-undefined -rpath $(libdir)
-#struct_LDFLAGS = -no-undefined -rpath $(libdir)
-
-EXTRA_bindir = $(bindir)
-
-f77_ij_SOURCES = f77_ij.f
-f77_ij_b_SOURCES = f77_ij_b.f
-f77_ij_mv_SOURCES = f77_ij_mv.f
-f77_struct_SOURCES = f77_struct.f
-#EXTRA_f77_struct_b_SOURCES = f77_struct_b.f
+# optiontional target, fei++
+# fei
 fei_SOURCES = fei.cxx
 fei_CPPFLAGS = \
  -DNOFEI\
  -DHYPRE_TIMING\
  -I$(includedir)
-ij_b_SOURCES = ij_b.c
-#EXTRA_struct_b_SOURCES = struct_b.c
-nodist_ij_C___SOURCES = ij.C++.cxx
-nodist_new_ij_C___SOURCES = new_ij.C++.cxx
-nodist_ij_mv_C___SOURCES = ij_mv.C++.cxx
-nodist_struct_C___SOURCES = struct.C++.cxx
-nodist_sstruct_C___SOURCES = sstruct.C++.cxx
-f77_ij_dependencies = \
- $(includedir)/utilities.h\
- $(includedir)/HYPRE.h\
- $(includedir)/HYPRE_IJ_mv.h\
- $(includedir)/HYPRE_parcsr_mv.h\
- $(includedir)/HYPRE_parcsr_ls.h\
- $(includedir)/parcsr_mv.h\
- $(includedir)/krylov.h
-f77_ij_mv_dependencies = \
- $(includedir)/utilities.h\
- $(includedir)/HYPRE.h\
- $(includedir)/HYPRE_IJ_mv.h\
- $(includedir)/HYPRE_parcsr_mv.h\
- $(includedir)/HYPRE_parcsr_ls.h\
- $(includedir)/krylov.h
-f77_struct_dependencies = \
- $(includedir)/utilities.h\
- $(includedir)/HYPRE_struct_ls.h\
- $(includedir)/struct_mv.h\
- $(includedir)/krylov.h
-#f77_struct_b_dependencies = \
-#$(includedir)/utilities.h\
-#$(includedir)/HYPRE_struct_ls.h\
-#$(includedir)/struct_mv.h\
-#$(includedir)/krylov.h
+fei_LDADD = \
+ -L$(libdir)\
+ -lHYPRE_LSI\
+ -lHYPRE_superlu\
+ $(LAPACKLIBFLAGS)\
+ $(BLASLIBFLAGS)\
+ $(LIBM)
+#fei_LDFLAGS = -static
 fei_dependencies = \
  $(includedir)/utilities.h\
  $(includedir)/HYPRE.h\
@@ -216,64 +207,11 @@ fei_dependencies = \
  $(includedir)/HYPRE_parcsr_mv.h\
  $(includedir)/HYPRE_parcsr_ls.h\
  $(includedir)/HYPRE_LinSysCore.h
-ij_b_dependencies = \
- $(includedir)/utilities.h\
- $(includedir)/HYPRE.h\
- $(includedir)/HYPRE_IJ_mv.h\
- $(includedir)/HYPRE_parcsr_mv.h\
- $(includedir)/HYPRE_parcsr_ls.h\
- $(includedir)/parcsr_mv.h\
- $(includedir)/krylov.h\
- $(includedir)/bHYPRE.h\
- $(includedir)/bHYPRE_IJParCSRMatrix_Impl.h\
- $(includedir)/bHYPRE_IJParCSRVector_Impl.h\
- $(includedir)/bHYPRE_ParCSRDiagScale_Impl.h
-#struct_b_dependencies = \
-#$(includedir)/utilities.h\
-#$(includedir)/HYPRE_struct_ls.h\
-#$(includedir)/Hypre_Box_Stub.h\
-#$(includedir)/Hypre_StructStencil_Stub.h\
-#$(includedir)/Hypre_StructGrid_Stub.h\
-#$(includedir)/Hypre_StructMatrix_Stub.h\
-#$(includedir)/Hypre_StructMatrixBuilder_Stub.h\
-#$(includedir)/Hypre_StructVector_Stub.h\
-#$(includedir)/Hypre_StructVectorBuilder_Stub.h\
-#$(includedir)/Hypre_MPI_Com_Stub.h\
-#$(includedir)/Hypre_StructJacobi_Stub.h\
-#$(includedir)/Hypre_StructSMG_Stub.h\
-#$(includedir)/Hypre_PCG_Stub.h
-ij_C___dependencies = \
- $(includedir)/utilities.h\
- $(includedir)/HYPRE.h\
- $(includedir)/HYPRE_IJ_mv.h\
- $(includedir)/HYPRE_parcsr_mv.h\
- $(includedir)/HYPRE_parcsr_ls.h\
- $(includedir)/parcsr_mv.h\
- $(includedir)/krylov.h
-new_ij_C___dependencies = \
- $(includedir)/utilities.h\
- $(includedir)/HYPRE.h\
- $(includedir)/HYPRE_IJ_mv.h\
- $(includedir)/HYPRE_parcsr_mv.h\
- $(includedir)/HYPRE_parcsr_ls.h\
- $(includedir)/parcsr_mv.h\
- $(includedir)/krylov.h
-ij_mv_C___dependencies = \
- $(includedir)/utilities.h\
- $(includedir)/HYPRE.h\
- $(includedir)/HYPRE_IJ_mv.h\
- $(includedir)/HYPRE_parcsr_mv.h\
- $(includedir)/HYPRE_parcsr_ls.h\
- $(includedir)/krylov.h
-struct_C___dependencies = \
- $(includedir)/utilities.h\
- $(includedir)/HYPRE_struct_ls.h\
- $(includedir)/struct_mv.h\
- $(includedir)/krylov.h
-sstruct_C___dependencies = \
- $(includedir)/utilities.h\
- $(includedir)/HYPRE_sstruct_ls.h\
- $(includedir)/krylov.h
+$(fei_OBJECTS): $(fei_dependencies)
+
+# optiontional targets, all77
+# f77_ij
+f77_ij_SOURCES = f77_ij.f
 f77_ij_LDADD = \
  -L$(libdir)\
  -lHYPRE_parcsr_ls\
@@ -291,6 +229,67 @@ f77_ij_LDADD = \
  $(BLASLIBFLAGS)\
  @FLIBS@\
  $(LIBM)
+#f77_ij_LDFLAGS = -static
+f77_ij_dependencies = \
+ $(includedir)/utilities.h\
+ $(includedir)/HYPRE.h\
+ $(includedir)/HYPRE_IJ_mv.h\
+ $(includedir)/HYPRE_parcsr_mv.h\
+ $(includedir)/HYPRE_parcsr_ls.h\
+ $(includedir)/parcsr_mv.h\
+ $(includedir)/krylov.h
+$(f77_ij_OBJECTS): $(f77_ij_dependencies)
+
+# f77_ij_mv
+f77_ij_mv_SOURCES = f77_ij_mv.f
+f77_ij_mv_LDADD = \
+ -L$(libdir)\
+ -lHYPRE_parcsr_ls\
+ -lHYPRE_DistributedMatrixPilutSolver \
+ -lHYPRE_ParaSails \
+ -lHYPRE_Euclid \
+ -lHYPRE_MatrixMatrix \
+ -lHYPRE_DistributedMatrix \
+ -lHYPRE_IJ_mv\
+ -lHYPRE_parcsr_mv\
+ -lHYPRE_seq_mv\
+ -lHYPRE_krylov\
+ -lHYPRE_utilities\
+ $(LAPACKLIBFLAGS)\
+ $(BLASLIBFLAGS)\
+ @FLIBS@\
+ $(LIBM)
+#f77_ij_mv_LDFLAGS = -static
+f77_ij_mv_dependencies = \
+ $(includedir)/utilities.h\
+ $(includedir)/HYPRE.h\
+ $(includedir)/HYPRE_IJ_mv.h\
+ $(includedir)/HYPRE_parcsr_mv.h\
+ $(includedir)/HYPRE_parcsr_ls.h\
+ $(includedir)/krylov.h
+$(f77_ij_mv_OBJECTS): $(f77_ij_mv_dependencies)
+
+# f77_struct
+f77_struct_SOURCES = f77_struct.f
+f77_struct_LDADD = \
+ -L$(libdir)\
+ -lHYPRE_struct_ls\
+ -lHYPRE_struct_mv\
+ -lHYPRE_krylov\
+ -lHYPRE_utilities\
+ @FLIBS@\
+ $(LIBM)
+#f77_struct_LDFLAGS = -static
+f77_struct_dependencies = \
+ $(includedir)/utilities.h\
+ $(includedir)/HYPRE_struct_ls.h\
+ $(includedir)/struct_mv.h\
+ $(includedir)/krylov.h
+$(f77_struct_OBJECTS): $(f77_struct_dependencies)
+
+# optiontional targets, babel
+# f77_ij_b
+f77_ij_b_SOURCES = f77_ij_b.f
 f77_ij_b_LDADD = \
  @BABELLIBFLAGS@\
  -L$(libdir)\
@@ -309,45 +308,9 @@ f77_ij_b_LDADD = \
  $(BLASLIBFLAGS)\
  @FLIBS@\
  $(LIBM)
-f77_ij_mv_LDADD = \
- -L$(libdir)\
- -lHYPRE_parcsr_ls\
- -lHYPRE_DistributedMatrixPilutSolver \
- -lHYPRE_ParaSails \
- -lHYPRE_Euclid \
- -lHYPRE_MatrixMatrix \
- -lHYPRE_DistributedMatrix \
- -lHYPRE_IJ_mv\
- -lHYPRE_parcsr_mv\
- -lHYPRE_seq_mv\
- -lHYPRE_krylov\
- -lHYPRE_utilities\
- $(LAPACKLIBFLAGS)\
- $(BLASLIBFLAGS)\
- @FLIBS@\
- $(LIBM)
-f77_struct_LDADD = \
- -L$(libdir)\
- -lHYPRE_struct_ls\
- -lHYPRE_struct_mv\
- -lHYPRE_krylov\
- -lHYPRE_utilities\
- @FLIBS@\
- $(LIBM)
-#f77_struct_b_LDADD = \
-# -L$(libdir)\
-# -lHYPRE_struct_ls\
-# -lHYPRE_struct_mv\
-# -lHYPRE_krylov\
-# -lHYPRE_utilities\
-# @FLIBS@
-fei_LDADD = \
- -L$(libdir)\
- -lHYPRE_LSI\
- -lHYPRE_superlu\
- $(LAPACKLIBFLAGS)\
- $(BLASLIBFLAGS)\
- $(LIBM)
+#f77_ij_b_LDFLAGS = -static
+# ij_b
+ij_b_SOURCES = ij_b.c
 ij_b_LDADD = \
  @BABELLIBFLAGS@\
  -L$(libdir)\
@@ -365,6 +328,36 @@ ij_b_LDADD = \
  $(LAPACKLIBFLAGS)\
  $(BLASLIBFLAGS)\
  $(LIBM)
+#ij_b_LDFLAGS = -static
+ij_b_dependencies = \
+ $(includedir)/utilities.h\
+ $(includedir)/HYPRE.h\
+ $(includedir)/HYPRE_IJ_mv.h\
+ $(includedir)/HYPRE_parcsr_mv.h\
+ $(includedir)/HYPRE_parcsr_ls.h\
+ $(includedir)/parcsr_mv.h\
+ $(includedir)/krylov.h\
+ $(includedir)/bHYPRE.h\
+ $(includedir)/bHYPRE_IJParCSRMatrix_Impl.h\
+ $(includedir)/bHYPRE_IJParCSRVector_Impl.h\
+ $(includedir)/bHYPRE_ParCSRDiagScale_Impl.h
+$(ij_b_OBJECTS): $(ij_b_dependencies)
+#EXTRA_f77_struct_b_SOURCES = f77_struct_b.f
+#f77_struct_b_LDADD = \
+# -L$(libdir)\
+# -lHYPRE_struct_ls\
+# -lHYPRE_struct_mv\
+# -lHYPRE_krylov\
+# -lHYPRE_utilities\
+# @FLIBS@
+##f77_struct_b_LDFLAGS = -static
+#f77_struct_b_dependencies = \
+#$(includedir)/utilities.h\
+#$(includedir)/HYPRE_struct_ls.h\
+#$(includedir)/struct_mv.h\
+#$(includedir)/krylov.h
+#$(f77_struct_b_OBJECTS): $(f77_struct_b_dependencies)
+#EXTRA_struct_b_SOURCES = struct_b.c
 #struct_b_LDADD = \
 # -L$(libdir)\
 # -lHYPRE_struct_ls\
@@ -372,6 +365,27 @@ ij_b_LDADD = \
 # -lHYPRE_krylov\
 # -lHYPRE_utilities\
 # $(LIBM)
+##struct_b_LDFLAGS = -static
+#struct_b_dependencies = \
+#$(includedir)/utilities.h\
+#$(includedir)/HYPRE_struct_ls.h\
+#$(includedir)/Hypre_Box_Stub.h\
+#$(includedir)/Hypre_StructStencil_Stub.h\
+#$(includedir)/Hypre_StructGrid_Stub.h\
+#$(includedir)/Hypre_StructMatrix_Stub.h\
+#$(includedir)/Hypre_StructMatrixBuilder_Stub.h\
+#$(includedir)/Hypre_StructVector_Stub.h\
+#$(includedir)/Hypre_StructVectorBuilder_Stub.h\
+#$(includedir)/Hypre_MPI_Com_Stub.h\
+#$(includedir)/Hypre_StructJacobi_Stub.h\
+#$(includedir)/Hypre_StructSMG_Stub.h\
+#$(includedir)/Hypre_PCG_Stub.h
+#$(struct_b_OBJECTS): $(struct_b_dependencies)
+
+# optiontional targets, all++
+# Note, automake conversion of + to _, and sources are temp (no distribute)
+# ij.C++
+nodist_ij_C___SOURCES = ij.C++.cxx
 ij_C___LDADD = \
  -L$(libdir)\
  -lHYPRE_parcsr_ls\
@@ -388,6 +402,18 @@ ij_C___LDADD = \
  $(LAPACKLIBFLAGS)\
  $(BLASLIBFLAGS)\
  $(LIBM)
+ij_C___dependencies = \
+ $(includedir)/utilities.h\
+ $(includedir)/HYPRE.h\
+ $(includedir)/HYPRE_IJ_mv.h\
+ $(includedir)/HYPRE_parcsr_mv.h\
+ $(includedir)/HYPRE_parcsr_ls.h\
+ $(includedir)/parcsr_mv.h\
+ $(includedir)/krylov.h
+$(ij_C___OBJECTS): $(ij_C___dependencies)
+
+# ij_mv.C++
+nodist_ij_mv_C___SOURCES = ij_mv.C++.cxx
 ij_mv_C___LDADD = \
  -L$(libdir)\
  -lHYPRE_parcsr_ls\
@@ -404,6 +430,17 @@ ij_mv_C___LDADD = \
  $(LAPACKLIBFLAGS)\
  $(BLASLIBFLAGS)\
  $(LIBM)
+ij_mv_C___dependencies = \
+ $(includedir)/utilities.h\
+ $(includedir)/HYPRE.h\
+ $(includedir)/HYPRE_IJ_mv.h\
+ $(includedir)/HYPRE_parcsr_mv.h\
+ $(includedir)/HYPRE_parcsr_ls.h\
+ $(includedir)/krylov.h
+$(ij_mv_C___OBJECTS): $(ij_mv_C___dependencies)
+
+# new_ij.C++
+nodist_new_ij_C___SOURCES = new_ij.C++.cxx
 new_ij_C___LDADD = \
  -L$(libdir)\
  -lHYPRE_parcsr_ls\
@@ -420,6 +457,18 @@ new_ij_C___LDADD = \
  $(LAPACKLIBFLAGS)\
  $(BLASLIBFLAGS)\
  $(LIBM)
+new_ij_C___dependencies = \
+ $(includedir)/utilities.h\
+ $(includedir)/HYPRE.h\
+ $(includedir)/HYPRE_IJ_mv.h\
+ $(includedir)/HYPRE_parcsr_mv.h\
+ $(includedir)/HYPRE_parcsr_ls.h\
+ $(includedir)/parcsr_mv.h\
+ $(includedir)/krylov.h
+$(new_ij_C___OBJECTS): $(new_ij_C___dependencies)
+
+# sstruct.C++
+nodist_sstruct_C___SOURCES = sstruct.C++.cxx
 sstruct_C___LDADD = \
  -L$(libdir)\
  -lHYPRE_sstruct_ls\
@@ -440,6 +489,14 @@ sstruct_C___LDADD = \
  $(LAPACKLIBFLAGS)\
  $(BLASLIBFLAGS)\
  $(LIBM)
+sstruct_C___dependencies = \
+ $(includedir)/utilities.h\
+ $(includedir)/HYPRE_sstruct_ls.h\
+ $(includedir)/krylov.h
+$(sstruct_C___OBJECTS): $(sstruct_C___dependencies)
+
+# struct.C++
+nodist_struct_C___SOURCES = struct.C++.cxx
 struct_C___LDADD = \
  -L$(libdir)\
  -lHYPRE_struct_ls\
@@ -447,20 +504,12 @@ struct_C___LDADD = \
  -lHYPRE_krylov\
  -lHYPRE_utilities\
  $(LIBM)
-#f77_ij_LDFLAGS = -static
-#f77_ij_b_LDFLAGS = -static
-#f77_ij_mv_LDFLAGS = -static
-#f77_struct_LDFLAGS = -static
-##f77_struct_b_LDFLAGS = -static
-#fei_LDFLAGS = -static
-#ij_b_LDFLAGS = -static
-##struct_b_LDFLAGS = -static
-
-EXTRA_DIST = \
- funcs.sh\
- runtest.sh
-
-binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
+struct_C___dependencies = \
+ $(includedir)/utilities.h\
+ $(includedir)/HYPRE_struct_ls.h\
+ $(includedir)/struct_mv.h\
+ $(includedir)/krylov.h
+$(struct_C___OBJECTS): $(struct_C___dependencies)
 
 all: ij ij_mv new_ij struct sstruct
 
@@ -485,28 +534,6 @@ sstruct.C++.cxx:
 struct.C++.cxx:
 	cp -f $(srcdir)/struct.c struct.C++.cxx
 
-##.c.C++.o:
-##	cp -f $< ${@:.o=.cxx}
-##	${CXX} -o $@ -c ${CXXFLAGS} ${@:.o=.cxx}
-##	rm -f ${@:.o=.cxx}
-$(ij_OBJECTS): $(ij_dependencies)
-$(ij_mv_OBJECTS): $(ij_mv_dependencies)
-$(new_ij_OBJECTS): $(new_ij_dependencies)
-$(sstruct_OBJECTS): $(sstruct_dependencies)
-$(struct_OBJECTS): $(struct_dependencies)
-$(f77_ij_OBJECTS): $(f77_ij_dependencies)
-$(f77_ij_mv_OBJECTS): $(f77_ij_mv_dependencies)
-$(f77_struct_OBJECTS): $(f77_struct_dependencies)
-#$(f77_struct_b_OBJECTS): $(f77_struct_b_dependencies)
-$(fei_OBJECTS): $(fei_dependencies)
-$(ij_b_OBJECTS): $(ij_b_dependencies)
-#$(struct_b_OBJECTS): $(struct_b_dependencies)
-$(ij_C___OBJECTS): $(ij_C___dependencies)
-$(new_ij_C___OBJECTS): $(new_ij_C___dependencies)
-$(ij_mv_C___OBJECTS): $(ij_mv_C___dependencies)
-$(struct_C___OBJECTS): $(struct_C___dependencies)
-$(sstruct_C___OBJECTS): $(sstruct_C___dependencies)
-
 clean-local:
 	@ \
 	for i in ij ij_mv new_ij sstruct struct \
@@ -519,6 +546,7 @@ clean-local:
 	  fi; \
 	done
 
+# install, put programs in to ./TEST_* directories
 install-exec-hook: all
 	@ \
 	for i in fei ij sstruct struct ; \
