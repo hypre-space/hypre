@@ -57,16 +57,18 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    int       old_num_levels, num_levels;
    int       level;
    int       local_size, i;
+   int       first_local_row;
    int       coarse_size;
    int       coarsen_type;
    int       measure_type;
    int       setup_type;
    int       fine_size;
+   int       rest, tms, indx;
    double    size;
    int       not_finished_coarsening = 1;
    int       Setup_err_flag = 0;
    int       coarse_threshold = 9;
-   int       j;
+   int       j, k;
    int       num_procs,my_id;
    int      *grid_relax_type = hypre_ParAMGDataGridRelaxType(amg_data);
    int       num_functions = hypre_ParAMGDataNumFunctions(amg_data);
@@ -100,6 +102,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    P_array = hypre_ParAMGDataPArray(amg_data);
    CF_marker_array = hypre_ParAMGDataCFMarkerArray(amg_data);
    dof_func_array = hypre_ParAMGDataDofFuncArray(amg_data);
+   local_size = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
 
    grid_relax_type[3] = hypre_ParAMGDataUserCoarseRelaxType(amg_data); 
    if (A_array || P_array || CF_marker_array || dof_func_array)
@@ -137,6 +140,28 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       CF_marker_array = hypre_CTAlloc(int*, max_levels-1);
    if (dof_func_array == NULL)
       dof_func_array = hypre_CTAlloc(int*, max_levels);
+
+   if (dof_func == NULL)
+   {
+      first_local_row = hypre_ParCSRMatrixFirstRowIndex(A);
+      dof_func = hypre_CTAlloc(int,local_size);
+      rest = first_local_row-((first_local_row/num_functions)*num_functions);
+      indx = num_functions-rest;
+      if (rest == 0) indx = 0;
+      k = num_functions - 1;
+      for (j = indx-1; j > -1; j--)
+         dof_func[j] = k--;
+      tms = local_size/num_functions;
+      if (tms*num_functions+indx > local_size) tms--;
+      for (j=0; j < tms; j++)
+      {
+         for (k=0; k < num_functions; k++)
+            dof_func[indx++] = k;
+      }
+      k = 0;
+      while (indx < local_size)
+         dof_func[indx++] = k++;
+   }
 
    A_array[0] = A;
    dof_func_array[0] = dof_func;
@@ -246,7 +271,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       }
       else
       {
-	 local_size = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
          CF_marker = hypre_CTAlloc(int, local_size );
 	 for (i=0; i < local_size ; i++)
 	    CF_marker[i] = 1;
