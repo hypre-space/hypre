@@ -6,7 +6,6 @@
  *
  *********************************************************************EHEADER*/
 
-#ifdef MLI_ARPACK
 #ifdef MLI_SUPERLU
 
 /* ****************************************************************************
@@ -106,6 +105,7 @@ int MLI_Solver_ARPACKSuperLU::solve( MLI_Vector *f_in, MLI_Vector *u_in )
    MPI_Request        *requests;
    MPI_Status         *statuses;
 
+#ifdef MLI_ARPACK 
    /* -------------------------------------------------------------
     * fetch matrix and vector parameters
     * -----------------------------------------------------------*/
@@ -229,6 +229,11 @@ printf("%d : f,u %5d = %e %e\n", mypid, iE, f_data[iE], u_data[iE]);
       delete [] statuses;
    }
    return info;
+#else
+   printf("FATAL ERROR : ARPACK not installed.\n");
+   exit(1);
+   return -1;
+#endif
 }
 
 /******************************************************************************
@@ -270,10 +275,5 @@ int MLI_Solver_ARPACKSuperLU::setParams( char *paramString, int argc,
    return 0;
 }
 
-#else
-int bogus1;
-#endif
-#else
-int bogus2;
 #endif
 

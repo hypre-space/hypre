@@ -314,8 +314,13 @@ int MLI_Method_AMGSA::setupSubdomainNullSpaceUsingFEData( MLI *mli )
    else 
    {
       strcpy( which, "destroy" );
+#ifdef MLI_ARPACK
       dnstev_(&csrNrows, &nullspace_dim, which, &sigmaR, &sigmaI, 
               csrIA, csrJA, csrAA, eigenR, eigenI, eigenV, &csrNrows, &info);
+#else
+   printf("FATAL ERROR : ARPACK not installed.\n");
+   exit(1);
+#endif
    }
 #if 1
    for ( i = 0; i < nullspace_dim; i++ )
