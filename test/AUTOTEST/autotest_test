@@ -379,16 +379,16 @@ apply_error_filters () {
           '\ remark:\ '
         do process_filter $ErrorFile "${ii}"
         done
-        for ii in \
-          '266:\ function\ declared\ implicitly'
-        do multi_line_delete $ErrorFile 3 "${ii}"
-        done
-        for ii in \
-          '\ :\ Terminating\ a\ DO\ loop\ with\ a\ statement\ other\ than\ '\
-          '\ :\ Type\ size\ specifiers\ are\ an\ extension\ to\ standard '\
-          '\ :\ DO\ loops\ sharing\ the\ same\ terminating\ statement\ is\ '
-        do multi_line_bakdelete $ErrorFile 3 "${ii}"
-        done
+#       for ii in \
+#         '266:\ function\ declared\ implicitly'
+#       do multi_line_delete $ErrorFile 3 "${ii}"
+#       done
+#       for ii in \
+#         '\ :\ Terminating\ a\ DO\ loop\ with\ a\ statement\ other\ than\ '\
+#         '\ :\ Type\ size\ specifiers\ are\ an\ extension\ to\ standard '\
+#         '\ :\ DO\ loops\ sharing\ the\ same\ terminating\ statement\ is\ '
+#       do multi_line_bakdelete $ErrorFile 3 "${ii}"
+#       done
       ;;
       riptide*)
         for ii in \
