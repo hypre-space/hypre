@@ -57,23 +57,8 @@ HYPRE_EXTRA_DIRS =\
  CI_struct_matrix_vector\
  CI_struct_linear_solvers @HYPRE_PETSCLIBDIRS@
 
-all:
+all: struct IJ
 	@ \
-	mkdir -p hypre/include; \
-	mkdir -p hypre/lib; \
-	HYPRE_INSTALL_DIR=`pwd`/hypre; \
-	export HYPRE_INSTALL_DIR; \
-	cp -f HYPRE_config.h $$HYPRE_INSTALL_DIR/include/.;\
-	cp -f HYPRE.h $$HYPRE_INSTALL_DIR/include/.;\
-	for i in ${HYPRE_DIRS}; \
-	do \
-	  if [ -d $$i ]; \
-	  then \
-	    echo "Making $$i ..."; \
-	    (cd $$i; make install); \
-	    echo ""; \
-	  fi; \
-	done; \
 	echo "Making test drivers ..."; \
 	(cd test; make veryclean; make); \
 	echo ""
@@ -82,7 +67,6 @@ beta: all
 	@ \
 	HYPRE_INSTALL_DIR=`pwd`/hypre; \
 	export HYPRE_INSTALL_DIR; \
-	cp -f HYPRE.h $$HYPRE_INSTALL_DIR/include/.; \
 	for i in ${HYPRE_EXTRA_DIRS}; \
 	do \
 	  if [ -d $$i ]; \
@@ -96,14 +80,38 @@ beta: all
 	(cd test; make beta); \
 	echo ""
 
-fei: 
+struct: base
 	@ \
-	mkdir -p hypre/include; \
-	mkdir -p hypre/lib; \
 	HYPRE_INSTALL_DIR=`pwd`/hypre; \
 	export HYPRE_INSTALL_DIR; \
-	cp -f HYPRE_config.h $$HYPRE_INSTALL_DIR/include/.;\
-	cp -f HYPRE.h $$HYPRE_INSTALL_DIR/include/.;\
+	for i in ${HYPRE_STRUCT_DIRS}; \
+	do \
+	  if [ -d $$i ]; \
+	  then \
+	    echo "Making $$i ..."; \
+	    (cd $$i; make install); \
+	    echo ""; \
+	  fi; \
+	done
+
+IJ: base
+	@ \
+	HYPRE_INSTALL_DIR=`pwd`/hypre; \
+	export HYPRE_INSTALL_DIR; \
+	for i in ${HYPRE_IJ_DIRS}; \
+	do \
+	  if [ -d $$i ]; \
+	  then \
+	    echo "Making $$i ..."; \
+	    (cd $$i; make install); \
+	    echo ""; \
+	  fi; \
+	done
+
+fei: base
+	@ \
+	HYPRE_INSTALL_DIR=`pwd`/hypre; \
+	export HYPRE_INSTALL_DIR; \
 	for i in ${HYPRE_FEI_DIRS}; \
 	do \
 	  if [ -d $$i ]; \
@@ -117,10 +125,18 @@ fei:
 	mv -f hypre/lib/*.a hypre/tmp; \
 	for i in ${HYPRE_FEI_LIBFILES}; \
 	do \
-	   ar x hypre/tmp/$$i \
+	   ar x hypre/tmp/$$i; \
 	done; \
-	ar ruv /hypre/lib/libHYPRE_FEI.a 
+	ar ruv /hypre/lib/libHYPRE_FEI.a; \
 	echo ""
+
+base:
+	@ \
+	mkdir -p hypre/include; \
+	mkdir -p hypre/lib; \
+	HYPRE_INSTALL_DIR=`pwd`/hypre; \
+	cp -f HYPRE_config.h $$HYPRE_INSTALL_DIR/include/.;\
+	cp -f HYPRE.h $$HYPRE_INSTALL_DIR/include/.
 
 install: all
 	@ \
@@ -164,28 +180,4 @@ veryclean:
 	done; \
 	echo "Very-cleaning test ..."; \
 	(cd test; make veryclean)
-
-struct:
-	@ \
-	for i in ${HYPRE_STRUCT_DIRS}; \
-	do \
-	  if [ -d $$i ]; \
-	  then \
-	    echo "Making $$i ..."; \
-	    (cd $$i; make); \
-	    echo ""; \
-	  fi; \
-	done
-
-IJ:
-	@ \
-	for i in ${HYPRE_IJ_DIRS}; \
-	do \
-	  if [ -d $$i ]; \
-	  then \
-	    echo "Making $$i ..."; \
-	    (cd $$i; make); \
-	    echo ""; \
-	  fi; \
-	done
 
