@@ -122,7 +122,7 @@ hypre_F90_IFACE(hypre_paramgsetmaxlevels)( long int *solver,
 
 void
 hypre_F90_IFACE(hypre_paramgsetstrongthreshold)( long int *solver,
-                                                 long int *strong_threshold,
+                                                 double   *strong_threshold,
                                                  int      *ierr              )
 {
    *ierr = (int)
