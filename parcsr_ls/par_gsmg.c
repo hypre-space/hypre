@@ -487,6 +487,7 @@ hypre_BoomerAMGCreateSmoothDirs(void *datay,
                        hypre_ParCSRMatrix *A,
                        int                    num_sweeps,
                        double                 thresh,
+                       int                    level,
                        int                    num_functions, 
                        int                   *dof_func,
                        hypre_ParCSRMatrix   **S_ptr)
@@ -511,6 +512,12 @@ hypre_BoomerAMGCreateSmoothDirs(void *datay,
    double *datax, *bp, *p;
    double minimax;
 
+/**** change ****/
+   int rlx_type;
+   int *smooth_option;
+   HYPRE_Solver *smoother;
+/**** change ****/
+
 #if 0
     hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
     double          *A_diag_data = hypre_CSRMatrixData(A_diag);
@@ -523,6 +530,17 @@ hypre_BoomerAMGCreateSmoothDirs(void *datay,
 #endif
 
 printf("Creating smooth dirs, %d sweeps, %d samples\n", num_sweeps, nsamples);
+
+/**** change ****/
+   smooth_option = hypre_ParAMGDataSmoothOption(amg_data);
+   if (smooth_option[0] > 0)
+   {
+      smoother = hypre_ParAMGDataSmoother(amg_data);
+      if (smooth_option[level] != -1)
+	 num_sweeps = hypre_ParAMGDataSmoothNumSweep(amg_data);
+   }
+   rlx_type = hypre_ParAMGDataGridRelaxType(amg_data)[0];
+/**** change ****/
 
    if (amg_data->gsi_x == NULL)
    {
@@ -580,9 +598,23 @@ printf("Creating smooth dirs, %d sweeps, %d samples\n", num_sweeps, nsamples);
 
        for (i=0; i<num_sweeps; i++)
        {
-           ret = hypre_BoomerAMGRelax(A, Zero, NULL /*CFmarker*/,
-               6 /* GS */, 0 /*rel pts*/, 1.0 /*weight*/, U, Temp);
-           assert(ret == 0);
+/**** change ****/
+	   if (smooth_option[level] == 6)
+	   {
+	      HYPRE_SchwarzSolve(smoother[level],
+			(HYPRE_ParCSRMatrix) A, 
+			(HYPRE_ParVector) Zero,
+			(HYPRE_ParVector) U);
+	   }
+	   else
+	   {
+/**** change ****/
+              ret = hypre_BoomerAMGRelax(A, Zero, NULL /*CFmarker*/,
+               rlx_type , 0 /*rel pts*/, 1.0 /*weight*/, U, Temp);
+              assert(ret == 0);
+/**** change ****/
+	   }
+/**** change ****/
        }
 
        /* copy out the solution */
