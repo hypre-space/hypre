@@ -150,7 +150,7 @@ int HYPRE_LSI_MLICreate( MPI_Comm comm, HYPRE_Solver *solver )
    mli_object->nCoordAccept_        = 0;
    mli_object->nullScales_          = NULL;
    mli_object->calibrationSize_     = 0;
-   mli_object->Pweight_             = 1.333;
+   mli_object->Pweight_             = 0.0;
    mli_object->adjustNullSpace_     = 0;
    mli_object->numResetNull_        = 0;
    mli_object->resetNullIndices_    = NULL;
