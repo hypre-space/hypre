@@ -1334,7 +1334,7 @@ if test "${with_strict_checking+set}" = set; then
   CC=kcc
  CXX=KCC
  CFLAGS="$CFLAGS --c --strict --lint --display_error_number"
- CFLAGS="$CFLAGS --diag_suppress 236,1018,1021,1022,1023,1024,1030,1041"
+ CFLAGS="$CFLAGS --diag_suppress 236,826,1018,1021,1022,1023,1024,1030,1041"
  CXXFLAGS="$CXXFLAGS --strict --lint --display_error_number"
  casc_users_chose_compilers=yes
  casc_using_mpi=no
@@ -7449,7 +7449,7 @@ else
 echo "configure:7450: checking for Fortran libraries" >&5
             echo "      END" > conftest.f
   foutput=`${F77-f77} -v -o conftest conftest.f 2>&1`
-            xlf_p=`echo $foutput | sed -n -e '/xlfentry/p'`
+            xlf_p=`echo $foutput | grep xlfentry`
   if test -n "$xlf_p"; then
     foutput=`echo $foutput | sed 's/,/ /g'`
   fi
