@@ -151,7 +151,7 @@ int hypre_SymQMRSetup( void *symqmr_vdata, void *A, void *b, void *x         )
    if ((symqmr_data -> matvec_data) == NULL)
       (symqmr_data -> matvec_data) = hypre_ParKrylovMatvecCreate(A, x);
  
-   precond_setup(precond_data, A, b, x);
+   ierr = precond_setup(precond_data, A, b, x);
  
    /*-----------------------------------------------------
     * Allocate space for log info

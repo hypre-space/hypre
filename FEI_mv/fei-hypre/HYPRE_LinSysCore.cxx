@@ -3630,7 +3630,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
    int                *constrMap, *constrEqns;
 #endif
    int                *numSweeps, *relaxType;
-   int                *matSizes, *rowInd;
+   int                *matSizes, *rowInd, retFlag;
    double             rnorm=0.0, ddata, *colVal, *relaxWt, *diagVals;
    double             stime, etime, ptime, rtime1, rtime2, newnorm;
    char               fname[40];
@@ -3997,11 +3997,22 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
               if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
                  HYPRE_ParCSRPCGSetPrintLevel(HYSolver_, 2);
            }
-           HYPRE_ParCSRPCGSetup(HYSolver_, A_csr, b_csr, x_csr);
+           retFlag = HYPRE_ParCSRPCGSetup(HYSolver_, A_csr, b_csr, x_csr);
+           if ( retFlag != 0 )
+           {
+              printf("HYPRE_LSC::launchSolver ERROR : in PCG setup.\n");
+              return retFlag;
+           }
+
            MPI_Barrier( comm_ );
            ptime  = LSC_Wtime();
 
-           HYPRE_ParCSRPCGSolve(HYSolver_, A_csr, b_csr, x_csr);
+           retFlag = HYPRE_ParCSRPCGSolve(HYSolver_, A_csr, b_csr, x_csr);
+           if ( retFlag != 0 )
+           {
+              printf("HYPRE_LSC::launchSolver ERROR : in PCG solve.\n");
+              return retFlag;
+           }
            HYPRE_ParCSRPCGGetNumIterations(HYSolver_, &numIterations);
            HYPRE_ParVectorCopy( b_csr, r_csr );
            HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
@@ -4041,10 +4052,20 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
               if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
                  HYPRE_ParCSRLSICGSetLogging(HYSolver_, 2);
            }
-           HYPRE_ParCSRLSICGSetup(HYSolver_, A_csr, b_csr, x_csr);
+           retFlag = HYPRE_ParCSRLSICGSetup(HYSolver_, A_csr, b_csr, x_csr);
+           if ( retFlag != 0 )
+           {
+              printf("HYPRE_LSC::launchSolver ERROR : in LSICG setup.\n");
+              return retFlag;
+           }
            MPI_Barrier( comm_ );
            ptime  = LSC_Wtime();
-           HYPRE_ParCSRLSICGSolve(HYSolver_, A_csr, b_csr, x_csr);
+           retFlag = HYPRE_ParCSRLSICGSolve(HYSolver_, A_csr, b_csr, x_csr);
+           if ( retFlag != 0 )
+           {
+              printf("HYPRE_LSC::launchSolver ERROR : in LSICG solve.\n");
+              return retFlag;
+           }
            HYPRE_ParCSRLSICGGetNumIterations(HYSolver_, &numIterations);
            HYPRE_ParVectorCopy( b_csr, r_csr );
            HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
@@ -4099,10 +4120,20 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
               if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
                  HYPRE_ParCSRHybridSetLogging(HYSolver_, 2);
            }
-           HYPRE_ParCSRHybridSetup(HYSolver_, A_csr, b_csr, x_csr);
+           retFlag = HYPRE_ParCSRHybridSetup(HYSolver_, A_csr, b_csr, x_csr);
+           if ( retFlag != 0 )
+           {
+              printf("HYPRE_LSC::launchSolver ERROR : in Hybrid setup.\n");
+              return retFlag;
+           }
            MPI_Barrier( comm_ );
            ptime  = LSC_Wtime();
-           HYPRE_ParCSRHybridSolve(HYSolver_, A_csr, b_csr, x_csr);
+           retFlag = HYPRE_ParCSRHybridSolve(HYSolver_, A_csr, b_csr, x_csr);
+           if ( retFlag != 0 )
+           {
+              printf("HYPRE_LSC::launchSolver ERROR : in Hybrid solve.\n");
+              return retFlag;
+           }
            HYPRE_ParCSRHybridGetNumIterations(HYSolver_, &numIterations);
            HYPRE_ParVectorCopy( b_csr, r_csr );
            HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
@@ -4139,10 +4170,20 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
               if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
                  HYPRE_ParCSRGMRESSetPrintLevel(HYSolver_, 2);
            }
-           HYPRE_ParCSRGMRESSetup(HYSolver_, A_csr, b_csr, x_csr);
+           retFlag = HYPRE_ParCSRGMRESSetup(HYSolver_, A_csr, b_csr, x_csr);
+           if ( retFlag != 0 )
+           {
+              printf("HYPRE_LSC::launchSolver ERROR : in GMRES setup.\n");
+              return retFlag;
+           }
            MPI_Barrier( comm_ );
            ptime  = LSC_Wtime();
-           HYPRE_ParCSRGMRESSolve(HYSolver_, A_csr, b_csr, x_csr);
+           retFlag = HYPRE_ParCSRGMRESSolve(HYSolver_, A_csr, b_csr, x_csr);
+           if ( retFlag != 0 )
+           {
+              printf("HYPRE_LSC::launchSolver ERROR : in GMRES solve.\n");
+              return retFlag;
+           }
            HYPRE_ParCSRGMRESGetNumIterations(HYSolver_, &numIterations);
            HYPRE_ParVectorCopy( b_csr, r_csr );
            HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
@@ -4183,7 +4224,12 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
               HYPRE_ParCSRFGMRESSetLogging(HYSolver_, 1);
            }
 
-           HYPRE_ParCSRFGMRESSetup(HYSolver_, A_csr, b_csr, x_csr);
+           retFlag = HYPRE_ParCSRFGMRESSetup(HYSolver_, A_csr, b_csr, x_csr);
+           if ( retFlag != 0 )
+           {
+              printf("HYPRE_LSC::launchSolver ERROR : in FGMRES setup.\n");
+              return retFlag;
+           }
 
            if ( fgmresUpdateTol_ && HYPreconID_ == HYBLOCK )
               HYPRE_ParCSRFGMRESUpdatePrecondTolerance(HYSolver_, 
@@ -4191,7 +4237,12 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
 
            MPI_Barrier( comm_ );
            ptime  = LSC_Wtime();
-           HYPRE_ParCSRFGMRESSolve(HYSolver_, A_csr, b_csr, x_csr);
+           retFlag = HYPRE_ParCSRFGMRESSolve(HYSolver_, A_csr, b_csr, x_csr);
+           if ( retFlag != 0 )
+           {
+              printf("HYPRE_LSC::launchSolver ERROR : in FGMRES solve.\n");
+              return retFlag;
+           }
            HYPRE_ParCSRFGMRESGetNumIterations(HYSolver_, &numIterations);
            HYPRE_ParVectorCopy( b_csr, r_csr );
            HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
@@ -4231,10 +4282,20 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
               if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
                  HYPRE_ParCSRBiCGSTABSetPrintLevel(HYSolver_, 2);
            }
-           HYPRE_ParCSRBiCGSTABSetup(HYSolver_, A_csr, b_csr, x_csr);
+           retFlag = HYPRE_ParCSRBiCGSTABSetup(HYSolver_, A_csr, b_csr, x_csr);
+           if ( retFlag != 0 )
+           {
+              printf("HYPRE_LSC::launchSolver ERROR : in BiCGSTAB setup.\n");
+              return retFlag;
+           }
            MPI_Barrier( comm_ );
            ptime  = LSC_Wtime();
-           HYPRE_ParCSRBiCGSTABSolve(HYSolver_, A_csr, b_csr, x_csr);
+           retFlag = HYPRE_ParCSRBiCGSTABSolve(HYSolver_, A_csr, b_csr, x_csr);
+           if ( retFlag != 0 )
+           {
+              printf("HYPRE_LSC::launchSolver ERROR : in BiCGSTAB solve.\n");
+              return retFlag;
+           }
            HYPRE_ParCSRBiCGSTABGetNumIterations(HYSolver_, &numIterations);
            HYPRE_ParVectorCopy( b_csr, r_csr );
            HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
@@ -4272,10 +4333,20 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                 printf("***************************************************\n");
               HYPRE_ParCSRBiCGSTABLSetLogging(HYSolver_, 1);
            }
-           HYPRE_ParCSRBiCGSTABLSetup(HYSolver_, A_csr, b_csr, x_csr);
+           retFlag = HYPRE_ParCSRBiCGSTABLSetup(HYSolver_, A_csr, b_csr, x_csr);
+           if ( retFlag != 0 )
+           {
+              printf("HYPRE_LSC::launchSolver ERROR : in BiCGSTABL setup.\n");
+              return retFlag;
+           }
            MPI_Barrier( comm_ );
            ptime  = LSC_Wtime();
-           HYPRE_ParCSRBiCGSTABLSolve(HYSolver_, A_csr, b_csr, x_csr);
+           retFlag = HYPRE_ParCSRBiCGSTABLSolve(HYSolver_, A_csr, b_csr, x_csr);
+           if ( retFlag != 0 )
+           {
+              printf("HYPRE_LSC::launchSolver ERROR : in BiCGSTABL solve.\n");
+              return retFlag;
+           }
            HYPRE_ParCSRBiCGSTABLGetNumIterations(HYSolver_, &numIterations);
            HYPRE_ParVectorCopy( b_csr, r_csr );
            HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
@@ -4313,10 +4384,20 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                 printf("***************************************************\n");
               HYPRE_ParCSRTFQmrSetLogging(HYSolver_, 1);
            }
-           HYPRE_ParCSRTFQmrSetup(HYSolver_, A_csr, b_csr, x_csr);
+           retFlag = HYPRE_ParCSRTFQmrSetup(HYSolver_, A_csr, b_csr, x_csr);
+           if ( retFlag != 0 )
+           {
+              printf("HYPRE_LSC::launchSolver ERROR : in TFQMR setup.\n");
+              return retFlag;
+           }
            MPI_Barrier( comm_ );
            ptime  = LSC_Wtime();
-           HYPRE_ParCSRTFQmrSolve(HYSolver_, A_csr, b_csr, x_csr);
+           retFlag = HYPRE_ParCSRTFQmrSolve(HYSolver_, A_csr, b_csr, x_csr);
+           if ( retFlag != 0 )
+           {
+              printf("HYPRE_LSC::launchSolver ERROR : in TFQMR solve.\n");
+              return retFlag;
+           }
            HYPRE_ParCSRTFQmrGetNumIterations(HYSolver_, &numIterations);
            HYPRE_ParVectorCopy( b_csr, r_csr );
            HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
@@ -4354,10 +4435,20 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                 printf("***************************************************\n");
               HYPRE_ParCSRBiCGSSetLogging(HYSolver_, 1);
            }
-           HYPRE_ParCSRBiCGSSetup(HYSolver_, A_csr, b_csr, x_csr);
+           retFlag = HYPRE_ParCSRBiCGSSetup(HYSolver_, A_csr, b_csr, x_csr);
+           if ( retFlag != 0 )
+           {
+              printf("HYPRE_LSC::launchSolver ERROR : in CGS setup.\n");
+              return retFlag;
+           }
            MPI_Barrier( comm_ );
            ptime  = LSC_Wtime();
-           HYPRE_ParCSRBiCGSSolve(HYSolver_, A_csr, b_csr, x_csr);
+           retFlag = HYPRE_ParCSRBiCGSSolve(HYSolver_, A_csr, b_csr, x_csr);
+           if ( retFlag != 0 )
+           {
+              printf("HYPRE_LSC::launchSolver ERROR : in CGS solve.\n");
+              return retFlag;
+           }
            HYPRE_ParCSRBiCGSGetNumIterations(HYSolver_, &numIterations);
            HYPRE_ParVectorCopy( b_csr, r_csr );
            HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
@@ -4395,10 +4486,20 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                 printf("***************************************************\n");
               HYPRE_ParCSRSymQMRSetLogging(HYSolver_, 1);
            }
-           HYPRE_ParCSRSymQMRSetup(HYSolver_, A_csr, b_csr, x_csr);
+           retFlag = HYPRE_ParCSRSymQMRSetup(HYSolver_, A_csr, b_csr, x_csr);
+           if ( retFlag != 0 )
+           {
+              printf("HYPRE_LSC::launchSolver ERROR : in SymQMR setup.\n");
+              return retFlag;
+           }
            MPI_Barrier( comm_ );
            ptime  = LSC_Wtime();
-           HYPRE_ParCSRSymQMRSolve(HYSolver_, A_csr, b_csr, x_csr);
+           retFlag = HYPRE_ParCSRSymQMRSolve(HYSolver_, A_csr, b_csr, x_csr);
+           if ( retFlag != 0 )
+           {
+              printf("HYPRE_LSC::launchSolver ERROR : in SymQMR solve.\n");
+              return retFlag;
+           }
            HYPRE_ParCSRSymQMRGetNumIterations(HYSolver_, &numIterations);
            HYPRE_ParVectorCopy( b_csr, r_csr );
            HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );

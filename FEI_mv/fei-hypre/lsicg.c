@@ -123,7 +123,7 @@ int hypre_LSICGSetup( void *lsicg_vdata, void *A, void *b, void *x         )
    if ((lsicg_data -> matvec_data) == NULL)
       (lsicg_data -> matvec_data) = hypre_ParKrylovMatvecCreate(A, x);
  
-   precond_setup(precond_data, A, b, x);
+   ierr = precond_setup(precond_data, A, b, x);
  
    return ierr;
 }
@@ -201,6 +201,12 @@ int hypre_LSICGSolve(void  *lsicg_vdata, void  *A, void  *b, void  *x)
          hypre_ParKrylovMatvec(matvec_data,1.0e0,A,p,0.0,ap);
          sigma = hypre_ParKrylovInnerProd(p,ap);
          alpha  = rho / sigma;
+         if ( sigma == 0.0 )
+         {
+            printf("HYPRE::LSICG ERROR - sigma = 0.0.\n");
+            ierr = 2;
+            return ierr;
+         }
          hypre_ParKrylovAxpy(alpha, p, x);
          hypre_ParKrylovAxpy(-alpha, ap, r);
          dArray[0] = hypre_SeqVectorInnerProd( r_local, r_local );
@@ -221,6 +227,7 @@ int hypre_LSICGSolve(void  *lsicg_vdata, void  *A, void  *b, void  *x)
          printf("LSICG actual residual norm = %e \n",r_norm);
       if ( r_norm < epsilon || iter >= max_iter ) converged = 1;
    }
+   if ( iter >= max_iter ) ierr = 1;
    lsicg_data->rel_residual_norm = r_norm;
    lsicg_data->num_iterations    = iter;
    if ( logging >= 1 && mypid == 0 )

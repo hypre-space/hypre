@@ -144,7 +144,7 @@ int hypre_FGMRESSetup( void *fgmres_vdata, void *A, void *b, void *x )
    if ((fgmres_data -> matvec_data) == NULL)
       (fgmres_data -> matvec_data) = hypre_ParKrylovMatvecCreate(A, x);
 
-   precond_setup(precond_data, A, b, x);
+   ierr = precond_setup(precond_data, A, b, x);
  
    if ((fgmres_data -> logging) > 0)
    {
