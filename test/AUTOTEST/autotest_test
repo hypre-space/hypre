@@ -24,6 +24,7 @@ initialize_variables ()
   BatchOpt=""
   MailOpt=""
   MailCmd="no"
+  DEBUG_MODE="no"
   Skip=0
   Build=1
   Run=2
@@ -188,6 +189,9 @@ usage () {
 #=============================================================================
 
 process_filter () {
+  if [ "$DEBUG_MODE" = "yes" ] ; then
+    set -xv
+  fi
   ErrorFile=$1
   shift
   if (egrep "$@" $ErrorFile >/dev/null)
@@ -199,6 +203,9 @@ process_filter () {
   fi
 }
 multi_line_filter () {
+  if [ "$DEBUG_MODE" = "yes" ] ; then
+    set -xv
+  fi
   ErrorFile=$1
   shift
   Join=$1
@@ -222,6 +229,9 @@ EOF
   fi
 }
 apply_error_filters () {
+  if [ "$DEBUG_MODE" = "yes" ] ; then
+    set -xv
+  fi
   ErrorFile=$1
   if [ -s "${ErrorFile}" ] ; then
     HOST=`hostname`
@@ -242,9 +252,18 @@ apply_error_filters () {
         ;;
       peng*)
         for ii in \
-          '^[A-Za-z0-9_]\.[cCf]$'\
+          '^[A-Za-z0-9_]*\.[cCf]$'\
+          '^[A-Za-z0-9_]*\.cxx$'\
+          '^[0-9]*\ Lines\ Compiled$'\
+          'external\ (subroutine|function)'\
+          'EXTERNAL\ (SUBROUTINE|FUNCTION)'\
+          '^icc:\ Command\ line\ warning:\ overriding'\
           '\ remark:\ '
         do process_filter $ErrorFile "${ii}"
+        done
+        for ii in \
+          '266:\ function\ declared\ implicitly'
+        do multi_line_filter $ErrorFile 3 "${ii}"
         done
       ;;
       tckk*|tc2k*|gps*)
@@ -257,7 +276,8 @@ apply_error_filters () {
       tux*)
         for ii in \
           '(autoconf|automake|autoheader)\ has\ been\ disabled'\
-          'configure:\ WARNING:\ Configuration\ for'
+          'configure:\ WARNING:\ Configuration\ for'\
+          'sed:\ Couldn\'t\ close\ {standard\ output}'
         do process_filter $ErrorFile "${ii}"
         done
       ;;
@@ -270,8 +290,13 @@ apply_error_filters () {
       achi*|sunup*)
         for ii in \
           'Option -fexceptions passed to ld'\
-          'configure: WARNING: Configuration for'
+          '(autoconf|automake|autoheader) has been disabled'\
+          '^configure: WARNING: '
         do process_filter $ErrorFile "${ii}"
+        done
+        for ii in \
+          ': warning: assignment type mismatch:$'
+        do multi_line_filter $ErrorFile 3 "${ii}"
         done
       ;;
     esac
