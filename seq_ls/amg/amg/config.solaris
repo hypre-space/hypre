@@ -13,7 +13,12 @@
 
 AMG_CC="gcc"
 AMG_CC_FLAGS="-DSOLARIS -I/home/casc/include"
-AMG_CC_DEBUG="-g -DAMG_MALLOC_DEBUG"
+if [ -z "$MALLOC_DEBUG" ]
+then
+  AMG_CC_DEBUG="-g"
+else
+  AMG_CC_DEBUG="-g -DAMG_MALLOC_DEBUG"
+fi
 
 AMG_F77="/home/casc/g77/bin/g77"
 AMG_F77_FLAGS=""
