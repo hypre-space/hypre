@@ -5,7 +5,7 @@
 #ifndef _HYPRE_LinSysCore_h_
 #define _HYPRE_LinSysCore_h_
 
-#define HYPRE_FEI_Version() "FEI/HYPRE 2.0.0R7"
+#define HYPRE_FEI_Version() "FEI/HYPRE 2.0.0R9"
 
 // *************************************************************************
 // system libraries used
@@ -404,6 +404,12 @@ class HYPRE_LinSysCore
    // HYPRE specific private functions
    // ----------------------------------------------------------------------
 
+   void  setupPCGPrecon();
+   void  setupGMRESPrecon();
+   void  setupBiCGSTABPrecon();
+   void  setupBiCGSTABLPrecon();
+   void  setupTFQmrPrecon();
+   void  setupBiCGSPrecon();
    void  solveUsingBoomeramg(int&);
    void  solveUsingSuperLU(int&);
    void  solveUsingSuperLUX(int&);
@@ -527,6 +533,7 @@ class HYPRE_LinSysCore
    int             amgRelaxType_[4];
    double          amgRelaxWeight_[25];
    double          amgStrongThreshold_;
+   int             amgSystemSize_;
    int             pilutFillin_;
    double          pilutDropTol_;
    int             pilutMaxNnzPerRow_;

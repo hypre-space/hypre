@@ -95,7 +95,7 @@ LFLAGS =\
  ${MPILIBFLAGS} ${MPI_LIBS} ${LIBFLAGS} ${LDLIBFLAGS}\
  -ldxml -lm
 
-FILES = HYPRE_LinSysCore.C cfei_hypre.C hypre_slide_reduce.C \
+FILES = HYPRE_LinSysCore.C HYPRE_LSC_aux.C cfei_hypre.C hypre_slide_reduce.C \
         hypre_schur_reduce.C hypre_lsi_misc.c hypre_lsi_ddamg.C \
         HYPRE_parcsr_ml.c HYPRE_LSI_ddilut.c hypre_lsi_amge.c \
         HYPRE_parcsr_bicgstabl.c bicgstabl.c fegridinfo.C \
@@ -105,7 +105,7 @@ FILES = HYPRE_LinSysCore.C cfei_hypre.C hypre_slide_reduce.C \
 TEMP = ${FILES:.c=.o}
 OBJS = ${TEMP:.C=.o}
 
-FILESV12 = HYPRE_LinSysCore.C hypre_slide_reduce.C \
+FILESV12 = HYPRE_LinSysCore.C HYPRE_LSC_aux.C hypre_slide_reduce.C \
            hypre_schur_reduce.C hypre_lsi_misc.c hypre_lsi_ddamg.C \
            HYPRE_parcsr_ml.c HYPRE_LSI_ddilut.c \
            HYPRE_parcsr_bicgstabl.c bicgstabl.c fegridinfo.C \

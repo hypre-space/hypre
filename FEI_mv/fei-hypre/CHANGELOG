@@ -43,4 +43,9 @@
 04/25/01    2.0.0R8
             - make preconditioner reuse more usable
             - make A-conjugate projection restart instead of truncation
-
+04/26/01    2.0.0R9
+            - split HYPRE_LinSysCore.C into 2 files and shorten subroutines
+            - add system AMG
+05/02/01    2.0.0R9
+            - take out iostream.h because it creates problem on solaris
+          
