@@ -86,12 +86,12 @@ int HYPRE_ParaSailsDestroy(HYPRE_ParaSails ps)
  * HYPRE_ParaSailsSetup.
  *--------------------------------------------------------------------------*/
 
-int HYPRE_ParaSailsSelectThresh(HYPRE_ParaSails ps, double *threshp)
+int HYPRE_ParaSailsSelectThresh(HYPRE_ParaSails ps, double param,
+  double *threshp)
 {
     hypre_ParaSails *internal = (hypre_ParaSails *) ps;
 
-    /* Use a default parameter here */
-    *threshp = ParaSailsSelectThresh(internal->ps, 0.75);
+    *threshp = ParaSailsSelectThresh(internal->ps, param);
 
     return 0;
 }
