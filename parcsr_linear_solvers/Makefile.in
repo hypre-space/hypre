@@ -21,6 +21,25 @@ F77_COMPILE_FLAGS=@F77FLAGS@
 CINCLUDES=@INCLUDES@ @MPIINCLUDE@
 CDEFS = @HYPREDEFS@
  
+#Pilut flags and definitions
+
+HYPRE_DIR = @HYPRE_TOP_SRC_DIR@
+
+# FC_LIB contains the libraries for a CLINKER to use for code containing
+# FORTRAN code (such as I/O or special Fortran runtimes).
+#
+FC_LIB         = -L/opt/SUNWspro/SC4.2/lib -lF77 -lM77 -lsunmath
+BLAS_LIB       =  -lsunperf ${FC_LIB} -lSUNWPro_lic
+
+PILUT_LIBFLAGS =\
+ -L${HYPRE_DIR}/distributed_linear_solvers/pilut\
+ -L${HYPRE_DIR}/distributed_matrix\
+ -L${HYPRE_DIR}/matrix_matrix\
+ -l_HYPRE_DistributedMatrixPilutSolver \
+ -l_HYPRE_DistributedMatrix \
+ -l_HYPRE_MatrixMatrix \
+ $(BLAS_LIB)
+
 CFLAGS =\
  ${C_COMPILE_FLAGS}\
  -I../utilities\
@@ -41,6 +60,7 @@ LFLAGS =\
  -L../seq_matrix_vector\
  -L../utilities\
  -lHYPRE_parcsr_ls\
+ $(PILUT_LIBFLAGS)\
  -lHYPRE_parcsr_mv\
  -lHYPRE_mv\
  -lHYPRE_utilities\
@@ -78,7 +98,8 @@ FILES =\
  HYPRE_parcsr_amg.c\
  HYPRE_parcsr_cgnr.c\
  HYPRE_parcsr_gmres.c\
- HYPRE_parcsr_pcg.c
+ HYPRE_parcsr_pcg.c\
+ HYPRE_parcsr_pilut.c
 
 OBJS = ${FILES:.c=.o}
 

@@ -101,6 +101,15 @@ int HYPRE_ParCSRPCGGetFinalRelativeResidualNorm P((HYPRE_Solver solver , double 
 int HYPRE_ParCSRDiagScaleSetup P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector y , HYPRE_ParVector x ));
 int HYPRE_ParCSRDiagScale P((HYPRE_Solver solver , HYPRE_ParCSRMatrix HA , HYPRE_ParVector Hy , HYPRE_ParVector Hx ));
 
+/* HYPRE_parcsr_pilut.c */
+int HYPRE_ParCSRPilutInitialize P(( MPI_Comm comm, HYPRE_Solver *solver ));
+int HYPRE_ParCSRPilutFinalize P((HYPRE_Solver solver ));
+int HYPRE_ParCSRPilutSetup P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x ));
+int HYPRE_ParCSRPilutSolve P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x ));
+int HYPRE_ParCSRPilutSetMaxIter P((HYPRE_Solver solver , int max_iter ));
+int HYPRE_ParCSRPilutSetDropTolerance P((HYPRE_Solver solver , double tol ));
+int HYPRE_ParCSRPilutSetFactorRowSize P((HYPRE_Solver solver , int size ));
+
 #undef P
 
 #ifdef __cplusplus

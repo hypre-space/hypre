@@ -51,6 +51,10 @@ main( int   argc,
    double   relax_weight; 
    double   tol = 1.0e-7;
 
+   /* parameters for PILUT */
+   double   drop_tol = -1;
+   int      nonzeros_to_keep = -1;
+
    /* parameters for GMRES */
    int	    k_dim;
 
@@ -313,6 +317,16 @@ main( int   argc,
          arg_index++;
          tol  = atof(argv[arg_index++]);
       }
+      else if ( strcmp(argv[arg_index], "-drop_tol") == 0 )
+      {
+         arg_index++;
+         drop_tol  = atof(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-nonzeros_to_keep") == 0 )
+      {
+         arg_index++;
+         nonzeros_to_keep  = atoi(argv[arg_index++]);
+      }
       else if ( strcmp(argv[arg_index], "-tr") == 0 )
       {
          arg_index++;
@@ -359,6 +373,7 @@ main( int   argc,
       printf("       1=AMG-PCG    2=DS-PCG   \n");
       printf("       3=AMG-GMRES  4=DS-GMRES  \n");     
       printf("       5=AMG-CGNR   6=DS-CGNR  \n");     
+      printf("       7=PILUT-GMRES  \n");     
       printf("\n");
       printf("   -ruge                 : Ruge coarsening (local)\n");
       printf("   -ruge3                : third pass on boundary\n");
@@ -378,6 +393,9 @@ main( int   argc,
       printf("  -tol <val>             : set AMG convergence tolerance to val\n");
       printf("  -w  <val>              : set Jacobi relax weight = val\n");
       printf("  -k  <val>              : dimension Krylov space for GMRES\n");
+      printf("\n");  
+      printf("  -drop_tol  <val>       : set threshold for dropping in PILUT\n");
+      printf("  -nonzeros_to_keep <val>: number of nonzeros in each row to keep\n");
       printf("\n");  
       printf("  -iout <val>            : set output flag\n");
       printf("       0=no output    1=matrix stats\n"); 
@@ -434,7 +452,7 @@ main( int   argc,
     * Set up the RHS and initial guess
     *-----------------------------------------------------------*/
 
-#if 0
+#if 1
    hypre_PrintParCSRMatrix(A, "driver.out.A");
 #endif
 
@@ -650,7 +668,7 @@ main( int   argc,
     * Solve the system using GMRES 
     *-----------------------------------------------------------*/
 
-   if (solver_id == 3 || solver_id == 4)
+   if (solver_id == 3 || solver_id == 4 || solver_id == 7)
    {
       time_index = hypre_InitializeTiming("GMRES Setup");
       hypre_BeginTiming(time_index);
@@ -689,6 +707,27 @@ main( int   argc,
                                    HYPRE_ParCSRDiagScale,
                                    HYPRE_ParCSRDiagScaleSetup,
                                    pcg_precond);
+      }
+      else if (solver_id == 7)
+      {
+         /* use PILUT as preconditioner */
+         ierr = HYPRE_ParCSRPilutInitialize( MPI_COMM_WORLD, &pcg_precond ); 
+         if (ierr) {
+	   printf("Error in ParPilutInitialize\n");
+         }
+
+         HYPRE_ParCSRGMRESSetPrecond(pcg_solver,
+                                   HYPRE_ParCSRPilutSolve,
+                                   HYPRE_ParCSRPilutSetup,
+                                   pcg_precond);
+
+         if (drop_tol >= 0 )
+            HYPRE_ParCSRPilutSetDropTolerance( pcg_precond,
+               drop_tol );
+
+         if (nonzeros_to_keep >= 0 )
+            HYPRE_ParCSRPilutSetFactorRowSize( pcg_precond,
+               nonzeros_to_keep );
       }
  
       HYPRE_ParCSRGMRESSetup(pcg_solver, A, b, x);
