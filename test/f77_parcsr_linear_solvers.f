@@ -109,6 +109,29 @@ c-----------------------------------------------------------------------
  
 c     open( 5, file='parcsr_linear_solver.in', status='old')
 c
+c     read( 5, *) dim
+c
+c     read( 5, *) nx
+c     read( 5, *) ny
+c     read( 5, *) nz
+c
+c     read( 5, *) Px
+c     read( 5, *) Py
+c     read( 5, *) Pz
+c
+c     read( 5, *) bx
+c     read( 5, *) by
+c     read( 5, *) bz
+c
+c     read( 5, *) cx
+c     read( 5, *) cy
+c     read( 5, *) cz
+c
+c     read( 5, *) n_pre
+c     read( 5, *) n_post
+c
+c     read( 5, *) solver_id
+c
 c     close( 5 )
 
 c-----------------------------------------------------------------------
@@ -201,14 +224,14 @@ c-----------------------------------------------------------------------
      &                        b, ierr)
       call hypre_SetParVectorPartitioningO(b, 0, ierr)
       call HYPRE_InitializeParVector(b, ierr)
-      call hypre_SetParVectorConstantValue(b, 0.0, ierr)
+      call hypre_SetParVectorConstantValue(b, 0d0, ierr)
 c     call HYPRE_PrintParVector("driver.out.b", b, zero, ierr)
 
       call HYPRE_NewParVector(MPI_COMM_WORLD, num_rows, row_starts,
      &                        x, ierr)
       call hypre_SetParVectorPartitioningO(x, 0, ierr)
       call HYPRE_InitializeParVector(x, ierr)
-      call hypre_SetParVectorConstantValue(x, 1.0, ierr)
+      call hypre_SetParVectorConstantValue(x, 1d0, ierr)
 c     call HYPRE_PrintParVector("driver.out.x0", x, zero, ierr)
 
 c-----------------------------------------------------------------------
