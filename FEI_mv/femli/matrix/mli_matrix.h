@@ -41,6 +41,8 @@ public :
    MLI_Matrix( void *, char *, MLI_Function *func);
    ~MLI_Matrix();
    void       *getMatrix()                          { return matrix; }
+   void	      *takeMatrix()                         { destroy_func = NULL;
+                                                      return matrix; }
    char       *getName()                            { return name; }
    int        apply( double, MLI_Vector *, double, MLI_Vector *, MLI_Vector * );
    MLI_Vector *createVector();
