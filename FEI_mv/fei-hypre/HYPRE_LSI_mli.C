@@ -22,7 +22,7 @@
  *        HYPRE_LSI_MLISetFEData
  *        HYPRE_LSI_MLISetStrengthThreshold
  *        HYPRE_LSI_MLISetMethod
- *        HYPRE_LSI_MLISetNodalCoordinates
+ *        HYPRE_LSI_MLILoadNodalCoordinates
  *--------------------------------------------------------------------------
  *        HYPRE_LSI_MLIFEDataCreate
  *        HYPRE_LSI_MLIFEDataDestroy
@@ -86,6 +86,7 @@ typedef struct HYPRE_LSI_MLI_Struct
    double   *coarseSolverWts_;    /* relaxation weight (if Jacobi used) */
    int      minCoarseSize_;       /* minimum coarse grid size */
    int      nodeDOF_;             /* node degree of freedom */
+   int      spaceDim_;            /* 2D or 3D */
    int      nSpaceDim_;           /* number of null vectors */
    int      localNEqns_;          /* number of equations locally */
    int      nCoordAccept_;        /* flag to accept nodal coordinate or not */ 
@@ -142,15 +143,16 @@ int HYPRE_LSI_MLICreate( MPI_Comm comm, HYPRE_Solver *solver )
    strcpy(mli_object->coarseSolver_, "SuperLU");
    mli_object->coarseSolverNSweeps_ = 0;
    mli_object->coarseSolverWts_     = NULL;
-   mli_object->minCoarseSize_       = 20;
+   mli_object->minCoarseSize_       = 1;
    mli_object->nodeDOF_             = 1;
-   mli_object->nSpaceDim_           = 1;
+   mli_object->spaceDim_            = 3;
+   mli_object->nSpaceDim_           = 4;
    mli_object->localNEqns_          = 0;
    mli_object->nCoordinates_        = NULL;
-   mli_object->nCoordAccept_        = 0;
+   mli_object->nCoordAccept_        = 1;
    mli_object->nullScales_          = NULL;
    mli_object->calibrationSize_     = 0;
-   mli_object->Pweight_             = 0.0;
+   mli_object->Pweight_             = 1.33;
    mli_object->adjustNullSpace_     = 0;
    mli_object->numResetNull_        = 0;
    mli_object->resetNullIndices_    = NULL;
@@ -214,7 +216,7 @@ int HYPRE_LSI_MLISetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
 #ifdef HAVE_MLI
    int           targc, nNodes, iZero=0;
    double        tol=1.0e-8;
-   char          *targv[5], paramString[100];;
+   char          *targv[6], paramString[100];;
    HYPRE_LSI_MLI *mli_object;
    MLI_Matrix    *mli_mat;   
    MLI_Method    *method;   
@@ -310,12 +312,13 @@ int HYPRE_LSI_MLISetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
    if ( mli_object->nCoordinates_ != NULL )
    {
       nNodes = mli_object->localNEqns_ / mli_object->nodeDOF_;
-      targc    = 5;
+      targc    = 6;
       targv[0] = (char *) &nNodes;
       targv[1] = (char *) &(mli_object->nodeDOF_);
-      targv[2] = (char *) mli_object->nCoordinates_;
-      targv[3] = (char *) mli_object->nullScales_;
+      targv[2] = (char *) &(mli_object->spaceDim_);
+      targv[3] = (char *) mli_object->nCoordinates_;
       targv[4] = (char *) &(mli_object->nSpaceDim_);
+      targv[5] = (char *) mli_object->nullScales_;
       strcpy( paramString, "setNodalCoord" );
       method->setParams( paramString, targc, targv );
 #if 0
@@ -408,7 +411,7 @@ int HYPRE_LSI_MLISetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
          mli_object->nSpaceDim_ = mli_object->nodeDOF_; 
       targv[1] = (char *) &(mli_object->nSpaceDim_);
       targv[2] = (char *) NULL;
-      targv[3] = (char *) iZero;
+      targv[3] = (char *) &iZero;
       strcpy( paramString, "setNullSpace" );
       method->setParams( paramString, targc, targv );
    }
@@ -954,12 +957,12 @@ int HYPRE_LSI_MLI_SetMethod( HYPRE_Solver solver, char *paramString )
 
 extern "C"
 int HYPRE_LSI_MLILoadNodalCoordinates(HYPRE_Solver solver, int nNodes,
-              int nodeDOF, int *eqnNumbers, int endRow, double *coords)
+              int nodeDOF, int *eqnNumbers, int nDim, double *coords)
 {
    int           iN, iP, mypid, nprocs, *nodeProcMap, *iTempArray, eqnInd;
    int           iS, nSends, *sendLengs, *sendProcs, **iSendBufs, procIndex;
    int           iR, nRecvs, *recvLengs, *recvProcs, **iRecvBufs, *procList;
-   int           iD, *procNRows, numNodes;
+   int           iD, *procNRows, numNodes, coordLength;
    double        **dSendBufs, **dRecvBufs, *nCoords;
    MPI_Request   *mpiRequests;
    MPI_Status    mpiStatus;
@@ -997,10 +1000,12 @@ int HYPRE_LSI_MLILoadNodalCoordinates(HYPRE_Solver solver, int nNodes,
 
    procNRows = new int[nprocs+1];
    iTempArray = new int[nprocs];
-   for ( iP = 0; iP < nprocs; iP++ ) iTempArray[iP] = 0;
-   iTempArray[mypid] = endRow + 1;
-   MPI_Allreduce(iTempArray,&(procNRows[1]),nprocs,MPI_INT,MPI_SUM,mpiComm);
+   for ( iP = 0; iP <= nprocs; iP++ ) procNRows[iP] = 0;
+   procNRows[mypid] = nNodes * nodeDOF;
+   MPI_Allreduce(procNRows,iTempArray,nprocs,MPI_INT,MPI_SUM,mpiComm);
    procNRows[0] = 0;
+   for ( iP = 1; iP <= nprocs; iP++ ) 
+      procNRows[iP] = procNRows[iP-1] + iTempArray[iP-1];
 
    /* -------------------------------------------------------- */
    /* construct node to processor map                          */
@@ -1052,11 +1057,8 @@ int HYPRE_LSI_MLILoadNodalCoordinates(HYPRE_Solver solver, int nNodes,
 
    for ( iP = 0; iP < nprocs; iP++ ) procList[iP] = 0;
    for ( iP = 0; iP < nSends; iP++ ) procList[sendProcs[iP]]++;
-   iTempArray = new int[nprocs];
    MPI_Allreduce(procList,iTempArray,nprocs,MPI_INT,MPI_SUM,mpiComm);
    nRecvs = iTempArray[mypid];
-   delete [] procList;
-   delete [] iTempArray;
    if ( nRecvs > 0 )
    {
       recvLengs = new int[nRecvs];
@@ -1114,13 +1116,13 @@ int HYPRE_LSI_MLILoadNodalCoordinates(HYPRE_Solver solver, int nNodes,
 
    for ( iP = 0; iP < nRecvs; iP++ )
    {
-      dRecvBufs[iP] = new double[recvLengs[iP]*nodeDOF];
-      MPI_Irecv(dRecvBufs[iP], recvLengs[iP]*nodeDOF, MPI_DOUBLE, 
+      dRecvBufs[iP] = new double[recvLengs[iP]*nDim];
+      MPI_Irecv(dRecvBufs[iP], recvLengs[iP]*nDim, MPI_DOUBLE, 
                 recvProcs[iP], 29425, mpiComm, &(mpiRequests[iP]));
    }
    for ( iP = 0; iP < nSends; iP++ )
    {
-      dSendBufs[iP] = new double[sendLengs[iP]*nodeDOF];
+      dSendBufs[iP] = new double[sendLengs[iP]*nDim];
       sendLengs[iP] = 0;
    }
    for ( iN = 0; iN < nNodes; iN++ )
@@ -1130,14 +1132,14 @@ int HYPRE_LSI_MLILoadNodalCoordinates(HYPRE_Solver solver, int nNodes,
          procIndex = nodeProcMap[iN];
          for ( iP = 0; iP < nSends; iP++ )
             if ( procIndex == sendProcs[iP] ) break;
-         for ( iD = 0; iD < nodeDOF; iD++ )
-            dSendBufs[iP][sendLengs[iP]++]=coords[iN*nodeDOF+iD];
+         for ( iD = 0; iD < nDim; iD++ )
+            dSendBufs[iP][sendLengs[iP]++]=coords[iN*nDim+iD];
       }
    }
    for ( iP = 0; iP < nSends; iP++ )
    {
-      sendLengs[iP] /= nodeDOF;
-      MPI_Send(dSendBufs[iP], sendLengs[iP]*nodeDOF, MPI_DOUBLE, 
+      sendLengs[iP] /= nDim;
+      MPI_Send(dSendBufs[iP], sendLengs[iP]*nDim, MPI_DOUBLE, 
                sendProcs[iP], 29425, mpiComm);
    }
    for ( iP = 0; iP < nRecvs; iP++ ) MPI_Wait(&(mpiRequests[iP]), &mpiStatus);
@@ -1146,40 +1148,44 @@ int HYPRE_LSI_MLILoadNodalCoordinates(HYPRE_Solver solver, int nNodes,
    /* set up nodal coordinate information in correct order     */
    /* -------------------------------------------------------- */
 
-   mli_object->nodeDOF_      = nodeDOF;
-   mli_object->localNEqns_   = procNRows[mypid+1] - procNRows[mypid];
-   mli_object->nCoordinates_ = new double[mli_object->localNEqns_];
+   mli_object->spaceDim_   = nDim;
+   mli_object->nodeDOF_    = nodeDOF;
+   mli_object->localNEqns_ = procNRows[mypid+1] - procNRows[mypid];
+   coordLength = nNodes * nDim;
+   mli_object->nCoordinates_ = new double[coordLength];
    nCoords                   = mli_object->nCoordinates_;
-   for (iN = 0; iN < mli_object->localNEqns_; iN++) nCoords[iN] = -999999.0;  
+   for (iN = 0; iN < coordLength; iN++) nCoords[iN] = -999999.0;  
 
    numNodes = 0;
    for ( iN = 0; iN < nNodes; iN++ )  
    {
       if ( nodeProcMap[iN] < 0 ) 
       {
-         eqnInd = eqnNumbers[iN] - procNRows[mypid];
-         if ( nCoords[eqnInd] == -999999.0 ) numNodes++;
-         for ( iD = 0; iD < nodeDOF; iD++ )  
-            nCoords[eqnInd+iD] = coords[iN*nodeDOF+iD]; 
+         eqnInd = (eqnNumbers[iN] - procNRows[mypid]) / nodeDOF;
+         if ( nCoords[eqnInd*nDim] == -999999.0 ) numNodes++;
+         for ( iD = 0; iD < nDim; iD++ )  
+            nCoords[eqnInd*nDim+iD] = coords[iN*nDim+iD]; 
       }
    }
    for ( iP = 0; iP < nRecvs; iP++ )
    {
       for ( iR = 0; iR < recvLengs[iP]; iR++ )
       {
-         eqnInd = iRecvBufs[iP][iR] - procNRows[mypid];
-         if ( nCoords[eqnInd] == -999999.0 ) numNodes++;
-         for ( iD = 0; iD < nodeDOF; iD++ )  
-            nCoords[eqnInd+iD] = dRecvBufs[iP][iR*nodeDOF+iD];
+         eqnInd = (iRecvBufs[iP][iR] - procNRows[mypid]) / nodeDOF;
+         if ( nCoords[eqnInd*nDim] == -999999.0 ) numNodes++;
+         for ( iD = 0; iD < nDim; iD++ )  
+            nCoords[eqnInd*nDim+iD] = dRecvBufs[iP][iR*nDim+iD];
       }
    }
-   mli_object->localNEqns_ = numNodes * nodeDOF;
 
    /* -------------------------------------------------------- */
    /* clean up                                                 */
    /* -------------------------------------------------------- */
 
+   delete [] procList;
+   delete [] iTempArray;
    delete [] nodeProcMap;
+   delete [] procNRows;
    if ( nSends > 0 )
    {
       delete [] sendProcs;

@@ -2020,12 +2020,12 @@ int HYPRE_LinSysCore::putNodalFieldData(int fieldID, int fieldSize,
          nodeFieldIDs   = (int **) lookup_->getFieldIDsTable(blockID);
          nodeFieldID    = nodeFieldIDs[0][0];
          checkFieldSize = lookup_->getFieldSize(nodeFieldID);
-         assert( checkFieldSize == fieldSize );
-         eqnNumbers     = new int[numNodes];
+         //assert( checkFieldSize == fieldSize );
+         eqnNumbers = new int[numNodes];
          for ( i = 0; i < numNodes; i++ )
             eqnNumbers[i] = lookup_->getEqnNumber(nodeNumbers[i],nodeFieldID);
-         HYPRE_LSI_MLILoadNodalCoordinates(HYPrecon_, numNodes, fieldSize,
-                       eqnNumbers, localEndRow_-1, (double *) data);
+         HYPRE_LSI_MLILoadNodalCoordinates(HYPrecon_, numNodes, checkFieldSize,
+                       eqnNumbers, fieldSize, (double *) data);
          delete [] eqnNumbers;
       }    
    }    
