@@ -71,18 +71,19 @@ initialize_variables ()
     [ -x /usr/bin/Mail ] && HYPRE_MAIL=/usr/bin/Mail
     [ -x /usr/bin/mailx ] && HYPRE_MAIL=/usr/bin/mailx
     [ -x /usr/sbin/mailx ] && HYPRE_MAIL=/usr/sbin/mailx
+    [ -x /usr/bin/mailto ] && HYPRE_MAIL=/usr/bin/mailto
   fi
   if test ! "${HYPRE_DEFAULT_EMAIL}" ; then
-    if test ! "${USER}" ; then
-      USER=`whoami`
+    if test ! "${USER_EMAIL}" ; then
+      USER_EMAIL=Treadway1@LLNL.gov
     fi
-    HYPRE_DEFAULT_EMAIL=${HYPRE_DEFAULT_EMAIL:=$USER}
-    HYPRE_CHECKOUT_EMAIL=${HYPRE_CHECKOUT_EMAIL:=$USER}
-    HYPRE_CONFIGURE_EMAIL=${HYPRE_CONFIGURE_EMAIL:=$USER}
-    HYPRE_STRUCT_EMAIL=${HYPRE_STRUCT_EMAIL:=$USER}
-    HYPRE_IJ_EMAIL=${HYPRE_IJ_EMAIL:=$USER}
-    HYPRE_FEI_EMAIL=${HYPRE_FEI_EMAIL:=$USER}
-    HYPRE_ALL_EMAIL=${HYPRE_ALL_EMAIL:=$USER}
+    HYPRE_DEFAULT_EMAIL=${HYPRE_DEFAULT_EMAIL:=$USER_EMAIL}
+    HYPRE_CHECKOUT_EMAIL=${HYPRE_CHECKOUT_EMAIL:=$USER_EMAIL}
+    HYPRE_CONFIGURE_EMAIL=${HYPRE_CONFIGURE_EMAIL:=$USER_EMAIL}
+    HYPRE_STRUCT_EMAIL=${HYPRE_STRUCT_EMAIL:=$USER_EMAIL}
+    HYPRE_IJ_EMAIL=${HYPRE_IJ_EMAIL:=$USER_EMAIL}
+    HYPRE_FEI_EMAIL=${HYPRE_FEI_EMAIL:=$USER_EMAIL}
+    HYPRE_ALL_EMAIL=${HYPRE_ALL_EMAIL:=$USER_EMAIL}
   fi
 }
 
@@ -159,6 +160,7 @@ usage () {
   printf "%s\n" "-b opt   Beta; perform the (default) configure, make beta,"
   printf "         nofei, fei++, followed by the runtest script (when opt=2).\n"
   printf "%s\n" "-c       C++; make all++ (no configure, or execute)."
+  printf "%s\n" "-D       Turn on debug messages."
   printf "%s\n" "-d       Docs; make the documentation directory."
   printf "%s\n" "-f       F77; make all77 (no configure, or execute)."
   printf "%s\n" "-i opt   Insure++; perform configure --with-insure. Output"
@@ -300,16 +302,16 @@ mail_summary () {
     TotalTestCount=0
     TotalSuccessCount=0
     TotalFailureCount=0
-    for i in TEST_fei TEST_ij TEST_sstruct TEST_struct ; do
-      printf "%-15s: " ${i#*TEST_} >> $SUMFILE
+    for i in fei ij sstruct struct ; do
+      printf "%-15s: " ${i} >> $SUMFILE
       TestCaseSuccessCount=0; TestCaseFailedCount=0; TestCaseFailedFlag=0
-      for j in ${SRC}/test/${i}/*.sh ; do
+      for j in ${SRC}/test/TEST_${i}/*.sh ; do
         TotalTestCount=`expr $TotalTestCount + 1`
         TestCaseFailedFlag=0
         ErrFile=`echo $j | sed -e 's/\.sh$/.err/'`
         OutFile=`echo $j | sed -e 's/\.sh$/.out/'`
 # look for non-zero length subtest, TEST_*/test.err.* files
-        if [ "InsureSelected" = "0" ] ; then
+        if [ "$InsureSelected" = "0" ] ; then
           for k in ${ErrFile}.*; do
             if [ -s "${k}" ] ; then
               if [ "$DEBUG_MODE" = "yes" ] ; then
@@ -388,10 +390,10 @@ mail_summary () {
     SUBJECT="Autotest $AutotestFailureCount Errors ($MAIL_HEADER)"
   fi
   if test "${HYPRE_MESSAGE}" ; then
-    SUNJECT="$HYPRE_MESSAGE $SUBJECT"
+    SUBJECT="$HYPRE_MESSAGE $SUBJECT"
   fi
   if [ "$DEBUG_MODE" = "yes" ] ; then
-    ${HYPRE_MAIL} -s "$SUBJECT" -r Treadway1@LLNL.gov $USER < $SUMFILE 
+    ${HYPRE_MAIL} -s "$SUBJECT" -r Treadway1@LLNL.gov $USER_EMAIL < $SUMFILE 
   else
     ${HYPRE_MAIL} -s "$SUBJECT" -r Treadway1@LLNL.gov $HYPRE_ALL_EMAIL < $SUMFILE 
   fi
@@ -413,7 +415,7 @@ mail_errors () {
             RECIPIENTS=`cat ${i}.email` 
             SUBJECT="Autotest error: ${i} ($HYPRE_ARCH)"
             if [ "$DEBUG_MODE" = "yes" ] ; then
-              ${HYPRE_MAIL} -s "$SUBJECT" -r Treadway1@LLNL.gov $USER < $i 
+              ${HYPRE_MAIL} -s "$SUBJECT" -r Treadway1@LLNL.gov $USER_EMAIL < $i 
             else
               ${HYPRE_MAIL} -s "$SUBJECT" -r Treadway1@LLNL.gov $RECIPIENTS < $i 
             fi
