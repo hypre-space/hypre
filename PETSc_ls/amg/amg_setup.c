@@ -19,7 +19,7 @@
  * HYPRE_AMGSetup
  *--------------------------------------------------------------------------*/
 
-int      HYPRE_AMGSetup(A, data)
+int      hypre_AMGSetup(A, data)
 hypre_Matrix  *A;
 void    *data;
 {

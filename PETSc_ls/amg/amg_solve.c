@@ -17,10 +17,10 @@
 
 
 /*--------------------------------------------------------------------------
- * HYPRE_AMGSolve
+ * hypre_AMGSolve
  *--------------------------------------------------------------------------*/
 
-int         HYPRE_AMGSolve(u, f, tol, data)
+int         hypre_AMGSolve(u, f, tol, data)
 hypre_Vector      *u;
 hypre_Vector      *f;
 double       tol;
