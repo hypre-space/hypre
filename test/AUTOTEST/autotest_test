@@ -25,7 +25,6 @@ initialize_variables ()
   MailOpt=""
   MailCmd="no"
   DEBUG_MODE="no"
-  HYPRE_DST_DIR=""
   Skip=0
   Build=1
   Run=2
@@ -127,7 +126,7 @@ parse_arguments () {
 # probably implement the obsolute getopt) then
 # getopts(1) will be used.
 #
-  while getopts :a:b:cDde:fhi:l:mno:p:q:r:sv:xy arg
+  while getopts :a:b:cDde:fhi:l:mno:p:q:r:sv: arg
   do
     argcur=$arg
     case $arg in
@@ -168,7 +167,7 @@ parse_arguments () {
 # Function for display of help/usage
 #=============================================================================
 usage () {
-  printf "Usage: %s [-cDdfhmnsxy] [-a opt] [-b opt] [-e opt]\n" $0
+  printf "Usage: %s [-cDdfhmns] [-a opt] [-b opt] [-e opt]\n" $0
   printf "       [-i opt] [-l opt] [-o opt] [-p path]\n"
   printf "       [-q opt] [-r host] [-v text]\n"
   printf "\n"
@@ -456,10 +455,10 @@ mail_summary () {
   printf "Compile machine:    %s\n" $HYPRE_COMPILE_MACHINE >> $SUMFILE
   printf "Execute machine:    %s\n" $HYPRE_RUN_MACHINE >> $SUMFILE
   printf "Operating system:   `uname -a`\n" >> $SUMFILE
-  if [ -z "$HYPRE_DST_DIR" -o "$HYPRE_DST_DIR" = "" ] ; then
+  if test "${HYPRE_DST_DIR}" ; then
+    printf "Local Directory:    %s\n" $HYPRE_DST_DIR >> $SUMFILE
     printf "Directory:          %s\n" $HYPRE_AUTOTEST_DIR >> $SUMFILE
   else
-    printf "Local Directory:    %s\n" $HYPRE_DST_DIR >> $SUMFILE
     printf "Directory:          %s\n" $HYPRE_AUTOTEST_DIR >> $SUMFILE
   fi
   printf "%s\n" "--------------------------------------------" >> $SUMFILE
@@ -616,6 +615,9 @@ mail_summary () {
     fi
   printf "%s\n" "--------------------------------------------" >> $SUMFILE
   chgrp hypre $SUMFILE
+  if test "${HYPRE_DST_DIR}" ; then
+    cp -p $SUMFILE $HYPRE_AUTOTEST_DIR 
+  fi
   MAIL_HEADER="`uname -n` `uname -s`:`uname -r`.`uname -v`"
   if [ "$AutotestFailureCount" = "0" ] ; then
     SUBJECT="Autotest NO Errors ($MAIL_HEADER)"
