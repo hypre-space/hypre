@@ -2,22 +2,15 @@
 \chapter{Introduction}
 \label{Introduction}
 
-\hypre{} is a software library focused on the solution of large, sparse linear
-systems of equations on highly parallel distributed-memory computer
+\hypre{} is a software library for solving large, sparse linear
+systems of equations on parallel distributed-memory computer
 systems. The library has been created with the goals of robustness,
 computational performance, ease of use, flexibility, and interoperability
-with other similar libraries. The mathematical emphasis is to provide
-the latest scalable preconditioner algorithms to application codes
-with a minimum of delay between development and deployment.
+with other similar libraries. The mathematical emphasis is on
+powerful, robust preconditioners.
 
-\section{Overview}
 
-The following is a high-level list of the major features, assumptions and
-limitations, and modes of use of 
-\hypre{}. All of these subjects will be discussed in more detail later in this
-User's Guide.
-
-\subsection{Features}
+\section{Features}
 
 \begin{itemize}
 
@@ -26,21 +19,20 @@ User's Guide.
 Systems:} \hypre{} 
 contains several families of complex preconditioner algorithms focused on the
 scalable solution of very 
-large sparse linear systems. \hypre{} includes algorithms that other
-general-purpose libraries cannot, such as 
-structured multigrid, through the use of the Grid-centric interfaces discussed
-below. These interfaces 
-provide more information to solvers than traditional sparse matrix data
-structures can provide, enabling 
-more effective algorithms.
+large sparse linear systems. \hypre{} includes ``grey-box'' algorithms that use more
+than just the matrix to solve certain classes of problems more efficiently
+than
+general-purpose libraries. This includes algorithms such as 
+structured multigrid and element-base algebraic multigrid.
 
 \item
 {\bf Suite of Common Iterative Methods Provides Options for a Spectrum of Problems:}
 \hypre{} provides 
 an assortment of the most widely used Krylov-based iterative methods to be used
 in conjunction with the 
-scalable preconditioners. This includes general methods such as GMRES and
-methods specialized for 
+scalable preconditioners. This includes methods for nonsymmetric systems
+such as GMRES and
+methods for 
 symmetric matrices such as Conjugate Gradient.
 
 \item
@@ -61,12 +53,12 @@ Each interface provides access to several solvers without the need to
 write new interface code.
 
 \item
-{\bf Many User Options Accommodate Beginners through Experts:} \hypre{} allows a
+{\bf User Options Accommodate Beginners through Experts:} \hypre{} allows a
 spectrum of expertise 
 to be applied by users. The beginning user can get up and running with a
 minimal amount of effort. More expert users can take further
 control of the solution process 
-through various parameters, all of which have reasonable defaults. 
+through various parameters. 
 %Further expertise can 
 %allows users to put together their own solvers using components of \hypre{} as
 %"building blocks", a 
@@ -74,7 +66,7 @@ through various parameters, all of which have reasonable defaults.
 %libraries.
 
 \item
-{\bf Many Configuration Options to Suit your Computing System:} \hypre{} utilizes the
+{\bf Configuration Options to Suit your Computing System:} \hypre{} utilizes the
 autoconf package to 
 allow simple and flexible installation on a wide variety of computing systems.
 Users can tailor the 
@@ -82,7 +74,7 @@ installation to match their computing system. Options include debug and
 optimized modes, modes for 
 including components from other installed linear solver libraries such as PETSc
 and ISIS++ (see below), 
-the ability to change dependent libraries such as MPI and BLAS, a
+the ability to change required libraries such as MPI and BLAS, a
 serial-machine mode, and modes 
 enabling threads for certain solvers. On most systems, however, \hypre{} can be
 built by simply typing 
@@ -101,7 +93,7 @@ process is ongoing, but it already allows \hypre{} users to invoke solvers and
 preconditioners from libraries 
 such as PETSc, ISIS++, and Aztec, oftentimes mixing and matching elements from
 one library with 
-elements from another. This provides a huge increase in options for users so
+elements from another. This increases the number of options for users so
 that they can find the unique 
 combination that works best for them.
 
@@ -123,34 +115,47 @@ interfaces for both Fortran and C users.
 
 \subsection{Assumptions and Limitations}
 
+\begin{itemize}
+
+\item
 {\bf \hypre{} is designed for large, sparse, linear systems on parallel
 computers.}  Small linear systems, 
 systems that are solvable on a sequential computer, and dense systems are all
 better addressed by libraries designed specifically for them. 
 
+\item
 {\bf \hypre{} requires an installation of the Message Passing Interface (MPI).}
 Exception: will run 
 sequentially (for debugging) with an included "stub" version of MPI.
 
+\item
 {\bf Configuration of \hypre{} with threads
 requires an implementation of the Open MP standard.}
 Only a small set of \hypre{} is compatible with threads at the current time.
 
+\item
 {\bf Configuration of \hypre{} with other libraries requires installation of and
 linking to those libraries.}
 
+\item
 {\bf \hypre{} is a project under construction.} Systems problems, SAMR interface,
 semi-structured interface, 
 AMGe, full object orientation, full multilanguage support, ESI not integrated
 yet, etc.
 
+\end{itemize''
 
 
 
-\section{General Structure of Usage}
 
-Give example code here, maybe Rob's structured example is clearest. Use it to
-demonstrate basic structure of usage:  This be temporarily yucky -MAL
+\chapter{General Structure of Usage}
+
+The following code sample serves as a typical example of usage
+of \hypre{}. In this example, the structured grid interface (discussed
+in Chapter
+~\ref{Structured-Grid Interface}) is used to enter the problem
+into \hypre{} and the ``PF'' Multigrid solver is used to solve
+the system.
 
 \begin{display}
 \begin{verbatim}
@@ -285,12 +290,7 @@ single solver to make them easier to use.
 \item 
 {\bf Look up matrix requirements for each solver and preconditioner.} Each
 specific solver and 
-preconditioner ("Operator") has requirements from the input matrix. Some only
-work with specific 
-matrix types, while others can work with any matrix that provides certain
-"services" (for example, 
-most Krylov solvers only need a "matrix-vector" multiplication service from the
-input matrix). This 
+preconditioner ("Operator") has requirements from the input matrix. This 
 information is provided in several places (Developer's Guide, source comments,
 headers) in the form 
 of type information.
@@ -308,9 +308,9 @@ incompatible.
 \end{enumerate}
 
 Once the previous set of decisions have been made, it is time to code your application 
-to call HYRPE:
+to call \hypre{}:
 
-\begin{itemize}
+\begin{enumerate}
 
 \item
 {\bf Build any necessary auxiliary structures for your chosen conceptual
@@ -341,7 +341,7 @@ things you may want to do with the solution vector. Also, performance
 information such as number of 
 iterations is typically available, though it may differ from solver to solver.
 
-\end{itemize}
+\end{enumerate}
 
 
 {\bf Note on capitalization:} We use \code{HYPRE} and \code{hypre }
@@ -356,7 +356,12 @@ supported or fully tested, nor that they will not change in future releases of
 
 \section{Bug Reporting}
 
-\hypre{} has an automated bug reporting mechanism in place that may be used as a resource for submitting bugs, desired featured, and documentation problems, as well as querying the status of previous reports.   Access \htmladdnormallink{http://apollo.llnl.gov:8080/bugs}{http://apollo.llnl.gov:8080/bugs} for full bug tracking details or to submit or query a bug report.  This website is currently available only within the llnl.gov domain.  When using the CASC bug reporting site for the first time, click on ``Open a new Bugzilla account'' under the ``User login account management'' heading.    
- 
-
-
+\hypre{} has an automated bug reporting mechanism in place that may be used 
+as a resource for submitting bugs, desired featured, and documentation
+problems, as well as querying the status of previous reports.  Access
+\htmladdnormallink{http://apollo.llnl.gov:8080/bugs}{http://apollo.llnl.gov:8080/bugs}
+for full bug tracking details or to submit or query a bug report.
+This website is currently available only within the llnl.gov domain.
+When using the CASC bug reporting site for the first time, click on
+``Open a new Bugzilla account'' under the ``User login account
+management'' heading.
