@@ -157,17 +157,25 @@ void  impl_Hypre_StructJacobi_SetSystemOperator
 } /* end impl_Hypre_StructJacobiSetSystemOperator */
 
 /* ********************************************************
- * impl_Hypre_StructJacobiGetParameter
+ * impl_Hypre_StructJacobiGetDoubleParameter
  **********************************************************/
-double  impl_Hypre_StructJacobi_GetParameter(Hypre_StructJacobi this, char* name) {
-   printf( "Hypre_StructJacobi_GetParameter does not recognize name ~s\n", name );
+double  impl_Hypre_StructJacobi_GetDoubleParameter(Hypre_StructJacobi this, char* name) {
+   printf( "Hypre_StructJacobi_GetDoubleParameter does not recognize name ~s\n", name );
    return 0;
-} /* end impl_Hypre_StructJacobiGetParameter */
+} /* end impl_Hypre_StructJacobiGetDoubleParameter */
 
 /* ********************************************************
- * impl_Hypre_StructJacobiSetParameter
+ * impl_Hypre_StructJacobiGetIntParameter
  **********************************************************/
-void  impl_Hypre_StructJacobi_SetParameter
+int  impl_Hypre_StructJacobi_GetIntParameter(Hypre_StructJacobi this, char* name) {
+   printf( "Hypre_StructJacobi_GetIntParameter does not recognize name ~s\n", name );
+   return 0;
+} /* end impl_Hypre_StructJacobiGetIntParameter */
+
+/* ********************************************************
+ * impl_Hypre_StructJacobiSetDoubleParameter
+ **********************************************************/
+void  impl_Hypre_StructJacobi_SetDoubleParameter
 (Hypre_StructJacobi this, char* name, double value) {
 
 /* JFP: This function just dispatches to the parameter's set function. */
@@ -179,10 +187,30 @@ void  impl_Hypre_StructJacobi_SetParameter
       HYPRE_StructJacobiSetTol( *S, value );
       return;
    };
+   if ( !strcmp(name,"zero guess") ) {
+      HYPRE_StructJacobiSetZeroGuess( *S );
+      return;
+   };
+   if (  !strcmp(name,"nonzero guess") ) {
+      HYPRE_StructJacobiSetNonZeroGuess( *S );
+      return;
+   };
+
+} /* end impl_Hypre_StructJacobiSetDoubleParameter */
+
+/* ********************************************************
+ * impl_Hypre_StructJacobiSetIntParameter
+ **********************************************************/
+void  impl_Hypre_StructJacobi_SetIntParameter
+(Hypre_StructJacobi this, char* name, int value) {
+
+/* JFP: This function just dispatches to the parameter's set function. */
+
+   struct Hypre_StructJacobi_private_type *HSJp = this->d_table;
+   HYPRE_StructSolver *S = HSJp->hssolver;
+
    if ( !strcmp(name,"max_iter" )) {
-      HYPRE_StructJacobiSetMaxIter( *S, floor(value*1.001) );
-      /* ... floor(value*1.001) is a simple adequate way to undo an
-         int->double conversion */
+      HYPRE_StructJacobiSetMaxIter( *S, value );
       return;
    };
    if ( !strcmp(name,"zero guess") ) {
@@ -194,7 +222,7 @@ void  impl_Hypre_StructJacobi_SetParameter
       return;
    };
 
-} /* end impl_Hypre_StructJacobiSetParameter */
+} /* end impl_Hypre_StructJacobiSetIntParameter */
 
 /* ********************************************************
  * impl_Hypre_StructJacobiNew

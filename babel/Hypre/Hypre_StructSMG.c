@@ -115,7 +115,7 @@ void  impl_Hypre_StructSMG_GetConvergenceInfo
       return;
    }
 
-   printf( "Hypre_StructJacobi_GetParameter does not recognize name ~s\n", name );
+   printf( "Hypre_StructJacobi_GetConvergenceInfo does not recognize name ~s\n", name );
 
    return;
 } /* end impl_Hypre_StructSMGGetConvergenceInfo */
@@ -134,19 +134,29 @@ void  impl_Hypre_StructSMG_SetSystemOperator
 } /* end impl_Hypre_StructSMGSetSystemOperator */
 
 /* ********************************************************
- * impl_Hypre_StructSMGGetParameter
+ * impl_Hypre_StructSMGGetDoubleParameter
  **********************************************************/
-double  impl_Hypre_StructSMG_GetParameter(Hypre_StructSMG this, char* name) {
+double  impl_Hypre_StructSMG_GetDoubleParameter(Hypre_StructSMG this, char* name) {
    double value;
    int ivalue;
-   printf( "Hypre_StructJacobi_GetParameter does not recognize name ~s\n", name );
+   printf( "Hypre_StructJacobi_GetDoubleParameter does not recognize name ~s\n", name );
    return 0;
-} /* end impl_Hypre_StructSMGGetParameter */
+} /* end impl_Hypre_StructSMGGetDoubleParameter */
 
 /* ********************************************************
- * impl_Hypre_StructSMGSetParameter
+ * impl_Hypre_StructSMGGetIntParameter
  **********************************************************/
-void  impl_Hypre_StructSMG_SetParameter
+int  impl_Hypre_StructSMG_GetIntParameter(Hypre_StructSMG this, char* name) {
+   double value;
+   int ivalue;
+   printf( "Hypre_StructJacobi_GetIntParameter does not recognize name ~s\n", name );
+   return 0;
+} /* end impl_Hypre_StructSMGGetIntParameter */
+
+/* ********************************************************
+ * impl_Hypre_StructSMGSetDoubleParameter
+ **********************************************************/
+void  impl_Hypre_StructSMG_SetDoubleParameter
 (Hypre_StructSMG this, char* name, double value) {
 
 /* JFP: This function just dispatches to the parameter's set function. */
@@ -158,16 +168,34 @@ void  impl_Hypre_StructSMG_SetParameter
       HYPRE_StructSMGSetTol( *S, value );
       return;
    };
+   if ( !strcmp(name,"zero guess") ) {
+      HYPRE_StructSMGSetZeroGuess( *S );
+      return;
+   };
+   if (  !strcmp(name,"nonzero guess") ) {
+      HYPRE_StructSMGSetNonZeroGuess( *S );
+      return;
+   };
+
+} /* end impl_Hypre_StructSMGSetDoubleParameter */
+
+/* ********************************************************
+ * impl_Hypre_StructSMGSetIntParameter
+ **********************************************************/
+void  impl_Hypre_StructSMG_SetIntParameter
+(Hypre_StructSMG this, char* name, int value) {
+
+/* JFP: This function just dispatches to the parameter's set function. */
+
+   struct Hypre_StructSMG_private_type *HSMGp = this->d_table;
+   HYPRE_StructSolver *S = HSMGp->hssolver;
+
    if ( !strcmp(name,"max_iter" )) {
-      HYPRE_StructSMGSetMaxIter( *S, floor(value*1.001) );
-      /* ... floor(value*1.001) is a simple adequate way to undo an
-         int->double conversion */
+      HYPRE_StructSMGSetMaxIter( *S, value );
       return;
    };
    if ( !strcmp(name,"max iter" )) {
-      HYPRE_StructSMGSetMaxIter( *S, floor(value*1.001) );
-      /* ... floor(value*1.001) is a simple adequate way to undo an
-         int->double conversion */
+      HYPRE_StructSMGSetMaxIter( *S, value );
       return;
    };
    if ( !strcmp(name,"zero guess") ) {
@@ -179,22 +207,22 @@ void  impl_Hypre_StructSMG_SetParameter
       return;
    };
    if ( !strcmp(name,"memory use") ) {
-      HYPRE_StructSMGSetMemoryUse( *S, floor(value*1.001) );
+      HYPRE_StructSMGSetMemoryUse( *S, value );
    };
    if ( !strcmp(name,"rel change") ) {
-      HYPRE_StructSMGSetRelChange( *S, floor(value*1.001) );
+      HYPRE_StructSMGSetRelChange( *S, value );
    };
    if ( !strcmp(name,"num prerelax") ) {
-      HYPRE_StructSMGSetNumPreRelax( *S, floor(value*1.001) );
+      HYPRE_StructSMGSetNumPreRelax( *S, value );
    };
    if ( !strcmp(name,"num postrelax") ) {
-      HYPRE_StructSMGSetNumPostRelax( *S, floor(value*1.001) );
+      HYPRE_StructSMGSetNumPostRelax( *S, value );
    };
    if ( !strcmp(name,"logging") ) {
-      HYPRE_StructSMGSetLogging( *S, floor(value*1.001) );
+      HYPRE_StructSMGSetLogging( *S, value );
    };
 
-} /* end impl_Hypre_StructSMGSetParameter */
+} /* end impl_Hypre_StructSMGSetIntParameter */
 
 /* ********************************************************
  * impl_Hypre_StructSMGNew

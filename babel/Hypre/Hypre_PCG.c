@@ -154,21 +154,33 @@ void  impl_Hypre_PCG_SetSystemOperator(Hypre_PCG this, Hypre_StructMatrix op) {
 } /* end impl_Hypre_PCGSetSystemOperator */
 
 /* ********************************************************
- * impl_Hypre_PCGGetParameter
+ * impl_Hypre_PCGGetDoubleParameter
  **********************************************************/
-double  impl_Hypre_PCG_GetParameter(Hypre_PCG this, char* name) {
+double  impl_Hypre_PCG_GetDoubleParameter(Hypre_PCG this, char* name) {
 /* The parameters exist, but there are no HYPRE-level Get functions.
    I'll implement pieces of this when needed. */
 
-   printf( "Hypre_PCG_GetParameter does not recognize name ~s\n", name );
+   printf( "Hypre_PCG_GetDoubleParameter does not recognize name ~s\n", name );
    return 0;
 
-} /* end impl_Hypre_PCGGetParameter */
+} /* end impl_Hypre_PCGGetDoubleParameter */
 
 /* ********************************************************
- * impl_Hypre_PCGSetParameter
+ * impl_Hypre_PCGGetIntParameter
  **********************************************************/
-void  impl_Hypre_PCG_SetParameter(Hypre_PCG this, char* name, double value) {
+int  impl_Hypre_PCG_GetIntParameter(Hypre_PCG this, char* name) {
+/* The parameters exist, but there are no HYPRE-level Get functions.
+   I'll implement pieces of this when needed. */
+
+   printf( "Hypre_PCG_GetIntParameter does not recognize name ~s\n", name );
+   return 0;
+
+} /* end impl_Hypre_PCGGetIntParameter */
+
+/* ********************************************************
+ * impl_Hypre_PCGSetDoubleParameter
+ **********************************************************/
+void  impl_Hypre_PCG_SetDoubleParameter(Hypre_PCG this, char* name, double value) {
 /* JFP: This function just dispatches to the parameter's set function. */
 
    struct Hypre_PCG_private_type *HSp = this->d_table;
@@ -178,28 +190,40 @@ void  impl_Hypre_PCG_SetParameter(Hypre_PCG this, char* name, double value) {
       HYPRE_StructPCGSetTol( *S, value );
       return;
    }
-   else if ( !strcmp(name,"max_iter" )) {
-      HYPRE_StructPCGSetMaxIter( *S, floor(value*1.001) );
-      /* ... floor(value*1.001) is a simple adequate way to undo an
-         int->double conversion */
+   else {
+      printf( "Hypre_PCG_SetDoubleParameter does not recognize name ~s\n", name );
+   } ;
+} /* end impl_Hypre_PCGSetDoubleParameter */
+
+/* ********************************************************
+ * impl_Hypre_PCGSetIntParameter
+ **********************************************************/
+void  impl_Hypre_PCG_SetIntParameter(Hypre_PCG this, char* name, int value) {
+/* JFP: This function just dispatches to the parameter's set function. */
+
+   struct Hypre_PCG_private_type *HSp = this->d_table;
+   HYPRE_StructSolver *S = HSp->hssolver;
+
+   if ( !strcmp(name,"max_iter" )) {
+      HYPRE_StructPCGSetMaxIter( *S, value );
       return;
    }
    else if ( !strcmp(name, "2-norm" ) ) {
-      HYPRE_StructPCGSetTwoNorm( *S, floor(value*1.001) );
+      HYPRE_StructPCGSetTwoNorm( *S, value );
       return;
    }
    else if ( !strcmp(name,"relative change test") ) {
-      HYPRE_StructPCGSetRelChange( *S, floor(value*1.001) );
+      HYPRE_StructPCGSetRelChange( *S, value );
       return;
    }
    else if (  !strcmp(name,"log") ) {
-      HYPRE_StructPCGSetLogging( *S, floor(value*1.001) );
+      HYPRE_StructPCGSetLogging( *S, value );
       return;
    }
    else {
-      printf( "Hypre_PCG_SetParameter does not recognize name ~s\n", name );
+      printf( "Hypre_PCG_SetIntParameter does not recognize name ~s\n", name );
    } ;
-} /* end impl_Hypre_PCGSetParameter */
+} /* end impl_Hypre_PCGSetIntParameter */
 
 /* ********************************************************
  * impl_Hypre_PCGNew
