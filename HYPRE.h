@@ -24,16 +24,16 @@
  * Constants
  *--------------------------------------------------------------------------*/
 
-#define HYPRE_PETSC_MAT_PARILUT_SOLVER 22
+#define HYPRE_UNITIALIZED -999
 
-#define HYPRE_PARILUT      872
+#define HYPRE_PETSC_MAT_PARILUT_SOLVER 222
+#define HYPRE_PARILUT                  333
 
-#define HYPRE_UNITIALIZED -47
+#define HYPRE_STRUCT  1111
+#define HYPRE_SSTRUCT 3333
+#define HYPRE_PARCSR  5555
 
-#define HYPRE_ISIS 197983
-
-#define HYPRE_PETSC 497967
-
-#define HYPRE_PARCSR 797997
+#define HYPRE_ISIS    9911
+#define HYPRE_PETSC   9933
 
 #endif

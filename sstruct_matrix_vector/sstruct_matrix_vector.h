@@ -559,6 +559,7 @@ typedef struct hypre_SStructVector_struct
    MPI_Comm                comm;
    int                     ndim;
    hypre_SStructGrid      *grid;
+   int                     object_type;
 
    /* s-vector info */
    int                     nparts;
@@ -581,6 +582,7 @@ typedef struct hypre_SStructVector_struct
 #define hypre_SStructVectorComm(vec)           ((vec) -> comm)
 #define hypre_SStructVectorNDim(vec)           ((vec) -> ndim)
 #define hypre_SStructVectorGrid(vec)           ((vec) -> grid)
+#define hypre_SStructVectorObjectType(vec)     ((vec) -> object_type)
 #define hypre_SStructVectorNParts(vec)         ((vec) -> nparts)
 #define hypre_SStructVectorPVectors(vec)       ((vec) -> pvectors)
 #define hypre_SStructVectorPVector(vec, part)  ((vec) -> pvectors[part])

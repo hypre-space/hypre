@@ -36,6 +36,7 @@ HYPRE_SStructVectorCreate( MPI_Comm              comm,
    hypre_SStructVectorComm(vector) = comm;
    hypre_SStructVectorNDim(vector) = hypre_SStructGridNDim(grid);
    hypre_SStructGridRef(grid, &hypre_SStructVectorGrid(vector));
+   hypre_SStructVectorObjectType(vector) = HYPRE_SSTRUCT;
    nparts = hypre_SStructGridNParts(grid);
    hypre_SStructVectorNParts(vector) = nparts;
    pvectors = hypre_TAlloc(hypre_SStructPVector *, nparts);
@@ -258,6 +259,11 @@ HYPRE_SStructVectorGather( HYPRE_SStructVector vector )
    int            nparts   = hypre_SStructVectorNParts(vector);
    int            part;
 
+   if (hypre_SStructVectorObjectType(vector) == HYPRE_PARCSR)
+   {
+      hypre_SStructVectorRestore(vector, hypre_SStructVectorParVector(vector));
+   }
+
    for (part = 0; part < nparts; part++)
    {
       hypre_SStructPVectorGather(hypre_SStructVectorPVector(vector, part));
@@ -337,6 +343,7 @@ HYPRE_SStructVectorSetObjectType( HYPRE_SStructVector  vector,
    int ierr = 0;
 
    /* this implements only HYPRE_PARCSR, which is always available */
+   hypre_SStructVectorObjectType(vector) = type;
 
    return ierr;
 }
