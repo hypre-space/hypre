@@ -51,8 +51,7 @@ zzz_FreeStructGrid( zzz_StructGrid *grid )
    tfree(zzz_StructGridProcesses(grid));
 
    /* this box array points to grid boxes in all_boxes */
-   zzz_BoxArraySize(zzz_StructGridBoxes(grid)) = 0;
-   zzz_FreeBoxArray(zzz_StructGridBoxes(grid));
+   zzz_FreeBoxArrayShell(zzz_StructGridBoxes(grid));
 
    tfree(zzz_StructGridBoxRanks(grid));
 
@@ -189,10 +188,10 @@ zzz_AssembleStructGrid( zzz_StructGrid *grid )
       {
 	 zzz_AppendBox(box, zzz_StructGridBoxes(grid));
 	 zzz_StructGridBoxRank(grid, k++) = j-1;
-         zzz_StructGridLocalSize(grid) += zzz_BoxTotalSize(box);
+         zzz_StructGridLocalSize(grid) += zzz_BoxVolume(box);
       }
 
-      zzz_StructGridGlobalSize(grid) += zzz_BoxTotalSize(box);
+      zzz_StructGridGlobalSize(grid) += zzz_BoxVolume(box);
    }
 
    zzz_FreeBoxArray(boxes);

@@ -79,12 +79,27 @@ zzz_NewBoxArrayArray( int size )
 void 
 zzz_FreeBox( zzz_Box *box )
 {
-   if ( box == NULL )
-      return;
+   if (box)
+   {
+      zzz_FreeIndex(zzz_BoxIMin(box));
+      zzz_FreeIndex(zzz_BoxIMax(box));
+      tfree(box);
+   }
+}
 
-   zzz_FreeIndex(zzz_BoxIMin(box));
-   zzz_FreeIndex(zzz_BoxIMax(box));
-   tfree(box);
+/*--------------------------------------------------------------------------
+ * zzz_FreeBoxArrayShell:
+ *   Frees everything but the boxes.
+ *--------------------------------------------------------------------------*/
+
+void 
+zzz_FreeBoxArrayShell( zzz_BoxArray *box_array )
+{
+   if (box_array)
+   {
+      tfree(zzz_BoxArrayBoxes(box_array));
+      tfree(box_array);
+   }
 }
 
 /*--------------------------------------------------------------------------
@@ -96,30 +111,31 @@ zzz_FreeBoxArray( zzz_BoxArray *box_array )
 {
    int  i;
 
-   if ( box_array == NULL )
-      return;
-
-   if ( zzz_BoxArrayBoxes(box_array)!= NULL )
+   if (box_array)
    {
-      zzz_ForBoxI(i, box_array)
-         zzz_FreeBox(zzz_BoxArrayBox(box_array, i));
+      if ( zzz_BoxArrayBoxes(box_array)!= NULL )
+      {
+         zzz_ForBoxI(i, box_array)
+            zzz_FreeBox(zzz_BoxArrayBox(box_array, i));
+      }
+
+      zzz_FreeBoxArrayShell(box_array);
    }
-
-   tfree(zzz_BoxArrayBoxes(box_array));
-
-   tfree(box_array);
 }
 
 /*--------------------------------------------------------------------------
- * zzz_FreeBoxArrayShell:
- *   Frees everything but the boxes.
+ * zzz_FreeBoxArrayArrayShell:
+ *   Frees everything but the box_arrays.
  *--------------------------------------------------------------------------*/
 
 void 
-zzz_FreeBoxArrayShell( zzz_BoxArray *box_array )
+zzz_FreeBoxArrayArrayShell( zzz_BoxArrayArray *box_array_array )
 {
-   zzz_BoxArraySize(box_array) = 0;
-   zzz_FreeBoxArray(box_array);
+   if (box_array_array)
+   {
+      tfree(zzz_BoxArrayArrayBoxArrays(box_array_array));
+      tfree(box_array_array);
+   }
 }
 
 /*--------------------------------------------------------------------------
@@ -127,34 +143,17 @@ zzz_FreeBoxArrayShell( zzz_BoxArray *box_array )
  *--------------------------------------------------------------------------*/
 
 void
-zzz_FreeBoxArrayArray( BoxArrayArray *box_array_array )
+zzz_FreeBoxArrayArray( zzz_BoxArrayArray *box_array_array )
 {
    int  i;
  
-   zzz_ForBoxArrayI(i, box_array_array)
-      zzz_FreeBoxArray(zzz_BoxArrayArrayBoxArray(box_array_array, i));
- 
-   tfree(zzz_BoxArrayArrayBoxArrays(box_array_array));
- 
-   tfree(box_array_array);
-}
+   if (box_array_array)
+   {
+      zzz_ForBoxArrayI(i, box_array_array)
+         zzz_FreeBoxArray(zzz_BoxArrayArrayBoxArray(box_array_array, i));
 
-/*--------------------------------------------------------------------------
- * zzz_FreeBoxArrayArrayShell:
- *   Frees everything but the boxes.
- *--------------------------------------------------------------------------*/
-
-void 
-zzz_FreeBoxArrayArrayShell( zzz_BoxArrayArray *box_array_array )
-{
-   int  i;
-
-   zzz_ForBoxArrayI(i, box_array_array)
-      zzz_FreeBoxArrayShell(zzz_BoxArrayArrayBoxArray(box_array_array, i));
- 
-   tfree(zzz_BoxArrayArrayBoxArrays(box_array_array));
- 
-   tfree(box_array_array);
+      zzz_FreeBoxArrayArrayShell(box_array_array);
+   }
 }
 
 /*--------------------------------------------------------------------------

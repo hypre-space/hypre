@@ -27,12 +27,15 @@ typedef struct
    zzz_BoxArray       *data_space;
 
    double             *data;         /* Pointer to vector data */
+   int                 data_size;    /* Size of vector data */
    int                *data_indices; /* num-boxes array of indices into
                                         the data array.  data_indices[b]
                                         is the starting index of vector
                                         data corresponding to box b. */
 
-   int                 size;         /* Total number coefficients */
+   int                 num_ghost[6]; /* Num ghost layers in each direction */
+
+   int                 global_size;  /* Total number coefficients */
 
 } zzz_StructVector;
 
@@ -40,14 +43,17 @@ typedef struct
  * Accessor macros: zzz_StructVector
  *--------------------------------------------------------------------------*/
 
-#define zzz_StructVectorStructGrid(vector)    ((vector) -> grid)
+#define zzz_StructVectorGrid(vector)          ((vector) -> grid)
 
 #define zzz_StructVectorDataSpace(vector)     ((vector) -> data_space)
  
 #define zzz_StructVectorData(vector)          ((vector) -> data)
+#define zzz_StructVectorDataSize(vector)      ((vector) -> data_size)
 #define zzz_StructVectorDataIndices(vector)   ((vector) -> data_indices)
+
+#define zzz_StructVectorNumGhost(vector)      ((vector) -> num_ghost)
  
-#define zzz_StructVectorSize(vector)          ((vector) -> size)
+#define zzz_StructVectorGlobalSize(vector)    ((vector) -> global_size)
  
 #define zzz_StructVectorBox(vector, b) \
 zzz_BoxArrayBox(zzz_StructVectorDataSpace(vector), b)

@@ -19,39 +19,19 @@
  *--------------------------------------------------------------------------*/
 
 zzz_StructStencil *
-zzz_NewStructStencil( int dim,
-                      int size )
+zzz_NewStructStencil( int         dim,
+                      int         size,
+                      zzz_Index **shape )
 {
-   zzz_StructStencil     *stencil;
-   zzz_StructStencilElt  *shape;
-
+   zzz_StructStencil   *stencil;
 
    stencil = talloc(zzz_StructStencil, 1);
 
-   zzz_StructStencilShape(stencil) = ctalloc(zzz_StructStencilElt, size);
-   zzz_StructStencilDim(stencil)  = dim;
-   zzz_StructStencilSize(stencil) = size;
+   zzz_StructStencilShape(stencil) = shape;
+   zzz_StructStencilSize(stencil)  = size;
+   zzz_StructStencilDim(stencil)   = dim;
 
    return stencil;
-}
-
-/*--------------------------------------------------------------------------
- * zzz_SetStructStencilElement
- *--------------------------------------------------------------------------*/
-
-void 
-zzz_SetStructStencilElement( zzz_StructStencil *stencil,
-                             int                element_index,
-                             int               *offset        )
-{
-   zzz_StructStencilElt  *shape;
-
-   int                    d;
-
-
-   shape = zzz_StructStencilShape(stencil);
-   for (d = 0; d < zzz_StructStencilDim(stencil); d++)
-      shape[element_index][d] = offset[d];
 }
 
 /*--------------------------------------------------------------------------
@@ -61,8 +41,12 @@ zzz_SetStructStencilElement( zzz_StructStencil *stencil,
 void 
 zzz_FreeStructStencil( zzz_StructStencil *stencil )
 {
+   int  i;
+
    if (stencil)
    {
+      for (i = 0; i < zzz_StructStencilSize(stencil); i++)
+         zzz_FreeIndex(zzz_StructStencilShape(stencil)[i]);
       tfree(zzz_StructStencilShape(stencil));
       tfree(stencil);
    }

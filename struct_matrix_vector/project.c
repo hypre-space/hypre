@@ -18,6 +18,9 @@
  * zzz_ProjectBox:
  *   Projects a box onto a strided index space that contains the
  *   index `index' and has stride `stride'.
+ *
+ *   Note: An SBox is returned regardless of the outcome of the
+ *   projection.  So, it is possible to return an SBox with volume 0.
  *--------------------------------------------------------------------------*/
 
 zzz_SBox *
@@ -49,7 +52,7 @@ zzz_ProjectBox( zzz_Box    *box,
       iu = ((int) ((iu + (s-1)) / s)) * s - i;
 
       zzz_BoxIMinD(new_box, d) = il;
-      zzz_BoxIMaxD(new_box, d) = iu - 1;
+      zzz_BoxIMaxD(new_box, d) = iu - s;
    }
 
    /*------------------------------------------------------
@@ -67,6 +70,10 @@ zzz_ProjectBox( zzz_Box    *box,
 
 /*--------------------------------------------------------------------------
  * zzz_ProjectBoxArrayArray:
+ *
+ *   Note: The dimensions of the returned SBoxArrayArray are the same as
+ *   the input argument `box_array_array'.  So, it is possible for the
+ *   returned SBoxArrayArray to contain SBoxes with volume 0.
  *--------------------------------------------------------------------------*/
 
 zzz_SBoxArrayArray *
@@ -74,33 +81,30 @@ zzz_ProjectBoxArrayArray( zzz_BoxArrayArray  *box_array_array,
                           zzz_Index          *index,
                           zzz_Index          *stride          )
 {
-   SBoxArrayArray  *new_sbox_array_array;
-   SBoxArray       *new_sbox_array;
-   SBox            *new_sbox;
+   zzz_SBoxArrayArray  *new_sbox_array_array;
+   zzz_SBoxArray       *new_sbox_array;
+   zzz_SBox            *new_sbox;
 
-   BoxArray        *box_array;
-   Box             *box;
+   zzz_BoxArray        *box_array;
+   zzz_Box             *box;
 
-   int              i, j;
+   int                  i, j;
 
    new_sbox_array_array =
       zzz_NewSBoxArrayArray(zzz_BoxArrayArraySize(box_array_array));
 
    zzz_ForBoxArrayI(i, box_array_array)
-      {
-         box_array      = zzz_BoxArrayArrayBoxArray(box_array_array, i);
-         new_sbox_array = zzz_SBoxArrayArraySBoxArray(new_sbox_array_array, i);
+   {
+      box_array      = zzz_BoxArrayArrayBoxArray(box_array_array, i);
+      new_sbox_array = zzz_SBoxArrayArraySBoxArray(new_sbox_array_array, i);
 
-         zzz_ForBoxI(j, box_array)
-            {
-               box      = zzz_BoxArrayBox(box_array, j);
-               new_sbox = zzz_ProjectBox(box, index, stride);
-               if (zzz_SBoxTotalSize(new_sbox))
-                  zzz_AppendSBox(new_sbox, new_sbox_array);
-               else
-                  zzz_FreeSBox(new_sbox);
-            }
+      zzz_ForBoxI(j, box_array)
+      {
+         box      = zzz_BoxArrayBox(box_array, j);
+         new_sbox = zzz_ProjectBox(box, index, stride);
+         zzz_AppendSBox(new_sbox, new_sbox_array);
       }
+   }
 
    return new_sbox_array_array;
 }
@@ -119,14 +123,14 @@ zzz_ProjectBoxArrayArray( zzz_BoxArrayArray  *box_array_array,
 
 zzz_SBoxArrayArray *
 zzz_ProjectRBPoint( zzz_BoxArrayArray *box_array_array,
-                    zzz_Index          rb[4]           )
+                    zzz_Index         *rb[4]           )
 {
    zzz_SBoxArrayArray *new_sbox_array_array;
    zzz_SBoxArrayArray *tmp_sbox_array_array;
 
    zzz_Index          *stride;
 
-   int                 i, j;
+   int                 i, j, d;
 
    stride = zzz_NewIndex();
    for (d = 0; d < 3; d++)
@@ -143,6 +147,6 @@ zzz_ProjectRBPoint( zzz_BoxArrayArray *box_array_array,
       zzz_FreeSBoxArrayArrayShell(tmp_sbox_array_array);
    }
    
-   return new;
+   return new_sbox_array_array;
 }
 

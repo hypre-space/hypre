@@ -59,7 +59,7 @@ typedef struct
  * Accessor macros: zzz_SBox
  *--------------------------------------------------------------------------*/
 
-#define zzz_SBoxBox(zzz_SBox)     ((sbox) -> box)
+#define zzz_SBoxBox(sbox)         ((sbox) -> box)
 #define zzz_SBoxStride(sbox)      ((sbox) -> stride)
 #define zzz_SBoxProcess(sbox)     ((sbox) -> process)
 				        
@@ -70,7 +70,7 @@ typedef struct
 #define zzz_SBoxIMaxD(sbox, d)    zzz_BoxIMaxD(zzz_SBoxBox(sbox), d)
 #define zzz_SBoxStrideD(sbox, d)  zzz_IndexD(zzz_SBoxStride(sbox), d)
 #define zzz_SBoxSizeD(sbox, d) \
-(((zzz_BoxSizeD(zzz_SBoxBox(sbox), d) - 1) / zzz_SBoxStrideD(sbox, d)) + 1)
+(zzz_BoxSizeD(zzz_SBoxBox(sbox), d) / zzz_SBoxStrideD(sbox, d))
 				        
 #define zzz_SBoxIMinX(sbox)       zzz_SBoxIMinD(sbox, 0)
 #define zzz_SBoxIMinY(sbox)       zzz_SBoxIMinD(sbox, 1)
@@ -88,16 +88,16 @@ typedef struct
 #define zzz_SBoxSizeY(sbox)       zzz_SBoxSizeD(sbox, 1)
 #define zzz_SBoxSizeZ(sbox)       zzz_SBoxSizeD(sbox, 2)
 
-#define zzz_SBoxTotalSize(sbox) \
+#define zzz_SBoxVolume(sbox) \
 (zzz_SBoxSizeX(sbox) * zzz_SBoxSizeY(sbox) * zzz_SBoxSizeZ(sbox))
 
 /*--------------------------------------------------------------------------
  * Accessor macros: zzz_SBoxArray
  *--------------------------------------------------------------------------*/
 
-#define zzz_SBoxArrayzzz_SBoxes(sbox_array)  ((sbox_array) -> sboxes)
-#define zzz_SBoxArrayzzz_SBox(sbox_array, i) ((sbox_array) -> sboxes[(i)])
-#define zzz_SBoxArraySize(sbox_array)        ((sbox_array) -> size)
+#define zzz_SBoxArraySBoxes(sbox_array)  ((sbox_array) -> sboxes)
+#define zzz_SBoxArraySBox(sbox_array, i) ((sbox_array) -> sboxes[(i)])
+#define zzz_SBoxArraySize(sbox_array)    ((sbox_array) -> size)
 
 /*--------------------------------------------------------------------------
  * Accessor macros: zzz_SBoxArrayArray

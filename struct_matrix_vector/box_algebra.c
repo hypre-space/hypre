@@ -221,7 +221,19 @@ zzz_UnionBoxArray( zzz_BoxArray *boxes )
    int     	  i_tmp0, i_tmp1;
    int            ioff, joff, koff;
    int     	  bi, d, i, j, k;
+
+   int            index_not_there;
 	    
+   /*------------------------------------------------------
+    * If the size of boxes is 0, return an empty union
+    *------------------------------------------------------*/
+
+   if (zzz_BoxArraySize(boxes) == 0)
+   {
+      box_union = zzz_NewBoxArray();
+      return box_union;
+   }
+      
    /*------------------------------------------------------
     * Set up the block_index array
     *------------------------------------------------------*/
@@ -244,14 +256,19 @@ zzz_UnionBoxArray( zzz_BoxArray *boxes )
 	 for (i = 0; i < 2; i++)
 	 {
 	    /* find the new index position in the block_index array */
+            index_not_there = 1;
 	    for (j = 0; j < block_sz[d]; j++)
 	    {
 	       if (iminmax[i] <= block_index[d][j])
+               {
+                  if (iminmax[i] == block_index[d][j])
+                     index_not_there = 0;
 		  break;
+               }
 	    }
 
 	    /* if the index is already there, don't add it again */
-	    if (iminmax[i] < block_index[d][j])
+	    if (index_not_there)
 	    {
 	       for (k = block_sz[d]; k > j; k--)
 		  block_index[d][k] = block_index[d][k-1];

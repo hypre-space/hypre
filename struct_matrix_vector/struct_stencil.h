@@ -20,14 +20,12 @@
  * zzz_StructStencil
  *--------------------------------------------------------------------------*/
 
-typedef int zzz_StructStencilElt[3];
-
 typedef struct
 {
-   zzz_StructStencilElt  *shape;   /* Description of a stencil's shape */
-   int                    size;    /* Number of stencil coefficients */
-
-   int                    dim;     /* Number of dimensions */
+   zzz_Index  **shape;   /* Description of a stencil's shape */
+   int          size;    /* Number of stencil coefficients */
+                
+   int          dim;     /* Number of dimensions */
 
 } zzz_StructStencil;
 
