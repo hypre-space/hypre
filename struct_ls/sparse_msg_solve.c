@@ -172,7 +172,9 @@ hypre_SparseMSGSolve( void               *smsg_vdata,
          }
 /* RDF */
 #if 0
+
 printf("iter = %d, rel_norm = %e\n", i, rel_norms[i]);
+
 #endif
 
          /* always do at least 1 V-cycle */

@@ -39,6 +39,7 @@ hypre_SparseMSGCreate( MPI_Comm  comm )
    (smsg_data -> num_post_relax) = 1;
    (smsg_data -> num_fine_relax) = 1;
    (smsg_data -> logging)        = 0;
+   (smsg_data -> print_level)    = 0;
 
    /* initialize */
    (smsg_data -> num_grids[0])    = 1;
@@ -308,6 +309,22 @@ hypre_SparseMSGSetLogging( void *smsg_vdata,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_SparseMSGSetPrintLevel
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_SparseMSGSetPrintLevel( void *smsg_vdata,
+                           int   print_level    )
+{
+   hypre_SparseMSGData *smsg_data = smsg_vdata;
+   int             ierr = 0;
+ 
+   (smsg_data -> print_level) = print_level;
+ 
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_SparseMSGGetNumIterations
  *--------------------------------------------------------------------------*/
 
@@ -336,19 +353,23 @@ hypre_SparseMSGPrintLogging( void *smsg_vdata,
    int             i;
    int             num_iterations  = (smsg_data -> num_iterations);
    int             logging   = (smsg_data -> logging);
+   int           print_level = (smsg_data -> print_level);
    double         *norms     = (smsg_data -> norms);
    double         *rel_norms = (smsg_data -> rel_norms);
 
    if (myid == 0)
    {
-      if (logging > 0)
-      {
-         for (i = 0; i < num_iterations; i++)
-         {
-            printf("Residual norm[%d] = %e   ",i,norms[i]);
-            printf("Relative residual norm[%d] = %e\n",i,rel_norms[i]);
-         }
-      }
+     if (print_level > 0)
+     {
+        if (logging > 0)
+        {
+           for (i = 0; i < num_iterations; i++)
+           {
+              printf("Residual norm[%d] = %e   ",i,norms[i]);
+              printf("Relative residual norm[%d] = %e\n",i,rel_norms[i]);
+           }
+        }
+     }
    }
   
    return ierr;

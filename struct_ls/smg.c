@@ -41,6 +41,7 @@ hypre_SMGCreate( MPI_Comm  comm )
    hypre_SetIndex((smg_data -> base_index), 0, 0, 0);
    hypre_SetIndex((smg_data -> base_stride), 1, 1, 1);
    (smg_data -> logging) = 0;
+   (smg_data -> print_level) = 0;
 
    /* initialize */
    (smg_data -> num_levels) = -1;
@@ -285,6 +286,22 @@ hypre_SMGSetLogging( void *smg_vdata,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_SMGSetPrintLevel
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_SMGSetPrintLevel( void *smg_vdata,
+                        int   print_level)
+{
+   hypre_SMGData *smg_data = smg_vdata;
+   int            ierr = 0;
+ 
+   (smg_data -> print_level) = print_level;
+ 
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_SMGGetNumIterations
  *--------------------------------------------------------------------------*/
 
@@ -313,20 +330,24 @@ hypre_SMGPrintLogging( void *smg_vdata,
    int          i;
    int          num_iterations  = (smg_data -> num_iterations);
    int          logging   = (smg_data -> logging);
+   int          print_level  = (smg_data -> print_level);
    double      *norms     = (smg_data -> norms);
    double      *rel_norms = (smg_data -> rel_norms);
 
    
    if (myid == 0)
    {
-      if (logging > 0)
-      {
-         for (i = 0; i < num_iterations; i++)
-         {
-            printf("Residual norm[%d] = %e   ",i,norms[i]);
-            printf("Relative residual norm[%d] = %e\n",i,rel_norms[i]);
-         }
-      }
+     if (print_level > 0)
+     {
+        if (logging > 0)
+        {
+           for (i = 0; i < num_iterations; i++)
+           {
+              printf("Residual norm[%d] = %e   ",i,norms[i]);
+              printf("Relative residual norm[%d] = %e\n",i,rel_norms[i]);
+           }
+        }
+     }
    }
   
    return ierr;
