@@ -533,6 +533,7 @@ install: all
 	cp -fp libHYPRE* ${HYPRE_LIB_INSTALL}
 
 clean:
+	rm -f *.o lib*.a
 
-distclean:
-	rm -f *.o lib*.a Makefile
+distclean: clean
+	rm -f Makefile
