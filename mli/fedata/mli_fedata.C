@@ -2064,6 +2064,19 @@ int MLI_FEData::getOrderOfFE(int& order)
 }
 
 //*************************************************************************
+// get field size  
+//-------------------------------------------------------------------------
+
+int MLI_FEData::getFieldSize(int fieldID, int& fieldSize)
+{
+   fieldSize = 0;
+   for ( int i = 0; i < numFields_; i++ )
+      if ( fieldIDs_[i] == fieldID ) fieldSize = fieldSizes_[i];
+   if ( fieldSize > 0 ) return 1;
+   else                 return 0;
+}
+
+//*************************************************************************
 // get number of local elements 
 //-------------------------------------------------------------------------
 

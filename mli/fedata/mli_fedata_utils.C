@@ -710,9 +710,10 @@ void MLI_FEDataAgglomerateElemsLocal(MLI_Matrix *elemMatrix,
          for ( jj = 0; jj < row_leng; jj++ )
          {
             col_index = cols[jj] - start_elem;
+printf("element %5d has neighbor = %5d %e\n", ielem, col_index, vals[jj]);
             if ( col_index >= 0 && col_index < local_nElems )
             {
-               if ( dense_row[col_index] >= 0 )
+               if ( dense_row[col_index] >= 0 && col_index != ielem )
                {
                   dense_row[col_index] = (int) vals[jj];
                   if ( ((int) vals[jj]) > cur_weight )
@@ -730,8 +731,10 @@ void MLI_FEDataAgglomerateElemsLocal(MLI_Matrix *elemMatrix,
          elem_count = 0;
          macro_list[elem_count++] = ielem;
          dense_row[ielem] = -1;
+printf("current weight = %5d %5d\n", cur_weight, max_weight);
          while ( cur_weight >= 4 && cur_weight > max_weight && elem_count < 100 )
          { 
+printf("current index and weight = %5d %5d\n", cur_index, cur_weight);
             max_weight = cur_weight;
             macro_list[elem_count++] = cur_index;
             dense_row[cur_index] = -1;
