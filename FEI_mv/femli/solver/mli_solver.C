@@ -74,6 +74,7 @@ MLI_Solver::MLI_Solver( int sid )
            cout << "MLI_Solver constructor ERROR : SuperLU not available\n";
            exit(1);
 #endif
+           break;
       case MLI_SOLVER_ARPACKSUPERLU_ID :
 #ifdef MLI_SUPERLU
            strcpy( solver_name, "ARPACKSuperLU" );
