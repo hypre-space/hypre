@@ -1,648 +1,428 @@
+/*
+ * This is the HYPRE SIDL interface description file.  It is an example of a
+ * SIDL description file.  This work was presented at the 2001 SIAM Parallel
+ * Processing conference.  The authors are Andy Cleary, Jeff Painter, and Cal
+ * Ribbens (from HYPRE) and Scott Kohn and Gary Kumfert (from Components).
+ *
+ * Questions about the syntax of this file should be directed to either Scott
+ * or Gary at components@llnl.gov.
+ *
+ * All SIDL files begin with a series of version statements.  You must provide
+ * a version for any new packages defined in the symbol file.  You may also
+ * provide version statements for any packages you reference in your file.
+ * If you do not explicitly provide a version statement, then the most recent
+ * version of the external package will be used.  For example, this file does
+ * does not explicitly state which version of the SIDL classes it expects, so
+ * it will always receive the most recent version of the SIDL base classes.
+ *
+ * Additional edits and mods begun by Andy Cleary, July 2001 
+ */
+version Hypre 0.1.5;
+
+
+/**
+ * The <code>Hypre</code> package defines interfaces for an experimental
+ * version of the HYPRE software package that used SIDL and Babel to generate
+ * foreign language bindings. 
+ */
 package Hypre {
 
-   //   TO DO: replace printf's with a function call which I can easily make
-   // do something else (e.g. throw an exception or assert(false)) if needed.
-   // (Actually, this would be useful for Hypre in general).
-   //   TO DO: Operator returns more about its domain & range
-   // (presently returns dimensions; could also return some sort of size)
-   //   TO DO: Map class as in ESI (or call it Partitioning as in HYPRE)
-   // functions to return index range for a given processor, etc.
-   // GetLocalRange, GetRowPartition
-   // Operator will contain Maps, via GetDomainMap, GetRangeMap functions
-   // (aka GetColumnMap, GetRowMap)
-   //   TO DO: consider changing names Start() and Setup().
-   // Start was formerly called New, but that is now a Babel reserved word.
-   // For a builder, Start() or Reset() and Finish() are alternatives.
-   // For a self-building class, Initialize() makes sense.
-   // Maybe to do: operator returns domain and range as a Map
-   // Maybe to do: SolverBuilder and derived classes have a Setup function
-   // which takes Vector arguments; maybe a Map would be better.
+//
+// -------------------------- Interfaces ---------------------------
+//
 
-   // To do in future, as needed:
-   // add SetDefault functions to builders
-
-   // Definition of Hypre interface.  dec1999 - jun2000
-   // complaints to Jeff Painter
-
-   // The case of the package name is chosen to prevent name conflicts.
-   // All functions (other than the Babel-provided functions and the
-   // convenience function Constructor)
-   // return an error code: 0 for good, 1 (or, in principle, >1) for bad.
-
-   // These forward declarations are needed for the interface definitions
-   // but are not otherwise needed for class declarations.
-   // None of these classes cannot be taken out of the interface definitions
-   // as long as we don't change Hypre - they all contain data which some
-   // Babel/Hypre function passes on to a HYPRE function.
-   // Note that even though I have declared a StructuredGrid interface,
-   // we still need to forward-declare the class: the matrix and vector
-   // builders really care about the data in the grid class, they couldn't care
-   // less about its interface.
-   class MPI_Com;
-   class Box;
-   class StructGrid;
-   class StructStencil;
-   interface Map;
-   
-// ---------------- Interfaces ----------------
 
    interface Vector {
-      // operations:
-      int Clear ();                          // y <- 0 (where y=self)
-      int Copy (in Vector x);                // y <- x 
-      int Clone (out Vector x);              // create an x compatible with y
-      int Scale (in double a);               // y <- a*y 
-      int Dot (in Vector x, out double d);   // d <- (y,x)
-      int Axpy (in double a, in Vector x);   // y <- a*x + y
+      /**
+       * y <- 0 (where y=self)
+       */
+      int Clear ();
 
-      // size and structure reporting:
-      int GetGlobalSize( out int size );
-      int GetMap( out Map map );             // data distribution
-   };
+      /**
+       * y <- x 
+       */
+      int Copy (in Vector x);
 
-   // Note that generic matrices are returned as Operator or LinearOperator.
-   // There are possible functions which pertain solely to data storage don't
-   // belong in Operator or LinearOperator interfaces, e.g. GetMap.
+      /**
+       * create an x compatible with y
+       */
+      int Clone (out Vector x);
 
-   interface Operator {
-      int Apply( in Vector x, out Vector b );
-      int GetDims( out int m, out int n );
-   };
-   // ... Things which inherit from Operator include Matrix, Solver.
+      /**
+       * y <- a*y 
+       */
+      int Scale (in double a);
 
-   interface LinearOperator extends Operator {
-      int Apply( in Vector x, out Vector b );
-      int GetDims( out int m, out int n );
-   };
-
-   interface RowAccess {
-      int GetRow( in  int row,
-                  out int size,
-                  out array<int,1> col_ind,
-                  out array<double,1> values);
-      int RestoreRow( in int row,
-                      in int size,
-                      in array<int,1> col_ind,
-                      in array<double,1> values);
-   };
-
-   interface StructuredGrid {
-   };
-
-   interface StructuredGridBuilder 
-   {
-      int SetGridExtents( in Box box );
-      int SetParameterDouble( in string name, in double value );
-      int SetParameterInt( in string name, in int value );
-      int SetParameterIntArray( in string name, in array<int,1> value );
-      int GetParameterInt( in string name, out int value );
-      int GetConstructedObject(out StructuredGrid obj);
-      int Start( in MPI_Com com, in int dimension );
-      int Setup();
-   };
-   
-   interface Stencil {
-      int SetElement( in int element_index, in array<int,1> element_offset );
-   };
-
-   interface Map {}; // describes a data distribution, e.g. of a vector
-
-   interface MapPartitionedBuilder {
-      int Start( in array<int,1> partitioning );
-      int Setup();
-      int GetConstructedObject( out Map obj );
-      // HYPRE-like:
-      int SetPartitioning( in array<int,1> partitioning );
-      int GetPartitioning( out array<int,1> partitioning );
-   };
-
-   interface MapPartitioned extends Map {
-      // HYPRE-like:
-      int GetPartitioning( out array<int,1> partitioning );
-      // ESI-like functions:
-      // I (JfP) may not implement these until the need arises.
-      // All can be implemented in terms of the HYPRE-like function, assuming
-      // that the local MPI rank is appropriate index into partitioning array
-      // (ESI seems to contemplate that the partition rank may be different).
-      // int getGlobalSize( out int globalSize );
-      // int getLocalSize( out int localSize );
-      // int getNumPartitions( out int numberOfPartitions );
-      // int getPartitionRank( out int localPartitionRank );
-      // int getGlobalOwnership( out array<int,1> globalOwnedSizes,
-      //   out array<int,1> globalOwnedGlobalOffsets );
-      // int getLocalOwnership( out int localOwnedSize,
-      //   out int localOwnedGlobalOffset );
-   };
-
-// TO DO: MapStructMatrix will be the same, except that map information also includes a stencil
-
-   interface MapStructuredVector extends Map {
-      int GetNumGhost( out array<int,1> values );
-      int GetGrid( out StructuredGrid grid );
-   };
-
-   interface MapStructuredVectorBuilder {
-      int Start( in array<int,1> num_ghost, in StructuredGrid grid );
-      int SetNumGhost( in array<int,1> values );
-      int Setup();
-      int GetConstructedObject( out MapStructuredVector obj );
-   };
- 
-   interface StructuredGridVectorBuilder {
-      int SetValue( in array<int,1> where, in double value );
-      int SetBoxValues( in Box box, in array<double,1> values );
-      // ... this is basically how the HYPRE functions work, except that
-      // ilower, iupper, and dim are combined into a Box object.  Probably
-      // it would be better to encode the "values" data structure in a more
-      // natural form.
-      int SetMap( in Map map );
-      int GetMap( out Map map );
-      int Start( in StructGrid grid );
-      int Setup();
-      int GetConstructedObject(out Vector obj);
-   };
-
-   interface StructuredGridMatrixBuilder {
-      int SetValue( in array<int,1> where, in double value );
-      int SetBoxValues( in Box box, in array<int,1> stencil_indices,
-                        in array<double,1> values );
-      // ... this is basically how the HYPRE functions work, except that
-      // ilower, iupper, and dim are combined into a Box object.  Probably
-      // it would be better to encode the "values" data structure in a more
-      // natural form.
-      int SetMap( in Map map );
-      int GetMap( out Map map );
-      int Start( in StructGrid grid, in StructStencil stencil,
-               in int symmetric, in array<int,1> num_ghost );
-      int Setup();
-      int GetConstructedObject(out LinearOperator obj);
-   };
-
-   interface IJMatrixBuilder {
-      int Start( in MPI_Com com, in int m_global, in int n_global );
-      int SetLocalSize( in int m_local, in int n_local );
-      int SetRowSizes( in array<int,1> sizes );
-      int SetDiagRowSizes( in array<int,1> sizes );
-      int SetOffDiagRowSizes( in array<int,1> sizes );
-      int GetLocalRange( out int row_start, out int row_end,
-                         out int col_start, out int col_end );
-      int InsertRow( in int n, 
-                     in int row, 
-                     in array<int,1> cols, 
-                     in array<double,1> values );
-      int AddToRow ( in int n, 
-                     in int row, 
-                     in array<int,1> cols, 
-                     in array<double,1> values );
-      int InsertBlock( in int m, 
-                       in int n, 
-                       in array<int,1> rows, 
-                       in array<int,1> cols, 
-                       in array<double,1> values );
-      int AddtoBlock ( in int m, 
-                       in int n, 
-                       in array<int,1> rows, 
-                       in array<int,1> cols, 
-                       in array<double,1> values );
-      int Setup();
-      int GetConstructedObject(out LinearOperator obj);
-//      int SetRowPartitioning( in array<int,1> partitioning );
-//      int GetRowPartitioning( out array<int,1> partitioning );
-      int SetMap( in Map map );  // the map is a row partitioning
-      int GetMap( out Map map );
-   };
-
-   interface IJVectorBuilder {
-      int Start( in MPI_Com com, in int global_n );
-//      int SetPartitioning( in array<int,1> partitioning );
-//      int GetPartitioning( out array<int,1> partitioning );
-      int SetMap( in Map map );
-      int GetMap( out Map map );
-      int SetLocalComponents( in int num_values,
-                              in array<int,1> glob_vec_indices,
- 			      in array<int,1> value_indices,
-                              in array<double,1> values );
-      int AddtoLocalComponents( in int num_values,
-                                in array<int,1> glob_vec_indices,
- 			        in array<int,1> value_indices,
-                                in array<double,1> values );
-      int SetLocalComponentsInBlock( in int start_glob_vec_index,
-                                     in int stop_glob_vec_index,
-                                     in array<int,1> value_indices,
-                                     in array<double,1> values );
-      int AddToLocalComponentsInBlock( in int start_glob_vec_index,
-                                       in int stop_glob_vec_index,
-                                       in array<int,1> value_indices,
-                                       in array<double,1> values );
-      int Setup();
-      int GetConstructedObject(out Vector obj);
-   };
-
-   interface Solver extends LinearOperator {
-      int Apply( in Vector b, out Vector x );
-      int GetDims( out int m, out int n );
-      int GetSystemOperator(out LinearOperator op);
-      int GetResidual(out Vector resid);
-      int GetConvergenceInfo( in string name, out double value );
-   };
-
-   interface PreconditionedSolver extends Solver {
-      int GetPreconditioner( out Solver precond );
-   };
-
-   interface SolverBuilder {
-      int GetParameterDouble( in string name, out double value );
-      int GetParameterInt( in string name, out int value );
-      int SetParameterDouble( in string name, in double value );
-      int SetParameterInt( in string name, in int value );
-      int SetParameterString( in string name, in string value );
-      int Start( in MPI_Com comm );
-      int Setup( in LinearOperator A, in Vector b, in Vector x );
-      int GetConstructedObject(out Solver obj);    
-   };
-
-   interface PreconditionedSolverBuilder extends SolverBuilder {
-      int SetPreconditioner( in Solver precond );
-   };
-
-
-// ---------------- Classes ----------------
-
-// Note re "Start" and "Constructor" functions:
-// There are two ways to design a class structure for the above interfaces.
-// In one, for every class Foo there is a class FooBuilder.  A builder
-// object makes the object you want.
-// In the other design, you construct objects the "normal" way, which
-// begins by calling a constructor.
-//
-// If you use a separate builder, the way things work is:
-//  builder's New() makes a builder
-//  builder's Start(...) makes an object and does basic initialization
-//  builder's Set functions put data into the new object
-//  builder's Setup(...) finishes building the object
-//  builder's GetConstructedObject(...) returns that object
-//
-// If you use an object which implements its own builder interface, the
-// way things work is:
-//  object's New() makes a basic uninitialized object
-//  object's Start(...) starts building of a valid version of the object
-//  object's Set functions put data into the new object
-//  object's Setup(...) finishes building the object
-//
-// In many cases the object has a convenience function Constructor(...) which
-// simply combines the New() and Start(...) functions.  It is declared static
-// (i.e., belongs to the class, not to any particular object instantiating the
-// class).  We may eliminate the Constructor(...) functions in the future -
-// they make user code more compact but have caused some confusion and
-// cannot be expected to work in a future distributed version of Babel.
-
-   class MPI_Com 
-   {
-      // This class contains MPI information.  Potentially this can be
-      // the object which answers questions like "how many processors
-      // are there?". So the MPI communicator has to be passed into it
-      // upon construction.
-      // The problem is that I have to build into this the "secret"
-      // knowledge that an MPI communicator handle is really an integer.
-      int Start( in int comm );
-      int GetRank( out int rank );
-      static MPI_Com Constructor( in int comm );
-   };
-   
-   // ---------------- Grid, matrix, vector classes
-
-   // The "print" functions in this file print brief information
-   // to stdout for debugging use.  The Matrix and Vector ones also
-   // call the Hypre "Print" functions, which print their entire
-   // contents to a file.
-
-   class Box {
-      int Start( in array<int,1> lower, in array<int,1> upper,
-               in int dimension );
-      static Box Constructor( in array<int,1> lower, in array<int,1> upper,
-                              in int dimension );
-      int Setup();
-      void print();
-   };
-
-   class StructStencil implements Stencil 
-   {
-      void print();
-      int SetElement( in int index_element, in array<int,1> offset_element );
-      int Start( in int dimension, in int size );
-      static StructStencil Constructor( in int dimension, in int size );
-      int Setup();
-   };
-   
-   class MapStructVector implements MapStructuredVector {
-      int GetNumGhost( out array<int,1> values );
-      int GetGrid( out StructuredGrid grid );
-   };
-
-   class MapStructVectorBuilder implements MapStructuredVectorBuilder {
-      int Start( in array<int,1> num_ghost, in StructuredGrid grid );
-      int SetNumGhost( in array<int,1> values );
-      int Setup();
-      int GetConstructedObject( out MapStructuredVector obj );
-   };
- 
-   class StructVectorBuilder implements StructuredGridVectorBuilder {
-      void print();
-      int SetValue( in array<int,1> where, in double value );
-      int SetBoxValues( in Box box, in array<double,1> values );
-      int SetNumGhost( in array<int,1> values );
-      int SetMap( in Map map );
-      int GetMap( out Map map );
-      int GetConstructedObject(out Vector obj);
-      int Start( in StructGrid grid );
-      static StructVectorBuilder Constructor( in StructGrid grid );
-      int Setup();
-   };
-
-   class StructVector implements Vector {
-      int GetNumGhost( out array<int,1> values );
-      int Clear ();                    
-      int Copy (in Vector x);         
-      int Clone (out Vector x);       
-      int Scale (in double a);        
+      /**
+       * d <- (y,x)
+       */
       int Dot (in Vector x, out double d);
+
+      /**
+       * y <- a*x + y
+       */
       int Axpy (in double a, in Vector x);
-      int GetGlobalSize( out int size );
-      int GetMap( out Map map );
-   };
+   }
 
-   class StructMatrixBuilder implements StructuredGridMatrixBuilder {
-      int SetStencil( in StructStencil stencil );
-      int SetValue( in array<int,1> where, in double value );
-      int SetBoxValues( in Box box, in array<int,1> stencil_indices,
-                        in array<double,1> values );
-      int GetDims( out int m, out int n );
-      int SetMap( in Map map );
-      int GetMap( out Map map );
-      int GetConstructedObject(out LinearOperator obj);
-      int Start( in StructGrid grid, in StructStencil stencil,
-               in int symmetric, in array<int,1> num_ghost  );
-      static StructMatrixBuilder Constructor
-      ( in StructGrid grid, in StructStencil stencil, in int symmetric,
-        in array<int,1> num_ghost );
-      int Setup();
-   };
 
-   class StructMatrix implements LinearOperator {
-      void print();
-      int GetMap( out Map map );
-      int Apply( in Vector x, out Vector b );
-      int GetDims( out int m, out int n );
-   };
+   /**
+    * <p>The purpose of a ProblemDefinition is to:</p>
+    * <ul>
+    * <li>present the user with a particular view of how to define
+    *     a problem</li>
+    * <li>construct and return a "problem object"</li>
+    * </ul>
+    *
+    * <p>A "problem object" is an intentionally vague term that corresponds
+    * to any useful object used to define a problem.  Prime examples are:</p>
+    * <ul>
+    * <li>a LinearOperator object, i.e., something with a matvec</li>
+    * <li>a MatrixAccess object, i.e., something with a getrow</li>
+    * <li>a Vector, i.e., something with a dot, axpy, ...</li>
+    * </ul>
+    *
+    * <p>Note that the terms "Initialize" and "Assemble" are reserved here
+    * for defining problem objects through a particular user interface.</p>
+   */
 
-   class StructGrid implements StructuredGridBuilder, StructuredGrid
+   interface ProblemDefinition 
    {
-      void print();
-      int SetGridExtents( in Box box );
-      int SetParameterDouble( in string name, in double value );
-      int SetParameterInt( in string name, in int value );
-      int SetParameterIntArray( in string name, in array<int,1> value );
-      int GetParameterInt( in string name, out int value );
-      int GetConstructedObject(out StructuredGrid obj);
-      int Start( in MPI_Com com, in int dimension );
-      static StructGrid Constructor( in MPI_Com com, in int dimension );
-      int Setup();
-   };
-   
-         
-   class ParCSRMatrixBuilder implements IJMatrixBuilder {
-      static ParCSRMatrixBuilder Constructor( in MPI_Com com,
-                                              in int m_global, in int n_global);
-      int Start( in MPI_Com com, in int m_global, in int n_global );
-      int SetLocalSize( in int m_local, in int n_local );
-      int SetRowSizes( in array<int,1> sizes );
-      int SetDiagRowSizes( in array<int,1> sizes );
-      int SetOffDiagRowSizes( in array<int,1> sizes );
-      int GetLocalRange( out int row_start, out int row_end,
-                         out int col_start, out int col_end );
-      int InsertRow( in int n, 
-                     in int row, 
-                     in array<int,1> cols, 
-                     in array<double,1> values );
-      int  AddToRow( in int n, 
-                     in int row, 
-                     in array<int,1> cols, 
-                     in array<double,1> values );
-      int InsertBlock( in int m, 
-                       in int n, 
-                       in array<int,1> rows, 
-                       in array<int,1> cols, 
-                       in array<double,1> values );
-      int  AddtoBlock( in int m, 
-                       in int n, 
-                       in array<int,1> rows, 
-                       in array<int,1> cols, 
-                       in array<double,1> values );
-      int Setup();
-      int GetConstructedObject(out LinearOperator obj);
-//      int GetRowPartitioning( out array<int,1> partitioning );
-//      int SetRowPartitioning( out array<int,1> partitioning );
-      int SetMap( in Map map );  // the map is a row partitioning
-      int GetMap( out Map map );
-   };
+      int SetCommunicator (in opaque mpi_comm);
 
-   class ParCSRVectorBuilder implements IJVectorBuilder {
-      static ParCSRVectorBuilder Constructor( in MPI_Com com, in int global_n );
-      int Start( in MPI_Com com, in int global_n );
-//      int SetPartitioning( in array<int,1> partitioning );
-//      int GetPartitioning( out array<int,1> partitioning );
-      int SetMap( in Map map );
-      int GetMap( out Map map );
-      int SetLocalComponents( in int num_values,
-                              in array<int,1> glob_vec_indices,
- 			      in array<int,1> value_indices,
-                              in array<double,1> values );
-      int AddtoLocalComponents( in int num_values,
-                                in array<int,1> glob_vec_indices,
- 			        in array<int,1> value_indices,
-                                in array<double,1> values );
-      int SetLocalComponentsInBlock( in int start_glob_vec_index,
-                                     in int stop_glob_vec_index,
-                                     in array<int,1> value_indices,
-                                     in array<double,1> values );
-      int AddToLocalComponentsInBlock( in int start_glob_vec_index,
-                                       in int stop_glob_vec_index,
-                                       in array<int,1> value_indices,
-                                       in array<double,1> values );
-      int Setup();
-      int GetConstructedObject(out Vector obj);
-   };
+      /**
+       * Prepare an object for setting coefficient values, whether for
+       * the first time or subsequently.
+       *
+      **/
+      int Initialize ();           // "get ready to accept new values"
 
-   class ParCSRMatrix implements LinearOperator, RowAccess { 
-      int Apply( in Vector x, out Vector y );
-      int GetDims( out int m, out int n );
-      int GetLocalRange( out int row_start, out int row_end,
-                         out int col_start, out int col_end );
-      int GetRow( in  int row,
-                  out int size,
-                  out array<int,1> col_ind,
-                  out array<double,1> values);
-      int RestoreRow( in int row,
-                      in int size,
-                      in array<int,1> col_ind,
-                      in array<double,1> values);
-//      int GetRowPartitioning( out array<int,1> partitioning );
-      int GetMap( out Map map );  // the map is a row partitioning
-   };
+      /**
+       * Finalize the construction of an object before using, either for
+       * the first time or on subsequent uses. "Initialize" and "Assemble"
+       * always appear in a matched set, with Initialize preceding Assemble. Values
+       * can only be set in between a call to Initialize and Assemble.
+       *
+      **/
+      int Assemble ();             // "done accepting new values"
 
-   class ParCSRVector implements Vector { 
-      int Clear();                    
-      int Copy( in Vector x );         
-      int Clone( out Vector x );       
-      int Scale( in double a );        
-      int Dot( in Vector x, out double d );
-      int Axpy( in double a, in Vector x );
-//      int GetPartitioning( out array<int,1> partitioning );
-      int GetGlobalSize( out int size );
-      int GetMap( out Map map );
-   };
+      /**
+       * The problem definition interface is a "builder" that creates an object
+       * that contains the problem definition information, e.g. a matrix. To
+       * perform subsequent operations with that object, it must be returned from
+       * the problem definition object. "GetObject" performs this function.
+       * <note>At compile time, the type of the returned object is unknown.
+       * Thus, the returned type is a SIDL.BaseInterface. QueryInterface or Cast must
+       * be used on the returned object to convert it into a known type.</note>
+       *
+      **/
+      int GetObject ( out SIDL.BaseInterface A );
+   }
 
-   class PartitionBuilder implements MapPartitionedBuilder {
-      int Start( in array<int,1> partitioning );
-      int Setup();
-      int GetConstructedObject( out Map obj );
-      // HYPRE-like:
-      int SetPartitioning( in array<int,1> partitioning );
-      int GetPartitioning( out array<int,1> partitioning );
-   };
+   interface StructuredGridBuildMatrix extends ProblemDefinition 
+   {
+      int SetGrid (in StructGrid grid );
+      int SetStencil (in StructStencil stencil );
+      int SetValues (in array<int> index, 
+                     in int num_stencil_indices,
+                     in array<int> stencil_indices,
+                     in array<double> values);
+      int SetBoxValues (in array<int> ilower,
+                        in array<int> iupper,
+                        in int num_stencil_indices,
+                        in array<int> stencil_indices,
+                        in array<double> values);
+      int SetNumGhost (in array<int> num_ghost);
+      int SetSymmetric (in int symmetric);
+   }
 
-   class Partition implements MapPartitioned {
-      int GetPartitioning( out array<int,1> partitioning );
-   };
- 
-   // ---------------- Solver and related classes
+   interface StructuredGridBuildVector extends ProblemDefinition 
+   {
+      int SetGrid (in StructGrid grid );
+      int SetStencil (in StructStencil stencil );   // really needed?
+      int SetValue (in array<int> grid_index, in double value);
+      int SetBoxValues (in array<int> ilower,
+                        in array<int> iupper,
+                        in array<double> values);
+   }
+
+   /**
+    *
+    * This interface represents a linear-algebraic conceptual view of a
+    * linear system.  The 'I' and 'J' in the name are meant to be
+    * mnemonic for the traditional matrix notation A(I,J).
+    *
+    **/
+
+  interface IJBuildMatrix extends ProblemDefinition 
+  {
+/**
+ * Create a matrix object.  Each process owns some unique consecutive
+ * range of rows, indicated by the global row indices {\tt ilower} and
+ * {\tt iupper}.  The row data is required to be such that the value
+ * of {\tt ilower} on any process $p$ be exactly one more than the
+ * value of {\tt iupper} on process $p-1$.  Note that the first row of
+ * the global matrix may start with any integer value.  In particular,
+ * one may use zero- or one-based indexing.
+ *
+ * For square matrices, {\tt jlower} and {\tt jupper} typically should
+ * match {\tt ilower} and {\tt iupper}, respectively.  For rectangular
+ * matrices, {\tt jlower} and {\tt jupper} should define a
+ * partitioning of the columns.  This partitioning must be used for
+ * any vector $v$ that will be used in matrix-vector products with the
+ * rectangular matrix.  The matrix data structure may use {\tt jlower}
+ * and {\tt jupper} to store the diagonal blocks (rectangular in
+ * general) of the matrix separately from the rest of the matrix.
+ *
+ * Collective.
+ *
+ **/
+      int Create( in int ilower, in int iupper,
+                  in int jlower, in int jupper );
+
+/**
+ * Sets values for {\tt nrows} of the matrix.  The arrays {\tt ncols}
+ * and {\tt rows} are of dimension {\tt nrows} and contain the number
+ * of columns in each row and the row indices, respectively.  The
+ * array {\tt cols} contains the column indices for each of the {\tt
+ * rows}, and is ordered by rows.  The data in the {\tt values} array
+ * corresponds directly to the column entries in {\tt cols}.  Erases
+ * any previous values at the specified locations and replaces them
+ * with new ones, or, if there was no value there before, inserts a
+ * new one.
+ *
+ * Not collective.
+ *
+ **/
+      int SetValues( in int nrows, in array<int> ncols, in array<int> rows,
+                     in array<int> cols, in array<double> values );
+
+/**
+ * Adds to values for {\tt nrows} of the matrix.  Usage details are
+ * analogous to \Ref{HYPRE_IJMatrixSetValues}.  Adds to any previous
+ * values at the specified locations, or, if there was no value there
+ * before, inserts a new one.
+ *
+ * Not collective.
+ *
+ **/
+      int AddToValues( in int nrows, in array<int> ncols, in array<int> rows,
+                     in array<int> cols, in array<double> values );
+   /**
+    * (Optional) Set the max number of nonzeros to expect in each row.
+    * The array {\tt sizes} contains estimated sizes for each row on this
+    * process.  This call can significantly improve the efficiency of
+    * matrix construction, and should always be utilized if possible.
+    *
+    * Not collective.
+    *
+    * DEVELOPER NOTES: None.
+    **/
+      int SetRowSizes( in array<int> sizes );
+
+   /**
+    * (Optional) Set the max number of nonzeros to expect in each row of
+    * the diagonal and off-diagonal blocks.  The diagonal block is the
+    * submatrix whose column numbers correspond to rows owned by this
+    * process, and the off-diagonal block is everything else.  The arrays
+    * {\tt diag\_sizes} and {\tt offdiag\_sizes} contain estimated sizes
+    * for each row of the diagonal and off-diagonal blocks, respectively.
+    * This routine can significantly improve the efficiency of matrix
+    * construction, and should always be utilized if possible.
+    *
+    * Not collective.
+    *
+    **/
+     int SetDiagOffdSizes( in array<int> diag_sizes, in array<int> offdiag_sizes );
+
+    /**
+     * Read the matrix from file.  This is mainly for debugging purposes.
+     **/
+     int Read( in string filename,
+		       in opaque comm );
+
+    /**
+     * Print the matrix to file.  This is mainly for debugging purposes.
+     **/
+     int Print( in string filename);
+
+  }
+
+  interface IJBuildVector extends ProblemDefinition 
+  {
+     int SetGlobalSize (in int n);
+     int SetPartitioning (in array<int> partitioning);
+     int SetLocalComponents (in int num_values,
+                             in array<int> glob_vec_indices,
+			     in array<int> value_indices,
+                             in array<double> values);
+     int AddtoLocalComponents (in int num_values,
+                               in array<int> glob_vec_indices,
+			       in array<int> value_indices,
+                               in array<double> values);
+     int SetLocalComponentsInBlock (in int glob_vec_index_start,
+                                    in int glob_vec_index_stop,
+                                    in array<int> value_indices,
+                                    in array<double> values);
+     int AddToLocalComponentsInBlock (in int glob_vec_index_start,
+                                      in int glob_vec_index_stop,
+                                      in array<int> value_indices,
+                                      in array<double> values);
+     /**
+      * Create a vector object.  Each process owns some unique consecutive
+      * range of vector unknowns, indicated by the global indices {\tt
+      * jlower} and {\tt jupper}.  The data is required to be such that the
+      * value of {\tt jlower} on any process $p$ be exactly one more than
+      * the value of {\tt jupper} on process $p-1$.  Note that the first
+      * index of the global vector may start with any integer value.  In
+      * particular, one may use zero- or one-based indexing.
+      *
+      * Collective.
+      *
+      **/
+     int Create( in opaque comm,
+                  in int jlower,
+                  in int jupper );
+     /**
+      * Sets values in vector.  The arrays {\tt values} and {\tt indices}
+      * are of dimension {\tt nvalues} and contain the vector values to be
+      * set and the corresponding global vector indices, respectively.
+      * Erases any previous values at the specified locations and replaces
+      * them with new ones.
+      *
+      * Not collective.
+      *
+      **/
+     int SetValues( in int nvalues,
+                    in array<int> indices,
+                    in array<double> values);
+     /**
+      * Adds to values in vector.  Usage details are analogous to
+      * \Ref{SetValues}.
+      *
+      * Not collective.
+      *
+      **/
+     int AddToValues( in int nvalues,
+                              in array<int> indices,
+                              in array< double> values);
+     /**
+      * Read the vector from file.  This is mainly for debugging purposes.
+      *
+      **/
+     int Read( in string filename,
+	       in opaque comm );
+
+     /**
+      * Print the vector to file.  This is mainly for debugging purposes.
+      **/
+     int Print( in string filename);
+  }
+
+  /**
+   * An Operator is anything that maps one Vector to another.
+   * The terms "Setup" and "Apply" are reserved for Operators.
+   */
+  interface Operator 
+  {
+     int SetCommunicator (in opaque comm);
+     int SetParameter (in string name, in double value);
+     int Setup ();
+     int Apply (in Vector x, out Vector y);
+  }
+
+  interface Solver extends Operator
+  {
+     int SetOperator (in Operator A);
+     int GetResidual (out Vector r);
+  }
+
+  interface PreconditionedSolver extends Solver 
+  {
+     int SetPreconditioner (in Solver s);
+     int GetPreconditionedResidual (out Vector r);
+  }
+
+  interface CoefficientAccess 
+  {
+     int GetRow (in int row, 
+                 out int size, 
+                 out array<int> col_ind,         // inout?
+                 out array<double> values);
+  }
 
 
-   // Some "standard" functions can be expected to work differently on different
-   // solvers, hence have keyword strings in their argument lists.
-   // The generic parameter type is a double because that's easily converted
-   // to int but not vice versa.
+//
+// -------------------------- Classes ---------------------------
+//
 
-   class StructJacobi implements Solver, SolverBuilder {
-      int Apply( in Vector b, out Vector x );
-      int GetDims( out int m, out int n );
-      int GetSystemOperator(out LinearOperator op);
-      int GetResidual(out Vector resid);
-      int GetConvergenceInfo( in string name, out double value );
+   /**
+    * Define a structured stencil for a structured problem description.
+    * More than one implementation is not envisioned, thus the decision has
+    * been made to make this a class rather than an interface.
+    */
+   class StructStencil 
+   {
+      int SetDimension (in int dim);
+      int SetSize (in int size);
+      int SetElement (in int index, in array<int> offset);
+   }
 
-      int GetParameterDouble( in string name, out double value );
-      int GetParameterInt( in string name, out int value );
-      int SetParameterDouble( in string name, in double value );
-      int SetParameterInt( in string name, in int value );
-      int SetParameterString( in string name, in string value );
-      int Start( in MPI_Com comm );
-      int Setup( in LinearOperator A, in Vector b, in Vector x );
-      static StructJacobi Constructor( in MPI_Com comm );
-      int GetConstructedObject(out Solver obj);
-   };
+   /**
+    * Define a structured grid class.
+    */
+   class StructGrid 
+   {
+      int SetCommunicator (in opaque MPI_comm);
+      int SetDimension (in int dim);
+      int SetExtents (in array<int> ilower, in array<int> iupper);
+      int SetPeriodic(in array<int> periodic);
+      int Assemble();
+   }
 
-   class StructSMG implements Solver, SolverBuilder {
-      int Apply( in Vector b, out Vector x );
-      int GetDims( out int m, out int n );
-      int GetSystemOperator( out LinearOperator op);
-      int GetResidual( out Vector resid );
-      int GetConvergenceInfo( in string name, out double value );
+  /**
+   * The following are all classes that implement some subset of the above interfaces.
+   */
 
-      int GetParameterDouble( in string name, out double value );
-      int GetParameterInt( in string name, out int value );
-      int SetParameterDouble( in string name, in double value );
-      int SetParameterInt( in string name, in int value );
-      int SetParameterString( in string name, in string value );
-      int Start( in MPI_Com comm );
-      int Setup( in LinearOperator A, in Vector b, in Vector x );
-      static StructSMG Constructor( in MPI_Com comm );
-      int GetConstructedObject(out Solver obj);
-   };
+  /**
+   * A single class that implements both a build interface and an operator
+   * interface. It returns itself for <code>GetConstructedObject</code>.
+   */
+  class StructMatrix implements-all StructuredGridBuildMatrix, Operator { }
 
-   class PCG implements PreconditionedSolver, PreconditionedSolverBuilder {
-      int Apply( in Vector b, out Vector x );
-      int GetDims( out int m, out int n );
-      int GetSystemOperator( out LinearOperator op );
-      int GetResidual( out Vector resid );
-      int GetConvergenceInfo( in string name, out double value );
+  class StructVector implements-all StructuredGridBuildVector, Vector { }
 
-      int GetPreconditioner( out Solver precond );
+  /**
+   * A single class that implements both a build interface and an operator
+   * interface. It returns itself for <code>GetConstructedObject</code>.
+   */
+  class ParCSRMatrix implements-all IJBuildMatrix, Operator, CoefficientAccess { }
 
-      int GetParameterDouble( in string name, out double value );
-      int GetParameterInt( in string name, out int value );
-      int SetParameterDouble( in string name, in double value );
-      int SetParameterInt( in string name, in int value );
-      int SetParameterString( in string name, in string value );
-      int Start( in MPI_Com comm );
-      static PCG Constructor( in MPI_Com comm );
-      int Setup( in LinearOperator A, in Vector b, in Vector x );
-      int GetConstructedObject(out Solver obj);    
-
-      int SetPreconditioner( in Solver precond );
-   };
-
-   class GMRES implements PreconditionedSolver, PreconditionedSolverBuilder { 
-      int Apply( in Vector b, out Vector x );
-      int GetDims( out int m, out int n );
-      int GetSystemOperator( out LinearOperator op );
-      int GetResidual( out Vector resid );
-      int GetConvergenceInfo( in string name, out double value );
-
-      int GetPreconditioner( out Solver precond );
-
-      int GetParameterDouble( in string name, out double value );
-      int GetParameterInt( in string name, out int value );
-      int SetParameterDouble( in string name, in double value );
-      int SetParameterInt( in string name, in int value );
-      int SetParameterString( in string name, in string value );
-      int Start( in MPI_Com comm );
-      static GMRES Constructor ( in MPI_Com comm );
-      int Setup( in LinearOperator A, in Vector b, in Vector x );
-      int GetConstructedObject(out Solver obj);    
-
-      int SetPreconditioner( in Solver precond );
-   };
-
-   class ParAMG implements SolverBuilder, Solver { 
-      int GetParameterDouble( in string name, out double value );
-      int GetParameterInt( in string name, out int value );
-      int SetParameterDouble( in string name, in double value );
-      int SetParameterDoubleArray( in string name, in array<double,1> value );
-      int SetParameterDoubleArray2( in string name, in array<double,2> value );
-      int SetParameterInt( in string name, in int value );
-      int SetParameterIntArray( in string name, in array<int,1> value );
-      int SetParameterIntArray2( in string name, in array<int,2> value );
-      int SetParameterString( in string name, in string value );
-      int Start( in MPI_Com comm );
-      static ParAMG Constructor( in MPI_Com comm );
-      int Setup( in LinearOperator A, in Vector b, in Vector x );
-      int GetConstructedObject(out Solver obj);    
-
-      int Apply( in Vector b, out Vector x );
-      int GetDims( out int m, out int n );
-      int GetSystemOperator( out LinearOperator op );
-      int GetResidual( out Vector resid );
-      int GetConvergenceInfo( in string name, out double value );
-   };
-
-   class Pilut implements SolverBuilder, Solver { 
-      int GetParameterDouble( in string name, out double value );
-      int GetParameterInt( in string name, out int value );
-      int SetParameterDouble( in string name, in double value );
-      int SetParameterInt( in string name, in int value );
-      int SetParameterString( in string name, in string value );
-      int Start( in MPI_Com comm );
-      static Pilut Constructor( in MPI_Com comm );
-      int Setup( in LinearOperator A, in Vector b, in Vector x );
-      int GetConstructedObject(out Solver obj);    
-
-      int Apply( in Vector b, out Vector x );
-      int GetDims( out int m, out int n );
-      int GetSystemOperator( out LinearOperator op );
-      int GetResidual( out Vector resid );
-      int GetConvergenceInfo( in string name, out double value );
-   };
+  class ParCSRVector implements-all IJBuildVector, Vector, CoefficientAccess { }
 
 
+  /**
+   * This class implements the StructuredGrid user interface, but builds
+   * an unstructured matrix behind the curtain.  It does this by using
+   * an IJBuildMatrix (e.g., ParCSRMatrix, PETScMatrix, ...)
+   * specified by the user with an extra method ...
+   */
+  class StructToIJMatrix implements-all StructuredGridBuildMatrix 
+  {
+     int SetIJMatrix (in IJBuildMatrix I);
+  }
+
+  class StructToIJVector implements-all StructuredGridBuildVector 
+  {
+     int SetIJVector (in IJBuildVector I);
+  }
+
+  class StructSMG implements-all Solver { }
+
+  class ParAMG implements-all Solver { }
+
+  class Pilut implements-all Solver { }
+
+  class PCG implements-all PreconditionedSolver { }
+
+  class GMRES implements-all PreconditionedSolver { }
 }
-;
