@@ -187,6 +187,16 @@ int hypre_CGNRSetLogging P((void *cgnr_vdata , int logging ));
 int hypre_CGNRGetNumIterations P((void *cgnr_vdata , int *num_iterations ));
 int hypre_CGNRGetFinalRelativeResidualNorm P((void *cgnr_vdata , double *relative_residual_norm ));
 
+/* driver.c */
+int main P((int argc , char *argv []));
+int BuildParFromFile P((int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr ));
+int BuildParLaplacian P((int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr ));
+int BuildParDifConv P((int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr ));
+int BuildParFromOneFile P((int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr ));
+int BuildRhsParFromOneFile P((int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix A , HYPRE_ParVector *b_ptr ));
+int BuildParLaplacian9pt P((int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr ));
+int BuildParLaplacian27pt P((int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr ));
+
 /* gmres.c */
 void *hypre_GMRESCreate P((void ));
 int hypre_GMRESDestroy P((void *gmres_vdata ));
@@ -277,7 +287,7 @@ hypre_CSRMatrix *hypre_ExchangeRAPData P((hypre_CSRMatrix *RAP_int , hypre_ParCS
 
 /* par_rap_communication.c */
 int hypre_GetCommPkgRTFromCommPkgA P((hypre_ParCSRMatrix *RT , hypre_ParCSRMatrix *A ));
-hypre_ParCSRCommPkg *hypre_GenerateSendMapAndCommPkg P((MPI_Comm comm , int num_sends , int num_recvs , int *recv_procs , int *send_procs , int *recv_vec_starts , hypre_ParCSRMatrix *A ));
+int hypre_GenerateSendMapAndCommPkg P((MPI_Comm comm , int num_sends , int num_recvs , int *recv_procs , int *send_procs , int *recv_vec_starts , hypre_ParCSRMatrix *A ));
 int hypre_GenerateRAPCommPkg P((hypre_ParCSRMatrix *RAP , hypre_ParCSRMatrix *A ));
 
 /* par_relax.c */
@@ -285,11 +295,11 @@ int hypre_ParAMGRelax P((hypre_ParCSRMatrix *A , hypre_ParVector *f , int *cf_ma
 int gselim P((double *A , double *x , int n ));
 
 /* par_scaled_matnorm.c */
-double hypre_ParScaledMatNorm P((hypre_ParCSRMatrix *A ));
+int hypre_ParCSRMatrixScaledNorm P((hypre_ParCSRMatrix *A , double *scnorm ));
 
 /* par_stats.c */
 int hypre_ParAMGSetupStats P((void *amg_vdata , hypre_ParCSRMatrix *A ));
-void hypre_WriteParAMGSolverParams P((void *data ));
+int hypre_ParAMGWriteSolverParams P((void *data ));
 
 /* pcg.c */
 int hypre_PCGIdentitySetup P((void *vdata , void *A , void *b , void *x ));

@@ -440,11 +440,11 @@ hypre_ParAMGSetupStats( void               *amg_vdata,
 
 
 /*---------------------------------------------------------------
- * hypre_WriteParAMGSolverParams
+ * hypre_ParAMGWriteSolverParams
  *---------------------------------------------------------------*/
 
 
-void     hypre_WriteParAMGSolverParams(data)
+int    hypre_ParAMGWriteSolverParams(data)
 void    *data;
  
 { 
@@ -526,5 +526,5 @@ void    *data;
       printf( " Output flag (ioutdat): %d \n", amg_ioutdat);
    }
  
-   return;
+   return 0;
 }

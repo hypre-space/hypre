@@ -114,7 +114,7 @@ hypre_ParAMGSolveT( void               *amg_vdata,
 
 
    if (my_id == 0 && amg_ioutdat > 1)
-      hypre_WriteParAMGSolverParams(amg_data); 
+      hypre_ParAMGWriteSolverParams(amg_data); 
 
 
 

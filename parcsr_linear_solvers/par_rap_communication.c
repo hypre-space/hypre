@@ -131,10 +131,9 @@ hypre_GetCommPkgRTFromCommPkgA( hypre_ParCSRMatrix *RT,
  * generate send_map_starts and send_map_elmts
  *--------------------------------------------------------------------------*/
 
-   hypre_ParCSRMatrixCommPkg(RT) = hypre_GenerateSendMapAndCommPkg(comm, 
-			num_sends_RT, num_recvs_RT,
-			recv_procs_RT, send_procs_RT, 
-			recv_vec_starts_RT, RT);
+   hypre_GenerateSendMapAndCommPkg(comm, num_sends_RT, num_recvs_RT,
+				   recv_procs_RT, send_procs_RT, 
+				   recv_vec_starts_RT, RT);
 
 /*   printf (" my_id %d num_sends %d num_recvs %d \n", my_id,
 	num_sends_RT, num_recvs_RT);
@@ -161,7 +160,7 @@ hypre_GetCommPkgRTFromCommPkgA( hypre_ParCSRMatrix *RT,
    return ierr;
 }
 
-hypre_ParCSRCommPkg *
+int
 hypre_GenerateSendMapAndCommPkg(MPI_Comm comm, int num_sends, int num_recvs,
 				int *recv_procs, int *send_procs,
 				int *recv_vec_starts, hypre_ParCSRMatrix *A)
@@ -238,7 +237,8 @@ hypre_GenerateSendMapAndCommPkg(MPI_Comm comm, int num_sends, int num_recvs,
    hypre_TFree(status);
    hypre_TFree(requests);
 
-   return comm_pkg;
+   hypre_ParCSRMatrixCommPkg(A) = comm_pkg;
+   return 0;
 }
 
 int
@@ -566,10 +566,9 @@ hypre_GenerateRAPCommPkg( hypre_ParCSRMatrix *RAP,
  * generate send_map_starts and send_map_elmts
  *--------------------------------------------------------------------------*/
 
-   hypre_ParCSRMatrixCommPkg(RAP) = hypre_GenerateSendMapAndCommPkg(comm,
-                        num_sends_RAP, num_recvs_RAP,
-                        recv_procs_RAP, send_procs_RAP,
-                        recv_vec_starts_RAP, RAP);
+   hypre_GenerateSendMapAndCommPkg(comm, num_sends_RAP, num_recvs_RAP,
+                        	   recv_procs_RAP, send_procs_RAP,
+                        	   recv_vec_starts_RAP, RAP);
 
 /*   send_map_starts_RAP = 
 	hypre_ParCSRCommPkgSendMapStarts(hypre_ParCSRMatrixCommPkg(RAP));

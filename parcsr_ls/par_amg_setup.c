@@ -115,7 +115,7 @@ hypre_ParAMGSetup( void               *amg_vdata,
       }
       if (relax_weight[level] == 0.0)
       {
-	 relax_weight[level] = hypre_ParScaledMatNorm(A_array[level]);
+	 hypre_ParCSRMatrixScaledNorm(A_array[level], &relax_weight[level]);
 	 if (relax_weight[level] != 0.0)
 	    relax_weight[level] = 1.0/relax_weight[level];
 	 else

@@ -15,11 +15,11 @@
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * hypre_ParScaledMatNorm
+ * hypre_ParCSRMatrixScaledNorm
  *--------------------------------------------------------------------------*/
 
-double
-hypre_ParScaledMatNorm( hypre_ParCSRMatrix *A)
+int
+hypre_ParCSRMatrixScaledNorm( hypre_ParCSRMatrix *A, double *scnorm)
 {
    hypre_ParCSRCommHandle	*comm_handle;
    hypre_ParCSRCommPkg	*comm_pkg = hypre_ParCSRMatrixCommPkg(A);
@@ -124,6 +124,7 @@ hypre_ParScaledMatNorm( hypre_ParCSRMatrix *A)
    hypre_VectorDestroy(sum);
    hypre_VectorDestroy(dis_ext);
    hypre_TFree(d_buf_data);
-  
-   return mat_norm;
+
+   *scnorm = mat_norm;  
+   return 0;
 }
