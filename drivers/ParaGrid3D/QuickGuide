@@ -1,0 +1,25 @@
+To use this software, you need to go through the following steps :
+
+1. obtain HYPRE, with HYPRE FEI that is FEI 1.5 compatible.
+
+2. compile HYPRE, and copy the libHYPRE_LSI.a file to the lib directory
+
+3. obtain FEI 1.5p1 source code, compile without any iterative solver libraries,
+   and copy the .a file to lib/libfei_none.a
+
+4. copy the mc.tar.gz file to your local machine (SUN workstation),
+   unzip and untar it.  The 'start' program is the one to use when you
+   want to visualize the grid.  Use it with the -v option in the parallel3D
+   executable.
+
+5. go into parallel3D, copy either makefile_west or makefile_blue to makefile
+   (if you want to run on other platforms, you have to create your own makefile).
+   Do an "make dd".
+
+6. At the end when compilation and linking are successful, you will have the
+   executable "dd_u" in your parallel3D directory.  Now you can follow the
+   instruction in doc/userguide.ps to run it.
+
+Note : if you are running on the blue machine, make sure you refer to the
+       proper STL include files
+
