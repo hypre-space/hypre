@@ -1,3 +1,4 @@
+# Generated automatically from Makefile.in by configure.
 #BHEADER***********************************************************************
 # (c) 1998   The Regents of the University of California
 #
@@ -8,7 +9,44 @@
 #EHEADER***********************************************************************
 
 .SUFFIXES:
-.SUFFIXES: .c .o
+.SUFFIXES: .c .f .o
+
+srcdir = .
+ 
+CC = gcc
+ 
+CINCLUDES= -I/home/casc/include  -I/usr/local/mpi/mpich-1.1.1/include -I/usr/local/mpi/mpich-1.1.1/lib/solaris/ch_p4
+COPT= 
+CDEBUG = -g -Wall
+CDEFS =  -DHYPRE_MEMORY_DMALLOC -DHYPRE_TIMING
+
+CFLAGS =\
+ -I../../utilities\
+ -I../../seq_matrix_vector\
+ -I../../parcsr_matrix_vector\
+ ${CINCLUDES}\
+ ${COPT}\
+ ${CDEBUG}\
+ ${CDEFS}
+ 
+RANLIB= ranlib
+ 
+MPILIBFLAGS =  -L/usr/local/mpi/mpich-1.1.1/lib/solaris/ch_p4  -lpmpich -lmpich -lsocket -lnsl -lpthread  
+LIBFLAGS =   -lm
+LDLIBFLAGS = -L/home/casc/lib   -lcegdb -ldmalloc
+ 
+LFLAGS =\
+ -L.\
+ -L../../parcsr_matrix_vector\
+ -L../../seq_matrix_vector\
+ -L../../utilities\
+ -lHYPRE_ls\
+ -lHYPRE_parcsr_mv\
+ -lHYPRE_mv\
+ -lHYPRE_utilities\
+ -lmpe\
+ ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
+ 
 
 HEADERS =\
  headers.h\
@@ -38,30 +76,7 @@ OBJS = ${FILES:.c=.o}
 
 CC = gcc
 
-CFLAGS =\
- -I/usr/local/include\
- -I/home/casc/include\
- -I/usr/local/mpi/mpich/include\
- -I../../utilities\
- -I../../seq_matrix_vector\
- -g -Wall -DHYPRE_SEQUENTIAL -DHYPRE_MEMORY_DMALLOC
-#-g -Wall -DHYPRE_SEQUENTIAL
 
-FFLAGS = -g
-
-LFLAGS =\
- -L/usr/local/lib\
- -L/home/casc/lib\
- -L/usr/local/mpi/mpich/lib/solaris/ch_p4\
- -L.\
- -L../../seq_matrix_vector\
- -L../../utilities\
- -lHYPRE_ls\
- -lHYPRE_mv\
- -lHYPRE_utilities\
- -lcegdb\
- -ldmalloc\
- -lm
 
 ##################################################################
 # Targets

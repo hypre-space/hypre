@@ -105,10 +105,8 @@ ${OBJS}: ${HEADERS}
 ##################################################################
 
 .c.o:
-	@echo "Making (c) " $@
-	@${CC} -o $@ -c ${CFLAGS} $<
+	${CC} -o $@ -c ${CFLAGS} $<
 
-.f.${AMG_ARCH}.o:
-	@echo "Making (f) " $@
-	@${F77} -o $@ -c ${FFLAGS} $<
+.f.o:
+	${F77} -o $@ -c ${FFLAGS} $<
 
