@@ -148,8 +148,9 @@ do
         HYPRE_RUN_MACHINE="tux03"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST"
 	HYPRE_MACHINE_COMMANDS="-m -dt 1 -nsa 1 -cxfy -i 2"
-	print_header
-        ./autotest_test $HYPRE_MACHINE_COMMANDS
+#	print_header
+#	./autotest_test $HYPRE_MACHINE_COMMANDS
+	perform_test
         shift;;
     -purify)
         HYPRE_ARCH="casc"
@@ -178,8 +179,8 @@ do
         shift;;
     -tc2k | -tc2kmp)
         HYPRE_ARCH="dec"
-        HYPRE_COMPILE_MACHINE="tc2k"
-        HYPRE_RUN_MACHINE="tc2k"
+        HYPRE_COMPILE_MACHINE="tckk"
+        HYPRE_RUN_MACHINE="tckk"
         HYPRE_REMOTE_DIR="/usr/gapps/hypre/alphaev67-dec-osf5.1/AUTOTEST"
         if [ "$1" = "-tc2k" ] ; then
 	  HYPRE_MACHINE_COMMANDS="-ml -o 1 -a 2 -cf"
