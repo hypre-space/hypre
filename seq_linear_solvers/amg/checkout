@@ -97,6 +97,12 @@ done
 # Check out the repository source
 #=======================================================
 
+if [ -f "$AMG_SRC/RCS/rcs_files,v" ]; then
+  (cd $AMG_SRC/; co $* -q rcs_files; co $* -q `cat rcs_files`)
+else
+  (cd $AMG_SRC/; co $* -q RCS/*)
+fi
+
 for i in $DIRS
 do
   echo "Checking out $i"
