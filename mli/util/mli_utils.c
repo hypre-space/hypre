@@ -976,3 +976,80 @@ int MLI_Utils_HypreBiCGSTABSolve( CMLI *cmli, HYPRE_Matrix A,
    return 0;
 }
 
+/***************************************************************************
+ * binary search
+ *--------------------------------------------------------------------------*/
+
+int MLI_Utils_BinarySearch(int key, int *list, int size)
+{
+   int  nfirst, nlast, nmid, found, index;
+
+   if (size <= 0) return -1;
+   nfirst = 0;
+   nlast  = size - 1;
+   if (key > list[nlast])  return -(nlast+1);
+   if (key < list[nfirst]) return -(nfirst+1);
+   found = 0;
+   while ((found == 0) && ((nlast-nfirst)>1))
+   {
+      nmid = (nfirst + nlast) / 2;
+      if      (key == list[nmid]) {index  = nmid; found = 1;}
+      else if (key > list[nmid])  nfirst = nmid;
+      else                        nlast  = nmid;
+   }
+   if (found == 1)                    return index;
+   else if (key == list[nfirst]) return nfirst;
+   else if (key == list[nlast])  return nlast;
+   else                          return -(nfirst+1);
+}
+
+/***************************************************************************
+ * quicksort on integers
+ *--------------------------------------------------------------------------*/
+
+int MLI_Utils_IntQSort2(int *ilist, int *ilist2, int left, int right)
+{
+   int i, last, mid, itemp;
+
+   if (left >= right) return 0;
+   mid          = (left + right) / 2;
+   itemp        = ilist[left];
+   ilist[left]  = ilist[mid];
+   ilist[mid]   = itemp;
+   if ( ilist2 != NULL )
+   {
+      itemp        = ilist2[left];
+      ilist2[left] = ilist2[mid];
+      ilist2[mid]  = itemp;
+   }
+   last         = left;
+   for (i = left+1; i <= right; i++)
+   {
+      if (ilist[i] < ilist[left])
+      {
+         last++;
+         itemp        = ilist[last];
+         ilist[last]  = ilist[i];
+         ilist[i]     = itemp;
+         if ( ilist2 != NULL )
+         {
+            itemp        = ilist2[last];
+            ilist2[last] = ilist2[i];
+            ilist2[i]    = itemp;
+         }
+      }
+   }
+   itemp        = ilist[left];
+   ilist[left]  = ilist[last];
+   ilist[last]  = itemp;
+   if ( ilist2 != NULL )
+   {
+      itemp        = ilist2[left];
+      ilist2[left] = ilist2[last];
+      ilist2[last] = itemp;
+   }
+   MLI_Utils_IntQSort2(ilist, ilist2, left, last-1);
+   MLI_Utils_IntQSort2(ilist, ilist2, last+1, right);
+   return 0;
+}
+
