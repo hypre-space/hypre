@@ -275,6 +275,8 @@ class HYPRE_LinSysCore
    void  buildSchurReducedSoln();
    void  getVersion(char**);
    void  createMapFromSoln();
+   void  putIntoMappedMatrix(int row, int numValues, const double* values,
+                             const int* scatterIndices);
 
  private:        //functions
 
