@@ -38,7 +38,7 @@ LFLAGS =\
  -L.\
  -L../../seq_matrix_vector\
  -L../../utilities\
- -lHYPRE_ls\
+ -lHYPRE_amg_ls\
  -lHYPRE_seq_mv\
  -lHYPRE_utilities\
  ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
