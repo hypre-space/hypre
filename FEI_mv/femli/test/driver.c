@@ -13,10 +13,10 @@
 int main(int argc, char **argv)
 {
 
-   int                j, nx=64, ny=64, P, Q, p, q, nprocs, mypid, start_row;
+   int                j, nx=64, ny=512, P, Q, p, q, nprocs, mypid, start_row;
    int                *partition, global_size, local_size, nsweeps, row_size;
    int                *col_ind, k, *proc_cnts, *offsets, *row_cnts;
-   int                ndofs=3, null_dim=6, test_prob=0, solver=1, scale_flag=1;
+   int                ndofs=3, null_dim=6, test_prob=0, solver=1, scale_flag=0;
    char               *targv[10];
    double             *values, *null_vects, *scale_vec, *col_val, *gscale_vec;
    HYPRE_IJMatrix     newIJA;
@@ -190,12 +190,13 @@ int main(int argc, char **argv)
    free( func_ptr );
    cmli = MLI_Create( MPI_COMM_WORLD );
    cmli_method = MLI_MethodCreate( "AMGSA", MPI_COMM_WORLD );
-   nsweeps = 2;
+   nsweeps = 4;
    targv[0] = (char *) &nsweeps;
    targv[1] = (char *) NULL;
-   MLI_MethodSetParams( cmli_method, "setNumLevels 2", 0, NULL );
-   MLI_MethodSetParams( cmli_method, "setPreSmoother MLS", 2, targv );
-   MLI_MethodSetParams( cmli_method, "setPostSmoother MLS", 2, targv );
+   MLI_MethodSetParams( cmli_method, "setNumLevels 20", 0, NULL );
+   MLI_MethodSetParams( cmli_method, "setPreSmoother CG", 2, targv );
+   MLI_MethodSetParams( cmli_method, "setPostSmoother CG", 2, targv );
+   MLI_MethodSetParams( cmli_method, "setOutputLevel 2", 0, NULL );
    nsweeps = 20;
    targv[0] = (char *) &nsweeps;
    targv[1] = (char *) NULL;
@@ -224,12 +225,18 @@ int main(int argc, char **argv)
    MLI_MethodSetParams( cmli_method, "print", 0, NULL );
    MLI_SetMethod( cmli, cmli_method );
    MLI_SetSystemMatrix( cmli, 0, cmli_mat );
+   MLI_SetOutputLevel( cmli, 2 );
 
    if ( solver == 0 )
    {
       MLI_Setup( cmli );
       MLI_Solve( cmli, csol, crhs );
    } 
+   else if ( solver == 1 )
+   {
+      MLI_Utils_HyprePCGSolve(cmli, (HYPRE_Matrix) HYPRE_A, 
+                             (HYPRE_Vector) rhs, (HYPRE_Vector) sol);
+   }
    else
    {
       MLI_Utils_HypreGMRESSolve(cmli, (HYPRE_Matrix) HYPRE_A, 
