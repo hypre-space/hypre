@@ -13,22 +13,22 @@ BLASFILES = \
  $(top_srcdir)/blas/daxpy.c\
  $(top_srcdir)/blas/dcopy.c\
  $(top_srcdir)/blas/ddot.c\
- $(top_srcdir)/blas/dgels_all.c\
  $(top_srcdir)/blas/dgemm.c\
  $(top_srcdir)/blas/dgemv.c\
+ $(top_srcdir)/blas/dger.c\
  $(top_srcdir)/blas/dnrm2.c\
- $(top_srcdir)/blas/dpotrf.c\
- $(top_srcdir)/blas/dpotrs.c\
  $(top_srcdir)/blas/drot.c\
  $(top_srcdir)/blas/dscal.c\
  $(top_srcdir)/blas/dsymv.c\
  $(top_srcdir)/blas/dsyr2.c\
+ $(top_srcdir)/blas/dsyr2k.c\
  $(top_srcdir)/blas/dsyrk.c\
+ $(top_srcdir)/blas/dtrmm.c\
+ $(top_srcdir)/blas/dtrmv.c\
  $(top_srcdir)/blas/dtrsm.c\
  $(top_srcdir)/blas/dtrsv.c\
  $(top_srcdir)/blas/idamax.c\
- $(top_srcdir)/blas/s_cmp.c\
- $(top_srcdir)/blas/s_copy.c
+ $(top_srcdir)/blas/blas_utils.c
 else !BLASNEEDED
 BLASDIR = 
 BLASFILES = 
