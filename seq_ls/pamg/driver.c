@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "hypre_utilities.h"
+#include "utilities.h"
 #include "hypre_ls.h"
 
 /*--------------------------------------------------------------------------

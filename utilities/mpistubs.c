@@ -14,7 +14,7 @@
 
 #ifdef HYPRE_SEQUENTIAL
 
-#include "hypre_utilities.h"
+#include "utilities.h"
 
 int
 MPI_Init( int    *argc,

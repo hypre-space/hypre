@@ -16,7 +16,7 @@
 
 #define HYPRE_USING_THREAD_MPISTUBS 
 
-#include "hypre_utilities.h"
+#include "utilities.h"
 #include <mpi.h>
 
 int

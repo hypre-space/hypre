@@ -21,7 +21,7 @@ cat > $INTERNAL_HEADER <<@
 #ifndef hypre_PARCSR_MV_HEADER
 #define hypre_PARCSR_MV_HEADER
 
-#include "hypre_utilities.h"
+#include "utilities.h"
 #include "mpe.h"                   /* need to get rid of this */
 #include "hypre_mv.h"
 

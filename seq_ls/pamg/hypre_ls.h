@@ -4,7 +4,7 @@
 #ifndef hypre_LS_HEADER
 #define hypre_LS_HEADER
 
-#include "hypre_utilities.h"
+#include "utilities.h"
 #include "hypre_mv.h"
 
 #ifdef __cplusplus
@@ -37,9 +37,6 @@ int HYPRE_AMGSetLogFileName P((HYPRE_Solver solver , char *log_file_name ));
 int HYPRE_AMGSetLogging P((HYPRE_Solver solver , int ioutdat , char *log_file_name ));
 
 /* SPamg-pcg.c */
-int main P((int argc , char *argv []));
-
-/* SPamg.c */
 int main P((int argc , char *argv []));
 
 /* amg.c */
@@ -93,7 +90,7 @@ int hypre_AMGBuildInterp P((hypre_CSRMatrix *A , int *CF_marker , hypre_CSRMatri
 
 /* laplace.c */
 hypre_CSRMatrix *hypre_GenerateLaplacian P((int nx , int ny , int nz , int P , int Q , int R , double *value ));
-int map P((int ix , int iy , int iz , int p , int q , int r , int P , int Q , int R , int *nx_part , int *ny_part , int *nz_part , int *global_part));
+int map P((int ix , int iy , int iz , int p , int q , int r , int P , int Q , int R , int *nx_part , int *ny_part , int *nz_part , int *global_part ));
 
 /* pcg.c */
 void PCG P((hypre_Vector *x , hypre_Vector *b , double tol , void *data ));

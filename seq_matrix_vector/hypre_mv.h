@@ -4,7 +4,7 @@
 #ifndef hypre_MV_HEADER
 #define hypre_MV_HEADER
 
-#include "hypre_utilities.h"
+#include "utilities.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -248,6 +248,9 @@ int hypre_CopyCSRMatrix P((hypre_CSRMatrix *A , hypre_CSRMatrix *B , int copy_da
 int hypre_Matvec P((double alpha , hypre_CSRMatrix *A , hypre_Vector *x , double beta , hypre_Vector *y ));
 int hypre_MatvecT P((double alpha , hypre_CSRMatrix *A , hypre_Vector *x , double beta , hypre_Vector *y ));
 
+/* genpart.c */
+int hypre_GeneratePartitioning P((int length , int num_procs , int **part_ptr ));
+
 /* mapped_matrix.c */
 hypre_MappedMatrix *hypre_NewMappedMatrix P((void ));
 int hypre_FreeMappedMatrix P((hypre_MappedMatrix *matrix ));
@@ -284,14 +287,6 @@ int hypre_CopyVector P((hypre_Vector *x , hypre_Vector *y ));
 int hypre_ScaleVector P((double alpha , hypre_Vector *y ));
 int hypre_Axpy P((double alpha , hypre_Vector *x , hypre_Vector *y ));
 double hypre_InnerProd P((hypre_Vector *x , hypre_Vector *y ));
-
-/* csr_matop.c */
-hypre_CSRMatrix *hypre_Matadd P((hypre_CSRMatrix *A, hypre_CSRMatrix *B));
-hypre_CSRMatrix *hypre_Matmul P((hypre_CSRMatrix *A, hypre_CSRMatrix *B));
-hypre_CSRMatrix *hypre_DeleteZerosInMatrix P((hypre_CSRMatrix *A, double tol));
-
-/* genpart.c */
-int hypre_GeneratePartitioning P((int length, int num_procs, int **part_ptr));
 
 #undef P
 

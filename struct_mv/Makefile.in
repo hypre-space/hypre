@@ -54,7 +54,7 @@ HEADERS =\
  struct_matrix.h\
  struct_stencil.h\
  struct_vector.h\
- hypre_mv.h\
+ struct_matrix_vector.h\
  HYPRE_mv.h
 
 FILES =\
@@ -93,7 +93,7 @@ OBJS = ${FILES:.c=.o}
 all: libHYPRE_mv.a
 
 install: all
-	@cp -f HYPRE_*.h hypre_*.h $$HYPRE_INSTALL_DIR/include
+	@cp -f HYPRE_*.h struct_matrix_vector.h $$HYPRE_INSTALL_DIR/include
 	@cp -f libHYPRE_*.a $$HYPRE_INSTALL_DIR/lib
 
 clean:

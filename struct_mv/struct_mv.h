@@ -4,7 +4,7 @@
 #ifndef hypre_MV_HEADER
 #define hypre_MV_HEADER
 
-#include "hypre_utilities.h"
+#include "utilities.h"
 
 #ifdef __cplusplus
 extern "C" {

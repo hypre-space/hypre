@@ -4,7 +4,8 @@
 #ifndef hypre_PARCSR_LS_HEADER
 #define hypre_PARCSR_LS_HEADER
 
-#include "hypre_utilities.h"
+#include "utilities.h"
+#include "mpe.h"                   /* need to get rid of this */
 #include "hypre_mv.h"
 #include "hypre_parcsr_mv.h"
 
@@ -33,13 +34,10 @@ int HYPRE_ParAMGSetTol P((HYPRE_Solver solver , double tol ));
 int HYPRE_ParAMGSetNumGridSweeps P((HYPRE_Solver solver , int *num_grid_sweeps ));
 int HYPRE_ParAMGSetGridRelaxType P((HYPRE_Solver solver , int *grid_relax_type ));
 int HYPRE_ParAMGSetGridRelaxPoints P((HYPRE_Solver solver , int **grid_relax_points ));
-int HYPRE_ParAMGSetRelaxWeight P((HYPRE_Solver solver, double relax_weight ));
+int HYPRE_ParAMGSetRelaxWeight P((HYPRE_Solver solver , double relax_weight ));
 int HYPRE_ParAMGSetIOutDat P((HYPRE_Solver solver , int ioutdat ));
 int HYPRE_ParAMGSetLogFileName P((HYPRE_Solver solver , char *log_file_name ));
 int HYPRE_ParAMGSetLogging P((HYPRE_Solver solver , int ioutdat , char *log_file_name ));
-
-/* par_coarsen.c */
-int hypre_ParAMGCoarsen P((hypre_ParCSRMatrix *parA , double strength_threshold , hypre_ParCSRMatrix **parS_ptr , int **CF_marker_ptr , int *coarse_size_ptr ));
 
 /* driver.c */
 int main P((int argc , char *argv []));
@@ -53,10 +51,6 @@ int main P((int argc , char *argv []));
 /* driver_rap.c */
 int main P((int argc , char *argv []));
 
-/* par_indepset.c */
-int hypre_InitParAMGIndepSet P((hypre_ParCSRMatrix *parS , double *measure_array ));
-int hypre_ParAMGIndepSet P((hypre_ParCSRMatrix *parS , hypre_CSRMatrix *S_ext , double *measure_array , int *graph_array , int graph_array_size , int *IS_marker ));
-
 /* par_amg.c */
 void *hypre_ParAMGInitialize P((void ));
 int hypre_ParAMGFinalize P((void *data ));
@@ -69,7 +63,7 @@ int hypre_ParAMGSetTol P((void *data , double tol ));
 int hypre_ParAMGSetNumGridSweeps P((void *data , int *num_grid_sweeps ));
 int hypre_ParAMGSetGridRelaxType P((void *data , int *grid_relax_type ));
 int hypre_ParAMGSetGridRelaxPoints P((void *data , int **grid_relax_points ));
-int hypre_ParAMGSetRelaxWeight P((void *data , double relax_weight));
+int hypre_ParAMGSetRelaxWeight P((void *data , double relax_weight ));
 int hypre_ParAMGSetIOutDat P((void *data , int ioutdat ));
 int hypre_ParAMGSetLogFileName P((void *data , char *log_file_name ));
 int hypre_ParAMGSetLogging P((void *data , int ioutdat , char *log_file_name ));
@@ -85,8 +79,15 @@ int hypre_ParAMGSetup P((void *amg_vdata , hypre_ParCSRMatrix *A , hypre_ParVect
 /* par_amg_solve.c */
 int hypre_ParAMGSolve P((void *amg_vdata , hypre_ParCSRMatrix *A , hypre_ParVector *f , hypre_ParVector *u ));
 
+/* par_coarsen.c */
+int hypre_ParAMGCoarsen P((hypre_ParCSRMatrix *A , double strength_threshold , hypre_ParCSRMatrix **S_ptr , int **CF_marker_ptr , int *coarse_size_ptr ));
+
 /* par_cycle.c */
 int hypre_ParAMGCycle P((void *amg_vdata , hypre_ParVector **F_array , hypre_ParVector **U_array ));
+
+/* par_indepset.c */
+int hypre_InitParAMGIndepSet P((hypre_ParCSRMatrix *S , double *measure_array ));
+int hypre_ParAMGIndepSet P((hypre_ParCSRMatrix *S , hypre_CSRMatrix *S_ext , double *measure_array , int *graph_array , int graph_array_size , int *IS_marker ));
 
 /* par_interp.c */
 int hypre_ParAMGBuildInterp P((hypre_ParCSRMatrix *A , int *CF_marker , hypre_ParCSRMatrix *S , hypre_ParCSRMatrix **P_ptr ));
@@ -107,11 +108,11 @@ hypre_CommPkg *hypre_GenerateSendMapAndCommPkg P((MPI_Comm comm , int num_sends 
 int hypre_GenerateRAPCommPkg P((hypre_ParCSRMatrix *RAP , hypre_ParCSRMatrix *A ));
 
 /* par_relax.c */
-int hypre_ParAMGRelax P(( hypre_ParCSRMatrix *A , hypre_ParVector *f , int *cf_marker, int relax_type , int relax_points , double relax_weight , hypre_ParVector *u , hypre_ParVector *Vtemp ));
-int gselim P(( double *A , double *x , int n ));
- 
+int hypre_ParAMGRelax P((hypre_ParCSRMatrix *A , hypre_ParVector *f , int *cf_marker , int relax_type , int relax_points , double relax_weight , hypre_ParVector *u , hypre_ParVector *Vtemp ));
+int gselim P((double *A , double *x , int n ));
+
 /* par_stats.c */
-int hypre_ParAMGSetupStats P(( void *amg_vdata, hypre_ParCSRMatrix *A )); 
+int hypre_ParAMGSetupStats P((void *amg_vdata , hypre_ParCSRMatrix *A ));
 void hypre_WriteParAMGSolverParams P((void *data ));
 
 /* random.c */

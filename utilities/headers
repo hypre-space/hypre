@@ -8,7 +8,7 @@
 # $Revision$
 #EHEADER***********************************************************************
 
-INTERNAL_HEADER=hypre_utilities.h
+INTERNAL_HEADER=utilities.h
 
 #===========================================================================
 # Include guards and other includes

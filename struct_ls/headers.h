@@ -11,5 +11,5 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "hypre_ls.h"
+#include "struct_linear_solvers.h"
 

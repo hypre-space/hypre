@@ -4,7 +4,8 @@
 #ifndef hypre_PARCSR_MV_HEADER
 #define hypre_PARCSR_MV_HEADER
 
-#include "hypre_utilities.h"
+#include "utilities.h"
+#include "mpe.h"                   /* need to get rid of this */
 #include "hypre_mv.h"
 
 #ifdef __cplusplus
@@ -177,7 +178,6 @@ typedef struct
 
    int     		global_num_rows;
    int     		global_num_cols;
-   int			num_nonzeros;  /* total number of nonzeros */
    int			first_row_index;
    int			first_col_diag;
    hypre_CSRMatrix	*diag;
@@ -203,6 +203,8 @@ typedef struct
    int      owns_row_starts;
    int      owns_col_starts;
 
+   int      num_nonzeros;
+
 } hypre_ParCSRMatrix;
 
 /*--------------------------------------------------------------------------
@@ -212,7 +214,6 @@ typedef struct
 #define hypre_ParCSRMatrixComm(matrix)		  ((matrix) -> comm)
 #define hypre_ParCSRMatrixGlobalNumRows(matrix)   ((matrix) -> global_num_rows)
 #define hypre_ParCSRMatrixGlobalNumCols(matrix)   ((matrix) -> global_num_cols)
-#define hypre_ParCSRMatrixNumNonzeros(matrix)     ((matrix) -> num_nonzeros)
 #define hypre_ParCSRMatrixFirstRowIndex(matrix)   ((matrix) -> first_row_index)
 #define hypre_ParCSRMatrixFirstColDiag(matrix)    ((matrix) -> first_col_diag)
 #define hypre_ParCSRMatrixDiag(matrix)  	  ((matrix) -> diag)
@@ -228,6 +229,7 @@ typedef struct
 hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(matrix))
 #define hypre_ParCSRMatrixNumCols(matrix) \
 hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(matrix))
+#define hypre_ParCSRMatrixNumNonzeros(matrix)     ((matrix) -> num_nonzeros)
 
 #endif
 #ifdef __STDC__

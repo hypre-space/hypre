@@ -21,7 +21,7 @@ cat > $INTERNAL_HEADER <<@
 #ifndef hypre_LS_HEADER
 #define hypre_LS_HEADER
 
-#include "hypre_utilities.h"
+#include "utilities.h"
 #include "hypre_mv.h"
 
 #ifdef __cplusplus

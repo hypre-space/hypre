@@ -53,6 +53,8 @@ typedef struct
    int      owns_row_starts;
    int      owns_col_starts;
 
+   int      num_nonzeros;
+
 } hypre_ParCSRMatrix;
 
 /*--------------------------------------------------------------------------
@@ -77,8 +79,6 @@ typedef struct
 hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(matrix))
 #define hypre_ParCSRMatrixNumCols(matrix) \
 hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(matrix))
-
-/* need to add */
-#define hypre_ParCSRMatrixNumNonzeros(matrix) 1
+#define hypre_ParCSRMatrixNumNonzeros(matrix)     ((matrix) -> num_nonzeros)
 
 #endif

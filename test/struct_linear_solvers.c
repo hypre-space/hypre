@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "hypre_utilities.h"
+#include "utilities.h"
 #include "HYPRE_ls.h"
  
 #ifdef HYPRE_DEBUG
