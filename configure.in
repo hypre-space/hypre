@@ -70,6 +70,37 @@ dnl *********************************************************************
 CASC_CHOOSE_OPT_OR_DEBUG
 
 dnl *********************************************************************
+
+AC_ARG_WITH(pthreads,
+   [  --with-pthreads         use pthreads],
+   if test "$withval" != "no"; then
+      CASC_CHECK_LIB(pthread, pthread_create, ,
+         [CASC_CHECK_LIB(pthreads, pthread_create)])
+
+      if test "$ac_cv_lib_pthread_pthread_create" = "yes" ||
+         test "$ac_cv_lib_pthreads_pthread_create" = "yes"; then
+            HYPREDEFS="$HYPREDEFS -DHYPRE_USE_PTHREADS"
+            UTILITIESEXTRAFILES="$UTILITIESEXTRAFILES threading.c thread_mpistubs.c"
+             
+            AC_CHECK_PROGS(CC_R, cc_r xlc_r)
+            AC_CHECK_PROG(MPICC_R, mpcc_r, mpcc_r)
+
+            if test -n "$CC_R"; then
+               CC=$CC_R
+            fi
+            if test -n "$MPICC_R"; then
+               MPICC=$MPICC_R
+            fi
+      fi      
+   fi
+)
+
+
+
+
+
+
+dnl *********************************************************************
 dnl * sets MPIINCLUDE, MPILIBDIRS, MPILIBS, MPIFLAGS
 dnl *********************************************************************
 
