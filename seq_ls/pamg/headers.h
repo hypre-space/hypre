@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "hypre_ls.h"
+#include "ls.h"
 
 #include "general.h" 
 
