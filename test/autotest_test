@@ -174,6 +174,7 @@ mail_summary () {
   CLOGCNT=0; ELOGCNT=0
   CERRCNT=0; EERRCNT=0; TOTCNT=0
   CLIST=""; ELIST=""
+  DWRNCNT=0; DERRCNT=0
   cd $HYPRE_AUTOTEST_DIR
   SUMFILE="autotest.$HYPRE_ARCH.`date '+%Y%m%d'`"
   if [ -z "$HYPRE_COMPILE_MACHINE" -o "$HYPRE_COMPILE_MACHINE" = "" ] ; then
@@ -189,7 +190,7 @@ mail_summary () {
   printf "Execute machine:    %s\n" $HYPRE_RUN_MACHINE >> $SUMFILE
   printf "Directory:          %s\n" ${HYPRE_AUTOTEST_DIR} >> $SUMFILE
   printf "%s\n" "--------------------------------------------" >> $SUMFILE
-  printf "Compile summary:\n" >> $SUMFILE
+  printf "Compile summary: Status: Warnings: Errors\n" >> $SUMFILE
   for ConfOpt in default beta no_mpi openmp petac \
            pthreads purify strict_checking \
            docs all++ all77 beta++ beta77
@@ -212,6 +213,8 @@ mail_summary () {
             CERRCNT=`expr $CERRCNT + 1`
             COLCNT=`expr $COLCNT + 1`
             CLIST="${CLIST}${EFILE}\n"
+            DWRNCNT=`grep -i warning ${EFILE}|wc -l`
+            DERRCNT=`grep -i error ${EFILE}|wc -l`
           else
             CLOGCNT=`expr $CLOGCNT + 1`
             COLFLG=`expr $COLFLG + 1`
@@ -220,7 +223,7 @@ mail_summary () {
       done
     done
     if [ "$COLCNT" != "0" ] ; then
-      printf "Failed\n" >> $SUMFILE
+      printf "Failed:    %2d   :   %2d\n" $DWRNCNT $DERRCNT >> $SUMFILE
     elif [ "$COLFLG" != "0" ] ; then
       printf "Passed\n" >> $SUMFILE
     else
