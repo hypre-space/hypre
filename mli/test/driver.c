@@ -13,7 +13,7 @@ int main(int argc, char **argv)
 
    int                j, nx=27, ny=27, P, Q, p, q, nprocs, mypid, start_row;
    int                *partition, global_size, local_size, nsweeps;
-   int                ndofs=3, null_dim=6, test_prob=1, solver=1, scale_flag=1;
+   int                ndofs=3, null_dim=6, test_prob=0, solver=1, scale_flag=1;
    char               *targv[10];
    double             *values, *null_vects, *scale_vec;
    HYPRE_ParCSRMatrix HYPRE_A;
@@ -128,10 +128,7 @@ int main(int argc, char **argv)
    cmli_mat = MLI_MatrixCreate((void*) hypre_A,"HYPRE_ParCSR",func_ptr);
    free( func_ptr );
    cmli = MLI_Create( MPI_COMM_WORLD );
-/*
-   cmli_method = MLI_MethodCreate( "MLI_AMGSA_CALIB", MPI_COMM_WORLD );
-*/
-   cmli_method = MLI_MethodCreate( "MLI_AMGSA", MPI_COMM_WORLD );
+   cmli_method = MLI_MethodCreate( "MLI_METHOD_AMGSA", MPI_COMM_WORLD );
    nsweeps = 10;
    targv[0] = (char *) &nsweeps;
    targv[1] = (char *) NULL;
@@ -141,8 +138,8 @@ int main(int argc, char **argv)
    nsweeps = 20;
    targv[0] = (char *) &nsweeps;
    targv[1] = (char *) NULL;
-   MLI_MethodSetParams( cmli_method, "setCoarseSolver SuperLU", 2, targv );
-   MLI_MethodSetParams( cmli_method, "setCalibrationSize 1", 0, NULL );
+   MLI_MethodSetParams( cmli_method, "setCoarseSolver SGS", 2, targv );
+   MLI_MethodSetParams( cmli_method, "setCalibrationSize 0", 0, NULL );
    if ( test_prob == 1 )
    {
       targv[0] = (char *) &ndofs;
