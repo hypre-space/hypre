@@ -8,9 +8,9 @@
 
 #include "./distributed_matrix.h"
 
-#ifdef ISIS_AVAILABLE
 extern "C" {
 
+#ifdef ISIS_AVAILABLE
 typedef struct
 {
     int *ind;
