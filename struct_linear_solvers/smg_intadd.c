@@ -139,10 +139,14 @@ hypre_SMGIntAddSetup( void               *intadd_vdata,
                                      f_send_boxes, recv_boxes,
                                      &recv_processes);
 
+   hypre_ForBoxArrayI(i, f_send_boxes)
+      hypre_TFree(temp_send_processes[i]);
    hypre_FreeBoxArrayArray(f_send_boxes);
-   hypre_FreeBoxArrayArray(f_recv_boxes);
-
    hypre_TFree(temp_send_processes);
+
+   hypre_ForBoxArrayI(i, f_recv_boxes)
+      hypre_TFree(temp_recv_processes[i]);
+   hypre_FreeBoxArrayArray(f_recv_boxes);
    hypre_TFree(temp_recv_processes);
 
    hypre_NewComputePkg(send_boxes, recv_boxes,
