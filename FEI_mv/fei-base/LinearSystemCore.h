@@ -1,32 +1,49 @@
 #ifndef _LinearSystemCore_h_
 #define _LinearSystemCore_h_
 
-//Files that should to be included before the compiler
-//reaches this header:
-//
-//#include "src/Data.h"        //for the declaration of the 'Data' class.
-//#include "base/basicTypes.h" //for the definition of the 'GlobalID' type.
-//
+#ifdef min
+#undef min
+#endif
 
+#ifdef max
+#undef max
+#endif
+
+#include <iostream.h>
+
+class Data;
 class Lookup;
 
+#include "fei_defs.h"
 
 /**  
-  This is the 'generic' interface (to be replaced by ESI_LSManager) to a
-  solver-library -- the destination for the data being assembled into a linear
-  system by the FEI implementation.
+  This is the original internal FEI interface to solver-libraries --
+  the destination for the data being assembled into a linear system by the FEI 
+  implementation.
 
   When creating a specific FEI implementation, i.e., a version that
   supports a specific underlying linear solver library, the main
   task that must be performed is the implementation of this interface,
-  LinearSystemCore (Note: the LinearSystemCore interface will ultimately be
-  replaced by the ESI_LSManager interface.).
-  
-  This is the class that holds and manipulates all solver-library-specific
-  stuff, such as matrices/vectors, solvers/preconditioners, etc. An
-  instance of this class is owned and used by the class that implements
-  the public FEI spec. i.e., when element contributions, etc., are received
-  from the finite-element application, the data is ultimately passed to this
+  LinearSystemCore (Note: the LinearSystemCore interface is being
+  replaced by the ESI_Broker interface.).
+
+  To date (as of August 2001), implementations of this interface exist for
+  coupling the following solver libraries to the FEI implementation:
+  <ul>
+  <li>Aztec
+  <li>HYPRE
+  <li>ISIS++
+  <li>PETSc
+  <li>Prometheus
+  <li>SPOOLES
+  </ul>
+
+  An implementation of LinearSystemCore holds and manipulates all
+  solver-library-specific stuff, such as matrices/vectors, 
+  solvers/preconditioners, etc. An instance of this class is owned and used by
+  the class that implements the public FEI spec. i.e., when element
+  contributions, etc., are received from the finite-element application, the
+  data is ultimately passed to this
   class for assembly into the sparse matrix and associated vectors. This class
   will also be asked to launch any underlying solver, and finally to
   return the solution.
@@ -151,6 +168,21 @@ class LinearSystemCore {
   */
    virtual int setLookup(Lookup& lookup) = 0;
 
+
+   /** Query a named property (such as timing statistics, etc.) from the solver
+       library.
+       @param name Input. Name of the property for which a value is being
+       requested.
+       @pararm value Output. Requested property's value.
+       @return error-code 0 if successful. -1 probably indicates that the
+       named property is not recognized.
+   */
+   virtual int getProperty(const char* name, double& value)
+     {
+       cerr << "LinearSystemCore::getProperty not implemented by derived class."
+	 << endl;
+       return(-1);
+     }
 
   /** Supply LinearSystemCore with global offset information for the problem
       being assembled.

@@ -5,11 +5,11 @@
 #include <stdlib.h>
 
 /**
-  This is a very simple class for passing stuff in and out of LinearSystemCore
+  This is a very simple class for passing stuff around
   in a void pointer. It has the ability to store and query
   a type name, so at least there can be user-enforced
   type safety.
-  
+
   When setTypeName is called, a char* is created and a copy
   of the input argument is taken. This char* is later destroyed
   by the Data destructor. The void* dataPtr_ member is not

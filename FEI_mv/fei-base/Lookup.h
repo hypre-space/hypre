@@ -1,18 +1,20 @@
 #ifndef _Lookup_h_
 #define _Lookup_h_
 
+#include "fei_defs.h"
+
 /**  
   This interface is intended to be used by a LinearSystemCore implementation
-  (or a ESI_LSManager implementation) to look up various information about the
-  structure of the finite-element problem that the linear system being
-  assembled into LinearSystemCore by a FEI implementation, arises from.
+  (or a ESI_Broker or FiniteElementData implementation) to look up various
+  information about the structure of the finite-element problem being assembled
+  into LinearSystemCore by a FEI implementation.
   
   Lookup basically provides the query functions from the FEI implementation's
-  ProblemStructure class. However, unlike the ProblemStructure header, this 
+  SNL_FEI_Structure class. However, unlike the SNL_FEI_Structure header, this 
   header can be included without also including a  bunch of other non-public
-  FEI implementation headers. ProblemStructure also provides a lot of 
+  FEI implementation headers. SNL_FEI_Structure also provides a lot of 
   functions for *setting* the structural information, which the
-  LinearSystemCore object shouldn't get access to.
+  LinearSystemCore object doesn't need access to.
   
   Background:
     The finite element problem consists of a set of element-blocks, each of
@@ -23,7 +25,10 @@
     solution-fields. This is indicated by a negative fieldID. There are no
     equations corresponding to fields with negative fieldIDs. Data that is
     passed in associated with negative fieldIDs is probably coordinate or
-    nullspace data, or other data passed from the application to the solver.
+    nullspace data, or other data passed from the application to the solver
+    (note that this non-solution-field data won't appear in element-matrices,
+    it will be passed separately through a special function for supplying
+    nodal data).
   
     elem-block IDs and field IDs are application-provided numbers, and no
     assumption may be made regarding their order, contiguousness, etc.
@@ -36,13 +41,11 @@
   NOTES: 1. functions that return an equation number, or a size (e.g., 
          num-equations, num-fields, etc.) may indicate an error or 'not-found'
          condition by returning a negative number. Functions that return a
-         pointer, may indicate an error by returning NULL.
+         pointer may indicate an error by returning NULL.
 */
 
 class Lookup {
  public:
-  /** Constructor */
-   Lookup(){};
   /** Destructor, Don't call this. The FEI implementation will destroy this
       object. */
    virtual ~Lookup(){};
@@ -118,7 +121,6 @@ class Lookup {
 
    /** Given a nodeNumber/fieldID pair, this function returns the first global
      (0-based) equation number associated with that nodeNumber/fieldID pair.
-     !!!!! not yet implemented !!!!!
       @param nodeNumber
       @param fieldID
    */
@@ -136,6 +138,38 @@ class Lookup {
    */
    virtual int getAssociatedFieldID(int eqnNumber) = 0;
 
+
+   /** Given a nodeNumber, determine whether that node is connected to a local
+       element.
+       @param nodeNumber
+       @return true if nodeNumber is connected to a local element, false
+       otherwise.
+   */
+   virtual bool isInLocalElement(int nodeNumber) = 0;
+
+   /** Given a nodeNumber, return the number of subdomains that contain this
+       node. subdomains correspond to processors. The number of subdomains that
+       contain a node does not always equal the number of processors that share
+       a node. There are two kinds of "sharing" -- the "normal" kind, where a
+       node is shared because it is connected to elements that reside on more
+       than one processor, and the "wierd" kind where nodes are considered 
+       shared simply because of being in cross-processor constraints. This
+       function describes how many processors share this node in the "normal"
+       sense. Thus, in general, this relationship holds:
+       getNumSubdomains(nodeNum) <= getNumSharingProcs(nodeNum)
+       @param nodeNumber
+       @return numSubdomains
+   */
+   virtual int getNumSubdomains(int nodeNumber) = 0;
+
+   /** Given a nodeNumber, return a list of the subdomains that contain this
+       node. This is the list of subdomains that's counted by the method
+       'getNumSubdomains' above.
+       @param nodeNumber
+       @return pointer to list of subdomains (processor ranks). NULL if the
+       specified nodeNumber is not found.
+   */
+   virtual int* getSubdomainList(int nodeNumber) = 0;
 
    /** Return the number of local nodes that are shared by multiple processors
     */
