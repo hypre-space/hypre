@@ -1,0 +1,270 @@
+//
+// File:        sidl.sidl
+// Release:     $Name$
+// Revision:    @(#) $Revision$
+// Date:        $Date$
+// Description: SIDL interface description for the basic SIDL run-time library
+// 
+// Copyright (c) 2001, The Regents of the University of Calfornia.
+// Produced at the Lawrence Livermore National Laboratory.
+// Written by the Components Team <components@llnl.gov>
+// UCRL-CODE-2002-054
+// All rights reserved.
+// 
+// This file is part of Babel. For more information, see
+// http://www.llnl.gov/CASC/components/. Please read the COPYRIGHT file
+// for Our Notice and the LICENSE file for the GNU Lesser General Public
+// License.
+// 
+// This program is free software; you can redistribute it and/or modify it
+// under the terms of the GNU Lesser General Public License (as published by
+// the Free Software Foundation) version 2.1 dated February 1999.
+// 
+// This program is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the IMPLIED WARRANTY OF
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the terms and
+// conditions of the GNU Lesser General Public License for more details.
+// 
+// You should have recieved a copy of the GNU Lesser General Public License
+// along with this program; if not, write to the Free Software Foundation,
+// Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+
+version SIDL 0.7.5;
+
+/**
+ * The <code>SIDL</code> package contains the fundamental type and interface
+ * definitions for the <code>SIDL</code> interface definition language.  It
+ * defines common run-time libraries and common base classes and interfaces.
+ * Every interface implicitly inherits from <code>SIDL.BaseInterface</code>
+ * and every class implicitly inherits from <code>SIDL.BaseClass</code>.
+ * 
+ */
+package SIDL {
+
+  /**
+   * Every interface in <code>SIDL</code> implicitly inherits
+   * from <code>BaseInterface</code>, and it is implemented
+   * by <code>BaseClass</code> below.
+   */
+  interface BaseInterface {
+
+    /**
+     * <p>
+     * Add one to the intrinsic reference count in the underlying object.
+     * Object in <code>SIDL</code> have an intrinsic reference count.
+     * Objects continue to exist as long as the reference count is
+     * positive. Clients should call this method whenever they
+     * create another ongoing reference to an object or interface.
+     * </p>
+     * <p>
+     * This does not have a return value because there is no language
+     * independent type that can refer to an interface or a
+     * class.
+     * </p>
+     */
+    void addReference();
+
+    /**
+     * Decrease by one the intrinsic reference count in the underlying
+     * object, and delete the object if the reference is non-positive.
+     * Objects in <code>SIDL</code> have an intrinsic reference count.
+     * Clients should call this method whenever they remove a
+     * reference to an object or interface.
+     */
+    void deleteReference();
+
+    /**
+     * Return true if and only if <code>obj</code> refers to the same
+     * object as this object.
+     */
+    bool isSame(in BaseInterface iobj);
+
+    /**
+     * Check whether the object can support the specified interface or
+     * class.  If the <code>SIDL</code> type name in <code>name</code>
+     * is supported, then a reference to that object is returned with the
+     * reference count incremented.  The callee will be responsible for
+     * calling <code>deleteReference</code> on the returned object.  If
+     * the specified type is not supported, then a null reference is
+     * returned.
+     */
+    BaseInterface queryInterface(in string name);
+
+    /**
+     * Return whether this object is an instance of the specified type.
+     * The string name must be the <code>SIDL</code> type name.  This
+     * routine will return <code>true</code> if and only if a cast to
+     * the string type name would succeed.
+     */
+   bool isInstanceOf(in string name);
+  }
+
+  /**
+   * Every class implicitly inherits from <code>BaseClass</code>.  This
+   * class implements the methods in <code>BaseInterface</code>.
+   */
+  class BaseClass implements-all BaseInterface {
+  }
+
+  /**
+   * Every exception inherits from <code>BaseException</code>.  This class
+   * provides basic functionality to get and set error messages and stack
+   * traces.
+   */
+  class BaseException {
+
+    /**
+     * Return the message associated with the exception.
+     */
+    string getMessage();
+
+    /**
+     * Set the message associated with the exception.
+     */
+    void setMessage(in string message);
+
+    /**
+     * Returns formatted string containing the concatenation of all 
+     * tracelines.
+     */
+    string getTrace();
+
+    /**
+     * Adds a stringified entry/line to the stack trace.
+     */
+    void addToStackTrace(in string traceline);
+
+    /**
+     * Formats and adds an entry to the stack trace based on the 
+     * file name, line number, and method name.
+     */
+    void addToTrace(in string filename, in int lineno, in string methodname);
+  }
+
+  /**
+   * The <code>DLL</code> class encapsulates access to a single
+   * dynamically linked library.  DLLs are loaded at run-time using
+   * the <code>loadLibrary</code> method and later unloaded using
+   * <code>unloadLibrary</code>.  Symbols in a loaded library are
+   * resolved to an opaque pointer by method <code>lookupSymbol</code>.
+   * Class instances are created by <code>createClass</code>.
+   */
+  class DLL {
+
+    /**
+     * Load a dynamic link library using the specified URI.  The
+     * URI may be of the form "main:", "lib:", "file:", "ftp:", or
+     * "http:".  A URI that starts with any other protocol string
+     * is assumed to be a file name.  The "main:" URI creates a
+     * library that allows access to global symbols in the running
+     * program's main address space.  The "lib:X" URI converts the
+     * library "X" into a platform-specific name (e.g., libX.so) and
+     * loads that library.  The "file:" URI opens the DLL from the
+     * specified file path.  The "ftp:" and "http:" URIs copy the
+     * specified library from the remote site into a local temporary
+     * file and open that file.  This method returns true if the
+     * DLL was loaded successfully and false otherwise.  Note that
+     * the "ftp:" and "http:" protocols are valid only if the W3C
+     * WWW library is available.
+     */
+    bool loadLibrary(in string uri);
+
+    /**
+     * Get the library name.  This is the name used to load the
+     * library in <code>loadLibrary</code> except that all file names
+     * contain the "file:" protocol.
+     */
+    string getLibraryName();
+
+    /**
+     * Unload the dynamic link library.  The library may no longer
+     * be used to access symbol names.  When the library is actually
+     * unloaded from the memory image depends on details of the operating
+     * system.
+     */
+    void unloadLibrary();
+
+    /**
+     * Lookup a symbol from the DLL and return the associated pointer.
+     * A null value is returned if the name does not exist.
+     */
+    opaque lookupSymbol(in string linker_name);
+
+    /**
+     * Create an instance of the SIDL class.  If the class constructor
+     * is not defined in this DLL, then return null.
+     */
+    BaseClass createClass(in string sidl_name);
+  }
+
+  /**
+   * Class <code>Loader</code> manages dynamic loading and symbol name
+   * resolution for the SIDL runtime system.  The <code>Loader</code> class
+   * manages a library search path and keeps a record of all libraries
+   * loaded through this interface, including the initial "global" symbols
+   * in the main program.  Unless explicitly set, the search path is taken
+   * from the environment variable SIDL_DLL_PATH, which is a semi-colon
+   * separated sequence of URIs as described in class <code>DLL</code>.
+   */
+  class Loader {
+
+    /**
+     * Set the search path, which is a semi-colon separated sequence of
+     * URIs as described in class <code>DLL</code>.  This method will
+     * invalidate any existing search path.
+     */
+    static void setSearchPath(in string path_name);
+
+    /**
+     * Return the current search path.  If the search path has not been
+     * set, then the search path will be taken from environment variable
+     * SIDL_DLL_PATH.
+     */
+    static string getSearchPath();
+
+    /**
+     * Append the specified path fragment to the beginning of the
+     * current search path.  If the search path has not yet been set
+     * by a call to <code>setSearchPath</code>, then this fragment will
+     * be appended to the path in environment variable SIDL_DLL_PATH.
+     */
+    static void addSearchPath(in string path_fragment);
+
+    /**
+     * Load the specified library if it has not already been loaded.
+     * The URI format is defined in class <code>DLL</code>.  The search
+     * path is not searched to resolve the library name.
+     */
+    static bool loadLibrary(in string uri);
+
+    /**
+     * Append the specified DLL to the beginning of the list of already
+     * loaded DLLs.
+     */
+    static void addDLL(in DLL dll);
+
+    /**
+     * Unload all dynamic link libraries.  The library may no longer
+     * be used to access symbol names.  When the library is actually
+     * unloaded from the memory image depends on details of the operating
+     * system.
+     */
+    static void unloadLibraries();
+
+    /**
+     * Look up the secified symbol name.  If the symbol name cannot be
+     * found in one of the already loaded libraries, then the method will
+     * search through the library search path.  A null is returned if the
+     * symbol could not be resolved.
+     */
+    static opaque lookupSymbol(in string linker_name);
+
+    /**
+     * Create an instance of the specified SIDL class.  If the class
+     * constructor cannot be found in one of the already loaded libraries,
+     * then the method will search through the library search path.  A null
+     * object is returned if the symbol could not be resolved.
+     */
+    static BaseClass createClass(in string sidl_name);
+  }
+}
