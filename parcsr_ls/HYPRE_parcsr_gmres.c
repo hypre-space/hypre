@@ -141,8 +141,8 @@ HYPRE_ParCSRGMRESSetStopCrit( HYPRE_Solver solver,
 
 int
 HYPRE_ParCSRGMRESSetPrecond( HYPRE_Solver          solver,
-                             HYPRE_PtrToSolverFcn  precond,
-                             HYPRE_PtrToSolverFcn  precond_setup,
+                             HYPRE_PtrToParSolverFcn  precond,
+                             HYPRE_PtrToParSolverFcn  precond_setup,
                              HYPRE_Solver          precond_solver )
 {
    return( hypre_GMRESSetPrecond( (void *) solver,

@@ -54,12 +54,20 @@ struct hypre_Solver_struct;
 #define HYPRE_SOLVER_STRUCT
 struct hypre_Solver_struct;
 typedef struct hypre_Solver_struct *HYPRE_Solver;
+struct hypre_Matrix_struct;
+typedef struct hypre_Matrix_struct *HYPRE_Matrix;
+#endif
+#ifndef HYPRE_VECTOR_STRUCT
+#define HYPRE_VECTOR_STRUCT
+struct hypre_Vector_struct;
+typedef struct hypre_Vector_struct *HYPRE_Vector;
 #endif
 
-typedef int (*HYPRE_PtrToSolverFcn)(HYPRE_Solver,
-                                    HYPRE_ParCSRMatrix,
-                                    HYPRE_ParVector,
-                                    HYPRE_ParVector);
+typedef int (*HYPRE_PtrToParSolverFcn)(HYPRE_Solver,
+                                       HYPRE_ParCSRMatrix,
+                                       HYPRE_ParVector,
+                                       HYPRE_ParVector);
+
 /*@}*/
 
 /*--------------------------------------------------------------------------
@@ -666,8 +674,8 @@ int HYPRE_ParCSRPCGSetRelChange(HYPRE_Solver solver,
  * (Optional) Set the preconditioner to use.
  **/
 int HYPRE_ParCSRPCGSetPrecond(HYPRE_Solver         solver,
-                              HYPRE_PtrToSolverFcn precond,
-                              HYPRE_PtrToSolverFcn precond_setup,
+                              HYPRE_PtrToParSolverFcn precond,
+                              HYPRE_PtrToParSolverFcn precond_setup,
                               HYPRE_Solver         precond_solver);
 
 /**
@@ -779,8 +787,8 @@ int HYPRE_ParCSRGMRESSetStopCrit(HYPRE_Solver solver,
  * (Optional) Set the preconditioner to use.
  **/
 int HYPRE_ParCSRGMRESSetPrecond(HYPRE_Solver          solver,
-                                HYPRE_PtrToSolverFcn  precond,
-                                HYPRE_PtrToSolverFcn  precond_setup,
+                                HYPRE_PtrToParSolverFcn  precond,
+                                HYPRE_PtrToParSolverFcn  precond_setup,
                                 HYPRE_Solver          precond_solver);
 
 /**
@@ -843,8 +851,8 @@ int HYPRE_ParCSRBiCGSTABSetStopCrit(HYPRE_Solver solver,
                                     int          stop_crit);
 
 int HYPRE_ParCSRBiCGSTABSetPrecond(HYPRE_Solver         solver,
-                                   HYPRE_PtrToSolverFcn precond,
-                                   HYPRE_PtrToSolverFcn precond_setup,
+                                   HYPRE_PtrToParSolverFcn precond,
+                                   HYPRE_PtrToParSolverFcn precond_setup,
                                    HYPRE_Solver         precond_solver);
 
 int HYPRE_ParCSRBiCGSTABGetPrecond(HYPRE_Solver  solver,
@@ -896,9 +904,9 @@ int HYPRE_ParCSRCGNRSetStopCrit(HYPRE_Solver solver,
                                 int          stop_crit);
 
 int HYPRE_ParCSRCGNRSetPrecond(HYPRE_Solver         solver,
-                               HYPRE_PtrToSolverFcn precond,
-                               HYPRE_PtrToSolverFcn precondT,
-                               HYPRE_PtrToSolverFcn precond_setup,
+                               HYPRE_PtrToParSolverFcn precond,
+                               HYPRE_PtrToParSolverFcn precondT,
+                               HYPRE_PtrToParSolverFcn precond_setup,
                                HYPRE_Solver         precond_solver);
 
 int HYPRE_ParCSRCGNRGetPrecond(HYPRE_Solver  solver,

@@ -57,14 +57,11 @@ HYPRE_ParCSRPCGDestroy( HYPRE_Solver solver )
 
 int 
 HYPRE_ParCSRPCGSetup( HYPRE_Solver solver,
-                      HYPRE_ParCSRMatrix A,
+                      HYPRE_Matrix A,
                       HYPRE_ParVector b,
                       HYPRE_ParVector x      )
 {
-   return( hypre_PCGSetup( (void *) solver,
-                           (void *) A,
-                           (void *) b,
-                           (void *) x ) );
+   return( HYPRE_PCGSetup( solver, A, b, x ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -73,14 +70,11 @@ HYPRE_ParCSRPCGSetup( HYPRE_Solver solver,
 
 int 
 HYPRE_ParCSRPCGSolve( HYPRE_Solver solver,
-                      HYPRE_ParCSRMatrix A,
+                      HYPRE_Matrix A,
                       HYPRE_ParVector b,
                       HYPRE_ParVector x      )
 {
-   return( hypre_PCGSolve( (void *) solver,
-                           (void *) A,
-                           (void *) b,
-                           (void *) x ) );
+   return( HYPRE_PCGSolve( solver, A, b, x ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -91,7 +85,7 @@ int
 HYPRE_ParCSRPCGSetTol( HYPRE_Solver solver,
                        double             tol    )
 {
-   return( hypre_PCGSetTol( (void *) solver, tol ) );
+   return( HYPRE_PCGSetTol( solver, tol ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -102,7 +96,7 @@ int
 HYPRE_ParCSRPCGSetMaxIter( HYPRE_Solver solver,
                            int                max_iter )
 {
-   return( hypre_PCGSetMaxIter( (void *) solver, max_iter ) );
+   return( HYPRE_PCGSetMaxIter( solver, max_iter ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -113,7 +107,7 @@ int
 HYPRE_ParCSRPCGSetStopCrit( HYPRE_Solver solver,
                             int          stop_crit )
 {
-   return( hypre_PCGSetStopCrit( (void *) solver, stop_crit ) );
+   return( HYPRE_PCGSetStopCrit( solver, stop_crit ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -124,7 +118,7 @@ int
 HYPRE_ParCSRPCGSetTwoNorm( HYPRE_Solver solver,
                            int                two_norm )
 {
-   return( hypre_PCGSetTwoNorm( (void *) solver, two_norm ) );
+   return( HYPRE_PCGSetTwoNorm( solver, two_norm ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -135,7 +129,7 @@ int
 HYPRE_ParCSRPCGSetRelChange( HYPRE_Solver solver,
                              int                rel_change )
 {
-   return( hypre_PCGSetRelChange( (void *) solver, rel_change ) );
+   return( HYPRE_PCGSetRelChange( solver, rel_change ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -144,13 +138,14 @@ HYPRE_ParCSRPCGSetRelChange( HYPRE_Solver solver,
 
 int
 HYPRE_ParCSRPCGSetPrecond( HYPRE_Solver         solver,
-                           HYPRE_PtrToSolverFcn precond,
-                           HYPRE_PtrToSolverFcn precond_setup,
+                           HYPRE_PtrToParSolverFcn precond,
+                           HYPRE_PtrToParSolverFcn precond_setup,
                            HYPRE_Solver         precond_solver )
 {
-   return( hypre_PCGSetPrecond( (void *) solver,
-                                   precond, precond_setup,
-                                   (void *) precond_solver ) );
+   return( HYPRE_PCGSetPrecond( solver,
+                                precond,
+                                precond_setup,
+                                precond_solver ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -161,8 +156,7 @@ int
 HYPRE_ParCSRPCGGetPrecond( HYPRE_Solver  solver,
                            HYPRE_Solver *precond_data_ptr )
 {
-   return( hypre_PCGGetPrecond( (void *)     solver,
-                                   (HYPRE_Solver *) precond_data_ptr ) );
+   return( HYPRE_PCGGetPrecond( solver, precond_data_ptr ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -173,7 +167,7 @@ int
 HYPRE_ParCSRPCGSetLogging( HYPRE_Solver solver,
                            int                logging )
 {
-   return( hypre_PCGSetLogging( (void *) solver, logging ) );
+   return( HYPRE_PCGSetLogging( solver, logging ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -184,7 +178,7 @@ int
 HYPRE_ParCSRPCGGetNumIterations( HYPRE_Solver  solver,
                                  int                *num_iterations )
 {
-   return( hypre_PCGGetNumIterations( (void *) solver, num_iterations ) );
+   return( HYPRE_PCGGetNumIterations( solver, num_iterations ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -195,7 +189,7 @@ int
 HYPRE_ParCSRPCGGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
                                              double             *norm   )
 {
-   return( hypre_PCGGetFinalRelativeResidualNorm( (void *) solver, norm ) );
+   return( HYPRE_PCGGetFinalRelativeResidualNorm( solver, norm ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -204,7 +198,7 @@ HYPRE_ParCSRPCGGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
  
 int 
 HYPRE_ParCSRDiagScaleSetup( HYPRE_Solver solver,
-                            HYPRE_ParCSRMatrix A,
+                            HYPRE_Matrix A,
                             HYPRE_ParVector y,
                             HYPRE_ParVector x      )
 {
@@ -217,11 +211,11 @@ HYPRE_ParCSRDiagScaleSetup( HYPRE_Solver solver,
  
 int 
 HYPRE_ParCSRDiagScale( HYPRE_Solver solver,
-                       HYPRE_ParCSRMatrix HA,
+                       HYPRE_Matrix HA,
                        HYPRE_ParVector Hy,
                        HYPRE_ParVector Hx      )
 {
-   hypre_ParCSRMatrix *A = (hypre_ParCSRMatrix *) HA;
+   HYPRE_Matrix *A = (HYPRE_Matrix *) HA;
    hypre_ParVector    *y = (hypre_ParVector *) Hy;
    hypre_ParVector    *x = (hypre_ParVector *) Hx;
    double *x_data = hypre_VectorData(hypre_ParVectorLocalVector(x));

@@ -128,8 +128,8 @@ HYPRE_ParCSRBiCGSTABSetStopCrit( HYPRE_Solver solver,
 
 int
 HYPRE_ParCSRBiCGSTABSetPrecond( HYPRE_Solver         solver,
-                                HYPRE_PtrToSolverFcn precond,
-                                HYPRE_PtrToSolverFcn precond_setup,
+                                HYPRE_PtrToParSolverFcn precond,
+                                HYPRE_PtrToParSolverFcn precond_setup,
                                 HYPRE_Solver         precond_solver )
 {
    return( hypre_BiCGSTABSetPrecond( (void *) solver,
