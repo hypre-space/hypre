@@ -115,8 +115,12 @@ HYPRE_IJVectorDestroy( HYPRE_IJVector vector )
 
    else
    {
+      /* Tong : desire to destroy IJ without destroying the underlying
+                vector 
       printf("Unrecognized object type -- HYPRE_IJVectorDestroy\n");
       exit(1);
+      */
+      ierr = 1;
    }
 
    hypre_TFree(vec);
