@@ -195,9 +195,7 @@ hypre_SetIJMatrixDiagRowSizesParcsr(hypre_IJMatrix *matrix,
    hypre_CSRMatrix *diag;
    int *diag_i;
    par_matrix = hypre_IJMatrixLocalStorage(matrix);
-   if (par_matrix)
-      local_num_rows = hypre_AuxParCSRMatrixLocalNumRows(aux_matrix);
-   else
+   if (!par_matrix)
       return -1;
    
    diag =  hypre_ParCSRMatrixDiag(par_matrix);
@@ -229,9 +227,7 @@ hypre_SetIJMatrixOffDiagRowSizesParcsr(hypre_IJMatrix *matrix,
    hypre_CSRMatrix *offd;
    int *offd_i;
    par_matrix = hypre_IJMatrixLocalStorage(matrix);
-   if (par_matrix)
-      local_num_rows = hypre_AuxParCSRMatrixLocalNumRows(aux_matrix);
-   else
+   if (!par_matrix)
       return -1;
    
    offd =  hypre_ParCSRMatrixOffd(par_matrix);
@@ -508,7 +504,7 @@ hypre_AddIJMatrixRowParcsr(hypre_IJMatrix *matrix,
    hypre_AuxParCSRMatrix *aux_matrix;
    int *row_starts;
    int *col_starts;
-   MPI_Comm comm = hypre_IJMatrixContext(aux_matrix);
+   MPI_Comm comm = hypre_IJMatrixContext(matrix);
    int num_procs, my_id;
    int row_local;
    int col_0, col_n;
