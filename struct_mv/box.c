@@ -444,15 +444,21 @@ hypre_DeleteMultipleBoxes( hypre_BoxArray *box_array,
    {
       if (j < num)
       {
-         while ((i+j) == indices[j])
+         while ((i+j) == indices[j]) /* see if deleting consecutive items */
          {
             j++; /*increase the shift*/
             if (j == num) break;
          }
       }
+            
+      if ( (i+j) < array_size)  /* if deleting the last item then no moving */
+      {
+         
+         hypre_CopyBox(hypre_BoxArrayBox(box_array, i+j),
+                       hypre_BoxArrayBox(box_array, i));
+      }
       
-      hypre_CopyBox(hypre_BoxArrayBox(box_array, i+j),
-                    hypre_BoxArrayBox(box_array, i));
+      
    }
 
 
