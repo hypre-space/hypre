@@ -52,7 +52,8 @@ HEADERS =\
  mli_pcsr_bool_mat.h
 
 FILES =\
- mli_pcsr_bool_mat.c
+ mli_pcsr_bool_mat.c\
+ mli_pcsr_bool_matop.c
 
 OBJS = ${FILES:.c=.o}
 
