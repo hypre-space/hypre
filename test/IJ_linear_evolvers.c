@@ -562,6 +562,8 @@ main( int   argc,
    time_index = hypre_InitializeTiming("IJ Interface");
    hypre_BeginTiming(time_index);
 
+   printf("  Backward Euler time step with dt = %f\n",dt);
+   printf("  Dirichlet 0 BCs are implicit in the spatial operator\n");
    if ( build_matrix_type == 0 )
    {
       BuildParFromFile(argc, argv, build_matrix_arg_index, &parcsr_A);
@@ -793,23 +795,6 @@ main( int   argc,
       x = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage( ij_x );
 
    }
-   else if ( build_rhs_type == 3 )
-   {
-
-      HYPRE_ParVectorCreate(MPI_COMM_WORLD, global_n, part_b,&b);
-      HYPRE_ParVectorInitialize(b);
-      HYPRE_ParVectorSetRandomValues(b, 22775);
-      HYPRE_ParVectorInnerProd(b,b,&norm);
-      norm = 1.0/sqrt(norm);
-      ierr = HYPRE_ParVectorScale(norm, b);      
-
-      HYPRE_IJVectorCreate(MPI_COMM_WORLD, &ij_x, global_n);
-      HYPRE_IJVectorSetLocalStorageType(ij_x,ij_vector_storage_type );
-      HYPRE_IJVectorSetPartitioning(ij_x, (const int *) part_x);
-      HYPRE_IJVectorInitialize(ij_x);
-      HYPRE_IJVectorZeroLocalComponents(ij_x); 
-      x = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage( ij_x );
-   }
    else if ( build_rhs_type == 4 )
    {
 
@@ -823,17 +808,34 @@ main( int   argc,
 
       HYPRE_ParVectorSetConstantValues(x, 0.0);
    }
-   else /* if ( build_rhs_type == 0 ) */
+   else
    {
-      HYPRE_ParVectorCreate(MPI_COMM_WORLD, global_n, part_b, &b);
-      HYPRE_ParVectorInitialize(b);
-      HYPRE_ParVectorSetConstantValues(b, 1.0);
+      printf("  Initial unknown is random in the range 0 - 1\n");
+
+      HYPRE_IJVectorCreate(MPI_COMM_WORLD, &ij_b, global_n);
+      HYPRE_IJVectorSetLocalStorageType(ij_b,ij_vector_storage_type );
+      HYPRE_IJVectorSetPartitioning(ij_b, (const int *) part_b);
+      HYPRE_IJVectorInitialize(ij_b);
+      values = hypre_CTAlloc(double, part_x[myid+1] - part_x[myid]);
+
+      hypre_SeedRand( (double) myid );
+      for (i = 0; i < part_x[myid+1] - part_x[myid]; i++)
+         values[i] = hypre_Rand()/dt;
+
+      HYPRE_IJVectorSetLocalComponentsInBlock(ij_b,
+                                              part_x[myid],
+                                              part_x[myid+1]-1,
+                                              NULL,
+                                              values);
+      hypre_TFree(values);
 
       HYPRE_IJVectorCreate(MPI_COMM_WORLD, &ij_x, global_n);
       HYPRE_IJVectorSetLocalStorageType(ij_x,ij_vector_storage_type );
       HYPRE_IJVectorSetPartitioning(ij_x, (const int *) part_x);
       HYPRE_IJVectorInitialize(ij_x);
       HYPRE_IJVectorZeroLocalComponents(ij_x); 
+
+      b = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage( ij_b );
       x = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage( ij_x );
    }
 
@@ -1577,11 +1579,10 @@ BuildParLaplacian( int                  argc,
  
    if (myid == 0)
    {
-      printf("  Backward Euler Laplacian diffusion operator:\n");
+      printf("  Laplacian 7pt:\n");
       printf("    (nx, ny, nz) = (%d, %d, %d)\n", nx, ny, nz);
       printf("    (Px, Py, Pz) = (%d, %d, %d)\n", P,  Q,  R);
       printf("    (cx, cy, cz) = (%f, %f, %f)\n", cx, cy, cz);
-      printf("    dt = %f\n",dt);
    }
 
    /*-----------------------------------------------------------
