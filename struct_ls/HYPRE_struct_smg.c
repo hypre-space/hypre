@@ -110,12 +110,36 @@ HYPRE_SMGSetZeroGuess( HYPRE_StructSolver solver )
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_SMGSetNumPreRelax
+ *
+ * Note that we require at least 1 pre-relax sweep. 
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_SMGSetNumPreRelax( HYPRE_StructSolver solver,
+                         int                num_pre_relax )
+{
+   return( hypre_SMGSetNumPreRelax( (void *) solver, num_pre_relax) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_SMGSetNumPostRelax
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_SMGSetNumPostRelax( HYPRE_StructSolver solver,
+                          int                num_post_relax )
+{
+   return( hypre_SMGSetNumPostRelax( (void *) solver, num_post_relax) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_SMGGetNumIterations
  *--------------------------------------------------------------------------*/
 
 int
 HYPRE_SMGGetNumIterations( HYPRE_StructSolver  solver,
-                           int              *num_iterations )
+                           int                *num_iterations )
 {
    return( hypre_SMGGetNumIterations( (void *) solver, num_iterations ) );
 }
@@ -126,8 +150,8 @@ HYPRE_SMGGetNumIterations( HYPRE_StructSolver  solver,
 
 int
 HYPRE_SMGGetFinalRelativeResidualNorm( HYPRE_StructSolver  solver,
-                                       double           *relative_residual_norm )
+                                       double             *norm   )
 {
-   return( hypre_SMGGetFinalRelativeResidualNorm( (void *) solver, relative_residual_norm ) );
+   return( hypre_SMGGetFinalRelativeResidualNorm( (void *) solver, norm ) );
 }
 

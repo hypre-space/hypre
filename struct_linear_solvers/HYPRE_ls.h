@@ -44,8 +44,10 @@ int HYPRE_SMGSetMemoryUse P((HYPRE_StructSolver solver , int memory_use ));
 int HYPRE_SMGSetTol P((HYPRE_StructSolver solver , double tol ));
 int HYPRE_SMGSetMaxIter P((HYPRE_StructSolver solver , int max_iter ));
 int HYPRE_SMGSetZeroGuess P((HYPRE_StructSolver solver ));
+int HYPRE_SMGSetNumPreRelax P((HYPRE_StructSolver solver , int num_pre_relax ));
+int HYPRE_SMGSetNumPostRelax P((HYPRE_StructSolver solver , int num_post_relax ));
 int HYPRE_SMGGetNumIterations P((HYPRE_StructSolver solver , int *num_iterations ));
-int HYPRE_SMGGetFinalRelativeResidualNorm P((HYPRE_StructSolver solver , double *relative_residual_norm ));
+int HYPRE_SMGGetFinalRelativeResidualNorm P((HYPRE_StructSolver solver , double *norm ));
  
 #undef P
 
