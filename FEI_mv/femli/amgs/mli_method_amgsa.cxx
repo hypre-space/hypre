@@ -69,6 +69,7 @@ MLI_Method_AMGSA::MLI_Method_AMGSA( MPI_Comm comm ) : MLI_Method( comm )
    }
    calcNormScheme_ = 0;              /* use matrix rowsum norm */
    minCoarseSize_  = 5;              /* smallest coarse grid   */
+   minAggrSize_    = 3;              /* smallest aggregate size */
    coarsenScheme_  = MLI_METHOD_AMGSA_LOCAL;
    strcpy(preSmoother_, "Jacobi");
    strcpy(postSmoother_, "Jacobi");
@@ -214,6 +215,11 @@ int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
    {
       sscanf(in_name,"%s %d", param1, &size);
       return ( setMinCoarseSize( size ) );
+   }
+   else if ( !strcasecmp(param1, "setMinAggrSize" ))
+   {
+      sscanf(in_name,"%s %d", param1, &size);
+      return ( setMinAggregateSize( size ) );
    }
    else if ( !strcasecmp(param1, "setStrengthThreshold" ))
    {
@@ -477,7 +483,7 @@ int MLI_Method_AMGSA::getParams(char *in_name, int *argc, char *argv[])
 int MLI_Method_AMGSA::setup( MLI *mli ) 
 {
    int             level, mypid;
-   double          start_time, elapsed_time, maxEigen, maxEigenT;
+   double          startTime, elapsedTime, maxEigen, maxEigenT;
    char            paramString[100], *targv[10];
    MLI_Matrix      *mli_Pmat, *mli_Rmat, *mli_Amat, *mli_ATmat, *mli_cAmat;
    MLI_Solver      *smootherPtr, *csolvePtr;
@@ -602,7 +608,7 @@ int MLI_Method_AMGSA::setup( MLI *mli )
       }
       if (maxEigen != 0.0) spectralNorms_[level] = maxEigen;
       if (mli_Pmat == NULL) break;
-      start_time = MLI_Utils_WTime();
+      startTime = MLI_Utils_WTime();
 
       /* -------------------------------------------------- */
       /* construct and set the coarse grid matrix           */
@@ -611,10 +617,10 @@ int MLI_Method_AMGSA::setup( MLI *mli )
       if (mypid == 0 && outputLevel_ > 0) printf("\tComputing RAP\n");
       MLI_Matrix_ComputePtAP(mli_Pmat, mli_Amat, &mli_cAmat);
       mli->setSystemMatrix(level+1, mli_cAmat);
-      elapsed_time = (MLI_Utils_WTime() - start_time);
-      RAPTime_ += elapsed_time;
+      elapsedTime = (MLI_Utils_WTime() - startTime);
+      RAPTime_ += elapsedTime;
       if (mypid == 0 && outputLevel_ > 0) 
-         printf("\tRAP computed, time = %e seconds.\n", elapsed_time);
+         printf("\tRAP computed, time = %e seconds.\n", elapsedTime);
 
 #if 0
       mli_Amat->print("Amat");
@@ -903,9 +909,19 @@ int MLI_Method_AMGSA::setCoarsenScheme( int scheme )
  * set minimum coarse size
  * --------------------------------------------------------------------- */
 
-int MLI_Method_AMGSA::setMinCoarseSize( int coarse_size )
+int MLI_Method_AMGSA::setMinCoarseSize( int coarseSize )
 {
-   if ( coarse_size > 0 ) minCoarseSize_ = coarse_size;
+   if ( coarseSize > 0 ) minCoarseSize_ = coarseSize;
+   return 0;
+}
+
+/* ********************************************************************* *
+ * set minimum aggregate size
+ * --------------------------------------------------------------------- */
+
+int MLI_Method_AMGSA::setMinAggregateSize( int aggrSize )
+{
+   if ( aggrSize > 0 ) minAggrSize_ = aggrSize;
    return 0;
 }
 
@@ -1042,8 +1058,6 @@ int MLI_Method_AMGSA::setNodalCoordinates(int num_nodes, int nDOF, int nsDim,
    MPI_Comm comm = getComm();
    MPI_Comm_rank( comm, &mypid );
 
-   if ( useSAMGeFlag_ ) return 0;
-
    if ( nDOF == 1 )
    {
       nodeDofs_     = 1;
@@ -1076,6 +1090,7 @@ int MLI_Method_AMGSA::setNodalCoordinates(int num_nodes, int nDOF, int nsDim,
       exit(1);
    }
    if ( nullspaceVec_ != NULL ) delete [] nullspaceVec_;
+
    nullspaceVec_ = new double[nullspaceLen_ * nullspaceDim_];
 
    for( i = 0 ; i < num_nodes; i++ ) 
@@ -1091,6 +1106,7 @@ int MLI_Method_AMGSA::setNodalCoordinates(int num_nodes, int nDOF, int nsDim,
       }
       else if ( nodeDofs_ == 3 )
       {
+         if ( useSAMGeFlag_ == 0 ) nullspaceDim_ = 6;
          voffset = i * nodeDofs_;
          for ( j = 0; j < 3; j++ )
          {

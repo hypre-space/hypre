@@ -68,6 +68,7 @@ class MLI_Method_AMGSA : public MLI_Method
    int      **saDataAux_;            /* for subdomain aggregates         */
    double   *spectralNorms_;         /* computed matrix norms            */
    int      calcNormScheme_;         /* method to estimate matrix norm   */
+   int      minAggrSize_;            /* tell when to stop aggregation    */
    int      minCoarseSize_;          /* tell when to stop aggregation    */
    int      coarsenScheme_;          /* different aggregation schemes    */
    char     preSmoother_[20];        /* denote which pre-smoother to use */
@@ -105,6 +106,7 @@ public :
    int    setSmoother( int prePost, char *stype, int num, double *wgt );
    int    setCoarseSolver( char *stype, int num, double *wgt );
    int    setCoarsenScheme( int scheme );
+   int    setMinAggregateSize( int minSize );
    int    setMinCoarseSize( int minSize );
    int    setStrengthThreshold( double thresh );
    int    setPweight( double weight );
