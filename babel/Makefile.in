@@ -45,10 +45,6 @@ BLASLIBFLAGS =  @BLASLIBFLAGS@
 PETSCLIBFLAGS = @PETSCLIBDIRS@ @PETSCLIBS@
 BABELLIBFLAGS =  @BABELLIBFLAGS@
 
-#BABELLIBFLAGS =  @BABELLIBFLAGS@ -L/home/painter/babel-0.6.3/runtime/sidl/.libs\
-#  -L/home/painter/linear_solvers/babel/Hypre -lHypreBabel -lsidl
-
-
 LFLAGS =\
  ${LD_LINK_FLAGS}\
  -L../hypre/lib\
@@ -97,8 +93,24 @@ babel-interfaces:
 	@ \
 	if [ -d Hypre ]; \
 	then \
-	  echo "Making Hypre ..."; \
+	  echo "Making Hypre Server..."; \
 	  (cd Hypre; $(MAKE)); \
+	  echo ""; \
+	fi; \
+
+	@ \
+	if [ -d HypreClient-C ]; \
+	then \
+	  echo "Making Hypre C Client..."; \
+	  (cd HypreClient-C; $(MAKE)); \
+	  echo ""; \
+	fi; \
+
+	@ \
+	if [ -d HypreClient-F ]; \
+	then \
+	  echo "Making Hypre Fortran Client ..."; \
+	  (cd HypreClient-F; $(MAKE)); \
 	  echo ""; \
 	fi; \
 
@@ -109,8 +121,26 @@ clean:
 	@ \
 	if [ -d Hypre ]; \
 	then \
-	  echo "Making Hypre clean ..."; \
+	  echo "Making Hypre Server clean ..."; \
 	  (cd Hypre; $(MAKE) clean); \
+	  echo ""; \
+	fi; \
+
+	@rm -f *.o
+	@ \
+	if [ -d HypreClient-C ]; \
+	then \
+	  echo "Making Hypre C Client clean ..."; \
+	  (cd HypreClient-C; $(MAKE) clean); \
+	  echo ""; \
+	fi; \
+
+	@rm -f *.o
+	@ \
+	if [ -d HypreClient-F ]; \
+	then \
+	  echo "Making Hypre Fortran Client clean ..."; \
+	  (cd HypreClient-F; $(MAKE) clean); \
 	  echo ""; \
 	fi; \
 
@@ -122,8 +152,22 @@ veryclean: clean
 	@ \
 	if [ -d Hypre ]; \
 	then \
-	  echo "Making Hypre very clean ..."; \
+	  echo "Making Hypre Server very clean ..."; \
 	  (cd Hypre; $(MAKE) veryclean); \
+	  echo ""; \
+	fi; \
+
+	if [ -d HypreClient-C ]; \
+	then \
+	  echo "Making Hypre C Client very clean ..."; \
+	  (cd HypreClient-C; $(MAKE) veryclean); \
+	  echo ""; \
+	fi; \
+
+	if [ -d HypreClient-F ]; \
+	then \
+	  echo "Making Hypre Fortran Client very clean ..."; \
+	  (cd HypreClient-C; $(MAKE) veryclean); \
 	  echo ""; \
 	fi; \
 

@@ -1,0 +1,10 @@
+#!/bin/sh
+# Runs Babel to generate interfaces for standard languages.
+
+# Output directories must be different so the make file babel.make
+# won't get overwritten.  The server (-sC) directory name was chosen for
+# backwards compatibility.
+
+babel --output-directory=Hypre -sC Interfaces.idl
+babel --output-directory=HypreClient-C -cC Interfaces.idl
+babel --output-directory=HypreClient-F -cF77 Interfaces.idl
