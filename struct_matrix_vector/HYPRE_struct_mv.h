@@ -135,7 +135,7 @@ struct hypre_StructMatrix_struct;
 /**
  * The matrix object.
  **/
-typedef struct hypre_StructMatrix_struct *HYPRE_StructMatrix;
+typedef struct hypre_Matrix_struct *HYPRE_StructMatrix;
 
 /**
  * Create a matrix object.
@@ -222,11 +222,11 @@ int HYPRE_StructMatrixPrint(char               *filename,
  **/
 /*@{*/
 
-struct hypre_StructVector_struct;
+struct hypre_Vector_struct;
 /**
  * The vector object.
  **/
-typedef struct hypre_StructVector_struct *HYPRE_StructVector;
+typedef struct hypre_Vector_struct *HYPRE_StructVector;
 
 /**
  * Create a vector object.
