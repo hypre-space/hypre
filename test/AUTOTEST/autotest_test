@@ -277,6 +277,11 @@ mail_summary () {
       printf "N/A\n" >> $SUMFILE
     fi
   done
+  if [ "$DEBUG_MODE" = "yes" ] ; then
+    printf "%2d test failed\n" $CERRCNT
+    printf "%2d test succeeded\n" $CLOGCNT
+    printf "%2d test total\n" $CTOTCNT
+  fi
   printf "\n" >> $SUMFILE
   printf "%2d test failed\n" $CERRCNT  >> $SUMFILE
   printf "%2d test succeeded\n" $CLOGCNT >> $SUMFILE
@@ -307,6 +312,9 @@ mail_summary () {
         if [ "InsureSelected" = "0" ] ; then
           for k in ${ErrFile}.*; do
             if [ -s "${k}" ] ; then
+              if [ "$DEBUG_MODE" = "yes" ] ; then
+                printf "nonzero .err. file = ${k}\n"
+              fi
               AutotestFailureCount=`expr $AutotestFailureCount + 1`
               TotalFailureCount=`expr $TotalFailureCount + 1`
               TestCaseFailedCount=`expr $TestCaseFailedCount + 1`
@@ -321,6 +329,9 @@ mail_summary () {
           for k in ${OutFile}.*; do
 # look for non-zero length subtest, TEST_*/test.out.* files
             if [ -s "${OutFile}" ] ; then
+              if [ "$DEBUG_MODE" = "yes" ] ; then
+                printf "nonzero .out. file = ${OutFile}\n"
+              fi
               AutotestFailureCount=`expr $AutotestFailureCount + 1`
               TotalFailureCount=`expr $TotalFailureCount + 1`
               TestCaseFailedCount=`expr $TestCaseFailedCount + 1`
@@ -333,6 +344,9 @@ mail_summary () {
         if [ "$TestCaseFailedFlag" = "0" ] ; then
 # look for a TEST_*/test.err files
           if [ -s "${ErrFile}" ] ; then
+            if [ "$DEBUG_MODE" = "yes" ] ; then
+              printf "nonzero .err file = ${ErrFile}\n"
+            fi
             AutotestFailureCount=`expr $AutotestFailureCount + 1`
             TotalFailureCount=`expr $TotalFailureCount + 1`
             TestCaseFailedCount=`expr $TestCaseFailedCount + 1`
@@ -353,6 +367,11 @@ mail_summary () {
         printf "N/A\n" >> $SUMFILE
       fi
     done
+    if [ "$DEBUG_MODE" = "yes" ] ; then
+      printf "%2d test failed\n" $TotalFailureCount
+      printf "%2d test succeeded\n" $TotalSuccessCount
+      printf "%2d test total\n" $TotalTestCount
+    fi
     printf "\n" >> $SUMFILE
     printf "%2d test failed\n" $TotalFailureCount >> $SUMFILE
     printf "%2d test succeeded\n" $TotalSuccessCount >> $SUMFILE
@@ -369,9 +388,9 @@ mail_summary () {
     SUBJECT="Autotest $AutotestFailureCount Errors ($MAIL_HEADER)"
   fi
   if [ "$DEBUG_MODE" = "yes" ] ; then
-    ${HYPRE_MAIL} -s "$SUBJECT" $USER < $SUMFILE 
+    ${HYPRE_MAIL} -s "$SUBJECT" -r Treadway1@LLNL.gov $USER < $SUMFILE 
   else
-    ${HYPRE_MAIL} -s "$SUBJECT" $HYPRE_ALL_EMAIL < $SUMFILE 
+    ${HYPRE_MAIL} -s "$SUBJECT" -r Treadway1@LLNL.gov $HYPRE_ALL_EMAIL < $SUMFILE 
   fi
   echo "Autotest mail sent"
 }
@@ -391,9 +410,9 @@ mail_errors () {
             RECIPIENTS=`cat ${i}.email` 
             SUBJECT="Autotest error: ${i} ($HYPRE_ARCH)"
             if [ "$DEBUG_MODE" = "yes" ] ; then
-              ${HYPRE_MAIL} -s "$SUBJECT" $USER < $i 
+              ${HYPRE_MAIL} -s "$SUBJECT" -r Treadway1@LLNL.gov $USER < $i 
             else
-              ${HYPRE_MAIL} -s "$SUBJECT" $RECIPIENTS < $i 
+              ${HYPRE_MAIL} -s "$SUBJECT" -r Treadway1@LLNL.gov $RECIPIENTS < $i 
             fi
           fi
         fi 
