@@ -44,7 +44,7 @@ double time_get_cpu_seconds_ P((void ));
 
 #ifndef HYPRE_TIMING
 
-#define hypre_InitializeTiming(name) (int)(name)
+#define hypre_InitializeTiming(name) 0
 #define hypre_IncFLOPCount(inc)
 #define hypre_BeginTiming(i)
 #define hypre_EndTiming(i)
