@@ -910,6 +910,8 @@ HOSTNAME="`hostname`"
           AC_CHECK_PROGS(CC,guidec) 
           AC_CHECK_PROGS(CXX,guidec++)
           AC_CHECK_PROGS(F77,guidef77)
+          CFLAGS="-I/usr/local/src/guide.assure/guide40.22.5/KCC/KCC_BASE/include/ $CFLAGS"
+          CXXFLAGS="-I/usr/local/src/guide.assure/guide40.22.5/KCC/KCC_BASE/include/ $CXXFLAGS"
         fi
         if  test "$casc_using_debug" = "yes"
         then
