@@ -87,7 +87,7 @@ initialize_variables ()
 #
 # Need the nopoe script for AIX platforms to force single task
 #
-  if [ "$HYPRE_ARCH"="blue" ] ; then
+  if [ "$HYPRE_ARCH" = "blue" ] ; then
     CONFIGURE="./nopoe ./configure"
   else
     CONFIGURE="./configure"
@@ -708,7 +708,7 @@ if [ ${BuildOpt} -ne $Skip ] ; then
     cd $StdBuildDir
     if [ "$MessageStr" != "insure" ]
     then			# don't want to delete previous build
-        $MAKE distclean	        # assumed working with --enable-debug build
+        $MAKE clean	        # assumed working with --enable-debug build
     fi
     [ -f config.cache ] && rm config.cache
     if [ "$ConfigOption" != " " ]
