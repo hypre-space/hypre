@@ -92,7 +92,7 @@ lib: $(PROTOS) ${OBJS}
 	@echo  "Building $@ ... "
 	@echo  "Building ${OBJS} ... "
 	@ar -rcu libHYPRE_DistributedMatrix.a ${OBJS}
-	@ranlib libHYPRE_DistributedMatrix.a 
+	${RANLIB} libHYPRE_DistributedMatrix.a 
 
 ##################################################################
 # Targets
