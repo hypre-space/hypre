@@ -3,17 +3,17 @@
 #include <math.h>
 
 #include "utilities.h"
-#include "../CI_struct_matrix_vector/HYPRE_CI_struct_matrix_vector_types.h"  
-#include "../CI_struct_matrix_vector/HYPRE_CI_struct_matrix_vector_protos.h"  
-#include "../CI_struct_linear_solvers/HYPRE_CI_struct_linear_solvers_types.h"  
-#include "../CI_struct_linear_solvers/HYPRE_CI_struct_linear_solvers_protos.h"  
- 
+#include "HYPRE_CI_ls.h"
+
 #ifdef HYPRE_DEBUG
 #include <cegdb.h>
 #endif
 
 /*--------------------------------------------------------------------------
- * Test driver for structured matrix interface (structured storage)
+ * Test driver for the CI (conceptual interface) version of the
+ * structured grid interface.  A PETSc matrix is actually
+ * constructed, under the hood; and PETSc gmres + pilut preconditioning
+ * is used as the solver.
  *--------------------------------------------------------------------------*/
  
 /*----------------------------------------------------------------------
@@ -74,24 +74,16 @@ main( int   argc,
     *-----------------------------------------------------------*/
 
 #ifdef HYPRE_USE_PTHREADS
-   HYPRE_InitPthreads(MPI_COMM_WORLD);
+   HYPRE_InitPthreads(4);
 #endif  
-
- 
-   /* Initialize MPI */
-   MPI_Init(&argc, &argv); 
-
-   MPI_Comm_size(MPI_COMM_WORLD, &num_procs );
-   MPI_Comm_rank(MPI_COMM_WORLD, &myid );
-
 
 #ifdef HYPRE_DEBUG
    cegdb(&argc, &argv, myid);
 #endif
-   MPI_Initialized( &ix );
 
-   /* Initialize Petsc */ /* In regular code should not be done here */
-   PetscInitialize( NULL, NULL, NULL, NULL);
+   /* Initialize Petsc (and MPI) */ 
+
+   PetscInitialize(&argc, &argv, NULL, NULL);
 
    MPI_Comm_size(MPI_COMM_WORLD, &num_procs );
    MPI_Comm_rank(MPI_COMM_WORLD, &myid );
@@ -362,31 +354,31 @@ main( int   argc,
          break;
    } 
 
-   grid = HYPRE_NewStructGrid(MPI_COMM_WORLD, dim);
+   HYPRE_StructGridCreate(MPI_COMM_WORLD, dim, &grid);
    for (ib = 0; ib < nblocks; ib++)
    {
-      HYPRE_SetStructGridExtents(grid, ilower[ib], iupper[ib]);
+      HYPRE_StructGridSetExtents(grid, ilower[ib], iupper[ib]);
    }
-   HYPRE_AssembleStructGrid(grid);
+   HYPRE_StructGridAssemble(grid);
 
    /*-----------------------------------------------------------
     * Set up the stencil structure
     *-----------------------------------------------------------*/
  
-   stencil = HYPRE_NewStructStencil(dim, dim + 1);
+   HYPRE_StructStencilCreate(dim, dim + 1, &stencil);
    for (s = 0; s < dim + 1; s++)
    {
-      HYPRE_SetStructStencilElement(stencil, s, offsets[s]);
+      HYPRE_StructStencilSetElement(stencil, s, offsets[s]);
    }
 
    /*-----------------------------------------------------------
     * Set up the matrix structure
     *-----------------------------------------------------------*/
  
-   A = HYPRE_NewStructInterfaceMatrix(MPI_COMM_WORLD, grid, stencil);
-   HYPRE_SetStructInterfaceMatrixSymmetric(A, 1);  
-   HYPRE_SetStructInterfaceMatrixNumGhost(A, A_num_ghost); 
-   HYPRE_InitializeStructInterfaceMatrix(A); 
+   HYPRE_StructInterfaceMatrixCreate(MPI_COMM_WORLD, grid, stencil, &A);
+   HYPRE_StructInterfaceMatrixSetSymmetric(A, 1);  
+   HYPRE_StructInterfaceMatrixSetNumGhost(A, A_num_ghost); 
+   HYPRE_StructInterfaceMatrixInitialize(A); 
 
    /*-----------------------------------------------------------
     * Fill in the matrix elements
@@ -422,7 +414,7 @@ main( int   argc,
    }
    for (ib = 0; ib < nblocks; ib++)
    {
-      HYPRE_SetStructInterfaceMatrixBoxValues(A, ilower[ib], iupper[ib], 
+      HYPRE_StructInterfaceMatrixSetBoxValues(A, ilower[ib], iupper[ib], 
 (dim+1),
                                      stencil_indices, values);   
    }
@@ -441,14 +433,14 @@ main( int   argc,
             i = iupper[ib][d];
             iupper[ib][d] = istart[d];
             stencil_indices[0] = d;
-            HYPRE_SetStructInterfaceMatrixBoxValues(A, ilower[ib], iupper[ib],
+            HYPRE_StructInterfaceMatrixSetBoxValues(A, ilower[ib], iupper[ib],
                                            1, stencil_indices, values); 
             iupper[ib][d] = i;
          }
       }
    }
 
-   HYPRE_AssembleStructInterfaceMatrix(A);
+   HYPRE_StructInterfaceMatrixAssemble(A);
 #if 0
    HYPRE_PrintStructInterfaceMatrix("driver.out.A", A, 0);
 #endif
@@ -461,34 +453,34 @@ main( int   argc,
 
    values = hypre_CTAlloc(double, volume);
 
-   b = HYPRE_NewStructInterfaceVector(MPI_COMM_WORLD, grid, stencil);
-   HYPRE_InitializeStructInterfaceVector(b);  
+   HYPRE_StructInterfaceVectorCreate(MPI_COMM_WORLD, grid, stencil, &b);
+   HYPRE_StructInterfaceVectorInitialize(b);  
    for (i = 0; i < volume; i++)
    {
       values[i] = 1.0;
    }
    for (ib = 0; ib < nblocks; ib++)
    {
-      HYPRE_SetStructInterfaceVectorBoxValues(b, ilower[ib], iupper[ib], 
+      HYPRE_StructInterfaceVectorSetBoxValues(b, ilower[ib], iupper[ib], 
 values); /***** ? *****/
    }
-   HYPRE_AssembleStructInterfaceVector(b);
+   HYPRE_StructInterfaceVectorAssemble(b);
 #if 0
    HYPRE_PrintStructInterfaceVector("driver.out.b", b, 0);
 #endif
 
-   x = HYPRE_NewStructInterfaceVector(MPI_COMM_WORLD, grid, stencil);
-   HYPRE_InitializeStructInterfaceVector(x);
+   HYPRE_StructInterfaceVectorCreate(MPI_COMM_WORLD, grid, stencil, &x);
+   HYPRE_StructInterfaceVectorInitialize(x);
    for (i = 0; i < volume; i++)
    {
       values[i] = 0.0;
    }
    for (ib = 0; ib < nblocks; ib++)
    {
-      HYPRE_SetStructInterfaceVectorBoxValues(x, ilower[ib], iupper[ib], 
+      HYPRE_StructInterfaceVectorSetBoxValues(x, ilower[ib], iupper[ib], 
 values); /***** ? *****/
    }
-   HYPRE_AssembleStructInterfaceVector(x);
+   HYPRE_StructInterfaceVectorAssemble(x);
 #if 0
    HYPRE_PrintStructInterfaceVector("driver.out.x0", x, 0);
 #endif
@@ -504,7 +496,7 @@ values); /***** ? *****/
       time_index = hypre_InitializeTiming("Petsc/pilut Setup");
       hypre_BeginTiming(time_index);
 
-      pilut_solver = HYPRE_NewStructInterfaceSolver(MPI_COMM_WORLD, grid, stencil);
+      HYPRE_StructInterfaceSolverCreate(MPI_COMM_WORLD, grid, stencil, &pilut_solver);
 
       ierr = HYPRE_StructInterfaceSolverInitialize( pilut_solver );
       if (ierr) 
@@ -546,7 +538,7 @@ values); /***** ? *****/
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
    
-      HYPRE_FreeStructInterfaceSolver(pilut_solver); 
+      HYPRE_StructInterfaceSolverDestroy(pilut_solver); 
    } else
    {
       printf("You have asked for a solver that is not supported.\n");
@@ -557,10 +549,11 @@ values); /***** ? *****/
     * Finalize things
     *-----------------------------------------------------------*/
 
-   HYPRE_FreeStructGrid(grid);
-   HYPRE_FreeStructInterfaceMatrix(A);
-   HYPRE_FreeStructInterfaceVector(b);
-   HYPRE_FreeStructInterfaceVector(x);
+   HYPRE_StructGridDestroy(grid);
+   HYPRE_StructStencilDestroy(stencil);
+   HYPRE_StructInterfaceMatrixDestroy(A);
+   HYPRE_StructInterfaceVectorDestroy(b);
+   HYPRE_StructInterfaceVectorDestroy(x);
 
    for (i = 0; i < nblocks; i++)
    {
@@ -578,7 +571,6 @@ values); /***** ? *****/
 
    hypre_FinalizeMemoryDebug();
 
-   /* Finalize MPI */
    MPI_Finalize();
 
 #ifdef HYPRE_USE_PTHREADS
