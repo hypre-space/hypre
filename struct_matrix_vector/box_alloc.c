@@ -29,6 +29,7 @@ union box_memory
 static union box_memory *s_free      = NULL;
 static union box_memory *s_finalize  = NULL;
 static int               s_at_a_time = 1000;
+static int               s_count     = 0;
 
 /*--------------------------------------------------------------------------
  * Allocate a new block of memory and thread it into the free list.  The
@@ -104,6 +105,7 @@ hypre_BoxAlloc()
 
    ptr = s_free;
    s_free = (s_free -> d_next);
+   s_count++;
    return( &(ptr -> d_box) );
 }
 
@@ -115,7 +117,14 @@ void
 hypre_BoxFree( hypre_Box *box )
 {
    union box_memory *ptr = (union box_memory *) box;
+
    (ptr -> d_next) = s_free;
    s_free = ptr;
+   s_count--;
+
+   if (!s_count)
+   {
+      hypre_FinalizeBoxMemory();
+   }
 }
 
