@@ -306,40 +306,6 @@ HYPRE_SetIJVectorLocalStorageType( HYPRE_IJVector IJvector, int type )
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SetIJVectorLocalSize
- *--------------------------------------------------------------------------*/
-
-/**
-Tells "vector" local size
-@return integer error code
-@param HYPRE_IJVector IJvector
-vector for which local size is to be set 
-@param int local_n [IN]
-local number of components
-HYPRE_SetIJVectorLocalStorageType needs to be called before this function.
-
-*/
-
-int 
-HYPRE_SetIJVectorLocalSize( HYPRE_IJVector IJvector, int local_n )
-{
-   int ierr = 0;
-   hypre_IJVector *vector = (hypre_IJVector *) IJvector;
-
-   /* if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PETSC )
-      ierr = hypre_SetIJVectorLocalSizePETSC(vector, local_n);
-   if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_ISIS )
-      ierr = hypre_SetIJVectorLocalSizeISIS(vector, local_n);
-      */
-/*   if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR )
-      ierr = hypre_SetIJVectorLocalSizePar(vector, local_n); 
-   else */
-      ierr = -1;
-
-   return(ierr);
-}
-
-/*--------------------------------------------------------------------------
  * HYPRE_SetIJVectorLocalComponents
  *--------------------------------------------------------------------------*/
 
