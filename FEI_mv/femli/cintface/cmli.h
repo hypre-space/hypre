@@ -33,8 +33,6 @@ typedef struct CMLI_FEData_Struct CMLI_FEData;
 typedef struct CMLI_Method_Struct CMLI_Method;
 typedef struct CMLI_Mapper_Struct CMLI_Mapper;
 
-#include "util/mli_utils.h"
-
 /******************************************************************************
  * structure prototypes
  *****************************************************************************/
@@ -46,6 +44,16 @@ struct CMLI_Solver_Struct { void* solver_; int owner_; };
 struct CMLI_FEData_Struct { void* fedata_; int owner_; };
 struct CMLI_Method_Struct { void* method_; int owner_; };
 struct CMLI_Mapper_Struct { void* mapper_; int owner_; };
+
+#ifdef __cplusplus
+}
+#endif
+
+#include "util/mli_utils.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /* **************************************************************** */
 /* functions for the top level "C" MLI object                       */
