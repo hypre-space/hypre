@@ -483,7 +483,7 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
    {
      nrows = hypre_SStructGridLocalSize(grid);
    }
-   if (matrix_type == HYPRE_SSTRUCT)
+   if (matrix_type == HYPRE_SSTRUCT || matrix_type == HYPRE_STRUCT)
    {
      nrows = hypre_SStructGridGhlocalSize(grid) ;
    }
@@ -529,7 +529,7 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
             hypre_CopyBox(gridbox,ghostbox);
 	    hypre_BoxExpand(ghostbox,num_ghost);
 
-	    if (matrix_type == HYPRE_SSTRUCT)
+            if (matrix_type == HYPRE_SSTRUCT || matrix_type == HYPRE_STRUCT)
 	    {
                hypre_CopyBox(ghostbox,loopbox);
             }
