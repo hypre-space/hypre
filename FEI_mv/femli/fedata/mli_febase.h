@@ -148,7 +148,7 @@ public :
        @param procLists[i] - a list of processors to share node i
    */
    virtual int initSharedNodes(int nNodes, 
-                               int *nGlobalIDs, 
+                               const int *nGlobalIDs, 
                                const int *numProcs, 
                                const int * const *procLists) 
                                {(void) nNodes; (void) nGlobalIDs;
@@ -316,7 +316,6 @@ public :
        @param nGlobalIDs    - a list of nodes for the element
        @param sMatDim       - dimension of the element matrix (for checking)
        @param stiffMat      - element stiffness matrix (column major)
-   */
    virtual int loadElemMatrix(int eGlobalID, 
                               int nNodesPerElem, 
                               const int *nGlobalIDs, 
@@ -325,6 +324,7 @@ public :
                               {(void) eGlobalID; (void) nNodesPerElem; 
                                (void) nGlobalIDs; (void) sMatDim; 
                                (void) stiffMat; return -1;}
+   */
 
    virtual int loadElemMatrix(int eGlobalID, 
                               int sMatDim, 
@@ -375,7 +375,7 @@ public :
        @param func   - pointer to the function for getting element matrices
    */
    virtual int loadFunc_getElemMatrix(void *object, 
-                   int (*func) (int eGlobalID,int sMatDim,double *stiffMat)) 
+                int (*func)(void*,int eGlobalID,int sMatDim,double *stiffMat)) 
                    {(void) object; (void) func; return -1;}
 
    // =========================================================================
