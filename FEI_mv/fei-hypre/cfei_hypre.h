@@ -22,6 +22,10 @@ typedef struct LinSysCore_struct LinSysCore;
 #endif
 
 #ifdef __cplusplus
+LinearSystemCore *HYPRE_base_create( MPI_Comm comm );
+#endif
+
+#ifdef __cplusplus
 extern "C" {
 #endif
 
