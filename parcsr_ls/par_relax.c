@@ -32,7 +32,7 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
    double         *A_diag_data  = hypre_CSRMatrixData(A_diag);
    int            *A_diag_i     = hypre_CSRMatrixI(A_diag);
    int            *A_diag_j     = hypre_CSRMatrixJ(A_diag);
-   hypre_CSRMatrix *A_offd = hypre_ParCSRMatrixDiag(A);
+   hypre_CSRMatrix *A_offd = hypre_ParCSRMatrixOffd(A);
    int            *A_offd_i     = hypre_CSRMatrixI(A_offd);
    double         *A_offd_data  = hypre_CSRMatrixData(A_offd);
    int            *A_offd_j     = hypre_CSRMatrixJ(A_offd);
@@ -178,7 +178,7 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
                      ii = A_diag_j[jj];
                      res -= A_diag_data[jj] * Vtemp_data[ii];
                   }
-                  for (jj = A_offd_i[i]+1; jj < A_offd_i[i+1]; jj++)
+                  for (jj = A_offd_i[i]; jj < A_offd_i[i+1]; jj++)
                   {
                      ii = A_offd_j[jj];
                      res -= A_offd_data[jj] * Vext_data[ii];
@@ -211,7 +211,7 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
                      ii = A_diag_j[jj];
                      res -= A_diag_data[jj] * Vtemp_data[ii];
                   }
-                  for (jj = A_offd_i[i]+1; jj < A_offd_i[i+1]; jj++)
+                  for (jj = A_offd_i[i]; jj < A_offd_i[i+1]; jj++)
                   {
                      ii = A_offd_j[jj];
                      res -= A_offd_data[jj] * Vext_data[ii];
@@ -251,7 +251,7 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
             for (jj = A_CSR_i[i]; jj < A_CSR_i[i+1]; jj++)
             {
                column = A_CSR_j[jj];
-               A_mat[i*n+column] = A_CSR_data[jj];
+               A_mat[i*n_global+column] = A_CSR_data[jj];
             }
             b_vec[i] = f_vector_data[i];
          }
