@@ -8,16 +8,13 @@ libbHYPREClient_F_la_LDFLAGS = -avoid-version
 
 C_COMPILE_FLAGS=@CFLAGS@
 # new configure won't fill in: CINCLUDES=@INCLUDES@ @MPIINCLUDE@ @BABEL_HYPRE_INCLUDES@
-CINCLUDES=-I$(srcdir)/../../hypre/include
-BABEL_RUNTIME_INCLUDES=-I$(srcdir)/../../babel-runtime/sidl
+CINCLUDES=-I$(includedir)
+BABEL_RUNTIME_INCLUDES=-I$(top_builddir)/babel-runtime/sidl
 
 AM_CPPFLAGS = \
  ${C_COMPILE_FLAGS}\
- -I..\
- -I$(srcdir)\
- -I$(srcdir)/..\
- -I$(srcdir)/../../utilities\
- -I$(srcdir)/../../seq_mv\
+ -I$(top_srcdir)/../../utilities\
+ -I$(top_srcdir)/../../seq_mv\
  ${BABEL_RUNTIME_INCLUDES}\
  ${CINCLUDES}\
  ${CDEFS}
