@@ -252,8 +252,7 @@ HYPRE_IJMatrixSetLocalSize( HYPRE_IJMatrix IJmatrix, int local_m, int local_n )
 Not collective.
 Tells "matrix" how many nonzeros to expect in each row.
 Knowing this quantity apriori may have a significant impact on the time needed for the Assemble phase,
-and this option should always be utilized if the information is available.It is most useful in conjunction
-with the next function.
+and this option should always be utilized if the information is available.
 @return integer error code
 @param HYPRE_IJMatrix &matrix [IN] 
 the matrix to be operated on.
