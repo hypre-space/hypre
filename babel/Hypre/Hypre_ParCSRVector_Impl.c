@@ -3,8 +3,8 @@
  * Symbol:        Hypre.ParCSRVector-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.7.4
- * SIDL Created:  20021217 16:01:16 PST
- * Generated:     20021217 16:01:26 PST
+ * SIDL Created:  20021217 16:38:33 PST
+ * Generated:     20021217 16:38:43 PST
  * Description:   Server-side implementation for Hypre.ParCSRVector
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -142,8 +142,7 @@ impl_Hypre_ParCSRVector_Copy(
    else {
       assert( "Unrecognized vector type."==(char *)x );
    }
-   /* This is the old code for the above.  It seems that queryInterface has been
-      changed to return TRUE or FALSE rather than the object (jfp Oct2002)
+   /* This is the old code for the above.
       HypreP_x = Hypre_Vector__cast2
          ( Hypre_Vector_queryInterface( x, "Hypre.ParCSRVector"),
            "Hypre.ParCSRVector" );
@@ -309,8 +308,7 @@ impl_Hypre_ParCSRVector_Dot(
    else {
       assert( "Unrecognized vector type."==(char *)x );
    }
-   /* This is the old code for the above.  It seems that queryInterface has been
-      changed to return TRUE or FALSE rather than the object (jfp Oct2002)
+   /* This is the old code for the above.
       HypreP_x = Hypre_Vector__cast2
          ( Hypre_Vector_queryInterface( x, "Hypre.ParCSRVector"),
            "Hypre.ParCSRVector" );
@@ -371,8 +369,7 @@ impl_Hypre_ParCSRVector_Axpy(
    else {
       assert( "Unrecognized vector type."==(char *)x );
    }
-   /* This is the old code for the above.  It seems that queryInterface has been
-      changed to return TRUE or FALSE rather than the object (jfp Oct2002)
+   /* This is the old code for the above.
       HypreP_x = Hypre_Vector__cast2
          ( Hypre_Vector_queryInterface( x, "Hypre.ParCSRVector"),
            "Hypre.ParCSRVector" );
@@ -439,6 +436,7 @@ impl_Hypre_ParCSRVector_SetCommunicator(
    struct Hypre_ParCSRVector__data * data;
    data = Hypre_ParCSRVector__get_data( self );
    data -> comm = (MPI_Comm) mpi_comm;
+   return ierr;
   /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector.SetCommunicator) */
 }
 

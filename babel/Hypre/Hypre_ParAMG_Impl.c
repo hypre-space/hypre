@@ -3,8 +3,8 @@
  * Symbol:        Hypre.ParAMG-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.7.4
- * SIDL Created:  20021217 16:01:16 PST
- * Generated:     20021217 16:01:26 PST
+ * SIDL Created:  20021217 16:38:33 PST
+ * Generated:     20021217 16:38:43 PST
  * Description:   Server-side implementation for Hypre.ParAMG
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -416,10 +416,10 @@ impl_Hypre_ParAMG_Setup(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.ParAMG.Setup) */
   /* Insert the implementation of the Setup method here... */
-
+   int ierr = 0;
    /* nothing to implement - HYPRE_BoomerAMGSetup requires
       the vectors x,y in Ay=x.  So we do Setup in Apply. */
-
+   return ierr;
   /* DO-NOT-DELETE splicer.end(Hypre.ParAMG.Setup) */
 }
 
@@ -465,8 +465,7 @@ impl_Hypre_ParAMG_Apply(
    else {
       assert( "Unrecognized vector type."==(char *)x );
    }
-   /* This is the old code for the above.  It seems that queryInterface has been
-      changed to return TRUE or FALSE rather than the object (jfp Oct2002)
+   /* This is the old code for the above.
       HypreP_b = Hypre_Vector__cast2
          ( Hypre_Vector_queryInterface( b, "Hypre.ParCSRVector"), "Hypre.ParCSRVector" );
       assert( HypreP_b!=NULL );
@@ -477,18 +476,11 @@ impl_Hypre_ParAMG_Apply(
    ierr += HYPRE_IJVectorGetObject( ij_b, &objectb );
    bb = (HYPRE_ParVector) objectb;
 
-/* >>>> In the SIDL specification of Apply, y is an output argument.  That means the whole vector,
-   not just its data.
-   Therefore we must _always_ make a new vector (could let the user provide a Builder which provides
-   us with an old one), or at least remember the old one and return it with a higher reference
-   count.  Or we could change the SIDL spec, make x inout.  But Andy Cleary prefers output only.
-   Cf the email conversation of Tuesday November 19.  >>>> TO DO: change this to be correct.<<<<
-   But don't forget to accomodate typical big-code users who like to use the same vector over
-   and over again. Note Dec10: the user may well want to specify the initial value of x
-   (tremendous performance advantage is you're doing multiple similar problems).
-   Thus x MUST be input/output.  */
-   if ( *x==NULL ) {
+   if ( *x==NULL ) {  /* If vector not supplied, make one...*/
+      /* There's no good way to check the size of x.  It would be good to do
+         something similar if x had zero length.  Or assert(x has the right size) */
       Hypre_Vector_Clone( b, x );
+      Hypre_Vector_Clear( *x );
    }
    if ( Hypre_Vector_queryInterface( *x, "Hypre.ParCSRVector" ) ) {
       HypreP_x = Hypre_Vector__cast2( *x, "Hypre.ParCSRVector" );
@@ -496,8 +488,7 @@ impl_Hypre_ParAMG_Apply(
    else {
       assert( "Unrecognized vector type."==(char *)(*x) );
    }
-   /* This is the old code for the above.  It seems that queryInterface has been
-      changed to return TRUE or FALSE rather than the object (jfp Oct2002)
+   /* This is the old code for the above.
       HypreP_x = Hypre_Vector__cast2
          ( Hypre_Vector_queryInterface( *x, "Hypre.ParCSRVector"), "Hypre.ParCSRVector" );
       assert( HypreP_x!=NULL );
@@ -541,8 +532,7 @@ impl_Hypre_ParAMG_SetOperator(
    else {
       assert( "Unrecognized operator type."==(char *)A );
    }
-   /* This is the old code for the above.  It seems that queryInterface has been
-      changed to return TRUE or FALSE rather than the object (jfp Oct2002)
+   /* This is the old code for the above.
       Amat = Hypre_Operator__cast2
          ( Hypre_Operator_queryInterface( A, "Hypre.ParCSRMatrix"), "Hypre.ParCSRMatrix" );
       assert( Amat!=NULL );
@@ -591,8 +581,7 @@ impl_Hypre_ParAMG_GetResidual(
    else {
       assert( "Unrecognized vector type."==(char *)(*r) );
    }
-   /* This is the old code for the above.  It seems that queryInterface has been
-      changed to return TRUE or FALSE rather than the object (jfp Oct2002)
+   /* This is the old code for the above.
       HypreP_r = Hypre_Vector__cast2
          ( Hypre_Vector_queryInterface( *r, "Hypre.ParCSRVector"), "Hypre.ParCSRVector" );
       assert( HypreP_r!=NULL );

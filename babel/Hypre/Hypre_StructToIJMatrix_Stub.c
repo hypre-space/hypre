@@ -3,8 +3,8 @@
  * Symbol:        Hypre.StructToIJMatrix-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.7.4
- * SIDL Created:  20021217 16:01:16 PST
- * Generated:     20021217 16:01:21 PST
+ * SIDL Created:  20021217 16:38:33 PST
+ * Generated:     20021217 16:38:39 PST
  * Description:   Client-side glue code for Hypre.StructToIJMatrix
  * 
  * WARNING: Automatically generated; changes will be lost

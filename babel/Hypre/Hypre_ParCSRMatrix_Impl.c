@@ -3,8 +3,8 @@
  * Symbol:        Hypre.ParCSRMatrix-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.7.4
- * SIDL Created:  20021217 16:01:16 PST
- * Generated:     20021217 16:01:24 PST
+ * SIDL Created:  20021217 16:38:33 PST
+ * Generated:     20021217 16:38:41 PST
  * Description:   Server-side implementation for Hypre.ParCSRMatrix
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -793,8 +793,7 @@ impl_Hypre_ParCSRMatrix_Apply(
    else {
       assert( "Unrecognized vector type."==(char *)b );
    }
-   /* This is the old code for the above.  It seems that queryInterface has been
-      changed to return TRUE or FALSE rather than the object (jfp Oct2002)
+   /* This is the old code for the above.
       HypreP_b = Hypre_Vector__cast2( Hypre_Vector_queryInterface( b, "Hypre.ParCSRVector"),
                                      "Hypre.ParCSRVector" );
       assert( HypreP_b!=NULL );
@@ -806,8 +805,7 @@ impl_Hypre_ParCSRMatrix_Apply(
    else {
       assert( "Unrecognized vector type."==(char *)x );
    }
-   /* This is the old code for the above.  It seems that queryInterface has been
-      changed to return TRUE or FALSE rather than the object (jfp Oct2002)
+   /* This is the old code for the above.
       HypreP_x = Hypre_Vector__cast2( Hypre_Vector_queryInterface( *x, "Hypre.ParCSRVector"),
                                      "Hypre.ParCSRVector" );
       assert( HypreP_x!=NULL );

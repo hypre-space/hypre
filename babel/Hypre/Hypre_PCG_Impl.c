@@ -3,8 +3,8 @@
  * Symbol:        Hypre.PCG-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.7.4
- * SIDL Created:  20021217 16:01:16 PST
- * Generated:     20021217 16:01:25 PST
+ * SIDL Created:  20021217 16:38:33 PST
+ * Generated:     20021217 16:38:42 PST
  * Description:   Server-side implementation for Hypre.PCG
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -492,6 +492,13 @@ impl_Hypre_PCG_Apply(
    assert( comm != (MPI_Comm)NULL ); /* SetCommunicator should have been called earlier */
    mat = data->matrix;
    assert( mat != NULL ); /* SetOperator should have been called earlier */
+
+   if ( *x==NULL ) {  /* If vector not supplied, make one...*/
+      /* There's no good way to check the size of x.  It would be good to do
+         something similar if x had zero length.  Or assert(x has the right size) */
+      Hypre_Vector_Clone( b, x );
+      Hypre_Vector_Clear( *x );
+   }
 
    if ( data -> vector_type == NULL ) {
       /* This is the first time this Babel PCG object has seen a vector.

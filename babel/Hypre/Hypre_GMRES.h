@@ -3,8 +3,8 @@
  * Symbol:        Hypre.GMRES-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.7.4
- * SIDL Created:  20021217 16:01:16 PST
- * Generated:     20021217 16:01:20 PST
+ * SIDL Created:  20021217 16:38:33 PST
+ * Generated:     20021217 16:38:37 PST
  * Description:   Client-side glue code for Hypre.GMRES
  * 
  * WARNING: Automatically generated; changes will be lost
