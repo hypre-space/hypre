@@ -1064,7 +1064,6 @@ hypre_StructVectorMaxValue( hypre_StructVector *vector,
    double           *data;
 
    hypre_Index       imin;
-   hypre_Index       imax;
    hypre_BoxArray   *boxes;
    hypre_Box        *box;
    hypre_Index       loop_size;
@@ -1090,10 +1089,6 @@ hypre_StructVectorMaxValue( hypre_StructVector *vector,
          data = hypre_StructVectorBoxData(vector, i);
          hypre_BoxGetSize(box, loop_size);
          hypre_CopyIndex( hypre_BoxIMin(box), imin );
-         hypre_CopyIndex( hypre_BoxIMax(box), imax );
-         /* The above will do the job, but I don't understand why these don't work...
-         imin = hypre_BoxIMin( box );
-         imax = hypre_BoxIMax( box );*/
 
          hypre_BoxLoop1Begin(loop_size,
                              box, imin, unit_stride, datai);

@@ -155,7 +155,6 @@ hypre_PointRelaxSetup( void               *relax_vdata,
    hypre_ComputeInfo     *compute_info;
    hypre_ComputePkg     **compute_pkgs;
 
-   hypre_Index            unit_stride;
    hypre_Index            diag_index;
    hypre_IndexRef         stride;
    hypre_IndexRef         index;
@@ -207,8 +206,6 @@ hypre_PointRelaxSetup( void               *relax_vdata,
    /*----------------------------------------------------------
     * Set up the compute packages
     *----------------------------------------------------------*/
-
-   hypre_SetIndex(unit_stride, 1, 1, 1);
 
    compute_pkgs = hypre_CTAlloc(hypre_ComputePkg *, num_pointsets);
 
