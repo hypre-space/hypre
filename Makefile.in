@@ -273,6 +273,7 @@ clean:
 veryclean:
 	@ \
 	rm -Rf hypre; \
+	rm Makefile; \
 	for i in ${HYPRE_DIRS} ${HYPRE_EXTRA_DIRS}; \
 	do \
 	  if [ -d $$i ]; \

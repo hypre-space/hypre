@@ -7,55 +7,68 @@
 # $Revision$
 #EHEADER***********************************************************************
 
-###  If internal BLAS routines are needed, copy the files to the utilities 
-###  directory to be included in libHYPRE_utilities.a 
+###  If internal BLAS routines are needed, compile in this sub-directory 
+###  then copy the files to the utilities directory to be included in
+###  libHYPRE_utilities.a 
 
 include ../config/Makefile.config
 
 
-BLAS_HEADERS =\
-  f2c.h\
-  hypre_blas.h
+BLAS_LOCAL_HEADER =
+BLAS_HEADER = hypre_no_blas.h
+@BLASNEEDED@BLAS_LOCAL_HEADER = f2c.h
+@BLASNEEDED@BLAS_HEADER = hypre_blas.h
 
-BLAS_FILES = \
-   blas_utils.c\
-   dasum.c\
-   daxpy.c\
-   dcopy.c\
-   ddot.c\
-   dgemm.c\
-   dgemv.c\
-   dger.c\
-   dnrm2.c\
-   drot.c\
-   dscal.c\
-   dswap.c\
-   dsymm.c\
-   dsymv.c\
-   dsyr2.c\
-   dsyr2k.c\
-   dsyrk.c\
-   dtrmm.c\
-   dtrmv.c\
-   dtrsm.c\
-   dtrsv.c\
-   idamax.c
+BLAS_FILES = hypre_no_blas.c
+@BLASNEEDED@BLAS_FILES = \
+@BLASNEEDED@blas_utils.c\
+@BLASNEEDED@dasum.c\
+@BLASNEEDED@daxpy.c\
+@BLASNEEDED@dcopy.c\
+@BLASNEEDED@ddot.c\
+@BLASNEEDED@dgemm.c\
+@BLASNEEDED@dgemv.c\
+@BLASNEEDED@dger.c\
+@BLASNEEDED@dnrm2.c\
+@BLASNEEDED@drot.c\
+@BLASNEEDED@dscal.c\
+@BLASNEEDED@dswap.c\
+@BLASNEEDED@dsymm.c\
+@BLASNEEDED@dsymv.c\
+@BLASNEEDED@dsyr2.c\
+@BLASNEEDED@dsyr2k.c\
+@BLASNEEDED@dsyrk.c\
+@BLASNEEDED@dtrmm.c\
+@BLASNEEDED@dtrmv.c\
+@BLASNEEDED@dtrsm.c\
+@BLASNEEDED@dtrsv.c\
+@BLASNEEDED@idamax.c
 
+OBJS = ${BLAS_FILES:.c=.o}
+HEADERS = ${BLAS_LOCAL_HEADER} ${BLAS_HEADER}
 
-all:
+##################################################################
+# Targets
+##################################################################
+
+all: ${OBJS}
 	@ \
-	for head in ${BLAS_HEADERS}; \
+	for file in ${OBJS}; \
 	do \
-	  (cp -f $$head ../utilities); \
-	done;\
-	for file in ${BLAS_FILES}; \
-	do \
-	  (cp -f $$file ../utilities); \
-	done
+	 (cp -fp $$file ../utilities); \
+	done; \
+	cp -fp ${BLAS_HEADER} ../utilities
 
 install: all
 
 clean:
-	@rm -f *.o lib*
+	@rm -f *.o
 
 veryclean: clean
+	@rm -f Makefile
+
+##################################################################
+# Rules
+##################################################################
+
+${OBJS}: ${HEADERS}

@@ -108,6 +108,7 @@ clean:
 
 veryclean: clean
 	@rm -f libHYPRE_*.a
+	@rm -f Makefile
 
 
 ##################################################################

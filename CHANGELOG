@@ -14,7 +14,7 @@
 #
 #=============================================================================
 
-Version 1.8.4a released, 2004/12/01.
+Version 1.8.4a released, ???????.
 
 - Removed all automake & libtool use from build system.  Autoconf reads 
   configure.in to create the configure script.  The Makefiles are created by

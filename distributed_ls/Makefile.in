@@ -37,13 +37,5 @@ clean:
 	  fi; \
 	done
 
-veryclean:
-	@ \
-	for i in ${HYPRE_DIST_LS_DIRS}; \
-	do \
-	  if [ -d $$i ]; \
-	  then \
-	    (cd $$i && $(MAKE) $@); \
-	  fi; \
-	done
-
+veryclean: clean
+	@rm -f Makefile
