@@ -67,14 +67,14 @@ AC_HELP_STRING([--with-babel],[use babel]),
     casc_using_babel=yes
     BABEL_INSTALL_DIR=HYPRE_TOP_SRC_DIR/babel-runtime
     BABEL_HYPRE_INCLUDES="\
-    -I HYPRE_TOP_SRC_DIR/hypre/include\
+    -I\$ac_top_srcdir/hypre/include\
     -I$BABEL_INSTALL_DIR/sidl\
-    -I HYPRE_TOP_SRC_DIR/babel/bHYPRE"
+    -I\$ac_top_srcdir/babel/bHYPRE"
     BABEL_LIB_DIR="HYPRE_TOP_SRC_DIR/hypre/lib"
     BABELLIBFLAGS="\
-    -L/HYPRE_TOP_SRC_DIR/babel/bHYPREClient-C -lbHYPREClient-C\
-    -L/HYPRE_TOP_SRC_DIR/babel/bHYPREClient-F -lbHYPREClient-F\
-    -L/HYPRE_TOP_SRC_DIR/babel/bHYPRE -lbHYPRE\
+    -LHYPRE_TOP_SRC_DIR/babel/bHYPREClient-C -lbHYPREClient-C\
+    -LHYPRE_TOP_SRC_DIR/babel/bHYPREClient-F -lbHYPREClient-F\
+    -LHYPRE_TOP_SRC_DIR/babel/bHYPRE -lbHYPRE\
     -L${BABEL_LIB_DIR} -lsidl"
  
     babeldir="${BABEL_INSTALL_DIR}"
@@ -100,7 +100,7 @@ AC_SUBST(BABELDIR)
 
 dnl option to ignore the lib directory (speed-up builds/testing)
 AC_ARG_WITH(libdir,
-AC_HELP_STRING([--with-libdir],[build libHYPRE and libHYPRE_LSI libraries]),
+AC_HELP_STRING([--with-libdir],[build libHYPRE and libHYPRE_LSI libraries in lib directory]),
 [ if test "$withval" = "no"; then
     casc_using_libdir=no
   elif test "$withval" = "yes"; then
@@ -362,7 +362,7 @@ AC_CONFIG_FILES([
   FEI_mv/femli/util/Makefile
   FEI_mv/femli/vector/Makefile
   IJ_mv/Makefile])
-if test -d babel; then
+if test -d babel || test "$casc_using_babel" = "yes" ; then
   AC_CONFIG_FILES([
     babel/Makefile
     babel/bHYPRE/Makefile

@@ -1075,7 +1075,8 @@ Optional Packages:
                           the machine
   --with-purify-to-file   direct purify output to the file "purify.log"
   --with-babel            use babel
-  --with-libdir           build libHYPRE and libHYPRE_LSI libraries
+  --with-libdir           build libHYPRE and libHYPRE_LSI libraries in lib
+                          directory
   --with-FEI_BASE_DIR     specify the directory where the fei header files
                           live.
   --with-FEI_LIB_DIR      specify an additional directory for fei library
@@ -3311,14 +3312,14 @@ if test "${with_babel+set}" = set; then
     casc_using_babel=yes
     BABEL_INSTALL_DIR=`pwd`/babel-runtime
     BABEL_HYPRE_INCLUDES="\
-    -I `pwd`/hypre/include\
+    -I\$ac_top_srcdir/hypre/include\
     -I$BABEL_INSTALL_DIR/sidl\
-    -I `pwd`/babel/bHYPRE"
+    -I\$ac_top_srcdir/babel/bHYPRE"
     BABEL_LIB_DIR="`pwd`/hypre/lib"
     BABELLIBFLAGS="\
-    -L/`pwd`/babel/bHYPREClient-C -lbHYPREClient-C\
-    -L/`pwd`/babel/bHYPREClient-F -lbHYPREClient-F\
-    -L/`pwd`/babel/bHYPRE -lbHYPRE\
+    -LHYPRE_TOP_SRC_DIR/babel/bHYPREClient-C -lbHYPREClient-C\
+    -LHYPRE_TOP_SRC_DIR/babel/bHYPREClient-F -lbHYPREClient-F\
+    -LHYPRE_TOP_SRC_DIR/babel/bHYPRE -lbHYPRE\
     -L${BABEL_LIB_DIR} -lsidl"
 
     babeldir="${BABEL_INSTALL_DIR}"
@@ -6317,7 +6318,7 @@ fi
 
 
 # Provide some information about the compiler.
-echo "$as_me:6320:" \
+echo "$as_me:6321:" \
      "checking for Fortran 77 compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -6513,7 +6514,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_verb"
-(eval echo $as_me:6516: \"$ac_link\") >&5
+(eval echo $as_me:6517: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -6591,7 +6592,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_cv_prog_f77_v"
-(eval echo $as_me:6594: \"$ac_link\") >&5
+(eval echo $as_me:6595: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -7821,7 +7822,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 7824 "configure"' > conftest.$ac_ext
+  echo '#line 7825 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -9747,11 +9748,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9750: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9751: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:9754: \$? = $ac_status" >&5
+   echo "$as_me:9755: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -9979,11 +9980,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9982: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9983: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:9986: \$? = $ac_status" >&5
+   echo "$as_me:9987: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -10046,11 +10047,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:10049: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:10050: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:10053: \$? = $ac_status" >&5
+   echo "$as_me:10054: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -12236,7 +12237,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 12239 "configure"
+#line 12240 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12334,7 +12335,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 12337 "configure"
+#line 12338 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -14506,11 +14507,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14509: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14510: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:14513: \$? = $ac_status" >&5
+   echo "$as_me:14514: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -14573,11 +14574,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14576: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14577: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:14580: \$? = $ac_status" >&5
+   echo "$as_me:14581: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -15958,7 +15959,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 15961 "configure"
+#line 15962 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -16056,7 +16057,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 16059 "configure"
+#line 16060 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -16878,11 +16879,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:16881: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:16882: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:16885: \$? = $ac_status" >&5
+   echo "$as_me:16886: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -16945,11 +16946,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:16948: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:16949: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:16952: \$? = $ac_status" >&5
+   echo "$as_me:16953: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -18911,11 +18912,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:18914: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:18915: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:18918: \$? = $ac_status" >&5
+   echo "$as_me:18919: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -19143,11 +19144,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:19146: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:19147: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:19150: \$? = $ac_status" >&5
+   echo "$as_me:19151: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -19210,11 +19211,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:19213: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:19214: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:19217: \$? = $ac_status" >&5
+   echo "$as_me:19218: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -21400,7 +21401,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 21403 "configure"
+#line 21404 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -21498,7 +21499,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 21501 "configure"
+#line 21502 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -26091,7 +26092,7 @@ fi
 
                                                                                                                                                                                               ac_config_files="$ac_config_files Makefile FEI_mv/Makefile FEI_mv/SuperLU/Makefile FEI_mv/fei-base/Makefile FEI_mv/fei-hypre/Makefile FEI_mv/femli/Makefile FEI_mv/femli/amgs/Makefile FEI_mv/femli/base/Makefile FEI_mv/femli/blas/Makefile FEI_mv/femli/cintface/Makefile FEI_mv/femli/fedata/Makefile FEI_mv/femli/lib/Makefile FEI_mv/femli/mapper/Makefile FEI_mv/femli/matrix/Makefile FEI_mv/femli/solver/Makefile FEI_mv/femli/test/Makefile FEI_mv/femli/util/Makefile FEI_mv/femli/vector/Makefile IJ_mv/Makefile"
 
-if test -d babel; then
+if test -d babel || test "$casc_using_babel" = "yes" ; then
                                           ac_config_files="$ac_config_files babel/Makefile babel/bHYPRE/Makefile babel/bHYPREClient-C/Makefile babel/bHYPREClient-F/Makefile"
 
 fi
