@@ -60,6 +60,7 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
    int             *P_offd_j = hypre_CSRMatrixJ(P_offd);
 
    int	first_col_diag_P = hypre_ParCSRMatrixFirstColDiag(P);
+   int	last_col_diag_P;
    int	num_cols_diag_P = hypre_CSRMatrixNumCols(P_diag);
    int	num_cols_offd_P = hypre_CSRMatrixNumCols(P_offd);
    int *coarse_partitioning = hypre_ParCSRMatrixColStarts(P);
@@ -92,11 +93,14 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
    int             *RAP_offd_j;
 
    int              RAP_size;
+   int              RAP_ext_size;
    int              RAP_diag_size;
    int              RAP_offd_size;
+   int              P_ext_diag_size;
+   int              P_ext_offd_size;
    int		    first_col_diag_RAP;
    int		    last_col_diag_RAP;
-   int		    num_cols_offd_RAP;
+   int		    num_cols_offd_RAP = 0;
    
    hypre_CSRMatrix *R_diag;
    
@@ -110,20 +114,36 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
    int             *R_offd_i;
    int             *R_offd_j;
 
-   hypre_CSRMatrix *P_ext;
+   hypre_CSRMatrix *Ps_ext;
    
-   double          *P_ext_data;
-   int             *P_ext_i;
-   int             *P_ext_j;
+   double          *Ps_ext_data;
+   int             *Ps_ext_i;
+   int             *Ps_ext_j;
+
+   double 	   *P_ext_diag_data;
+   int             *P_ext_diag_i;
+   int             *P_ext_diag_j;
+
+   double 	   *P_ext_offd_data;
+   int             *P_ext_offd_i;
+   int             *P_ext_offd_j;
+
+   int		   *col_map_offd_Pext;
+   int		   *map_P_to_Pext;
+   int		   *map_P_to_RAP;
+   int		   *map_Pext_to_RAP;
 
    int		   *P_marker;
    int		   *A_marker;
+   int		   *temp;
 
    int              n_coarse;
    int              n_fine;
+   int              num_cols_offd_Pext = 0;
    
    int              ic, i, j, k;
    int              i1, i2, i3;
+   int              index, index2, cnt, cnt_offd, cnt_diag, value;
    int              jj1, jj2, jj3, jcol;
    
    int              jj_counter, jj_count_diag, jj_count_offd;
@@ -177,23 +197,119 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
    num_nz_cols_A = num_cols_diag_A + num_cols_offd_A;
 
    /*-----------------------------------------------------------------------
-    *  Generate P_ext, i.e. portion of P that is stored on neighbor procs
+    *  Generate Ps_ext, i.e. portion of P that is stored on neighbor procs
     *  and needed locally for triple matrix product 
     *-----------------------------------------------------------------------*/
 
    if (num_cols_diag_A != n_fine) 
    {
-   	P_ext = hypre_ExtractBExt(P,A,1);
-   	P_ext_data = hypre_CSRMatrixData(P_ext);
-   	P_ext_i    = hypre_CSRMatrixI(P_ext);
-   	P_ext_j    = hypre_CSRMatrixJ(P_ext);
+   	Ps_ext = hypre_ExtractBExt(P,A,1);
+   	Ps_ext_data = hypre_CSRMatrixData(Ps_ext);
+   	Ps_ext_i    = hypre_CSRMatrixI(Ps_ext);
+   	Ps_ext_j    = hypre_CSRMatrixJ(Ps_ext);
+   }
+
+   P_ext_diag_i = hypre_CTAlloc(int,num_cols_offd_A+1);
+   P_ext_offd_i = hypre_CTAlloc(int,num_cols_offd_A+1);
+   P_ext_diag_size = 0;
+   P_ext_offd_size = 0;
+   last_col_diag_P = first_col_diag_P + num_cols_diag_P - 1;
+
+   for (i=0; i < num_cols_offd_A; i++)
+   {
+      for (j=Ps_ext_i[i]; j < Ps_ext_i[i+1]; j++)
+         if (Ps_ext_j[j] < first_col_diag_P || Ps_ext_j[j] > last_col_diag_P)
+	    P_ext_offd_size++;
+	 else
+	    P_ext_diag_size++;
+      P_ext_diag_i[i+1] = P_ext_diag_size;
+      P_ext_offd_i[i+1] = P_ext_offd_size;
+   }
+   
+   if (P_ext_diag_size)
+   {
+      P_ext_diag_j = hypre_CTAlloc(int, P_ext_diag_size);
+      P_ext_diag_data = hypre_CTAlloc(double, P_ext_diag_size);
+   }
+   if (P_ext_offd_size)
+   {
+      P_ext_offd_j = hypre_CTAlloc(int, P_ext_offd_size);
+      P_ext_offd_data = hypre_CTAlloc(double, P_ext_offd_size);
+   }
+
+   cnt_offd = 0;
+   cnt_diag = 0;
+   cnt = 0;
+   for (i=0; i < num_cols_offd_A; i++)
+   {
+      for (j=Ps_ext_i[i]; j < Ps_ext_i[i+1]; j++)
+         if (Ps_ext_j[j] < first_col_diag_P || Ps_ext_j[j] > last_col_diag_P)
+         {
+	    P_ext_offd_j[cnt_offd] = Ps_ext_j[j];
+	    P_ext_offd_data[cnt_offd++] = Ps_ext_data[j];
+         }
+	 else
+         {
+	    P_ext_diag_j[cnt_diag] = Ps_ext_j[j] - first_col_diag_P;
+	    P_ext_diag_data[cnt_diag++] = Ps_ext_data[j];
+         }
+   }
+   if (num_cols_diag_A != n_fine) hypre_DestroyCSRMatrix(Ps_ext);
+
+   if (P_ext_offd_size || num_cols_offd_P)
+   {
+      temp = hypre_CTAlloc(int, P_ext_offd_size+num_cols_offd_P);
+      for (i=0; i < P_ext_offd_size; i++)
+         temp[i] = P_ext_offd_j[i];
+      cnt = P_ext_offd_size;
+      for (i=0; i < num_cols_offd_P; i++)
+         temp[cnt++] = col_map_offd_P[i];
+   }
+   if (cnt)
+   {
+      qsort0(temp, 0, cnt-1);
+
+      num_cols_offd_Pext = 1;
+      value = temp[0];
+      for (i=1; i < cnt; i++)
+      {
+         if (temp[i] > value)
+         {
+	    value = temp[i];
+	    temp[num_cols_offd_Pext++] = value;
+         }
+      }
+   }
+ 
+   if (num_cols_offd_Pext)
+	col_map_offd_Pext = hypre_CTAlloc(int,num_cols_offd_Pext);
+
+   for (i=0; i < num_cols_offd_Pext; i++)
+      col_map_offd_Pext[i] = temp[i];
+
+   if (P_ext_offd_size || num_cols_offd_P)
+      hypre_TFree(temp);
+
+   for (i=0 ; i < P_ext_offd_size; i++)
+      P_ext_offd_j[i] = hypre_BinarySearch(col_map_offd_Pext,
+					   P_ext_offd_j[i],
+					   num_cols_offd_Pext);
+   if (num_cols_offd_P)
+   {
+      map_P_to_Pext = hypre_CTAlloc(int,num_cols_offd_P);
+
+      cnt = 0;
+      for (i=0; i < num_cols_offd_Pext; i++)
+         if (col_map_offd_Pext[i] == col_map_offd_P[cnt])
+	    map_P_to_Pext[cnt++] = i;
    }
 
    /*-----------------------------------------------------------------------
     *  Allocate marker arrays.
     *-----------------------------------------------------------------------*/
 
-   P_marker = hypre_CTAlloc(int, n_coarse);
+   if (num_cols_offd_Pext || num_cols_diag_P)
+      P_marker = hypre_CTAlloc(int, num_cols_diag_P+num_cols_offd_Pext);
    A_marker = hypre_CTAlloc(int, num_nz_cols_A);
 
    /*-----------------------------------------------------------------------
@@ -210,7 +326,7 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
     *-----------------------------------------------------------------------*/
 
    jj_counter = start_indexing;
-   for (ic = 0; ic < n_coarse; ic++)
+   for (ic = 0; ic < num_cols_diag_P+num_cols_offd_Pext; ic++)
    {      
       P_marker[ic] = -1;
    }
@@ -262,9 +378,25 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
                 *  Loop over entries in row i2 of P_ext.
                 *-----------------------------------------------------------*/
 
-               for (jj3 = P_ext_i[i2]; jj3 < P_ext_i[i2+1]; jj3++)
+               for (jj3 = P_ext_diag_i[i2]; jj3 < P_ext_diag_i[i2+1]; jj3++)
                {
-                  i3 = P_ext_j[jj3];
+                  i3 = P_ext_diag_j[jj3];
+                  
+                  /*--------------------------------------------------------
+                   *  Check P_marker to see that RAP_{ic,i3} has not already
+                   *  been accounted for. If it has not, mark it and increment
+                   *  counter.
+                   *--------------------------------------------------------*/
+
+                  if (P_marker[i3] < jj_row_begining)
+                  {
+                     P_marker[i3] = jj_counter;
+                     jj_counter++;
+                  }
+               }
+               for (jj3 = P_ext_offd_i[i2]; jj3 < P_ext_offd_i[i2+1]; jj3++)
+               {
+                  i3 = P_ext_offd_j[jj3] + num_cols_diag_P;
                   
                   /*--------------------------------------------------------
                    *  Check P_marker to see that RAP_{ic,i3} has not already
@@ -308,7 +440,7 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
 
                for (jj3 = P_diag_i[i2]; jj3 < P_diag_i[i2+1]; jj3++)
                {
-                  i3 = P_diag_j[jj3]+first_col_diag_P;
+                  i3 = P_diag_j[jj3];
                   
                   /*--------------------------------------------------------
                    *  Check P_marker to see that RAP_{ic,i3} has not already
@@ -328,7 +460,7 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
 
                for (jj3 = P_offd_i[i2]; jj3 < P_offd_i[i2+1]; jj3++)
                {
-                  i3 = col_map_offd_P[P_offd_j[jj3]];
+                  i3 = map_P_to_Pext[P_offd_j[jj3]] + num_cols_diag_P;
                   
                   /*--------------------------------------------------------
                    *  Check P_marker to see that RAP_{ic,i3} has not already
@@ -373,7 +505,7 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
     *-----------------------------------------------------------------------*/
 
    jj_counter = start_indexing;
-   for (ic = 0; ic < n_coarse; ic++)
+   for (ic = 0; ic < num_cols_diag_P+num_cols_offd_Pext; ic++)
    {      
       P_marker[ic] = -1;
    }
@@ -427,10 +559,10 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
                 *  Loop over entries in row i2 of P_ext.
                 *-----------------------------------------------------------*/
 
-               for (jj3 = P_ext_i[i2]; jj3 < P_ext_i[i2+1]; jj3++)
+               for (jj3 = P_ext_diag_i[i2]; jj3 < P_ext_diag_i[i2+1]; jj3++)
                {
-                  i3 = P_ext_j[jj3];
-                  r_a_p_product = r_a_product * P_ext_data[jj3];
+                  i3 = P_ext_diag_j[jj3];
+                  r_a_p_product = r_a_product * P_ext_diag_data[jj3];
                   
                   /*--------------------------------------------------------
                    *  Check P_marker to see that RAP_{ic,i3} has not already
@@ -442,7 +574,32 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
                   {
                      P_marker[i3] = jj_counter;
                      RAP_int_data[jj_counter] = r_a_p_product;
-                     RAP_int_j[jj_counter] = i3;
+                     RAP_int_j[jj_counter] = i3 + first_col_diag_P;
+                     jj_counter++;
+                  }
+                  else
+                  {
+                     RAP_int_data[P_marker[i3]] += r_a_p_product;
+                  }
+               }
+
+               for (jj3 = P_ext_offd_i[i2]; jj3 < P_ext_offd_i[i2+1]; jj3++)
+               {
+                  i3 = P_ext_offd_j[jj3] + num_cols_diag_P;
+                  r_a_p_product = r_a_product * P_ext_offd_data[jj3];
+                  
+                  /*--------------------------------------------------------
+                   *  Check P_marker to see that RAP_{ic,i3} has not already
+                   *  been accounted for. If it has not, create a new entry.
+                   *  If it has, add new contribution.
+                   *--------------------------------------------------------*/
+
+                  if (P_marker[i3] < jj_row_begining)
+                  {
+                     P_marker[i3] = jj_counter;
+                     RAP_int_data[jj_counter] = r_a_p_product;
+                     RAP_int_j[jj_counter] 
+				= col_map_offd_Pext[i3-num_cols_diag_P];
                      jj_counter++;
                   }
                   else
@@ -459,10 +616,16 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
 
             else
             {
-               for (jj3 = P_ext_i[i2]; jj3 < P_ext_i[i2+1]; jj3++)
+               for (jj3 = P_ext_diag_i[i2]; jj3 < P_ext_diag_i[i2+1]; jj3++)
                {
-                  i3 = P_ext_j[jj3];
-                  r_a_p_product = r_a_product * P_ext_data[jj3];
+                  i3 = P_ext_diag_j[jj3];
+                  r_a_p_product = r_a_product * P_ext_diag_data[jj3];
+                  RAP_int_data[P_marker[i3]] += r_a_p_product;
+               }
+               for (jj3 = P_ext_offd_i[i2]; jj3 < P_ext_offd_i[i2+1]; jj3++)
+               {
+                  i3 = P_ext_offd_j[jj3] + num_cols_diag_P;
+                  r_a_p_product = r_a_product * P_ext_offd_data[jj3];
                   RAP_int_data[P_marker[i3]] += r_a_p_product;
                }
             }
@@ -497,7 +660,7 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
 
                for (jj3 = P_diag_i[i2]; jj3 < P_diag_i[i2+1]; jj3++)
                {
-                  i3 = P_diag_j[jj3]+first_col_diag_P;
+                  i3 = P_diag_j[jj3];
                   r_a_p_product = r_a_product * P_diag_data[jj3];
                   
                   /*--------------------------------------------------------
@@ -510,7 +673,7 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
                   {
                      P_marker[i3] = jj_counter;
                      RAP_int_data[jj_counter] = r_a_p_product;
-                     RAP_int_j[jj_counter] = i3;
+                     RAP_int_j[jj_counter] = i3 + first_col_diag_P;
                      jj_counter++;
                   }
                   else
@@ -520,7 +683,7 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
                }
                for (jj3 = P_offd_i[i2]; jj3 < P_offd_i[i2+1]; jj3++)
                {
-                  i3 = col_map_offd_P[P_offd_j[jj3]];
+                  i3 = map_P_to_Pext[P_offd_j[jj3]] + num_cols_diag_P;
                   r_a_p_product = r_a_product * P_offd_data[jj3];
                   
                   /*--------------------------------------------------------
@@ -533,7 +696,8 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
                   {
                      P_marker[i3] = jj_counter;
                      RAP_int_data[jj_counter] = r_a_p_product;
-                     RAP_int_j[jj_counter] = i3;
+                     RAP_int_j[jj_counter] = 
+				col_map_offd_Pext[i3-num_cols_diag_P];
                      jj_counter++;
                   }
                   else
@@ -552,13 +716,13 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
             {
                for (jj3 = P_diag_i[i2]; jj3 < P_diag_i[i2+1]; jj3++)
                {
-                  i3 = P_diag_j[jj3]+first_col_diag_P;
+                  i3 = P_diag_j[jj3];
                   r_a_p_product = r_a_product * P_diag_data[jj3];
                   RAP_int_data[P_marker[i3]] += r_a_p_product;
                }
                for (jj3 = P_offd_i[i2]; jj3 < P_offd_i[i2+1]; jj3++)
                {
-                  i3 = col_map_offd_P[P_offd_j[jj3]];
+                  i3 = map_P_to_Pext[P_offd_j[jj3]] + num_cols_diag_P;
                   r_a_p_product = r_a_product * P_offd_data[jj3];
                   RAP_int_data[P_marker[i3]] += r_a_p_product;
                }
@@ -573,12 +737,14 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
    hypre_CSRMatrixData(RAP_int) = RAP_int_data;
   }
 
+   RAP_ext_size = 0;
    if (num_sends_RT || num_recvs_RT)
    {
 	RAP_ext = hypre_ExchangeRAPData(RAP_int,comm_pkg_RT);
    	RAP_ext_i = hypre_CSRMatrixI(RAP_ext);
    	RAP_ext_j = hypre_CSRMatrixJ(RAP_ext);
    	RAP_ext_data = hypre_CSRMatrixData(RAP_ext);
+        RAP_ext_size = RAP_ext_i[hypre_CSRMatrixNumRows(RAP_ext)];
    }
    if (num_cols_offd_RT)
    	hypre_DestroyCSRMatrix(RAP_int);
@@ -590,12 +756,77 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
    last_col_diag_RAP = first_col_diag_P + num_cols_diag_P - 1;
 
    /*-----------------------------------------------------------------------
+    *  check for new nonzero columns in RAP_offd generated through RAP_ext
+    *-----------------------------------------------------------------------*/
+
+   if (RAP_ext_size || num_cols_offd_Pext)
+   {
+      temp = hypre_CTAlloc(int,RAP_ext_size+num_cols_offd_Pext);
+      cnt = 0;
+      for (i=0; i < RAP_ext_size; i++)
+         if (RAP_ext_j[i] < first_col_diag_RAP 
+			|| RAP_ext_j[i] > last_col_diag_RAP)
+            temp[cnt++] = RAP_ext_j[i];
+      for (i=0; i < num_cols_offd_Pext; i++)
+         temp[cnt++] = col_map_offd_Pext[i];
+
+
+      if (cnt)
+      {
+         qsort0(temp,0,cnt-1);
+         value = temp[0];
+         num_cols_offd_RAP = 1;
+         for (i=1; i < cnt; i++)
+         {
+            if (temp[i] > value)
+            {
+	       value = temp[i];
+	       temp[num_cols_offd_RAP++] = value;
+            }
+         }
+      }
+
+   /* now evaluate col_map_offd_RAP */
+      if (num_cols_offd_RAP)
+ 	 col_map_offd_RAP = hypre_CTAlloc(int, num_cols_offd_RAP);
+
+      for (i=0 ; i < num_cols_offd_RAP; i++)
+	 col_map_offd_RAP[i] = temp[i];
+  
+      hypre_TFree(temp);
+   }
+
+   if (num_cols_offd_P)
+   {
+      map_P_to_RAP = hypre_CTAlloc(int,num_cols_offd_P);
+
+      cnt = 0;
+      for (i=0; i < num_cols_offd_RAP; i++)
+         if (col_map_offd_RAP[i] == col_map_offd_P[cnt])
+	    map_P_to_RAP[cnt++] = i;
+   }
+
+   if (num_cols_offd_Pext)
+   {
+      map_Pext_to_RAP = hypre_CTAlloc(int,num_cols_offd_Pext);
+
+      cnt = 0;
+      for (i=0; i < num_cols_offd_RAP; i++)
+         if (col_map_offd_RAP[i] == col_map_offd_Pext[cnt])
+	    map_Pext_to_RAP[cnt++] = i;
+   }
+
+/*   need to allocate new P_marker etc. and make further changes */
+   /*-----------------------------------------------------------------------
     *  Initialize some stuff.
     *-----------------------------------------------------------------------*/
+   if (num_cols_offd_Pext || num_cols_diag_P)
+      hypre_TFree(P_marker);
+   P_marker = hypre_CTAlloc(int, num_cols_diag_P+num_cols_offd_RAP);
 
    jj_count_diag = start_indexing;
    jj_count_offd = start_indexing;
-   for (ic = 0; ic < n_coarse; ic++)
+   for (ic = 0; ic < num_cols_diag_P+num_cols_offd_RAP; ic++)
    {      
       P_marker[ic] = -1;
    }
@@ -616,7 +847,7 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
        *  being added to row ic of RAP_diag and RAP_offd through RAP_ext
        *--------------------------------------------------------------------*/
  
-      P_marker[ic+first_col_diag_P] = jj_count_diag;
+      P_marker[ic] = jj_count_diag;
       jj_row_begin_diag = jj_count_diag;
       jj_row_begin_offd = jj_count_offd;
       jj_count_diag++;
@@ -630,6 +861,9 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
 		   jcol = RAP_ext_j[k];
 		   if (jcol < first_col_diag_RAP || jcol > last_col_diag_RAP)
 		   {
+		   	jcol = num_cols_diag_P 
+				+ hypre_BinarySearch(col_map_offd_RAP,
+						jcol,num_cols_offd_RAP);
 		   	if (P_marker[jcol] < jj_row_begin_offd)
 			{
 			 	P_marker[jcol] = jj_count_offd;
@@ -638,6 +872,7 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
 		   }
 		   else
 		   {
+		   	jcol -= first_col_diag_P;
 		   	if (P_marker[jcol] < jj_row_begin_diag)
 			{
 			 	P_marker[jcol] = jj_count_diag;
@@ -684,9 +919,9 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
                 *  Loop over entries in row i2 of P_ext.
                 *-----------------------------------------------------------*/
  
-               for (jj3 = P_ext_i[i2]; jj3 < P_ext_i[i2+1]; jj3++)
+               for (jj3 = P_ext_diag_i[i2]; jj3 < P_ext_diag_i[i2+1]; jj3++)
                {
-                  i3 = P_ext_j[jj3];
+                  i3 = P_ext_diag_j[jj3];
                   
                   /*--------------------------------------------------------
                    *  Check P_marker to see that RAP_{ic,i3} has not already
@@ -694,22 +929,27 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
                    *  counter.
                    *--------------------------------------------------------*/
 
-		  if (i3 < first_col_diag_RAP || i3 > last_col_diag_RAP)
-		  { 
-                  	if (P_marker[i3] < jj_row_begin_offd)
-                  	{
-                     		P_marker[i3] = jj_count_offd;
-                     		jj_count_offd++;
-                  	}
-		  } 
-		  else
-		  { 
-                  	if (P_marker[i3] < jj_row_begin_diag)
-                  	{
-                     		P_marker[i3] = jj_count_diag;
-                     		jj_count_diag++;
-                  	}
-		  } 
+                  if (P_marker[i3] < jj_row_begin_diag)
+                  {
+                     P_marker[i3] = jj_count_diag;
+                     jj_count_diag++;
+                  }
+               }
+               for (jj3 = P_ext_offd_i[i2]; jj3 < P_ext_offd_i[i2+1]; jj3++)
+               {
+                  i3 = map_Pext_to_RAP[P_ext_offd_j[jj3]]+num_cols_diag_P;
+                  
+                  /*--------------------------------------------------------
+                   *  Check P_marker to see that RAP_{ic,i3} has not already
+                   *  been accounted for. If it has not, mark it and increment
+                   *  counter.
+                   *--------------------------------------------------------*/
+
+                  if (P_marker[i3] < jj_row_begin_offd)
+                  {
+                     P_marker[i3] = jj_count_offd;
+                     jj_count_offd++;
+                  }
                }
             }
            }
@@ -742,7 +982,7 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
  
                for (jj3 = P_diag_i[i2]; jj3 < P_diag_i[i2+1]; jj3++)
                {
-                  i3 = P_diag_j[jj3]+first_col_diag_P;
+                  i3 = P_diag_j[jj3];
                   
                   /*--------------------------------------------------------
                    *  Check P_marker to see that RAP_{ic,i3} has not already
@@ -764,7 +1004,7 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
 	       { 
                  for (jj3 = P_offd_i[i2]; jj3 < P_offd_i[i2+1]; jj3++)
                  {
-                  i3 = col_map_offd_P[P_offd_j[jj3]];
+                  i3 = map_P_to_RAP[P_offd_j[jj3]] + num_cols_diag_P;
                   
                   /*--------------------------------------------------------
                    *  Check P_marker to see that RAP_{ic,i3} has not already
@@ -801,8 +1041,11 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
     *-----------------------------------------------------------------------*/
  
    RAP_diag_size = jj_count_diag;
-   RAP_diag_data = hypre_CTAlloc(double, RAP_diag_size);
-   RAP_diag_j    = hypre_CTAlloc(int, RAP_diag_size);
+   if (RAP_diag_size)
+   { 
+      RAP_diag_data = hypre_CTAlloc(double, RAP_diag_size);
+      RAP_diag_j    = hypre_CTAlloc(int, RAP_diag_size);
+   } 
  
    RAP_offd_size = jj_count_offd;
    if (RAP_offd_size)
@@ -822,7 +1065,7 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
 
    jj_count_diag = start_indexing;
    jj_count_offd = start_indexing;
-   for (ic = 0; ic < n_coarse; ic++)
+   for (ic = 0; ic < num_cols_diag_P+num_cols_offd_RAP; ic++)
    {      
       P_marker[ic] = -1;
    }
@@ -842,7 +1085,7 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
        *  Create diagonal entry, RAP_{ic,ic} and add entries of RAP_ext 
        *--------------------------------------------------------------------*/
 
-      P_marker[ic+first_col_diag_P] = jj_count_diag;
+      P_marker[ic] = jj_count_diag;
       jj_row_begin_diag = jj_count_diag;
       jj_row_begin_offd = jj_count_offd;
       RAP_diag_data[jj_count_diag] = zero;
@@ -858,12 +1101,16 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
 		   jcol = RAP_ext_j[k];
 		   if (jcol < first_col_diag_RAP || jcol > last_col_diag_RAP)
 		   {
+		   	jcol = num_cols_diag_P 
+				+ hypre_BinarySearch(col_map_offd_RAP,
+						jcol,num_cols_offd_RAP);
 		   	if (P_marker[jcol] < jj_row_begin_offd)
 			{
 			 	P_marker[jcol] = jj_count_offd;
 				RAP_offd_data[jj_count_offd] 
 					= RAP_ext_data[k];
-				RAP_offd_j[jj_count_offd] = jcol;
+				RAP_offd_j[jj_count_offd] 
+					= jcol-num_cols_diag_P;
 				jj_count_offd++;
 			}
 			else
@@ -872,13 +1119,13 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
 		   }
 		   else
 		   {
+		   	jcol -= first_col_diag_P; 
 		   	if (P_marker[jcol] < jj_row_begin_diag)
 			{
 			 	P_marker[jcol] = jj_count_diag;
 				RAP_diag_data[jj_count_diag] 
 					= RAP_ext_data[k];
-				RAP_diag_j[jj_count_diag] 
-					= jcol-first_col_diag_P;
+				RAP_diag_j[jj_count_diag] = jcol;
 				jj_count_diag++;
 			}
 			else
@@ -927,40 +1174,45 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
                 *  Loop over entries in row i2 of P_ext.
                 *-----------------------------------------------------------*/
 
-               for (jj3 = P_ext_i[i2]; jj3 < P_ext_i[i2+1]; jj3++)
+               for (jj3 = P_ext_diag_i[i2]; jj3 < P_ext_diag_i[i2+1]; jj3++)
                {
-                  i3 = P_ext_j[jj3];
-                  r_a_p_product = r_a_product * P_ext_data[jj3];
+                  i3 = P_ext_diag_j[jj3];
+                  r_a_p_product = r_a_product * P_ext_diag_data[jj3];
                   
                   /*--------------------------------------------------------
                    *  Check P_marker to see that RAP_{ic,i3} has not already
                    *  been accounted for. If it has not, create a new entry.
                    *  If it has, add new contribution.
                    *--------------------------------------------------------*/
-		  if (i3 < first_col_diag_RAP || i3 > last_col_diag_RAP)
-		  {
-                     if (P_marker[i3] < jj_row_begin_offd)
-                     {
+                  if (P_marker[i3] < jj_row_begin_diag)
+                  {
+                    	P_marker[i3] = jj_count_diag;
+                     	RAP_diag_data[jj_count_diag] = r_a_p_product;
+                     	RAP_diag_j[jj_count_diag] = i3;
+                     	jj_count_diag++;
+		  }
+		  else
+                     	RAP_diag_data[P_marker[i3]] += r_a_p_product;
+               }
+               for (jj3 = P_ext_offd_i[i2]; jj3 < P_ext_offd_i[i2+1]; jj3++)
+               {
+                  i3 = map_Pext_to_RAP[P_ext_offd_j[jj3]] + num_cols_diag_P;
+                  r_a_p_product = r_a_product * P_ext_offd_data[jj3];
+                  
+                  /*--------------------------------------------------------
+                   *  Check P_marker to see that RAP_{ic,i3} has not already
+                   *  been accounted for. If it has not, create a new entry.
+                   *  If it has, add new contribution.
+                   *--------------------------------------------------------*/
+                  if (P_marker[i3] < jj_row_begin_offd)
+                  {
                      	P_marker[i3] = jj_count_offd;
                      	RAP_offd_data[jj_count_offd] = r_a_p_product;
-                     	RAP_offd_j[jj_count_offd] = i3;
+                     	RAP_offd_j[jj_count_offd] = i3 - num_cols_diag_P;
                      	jj_count_offd++;
-		     }
-		     else
+	 	  }
+		  else
                      	RAP_offd_data[P_marker[i3]] += r_a_p_product;
-                  }
-                  else
-                  {
-                     if (P_marker[i3] < jj_row_begin_diag)
-                     {
-                     	P_marker[i3] = jj_count_diag;
-                     	RAP_diag_data[jj_count_diag] = r_a_p_product;
-                     	RAP_diag_j[jj_count_diag] = i3-first_col_diag_RAP;
-                     	jj_count_diag++;
-		     }
-		     else
-                     	RAP_diag_data[P_marker[i3]] += r_a_p_product;
-                  }
                }
             }
 
@@ -970,14 +1222,17 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
              *--------------------------------------------------------------*/
             else
             {
-               for (jj3 = P_ext_i[i2]; jj3 < P_ext_i[i2+1]; jj3++)
+               for (jj3 = P_ext_diag_i[i2]; jj3 < P_ext_diag_i[i2+1]; jj3++)
                {
-                  i3 = P_ext_j[jj3];
-                  r_a_p_product = r_a_product * P_ext_data[jj3];
-		  if (i3 < first_col_diag_RAP || i3 > last_col_diag_RAP)
-                  	RAP_offd_data[P_marker[i3]] += r_a_p_product;
-		  else
-                  	RAP_diag_data[P_marker[i3]] += r_a_p_product;
+                  i3 = P_ext_diag_j[jj3];
+                  r_a_p_product = r_a_product * P_ext_diag_data[jj3];
+                  RAP_diag_data[P_marker[i3]] += r_a_p_product;
+               }
+               for (jj3 = P_ext_offd_i[i2]; jj3 < P_ext_offd_i[i2+1]; jj3++)
+               {
+                  i3 = map_Pext_to_RAP[P_ext_offd_j[jj3]] + num_cols_diag_P;
+                  r_a_p_product = r_a_product * P_ext_offd_data[jj3];
+                  RAP_offd_data[P_marker[i3]] += r_a_p_product;
                }
             }
           }
@@ -1012,7 +1267,7 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
 
                for (jj3 = P_diag_i[i2]; jj3 < P_diag_i[i2+1]; jj3++)
                {
-                  i3 = P_diag_j[jj3]+first_col_diag_P;
+                  i3 = P_diag_j[jj3];
                   r_a_p_product = r_a_product * P_diag_data[jj3];
                   
                   /*--------------------------------------------------------
@@ -1037,7 +1292,7 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
 	       {
 		for (jj3 = P_offd_i[i2]; jj3 < P_offd_i[i2+1]; jj3++)
                 {
-                  i3 = col_map_offd_P[P_offd_j[jj3]];
+                  i3 = map_P_to_RAP[P_offd_j[jj3]] + num_cols_diag_P;
                   r_a_p_product = r_a_product * P_offd_data[jj3];
                   
                   /*--------------------------------------------------------
@@ -1050,7 +1305,7 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
                   {
                      P_marker[i3] = jj_count_offd;
                      RAP_offd_data[jj_count_offd] = r_a_p_product;
-                     RAP_offd_j[jj_count_offd] = i3;
+                     RAP_offd_j[jj_count_offd] = i3 - num_cols_diag_P;
                      jj_count_offd++;
                   }
                   else
@@ -1070,7 +1325,7 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
             {
                for (jj3 = P_diag_i[i2]; jj3 < P_diag_i[i2+1]; jj3++)
                {
-                  i3 = P_diag_j[jj3]+first_col_diag_P;
+                  i3 = P_diag_j[jj3];
                   r_a_p_product = r_a_product * P_diag_data[jj3];
                   RAP_diag_data[P_marker[i3]] += r_a_p_product;
                }
@@ -1078,7 +1333,7 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
 	       {
                 for (jj3 = P_offd_i[i2]; jj3 < P_offd_i[i2+1]; jj3++)
                 {
-                  i3 = col_map_offd_P[P_offd_j[jj3]];
+                  i3 = map_P_to_RAP[P_offd_j[jj3]] + num_cols_diag_P;
                   r_a_p_product = r_a_product * P_offd_data[jj3];
                   RAP_offd_data[P_marker[i3]] += r_a_p_product;
                 }
@@ -1087,34 +1342,6 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
          }
       }
    }
-
-   /*-----------------------------------------------------------------------
-    *  Delete 0-columns in RAP_offd, i.e. generate col_map_offd and reset
-    *  RAP_offd_j.
-    *-----------------------------------------------------------------------*/
-
-   for (i=0; i < RAP_offd_size; i++)
-	P_marker[RAP_offd_j[i]] = -2;
-
-   num_cols_offd_RAP = 0;
-   for (i=0; i < n_coarse; i++)
-	if (P_marker[i] == -2) 
-		num_cols_offd_RAP++;
-
-   if (num_cols_offd_RAP)
-	col_map_offd_RAP = hypre_CTAlloc(int,num_cols_offd_RAP);
-
-   count = 0;
-   for (i=0; i < n_coarse; i++)
-	if (P_marker[i] == -2) 
-	{
-		col_map_offd_RAP[count] = i;
-		P_marker[i] = count;
-		count++;
-	}
-
-   for (i=0; i < RAP_offd_size; i++)
-	RAP_offd_j[i] = P_marker[RAP_offd_j[i]];
 
    RAP = hypre_CreateParCSRMatrix(comm, n_coarse, n_coarse, 
 	coarse_partitioning, coarse_partitioning,
@@ -1155,10 +1382,30 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
    if (num_sends_RT || num_recvs_RT) 
 	hypre_DestroyCSRMatrix(RAP_ext);
 
-   if (num_cols_diag_A != n_fine) hypre_DestroyCSRMatrix(P_ext);
    hypre_TFree(P_marker);   
    hypre_TFree(A_marker);
-
+   hypre_TFree(P_ext_diag_i);
+   hypre_TFree(P_ext_offd_i);
+   if (num_cols_offd_P)
+   {
+      hypre_TFree(map_P_to_Pext);
+      hypre_TFree(map_P_to_RAP);
+   }
+   if (num_cols_offd_Pext)
+   {
+      hypre_TFree(col_map_offd_Pext);
+      hypre_TFree(map_Pext_to_RAP);
+   }
+   if (P_ext_diag_size)
+   {
+      hypre_TFree(P_ext_diag_data);
+      hypre_TFree(P_ext_diag_j);
+   }
+   if (P_ext_offd_size)
+   {
+      hypre_TFree(P_ext_offd_data);
+      hypre_TFree(P_ext_offd_j);
+   }
    return(0);
    
 }            
@@ -1305,8 +1552,11 @@ hypre_ExchangeRAPData( 	hypre_CSRMatrix *RAP_int,
 
    num_rows = send_map_starts[num_sends];
    num_nonzeros = RAP_ext_i[num_rows];
-   RAP_ext_j = hypre_CTAlloc(int, num_nonzeros);
-   RAP_ext_data = hypre_CTAlloc(double, num_nonzeros);
+   if (num_nonzeros)
+   {
+      RAP_ext_j = hypre_CTAlloc(int, num_nonzeros);
+      RAP_ext_data = hypre_CTAlloc(double, num_nonzeros);
+   }
 
    for (i=0; i < num_sends; i++)
    {
@@ -1325,8 +1575,11 @@ hypre_ExchangeRAPData( 	hypre_CSRMatrix *RAP_int,
    RAP_ext = hypre_CreateCSRMatrix(num_rows,num_cols,num_nonzeros);
 
    hypre_CSRMatrixI(RAP_ext) = RAP_ext_i;
-   hypre_CSRMatrixJ(RAP_ext) = RAP_ext_j;
-   hypre_CSRMatrixData(RAP_ext) = RAP_ext_data;
+   if (num_nonzeros)
+   {
+      hypre_CSRMatrixJ(RAP_ext) = RAP_ext_j;
+      hypre_CSRMatrixData(RAP_ext) = RAP_ext_data;
+   }
 
    hypre_FinalizeCommunication(comm_handle); 
 

@@ -829,33 +829,38 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
       P_offd_i[n_fine] -= num_lost_offd;
    }
 
-
-   hypre_TFree(P_marker); 
-   P_marker = hypre_CTAlloc(int, total_global_cpts);
-
-   for (i=0; i < P_offd_size; i++)
-	P_marker[P_offd_j[i]] = -2;
-
    num_cols_P_offd = 0;
-   for (i=0; i < total_global_cpts; i++)
-	if (P_marker[i] == -2) 
-		num_cols_P_offd++;
+   if (P_offd_size)
+   {
+      hypre_TFree(P_marker); 
+      P_marker = hypre_CTAlloc(int, P_offd_size);
 
-   if (num_cols_P_offd)
-	col_map_offd_P = hypre_CTAlloc(int,num_cols_P_offd);
+      for (i=0; i < P_offd_size; i++)
+	 P_marker[i] = P_offd_j[i];
 
-   count = 0;
-   for (i=0; i < total_global_cpts; i++)
-	if (P_marker[i] == -2) 
+      qsort0(P_marker, 0, P_offd_size-1);
+
+      num_cols_P_offd = 1;
+      index = P_marker[0];
+      for (i=1; i < P_offd_size; i++)
+      {
+	if (P_marker[i] > index)
 	{
-		col_map_offd_P[count] = i;
-		P_marker[i] = count;
-		count++;
-	}
+ 	  index = P_marker[i];
+ 	  P_marker[num_cols_P_offd++] = index;
+  	}
+      }
 
-   for (i=0; i < P_offd_size; i++)
-	P_offd_j[i] = P_marker[P_offd_j[i]];
+      col_map_offd_P = hypre_CTAlloc(int,num_cols_P_offd);
 
+      for (i=0; i < num_cols_P_offd; i++)
+         col_map_offd_P[i] = P_marker[i];
+
+      for (i=0; i < P_offd_size; i++)
+	P_offd_j[i] = hypre_BinarySearch(col_map_offd_P,
+					 P_offd_j[i],
+					 num_cols_P_offd);
+   }
 
    P = hypre_CreateParCSRMatrix(comm, 
                                 hypre_ParCSRMatrixGlobalNumRows(A), 
