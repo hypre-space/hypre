@@ -762,6 +762,7 @@ int HYPRE_GMRESSetTol( HYPRE_Solver solver , double tol );
 int HYPRE_GMRESSetMinIter( HYPRE_Solver solver , int min_iter );
 int HYPRE_GMRESSetMaxIter( HYPRE_Solver solver , int max_iter );
 int HYPRE_GMRESSetStopCrit( HYPRE_Solver solver , int stop_crit );
+int HYPRE_GMRESSetRelChange( HYPRE_Solver solver , int rel_change );
 int HYPRE_GMRESSetPrecond( HYPRE_Solver solver , HYPRE_PtrToSolverFcn precond , HYPRE_PtrToSolverFcn precond_setup , HYPRE_Solver precond_solver );
 int HYPRE_GMRESGetPrecond( HYPRE_Solver solver , HYPRE_Solver *precond_data_ptr );
 int HYPRE_GMRESSetLogging( HYPRE_Solver solver , int logging );
