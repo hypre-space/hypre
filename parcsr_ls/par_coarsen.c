@@ -880,7 +880,6 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
    int              measure, new_meas;
    int              num_left, elmt;
    int              nabor, nabor_two;
-   int              falgout = 0;
 
    int              ierr = 0;
    int              break_var = 0;
@@ -993,7 +992,6 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
    {
       f_pnt = Z_PT;
       coarsen_type = 1;
-      falgout = 1;
    }
 
    if ((measure_type || coarsen_type != 1) && num_procs > 1)
@@ -1818,9 +1816,6 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
    /*---------------------------------------------------
     * Clean up and return
     *---------------------------------------------------*/
-   /*if (!falgout)
-    for (i=0; i < num_variables; i++)
-      if (CF_marker[i] == SF_PT) CF_marker[i] = F_PT;*/
 
    if (coarsen_type != 1)
    {   
