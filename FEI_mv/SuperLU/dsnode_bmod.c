@@ -26,8 +26,8 @@
 /* 
  * Function prototypes 
  */
-void dlsolve(int, int, double*, double*);
-void dmatvec(int, int, int, double*, double*, double*);
+void sludlsolve(int, int, double*, double*);
+void sludmatvec(int, int, int, double*, double*, double*);
 
 
 /*
@@ -106,8 +106,8 @@ dsnode_bmod (
 		&lusup[ufirst], &incx, &beta, &lusup[ufirst+nsupc], &incy );
 #endif
 #else
-	dlsolve ( nsupr, nsupc, &lusup[luptr], &lusup[ufirst] );
-	dmatvec ( nsupr, nrow, nsupc, &lusup[luptr+nsupc], 
+	sludlsolve ( nsupr, nsupc, &lusup[luptr], &lusup[ufirst] );
+	sludmatvec ( nsupr, nrow, nsupc, &lusup[luptr+nsupc], 
 			&lusup[ufirst], &tempv[0] );
 
         /* Scatter tempv[*] into lusup[*] */

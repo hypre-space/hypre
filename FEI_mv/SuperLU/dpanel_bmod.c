@@ -28,8 +28,8 @@
 /* 
  * Function prototypes 
  */
-void dlsolve(int, int, double *, double *);
-void dmatvec(int, int, int, double *, double *, double *);
+void sludlsolve(int, int, double *, double *);
+void sludmatvec(int, int, int, double *, double *, double *);
 extern void dcheck_tempv();
 
 void
@@ -220,7 +220,7 @@ dpanel_bmod (
 			   &nsupr, TriTmp, &incx );
 #endif
 #else		
-		    dlsolve ( nsupr, segsze, &lusup[luptr], TriTmp );
+		    sludlsolve ( nsupr, segsze, &lusup[luptr], TriTmp );
 #endif
 		    
 
@@ -267,7 +267,7 @@ dpanel_bmod (
 			   &nsupr, TriTmp, &incx, &beta, MatvecTmp, &incy);
 #endif
 #else
-		    dmatvec(nsupr, block_nrow, segsze, &lusup[luptr1],
+		    sludmatvec(nsupr, block_nrow, segsze, &lusup[luptr1],
 			   TriTmp, MatvecTmp);
 #endif
 		    
@@ -411,11 +411,11 @@ dpanel_bmod (
 			   &nsupr, tempv, &incx, &beta, tempv1, &incy );
 #endif
 #else
-		    dlsolve ( nsupr, segsze, &lusup[luptr], tempv );
+		    sludlsolve ( nsupr, segsze, &lusup[luptr], tempv );
 		    
 		    luptr += segsze;        /* Dense matrix-vector */
 		    tempv1 = &tempv[segsze];
-		    dmatvec (nsupr, nrow, segsze, &lusup[luptr], tempv, tempv1);
+		    sludmatvec (nsupr,nrow,segsze,&lusup[luptr],tempv,tempv1);
 #endif
 		    
 		    /* Scatter tempv[*] into SPA dense[*] temporarily, such

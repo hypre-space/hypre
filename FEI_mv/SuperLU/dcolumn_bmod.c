@@ -28,9 +28,9 @@
 /* 
  * Function prototypes 
  */
-void dusolve(int, int, double*, double*);
-void dlsolve(int, int, double*, double*);
-void dmatvec(int, int, int, double*, double*, double*);
+void sludusolve(int, int, double*, double*);
+void sludlsolve(int, int, double*, double*);
+void sludmatvec(int, int, int, double*, double*, double*);
 
 
 
@@ -233,11 +233,11 @@ dcolumn_bmod (
 		       &nsupr, tempv, &incx, &beta, tempv1, &incy );
 #endif
 #else
-		dlsolve ( nsupr, segsze, &lusup[luptr], tempv );
+		sludlsolve ( nsupr, segsze, &lusup[luptr], tempv );
 
  		luptr += segsze;  /* Dense matrix-vector */
 		tempv1 = &tempv[segsze];
-		dmatvec (nsupr, nrow , segsze, &lusup[luptr], tempv, tempv1);
+		sludmatvec (nsupr, nrow , segsze, &lusup[luptr], tempv, tempv1);
 #endif
 		
 		
@@ -332,9 +332,9 @@ dcolumn_bmod (
 	       &lusup[ufirst], &incx, &beta, &lusup[ufirst+nsupc], &incy );
 #endif
 #else
-	dlsolve ( nsupr, nsupc, &lusup[luptr], &lusup[ufirst] );
+	sludlsolve ( nsupr, nsupc, &lusup[luptr], &lusup[ufirst] );
 
-	dmatvec ( nsupr, nrow, nsupc, &lusup[luptr+nsupc],
+	sludmatvec ( nsupr, nrow, nsupc, &lusup[luptr+nsupc],
 		&lusup[ufirst], tempv );
 	
         /* Copy updates from tempv[*] into lusup[*] */
