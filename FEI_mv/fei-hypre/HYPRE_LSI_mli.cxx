@@ -127,6 +127,7 @@ typedef struct HYPRE_LSI_MLI_Struct
    HYPRE_ParCSRMatrix correctionMatrix_; /* for nullspace correction */
    int      numSmoothVecs_;
    int      smoothVecSteps_;
+   double   arpackTol_;
 } 
 HYPRE_LSI_MLI;
 
@@ -211,6 +212,7 @@ int HYPRE_LSI_MLICreate( MPI_Comm comm, HYPRE_Solver *solver )
    mli_object->injectionForR_       = 0;
    mli_object->numSmoothVecs_       = 0;
    mli_object->smoothVecSteps_      = 0;
+   mli_object->arpackTol_           = 0.0;
 #ifdef HAVE_MLI
    mli_object->mli_                 = NULL;
    mli_object->sfei_                = NULL;
@@ -353,6 +355,11 @@ int HYPRE_LSI_MLISetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
                  mli_object->smoothVecSteps_);
       else
          sprintf(paramString, "setSmoothVecSteps 5"); 
+      method->setParams( paramString, 0, NULL );
+   }
+   if ( mli_object->arpackTol_ > 0.0 )
+   {
+      sprintf(paramString, "arpackTol %e", mli_object->arpackTol_);
       method->setParams( paramString, 0, NULL );
    }
 
@@ -707,6 +714,7 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
          printf("\t      paramFile <s> \n");
          printf("\t      numSmoothVecs <d> \n");
          printf("\t      smoothVecSteps <d> \n");
+         printf("\t      arpackTol <f> \n");
       }
    }
    else if ( !strcmp(param2, "outputLevel") )
@@ -889,6 +897,12 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
              &(mli_object->smoothVecSteps_));
       if ( mli_object->smoothVecSteps_ < 0 ) mli_object->smoothVecSteps_ = 0; 
    }
+   else if ( !strcmp(param2, "arpackTol") )
+   {
+      sscanf(paramString,"%s %s %lg",param1,param2,
+             &(mli_object->arpackTol_));
+      if ( mli_object->arpackTol_ <= 0.0 ) mli_object->arpackTol_ = 0.0; 
+   }
    else 
    {
       if ( mypid == 0 )
@@ -923,6 +937,7 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
          printf("\t      paramFile <s> \n");
          printf("\t      numSmoothVecs <d> \n");
          printf("\t      smoothVecSteps <d> \n");
+         printf("\t      arpackTol <f> \n");
          exit(1);
       }
    }
