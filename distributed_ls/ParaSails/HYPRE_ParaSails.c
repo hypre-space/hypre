@@ -103,6 +103,8 @@ int HYPRE_ParaSailsSetup(HYPRE_ParaSails ps, double thresh, int nlevels)
 {
     hypre_ParaSails *internal = (hypre_ParaSails *) ps;
 
+    ParaSailsSetSym(internal->ps, 1);
+
     ParaSailsSetupPattern(internal->ps, thresh, nlevels);
 
     ParaSailsSetupValues(internal->ps, internal->A);
