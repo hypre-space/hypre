@@ -54,16 +54,16 @@ int HYPRE_IJMatrixCreate( MPI_Comm comm, int ilower, int iupper,
    info[2] = jlower;
    info[3] = jupper;
 
-   if (ilower > iupper)
+   if (ilower > iupper+1)
    {
       ierr = -11;
-      printf("Warning! ilower larger than iupper!\n");
+      printf("Warning! ilower larger than iupper+1!\n");
    }
 
-   if (jlower > jupper)
+   if (jlower > jupper+1)
    {
       ierr = -12;
-      printf("Warning! jlower larger than jupper!\n");
+      printf("Warning! jlower larger than jupper+1!\n");
    }
 
    /* Generate row- and column-partitioning through information exchange
@@ -81,7 +81,7 @@ int HYPRE_IJMatrixCreate( MPI_Comm comm, int ilower, int iupper,
       i4 = 4*i;
       if ( recv_buf[i4+1] != (recv_buf[i4+4]-1) )
       {
-         printf("Warning -- row partitioning does not line up!\n");
+         printf("Warning -- row partitioning does not line up! Partitioning incomplete!\n");
 	 ierr = -9;
 	 break;
       }
@@ -111,7 +111,7 @@ int HYPRE_IJMatrixCreate( MPI_Comm comm, int ilower, int iupper,
          i4 = 4*i;
          if (recv_buf[i4+3] != recv_buf[i4+6]-1)
          {
-           printf("Warning -- col partitioning does not line up!\n");
+           printf("Warning -- col partitioning does not line up! Partitioning incomplete!\n");
    	   ierr = -10;
    	   break;
          }
