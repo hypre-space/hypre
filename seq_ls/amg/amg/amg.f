@@ -1,6 +1,6 @@
 C@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 C
-C     File: amgdrv.f
+C     File: amg.f
 C     TEST DRIVER FOR AMG Problems
 C     reads matrix in from file AMG.in.ysmp.         Use link.
 C     reads right-hand side from  AMG.in.rhs.        Use link.
@@ -13,17 +13,18 @@ C
       IMPLICIT REAL*8 (A-H,O-Z)
       integer TOLD,TNEW,TAMG
 C
+      include `params.amg'
       COMMON /SCONN/  KSTRNG,ISTRNG,NSWEEP
-      DIMENSION A(125000),JA(125000),IA(10000),
-     *          U(10000),F(10000)
-      dimension iu(10000)
-      dimension ip(10000)
-      dimension iv(10000)
-      dimension xp(10000)
-      dimension yp(10000)
+      DIMENSION A(ndima),JA(ndima),IA(ndimu),
+     *          U(ndimu),F(ndimu)
+      dimension iu(ndimu)
+      dimension ip(ndimu)
+      dimension iv(ndimp)
+      dimension xp(ndimp)
+      dimension yp(ndimp)
 cveh zp added
-      dimension zp(10000)
-      dimension ifc(10000)
+      dimension zp(ndimp)
+      dimension ifc(ndimu)
       common /layerx/  hxl(20),nlx,jlxlo(20),jlxhi(20)
       common /layery/  hyl(20),nly,jlylo(20),jlyhi(20)
       common /bound/   ibcn,ibcs,ibce,ibcw
