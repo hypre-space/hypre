@@ -154,7 +154,7 @@ ReadData( char         *filename,
    int                memchunk = 10000;
    int                maxline  = 250;
 
-   char               key[50];
+   char               key[250];
 
    int                part, var, entry, s, i;
 
