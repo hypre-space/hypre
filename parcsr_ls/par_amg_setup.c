@@ -59,8 +59,8 @@ hypre_ParAMGSetup( void               *amg_vdata,
    P_array = hypre_CTAlloc(hypre_ParCSRMatrix*, max_levels-1);
    CF_marker_array = hypre_CTAlloc(int*, max_levels-1);
 
+   hypre_SetParCSRMatrixNumNonzeros(A);
    A_array[0] = A;
-
    /*----------------------------------------------------------
     * Initialize hypre_ParAMGData
     *----------------------------------------------------------*/
@@ -103,6 +103,7 @@ hypre_ParAMGSetup( void               *amg_vdata,
       hypre_ParAMGBuildInterp(A_array[level], CF_marker_array[level], S, &P);
       P_array[level] = P; 
       hypre_DestroyParCSRMatrix(S);
+      coarse_size = hypre_ParCSRMatrixGlobalNumCols(P);
       /*-------------------------------------------------------------
        * Build coarse-grid operator, A_array[level+1] by R*A*P
        *--------------------------------------------------------------*/
@@ -111,6 +112,7 @@ hypre_ParAMGSetup( void               *amg_vdata,
                                       P_array[level], &A_H);
 
       ++level;
+      hypre_SetParCSRMatrixNumNonzeros(A_H);
       A_array[level] = A_H;
 
       if ( (level+1 >= max_levels) || 
