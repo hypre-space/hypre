@@ -19,15 +19,17 @@
 #include <mpi.h>
 #include "parcsr_mv/parcsr_mv.h"
 #include "mli_fedata.h"
+#include "../matrix/mli_matrix.h"
 
 /**************************************************************************
  * functions 
  *-----------------------------------------------------------------------*/
 
-void MLI_FEData_GetParCSRelement_node(MPI_Comm,MLI_FEData&,HYPRE_ParCSRMatrix*);
-void MLI_FEData_GetParCSRelement_face(MPI_Comm,MLI_FEData&,HYPRE_ParCSRMatrix*);
-void MLI_FEData_GetParCSRface_node(   MPI_Comm,MLI_FEData&,HYPRE_ParCSRMatrix*);
-void MLI_FEData_GetParCSRnode_element(MPI_Comm,MLI_FEData&,HYPRE_ParCSRMatrix*);
-void MLI_FEData_GetParCSRface_element(MPI_Comm,MLI_FEData&,HYPRE_ParCSRMatrix*);
-void MLI_FEData_GetParCSRnode_face   (MPI_Comm,MLI_FEData&,HYPRE_ParCSRMatrix*);
+void MLI_FEDataConstructElemNodeMatrix(MPI_Comm, MLI_FEData*, MLI_Matrix**);
+void MLI_FEDataConstructElemFaceMatrix(MPI_Comm, MLI_FEData*, MLI_Matrix**);
+void MLI_FEDataConstructFaceNodeMatrix(MPI_Comm, MLI_FEData*, MLI_Matrix**);
+void MLI_FEDataConstructNodeElemMatrix(MPI_Comm, MLI_FEData*, MLI_Matrix**);
+void MLI_FEDataConstructFaceElemMatrix(MPI_Comm, MLI_FEData*, MLI_Matrix**);
+void MLI_FEDataConstructNodeFaceMatrix(MPI_Comm, MLI_FEData*, MLI_Matrix**);
+void MLI_FEDataAgglomerateElemsLocal(MLI_Matrix *, int **macro_labels_out);
 
