@@ -175,7 +175,7 @@ hypre_F90_IFACE(hypre_ijmatrixgetobjecttype, HYPRE_IJMATRIXSETOBJECTTYPE)(
                                                      int      *ierr    )
 {
    *ierr = (int) ( HYPRE_IJMatrixGetObjectType( (HYPRE_IJMatrix) *matrix,
-                                                (int *)          *type    ) );
+                                                (int *)           type    ) );
 }
 
 /*--------------------------------------------------------------------------
