@@ -303,11 +303,6 @@ hypre_IJMatrixGetValuesParCSR( hypre_IJMatrix *matrix,
    int warning = 0;
    int *counter;
 
-   int diag_indx;
-   int offd_indx;
-   int *indx_diag;
-   int *indx_offd;
-
    MPI_Comm_size(comm,&num_procs);
    MPI_Comm_rank(comm,&my_id);
 
