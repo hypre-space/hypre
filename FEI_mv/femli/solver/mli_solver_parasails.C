@@ -21,19 +21,19 @@
  * constructor
  *--------------------------------------------------------------------------*/
 
-MLI_Solver_ParaSails::MLI_Solver_ParaSails() 
-                     : MLI_Solver(MLI_SOLVER_PARASAILS_ID)
+MLI_Solver_ParaSails::MLI_Solver_ParaSails(char *name) : MLI_Solver(name)
 {
 #ifdef MLI_PARASAILS
-   Amat       = NULL;
-   ps         = NULL;
-   nlevels    = 0;        /* number of levels */
-   symmetric  = 0;        /* nonsymmetric */
-   transpose  = 0;        /* non-transpose */
-   threshold  = 0.0;
-   filter     = 0.0;
-   loadbal    = 0;        /* no load balance */
-   factorized = 0;        /* not factorized */
+   Amat_            = NULL;
+   ps_              = NULL;
+   nlevels_         = 1;     /* number of levels */
+   symmetric_       = 1;     /* symmetric */
+   transpose_       = 0;     /* non-transpose */
+   correction_      = 0.8;   /* 0.8 confirmed a good value for 4-8 proc */
+   threshold_       = 1.0e-4;
+   filter_          = 1.0e-4;
+   loadbal_         = 0;        /* no load balance */
+   zeroInitialGuess_ = 0;
 #else
    printf("MLI_Solver_ParaSails::constructor - ParaSails smoother ");
    printf("not available.\n");
@@ -48,8 +48,8 @@ MLI_Solver_ParaSails::MLI_Solver_ParaSails()
 MLI_Solver_ParaSails::~MLI_Solver_ParaSails()
 {
 #ifdef MLI_PARASAILS
-   if ( ps != NULL ) ParaSailsDestroy(ps);
-   ps = NULL;
+   if ( ps_ != NULL ) ParaSailsDestroy(ps_);
+   ps_ = NULL;
 #endif
 }
 
@@ -71,8 +71,8 @@ int MLI_Solver_ParaSails::setup(MLI_Matrix *Amat_in)
     * fetch machine and matrix parameters
     *-----------------------------------------------------------------*/
 
-   Amat = Amat_in;
-   A = (hypre_ParCSRMatrix *) Amat->getMatrix();
+   Amat_ = Amat_in;
+   A = (hypre_ParCSRMatrix *) Amat_->getMatrix();
    comm = hypre_ParCSRMatrixComm(A);
    MPI_Comm_rank(comm,&mypid);  
    HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) A, &partition);
@@ -96,12 +96,12 @@ int MLI_Solver_ParaSails::setup(MLI_Matrix *Amat_in)
     * construct a ParaSails smoother object
     *-----------------------------------------------------------------*/
 
-   ps = ParaSailsCreate(comm, start_row, end_row, factorized);
-   ps->loadbal_beta = loadbal;
-   ParaSailsSetupPattern(ps, mat, threshold, nlevels);
-   ParaSailsStatsPattern(ps, mat);
-   ParaSailsSetupValues(ps, mat, filter);
-   ParaSailsStatsValues(ps, mat);
+   ps_ = ParaSailsCreate(comm, start_row, end_row, symmetric_);
+   ps_->loadbal_beta = loadbal_;
+   ParaSailsSetupPattern(ps_, mat, threshold_, nlevels_);
+   ParaSailsStatsPattern(ps_, mat);
+   ParaSailsSetupValues(ps_, mat, filter_);
+   ParaSailsStatsValues(ps_, mat);
 
    /*-----------------------------------------------------------------
     * clean up and return object and function
@@ -125,8 +125,8 @@ int MLI_Solver_ParaSails::setup(MLI_Matrix *Amat_in)
 int MLI_Solver_ParaSails::solve(MLI_Vector *f_in, MLI_Vector *u_in)
 {
 #ifdef MLI_PARASAILS
-   if (transpose) return (applyParaSailsTrans( f_in, u_in ));
-   else           return (applyParaSails( f_in, u_in ));
+   if (transpose_) return (applyParaSailsTrans( f_in, u_in ));
+   else            return (applyParaSails( f_in, u_in ));
 #else
    (void) f_in;
    (void) u_in;
@@ -141,34 +141,43 @@ int MLI_Solver_ParaSails::solve(MLI_Vector *f_in, MLI_Vector *u_in)
  * set parameters
  *---------------------------------------------------------------------------*/
 
-int MLI_Solver_ParaSails::setParams(char *param_string, int argc, char **argv)
+int MLI_Solver_ParaSails::setParams(char *paramString, int argc, char **argv)
 {
    char param1[100];
 
-   if ( !strcasecmp(param_string, "nLevels") )
+   sscanf(paramString, "%s", param1);
+   if ( !strcmp(param1, "nLevels") )
    {
-      sscanf(param_string, "%s %d", param1, &nlevels);
-      if ( nlevels < 0 ) nlevels = 0;
+      sscanf(paramString, "%s %d", param1, &nlevels_);
+      if ( nlevels_ < 0 ) nlevels_ = 0;
    }
-   else if ( !strcasecmp(param_string, "symmetric") )   symmetric  = 1;
-   else if ( !strcasecmp(param_string, "unsymmetric") ) symmetric  = 0;
-   else if ( !strcasecmp(param_string, "factorized") )  factorized = 1;
-   else if ( !strcasecmp(param_string, "transpose") )   transpose  = 1;
-   else if ( !strcasecmp(param_string, "loadbal") )     loadbal    = 1;
-   else if ( !strcasecmp(param_string, "threshold") )
+   else if ( !strcmp(param1, "symmetric") )   symmetric_ = 1;
+   else if ( !strcmp(param1, "unsymmetric") ) symmetric_ = 0;
+   else if ( !strcmp(param1, "transpose") )   transpose_ = 1;
+   else if ( !strcmp(param1, "loadbal") )     loadbal_   = 1;
+   else if ( !strcmp(param1, "threshold") )
    {
-      sscanf(param_string, "%s %lg", param1, &threshold);
-      if ( threshold < 0 || threshold > 1. ) threshold = 0.;
+      sscanf(paramString, "%s %lg", param1, &threshold_);
+      if ( threshold_< 0 || threshold_> 1. ) threshold_= 0.;
    }
-   else if ( !strcasecmp(param_string, "filter") )
+   else if ( !strcmp(param1, "filter") )
    {
-      sscanf(param_string, "%s %lg", param1, &filter);
-      if ( filter < 0 || filter > 1. ) filter = 0.;
+      sscanf(paramString, "%s %lg", param1, &filter_);
+      if ( filter_ < 0 || filter_ > 1. ) filter_= 0.;
    }
-   else if ( strcasecmp(param_string, "zeroInitialGuess") )
+   else if ( !strcmp(param1, "correction") )
+   {
+      sscanf(paramString, "%s %lg", param1, &correction_);
+      if ( correction_<= 0 ) correction_= 0.5;
+   }
+   else if ( !strcmp(param1, "zeroInitialGuess") )
+   {
+      zeroInitialGuess_ = 1;
+   }
+   else if ( strcmp(param1, "relaxWeight") )
    {   
       printf("MLI_Solver_ParaSails::setParams - parameter not recognized.\n");
-      printf("              Params = %s\n", param_string);
+      printf("              Params = %s\n", paramString);
       return 1;
    }
    return 0;
@@ -196,7 +205,7 @@ int MLI_Solver_ParaSails::applyParaSails(MLI_Vector *f_in, MLI_Vector *u_in)
     * fetch machine and smoother parameters
     *-----------------------------------------------------------------*/
 
-   A       = (hypre_ParCSRMatrix *) Amat->getMatrix();
+   A       = (hypre_ParCSRMatrix *) Amat_->getMatrix();
    comm    = hypre_ParCSRMatrixComm(A);
    A_diag  = hypre_ParCSRMatrixDiag(A);
    n       = hypre_CSRMatrixNumRows(A_diag);
@@ -223,21 +232,19 @@ int MLI_Solver_ParaSails::applyParaSails(MLI_Vector *f_in, MLI_Vector *u_in)
     * perform smoothing
     *-----------------------------------------------------------------*/
 
-   hypre_ParVectorCopy(f, Vtemp);
-   hypre_ParCSRMatrixMatvec(-1.0, A, u, 1.0, Vtemp);
    tmp_data = new double[n];
+   hypre_ParVectorCopy(f, Vtemp);
+   if ( zeroInitialGuess_ == 0 )
+      hypre_ParCSRMatrixMatvec(-1.0, A, u, 1.0, Vtemp);
 
-   if (!factorized)
-   {
-      MatrixMatvec(ps->M, Vtemp_data, tmp_data);
-      for (i = 0; i < n; i++) u_data[i] += tmp_data[i];
-   }
+   ParaSailsApply(ps_, Vtemp_data, tmp_data);
+
+   if ( zeroInitialGuess_ == 0 )
+      for (i = 0; i < n; i++) u_data[i] += correction_ * tmp_data[i];
    else
-   {
-      MatrixMatvec(ps->M, Vtemp_data, tmp_data);
-      MatrixMatvecTrans(ps->M, tmp_data, tmp_data);
-      for (i = 0; i < n; i++) u_data[i] += tmp_data[i];
-   }
+      for (i = 0; i < n; i++) u_data[i] = correction_ * tmp_data[i];
+
+   zeroInitialGuess_ = 0;
 
    /*-----------------------------------------------------------------
     * clean up 
@@ -279,7 +286,7 @@ int MLI_Solver_ParaSails::applyParaSailsTrans(MLI_Vector *f_in,
     * fetch machine and smoother parameters
     *-----------------------------------------------------------------*/
 
-   A       = (hypre_ParCSRMatrix *) Amat->getMatrix();
+   A       = (hypre_ParCSRMatrix *) Amat_->getMatrix();
    comm    = hypre_ParCSRMatrixComm(A);
    A_diag  = hypre_ParCSRMatrixDiag(A);
    n       = hypre_CSRMatrixNumRows(A_diag);
@@ -305,21 +312,19 @@ int MLI_Solver_ParaSails::applyParaSailsTrans(MLI_Vector *f_in,
     * perform smoothing
     *-----------------------------------------------------------------*/
 
-   hypre_ParVectorCopy(f, Vtemp);
-   hypre_ParCSRMatrixMatvec(-1.0, A, u, 1.0, Vtemp);
    tmp_data = new double[n];
+   hypre_ParVectorCopy(f, Vtemp);
+   if ( zeroInitialGuess_ == 0 )
+      hypre_ParCSRMatrixMatvec(-1.0, A, u, 1.0, Vtemp);
 
-   if (!factorized)
-   {
-      MatrixMatvecTrans(ps->M, Vtemp_data, tmp_data);
-      for (i = 0; i < n; i++) u_data[i] += tmp_data[i];
-   }
+   ParaSailsApplyTrans(ps_, Vtemp_data, tmp_data);
+
+   if ( zeroInitialGuess_ == 0 )
+      for (i = 0; i < n; i++) u_data[i] += correction_ * tmp_data[i];
    else
-   {
-      MatrixMatvec(ps->M, Vtemp_data, tmp_data);
-      MatrixMatvecTrans(ps->M, tmp_data, tmp_data);
-      for (i = 0; i < n; i++) u_data[i] += tmp_data[i];
-   }
+      for (i = 0; i < n; i++) u_data[i] = correction_ * tmp_data[i];
+
+   zeroInitialGuess_ = 0;
 
    /*-----------------------------------------------------------------
     * clean up 
@@ -347,9 +352,9 @@ int MLI_Solver_ParaSails::setNumLevels( int levels )
    if ( levels < 0 )
    {
       printf("MLI_Solver_ParaSails::setNumLevels WARNING : nlevels = 0.\n");
-      nlevels = 0;
+      nlevels_ = 0;
    }
-   else nlevels = levels;
+   else nlevels_ = levels;
    return 0;
 }
 
@@ -359,7 +364,7 @@ int MLI_Solver_ParaSails::setNumLevels( int levels )
 
 int MLI_Solver_ParaSails::setSymmetric()
 {
-   symmetric = 1;
+   symmetric_ = 1;
    return 0;
 }
 
@@ -367,7 +372,7 @@ int MLI_Solver_ParaSails::setSymmetric()
 
 int MLI_Solver_ParaSails::setUnSymmetric()
 {
-   symmetric = 0;
+   symmetric_ = 0;
    return 0;
 }
 
@@ -380,9 +385,9 @@ int MLI_Solver_ParaSails::setThreshold( double thresh )
    if ( thresh < 0 || thresh > 1. )
    {
       printf("MLI_Solver_ParaSails::setThreshold WARNING - thresh = 0.\n");
-      threshold = 0.;
+      threshold_ = 0.;
    }
-   else threshold = thresh;
+   else threshold_ = thresh;
    return 0;
 }
 
@@ -395,9 +400,9 @@ int MLI_Solver_ParaSails::setFilter( double data )
    if ( data < 0 || data > 1. )
    {
       printf("MLI_Solver_ParaSails::setThreshold WARNING - filter = 0.\n");
-      filter = 0.;
+      filter_ = 0.;
    }
-   else filter = data;
+   else filter_ = data;
    return 0;
 }
 
@@ -407,17 +412,7 @@ int MLI_Solver_ParaSails::setFilter( double data )
 
 int MLI_Solver_ParaSails::setLoadBal()
 {
-   loadbal = 1;
-   return 0;
-}
-
-/******************************************************************************
- * set ParaSails factorized parameter
- *---------------------------------------------------------------------------*/
-
-int MLI_Solver_ParaSails::setFactorized()
-{
-   factorized = 1;
+   loadbal_ = 1;
    return 0;
 }
 
@@ -427,7 +422,17 @@ int MLI_Solver_ParaSails::setFactorized()
 
 int MLI_Solver_ParaSails::setTranspose()
 {
-   transpose = 1;
+   transpose_ = 1;
+   return 0;
+}
+
+/******************************************************************************
+ * set ParaSails smoother correction factor
+ *---------------------------------------------------------------------------*/
+
+int MLI_Solver_ParaSails::setUnderCorrection(double factor)
+{
+   correction_ = factor;
    return 0;
 }
 

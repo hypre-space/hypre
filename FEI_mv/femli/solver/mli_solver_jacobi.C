@@ -19,7 +19,7 @@
  * constructor
  *---------------------------------------------------------------------------*/
 
-MLI_Solver_Jacobi::MLI_Solver_Jacobi() : MLI_Solver(MLI_SOLVER_JACOBI_ID)
+MLI_Solver_Jacobi::MLI_Solver_Jacobi(char *name) : MLI_Solver(name)
 {
    Amat_             = NULL;
    nSweeps_          = 1;
@@ -95,7 +95,7 @@ int MLI_Solver_Jacobi::setup(MLI_Matrix *Amat)
     *-----------------------------------------------------------------*/
 
    funcPtr = (MLI_Function *) malloc( sizeof( MLI_Function ) );
-   MLI_Utils_HypreVectorGetDestroyFunc(funcPtr);
+   MLI_Utils_HypreParVectorGetDestroyFunc(funcPtr);
    HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) A, &partition);
    hypreVec = hypre_ParVectorCreate(comm, globalNRows, partition);
    hypre_ParVectorInitialize(hypreVec);
@@ -117,7 +117,7 @@ int MLI_Solver_Jacobi::setup(MLI_Matrix *Amat)
       maxEigen_ = ritzValues[0]; 
       delete [] ritzValues;
    }
-   for (i = 0; i < nSweeps_; i++) relaxWeights_[i] = 2.0 / (3.0*maxEigen_);
+   for (i = 0; i < nSweeps_; i++) relaxWeights_[i] = 4.0 / (3.0*maxEigen_);
    return 0;
 }
 
@@ -177,7 +177,7 @@ int MLI_Solver_Jacobi::setParams( char *paramString, int argc, char **argv )
    int    i;
    double *weights;
 
-   if ( !strcasecmp(paramString, "numSweeps") )
+   if ( !strcmp(paramString, "numSweeps") )
    {
       if ( argc != 1 ) 
       {
@@ -186,9 +186,11 @@ int MLI_Solver_Jacobi::setParams( char *paramString, int argc, char **argv )
       }
       nSweeps_ = *(int*) argv[0];
       if ( nSweeps_ < 1 ) nSweeps_ = 1;
+      if ( relaxWeights_ != NULL ) delete [] relaxWeights_;
+      relaxWeights_ = NULL;
       return 0;
    }
-   else if ( !strcasecmp(paramString, "setMaxEigen") )
+   else if ( !strcmp(paramString, "setMaxEigen") )
    {
       if ( argc != 1 ) 
       {
@@ -198,7 +200,7 @@ int MLI_Solver_Jacobi::setParams( char *paramString, int argc, char **argv )
       maxEigen_ = *(double*) argv[0];
       return 0;
    }
-   else if ( !strcasecmp(paramString, "relaxWeight") )
+   else if ( !strcmp(paramString, "relaxWeight") )
    {
       if ( argc != 2 && argc != 1 ) 
       {
@@ -216,7 +218,7 @@ int MLI_Solver_Jacobi::setParams( char *paramString, int argc, char **argv )
          for ( i = 0; i < nSweeps_; i++ ) relaxWeights_[i] = weights[i];
       }
    }
-   else if ( !strcasecmp(paramString, "zeroInitialGuess") )
+   else if ( !strcmp(paramString, "zeroInitialGuess") )
    {
       zeroInitialGuess_ = 1;
       return 0;
@@ -275,7 +277,7 @@ int MLI_Solver_Jacobi::getParams( char *paramString, int *argc, char **argv )
 {
    double *ddata, *ritzValues;
 
-   if ( !strcasecmp(paramString, "getMaxEigen") )
+   if ( !strcmp(paramString, "getMaxEigen") )
    {
       if ( maxEigen_ == 0.0 )
       {

@@ -6,13 +6,16 @@
  *
  *********************************************************************EHEADER*/
 
-#ifndef __MLI_SOLVERPARASAILSH__
-#define __MLI_SOLVERPARASAILSH__
+#ifndef __MLI_SOLVERPARASAILS_H__
+#define __MLI_SOLVERPARASAILS_H__
+
+#define MLI_PARASAILS
 
 #include <stdio.h>
 #include "matrix/mli_matrix.h"
 #include "vector/mli_vector.h"
 #include "solver/mli_solver.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -30,26 +33,26 @@ extern "C" {
 
 class MLI_Solver_ParaSails : public MLI_Solver
 {
-   MLI_Matrix *Amat;
-#ifdef PARASAILS
-   ParaSails  *ps;
+   MLI_Matrix *Amat_;
+#ifdef MLI_PARASAILS
+   ParaSails  *ps_;
 #endif
-   int        nlevels;
-   int        symmetric;
-   double     threshold;
-   int        num_levels;
-   double     filter;
-   int        loadbal;
-   int        factorized;
-   int        transpose;
+   int        nlevels_;
+   int        symmetric_;
+   double     threshold_;
+   double     filter_;
+   int        loadbal_;
+   int        transpose_;
+   double     correction_;
+   int        zeroInitialGuess_;
 
 public :
 
-   MLI_Solver_ParaSails();
+   MLI_Solver_ParaSails(char *name);
    ~MLI_Solver_ParaSails();
    int setup(MLI_Matrix *Amat);
    int solve(MLI_Vector *f, MLI_Vector *u);
-   int setParams(char *param_string, int argc, char **argv);
+   int setParams(char *paramString, int argc, char **argv);
 
    int applyParaSails(MLI_Vector *f, MLI_Vector *u);
    int applyParaSailsTrans(MLI_Vector *f, MLI_Vector *u);
@@ -60,8 +63,8 @@ public :
    int setThreshold( double thresh );
    int setFilter( double filter );
    int setLoadBal();
-   int setFactorized();
    int setTranspose();
+   int setUnderCorrection(double);
 };
 
 #endif

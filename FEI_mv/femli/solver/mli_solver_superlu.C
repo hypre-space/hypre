@@ -23,12 +23,12 @@
  * constructor 
  * --------------------------------------------------------------------------*/
 
-MLI_Solver_SuperLU::MLI_Solver_SuperLU() : MLI_Solver(MLI_SOLVER_SUPERLU_ID)
+MLI_Solver_SuperLU::MLI_Solver_SuperLU(char *name) : MLI_Solver(name)
 {
-   perm_r     = NULL;
-   perm_c     = NULL;
-   mli_Amat   = NULL;
-   factorized = 0;
+   permR_      = NULL;
+   permC_      = NULL;
+   mliAmat_    = NULL;
+   factorized_ = 0;
 }
 
 /* ****************************************************************************
@@ -37,14 +37,14 @@ MLI_Solver_SuperLU::MLI_Solver_SuperLU() : MLI_Solver(MLI_SOLVER_SUPERLU_ID)
 
 MLI_Solver_SuperLU::~MLI_Solver_SuperLU()
 {
-   if ( perm_r != NULL ) 
+   if ( permR_ != NULL ) 
    {
       Destroy_SuperNode_Matrix(&superLU_Lmat);
       Destroy_CompCol_Matrix(&superLU_Umat);
       StatFree();
    }
-   if ( perm_r != NULL ) delete [] perm_r;
-   if ( perm_c != NULL ) delete [] perm_c;
+   if ( permR_ != NULL ) delete [] permR_;
+   if ( permC_ != NULL ) delete [] permC_;
 }
 
 /* ****************************************************************************
@@ -53,14 +53,14 @@ MLI_Solver_SuperLU::~MLI_Solver_SuperLU()
 
 int MLI_Solver_SuperLU::setup( MLI_Matrix *Amat )
 {
-   int      global_nrows, local_nrows, start_row, local_nnz, global_nnz;
-   int      *csr_ia, *csr_ja, *gcsr_ia, *gcsr_ja, *gcsc_ja, *gcsc_ia;
-   int      nnz, row_num, irow, i, j, row_size, *cols, *recv_cnt_array;
-   int      *disp_array, itemp, *cnt_array, icol, col_num, index;
-   int      *etree, permc_spec, lwork, panel_size, relax, info, mypid, nprocs;
-   double   *vals, *csr_aa, *gcsr_aa, *gcsc_aa, diag_pivot_thresh, drop_tol;
+   int      globalNRows, localNRows, startRow, localNnz, globalNnz;
+   int      *csrIA, *csrJA, *gcsrIA, *gcsrJA, *gcscJA, *gcscIA;
+   int      nnz, row_num, irow, i, j, rowSize, *cols, *recvCntArray;
+   int      *dispArray, itemp, *cntArray, icol, colNum, index;
+   int      *etree, permcSpec, lwork, panel_size, relax, info, mypid, nprocs;
+   double   *vals, *csrAA, *gcsrAA, *gcscAA, diagPivotThresh, dropTol;
    char     refact[1];
-   MPI_Comm mpi_comm;
+   MPI_Comm mpiComm;
    hypre_ParCSRMatrix   *hypreA;
    SuperMatrix          AC;
    extern SuperLUStat_t SuperLUStat;
@@ -69,165 +69,165 @@ int MLI_Solver_SuperLU::setup( MLI_Matrix *Amat )
     * fetch matrix
     * -------------------------------------------------------------*/
 
-   mli_Amat = Amat;
-   if ( strcasecmp( mli_Amat->getName(), "HYPRE_ParCSR" ) )
+   mliAmat_ = Amat;
+   if ( strcmp( mliAmat_->getName(), "HYPRE_ParCSR" ) )
    {
       printf("MLI_Solver_SuperLU::setup ERROR - not HYPRE_ParCSR.\n");
       exit(1);
    }
-   hypreA = (hypre_ParCSRMatrix *) mli_Amat->getMatrix();
+   hypreA = (hypre_ParCSRMatrix *) mliAmat_->getMatrix();
 
    /* ---------------------------------------------------------------
     * fetch matrix
     * -------------------------------------------------------------*/
  
-   mpi_comm     = hypre_ParCSRMatrixComm( hypreA );
-   global_nrows = hypre_ParCSRMatrixGlobalNumRows( hypreA );
-   local_nrows  = hypre_ParCSRMatrixNumRows( hypreA );
-   start_row    = hypre_ParCSRMatrixFirstRowIndex( hypreA );
-   local_nnz    = 0;
-   for ( irow = 0; irow < local_nrows; irow++ )
+   mpiComm     = hypre_ParCSRMatrixComm( hypreA );
+   globalNRows = hypre_ParCSRMatrixGlobalNumRows( hypreA );
+   localNRows  = hypre_ParCSRMatrixNumRows( hypreA );
+   startRow    = hypre_ParCSRMatrixFirstRowIndex( hypreA );
+   localNnz    = 0;
+   for ( irow = 0; irow < localNRows; irow++ )
    {
-      row_num = start_row + irow;
-      hypre_ParCSRMatrixGetRow(hypreA, row_num, &row_size, &cols, NULL);
-      local_nnz += row_size;
-      hypre_ParCSRMatrixRestoreRow(hypreA, row_num, &row_size, &cols, NULL);
+      row_num = startRow + irow;
+      hypre_ParCSRMatrixGetRow(hypreA, row_num, &rowSize, &cols, NULL);
+      localNnz += rowSize;
+      hypre_ParCSRMatrixRestoreRow(hypreA, row_num, &rowSize, &cols, NULL);
    }
-   MPI_Allreduce(&local_nnz, &global_nnz, 1, MPI_INT, MPI_SUM, mpi_comm);
-   csr_ia       = new int[local_nrows+1];
-   csr_ja       = new int[local_nnz];
-   csr_aa       = new double[local_nnz];
-   nnz          = 0;
-   csr_ia[0]    = nnz;
-   for ( irow = 0; irow < local_nrows; irow++ )
+   MPI_Allreduce(&localNnz, &globalNnz, 1, MPI_INT, MPI_SUM, mpiComm );
+   csrIA    = new int[localNRows+1];
+   csrJA    = new int[localNnz];
+   csrAA    = new double[localNnz];
+   nnz      = 0;
+   csrIA[0] = nnz;
+   for ( irow = 0; irow < localNRows; irow++ )
    {
-      row_num = start_row + irow;
-      hypre_ParCSRMatrixGetRow(hypreA, row_num, &row_size, &cols, &vals);
-      for ( i = 0; i < row_size; i++ )
+      row_num = startRow + irow;
+      hypre_ParCSRMatrixGetRow(hypreA, row_num, &rowSize, &cols, &vals);
+      for ( i = 0; i < rowSize; i++ )
       {
-         csr_ja[nnz] = cols[i];
-         csr_aa[nnz++] = vals[i];
+         csrJA[nnz] = cols[i];
+         csrAA[nnz++] = vals[i];
       }
-      hypre_ParCSRMatrixRestoreRow(hypreA, row_num, &row_size, &cols, &vals);
-      csr_ia[irow+1] = nnz;
+      hypre_ParCSRMatrixRestoreRow(hypreA, row_num, &rowSize, &cols, &vals);
+      csrIA[irow+1] = nnz;
    }
 
    /* ---------------------------------------------------------------
     * collect the whole matrix
     * -------------------------------------------------------------*/
 
-   MPI_Comm_rank( mpi_comm, &mypid );
-   MPI_Comm_size( mpi_comm, &nprocs );
-   gcsr_ia = new int[global_nrows+1];
-   gcsr_ja = new int[global_nnz];
-   gcsr_aa = new double[global_nnz];
-   recv_cnt_array = new int[nprocs];
-   disp_array     = new int[nprocs];
+   MPI_Comm_rank( mpiComm, &mypid );
+   MPI_Comm_size( mpiComm, &nprocs );
+   gcsrIA = new int[globalNRows+1];
+   gcsrJA = new int[globalNnz];
+   gcsrAA = new double[globalNnz];
+   recvCntArray = new int[nprocs];
+   dispArray    = new int[nprocs];
 
-   MPI_Allgather(&local_nrows, 1, MPI_INT, recv_cnt_array, 1, MPI_INT, mpi_comm);
-   disp_array[0] = 0;
+   MPI_Allgather(&localNRows,1,MPI_INT,recvCntArray,1,MPI_INT,mpiComm);
+   dispArray[0] = 0;
    for ( i = 1; i < nprocs; i++ )
-       disp_array[i] = disp_array[i-1] + recv_cnt_array[i-1];
-   csr_ia[0] = csr_ia[local_nrows];
-   MPI_Allgatherv(csr_ia, local_nrows, MPI_INT, gcsr_ia, recv_cnt_array, 
-                  disp_array, MPI_INT, mpi_comm);
-   nnz = gcsr_ia[0];
-   gcsr_ia[0] = 0;
-   row_num = recv_cnt_array[0];
+       dispArray[i] = dispArray[i-1] + recvCntArray[i-1];
+   csrIA[0] = csrIA[localNRows];
+   MPI_Allgatherv(csrIA, localNRows, MPI_INT, gcsrIA, recvCntArray, 
+                  dispArray, MPI_INT, mpiComm);
+   nnz = gcsrIA[0];
+   gcsrIA[0] = 0;
+   row_num = recvCntArray[0];
    for ( i = 1; i < nprocs; i++ )
    {
-      itemp = gcsr_ia[row_num];
-      gcsr_ia[row_num] = 0;
-      for ( j = 0; j < recv_cnt_array[i]; j++ )
-         gcsr_ia[row_num+j] += nnz;
+      itemp = gcsrIA[row_num];
+      gcsrIA[row_num] = 0;
+      for ( j = 0; j < recvCntArray[i]; j++ )
+         gcsrIA[row_num+j] += nnz;
       nnz += itemp;
-      row_num += recv_cnt_array[i];
+      row_num += recvCntArray[i];
    }
-   gcsr_ia[global_nrows] = nnz;
+   gcsrIA[globalNRows] = nnz;
 
-   MPI_Allgather(&local_nnz, 1, MPI_INT, recv_cnt_array, 1, MPI_INT, mpi_comm);
-   disp_array[0] = 0;
+   MPI_Allgather(&localNnz, 1, MPI_INT, recvCntArray, 1, MPI_INT, mpiComm);
+   dispArray[0] = 0;
    for ( i = 1; i < nprocs; i++ )
-      disp_array[i] = disp_array[i-1] + recv_cnt_array[i-1];
-   MPI_Allgatherv(csr_ja, local_nnz, MPI_INT, gcsr_ja, recv_cnt_array, 
-                  disp_array, MPI_INT, mpi_comm);
+      dispArray[i] = dispArray[i-1] + recvCntArray[i-1];
+   MPI_Allgatherv(csrJA, localNnz, MPI_INT, gcsrJA, recvCntArray, 
+                  dispArray, MPI_INT, mpiComm);
 
-   MPI_Allgatherv(csr_aa, local_nnz, MPI_DOUBLE, gcsr_aa, recv_cnt_array, 
-                  disp_array, MPI_DOUBLE, mpi_comm);
+   MPI_Allgatherv(csrAA, localNnz, MPI_DOUBLE, gcsrAA, recvCntArray, 
+                  dispArray, MPI_DOUBLE, mpiComm);
 
-   delete [] recv_cnt_array;
-   delete [] disp_array;
-   delete [] csr_ia;
-   delete [] csr_ja;
-   delete [] csr_aa;
+   delete [] recvCntArray;
+   delete [] dispArray;
+   delete [] csrIA;
+   delete [] csrJA;
+   delete [] csrAA;
 
    /* ---------------------------------------------------------------
     * conversion from CSR to CSC 
     * -------------------------------------------------------------*/
 
-   cnt_array = new int[global_nrows];
-   for ( irow = 0; irow < global_nrows; irow++ ) cnt_array[irow] = 0;
-   for ( irow = 0; irow < global_nrows; irow++ ) 
-      for ( i = gcsr_ia[irow]; i < gcsr_ia[irow+1]; i++ ) 
-         cnt_array[gcsr_ja[i]]++;
-   gcsc_ja = (int *)    malloc( (global_nrows+1) * sizeof(int) );
-   gcsc_ia = (int *)    malloc( global_nnz * sizeof(int) );
-   gcsc_aa = (double *) malloc( global_nnz * sizeof(double) );
-   gcsc_ja[0] = 0;
+   cntArray = new int[globalNRows];
+   for ( irow = 0; irow < globalNRows; irow++ ) cntArray[irow] = 0;
+   for ( irow = 0; irow < globalNRows; irow++ ) 
+      for ( i = gcsrIA[irow]; i < gcsrIA[irow+1]; i++ ) 
+         cntArray[gcsrJA[i]]++;
+   gcscJA = (int *)    malloc( (globalNRows+1) * sizeof(int) );
+   gcscIA = (int *)    malloc( globalNnz * sizeof(int) );
+   gcscAA = (double *) malloc( globalNnz * sizeof(double) );
+   gcscJA[0] = 0;
    nnz = 0;
-   for ( icol = 1; icol <= global_nrows; icol++ ) 
+   for ( icol = 1; icol <= globalNRows; icol++ ) 
    {
-      nnz += cnt_array[icol-1]; 
-      gcsc_ja[icol] = nnz;
+      nnz += cntArray[icol-1]; 
+      gcscJA[icol] = nnz;
    }
-   for ( irow = 0; irow < global_nrows; irow++ )
+   for ( irow = 0; irow < globalNRows; irow++ )
    {
-      for ( i = gcsr_ia[irow]; i < gcsr_ia[irow+1]; i++ ) 
+      for ( i = gcsrIA[irow]; i < gcsrIA[irow+1]; i++ ) 
       {
-         col_num = gcsr_ja[i];
-         index   = gcsc_ja[col_num]++;
-         gcsc_ia[index] = irow;
-         gcsc_aa[index] = gcsr_aa[i];
+         colNum = gcsrJA[i];
+         index   = gcscJA[colNum]++;
+         gcscIA[index] = irow;
+         gcscAA[index] = gcsrAA[i];
       }
    }
-   gcsc_ja[0] = 0;
+   gcscJA[0] = 0;
    nnz = 0;
-   for ( icol = 1; icol <= global_nrows; icol++ ) 
+   for ( icol = 1; icol <= globalNRows; icol++ ) 
    {
-      nnz += cnt_array[icol-1]; 
-      gcsc_ja[icol] = nnz;
+      nnz += cntArray[icol-1]; 
+      gcscJA[icol] = nnz;
    }
-   delete [] cnt_array;
-   delete [] gcsr_ia;
-   delete [] gcsr_ja;
-   delete [] gcsr_aa;
+   delete [] cntArray;
+   delete [] gcsrIA;
+   delete [] gcsrJA;
+   delete [] gcsrAA;
 
    /* ---------------------------------------------------------------
     * make SuperMatrix 
     * -------------------------------------------------------------*/
    
-   dCreate_CompCol_Matrix(&superLU_Amat, global_nrows, global_nrows, 
-                          gcsc_ja[global_nrows], gcsc_aa, gcsc_ia, gcsc_ja,
+   dCreate_CompCol_Matrix(&superLU_Amat, globalNRows, globalNRows, 
+                          gcscJA[globalNRows], gcscAA, gcscIA, gcscJA,
                           NC, D_D, GE);
    *refact = 'N';
-   etree   = new int[global_nrows];
-   perm_c  = new int[global_nrows];
-   perm_r  = new int[global_nrows];
-   permc_spec = 0;
-   get_perm_c(permc_spec, &superLU_Amat, perm_c);
-   sp_preorder(refact, &superLU_Amat, perm_c, etree, &AC);
-   diag_pivot_thresh = 1.0;
-   drop_tol = 0.0;
+   etree   = new int[globalNRows];
+   permC_  = new int[globalNRows];
+   permR_  = new int[globalNRows];
+   permcSpec = 0;
+   get_perm_c(permcSpec, &superLU_Amat, permC_);
+   sp_preorder(refact, &superLU_Amat, permC_, etree, &AC);
+   diagPivotThresh = 1.0;
+   dropTol = 0.0;
    panel_size = sp_ienv(1);
    relax = sp_ienv(2);
    StatInit(panel_size, relax);
    lwork = 0;
-   dgstrf(refact, &AC, diag_pivot_thresh, drop_tol, relax, panel_size,
-          etree,NULL,lwork,perm_r,perm_c,&superLU_Lmat,&superLU_Umat,&info);
+   dgstrf(refact, &AC, diagPivotThresh, dropTol, relax, panel_size,
+          etree,NULL,lwork,permR_,permC_,&superLU_Lmat,&superLU_Umat,&info);
    Destroy_CompCol_Permuted(&AC);
    Destroy_CompCol_Matrix(&superLU_Amat);
    delete [] etree;
-   factorized = 1;
+   factorized_ = 1;
    return 0;
 }
 
@@ -238,22 +238,21 @@ int MLI_Solver_SuperLU::setup( MLI_Matrix *Amat )
 
 int MLI_Solver_SuperLU::solve( MLI_Vector *f_in, MLI_Vector *u_in )
 {
-   int             global_nrows, local_nrows, start_row, *recv_cnt_array;
-   int             i, irow, nprocs, *disp_array, info;
-   double          *f_global;
+   int             globalNRows, localNRows, startRow, *recvCntArray;
+   int             i, irow, nprocs, *dispArray, info;
+   double          *fGlobal;
    char            trans[1];
    hypre_ParVector *f, *u;
-   hypre_Vector    *u_local, *f_local;
-   double          *u_data, *f_data;
+   double          *uData, *fData;
    SuperMatrix     B;
-   MPI_Comm        mpi_comm;
+   MPI_Comm        mpiComm;
    hypre_ParCSRMatrix *hypreA;
 
    /* -------------------------------------------------------------
     * check that the factorization has been called
     * -----------------------------------------------------------*/
 
-   if ( ! factorized )
+   if ( ! factorized_ )
    {
       printf("MLI_Solver_SuperLU::Solve ERROR - not factorized yet.\n");
       exit(1);
@@ -263,56 +262,54 @@ int MLI_Solver_SuperLU::solve( MLI_Vector *f_in, MLI_Vector *u_in )
     * fetch matrix and vector parameters
     * -----------------------------------------------------------*/
 
-   hypreA       = (hypre_ParCSRMatrix *) mli_Amat->getMatrix();
-   mpi_comm     = hypre_ParCSRMatrixComm( hypreA );
-   global_nrows = hypre_ParCSRMatrixGlobalNumRows( hypreA );
-   local_nrows  = hypre_ParCSRMatrixNumRows( hypreA );
-   start_row    = hypre_ParCSRMatrixFirstRowIndex( hypreA );
-   u            = (hypre_ParVector *) u_in->getVector();
-   u_local      = hypre_ParVectorLocalVector(u);
-   u_data       = hypre_VectorData(u_local);
-   f            = (hypre_ParVector *) f_in->getVector();
-   f_local      = hypre_ParVectorLocalVector(f);
-   f_data       = hypre_VectorData(f_local);
+   hypreA      = (hypre_ParCSRMatrix *) mliAmat_->getMatrix();
+   mpiComm     = hypre_ParCSRMatrixComm( hypreA );
+   globalNRows = hypre_ParCSRMatrixGlobalNumRows( hypreA );
+   localNRows  = hypre_ParCSRMatrixNumRows( hypreA );
+   startRow    = hypre_ParCSRMatrixFirstRowIndex( hypreA );
+   u           = (hypre_ParVector *) u_in->getVector();
+   uData       = hypre_VectorData(hypre_ParVectorLocalVector(u));
+   f           = (hypre_ParVector *) f_in->getVector();
+   fData       = hypre_VectorData(hypre_ParVectorLocalVector(f));
 
    /* -------------------------------------------------------------
     * collect global vector and create a SuperLU dense matrix
     * -----------------------------------------------------------*/
 
-   MPI_Comm_size( mpi_comm, &nprocs );
-   recv_cnt_array = new int[nprocs];
-   disp_array     = new int[nprocs];
-   f_global       = new double[global_nrows];
+   MPI_Comm_size( mpiComm, &nprocs );
+   recvCntArray = new int[nprocs];
+   dispArray    = new int[nprocs];
+   fGlobal      = new double[globalNRows];
 
-   MPI_Allgather(&local_nrows,1,MPI_INT,recv_cnt_array,1,MPI_INT,mpi_comm);
-   disp_array[0] = 0;
+   MPI_Allgather(&localNRows,1,MPI_INT,recvCntArray,1,MPI_INT,mpiComm);
+   dispArray[0] = 0;
    for ( i = 1; i < nprocs; i++ )
-       disp_array[i] = disp_array[i-1] + recv_cnt_array[i-1];
-   MPI_Allgatherv(f_data, local_nrows, MPI_DOUBLE, f_global, recv_cnt_array, 
-                  disp_array, MPI_DOUBLE, mpi_comm);
-   dCreate_Dense_Matrix(&B, global_nrows,1,f_global,global_nrows,DN,D_D,GE);
+       dispArray[i] = dispArray[i-1] + recvCntArray[i-1];
+   MPI_Allgatherv(fData, localNRows, MPI_DOUBLE, fGlobal, recvCntArray, 
+                  dispArray, MPI_DOUBLE, mpiComm);
+   dCreate_Dense_Matrix(&B, globalNRows,1,fGlobal,globalNRows,DN,D_D,GE);
 
    /* -------------------------------------------------------------
     * solve the problem
     * -----------------------------------------------------------*/
 
    *trans  = 'N';
-   dgstrs (trans, &superLU_Lmat, &superLU_Umat, perm_r, perm_c, &B, &info);
+   dgstrs (trans, &superLU_Lmat, &superLU_Umat, permR_, permC_, &B, &info);
 
    /* -------------------------------------------------------------
     * fetch the solution
     * -----------------------------------------------------------*/
 
-   for ( irow = 0; irow < local_nrows; irow++ )
-      u_data[irow] = f_global[start_row+irow];
+   for ( irow = 0; irow < localNRows; irow++ )
+      uData[irow] = fGlobal[startRow+irow];
 
    /* -------------------------------------------------------------
     * clean up 
     * -----------------------------------------------------------*/
 
-   delete [] f_global;
-   delete [] recv_cnt_array;
-   delete [] disp_array;
+   delete [] fGlobal;
+   delete [] recvCntArray;
+   delete [] dispArray;
    Destroy_SuperMatrix_Store(&B);
 
    return info;

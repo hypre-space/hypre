@@ -12,8 +12,8 @@
  *
  *****************************************************************************/
 
-#ifndef __MLISOLVERH__
-#define __MLISOLVERH__
+#ifndef __MLI_SOLVER_H__
+#define __MLI_SOLVER_H__
 
 /*--------------------------------------------------------------------------
  * include files 
@@ -32,23 +32,20 @@
 class MLI_Solver
 {
    char solver_name[100];
-   int  solver_id;
 
 public :
 
    MLI_Solver(char *name);
-   MLI_Solver(int  id);
    virtual ~MLI_Solver()     { }
 
    char* getName()           { return solver_name; }
-   int   getID()             { return solver_id; }
 
    virtual int setup(MLI_Matrix *)=0;
    virtual int solve(MLI_Vector *, MLI_Vector *)=0;
-   virtual int setParams(char *param_string,int argc,char **argv)  
-               {(void) param_string; (void) argc; (void) argv; return -1;}
-   virtual int getParams(char *param_string,int *argc,char **argv)
-               {(void) param_string; (void) argc; (void) argv; return -1;}
+   virtual int setParams(char *paramString,int argc,char **argv)  
+               {(void) paramString; (void) argc; (void) argv; return -1;}
+   virtual int getParams(char *paramString,int *argc,char **argv)
+               {(void) paramString; (void) argc; (void) argv; return -1;}
 };
 
 /*--------------------------------------------------------------------------
@@ -56,7 +53,6 @@ public :
  *--------------------------------------------------------------------------*/
 
 extern MLI_Solver *MLI_Solver_CreateFromName(char *);
-extern MLI_Solver *MLI_Solver_CreateFromID(int);
 
 #endif
 

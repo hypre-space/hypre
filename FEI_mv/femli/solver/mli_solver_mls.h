@@ -6,8 +6,8 @@
  *
  *********************************************************************EHEADER*/
 
-#ifndef __MLI_SOLVER_MLS__
-#define __MLI_SOLVER_MLS__
+#ifndef __MLI_SOLVER_MLS_H__
+#define __MLI_SOLVER_MLS_H__
 
 #include <stdio.h>
 #include "matrix/mli_matrix.h"
@@ -36,7 +36,7 @@ class MLI_Solver_MLS : public MLI_Solver
 
 public :
 
-   MLI_Solver_MLS();
+   MLI_Solver_MLS(char *name);
    ~MLI_Solver_MLS();
    int setup(MLI_Matrix *Amat);
    int solve(MLI_Vector *f, MLI_Vector *u);

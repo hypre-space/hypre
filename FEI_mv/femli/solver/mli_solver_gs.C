@@ -20,7 +20,7 @@
  * constructor
  *---------------------------------------------------------------------------*/
 
-MLI_Solver_GS::MLI_Solver_GS() : MLI_Solver(MLI_SOLVER_GS_ID)
+MLI_Solver_GS::MLI_Solver_GS(char *name) : MLI_Solver(name)
 {
    Amat_             = NULL;
    nSweeps_          = 1;
@@ -235,13 +235,13 @@ int MLI_Solver_GS::setParams(char *paramString, int argc, char **argv)
    int    i;
    double *weights;
 
-   if ( !strcasecmp(paramString, "numSweeps") )
+   if ( !strcmp(paramString, "numSweeps") )
    {
       if ( argc == 1 ) nSweeps_ = *(int*) argv[0];
       if ( nSweeps_ < 1 ) nSweeps_ = 1;
       return 0;
    }
-   else if ( !strcasecmp(paramString, "relaxWeight") )
+   else if ( !strcmp(paramString, "relaxWeight") )
    {
       if ( argc != 2 && argc != 1 ) 
       {
@@ -259,7 +259,7 @@ int MLI_Solver_GS::setParams(char *paramString, int argc, char **argv)
          for ( i = 0; i < nSweeps_; i++ ) relaxWeights_[i] = weights[i];
       }
    }
-   else if ( strcasecmp(paramString, "zeroInitialGuess") )
+   else if ( strcmp(paramString, "zeroInitialGuess") )
    {   
       printf("MLI_Solver_GS::setParams - parameter not recognized.\n");
       printf("              Params = %s\n", paramString);

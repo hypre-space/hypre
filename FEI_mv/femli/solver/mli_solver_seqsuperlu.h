@@ -8,8 +8,8 @@
 
 #ifdef MLI_SUPERLU
 
-#ifndef __MLI_SOLVER_SUPERLU_H__
-#define __MLI_SOLVER_SUPERLU_H__
+#ifndef __MLI_SOLVER_SEQSUPERLU_H__
+#define __MLI_SOLVER_SEQSUPERLU_H__
 
 #include <stdio.h>
 #include "dsp_defs.h"
@@ -19,23 +19,24 @@
 #include "solver/mli_solver.h"
 
 /******************************************************************************
- * data structure for the SuperLU solution scheme
+ * data structure for the sequential SuperLU solution scheme
  *---------------------------------------------------------------------------*/
 
-class MLI_Solver_SuperLU : public MLI_Solver
+class MLI_Solver_SeqSuperLU : public MLI_Solver
 {
    MLI_Matrix   *mliAmat_;
    int          factorized_;
    int          *permR_;
    int          *permC_;
+   int          localNRows_;
    SuperMatrix  superLU_Amat;
    SuperMatrix  superLU_Lmat;
    SuperMatrix  superLU_Umat;
 
 public :
 
-   MLI_Solver_SuperLU(char *name);
-   ~MLI_Solver_SuperLU();
+   MLI_Solver_SeqSuperLU(char *name);
+   ~MLI_Solver_SeqSuperLU();
    int setup(MLI_Matrix *Amat);
    int solve(MLI_Vector *f, MLI_Vector *u);
    int setParams(char *paramString, int argc, char **argv) {return -1;}

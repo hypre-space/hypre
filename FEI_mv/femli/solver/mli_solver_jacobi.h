@@ -6,8 +6,8 @@
  *
  *********************************************************************EHEADER*/
 
-#ifndef __MLI_SOLVER_JACOBI__
-#define __MLI_SOLVER_JACOBI__
+#ifndef __MLI_SOLVER_JACOBI_H__
+#define __MLI_SOLVER_JACOBI_H__
 
 #include <stdio.h>
 #include "matrix/mli_matrix.h"
@@ -30,14 +30,14 @@ class MLI_Solver_Jacobi : public MLI_Solver
 
 public :
 
-   MLI_Solver_Jacobi();
+   MLI_Solver_Jacobi(char *name);
    ~MLI_Solver_Jacobi();
    int setup(MLI_Matrix *Amat);
    int solve(MLI_Vector *f, MLI_Vector *u);
 
-   int setParams( char *param_string, int argc, char **argv );
+   int setParams( char *paramString, int argc, char **argv );
    int setParams( int ntimes, double *relax_weights );
-   int getParams( char *param_string, int *argc, char **argv );
+   int getParams( char *paramString, int *argc, char **argv );
 };
 
 #endif

@@ -6,8 +6,8 @@
  *
  *********************************************************************EHEADER*/
 
-#ifndef __MLI_SOLVER_GSH__
-#define __MLI_SOLVER_GSH__
+#ifndef __MLI_SOLVER_GS_H__
+#define __MLI_SOLVER_GS_H__
 
 #include <stdio.h>
 #include "parcsr_mv/parcsr_mv.h"
@@ -28,12 +28,12 @@ class MLI_Solver_GS : public MLI_Solver
 
 public :
 
-   MLI_Solver_GS();
+   MLI_Solver_GS(char *name);
    ~MLI_Solver_GS();
    int setup(MLI_Matrix *Amat);
    int solve(MLI_Vector *f, MLI_Vector *u);
 
-   int setParams(char *param_string, int argc, char **argv);
+   int setParams(char *paramString, int argc, char **argv);
    int setParams(int ntimes, double *relax_weights);
 };
 

@@ -6,8 +6,8 @@
  *
  *********************************************************************EHEADER*/
 
-#ifndef __MLI_SOLVER_SGSH__
-#define __MLI_SOLVER_SGSH__
+#ifndef __MLI_SOLVER_SGS_H__
+#define __MLI_SOLVER_SGS_H__
 
 #include <stdio.h>
 #include "parcsr_mv/parcsr_mv.h"
@@ -25,16 +25,21 @@ class MLI_Solver_SGS : public MLI_Solver
    int         zeroInitialGuess_;
    int         nSweeps_;
    double      *relaxWeights_;
+   int         myColor_;
+   int         numColors_;
+   int         scheme_;
 
 public :
 
-   MLI_Solver_SGS();
+   MLI_Solver_SGS(char *name);
    ~MLI_Solver_SGS();
    int setup(MLI_Matrix *Amat);
    int solve(MLI_Vector *f, MLI_Vector *u);
 
    int setParams(char *param, int argc, char **argv);
    int setParams(int nTimes, double *relaxWeights);
+
+   int doProcColoring();
 };
 
 #endif

@@ -16,20 +16,20 @@
 #include "base/mli_defs.h"
 #include "parcsr_mv/parcsr_mv.h"
 
-#define min(x,y) (((x) < (y)) ? (x) : (y))
+#define hmin(x,y) (((x) < (y)) ? (x) : (y))
 
 /******************************************************************************
  * constructor
  *---------------------------------------------------------------------------*/
 
-MLI_Solver_MLS::MLI_Solver_MLS() : MLI_Solver(MLI_SOLVER_MLS_ID)
+MLI_Solver_MLS::MLI_Solver_MLS(char *name) : MLI_Solver(name)
 {
    Amat_     = NULL;
    Vtemp_    = NULL;
    Wtemp_    = NULL;
    Ytemp_    = NULL;
    maxEigen_ = 0.0;
-   mlsDeg_   = 4;
+   mlsDeg_   = 1;
    mlsBoost_ = 1.1;
    mlsOver_  = 1.1;
    for ( int i = 0; i < 5; i++ ) mlsOm_[i] = 0.0;
@@ -67,12 +67,14 @@ int MLI_Solver_MLS::setup(MLI_Matrix *mat)
     *-----------------------------------------------------------------*/
 
    Amat_ = mat;
-   if ( maxEigen_ == 0.0 )
+   if ( maxEigen_ <= 0.0 )
    {
       ritzValues = new double[2];
       MLI_Utils_ComputeExtremeRitzValues( (hypre_ParCSRMatrix *)
                               Amat_->getMatrix(), ritzValues, 0 );
       maxEigen_ = ritzValues[0];
+printf("MLS : maxEigen_ boosted another 20 percent\n");
+maxEigen_ *= 1.2;
       delete [] ritzValues;
    }
 
@@ -80,6 +82,7 @@ int MLI_Solver_MLS::setup(MLI_Matrix *mat)
     * compute the coefficients
     *-----------------------------------------------------------------*/
 
+printf("MLS : maxEigen_, deg = %e %d\n", maxEigen_, mlsDeg_);
    for ( i = 0; i < MAX_DEG; i++ ) mlsOm_[i] = 0.e0;
    rho  = mlsOver_ * maxEigen_;
    cosData1 = 1.e0 / (2.e0 * (double) mlsDeg_ + 1.e0);
@@ -109,10 +112,10 @@ int MLI_Solver_MLS::setup(MLI_Matrix *mat)
    if ( mlsDeg_> 1 )
    {
       gridStep = rho / (double) nSamples;
-      nGrid    = (int) min(rint(rho/gridStep)+1, nSamples);
+      nGrid    = (int) hmin(rint(rho/gridStep)+1, nSamples);
 
       rho2 = 0.e0;
-      for ( i = 0; i < nGrid; i++ ) 
+      for ( i = 0; i < nGrid-1; i++ ) 
       {
          coord  = (double)(i+1) * gridStep;
          sample = 1.e0 - mlsOm_[0] * coord;
@@ -317,9 +320,9 @@ int MLI_Solver_MLS::solve(MLI_Vector *fIn, MLI_Vector *uIn)
  * set MLS parameters
  *---------------------------------------------------------------------------*/
 
-int MLI_Solver_MLS::setParams( char *param_string, int argc, char **argv )
+int MLI_Solver_MLS::setParams( char *paramString, int argc, char **argv )
 {
-   if ( !strcasecmp(param_string, "maxEigen") )
+   if ( !strcmp(paramString, "maxEigen") )
    {
       if ( argc != 1 ) 
       {
@@ -331,10 +334,11 @@ int MLI_Solver_MLS::setParams( char *param_string, int argc, char **argv )
       {
          printf("MLI_Solver_MLS::setParams ERROR - maxEigen <= 0 (%e)\n", 
                 maxEigen_);
+         maxEigen_ = 0.0;
          return 1;
       }
    }
-   else if ( !strcasecmp(param_string, "zeroInitialGuess") )
+   else if ( !strcmp(paramString, "zeroInitialGuess") )
    {
       zeroInitialGuess_ = 1;
    }
