@@ -5,19 +5,16 @@
 #include "parcsr_mv.h"
 #include "mli_matrix.h"
  
-#define MLI_AGGR_READY     -1
-#define MLI_AGGR_SELECTED  -2
-#define MLI_AGGR_PENDING   -3
-
 /***********************************************************************
  * Function  : MLI_AMG_SA_FormGraph
- * Purpose   : Form graph from the matrix
+ * Purpose   : Form graph from Amat (specific to aggregation scheme) 
  **********************************************************************/
 
-void MLI_AMG_SA_FormGraph(MLI_Aggregation *mli_aggr)
+void MLI_AMG_SA_FormGraph(MLI_Aggregation *mli_aggr, 
+                          hypre_ParCSRMatrix *Amat;
+                          hypre_ParCSRMatrix *graph)
 {
    HYPRE_IJMatrix         IJGraph;
-   hypre_ParCSRMatrix     *Amat;
    hypre_CSRMatrix        *Adiag_block;
    MPI_Comm               comm;
    int                    i, j, jj, index, mypid, num_procs, *partition;
@@ -32,7 +29,7 @@ void MLI_AMG_SA_FormGraph(MLI_Aggregation *mli_aggr)
     * fetch machine and matrix parameters
     *-----------------------------------------------------------------*/
 
-   Amat = (hypre_ParCSRMatrix *) mli_aggr->Amat;
+   assert( Amat == NULL );
    comm = hypre_ParCSRMatrixComm(Amat);
    MPI_Comm_rank(comm,&mypid);
    MPI_Comm_size(comm,&num_procs);
@@ -171,10 +168,10 @@ void MLI_AMG_SA_FormGraph(MLI_Aggregation *mli_aggr)
    assert(!ierr);
 
    /*-----------------------------------------------------------------
-    * store the graph and clean up
+    * return the graph and clean up
     *-----------------------------------------------------------------*/
 
-   mli_aggr->graph = IJGraph;
+   graph = HYPRE_IJMatrixGetLocalStorageType(IJGraph, HYPRE_PARCSR);
    free( col_ind );
    free( col_val );
    if ( threshold > 0.0 ) free( diag_data );
