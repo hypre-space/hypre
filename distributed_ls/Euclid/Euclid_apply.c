@@ -97,6 +97,7 @@ END_OF_FUNCTION: ;
 
   /* total triangular solve count */
   ctx->its += 1;
+  ctx->itsTotal += 1;
 
   END_FUNC_DH
 }

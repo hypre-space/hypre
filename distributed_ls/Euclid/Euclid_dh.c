@@ -130,7 +130,6 @@ void Euclid_dhSetup(Euclid_dh ctx)
    *----------------------------------------------------*/
   if (ctx->setupCount && ctx->printStats) {
     Euclid_dhPrintStatsShorter(ctx, stdout); CHECK_V_ERROR;
-    ctx->itsTotal += ctx->its;
     ctx->its = 0;
   }
 
