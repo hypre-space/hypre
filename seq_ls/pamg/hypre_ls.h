@@ -5,6 +5,7 @@
 #define hypre_LS_HEADER
 
 #include "hypre_utilities.h"
+#include "mpe.h"
 #include "hypre_mv.h"
 
 #ifdef __cplusplus
@@ -92,7 +93,8 @@ int hypre_AMGIndepSet P((hypre_CSRMatrix *S , double *measure_array , int *graph
 int hypre_AMGBuildInterp P((hypre_CSRMatrix *A , int *CF_marker , hypre_CSRMatrix *S , hypre_CSRMatrix **P_ptr ));
 
 /* laplace.c */
-hypre_CSRMatrix *hypre_GenerateLaplacian P((int nx , int ny , int nz , double *value ));
+hypre_CSRMatrix *hypre_GenerateLaplacian P((int nx , int ny , int nz , int P , int Q , int R , double *value ));
+int map P((int ix , int iy , int iz , int p , int q , int r , int P , int Q , int R , int *nx_part , int *ny_part , int *nz_part , int *global_part));
 
 /* pcg.c */
 void PCG P((hypre_Vector *x , hypre_Vector *b , double tol , void *data ));
