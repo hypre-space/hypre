@@ -21,6 +21,7 @@ CXX = KCC -I/usr/local/mpi/mpich-1.1.1/lib/solaris/ch_p4/c++ \
         -I/usr/local/mpi/mpich-1.1.1/lib/solaris/ch_p4/c++
 
 CXXFLAGS = \
+ -I../..\
  -I../../distributed_matrix\
  -I../../IJ_matrix_vector\
  -I../../parcsr_matrix_vector\
