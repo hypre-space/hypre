@@ -192,9 +192,11 @@ then
     (
 	cd $HYPRE_INSTALL_DIR/src/linear_solvers
 	./build -$HYPRE_ARCH install
+	./build -$HYPRE_ARCH veryclean
     )
 
     (
+	echo "setting permissions ..."
 	cd $HYPRE_INSTALL_DIR
 	chmod -fR $HYPRE_INSTALL_PERMISSIONS *
     )
@@ -255,13 +257,6 @@ then
 	    shift
 	    COUNT=`expr $COUNT - 1`
 	done
-
-	# clean the source directory
-	echo "cleaning the source directories ..."
-	(
-	    cd src/linear_solvers
-	    ./build -$HYPRE_ARCH veryclean
-	)
     )
 fi
 
