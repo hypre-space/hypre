@@ -207,3 +207,16 @@ ZZZ_SetStructMatrixSymmetric( ZZZ_StructMatrix  matrix,
    zzz_StructMatrixSymmetric( (zzz_StructMatrix *) matrix ) = symmetric;
 }
 
+/*--------------------------------------------------------------------------
+ * ZZZ_PrintStructMatrix
+ *--------------------------------------------------------------------------*/
+
+void 
+ZZZ_PrintStructMatrix( char            *filename,
+                       ZZZ_StructMatrix matrix,
+                       int              all )
+{
+   zzz_PrintStructMatrix( filename,
+                          (zzz_StructMatrix *) matrix,
+                          all );
+}
