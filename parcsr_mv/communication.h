@@ -1,21 +1,4 @@
 /*--------------------------------------------------------------------------
- * hypre_VectorCommPkg:
- *   Structure containing information for doing communications for parallel 
- *   vectors
- *--------------------------------------------------------------------------*/
-
-typedef struct
-{
-   MPI_Comm               comm;
-
-   int                   *vec_starts;
-
-   /* remote communication information */
-   MPI_Datatype          *vector_mpi_types;
-
-} hypre_VectorCommPkg;
-
-/*--------------------------------------------------------------------------
  * hypre_CommPkg:
  *   Structure containing information for doing communications
  *--------------------------------------------------------------------------*/
