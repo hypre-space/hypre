@@ -90,6 +90,34 @@ int  impl_Hypre_ParAMG_SetDoubleParameter(Hypre_ParAMG this, char* name, double 
 } /* end impl_Hypre_ParAMGSetDoubleParameter */
 
 /* ********************************************************
+ * impl_Hypre_ParAMGSetDoubleArrayParameter
+ **********************************************************/
+int  impl_Hypre_ParAMG_SetDoubleArrayParameter
+( Hypre_ParAMG this, char* name, array1double value ) {
+   struct Hypre_ParAMG_private_type *HSp = this->d_table;
+   HYPRE_Solver *S = HSp->Hsolver;
+
+   if ( !strcmp(name,"relax weight") ) {
+      return HYPRE_ParAMGSetRelaxWeight( *S, value.data );
+   }
+   else
+      printf(
+         "Hypre_ParAMG_SetDoubleArrayParameter does not recognize name %s\n", name );
+
+   return 1;
+} /* end impl_Hypre_ParAMGSetDoubleArrayParameter */
+
+/* ********************************************************
+ * impl_Hypre_ParAMGSetDoubleArray2Parameter
+ **********************************************************/
+int  impl_Hypre_ParAMG_SetDoubleArray2Parameter
+(Hypre_ParAMG this, char* name, array2double value) {
+   printf(
+      "Hypre_ParAMG_SetDoubleArray2Parameter does not recognize name %s\n", name );
+   return 1;
+} /* end impl_Hypre_ParAMGSetDoubleArray2Parameter */
+
+/* ********************************************************
  * impl_Hypre_ParAMGSetIntParameter
  **********************************************************/
 int  impl_Hypre_ParAMG_SetIntParameter(Hypre_ParAMG this, char* name, int value) {
@@ -126,6 +154,9 @@ int  impl_Hypre_ParAMG_SetIntParameter(Hypre_ParAMG this, char* name, int value)
    else if ( !strcmp(name,"debug") ) {
       return HYPRE_ParAMGSetDebugFlag( *S, value );
    }
+   else if ( !strcmp(name,"logging") ) {
+      return HYPRE_ParAMGSetLogging( *S, value, "Hypre_log_file" );
+   }
    else
       printf( "Hypre_ParAMG_SetIntParameter does not recognize name %s\n", name );
 
@@ -133,24 +164,81 @@ int  impl_Hypre_ParAMG_SetIntParameter(Hypre_ParAMG this, char* name, int value)
 
 } /* end impl_Hypre_ParAMGSetIntParameter */
 
-/* >>>> TO DO: no way to call these set's with present SIDL file:
-HYPRE_ParAMGSetGridRelaxPoints( HYPRE_Solver   solver,
-                                int          **grid_relax_points  )
- (a 2-d array would do fine.  You need intimate knowledge of the algorithm
-  for this to do anything for you)
-HYPRE_ParAMGSetLogFileName( HYPRE_Solver  solver,
-                            char         *log_file_name  )
-HYPRE_ParAMGSetLogging( HYPRE_Solver  solver,
-                        int           ioutdat,
-                        char         *log_file_name  )
- (note: the last arg can be dropped; reset it later)
-HYPRE_ParAMGSetRelaxWeight( HYPRE_Solver  solver,
-                            double       *relax_weight  )
-HYPRE_ParAMGSetNumGridSweeps( HYPRE_Solver  solver,
-                              int          *num_grid_sweeps  )
-HYPRE_ParAMGSetGridRelaxType( HYPRE_Solver  solver,
-                              int          *grid_relax_type  )
-*/
+/* ********************************************************
+ * impl_Hypre_ParAMGSetIntArrayParameter
+ **********************************************************/
+int  impl_Hypre_ParAMG_SetIntArrayParameter
+( Hypre_ParAMG this, char* name, array1int value ) {
+   struct Hypre_ParAMG_private_type *HSp = this->d_table;
+   HYPRE_Solver *S = HSp->Hsolver;
+
+   if ( !strcmp(name,"num grid sweeps") ) {
+      return HYPRE_ParAMGSetNumGridSweeps( *S, value.data );
+   }
+   else if ( !strcmp(name,"grid relax type") ) {
+      return HYPRE_ParAMGSetGridRelaxType( *S, value.data );
+   }
+   else
+      printf(
+         "Hypre_ParAMG_SetIntArrayParameter does not recognize name %s\n", name );
+
+   return 1;
+} /* end impl_Hypre_ParAMGSetIntArrayParameter */
+
+/* ********************************************************
+ * impl_Hypre_ParAMGSetIntArray2Parameter
+ **********************************************************/
+int  impl_Hypre_ParAMG_SetIntArray2Parameter
+( Hypre_ParAMG this, char* name, array2int value ) {
+   int dim0, dim1, i, j;
+   int ** valuepp;
+   struct Hypre_ParAMG_private_type *HSp = this->d_table;
+   HYPRE_Solver *S = HSp->Hsolver;
+
+   if ( !strcmp(name,"grid relax points") ) {
+      /* You need intimate knowledge of the algorithm
+         for this to do anything for you) */
+      /* This is awkward because we get data in the form of a pseudo-Fortran
+         array (continuous data, 2-d indexing) but have to pass it on in the
+         form of a int**.
+         And - this is a real memory management problem because nobody else
+         can (or should) know that a data structure got copied here.  How
+         can other codes do their duty to release memory at the right time?
+      */
+      dim0 = value.upper[0]-value.lower[0];
+      dim1 = value.upper[1]-value.lower[1];
+      valuepp = hypre_CTAlloc(int *, dim0);
+      for ( i=0; i<dim0; ++i ) {
+         valuepp[i] = hypre_CTAlloc(int,dim1);
+         for ( j=0; j<dim1; ++j )
+            valuepp[i][j] = value.data[i+j*dim0];
+         /* ... I'm guessing that the Babel standard index ordering is Fortran-
+            like, as the array has to be passable to Fortran code */
+      };
+      return HYPRE_ParAMGSetGridRelaxPoints( *S, valuepp );
+   }
+   else
+      printf(
+         "Hypre_ParAMG_SetIntArray2Parameter does not recognize name %s\n", name );
+   return 1;
+} /* end impl_Hypre_ParAMGSetIntArray2Parameter */
+
+/* ********************************************************
+ * impl_Hypre_ParAMGSetStringParameter
+ **********************************************************/
+int  impl_Hypre_ParAMG_SetStringParameter
+(Hypre_ParAMG this, char* name, char* value) {
+   struct Hypre_ParAMG_private_type *HSp = this->d_table;
+   HYPRE_Solver *S = HSp->Hsolver;
+
+   if ( !strcmp(name,"log file name") ) {
+      return HYPRE_ParAMGSetLogFileName( *S, value );
+   }
+   else
+      printf( "Hypre_ParAMG_SetStringParameter does not recognize name %s\n", name );
+
+   return 1;
+} /* end impl_Hypre_ParAMGSetStringParameter */
 
 /* ********************************************************
  * impl_Hypre_ParAMGNew
