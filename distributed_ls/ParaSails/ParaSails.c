@@ -1080,7 +1080,7 @@ static double SelectFilter(MPI_Comm comm, Matrix *M, DiagScale *diag_scale,
 	/* Copy the scaled absolute values into a work buffer */
 	for (i=0; i<len; i++)
 	{
-	    buffer[i] = ABS(val[i] * DiagScaleGet(diag_scale, ind[i]));
+	    buffer[i] = ABS(val[i]) / DiagScaleGet(diag_scale, ind[i]);
 	    if (ind[i] == row)
 	        buffer[i] = 0.0;
 	}
@@ -1121,7 +1121,7 @@ static void FilterValues(Matrix *M, Matrix *F, DiagScale *diag_scale,
         j = 0;
         for (i=0; i<len; i++)
         {
-            if (ABS(val[i] * DiagScaleGet(diag_scale, ind[i])) >= filter 
+            if (ABS(val[i]) / DiagScaleGet(diag_scale, ind[i]) >= filter 
 	      || row == ind[i])
 	    {
                 val[j] = val[i];
