@@ -1,0 +1,51 @@
+driver.c is the same as linear_solvers/test/IJ_linear_evolvers.c,
+but with added "-solver <int>" switches for Euclid:
+
+       43=Euclid-PCG
+       44=Euclid-GMRES
+       45=Euclid-BICGSTAB
+
+-------------------------------------------------------------------
+Euclid recognizes the following command-line switches:
+
+   -level <int>   
+
+       sets the level for ILU(k) factorization; must be 0 or
+       greater; default is 1.  
+
+   -sparseA <double>
+
+       controls sparsification: values in A that are smaller
+       (in absolute value) than <double> are discarded before
+       factorization; default is 0.0, or no dropping.
+
+   -doNotScale
+
+      default behavior is to scale matrix rows so that the largest
+      entry in each row is +1 or -1; use this switch to turn off
+      scaling (but note that the sparsification strategy really only
+      makes sense when rows are scaled.)
+
+   -iluNONE
+
+      turns off preconditioning (mainly for testing/debugging).
+       
+   -rho <double>   
+
+      determines initial storage allocation for the ILU factors;
+      initial allocation is (number of non-zeros in A)*rho;
+      default is 2.0; Euclid will reallocate during factorization
+      if initial allocation is insufficient; carefull setting of
+      this parameter, based on previous solutions, can increase
+      memory usage; the "ideal" value that should have been set
+      is printed when HYPRE_ParCSREuclidPrintParams() is 
+      called.
+
+   -printMat
+
+      Causes both preconditioner and input matrix to be printed to 
+      files (F.trip, A.trip) in 
+      <row, col, val> format; this is primarily for debugging, 
+      e.g, for examining preconditioner patterns using spy() in
+      matlab.
+-------------------------------------------------------------------

@@ -1,0 +1,146 @@
+#BHEADER***********************************************************************
+# (c) 1999   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+
+########Euclid specific macros:
+PCPACK_DIR = `pwd`
+EUCLID_CFLAGS =  -DMPI_MODE -DMPI_TIMING -DUSING_MPI -DHYPRE_GET_ROW \
+                 -DHYPRE_MODE -DOPTIMIZED_DH
+EUCLID_INCLUDES = -I${PCPACK_DIR}/include
+
+.SUFFIXES: .c .f .o
+
+CC =  @CC@
+
+C_COMPILE_FLAGS=@CFLAGS@ 
+CXX_COMPILE_FLAGS=@CXXFLAGS@
+F77_COMPILE_FLAGS=@F77FLAGS@
+CINCLUDES=@INCLUDES@ @MPIINCLUDE@ 
+ 
+CFLAGS = \
+ ${EUCLID_CFLAGS} \
+ ${EUCLID_INCLUDES} \
+ ${C_COMPILE_FLAGS}\
+ -I../..\
+ -I../../utilities\
+ -I../../parcsr_matrix_vector\
+ -I../../hypre/include\
+ ${CINCLUDES}\
+ ${CDEFS}
+
+RANLIB = @RANLIB@
+
+MPILIBFLAGS =    @MPILIBDIRS@ @MPILIBS@ @MPIFLAGS@
+LIBFLAGS =   @LIBDIRS@ @LIBS@
+LDLIBFLAGS =  @LDLIBDIRS@ @LDLIBS@
+BLASLIBFLAGS = @BLASLIBFLAGS@
+
+LFLAGS =\
+ -L../../hypre/lib\
+ -lHYPRE_sstruct_mv\
+ -lHYPRE_struct_ls\
+ -lHYPRE_struct_mv\
+ -lHYPRE_parcsr_ls\
+ -lHYPRE_DistributedMatrixPilutSolver \
+ -lHYPRE_ParaSails \
+ -lHYPRE_Euclid \
+ -lHYPRE_MatrixMatrix \
+ -lHYPRE_DistributedMatrix \
+ -lHYPRE_IJ_mv\
+ -lHYPRE_parcsr_mv\
+ -lHYPRE_seq_mv\
+ -lkrylov\
+ -lHYPRE_utilities\
+ ${BLASLIBFLAGS}\
+ ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
+
+
+HEADERS =
+
+FILES =\
+ src/Euclid_all.c\
+ src/Euclid_mpi.c\
+ src/Euclid_seq.c\
+ src/Euclid_apply.c\
+ src/Hash_dh.c\
+ src/MatGenFD.c\
+ src/Mat_dh.c\
+ src/Mem_dh.c\
+ src/Numbering_dh.c\
+ src/Parser_dh.c\
+ src/SortedList_dh.c\
+ src/TimeLog_dh.c\
+ src/Timer_dh.c\
+ src/Vec_dh.c\
+ src/blas_dh.c\
+ src/globalObjects.c\
+ src/ilu_mpi.c\
+ src/ilu_seq.c\
+ src/io_dh.c\
+ src/krylov_dh.c\
+ src/petsc_euclid.c\
+ src/shellSort_dh.c\
+ src/getRow_dh.c
+
+OBJS = ${FILES:.c=.o}
+
+##################################################################
+# Targets
+##################################################################
+
+all: setHomeDir libHYPRE_Euclid.a 
+
+driver: driver.o libHYPRE_Euclid.a
+	@echo  "Linking" $@ "... "
+	${CC} -o $@ driver.o ${LFLAGS}
+
+convert: convert.o
+	${CC} -o $@ convert.o
+
+setHomeDir:
+	@rm -f include/home_dh.h
+	@echo "#ifndef PCPACK_HOME_DH" > include/home_dh.h 
+	@echo "#define PCPACK_HOME_DH" >> include/home_dh.h 
+	@echo "#define MASTER_OPTIONS_LIST \"${PCPACK_DIR}/include/options_database\" " >> include/home_dh.h
+	@echo "#endif" >> include/home_dh.h
+
+install: all
+	@cp -f libHYPRE_*.a $$HYPRE_INSTALL_DIR/lib/.
+
+clean:
+	@cd src; rm -f *.o
+	@rm -f *.o driver *a
+
+veryclean: clean
+	@cd src; rm -f *.o libHYPRE_*.a
+	@rm -f *.o driver *a
+
+
+##################################################################
+# Rules
+##################################################################
+
+libHYPRE_Euclid.a: ${OBJS}
+	@echo  "Building $@ ... "
+	ar -rcu $@ ${OBJS}
+	${RANLIB} $@
+
+
+${OBJS}: ${HEADERS}
+
+
+##################################################################
+# Generic rules
+##################################################################
+
+.c.o:
+	${CC} -o $@ -c ${CFLAGS} $<
+
+.f.o:
+	${F77} -o $@ -c ${FFLAGS} $<
