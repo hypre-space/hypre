@@ -25,10 +25,10 @@ extern "C" {
  * Structures
  *--------------------------------------------------------------------------*/
 
-typedef void *HYPRE_CSRMatrix;
-typedef void *HYPRE_MappedMatrix;
-typedef void *HYPRE_MultiblockMatrix;
-typedef void *HYPRE_Vector;
+typedef struct {int opaque;} *HYPRE_CSRMatrix;
+typedef struct {int opaque;} *HYPRE_MappedMatrix;
+typedef struct {int opaque;} *HYPRE_MultiblockMatrix;
+typedef struct {int opaque;} *HYPRE_Vector;
 
 /*--------------------------------------------------------------------------
  * Prototypes
