@@ -171,4 +171,9 @@
             - put in an additional fe class for multiple domain per proc
             - take out compiler warnings
             - take out a few memory leaks
+09/12/03    2.5.1R4
+            - put in ARPACK and eigenvector nullspace for aggregation
+            - add scalar variable to aggregation
+            - change error threshold for QR
+            - add amgMaxLevels 
 
