@@ -214,7 +214,7 @@ HYPRE_SStructGraphAddEntries( HYPRE_SStructGraph   graph,
    /* GEC 0902 filling up the iUventries with local ghrank
     * since HYPRE_SSTRUCT is chosen */
 
-   if (type == HYPRE_SSTRUCT) 
+   if (type == HYPRE_SSTRUCT || type == HYPRE_STRUCT) 
    { 
      startrank = hypre_SStructGridGhstartRank(grid);
    }
