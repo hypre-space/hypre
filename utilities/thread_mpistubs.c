@@ -404,7 +404,6 @@ thread_MPI_Irecv( void        *buf,
   {
     returnval=0;
   }
-  hypre_barrier(&mpi_mtx,&mpi_cnd,&th_sem);
   return returnval;
 }
 
@@ -432,7 +431,6 @@ thread_MPI_Waitall( int          count,
              MPI_Status  *array_of_statuses )
 {
   int returnval;
-  hypre_barrier(&mpi_mtx,&mpi_cnd,&th_sem);
   if (pthread_equal(pthread_self(),hypre_thread[0]))
   {
     returnval=MPI_Waitall(count,array_of_requests,array_of_statuses);
