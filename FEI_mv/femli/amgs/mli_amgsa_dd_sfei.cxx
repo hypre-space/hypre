@@ -311,12 +311,13 @@ int MLI_Method_AMGSA::setupSFEIBasedNullSpaces( MLI *mli )
       sigmaI = 0.0e0;
       dnstev_(&csrNrows, &nullspaceDim_, which, &sigmaR, &sigmaI, 
            csrIA, csrJA, csrAA, eigenR, eigenI, eigenV, &csrNrows, &info);
-      if ( mypid == 0 && outputLevel_ > 0 )
+      if ( outputLevel_ > 0 )
       {
-         printf("Subdomain %3d (%3d) (size=%d) : \n",iD,nSubdomains,csrNrows);
+         printf("%5d : Subdomain %3d (%3d) (size=%d) : \n",mypid,iD,
+                nSubdomains,csrNrows);
          for ( k = 0; k < nullspaceDim_; k++ )
-         printf("\tARPACK eigenvalues %2d = %16.8e %16.8e\n", k, eigenR[k],
-                eigenI[k]);
+         printf("\t%5d : ARPACK eigenvalues %2d = %16.8e %16.8e\n", mypid,
+                k, eigenR[k], eigenI[k]);
       }
 #else
       printf("MLI_Method_AMGSA::FATAL ERROR : ARPACK not installed.\n");
