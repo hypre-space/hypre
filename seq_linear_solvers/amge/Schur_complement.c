@@ -177,7 +177,8 @@ int hypre_AMGeSchurComplement(int *i_domain_chord,
 
       if (ierr < 0) 
 	{
-
+	  printf("ierr in Schur complement.c: %d\n ", ierr);	 
+	  /* ----------------------------------------------------------
 	  for (i_loc=0; i_loc < first_counter; i_loc++)
 	    {
 	      printf("\n ");
@@ -186,7 +187,7 @@ int hypre_AMGeSchurComplement(int *i_domain_chord,
 
 	      printf("\n ");	 
 	    }
-	 
+	    -------------------------------------------------------- */	 
 	}
 
 
