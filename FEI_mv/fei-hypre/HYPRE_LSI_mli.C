@@ -61,11 +61,12 @@
 #define MLI_SOLVER_SGS_ID       2 
 #define MLI_SOLVER_PARASAILS_ID 3 
 #define MLI_SOLVER_BSGS_ID      4 
-#define MLI_SOLVER_MLS_ID       5 
-#define MLI_SOLVER_SUPERLU_ID   6 
-#define MLI_METHOD_AMGSA_ID     7
-#define MLI_METHOD_AMGSAE_ID    8
-#define MLI_METHOD_AMGSADD_ID   9
+#define MLI_SOLVER_CGSGS_ID     5 
+#define MLI_SOLVER_MLS_ID       6 
+#define MLI_SOLVER_SUPERLU_ID   7 
+#define MLI_METHOD_AMGSA_ID    11
+#define MLI_METHOD_AMGSAE_ID   12
+#define MLI_METHOD_AMGSADD_ID  139
 #endif
 #include "HYPRE_LSI_mli.h"
 
@@ -265,6 +266,8 @@ int HYPRE_LSI_MLISetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
            sprintf(paramString, "setPreSmoother GS" ); break;
       case MLI_SOLVER_SGS_ID       : 
            sprintf(paramString, "setPreSmoother SGS" ); break;
+      case MLI_SOLVER_CGSGS_ID     : 
+           sprintf(paramString, "setPreSmoother CGSGS" ); break;
       case MLI_SOLVER_PARASAILS_ID : 
            sprintf(paramString, "setPreSmoother ParaSails" ); break;
       case MLI_SOLVER_BSGS_ID   : 
@@ -289,6 +292,8 @@ int HYPRE_LSI_MLISetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
            sprintf(paramString, "setPostSmoother GS" ); break;
       case MLI_SOLVER_SGS_ID       : 
            sprintf(paramString, "setPostSmoother SGS" ); break;
+      case MLI_SOLVER_CGSGS_ID     : 
+           sprintf(paramString, "setPostSmoother CGSGS" ); break;
       case MLI_SOLVER_PARASAILS_ID : 
            sprintf(paramString, "setPostSmoother ParaSails" ); break;
       case MLI_SOLVER_BSGS_ID   : 
@@ -313,6 +318,8 @@ int HYPRE_LSI_MLISetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
            sprintf(paramString, "setCoarseSolver GS" ); break;
       case MLI_SOLVER_SGS_ID       : 
            sprintf(paramString, "setCoarseSolver SGS" ); break;
+      case MLI_SOLVER_CGSGS_ID       : 
+           sprintf(paramString, "setCoarseSolver CGSGS" ); break;
       case MLI_SOLVER_PARASAILS_ID : 
            sprintf(paramString, "setCoarseSolver ParaSails" ); break;
       case MLI_SOLVER_BSGS_ID   : 
@@ -541,6 +548,11 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
          mli_object->preSmoother_  = MLI_SOLVER_SGS_ID;
          mli_object->postSmoother_ = MLI_SOLVER_SGS_ID;
       }
+      else if ( ! strcasecmp( param3, "CGSGS" ) )
+      {
+         mli_object->preSmoother_  = MLI_SOLVER_CGSGS_ID;
+         mli_object->postSmoother_ = MLI_SOLVER_CGSGS_ID;
+      }
       else if ( ! strcasecmp( param3, "ParaSails" ) )
       {
          mli_object->preSmoother_  = MLI_SOLVER_PARASAILS_ID;
@@ -571,6 +583,8 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
          mli_object->coarseSolver_ = MLI_SOLVER_GS_ID;
       else if ( ! strcasecmp( param3, "SGS" ) )
          mli_object->coarseSolver_ = MLI_SOLVER_SGS_ID;
+      else if ( ! strcasecmp( param3, "CGSGS" ) )
+         mli_object->coarseSolver_ = MLI_SOLVER_CGSGS_ID;
       else if ( ! strcasecmp( param3, "ParaSails" ) )
          mli_object->coarseSolver_ = MLI_SOLVER_PARASAILS_ID;
       else if ( ! strcasecmp( param3, "BSGS" ) )
@@ -944,9 +958,10 @@ int HYPRE_LSI_MLI_SetMethod( HYPRE_Solver solver, char *paramString )
 /* smoother type : 0 (Jacobi)                                               */
 /*                 1 (GS)                                                   */
 /*                 2 (SGS)                                                  */
-/*                 3 (ParaSails)                                            */
-/*                 4 (BSGS)                                                 */
-/*                 5 (MLS)                                                  */
+/*                 3 (CGSGS)                                                */
+/*                 4 (ParaSails)                                            */
+/*                 5 (BSGS)                                                 */
+/*                 6 (MLS)                                                  */
 /*--------------------------------------------------------------------------*/
 
 extern "C"
@@ -958,7 +973,7 @@ int HYPRE_LSI_MLISetSmoother( HYPRE_Solver solver, int pre_post,
    HYPRE_LSI_MLI *mli_object = (HYPRE_LSI_MLI *) solver;
 
    stype = smoother_type;
-   if ( stype < 0 || stype > 5 )
+   if ( stype < 0 || stype > 6 )
    {
       printf("HYPRE_LSI_MLI_SetSmoother WARNING : set to Jacobi.\n");
       stype = 0;
@@ -1043,8 +1058,6 @@ int HYPRE_LSI_MLISetSmoother( HYPRE_Solver solver, int pre_post,
 
 /****************************************************************************/
 /* HYPRE_LSI_MLISetCoarseSolver                                             */
-/* solver ID = 0  (superlu)                                                 */
-/* solver ID = 1  (aggregation)                                             */
 /*--------------------------------------------------------------------------*/
 
 extern "C"
@@ -1056,7 +1069,7 @@ int HYPRE_LSI_MLISetCoarseSolver( HYPRE_Solver solver, int solver_id,
    HYPRE_LSI_MLI *mli_object = (HYPRE_LSI_MLI *) solver;
 
    stype = solver_id;
-   if ( stype < 0 || stype > 6 )
+   if ( stype < 0 || stype > 7 )
    {
       printf("HYPRE_LSI_MLISetCoarseSolver WARNING : set to Jacobi.\n");
       stype = 0;
@@ -1615,5 +1628,4 @@ int HYPRE_LSI_MLIFEDataWriteToFile( void *object, char *filename )
    return 1;
 #endif
 }
-
 
