@@ -672,19 +672,5 @@ int hypre_PrintTiming P((char *heading , MPI_Comm comm ));
 }
 #endif
 
-/*-------------------------------------------------------
- * Prototype for Random Number Generator
- *-------------------------------------------------------*/
-
-#ifdef __STDC__
-# define        P(s) s
-#else
-# define P(s) ()
 #endif
 
-/* random.c */
-void hypre_SeedRand P((int seed ));
-double hypre_Rand P((void ));
-
-
-#endif
