@@ -12,17 +12,22 @@ SHELL = /bin/sh
 srcdir = @srcdir@
 VPATH = @srcdir@
 
-#These are the directories for structured interface
-HYPRE_STRUCT_DIRS =\
+HYPRE_BASIC_DIRS =\
  blas\
- utilities\
+ utilities
+
+#These are the directories for the structured interface
+HYPRE_STRUCT_DIRS =\
  struct_matrix_vector\
  struct_linear_solvers
 
-#These are the directories for IJ interface
+#These are the directories for the semi-structured interface
+HYPRE_SSTRUCT_DIRS =\
+ sstruct_matrix_vector\
+ sstruct_linear_solvers
+
+#These are the directories for the IJ interface
 HYPRE_IJ_DIRS =\
- blas\
- utilities\
  seq_matrix_vector\
  parcsr_matrix_vector\
  distributed_matrix\
@@ -32,7 +37,7 @@ HYPRE_IJ_DIRS =\
  distributed_linear_solvers/ParaSails\
  parcsr_linear_solvers
 
-#These are the directories for FEI interface
+#These are the directories for the FEI
 HYPRE_FEI_DIRS =\
  FEI_matrix_vector/fei-hypre
 # FEI_matrix_vector/fei-base\
@@ -47,19 +52,20 @@ HYPRE_FEI_LIBFILES =\
 
 # These are directories that are officially in HYPRE
 HYPRE_DIRS =\
+ ${HYPRE_BASIC_DIRS}\
  ${HYPRE_STRUCT_DIRS}\
- ${HYPRE_IJ_DIRS}
+ ${HYPRE_SSTRUCT_DIRS}\
+ ${HYPRE_IJ_DIRS}\
+ ${HYPRE_FEI_DIRS}
 
 # These are directories that are not yet officially in HYPRE
 HYPRE_EXTRA_DIRS =\
- sstruct_matrix_vector\
- sstruct_linear_solvers\
  seq_linear_solvers/pamg\
  structIJ_matrix_vector\
  CI_struct_matrix_vector\
  CI_struct_linear_solvers @HYPRE_PETSCLIBDIRS@
 
-all: struct IJ fei
+all: struct sstruct IJ fei
 	@ \
 	echo "Making test drivers ..."; \
 	(cd test; make veryclean; make); \
@@ -96,6 +102,20 @@ struct: base
 	  fi; \
 	done
 
+sstruct: struct IJ
+	@ \
+	HYPRE_INSTALL_DIR=`pwd`/hypre; \
+	export HYPRE_INSTALL_DIR; \
+	for i in ${HYPRE_SSTRUCT_DIRS}; \
+	do \
+	  if [ -d $$i ]; \
+	  then \
+	    echo "Making $$i ..."; \
+	    (cd $$i; make install); \
+	    echo ""; \
+	  fi; \
+	done
+
 IJ: base
 	@ \
 	HYPRE_INSTALL_DIR=`pwd`/hypre; \
@@ -109,21 +129,9 @@ IJ: base
 	    echo ""; \
 	  fi; \
 	done
-	echo ""
 
-fei: base
+fei: IJ
 	@ \
-	HYPRE_INSTALL_DIR=`pwd`/hypre; \
-	export HYPRE_INSTALL_DIR; \
-	for i in ${HYPRE_IJ_DIRS}; \
-	do \
-	  if [ -d $$i ]; \
-	  then \
-	    echo "Making $$i ..."; \
-	    (cd $$i; make install); \
-	    echo ""; \
-	  fi; \
-	done; \
 	HYPRE_INSTALL_DIR=`pwd`/hypre; \
 	export HYPRE_INSTALL_DIR; \
 	for i in ${HYPRE_FEI_DIRS}; \
@@ -145,8 +153,7 @@ fei: base
 	   fi; \
 	done; \
 	(cd hypre/tmp; ar rcu ../lib/libHYPRE_LSI.a *.o;); \
-	rm -rf hypre/tmp; \
-	echo ""
+	rm -rf hypre/tmp
 
 # special autotest target
 nofei: IJ
@@ -173,16 +180,25 @@ nofei: IJ
 	   fi; \
 	done; \
 	(cd hypre/tmp; ar rcu ../lib/libHYPRE_LSI.a *.o;); \
-	rm -rf hypre/tmp; \
-	echo ""
+	rm -rf hypre/tmp
 
 base:
 	@ \
 	mkdir -p hypre/include; \
 	mkdir -p hypre/lib; \
 	HYPRE_INSTALL_DIR=`pwd`/hypre; \
-	cp -f HYPRE_config.h $$HYPRE_INSTALL_DIR/include/.;\
-	cp -f HYPRE.h $$HYPRE_INSTALL_DIR/include/.
+	export HYPRE_INSTALL_DIR; \
+	cp -f HYPRE_config.h $$HYPRE_INSTALL_DIR/include/.; \
+	cp -f HYPRE.h $$HYPRE_INSTALL_DIR/include/.; \
+	for i in ${HYPRE_BASIC_DIRS}; \
+	do \
+	  if [ -d $$i ]; \
+	  then \
+	    echo "Making $$i ..."; \
+	    (cd $$i; make install); \
+	    echo ""; \
+	  fi; \
+	done
 
 install: all
 	@ \
@@ -202,7 +218,7 @@ install: all
 
 clean:
 	@ \
-	for i in ${HYPRE_DIRS} ${HYPRE_EXTRA_DIRS} ${HYPRE_FEI_DIRS}; \
+	for i in ${HYPRE_DIRS} ${HYPRE_EXTRA_DIRS}; \
 	do \
 	  if [ -d $$i ]; \
 	  then \
@@ -216,7 +232,7 @@ clean:
 veryclean:
 	@ \
 	rm -Rf hypre; \
-	for i in ${HYPRE_DIRS} ${HYPRE_EXTRA_DIRS} ${HYPRE_FEI_DIRS}; \
+	for i in ${HYPRE_DIRS} ${HYPRE_EXTRA_DIRS}; \
 	do \
 	  if [ -d $$i ]; \
 	  then \

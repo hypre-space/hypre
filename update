@@ -205,6 +205,8 @@ then
             UPDATE/src/linear_solvers/utilities \
             UPDATE/src/linear_solvers/struct_matrix_vector \
             UPDATE/src/linear_solvers/struct_linear_solvers \
+            UPDATE/src/linear_solvers/sstruct_matrix_vector \
+            UPDATE/src/linear_solvers/sstruct_linear_solvers \
             UPDATE/src/linear_solvers/seq_matrix_vector \
             UPDATE/src/linear_solvers/parcsr_matrix_vector \
             UPDATE/src/linear_solvers/distributed_matrix \
