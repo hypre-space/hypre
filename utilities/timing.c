@@ -427,7 +427,7 @@ hypre_PrintTiming( char     *heading,
                cpu_mflops = hypre_TimingFLOPS(i) / cpu_time / 1.0E6;
             else
                cpu_mflops = 0.0;
-            printf("  cpu MFLOPS      = %f\n", cpu_mflops);
+            printf("  cpu MFLOPS      = %f\n\n", cpu_mflops);
          }
       }
    }
@@ -603,7 +603,7 @@ hypre_PrintTiming( char     *heading,
                   }
                }
 
-               printf("  cpu MFLOPS      = %f\n", cpu_mflops);
+               printf("  cpu MFLOPS      = %f\n\n", cpu_mflops);
             }
          }
       }
