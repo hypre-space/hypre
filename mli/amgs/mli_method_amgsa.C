@@ -309,7 +309,7 @@ int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
 
 int MLI_Method_AMGSA::getParams(char *in_name, int *argc, char *argv[])
 {
-   int    node_dofs, num_ns, length;
+   int    ndofs, num_ns, length;
    double *nullspace;
 
    if ( !strcmp(in_name, "getNullSpace" ))
@@ -320,7 +320,7 @@ int MLI_Method_AMGSA::getParams(char *in_name, int *argc, char *argv[])
          exit(1);
       }
       getNullSpace(node_dofs,num_ns,nullspace,length);
-      argv[0] = (char *) &node_dofs;
+      argv[0] = (char *) &ndofs;
       argv[1] = (char *) &num_ns;
       argv[2] = (char *) nullspace;
       argv[3] = (char *) &length;
@@ -346,7 +346,7 @@ int MLI_Method_AMGSA::setup( MLI *mli )
    MLI_Matrix      *mli_Pmat, *mli_Rmat, *mli_Amat, *mli_cAmat;
    MLI_OneLevel    *single_level, *next_level;
    MLI_Solver      *smoother_ptr, *csolve_ptr;
-   MPI_Comm        mpi_comm;
+   MPI_Comm        comm;
 
 #ifdef MLI_DEBUG_DETAILED
    cout << " MLI_Method_AMGSA::setup begins..." << endl;
@@ -376,8 +376,8 @@ int MLI_Method_AMGSA::setup( MLI *mli )
    /* traverse all levels                                             */
    /* --------------------------------------------------------------- */
 
-   mpi_comm = getComm();
-   MPI_Comm_rank( mpi_comm, &mypid );
+   comm = getComm();
+   MPI_Comm_rank( comm, &mypid );
    single_level = mli->getOneLevelObject( 0 );
    mli_Amat     = single_level->getAmat();
    total_time   = MLI_Utils_WTime();
@@ -893,13 +893,13 @@ int MLI_Method_AMGSA::printStatistics(MLI *mli)
    char         param_string[100];
    MLI_Matrix   *mli_Amat, *mli_Pmat;
    MLI_OneLevel *single_level;
-   MPI_Comm     mpi_comm = getComm();
+   MPI_Comm     comm = getComm();
 
    /* --------------------------------------------------------------- */
    /* output header                                                   */
    /* --------------------------------------------------------------- */
 
-   MPI_Comm_rank( mpi_comm, &mypid);
+   MPI_Comm_rank( comm, &mypid);
    if ( mypid == 0 )
       cout << "\t******************** AMGSA Statistics **********************\n";
 
