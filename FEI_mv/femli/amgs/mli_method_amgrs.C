@@ -411,8 +411,8 @@ int MLI_Method_AMGRS::setup( MLI *mli )
          hypre_ParCSRMatrixTranspose( hypreRT, &hypreR, one );
          func_ptr = new MLI_Function();
          MLI_Utils_HypreParCSRMatrixGetDestroyFunc(func_ptr);
-         sprintf(param_string, "HYPRE_ParCSRT" ); 
-         mli_Rmat = new MLI_Matrix( (void *) hypreRT, param_string, func_ptr );
+         sprintf(param_string, "HYPRE_ParCSR" ); 
+         mli_Rmat = new MLI_Matrix( (void *) hypreR, param_string, func_ptr );
          mli->setRestriction(level, mli_Rmat);
          delete func_ptr;
          delete mli_ATmat;
