@@ -359,7 +359,9 @@ hypre_HybridSolve( void               *hybrid_vdata,
     *-----------------------------------------------------------------------*/
    pcg_functions =
       hypre_PCGFunctionsCreate(
-         hypre_CAlloc, hypre_StructKrylovFree, hypre_StructKrylovCreateVector,
+         hypre_CAlloc, hypre_StructKrylovFree,
+         hypre_StructKrylovCommInfo,
+         hypre_StructKrylovCreateVector,
          hypre_StructKrylovDestroyVector, hypre_StructKrylovMatvecCreate,
          hypre_StructKrylovMatvec, hypre_StructKrylovMatvecDestroy,
          hypre_StructKrylovInnerProd, hypre_StructKrylovCopyVector,
@@ -428,6 +430,7 @@ hypre_HybridSolve( void               *hybrid_vdata,
       pcg_functions =
          hypre_PCGFunctionsCreate(
             hypre_CAlloc, hypre_StructKrylovFree,
+            hypre_StructKrylovCommInfo,
             hypre_StructKrylovCreateVector,
             hypre_StructKrylovDestroyVector, hypre_StructKrylovMatvecCreate,
             hypre_StructKrylovMatvec, hypre_StructKrylovMatvecDestroy,
