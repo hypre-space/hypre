@@ -601,6 +601,10 @@ dnl *    CASC_ADD_LIB(mpi, main, /usr/lib, MPI) )
      then
        CASC_SET_COPT(-o5)
        CASC_SET_CDEBUG()
+     elif test "$CC" = "guidec" 
+     then
+       CASC_SET_COPT(-O)
+       CASC_SET_CDEBUG()
      else 
        CASC_SET_COPT(-fast)
        CASC_SET_CDEBUG(-g)
