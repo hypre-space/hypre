@@ -55,7 +55,7 @@ clean:
 	@rm -f *.o
 
 veryclean: clean
-	@rm -f lib*.a
+	@rm -f lib*.a Makefile
 
 
 ##################################################################

@@ -18,7 +18,7 @@ F77=@F77@
 C_COMPILE_FLAGS=@CFLAGS@
 CXX_COMPILE_FLAGS=@CXXFLAGS@
 F77_COMPILE_FLAGS=@F77FLAGS@
-LD_LINK_FLAGS=@LDFLAGS@
+LD_LINK_FLAGS=@LDFLAGS@ @LIBM@
 CINCLUDES=@INCLUDES@ @MPIINCLUDE@
 CDEFS = -DHYPRE_TIMING
  
@@ -377,11 +377,6 @@ f77_ij: f77_ij.o
 f77_ij_mv: f77_ij_mv.o
 	@echo  "Building" $@ "... "
 	${F77} -o $@ $@.o ${FFLAGS} ${IJ_MV_LFLAGS}
-
-# special autotest target
-${HYPRE_FEI_DRIVER_CXX_EXECS}: ${HYPRE_FEI_DRIVER_CXX_OBJS}
-	@echo  "Building" $@ "... "
-	${CXX} -o $@ $@.o -DNOFEI ${FEICXX_LFLAGS}
 
 ##################################################################
 # Babel version of above

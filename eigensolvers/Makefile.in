@@ -40,7 +40,7 @@ all:
 	@ \
 	for file in ${EIGEN_FILES}; \
 	do \
-	    (cp -f $$file ./lib); \
+	    (cp -fp $$file ./lib); \
 	done;\
 	(cd ./lib && $(MAKE) install)
 
@@ -50,3 +50,4 @@ clean:
 	@(cd ./lib && $(MAKE) $@)
 
 veryclean: clean
+	@rm -f Makefile

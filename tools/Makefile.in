@@ -49,6 +49,7 @@ veryclean: clean
 	@rm -f one_to_many_vector
 	@rm -f create_2d_laplacian 
 	@rm -f create_3d_laplacian
+	@rm -f Makefile
 
 ##################################################################
 # Rules

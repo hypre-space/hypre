@@ -62,7 +62,7 @@ clean:
 	@rm -f *.o
  
 veryclean: clean
-	@rm -f libHYPRE_seq_mv.a
+	@rm -f libHYPRE_seq_mv.a Makefile
  
 
 ##################################################################

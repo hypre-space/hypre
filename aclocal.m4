@@ -617,22 +617,19 @@ dnl
 dnl 	$BLASLIBS $LIBS $FLIBS
 dnl
 dnl in that order.  FLIBS is the output variable of the
-dnl AC_F77_LIBRARY_LDFLAGS macro (called if necessary by ACX_BLAS),
-dnl and is sometimes necessary in order to link with F77 libraries.
-dnl Users will also need to use AC_F77_DUMMY_MAIN (see the autoconf
-dnl manual), for the same reason.
+dnl AC_F77_LIBRARY_LDFLAGS macro, and is sometimes necessary in order to link
+dnl with F77 libraries.
 dnl
 dnl Many libraries are searched for, from ATLAS to CXML to ESSL.
-dnl The user may specify a BLAS library by using the --with-blas-libs and
-dnl --with-blas-dirs options.  In order to link successfully,
-dnl however, be aware that you will probably need to use the same
-dnl Fortran compiler (which can be set via the F77 env. var.) as
-dnl was used to compile the BLAS library.
+dnl The user may specify a BLAS library by using the --with-blas-libs=<lib>
+dnl and --with-blas-lib-dirs=<dir> options.  In order to link successfully,
+dnl however, be aware that you will probably need to use the same Fortran
+dnl compiler (which can be set via the F77 env. var.) as was used to compile
+dnl the BLAS library.
 dnl
 dnl ACTION-IF-FOUND is a list of shell commands to run if a BLAS
 dnl library is found, and ACTION-IF-NOT-FOUND is a list of commands
-dnl to run it if it is not found.  If ACTION-IF-FOUND is not specified,
-dnl the default action will define HAVE_BLAS.
+dnl to run it if it is not found. 
 dnl
 dnl This macro requires autoconf 2.50 or later.
 dnl
@@ -645,7 +642,6 @@ AC_DEFUN([HYPRE_FIND_BLAS],
   AC_REQUIRE([AC_F77_LIBRARY_LDFLAGS])
 
   hypre_blas_ok=no
-  BLASLIBS=""
 
   AC_ARG_WITH(blas,
 	[AS_HELP_STRING([  --with-blas], [Find a system-provided BLAS library])])
@@ -662,7 +658,7 @@ AC_DEFUN([HYPRE_FIND_BLAS],
   hypre_blas_save_LIBS="$LIBS"
   LIBS="$LIBS $FLIBS"
 
-# First, check BLASLIBS environment variable
+# Is BLASLIBS environment variable set?
   if test $hypre_blas_ok = no; then
     if test "x$BLASLIBS" != x; then
 	save_LIBS="$LIBS"; LIBS="$BLASLIBS $LIBS"
@@ -676,8 +672,13 @@ AC_DEFUN([HYPRE_FIND_BLAS],
 # BLAS linked to by default?  (happens on some supercomputers)
   if test $hypre_blas_ok = no; then
 	save_LIBS="$LIBS"; LIBS="$LIBS"
-	AC_CHECK_FUNC($dgemm, [hypre_blas_ok=yes])
+	AC_CHECK_FUNC($dgemm, [hypre_blas_ok=yes; BLASLIBS="$LIBS"])
 	LIBS="$save_LIBS"
+  fi
+
+# Generic BLAS library? 
+  if test $hypre_blas_ok = no; then
+	AC_CHECK_LIB(blas, $dgemm, [hypre_blas_ok=yes; BLASLIBS="-lblas"])
   fi
 
 # BLAS in ATLAS library? (http://math-atlas.sourceforge.net/)
@@ -730,11 +731,6 @@ AC_DEFUN([HYPRE_FIND_BLAS],
 	AC_DEFINE(HYPRE_USING_ESSL, 1, [Using essl for Blas])])
   fi
 
-# Generic BLAS library? 
-  if test $hypre_blas_ok = no; then
-	AC_CHECK_LIB(blas, $dgemm, [hypre_blas_ok=yes; BLASLIBS="-lblas"])
-  fi
-
   LIBS="$hypre_blas_save_LIBS"
 
   if test $hypre_blas_ok = no; then
@@ -747,40 +743,36 @@ dnl @synopsis HYPRE_FIND_LAPACK([ACTION-IF-FOUND[, ACTION-IF-NOT-FOUND]])
 dnl
 dnl This macro looks for a library that implements the LAPACK
 dnl linear-algebra interface (see http://www.netlib.org/lapack/).
-dnl On success, it sets the LAPACK_LIBS output variable to
+dnl On success, it sets the LAPACKLIBS output variable to
 dnl hold the requisite library linkages.
 dnl
 dnl To link with LAPACK, you should link with:
 dnl
-dnl     $LAPACK_LIBS $BLAS_LIBS $LIBS $FLIBS
+dnl     $LAPACKLIBS $BLASLIBS $LIBS $FLIBS
 dnl
-dnl in that order.  BLAS_LIBS is the output variable of the HYPRE_FIND_BLAS
-dnl macro, called automatically.  FLIBS is the output variable of the
-dnl AC_F77_LIBRARY_LDFLAGS macro (called if necessary by HYPRE_FIND_BLAS),
-dnl and is sometimes necessary in order to link with F77 libraries.
-dnl Users will also need to use AC_F77_DUMMY_MAIN (see the autoconf
-dnl manual), for the same reason.
+dnl in that order.  BLASLIBS is either the output variable of the HYPRE_FIND_BLAS
+dnl macro (which is called by configure before this macro) or the user-defined 
+dnl blas library.  FLIBS is the output variable of the AC_F77_LIBRARY_LDFLAGS 
+dnl macro, which is sometimes necessary in order to link with F77 libraries. 
 dnl
-dnl The user may also use --with-lapack_liband --with-lapack_dirs in order
-dnl to use a specific LAPACK library <lib>.  In order to link successfully,
-dnl however, be aware that you will probably need to use the same
-dnl Fortran compiler (which can be set via the F77 env. var.) as
-dnl was used to compile the LAPACK and BLAS libraries.
+dnl The user may use --with-lapack-libs=<lib> and --with-lapack-lib-dirs=<dir>
+dnl in order to use a specific LAPACK library <lib>.  In order to link successfully,
+dnl however, be aware that you will probably need to use the same Fortran compiler
+dnl (which can be set via the F77 env. var.) as was used to compile the LAPACK and
+dnl BLAS libraries.
 dnl
 dnl ACTION-IF-FOUND is a list of shell commands to run if a LAPACK
 dnl library is found, and ACTION-IF-NOT-FOUND is a list of commands
-dnl to run it if it is not found.  If ACTION-IF-FOUND is not specified,
-dnl the default action will define HAVE_LAPACK.
+dnl to run it if it is not found.
 dnl
 dnl @version $Id$
 dnl @author Steven G. Johnson <stevenj@alum.mit.edu>
 
 AC_DEFUN([HYPRE_FIND_LAPACK], 
 [
-  AC_REQUIRE([HYPRE_FIND_BLAS])
+  AC_REQUIRE([AC_F77_LIBRARY_LDFLAGS])
 
   hypre_lapack_ok=no
-  LAPACKLIBS=""
 
   AC_ARG_WITH(lapack,
         [AS_HELP_STRING([  --with-lapack], [Find a system-provided LAPACK library])])
@@ -794,12 +786,12 @@ AC_DEFUN([HYPRE_FIND_LAPACK],
 # Get fortran linker name of LAPACK function to check for.
   AC_F77_FUNC(dsygv)
 
-  hypre_lapack_save_LIBS="$LIBS"
+  hypre_lapack_save_libs="$LIBS"
 
-# First, check LAPACKLIBS environment variable
+# Is LAPACKLIBS environment variable set?
   if test $hypre_lapack_ok = no; then
     if test "x$LAPACKLIBS" != x; then
-        save_LIBS="$LIBS"; LIBS="$LAPACKLIBS $BLASLIBS $LIBS $FLIBS"
+        save_LIBS="$LIBS"; LIBS="$LAPACKLIBS $LIBS"
         AC_MSG_CHECKING([for $dsygv in $LAPACKLIBS])
         AC_TRY_LINK_FUNC($dsygv, [hypre_lapack_ok=yes], [LAPACKLIBS=""])
         AC_MSG_RESULT($hypre_lapack_ok)
@@ -807,22 +799,48 @@ AC_DEFUN([HYPRE_FIND_LAPACK],
     fi
   fi
 
-# LAPACK linked to by default?  (is sometimes included in BLAS lib)
+# LAPACK included in BLAS lib?
   if test $hypre_lapack_ok = no; then
         save_LIBS="$LIBS"; LIBS="$LIBS $BLASLIBS $FLIBS"
-        AC_CHECK_FUNC($dsygv, [hypre_lapack_ok=yes])
+        AC_CHECK_FUNC($dsygv, [hypre_lapack_ok=yes; LAPACKLIBS="$BLASLIBS"])
         LIBS="$save_LIBS"
   fi
 
-# Generic LAPACK library?
-  for lapack in lapack lapack_rs6k; do
-        if test $hypre_lapack_ok = no; then
-                save_LIBS="$LIBS"; LIBS="$BLASLIBS $LIBS"
-                AC_CHECK_LIB($lapack, $dsygv,
-                    [hypre_lapack_ok=yes; LAPACKLIBS="-l$lapack"], [], [$FLIBS])
-                LIBS="$save_LIBS"
-        fi
-  done
+# LAPACK linked to by default? 
+  if test $hypre_lapack_ok = no; then
+        save_LIBS="$LIBS"; LIBS="$LIBS"
+        AC_CHECK_FUNC($dsygv, [hypre_lapack_ok=yes; LAPACKLIBS="$LIBS"])
+        LIBS="$save_LIBS"
+  fi
+
+# Generic LAPACK library
+  if test $hypre_lapack_ok = no; then
+     if test "$BLASLIBS" = "-lHYPRE_utilities"; then
+       TEMPBLAS=
+     else
+       TEMPBLAS="$BLASLIBS"
+     fi
+     save_LIBS="$LIBS"; LIBS="$LIBS $FLIBS"
+     save_LDFLAGS="$LDFLAGS"
+     LDFLAGS="-L/usr/lib -L/usr/local/lib $LDFLAGS"
+     AC_CHECK_LIB(lapack, $dsygv, [hypre_lapack_ok=yes; LAPACKLIBS="-llapack"],
+                              [], [$TEMPBLAS])
+     LIBS="$save_LIBS"
+     LDFLAGS="$save_LDFLAGS"
+  fi
+
+# Generic LAPACK_RS6K library
+  if test $hypre_lapack_ok = no; then
+     save_LIBS="$LIBS"; LIBS="$LIBS $FLIBS"
+     save_LDFLAGS="$LDFLAGS"
+     LDFLAGS="-L/usr/lib -L/usr/local/lib $LDFLAGS"
+     AC_CHECK_LIB(lapack_rs6k, $dsygv, [hypre_lapack_ok=yes; LAPACKLIBS="-llapack_rs6k"],
+                              [], [$BLASLIBS])
+     LIBS="$save_LIBS"
+     LDFLAGS="$save_LDFLAGS"
+  fi
+
+  LIBS="$hypre_lapack_save_libs"
 
 if test $hypre_lapack_ok = no; then
          LAPACKLIBS="no"

@@ -10,11 +10,14 @@
 ###  If internal BLAS routines are needed, compile in this sub-directory 
 ###  then copy the files to the utilities directory to be included in
 ###  libHYPRE_utilities.a 
+###
+###  NOTE: files hypre_no_blas.c and hypre_no_blas.h are include to allow proper
+###        execution when internal files are NOT used.
 
 include ../config/Makefile.config
 
 
-BLAS_LOCAL_HEADER =
+BLAS_LOCAL_HEADER = hypre_no_blas.h
 BLAS_HEADER = hypre_no_blas.h
 @BLASNEEDED@BLAS_LOCAL_HEADER = f2c.h
 @BLASNEEDED@BLAS_HEADER = hypre_blas.h
@@ -57,6 +60,7 @@ all: ${OBJS}
 	do \
 	 (cp -fp $$file ../utilities); \
 	done; \
+	cp -fp ${BLAS_LOCAL_HEADER} ../utilities
 	cp -fp ${BLAS_HEADER} ../utilities
 
 install: all

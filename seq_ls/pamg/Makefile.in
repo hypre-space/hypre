@@ -10,8 +10,6 @@
 include ../../config/Makefile.config
 
 C_COMPILE_FLAGS=@CFLAGS@
-CXX_COMPILE_FLAGS=@CXXFLAGS@
-F77_COMPILE_FLAGS=@F77FLAGS@ 
 CINCLUDES=@INCLUDES@ @MPIINCLUDE@
 CDEFS =
 
@@ -101,7 +99,7 @@ clean:
 	@rm -f *.o
 
 veryclean: clean
-	@rm -f libHYPRE_amg_ls.a
+	@rm -f libHYPRE_amg_ls.a Makefile
 
 ##################################################################
 # Rules

@@ -68,7 +68,7 @@ clean:
 	@rm -f *.o
 
 veryclean: clean
-	@rm -f libHYPRE_*.a
+	@rm -f libHYPRE_*.a Makefile
 
 ##################################################################
 # Rules

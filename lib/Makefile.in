@@ -30,105 +30,99 @@ HYPRE_SRC_DIRS =\
  struct_mv\
  utilities
  
-ifdef BLASNEEDED
-  BLASFILES =\
-     dasum.o\
-     daxpy.o\
-     dcopy.o\
-     ddot.o\
-     dgemm.o\
-     dgemv.o\
-     dger.o\
-     dnrm2.o\
-     drot.o\
-     dscal.o\
-     dsymv.o\
-     dsyr2.o\
-     dsyr2k.o\
-     dsyrk.o\
-     dtrmm.o\
-     dtrmv.o\
-     dtrsm.o\
-     dtrsv.o\
-     idamax.o\
-     blas_utils.o
-else
-  BLASFILES=
-endif
+BLASFILES =
+@BLASNEEDED@BLASFILES =\
+@BLASNEEDED@dasum.o\
+@BLASNEEDED@daxpy.o\
+@BLASNEEDED@dcopy.o\
+@BLASNEEDED@ddot.o\
+@BLASNEEDED@dgemm.o\
+@BLASNEEDED@dgemv.o\
+@BLASNEEDED@dger.o\
+@BLASNEEDED@dnrm2.o\
+@BLASNEEDED@drot.o\
+@BLASNEEDED@dscal.o\
+@BLASNEEDED@dsymv.o\
+@BLASNEEDED@dsyr2.o\
+@BLASNEEDED@dsyr2k.o\
+@BLASNEEDED@dsyrk.o\
+@BLASNEEDED@dtrmm.o\
+@BLASNEEDED@dtrmv.o\
+@BLASNEEDED@dtrsm.o\
+@BLASNEEDED@dtrsv.o\
+@BLASNEEDED@idamax.o\
+@BLASNEEDED@blas_utils.o
 
 
-ifdef LAPACKNEEDED
-  LAPACKFILES = \
-     dbdsqr.o\
-     dgebd2.o\
-     dgebrd.o\
-     dgelq2.o\
-     dgelqf.o\
-     dgels.o\
-     dgeqr2.o\
-     dgeqrf.o\
-     dgesvd.o\
-     dlabad.o\
-     dlabrd.o\
-     dlacpy.o\
-     dlae2.o\
-     dlaev2.o\
-     dlamch.o\
-     dlange.o\
-     dlanst.o\
-     dlansy.o\
-     dlapy2.o\
-     dlarf.o\
-     dlarfb.o\
-     dlarfg.o\
-     dlarft.o\
-     dlartg.o\
-     dlas2.o\
-     dlascl.o\
-     dlaset.o\
-     dlasq1.o\
-     dlasq2.o\
-     dlasq3.o\
-     dlasq4.o\
-     dlasq5.o\
-     dlasq6.o\
-     dlasr.o\
-     dlasrt.o\
-     dlassq.o\
-     dlasv2.o\
-     dlatrd.o\
-     dorg2l.o\
-     dorg2r.o\
-     dorgbr.o\
-     dorgl2.o\
-     dorglq.o\
-     dorgql.o\
-     dorgqr.o\
-     dorgtr.o\
-     dorm2r.o\
-     dormbr.o\
-     dorml2.o\
-     dormlq.o\
-     dormqr.o\
-     dpotf2.o\
-     dpotrf.o\
-     dpotrs.o\
-     dsteqr.o\
-     dsterf.o\
-     dsyev.o\
-     dsygs2.o\
-     dsygst.o\
-     dsygv.o\
-     dsytd2.o\
-     dsytrd.o\
-     ieeeck.o\
-     ilaenv.o\
-     lapack_utils.o\
-     lsame.o\
-     xerbla.o
-else
-  LAPACKFILES=
-endif
+LAPACKFILES =
+@LAPACKNEEDED@LAPACKFILES = \
+@LAPACKNEEDED@dbdsqr.o\
+@LAPACKNEEDED@dgebd2.o\
+@LAPACKNEEDED@dgebrd.o\
+@LAPACKNEEDED@dgelq2.o\
+@LAPACKNEEDED@dgelqf.o\
+@LAPACKNEEDED@dgels.o\
+@LAPACKNEEDED@dgeqr2.o\
+@LAPACKNEEDED@dgeqrf.o\
+@LAPACKNEEDED@dgesvd.o\
+@LAPACKNEEDED@dlabad.o\
+@LAPACKNEEDED@dlabrd.o\
+@LAPACKNEEDED@dlacpy.o\
+@LAPACKNEEDED@dlae2.o\
+@LAPACKNEEDED@dlaev2.o\
+@LAPACKNEEDED@dlamch.o\
+@LAPACKNEEDED@dlange.o\
+@LAPACKNEEDED@dlanst.o\
+@LAPACKNEEDED@dlansy.o\
+@LAPACKNEEDED@dlapy2.o\
+@LAPACKNEEDED@dlarf.o\
+@LAPACKNEEDED@dlarfb.o\
+@LAPACKNEEDED@dlarfg.o\
+@LAPACKNEEDED@dlarft.o\
+@LAPACKNEEDED@dlartg.o\
+@LAPACKNEEDED@dlas2.o\
+@LAPACKNEEDED@dlascl.o\
+@LAPACKNEEDED@dlaset.o\
+@LAPACKNEEDED@dlasq1.o\
+@LAPACKNEEDED@dlasq2.o\
+@LAPACKNEEDED@dlasq3.o\
+@LAPACKNEEDED@dlasq4.o\
+@LAPACKNEEDED@dlasq5.o\
+@LAPACKNEEDED@dlasq6.o\
+@LAPACKNEEDED@dlasr.o\
+@LAPACKNEEDED@dlasrt.o\
+@LAPACKNEEDED@dlassq.o\
+@LAPACKNEEDED@dlasv2.o\
+@LAPACKNEEDED@dlatrd.o\
+@LAPACKNEEDED@dorg2l.o\
+@LAPACKNEEDED@dorg2r.o\
+@LAPACKNEEDED@dorgbr.o\
+@LAPACKNEEDED@dorgl2.o\
+@LAPACKNEEDED@dorglq.o\
+@LAPACKNEEDED@dorgql.o\
+@LAPACKNEEDED@dorgqr.o\
+@LAPACKNEEDED@dorgtr.o\
+@LAPACKNEEDED@dorm2r.o\
+@LAPACKNEEDED@dormbr.o\
+@LAPACKNEEDED@dorml2.o\
+@LAPACKNEEDED@dormlq.o\
+@LAPACKNEEDED@dormqr.o\
+@LAPACKNEEDED@dpotf2.o\
+@LAPACKNEEDED@dpotrf.o\
+@LAPACKNEEDED@dpotrs.o\
+@LAPACKNEEDED@dsteqr.o\
+@LAPACKNEEDED@dsterf.o\
+@LAPACKNEEDED@dsyev.o\
+@LAPACKNEEDED@dsygs2.o\
+@LAPACKNEEDED@dsygst.o\
+@LAPACKNEEDED@dsygv.o\
+@LAPACKNEEDED@dsytd2.o\
+@LAPACKNEEDED@dsytrd.o\
+@LAPACKNEEDED@ieeeck.o\
+@LAPACKNEEDED@ilaenv.o\
+@LAPACKNEEDED@lapack_utils.o\
+@LAPACKNEEDED@lsame.o\
+@LAPACKNEEDED@xerbla.o
 
 SUPERLUFILES = \
  colamd.o\
@@ -237,6 +231,7 @@ MOSTFILES = \
  mli_solver_jacobi.o\
  mli_solver_kaczmarz.o\
  mli_solver_mls.o\
+ mli_solver_mli.o\
  mli_solver_parasails.o\
  mli_solver_seqsuperlu.o\
  mli_solver_sgs.o\
@@ -548,18 +543,18 @@ all:
 	do \
 	   for file in ../$$dir/*.o; \
 	   do \
-	      (cp -f $$file .); \
+	      (cp -fp $$file .); \
 	   done; \
 	done
 
 install: all libHYPRE.a libHYPRE_LSI.a
-	@cp -f libHYPRE* ../hypre/lib
+	@cp -fp libHYPRE* ../hypre/lib
 
 clean:
 	@rm -f *.o 
 
 veryclean: clean
-	@rm -f lib*.a
+	@rm -f lib*.a Makefile
 
 
 ##################################################################

@@ -10,11 +10,8 @@
 include ../config/Makefile.config
 
 CC = @CC@
-CXX = @CXX@
-F77 = @F77@
 
 C_COMPILE_FLAGS=@CFLAGS@
-CXX_COMPILE_FLAGS=@CXXFLAGS@
 CINCLUDES=@INCLUDES@ @MPIINCLUDE@
 
 CFLAGS = \
@@ -26,8 +23,6 @@ CFLAGS = \
  -I$(srcdir)/../parcsr_mv\
  ${C_COMPILE_FLAGS}\
  ${CINCLUDES} ${CDEFS}
-
-CXXFLAGS = ${CXX_COMPILE_FLAGS} ${CFLAGS}
 
 EXTRA_FILES =\
  internal_protos.h
@@ -54,7 +49,7 @@ clean:
 	@rm -f *.o 
 
 veryclean: clean
-	@rm -f lib*.a
+	@rm -f lib*.a Makefile
 
 ##################################################################
 # Rules

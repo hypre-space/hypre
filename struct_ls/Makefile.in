@@ -101,12 +101,10 @@ install: all
 	@cp -f $(srcdir)/struct_ls.h $$HYPRE_INSTALL_DIR/include/.
 	@cp -f libHYPRE_*.a $$HYPRE_INSTALL_DIR/lib/.
 clean:
-	@rm -f *.o *.dxx 
-	@rm -f *.prj
-	@rm -f *.kdd
+	@rm -f *.o
 
 veryclean: clean
-	@rm -f libHYPRE_*.a
+	@rm -f libHYPRE_*.a Makefile
 
 
 ##################################################################

@@ -103,7 +103,7 @@ clean:
 	@rm -f *.o
 
 veryclean: clean
-	@rm -f libHYPRE_parcsr_ls.a
+	@rm -f libHYPRE_parcsr_ls.a Makefile
 
 
 ##################################################################

@@ -81,11 +81,11 @@ all:
 	@ \
 	for head in ${HEADERS}; \
 	do \
-	    (cp $$head ./lib); \
+	    (cp -fp $$head ./lib); \
 	done;\
 	for file in ${FILES}; \
 	do \
-	    (cp $$file ./lib); \
+	    (cp -fp $$file ./lib); \
 	done;\
 	(cd ./lib && $(MAKE) install)
 
@@ -96,3 +96,4 @@ clean:
 
 veryclean: clean
 	@(cd ./lib && $(MAKE) $@)
+	@rm -f Makefile

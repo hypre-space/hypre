@@ -80,7 +80,7 @@ clean:
 	@rm -f *.o *.h *.c
 
 veryclean: clean
-	@rm -f lib*.a
+	@rm -f lib*.a Makefile
 
 ##################################################################
 # Rules

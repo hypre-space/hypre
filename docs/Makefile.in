@@ -50,6 +50,7 @@ veryclean: clean
 	@/bin/rm -f  HYPRE_ref_manual.tex HYPRE_ref_manual.ps
 	@/bin/rm -fr bHYPRE_ref_manual
 	@/bin/rm -f  bHYPRE_ref_manual.tex bHYPRE_ref_manual.ps
+	@/bin/rm -f  Makefile
 
 ##################################################################
 # Rules

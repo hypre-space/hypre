@@ -162,7 +162,7 @@ clean:
 	@rm -rf *.o 
 
 veryclean: clean
-	@rm -rf *.a 
+	@rm -rf *.a Makefile
 
 ##################################################################
 # Rules

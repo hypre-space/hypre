@@ -49,4 +49,4 @@ veryclean:
 	    (cd $$i && $(MAKE) $@); \
 	  fi; \
 	done
-
+	@rm -f Makefile

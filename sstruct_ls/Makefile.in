@@ -71,7 +71,7 @@ clean:
 	@rm -f *.kdd
 
 veryclean: clean
-	@rm -f libHYPRE_*.a
+	@rm -f libHYPRE_*.a Makefile
 
 ##################################################################
 # Rules

@@ -143,7 +143,7 @@ clean:
 	@rm -f *.o *.h *.c *.f *.cxx
 
 veryclean: clean
-	@rm -f lib*.a
+	@rm -f lib*.a Makefile
 
 
 ##################################################################

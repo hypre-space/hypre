@@ -7,24 +7,31 @@
 #ifndef F2C_INCLUDE
 #define F2C_INCLUDE
 
-typedef long int integer;
-typedef unsigned long uinteger;
+/* F2C_INTEGER will normally be `int' but would be `long' on 16-bit systems */
+/* we assume short, float are OK */
+
+/* integer changed to int - edmond 1/12/00 */
+
+typedef int integer;
+typedef unsigned long int /* long */ uinteger;
 typedef char *address;
 typedef short int shortint;
 typedef float real;
 typedef double doublereal;
 typedef struct { real r, i; } complex;
 typedef struct { doublereal r, i; } doublecomplex;
-typedef long int logical;
+typedef long int /* long int */ logical;
 typedef short int shortlogical;
 typedef char logical1;
 typedef char integer1;
-#if 0	/* Adjust for integer*8. */
-typedef long long longint;		/* system-dependent */
-typedef unsigned long long ulongint;	/* system-dependent */
+/* integer*8 support from f2c not currently supported: */
+#if 0
+typedef @F2C_LONGINT@ /* long long */ longint; /* system-dependent */
+typedef unsigned @F2C_LONGINT@ ulongint;	/* system-dependent */
 #define qbit_clear(a,b)	((a) & ~((ulongint)1 << (b)))
 #define qbit_set(a,b)	((a) |  ((ulongint)1 << (b)))
 #endif
+/* typedef long long int longint; */ /* RDF: removed */
 
 #define TRUE_ (1)
 #define FALSE_ (0)
@@ -37,14 +44,15 @@ typedef unsigned long long ulongint;	/* system-dependent */
 /* I/O stuff */
 
 #ifdef f2c_i2
+  #error f2c_i2 will not work with g77!!!!
 /* for -i2 */
 typedef short flag;
 typedef short ftnlen;
 typedef short ftnint;
 #else
-typedef long int flag;
-typedef long int ftnlen;
-typedef long int ftnint;
+typedef long int /* int or long int */ flag;
+typedef int /* int or long int */ ftnlen; /* changed by edmond */
+typedef long int /* int or long int */ ftnint;
 #endif
 
 /*external read, write*/
@@ -201,6 +209,9 @@ typedef doublereal E_f;	/* real function with -R not specified */
 /* undef any lower-case symbols that your C compiler predefines, e.g.: */
 
 #ifndef Skip_f2c_Undefs
+/* (No such symbols should be defined in a strict ANSI C compiler.
+   We can avoid trouble with f2c-translated code by using
+   gcc -ansi [-traditional].) */
 #undef cray
 #undef gcos
 #undef mc68010

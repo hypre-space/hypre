@@ -21,12 +21,120 @@ CFLAGS =\
    ${CDEFS}
 
 ##################################################################
-# HEADER Files
+# Lapack Object Files
+##################################################################
+LAPACK_HEADERS = 
+@LAPACK_NEEDED@LAPACK_HEADERS = hypre_lapack.h f2c.h
+
+LAPACK_FILES =
+@LAPACKNEEDED@LAPACK_FILES = \
+@LAPACKNEEDED@dbdsqr.o\
+@LAPACKNEEDED@dgebd2.o\
+@LAPACKNEEDED@dgebrd.o\
+@LAPACKNEEDED@dgelq2.o\
+@LAPACKNEEDED@dgelqf.o\
+@LAPACKNEEDED@dgels.o\
+@LAPACKNEEDED@dgeqr2.o\
+@LAPACKNEEDED@dgeqrf.o\
+@LAPACKNEEDED@dgesvd.o\
+@LAPACKNEEDED@dlabad.o\
+@LAPACKNEEDED@dlabrd.o\
+@LAPACKNEEDED@dlacpy.o\
+@LAPACKNEEDED@dlae2.o\
+@LAPACKNEEDED@dlaev2.o\
+@LAPACKNEEDED@dlamch.o\
+@LAPACKNEEDED@dlange.o\
+@LAPACKNEEDED@dlanst.o\
+@LAPACKNEEDED@dlansy.o\
+@LAPACKNEEDED@dlapy2.o\
+@LAPACKNEEDED@dlarfb.o\
+@LAPACKNEEDED@dlarf.o\
+@LAPACKNEEDED@dlarfg.o\
+@LAPACKNEEDED@dlarft.o\
+@LAPACKNEEDED@dlartg.o\
+@LAPACKNEEDED@dlas2.o\
+@LAPACKNEEDED@dlascl.o\
+@LAPACKNEEDED@dlaset.o\
+@LAPACKNEEDED@dlasq1.o\
+@LAPACKNEEDED@dlasq2.o\
+@LAPACKNEEDED@dlasq3.o\
+@LAPACKNEEDED@dlasq4.o\
+@LAPACKNEEDED@dlasq5.o\
+@LAPACKNEEDED@dlasq6.o\
+@LAPACKNEEDED@dlasr.o\
+@LAPACKNEEDED@dlasrt.o\
+@LAPACKNEEDED@dlassq.o\
+@LAPACKNEEDED@dlasv2.o\
+@LAPACKNEEDED@dlatrd.o\
+@LAPACKNEEDED@dorg2l.o\
+@LAPACKNEEDED@dorg2r.o\
+@LAPACKNEEDED@dorgbr.o\
+@LAPACKNEEDED@dorgl2.o\
+@LAPACKNEEDED@dorglq.o\
+@LAPACKNEEDED@dorgql.o\
+@LAPACKNEEDED@dorgqr.o\
+@LAPACKNEEDED@dorgtr.o\
+@LAPACKNEEDED@dorm2r.o\
+@LAPACKNEEDED@dormbr.o\
+@LAPACKNEEDED@dorml2.o\
+@LAPACKNEEDED@dormlq.o\
+@LAPACKNEEDED@dormqr.o\
+@LAPACKNEEDED@dpotf2.o\
+@LAPACKNEEDED@dpotrf.o\
+@LAPACKNEEDED@dpotrs.o\
+@LAPACKNEEDED@dsteqr.o\
+@LAPACKNEEDED@dsterf.o\
+@LAPACKNEEDED@dsyev.o\
+@LAPACKNEEDED@dsygs2.o\
+@LAPACKNEEDED@dsygst.o\
+@LAPACKNEEDED@dsygv.o\
+@LAPACKNEEDED@dsytd2.o\
+@LAPACKNEEDED@dsytrd.o\
+@LAPACKNEEDED@ieeeck.o\
+@LAPACKNEEDED@ilaenv.o\
+@LAPACKNEEDED@lapack_utils.o\
+@LAPACKNEEDED@lsame.o\
+@LAPACKNEEDED@xerbla.o
+
+LAPACK_INFO = ${LAPACK_HEADERS} ${LAPACK_FILES}
+
+##################################################################
+# Blas Object Files
+##################################################################
+BLAS_HEADERS = 
+@BLAS_NEEDED@BLAS_HEADERS = hypre_blas.h f2c.h
+
+BLAS_FILES =
+@BLASNEEDED@BLAS_FILES = \
+@BLASNEEDED@blas_utils.o\
+@BLASNEEDED@dasum.o\
+@BLASNEEDED@daxpy.o\
+@BLASNEEDED@dcopy.o\
+@BLASNEEDED@ddot.o\
+@BLASNEEDED@dgemm.o\
+@BLASNEEDED@dgemv.o\
+@BLASNEEDED@dger.o\
+@BLASNEEDED@dnrm2.o\
+@BLASNEEDED@drot.o\
+@BLASNEEDED@dscal.o\
+@BLASNEEDED@dswap.o\
+@BLASNEEDED@dsymm.o\
+@BLASNEEDED@dsymv.o\
+@BLASNEEDED@dsyr2.o\
+@BLASNEEDED@dsyr2k.o\
+@BLASNEEDED@dsyrk.o\
+@BLASNEEDED@dtrmm.o\
+@BLASNEEDED@dtrmv.o\
+@BLASNEEDED@dtrsm.o\
+@BLASNEEDED@dtrsv.o\
+@BLASNEEDED@idamax.o
+
+BLAS_INFO = ${BLAS_HEADERS} ${BLAS_FILES}
+
+##################################################################
+# Utilities Header Files
 ##################################################################
 HEADERS =\
- f2c.h\
- hypre_blas.h\
- hypre_lapack.h\
  amg_linklist.h\
  exchange_data.h\
  fortran.h\
@@ -44,7 +152,7 @@ HEADERS =\
 ##################################################################
 # Utilities Files
 ##################################################################
-UTILITIES_FILES =\
+FILES =\
  amg_linklist.c\
  binsearch.c\
  exchange_data.c\
@@ -59,112 +167,6 @@ UTILITIES_FILES =\
  timer.c\
  timing.c\
  umalloc_local.c
-
-##################################################################
-# BLAS Files
-##################################################################
-BLAS_FILES=
-@BLASNEEDED@BLAS_FILES=\
-@BLASNEEDED@blas_utils.c\
-@BLASNEEDED@dasum.c\
-@BLASNEEDED@daxpy.c\
-@BLASNEEDED@dcopy.c\
-@BLASNEEDED@ddot.c\
-@BLASNEEDED@dgemm.c\
-@BLASNEEDED@dgemv.c\
-@BLASNEEDED@dger.c\
-@BLASNEEDED@dnrm2.c\
-@BLASNEEDED@drot.c\
-@BLASNEEDED@dscal.c\
-@BLASNEEDED@dswap.c\
-@BLASNEEDED@dsymm.c\
-@BLASNEEDED@dsymv.c\
-@BLASNEEDED@dsyr2.c\
-@BLASNEEDED@dsyr2k.c\
-@BLASNEEDED@dsyrk.c\
-@BLASNEEDED@dtrmm.c\
-@BLASNEEDED@dtrmv.c\
-@BLASNEEDED@dtrsm.c\
-@BLASNEEDED@dtrsv.c\
-@BLASNEEDED@idamax.c
-
-##################################################################
-# LAPACK Files
-##################################################################
-LAPACK_FILES =
-@LAPACKNEEDED@LAPACK_FILES=\
-@LAPACKNEEDED@dbdsqr.c\
-@LAPACKNEEDED@dgebd2.c\
-@LAPACKNEEDED@dgebrd.c\
-@LAPACKNEEDED@dgelq2.c\
-@LAPACKNEEDED@dgelqf.c\
-@LAPACKNEEDED@dgels.c\
-@LAPACKNEEDED@dgeqr2.c\
-@LAPACKNEEDED@dgeqrf.c\
-@LAPACKNEEDED@dgesvd.c\
-@LAPACKNEEDED@dlabad.c\
-@LAPACKNEEDED@dlabrd.c\
-@LAPACKNEEDED@dlacpy.c\
-@LAPACKNEEDED@dlae2.c\
-@LAPACKNEEDED@dlaev2.c\
-@LAPACKNEEDED@dlamch.c\
-@LAPACKNEEDED@dlange.c\
-@LAPACKNEEDED@dlanst.c\
-@LAPACKNEEDED@dlansy.c\
-@LAPACKNEEDED@dlapy2.c\
-@LAPACKNEEDED@dlarfb.c\
-@LAPACKNEEDED@dlarf.c\
-@LAPACKNEEDED@dlarfg.c\
-@LAPACKNEEDED@dlarft.c\
-@LAPACKNEEDED@dlartg.c\
-@LAPACKNEEDED@dlas2.c\
-@LAPACKNEEDED@dlascl.c\
-@LAPACKNEEDED@dlaset.c\
-@LAPACKNEEDED@dlasq1.c\
-@LAPACKNEEDED@dlasq2.c\
-@LAPACKNEEDED@dlasq3.c\
-@LAPACKNEEDED@dlasq4.c\
-@LAPACKNEEDED@dlasq5.c\
-@LAPACKNEEDED@dlasq6.c\
-@LAPACKNEEDED@dlasr.c\
-@LAPACKNEEDED@dlasrt.c\
-@LAPACKNEEDED@dlassq.c\
-@LAPACKNEEDED@dlasv2.c\
-@LAPACKNEEDED@dlatrd.c\
-@LAPACKNEEDED@dorg2l.c\
-@LAPACKNEEDED@dorg2r.c\
-@LAPACKNEEDED@dorgbr.c\
-@LAPACKNEEDED@dorgl2.c\
-@LAPACKNEEDED@dorglq.c\
-@LAPACKNEEDED@dorgql.c\
-@LAPACKNEEDED@dorgqr.c\
-@LAPACKNEEDED@dorgtr.c\
-@LAPACKNEEDED@dorm2r.c\
-@LAPACKNEEDED@dormbr.c\
-@LAPACKNEEDED@dorml2.c\
-@LAPACKNEEDED@dormlq.c\
-@LAPACKNEEDED@dormqr.c\
-@LAPACKNEEDED@dpotf2.c\
-@LAPACKNEEDED@dpotrf.c\
-@LAPACKNEEDED@dpotrs.c\
-@LAPACKNEEDED@dsteqr.c\
-@LAPACKNEEDED@dsterf.c\
-@LAPACKNEEDED@dsyev.c\
-@LAPACKNEEDED@dsygs2.c\
-@LAPACKNEEDED@dsygst.c\
-@LAPACKNEEDED@dsygv.c\
-@LAPACKNEEDED@dsytd2.c\
-@LAPACKNEEDED@dsytrd.c\
-@LAPACKNEEDED@ieeeck.c\
-@LAPACKNEEDED@ilaenv.c\
-@LAPACKNEEDED@lapack_utils.c\
-@LAPACKNEEDED@lsame.c\
-@LAPACKNEEDED@xerbla.c
-
-FILES =\
- ${UTILITIES_FILES}\
- ${BLAS_FILES} \
- ${LAPACK_FILES}
 
 OBJS = ${FILES:.c=.o}
 
@@ -181,20 +183,19 @@ install: all
 
 clean:
 	@rm -f *.o
-	@rm -f ${BLAS_FILES}
-	@rm -f ${LAPACK_FILES}
 
 veryclean: clean
 	@rm -f libHYPRE_*.a
+	@rm -f Makefile
 
 
 ##################################################################
 # Rules
 ##################################################################
  
-libHYPRE_utilities.a: ${OBJS} 
+libHYPRE_utilities.a: ${OBJS}
 	@echo  "Building $@ ... "
-	ar -rcu $@ ${OBJS}
+	ar -rcu $@ ${OBJS} ${LAPACK_INFO} ${BLAS_INFO}
 	${RANLIB} $@
 
 ${OBJS}: ${HEADERS}

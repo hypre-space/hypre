@@ -12,8 +12,6 @@ include ../config/Makefile.config
 CC = @CC@
 
 C_COMPILE_FLAGS=@CFLAGS@
-CXX_COMPILE_FLAGS=@CXXFLAGS@
-F77_COMPILE_FLAGS=@F77FLAGS@
 CINCLUDES=@INCLUDES@ @MPIINCLUDE@
  
 CFLAGS =\
@@ -53,12 +51,10 @@ install: all
 	@cp -f $(srcdir)/krylov.h $$HYPRE_INSTALL_DIR/include/.
 	@cp -f lib*.a $$HYPRE_INSTALL_DIR/lib/.
 clean:
-	@rm -f *.o *.dxx 
-	@rm -f *.prj
-	@rm -f *.kdd
+	@rm -f *.o
 
 veryclean: clean
-	@rm -f lib*.a
+	@rm -f lib*.a Makefile
 
 
 ##################################################################

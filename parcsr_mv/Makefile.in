@@ -110,6 +110,7 @@ clean:
 veryclean: clean
 	@rm -f libHYPRE_parcsr_mv.a
 	@rm -f driver driver_matvec driver_matmul
+	@rm -f Makefile
 
 ##################################################################
 # Rules

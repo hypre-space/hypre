@@ -10,9 +10,13 @@
 ###  If internal LAPACK routines are needed, compile in this sub-directory
 ###  then copy the files to the utilities directory to be included in 
 ###  libHYPRE_utilities.a 
+###
+### NOTE: files hypre_no_lapack.c and hypre_no_lapack.h are incldued to allow
+###       proper execution when internal files are NOT used.
 
 include ../config/Makefile.config
 
+LAPACK_LOCAL_HEADER = hypre_no_lapack.h
 LAPACK_HEADER = hypre_no_lapack.h
 
 @LAPACKNEEDED@LAPACK_LOCAL_HEADER = f2c.h
@@ -101,6 +105,7 @@ all: ${OBJS}
 	do \
 	  (cp -fp $$file ../utilities); \
 	done; \
+	cp -fp ${LAPACK_LOCAL_HEADER} ../utilities
 	cp -fp ${LAPACK_HEADER} ../utilities
 
 install: all
