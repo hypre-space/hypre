@@ -61,10 +61,10 @@ extern "C"
 
 void HYPRE_LinSysCore::buildSlideReducedSystem()
 {
-    int    i, j, ierr, StartRow, EndRow, rowSize, *colInd, globalNConstr;
-    int    nRows, *ProcNRows, *tempList, globalNRows, globalNConst, ncnt;
+    int    i, j, StartRow, EndRow, rowSize, *colInd, globalNConstr;
+    int    nRows, *ProcNRows, *tempList, globalNRows, ncnt;
     int    globalNSelected, *globalSelectedList, *globalSelectedListAux;
-    int    *ProcNConstr, isAConstr, one=1, ncnt2;
+    int    *ProcNConstr, isAConstr, ncnt2;
     double *colVal;
     HYPRE_ParCSRMatrix A_csr, RAP_csr;
 
@@ -257,7 +257,7 @@ void HYPRE_LinSysCore::buildSlideReducedSystemPartA(int *ProcNRows,
     int    nSlaves, *constrListAux, colIndex, searchIndex, procIndex, ubound;
     int    j, k, ierr, rowSize, *colInd, *colInd2, rowIndex, nSelected;
     int    *recvCntArray, *displArray, *selectedList, *selectedListAux;
-    int    globalNSelected, rowSize2;
+    int    rowSize2;
     double *colVal, searchValue, *dble_array, *colVal2;
     HYPRE_ParCSRMatrix A_csr;
 
@@ -271,7 +271,6 @@ void HYPRE_LinSysCore::buildSlideReducedSystemPartA(int *ProcNRows,
     nSelected       = nConstraints_;
     selectedList    = selectedList_;
     selectedListAux = selectedListAux_;
-    globalNSelected = globalNConstr;
 
     //------------------------------------------------------------------
     // compose candidate slave list
@@ -1122,15 +1121,15 @@ void HYPRE_LinSysCore::buildSlideReducedSystemPartC(int *ProcNRows,
                             HYPRE_ParCSRMatrix RAP_csr)
 {
     int    i, j, nRows, StartRow, EndRow; 
-    int    newNRows, newGlobalNRows, *reducedAMatSize, reducedAStartRow;
+    int    newNRows, *reducedAMatSize, reducedAStartRow;
     int    rowCount, rowIndex, newRowSize, rowSize, rowSize2, *newColInd;
     int    *colInd, *colInd2, colIndex, searchIndex, ubound, ncnt, ierr;
     int    A21NRows, A21NCols, A21GlobalNRows, A21GlobalNCols, A21StartRow;
     int    A12NRows, A12NCols, A12GlobalNRows, A12GlobalNCols, A12StartRow;
     int    *A12MatSize, newEndRow, globalNSelected, procIndex, nnzA12;
     int    nSelected, *selectedList, *selectedListAux, A21StartCol;
-    double *colVal, *colVal2, *newColVal, searchValue, ddata;
-    HYPRE_IJMatrix     A12, A21, reducedA;
+    double *colVal, *colVal2, *newColVal, ddata;
+    HYPRE_IJMatrix     A12, reducedA;
     HYPRE_ParCSRMatrix A_csr, A12_csr, reducedA_csr, invA22_csr;
     HYPRE_IJVector     f2, f2hat;
     HYPRE_ParVector    f2_csr, f2hat_csr, reducedB_csr;
@@ -1155,7 +1154,6 @@ void HYPRE_LinSysCore::buildSlideReducedSystemPartC(int *ProcNRows,
     //------------------------------------------------------------------
 
     newNRows       = nRows - 2 * nConstraints_;
-    newGlobalNRows = globalNRows - 2 * globalNConstr;
     A21StartCol = ProcNRows[mypid_] - 2 * ProcNConstr[mypid_];
     ierr  = HYPRE_IJMatrixCreate(comm_, A21StartCol, A21StartCol+newNRows-1,
                              A21StartCol, A21StartCol+newNRows-1, &reducedA);
@@ -1672,32 +1670,30 @@ void HYPRE_LinSysCore::buildSlideReducedSystemPartC(int *ProcNRows,
 
 void HYPRE_LinSysCore::buildSlideReducedSystem2()
 {
-    int    i, j, k, nRows, globalNRows, colIndex, nSlaves;
+    int    i, j, nRows, globalNRows, colIndex;
     int    globalNConstr, globalNSelected, *globalSelectedList;
     int    *globalSelectedListAux;
     int    nSelected, *tempList, reducedAStartRow;
     int    searchIndex, procIndex, A21StartRow, A12StartRow, A12NRows;
     int    rowSize, *colInd, A21NRows, A21GlobalNRows;
     int    A21NCols, A21GlobalNCols, rowCount, maxRowSize, newEndRow;
-    int    A12NCols, A12GlobalNCols, *constrListAux;
+    int    A12NCols, A12GlobalNCols;
     int    *A21MatSize, rowIndex, *A12MatSize, A12GlobalNRows;
     int    *newColInd, diagCount, newRowSize, ierr;
     int    invA22NRows, invA22GlobalNRows, invA22NCols, invA22GlobalNCols;
-    int    *invA22MatSize, newNRows, newGlobalNRows, newColIndex;
+    int    *invA22MatSize, newNRows, newColIndex;
     int    *colInd2, ncnt, ubound, one=1;
     int    rowSize2, *recvCntArray, *displArray, ncnt2, isAConstr;
     int    StartRow, EndRow, *reducedAMatSize;
     int    *ProcNRows, *ProcNConstr, nnzA21, nnzA12;
-    int    nRecv, nSend, *recvLeng, *recvProc, offset, length, msgid, proc_id; 
-    int    *sendLeng, *sendProc, *intBuf, A21StartCol;
-    double searchValue, *colVal, *colVal2, *newColVal, *diagonal;
-    double *extDiagonal, *dble_array, ddata;
+    int    A21StartCol;
+    double *colVal, *colVal2, *newColVal, *diagonal;
+    double *extDiagonal, ddata;
     HYPRE_IJMatrix     A12, A21, invA22, reducedA;
     HYPRE_ParCSRMatrix A_csr, A12_csr, A21_csr, invA22_csr, RAP_csr;
     HYPRE_ParCSRMatrix reducedA_csr;
     HYPRE_IJVector     f2, f2hat;
     HYPRE_ParVector    f2_csr, f2hat_csr, reducedB_csr;
-    MPI_Status         status;
 
     //******************************************************************
     // fetch local matrix information
@@ -2430,8 +2426,7 @@ void HYPRE_LinSysCore::buildSlideReducedSystem2()
     // first calculate the dimension of the reduced matrix
     //------------------------------------------------------------------
 
-    newNRows       = nRows - nConstraints_;
-    newGlobalNRows = globalNRows - globalNConstr;
+    newNRows = nRows - nConstraints_;
     ierr  = HYPRE_IJMatrixCreate(comm_, A21StartCol, A21StartCol+newNRows-1,
                            A21StartCol, A21StartCol+newNRows-1, &reducedA);
     ierr += HYPRE_IJMatrixSetObjectType(reducedA, HYPRE_PARCSR);

@@ -215,7 +215,7 @@ int MLI_Method_AMGCR::setup( MLI *mli )
    MLI_Solver  *smootherPtr, *csolvePtr;
    MPI_Comm    comm;
    hypre_ParCSRMatrix *hypreA, *hypreP, *hypreR, *hypreAP, *hypreAC;
-   hypre_CSRMatrix *ADiag, *AOffd;
+   hypre_CSRMatrix *ADiag;
    MLI_Function    *funcPtr;
 
 #ifdef MLI_DEBUG_DETAILED
@@ -246,7 +246,6 @@ int MLI_Method_AMGCR::setup( MLI *mli )
       hypreA = (hypre_ParCSRMatrix *) mli_Amat->getMatrix();
       gNRows = hypre_ParCSRMatrixGlobalNumRows(hypreA);
       ADiag = hypre_ParCSRMatrixDiag(hypreA);
-      AOffd = hypre_ParCSRMatrixOffd(hypreA);
       localNRows = hypre_CSRMatrixNumRows(ADiag);
       if (localNRows < minCoarseSize_) break;
 
