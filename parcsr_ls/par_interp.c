@@ -118,7 +118,7 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
    int              next_open,now_checking,num_lost,start_j;
    int              next_open_offd,now_checking_offd,num_lost_offd;
 
-   int col_1 = hypre_ParCSRMatrixFirstColDiag(A);
+   int col_1 = hypre_ParCSRMatrixFirstRowIndex(A);
    int local_numrows = hypre_CSRMatrixNumRows(A_diag);
    int col_n = col_1 + local_numrows;
 
@@ -200,22 +200,6 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
       A_ext_i    = hypre_CSRMatrixI(A_ext);
       A_ext_j    = hypre_CSRMatrixJ(A_ext);
       A_ext_data = hypre_CSRMatrixData(A_ext);
-
-      jj_counter = 0;
-      for (i=0; i < A_ext_i[num_cols_A_offd]; i++)
-      {
-         jj = A_ext_j[i];
-         if (jj < col_1 || jj > col_n-1)
-         {
-	    jj1 = hypre_BinarySearch(col_map_offd,jj,num_cols_A_offd);
-            if (jj1 > -1) A_ext_j[i] = -jj1-2;
-	    else A_ext_j[i] = -1;
-         }
-         else
-         {
-            A_ext_j[i] = jj-col_1;
-         }
-      }
    }
    
    if (debug_flag==4)
@@ -705,23 +689,28 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
                   {
                      i2 = A_ext_j[jj1];
                                          
-                     if (i2 > -1)
+                     if (i2 >= col_1 && i2 < col_n)    
                      {                            
                                            /* in the diagonal block */
-                        if (P_marker[i2] >= jj_begin_row
+                        if (P_marker[i2-col_1] >= jj_begin_row
 				&& (sgn*A_ext_data[jj1]) < 0)
                         {
                            sum += A_ext_data[jj1];
                         }
                      }
-                     else if (i2 < -1)
+                     else                       
                      {                          
                                            /* in the off_diagonal block  */
-                        if (P_marker_offd[-i2-2] >= jj_begin_row_offd
+                        j = hypre_BinarySearch(col_map_offd,i2,num_cols_A_offd);
+                        if (j != -1)
+                        { 
+                           if (P_marker_offd[j] >= jj_begin_row_offd
 				&& (sgn*A_ext_data[jj1]) < 0)
-                        {
-			   sum += A_ext_data[jj1];
+                           {
+			      sum += A_ext_data[jj1];
+                           }
                         }
+ 
                      }
 
                   }
@@ -740,22 +729,26 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
                   {
                      i2 = A_ext_j[jj1];
 
-                     if (i2 > -1) /* in the diagonal block */           
+                     if (i2 >= col_1 && i2 < col_n) /* in the diagonal block */           
                      {
-                        if (P_marker[i2] >= jj_begin_row
+                        if (P_marker[i2-col_1] >= jj_begin_row
 				&& (sgn*A_ext_data[jj1]) < 0)
                         {
-                           P_diag_data[P_marker[i2]]
+                           P_diag_data[P_marker[i2-col_1]]
                                      += distribute * A_ext_data[jj1];
                         }
                      }
-                     else if (i2 < -1)
+                     else
                      {
                         /* check to see if it is in the off_diagonal block  */
-                        if (P_marker_offd[-i2-2] >= jj_begin_row_offd
+                        j = hypre_BinarySearch(col_map_offd,i2,num_cols_A_offd);
+                        if (j != -1)
+                        { 
+                           if (P_marker_offd[j] >= jj_begin_row_offd
 				&& (sgn*A_ext_data[jj1]) < 0)
-                               P_offd_data[P_marker_offd[-i2-2]]
-                                  += distribute * A_ext_data[jj1];
+                                  P_offd_data[P_marker_offd[j]]
+                                     += distribute * A_ext_data[jj1];
+                        }
                      }
                   }
                   }
