@@ -153,8 +153,7 @@ hypre_BoxBoundaryG( hypre_Box *box, hypre_StructGrid *g,
  * and boundaryp (for the plus direction).  (Any input contents of these box
  * arrays may get changed).
  * The second input argument is the grid the box is in (hypre_BoxBoundaryG).
- * The boundary thickness is set to the ghost layer thickness, regardless
- * of whether the computed boundary will consist of ghost zones.
+ * The boundary thickness is set to 1.
  *--------------------------------------------------------------------------*/
 
 int
@@ -165,7 +164,9 @@ hypre_BoxBoundaryDG( hypre_Box *box, hypre_StructGrid *g,
    int ierr = 0;
    hypre_BoxNeighbors  *neighbors = hypre_StructGridNeighbors(g);
    hypre_BoxArray *neighbor_boxes = hypre_BoxNeighborsBoxes( neighbors );
-   int * thickness = hypre_StructGridNumGhost(g);
+   int i;
+   int thickness[6];
+   for ( i=0; i<6; ++i ) thickness[i] = 1;
    /* neighbor_boxes are this processor's neighbors, not this box's
       neighbors.  But it's likely to be cheaper to use them all in the
       next step than to try to shrink it to just this box's neighbors. */
