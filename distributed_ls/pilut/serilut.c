@@ -352,6 +352,12 @@ int FindStructuralUnion( HYPRE_DistributedMatrix matrix,
         (*structural_union)[ col_ind[j] ] = 1;
       }
     }
+
+    /* Restore row structure */
+    ierr = HYPRE_RestpreDistributedMatrixRow( matrix, firstrow+i, &row_size,
+               &col_ind, NULL );
+    if (ierr) return(ierr);
+
   }
 
   return(ierr);

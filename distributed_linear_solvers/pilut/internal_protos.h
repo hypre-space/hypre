@@ -95,12 +95,11 @@ int SelectInterior( int local_num_rows,
                     hypre_PilutSolverGlobals *globals );
 void SecondDrop P((int maxnz , double tol , int row , int *perm , int *iperm , FactorMatType *ldu , hypre_PilutSolverGlobals *globals ));
 void SecondDropUpdate P((int maxnz , int maxnzkeep , double tol , int row , int nlocal , int *perm , int *iperm , FactorMatType *ldu , ReduceMatType *rmat , hypre_PilutSolverGlobals *globals ));
+void SetUpFactor P((DataDistType *ddist, FactorMatType *ldu, int maxnz, int *petotal, int *rind, int *imap, int *maxsendP, int DoingL, hypre_PilutSolverGlobals *globals ));
 
 /* trifactor.c */
 void LDUSolve P((DataDistType *ddist , FactorMatType *ldu , double *x , double *b , hypre_PilutSolverGlobals *globals ));
 void SetUpLUFactor P((DataDistType *ddist , FactorMatType *ldu , int maxnz , hypre_PilutSolverGlobals *globals ));
-void SetUpFactor P((DataDistType *ddist , FactorMatType *ldu , int maxnz , int *petotal , int *rind , int *imap , int *maxsendP , bool DoingL , hypre_PilutSolverGlobals *globals ));
-
 /* util.c */
 int ExtractMinLR P((hypre_PilutSolverGlobals *globals ));
 void IdxIncSort P((int n , int *idx , double *val ));

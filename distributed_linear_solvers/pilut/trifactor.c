@@ -76,7 +76,6 @@ void LDUSolve(DataDistType *ddist, FactorMatType *ldu, double *x, double *b,
   colind = ldu->lcolind;
   values = ldu->lvalues;
 
-
   /* Do the local first.
    * For forward substitution we do local+1st MIS == nnodes[1] (NOT [0]!) */
   for (i=0; i<nnodes[max(0,min(1,nlevels))]; i++) {
@@ -246,7 +245,7 @@ void SetUpLUFactor(DataDistType *ddist, FactorMatType *ldu, int maxnz,
 **************************************************************************/
 void SetUpFactor(DataDistType *ddist, FactorMatType *ldu, int maxnz,
 		 int *petotal, int *rind, int *imap,
-		 int *maxsendP, bool DoingL,
+		 int *maxsendP, int DoingL,
                    hypre_PilutSolverGlobals *globals )
 {
   int i, ii, j, k, l, 
