@@ -12,6 +12,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 #include <stdio.h>
 #include <iostream.h>
 #include <assert.h>
@@ -32,6 +33,7 @@
 #include "HYPRE_parcsr_bicgs.h"
 #include "HYPRE_parcsr_symqmr.h"
 #include "HYPRE_parcsr_fgmres.h"
+#include "HYPRE_parcsr_lsicg.h"
 #include "HYPRE_LinSysCore.h"
 #include "parcsr_mv/parcsr_mv.h"
 #include "HYPRE_LSI_schwarz.h"
@@ -217,7 +219,10 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
    amgRelaxType_[2]    = 3;    // hybrid for postsmoothing
    amgRelaxType_[3]    = 9;    // direct for the coarsest level
    amgStrongThreshold_ = 0.25;
-   for (int i = 0; i < 25; i++) amgRelaxWeight_[i] = 0.0; 
+   amgUseGSMG_         = 0;
+   amgGSMGNSamples_    = 0;
+   for (int i = 0; i < 25; i++) amgRelaxWeight_[i] = 1.0; 
+   for (int i = 0; i < 25; i++) amgRelaxOmega_[i] = 1.0; 
 
    pilutFillin_        = 0;    // how many nonzeros to keep in L and U
    pilutDropTol_       = 0.0;
@@ -2774,6 +2779,7 @@ void HYPRE_LinSysCore::selectSolver(char* name)
    if ( HYSolver_ != NULL )
    {
       if ( HYSolverID_ == HYPCG )    HYPRE_ParCSRPCGDestroy(HYSolver_);
+      if ( HYSolverID_ == HYLSICG )  HYPRE_ParCSRLSICGDestroy(HYSolver_);
       if ( HYSolverID_ == HYHYBRID ) HYPRE_ParCSRHybridDestroy(HYSolver_);
       if ( HYSolverID_ == HYGMRES )  HYPRE_ParCSRGMRESDestroy(HYSolver_);
       if ( HYSolverID_ == HYFGMRES)  HYPRE_ParCSRFGMRESDestroy(HYSolver_);
@@ -2793,6 +2799,11 @@ void HYPRE_LinSysCore::selectSolver(char* name)
    {
       strcpy( HYSolverName_, name );
       HYSolverID_ = HYPCG;
+   }
+   else if ( !strcasecmp(name, "lsicg" ) )
+   {
+      strcpy( HYSolverName_, name );
+      HYSolverID_ = HYLSICG;
    }
    else if ( !strcasecmp(name, "hybrid") )
    {
@@ -2886,6 +2897,9 @@ void HYPRE_LinSysCore::selectSolver(char* name)
    {
       case HYPCG :
            HYPRE_ParCSRPCGCreate(comm_, &HYSolver_);
+           break;
+      case HYLSICG :
+           HYPRE_ParCSRLSICGCreate(comm_, &HYSolver_);
            break;
       case HYHYBRID :
            HYPRE_ParCSRHybridCreate(&HYSolver_);
@@ -3457,15 +3471,58 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
            {
               if ( mypid_ == 0 )
                 printf("***************************************************\n");
-              HYPRE_ParCSRPCGSetLogging(HYSolver_, 1);
+              HYPRE_ParCSRPCGSetPrintLevel(HYSolver_, 1);
               if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
-                 HYPRE_ParCSRPCGSetLogging(HYSolver_, 2);
+                 HYPRE_ParCSRPCGSetPrintLevel(HYSolver_, 2);
            }
            HYPRE_ParCSRPCGSetup(HYSolver_, A_csr, b_csr, x_csr);
            MPI_Barrier( comm_ );
            ptime  = LSC_Wtime();
            HYPRE_ParCSRPCGSolve(HYSolver_, A_csr, b_csr, x_csr);
            HYPRE_ParCSRPCGGetNumIterations(HYSolver_, &numIterations);
+           HYPRE_ParVectorCopy( b_csr, r_csr );
+           HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
+           HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
+           rnorm = sqrt( rnorm );
+           switch ( projectionScheme_ )
+           {
+              case 1 : addToAConjProjectionSpace(currX_,currB_);  break;
+              case 2 : addToMinResProjectionSpace(currX_,currB_); break;
+           }
+           if ( numIterations >= maxIterations_ ) status = 1; else status = 0;
+           break;
+
+      //----------------------------------------------------------------
+      // choose LSICG 
+      //----------------------------------------------------------------
+
+      case HYLSICG :
+           if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
+           {
+              printf("***************************************************\n");
+              printf("* Conjugate Gradient solver \n");
+              printf("* maximum no. of iterations = %d\n", maxIterations_);
+              printf("* convergence tolerance     = %e\n", tolerance_);
+              printf("*--------------------------------------------------\n");
+           }
+           setupLSICGPrecon();
+           HYPRE_ParCSRLSICGSetMaxIter(HYSolver_, maxIterations_);
+           HYPRE_ParCSRLSICGSetTol(HYSolver_, tolerance_);
+           if (normAbsRel_ == 0) HYPRE_ParCSRLSICGSetStopCrit(HYSolver_,0);
+           else                  HYPRE_ParCSRLSICGSetStopCrit(HYSolver_,1);
+           if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )
+           {
+              if ( mypid_ == 0 )
+                printf("***************************************************\n");
+              HYPRE_ParCSRLSICGSetLogging(HYSolver_, 1);
+              if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+                 HYPRE_ParCSRLSICGSetLogging(HYSolver_, 2);
+           }
+           HYPRE_ParCSRLSICGSetup(HYSolver_, A_csr, b_csr, x_csr);
+           MPI_Barrier( comm_ );
+           ptime  = LSC_Wtime();
+           HYPRE_ParCSRLSICGSolve(HYSolver_, A_csr, b_csr, x_csr);
+           HYPRE_ParCSRLSICGGetNumIterations(HYSolver_, &numIterations);
            HYPRE_ParVectorCopy( b_csr, r_csr );
            HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
            HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
