@@ -39,7 +39,7 @@ class Lookup
 enum HYsolverID {HYPCG,HYGMRES,HYCGSTAB,HYCGSTABL,HYAMG,HYSUPERLU,
                  HYSUPERLUX,HYY12M,HYAMGE};
 enum HYpreconID {HYDIAGONAL,HYPILUT,HYPARASAILS,HYBOOMERAMG,HYNONE,HYML,
-                 HYDDILUT};
+                 HYDDILUT,HYPOLY};
 
 #define HYFEI_HIGHMASK      2147483647-255
 #define HYFEI_SPECIALMASK              255
@@ -534,6 +534,7 @@ class HYPRE_LinSysCore
    char            superluScale_[1];
    double          ddilutFillin_;
    double          ddilutDropTol_;
+   int             polyOrder_;
 
    // ----------------------------------------------------------------------
    // map and others 

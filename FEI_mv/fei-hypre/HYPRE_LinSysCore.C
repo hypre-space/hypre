@@ -42,6 +42,7 @@
 
 #include "parcsr_matrix_vector/parcsr_matrix_vector.h"
 #include "hypre_lsi_ddilut.h"
+#include "hypre_lsi_poly.h"
 
 #ifdef SUPERLU
 #include "dsp_defs.h"
@@ -73,7 +74,6 @@ extern "C" {
    int HYPRE_ParCSRMLSetDampingFactor( HYPRE_Solver, double );
 #endif
 
-   int HYPRE_LSI_DDIlutSetOutputLevel(HYPRE_Solver, int);
    int hypre_BoomerAMGBuildCoarseOperator(hypre_ParCSRMatrix*,
                                        hypre_ParCSRMatrix*,
                                        hypre_ParCSRMatrix*,
@@ -214,6 +214,8 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
 
     ddilutFillin_       = 1.0;  // additional fillin other than A
     ddilutDropTol_      = 1.0e-8;
+
+    polyOrder_          = 8;    // order of polynomial preconditioner
 
     parasailsSym_       = 0;    // default is nonsymmetric
     parasailsThreshold_ = 0.1;
@@ -368,6 +370,12 @@ HYPRE_LinSysCore::~HYPRE_LinSysCore()
 
        else if ( HYPreconID_ == HYBOOMERAMG )
           HYPRE_BoomerAMGDestroy( HYPrecon_ );
+
+       else if ( HYPreconID_ == HYDDILUT )
+          HYPRE_LSI_DDIlutDestroy( HYPrecon_ );
+
+       else if ( HYPreconID_ == HYPOLY )
+          HYPRE_LSI_PolyDestroy( HYPrecon_ );
 
 #ifdef MLPACK
        else if ( HYPreconID_ == HYML )
@@ -757,6 +765,22 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
           {
              printf("       HYPRE_LSC::parameters ddilutDropTol = %e\n",
                     ddilutDropTol_);
+          }
+       }
+
+       //----------------------------------------------------------------
+       // Poly preconditioner : order
+       //----------------------------------------------------------------
+
+       else if ( !strcmp(param1, "polyOrder") )
+       {
+          sscanf(params[i],"%s %d", param, &polyOrder_);
+          if ( polyOrder_ < 0 ) polyOrder_ = 0;
+          if ( polyOrder_ > 8 ) polyOrder_ = 8;
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+          {
+             printf("       HYPRE_LSC::parameters polyOrder = %d\n",
+                    polyOrder_);
           }
        }
 
@@ -2955,6 +2979,9 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
        else if ( HYPreconID_ == HYDDILUT )
           HYPRE_LSI_DDIlutDestroy( HYPrecon_ );
 
+       else if ( HYPreconID_ == HYPOLY )
+          HYPRE_LSI_PolyDestroy( HYPrecon_ );
+
 #ifdef MLPACK
        else if ( HYPreconID_ == HYML )
           HYPRE_ParCSRMLDestroy( HYPrecon_ );
@@ -2994,6 +3021,11 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
     {
        strcpy( HYPreconName_, name );
        HYPreconID_ = HYDDILUT;
+    }
+    else if ( !strcmp(name, "poly") )
+    {
+       strcpy( HYPreconName_, name );
+       HYPreconID_ = HYPOLY;
     }
     else if ( !strcmp(name, "ml") )
     {
@@ -3064,6 +3096,11 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
 
        case HYDDILUT :
             ierr = HYPRE_LSI_DDIlutCreate( comm_, &HYPrecon_ );
+            assert( !ierr );
+            break;
+
+       case HYPOLY :
+            ierr = HYPRE_LSI_PolyCreate( comm_, &HYPrecon_ );
             assert( !ierr );
             break;
 
@@ -3432,6 +3469,20 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   exit(1);
                   break;
 
+             case HYPOLY :
+                  HYPRE_LSI_PolySetOrder(HYPrecon_, polyOrder_);
+                  if ( HYPreconReuse_ == 1 )
+                  {
+                     HYPRE_ParCSRPCGSetPrecond(HYSolver_,HYPRE_LSI_PolySolve,
+                                      HYPRE_DummyFunction, HYPrecon_);
+                  }
+                  else
+                  {
+                     HYPRE_ParCSRPCGSetPrecond(HYSolver_,HYPRE_LSI_PolySolve,
+                                      HYPRE_LSI_PolySetup, HYPrecon_);
+                  }
+                  break;
+
              case HYPARASAILS :
                   if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
                   {
@@ -3641,6 +3692,20 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   {
                      HYPRE_ParCSRGMRESSetPrecond(HYSolver_,HYPRE_LSI_DDIlutSolve,
                                       HYPRE_LSI_DDIlutSetup, HYPrecon_);
+                  }
+                  break;
+
+             case HYPOLY :
+                  HYPRE_LSI_PolySetOrder(HYPrecon_, polyOrder_);
+                  if ( HYPreconReuse_ == 1 )
+                  {
+                     HYPRE_ParCSRGMRESSetPrecond(HYSolver_,HYPRE_LSI_PolySolve,
+                                      HYPRE_DummyFunction, HYPrecon_);
+                  }
+                  else
+                  {
+                     HYPRE_ParCSRGMRESSetPrecond(HYSolver_,HYPRE_LSI_PolySolve,
+                                      HYPRE_LSI_PolySetup, HYPrecon_);
                   }
                   break;
 
@@ -3854,6 +3919,20 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   }
                   break;
 
+             case HYPOLY :
+                  HYPRE_LSI_PolySetOrder(HYPrecon_, polyOrder_);
+                  if ( HYPreconReuse_ == 1 )
+                  {
+                     HYPRE_ParCSRBiCGSTABSetPrecond(HYSolver_,HYPRE_LSI_PolySolve,
+                                      HYPRE_DummyFunction, HYPrecon_);
+                  }
+                  else
+                  {
+                     HYPRE_ParCSRBiCGSTABSetPrecond(HYSolver_,HYPRE_LSI_PolySolve,
+                                      HYPRE_LSI_PolySetup, HYPrecon_);
+                  }
+                  break;
+
              case HYPARASAILS :
                   if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
                   {
@@ -4060,6 +4139,20 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   {
                      HYPRE_ParCSRBiCGSTABLSetPrecond(HYSolver_,
                          HYPRE_LSI_DDIlutSolve,HYPRE_LSI_DDIlutSetup,HYPrecon_);
+                  }
+                  break;
+
+             case HYPOLY :
+                  HYPRE_LSI_PolySetOrder(HYPrecon_, polyOrder_);
+                  if ( HYPreconReuse_ == 1 )
+                  {
+                     HYPRE_ParCSRBiCGSTABLSetPrecond(HYSolver_,HYPRE_LSI_PolySolve,
+                                      HYPRE_DummyFunction, HYPrecon_);
+                  }
+                  else
+                  {
+                     HYPRE_ParCSRBiCGSTABLSetPrecond(HYSolver_,HYPRE_LSI_PolySolve,
+                                      HYPRE_LSI_PolySetup, HYPrecon_);
                   }
                   break;
 
