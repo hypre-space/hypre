@@ -10,7 +10,6 @@ abs_builddir = @abs_builddir@
 EXTRA_bindir = $(bindir)
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 
-
 SUBDIRS = \
  .\
  AUTOTEST\
@@ -46,13 +45,12 @@ AM_CPPFLAGS = \
  -DHYPRE_TIMING\
  -I$(includedir)
 
-AM_CXXFLAGS = -DMPICH_SKIP_MPICXX
+AM_CXXFLAGS = -DMPICH_SKIP_MPICXX $(AM_CPPFLAGS)
 
 AM_FFLAGS = \
  -I$(includedir)
 
 EXTRA_DIST = \
- funcs.sh\
  runtest.sh
 
 # ij, build 
@@ -84,11 +82,10 @@ ij_dependencies = \
  $(includedir)/HYPRE_parcsr_ls.h\
  $(includedir)/parcsr_mv.h\
  $(includedir)/krylov.h
-# automake will reorder
-$(ij_OBJECTS): $(ij_dependencies)
 
 # ij_mv, build
 ij_mv_SOURCES = ij_mv.c
+ij_mv_CPPFLAGS = $(AM_CPPFLAGS)
 ij_mv_libraries = $(ij_libraries)
 ij_mv_LDADD = $(ij_mv_libraries)
 ij_mv_dependencies = \
@@ -99,15 +96,15 @@ ij_mv_dependencies = \
  $(includedir)/HYPRE_parcsr_ls.h\
  $(includedir)/parcsr_mv.h\
  $(includedir)/krylov.h
-$(ij_mv_OBJECTS): $(ij_mv_dependencies)
 
 # new_ij, build
 new_ij_SOURCES = new_ij.c
+new_ij_CPPFLAGS = $(AM_CPPFLAGS)
 new_ij_LDADD = $(ij_libraries)
-$(new_ij_OBJECTS): $(ij_dependencies)
 
 # sstruct, build
 sstruct_SOURCES = sstruct.c
+sstruct_CPPFLAGS = $(AM_CPPFLAGS)
 sstruct_libraries = \
  -L$(libdir)\
  -lHYPRE_sstruct_ls\
@@ -133,10 +130,10 @@ sstruct_dependencies = \
  $(includedir)/utilities.h\
  $(includedir)/HYPRE_sstruct_ls.h\
  $(includedir)/krylov.h
-$(sstruct_OBJECTS): $(sstruct_dependencies)
 
 # struct, build
 struct_SOURCES = struct.c
+struct_CPPFLAGS = $(AM_CPPFLAGS)
 struct_libraries = \
  -L$(libdir)\
  -lHYPRE_struct_ls\
@@ -150,16 +147,15 @@ struct_dependencies = \
  $(includedir)/HYPRE_struct_ls.h\
  $(includedir)/struct_mv.h\
  $(includedir)/krylov.h
-$(struct_OBJECTS): $(struct_dependencies)
 
 # optiontional target, fei++
 # fei
 fei_SOURCES = fei.cxx
-fei_CXXFLAGS = \
- -DNOFEI\
- -DHYPRE_TIMING\
- -DMPICH_SKIP_MPICXX\
- -I$(includedir)
+#fei_CXXFLAGS = \
+# -DNOFEI\
+# -DHYPRE_TIMING\
+# -DMPICH_SKIP_MPICXX\
+# -I$(includedir)
 fei_LDADD = \
  -L$(libdir)\
  -lHYPRE_LSI\
@@ -175,59 +171,59 @@ fei_dependencies = \
  $(includedir)/HYPRE_parcsr_mv.h\
  $(includedir)/HYPRE_parcsr_ls.h\
  $(includedir)/HYPRE_LinSysCore.h
-$(fei_OBJECTS): $(fei_dependencies)
 
 # optiontional targets, all77
 # f77_ij
 f77_ij_SOURCES = f77_ij.f
+f77_ij_FFLAGS = $(AM_FFLAGS)
 f77_ij_LDADD = \
  $(ij_libraries)\
  @FLIBS@
 #f77_ij_LDFLAGS = -static
-$(f77_ij_OBJECTS): $(ij_dependencies)
 
 # f77_ij_mv
 f77_ij_mv_SOURCES = f77_ij_mv.f
+f77_ij_mv_FFLAGS = $(AM_FFLAGS)
 f77_ij_mv_LDADD = \
  $(ij_mv_libraries)\
  @FLIBS@
 #f77_ij_mv_LDFLAGS = -static
-$(f77_ij_mv_OBJECTS): $(ij_mv_dependencies)
 
 # f77_struct
 f77_struct_SOURCES = f77_struct.f
+f77_struct_FFLAGS = $(AM_FFLAGS)
 f77_struct_LDADD = \
  $(struct_libraries)\
  @FLIBS@
 #f77_struct_LDFLAGS = -static
-$(f77_struct_OBJECTS): $(struct_dependencies)
 
 # optiontional targets, babel
 # ij_b
 ij_b_SOURCES = ij_b.c
+ij_b_CPPFLAGS = $(AM_CPPFLAGS)
 ij_b_LDADD = \
  @BABELLIBFLAGS@\
  $(ij_libraries)
 #ij_b_LDFLAGS = -static
 ij_b_dependencies = \
- ij_dependencies\
+ $(ij_dependencies)\
  $(includedir)/bHYPRE.h\
  $(includedir)/bHYPRE_IJParCSRMatrix_Impl.h\
  $(includedir)/bHYPRE_IJParCSRVector_Impl.h\
  $(includedir)/bHYPRE_ParCSRDiagScale_Impl.h
-$(ij_b_OBJECTS): $(ij_b_dependencies)
 
 # f77_ij_b
 f77_ij_b_SOURCES = f77_ij_b.f
+f77_ij_b_FFLAGS = $(AM_FFLAGS)
 f77_ij_b_LDADD = \
  @BABELLIBFLAGS@\
  $(ij_libraries)\
  @FLIBS@
 #f77_ij_b_LDFLAGS = -static
-$(f77_ij_b_OBJECTS): $(ij_b_dependencies)
 
 # struct_b
 #EXTRA_struct_b_SOURCES = struct_b.c
+#struct_b_CPPFLAGS = $(AM_CPPFLAGS)
 #struct_b_LDADD = $(struct_libraries)
 ##struct_b_LDFLAGS = -static
 #struct_b_dependencies = \
@@ -244,43 +240,42 @@ $(f77_ij_b_OBJECTS): $(ij_b_dependencies)
 #$(includedir)/Hypre_StructJacobi_Stub.h\
 #$(includedir)/Hypre_StructSMG_Stub.h\
 #$(includedir)/Hypre_PCG_Stub.h
-#$(struct_b_OBJECTS): $(struct_b_dependencies)
 
 # f77_struct_b
 #EXTRA_f77_struct_b_SOURCES = f77_struct_b.f
+#f77_struct_b_FFLAGS = $(AM_FFLAGS)
 #f77_struct_b_LDADD = \
 # $(struct_libraries)\
 # @FLIBS@
 ##f77_struct_b_LDFLAGS = -static
-#$(f77_struct_b_OBJECTS): $(struct_b_dependencies)
 
 # optiontional targets, all++
 # Note, automake conversion of +, and . to _ 
 # sources are temp (no distribute), add to clean-local target
 # ij.C++
 nodist_ij_C___SOURCES = ij.C++.cxx
+ij_C___CXXFLAGS = $(AM_CXXFLAGS)
 ij_C___LDADD = $(ij_libraries)
-$(ij_C___OBJECTS): $(ij_dependencies)
 
 # ij_mv.C++
 nodist_ij_mv_C___SOURCES = ij_mv.C++.cxx
+ij_mv_C___CXXFLAGS = $(AM_CXXFLAGS)
 ij_mv_C___LDADD = $(ij_mv_libraries)
-$(ij_mv_C___OBJECTS): $(ij_mv_dependencies)
 
 # new_ij.C++
 nodist_new_ij_C___SOURCES = new_ij.C++.cxx
+new_ij_C___CXXFLAGS = $(default_cxxxlags)
 new_ij_C___LDADD = $(ij_libraries)
-$(new_ij_C___OBJECTS): $(ij_dependencies)
 
 # sstruct.C++
 nodist_sstruct_C___SOURCES = sstruct.C++.cxx
+sstruct_C___CXXFLAGS = $(AM_CXXFLAGS)
 sstruct_C___LDADD = $(sstruct_libraries)
-$(sstruct_C___OBJECTS): $(sstruct_dependencies)
 
 # struct.C++
 nodist_struct_C___SOURCES = struct.C++.cxx
+struct_C___CXXFLAGS = $(AM_CXXFLAGS)
 struct_C___LDADD = $(struct_libraries)
-$(struct_C___OBJECTS): $(struct_dependencies)
 
 all: ij ij_mv new_ij struct sstruct
 
@@ -291,6 +286,26 @@ all++: ij.C++ ij_mv.C++ struct.C++ sstruct.C++
 all77: f77_ij f77_ij_mv f77_struct
 
 babel: f77_ij_b ij_b # f77_struct_b struct_b
+
+# some simple dependency checking
+$(ij_OBJECTS): $(ij_dependencies)
+$(ij_mv_OBJECTS): $(ij_mv_dependencies)
+$(new_ij_OBJECTS): $(ij_dependencies)
+$(sstruct_OBJECTS): $(sstruct_dependencies)
+$(struct_OBJECTS): $(struct_dependencies)
+$(fei_OBJECTS): $(fei_dependencies)
+$(f77_ij_OBJECTS): $(ij_dependencies)
+$(f77_ij_mv_OBJECTS): $(ij_mv_dependencies)
+$(f77_struct_OBJECTS): $(struct_dependencies)
+$(ij_b_OBJECTS): $(ij_b_dependencies)
+$(f77_ij_b_OBJECTS): $(ij_b_dependencies)
+#$(struct_b_OBJECTS): $(struct_b_dependencies)
+#$(f77_struct_b_OBJECTS): $(struct_b_dependencies)
+$(ij_C___OBJECTS): $(ij_dependencies)
+$(ij_mv_C___OBJECTS): $(ij_mv_dependencies)
+$(new_ij_C___OBJECTS): $(ij_dependencies)
+$(sstruct_C___OBJECTS): $(sstruct_dependencies)
+$(struct_C___OBJECTS): $(struct_dependencies)
 
 # rule to compile C files with C++
 ij.C++.cxx:

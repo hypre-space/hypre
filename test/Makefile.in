@@ -57,58 +57,58 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/HYPRE_config.h
 CONFIG_CLEAN_FILES =
-am_f77_ij_OBJECTS = f77_ij.$(OBJEXT)
+am_f77_ij_OBJECTS = f77_ij-f77_ij.$(OBJEXT)
 f77_ij_OBJECTS = $(am_f77_ij_OBJECTS)
 am__DEPENDENCIES_1 =
 am__DEPENDENCIES_2 = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1)
 f77_ij_DEPENDENCIES = $(am__DEPENDENCIES_2)
-am_f77_ij_b_OBJECTS = f77_ij_b.$(OBJEXT)
+am_f77_ij_b_OBJECTS = f77_ij_b-f77_ij_b.$(OBJEXT)
 f77_ij_b_OBJECTS = $(am_f77_ij_b_OBJECTS)
 f77_ij_b_DEPENDENCIES = $(am__DEPENDENCIES_2)
-am_f77_ij_mv_OBJECTS = f77_ij_mv.$(OBJEXT)
+am_f77_ij_mv_OBJECTS = f77_ij_mv-f77_ij_mv.$(OBJEXT)
 f77_ij_mv_OBJECTS = $(am_f77_ij_mv_OBJECTS)
 am__DEPENDENCIES_3 = $(am__DEPENDENCIES_2)
 f77_ij_mv_DEPENDENCIES = $(am__DEPENDENCIES_3)
-am_f77_struct_OBJECTS = f77_struct.$(OBJEXT)
+am_f77_struct_OBJECTS = f77_struct-f77_struct.$(OBJEXT)
 f77_struct_OBJECTS = $(am_f77_struct_OBJECTS)
 am__DEPENDENCIES_4 = $(am__DEPENDENCIES_1)
 f77_struct_DEPENDENCIES = $(am__DEPENDENCIES_4)
-am_fei_OBJECTS = fei-fei.$(OBJEXT)
+am_fei_OBJECTS = fei.$(OBJEXT)
 fei_OBJECTS = $(am_fei_OBJECTS)
 fei_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1)
 am_ij_OBJECTS = ij.$(OBJEXT)
 ij_OBJECTS = $(am_ij_OBJECTS)
 ij_DEPENDENCIES = $(am__DEPENDENCIES_2)
-nodist_ij_C___OBJECTS = ij.C++.$(OBJEXT)
+nodist_ij_C___OBJECTS = ij_C__-ij.C++.$(OBJEXT)
 ij_C___OBJECTS = $(nodist_ij_C___OBJECTS)
 ij_C___DEPENDENCIES = $(am__DEPENDENCIES_2)
-am_ij_b_OBJECTS = ij_b.$(OBJEXT)
+am_ij_b_OBJECTS = ij_b-ij_b.$(OBJEXT)
 ij_b_OBJECTS = $(am_ij_b_OBJECTS)
 ij_b_DEPENDENCIES = $(am__DEPENDENCIES_2)
-am_ij_mv_OBJECTS = ij_mv.$(OBJEXT)
+am_ij_mv_OBJECTS = ij_mv-ij_mv.$(OBJEXT)
 ij_mv_OBJECTS = $(am_ij_mv_OBJECTS)
 ij_mv_DEPENDENCIES = $(am__DEPENDENCIES_3)
-nodist_ij_mv_C___OBJECTS = ij_mv.C++.$(OBJEXT)
+nodist_ij_mv_C___OBJECTS = ij_mv_C__-ij_mv.C++.$(OBJEXT)
 ij_mv_C___OBJECTS = $(nodist_ij_mv_C___OBJECTS)
 ij_mv_C___DEPENDENCIES = $(am__DEPENDENCIES_3)
-am_new_ij_OBJECTS = new_ij.$(OBJEXT)
+am_new_ij_OBJECTS = new_ij-new_ij.$(OBJEXT)
 new_ij_OBJECTS = $(am_new_ij_OBJECTS)
 new_ij_DEPENDENCIES = $(am__DEPENDENCIES_2)
-nodist_new_ij_C___OBJECTS = new_ij.C++.$(OBJEXT)
+nodist_new_ij_C___OBJECTS = new_ij_C__-new_ij.C++.$(OBJEXT)
 new_ij_C___OBJECTS = $(nodist_new_ij_C___OBJECTS)
 new_ij_C___DEPENDENCIES = $(am__DEPENDENCIES_2)
-am_sstruct_OBJECTS = sstruct.$(OBJEXT)
+am_sstruct_OBJECTS = sstruct-sstruct.$(OBJEXT)
 sstruct_OBJECTS = $(am_sstruct_OBJECTS)
 sstruct_DEPENDENCIES = $(am__DEPENDENCIES_2)
-nodist_sstruct_C___OBJECTS = sstruct.C++.$(OBJEXT)
+nodist_sstruct_C___OBJECTS = sstruct_C__-sstruct.C++.$(OBJEXT)
 sstruct_C___OBJECTS = $(nodist_sstruct_C___OBJECTS)
 sstruct_C___DEPENDENCIES = $(am__DEPENDENCIES_2)
-am_struct_OBJECTS = struct.$(OBJEXT)
+am_struct_OBJECTS = struct-struct.$(OBJEXT)
 struct_OBJECTS = $(am_struct_OBJECTS)
 struct_DEPENDENCIES = $(am__DEPENDENCIES_4)
-nodist_struct_C___OBJECTS = struct.C++.$(OBJEXT)
+nodist_struct_C___OBJECTS = struct_C__-struct.C++.$(OBJEXT)
 struct_C___OBJECTS = $(nodist_struct_C___OBJECTS)
 struct_C___DEPENDENCIES = $(am__DEPENDENCIES_4)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
@@ -314,12 +314,11 @@ AM_CPPFLAGS = \
  -DHYPRE_TIMING\
  -I$(includedir)
 
-AM_CXXFLAGS = -DMPICH_SKIP_MPICXX
+AM_CXXFLAGS = -DMPICH_SKIP_MPICXX $(AM_CPPFLAGS)
 AM_FFLAGS = \
  -I$(includedir)
 
 EXTRA_DIST = \
- funcs.sh\
  runtest.sh
 
 
@@ -357,6 +356,7 @@ ij_dependencies = \
 
 # ij_mv, build
 ij_mv_SOURCES = ij_mv.c
+ij_mv_CPPFLAGS = $(AM_CPPFLAGS)
 ij_mv_libraries = $(ij_libraries)
 ij_mv_LDADD = $(ij_mv_libraries)
 ij_mv_dependencies = \
@@ -371,10 +371,12 @@ ij_mv_dependencies = \
 
 # new_ij, build
 new_ij_SOURCES = new_ij.c
+new_ij_CPPFLAGS = $(AM_CPPFLAGS)
 new_ij_LDADD = $(ij_libraries)
 
 # sstruct, build
 sstruct_SOURCES = sstruct.c
+sstruct_CPPFLAGS = $(AM_CPPFLAGS)
 sstruct_libraries = \
  -L$(libdir)\
  -lHYPRE_sstruct_ls\
@@ -405,6 +407,7 @@ sstruct_dependencies = \
 
 # struct, build
 struct_SOURCES = struct.c
+struct_CPPFLAGS = $(AM_CPPFLAGS)
 struct_libraries = \
  -L$(libdir)\
  -lHYPRE_struct_ls\
@@ -424,12 +427,11 @@ struct_dependencies = \
 # optiontional target, fei++
 # fei
 fei_SOURCES = fei.cxx
-fei_CXXFLAGS = \
- -DNOFEI\
- -DHYPRE_TIMING\
- -DMPICH_SKIP_MPICXX\
- -I$(includedir)
-
+#fei_CXXFLAGS = \
+# -DNOFEI\
+# -DHYPRE_TIMING\
+# -DMPICH_SKIP_MPICXX\
+# -I$(includedir)
 fei_LDADD = \
  -L$(libdir)\
  -lHYPRE_LSI\
@@ -451,35 +453,42 @@ fei_dependencies = \
 # optiontional targets, all77
 # f77_ij
 f77_ij_SOURCES = f77_ij.f
+f77_ij_FFLAGS = $(AM_FFLAGS)
 f77_ij_LDADD = \
  $(ij_libraries)\
  @FLIBS@
 
+#f77_ij_LDFLAGS = -static
 
 # f77_ij_mv
 f77_ij_mv_SOURCES = f77_ij_mv.f
+f77_ij_mv_FFLAGS = $(AM_FFLAGS)
 f77_ij_mv_LDADD = \
  $(ij_mv_libraries)\
  @FLIBS@
 
+#f77_ij_mv_LDFLAGS = -static
 
 # f77_struct
 f77_struct_SOURCES = f77_struct.f
+f77_struct_FFLAGS = $(AM_FFLAGS)
 f77_struct_LDADD = \
  $(struct_libraries)\
  @FLIBS@
 
+#f77_struct_LDFLAGS = -static
 
 # optiontional targets, babel
 # ij_b
 ij_b_SOURCES = ij_b.c
+ij_b_CPPFLAGS = $(AM_CPPFLAGS)
 ij_b_LDADD = \
  @BABELLIBFLAGS@\
  $(ij_libraries)
 
 #ij_b_LDFLAGS = -static
 ij_b_dependencies = \
- ij_dependencies\
+ $(ij_dependencies)\
  $(includedir)/bHYPRE.h\
  $(includedir)/bHYPRE_IJParCSRMatrix_Impl.h\
  $(includedir)/bHYPRE_IJParCSRVector_Impl.h\
@@ -488,14 +497,17 @@ ij_b_dependencies = \
 
 # f77_ij_b
 f77_ij_b_SOURCES = f77_ij_b.f
+f77_ij_b_FFLAGS = $(AM_FFLAGS)
 f77_ij_b_LDADD = \
  @BABELLIBFLAGS@\
  $(ij_libraries)\
  @FLIBS@
 
+#f77_ij_b_LDFLAGS = -static
 
 # struct_b
 #EXTRA_struct_b_SOURCES = struct_b.c
+#struct_b_CPPFLAGS = $(AM_CPPFLAGS)
 #struct_b_LDADD = $(struct_libraries)
 #struct_b_dependencies = \
 #$(struct_dependencies)\
@@ -511,36 +523,40 @@ f77_ij_b_LDADD = \
 #$(includedir)/Hypre_StructJacobi_Stub.h\
 #$(includedir)/Hypre_StructSMG_Stub.h\
 #$(includedir)/Hypre_PCG_Stub.h
-#$(struct_b_OBJECTS): $(struct_b_dependencies)
 
 # f77_struct_b
 #EXTRA_f77_struct_b_SOURCES = f77_struct_b.f
+#f77_struct_b_FFLAGS = $(AM_FFLAGS)
 #f77_struct_b_LDADD = \
 # $(struct_libraries)\
 # @FLIBS@
-#$(f77_struct_b_OBJECTS): $(struct_b_dependencies)
 
 # optiontional targets, all++
 # Note, automake conversion of +, and . to _ 
 # sources are temp (no distribute), add to clean-local target
 # ij.C++
 nodist_ij_C___SOURCES = ij.C++.cxx
+ij_C___CXXFLAGS = $(AM_CXXFLAGS)
 ij_C___LDADD = $(ij_libraries)
 
 # ij_mv.C++
 nodist_ij_mv_C___SOURCES = ij_mv.C++.cxx
+ij_mv_C___CXXFLAGS = $(AM_CXXFLAGS)
 ij_mv_C___LDADD = $(ij_mv_libraries)
 
 # new_ij.C++
 nodist_new_ij_C___SOURCES = new_ij.C++.cxx
+new_ij_C___CXXFLAGS = $(default_cxxxlags)
 new_ij_C___LDADD = $(ij_libraries)
 
 # sstruct.C++
 nodist_sstruct_C___SOURCES = sstruct.C++.cxx
+sstruct_C___CXXFLAGS = $(AM_CXXFLAGS)
 sstruct_C___LDADD = $(sstruct_libraries)
 
 # struct.C++
 nodist_struct_C___SOURCES = struct.C++.cxx
+struct_C___CXXFLAGS = $(AM_CXXFLAGS)
 struct_C___LDADD = $(struct_libraries)
 all: all-recursive
 
@@ -639,6 +655,51 @@ distclean-compile:
 .c.lo:
 	$(LTCOMPILE) -c -o $@ $<
 
+ij_b-ij_b.o: ij_b.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ij_b_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ij_b-ij_b.o `test -f 'ij_b.c' || echo '$(srcdir)/'`ij_b.c
+
+ij_b-ij_b.obj: ij_b.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ij_b_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ij_b-ij_b.obj `if test -f 'ij_b.c'; then $(CYGPATH_W) 'ij_b.c'; else $(CYGPATH_W) '$(srcdir)/ij_b.c'; fi`
+
+ij_b-ij_b.lo: ij_b.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ij_b_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ij_b-ij_b.lo `test -f 'ij_b.c' || echo '$(srcdir)/'`ij_b.c
+
+ij_mv-ij_mv.o: ij_mv.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ij_mv_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ij_mv-ij_mv.o `test -f 'ij_mv.c' || echo '$(srcdir)/'`ij_mv.c
+
+ij_mv-ij_mv.obj: ij_mv.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ij_mv_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ij_mv-ij_mv.obj `if test -f 'ij_mv.c'; then $(CYGPATH_W) 'ij_mv.c'; else $(CYGPATH_W) '$(srcdir)/ij_mv.c'; fi`
+
+ij_mv-ij_mv.lo: ij_mv.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ij_mv_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ij_mv-ij_mv.lo `test -f 'ij_mv.c' || echo '$(srcdir)/'`ij_mv.c
+
+new_ij-new_ij.o: new_ij.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(new_ij_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o new_ij-new_ij.o `test -f 'new_ij.c' || echo '$(srcdir)/'`new_ij.c
+
+new_ij-new_ij.obj: new_ij.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(new_ij_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o new_ij-new_ij.obj `if test -f 'new_ij.c'; then $(CYGPATH_W) 'new_ij.c'; else $(CYGPATH_W) '$(srcdir)/new_ij.c'; fi`
+
+new_ij-new_ij.lo: new_ij.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(new_ij_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o new_ij-new_ij.lo `test -f 'new_ij.c' || echo '$(srcdir)/'`new_ij.c
+
+sstruct-sstruct.o: sstruct.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(sstruct_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sstruct-sstruct.o `test -f 'sstruct.c' || echo '$(srcdir)/'`sstruct.c
+
+sstruct-sstruct.obj: sstruct.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(sstruct_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sstruct-sstruct.obj `if test -f 'sstruct.c'; then $(CYGPATH_W) 'sstruct.c'; else $(CYGPATH_W) '$(srcdir)/sstruct.c'; fi`
+
+sstruct-sstruct.lo: sstruct.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(sstruct_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sstruct-sstruct.lo `test -f 'sstruct.c' || echo '$(srcdir)/'`sstruct.c
+
+struct-struct.o: struct.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(struct_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o struct-struct.o `test -f 'struct.c' || echo '$(srcdir)/'`struct.c
+
+struct-struct.obj: struct.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(struct_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o struct-struct.obj `if test -f 'struct.c'; then $(CYGPATH_W) 'struct.c'; else $(CYGPATH_W) '$(srcdir)/struct.c'; fi`
+
+struct-struct.lo: struct.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(struct_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o struct-struct.lo `test -f 'struct.c' || echo '$(srcdir)/'`struct.c
+
 .cxx.o:
 	$(CXXCOMPILE) -c -o $@ $<
 
@@ -648,14 +709,50 @@ distclean-compile:
 .cxx.lo:
 	$(LTCXXCOMPILE) -c -o $@ $<
 
-fei-fei.o: fei.cxx
-	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(fei_CXXFLAGS) $(CXXFLAGS) -c -o fei-fei.o `test -f 'fei.cxx' || echo '$(srcdir)/'`fei.cxx
+ij_C__-ij.C++.o: ij.C++.cxx
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ij_C___CXXFLAGS) $(CXXFLAGS) -c -o ij_C__-ij.C++.o `test -f 'ij.C++.cxx' || echo '$(srcdir)/'`ij.C++.cxx
 
-fei-fei.obj: fei.cxx
-	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(fei_CXXFLAGS) $(CXXFLAGS) -c -o fei-fei.obj `if test -f 'fei.cxx'; then $(CYGPATH_W) 'fei.cxx'; else $(CYGPATH_W) '$(srcdir)/fei.cxx'; fi`
+ij_C__-ij.C++.obj: ij.C++.cxx
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ij_C___CXXFLAGS) $(CXXFLAGS) -c -o ij_C__-ij.C++.obj `if test -f 'ij.C++.cxx'; then $(CYGPATH_W) 'ij.C++.cxx'; else $(CYGPATH_W) '$(srcdir)/ij.C++.cxx'; fi`
 
-fei-fei.lo: fei.cxx
-	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(fei_CXXFLAGS) $(CXXFLAGS) -c -o fei-fei.lo `test -f 'fei.cxx' || echo '$(srcdir)/'`fei.cxx
+ij_C__-ij.C++.lo: ij.C++.cxx
+	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ij_C___CXXFLAGS) $(CXXFLAGS) -c -o ij_C__-ij.C++.lo `test -f 'ij.C++.cxx' || echo '$(srcdir)/'`ij.C++.cxx
+
+ij_mv_C__-ij_mv.C++.o: ij_mv.C++.cxx
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ij_mv_C___CXXFLAGS) $(CXXFLAGS) -c -o ij_mv_C__-ij_mv.C++.o `test -f 'ij_mv.C++.cxx' || echo '$(srcdir)/'`ij_mv.C++.cxx
+
+ij_mv_C__-ij_mv.C++.obj: ij_mv.C++.cxx
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ij_mv_C___CXXFLAGS) $(CXXFLAGS) -c -o ij_mv_C__-ij_mv.C++.obj `if test -f 'ij_mv.C++.cxx'; then $(CYGPATH_W) 'ij_mv.C++.cxx'; else $(CYGPATH_W) '$(srcdir)/ij_mv.C++.cxx'; fi`
+
+ij_mv_C__-ij_mv.C++.lo: ij_mv.C++.cxx
+	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ij_mv_C___CXXFLAGS) $(CXXFLAGS) -c -o ij_mv_C__-ij_mv.C++.lo `test -f 'ij_mv.C++.cxx' || echo '$(srcdir)/'`ij_mv.C++.cxx
+
+new_ij_C__-new_ij.C++.o: new_ij.C++.cxx
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(new_ij_C___CXXFLAGS) $(CXXFLAGS) -c -o new_ij_C__-new_ij.C++.o `test -f 'new_ij.C++.cxx' || echo '$(srcdir)/'`new_ij.C++.cxx
+
+new_ij_C__-new_ij.C++.obj: new_ij.C++.cxx
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(new_ij_C___CXXFLAGS) $(CXXFLAGS) -c -o new_ij_C__-new_ij.C++.obj `if test -f 'new_ij.C++.cxx'; then $(CYGPATH_W) 'new_ij.C++.cxx'; else $(CYGPATH_W) '$(srcdir)/new_ij.C++.cxx'; fi`
+
+new_ij_C__-new_ij.C++.lo: new_ij.C++.cxx
+	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(new_ij_C___CXXFLAGS) $(CXXFLAGS) -c -o new_ij_C__-new_ij.C++.lo `test -f 'new_ij.C++.cxx' || echo '$(srcdir)/'`new_ij.C++.cxx
+
+sstruct_C__-sstruct.C++.o: sstruct.C++.cxx
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(sstruct_C___CXXFLAGS) $(CXXFLAGS) -c -o sstruct_C__-sstruct.C++.o `test -f 'sstruct.C++.cxx' || echo '$(srcdir)/'`sstruct.C++.cxx
+
+sstruct_C__-sstruct.C++.obj: sstruct.C++.cxx
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(sstruct_C___CXXFLAGS) $(CXXFLAGS) -c -o sstruct_C__-sstruct.C++.obj `if test -f 'sstruct.C++.cxx'; then $(CYGPATH_W) 'sstruct.C++.cxx'; else $(CYGPATH_W) '$(srcdir)/sstruct.C++.cxx'; fi`
+
+sstruct_C__-sstruct.C++.lo: sstruct.C++.cxx
+	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(sstruct_C___CXXFLAGS) $(CXXFLAGS) -c -o sstruct_C__-sstruct.C++.lo `test -f 'sstruct.C++.cxx' || echo '$(srcdir)/'`sstruct.C++.cxx
+
+struct_C__-struct.C++.o: struct.C++.cxx
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(struct_C___CXXFLAGS) $(CXXFLAGS) -c -o struct_C__-struct.C++.o `test -f 'struct.C++.cxx' || echo '$(srcdir)/'`struct.C++.cxx
+
+struct_C__-struct.C++.obj: struct.C++.cxx
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(struct_C___CXXFLAGS) $(CXXFLAGS) -c -o struct_C__-struct.C++.obj `if test -f 'struct.C++.cxx'; then $(CYGPATH_W) 'struct.C++.cxx'; else $(CYGPATH_W) '$(srcdir)/struct.C++.cxx'; fi`
+
+struct_C__-struct.C++.lo: struct.C++.cxx
+	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(struct_C___CXXFLAGS) $(CXXFLAGS) -c -o struct_C__-struct.C++.lo `test -f 'struct.C++.cxx' || echo '$(srcdir)/'`struct.C++.cxx
 
 .f.o:
 	$(F77COMPILE) -c -o $@ $<
@@ -665,6 +762,42 @@ fei-fei.lo: fei.cxx
 
 .f.lo:
 	$(LTF77COMPILE) -c -o $@ $<
+
+f77_ij-f77_ij.o: f77_ij.f
+	$(F77) $(f77_ij_FFLAGS) $(FFLAGS) -c -o f77_ij-f77_ij.o `test -f 'f77_ij.f' || echo '$(srcdir)/'`f77_ij.f
+
+f77_ij-f77_ij.obj: f77_ij.f
+	$(F77) $(f77_ij_FFLAGS) $(FFLAGS) -c -o f77_ij-f77_ij.obj `if test -f 'f77_ij.f'; then $(CYGPATH_W) 'f77_ij.f'; else $(CYGPATH_W) '$(srcdir)/f77_ij.f'; fi`
+
+f77_ij-f77_ij.lo: f77_ij.f
+	$(LIBTOOL) --mode=compile $(F77) $(f77_ij_FFLAGS) $(FFLAGS) -c -o f77_ij-f77_ij.lo `test -f 'f77_ij.f' || echo '$(srcdir)/'`f77_ij.f
+
+f77_ij_b-f77_ij_b.o: f77_ij_b.f
+	$(F77) $(f77_ij_b_FFLAGS) $(FFLAGS) -c -o f77_ij_b-f77_ij_b.o `test -f 'f77_ij_b.f' || echo '$(srcdir)/'`f77_ij_b.f
+
+f77_ij_b-f77_ij_b.obj: f77_ij_b.f
+	$(F77) $(f77_ij_b_FFLAGS) $(FFLAGS) -c -o f77_ij_b-f77_ij_b.obj `if test -f 'f77_ij_b.f'; then $(CYGPATH_W) 'f77_ij_b.f'; else $(CYGPATH_W) '$(srcdir)/f77_ij_b.f'; fi`
+
+f77_ij_b-f77_ij_b.lo: f77_ij_b.f
+	$(LIBTOOL) --mode=compile $(F77) $(f77_ij_b_FFLAGS) $(FFLAGS) -c -o f77_ij_b-f77_ij_b.lo `test -f 'f77_ij_b.f' || echo '$(srcdir)/'`f77_ij_b.f
+
+f77_ij_mv-f77_ij_mv.o: f77_ij_mv.f
+	$(F77) $(f77_ij_mv_FFLAGS) $(FFLAGS) -c -o f77_ij_mv-f77_ij_mv.o `test -f 'f77_ij_mv.f' || echo '$(srcdir)/'`f77_ij_mv.f
+
+f77_ij_mv-f77_ij_mv.obj: f77_ij_mv.f
+	$(F77) $(f77_ij_mv_FFLAGS) $(FFLAGS) -c -o f77_ij_mv-f77_ij_mv.obj `if test -f 'f77_ij_mv.f'; then $(CYGPATH_W) 'f77_ij_mv.f'; else $(CYGPATH_W) '$(srcdir)/f77_ij_mv.f'; fi`
+
+f77_ij_mv-f77_ij_mv.lo: f77_ij_mv.f
+	$(LIBTOOL) --mode=compile $(F77) $(f77_ij_mv_FFLAGS) $(FFLAGS) -c -o f77_ij_mv-f77_ij_mv.lo `test -f 'f77_ij_mv.f' || echo '$(srcdir)/'`f77_ij_mv.f
+
+f77_struct-f77_struct.o: f77_struct.f
+	$(F77) $(f77_struct_FFLAGS) $(FFLAGS) -c -o f77_struct-f77_struct.o `test -f 'f77_struct.f' || echo '$(srcdir)/'`f77_struct.f
+
+f77_struct-f77_struct.obj: f77_struct.f
+	$(F77) $(f77_struct_FFLAGS) $(FFLAGS) -c -o f77_struct-f77_struct.obj `if test -f 'f77_struct.f'; then $(CYGPATH_W) 'f77_struct.f'; else $(CYGPATH_W) '$(srcdir)/f77_struct.f'; fi`
+
+f77_struct-f77_struct.lo: f77_struct.f
+	$(LIBTOOL) --mode=compile $(F77) $(f77_struct_FFLAGS) $(FFLAGS) -c -o f77_struct-f77_struct.lo `test -f 'f77_struct.f' || echo '$(srcdir)/'`f77_struct.f
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -929,27 +1062,6 @@ uninstall-info: uninstall-info-recursive
 	pdf pdf-am ps ps-am tags tags-recursive uninstall uninstall-am \
 	uninstall-info-am
 
-# automake will reorder
-$(ij_OBJECTS): $(ij_dependencies)
-$(ij_mv_OBJECTS): $(ij_mv_dependencies)
-$(new_ij_OBJECTS): $(ij_dependencies)
-$(sstruct_OBJECTS): $(sstruct_dependencies)
-$(struct_OBJECTS): $(struct_dependencies)
-$(fei_OBJECTS): $(fei_dependencies)
-#f77_ij_LDFLAGS = -static
-$(f77_ij_OBJECTS): $(ij_dependencies)
-#f77_ij_mv_LDFLAGS = -static
-$(f77_ij_mv_OBJECTS): $(ij_mv_dependencies)
-#f77_struct_LDFLAGS = -static
-$(f77_struct_OBJECTS): $(struct_dependencies)
-$(ij_b_OBJECTS): $(ij_b_dependencies)
-#f77_ij_b_LDFLAGS = -static
-$(f77_ij_b_OBJECTS): $(ij_b_dependencies)
-$(ij_C___OBJECTS): $(ij_dependencies)
-$(ij_mv_C___OBJECTS): $(ij_mv_dependencies)
-$(new_ij_C___OBJECTS): $(ij_dependencies)
-$(sstruct_C___OBJECTS): $(sstruct_dependencies)
-$(struct_C___OBJECTS): $(struct_dependencies)
 
 all: ij ij_mv new_ij struct sstruct
 
@@ -960,6 +1072,26 @@ all++: ij.C++ ij_mv.C++ struct.C++ sstruct.C++
 all77: f77_ij f77_ij_mv f77_struct
 
 babel: f77_ij_b ij_b # f77_struct_b struct_b
+
+# some simple dependency checking
+$(ij_OBJECTS): $(ij_dependencies)
+$(ij_mv_OBJECTS): $(ij_mv_dependencies)
+$(new_ij_OBJECTS): $(ij_dependencies)
+$(sstruct_OBJECTS): $(sstruct_dependencies)
+$(struct_OBJECTS): $(struct_dependencies)
+$(fei_OBJECTS): $(fei_dependencies)
+$(f77_ij_OBJECTS): $(ij_dependencies)
+$(f77_ij_mv_OBJECTS): $(ij_mv_dependencies)
+$(f77_struct_OBJECTS): $(struct_dependencies)
+$(ij_b_OBJECTS): $(ij_b_dependencies)
+$(f77_ij_b_OBJECTS): $(ij_b_dependencies)
+#$(struct_b_OBJECTS): $(struct_b_dependencies)
+#$(f77_struct_b_OBJECTS): $(struct_b_dependencies)
+$(ij_C___OBJECTS): $(ij_dependencies)
+$(ij_mv_C___OBJECTS): $(ij_mv_dependencies)
+$(new_ij_C___OBJECTS): $(ij_dependencies)
+$(sstruct_C___OBJECTS): $(sstruct_dependencies)
+$(struct_C___OBJECTS): $(struct_dependencies)
 
 # rule to compile C files with C++
 ij.C++.cxx:
