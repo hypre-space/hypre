@@ -14,6 +14,7 @@ srcdir = @srcdir@
 VPATH = @srcdir@
 
 ONLINE_OPTS =\
+ -split 1\
  -show_section_numbers\
  -bottom_navigation
 
@@ -94,6 +95,7 @@ DEV_FILES =\
  dev_makefile.tex\
  dev_manual.tex\
  dev_reference.tex\
+ dev_repository.tex\
  dev_requirements.tex
 
 dev_manual/dev_manual.html: dev_manual.dvi
