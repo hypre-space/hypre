@@ -312,6 +312,10 @@ int hypre_BoomerAMGSolveT( void *amg_vdata , hypre_ParCSRMatrix *A , hypre_ParVe
 int hypre_BoomerAMGCycleT( void *amg_vdata , hypre_ParVector **F_array , hypre_ParVector **U_array );
 int hypre_BoomerAMGRelaxT( hypre_ParCSRMatrix *A , hypre_ParVector *f , int *cf_marker , int relax_type , int relax_points , double relax_weight , hypre_ParVector *u , hypre_ParVector *Vtemp );
 
+/* par_cg_relax_wt.c */
+int hypre_BoomerAMGCGRelaxWt( void *amg_vdata , int level , int num_cg_sweeps , double *rlx_wt );
+int hypre_Bisection( int n, double *diag, double *offd, double y, double z, double tol, int k, double *ev_ptr);
+
 /* par_coarsen.c */
 int hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *A , int CF_init , int debug_flag , int **CF_marker_ptr );
 int hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *A , int measure_type , int coarsen_type , int debug_flag , int **CF_marker_ptr );
@@ -383,6 +387,7 @@ int hypre_SchwarzSetNumFunctions( void *data , int num_functions );
 int hypre_SchwarzSetRelaxWeight( void *data , double relax_weight );
 int hypre_SchwarzSetDomainStructure( void *data , hypre_CSRMatrix *domain_structure );
 int hypre_SchwarzSetScale( void *data , double *scale );
+int hypre_SchwarzReScale( void *data , int size, double value );
 int hypre_SchwarzSetDofFunc( void *data , int *dof_func );
 
 /* par_stats.c */

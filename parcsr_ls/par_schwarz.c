@@ -245,6 +245,21 @@ hypre_SchwarzSetScale( void *data, double *scale)
 }
 
 int
+hypre_SchwarzReScale( void *data, int size, double value)
+{
+   int ierr = 0;
+   int i;
+   double *scale;
+   hypre_SchwarzData  *schwarz_data = data;
+
+   scale = hypre_SchwarzDataScale(schwarz_data);
+   for (i=0; i < size; i++)
+      scale[i] *= value;
+
+   return (ierr);
+}
+
+int
 hypre_SchwarzSetDofFunc( void *data, int *dof_func)
 {
    int ierr = 0;

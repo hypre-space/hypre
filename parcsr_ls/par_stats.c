@@ -90,6 +90,16 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
    double   operat_cmplxty;
    double   grid_cmplxty;
 
+   /* amg solve params */
+   int      max_iter;
+   int      cycle_type;    
+   int     *num_grid_sweeps;  
+   int     *grid_relax_type;   
+   int    **grid_relax_points; 
+   double  *relax_weight;
+   double  *omega;
+   double   tol;
+ 
    MPI_Comm_size(comm, &num_procs);   
    MPI_Comm_rank(comm,&my_id);
 
@@ -99,6 +109,20 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
    coarsen_type = hypre_ParAMGDataCoarsenType(amg_data);
    measure_type = hypre_ParAMGDataMeasureType(amg_data);
 
+   /*----------------------------------------------------------
+    * Get the amg_data data
+    *----------------------------------------------------------*/
+
+   num_levels = hypre_ParAMGDataNumLevels(amg_data);
+   max_iter   = hypre_ParAMGDataMaxIter(amg_data);
+   cycle_type = hypre_ParAMGDataCycleType(amg_data);    
+   num_grid_sweeps = hypre_ParAMGDataNumGridSweeps(amg_data);  
+   grid_relax_type = hypre_ParAMGDataGridRelaxType(amg_data);
+   grid_relax_points = hypre_ParAMGDataGridRelaxPoints(amg_data);
+   relax_weight = hypre_ParAMGDataRelaxWeight(amg_data); 
+   omega = hypre_ParAMGDataOmega(amg_data); 
+   tol = hypre_ParAMGDataTol(amg_data);
+ 
    send_buff     = hypre_CTAlloc(double, 6);
    gather_buff = hypre_CTAlloc(double,6*num_procs);    
  
@@ -413,6 +437,47 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
 
    if (my_id == 0) printf("\n\n");
 
+   if (my_id == 0)
+   { 
+      printf("\n\nBoomerAMG SOLVER PARAMETERS:\n\n");
+      printf( "  Maximum number of cycles:         %d \n",max_iter);
+      printf( "  Stopping Tolerance:               %e \n",tol); 
+      printf( "  Cycle type (1 = V, 2 = W, etc.):  %d\n\n", cycle_type);
+      printf( "  Relaxation Parameters:\n");
+      printf( "   Visiting Grid:                     fine  down   up  coarse\n");
+      printf( "            Number of partial sweeps:%4d  %4d   %2d  %4d \n",
+              num_grid_sweeps[0],num_grid_sweeps[2],
+              num_grid_sweeps[2],num_grid_sweeps[3]);
+      printf( "   Type 0=Jac, 1=GS, 3=Hybrid 9=GE:  %4d  %4d   %2d  %4d \n",
+              grid_relax_type[0],grid_relax_type[2],
+              grid_relax_type[2],grid_relax_type[3]);
+      printf( "   Point types, partial sweeps (1=C, -1=F):\n");
+      printf( "                               Finest grid:");
+      for (j = 0; j < num_grid_sweeps[0]; j++)
+              printf("  %2d", grid_relax_points[0][j]);
+      printf( "\n");
+      printf( "                  Pre-CG relaxation (down):");
+      for (j = 0; j < num_grid_sweeps[1]; j++)
+              printf("  %2d", grid_relax_points[1][j]);
+      printf( "\n");
+      printf( "                   Post-CG relaxation (up):");
+      for (j = 0; j < num_grid_sweeps[2]; j++)
+              printf("  %2d", grid_relax_points[2][j]);
+      printf( "\n");
+      printf( "                             Coarsest grid:");
+      for (j = 0; j < num_grid_sweeps[3]; j++)
+              printf("  %2d", grid_relax_points[3][j]);
+      printf( "\n\n");
+      /*if(grid_relax_type[0] == 0 || grid_relax_type[1] == 0 ||
+         grid_relax_type[2] == 0 || grid_relax_type[3] == 0)*/
+      {
+         for (j=0; j < num_levels; j++)
+         printf( " Relaxation Weight %f level %d\n",relax_weight[j],j);
+         for (j=0; j < num_levels; j++)
+         printf( " Outer relaxation weight %f level %d\n",omega[j],j);
+      }
+
+   }
    hypre_TFree(num_coeffs);
    hypre_TFree(num_variables);
    hypre_TFree(send_buff);
@@ -501,8 +566,8 @@ void    *data;
       for (j = 0; j < num_grid_sweeps[3]; j++)
               printf("  %2d", grid_relax_points[3][j]);
       printf( "\n\n");
-      if(grid_relax_type[0] == 0 || grid_relax_type[1] == 0 ||
-         grid_relax_type[2] == 0 || grid_relax_type[3] == 0)
+      /*if(grid_relax_type[0] == 0 || grid_relax_type[1] == 0 ||
+         grid_relax_type[2] == 0 || grid_relax_type[3] == 0)*/
       {
          for (j=0; j < num_levels; j++)
          printf( "  Relaxation Weight (Jacobi) %f level %d\n",relax_weight[j],j);

@@ -92,6 +92,7 @@ FILES =\
  par_stats.c\
  par_strength.c\
  par_cycle.c\
+ par_cg_relax_wt.c\
  par_difconv.c\
  par_interp.c\
  par_coarsen.c\
