@@ -28,7 +28,6 @@ FILE      *file;
  * used directly to pack and unpack buffers during the communications.
  *
  * Note: The input boxes and processes are destroyed.
- * The diag_rank argument is only referenced if constant_coefficient==2.
  *--------------------------------------------------------------------------*/
 
 int
@@ -36,8 +35,7 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
                      hypre_BoxArray   *send_data_space,
                      hypre_BoxArray   *recv_data_space,
                      int               num_values,
-                     int               constant_coefficient,
-                     int               diag_rank,
+                     int               data_offset_offset,
                      MPI_Comm          comm,
                      hypre_CommPkg   **comm_pkg_ptr )
 {
@@ -110,31 +108,13 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
 
    /* set send_data_offsets and send_data_space */
    data_offsets = hypre_TAlloc(int, hypre_BoxArraySize(send_data_space));
-   data_offset = 0;
-   if (constant_coefficient==2)
-   {
-      data_offset= diag_rank;
-   }
+   data_offset = data_offset_offset;
    hypre_ForBoxI(i, send_data_space)
       {
          data_offsets[i] = data_offset;
          data_box = hypre_BoxArrayBox(send_data_space, i);
-         if ( constant_coefficient==0 )
-         {
             data_offset += hypre_BoxVolume(data_box) * num_values;
-         }
-         else if ( constant_coefficient==1 )
-         {
-            data_offset += num_values;
-         }
-         else
-         {
-            assert( constant_coefficient==2);
-            /*  the whole matrix: data_offset += num_values + hypre_BoxVolume(data_box)-1;*/
-            /* communicate the (variable) diagonal only, skipping the off-diagonal
-               constant coefficients ... */
-            data_offset += hypre_BoxVolume(data_box) + diag_rank;
-         }
+            data_offset += data_offset_offset;
       }
 
    /* compute num_comms and use -p_comm_types to compute num_entries */
@@ -250,8 +230,7 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
                                hypre_CommTypeLocBoxes(comm_type),
                                hypre_CommPkgSendStride(comm_pkg),
                                hypre_CommPkgNumValues(comm_pkg),
-                               send_data_space, data_offsets,
-                               constant_coefficient );
+                               send_data_space, data_offsets );
       if (m > 0)
       {
          hypre_CommTypeLocBoxnums(comm_type) = NULL;
@@ -282,31 +261,13 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
 
    /* set data_offsets and recv_data_space */
    data_offsets = hypre_TAlloc(int, hypre_BoxArraySize(recv_data_space));
-   data_offset = 0;
-   if (constant_coefficient==2)
-   {
-      data_offset= diag_rank;
-   }
+   data_offset = data_offset_offset;
    hypre_ForBoxI(i, recv_data_space)
       {
          data_offsets[i] = data_offset;
          data_box = hypre_BoxArrayBox(recv_data_space, i);
-         if ( constant_coefficient==0 )
-         {
-            data_offset += hypre_BoxVolume(data_box) * num_values;
-         }
-         else if ( constant_coefficient==1 )
-         {
-            data_offset += num_values;
-         }
-         else
-         {
-            assert( constant_coefficient==2);
-            /* the whole matrix: data_offset += num_values + hypre_BoxVolume(data_box)-1;*/
-            /* communicate the (variable) diagonal only, skipping the off-diagonal
-               constant coefficients ... */
-            data_offset += hypre_BoxVolume(data_box) + diag_rank;
-         }
+         data_offset += hypre_BoxVolume(data_box) * num_values;
+         data_offset += data_offset_offset;
       }
    hypre_CommPkgRecvDataOffsets(comm_pkg) = data_offsets;
    hypre_CommPkgRecvDataSpace(comm_pkg) =
@@ -397,8 +358,7 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
                             hypre_CommPkgRecvStride(comm_pkg),
                             hypre_CommPkgNumValues(comm_pkg),
                             hypre_CommPkgRecvDataSpace(comm_pkg),
-                            hypre_CommPkgRecvDataOffsets(comm_pkg),
-                            constant_coefficient );
+                            hypre_CommPkgRecvDataOffsets(comm_pkg) );
 
    /* set recv info in comm_pkg */
    hypre_CommPkgRecvBufsize(comm_pkg) = comm_bufsize;
@@ -586,8 +546,7 @@ hypre_CommTypeSetEntries( hypre_CommType  *comm_type,
                           hypre_Index      stride,
                           int              num_values,
                           hypre_BoxArray  *data_space,
-                          int             *data_offsets,
-                          int              constant_coefficient )
+                          int             *data_offsets )
 {
    int         ierr = 0;
 
@@ -604,7 +563,7 @@ hypre_CommTypeSetEntries( hypre_CommType  *comm_type,
       data_box = hypre_BoxArrayBox(data_space, i);
 
       hypre_CommTypeSetEntry(box, stride, data_box, num_values, data_offsets[i],
-                             constant_coefficient, &entries[j]);
+                             &entries[j]);
    }
 
    return ierr;
@@ -619,7 +578,6 @@ hypre_CommTypeSetEntry( hypre_Box           *box,
                         hypre_Box           *data_box,
                         int                  num_values,
                         int                  data_box_offset,
-                        int                  constant_coefficient,
                         hypre_CommEntryType *comm_entry )
 {
    int           ierr = 0;
@@ -632,15 +590,8 @@ hypre_CommTypeSetEntry( hypre_Box           *box,
     * Set offset
     *------------------------------------------------------*/
 
-   if ( constant_coefficient==0 || constant_coefficient==2 )
-   {
-      hypre_CommEntryTypeOffset(comm_entry) =
-         data_box_offset + hypre_BoxIndexRank(data_box, hypre_BoxIMin(box));
-   }
-   else
-   {
-      hypre_CommEntryTypeOffset(comm_entry) = data_box_offset;
-   }
+   hypre_CommEntryTypeOffset(comm_entry) =
+      data_box_offset + hypre_BoxIndexRank(data_box, hypre_BoxIMin(box));
 
    /*------------------------------------------------------
     * Set length_array, stride_array, and dim
@@ -650,66 +601,23 @@ hypre_CommTypeSetEntry( hypre_Box           *box,
    stride_array = hypre_CommEntryTypeStrideArray(comm_entry);
  
    /* initialize length_array */
-   if ( constant_coefficient==0 )
+   hypre_BoxGetStrideSize(box, stride, size);
+   for (i = 0; i < 3; i++)
    {
-      hypre_BoxGetStrideSize(box, stride, size);
-      for (i = 0; i < 3; i++)
-      {
-         length_array[i] = hypre_IndexD(size, i);
-      }
-      length_array[3] = num_values;
+      length_array[i] = hypre_IndexD(size, i);
    }
-   else if ( constant_coefficient==1 )
-   {
-      for (i = 0; i < 3; i++) length_array[i] = 1;
-      length_array[3] = num_values;
-   }
-   else
-   {
-      assert( constant_coefficient==2 );
-      /* length_array doesn't apply to the whole matrix, only to the diagonal
-       part.  We're not communicating the off-diagonal part because it is
-       constant, every processor should have it already.  The basic concept
-      of length_array requires the data to be rectangularly organized, but
-      that's not the case here.  It is the case for the diagonal. */
-      hypre_BoxGetStrideSize(box, stride, size);
-      for (i = 0; i < 3; i++)
-      {
-         length_array[i] = hypre_IndexD(size, i);
-      }
-      length_array[3] = 1;
-   }
+   length_array[3] = num_values;
 
    /* initialize stride_array */
-   if ( constant_coefficient==0 )
+   for (i = 0; i < 3; i++)
    {
-      for (i = 0; i < 3; i++)
+      stride_array[i] = hypre_IndexD(stride, i);
+      for (j = 0; j < i; j++)
       {
-         stride_array[i] = hypre_IndexD(stride, i);
-         for (j = 0; j < i; j++)
-         {
-            stride_array[i] *= hypre_BoxSizeD(data_box, j);
-         }
+         stride_array[i] *= hypre_BoxSizeD(data_box, j);
       }
-      stride_array[3] = hypre_BoxVolume(data_box);
    }
-   else if ( constant_coefficient==1 )
-   {
-      for (i = 0; i < 4; i++) stride_array[i] = 1;
-   }
-   else
-   {
-      assert( constant_coefficient==2 );
-      for (i = 0; i < 3; i++)
-      {
-         stride_array[i] = hypre_IndexD(stride, i);
-         for (j = 0; j < i; j++)
-         {
-            stride_array[i] *= hypre_BoxSizeD(data_box, j);
-         }
-      }
-      stride_array[3] = hypre_BoxVolume(data_box);
-   }
+   stride_array[3] = hypre_BoxVolume(data_box);
 
    /* eliminate dimensions with length_array = 1 */
    dim = 4;
@@ -988,7 +896,7 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
  *--------------------------------------------------------------------------*/
 
 int
-hypre_FinalizeCommunication( hypre_CommHandle *comm_handle, int constant_coefficient )
+hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
 {
    
    int              ierr = 0;
@@ -1048,8 +956,7 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle, int constant_coeffic
                                   hypre_CommPkgRecvStride(comm_pkg),
                                   hypre_CommPkgNumValues(comm_pkg),
                                   hypre_CommPkgRecvDataSpace(comm_pkg),
-                                  hypre_CommPkgRecvDataOffsets(comm_pkg),
-                                  constant_coefficient );
+                                  hypre_CommPkgRecvDataOffsets(comm_pkg) );
 
          dptr += hypre_CommPrefixSize(num_entries);
       }

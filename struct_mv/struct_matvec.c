@@ -283,7 +283,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
       {
          /* This FinalizeIndtCompuations is for xp, a vector, so the
             "constant_coefficient" argument should be 0 .*/
-         hypre_FinalizeIndtComputations(comm_handle,0);
+         hypre_FinalizeIndtComputations(comm_handle);
          compute_box_aa = hypre_ComputePkgDeptBoxes(compute_pkg);
       }
       break;
