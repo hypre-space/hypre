@@ -603,6 +603,8 @@ main( int   argc,
       {
          /* use BoomerAMG as preconditioner */
          pcg_precond = HYPRE_ParAMGInitialize(); 
+         HYPRE_ParAMGSetCoarsenType(pcg_precond, (hybrid*coarsen_type));
+         HYPRE_ParAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_ParAMGSetStrongThreshold(pcg_precond, strong_threshold);
          HYPRE_ParAMGSetLogging(pcg_precond, ioutdat, "driver.out.log");
          HYPRE_ParAMGSetMaxIter(pcg_precond, 1);
@@ -612,6 +614,7 @@ main( int   argc,
          HYPRE_ParAMGSetRelaxWeight(pcg_precond, relax_weight);
          HYPRE_ParAMGSetGridRelaxPoints(pcg_precond, grid_relax_points);
          HYPRE_ParAMGSetMaxLevels(pcg_precond, 25);
+
          HYPRE_ParCSRPCGSetPrecond(pcg_solver,
                                    HYPRE_ParAMGSolve,
                                    HYPRE_ParAMGSetup,
@@ -682,7 +685,10 @@ main( int   argc,
       if (solver_id == 3)
       {
          /* use BoomerAMG as preconditioner */
+
          pcg_precond = HYPRE_ParAMGInitialize(); 
+         HYPRE_ParAMGSetCoarsenType(pcg_precond, (hybrid*coarsen_type));
+         HYPRE_ParAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_ParAMGSetStrongThreshold(pcg_precond, strong_threshold);
          HYPRE_ParAMGSetLogging(pcg_precond, ioutdat, "driver.out.log");
          HYPRE_ParAMGSetMaxIter(pcg_precond, 1);
