@@ -451,12 +451,34 @@ int HYPRE_SStructMatrixAddToBoxValues(HYPRE_SStructMatrix  matrix,
 int HYPRE_SStructMatrixAssemble(HYPRE_SStructMatrix matrix);
 
 /**
- * Define symmetry properties of the matrix.  By default, matrices are
- * assumed to be nonsymmetric.  Significant storage savings can be
- * made if the matrix is symmetric.
+ * Define symmetry properties for the stencil entries in the matrix.
+ * The boolean argument {\tt symmetric} is applied to stencil entries
+ * on part {\tt part} that couple variable {\tt var} to variable {\tt
+ * to_var}.  A value of -1 may be used for {\tt part}, {\tt var}, or
+ * {\tt to_var} to specify ``all''.  For example, if {\tt part} and
+ * {\tt to_var} are set to -1, then the boolean is applied to stencil
+ * entries on all parts that couple variable {\tt var} to all other
+ * variables.
+ * 
+ * By default, matrices are assumed to be nonsymmetric.  Significant
+ * storage savings can be made if the matrix is symmetric.
+ *
+ * DEVELOPER NOTE: This was less flexible before and had not yet been
+ * implemented anyway.  This will probably be useful for people with
+ * systems problems, as these are often symmetric within a variable,
+ * but not between variables.
  **/
-int HYPRE_SStructMatrixSetSymmetric(HYPRE_SStructMatrix  matrix,
-                                    int                  symmetric);
+int HYPRE_SStructMatrixSetSymmetric(HYPRE_SStructMatrix matrix,
+                                    int                 part,
+                                    int                 var,
+                                    int                 to_var,
+                                    int                 symmetric);
+
+/**
+ * Define symmetry properties for all non-stencil matrix entries.
+ **/
+int HYPRE_SStructMatrixSetNSSymmetric(HYPRE_SStructMatrix matrix,
+                                      int                 symmetric);
 
 /**
  * Set the storage type of the matrix object to be constructed.

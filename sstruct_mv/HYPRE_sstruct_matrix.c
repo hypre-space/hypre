@@ -31,6 +31,7 @@ HYPRE_SStructMatrixCreate( MPI_Comm              comm,
    int                  ***splits;
    int                     nparts;
    hypre_SStructPMatrix  **pmatrices;
+   int                  ***symmetric;
 
    hypre_SStructPGrid     *pgrid;
    int                     nvars;
@@ -57,17 +58,21 @@ HYPRE_SStructMatrixCreate( MPI_Comm              comm,
    hypre_SStructMatrixSplits(matrix) = splits;
    pmatrices = hypre_TAlloc(hypre_SStructPMatrix *, nparts);
    hypre_SStructMatrixPMatrices(matrix) = pmatrices;
+   symmetric = hypre_TAlloc(int **, nparts);
+   hypre_SStructMatrixSymmetric(matrix) = symmetric;
    for (part = 0; part < nparts; part++)
    {
       pgrid = hypre_SStructGraphPGrid(graph, part);
       nvars = hypre_SStructPGridNVars(pgrid);
       splits[part] = hypre_TAlloc(int *, nvars);
+      symmetric[part] = hypre_TAlloc(int *, nvars);
       for (vi = 0; vi < nvars; vi++)
       {
          stencil_size  = hypre_SStructStencilSize(stencils[part][vi]);
          stencil_vars  = hypre_SStructStencilVars(stencils[part][vi]);
          pstencil_size = 0;
          splits[part][vi] = hypre_TAlloc(int, stencil_size);
+         symmetric[part][vi] = hypre_TAlloc(int, nvars);
          for (i = 0; i < stencil_size; i++)
          {
             vj = stencil_vars[i];
@@ -82,6 +87,10 @@ HYPRE_SStructMatrixCreate( MPI_Comm              comm,
             {
                splits[part][vi][i] = -1;
             }
+         }
+         for (vj = 0; vj < nvars; vj++)
+         {
+            symmetric[part][vi][vj] = 0;
          }
       }
    }
@@ -108,9 +117,9 @@ HYPRE_SStructMatrixCreate( MPI_Comm              comm,
    hypre_SStructMatrixTmpColCoords(matrix) = NULL;
    hypre_SStructMatrixTmpCoeffs(matrix)    = NULL;
 
-   hypre_SStructMatrixSymmetric(matrix)  = 0;
-   hypre_SStructMatrixGlobalSize(matrix) = 0;
-   hypre_SStructMatrixRefCount(matrix)   = 1;
+   hypre_SStructMatrixNSSymmetric(matrix) = 0;
+   hypre_SStructMatrixGlobalSize(matrix)  = 0;
+   hypre_SStructMatrixRefCount(matrix)    = 1;
 
    *matrix_ptr = matrix;
 
@@ -129,6 +138,7 @@ HYPRE_SStructMatrixDestroy( HYPRE_SStructMatrix matrix )
    int                  ***splits;
    int                     nparts;
    hypre_SStructPMatrix  **pmatrices;
+   int                  ***symmetric;
    hypre_SStructPGrid     *pgrid;
    int                     nvars;
    int                     part, var;
@@ -142,6 +152,7 @@ HYPRE_SStructMatrixDestroy( HYPRE_SStructMatrix matrix )
          splits       = hypre_SStructMatrixSplits(matrix);
          nparts       = hypre_SStructMatrixNParts(matrix);
          pmatrices    = hypre_SStructMatrixPMatrices(matrix);
+         symmetric    = hypre_SStructMatrixSymmetric(matrix);
          for (part = 0; part < nparts; part++)
          {
             pgrid = hypre_SStructGraphPGrid(graph, part);
@@ -149,13 +160,16 @@ HYPRE_SStructMatrixDestroy( HYPRE_SStructMatrix matrix )
             for (var = 0; var < nvars; var++)
             {
                hypre_TFree(splits[part][var]);
+               hypre_TFree(symmetric[part][var]);
             }
             hypre_TFree(splits[part]);
+            hypre_TFree(symmetric[part]);
             hypre_SStructPMatrixDestroy(pmatrices[part]);
          }
          HYPRE_SStructGraphDestroy(graph);
          hypre_TFree(splits);
          hypre_TFree(pmatrices);
+         hypre_TFree(symmetric);
          HYPRE_IJMatrixDestroy(hypre_SStructMatrixIJMatrix(matrix));
          hypre_TFree(hypre_SStructMatrixSEntries(matrix));
          hypre_TFree(hypre_SStructMatrixUEntries(matrix));
@@ -179,6 +193,7 @@ HYPRE_SStructMatrixInitialize( HYPRE_SStructMatrix matrix )
    int                     nparts    = hypre_SStructMatrixNParts(matrix);
    hypre_SStructGraph     *graph     = hypre_SStructMatrixGraph(matrix);
    hypre_SStructPMatrix  **pmatrices = hypre_SStructMatrixPMatrices(matrix);
+   int                  ***symmetric = hypre_SStructMatrixSymmetric(matrix);
    hypre_SStructStencil ***stencils  = hypre_SStructGraphStencils(graph);
    int                    *split;
 
@@ -230,6 +245,14 @@ HYPRE_SStructMatrixInitialize( HYPRE_SStructMatrix matrix )
       }
       pcomm = hypre_SStructPGridComm(pgrid);
       hypre_SStructPMatrixCreate(pcomm, pgrid, pstencils, &pmatrices[part]);
+      for (var = 0; var < nvars; var++)
+      {
+         for (i = 0; i < nvars; i++)
+         {
+            hypre_SStructPMatrixSetSymmetric(pmatrices[part], var, i,
+                                             symmetric[part][var][i]);
+         }
+      }
       hypre_SStructPMatrixInitialize(pmatrices[part]);
    }
 
@@ -556,14 +579,74 @@ HYPRE_SStructMatrixAssemble( HYPRE_SStructMatrix matrix )
 }
 
 /*--------------------------------------------------------------------------
- * TODO
+ * NOTE: Should set things up so that this information can be passed
+ * immediately to the PMatrix.  Unfortunately, the PMatrix is
+ * currently not created until the SStructMatrix is initialized.
  *--------------------------------------------------------------------------*/
  
 int
-HYPRE_SStructMatrixSetSymmetric( HYPRE_SStructMatrix  matrix,
-                                 int                  symmetric )
+HYPRE_SStructMatrixSetSymmetric( HYPRE_SStructMatrix matrix,
+                                 int                 part,
+                                 int                 var,
+                                 int                 to_var,
+                                 int                 symmetric )
 {
    int ierr = 0;
+
+   int                ***msymmetric = hypre_SStructMatrixSymmetric(matrix);
+   hypre_SStructGraph   *graph      = hypre_SStructMatrixGraph(matrix);
+   hypre_SStructPGrid   *pgrid;
+
+   int pstart = part;
+   int psize  = 1;
+   int vstart = var;
+   int vsize  = 1;
+   int tstart = to_var;
+   int tsize  = 1;
+   int p, v, t;
+
+   if (part == -1)
+   {
+      pstart = 0;
+      psize  = hypre_SStructMatrixNParts(matrix);
+   }
+
+   for (p = pstart; p < psize; p++)
+   {
+      pgrid = hypre_SStructGraphPGrid(graph, p);
+      if (var == -1)
+      {
+         vstart = 0;
+         vsize  = hypre_SStructPGridNVars(pgrid);
+      }
+      if (to_var == -1)
+      {
+         tstart = 0;
+         tsize  = hypre_SStructPGridNVars(pgrid);
+      }
+
+      for (v = vstart; v < vsize; v++)
+      {
+         for (t = tstart; t < tsize; t++)
+         {
+            msymmetric[p][v][t] = symmetric;
+         }
+      }
+   }
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+ 
+int
+HYPRE_SStructMatrixSetNSSymmetric( HYPRE_SStructMatrix matrix,
+                                   int                 symmetric )
+{
+   int ierr = 0;
+
+   hypre_SStructMatrixNSSymmetric(matrix) = symmetric;
 
    return ierr;
 }

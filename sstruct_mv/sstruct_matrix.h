@@ -29,12 +29,14 @@ typedef struct
    int                   **smaps;
    hypre_StructStencil  ***sstencils;    /* nvar x nvar array of sstencils */
    hypre_StructMatrix   ***smatrices;    /* nvar x nvar array of smatrices */
+   int                   **symmetric;    /* Stencil entries symmetric?
+                                          * (nvar x nvar array) */
 
    /* temporary storage for SetValues routines */
    int                     sentries_size;
    int                    *sentries;
 
-   int                     complex;      /* Is the matrix complex */
+   int                     complex;      /* Matrix complex? */
 
    int                     ref_count;
 
@@ -50,6 +52,8 @@ typedef struct hypre_SStructMatrix_struct
    /* S-matrix info */
    int                     nparts;
    hypre_SStructPMatrix  **pmatrices;
+   int                  ***symmetric;    /* Stencil entries symmetric?
+                                          * (nparts x nvar x nvar array) */
 
    /* U-matrix info */
    HYPRE_IJMatrix          ijmatrix;
@@ -62,8 +66,8 @@ typedef struct hypre_SStructMatrix_struct
    int                    *tmp_col_coords;
    double                 *tmp_coeffs;
 
-   int                     symmetric;    /* Is the matrix symmetric */
-   int                     complex;      /* Is the matrix complex */
+   int                     ns_symmetric; /* Non-stencil entries symmetric? */
+   int                     complex;      /* Matrix complex? */
    int                     global_size;  /* Total number of nonzero coeffs */
 
    int                     ref_count;
@@ -77,11 +81,12 @@ typedef struct hypre_SStructMatrix_struct
 #define hypre_SStructMatrixComm(mat)           ((mat) -> comm)
 #define hypre_SStructMatrixNDim(mat)           ((mat) -> ndim)
 #define hypre_SStructMatrixGraph(mat)          ((mat) -> graph)
-#define hypre_SStructMatrixSplits(mat)         ((mat)-> splits)
+#define hypre_SStructMatrixSplits(mat)         ((mat) -> splits)
 #define hypre_SStructMatrixSplit(mat, p, v)    ((mat) -> splits[p][v])
 #define hypre_SStructMatrixNParts(mat)         ((mat) -> nparts)
 #define hypre_SStructMatrixPMatrices(mat)      ((mat) -> pmatrices)
 #define hypre_SStructMatrixPMatrix(mat, part)  ((mat) -> pmatrices[part])
+#define hypre_SStructMatrixSymmetric(mat)      ((mat) -> symmetric)
 #define hypre_SStructMatrixIJMatrix(mat)       ((mat) -> ijmatrix)
 #define hypre_SStructMatrixParCSRMatrix(mat)   ((mat) -> parcsrmatrix)
 #define hypre_SStructMatrixEntriesSize(mat)    ((mat) -> entries_size)
@@ -89,7 +94,7 @@ typedef struct hypre_SStructMatrix_struct
 #define hypre_SStructMatrixUEntries(mat)       ((mat) -> Uentries)
 #define hypre_SStructMatrixTmpColCoords(mat)   ((mat) -> tmp_col_coords)
 #define hypre_SStructMatrixTmpCoeffs(mat)      ((mat) -> tmp_coeffs)
-#define hypre_SStructMatrixSymmetric(mat)      ((mat) -> symmetric)
+#define hypre_SStructMatrixNSSymmetric(mat)    ((mat) -> ns_symmetric)
 #define hypre_SStructMatrixComplex(mat)        ((mat) -> complex)
 #define hypre_SStructMatrixGlobalSize(mat)     ((mat) -> global_size)
 #define hypre_SStructMatrixRefCount(mat)       ((mat) -> ref_count)
@@ -111,6 +116,7 @@ typedef struct hypre_SStructMatrix_struct
 #define hypre_SStructPMatrixSMatrices(pmat)         ((pmat) -> smatrices)
 #define hypre_SStructPMatrixSMatrix(pmat, vi, vj)  \
 ((pmat) -> smatrices[vi][vj])
+#define hypre_SStructPMatrixSymmetric(pmat)         ((pmat) -> symmetric)
 #define hypre_SStructPMatrixSEntriesSize(pmat)      ((pmat) -> sentries_size)
 #define hypre_SStructPMatrixSEntries(pmat)          ((pmat) -> sentries)
 #define hypre_SStructPMatrixComplex(pmat)           ((pmat) -> complex)

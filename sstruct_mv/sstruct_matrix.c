@@ -49,7 +49,7 @@ hypre_SStructPMatrixCreate( MPI_Comm               comm,
    int                  **smaps;
    hypre_StructStencil ***sstencils;
    hypre_StructMatrix  ***smatrices;
-   int                    num_ghost[6] = {1, 1, 1, 1, 1, 1};
+   int                  **symmetric;
 
    hypre_StructStencil   *sstencil;
    int                   *vars;
@@ -144,12 +144,22 @@ hypre_SStructPMatrixCreate( MPI_Comm               comm,
             sgrid = hypre_SStructPGridSGrid(pgrid, vi);
             smatrices[vi][vj] =
                hypre_StructMatrixCreate(comm, sgrid, sstencils[vi][vj]);
-            /* TODO hypre_StructMatrixSetSymmetric(smatrices[vi][vj], 1); */
-            hypre_StructMatrixSetNumGhost(smatrices[vi][vj], num_ghost);
          }
       }
    }
    hypre_SStructPMatrixSMatrices(pmatrix) = smatrices;
+
+   /* create symmetric */
+   symmetric = hypre_TAlloc(int *, nvars);
+   for (vi = 0; vi < nvars; vi++)
+   {
+      symmetric[vi] = hypre_TAlloc(int, nvars);
+      for (vj = 0; vj < nvars; vj++)
+      {
+         symmetric[vi][vj] = 0;
+      }
+   }
+   hypre_SStructPMatrixSymmetric(pmatrix) = symmetric;
 
    hypre_SStructPMatrixSEntriesSize(pmatrix) = size;
    hypre_SStructPMatrixSEntries(pmatrix) = hypre_TAlloc(int, size);
@@ -175,6 +185,7 @@ hypre_SStructPMatrixDestroy( hypre_SStructPMatrix *pmatrix )
    int                   **smaps;
    hypre_StructStencil  ***sstencils;
    hypre_StructMatrix   ***smatrices;
+   int                   **symmetric;
    int                     vi, vj;
 
    if (pmatrix)
@@ -187,6 +198,7 @@ hypre_SStructPMatrixDestroy( hypre_SStructPMatrix *pmatrix )
          smaps     = hypre_SStructPMatrixSMaps(pmatrix);
          sstencils = hypre_SStructPMatrixSStencils(pmatrix);
          smatrices = hypre_SStructPMatrixSMatrices(pmatrix);
+         symmetric = hypre_SStructPMatrixSymmetric(pmatrix);
          for (vi = 0; vi < nvars; vi++)
          {
             HYPRE_SStructStencilDestroy(stencils[vi]);
@@ -198,11 +210,13 @@ hypre_SStructPMatrixDestroy( hypre_SStructPMatrix *pmatrix )
             }
             hypre_TFree(sstencils[vi]);
             hypre_TFree(smatrices[vi]);
+            hypre_TFree(symmetric[vi]);
          }
          hypre_TFree(stencils);
          hypre_TFree(smaps);
          hypre_TFree(sstencils);
          hypre_TFree(smatrices);
+         hypre_TFree(symmetric);
          hypre_TFree(hypre_SStructPMatrixSEntries(pmatrix));
          hypre_TFree(pmatrix);
       }
@@ -218,9 +232,12 @@ int
 hypre_SStructPMatrixInitialize( hypre_SStructPMatrix *pmatrix )
 {
    int ierr = 0;
-   int                 nvars = hypre_SStructPMatrixNVars(pmatrix);
-   hypre_StructMatrix *smatrix;
-   int                 vi, vj;
+
+   int                  nvars        = hypre_SStructPMatrixNVars(pmatrix);
+   int                **symmetric    = hypre_SStructPMatrixSymmetric(pmatrix);
+   int                  num_ghost[6] = {1, 1, 1, 1, 1, 1};
+   hypre_StructMatrix  *smatrix;
+   int                  vi, vj;
 
    for (vi = 0; vi < nvars; vi++)
    {
@@ -229,6 +246,8 @@ hypre_SStructPMatrixInitialize( hypre_SStructPMatrix *pmatrix )
          smatrix = hypre_SStructPMatrixSMatrix(pmatrix, vi, vj);
          if (smatrix != NULL)
          {
+            HYPRE_StructMatrixSetSymmetric(smatrix, symmetric[vi][vj]);
+            hypre_StructMatrixSetNumGhost(smatrix, num_ghost);
             hypre_StructMatrixInitialize(smatrix);
          }
       }
@@ -344,6 +363,47 @@ hypre_SStructPMatrixAssemble( hypre_SStructPMatrix *pmatrix )
 }
 
 /*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+ 
+int
+hypre_SStructPMatrixSetSymmetric( hypre_SStructPMatrix *pmatrix,
+                                  int                   var,
+                                  int                   to_var,
+                                  int                   symmetric )
+{
+   int ierr = 0;
+
+   int **pmsymmetric = hypre_SStructPMatrixSymmetric(pmatrix);
+
+   int vstart = var;
+   int vsize  = 1;
+   int tstart = to_var;
+   int tsize  = 1;
+   int v, t;
+
+   if (var == -1)
+   {
+      vstart = 0;
+      vsize  = hypre_SStructPMatrixNVars(pmatrix);
+   }
+   if (to_var == -1)
+   {
+      tstart = 0;
+      tsize  = hypre_SStructPMatrixNVars(pmatrix);
+   }
+
+   for (v = vstart; v < vsize; v++)
+   {
+      for (t = tstart; t < tsize; t++)
+      {
+         pmsymmetric[v][t] = symmetric;
+      }
+   }
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_SStructPMatrixPrint
  *--------------------------------------------------------------------------*/
 
@@ -432,10 +492,13 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
                nnzs++;
             }
          }
+#if 0
+         /* TODO: For now, assume stencil is full/complete */
          if (hypre_SStructMatrixSymmetric(matrix))
          {
             nnzs = 2*nnzs - 1;
          }
+#endif
          for (j = 0; j < nrows; j++)
          {
             row_sizes[i] = nnzs;
@@ -653,7 +716,8 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
 
       hypre_CopyIndex(ilower, hypre_BoxIMin(box));
       hypre_CopyIndex(iupper, hypre_BoxIMax(box));
-      nrows    = hypre_BoxVolume(box);
+      /* ZTODO: check that this change fixes multiple-entry problem */
+      nrows    = hypre_BoxVolume(box)*nentries;
       ncols    = hypre_CTAlloc(int, nrows);
       for (i = 0; i < nrows; i++)
       {
