@@ -8881,7 +8881,6 @@ subdirs="$config_babel_runtime"
  FEI_mv/femli/fedata\
  FEI_mv/femli/mapper\
  FEI_mv/femli/lib\
- FEI_mv/femli/test\
  IJ_mv\
  krylov\
  lapack\
