@@ -65,6 +65,11 @@ LAPACKFILES = \
  $(top_srcdir)/lapack/dlascl.c\
  $(top_srcdir)/lapack/dlaset.c\
  $(top_srcdir)/lapack/dlasq1.c\
+ $(top_srcdir)/lapack/dlasq2.c\
+ $(top_srcdir)/lapack/dlasq3.c\
+ $(top_srcdir)/lapack/dlasq4.c\
+ $(top_srcdir)/lapack/dlasq5.c\
+ $(top_srcdir)/lapack/dlasq6.c\
  $(top_srcdir)/lapack/dlasr.c\
  $(top_srcdir)/lapack/dlasrt.c\
  $(top_srcdir)/lapack/dlassq.c\

@@ -34,6 +34,11 @@ FILES = \
  dlaset.c\
  dlas2.c\
  dlasq1.c\
+ dlasq2.c\
+ dlasq3.c\
+ dlasq4.c\
+ dlasq5.c\
+ dlasq6.c\
  dlasr.c\
  dlasrt.c\
  dlassq.c\
