@@ -155,17 +155,17 @@ hypre_F90_IFACE(hypre_parcsrmatrixgetrow)( long int *matrix,
                                            long int *values_ptr,
                                            int      *ierr )
 {
-   int    **col_ind;
-   double **values;
+   int    *col_ind;
+   double *values;
 
    *ierr = (int) ( HYPRE_ParCSRMatrixGetRow( (HYPRE_ParCSRMatrix) *matrix,
                                              (int)                *row,
-                                             (int *)              size,
-                                             (int **)             col_ind,
-                                             (double **)          values   ) );
+                                             (int *)               size,
+                                             (int **)             &col_ind,
+                                             (double **)          &values   ) );
 
-   *col_ind_ptr = (long int) *col_ind;
-   *values_ptr  = (long int) *values;
+   *col_ind_ptr = (long int) col_ind;
+   *values_ptr  = (long int) values;
 }
 
 /*--------------------------------------------------------------------------
@@ -180,16 +180,16 @@ hypre_F90_IFACE(hypre_parcsrmatrixrestorerow)( long int *matrix,
                                                long int *values_ptr,
                                                int      *ierr         )
 {
-   int    **col_ind;  
-   double **values;
+   int    *col_ind;  
+   double *values;
 
    *ierr = (int) ( HYPRE_ParCSRMatrixRestoreRow( (HYPRE_ParCSRMatrix) *matrix,
                                                  (int)                *row,
                                                  (int *)               size,
-                                                 (int **)              col_ind,
-                                                 (double **)           values   ) );
+                                                 (int **)             &col_ind,
+                                                 (double **)          &values   ) );
 
-   *col_ind_ptr = (long int) *col_ind;
-   *values_ptr  = (long int) *values;
+   *col_ind_ptr = (long int) col_ind;
+   *values_ptr  = (long int) values;
 
 }
