@@ -423,12 +423,6 @@ then
   seconds; TIME=$SECS
   echo "Autotest starting make of $MessageStr"
   cd $StdBuildDir/$MakeDir
-  if [ -r ./Makefile ] ; then
-    cd $StdBuildDir
-    ./configure 1> ${Hdr}.${MessageStr}.configure.log \
-	2> ${Hdr}.${MessageStr}.configure.err
-    cd $StdBuildDir/$MakeDir
-  fi
   $MAKE $MakeOption 1> ${Hdr}.${MessageStr}.log \
 	2> ${Hdr}.${MessageStr}.err
   echo "$HYPRE_ALL_EMAIL" > ${Hdr}.${MessageStr}.err.email
