@@ -395,8 +395,6 @@ then
   case $ARCH in
     sun4 | solaris )
 
-      AC_DEFINE(HYPRE_SOLARIS)
-
       if test "$casc_user_chose_compilers" = "no"
       then
         if test "$casc_using_mpi" = "no"
@@ -418,11 +416,11 @@ then
       CASC_SET_FOPT(-O -silent)
       CASC_SET_FDEBUG(-g -silent)
 
+      AC_DEFINE(HYPRE_SOLARIS)
+
    ;;
 
    alpha)
-
-     AC_DEFINE(HYPRE_ALPHA)
 
      casc_using_blas=yes
      if test "$casc_user_chose_compilers" = "no"
@@ -485,11 +483,11 @@ then
      CASC_SET_CXXOPT(-O)
      CASC_SET_CXXDEBUG(-g)
 
+     AC_DEFINE(HYPRE_ALPHA)
+
    ;;
 
    rs6000)
-
-   AC_DEFINE(HYPRE_RS6000)
 
    AC_ARG_WITH(COMM_SIMPLE, [\
    --without-COMM_SIMPLE           use MPI derived data types],
@@ -561,6 +559,7 @@ AC_PROG_CPP
      CASC_SET_CXXDEBUG(-g)
      CFLAGS="$CFLAGS -qmaxmem=8192"
 
+     AC_DEFINE(HYPRE_RS6000)
    ;;
 
    IRIX64)
