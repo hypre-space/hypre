@@ -24,6 +24,7 @@ HYPRE_Solver HYPRE_ParAMGInitialize P((void ));
 int HYPRE_ParAMGFinalize P((HYPRE_Solver solver ));
 int HYPRE_ParAMGSetup P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x ));
 int HYPRE_ParAMGSolve P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x ));
+int HYPRE_ParAMGSolveT P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x ));
 int HYPRE_ParAMGSetMaxLevels P((HYPRE_Solver solver , int max_levels ));
 int HYPRE_ParAMGSetStrongThreshold P((HYPRE_Solver solver , double strong_threshold ));
 int HYPRE_ParAMGSetInterpType P((HYPRE_Solver solver , int interp_type ));
@@ -38,22 +39,18 @@ int HYPRE_ParAMGSetIOutDat P((HYPRE_Solver solver , int ioutdat ));
 int HYPRE_ParAMGSetLogFileName P((HYPRE_Solver solver , char *log_file_name ));
 int HYPRE_ParAMGSetLogging P((HYPRE_Solver solver , int ioutdat , char *log_file_name ));
 
-/* HYPRE_parcsr_pcg.c */
-int HYPRE_ParCSRPCGInitialize P((MPI_Comm comm , HYPRE_Solver *solver ));
-int HYPRE_ParCSRPCGFinalize P((HYPRE_Solver solver ));
-int HYPRE_ParCSRPCGSetup P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x ));
-int HYPRE_ParCSRPCGSolve P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x ));
-int HYPRE_ParCSRPCGSetTol P((HYPRE_Solver solver , double tol ));
-int HYPRE_ParCSRPCGSetMaxIter P((HYPRE_Solver solver , int max_iter ));
-int HYPRE_ParCSRPCGSetTwoNorm P((HYPRE_Solver solver , int two_norm ));
-int HYPRE_ParCSRPCGSetRelChange P((HYPRE_Solver solver , int rel_change )) ;
-int HYPRE_ParCSRPCGSetPrecond P((HYPRE_Solver solver , int (*precond )(), int (*precond_setup )(), void *precond_data ));
-int HYPRE_ParCSRPCGSetLogging P((HYPRE_Solver solver , int logging ));
-int HYPRE_ParCSRPCGGetNumIterations P((HYPRE_Solver solver , int *num_iterations));
-int HYPRE_ParCSRPCGGetFinalRelativeResidualNorm P((HYPRE_Solver solver , double *norm ));
-int HYPRE_ParCSRDiagScaleSetup P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector y , HYPRE_ParVector x ));
-int HYPRE_ParCSRDiagScale P((HYPRE_Solver solver , HYPRE_ParCSRMatrix HA , HYPRE_ParVector Hy , HYPRE_ParVector Hx ));
- 
+/* HYPRE_parcsr_cgnr.c */
+int HYPRE_ParCSRCGNRInitialize P((MPI_Comm comm , HYPRE_Solver *solver ));
+int HYPRE_ParCSRCGNRFinalize P((HYPRE_Solver solver ));
+int HYPRE_ParCSRCGNRSetup P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x ));
+int HYPRE_ParCSRCGNRSolve P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x ));
+int HYPRE_ParCSRCGNRSetTol P((HYPRE_Solver solver , double tol ));
+int HYPRE_ParCSRCGNRSetMaxIter P((HYPRE_Solver solver , int max_iter ));
+int HYPRE_ParCSRCGNRSetPrecond P((HYPRE_Solver solver , int (*precond )(), int (*precondT )(), int (*precond_setup )(), void *precond_data ));
+int HYPRE_ParCSRCGNRSetLogging P((HYPRE_Solver solver , int logging ));
+int HYPRE_ParCSRCGNRGetNumIterations P((HYPRE_Solver solver , int *num_iterations ));
+int HYPRE_ParCSRCGNRGetFinalRelativeResidualNorm P((HYPRE_Solver solver , double *norm ));
+
 /* HYPRE_parcsr_gmres.c */
 int HYPRE_ParCSRGMRESInitialize P((MPI_Comm comm , HYPRE_Solver *solver ));
 int HYPRE_ParCSRGMRESFinalize P((HYPRE_Solver solver ));
@@ -64,8 +61,36 @@ int HYPRE_ParCSRGMRESSetTol P((HYPRE_Solver solver , double tol ));
 int HYPRE_ParCSRGMRESSetMaxIter P((HYPRE_Solver solver , int max_iter ));
 int HYPRE_ParCSRGMRESSetPrecond P((HYPRE_Solver solver , int (*precond )(), int (*precond_setup )(), void *precond_data ));
 int HYPRE_ParCSRGMRESSetLogging P((HYPRE_Solver solver , int logging ));
-int HYPRE_ParCSRGMRESGetNumIterations P((HYPRE_Solver solver , int *num_iterations));
+int HYPRE_ParCSRGMRESGetNumIterations P((HYPRE_Solver solver , int *num_iterations ));
 int HYPRE_ParCSRGMRESGetFinalRelativeResidualNorm P((HYPRE_Solver solver , double *norm ));
+
+/* HYPRE_parcsr_pcg.c */
+int HYPRE_ParCSRPCGInitialize P((MPI_Comm comm , HYPRE_Solver *solver ));
+int HYPRE_ParCSRPCGFinalize P((HYPRE_Solver solver ));
+int HYPRE_ParCSRPCGSetup P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x ));
+int HYPRE_ParCSRPCGSolve P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x ));
+int HYPRE_ParCSRPCGSetTol P((HYPRE_Solver solver , double tol ));
+int HYPRE_ParCSRPCGSetMaxIter P((HYPRE_Solver solver , int max_iter ));
+int HYPRE_ParCSRPCGSetTwoNorm P((HYPRE_Solver solver , int two_norm ));
+int HYPRE_ParCSRPCGSetRelChange P((HYPRE_Solver solver , int rel_change ));
+int HYPRE_ParCSRPCGSetPrecond P((HYPRE_Solver solver , int (*precond )(), int (*precond_setup )(), void *precond_data ));
+int HYPRE_ParCSRPCGSetLogging P((HYPRE_Solver solver , int logging ));
+int HYPRE_ParCSRPCGGetNumIterations P((HYPRE_Solver solver , int *num_iterations ));
+int HYPRE_ParCSRPCGGetFinalRelativeResidualNorm P((HYPRE_Solver solver , double *norm ));
+int HYPRE_ParCSRDiagScaleSetup P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector y , HYPRE_ParVector x ));
+int HYPRE_ParCSRDiagScale P((HYPRE_Solver solver , HYPRE_ParCSRMatrix HA , HYPRE_ParVector Hy , HYPRE_ParVector Hx ));
+
+/* cgnr.c */
+void *hypre_CGNRInitialize P((void ));
+int hypre_CGNRFinalize P((void *cgnr_vdata ));
+int hypre_CGNRSetup P((void *cgnr_vdata , void *A , void *b , void *x ));
+int hypre_CGNRSolve P((void *cgnr_vdata , void *A , void *b , void *x ));
+int hypre_CGNRSetTol P((void *cgnr_vdata , double tol ));
+int hypre_CGNRSetMaxIter P((void *cgnr_vdata , int max_iter ));
+int hypre_CGNRSetPrecond P((void *cgnr_vdata , int (*precond )(), int (*precondT )(), int (*precond_setup )(), void *precond_data ));
+int hypre_CGNRSetLogging P((void *cgnr_vdata , int logging ));
+int hypre_CGNRGetNumIterations P((void *cgnr_vdata , int *num_iterations ));
+int hypre_CGNRGetFinalRelativeResidualNorm P((void *cgnr_vdata , double *relative_residual_norm ));
 
 /* driver.c */
 int main P((int argc , char *argv []));
@@ -86,7 +111,7 @@ void *hypre_GMRESInitialize P((void ));
 int hypre_GMRESFinalize P((void *gmres_vdata ));
 int hypre_GMRESSetup P((void *gmres_vdata , void *A , void *b , void *x ));
 int hypre_GMRESSolve P((void *gmres_vdata , void *A , void *b , void *x ));
-int hypre_GMRESSetKDim P((void *gmres_vdata , int k_diM ));
+int hypre_GMRESSetKDim P((void *gmres_vdata , int k_dim ));
 int hypre_GMRESSetTol P((void *gmres_vdata , double tol ));
 int hypre_GMRESSetMaxIter P((void *gmres_vdata , int max_iter ));
 int hypre_GMRESSetPrecond P((void *gmres_vdata , int (*precond )(), int (*precond_setup )(), void *precond_data ));
@@ -122,6 +147,11 @@ int hypre_ParAMGSetup P((void *amg_vdata , hypre_ParCSRMatrix *A , hypre_ParVect
 /* par_amg_solve.c */
 int hypre_ParAMGSolve P((void *amg_vdata , hypre_ParCSRMatrix *A , hypre_ParVector *f , hypre_ParVector *u ));
 
+/* par_amg_solveT.c */
+int hypre_ParAMGSolveT P((void *amg_vdata , hypre_ParCSRMatrix *A , hypre_ParVector *f , hypre_ParVector *u ));
+int hypre_ParAMGCycleT P((void *amg_vdata , hypre_ParVector **F_array , hypre_ParVector **U_array ));
+int hypre_ParAMGRelaxT P((hypre_ParCSRMatrix *A , hypre_ParVector *f , int *cf_marker , int relax_type , int relax_points , double relax_weight , hypre_ParVector *u , hypre_ParVector *Vtemp ));
+
 /* par_coarsen.c */
 int hypre_ParAMGCoarsen P((hypre_ParCSRMatrix *A , double strength_threshold , hypre_ParCSRMatrix **S_ptr , int **CF_marker_ptr , int *coarse_size_ptr ));
 
@@ -145,8 +175,6 @@ void swap P((int *v , int i , int j ));
 hypre_ParCSRMatrix *hypre_GenerateLaplacian9pt P((MPI_Comm comm , int nx , int ny , int P , int Q , int p , int q , double *value ));
 int map2 P((int ix , int iy , int p , int q , int P , int Q , int *nx_part , int *ny_part , int *global_part ));
 
-/* par_rap.c */
-int hypre_ParAMGBuildCoarseOperator P((hypre_ParCSRMatrix *RT , hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *P , hypre_ParCSRMatrix **RAP_ptr ));
 /* par_rap.c */
 int hypre_ParAMGBuildCoarseOperator P((hypre_ParCSRMatrix *RT , hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *P , hypre_ParCSRMatrix **RAP_ptr ));
 hypre_CSRMatrix *hypre_ExchangeRAPData P((hypre_CSRMatrix *RAP_int , hypre_CommPkg *comm_pkg_RT ));
@@ -185,17 +213,18 @@ int hypre_PCGGetFinalRelativeResidualNorm P((void *pcg_vdata , double *relative_
 char *hypre_PCGCAlloc P((int count , int elt_size ));
 int hypre_PCGFree P((char *ptr ));
 void *hypre_PCGNewVector P((void *vvector ));
-void *hypre_PCGNewVectorArray P((int n, void *vvector ));
+void *hypre_PCGNewVectorArray P((int n , void *vvector ));
 int hypre_PCGFreeVector P((void *vvector ));
 void *hypre_PCGMatvecInitialize P((void *A , void *x ));
 int hypre_PCGMatvec P((void *matvec_data , double alpha , void *A , void *x , double beta , void *y ));
+int hypre_PCGMatvecT P((void *matvec_data , double alpha , void *A , void *x , double beta , void *y ));
 int hypre_PCGMatvecFinalize P((void *matvec_data ));
 double hypre_PCGInnerProd P((void *x , void *y ));
 int hypre_PCGCopyVector P((void *x , void *y ));
 int hypre_PCGClearVector P((void *x ));
 int hypre_PCGScaleVector P((double alpha , void *x ));
 int hypre_PCGAxpy P((double alpha , void *x , void *y ));
- 
+
 /* transpose.c */
 int hypre_CSRMatrixTranspose P((hypre_CSRMatrix *A , hypre_CSRMatrix **AT ));
 
