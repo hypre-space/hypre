@@ -117,7 +117,8 @@ int MLI_Solver_GS::solve(MLI_Vector *fIn, MLI_Vector *uIn)
  
    for( is = 0; is < nSweeps_; is++ )
    {
-      relaxWeight = relaxWeights_[is];
+      if ( relaxWeights_ != NULL ) relaxWeight = relaxWeights_[is];
+      else                         relaxWeight = 1.0;
 
       if (nprocs > 1 && zeroInitialGuess_ != 1 )
       {
@@ -255,7 +256,12 @@ int MLI_Solver_GS::setParams(char *paramString, int argc, char **argv)
       if ( weights != NULL )
       {
          relaxWeights_ = new double[nSweeps_];
-         for ( i = 0; i < nSweeps_; i++ ) relaxWeights_[i] = weights[i];
+         for ( i = 0; i < nSweeps_; i++ ) 
+         {
+            if ( weights[i] > 0.0 ) relaxWeights_[i] = weights[i];
+            else                    relaxWeights_[i] = 1.0;
+         }
+printf("GS : set relaxwe = %e\n", relaxWeights_[0]);
       }
    }
    else if ( strcmp(paramString, "zeroInitialGuess") )

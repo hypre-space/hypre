@@ -31,6 +31,7 @@
 #define MLI_SOLVER_SUPERLU_ID       310
 #define MLI_SOLVER_SEQSUPERLU_ID    311
 #define MLI_SOLVER_ARPACKSUPERLU_ID 312
+#define MLI_SOLVER_KARCMARZ_ID      313
 
 /*--------------------------------------------------------------------------
  * include files 

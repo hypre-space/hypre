@@ -61,6 +61,7 @@ HEADERS =\
  mli_solver_mls.h \
  mli_solver_chebyshev.h \
  mli_solver_cg.h \
+ mli_solver_kaczmarz.h \
  mli_solver_superlu.h \
  mli_solver_seqsuperlu.h \
  mli_solver_arpacksuperlu.h
@@ -76,6 +77,7 @@ FILES =\
  mli_solver_mls.C \
  mli_solver_chebyshev.C \
  mli_solver_cg.C \
+ mli_solver_kaczmarz.C \
  mli_solver_superlu.C \
  mli_solver_seqsuperlu.C \
  mli_solver_arpacksuperlu.C

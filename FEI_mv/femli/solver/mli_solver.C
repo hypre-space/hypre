@@ -35,6 +35,7 @@
 #include "solver/mli_solver_superlu.h"
 #include "solver/mli_solver_seqsuperlu.h"
 #include "solver/mli_solver_arpacksuperlu.h"
+#include "solver/mli_solver_kaczmarz.h"
 
 /*****************************************************************************
  * constructor 
@@ -98,6 +99,10 @@ MLI_Solver *MLI_Solver_CreateFromName( char *str )
       strcpy( paramString, "baseMethod BSGS");
       solver_ptr->setParams( paramString, 0, NULL);
    }
+   else if (!strcmp(str, "Kaczmarz"))   
+   {
+      solver_ptr = new MLI_Solver_Kaczmarz(str);
+   }
    else if (!strcmp(str,"SuperLU"))   
    {
 #ifdef MLI_SUPERLU
@@ -143,6 +148,7 @@ MLI_Solver *MLI_Solver_CreateFromName( char *str )
       printf("\t CGBJacobi \n");
       printf("\t CGSGS \n");
       printf("\t CGBSGS \n");
+      printf("\t Kaczmarz\n"); 
       printf("\t SuperLU\n");
       printf("\t SeqSuperLU\n");
       printf("\t ARPACKSuperLU\n"); 

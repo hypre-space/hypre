@@ -22,7 +22,7 @@ OBJS = mli.o                mli_oneLevel.o          cmli.o \
        mli_amgsa_calib.o    mli_utils_fortran.o     mli_mapper.o \
        mli_solver_cg.o      mli_solver_chebyshev.o  mli_amgsa_substructure.o \
        mli_solver_bjacobi.o mli_solver_seqsuperlu.o mli_solver_arpacksuperlu.o \
-       mli_matrix_mult.o
+       mli_matrix_mult.o    mli_solver_kaczmarz.o
 
 ##################################################################
 # Targets
