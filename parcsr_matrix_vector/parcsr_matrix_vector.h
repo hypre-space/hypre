@@ -283,6 +283,7 @@ int HYPRE_ParCSRMatrixGetRow P((HYPRE_ParCSRMatrix matrix , int row , int *size 
 int HYPRE_ParCSRMatrixRestoreRow P((HYPRE_ParCSRMatrix matrix , int row , int *size , int **col_ind , double **values ));
 int HYPRE_CSRMatrixToParCSRMatrix P((MPI_Comm comm , HYPRE_CSRMatrix A_CSR , int *row_partitioning , int *col_partitioning , HYPRE_ParCSRMatrix *matrix ));
 int HYPRE_ParCSRMatrixMatvec P((double alpha , HYPRE_ParCSRMatrix A , HYPRE_ParVector x , double beta , HYPRE_ParVector y ));
+int HYPRE_ParCSRMatrixMatvecT P((double alpha , HYPRE_ParCSRMatrix A , HYPRE_ParVector x , double beta , HYPRE_ParVector y ));
 
 /* HYPRE_parcsr_vector.c */
 int HYPRE_ParVectorCreate P((MPI_Comm comm , int global_size , int *partitioning , HYPRE_ParVector *vector ));
