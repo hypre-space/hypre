@@ -14,6 +14,12 @@
 
 #include "headers.h"
 
+/* this currently cannot be greater than 7 */
+#ifdef MAX_DEPTH
+#undef MAX_DEPTH
+#endif
+#define MAX_DEPTH 7
+
 /*--------------------------------------------------------------------------
  * hypre_StructMatvecData data structure
  *--------------------------------------------------------------------------*/
@@ -128,10 +134,23 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
    hypre_Box               *y_data_box;
                           
    int                      Ai;
-   int                      xi, xoffset;
+   int                      xi;
+   int                      xoff0;
+   int                      xoff1;
+   int                      xoff2;
+   int                      xoff3;
+   int                      xoff4;
+   int                      xoff5;
+   int                      xoff6;
    int                      yi;
                           
-   double                  *Ap;
+   double                  *Ap0;
+   double                  *Ap1;
+   double                  *Ap2;
+   double                  *Ap3;
+   double                  *Ap4;
+   double                  *Ap5;
+   double                  *Ap6;
    double                  *xp;
    double                  *yp;
                           
@@ -144,6 +163,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
    hypre_StructStencil     *stencil;
    hypre_Index             *stencil_shape;
    int                      stencil_size;
+   int                      depth;
                           
    double                   temp;
    int                      compute_i, i, j, si;
@@ -271,20 +291,208 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                   hypre_GetBoxSize(compute_box, loop_size);
                   start  = hypre_BoxIMin(compute_box);
 
-                  for (si = 0; si < stencil_size; si++)
+                  /* unroll up to depth MAX_DEPTH */
+                  for (si = 0; si < stencil_size; si+= MAX_DEPTH)
                   {
-                     Ap = hypre_StructMatrixBoxData(A, i, si);
+                     depth = hypre_min(MAX_DEPTH, (stencil_size -si));
+                     switch(depth)
+                     {
+                        case 7:
+                        Ap0 = hypre_StructMatrixBoxData(A, i, si+0);
+                        Ap1 = hypre_StructMatrixBoxData(A, i, si+1);
+                        Ap2 = hypre_StructMatrixBoxData(A, i, si+2);
+                        Ap3 = hypre_StructMatrixBoxData(A, i, si+3);
+                        Ap4 = hypre_StructMatrixBoxData(A, i, si+4);
+                        Ap5 = hypre_StructMatrixBoxData(A, i, si+5);
+                        Ap6 = hypre_StructMatrixBoxData(A, i, si+6);
 
-                     xoffset = hypre_BoxOffsetDistance(x_data_box,
-                                                       stencil_shape[si]);
+                        xoff0 = hypre_BoxOffsetDistance(x_data_box,
+                                                        stencil_shape[si+0]);
+                        xoff1 = hypre_BoxOffsetDistance(x_data_box,
+                                                        stencil_shape[si+1]);
+                        xoff2 = hypre_BoxOffsetDistance(x_data_box,
+                                                        stencil_shape[si+2]);
+                        xoff3 = hypre_BoxOffsetDistance(x_data_box,
+                                                        stencil_shape[si+3]);
+                        xoff4 = hypre_BoxOffsetDistance(x_data_box,
+                                                        stencil_shape[si+4]);
+                        xoff5 = hypre_BoxOffsetDistance(x_data_box,
+                                                        stencil_shape[si+5]);
+                        xoff6 = hypre_BoxOffsetDistance(x_data_box,
+                                                        stencil_shape[si+6]);
 
-                     hypre_BoxLoop3(loopi, loopj, loopk, loop_size,
-                                    A_data_box, start, stride, Ai,
-                                    x_data_box, start, stride, xi,
-                                    y_data_box, start, stride, yi,
-                                    {
-                                       yp[yi] += Ap[Ai] * xp[xi + xoffset];
-                                    });
+                        hypre_BoxLoop3(loopi, loopj, loopk, loop_size,
+                                       A_data_box, start, stride, Ai,
+                                       x_data_box, start, stride, xi,
+                                       y_data_box, start, stride, yi,
+                                       {
+                                          yp[yi] +=
+                                             Ap0[Ai] * xp[xi + xoff0] +
+                                             Ap1[Ai] * xp[xi + xoff1] +
+                                             Ap2[Ai] * xp[xi + xoff2] +
+                                             Ap3[Ai] * xp[xi + xoff3] +
+                                             Ap4[Ai] * xp[xi + xoff4] +
+                                             Ap5[Ai] * xp[xi + xoff5] +
+                                             Ap6[Ai] * xp[xi + xoff6];
+                                       });
+                        break;
+
+                        case 6:
+                        Ap0 = hypre_StructMatrixBoxData(A, i, si+0);
+                        Ap1 = hypre_StructMatrixBoxData(A, i, si+1);
+                        Ap2 = hypre_StructMatrixBoxData(A, i, si+2);
+                        Ap3 = hypre_StructMatrixBoxData(A, i, si+3);
+                        Ap4 = hypre_StructMatrixBoxData(A, i, si+4);
+                        Ap5 = hypre_StructMatrixBoxData(A, i, si+5);
+
+                        xoff0 = hypre_BoxOffsetDistance(x_data_box,
+                                                        stencil_shape[si+0]);
+                        xoff1 = hypre_BoxOffsetDistance(x_data_box,
+                                                        stencil_shape[si+1]);
+                        xoff2 = hypre_BoxOffsetDistance(x_data_box,
+                                                        stencil_shape[si+2]);
+                        xoff3 = hypre_BoxOffsetDistance(x_data_box,
+                                                        stencil_shape[si+3]);
+                        xoff4 = hypre_BoxOffsetDistance(x_data_box,
+                                                        stencil_shape[si+4]);
+                        xoff5 = hypre_BoxOffsetDistance(x_data_box,
+                                                        stencil_shape[si+5]);
+
+                        hypre_BoxLoop3(loopi, loopj, loopk, loop_size,
+                                       A_data_box, start, stride, Ai,
+                                       x_data_box, start, stride, xi,
+                                       y_data_box, start, stride, yi,
+                                       {
+                                          yp[yi] +=
+                                             Ap0[Ai] * xp[xi + xoff0] +
+                                             Ap1[Ai] * xp[xi + xoff1] +
+                                             Ap2[Ai] * xp[xi + xoff2] +
+                                             Ap3[Ai] * xp[xi + xoff3] +
+                                             Ap4[Ai] * xp[xi + xoff4] +
+                                             Ap5[Ai] * xp[xi + xoff5];
+                                       });
+                        break;
+
+                        case 5:
+                        Ap0 = hypre_StructMatrixBoxData(A, i, si+0);
+                        Ap1 = hypre_StructMatrixBoxData(A, i, si+1);
+                        Ap2 = hypre_StructMatrixBoxData(A, i, si+2);
+                        Ap3 = hypre_StructMatrixBoxData(A, i, si+3);
+                        Ap4 = hypre_StructMatrixBoxData(A, i, si+4);
+
+                        xoff0 = hypre_BoxOffsetDistance(x_data_box,
+                                                        stencil_shape[si+0]);
+                        xoff1 = hypre_BoxOffsetDistance(x_data_box,
+                                                        stencil_shape[si+1]);
+                        xoff2 = hypre_BoxOffsetDistance(x_data_box,
+                                                        stencil_shape[si+2]);
+                        xoff3 = hypre_BoxOffsetDistance(x_data_box,
+                                                        stencil_shape[si+3]);
+                        xoff4 = hypre_BoxOffsetDistance(x_data_box,
+                                                        stencil_shape[si+4]);
+
+                        hypre_BoxLoop3(loopi, loopj, loopk, loop_size,
+                                       A_data_box, start, stride, Ai,
+                                       x_data_box, start, stride, xi,
+                                       y_data_box, start, stride, yi,
+                                       {
+                                          yp[yi] +=
+                                             Ap0[Ai] * xp[xi + xoff0] +
+                                             Ap1[Ai] * xp[xi + xoff1] +
+                                             Ap2[Ai] * xp[xi + xoff2] +
+                                             Ap3[Ai] * xp[xi + xoff3] +
+                                             Ap4[Ai] * xp[xi + xoff4];
+                                       });
+                        break;
+
+                        case 4:
+                        Ap0 = hypre_StructMatrixBoxData(A, i, si+0);
+                        Ap1 = hypre_StructMatrixBoxData(A, i, si+1);
+                        Ap2 = hypre_StructMatrixBoxData(A, i, si+2);
+                        Ap3 = hypre_StructMatrixBoxData(A, i, si+3);
+
+                        xoff0 = hypre_BoxOffsetDistance(x_data_box,
+                                                        stencil_shape[si+0]);
+                        xoff1 = hypre_BoxOffsetDistance(x_data_box,
+                                                        stencil_shape[si+1]);
+                        xoff2 = hypre_BoxOffsetDistance(x_data_box,
+                                                        stencil_shape[si+2]);
+                        xoff3 = hypre_BoxOffsetDistance(x_data_box,
+                                                        stencil_shape[si+3]);
+
+                        hypre_BoxLoop3(loopi, loopj, loopk, loop_size,
+                                       A_data_box, start, stride, Ai,
+                                       x_data_box, start, stride, xi,
+                                       y_data_box, start, stride, yi,
+                                       {
+                                          yp[yi] +=
+                                             Ap0[Ai] * xp[xi + xoff0] +
+                                             Ap1[Ai] * xp[xi + xoff1] +
+                                             Ap2[Ai] * xp[xi + xoff2] +
+                                             Ap3[Ai] * xp[xi + xoff3];
+                                       });
+                        break;
+
+                        case 3:
+                        Ap0 = hypre_StructMatrixBoxData(A, i, si+0);
+                        Ap1 = hypre_StructMatrixBoxData(A, i, si+1);
+                        Ap2 = hypre_StructMatrixBoxData(A, i, si+2);
+
+                        xoff0 = hypre_BoxOffsetDistance(x_data_box,
+                                                        stencil_shape[si+0]);
+                        xoff1 = hypre_BoxOffsetDistance(x_data_box,
+                                                        stencil_shape[si+1]);
+                        xoff2 = hypre_BoxOffsetDistance(x_data_box,
+                                                        stencil_shape[si+2]);
+
+                        hypre_BoxLoop3(loopi, loopj, loopk, loop_size,
+                                       A_data_box, start, stride, Ai,
+                                       x_data_box, start, stride, xi,
+                                       y_data_box, start, stride, yi,
+                                       {
+                                          yp[yi] +=
+                                             Ap0[Ai] * xp[xi + xoff0] +
+                                             Ap1[Ai] * xp[xi + xoff1] +
+                                             Ap2[Ai] * xp[xi + xoff2];
+                                       });
+                        break;
+
+                        case 2:
+                        Ap0 = hypre_StructMatrixBoxData(A, i, si+0);
+                        Ap1 = hypre_StructMatrixBoxData(A, i, si+1);
+
+                        xoff0 = hypre_BoxOffsetDistance(x_data_box,
+                                                        stencil_shape[si+0]);
+                        xoff1 = hypre_BoxOffsetDistance(x_data_box,
+                                                        stencil_shape[si+1]);
+
+                        hypre_BoxLoop3(loopi, loopj, loopk, loop_size,
+                                       A_data_box, start, stride, Ai,
+                                       x_data_box, start, stride, xi,
+                                       y_data_box, start, stride, yi,
+                                       {
+                                          yp[yi] +=
+                                             Ap0[Ai] * xp[xi + xoff0] +
+                                             Ap1[Ai] * xp[xi + xoff1];
+                                       });
+                        break;
+
+                        case 1:
+                        Ap0 = hypre_StructMatrixBoxData(A, i, si+0);
+
+                        xoff0 = hypre_BoxOffsetDistance(x_data_box,
+                                                        stencil_shape[si+0]);
+
+                        hypre_BoxLoop3(loopi, loopj, loopk, loop_size,
+                                       A_data_box, start, stride, Ai,
+                                       x_data_box, start, stride, xi,
+                                       y_data_box, start, stride, yi,
+                                       {
+                                          yp[yi] +=
+                                             Ap0[Ai] * xp[xi + xoff0];
+                                       });
+                        break;
+                     }
                   }
 
                   if (alpha != 1.0)
