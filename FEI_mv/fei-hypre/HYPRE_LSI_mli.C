@@ -588,7 +588,7 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
              &(mli_object->minCoarseSize_));
       if ( mli_object->minCoarseSize_ <= 0 ) mli_object->minCoarseSize_ = 20;
    }
-   else if ( !strcmp(param2, "setPweight") )
+   else if ( !strcmp(param2, "Pweight") )
    {
       sscanf(paramString,"%s %s %lg",param1,param2,
              &(mli_object->Pweight_));
