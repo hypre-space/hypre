@@ -111,6 +111,10 @@ int  impl_Hypre_StructuredGrid_Assemble(Hypre_StructuredGrid this) {
 /*#endif*/
 }
 
+void  impl_Hypre_StructuredGrid_SetParameter
+(Hypre_StructuredGrid this, char* name, double value) {
+}
+
 Hypre_StructuredGrid  impl_Hypre_StructuredGrid_GetConstructedObject(Hypre_StructuredGrid this) {
    return this;
 }
