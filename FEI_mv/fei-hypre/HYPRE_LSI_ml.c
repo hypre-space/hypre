@@ -1136,9 +1136,9 @@ int HYPRE_LSI_MLConstructMHMatrix(HYPRE_ParCSRMatrix A, MH_Matrix *mh_mat,
     /* form the remote portion of the matrix                    */
     /* -------------------------------------------------------- */ 
 
+#ifndef HYPRE_SEQUENTIAL
     if ( nprocs > 1 ) 
     {
-#ifndef HYPRE_SEQUENTIAL
        /* ----------------------------------------------------- */ 
        /* count number of elements to be received from each     */
        /* remote processor (assume sequential mapping)          */
@@ -1301,8 +1301,10 @@ int HYPRE_LSI_MLConstructMHMatrix(HYPRE_ParCSRMatrix A, MH_Matrix *mh_mat,
        /* ----------------------------------------------------- */ 
 
        free( tempCnt );
-#endif
     }
     return 0;
+#else
+    return 0;
+#endif
 }
 

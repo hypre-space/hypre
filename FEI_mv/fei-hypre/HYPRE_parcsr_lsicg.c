@@ -43,7 +43,7 @@ extern int hypre_LSICGGetFinalRelativeResidualNorm(void *, double *);
 
 int HYPRE_ParCSRLSICGCreate( MPI_Comm comm, HYPRE_Solver *solver )
 {
-   *solver = ( (HYPRE_Solver) hypre_LSICGCreate( ) );
+   *solver = (HYPRE_Solver) hypre_LSICGCreate( );
 
    return 0;
 }

@@ -43,7 +43,7 @@ extern int hypre_BiCGSGetFinalRelativeResidualNorm(void *, double *);
 
 int HYPRE_ParCSRBiCGSCreate( MPI_Comm comm, HYPRE_Solver *solver )
 {
-   *solver = ( (HYPRE_Solver) hypre_BiCGSCreate( ) );
+   *solver = (HYPRE_Solver) hypre_BiCGSCreate( );
 
    return 0;
 }

@@ -43,7 +43,7 @@ extern int hypre_TFQmrGetFinalRelativeResidualNorm(void *, double *);
 
 int HYPRE_ParCSRTFQmrCreate( MPI_Comm comm, HYPRE_Solver *solver )
 {
-   *solver = ( (HYPRE_Solver) hypre_TFQmrCreate( ) );
+   *solver = (HYPRE_Solver) hypre_TFQmrCreate( );
 
    return 0;
 }

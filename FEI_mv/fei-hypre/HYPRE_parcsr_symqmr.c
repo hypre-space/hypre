@@ -43,7 +43,7 @@ extern int  hypre_SymQMRGetFinalRelativeResidualNorm(void *, double *);
 
 int HYPRE_ParCSRSymQMRCreate( MPI_Comm comm, HYPRE_Solver *solver )
 {
-   *solver = ( (HYPRE_Solver) hypre_SymQMRCreate( ) );
+   *solver = (HYPRE_Solver) hypre_SymQMRCreate( );
 
    return 0;
 }

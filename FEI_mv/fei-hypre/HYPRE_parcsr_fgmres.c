@@ -46,7 +46,7 @@ extern int  hypre_FGMRESUpdatePrecondTolerance(void *, int (*update_tol)());
 
 int HYPRE_ParCSRFGMRESCreate( MPI_Comm comm, HYPRE_Solver *solver )
 {
-   *solver = ( (HYPRE_Solver) hypre_FGMRESCreate( ) );
+   *solver = (HYPRE_Solver) hypre_FGMRESCreate( );
 
    return 0;
 }
