@@ -44,7 +44,6 @@ LFLAGS =\
  -lHYPRE_parcsr_mv\
  -lHYPRE_mv\
  -lHYPRE_utilities\
- -lmpe\
  ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
  
 HEADERS =\
