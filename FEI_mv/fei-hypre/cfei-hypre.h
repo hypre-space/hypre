@@ -1,5 +1,5 @@
-#ifndef cfei_isis_h_included
-#define cfei_isis_h_included
+#ifndef cfei_hypre_h_included
+#define cfei_hypre_h_included
 /*
           This file is part of Sandia National Laboratories
           copyrighted software.  You are legally liable for any
@@ -35,5 +35,5 @@
 #include "cfei.h"
 #include "cfei_hypre.h"
 
-#endif /*cfei_isis_h_included*/
+#endif /*cfei_hypre_h_included*/
 
