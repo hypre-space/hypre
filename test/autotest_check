@@ -1,0 +1,47 @@
+#!/bin/sh
+#BHEADER***********************************************************************
+# (c) 1998   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+#==============================================================================
+# Environment variables
+# NOTE: this should be stripped down to something more minimal
+#==============================================================================
+
+CVSROOT=/home/casc/repository
+export CVSROOT
+
+PATH=/home/casc/bin:\
+/opt/SUNWspro/bin:/usr/ccs/bin:/usr/local/bin:\
+/usr/sbin:/usr/bin:/usr/ucb:\
+/sbin/bin:\
+/usr/local/scripts:\
+/usr/local/mpi/mpich/bin
+export PATH
+
+#==============================================================================
+# Set autotest directory (assumes CASC cluster)
+#==============================================================================
+
+HYPRE_AUTOTEST_DIR="/home/casc/software/hypre/autotest"
+
+#==============================================================================
+# Autotest completion check:
+#==============================================================================
+
+RECIPIENTS="\
+ dwalker@llnl.gov\
+ rfalgout@llnl.gov"
+
+HYPRE_MAIL=/usr/ucb/Mail
+
+if [ ! -f "$HYPRE_AUTOTEST_DIR/autotest_finished" ]
+then
+    ${HYPRE_MAIL} -s "Autotest error: autotest did not finish!" $RECIPIENTS
+fi
+
