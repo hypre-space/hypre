@@ -91,7 +91,8 @@ int  impl_Hypre_StructMatrix_SetGrid(Hypre_StructMatrix this, Hypre_StructuredGr
 /* ********************************************************
  * impl_Hypre_StructMatrixSetStencil
  **********************************************************/
-int  impl_Hypre_StructMatrix_SetStencil(Hypre_StructMatrix this, Hypre_StructStencil stencil) {
+int  impl_Hypre_StructMatrix_SetStencil
+(Hypre_StructMatrix this, Hypre_StructStencil stencil) {
 
 /* not implemented; this functionality isn't in Hypre (though doesn't
    look too hard to put in)
@@ -174,10 +175,13 @@ Hypre_StructMatrix  impl_Hypre_StructMatrix_GetConstructedObject(Hypre_StructMat
  **********************************************************/
 void  impl_Hypre_StructMatrix_New
 (Hypre_StructMatrix this, Hypre_StructuredGrid grid,
- Hypre_StructStencil stencil, int symmetric) {
+ Hypre_StructStencil stencil, int symmetric, array1int num_ghost ) {
+
+   int i;
 
    struct Hypre_StructMatrix_private_type *SMp = this->d_table;
    HYPRE_StructMatrix *M = SMp->hsmat;
+   hypre_StructMatrix *m = (hypre_StructMatrix *) *M;
 
    struct Hypre_StructuredGrid_private_type *Gp = grid->d_table;
    HYPRE_StructGrid *G = Gp->hsgrid;
@@ -192,6 +196,7 @@ void  impl_Hypre_StructMatrix_New
 
    HYPRE_StructMatrixSetSymmetric( *M, symmetric );
 
+   HYPRE_StructMatrixSetNumGhost( *M, num_ghost.data );
    HYPRE_StructMatrixInitialize( *M );
 
 } /* end impl_Hypre_StructMatrixNew */
@@ -200,10 +205,11 @@ void  impl_Hypre_StructMatrix_New
  * impl_Hypre_StructMatrixConstructor
  **********************************************************/
 Hypre_StructMatrix  impl_Hypre_StructMatrix_Constructor
-(Hypre_StructuredGrid grid, Hypre_StructStencil stencil, int symmetric) {
+(Hypre_StructuredGrid grid, Hypre_StructStencil stencil, int symmetric,
+ array1int num_ghost ) {
    /* declared static; just combines the new and New functions */
    Hypre_StructMatrix SM = Hypre_StructMatrix_new();
-   Hypre_StructMatrix_New( SM, grid, stencil, symmetric );
+   Hypre_StructMatrix_New( SM, grid, stencil, symmetric, num_ghost );
    return SM;
 } /* end impl_Hypre_StructMatrixConstructor */
 
