@@ -50,7 +50,6 @@ typedef struct
    hypre_StructVector     *x;
 
    hypre_StructVector     *temp_vec;
-   int                     temp_vec_allocated;
    hypre_StructMatrix     *A_sol;  /* Coefficients of A that make up
                                       the (sol)ve part of the relaxation */
    hypre_StructMatrix     *A_rem;  /* Coefficients of A (rem)aining:
@@ -100,8 +99,10 @@ hypre_SMGRelaxInitialize( MPI_Comm  comm )
    (relax_data -> reg_space_ranks[0]) = 0;
    hypre_SetIndex((relax_data -> base_index), 0, 0, 0);
    hypre_SetIndex((relax_data -> base_stride), 1, 1, 1);
+   (relax_data -> A)                  = NULL;
+   (relax_data -> b)                  = NULL;
+   (relax_data -> x)                  = NULL;
    (relax_data -> temp_vec)           = NULL;
-   (relax_data -> temp_vec_allocated) = 1;
 
    (relax_data -> num_pre_relax) = 1;
    (relax_data -> num_post_relax) = 1;
@@ -119,10 +120,7 @@ hypre_SMGRelaxFreeTempVec( void *relax_vdata )
    hypre_SMGRelaxData  *relax_data = relax_vdata;
    int                  ierr = 0;
 
-   if (relax_data -> temp_vec_allocated)
-   {
-      hypre_FreeStructVector(relax_data -> temp_vec);
-   }
+   hypre_FreeStructVector(relax_data -> temp_vec);
    (relax_data -> setup_temp_vec) = 1;
 
    return ierr;
@@ -146,7 +144,7 @@ hypre_SMGRelaxFreeARem( void *relax_vdata )
          hypre_SMGResidualFinalize(relax_data -> residual_data[i]);
       }
       hypre_TFree(relax_data -> residual_data);
-      hypre_FreeStructMatrixMask(relax_data -> A_rem);
+      hypre_FreeStructMatrix(relax_data -> A_rem);
       (relax_data -> A_rem) = NULL;
    }
    (relax_data -> setup_a_rem) = 1;
@@ -177,7 +175,7 @@ hypre_SMGRelaxFreeASol( void *relax_vdata )
             hypre_CyclicReductionFinalize(relax_data -> solve_data[i]);
       }
       hypre_TFree(relax_data -> solve_data);
-      hypre_FreeStructMatrixMask(relax_data -> A_sol);
+      hypre_FreeStructMatrix(relax_data -> A_sol);
       (relax_data -> A_sol) = NULL;
    }
    (relax_data -> setup_a_sol) = 1;
@@ -202,6 +200,10 @@ hypre_SMGRelaxFinalize( void *relax_vdata )
       hypre_TFree(relax_data -> pre_space_ranks);
       hypre_TFree(relax_data -> reg_space_ranks);
       hypre_FreeBoxArray(relax_data -> base_box_array);
+
+      hypre_FreeStructMatrix(relax_data -> A);
+      hypre_FreeStructVector(relax_data -> b);
+      hypre_FreeStructVector(relax_data -> x);
 
       hypre_SMGRelaxFreeTempVec(relax_vdata);
       hypre_SMGRelaxFreeARem(relax_vdata);
@@ -360,9 +362,12 @@ hypre_SMGRelaxSetup( void               *relax_vdata,
 
    stencil_dim = hypre_StructStencilDim(hypre_StructMatrixStencil(A));
    (relax_data -> stencil_dim) = stencil_dim;
-   (relax_data -> A)           = A;
-   (relax_data -> b)           = b;
-   (relax_data -> x)           = x;
+   hypre_FreeStructMatrix(relax_data -> A);
+   hypre_FreeStructVector(relax_data -> b);
+   hypre_FreeStructVector(relax_data -> x);
+   (relax_data -> A) = hypre_RefStructMatrix(A);
+   (relax_data -> b) = hypre_RefStructVector(b);
+   (relax_data -> x) = hypre_RefStructVector(x);
 
    /*----------------------------------------------------------
     * Set up memory according to memory_use parameter.
@@ -427,15 +432,14 @@ hypre_SMGRelaxSetupTempVec( void               *relax_vdata,
     * Set up data
     *----------------------------------------------------------*/
 
-   if (relax_data -> temp_vec_allocated)
+   if ((relax_data -> temp_vec) == NULL)
    {
       temp_vec = hypre_NewStructVector(hypre_StructVectorComm(b),
                                        hypre_StructVectorGrid(b));
       hypre_SetStructVectorNumGhost(temp_vec, hypre_StructVectorNumGhost(b));
       hypre_InitializeStructVector(temp_vec);
       hypre_AssembleStructVector(temp_vec);
-      (relax_data -> temp_vec)           = temp_vec;
-      (relax_data -> temp_vec_allocated) = 1;
+      (relax_data -> temp_vec) = temp_vec;
    }
    (relax_data -> setup_temp_vec) = 0;
 
@@ -636,8 +640,7 @@ hypre_SMGRelaxSetTempVec( void               *relax_vdata,
    int                 ierr = 0;
 
    hypre_SMGRelaxFreeTempVec(relax_vdata);
-   (relax_data -> temp_vec)           = temp_vec;
-   (relax_data -> temp_vec_allocated) = 0;
+   (relax_data -> temp_vec) = hypre_RefStructVector(temp_vec);
 
    (relax_data -> setup_temp_vec) = 1;
    (relax_data -> setup_a_rem)    = 1;

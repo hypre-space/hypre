@@ -774,6 +774,7 @@ main( int   argc,
     *-----------------------------------------------------------*/
 
    HYPRE_FreeStructGrid(grid);
+   HYPRE_FreeStructStencil(stencil);
    HYPRE_FreeStructMatrix(A);
    HYPRE_FreeStructVector(b);
    HYPRE_FreeStructVector(x);

@@ -115,7 +115,7 @@ hypre_PFMGInterpSetup( void               *interp_vdata,
     * Set up the interp data structure
     *----------------------------------------------------------*/
 
-   (interp_data -> P)             = P;
+   (interp_data -> P)             = hypre_RefStructMatrix(P);
    (interp_data -> compute_pkg)   = compute_pkg;
    (interp_data -> coarse_points) = coarse_points;
    hypre_CopyIndex(cindex, (interp_data -> cindex));
@@ -299,6 +299,7 @@ hypre_PFMGInterpFinalize( void *interp_vdata )
 
    if (interp_data)
    {
+      hypre_FreeStructMatrix(interp_data -> P);
       hypre_FreeBoxArray(interp_data -> coarse_points);
       hypre_FreeComputePkg(interp_data -> compute_pkg);
       hypre_FinalizeTiming(interp_data -> time_index);

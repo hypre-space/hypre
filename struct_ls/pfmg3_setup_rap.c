@@ -148,6 +148,8 @@ hypre_PFMG3NewRAPOp( hypre_StructMatrix *R,
    RAP = hypre_NewStructMatrix(hypre_StructMatrixComm(A),
                                coarse_grid, RAP_stencil);
 
+   hypre_FreeStructStencil(RAP_stencil);
+
    /*-----------------------------------------------------------------------
     * Coarse operator in symmetric iff fine operator is
     *-----------------------------------------------------------------------*/

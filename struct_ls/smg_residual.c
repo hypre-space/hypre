@@ -122,10 +122,10 @@ hypre_SMGResidualSetup( void               *residual_vdata,
     * Set up the residual data structure
     *----------------------------------------------------------*/
 
-   (residual_data -> A)           = A;
-   (residual_data -> x)           = x;
-   (residual_data -> b)           = b;
-   (residual_data -> r)           = r;
+   (residual_data -> A)           = hypre_RefStructMatrix(A);
+   (residual_data -> x)           = hypre_RefStructVector(x);
+   (residual_data -> b)           = hypre_RefStructVector(b);
+   (residual_data -> r)           = hypre_RefStructVector(r);
    (residual_data -> base_points) = base_points;
    (residual_data -> compute_pkg) = compute_pkg;
 
@@ -336,6 +336,10 @@ hypre_SMGResidualFinalize( void *residual_vdata )
 
    if (residual_data)
    {
+      hypre_FreeStructMatrix(residual_data -> A);
+      hypre_FreeStructVector(residual_data -> x);
+      hypre_FreeStructVector(residual_data -> b);
+      hypre_FreeStructVector(residual_data -> r);
       hypre_FreeBoxArray(residual_data -> base_points);
       hypre_FreeComputePkg(residual_data -> compute_pkg );
       hypre_FinalizeTiming(residual_data -> time_index);

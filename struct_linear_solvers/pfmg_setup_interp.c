@@ -53,6 +53,8 @@ hypre_PFMGNewInterpOp( hypre_StructMatrix *A,
    P = hypre_NewStructMatrix(hypre_StructMatrixComm(A), cgrid, stencil);
    hypre_SetStructMatrixNumGhost(P, num_ghost);
    hypre_InitializeStructMatrixShell(P);
+
+   hypre_FreeStructStencil(stencil);
  
    return P;
 }

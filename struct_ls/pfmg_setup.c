@@ -168,7 +168,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 
    cdir_l = hypre_TAlloc(int, max_levels);
    grid_l = hypre_TAlloc(hypre_StructGrid *, max_levels);
-   grid_l[0] = grid;
+   grid_l[0] = hypre_RefStructGrid(grid);
    P_grid_l = hypre_TAlloc(hypre_StructGrid *, max_levels);
    P_grid_l[0] = NULL;
    for (l = 0; ; l++)
@@ -308,9 +308,9 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    r_l  = tx_l;
    e_l  = tx_l;
 
-   A_l[0] = A;
-   b_l[0] = b;
-   x_l[0] = x;
+   A_l[0] = hypre_RefStructMatrix(A);
+   b_l[0] = hypre_RefStructVector(b);
+   x_l[0] = hypre_RefStructVector(x);
 
    tx_l[0] = hypre_NewStructVector(comm, grid_l[0]);
    hypre_SetStructVectorNumGhost(tx_l[0], x_num_ghost);

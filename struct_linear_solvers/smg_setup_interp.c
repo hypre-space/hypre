@@ -53,6 +53,8 @@ hypre_SMGNewInterpOp( hypre_StructMatrix *A,
    PT = hypre_NewStructMatrix(hypre_StructMatrixComm(A), cgrid, stencil);
    hypre_SetStructMatrixNumGhost(PT, num_ghost);
    hypre_InitializeStructMatrixShell(PT);
+
+   hypre_FreeStructStencil(stencil);
  
    return PT;
 }
@@ -204,7 +206,7 @@ hypre_SMGSetupInterpOp( void               *relax_data,
        * Free up A_mask matrix
        *-----------------------------------------------------*/
 
-      hypre_FreeStructMatrixMask(A_mask);
+      hypre_FreeStructMatrix(A_mask);
 
       /*-----------------------------------------------------
        * Set up compute package for communication of 

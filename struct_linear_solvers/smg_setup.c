@@ -65,6 +65,8 @@ hypre_SMGSetup( void               *smg_vdata,
    hypre_StructVector  **e_l;
    double               *b_data;
    double               *x_data;
+   int                   b_data_alloced;
+   int                   x_data_alloced;
 
    void                **relax_data_l;
    void                **residual_data_l;
@@ -146,7 +148,7 @@ hypre_SMGSetup( void               *smg_vdata,
    (smg_data -> max_levels) = max_levels;
 
    grid_l = hypre_TAlloc(hypre_StructGrid *, max_levels);
-   grid_l[0] = grid;
+   grid_l[0] = hypre_RefStructGrid(grid);
    for (l = 0; ; l++)
    {
       /* set cindex and stride */
@@ -220,9 +222,9 @@ hypre_SMGSetup( void               *smg_vdata,
    r_l  = tx_l;
    e_l  = tx_l;
 
-   A_l[0] = A;
-   b_l[0] = b;
-   x_l[0] = x;
+   A_l[0] = hypre_RefStructMatrix(A);
+   b_l[0] = hypre_RefStructVector(b);
+   x_l[0] = hypre_RefStructVector(x);
 
    for (i = 0; i <= cdir; i++)
    {
@@ -353,7 +355,9 @@ hypre_SMGSetup( void               *smg_vdata,
 
    /* temporarily set the data for x_l[0] and b_l[0] to temp data */
    b_data = hypre_StructVectorData(b_l[0]);
+   b_data_alloced = hypre_StructVectorDataAlloced(b_l[0]);
    x_data = hypre_StructVectorData(x_l[0]);
+   x_data_alloced = hypre_StructVectorDataAlloced(x_l[0]);
    hypre_InitializeStructVectorData(b_l[0], hypre_StructVectorData(tb_l[0]));
    hypre_InitializeStructVectorData(x_l[0], hypre_StructVectorData(tx_l[0]));
    hypre_AssembleStructVector(b_l[0]);
@@ -443,7 +447,9 @@ hypre_SMGSetup( void               *smg_vdata,
 
    /* set the data for x_l[0] and b_l[0] the way they were */
    hypre_InitializeStructVectorData(b_l[0], b_data);
+   hypre_StructVectorDataAlloced(b_l[0]) = b_data_alloced;
    hypre_InitializeStructVectorData(x_l[0], x_data);
+   hypre_StructVectorDataAlloced(x_l[0]) = x_data_alloced;
    hypre_AssembleStructVector(b_l[0]);
    hypre_AssembleStructVector(x_l[0]);
 

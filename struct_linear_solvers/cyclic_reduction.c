@@ -195,6 +195,8 @@ hypre_CycRedNewCoarseOp( hypre_StructMatrix *A,
    Ac = hypre_NewStructMatrix(hypre_StructMatrixComm(A),
                               coarse_grid, Ac_stencil);
 
+   hypre_FreeStructStencil(Ac_stencil);
+
    /*-----------------------------------------------
     * Coarse operator in symmetric iff fine operator is
     *-----------------------------------------------*/
@@ -478,7 +480,7 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
    num_levels = hypre_Log2(idmax - idmin + 1) + 2;
 
    grid_l    = hypre_TAlloc(hypre_StructGrid *, num_levels);
-   grid_l[0] = grid;
+   grid_l[0] = hypre_RefStructGrid(grid);
    for (l = 0; ; l++)
    {
       /* set cindex and stride */
@@ -585,8 +587,8 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
    A_l  = hypre_TAlloc(hypre_StructMatrix *, num_levels);
    x_l  = hypre_TAlloc(hypre_StructVector *, num_levels);
 
-   A_l[0] = A;
-   x_l[0] = x;
+   A_l[0] = hypre_RefStructMatrix(A);
+   x_l[0] = hypre_RefStructVector(x);
 
    x_num_ghost[2*cdir]     = 1;
    x_num_ghost[2*cdir + 1] = 1;
@@ -802,8 +804,10 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
 
    hypre_SetIndex(stridec, 1, 1, 1);
 
-   A_l[0] = A;
-   x_l[0] = x;
+   hypre_FreeStructMatrix(A_l[0]);
+   hypre_FreeStructVector(x_l[0]);
+   A_l[0] = hypre_RefStructMatrix(A);
+   x_l[0] = hypre_RefStructVector(x);
 
    /*--------------------------------------------------
     * Copy b into x
@@ -1120,13 +1124,16 @@ hypre_CyclicReductionFinalize( void *cyc_red_vdata )
    if (cyc_red_data)
    {
       hypre_FreeBoxArray(cyc_red_data -> base_points);
+      hypre_FreeStructGrid(cyc_red_data -> grid_l[0]);
+      hypre_FreeStructMatrix(cyc_red_data -> A_l[0]);
+      hypre_FreeStructVector(cyc_red_data -> x_l[0]);
       for (l = 0; l < ((cyc_red_data -> num_levels) - 1); l++)
       {
          hypre_FreeStructGrid(cyc_red_data -> grid_l[l+1]);
          hypre_FreeBoxArray(cyc_red_data -> fine_points_l[l]);
          hypre_FreeBoxArray(cyc_red_data -> coarse_points_l[l]);
-         hypre_FreeStructMatrixShell(cyc_red_data -> A_l[l+1]);
-         hypre_FreeStructVectorShell(cyc_red_data -> x_l[l+1]);
+         hypre_FreeStructMatrix(cyc_red_data -> A_l[l+1]);
+         hypre_FreeStructVector(cyc_red_data -> x_l[l+1]);
          hypre_FreeComputePkg(cyc_red_data -> down_compute_pkg_l[l]);
          hypre_FreeComputePkg(cyc_red_data -> up_compute_pkg_l[l]);
       }

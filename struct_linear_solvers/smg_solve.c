@@ -97,9 +97,12 @@ hypre_SMGSolve( void               *smg_vdata,
 
    hypre_BeginTiming(smg_data -> time_index);
 
-   A_l[0] = A;
-   b_l[0] = b;
-   x_l[0] = x;
+   hypre_FreeStructMatrix(A_l[0]);
+   hypre_FreeStructVector(b_l[0]);
+   hypre_FreeStructVector(x_l[0]);
+   A_l[0] = hypre_RefStructMatrix(A);
+   b_l[0] = hypre_RefStructVector(b);
+   x_l[0] = hypre_RefStructVector(x);
 
    (smg_data -> num_iterations) = 0;
 

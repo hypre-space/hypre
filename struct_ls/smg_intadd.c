@@ -168,7 +168,7 @@ hypre_SMGIntAddSetup( void               *intadd_vdata,
     * Set up the intadd data structure
     *----------------------------------------------------------*/
 
-   (intadd_data -> PT)            = PT;
+   (intadd_data -> PT)            = hypre_RefStructMatrix(PT);
    (intadd_data -> compute_pkg)   = compute_pkg;
    (intadd_data -> coarse_points) = coarse_points;
    hypre_CopyIndex(cindex, (intadd_data -> cindex));
@@ -411,6 +411,7 @@ hypre_SMGIntAddFinalize( void *intadd_vdata )
 
    if (intadd_data)
    {
+      hypre_FreeStructMatrix(intadd_data -> PT);
       hypre_FreeBoxArray(intadd_data -> coarse_points);
       hypre_FreeComputePkg(intadd_data -> compute_pkg);
       hypre_FinalizeTiming(intadd_data -> time_index);

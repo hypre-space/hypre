@@ -106,7 +106,7 @@ hypre_PFMGRestrictSetup( void               *restrict_vdata,
     * Set up the restrict data structure
     *----------------------------------------------------------*/
 
-   (restrict_data -> RT)           = RT;
+   (restrict_data -> RT)          = hypre_RefStructMatrix(RT);
    (restrict_data -> compute_pkg) = compute_pkg;
    hypre_CopyIndex(cindex ,(restrict_data -> cindex));
    hypre_CopyIndex(stride ,(restrict_data -> stride));
@@ -261,6 +261,7 @@ hypre_PFMGRestrictFinalize( void *restrict_vdata )
 
    if (restrict_data)
    {
+      hypre_FreeStructMatrix(restrict_data -> RT);
       hypre_FreeComputePkg(restrict_data -> compute_pkg);
       hypre_FinalizeTiming(restrict_data -> time_index);
       hypre_TFree(restrict_data);

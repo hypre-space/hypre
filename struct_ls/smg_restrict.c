@@ -106,7 +106,7 @@ hypre_SMGRestrictSetup( void               *restrict_vdata,
     * Set up the intadd data structure
     *----------------------------------------------------------*/
 
-   (restrict_data -> R)           = R;
+   (restrict_data -> R)           = hypre_RefStructMatrix(R);
    (restrict_data -> compute_pkg) = compute_pkg;
    hypre_CopyIndex(cindex ,(restrict_data -> cindex));
    hypre_CopyIndex(stride ,(restrict_data -> stride));
@@ -263,6 +263,7 @@ hypre_SMGRestrictFinalize( void *restrict_vdata )
 
    if (restrict_data)
    {
+      hypre_FreeStructMatrix(restrict_data -> R);
       hypre_FreeComputePkg(restrict_data -> compute_pkg);
       hypre_FinalizeTiming(restrict_data -> time_index);
       hypre_TFree(restrict_data);

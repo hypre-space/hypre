@@ -41,7 +41,6 @@ typedef struct
    hypre_StructVector     *x;
 
    hypre_StructVector     *t;
-   int                     t_allocated;
 
    int                     diag_rank;
 
@@ -72,18 +71,17 @@ hypre_PointRelaxInitialize( MPI_Comm  comm )
    (relax_data -> time_index) = hypre_InitializeTiming("PointRelax");
 
    /* set defaults */
-   (relax_data -> tol)                 = 1.0e-06;
-   (relax_data -> max_iter)            = 1000;
-   (relax_data -> rel_change)          = 0;
-   (relax_data -> zero_guess)          = 0;
-   (relax_data -> weight)              = 1.0;
-   (relax_data -> num_pointsets)       = 0;
-   (relax_data -> pointset_sizes)      = NULL;
-   (relax_data -> pointset_ranks)      = NULL;
-   (relax_data -> pointset_strides)    = NULL;
-   (relax_data -> pointset_indices)    = NULL;
-   (relax_data -> t)                   = NULL;
-   (relax_data -> t_allocated)         = 1;
+   (relax_data -> tol)              = 1.0e-06;
+   (relax_data -> max_iter)         = 1000;
+   (relax_data -> rel_change)       = 0;
+   (relax_data -> zero_guess)       = 0;
+   (relax_data -> weight)           = 1.0;
+   (relax_data -> num_pointsets)    = 0;
+   (relax_data -> pointset_sizes)   = NULL;
+   (relax_data -> pointset_ranks)   = NULL;
+   (relax_data -> pointset_strides) = NULL;
+   (relax_data -> pointset_indices) = NULL;
+   (relax_data -> t)                = NULL;
 
    hypre_SetIndex(stride, 1, 1, 1);
    hypre_SetIndex(indices[0], 0, 0, 0);
@@ -115,13 +113,11 @@ hypre_PointRelaxFinalize( void *relax_vdata )
       hypre_TFree(relax_data -> pointset_ranks);
       hypre_TFree(relax_data -> pointset_strides);
       hypre_TFree(relax_data -> pointset_indices);
+      hypre_FreeStructMatrix(relax_data -> A);
+      hypre_FreeStructVector(relax_data -> b);
+      hypre_FreeStructVector(relax_data -> x);
       hypre_TFree(relax_data -> compute_pkgs);
-
-      if (relax_data -> t_allocated)
-      {
-         hypre_FreeStructVector(relax_data -> t);
-      }
-      (relax_data -> t) = NULL;
+      hypre_FreeStructVector(relax_data -> t);
 
       hypre_FinalizeTiming(relax_data -> time_index);
       hypre_TFree(relax_data);
@@ -188,15 +184,14 @@ hypre_PointRelaxSetup( void               *relax_vdata,
     * Set up the temp vector
     *----------------------------------------------------------*/
 
-   if (relax_data -> t_allocated)
+   if ((relax_data -> t) == NULL)
    {
       t = hypre_NewStructVector(hypre_StructVectorComm(b),
-                                       hypre_StructVectorGrid(b));
+                                hypre_StructVectorGrid(b));
       hypre_SetStructVectorNumGhost(t, hypre_StructVectorNumGhost(b));
       hypre_InitializeStructVector(t);
       hypre_AssembleStructVector(t);
-      (relax_data -> t)           = t;
-      (relax_data -> t_allocated) = 1;
+      (relax_data -> t) = t;
    }
 
    /*----------------------------------------------------------
@@ -294,9 +289,9 @@ hypre_PointRelaxSetup( void               *relax_vdata,
     * Set up the relax data structure
     *----------------------------------------------------------*/
 
-   (relax_data -> A) = A;
-   (relax_data -> x) = x;
-   (relax_data -> b) = b;
+   (relax_data -> A) = hypre_RefStructMatrix(A);
+   (relax_data -> x) = hypre_RefStructVector(x);
+   (relax_data -> b) = hypre_RefStructVector(b);
    (relax_data -> diag_rank)    = diag_rank;
    (relax_data -> compute_pkgs) = compute_pkgs;
 
@@ -389,9 +384,12 @@ hypre_PointRelax( void               *relax_vdata,
 
    hypre_BeginTiming(relax_data -> time_index);
 
-   (relax_data -> A) = A;
-   (relax_data -> b) = b;
-   (relax_data -> x) = x;
+   hypre_FreeStructMatrix(relax_data -> A);
+   hypre_FreeStructVector(relax_data -> b);
+   hypre_FreeStructVector(relax_data -> x);
+   (relax_data -> A) = hypre_RefStructMatrix(A);
+   (relax_data -> x) = hypre_RefStructVector(x);
+   (relax_data -> b) = hypre_RefStructVector(b);
 
    (relax_data -> num_iterations) = 0;
 
@@ -767,12 +765,8 @@ hypre_PointRelaxSetTempVec( void               *relax_vdata,
    hypre_PointRelaxData *relax_data = relax_vdata;
    int                   ierr = 0;
 
-   if (relax_data -> t_allocated)
-   {
-      hypre_FreeStructVector(relax_data -> t);
-   }
-   (relax_data -> t)           = t;
-   (relax_data -> t_allocated) = 0;
+   hypre_FreeStructVector(relax_data -> t);
+   (relax_data -> t) = hypre_RefStructVector(t);
 
    return ierr;
 }
