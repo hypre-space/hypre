@@ -65,7 +65,7 @@ c     HYPRE_Solver        precond
       double precision    values(4)
 
       integer             p, q, r
-      integer             ierr
+      integer             file_name_len,ierr
 
       data zero          / 0 /
       data one           / 1 /
@@ -247,7 +247,9 @@ c Generate a Dirichlet Laplacian
          call HYPRE_ParCSRMatrixRead(MPI_COMM_WORLD, A, matfile, ierr)
       endif
 
-      call HYPRE_ParCSRMatrixPrint(A, "driver.out.A", ierr)
+      file_name_len = len("driver.out.A")
+      call HYPRE_ParCSRMatrixPrint(A, "driver.out.A", file_name_len,
+     &                             ierr)
 
 c     call HYPRE_ParCSRMatrixCreate(MPI_COMM_WORLD, gnrows, gncols,
 c    &   rstarts, cstarts, ncoloffdg, nonzsdg, nonzsoffdg, A, ierr)
@@ -268,7 +270,9 @@ c-----------------------------------------------------------------------
         call HYPRE_ParVectorInitialize(b, ierr)
 c Set up a Dirichlet 0 problem
         call hypre_SetParVectorConstantValue(b, 0d0, ierr)
-        call HYPRE_ParVectorPrint(b, "driver.out.b", ierr)
+        file_name_len = len("driver.out.b")
+        call HYPRE_ParVectorPrint(b, "driver.out.b", file_name_len,
+     &                            ierr)
       else
         call HYPRE_ParVectorRead(MPI_COMM_WORLD, b, rhsfile, ierr)
       endif
@@ -279,7 +283,9 @@ c Set up a Dirichlet 0 problem
       call HYPRE_ParVectorInitialize(x, ierr)
 c Choose a nonzero initial guess
       call hypre_SetParVectorConstantValue(x, 1d0, ierr)
-      call HYPRE_ParVectorPrint(x, "driver.out.x0", ierr)
+      file_name_len = len("driver.out.x0")
+      call HYPRE_ParVectorPrint(b, "driver.out.x0", file_name_len,
+     &                          ierr)
 
 c-----------------------------------------------------------------------
 c     Solve the linear system
@@ -467,7 +473,8 @@ c-----------------------------------------------------------------------
 c     Print the solution and other info
 c-----------------------------------------------------------------------
 
-      call HYPRE_ParVectorPrint(x, "driver.out.x", ierr)
+      file_name_len = len("driver.out.x")
+      call HYPRE_ParVectorPrint(x, "driver.out.x", file_name_len, ierr)
 
       if (myid .eq. 0) then
          print *, 'Iterations = ', num_iterations
