@@ -252,13 +252,12 @@ void MatrixPrint(Matrix *mat, char *filename)
 
     for (pe=0; pe<npes; pe++)
     {
-        FILE *file = fopen(filename, (pe==0 ? "w" : "a"));
-        assert(file != NULL);
-
 	MPI_Barrier(mat->comm);
 
 	if (mype == pe)
 	{
+            FILE *file = fopen(filename, (pe==0 ? "w" : "a"));
+            assert(file != NULL);
 
             for (row=0; row<=mat->end_row - mat->beg_row; row++)
             {
@@ -269,9 +268,9 @@ void MatrixPrint(Matrix *mat, char *filename)
 			row + mat->beg_row, 
 			mat->numb->local_to_global[ind[i]], val[i]);
             }
-	}
 
-        fclose(file);
+            fclose(file);
+	}
     }
 }
 
