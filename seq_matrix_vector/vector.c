@@ -15,11 +15,11 @@
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * hypre_CreateVector
+ * hypre_VectorCreate
  *--------------------------------------------------------------------------*/
 
 hypre_Vector *
-hypre_CreateVector( int size )
+hypre_VectorCreate( int size )
 {
    hypre_Vector  *vector;
 
@@ -35,11 +35,11 @@ hypre_CreateVector( int size )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_DestroyVector
+ * hypre_VectorDestroy
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_DestroyVector( hypre_Vector *vector )
+hypre_VectorDestroy( hypre_Vector *vector )
 {
    int  ierr=0;
 
@@ -56,11 +56,11 @@ hypre_DestroyVector( hypre_Vector *vector )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_InitializeVector
+ * hypre_VectorInitialize
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_InitializeVector( hypre_Vector *vector )
+hypre_VectorInitialize( hypre_Vector *vector )
 {
    int  size = hypre_VectorSize(vector);
    int  ierr = 0;
@@ -72,11 +72,11 @@ hypre_InitializeVector( hypre_Vector *vector )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SetVectorDataOwner
+ * hypre_VectorSetDataOwner
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_SetVectorDataOwner( hypre_Vector *vector,
+hypre_VectorSetDataOwner( hypre_Vector *vector,
                           int           owns_data   )
 {
    int    ierr=0;
@@ -91,7 +91,7 @@ hypre_SetVectorDataOwner( hypre_Vector *vector,
  *--------------------------------------------------------------------------*/
 
 hypre_Vector *
-hypre_ReadVector( char *file_name )
+hypre_VectorRead( char *file_name )
 {
    hypre_Vector  *vector;
 
@@ -110,8 +110,8 @@ hypre_ReadVector( char *file_name )
 
    fscanf(fp, "%d", &size);
 
-   vector = hypre_CreateVector(size);
-   hypre_InitializeVector(vector);
+   vector = hypre_VectorCreate(size);
+   hypre_VectorInitialize(vector);
 
    data = hypre_VectorData(vector);
    for (j = 0; j < size; j++)
@@ -125,11 +125,11 @@ hypre_ReadVector( char *file_name )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PrintVector
+ * hypre_VectorPrint
  *--------------------------------------------------------------------------*/
 
 int
-hypre_PrintVector( hypre_Vector *vector,
+hypre_VectorPrint( hypre_Vector *vector,
                    char         *file_name )
 {
    FILE    *fp;
@@ -163,11 +163,11 @@ hypre_PrintVector( hypre_Vector *vector,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SetVectorConstantValues
+ * hypre_VectorSetConstantValues
  *--------------------------------------------------------------------------*/
 
 int
-hypre_SetVectorConstantValues( hypre_Vector *v,
+hypre_VectorSetConstantValues( hypre_Vector *v,
                                double        value )
 {
    double  *vector_data = hypre_VectorData(v);
@@ -185,13 +185,13 @@ hypre_SetVectorConstantValues( hypre_Vector *v,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SetVectorRandomValues
+ * hypre_VectorSetRandomValues
  *
  *     returns vector of values randomly distributed between -1.0 and +1.0
  *--------------------------------------------------------------------------*/
 
 int
-hypre_SetVectorRandomValues( hypre_Vector *v,
+hypre_VectorSetRandomValues( hypre_Vector *v,
                              int           seed )
 {
    double  *vector_data = hypre_VectorData(v);
@@ -209,11 +209,11 @@ hypre_SetVectorRandomValues( hypre_Vector *v,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_CopyVector
+ * hypre_VectorCopy
  *--------------------------------------------------------------------------*/
 
 int
-hypre_CopyVector( hypre_Vector *x,
+hypre_VectorCopy( hypre_Vector *x,
                   hypre_Vector *y )
 {
    double  *x_data = hypre_VectorData(x);
@@ -231,11 +231,11 @@ hypre_CopyVector( hypre_Vector *x,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_ScaleVector
+ * hypre_VectorScale
  *--------------------------------------------------------------------------*/
 
 int
-hypre_ScaleVector( double        alpha,
+hypre_VectorScale( double        alpha,
                    hypre_Vector *y     )
 {
    double  *y_data = hypre_VectorData(y);
@@ -252,11 +252,11 @@ hypre_ScaleVector( double        alpha,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_Axpy
+ * hypre_VectorAxpy
  *--------------------------------------------------------------------------*/
 
 int
-hypre_Axpy( double        alpha,
+hypre_VectorAxpy( double        alpha,
             hypre_Vector *x,
             hypre_Vector *y     )
 {
@@ -275,10 +275,10 @@ hypre_Axpy( double        alpha,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_InnerProd
+ * hypre_VectorInnerProd
  *--------------------------------------------------------------------------*/
 
-double   hypre_InnerProd( hypre_Vector *x,
+double   hypre_VectorInnerProd( hypre_Vector *x,
                           hypre_Vector *y )
 {
    double  *x_data = hypre_VectorData(x);

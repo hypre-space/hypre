@@ -15,53 +15,53 @@
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * HYPRE_CreateVector
+ * HYPRE_VectorCreate
  *--------------------------------------------------------------------------*/
 
 HYPRE_Vector
-HYPRE_CreateVector( int size )
+HYPRE_VectorCreate( int size )
 {
-   return ( (HYPRE_Vector) hypre_CreateVector(size) );
+   return ( (HYPRE_Vector) hypre_VectorCreate(size) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_DestroyVector
+ * HYPRE_VectorDestroy
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_DestroyVector( HYPRE_Vector vector )
+HYPRE_VectorDestroy( HYPRE_Vector vector )
 {
-   return ( hypre_DestroyVector( (hypre_Vector *) vector ) );
+   return ( hypre_VectorDestroy( (hypre_Vector *) vector ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_InitializeVector
+ * HYPRE_VectorInitialize
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_InitializeVector( HYPRE_Vector vector )
+HYPRE_VectorInitialize( HYPRE_Vector vector )
 {
-   return ( hypre_InitializeVector( (hypre_Vector *) vector ) );
+   return ( hypre_VectorInitialize( (hypre_Vector *) vector ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_PrintVector
+ * HYPRE_VectorPrint
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_PrintVector( HYPRE_Vector  vector,
+HYPRE_VectorPrint( HYPRE_Vector  vector,
                    char         *file_name )
 {
-   return ( hypre_PrintVector( (hypre_Vector *) vector,
+   return ( hypre_VectorPrint( (hypre_Vector *) vector,
                       file_name ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ReadVector
+ * HYPRE_VectorRead
  *--------------------------------------------------------------------------*/
 
 HYPRE_Vector
-HYPRE_ReadVector( char         *file_name )
+HYPRE_VectorRead( char         *file_name )
 {
-   return ( (HYPRE_Vector) hypre_ReadVector( file_name ) );
+   return ( (HYPRE_Vector) hypre_VectorRead( file_name ) );
 }

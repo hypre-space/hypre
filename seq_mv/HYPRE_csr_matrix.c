@@ -15,11 +15,11 @@
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * HYPRE_CreateCSRMatrix
+ * HYPRE_CSRMatrixCreate
  *--------------------------------------------------------------------------*/
 
 HYPRE_CSRMatrix 
-HYPRE_CreateCSRMatrix( int  num_rows,
+HYPRE_CSRMatrixCreate( int  num_rows,
                        int  num_cols,
                        int *row_sizes )
 {
@@ -34,51 +34,51 @@ HYPRE_CreateCSRMatrix( int  num_rows,
       matrix_i[i+1] = matrix_i[i] + row_sizes[i];
    }
 
-   matrix = hypre_CreateCSRMatrix(num_rows, num_rows, matrix_i[num_rows]);
+   matrix = hypre_CSRMatrixCreate(num_rows, num_rows, matrix_i[num_rows]);
    hypre_CSRMatrixI(matrix) = matrix_i;
 
    return ( (HYPRE_CSRMatrix) matrix );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_DestroyCSRMatrix
+ * HYPRE_CSRMatrixDestroy
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_DestroyCSRMatrix( HYPRE_CSRMatrix matrix )
+HYPRE_CSRMatrixDestroy( HYPRE_CSRMatrix matrix )
 {
-   return( hypre_DestroyCSRMatrix( (hypre_CSRMatrix *) matrix ) );
+   return( hypre_CSRMatrixDestroy( (hypre_CSRMatrix *) matrix ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_InitializeCSRMatrix
+ * HYPRE_CSRMatrixInitialize
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_InitializeCSRMatrix( HYPRE_CSRMatrix matrix )
+HYPRE_CSRMatrixInitialize( HYPRE_CSRMatrix matrix )
 {
-   return ( hypre_InitializeCSRMatrix( (hypre_CSRMatrix *) matrix ) );
+   return ( hypre_CSRMatrixInitialize( (hypre_CSRMatrix *) matrix ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ReadCSRMatrix
+ * HYPRE_CSRMatrixRead
  *--------------------------------------------------------------------------*/
 
 HYPRE_CSRMatrix 
-HYPRE_ReadCSRMatrix( char            *file_name )
+HYPRE_CSRMatrixRead( char            *file_name )
 {
-   return ( (HYPRE_CSRMatrix) hypre_ReadCSRMatrix( file_name ) );
+   return ( (HYPRE_CSRMatrix) hypre_CSRMatrixRead( file_name ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_PrintCSRMatrix
+ * HYPRE_CSRMatrixPrint
  *--------------------------------------------------------------------------*/
 
 void 
-HYPRE_PrintCSRMatrix( HYPRE_CSRMatrix  matrix,
+HYPRE_CSRMatrixPrint( HYPRE_CSRMatrix  matrix,
                       char            *file_name )
 {
-   hypre_PrintCSRMatrix( (hypre_CSRMatrix *) matrix,
+   hypre_CSRMatrixPrint( (hypre_CSRMatrix *) matrix,
                          file_name );
 }
 

@@ -15,11 +15,11 @@
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * hypre_Matvec
+ * hypre_CSRMatrixMatvec
  *--------------------------------------------------------------------------*/
 
 int
-hypre_Matvec( double           alpha,
+hypre_CSRMatrixMatvec( double           alpha,
               hypre_CSRMatrix *A,
               hypre_Vector    *x,
               double           beta,
@@ -121,15 +121,15 @@ hypre_Matvec( double           alpha,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_MatvecT
+ * hypre_CSRMatrixMatvecT
  *
  *   Performs y <- alpha * A^T * x + beta * y
  *
- *   From Van Henson's modification of hypre_Matvec.
+ *   From Van Henson's modification of hypre_CSRMatrixMatvec.
  *--------------------------------------------------------------------------*/
 
 int
-hypre_MatvecT( double           alpha,
+hypre_CSRMatrixMatvecT( double           alpha,
                hypre_CSRMatrix *A,
                hypre_Vector    *x,
                double           beta,

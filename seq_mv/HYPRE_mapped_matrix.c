@@ -15,67 +15,67 @@
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * HYPRE_NewMappedMatrix
+ * HYPRE_MappedMatrixCreate
  *--------------------------------------------------------------------------*/
 
 HYPRE_MappedMatrix 
-HYPRE_NewMappedMatrix( )
+HYPRE_MappedMatrixCreate( )
 {
    return ( (HYPRE_MappedMatrix)
-            hypre_NewMappedMatrix(  ));
+            hypre_MappedMatrixCreate(  ));
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_FreeMappedMatrix
+ * HYPRE_MappedMatrixDestroy
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_FreeMappedMatrix( HYPRE_MappedMatrix matrix )
+HYPRE_MappedMatrixDestroy( HYPRE_MappedMatrix matrix )
 {
-   return( hypre_FreeMappedMatrix( (hypre_MappedMatrix *) matrix ) );
+   return( hypre_MappedMatrixDestroy( (hypre_MappedMatrix *) matrix ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_LimitedFreeMappedMatrix
+ * HYPRE_MappedMatrixLimitedDestroy
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_LimitedFreeMappedMatrix( HYPRE_MappedMatrix matrix )
+HYPRE_MappedMatrixLimitedDestroy( HYPRE_MappedMatrix matrix )
 {
-   return( hypre_LimitedFreeMappedMatrix( (hypre_MappedMatrix *) matrix ) );
+   return( hypre_MappedMatrixLimitedDestroy( (hypre_MappedMatrix *) matrix ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_InitializeMappedMatrix
+ * HYPRE_MappedMatrixInitialize
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_InitializeMappedMatrix( HYPRE_MappedMatrix matrix )
+HYPRE_MappedMatrixInitialize( HYPRE_MappedMatrix matrix )
 {
-   return ( hypre_InitializeMappedMatrix( (hypre_MappedMatrix *) matrix ) );
+   return ( hypre_MappedMatrixInitialize( (hypre_MappedMatrix *) matrix ) );
 }
 
 
 /*--------------------------------------------------------------------------
- * HYPRE_AssembleMappedMatrix
+ * HYPRE_MappedMatrixAssemble
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_AssembleMappedMatrix( HYPRE_MappedMatrix matrix )
+HYPRE_MappedMatrixAssemble( HYPRE_MappedMatrix matrix )
 {
-   return( hypre_AssembleMappedMatrix( (hypre_MappedMatrix *) matrix ) );
+   return( hypre_MappedMatrixAssemble( (hypre_MappedMatrix *) matrix ) );
 }
 
 
 
 /*--------------------------------------------------------------------------
- * HYPRE_PrintMappedMatrix
+ * HYPRE_MappedMatrixPrint
  *--------------------------------------------------------------------------*/
 
 void 
-HYPRE_PrintMappedMatrix( HYPRE_MappedMatrix matrix )
+HYPRE_MappedMatrixPrint( HYPRE_MappedMatrix matrix )
 {
-   hypre_PrintMappedMatrix( (hypre_MappedMatrix *) matrix );
+   hypre_MappedMatrixPrint( (hypre_MappedMatrix *) matrix );
 }
 
 /****************************************************************************
@@ -84,51 +84,51 @@ HYPRE_PrintMappedMatrix( HYPRE_MappedMatrix matrix )
  ***************************************************************************/
 
 /*--------------------------------------------------------------------------
- * HYPRE_GetMappedMatrixColIndex
+ * HYPRE_MappedMatrixGetColIndex
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_GetMappedMatrixColIndex( HYPRE_MappedMatrix matrix, int j )
+HYPRE_MappedMatrixGetColIndex( HYPRE_MappedMatrix matrix, int j )
 {
-   return( hypre_GetMappedMatrixColIndex( (hypre_MappedMatrix *) matrix, j ));
+   return( hypre_MappedMatrixGetColIndex( (hypre_MappedMatrix *) matrix, j ));
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_GetMappedMatrixMatrix
+ * HYPRE_MappedMatrixGetMatrix
  *--------------------------------------------------------------------------*/
 
 void *
-HYPRE_GetMappedMatrixMatrix( HYPRE_MappedMatrix matrix )
+HYPRE_MappedMatrixGetMatrix( HYPRE_MappedMatrix matrix )
 {
-   return( hypre_GetMappedMatrixMatrix( (hypre_MappedMatrix *) matrix ));
+   return( hypre_MappedMatrixGetMatrix( (hypre_MappedMatrix *) matrix ));
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SetMappedMatrixMatrix
+ * HYPRE_MappedMatrixSetMatrix
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_SetMappedMatrixMatrix( HYPRE_MappedMatrix matrix, void *matrix_data )
+HYPRE_MappedMatrixSetMatrix( HYPRE_MappedMatrix matrix, void *matrix_data )
 {
-   return( hypre_SetMappedMatrixMatrix( (hypre_MappedMatrix *) matrix, matrix_data ) );
+   return( hypre_MappedMatrixSetMatrix( (hypre_MappedMatrix *) matrix, matrix_data ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SetMappedMatrixColMap
+ * HYPRE_MappedMatrixSetColMap
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_SetMappedMatrixColMap( HYPRE_MappedMatrix matrix, int (*ColMap)(int, void *) )
+HYPRE_MappedMatrixSetColMap( HYPRE_MappedMatrix matrix, int (*ColMap)(int, void *) )
 {
-   return( hypre_SetMappedMatrixColMap( (hypre_MappedMatrix *) matrix, ColMap ) );
+   return( hypre_MappedMatrixSetColMap( (hypre_MappedMatrix *) matrix, ColMap ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SetMappedMatrixMapData
+ * HYPRE_MappedMatrixSetMapData
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_SetMappedMatrixMapData( HYPRE_MappedMatrix matrix, void *MapData )
+HYPRE_MappedMatrixSetMapData( HYPRE_MappedMatrix matrix, void *MapData )
 {
-   return( hypre_SetMappedMatrixMapData( (hypre_MappedMatrix *) matrix, MapData ) );
+   return( hypre_MappedMatrixSetMapData( (hypre_MappedMatrix *) matrix, MapData ) );
 }

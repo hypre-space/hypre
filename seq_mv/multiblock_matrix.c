@@ -15,11 +15,11 @@
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * hypre_NewMultiblockMatrix
+ * hypre_MultiblockMatrixCreate
  *--------------------------------------------------------------------------*/
 
 hypre_MultiblockMatrix *
-hypre_NewMultiblockMatrix( )
+hypre_MultiblockMatrixCreate( )
 {
    hypre_MultiblockMatrix  *matrix;
 
@@ -29,11 +29,11 @@ hypre_NewMultiblockMatrix( )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_FreeMultiblockMatrix
+ * hypre_MultiblockMatrixDestroy
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_FreeMultiblockMatrix( hypre_MultiblockMatrix *matrix )
+hypre_MultiblockMatrixDestroy( hypre_MultiblockMatrix *matrix )
 {
    int  ierr=0, i;
 
@@ -52,11 +52,11 @@ hypre_FreeMultiblockMatrix( hypre_MultiblockMatrix *matrix )
 
 
 /*--------------------------------------------------------------------------
- * hypre_LimitedFreeMultiblockMatrix
+ * hypre_MultiblockMatrixLimitedDestroy
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_LimitedFreeMultiblockMatrix( hypre_MultiblockMatrix *matrix )
+hypre_MultiblockMatrixLimitedDestroy( hypre_MultiblockMatrix *matrix )
 {
    int  ierr=0;
 
@@ -73,11 +73,11 @@ hypre_LimitedFreeMultiblockMatrix( hypre_MultiblockMatrix *matrix )
 
 
 /*--------------------------------------------------------------------------
- * hypre_InitializeMultiblockMatrix
+ * hypre_MultiblockMatrixInitialize
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_InitializeMultiblockMatrix( hypre_MultiblockMatrix *matrix )
+hypre_MultiblockMatrixInitialize( hypre_MultiblockMatrix *matrix )
 {
    int    ierr=0;
 
@@ -95,11 +95,11 @@ hypre_InitializeMultiblockMatrix( hypre_MultiblockMatrix *matrix )
 
 
 /*--------------------------------------------------------------------------
- * hypre_AssembleMultiblockMatrix
+ * hypre_MultiblockMatrixAssemble
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_AssembleMultiblockMatrix( hypre_MultiblockMatrix *matrix )
+hypre_MultiblockMatrixAssemble( hypre_MultiblockMatrix *matrix )
 {
    int    ierr=0;
 
@@ -108,21 +108,21 @@ hypre_AssembleMultiblockMatrix( hypre_MultiblockMatrix *matrix )
 
 
 /*--------------------------------------------------------------------------
- * hypre_PrintMultiblockMatrix
+ * hypre_MultiblockMatrixPrint
  *--------------------------------------------------------------------------*/
 
 void
-hypre_PrintMultiblockMatrix(hypre_MultiblockMatrix *matrix  )
+hypre_MultiblockMatrixPrint(hypre_MultiblockMatrix *matrix  )
 {
    printf("Stub for hypre_MultiblockMatrix\n");
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SetMultiblockMatrixNumSubmatrices
+ * hypre_MultiblockMatrixSetNumSubmatrices
  *--------------------------------------------------------------------------*/
 
 int
-hypre_SetMultiblockMatrixNumSubmatrices(hypre_MultiblockMatrix *matrix, int n  )
+hypre_MultiblockMatrixSetNumSubmatrices(hypre_MultiblockMatrix *matrix, int n  )
 {
    int ierr = 0;
 
@@ -131,11 +131,11 @@ hypre_SetMultiblockMatrixNumSubmatrices(hypre_MultiblockMatrix *matrix, int n  )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SetMultiblockMatrixSubmatrixType
+ * hypre_MultiblockMatrixSetSubmatrixType
  *--------------------------------------------------------------------------*/
 
 int
-hypre_SetMultiblockMatrixSubmatrixType(hypre_MultiblockMatrix *matrix, 
+hypre_MultiblockMatrixSetSubmatrixType(hypre_MultiblockMatrix *matrix, 
                                      int j,
                                      int type  )
 {
@@ -151,11 +151,11 @@ hypre_SetMultiblockMatrixSubmatrixType(hypre_MultiblockMatrix *matrix,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SetMultiblockMatrixSubmatrix
+ * hypre_MultiblockMatrixSetSubmatrix
  *--------------------------------------------------------------------------*/
 
 int
-hypre_SetMultiblockMatrixSubmatrix(hypre_MultiblockMatrix *matrix, 
+hypre_MultiblockMatrixSetSubmatrix(hypre_MultiblockMatrix *matrix, 
                                      int j,
                                      void *submatrix  )
 {

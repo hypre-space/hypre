@@ -15,67 +15,67 @@
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * HYPRE_NewMultiblockMatrix
+ * HYPRE_MultiblockMatrixCreate
  *--------------------------------------------------------------------------*/
 
 HYPRE_MultiblockMatrix 
-HYPRE_NewMultiblockMatrix( )
+HYPRE_MultiblockMatrixCreate( )
 {
    return ( (HYPRE_MultiblockMatrix)
-            hypre_NewMultiblockMatrix(  ));
+            hypre_MultiblockMatrixCreate(  ));
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_FreeMultiblockMatrix
+ * HYPRE_MultiblockMatrixDestroy
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_FreeMultiblockMatrix( HYPRE_MultiblockMatrix matrix )
+HYPRE_MultiblockMatrixDestroy( HYPRE_MultiblockMatrix matrix )
 {
-   return( hypre_FreeMultiblockMatrix( (hypre_MultiblockMatrix *) matrix ) );
+   return( hypre_MultiblockMatrixDestroy( (hypre_MultiblockMatrix *) matrix ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_LimitedFreeMultiblockMatrix
+ * HYPRE_MultiblockMatrixLimitedDestroy
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_LimitedFreeMultiblockMatrix( HYPRE_MultiblockMatrix matrix )
+HYPRE_MultiblockMatrixLimitedDestroy( HYPRE_MultiblockMatrix matrix )
 {
-   return( hypre_LimitedFreeMultiblockMatrix( (hypre_MultiblockMatrix *) matrix ) );
+   return( hypre_MultiblockMatrixLimitedDestroy( (hypre_MultiblockMatrix *) matrix ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_InitializeMultiblockMatrix
+ * HYPRE_MultiblockMatrixInitialize
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_InitializeMultiblockMatrix( HYPRE_MultiblockMatrix matrix )
+HYPRE_MultiblockMatrixInitialize( HYPRE_MultiblockMatrix matrix )
 {
-   return ( hypre_InitializeMultiblockMatrix( (hypre_MultiblockMatrix *) matrix ) );
+   return ( hypre_MultiblockMatrixInitialize( (hypre_MultiblockMatrix *) matrix ) );
 }
 
 
 /*--------------------------------------------------------------------------
- * HYPRE_AssembleMultiblockMatrix
+ * HYPRE_MultiblockMatrixAssemble
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_AssembleMultiblockMatrix( HYPRE_MultiblockMatrix matrix )
+HYPRE_MultiblockMatrixAssemble( HYPRE_MultiblockMatrix matrix )
 {
-   return( hypre_AssembleMultiblockMatrix( (hypre_MultiblockMatrix *) matrix ) );
+   return( hypre_MultiblockMatrixAssemble( (hypre_MultiblockMatrix *) matrix ) );
 }
 
 
 
 /*--------------------------------------------------------------------------
- * HYPRE_PrintMultiblockMatrix
+ * HYPRE_MultiblockMatrixPrint
  *--------------------------------------------------------------------------*/
 
 void 
-HYPRE_PrintMultiblockMatrix( HYPRE_MultiblockMatrix matrix )
+HYPRE_MultiblockMatrixPrint( HYPRE_MultiblockMatrix matrix )
 {
-   hypre_PrintMultiblockMatrix( (hypre_MultiblockMatrix *) matrix );
+   hypre_MultiblockMatrixPrint( (hypre_MultiblockMatrix *) matrix );
 }
 
 /****************************************************************************
@@ -84,25 +84,25 @@ HYPRE_PrintMultiblockMatrix( HYPRE_MultiblockMatrix matrix )
  ***************************************************************************/
 
 /*--------------------------------------------------------------------------
- * HYPRE_SetMultiblockMatrixNumSubmatrices
+ * HYPRE_MultiblockMatrixSetNumSubmatrices
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_SetMultiblockMatrixNumSubmatrices( HYPRE_MultiblockMatrix matrix, int n )
+HYPRE_MultiblockMatrixSetNumSubmatrices( HYPRE_MultiblockMatrix matrix, int n )
 {
-   return( hypre_SetMultiblockMatrixNumSubmatrices( 
+   return( hypre_MultiblockMatrixSetNumSubmatrices( 
              (hypre_MultiblockMatrix *) matrix, n ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SetMultiblockMatrixSubmatrixType
+ * HYPRE_MultiblockMatrixSetSubmatrixType
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_SetMultiblockMatrixSubmatrixType( HYPRE_MultiblockMatrix matrix, 
+HYPRE_MultiblockMatrixSetSubmatrixType( HYPRE_MultiblockMatrix matrix, 
                                       int j,
                                       int type )
 {
-   return( hypre_SetMultiblockMatrixSubmatrixType( 
+   return( hypre_MultiblockMatrixSetSubmatrixType( 
              (hypre_MultiblockMatrix *) matrix, j, type ) );
 }

@@ -15,11 +15,11 @@
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * hypre_NewMappedMatrix
+ * hypre_MappedMatrixCreate
  *--------------------------------------------------------------------------*/
 
 hypre_MappedMatrix *
-hypre_NewMappedMatrix(  )
+hypre_MappedMatrixCreate(  )
 {
    hypre_MappedMatrix  *matrix;
 
@@ -30,11 +30,11 @@ hypre_NewMappedMatrix(  )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_FreeMappedMatrix
+ * hypre_MappedMatrixDestroy
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_FreeMappedMatrix( hypre_MappedMatrix *matrix )
+hypre_MappedMatrixDestroy( hypre_MappedMatrix *matrix )
 {
    int  ierr=0;
 
@@ -51,11 +51,11 @@ hypre_FreeMappedMatrix( hypre_MappedMatrix *matrix )
 
 
 /*--------------------------------------------------------------------------
- * hypre_LimitedFreeMappedMatrix
+ * hypre_MappedMatrixLimitedDestroy
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_LimitedFreeMappedMatrix( hypre_MappedMatrix *matrix )
+hypre_MappedMatrixLimitedDestroy( hypre_MappedMatrix *matrix )
 {
    int  ierr=0;
 
@@ -69,11 +69,11 @@ hypre_LimitedFreeMappedMatrix( hypre_MappedMatrix *matrix )
 
 
 /*--------------------------------------------------------------------------
- * hypre_InitializeMappedMatrix
+ * hypre_MappedMatrixInitialize
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_InitializeMappedMatrix( hypre_MappedMatrix *matrix )
+hypre_MappedMatrixInitialize( hypre_MappedMatrix *matrix )
 {
    int    ierr=0;
 
@@ -82,11 +82,11 @@ hypre_InitializeMappedMatrix( hypre_MappedMatrix *matrix )
 
 
 /*--------------------------------------------------------------------------
- * hypre_AssembleMappedMatrix
+ * hypre_MappedMatrixAssemble
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_AssembleMappedMatrix( hypre_MappedMatrix *matrix )
+hypre_MappedMatrixAssemble( hypre_MappedMatrix *matrix )
 {
    int    ierr=0;
 
@@ -107,41 +107,41 @@ hypre_AssembleMappedMatrix( hypre_MappedMatrix *matrix )
 
 
 /*--------------------------------------------------------------------------
- * hypre_PrintMappedMatrix
+ * hypre_MappedMatrixPrint
  *--------------------------------------------------------------------------*/
 
 void
-hypre_PrintMappedMatrix(hypre_MappedMatrix *matrix  )
+hypre_MappedMatrixPrint(hypre_MappedMatrix *matrix  )
 {
    printf("Stub for hypre_MappedMatrix\n");
 }
 
 /*--------------------------------------------------------------------------
- * hypre_GetMappedMatrixColIndex
+ * hypre_MappedMatrixGetColIndex
  *--------------------------------------------------------------------------*/
 
 int
-hypre_GetMappedMatrixColIndex(hypre_MappedMatrix *matrix, int j  )
+hypre_MappedMatrixGetColIndex(hypre_MappedMatrix *matrix, int j  )
 {
    return( hypre_MappedMatrixColIndex(matrix,j) );
 }
 
 /*--------------------------------------------------------------------------
- * hypre_GetMappedMatrixMatrix
+ * hypre_MappedMatrixGetMatrix
  *--------------------------------------------------------------------------*/
 
 void *
-hypre_GetMappedMatrixMatrix(hypre_MappedMatrix *matrix )
+hypre_MappedMatrixGetMatrix(hypre_MappedMatrix *matrix )
 {
    return( hypre_MappedMatrixMatrix(matrix) );
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SetMappedMatrixMatrix
+ * hypre_MappedMatrixSetMatrix
  *--------------------------------------------------------------------------*/
 
 int
-hypre_SetMappedMatrixMatrix(hypre_MappedMatrix *matrix, void *matrix_data  )
+hypre_MappedMatrixSetMatrix(hypre_MappedMatrix *matrix, void *matrix_data  )
 {
    int ierr=0;
 
@@ -151,11 +151,11 @@ hypre_SetMappedMatrixMatrix(hypre_MappedMatrix *matrix, void *matrix_data  )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SetMappedMatrixColMap
+ * hypre_MappedMatrixSetColMap
  *--------------------------------------------------------------------------*/
 
 int
-hypre_SetMappedMatrixColMap(hypre_MappedMatrix *matrix, 
+hypre_MappedMatrixSetColMap(hypre_MappedMatrix *matrix, 
                           int (*ColMap)(int, void *)  )
 {
    int ierr=0;
@@ -166,11 +166,11 @@ hypre_SetMappedMatrixColMap(hypre_MappedMatrix *matrix,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SetMappedMatrixMapData
+ * hypre_MappedMatrixSetMapData
  *--------------------------------------------------------------------------*/
 
 int
-hypre_SetMappedMatrixMapData(hypre_MappedMatrix *matrix, 
+hypre_MappedMatrixSetMapData(hypre_MappedMatrix *matrix, 
                           void *map_data )
 {
    int ierr=0;

@@ -15,15 +15,15 @@
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * hypre_Matadd:
+ * hypre_CSRMatrixAdd:
  * adds two CSR Matrices A and B and returns a CSR Matrix C;
  * Note: The routine does not check for 0-elements which might be generated
  *       through cancellation of elements in A and B or already contained
- 	 in A and B. To remove those, use hypre_DeleteZerosInMatrix 
+ 	 in A and B. To remove those, use hypre_CSRMatrixDeleteZeros 
  *--------------------------------------------------------------------------*/
 
 hypre_CSRMatrix *
-hypre_Matadd( hypre_CSRMatrix *A,
+hypre_CSRMatrixAdd( hypre_CSRMatrix *A,
               hypre_CSRMatrix *B)
 {
    double     *A_data   = hypre_CSRMatrixData(A);
@@ -80,9 +80,9 @@ hypre_Matadd( hypre_CSRMatrix *A,
 	C_i[ic+1] = num_nonzeros;
    }
 
-   C = hypre_CreateCSRMatrix(nrows_A, ncols_A, num_nonzeros);
+   C = hypre_CSRMatrixCreate(nrows_A, ncols_A, num_nonzeros);
    hypre_CSRMatrixI(C) = C_i;
-   hypre_InitializeCSRMatrix(C);
+   hypre_CSRMatrixInitialize(C);
    C_j = hypre_CSRMatrixJ(C);
    C_data = hypre_CSRMatrixData(C);
 
@@ -122,15 +122,15 @@ hypre_Matadd( hypre_CSRMatrix *A,
 }	
 
 /*--------------------------------------------------------------------------
- * hypre_Matmul
+ * hypre_CSRMatrixMultiply
  * multiplies two CSR Matrices A and B and returns a CSR Matrix C;
  * Note: The routine does not check for 0-elements which might be generated
  *       through cancellation of elements in A and B or already contained
- 	 in A and B. To remove those, use hypre_DeleteZerosInMatrix 
+ 	 in A and B. To remove those, use hypre_CSRMatrixDeleteZeros 
  *--------------------------------------------------------------------------*/
 
 hypre_CSRMatrix *
-hypre_Matmul( hypre_CSRMatrix *A,
+hypre_CSRMatrixMultiply( hypre_CSRMatrix *A,
               hypre_CSRMatrix *B)
 {
    double     *A_data   = hypre_CSRMatrixData(A);
@@ -184,9 +184,9 @@ hypre_Matmul( hypre_CSRMatrix *A,
    	}
    }
 
-   C = hypre_CreateCSRMatrix(nrows_A, ncols_B, num_nonzeros);
+   C = hypre_CSRMatrixCreate(nrows_A, ncols_B, num_nonzeros);
    hypre_CSRMatrixI(C) = C_i;
-   hypre_InitializeCSRMatrix(C);
+   hypre_CSRMatrixInitialize(C);
    C_j = hypre_CSRMatrixJ(C);
    C_data = hypre_CSRMatrixData(C);
 
@@ -223,7 +223,7 @@ hypre_Matmul( hypre_CSRMatrix *A,
 }	
 
 hypre_CSRMatrix *
-hypre_DeleteZerosInMatrix( hypre_CSRMatrix *A, double tol)
+hypre_CSRMatrixDeleteZeros( hypre_CSRMatrix *A, double tol)
 {
    double     *A_data   = hypre_CSRMatrixData(A);
    int        *A_i      = hypre_CSRMatrixI(A);
@@ -248,8 +248,8 @@ hypre_DeleteZerosInMatrix( hypre_CSRMatrix *A, double tol)
 
    if (zeros)
    {
-	B = hypre_CreateCSRMatrix(nrows_A,ncols_A,num_nonzeros-zeros);
-	hypre_InitializeCSRMatrix(B);
+	B = hypre_CSRMatrixCreate(nrows_A,ncols_A,num_nonzeros-zeros);
+	hypre_CSRMatrixInitialize(B);
 	B_i = hypre_CSRMatrixI(B);
 	B_j = hypre_CSRMatrixJ(B);
 	B_data = hypre_CSRMatrixData(B);

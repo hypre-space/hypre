@@ -15,11 +15,11 @@
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * hypre_CreateCSRMatrix
+ * hypre_CSRMatrixCreate
  *--------------------------------------------------------------------------*/
 
 hypre_CSRMatrix *
-hypre_CreateCSRMatrix( int num_rows,
+hypre_CSRMatrixCreate( int num_rows,
                        int num_cols,
                        int num_nonzeros )
 {
@@ -41,11 +41,11 @@ hypre_CreateCSRMatrix( int num_rows,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_DestroyCSRMatrix
+ * hypre_CSRMatrixDestroy
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_DestroyCSRMatrix( hypre_CSRMatrix *matrix )
+hypre_CSRMatrixDestroy( hypre_CSRMatrix *matrix )
 {
    int  ierr=0;
 
@@ -64,11 +64,11 @@ hypre_DestroyCSRMatrix( hypre_CSRMatrix *matrix )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_InitializeCSRMatrix
+ * hypre_CSRMatrixInitialize
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_InitializeCSRMatrix( hypre_CSRMatrix *matrix )
+hypre_CSRMatrixInitialize( hypre_CSRMatrix *matrix )
 {
    int  num_rows     = hypre_CSRMatrixNumRows(matrix);
    int  num_nonzeros = hypre_CSRMatrixNumNonzeros(matrix);
@@ -86,11 +86,11 @@ hypre_InitializeCSRMatrix( hypre_CSRMatrix *matrix )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SetCSRMatrixDataOwner
+ * hypre_CSRMatrixSetDataOwner
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_SetCSRMatrixDataOwner( hypre_CSRMatrix *matrix,
+hypre_CSRMatrixSetDataOwner( hypre_CSRMatrix *matrix,
                              int              owns_data )
 {
    int    ierr=0;
@@ -101,11 +101,11 @@ hypre_SetCSRMatrixDataOwner( hypre_CSRMatrix *matrix,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_ReadCSRMatrix
+ * hypre_CSRMatrixRead
  *--------------------------------------------------------------------------*/
 
 hypre_CSRMatrix *
-hypre_ReadCSRMatrix( char *file_name )
+hypre_CSRMatrixRead( char *file_name )
 {
    hypre_CSRMatrix  *matrix;
 
@@ -139,9 +139,9 @@ hypre_ReadCSRMatrix( char *file_name )
 
    num_nonzeros = matrix_i[num_rows];
 
-   matrix = hypre_CreateCSRMatrix(num_rows, num_rows, matrix_i[num_rows]);
+   matrix = hypre_CSRMatrixCreate(num_rows, num_rows, matrix_i[num_rows]);
    hypre_CSRMatrixI(matrix) = matrix_i;
-   hypre_InitializeCSRMatrix(matrix);
+   hypre_CSRMatrixInitialize(matrix);
 
    matrix_j = hypre_CSRMatrixJ(matrix);
    for (j = 0; j < num_nonzeros; j++)
@@ -170,11 +170,11 @@ hypre_ReadCSRMatrix( char *file_name )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PrintCSRMatrix
+ * hypre_CSRMatrixPrint
  *--------------------------------------------------------------------------*/
 
 int
-hypre_PrintCSRMatrix( hypre_CSRMatrix *matrix,
+hypre_CSRMatrixPrint( hypre_CSRMatrix *matrix,
                       char            *file_name )
 {
    FILE    *fp;
@@ -224,14 +224,14 @@ hypre_PrintCSRMatrix( hypre_CSRMatrix *matrix,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_CopyCSRMatrix:
+ * hypre_CSRMatrixCopy:
  * copys A to B, 
  * if copy_data = 0 only the structure of A is copied to B.
  * the routine does not check if the dimensions of A and B match !!! 
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_CopyCSRMatrix( hypre_CSRMatrix *A, hypre_CSRMatrix *B, int copy_data )
+hypre_CSRMatrixCopy( hypre_CSRMatrix *A, hypre_CSRMatrix *B, int copy_data )
 {
    int  ierr=0;
    int  num_rows = hypre_CSRMatrixNumRows(A);
