@@ -127,7 +127,8 @@ hypre_ParAMGSetup( void               *amg_vdata,
        *--------------------------------------------------------------*/
       if (debug_flag) wall_time = time_getWallclockSeconds();
 
-      hypre_ParAMGBuildInterp(A_array[level], CF_marker_array[level], S, &P);
+      hypre_ParAMGBuildInterp(A_array[level], CF_marker_array[level], S,
+                              debug_flag, &P);
 
       if (debug_flag)
       {
