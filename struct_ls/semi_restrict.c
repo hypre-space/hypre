@@ -167,6 +167,7 @@ hypre_SemiRestrict( void               *restrict_vdata,
    constant_coefficient = hypre_StructMatrixConstantCoefficient(R);
    assert( constant_coefficient==0 || constant_coefficient==1 );
    /* ... if A has constant_coefficient==2, R has constant_coefficient==0 */
+   if (constant_coefficient==1) hypre_StructVectorClearBoundGhostValues( r );
 
    hypre_SetIndex(stridec, 1, 1, 1);
 

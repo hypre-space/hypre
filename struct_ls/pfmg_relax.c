@@ -73,11 +73,11 @@ hypre_PFMGRelax( void               *pfmg_relax_vdata,
                  hypre_StructVector *x                )
 {
    hypre_PFMGRelaxData *pfmg_relax_data = pfmg_relax_vdata;
-   int                  relax_type = (pfmg_relax_data -> relax_type);
-   int                  constant_coeff= hypre_StructMatrixConstantCoefficient(A);
+   int          relax_type = (pfmg_relax_data -> relax_type);
+   int          constant_coefficient= hypre_StructMatrixConstantCoefficient(A);
+   int          ierr = 0;
 
-   int                  ierr = 0;
-
+   if (constant_coefficient==1) hypre_StructVectorClearBoundGhostValues( b );
    switch(relax_type)
    {
       case 0:
@@ -86,7 +86,7 @@ hypre_PFMGRelax( void               *pfmg_relax_vdata,
          break;
       case 2:
       case 3:
-         if (constant_coeff)
+         if (constant_coefficient)
          {
             ierr = hypre_RedBlackConstantCoefGS((pfmg_relax_data -> rb_relax_data), 
                                                  A, b, x);
