@@ -7,7 +7,7 @@
 #EHEADER***********************************************************************
 
 .SUFFIXES:
-.SUFFIXES: .C .c .o
+.SUFFIXES: .cxx .c .o
 
 srcdir = @srcdir@
 VPATH = @srcdir@
@@ -68,15 +68,15 @@ HEADERS =\
  mli_matrix.h
 
 FILES =\
- mli_matrix.C \
- mli_matrix_mult.C \
- mli_matrix_utils.C
+ mli_matrix.cxx \
+ mli_matrix_mult.cxx \
+ mli_matrix_utils.cxx
 
-DRIVER_FILES = driver.C
+DRIVER_FILES = driver.cxx
 
-OBJS = ${FILES:.C=.o}
+OBJS = ${FILES:.cxx=.o}
 
-DRIVER_OBJS = ${DRIVERS_FILE:.C=.o}
+DRIVER_OBJS = ${DRIVERS_FILE:.cxx=.o}
 
 ##################################################################
 # Targets
@@ -109,6 +109,6 @@ ${OBJS}: ${HEADERS}
 
 .c.o:
 	${CC} -o $@ -c ${CFLAGS} $<
-.C.o:
+.cxx.o:
 	${CXX} -o $@ -c ${CXXFLAGS} $<
 

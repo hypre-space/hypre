@@ -7,7 +7,7 @@
 #EHEADER***********************************************************************
 
 .SUFFIXES:
-.SUFFIXES: .C .c .o
+.SUFFIXES: .cxx .c .o
 
 srcdir = @srcdir@
 VPATH = @srcdir@
@@ -67,22 +67,22 @@ HEADERS =\
  mli_solver_arpacksuperlu.h
 
 FILES =\
- mli_solver.C \
- mli_solver_jacobi.C \
- mli_solver_bjacobi.C \
- mli_solver_gs.C \
- mli_solver_sgs.C \
- mli_solver_bsgs.C \
- mli_solver_parasails.C \
- mli_solver_mls.C \
- mli_solver_chebyshev.C \
- mli_solver_cg.C \
- mli_solver_kaczmarz.C \
- mli_solver_superlu.C \
- mli_solver_seqsuperlu.C \
- mli_solver_arpacksuperlu.C
+ mli_solver.cxx \
+ mli_solver_jacobi.cxx \
+ mli_solver_bjacobi.cxx \
+ mli_solver_gs.cxx \
+ mli_solver_sgs.cxx \
+ mli_solver_bsgs.cxx \
+ mli_solver_parasails.cxx \
+ mli_solver_mls.cxx \
+ mli_solver_chebyshev.cxx \
+ mli_solver_cg.cxx \
+ mli_solver_kaczmarz.cxx \
+ mli_solver_superlu.cxx \
+ mli_solver_seqsuperlu.cxx \
+ mli_solver_arpacksuperlu.cxx
 
-OBJS = ${FILES:.C=.o}
+OBJS = ${FILES:.cxx=.o}
 
 ##################################################################
 # Targets
@@ -111,6 +111,6 @@ ${OBJS}: ${HEADERS}
 
 .c.o:
 	${CC} -o $@ -c ${CFLAGS} $<
-.C.o:
+.cxx.o:
 	${CXX} -o $@ -c ${CXXFLAGS} $<
 
