@@ -91,10 +91,16 @@ main( int   argc,
          build_matrix_type      = 1;
          build_matrix_arg_index = arg_index;
       }
-      else if ( strcmp(argv[arg_index], "-laplacian9pt") == 0 )
+      else if ( strcmp(argv[arg_index], "-9pt") == 0 )
       {
          arg_index++;
          build_matrix_type      = 3;
+         build_matrix_arg_index = arg_index;
+      }
+      else if ( strcmp(argv[arg_index], "-27pt") == 0 )
+      {
+         arg_index++;
+         build_matrix_type      = 4;
          build_matrix_arg_index = arg_index;
       }
       else if ( strcmp(argv[arg_index], "-solver") == 0 )
@@ -197,6 +203,10 @@ main( int   argc,
    else if ( build_matrix_type == 3 )
    {
       BuildLaplacian9pt(argc, argv, build_matrix_arg_index, &A);
+   }
+   else if ( build_matrix_type == 4 )
+   {
+      BuildLaplacian27pt(argc, argv, build_matrix_arg_index, &A);
    }
 
    /*-----------------------------------------------------------
@@ -634,7 +644,7 @@ BuildLaplacian( int               argc,
 }
 
 /*----------------------------------------------------------------------
- * Build standard 9-point laplacian in 2D with grid and anisotropy.
+ * Build standard 9-point laplacian in 2D 
  * Parameters given in command line.
  *----------------------------------------------------------------------*/
 
@@ -762,6 +772,131 @@ BuildLaplacian9pt( int               argc,
                                values, &global_part);
 #endif
    A = hypre_GenerateLaplacian9pt(nx, ny, P, Q, values);
+
+   hypre_TFree(values);
+
+   *A_ptr = A;
+#if 0
+   *global_part_ptr = global_part;
+#endif
+
+   return (0);
+}
+
+/*----------------------------------------------------------------------
+ * Build standard 27-point laplacian in 3D 
+ * Parameters given in command line.
+ *----------------------------------------------------------------------*/
+
+int
+BuildLaplacian27pt(int               argc,
+                   char             *argv[],
+                   int               arg_index,
+                   hypre_CSRMatrix **A_ptr     )
+{
+   int                 nx, ny, nz;
+   int                 P, Q, R;
+
+#if 0
+   hypre_ParCSRMatrix *A;
+   int 		      *global_part;
+#endif
+   hypre_CSRMatrix    *A;
+
+   int                 num_procs, myid, volume;
+   int                 p, q, r;
+   double             *values;
+
+   /*-----------------------------------------------------------
+    * Initialize some stuff
+    *-----------------------------------------------------------*/
+
+#if 0 
+   MPI_Comm_size(MPI_COMM_WORLD, &num_procs );
+   MPI_Comm_rank(MPI_COMM_WORLD, &myid );
+#endif
+
+   num_procs = 1;
+   myid = 0;
+
+   /*-----------------------------------------------------------
+    * Set defaults
+    *-----------------------------------------------------------*/
+ 
+   nx = 10;
+   ny = 10;
+   nz = 10;
+
+   P  = 1;
+   Q  = num_procs;
+   R  = 1;
+
+   /*-----------------------------------------------------------
+    * Parse command line
+    *-----------------------------------------------------------*/
+   arg_index = 0; 
+   while (arg_index < argc)
+   {
+      if ( strcmp(argv[arg_index], "-n") == 0 )
+      {
+         arg_index++;
+         nx = atoi(argv[arg_index++]);
+         ny = atoi(argv[arg_index++]);
+         nz = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-P") == 0 )
+      {
+         arg_index++;
+         P  = atoi(argv[arg_index++]);
+         Q  = atoi(argv[arg_index++]);
+         R  = atoi(argv[arg_index++]);
+      }
+      else
+      {
+         arg_index++;
+      }
+   }
+
+   /*-----------------------------------------------------------
+    * Print driver parameters
+    *-----------------------------------------------------------*/
+ 
+   if (myid == 0)
+   {
+      printf("  27pt_Laplacian:\n");
+      printf("    (nx, ny) = (%d, %d, %d)\n", nx, ny, nz);
+      printf("    (Px, Py) = (%d, %d, %d)\n", P,  Q, R);
+   }
+
+   /*-----------------------------------------------------------
+    * Set up the grid structure
+    *-----------------------------------------------------------*/
+
+   volume  = nx*ny*nz;
+
+   /* compute p,q,r from P,Q, R and myid */
+   p = myid % P;
+   q = ( myid - p)/P;
+
+   /*-----------------------------------------------------------
+    * Generate the matrix 
+    *-----------------------------------------------------------*/
+ 
+   values = hypre_CTAlloc(double, 2);
+
+   values[1] = -1.0;
+
+   values[0] = 26.0;
+   if (nx == 1 || ny == 1 || nz == 1)
+   {
+      values[0] = 8.0;
+   }
+   if (ny*nx == 1 || ny*nz == 1 || nx*ny == 1)
+   {
+      values[0] = 2.0;
+   }
+
+   A = hypre_GenerateLaplacian27pt(nx, ny, nz, P, Q, R, values);
 
    hypre_TFree(values);
 
