@@ -93,12 +93,8 @@ FILES = HYPRE_LinSysCore.C cfei_hypre.C hypre_slide_reduce.C \
         hypre_schur_reduce.C hypre_lsi_misc.c hypre_lsi_ddamg.C \
         HYPRE_parcsr_ml.c HYPRE_LSI_ddilut.c hypre_lsi_amge.c \
         HYPRE_parcsr_bicgstabl.c bicgstabl.c fegridinfo.C \
-<<<<<<< Makefile.in
         HYPRE_LSI_poly.c HYPRE_LSI_ssor.c HYPRE_LSI_ddict.c \
         HYPRE_parcsr_TFQmr.c TFQmr.c HYPRE_parcsr_bicgs.c bicgs.c
-=======
-        hypre_lsi_poly.c hypre_lsi_mssor.c
->>>>>>> 1.28
 
 TEMP = ${FILES:.c=.o}
 OBJS = ${TEMP:.C=.o}
@@ -107,12 +103,8 @@ FILESV12 = HYPRE_LinSysCore.C hypre_slide_reduce.C \
            hypre_schur_reduce.C hypre_lsi_misc.c hypre_lsi_ddamg.C \
            HYPRE_parcsr_ml.c HYPRE_LSI_ddilut.c \
            HYPRE_parcsr_bicgstabl.c bicgstabl.c fegridinfo.C \
-<<<<<<< Makefile.in
            HYPRE_LSI_poly.c HYPRE_LSI_ssor.c HYPRE_LSI_ddict.c \
            HYPRE_parcsr_TFQmr.c TFQmr.c HYPRE_parcsr_bicgs.c bicgs.c
-=======
-           hypre_lsi_poly.c hypre_lsi_mssor.c
->>>>>>> 1.28
 
 TEMPV12 = ${FILESV12:.c=.o}
 OBJSV12 = ${TEMPV12:.C=.o}
