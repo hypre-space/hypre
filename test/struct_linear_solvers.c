@@ -219,6 +219,7 @@ main( int   argc,
       printf("                         1  - PFMG\n");
       printf("                         10 - CG with SMG precond\n");
       printf("                         11 - CG with PFMG precond\n");
+      printf("                         17 - CG with 2-step Jacobi\n");
       printf("                         18 - CG with diagonal scaling\n");
       printf("                         19 - CG\n");
       printf("                         20 - Hybrid with SMG precond\n");
