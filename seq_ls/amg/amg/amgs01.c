@@ -69,7 +69,6 @@ Data        *data;
    int     *levv;
    int     *levp;
    int     *levi;
-/* veh test levpi */
    int     *levpi;
    int     *numa;
    int     *numb;
@@ -213,8 +212,7 @@ Data        *data;
     * Shift index arrays
     *----------------------------------------------------------*/
    
-   /* make room for `num(j)+1' entry in `ia' and `ib' */
-   /* veh also make room for `num(j)+1' entry in iv */
+   /* make room for `num(j)+1' entry in `ia', `ib', and `iv' */
    for (j = num_levels-1; j > 0; j--)
    {
       for (k = numv[j]; k >= 0; k--)
