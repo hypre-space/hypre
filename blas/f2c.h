@@ -11,7 +11,6 @@
 /* we assume short, float are OK */
 
 /* integer changed to int - edmond 1/12/00 */
-/* typedef long int /* long int */ integer; */
 
 typedef int integer;
 typedef unsigned long int /* long */ uinteger;
@@ -52,7 +51,7 @@ typedef short ftnlen;
 typedef short ftnint;
 #else
 typedef long int /* int or long int */ flag;
-typedef long int /* int or long int */ ftnlen;
+typedef int /* int or long int */ ftnlen; /* changed by edmond */
 typedef long int /* int or long int */ ftnint;
 #endif
 
