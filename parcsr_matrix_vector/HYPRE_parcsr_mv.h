@@ -27,8 +27,8 @@ extern "C" {
  *--------------------------------------------------------------------------*/
 
 /* this needs to be fixed */
-typedef void *HYPRE_ParCSRMatrix;
-typedef void *HYPRE_ParVector;
+typedef struct {int opaque;} *HYPRE_ParCSRMatrix;
+typedef struct {int opaque;} *HYPRE_ParVector;
 
 /*--------------------------------------------------------------------------
  * Prototypes
