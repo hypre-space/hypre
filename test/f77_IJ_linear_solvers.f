@@ -379,6 +379,7 @@ c       Solve the system using preconditioned GMRES
           precond_id = 2
 
 c Set defaults for BoomerAMG
+          maxiter = 1
           coarsen_type = 0
           hybrid = 1
           measure_type = 0
@@ -387,46 +388,32 @@ c Set defaults for BoomerAMG
           cycle_type = 1
 
           call HYPRE_ParAMGCreate(precond, ierr)
-
           call HYPRE_ParAMGSetCoarsenType(precond,
      &                                    (hybrid*coarsen_type), ierr)
-
           call HYPRE_ParAMGSetMeasureType(precond, measure_type, ierr)
-
           call HYPRE_ParAMGSetStrongThreshold(precond,
      &                                        strong_threshold, ierr)
-
 c         call HYPRE_ParAMGSetTruncFactor(precond, trunc_factor, ierr)
-
           call HYPRE_ParAMGSetLogging(precond, ioutdat,
      &                                "test.out.log", ierr)
-
-          call HYPRE_ParAMGSetMaxIter(precond, 1, ierr)
-
+          call HYPRE_ParAMGSetMaxIter(precond, maxiter, ierr)
           call HYPRE_ParAMGSetCycleType(precond, cycle_type, ierr)
-
           call HYPRE_ParAMGInitGridRelaxation(num_grid_sweeps,
      &                                        grid_relax_type,
      &                                        grid_relax_points,
      &                                        coarsen_type,
      &                                        relax_weights,
      &                                        MAXLEVELS,ierr)
-
           call HYPRE_ParAMGSetNumGridSweeps(precond,
      &                                      num_grid_sweeps, ierr)
-
           call HYPRE_ParAMGSetGridRelaxType(precond,
      &                                      grid_relax_type, ierr)
-
           call HYPRE_ParAMGSetRelaxWeight(precond,
      &                                    relax_weights, ierr)
-
           call HYPRE_ParAMGSetGridRelaxPoints(precond,
      &                                        grid_relax_points, ierr)
-
           call HYPRE_ParAMGSetMaxLevels(precond,
      &                                  MAXLEVELS, ierr)
-
           call HYPRE_ParCSRGMRESSetPrecond(solver, precond_id,
      &                                     precond, ierr)
 
@@ -453,24 +440,20 @@ c         call HYPRE_ParAMGSetTruncFactor(precond, trunc_factor, ierr)
           call HYPRE_ParCSRGMRESSetPrecond(solver, precond_id,
      &                                     precond, ierr)
 
-           if (drop_tol .ge. 0.)
-     &         call HYPRE_ParCSRPilutSetDropToleran(precond,
+          if (drop_tol .ge. 0.)
+     &        call HYPRE_ParCSRPilutSetDropToleran(precond,
      &                                              drop_tol, ierr)
 
         endif
 
         call HYPRE_ParCSRGMRESSetup(solver, A_storage, b_storage,
      &                              x_storage, ierr)
-
         call HYPRE_ParCSRGMRESSolve(solver, A_storage, b_storage,
      &                              x_storage, ierr)
-
         call HYPRE_ParCSRGMRESGetNumIteratio(solver,
      &                                       num_iterations, ierr)
-
         call HYPRE_ParCSRGMRESGetFinalRelati(solver,
      &                                       final_res_norm, ierr)
-
         call HYPRE_ParCSRGMRESDestroy(solver, ierr)
 
       endif
@@ -491,9 +474,7 @@ c     Finalize things
 c-----------------------------------------------------------------------
 
       call HYPRE_ParCSRMatrixDestroy(A_storage, ierr)
-
       call HYPRE_IJVectorDestroy(b, ierr)
-
       call HYPRE_IJVectorDestroy(x, ierr)
 
 c     Finalize MPI
