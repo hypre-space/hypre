@@ -120,3 +120,14 @@ ZZZ_SMGGetNumIterations( ZZZ_StructSolver  solver,
    return( zzz_SMGGetNumIterations( (void *) solver, num_iterations ) );
 }
 
+/*--------------------------------------------------------------------------
+ * ZZZ_SMGGetFinalRelativeResidualNorm
+ *--------------------------------------------------------------------------*/
+
+int
+ZZZ_SMGGetFinalRelativeResidualNorm( ZZZ_StructSolver  solver,
+                                     double           *relative_residual_norm )
+{
+   return( zzz_SMGGetFinalRelativeResidualNorm( (void *) solver, relative_residual_norm ) );
+}
+
