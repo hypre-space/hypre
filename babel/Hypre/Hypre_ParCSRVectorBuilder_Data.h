@@ -7,18 +7,7 @@
 #ifndef Hypre_ParCSRVectorBuilder_DataMembers_
 #define Hypre_ParCSRVectorBuilder_DataMembers_
 
-/* jfp: this really belongs in a .h file... */
-#ifndef array1int_
-#define array1int_
-typedef struct array1int{
-	int upper[1];
-	int lower[1];
-	int *data;
-}array1int;
-#endif
-
 #include "Hypre_ParCSRVector.h"
-#include "Hypre_MPI_Com.h"
 
 struct Hypre_ParCSRVectorBuilder_private_type
 {

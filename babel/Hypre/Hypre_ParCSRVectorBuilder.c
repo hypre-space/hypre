@@ -69,7 +69,7 @@ int impl_Hypre_ParCSRVectorBuilder_New
 
    Vp = this->d_table->newvec->d_table;
    V = Vp->Hvec;
-   Vp->comm = comm;
+   Vp->comm = com;
 
    ierr += HYPRE_IJVectorCreate( *comm, V, global_n );
    ierr += HYPRE_IJVectorSetLocalStorageType( *V, HYPRE_PARCSR );
@@ -94,7 +94,7 @@ int  impl_Hypre_ParCSRVectorBuilder_SetPartitioning
 ( Hypre_ParCSRVectorBuilder this, array1int partitioning ) {
    Hypre_ParCSRVector vec = this->d_table->newvec;
    HYPRE_IJVector * Hvec = vec->d_table->Hvec;
-   int * partitioning_data = &(partitioning.data[*(partitioning.lower)]);
+   int * partition_data = &(partitioning.data[*(partitioning.lower)]);
 
    if (this->d_table->vecgood==1) {
       /* ... error to set partitioning on a fully built vector */
@@ -103,7 +103,7 @@ int  impl_Hypre_ParCSRVectorBuilder_SetPartitioning
       return 1;
    }
    else {
-      return HYPRE_IJVectorSetPartitioning( *Hvec, partitioning_data );
+      return HYPRE_IJVectorSetPartitioning( *Hvec, partition_data );
    }
 } /* end impl_Hypre_ParCSRVectorBuilderSetPartitioning */
 
@@ -211,3 +211,44 @@ Hypre_Vector  impl_Hypre_ParCSRVectorBuilder_GetConstructedObject
 
 } /* end impl_Hypre_ParCSRVectorBuilderGetConstructedObject */
 
+/* ********************************************************
+ * ********************************************************
+ *
+ * The following functions are not declared in the SIDL file.
+ *
+ * ********************************************************
+ * ********************************************************
+ */
+
+
+/* ********************************************************
+ * Hypre_ParCSRVectorBuilder_New_fromHYPRE
+ *
+ * Input: V, a pointer to an already-constructed HYPRE_IJVector.
+ * At a minimum, V represents a call of HYPRE_IJVectorCreate.
+ * This function builds a Hypre_ParCSRVector which points to it.
+ * The new Hypre_ParCSRVector is available by calling
+ * GetConstructedObject.
+ * There is no need to call Setup or Set functions if that has
+ * already been done directly to the HYPRE_IJMatrix.
+ **********************************************************/
+int Hypre_ParCSRVectorBuilder_New_fromHYPRE
+( Hypre_ParCSRVectorBuilder this, Hypre_MPI_Com com, HYPRE_IJVector * V ) {
+
+   int ierr = 0;
+
+   struct Hypre_ParCSRVector_private_type * Vp;
+   if ( this->d_table->newvec != NULL )
+      Hypre_ParCSRVector_deleteReference( this->d_table->newvec );
+   this->d_table->newvec = Hypre_ParCSRVector_new();
+   this->d_table->vecgood = 0;
+   Hypre_ParCSRVector_addReference( this->d_table->newvec );
+
+   Vp = this->d_table->newvec->d_table;
+   Vp->Hvec = V;
+   Vp->comm = com;
+   this->d_table->vecgood = 1;
+
+   return ierr;
+
+} /* end impl_Hypre_ParCSRVectorBuilderNew */
