@@ -25035,13 +25035,13 @@ ac_compile='$F77 -c $FFLAGS conftest.$ac_ext >&5'
 ac_link='$F77 -o conftest$ac_exeext $FFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_f77_compiler_gnu
 case $ac_cv_f77_mangling in
-  upper*) ac_val="DSYEV" ;;
-  lower*) ac_val="dsyev" ;;
+  upper*) ac_val="DSYGV" ;;
+  lower*) ac_val="dsygv" ;;
   *)      ac_val="unknown" ;;
 esac
 case $ac_cv_f77_mangling in *," underscore"*) ac_val="$ac_val"_ ;; esac
 
-dsyev="$ac_val"
+dsygv="$ac_val"
 
 ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
@@ -25060,8 +25060,8 @@ fi
 # First, check LAPACK_LIBS environment variable
 if test "x$LAPACK_LIBS" != x; then
         save_LIBS="$LIBS"; LIBS="$LAPACK_LIBS $BLAS_LIBS $LIBS $FLIBS"
-        echo "$as_me:$LINENO: checking for $dsyev in $LAPACK_LIBS" >&5
-echo $ECHO_N "checking for $dsyev in $LAPACK_LIBS... $ECHO_C" >&6
+        echo "$as_me:$LINENO: checking for $dsygv in $LAPACK_LIBS" >&5
+echo $ECHO_N "checking for $dsygv in $LAPACK_LIBS... $ECHO_C" >&6
         cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
 _ACEOF
@@ -25075,7 +25075,7 @@ extern "C"
 #endif
 /* We use char because int might match the return type of a gcc2
    builtin and then its argument prototype would still apply.  */
-char $dsyev ();
+char $dsygv ();
 #ifdef F77_DUMMY_MAIN
 
 #  ifdef __cplusplus
@@ -25087,7 +25087,7 @@ char $dsyev ();
 int
 main ()
 {
-$dsyev ();
+$dsygv ();
   ;
   return 0;
 }
@@ -25134,9 +25134,9 @@ fi
 # LAPACK linked to by default?  (is sometimes included in BLAS lib)
 if test $acx_lapack_ok = no; then
         save_LIBS="$LIBS"; LIBS="$LIBS $BLAS_LIBS $FLIBS"
-        as_ac_var=`echo "ac_cv_func_$dsyev" | $as_tr_sh`
-echo "$as_me:$LINENO: checking for $dsyev" >&5
-echo $ECHO_N "checking for $dsyev... $ECHO_C" >&6
+        as_ac_var=`echo "ac_cv_func_$dsygv" | $as_tr_sh`
+echo "$as_me:$LINENO: checking for $dsygv" >&5
+echo $ECHO_N "checking for $dsygv... $ECHO_C" >&6
 if eval "test \"\${$as_ac_var+set}\" = set"; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
@@ -25146,12 +25146,12 @@ _ACEOF
 cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
-/* Define $dsyev to an innocuous variant, in case <limits.h> declares $dsyev.
+/* Define $dsygv to an innocuous variant, in case <limits.h> declares $dsygv.
    For example, HP-UX 11i <limits.h> declares gettimeofday.  */
-#define $dsyev innocuous_$dsyev
+#define $dsygv innocuous_$dsygv
 
 /* System header to define __stub macros and hopefully few prototypes,
-    which can conflict with char $dsyev (); below.
+    which can conflict with char $dsygv (); below.
     Prefer <limits.h> to <assert.h> if __STDC__ is defined, since
     <limits.h> exists even on freestanding compilers.  */
 
@@ -25161,7 +25161,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 # include <assert.h>
 #endif
 
-#undef $dsyev
+#undef $dsygv
 
 /* Override any gcc2 internal prototype to avoid an error.  */
 #ifdef __cplusplus
@@ -25170,14 +25170,14 @@ extern "C"
 #endif
 /* We use char because int might match the return type of a gcc2
    builtin and then its argument prototype would still apply.  */
-char $dsyev ();
+char $dsygv ();
 /* The GNU C library defines this for functions which it implements
     to always fail with ENOSYS.  Some functions are actually named
     something starting with __ and the normal name is an alias.  */
-#if defined (__stub_$dsyev) || defined (__stub___$dsyev)
+#if defined (__stub_$dsygv) || defined (__stub___$dsygv)
 choke me
 #else
-char (*f) () = $dsyev;
+char (*f) () = $dsygv;
 #endif
 #ifdef __cplusplus
 }
@@ -25194,7 +25194,7 @@ char (*f) () = $dsyev;
 int
 main ()
 {
-return f != $dsyev;
+return f != $dsygv;
   ;
   return 0;
 }
@@ -25244,9 +25244,9 @@ fi
 for lapack in lapack lapack_rs6k; do
         if test $acx_lapack_ok = no; then
                 save_LIBS="$LIBS"; LIBS="$BLAS_LIBS $LIBS"
-                as_ac_Lib=`echo "ac_cv_lib_$lapack''_$dsyev" | $as_tr_sh`
-echo "$as_me:$LINENO: checking for $dsyev in -l$lapack" >&5
-echo $ECHO_N "checking for $dsyev in -l$lapack... $ECHO_C" >&6
+                as_ac_Lib=`echo "ac_cv_lib_$lapack''_$dsygv" | $as_tr_sh`
+echo "$as_me:$LINENO: checking for $dsygv in -l$lapack" >&5
+echo $ECHO_N "checking for $dsygv in -l$lapack... $ECHO_C" >&6
 if eval "test \"\${$as_ac_Lib+set}\" = set"; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
@@ -25265,7 +25265,7 @@ extern "C"
 #endif
 /* We use char because int might match the return type of a gcc2
    builtin and then its argument prototype would still apply.  */
-char $dsyev ();
+char $dsygv ();
 #ifdef F77_DUMMY_MAIN
 
 #  ifdef __cplusplus
@@ -25277,7 +25277,7 @@ char $dsyev ();
 int
 main ()
 {
-$dsyev ();
+$dsygv ();
   ;
   return 0;
 }

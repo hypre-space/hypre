@@ -63,9 +63,10 @@ am__libHYPRE_struct_mv_a_SOURCES_DIST = F90_HYPRE_struct_grid.c \
 	F90_HYPRE_struct_vector.c HYPRE_struct_grid.c \
 	HYPRE_struct_matrix.c HYPRE_struct_stencil.c \
 	HYPRE_struct_vector.c box.c box_algebra.c box_alloc.c \
-	box_boundary.c box_neighbors.c communication_info.c computation.c grow.c \
-	project.c struct_axpy.c struct_communication.c struct_copy.c \
-	struct_grid.c struct_innerprod.c struct_io.c struct_matrix.c \
+	box_boundary.c box_neighbors.c communication_info.c \
+	computation.c grow.c project.c struct_axpy.c \
+	struct_communication.c struct_copy.c struct_grid.c \
+	struct_innerprod.c struct_io.c struct_matrix.c \
 	struct_matrix_mask.c struct_matvec.c struct_scale.c \
 	struct_stencil.c struct_vector.c
 am__objects_1 = F90_HYPRE_struct_grid.$(OBJEXT) \
@@ -75,14 +76,15 @@ am__objects_1 = F90_HYPRE_struct_grid.$(OBJEXT) \
 	HYPRE_struct_matrix.$(OBJEXT) HYPRE_struct_stencil.$(OBJEXT) \
 	HYPRE_struct_vector.$(OBJEXT) box.$(OBJEXT) \
 	box_algebra.$(OBJEXT) box_alloc.$(OBJEXT) \
-	box_boundary.$(OBJEXT) box_neighbors.$(OBJEXT) communication_info.$(OBJEXT) \
-	computation.$(OBJEXT) grow.$(OBJEXT) project.$(OBJEXT) \
-	struct_axpy.$(OBJEXT) struct_communication.$(OBJEXT) \
-	struct_copy.$(OBJEXT) struct_grid.$(OBJEXT) \
-	struct_innerprod.$(OBJEXT) struct_io.$(OBJEXT) \
-	struct_matrix.$(OBJEXT) struct_matrix_mask.$(OBJEXT) \
-	struct_matvec.$(OBJEXT) struct_scale.$(OBJEXT) \
-	struct_stencil.$(OBJEXT) struct_vector.$(OBJEXT)
+	box_boundary.$(OBJEXT) box_neighbors.$(OBJEXT) \
+	communication_info.$(OBJEXT) computation.$(OBJEXT) \
+	grow.$(OBJEXT) project.$(OBJEXT) struct_axpy.$(OBJEXT) \
+	struct_communication.$(OBJEXT) struct_copy.$(OBJEXT) \
+	struct_grid.$(OBJEXT) struct_innerprod.$(OBJEXT) \
+	struct_io.$(OBJEXT) struct_matrix.$(OBJEXT) \
+	struct_matrix_mask.$(OBJEXT) struct_matvec.$(OBJEXT) \
+	struct_scale.$(OBJEXT) struct_stencil.$(OBJEXT) \
+	struct_vector.$(OBJEXT)
 @STATICONLY_TRUE@am_libHYPRE_struct_mv_a_OBJECTS = $(am__objects_1)
 libHYPRE_struct_mv_a_OBJECTS = $(am_libHYPRE_struct_mv_a_OBJECTS)
 libLTLIBRARIES_INSTALL = $(INSTALL)
@@ -93,9 +95,10 @@ am__libHYPRE_struct_mv_la_SOURCES_DIST = F90_HYPRE_struct_grid.c \
 	F90_HYPRE_struct_vector.c HYPRE_struct_grid.c \
 	HYPRE_struct_matrix.c HYPRE_struct_stencil.c \
 	HYPRE_struct_vector.c box.c box_algebra.c box_alloc.c \
-	box_boundar.c box_neighbors.c communication_info.c computation.c grow.c \
-	project.c struct_axpy.c struct_communication.c struct_copy.c \
-	struct_grid.c struct_innerprod.c struct_io.c struct_matrix.c \
+	box_boundary.c box_neighbors.c communication_info.c \
+	computation.c grow.c project.c struct_axpy.c \
+	struct_communication.c struct_copy.c struct_grid.c \
+	struct_innerprod.c struct_io.c struct_matrix.c \
 	struct_matrix_mask.c struct_matvec.c struct_scale.c \
 	struct_stencil.c struct_vector.c
 am__objects_2 = F90_HYPRE_struct_grid.lo F90_HYPRE_struct_matrix.lo \
