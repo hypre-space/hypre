@@ -499,7 +499,7 @@ then
 dnl * there seem to be a problem here
 dnl *  HYPRE_ADD_LIB(mpi, main, /usr/opt/MPI170/lib, MPI, ,
 dnl *    CASC_ADD_LIB(mpi, main, /usr/lib, MPI) )
-       CASC_ADD_LIB(mpi, main, /usr/lib, MPI) )
+       CASC_ADD_LIB(mpi, main, /usr/lib, MPI)
        if test -z "$MPILIBS"
        then
          AC_MSG_WARN([MPI not found--in alpha test-must set manually using --with-flags])
