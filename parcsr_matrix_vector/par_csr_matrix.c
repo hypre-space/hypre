@@ -52,6 +52,12 @@ hypre_CreateParCSRMatrix( MPI_Comm comm,
 
    if (!col_starts)
    {
+      if (global_num_rows == global_num_cols)
+      {
+	col_starts = row_starts;
+      }
+      else
+      {
 	col_starts = hypre_CTAlloc(int, num_procs+1);
 	for (i=0; i < num_procs; i++)
 	{   	
@@ -60,6 +66,7 @@ hypre_CreateParCSRMatrix( MPI_Comm comm,
 		col_starts[i]--;
 	}
 	col_starts[num_procs] = global_num_cols;
+      }
    }
 
    first_row_index = row_starts[my_id];
@@ -82,7 +89,10 @@ hypre_CreateParCSRMatrix( MPI_Comm comm,
 
    /* set defaults */
    hypre_ParCSRMatrixOwnsData(matrix) = 1;
-   hypre_ParCSRMatrixOwnsPartitioning(matrix) = 1;
+   hypre_ParCSRMatrixOwnsRowStarts(matrix) = 1;
+   hypre_ParCSRMatrixOwnsColStarts(matrix) = 1;
+   if (row_starts == col_starts)
+   	hypre_ParCSRMatrixOwnsColStarts(matrix) = 0;
 
    return matrix;
 }
@@ -107,17 +117,10 @@ hypre_DestroyParCSRMatrix( hypre_ParCSRMatrix *matrix )
          if (hypre_ParCSRMatrixCommPkg(matrix))
 	      hypre_DestroyMatvecCommPkg(hypre_ParCSRMatrixCommPkg(matrix));
       }
-      if ( hypre_ParCSRMatrixOwnsPartitioning(matrix) )
-      {
-      	 if (hypre_ParCSRMatrixRowStarts(matrix) == 
-			hypre_ParCSRMatrixColStarts(matrix))
+      if ( hypre_ParCSRMatrixOwnsRowStarts(matrix) )
       	      hypre_TFree(hypre_ParCSRMatrixRowStarts(matrix));
-      	 else
-	 {
-      	      hypre_TFree(hypre_ParCSRMatrixRowStarts(matrix));
+      if ( hypre_ParCSRMatrixOwnsColStarts(matrix) )
       	      hypre_TFree(hypre_ParCSRMatrixColStarts(matrix));
-	 }
-      }
       hypre_TFree(matrix);
    }
 
@@ -161,16 +164,31 @@ hypre_SetParCSRMatrixDataOwner( hypre_ParCSRMatrix *matrix,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SetParCSRMatrixPartitioningOwner
+ * hypre_SetParCSRMatrixRowStartsOwner
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_SetParCSRMatrixPartitioningOwner( hypre_ParCSRMatrix *matrix,
-                                	int              owns_partitioning )
+hypre_SetParCSRMatrixRowStartsOwner( hypre_ParCSRMatrix *matrix,
+                                     int owns_row_starts )
 {
    int    ierr=0;
 
-   hypre_ParCSRMatrixOwnsPartitioning(matrix) = owns_partitioning;
+   hypre_ParCSRMatrixOwnsRowStarts(matrix) = owns_row_starts;
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_SetParCSRMatrixColStartsOwner
+ *--------------------------------------------------------------------------*/
+
+int 
+hypre_SetParCSRMatrixColStartsOwner( hypre_ParCSRMatrix *matrix,
+                                     int owns_col_starts )
+{
+   int    ierr=0;
+
+   hypre_ParCSRMatrixOwnsColStarts(matrix) = owns_col_starts;
 
    return ierr;
 }
@@ -346,17 +364,12 @@ hypre_CSRMatrixToParCSRMatrix( MPI_Comm comm, hypre_CSRMatrix *A,
    local_num_rows = hypre_CTAlloc(int, num_procs);
    csr_matrix_datatypes = hypre_CTAlloc(MPI_Datatype, num_procs);
 
-   if (!row_starts)
-   {
-	row_starts = hypre_CTAlloc(int, num_procs+1);
-   	for (i=0; i < num_procs; i++)
-   	{
-	 MPE_Decomp1d(global_num_rows, num_procs, i, &row_starts[i], 
-		&local_num_rows[i]);
-	 row_starts[i]--;
-   	}
-	row_starts[num_procs] = global_num_rows;
-   }
+   par_matrix = hypre_CreateParCSRMatrix (comm, global_num_rows,
+	global_num_cols,row_starts,col_starts,0,0,0);
+
+   row_starts = hypre_ParCSRMatrixRowStarts(par_matrix);
+   col_starts = hypre_ParCSRMatrixColStarts(par_matrix);
+
    for (i=0; i < num_procs; i++)
 	 local_num_rows[i] = row_starts[i+1] - row_starts[i];
 
@@ -415,23 +428,9 @@ hypre_CSRMatrixToParCSRMatrix( MPI_Comm comm, hypre_CSRMatrix *A,
 	MPI_Type_free(csr_matrix_datatypes);
    }
 
-   if (!col_starts)
-   {
-	col_starts = hypre_CTAlloc(int,num_procs+1);
-	for (i=0; i < num_procs; i++)
-   	{
-    	    MPE_Decomp1d(global_num_cols, num_procs, i, &col_starts[i],
-		&last_col_diag);
-	    col_starts[i]--;
-   	}
-	col_starts[num_procs] = global_num_cols;
-   }
-   
    first_col_diag = col_starts[my_id];
    last_col_diag = col_starts[my_id+1]-1;
 
-   par_matrix = hypre_CreateParCSRMatrix (comm, global_num_rows,
-	global_num_cols,row_starts,col_starts,0,0,0);
    diag = hypre_ParCSRMatrixDiag(par_matrix);
    offd = hypre_ParCSRMatrixOffd(par_matrix);
 
