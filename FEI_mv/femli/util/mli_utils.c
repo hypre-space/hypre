@@ -404,7 +404,7 @@ int MLI_Utils_HypreMatrixGetInfo(void *Amat, int *mat_info, double *val_info)
 int MLI_Utils_HypreMatrixCompress(void *Amat, int blksize, void **Amat2) 
 {
    int                mypid, *partition, start_row, local_nrows;
-   int                global_nrows, new_lnrows, new_start_row;
+   int                new_lnrows, new_start_row;
    int                ierr, *row_lengths, irow, row_num, row_size, *col_ind;
    int                *new_ind, new_size, j, k, nprocs;
    double             *col_val, *new_val;
@@ -423,7 +423,6 @@ int MLI_Utils_HypreMatrixCompress(void *Amat, int blksize, void **Amat2)
    HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) hypreA,&partition);
    start_row    = partition[mypid];
    local_nrows  = partition[mypid+1] - start_row;
-   global_nrows = partition[nprocs];
    free( partition );
    if ( local_nrows % blksize != 0 )
    {
