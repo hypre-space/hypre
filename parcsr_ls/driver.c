@@ -102,10 +102,16 @@ main( int   argc,
          build_matrix_type      = 1;
          build_matrix_arg_index = arg_index;
       }
-      else if ( strcmp(argv[arg_index], "-laplacian9pt") == 0 )
+      else if ( strcmp(argv[arg_index], "-9pt") == 0 )
       {
          arg_index++;
          build_matrix_type      = 3;
+         build_matrix_arg_index = arg_index;
+      }
+      else if ( strcmp(argv[arg_index], "-27pt") == 0 )
+      {
+         arg_index++;
+         build_matrix_type      = 4;
          build_matrix_arg_index = arg_index;
       }
       else if ( strcmp(argv[arg_index], "-solver") == 0 )
@@ -243,7 +249,8 @@ main( int   argc,
       printf("  -fromonefile <filename>: matrix from standard CSR file\n");
       printf("\n");
       printf("  -laplacian [<options>] : build laplacian matrix\n");
-      printf("  -laplacian9pt [<opts>] : build 9pt 2D laplacian matrix\n");
+      printf("  -9pt [<opts>] : build 9pt 2D laplacian matrix\n");
+      printf("  -27pt [<opts>] : build 27pt 3D laplacian matrix\n");
       printf("    -n <nx> <ny> <nz>    : problem size per processor\n");
       printf("    -P <Px> <Py> <Pz>    : processor topology\n");
       printf("    -c <cx> <cy> <cz>    : diffusion coefficients\n");
@@ -292,6 +299,10 @@ main( int   argc,
    else if ( build_matrix_type == 3 )
    {
       BuildParLaplacian9pt(argc, argv, build_matrix_arg_index, &A);
+   }
+   else if ( build_matrix_type == 4 )
+   {
+      BuildParLaplacian27pt(argc, argv, build_matrix_arg_index, &A);
    }
 
    /*-----------------------------------------------------------
@@ -1129,6 +1140,119 @@ BuildParLaplacian9pt( int                  argc,
 
    A = hypre_GenerateLaplacian9pt(MPI_COMM_WORLD,
                                   nx, ny, P, Q, p, q, values);
+
+   hypre_TFree(values);
+
+   *A_ptr = A;
+
+   return (0);
+}
+/*----------------------------------------------------------------------
+ * Build 27-point laplacian in 3D, 
+ * Parameters given in command line.
+ *----------------------------------------------------------------------*/
+
+int
+BuildParLaplacian27pt( int                  argc,
+                       char                *argv[],
+                       int                  arg_index,
+                       hypre_ParCSRMatrix **A_ptr     )
+{
+   int                 nx, ny, nz;
+   int                 P, Q, R;
+
+   hypre_ParCSRMatrix *A;
+
+   int                 num_procs, myid;
+   int                 p, q, r;
+   double             *values;
+
+   /*-----------------------------------------------------------
+    * Initialize some stuff
+    *-----------------------------------------------------------*/
+
+   MPI_Comm_size(MPI_COMM_WORLD, &num_procs );
+   MPI_Comm_rank(MPI_COMM_WORLD, &myid );
+
+   /*-----------------------------------------------------------
+    * Set defaults
+    *-----------------------------------------------------------*/
+ 
+   nx = 10;
+   ny = 10;
+   nz = 10;
+
+   P  = 1;
+   Q  = num_procs;
+   R  = 1;
+
+   /*-----------------------------------------------------------
+    * Parse command line
+    *-----------------------------------------------------------*/
+   arg_index = 0;
+   while (arg_index < argc)
+   {
+      if ( strcmp(argv[arg_index], "-n") == 0 )
+      {
+         arg_index++;
+         nx = atoi(argv[arg_index++]);
+         ny = atoi(argv[arg_index++]);
+         nz = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-P") == 0 )
+      {
+         arg_index++;
+         P  = atoi(argv[arg_index++]);
+         Q  = atoi(argv[arg_index++]);
+         R  = atoi(argv[arg_index++]);
+      }
+      else
+      {
+         arg_index++;
+      }
+   }
+
+   /*-----------------------------------------------------------
+    * Check a few things
+    *-----------------------------------------------------------*/
+
+   if ((P*Q*R) != num_procs)
+   {
+      printf("Error: Invalid number of processors or processor topology \n");
+      exit(1);
+   }
+
+   /*-----------------------------------------------------------
+    * Print driver parameters
+    *-----------------------------------------------------------*/
+ 
+   if (myid == 0)
+   {
+      printf("  Laplacian_27pt:\n");
+      printf("    (nx, ny, nz) = (%d, %d, %d)\n", nx, ny, nz);
+      printf("    (Px, Py, Pz) = (%d, %d, %d)\n", P,  Q,  R);
+   }
+
+   /*-----------------------------------------------------------
+    * Set up the grid structure
+    *-----------------------------------------------------------*/
+
+   /* compute p,q,r from P,Q,R and myid */
+   p = myid % P;
+   q = (( myid - p)/P) % Q;
+   r = ( myid - p - P*q)/( P*Q );
+
+   /*-----------------------------------------------------------
+    * Generate the matrix 
+    *-----------------------------------------------------------*/
+ 
+   values = hypre_CTAlloc(double, 2);
+
+   values[0] = 26.0;
+   values[1] = -1.0;
+
+   A = hypre_GenerateLaplacian27pt(MPI_COMM_WORLD,
+                               nx, ny, nz, P, Q, R, p, q, r, values);
 
    hypre_TFree(values);
 
