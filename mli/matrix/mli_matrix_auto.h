@@ -29,6 +29,8 @@ extern "C" {
 
 /*#include <mpi.h>*/ /* jfp */
 #include "communication.h"
+#include "../../seq_mv/csr_matrix.h"
+#include "../../parcsr_mv/par_csr_matrix.h"
 
 /*--------------------------------------------------------------------------
  * CSR Boolean Matrix
@@ -90,6 +92,7 @@ typedef struct
 #define MLI_ParCSRBooleanMatrix_Get_GlobalNRows(matrix)   ((matrix)->global_num_rows)
 #define MLI_ParCSRBooleanMatrix_Get_GlobalNCols(matrix)   ((matrix)->global_num_cols)
 #define MLI_ParCSRBooleanMatrix_Get_StartRow(matrix)      ((matrix)->first_row_index)
+#define MLI_ParCSRBooleanMatrix_Get_FirstRowIndex(matrix) ((matrix)->first_row_index)
 #define MLI_ParCSRBooleanMatrix_Get_FirstColDiag(matrix)  ((matrix)->first_col_diag)
 #define MLI_ParCSRBooleanMatrix_Get_Diag(matrix)          ((matrix)->diag)
 #define MLI_ParCSRBooleanMatrix_Get_Offd(matrix)          ((matrix)->offd)
