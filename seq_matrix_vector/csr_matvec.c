@@ -153,8 +153,6 @@ hypre_CSRMatrixMatvecT( double           alpha,
 
    double     *x_data = hypre_VectorData(x);
    double     *y_data = hypre_VectorData(y);
-   double    **y_tmp_array;
-   double     *y_tmp_data;
    int         x_size = hypre_VectorSize(x);
    int         y_size = hypre_VectorSize(y);
 
@@ -226,49 +224,35 @@ hypre_CSRMatrixMatvecT( double           alpha,
     *-----------------------------------------------------------------*/
    if (hypre_NumThreads > 1)
    {
-      y_tmp_array = hypre_CTAlloc(double *,hypre_NumThreads);
-      for (i=0; i < hypre_NumThreads; i++)
-         y_tmp_array[i] = hypre_CTAlloc(double,num_rows);
 
-#define HYPRE_SMP_PRIVATE i, i1,jj,j,y_tmp_data,ns,ne,size,rest
+#define HYPRE_SMP_PRIVATE i, i1,jj,j,ns,ne,size,rest
 #include "../utilities/hypre_smp_forloop.h"
       for (i1 = 0; i1 < hypre_NumThreads; i1++)
       {
-         size = num_rows/hypre_NumThreads;
-         rest = num_rows - size*hypre_NumThreads;
+         size = num_cols/hypre_NumThreads;
+         rest = num_cols - size*hypre_NumThreads;
          if (i1 < rest)
          {
-            ns = i1*size+i1;
+            ns = i1*size+i1-1;
             ne = (i1+1)*size+i1+1;
          }
          else
          {
-            ns = i1*size+rest;
+            ns = i1*size+rest-1;
             ne = (i1+1)*size+rest;
          }
-         y_tmp_data = y_tmp_array[i1];
-         for (i = ns; i < ne; i++)
+         for (i = 0; i < num_rows; i++)
          {
             for (jj = A_i[i]; jj < A_i[i+1]; jj++)
             {
-   	    j = A_j[jj];
-               y_tmp_data[j] += A_data[jj] * x_data[i];
+   	       j = A_j[jj];
+   	       if (j > ns && j < ne)
+                  y_data[j] += A_data[jj] * x_data[i];
             }
          }
       }
-
-#define HYPRE_SMP_PRIVATE i, j
-#include "../utilities/hypre_smp_forloop.h"
-      for (i = 0; i < num_cols; i++)
-         for (j = 0; j < hypre_NumThreads; j++)
-            y_data[i] += y_tmp_array[j][i];
-
-      for (i=0; i < hypre_NumThreads; i++)
-         hypre_TFree(y_tmp_array[i]);
-      hypre_TFree(y_tmp_array);
-
    }
-   else
+   else 
    {
       for (i = 0; i < num_rows; i++)
       {
