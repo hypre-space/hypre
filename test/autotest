@@ -73,12 +73,16 @@ chgrp -fR hypre linear_solvers
 while [ "$*" != "" ]
 do
   case $1 in
-    -blue)
+    -blue | -bluemp)
         HYPRE_ARCH="blue"
         HYPRE_COMPILE_MACHINE="blue"
         HYPRE_RUN_MACHINE="blue"
         HYPRE_REMOTE_DIR="/usr/gapps/hypre/powerpc-ibm-aix4.3.3.0/AUTOTEST"
-	HYPRE_MACHINE_COMMANDS="-m -o 2 -a 2 -cf"
+        if [ "$1" = "-blue" ] ; then
+	  HYPRE_MACHINE_COMMANDS="-m -o 1 -a 2 -cf"
+        else
+	  HYPRE_MACHINE_COMMANDS="-m -a 1 -cf -o 2 -cf"
+        fi
 	perform_test
         shift;;
     -frost)
@@ -98,12 +102,16 @@ do
 	print_header
         ./autotest_test $HYPRE_MACHINE_COMMANDS
         shift;;
-    -compass)
+    -compass | -compassmp)
         HYPRE_ARCH="dec"
         HYPRE_COMPILE_MACHINE="west"
         HYPRE_RUN_MACHINE="southeast"
         HYPRE_REMOTE_DIR="/usr/gapps/hypre/alphaev56-dec-osf4.0f/AUTOTEST"
-	HYPRE_MACHINE_COMMANDS="-m -r $HYPRE_RUN_MACHINE -o 2 -a 2 -cf"
+        if [ "$1" = "-compass" ] ; then
+	  HYPRE_MACHINE_COMMANDS="-m -r $HYPRE_RUN_MACHINE -o 1 -a 2 -cf"
+        else
+	  HYPRE_MACHINE_COMMANDS="-m -r $HYPRE_RUN_MACHINE -a 1 -cf -o 2 -cf"
+        fi
 	perform_test
         shift;;
     -lx)
@@ -139,20 +147,28 @@ do
 	HYPRE_MACHINE_COMMANDS="-m -a 2 -cf"
 	perform_test
         shift;;
-    -tc2k)
+    -tc2k | -tc2kmp)
         HYPRE_ARCH="dec"
         HYPRE_COMPILE_MACHINE="tc2k"
         HYPRE_RUN_MACHINE="tc2k"
         HYPRE_REMOTE_DIR="/usr/gapps/hypre/alphaev67-dec-osf5.1/AUTOTEST"
-	HYPRE_MACHINE_COMMANDS="-m -o 1 -a 2 -cf"
+        if [ "$1" = "-tc2k" ] ; then
+	  HYPRE_MACHINE_COMMANDS="-m -o 1 -a 2 -cf"
+        else
+	  HYPRE_MACHINE_COMMANDS="-m -a 1 -cf -o 2 -cf"
+        fi
 	perform_test
         shift;;
-    -tc)
+    -tc | -tcmp)
         HYPRE_ARCH="dec"
         HYPRE_COMPILE_MACHINE="tc01"
         HYPRE_RUN_MACHINE="tc01"
         HYPRE_REMOTE_DIR="/usr/gapps/hypre/alphaev56-dec-osf5.1/AUTOTEST"
-	HYPRE_MACHINE_COMMANDS="-m -o 2 -a 2 -cf"
+        if [ "$1" = "-tc" ] ; then
+	  HYPRE_MACHINE_COMMANDS="-m -o 1 -a 2 -cf"
+        else
+	  HYPRE_MACHINE_COMMANDS="-m -a 1 -cf -o 2 -cf"
+        fi
 	perform_test
         shift;;
     -tux)
