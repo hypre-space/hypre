@@ -7,6 +7,7 @@ m4_define(HYPRE_TOP_SRC_DIR, `pwd`)
 # Variable Initialization
 casc_user_chose_compilers=no
 casc_user_chose_blas=no
+casc_user_chose_lapack=no
 casc_using_mpi=yes
 casc_using_debug=no
 casc_using_openmp=no   
@@ -288,6 +289,10 @@ ACX_BLAS([casc_user_chose_blas=yes;BLASLIBFLAGS=$BLAS_LIBS],
   [casc_user_chose_blas=no;BLASLIBFLAGS="-lHYPRE_blas"]) 
 AM_CONDITIONAL(BLASNEEDED, test "$casc_user_chose_blas" = no)
 AC_SUBST(BLASLIBFLAGS)
+ACX_LAPACK([casc_user_chose_lapack=yes;LAPACKLIBFLAGS=$BLAS_LIBS], 
+  [casc_user_chose_lapack=no;LAPACKLIBFLAGS="-lHYPRE_blas"]) 
+AM_CONDITIONAL(LAPACKNEEDED, test "$casc_user_chose_lapack" = no)
+AC_SUBST(LAPACKLIBFLAGS)
 AC_CHECK_LIBM
 AC_SUBST(LIBM)
 
@@ -358,6 +363,7 @@ AC_CONFIG_FILES([
   distributed_matrix/Makefile
   docs/Makefile
   krylov/Makefile
+  lapack/Makefile
   lib/Makefile
   matrix_matrix/Makefile
   parcsr_es/Makefile

@@ -34,8 +34,21 @@ BLASDIR =
 BLASFILES = 
 endif !BLASNEEDED
 
+if LAPACKNEEDED
+LAPACKDIR = lapack
+LAPACKFILES = \
+ $(top_srcdir)/dgels.c\
+ $(top_srcdir)/dsyev.c\
+ $(top_srcdir)/dsygv.c\
+ $(top_srcdir)/lapack_utils.c
+else !LAPACKNEEDED
+LAPACKDIR = 
+LAPACKFILES =
+endif !LAPACKNEEDED
+
 HYPRE_SRC_DIRS = \
  $(BLASDIR)\
+ $(LAPACKDIR)\
  FEI_mv/SuperLU\
  FEI_mv/fei-hypre\
  FEI_mv/femli/lib\
@@ -58,6 +71,7 @@ HYPRE_SRC_DIRS = \
 
 FILES = \
  $(BLASFILES)\
+ $(LAPACKFILES)\
  $(top_srcdir)/FEI_mv/SuperLU/colamd.c\
  $(top_srcdir)/FEI_mv/SuperLU/dcolumn_bmod.c\
  $(top_srcdir)/FEI_mv/SuperLU/dcolumn_dfs.c\
