@@ -25,6 +25,7 @@ typedef struct
    int                   dscg_max_its;
    int                   pcg_max_its;
    int                   two_norm;
+   int                   stop_crit;
    int                   rel_change;
    int                   solver_type;
    int                   k_dim;
@@ -79,6 +80,7 @@ hypre_AMGHybridCreate( )
    (AMGhybrid_data -> dscg_max_its)      = 1000;
    (AMGhybrid_data -> pcg_max_its)       = 200;
    (AMGhybrid_data -> two_norm)          = 0;
+   (AMGhybrid_data -> stop_crit)         = 0;
    (AMGhybrid_data -> rel_change)        = 0;
    (AMGhybrid_data -> pcg_default)       = 1;
    (AMGhybrid_data -> solver_type)       = 1;
@@ -247,6 +249,22 @@ hypre_AMGHybridSetKDim( void   *AMGhybrid_vdata,
    int               ierr = 0;
 
    (AMGhybrid_data -> k_dim) = k_dim;
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_AMGHybridSetStopCrit
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_AMGHybridSetStopCrit( void *AMGhybrid_vdata,
+                        int   stop_crit  )
+{
+   hypre_AMGHybridData *AMGhybrid_data = AMGhybrid_vdata;
+   int               ierr = 0;
+
+   (AMGhybrid_data -> stop_crit) = stop_crit;
 
    return ierr;
 }
@@ -641,6 +659,7 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
    int                dscg_max_its   = (AMGhybrid_data -> dscg_max_its);
    int                pcg_max_its    = (AMGhybrid_data -> pcg_max_its);
    int                two_norm       = (AMGhybrid_data -> two_norm);
+   int                stop_crit      = (AMGhybrid_data -> stop_crit);
    int                rel_change     = (AMGhybrid_data -> rel_change);
    int                logging        = (AMGhybrid_data -> logging);
    int                plogging       = (AMGhybrid_data -> plogging);
@@ -711,6 +730,7 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
       hypre_PCGSetTol(pcg_solver, tol);
       hypre_PCGSetConvergenceFactorTol(pcg_solver, cf_tol);
       hypre_PCGSetTwoNorm(pcg_solver, two_norm);
+      hypre_PCGSetStopCrit(pcg_solver, stop_crit);
       hypre_PCGSetRelChange(pcg_solver, rel_change);
       hypre_PCGSetPrintLevel(pcg_solver, logging);
 
@@ -759,7 +779,7 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
       hypre_GMRESSetTol(pcg_solver, tol);
       hypre_GMRESSetKDim(pcg_solver, k_dim);
       hypre_GMRESSetConvergenceFactorTol(pcg_solver, cf_tol);
-      hypre_GMRESSetStopCrit(pcg_solver, two_norm);
+      hypre_GMRESSetStopCrit(pcg_solver, stop_crit);
       hypre_GMRESSetRelChange(pcg_solver, rel_change);
       hypre_GMRESSetPrintLevel(pcg_solver, logging);
 
@@ -804,7 +824,7 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
       hypre_BiCGSTABSetMaxIter(pcg_solver, dscg_max_its);
       hypre_BiCGSTABSetTol(pcg_solver, tol);
       hypre_BiCGSTABSetConvergenceFactorTol(pcg_solver, cf_tol);
-      hypre_BiCGSTABSetStopCrit(pcg_solver, two_norm);
+      hypre_BiCGSTABSetStopCrit(pcg_solver, stop_crit);
       hypre_BiCGSTABSetLogging(pcg_solver, logging);
 
       pcg_precond = NULL;
@@ -869,6 +889,7 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
          hypre_PCGSetMaxIter(pcg_solver, pcg_max_its);
          hypre_PCGSetTol(pcg_solver, tol);
          hypre_PCGSetTwoNorm(pcg_solver, two_norm);
+         hypre_PCGSetStopCrit(pcg_solver, stop_crit);
          hypre_PCGSetRelChange(pcg_solver, rel_change);
          hypre_PCGSetPrintLevel(pcg_solver, logging);
          hypre_PCGSetConvergenceFactorTol(pcg_solver, 0.0);
@@ -895,7 +916,7 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
          hypre_GMRESSetMaxIter(pcg_solver, dscg_max_its);
          hypre_GMRESSetTol(pcg_solver, tol);
          hypre_GMRESSetKDim(pcg_solver, k_dim);
-         hypre_GMRESSetStopCrit(pcg_solver, two_norm);
+         hypre_GMRESSetStopCrit(pcg_solver, stop_crit);
          hypre_GMRESSetRelChange(pcg_solver, rel_change);
          hypre_GMRESSetPrintLevel(pcg_solver, logging);
          hypre_GMRESSetConvergenceFactorTol(pcg_solver, 0.0);
@@ -918,7 +939,7 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
 
          hypre_BiCGSTABSetMaxIter(pcg_solver, dscg_max_its);
          hypre_BiCGSTABSetTol(pcg_solver, tol);
-         hypre_BiCGSTABSetStopCrit(pcg_solver, two_norm);
+         hypre_BiCGSTABSetStopCrit(pcg_solver, stop_crit);
          hypre_BiCGSTABSetLogging(pcg_solver, logging);
          hypre_BiCGSTABSetConvergenceFactorTol(pcg_solver, 0.0);
       }

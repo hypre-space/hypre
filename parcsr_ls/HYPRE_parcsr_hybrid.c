@@ -145,6 +145,17 @@ HYPRE_ParCSRHybridSetTwoNorm( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetStopCrit
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParCSRHybridSetStopCrit( HYPRE_Solver solver,
+                              int                stop_crit    )
+{
+   return( hypre_AMGHybridSetStopCrit( (void *) solver, stop_crit ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_ParCSRHybridSetRelChange
  *--------------------------------------------------------------------------*/
 

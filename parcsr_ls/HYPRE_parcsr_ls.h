@@ -1261,6 +1261,9 @@ int HYPRE_ParCSRHybridSetKDim(HYPRE_Solver solver,
 int HYPRE_ParCSRHybridSetTwoNorm(HYPRE_Solver solver,
                                  int                two_norm);
  
+int HYPRE_ParCSRHybridSetStopCrit(HYPRE_Solver solver,
+                                 int                stop_crit);
+ 
 int HYPRE_ParCSRHybridSetRelChange(HYPRE_Solver solver,
                                    int                rel_change); 
  
