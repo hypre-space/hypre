@@ -229,9 +229,9 @@ do
         if [ "$DEBUGMODE" = "yes" ] ; then
           HYPRE_MACHINE_COMMANDS="-D $HYPRE_MACHINE_COMMANDS"
         fi
-   	print_header
-        ./autotest_test $HYPRE_MACHINE_COMMANDS -v $HYPRE_MESSAGE
-##	perform_test
+## 	print_header
+##      ./autotest_test $HYPRE_MACHINE_COMMANDS -v $HYPRE_MESSAGE
+  	perform_test
         shift;;
     -automake)
 ##      if [ -x linear_solvers/config/bootstrap ] ; then
@@ -286,8 +286,8 @@ do
         shift;;
     -casc)
         HYPRE_ARCH="casc"
-        HYPRE_COMPILE_MACHINE="sunup"
-        HYPRE_RUN_MACHINE="sunup"
+        HYPRE_COMPILE_MACHINE="achilles"
+        HYPRE_RUN_MACHINE="achilles"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/sparc-sun-solaris2.8/AUTOTEST"
         if [ "$AUTOMAKEMODE" = "yes" ] ; then
 	  HYPRE_MACHINE_COMMANDS="-mnse 1 -a 1 -cfl 2"
@@ -425,8 +425,8 @@ do
         shift;;
     -purify)
         HYPRE_ARCH="casc"
-        HYPRE_COMPILE_MACHINE="sunup"
-        HYPRE_RUN_MACHINE="sunup"
+        HYPRE_COMPILE_MACHINE="achilles"
+        HYPRE_RUN_MACHINE="achilles"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/sparc-sun-solaris2.8/AUTOTEST"
 	HYPRE_MACHINE_COMMANDS="-mnse 1 -a 1 -cfq 2"
         HYPRE_MESSAGE='SECONDARY[purify]'
@@ -436,8 +436,8 @@ do
         shift;;
     -purifyo)
         HYPRE_ARCH="casc"
-        HYPRE_COMPILE_MACHINE="poincare"
-        HYPRE_RUN_MACHINE="poincare"
+        HYPRE_COMPILE_MACHINE="perrin"
+        HYPRE_RUN_MACHINE="perrin"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/sparc-sun-solaris2.7/AUTOTEST"
 	HYPRE_MACHINE_COMMANDS="-mnse 1 -a 1 -cfq 2"
         HYPRE_MESSAGE='SECONDARY[purify]'
