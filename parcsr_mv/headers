@@ -35,6 +35,7 @@ extern "C" {
 #===========================================================================
 
 cat communication.h           >> $INTERNAL_HEADER	
+cat fortran.h                 >> $INTERNAL_HEADER	
 cat par_vector.h              >> $INTERNAL_HEADER	
 cat par_csr_matrix.h          >> $INTERNAL_HEADER	
 
