@@ -238,6 +238,12 @@ int MLI_Solver_CG::setParams( char *paramString, int argc, char **argv )
    }
    else if ( !strcmp(param1, "relaxWeight") )
    {
+      if ( argc != 2 && argc != 1 ) 
+      {
+         printf("MLI_Solver_CG::setParams ERROR : needs 1 or 2 args.\n");
+         return 1;
+      }
+      if ( argc >= 1 ) maxIterations_ = *(int*) argv[0];
       return 0;
    }
    else if ( !strcmp(param1, "baseMethod") )
