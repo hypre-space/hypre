@@ -16,7 +16,7 @@ initialize_variables ()
 {
   OldMask=`umask`
   umask 007
-  MAKE="make -k"
+  MAKE="make -i"
   Hdr="autotest"
   Skip=0
   Build=1
