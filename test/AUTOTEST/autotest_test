@@ -107,7 +107,6 @@ initialize_variables ()
     HYPRE_CONFIGURE_EMAIL=${HYPRE_CONFIGURE_EMAIL:=$USER_EMAIL}
     HYPRE_STRUCT_EMAIL=${HYPRE_STRUCT_EMAIL:=$USER_EMAIL}
     HYPRE_IJ_EMAIL=${HYPRE_IJ_EMAIL:=$USER_EMAIL}
-    HYPRE_FEI_EMAIL=${HYPRE_FEI_EMAIL:=$USER_EMAIL}
     HYPRE_ALL_EMAIL=${HYPRE_ALL_EMAIL:=$USER_EMAIL}
   fi
 }
@@ -175,8 +174,8 @@ usage () {
   printf "  2=configure, make and run.\n"
   printf "\n"
   printf "%s\n" "-a opt   All; the (default) configure, make, and execute. Also"
-  printf "         performs make struct, IJ, fei, all, nofei, and\n"
-  printf "         fei++, followed by the runtest script (when opt=2).\n"
+  printf "         performs make struct, IJ, fei and all \n"
+  printf "         followed by the runtest script (when opt=2).\n"
   printf "%s\n" "-b opt   Babel; configure --with-babel, make, and execute)."
   printf "%s\n" "-c       C++; make all++ (no configure, or execute)."
   printf "%s\n" "-D       Turn on debug messages."
@@ -444,8 +443,7 @@ mail_summary () {
     printf "%-15s: " $ConfOpt >> $SUMFILE
     TestCaseSuccessCount=0; TestCaseFailedCount=0;
     DWRNCNT=0; DERRCNT=0;
-    for MakeOpt in ""  all configure IJ fei++ \
-           fei nofei sstruct struct
+    for MakeOpt in ""  all configure IJ sstruct struct
     do
       FILE=autotest.$ConfOpt.$MakeOpt
       LFILE=`echo $FILE|sed -e 's/\.$//'`.log
@@ -504,7 +502,7 @@ mail_summary () {
     TotalTestCount=0
     TotalSuccessCount=0
     TotalFailureCount=0
-    for i in fei ij ij_es sstruct struct ; do
+    for i in ij ij_es sstruct struct ; do
       printf "%-15s: " ${i} >> $SUMFILE
       TestCaseSuccessCount=0; TestCaseFailedCount=0; TestCaseFailedFlag=0
       for j in ${SRC}/test/TEST_${i}/*.sh ; do
@@ -702,8 +700,6 @@ confbuildtest ()
 BuildOpt=$1	 ConfigOption=$2  MessageStr=$3
 IJOpt=$4	 FeiOpt=$5	  StructOpt=$6
 SstructOpt=$7	 MakeOpt=$8	  BetaOpt=$9
-shift                           # problem getting $10 on some systems
-NoFeiOpt=$9
 if [ ${BuildOpt} -ne $Skip ] ; then
   seconds; TIME=$SECS
   echo "Autotest starting configure and make of $MessageStr"
@@ -731,10 +727,6 @@ if [ ${BuildOpt} -ne $Skip ] ; then
       makeit "IJ" $MessageStr "$HYPRE_IJ_EMAIL"
     fi
 
-    if [ $FeiOpt -ne $Skip ] ; then
-      makeit "fei" $MessageStr "$HYPRE_FEI_EMAIL"
-    fi
-
     if [ $StructOpt -ne $Skip ] ; then
       makeit "struct" $MessageStr "$HYPRE_STRUCT_EMAIL"
     fi
@@ -758,15 +750,6 @@ if [ ${BuildOpt} -ne $Skip ] ; then
     makeit "install" $MessageStr "$HYPRE_DEFAULT_EMAIL"
     cd ${HYPRE_AUTOTEST_DIR}/${SRC}/test
     makeit "all" $MessageStr "$HYPRE_DEFAULT_EMAIL"
-    if [ $NoFeiOpt -ne $Skip ] ; then
-      cd ${HYPRE_AUTOTEST_DIR}/${SRC}
-      makeit "nofei" $MessageStr "$HYPRE_FEI_EMAIL"
-      HYPRE_INSTALL_DIR=${HYPRE_AUTOTEST_DIR}/${SRC}/hypre
-      export HYPRE_INSTALL_DIR
-      makeit "install" $MessageStr "$HYPRE_FEI_EMAIL"
-      cd ${HYPRE_AUTOTEST_DIR}/${SRC}/test
-      makeit "fei++" $MessageStr "$HYPRE_FEI_EMAIL"
-    fi
   if [ ${BuildOpt} -eq $Run ] ; then
     if [ -z "${HYPRE_RUN_MACHINE}" -o "${HYPRE_RUN_MACHINE}" = "" ] ; then
       cd $HYPRE_AUTOTEST_DIR/${SRC}/test
