@@ -175,7 +175,7 @@ fei: IJ
 	rm -rf hypre/tmp
 
 # special autotest target
-nofei: IJ
+nofei: IJ krylov
 	@ \
 	HYPRE_INSTALL_DIR=`pwd`/hypre; \
 	export HYPRE_INSTALL_DIR; \
