@@ -1613,7 +1613,7 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC0(
                      
    int                   ierr = 0;
 
-   printf("nosym 5.0\n");
+   /*printf("nosym 5.0\n");*/
    stridef = cstride;
    hypre_SetIndex(stridec, 1, 1, 1);
 
@@ -1761,7 +1761,7 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC0(
 
    if ( constant_coefficient_A == 0 )
    {
-      printf("nosym 5.0.0\n");
+      /*printf("nosym 5.0.0\n");*/
       hypre_BoxLoop4Begin(loop_size,
                           P_dbox, cstart, stridec, iP,
                           R_dbox, cstart, stridec, iR,
@@ -1795,7 +1795,7 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC0(
    else
    {
       assert( constant_coefficient_A==2 );
-      printf("nosym 5.0.2\n");
+      /*printf("nosym 5.0.2\n"); */
 
       iA_offd = hypre_CCBoxIndexRank(A_dbox,fstart);
       iA_offdm1 = iA_offd - yOffsetA_offd;
@@ -1888,7 +1888,7 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC1(
                      
    int                   ierr = 0;
 
-   printf("nosym 5.1\n");
+   /* printf("nosym 5.1\n");*/
    stridef = cstride;
    hypre_SetIndex(stridec, 1, 1, 1);
 
@@ -2110,7 +2110,7 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC0(
                      
    int                   ierr = 0;
 
-   printf("nosym 9.0\n");
+   /*printf("nosym 9.0\n");*/
    stridef = cstride;
    hypre_SetIndex(stridec, 1, 1, 1);
 
@@ -2284,7 +2284,7 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC0(
 
    if ( constant_coefficient_A==0 )
    {
-      printf("nosym 9.0.0\n");
+      /*printf("nosym 9.0.0\n");*/
       hypre_BoxLoop4Begin(loop_size,
                           P_dbox, cstart, stridec, iP,
                           R_dbox, cstart, stridec, iR,
@@ -2326,7 +2326,7 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC0(
    }
    else
    {
-      printf("nosym 9.0.2\n");
+      /*printf("nosym 9.0.2\n");*/
       assert( constant_coefficient_A==2 );
       iA_offd = hypre_CCBoxIndexRank(A_dbox,fstart);
       iA_offdm1 = iA_offd - yOffsetA_offd;
@@ -2437,7 +2437,7 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC1(
                      
    int                   ierr = 0;
 
-   printf("nosym 9.1\n");
+   /*printf("nosym 9.1\n");*/
    stridef = cstride;
    hypre_SetIndex(stridec, 1, 1, 1);
 
