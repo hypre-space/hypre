@@ -181,6 +181,7 @@ libHYPRE_lapack_la_LDFLAGS = -avoid-version
 
 #
 FILES = \
+ dbdsqr.c\
  dgebd2.c\
  dgebrd.c\
  dgelq2.c\
@@ -191,6 +192,7 @@ FILES = \
  dgesvd.c\
  dlabad.c\
  dlabrd.c\
+ dlacpy.c\
  dlae2.c\
  dlaev2.c\
  dlamch.c\
@@ -211,10 +213,13 @@ FILES = \
  dlatrd.c\
  dorg2l.c\
  dorg2r.c\
+ dorgbr.c\
+ dorglq.c\
  dorgql.c\
  dorgqr.c\
  dorgtr.c\
  dorm2r.c\
+ dormbr.c\
  dorml2.c\
  dormlq.c\
  dormqr.c\
@@ -224,6 +229,7 @@ FILES = \
  dsteqr.c\
  dsterf.c\
  dsyev.c\
+ dsygs2.c\
  dsygst.c\
  dsygv.c\
  dsytd2.c\
@@ -244,14 +250,15 @@ CONFIG_CLEAN_FILES =
 LTLIBRARIES = $(lib_LTLIBRARIES)
 
 libHYPRE_lapack_la_LIBADD =
-am__objects_1 = dgebd2.lo dgebrd.lo dgelq2.lo dgelqf.lo dgels.lo \
-	dgeqr2.lo dgeqrf.lo dgesvd.lo dlabad.lo dlabrd.lo dlae2.lo \
-	dlaev2.lo dlamch.lo dlange.lo dlanst.lo dlansy.lo dlapy2.lo \
-	dlarf.lo dlarfb.lo dlarfg.lo dlarft.lo dlartg.lo dlascl.lo \
-	dlaset.lo dlasr.lo dlasrt.lo dlassq.lo dlatrd.lo dorg2l.lo \
-	dorg2r.lo dorgql.lo dorgqr.lo dorgtr.lo dorm2r.lo dorml2.lo \
-	dormlq.lo dormqr.lo dpotf2.lo dpotrf.lo dpotrs.lo dsteqr.lo \
-	dsterf.lo dsyev.lo dsygst.lo dsygv.lo dsytd2.lo dsytrd.lo \
+am__objects_1 = dbdsqr.lo dgebd2.lo dgebrd.lo dgelq2.lo dgelqf.lo \
+	dgels.lo dgeqr2.lo dgeqrf.lo dgesvd.lo dlabad.lo dlabrd.lo \
+	dlacpy.lo dlae2.lo dlaev2.lo dlamch.lo dlange.lo dlanst.lo \
+	dlansy.lo dlapy2.lo dlarf.lo dlarfb.lo dlarfg.lo dlarft.lo \
+	dlartg.lo dlascl.lo dlaset.lo dlasr.lo dlasrt.lo dlassq.lo \
+	dlatrd.lo dorg2l.lo dorg2r.lo dorgbr.lo dorglq.lo dorgql.lo \
+	dorgqr.lo dorgtr.lo dorm2r.lo dormbr.lo dorml2.lo dormlq.lo \
+	dormqr.lo dpotf2.lo dpotrf.lo dpotrs.lo dsteqr.lo dsterf.lo \
+	dsyev.lo dsygs2.lo dsygst.lo dsygv.lo dsytd2.lo dsytrd.lo \
 	ieeeck.lo ilaenv.lo lapack_utils.lo lsame.lo xerbla.lo
 am_libHYPRE_lapack_la_OBJECTS = $(am__objects_1)
 libHYPRE_lapack_la_OBJECTS = $(am_libHYPRE_lapack_la_OBJECTS)
@@ -259,11 +266,12 @@ libHYPRE_lapack_la_OBJECTS = $(am_libHYPRE_lapack_la_OBJECTS)
 DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
-@AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/dgebd2.Plo ./$(DEPDIR)/dgebrd.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dgelq2.Plo ./$(DEPDIR)/dgelqf.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dgels.Plo ./$(DEPDIR)/dgeqr2.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dgeqrf.Plo ./$(DEPDIR)/dgesvd.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dlabad.Plo ./$(DEPDIR)/dlabrd.Plo \
+@AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/dbdsqr.Plo ./$(DEPDIR)/dgebd2.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dgebrd.Plo ./$(DEPDIR)/dgelq2.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dgelqf.Plo ./$(DEPDIR)/dgels.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dgeqr2.Plo ./$(DEPDIR)/dgeqrf.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dgesvd.Plo ./$(DEPDIR)/dlabad.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dlabrd.Plo ./$(DEPDIR)/dlacpy.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/dlae2.Plo ./$(DEPDIR)/dlaev2.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/dlamch.Plo ./$(DEPDIR)/dlange.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/dlanst.Plo ./$(DEPDIR)/dlansy.Plo \
@@ -274,13 +282,15 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@	./$(DEPDIR)/dlasr.Plo ./$(DEPDIR)/dlasrt.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/dlassq.Plo ./$(DEPDIR)/dlatrd.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/dorg2l.Plo ./$(DEPDIR)/dorg2r.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dorgbr.Plo ./$(DEPDIR)/dorglq.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/dorgql.Plo ./$(DEPDIR)/dorgqr.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/dorgtr.Plo ./$(DEPDIR)/dorm2r.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dorml2.Plo ./$(DEPDIR)/dormlq.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dormqr.Plo ./$(DEPDIR)/dpotf2.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dpotrf.Plo ./$(DEPDIR)/dpotrs.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dsteqr.Plo ./$(DEPDIR)/dsterf.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dsyev.Plo ./$(DEPDIR)/dsygst.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dormbr.Plo ./$(DEPDIR)/dorml2.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dormlq.Plo ./$(DEPDIR)/dormqr.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dpotf2.Plo ./$(DEPDIR)/dpotrf.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dpotrs.Plo ./$(DEPDIR)/dsteqr.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dsterf.Plo ./$(DEPDIR)/dsyev.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dsygs2.Plo ./$(DEPDIR)/dsygst.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/dsygv.Plo ./$(DEPDIR)/dsytd2.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/dsytrd.Plo ./$(DEPDIR)/ieeeck.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/ilaenv.Plo ./$(DEPDIR)/lapack_utils.Plo \
@@ -341,6 +351,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dbdsqr.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgebd2.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgebrd.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgelq2.Plo@am__quote@
@@ -351,6 +362,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgesvd.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlabad.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlabrd.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlacpy.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlae2.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlaev2.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlamch.Plo@am__quote@
@@ -371,10 +383,13 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlatrd.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dorg2l.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dorg2r.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dorgbr.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dorglq.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dorgql.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dorgqr.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dorgtr.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dorm2r.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dormbr.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dorml2.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dormlq.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dormqr.Plo@am__quote@
@@ -384,6 +399,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsteqr.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsterf.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsyev.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsygs2.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsygst.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsygv.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsytd2.Plo@am__quote@
