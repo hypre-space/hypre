@@ -80,10 +80,10 @@ do
   case $1 in
     -achilles)
         HYPRE_ARCH="casc"
-        HYPRE_COMPILE_MACHINE="hypnos"
-        HYPRE_RUN_MACHINE="hypnos"
+        HYPRE_COMPILE_MACHINE="achilles"
+        HYPRE_RUN_MACHINE="achilles"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/sparc-sun-solaris2.8/AUTOTEST"
-	HYPRE_MACHINE_COMMANDS="-m -t 1 -ns -a 2 -dcxfy"
+	HYPRE_MACHINE_COMMANDS="-m -t 1 -n -a 2 -dcxfy"
 	perform_test
         shift;;
     -blue | -bluemp)
