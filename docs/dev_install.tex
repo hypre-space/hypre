@@ -146,8 +146,11 @@ Installing the \hypre{} distribution:
 
 \begin{enumerate}
 
-   \item Copy the tar file \file{hypre-M.nn.rr.tar.gz} to the 
-   appropriate systems, and locations for the install. For non-CASC 
+   \item Copy the tar file \file{hypre-M.nn.rr.tar.gz} to 
+   \file{/usr/gapps/hypre/} and, \file{/usr/casc/hypre/}.
+   Run the script \kbd{mkdistlinks} to create symbolic-links
+   between the tar file and the 
+   appropriate systems, and locations for the build. For non-CASC 
    machines there are two install locations:
       \begin{itemize}
        \item \file{/usr/gapps/hypre/}\textit{canonical system name}
@@ -172,17 +175,18 @@ Installing the \hypre{} distribution:
    Some mappings between the \file{/usr/gapps/hypre/} 
    \textit{canonical system name} directory names, the
    \kbd{SYS\_TYPE}, and the system  follow:
- \textit{canonical system name}  \kbd{SYS\_TYPE}   System
+\begin{enumerate}
+   \item \textit{canonical system name}  \kbd{SYS\_TYPE}   \kbd{System}
    \begin{itemize}
-   \item  alphaev67-dec-osf5.1        tru64\_5sc           tc2k
-   \item  alphaev68-dec-osf5.1        tru64\_5             gps
-   \item  i686-pc-linux-gnu           redhat\_7a\_ia32      vivid,ilx
-   \item  i686-pc-linux-gnu-pengra    redhat\_7a\_ia32\_qsw  pengra
-   \item  mips-sgi-irix6.5            irix64              riptide
-   \item  powerpc-ibm-aix5.1.0.0      aix\_5               blue
-   \item  powerpcll-ibm-aix5.1.0.0    aix\_5\_ll            frost
+   \item  \file{alphaev67-dec-osf5.1}        tru64\_5sc           tc2k
+   \item  \file{alphaev68-dec-osf5.1}        tru64\_5             gps
+   \item  \file{i686-pc-linux-gnu}           redhat\_7a\_ia32      vivid,ilx
+   \item  \file{i686-pc-linux-gnu-pengra}    redhat\_7a\_ia32\_qsw  pengra
+   \item  \file{mips-sgi-irix6.5}            irix64              riptide
+   \item  \file{powerpc-ibm-aix5.1.0.0}      aix\_5               blue
+   \item  \file{powerpcll-ibm-aix5.1.0.0}    aix\_5\_ll            frost
    \end{itemize}
-
+\end{enumerate}
    see: https://lc.llnl.gov/computing/techbulletins/bulletin258l.html
 
    Copying the tar file on to an SCF machine requires going through
@@ -191,7 +195,11 @@ Installing the \hypre{} distribution:
 
    \item Run the Bourne-shell install script \kbd{mklibs} located in 
    the tools directory of the \hypre{} repository, a copy also
-   exist at the root level of the hypre install directory. Typing
+   exist at the root level of the hypre install directory. There are
+   a couple specialized versions of \kbd{mklibs}, including:
+   \kbd{mklibs.aix}, which creates combined 32, and 64 bit
+   libraries, and \kbd{mklibs.babel} which adds --with-babel to
+   each of the installations. Typing
    \kbd{mklibs -help} will provide usage information. Executing
    \kbd{mklibs} will untar the distribution, and build the hypre 
    libraries. The untaring of the distribution, creates a directory
