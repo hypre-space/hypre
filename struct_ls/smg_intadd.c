@@ -139,18 +139,8 @@ hypre_SMGIntAddSetup( void               *intadd_vdata,
                                      f_send_boxes, recv_boxes,
                                      &recv_processes);
 
-   hypre_ForBoxArrayI(i, f_send_boxes)
-      {
-         hypre_FreeBoxArrayShell(hypre_BoxArrayArrayBoxArray(f_send_boxes, i));
-         hypre_TFree(temp_send_processes[i]);
-      }
-   hypre_FreeBoxArrayArrayShell(f_send_boxes);
-   hypre_ForBoxArrayI(i, f_recv_boxes)
-      {
-         hypre_FreeBoxArrayShell(hypre_BoxArrayArrayBoxArray(f_recv_boxes, i));
-         hypre_TFree(temp_recv_processes[i]);
-      }
-   hypre_FreeBoxArrayArrayShell(f_recv_boxes);
+   hypre_FreeBoxArrayArray(f_send_boxes);
+   hypre_FreeBoxArrayArray(f_recv_boxes);
 
    hypre_TFree(temp_send_processes);
    hypre_TFree(temp_recv_processes);
@@ -449,7 +439,6 @@ hypre_AppendBoxArrayArrayAndProcs( int                  **processes_0,
    int                box_array_size_1; 
    int                i;
    int                j;
-   int                k;
  
    box_array_array_size = hypre_BoxArrayArraySize(box_array_array_0);
    processes = hypre_CTAlloc(int *, box_array_array_size);
@@ -462,10 +451,10 @@ hypre_AppendBoxArrayArrayAndProcs( int                  **processes_0,
          box_array_size_1 = hypre_BoxArraySize(box_array_1);
          processes[i] =
             hypre_CTAlloc(int, box_array_size_0 + box_array_size_1);
-         for ( j=0 ; j < box_array_size_1; j++)
+         for (j = 0 ; j < box_array_size_1; j++)
             processes[i][j] = processes_1[i][j];
-         for ( k=0 ; k < box_array_size_0; k++)
-            processes[i][k+box_array_size_1] = processes_0[i][k];
+         for (j = 0 ; j < box_array_size_0; j++)
+            processes[i][j+box_array_size_1] = processes_0[i][j];
          hypre_AppendBoxArray(box_array_0, box_array_1);
       }
 

@@ -81,6 +81,8 @@ hypre_NewCommInfoFromStencil( hypre_BoxArrayArray  **send_boxes_ptr,
     * Compute send/recv boxes and processes
     *------------------------------------------------------*/
 
+   box0 = hypre_NewBox();
+
    send_boxes = hypre_NewBoxArrayArray(hypre_BoxArraySize(boxes));
    recv_boxes = hypre_NewBoxArrayArray(hypre_BoxArraySize(boxes));
    send_processes = hypre_CTAlloc(int *, hypre_BoxArraySize(boxes));
@@ -122,8 +124,8 @@ hypre_NewCommInfoFromStencil( hypre_BoxArrayArray  **send_boxes_ptr,
                {
                   neighbor_box = hypre_BoxArrayBox(neighbor_boxes, j);
 
-                  box0 = hypre_IntersectBoxes(shift_box, neighbor_box);
-                  if (box0)
+                  hypre_IntersectBoxes(shift_box, neighbor_box, box0);
+                  if (hypre_BoxVolume(box0))
                   {
                      if (cbox_arrays[j] == NULL)
                      {
@@ -134,8 +136,7 @@ hypre_NewCommInfoFromStencil( hypre_BoxArrayArray  **send_boxes_ptr,
                      box_a0 = hypre_SubtractBoxes(box0, box);
                      hypre_AppendBoxArray(box_a0, cbox_arrays[j]);
 
-                     hypre_FreeBox(box0);
-                     hypre_FreeBoxArrayShell(box_a0);
+                     hypre_FreeBoxArray(box_a0);
                   }
                }
             hypre_EndBoxNeighborsLoop;
@@ -165,7 +166,7 @@ hypre_NewCommInfoFromStencil( hypre_BoxArrayArray  **send_boxes_ptr,
                   hypre_AppendBox(hypre_BoxArrayBox(cbox_arrays[j], k),
                                   recv_box_array);
                }
-            hypre_FreeBoxArrayShell(cbox_arrays[j]);
+            hypre_FreeBoxArray(cbox_arrays[j]);
             cbox_arrays[j] = NULL;
          }
 
@@ -198,8 +199,8 @@ hypre_NewCommInfoFromStencil( hypre_BoxArrayArray  **send_boxes_ptr,
                {
                   neighbor_box = hypre_BoxArrayBox(neighbor_boxes, j);
 
-                  box0 = hypre_IntersectBoxes(shift_box, neighbor_box);
-                  if (box0)
+                  hypre_IntersectBoxes(shift_box, neighbor_box, box0);
+                  if (hypre_BoxVolume(box0))
                   {
                      /* shift box0 back */
                      for (d = 0; d < 3; d++)
@@ -219,8 +220,7 @@ hypre_NewCommInfoFromStencil( hypre_BoxArrayArray  **send_boxes_ptr,
                      box_a0 = hypre_SubtractBoxes(box0, neighbor_box);
                      hypre_AppendBoxArray(box_a0, cbox_arrays[j]);
 
-                     hypre_FreeBox(box0);
-                     hypre_FreeBoxArrayShell(box_a0);
+                     hypre_FreeBoxArray(box_a0);
                   }
                }
             hypre_EndBoxNeighborsLoop;
@@ -257,7 +257,7 @@ hypre_NewCommInfoFromStencil( hypre_BoxArrayArray  **send_boxes_ptr,
                   hypre_AppendBox(hypre_BoxArrayBox(cbox_arrays[j], k),
                                   send_box_array);
                }
-            hypre_FreeBoxArrayShell(cbox_arrays[j]);
+            hypre_FreeBoxArray(cbox_arrays[j]);
             cbox_arrays[j] = NULL;
          }
 
@@ -266,6 +266,8 @@ hypre_NewCommInfoFromStencil( hypre_BoxArrayArray  **send_boxes_ptr,
 
    hypre_TFree(cbox_arrays);
    hypre_TFree(cbox_arrays_i);
+
+   hypre_FreeBox(box0);
 
    /*------------------------------------------------------
     * Return
@@ -351,6 +353,7 @@ hypre_NewCommInfoFromGrids( hypre_BoxArrayArray  **send_boxes_ptr,
       comm_boxes = hypre_NewBoxArrayArray(hypre_BoxArraySize(local_boxes));
       comm_processes = hypre_CTAlloc(int *, hypre_BoxArraySize(local_boxes));
 
+      comm_box = hypre_NewBox();
       hypre_ForBoxI(i, local_boxes)
          {
             local_box = hypre_BoxArrayBox(local_boxes, i);
@@ -363,8 +366,8 @@ hypre_NewCommInfoFromGrids( hypre_BoxArrayArray  **send_boxes_ptr,
                {
                   remote_box = hypre_BoxArrayBox(remote_all_boxes, j);
 
-                  comm_box = hypre_IntersectBoxes(local_box, remote_box);
-                  if (comm_box)
+                  hypre_IntersectBoxes(local_box, remote_box, comm_box);
+                  if (hypre_BoxVolume(comm_box))
                   {
                      k = hypre_BoxArraySize(comm_box_array);
                      comm_processes[i][k] = remote_processes[j];
@@ -377,6 +380,7 @@ hypre_NewCommInfoFromGrids( hypre_BoxArrayArray  **send_boxes_ptr,
                hypre_TReAlloc(comm_processes[i],
                               int, hypre_BoxArraySize(comm_box_array));
          }
+      hypre_FreeBox(comm_box);
 
       hypre_FreeBoxArray(remote_all_boxes);
       hypre_TFree(remote_processes);

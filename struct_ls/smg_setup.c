@@ -156,8 +156,8 @@ hypre_SMGSetup( void               *smg_vdata,
       boxes = hypre_NewBoxArray(num_boxes);
       for (i = 0; i < num_boxes; i++)
       {
-         box = hypre_DuplicateBox(hypre_BoxArrayBox(all_boxes, box_ranks[i]));
-         hypre_AppendBox(box, boxes);
+         hypre_CopyBox(hypre_BoxArrayBox(all_boxes, box_ranks[i]),
+                       hypre_BoxArrayBox(boxes, i));
       }
 
       grid_l[l+1] = hypre_NewStructGrid(comm, hypre_StructGridDim(grid_l[l]));
@@ -354,15 +354,8 @@ hypre_SMGSetup( void               *smg_vdata,
    intadd_data_l   = hypre_TAlloc(void *, num_levels);
 
    /* temporarily set the data for x_l[0] and b_l[0] to temp data */
-#ifdef HYPRE_USE_PTHREADS
-   hypre_BarrierThreadWrapper({
-      b_data = hypre_StructVectorData(b_l[0]);
-      x_data = hypre_StructVectorData(x_l[0]);
-   });
-#else
    b_data = hypre_StructVectorData(b_l[0]);
    x_data = hypre_StructVectorData(x_l[0]);
-#endif
    hypre_InitializeStructVectorData(b_l[0], hypre_StructVectorData(tb_l[0]));
    hypre_InitializeStructVectorData(x_l[0], hypre_StructVectorData(tx_l[0]));
    hypre_AssembleStructVector(b_l[0]);

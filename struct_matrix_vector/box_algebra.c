@@ -21,76 +21,24 @@
  *   If no intersection, return NULL.
  *--------------------------------------------------------------------------*/
 
-hypre_Box *
+int
 hypre_IntersectBoxes( hypre_Box *box1,
-                      hypre_Box *box2 )
+                      hypre_Box *box2,
+                      hypre_Box *ibox )
 {
-   hypre_Box   *box;
-
-   hypre_Index  imin;
-   hypre_Index  imax;
-
+   int          ierr = 0;
    int          d;
 
    /* find x, y, and z bounds */
    for (d = 0; d < 3; d++)
    {
-      hypre_IndexD(imin, d) = max(hypre_BoxIMinD(box1, d),
-                                  hypre_BoxIMinD(box2, d));
-      hypre_IndexD(imax, d) = min(hypre_BoxIMaxD(box1, d),
-                                  hypre_BoxIMaxD(box2, d));
-      if (hypre_IndexD(imax, d) < hypre_IndexD(imin, d))
-      {
-	 return NULL;
-      }
+      hypre_BoxIMinD(ibox, d) =
+         max(hypre_BoxIMinD(box1, d), hypre_BoxIMinD(box2, d));
+      hypre_BoxIMaxD(ibox, d) =
+         min(hypre_BoxIMaxD(box1, d), hypre_BoxIMaxD(box2, d));
    }
 
-   /* return intersection */
-   box = hypre_NewBox(imin, imax);
-   return box;
-}
-
-/*--------------------------------------------------------------------------
- * hypre_IntersectBoxArrays:
- *   Intersect box_array1 and box_array2.
- *   If no intersection, return NULL.
- *--------------------------------------------------------------------------*/
-
-hypre_BoxArray *
-hypre_IntersectBoxArrays( hypre_BoxArray *box_array1,
-                          hypre_BoxArray *box_array2 )
-{
-   hypre_BoxArray  *box_array;
-   hypre_Box       *box;
-
-   hypre_Box       *box1;
-   hypre_Box       *box2;
-
-   int              i1, i2;
-
-   box_array = hypre_NewBoxArray(0);
-
-   hypre_ForBoxI(i1, box_array1)
-      {
-         box1 = hypre_BoxArrayBox(box_array1, i1);
-
-         hypre_ForBoxI(i2, box_array2)
-            {
-               box2 = hypre_BoxArrayBox(box_array2, i2);
-
-               box = hypre_IntersectBoxes(box1, box2);
-               if (box)
-                  hypre_AppendBox(box, box_array);
-            }
-      }
-
-   if (hypre_BoxArraySize(box_array) == 0)
-   {
-      hypre_FreeBoxArray(box_array);
-      return NULL;
-   }
-   else
-      return box_array;
+   return ierr;
 }
 
 /*--------------------------------------------------------------------------
@@ -103,11 +51,9 @@ hypre_SubtractBoxes( hypre_Box *box1,
                      hypre_Box *box2 )
 {
    hypre_BoxArray  *box_array;
-   hypre_Box       *box;
-
    hypre_Box       *cutbox;
 
-   int              d;
+   int              d, iminmax;
 
    /*------------------------------------------------------
     * Do a quick check to see if the boxes intersect.
@@ -120,7 +66,7 @@ hypre_SubtractBoxes( hypre_Box *box1,
 	   (hypre_BoxIMaxD(box2, d) < hypre_BoxIMinD(box1, d)) )
       {
 	 box_array = hypre_NewBoxArray(1);
-	 hypre_AppendBox(hypre_DuplicateBox(box1), box_array);
+	 hypre_CopyBox(box1, hypre_BoxArrayBox(box_array, 0));
 	 return box_array;
       }
    }
@@ -138,19 +84,21 @@ hypre_SubtractBoxes( hypre_Box *box1,
       if ( (hypre_BoxIMinD(box2, d) >  hypre_BoxIMinD(cutbox, d)) &&
 	   (hypre_BoxIMinD(box2, d) <= hypre_BoxIMaxD(cutbox, d)) )
       {
-	 box = hypre_DuplicateBox(cutbox);
-	 hypre_BoxIMaxD(box, d) = hypre_BoxIMinD(box2, d) - 1;
-	 hypre_AppendBox(box, box_array);
+         iminmax = hypre_BoxIMaxD(cutbox, d);
+	 hypre_BoxIMaxD(cutbox, d) = hypre_BoxIMinD(box2, d) - 1;
+	 hypre_AppendBox(cutbox, box_array);
 
+         hypre_BoxIMaxD(cutbox, d) = iminmax;
 	 hypre_BoxIMinD(cutbox, d) = hypre_BoxIMinD(box2, d);
       }
       if ( (hypre_BoxIMaxD(box2, d) >= hypre_BoxIMinD(cutbox, d)) &&
 	   (hypre_BoxIMaxD(box2, d) <  hypre_BoxIMaxD(cutbox, d)) )
       {
-	 box = hypre_DuplicateBox(cutbox);
-	 hypre_BoxIMinD(box, d) = hypre_BoxIMaxD(box2, d) + 1;
-	 hypre_AppendBox(box, box_array);
+         iminmax = hypre_BoxIMinD(cutbox, d);
+	 hypre_BoxIMinD(cutbox, d) = hypre_BoxIMaxD(box2, d) + 1;
+	 hypre_AppendBox(cutbox, box_array);
 
+         hypre_BoxIMinD(cutbox, d) = iminmax;
 	 hypre_BoxIMaxD(cutbox, d) = hypre_BoxIMaxD(box2, d);
       }
    }
@@ -396,6 +344,7 @@ hypre_UnionBoxArray( hypre_BoxArray *boxes )
     *------------------------------------------------------*/
 
    box_union = hypre_NewBoxArray(0);
+   box = hypre_NewBox();
 
    index = 0;
    for (k = 0; k < block_sz[2]; k++)
@@ -417,8 +366,7 @@ hypre_UnionBoxArray( hypre_BoxArray *boxes )
 	       hypre_IndexD(imax, 1) = block_index[1][j + joff] - 1;
 	       hypre_IndexD(imax, 2) = block_index[2][k + koff] - 1;
 
-	       box = hypre_NewBox(imin, imax);
-
+	       hypre_SetBoxExtents(box, imin, imax);
 	       hypre_AppendBox(box, box_union);
 	    }
 	       
@@ -426,6 +374,7 @@ hypre_UnionBoxArray( hypre_BoxArray *boxes )
 	 }
       }
    }
+   hypre_FreeBox(box);
 
    /*------------------------------------------------------
     * Free up block_index and block

@@ -156,9 +156,8 @@ hypre_NewBoxNeighbors( int             *local_ranks,
    new_processes = hypre_TAlloc(int, num_new_boxes);
    for (i = 0; i < num_new_boxes; i++)
    {
-      neighbor_box =
-         hypre_DuplicateBox(hypre_BoxArrayBox(boxes, new_boxes_ranks[i]));
-      hypre_AppendBox(neighbor_box, new_boxes);
+      neighbor_box = hypre_BoxArrayBox(boxes, new_boxes_ranks[i]);
+      hypre_CopyBox(neighbor_box, hypre_BoxArrayBox(new_boxes, i));
       new_processes[i] = processes[new_boxes_ranks[i]];
    }
 

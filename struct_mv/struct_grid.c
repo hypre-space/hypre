@@ -72,8 +72,10 @@ hypre_SetStructGridExtents( hypre_StructGrid  *grid,
       hypre_StructGridBoxes(grid) = hypre_NewBoxArray(0);
    }
 
-   box = hypre_NewBox(ilower, iupper);
+   box = hypre_NewBox();
+   hypre_SetBoxExtents(box, ilower, iupper);
    hypre_AppendBox(box, hypre_StructGridBoxes(grid));
+   hypre_FreeBox(box);
 
    return ierr;
 }
@@ -190,7 +192,7 @@ hypre_GatherAllBoxes( MPI_Comm         comm,
    int               *displs;
    int                recvbuf_size;
                      
-   int                i, p, b, d;
+   int                i, p, b, ab, d;
    int                ierr = 0;
 
    /*-----------------------------------------------------
@@ -255,9 +257,11 @@ hypre_GatherAllBoxes( MPI_Comm         comm,
    all_boxes = hypre_NewBoxArray(all_boxes_size);
    processes = hypre_TAlloc(int, all_boxes_size);
    box_ranks = hypre_TAlloc(int, hypre_BoxArraySize(boxes));
-   i = 0;
-   p = 0;
-   b = 0;
+   i  = 0;
+   p  = 0;
+   b  = 0;
+   ab = 0;
+   box = hypre_NewBox();
    while (i < recvbuf_size)
    {
       processes[p] = recvbuf[i++];
@@ -266,8 +270,9 @@ hypre_GatherAllBoxes( MPI_Comm         comm,
 	 hypre_IndexD(imin, d) = recvbuf[i++];
 	 hypre_IndexD(imax, d) = recvbuf[i++];
       }
-      box = hypre_NewBox(imin, imax);
-      hypre_AppendBox(box, all_boxes);
+      hypre_SetBoxExtents(box, imin, imax);
+      hypre_CopyBox(box, hypre_BoxArrayBox(all_boxes, ab));
+      ab++;
 
       if (processes[p] == my_rank)
       {
@@ -277,6 +282,7 @@ hypre_GatherAllBoxes( MPI_Comm         comm,
 
       p++;
    }
+   hypre_FreeBox(box);
 
    /*-----------------------------------------------------
     * Return

@@ -86,25 +86,29 @@ hypre_GetComputeInfo( hypre_BoxArrayArray  **send_boxes_ptr,
 
          /* intersect `box_aa0' with `boxes' to create `dept_box_a' */
          dept_box_a = hypre_NewBoxArray(0);
+         box0 = hypre_NewBox();
          hypre_ForBoxArrayI(j, box_aa0)
             {
                box_a0 = hypre_BoxArrayArrayBoxArray(box_aa0, i);
 
                hypre_ForBoxI(k, box_a0)
                   {
-                     box0 = hypre_IntersectBoxes(hypre_BoxArrayBox(box_a0, k),
-                                                 hypre_BoxArrayBox(boxes, i));
-                     if (box0)
+                     hypre_IntersectBoxes(hypre_BoxArrayBox(box_a0, k),
+                                          hypre_BoxArrayBox(boxes, i), box0);
+                     if (hypre_BoxVolume(box0))
+                     {
                         hypre_AppendBox(box0, dept_box_a);
+                     }
                   }
             }
+         hypre_FreeBox(box0);
          hypre_FreeBoxArrayArray(box_aa0);
 
          /* append `send_boxes' to `dept_box_a' */
          send_box_a = hypre_BoxArrayArrayBoxArray(send_boxes, i);
          hypre_ForBoxI(j, send_box_a)
             {
-               box0 = hypre_DuplicateBox(hypre_BoxArrayBox(send_box_a, j));
+               box0 = hypre_BoxArrayBox(send_box_a, j);
                hypre_AppendBox(box0, dept_box_a);
             }
 
@@ -120,7 +124,7 @@ hypre_GetComputeInfo( hypre_BoxArrayArray  **send_boxes_ptr,
 
    hypre_ForBoxI(i, boxes)
       {
-         box0 = hypre_DuplicateBox(hypre_BoxArrayBox(boxes, i));
+         box0 = hypre_BoxArrayBox(boxes, i);
          hypre_AppendBox(box0, hypre_BoxArrayArrayBoxArray(dept_boxes, i));
       }
 
@@ -141,8 +145,7 @@ hypre_GetComputeInfo( hypre_BoxArrayArray  **send_boxes_ptr,
 
          /* initialize `indt_box_a' */
          indt_box_a = hypre_BoxArrayArrayBoxArray(indt_boxes, i);
-         hypre_AppendBox(hypre_DuplicateBox(hypre_BoxArrayBox(boxes, i)),
-                         indt_box_a);
+         hypre_AppendBox(hypre_BoxArrayBox(boxes, i), indt_box_a);
 
          /* subtract `dept_box_a' from `indt_box_a' */
          hypre_ForBoxI(j, dept_box_a)
@@ -155,7 +158,7 @@ hypre_GetComputeInfo( hypre_BoxArrayArray  **send_boxes_ptr,
                         hypre_SubtractBoxes(hypre_BoxArrayBox(indt_box_a, k),
                                             hypre_BoxArrayBox(dept_box_a, j));
                      hypre_AppendBoxArray(box_a1, box_a0);
-                     hypre_FreeBoxArrayShell(box_a1);
+                     hypre_FreeBoxArray(box_a1);
                   }
 
                hypre_FreeBoxArray(indt_box_a);

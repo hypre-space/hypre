@@ -48,13 +48,13 @@ typedef struct
 
 typedef struct
 {
-   hypre_Box  **boxes;         /* Array of pointers to boxes */
-   int          size;          /* Size of box array */
-   int          alloc_size;
+   hypre_Box  *boxes;         /* Array of boxes */
+   int         size;          /* Size of box array */
+   int         alloc_size;    /* Size of currently alloced space */
 
 } hypre_BoxArray;
 
-#define hypre_BoxArrayBlocksize 10
+#define hypre_BoxArrayExcess 10
 
 /*--------------------------------------------------------------------------
  * hypre_BoxArrayArray:
@@ -119,6 +119,10 @@ max(0, (hypre_BoxIMaxD(box, d) - hypre_BoxIMinD(box, d) + 1))
 #define hypre_BoxSizeY(box)    hypre_BoxSizeD(box, 1)
 #define hypre_BoxSizeZ(box)    hypre_BoxSizeD(box, 2)
 
+#define hypre_CopyBox(box1, box2) \
+( hypre_CopyIndex(hypre_BoxIMin(box1), hypre_BoxIMin(box2)),\
+  hypre_CopyIndex(hypre_BoxIMax(box1), hypre_BoxIMax(box2)) )
+
 #define hypre_BoxVolume(box) \
 (hypre_BoxSizeX(box) * hypre_BoxSizeY(box) * hypre_BoxSizeZ(box))
 
@@ -141,7 +145,7 @@ max(0, (hypre_BoxIMaxD(box, d) - hypre_BoxIMinD(box, d) + 1))
  *--------------------------------------------------------------------------*/
 
 #define hypre_BoxArrayBoxes(box_array)     ((box_array) -> boxes)
-#define hypre_BoxArrayBox(box_array, i)    ((box_array) -> boxes[(i)])
+#define hypre_BoxArrayBox(box_array, i)    &((box_array) -> boxes[(i)])
 #define hypre_BoxArraySize(box_array)      ((box_array) -> size)
 #define hypre_BoxArrayAllocSize(box_array) ((box_array) -> alloc_size)
 

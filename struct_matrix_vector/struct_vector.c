@@ -116,8 +116,9 @@ hypre_InitializeStructVectorShell( hypre_StructVector *vector )
       hypre_ForBoxI(i, boxes)
          {
             box = hypre_BoxArrayBox(boxes, i);
+            data_box = hypre_BoxArrayBox(data_space, i);
 
-            data_box = hypre_DuplicateBox(box);
+            hypre_CopyBox(box, data_box);
             if (hypre_BoxVolume(data_box))
             {
                for (d = 0; d < 3; d++)
@@ -126,8 +127,6 @@ hypre_InitializeStructVectorShell( hypre_StructVector *vector )
                   hypre_BoxIMaxD(data_box, d) += num_ghost[2*d + 1];
                }
             }
-
-            hypre_AppendBox(data_box, data_space);
          }
 
       hypre_StructVectorDataSpace(vector) = data_space;
@@ -320,12 +319,14 @@ hypre_SetStructVectorBoxValues( hypre_StructVector *vector,
 
    grid_boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(vector));
    box_array = hypre_NewBoxArray(hypre_BoxArraySize(grid_boxes));
+   box = hypre_NewBox();
    hypre_ForBoxI(i, grid_boxes)
       {
          grid_box = hypre_BoxArrayBox(grid_boxes, i);
-         box = hypre_IntersectBoxes(value_box, grid_box);
-         hypre_AppendBox(box, box_array);
+         hypre_IntersectBoxes(value_box, grid_box, box);
+         hypre_CopyBox(box, hypre_BoxArrayBox(box_array, i));
       }
+   hypre_FreeBox(box);
 
    /*-----------------------------------------------------------------------
     * Set the vector coefficients
@@ -417,12 +418,14 @@ hypre_GetStructVectorBoxValues( hypre_StructVector *vector,
 
    grid_boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(vector));
    box_array = hypre_NewBoxArray(hypre_BoxArraySize(grid_boxes));
+   box = hypre_NewBox();
    hypre_ForBoxI(i, grid_boxes)
       {
          grid_box = hypre_BoxArrayBox(grid_boxes, i);
-         box = hypre_IntersectBoxes(value_box, grid_box);
-         hypre_AppendBox(box, box_array);
+         hypre_IntersectBoxes(value_box, grid_box, box);
+         hypre_CopyBox(box, hypre_BoxArrayBox(box_array, i));
       }
+   hypre_FreeBox(box);
 
    /*-----------------------------------------------------------------------
     * Set the vector coefficients

@@ -490,8 +490,8 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
       boxes = hypre_NewBoxArray(num_boxes);
       for (i = 0; i < num_boxes; i++)
       {
-         box = hypre_DuplicateBox(hypre_BoxArrayBox(all_boxes, box_ranks[i]));
-         hypre_AppendBox(box, boxes);
+         hypre_CopyBox(hypre_BoxArrayBox(all_boxes, box_ranks[i]),
+                       hypre_BoxArrayBox(boxes, i));
       }
 
       grid_l[l+1] = hypre_NewStructGrid(comm, hypre_StructGridDim(grid_l[l]));

@@ -224,8 +224,9 @@ hypre_InitializeStructMatrixShell( hypre_StructMatrix *matrix )
       hypre_ForBoxI(i, boxes)
          {
             box = hypre_BoxArrayBox(boxes, i);
+            data_box = hypre_BoxArrayBox(data_space, i);
 
-            data_box = hypre_DuplicateBox(box);
+            hypre_CopyBox(box, data_box);
             if (hypre_BoxVolume(data_box))
             {
                for (d = 0; d < 3; d++)
@@ -234,8 +235,6 @@ hypre_InitializeStructMatrixShell( hypre_StructMatrix *matrix )
                   hypre_BoxIMaxD(data_box, d) += num_ghost[2*d + 1];
                }
             }
-
-            hypre_AppendBox(data_box, data_space);
          }
 
       hypre_StructMatrixDataSpace(matrix) = data_space;
@@ -457,12 +456,14 @@ hypre_SetStructMatrixBoxValues( hypre_StructMatrix *matrix,
 
    grid_boxes = hypre_StructGridBoxes(hypre_StructMatrixGrid(matrix));
    box_array = hypre_NewBoxArray(hypre_BoxArraySize(grid_boxes));
+   box = hypre_NewBox();
    hypre_ForBoxI(i, grid_boxes)
       {
          grid_box = hypre_BoxArrayBox(grid_boxes, i);
-         box = hypre_IntersectBoxes(value_box, grid_box);
-         hypre_AppendBox(box, box_array);
+         hypre_IntersectBoxes(value_box, grid_box, box);
+         hypre_CopyBox(box, hypre_BoxArrayBox(box_array, i));
       }
+   hypre_FreeBox(box);
 
    /*-----------------------------------------------------------------------
     * Set the matrix coefficients

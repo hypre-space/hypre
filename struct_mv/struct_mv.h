@@ -60,13 +60,13 @@ typedef struct
 
 typedef struct
 {
-   hypre_Box  **boxes;         /* Array of pointers to boxes */
-   int          size;          /* Size of box array */
-   int          alloc_size;
+   hypre_Box  *boxes;         /* Array of boxes */
+   int         size;          /* Size of box array */
+   int         alloc_size;    /* Size of currently alloced space */
 
 } hypre_BoxArray;
 
-#define hypre_BoxArrayBlocksize 10
+#define hypre_BoxArrayExcess 10
 
 /*--------------------------------------------------------------------------
  * hypre_BoxArrayArray:
@@ -131,6 +131,10 @@ max(0, (hypre_BoxIMaxD(box, d) - hypre_BoxIMinD(box, d) + 1))
 #define hypre_BoxSizeY(box)    hypre_BoxSizeD(box, 1)
 #define hypre_BoxSizeZ(box)    hypre_BoxSizeD(box, 2)
 
+#define hypre_CopyBox(box1, box2) \
+( hypre_CopyIndex(hypre_BoxIMin(box1), hypre_BoxIMin(box2)),\
+  hypre_CopyIndex(hypre_BoxIMax(box1), hypre_BoxIMax(box2)) )
+
 #define hypre_BoxVolume(box) \
 (hypre_BoxSizeX(box) * hypre_BoxSizeY(box) * hypre_BoxSizeZ(box))
 
@@ -153,7 +157,7 @@ max(0, (hypre_BoxIMaxD(box, d) - hypre_BoxIMinD(box, d) + 1))
  *--------------------------------------------------------------------------*/
 
 #define hypre_BoxArrayBoxes(box_array)     ((box_array) -> boxes)
-#define hypre_BoxArrayBox(box_array, i)    ((box_array) -> boxes[(i)])
+#define hypre_BoxArrayBox(box_array, i)    &((box_array) -> boxes[(i)])
 #define hypre_BoxArraySize(box_array)      ((box_array) -> size)
 #define hypre_BoxArrayAllocSize(box_array) ((box_array) -> alloc_size)
 
@@ -979,13 +983,12 @@ int HYPRE_MigrateStructVector P((HYPRE_CommPkg comm_pkg , HYPRE_StructVector fro
 int HYPRE_FreeCommPkg P((HYPRE_CommPkg comm_pkg ));
 
 /* box.c */
-hypre_Box *hypre_NewBox P((hypre_Index imin , hypre_Index imax ));
-hypre_BoxArray *hypre_NewBoxArray P((int alloc_size ));
+hypre_Box *hypre_NewBox P((void ));
+int hypre_SetBoxExtents P((hypre_Box *box , hypre_Index imin , hypre_Index imax ));
+hypre_BoxArray *hypre_NewBoxArray P((int size ));
 hypre_BoxArrayArray *hypre_NewBoxArrayArray P((int size ));
 int hypre_FreeBox P((hypre_Box *box ));
-int hypre_FreeBoxArrayShell P((hypre_BoxArray *box_array ));
 int hypre_FreeBoxArray P((hypre_BoxArray *box_array ));
-int hypre_FreeBoxArrayArrayShell P((hypre_BoxArrayArray *box_array_array ));
 int hypre_FreeBoxArrayArray P((hypre_BoxArrayArray *box_array_array ));
 hypre_Box *hypre_DuplicateBox P((hypre_Box *box ));
 hypre_BoxArray *hypre_DuplicateBoxArray P((hypre_BoxArray *box_array ));
@@ -993,14 +996,11 @@ hypre_BoxArrayArray *hypre_DuplicateBoxArrayArray P((hypre_BoxArrayArray *box_ar
 int hypre_AppendBox P((hypre_Box *box , hypre_BoxArray *box_array ));
 int hypre_DeleteBox P((hypre_BoxArray *box_array , int index ));
 int hypre_AppendBoxArray P((hypre_BoxArray *box_array_0 , hypre_BoxArray *box_array_1 ));
-int hypre_AppendBoxArrayArray P((hypre_BoxArrayArray *box_array_array_0 , hypre_BoxArrayArray *box_array_array_1 ));
 int hypre_GetBoxSize P((hypre_Box *box , hypre_Index size ));
 int hypre_GetStrideBoxSize P((hypre_Box *box , hypre_Index stride , hypre_Index size ));
-int hypre_CopyBoxArrayData P((hypre_BoxArray *box_array_in , hypre_BoxArray *data_space_in , int num_values_in , double *data_in , hypre_BoxArray *box_array_out , hypre_BoxArray *data_space_out , int num_values_out , double *data_out ));
 
 /* box_algebra.c */
-hypre_Box *hypre_IntersectBoxes P((hypre_Box *box1 , hypre_Box *box2 ));
-hypre_BoxArray *hypre_IntersectBoxArrays P((hypre_BoxArray *box_array1 , hypre_BoxArray *box_array2 ));
+int hypre_IntersectBoxes P((hypre_Box *box1 , hypre_Box *box2 , hypre_Box *ibox ));
 hypre_BoxArray *hypre_SubtractBoxes P((hypre_Box *box1 , hypre_Box *box2 ));
 hypre_BoxArray *hypre_UnionBoxArray P((hypre_BoxArray *boxes ));
 
@@ -1009,6 +1009,9 @@ int hypre_InitializeBoxMemory P((const int at_a_time ));
 int hypre_FinalizeBoxMemory P((void ));
 hypre_Box *hypre_BoxAlloc P((void ));
 int hypre_BoxFree P((hypre_Box *box ));
+
+/* box_data.c */
+void hypre_CopyBoxArrayData P((hypre_BoxArray *box_array_in , hypre_BoxArray *data_space_in , int num_values_in , double *data_in , hypre_BoxArray *box_array_out , hypre_BoxArray *data_space_out , int num_values_out , double *data_out ));
 
 /* box_neighbors.c */
 hypre_RankLink *hypre_NewRankLink P((int rank ));

@@ -113,7 +113,8 @@ HYPRE_SetStructMatrixBoxValues( HYPRE_StructMatrix  matrix,
       hypre_IndexD(new_ilower, d) = ilower[d];
       hypre_IndexD(new_iupper, d) = iupper[d];
    }
-   new_value_box = hypre_NewBox(new_ilower, new_iupper);
+   new_value_box = hypre_NewBox();
+   hypre_SetBoxExtents(new_value_box, new_ilower, new_iupper);
 
    ierr = hypre_SetStructMatrixBoxValues( new_matrix,
                                           new_value_box,
