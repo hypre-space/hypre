@@ -19,7 +19,8 @@ main( int   argc,
    int                 solver_id;
    int                 ioutdat;
    int                 debug_flag;
-   int                 ierr; 
+   int                 ierr,i; 
+   int                 max_levels = 25;
    int                 num_iterations; 
    double              norm;
    double              final_res_norm;
@@ -48,8 +49,8 @@ main( int   argc,
    int     *grid_relax_type;   
    int    **grid_relax_points;
    int      relax_default;
-   double   relax_weight; 
-   double   tol = 1.0e-7;
+   double  *relax_weight; 
+   double   tol = 1.0e-6;
 
    /* parameters for PILUT */
    double   drop_tol = -1;
@@ -227,12 +228,14 @@ main( int   argc,
    strong_threshold = 0.25;
    trunc_factor = 0.0;
    cycle_type = 1;
-   relax_weight = 1.0;
 
    num_grid_sweeps = hypre_CTAlloc(int,4);
    grid_relax_type = hypre_CTAlloc(int,4);
    grid_relax_points = hypre_CTAlloc(int *,4);
+   relax_weight = hypre_CTAlloc(double,max_levels);
 
+   for (i=0; i < max_levels; i++)
+	relax_weight[i] = 0.0;
    if (coarsen_type == 5)
    {
       /* fine grid */
@@ -247,8 +250,8 @@ main( int   argc,
       num_grid_sweeps[1] = 4;
       grid_relax_type[1] = relax_default; 
       grid_relax_points[1] = hypre_CTAlloc(int, 4); 
-      grid_relax_points[1][0] = 1;
-      grid_relax_points[1][1] = -1;
+      grid_relax_points[1][0] = -1;
+      grid_relax_points[1][1] = 1;
       grid_relax_points[1][2] = -2;
       grid_relax_points[1][3] = -2;
    
@@ -258,8 +261,8 @@ main( int   argc,
       grid_relax_points[2] = hypre_CTAlloc(int, 4); 
       grid_relax_points[2][0] = -2;
       grid_relax_points[2][1] = -2;
-      grid_relax_points[2][2] = -1;
-      grid_relax_points[2][3] = 1;
+      grid_relax_points[2][2] = 1;
+      grid_relax_points[2][3] = -1;
    }
    else
    {   
@@ -267,9 +270,9 @@ main( int   argc,
       num_grid_sweeps[0] = 2;
       grid_relax_type[0] = relax_default; 
       grid_relax_points[0] = hypre_CTAlloc(int, 2); 
-      grid_relax_points[0][0] = -1;
-      grid_relax_points[0][1] = 1;
-   
+      grid_relax_points[0][0] = 1;
+      grid_relax_points[0][1] = -1;
+  
       /* down cycle */
       num_grid_sweeps[1] = 2;
       grid_relax_type[1] = relax_default; 
@@ -305,7 +308,9 @@ main( int   argc,
       else if ( strcmp(argv[arg_index], "-w") == 0 )
       {
          arg_index++;
-         relax_weight = atof(argv[arg_index++]);
+         relax_weight[0] = atof(argv[arg_index++]);
+         for (i=1; i < max_levels; i++)
+	   relax_weight[i] = relax_weight[0];
       }
       else if ( strcmp(argv[arg_index], "-th") == 0 )
       {
@@ -560,7 +565,7 @@ main( int   argc,
       HYPRE_ParAMGSetGridRelaxType(amg_solver, grid_relax_type);
       HYPRE_ParAMGSetRelaxWeight(amg_solver, relax_weight);
       HYPRE_ParAMGSetGridRelaxPoints(amg_solver, grid_relax_points);
-      HYPRE_ParAMGSetMaxLevels(amg_solver, 25);
+      HYPRE_ParAMGSetMaxLevels(amg_solver, max_levels);
       HYPRE_ParAMGSetDebugFlag(amg_solver, debug_flag);
 
       HYPRE_ParAMGSetup(amg_solver, A, b, x);
@@ -594,7 +599,6 @@ main( int   argc,
  
       HYPRE_ParCSRPCGInitialize(MPI_COMM_WORLD, &pcg_solver);
       HYPRE_ParCSRPCGSetMaxIter(pcg_solver, 500);
-/*      HYPRE_ParCSRPCGSetTol(pcg_solver, 1.0e-08);  */
       HYPRE_ParCSRPCGSetTol(pcg_solver, tol);
       HYPRE_ParCSRPCGSetTwoNorm(pcg_solver, 1);
       HYPRE_ParCSRPCGSetRelChange(pcg_solver, 0);
@@ -614,8 +618,7 @@ main( int   argc,
          HYPRE_ParAMGSetGridRelaxType(pcg_precond, grid_relax_type);
          HYPRE_ParAMGSetRelaxWeight(pcg_precond, relax_weight);
          HYPRE_ParAMGSetGridRelaxPoints(pcg_precond, grid_relax_points);
-         HYPRE_ParAMGSetMaxLevels(pcg_precond, 25);
-
+         HYPRE_ParAMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_ParCSRPCGSetPrecond(pcg_solver,
                                    HYPRE_ParAMGSolve,
                                    HYPRE_ParAMGSetup,
@@ -680,7 +683,6 @@ main( int   argc,
       HYPRE_ParCSRGMRESInitialize(MPI_COMM_WORLD, &pcg_solver);
       HYPRE_ParCSRGMRESSetKDim(pcg_solver, k_dim);
       HYPRE_ParCSRGMRESSetMaxIter(pcg_solver, 100);
-/*      HYPRE_ParCSRGMRESSetTol(pcg_solver, 1.0e-08);   */
       HYPRE_ParCSRGMRESSetTol(pcg_solver, tol);
       HYPRE_ParCSRGMRESSetLogging(pcg_solver, 1);
  
@@ -699,7 +701,7 @@ main( int   argc,
          HYPRE_ParAMGSetGridRelaxType(pcg_precond, grid_relax_type);
          HYPRE_ParAMGSetRelaxWeight(pcg_precond, relax_weight);
          HYPRE_ParAMGSetGridRelaxPoints(pcg_precond, grid_relax_points);
-         HYPRE_ParAMGSetMaxLevels(pcg_precond, 25);
+         HYPRE_ParAMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_ParCSRGMRESSetPrecond(pcg_solver,
                                    HYPRE_ParAMGSolve,
                                    HYPRE_ParAMGSetup,
@@ -788,13 +790,15 @@ main( int   argc,
  
       HYPRE_ParCSRCGNRInitialize(MPI_COMM_WORLD, &pcg_solver);
       HYPRE_ParCSRCGNRSetMaxIter(pcg_solver, 1000);
-      HYPRE_ParCSRCGNRSetTol(pcg_solver, 1.0e-08);
+      HYPRE_ParCSRCGNRSetTol(pcg_solver, tol);
       HYPRE_ParCSRCGNRSetLogging(pcg_solver, 1);
  
       if (solver_id == 5)
       {
          /* use BoomerAMG as preconditioner */
          pcg_precond = HYPRE_ParAMGInitialize(); 
+         HYPRE_ParAMGSetCoarsenType(pcg_precond, (hybrid*coarsen_type));
+         HYPRE_ParAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_ParAMGSetStrongThreshold(pcg_precond, strong_threshold);
          HYPRE_ParAMGSetLogging(pcg_precond, ioutdat, "driver.out.log");
          HYPRE_ParAMGSetMaxIter(pcg_precond, 1);
@@ -803,7 +807,7 @@ main( int   argc,
          HYPRE_ParAMGSetGridRelaxType(pcg_precond, grid_relax_type);
          HYPRE_ParAMGSetRelaxWeight(pcg_precond, relax_weight);
          HYPRE_ParAMGSetGridRelaxPoints(pcg_precond, grid_relax_points);
-         HYPRE_ParAMGSetMaxLevels(pcg_precond, 25);
+         HYPRE_ParAMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_ParCSRCGNRSetPrecond(pcg_solver,
                                    HYPRE_ParAMGSolve,
                                    HYPRE_ParAMGSolveT,
