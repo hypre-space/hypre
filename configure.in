@@ -1,5 +1,17 @@
 dnl *********************************************************************
-dnl configure.in
+dnl * configure.in, when autoconf is run, this file is read and 
+dnl * the script configure is generated.  Configure.in is structured
+dnl * as follows:  initialization, the current architecture is determined,
+dnl * user specified compilers are set, 
+dnl * other user specifieds options are determined and relevant macros
+dnl * assigned.  Then, given the architecture, an optimal compiler is
+dnl * found (if not specified by the user). If the archtecture is
+dnl * unknown or none of the preferred compilers are available then
+dnl * default compilers are found.  For each chosen compiler, the 
+dnl * appropriate flags are set for optimization or debugging and MPI
+dnl * and pthreading (if required).  The C preprocessor is also checked.
+dnl * Finally, library flags are added and AC_SUBST is used to export
+dnl * all necessary macro values.  
 dnl *********************************************************************
 
 dnl *********************************************************************
@@ -11,97 +23,106 @@ dnl *********************************************************************
 AC_INIT(utilities/memory.c)
 
 dnl *********************************************************************
-dnl * Find the compilers and preprocessors.  AC_SUBST is called for each.
+dnl * Set the variable ARCH, (CASC_GUESS_ARCH uses tarch).  ARCH will
+dnl * be used throught this file to determine optimal compilers, options
+dnl * flag, etc for each supported architecture.  If ARCH is unknown
+dnl * then default settings will apply.
 dnl *********************************************************************
 
+
+HYPRE_GUESS_ARCH
+
+
 dnl *********************************************************************
-dnl * This is an example of how to set a command-line option to configure.
-dnl * This form can be used with many different macros.
-dnl *********************************************************************
+dnl * If the user has specified a c, c++, or fortran compiler on the 
+dnl * command line, that compiler will be used.  No checks are done
+dnl * to assure this compiler is present or working.  Additionally,
+dnl * if the user indicated any MPI include, library, or directory
+dnl * to use with the chosen compiler those options are identified
+dnl * and the appropriate macros are assigned values.
+dnl *********************************************************************dnl * 
+
+casc_user_chose_compilers=no
+casc_user_chose_mpi=no
+casc_using_pthreads=no
 
 AC_ARG_WITH(CC,
    [  --with-CC=ARG           manually set C compiler to ARG],
-   CC=$withval,
-   [AC_PROG_CC])
+   CC=$withval
+   casc_user_chose_compilers=yes)
 
 AC_ARG_WITH(CXX,
    [  --with-CXX=ARG          manually set C++ compiler to ARG],
-   CXX=$withval,
-   [AC_PROG_CXX])
+   CXX=$withval
+   casc_user_chose_compilers=yes)
 
-dnl * Next line will usually give you $CC -E.  Should be called
-dnl * before calling AC_CHECK_HEADER or CASC_CHECK_HEADER.
-AC_PROG_CPP
+AC_ARG_WITH(F77,
+   [  --with-f77=ARG          manually set f77 compiler to ARG],
+   F77=$withval
+   casc_user_chose_compilers=yes)
 
-AC_PROG_RANLIB
+AC_ARG_WITH(mpi-include, [  --with-mpi-include=DIR  mpi.h is in DIR],
+            for mpi_dir in $withval; do
+               MPIINCLUDE="$MPIINCLUDE -I$withval"
+            done; casc_user_chose_mpi=yes)
 
-dnl *********************************************************************
-dnl * Set the variable ARCH
-dnl *********************************************************************
+AC_ARG_WITH(mpi-libs,
+[  --with-mpi-libs=LIBS    LIBS is space-separated list of library names 
+                          needed for MPI, e.g. \"nsl socket mpi\"],  
+            for mpi_lib in $withval; do
+               MPILIBS="$MPILIBS -l$mpi_lib"
+            done; casc_user_chose_mpi=yes)
 
-CASC_GUESS_ARCH
+AC_ARG_WITH(mpi-lib-dirs,
+[  --with-mpi-lib-dirs=DIRS
+                      DIRS is space-separated list of directories
+                      containing the libraries specified by
+                      \`--with-mpi-libs', e.g \"/usr/lib /usr/local/mpi/lib\"],
+            for mpi_lib_dir in $withval; do
+               MPILIBDIRS="-L$mpi_lib_dir $MPILIBDIRS"
+            done; casc_user_chose_mpi=yes)
 
-dnl *********************************************************************
-dnl * You can set debugging and optimization flags for various
-dnl * architectures and/or compilers.
-dnl *********************************************************************
 
-case $ARCH in
-   sun4 | solaris)
-      CASC_SET_COPT(-O)
-      CASC_SET_CDEBUG(-g)
-   ;;
+AC_ARG_WITH(mpi-flags,
+[  --with-mpi-flags=FLAGS	FLAGS is space-separated list of 
+		whatever flags other than -l and -L are needed 
+		to link with mpi libraries],
+            MPIFLAGS=$withval)
 
-   rs6000)
-      CASC_SET_COPT(-O3 -qstrict -qarch=ppcgr -qtune=604)
-      CASC_SET_CDEBUG(-g)
-   ;;
+AC_ARG_WITH(MPICC,
+[  --with-MPICC=ARG        ARG is mpicc or similar MPI C compiling tool],
+	   CC=$withval
+	   if test "$CC" = "yes"
+	   then	      
+              echo "why does not this work cc=$CC"   
+           dnl *   AC_CHECK_PROGS(CC, mpicc)
+           fi)
 
-   *)
-      CASC_SET_COPT(-O)
-      CASC_SET_CDEBUG(-g)
-   ;;
-esac
+AC_ARG_WITH(MPICXX,
+[  --with-MPICXX=ARG        ARG is mpiCC or similar MPI C++ compiling tool],
+	   CC=$withval
+	   if test "$CXX" = "yes"
+	   then	      
+              echo "why does not this work c++=$CXX"   
+           dnl *   AC_CHECK_PROGS(CXX, mpiCC)
+           fi)
 
-dnl *********************************************************************
-dnl * Checks flag '--enable-opt-debug' to decide which compiler flags
-dnl * to leave on.  Default is opt, if flag not invoked.
-dnl *********************************************************************
-
-CASC_CHOOSE_OPT_OR_DEBUG
-
-dnl *********************************************************************
-dnl * Pthreads stuff.
-dnl *********************************************************************
-
-AC_ARG_WITH(pthreads,
-   [  --with-pthreads         use pthreads],
-   if test "$withval" != "no"
-   then
-      CASC_CHECK_LIB(pthread, pthread_create, ,
-         [CASC_CHECK_LIB(pthreads, pthread_create)])
-
-      if test "$ac_cv_lib_pthread_pthread_create"  = "yes" ||
-         test "$ac_cv_lib_pthreads_pthread_create" = "yes"
-      then
-         HYPREDEFS="$HYPREDEFS -DHYPRE_USE_PTHREADS"
-          
-         AC_CHECK_PROGS(CC_R, cc_r xlc_r)
-         AC_CHECK_PROG(MPICC_R, mpcc_r, mpcc_r)
-	 
-         if test -n "$CC_R"; then
-            CC=$CC_R
-         fi
-         if test -n "$MPICC_R"; then
-            MPICC=$MPICC_R
-         fi
-      fi      
-   fi
-)
+AC_ARG_WITH(MPIF77,
+[  --with-MPIF77=ARG        ARG mpif77 or similar MPI fortran compiling tool],
+	   CC=$withval
+	   if test "$F77" = "yes"
+	   then	      
+              echo "why does not this work f77=$F77"   
+           dnl *   AC_CHECK_PROGS(F77, mpif77)
+           fi)
 
 dnl *********************************************************************
-dnl * Sets MPIINCLUDE, MPILIBDIRS, MPILIBS, MPIFLAGS
+dnl * If the user has specified any other command line options (without-MPI, 
+dnl * with-pthreads, with-dmalloc etc.) then this section identifies the 
+dnl * options and assigns yes or no values to appropriate macros.  These
+dnl * values will be used to determine compilers, flags and libraries needed.
 dnl *********************************************************************
+
 
 AC_ARG_WITH(MPI,
    [  --without-MPI           do not use MPI],
@@ -111,29 +132,11 @@ AC_ARG_WITH(MPI,
       HYPREDEFS="$HYPREDEFS -DHYPRE_SEQUENTIAL"
    else
       casc_using_mpi=yes
-   fi ,
-   casc_using_mpi=yes )
+   fi,
+   casc_using_mpi=yes
+   )
 
-if test "$casc_using_mpi" = "yes"
-then
-   CASC_FIND_MPI
-   if test -z "$MPIINCLUDE"
-   then
-      AC_MSG_WARN(configuring to not use MPI)
-      HYPREDEFS="$HYPREDEFS -DHYPRE_SEQUENTIAL"
-   else
-      TIMERDEFS="$TIMERDEFS -DTIMER_USE_MPI"
-   fi
-   if test -z "$with_CC"
-   then
-      CC=$MPICC
-      CFLAGS="$COPT $CDEBUG"
-   fi
-fi
 
-dnl *********************************************************************
-dnl * Dmalloc stuff
-dnl *********************************************************************
 
 AC_ARG_WITH(dmalloc,
    [  --with-dmalloc          use dmalloc package],
@@ -142,10 +145,365 @@ AC_ARG_WITH(dmalloc,
    )
 )
 
+
+AC_ARG_WITH(pthreads,
+   [  --with-pthreads		use pthreads],
+   if test "$withval" != "no"
+   then
+      casc_using_pthreads=yes
+      CASC_CHECK_LIB(pthread, pthread_create, ,
+	 [CASC_CHECK_LIB(pthreads, pthread_create)])
+
+      if test "$ac_cv_lib_pthread_pthread_create" = "yes" ||
+         test "$ac_cv_lib_pthreads_pthread_create" = "yes"
+      then
+	 HYPREDEFS="$HYPREDEFS -DHYPRE_USE_PTHREADS"
+      fi
+   fi
+)
+
+
+AC_PROG_RANLIB
+
+dnl *********************************************************************
+dnl * For each ARCH (6 supported platforms and 1 default) the "best" 
+dnl * compilers are chosen based on, the architecture, MPI  or no-MPI, 
+dnl * pthreads or no pthreads, and the preference list of compilers.
+dnl * If none of the preferred compilers are available then the default
+dnl * compilers will be searched for (using CASC_FIND_MPI or AC_PROG_CC,
+dnl * AC_PROG_CXX, and AC_PROG_F77). Depending on the compiler chosen,
+dnl * flags are set as needed. The supported platforms are IRIX, DEC alpha,
+dnl * sun/solaris, IBM rs6000, Intel ??, and SGI ??. 
+dnl *********************************************************************
+
+case $HOSTNAME in
+   sasn100 )
+
+     if  test "$casc_user_chose_compilers" = "no"
+     then
+	AC_CHECK_PROGS(CC, cicc cc)
+	AC_CHECK_PROGS(CXX, ciCC CC) 
+	AC_CHECK_PROGS(F77, cif77 f77)
+     fi
+
+     if  test "$casc_user_chose_mpi" = "no" 
+     then  	
+	if test "$casc_using_mpi" = "yes"
+	then
+           CASC_CHECK_HEADER(mpi.h, /opt/intel/tflop/TF98_2.4.1/tflops/cougar/include)
+	   MPIINCLUDE="$MPIINCLUDE $INCLUDES"
+	   CASC_ADD_LIB(mpi, main, /opt/intel/tflop/TF98_2.4.1/tflops/cougar/lib/puma, MPI)
+	   if test -z "$MPILIBS"
+ 	   then
+		AC_MSG_WARN([MPI not found-- must set manually using --with-flags])
+	   fi
+	fi
+     fi
+
+       CASC_SET_COPT(-O)
+       CASC_SET_CDEBUG(-g)
+       CASC_SET_CXXOPT(-O)
+       CASC_SET_CXXDEBUG(-g) 
+       CASC_SET_FOPT(-O)
+       CASC_SET_FDEBUG(-g)
+      
+   ;;
+
+   n0* )
+
+     if  test "$casc_user_chose_compilers" = "no"
+     then
+	AC_CHECK_PROGS(CC, cc kcc gcc)
+	AC_CHECK_PROGS(CXX, CC KCC g++) 
+	AC_CHECK_PROGS(F77, f77 g77)
+     fi
+
+     if  test "$casc_user_chose_mpi" = "no" 
+     then  	
+	if test "$casc_using_mpi" = "yes"
+	then
+	   CASC_ADD_LIB(mpi, main, /usr/lib, MPI)
+	   if test -z "$MPILIBS"
+ 	   then
+		AC_MSG_WARN([MPI not found-- must set manually using --with-flags])
+	   fi
+	fi
+     fi
+
+       CASC_SET_COPT(-O)
+       CASC_SET_CDEBUG(-g)
+       CASC_SET_CXXOPT(-O)
+       CASC_SET_CXXDEBUG(-g)
+       CASC_SET_FOPT(-O)
+       CASC_SET_FDEBUG(-g)
+      
+   ;;
+	
+esac
+   
+
+if test -z "$CC"
+then
+
+  case $ARCH in
+     sun4 )
+
+        if test "$casc_user_chose_compilers" = "no"
+        then
+          if test "$casc_using_mpi" = "no"
+          then
+            AC_CHECK_PROGS(CC, cc gcc kcc)
+            AC_CHECK_PROGS(CXX, CC g++)
+            AC_CHECK_PROGS(F77, f77 g77)
+          else
+            AC_CHECK_PROGS(CC, mpicc)
+            AC_CHECK_PROGS(CXX, mpiCC)
+            AC_CHECK_PROGS(F77, mpif77)
+          fi
+        fi
+ 
+        CASC_SET_COPT(-O)
+        CASC_SET_CDEBUG(-g)
+        CASC_SET_CXXOPT(-O)
+        CASC_SET_CXXDEBUG(-g)
+        CASC_SET_FOPT(-O)
+        CASC_SET_FDEBUG(-g)
+
+   ;;
+
+   alpha)
+
+     if test "$casc_user_chose_compilers" = "no"
+     then
+       if test "$casc_using_mpi" = "no"
+       then
+         AC_CHECK_PROGS(CC,cc kcc gcc c89)
+         AC_CHECK_PROGS(CXX,cxx KCC g++)
+         AC_CHECK_PROGS(F77,f77 kf77 g77)
+       else
+         AC_CHECK_PROGS(CC,cc kcc mpicc) 
+         AC_CHECK_PROGS(CXX,cxx KCC mpiCC) 
+         AC_CHECK_PROGS(F77,f77 kf77 mpif77)
+       fi
+     fi
+
+     if test "$CC" = "cc" ||
+	test "$CC" = "kcc" &&
+        test "$casc_user_chose_mpi" = "no" &&
+ 	test "$casc_using_mpi" = "yes"
+     then
+       CASC_CHECK_HEADER(mpi.h, /usr/include)
+       MPIINCLUDE="$MPIINCLUDE $INCLUDES"
+       CASC_ADD_LIB(rt, main, /usr/lib)
+       HYPRE_ADD_LIB(mpi, main, /usr/opt/MPI170/lib, MPI, ,
+	 CASC_ADD_LIB(mpi, main, /usr/lib, MPI) )
+       if test -z "$MPILIBS"
+       then
+	 AC_MSG_WARN([MPI not found-- must set manually using --with-flags])
+       fi
+     fi
+
+     if test "$CC" = "kcc" 
+     then
+       CASC_SET_COPT(-o5)
+       CASC_SET_CDEBUG()
+     else 
+       CASC_SET_COPT(-O)
+       CASC_SET_CDEBUG(-g)
+     fi
+
+     if test "$F77" = "kf77" 
+     then
+       CASC_SET_FOPT(-o5)
+       CASC_SET_FDEBUG()
+     else 
+       CASC_SET_FOPT(-o5)
+       CASC_SET_FDEBUG()
+     fi
+      
+     CASC_SET_CXXOPT(-0)
+     CASC_SET_CXXDEBUG(-g)
+   ;;
+
+   rs6000)
+
+     if test "$casc_user_chose_compilers" = "no"
+     then
+       if test "$casc_using_mpi" = "no"
+       then
+         if test "$casc_using_pthreads" = "no"
+         then
+           AC_CHECK_PROGS(CC,xlc gcc cc c89)
+           AC_CHECK_PROGS(CXX,xlC KCC g++)
+           AC_CHECK_PROGS(F77,xlf g77)
+	 else
+           AC_CHECK_PROGS(CC,xlc_r gcc)
+           AC_CHECK_PROGS(CXX,xlC_r g++)
+           AC_CHECK_PROGS(F77,xlf_r g77)	
+         fi
+       else
+	 if test "$casc_using_pthreads" = "no"
+	 then
+           AC_CHECK_PROGS(CC,mpcc mpicc) 
+           AC_CHECK_PROGS(CXX,mpCC mpiCC) 
+           AC_CHECK_PROGS(F77,mpxlf mpif77)
+         else
+           AC_CHECK_PROGS(CC,mpxlc_r mpcc_r mpicc) 
+           AC_CHECK_PROGS(CXX,mpxlC_r mpCC_r mpiCC) 
+           AC_CHECK_PROGS(F77,mpxlf_r mpif77)
+         fi
+       fi
+     fi
+
+     CASC_SET_COPT(-O)
+     CASC_SET_CDEBUG(-g)
+     CASC_SET_FOPT(-O)
+     CASC_SET_FDEBUG(-g) 
+     CASC_SET_CXXOPT(-0)
+     CASC_SET_CXXDEBUG(-g)
+
+   ;;
+
+   IRIX64)
+  
+     if test "$casc_user_chose_compilers" = "no"
+     then
+       if test "$casc_using_mpi" = "no"
+       then
+	 AC_CHECK_PROGS(CC, cc gcc c89)
+	 AC_CHECK_PROGS(CXX, cxx CC g++) 
+	 AC_CHECK_PROGS(F77, f77 g77)
+       else 
+	 AC_CHECK_PROGS(CC, mpicc mpcc tmcc hcc)
+	 AC_CHECK_PROGS(CXX, mpiCC)
+         AC_CHECK_PROGS(F77, mpif77)
+	 if test -z "$CC"
+	 then
+	   AC_CHECK_PROGS(CC, cc gcc)
+         fi
+	 if test -z "$CXX"
+	 then
+	   AC_CHECK_PROGS(CXX, cxx CC g++)
+         fi
+	 if test -z "$F77"
+	 then
+	   AC_CHECK_PROGS(F77, f77 g77)
+         fi
+       fi
+     fi
+
+     if test "$CC" = "cc" ||
+	test "$CC" = "gcc" &&
+        test "$casc_user_chose_mpi" = "no" &&
+ 	test "$casc_using_mpi" = "yes"
+     then
+       CASC_CHECK_HEADER(mpi.h, /usr/local/mpi/include)
+       MPIINCLUDE="$MPIINCLUDE -I$INCLUDES"
+       CASC_ADD_LIB(mpi, main, /usr/local/mpi/lib, MPI)
+       if test -z "$MPILIBS"
+       then
+	 AC_MSG_WARN([MPI not found-- must set manually using --with-flags])
+       fi
+     fi
+
+     CASC_SET_COPT(-O)
+     CASC_SET_CDEBUG(-g)
+     CASC_SET_CXXOPT(-O)
+     CASC_SET_CXXDEBUG(-g)
+     CASC_SET_FOPT(-O)
+     CASC_SET_FDEBUG(-g)
+   ;;
+   
+  esac
+
+fi
+
+if test -z "$CC"
+then
+  if  test "$casc_user_chose_compilers" = "no"
+  then
+    if test "$casc_using_mpi" = "no"
+    then
+      AC_CHECK_PROGS(CC, cc kcc gcc c89)
+      AC_CHECK_PROGS(CXX, cxx CC KCC g++) 
+      AC_CHECK_PROGS(F77, f77 kf77 g77)
+    else 
+      AC_CHECK_PROGS(CC, mpicc mpcc tmcc hcc)
+      AC_CHECK_PROGS(CXX, mpiCC)
+      AC_CHECK_PROGS(F77, mpif77)
+      if test -z "$CC"
+      then
+	AC_CHECK_PROGS(CC, cc kcc gcc)
+      fi
+      if test -z "$CXX"
+      then
+	AC_CHECK_PROGS(CXX, cxx CC g++)
+      fi
+      if test -z "$F77" 
+      then
+	AC_CHECK_PROGS(F77, f77 g77)
+      fi
+    fi
+  fi
+
+  if test "$CC" = "cc" ||
+     test "$CC" = "gcc" ||
+     test "$CC" = "kcc" &&
+     test "$casc_user_chose_mpi" = "no" &&
+     test "$casc_using_mpi" = "yes"
+  then
+    CASC_CHECK_HEADER(mpi.h, /usr/local/mpi/include)
+    MPIINCLUDE="$MPIINCLUDE -I$INCLUDES"
+    CASC_ADD_LIB(mpi, main, /usr/local/mpi/lib, MPI)
+    if test -z "$MPILIBS"
+    then
+      AC_MSG_WARN([MPI not found-- must set manually using --with-flags])
+    fi
+  fi
+
+  if test "$CC" = "kcc" 
+  then
+    CASC_SET_COPT(-o5)
+    CASC_SET_CDEBUG()
+  else 
+    CASC_SET_COPT(-O)
+    CASC_SET_CDEBUG(-g)
+  fi
+  if test "$F77" = "kf77" 
+  then
+    CASC_SET_FOPT(-o5)
+    CASC_SET_FDEBUG()
+  else 
+    CASC_SET_FOPT(-o5)
+    CASC_SET_FDEBUG()
+  fi
+
+fi
+
+dnl ********************************************************************
+dnl * a check to find out how to use the preprocessors.  This must
+dnl * be done AFTER compilers are set is set.
+dnl * ******************************************************************
+
+AC_PROG_CPP
+AC_PROG_CXXCPP
+CASC_PROG_FPP
+
+dnl *********************************************************************
+dnl * This macro uses the values assigned to CASC_SET_COPT and 
+dnl * CASC_SET_CDEBUG (and C++ and Fortan counterparts) to set either
+dnl * the debug or opt compiler flag depending on what the user enters
+dnl * on the command line.  If neither is selected then all selected
+dnl * flags remain on.
+dnl *********************************************************************
+
+CASC_OPT_DEBUG_CHOICES
+
+
 dnl *********************************************************************
 dnl * When debugging was chosen, look for debugging libraries and headers,
-dnl * if they are available
-dnl * 
+dnl * if they are available.  Note that if neither debug or opt is chosen
+dnl * or if both debug and opt are chosen OPTCHOICE is set to O.
 dnl * adds -l flags to LDLIBS, adds -L flags to LDLIBDIRS, if necessary
 dnl *********************************************************************
 
@@ -156,16 +514,14 @@ then
    )
 fi
 
+
 dnl *********************************************************************
 dnl * Add flags to LIBS and LIBDIRS
-dnl *********************************************************************
-
-CASC_ADD_LIB(m, sqrt, /usr/lib /lib)
-
-dnl *********************************************************************
 dnl * Note:  CASC_ADD_LIB calls should be placed in the order you want the
 dnl *        libraries to appear on the linking line.
 dnl *********************************************************************
+
+CASC_ADD_LIB(m, main, /usr/lib /usr/ccs/lib)
 
 dnl *********************************************************************
 dnl * AC_SUBST performs the variable substitutions
@@ -187,33 +543,13 @@ AC_SUBST(TIMERDEFS)
 AC_SUBST(LDLIBS)
 AC_SUBST(LDLIBDIRS)
 AC_SUBST(ARCH)
-
-dnl *********************************************************************
-dnl * DIRECTING THE OUTPUT
-dnl *********************************************************************
-
-dnl *********************************************************************
-dnl * The following is the usual format, to be used when you expect the
-dnl * full structure of the package to be present, and when you don't want
-dnl * non-standard names for your output files.
-dnl *********************************************************************
-
-dnl * AC_OUTPUT(Makefile \
-dnl *           utilities/Makefile \
-dnl *           parcsr_matrix_vector/Makefile \
-dnl *           parcsr_linear_solvers/Makefile \
-dnl *           seq_matrix_vector/Makefile \
-dnl *           struct_matrix_vector/Makefile \
-dnl *           struct_linear_solvers/Makefile \
-dnl *           seq_linear_solvers/pamg/Makefile \
-dnl *           test/Makefile \
-dnl *           bmakes/Makefile \
-dnl *		docs/Makefile)
+AC_SUBST(RANLIB)
 
 dnl *********************************************************************
 dnl * Use CASC_CONFIG_OUTPUT_LIST with AC_OUTPUT if you want to handle the
 dnl * possibility that certain parts of the package are not present.
 dnl *********************************************************************
+
 
 CASC_CONFIG_OUTPUT_LIST(\
  .\
@@ -230,21 +566,4 @@ CASC_CONFIG_OUTPUT_LIST(\
 
 AC_OUTPUT($Makefile_list)
 
-dnl *********************************************************************
-dnl * Use the following format for AC_OUTPUT when you want your output
-dnl * files to have a name other than that which you get from dropping the
-dnl * '.in' from the input file name.  This example adds .$ARCH to the
-dnl * end of each Makefile, creating the possibility of keeping several
-dnl * Makefiles in each directory, each for a separate architecture
-dnl *********************************************************************
 
-dnl AC_OUTPUT(
-dnl utilities/Makefile.$ARCH:utilities/Makefile.in \
-dnl parcsr_matrix_vector/Makefile.$ARCH:parcsr_matrix_vector/Makefile.in \
-dnl parcsr_linear_solvers/Makefile.$ARCH:parcsr_linear_solvers/Makefile.in\
-dnl seq_matrix_vector/Makefile.$ARCH:seq_matrix_vector/Makefile.in \
-dnl struct_matrix_vector/Makefile.$ARCH:struct_matrix_vector/Makefile.in \
-dnl struct_linear_solvers/Makefile.$ARCH:struct_linear_solvers/Makefile.in\
-dnl seq_linear_solvers/pamg/Makefile.$ARCH:seq_linear_solvers/pamg/Makefile.in\
-dnl test/Makefile.$ARCH:test/Makefile.in \
-dnl docs/Makefile.$ARCH:docs/Makefile.in)
