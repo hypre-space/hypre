@@ -604,7 +604,7 @@ int HYPRE_LSI_SplitDSort(double *dlist, int nlist, int *ilist, int limit)
          darray1[count1] = dlist[i];
          iarray1[count1++] = ilist[i];
       }
-      else if (dlist[i] <  dtemp)
+      else
       {
          darray2[count2] = dlist[i];
          iarray2[count2++] = ilist[i];
@@ -624,6 +624,8 @@ int HYPRE_LSI_SplitDSort(double *dlist, int nlist, int *ilist, int limit)
    }
    free( darray1 );
    free( iarray1 );
+   free( darray2 );
+   free( iarray2 );
    if ( count1+1 == limit ) return 0;
    else if ( count1+1 < limit )
       HYPRE_LSI_SplitDSort(&(dlist[count1+1]),count2,&(ilist[count1+1]),
