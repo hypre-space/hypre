@@ -10,7 +10,6 @@
 #ifndef HYPRE_SSTRUCT_MV_HEADER
 #define HYPRE_SSTRUCT_MV_HEADER
 
-#include "HYPRE_config.h"
 #include "HYPRE_utilities.h"
 #include "HYPRE.h"
 #include "HYPRE_struct_mv.h"

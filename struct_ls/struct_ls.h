@@ -1,12 +1,10 @@
-
-#include <HYPRE_config.h>
+#include "utilities.h"
 
 #include "HYPRE_struct_ls.h"
 
 #ifndef hypre_STRUCT_LS_HEADER
 #define hypre_STRUCT_LS_HEADER
 
-#include "utilities.h"
 #include "struct_mv.h"
 #include "krylov.h"
 

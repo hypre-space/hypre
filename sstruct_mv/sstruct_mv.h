@@ -1,12 +1,11 @@
 
-#include <HYPRE_config.h>
+#include "utilities.h"
 
 #include "HYPRE_sstruct_mv.h"
 
 #ifndef hypre_SSTRUCT_MV_HEADER
 #define hypre_SSTRUCT_MV_HEADER
 
-#include "utilities.h"
 #include "struct_mv.h"
 #include "IJ_mv.h"
 #include "HYPRE.h"
