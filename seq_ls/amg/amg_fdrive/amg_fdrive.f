@@ -2,9 +2,9 @@ C@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 C
 C     Example DRIVER for AMG library
 C
-C     reads matrix in from file:        AMG.in.ysmp         
-C     reads right-hand side from:       AMG.in.rhs        
-C     reads initial approximation from: AMG.in.initu.
+C     reads matrix in from file:        AMG2.in.ysmp         
+C     reads right-hand side from:       AMG2.in.rhs        
+C     reads initial approximation from: AMG2.in.initu.
 C
 C@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 C
@@ -13,42 +13,22 @@ C
 
       parameter(ndima=600000,ndimu=250000)
       DIMENSION A(ndima),JA(ndima),IA(ndimu),U(ndimu),F(ndimu)
-      CHARACTER*15 FYSMP,FRHS,FINITU,FCONT
+      CHARACTER*15 FYSMP,FRHS,FINITU
 
-      dimension mu(10), iprlx(4), ntrlx(4),ierlx(4),iurlx(4)
       integer data
 C
 C     READ INPUT FILES WITH MATRIX, RIGHT-HAND SIDE, PROBLEM SPECS,
 C     INITIAL GUESS.
 C
 
-      FYSMP = 'AMG.in.ysmp'
-      FRHS = 'AMG.in.rhs'
-      FINITU='AMG.in.initu'
-      FCONT = 'AMG.in.control'
+      FYSMP = 'AMG2.in.ysmp'
+      FRHS = 'AMG2.in.rhs'
+      FINITU='AMG2.in.initu'
 
-
-CVEH
-C     READ IN CONTROL PARAMETERS FROM AMG.in.control
-CVEH
-      open (8,FILE=FCONT,STATUS='OLD')
-      read (8,*) tol
-      read (8,*) levmax
-      read (8,*) ncg, ecg
-      read (8,*) nwt, ewt
-      read (8,*) nstr
-      read (8,*) ncyc
-      read (8,*) (mu(j), j=1,10)
-      read (8,*) (ntrlx(j), j=1,4)
-      read (8,*) (iprlx(j), j=1,4)
-      read (8,*) (ierlx(j), j=1,4)
-      read (8,*) (iurlx(j), j=1,4)
-      read (8,*) ioutdat
-      close (8)
 
 
 CVEH
-C     READ IN MATRIX FROM AMG.in.ysmp
+C     READ IN MATRIX FROM AMG2.in.ysmp
 CVEH
       open (8,FILE=FYSMP,STATUS='OLD')
       read (8,*) junk
@@ -61,7 +41,7 @@ CVEH
 
 
 CVEH
-C     READ IN RHS FROM AMG.in.rhs
+C     READ IN RHS FROM AMG2.in.rhs
 CVEH
       open (8,FILE=FRHS,STATUS='OLD')
       read (8,*) junk
@@ -76,7 +56,7 @@ CVEH
 
 
 CVEH
-C     READ IN INITIAL GUESS FROM AMG.in.initu
+C     READ IN INITIAL GUESS FROM AMG2.in.initu
 CVEH
       open (8,FILE=FINITU,STATUS='OLD')
       read (8,*) junk
@@ -91,19 +71,8 @@ CVEH
 
       call amg_Initialize(data,0)
 
-      call amg_SetNumUnknowns(3,data)
-      call amg_SetNumPoints(305,data)
 
-      call amg_SetLogging(ioutdat, "AMG.runlog", data)
-      call amg_SetLevMax(levmax, data)
-      call amg_SetEWT(ewt,data)
-      call amg_SetNWT(nwt,data)
-      call amg_SetNCG(ncg, data)
-      call amg_SetECG(ecg, data)
-      call amg_SetNWT(nwt, data)
-      call amg_SetEWT(ewt, data)
-      call amg_SetNSTR(nstr, data)
-      call amg_SetNCyc(ncyc, data)
+      call amg_SetLogging(3, "AMG2.runlog", data)
 
       call amg_Setup(isterr,a,ia,ja,nv,data)
       print *, 'Setup error flag = ', isterr
