@@ -1304,6 +1304,7 @@ int HYPRE_LSI_MLConstructMHMatrix(HYPRE_ParCSRMatrix A, MH_Matrix *mh_mat,
     }
     return 0;
 #else
+    nprocs = 1;
     return 0;
 #endif
 }
