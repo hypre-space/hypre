@@ -8,15 +8,18 @@
 # $Revision$
 #EHEADER***********************************************************************
 
-perform_test()
+print_header()
 {
   echo ""
   echo "======================================================================"
   echo "Running tests on $HYPRE_RUN_MACHINE"
   echo "======================================================================"
   echo ""
-
-  echo "creating new AUTOTEST directory...."
+}
+perform_test()
+{
+  print_header
+  echo "deleting old AUTOTEST directory...."
   ssh ${HYPRE_COMPILE_MACHINE} "\
     (\
         rm -fR ${HYPRE_REMOTE_DIR}/linear_solvers;\
@@ -25,7 +28,7 @@ perform_test()
   echo "copying new source...."
   scp -pr linear_solvers ${HYPRE_COMPILE_MACHINE}:${HYPRE_REMOTE_DIR}
 
-  echo "running autotest...."
+  echo "scheduling remote autotest...."
   ssh ${HYPRE_COMPILE_MACHINE} "\
     (\
         cd ${HYPRE_REMOTE_DIR};\
@@ -34,8 +37,8 @@ perform_test()
         . linear_solvers/test/autotest_test ${HYPRE_MACHINE_COMMANDS};\
         chgrp -fR hypre ${HYPRE_REMOTE_DIR};\
         chmod -R a+rX,u+w,go-w ${HYPRE_REMOTE_DIR};\
-    )"
-  echo "finished autotest...."
+    )" &
+  echo "returning to autotest...."
 }
 
 #==============================================================================
@@ -92,6 +95,7 @@ do
         HYPRE_RUN_MACHINE="perrin"
         HYPRE_REMOTE_DIR="/home/casc/software/hypre/autotest"
 	HYPRE_MACHINE_COMMANDS="-m -a 2 -dcxfy -t 1 -ns"
+	print_header
         ./autotest_test $HYPRE_MACHINE_COMMANDS
         shift;;
     -compass)
@@ -116,6 +120,7 @@ do
         HYPRE_RUN_MACHINE="perrin"
         HYPRE_REMOTE_DIR="/home/casc/software/hypre/autotest"
 	HYPRE_MACHINE_COMMANDS="-m -q 2 -da 1 -cxfy -t 1 -ns"
+	print_header
         ./autotest_test $HYPRE_MACHINE_COMMANDS
         shift;;
     -red)
