@@ -99,6 +99,8 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
    double  *relax_weight;
    double  *omega;
    double   tol;
+
+   int *smooth_option;
  
    MPI_Comm_size(comm, &num_procs);   
    MPI_Comm_rank(comm,&my_id);
@@ -108,6 +110,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
    num_levels = hypre_ParAMGDataNumLevels(amg_data);
    coarsen_type = hypre_ParAMGDataCoarsenType(amg_data);
    measure_type = hypre_ParAMGDataMeasureType(amg_data);
+   smooth_option = hypre_ParAMGDataSmoothOption(amg_data);
 
    /*----------------------------------------------------------
     * Get the amg_data data
@@ -471,6 +474,10 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
       /*if(grid_relax_type[0] == 0 || grid_relax_type[1] == 0 ||
          grid_relax_type[2] == 0 || grid_relax_type[3] == 0)*/
       {
+         for (j=0; j < num_levels; j++)
+            if (smooth_option[j] == 6)
+               printf( " Schwarz Relaxation Weight %f level %d\n",
+			hypre_ParAMGDataSchwarzRlxWeight(amg_data),j);
          for (j=0; j < num_levels; j++)
          printf( " Relaxation Weight %f level %d\n",relax_weight[j],j);
          for (j=0; j < num_levels; j++)

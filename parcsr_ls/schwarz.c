@@ -418,6 +418,7 @@ int hypre_MPSchwarzSolve(hypre_ParCSRMatrix *par_A,
 		       hypre_Vector *rhs_vector,
 		       hypre_CSRMatrix *domain_structure,
 		       hypre_ParVector *par_x,
+		       double relax_wt,
 		       hypre_Vector *aux_vector)
 
 {
@@ -499,7 +500,7 @@ int hypre_MPSchwarzSolve(hypre_ParCSRMatrix *par_A,
       jj = 0;
       for (j=i_domain_dof[i]; j < i_domain_dof[i+1]; j++)
 	{
-	   x[j_domain_dof[j]]+=  aux[jj++];
+	   x[j_domain_dof[j]]+=  relax_wt * aux[jj++];
 	}
 #ifdef ESSL
       matrix_size_counter += matrix_size * (matrix_size+1)/2;  
@@ -550,7 +551,7 @@ int hypre_MPSchwarzSolve(hypre_ParCSRMatrix *par_A,
       jj = 0;
       for (j=i_domain_dof[i]; j < i_domain_dof[i+1]; j++)
 	{
-	   x[j_domain_dof[j]]+=  aux[jj++];
+	   x[j_domain_dof[j]]+=  relax_wt*aux[jj++];
 	}
     }			      
 

@@ -148,6 +148,7 @@ hypre_SchwarzSolve(void               *schwarz_vdata,
    double *scale = hypre_SchwarzDataScale(schwarz_data);
    hypre_ParVector *Vtemp = hypre_SchwarzDataVtemp(schwarz_data);
    int variant = hypre_SchwarzDataVariant(schwarz_data);
+   double relax_wt = hypre_SchwarzDataRelaxWeight(schwarz_data);
 
    if (variant)
    {
@@ -156,7 +157,7 @@ hypre_SchwarzSolve(void               *schwarz_vdata,
    else
    {
       ierr = hypre_MPSchwarzSolve(A, hypre_ParVectorLocalVector(f), 
-				domain_structure, u,  
+				domain_structure, u, relax_wt, 
 				hypre_ParVectorLocalVector(Vtemp));
    }
       
