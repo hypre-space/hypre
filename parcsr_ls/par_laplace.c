@@ -42,6 +42,7 @@ hypre_GenerateLaplacian(MPI_Comm comm, int nx, int ny, int nz,
    int nx_local, ny_local, nz_local;
    int nx_size, ny_size, nz_size;
    int num_cols_offd;
+   int grid_size;
 
    int *nx_part;
    int *ny_part;
@@ -52,6 +53,7 @@ hypre_GenerateLaplacian(MPI_Comm comm, int nx, int ny, int nz,
    MPI_Comm_size(comm,&num_procs);
    MPI_Comm_rank(comm,&my_id);
 
+   grid_size = nx*ny*nz;
    nx_part = hypre_CTAlloc(int,P+1);
    ny_part = hypre_CTAlloc(int,Q+1);
    nz_part = hypre_CTAlloc(int,R+1);
@@ -313,32 +315,26 @@ hypre_GenerateLaplacian(MPI_Comm comm, int nx, int ny, int nz,
 		}
    }
 
-   diag = hypre_CreateCSRMatrix(local_num_rows,local_num_rows,
-	diag_i[local_num_rows]);
+   A = hypre_CreateParCSRMatrix(comm, grid_size, grid_size, global_part,
+	global_part, num_cols_offd, diag_i[local_num_rows],
+	offd_i[local_num_rows]);
+
+   hypre_ParCSRMatrixColMapOffd(A) = col_map_offd;
+
+   diag = hypre_ParCSRMatrixDiag(A);
    hypre_CSRMatrixI(diag) = diag_i;
    hypre_CSRMatrixJ(diag) = diag_j;
    hypre_CSRMatrixData(diag) = diag_data;
 
-   offd = hypre_CreateCSRMatrix(local_num_rows,num_cols_offd,
-	offd_i[local_num_rows]);
-   hypre_CSRMatrixI(offd) = offd_i;
-   hypre_CSRMatrixJ(offd) = offd_j;
-   hypre_CSRMatrixData(offd) = offd_data;
-
-   A = hypre_CTAlloc(hypre_ParCSRMatrix,1);
-
-   hypre_ParCSRMatrixOwnsData(A) = 1;
-   hypre_ParCSRMatrixComm(A) = comm;
-   hypre_ParCSRMatrixDiag(A) = diag;
-   hypre_ParCSRMatrixOffd(A) = offd;
-   hypre_ParCSRMatrixColMapOffd(A) = col_map_offd;
-   hypre_ParCSRMatrixGlobalNumRows(A) = nx*ny*nz;
-   hypre_ParCSRMatrixGlobalNumCols(A) = nx*ny*nz;
-   hypre_ParCSRMatrixFirstRowIndex(A) = global_part[my_id];
-   hypre_ParCSRMatrixFirstColDiag(A) = global_part[my_id];
-   hypre_ParCSRMatrixRowStarts(A) = global_part;
-   hypre_ParCSRMatrixColStarts(A) = global_part;
-   hypre_ParCSRMatrixCommPkg(A) = NULL;
+   if (num_cols_offd)
+   {
+   	offd = hypre_ParCSRMatrixOffd(A);
+   	hypre_CSRMatrixI(offd) = offd_i;
+   	hypre_CSRMatrixJ(offd) = offd_j;
+   	hypre_CSRMatrixData(offd) = offd_data;
+   }
+   else
+	hypre_TFree(offd_i);
 
    hypre_TFree(nx_part);
    hypre_TFree(ny_part);
