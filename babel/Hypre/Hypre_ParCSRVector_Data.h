@@ -14,7 +14,7 @@ struct Hypre_ParCSRVector_private_type
 {
    HYPRE_IJVector *Hvec;
    /* We need to save constructor inputs to support a Clone function: */
-   Hypre_MPI_Com *comm;
+   Hypre_MPI_Com comm;
 }
 ;
 #endif

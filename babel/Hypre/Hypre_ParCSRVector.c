@@ -8,15 +8,19 @@
 #include "Hypre_ParCSRVector_Skel.h" 
 #include "Hypre_ParCSRVector_Data.h" 
 
+/* currently on a Sun the assert.h this gives us is
+/usr/local/sparc-sun-solaris2.5/include/assert.h
+which needs libgcc.a ... */
 #include <assert.h>
+
 #include "Hypre_MPI_Com_Skel.h"
 #include "Hypre_MPI_Com_Data.h"
-#include "HYPRE_IJ_mv.h"
 #include "HYPRE_IJ_mv.h"
 #include "IJ_matrix_vector.h"
 #include "parcsr_matrix_vector.h"
 #include "Hypre_ParCSRVectorBuilder.h"
 #include "HYPRE.h"
+
 
 /* *************************************************
  * Constructor
@@ -70,7 +74,7 @@ int  impl_Hypre_ParCSRVector_Copy(Hypre_ParCSRVector this, Hypre_Vector x) {
    int ierr = 0;
    struct Hypre_ParCSRVector_private_type *HPy = this->d_table;
    HYPRE_IJVector *Hy = HPy->Hvec;
-   hypre_IJVector *hy = (hypre_IJVector *) Hy;
+   hypre_IJVector *hy = (hypre_IJVector *) *Hy;
    hypre_ParVector *y_par = hypre_IJVectorLocalStorage(hy);
 
    Hypre_ParCSRVector xin;
@@ -83,7 +87,7 @@ int  impl_Hypre_ParCSRVector_Copy(Hypre_ParCSRVector this, Hypre_Vector x) {
    if ( xin==NULL ) return 1;
    HPx = xin->d_table;
    Hx = HPx->Hvec;
-   hx = (hypre_IJVector *) Hx;
+   hx = (hypre_IJVector *) *Hx;
    x_par = hypre_IJVectorLocalStorage(hx);
 
    ierr = hypre_ParVectorCopy( x_par, y_par );
@@ -101,14 +105,19 @@ int  impl_Hypre_ParCSRVector_Clone(Hypre_ParCSRVector this, Hypre_Vector* x) {
    int num_procs;
    struct Hypre_ParCSRVector_private_type *HPy = this->d_table;
    HYPRE_IJVector *Hy = HPy->Hvec;
-   hypre_IJVector *hy = (hypre_IJVector *) Hy;
-   int global_n = hypre_IJVectorN(hy); 
+   hypre_IJVector *hy = (hypre_IJVector *) *Hy;
+   int global_n = hypre_IJVectorN(hy);
+   struct Hypre_ParCSRVector_private_type *HPx;/* for debugging */
+   HYPRE_IJVector *Hx;
+   hypre_IJVector *hx;
+   hypre_ParVector *par_x;
+   hypre_Vector	*x_local_vector; 
 
-   Hypre_MPI_Com * comm = HPy->comm;
-   MPI_Comm * MCp = (*comm)->d_table->hcom;
+   Hypre_MPI_Com comm = HPy->comm;
+   MPI_Comm * MCp = comm->d_table->hcom;
 
    /* To build the new x, we first need to build a builder...*/
-   Hypre_ParCSRVectorBuilder Bldr = Hypre_ParCSRVectorBuilder_Constructor( *comm, 0 );
+   Hypre_ParCSRVectorBuilder Bldr = Hypre_ParCSRVectorBuilder_Constructor( comm, 0 );
 
    array1int partitioning;
 
@@ -118,13 +127,22 @@ int  impl_Hypre_ParCSRVector_Clone(Hypre_ParCSRVector this, Hypre_Vector* x) {
    MPI_Comm_size( *MCp, &num_procs );
    partitioning.lower[0] = 0;
    partitioning.upper[0] = num_procs;
-   partitioning.data = hypre_CTAlloc( int, num_procs );
-   ierr +=  Hypre_ParCSRVector_GetPartitioning( this, partitioning );
+   ierr +=  Hypre_ParCSRVector_GetPartitioning( this, &partitioning );
    ierr +=  Hypre_ParCSRVectorBuilder_SetPartitioning( Bldr, partitioning );
-   hypre_TFree( partitioning.data );
 
    ierr += Hypre_ParCSRVectorBuilder_Setup( Bldr );
    *x = Hypre_ParCSRVectorBuilder_GetConstructedObject( Bldr );
+
+   HPx = ((Hypre_ParCSRVector)Hypre_Vector_castTo(*x,"Hypre_ParCSRVector"))->d_table;
+   Hx = HPx->Hvec;
+   hx = (hypre_IJVector *) *Hx;
+   par_x = hypre_IJVectorLocalStorage( hx );
+   assert( par_x );
+   x_local_vector = hypre_ParVectorLocalVector(par_x);
+   assert( x_local_vector );
+   assert( hypre_VectorData( x_local_vector ) );
+
+   return ierr;
 
 } /* end impl_Hypre_ParCSRVectorClone */
 
@@ -199,7 +217,7 @@ int  impl_Hypre_ParCSRVector_Axpy( Hypre_ParCSRVector this, double a,
  *****************************************************************************/
 int
 hypre_IJVectorGetPartitioningPar(hypre_IJVector *vector,
-                                 int      *partitioning )
+                                 int     **partitioning )
 {
    int ierr = 0;
    hypre_ParVector *par_vector = hypre_IJVectorLocalStorage(vector);
@@ -209,7 +227,7 @@ hypre_IJVectorGetPartitioningPar(hypre_IJVector *vector,
       return 1;
    }
    else
-      partitioning = hypre_ParVectorPartitioning(par_vector);
+      *partitioning = hypre_ParVectorPartitioning(par_vector);
 
    return ierr;
 }
@@ -382,7 +400,7 @@ HYPRE_IJVectorSetLocalStorageType needs to be called before this function.
 */
 int 
 HYPRE_IJVectorGetPartitioning( HYPRE_IJVector  IJvector,
-                               int      *partitioning )
+                               int     **partitioning )
 {
    int ierr = 0;
    hypre_IJVector *vector = (hypre_IJVector *) IJvector;
@@ -403,20 +421,85 @@ HYPRE_IJVectorGetPartitioning( HYPRE_IJVector  IJvector,
 
 
 /* Not in SIDL file yet, should be: */
-int  impl_Hypre_ParCSRVector_GetPartitioning
-( Hypre_ParCSRVector this, array1int partitioning )
+int  Hypre_ParCSRVector_GetPartitioning
+( Hypre_ParCSRVector this, array1int * partitioning )
 {
    int i, p;
    HYPRE_IJVector * Hvec = this->d_table->Hvec;
-   int * new_data;
+   int * new_data_p;
+   int ** new_data = &new_data_p;
 
    HYPRE_IJVectorGetPartitioning( *Hvec, new_data );
 
+/* >>>> TO DO: Is this right with nonzero lower index ?? >>>> */
+   (*partitioning).data = *new_data;
+/* old code which copied...
    i = 0;
-   for ( p=*(partitioning.lower); p<*(partitioning.upper); ++p )
+   for ( p=*((*partitioning).lower); p<=*((*partitioning).upper); ++p )
    {
-      partitioning.data[p] = new_data[i];
+      (*partitioning).data[p] = (*new_data)[i];
       ++i;
    };
+*/
+   return 0;
 
 } /* end impl_Hypre_ParCSRVectorBuilderSetPartitioning */
+
+void Hypre_Vector_Debug_Print
+(Hypre_Vector x, Hypre_Vector* y) {
+
+   Hypre_ParCSRVector xin;
+   struct Hypre_ParCSRVector_private_type *HPx;
+   HYPRE_IJVector *Hx;
+   hypre_IJVector *hx;
+   hypre_ParVector *par_x;
+
+   Hypre_ParCSRVector yin;
+   struct Hypre_ParCSRVector_private_type *HPy;
+   HYPRE_IJVector *Hy;
+   hypre_IJVector *hy;
+   hypre_ParVector *par_y;
+
+   xin = (Hypre_ParCSRVector) Hypre_Vector_castTo( x, "Hypre_ParCSRVector" );
+   if ( xin==NULL ) { printf("error"); return; };
+   HPx = xin->d_table;
+   Hx = HPx->Hvec;
+   hx = (hypre_IJVector *) *Hx;
+   assert( hypre_IJVectorLocalStorage(hx) );
+   par_x = hypre_IJVectorLocalStorage(hx);
+
+   yin = (Hypre_ParCSRVector) Hypre_Vector_castTo( *y, "Hypre_ParCSRVector" );
+   if ( yin==NULL ) { printf("error 2"); return; };
+   HPy = yin->d_table;
+   Hy = HPy->Hvec;
+   hy = (hypre_IJVector *) *Hy;
+   assert( hypre_IJVectorLocalStorage(hy) );
+   par_y = hypre_IJVectorLocalStorage(hy);
+   printf(
+      "hypre_ParVector x at %i has data at %i and\n hypre_ParVector y at %i has data at %i\n",
+      par_x, par_x->local_vector->data,
+      par_y, par_y->local_vector->data );
+
+}
+
+void Hypre_Vector_Debug_Print1(Hypre_Vector x ) {
+
+   Hypre_ParCSRVector xin;
+   struct Hypre_ParCSRVector_private_type *HPx;
+   HYPRE_IJVector *Hx;
+   hypre_IJVector *hx;
+   hypre_ParVector *par_x;
+
+   xin = (Hypre_ParCSRVector) Hypre_Vector_castTo( x, "Hypre_ParCSRVector" );
+   if ( xin==NULL ) { printf("error"); return; };
+   HPx = xin->d_table;
+   Hx = HPx->Hvec;
+   hx = (hypre_IJVector *) *Hx;
+   assert( hypre_IJVectorLocalStorage(hx) );
+   par_x = hypre_IJVectorLocalStorage(hx);
+
+   printf(
+      "hypre_ParVector at %i has data at %i\n",
+      par_x, par_x->local_vector->data );
+
+}
