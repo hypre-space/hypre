@@ -1373,6 +1373,8 @@ void HYPRE_LinSysCore::createMatricesAndVectors(int numGlobalEqns,
 void HYPRE_LinSysCore::setGlobalOffsets(int leng, int* nodeOffsets,
                        int* eqnOffsets, int* blkEqnOffsets)
 {
+    int i, nRows;
+
     //-------------------------------------------------------------------
     // diagnostic message
     //-------------------------------------------------------------------
@@ -1380,6 +1382,31 @@ void HYPRE_LinSysCore::setGlobalOffsets(int leng, int* nodeOffsets,
     if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
     {
        printf("%4d : HYPRE_LSC::entering setGlobalOffsets.\n",mypid_);
+    }
+
+    //-------------------------------------------------------------------
+    // clean up previous data
+    //-------------------------------------------------------------------
+
+    nRows = localEndRow_ - localStartRow_ + 1;
+    if ( rowLengths_ != NULL )
+    {
+       delete [] rowLengths_;
+       rowLengths_ = NULL;
+    }
+    if ( colIndices_ != NULL )
+    {
+       for ( i = 0; i < nRows; i++ )
+          if ( colIndices_[i] != NULL ) delete [] colIndices_[i];
+       delete [] colIndices_;
+       colIndices_ = NULL;
+    }
+    if ( colValues_ != NULL )
+    {
+       for ( i = 0; i < nRows; i++ )
+          if ( colValues_[i] != NULL ) delete [] colValues_[i];
+       delete [] colValues_;
+       colValues_ = NULL;
     }
 
     //-------------------------------------------------------------------
