@@ -32,7 +32,7 @@ typedef struct
    int     *num_grid_sweeps;  
    int     *grid_relax_type;   
    int    **grid_relax_points;
-   double   relax_weight; 
+   double  *relax_weight; 
    double   tol;
 
    /* problem data */
