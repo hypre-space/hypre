@@ -341,6 +341,7 @@ double hypre_ParCSRMatrixChooseThresh(hypre_ParCSRMatrix *S);
 int hypre_ParCSRMatrixThreshold(hypre_ParCSRMatrix *A , double thresh);
 int hypre_BoomerAMGCreateSmoothVecs(void *data , hypre_ParCSRMatrix *A , int num_sweeps , int level , double **SmoothVecs_p);
 int hypre_BoomerAMGCreateSmoothDirs(void *data , hypre_ParCSRMatrix *A , double *SmoothVecs , double thresh , int num_functions , int *dof_func , hypre_ParCSRMatrix **S_ptr);
+int hypre_BoomerAMGFitVectors(int ip , int n , int num , double *V , int nc , const int *ind , double *val);
 int hypre_BoomerAMGBuildInterpLS(hypre_ParCSRMatrix *A , int *CF_marker , hypre_ParCSRMatrix *S , int *num_cpts_global , int num_functions , int *dof_func , int debug_flag , double trunc_factor , int num_smooth , double *SmoothVecs , hypre_ParCSRMatrix **P_ptr);
 int hypre_BoomerAMGBuildInterpGSMG(hypre_ParCSRMatrix *A , int *CF_marker , hypre_ParCSRMatrix *S , int *num_cpts_global , int num_functions , int *dof_func , int debug_flag , double trunc_factor , hypre_ParCSRMatrix **P_ptr);
 

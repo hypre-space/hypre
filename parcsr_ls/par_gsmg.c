@@ -20,6 +20,10 @@
 #include "headers.h"
 #include "par_amg.h"
 
+#include "fortran.h"
+void hypre_F90_NAME_BLAS(dgels, DGELS)(char *, int *, int *, int *, double *, 
+  int *, double *, int *, double *, int *, int *);
+
 #ifndef ABS
 #define ABS(x) ((x)>0 ? (x) : -(x))
 #endif
@@ -84,6 +88,7 @@ hypre_ParCSRMatrixClone(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix **Sp,
 /*--------------------------------------------------------------------------
  * hypre_ParCSRMatrixFillSmooth
  * - fill in smooth matrix
+ * - this function will scale the smooth vectors
  *--------------------------------------------------------------------------*/
 
 int
@@ -601,19 +606,17 @@ hypre_BoomerAMGCreateSmoothDirs(void         *data,
  * ip  = row number of row in P being processed (0-based)
  * n   = length of smooth vectors
  * num = number of smooth vectors
- * V   = smooth vectors (array of length n*num)
+ * V   = smooth vectors (array of length n*num), also an output
  * nc  = number of coarse grid points
  * ind = indices of coarse grid points (0-based)
  * 
  * output:
  * val = interpolation weights for the coarse grid points
+ * V   = smooth vectors; first one has been changed to constant vector;
+ *       vectors have also been normalized; this is also an input
  *--------------------------------------------------------------------------*/
-#include "fortran.h"
-void hypre_F90_NAME_BLAS(dgels, DGELS)(char *, int *, int *, int *, double *, 
-  int *, double *, int *, double *, int *, int *);
-
 int
-hypre_BoomerAMGFitVectors(int ip, int n, int num, const double *V, 
+hypre_BoomerAMGFitVectors(int ip, int n, int num, double *V, 
   int nc, const int *ind, double *val)
 {
    double *a, *b;
@@ -632,6 +635,10 @@ hypre_BoomerAMGFitVectors(int ip, int n, int num, const double *V,
       printf("%d ", ind[i]);
    printf("\n");
 */
+
+   /* change first vector to the constant vector */
+   for (i=0; i<n; i++)
+      V[i] = 1.0;
 
    work_size = 2000*64;
    work = hypre_CTAlloc(double, work_size);
