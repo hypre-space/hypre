@@ -68,6 +68,13 @@ lib: $(PROTOS) ${OBJS}
 	@ar -rcu libHYPRE_FEI_base.a ${OBJS}
 	@ranlib libHYPRE_FEI_base.a 
 
+clean:
+	@rm -rf *.o ti_files
+
+veryclean: clean
+	@rm -f libHYPRE_*.a
+
+
 ##################################################################
 # Generic rules
 ##################################################################
