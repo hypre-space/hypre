@@ -109,11 +109,7 @@ hypre_FreeStructMatrix( hypre_StructMatrix *matrix )
 
    if (matrix)
    {
-#ifdef HYPRE_USE_PTHREADS
       hypre_SharedTFree(hypre_StructMatrixData(matrix));
-#else
-      hypre_TFree(hypre_StructMatrixData(matrix));
-#endif
       hypre_FreeStructMatrixShell(matrix);
    }
 
@@ -365,11 +361,7 @@ hypre_InitializeStructMatrix( hypre_StructMatrix *matrix )
 
    ierr = hypre_InitializeStructMatrixShell(matrix);
 
-#ifdef HYPRE_USE_PTHREADS
    data = hypre_SharedCTAlloc(double, hypre_StructMatrixDataSize(matrix));
-#else
-   data = hypre_CTAlloc(double, hypre_StructMatrixDataSize(matrix));
-#endif
    hypre_InitializeStructMatrixData(matrix, data);
 
    return ierr;
@@ -646,13 +638,21 @@ hypre_PrintStructMatrix( char               *filename,
    int                   i, j;
                    
    int                   myid;
-
+   int                  *myid_ptr;
 
    /*----------------------------------------
     * Open file
     *----------------------------------------*/
  
-   MPI_Comm_rank(hypre_StructMatrixComm(matrix), &myid );
+#ifdef HYPRE_USE_PTHREADS
+   myid_ptr = hypre_SharedTAlloc(int, i);
+   MPI_Comm_rank(hypre_StructMatrixComm(matrix), myid_ptr );
+   myid = *myid_ptr;
+   hypre_SharedTFree(myid_ptr);
+#else
+   MPI_Comm_rank(hypre_StructMatrixComm(matrix), &myid);
+#endif
+
    sprintf(new_filename, "%s.%05d", filename, myid);
  
    if ((file = fopen(new_filename, "w")) == NULL)
@@ -800,12 +800,21 @@ hypre_ReadStructMatrix( MPI_Comm   comm,
    int                   i, idummy;
                        
    int                   myid;
+   int                  *myid_ptr;
 
    /*----------------------------------------
     * Open file
     *----------------------------------------*/
- 
+
+#ifdef HYPRE_USE_PTHREADS
+   myid_ptr = hypre_SharedTAlloc(int, i);
+   MPI_Comm_rank(comm, myid_ptr );
+   myid = *myid_ptr;
+   hypre_SharedTFree(myid_ptr);
+#else
    MPI_Comm_rank(comm, &myid );
+#endif
+
    sprintf(new_filename, "%s.%05d", filename, myid);
  
    if ((file = fopen(new_filename, "r")) == NULL)

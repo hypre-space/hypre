@@ -70,11 +70,7 @@ hypre_FreeStructVector( hypre_StructVector *vector )
 
    if (vector)
    {
-#ifdef HYPRE_USE_PTHREADS
       hypre_SharedTFree(hypre_StructVectorData(vector));
-#else
-      hypre_TFree(hypre_StructVectorData(vector));
-#endif
       hypre_FreeStructVectorShell(vector);
    }
 
@@ -192,11 +188,7 @@ hypre_InitializeStructVector( hypre_StructVector *vector )
 
    ierr = hypre_InitializeStructVectorShell(vector);
 
-#ifdef HYPRE_USE_PTHREADS
    data = hypre_SharedCTAlloc(double, hypre_StructVectorDataSize(vector));
-#else
-   data = hypre_CTAlloc(double, hypre_StructVectorDataSize(vector));
-#endif
 
    hypre_InitializeStructVectorData(vector, data);
 
@@ -721,12 +713,20 @@ hypre_PrintStructVector( char               *filename,
    hypre_BoxArray    *data_space;
 
    int                myid;
+   int               *myid_ptr;
 
    /*----------------------------------------
     * Open file
     *----------------------------------------*/
- 
+#ifdef HYPRE_USE_PTHREADS
+   myid_ptr = hypre_SharedTAlloc(int, 1);
+   MPI_Comm_rank(hypre_StructVectorComm(vector), myid_ptr );
+   myid = *myid_ptr;
+   hypre_SharedTFree(myid_ptr);
+#else
    MPI_Comm_rank(hypre_StructVectorComm(vector), &myid );
+#endif
+
    sprintf(new_filename, "%s.%05d", filename, myid);
  
    if ((file = fopen(new_filename, "w")) == NULL)
@@ -789,12 +789,22 @@ hypre_ReadStructVector( MPI_Comm   comm,
    hypre_BoxArray       *data_space;
 
    int                   myid;
+   int                  *myid_ptr;
  
    /*----------------------------------------
     * Open file
     *----------------------------------------*/
- 
+
+
+#ifdef HYPRE_USE_PTHREADS
+   myid_ptr = hypre_SharedTAlloc(int, 1);
+   MPI_Comm_rank(comm, myid_ptr );
+   myid = *myid_ptr;
+   hypre_SharedTFree(myid_ptr);
+#else
    MPI_Comm_rank(comm, &myid );
+#endif
+
    sprintf(new_filename, "%s.%05d", filename, myid);
  
    if ((file = fopen(new_filename, "r")) == NULL)

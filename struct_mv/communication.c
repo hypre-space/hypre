@@ -314,7 +314,7 @@ hypre_InitializeCommunication( hypre_CommPkg *comm_pkg,
          recv_sizes[i] += entry_size;
       }
 
-      recv_buffers[i] = hypre_TAlloc(double, recv_sizes[i]);
+      recv_buffers[i] = hypre_SharedTAlloc(double, recv_sizes[i]);
    }
 
    /*--------------------------------------------------------------------
@@ -607,7 +607,7 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
    for (i = 0; i < num_sends; i++)
       hypre_TFree(send_buffers[i]);
    for (i = 0; i < num_recvs; i++)
-      hypre_TFree(recv_buffers[i]);
+      hypre_SharedTFree(recv_buffers[i]);
    hypre_TFree(send_buffers);
    hypre_TFree(recv_buffers);
 
@@ -988,7 +988,8 @@ headers.h
   by the number of processors involved in the communications, not
   counting ``my processor''.
 @param comm_processes_ptr [OUT]
-  processor ranks involved in the communications.
+  processor 
+ranks involved in the communications.
 @param comm_types_ptr [OUT]
   inter-processor communication types.
 @param copy_type_ptr [OUT]
@@ -1025,16 +1026,24 @@ hypre_NewCommPkgInfo( hypre_BoxArrayArray   *boxes,
                         
    int                    i, j, p, m;
    int                    num_procs, my_proc;
+   int                   *nprocs_ptr, *myproc_ptr;
                         
    int                    ierr = 0;
                 
    /*---------------------------------------------------------
     * Misc stuff
     *---------------------------------------------------------*/
+   nprocs_ptr = hypre_SharedTAlloc(int, 1);
+   myproc_ptr = hypre_SharedTAlloc(int, 1);
 
-   MPI_Comm_size(comm, &num_procs );
-   MPI_Comm_rank(comm, &my_proc );
+   MPI_Comm_size(comm, nprocs_ptr );
+   MPI_Comm_rank(comm, myproc_ptr );
 
+   num_procs = *nprocs_ptr;
+   my_proc = *myproc_ptr;
+
+   hypre_SharedTFree(nprocs_ptr);
+   hypre_SharedTFree(myproc_ptr);
    /*------------------------------------------------------
     * Loop over boxes and compute num_entries.
     *------------------------------------------------------*/
@@ -1312,7 +1321,7 @@ hypre_CommitCommPkg( hypre_CommPkg *comm_pkg )
 
    /* create send MPI_Datatype's */
    hypre_CommPkgSendMPITypes(comm_pkg) =
-      hypre_TAlloc(MPI_Datatype, hypre_CommPkgNumSends(comm_pkg));
+      hypre_SharedTAlloc(MPI_Datatype, hypre_CommPkgNumSends(comm_pkg));
    hypre_BuildCommMPITypes(hypre_CommPkgNumSends(comm_pkg),
                            hypre_CommPkgSendProcs(comm_pkg),
                            hypre_CommPkgSendTypes(comm_pkg),
@@ -1320,7 +1329,7 @@ hypre_CommitCommPkg( hypre_CommPkg *comm_pkg )
 
    /* create recv MPI_Datatype's */
    hypre_CommPkgRecvMPITypes(comm_pkg) =
-      hypre_TAlloc(MPI_Datatype, hypre_CommPkgNumRecvs(comm_pkg));
+      hypre_SharedTAlloc(MPI_Datatype, hypre_CommPkgNumRecvs(comm_pkg));
    hypre_BuildCommMPITypes(hypre_CommPkgNumRecvs(comm_pkg),
                            hypre_CommPkgRecvProcs(comm_pkg),
                            hypre_CommPkgRecvTypes(comm_pkg),
@@ -1360,7 +1369,7 @@ hypre_UnCommitCommPkg( hypre_CommPkg *comm_pkg )
       {
          for (i = 0; i < hypre_CommPkgNumSends(comm_pkg); i++)
             MPI_Type_free(&types[i]);
-         hypre_TFree(types);
+         hypre_SharedTFree(types);
       }
      
       types = hypre_CommPkgRecvMPITypes(comm_pkg);
@@ -1368,7 +1377,7 @@ hypre_UnCommitCommPkg( hypre_CommPkg *comm_pkg )
       {
          for (i = 0; i < hypre_CommPkgNumRecvs(comm_pkg); i++)
             MPI_Type_free(&types[i]);
-         hypre_TFree(types);
+         hypre_SharedTFree(types);
       }
    }
 
@@ -1423,7 +1432,7 @@ hypre_BuildCommMPITypes( int               num_comms,
       num_entries = hypre_CommTypeNumEntries(comm_type);
       comm_entry_blocklengths = hypre_TAlloc(int, num_entries);
       comm_entry_displacements = hypre_TAlloc(MPI_Aint, num_entries);
-      comm_entry_mpi_types = hypre_TAlloc(MPI_Datatype, num_entries);
+      comm_entry_mpi_types = hypre_SharedTAlloc(MPI_Datatype, num_entries);
 
       for (i = 0; i < num_entries; i++)
       {
@@ -1451,7 +1460,7 @@ hypre_BuildCommMPITypes( int               num_comms,
          MPI_Type_free(&comm_entry_mpi_types[i]);
       hypre_TFree(comm_entry_blocklengths);
       hypre_TFree(comm_entry_displacements);
-      hypre_TFree(comm_entry_mpi_types);
+      hypre_SharedTFree(comm_entry_mpi_types);
    }
 
    return ierr;
@@ -1499,8 +1508,8 @@ hypre_BuildCommEntryMPIType( hypre_CommTypeEntry *comm_entry,
    }
    else
    {
-      old_type = hypre_CTAlloc(MPI_Datatype, 1);
-      new_type = hypre_CTAlloc(MPI_Datatype, 1);
+      old_type = hypre_SharedCTAlloc(MPI_Datatype, 1);
+      new_type = hypre_SharedCTAlloc(MPI_Datatype, 1);
 
       MPI_Type_hvector(length_array[0], 1,
                        (MPI_Aint)(stride_array[0]*sizeof(double)),
@@ -1522,8 +1531,8 @@ hypre_BuildCommEntryMPIType( hypre_CommTypeEntry *comm_entry,
                        *old_type, comm_entry_mpi_type);
       MPI_Type_free(old_type);
 
-      hypre_TFree(old_type);
-      hypre_TFree(new_type);
+      hypre_SharedTFree(old_type);
+      hypre_SharedTFree(new_type);
    }
 
    return ierr;

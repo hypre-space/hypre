@@ -27,6 +27,10 @@ extern pthread_t *hypre_thread;
  * hypre_StructInnerProd
  *--------------------------------------------------------------------------*/
 
+#ifdef HYPRE_USE_PTHREADS
+double global_result;
+#endif
+
 double
 hypre_StructInnerProd(  hypre_StructVector *x,
                         hypre_StructVector *y )
@@ -78,8 +82,16 @@ hypre_StructInnerProd(  hypre_StructVector *x,
                         });
       }
 
+#ifdef HYPRE_USE_PTHREADS
+   MPI_Allreduce(&local_result, &global_result, 1,
+                 MPI_DOUBLE, MPI_SUM, hypre_StructVectorComm(x));
+
+   result = global_result;
+#else
    MPI_Allreduce(&local_result, &result, 1,
                  MPI_DOUBLE, MPI_SUM, hypre_StructVectorComm(x));
+#endif
+
 
 #ifdef HYPRE_USE_PTHREADS
    if (pthread_equal(pthread_self(), initial_thread) ||

@@ -13,7 +13,6 @@
  *****************************************************************************/
 
 #include "headers.h"
-
 /*--------------------------------------------------------------------------
  * hypre_NewStructGrid
  *--------------------------------------------------------------------------*/
@@ -167,6 +166,7 @@ hypre_GatherAllBoxes( MPI_Comm         comm,
    hypre_Index        imax;
                      
    int                num_procs, my_rank;
+   int               *nproc_ptr, *rank_ptr;
                      
    int               *sendbuf;
    int                sendcount;
@@ -181,16 +181,22 @@ hypre_GatherAllBoxes( MPI_Comm         comm,
    /*-----------------------------------------------------
     * Accumulate the box info
     *-----------------------------------------------------*/
+   
+   nproc_ptr = hypre_SharedTAlloc(int, 1);
+   rank_ptr = hypre_SharedTAlloc(int, 1);
 
-   MPI_Comm_size(comm, &num_procs);
-   MPI_Comm_rank(comm, &my_rank);
+   MPI_Comm_size(comm, nproc_ptr);
+   MPI_Comm_rank(comm, rank_ptr);
+
+   num_procs = *nproc_ptr;
+   my_rank = *rank_ptr;
 
    /* allocate sendbuf */
    sendcount = 7*hypre_BoxArraySize(boxes);
    sendbuf = hypre_TAlloc(int, sendcount);
 
    /* compute recvcounts and displs */
-   recvcounts = hypre_TAlloc(int, num_procs);
+   recvcounts = hypre_SharedTAlloc(int, num_procs);
    displs = hypre_TAlloc(int, num_procs);
    MPI_Allgather(&sendcount, 1, MPI_INT,
 		 recvcounts, 1, MPI_INT, comm);
@@ -203,7 +209,7 @@ hypre_GatherAllBoxes( MPI_Comm         comm,
    }
 
    /* allocate recvbuf */
-   recvbuf = hypre_TAlloc(int, recvbuf_size);
+   recvbuf = hypre_SharedTAlloc(int, recvbuf_size);
 
    /* put local box extents and process number into sendbuf */
    i = 0;
@@ -240,7 +246,6 @@ hypre_GatherAllBoxes( MPI_Comm         comm,
    while (i < recvbuf_size)
    {
       processes[p] = recvbuf[i++];
-
       for (d = 0; d < 3; d++)
       {
 	 hypre_IndexD(imin, d) = recvbuf[i++];
@@ -262,10 +267,12 @@ hypre_GatherAllBoxes( MPI_Comm         comm,
     * Return
     *-----------------------------------------------------*/
 
+   hypre_SharedTFree(nproc_ptr);
+   hypre_SharedTFree(rank_ptr);
    hypre_TFree(sendbuf);
-   hypre_TFree(recvcounts);
+   hypre_SharedTFree(recvcounts);
    hypre_TFree(displs);
-   hypre_TFree(recvbuf);
+   hypre_SharedTFree(recvbuf);
 
    *all_boxes_ptr = all_boxes;
    *processes_ptr = processes;
