@@ -1,5 +1,5 @@
 /*BHEADER**********************************************************************
- * (c) 1999   The Regents of the University of California
+ * (c) 2001   The Regents of the University of California
  *
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
@@ -73,11 +73,12 @@ extern "C" {
    int HYPRE_ParCSRMLSetCoarseSolver( HYPRE_Solver, int );
 #endif
 
-   void qsort1(int *, double *, int, int);
-   int  HYPRE_DummyFunction(HYPRE_Solver, HYPRE_ParCSRMatrix,
+   void  qsort1(int *, double *, int, int);
+   int   HYPRE_DummyFunction(HYPRE_Solver, HYPRE_ParCSRMatrix,
                             HYPRE_ParVector, HYPRE_ParVector) {return 0;}
    int   HYPRE_LSI_Search(int*, int, int);
-   int   HYPRE_LSI_Sort(int*, int, int *, double *);
+   int   HYPRE_LSI_SolveIdentity(HYPRE_Solver, HYPRE_ParCSRMatrix,
+                                 HYPRE_ParVector , HYPRE_ParVector);
    int   getMatrixCSR(HYPRE_IJMatrix,int nrows,int nnz,int*,int*,double*);
 
 #ifdef Y12M
@@ -1082,11 +1083,16 @@ void HYPRE_LinSysCore::setupPCGPrecon()
 
     switch ( HYPreconID_ )
     {
+       case HYIDENTITY :
+            if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
+               printf("No preconditioning \n");
+            HYPRE_ParCSRPCGSetPrecond(HYSolver_, HYPRE_LSI_SolveIdentity,
+                                      HYPRE_DummyFunction, HYPrecon_);
+            break;
+
        case HYDIAGONAL :
             if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
-            {
                printf("Diagonal preconditioning \n");
-            }
             if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
             {
                HYPRE_ParCSRPCGSetPrecond(HYSolver_, HYPRE_ParCSRDiagScale,
@@ -1317,11 +1323,16 @@ void HYPRE_LinSysCore::setupGMRESPrecon()
 
     switch ( HYPreconID_ )
     {
+       case HYIDENTITY :
+            if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
+               printf("No preconditioning \n");
+            HYPRE_ParCSRGMRESSetPrecond(HYSolver_, HYPRE_LSI_SolveIdentity,
+                                        HYPRE_DummyFunction, HYPrecon_);
+            break;
+
        case HYDIAGONAL :
             if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
-            {
                printf("Diagonal preconditioning \n");
-            }
             if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
             {
                HYPRE_ParCSRGMRESSetPrecond(HYSolver_, HYPRE_ParCSRDiagScale,
@@ -1587,11 +1598,16 @@ void HYPRE_LinSysCore::setupBiCGSTABPrecon()
 
     switch ( HYPreconID_ )
     {
+       case HYIDENTITY :
+            if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
+               printf("No preconditioning \n");
+            HYPRE_ParCSRBiCGSTABSetPrecond(HYSolver_, HYPRE_LSI_SolveIdentity,
+                                           HYPRE_DummyFunction, HYPrecon_);
+            break;
+
        case HYDIAGONAL :
             if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
-            {
                printf("Diagonal preconditioning \n");
-            }
             if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
             {
                HYPRE_ParCSRBiCGSTABSetPrecond(HYSolver_, HYPRE_ParCSRDiagScale,
@@ -1860,11 +1876,16 @@ void HYPRE_LinSysCore::setupBiCGSTABLPrecon()
 
     switch ( HYPreconID_ )
     {
+       case HYIDENTITY :
+            if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
+               printf("No preconditioning \n");
+            HYPRE_ParCSRBiCGSTABLSetPrecond(HYSolver_, HYPRE_LSI_SolveIdentity,
+                                            HYPRE_DummyFunction, HYPrecon_);
+            break;
+
        case HYDIAGONAL :
             if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
-            {
                printf("Diagonal preconditioning \n");
-            }
             if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
             {
                HYPRE_ParCSRBiCGSTABLSetPrecond(HYSolver_, HYPRE_ParCSRDiagScale,
@@ -2134,11 +2155,16 @@ void HYPRE_LinSysCore::setupTFQmrPrecon()
 
     switch ( HYPreconID_ )
     {
+       case HYIDENTITY :
+            if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
+               printf("No preconditioning \n");
+            HYPRE_ParCSRTFQmrSetPrecond(HYSolver_, HYPRE_LSI_SolveIdentity,
+                                        HYPRE_DummyFunction, HYPrecon_);
+            break;
+
        case HYDIAGONAL :
             if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
-            {
                printf("Diagonal preconditioning \n");
-            }
             if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
             {
                HYPRE_ParCSRTFQmrSetPrecond(HYSolver_, HYPRE_ParCSRDiagScale,
@@ -2404,11 +2430,16 @@ void HYPRE_LinSysCore::setupBiCGSPrecon()
 
     switch ( HYPreconID_ )
     {
+       case HYIDENTITY :
+            if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
+               printf("No preconditioning \n");
+            HYPRE_ParCSRBiCGSSetPrecond(HYSolver_, HYPRE_LSI_SolveIdentity,
+                                        HYPRE_DummyFunction, HYPrecon_);
+            break;
+
        case HYDIAGONAL :
             if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
-            {
                printf("Diagonal preconditioning \n");
-            }
             if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
             {
                HYPRE_ParCSRBiCGSSetPrecond(HYSolver_, HYPRE_ParCSRDiagScale,
@@ -2894,8 +2925,7 @@ void HYPRE_LinSysCore::solveUsingSuperLU(int& status)
 
        ierr = HYPRE_ParVectorCopy( b_csr, r_csr );
        assert(!ierr);
-       ierr = HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
-       assert(!ierr);
+       HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
        ierr = HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
        assert(!ierr);
        rnorm = sqrt( rnorm );
@@ -3112,7 +3142,7 @@ void HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
        //ierr = HYPRE_IJVectorSetLocalComponents(currX_,nrows,ind_array,
        //                                        NULL,soln);
        //---new_IJ------------------------------------------------------
-       ierr = HYPRE_IJVectorSetValues(currX_, nrows, (const int *) ind_array,
+       ierr = HYPRE_IJVectorSetValues(currX_, nrows, (const int *) &ind_array,
                     	       (const double *) soln);
        //---------------------------------------------------------------
        assert(!ierr);
@@ -3629,7 +3659,7 @@ void HYPRE_LinSysCore::putIntoMappedMatrix(int row, int numValues,
              printf("%4d : putIntoMappedMatrix : row, col = %8d %8d %e \n",
                     mypid_, localRow, colIndices_[localRow][ind2]-1,
                     colValues_[localRow][ind2]);
-          HYPRE_LSI_Sort(colIndices_[localRow],index,NULL,colValues_[localRow]);
+          qsort1(colIndices_[localRow],colValues_[localRow],0,index-1);
        }
     }
     rowLengths_[localRow] = newLeng;
