@@ -277,7 +277,7 @@ then
         make veryclean
         
         echo "setting permissions ..."
-        chmod -fR $HYPRE_INSTALL_PERMISSIONS $HYPRE_INSTALL_DIR/*
+        chmod -fR $HYPRE_INSTALL_PERMISSIONS $HYPRE_INSTALL_DIR
     )
 fi
 
