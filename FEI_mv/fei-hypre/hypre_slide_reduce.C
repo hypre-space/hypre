@@ -1091,6 +1091,7 @@ void HYPRE_LinSysCore::buildSlideReducedSystem2()
           HYPRE_ParCSRMatrixRestoreRow(A_csr,i,&rowSize,&colInd,&colVal);
           ierr = HYPRE_ParCSRMatrixRestoreRow(RAP_csr,rowCount,&rowSize2,
                                               &colInd2,&colVal2);
+          delete [] newColInd;
           assert( !ierr );
           rowCount++;
        }
