@@ -1043,7 +1043,7 @@ HYPRE_ParCSRMatrix GenerateLaplacian(MPI_Comm comm,
                                      int      r,
                                      double  *value);
 
-int map(int ix,
+int hypre_map(int ix,
         int iy,
         int iz,
         int p,
@@ -1069,7 +1069,7 @@ HYPRE_ParCSRMatrix GenerateLaplacian27pt(MPI_Comm comm,
                                          int      r,
                                          double  *value);
 
-int map3(int ix,
+int hypre_map3(int ix,
          int iy,
          int iz,
          int p,
@@ -1092,7 +1092,7 @@ HYPRE_ParCSRMatrix GenerateLaplacian9pt(MPI_Comm comm,
                                         int      q,
                                         double  *value);
 
-int map2(int ix,
+int hypre_map2(int ix,
          int iy,
          int p,
          int q,
