@@ -15,7 +15,7 @@ TWRAPPER_FILE=thread_wrappers.c
 # Create standard interface prototypes
 #===========================================================================
 
-../utilities/protos HYPRE*.c > $TEMP_FILE
+mkproto HYPRE*.c > $TEMP_FILE
 
 #===========================================================================
 # Create thread wrapper routines
@@ -62,6 +62,7 @@ cat <<@
 
 @
 
-cat $TEMP_FILE
 rm -f $TEMP_FILE
+
+../utilities/protos HYPRE*.c
 
