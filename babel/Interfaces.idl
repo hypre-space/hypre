@@ -20,6 +20,7 @@ package Hypre {
    //   TO DO: consider changing names New() and Setup(), especially New().
    // For a builder, Start() or Reset() and Finish() are alternatives.
    // For a self-building class, Initialize() makes sense.
+   // 10may: Babel 0.4.0 uses New(); our function is changed to Start() for now.
    //   TO DO: For StructVectorBuilder, try to eliminate duplicate provisions
    // of "grid" in New and Constructor. (a problem: grid is needed by present
    // New, which is called by Constructor if same class implements Vector and
@@ -89,7 +90,7 @@ package Hypre {
       // ilower, iupper, and dim are combined into a Box object.  Probably
       // it would be better to encode the "values" data structure in a more
       // natural form.
-      int New( in StructGrid grid );
+      int Start( in StructGrid grid );
       int Setup();
       int GetConstructedObject(out Vector obj);
    };
@@ -102,14 +103,14 @@ package Hypre {
       // ilower, iupper, and dim are combined into a Box object.  Probably
       // it would be better to encode the "values" data structure in a more
       // natural form.
-      int New( in StructGrid grid, in StructStencil stencil,
+      int Start( in StructGrid grid, in StructStencil stencil,
                in int symmetric, in array<int,1> num_ghost );
       int Setup();
       int GetConstructedObject(out LinearOperator obj);
    };
 
    interface IJMatrixBuilder {
-      int New( in MPI_Com com, in int global_m, in int global_n );
+      int Start( in MPI_Com com, in int global_m, in int global_n );
       int SetLocalSize( in int local_m, in int local_n );
       int SetRowSizes( in array<int,1> sizes );
       int SetDiagRowSizes( in array<int,1> sizes );
@@ -138,7 +139,7 @@ package Hypre {
    };
 
    interface IJVectorBuilder {
-      int New( in MPI_Com com, in int global_n );
+      int Start( in MPI_Com com, in int global_n );
       int SetPartitioning( in array<int,1> partitioning );
       int GetPartitioning( out array<int,1> partitioning );
       int SetLocalComponents( in int num_values,
@@ -172,7 +173,7 @@ package Hypre {
       int SetParameterIntArray( in string name, in array<int,1> value );
       int GetParameterInt( in string name, out int value );
       int GetConstructedObject(out StructuredGrid obj);
-      int New( in MPI_Com com, in int dimension );
+      int Start( in MPI_Com com, in int dimension );
       int Setup();
    };
    
@@ -204,7 +205,7 @@ package Hypre {
       int SetParameterDouble( in string name, in double value );
       int SetParameterInt( in string name, in int value );
       int SetParameterString( in string name, in string value );
-      int New( in MPI_Com comm );
+      int Start( in MPI_Com comm );
       int Setup( in LinearOperator A, in Vector b, in Vector x );
       int GetConstructedObject(out Solver obj);    
    };
@@ -215,7 +216,7 @@ package Hypre {
       int SetParameterDouble( in string name, in double value );
       int SetParameterInt( in string name, in int value );
       int SetParameterString( in string name, in string value );
-      int New( in MPI_Com comm );
+      int Start( in MPI_Com comm );
       int Setup( in LinearOperator A, in Vector b, in Vector x );
       int GetConstructedObject(out Solver obj);    
 
@@ -225,7 +226,7 @@ package Hypre {
 
 // ---------------- Classes ----------------
 
-// Note re "New" and "Constructor" functions:
+// Note re "Start" and "Constructor" functions:
 // There are two ways to design a class structure for the above interfaces.
 // In one, for every class Foo there is a class FooBuilder.  A builder
 // object makes the object you want.
@@ -234,7 +235,7 @@ package Hypre {
 //
 // If you use a separate builder, the way things work is:
 //  builder's Constructor() makes a builder
-//  builder's New(...) makes an object and does basic initialization
+//  builder's Start(...) makes an object and does basic initialization
 //  builder's Set functions put data into the new object
 //  builder's Setup(...) finishes building the object
 //  builder's GetConstructedObject(...) returns that object
@@ -245,12 +246,12 @@ package Hypre {
 //  object's Set functions put data into the new object
 //  object's Setup(...) finishes building the object
 //
-// Internally, the Constructor() combines the Babel constructor() and New(...).
+// Internally, the Constructor() combines the Babel constructor() and Start(...).
 // But there is no reason for a user to call them separately or even know that
 // they exist. (except: in a future distributed version of Babel, the Babel
-// new() will need to be separately called.  The following New(...) function
+// new() will need to be separately called.  The following Start(...) function
 // will then be required.)
-// Nevertheless, the New() function must be implemented even when
+// Nevertheless, the Start() function must be implemented even when
 // an object is its own builder.  This is because it is needed by any separate
 // builder, hence it must be declared in the builder interface.
 
@@ -262,7 +263,7 @@ package Hypre {
       // upon construction.
       // The problem is that I have to build into this the "secret"
       // knowledge that an MPI communicator handle is really an integer.
-      int New( in int comm );
+      int Start( in int comm );
       static MPI_Com Constructor( in int comm );
    };
    
@@ -274,7 +275,7 @@ package Hypre {
    // contents to a file.
 
    class Box {
-      int New( in array<int,1> lower, in array<int,1> upper,
+      int Start( in array<int,1> lower, in array<int,1> upper,
                in int dimension );
       static Box Constructor( in array<int,1> lower, in array<int,1> upper,
                               in int dimension );
@@ -286,7 +287,7 @@ package Hypre {
    {
       void print();
       int SetElement( in int element_index, in array<int,1> element_offset );
-      int New( in int dimension, in int size );
+      int Start( in int dimension, in int size );
       static StructStencil Constructor( in int dimension, in int size );
       int Setup();
    };
@@ -297,7 +298,7 @@ package Hypre {
       int SetBoxValues( in Box box, in array<double,1> values );
       int SetNumGhost( in array<int,1> values );
       int GetConstructedObject(out Vector obj);
-      int New( in StructGrid grid );
+      int Start( in StructGrid grid );
       static StructVectorBuilder Constructor( in StructGrid grid );
       int Setup();
    };
@@ -319,7 +320,7 @@ package Hypre {
                         in array<double,1> values );
       int GetDims( out int m, out int n );
       int GetConstructedObject(out LinearOperator obj);
-      int New( in StructGrid grid, in StructStencil stencil,
+      int Start( in StructGrid grid, in StructStencil stencil,
                in int symmetric, in array<int,1> num_ghost  );
       static StructMatrixBuilder Constructor
       ( in StructGrid grid, in StructStencil stencil, in int symmetric,
@@ -352,7 +353,7 @@ package Hypre {
       int SetParameterIntArray( in string name, in array<int,1> value );
       int GetParameterInt( in string name, out int value );
       int GetConstructedObject(out StructuredGrid obj);
-      int New( in MPI_Com com, in int dimension );
+      int Start( in MPI_Com com, in int dimension );
       static StructGrid Constructor( in MPI_Com com, in int dimension );
       int Setup();
    };
@@ -361,7 +362,7 @@ package Hypre {
    class ParCSRMatrixBuilder implements IJMatrixBuilder {
       static ParCSRMatrixBuilder Constructor (in MPI_Com com, 
                                               in int global_m,                                                                in int global_n);
-      int New( in MPI_Com com, in int global_m, in int global_n );
+      int Start( in MPI_Com com, in int global_m, in int global_n );
       int SetLocalSize( in int local_m, in int local_n );
       int SetRowSizes( in array<int,1> sizes );
       int SetDiagRowSizes( in array<int,1> sizes );
@@ -391,7 +392,7 @@ package Hypre {
 
    class ParCSRVectorBuilder implements IJVectorBuilder {
       static ParCSRVectorBuilder Constructor( in MPI_Com com, in int global_n );
-      int New( in MPI_Com com, in int global_n );
+      int Start( in MPI_Com com, in int global_n );
       int SetPartitioning( in array<int,1> partitioning );
       int GetPartitioning( out array<int,1> partitioning );
       int SetLocalComponents( in int num_values,
@@ -459,7 +460,7 @@ package Hypre {
       int SetParameterDouble( in string name, in double value );
       int SetParameterInt( in string name, in int value );
       int SetParameterString( in string name, in string value );
-      int New( in MPI_Com comm );
+      int Start( in MPI_Com comm );
       int Setup( in LinearOperator A, in Vector b, in Vector x );
       static StructJacobi Constructor( in MPI_Com comm );
       int GetConstructedObject(out Solver obj);
@@ -477,7 +478,7 @@ package Hypre {
       int SetParameterDouble( in string name, in double value );
       int SetParameterInt( in string name, in int value );
       int SetParameterString( in string name, in string value );
-      int New( in MPI_Com comm );
+      int Start( in MPI_Com comm );
       int Setup( in LinearOperator A, in Vector b, in Vector x );
       static StructSMG Constructor( in MPI_Com comm );
       int GetConstructedObject(out Solver obj);
@@ -497,7 +498,7 @@ package Hypre {
       int SetParameterDouble( in string name, in double value );
       int SetParameterInt( in string name, in int value );
       int SetParameterString( in string name, in string value );
-      int New( in MPI_Com comm );
+      int Start( in MPI_Com comm );
       static PCG Constructor( in MPI_Com comm );
       int Setup( in LinearOperator A, in Vector b, in Vector x );
       int GetConstructedObject(out Solver obj);    
@@ -519,7 +520,7 @@ package Hypre {
       int SetParameterDouble( in string name, in double value );
       int SetParameterInt( in string name, in int value );
       int SetParameterString( in string name, in string value );
-      int New( in MPI_Com comm );
+      int Start( in MPI_Com comm );
       static GMRES Constructor ( in MPI_Com comm );
       int Setup( in LinearOperator A, in Vector b, in Vector x );
       int GetConstructedObject(out Solver obj);    
@@ -537,7 +538,7 @@ package Hypre {
       int SetParameterIntArray( in string name, in array<int,1> value );
       int SetParameterIntArray2( in string name, in array<int,2> value );
       int SetParameterString( in string name, in string value );
-      int New( in MPI_Com comm );
+      int Start( in MPI_Com comm );
       static ParAMG Constructor( in MPI_Com comm );
       int Setup( in LinearOperator A, in Vector b, in Vector x );
       int GetConstructedObject(out Solver obj);    
@@ -555,7 +556,7 @@ package Hypre {
       int SetParameterDouble( in string name, in double value );
       int SetParameterInt( in string name, in int value );
       int SetParameterString( in string name, in string value );
-      int New( in MPI_Com comm );
+      int Start( in MPI_Com comm );
       static Pilut Constructor( in MPI_Com comm );
       int Setup( in LinearOperator A, in Vector b, in Vector x );
       int GetConstructedObject(out Solver obj);    
