@@ -934,6 +934,8 @@ DistributeData( ProblemData   global_data,
                                            m[0]*m[1]*m[2]*pdata.nboxes);
             pdata.iuppers = hypre_TReAlloc(pdata.iuppers, ProblemIndex,
                                            m[0]*m[1]*m[2]*pdata.nboxes);
+            pdata.boxsizes = hypre_TReAlloc(pdata.boxsizes, int,
+                                            m[0]*m[1]*m[2]*pdata.nboxes);
             for (box = 0; box < pdata.nboxes; box++)
             {
                n[0] = pdata.iuppers[box][0] - pdata.ilowers[box][0] + 1;
@@ -960,6 +962,11 @@ DistributeData( ProblemData   global_data,
                         pdata.iuppers[i][0] = pdata.iuppers[box][0] + p*n[0];
                         pdata.iuppers[i][1] = pdata.iuppers[box][1] + q*n[1];
                         pdata.iuppers[i][2] = pdata.iuppers[box][2] + r*n[2];
+                        for (d = 3; d < 9; d++)
+                        {
+                           pdata.ilowers[i][d] = pdata.ilowers[box][d];
+                           pdata.iuppers[i][d] = pdata.iuppers[box][d];
+                        }
                         i += pdata.nboxes;
                      }
                   }
