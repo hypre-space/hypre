@@ -47,7 +47,8 @@ typedef struct
    /* Does the ParCSRMatrix create/destroy `diag', `offd', `col_map_offd'? */
    int      owns_data;
    /* Does the ParCSRMatrix create/destroy `row_starts', `col_starts'? */
-   int      owns_partitioning;
+   int      owns_row_starts;
+   int      owns_col_starts;
 
 } hypre_ParCSRMatrix;
 
@@ -67,5 +68,6 @@ typedef struct
 #define hypre_ParCSRMatrixColStarts(matrix)       ((matrix) -> col_starts)
 #define hypre_ParCSRMatrixCommPkg(matrix)	  ((matrix) -> comm_pkg)
 #define hypre_ParCSRMatrixOwnsData(matrix)        ((matrix) -> owns_data)
-#define hypre_ParCSRMatrixOwnsPartitioning(matrix)((matrix) -> owns_partitioning)
+#define hypre_ParCSRMatrixOwnsRowStarts(matrix)   ((matrix) -> owns_row_starts)
+#define hypre_ParCSRMatrixOwnsColStarts(matrix)   ((matrix) -> owns_col_starts)
 
