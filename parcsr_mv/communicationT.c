@@ -61,13 +61,13 @@ void RowsWithColumn
 /* Finds rows of A which have a nonzero at the given (global) column number.
    Sets rowmin to the minimum (local) row number of such rows, and rowmax
    to the max.  If there are no such rows, will return rowmax<0<=rowmin
-   The matrix A, normally a hypre_ParCSRMatrix or MLI_ParCSRBooleanMatrix,
+   The matrix A, normally a hypre_ParCSRMatrix or hypre_ParCSRBooleanMatrix,
    is specified by:
  num_rows_diag, (number of rows in diag, assumed to be same in offd)
  firstColDiag, colMapOffd (to map CSR-type matrix columns to ParCSR-type columns
- mat_i_diag, mat_j_diag: indices in the hypre_CSRMatrix or MLI_CSRBooleanMatrix for
+ mat_i_diag, mat_j_diag: indices in the hypre_CSRMatrix or hypre_CSRBooleanMatrix for
    diag block of A
- mat_i_offd, mat_j_offd: indices in the hypre_CSRMatrix or MLI_CSRBooleanMatrix for
+ mat_i_offd, mat_j_offd: indices in the hypre_CSRMatrix or hypre_CSRBooleanMatrix for
    offd block of A
  */
 {
@@ -109,7 +109,7 @@ void RowsWithColumn
 
 /* hypre_MatTCommPkgCreate_core does all the communications and computations for
        hypre_MatTCommPkgCreate ( hypre_ParCSRMatrix *A)
- and   hypre_BoolMatTCommPkgCreate ( MLI_ParCSRBooleanMatrix *A)
+ and   hypre_BoolMatTCommPkgCreate ( hypre_ParCSRBooleanMatrix *A)
  To support both data types, it has hardly any data structures other than int*.
 
 */

@@ -200,7 +200,7 @@ hypre_ParCSRCommHandleDestroy( hypre_ParCSRCommHandle *comm_handle )
 
 /* hypre_MatCommPkgCreate_core does all the communications and computations for
        hypre_MatCommPkgCreate ( hypre_ParCSRMatrix *A)
- and   hypre_BoolMatCommPkgCreate ( MLI_ParCSRBooleanMatrix *A)
+ and   hypre_BoolMatCommPkgCreate ( hypre_ParCSRBooleanMatrix *A)
  To support both data types, it has hardly any data structures other than int*.
 
 */

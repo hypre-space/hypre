@@ -62,7 +62,36 @@ typedef struct
 #define hypre_CSRMatrixNumNonzeros(matrix)  ((matrix) -> num_nonzeros)
 #define hypre_CSRMatrixOwnsData(matrix)     ((matrix) -> owns_data)
 
+
+
+/*--------------------------------------------------------------------------
+ * CSR Boolean Matrix
+ *--------------------------------------------------------------------------*/
+
+typedef struct
+{
+   int    *i;
+   int    *j;
+   int     num_rows;
+   int     num_cols;
+   int     num_nonzeros;
+   int     owns_data;
+
+} hypre_CSRBooleanMatrix;
+
+/*--------------------------------------------------------------------------
+ * Accessor functions for the CSR Boolean Matrix structure
+ *--------------------------------------------------------------------------*/
+
+#define hypre_CSRBooleanMatrix_Get_I(matrix)        ((matrix)->i)
+#define hypre_CSRBooleanMatrix_Get_J(matrix)        ((matrix)->j)
+#define hypre_CSRBooleanMatrix_Get_NRows(matrix)    ((matrix)->num_rows)
+#define hypre_CSRBooleanMatrix_Get_NCols(matrix)    ((matrix)->num_cols)
+#define hypre_CSRBooleanMatrix_Get_NNZ(matrix)      ((matrix)->num_nonzeros)
+#define hypre_CSRBooleanMatrix_Get_OwnsData(matrix) ((matrix)->owns_data)
+
 #endif
+
 /*BHEADER**********************************************************************
  * (c) 1996   The Regents of the University of California
  *
