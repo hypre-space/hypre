@@ -837,33 +837,36 @@ main( int   argc,
    hypre_PrintTiming("IJ Interface", MPI_COMM_WORLD);
    hypre_FinalizeTiming(time_index);
    hypre_ClearTiming();
-
-   if (build_funcs_type)
+   
+   if (num_functions > 1)
    {
-      printf (" Not implemented yet!");
-   }
-   else
-   {
-      local_num_vars = last_local_row -first_local_row+1;
-      dof_func = hypre_CTAlloc(int,local_num_vars);
-      if (myid == 0)
-	 printf (" Number of unknown functions = %d \n", num_functions);
-      rest = first_local_row - ((first_local_row/num_functions)*num_functions);
-      indx = num_functions-rest;
-      if (rest == 0) indx = 0;
-      k = num_functions - 1;
-      for (j = indx-1; j > -1; j--)
-	 dof_func[j] = k--;
-      tms = local_num_vars/num_functions;
-      if (tms*num_functions+indx > local_num_vars) tms--;
-      for (j=0; j < tms; j++)
+      if (build_funcs_type)
       {
-	 for (k=0; k < num_functions; k++)
-	    dof_func[indx++] = k;
+         printf (" Not implemented yet!");
       }
-      k = 0;
-      while (indx < local_num_vars)
-	 dof_func[indx++] = k++;
+      else
+      {
+         local_num_vars = last_local_row -first_local_row+1;
+         dof_func = hypre_CTAlloc(int,local_num_vars);
+         if (myid == 0)
+	    printf (" Number of unknown functions = %d \n", num_functions);
+         rest = first_local_row-((first_local_row/num_functions)*num_functions);
+         indx = num_functions-rest;
+         if (rest == 0) indx = 0;
+         k = num_functions - 1;
+         for (j = indx-1; j > -1; j--)
+	    dof_func[j] = k--;
+         tms = local_num_vars/num_functions;
+         if (tms*num_functions+indx > local_num_vars) tms--;
+         for (j=0; j < tms; j++)
+         {
+	    for (k=0; k < num_functions; k++)
+	       dof_func[indx++] = k;
+         }
+         k = 0;
+         while (indx < local_num_vars)
+	    dof_func[indx++] = k++;
+      }
    }
  
    /*-----------------------------------------------------------
@@ -893,7 +896,8 @@ main( int   argc,
       HYPRE_BoomerAMGSetMaxRowSum(amg_solver, max_row_sum);
       HYPRE_BoomerAMGSetDebugFlag(amg_solver, debug_flag);
       HYPRE_BoomerAMGSetNumFunctions(amg_solver, num_functions);
-      HYPRE_BoomerAMGSetDofFunc(amg_solver, dof_func);
+      if (num_functions > 1)
+	 HYPRE_BoomerAMGSetDofFunc(amg_solver, dof_func);
 
       HYPRE_BoomerAMGSetup(amg_solver, A, b, x);
 
@@ -958,7 +962,8 @@ main( int   argc,
          HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
          HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
-         HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
+         if (num_functions > 1)
+            HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
          HYPRE_ParCSRPCGSetPrecond(pcg_solver,
                                    HYPRE_BoomerAMGSolve,
                                    HYPRE_BoomerAMGSetup,
@@ -1108,7 +1113,8 @@ main( int   argc,
          HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
          HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
-         HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
+         if (num_functions > 1)
+            HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
          HYPRE_ParCSRGMRESSetPrecond(pcg_solver,
                                      HYPRE_BoomerAMGSolve,
                                      HYPRE_BoomerAMGSetup,
@@ -1281,7 +1287,8 @@ main( int   argc,
          HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
          HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
-         HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
+         if (num_functions > 1)
+            HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
          HYPRE_ParCSRBiCGSTABSetPrecond(pcg_solver,
                                         HYPRE_BoomerAMGSolve,
                                         HYPRE_BoomerAMGSetup,
@@ -1427,7 +1434,8 @@ main( int   argc,
          HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
          HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
-         HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
+         if (num_functions > 1)
+            HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
          HYPRE_ParCSRCGNRSetPrecond(pcg_solver,
                                    HYPRE_BoomerAMGSolve,
                                    HYPRE_BoomerAMGSolveT,
@@ -1519,6 +1527,8 @@ main( int   argc,
       HYPRE_IJVectorDestroy(ij_x);
    else
       HYPRE_ParVectorDestroy(x);
+   if (num_functions > 1)
+      hypre_TFree (dof_func);
 /*
    hypre_FinalizeMemoryDebug();
 */
