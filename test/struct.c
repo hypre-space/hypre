@@ -92,6 +92,10 @@ main( int   argc,
    int                 periodic[3];
    int               **offsets;
    int                 constant_coefficient = 0;
+   int                *stencil_entries;
+   int                 stencil_size;
+   int                 diag_rank;
+   hypre_Index         diag_index;
 
    HYPRE_StructGrid    grid;
    HYPRE_StructGrid    readgrid;
@@ -772,15 +776,29 @@ main( int   argc,
       }
 
       HYPRE_StructMatrixCreate(MPI_COMM_WORLD, grid, stencil, &A);
-      if ( solver_id == 3 )
+      if ( solver_id == 3 || solver_id == 4 )
       {
-         HYPRE_StructMatrixSetConstantCoefficient( A, 1 );
-         constant_coefficient = 1;
-      }
-      if ( solver_id == 4 )
-      {
-         HYPRE_StructMatrixSetConstantCoefficient( A, 2 );
-         constant_coefficient = 2;
+         stencil_size  = hypre_StructStencilSize(stencil);
+         stencil_entries = hypre_CTAlloc(int, stencil_size);
+         if ( solver_id == 3 )
+         {
+            for ( i=0; i<stencil_size; ++i ) stencil_entries[i]=i;
+            hypre_StructMatrixSetConstantEntries( A, stencil_size, stencil_entries );
+            hypre_TFree( stencil_entries );
+            constant_coefficient = 1;
+         }
+         if ( solver_id == 4 )
+         {
+            hypre_SetIndex(diag_index, 0, 0, 0);
+            diag_rank = hypre_StructStencilElementRank( stencil, diag_index );
+            for ( i=0; i<stencil_size; ++i )
+            {
+               if ( i!= diag_rank ) stencil_entries[i]=i;
+            }
+            hypre_StructMatrixSetConstantEntries( A, stencil_size, stencil_entries );
+            hypre_TFree( stencil_entries );
+            constant_coefficient = 2;
+         }
       }
       HYPRE_StructMatrixSetSymmetric(A, sym);
       HYPRE_StructMatrixSetNumGhost(A, A_num_ghost);
@@ -1981,10 +1999,12 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
   int                 volume,dim,sym;
   int                *stencil_indices;
   int                 stencil_size;
+  int                 constant_coefficient;
 
   gridboxes =  hypre_StructGridBoxes(gridmatrix);
   dim       =  hypre_StructGridDim(gridmatrix);
   sym       =  hypre_StructMatrixSymmetric(A);
+  constant_coefficient = hypre_StructMatrixConstantCoefficient(A);
 
   bi=0;
 
@@ -2007,40 +2027,109 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
 
   if(sym)
   {
-     hypre_ForBoxI(bi, gridboxes)
-        {
-           box      = hypre_BoxArrayBox(gridboxes, bi);
-           volume   =  hypre_BoxVolume(box);
-           values   = hypre_CTAlloc(double, stencil_size*volume);
-
-           for (i = 0; i < stencil_size*volume; i += stencil_size)
+     if ( constant_coefficient==0 )
+     {
+        hypre_ForBoxI(bi, gridboxes)
            {
-              switch (dim)
+              box      = hypre_BoxArrayBox(gridboxes, bi);
+              volume   =  hypre_BoxVolume(box);
+              values   = hypre_CTAlloc(double, stencil_size*volume);
+
+              for (i = 0; i < stencil_size*volume; i += stencil_size)
               {
+                 switch (dim)
+                 {
                  case 1:
-                   values[i  ] = west;
-                   values[i+1] = center;
-                   break;
+                    values[i  ] = west;
+                    values[i+1] = center;
+                    break;
                  case 2:
-                   values[i  ] = west;
-                   values[i+1] = south;
-                   values[i+2] = center;
-                   break;
+                    values[i  ] = west;
+                    values[i+1] = south;
+                    values[i+2] = center;
+                    break;
                  case 3:
                     values[i  ] = west;
                     values[i+1] = south;
                     values[i+2] = bottom;
                     values[i+3] = center;
                     break;
+                 }
               }
+              ilower = hypre_BoxIMin(box);
+              iupper = hypre_BoxIMax(box);
+              HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, stencil_size,
+                                             stencil_indices, values);
+              hypre_TFree(values);
            }
-           ilower = hypre_BoxIMin(box);
-	   iupper = hypre_BoxIMax(box);
-           HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, stencil_size,
-                                     stencil_indices, values);
-
-	   hypre_TFree(values);
+     }
+     else if ( constant_coefficient==1 )
+     {
+        values   = hypre_CTAlloc(double, stencil_size);
+        switch (dim)
+        {
+        case 1:
+           values[0] = west;
+           values[1] = center;
+           break;
+        case 2:
+           values[0] = west;
+           values[1] = south;
+           values[2] = center;
+           break;
+        case 3:
+           values[0] = west;
+           values[1] = south;
+           values[2] = bottom;
+           values[3] = center;
+           break;
         }
+        HYPRE_StructMatrixSetConstantValues(A, stencil_size,
+                                            stencil_indices, values);
+        hypre_TFree(values);
+     }
+     else
+     {
+        assert( constant_coefficient==2 );
+
+        /* stencil index for the center equals dim, so it's easy to leave out */
+        values   = hypre_CTAlloc(double, stencil_size-1);
+        switch (dim)
+        {
+        case 1:
+           values[0] = west;
+           break;
+        case 2:
+           values[0] = west;
+           values[1] = south;
+           break;
+        case 3:
+           values[0] = west;
+           values[1] = south;
+           values[2] = bottom;
+           break;
+        }
+        HYPRE_StructMatrixSetConstantValues(A, stencil_size-1,
+                                            stencil_indices, values);
+        hypre_TFree(values);
+
+        hypre_ForBoxI(bi, gridboxes)
+           {
+              box      = hypre_BoxArrayBox(gridboxes, bi);
+              volume   =  hypre_BoxVolume(box);
+              values   = hypre_CTAlloc(double, volume);
+
+              for ( i=0; i < volume; ++i )
+              {
+                 values[i] = center;
+              }
+              ilower = hypre_BoxIMin(box);
+              iupper = hypre_BoxIMax(box);
+              HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, 1,
+                                             stencil_indices+dim, values);
+              hypre_TFree(values);
+           }
+     }
   }
   else
   {
@@ -2075,28 +2164,30 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
         center -= conz;
      }
 
-     hypre_ForBoxI(bi, gridboxes)
-        {
-           box      = hypre_BoxArrayBox(gridboxes, bi);
-           volume   =  hypre_BoxVolume(box);
-           values   = hypre_CTAlloc(double, stencil_size*volume);
-
-           for (i = 0; i < stencil_size*volume; i += stencil_size)
+     if ( constant_coefficient==0 )
+     {
+        hypre_ForBoxI(bi, gridboxes)
            {
-              switch (dim)
+              box      = hypre_BoxArrayBox(gridboxes, bi);
+              volume   =  hypre_BoxVolume(box);
+              values   = hypre_CTAlloc(double, stencil_size*volume);
+
+              for (i = 0; i < stencil_size*volume; i += stencil_size)
               {
+                 switch (dim)
+                 {
                  case 1:
-                   values[i  ] = west;
-                   values[i+1] = center;
-                   values[i+2] = east;
-                   break;
+                    values[i  ] = west;
+                    values[i+1] = center;
+                    values[i+2] = east;
+                    break;
                  case 2:
-                   values[i  ] = west;
-                   values[i+1] = south;
-                   values[i+2] = center;
-                   values[i+3] = east;
-                   values[i+4] = north;
-                   break;
+                    values[i  ] = west;
+                    values[i+1] = south;
+                    values[i+2] = center;
+                    values[i+3] = east;
+                    values[i+4] = north;
+                    break;
                  case 3:
                     values[i  ] = west;
                     values[i+1] = south;
@@ -2106,15 +2197,112 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
                     values[i+5] = north;
                     values[i+6] = top;
                     break;
+                 }
               }
-           }
-           ilower = hypre_BoxIMin(box);
-	   iupper = hypre_BoxIMax(box);
-           HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, stencil_size,
-                                     stencil_indices, values);
+              ilower = hypre_BoxIMin(box);
+              iupper = hypre_BoxIMax(box);
+              HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, stencil_size,
+                                             stencil_indices, values);
 
-	   hypre_TFree(values);
+              hypre_TFree(values);
+           }
+     }
+     else if ( constant_coefficient==1 )
+     {
+        values = hypre_CTAlloc( double, stencil_size );
+
+        switch (dim)
+        {
+        case 1:
+           values[0] = west;
+           values[1] = center;
+           values[2] = east;
+           break;
+        case 2:
+           values[0] = west;
+           values[1] = south;
+           values[2] = center;
+           values[3] = east;
+           values[4] = north;
+           break;
+        case 3:
+           values[0] = west;
+           values[1] = south;
+           values[2] = bottom;
+           values[3] = center;
+           values[4] = east;
+           values[5] = north;
+           values[6] = top;
+           break;
         }
+
+        HYPRE_StructMatrixSetConstantValues(A, stencil_size,
+                                            stencil_indices, values);
+
+        hypre_TFree(values);
+     }
+     else
+     {
+        assert( constant_coefficient==2 );
+        values = hypre_CTAlloc( double, stencil_size-1 );
+        switch (dim)
+        {  /* no center in stencil_indices and values */
+        case 1:
+           stencil_indices[0] = 0;
+           stencil_indices[1] = 2;
+           values[0] = west;
+           values[1] = east;
+           break;
+        case 2:
+           stencil_indices[0] = 0;
+           stencil_indices[1] = 1;
+           stencil_indices[2] = 3;
+           stencil_indices[3] = 4;
+           values[0] = west;
+           values[1] = south;
+           values[2] = east;
+           values[3] = north;
+           break;
+        case 3:
+           stencil_indices[0] = 0;
+           stencil_indices[1] = 1;
+           stencil_indices[2] = 2;
+           stencil_indices[3] = 4;
+           stencil_indices[4] = 5;
+           stencil_indices[5] = 6;
+           values[0] = west;
+           values[1] = south;
+           values[2] = bottom;
+           values[3] = east;
+           values[4] = north;
+           values[5] = top;
+           break;
+        }
+
+        HYPRE_StructMatrixSetConstantValues(A, stencil_size,
+                                       stencil_indices, values);
+        hypre_TFree(values);
+
+
+        /* center is variable */
+        stencil_indices[0] = dim; /* refers to center */
+        hypre_ForBoxI(bi, gridboxes)
+           {
+              box      = hypre_BoxArrayBox(gridboxes, bi);
+              volume   =  hypre_BoxVolume(box);
+              values   = hypre_CTAlloc(double, volume);
+
+              for ( i=0; i < volume; ++i )
+              {
+                 values[i] = center;
+              }
+              ilower = hypre_BoxIMin(box);
+              iupper = hypre_BoxIMax(box);
+              HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, 1,
+                                             stencil_indices, values);
+              hypre_TFree(values);
+           }
+     }
   }
 
   hypre_TFree(stencil_indices);
@@ -2146,6 +2334,7 @@ SetStencilBndry(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,int* period)
   double            *values;
   int                volume, dim;
   int               *stencil_indices;
+  int                constant_coefficient;
 
   gridboxes       = hypre_StructGridBoxes(gridmatrix);
   boundingbox     = hypre_StructGridBoundingBox(gridmatrix);
@@ -2154,6 +2343,12 @@ SetStencilBndry(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,int* period)
   size            = hypre_StructGridNumBoxes(gridmatrix);
   dim             = hypre_StructGridDim(gridmatrix);
   stencil_indices = hypre_CTAlloc(int, 1);
+
+  constant_coefficient = hypre_StructMatrixConstantCoefficient(A);
+  if ( constant_coefficient>0 ) return 1;
+  /*...no space dependence if constant_coefficient==1,
+    and space dependence only for diagonal if constant_coefficient==2 --
+    and this function only touches off-diagonal entries */
 
   vol    = hypre_CTAlloc(int, size);
   ilower = hypre_CTAlloc(int*, size);
@@ -2182,37 +2377,40 @@ SetStencilBndry(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,int* period)
         hypre_BoxDestroy(dummybox);
      }
 
-  for (d = 0; d < dim; d++)
+  if ( constant_coefficient==0 )
   {
-     for (ib = 0; ib < size; ib++)
+     for (d = 0; d < dim; d++)
      {
-        values = hypre_CTAlloc(double, vol[ib]);
+        for (ib = 0; ib < size; ib++)
+        {
+           values = hypre_CTAlloc(double, vol[ib]);
         
-        for (i = 0; i < vol[ib]; i++)
-        {
-           values[i] = 0.0;
-	 }
+           for (i = 0; i < vol[ib]; i++)
+           {
+              values[i] = 0.0;
+           }
 
-        if( ilower[ib][d] == istart[d] && period[d] == 0 )
-        {
-           j = iupper[ib][d];
-           iupper[ib][d] = istart[d];
-           stencil_indices[0] = d;
-           HYPRE_StructMatrixSetBoxValues(A, ilower[ib], iupper[ib],
-                                          1, stencil_indices, values);
-           iupper[ib][d] = j;
-        }
+           if( ilower[ib][d] == istart[d] && period[d] == 0 )
+           {
+              j = iupper[ib][d];
+              iupper[ib][d] = istart[d];
+              stencil_indices[0] = d;
+              HYPRE_StructMatrixSetBoxValues(A, ilower[ib], iupper[ib],
+                                             1, stencil_indices, values);
+              iupper[ib][d] = j;
+           }
 
-        if( iupper[ib][d] == iend[d] && period[d] == 0 )
-        {
-           j = ilower[ib][d];
-           ilower[ib][d] = iend[d];
-           stencil_indices[0] = dim + 1 + d;
-           HYPRE_StructMatrixSetBoxValues(A, ilower[ib], iupper[ib],
-                                          1, stencil_indices, values);
-           ilower[ib][d] = j;
+           if( iupper[ib][d] == iend[d] && period[d] == 0 )
+           {
+              j = ilower[ib][d];
+              ilower[ib][d] = iend[d];
+              stencil_indices[0] = dim + 1 + d;
+              HYPRE_StructMatrixSetBoxValues(A, ilower[ib], iupper[ib],
+                                             1, stencil_indices, values);
+              ilower[ib][d] = j;
+           }
+           hypre_TFree(values);
         }
-        hypre_TFree(values);
      }
   }
   
