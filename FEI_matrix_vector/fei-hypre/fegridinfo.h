@@ -196,6 +196,7 @@ public :
    int loadFunc_computeShapeFuncInterpolant(int (*func)
             (void *,int elem,int nnodes,double *coord,double *coef));
 
+   int writeToFile();
 
 private :
 

@@ -1580,7 +1580,7 @@ int FEGridInfo::processNodeInfo()
    for ( i = 1; i < numLocalElems_; i++ ) 
    { 
       if ( elemGlobalID_[i] == elemGlobalID_[i-1] )
-         printf("FEGridInfo ERROR : endInitElemSet - duplicate elemIDs.\n");
+         printf("FEGridInfo ERROR : processNodeInfo - duplicate elemIDs.\n");
    }
    dddarray  = elemStiff_;
    dddarray2 = elemNullSpace_;
@@ -1779,6 +1779,61 @@ int FEGridInfo::intSort2(int N, int list[], int list2[])
       }
       list[ 0] = RR;
    }
+   return 1;
+}
+
+//*************************************************************************
+// write grid information to files
+//-------------------------------------------------------------------------
+
+int FEGridInfo::writeToFile()
+{
+   int  i, j, k, length;
+   FILE *fp;
+
+   if ( processElemFlag_ == 0 || processNodeFlag_ == 0 )
+   {
+      printf("FEGridInfo ERROR : writeToFile - not initialized completely.\n");
+      return 0;
+   }
+
+   fp = fopen("element_chord", "w");
+
+   for ( i = 0; i < numLocalElems_; i++ )
+   {
+      length = 0;
+      for ( j = 0; j < elemNodeLeng_[i]; j++ ) 
+         length += nodeDOF_[elemNodeList_[i][j]];
+      for ( j = 0; j < length; j++ )
+      {
+         for ( k = 0; k < length; k++ )
+            fprintf(fp, "%13.6e ", elemStiff_[i][j][k]);
+         fprintf(fp, "\n");
+      }
+   }
+   fprintf(fp, "\n");
+   fclose(fp);
+
+   fp = fopen("element_node", "w");
+   
+   fprintf(fp, "%d %d\n", numLocalElems_, numLocalNodes_);
+   for (i = 0; i < numLocalElems_; i++) 
+   {
+      for (j = 0; j < elemNodeLeng_[i]; j++) 
+         fprintf(fp, "%d ", elemNodeList_[i][j]+1);
+      fprintf(fp,"\n");
+   } 
+
+   fclose(fp);
+
+   fp = fopen("node_on_bdry", "w");
+
+   for (i = 0; i < numNodeBCs_; i++) 
+   {
+      fprintf(fp, "%d\n", nodeBCList_[i]);
+   }
+   fclose(fp);
+
    return 1;
 }
 
