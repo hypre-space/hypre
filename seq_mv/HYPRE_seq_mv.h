@@ -12,8 +12,8 @@
  *
  *****************************************************************************/
 
-#ifndef HYPRE_MV_HEADER
-#define HYPRE_MV_HEADER
+#ifndef HYPRE_SEQ_MV_HEADER
+#define HYPRE_SEQ_MV_HEADER
 
 #include "HYPRE_utilities.h"
 
