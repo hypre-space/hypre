@@ -34,7 +34,49 @@
 #include "Hypre_ParDiagScale_Impl.h"
 #include <assert.h>
 
+/* This can't be implemented until the HYPRE_PCG Get functions are implemented.
+   But this function should be used to initialize the parameter cache
+   in the Hypre_PCG__data object, so that we can have Hypre_PCG Get
+   functions for all settable parameters...
+int impl_Hypre_PCG_Copy_Parameters_from_HYPRE_struct( Hypre_PCG self )
+{
+   int ierr = 0;
+   HYPRE_Solver solver;
+   struct Hypre_PCG__data * data;
+
+   data = Hypre_PCG__get_data( self );
+   assert( data->solver != NULL );
+   solver = data->solver;
+
+   / * double parameters: * /
+   ierr += HYPRE_PCGGetTol( solver, &(data->tol) );
+   ierr += HYPRE_PCGGetAbsoluteTolFactor( solver,
+                                          &(data->atolf) );
+   ierr += HYPRE_PCGGetConvergenceFactorTol( solver,
+                                             &(data->cf_tol) );
+
+   / * int parameters: * /
+   ierr += HYPRE_PCGGetMaxIter( solver, &(data->maxiter) );
+   ierr += HYPRE_PCGGetRelChange( solver, &(data->relchange) );
+   ierr += HYPRE_PCGGetTwoNorm( solver, &(data->twonorm) );
+   ierr += HYPRE_PCGGetStopCrit( solver, &(data->stop_crit) );
+
+   ierr += HYPRE_PCGGetPrintLevel( solver, &(data->printlevel) );
+   ierr += HYPRE_PCGGetLogLevel( solver, *(data->log_level) );
+
+   return ierr;
+}
+*/
+
 int impl_Hypre_PCG_Copy_Parameters_to_HYPRE_struct( Hypre_PCG self )
+/* Copy parameter cache from the Hypre_PCG__data object into the
+   HYPRE_Solver object */
+/* >>> Possible BUG: If the default (initial) values in the HYPRE code
+   are different from those used in the Babel interface, and the user didn't
+   set everything, calling this function will give the wrong defaults
+   (defining "correct" defaults to be those used in the HYPRE interface).
+   The solution is to intialize the Babel PCG parameters by calling HYPRE-level
+   Get functions (which haven't been written yet). */
 {
    int ierr = 0;
    HYPRE_Solver solver;
@@ -89,6 +131,18 @@ impl_Hypre_PCG__ctor(
       to call.  If we were to switch to a Babel-based PCG solver, we would be
       able to use generic function names; hence we could really initialize PCG
       here. */
+
+   /* default values (copied from pcg.c; better to get them by function calls)...*/
+   data -> tol = 1.0e-6;
+   data -> atolf = 0.0;
+   data -> cf_tol = 0.0;
+   data -> maxiter = 1000;
+   data -> relchange = 0;
+   data -> twonorm = 0;
+   data ->log_level = 0;
+   data -> printlevel = 0;
+   data -> stop_crit = 0;
+
    /* set any other data components here */
    Hypre_PCG__set_data( self, data );
   /* DO-NOT-DELETE splicer.end(Hypre.PCG._ctor) */
@@ -133,6 +187,12 @@ impl_Hypre_PCG_Apply(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.PCG.Apply) */
   /* Insert the implementation of the Apply method here... */
+   /* In the long run, the solver should be implemented right here, calling
+      the appropriate Hypre functions.  But for now we are calling the existing
+      HYPRE solver.  Advantages: don't want to have two versions of the same
+      PCG solver lying around.  Disadvantage: we have to cache user-supplied
+      parameters until the Apply call, where we make the PCG object and really
+      set the parameters - messy and unnatural. */
    int ierr=0;
    MPI_Comm comm;
    HYPRE_Solver solver;
@@ -323,7 +383,48 @@ impl_Hypre_PCG_GetPreconditionedResidual(
   /* DO-NOT-DELETE splicer.begin(Hypre.PCG.GetPreconditionedResidual) */
   /* Insert the implementation of the GetPreconditionedResidual method here... 
     */
-   /* >>>>>>>>>>>> TO DO <<<<<<<<<<<<<<<<< */
+   /* This is all wrong, and the whole function is not needed.
+      >>> Delete this entire implementation soon. <<< */
+   /* The preconditioned residual is s = C*r in the file krylov/pcg.c, pcg.h.
+      (r is the residual b-A*x, C the preconditioner, an approx. inverse of A) */
+   int ierr = 0;
+   void * objectr;
+   char *vector_type;
+   HYPRE_Solver solver;
+   struct Hypre_PCG__data * data;
+
+   /* declarations for ParCSR matrix/vector type: */
+   struct Hypre_ParCSRVector__data * datar;
+   Hypre_ParCSRVector HypreP_r;
+   HYPRE_ParVector rr;
+   HYPRE_ParVector rr2;
+   HYPRE_ParVector * prr = &rr2;
+   HYPRE_IJVector ij_r;
+
+   data = Hypre_PCG__get_data( self );
+   solver = data->solver;
+   vector_type = data -> vector_type;
+
+   if ( vector_type=="ParVector" ) {
+      HypreP_r = Hypre_Vector__cast2
+         ( Hypre_Vector_queryInterface( *r, "Hypre.ParCSRVector"),
+           "Hypre.ParCSRVector" );
+      assert( HypreP_r!=NULL );
+      datar = Hypre_ParCSRVector__get_data( HypreP_r );
+      ij_r = datar -> ij_b;
+      ierr += HYPRE_IJVectorGetObject( ij_r, &objectr );
+      rr = (HYPRE_ParVector) objectr;
+
+      ierr += HYPRE_PCGGetPreconditionedResidual( solver, (void **) prr );
+      HYPRE_ParVectorCopy( *prr, rr );
+   }
+   else {
+      /* Unsupported vector type */
+      ++ierr;
+      return ierr;
+   }
+
+   return ierr;
   /* DO-NOT-DELETE splicer.end(Hypre.PCG.GetPreconditionedResidual) */
 }
 
@@ -369,7 +470,7 @@ impl_Hypre_PCG_GetResidual(
       ierr += HYPRE_IJVectorGetObject( ij_r, &objectr );
       rr = (HYPRE_ParVector) objectr;
 
-      ierr += HYPRE_PCGGetResidual( solver, prr );
+      ierr += HYPRE_PCGGetResidual( solver, (void**) prr );
       HYPRE_ParVectorCopy( *prr, rr );
    }
    else {
