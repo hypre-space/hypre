@@ -3984,7 +3984,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
           {
              addToAConjProjectionSpace( currX_, currB_ );
           }
-          else
+          else if (projectionScheme_ == 2)
           {
              addToMinResProjectionSpace( currX_, currB_ );
           }
@@ -4260,7 +4260,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
           {
              addToAConjProjectionSpace( currX_, currB_ );
           }
-          else
+          else if (projectionScheme_ == 2)
           {
              addToMinResProjectionSpace( currX_, currB_ );
           }
@@ -4532,7 +4532,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
           {
              addToAConjProjectionSpace( currX_, currB_ );
           }
-          else
+          else if (projectionScheme_ == 2)
           {
              addToMinResProjectionSpace( currX_, currB_ );
           }
@@ -4804,7 +4804,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
           {
              addToAConjProjectionSpace( currX_, currB_ );
           }
-          else
+          else if (projectionScheme_ == 2)
           {
              addToMinResProjectionSpace( currX_, currB_ );
           }
@@ -5071,7 +5071,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
           {
              addToAConjProjectionSpace( currX_, currB_ );
           }
-          else
+          else if (projectionScheme_ == 2)
           {
              addToMinResProjectionSpace( currX_, currB_ );
           }
@@ -5338,7 +5338,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
           {
              addToAConjProjectionSpace( currX_, currB_ );
           }
-          else
+          else if (projectionScheme_ == 2)
           {
              addToMinResProjectionSpace( currX_, currB_ );
           }
