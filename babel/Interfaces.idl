@@ -21,47 +21,33 @@ package Hypre {
    interface Operator {
       void Apply( in StructVector x, out StructVector b );
    };
-   // ... Things which inherit from Operator include Matrix, Solver, Vector.
-
-   //   When interpreted as operators, a matrix or solver (inverse matrix)
-   // normally multiplies an input vector to produce an output vector.
-   //   Vectors have more varied common interpretations as operators - multiply
-   // a scalar to get a scalar or vector, or multiply a vector to get a scalar
-   // (dot product), vector (cross product, not normally seen except in 3D), or
-   // matrix (outer product).  Part of this ambiguity arises because a vector,
-   // if seen as a matrix, is ambiguously equivalent to its transpose.
-   //   But even a matrix has alternative interpretations as an operator, e.g.
-   // scalar to matrix and matrix to matrix.
-   //   If we choose the Operator interface's Apply to be "right" for a matrix,
-   // that leaves us with the cross product for a vector - a poor choice.
-   //   I think that Vector would best not inherit from Operator, despite its
-   // conceptual similarity to Matrix.  It would best be a data member of
-   // whatever operators it's used in, as a Matrix can be a data member of a
-   // Solver.
+   // ... Things which inherit from Operator include Matrix, Solver.
 
    interface LinearOperator extends Operator {
       void Apply( in StructVector x, out StructVector b );
    };
 
    interface StructuredGridVectorBuilder {
-      int SetGrid( in StructuredGrid grid ); // was SetStructuredGrid
+      int SetGrid( in StructuredGrid grid );
       int SetValues( in Box box, in array<double,1> values );
-      // ... this is basically how it works now, except that ilower, iupper,
-      // and dim are combined into a Box object.  Probably it would be better
-      // to encode the "values" data structure in a more natural form.
+      // ... this is basically how the HYPRE functions work, except that
+      // ilower, iupper, and dim are combined into a Box object.  Probably
+      // it would be better to encode the "values" data structure in a more
+      // natural form.
       void New( in StructuredGrid grid );
       int Setup( in StructuredGrid grid );
       StructVector GetConstructedObject();
    };
 
    interface StructuredGridMatrixBuilder {
-      int SetGrid( in StructuredGrid grid ); // was SetStructuredGrid
+      int SetGrid( in StructuredGrid grid );
       int SetStencil( in StructStencil stencil );
       int SetValues( in Box box, in array<int,1> stencil_indices,
                      in array<double,1> values );
-      // ... this is basically how it works now, except that ilower, iupper,
-      // and dim are combined into a Box object.  Probably it would be better
-      // to encode the "values" data structure in a more natural form.
+      // ... this is basically how the HYPRE functions work, except that
+      // ilower, iupper, and dim are combined into a Box object.  Probably
+      // it would be better to encode the "values" data structure in a more
+      // natural form.
       void New( in StructuredGrid grid, in StructStencil stencil,
                       	in int symmetric );
       int Setup( in StructuredGrid grid, in StructStencil stencil,
@@ -143,7 +129,7 @@ package Hypre {
 
    class StructMatrix implements StructuredGridMatrixBuilder, LinearOperator {
       void print();
-      int SetGrid( in StructuredGrid grid ); // was SetStructuredGrid
+      int SetGrid( in StructuredGrid grid );
       int SetStencil( in StructStencil stencil );
       int SetValues( in Box box, in array<int,1> stencil_indices,
                      in array<double,1> values );
@@ -159,7 +145,7 @@ package Hypre {
 
    class StructVector implements StructuredGridVectorBuilder {
       void print();
-      int SetGrid( in StructuredGrid grid ); // was SetStructuredGrid
+      int SetGrid( in StructuredGrid grid );
       int SetValues( in Box box, in array<double,1> values );
       StructVector GetConstructedObject();
       void New( in StructuredGrid grid );
