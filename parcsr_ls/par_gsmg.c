@@ -20,7 +20,7 @@
 #include "headers.h"
 #include "par_amg.h"
 
-#ifdef ESSL
+#ifdef HYPRE_USING_ESSL
 #include <essl.h>
 #else
 #include "fortran.h"
@@ -35,7 +35,7 @@ void hypre_F90_NAME_BLAS(dgels, DGELS)(char *, int *, int *, int *, double *,
 #define MAX(a,b) ((a)>(b)?(a):(b))
 #endif
 
-static double dnrm2(int n, double *x)
+static double mydnrm2(int n, double *x)
 {
     double temp = 0.;
     int i;
@@ -45,7 +45,7 @@ static double dnrm2(int n, double *x)
     return sqrt(temp);
 }
 
-static void dscal(int n, double a, double *x)
+static void mydscal(int n, double a, double *x)
 {
     int i;
 
@@ -134,9 +134,9 @@ hypre_ParCSRMatrixFillSmooth(int nsamples, double *samples,
    /* normalize each sample vector and divide by number of samples */
    for (k=0; k<nsamples; k++)
    {
-       nm = dnrm2(n, samples+k*n);
+       nm = mydnrm2(n, samples+k*n);
        nm = 1./nm/nsamples;
-       dscal(n, nm, samples+k*n);
+       mydscal(n, nm, samples+k*n);
    }
 
    num_cols_offd = hypre_CSRMatrixNumCols(S_offd);
@@ -630,8 +630,8 @@ hypre_BoomerAMGNormalizeVecs(int n, int num, double *V)
 
    for (j=0; j<num; j++)
    {
-       nrm = dnrm2(n, &V[j*n]);
-       dscal(n, 1./nrm, &V[j*n]);
+       nrm = mydnrm2(n, &V[j*n]);
+       mydscal(n, 1./nrm, &V[j*n]);
    }
 
    return 0;
@@ -697,7 +697,7 @@ hypre_BoomerAMGFitVectors(int ip, int n, int num, const double *V,
    for (i=0; i<num; i++)
       b[i] = V[i*n+ip];
 
-#ifdef ESSL
+#ifdef HYPRE_USING_ESSL
    dgells(0, a, num, b, num, val, nc, NULL, 1.e-12, num, nc, 1, 
       &info, work, work_size);
 #else
