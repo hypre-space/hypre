@@ -78,6 +78,8 @@ HYPRE_EXTRA_DIRS =\
 
 all: krylov struct sstruct IJ eigen fei hyprelibs docs
 	@ \
+	HYPRE_INSTALL_DIR=`pwd`/hypre;\
+	export HYPRE_INSTALL_DIR;\
 	echo "Making test drivers ..."; \
 	(cd test; $(MAKE) veryclean; $(MAKE)); \
 	echo ""
@@ -99,6 +101,8 @@ beta: all
 
 krylov: base
 	@ \
+	HYPRE_INSTALL_DIR=`pwd`/hypre;\
+	export HYPRE_INSTALL_DIR;\
 	for i in ${HYPRE_KRYLOV_DIRS}; \
 	do \
 	  if [ -d $$i ]; \
@@ -111,6 +115,8 @@ krylov: base
 
 struct: base
 	@ \
+	HYPRE_INSTALL_DIR=`pwd`/hypre;\
+	export HYPRE_INSTALL_DIR;\
 	for i in ${HYPRE_STRUCT_DIRS}; \
 	do \
 	  if [ -d $$i ]; \
@@ -123,6 +129,8 @@ struct: base
 
 sstruct: struct IJ
 	@ \
+	HYPRE_INSTALL_DIR=`pwd`/hypre;\
+	export HYPRE_INSTALL_DIR;\
 	for i in ${HYPRE_SSTRUCT_DIRS}; \
 	do \
 	  if [ -d $$i ]; \
@@ -135,6 +143,8 @@ sstruct: struct IJ
 
 IJ: base
 	@ \
+	HYPRE_INSTALL_DIR=`pwd`/hypre;\
+	export HYPRE_INSTALL_DIR;\
 	for i in ${HYPRE_IJ_DIRS}; \
 	do \
 	  if [ -d $$i ]; \
@@ -147,6 +157,8 @@ IJ: base
 
 eigen: base
 	@ \
+	HYPRE_INSTALL_DIR=`pwd`/hypre;\
+	export HYPRE_INSTALL_DIR;\
 	for i in ${HYPRE_EIGEN_DIRS}; \
 	do \
 	  if [ -d $$i ]; \
@@ -159,6 +171,8 @@ eigen: base
 
 hyprelibs:
 	@ \
+	HYPRE_INSTALL_DIR=`pwd`/hypre;\
+	export HYPRE_INSTALL_DIR;\
 	for i in ${HYPRE_LIBS_DIRS}; \
 	do \
 	  if [ -d $$i ]; \
@@ -171,6 +185,8 @@ hyprelibs:
 
 docs:
 	@ \
+	HYPRE_INSTALL_DIR=`pwd`/hypre;\
+	export HYPRE_INSTALL_DIR;\
 	for i in ${HYPRE_DOCS_DIRS}; \
 	do \
 	  if [ -d $$i ]; \
@@ -183,6 +199,8 @@ docs:
 
 fei: IJ krylov
 	@ \
+	HYPRE_INSTALL_DIR=`pwd`/hypre;\
+	export HYPRE_INSTALL_DIR;\
 	for i in ${HYPRE_FEI_DIRS}; \
 	do \
 	  if [ -d $$i ]; \
@@ -206,6 +224,8 @@ fei: IJ krylov
 
 base:
 	@ \
+	HYPRE_INSTALL_DIR=`pwd`/hypre;\
+	export HYPRE_INSTALL_DIR;\
 	mkdir -p hypre/include; \
 	mkdir -p hypre/lib; \
 	cp -f HYPRE_config.h $$HYPRE_INSTALL_DIR/include/.; \
@@ -222,6 +242,8 @@ base:
 
 install: all
 	@ \
+	HYPRE_INSTALL_DIR=`pwd`/hypre;\
+	export HYPRE_INSTALL_DIR;\
 	echo "******install-dir: $$HYPRE_INSTALL_DIR"; \
 	if [ ! "$$HYPRE_INSTALL_DIR" ]; \
 	then \
@@ -239,6 +261,8 @@ install: all
 
 clean:
 	@ \
+	HYPRE_INSTALL_DIR=`pwd`/hypre;\
+	export HYPRE_INSTALL_DIR;\
 	for i in ${HYPRE_DIRS} ${HYPRE_EXTRA_DIRS}; \
 	do \
 	  if [ -d $$i ]; \
@@ -252,6 +276,8 @@ clean:
 
 veryclean:
 	@ \
+	HYPRE_INSTALL_DIR=`pwd`/hypre;\
+	export HYPRE_INSTALL_DIR;\
 	rm -Rf hypre; \
 	rm Makefile; \
 	for i in ${HYPRE_DIRS} ${HYPRE_EXTRA_DIRS}; \
