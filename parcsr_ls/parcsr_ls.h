@@ -121,10 +121,6 @@ int gselim P((double *A , double *x , int n ));
 int hypre_ParAMGSetupStats P((void *amg_vdata , hypre_ParCSRMatrix *A ));
 void hypre_WriteParAMGSolverParams P((void *data ));
 
-/* random.c */
-void hypre_SeedRand P((int seed ));
-double hypre_Rand P((void ));
-
 /* transpose.c */
 int hypre_CSRMatrixTranspose P((hypre_CSRMatrix *A , hypre_CSRMatrix **AT ));
 
