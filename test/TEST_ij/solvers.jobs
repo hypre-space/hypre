@@ -32,4 +32,5 @@ mpirun -np 2 ./ij -solver 8 -rhsrand > solvers.out.7
 mpirun -np 2 ./ij -solver 20 -rhsrand > solvers.out.8
 mpirun -np 2 ./ij -solver 20 -cf 0.5 -rhsrand > solvers.out.9
 mpirun -np 2 ./ij -solver 20 -cf 0.5 -rhsrand -solver_type 2 > solvers.out.10
+mpirun -np 2 ./ij -solver 20 -cf 0.5 -rhsrand -solver_type 3 > solvers.out.11
 
