@@ -501,8 +501,11 @@ void RhsRead(double *rhs, Matrix *mat, char *filename)
  * to local indexing.  The number of external indices is returned through
  * "lenp".
  *
- * local_to_global = external indices using base 0
- * global_to_local = indexed by hash table
+ * local_to_global = external indices using base 0 (input buffer filled on out)
+ * global_to_local = indexed by hash table (input buffer filled on output)
+ *
+ * These buffers must be able to hold all the external indices of this 
+ * processor.  Max 30000 hardcoded.
  *--------------------------------------------------------------------------*/
 
 static void GetExternalIndices(Matrix *mat, int *lenp,
@@ -525,9 +528,7 @@ static void GetExternalIndices(Matrix *mat, int *lenp,
                 index = HashInsert(hash, ind[i], &inserted);
 
                 if (inserted)
-		{
                     local_to_global[num_external++] = ind[i];
-		}
 	    }
 	}
     }
@@ -735,6 +736,10 @@ static void MatrixMatvecSetup(Matrix *mat)
     int *outlist, *inlist;
     Hash *hash;
 
+    int row, i, *ind;
+    double *val;
+    int num_external = 0;
+
     mat->matvec_setup = 1;
 
     MPI_Comm_rank(mat->comm, &mype);
@@ -749,13 +754,30 @@ static void MatrixMatvecSetup(Matrix *mat)
     outlist = (int *) calloc(npes, sizeof(int));
     inlist  = (int *) calloc(npes, sizeof(int));
 
-    mat->global_to_local = (int *) malloc(140001 * sizeof(int));
-    mat->local_to_global = (int *) malloc(140001 * sizeof(int));
+    /* determine number of external indices, and use as upper bound to
+       number of unique external indices */
+    for (row=mat->beg_row; row<=mat->end_row; row++)
+    {
+        MatrixGetRow(mat, row, &len, &ind, &val);
+	for (i=0; i<len; i++)
+	{
+	    if (ind[i] < mat->beg_row || ind[i] > mat->end_row)
+	        num_external++;
+	}
+    }
 
-    mat->hash_numbering = HashCreate(140001);
+    mat->global_to_local = (int *) malloc(num_external * sizeof(int));
+    mat->local_to_global = (int *) malloc(num_external * sizeof(int));
+
+    mat->hash_numbering = HashCreate(num_external);
 
     GetExternalIndices(mat, &len, mat->local_to_global, 
         mat->global_to_local, mat->hash_numbering);
+
+/*
+    printf("allocated %d, but needed %d\n", num_external, len);
+    fflush(stdout);
+*/
 
     ConvertToLocalIndices(mat, mat->hash_numbering, mat->global_to_local);
 
