@@ -749,12 +749,9 @@ main( int   argc,
    }
    else /* if ( build_rhs_type == 0 ) */
    {
-      HYPRE_IJVectorCreate(MPI_COMM_WORLD, &ij_b, global_n);
-      HYPRE_IJVectorSetLocalStorageType(ij_b,ij_vector_storage_type );
-      HYPRE_IJVectorSetPartitioning(ij_b, (const int *) part_b);
-      HYPRE_IJVectorInitialize(ij_b);
-      HYPRE_IJVectorZeroLocalComponents(ij_b); 
-      b = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage( ij_b );
+      b = HYPRE_ParVectorCreate(MPI_COMM_WORLD, global_n, part_b);
+      HYPRE_ParVectorInitialize(b);
+      HYPRE_ParVectorSetConstantValues(b, 1.0);
 
       HYPRE_IJVectorCreate(MPI_COMM_WORLD, &ij_x, global_n);
       HYPRE_IJVectorSetLocalStorageType(ij_x,ij_vector_storage_type );
@@ -1094,7 +1091,7 @@ main( int   argc,
     *-----------------------------------------------------------*/
 
    HYPRE_IJMatrixDestroy(ij_matrix);
-   if (build_rhs_type == 0 || build_rhs_type == 1)
+   if (build_rhs_type == 1)
       HYPRE_IJVectorDestroy(ij_b);
    else
       HYPRE_ParVectorDestroy(b);
