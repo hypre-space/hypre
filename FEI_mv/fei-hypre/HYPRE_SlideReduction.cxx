@@ -1369,7 +1369,7 @@ int HYPRE_SlideReduction::buildSubMatrices()
          if (colVal[jcol] != 0.0 && 
              (colIndex <= newEndRow || colIndex > endRow)) newRowSize++;
       }
-      A21MatSize[irow] = newRowSize;
+      A21MatSize[irow-newEndRow-1] = newRowSize;
       maxRowSize = ( newRowSize > maxRowSize ) ? newRowSize : maxRowSize;
       HYPRE_ParCSRMatrixRestoreRow(A_csr,irow,&rowSize,&colInd,&colVal);
    }
