@@ -77,6 +77,7 @@ void    *data;
    int      decr;
 
    double  *vtmp;
+   Vector  *Vtemp;
 
    char     fnam[255];
    int Setup_err_flag;
@@ -183,6 +184,7 @@ void    *data;
    icg   = ctalloc(int, ndimu);
    ifg   = ctalloc(int, ndimu);
    vtmp  = ctalloc(double, num_variables);
+   Vtemp = NewVector(vtmp,num_variables);
    
    /* set fine level point and variable bounds */
    ipmn[0] = 1;
@@ -204,7 +206,8 @@ void    *data;
    AMGDataICG(amg_data)       = icg;
    AMGDataIFG(amg_data)       = ifg;
 
-   AMGDataVecTemp(amg_data)     = vtmp;
+   AMGDataVecTemp(amg_data)   = vtmp;
+   AMGDataVtemp(amg_data)     = Vtemp;
    
    /*----------------------------------------------------------
     * Call the setup phase code
