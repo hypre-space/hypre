@@ -457,7 +457,7 @@ HYPRE_SStructMatrixAssemble( HYPRE_SStructMatrix matrix )
    double                  *values = NULL;
 
    int                      nvars, nentries;
-   int                      part, var, entry, sentry, b, sb, i;
+   int                      part, var, entry, sentry, b, sb;
 
    /*------------------------------------------------------
     * Move off-part couplings (described by neighbor info)
