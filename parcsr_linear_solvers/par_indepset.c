@@ -95,7 +95,8 @@ hypre_ParAMGIndepSet( hypre_ParCSRMatrix *S,
                       double             *measure_array,
                       int                *graph_array,
                       int                 graph_array_size,
-                      int                *IS_marker        )
+                      int                *IS_marker,
+                      int                *IS_marker_offd     )
 {
    int		   *col_map_offd = hypre_ParCSRMatrixColMapOffd(S);
    hypre_CSRMatrix *S_diag      = hypre_ParCSRMatrixDiag(S);
@@ -115,7 +116,7 @@ hypre_ParAMGIndepSet( hypre_ParCSRMatrix *S,
    int		    col_1 = hypre_ParCSRMatrixFirstColDiag(S);
    int		    col_n = col_1 + hypre_CSRMatrixNumCols(S_diag);
    int		    ic, jc;
-   int              i, j, ig, jS;
+   int              i, j, ig, jS, jj, jjc;
                    
    int              ierr = 0;
 
@@ -138,7 +139,14 @@ hypre_ParAMGIndepSet( hypre_ParCSRMatrix *S,
       i = graph_array[ig];
       if (measure_array[i] > 1)
       {
-         IS_marker[i] = 1;
+	 if (i < local_num_vars)
+	 {
+            IS_marker[i] = 1;
+	 }
+	 else
+	 {
+            IS_marker_offd[i-local_num_vars] = 1;
+	 }
       }
    }
 
@@ -173,14 +181,15 @@ hypre_ParAMGIndepSet( hypre_ParCSRMatrix *S,
          }
          for (jS = S_offd_i[i]; jS < S_offd_i[i+1]; jS++)
          {
-            j = local_num_vars+S_offd_j[jS];
+            jj = S_offd_j[jS];
+            j = local_num_vars+jj;
             
             /* only consider valid graph edges */
             if ( (measure_array[j] > 1) && (S_offd_data[jS]) )
             {
                if (measure_array[i] > measure_array[j])
                {
-                  IS_marker[j] = 0;
+                  IS_marker_offd[jj] = 0;
                }
                else if (measure_array[j] > measure_array[i])
                {
@@ -210,7 +219,7 @@ hypre_ParAMGIndepSet( hypre_ParCSRMatrix *S,
                }
                else if (measure_array[jc] > measure_array[i])
                {
-                  IS_marker[i] = 0;
+                  IS_marker_offd[ic] = 0;
                }
             }
 	  }
@@ -220,17 +229,17 @@ hypre_ParAMGIndepSet( hypre_ParCSRMatrix *S,
 	    {
 	      if (j == col_map_offd[jc])
 	      {
-		jc += local_num_vars;
+		jjc = jc+local_num_vars;
             /* only consider valid graph edges */
-                if ((measure_array[jc] > 1) && (S_ext_data[jS]))
+                if ((measure_array[jjc] > 1) && (S_ext_data[jS]))
                 {
-                   if (measure_array[i] > measure_array[jc])
+                   if (measure_array[i] > measure_array[jjc])
                    {
-                      IS_marker[jc] = 0;
+                      IS_marker_offd[jc] = 0;
                    }
-                   else if (measure_array[jc] > measure_array[i])
+                   else if (measure_array[jjc] > measure_array[i])
                    {
-                      IS_marker[i] = 0;
+                      IS_marker_offd[ic] = 0;
                    }
                 }
 		break;
