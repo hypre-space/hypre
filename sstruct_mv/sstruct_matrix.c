@@ -502,13 +502,13 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
    {
       ierr = HYPRE_IJMatrixAddToValues(ijmatrix, ncoeffs, row_coord,
                                        (const int *) col_coords,
-                                       (const double *) values);
+                                       (const double *) coeffs);
    }
    else
    {
       ierr = HYPRE_IJMatrixSetValues(ijmatrix, ncoeffs, row_coord,
                                      (const int *) col_coords,
-                                     (const double *) values);
+                                     (const double *) coeffs);
    }
 
    hypre_TFree(col_coords);
