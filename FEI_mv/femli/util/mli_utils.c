@@ -1986,7 +1986,7 @@ int MLI_Utils_IntMergeSort(int nList, int *listLengs, int **lists,
       }
       else
       {
-         tree[i] = 1 << 31 - 1;
+         tree[i] = (1 << 30) - 1;
          treeInd[i] = -1;
       }
    }
@@ -2013,7 +2013,7 @@ int MLI_Utils_IntMergeSort(int nList, int *listLengs, int **lists,
       }
       else
       {
-         tree[0] = 1 << 31 - 1;
+         tree[0] = (1 << 30) - 1;
          treeInd[0] = - 1;
       }
       MLI_Utils_IntTreeUpdate(nList, tree, treeInd);
