@@ -361,8 +361,8 @@ hypre_InitializeStructMatrixData( hypre_StructMatrix *matrix,
                            data_box, start, stride, datai);
 
 
-#define HYPRE_SMP_PRIVATE loopi,loopj,datai
-#include "hypre_smp_forloop.h"
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,datai
+#include "hypre_box_smp_forloop.h"
        
 	    hypre_BoxLoop1For(loopi, loopj, loopk, datai)
 	      {
@@ -526,8 +526,8 @@ hypre_SetStructMatrixBoxValues( hypre_StructMatrix *matrix,
                              data_box, data_start, data_stride, datai,
                              dval_box, dval_start, dval_stride, dvali);
 
-#define HYPRE_SMP_PRIVATE loopi,loopj,datai,dvali
-#include "hypre_smp_forloop.h"
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,datai,dvali
+#include "hypre_box_smp_forloop.h"
 		     
 	         hypre_BoxLoop2For(loopi, loopj, loopk, datai, dvali)
 	           {

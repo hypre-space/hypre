@@ -65,8 +65,8 @@ hypre_CopyBoxArrayData( hypre_BoxArray *box_array_in,
                      data_box_in, hypre_BoxIMin(box_out), stride, datai_in,
                      data_box_out, hypre_BoxIMin(box_out), stride, datai_out);
 
-#define HYPRE_SMP_PRIVATE loopi,loopj,datai_in,datai_out
-#include "hypre_smp_forloop.h"
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,datai_in,datai_out
+#include "hypre_box_smp_forloop.h"
 		     
    hypre_BoxLoop2For(loopi, loopj, loopk, datai_in, datai_out)
      {

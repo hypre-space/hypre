@@ -138,8 +138,8 @@ hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
                              A_data_box, start, stride, Ai,
                              P_data_box, startc, stridec, Pi);
 	 
-#define HYPRE_SMP_PRIVATE loopi,loopj,Ai,Pi,center,si,Ap,Astenc
-#include "hypre_smp_forloop.h"
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,Pi,center,si,Ap,Astenc
+#include "hypre_box_smp_forloop.h"
    
 	 hypre_BoxLoop2For(loopi, loopj, loopk, Ai, Pi)
 	   {

@@ -360,8 +360,8 @@ hypre_SMG2BuildRAPSym( hypre_StructMatrix *A,
                                 R_data_box,   cstart, stridec, iR,
                                 A_data_box,   fstart, stridef, iA,
                                 RAP_data_box, cstart, stridec, iAc);
-#define HYPRE_SMP_PRIVATE loopi,loopj,iP,iR,iA,iAc,iAm1,iAp1,iP1
-#include "hypre_smp_forloop.h"
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iP,iR,iA,iAc,iAm1,iAp1,iP1
+#include "hypre_box_smp_forloop.h"
             hypre_BoxLoop4For(loopi, loopj, loopk, iP, iR, iA, iAc)
                {
                   iAm1 = iA - yOffsetA;
@@ -411,8 +411,8 @@ hypre_SMG2BuildRAPSym( hypre_StructMatrix *A,
                                 R_data_box,   cstart, stridec, iR,
                                 A_data_box,   fstart, stridef, iA,
                                 RAP_data_box, cstart, stridec, iAc);
-#define HYPRE_SMP_PRIVATE loopi,loopj,iP,iR,iA,iAc,iAm1,iAp1,iP1
-#include "hypre_smp_forloop.h"
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iP,iR,iA,iAc,iAm1,iAp1,iP1
+#include "hypre_box_smp_forloop.h"
             hypre_BoxLoop4For(loopi, loopj, loopk, iP, iR, iA, iAc)
                {
                   iAm1 = iA - yOffsetA;
@@ -668,8 +668,8 @@ hypre_SMG2BuildRAPNoSym( hypre_StructMatrix *A,
                                 R_data_box,   cstart, stridec, iR,
                                 A_data_box,   fstart, stridef, iA,
                                 RAP_data_box, cstart, stridec, iAc);
-#define HYPRE_SMP_PRIVATE loopi,loopj,iP,iR,iA,iAc,iAm1,iAp1,iP1
-#include "hypre_smp_forloop.h"
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iP,iR,iA,iAc,iAm1,iAp1,iP1
+#include "hypre_box_smp_forloop.h"
             hypre_BoxLoop4For(loopi, loopj, loopk, iP, iR, iA, iAc)
                {
                   iAm1 = iA - yOffsetA;
@@ -710,8 +710,8 @@ hypre_SMG2BuildRAPNoSym( hypre_StructMatrix *A,
                                 R_data_box,   cstart, stridec, iR,
                                 A_data_box,   fstart, stridef, iA,
                                 RAP_data_box, cstart, stridec, iAc);
-#define HYPRE_SMP_PRIVATE loopi,loopj,iP,iR,iA,iAc,iAm1,iAp1,iP1
-#include "hypre_smp_forloop.h"
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iP,iR,iA,iAc,iAm1,iAp1,iP1
+#include "hypre_box_smp_forloop.h"
             hypre_BoxLoop4For(loopi, loopj, loopk, iP, iR, iA, iAc)
                {
                   iAm1 = iA - yOffsetA;
@@ -839,8 +839,8 @@ hypre_SMG2RAPPeriodicSym( hypre_StructMatrix *RAP,
          hypre_BoxLoop1Begin(loop_size,
                                 RAP_data_box, cstart, stridec, iAc);
 
-#define HYPRE_SMP_PRIVATE loopi,loopj,iAc,iAcm1
-#include "hypre_smp_forloop.h"
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iAc,iAcm1
+#include "hypre_box_smp_forloop.h"
             hypre_BoxLoop1For(loopi, loopj, loopk, iAc)
                {
                        iAcm1 = iAc - xOffset;
@@ -856,8 +856,8 @@ hypre_SMG2RAPPeriodicSym( hypre_StructMatrix *RAP,
          hypre_BoxLoop1Begin(loop_size,
                                 RAP_data_box, cstart, stridec, iAc);
 
-#define HYPRE_SMP_PRIVATE loopi,loopj,iAc
-#include "hypre_smp_forloop.h"
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iAc
+#include "hypre_box_smp_forloop.h"
             hypre_BoxLoop1For(loopi, loopj, loopk, iAc)
                {
                        rap_csw[iAc] = zero;
@@ -963,8 +963,8 @@ hypre_SMG2RAPPeriodicNoSym( hypre_StructMatrix *RAP,
          hypre_BoxLoop1Begin(loop_size,
                                 RAP_data_box, cstart, stridec, iAc);
 
-#define HYPRE_SMP_PRIVATE loopi,loopj,iAc
-#include "hypre_smp_forloop.h"
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iAc
+#include "hypre_box_smp_forloop.h"
             hypre_BoxLoop1For(loopi, loopj, loopk, iAc)
                {
                        rap_cw[iAc] += (rap_cnw[iAc] + rap_csw[iAc]);

@@ -230,8 +230,8 @@ hypre_PFMGRestrict( void               *restrict_vdata,
                                    r_data_box, start, stride, ri,
                                    rc_data_box, startc, stridec, rci);
 		     
-#define HYPRE_SMP_PRIVATE loopi,loopj,RTi,ri,rci
-#include "hypre_smp_forloop.h"
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,RTi,ri,rci
+#include "hypre_box_smp_forloop.h"
      
 		     hypre_BoxLoop3For(loopi, loopj, loopk, RTi, ri, rci)
 		       {

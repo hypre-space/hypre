@@ -66,8 +66,8 @@ hypre_PrintBoxArrayData( FILE            *file,
 
 
 
-#define HYPRE_SMP_PRIVATE loopi,loopj,datai
-#include "hypre_smp_forloop.h"
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,datai
+#include "hypre_box_smp_forloop.h"
        
 	 hypre_BoxLoop1For(loopi, loopj, loopk, datai)
 	   {
@@ -138,8 +138,8 @@ hypre_ReadBoxArrayData( FILE            *file,
 
 
 
-#define HYPRE_SMP_PRIVATE loopi,loopj,datai
-#include "hypre_smp_forloop.h"
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,datai
+#include "hypre_box_smp_forloop.h"
        
 	 hypre_BoxLoop1For(loopi, loopj, loopk, datai)
 	   {

@@ -591,10 +591,10 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
 	 cy = cxyz[1];
 	 cz = cxyz[2];
 	 
-#define HYPRE_SMP_PRIVATE loopi,loopj,Ai
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai
 #define HYPRE_SMP_REDUCTION_OP +
 #define HYPRE_SMP_REDUCTION_VARS cx,cy,cz
-#include "hypre_smp_forloop.h"
+#include "hypre_box_smp_forloop.h"
        
 	 hypre_BoxLoop1For(loopi, loopj, loopk, Ai)
 	   {

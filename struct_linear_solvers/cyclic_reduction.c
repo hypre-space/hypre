@@ -335,8 +335,8 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
                                 A_data_box, fstart, stridef, iA,
                                 Ac_data_box, cstart, stridec, iAc);
 
-#define HYPRE_SMP_PRIVATE loopi,loopj,iA,iAc,iAm1,iAp1
-#include "hypre_smp_forloop.h"
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iA,iAc,iAm1,iAp1
+#include "hypre_box_smp_forloop.h"
 		     
 	    hypre_BoxLoop2For(loopi, loopj, loopk, iA, iAc)
 	      {
@@ -369,8 +369,8 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
                                 A_data_box, fstart, stridef, iA,
                                 Ac_data_box, cstart, stridec, iAc);
 
-#define HYPRE_SMP_PRIVATE loopi,loopj,iA,iAc,iAm1,iAp1
-#include "hypre_smp_forloop.h"
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iA,iAc,iAm1,iAp1
+#include "hypre_box_smp_forloop.h"
 		     
 	    hypre_BoxLoop2For(loopi, loopj, loopk, iA, iAc)
 	      {
@@ -440,8 +440,8 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
             hypre_BoxLoop1Begin(loop_size,
                                 Ac_data_box, cstart, stridec, iAc);
 
-#define HYPRE_SMP_PRIVATE loopi,loopj,iAc
-#include "hypre_smp_forloop.h"
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iAc
+#include "hypre_box_smp_forloop.h"
 
             hypre_BoxLoop1For(loopi, loopj, loopk, iAc)
               {
@@ -464,8 +464,8 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
             hypre_BoxLoop1Begin(loop_size,
                                 Ac_data_box, cstart, stridec, iAc);
 
-#define HYPRE_SMP_PRIVATE loopi,loopj,iAc
-#include "hypre_smp_forloop.h"
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iAc
+#include "hypre_box_smp_forloop.h"
 
             hypre_BoxLoop1For(loopi, loopj, loopk, iAc)
               {
@@ -950,8 +950,8 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
                                 x_data_box, start, base_stride, xi,
                                 b_data_box, start, base_stride, bi);
 
-#define HYPRE_SMP_PRIVATE loopi,loopj,xi,bi
-#include "hypre_smp_forloop.h"
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,xi,bi
+#include "hypre_box_smp_forloop.h"
 		     
 	 hypre_BoxLoop2For(loopi, loopj, loopk, xi, bi)
 	      {
@@ -1012,8 +1012,8 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
                                 A_data_box, start, stride, Ai,
                                 x_data_box, start, stride, xi);
 
-#define HYPRE_SMP_PRIVATE loopi,loopj,Ai,xi
-#include "hypre_smp_forloop.h"
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,xi
+#include "hypre_box_smp_forloop.h"
 		     
 	    hypre_BoxLoop2For(loopi, loopj, loopk, Ai, xi)
 	      {
@@ -1091,8 +1091,8 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
                                     x_data_box, start, stride, xi,
                                    xc_data_box, startc, stridec, xci);
 
-#define HYPRE_SMP_PRIVATE loopi,loopj,Ai,xi,xci
-#include "hypre_smp_forloop.h"
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,xi,xci
+#include "hypre_box_smp_forloop.h"
 		     
 		     hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, xci)
 		       {
@@ -1148,8 +1148,8 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
                                 x_data_box, start, stride, xi,
                                 xc_data_box, startc, stridec, xci);
 
-#define HYPRE_SMP_PRIVATE loopi,loopj,xi,xci
-#include "hypre_smp_forloop.h"
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,xi,xci
+#include "hypre_box_smp_forloop.h"
 		     
 	    hypre_BoxLoop2For(loopi, loopj, loopk, xi, xci)
 	      {
@@ -1220,8 +1220,8 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
                                 A_data_box, start, stride, Ai,
                                 x_data_box, start, stride, xi);
 
-#define HYPRE_SMP_PRIVATE loopi,loopj,Ai,xi
-#include "hypre_smp_forloop.h"
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,xi
+#include "hypre_box_smp_forloop.h"
 		     
 	             hypre_BoxLoop2For(loopi, loopj, loopk, Ai, xi)
 		       {

@@ -464,8 +464,8 @@ hypre_PointRelax( void               *relax_vdata,
                                     b_data_box, start, stride, bi,
                                     x_data_box, start, stride, xi);
 		     		 
-#define HYPRE_SMP_PRIVATE loopi,loopj,Ai,bi,xi
-#include "hypre_smp_forloop.h"
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,bi,xi
+#include "hypre_box_smp_forloop.h"
 	     
 		     hypre_BoxLoop3For(loopi, loopj, loopk, Ai, bi, xi)
 		       {
@@ -546,8 +546,8 @@ hypre_PointRelax( void               *relax_vdata,
                              b_data_box, start, stride, bi,
                              t_data_box, start, stride, ti);
 	       
-#define HYPRE_SMP_PRIVATE loopi,loopj,bi,ti
-#include "hypre_smp_forloop.h"
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,bi,ti
+#include "hypre_box_smp_forloop.h"
 		     
 	       hypre_BoxLoop2For(loopi, loopj, loopk, bi, ti)
 		 {
@@ -570,8 +570,8 @@ hypre_PointRelax( void               *relax_vdata,
                                     x_data_box, start, stride, xi,
                                     t_data_box, start, stride, ti);
 			   
-#define HYPRE_SMP_PRIVATE loopi,loopj,Ai,xi,ti
-#include "hypre_smp_forloop.h"
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,xi,ti
+#include "hypre_box_smp_forloop.h"
      
 		           hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, ti)
 			     {
@@ -590,8 +590,8 @@ hypre_PointRelax( void               *relax_vdata,
                              A_data_box, start, stride, Ai,
                              t_data_box, start, stride, ti);
 		     
-#define HYPRE_SMP_PRIVATE loopi,loopj,Ai,ti
-#include "hypre_smp_forloop.h"
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,ti
+#include "hypre_box_smp_forloop.h"
 	     
 	             hypre_BoxLoop2For(loopi, loopj, loopk, Ai, ti)
 		       {

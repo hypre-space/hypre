@@ -56,8 +56,8 @@ hypre_StructScale( double              alpha,
 
 
 
-#define HYPRE_SMP_PRIVATE loopi,loopj,yi
-#include "hypre_smp_forloop.h"
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi
+#include "hypre_box_smp_forloop.h"
        
 	 hypre_BoxLoop1For(loopi, loopj, loopk, yi)
 	   {

@@ -360,8 +360,8 @@ hypre_SetStructVectorBoxValues( hypre_StructVector *vector,
                              data_box, data_start, data_stride, datai,
                              dval_box, dval_start, dval_stride, dvali);
 
-#define HYPRE_SMP_PRIVATE loopi,loopj,datai,dvali
-#include "hypre_smp_forloop.h"
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,datai,dvali
+#include "hypre_box_smp_forloop.h"
 		     
 	       hypre_BoxLoop2For(loopi, loopj, loopk, datai, dvali)
 	         {
@@ -460,8 +460,8 @@ hypre_GetStructVectorBoxValues( hypre_StructVector *vector,
                              data_box, data_start, data_stride, datai,
                              dval_box, dval_start, dval_stride, dvali);
 
-#define HYPRE_SMP_PRIVATE loopi,loopj,datai,dvali
-#include "hypre_smp_forloop.h"
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,datai,dvali
+#include "hypre_box_smp_forloop.h"
 		     
 	       hypre_BoxLoop2For(loopi, loopj, loopk, datai, dvali)
 	         {
@@ -554,8 +554,8 @@ hypre_SetStructVectorConstantValues( hypre_StructVector *vector,
          hypre_BoxLoop1Begin(loop_size,
                            v_data_box, start, unit_stride, vi);
 
-#define HYPRE_SMP_PRIVATE  loopi,loopj,vi 
-#include "hypre_smp_forloop.h"
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,vi 
+#include "hypre_box_smp_forloop.h"
        
          hypre_BoxLoop1For(loopi, loopj, loopk, vi)
 	    {
@@ -621,9 +621,9 @@ hypre_ClearStructVectorGhostValues( hypre_StructVector *vector )
                hypre_BoxLoop1Begin(loop_size,
                            v_data_box, start, unit_stride, vi);
 
-#define HYPRE_SMP_PRIVATE  loopi,loopj,vi 
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,vi 
 
-#include "hypre_smp_forloop.h"
+#include "hypre_box_smp_forloop.h"
        
                hypre_BoxLoop1For(loopi, loopj, loopk, vi)
 	         {
@@ -666,9 +666,9 @@ hypre_ClearStructVectorAllValues( hypre_StructVector *vector )
 
    hypre_BoxLoop0Begin(loop_size);
 
-#define HYPRE_SMP_PRIVATE  loopi,loopj
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj
 
-#include "hypre_smp_forloop.h"
+#include "hypre_box_smp_forloop.h"
        
    hypre_BoxLoop0For(loopi, loopj, loopk)
      {

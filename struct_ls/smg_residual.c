@@ -231,8 +231,8 @@ hypre_SMGResidual( void               *residual_vdata,
                   hypre_BoxLoop2Begin(loop_size,
                                       b_data_box, start, base_stride, bi,
                                       r_data_box, start, base_stride, ri);
-#define HYPRE_SMP_PRIVATE loopi,loopj,bi,ri
-#include "hypre_smp_forloop.h"
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,bi,ri
+#include "hypre_box_smp_forloop.h"
                   hypre_BoxLoop2For(loopi, loopj, loopk, bi, ri)
                      {
                         rp[ri] = bp[bi];
@@ -282,8 +282,8 @@ hypre_SMGResidual( void               *residual_vdata,
                                          A_data_box, start, base_stride, Ai,
                                          x_data_box, start, base_stride, xi,
                                          r_data_box, start, base_stride, ri);
-#define HYPRE_SMP_PRIVATE loopi,loopj,Ai,xi,ri
-#include "hypre_smp_forloop.h"
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,xi,ri
+#include "hypre_box_smp_forloop.h"
                      hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, ri)
                         {
                            rp[ri] -= Ap[Ai] * xp[xi];

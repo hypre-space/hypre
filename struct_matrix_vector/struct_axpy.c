@@ -63,8 +63,8 @@ hypre_StructAxpy( double              alpha,
                              x_data_box, start, unit_stride, xi,
                              y_data_box, start, unit_stride, yi);
 
-#define HYPRE_SMP_PRIVATE loopi,loopj,xi,yi
-#include "hypre_smp_forloop.h"
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,xi,yi
+#include "hypre_box_smp_forloop.h"
 		     
 	 hypre_BoxLoop2For(loopi, loopj, loopk, xi, yi)
 	   {

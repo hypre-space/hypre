@@ -394,8 +394,8 @@ hypre_PFMG2BuildRAPSym( hypre_StructMatrix *A,
                                 A_data_box, fstart, stridef, iA,
                                 RAP_data_box, cstart, stridec, iAc);
 	       
-#define HYPRE_SMP_PRIVATE loopi,loopj,iP,iR,iA,iAc,iAm1,iAp1,iP1
-#include "hypre_smp_forloop.h"
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iP,iR,iA,iAc,iAm1,iAp1,iP1
+#include "hypre_box_smp_forloop.h"
 
 	    hypre_BoxLoop4For(loopi, loopj, loopk, iP, iR, iA, iAc)
 	      {
@@ -448,8 +448,8 @@ hypre_PFMG2BuildRAPSym( hypre_StructMatrix *A,
                                 A_data_box, fstart, stridef, iA,
                                 RAP_data_box, cstart, stridec, iAc);
 	        
-#define HYPRE_SMP_PRIVATE loopi,loopj,iP,iR,iA,iAc,iAm1,iAp1,iP1
-#include "hypre_smp_forloop.h"
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iP,iR,iA,iAc,iAm1,iAp1,iP1
+#include "hypre_box_smp_forloop.h"
      
 	    hypre_BoxLoop4For(loopi, loopj, loopk, iP, iR, iA, iAc)
 	      {
@@ -732,8 +732,8 @@ hypre_PFMG2BuildRAPNoSym( hypre_StructMatrix *A,
                                 A_data_box, fstart, stridef, iA,
                                 RAP_data_box, cstart, stridec, iAc);
 	    	   
-#define HYPRE_SMP_PRIVATE loopi,loopj,iP,iR,iA,iAc,iAm1,iAp1,iP1
-#include "hypre_smp_forloop.h"
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iP,iR,iA,iAc,iAm1,iAp1,iP1
+#include "hypre_box_smp_forloop.h"
 		     
 	    hypre_BoxLoop4For(loopi, loopj, loopk, iP, iR, iA, iAc)
 	      {
@@ -777,8 +777,8 @@ hypre_PFMG2BuildRAPNoSym( hypre_StructMatrix *A,
                                 A_data_box, fstart, stridef, iA,
                                 RAP_data_box, cstart, stridec, iAc);
 	     
-#define HYPRE_SMP_PRIVATE loopi,loopj,iP,iR,iA,iAc,iAm1,iAp1,iP1
-#include "hypre_smp_forloop.h"
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iP,iR,iA,iAc,iAm1,iAp1,iP1
+#include "hypre_box_smp_forloop.h"
    
 	    hypre_BoxLoop4For(loopi, loopj, loopk, iP, iR, iA, iAc)
 	      {

@@ -229,8 +229,8 @@ hypre_SMGRestrict( void               *restrict_vdata,
                                       R_data_box,  startc, stridec, Ri,
                                       r_data_box,  start,  stride,  ri,
                                       rc_data_box, startc, stridec, rci);
-#define HYPRE_SMP_PRIVATE loopi,loopj,Ri,ri,rci
-#include "hypre_smp_forloop.h"
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ri,ri,rci
+#include "hypre_box_smp_forloop.h"
                   hypre_BoxLoop3For(loopi, loopj, loopk, Ri, ri, rci)
                      {
                         rcp[rci] = rp[ri] + (Rp0[Ri] * rp0[ri] +
