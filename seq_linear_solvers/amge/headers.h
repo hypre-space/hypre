@@ -21,6 +21,5 @@
 #include "seq_matrix_vector.h"
 
 #include "AMGe_matrix_topology.h"
-#include "general.h" 
 
 #endif
