@@ -130,10 +130,9 @@ int MLI_Solver_SuperLU::setup( MLI_Matrix *Amat )
    csrIA[0] = csrIA[localNRows];
    MPI_Allgatherv(csrIA, localNRows, MPI_INT, gcsrIA, recvCntArray, 
                   dispArray, MPI_INT, mpiComm);
-   nnz = gcsrIA[0];
-   gcsrIA[0] = 0;
-   row_num = recvCntArray[0];
-   for ( i = 1; i < nprocs; i++ )
+   nnz = 0;
+   row_num = 0;
+   for ( i = 0; i < nprocs; i++ )
    {
       if ( recvCntArray[i] > 0 )
       {
