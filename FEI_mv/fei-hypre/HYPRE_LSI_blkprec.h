@@ -36,14 +36,10 @@
 #define HYPRE_INCFLOW_BLU    3
 
 // *************************************************************************
-// local defines 
+// FEI include files 
 // -------------------------------------------------------------------------
 
-#include "fei_defs.h"
-#include "Data.h"
-//#include "basicTypes.h"
-#define  GlobalID int
-#include "Lookup.h"
+#include "HYPRE_FEI_includes.h"
 
 // *************************************************************************
 // C-wrapper for the FEI Lookup class 

@@ -12,16 +12,8 @@
 #include <stdio.h>
 #include <assert.h>
 
-#include "utilities/utilities.h"
-#include "fei_defs.h"
-#include "Data.h"
-//#include "basicTypes.h"
-
-#ifndef NOFEI 
-#include "LinearSystemCore.h"
-#endif
-
 #include "HYPRE.h"
+#include "utilities/utilities.h"
 #include "../../IJ_mv/HYPRE_IJ_mv.h"
 #include "../../parcsr_mv/HYPRE_parcsr_mv.h"
 #include "../../parcsr_ls/HYPRE_parcsr_ls.h"

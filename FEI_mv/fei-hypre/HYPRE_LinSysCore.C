@@ -18,14 +18,6 @@
 #include <math.h>
 
 //***************************************************************************
-// FEI includes
-//---------------------------------------------------------------------------
-
-#include "fei_defs.h"
-#include "Data.h"
-//#include "basicTypes.h"
-
-//***************************************************************************
 // HYPRE includes
 //---------------------------------------------------------------------------
 
@@ -40,14 +32,7 @@
 #include "HYPRE_parcsr_bicgs.h"
 #include "HYPRE_parcsr_symqmr.h"
 #include "HYPRE_parcsr_fgmres.h"
-#include "LinearSystemCore.h"
 #include "HYPRE_LinSysCore.h"
-
-//---------------------------------------------------------------------------
-// parcsr_mv.h is put here instead of in HYPRE_LinSysCore.h 
-// because it gives warning when compiling cfei.cc
-//---------------------------------------------------------------------------
-
 #include "parcsr_mv/parcsr_mv.h"
 #include "HYPRE_LSI_schwarz.h"
 #include "HYPRE_LSI_ddilut.h"

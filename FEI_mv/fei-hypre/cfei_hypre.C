@@ -2,32 +2,13 @@
 #include <iostream.h>
 #include <stdlib.h>
 
-#include "utilities/utilities.h"
-
-#include "fei_defs.h"
-#include "Data.h"
-//#include "basicTypes.h"
-
-//############### 1.5 includes #################
-//#ifndef NOFEI 
-//#include "LinearSystemCore.h"
-//#include "LSC.h"
-//#endif
-//##############################################
-
-//############### 2.0 includes #################
-#ifndef NOFEI 
-#include "LinearSystemCore.h"
-#endif
-//##############################################
-
-//#include "cfei.h"
-#include "cfei_hypre.h"
 #include "HYPRE.h"
+#include "utilities/utilities.h"
 #include "../../IJ_mv/HYPRE_IJ_mv.h"
 #include "../../parcsr_mv/HYPRE_parcsr_mv.h"
 #include "../../parcsr_ls/HYPRE_parcsr_ls.h"
 #include "HYPRE_LinSysCore.h"
+#include "cfei_hypre.h"
 
 /******************************************************************************/
 /* Create function for a HYPRE_LinSysCore object.                             */

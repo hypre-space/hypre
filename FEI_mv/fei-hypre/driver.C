@@ -1,3 +1,18 @@
+/*BHEADER**********************************************************************
+ * (c) 2001   The Regents of the University of California
+ *
+ * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+ * notice, contact person, and disclaimer.
+ *
+ *********************************************************************EHEADER*/
+
+// *************************************************************************
+// test program for HYPRE_LinSysCore
+// *************************************************************************
+
+//***************************************************************************
+// system includes
+//---------------------------------------------------------------------------
 
 #include <stdlib.h>
 #include <string.h>
@@ -5,33 +20,29 @@
 #include <stdio.h>
 #include <assert.h>
 
-#define dabs(x) ((x > 0 ) ? x : -(x))
-
-//---------------------------------------------------------------------------
-// parcsr_mv.h is put here instead of in HYPRE_LinSysCore.h 
-// because it gives warning when compiling cfei.cc
+//**************************************************************************
+// HYPRE includes
 //---------------------------------------------------------------------------
 
-#include "utilities/utilities.h"
-#include "Data.h"
-#include "basicTypes.h"
-#include "Utils.h"
-#include "LinearSystemCore.h"
 #include "HYPRE.h"
+#include "utilities/utilities.h"
 #include "../../IJ_mv/HYPRE_IJ_mv.h"
 #include "../../parcsr_mv/HYPRE_parcsr_mv.h"
 #include "../../parcsr_ls/HYPRE_parcsr_ls.h"
 #include "HYPRE_LinSysCore.h"
+#include "HYPRE_FEI_includes.h"
 
+//**************************************************************************
+// local defines and local and external functions
+//---------------------------------------------------------------------------
+
+#define dabs(x) ((x > 0 ) ? x : -(x))
 void fei_hypre_domaindecomposition(int, char **);
 void fei_hypre_test(int, char **);
 
-
 extern "C" {
-
 int  HYPRE_LSI_DDAMGSolve(HYPRE_ParCSRMatrix A_csr, HYPRE_ParVector x_csr, 
                          HYPRE_ParVector b_csr );
-
 void HYPRE_LSI_Get_IJAMatrixFromFile(double **val, int **ia, 
      int **ja, int *N, double **rhs, char *matfile, char *rhsfile);
 }

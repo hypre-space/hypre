@@ -24,8 +24,12 @@
 #include <string.h>
 #include <assert.h>
 #include <math.h>
-#define  GlobalID int
-#include "Lookup.h"
+
+// *************************************************************************
+// FEI-specific include files
+// -------------------------------------------------------------------------
+
+#include "HYPRE_FEI_includes.h"
 
 // *************************************************************************
 // local enumerations and defines

@@ -29,7 +29,7 @@
 #include "utilities/utilities.h"
 #include "parcsr_ls/HYPRE_parcsr_ls.h"
 #include "parcsr_mv/parcsr_mv.h"
-#include "Lookup.h"
+#include "HYPRE_FEI_includes.h"
 
 /******************************************************************************
  * Functions to access this data structure
