@@ -112,8 +112,10 @@ hypre_InitializeAuxParCSRMatrix( hypre_AuxParCSRMatrix *matrix )
    double **aux_data;
    int i;
 
-   if (local_num_rows <= 0) 
+   if (local_num_rows < 0) 
       return -1;
+   if (local_num_rows == 0) 
+      return 0;
    if (hypre_AuxParCSRMatrixNeedAux(matrix))
    {
       aux_j = hypre_CTAlloc(int *, local_num_rows);
