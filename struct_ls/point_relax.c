@@ -720,6 +720,7 @@ hypre_PointRelax( void               *relax_vdata,
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,xi,ti
 #include "hypre_box_smp_forloop.h"
 #ifdef USE_ONESTRIDE
+#undef hypre_UserOutsideInnerLoop
 #define hypre_UserOutsideInnerLoop\
                                     p_tp = &tp[ti];\
                                     p_xp0 = &xp[xi+xoff0];\
@@ -742,6 +743,7 @@ hypre_PointRelax( void               *relax_vdata,
                                           AAp6 * p_xp6[loopi];
                                  }
                               hypre_BoxLoop2End_OneStride(xi, ti);
+#undef hypre_UserOutsideInnerLoop
 #define hypre_UserOutsideInnerLoop
 #else
 /* normal loop */
@@ -773,6 +775,7 @@ hypre_PointRelax( void               *relax_vdata,
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,xi,ti
 #include "hypre_box_smp_forloop.h"
 #ifdef USE_ONESTRIDE
+#undef hypre_UserOutsideInnerLoop
 #define hypre_UserOutsideInnerLoop\
                                     p_tp = &tp[ti];\
                                     p_xp0 = &xp[xi+xoff0];\
@@ -793,6 +796,7 @@ hypre_PointRelax( void               *relax_vdata,
                                           AAp5 * p_xp5[loopi];
                                  }
                               hypre_BoxLoop2End_OneStride(xi, ti);
+#undef hypre_UserOutsideInnerLoop
 #define hypre_UserOutsideInnerLoop
 #else
 /* normal loop */
@@ -822,6 +826,7 @@ hypre_PointRelax( void               *relax_vdata,
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,xi,ti
 #include "hypre_box_smp_forloop.h"
 #ifdef USE_ONESTRIDE
+#undef hypre_UserOutsideInnerLoop
 #define hypre_UserOutsideInnerLoop\
                                     p_tp = &tp[ti];\
                                     p_xp0 = &xp[xi+xoff0];\
@@ -840,6 +845,7 @@ hypre_PointRelax( void               *relax_vdata,
                                        AAp4 * p_xp4[loopi];
                                  }
                               hypre_BoxLoop2End_OneStride(xi, ti);
+#undef hypre_UserOutsideInnerLoop
 #define hypre_UserOutsideInnerLoop
 #else
 /* normal loop */
@@ -867,6 +873,7 @@ hypre_PointRelax( void               *relax_vdata,
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,xi,ti
 #include "hypre_box_smp_forloop.h"
 #ifdef USE_ONESTRIDE
+#undef hypre_UserOutsideInnerLoop
 #define hypre_UserOutsideInnerLoop\
                                     p_tp = &tp[ti];\
                                     p_xp0 = &xp[xi+xoff0];\
@@ -883,6 +890,7 @@ hypre_PointRelax( void               *relax_vdata,
                                        AAp3 * p_xp3[loopi];
                                  }
                               hypre_BoxLoop2End_OneStride(xi, ti);
+#undef hypre_UserOutsideInnerLoop
 #define hypre_UserOutsideInnerLoop
 #else
 /* normal loop */
@@ -908,6 +916,7 @@ hypre_PointRelax( void               *relax_vdata,
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,xi,ti
 #include "hypre_box_smp_forloop.h"
 #ifdef USE_ONESTRIDE
+#undef hypre_UserOutsideInnerLoop
 #define hypre_UserOutsideInnerLoop\
                                     p_tp = &tp[ti];\
                                     p_xp0 = &xp[xi+xoff0];\
@@ -922,6 +931,7 @@ hypre_PointRelax( void               *relax_vdata,
                                        AAp2 * p_xp2[loopi];
                                  }
                               hypre_BoxLoop2End_OneStride(xi, ti);
+#undef hypre_UserOutsideInnerLoop
 #define hypre_UserOutsideInnerLoop
 #else
 /* normal loop */
@@ -945,6 +955,7 @@ hypre_PointRelax( void               *relax_vdata,
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,xi,ti
 #include "hypre_box_smp_forloop.h"
 #ifdef USE_ONESTRIDE
+#undef hypre_UserOutsideInnerLoop
 #define hypre_UserOutsideInnerLoop\
                                     p_tp = &tp[ti];\
                                     p_xp0 = &xp[xi+xoff0];\
@@ -957,6 +968,7 @@ hypre_PointRelax( void               *relax_vdata,
                                        AAp1 * p_xp1[loopi];
                                  }
                               hypre_BoxLoop2End_OneStride(xi, ti);
+#undef hypre_UserOutsideInnerLoop
 #define hypre_UserOutsideInnerLoop
 #else
 /* normal loop */
@@ -978,6 +990,7 @@ hypre_PointRelax( void               *relax_vdata,
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,xi,ti
 #include "hypre_box_smp_forloop.h"
 #ifdef USE_ONESTRIDE
+#undef hypre_UserOutsideInnerLoop
 #define hypre_UserOutsideInnerLoop\
                                     p_tp = &tp[ti];\
                                     p_xp0 = &xp[xi+xoff0];
@@ -988,6 +1001,7 @@ hypre_PointRelax( void               *relax_vdata,
                                        AAp0 * p_xp0[loopi];
                                  }
                               hypre_BoxLoop2End_OneStride(xi, ti);
+#undef hypre_UserOutsideInnerLoop
 #define hypre_UserOutsideInnerLoop
 #else
 /* normal loop */
