@@ -563,7 +563,7 @@ hypre_ExtractBExt( hypre_ParCSRMatrix *B, hypre_ParCSRMatrix *A, int data)
    int *B_int_j;
    double *B_int_data;
 
-   int num_cols_B_int, num_nonzeros;
+   int num_cols_B, num_nonzeros;
    int num_rows_B_ext;
    int num_procs, my_id;
 
@@ -580,7 +580,7 @@ hypre_ExtractBExt( hypre_ParCSRMatrix *B, hypre_ParCSRMatrix *A, int data)
    MPI_Comm_size(comm,&num_procs);
    MPI_Comm_rank(comm,&my_id);
 
-   num_cols_B_int = num_cols_diag + num_cols_offd;
+   num_cols_B = hypre_ParCSRMatrixGlobalNumCols(B);
    num_rows_B_ext = recv_vec_starts[num_recvs];
    B_int_i = hypre_CTAlloc(int, send_map_starts[num_sends]+1);
    send_matrix_types = hypre_CTAlloc(MPI_Datatype, num_sends);
@@ -680,7 +680,7 @@ hypre_ExtractBExt( hypre_ParCSRMatrix *B, hypre_ParCSRMatrix *A, int data)
 
    num_nonzeros = B_ext_i[num_rows_B_ext];
 
-   B_ext = hypre_CreateCSRMatrix(num_rows_B_ext,num_cols_B_int,num_nonzeros);
+   B_ext = hypre_CreateCSRMatrix(num_rows_B_ext,num_cols_B,num_nonzeros);
    B_ext_j = hypre_CTAlloc(int, num_nonzeros);
    if (data) B_ext_data = hypre_CTAlloc(double, num_nonzeros);
 
