@@ -95,6 +95,8 @@ int MLI_Mapper::getMap(int nItems, int *itemList, int *mapList)
          exit(1);
       } 
    }
+   delete [] itemTemp;
+   delete [] itemAux;
    return 0;
 }
 
