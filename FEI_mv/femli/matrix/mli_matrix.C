@@ -134,7 +134,7 @@ int MLI_Matrix::apply(double alpha, MLI_Vector *vec1, double beta,
 
 MLI_Vector *MLI_Matrix::createVector()
 {
-   int                i, mypid, nprocs, start_row, end_row, global_nrows;
+   int                mypid, nprocs, start_row, end_row, global_nrows;
    int                ierr, *partitioning;
    char               param_string[100];
    MPI_Comm           comm;
@@ -158,13 +158,14 @@ MLI_Vector *MLI_Matrix::createVector()
    start_row    = partitioning[mypid];
    end_row      = partitioning[mypid+1];
    free( partitioning );
-   ierr = HYPRE_IJVectorCreate(comm, start_row, end_row-1, &IJvec);
-   ierr = HYPRE_IJVectorSetObjectType(IJvec, HYPRE_PARCSR);
-   ierr = HYPRE_IJVectorInitialize(IJvec);
-   ierr = HYPRE_IJVectorAssemble(IJvec);
-   ierr = HYPRE_IJVectorGetObject(IJvec, (void **) &new_vec);
-   ierr = HYPRE_IJVectorSetObjectType(IJvec, -1);
-   ierr = HYPRE_IJVectorDestroy(IJvec);
+   ierr  = HYPRE_IJVectorCreate(comm, start_row, end_row-1, &IJvec);
+   ierr += HYPRE_IJVectorSetObjectType(IJvec, HYPRE_PARCSR);
+   ierr += HYPRE_IJVectorInitialize(IJvec);
+   ierr += HYPRE_IJVectorAssemble(IJvec);
+   ierr += HYPRE_IJVectorGetObject(IJvec, (void **) &new_vec);
+   ierr += HYPRE_IJVectorSetObjectType(IJvec, -1);
+   ierr += HYPRE_IJVectorDestroy(IJvec);
+   assert( !ierr );
    HYPRE_ParVectorSetConstantValues( new_vec, 0.0 );
    sprintf( param_string, "HYPRE_ParVector" );
    func_ptr = new MLI_Function();
@@ -218,10 +219,6 @@ int MLI_Matrix::getMatrixInfo(char *param_string, int &int_param,
 
 int MLI_Matrix::print(char *filename)
 {
-   int      mypid, nprocs, icol, isum[4], ibuf[4], *partition, this_nnz;
-   int      local_nrows, irow, rownum, rowsize, *colind, startrow;
-   double   *colval, dsum[2], dbuf[2];
-
    if ( !strcmp(name, "HYPRE_ParCSR") && !strcmp(name, "HYPRE_ParCSRT") )
    {
       cout << "MLI_Matrix::print ERROR : matrix not HYPRE_ParCSR." << endl;

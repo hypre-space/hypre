@@ -59,7 +59,7 @@ extern "C"
 
 int MLI_Method_AMGSA::setupSubdomainNullSpaceUsingFEData( MLI *mli ) 
 {
-   int          i, j, k, j1, k1, ierr, level, mypid, nElems, nodeNumFields;
+   int          i, j, k, j1, k1, level, mypid, nElems, nodeNumFields;
    int          nodeFieldID, elemNNodes, **elemNodeLists, *elemNodeList1D;
    int          blockSize, *nodeEqnList, eMatDim, *partition, localStartRow;
    int          localNRows, rowInd1, rowInd2, colInd1, colInd2;
@@ -73,7 +73,6 @@ int MLI_Method_AMGSA::setupSubdomainNullSpaceUsingFEData( MLI *mli )
    MPI_Comm     comm;
    MLI_FEData   *fedata;
    MLI_Mapper   *nodeEqnMap;
-   MLI_Function *funcPtr;
    MLI_Matrix   *mliAmat;
    hypre_ParCSRMatrix *hypreA;
 
@@ -463,7 +462,7 @@ int MLI_Method_AMGSA::setupDDFormSubdomainAggregate( MLI *mli )
 
 int MLI_Method_AMGSA::setupDDSuperLUSmoother( MLI *mli, int level ) 
 {
-   int         mypid, nprocs, localStartRow, localNRows, localEndRow;
+   int         mypid, nprocs, localStartRow, localEndRow;
    int         *partition, nodeNumFields, nElems, *elemIDs, elemNNodes;
    int         totalNNodes, **elemNodeLists, *elemNodeList1D;
    int         nodeFieldID, blockSize, *newNodeEqnList, *newElemNodeList;
@@ -508,7 +507,6 @@ int MLI_Method_AMGSA::setupDDSuperLUSmoother( MLI *mli, int level )
    HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) hypreA, 
                                         &partition);
    localStartRow = partition[mypid];
-   localNRows    = partition[mypid+1] - localStartRow;
    localEndRow   = partition[mypid+1] - 1;
    free( partition );
 
