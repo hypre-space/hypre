@@ -8,16 +8,16 @@
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
- * Header info for the SMG3 solver
+ * Header info for the SMG solver
  *
  *****************************************************************************/
 
-#ifndef zzz_SMG3_HEADER
-#define zzz_SMG3_HEADER
+#ifndef zzz_SMG_HEADER
+#define zzz_SMG_HEADER
 
 
 /*--------------------------------------------------------------------------
- * zzz_SMG3Data:
+ * zzz_SMGData:
  *--------------------------------------------------------------------------*/
 
 typedef struct
@@ -28,7 +28,12 @@ typedef struct
    int                 max_levels;  /* max_level <= 0 means no limit */
                     
    int                 num_levels;
-                    
+
+   zzz_Index          *cindex;
+   zzz_Index          *cstride;
+   zzz_Index          *findex;
+   zzz_Index          *fstride;
+
    zzz_StructGrid    **grid_l;
                     
    zzz_StructMatrix  **A_l;
@@ -50,15 +55,15 @@ typedef struct
    void              **restrict_data_l;
    void              **intadd_data_l;
 
-} zzz_SMG3Data;
+   /* log info (always logged) */
+   int                 num_iterations;
 
-/*--------------------------------------------------------------------------
- * Accessor macros:
- *--------------------------------------------------------------------------*/
+   /* additional log info (logged when `logging' > 0) */
+   int                 logging;
+   int                *norms;
+   int                *rel_norms;
 
-#define zzz_SMG3DataComm(smg3_data)         ((smg3_data) -> comm)
-#define zzz_SMG3DataMaxIter(smg3_data)      ((smg3_data) -> max_iter)
-#define zzz_SMG3DataMaxLevels(smg3_data)    ((smg3_data) -> max_levels)
+} zzz_SMGData;
 
 /*--------------------------------------------------------------------------
  * Utility routines:

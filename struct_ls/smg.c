@@ -12,38 +12,47 @@
  *****************************************************************************/
 
 #include "headers.h"
-#include "smg3.h"
+#include "smg.h"
 
 /*--------------------------------------------------------------------------
- * zzz_SMG3Initialize
+ * zzz_SMGInitialize
  *--------------------------------------------------------------------------*/
 
-zzz_SMG3Data *
-zzz_SMG3Initialize( MPI_Comm *comm )
+zzz_SMGData *
+zzz_SMGInitialize( MPI_Comm *comm )
 {
-   zzz_SMG3Data *smg3_data;
+   zzz_SMGData *smg_data;
 
-   smg3_data = zzz_CTAlloc(zzz_SMG3Data, 1);
+   smg_data = zzz_CTAlloc(zzz_SMGData, 1);
+
+   (smg_data -> cindex)  = zzz_NewIndex();
+   (smg_data -> cstride) = zzz_NewIndex();
+   (smg_data -> findex)  = zzz_NewIndex();
+   (smg_data -> fstride) = zzz_NewIndex();
 
    /* set default parameters ... */
+   zzz_SetIndex((smg_data -> cindex), 0, 0, 0);
+   zzz_SetIndex((smg_data -> cstride), 1, 1, 2);
+   zzz_SetIndex((smg_data -> findex), 0, 0, 1);
+   zzz_SetIndex((smg_data -> fstride), 1, 1, 2);
 
-   return smg3_data;
+   return smg_data;
 }
 
 /*--------------------------------------------------------------------------
- * zzz_SMG3Set ...
+ * zzz_SMGSet ...
  *--------------------------------------------------------------------------*/
 
 /*--------------------------------------------------------------------------
- * zzz_SMG3Get ...
+ * zzz_SMGGet ...
  *--------------------------------------------------------------------------*/
 
 /*--------------------------------------------------------------------------
- * zzz_SMG3Finalize
+ * zzz_SMGFinalize
  *--------------------------------------------------------------------------*/
 
 int
-zzz_SMG3Finalize( zzz_SMG3Data *smg3_data )
+zzz_SMGFinalize( zzz_SMGData *smg_data )
 {
    int  ierr;
 
