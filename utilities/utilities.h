@@ -324,6 +324,18 @@ double *hypre_IncrementSharedDataPtr P((double *ptr , int size ));
 #endif
 
 #endif
+#ifdef __STDC__
+# define	P(s) s
+#else
+# define P(s) ()
+#endif
+
+
+/* random.c */
+void hypre_SeedRand P((int seed ));
+double hypre_Rand P((void ));
+
+#undef P
 /*BHEADER**********************************************************************
  * (c) 1998   The Regents of the University of California
  *
@@ -446,7 +458,7 @@ int hypre_thread_MPI_Type_commit P((MPI_Datatype *datatype ));
 #endif
 
 #include<pthread.h>
-#include "mpi.h"
+#include "utilities.h"
 
 /* hypre_work_proc_t typedef'd to be a pointer to a function with a void*
    argument and a void return type */
