@@ -45,8 +45,10 @@ public :
 
    virtual int setup(MLI_Matrix *)=0;
    virtual int solve(MLI_Vector *, MLI_Vector *)=0;
-   virtual int setParams(char *param_string,int argc,char **argv)  {return -1;}
-   virtual int getParams(char *param_string,int *argc,char **argv) {return -1;}
+   virtual int setParams(char *param_string,int argc,char **argv)  
+               {(void) param_string; (void) argc; (void) argv; return -1;}
+   virtual int getParams(char *param_string,int *argc,char **argv)
+               {(void) param_string; (void) argc; (void) argv; return -1;}
 };
 
 /*--------------------------------------------------------------------------

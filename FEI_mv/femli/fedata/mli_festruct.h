@@ -42,7 +42,7 @@ public :
    /** set order of PDE 
        @param pdeOrder - order of PDE (e.g. 2 for second order)
    */
-   virtual int setOrderOfPDE(int pdeOrder) {return -1;}
+   virtual int setOrderOfPDE(int pdeOrder) {(void) pdeOrder; return -1;}
 
    /** set order of finite element discretization 
        @param feOrder - order of FE discretization e.g. 2 for second order)
@@ -258,7 +258,9 @@ public :
                            int elemDOF, 
                            const char *const *BCFlags, 
                            const double *const *bcVals) 
-                           {return -1;}
+                           {(void) nElems; (void) eGlobalIDs;
+                            (void) elemDOF; (void) BCFlags;
+                            (void) bcVals; return -1;}
 
    // -------------------------------------------------------------------------
    // These functions allows elements to be loaded individually.
