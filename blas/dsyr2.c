@@ -19,9 +19,9 @@
     static integer info;
     static doublereal temp1, temp2;
     static integer i, j;
-    extern logical lsame_(char *, char *);
+    extern logical hypre_lsame_(char *, char *);
     static integer ix, iy, jx, jy, kx, ky;
-    extern /* Subroutine */ int xerbla_(char *, integer *);
+    extern /* Subroutine */ int hypre_xerbla_(char *, integer *);
 
 
 /*  Purpose   
@@ -127,7 +127,7 @@
 #define A(I,J) a[(I)-1 + ((J)-1)* ( *lda)]
 
     info = 0;
-    if (! lsame_(uplo, "U") && ! lsame_(uplo, "L")) {
+    if (! hypre_lsame_(uplo, "U") && ! hypre_lsame_(uplo, "L")) {
 	info = 1;
     } else if (*n < 0) {
 	info = 2;
@@ -139,7 +139,7 @@
 	info = 9;
     }
     if (info != 0) {
-	xerbla_("DSYR2 ", &info);
+	hypre_xerbla_("DSYR2 ", &info);
 	return 0;
     }
 
@@ -172,7 +172,7 @@
        accessed sequentially with one pass through the triangular part   
        of A. */
 
-    if (lsame_(uplo, "U")) {
+    if (hypre_lsame_(uplo, "U")) {
 
 /*        Form  A  when A is stored in the upper triangle. */
 

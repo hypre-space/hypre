@@ -19,10 +19,10 @@
     static integer info;
     static doublereal temp;
     static integer i, j, l;
-    extern logical lsame_(char *, char *);
+    extern logical hypre_lsame_(char *, char *);
     static integer nrowa;
     static logical upper;
-    extern /* Subroutine */ int xerbla_(char *, integer *);
+    extern /* Subroutine */ int hypre_xerbla_(char *, integer *);
 
 
 /*  Purpose   
@@ -173,18 +173,18 @@
 #define A(I,J) a[(I)-1 + ((J)-1)* ( *lda)]
 #define C(I,J) c[(I)-1 + ((J)-1)* ( *ldc)]
 
-    if (lsame_(trans, "N")) {
+    if (hypre_lsame_(trans, "N")) {
 	nrowa = *n;
     } else {
 	nrowa = *k;
     }
-    upper = lsame_(uplo, "U");
+    upper = hypre_lsame_(uplo, "U");
 
     info = 0;
-    if (! upper && ! lsame_(uplo, "L")) {
+    if (! upper && ! hypre_lsame_(uplo, "L")) {
 	info = 1;
-    } else if (! lsame_(trans, "N") && ! lsame_(trans, "T") &&
-	     ! lsame_(trans, "C")) {
+    } else if (! hypre_lsame_(trans, "N") && ! hypre_lsame_(trans, "T") &&
+	     ! hypre_lsame_(trans, "C")) {
 	info = 2;
     } else if (*n < 0) {
 	info = 3;
@@ -196,7 +196,7 @@
 	info = 10;
     }
     if (info != 0) {
-	xerbla_("DSYRK ", &info);
+	hypre_xerbla_("DSYRK ", &info);
 	return 0;
     }
 
@@ -251,7 +251,7 @@
 
 /*     Start the operations. */
 
-    if (lsame_(trans, "N")) {
+    if (hypre_lsame_(trans, "N")) {
 
 /*        Form  C := alpha*A*A' + beta*C. */
 

@@ -20,10 +20,10 @@
     static doublereal temp;
     static integer i, j, k;
     static logical lside;
-    extern logical lsame_(char *, char *);
+    extern logical hypre_lsame_(char *, char *);
     static integer nrowa;
     static logical upper;
-    extern /* Subroutine */ int xerbla_(char *, integer *);
+    extern /* Subroutine */ int hypre_xerbla_(char *, integer *);
     static logical nounit;
 
 
@@ -183,24 +183,24 @@
 #define A(I,J) a[(I)-1 + ((J)-1)* ( *lda)]
 #define B(I,J) b[(I)-1 + ((J)-1)* ( *ldb)]
 
-    lside = lsame_(side, "L");
+    lside = hypre_lsame_(side, "L");
     if (lside) {
 	nrowa = *m;
     } else {
 	nrowa = *n;
     }
-    nounit = lsame_(diag, "N");
-    upper = lsame_(uplo, "U");
+    nounit = hypre_lsame_(diag, "N");
+    upper = hypre_lsame_(uplo, "U");
 
     info = 0;
-    if (! lside && ! lsame_(side, "R")) {
+    if (! lside && ! hypre_lsame_(side, "R")) {
 	info = 1;
-    } else if (! upper && ! lsame_(uplo, "L")) {
+    } else if (! upper && ! hypre_lsame_(uplo, "L")) {
 	info = 2;
-    } else if (! lsame_(transa, "N") && ! lsame_(transa, "T") 
-	    && ! lsame_(transa, "C")) {
+    } else if (! hypre_lsame_(transa, "N") && ! hypre_lsame_(transa, "T") 
+	    && ! hypre_lsame_(transa, "C")) {
 	info = 3;
-    } else if (! lsame_(diag, "U") && ! lsame_(diag, "N")) {
+    } else if (! hypre_lsame_(diag, "U") && ! hypre_lsame_(diag, "N")) {
 	info = 4;
     } else if (*m < 0) {
 	info = 5;
@@ -212,7 +212,7 @@
 	info = 11;
     }
     if (info != 0) {
-	xerbla_("DTRSM ", &info);
+	hypre_xerbla_("DTRSM ", &info);
 	return 0;
     }
 
@@ -238,7 +238,7 @@
 /*     Start the operations. */
 
     if (lside) {
-	if (lsame_(transa, "N")) {
+	if (hypre_lsame_(transa, "N")) {
 
 /*           Form  B := alpha*inv( A )*B. */
 
@@ -326,7 +326,7 @@
 	    }
 	}
     } else {
-	if (lsame_(transa, "N")) {
+	if (hypre_lsame_(transa, "N")) {
 
 /*           Form  B := alpha*B*inv( A ). */
 

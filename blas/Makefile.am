@@ -6,27 +6,28 @@ libHYPRE_blas_la_LDFLAGS = -avoid-version
 
 #
 FILES = \
- dasum.c \
- daxpy.c \
- dcopy.c \
- ddot.c \
- dgels_all.c \
- dgemm.c \
- dgemv.c \
- dnrm2.c \
- dpotrf.c \
- dpotrs.c \
- drot.c \
- dscal.c \
- dsygv.c \
- dsymv.c \
- dsyr2.c \
- dsyrk.c \
- dtrsm.c \
- dtrsv.c \
- idamax.c \
- s_cmp.c \
- s_copy.c \
- hypre_blas.h \
- f2c.h
-
+ dasum.c\
+ daxpy.c\
+ dcopy.c\
+ ddot.c\
+ dgemm.c\
+ dgemv.c\
+ dger.c\
+ dnrm2.c\
+ drot.c\
+ dscal.c\
+ dswap.c\
+ dsymm.c\
+ dsymv.c\
+ dsyr2.c\
+ dsyr2k.c\
+ dsyrk.c\
+ dtrmm.c\
+ dtrmv.c\
+ dtrsm.c\
+ dtrsv.c\
+ idamax.c\
+ blas_utils.c\
+ xerbla.c\
+ f2c.h\
+ hypre_blas.h

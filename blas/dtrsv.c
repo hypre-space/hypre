@@ -18,9 +18,9 @@
     static integer info;
     static doublereal temp;
     static integer i, j;
-    extern logical lsame_(char *, char *);
+    extern logical hypre_lsame_(char *, char *);
     static integer ix, jx, kx;
-    extern /* Subroutine */ int xerbla_(char *, integer *);
+    extern /* Subroutine */ int hypre_xerbla_(char *, integer *);
     static logical nounit;
 
 
@@ -136,12 +136,12 @@
 #define A(I,J) a[(I)-1 + ((J)-1)* ( *lda)]
 
     info = 0;
-    if (! lsame_(uplo, "U") && ! lsame_(uplo, "L")) {
+    if (! hypre_lsame_(uplo, "U") && ! hypre_lsame_(uplo, "L")) {
 	info = 1;
-    } else if (! lsame_(trans, "N") && ! lsame_(trans, "T") &&
-	     ! lsame_(trans, "C")) {
+    } else if (! hypre_lsame_(trans, "N") && ! hypre_lsame_(trans, "T") &&
+	     ! hypre_lsame_(trans, "C")) {
 	info = 2;
-    } else if (! lsame_(diag, "U") && ! lsame_(diag, "N")) {
+    } else if (! hypre_lsame_(diag, "U") && ! hypre_lsame_(diag, "N")) {
 	info = 3;
     } else if (*n < 0) {
 	info = 4;
@@ -151,7 +151,7 @@
 	info = 8;
     }
     if (info != 0) {
-	xerbla_("DTRSV ", &info);
+	hypre_xerbla_("DTRSV ", &info);
 	return 0;
     }
 
@@ -161,7 +161,7 @@
 	return 0;
     }
 
-    nounit = lsame_(diag, "N");
+    nounit = hypre_lsame_(diag, "N");
 
 /*     Set up the start point in X if the increment is not unity. This   
        will be  ( N - 1 )*INCX  too small for descending loops. */
@@ -175,11 +175,11 @@
 /*     Start the operations. In this version the elements of A are   
        accessed sequentially with one pass through A. */
 
-    if (lsame_(trans, "N")) {
+    if (hypre_lsame_(trans, "N")) {
 
 /*        Form  x := inv( A )*x. */
 
-	if (lsame_(uplo, "U")) {
+	if (hypre_lsame_(uplo, "U")) {
 	    if (*incx == 1) {
 		for (j = *n; j >= 1; --j) {
 		    if (X(j) != 0.) {
@@ -252,7 +252,7 @@
 
 /*        Form  x := inv( A' )*x. */
 
-	if (lsame_(uplo, "U")) {
+	if (hypre_lsame_(uplo, "U")) {
 	    if (*incx == 1) {
 		for (j = 1; j <= *n; ++j) {
 		    temp = X(j);
