@@ -228,6 +228,31 @@ HYPRE_EuclidSetup( HYPRE_Solver solver,
   START_FUNC_DH
   Euclid_dh eu = (Euclid_dh)solver;
 
+
+#if 0
+
+for testing!
+  {
+  int ierr;
+  int m,n,rs,re,cs,ce;
+
+   HYPRE_DistributedMatrix mat;
+   ierr = HYPRE_ConvertParCSRMatrixToDistributedMatrix( A, &mat );
+   if (ierr) exit(-1);
+
+    ierr = HYPRE_DistributedMatrixGetDims(mat, &m, &n);
+    ierr = HYPRE_DistributedMatrixGetLocalRange(mat, &rs, &re,
+                                       &cs, &ce);
+
+    printf("\n### [%i] m= %i, n= %i, rs= %i, re= %i, cs= %i, ce= %i\n",
+                                            myid_dh, m, n, rs, re, cs, ce);
+
+   ierr = HYPRE_DistributedMatrixDestroy(mat);
+
+   if (ierr) exit(-1);
+  }
+#endif
+
   Euclid_dhInputHypreMat(eu, A); HYPRE_EUCLID_ERRCHKA;
   Euclid_dhSetup(eu); HYPRE_EUCLID_ERRCHKA;
 
@@ -292,56 +317,3 @@ HYPRE_EuclidSetParamsFromFile(HYPRE_Solver solver,
   END_FUNC_VAL(0)
 }
 
-/*--------------------------------------------------------------------------
- * HYPRE_EuclidPrintParams - prints summary of current settings and
- * other info.  Call this after HYPRE_EuclidSetup() completes
- * (you can call it before, but info won't be accurate).
- *--------------------------------------------------------------------------*/
-
-#undef __FUNC__
-#define __FUNC__ "HYPRE_EuclidPrintParams"
-int
-HYPRE_EuclidPrintParams(HYPRE_Solver solver)
-{
-  START_FUNC_DH
-  Euclid_dh eu = (Euclid_dh)solver;
-  Euclid_dhPrintHypreReport(eu, stdout); HYPRE_EUCLID_ERRCHKA;
-  END_FUNC_VAL(0)
-}
-
-
-#if 0
-
-/*--------------------------------------------------------------------------
- * HYPRE_EuclidReadRho
- *--------------------------------------------------------------------------*/
-
-#undef __FUNC__
-#define __FUNC__ "HYPRE_EuclidReadRho"
-int
-HYPRE_EuclidReadRho(HYPRE_Solver solver, double *rho)
-{
-  START_FUNC_DH
-  Euclid_dh eu = (Euclid_dh)solver;
-  *rho = eu->rho_final;
-  END_FUNC_VAL(0)
-}
-
-
-/*--------------------------------------------------------------------------
- * HYPRE_EuclidSetLogging 
- *--------------------------------------------------------------------------*/
-
-#undef __FUNC__
-#define __FUNC__ "HYPRE_EuclidSetLogging"
-int
-HYPRE_EuclidSetLogging(HYPRE_Solver solver, 
-                             int logging)
-{
-  START_FUNC_DH
-  Euclid_dh eu = (Euclid_dh)solver;
-  eu->logging = logging;
-  END_FUNC_VAL(0)
-}
-
-#endif
