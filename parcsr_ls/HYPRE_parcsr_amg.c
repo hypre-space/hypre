@@ -466,10 +466,10 @@ HYPRE_BoomerAMGGetNumIterations( HYPRE_Solver  solver,
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_BoomerAMGGetResidual( HYPRE_Solver solver, HYPRE_ParVector residual )
+HYPRE_BoomerAMGGetResidual( HYPRE_Solver solver, HYPRE_ParVector * residual )
 {
    return hypre_BoomerAMGGetResidual( (void *) solver,
-                                      (hypre_ParVector *) residual );
+                                      (hypre_ParVector **) residual );
 }
                             
 

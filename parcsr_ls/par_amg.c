@@ -746,11 +746,11 @@ hypre_BoomerAMGGetNumIterations( void     *data,
 }
 
 int
-hypre_BoomerAMGGetResidual( void * data, hypre_ParVector * resid )
+hypre_BoomerAMGGetResidual( void * data, hypre_ParVector ** resid )
 {
    int ierr = 0;
    hypre_ParAMGData  *amg_data = data;
-   resid = hypre_ParAMGDataResidual( amg_data );
+   *resid = hypre_ParAMGDataResidual( amg_data );
    return ierr;
 }
                             
