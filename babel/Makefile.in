@@ -265,8 +265,8 @@ install-am: all-am
 install: install-recursive
 uninstall-am:
 uninstall: uninstall-recursive
-all-am: Makefile 
-all-redirect: all-local all-recursive
+all-am: Makefile all-local
+all-redirect: all-recursive
 install-strip:
 	$(MAKE) $(AM_MAKEFLAGS) AM_INSTALL_PROGRAM_FLAGS=-s install
 installdirs: installdirs-recursive
