@@ -8,7 +8,58 @@
 #EHEADER***********************************************************************
 
 .SUFFIXES:
-.SUFFIXES: .C .c .f .o
+.SUFFIXES: .cxx .c .f .o
+
+srcdir = @srcdir@
+VPATH = @srcdir@
+
+CC = @CC@
+CXX = @CXX@
+F77 = @F77@
+
+C_COMPILE_FLAGS=@CFLAGS@
+CXX_COMPILE_FLAGS=@CXXFLAGS@
+F77_COMPILE_FLAGS=@F77FLAGS@
+CINCLUDES=@INCLUDES@ @MPIINCLUDE@
+CXXINCLUDES=@INCLUDES@ @MPIINCLUDE@
+F77INCLUDES=@INCLUDES@ @MPIINCLUDE@
+CDEFS =
+CXXDEFS =
+F77DEFS =
+
+CFLAGS =\
+ ${C_COMPILE_FLAGS}\
+ -I../../..\
+ -I$(srcdir)\
+ -I$(srcdir)/..\
+ -I$(srcdir)/../..\
+ -I$(srcdir)/../../..\
+ -I$(srcdir)/../../../utilities\
+ -I$(srcdir)/../../../parcsr_mv\
+ -I$(srcdir)/../../../seq_mv\
+ -I$(srcdir)/../../../IJ_mv\
+ ${CINCLUDES}\
+ ${CDEFS}
+ 
+CXXFLAGS =\
+ ${CXX_COMPILE_FLAGS}\
+ -I../../..\
+ -I$(srcdir)\
+ -I$(srcdir)\
+ -I$(srcdir)/..\
+ -I$(srcdir)/../..\
+ -I$(srcdir)/../../..\
+ -I$(srcdir)/../../../utilities\
+ -I$(srcdir)/../../../parcsr_mv\
+ -I$(srcdir)/../../../seq_mv\
+ -I$(srcdir)/../../../IJ_mv\
+ ${CXXINCLUDES}\
+ ${CXXDEFS} 
+
+F77FLAGS =\
+ ${F77_COMPILE_FLAGS}\
+ ${F77INCLUDES}\
+ ${F77DEFS}
 
 RANLIB = @RANLIB@
 
@@ -60,7 +111,9 @@ FILES = \
  $(srcdir)/../vector/mli_vector.cxx\
  $(srcdir)/../util/mli_utils_fortran.f
 
-OBJS = ${FILESS:.c=.o}
+TEMP1 = ${FILES:.c=.o}
+TEMP2 = ${TEMP1:.cxx=.o}
+OBJS = ${TEMP2:.f=.o}
 
 ##################################################################
 # Targets
@@ -68,6 +121,12 @@ OBJS = ${FILESS:.c=.o}
 
 all: libHYPRE_mli.a 
  
+libHYPRE_mli.a: ${OBJS}
+	@echo  "Building $@ ... "
+	${AR} -rcu $@ ${OBJS}
+	${RANLIB} $@
+	@cp -f libHYPRE_mli.a $$HYPRE_INSTALL_DIR/lib
+
 install: all
  
 clean:
@@ -78,10 +137,11 @@ veryclean: clean
 ##################################################################
 # Rules
 ##################################################################
-
-libHYPRE_mli.a: ${OBJS}
-	@echo  "Building $@ ... "
-	${AR} -rcu $@ ${OBJS}
-	${RANLIB} $@
-	@cp -f libHYPRE_mli.a $$HYPRE_INSTALL_DIR/lib
  
+.c.o:
+	${CC} -o $@ -c ${CFLAGS} $<
+.cxx.o:
+	${CXX} -o $@ -c ${CXXFLAGS} $<
+.f.o:
+	${F77} -o $@ -c ${F77FLAGS} $<
+
