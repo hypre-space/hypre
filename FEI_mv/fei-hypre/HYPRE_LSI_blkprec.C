@@ -684,11 +684,7 @@ int HYPRE_LSI_BlockP::buildBlocks()
             else
             {
                searchInd = - searchInd - 1;
-               for ( k = 0; k < nprocs; k++ )
-                  if ( partition[k] > searchInd ) break;
-               k--;
-               searchInd = index - P22Offsets_[k] - searchInd;
-               A11_inds[A11NewSize] = searchInd;
+               A11_inds[A11NewSize] = index - searchInd;
                A11_vals[A11NewSize++] = vals[j];
             }
          }
