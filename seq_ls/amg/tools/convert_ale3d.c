@@ -34,23 +34,17 @@ char *argv[];
    double   atemp;
    int      ctemp;
    int      ret;
-   int      k;
 
    double  *S_data;
    int     *S_ia;
    int     *S_ja;
-   double  *A_data;
-   int     *A_ia;
-   int     *A_ja;
    Matrix  *A;
 
    double  *x;
    double  *y;
    double  *z;
-
-   int     *iarray;
    
-   int      n, m, i, j, ii, jj;
+   int      n, m, i, j;
 
 
 
@@ -108,11 +102,7 @@ char *argv[];
    /* read in column info, S_ja, and values S_data */
    S_ja = talloc(int, S_ia[n]);
    S_data = talloc(double, S_ia[n]);
-/* veh temp */
-   A_ja = talloc(int, S_ia[n]);
-   A_data = talloc(double, S_ia[n]);
-   k = 0;
-/* end temp */   
+ 
   
    for (i = 0; i < S_ia[n]; i++)
    {
@@ -128,9 +118,6 @@ char *argv[];
 
        if (jdiag != -1)
        {
-          A_data[k] = jdiag;
-          A_ja[k] = S_ia[i]-1;
-          k++;
           ctemp = S_ja[jdiag];
           atemp = S_data[jdiag];
           S_ja[jdiag] = S_ja[S_ia[i]-1];
