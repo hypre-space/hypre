@@ -1,0 +1,116 @@
+#BHEADER***********************************************************************
+# (c) 1997   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+.SUFFIXES:
+.SUFFIXES: .c .f .o
+
+srcdir = @srcdir@
+VPATH = @srcdir@
+ 
+ 
+CC = @CC@
+ 
+CINCLUDES=@INCLUDES@ @MPIINCLUDE@
+COPT= @COPT@
+CDEBUG = @CDEBUG@
+CDEFS = @HYPREDEFS@ -DHYPRE_TIMING
+ 
+CFLAGS = \
+ -I../utilities\
+ -I../seq_matrix_vector\
+ ${CINCLUDES}\
+ ${COPT}\
+ ${CDEBUG}\
+ ${CDEFS}
+ 
+RANLIB = @RANLIB@
+ 
+MPILIBFLAGS = @MPILIBDIRS@ @MPILIBS@ @MPIFLAGS@ 
+LIBFLAGS = @LIBDIRS@ @LIBS@
+LDLIBFLAGS = @LDLIBDIRS@ @LDLIBS@
+ 
+LFLAGS =\
+ -L.\
+ -L../seq_matrix_vector\
+ -L../utilities\
+ -lHYPRE_parmv\
+ -lHYPRE_mv\
+ -lHYPRE_utilities\
+ -lmpe\
+ ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
+ 
+
+HEADERS =\
+ communication.h\
+ headers.h\
+ par_csr_matrix.h\
+ par_vector.h\
+ protos.h
+
+FILES =\
+ communication.c\
+ par_csr_matop.c\
+ par_csr_matrix.c\
+ par_csr_matvec.c\
+ par_vector.c
+
+OBJS = ${FILES:.c=.o}
+
+##################################################################
+# Targets
+##################################################################
+
+all: libHYPRE_parmv.a
+ 
+install: all
+	@cp -f HYPRE_*.h hypre_*.h $$HYPRE_INSTALL_DIR/include
+	@cp -f libHYPRE_*.a $$HYPRE_INSTALL_DIR/lib
+ 
+clean:
+	@rm -f *.o
+
+veryclean: clean
+	@rm -f libHYPRE_parmv.a
+	@rm -f test test_matvec driver.o driver_matvec.o
+
+##################################################################
+# Rules
+##################################################################
+
+test: driver.o libHYPRE_parmv.a 
+	@echo  "Linking" $@ "... "
+	${CC} -o test driver.o ${LFLAGS} 
+
+test_matvec: driver_matvec.o libHYPRE_parmv.a
+	@echo  "Linking" $@ "... "
+	${CC} -o test_matvec driver_matvec.o ${LFLAGS} 
+
+test_matmul: driver_matmul.o libHYPRE_parmv.a
+	@echo  "Linking" $@ "... "
+	${CC} -o test_matmul driver_matmul.o ${LFLAGS} 
+
+libHYPRE_parmv.a: ${OBJS}
+	@echo  "Building $@ ... "
+	ar -ru $@ ${OBJS}
+	ranlib $@
+
+${OBJS}: ${HEADERS}
+
+##################################################################
+# Generic rules
+##################################################################
+
+.c.o:
+	@echo "Making (c) " $@
+	@${CC} -o $@ -c ${CFLAGS} $<
+
+.f.${AMG_ARCH}.o:
+	@echo "Making (f) " $@
+	@${F77} -o $@ -c ${FFLAGS} $<
+

@@ -1,0 +1,113 @@
+#BHEADER***********************************************************************
+# (c) 1997   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+.SUFFIXES:
+.SUFFIXES: .c .f .o
+
+srcdir = @srcdir@
+VPATH = @srcdir@
+ 
+ 
+CC = @CC@
+ 
+CINCLUDES=@INCLUDES@ @MPIINCLUDE@
+COPT= @COPT@
+CDEBUG = @CDEBUG@
+CDEFS = @HYPREDEFS@ -DHYPRE_TIMING
+ 
+CFLAGS =\
+ -I../utilities\
+ -I../seq_matrix_vector\
+ -I../parcsr_matrix_vector\
+ ${CINCLUDES}\
+ ${COPT}\
+ ${CDEBUG}\
+ ${CDEFS}
+ 
+RANLIB= @RANLIB@
+ 
+MPILIBFLAGS = @MPILIBDIRS@ @MPILIBS@ @MPIFLAGS@
+LIBFLAGS = @LIBDIRS@ @LIBS@
+LDLIBFLAGS = @LDLIBDIRS@ @LDLIBS@
+ 
+LFLAGS =\
+ -L.\
+ -L../parcsr_matrix_vector\
+ -L../seq_matrix_vector\
+ -L../utilities\
+ -lHYPRE_paramg\
+ -lHYPRE_parmv\
+ -lHYPRE_mv\
+ -lmpe\
+ -lHYPRE_utilities\
+ ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
+ 
+HEADERS =\
+ headers.h\
+ protos.h
+
+FILES =\
+ par_laplace.c\
+ coarsen.c\
+ indepset.c\
+ par_rap.c\
+ par_rap_communication.c\
+ random.c\
+ transpose.c
+
+OBJS = ${FILES:.c=.o}
+
+##################################################################
+# Targets
+##################################################################
+
+all: libHYPRE_paramg.a
+ 
+install: all
+	@cp -f HYPRE_*.h hypre_*.h $$HYPRE_INSTALL_DIR/include
+	@cp -f libHYPRE_*.a $$HYPRE_INSTALL_DIR/lib
+ 
+clean:
+	@rm -f *.o
+
+veryclean: clean
+	@rm -f libHYPRE_paramg.a
+	@rm -f test test_rap 
+
+##################################################################
+# Rules
+##################################################################
+
+test: driver.o libHYPRE_paramg.a
+	@echo  "Linking" $@ "... "
+	${CC} -o test driver.o ${LFLAGS} 
+
+test_rap: driver_rap.o libHYPRE_paramg.a
+	@echo  "Linking" $@ "... "
+	${CC} -o test_rap driver_rap.o ${LFLAGS} 
+
+libHYPRE_paramg.a: ${OBJS}
+	@echo  "Building $@ ... "
+	ar -ru $@ ${OBJS}
+	ranlib $@
+ 
+${OBJS}: ${HEADERS}
+ 
+##################################################################
+# Generic rules
+##################################################################
+
+.c.o:
+	@echo "Making (c) " $@
+	@${CC} -o $@ -c ${CFLAGS} $<
+
+.f.${AMG_ARCH}.o:
+	@echo "Making (f) " $@
+	@${F77} -o $@ -c ${FFLAGS} $<
+
