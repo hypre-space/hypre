@@ -3,6 +3,7 @@
 #include "HYPRE_mv.h"
 #include "utilities.h"
 
+
 /*----------------------------------------------------------------
  * HYPRE_NewStructGrid thread wrappers
  *----------------------------------------------------------------*/
@@ -134,6 +135,51 @@ HYPRE_SetStructGridExtentsPush(
    pushargs.iupper = iupper;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_SetStructGridExtentsVoidPtr, (void *)&pushargs );
+
+   hypre_work_wait();
+
+   returnvalue = pushargs.returnvalue[0];
+
+   return returnvalue;
+}
+
+/*----------------------------------------------------------------
+ * HYPRE_SetStructGridPeriodic thread wrappers
+ *----------------------------------------------------------------*/
+
+typedef struct {
+   HYPRE_StructGridArray *grid;
+   int *periodic;
+   int  returnvalue[hypre_MAX_THREADS];
+} HYPRE_SetStructGridPeriodicArgs;
+
+void
+HYPRE_SetStructGridPeriodicVoidPtr( void *argptr )
+{
+   int threadid = hypre_GetThreadID();
+
+   HYPRE_SetStructGridPeriodicArgs *localargs =
+      (HYPRE_SetStructGridPeriodicArgs *) argptr;
+
+   (localargs -> returnvalue[threadid]) =
+      HYPRE_SetStructGridPeriodic(
+         (*(localargs -> grid))[threadid],
+         localargs -> periodic );
+}
+
+int 
+HYPRE_SetStructGridPeriodicPush(
+   HYPRE_StructGridArray grid,
+   int *periodic )
+{
+   HYPRE_SetStructGridPeriodicArgs pushargs;
+   int i;
+   int  returnvalue;
+
+   pushargs.grid = (HYPRE_StructGridArray *)grid;
+   pushargs.periodic = periodic;
+   for (i = 0; i < hypre_NumThreads; i++)
+      hypre_work_put( HYPRE_SetStructGridPeriodicVoidPtr, (void *)&pushargs );
 
    hypre_work_wait();
 
