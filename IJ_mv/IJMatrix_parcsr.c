@@ -1278,6 +1278,11 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
    
          offd_j = hypre_CSRMatrixJ(offd);
       }
+
+            /*  generate the nonzero rows inside offd and diag by calling */
+
+      hypre_CSRMatrixSetRownnz(diag);
+      hypre_CSRMatrixSetRownnz(offd);
    
    /*  generate col_map_offd */
       nnz_offd = offd_i[num_rows];
