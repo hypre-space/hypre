@@ -51,13 +51,14 @@ void Hypre_MPI_Com_destructor(Hypre_MPI_Com this) {
 /* ********************************************************
  * impl_Hypre_MPI_ComNew
  **********************************************************/
-void  impl_Hypre_MPI_Com_New(Hypre_MPI_Com this, int comm) {
+int  impl_Hypre_MPI_Com_New(Hypre_MPI_Com this, int comm) {
 /* For multiprocessing code, the int comm should really be an
    MPI handle such as MPI_COMM_WORLD.  For sequential code it
    should really be the appropriate pointer to a dummy struct
    (or, maybe, comm=0) */
    MPI_Comm * MCp = this->d_table->hcom;
    *MCp = (MPI_Comm) comm;
+   return 0;
 } /* end impl_Hypre_MPI_ComNew */
 
 /* ********************************************************

@@ -46,7 +46,7 @@ void Hypre_Box_destructor(Hypre_Box this) {
 /* ********************************************************
  * impl_Hypre_BoxNew
  **********************************************************/
-void  impl_Hypre_Box_New
+int  impl_Hypre_Box_New
 (Hypre_Box this, array1int lower, array1int upper, int dimension) {
 /* JFP: This function initializes the data in a box. */
 
@@ -79,8 +79,9 @@ Hypre_Box  impl_Hypre_Box_Constructor
 /* ********************************************************
  * impl_Hypre_BoxSetup
  **********************************************************/
-void  impl_Hypre_Box_Setup(Hypre_Box this) {
+int  impl_Hypre_Box_Setup(Hypre_Box this) {
    /* nothing to do; provided for consistency with other Hypre classes */
+   return 0;
 } /* end impl_Hypre_BoxSetup */
 
 /* ********************************************************
