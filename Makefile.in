@@ -721,20 +721,13 @@ uninstall-info: uninstall-info-recursive
 	tags tags-recursive uninstall uninstall-am \
 	uninstall-includeHEADERS uninstall-info-am
 
-
-.PHONY: test
 # causes problems with "make distclean"
 # FEI_mv babel babel-runtime test lib docs .
 
 test:
 	@ \
 	$(MAKE) $(AM_MAKEFLAGS) install; \
-	(cd test && $(MAKE) $(AM_MAKEFLAGS) install)
-
-tests:
-	@ \
-	$(MAKE) $(AM_MAKEFLAGS) install; \
-	(cd test && $(MAKE) $(AM_MAKEFLAGS) install)
+	(cd test && $(MAKE) $(AM_MAKEFLAGS))
 
 docs: dvi ps pdf html
 
@@ -815,6 +808,8 @@ clean-local:
 #	    cp -f $$i $(distdir); \
 #	  fi; \
 #	done
+
+.PHONY: test
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:
