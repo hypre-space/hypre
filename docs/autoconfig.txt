@@ -2,11 +2,8 @@
    		 Using Autoconfig in hypre
    		 -------------------------
 
-NOTE: These procedures currently only apply to the following directories:
-
-  utilities
-  struct_matrix_vector
-  struct_linear_solvers
+NOTE: These procedures currently only apply to the directories listed
+in the `CASC_CONFIG_OUTPUT_LIST' line of the `configure.in' file.
 
 To automatically generate machine specific makefiles, type `configure'
 in the `linear_solvers' directory.  The configure script is a portable
