@@ -258,6 +258,9 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,MLI_Matrix **Pmat_out,
          if ( agg_size < nullspace_dim )
          {
             cout << "Aggregation ERROR : underdetermined system in QR.\n";
+            cout << "            error on Proc " << mypid << endl;
+            cout << "            error on aggr " << i << endl;
+            cout << "            aggr size is  " << agg_size << endl;
             exit(1);
          }
           
@@ -268,7 +271,7 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,MLI_Matrix **Pmat_out,
             for ( k = 0; k < nullspace_dim; k++ ) 
                q_array[agg_size*k+j] = P_vecs[k][agg_ind_array[i][j]]; 
          }
-if (i == -1)
+if (mypid == -1 && i == 0)
 {
 for ( j = 0; j < agg_size; j++ ) 
 {
@@ -285,11 +288,12 @@ printf("\n");
          if (info != 0)
          {
             cout << mypid << " : Aggregation ERROR : QR returned a non-zero " 
-                 << i << endl;
+                 << i << " " << agg_size << endl;
             for ( j = 0; j < agg_size; j++ ) 
             {
+               printf("%5d : ", agg_ind_array[i][j]);
                for ( k = 0; k < nullspace_dim; k++ ) 
-                  printf(" %16.8e ", q_array[agg_size*k+j]);
+                  printf("%10.3e ", q_array[agg_size*k+j]);
                printf("\n");
             }
             exit(1);
