@@ -1204,6 +1204,7 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
 
 #define CPOINT 1
 #define FPOINT -1
+#define ZPOINT -2
 #define UNDECIDED 0 
 
 
@@ -1625,7 +1626,7 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
       {
          if (measure < 0) printf("negative measure!\n");
          CF_marker[j] = CPOINT;
-         ++coarse_size;
+         ++coarse_size; 
          --num_left;
       }
    }
@@ -2355,6 +2356,7 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
 #define COMMON_C_PT  2
 #define CPOINT 1
 #define FPOINT -1
+#define ZPOINT -2
 #define UNDECIDED 0 
 
 
@@ -2462,7 +2464,7 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
    int              points_left, new_C;
    int              new_meas, bumps, top_max;
    int              num_left;
-   int              nabor, nabor_two;
+   int              nabor, nabor_two, cnt;
 
    int              ierr = 0;
    int              break_var = 0;
@@ -2776,7 +2778,7 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
       else
       {
          if (measure < 0) printf("negative measure!\n");
-         CF_marker[j] = FPOINT;
+         CF_marker[j] = ZPOINT;
          /* CF_marker[j] = CPOINT;
          ++coarse_size; */
          --num_left;
@@ -2991,7 +2993,7 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
    for (i=0; i < S_offd_i[num_variables]; i++)
    { 
       measure_array[num_variables + S_offd_j[i]] += 1.0;
-   }
+   } 
    if (num_procs > 1)
    comm_handle = hypre_ParCSRCommHandleCreate(2, comm_pkg, 
 			&measure_array[num_variables], buf_data);
@@ -3027,9 +3029,9 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
 
    /* initialize measure array and graph array */
 
-   for (ig = 0; ig < num_variables+num_cols_offd; ig++)
+   /* for (ig = 0; ig < num_variables+num_cols_offd; ig++)
       graph_array[ig] = ig;
-
+   */
    /*---------------------------------------------------
     * Initialize the C/F marker array
     * C/F marker array contains interior points in elements 0 ... 
@@ -3039,19 +3041,38 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
    CF_marker_offd = hypre_CTAlloc(int, num_cols_offd);
    for (i=0; i < num_cols_offd; i++)
 	CF_marker_offd[i] = 0;
+   graph_size = num_variables+num_cols_offd;
+   cnt = 0;
    for (i=0; i < num_variables; i++)
    {
-	if ( (CF_marker[i] == -1)||
-	     (CF_marker[i] == 1 && (S_offd_i[i+1]-S_offd_i[i]) > 0)) 
+	if ( (S_offd_i[i+1]-S_offd_i[i]) > 0 || CF_marker[i] == -1) 
+	{
 	   CF_marker[i] = 0;
+	}
+	if ( CF_marker[i] == ZPOINT)
+	{
+	   if ((S_diag_i[i+1]-S_diag_i[i]) > 0)
+	   {
+	      CF_marker[i] = 0;
+	      graph_array[cnt++] = i;
+	   }
+	   else
+	   {
+	      graph_size--;
+	      CF_marker[i] = FPOINT;
+	   }
+	}
+	else
+	   graph_array[cnt++] = i;
    }
+   for (i=0; i < num_cols_offd; i++)
+      graph_array[cnt++] = num_variables+i;
 
    /*---------------------------------------------------
     * Loop until all points are either fine or coarse.
     *---------------------------------------------------*/
 
    coarse_size = 0;
-   graph_size = num_variables+num_cols_offd;
    if (num_procs > 1)
    {
       S_ext      = hypre_ParCSRMatrixExtractBExt(S,A,0);
@@ -3144,10 +3165,10 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
 			&measure_array[num_variables]); 
  
       hypre_ParCSRCommHandleDestroy(comm_handle);   
- 
+
       comm_handle = hypre_ParCSRCommHandleCreate( 11, comm_pkg_mS, S_buf_j, 
 			S_ext_j);
- 
+
       hypre_ParCSRCommHandleDestroy(comm_handle);   
       }
  
