@@ -103,6 +103,44 @@ Vector  *vector;
 }
 
 
+/*--------------------------------------------------------------------------
+ * WriteVecInt
+ *--------------------------------------------------------------------------*/
+
+void     WriteVecInt(file_name, vector)
+char    *file_name;
+VectorInt  *vector;
+{
+   FILE    *fp;
+
+   int     *data;
+   int      size;
+   
+   int      j;
+
+
+   /*----------------------------------------------------------
+    * Write the data
+    *----------------------------------------------------------*/
+
+   data = VectorIntData(vector);
+   size = VectorIntSize(vector);
+
+   fp = fopen(file_name, "w");
+
+   /* write junk line */
+   fprintf(fp, "1 1\n");
+
+   fprintf(fp, "%d\n", size);
+
+   for (j = 0; j < size; j++)
+      fprintf(fp, "%d\n", data[j]);
+
+   fclose(fp);
+
+   return;
+}
+
 /*---------------------------------------------------------------
  * WriteSetupParams
  *---------------------------------------------------------------*/

@@ -174,7 +174,6 @@ void relax_(int *, int *, int *, int *, int *, int *, int *,
 /* intad */
 #define CALL_INTAD(coarse_grid,fine_grid,numv,Vstar_flag,F_array,U_array,amg_data) \
 intad_(VectorData(U_array[fine_grid]),\
-       VectorIntData(ICG_array[fine_grid]),\
        MatrixData(P_array[fine_grid]),\
        MatrixIA(P_array[fine_grid]),\
        MatrixJA(P_array[fine_grid]),\
@@ -191,7 +190,7 @@ intad_(VectorData(U_array[fine_grid]),\
        &AMGDataNumUnknowns(amg_data));
 
 
-void intad_(double *, int *, double *, int *, int *, int *,
+void intad_(double *, double *, int *, int *, int *,
             double *, double *, double *, double *, 
             int *, int *, int *, int *, int *, int *);	
 
@@ -207,14 +206,13 @@ rscali_(VectorData(F_array[coarse_grid]),\
         MatrixData(A_array[fine_grid]),\
         MatrixIA(A_array[fine_grid]),\
         MatrixJA(A_array[fine_grid]),\
-        VectorIntData(ICG_array[fine_grid]),\
         MatrixData(P_array[fine_grid]),\
         MatrixIA(P_array[fine_grid]),\
         MatrixJA(P_array[fine_grid]),\
         &numv[fine_grid]);                   
 
 void rscali_(double *, int *, double *, double *, double *,
-             double *, int *, int *, int *, 
+             double *, int *, int *, 
              double *, int *, int *, int *); 
    
 

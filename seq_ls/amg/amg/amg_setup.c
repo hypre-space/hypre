@@ -461,6 +461,15 @@ void    *data;
          WriteYSMP(fnam, P_array[j]);
       }
    }
+
+   if (AMGDataIOutDat(amg_data) == -3)
+   {
+      for (j=0; j < num_levels-1; j++)
+      {
+         sprintf(fnam,"ICG_%d.vec",j);
+         WriteVecInt(fnam, ICG_array[j]);
+      }
+   }
    
    return(Setup_err_flag);
 }
