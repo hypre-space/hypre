@@ -206,7 +206,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
             }
 
             /* restrict residual */
-            if (constant_coefficient==1) hypre_StructVectorClearBoundGhostValues( r_l[l] );
+            if (constant_coefficient>=1) hypre_StructVectorClearBoundGhostValues( r_l[l] );
             hypre_SemiRestrict(restrict_data_l[l], RT_l[l], r_l[l], b_l[l+1]);
 #if DEBUG
             sprintf(filename, "zout_xdown.%02d", l);
