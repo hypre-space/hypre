@@ -1166,7 +1166,7 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
             hypre_ParKrylovIdentitySetup, hypre_ParKrylovIdentity );
          pcg_solver = hypre_GMRESCreate( gmres_functions );
 
-         hypre_GMRESSetMaxIter(pcg_solver, dscg_max_its);
+         hypre_GMRESSetMaxIter(pcg_solver, pcg_max_its);
          hypre_GMRESSetTol(pcg_solver, tol);
          hypre_GMRESSetKDim(pcg_solver, k_dim);
          hypre_GMRESSetStopCrit(pcg_solver, stop_crit);
@@ -1191,7 +1191,7 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
             hypre_ParKrylovIdentitySetup, hypre_ParKrylovIdentity );
          pcg_solver = hypre_BiCGSTABCreate( bicgstab_functions );
 
-         hypre_BiCGSTABSetMaxIter(pcg_solver, dscg_max_its);
+         hypre_BiCGSTABSetMaxIter(pcg_solver, pcg_max_its);
          hypre_BiCGSTABSetTol(pcg_solver, tol);
          hypre_BiCGSTABSetStopCrit(pcg_solver, stop_crit);
          hypre_BiCGSTABSetLogging(pcg_solver, logging);
