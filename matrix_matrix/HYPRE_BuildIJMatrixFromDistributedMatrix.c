@@ -19,6 +19,7 @@
 #include "general.h"
 
 #include "../HYPRE.h"
+#include "../utilities/HYPRE_utilities.h"
 
 /* Prototypes for DistributedMatrix */
 #include "../distributed_matrix/HYPRE_distributed_matrix_types.h"
