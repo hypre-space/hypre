@@ -72,6 +72,7 @@ main( int   argc,
    build_rhs_type = 0;
    build_rhs_arg_index = argc;
    relax_default = 0;
+   debug_flag = 0;
 
    solver_id = 0;
 
