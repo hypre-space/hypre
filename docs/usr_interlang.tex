@@ -24,7 +24,7 @@ configuration of the interoperation codes.
 Portability across DEC Compass, DEC Tera, and IBM ASCI-Blue platforms is
 achieved with the specific Fortran-calling-C mapping: 
 
-\vspace{0.1in}
+\vspace{0.2in}
 
 \begin{tabular}{lcl}
 
@@ -32,17 +32,17 @@ achieved with the specific Fortran-calling-C mapping:
 \underline{called C function parameter type} \\
                               &                   &   \\
 \hspace{0.1in} (addr of) integer*8        & $\longrightarrow$ &
-\hspace{0.1in} long int * \\
+\hspace{0.3in} long int * \\
 \hspace{0.1in} (addr of) integer          & $\longrightarrow$ &
-\hspace{0.1in} int * \\
+\hspace{0.3in} int * \\
 \hspace{0.1in} (addr of) character        & $\longrightarrow$ &
-\hspace{0.1in} char * \\
+\hspace{0.3in} char * \\
 \hspace{0.1in} (addr of) double precision & $\longrightarrow$ &
-\hspace{0.1in} double * \\
+\hspace{0.3in} double * \\
 
 \end{tabular}
 
-\vspace{0.1in}
+\vspace{0.2in}
 
 
 In particular, on DEC Compass, DEC Tera, and IBM ASCI-Blue, C-type
@@ -57,8 +57,8 @@ variables.  These addresses might not have originated in any Fortran call,
 and if they are addresses to inhomogeneously typed collections of data
 (e.g. C structures), Fortran might not have enough information to dereference
 the addresses.  But Fortran can still carry around such addresses, and in
-particular hand them back and forth between various C functions.  The Hypre
-Fortran interface makes extensive use of this technique.
+particular hand them back and forth between various C functions.  The
+{\itshape hypre} Fortran interface makes extensive use of this technique.
 
 \vspace{0.2in}
 
@@ -68,24 +68,20 @@ Fortran interface makes extensive use of this technique.
 
   Fortran calling:
 \begin{verbatim}
+      integer*8        struct_addr
+      integer          intg, ierr
+      character        charact
+      double precision double_prec
 
-    integer*8        struct_addr
-    integer          intg, ierr
-    character        charact
-    double precision double_prec
-
-    call sub_name(struct_addr, intg, charact, double_prec, ierr)
-
+      call sub_name(struct_addr, intg, charact, double_prec, ierr)
 \end{verbatim}
   C called:
 \begin{verbatim}
-
-    void hypre_F90_NAME(sub_name)( long int  *struct_addr,
-                                   int       *intg,
-                                   char      *charact,
-                                   double    *double_prec,
-                                   int       *ierr          )
-
+      void hypre_F90_NAME(sub_name)( long int  *struct_addr,
+                                     int       *intg,
+                                     char      *charact,
+                                     double    *double_prec,
+                                     int       *ierr          )
 \end{verbatim}
 
 \section{Fortran subroutine calls in {\itshape hypre} source code}
@@ -98,27 +94,23 @@ Fortran interface makes extensive use of this technique.
 
   C calling:
 \begin{verbatim}
+      long int struct_addr;
+      int      intg, ierr;
+      char     charact;
+      double   double_prec;
 
-    long int struct_addr;
-    int      intg, ierr;
-    char     charact;
-    double   double_prec;
-
-    hypre_F90_NAME(sub_name)( &struct_addr, &intg, &charact,
-                              &double_prec, &ierr )
-
+      hypre_F90_NAME(sub_name)( &struct_addr, &intg, &charact,
+                                &double_prec, &ierr )
 \end{verbatim}
 
   Fortran called:
 \begin{verbatim}
+      subroutine sub_name(struct_addr, intg, charact, double_prec, ierr)
 
-    subroutine sub_name(struct_addr, intg, charact, double_prec, ierr)
-
-    integer*8        struct_addr
-    integer          intg, ierr
-    character        charact
-    double precision double_prec
-
+      integer*8        struct_addr
+      integer          intg, ierr
+      character        charact
+      double precision double_prec
 \end{verbatim}
 
 %==========================================================================
