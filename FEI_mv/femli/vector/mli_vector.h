@@ -40,8 +40,8 @@ public :
 
    MLI_Vector( void *in_vec, char *in_name, MLI_Function *func_ptr );
    ~MLI_Vector();
-   char   *getName()                            { return name; }
-   void   *getVector()                          { return vector; }
+   char   *getName();
+   void   *getVector();
    int    setConstantValue(double value);
    int    copy(MLI_Vector *vec2);
    int    print(char *filename);
