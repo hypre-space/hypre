@@ -13,10 +13,6 @@
 # PARTICULAR PURPOSE.
 
 @SET_MAKE@
-
-
-SOURCES = $(create_2d_laplacian_SOURCES) $(create_3d_laplacian_SOURCES) $(one_to_many_SOURCES) $(one_to_many_vector_SOURCES)
-
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
 VPATH = @srcdir@
@@ -38,8 +34,6 @@ NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
 host_triplet = @host@
-noinst_PROGRAMS = one_to_many$(EXEEXT) one_to_many_vector$(EXEEXT) \
-	create_2d_laplacian$(EXEEXT) create_3d_laplacian$(EXEEXT)
 subdir = tools
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -52,40 +46,10 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/HYPRE_config.h
 CONFIG_CLEAN_FILES =
-PROGRAMS = $(noinst_PROGRAMS)
-am_create_2d_laplacian_OBJECTS = create_2d_laplacian.$(OBJEXT)
-create_2d_laplacian_OBJECTS = $(am_create_2d_laplacian_OBJECTS)
-create_2d_laplacian_LDADD = $(LDADD)
-am_create_3d_laplacian_OBJECTS = create_3d_laplacian.$(OBJEXT)
-create_3d_laplacian_OBJECTS = $(am_create_3d_laplacian_OBJECTS)
-create_3d_laplacian_LDADD = $(LDADD)
-am_one_to_many_OBJECTS = one_to_many.$(OBJEXT)
-one_to_many_OBJECTS = $(am_one_to_many_OBJECTS)
-one_to_many_LDADD = $(LDADD)
-am_one_to_many_vector_OBJECTS = one_to_many_vector.$(OBJEXT)
-one_to_many_vector_OBJECTS = $(am_one_to_many_vector_OBJECTS)
-one_to_many_vector_LDADD = $(LDADD)
-am__installdirs = $(DESTDIR)$(bindir)
-binSCRIPT_INSTALL = $(INSTALL_SCRIPT)
-SCRIPTS = $(bin_SCRIPTS)
-DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp =
 am__depfiles_maybe =
-COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
-	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
-LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) \
-	$(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
-	$(AM_CFLAGS) $(CFLAGS)
-LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = $(create_2d_laplacian_SOURCES) \
-	$(create_3d_laplacian_SOURCES) $(one_to_many_SOURCES) \
-	$(one_to_many_vector_SOURCES)
-DIST_SOURCES = $(create_2d_laplacian_SOURCES) \
-	$(create_3d_laplacian_SOURCES) $(one_to_many_SOURCES) \
-	$(one_to_many_vector_SOURCES)
-ETAGS = etags
-CTAGS = ctags
+SOURCES =
+DIST_SOURCES =
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
@@ -139,12 +103,7 @@ LAPACKLIBFLAGS = @LAPACKLIBFLAGS@
 LAPACKNEEDED_FALSE = @LAPACKNEEDED_FALSE@
 LAPACKNEEDED_TRUE = @LAPACKNEEDED_TRUE@
 LAPACK_LIBS = @LAPACK_LIBS@
-LDFLAGS = \
- -L$(srcdir)/../struct_mv\
- -L$(srcdir)/../utilities\
- -lHYPRE_struct_mv\
- -lHYPRE_utilities
-
+LDFLAGS = @LDFLAGS@
 LIBDIRNEEDED_FALSE = @LIBDIRNEEDED_FALSE@
 LIBDIRNEEDED_TRUE = @LIBDIRNEEDED_TRUE@
 LIBM = @LIBM@
@@ -229,19 +188,34 @@ sharedstatedir = @sharedstatedir@
 subdirs = @subdirs@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
-bin_SCRIPTS = V99-09-23.hypre_convert V2000-05-31.hypre_convert
-one_to_many_SOURCES = one_to_many.c
-one_to_many_vector_SOURCES = one_to_many_vector.c
-create_2d_laplacian_SOURCES = create_2d_laplacian.c
-create_3d_laplacian_SOURCES = create_3d_laplacian.c
-AM_CPPFLAGS = -DHYPRE_TIMING\
- -I$(top_srcdir)/utilities\
- -I$(top_srcdir)/struct_mv
+EXTRA_DIST = \
+ V2000-05-31.hypre_convert\
+ V99-09-23.hypre_convert\
+ ardra_write_matrix.m\
+ create_2d_laplacian.c\
+ create_3d_laplacian.c\
+ dco_8.dat\
+ hypre_struct_collapse\
+ lap_write_matrix.m\
+ manalyze.m\
+ mkdist\
+ mklibs\
+ mklibs.aix\
+ mklibs.babel\
+ mvit\
+ one_to_many.c\
+ one_to_many_vector.c\
+ read_matrix.m\
+ read_vector.m\
+ readij.m\
+ readysmp.m\
+ write_matrix.m\
+ write_vector.m\
+ writeysmp.m
 
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .c .lo .o .obj
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -272,59 +246,6 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 
-clean-noinstPROGRAMS:
-	@list='$(noinst_PROGRAMS)'; for p in $$list; do \
-	  f=`echo $$p|sed 's/$(EXEEXT)$$//'`; \
-	  echo " rm -f $$p $$f"; \
-	  rm -f $$p $$f ; \
-	done
-create_2d_laplacian$(EXEEXT): $(create_2d_laplacian_OBJECTS) $(create_2d_laplacian_DEPENDENCIES) 
-	@rm -f create_2d_laplacian$(EXEEXT)
-	$(LINK) $(create_2d_laplacian_LDFLAGS) $(create_2d_laplacian_OBJECTS) $(create_2d_laplacian_LDADD) $(LIBS)
-create_3d_laplacian$(EXEEXT): $(create_3d_laplacian_OBJECTS) $(create_3d_laplacian_DEPENDENCIES) 
-	@rm -f create_3d_laplacian$(EXEEXT)
-	$(LINK) $(create_3d_laplacian_LDFLAGS) $(create_3d_laplacian_OBJECTS) $(create_3d_laplacian_LDADD) $(LIBS)
-one_to_many$(EXEEXT): $(one_to_many_OBJECTS) $(one_to_many_DEPENDENCIES) 
-	@rm -f one_to_many$(EXEEXT)
-	$(LINK) $(one_to_many_LDFLAGS) $(one_to_many_OBJECTS) $(one_to_many_LDADD) $(LIBS)
-one_to_many_vector$(EXEEXT): $(one_to_many_vector_OBJECTS) $(one_to_many_vector_DEPENDENCIES) 
-	@rm -f one_to_many_vector$(EXEEXT)
-	$(LINK) $(one_to_many_vector_LDFLAGS) $(one_to_many_vector_OBJECTS) $(one_to_many_vector_LDADD) $(LIBS)
-install-binSCRIPTS: $(bin_SCRIPTS)
-	@$(NORMAL_INSTALL)
-	$(mkdir_p) $(DESTDIR)$(bindir)
-	@list='$(bin_SCRIPTS)'; for p in $$list; do \
-	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
-	  if test -f $$d$$p; then \
-	    f=`echo "$$p" | sed 's|^.*/||;$(transform)'`; \
-	    echo " $(binSCRIPT_INSTALL) $$d$$p $(DESTDIR)$(bindir)/$$f"; \
-	    $(binSCRIPT_INSTALL) $$d$$p $(DESTDIR)$(bindir)/$$f; \
-	  else :; fi; \
-	done
-
-uninstall-binSCRIPTS:
-	@$(NORMAL_UNINSTALL)
-	@list='$(bin_SCRIPTS)'; for p in $$list; do \
-	  f=`echo "$$p" | sed 's|^.*/||;$(transform)'`; \
-	  echo " rm -f $(DESTDIR)$(bindir)/$$f"; \
-	  rm -f $(DESTDIR)$(bindir)/$$f; \
-	done
-
-mostlyclean-compile:
-	-rm -f *.$(OBJEXT)
-
-distclean-compile:
-	-rm -f *.tab.c
-
-.c.o:
-	$(COMPILE) -c $<
-
-.c.obj:
-	$(COMPILE) -c `$(CYGPATH_W) '$<'`
-
-.c.lo:
-	$(LTCOMPILE) -c -o $@ $<
-
 mostlyclean-libtool:
 	-rm -f *.lo
 
@@ -334,52 +255,12 @@ clean-libtool:
 distclean-libtool:
 	-rm -f libtool
 uninstall-info-am:
-
-ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
-	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
-	unique=`for i in $$list; do \
-	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
-	  done | \
-	  $(AWK) '    { files[$$0] = 1; } \
-	       END { for (i in files) print i; }'`; \
-	mkid -fID $$unique
 tags: TAGS
+TAGS:
 
-TAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
-		$(TAGS_FILES) $(LISP)
-	tags=; \
-	here=`pwd`; \
-	list='$(SOURCES) $(HEADERS)  $(LISP) $(TAGS_FILES)'; \
-	unique=`for i in $$list; do \
-	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
-	  done | \
-	  $(AWK) '    { files[$$0] = 1; } \
-	       END { for (i in files) print i; }'`; \
-	test -z "$(ETAGS_ARGS)$$tags$$unique" \
-	  || $(ETAGS) $(ETAGSFLAGS) $(AM_ETAGSFLAGS) $(ETAGS_ARGS) \
-	     $$tags $$unique
 ctags: CTAGS
-CTAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
-		$(TAGS_FILES) $(LISP)
-	tags=; \
-	here=`pwd`; \
-	list='$(SOURCES) $(HEADERS)  $(LISP) $(TAGS_FILES)'; \
-	unique=`for i in $$list; do \
-	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
-	  done | \
-	  $(AWK) '    { files[$$0] = 1; } \
-	       END { for (i in files) print i; }'`; \
-	test -z "$(CTAGS_ARGS)$$tags$$unique" \
-	  || $(CTAGS) $(CTAGSFLAGS) $(AM_CTAGSFLAGS) $(CTAGS_ARGS) \
-	     $$tags $$unique
+CTAGS:
 
-GTAGS:
-	here=`$(am__cd) $(top_builddir) && pwd` \
-	  && cd $(top_srcdir) \
-	  && gtags -i $(GTAGS_ARGS) $$here
-
-distclean-tags:
-	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH tags
 
 distdir: $(DISTFILES)
 	@srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`; \
@@ -410,9 +291,8 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(PROGRAMS) $(SCRIPTS)
+all-am: Makefile
 installdirs:
-	$(mkdir_p) $(DESTDIR)$(bindir)
 install: install-am
 install-exec: install-exec-am
 install-data: install-data-am
@@ -439,13 +319,11 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-generic clean-libtool clean-noinstPROGRAMS \
-	mostlyclean-am
+clean-am: clean-generic clean-libtool mostlyclean-am
 
 distclean: distclean-am
 	-rm -f Makefile
-distclean-am: clean-am distclean-compile distclean-generic \
-	distclean-libtool distclean-tags
+distclean-am: clean-am distclean-generic distclean-libtool
 
 dvi: dvi-am
 
@@ -459,7 +337,7 @@ info-am:
 
 install-data-am:
 
-install-exec-am: install-binSCRIPTS
+install-exec-am:
 
 install-info: install-info-am
 
@@ -473,8 +351,7 @@ maintainer-clean-am: distclean-am maintainer-clean-generic
 
 mostlyclean: mostlyclean-am
 
-mostlyclean-am: mostlyclean-compile mostlyclean-generic \
-	mostlyclean-libtool
+mostlyclean-am: mostlyclean-generic mostlyclean-libtool
 
 pdf: pdf-am
 
@@ -484,21 +361,42 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-binSCRIPTS
+uninstall-am:
 
-.PHONY: CTAGS GTAGS all all-am check check-am clean clean-generic \
-	clean-libtool clean-noinstPROGRAMS ctags distclean \
-	distclean-compile distclean-generic distclean-libtool \
-	distclean-tags distdir dvi dvi-am html html-am info info-am \
-	install install-am install-binSCRIPTS install-data \
-	install-data-am install-exec install-exec-am install-info \
-	install-info-am install-man install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags uninstall uninstall-am uninstall-binSCRIPTS \
+.PHONY: all all-am check check-am clean clean-generic clean-libtool \
+	distclean distclean-generic distclean-libtool distdir dvi \
+	dvi-am html html-am info info-am install install-am \
+	install-data install-data-am install-exec install-exec-am \
+	install-info install-info-am install-man install-strip \
+	installcheck installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-generic \
+	mostlyclean-libtool pdf pdf-am ps ps-am uninstall uninstall-am \
 	uninstall-info-am
 
+
+#bin_SCRIPTS = V99-09-23.hypre_convert V2000-05-31.hypre_convert
+#noinst_PROGRAMS = one_to_many \
+# one_to_many_vector \
+# create_2d_laplacian \
+# create_3d_laplacian
+
+#one_to_many_SOURCES = one_to_many.c
+
+#one_to_many_vector_SOURCES = one_to_many_vector.c
+
+#create_2d_laplacian_SOURCES = create_2d_laplacian.c
+
+#create_3d_laplacian_SOURCES = create_3d_laplacian.c
+
+#AM_CPPFLAGS = -DHYPRE_TIMING\
+# -I$(top_srcdir)/utilities\
+# -I$(top_srcdir)/struct_mv
+
+#LDFLAGS = \
+# -L$(srcdir)/../struct_mv\
+# -L$(srcdir)/../utilities\
+# -lHYPRE_struct_mv\
+# -lHYPRE_utilities
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

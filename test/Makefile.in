@@ -17,7 +17,6 @@
 #
 # Makefile.am --- automake input file for Hypre test drivers
 #
-
 SOURCES = $(f77_ij_SOURCES) $(f77_ij_b_SOURCES) $(f77_ij_mv_SOURCES) $(f77_struct_SOURCES) $(fei_SOURCES) $(ij_SOURCES) $(nodist_ij_C___SOURCES) $(ij_b_SOURCES) $(ij_mv_SOURCES) $(nodist_ij_mv_C___SOURCES) $(new_ij_SOURCES) $(nodist_new_ij_C___SOURCES) $(sstruct_SOURCES) $(nodist_sstruct_C___SOURCES) $(struct_SOURCES) $(nodist_struct_C___SOURCES)
 
 srcdir = @srcdir@
@@ -41,12 +40,11 @@ NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
 host_triplet = @host@
-bin_PROGRAMS = ij$(EXEEXT) ij_mv$(EXEEXT) new_ij$(EXEEXT) \
-	sstruct$(EXEEXT) struct$(EXEEXT)
-EXTRA_PROGRAMS = f77_ij$(EXEEXT) f77_ij_b$(EXEEXT) f77_ij_mv$(EXEEXT) \
-	f77_struct$(EXEEXT) fei$(EXEEXT) ij_b$(EXEEXT) ij.C++$(EXEEXT) \
-	new_ij.C++$(EXEEXT) ij_mv.C++$(EXEEXT) struct.C++$(EXEEXT) \
-	sstruct.C++$(EXEEXT)
+EXTRA_PROGRAMS = ij$(EXEEXT) ij_mv$(EXEEXT) new_ij$(EXEEXT) \
+	sstruct$(EXEEXT) struct$(EXEEXT) f77_ij$(EXEEXT) \
+	f77_ij_b$(EXEEXT) f77_ij_mv$(EXEEXT) f77_struct$(EXEEXT) \
+	fei$(EXEEXT) ij_b$(EXEEXT) ij.C++$(EXEEXT) new_ij.C++$(EXEEXT) \
+	ij_mv.C++$(EXEEXT) struct.C++$(EXEEXT) sstruct.C++$(EXEEXT)
 subdir = test
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -59,44 +57,68 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/HYPRE_config.h
 CONFIG_CLEAN_FILES =
-am__installdirs = $(DESTDIR)$(bindir)
-binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
-PROGRAMS = $(bin_PROGRAMS)
 am_f77_ij_OBJECTS = f77_ij.$(OBJEXT)
 f77_ij_OBJECTS = $(am_f77_ij_OBJECTS)
 am__DEPENDENCIES_1 =
+f77_ij_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1)
 am_f77_ij_b_OBJECTS = f77_ij_b.$(OBJEXT)
 f77_ij_b_OBJECTS = $(am_f77_ij_b_OBJECTS)
 f77_ij_b_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1)
 am_f77_ij_mv_OBJECTS = f77_ij_mv.$(OBJEXT)
 f77_ij_mv_OBJECTS = $(am_f77_ij_mv_OBJECTS)
+f77_ij_mv_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1)
 am_f77_struct_OBJECTS = f77_struct.$(OBJEXT)
 f77_struct_OBJECTS = $(am_f77_struct_OBJECTS)
+f77_struct_DEPENDENCIES = $(am__DEPENDENCIES_1)
 am_fei_OBJECTS = fei-fei.$(OBJEXT)
 fei_OBJECTS = $(am_fei_OBJECTS)
+fei_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1)
 am_ij_OBJECTS = ij.$(OBJEXT)
 ij_OBJECTS = $(am_ij_OBJECTS)
+ij_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1)
 nodist_ij_C___OBJECTS = ij.C++.$(OBJEXT)
 ij_C___OBJECTS = $(nodist_ij_C___OBJECTS)
+ij_C___DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1)
 am_ij_b_OBJECTS = ij_b.$(OBJEXT)
 ij_b_OBJECTS = $(am_ij_b_OBJECTS)
+ij_b_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1)
 am_ij_mv_OBJECTS = ij_mv.$(OBJEXT)
 ij_mv_OBJECTS = $(am_ij_mv_OBJECTS)
+ij_mv_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1)
 nodist_ij_mv_C___OBJECTS = ij_mv.C++.$(OBJEXT)
 ij_mv_C___OBJECTS = $(nodist_ij_mv_C___OBJECTS)
+ij_mv_C___DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1)
 am_new_ij_OBJECTS = new_ij.$(OBJEXT)
 new_ij_OBJECTS = $(am_new_ij_OBJECTS)
+new_ij_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1)
 nodist_new_ij_C___OBJECTS = new_ij.C++.$(OBJEXT)
 new_ij_C___OBJECTS = $(nodist_new_ij_C___OBJECTS)
+new_ij_C___DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1)
 am_sstruct_OBJECTS = sstruct.$(OBJEXT)
 sstruct_OBJECTS = $(am_sstruct_OBJECTS)
+sstruct_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1)
 nodist_sstruct_C___OBJECTS = sstruct.C++.$(OBJEXT)
 sstruct_C___OBJECTS = $(nodist_sstruct_C___OBJECTS)
+sstruct_C___DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1)
 am_struct_OBJECTS = struct.$(OBJEXT)
 struct_OBJECTS = $(am_struct_OBJECTS)
+struct_DEPENDENCIES = $(am__DEPENDENCIES_1)
 nodist_struct_C___OBJECTS = struct.C++.$(OBJEXT)
 struct_C___OBJECTS = $(nodist_struct_C___OBJECTS)
+struct_C___DEPENDENCIES = $(am__DEPENDENCIES_1)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp =
 am__depfiles_maybe =
@@ -306,7 +328,7 @@ ij_mv_SOURCES = ij_mv.c
 new_ij_SOURCES = new_ij.c
 sstruct_SOURCES = sstruct.c
 struct_SOURCES = struct.c
-ij_DEPENDENCIES = \
+ij_dependencies = \
  $(includedir)/utilities.h\
  $(includedir)/HYPRE.h\
  $(includedir)/HYPRE_IJ_mv.h\
@@ -315,7 +337,7 @@ ij_DEPENDENCIES = \
  $(includedir)/parcsr_mv.h\
  $(includedir)/krylov.h
 
-ij_mv_DEPENDENCIES = \
+ij_mv_dependencies = \
  $(includedir)/utilities.h\
  $(includedir)/HYPRE.h\
  $(includedir)/HYPRE_IJ_mv.h\
@@ -323,7 +345,7 @@ ij_mv_DEPENDENCIES = \
  $(includedir)/HYPRE_parcsr_ls.h\
  $(includedir)/krylov.h
 
-new_ij_DEPENDENCIES = \
+new_ij_dependencies = \
  $(includedir)/utilities.h\
  $(includedir)/HYPRE.h\
  $(includedir)/HYPRE_IJ_mv.h\
@@ -332,12 +354,12 @@ new_ij_DEPENDENCIES = \
  $(includedir)/parcsr_mv.h\
  $(includedir)/krylov.h
 
-sstruct_DEPENDENCIES = \
+sstruct_dependencies = \
  $(includedir)/utilities.h\
  $(includedir)/HYPRE_sstruct_ls.h\
  $(includedir)/krylov.h
 
-struct_DEPENDENCIES = \
+struct_dependencies = \
  $(includedir)/utilities.h\
  $(includedir)/HYPRE_struct_ls.h\
  $(includedir)/struct_mv.h\
@@ -448,7 +470,7 @@ nodist_new_ij_C___SOURCES = new_ij.C++.cxx
 nodist_ij_mv_C___SOURCES = ij_mv.C++.cxx
 nodist_struct_C___SOURCES = struct.C++.cxx
 nodist_sstruct_C___SOURCES = sstruct.C++.cxx
-f77_ij_DEPENDENCIES = \
+f77_ij_dependencies = \
  $(includedir)/utilities.h\
  $(includedir)/HYPRE.h\
  $(includedir)/HYPRE_IJ_mv.h\
@@ -457,7 +479,7 @@ f77_ij_DEPENDENCIES = \
  $(includedir)/parcsr_mv.h\
  $(includedir)/krylov.h
 
-f77_ij_mv_DEPENDENCIES = \
+f77_ij_mv_dependencies = \
  $(includedir)/utilities.h\
  $(includedir)/HYPRE.h\
  $(includedir)/HYPRE_IJ_mv.h\
@@ -465,18 +487,18 @@ f77_ij_mv_DEPENDENCIES = \
  $(includedir)/HYPRE_parcsr_ls.h\
  $(includedir)/krylov.h
 
-f77_struct_DEPENDENCIES = \
+f77_struct_dependencies = \
  $(includedir)/utilities.h\
  $(includedir)/HYPRE_struct_ls.h\
  $(includedir)/struct_mv.h\
  $(includedir)/krylov.h
 
-#f77_struct_b_DEPENDENCIES = \
+#f77_struct_b_dependencies = \
 #$(includedir)/utilities.h\
 #$(includedir)/HYPRE_struct_ls.h\
 #$(includedir)/struct_mv.h\
 #$(includedir)/krylov.h
-fei_DEPENDENCIES = \
+fei_dependencies = \
  $(includedir)/utilities.h\
  $(includedir)/HYPRE.h\
  $(includedir)/HYPRE_IJ_mv.h\
@@ -484,7 +506,7 @@ fei_DEPENDENCIES = \
  $(includedir)/HYPRE_parcsr_ls.h\
  $(includedir)/HYPRE_LinSysCore.h
 
-ij_b_DEPENDENCIES = \
+ij_b_dependencies = \
  $(includedir)/utilities.h\
  $(includedir)/HYPRE.h\
  $(includedir)/HYPRE_IJ_mv.h\
@@ -497,7 +519,7 @@ ij_b_DEPENDENCIES = \
  $(includedir)/bHYPRE_IJParCSRVector_Impl.h\
  $(includedir)/bHYPRE_ParCSRDiagScale_Impl.h
 
-#struct_b_DEPENDENCIES = \
+#struct_b_dependencies = \
 #$(includedir)/utilities.h\
 #$(includedir)/HYPRE_struct_ls.h\
 #$(includedir)/Hypre_Box_Stub.h\
@@ -511,7 +533,7 @@ ij_b_DEPENDENCIES = \
 #$(includedir)/Hypre_StructJacobi_Stub.h\
 #$(includedir)/Hypre_StructSMG_Stub.h\
 #$(includedir)/Hypre_PCG_Stub.h
-ij_C___DEPENDENCIES = \
+ij_C___dependencies = \
  $(includedir)/utilities.h\
  $(includedir)/HYPRE.h\
  $(includedir)/HYPRE_IJ_mv.h\
@@ -520,7 +542,7 @@ ij_C___DEPENDENCIES = \
  $(includedir)/parcsr_mv.h\
  $(includedir)/krylov.h
 
-new_ij_C___DEPENDENCIES = \
+new_ij_C___dependencies = \
  $(includedir)/utilities.h\
  $(includedir)/HYPRE.h\
  $(includedir)/HYPRE_IJ_mv.h\
@@ -529,7 +551,7 @@ new_ij_C___DEPENDENCIES = \
  $(includedir)/parcsr_mv.h\
  $(includedir)/krylov.h
 
-ij_mv_C___DEPENDENCIES = \
+ij_mv_C___dependencies = \
  $(includedir)/utilities.h\
  $(includedir)/HYPRE.h\
  $(includedir)/HYPRE_IJ_mv.h\
@@ -537,13 +559,13 @@ ij_mv_C___DEPENDENCIES = \
  $(includedir)/HYPRE_parcsr_ls.h\
  $(includedir)/krylov.h
 
-struct_C___DEPENDENCIES = \
+struct_C___dependencies = \
  $(includedir)/utilities.h\
  $(includedir)/HYPRE_struct_ls.h\
  $(includedir)/struct_mv.h\
  $(includedir)/krylov.h
 
-sstruct_C___DEPENDENCIES = \
+sstruct_C___dependencies = \
  $(includedir)/utilities.h\
  $(includedir)/HYPRE_sstruct_ls.h\
  $(includedir)/krylov.h
@@ -742,6 +764,7 @@ EXTRA_DIST = \
  funcs.sh\
  runtest.sh
 
+binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 all: all-recursive
 
 .SUFFIXES:
@@ -775,34 +798,6 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
-install-binPROGRAMS: $(bin_PROGRAMS)
-	@$(NORMAL_INSTALL)
-	$(mkdir_p) $(DESTDIR)$(bindir)
-	@list='$(bin_PROGRAMS)'; for p in $$list; do \
-	  p1=`echo $$p|sed 's/$(EXEEXT)$$//'`; \
-	  if test -f $$p \
-	     || test -f $$p1 \
-	  ; then \
-	    f=`echo "$$p1" | sed 's,^.*/,,;$(transform);s/$$/$(EXEEXT)/'`; \
-	   echo " $(INSTALL_PROGRAM_ENV) $(LIBTOOL) --mode=install $(binPROGRAMS_INSTALL) $$p $(DESTDIR)$(bindir)/$$f"; \
-	   $(INSTALL_PROGRAM_ENV) $(LIBTOOL) --mode=install $(binPROGRAMS_INSTALL) $$p $(DESTDIR)$(bindir)/$$f || exit 1; \
-	  else :; fi; \
-	done
-
-uninstall-binPROGRAMS:
-	@$(NORMAL_UNINSTALL)
-	@list='$(bin_PROGRAMS)'; for p in $$list; do \
-	  f=`echo "$$p" | sed 's,^.*/,,;s/$(EXEEXT)$$//;$(transform);s/$$/$(EXEEXT)/'`; \
-	  echo " rm -f $(DESTDIR)$(bindir)/$$f"; \
-	  rm -f $(DESTDIR)$(bindir)/$$f; \
-	done
-
-clean-binPROGRAMS:
-	@list='$(bin_PROGRAMS)'; for p in $$list; do \
-	  f=`echo $$p|sed 's/$(EXEEXT)$$//'`; \
-	  echo " rm -f $$p $$f"; \
-	  rm -f $$p $$f ; \
-	done
 f77_ij$(EXEEXT): $(f77_ij_OBJECTS) $(f77_ij_DEPENDENCIES) 
 	@rm -f f77_ij$(EXEEXT)
 	$(F77LINK) $(f77_ij_LDFLAGS) $(f77_ij_OBJECTS) $(f77_ij_LDADD) $(LIBS)
@@ -1062,10 +1057,9 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-recursive
-all-am: Makefile $(PROGRAMS)
+all-am: Makefile
 installdirs: installdirs-recursive
 installdirs-am:
-	$(mkdir_p) $(DESTDIR)$(bindir)
 install: install-recursive
 install-exec: install-exec-recursive
 install-data: install-data-recursive
@@ -1092,8 +1086,7 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-recursive
 
-clean-am: clean-binPROGRAMS clean-generic clean-libtool clean-local \
-	mostlyclean-am
+clean-am: clean-generic clean-libtool clean-local mostlyclean-am
 
 distclean: distclean-recursive
 	-rm -f Makefile
@@ -1112,7 +1105,7 @@ info-am:
 
 install-data-am:
 
-install-exec-am: install-binPROGRAMS
+install-exec-am:
 	@$(NORMAL_INSTALL)
 	$(MAKE) $(AM_MAKEFLAGS) install-exec-hook
 
@@ -1139,26 +1132,25 @@ ps: ps-recursive
 
 ps-am:
 
-uninstall-am: uninstall-binPROGRAMS
+uninstall-am:
 	@$(NORMAL_INSTALL)
 	$(MAKE) $(AM_MAKEFLAGS) uninstall-hook
 
 uninstall-info: uninstall-info-recursive
 
 .PHONY: $(RECURSIVE_TARGETS) CTAGS GTAGS all all-am check check-am \
-	clean clean-binPROGRAMS clean-generic clean-libtool \
-	clean-local clean-recursive ctags ctags-recursive distclean \
-	distclean-compile distclean-generic distclean-libtool \
-	distclean-recursive distclean-tags distdir dvi dvi-am html \
-	html-am info info-am install install-am install-binPROGRAMS \
-	install-data install-data-am install-exec install-exec-am \
-	install-info install-info-am install-man install-strip \
-	installcheck installcheck-am installdirs installdirs-am \
-	maintainer-clean maintainer-clean-generic \
+	clean clean-generic clean-libtool clean-local clean-recursive \
+	ctags ctags-recursive distclean distclean-compile \
+	distclean-generic distclean-libtool distclean-recursive \
+	distclean-tags distdir dvi dvi-am html html-am info info-am \
+	install install-am install-data install-data-am install-exec \
+	install-exec-am install-info install-info-am install-man \
+	install-strip installcheck installcheck-am installdirs \
+	installdirs-am maintainer-clean maintainer-clean-generic \
 	maintainer-clean-recursive mostlyclean mostlyclean-compile \
 	mostlyclean-generic mostlyclean-libtool mostlyclean-recursive \
 	pdf pdf-am ps ps-am tags tags-recursive uninstall uninstall-am \
-	uninstall-binPROGRAMS uninstall-info-am
+	uninstall-info-am
 
 
 all: ij ij_mv new_ij struct sstruct
@@ -1183,6 +1175,24 @@ sstruct.C++.cxx:
 
 struct.C++.cxx:
 	cp -f $(srcdir)/struct.c struct.C++.cxx
+
+$(ij_OBJECTS): $(ij_dependencies)
+$(ij_mv_OBJECTS): $(ij_mv_dependencies)
+$(new_ij_OBJECTS): $(new_ij_dependencies)
+$(sstruct_OBJECTS): $(sstruct_dependencies)
+$(struct_OBJECTS): $(struct_dependencies)
+$(f77_ij_OBJECTS): $(f77_ij_dependencies)
+$(f77_ij_mv_OBJECTS): $(f77_ij_mv_dependencies)
+$(f77_struct_OBJECTS): $(f77_struct_dependencies)
+#$(f77_struct_b_OBJECTS): $(f77_struct_b_dependencies)
+$(fei_OBJECTS): $(fei_dependencies)
+$(ij_b_OBJECTS): $(ij_b_dependencies)
+#$(struct_b_OBJECTS): $(struct_b_dependencies)
+$(ij_C___OBJECTS): $(ij_C___dependencies)
+$(new_ij_C___OBJECTS): $(new_ij_C___dependencies)
+$(ij_mv_C___OBJECTS): $(ij_mv_C___dependencies)
+$(struct_C___OBJECTS): $(struct_C___dependencies)
+$(sstruct_C___OBJECTS): $(sstruct_C___dependencies)
 
 clean-local:
 	@ \
