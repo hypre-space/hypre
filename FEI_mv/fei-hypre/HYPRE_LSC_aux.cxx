@@ -3463,7 +3463,7 @@ void HYPRE_LinSysCore::solveUsingSuperLU(int& status)
 #ifdef HAVE_SUPERLU
    int                i, nnz, nrows, ierr;
    int                rowSize, *colInd, *new_ia, *new_ja, *ind_array;
-   int                j, nz_ptr, *partition, start_row, end_row;
+   int                nz_ptr, *partition, start_row, end_row;
    double             *colVal, *new_a, rnorm;
    HYPRE_ParCSRMatrix A_csr;
    HYPRE_ParVector    r_csr;
@@ -3475,9 +3475,8 @@ void HYPRE_LinSysCore::solveUsingSuperLU(int& status)
    double             *rhs, *soln;
    mem_usage_t        mem_usage;
    SuperMatrix        A2, B, L, U;
-   NRformat           *Astore, *Ustore;
+   NRformat           *Ustore;
    SCformat           *Lstore;
-   DNformat           *Bstore;
 
    //-------------------------------------------------------------------
    // available for sequential processing only for now
@@ -3562,26 +3561,26 @@ void HYPRE_LinSysCore::solveUsingSuperLU(int& status)
        status = 1;
        Lstore = (SCformat *) L.Store;
        Ustore = (NRformat *) U.Store;
-       //printf("No of nonzeros in factor L = %d\n", Lstore->nnz);
-       //printf("No of nonzeros in factor U = %d\n", Ustore->nnz);
-       //printf("SuperLU : NNZ in L+U = %d\n",Lstore->nnz+Ustore->nnz-nrows);
+       printf("No of nonzeros in factor L = %d\n", Lstore->nnz);
+       printf("No of nonzeros in factor U = %d\n", Ustore->nnz);
+       printf("SuperLU : NNZ in L+U = %d\n",Lstore->nnz+Ustore->nnz-nrows);
 
-       //dQuerySpace(&L, &U, panel_size, &mem_usage);
-       //printf("L\\U MB %.3f\ttotal MB needed %.3f\texpansions %d\n",
-       //       mem_usage.for_lu/1e6, mem_usage.total_needed/1e6,
-       //       mem_usage.expansions);
+       dQuerySpace(&L, &U, panel_size, &mem_usage);
+       printf("L\\U MB %.3f\ttotal MB needed %.3f\texpansions %d\n",
+              mem_usage.for_lu/1e6, mem_usage.total_needed/1e6,
+              mem_usage.expansions);
 
    } 
    else 
    {
        status = 0;
        printf("HYPRE_LinSysCore::solveUsingSuperLU - dgssv error = %d\n",info);
-       //if ( info <= nrows ) { /* factorization completes */
-       //    dQuerySpace(&L, &U, panel_size, &mem_usage);
-       //    printf("L\\U MB %.3f\ttotal MB needed %.3f\texpansions %d\n",
-       //           mem_usage.for_lu/1e6, mem_usage.total_needed/1e6,
-       //           mem_usage.expansions);
-       //}
+       if ( info <= nrows ) { /* factorization completes */
+           dQuerySpace(&L, &U, panel_size, &mem_usage);
+           printf("L\\U MB %.3f\ttotal MB needed %.3f\texpansions %d\n",
+                  mem_usage.for_lu/1e6, mem_usage.total_needed/1e6,
+                  mem_usage.expansions);
+       }
    }
 
    //-------------------------------------------------------------------
@@ -3641,9 +3640,9 @@ void HYPRE_LinSysCore::solveUsingSuperLU(int& status)
 void HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
 {
 #ifdef HAVE_SUPERLU
-   int                i, k, nnz, nrows, ierr;
+   int                i, nnz, nrows, ierr;
    int                rowSize, *colInd, *new_ia, *new_ja, *ind_array;
-   int                j, nz_ptr, *colLengths, count, maxRowSize, rowSize2;
+   int                j, nz_ptr, *colLengths, maxRowSize;
    int                *partition, start_row, end_row;
    double             *colVal, *new_a, rnorm;
    HYPRE_ParCSRMatrix A_csr;
@@ -3652,7 +3651,7 @@ void HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
    HYPRE_ParVector    x_csr;
 
    int                info, panel_size, permc_spec;
-   int                *perm_r, *perm_c, *etree, lwork, relax;
+   int                *perm_r, *perm_c, *etree, lwork;
    double             *rhs, *soln;
    double             *R, *C;
    double             *ferr, *berr;
@@ -3661,9 +3660,8 @@ void HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
    void               *work=NULL;
    mem_usage_t        mem_usage;
    SuperMatrix        A2, B, X, L, U;
-   NRformat           *Astore, *Ustore;
+   NRformat           *Ustore;
    SCformat           *Lstore;
-   DNformat           *Bstore;
    factor_param_t     iparam;
 
    //-------------------------------------------------------------------
@@ -3863,6 +3861,7 @@ void HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
 
 void HYPRE_LinSysCore::solveUsingDSuperLU(int& status)
 {
+#ifdef HAVE_DSUPERLU
    int                ierr;
    double             rnorm;
    HYPRE_ParCSRMatrix A_csr;
@@ -3873,7 +3872,6 @@ void HYPRE_LinSysCore::solveUsingDSuperLU(int& status)
    HYPRE_IJVectorGetObject(currB_, (void **) &b_csr);
    HYPRE_IJVectorGetObject(currR_, (void **) &r_csr);
 
-#ifdef HAVE_DSUPERLU
    HYPRE_LSI_DSuperLUCreate(comm_, &HYSolver_);  
    HYPRE_LSI_DSuperLUSetOutputLevel(HYSolver_, HYOutputLevel_);
    HYPRE_LSI_DSuperLUSetup(HYSolver_, A_csr, b_csr, x_csr);
@@ -4204,8 +4202,8 @@ void HYPRE_LinSysCore::beginCreateMapFromSoln()
 
 void HYPRE_LinSysCore::endCreateMapFromSoln()
 {
-   int    i, ierr, *equations, local_nrows, *iarray;
-   double *darray, *answers;
+   int    i, *iarray;
+   double *darray;
 
    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
       printf("%4d : HYPRE_LSC::entering endCreateMapFromSoln.\n",mypid_);
@@ -4398,10 +4396,9 @@ void HYPRE_LinSysCore::computeMinResProjection(HYPRE_ParCSRMatrix A_csr,
 void HYPRE_LinSysCore::addToMinResProjectionSpace(HYPRE_IJVector xvec,
                                                   HYPRE_IJVector bvec)
 {
-   int                i, ierr, nrows, *partition, start_row, end_row;
+   int                i, ierr, *partition, start_row, end_row;
    double             alpha;
    HYPRE_ParVector    v_csr, x_csr, xn_csr, b_csr, r_csr, bn_csr;
-   HYPRE_IJVector     tmpxvec, tmpbvec;
    HYPRE_ParCSRMatrix A_csr;
 
    //-----------------------------------------------------------------------
@@ -4430,7 +4427,6 @@ void HYPRE_LinSysCore::addToMinResProjectionSpace(HYPRE_IJVector xvec,
       HYPRE_ParCSRMatrixGetRowPartitioning( A_csr, &partition );
       start_row = partition[mypid_];
       end_row   = partition[mypid_+1] - 1;
-      nrows     = end_row - start_row + 1;
       free( partition );
       HYpxs_    = new HYPRE_IJVector[projectSize_+1];
       HYpbs_    = new HYPRE_IJVector[projectSize_+1];
@@ -4644,10 +4640,10 @@ void HYPRE_LinSysCore::computeAConjProjection(HYPRE_ParCSRMatrix A_csr,
 void HYPRE_LinSysCore::addToAConjProjectionSpace(HYPRE_IJVector xvec,
                                                  HYPRE_IJVector bvec)
 {
-   int                i, k, ierr, nrows, *partition, start_row, end_row;
-   double             alpha, acc_norm;
+   int                i, ierr, *partition, start_row, end_row;
+   double             alpha;
    HYPRE_ParVector    v_csr, x_csr, b_csr, bn_csr, xn_csr;
-   HYPRE_IJVector     tmpxvec;
+   //HYPRE_IJVector     tmpxvec;
    HYPRE_ParCSRMatrix A_csr;
 
    //-----------------------------------------------------------------------
@@ -4675,7 +4671,6 @@ void HYPRE_LinSysCore::addToAConjProjectionSpace(HYPRE_IJVector xvec,
       HYPRE_ParCSRMatrixGetRowPartitioning( A_csr, &partition );
       start_row = partition[mypid_];
       end_row   = partition[mypid_+1] - 1;
-      nrows     = end_row - start_row + 1;
       free( partition );
       HYpxs_    = new HYPRE_IJVector[projectSize_+1];
       HYpbs_    = new HYPRE_IJVector[projectSize_+1];
