@@ -217,7 +217,7 @@ int HYPRE_LSI_DDIlutSetOutputLevel(HYPRE_Solver solver, int level)
 int HYPRE_LSI_DDIlutSolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
                        HYPRE_ParVector b,   HYPRE_ParVector x )
 {
-   int              i, j, ierr = 0, *idiag, Nrows, extNrows, *mat_ia, *mat_ja;
+   int              i, j, *idiag, Nrows, extNrows, *mat_ia, *mat_ja;
    int              column, *order_list, *reorder_list, order_flag;
    double           *rhs, *soln, *dbuffer, ddata, *mat_aa;
    HYPRE_LSI_DDIlut *ilut_ptr = (HYPRE_LSI_DDIlut *) solver;
