@@ -106,11 +106,26 @@ install:
 
 clean:
 	@rm -f *.o
+	@ \
+	if [ -d Hypre ]; \
+	then \
+	  echo "Making Hypre clean ..."; \
+	  (cd Hypre; $(MAKE) clean); \
+	  echo ""; \
+	fi; \
 
 veryclean: clean
 	@rm -f ${HYPRE_BABEL_DRIVER_EXECS}
 	@rm -f ${HYPRE_BABEL_DRIVER_CXX_EXECS}
 	@rm -f ${HYPRE_BABEL_DRIVER_F77_EXECS}
+	@rm -f *.o
+	@ \
+	if [ -d Hypre ]; \
+	then \
+	  echo "Making Hypre very clean ..."; \
+	  (cd Hypre; $(MAKE) veryclean); \
+	  echo ""; \
+	fi; \
 
 ##################################################################
 # Rules
