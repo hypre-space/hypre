@@ -290,7 +290,7 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
        {
           sscanf(params[i],"%s %d", param, &k);
 #ifdef HAVE_MLI
-          if ( feGrid_ != NULL ) HYPRE_LSI_MLIFEDataSetNullSpaceInfo(feGrid_,k);
+          if ( feGrid_ != NULL ) HYPRE_LSI_MLIFEDataLoadNullSpaceInfo(feGrid_,k);
           if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
           {
              printf("       HYPRE_LSC::parameters FEDataNullSize = %d\n",k);
@@ -4629,21 +4629,6 @@ void HYPRE_LinSysCore::putIntoMappedMatrix(int row, int numValues,
 }
 
 //***************************************************************************
-// add extra nonzero entries into the matrix data structure
-//---------------------------------------------------------------------------
-
-void HYPRE_LinSysCore::loadElemMatrix(int elemID, int nNodes, 
-                         int *elemNodeList, int matDim, double **elemMat)
-{
-   (void) elemID;
-   (void) nNodes;
-   (void) elemNodeList;
-   (void) matDim;
-   (void) elemMat;
-   return;
-}
-
-//***************************************************************************
 // project the initial guess into the previous solutions (x + X inv(R) Q^T b)
 // Given r and B (a collection of right hand vectors such that A X = B)
 //
@@ -5229,5 +5214,64 @@ void HYPRE_LinSysCore::addToAConjProjectionSpace(HYPRE_IJVector xvec,
        printf("%4d : HYPRE_LSC::leaving addToAConjProjectionSpace %d\n",mypid_,
                projectCurrSize_);
     }
+}
+
+//***************************************************************************
+//***************************************************************************
+// MLI specific functions
+//***************************************************************************
+//***************************************************************************
+
+//***************************************************************************
+// initialize element node list
+//---------------------------------------------------------------------------
+
+void HYPRE_LinSysCore::FE_initElemNodeList(int elemID, int nNodesPerElem, 
+                                           int *nodeIDs)
+{
+#ifdef HAVE_MLI
+   if ( haveFEGrid_ && feGrid_ != NULL )
+      HYPRE_LSI_MLIFEDataInitElemNodeList(feGrid_,1,nNodesPerElem,&elemID,
+                                          &nodeIDs);
+#endif
+   return;
+}
+
+//***************************************************************************
+// initialize complete 
+//---------------------------------------------------------------------------
+
+void HYPRE_LinSysCore::FE_initComplete()
+{
+#ifdef HAVE_MLI
+   if ( haveFEGrid_ && feGrid_ != NULL )
+      HYPRE_LSI_MLIFEDataInitComplete(feGrid_);
+#endif
+   return;
+}
+
+//***************************************************************************
+// add extra nonzero entries into the matrix data structure
+//---------------------------------------------------------------------------
+
+void HYPRE_LinSysCore::FE_loadElemMatrix(int elemID, int nNodes, 
+                         int *elemNodeList, int matDim, double **elemMat)
+{
+#ifdef HAVE_MLI
+   (void) elemID;
+   (void) matDim;
+   (void) nNodes;
+   (void) elemNodeList;
+   if ( haveFEGrid_ && feGrid_ != NULL )
+   {
+      int nrows=0, ncols=0, *cols=NULL;
+      // convert elemNodeList into col and row numbers
+      HYPRE_LSI_MLIFEDataLoadElemMatrix(feGrid_,nrows,ncols,cols,
+                                        elemMat);
+      printf("HYPRE_LinSysCore::loadElemMatrix ERROR : not implemented.\n");
+      exit(1);
+   }
+#endif
+   return;
 }
 

@@ -781,8 +781,8 @@ int HYPRE_LinSysCore::setConnectivities(GlobalID elemBlock, int numElements,
    (void) elemBlock;
 #ifdef HAVE_MLI
    if ( haveFEGrid_ )
-      HYPRE_LSI_MLIFEDataSetElemNodeList(feGrid_, numElements, numNodesPerElem, 
-                                         elemIDs, connNodes);
+      HYPRE_LSI_MLIFEDataInitElemNodeList(feGrid_, numElements, numNodesPerElem, 
+                                          (int *) elemIDs, (int **) connNodes);
 #else
    (void) numElements;
    (void) numNodesPerElem;
@@ -1421,8 +1421,8 @@ int HYPRE_LinSysCore::sumIntoSystemMatrix(int numPtRows, const int* ptRows,
 
 #ifdef HAVE_MLI
    if ( haveFEGrid_ )
-      HYPRE_LSI_MLIFEDataAccumulateElemMatrix(feGrid_,numPtRows,numPtCols, 
-                                              ptCols, values );
+      HYPRE_LSI_MLIFEDataLoadElemMatrix(feGrid_,numPtRows,numPtCols, 
+                                        (int *) ptCols, (double **) values );
 #endif
 
    //-------------------------------------------------------------------

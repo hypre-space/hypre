@@ -822,11 +822,11 @@ int HYPRE_LSI_MLIFEDataDestroy( void *object )
 }
 
 /****************************************************************************/
-/* HYPRE_LSI_MLIFEDataSetNullSpaceInfo                                      */
+/* HYPRE_LSI_MLIFEDataLoadNullSpaceInfo                                     */
 /*--------------------------------------------------------------------------*/
 
 extern "C"
-int HYPRE_LSI_MLIFEDataSetNullSpaceInfo( void *object, int number )
+int HYPRE_LSI_MLIFEDataLoadNullSpaceInfo( void *object, int number )
 {
 #ifdef HAVE_MLI
    HYPRE_MLI_FEData *hypre_fedata = (HYPRE_MLI_FEData *) object;
@@ -906,13 +906,13 @@ int HYPRE_LSI_MLIFEDataInit( void *object, Lookup *lookup )
 }
 
 /****************************************************************************/
-/* HYPRE_LSI_MLIFEDataSetElemNodeList                                       */
+/* HYPRE_LSI_MLIFEDataInitElemNodeList                                      */
 /*--------------------------------------------------------------------------*/
 
 extern "C"
-int HYPRE_LSI_MLIFEDataSetElemNodeList( void *object, int numElements,
-                       int numNodesPerElem, const int* elemIDs,
-                       const int* const* connNodes)
+int HYPRE_LSI_MLIFEDataInitElemNodeList( void *object, int nElems,
+                       int nNodesPerElem, int *elemIDs,
+                       int **elemNodeList)
 {
 #ifdef HAVE_MLI
    int              i;
@@ -922,9 +922,9 @@ int HYPRE_LSI_MLIFEDataSetElemNodeList( void *object, int numElements,
    if ( hypre_fedata == NULL ) return 1;
    fedata = (MLI_FEData *) hypre_fedata->fedata_;
    if ( fedata == NULL ) return 1;
-   for ( i = 0; i < numElements; i++ )
+   for ( i = 0; i < nElems; i++ )
    {
-      fedata->initElemNodeList(elemIDs[i],numNodesPerElem,connNodes[i],3,NULL);
+      fedata->initElemNodeList(elemIDs[i],nNodesPerElem,elemNodeList[i],3,NULL);
       hypre_fedata->fedataElemIDs_[hypre_fedata->fedataElemCnt_++] = elemIDs[i];
    }
    return 0;
@@ -1001,13 +1001,12 @@ int HYPRE_LSI_MLIFEDataInitComplete( void *object )
 }
 
 /****************************************************************************/
-/* HYPRE_LSI_MLIFEDataAccumulateElemMatrix                                  */
+/* HYPRE_LSI_MLIFEDataLoadElemMatrix                                        */
 /*--------------------------------------------------------------------------*/
 
 extern "C"
-int HYPRE_LSI_MLIFEDataAccumulateElemMatrix(void *object, int nrows, int ncols,
-                                            const int * cols,
-                                            const double * const *inValues)
+int HYPRE_LSI_MLIFEDataLoadElemMatrix(void *object, int nrows, int ncols,
+                                      int *cols, double **inValues)
 {
 #ifdef HAVE_MLI
    int              nElems, elemID, i, j, rowCnt, matz=1, ierr, nNodes, itmp;
@@ -1026,7 +1025,7 @@ int HYPRE_LSI_MLIFEDataAccumulateElemMatrix(void *object, int nrows, int ncols,
 
    if (hypre_fedata->fedataMatDim_ != 0 && hypre_fedata->fedataMatDim_ != ncols)
    {
-      printf("HYPRE_LSI_MLIFEDataAccumulateElemMatrix ERROR:MatDim mismatch\n");
+      printf("HYPRE_LSI_MLIFEDataLoadElemMatrix ERROR:MatDim mismatch\n");
       exit(1);
    }
 
@@ -1067,7 +1066,7 @@ int HYPRE_LSI_MLIFEDataAccumulateElemMatrix(void *object, int nrows, int ncols,
    fedata->getNumElements(nElems);
    if ( hypre_fedata->fedataElemCnt_ >= nElems )
    {
-      printf("HYPRE_LSI_MLIFEDataAccumulateElemMatrix ERROR:nElems > max \n");
+      printf("HYPRE_LSI_MLIFEDataLoadElemMatrix ERROR:nElems > max \n");
       exit(1);
    }
    elemID = hypre_fedata->fedataElemIDs_[hypre_fedata->fedataElemCnt_++];
@@ -1167,8 +1166,8 @@ int HYPRE_LSI_MLIFEDataConstructNullSpace( void *object )
    nCnts  = hypre_fedata->nullCnts_;
    if ( nSpace == NULL || nCnts == NULL )
    {
-      printf("HYPRE_LSI_MLIFEDataConstructNullSpace ERROR : no kernel.\n");
-      exit(1);
+      /*printf("HYPRE_LSI_MLIFEDataConstructNullSpace ERROR : no kernel.\n");*/
+      return 1;
    }
 
    /* -------------------------------------------------------- */ 
