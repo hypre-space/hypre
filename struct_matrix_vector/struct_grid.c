@@ -223,7 +223,7 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
    int                  i;
 
    boxes = hypre_StructGridBoxes(grid);
-   prune = 0;
+   prune = 1;
 
    if (hypre_StructGridNeighbors(grid) == NULL)
    {
