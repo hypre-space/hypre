@@ -8,7 +8,7 @@
 #EHEADER***********************************************************************
 
 CC = gcc
-CCC = KCC -TEMPLATES_SUPPORTED
+CCC = KCC -DTEMPLATES_SUPPORTED
 
 F77 = f77
 
@@ -22,7 +22,7 @@ PETSC_CFLAGS =\
  -I${PETSC_DIR}/include\
  -I/usr/local/mpi/mpich/include
 
-ISIS_DIR = /home/cleary/ale3d/isis
+ISIS_DIR = /g/g18/cleary/ale3d/isis
 ISIS_FLAGS =\
  -I${ISIS_DIR}/include\
  -DBOOL_SUPPORTED
@@ -32,7 +32,10 @@ CFLAGS =\
  ${ISIS_FLAGS}\
  -I/usr/local/include\
  -I${HYPRE_DIR}/includes\
+ -DPETSC_AVAILABLE\
+ -DISIS_AVAILABLE\
  -DHYPRE_MEMORY_CHECK\
+ -I$(ISIS_DIR)/include\
  -g
 
 FFLAGS = -g
@@ -88,4 +91,8 @@ LFLAGS =\
  ${ISIS_LFLAGS}\
  -lf2c\
  -lm
+
+.cc.o:
+	@echo "Making (c++) " $@
+	${CCC} -o $@ -c ${CFLAGS} $<
 
