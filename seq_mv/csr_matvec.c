@@ -31,6 +31,9 @@ hypre_CSRMatrixMatvec( double           alpha,
    int         num_rows = hypre_CSRMatrixNumRows(A);
    int         num_cols = hypre_CSRMatrixNumCols(A);
 
+   int        *A_rownnz = hypre_CSRMatrixRownnz(A);
+   int         num_rownnz = hypre_CSRMatrixNumRownnz(A);
+
    double     *x_data = hypre_VectorData(x);
    double     *y_data = hypre_VectorData(y);
    int         x_size = hypre_VectorSize(x);
@@ -38,7 +41,11 @@ hypre_CSRMatrixMatvec( double           alpha,
 
    double      temp;
 
-   int         i, jj;
+   int         i, j, jj;
+
+   int         m;
+
+   double     xpar=0.7;
 
    int         ierr = 0;
 
@@ -106,12 +113,31 @@ hypre_CSRMatrixMatvec( double           alpha,
 
 #define HYPRE_SMP_PRIVATE i,jj
 #include "../utilities/hypre_smp_forloop.h"
-   for (i = 0; i < num_rows; i++)
+
+/* use rownnz pointer to do the A*x multiplication  when num_rownnz is smaller than num_rows */
+
+   if (num_rownnz < xpar*(num_rows))
    {
-      temp = y_data[i];
-      for (jj = A_i[i]; jj < A_i[i+1]; jj++)
-         temp += A_data[jj] * x_data[A_j[jj]];
-      y_data[i] = temp;
+       for (i = 0; i < num_rownnz; i++)
+       {
+         m = A_rownnz[i];
+         for (jj = A_i[m]; jj < A_i[m+1]; jj++)
+         {
+         j = A_j[jj];
+         y_data[m] += A_data[jj] * x_data[j];
+         }
+       }
+
+   }
+   else
+   {
+       for (i = 0; i < num_rows; i++)
+       {
+          temp = y_data[i];
+          for (jj = A_i[i]; jj < A_i[i+1]; jj++)
+             temp += A_data[jj] * x_data[A_j[jj]];
+          y_data[i] = temp;
+       }
    }
 
    /*-----------------------------------------------------------------
