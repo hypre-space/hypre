@@ -117,6 +117,45 @@ HYPRE_StructMatrixSetBoxValues( HYPRE_StructMatrix  matrix,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_StructMatrixGetBoxValues
+ *--------------------------------------------------------------------------*/
+                                                                                                         
+int
+HYPRE_StructMatrixGetBoxValues( HYPRE_StructMatrix  matrix,
+                                int                *ilower,
+                                int                *iupper,
+                                int                 num_stencil_indices,
+                                int                *stencil_indices,
+                                double             *values )
+{
+   hypre_Index         new_ilower;
+   hypre_Index         new_iupper;
+   hypre_Box          *new_value_box;
+                                                                                                         
+   int                 d;
+   int                 ierr = 0;
+                                                                                                         
+   hypre_ClearIndex(new_ilower);
+   hypre_ClearIndex(new_iupper);
+   for (d = 0; d < hypre_StructGridDim(hypre_StructMatrixGrid(matrix)); d++)
+   {
+      hypre_IndexD(new_ilower, d) = ilower[d];
+      hypre_IndexD(new_iupper, d) = iupper[d];
+   }
+   new_value_box = hypre_BoxCreate();
+   hypre_BoxSetExtents(new_value_box, new_ilower, new_iupper);
+                                                                                                         
+   ierr = hypre_StructMatrixSetBoxValues(matrix, new_value_box,
+                                         num_stencil_indices, stencil_indices,
+                                         values, -2);
+                                                                                                         
+   hypre_BoxDestroy(new_value_box);
+                                                                                                         
+   return (ierr);
+}
+                                                                                                         
+
+/*--------------------------------------------------------------------------
  * HYPRE_StructMatrixSetConstantValues
  *--------------------------------------------------------------------------*/
 
