@@ -160,6 +160,139 @@ HYPRE_ParCSRHybridSetLogging( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetPLogging
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParCSRHybridSetPLogging( HYPRE_Solver solver,
+                              int               plogging    )
+{
+   return( hypre_AMGHybridSetPLogging( (void *) solver, plogging ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetStrongThreshold
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParCSRHybridSetStrongThreshold( HYPRE_Solver solver,
+                              double            strong_threshold    )
+{
+   return( hypre_AMGHybridSetStrongThreshold( (void *) solver, 
+		strong_threshold ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetMaxRowSum
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParCSRHybridSetMaxRowSum( HYPRE_Solver solver,
+                              double             max_row_sum    )
+{
+   return( hypre_AMGHybridSetMaxRowSum( (void *) solver, max_row_sum ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetTruncFactor
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParCSRHybridSetTruncFactor( HYPRE_Solver solver,
+                              double              trunc_factor    )
+{
+   return( hypre_AMGHybridSetTruncFactor( (void *) solver, trunc_factor ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetMaxLevels
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParCSRHybridSetMaxLevels( HYPRE_Solver solver,
+                              int                max_levels    )
+{
+   return( hypre_AMGHybridSetMaxLevels( (void *) solver, max_levels ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetMeasureType
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParCSRHybridSetMeasureType( HYPRE_Solver solver,
+                              int                measure_type    )
+{
+   return( hypre_AMGHybridSetMeasureType( (void *) solver, measure_type ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetCoarsenType
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParCSRHybridSetCoarsenType( HYPRE_Solver solver,
+                              int                coarsen_type    )
+{
+   return( hypre_AMGHybridSetCoarsenType( (void *) solver, coarsen_type ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetCycleType
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParCSRHybridSetCycleType( HYPRE_Solver solver,
+                              int                cycle_type    )
+{
+   return( hypre_AMGHybridSetCycleType( (void *) solver, cycle_type ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetNumGridSweeps
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParCSRHybridSetNumGridSweeps( HYPRE_Solver solver,
+                              int               *num_grid_sweeps    )
+{
+   return( hypre_AMGHybridSetNumGridSweeps( (void *) solver, num_grid_sweeps ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetGridRelaxType
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParCSRHybridSetGridRelaxType( HYPRE_Solver solver,
+                              int               *grid_relax_type    )
+{
+   return( hypre_AMGHybridSetGridRelaxType( (void *) solver, grid_relax_type ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetGridRelaxPoints
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParCSRHybridSetGridRelaxPoints( HYPRE_Solver solver,
+                              int              **grid_relax_points    )
+{
+   return( hypre_AMGHybridSetGridRelaxPoints( (void *) solver, grid_relax_points ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetRelaxWeight
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParCSRHybridSetRelaxWeight( HYPRE_Solver solver,
+                              double             *relax_weight    )
+{
+   return( hypre_AMGHybridSetRelaxWeight( (void *) solver, relax_weight ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_ParCSRHybridGetNumIterations
  *--------------------------------------------------------------------------*/
 
