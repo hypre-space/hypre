@@ -78,6 +78,11 @@ int hypre_ILUfactor(int **i_ILUdof_to_dof_pointer,
 
   double diag, diagonal, entry, row_sum;
 
+  int *dof_on_list;
+
+  double *aux;
+
+  dof_on_list = hypre_CTAlloc(int, num_dofs);
   i_dof_to_ILUdof = hypre_CTAlloc(int, num_dofs);
   i_ILUdof_to_dof = hypre_CTAlloc(int, num_dofs);
 
@@ -108,11 +113,26 @@ int hypre_ILUfactor(int **i_ILUdof_to_dof_pointer,
 
 
   hypre_TFree(i_block_dof);
-  hypre_TFree(j_block_dof);
+  /* hypre_TFree(j_block_dof); */
 
-  /* create sparsity pattern of ILU matrix based on a^2; -------------- */
+ 
 
+  i_dof_dof = i_a;
+  j_dof_dof = j_a;
+
+
+  /*
   ierr = matrix_matrix_product(&i_dof_dof, &j_dof_dof,
+
+			       i_a, j_a, 
+			       i_a, j_a,
+
+			       num_dofs, num_dofs, num_dofs); 
+  */
+			       
+  /* create sparsity pattern of ILU matrix based on a^2; -------------- */
+  /*
+  ierr = matrix_matrix_product(&i_dof_dof_0, &j_dof_dof_0,
 
 			       i_a, j_a, 
 			       i_a, j_a,
@@ -120,7 +140,20 @@ int hypre_ILUfactor(int **i_ILUdof_to_dof_pointer,
 			       num_dofs, num_dofs, num_dofs);
 
 
-  i_dof_index = hypre_CTAlloc(int, num_dofs);
+  ierr = matrix_matrix_product(&i_dof_dof, &j_dof_dof,
+
+			       i_dof_dof_0, j_dof_dof_0,
+			       i_dof_dof_0, j_dof_dof_0,
+
+			       num_dofs, num_dofs, num_dofs);
+
+  free(i_dof_dof_0);
+  free(j_dof_dof_0);
+  */
+
+
+  /*  i_dof_index = hypre_CTAlloc(int, num_dofs); */
+  i_dof_index = j_block_dof;
 
   for (i=0; i< num_dofs; i++)
     i_dof_index[i] = -1;
@@ -146,7 +179,7 @@ int hypre_ILUfactor(int **i_ILUdof_to_dof_pointer,
 	i_dof_index[j_a[j]] = -1;
     }
 
-  hypre_TFree(i_dof_index);
+  /* hypre_CTFree(i_dof_index);  */
 
   /* ==================================================================
      factorize the matrix: --------------------------------------------
@@ -217,6 +250,8 @@ int hypre_ILUfactor(int **i_ILUdof_to_dof_pointer,
 
   hypre_TFree(a_dof_dof);
 
+
+
   i_ILUdof_ILUdof[num_dofs] = ILUdof_ILUdof_counter;
   i_ILUdof_ILUdof_t[num_dofs] = ILUdof_ILUdof_t_counter;
 
@@ -229,10 +264,20 @@ int hypre_ILUfactor(int **i_ILUdof_to_dof_pointer,
 	     i_dof_dof[num_dofs]);
     }
 
+
+  /*
   hypre_TFree(i_dof_dof);
   hypre_TFree(j_dof_dof);
+  */
 
-  hypre_TFree(i_dof_to_ILUdof);
+  aux =  hypre_CTAlloc(double, num_dofs);
+
+  for (i=0; i < num_dofs; i++)
+    aux[i] = 0.e0;
+
+  /* hypre_TFree(i_dof_to_ILUdof); */
+
+  dof_on_list = i_dof_to_ILUdof;
 
   /* FACTORIZATION PART: ===========================================*/
 
@@ -244,7 +289,7 @@ int hypre_ILUfactor(int **i_ILUdof_to_dof_pointer,
 	{
 	  printf("failure of ILU: non--positive diagonal entry: %e-----\n",
 		 diagonal);
-	  return -1;
+	  return -1; 
 	}
       else
 	diag = 1.e0/diagonal;
@@ -254,11 +299,39 @@ int hypre_ILUfactor(int **i_ILUdof_to_dof_pointer,
       for (j=i_ILUdof_ILUdof_t[i]; j < i_ILUdof_ILUdof_t[i+1]; j++)
 	b_dof_dof_t[j] *= diag;
 
-      /* form Schur complement: ------------------------------------*/
 
       for (j=i_ILUdof_ILUdof_t[i]; j < i_ILUdof_ILUdof_t[i+1]; j++)
 	{
 	  j1 = j_ILUdof_ILUdof_t[j];
+	  dof_on_list[j1] = 0;
+
+	  /* (j1,*) is allowed in the following sparsity pattern;  */
+
+	  for (l=i_ILUdof_ILUdof[j1]; l<i_ILUdof_ILUdof[j1+1]; l++)
+	    i_dof_index[j_ILUdof_ILUdof[l]] = 0;
+	  for (l=i_ILUdof_ILUdof_t[j1]; l<i_ILUdof_ILUdof_t[j1+1]; l++)
+	    i_dof_index[j_ILUdof_ILUdof_t[l]] = 0;
+
+	  for (k=i_ILUdof_ILUdof_t[i]; k<i_ILUdof_ILUdof_t[i+1]; k++)
+	    {
+	      j2 = j_ILUdof_ILUdof_t[k];
+	      if (i_dof_index[j2] < 0) 
+		{
+		  dof_on_list[j1] = -1;
+		  break;
+		}
+	    }
+	  for (l=i_ILUdof_ILUdof[j1]; l<i_ILUdof_ILUdof[j1+1]; l++)
+	    i_dof_index[j_ILUdof_ILUdof[l]] = -1;
+	  for (l=i_ILUdof_ILUdof_t[j1]; l<i_ILUdof_ILUdof_t[j1+1]; l++)
+	    i_dof_index[j_ILUdof_ILUdof_t[l]] = -1;
+	}
+
+      /* perform factorization: ********************************* */
+      for (j=i_ILUdof_ILUdof_t[i]; j < i_ILUdof_ILUdof_t[i+1]; j++)
+	{
+	  j1 = j_ILUdof_ILUdof_t[j];
+
 	  for (k=i_ILUdof_ILUdof[j1]; k<i_ILUdof_ILUdof[j1+1]; k++)
 	    if (j_ILUdof_ILUdof[k] == i)
 	      {
@@ -267,37 +340,48 @@ int hypre_ILUfactor(int **i_ILUdof_to_dof_pointer,
 		break;
 	      }
 
-	  /* row_sum = 0.e0;  */
+	  if (dof_on_list[j1] == 0) /* j1 is acceptable: ---------------- */
+	    {
+	      for (k=i_ILUdof_ILUdof_t[i]; k<i_ILUdof_ILUdof_t[i+1]; k++)
+		{
+		  j2 = j_ILUdof_ILUdof_t[k];
+		  if (dof_on_list[j2] == 0) /* j2 is acceptable: --------- */
+		    aux[j2]+= entry * diagonal * b_dof_dof_t[k];
+		}  
+
+	      for (k=i_ILUdof_ILUdof_t[i]; k<i_ILUdof_ILUdof_t[i+1]; k++)
+		{
+		  j2 = j_ILUdof_ILUdof_t[k];
+		  aux[j2] -= entry * diagonal * b_dof_dof_t[k];
+		}
+	    }
+
 	  for (k=i_ILUdof_ILUdof_t[i]; k<i_ILUdof_ILUdof_t[i+1]; k++)
 	    {
 	      j2 = j_ILUdof_ILUdof_t[k];
-	      if (j1 >= j2)
-		for (l=i_ILUdof_ILUdof[j1]; l<i_ILUdof_ILUdof[j1+1]; l++)
-		  {
-		    if (j_ILUdof_ILUdof[l] == j2)
-		      {
-			b_dof_dof[l] -= entry * diagonal * b_dof_dof_t[k];
-			break;
-		      }
-		    /* else
-		      row_sum-=entry * diagonal * b_dof_dof_t[k]; */
-		  }
-	      else
-		for (l=i_ILUdof_ILUdof_t[j1]; l<i_ILUdof_ILUdof_t[j1+1]; l++)
-		  if (j_ILUdof_ILUdof_t[l] == j2)
-		    {
-		      b_dof_dof_t[l] -= entry * diagonal * b_dof_dof_t[k];
-		      break;
-		    }
-	      /* else
-		    row_sum-= entry * diagonal * b_dof_dof_t[k]; */
+	      if (dof_on_list[j2] == 0) /* j2 is acceptable: --------- */
+		aux[j2] -= entry * diagonal * b_dof_dof_t[k];
 	    }
+				  
+	  for (l=i_ILUdof_ILUdof[j1]; l<i_ILUdof_ILUdof[j1+1]; l++)
+	    b_dof_dof[l] += aux[j_ILUdof_ILUdof[l]];
+	     
+	  for (l=i_ILUdof_ILUdof_t[j1]; l<i_ILUdof_ILUdof_t[j1+1]; l++)
+	    b_dof_dof_t[l] += aux[j_ILUdof_ILUdof_t[l]];
 
-	  /* b_dof_dof[i_ILUdof_ILUdof[j1]]+= row_sum;  */
+	     
+
+	  for (k=i_ILUdof_ILUdof_t[i]; k<i_ILUdof_ILUdof_t[i+1]; k++)
+	    {
+	      j2 = j_ILUdof_ILUdof_t[k];
+	      aux[j2] = 0.e0;
+	    }
 	}
     }
 
-
+  hypre_TFree(i_dof_to_ILUdof);
+  hypre_TFree(j_block_dof);
+  hypre_TFree(aux);
 
 
   *i_ILUdof_to_dof_pointer = i_ILUdof_to_dof;
