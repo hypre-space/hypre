@@ -42,7 +42,7 @@ hypre_IJVectorCreatePar(hypre_IJVector *vector, int *IJpartitioning)
    MPI_Comm_rank(comm, &my_id);
 
    MPI_Allreduce(&IJpartitioning[my_id], &jmin, 1, MPI_INT, MPI_MIN, comm);
-   MPI_Allreduce(&IJpartitioning[my_id], &jmax, 1, MPI_INT, MPI_MAX, comm);
+   MPI_Allreduce(&IJpartitioning[my_id+1], &jmax, 1, MPI_INT, MPI_MAX, comm);
    global_n = jmax - jmin; 
    
    partitioning = hypre_CTAlloc(int, num_procs+1); 
