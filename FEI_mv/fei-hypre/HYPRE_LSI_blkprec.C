@@ -12,16 +12,16 @@
 // element discretization of the incompressible Navier Stokes equations.
 // The steps in using this module are :
 //
-//      (1)  precond = new HYPRE_LSI_BlockP(HYPRE_IJMatrix Amat)
-//      (2a) precond->setSchemeBlockDiag(), or
-//      (2b) precond->setSchemeBlockTriangular(), or
-//      (2c) precond->setSchemeBlockInverse()
-//      (3)  If lumped mass matrix is to be loaded, do the following :
-//           -- call directly to HYPRE : beginCreateMapFromSoln 
-//           -- use FEI function to load initial guess with map
-//           -- call directly to HYPRE : endCreateMapFromSoln 
-//      (4)  precond->setup(mapFromSolnList_,mapFromSolnList2_,mapFromSolnLeng_)
-//      (5)  precond->solve( HYPRE_IJVector x, HYPRE_IJVector f )
+//    (1)  precond = new HYPRE_LSI_BlockP(HYPRE_IJMatrix Amat)
+//    (2a) precond->setSchemeBlockDiag(), or
+//    (2b) precond->setSchemeBlockTriangular(), or
+//    (2c) precond->setSchemeBlockInverse()
+//    (3)  If lumped mass matrix is to be loaded, do the following :
+//         -- call directly to HYPRE : beginCreateMapFromSoln 
+//         -- use FEI function to load initial guess with map
+//         -- call directly to HYPRE : endCreateMapFromSoln 
+//    (4)  precond->setup(mapFromSolnList_,mapFromSolnList2_,mapFromSolnLeng_)
+//    (5)  precond->solve( HYPRE_IJVector x, HYPRE_IJVector f )
 // 
 //******************************************************************************
 //******************************************************************************
@@ -114,8 +114,9 @@ extern "C" int HYPRE_LSI_BlockPrecondDestroy(HYPRE_Solver *solver)
 
 //------------------------------------------------------------------------------
 
-extern "C" int HYPRE_LSI_BlockPrecondSetLumpedMasses(HYPRE_Solver *solver,
-                                                     int length, double *mass_v)
+extern "C"
+int HYPRE_LSI_BlockPrecondSetLumpedMasses(HYPRE_Solver *solver, int length, 
+                                          double *mass_v)
 {
    int err=0;
 
@@ -295,7 +296,7 @@ int HYPRE_LSI_BlockP::setLumpedMasses(int length, double *Mdata)
 
 //******************************************************************************
 // Given a matrix A, compute the sizes and indices of the 2 x 2 blocks
-// (P22Size_, P22GSize_, P22LocalInds_, P22GlobalInds_, P22Offsets_, APartition_)
+// (P22Size_,P22GSize_,P22LocalInds_,P22GlobalInds_,P22Offsets_,APartition_)
 //------------------------------------------------------------------------------
 
 int HYPRE_LSI_BlockP::computeBlockInfo()
@@ -531,8 +532,10 @@ int HYPRE_LSI_BlockP::buildBlocks()
          if ( A12NewSize <= 0 ) A12NewSize = 1;
          A11RowLengs[A11RowCnt++] = A11NewSize;
          A12RowLengs[A12RowCnt++] = A12NewSize;
-         A11MaxRowLeng = (A11NewSize > A11MaxRowLeng) ? A11NewSize : A11MaxRowLeng;
-         A12MaxRowLeng = (A12NewSize > A12MaxRowLeng) ? A12NewSize : A12MaxRowLeng;
+         A11MaxRowLeng = (A11NewSize > A11MaxRowLeng) ? 
+                          A11NewSize : A11MaxRowLeng;
+         A12MaxRowLeng = (A12NewSize > A12MaxRowLeng) ? 
+                          A12NewSize : A12MaxRowLeng;
       }
       else // A(2,2) block
       {
@@ -544,7 +547,8 @@ int HYPRE_LSI_BlockP::buildBlocks()
             if (searchInd >= 0) A22NewSize++;
          }
          A22RowLengs[A22RowCnt++] = A22NewSize;
-         A22MaxRowLeng = (A22NewSize > A22MaxRowLeng) ? A22NewSize : A22MaxRowLeng;
+         A22MaxRowLeng = (A22NewSize > A22MaxRowLeng) ? 
+                          A22NewSize : A22MaxRowLeng;
       }
       HYPRE_ParCSRMatrixRestoreRow(Amat_, irow, &rowSize, &inds, &vals);
    }
@@ -816,12 +820,13 @@ int HYPRE_LSI_BlockP::setup(HYPRE_ParCSRMatrix Amat)
    ierr =  HYPRE_IJMatrixAssemble(Mmat);
    ierr += HYPRE_IJMatrixGetObject(Mmat, (void **) &Mmat_csr);
    assert( !ierr );
+   hypre_MatvecCommPkgCreate((hypre_ParCSRMatrix *) Mmat_csr);
 
    //------------------------------------------------------------------
    // create Pressure Poisson matrix (S = C^T M^{-1} C)
    //------------------------------------------------------------------
    
-   if ( outputLevel_ >= 1 ) printf("BlockPrecond setup : C^T M^{-1} C begins\n");
+   if (outputLevel_ >= 1) printf("BlockPrecond setup : C^T M^{-1} C begins\n");
 
    HYPRE_IJMatrixGetObject(A12mat_, (void **) &Cmat_csr);
    hypre_BoomerAMGBuildCoarseOperator( (hypre_ParCSRMatrix *) Cmat_csr,
@@ -829,7 +834,7 @@ int HYPRE_LSI_BlockP::setup(HYPRE_ParCSRMatrix Amat)
                                        (hypre_ParCSRMatrix *) Cmat_csr,
                                        (hypre_ParCSRMatrix **) &Smat_csr);
 
-   if ( outputLevel_ >= 1 ) printf("BlockPrecond setup : C^T M^{-1} C ends\n");
+   if (outputLevel_ >= 1) printf("BlockPrecond setup : C^T M^{-1} C ends\n");
 
    //------------------------------------------------------------------
    // construct new A22 = S, assuming original A22 = 0 
@@ -965,7 +970,7 @@ int HYPRE_LSI_BlockP::solve(HYPRE_ParVector fvec, HYPRE_ParVector xvec)
    V1Start = AStart - P22Offsets_[mypid];
    V2Leng  = P22Size_;
    V2Start = P22Offsets_[mypid];
-   fvals   = hypre_VectorData(hypre_ParVectorLocalVector((hypre_ParVector*) fvec));
+   fvals = hypre_VectorData(hypre_ParVectorLocalVector((hypre_ParVector*)fvec));
    V1Cnt   = V1Start;
    V2Cnt   = V2Start;
    for ( irow = AStart; irow < AEnd; irow++ ) 
@@ -974,14 +979,14 @@ int HYPRE_LSI_BlockP::solve(HYPRE_ParVector fvec, HYPRE_ParVector xvec)
       if ( searchInd >= 0 )
       {
          ierr = HYPRE_IJVectorSetValues(F2vec_, 1, (const int *) &V2Cnt,
-		                        (const double *) &fvals[irow]);
+		                        (const double *) &fvals[irow-AStart]);
          assert( !ierr );
          V2Cnt++;
       }
       else
       {
          ierr = HYPRE_IJVectorSetValues(F1vec_, 1, (const int *) &V1Cnt,
-		                        (const double *) &fvals[irow]);
+		                        (const double *) &fvals[irow-AStart]);
          assert( !ierr );
          V1Cnt++;
       }
@@ -1013,19 +1018,19 @@ int HYPRE_LSI_BlockP::solve(HYPRE_ParVector fvec, HYPRE_ParVector xvec)
 
    V1Cnt = V1Start;
    V2Cnt = V2Start;
-   xvals = hypre_VectorData(hypre_ParVectorLocalVector((hypre_ParVector*) xvec));
+   xvals = hypre_VectorData(hypre_ParVectorLocalVector((hypre_ParVector*)xvec));
    for ( irow = AStart; irow < AEnd; irow++ ) 
    {
       searchInd = hypre_BinarySearch( P22LocalInds_, irow, P22Size_);
       if ( searchInd >= 0 )
       {
-         ierr = HYPRE_IJVectorGetValues(X2vec_, 1, &V2Cnt, &xvals[irow]);
+         ierr = HYPRE_IJVectorGetValues(X2vec_, 1, &V2Cnt, &xvals[irow-AStart]);
          assert( !ierr );
          V2Cnt++;
       }
       else
       {
-         ierr = HYPRE_IJVectorGetValues(X1vec_, 1, &V1Cnt, &xvals[irow]);
+         ierr = HYPRE_IJVectorGetValues(X1vec_, 1, &V1Cnt, &xvals[irow-AStart]);
          assert( !ierr );
          V1Cnt++;
       }
@@ -1155,7 +1160,7 @@ int HYPRE_LSI_BlockP::solveBSolve(HYPRE_IJVector x1,HYPRE_IJVector x2,
 //------------------------------------------------------------------------------
 
 int HYPRE_LSI_BlockP::solveBISolve(HYPRE_IJVector x1,HYPRE_IJVector x2,
-                                             HYPRE_IJVector f1,HYPRE_IJVector f2)
+                                   HYPRE_IJVector f1,HYPRE_IJVector f2)
 {
    int                irow, ierr, max_iter=10, mypid, A22Start, A22NRows;
    int                i, *nsweeps, *relaxType, *inds;
