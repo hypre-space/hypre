@@ -32,6 +32,10 @@
 
 /* DO-NOT-DELETE splicer.begin(Hypre.GMRES._includes) */
 /* Put additional include files here... */
+#include "HYPRE.h"
+#include "utilities.h"
+#include "krylov.h"
+#include "HYPRE_parcsr_ls.h"
 /* DO-NOT-DELETE splicer.end(Hypre.GMRES._includes) */
 
 /*
@@ -41,7 +45,27 @@
 struct Hypre_GMRES__data {
   /* DO-NOT-DELETE splicer.begin(Hypre.GMRES._data) */
   /* Put private data members here... */
-  int ignore; /* dummy to force non-empty struct; remove if you add data */
+
+   MPI_Comm comm;
+   HYPRE_Solver solver;
+   Hypre_Operator matrix;
+   char * vector_type;
+
+   /* parameter cache, to save in Set*Parameter functions and copy in Apply: */
+   double tol;
+   int k_dim;
+   int min_iter;
+   int max_iter;
+   int rel_change;
+   int stop_crit;
+   int log_level;
+   int printlevel;
+
+   /* preconditioner cache, to save in SetPreconditioner and apply in Apply:*/
+   HYPRE_Solver * solverprecond;
+   HYPRE_PtrToSolverFcn precond; /* function */
+   HYPRE_PtrToSolverFcn precond_setup; /* function */
+
   /* DO-NOT-DELETE splicer.end(Hypre.GMRES._data) */
 };
 
