@@ -102,7 +102,7 @@ HYPRE_LSI_MLI;
 typedef struct HYPRE_MLI_FEData_Struct
 {
 #ifdef HAVE_MLI
-   MPI_Comm   comm;
+   MPI_Comm   comm_;
    MLI_FEData *fedata_;
    int        *fedataElemIDs_;
    int        fedataElemCnt_;
@@ -777,7 +777,7 @@ void *HYPRE_LSI_MLIFEDataCreate( MPI_Comm mpi_comm )
    hypre_fedata->fedataRowCnt_  = 0;
    hypre_fedata->fedataMatDim_  = 0;
    hypre_fedata->fedataValues_  = NULL;
-   hypre_fedata->comm           = mpi_comm;
+   hypre_fedata->comm_          = mpi_comm;
    hypre_fedata->fedata_        = new MLI_FEData(mpi_comm);
    hypre_fedata->lookup_        = NULL;
    hypre_fedata->computeNull_   = 0;
@@ -854,7 +854,7 @@ int HYPRE_LSI_MLIFEDataInit( void *object, Lookup *lookup )
    int              i, nFields, blockID=0, interleaveStrategy, lumpingStrategy;
    int              numElemDOF, numElemBlocks, numElements, numNodesPerElem;
    int              numEqnsPerElem, *nodeFieldIDs, nodeNumFields, numProcs;
-   int              nSharedNodes, *sharedProcLengs, **sharedProcIDs;
+   int              nSharedNodes, *sharedProcLengs, **sharedProcIDs, mypid;
    const int        *intArray, *fieldIDs, *fieldSizes, *sharedNodeIDs;
    const int* const *intArray2;
    HYPRE_MLI_FEData *hypre_fedata = (HYPRE_MLI_FEData *) object;
@@ -868,7 +868,9 @@ int HYPRE_LSI_MLIFEDataInit( void *object, Lookup *lookup )
    if ( hypre_fedata == NULL ) return 1;
    fedata = (MLI_FEData *) hypre_fedata->fedata_;
    if ( fedata == NULL ) return 1;
-   printf("HYPRE_LSI_MLIFEDataInit called.\n");
+   MPI_Comm_rank( hypre_fedata->comm_, &mypid);
+   if ( mypid == 0 )
+      printf("%4d : HYPRE_LSI_MLIFEDataInit called.\n", mypid);
 
    /* -------------------------------------------------------- */ 
    /* get and load field and element block information         */
@@ -916,7 +918,7 @@ int HYPRE_LSI_MLIFEDataInitElemNodeList( void *object, int nElems,
                        int **elemNodeList)
 {
 #ifdef HAVE_MLI
-   int              i;
+   int              i, mypid;
    HYPRE_MLI_FEData *hypre_fedata = (HYPRE_MLI_FEData *) object;
    MLI_FEData       *fedata;
 
@@ -924,7 +926,11 @@ int HYPRE_LSI_MLIFEDataInitElemNodeList( void *object, int nElems,
    fedata = (MLI_FEData *) hypre_fedata->fedata_;
    if ( fedata == NULL ) return 1;
    if ( hypre_fedata->fedataElemCnt_ == 0 )
-      printf("HYPRE_LSI_MLIFEDataInitElemNodeList called.\n");
+   {
+      MPI_Comm_rank( hypre_fedata->comm_, &mypid);
+      if ( mypid == 0 )
+         printf("%4d : HYPRE_LSI_MLIFEDataInitElemNodeList called.\n",mypid);
+   }
    for ( i = 0; i < nElems; i++ )
    {
       fedata->initElemNodeList(elemIDs[i],nNodesPerElem,elemNodeList[i],3,NULL);
@@ -944,7 +950,7 @@ extern "C"
 int HYPRE_LSI_MLIFEDataInitComplete( void *object )
 {
 #ifdef HAVE_MLI
-   int              i, j;
+   int              i, j, mypid;
    int              numProcs, nSharedNodes, *sharedProcLengs, **sharedProcIDs;
    const int        *intArray, *sharedNodeIDs;
    HYPRE_MLI_FEData *hypre_fedata = (HYPRE_MLI_FEData *) object;
@@ -962,13 +968,15 @@ int HYPRE_LSI_MLIFEDataInitComplete( void *object )
    hypre_fedata->fedataMatDim_  = 0;
    fedata = (MLI_FEData *) hypre_fedata->fedata_;
    if ( fedata == NULL ) return 1;
-   printf("HYPRE_LSI_MLIFEDataInitComplete called.\n");
+   MPI_Comm_rank( hypre_fedata->comm_, &mypid);
+   if ( mypid == 0 )
+      printf("%4d : HYPRE_LSI_MLIFEDataInitComplete called.\n",mypid);
 
    /* -------------------------------------------------------- */ 
    /* get and load shared node information (if nprocs > 1)     */
    /* -------------------------------------------------------- */ 
 
-   MPI_Comm_size( hypre_fedata->comm, &numProcs );
+   MPI_Comm_size( hypre_fedata->comm_, &numProcs );
    lookup = hypre_fedata->lookup_;
    if ( numProcs > 1 )
    {
@@ -1014,7 +1022,7 @@ int HYPRE_LSI_MLIFEDataLoadElemMatrix(void *object, int nrows, int ncols,
 {
 #ifdef HAVE_MLI
    int              nElems, elemID, i, j, rowCnt, matz=1, ierr, nNodes, itmp;
-   int              index, nDim, length, *nCnts;
+   int              index, nDim, length, *nCnts, mypid;
    double           *elemMat, *evalues, *evectors, *dAux1, *dAux2, *nSpace;
    char             paramString[100], *targv[1];
    HYPRE_MLI_FEData *hypre_fedata = (HYPRE_MLI_FEData *) object;
@@ -1044,7 +1052,9 @@ int HYPRE_LSI_MLIFEDataLoadElemMatrix(void *object, int nrows, int ncols,
       if ( hypre_fedata->fedataValues_ != NULL )
          delete [] hypre_fedata->fedataValues_;
       hypre_fedata->fedataValues_ = new double[ncols*ncols];
-      printf("HYPRE_LSI_MLIFEDataLoadElemMatrix called.\n");
+      MPI_Comm_rank( hypre_fedata->comm_, &mypid);
+      if ( mypid == 0 )
+         printf("%4d : HYPRE_LSI_MLIFEDataLoadElemMatrix called.\n",mypid);
    }
 
    /* -------------------------------------------------------- */ 
@@ -1127,7 +1137,7 @@ int HYPRE_LSI_MLIFEDataLoadElemMatrix(void *object, int nrows, int ncols,
          nCnts[index+length*j]++;
       }
    }
-   if ( elemID == 0 )
+   if ( elemID == -1 )
    {
       for ( i = 0; i < ncols; i++ )
          printf("Element %5d : eigenvalue = %e\n", elemID, evalues[i]);
@@ -1156,7 +1166,7 @@ extern "C"
 int HYPRE_LSI_MLIFEDataConstructNullSpace( void *object )
 {
 #ifdef HAVE_MLI
-   int    i, j, length, nDim, *nCnts;
+   int    i, j, length, nDim, *nCnts, mypid;
    double *nSpace;
    HYPRE_MLI_FEData *hypre_fedata = (HYPRE_MLI_FEData *) object;
 
@@ -1174,7 +1184,9 @@ int HYPRE_LSI_MLIFEDataConstructNullSpace( void *object )
       /*printf("HYPRE_LSI_MLIFEDataConstructNullSpace ERROR : no kernel.\n");*/
       return 1;
    }
-   printf("HYPRE_LSI_MLIFEDataConstructNullSpace called.\n");
+   MPI_Comm_rank(hypre_fedata->comm_, &mypid);
+   if ( mypid == 0 )
+      printf("%4d : HYPRE_LSI_MLIFEDataConstructNullSpace called.\n",mypid);
 
    /* -------------------------------------------------------- */ 
    /* adjust the kernel (since overlapped data have been       */
