@@ -14,7 +14,8 @@
 # All
 ##################################################################
 
-all: convert_icf3d.${AMG_ARCH} convert_ale3d.${AMG_ARCH}
+all: convert_icf3d.${AMG_ARCH} convert_ale3d.${AMG_ARCH} \
+     kill_ones.${AMG_ARCH}
 
 ##################################################################
 # convert_icf3d
@@ -45,6 +46,20 @@ convert_ale3d.${AMG_ARCH}: ${CONVERT_ALE3D_OBJS}
 ${CONVERT_ALE3D_OBJS}: ${CONVERT_ALE3D_HDRS}
 
 ##################################################################
+# kill_ones
+##################################################################
+
+KILL_ONES_HDRS = general.h matrix.h io.h
+KILL_ONES_FILES = kill_ones.c matrix.c write.c
+KILL_ONES_OBJS = ${KILL_ONES_FILES:.c=.${AMG_ARCH}.o}
+
+kill_ones.${AMG_ARCH}: ${KILL_ONES_OBJS}
+	@echo  "Linking" $@ "... "
+	@${AMG_LINK} -o $@ ${KILL_ONES_OBJS} ${LFLAGS}
+
+${KILL_ONES_OBJS}: ${KILL_ONES_HDRS}
+
+##################################################################
 # Generic rules
 ##################################################################
 
@@ -63,6 +78,7 @@ ${CONVERT_ALE3D_OBJS}: ${CONVERT_ALE3D_HDRS}
 install:
 	@${AMG_INSTALL} convert_icf3d.${AMG_ARCH} ${AMG_BIN_DIR}/convert_icf3d
 	@${AMG_INSTALL} convert_ale3d.${AMG_ARCH} ${AMG_BIN_DIR}/convert_ale3d
+	@${AMG_INSTALL} kill_ones.${AMG_ARCH} ${AMG_BIN_DIR}/kill_ones
 
 veryclean: clean
 	@rm -f convert_icf3d.${AMG_ARCH}
