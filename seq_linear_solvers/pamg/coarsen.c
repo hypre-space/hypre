@@ -889,10 +889,11 @@ hypre_AMGCoarsenRuge( hypre_CSRMatrix    *A,
 
 int
 hypre_AMGCoarsenRugeLoL( hypre_CSRMatrix    *A,
-                      double              strength_threshold,
-                      hypre_CSRMatrix   **S_ptr,
-                      int               **CF_marker_ptr,
-                      int                *coarse_size_ptr     )
+			 double              strength_threshold,
+			 int                  *dof_func,
+			 hypre_CSRMatrix   **S_ptr,
+			 int               **CF_marker_ptr,
+			 int                *coarse_size_ptr     )
 {
    int             *A_i           = hypre_CSRMatrixI(A);
    int             *A_j           = hypre_CSRMatrixJ(A);
@@ -996,14 +997,16 @@ hypre_AMGCoarsenRugeLoL( hypre_CSRMatrix    *A,
       {
          for (jA = A_i[i]+1; jA < A_i[i+1]; jA++)
          {
-            row_scale = hypre_max(row_scale, A_data[jA]);
+	   if (dof_func[i] == dof_func[A_j[jA]])
+	     row_scale = hypre_max(row_scale, A_data[jA]);
          }
       }
       else
       {
          for (jA = A_i[i]+1; jA < A_i[i+1]; jA++)
          {
-            row_scale = hypre_min(row_scale, A_data[jA]);
+	   if (dof_func[i] == dof_func[A_j[jA]])
+	     row_scale = hypre_min(row_scale, A_data[jA]);
          }
       }
 
@@ -1012,7 +1015,8 @@ hypre_AMGCoarsenRugeLoL( hypre_CSRMatrix    *A,
       {
          for (jA = A_i[i]+1; jA < A_i[i+1]; jA++)
          {
-            if (A_data[jA] <= strength_threshold * row_scale)
+            if (A_data[jA] <= strength_threshold * row_scale
+		|| dof_func[i] != dof_func[A_j[jA]])
             {
                ST_j[jA] = -1;
 	       num_strong--;
@@ -1023,11 +1027,12 @@ hypre_AMGCoarsenRugeLoL( hypre_CSRMatrix    *A,
       {
          for (jA = A_i[i]+1; jA < A_i[i+1]; jA++)
          {
-            if (A_data[jA] >= strength_threshold * row_scale)
-            {
-               ST_j[jA] = -1;
-	       num_strong--;
-            }
+            if (A_data[jA] >= strength_threshold * row_scale
+		|| dof_func[i] != dof_func[A_j[jA]])
+	      {
+		ST_j[jA] = -1;
+		num_strong--;
+	      }
          }
       }
    }
