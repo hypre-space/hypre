@@ -154,11 +154,13 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
    hypre_Index           index_temp;
 
    hypre_StructGrid     *fgrid;
+   hypre_BoxArray       *fgrid_boxes;
+   hypre_Box            *fgrid_box;
    int                  *fgrid_ids;
    hypre_StructGrid     *cgrid;
    hypre_BoxArray       *cgrid_boxes;
-   int                  *cgrid_ids;
    hypre_Box            *cgrid_box;
+   int                  *cgrid_ids;
    hypre_IndexRef        cstart;
    hypre_Index           stridec;
    hypre_Index           fstart;
@@ -167,17 +169,17 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
 
    int                   constant_coefficient;
 
-   int                   fi, ci, cbi;
+   int                   fi, ci, fbi;
    int                   loopi, loopj, loopk;
+   int                   floopi, floopj, floopk;
 
    hypre_Box            *A_dbox;
    hypre_Box            *P_dbox;
    hypre_Box            *RAP_dbox;
-   hypre_BoxArray       *cboundarys;
-   hypre_BoxArray       *cboundaryn;
-   hypre_Box            *cg_bdy_box;
-   hypre_Index          base_index;
-   hypre_Index          box_index;
+   hypre_BoxArray       *fboundarys;
+   hypre_BoxArray       *fboundaryn;
+   hypre_Box            *fg_bdy_box;
+   hypre_Index           box_index;
 
    double               *pa, *pb;
 
@@ -202,6 +204,7 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
    hypre_SetIndex(stridec, 1, 1, 1);
 
    fgrid = hypre_StructMatrixGrid(A);
+   fgrid_boxes = hypre_StructGridBoxes(fgrid);
    fgrid_ids = hypre_StructGridIDs(fgrid);
 
    cgrid = hypre_StructMatrixGrid(RAP);
@@ -236,6 +239,7 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
          }
 
          cgrid_box = hypre_BoxArrayBox(cgrid_boxes, ci);
+         fgrid_box = hypre_BoxArrayBox(fgrid_boxes, fi);
 
          cstart = hypre_BoxIMin(cgrid_box);
          hypre_StructMapCoarseToFine(cstart, cindex, cstride, fstart);
@@ -447,12 +451,9 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
                diag = -west - east -north -south;
                diagcorr = a_cw[iA_offd] + a_ce[iA_offd] + a_cs[iA_offd] + a_cn[iA_offd];
 
-               hypre_SetIndex( base_index, hypre_BoxIMinX(cgrid_box),
-                               hypre_BoxIMinY(cgrid_box),
-                               hypre_BoxIMinZ(cgrid_box) );
-               cboundaryn = hypre_BoxArrayCreate(0);
-               cboundarys = hypre_BoxArrayCreate(0);
-               hypre_BoxBoundaryDG( cgrid_box, cgrid, cboundarys, cboundaryn, cdir );
+               fboundaryn = hypre_BoxArrayCreate(0);
+               fboundarys = hypre_BoxArrayCreate(0);
+               hypre_BoxBoundaryDG( fgrid_box, fgrid, fboundarys, fboundaryn, cdir );
                /* ... cgrid_box comes from the grid, so there are no ghost zones
                   involved here */
                /* new diagonal (variable) elements...*/
@@ -469,31 +470,32 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
                      diagm = a_cc[iAm1] + diagcorr;
                      diagp = a_cc[iAp1] + diagcorr;
                      rap_cc[iAc] = a_cc[iA] + diagcorr + diag + 0.5*( diagm+diagp );
+
                      bdy = 0;  /* so we don't treat this point as a boundary pt twice */
-                     hypre_BoxLoopGetIndex( box_index, base_index, loopi, loopj, loopk );
-                     hypre_ForBoxI(cbi, cboundarys)
+                     floopi= fstart[0] + loopi*stridef[0];
+                     floopj= fstart[1] + loopj*stridef[1];
+                     floopk= fstart[2] + loopk*stridef[2];
+                     hypre_SetIndex(box_index, floopi, floopj, floopk);
+
+                     hypre_ForBoxI(fbi, fboundarys)
                         {
-                           cg_bdy_box = hypre_BoxArrayBox( cboundarys, cbi);
-                           if ( hypre_IndexInBoxP( box_index, cg_bdy_box ) && bdy==0 )
+                           fg_bdy_box = hypre_BoxArrayBox( fboundarys, fbi);
+                           if ( hypre_IndexInBoxP( box_index, fg_bdy_box ) && bdy==0 )
                            {  /* we're in a boundary (in the south direction) */
                               rap_cc[iAc] -= south;
                               rap_cc[iAc] -= 0.5*diagm;
-                              /* rap_cc[iAc] -= a_cs[iA_offd] + 0.5*( a_cc[iAm1] +
-                                 a_cw[iA_offd] + a_ce[iA_offd] + a_cn[iA_offd] );*/
                               bdy = 1;
                               break;
                            }
                         }
                      if ( bdy == 0 )
-                     hypre_ForBoxI(cbi, cboundaryn)
+                     hypre_ForBoxI(fbi, fboundaryn)
                         {
-                           cg_bdy_box = hypre_BoxArrayBox( cboundaryn, cbi);
-                           if ( hypre_IndexInBoxP( box_index, cg_bdy_box ) && bdy==0 )
+                           fg_bdy_box = hypre_BoxArrayBox( fboundaryn, fbi);
+                           if ( hypre_IndexInBoxP( box_index, fg_bdy_box ) && bdy==0 )
                            {  /* we're in a boundary (in the north direction) */
                               rap_cc[iAc] -= north;
                               rap_cc[iAc] -= 0.5*diagp;
-                              /*rap_cc[iAc] -= a_cn[iA_offd] + 0.5*( a_cc[iAp1] +
-                                a_cw[iA_offd] + a_ce[iA_offd] + a_cs[iA_offd] );*/
                               bdy = 1;
                               break;
                            }
@@ -501,8 +503,8 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
                   }
                hypre_BoxLoop2End(iA, iAc);
 
-               hypre_BoxArrayDestroy(cboundaryn);
-               hypre_BoxArrayDestroy(cboundarys);
+               hypre_BoxArrayDestroy(fboundaryn);
+               hypre_BoxArrayDestroy(fboundarys);
 
             }
 
