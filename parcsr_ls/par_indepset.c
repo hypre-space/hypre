@@ -98,7 +98,6 @@ hypre_BoomerAMGIndepSetInit( hypre_ParCSRMatrix *S,
 
 int
 hypre_BoomerAMGIndepSet( hypre_ParCSRMatrix *S,
-		      hypre_CSRMatrix    *S_ext,
                       double             *measure_array,
                       int                *graph_array,
                       int                 graph_array_size,
@@ -110,14 +109,9 @@ hypre_BoomerAMGIndepSet( hypre_ParCSRMatrix *S,
    hypre_CSRMatrix *S_diag      = hypre_ParCSRMatrixDiag(S);
    int             *S_diag_i    = hypre_CSRMatrixI(S_diag);
    int             *S_diag_j    = hypre_CSRMatrixJ(S_diag);
-   /* double          *S_diag_data = hypre_CSRMatrixData(S_diag); */
    hypre_CSRMatrix *S_offd      = hypre_ParCSRMatrixOffd(S);
    int             *S_offd_i    = hypre_CSRMatrixI(S_offd);
    int             *S_offd_j;
-   /* double          *S_offd_data; */
-   int             *S_ext_i;
-   int             *S_ext_j;
-   /* double          *S_ext_data; */
 
    int		    local_num_vars = hypre_CSRMatrixNumRows(S_diag);
    int              i, j, ig, jS, jj;
@@ -132,10 +126,6 @@ hypre_BoomerAMGIndepSet( hypre_ParCSRMatrix *S,
    if (hypre_CSRMatrixNumCols(S_offd))
    {
 	S_offd_j = hypre_CSRMatrixJ(S_offd);
-	/* S_offd_data = hypre_CSRMatrixData(S_offd); */
-	S_ext_i = hypre_CSRMatrixI(S_ext);
-	S_ext_j = hypre_CSRMatrixJ(S_ext);
-	/* S_ext_data = hypre_CSRMatrixData(S_ext); */
    }
 
    for (ig = 0; ig < graph_array_size; ig++)

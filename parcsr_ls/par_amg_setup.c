@@ -436,6 +436,16 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 	    hypre_BoomerAMGCoarsen(S, A_array[level], 2,
                              debug_flag, &CF_marker);
          }
+         else if (coarsen_type == 8)
+         {
+	    hypre_BoomerAMGCoarsenMIS(S, A_array[level], 0,
+                             debug_flag, &CF_marker);
+         }
+         else if (coarsen_type == 9)
+         {
+	    hypre_BoomerAMGCoarsenMIS(S, A_array[level], 1,
+                             debug_flag, &CF_marker);
+         }
          else if (coarsen_type)
          {
            if (nodal < 0)
