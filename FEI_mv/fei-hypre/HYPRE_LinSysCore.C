@@ -41,29 +41,6 @@
 #endif
 
 //---------------------------------------------------------------------------
-// getParam subroutine borrowed from the Sandia's FEI implementation
-//---------------------------------------------------------------------------
-
-int getParam(const char* flag,int numParams,char** strings,char* param) 
-{
-    char temp[64];
-
-    if (flag == 0 || strings == 0)
-        return(0); // flag or strings is the NULL pointer
-
-    for (int i = 0; i<numParams; i++) {
-        if (strings[i] != 0)  { // check for NULL pointer
-            if (strncmp(flag, strings[i], strlen(flag)) == 0) {
-                // flag found
-                sscanf(strings[i], "%s %s", temp, param);
-                return(1);
-            }
-        }
-    }
-    return(0);  // flag was not found in strings
-}
-
-//---------------------------------------------------------------------------
 // These are external functions needed internally here
 //---------------------------------------------------------------------------
 
@@ -471,7 +448,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
 
        else if ( !strcmp(param1, "solver") )
        {
-          sscanf(params[i],"%s", HYSolverName_);
+          sscanf(params[i],"%s %s", param, HYSolverName_);
           selectSolver(HYSolverName_);
           if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
           {
@@ -940,7 +917,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
 
        else if ( !strcmp(param1, "mlStrongThreshold") )
        {
-          sscanf(param,"%lg", &mlStrongThreshold_);
+          sscanf(params[i],"%s %lg", param, &mlStrongThreshold_);
           if ( mlStrongThreshold_ < 0.0 || mlStrongThreshold_ > 1.0 )
              mlStrongThreshold_ = 0.08;
           if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
@@ -3075,9 +3052,9 @@ void HYPRE_LinSysCore::solveUsingSuperLU(int& status)
     new_ia = new int[nrows+1];
     new_ja = new int[nnz];
     new_a  = new double[nnz];
-    A_csr  = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(HYA_);
+    A_csr  = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(currA_);
 
-    nz_ptr = getMatrixCSR(HYA_, nrows, nnz, new_ia, new_ja, new_a);
+    nz_ptr = getMatrixCSR(currA_, nrows, nnz, new_ia, new_ja, new_a);
 
     nnz = nz_ptr;
 
@@ -3089,7 +3066,7 @@ void HYPRE_LinSysCore::solveUsingSuperLU(int& status)
     ind_array = new int[nrows];
     for ( i = 0; i < nrows; i++ ) ind_array[i] = i;
     rhs = new double[nrows];
-    ierr = HYPRE_IJVectorGetLocalComponents(HYb_, nrows, ind_array, NULL, rhs);
+    ierr = HYPRE_IJVectorGetLocalComponents(currb_, nrows, ind_array, NULL, rhs);
     assert(!ierr);
     dCreate_Dense_Matrix(&B, nrows, 1, rhs, nrows, DN, _D, GE);
 
@@ -3143,11 +3120,11 @@ void HYPRE_LinSysCore::solveUsingSuperLU(int& status)
     if ( info == 0 )
     {
        soln = (double *) ((DNformat *) B.Store)->nzval;
-       ierr = HYPRE_IJVectorSetLocalComponents(HYx_,nrows,ind_array,NULL,soln);
+       ierr = HYPRE_IJVectorSetLocalComponents(currx_,nrows,ind_array,NULL,soln);
        assert(!ierr);
-       x_csr  = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(HYx_);
-       b_csr  = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(HYb_);
-       r_csr  = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(HYr_);
+       x_csr  = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(currX_);
+       b_csr  = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(currB_);
+       r_csr  = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(currR_);
        ierr = HYPRE_ParVectorCopy( b_csr, r_csr );
        assert(!ierr);
        ierr = HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
@@ -3254,7 +3231,7 @@ void HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
     for ( i = 0; i < nrows; i++ ) colLengths[i] = 0;
     
     maxRowSize = 0;
-    A_csr  = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(HYA_);
+    A_csr  = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(currA_);
     for ( i = 0; i < nrows; i++ )
     {
        HYPRE_ParCSRMatrixGetRow(A_csr,i,&rowSize,&colInd,&colVal);
@@ -3270,7 +3247,7 @@ void HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
     new_ja = new int[nnz];
     new_a  = new double[nnz];
 
-    nz_ptr = getMatrixCSR(HYA_, nrows, nnz, new_ia, new_ja, new_a);
+    nz_ptr = getMatrixCSR(currA_, nrows, nnz, new_ia, new_ja, new_a);
 
     nnz = nz_ptr;
 
@@ -3282,7 +3259,7 @@ void HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
     ind_array = new int[nrows];
     for ( i = 0; i < nrows; i++ ) ind_array[i] = i;
     rhs = new double[nrows];
-    ierr = HYPRE_IJVectorGetLocalComponents(HYb_,nrows,ind_array,NULL,rhs);
+    ierr = HYPRE_IJVectorGetLocalComponents(currB_,nrows,ind_array,NULL,rhs);
     assert(!ierr);
     dCreate_Dense_Matrix(&B, nrows, 1, rhs, nrows, DN, _D, GE);
     soln = new double[nrows];
@@ -3357,11 +3334,11 @@ void HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
 
     if ( status == 1 )
     {
-       ierr = HYPRE_IJVectorSetLocalComponents(HYx_,nrows,ind_array,NULL,soln);
+       ierr = HYPRE_IJVectorSetLocalComponents(currX_,nrows,ind_array,NULL,soln);
        assert(!ierr);
-       x_csr  = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(HYx_);
-       r_csr  = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(HYr_);
-       b_csr    = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(HYb_);
+       x_csr  = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(currX_);
+       r_csr  = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(currR_);
+       b_csr    = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(currB_);
        ierr = HYPRE_ParVectorCopy( b_csr, r_csr );
        assert(!ierr);
        ierr = HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
@@ -3464,7 +3441,7 @@ void HYPRE_LinSysCore::solveUsingY12M(int& status)
     for ( i = 0; i < nrows; i++ ) colLengths[i] = 0;
     
     maxRowSize = 0;
-    A_csr  = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(HYA_);
+    A_csr  = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(currA_);
     for ( i = 0; i < nrows; i++ )
     {
        HYPRE_ParCSRMatrixGetRow(A_csr,i,&rowSize,&colInd,&colVal);
@@ -3520,7 +3497,7 @@ void HYPRE_LinSysCore::solveUsingY12M(int& status)
     ind_array = new int[nrows];
     for ( i = 0; i < nrows; i++ ) ind_array[i] = i;
     rhs = new double[nrows];
-    ierr = HYPRE_IJVectorGetLocalComponents(HYb_,nrows,ind_array,NULL,rhs);
+    ierr = HYPRE_IJVectorGetLocalComponents(currB_,nrows,ind_array,NULL,rhs);
     assert(!ierr);
 
     //------------------------------------------------------------------
@@ -3540,11 +3517,11 @@ void HYPRE_LinSysCore::solveUsingY12M(int& status)
 
     if ( ifail == 0 )
     {
-       ierr = HYPRE_IJVectorSetLocalComponents(HYx_,nrows,ind_array,NULL,rhs);
+       ierr = HYPRE_IJVectorSetLocalComponents(currX_,nrows,ind_array,NULL,rhs);
        assert(!ierr);
-       x_csr  = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(HYx_);
-       r_csr  = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(HYr_);
-       b_csr  = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(HYb_);
+       x_csr  = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(currX_);
+       r_csr  = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(currR_);
+       b_csr  = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(currB_);
        ierr = HYPRE_ParVectorCopy( b_csr, r_csr );
        assert(!ierr);
        ierr = HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
