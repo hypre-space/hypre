@@ -12,7 +12,7 @@
 # struct: Run PFMG on a constant coefficient, variable diagonal matrix
 #=============================================================================
 
-mpirun -np 2 ./struct -n 10 20 20 -solver 4 \
+mpirun -np 2 ./struct -n 10 20 20 -solver 4 -P 2 1 1\
  > pfmgconstcoeffmp.out.0
 mpirun -np 1 ./struct -n 20 20 20 -solver 4 \
  > pfmgconstcoeffmp.out.1
