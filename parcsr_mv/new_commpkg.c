@@ -588,7 +588,7 @@ hypre_LocateAssummedPartition(int row_start, int row_end, int global_num_rows,
                         hypre_SmIJPartition *part, int myid)
 {  
 
-  int       i, ierr;
+   int       i, ierr;
 
    int       *contact_list;
    int        contact_list_length, contact_list_storage;
@@ -597,7 +597,9 @@ hypre_LocateAssummedPartition(int row_start, int row_end, int global_num_rows,
    int        owner_start, owner_end;
    int        tmp_row_start, tmp_row_end, complete;
 
-   int        locate_row_start[2], locate_row_end[2], locate_ranges;
+   int        locate_row_start[2], locate_ranges;
+/*   int        locate_row_end[2]; */
+   
 
    int        locate_row_count, rows_found;  
  
@@ -750,16 +752,16 @@ hypre_LocateAssummedPartition(int row_start, int row_end, int global_num_rows,
    locate_row_count = 0;
  
    locate_row_start[0]=0;
-   locate_row_end[0]=0;
+   /* locate_row_end[0]=0; */
    locate_row_start[1]=0;
-   locate_row_end[1]=0;
+   /* locate_row_end[1]=0; */
    locate_ranges = 0;
 
    if (part->row_end < row_start  || row_end < part->row_start  ) 
    /*no overlap - so all of my assumed rows */ 
    {
       locate_row_start[0] = part->row_start;
-      locate_row_end[0] = part->row_end;
+      /* locate_row_end[0] = part->row_end; */
       locate_ranges++;
       locate_row_count += part->row_end - part->row_start + 1; 
    }
@@ -768,7 +770,7 @@ hypre_LocateAssummedPartition(int row_start, int row_end, int global_num_rows,
       if (part->row_start < row_start) 
       {/* check for locate rows on the low end of the local range */
          locate_row_start[0] = part->row_start;
-         locate_row_end[0] = row_start - 1;
+         /* locate_row_end[0] = row_start - 1; */
          locate_ranges++;
          locate_row_count += (row_start-1) - part->row_start + 1;
       } 
@@ -777,12 +779,12 @@ hypre_LocateAssummedPartition(int row_start, int row_end, int global_num_rows,
          if (locate_row_start[0]) 
          {
 	    locate_row_start[1] = row_end +1;
-            locate_row_end[1] = part->row_end;
+            /* locate_row_end[1] = part->row_end; */
 	 }
          else
          {
 	    locate_row_start[0] = row_end +1;
-            locate_row_end[0] = part->row_end;
+            /* locate_row_end[0] = part->row_end; */
          } 
          locate_ranges++;
          locate_row_count += part->row_end - (row_end + 1) + 1;
@@ -863,7 +865,7 @@ hypre_LocateAssummedPartition(int row_start, int row_end, int global_num_rows,
    hypre_TFree(contact_list);
 
 
-   return(0);
+   return(ierr);
 
 }
 
