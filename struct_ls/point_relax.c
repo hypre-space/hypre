@@ -47,7 +47,6 @@ typedef struct
    hypre_StructMatrix     *A;
    hypre_StructVector     *b;
    hypre_StructVector     *x;
-
    hypre_StructVector     *t;
 
    int                     diag_rank;
@@ -89,7 +88,11 @@ hypre_PointRelaxCreate( MPI_Comm  comm )
    (relax_data -> pointset_ranks)   = NULL;
    (relax_data -> pointset_strides) = NULL;
    (relax_data -> pointset_indices) = NULL;
+   (relax_data -> A)                = NULL;
+   (relax_data -> b)                = NULL;
+   (relax_data -> x)                = NULL;
    (relax_data -> t)                = NULL;
+   (relax_data -> compute_pkgs)     = NULL;
 
    hypre_SetIndex(stride, 1, 1, 1);
    hypre_SetIndex(indices[0], 0, 0, 0);
@@ -115,7 +118,13 @@ hypre_PointRelaxDestroy( void *relax_vdata )
       for (i = 0; i < (relax_data -> num_pointsets); i++)
       {
          hypre_TFree(relax_data -> pointset_indices[i]);
-         hypre_ComputePkgDestroy(relax_data -> compute_pkgs[i]);
+      }
+      if (relax_data -> compute_pkgs)
+      {
+         for (i = 0; i < (relax_data -> num_pointsets); i++)
+         {
+            hypre_ComputePkgDestroy(relax_data -> compute_pkgs[i]);
+         }
       }
       hypre_TFree(relax_data -> pointset_sizes);
       hypre_TFree(relax_data -> pointset_ranks);
@@ -124,8 +133,8 @@ hypre_PointRelaxDestroy( void *relax_vdata )
       hypre_StructMatrixDestroy(relax_data -> A);
       hypre_StructVectorDestroy(relax_data -> b);
       hypre_StructVectorDestroy(relax_data -> x);
-      hypre_TFree(relax_data -> compute_pkgs);
       hypre_StructVectorDestroy(relax_data -> t);
+      hypre_TFree(relax_data -> compute_pkgs);
 
       hypre_FinalizeTiming(relax_data -> time_index);
       hypre_TFree(relax_data);
@@ -1233,8 +1242,8 @@ hypre_PointRelax( void               *relax_vdata,
       }
       else
       {
-          /* hypre_relax_copy( relax_data, t, x );*/
-         hypre_StructCopy(t, x);
+         /*         hypre_StructCopy(t, x);*/
+         hypre_relax_copy( relax_data, t, x );
       }
 
       p    = (p + 1) % num_pointsets;
