@@ -51,10 +51,6 @@ remove_point(hypre_LinkList   *LoL_head_ptr,
    hypre_LinkList   LoL_head = *LoL_head_ptr;
    hypre_LinkList   LoL_tail = *LoL_tail_ptr;
    hypre_LinkList   list_ptr;
-   hypre_LinkList   new_ptr;
-
-   int         list_tail;
-   int         old_tail;
 
    list_ptr =  LoL_head;
 
@@ -163,8 +159,9 @@ hypre_LinkList create_elt( int Item )
        new_elt_ptr -> prev_elt = NULL;
        new_elt_ptr -> head = LIST_TAIL;
        new_elt_ptr -> tail = LIST_HEAD;
-       return (new_elt_ptr);
     }
+
+    return (new_elt_ptr);
 }
 
 /*****************************************************************
@@ -186,7 +183,6 @@ enter_on_lists(hypre_LinkList   *LoL_head_ptr,
    hypre_LinkList   list_ptr;
    hypre_LinkList   new_ptr;
 
-   int         list_tail;
    int         old_tail;
 
    list_ptr =  LoL_head;
