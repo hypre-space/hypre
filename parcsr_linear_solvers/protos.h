@@ -33,4 +33,13 @@ double hypre_Rand P((void ));
 /* transpose.c */
 int hypre_CSRMatrixTranspose P((hypre_CSRMatrix *A , hypre_CSRMatrix **AT ));
 
+/* par_laplace.c */
+hypre_ParCSRMatrix *hypre_GenerateLaplacian P((MPI_Comm comm, int nx, int ny,
+	int nz, int P, int Q, int R, int p, int q, int r, double *value,
+	int **global_part_ptr));
+int map P((int ix, int iy, int iz, int p, int q, int r, int P, int Q, int R,
+	int *nx_part, int *ny_part, int *nz_part, int *global_part));
+void qsort0 P((int *v, int left, int right));
+void swap P((int *v, int i, int j));
+
 #undef P
