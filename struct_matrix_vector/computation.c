@@ -299,7 +299,7 @@ headers.h
    hypre_ComputePkgDeptBoxes(compute_pkg)   = dept_boxes;
    hypre_CopyIndex(stride, hypre_ComputePkgStride(compute_pkg));
 
-   hypre_ComputePkgGrid(compute_pkg)        = hypre_StructGridRef(grid);
+   hypre_StructGridRef(grid, &hypre_ComputePkgGrid(compute_pkg));
    hypre_ComputePkgDataSpace(compute_pkg)   = data_space;
    hypre_ComputePkgNumValues(compute_pkg)   = num_values;
 

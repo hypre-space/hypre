@@ -19,6 +19,9 @@ grid-stencil computation.  These patterns are defined by intersecting
 the data dependencies of each box (including data dependencies within
 the box) with its neighbor boxes.
 
+{\bf Note:} It is assumed that the grids neighbor information is
+sufficiently large.
+
 {\bf Note:} No concept of data ownership is assumed.  As a result,
 problematic communications patterns can be produced when the grid
 boxes overlap.  For example, it is likely that some boxes will have
@@ -37,9 +40,9 @@ headers.h
   description of the grid data to be sent to other processors.
 @param recv_boxes_ptr [OUT]
   description of the grid data to be received from other processors.
-@param send_processes_ptr [OUT]
+@param send_procs_ptr [OUT]
   processors that data is to be sent to.
-@param recv_processes_ptr [OUT]
+@param recv_procs_ptr [OUT]
   processors that data is to be received from.
 
 @see hypre_CreateComputeInfo */
@@ -50,28 +53,27 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
                                  hypre_StructStencil   *stencil,
                                  hypre_BoxArrayArray  **send_boxes_ptr,
                                  hypre_BoxArrayArray  **recv_boxes_ptr,
-                                 int                 ***send_processes_ptr,
-                                 int                 ***recv_processes_ptr )
+                                 int                 ***send_procs_ptr,
+                                 int                 ***recv_procs_ptr )
 {
    int                      ierr = 0;
 
    /* output variables */
    hypre_BoxArrayArray     *send_boxes;
    hypre_BoxArrayArray     *recv_boxes;
-   int                    **send_processes;
-   int                    **recv_processes;
+   int                    **send_procs;
+   int                    **recv_procs;
 
    /* internal variables */
    hypre_BoxArray          *boxes = hypre_StructGridBoxes(grid);
 
    hypre_BoxNeighbors      *neighbors;
    hypre_BoxArray          *neighbor_boxes;
-   int                     *neighbor_processes;
+   int                     *neighbor_procs;
    hypre_Box               *neighbor_box;
 
    hypre_Index             *stencil_shape;
    hypre_IndexRef           stencil_offset;
-   int                      stencil_max_offset;
 
    hypre_Box               *box;
    hypre_Box               *shift_box;
@@ -97,27 +99,19 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
 
    neighbors = hypre_StructGridNeighbors(grid);
 
-   stencil_max_offset = hypre_StructStencilMaxOffset(stencil);
-   if (stencil_max_offset > hypre_BoxNeighborsMaxDistance(neighbors))
-   {
-      hypre_StructGridMaxDistance(grid) = stencil_max_offset;
-      hypre_StructGridAssemble(grid);
-      neighbors = hypre_StructGridNeighbors(grid);
-   }
-
    /*------------------------------------------------------
-    * Compute send/recv boxes and processes
+    * Compute send/recv boxes and procs
     *------------------------------------------------------*/
 
    send_boxes = hypre_BoxArrayArrayCreate(hypre_BoxArraySize(boxes));
    recv_boxes = hypre_BoxArrayArrayCreate(hypre_BoxArraySize(boxes));
-   send_processes = hypre_CTAlloc(int *, hypre_BoxArraySize(boxes));
-   recv_processes = hypre_CTAlloc(int *, hypre_BoxArraySize(boxes));
+   send_procs = hypre_CTAlloc(int *, hypre_BoxArraySize(boxes));
+   recv_procs = hypre_CTAlloc(int *, hypre_BoxArraySize(boxes));
 
    stencil_shape = hypre_StructStencilShape(stencil);
 
    neighbor_boxes = hypre_BoxNeighborsBoxes(neighbors);
-   neighbor_processes = hypre_BoxNeighborsProcesses(neighbors);
+   neighbor_procs = hypre_BoxNeighborsProcs(neighbors);
 
    box0 = hypre_BoxCreate();
    shift_box = hypre_BoxCreate();
@@ -178,17 +172,17 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
             recv_box_array_size += hypre_BoxArraySize(cbox_arrays[j]);
          }
 
-         /* create recv_box_array and recv_processes */
+         /* create recv_box_array and recv_procs */
          recv_box_array = hypre_BoxArrayArrayBoxArray(recv_boxes, i);
          hypre_BoxArraySetSize(recv_box_array, recv_box_array_size);
-         recv_processes[i] = hypre_CTAlloc(int, recv_box_array_size);
+         recv_procs[i] = hypre_CTAlloc(int, recv_box_array_size);
          n = 0;
          for (m = 0; m < num_cbox_arrays; m++)
          {
             j = cbox_arrays_i[m];
             hypre_ForBoxI(k, cbox_arrays[j])
                {
-                  recv_processes[i][n] = neighbor_processes[j];
+                  recv_procs[i][n] = neighbor_procs[j];
                   hypre_CopyBox(hypre_BoxArrayBox(cbox_arrays[j], k),
                                 hypre_BoxArrayBox(recv_box_array, n));
                   n++;
@@ -266,17 +260,17 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
             send_box_array_size += hypre_BoxArraySize(cbox_arrays[j]);
          }
 
-         /* create send_box_array and send_processes */
+         /* create send_box_array and send_procs */
          send_box_array = hypre_BoxArrayArrayBoxArray(send_boxes, i);
          hypre_BoxArraySetSize(send_box_array, send_box_array_size);
-         send_processes[i] = hypre_CTAlloc(int, send_box_array_size);
+         send_procs[i] = hypre_CTAlloc(int, send_box_array_size);
          n = 0;
          for (m = 0; m < num_cbox_arrays; m++)
          {
             j = cbox_arrays_i[m];
             hypre_ForBoxI(k, cbox_arrays[j])
                {
-                  send_processes[i][n] = neighbor_processes[j];
+                  send_procs[i][n] = neighbor_procs[j];
                   hypre_CopyBox(hypre_BoxArrayBox(cbox_arrays[j], k),
                                 hypre_BoxArrayBox(send_box_array, n));
                   n++;
@@ -298,8 +292,8 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
 
    *send_boxes_ptr = send_boxes;
    *recv_boxes_ptr = recv_boxes;
-   *send_processes_ptr = send_processes;
-   *recv_processes_ptr = recv_processes;
+   *send_procs_ptr = send_procs;
+   *recv_procs_ptr = recv_procs;
 
    return ierr;
 }
@@ -309,6 +303,9 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
 /** Return descriptions of communications patterns for a given grid
 with "ghost zones".  These patterns are defined by intersecting each
 box, "grown" by the number of "ghost zones", with its neighbor boxes.
+
+{\bf Note:} It is assumed that the grids neighbor information is
+sufficiently large.
 
 {\bf Input files:}
 headers.h
@@ -323,9 +320,9 @@ headers.h
   description of the grid data to be sent to other processors.
 @param recv_boxes_ptr [OUT]
   description of the grid data to be received from other processors.
-@param send_processes_ptr [OUT]
+@param send_procs_ptr [OUT]
   processors that data is to be sent to.
-@param recv_processes_ptr [OUT]
+@param recv_procs_ptr [OUT]
   processors that data is to be received from.
 
 @see hypre_CreateCommInfoFromStencil */
@@ -336,26 +333,26 @@ hypre_CreateCommInfoFromNumGhost( hypre_StructGrid      *grid,
                                   int                   *num_ghost,
                                   hypre_BoxArrayArray  **send_boxes_ptr,
                                   hypre_BoxArrayArray  **recv_boxes_ptr,
-                                  int                 ***send_processes_ptr,
-                                  int                 ***recv_processes_ptr )
+                                  int                 ***send_procs_ptr,
+                                  int                 ***recv_procs_ptr )
 {
    int                      ierr = 0;
 
    /* output variables */
    hypre_BoxArrayArray     *send_boxes;
    hypre_BoxArrayArray     *recv_boxes;
-   int                    **send_processes;
-   int                    **recv_processes;
+   int                    **send_procs;
+   int                    **recv_procs;
 
    /* internal variables */
    hypre_BoxArray          *boxes = hypre_StructGridBoxes(grid);
+   int                     *ids   = hypre_StructGridIDs(grid);
 
    hypre_BoxNeighbors      *neighbors;
    hypre_BoxArray          *neighbor_boxes;
-   int                     *neighbor_processes;
+   int                     *neighbor_procs;
+   int                     *neighbor_ids;
    hypre_Box               *neighbor_box;
-
-   int                      max_num_ghost;
 
    hypre_Box               *box;
    hypre_Box               *grow_box;
@@ -381,30 +378,18 @@ hypre_CreateCommInfoFromNumGhost( hypre_StructGrid      *grid,
 
    neighbors = hypre_StructGridNeighbors(grid);
 
-   max_num_ghost = 0;
-   for (i = 0; i < 6; i++)
-   {
-      max_num_ghost = hypre_max(max_num_ghost, num_ghost[i]);
-   }
-
-   if (max_num_ghost > hypre_BoxNeighborsMaxDistance(neighbors))
-   {
-      hypre_StructGridMaxDistance(grid) = max_num_ghost;
-      hypre_StructGridAssemble(grid);
-      neighbors = hypre_StructGridNeighbors(grid);
-   }
-
    /*------------------------------------------------------
-    * Compute send/recv boxes and processes
+    * Compute send/recv boxes and procs
     *------------------------------------------------------*/
 
    send_boxes = hypre_BoxArrayArrayCreate(hypre_BoxArraySize(boxes));
    recv_boxes = hypre_BoxArrayArrayCreate(hypre_BoxArraySize(boxes));
-   send_processes = hypre_CTAlloc(int *, hypre_BoxArraySize(boxes));
-   recv_processes = hypre_CTAlloc(int *, hypre_BoxArraySize(boxes));
+   send_procs = hypre_CTAlloc(int *, hypre_BoxArraySize(boxes));
+   recv_procs = hypre_CTAlloc(int *, hypre_BoxArraySize(boxes));
 
    neighbor_boxes = hypre_BoxNeighborsBoxes(neighbors);
-   neighbor_processes = hypre_BoxNeighborsProcesses(neighbors);
+   neighbor_procs = hypre_BoxNeighborsProcs(neighbors);
+   neighbor_ids   = hypre_BoxNeighborsIDs(neighbors);
 
    box0 = hypre_BoxCreate();
    grow_box = hypre_BoxCreate();
@@ -436,18 +421,21 @@ hypre_CreateCommInfoFromNumGhost( hypre_StructGrid      *grid,
  
          hypre_ForBoxI(j, neighbor_boxes)
             {
-               neighbor_box = hypre_BoxArrayBox(neighbor_boxes, j);
-
-               hypre_IntersectBoxes(grow_box, neighbor_box, box0);
-               if (hypre_BoxVolume(box0))
+               if (ids[i] != neighbor_ids[j])
                {
-                  if (cbox_arrays[j] == NULL)
+                  neighbor_box = hypre_BoxArrayBox(neighbor_boxes, j);
+
+                  hypre_IntersectBoxes(grow_box, neighbor_box, box0);
+                  if (hypre_BoxVolume(box0))
                   {
-                     cbox_arrays[j] = hypre_BoxArrayCreate(0);
-                     cbox_arrays_i[num_cbox_arrays] = j;
-                     num_cbox_arrays++;
+                     if (cbox_arrays[j] == NULL)
+                     {
+                        cbox_arrays[j] = hypre_BoxArrayCreate(0);
+                        cbox_arrays_i[num_cbox_arrays] = j;
+                        num_cbox_arrays++;
+                     }
+                     hypre_AppendBox(box0, cbox_arrays[j]);
                   }
-                  hypre_AppendBox(box0, cbox_arrays[j]);
                }
             }
 
@@ -460,17 +448,17 @@ hypre_CreateCommInfoFromNumGhost( hypre_StructGrid      *grid,
             recv_box_array_size += hypre_BoxArraySize(cbox_arrays[j]);
          }
 
-         /* create recv_box_array and recv_processes */
+         /* create recv_box_array and recv_procs */
          recv_box_array = hypre_BoxArrayArrayBoxArray(recv_boxes, i);
          hypre_BoxArraySetSize(recv_box_array, recv_box_array_size);
-         recv_processes[i] = hypre_CTAlloc(int, recv_box_array_size);
+         recv_procs[i] = hypre_CTAlloc(int, recv_box_array_size);
          n = 0;
          for (m = 0; m < num_cbox_arrays; m++)
          {
             j = cbox_arrays_i[m];
             hypre_ForBoxI(k, cbox_arrays[j])
                {
-                  recv_processes[i][n] = neighbor_processes[j];
+                  recv_procs[i][n] = neighbor_procs[j];
                   hypre_CopyBox(hypre_BoxArrayBox(cbox_arrays[j], k),
                                 hypre_BoxArrayBox(recv_box_array, n));
                   n++;
@@ -487,27 +475,30 @@ hypre_CreateCommInfoFromNumGhost( hypre_StructGrid      *grid,
 
          hypre_ForBoxI(j, neighbor_boxes)
             {
-               neighbor_box = hypre_BoxArrayBox(neighbor_boxes, j);
+               if (ids[i] != neighbor_ids[j])
+               {
+                  neighbor_box = hypre_BoxArrayBox(neighbor_boxes, j);
 
-               /* grow neighbor box by num_ghost */
-               for (d = 0; d < 3; d++)
-               {
-                  hypre_BoxIMinD(grow_box, d) =
-                     hypre_BoxIMinD(neighbor_box, d) - num_ghost[2*d];
-                  hypre_BoxIMaxD(grow_box, d) =
-                     hypre_BoxIMaxD(neighbor_box, d) + num_ghost[2*d + 1];
-               }
- 
-               hypre_IntersectBoxes(box, grow_box, box0);
-               if (hypre_BoxVolume(box0))
-               {
-                  if (cbox_arrays[j] == NULL)
+                  /* grow neighbor box by num_ghost */
+                  for (d = 0; d < 3; d++)
                   {
-                     cbox_arrays[j] = hypre_BoxArrayCreate(0);
-                     cbox_arrays_i[num_cbox_arrays] = j;
-                     num_cbox_arrays++;
+                     hypre_BoxIMinD(grow_box, d) =
+                        hypre_BoxIMinD(neighbor_box, d) - num_ghost[2*d];
+                     hypre_BoxIMaxD(grow_box, d) =
+                        hypre_BoxIMaxD(neighbor_box, d) + num_ghost[2*d + 1];
                   }
-                  hypre_AppendBox(box0, cbox_arrays[j]);
+ 
+                  hypre_IntersectBoxes(box, grow_box, box0);
+                  if (hypre_BoxVolume(box0))
+                  {
+                     if (cbox_arrays[j] == NULL)
+                     {
+                        cbox_arrays[j] = hypre_BoxArrayCreate(0);
+                        cbox_arrays_i[num_cbox_arrays] = j;
+                        num_cbox_arrays++;
+                     }
+                     hypre_AppendBox(box0, cbox_arrays[j]);
+                  }
                }
             }
 
@@ -520,17 +511,17 @@ hypre_CreateCommInfoFromNumGhost( hypre_StructGrid      *grid,
             send_box_array_size += hypre_BoxArraySize(cbox_arrays[j]);
          }
 
-         /* create send_box_array and send_processes */
+         /* create send_box_array and send_procs */
          send_box_array = hypre_BoxArrayArrayBoxArray(send_boxes, i);
          hypre_BoxArraySetSize(send_box_array, send_box_array_size);
-         send_processes[i] = hypre_CTAlloc(int, send_box_array_size);
+         send_procs[i] = hypre_CTAlloc(int, send_box_array_size);
          n = 0;
          for (m = 0; m < num_cbox_arrays; m++)
          {
             j = cbox_arrays_i[m];
             hypre_ForBoxI(k, cbox_arrays[j])
                {
-                  send_processes[i][n] = neighbor_processes[j];
+                  send_procs[i][n] = neighbor_procs[j];
                   hypre_CopyBox(hypre_BoxArrayBox(cbox_arrays[j], k),
                                 hypre_BoxArrayBox(send_box_array, n));
                   n++;
@@ -552,8 +543,8 @@ hypre_CreateCommInfoFromNumGhost( hypre_StructGrid      *grid,
 
    *send_boxes_ptr = send_boxes;
    *recv_boxes_ptr = recv_boxes;
-   *send_processes_ptr = send_processes;
-   *recv_processes_ptr = recv_processes;
+   *send_procs_ptr = send_procs;
+   *recv_procs_ptr = recv_procs;
 
    return ierr;
 }
@@ -576,9 +567,9 @@ headers.h
   description of the grid data to be sent to other processors.
 @param recv_boxes_ptr [OUT]
   description of the grid data to be received from other processors.
-@param send_processes_ptr [OUT]
+@param send_procs_ptr [OUT]
   processors that data is to be sent to.
-@param recv_processes_ptr [OUT]
+@param recv_procs_ptr [OUT]
   processors that data is to be received from.
 
 @see hypre_StructMatrixMigrate, hypre_StructVectorMigrate */
@@ -589,19 +580,19 @@ hypre_CreateCommInfoFromGrids( hypre_StructGrid      *from_grid,
                                hypre_StructGrid      *to_grid,
                                hypre_BoxArrayArray  **send_boxes_ptr,
                                hypre_BoxArrayArray  **recv_boxes_ptr,
-                               int                 ***send_processes_ptr,
-                               int                 ***recv_processes_ptr )
+                               int                 ***send_procs_ptr,
+                               int                 ***recv_procs_ptr )
 {
    int                      ierr = 0;
 
    /* output variables */
    hypre_BoxArrayArray     *send_boxes;
    hypre_BoxArrayArray     *recv_boxes;
-   int                    **send_processes;
-   int                    **recv_processes;
+   int                    **send_procs;
+   int                    **recv_procs;
 
    hypre_BoxArrayArray     *comm_boxes;
-   int                    **comm_processes;
+   int                    **comm_procs;
    hypre_BoxArray          *comm_box_array;
    hypre_Box               *comm_box;
 
@@ -611,8 +602,8 @@ hypre_CreateCommInfoFromGrids( hypre_StructGrid      *from_grid,
    hypre_BoxArray          *local_boxes;
    hypre_BoxArray          *remote_boxes;
    hypre_BoxArray          *remote_all_boxes;
-   int                     *remote_processes;
-   int                     *remote_box_ranks;
+   int                     *remote_all_procs;
+   int                      remote_first_local;
 
    hypre_Box               *local_box;
    hypre_Box               *remote_box;
@@ -639,18 +630,18 @@ hypre_CreateCommInfoFromGrids( hypre_StructGrid      *from_grid,
       }
 
       /*---------------------------------------------------
-       * Compute comm_boxes and comm_processes
+       * Compute comm_boxes and comm_procs
        *---------------------------------------------------*/
 
       local_boxes  = hypre_StructGridBoxes(local_grid);
       remote_boxes = hypre_StructGridBoxes(remote_grid);
       hypre_GatherAllBoxes(hypre_StructGridComm(remote_grid), remote_boxes,
                            &remote_all_boxes,
-                           &remote_processes,
-                           &remote_box_ranks);
+                           &remote_all_procs,
+                           &remote_first_local);
 
       comm_boxes = hypre_BoxArrayArrayCreate(hypre_BoxArraySize(local_boxes));
-      comm_processes = hypre_CTAlloc(int *, hypre_BoxArraySize(local_boxes));
+      comm_procs = hypre_CTAlloc(int *, hypre_BoxArraySize(local_boxes));
 
       comm_box = hypre_BoxCreate();
       hypre_ForBoxI(i, local_boxes)
@@ -658,7 +649,7 @@ hypre_CreateCommInfoFromGrids( hypre_StructGrid      *from_grid,
             local_box = hypre_BoxArrayBox(local_boxes, i);
 
             comm_box_array = hypre_BoxArrayArrayBoxArray(comm_boxes, i);
-            comm_processes[i] =
+            comm_procs[i] =
                hypre_CTAlloc(int, hypre_BoxArraySize(remote_all_boxes));
 
             hypre_ForBoxI(j, remote_all_boxes)
@@ -669,32 +660,31 @@ hypre_CreateCommInfoFromGrids( hypre_StructGrid      *from_grid,
                   if (hypre_BoxVolume(comm_box))
                   {
                      k = hypre_BoxArraySize(comm_box_array);
-                     comm_processes[i][k] = remote_processes[j];
+                     comm_procs[i][k] = remote_all_procs[j];
                      
                      hypre_AppendBox(comm_box, comm_box_array);
                   }
                }
 
-            comm_processes[i] =
-               hypre_TReAlloc(comm_processes[i],
+            comm_procs[i] =
+               hypre_TReAlloc(comm_procs[i],
                               int, hypre_BoxArraySize(comm_box_array));
          }
       hypre_BoxDestroy(comm_box);
 
       hypre_BoxArrayDestroy(remote_all_boxes);
-      hypre_TFree(remote_processes);
-      hypre_TFree(remote_box_ranks);
+      hypre_TFree(remote_all_procs);
 
       switch(r)
       {
          case 0:
-         send_boxes     = comm_boxes;
-         send_processes = comm_processes;
+         send_boxes = comm_boxes;
+         send_procs = comm_procs;
          break;
 
          case 1:
-         recv_boxes     = comm_boxes;
-         recv_processes = comm_processes;
+         recv_boxes = comm_boxes;
+         recv_procs = comm_procs;
          break;
       }
    }
@@ -705,8 +695,8 @@ hypre_CreateCommInfoFromGrids( hypre_StructGrid      *from_grid,
 
    *send_boxes_ptr = send_boxes;
    *recv_boxes_ptr = recv_boxes;
-   *send_processes_ptr = send_processes;
-   *recv_processes_ptr = recv_processes;
+   *send_procs_ptr = send_procs;
+   *recv_procs_ptr = recv_procs;
 
    return ierr;
 }

@@ -894,12 +894,14 @@ typedef hypre_RankLink *hypre_RankLinkArray[3][3][3];
 
 typedef struct
 {
-   int                  num_local;      /* number of local boxes */
-   hypre_BoxArray      *boxes;          /* array of boxes */
-   int                 *processes;      /* processes of `boxes' */
-   int                  max_distance;   /* in infinity norm */
+   hypre_BoxArray      *boxes;            /* boxes in the neighborhood */
+   int                 *procs;            /* procs for 'boxes' */
+   int                 *ids;              /* ids for 'boxes' */
+   int                  first_local;      /* first local box address */
+   int                  num_local;        /* number of local boxes */
+   int                  num_periodic;     /* number of periodic boxes */
 
-   hypre_RankLinkArray *rank_links;     /* neighbors of `box_ranks' boxes */
+   hypre_RankLinkArray *rank_links;      /* neighbors of local boxes */
 
 } hypre_BoxNeighbors;
 
@@ -915,12 +917,12 @@ typedef struct
  * Accessor macros: hypre_BoxNeighbors
  *--------------------------------------------------------------------------*/
 
-#define hypre_BoxNeighborsNumLocal(neighbors)    ((neighbors) -> num_local)
 #define hypre_BoxNeighborsBoxes(neighbors)       ((neighbors) -> boxes)
-#define hypre_BoxNeighborsBox(neighbors, n)      ((neighbors) -> boxes[n])
-#define hypre_BoxNeighborsProcesses(neighbors)   ((neighbors) -> processes)
-#define hypre_BoxNeighborsProcess(neighbors, n)  ((neighbors) -> processes[n])
-#define hypre_BoxNeighborsMaxDistance(neighbors) ((neighbors) -> max_distance)
+#define hypre_BoxNeighborsProcs(neighbors)       ((neighbors) -> procs)
+#define hypre_BoxNeighborsIDs(neighbors)         ((neighbors) -> ids)
+#define hypre_BoxNeighborsFirstLocal(neighbors)  ((neighbors) -> first_local)
+#define hypre_BoxNeighborsNumLocal(neighbors)    ((neighbors) -> num_local)
+#define hypre_BoxNeighborsNumPeriodic(neighbors) ((neighbors) -> num_periodic)
 #define hypre_BoxNeighborsRankLinks(neighbors)   ((neighbors) -> rank_links)
 
 #define hypre_BoxNeighborsNumBoxes(neighbors) \
@@ -1055,26 +1057,20 @@ typedef struct
 {
    MPI_Comm             comm;
                       
-   hypre_BoxArray      *boxes;        /* Array of boxes in this process */
-                      
    int                  dim;          /* Number of grid dimensions */
                       
-   int                  global_size;  /* Total number of grid points */
+   hypre_BoxArray      *boxes;        /* Array of boxes in this process */
+   int                 *ids;          /* Unique IDs for boxes */
+                      
+   hypre_BoxNeighbors  *neighbors;    /* Neighbors of boxes */
+   int                  max_distance; /* Neighborhood size */
+
+   hypre_Box           *bounding_box; /* Bounding box around grid */
+
    int                  local_size;   /* Number of grid points locally */
+   int                  global_size;  /* Total number of grid points */
 
-   hypre_BoxNeighbors  *neighbors;    /* neighbors of boxes */
-   int                  max_distance;
-
-   hypre_Index          periodic;     /* indicates if grid is periodic */
-
-   /* keep this for now to (hopefully) improve SMG setup performance */
-   hypre_BoxArray      *all_boxes;      /* valid only before Assemble */
-   int                 *processes;
-   int                 *box_ranks;
-   hypre_BoxArray      *base_all_boxes;
-   hypre_Index          pindex;         /* description of index-space to */
-   hypre_Index          pstride;        /* project base_all_boxes onto   */
-   int                  alloced;        /* boolean used to free up */
+   hypre_Index          periodic;     /* Indicates if grid is periodic */
 
    int                  ref_count;
 
@@ -1085,20 +1081,15 @@ typedef struct
  *--------------------------------------------------------------------------*/
 
 #define hypre_StructGridComm(grid)          ((grid) -> comm)
-#define hypre_StructGridBoxes(grid)         ((grid) -> boxes)
 #define hypre_StructGridDim(grid)           ((grid) -> dim)
-#define hypre_StructGridGlobalSize(grid)    ((grid) -> global_size)
-#define hypre_StructGridLocalSize(grid)     ((grid) -> local_size)
+#define hypre_StructGridBoxes(grid)         ((grid) -> boxes)
+#define hypre_StructGridIDs(grid)           ((grid) -> ids)
 #define hypre_StructGridNeighbors(grid)     ((grid) -> neighbors)
 #define hypre_StructGridMaxDistance(grid)   ((grid) -> max_distance)
+#define hypre_StructGridBoundingBox(grid)   ((grid) -> bounding_box)
+#define hypre_StructGridLocalSize(grid)     ((grid) -> local_size)
+#define hypre_StructGridGlobalSize(grid)    ((grid) -> global_size)
 #define hypre_StructGridPeriodic(grid)      ((grid) -> periodic)
-#define hypre_StructGridAllBoxes(grid)      ((grid) -> all_boxes)
-#define hypre_StructGridProcesses(grid)     ((grid) -> processes)
-#define hypre_StructGridBoxRanks(grid)      ((grid) -> box_ranks)
-#define hypre_StructGridBaseAllBoxes(grid)  ((grid) -> base_all_boxes)
-#define hypre_StructGridPIndex(grid)        ((grid) -> pindex)
-#define hypre_StructGridPStride(grid)       ((grid) -> pstride)
-#define hypre_StructGridAlloced(grid)       ((grid) -> alloced)
 #define hypre_StructGridRefCount(grid)      ((grid) -> ref_count)
 
 #define hypre_StructGridBox(grid, i) \
@@ -1488,6 +1479,8 @@ void hypre_F90_IFACE( int hypre_structmatrixdestroy );
 void hypre_F90_IFACE( int hypre_structmatrixinitialize );
 void hypre_F90_IFACE( int hypre_structmatrixsetvalues );
 void hypre_F90_IFACE( int hypre_structmatrixsetboxvalues );
+void hypre_F90_IFACE( int hypre_structmatrixaddtovalues );
+void hypre_F90_IFACE( int hypre_structmatrixaddtoboxvalues );
 void hypre_F90_IFACE( int hypre_structmatrixassemble );
 void hypre_F90_IFACE( int hypre_structmatrixsetnumghost );
 void hypre_F90_IFACE( int hypre_structmatrixgetgrid );
@@ -1503,8 +1496,10 @@ void hypre_F90_IFACE( int hypre_structvectorcreate );
 void hypre_F90_IFACE( int hypre_structvectordestroy );
 void hypre_F90_IFACE( int hypre_structvectorinitialize );
 void hypre_F90_IFACE( int hypre_structvectorsetvalues );
-void hypre_F90_IFACE( int hypre_structvectorgetvalues );
 void hypre_F90_IFACE( int hypre_structvectorsetboxvalues );
+void hypre_F90_IFACE( int hypre_structvectoraddtovalues );
+void hypre_F90_IFACE( int hypre_structvectoraddtoboxvalues );
+void hypre_F90_IFACE( int hypre_structvectorgetvalues );
 void hypre_F90_IFACE( int hypre_structvectorgetboxvalues );
 void hypre_F90_IFACE( int hypre_structvectorassemble );
 void hypre_F90_IFACE( int hypre_structvectorsetnumghost );
@@ -1591,9 +1586,10 @@ hypre_Box *hypre_BoxAlloc( void );
 int hypre_BoxFree( hypre_Box *box );
 
 /* box_neighbors.c */
-hypre_RankLink *hypre_RankLinkCreate( int rank );
+int hypre_RankLinkCreate( int rank , hypre_RankLink **rank_link_ptr );
 int hypre_RankLinkDestroy( hypre_RankLink *rank_link );
-hypre_BoxNeighbors *hypre_BoxNeighborsCreate( int *local_ranks , int num_local , hypre_BoxArray *boxes , int *processes , int max_distance );
+int hypre_BoxNeighborsCreate( hypre_BoxArray *boxes , int *procs , int *ids , int first_local , int num_local , int num_periodic , hypre_BoxNeighbors **neighbors_ptr );
+int hypre_BoxNeighborsAssemble( hypre_BoxNeighbors *neighbors , int max_distance );
 int hypre_BoxNeighborsDestroy( hypre_BoxNeighbors *neighbors );
 
 /* communication.c */
@@ -1616,9 +1612,9 @@ int hypre_CommTypeBuildMPI( int num_comms , int *comm_procs , hypre_CommType **c
 int hypre_CommTypeEntryBuildMPI( hypre_CommTypeEntry *comm_entry , MPI_Datatype *comm_entry_mpi_type );
 
 /* communication_info.c */
-int hypre_CreateCommInfoFromStencil( hypre_StructGrid *grid , hypre_StructStencil *stencil , hypre_BoxArrayArray **send_boxes_ptr , hypre_BoxArrayArray **recv_boxes_ptr , int ***send_processes_ptr , int ***recv_processes_ptr );
-int hypre_CreateCommInfoFromNumGhost( hypre_StructGrid *grid , int *num_ghost , hypre_BoxArrayArray **send_boxes_ptr , hypre_BoxArrayArray **recv_boxes_ptr , int ***send_processes_ptr , int ***recv_processes_ptr );
-int hypre_CreateCommInfoFromGrids( hypre_StructGrid *from_grid , hypre_StructGrid *to_grid , hypre_BoxArrayArray **send_boxes_ptr , hypre_BoxArrayArray **recv_boxes_ptr , int ***send_processes_ptr , int ***recv_processes_ptr );
+int hypre_CreateCommInfoFromStencil( hypre_StructGrid *grid , hypre_StructStencil *stencil , hypre_BoxArrayArray **send_boxes_ptr , hypre_BoxArrayArray **recv_boxes_ptr , int ***send_procs_ptr , int ***recv_procs_ptr );
+int hypre_CreateCommInfoFromNumGhost( hypre_StructGrid *grid , int *num_ghost , hypre_BoxArrayArray **send_boxes_ptr , hypre_BoxArrayArray **recv_boxes_ptr , int ***send_procs_ptr , int ***recv_procs_ptr );
+int hypre_CreateCommInfoFromGrids( hypre_StructGrid *from_grid , hypre_StructGrid *to_grid , hypre_BoxArrayArray **send_boxes_ptr , hypre_BoxArrayArray **recv_boxes_ptr , int ***send_procs_ptr , int ***recv_procs_ptr );
 
 /* computation.c */
 int hypre_CreateComputeInfo( hypre_StructGrid *grid , hypre_StructStencil *stencil , hypre_BoxArrayArray **send_boxes_ptr , hypre_BoxArrayArray **recv_boxes_ptr , int ***send_processes_ptr , int ***recv_processes_ptr , hypre_BoxArrayArray **indt_boxes_ptr , hypre_BoxArrayArray **dept_boxes_ptr );
@@ -1643,18 +1639,19 @@ int hypre_StructAxpy( double alpha , hypre_StructVector *x , hypre_StructVector 
 int hypre_StructCopy( hypre_StructVector *x , hypre_StructVector *y );
 
 /* struct_grid.c */
-hypre_StructGrid *hypre_StructGridCreate( MPI_Comm comm , int dim );
-hypre_StructGrid *hypre_StructGridRef( hypre_StructGrid *grid );
+int hypre_StructGridCreate( MPI_Comm comm , int dim , hypre_StructGrid **grid_ptr );
+int hypre_StructGridRef( hypre_StructGrid *grid , hypre_StructGrid **grid_ref );
 int hypre_StructGridDestroy( hypre_StructGrid *grid );
+int hypre_StructGridSetHoodInfo( hypre_StructGrid *grid , int max_distance );
 int hypre_StructGridSetPeriodic( hypre_StructGrid *grid , hypre_Index periodic );
 int hypre_StructGridSetExtents( hypre_StructGrid *grid , hypre_Index ilower , hypre_Index iupper );
 int hypre_StructGridSetBoxes( hypre_StructGrid *grid , hypre_BoxArray *boxes );
-int hypre_StructGridSetGlobalInfo( hypre_StructGrid *grid , hypre_BoxArray *all_boxes , int *processes , int *box_ranks , hypre_BoxArray *base_all_boxes , hypre_Index pindex , hypre_Index pstride );
+int hypre_StructGridSetHood( hypre_StructGrid *grid , hypre_BoxArray *hood_boxes , int *hood_procs , int *hood_ids , int first_local , int num_local , int num_periodic , hypre_Box *bounding_box );
 int hypre_StructGridAssemble( hypre_StructGrid *grid );
-int hypre_GatherAllBoxes( MPI_Comm comm , hypre_BoxArray *boxes , hypre_BoxArray **all_boxes_ptr , int **processes_ptr , int **box_ranks_ptr );
+int hypre_GatherAllBoxes( MPI_Comm comm , hypre_BoxArray *boxes , hypre_BoxArray **all_boxes_ptr , int **all_procs_ptr , int *first_local_ptr );
 int hypre_StructGridPrint( FILE *file , hypre_StructGrid *grid );
-hypre_StructGrid *hypre_StructGridRead( MPI_Comm comm , FILE *file );
-int hypre_StructGridPeriodicAllBoxes( hypre_StructGrid *grid , hypre_BoxArray **p_all_boxes_ptr , int **p_processes_ptr );
+int hypre_StructGridRead( MPI_Comm comm , FILE *file , hypre_StructGrid **grid_ptr );
+int hypre_StructGridPeriodicAllBoxes( hypre_StructGrid *grid , hypre_BoxArray **all_boxes_ptr , int **all_procs_ptr , int *first_local_ptr , int *num_periodic_ptr );
 
 /* struct_innerprod.c */
 double hypre_StructInnerProd( hypre_StructVector *x , hypre_StructVector *y );

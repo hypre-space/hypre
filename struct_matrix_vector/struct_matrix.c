@@ -56,7 +56,7 @@ hypre_StructMatrixCreate( MPI_Comm             comm,
    matrix = hypre_CTAlloc(hypre_StructMatrix, 1);
 
    hypre_StructMatrixComm(matrix)        = comm;
-   hypre_StructMatrixGrid(matrix)        = hypre_StructGridRef(grid);
+   hypre_StructGridRef(grid, &hypre_StructMatrixGrid(matrix));
    hypre_StructMatrixUserStencil(matrix) =
       hypre_StructStencilRef(user_stencil);
    hypre_StructMatrixDataAlloced(matrix) = 1;
@@ -879,7 +879,7 @@ hypre_StructMatrixRead( MPI_Comm   comm,
 
    /* read grid info */
    fscanf(file, "\nGrid:\n");
-   grid = hypre_StructGridRead(comm,file);
+   hypre_StructGridRead(comm,file,&grid);
 
    /* read stencil info */
    fscanf(file, "\nStencil:\n");

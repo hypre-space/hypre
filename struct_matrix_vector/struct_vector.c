@@ -29,7 +29,7 @@ hypre_StructVectorCreate( MPI_Comm          comm,
    vector = hypre_CTAlloc(hypre_StructVector, 1);
 
    hypre_StructVectorComm(vector)        = comm;
-   hypre_StructVectorGrid(vector)        = hypre_StructGridRef(grid);
+   hypre_StructGridRef(grid, &hypre_StructVectorGrid(vector));
    hypre_StructVectorDataAlloced(vector) = 1;
    hypre_StructVectorRefCount(vector)    = 1;
 
@@ -883,7 +883,7 @@ hypre_StructVectorRead( MPI_Comm   comm,
 
    /* read grid info */
    fscanf(file, "\nGrid:\n");
-   grid = hypre_StructGridRead(comm,file);
+   hypre_StructGridRead(comm,file,&grid);
 
    /*----------------------------------------
     * Initialize the vector

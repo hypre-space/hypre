@@ -22,9 +22,11 @@ HYPRE_StructGridCreate( MPI_Comm          comm,
                         int               dim,
                         HYPRE_StructGrid *grid )
 {
-   *grid = ( (HYPRE_StructGrid) hypre_StructGridCreate( comm, dim ) );
+   int ierr;
 
-   return 0;
+   ierr = hypre_StructGridCreate( comm, dim, (hypre_StructGrid **) grid );
+
+   return ierr;
 }
 
 /*--------------------------------------------------------------------------

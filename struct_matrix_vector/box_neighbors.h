@@ -34,12 +34,14 @@ typedef hypre_RankLink *hypre_RankLinkArray[3][3][3];
 
 typedef struct
 {
-   int                  num_local;      /* number of local boxes */
-   hypre_BoxArray      *boxes;          /* array of boxes */
-   int                 *processes;      /* processes of `boxes' */
-   int                  max_distance;   /* in infinity norm */
+   hypre_BoxArray      *boxes;            /* boxes in the neighborhood */
+   int                 *procs;            /* procs for 'boxes' */
+   int                 *ids;              /* ids for 'boxes' */
+   int                  first_local;      /* first local box address */
+   int                  num_local;        /* number of local boxes */
+   int                  num_periodic;     /* number of periodic boxes */
 
-   hypre_RankLinkArray *rank_links;     /* neighbors of `box_ranks' boxes */
+   hypre_RankLinkArray *rank_links;      /* neighbors of local boxes */
 
 } hypre_BoxNeighbors;
 
@@ -55,12 +57,12 @@ typedef struct
  * Accessor macros: hypre_BoxNeighbors
  *--------------------------------------------------------------------------*/
 
-#define hypre_BoxNeighborsNumLocal(neighbors)    ((neighbors) -> num_local)
 #define hypre_BoxNeighborsBoxes(neighbors)       ((neighbors) -> boxes)
-#define hypre_BoxNeighborsBox(neighbors, n)      ((neighbors) -> boxes[n])
-#define hypre_BoxNeighborsProcesses(neighbors)   ((neighbors) -> processes)
-#define hypre_BoxNeighborsProcess(neighbors, n)  ((neighbors) -> processes[n])
-#define hypre_BoxNeighborsMaxDistance(neighbors) ((neighbors) -> max_distance)
+#define hypre_BoxNeighborsProcs(neighbors)       ((neighbors) -> procs)
+#define hypre_BoxNeighborsIDs(neighbors)         ((neighbors) -> ids)
+#define hypre_BoxNeighborsFirstLocal(neighbors)  ((neighbors) -> first_local)
+#define hypre_BoxNeighborsNumLocal(neighbors)    ((neighbors) -> num_local)
+#define hypre_BoxNeighborsNumPeriodic(neighbors) ((neighbors) -> num_periodic)
 #define hypre_BoxNeighborsRankLinks(neighbors)   ((neighbors) -> rank_links)
 
 #define hypre_BoxNeighborsNumBoxes(neighbors) \

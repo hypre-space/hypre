@@ -57,8 +57,8 @@ hypre_StructMatrixCreateMask( hypre_StructMatrix *matrix,
 
    hypre_StructMatrixComm(mask) = hypre_StructMatrixComm(matrix);
 
-   hypre_StructMatrixGrid(mask) =
-      hypre_StructGridRef(hypre_StructMatrixGrid(matrix));
+   hypre_StructGridRef(hypre_StructMatrixGrid(matrix),
+                       &hypre_StructMatrixGrid(mask));
 
    hypre_StructMatrixUserStencil(mask) =
       hypre_StructStencilRef(hypre_StructMatrixUserStencil(matrix));

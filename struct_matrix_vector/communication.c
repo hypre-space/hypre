@@ -1193,7 +1193,7 @@ maintain consistency in communications.
 headers.h
 
 {\bf Note:}
-The entries are sorted by imin first.  Entries with common imin's are
+The entries are sorted by imin first.  Entries with common imin are
 then sorted by imax.  This assumes that imin and imax define a unique
 communication type.
 
@@ -1207,111 +1207,48 @@ communication type.
 
 int
 hypre_CommTypeSort( hypre_CommType  *comm_type,
-hypre_Index      periodic )
+                    hypre_Index      periodic )
 {
-hypre_CommTypeEntry  **comm_entries = hypre_CommTypeCommEntries(comm_type);
-int                    num_entries  = hypre_CommTypeNumEntries(comm_type);
+   hypre_CommTypeEntry  **comm_entries = hypre_CommTypeCommEntries(comm_type);
+   int                    num_entries  = hypre_CommTypeNumEntries(comm_type);
 
-hypre_CommTypeEntry   *comm_entry;
-hypre_IndexRef         imin0, imin1;
-int                   *imax0, *imax1;
-int                    swap;
-int                    i, j, ii, jj;
-int                    ierr = 0;
+   hypre_CommTypeEntry   *comm_entry;
+   hypre_IndexRef         imin0, imin1;
+   int                   *imax0, *imax1;
+   int                    swap;
+   int                    i, j, ii, jj;
+   int                    ierr = 0;
                       
 #if 1
-/*------------------------------------------------
-* Sort by imin:
-*------------------------------------------------*/
+   /*------------------------------------------------
+    * Sort by imin:
+    *------------------------------------------------*/
 
-for (i = (num_entries - 1); i > 0; i--)
-{
-   for (j = 0; j < i; j++)
+   for (i = (num_entries - 1); i > 0; i--)
    {
-      swap = 0;
-      imin0 = hypre_CommTypeEntryIMin(comm_entries[j]);
-      imin1 = hypre_CommTypeEntryIMin(comm_entries[j+1]);
-      if ( hypre_IModPeriodZ(imin0, periodic) > 
-           hypre_IModPeriodZ(imin1, periodic) )
-      {
-         swap = 1;
-      }
-      else if ( hypre_IModPeriodZ(imin0, periodic) == 
-                hypre_IModPeriodZ(imin1, periodic) )
-      {
-         if ( hypre_IModPeriodY(imin0, periodic) > 
-              hypre_IModPeriodY(imin1, periodic) )
-         {
-            swap = 1;
-         }
-         else if ( hypre_IModPeriodY(imin0, periodic) == 
-                   hypre_IModPeriodY(imin1, periodic) )
-         {
-            if ( hypre_IModPeriodX(imin0, periodic) > 
-                 hypre_IModPeriodX(imin1, periodic) )
-            {
-               swap = 1;
-            }
-         }
-      }
-
-      if (swap)
-      {
-         comm_entry        = comm_entries[j];
-         comm_entries[j]   = comm_entries[j+1];
-         comm_entries[j+1] = comm_entry;
-      }
-   }
-}
-
-/*------------------------------------------------
- * Sort entries with common imin's by imax:
- *------------------------------------------------*/
-
-for (ii = 0; ii < (num_entries - 1); ii = jj)
-{
-   /* want jj where entries ii through jj-1 have common imin's */
-   imin0 = hypre_CommTypeEntryIMin(comm_entries[ii]);
-   for (jj = (ii + 1); jj < num_entries; jj++)
-   {
-      imin1 = hypre_CommTypeEntryIMin(comm_entries[jj]);
-      if ( ( hypre_IModPeriodX(imin0, periodic) !=
-             hypre_IModPeriodX(imin1, periodic) ) ||
-           ( hypre_IModPeriodY(imin0, periodic) != 
-             hypre_IModPeriodY(imin1, periodic) ) ||
-           ( hypre_IModPeriodZ(imin0, periodic) !=
-             hypre_IModPeriodZ(imin1, periodic) ) )
-      {
-         break;
-      }
-   }
-
-   /* sort entries ii through jj-1 by imax */
-   for (i = (jj - 1); i > ii; i--)
-   {
-      for (j = ii; j < i; j++)
+      for (j = 0; j < i; j++)
       {
          swap = 0;
-         imax0 = hypre_CommTypeEntryIMax(comm_entries[j]);
-         imax1 = hypre_CommTypeEntryIMax(comm_entries[j+1]);
-         if ( hypre_IModPeriodZ(imax0, periodic) >
-              hypre_IModPeriodZ(imax1, periodic) )
+         imin0 = hypre_CommTypeEntryIMin(comm_entries[j]);
+         imin1 = hypre_CommTypeEntryIMin(comm_entries[j+1]);
+         if ( hypre_IModPeriodZ(imin0, periodic) > 
+              hypre_IModPeriodZ(imin1, periodic) )
          {
             swap = 1;
          }
-         else if ( hypre_IModPeriodZ(imax0, periodic) ==
-                   hypre_IModPeriodZ(imax1, periodic) )
+         else if ( hypre_IModPeriodZ(imin0, periodic) == 
+                   hypre_IModPeriodZ(imin1, periodic) )
          {
-            if ( hypre_IModPeriodY(imax0, periodic) >
-                 hypre_IModPeriodY(imax1, periodic) )
+            if ( hypre_IModPeriodY(imin0, periodic) > 
+                 hypre_IModPeriodY(imin1, periodic) )
             {
                swap = 1;
             }
-            else if ( hypre_IModPeriodY(imax0, periodic) ==
-                      hypre_IModPeriodY(imax1, periodic) )
+            else if ( hypre_IModPeriodY(imin0, periodic) == 
+                      hypre_IModPeriodY(imin1, periodic) )
             {
-               if ( hypre_IModPeriodX(imax0, periodic) >
-                    hypre_IModPeriodX(imax1, periodic) )
+               if ( hypre_IModPeriodX(imin0, periodic) > 
+                    hypre_IModPeriodX(imin1, periodic) )
                {
                   swap = 1;
                }
@@ -1326,10 +1263,73 @@ for (ii = 0; ii < (num_entries - 1); ii = jj)
          }
       }
    }
-}
 
+   /*------------------------------------------------
+    * Sort entries with common imin by imax:
+    *------------------------------------------------*/
+
+   for (ii = 0; ii < (num_entries - 1); ii = jj)
+   {
+      /* want jj where entries ii through jj-1 have common imin */
+      imin0 = hypre_CommTypeEntryIMin(comm_entries[ii]);
+      for (jj = (ii + 1); jj < num_entries; jj++)
+      {
+         imin1 = hypre_CommTypeEntryIMin(comm_entries[jj]);
+         if ( ( hypre_IModPeriodX(imin0, periodic) !=
+                hypre_IModPeriodX(imin1, periodic) ) ||
+              ( hypre_IModPeriodY(imin0, periodic) != 
+                hypre_IModPeriodY(imin1, periodic) ) ||
+              ( hypre_IModPeriodZ(imin0, periodic) !=
+                hypre_IModPeriodZ(imin1, periodic) ) )
+         {
+            break;
+         }
+      }
+
+      /* sort entries ii through jj-1 by imax */
+      for (i = (jj - 1); i > ii; i--)
+      {
+         for (j = ii; j < i; j++)
+         {
+            swap = 0;
+            imax0 = hypre_CommTypeEntryIMax(comm_entries[j]);
+            imax1 = hypre_CommTypeEntryIMax(comm_entries[j+1]);
+            if ( hypre_IModPeriodZ(imax0, periodic) >
+                 hypre_IModPeriodZ(imax1, periodic) )
+            {
+               swap = 1;
+            }
+            else if ( hypre_IModPeriodZ(imax0, periodic) ==
+                      hypre_IModPeriodZ(imax1, periodic) )
+            {
+               if ( hypre_IModPeriodY(imax0, periodic) >
+                    hypre_IModPeriodY(imax1, periodic) )
+               {
+                  swap = 1;
+               }
+               else if ( hypre_IModPeriodY(imax0, periodic) ==
+                         hypre_IModPeriodY(imax1, periodic) )
+               {
+                  if ( hypre_IModPeriodX(imax0, periodic) >
+                       hypre_IModPeriodX(imax1, periodic) )
+                  {
+                     swap = 1;
+                  }
+               }
+            }
+
+            if (swap)
+            {
+               comm_entry        = comm_entries[j];
+               comm_entries[j]   = comm_entries[j+1];
+               comm_entries[j+1] = comm_entry;
+            }
+         }
+      }
+   }
 #endif
-return ierr;
+
+   return ierr;
 }
 
 /*==========================================================================*/
@@ -1354,21 +1354,21 @@ hypre_CommPkgCommit( hypre_CommPkg *comm_pkg )
 {
    int  ierr = 0;
 
-   /* create send MPI_Datatype's */
+   /* create send MPI_Datatypes */
    hypre_CommPkgSendMPITypes(comm_pkg) =
       hypre_TAlloc(MPI_Datatype, hypre_CommPkgNumSends(comm_pkg));
    hypre_CommTypeBuildMPI(hypre_CommPkgNumSends(comm_pkg),
-                           hypre_CommPkgSendProcs(comm_pkg),
-                           hypre_CommPkgSendTypes(comm_pkg),
-                           hypre_CommPkgSendMPITypes(comm_pkg));
+                          hypre_CommPkgSendProcs(comm_pkg),
+                          hypre_CommPkgSendTypes(comm_pkg),
+                          hypre_CommPkgSendMPITypes(comm_pkg));
 
-   /* create recv MPI_Datatype's */
+   /* create recv MPI_Datatypes */
    hypre_CommPkgRecvMPITypes(comm_pkg) =
       hypre_TAlloc(MPI_Datatype, hypre_CommPkgNumRecvs(comm_pkg));
    hypre_CommTypeBuildMPI(hypre_CommPkgNumRecvs(comm_pkg),
-                           hypre_CommPkgRecvProcs(comm_pkg),
-                           hypre_CommPkgRecvTypes(comm_pkg),
-                           hypre_CommPkgRecvMPITypes(comm_pkg));
+                          hypre_CommPkgRecvProcs(comm_pkg),
+                          hypre_CommPkgRecvTypes(comm_pkg),
+                          hypre_CommPkgRecvMPITypes(comm_pkg));
 
    return ierr;
 }
@@ -1442,9 +1442,9 @@ headers.h
 
 int
 hypre_CommTypeBuildMPI( int               num_comms,
-                         int              *comm_procs,
-                         hypre_CommType  **comm_types,
-                         MPI_Datatype     *comm_mpi_types )
+                        int              *comm_procs,
+                        hypre_CommType  **comm_types,
+                        MPI_Datatype     *comm_mpi_types )
 {
    hypre_CommType       *comm_type;
    hypre_CommTypeEntry  *comm_entry;

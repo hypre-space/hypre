@@ -23,26 +23,20 @@ typedef struct
 {
    MPI_Comm             comm;
                       
-   hypre_BoxArray      *boxes;        /* Array of boxes in this process */
-                      
    int                  dim;          /* Number of grid dimensions */
                       
-   int                  global_size;  /* Total number of grid points */
+   hypre_BoxArray      *boxes;        /* Array of boxes in this process */
+   int                 *ids;          /* Unique IDs for boxes */
+                      
+   hypre_BoxNeighbors  *neighbors;    /* Neighbors of boxes */
+   int                  max_distance; /* Neighborhood size */
+
+   hypre_Box           *bounding_box; /* Bounding box around grid */
+
    int                  local_size;   /* Number of grid points locally */
+   int                  global_size;  /* Total number of grid points */
 
-   hypre_BoxNeighbors  *neighbors;    /* neighbors of boxes */
-   int                  max_distance;
-
-   hypre_Index          periodic;     /* indicates if grid is periodic */
-
-   /* keep this for now to (hopefully) improve SMG setup performance */
-   hypre_BoxArray      *all_boxes;      /* valid only before Assemble */
-   int                 *processes;
-   int                 *box_ranks;
-   hypre_BoxArray      *base_all_boxes;
-   hypre_Index          pindex;         /* description of index-space to */
-   hypre_Index          pstride;        /* project base_all_boxes onto   */
-   int                  alloced;        /* boolean used to free up */
+   hypre_Index          periodic;     /* Indicates if grid is periodic */
 
    int                  ref_count;
 
@@ -53,20 +47,15 @@ typedef struct
  *--------------------------------------------------------------------------*/
 
 #define hypre_StructGridComm(grid)          ((grid) -> comm)
-#define hypre_StructGridBoxes(grid)         ((grid) -> boxes)
 #define hypre_StructGridDim(grid)           ((grid) -> dim)
-#define hypre_StructGridGlobalSize(grid)    ((grid) -> global_size)
-#define hypre_StructGridLocalSize(grid)     ((grid) -> local_size)
+#define hypre_StructGridBoxes(grid)         ((grid) -> boxes)
+#define hypre_StructGridIDs(grid)           ((grid) -> ids)
 #define hypre_StructGridNeighbors(grid)     ((grid) -> neighbors)
 #define hypre_StructGridMaxDistance(grid)   ((grid) -> max_distance)
+#define hypre_StructGridBoundingBox(grid)   ((grid) -> bounding_box)
+#define hypre_StructGridLocalSize(grid)     ((grid) -> local_size)
+#define hypre_StructGridGlobalSize(grid)    ((grid) -> global_size)
 #define hypre_StructGridPeriodic(grid)      ((grid) -> periodic)
-#define hypre_StructGridAllBoxes(grid)      ((grid) -> all_boxes)
-#define hypre_StructGridProcesses(grid)     ((grid) -> processes)
-#define hypre_StructGridBoxRanks(grid)      ((grid) -> box_ranks)
-#define hypre_StructGridBaseAllBoxes(grid)  ((grid) -> base_all_boxes)
-#define hypre_StructGridPIndex(grid)        ((grid) -> pindex)
-#define hypre_StructGridPStride(grid)       ((grid) -> pstride)
-#define hypre_StructGridAlloced(grid)       ((grid) -> alloced)
 #define hypre_StructGridRefCount(grid)      ((grid) -> ref_count)
 
 #define hypre_StructGridBox(grid, i) \
