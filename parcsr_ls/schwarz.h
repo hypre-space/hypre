@@ -23,6 +23,7 @@ typedef struct
    double   relax_weight;
 
    hypre_CSRMatrix *domain_structure;
+   hypre_CSRMatrix *A_boundary;
    hypre_ParVector *Vtemp;
    double  *scale;
    int     *dof_func;
@@ -42,6 +43,7 @@ typedef struct
 ((schwarz_data)->relax_weight)
 #define hypre_SchwarzDataDomainStructure(schwarz_data) \
 ((schwarz_data)->domain_structure)
+#define hypre_SchwarzDataABoundary(schwarz_data) ((schwarz_data)->A_boundary)
 #define hypre_SchwarzDataVtemp(schwarz_data) ((schwarz_data)->Vtemp)
 #define hypre_SchwarzDataScale(schwarz_data) ((schwarz_data)->scale)
 #define hypre_SchwarzDataDofFunc(schwarz_data) ((schwarz_data)->dof_func)

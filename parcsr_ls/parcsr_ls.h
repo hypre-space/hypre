@@ -426,6 +426,8 @@ int hypre_ParKrylovIdentity( void *vdata , void *A , void *b , void *x );
 
 /* schwarz.c */
 void hypre_F90_NAME_BLAS( int dpotrf , int DPOTRF );
+int hypre_AMGNodalSchwarzSmoother( hypre_CSRMatrix *A, int num_functions , int option , hypre_CSRMatrix **domain_structure_pointer);
+int hypre_ParMPSchwarzSolve( hypre_ParCSRMatrix *par_A , hypre_CSRMatrix *A_boundary, hypre_ParVector *rhs_vector , hypre_CSRMatrix *domain_structure , hypre_ParVector *par_x , double relax_wt, double *scale, hypre_ParVector *Vtemp );
 int hypre_MPSchwarzSolve( hypre_ParCSRMatrix *par_A , hypre_Vector *rhs_vector , hypre_CSRMatrix *domain_structure , hypre_ParVector *par_x , double relax_wt, hypre_Vector *aux_vector );
 int transpose_matrix_create( int **i_face_element_pointer , int **j_face_element_pointer , int *i_element_face , int *j_element_face , int num_elements , int num_faces );
 int matrix_matrix_product( int **i_element_edge_pointer , int **j_element_edge_pointer , int *i_element_face , int *j_element_face , int *i_face_edge , int *j_face_edge , int num_elements , int num_faces , int num_edges );
@@ -441,6 +443,7 @@ int hypre_GenerateScale( hypre_CSRMatrix *domain_structure , int num_variables ,
 int hypre_ParAdSchwarzSolve( hypre_ParCSRMatrix *A , hypre_ParVector *F , hypre_CSRMatrix *domain_structure , double *scale , hypre_ParVector *X , hypre_ParVector *Vtemp );
 int hypre_ParAMGCreateDomainDof( hypre_ParCSRMatrix *A , int domain_type , int overlap , int num_functions , int *dof_func , hypre_CSRMatrix **domain_structure_pointer );
 int hypre_ParGenerateScale( hypre_ParCSRMatrix *A , hypre_CSRMatrix *domain_structure , double relaxation_weight , double **scale_pointer );
+int hypre_ParGenerateHybridScale( hypre_ParCSRMatrix *A , hypre_CSRMatrix *domain_structure , hypre_CSRMatrix **A_boundary_pointer , double **scale_pointer );
 
 
 #ifdef __cplusplus
