@@ -46,6 +46,8 @@ cat timing.h                   >> $INTERNAL_HEADER
 
 cat amg_linklist.h             >> $INTERNAL_HEADER
 
+cat exchange_data.h            >> $INTERNAL_HEADER
+
 ./protos amg_linklist.c        >> $INTERNAL_HEADER
 		          
 ./protos binsearch.c           >> $INTERNAL_HEADER
