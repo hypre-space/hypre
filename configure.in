@@ -209,9 +209,16 @@ AC_ARG_WITH(petsc,
    then
       casc_using_petsc=yes
       HYPRE_PETSCDEFS="$HYPRE_PETSCDEFS -DPETSC_AVAILABLE"
-      HYPRE_PETSC_DIRS="PETScMat_linear_solvers/pilut PETSc_linear_solvers/ParILUT"
+      HYPRE_PETSCLIBDIRS="$HYPRE_TOP_SRC_DIR/PETScMat_linear_solvers/pilut \
+ $HYPRE_TOP_SRC_DIR/PETSc_linear_solvers/ParILUT \
+ $HYPRE_TOP_SRC_DIR/matrix_matrix"
+      HYPRE_PETSCLIBS=" -l_HYPRE_PETScSolverParILUT \
+ -l_HYPRE_PETScMatPilutSolver \
+ -l_HYPRE_MatrixMatrix"
    else
-      HYPRE_PETSC_DIRS=""
+      HYPRE_PETSCDEFS=""
+      HYPRE_PETSCLIBDIRS=""
+      HYPRE_PETSCLIBS=""
    fi
 )
 
@@ -616,7 +623,6 @@ AC_SUBST(MPIFLAGS)
 dnl * macro definitions that should be included on compile line
 AC_SUBST(HYPREDEFS)
 AC_SUBST(TIMERDEFS)
-AC_SUBST(HYPRE_PETSCDEFS)
 
 dnl *Libraries and their directories that must be used at compile time 
 AC_SUBST(LDLIBS)
@@ -641,7 +647,8 @@ AC_SUBST(PETSCLIBS)
 AC_SUBST(PETSCLIBDIRS)
 AC_SUBST(PETSCINCLUDE)
 AC_SUBST(HYPRE_PETSCDEFS)
-AC_SUBST(HYPRE_PETSC_DIRS)
+AC_SUBST(HYPRE_PETSCLIBS)
+AC_SUBST(HYPRE_PETSCLIBDIRS)
 
 
 AC_SUBST(HYPRE_TOP_SRC_DIR)
