@@ -7,6 +7,7 @@ libHYPRE_parcsr_ls_la_LDFLAGS = -avoid-version
 include_HEADERS = parcsr_ls.h HYPRE_parcsr_ls.h
 
 AM_CPPFLAGS = \
+ -DHYPRE_MODE -DOPTIMIZED_DH\
  -I$(top_srcdir)/utilities\
  -I$(top_srcdir)/krylov\
  -I$(top_srcdir)/seq_mv\
