@@ -1,0 +1,78 @@
+\chapter{Interlanguage issues}
+
+%==========================================================================
+\section{Calling {\itshape hypre} from Fortran}
+
+Fortran 77 subroutine arguments always pass copies of the argument addresses
+on execution of the call.  This is referred to as call-by-address, or
+call-by-reference.  In the called subroutine, the memory space at the
+argument address can be altered.  The calling address, however, cannot be
+altered.
+
+C function parameters, on the other hand, are often directly copied upon
+entry to the function.  These parameters do not have to be addresses.
+This is referred to as call-by-value.  Altering the copied C parameter in the
+called function has no effect on the parameter in the calling function.  So,
+C essentially has more freedom than Fortran.  A pointer parameter in C can
+achieve the same effect as call-by-reference, but all parameters do not have
+to be pointers.
+
+The simplicity of Fortran, and the flexibility of C, allow the languages to
+interoperate.  However, portability might introduce complexities to
+configuration fo the interoperation codes.
+
+Portability across DEC Compass, DEC Tera, and IBM ASCI-Blue platforms is
+achieved with the specific Fortran-calling-C mapping: 
+
+
+  calling Fortran argument type        called C function parameter type
+  -----------------------------        ------------------------------
+
+   (addr of) integer*8           ---->            long int *
+   (addr of) integer             ---->            int *
+   (addr of) character           ---->            char *
+   (addr of) double precision    ---->            double *
+
+
+In particular, on DEC Compass, DEC Tera, and IBM ASCI-Blue, C-type
+(long int *) points to a space that can hold an address, a space which
+happens to be the size of that allocated by a Fortran integer*8 declaration.
+In orther words, C can hold an address to anything in a (long int) and
+assign that address to a Fortran integer*8 memory space (using (long int *)
+call-by-value).
+
+So, on the above platforms, Fortran can carry addresses in integer*8
+variables.  These addresses might not have originated in any Fortran call,
+and if they are addresses to inhomogeneously typed collectioins of data
+(e.g. C structures), Fortran might not have enough information to dereference
+the addresses.  But Fortran can still carry around such addresses, and in
+particular hand them back and forth between various C functions.  The Hypre
+Fortran interface makes extensive use of this technique.
+
+Example:
+
+  Fortran calling:
+
+\begin{verbatim}
+
+    integer*8        struct_addr
+    integer          intg, ierr
+    character        charact
+    double precision double_prec
+
+    call sub_name(struct_addr, intg, charact, double_prec, ierr)
+
+\end{verbatim}
+
+
+  C called:
+  
+\begin{verbatim}
+
+    void hypre_C_NAME(sub_name)( long int  *struct_addr,
+                                 int       *intg,
+                                 char      *charact,
+                                 double    *double_prec,
+                                 int       *ierr          )
+\end{verbatim}
+%==========================================================================
