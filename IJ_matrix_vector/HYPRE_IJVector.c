@@ -17,7 +17,7 @@
 #include "../HYPRE.h"
 
 /*--------------------------------------------------------------------------
- * HYPRE_CreateIJVector
+ * HYPRE_IJVectorCreate
  *--------------------------------------------------------------------------*/
 
 /** 
@@ -40,7 +40,7 @@ the dimensions of the entire, global vector.
 
 */
 
-int HYPRE_CreateIJVector( MPI_Comm comm,
+int HYPRE_IJVectorCreate( MPI_Comm comm,
                        HYPRE_IJVector *in_vector_ptr, 
                        int global_n)
 
@@ -63,7 +63,7 @@ int HYPRE_CreateIJVector( MPI_Comm comm,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_DestroyIJVector
+ * HYPRE_IJVectorDestroy
  *--------------------------------------------------------------------------*/
 
 /**
@@ -74,7 +74,7 @@ the vector to be freed.
 */
 
 int 
-HYPRE_DestroyIJVector( HYPRE_IJVector IJvector )
+HYPRE_IJVectorDestroy( HYPRE_IJVector IJvector )
 {
    int ierr = 0;
    hypre_IJVector *vector = (hypre_IJVector *) IJvector;
@@ -91,7 +91,7 @@ HYPRE_DestroyIJVector( HYPRE_IJVector IJvector )
          else if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_ISIS )
             ierr = hypre_DestroyIJVectorISIS(vector);
          else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR )
-            ierr = hypre_DestroyIJVectorPar(vector);
+            ierr = hypre_IJVectorDestroyPar(vector);
          else
             ierr = -1;
 
@@ -107,7 +107,7 @@ HYPRE_DestroyIJVector( HYPRE_IJVector IJvector )
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SetIJVectorPartitioning
+ * HYPRE_IJVectorSetPartitioning
  *--------------------------------------------------------------------------*/
 
 /**
@@ -116,12 +116,12 @@ HYPRE_DestroyIJVector( HYPRE_IJVector IJvector )
 vector for which partitioning is to be set
 @param int *partitioning [IN]
 pointer to array of integers specifying vector decomposition across processors
-HYPRE_SetIJVectorLocalStorageType needs to be called before this function.
+HYPRE_IJVectorSetLocalStorageType needs to be called before this function.
 
 */
 
 int 
-HYPRE_SetIJVectorPartitioning( HYPRE_IJVector  IJvector,
+HYPRE_IJVectorSetPartitioning( HYPRE_IJVector  IJvector,
                                const int      *partitioning )
 {
    int ierr = 0;
@@ -144,9 +144,9 @@ HYPRE_SetIJVectorPartitioning( HYPRE_IJVector  IJvector,
    else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR )
    {
       if (!hypre_IJVectorLocalStorage(vector)) 
-	 ierr = hypre_CreateIJVectorPar(vector, partitioning);
+	 ierr = hypre_IJVectorCreatePar(vector, partitioning);
       else
-         ierr = hypre_SetIJVectorParPartitioning(vector, partitioning);
+         ierr = hypre_IJVectorSetPartitioningPar(vector, partitioning);
    }
    else
       ++ierr;
@@ -155,7 +155,7 @@ HYPRE_SetIJVectorPartitioning( HYPRE_IJVector  IJvector,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SetIJVectorLocalPartitioning
+ * HYPRE_IJVectorSetLocalPartitioning
  *--------------------------------------------------------------------------*/
 
 /**
@@ -167,12 +167,12 @@ integer specifying local index to first data element on calling processor
 @param int vec_start_next_proc [IN]
 integer specifying local index to first data element on next processor in
 decomposition
-HYPRE_SetIJVectorLocalStorageType needs to be called before this function.
+HYPRE_IJVectorSetLocalStorageType needs to be called before this function.
 
 */
 
 int 
-HYPRE_SetIJVectorLocalPartitioning( HYPRE_IJVector IJvector,
+HYPRE_IJVectorSetLocalPartitioning( HYPRE_IJVector IJvector,
                                     int            vec_start_this_proc,
                                     int            vec_start_next_proc  )
 {
@@ -198,9 +198,9 @@ HYPRE_SetIJVectorLocalPartitioning( HYPRE_IJVector IJvector,
    else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR )
    {
       if (!hypre_IJVectorLocalStorage(vector)) 
-	   hypre_CreateIJVectorPar(vector, NULL);
+	   hypre_IJVectorCreatePar(vector, NULL);
 
-      ierr += hypre_SetIJVectorParLocalPartitioning(vector,
+      ierr += hypre_IJVectorSetLocalPartitioningPar(vector,
                                                     vec_start_this_proc,
                                                     vec_start_next_proc  );
    }
@@ -211,19 +211,19 @@ HYPRE_SetIJVectorLocalPartitioning( HYPRE_IJVector IJvector,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_InitializeIJVector
+ * HYPRE_IJVectorInitialize
  *--------------------------------------------------------------------------*/
 
 /**
 @return integer error code
 @param HYPRE_IJVector IJvector
 vector to be initialized
-HYPRE_SetIJVectorLocalStorageType needs to be called before this function.
+HYPRE_IJVectorSetLocalStorageType needs to be called before this function.
 
 */
 
 int 
-HYPRE_InitializeIJVector( HYPRE_IJVector IJvector )
+HYPRE_IJVectorInitialize( HYPRE_IJVector IJvector )
 {
    int ierr = 0;
    hypre_IJVector *vector = (hypre_IJVector *) IJvector;
@@ -235,8 +235,8 @@ HYPRE_InitializeIJVector( HYPRE_IJVector IJvector )
    else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR )
    {
       if (!hypre_IJVectorLocalStorage(vector))
-	 ierr = hypre_CreateIJVectorPar(vector, NULL);
-      ierr += hypre_InitializeIJVectorPar(vector);
+	 ierr = hypre_IJVectorCreatePar(vector, NULL);
+      ierr += hypre_IJVectorInitializePar(vector);
    }
    else
       ++ierr;
@@ -245,7 +245,7 @@ HYPRE_InitializeIJVector( HYPRE_IJVector IJvector )
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_DistributeIJVector
+ * HYPRE_IJVectorDistribute
  *--------------------------------------------------------------------------*/
 
 /**
@@ -258,13 +258,13 @@ pointer to array of integers specifying vector decomposition across processors
 */
 
 int 
-HYPRE_DistributeIJVector( HYPRE_IJVector IJvector, const int *vec_starts )
+HYPRE_IJVectorDistribute( HYPRE_IJVector IJvector, const int *vec_starts )
 {
    int ierr = 0;
    hypre_IJVector *vector = (hypre_IJVector *) IJvector;
 
    if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR )
-      ierr += hypre_DistributeIJVectorPar(vector, vec_starts);
+      ierr += hypre_IJVectorDistributePar(vector, vec_starts);
    else
       ++ierr;
 
@@ -272,7 +272,7 @@ HYPRE_DistributeIJVector( HYPRE_IJVector IJvector, const int *vec_starts )
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SetIJVectorLocalStorageType
+ * HYPRE_IJVectorSetLocalStorageType
  *--------------------------------------------------------------------------*/
 
 /**
@@ -299,7 +299,7 @@ type that they can work with automatically, but this is in the future.
 */
 
 int 
-HYPRE_SetIJVectorLocalStorageType( HYPRE_IJVector IJvector, int type )
+HYPRE_IJVectorSetLocalStorageType( HYPRE_IJVector IJvector, int type )
 {
    int ierr = 0;
    hypre_IJVector *vector = (hypre_IJVector *) IJvector;
@@ -310,7 +310,7 @@ HYPRE_SetIJVectorLocalStorageType( HYPRE_IJVector IJvector, int type )
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ZeroIJVectorLocalComponents
+ * HYPRE_IJVectorZeroLocalComponents
  *--------------------------------------------------------------------------*/
 
 /** 
@@ -330,7 +330,7 @@ value to which the local vector components are to be set
 */
 
 int 
-HYPRE_ZeroIJVectorLocalComponents( HYPRE_IJVector  IJvector)
+HYPRE_IJVectorZeroLocalComponents( HYPRE_IJVector  IJvector)
 {
    int ierr = 0;
    hypre_IJVector *vector = (hypre_IJVector *) IJvector;
@@ -340,7 +340,7 @@ HYPRE_ZeroIJVectorLocalComponents( HYPRE_IJVector  IJvector)
    else if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_ISIS )
       ierr = hypre_ZeroIJVectorISISLocalComponents(vector);
    else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR )
-      ierr = hypre_ZeroIJVectorParLocalComponents(vector);
+      ierr = hypre_IJVectorZeroLocalComponentsPar(vector);
    else
       ierr = -1;
 
@@ -348,7 +348,7 @@ HYPRE_ZeroIJVectorLocalComponents( HYPRE_IJVector  IJvector)
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SetIJVectorLocalComponents
+ * HYPRE_IJVectorSetLocalComponents
  *--------------------------------------------------------------------------*/
 
 /** 
@@ -371,7 +371,7 @@ pointer to array from which vector values are inserted
 */
 
 int 
-HYPRE_SetIJVectorLocalComponents( HYPRE_IJVector  IJvector,
+HYPRE_IJVectorSetLocalComponents( HYPRE_IJVector  IJvector,
                                   int             num_values,
                                   const int      *glob_vec_indices,
                                   const int      *value_indices,
@@ -393,7 +393,7 @@ HYPRE_SetIJVectorLocalComponents( HYPRE_IJVector  IJvector,
                                                   value_indices,
                                                   values);
    else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR )
-      ierr = hypre_SetIJVectorParLocalComponents(vector,
+      ierr = hypre_IJVectorSetLocalComponentsPar(vector,
                                                  num_values,
                                                  glob_vec_indices,
                                                  value_indices,
@@ -405,7 +405,7 @@ HYPRE_SetIJVectorLocalComponents( HYPRE_IJVector  IJvector,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SetIJVectorLocalComponentsInBlock
+ * HYPRE_IJVectorSetLocalComponentsInBlock
  *--------------------------------------------------------------------------*/
 
 /** 
@@ -429,7 +429,7 @@ pointer to array from which vector values are inserted
 */
 
 int 
-HYPRE_SetIJVectorLocalComponentsInBlock( HYPRE_IJVector  IJvector,
+HYPRE_IJVectorSetLocalComponentsInBlock( HYPRE_IJVector  IJvector,
                                          int             glob_vec_index_start, 
                                          int             glob_vec_index_stop,
                                          const int      *value_indices,
@@ -451,7 +451,7 @@ HYPRE_SetIJVectorLocalComponentsInBlock( HYPRE_IJVector  IJvector,
                                                          value_indices,
                                                          values);
    else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR )
-      ierr = hypre_SetIJVectorParLocalComponentsInBlock(vector,
+      ierr = hypre_IJVectorSetLocalComponentsInBlockPar(vector,
                                                         glob_vec_index_start,
                                                         glob_vec_index_stop,
                                                         value_indices,
@@ -463,7 +463,7 @@ HYPRE_SetIJVectorLocalComponentsInBlock( HYPRE_IJVector  IJvector,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_AddToIJVectorLocalComponents
+ * HYPRE_IJVectorAddLocalComponents
  *--------------------------------------------------------------------------*/
 
 /** 
@@ -486,7 +486,7 @@ pointer to array from which values are taken for summing
 */
 
 int 
-HYPRE_AddToIJVectorLocalComponents( HYPRE_IJVector  IJvector,
+HYPRE_IJVectorAddLocalComponents( HYPRE_IJVector  IJvector,
                                     int             num_values,
                                     const int      *glob_vec_indices,
                                     const int      *value_indices,
@@ -508,7 +508,7 @@ HYPRE_AddToIJVectorLocalComponents( HYPRE_IJVector  IJvector,
                                                     value_indices,
                                                     values);
    else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR )
-      ierr = hypre_AddToIJVectorParLocalComponents(vector,
+      ierr = hypre_IJVectorAddLocalComponentsPar(vector,
                                                    num_values,
                                                    glob_vec_indices,
                                                    value_indices,
@@ -520,7 +520,7 @@ HYPRE_AddToIJVectorLocalComponents( HYPRE_IJVector  IJvector,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_AddToIJVectorLocalComponentsInBlock
+ * HYPRE_IJVectorAddLocalComponentsInBlock
  *--------------------------------------------------------------------------*/
 
 /** 
@@ -545,7 +545,7 @@ pointer to array from which values are taken for summing
 */
 
 int 
-HYPRE_AddToIJVectorLocalComponentsInBlock( HYPRE_IJVector  IJvector,
+HYPRE_IJVectorAddLocalComponentsInBlock( HYPRE_IJVector  IJvector,
                                            int             glob_vec_index_start, 
                                            int             glob_vec_index_stop,
                                            const int      *value_indices,
@@ -567,7 +567,7 @@ HYPRE_AddToIJVectorLocalComponentsInBlock( HYPRE_IJVector  IJvector,
                                                            value_indices,
                                                            values);
    else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR )
-      ierr = hypre_AddToIJVectorParLocalComponentsInBlock(vector,
+      ierr = hypre_IJVectorAddLocalComponentsInBlockPar(vector,
                                                           glob_vec_index_start,
                                                           glob_vec_index_stop,
                                                           value_indices,
@@ -579,11 +579,11 @@ HYPRE_AddToIJVectorLocalComponentsInBlock( HYPRE_IJVector  IJvector,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_AssembleIJVector
+ * HYPRE_IJVectorAssemble
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_AssembleIJVector( HYPRE_IJVector  IJvector )
+HYPRE_IJVectorAssemble( HYPRE_IJVector  IJvector )
 {
    hypre_IJVector *vector = (hypre_IJVector *) IJvector;
 
@@ -592,11 +592,11 @@ HYPRE_AssembleIJVector( HYPRE_IJVector  IJvector )
    else if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_ISIS )
       return( hypre_AssembleIJVectorISIS( vector ) );
    else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR )
-      return(  hypre_AssembleIJVectorPar( vector ) );
+      return(  hypre_IJVectorAssemblePar( vector ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_GetIJVectorLocalComponents
+ * HYPRE_IJVectorGetLocalComponents
  *--------------------------------------------------------------------------*/
 
 /** 
@@ -613,7 +613,7 @@ vector from which components are to be fetched
 */
 
 int 
-HYPRE_GetIJVectorLocalComponents( HYPRE_IJVector  IJvector,
+HYPRE_IJVectorGetLocalComponents( HYPRE_IJVector  IJvector,
                                   int             num_values,
                                   const int      *glob_vec_indices,
                                   const int      *value_indices,
@@ -635,7 +635,7 @@ HYPRE_GetIJVectorLocalComponents( HYPRE_IJVector  IJvector,
                                                   value_indices,
                                                   values);
    else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR )
-      ierr = hypre_GetIJVectorParLocalComponents(vector,
+      ierr = hypre_IJVectorGetLocalComponentsPar(vector,
                                                  num_values,
                                                  glob_vec_indices,
                                                  value_indices,
@@ -647,7 +647,7 @@ HYPRE_GetIJVectorLocalComponents( HYPRE_IJVector  IJvector,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_GetIJVectorLocalComponentsInBlock
+ * HYPRE_IJVectorGetLocalComponentsInBlock
  *--------------------------------------------------------------------------*/
 
 /** 
@@ -666,7 +666,7 @@ the vector from which components are to be fetched
 */
 
 int 
-HYPRE_GetIJVectorLocalComponentsInBlock( HYPRE_IJVector  IJvector,
+HYPRE_IJVectorGetLocalComponentsInBlock( HYPRE_IJVector  IJvector,
                                          int             glob_vec_index_start, 
                                          int             glob_vec_index_stop,
                                          const int      *value_indices,
@@ -688,7 +688,7 @@ HYPRE_GetIJVectorLocalComponentsInBlock( HYPRE_IJVector  IJvector,
                                                          value_indices,
                                                          values);
    else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR )
-      ierr = hypre_GetIJVectorParLocalComponentsInBlock(vector,
+      ierr = hypre_IJVectorGetLocalComponentsInBlockPar(vector,
                                                         glob_vec_index_start,
                                                         glob_vec_index_stop,
                                                         value_indices,
@@ -700,11 +700,11 @@ HYPRE_GetIJVectorLocalComponentsInBlock( HYPRE_IJVector  IJvector,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_GetIJVectorLocalStorageType
+ * HYPRE_IJVectorGetLocalStorageType
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_GetIJVectorLocalStorageType( HYPRE_IJVector IJvector, int *type )
+HYPRE_IJVectorGetLocalStorageType( HYPRE_IJVector IJvector, int *type )
 {
    int ierr = 0;
    hypre_IJVector *vector = (hypre_IJVector *) IJvector;
@@ -718,7 +718,7 @@ HYPRE_GetIJVectorLocalStorageType( HYPRE_IJVector IJvector, int *type )
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_GetIJVectorLocalStorage
+ * HYPRE_IJVectorGetLocalStorage
  *--------------------------------------------------------------------------*/
 
 /**
@@ -732,7 +732,7 @@ work with a direct implementation of IJVector.
 */
 
 void *
-HYPRE_GetIJVectorLocalStorage( HYPRE_IJVector IJvector )
+HYPRE_IJVectorGetLocalStorage( HYPRE_IJVector IJvector )
 {
    hypre_IJVector *vector = (hypre_IJVector *) IJvector;
 

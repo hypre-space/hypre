@@ -16,7 +16,7 @@
 
 /******************************************************************************
  *
- * hypre_SetIJMatrixLocalSizeISIS
+ * hypre_IJMatrixSetLocalSizeISIS
  *
  * sets local number of rows and number of columns of diagonal matrix on
  * current processor.
@@ -24,7 +24,7 @@
  *****************************************************************************/
 
 int
-hypre_SetIJMatrixLocalSizeISIS(hypre_IJMatrix *matrix,
+hypre_IJMatrixSetLocalSizeISIS(hypre_IJMatrix *matrix,
 			       int     	 local_m,
 			       int     	 local_n)
 {
@@ -39,14 +39,14 @@ hypre_SetIJMatrixLocalSizeISIS(hypre_IJMatrix *matrix,
    else
    {
       hypre_IJMatrixTranslator(matrix) = 
-			hypre_CreateAuxParCSRMatrix(local_m,local_n,NULL);
+			hypre_AuxParCSRMatrixCreate(local_m,local_n,NULL);
    }
    return ierr;
 }
 
 /******************************************************************************
  *
- * hypre_CreateIJMatrixISIS
+ * hypre_IJMatrixCreateISIS
  *
  * creates AuxParCSRMatrix and ParCSRMatrix if necessary,
  * generates arrays row_starts and col_starts using either previously
@@ -55,7 +55,7 @@ hypre_SetIJMatrixLocalSizeISIS(hypre_IJMatrix *matrix,
  *
  *****************************************************************************/
 int
-hypre_CreateIJMatrixISIS(hypre_IJMatrix *matrix)
+hypre_IJMatrixCreateISIS(hypre_IJMatrix *matrix)
 {
    MPI_Comm comm = hypre_IJMatrixContext(matrix);
    int global_m = hypre_IJMatrixM(matrix); 
@@ -84,7 +84,7 @@ hypre_CreateIJMatrixISIS(hypre_IJMatrix *matrix)
    }
    else
    {
-      aux_matrix = hypre_CreateAuxParCSRMatrix(-1,-1,NULL);
+      aux_matrix = hypre_AuxParCSRMatrixCreate(-1,-1,NULL);
       local_m = -1;
       local_n = -1;
       hypre_IJMatrixTranslator(matrix) = aux_matrix;
@@ -143,7 +143,7 @@ hypre_CreateIJMatrixISIS(hypre_IJMatrix *matrix)
       }
    }
 
-   hypre_IJMatrixLocalStorage(matrix) = hypre_CreateParCSRMatrix(comm,global_m,
+   hypre_IJMatrixLocalStorage(matrix) = hypre_ParCSRMatrixCreate(comm,global_m,
 		global_n,row_starts, col_starts, num_cols_offd, 
 		num_nonzeros_diag, num_nonzeros_offd);
    return ierr;
@@ -151,11 +151,11 @@ hypre_CreateIJMatrixISIS(hypre_IJMatrix *matrix)
 
 /******************************************************************************
  *
- * hypre_SetIJMatrixRowSizesISIS
+ * hypre_IJMatrixSetRowSizesISIS
  *
  *****************************************************************************/
 int
-hypre_SetIJMatrixRowSizesISIS(hypre_IJMatrix *matrix,
+hypre_IJMatrixSetRowSizesISIS(hypre_IJMatrix *matrix,
 			      int	       *sizes)
 {
    int *row_space;
@@ -179,13 +179,13 @@ hypre_SetIJMatrixRowSizesISIS(hypre_IJMatrix *matrix,
 
 /******************************************************************************
  *
- * hypre_SetIJMatrixDiagRowSizesISIS
+ * hypre_IJMatrixSetDiagRowSizesISIS
  * sets diag_i inside the diag part of the ParCSRMatrix,
  * requires exact sizes for diag
  *
  *****************************************************************************/
 int
-hypre_SetIJMatrixDiagRowSizesISIS(hypre_IJMatrix *matrix,
+hypre_IJMatrixSetDiagRowSizesISIS(hypre_IJMatrix *matrix,
 			      	    int	           *sizes)
 {
    int local_num_rows;
@@ -211,13 +211,13 @@ hypre_SetIJMatrixDiagRowSizesISIS(hypre_IJMatrix *matrix,
 
 /******************************************************************************
  *
- * hypre_SetIJMatrixOffDiagRowSizesISIS
+ * hypre_IJMatrixSetOffDiagRowSizesISIS
  * sets offd_i inside the offd part of the ParCSRMatrix,
  * requires exact sizes for offd
  *
  *****************************************************************************/
 int
-hypre_SetIJMatrixOffDiagRowSizesISIS(hypre_IJMatrix *matrix,
+hypre_IJMatrixSetOffDiagRowSizesISIS(hypre_IJMatrix *matrix,
 			      	     int	      *sizes)
 {
    int local_num_rows;
@@ -243,14 +243,14 @@ hypre_SetIJMatrixOffDiagRowSizesISIS(hypre_IJMatrix *matrix,
 
 /******************************************************************************
  *
- * hypre_InitializeIJMatrixISIS
+ * hypre_IJMatrixInitializeISIS
  *
  * initializes AuxParCSRMatrix and ParCSRMatrix as necessary
  *
  *****************************************************************************/
 
 int
-hypre_InitializeIJMatrixISIS(hypre_IJMatrix *matrix)
+hypre_IJMatrixInitializeISIS(hypre_IJMatrix *matrix)
 {
    int ierr = 0;
    hypre_ParCSRMatrix *par_matrix = hypre_IJMatrixLocalStorage(matrix);
@@ -274,21 +274,21 @@ hypre_InitializeIJMatrixISIS(hypre_IJMatrix *matrix)
    if (local_num_cols < 0)
       hypre_AuxParCSRMatrixLocalNumCols(aux_matrix) = 
 		hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(par_matrix));
-   ierr = hypre_InitializeAuxParCSRMatrix(aux_matrix);
-   ierr += hypre_InitializeParCSRMatrix(par_matrix);
+   ierr = hypre_AuxParCSRMatrixInitialize(aux_matrix);
+   ierr += hypre_ParCSRMatrixInitialize(par_matrix);
    return ierr;
 }
 
 /******************************************************************************
  *
- * hypre_InsertIJMatrixBlockISIS
+ * hypre_IJMatrixInsertBlockISIS
  *
  * inserts a block of values into an IJMatrix, currently it just uses
  * InsertIJMatrixRowISIS
  *
  *****************************************************************************/
 int
-hypre_InsertIJMatrixBlockISIS(hypre_IJMatrix *matrix,
+hypre_IJMatrixInsertBlockISIS(hypre_IJMatrix *matrix,
 		       	      int	        m,
 		              int	        n,
 		              int	       *rows,
@@ -300,13 +300,13 @@ hypre_InsertIJMatrixBlockISIS(hypre_IJMatrix *matrix,
    for (i=0; i < m; i++)
    {
       in = i*n;
-      hypre_InsertIJMatrixRowISIS(matrix,n,rows[i],&cols[in],&coeffs[in]);
+      hypre_IJMatrixInsertRowISIS(matrix,n,rows[i],&cols[in],&coeffs[in]);
    }
    return ierr;
 }
 /******************************************************************************
  *
- * hypre_AddBlockToIJMatrixISIS
+ * hypre_IJMatrixAddBlockISIS
  *
  * adds a block of values to an IJMatrix, currently it just uses
  * AddIJMatrixRowISIS
@@ -314,7 +314,7 @@ hypre_InsertIJMatrixBlockISIS(hypre_IJMatrix *matrix,
  *****************************************************************************/
 
 int
-hypre_AddBlockToIJMatrixISIS(hypre_IJMatrix *matrix,
+hypre_IJMatrixAddBlockISIS(hypre_IJMatrix *matrix,
 		       	       int	       m,
 		               int	       n,
 		               int	      *rows,
@@ -326,14 +326,14 @@ hypre_AddBlockToIJMatrixISIS(hypre_IJMatrix *matrix,
    for (i=0; i < m; i++)
    {
       in = i*n;
-      hypre_AddIJMatrixRowISIS(matrix,n,rows[i],&cols[in],&coeffs[in]);
+      hypre_IJMatrixAddRowISIS(matrix,n,rows[i],&cols[in],&coeffs[in]);
    }
    return ierr;
 }
 
 /******************************************************************************
  *
- * hypre_InsertIJMatrixRowISIS
+ * hypre_IJMatrixInsertRowISIS
  *
  * inserts a row into an IJMatrix, 
  * if diag_i and offd_i are known, those values are inserted directly
@@ -342,7 +342,7 @@ hypre_AddBlockToIJMatrixISIS(hypre_IJMatrix *matrix,
  *
  *****************************************************************************/
 int
-hypre_InsertIJMatrixRowISIS(hypre_IJMatrix *matrix,
+hypre_IJMatrixInsertRowISIS(hypre_IJMatrix *matrix,
 		              int	      n,
 		              int	      row,
 		              int	     *indices,
@@ -485,13 +485,13 @@ hypre_InsertIJMatrixRowISIS(hypre_IJMatrix *matrix,
 
 /******************************************************************************
  *
- * hypre_AddIJMatrixRowISIS
+ * hypre_IJMatrixAddRowISIS
  *
  * adds a row to an IJMatrix before assembly, 
  * 
  *****************************************************************************/
 int
-hypre_AddIJMatrixRowISIS(hypre_IJMatrix *matrix,
+hypre_IJMatrixAddRowISIS(hypre_IJMatrix *matrix,
 	                 int	           n,
 		         int	           row,
 		         int	          *indices,
@@ -744,12 +744,12 @@ hypre_AddIJMatrixRowISIS(hypre_IJMatrix *matrix,
 
 /******************************************************************************
  *
- * hypre_AssembleIJMatrixISIS
+ * hypre_IJMatrixAssembleISIS
  *
  * assembles IJMAtrix from AuxParCSRMatrix auxiliary structure
  *****************************************************************************/
 int
-hypre_AssembleIJMatrixISIS(hypre_IJMatrix *matrix)
+hypre_IJMatrixAssembleISIS(hypre_IJMatrix *matrix)
 {
    int ierr = 0;
    MPI_Comm comm = hypre_IJMatrixContext(matrix);
@@ -870,7 +870,7 @@ hypre_AssembleIJMatrixISIS(hypre_IJMatrix *matrix)
    hypre_ParCSRMatrixColMapOffd(par_matrix) = col_map_offd;    
    hypre_CSRMatrixNumCols(offd) = num_cols_offd;    
 
-   hypre_DestroyAuxParCSRMatrix(aux_matrix);
+   hypre_AuxParCSRMatrixDestroy(aux_matrix);
    hypre_TFree(aux_offd_j);
 
    return ierr;
@@ -878,7 +878,7 @@ hypre_AssembleIJMatrixISIS(hypre_IJMatrix *matrix)
 
 /******************************************************************************
  *
- * hypre_DistributeIJMatrixISIS
+ * hypre_IJMatrixDistributeISIS
  *
  * takes an IJMatrix generated for one processor and distributes it
  * across many processors according to row_starts and col_starts,
@@ -886,7 +886,7 @@ hypre_AssembleIJMatrixISIS(hypre_IJMatrix *matrix)
  *
  *****************************************************************************/
 int
-hypre_DistributeIJMatrixISIS(hypre_IJMatrix *matrix,
+hypre_IJMatrixDistributeISIS(hypre_IJMatrix *matrix,
 			     int	      *row_starts,
 			     int	      *col_starts)
 {
@@ -896,20 +896,20 @@ hypre_DistributeIJMatrixISIS(hypre_IJMatrix *matrix,
    hypre_CSRMatrix *diag = hypre_ParCSRMatrixDiag(old_matrix);
    par_matrix = hypre_CSRMatrixToParCSRMatrix(hypre_ParCSRMatrixComm(old_matrix)
 		, diag, row_starts, col_starts);
-   ierr = hypre_DestroyParCSRMatrix(old_matrix);
+   ierr = hypre_ParCSRMatrixDestroy(old_matrix);
    hypre_IJMatrixLocalStorage(matrix) = par_matrix;
    return ierr;
 }
 
 /******************************************************************************
  *
- * hypre_ApplyIJMatrixISIS
+ * hypre_IJMatrixApplyISIS
  *
  * NOT IMPLEMENTED YET
  *
  *****************************************************************************/
 int
-hypre_ApplyIJMatrixISIS(hypre_IJMatrix  *matrix,
+hypre_IJMatrixApplyISIS(hypre_IJMatrix  *matrix,
 		        hypre_ParVector *x,
 		          hypre_ParVector *b)
 {
@@ -920,27 +920,27 @@ hypre_ApplyIJMatrixISIS(hypre_IJMatrix  *matrix,
 
 /******************************************************************************
  *
- * hypre_DestroyIJMatrixISIS
+ * hypre_IJMatrixDestroyISIS
  *
  * frees an IJMatrix
  *
  *****************************************************************************/
 int
-hypre_DestroyIJMatrixISIS(hypre_IJMatrix *matrix)
+hypre_IJMatrixDestroyISIS(hypre_IJMatrix *matrix)
 {
-   return hypre_DestroyParCSRMatrix(hypre_IJMatrixLocalStorage(matrix));
+   return hypre_ParCSRMatrixDestroy(hypre_IJMatrixLocalStorage(matrix));
 }
 
 /******************************************************************************
  *
- * hypre_SetIJMatrixTotalSizeISIS
+ * hypre_IJMatrixSetTotalSizeISIS
  *
  * sets the total number of nonzeros of matrix, can be somewhat useful
  * for storage estimates
  *
  *****************************************************************************/
 int
-hypre_SetIJMatrixTotalSizeISIS(hypre_IJMatrix *matrix,
+hypre_IJMatrixSetTotalSizeISIS(hypre_IJMatrix *matrix,
 			   	 int     	 size)
 {
    int ierr = 0;
@@ -948,7 +948,7 @@ hypre_SetIJMatrixTotalSizeISIS(hypre_IJMatrix *matrix,
    par_matrix = hypre_IJMatrixLocalStorage(matrix);
    if (!par_matrix)
    {
-      ierr = hypre_CreateIJMatrixISIS(matrix);
+      ierr = hypre_IJMatrixCreateISIS(matrix);
       par_matrix = hypre_IJMatrixLocalStorage(matrix);
    }
    hypre_ParCSRMatrixNumNonzeros(par_matrix) = size;

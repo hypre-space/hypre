@@ -1,5 +1,5 @@
 /*--------------------------------------------------------------------------
- * hypre_GetIJVectorParVector
+ * hypre_IJVectorGetParVector
  *--------------------------------------------------------------------------*/
 
 #include "headers.h"
@@ -15,7 +15,7 @@ The assembled HYPRE_IJVector.
 The pointer to be set to point to IJVector.
 */
 int 
-hypre_GetIJVectorParVector( HYPRE_IJVector IJvector, HYPRE_ParVector *reference )
+hypre_IJVectorGetParVector( HYPRE_IJVector IJvector, HYPRE_ParVector *reference )
 {
    int ierr = 0;
    hypre_IJVector *vector = (hypre_IJVector *) IJvector;

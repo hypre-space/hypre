@@ -16,7 +16,7 @@
 
 /******************************************************************************
  *
- * hypre_SetIJMatrixLocalSizeParCSR
+ * hypre_IJMatrixSetLocalSizeParCSR
  *
  * sets local number of rows and number of columns of diagonal matrix on
  * current processor.
@@ -24,7 +24,7 @@
  *****************************************************************************/
 
 int
-hypre_SetIJMatrixLocalSizeParCSR(hypre_IJMatrix *matrix,
+hypre_IJMatrixSetLocalSizeParCSR(hypre_IJMatrix *matrix,
 			   	 int     	 local_m,
 			   	 int     	 local_n)
 {
@@ -39,14 +39,14 @@ hypre_SetIJMatrixLocalSizeParCSR(hypre_IJMatrix *matrix,
    else
    {
       hypre_IJMatrixTranslator(matrix) = 
-			hypre_CreateAuxParCSRMatrix(local_m,local_n,NULL);
+			hypre_AuxParCSRMatrixCreate(local_m,local_n,NULL);
    }
    return ierr;
 }
 
 /******************************************************************************
  *
- * hypre_CreateIJMatrixParCSR
+ * hypre_IJMatrixCreateParCSR
  *
  * creates AuxParCSRMatrix and ParCSRMatrix if necessary,
  * generates arrays row_starts and col_starts using either previously
@@ -55,7 +55,7 @@ hypre_SetIJMatrixLocalSizeParCSR(hypre_IJMatrix *matrix,
  *
  *****************************************************************************/
 int
-hypre_CreateIJMatrixParCSR(hypre_IJMatrix *matrix)
+hypre_IJMatrixCreateParCSR(hypre_IJMatrix *matrix)
 {
    MPI_Comm comm = hypre_IJMatrixContext(matrix);
    int global_m = hypre_IJMatrixM(matrix); 
@@ -84,7 +84,7 @@ hypre_CreateIJMatrixParCSR(hypre_IJMatrix *matrix)
    }
    else
    {
-      aux_matrix = hypre_CreateAuxParCSRMatrix(-1,-1,NULL);
+      aux_matrix = hypre_AuxParCSRMatrixCreate(-1,-1,NULL);
       local_m = -1;
       local_n = -1;
       hypre_IJMatrixTranslator(matrix) = aux_matrix;
@@ -134,7 +134,7 @@ hypre_CreateIJMatrixParCSR(hypre_IJMatrix *matrix)
       }
    }
 
-   hypre_IJMatrixLocalStorage(matrix) = hypre_CreateParCSRMatrix(comm,global_m,
+   hypre_IJMatrixLocalStorage(matrix) = hypre_ParCSRMatrixCreate(comm,global_m,
 		global_n,row_starts, col_starts, num_cols_offd, 
 		num_nonzeros_diag, num_nonzeros_offd);
    return ierr;
@@ -146,7 +146,7 @@ hypre_CreateIJMatrixParCSR(hypre_IJMatrix *matrix)
  *
  *****************************************************************************/
 int
-hypre_SetIJMatrixRowSizesParCSR(hypre_IJMatrix *matrix,
+hypre_IJMatrixSetRowSizesParCSR(hypre_IJMatrix *matrix,
 			      	const int      *sizes)
 {
    int *row_space;
@@ -170,13 +170,13 @@ hypre_SetIJMatrixRowSizesParCSR(hypre_IJMatrix *matrix,
 
 /******************************************************************************
  *
- * hypre_SetIJMatrixDiagRowSizesParCSR
+ * hypre_IJMatrixSetDiagRowSizesParCSR
  * sets diag_i inside the diag part of the ParCSRMatrix,
  * requires exact row sizes for diag
  *
  *****************************************************************************/
 int
-hypre_SetIJMatrixDiagRowSizesParCSR(hypre_IJMatrix *matrix,
+hypre_IJMatrixSetDiagRowSizesParCSR(hypre_IJMatrix *matrix,
 			      	    const int	   *sizes)
 {
    int local_num_rows;
@@ -186,7 +186,7 @@ hypre_SetIJMatrixDiagRowSizesParCSR(hypre_IJMatrix *matrix,
    hypre_CSRMatrix *diag;
    int *diag_i;
    if (!hypre_IJMatrixLocalStorage(matrix))
-      ierr = hypre_CreateIJMatrixParCSR(matrix);
+      ierr = hypre_IJMatrixCreateParCSR(matrix);
    if (ierr) return ierr;
    par_matrix = hypre_IJMatrixLocalStorage(matrix);
    
@@ -205,13 +205,13 @@ hypre_SetIJMatrixDiagRowSizesParCSR(hypre_IJMatrix *matrix,
 
 /******************************************************************************
  *
- * hypre_SetIJMatrixOffDiagRowSizesParCSR
+ * hypre_IJMatrixSetOffDiagRowSizesParCSR
  * sets offd_i inside the offd part of the ParCSRMatrix,
  * requires exact row sizes for offd
  *
  *****************************************************************************/
 int
-hypre_SetIJMatrixOffDiagRowSizesParCSR(hypre_IJMatrix *matrix,
+hypre_IJMatrixSetOffDiagRowSizesParCSR(hypre_IJMatrix *matrix,
 			      	       const int      *sizes)
 {
    int local_num_rows;
@@ -222,7 +222,7 @@ hypre_SetIJMatrixOffDiagRowSizesParCSR(hypre_IJMatrix *matrix,
    int *offd_i;
    par_matrix = hypre_IJMatrixLocalStorage(matrix);
    if (!par_matrix)
-      ierr = hypre_CreateIJMatrixParCSR(matrix);
+      ierr = hypre_IJMatrixCreateParCSR(matrix);
    if (ierr) return ierr;
    
    hypre_AuxParCSRMatrixNeedAux(aux_matrix) = 0;
@@ -240,14 +240,14 @@ hypre_SetIJMatrixOffDiagRowSizesParCSR(hypre_IJMatrix *matrix,
 
 /******************************************************************************
  *
- * hypre_InitializeIJMatrixParCSR
+ * hypre_IJMatrixInitializeParCSR
  *
  * initializes AuxParCSRMatrix and ParCSRMatrix as necessary
  *
  *****************************************************************************/
 
 int
-hypre_InitializeIJMatrixParCSR(hypre_IJMatrix *matrix)
+hypre_IJMatrixInitializeParCSR(hypre_IJMatrix *matrix)
 {
    int ierr = 0;
    hypre_ParCSRMatrix *par_matrix = hypre_IJMatrixLocalStorage(matrix);
@@ -266,24 +266,24 @@ hypre_InitializeIJMatrixParCSR(hypre_IJMatrix *matrix)
    }
    else
    {
-      ierr = hypre_CreateIJMatrixParCSR(matrix);
+      ierr = hypre_IJMatrixCreateParCSR(matrix);
       par_matrix = hypre_IJMatrixLocalStorage(matrix);
    }
-   ierr += hypre_InitializeParCSRMatrix(par_matrix);
-   ierr += hypre_InitializeAuxParCSRMatrix(aux_matrix);
+   ierr += hypre_ParCSRMatrixInitialize(par_matrix);
+   ierr += hypre_AuxParCSRMatrixInitialize(aux_matrix);
    return ierr;
 }
 
 /******************************************************************************
  *
- * hypre_InsertIJMatrixBlockParCSR
+ * hypre_IJMatrixInsertBlockParCSR
  *
  * inserts a block of values into an IJMatrix, currently it just uses
  * InsertIJMatrixRowParCSR
  *
  *****************************************************************************/
 int
-hypre_InsertIJMatrixBlockParCSR(hypre_IJMatrix *matrix,
+hypre_IJMatrixInsertBlockParCSR(hypre_IJMatrix *matrix,
 		       	        int	        m,
 		                int	        n,
 		                const int      *rows,
@@ -295,13 +295,13 @@ hypre_InsertIJMatrixBlockParCSR(hypre_IJMatrix *matrix,
    for (i=0; i < m; i++)
    {
       in = i*n;
-      hypre_InsertIJMatrixRowParCSR(matrix,n,rows[i],&cols[in],&coeffs[in]);
+      hypre_IJMatrixInsertRowParCSR(matrix,n,rows[i],&cols[in],&coeffs[in]);
    }
    return ierr;
 }
 /******************************************************************************
  *
- * hypre_AddBlockToIJMatrixParCSR
+ * hypre_IJMatrixAddBlockParCSR
  *
  * adds a block of values to an IJMatrix, currently it just uses
  * AddIJMatrixRowParCSR
@@ -309,7 +309,7 @@ hypre_InsertIJMatrixBlockParCSR(hypre_IJMatrix *matrix,
  *****************************************************************************/
 
 int
-hypre_AddBlockToIJMatrixParCSR(hypre_IJMatrix *matrix,
+hypre_IJMatrixAddBlockParCSR(hypre_IJMatrix *matrix,
 		       	       int	       m,
 		               int	       n,
 		               const int      *rows,
@@ -321,14 +321,14 @@ hypre_AddBlockToIJMatrixParCSR(hypre_IJMatrix *matrix,
    for (i=0; i < m; i++)
    {
       in = i*n;
-      hypre_AddIJMatrixRowParCSR(matrix,n,rows[i],&cols[in],&coeffs[in]);
+      hypre_IJMatrixAddRowParCSR(matrix,n,rows[i],&cols[in],&coeffs[in]);
    }
    return ierr;
 }
 
 /******************************************************************************
  *
- * hypre_InsertIJMatrixRowParCSR
+ * hypre_IJMatrixInsertRowParCSR
  *
  * inserts a row into an IJMatrix, 
  * if diag_i and offd_i are known, those values are inserted directly
@@ -337,7 +337,7 @@ hypre_AddBlockToIJMatrixParCSR(hypre_IJMatrix *matrix,
  *
  *****************************************************************************/
 int
-hypre_InsertIJMatrixRowParCSR(hypre_IJMatrix *matrix,
+hypre_IJMatrixInsertRowParCSR(hypre_IJMatrix *matrix,
 		              int	      n,
 		              int	      row,
 		              const int	     *indices,
@@ -478,13 +478,13 @@ hypre_InsertIJMatrixRowParCSR(hypre_IJMatrix *matrix,
 
 /******************************************************************************
  *
- * hypre_AddIJMatrixRowParCSR
+ * hypre_IJMatrixAddRowParCSR
  *
  * adds a row to an IJMatrix before assembly, 
  * 
  *****************************************************************************/
 int
-hypre_AddIJMatrixRowParCSR(hypre_IJMatrix *matrix,
+hypre_IJMatrixAddRowParCSR(hypre_IJMatrix *matrix,
 	                   int	           n,
 		           int	           row,
 		           const int      *indices,
@@ -743,12 +743,12 @@ hypre_AddIJMatrixRowParCSR(hypre_IJMatrix *matrix,
 
 /******************************************************************************
  *
- * hypre_AssembleIJMatrixParCSR
+ * hypre_IJMatrixAssembleParCSR
  *
  * assembles IJMAtrix from AuxParCSRMatrix auxiliary structure
  *****************************************************************************/
 int
-hypre_AssembleIJMatrixParCSR(hypre_IJMatrix *matrix)
+hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
 {
    int ierr = 0;
    MPI_Comm comm = hypre_IJMatrixContext(matrix);
@@ -880,14 +880,14 @@ hypre_AssembleIJMatrixParCSR(hypre_IJMatrix *matrix)
       hypre_TFree(aux_offd_j);
    }
 
-   hypre_DestroyAuxParCSRMatrix(aux_matrix);
+   hypre_AuxParCSRMatrixDestroy(aux_matrix);
 
    return ierr;
 }
 
 /******************************************************************************
  *
- * hypre_DistributeIJMatrixParCSR
+ * hypre_IJMatrixDistributeParCSR
  *
  * takes an IJMatrix generated for one processor and distributes it
  * across many processors according to row_starts and col_starts,
@@ -895,7 +895,7 @@ hypre_AssembleIJMatrixParCSR(hypre_IJMatrix *matrix)
  *
  *****************************************************************************/
 int
-hypre_DistributeIJMatrixParCSR(hypre_IJMatrix *matrix,
+hypre_IJMatrixDistributeParCSR(hypre_IJMatrix *matrix,
 			       const int      *row_starts,
 			       const int      *col_starts)
 {
@@ -905,20 +905,20 @@ hypre_DistributeIJMatrixParCSR(hypre_IJMatrix *matrix,
    hypre_CSRMatrix *diag = hypre_ParCSRMatrixDiag(old_matrix);
    par_matrix = hypre_CSRMatrixToParCSRMatrix(hypre_ParCSRMatrixComm(old_matrix)
 		, diag, (int *) row_starts, (int *) col_starts);
-   ierr = hypre_DestroyParCSRMatrix(old_matrix);
+   ierr = hypre_ParCSRMatrixDestroy(old_matrix);
    hypre_IJMatrixLocalStorage(matrix) = par_matrix;
    return ierr;
 }
 
 /******************************************************************************
  *
- * hypre_ApplyIJMatrixParCSR
+ * hypre_IJMatrixApplyParCSR
  *
  * NOT IMPLEMENTED YET
  *
  *****************************************************************************/
 int
-hypre_ApplyIJMatrixParCSR(hypre_IJMatrix  *matrix,
+hypre_IJMatrixApplyParCSR(hypre_IJMatrix  *matrix,
 		    	  hypre_ParVector *x,
 		          hypre_ParVector *b)
 {
@@ -929,26 +929,26 @@ hypre_ApplyIJMatrixParCSR(hypre_IJMatrix  *matrix,
 
 /******************************************************************************
  *
- * hypre_DestroyIJMatrixParCSR
+ * hypre_IJMatrixDestroyParCSR
  *
  * frees an IJMatrix
  *
  *****************************************************************************/
 int
-hypre_DestroyIJMatrixParCSR(hypre_IJMatrix *matrix)
+hypre_IJMatrixDestroyParCSR(hypre_IJMatrix *matrix)
 {
-   return hypre_DestroyParCSRMatrix(hypre_IJMatrixLocalStorage(matrix));
+   return hypre_ParCSRMatrixDestroy(hypre_IJMatrixLocalStorage(matrix));
 }
 
 /******************************************************************************
  *
- * hypre_GetIJMatrixRowPartitioningParCSR
+ * hypre_IJMatrixGetRowPartitioningParCSR
  *
  * returns a pointer to the row partitioning
  *
  *****************************************************************************/
 int
-hypre_GetIJMatrixRowPartitioningParCSR(hypre_IJMatrix *matrix,
+hypre_IJMatrixGetRowPartitioningParCSR(hypre_IJMatrix *matrix,
 			   	       const int     **row_partitioning)
 {
    int ierr = 0;
@@ -964,13 +964,13 @@ hypre_GetIJMatrixRowPartitioningParCSR(hypre_IJMatrix *matrix,
 
 /******************************************************************************
  *
- * hypre_GetIJMatrixColPartitioningParCSR
+ * hypre_IJMatrixGetColPartitioningParCSR
  *
  * returns a pointer to the column partitioning
  *
  *****************************************************************************/
 int
-hypre_GetIJMatrixColPartitioningParCSR(hypre_IJMatrix *matrix,
+hypre_IJMatrixGetColPartitioningParCSR(hypre_IJMatrix *matrix,
 			   	       const int     **col_partitioning)
 {
    int ierr = 0;

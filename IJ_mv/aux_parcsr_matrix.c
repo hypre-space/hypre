@@ -17,11 +17,11 @@
 #include "aux_parcsr_matrix.h"
 
 /*--------------------------------------------------------------------------
- * hypre_CreateAuxParCSRMatrix
+ * hypre_AuxParCSRMatrixCreate
  *--------------------------------------------------------------------------*/
 
 hypre_AuxParCSRMatrix *
-hypre_CreateAuxParCSRMatrix( int  local_num_rows,
+hypre_AuxParCSRMatrixCreate( int  local_num_rows,
                        	     int  local_num_cols,
 			     int *sizes)
 {
@@ -60,11 +60,11 @@ hypre_CreateAuxParCSRMatrix( int  local_num_rows,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_DestroyAuxParCSRMatrix
+ * hypre_AuxParCSRMatrixDestroy
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_DestroyAuxParCSRMatrix( hypre_AuxParCSRMatrix *matrix )
+hypre_AuxParCSRMatrixDestroy( hypre_AuxParCSRMatrix *matrix )
 {
    int ierr=0;
    int i;
@@ -99,11 +99,11 @@ hypre_DestroyAuxParCSRMatrix( hypre_AuxParCSRMatrix *matrix )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_InitializeAuxParCSRMatrix
+ * hypre_AuxParCSRMatrixInitialize
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_InitializeAuxParCSRMatrix( hypre_AuxParCSRMatrix *matrix )
+hypre_AuxParCSRMatrixInitialize( hypre_AuxParCSRMatrix *matrix )
 {
    int local_num_rows = hypre_AuxParCSRMatrixLocalNumRows(matrix);
    int local_num_cols = hypre_AuxParCSRMatrixLocalNumCols(matrix);
