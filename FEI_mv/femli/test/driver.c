@@ -71,8 +71,12 @@ int main(int argc, char **argv)
    if ( testProb > 6 ) testProb = 6;
    if ( testProb != 1 && testProb != 6)
    {
-      printf("nx = ny = ? ");
-      scanf("%d", &nx);
+      if ( mypid == 0 )
+      {
+         printf("nx = ny = ? ");
+         scanf("%d", &nx);
+      }
+      MPI_Bcast(&nx, 1, MPI_INT, 0, MPI_COMM_WORLD);
       ny = nx;
    }
 
@@ -90,12 +94,18 @@ int main(int argc, char **argv)
       values[2] = -1.0;
       values[1] = -1.0;
       values[0] = 4.00;
-      printf("enter alpha : ");
-      scanf("%lg", &alpha);
-      printf("enter beta : ");
-      scanf("%lg", &beta);
-      printf("enter difference scheme (0 - upwind, center otherwise) : ");
-      scanf("%d", &fdScheme);
+      if ( mypid == 0 )
+      {
+         printf("enter alpha : ");
+         scanf("%lg", &alpha);
+         printf("enter beta : ");
+         scanf("%lg", &beta);
+         printf("enter difference scheme (0 - upwind, center otherwise) : ");
+         scanf("%d", &fdScheme);
+      }
+      MPI_Bcast(&alpha, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+      MPI_Bcast(&beta, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+      MPI_Bcast(&fdScheme, 1, MPI_INT, 0, MPI_COMM_WORLD);
       if (fdScheme == 0)
          GenerateConvectionDiffusion3D2(MPI_COMM_WORLD,nx,ny,nz,P,Q,R,p, 
                         q, r, alpha, beta, values, &HYPREA, 
