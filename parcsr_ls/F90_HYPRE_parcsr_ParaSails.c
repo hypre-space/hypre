@@ -89,3 +89,29 @@ hypre_F90_IFACE(hypre_parcsrparasailssetparams)( long int *solver,
                                                    (double)       *thresh,
                                                    (int)          *nlevels ) );
 }
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRParaSailsSetFilter
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_parcsrparasailssetfilter)( long int *solver,
+                                                 double   *filter,
+                                                 int      *ierr    )
+{
+   *ierr = (int) ( HYPRE_ParCSRParaSailsSetFilter( (HYPRE_Solver) *solver, 
+                                                   (double)       *filter  ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRParaSailsSetSym
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_parcsrparasailssetsym)( long int *solver,
+                                              int      *sym,
+                                              int      *ierr    )
+{
+   *ierr = (int) ( HYPRE_ParCSRParaSailsSetSym( (HYPRE_Solver) *solver, 
+                                                (int)          *sym     ) );
+}
