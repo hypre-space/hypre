@@ -31,6 +31,7 @@ int HYPRE_ParAMGSetStrongThreshold P((HYPRE_Solver solver , double strong_thresh
 int HYPRE_ParAMGSetInterpType P((HYPRE_Solver solver , int interp_type ));
 int HYPRE_ParAMGSetMaxIter P((HYPRE_Solver solver , int max_iter ));
 int HYPRE_ParAMGSetCoarsenType P((HYPRE_Solver solver , int coarsen_type ));
+int HYPRE_ParAMGSetMeasureType P((HYPRE_Solver solver , int measure_type ));
 int HYPRE_ParAMGSetCycleType P((HYPRE_Solver solver , int cycle_type ));
 int HYPRE_ParAMGSetTol P((HYPRE_Solver solver , double tol ));
 int HYPRE_ParAMGSetNumGridSweeps P((HYPRE_Solver solver , int *num_grid_sweeps ));
@@ -131,6 +132,7 @@ int hypre_ParAMGSetStrongThreshold P((void *data , double strong_threshold ));
 int hypre_ParAMGSetInterpType P((void *data , int interp_type ));
 int hypre_ParAMGSetMaxIter P((void *data , int max_iter ));
 int hypre_ParAMGSetCoarsenType P((void *data , int coarsen_type ));
+int hypre_ParAMGSetMeasureType P((void *data , int measure_type ));
 int hypre_ParAMGSetCycleType P((void *data , int cycle_type ));
 int hypre_ParAMGSetTol P((void *data , double tol ));
 int hypre_ParAMGSetNumGridSweeps P((void *data , int *num_grid_sweeps ));
@@ -159,7 +161,7 @@ int hypre_ParAMGRelaxT P((hypre_ParCSRMatrix *A , hypre_ParVector *f , int *cf_m
 
 /* par_coarsen.c */
 int hypre_ParAMGCoarsen P((hypre_ParCSRMatrix *A , double strength_threshold , hypre_ParCSRMatrix **S_ptr , int **CF_marker_ptr , int *coarse_size_ptr ));
-int hypre_ParAMGCoarsenRuge P((hypre_ParCSRMatrix *A , double strength_threshold , hypre_ParCSRMatrix **S_ptr , int **CF_marker_ptr , int *coarse_size_ptr ));
+int hypre_ParAMGCoarsenRuge P((hypre_ParCSRMatrix *A , double strength_threshold , int measure_type , int coarsen_type , hypre_ParCSRMatrix **S_ptr , int **CF_marker_ptr , int *coarse_size_ptr ));
 
 /* par_cycle.c */
 int hypre_ParAMGCycle P((void *amg_vdata , hypre_ParVector **F_array , hypre_ParVector **U_array ));
