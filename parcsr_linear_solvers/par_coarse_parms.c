@@ -67,7 +67,6 @@ hypre_BoomerAMGCoarseParms(MPI_Comm comm,
 {
    int            i, cnt;
    int            ierr = 0;
-   int            global_coarse_size;
    int		  num_procs;
 
    int	 *coarse_dof_func;

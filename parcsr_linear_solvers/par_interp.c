@@ -89,7 +89,7 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
    int             *fine_to_coarse_offd;
    int             *coarse_counter;
    int              coarse_shift;
-   int              num_cpts_local,total_global_cpts;
+   int              total_global_cpts;
    int              num_cols_P_offd,my_first_cpt;
 
    int              i,i1,i2;
@@ -210,52 +210,6 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
       fflush(NULL);
    }
 
-   /*-----------------------------------------------------------------------
-    * Determine the number of C-pts on each processor, broadcast,
-    * the first C-pt on each processor, and the total number of C-pts
-    *----------------------------------------------------------------------*/
-/*
-   if (debug_flag==4) wall_time = time_getWallclockSeconds();
-
-    num_cpts_global = hypre_CTAlloc(int, num_procs+1);
-    num_cpts_local = 0;
-
-#define HYPRE_SMP_PRIVATE i
-#define HYPRE_SMP_REDUCTION_OP +
-#define HYPRE_SMP_REDUCTION_VARS num_cpts_local
-#include "../utilities/hypre_smp_forloop.h"
-    for (i = 0; i < n_fine; i++)
-    {
-       if (CF_marker[i] >= 0) num_cpts_local++;
-    }
-
-    MPI_Allgather(&num_cpts_local,1,MPI_INT,num_cpts_global,1,MPI_INT,comm);
-    
-    if (debug_flag==4)
-    {
-       wall_time = time_getWallclockSeconds() - wall_time;
-       printf("Proc = %d     Interp: Comm 3 Allgather #C = %f\n",
-                     my_id, wall_time);
-       fflush(NULL);
-    }
-    if (debug_flag==4) wall_time = time_getWallclockSeconds();
-
-    my_first_cpt = 0;
-    for (i = 0; i < my_id; i++)
-    {
-       my_first_cpt += num_cpts_global[i];
-    }
-    total_global_cpts = my_first_cpt;
-    for (i = my_id; i < num_procs; i++)
-    {
-       total_global_cpts += num_cpts_global[i];
-    }
-    num_cpts_global[num_procs] = total_global_cpts;
-    for (i = num_procs-1; i >= 0; i--)
-    {
-       num_cpts_global[i] = num_cpts_global[i+1] - num_cpts_global[i];
-    }
-*/
    /*-----------------------------------------------------------------------
     *  First Pass: Determine size of P and fill in fine_to_coarse mapping.
     *-----------------------------------------------------------------------*/
