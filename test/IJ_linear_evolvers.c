@@ -505,7 +505,7 @@ main( int   argc,
       printf("  -9pt [<opts>] : build 9pt 2D laplacian problem\n");
       printf("  -27pt [<opts>] : build 27pt 3D laplacian problem\n");
       printf("  -difconv [<opts>]      : build convection-diffusion problem\n");
-      printf("    -n <nx> <ny> <nz>    : problem size per processor\n");
+      printf("    -n <nx> <ny> <nz>    : total problem size \n");
       printf("    -P <Px> <Py> <Pz>    : processor topology\n");
       printf("    -c <cx> <cy> <cz>    : diffusion coefficients\n");
       printf("    -a <ax> <ay> <az>    : convection coefficients\n");
