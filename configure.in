@@ -1201,12 +1201,12 @@ then
 BABEL_INSTALL_DIR=$HYPRE_TOP_SRC_DIR/babel-runtime
 BABEL_HYPRE_INCLUDES="\
  -I$HYPRE_TOP_SRC_DIR/hypre/include\
- -I$HYPRE_TOP_SRC_DIR/babel/Hypre"
+ -I$HYPRE_TOP_SRC_DIR/babel/bHYPRE"
 BABEL_LIB_DIR="$HYPRE_TOP_SRC_DIR/hypre/lib"
 BABELLIBFLAGS="\
- -L${HYPRE_TOP_SRC_DIR}/babel/HypreClient-C -lHypreBabelClient-C\
- -L${HYPRE_TOP_SRC_DIR}/babel/HypreClient-F -lHypreBabelClient-F\
- -L${HYPRE_TOP_SRC_DIR}/babel/Hypre -lHypreBabel\
+ -L${HYPRE_TOP_SRC_DIR}/babel/bHYPREClient-C -lbHYPREClient-C\
+ -L${HYPRE_TOP_SRC_DIR}/babel/bHYPREClient-F -lbHYPREClient-F\
+ -L${HYPRE_TOP_SRC_DIR}/babel/bHYPRE -lbHYPRE\
  -L${BABEL_LIB_DIR} -lsidl"
 
  babeldir="${BABEL_INSTALL_DIR}"
@@ -1388,9 +1388,9 @@ CASC_CONFIG_OUTPUT_LIST(\
  .\
  amge\
  babel\
- babel/Hypre\
- babel/HypreClient-C\
- babel/HypreClient-F\
+ babel/bHYPRE\
+ babel/bHYPREClient-C\
+ babel/bHYPREClient-F\
  blas\
  distributed_ls\
  distributed_ls/Euclid\
