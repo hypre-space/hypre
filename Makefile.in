@@ -41,7 +41,7 @@ HYPRE_STRUCT_DIRS =\
 HYPRE_SEQ_DIRS =\
  utilities\
  seq_matrix_vector\
- seq_linear_solvers
+ seq_linear_solvers/pamg
 
 #These are the directories for parallel compressed sparse row
 HYPRE_PARCSR_DIRS =\
