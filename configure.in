@@ -62,20 +62,45 @@ casc_using_pgcc_smp=no
 
 AC_ARG_WITH(CC, \[
   --with-CC=ARG           User can manually set C compiler to ARG],
-  CC=$withval
-  casc_user_chose_compilers=yes
+  if test "$withval" = "no"
+  then
+    casc_user_chose_compilers=no
+  elif test "$withval" = "yes"
+  then
+    casc_user_chose_compilers=no
+  else
+    CC=$withval
+    casc_user_chose_compilers=yes
+  fi, 
+  casc_user_chose_compilers=no
 )
 
 AC_ARG_WITH(CXX, [\
   --with-CXX=ARG          User can manually set C++ compiler to ARG],
-  CXX=$withval
-  casc_user_chose_compilers=yes
+  if test "$withval" = "no"
+  then
+    casc_user_chose_compilers=no
+  elif test "$withval" = "yes"
+  then
+    casc_user_chose_compilers=no
+  else
+    CXX=$withval
+    casc_user_chose_compilers=yes
+  fi 
 )
 
 AC_ARG_WITH(F77, [\
   --with-f77=ARG          User can manually set f77 compiler to ARG],
-  F77=$withval
-  casc_user_chose_compilers=yes
+  if test "$withval" = "no"
+  then
+    casc_user_chose_compilers=no
+  elif test "$withval" = "yes"
+  then
+    casc_user_chose_compilers=no
+  else
+    F77=$withval
+    casc_user_chose_compilers=yes
+  fi 
 )
 
 AC_ARG_WITH(CFLAGS, [\
@@ -84,17 +109,20 @@ AC_ARG_WITH(CFLAGS, [\
 			  flags unless you want to use an opt or debug flag
 		          that is not the default.  To choose the default
 			  use --enable-opt or --enable-debug],
-  CFLAGS=$withval
+  CFLAGS=$withval,
+  CFLAGS=
 )
 
 AC_ARG_WITH(CXXFLAGS, [\
   --with-CXXFLAGS=ARG     User can manually set c++ compiler flags.],
-  CXXFLAGS=$withval
+  CXXFLAGS=$withval,
+  CXXFLAGS=
 )
 
 AC_ARG_WITH(F77FLAGS, [\
   --with-F77FLAGS=ARG     User can manually set f77 compiler flags],
-  F77FLAGS=$withval
+  F77FLAGS=$withval,
+  F77FLAGS=
 )
 
 AC_ARG_WITH(mpi-include, [\
@@ -103,7 +131,8 @@ AC_ARG_WITH(mpi-include, [\
 			  --with-mpi-lib-dirs must be used together.],
   for mpi_dir in $withval; do
     MPIINCLUDE="$MPIINCLUDE -I$withval"
-  done; casc_user_chose_mpi=yes
+  done; casc_user_chose_mpi=yes,
+  casc_user_chose_mpi=no
 )
 
 AC_ARG_WITH(mpi-libs, [\
@@ -136,7 +165,16 @@ AC_ARG_WITH(mpi-flags, [\
                           search for other MPI information. May be used with
 			  the other three mpi options or alone in conjunction
 			  with the automatic mpi search.],
-  MPIFLAGS=$withval
+  if test "$withval" = "no"
+  then
+    MPIFLAGS=
+  elif test "$withval" = "yes"
+  then
+    MPIFLAGS=
+  else
+    MPIFLAGS=$withval
+  fi ,
+  MPIFLAGS=
 )
 
 AC_ARG_WITH(purify, [\
@@ -250,7 +288,15 @@ AC_ARG_WITH(MPI, [\
   --with-MPI              compiles with MPI (this is the default).
                           Selecting '--without-MPI' may affect
 			  which compiler is chosen],
-  casc_using_mpi=$withval,
+  if test "$withval" = "no"
+  then
+    casc_using_mpi=no
+  elif test "$withval" = "yes"
+  then
+    casc_using_mpi=yes
+  else
+    casc_using_mpi=$withval
+  fi ,
   casc_using_mpi=yes
 )
 if test $casc_using_mpi = "no"
@@ -289,32 +335,37 @@ AC_ARG_WITH(pthreads, [\
      test "$ac_cv_lib_pthreads_pthread_create" = "yes"
   then
     AC_DEFINE(HYPRE_USE_PTHREADS)
-  fi
+  fi,
+  casc_using_pthreads=no
 )
 
 AC_ARG_WITH(openmp, [\
   --with-openmp           use openMP--this may affect which compiler is 
                           chosen.  Supported on IBM and DECS only.],
   casc_using_openmp=yes
-  AC_DEFINE(HYPRE_USING_OPENMP)
+  AC_DEFINE(HYPRE_USING_OPENMP),
+  casc_using_openmp=no
 )
 
 AC_ARG_WITH(IBM_smp, [\
   --with-IBM_smp          use IBM SMP--not yet supported],
   casc_using_ibm_smp=yes
-  AC_DEFINE(HYPRE_USING_IBM_SMP)
+  AC_DEFINE(HYPRE_USING_IBM_SMP),
+  casc_using_ibm_smp=no
 )
 
 AC_ARG_WITH(SGI_smp, [\
   --with-SGI_smp          use SGI SMP--not yet supported],
   casc_using_sgi_smp=yes
-  AC_DEFINE(HYPRE_USING_SGI_SMP)
+  AC_DEFINE(HYPRE_USING_SGI_SMP),
+  casc_using_sgi_smp=no
 )
 
 AC_ARG_WITH(pgcc_smp, [\
   --with-pgcc_smp         use pgcc SMP (Red)--not yet supported],
   casc_using_pgcc_smp=yes 
-  AC_DEFINE(HYPRE_USING_PGCC_SMP)
+  AC_DEFINE(HYPRE_USING_PGCC_SMP),
+  casc_using_pgcc_smp=no
 )
 
 AC_ARG_WITH(blas, [\
@@ -328,7 +379,8 @@ HYPRE_TOP_SRC_DIR=`pwd`
 
 AC_ARG_WITH(babel, [\
   --with-babel            use babel],
-  casc_using_babel=yes
+  casc_using_babel=yes,
+  casc_using_babel=no
 )
 
 AC_ARG_WITH(petsc, [\
@@ -338,7 +390,8 @@ AC_ARG_WITH(petsc, [\
   HYPRE_PETSCLIBDIRS="$HYPRE_TOP_SRC_DIR/PETScMat_linear_solvers/pilut \
 $HYPRE_TOP_SRC_DIR/PETSc_linear_solvers/ParILUT "
   HYPRE_PETSCLIBS=" -l_HYPRE_PETScSolverParILUT \
--l_HYPRE_PETScMatPilutSolver "
+-l_HYPRE_PETScMatPilutSolver ",
+  casc_using_petsc=no
 )
 
 AC_PROG_RANLIB
@@ -549,7 +602,7 @@ dnl *    CASC_ADD_LIB(mpi, main, /usr/lib, MPI) )
        CASC_SET_COPT(-o5)
        CASC_SET_CDEBUG()
      else 
-       CASC_SET_COPT(-O)
+       CASC_SET_COPT(-fast)
        CASC_SET_CDEBUG(-g)
      fi
 
