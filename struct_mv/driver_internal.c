@@ -28,6 +28,7 @@ char *argv[];
    zzz_StructGrid     *grid;
    zzz_StructMatrix   *matrix;
    zzz_StructVector   *vector;
+   zzz_StructVector   *tmp_vector;
 
    int                 num_procs, myid;
 
@@ -64,6 +65,42 @@ char *argv[];
    zzz_PrintStructVector("zout_vector", vector, 0);
 
    /*-----------------------------------------------------------
+    * Do a matvec
+    *-----------------------------------------------------------*/
+
+   tmp_vector = zzz_NewStructVector(zzz_StructVectorGrid(vector));
+   zzz_InitializeStructVector(tmp_vector);
+   zzz_AssembleStructVector(tmp_vector);
+
+   zzz_StructMatvec(1.0, matrix, vector, 0.0, tmp_vector);
+
+   zzz_PrintStructVector("zout_matvec", tmp_vector, 0);
+
+   /*-----------------------------------------------------------
+    * Copy the vector into tmp_vector
+    *-----------------------------------------------------------*/
+
+   zzz_StructCopy(vector, tmp_vector);
+
+   zzz_PrintStructVector("zout_copy", tmp_vector, 0);
+
+   /*-----------------------------------------------------------
+    * Scale tmp_vector
+    *-----------------------------------------------------------*/
+
+   zzz_StructScale(2.0, tmp_vector);
+
+   zzz_PrintStructVector("zout_scale", tmp_vector, 0);
+
+   /*-----------------------------------------------------------
+    * Do an Axpy (2*vector - vector) = vector
+    *-----------------------------------------------------------*/
+
+   zzz_StructAxpy(-1.0, vector, tmp_vector);
+
+   zzz_PrintStructVector("zout_axpy", tmp_vector, 0);
+
+   /*-----------------------------------------------------------
     * Finalize things
     *-----------------------------------------------------------*/
 
@@ -72,6 +109,7 @@ char *argv[];
    zzz_FreeStructMatrix(matrix);
    zzz_FreeStructGrid(zzz_StructVectorGrid(vector));
    zzz_FreeStructVector(vector);
+   zzz_FreeStructVector(tmp_vector);
 
    /* malloc debug stuff */
    malloc_verify(0);

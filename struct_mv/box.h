@@ -271,6 +271,7 @@ int  kinc = (zzz_IndexZ(stride)*zzz_BoxSizeX(data_box)*zzz_BoxSizeY(data_box)\
 	 for (zzz_IndexX(index) = zzz_BoxIMinX(box);\
 	      zzz_IndexX(index) <= zzz_BoxIMaxX(box);\
 	      zzz_IndexX(index)++)\
+	 {\
 	    body;\
 	    i1 += zzz__iinc1;\
 	    i2 += zzz__iinc2;\
@@ -316,6 +317,7 @@ int  kinc = (zzz_IndexZ(stride)*zzz_BoxSizeX(data_box)*zzz_BoxSizeY(data_box)\
 	 for (zzz_IndexX(index) = zzz_BoxIMinX(box);\
 	      zzz_IndexX(index) <= zzz_BoxIMaxX(box);\
 	      zzz_IndexX(index)++)\
+	 {\
 	    body;\
 	    i1 += zzz__iinc1;\
 	    i2 += zzz__iinc2;\

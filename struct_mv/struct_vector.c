@@ -101,7 +101,7 @@ zzz_InitializeStructVectorShell( zzz_StructVector *vector )
          for (d = 0; d < 3; d++)
          {
             zzz_BoxIMinD(data_box, d) -= num_ghost[2*d];
-            zzz_BoxIMinD(data_box, d) += num_ghost[2*d + 1];
+            zzz_BoxIMaxD(data_box, d) += num_ghost[2*d + 1];
          }
       }
 

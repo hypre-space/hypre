@@ -123,7 +123,7 @@ zzz_SubtractBoxes( zzz_Box *box1,
 	   (zzz_BoxIMaxD(box2, d) < zzz_BoxIMinD(box1, d)) )
       {
 	 box_array = zzz_NewBoxArray();
-	 zzz_AppendBox(box1, box_array);
+	 zzz_AppendBox(zzz_DuplicateBox(box1), box_array);
 	 return box_array;
       }
    }

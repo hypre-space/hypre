@@ -61,7 +61,6 @@ typedef struct
 
 #define zzz_SBoxBox(sbox)         ((sbox) -> box)
 #define zzz_SBoxStride(sbox)      ((sbox) -> stride)
-#define zzz_SBoxProcess(sbox)     ((sbox) -> process)
 				        
 #define zzz_SBoxIMin(sbox)        zzz_BoxIMin(zzz_SBoxBox(sbox))
 #define zzz_SBoxIMax(sbox)        zzz_BoxIMax(zzz_SBoxBox(sbox))

@@ -32,8 +32,6 @@ zzz_NewStructMatrix( zzz_StructGrid    *grid,
    zzz_StructMatrixUserStencil(matrix) = user_stencil;
 
    /* set defaults */
-   zzz_StructMatrixStencilSpace(matrix) =
-      zzz_ConvertToSBoxArray(zzz_DuplicateBoxArray(zzz_StructGridBoxes(grid)));
    zzz_StructMatrixSymmetric(matrix) = 0;
    for (i = 0; i < 6; i++)
       zzz_StructMatrixNumGhost(matrix)[i] = 0;
@@ -62,7 +60,6 @@ zzz_FreeStructMatrix( zzz_StructMatrix *matrix )
       tfree(zzz_StructMatrixData(matrix));
 
       zzz_FreeBoxArray(zzz_StructMatrixDataSpace(matrix));
-      zzz_FreeSBoxArray(zzz_StructMatrixStencilSpace(matrix));
 
       if (zzz_StructMatrixSymmetric(matrix))
       {
@@ -542,8 +539,8 @@ zzz_AssembleStructMatrix( zzz_StructMatrix *matrix )
 
    zzz_SBoxArrayArray  *send_sboxes;
    zzz_SBoxArrayArray  *recv_sboxes;
-   int                **send_sbox_ranks;
-   int                **recv_sbox_ranks;
+   int                **send_box_ranks;
+   int                **recv_box_ranks;
    zzz_CommPkg         *comm_pkg;
 
    int                  i, d;
@@ -590,7 +587,7 @@ zzz_AssembleStructMatrix( zzz_StructMatrix *matrix )
       /* Set up the CommPkg */
 
       zzz_GetCommInfo(&send_boxes, &recv_boxes,
-                      &send_sbox_ranks, &recv_sbox_ranks,
+                      &send_box_ranks, &recv_box_ranks,
                       zzz_StructMatrixGrid(matrix),
                       comm_stencil);
 
@@ -598,22 +595,12 @@ zzz_AssembleStructMatrix( zzz_StructMatrix *matrix )
       recv_sboxes = zzz_ConvertToSBoxArrayArray(recv_boxes);
 
       comm_pkg = zzz_NewCommPkg(send_sboxes, recv_sboxes,
-                                send_sbox_ranks, recv_sbox_ranks,
+                                send_box_ranks, recv_box_ranks,
                                 zzz_StructMatrixGrid(matrix),
                                 zzz_StructMatrixDataSpace(matrix),
                                 zzz_StructMatrixNumValues(matrix));
 
       zzz_StructMatrixCommPkg(matrix) = comm_pkg;
-
-      zzz_ForSBoxArrayI(i, send_sboxes)
-         tfree(send_sbox_ranks[i]);
-      tfree(send_sbox_ranks);
-      zzz_FreeSBoxArrayArray(send_sboxes);
-
-      zzz_ForSBoxArrayI(i, recv_sboxes)
-         tfree(recv_sbox_ranks[i]);
-      tfree(recv_sbox_ranks);
-      zzz_FreeSBoxArrayArray(recv_sboxes);
 
       zzz_FreeStructStencil(comm_stencil);
    }
@@ -627,18 +614,6 @@ zzz_AssembleStructMatrix( zzz_StructMatrix *matrix )
    zzz_FinalizeCommunication(comm_handle);
 
    return(ierr);
-}
-
-/*--------------------------------------------------------------------------
- * zzz_SetStructMatrixStencilSpace
- *--------------------------------------------------------------------------*/
-
-void
-zzz_SetStructMatrixStencilSpace( zzz_StructMatrix *matrix,
-                                 zzz_SBoxArray    *stencil_space )
-{
-   zzz_FreeSBoxArray(zzz_StructMatrixStencilSpace(matrix));
-   zzz_StructMatrixStencilSpace(matrix) = stencil_space;
 }
 
 /*--------------------------------------------------------------------------

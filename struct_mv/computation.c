@@ -180,84 +180,35 @@ zzz_GetComputeInfo( zzz_BoxArrayArray  **send_boxes_ptr,
 }
 
 /*--------------------------------------------------------------------------
- * zzz_NewComputeInfo:
- *--------------------------------------------------------------------------*/
-
-zzz_ComputeInfo *
-zzz_NewComputeInfo( zzz_SBoxArrayArray  *send_sboxes,
-                    zzz_SBoxArrayArray  *recv_sboxes,
-                    int                **send_box_ranks,
-                    int                **recv_box_ranks,
-                    zzz_SBoxArrayArray  *indt_sboxes,
-                    zzz_SBoxArrayArray  *dept_sboxes    )
-{
-   zzz_ComputeInfo  *compute_info;
-
-   compute_info = ctalloc(zzz_ComputeInfo, 1);
-
-   zzz_ComputeInfoSendSBoxes(compute_info)    = send_sboxes;
-   zzz_ComputeInfoRecvSBoxes(compute_info)    = recv_sboxes;
-
-   zzz_ComputeInfoSendBoxRanks(compute_info) = send_box_ranks;
-   zzz_ComputeInfoRecvBoxRanks(compute_info) = recv_box_ranks;
-
-   zzz_ComputeInfoIndtSBoxes(compute_info)    = indt_sboxes;
-   zzz_ComputeInfoDeptSBoxes(compute_info)    = dept_sboxes;
-
-   return compute_info;
-}
-
-/*--------------------------------------------------------------------------
- * zzz_FreeComputeInfo:
- *--------------------------------------------------------------------------*/
-
-void
-zzz_FreeComputeInfo( zzz_ComputeInfo *compute_info )
-{
-   int  i;
-
-   if (compute_info)
-   {
-      zzz_FreeSBoxArrayArray(zzz_ComputeInfoIndtSBoxes(compute_info));
-      zzz_FreeSBoxArrayArray(zzz_ComputeInfoDeptSBoxes(compute_info));
-
-      zzz_ForBoxArrayI(i, zzz_ComputeInfoSendSBoxes(compute_info))
-         tfree(zzz_ComputeInfoSendBoxRanks(compute_info)[i]);
-      zzz_ForBoxArrayI(i, zzz_ComputeInfoRecvSBoxes(compute_info))
-         tfree(zzz_ComputeInfoRecvBoxRanks(compute_info)[i]);
-
-      zzz_FreeSBoxArrayArray(zzz_ComputeInfoSendSBoxes(compute_info));
-      zzz_FreeSBoxArrayArray(zzz_ComputeInfoRecvSBoxes(compute_info));
-
-      tfree(compute_info);
-   }
-}
-
-/*--------------------------------------------------------------------------
  * zzz_NewComputePkg:
  *--------------------------------------------------------------------------*/
 
 zzz_ComputePkg *
-zzz_NewComputePkg( zzz_ComputeInfo *compute_info,
-                   zzz_StructGrid  *grid,
-                   zzz_BoxArray    *data_space,
-                   int              num_values   )
+zzz_NewComputePkg( zzz_SBoxArrayArray  *send_sboxes,
+                   zzz_SBoxArrayArray  *recv_sboxes,
+                   int                **send_box_ranks,
+                   int                **recv_box_ranks,
+                   zzz_SBoxArrayArray  *indt_sboxes,
+                   zzz_SBoxArrayArray  *dept_sboxes,
+                   zzz_StructGrid      *grid,
+                   zzz_BoxArray        *data_space,
+                   int                  num_values     )
 {
    zzz_ComputePkg  *compute_pkg;
 
    compute_pkg = ctalloc(zzz_ComputePkg, 1);
 
-   zzz_ComputePkgComputeInfo(compute_pkg) = compute_info;
+   zzz_ComputePkgCommPkg(compute_pkg)     =
+      zzz_NewCommPkg(send_sboxes, recv_sboxes,
+                     send_box_ranks, recv_box_ranks,
+                     grid, data_space, num_values);
+
+   zzz_ComputePkgIndtSBoxes(compute_pkg)   = indt_sboxes;
+   zzz_ComputePkgDeptSBoxes(compute_pkg)   = dept_sboxes;
+
    zzz_ComputePkgGrid(compute_pkg)        = grid;
    zzz_ComputePkgDataSpace(compute_pkg)   = data_space;
    zzz_ComputePkgNumValues(compute_pkg)   = num_values;
-
-   zzz_ComputePkgCommPkg(compute_pkg)     =
-      zzz_NewCommPkg(zzz_ComputeInfoSendSBoxes(compute_info),
-                     zzz_ComputeInfoRecvSBoxes(compute_info),
-                     zzz_ComputeInfoSendBoxRanks(compute_info),
-                     zzz_ComputeInfoRecvBoxRanks(compute_info),
-                     grid, data_space, num_values);
 
    return compute_pkg;
 }
@@ -269,9 +220,14 @@ zzz_NewComputePkg( zzz_ComputeInfo *compute_info,
 void
 zzz_FreeComputePkg( zzz_ComputePkg *compute_pkg )
 {
+   int i;
+
    if (compute_pkg)
    {
       zzz_FreeCommPkg(zzz_ComputePkgCommPkg(compute_pkg));
+
+      zzz_FreeSBoxArrayArray(zzz_ComputePkgIndtSBoxes(compute_pkg));
+      zzz_FreeSBoxArrayArray(zzz_ComputePkgDeptSBoxes(compute_pkg));
 
       tfree(compute_pkg);
    }

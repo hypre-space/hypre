@@ -21,13 +21,19 @@
 
 typedef struct
 {
-   int            num_sends;
-   int           *send_processes;
-   MPI_Datatype  *send_types;
+   zzz_SBoxArrayArray  *send_sboxes;
+   zzz_SBoxArrayArray  *recv_sboxes;
 
-   int            num_recvs;
-   int           *recv_processes;
-   MPI_Datatype  *recv_types;
+   int                **send_box_ranks;
+   int                **recv_box_ranks;
+
+   int                  num_sends;
+   int                 *send_processes;
+   MPI_Datatype        *send_types;
+                     
+   int                  num_recvs;
+   int                 *recv_processes;
+   MPI_Datatype        *recv_types;
 
 } zzz_CommPkg;
 
@@ -46,6 +52,12 @@ typedef struct
  * Accessor macros: zzz_CommPkg
  *--------------------------------------------------------------------------*/
  
+#define zzz_CommPkgSendSBoxes(comm_pkg)      (comm_pkg -> send_sboxes)
+#define zzz_CommPkgRecvSBoxes(comm_pkg)      (comm_pkg -> recv_sboxes)
+                                             
+#define zzz_CommPkgSendBoxRanks(comm_pkg)    (comm_pkg -> send_box_ranks)
+#define zzz_CommPkgRecvBoxRanks(comm_pkg)    (comm_pkg -> recv_box_ranks)
+
 #define zzz_CommPkgNumSends(comm_pkg)        (comm_pkg -> num_sends)
 #define zzz_CommPkgSendProcesses(comm_pkg)   (comm_pkg -> send_processes)
 #define zzz_CommPkgSendProcess(comm_pkg, i)  (comm_pkg -> send_processes[(i)])

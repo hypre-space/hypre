@@ -401,8 +401,8 @@ zzz_GetSBoxType( zzz_SBox     *comm_sbox,
 zzz_CommPkg *
 zzz_NewCommPkg( zzz_SBoxArrayArray  *send_sboxes,
                 zzz_SBoxArrayArray  *recv_sboxes,
-                int                **send_sbox_ranks,
-                int                **recv_sbox_ranks,
+                int                **send_box_ranks,
+                int                **recv_box_ranks,
                 zzz_StructGrid      *grid,
                 zzz_BoxArray        *data_space,
                 int                  num_values     )
@@ -430,7 +430,7 @@ zzz_NewCommPkg( zzz_SBoxArrayArray  *send_sboxes,
    zzz_SBoxArrayArray  *comm_sboxes;
    zzz_SBoxArray       *comm_sbox_array;
    zzz_SBox            *comm_sbox;
-   int                **comm_sbox_ranks;
+   int                **comm_box_ranks;
 
    zzz_Box             *data_box;
    int                  data_box_offset;
@@ -474,13 +474,13 @@ zzz_NewCommPkg( zzz_SBoxArrayArray  *send_sboxes,
       switch(r)
       {
          case 0:
-         comm_sboxes     = send_sboxes;
-         comm_sbox_ranks = send_sbox_ranks;
+         comm_sboxes    = send_sboxes;
+         comm_box_ranks = send_box_ranks;
          break;
  
          case 1:
-         comm_sboxes     = recv_sboxes;
-         comm_sbox_ranks = recv_sbox_ranks;
+         comm_sboxes    = recv_sboxes;
+         comm_box_ranks = recv_box_ranks;
          break;
       }
 
@@ -498,7 +498,7 @@ zzz_NewCommPkg( zzz_SBoxArrayArray  *send_sboxes,
          zzz_ForSBoxI(j, comm_sbox_array)
          {
             comm_sbox = zzz_SBoxArraySBox(comm_sbox_array, j);
-            p = processes[comm_sbox_ranks[i][j]];
+            p = processes[comm_box_ranks[i][j]];
 
             if (zzz_SBoxVolume(comm_sbox) != 0)
             {
@@ -524,7 +524,7 @@ zzz_NewCommPkg( zzz_SBoxArrayArray  *send_sboxes,
          zzz_ForSBoxI(j, comm_sbox_array)
          {
             comm_sbox = zzz_SBoxArraySBox(comm_sbox_array, j);
-            p = processes[comm_sbox_ranks[i][j]];
+            p = processes[comm_box_ranks[i][j]];
 
             if (zzz_SBoxVolume(comm_sbox) != 0)
             {
@@ -545,11 +545,11 @@ zzz_NewCommPkg( zzz_SBoxArrayArray  *send_sboxes,
                {
                   case 0:
                   comm_structs[p][num_comms].orig = box_ranks[i];
-                  comm_structs[p][num_comms].dest = comm_sbox_ranks[i][j];
+                  comm_structs[p][num_comms].dest = comm_box_ranks[i][j];
                   break;
  
                   case 1:
-                  comm_structs[p][num_comms].orig = comm_sbox_ranks[i][j];
+                  comm_structs[p][num_comms].orig = comm_box_ranks[i][j];
                   comm_structs[p][num_comms].dest = box_ranks[i];
                   break;
                }
@@ -684,6 +684,12 @@ zzz_NewCommPkg( zzz_SBoxArrayArray  *send_sboxes,
 
    comm_pkg = ctalloc(zzz_CommPkg, 1);
 
+   zzz_CommPkgSendSBoxes(comm_pkg)    = send_sboxes;
+   zzz_CommPkgRecvSBoxes(comm_pkg)    = recv_sboxes;
+                                      
+   zzz_CommPkgSendBoxRanks(comm_pkg)  = send_box_ranks;
+   zzz_CommPkgRecvBoxRanks(comm_pkg)  = recv_box_ranks;
+
    zzz_CommPkgNumSends(comm_pkg)      = pkg_num_sends;
    zzz_CommPkgSendProcesses(comm_pkg) = pkg_send_processes;
    zzz_CommPkgSendTypes(comm_pkg)     = pkg_send_types;
@@ -707,6 +713,16 @@ zzz_FreeCommPkg( zzz_CommPkg *comm_pkg )
 
    if (comm_pkg)
    {
+      zzz_ForSBoxArrayI(i, zzz_CommPkgSendSBoxes(comm_pkg))
+         tfree(zzz_CommPkgSendBoxRanks(comm_pkg)[i]);
+      zzz_ForSBoxArrayI(i, zzz_CommPkgRecvSBoxes(comm_pkg))
+         tfree(zzz_CommPkgRecvBoxRanks(comm_pkg)[i]);
+      tfree(zzz_CommPkgSendBoxRanks(comm_pkg));
+      tfree(zzz_CommPkgRecvBoxRanks(comm_pkg));
+
+      zzz_FreeSBoxArrayArray(zzz_CommPkgSendSBoxes(comm_pkg));
+      zzz_FreeSBoxArrayArray(zzz_CommPkgRecvSBoxes(comm_pkg));
+
       tfree(zzz_CommPkgSendProcesses(comm_pkg));
       types = zzz_CommPkgSendTypes(comm_pkg);
       for (i = 0; i < zzz_CommPkgNumSends(comm_pkg); i++)

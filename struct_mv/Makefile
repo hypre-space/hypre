@@ -34,7 +34,11 @@ FILES =\
  sbox.c\
  struct_grid.c\
  struct_io.c\
+ struct_axpy.c\
+ struct_copy.c\
  struct_matrix.c\
+ struct_matvec.c\
+ struct_scale.c\
  struct_stencil.c\
  struct_vector.c
 

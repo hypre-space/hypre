@@ -31,7 +31,7 @@ zzz_BoxArray *zzz_UnionBoxArray P((zzz_BoxArray *boxes ));
 /* communication.c */
 void zzz_GetCommInfo P((zzz_BoxArrayArray **send_boxes_ptr , zzz_BoxArrayArray **recv_boxes_ptr , int ***send_box_ranks_ptr , int ***recv_box_ranks_ptr , zzz_StructGrid *grid , zzz_StructStencil *stencil ));
 void zzz_GetSBoxType P((zzz_SBox *comm_sbox , zzz_Box *data_box , int num_values , MPI_Datatype *comm_sbox_type ));
-zzz_CommPkg *zzz_NewCommPkg P((zzz_SBoxArrayArray *send_sboxes , zzz_SBoxArrayArray *recv_sboxes , int **send_sbox_ranks , int **recv_sbox_ranks , zzz_StructGrid *grid , zzz_BoxArray *data_space , int num_values ));
+zzz_CommPkg *zzz_NewCommPkg P((zzz_SBoxArrayArray *send_sboxes , zzz_SBoxArrayArray *recv_sboxes , int **send_box_ranks , int **recv_box_ranks , zzz_StructGrid *grid , zzz_BoxArray *data_space , int num_values ));
 void zzz_FreeCommPkg P((zzz_CommPkg *comm_pkg ));
 zzz_CommHandle *zzz_NewCommHandle P((int num_requests , MPI_Request *requests ));
 void zzz_FreeCommHandle P((zzz_CommHandle *comm_handle ));
@@ -40,12 +40,16 @@ void zzz_FinalizeCommunication P((zzz_CommHandle *comm_handle ));
 
 /* computation.c */
 void zzz_GetComputeInfo P((zzz_BoxArrayArray **send_boxes_ptr , zzz_BoxArrayArray **recv_boxes_ptr , int ***send_box_ranks_ptr , int ***recv_box_ranks_ptr , zzz_BoxArrayArray **indt_boxes_ptr , zzz_BoxArrayArray **dept_boxes_ptr , zzz_StructGrid *grid , zzz_StructStencil *stencil ));
-zzz_ComputeInfo *zzz_NewComputeInfo P((zzz_SBoxArrayArray *send_sboxes , zzz_SBoxArrayArray *recv_sboxes , int **send_box_ranks , int **recv_box_ranks , zzz_SBoxArrayArray *indt_sboxes , zzz_SBoxArrayArray *dept_sboxes ));
-void zzz_FreeComputeInfo P((zzz_ComputeInfo *compute_info ));
-zzz_ComputePkg *zzz_NewComputePkg P((zzz_ComputeInfo *compute_info , zzz_StructGrid *grid , zzz_BoxArray *data_space , int num_values ));
+zzz_ComputePkg *zzz_NewComputePkg P((zzz_SBoxArrayArray *send_sboxes , zzz_SBoxArrayArray *recv_sboxes , int **send_box_ranks , int **recv_box_ranks , zzz_SBoxArrayArray *indt_sboxes , zzz_SBoxArrayArray *dept_sboxes , zzz_StructGrid *grid , zzz_BoxArray *data_space , int num_values ));
 void zzz_FreeComputePkg P((zzz_ComputePkg *compute_pkg ));
 zzz_CommHandle *zzz_InitializeIndtComputations P((zzz_ComputePkg *compute_pkg , double *data ));
 void zzz_FinalizeIndtComputations P((zzz_CommHandle *comm_handle ));
+
+/* driver.c */
+int main P((int argc , char *argv []));
+
+/* driver_internal.c */
+int main P((int argc , char *argv []));
 
 /* grow.c */
 zzz_BoxArray *zzz_GrowBoxByStencil P((zzz_Box *box , zzz_StructStencil *stencil , int transpose ));
@@ -103,10 +107,16 @@ int zzz_InitializeStructMatrix P((zzz_StructMatrix *matrix ));
 int zzz_SetStructMatrixValues P((zzz_StructMatrix *matrix , zzz_Index *grid_index , int num_stencil_indices , int *stencil_indices , double *values ));
 int zzz_SetStructMatrixBoxValues P((zzz_StructMatrix *matrix , zzz_Box *value_box , int num_stencil_indices , int *stencil_indices , double *values ));
 int zzz_AssembleStructMatrix P((zzz_StructMatrix *matrix ));
-void zzz_SetStructMatrixStencilSpace P((zzz_StructMatrix *matrix , zzz_SBoxArray *stencil_space ));
 void zzz_SetStructMatrixNumGhost P((zzz_StructMatrix *matrix , int *num_ghost ));
 void zzz_PrintStructMatrix P((char *filename , zzz_StructMatrix *matrix , int all ));
 zzz_StructMatrix *zzz_ReadStructMatrix P((char *filename , int *num_ghost ));
+
+/* struct_matvec.c */
+void *zzz_StructMatvecInitialize P((void ));
+int zzz_StructMatvecSetup P((void *matvec_vdata , zzz_StructMatrix *A , zzz_StructVector *x ));
+int zzz_StructMatvecCompute P((void *matvec_vdata , double alpha , double beta , zzz_StructVector *y ));
+int zzz_StructMatvecFinalize P((void *matvec_vdata ));
+int zzz_StructMatvec P((double alpha , zzz_StructMatrix *A , zzz_StructVector *x , double beta , zzz_StructVector *y ));
 
 /* struct_stencil.c */
 zzz_StructStencil *zzz_NewStructStencil P((int dim , int size , zzz_Index **shape ));
