@@ -122,7 +122,7 @@ c
             r=r-a(j)*u(ja(j))
  110     continue
       if (a(ia(i)).eq.0.0) then
-         print *, 'zero row number',i, ' skipped'
+c         print *, 'zero row number',i, ' skipped'
          go to 120
       endif
          u(i)=r/a(ia(i))
@@ -139,6 +139,10 @@ c
          do 210 j=jlo,jhi
             r=r-a(j)*u(ja(j))
  210     continue
+      if (a(ia(i)).eq.0.0) then
+c         print *, 'zero row number',i, ' skipped'
+         go to 220
+      endif
          u(i)=r/a(ia(i))
  220  continue
       return
@@ -154,6 +158,10 @@ c
          do 310 j=jlo,jhi
             r=r-a(j)*u(ja(j))
  310     continue
+      if (a(ia(i)).eq.0.0) then
+c         print *, 'zero row number',i, ' skipped'
+         go to 320
+      endif
          u(i)=r/a(ia(i))
  320  continue
       return
