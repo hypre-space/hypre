@@ -1,3 +1,4 @@
+#include "Parser_dh.h"
 #include "Mem_dh.h"
 
 /* TODO: error checking is not complete; memRecord_dh  need to
