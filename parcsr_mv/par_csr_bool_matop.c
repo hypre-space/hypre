@@ -72,7 +72,7 @@ hypre_ParCSRBooleanMatrix *hypre_ParBooleanMatmul
    int		    count;
    int		    n_rows_A, n_cols_A;
    int		    n_rows_B, n_cols_B;
-
+   int              allsquare = 0;
 
    n_rows_A = hypre_ParCSRBooleanMatrix_Get_GlobalNRows(A);
    n_cols_A = hypre_ParCSRBooleanMatrix_Get_GlobalNCols(A);
@@ -84,6 +84,8 @@ hypre_ParCSRBooleanMatrix *hypre_ParBooleanMatmul
 	printf(" Error! Incompatible matrix dimensions!\n");
 	return NULL;
    }
+   if ( n_rows_A==n_cols_A && n_rows_B==n_cols_B ) allsquare = 1;
+
    /*-----------------------------------------------------------------------
     *  Extract B_ext, i.e. portion of B that is stored on neighbor procs
     *  and needed locally for matrix matrix product 
@@ -126,7 +128,7 @@ hypre_ParCSRBooleanMatrix *hypre_ParBooleanMatmul
       B_diag_i, B_diag_j, B_offd_i, B_offd_j,
       B_ext_i, B_ext_j, col_map_offd_B,
       &C_diag_size, &C_offd_size,
-      num_rows_diag_A, num_cols_offd_A, 1,
+      num_rows_diag_A, num_cols_offd_A, allsquare,
       first_col_diag_B, n_cols_B, num_cols_offd_B, num_cols_diag_B
       );
 
@@ -164,18 +166,20 @@ hypre_ParCSRBooleanMatrix *hypre_ParBooleanMatmul
     *  Loop over interior c-points.
     *-----------------------------------------------------------------------*/
     
-   for (i1 = 0; i1 < num_cols_diag_B; i1++)
+   for (i1 = 0; i1 < num_rows_diag_A; i1++)
    {
       
       /*--------------------------------------------------------------------
        *  Create diagonal entry, C_{i1,i1} 
        *--------------------------------------------------------------------*/
 
-      B_marker[i1+first_col_diag_B] = jj_count_diag;
       jj_row_begin_diag = jj_count_diag;
       jj_row_begin_offd = jj_count_offd;
-      C_diag_j[jj_count_diag] = i1;
-      jj_count_diag++;
+      if ( allsquare ) {
+         B_marker[i1+first_col_diag_B] = jj_count_diag;
+         C_diag_j[jj_count_diag] = i1;
+         jj_count_diag++;
+      }
 
          /*-----------------------------------------------------------------
           *  Loop over entries in row i1 of A_offd.
