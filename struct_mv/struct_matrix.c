@@ -344,7 +344,59 @@ void
 zzz_InitializeStructMatrixData( zzz_StructMatrix *matrix,
                                 double           *data   )
 {
+   zzz_BoxArray *data_boxes;
+   zzz_Box      *data_box;
+   zzz_Index    *loop_index;
+   zzz_Index    *loop_size;
+   zzz_Index    *index;
+   zzz_Index    *start;
+   zzz_Index    *stride;
+   double       *datap;
+   int           datai;
+   int           i;
+
    zzz_StructMatrixData(matrix) = data;
+
+   /*-------------------------------------------------
+    * If the matrix has a diagonal, set these entries
+    * to 1 everywhere.  This reduces the complexity of
+    * many computations by eliminating divide-by-zero
+    * in the ghost region.
+    *-------------------------------------------------*/
+
+   loop_index = zzz_NewIndex();
+   loop_size = zzz_NewIndex();
+
+   index = zzz_NewIndex();
+   stride = zzz_NewIndex();
+   zzz_SetIndex(index, 0, 0, 0);
+   zzz_SetIndex(stride, 1, 1, 1);
+
+   data_boxes = zzz_StructMatrixDataSpace(matrix);
+   zzz_ForBoxI(i, data_boxes)
+   {
+      datap = zzz_StructMatrixExtractPointerByIndex(matrix, i, index);
+
+      if (datap)
+      {
+         data_box = zzz_BoxArrayBox(data_boxes, i);
+         start = zzz_BoxIMin(data_box);
+
+         zzz_GetBoxSize(data_box, loop_size);
+         zzz_BoxLoop1(loop_index, loop_size,
+                      data_box, start, stride, datai,
+                      {
+                         datap[datai] = 1.0;
+                      });
+
+      }
+   }
+
+   zzz_FreeIndex(index);
+   zzz_FreeIndex(stride);
+
+   zzz_FreeIndex(loop_index);
+   zzz_FreeIndex(loop_size);
 }
 
 /*--------------------------------------------------------------------------

@@ -49,17 +49,6 @@ void zzz_FreeComputePkg P((zzz_ComputePkg *compute_pkg ));
 zzz_CommHandle *zzz_InitializeIndtComputations P((zzz_ComputePkg *compute_pkg , double *data ));
 void zzz_FinalizeIndtComputations P((zzz_CommHandle *comm_handle ));
 
-/* create_2d_laplacian.c */
-int main P((int argc , char *argv []));
-
-/* create_3d_laplacian.c */
-int main P((int argc , char *argv []));
-
-/* driver.c */
-int main P((int argc , char *argv []));
-
-/* driver_internal.c */
-int main P((int argc , char *argv []));
 
 /* grow.c */
 zzz_BoxArray *zzz_GrowBoxByStencil P((zzz_Box *box , zzz_StructStencil *stencil , int transpose ));
@@ -70,9 +59,6 @@ zzz_BoxArrayArray *zzz_GrowBoxArrayByStencil P((zzz_BoxArray *box_array , zzz_St
 /* neighbors.c */
 void zzz_FindBoxNeighbors P((zzz_BoxArray *boxes , zzz_BoxArray *all_boxes , zzz_StructStencil *stencil , zzz_BoxArray **neighbors_ptr , int **neighbor_ranks_ptr ));
 void zzz_FindBoxApproxNeighbors P((zzz_BoxArray *boxes , zzz_BoxArray *all_boxes , zzz_StructStencil *stencil , zzz_BoxArray **neighbors_ptr , int **neighbor_ranks_ptr ));
-
-/* one_to_many.c */
-int main P((int argc , char *argv []));
 
 /* project.c */
 zzz_SBox *zzz_ProjectBox P((zzz_Box *box , zzz_Index *index , zzz_Index *stride ));
@@ -165,6 +151,7 @@ void zzz_InitializeStructVectorData P((zzz_StructVector *vector , double *data )
 int zzz_InitializeStructVector P((zzz_StructVector *vector ));
 int zzz_SetStructVectorValues P((zzz_StructVector *vector , zzz_Index *grid_index , double values ));
 int zzz_SetStructVectorBoxValues P((zzz_StructVector *vector , zzz_Box *value_box , double *values ));
+int zzz_SetStructVectorConstantValues P((zzz_StructVector *vector , double values ));
 int zzz_AssembleStructVector P((zzz_StructVector *vector ));
 void zzz_SetStructVectorNumGhost P((zzz_StructVector *vector , int *num_ghost ));
 void zzz_PrintStructVector P((char *filename , zzz_StructVector *vector , int all ));
