@@ -35,6 +35,8 @@
 void hypre_F90_NAME(dpotrf)(char *, int *, double *, int *, int *);
 void hypre_F90_NAME(dpotrs)(char *, int *, int *, double *, int *, double *, 
   int *, int *);
+void hypre_F90_NAME(dgels)(char *, int *, int *, int *, double *, int *,
+  double *, int *, double *, int *, int *);
 #endif
 
 /******************************************************************************
@@ -183,7 +185,6 @@ static void SendReplyPrunedRows(MPI_Comm comm, Numbering *numb,
   int dest, int *buffer, int count,
   PrunedRows *pruned_rows, Mem *mem, MPI_Request *request)
 {
-    MPI_Status status;
     int sendbacksize, j;
     int len, *ind, *indbuf, *indbufp;
     int temp;
@@ -237,8 +238,7 @@ static void SendReplyPrunedRows(MPI_Comm comm, Numbering *numb,
  *--------------------------------------------------------------------------*/
 
 static void ReceiveReplyPrunedRows(MPI_Comm comm, Numbering *numb,
-  PrunedRows *pruned_rows, 
-  RowPatt *patt, Matrix *mat)
+  PrunedRows *pruned_rows, RowPatt *patt)
 {
     MPI_Status status;
     int source, count;
@@ -298,7 +298,6 @@ static void SendReplyStoredRows(MPI_Comm comm, Numbering *numb,
   int dest, int *buffer, int count,
   StoredRows *stored_rows, Mem *mem, MPI_Request *request)
 {
-    MPI_Status status;
     int sendbacksize, j;
     int len, *ind, *indbuf, *indbufp;
     double *val, *valbuf, *valbufp;
@@ -473,7 +472,7 @@ static void ExchangePrunedRows(MPI_Comm comm, Matrix *M, Numbering *numb,
         for (i=0; i<num_requests; i++)
         {
 	    /* Will also merge the pattern of received rows into "patt" */
-            ReceiveReplyPrunedRows(comm, numb, pruned_rows, patt, M);
+            ReceiveReplyPrunedRows(comm, numb, pruned_rows, patt);
         }
 
         MPI_Waitall(num_replies, requests, statuses);
@@ -596,7 +595,7 @@ static void ConstructPatternForEachRow(int symmetric, PrunedRows *pruned_rows,
     int i, j;
     RowPatt *row_patt;
     int nnz = 0;
-    int npes, pe;
+    int npes;
 
     MPI_Comm_size(M->comm, &npes);
     *costp = 0.0;
@@ -856,7 +855,7 @@ static void ComputeValuesNonsym(StoredRows *stored_rows, Matrix *mat,
     double *val;
 
     int i, j, len2, *ind2, loc;
-    double *val2, temp;
+    double *val2;
     double time0, time1, timet = 0.0, timea = 0.0;
 
     int npat;
@@ -1162,8 +1161,7 @@ static void FilterValues(Matrix *M, Matrix *F, DiagScale *diag_scale,
  * Rescale - Rescaling to be used after filtering, in symmetric case.
  *--------------------------------------------------------------------------*/
 
-static void Rescale(Matrix *M, StoredRows *stored_rows, DiagScale *diag_scale,
-  int num_ind)
+static void Rescale(Matrix *M, StoredRows *stored_rows, int num_ind)
 {
     int len, *ind, len2, *ind2;
     double *val, *val2, *w;
@@ -1409,14 +1407,13 @@ void ParaSailsSetupValues(ParaSails *ps, Matrix *A, double filter)
 	FilterValues(ps->M, filtered_matrix, diag_scale, ps->filter,
 	    ps->symmetric);
 
+        DiagScaleDestroy(diag_scale);
         MatrixDestroy(ps->M);
         ps->M = filtered_matrix;
 
-	/* rescale if factored preconditioner */
+	/* Rescale if factored preconditioner */
         if (ps->symmetric != 0)
-            Rescale(ps->M, stored_rows, diag_scale, ps->numb->num_ind);
-
-        DiagScaleDestroy(diag_scale);
+            Rescale(ps->M, stored_rows, ps->numb->num_ind);
     }
 
     /* 

@@ -86,7 +86,7 @@ int HYPRE_ParaSailsDestroy(HYPRE_ParaSails ps)
  * input parameters "thresh" and "nlevels".
  *--------------------------------------------------------------------------*/
 
-int HYPRE_ParaSailsSetup(HYPRE_ParaSails ps, int sym, double thresh, 
+int HYPRE_ParaSailsSetup(HYPRE_ParaSails ps, double thresh, 
   int nlevels, double filter)
 {
     hypre_ParaSails *internal = (hypre_ParaSails *) ps;

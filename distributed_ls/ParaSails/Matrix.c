@@ -618,8 +618,7 @@ static void SetupReceives(Matrix *mat, int reqlen, int *reqind, int *outlist)
 
 static void SetupSends(Matrix *mat, int *inlist)
 {
-    int i, j, k, mype, npes;
-    MPI_Request request;
+    int i, j, mype, npes;
     MPI_Request *requests;
     MPI_Status  *statuses;
     MPI_Comm comm = mat->comm;
@@ -767,7 +766,7 @@ void MatrixMatvec(Matrix *mat, double *x, double *y)
 void MatrixMatvecTrans(Matrix *mat, double *x, double *y)
 {
     int row, i, len, *ind;
-    double *val, temp;
+    double *val;
     int num_local = mat->end_row - mat->beg_row + 1;
 
     /* Set up persistent communications */

@@ -20,6 +20,8 @@
 #include "DiagScale.h"
 #include "OrderStat.h"
 
+int FindNumReplies(MPI_Comm comm, int *replies_list);
+
 #define DIAG_VALS_TAG      225
 #define DIAG_INDS_TAG      226
 

@@ -125,7 +125,7 @@ void RowPattMerge(RowPatt *p, int len, int *ind)
 
 void RowPattMergeExt(RowPatt *p, int len, int *ind, int num_loc)
 {
-    int i, index;
+    int i;
 
     for (i=0; i<len; i++)
     {

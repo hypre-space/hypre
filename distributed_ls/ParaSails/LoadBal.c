@@ -201,7 +201,7 @@ void LoadBalRecipRecv(MPI_Comm comm, Numbering *numb,
   int num_taken, RecipData *recip_data)
 {
     int i, row;
-    int source, count;
+    int count;
     MPI_Status status;
     int *buffer, *bufferp;
     int beg_row, end_row;

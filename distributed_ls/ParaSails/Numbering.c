@@ -27,6 +27,7 @@
 #include <assert.h>
 #include "Common.h"
 #include "Numbering.h"
+#include "OrderStat.h"
 
 /*--------------------------------------------------------------------------
  * NumberingCreate - Return (a pointer to) a numbering object
