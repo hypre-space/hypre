@@ -137,7 +137,7 @@ c=====================================================================
 c     compute (and print) residual
 c=====================================================================
 
-      subroutine rsdl(k,enrg,res,resv,vtmp,
+      subroutine rsdl(enrg,res,resv,vtmp,
      *     imin,imax,u,f,a,ia,ja,iu)
 
       implicit real*8 (a-h,o-z)
@@ -153,7 +153,7 @@ c=====================================================================
 
       dimension imin(*),imax(*)
 
-      dimension resv(20)
+      dimension resv(*)
 
 c---------------------------------------------------------------------
 
@@ -166,8 +166,8 @@ cveh   new residual routine, using matvec
 cveh   here vtmp = Au-f
 
       r2=0.e0
-      ilo=imin(k)
-      ihi=imax(k)
+      ilo=imin(1)
+      ihi=imax(1)
       nv = ihi-ilo+1
 
       call vcopy(f,vtmp,nv)

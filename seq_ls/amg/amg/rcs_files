@@ -13,6 +13,7 @@ config.irix
 config.solaris
 config.sunos
 crsgd.f
+cycle.f
 data.c
 data.h
 dirslv.f
@@ -41,7 +42,6 @@ setcw.f
 setdep.f
 setup.f
 setws.f
-solvr.f
 strong.f
 tests.f
 testsB.f
