@@ -45,11 +45,6 @@
 #include "../../seq_matrix_vector/vector.h"
 #include "../../parcsr_matrix_vector/par_vector.h"
 
-#ifdef MLPACK
-#include "ml_struct.h"
-#include "ml_aggregate.h"
-#endif
-
 extern void qsort0(int *, int, int);
 
 #include "HYPRE_MHMatrix.h"
@@ -370,17 +365,20 @@ int HYPRE_ParCSRMLCreate( MPI_Comm comm, HYPRE_Solver *solver)
 
     /* fill in all other default parameters */
 
-    link->comm         = comm;
-    link->nlevels      = 20;   /* max number of levels */
-    link->pre          = 0;    /* default is Gauss Seidel */
-    link->post         = 0;    /* default is Gauss Seidel */
-    link->pre_sweeps   = 2;    /* default is 2 smoothing steps */
-    link->post_sweeps  = 2;
+    link->comm          = comm;
+    link->nlevels       = 20;   /* max number of levels */
+    link->method        = 1;    /* default - smoothed aggregation */
+    link->num_PDEs      = 1;    /* default - 1 */
+    link->pre           = 1;    /* default - Gauss Seidel */
+    link->post          = 1;
+    link->pre_sweeps    = 2;    /* default - 2 smoothing steps */
+    link->post_sweeps   = 2;
     link->BGS_blocksize = 3;
-    link->jacobi_wt    = 0.5;  /* default damping factor */
-    link->ml_ag        = NULL;
-    link->ag_threshold = 0.18; /* threshold for aggregation */
-    link->contxt       = NULL; /* context for matvec */
+    link->jacobi_wt     = 1.0;  /* default damping factor */
+    link->ml_ag         = NULL;
+    link->ml_amg        = NULL;
+    link->ag_threshold  = 0.18; /* threshold for aggregation */
+    link->contxt        = NULL; /* context for matvec */
   
     /* create the ML structure */
 
@@ -407,6 +405,7 @@ int HYPRE_ParCSRMLDestroy( HYPRE_Solver solver )
     MH_Link   *link = (MH_Link *) solver;
 
     if ( link->ml_ag  != NULL ) ML_Aggregate_Destroy( &(link->ml_ag) );
+    if ( link->ml_amg != NULL ) ML_AMG_Destroy( &(link->ml_amg) );
     ML_Destroy( &(link->ml_ptr) );
     if ( link->contxt->partition != NULL ) free( link->contxt->partition );
     if ( link->contxt->Amat != NULL )
@@ -507,19 +506,34 @@ int HYPRE_ParCSRMLSetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
     ML_Set_Amatrix_Getrow(ml, nlevels-1, MH_GetRow, MH_ExchBdry, length);
 
     /* -------------------------------------------------------- */ 
-    /* create an aggregate context                              */
+    /* create an AMG or aggregate context                       */
     /* -------------------------------------------------------- */ 
 
-    ML_Aggregate_Create(&(link->ml_ag));
-    link->ml_ag->max_levels = link->nlevels;
-    ML_Aggregate_Set_Threshold( link->ml_ag, link->ag_threshold );
+    if ( link->method == 0 )
+    { 
+       ML_AMG_Create(&(link->ml_amg));
+       ML_AMG_Set_Threshold( link->ml_amg, link->ag_threshold );
+       if ( link->num_PDEs > 1 )
+          ML_AMG_Set_AMGScheme_SystemUnknown(link->ml_amg, link->num_PDEs);
+       else
+          ML_AMG_Set_AMGScheme_Scalar(link->ml_amg);
+       ML_AMG_Set_MaxLevels( link->ml_amg, link->nlevels );
+       coarsest_level = ML_Gen_MGHierarchy_UsingAMG(ml, nlevels-1, 
+                                        ML_DECREASING, link->ml_amg);
+    }
+    else
+    {
+       ML_Aggregate_Create(&(link->ml_ag));
+       ML_Aggregate_Set_MaxLevels( link->ml_ag, link->nlevels );
+       ML_Aggregate_Set_Threshold( link->ml_ag, link->ag_threshold );
+       coarsest_level = ML_Gen_MGHierarchy_UsingAggregation(ml, nlevels-1, 
+                                        ML_DECREASING, link->ml_ag);
+    }
 
     /* -------------------------------------------------------- */ 
     /* perform aggregation                                      */
     /* -------------------------------------------------------- */ 
 
-    coarsest_level = ML_Gen_MGHierarchy_UsingAggregation(ml, nlevels-1, 
-                                        ML_DECREASING, link->ml_ag);
     if ( my_id == 0 )
        printf("ML : number of levels = %d\n", coarsest_level);
 
@@ -539,28 +553,50 @@ int HYPRE_ParCSRMLSetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
              ML_Gen_Smoother_Jacobi(ml, level, ML_PRESMOOTHER, sweeps, wght);
              break;
           case 1 :
-             ML_Gen_Smoother_GaussSeidel(ml, level, ML_PRESMOOTHER, sweeps, 1.0);
-             break;
-          case 2 :
              ML_Gen_Smoother_SymGaussSeidel(ml,level,ML_PRESMOOTHER,sweeps,1.0);
              break;
+          case 2 :
+             ML_Gen_Smoother_SymGaussSeidelSequential(ml,level,ML_PRESMOOTHER,
+                                                      sweeps,1.0);
+             break;
           case 3 :
-             Nblocks = ML_Aggregate_Get_AggrCount( link->ml_ag, level );
-             ML_Aggregate_Get_AggrMap( link->ml_ag, level, &blockList );
-             ML_Gen_Smoother_VBlockJacobi(ml,level,ML_PRESMOOTHER,
-                                         sweeps, wght, Nblocks, blockList);
+             if ( link->method == 1 )
+             {
+                Nblocks = ML_Aggregate_Get_AggrCount( link->ml_ag, level );
+                ML_Aggregate_Get_AggrMap( link->ml_ag, level, &blockList );
+                ML_Gen_Smoother_VBlockJacobi(ml,level,ML_PRESMOOTHER,
+                                             sweeps, wght, Nblocks, blockList);
+             }
+             else
+             {
+                ML_Gen_Smoother_SymGaussSeidel(ml,level,ML_PRESMOOTHER,sweeps,1.0);
+             }
              break;
           case 4 :
-             Nblocks = ML_Aggregate_Get_AggrCount( link->ml_ag, level );
-             ML_Aggregate_Get_AggrMap( link->ml_ag, level, &blockList );
-             ML_Gen_Smoother_VBlockSymGaussSeidel(ml,level, ML_PRESMOOTHER, 
-                                         sweeps, 1.0, Nblocks, blockList);
+             if ( link->method == 1 )
+             {
+                Nblocks = ML_Aggregate_Get_AggrCount( link->ml_ag, level );
+                ML_Aggregate_Get_AggrMap( link->ml_ag, level, &blockList );
+                ML_Gen_Smoother_VBlockSymGaussSeidel(ml,level, ML_PRESMOOTHER, 
+                                             sweeps, 1.0, Nblocks, blockList);
+             }
+             else
+             {
+                ML_Gen_Smoother_GaussSeidel(ml,level,ML_PRESMOOTHER,sweeps,wght);
+             }
              break;
           case 5 :
-             Nblocks = ML_Aggregate_Get_AggrCount( link->ml_ag, level );
-             ML_Aggregate_Get_AggrMap( link->ml_ag, level, &blockList );
-             ML_Gen_Smoother_VBlockSymGaussSeidelSequential(ml,level,
+             if ( link->method == 1 )
+             {
+                Nblocks = ML_Aggregate_Get_AggrCount( link->ml_ag, level );
+                ML_Aggregate_Get_AggrMap( link->ml_ag, level, &blockList );
+                ML_Gen_Smoother_VBlockSymGaussSeidelSequential(ml,level,
                                   ML_PRESMOOTHER, sweeps, 1.0, Nblocks, blockList);
+             }
+             else
+             {
+                ML_Gen_Smoother_GaussSeidel(ml,level,ML_PRESMOOTHER,sweeps,wght);
+             }
              break;
           case 6 :
              ML_Gen_Smoother_OverlappedDDILUT(ml,level, ML_PRESMOOTHER); 
@@ -572,6 +608,11 @@ int HYPRE_ParCSRMLSetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
           case 8 :
              ML_Gen_Smoother_VBlockMultiplicativeSchwarz(ml,level,ML_PRESMOOTHER,
                                                          sweeps, 0, NULL);
+             break;
+          case 9 :
+             ML_Gen_Smoother_ParaSails(ml, level, ML_PRESMOOTHER, sweeps, 0,
+                                       0.1, 1, 0.01, 0, 1);
+             break;
           default :
              if ( my_id == 0 )
                 printf("ML Presmoother : set to default (SGS)\n");
@@ -586,28 +627,50 @@ int HYPRE_ParCSRMLSetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
              ML_Gen_Smoother_Jacobi(ml, level, ML_POSTSMOOTHER, sweeps, wght);
              break;
           case 1 :
-             ML_Gen_Smoother_GaussSeidel(ml, level, ML_POSTSMOOTHER, sweeps, 1.0);
-             break;
-          case 2 :
              ML_Gen_Smoother_SymGaussSeidel(ml,level,ML_POSTSMOOTHER,sweeps,1.0);
              break;
+          case 2 :
+             ML_Gen_Smoother_SymGaussSeidelSequential(ml,level,ML_POSTSMOOTHER,
+                                                      sweeps,1.0);
+             break;
           case 3 :
-             Nblocks = ML_Aggregate_Get_AggrCount( link->ml_ag, level );
-             ML_Aggregate_Get_AggrMap( link->ml_ag, level, &blockList );
-             ML_Gen_Smoother_VBlockJacobi(ml,level,ML_POSTSMOOTHER,
-                                         sweeps, wght, Nblocks, blockList);
+             if ( link->method == 1 )
+             {
+                Nblocks = ML_Aggregate_Get_AggrCount( link->ml_ag, level );
+                ML_Aggregate_Get_AggrMap( link->ml_ag, level, &blockList );
+                ML_Gen_Smoother_VBlockJacobi(ml,level,ML_POSTSMOOTHER,
+                                             sweeps, wght, Nblocks, blockList);
+             }
+             else
+             {
+                ML_Gen_Smoother_SymGaussSeidel(ml,level,ML_POSTSMOOTHER,sweeps,1.0);
+             }
              break;
           case 4 :
-             Nblocks = ML_Aggregate_Get_AggrCount( link->ml_ag, level );
-             ML_Aggregate_Get_AggrMap( link->ml_ag, level, &blockList );
-             ML_Gen_Smoother_VBlockSymGaussSeidel(ml,level,ML_POSTSMOOTHER,
-                                              sweeps, 1.0, Nblocks, blockList);
+             if ( link->method == 1 )
+             {
+                Nblocks = ML_Aggregate_Get_AggrCount( link->ml_ag, level );
+                ML_Aggregate_Get_AggrMap( link->ml_ag, level, &blockList );
+                ML_Gen_Smoother_VBlockSymGaussSeidel(ml,level,ML_POSTSMOOTHER,
+                                                     sweeps,1.0,Nblocks,blockList);
+             }
+             else
+             {
+                ML_Gen_Smoother_SymGaussSeidel(ml,level,ML_POSTSMOOTHER,sweeps,1.0);
+             }
              break;
           case 5 :
-             Nblocks = ML_Aggregate_Get_AggrCount( link->ml_ag, level );
-             ML_Aggregate_Get_AggrMap( link->ml_ag, level, &blockList );
-             ML_Gen_Smoother_VBlockSymGaussSeidelSequential(ml,level,
-                                  ML_POSTSMOOTHER, sweeps, 1.0, Nblocks, blockList);
+             if ( link->method == 1 )
+             {
+                Nblocks = ML_Aggregate_Get_AggrCount( link->ml_ag, level );
+                ML_Aggregate_Get_AggrMap( link->ml_ag, level, &blockList );
+                ML_Gen_Smoother_VBlockSymGaussSeidelSequential(ml,level,
+                                     ML_POSTSMOOTHER,sweeps,1.0,Nblocks,blockList);
+             }
+             else
+             {
+                ML_Gen_Smoother_SymGaussSeidel(ml,level,ML_POSTSMOOTHER,sweeps,1.0);
+             }
              break;
           default :
              if ( my_id == 0 )
@@ -617,9 +680,11 @@ int HYPRE_ParCSRMLSetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
        }
     }
 
+#ifdef SUPERLU
     ML_Gen_CoarseSolverSuperLU(ml, coarsest_level);
-    /*ML_Gen_Smoother_GaussSeidel(ml, coarsest_level, ML_PRESMOOTHER, 100, 1.0);*/
-
+#else
+    ML_Gen_Smoother_GaussSeidel(ml, coarsest_level, ML_PRESMOOTHER, 50, 1.0);
+#endif
     ML_Gen_Solver(ml, ML_MGV, nlevels-1, coarsest_level);
    
     return 0;
@@ -690,6 +755,32 @@ int HYPRE_ParCSRMLSetStrongThreshold(HYPRE_Solver solver,
 }
 
 /****************************************************************************/
+/* HYPRE_ParCSRMLSetMethod                                                  */
+/*--------------------------------------------------------------------------*/
+
+int HYPRE_ParCSRMLSetMethod( HYPRE_Solver solver, int method )
+{
+    MH_Link *link = (MH_Link *) solver;
+
+    if ( method == 1 ) link->method = 1;  /* smoothed aggregation */
+    else               link->method = 0;  /* AMG */
+    return( 0 );
+}
+
+/****************************************************************************/
+/* HYPRE_ParCSRMLSetNumPDEs                                                 */
+/*--------------------------------------------------------------------------*/
+
+int HYPRE_ParCSRMLSetNumPDEs( HYPRE_Solver solver, int numPDE )
+{
+    MH_Link *link = (MH_Link *) solver;
+
+    if ( numPDE > 1 ) link->num_PDEs = numPDE;
+    else              link->num_PDEs = 1;
+    return( 0 );
+}
+
+/****************************************************************************/
 /* HYPRE_ParCSRMLSetNumPreSmoothings                                        */
 /*--------------------------------------------------------------------------*/
 
@@ -710,7 +801,7 @@ int HYPRE_ParCSRMLSetNumPreSmoothings( HYPRE_Solver solver, int num_sweeps  )
 }
 
 /****************************************************************************/
-/* HYPRE_ParMLSetNumPostSmoothings                                          */
+/* HYPRE_ParCSRMLSetNumPostSmoothings                                       */
 /*--------------------------------------------------------------------------*/
 
 int HYPRE_ParCSRMLSetNumPostSmoothings( HYPRE_Solver solver, int num_sweeps  )

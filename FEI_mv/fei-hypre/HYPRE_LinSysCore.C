@@ -72,6 +72,7 @@ extern "C" {
    int HYPRE_ParCSRMLSetPreSmoother( HYPRE_Solver, int );
    int HYPRE_ParCSRMLSetPostSmoother( HYPRE_Solver, int );
    int HYPRE_ParCSRMLSetDampingFactor( HYPRE_Solver, double );
+   int HYPRE_ParCSRMLSetMethod( HYPRE_Solver, int );
 #endif
 
    int hypre_BoomerAMGBuildCoarseOperator(hypre_ParCSRMatrix*,
@@ -232,6 +233,7 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
     superluOrdering_    = 0;    // natural ordering in SuperLU
     superluScale_[0]    = 'N';  // no scaling in SuperLUX
 
+    mlMethod_           = 1;
     mlNumPreSweeps_     = 1;
     mlNumPostSweeps_    = 1;
     mlPresmootherType_  = 1;    // default Gauss-Seidel
@@ -1229,6 +1231,21 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
           {
              printf("       HYPRE_LSC::parameters mlStrongThreshold = %e\n",
                     mlStrongThreshold_);
+          }
+       }
+
+       //---------------------------------------------------------------
+       // mlpack preconditoner : method to use
+       //---------------------------------------------------------------
+
+       else if ( !strcmp(param1, "mlMethod") )
+       {
+          sscanf(params[i],"%s %s", param, param2);
+          if      ( !strcmp(param2, "amg" ) ) mlMethod_ = 0;
+          else                                mlMethod_ = 1;
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+          {
+             printf("       HYPRE_LSC::parameters mlMethod = %d\n",mlMethod_);
           }
        }
 
@@ -3756,6 +3773,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
 #ifdef MLPACK
              case HYML :
 
+                  HYPRE_ParCSRMLSetMethod(HYPrecon_,mlMethod_);
                   HYPRE_ParCSRMLSetStrongThreshold(HYPrecon_,mlStrongThreshold_);
                   HYPRE_ParCSRMLSetNumPreSmoothings(HYPrecon_,mlNumPreSweeps_);
                   HYPRE_ParCSRMLSetNumPostSmoothings(HYPrecon_,mlNumPostSweeps_);
@@ -4026,6 +4044,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
 #ifdef MLPACK
              case HYML :
 
+                  HYPRE_ParCSRMLSetMethod(HYPrecon_,mlMethod_);
                   HYPRE_ParCSRMLSetStrongThreshold(HYPrecon_,mlStrongThreshold_);
                   HYPRE_ParCSRMLSetNumPreSmoothings(HYPrecon_,mlNumPreSweeps_);
                   HYPRE_ParCSRMLSetNumPostSmoothings(HYPrecon_,mlNumPostSweeps_);
@@ -4292,6 +4311,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
 #ifdef MLPACK
              case HYML :
 
+                  HYPRE_ParCSRMLSetMethod(HYPrecon_,mlMethod_);
                   HYPRE_ParCSRMLSetStrongThreshold(HYPrecon_,mlStrongThreshold_);
                   HYPRE_ParCSRMLSetNumPreSmoothings(HYPrecon_,mlNumPreSweeps_);
                   HYPRE_ParCSRMLSetNumPostSmoothings(HYPrecon_,mlNumPostSweeps_);
@@ -4557,6 +4577,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
 #ifdef MLPACK
              case HYML :
 
+                  HYPRE_ParCSRMLSetMethod(HYPrecon_,mlMethod_);
                   HYPRE_ParCSRMLSetStrongThreshold(HYPrecon_,mlStrongThreshold_);
                   HYPRE_ParCSRMLSetNumPreSmoothings(HYPrecon_,mlNumPreSweeps_);
                   HYPRE_ParCSRMLSetNumPostSmoothings(HYPrecon_,mlNumPostSweeps_);
@@ -4817,6 +4838,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
 #ifdef MLPACK
              case HYML :
 
+                  HYPRE_ParCSRMLSetMethod(HYPrecon_,mlMethod_);
                   HYPRE_ParCSRMLSetStrongThreshold(HYPrecon_,mlStrongThreshold_);
                   HYPRE_ParCSRMLSetNumPreSmoothings(HYPrecon_,mlNumPreSweeps_);
                   HYPRE_ParCSRMLSetNumPostSmoothings(HYPrecon_,mlNumPostSweeps_);
@@ -5077,6 +5099,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
 #ifdef MLPACK
              case HYML :
 
+                  HYPRE_ParCSRMLSetMethod(HYPrecon_,mlMethod_);
                   HYPRE_ParCSRMLSetStrongThreshold(HYPrecon_,mlStrongThreshold_);
                   HYPRE_ParCSRMLSetNumPreSmoothings(HYPrecon_,mlNumPreSweeps_);
                   HYPRE_ParCSRMLSetNumPostSmoothings(HYPrecon_,mlNumPostSweeps_);

@@ -15,6 +15,8 @@
 
 #ifdef MLPACK
 #include "ml_struct.h"
+#include "ml_aggregate.h"
+#include "ml_amg.h"
 #endif
 
 typedef struct
@@ -50,6 +52,8 @@ typedef struct
     ML           *ml_ptr;
 #endif
     int          nlevels;
+    int          method;
+    int          num_PDEs;
     int          pre, post;
     int          pre_sweeps, post_sweeps;
     int          BGS_blocksize;
@@ -57,6 +61,7 @@ typedef struct
     double       ag_threshold;
 #ifdef MLPACK
     ML_Aggregate *ml_ag;
+    ML_AMG       *ml_amg;
 #endif
     MH_Context   *contxt;
 } 
