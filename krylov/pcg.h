@@ -104,7 +104,8 @@ typedef struct
    void    *A;
    void    *p;
    void    *s;
-   void    *r;
+   void    *r; /* ...contains the residual.  This is currently kept permanently.
+                  If that is ever changed, it still must be kept if log_level>2 */
 
    void    *matvec_data;
    void    *precond_data;
@@ -115,8 +116,8 @@ typedef struct
    int      num_iterations;
    double   rel_residual_norm;
 
-   /* additional log info (logged when `logging' > 0) */
-   int      logging;
+   int     printlevel; /* printing when printlevel>0 */
+   int     log_level;  /* extra computations for logging when log_level>0 */
    double  *norms;
    double  *rel_norms;
 

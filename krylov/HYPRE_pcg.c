@@ -176,14 +176,25 @@ HYPRE_PCGGetPrecond( HYPRE_Solver  solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_PCGSetLogging
+ * HYPRE_PCGSetPrintLevel
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_PCGSetLogging( HYPRE_Solver solver,
-                     int                logging )
+HYPRE_PCGSetPrintLevel( HYPRE_Solver solver,
+                        int          level )
 {
-   return( hypre_PCGSetLogging( (void *) solver, logging ) );
+   return( hypre_PCGSetPrintLevel( (void *) solver, level ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_PCGSetLogLevel
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_PCGSetLogLevel( HYPRE_Solver solver,
+                     int          level )
+{
+   return( hypre_PCGSetLogLevel( (void *) solver, level ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -207,3 +218,14 @@ HYPRE_PCGGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
 {
    return( hypre_PCGGetFinalRelativeResidualNorm( (void *) solver, norm ) );
 }
+
+/*--------------------------------------------------------------------------
+ * HYPRE_PCGGetResidual
+ *--------------------------------------------------------------------------*/
+
+int HYPRE_PCGGetResidual( HYPRE_Solver solver, void **residual )
+{
+   /* returns a pointer to the residual vector */
+   return hypre_PCGGetResidual( (void *) solver, residual );
+}
+

@@ -632,17 +632,18 @@ typedef struct
  **/
 
 /*
-  Standard error tolerance: |delta-residual|/|right-hand-side|<tol
+ Summary of Parameters to Control Stopping Test:
+ - Standard (default) error tolerance: |delta-residual|/|right-hand-side|<tol
  where the norm is an energy norm wrt preconditioner, |r|=sqrt(<Cr,r>).
-   two_norm!=0 means: the norm is the L2 norm, |r|=sqrt(<r,r>)
-   rel_change!=0 means: if pass the other stopping criteria, also check the
+ - two_norm!=0 means: the norm is the L2 norm, |r|=sqrt(<r,r>)
+ - rel_change!=0 means: if pass the other stopping criteria, also check the
  relative change in the solution x.
-   stop_crit!=0 means: pure absolute error tolerance rather than a pure relative
- error tolerance on the residual.  Never applies if rel_change!=0 or abstolf!=0.
-   abstolf = absolute error tolerance factor to be used _together_ with the
- relative error tolerance, |delta-residual| / ( abstolf + |right-hand-side| ) < tol
-   tol = relative error tolerance, as above
-   cf_tol = convergence factor tolerance; if >0 used for special test
+ - stop_crit!=0 means: pure absolute error tolerance rather than a pure relative
+ error tolerance on the residual.  Never applies if rel_change!=0 or atolf!=0.
+ - atolf = absolute error tolerance factor to be used _together_ with the
+ relative error tolerance, |delta-residual| / ( atolf + |right-hand-side| ) < tol
+ - tol = relative error tolerance, as above
+ - cf_tol = convergence factor tolerance; if >0 used for special test
  for slow convergence
 */
 
@@ -660,7 +661,8 @@ typedef struct
    void    *A;
    void    *p;
    void    *s;
-   void    *r;
+   void    *r; /* ...contains the residual.  This is currently kept permanently.
+                  If that is ever changed, it still must be kept if log_level>2 */
 
    void    *matvec_data;
    void    *precond_data;
@@ -671,8 +673,8 @@ typedef struct
    int      num_iterations;
    double   rel_residual_norm;
 
-   /* additional log info (logged when `logging' > 0) */
-   int      logging;
+   int     printlevel; /* printing when printlevel>0 */
+   int     log_level;  /* extra computations for logging when log_level>0 */
    double  *norms;
    double  *rel_norms;
 
@@ -739,64 +741,6 @@ extern "C" {
 #endif
 
 
-/* HYPRE_bicgstab.c */
-int HYPRE_BiCGSTABDestroy( HYPRE_Solver solver );
-int HYPRE_BiCGSTABSetup( HYPRE_Solver solver , HYPRE_Matrix A , HYPRE_Vector b , HYPRE_Vector x );
-int HYPRE_BiCGSTABSolve( HYPRE_Solver solver , HYPRE_Matrix A , HYPRE_Vector b , HYPRE_Vector x );
-int HYPRE_BiCGSTABSetTol( HYPRE_Solver solver , double tol );
-int HYPRE_BiCGSTABSetMinIter( HYPRE_Solver solver , int min_iter );
-int HYPRE_BiCGSTABSetMaxIter( HYPRE_Solver solver , int max_iter );
-int HYPRE_BiCGSTABSetStopCrit( HYPRE_Solver solver , int stop_crit );
-int HYPRE_BiCGSTABSetPrecond( HYPRE_Solver solver , HYPRE_PtrToSolverFcn precond , HYPRE_PtrToSolverFcn precond_setup , HYPRE_Solver precond_solver );
-int HYPRE_BiCGSTABGetPrecond( HYPRE_Solver solver , HYPRE_Solver *precond_data_ptr );
-int HYPRE_BiCGSTABSetLogging( HYPRE_Solver solver , int logging );
-int HYPRE_BiCGSTABGetNumIterations( HYPRE_Solver solver , int *num_iterations );
-int HYPRE_BiCGSTABGetFinalRelativeResidualNorm( HYPRE_Solver solver , double *norm );
-
-/* HYPRE_cgnr.c */
-int HYPRE_CGNRDestroy( HYPRE_Solver solver );
-int HYPRE_CGNRSetup( HYPRE_Solver solver , HYPRE_Matrix A , HYPRE_Vector b , HYPRE_Vector x );
-int HYPRE_CGNRSolve( HYPRE_Solver solver , HYPRE_Matrix A , HYPRE_Vector b , HYPRE_Vector x );
-int HYPRE_CGNRSetTol( HYPRE_Solver solver , double tol );
-int HYPRE_CGNRSetMinIter( HYPRE_Solver solver , int min_iter );
-int HYPRE_CGNRSetMaxIter( HYPRE_Solver solver , int max_iter );
-int HYPRE_CGNRSetStopCrit( HYPRE_Solver solver , int stop_crit );
-int HYPRE_CGNRSetPrecond( HYPRE_Solver solver , HYPRE_PtrToSolverFcn precond , HYPRE_PtrToSolverFcn precondT , HYPRE_PtrToSolverFcn precond_setup , HYPRE_Solver precond_solver );
-int HYPRE_CGNRGetPrecond( HYPRE_Solver solver , HYPRE_Solver *precond_data_ptr );
-int HYPRE_CGNRSetLogging( HYPRE_Solver solver , int logging );
-int HYPRE_CGNRGetNumIterations( HYPRE_Solver solver , int *num_iterations );
-int HYPRE_CGNRGetFinalRelativeResidualNorm( HYPRE_Solver solver , double *norm );
-
-/* HYPRE_gmres.c */
-int HYPRE_GMRESSetup( HYPRE_Solver solver , HYPRE_Matrix A , HYPRE_Vector b , HYPRE_Vector x );
-int HYPRE_GMRESSolve( HYPRE_Solver solver , HYPRE_Matrix A , HYPRE_Vector b , HYPRE_Vector x );
-int HYPRE_GMRESSetKDim( HYPRE_Solver solver , int k_dim );
-int HYPRE_GMRESSetTol( HYPRE_Solver solver , double tol );
-int HYPRE_GMRESSetMinIter( HYPRE_Solver solver , int min_iter );
-int HYPRE_GMRESSetMaxIter( HYPRE_Solver solver , int max_iter );
-int HYPRE_GMRESSetStopCrit( HYPRE_Solver solver , int stop_crit );
-int HYPRE_GMRESSetRelChange( HYPRE_Solver solver , int rel_change );
-int HYPRE_GMRESSetPrecond( HYPRE_Solver solver , HYPRE_PtrToSolverFcn precond , HYPRE_PtrToSolverFcn precond_setup , HYPRE_Solver precond_solver );
-int HYPRE_GMRESGetPrecond( HYPRE_Solver solver , HYPRE_Solver *precond_data_ptr );
-int HYPRE_GMRESSetLogging( HYPRE_Solver solver , int logging );
-int HYPRE_GMRESGetNumIterations( HYPRE_Solver solver , int *num_iterations );
-int HYPRE_GMRESGetFinalRelativeResidualNorm( HYPRE_Solver solver , double *norm );
-
-/* HYPRE_pcg.c */
-int HYPRE_PCGSetup( HYPRE_Solver solver , HYPRE_Matrix A , HYPRE_Vector b , HYPRE_Vector x );
-int HYPRE_PCGSolve( HYPRE_Solver solver , HYPRE_Matrix A , HYPRE_Vector b , HYPRE_Vector x );
-int HYPRE_PCGSetTol( HYPRE_Solver solver , double tol );
-int HYPRE_PCGSetMaxIter( HYPRE_Solver solver , int max_iter );
-int HYPRE_PCGSetAbsoluteTolFactor( HYPRE_Solver solver , int abstolf );
-int HYPRE_PCGSetStopCrit( HYPRE_Solver solver , int stop_crit );
-int HYPRE_PCGSetTwoNorm( HYPRE_Solver solver , int two_norm );
-int HYPRE_PCGSetRelChange( HYPRE_Solver solver , int rel_change );
-int HYPRE_PCGSetPrecond( HYPRE_Solver solver , HYPRE_PtrToSolverFcn precond , HYPRE_PtrToSolverFcn precond_setup , HYPRE_Solver precond_solver );
-int HYPRE_PCGGetPrecond( HYPRE_Solver solver , HYPRE_Solver *precond_data_ptr );
-int HYPRE_PCGSetLogging( HYPRE_Solver solver , int logging );
-int HYPRE_PCGGetNumIterations( HYPRE_Solver solver , int *num_iterations );
-int HYPRE_PCGGetFinalRelativeResidualNorm( HYPRE_Solver solver , double *norm );
-
 /* bicgstab.c */
 hypre_BiCGSTABFunctions *hypre_BiCGSTABFunctionsCreate( void *(*CreateVector )(void *vvector ), int (*DestroyVector )(void *vvector ), void *(*MatvecCreate )(void *A ,void *x ), int (*Matvec )(void *matvec_data ,double alpha ,void *A ,void *x ,double beta ,void *y ), int (*MatvecDestroy )(void *matvec_data ), double (*InnerProd )(void *x ,void *y ), int (*CopyVector )(void *x ,void *y ), int (*ScaleVector )(double alpha ,void *x ), int (*Axpy )(double alpha ,void *x ,void *y ), int (*CommInfo )(void *A ,int *my_id ,int *num_procs ), int (*precond )(), int (*precond_setup )());
 void *hypre_BiCGSTABCreate( hypre_BiCGSTABFunctions *bicgstab_functions );
@@ -847,10 +791,72 @@ int hypre_GMRESSetLogging( void *gmres_vdata , int logging );
 int hypre_GMRESGetNumIterations( void *gmres_vdata , int *num_iterations );
 int hypre_GMRESGetFinalRelativeResidualNorm( void *gmres_vdata , double *relative_residual_norm );
 
+/* HYPRE_bicgstab.c */
+int HYPRE_BiCGSTABDestroy( HYPRE_Solver solver );
+int HYPRE_BiCGSTABSetup( HYPRE_Solver solver , HYPRE_Matrix A , HYPRE_Vector b , HYPRE_Vector x );
+int HYPRE_BiCGSTABSolve( HYPRE_Solver solver , HYPRE_Matrix A , HYPRE_Vector b , HYPRE_Vector x );
+int HYPRE_BiCGSTABSetTol( HYPRE_Solver solver , double tol );
+int HYPRE_BiCGSTABSetMinIter( HYPRE_Solver solver , int min_iter );
+int HYPRE_BiCGSTABSetMaxIter( HYPRE_Solver solver , int max_iter );
+int HYPRE_BiCGSTABSetStopCrit( HYPRE_Solver solver , int stop_crit );
+int HYPRE_BiCGSTABSetPrecond( HYPRE_Solver solver , HYPRE_PtrToSolverFcn precond , HYPRE_PtrToSolverFcn precond_setup , HYPRE_Solver precond_solver );
+int HYPRE_BiCGSTABGetPrecond( HYPRE_Solver solver , HYPRE_Solver *precond_data_ptr );
+int HYPRE_BiCGSTABSetLogging( HYPRE_Solver solver , int logging );
+int HYPRE_BiCGSTABGetNumIterations( HYPRE_Solver solver , int *num_iterations );
+int HYPRE_BiCGSTABGetFinalRelativeResidualNorm( HYPRE_Solver solver , double *norm );
+
+/* HYPRE_cgnr.c */
+int HYPRE_CGNRDestroy( HYPRE_Solver solver );
+int HYPRE_CGNRSetup( HYPRE_Solver solver , HYPRE_Matrix A , HYPRE_Vector b , HYPRE_Vector x );
+int HYPRE_CGNRSolve( HYPRE_Solver solver , HYPRE_Matrix A , HYPRE_Vector b , HYPRE_Vector x );
+int HYPRE_CGNRSetTol( HYPRE_Solver solver , double tol );
+int HYPRE_CGNRSetMinIter( HYPRE_Solver solver , int min_iter );
+int HYPRE_CGNRSetMaxIter( HYPRE_Solver solver , int max_iter );
+int HYPRE_CGNRSetStopCrit( HYPRE_Solver solver , int stop_crit );
+int HYPRE_CGNRSetPrecond( HYPRE_Solver solver , HYPRE_PtrToSolverFcn precond , HYPRE_PtrToSolverFcn precondT , HYPRE_PtrToSolverFcn precond_setup , HYPRE_Solver precond_solver );
+int HYPRE_CGNRGetPrecond( HYPRE_Solver solver , HYPRE_Solver *precond_data_ptr );
+int HYPRE_CGNRSetLogging( HYPRE_Solver solver , int logging );
+int HYPRE_CGNRGetNumIterations( HYPRE_Solver solver , int *num_iterations );
+int HYPRE_CGNRGetFinalRelativeResidualNorm( HYPRE_Solver solver , double *norm );
+
+/* HYPRE_gmres.c */
+int HYPRE_GMRESSetup( HYPRE_Solver solver , HYPRE_Matrix A , HYPRE_Vector b , HYPRE_Vector x );
+int HYPRE_GMRESSolve( HYPRE_Solver solver , HYPRE_Matrix A , HYPRE_Vector b , HYPRE_Vector x );
+int HYPRE_GMRESSetKDim( HYPRE_Solver solver , int k_dim );
+int HYPRE_GMRESSetTol( HYPRE_Solver solver , double tol );
+int HYPRE_GMRESSetMinIter( HYPRE_Solver solver , int min_iter );
+int HYPRE_GMRESSetMaxIter( HYPRE_Solver solver , int max_iter );
+int HYPRE_GMRESSetStopCrit( HYPRE_Solver solver , int stop_crit );
+int HYPRE_GMRESSetRelChange( HYPRE_Solver solver , int rel_change );
+int HYPRE_GMRESSetPrecond( HYPRE_Solver solver , HYPRE_PtrToSolverFcn precond , HYPRE_PtrToSolverFcn precond_setup , HYPRE_Solver precond_solver );
+int HYPRE_GMRESGetPrecond( HYPRE_Solver solver , HYPRE_Solver *precond_data_ptr );
+int HYPRE_GMRESSetLogging( HYPRE_Solver solver , int logging );
+int HYPRE_GMRESGetNumIterations( HYPRE_Solver solver , int *num_iterations );
+int HYPRE_GMRESGetFinalRelativeResidualNorm( HYPRE_Solver solver , double *norm );
+
+/* HYPRE_pcg.c */
+int HYPRE_PCGSetup( HYPRE_Solver solver , HYPRE_Matrix A , HYPRE_Vector b , HYPRE_Vector x );
+int HYPRE_PCGSolve( HYPRE_Solver solver , HYPRE_Matrix A , HYPRE_Vector b , HYPRE_Vector x );
+int HYPRE_PCGSetTol( HYPRE_Solver solver , double tol );
+int HYPRE_PCGSetAbsoluteTolFactor( HYPRE_Solver solver , int abstolf );
+int HYPRE_PCGSetConvergenceFactorTol( HYPRE_Solver solver , double cf_tol );
+int HYPRE_PCGSetMaxIter( HYPRE_Solver solver , int max_iter );
+int HYPRE_PCGSetStopCrit( HYPRE_Solver solver , int stop_crit );
+int HYPRE_PCGSetTwoNorm( HYPRE_Solver solver , int two_norm );
+int HYPRE_PCGSetRelChange( HYPRE_Solver solver , int rel_change );
+int HYPRE_PCGSetPrecond( HYPRE_Solver solver , HYPRE_PtrToSolverFcn precond , HYPRE_PtrToSolverFcn precond_setup , HYPRE_Solver precond_solver );
+int HYPRE_PCGGetPrecond( HYPRE_Solver solver , HYPRE_Solver *precond_data_ptr );
+int HYPRE_PCGSetPrintLevel( HYPRE_Solver solver , int level );
+int HYPRE_PCGSetLogLevel( HYPRE_Solver solver , int level );
+int HYPRE_PCGGetNumIterations( HYPRE_Solver solver , int *num_iterations );
+int HYPRE_PCGGetFinalRelativeResidualNorm( HYPRE_Solver solver , double *norm );
+int HYPRE_PCGGetResidual( HYPRE_Solver solver , void **residual );
+
 /* pcg.c */
 hypre_PCGFunctions *hypre_PCGFunctionsCreate( char *(*CAlloc )(int count ,int elt_size ), int (*Free )(char *ptr ), int (*CommInfo )(void *A ,int *my_id ,int *num_procs ), void *(*CreateVector )(void *vector ), int (*DestroyVector )(void *vector ), void *(*MatvecCreate )(void *A ,void *x ), int (*Matvec )(void *matvec_data ,double alpha ,void *A ,void *x ,double beta ,void *y ), int (*MatvecDestroy )(void *matvec_data ), double (*InnerProd )(void *x ,void *y ), int (*CopyVector )(void *x ,void *y ), int (*ClearVector )(void *x ), int (*ScaleVector )(double alpha ,void *x ), int (*Axpy )(double alpha ,void *x ,void *y ), int (*PrecondSetup )(void *vdata ,void *A ,void *b ,void *x ), int (*Precond )(void *vdata ,void *A ,void *b ,void *x ));
 void *hypre_PCGCreate( hypre_PCGFunctions *pcg_functions );
 int hypre_PCGDestroy( void *pcg_vdata );
+int hypre_PCGGetResidual( void *pcg_vdata , void **residual );
 int hypre_PCGSetup( void *pcg_vdata , void *A , void *b , void *x );
 int hypre_PCGSolve( void *pcg_vdata , void *A , void *b , void *x );
 int hypre_PCGSetTol( void *pcg_vdata , double tol );
@@ -862,7 +868,8 @@ int hypre_PCGSetRelChange( void *pcg_vdata , int rel_change );
 int hypre_PCGSetStopCrit( void *pcg_vdata , int stop_crit );
 int hypre_PCGGetPrecond( void *pcg_vdata , HYPRE_Solver *precond_data_ptr );
 int hypre_PCGSetPrecond( void *pcg_vdata , int (*precond )(), int (*precond_setup )(), void *precond_data );
-int hypre_PCGSetLogging( void *pcg_vdata , int logging );
+int hypre_PCGSetPrintLevel( void *pcg_vdata , int level );
+int hypre_PCGSetLogLevel( void *pcg_vdata , int level );
 int hypre_PCGGetNumIterations( void *pcg_vdata , int *num_iterations );
 int hypre_PCGGetConverged( void *pcg_vdata , int *converged );
 int hypre_PCGPrintLogging( void *pcg_vdata , int myid );
