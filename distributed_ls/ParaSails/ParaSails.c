@@ -1091,7 +1091,10 @@ double ParaSailsSelectFilter(ParaSails *ps, double param)
 
 	/* Copy the scaled absolute values into a work buffer */
 	for (i=0; i<len; i++)
-	    buffer[i] = ABS(val[i]);
+	    if (ind[i] == row)
+	        buffer[i] = 0.0;
+	    else
+	        buffer[i] = ABS(val[i]);
 
         /* Compute which element to select */
 	i = (int) (len * param) + 1;
