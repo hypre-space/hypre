@@ -1053,9 +1053,9 @@ int HYPRE_LSI_BlockP::solve(HYPRE_ParVector fvec, HYPRE_ParVector xvec)
 int HYPRE_LSI_BlockP::solveBSolve(HYPRE_IJVector x1,HYPRE_IJVector x2,
                                   HYPRE_IJVector f1,HYPRE_IJVector f2)
 {
-   int                irow, ierr, max_iter=10, mypid, A22Start, A22NRows;
+   int                irow, ierr, max_iter=3, mypid, A22Start, A22NRows;
    int                i, *nsweeps, *relaxType, *inds;
-   double             tol=1.0e-2, *vals, alpha, *relaxWt;
+   double             tol=1.0e-1, *vals, alpha, *relaxWt;
    MPI_Comm           mpi_comm;
    HYPRE_ParCSRMatrix A11mat_csr, A22mat_csr, A12mat_csr;
    HYPRE_ParVector    x1_csr, x2_csr, f1_csr, f2_csr;
@@ -1081,7 +1081,7 @@ int HYPRE_LSI_BlockP::solveBSolve(HYPRE_IJVector x1,HYPRE_IJVector x2,
    if ( A11Solver_ == NULL )
    {
       HYPRE_BoomerAMGCreate(&A11Precond_);
-      HYPRE_BoomerAMGSetMaxIter(A11Precond_, 10);
+      HYPRE_BoomerAMGSetMaxIter(A11Precond_, 3);
       HYPRE_BoomerAMGSetCycleType(A11Precond_, 1);
       HYPRE_BoomerAMGSetMaxLevels(A11Precond_, 25);
       HYPRE_BoomerAMGSetMeasureType(A11Precond_, 0);
@@ -1134,7 +1134,7 @@ int HYPRE_LSI_BlockP::solveBSolve(HYPRE_IJVector x1,HYPRE_IJVector x2,
       HYPRE_BoomerAMGCreate(&A22Precond_);
       HYPRE_BoomerAMGSetMaxLevels(A22Precond_, 25);
       HYPRE_BoomerAMGSetCycleType(A22Precond_, 1);
-      HYPRE_BoomerAMGSetMaxIter(A22Precond_, 50);
+      HYPRE_BoomerAMGSetMaxIter(A22Precond_, 3);
       HYPRE_BoomerAMGSetMeasureType(A22Precond_, 0);
       //HYPRE_BoomerAMGSetIOutDat(A22Precond_, 2);
       HYPRE_BoomerAMGSetCoarsenType(A22Precond_, 0);
@@ -1184,9 +1184,9 @@ int HYPRE_LSI_BlockP::solveBSolve(HYPRE_IJVector x1,HYPRE_IJVector x2,
 int HYPRE_LSI_BlockP::solveBISolve(HYPRE_IJVector x1,HYPRE_IJVector x2,
                                    HYPRE_IJVector f1,HYPRE_IJVector f2)
 {
-   int                irow, ierr, max_iter=10, mypid, A22Start, A22NRows;
+   int                irow, ierr, max_iter=3, mypid, A22Start, A22NRows;
    int                i, *nsweeps, *relaxType, *inds;
-   double             tol=1.0e-2, *vals, alpha, *relaxWt;
+   double             tol=1.0e-3, *vals, alpha, *relaxWt;
    MPI_Comm           mpi_comm;
    HYPRE_ParCSRMatrix A11mat_csr, A22mat_csr, A12mat_csr;
    HYPRE_ParVector    x1_csr, x2_csr, f1_csr, f2_csr, y1_csr;
@@ -1219,13 +1219,12 @@ int HYPRE_LSI_BlockP::solveBISolve(HYPRE_IJVector x1,HYPRE_IJVector x2,
       HYPRE_ParCSRPCGSetRelChange(A11Solver_, 0);
       HYPRE_ParCSRPCGSetTwoNorm(A11Solver_, 1);
       HYPRE_BoomerAMGCreate(&A11Precond_);
-      HYPRE_BoomerAMGSetMaxIter(A11Precond_, 20);
+      HYPRE_BoomerAMGSetMaxIter(A11Precond_, 10);
       HYPRE_BoomerAMGSetCycleType(A11Precond_, 1);
       HYPRE_BoomerAMGSetMaxLevels(A11Precond_, 25);
       HYPRE_BoomerAMGSetMeasureType(A11Precond_, 0);
-      //HYPRE_BoomerAMGSetIOutDat(A11Precond_, 2);
       HYPRE_BoomerAMGSetCoarsenType(A11Precond_, 0);
-      HYPRE_BoomerAMGSetStrongThreshold(A11Precond_, 0.5);
+      HYPRE_BoomerAMGSetStrongThreshold(A11Precond_, 0.95);
       nsweeps = (int *) malloc( 4 * sizeof(int) );
       for ( i = 0; i < 4; i++ ) nsweeps[i] = 2;
       HYPRE_BoomerAMGSetNumGridSweeps(A11Precond_, nsweeps);
@@ -1246,7 +1245,6 @@ int HYPRE_LSI_BlockP::solveBISolve(HYPRE_IJVector x1,HYPRE_IJVector x2,
          HYPRE_ParCSRGMRESSetPrecond(A11Solver_, HYPRE_BoomerAMGSolve,
                                      HYPRE_BoomerAMGSetup, A11Precond_);
          HYPRE_ParCSRGMRESSetup(A11Solver_, A11mat_csr, f1_csr, x1_csr);
-
       }
       else
       {
@@ -1272,11 +1270,11 @@ int HYPRE_LSI_BlockP::solveBISolve(HYPRE_IJVector x1,HYPRE_IJVector x2,
       HYPRE_BoomerAMGCreate(&A22Precond_);
       HYPRE_BoomerAMGSetMaxLevels(A22Precond_, 25);
       HYPRE_BoomerAMGSetCycleType(A22Precond_, 1);
-      HYPRE_BoomerAMGSetMaxIter(A22Precond_, 20);
+      HYPRE_BoomerAMGSetMaxIter(A22Precond_, 10);
       HYPRE_BoomerAMGSetMeasureType(A22Precond_, 0);
-      //HYPRE_BoomerAMGSetIOutDat(A22Precond_, 2);
+      //HYPRE_BoomerAMGSetIOutDat(A22Precond_, 3);
       HYPRE_BoomerAMGSetCoarsenType(A22Precond_, 0);
-      HYPRE_BoomerAMGSetStrongThreshold(A22Precond_, 0.5);
+      HYPRE_BoomerAMGSetStrongThreshold(A22Precond_, 0.95);
       nsweeps = (int *) malloc( 4 * sizeof(int) );
       for ( i = 0; i < 4; i++ ) nsweeps[i] = 3;
       HYPRE_BoomerAMGSetNumGridSweeps(A22Precond_, nsweeps);
