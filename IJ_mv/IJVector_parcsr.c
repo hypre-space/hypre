@@ -590,6 +590,10 @@ hypre_IJVectorAssemblePar(hypre_IJVector *vector)
          off_proc_data=hypre_AuxParVectorOffProcData(aux_vector);
          hypre_IJVectorAssembleOffProcValsPar(vector, max_off_proc_elmts, 
 		current_num_elmts, off_proc_i, off_proc_data);
+	 hypre_TFree(hypre_AuxParVectorOffProcI(aux_vector));
+	 hypre_TFree(hypre_AuxParVectorOffProcData(aux_vector));
+	 hypre_AuxParVectorMaxOffProcElmts(aux_vector) = 0;
+	 hypre_AuxParVectorCurrentNumElmts(aux_vector) = 0;
       }
    }
 

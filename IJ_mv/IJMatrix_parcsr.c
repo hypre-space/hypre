@@ -631,6 +631,63 @@ hypre_IJMatrixSetValuesParCSR( hypre_IJMatrix *matrix,
                indx++;
             }
          }
+         else
+	 {
+   	    if (!aux_matrix)
+            {
+               size = row_partitioning[my_id+1]-row_partitioning[my_id];
+	       hypre_AuxParCSRMatrixCreate(&aux_matrix, size, size, NULL);
+      	       hypre_AuxParCSRMatrixNeedAux(aux_matrix) = 0;
+      	       hypre_IJMatrixTranslator(matrix) = aux_matrix;
+            }
+   	    current_num_elmts 
+		= hypre_AuxParCSRMatrixCurrentNumElmts(aux_matrix);
+   	    max_off_proc_elmts
+		= hypre_AuxParCSRMatrixMaxOffProcElmts(aux_matrix);
+   	    off_proc_i_indx = hypre_AuxParCSRMatrixOffProcIIndx(aux_matrix);
+   	    off_proc_i = hypre_AuxParCSRMatrixOffProcI(aux_matrix);
+   	    off_proc_j = hypre_AuxParCSRMatrixOffProcJ(aux_matrix);
+   	    off_proc_data = hypre_AuxParCSRMatrixOffProcData(aux_matrix);
+   	    
+	    if (!max_off_proc_elmts)
+	    {
+	       max_off_proc_elmts = hypre_max(n,1000);
+	       hypre_AuxParCSRMatrixMaxOffProcElmts(aux_matrix) =
+	       		max_off_proc_elmts;
+   	       hypre_AuxParCSRMatrixOffProcI(aux_matrix)
+			= hypre_CTAlloc(int,2*max_off_proc_elmts);
+   	       hypre_AuxParCSRMatrixOffProcJ(aux_matrix)
+			= hypre_CTAlloc(int,max_off_proc_elmts);
+   	       hypre_AuxParCSRMatrixOffProcData(aux_matrix)
+			= hypre_CTAlloc(double,max_off_proc_elmts);
+   	       off_proc_i = hypre_AuxParCSRMatrixOffProcI(aux_matrix);
+   	       off_proc_j = hypre_AuxParCSRMatrixOffProcJ(aux_matrix);
+   	       off_proc_data = hypre_AuxParCSRMatrixOffProcData(aux_matrix);
+	    }
+            else if (current_num_elmts + n > max_off_proc_elmts)
+            {
+               max_off_proc_elmts += 3*n;
+               off_proc_i = hypre_TReAlloc(off_proc_i,int,2*max_off_proc_elmts);
+               off_proc_j = hypre_TReAlloc(off_proc_j,int,max_off_proc_elmts);
+               off_proc_data = hypre_TReAlloc(off_proc_data,double,
+				max_off_proc_elmts);
+	       hypre_AuxParCSRMatrixMaxOffProcElmts(aux_matrix)
+   	    		= max_off_proc_elmts;
+	       hypre_AuxParCSRMatrixOffProcI(aux_matrix) = off_proc_i;
+	       hypre_AuxParCSRMatrixOffProcJ(aux_matrix) = off_proc_j;
+	       hypre_AuxParCSRMatrixOffProcData(aux_matrix) = off_proc_data;
+	    }
+            off_proc_i[off_proc_i_indx++] = row; 
+            off_proc_i[off_proc_i_indx++] = n; 
+	    for (i=0; i < n; i++)
+	    {
+	       off_proc_j[current_num_elmts] = cols[indx];
+	       off_proc_data[current_num_elmts++] = values[indx++];
+	    }
+	    hypre_AuxParCSRMatrixOffProcIIndx(aux_matrix) = off_proc_i_indx; 
+	    hypre_AuxParCSRMatrixCurrentNumElmts(aux_matrix)
+   	    	= current_num_elmts; 
+	 }
       }
    }
    else
@@ -1033,6 +1090,63 @@ hypre_IJMatrixAddToValuesParCSR( hypre_IJMatrix *matrix,
             indx++;
             }
          }
+         else
+	 {
+   	    if (!aux_matrix)
+            {
+               size = row_partitioning[my_id+1]-row_partitioning[my_id];
+	       hypre_AuxParCSRMatrixCreate(&aux_matrix, size, size, NULL);
+      	       hypre_AuxParCSRMatrixNeedAux(aux_matrix) = 0;
+      	       hypre_IJMatrixTranslator(matrix) = aux_matrix;
+            }
+   	    current_num_elmts 
+		= hypre_AuxParCSRMatrixCurrentNumElmts(aux_matrix);
+   	    max_off_proc_elmts
+		= hypre_AuxParCSRMatrixMaxOffProcElmts(aux_matrix);
+   	    off_proc_i_indx = hypre_AuxParCSRMatrixOffProcIIndx(aux_matrix);
+   	    off_proc_i = hypre_AuxParCSRMatrixOffProcI(aux_matrix);
+   	    off_proc_j = hypre_AuxParCSRMatrixOffProcJ(aux_matrix);
+   	    off_proc_data = hypre_AuxParCSRMatrixOffProcData(aux_matrix);
+   	    
+	    if (!max_off_proc_elmts)
+	    {
+	       max_off_proc_elmts = hypre_max(n,1000);
+	       hypre_AuxParCSRMatrixMaxOffProcElmts(aux_matrix) =
+	       		max_off_proc_elmts;
+   	       hypre_AuxParCSRMatrixOffProcI(aux_matrix)
+			= hypre_CTAlloc(int,2*max_off_proc_elmts);
+   	       hypre_AuxParCSRMatrixOffProcJ(aux_matrix)
+			= hypre_CTAlloc(int,max_off_proc_elmts);
+   	       hypre_AuxParCSRMatrixOffProcData(aux_matrix)
+			= hypre_CTAlloc(double,max_off_proc_elmts);
+   	       off_proc_i = hypre_AuxParCSRMatrixOffProcI(aux_matrix);
+   	       off_proc_j = hypre_AuxParCSRMatrixOffProcJ(aux_matrix);
+   	       off_proc_data = hypre_AuxParCSRMatrixOffProcData(aux_matrix);
+	    }
+            else if (current_num_elmts + n > max_off_proc_elmts)
+            {
+               max_off_proc_elmts += 3*n;
+               off_proc_i = hypre_TReAlloc(off_proc_i,int,2*max_off_proc_elmts);
+               off_proc_j = hypre_TReAlloc(off_proc_j,int,max_off_proc_elmts);
+               off_proc_data = hypre_TReAlloc(off_proc_data,double,
+				max_off_proc_elmts);
+	       hypre_AuxParCSRMatrixMaxOffProcElmts(aux_matrix)
+   	    		= max_off_proc_elmts;
+	       hypre_AuxParCSRMatrixOffProcI(aux_matrix) = off_proc_i;
+	       hypre_AuxParCSRMatrixOffProcJ(aux_matrix) = off_proc_j;
+	       hypre_AuxParCSRMatrixOffProcData(aux_matrix) = off_proc_data;
+	    }
+            off_proc_i[off_proc_i_indx++] = row; 
+            off_proc_i[off_proc_i_indx++] = n; 
+	    for (i=0; i < n; i++)
+	    {
+	       off_proc_j[current_num_elmts] = cols[indx];
+	       off_proc_data[current_num_elmts++] = values[indx++];
+	    }
+	    hypre_AuxParCSRMatrixOffProcIIndx(aux_matrix) = off_proc_i_indx; 
+	    hypre_AuxParCSRMatrixCurrentNumElmts(aux_matrix)
+   	    	= current_num_elmts; 
+	 }
       }
    }
    else
