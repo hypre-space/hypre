@@ -21,8 +21,8 @@ CXX = @CXX@
 #SUPERLU_LIB     = -L/g/g2/chtong/SUPERLU/WEST/SuperLU
 #MLPACK_INCLUDE  = -I/g/g2/chtong/ML/WEST/ml/src
 #MLPACK_LIB      = -L/g/g2/chtong/ML/WEST/ml/src
-SUPERLU_INCLUDE = 
-SUPERLU_LIB     = 
+SUPERLU_INCLUDE = -I$(srcdir)/../SuperLU
+SUPERLU_LIB     = -L$(srcdir)/../SuperLU
 MLPACK_INCLUDE  = 
 MLPACK_LIB      =
 
@@ -90,7 +90,7 @@ LFLAGS =\
  -lHYPRE_MatrixMatrix \
  -lHYPRE_DistributedMatrix \
  -lHYPRE_DistributedMatrixPilutSolver \
- -lsuperlu_alpha \
+ -lHYPRE_superlu \
  -lHYPRE_seq_mv \
  ${MPILIBFLAGS} ${MPI_LIBS} ${LIBFLAGS} ${LDLIBFLAGS}\
  -ldxml -lm
