@@ -29,6 +29,7 @@ extern "C"
    int HYPRE_LSI_DDIlutCreate( MPI_Comm comm, HYPRE_Solver *solver );
    int HYPRE_LSI_DDIlutDestroy( HYPRE_Solver solver );
    int HYPRE_LSI_DDIlutSetFillin( HYPRE_Solver solver, double fillin);
+   int HYPRE_LSI_DDIlutSetOutputLevel( HYPRE_Solver solver, int level);
    int HYPRE_LSI_DDIlutSetDropTolerance( HYPRE_Solver solver, double thresh);
    int HYPRE_LSI_DDIlutSolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
                           HYPRE_ParVector b,   HYPRE_ParVector x );
