@@ -1,0 +1,800 @@
+/* old sequential version:
+   assumes non-const copy of 
+   input matrix stored in ctc->rp,cval, aval.
+*/
+
+#ifdef SEQUENTIAL_MODE
+
+#include "Euclid_dh.h"
+#include "ilu_dh.h"
+#include "Mem_dh.h"
+#include "Parser_dh.h"
+#include "petsc_euclid.h"
+
+  /* private methods; called by Euclid_dhSetup() */
+static void partition_private(Euclid_dh ctx);
+static void make_block_diagonal_private(Euclid_dh ctx);
+static void profile_private (char *msg, int n, int *rp, int *cval, REAL_DH *aval);
+static void scale_matrix_private(Euclid_dh ctx);
+static void sparsify_private(double dt, int n, int *rp, int *cval, REAL_DH *aval, int *diag);
+static void order_interiors_private(Euclid_dh ctx);
+static void order_bdry_nodes_private(Euclid_dh ctx);
+static bool is_naturally_ordered_private(Euclid_dh ctx);
+static void factor_private(Euclid_dh ctx);
+
+#ifdef USING_METIS
+static void metis_order_private(Euclid_dh ctx);
+#endif
+
+
+#undef __FUNC__
+#define __FUNC__ "Euclid_dhSetup"
+void Euclid_dhSetup(Euclid_dh ctx)
+{
+  START_FUNC_DH
+  int m = ctx->m;
+
+  /* record initial size of matrix */
+  ctx->nzA = ctx->nzA_sp = ctx->rp[m];
+
+  /* query parser for runtime parameters */
+  get_runtime_params_private(ctx); CHECK_V_ERROR;
+
+  /* initialize natural ordering, if ordering not previously set */
+  if (ctx->n2o_row == NULL) {
+    int i, *tmp = ctx->n2o_row = (int*)MALLOC_DH(m*sizeof(int));  CHECK_V_ERROR;
+    for (i=0; i<m; ++i) tmp[i] = i;
+    ctx->n2o_col = ctx->n2o_row;
+    ctx->isSymOrdered = true;
+  }
+
+  /* partition matrix, for block jacobi or PILU parallelism */
+  if (ctx->algo_par == BJILU_PAR  ||  ctx->algo_par == PILU_PAR) {
+    partition_private(ctx); CHECK_V_ERROR;
+  }
+  ctx->block[ctx->blockCount-1].end_row = m;
+
+  /* throw out off-diagonal entries, for blockJacobi ILU */
+  if (ctx->algo_par == BJILU_PAR) {
+    make_block_diagonal_private(ctx); CHECK_V_ERROR;
+  }
+
+  /* order boundary nodes before interior nodes, for PILU */
+  if (ctx->algo_par == PILU_PAR) {
+    order_bdry_nodes_private(ctx); CHECK_V_ERROR;
+  }
+
+  /* optionally print profiling information */
+  if (ctx->printProfile) {
+    char msg[]  = "Profiling for input, before scaling, before sparsification";
+    profile_private(msg, m, ctx->rp, ctx->cval, ctx->aval); 
+  }
+
+  /* find largest value in matrix */
+  { double max = 0.0;
+    int i, nz = ctx->rp[m];
+    REAL_DH *aval = ctx->aval;
+    for (i=0; i<nz; ++i) max = MAX(max,fabs(aval[i]));
+    ctx->maxVal = max;
+  }
+
+  /* optionally scale matrix, so largest value in each row is +1 or -1 */
+  if (! Parser_dhHasSwitch(parser_dh, "-doNotScale")) {
+    scale_matrix_private(ctx);
+    if (ctx->printProfile) {
+      char msg[]  = "Profiling for input, after scaling, before sparsification";
+      profile_private(msg, m, ctx->rp, ctx->cval, ctx->aval);
+    }
+  }
+
+  /* optionally sparsify input matrix */
+  if (ctx->sparseTolA != 0.0) {
+    double dt = ctx->sparseTolA * ctx->maxVal;
+    sparsify_private(dt, m, ctx->rp, ctx->cval, ctx->aval, NULL);
+    ctx->nzA_sp = ctx->rp[m];
+    if (ctx->printProfile) {
+      char msg[]  = "Profiling for input, after scaling, after sparsification";
+      profile_private(msg, m, ctx->rp, ctx->cval, ctx->aval);
+    }
+  }
+
+  /* order subdomain interiors */
+  if (ctx->orderMethod != NATURAL_ORDER) {
+    order_interiors_private(ctx);
+  }
+
+  /* determine if matrix is naturally ordered.
+     (possibly used for selection of triangular solves - ?) 
+   */
+  ctx->isNaturallyOrdered = is_naturally_ordered_private(ctx); CHECK_V_ERROR;
+
+  /* for debugging: print original and reordered input matrix */
+  if (Parser_dhHasSwitch(parser_dh, "-printMat")) {
+    int n = ctx->n;
+    if (ctx->aval[0] == sizeof(double)) {
+      print_triples_to_file(n, m, 0, ctx->rp, ctx->cval,
+                        ctx->aval, NULL, NULL, NULL, NULL, "A.trip"); CHECK_V_ERROR;
+      print_triples_to_file(n, m, 0, ctx->rp, ctx->cval, ctx->aval, NULL,
+                 ctx->n2o_row, ctx->n2o_col, NULL, "A_ordered.trip"); CHECK_V_ERROR;
+    } else {
+      print_triples_to_file(n, m, 0, ctx->rp, ctx->cval,
+                        NULL, ctx->aval, NULL, NULL, NULL, "A.trip"); CHECK_V_ERROR;
+      print_triples_to_file(n, m, 0, ctx->rp, ctx->cval, NULL, ctx->aval, 
+                 ctx->n2o_row, ctx->n2o_col, NULL, "A_ordered.trip"); CHECK_V_ERROR;
+    }
+  }
+
+  /* perform symbolic and numeric factorization */
+  if (! Parser_dhHasSwitch(parser_dh, "-doNotFactor")) {
+    factor_private(ctx); CHECK_V_ERROR;
+    /* record size of factor */
+    ctx->nzF = ctx->nzF_sp = ctx->rpF[m];
+
+    if (ctx->printProfile) {
+      char msg[]  = "Profiling for factor, before sparsification";
+      profile_private(msg, m, ctx->rpF, ctx->cvalF, ctx->avalF);
+    }
+
+    if (ctx->sparseTolF != 0.0) {
+      double dt = ctx->sparseTolF * ctx->maxVal;
+      sparsify_private(dt, m, ctx->rpF, ctx->cvalF, ctx->avalF, NULL);
+      /* record size of factor, as used in the triangular solves */
+      ctx->nzF_sp = ctx->rpF[m];
+
+      if (ctx->printProfile) {
+        char msg[]  = "Profiling for factor, after sparsification";
+        profile_private(msg, m, ctx->rpF, ctx->cvalF, ctx->avalF);
+      }
+    }
+    ctx->rho_final = (double)ctx->nzF_sp/(double)ctx->nzA;
+
+    /* for debugging: print original and reordered input matrix */
+    if (Parser_dhHasSwitch(parser_dh, "-printMat")) {
+      int n = ctx->n;
+      if (ctx->aval[0] == sizeof(double)) {
+        print_triples_to_file(n, m, 0, ctx->rp, ctx->cval, ctx->aval, NULL,
+                                        NULL, NULL, NULL, "F.trip"); CHECK_V_ERROR;
+      } else {
+        print_triples_to_file(n, m, 0, ctx->rp, ctx->cval, NULL, ctx->aval, 
+                                        NULL, NULL, NULL, "F.trip"); CHECK_V_ERROR;
+      }
+    }
+
+    /* invert diagonals, for faster triangular solves */
+    { int i, *diag = ctx->diagF;
+      REAL_DH *aval = ctx->avalF;
+      for (i=0; i<m; ++i) {
+        if (aval[diag[i]] != 0.0) aval[diag[i]] = 1.0/aval[diag[i]]; 
+      }
+    }
+  }
+
+  /* free storage for input matrix, since it's no longer needed */
+  FREE_DH(ctx->rp);   CHECK_V_ERROR; ctx->rp = NULL;
+  FREE_DH(ctx->cval); CHECK_V_ERROR; ctx->cval = NULL;
+  FREE_DH(ctx->aval); CHECK_V_ERROR; ctx->aval = NULL;
+
+  /* allocate work vector for triangular solves */
+  ctx->work = (REAL_DH*)MALLOC_DH(ctx->n*sizeof(REAL_DH)); CHECK_V_ERROR;
+
+  END_FUNC_DH
+}
+
+#undef __FUNC__
+#define __FUNC__ "is_naturally_ordered_private"
+bool is_naturally_ordered_private(Euclid_dh ctx)
+{
+  START_FUNC_DH
+  int i, m = ctx->m, *tmp = ctx->n2o_row;
+  bool flag = true;
+
+  for (i=0; i<m; ++i) {
+    if (tmp[i] != i) {
+      flag = false;
+      break;
+    }
+  }
+
+  if (flag) {
+    tmp = ctx->n2o_col;
+    for (i=0; i<m; ++i) {
+      if (tmp[i] != i) {
+        flag = false;
+        break;
+      }
+    }
+  }
+
+  END_FUNC_VAL(flag)
+}
+
+
+#undef __FUNC__
+#define __FUNC__ "partition_private"
+void partition_private(Euclid_dh ctx)
+{
+  START_FUNC_DH
+  int i, m = ctx->m, blockCount = ctx->blockCount;
+  PartNode *part = ctx->block;
+
+  switch (ctx->partMethod) {
+    case SIMPLE_PART:
+          { int c = 0, rowsPerBlock = m/blockCount;
+            SET_INFO("using simple partitioning strategy");
+            for (i=0; i<blockCount; ++i) {
+              part[i].beg_row = c;
+              c += rowsPerBlock;
+              part[i].end_row = c;
+            }
+            part[blockCount-1].end_row = m;
+          }
+          break;
+
+#ifdef USING_METIS
+    case METIS_PART:
+           SET_INFO("using metis for partitioning");
+           metis_order_private(ctx);
+           break;
+#endif
+
+    default: sprintf(msgBuf_dh, "Unknown partitioning method");
+             SET_INFO(msgBuf_dh);
+  }
+  END_FUNC_DH
+}
+
+#undef __FUNC__
+#define __FUNC__ "make_block_diagonal_private"
+void make_block_diagonal_private(Euclid_dh ctx)
+{
+  START_FUNC_DH
+  int i, j, k, idx = 0, m = ctx->m;
+  int rpSTART, rpEND;
+  int *rp = ctx->rp, *cval = ctx->cval;
+  REAL_DH *aval = ctx->aval;
+  int blockCount = ctx->blockCount, count = rp[m];
+  PartNode *part = ctx->block;
+
+  rpSTART = 0;
+  for (i=0; i<blockCount; ++i) {  /* loop over partition blocks */
+    int from = part[i].beg_row;
+    int to = part[i].end_row;
+    for (j=from; j<to; ++j) {  /* loop over rows in this block */
+      rpEND = rp[j+1];
+      for (k=rpSTART; k<rpEND; ++k) {  /* loop over col values */
+        int col = cval[k];
+        if (col >= from && col < to) {
+          cval[idx] = col;
+          aval[idx] = aval[k];
+          ++idx;
+        }
+      }
+      rpSTART = rpEND;
+      rp[j+1] = idx;
+    }
+  }
+
+  sprintf(msgBuf_dh,"discarded %i entries, which is %f%% of input", 
+                   count-rp[m], 100.0*(double)(count-rp[m])/(double)count);
+  SET_INFO(msgBuf_dh);
+  END_FUNC_DH
+}
+
+
+#undef __FUNC__
+#define __FUNC__ "profile_private"
+void profile_private (char *msg, int n, int *rp, int *cval, REAL_DH *aval)
+{
+  START_FUNC_DH
+  END_FUNC_DH
+}
+
+#undef __FUNC__
+#define __FUNC__ "scale_matrix_private"
+void scale_matrix_private(Euclid_dh ctx)
+{
+  START_FUNC_DH
+  int i, j, m = ctx->m, *rp = ctx->rp;
+  REAL_DH *aval = ctx->aval;
+  REAL_DH *scale;
+  double s;
+
+  scale = ctx->scale = (REAL_DH*)MALLOC_DH(m*sizeof(REAL_DH));
+
+  for (i=0; i<m; ++i) {
+    double max = 0.0;
+    for (j=rp[i]; j<rp[i+1]; ++j) {
+      max = MAX(max, fabs(aval[j]));
+    }
+    if (max != 0.0) {
+      s = scale[i] = 1.0/max;
+    } else {
+      s = scale[i] = 1.0;
+    }
+
+    /* scale the row */
+    for (j=rp[i]; j<rp[i+1]; ++j) aval[j] *= s;
+  }
+  END_FUNC_DH
+}
+
+#undef __FUNC__
+#define __FUNC__ "sparsify_private"
+void sparsify_private(double dt, int m, int *rp, int *cval, REAL_DH *aval, int *diag)
+{
+  START_FUNC_DH
+  int i, j, c, idx = 0;
+  double max, drop;
+  REAL_DH v;
+
+  /* drop all values (except the diagonal) if smaller than
+   * dt*(largest abs. value in row)
+  */
+  int begin=0;
+  for (i=0; i<m;++i) {
+    /* find largest value in row */
+    max = 0.0;
+    for (j=begin; j<rp[i+1]; ++j) max = MAX(max,fabs(aval[j]));
+
+    /* set dropping threshold */
+    drop = dt*max;
+
+    /* drop values */
+    for (j=begin; j<rp[i+1]; ++j) {
+      v=aval[j];
+      c=cval[j];
+      if (fabs(v)>drop || c==i) {
+        cval[idx]=c;
+        aval[idx]=v;
+        ++idx;
+      }
+    }
+    begin=rp[i+1];
+    rp[i+1] = idx;
+  }
+
+  /* rebuild diagonal pointers */
+  if (diag != NULL) {
+    bool flag;
+    for (i=0; i<m; ++i) {
+      flag = true;
+      for (j=rp[i]; j<rp[i+1]; ++j) {
+        if (cval[j] == i) {
+          flag = false;
+          diag[i] = j;
+          break;
+        }
+      }
+      if (flag) {
+        sprintf(msgBuf_dh, "can't find diagonal in row %i of %i\n", i+1, m);
+        SET_V_ERROR(msgBuf_dh);
+      }
+    }
+  }
+
+  END_FUNC_DH
+}
+
+#undef __FUNC__
+#define __FUNC__ "order_interiors_private"
+void order_interiors_private(Euclid_dh ctx)
+{
+  START_FUNC_DH
+  if (ctx->orderMethod != NATURAL_ORDER) {
+    SET_V_ERROR("unknown ordering method");
+  }
+  END_FUNC_DH
+}
+
+#undef __FUNC__
+#define __FUNC__ "factor_private"
+void factor_private(Euclid_dh ctx)
+{
+  START_FUNC_DH
+  int  m = ctx->m, nzmax;
+
+  ctx->allocF = nzmax = ctx->rho_init*ctx->rp[m];
+  ctx->diagF = (int*)MALLOC_DH(m*sizeof(int));  CHECK_V_ERROR;
+  ctx->rpF   = (int*)MALLOC_DH((1+m)*sizeof(int));  CHECK_V_ERROR;
+  ctx->cvalF = (int*)MALLOC_DH(nzmax*sizeof(int));  CHECK_V_ERROR;
+  ctx->from = 0;
+  ctx->to = m;
+
+  switch(ctx->algo_ilu) {
+    case ILUK_ILU:
+          ctx->fillF = (int*)MALLOC_DH(nzmax*sizeof(int)); CHECK_V_ERROR;
+          iluk_symbolic_seq(ctx); CHECK_V_ERROR;
+          ctx->nzF = ctx->rpF[m];
+          ctx->avalF = (REAL_DH*)MALLOC_DH(ctx->nzF*sizeof(REAL_DH)); CHECK_V_ERROR;
+          ilu_numeric_seq(ctx); CHECK_V_ERROR;
+          break;
+    default: sprintf(msgBuf_dh, "unknown ILU factorization method: %i", ctx->algo_ilu);
+             SET_V_ERROR(msgBuf_dh);
+  }
+  END_FUNC_DH
+}
+
+#ifdef USING_METIS
+#undef __FUNC__
+#define __FUNC__ "metis_order_private"
+void metis_order_private(Euclid_dh ctx)
+{
+  START_FUNC_DH
+  int edgecut, options[5], *metisPart, zero = 0, m = ctx->m;
+  int *rp = ctx->rp, *cval = ctx->cval, n2o = ctx->n2o_row;
+  int c, i, blockCount = ctx->blockCount, *part;
+  PartNode *pn = ctx->block;
+
+  metisPart = (int*)MALLOC_DH(m*sizeof(int)); CHECK_V_ERROR;
+  part = (int*)MALLOC_DH((1+blockCount)*sizeof(int)); CHECK_V_ERROR;
+
+  options[0] = 0;  /* use default values for metis. */
+  METIS_PartGraphRecursive(&m, rp, cval, NULL, NULL, &zero, &zero,
+                                     &blockCount, options, &edgecut, metisPart);
+
+  /* compute first, last row in each partition */
+  for (i=0; i<=blockCount; ++i) part[i] = 0;
+  for (i=0; i<m; ++i) part[1+metisPart[i]] += 1;
+  for (i=1; i<=blockCount; ++i) part[i] += part[i-1];
+
+  c = 0;
+  for (i=0; i<blockCount; ++i) {
+    pn[i].beg_row = c;
+    c += part[i+1];
+    pn[i].end_row = c;
+  }
+
+  /* form ordering vectors */
+  for (i=0; i<m; ++i) {
+    int p = metisPart[i];
+    int newOrdering = part[p];
+    n2o[newOrdering] = i;
+    part[p] += 1;
+  }
+
+  FREE_DH(metisPart); CHECK_V_ERROR;
+  FREE_DH(part); CHECK_V_ERROR;
+  END_FUNC_DH
+}
+
+#endif /* #ifdef USING_METIS */
+
+/*--------------------------------------------------------------*/
+#ifndef PETSC_MODE
+/* note: see petsc_euclid.c for PETSc version of following */
+
+#undef __FUNC__
+#define __FUNC__ "Euclid_dhApply"
+void Euclid_dhApply(Euclid_dh ctx, double *xx, double *yy)
+{
+  START_FUNC_DH
+  Euclid_dhApply_private(ctx, xx, yy);
+  END_FUNC_DH
+}
+
+#undef __FUNC__
+#define __FUNC__ "Euclid_dhApply_s"
+void Euclid_dhApply_s(Euclid_dh ctx, float *xx, float *yy)
+{
+  START_FUNC_DH
+  Euclid_dhApply_s_private(ctx, xx, yy);
+  END_FUNC_DH
+}
+
+#endif /* #ifndef PETSC_MODE */
+/*--------------------------------------------------------------*/
+
+
+#undef __FUNC__
+#define __FUNC__ "Euclid_dhApply_private"
+void Euclid_dhApply_private(Euclid_dh ctx, double *xx, double *yy)
+{
+  START_FUNC_DH
+  int       h, n;
+  int       *rp, *cval, *diag;
+  REAL_DH   *aval, *scale;
+  int       pn = ctx->blockCount;
+  PartNode  *part = ctx->block;
+  REAL_DH   *v, *work;
+  double    sum;
+  int       i, *vi, nz;
+
+  if (ctx->algo_par== PILU_PAR) {
+    Euclid_dhApplyPILU_private(ctx, xx, yy);
+  } else if (! ctx->isNaturallyOrdered) {
+    Euclid_dhApplyPermuted_private(ctx, xx, yy);
+  } else {
+
+    n = ctx->n;
+    rp = ctx->rpF;
+    cval = ctx->cvalF;
+    aval = ctx->avalF;
+    diag = ctx->diagF;
+    scale = ctx->scale;
+    work = ctx->work;
+
+  #pragma omp parallel 
+  {
+     /* if matrix was scaled, must scale the rhs */
+     if (scale != NULL) {
+       #pragma omp for schedule(static)
+       for (i=0; i<n; ++i) { xx[i] *= scale[i]; }
+     } 
+
+   #pragma omp for schedule(static) private(v,vi,nz,sum,i)
+    for (h=0; h<pn; ++h) {    /* fwd solve diagonal block h */
+      int from = part[h].beg_row;
+      int to = part[h].end_row;
+
+      work[from] = xx[from];
+      for ( i=from+1; i<to; i++ ) {
+        v   = aval + rp[i];
+        vi  = cval + rp[i];
+        nz  = diag[i] - rp[i];
+        sum = xx[i];
+        while (nz--) sum -= (*v++ * work[*vi++]);
+        work[i] = sum;
+      }
+
+      /* backward solve the upper triangular */
+      for ( i=to-1; i>=from; i-- ){
+        v   = aval + diag[i] + 1;
+        vi  = cval + diag[i] + 1;
+        nz  = rp[i+1] - diag[i] - 1;
+        sum = work[i];
+        while (nz--) sum -= (*v++ * work[*vi++]);
+        yy[i] = work[i] = sum*aval[diag[i]];
+      }
+    }
+
+     /* put rhs back the way it was */
+     if (scale != NULL) {
+       #pragma omp for schedule(static) 
+       for (i=0; i<n; ++i) { xx[i] /= scale[i]; }
+     } 
+
+    } /* #pragma omp parallel */
+  }
+  END_FUNC_DH
+}
+
+#undef __FUNC__
+#define __FUNC__ "Euclid_dhApplyPermuted_private"
+void Euclid_dhApplyPermuted_private(Euclid_dh ctx, double *xx, double *yy)
+{
+  START_FUNC_DH
+  int       h, n;
+  int       *rp, *cval, *diag;
+  REAL_DH   *aval, *scale;
+  int       *n2o_row, *n2o_col, pn = ctx->blockCount;
+  PartNode  *part = ctx->block;
+  REAL_DH *v, *work;
+  double sum;
+  int i, *vi, nz;
+
+  n2o_row = ctx->n2o_row;
+  n2o_col = ctx->n2o_col;
+  n = ctx->n;
+  rp = ctx->rpF;
+  cval = ctx->cvalF;
+  aval = ctx->avalF;
+  diag = ctx->diagF;
+  scale = ctx->scale;
+  work = ctx->work;
+
+  #pragma omp parallel 
+  {
+    /* if matrix was scaled, must scale the rhs */
+    if (scale != NULL) {
+      #pragma omp for schedule(static)
+        for (i=0; i<n; ++i) { xx[i] *= scale[i]; }
+    } 
+
+   #pragma omp for schedule(static) private(v,vi,nz,sum,i)
+    for (h=0; h<pn; ++h) {    /* fwd solve diagonal block h */
+      int from = part[h].beg_row;
+      int to = part[h].end_row;
+
+      /* forward solve the lower triangle */
+      work[from] = xx[n2o_row[from]];
+      for ( i=from+1; i<to; i++ ) {
+        v   = aval + rp[i];
+        vi  = cval + rp[i];
+        nz  = diag[i] - rp[i];
+        sum = xx[n2o_row[i]];
+        while (nz--) sum -= (*v++ * work[*vi++]);
+        work[i] = sum;
+      }
+
+      /* backward solve the upper triangular */
+      for ( i=to-1; i>=from; i-- ){
+        v   = aval + diag[i] + 1;
+        vi  = cval + diag[i] + 1;
+        nz  = rp[i+1] - diag[i] - 1;
+        sum = work[i];
+        while (nz--) sum -= (*v++ * work[*vi++]);
+        yy[n2o_col[i]] = work[i] = sum*aval[diag[i]];
+      }
+    }
+
+    /* put rhs back the way it was */
+    if (scale != NULL) {
+      #pragma omp for schedule(static) 
+      for (i=0; i<n; ++i) { xx[i] /= scale[i]; }
+    } 
+
+  } /* #pragma omp parallel */
+
+  END_FUNC_DH
+}
+
+/* there is room for additional parallelism here, when
+   factoring boundary rows.  For possilbe future development . . .
+   (as written, factoring of boundary rows is entirely sequential)
+*/
+#undef __FUNC__
+#define __FUNC__ "Euclid_dhApplyPILU_private"
+void Euclid_dhApplyPILU_private(Euclid_dh ctx, double *xx, double *yy)
+{
+  START_FUNC_DH
+  int       h, n;
+  int       *rp, *cval, *diag;
+  REAL_DH   *aval, *scale;
+  int       *n2o_row, *n2o_col, pn = ctx->blockCount;
+  REAL_DH *v, *work;
+  double sum;
+  int i, *vi, nz, from, to;
+  PartNode  *part = ctx->block;
+
+  n2o_row = ctx->n2o_row;
+  n2o_col = ctx->n2o_col;
+  n = ctx->n;
+  rp = ctx->rpF;
+  cval = ctx->cvalF;
+  aval = ctx->avalF;
+  diag = ctx->diagF;
+  scale = ctx->scale;
+  work = ctx->work;
+
+  /* if matrix was scaled, must scale the rhs */
+  if (scale != NULL) {
+    #pragma omp for schedule(static)
+    for (i=0; i<n; ++i) { xx[i] *= scale[i]; }
+  } 
+
+    /* forward solve lower triangle interiors (parallel) */
+   #pragma omp for schedule(static) private(from,to,v,vi,nz,sum,i)
+    for (h=0; h<pn; ++h) { 
+      from = part[h].beg_row;
+      to = part[h].first_bdry;
+
+      work[from] = xx[n2o_row[from]];
+      for ( i=from+1; i<to; i++ ) {
+        v   = aval + rp[i];
+        vi  = cval + rp[i];
+        nz  = diag[i] - rp[i];
+        sum = xx[n2o_row[i]];
+        while (nz--) sum -= (*v++ * work[*vi++]);
+        work[i] = sum;
+      }
+    }
+
+    /* forward solve lower triangle boundaries (sequential) */
+    for (h=0; h<pn; ++h) { 
+      from = part[h].first_bdry;
+      to   = part[h].end_row;
+      for ( i=from; i<to; i++ ) {
+        v   = aval + rp[i];
+        vi  = cval + rp[i];
+        nz  = diag[i] - rp[i];
+        sum = xx[n2o_row[i]];
+        while (nz--) sum -= (*v++ * work[*vi++]);
+        work[i] = sum;
+      }
+    }
+
+    /* backward solve upper triangular boundaries (sequential) */
+    for (h=pn-1; h>=0; --h) { 
+      from = part[h].end_row-1;
+      to   = part[h].first_bdry;
+      for ( i=from; i>=to; i-- ){
+        v   = aval + diag[i] + 1;
+        vi  = cval + diag[i] + 1;
+        nz  = rp[i+1] - diag[i] - 1;
+        sum = work[i];
+        while (nz--) sum -= (*v++ * work[*vi++]);
+        yy[n2o_col[i]] = work[i] = sum*aval[diag[i]];
+      }
+    }
+
+    /* backward solve upper triangular interiors (parallel) */
+   #pragma omp for schedule(static) private(from,to,v,vi,nz,sum,i)
+    for (h=pn-1; h>=0; --h) { 
+      from = part[h].first_bdry - 1;
+      to   = part[h].beg_row;
+      for ( i=from; i>=to; i-- ){
+        v   = aval + diag[i] + 1;
+        vi  = cval + diag[i] + 1;
+        nz  = rp[i+1] - diag[i] - 1;
+        sum = work[i];
+        while (nz--) sum -= (*v++ * work[*vi++]);
+        yy[n2o_col[i]] = work[i] = sum*aval[diag[i]];
+      }
+    }
+
+  /* put rhs back the way it was */
+  if (scale != NULL) {
+    #pragma omp for schedule(static) 
+    for (i=0; i<n; ++i) { xx[i] /= scale[i]; }
+  } 
+
+  END_FUNC_DH
+}
+
+#undef __FUNC__
+#define __FUNC__ "order_bdry_nodes_private"
+void order_bdry_nodes_private(Euclid_dh ctx)
+{
+  START_FUNC_DH
+  int h, i, j, k, n = ctx->n;
+  int blockCount = ctx->blockCount;
+  PartNode *part = ctx->block;
+  int *n2o_row = ctx->n2o_row, *n2o_col = ctx->n2o_col, *o2n;
+  int *rp = ctx->rp, *cval = ctx->cval;
+  int *tmp, *tmp2, beg_row, end_row, idxLO, idxHI, count;
+  bool localFlag;
+
+  /* error checking */
+  if (blockCount >= MAX_SUBDOMAINS) {
+    sprintf(msgBuf_dh, "requested %i subdomains, but MAX_SUBDOMAINS = %i;\n", blockCount, MAX_SUBDOMAINS);
+    SET_V_ERROR(msgBuf_dh);
+  }
+
+  /* order nodes within each subdomain so that boundary rows are ordered last */
+
+  /* first, must invert the column permutation */
+  o2n = (int*)MALLOC_DH(n*sizeof(int));
+  for (i=0; i<n; ++i) o2n[n2o_col[i]] = i;
+
+  tmp = (int*)MALLOC_DH(n*sizeof(int));
+  tmp2 = (int*)MALLOC_DH(n*sizeof(int));
+  for (i=0; i<blockCount; ++i) {   /* loop over partition blocks */
+    beg_row = idxLO = part[i].beg_row;
+    end_row = idxHI = part[i].end_row-1;
+    for (j=beg_row; j<=end_row; ++j) {  /* loop over rows within each block */
+      int row = n2o_row[j];
+      localFlag = true;
+      for (k=rp[row]; k<rp[row+1]; ++k) {
+        int col = o2n[cval[k]];
+        if (col  < beg_row || col > end_row) {
+          localFlag = false;
+          break;
+        }
+      }
+      if (localFlag) { tmp[idxLO++] = row; } 
+      else           { tmp[idxHI--] = row; }
+    }
+    part[i].first_bdry = idxHI+1;
+
+    /* reverse ordering of bdry nodes; this puts them in same
+       relative order as they were originally.   Why do I do
+       this?  Well, it seems a good idea . . .
+     */
+    count = end_row-idxHI;
+    ++idxHI;
+    for (h=end_row, j=0; h>=idxHI; --h, ++j) {
+      tmp2[j] = tmp[h];
+    }
+    if (count) memcpy(tmp+idxHI, tmp2, count*sizeof(int));
+  }  /* loop over partition block(i) */
+
+  memcpy(ctx->n2o_row, tmp, n*sizeof(int));
+  memcpy(ctx->n2o_col, ctx->n2o_row, n*sizeof(int));
+ 
+  FREE_DH(tmp);
+  FREE_DH(tmp2);
+  FREE_DH(o2n);
+  END_FUNC_DH
+}
+
+#endif /* #ifdef SEQUENTIAL_MODE */

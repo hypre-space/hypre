@@ -1,0 +1,55 @@
+#if 0
+  /* print partition information */
+  { int i;
+    SET_INFO("\n######### partitioning information ############");
+    for (i=0; i<ctx->pn; ++i) {
+      sprintf(msgBuf, "partition %i: first_row= %i  last_row= %i  row_count= %i",
+                     i+1, 1+ctx->part[i], 1+ctx->part[i+1]-1, ctx->part[i+1]-ctx->part[i]);
+      SET_INFO(msgBuf);
+    }
+  }
+
+
+
+  /* set number of threads to use for factorization, application, etc;
+   * default is 1 thread.
+   */
+/*
+  #ifdef USING_OPENMP
+  { int threads = 1, id;
+    Parser_dhReadInt(parser_dh, "-threads",&(ctx->threads)); 
+    if (ctx->threads < 1) {
+      printf("WARNING: -threads <int> was less than 1; adjusted to 1.\n");
+      ctx->threads = 1;  
+    }
+    omp_set_num_threads(threads);
+    #pragma omp parallel private(threads, id)
+    {
+      id = omp_get_thread_num();
+      threads = omp_get_num_threads();
+      if (id == 0)  ctx->threads = threads;
+    }
+  }
+  #endif
+*/
+#endif
+
+
+#if 0
+
+for future experimentation  
+
+    /* graphColor ILU */
+    else if (Parser_dhReadInt(parser_dh, "-graphColor", &(ctx->cLevel))) {
+      ctx->algorithm = GRAPH_COLOR_DH;
+      sprintf(msgBuf, "blockJacobi; blocks = %i", blocks);
+      SET_INFO(msgBuf);
+
+      ctx->colorCounter = (int*)MALLOC_DH((n+1)*sizeof(int)); CHECK_V_ERROR;
+
+      iluGraphColor(n, ctx->rp, ctx->cval, ctx->cLevel, 
+                                         ctx->n2o_row, ctx->colorCounter);
+      memcpy(ctx->n2o_col, ctx->n2o_row, n*sizeof(int));
+      permute(n, ctx->rp, ctx->cval, ctx->aval, ctx->n2o_row, ctx->n2o_col);
+    }
+#endif
