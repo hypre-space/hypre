@@ -1220,11 +1220,10 @@ int MLI_Utils_ComputeLowEnergyLanczos(hypre_ParCSRMatrix *A,
     int maxIter, int num_vecs_to_return, double *le_vectors)
 {
    int      i, j, k, its, nprocs, mypid, localNRows, globalNRows;
-   int      startRow, endRow, *partition, *ADiagI;
-   double   alpha, beta, rho, rhom1, sigma, offdiagNorm, *zData;
-   double   rnorm, *alphaArray, *rnormArray, **Tmat, initOffdiagNorm;
-   double   app, aqq, arr, ass, apq, sign, tau, t, c, s;
-   double   *ADiagA, one=1.0, *rData;
+   int      startRow, endRow, *partition;
+   double   alpha, beta, rho, rhom1, sigma, *zData;
+   double   rnorm, *alphaArray, *rnormArray, **Tmat;
+   double   one=1.0, *rData;
    MPI_Comm comm;
    hypre_CSRMatrix *ADiag;
    hypre_ParVector *rVec, *zVec, *pVec, *apVec;
@@ -1240,8 +1239,6 @@ int MLI_Utils_ComputeLowEnergyLanczos(hypre_ParCSRMatrix *A,
    MPI_Comm_size(comm,&nprocs);  
 
    ADiag      = hypre_ParCSRMatrixDiag(A);
-   ADiagA     = hypre_CSRMatrixData(ADiag);
-   ADiagI     = hypre_CSRMatrixI(ADiag);
    HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) A, &partition);
    startRow    = partition[mypid];
    endRow      = partition[mypid+1] - 1;
