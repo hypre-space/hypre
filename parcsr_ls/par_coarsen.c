@@ -88,6 +88,7 @@
 
 #define C_PT  1
 #define F_PT -1
+#define SF_PT -3
 #define COMMON_C_PT  2
 #define Z_PT -2
 
@@ -249,8 +250,6 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *S,
 
    /* initialize measure array and graph array */
 
-   for (ig = 0; ig < num_variables; ig++)
-      graph_array[ig] = ig;
    for (ig = 0; ig < num_cols_offd; ig++)
       graph_array_offd[ig] = ig;
 
@@ -260,7 +259,6 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *S,
     * num_variables-1  followed by boundary values
     *---------------------------------------------------*/
 
-   graph_size = num_variables;
    graph_offd_size = num_cols_offd;
 
    if (CF_init)
@@ -288,16 +286,30 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *S,
                CF_marker[i] = F_PT;
             }
          }
-         else
+         else if (CF_marker[i] == SF_PT)
+	    measure_array[i] = 0;
+         else 
             graph_array[cnt++] = i;
       }
    }
    else
    {
       CF_marker = hypre_CTAlloc(int, num_variables);
+      cnt = 0;
       for (i=0; i < num_variables; i++)
+      {
 	 CF_marker[i] = 0;
+	 if ( (S_diag_i[i+1]-S_diag_i[i]) == 0 
+		&& (S_offd_i[i+1]-S_offd_i[i]) == 0)
+	 {
+	    CF_marker[i] = SF_PT;
+	    measure_array[i] = 0;
+	 }
+	 else
+            graph_array[cnt++] = i;
+      }
    }
+   graph_size = cnt;
    if (num_cols_offd)
       CF_marker_offd = hypre_CTAlloc(int, num_cols_offd);
    else
@@ -518,7 +530,7 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *S,
       {
          i = graph_array_offd[ig];
 
-         if (CF_marker_offd[i] == F_PT)
+         if (CF_marker_offd[i] < 0)
          {
             /* take point out of the subgraph */
             graph_offd_size--;
@@ -598,6 +610,14 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *S,
                j = S_diag_j[jS];
 	       if (j < 0) j = -j-1;
    
+               if (CF_marker[j] == SF_PT)
+               {
+                  if (S_diag_j[jS] > -1)
+                  {
+                     /* "remove" edge from S */
+                     S_diag_j[jS] = -S_diag_j[jS]-1;
+                  }
+               }
                if (CF_marker[j] > 0)
                {
                   if (S_diag_j[jS] > -1)
@@ -609,6 +629,14 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *S,
                   /* IMPORTANT: consider all dependencies */
                   /* temporarily modify CF_marker */
                   CF_marker[j] = COMMON_C_PT;
+               }
+               else if (CF_marker[j] == SF_PT)
+               {
+                  if (S_diag_j[jS] > -1)
+                  {
+                     /* "remove" edge from S */
+                     S_diag_j[jS] = -S_diag_j[jS]-1;
+                  }
                }
             }
             for (jS = S_offd_i[i]; jS < S_offd_i[i+1]; jS++)
@@ -627,6 +655,14 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *S,
                   /* IMPORTANT: consider all dependencies */
                   /* temporarily modify CF_marker */
                   CF_marker_offd[j] = COMMON_C_PT;
+               }
+               else if (CF_marker_offd[j] == SF_PT)
+               {
+                  if (S_offd_j[jS] > -1)
+                  {
+                     /* "remove" edge from S */
+                     S_offd_j[jS] = -S_offd_j[jS]-1;
+                  }
                }
             }
    
@@ -754,6 +790,8 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *S,
       if (S_offd_j[i] < 0)
          S_offd_j[i] = -S_offd_j[i]-1;
    }
+   /*for (i=0; i < num_variables; i++)
+      if (CF_marker[i] == SF_PT) CF_marker[i] = F_PT;*/
 
    hypre_TFree(measure_array);
    hypre_TFree(graph_array);
@@ -775,6 +813,7 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *S,
 #define C_PT 1
 #define F_PT -1
 #define Z_PT -2
+#define SF_PT -3
 #define UNDECIDED 0 
 
 
@@ -841,6 +880,7 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
    int              measure, new_meas;
    int              num_left, elmt;
    int              nabor, nabor_two;
+   int              falgout = 0;
 
    int              ierr = 0;
    int              break_var = 0;
@@ -859,9 +899,18 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
    where = hypre_CTAlloc(int, num_variables);
 
    CF_marker = hypre_CTAlloc(int, num_variables);
+   
+   num_left = 0;
    for (j = 0; j < num_variables; j++)
    {
-      CF_marker[j] = UNDECIDED;
+      if ((S_i[j+1]-S_i[j])== 0 &&
+		(S_offd_i[j+1]-S_offd_i[j]) == 0)
+         CF_marker[j] = SF_PT;
+      else
+      {
+         CF_marker[j] = UNDECIDED;
+         num_left++;
+      }
    } 
 
 #if 0 /* debugging */
@@ -959,6 +1008,7 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
    {
       f_pnt = Z_PT;
       coarsen_type = 1;
+      falgout = 1;
    }
 
    if ((measure_type || coarsen_type != 1) && num_procs > 1)
@@ -995,40 +1045,41 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
    *
    *************************************************************/
 
-   num_left = num_variables;
- 
    for (j = 0; j < num_variables; j++) 
    {    
       measure = measure_array[j];
-      if (measure > 0) 
+      if (CF_marker[j] != SF_PT)
       {
-         enter_on_lists(&LoL_head, &LoL_tail, measure, j, lists, where);
-      }
-      else
-      {
-         if (measure < 0) printf("negative measure!\n");
-         CF_marker[j] = f_pnt;
-         for (k = S_i[j]; k < S_i[j+1]; k++)
+         if (measure > 0)
          {
-            nabor = S_j[k];
-            if (nabor < j)
+            enter_on_lists(&LoL_head, &LoL_tail, measure, j, lists, where);
+         }
+         else
+         {
+            if (measure < 0) printf("negative measure!\n");
+            CF_marker[j] = f_pnt;
+            for (k = S_i[j]; k < S_i[j+1]; k++)
             {
-               new_meas = measure_array[nabor];
-	       if (new_meas > 0)
-                  remove_point(&LoL_head, &LoL_tail, new_meas, 
+               nabor = S_j[k];
+               if (nabor < j)
+               {
+                  new_meas = measure_array[nabor];
+	          if (new_meas > 0)
+                     remove_point(&LoL_head, &LoL_tail, new_meas, 
                                nabor, lists, where);
 
-               new_meas = ++(measure_array[nabor]);
+                  new_meas = ++(measure_array[nabor]);
                  
-               enter_on_lists(&LoL_head, &LoL_tail, new_meas,
+                  enter_on_lists(&LoL_head, &LoL_tail, new_meas,
                                  nabor, lists, where);
+               }
+	       else
+               {
+                  new_meas = ++(measure_array[nabor]);
+               }
             }
-	    else
-            {
-               new_meas = ++(measure_array[nabor]);
-            }
+            --num_left;
          }
-         --num_left;
       }
    }
 
@@ -1762,6 +1813,9 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
    /*---------------------------------------------------
     * Clean up and return
     *---------------------------------------------------*/
+   /*if (!falgout)
+    for (i=0; i < num_variables; i++)
+      if (CF_marker[i] == SF_PT) CF_marker[i] = F_PT;*/
 
    if (coarsen_type != 1)
    {   

@@ -483,7 +483,7 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
              * whose connection needs to be distributed.
              *--------------------------------------------------------------*/
 
-            else
+            else if (CF_marker[i1] != -3)
             {
                P_marker[i1] = strong_f_marker;
             }            
@@ -519,7 +519,7 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
                 * whose connection needs to be distributed.
                 *-----------------------------------------------------------*/
 
-               else
+               else if (CF_marker_offd[i1] != -3)
                {
                   P_marker_offd[i1] = strong_f_marker;
                }            
@@ -635,7 +635,7 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
              * into the diagonal.
              *--------------------------------------------------------------*/
 
-            else
+            else if (CF_marker[i1] != -3)
             {
 	       if (num_functions == 1 || dof_func[i] == dof_func[i1])
                   diagonal += A_diag_data[jj];
@@ -764,7 +764,7 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
                 * into the diagonal.
                 *-----------------------------------------------------------*/
 
-               else
+               else if (CF_marker_offd[i1] != -3)
                {
 	          if (num_functions == 1 || dof_func[i] == dof_func_offd[i1])
                      diagonal += A_offd_data[jj];
@@ -943,6 +943,9 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
     * runs on one processor.
     *
     *-------------------------------------------------------------------*/
+
+   for (i=0; i < n_fine; i++)
+      if (CF_marker[i] == -3) CF_marker[i] = -1;
 
    P_offd = hypre_ParCSRMatrixOffd(P);
    hypre_CSRMatrixI(P_offd) = P_offd_i; 
