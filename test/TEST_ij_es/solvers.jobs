@@ -1,38 +1,38 @@
-#!/bin/ksh 
-#BHEADER***********************************************************************
-# (c) 1998   The Regents of the University of California
-#
-# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
-# notice, contact person, and disclaimer.
-#
-# $Revision$
-#EHEADER***********************************************************************
-
-#=============================================================================
-# ij_es driver for eigenvaluesolvers: (wihtout -lobpcg option runs ij)
-# Run default case with all available PCG preconditioners (solvers):
-
-#    1:  BoomerAMG_PCG
-#    2:  DS_PCG
-#    8:  ParaSails_PCG
-#    12: Schwarz-PCG
-#    43: Euclid-PCG
-#=============================================================================
-# PCG run:
-mpirun -np 4 ./ij_es -solver 1 > solvers.out.1
-#LOBPCG run for one eigenpair:
-mpirun -np 4 ./ij_es -lobpcg -solver 1 -veye 1 > solvers.out.1.lobpcg
-
-mpirun -np 4 ./ij_es -solver 2 > solvers.out.2
-mpirun -np 4 ./ij_es -lobpcg -solver 2 -veye 1 > solvers.out.2.lobpcg
-
-mpirun -np 4 ./ij_es -solver 8 > solvers.out.8
-mpirun -np 4 ./ij_es -lobpcg -solver 8 -veye 1 > solvers.out.8.lobpcg
-
-mpirun -np 4 ./ij_es -solver 12 > solvers.out.12
-mpirun -np 4 ./ij_es -lobpcg -solver 12 -veye 1 > solvers.out.12.lobpcg
-
-mpirun -np 4 ./ij_es -solver 43 > solvers.out.43
-mpirun -np 4 ./ij_es -lobpcg -solver 43 -veye 1 > solvers.out.43.lobpcg
-
-
+#!/bin/ksh  
+#BHEADER*********************************************************************** 
+# (c) 1998   The Regents of the University of California 
+# 
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright 
+# notice, contact person, and disclaimer. 
+# 
+# $Revision$ 
+#EHEADER*********************************************************************** 
+ 
+#============================================================================= 
+# ij_es driver for eigenvaluesolvers: (wihtout -lobpcg option runs ij) 
+# Run default case with all available PCG preconditioners (solvers): 
+ 
+#    1:  BoomerAMG_PCG 
+#    2:  DS_PCG 
+#    8:  ParaSails_PCG 
+#    12: Schwarz-PCG 
+#    43: Euclid-PCG 
+#============================================================================= 
+# PCG run: 
+mpirun -np 4 ./ij_es -solver 1 > solvers.out.1 
+#LOBPCG run for one eigenpair: 
+mpirun -np 4 ./ij_es -lobpcg -solver 1 -veye 1 > solvers.out.1.lobpcg 
+ 
+mpirun -np 4 ./ij_es -solver 2 > solvers.out.2 
+mpirun -np 4 ./ij_es -lobpcg -solver 2 -veye 1 > solvers.out.2.lobpcg 
+ 
+mpirun -np 4 ./ij_es -solver 8 > solvers.out.8 
+mpirun -np 4 ./ij_es -lobpcg -solver 8 -veye 1 > solvers.out.8.lobpcg 
+ 
+mpirun -np 4 ./ij_es -solver 12 > solvers.out.12 
+mpirun -np 4 ./ij_es -lobpcg -solver 12 -veye 1 > solvers.out.12.lobpcg 
+ 
+mpirun -np 4 ./ij_es -solver 43 > solvers.out.43 
+mpirun -np 4 ./ij_es -lobpcg -solver 43 -veye 1 > solvers.out.43.lobpcg 
+ 
+ 
