@@ -51,7 +51,6 @@ hypre_IJVectorDistribute( HYPRE_IJVector vector, const int *vec_starts )
 int 
 hypre_IJVectorZeroValues( HYPRE_IJVector vector )
 {
-   int ierr = 0;
    hypre_IJVector *vec = (hypre_IJVector *) vector;
 
    if (vec == NULL)

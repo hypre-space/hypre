@@ -172,27 +172,28 @@ int
 HYPRE_IJMatrixInitialize( HYPRE_IJMatrix matrix )
 {
    hypre_IJMatrix *ijmatrix = (hypre_IJMatrix *) matrix;
+   int ierr = 0;
 
    if (!ijmatrix)
    {
       printf("Variable ijmatrix is NULL -- HYPRE_IJMatrixInitialize\n");
-      exit(1);
+      return 1;
    }
 
    /* if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PETSC )
-      return( hypre_IJMatrixInitializePETSc( ijmatrix ) );
+      ierr = hypre_IJMatrixInitializePETSc( ijmatrix ) ;
    else if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_ISIS )
-      return( hypre_IJMatrixInitializeISIS( ijmatrix ) );
+      ierr = hypre_IJMatrixInitializeISIS( ijmatrix ) ;
    else */
 
    if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PARCSR )
-      return( hypre_IJMatrixInitializeParCSR( ijmatrix ) );
+      ierr = hypre_IJMatrixInitializeParCSR( ijmatrix ) ;
    else
    {
       printf("Unrecognized object type -- HYPRE_IJMatrixInitialize\n");
-      exit(1);
+      return 1;
    }
-
+   return ierr; 
 }
 
 /*--------------------------------------------------------------------------

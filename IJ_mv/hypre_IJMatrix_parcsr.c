@@ -170,7 +170,6 @@ int
 hypre_IJMatrixInitializeParCSR(hypre_IJMatrix *matrix)
 {
    int ierr = 0;
-   MPI_Comm comm = hypre_IJMatrixComm(matrix);
    hypre_ParCSRMatrix *par_matrix = hypre_IJMatrixObject(matrix);
    hypre_AuxParCSRMatrix *aux_matrix = hypre_IJMatrixTranslator(matrix);
    int local_num_rows;
@@ -538,8 +537,8 @@ hypre_IJMatrixSetValuesParCSR( hypre_IJMatrix *matrix,
 						num_cols_offd);
       	          if (j_offd == -1)
       	          {
-      	             printf (" Error, element %d %d does not exist in ",
-				"structure!\n", row, cols[indx]);
+      	             printf (" Error, element %d %d does not exist\n",
+				row, cols[indx]);
       	             return -1;
       	          }
       	          for (j=pos_offd; j < len_offd; j++)
@@ -553,8 +552,8 @@ hypre_IJMatrixSetValuesParCSR( hypre_IJMatrix *matrix,
       	          }
       	          if (not_found)
       	          {
-      	             printf (" Error, element %d %d does not exist ",
-				"in structure!\n", row, cols[indx]);
+      	             printf (" Error, element %d %d does not exist\n",
+				row, cols[indx]);
       	             return -1;
       	          }
       	          not_found = 1;
@@ -564,8 +563,8 @@ hypre_IJMatrixSetValuesParCSR( hypre_IJMatrix *matrix,
       	       {
       	          if (diag_j[pos_diag] != row_local)
       	          {
-      	             printf (" Error, element %d %d does not exist in ",
-				"structure!\n", row, cols[indx]);
+      	             printf (" Error, element %d %d does not exist\n",
+				row, cols[indx]);
       	             return -1;
       	          }
       	          diag_data[pos_diag] = values[indx];
@@ -583,8 +582,8 @@ hypre_IJMatrixSetValuesParCSR( hypre_IJMatrix *matrix,
       	          }
       	          if (not_found)
       	          {
-      	             printf (" Error, element %d %d does not exist in ",
-				"structure!\n", row, cols[indx]);
+      	             printf (" Error, element %d %d does not exist\n",
+				row, cols[indx]);
       	             return -1;
       	          }
                }
@@ -882,8 +881,8 @@ hypre_IJMatrixAddToValuesParCSR( hypre_IJMatrix *matrix,
 						num_cols_offd);
       	          if (j_offd == -1)
       	          {
-      	             printf (" Error, element %d %d does not exist in ",
-				"structure!\n", row, cols[indx]);
+      	             printf (" Error, element %d %d does not exist\n",
+				row, cols[indx]);
       	             return -1;
       	          }
       	          for (j=pos_offd; j < len_offd; j++)
@@ -897,8 +896,8 @@ hypre_IJMatrixAddToValuesParCSR( hypre_IJMatrix *matrix,
       	          }
       	          if (not_found)
       	          {
-      	             printf (" Error, element %d %d does not exist in ",
-				"structure!\n", row, cols[indx]);
+      	             printf (" Error, element %d %d does not exist\n",
+				row, cols[indx]);
       	             return -1;
       	          }
       	          not_found = 1;
@@ -908,8 +907,8 @@ hypre_IJMatrixAddToValuesParCSR( hypre_IJMatrix *matrix,
       	       {
       	          if (diag_j[pos_diag] != row_local)
       	          {
-      	             printf (" Error, element %d %d does not exist in ",
-				"structure!\n", row, cols[indx]);
+      	             printf (" Error, element %d %d does not exist\n",
+				row, cols[indx]);
       	             return -1;
       	          }
       	          diag_data[pos_diag] += values[indx];
@@ -927,8 +926,8 @@ hypre_IJMatrixAddToValuesParCSR( hypre_IJMatrix *matrix,
       	          }
       	          if (not_found)
       	          {
-      	             printf (" Error, element %d %d does not exist in ",
-				"structure!\n", row, cols[indx]);
+      	             printf (" Error, element %d %d does not exist\n",
+				row, cols[indx]);
       	             return -1;
       	          }
                }

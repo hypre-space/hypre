@@ -27,7 +27,6 @@ int
 hypre_IJVectorCreatePar(hypre_IJVector *vector, int *IJpartitioning)
 {
    MPI_Comm comm = hypre_IJVectorComm(vector);
-   hypre_ParVector *par_vector = hypre_IJVectorObject(vector);
 
 #if 0
    if (par_vector)
@@ -232,7 +231,6 @@ hypre_IJVectorSetValuesPar(hypre_IJVector *vector,
    int *IJpartitioning = hypre_IJVectorPartitioning(vector);
    hypre_ParVector *par_vector = hypre_IJVectorObject(vector);
    MPI_Comm comm = hypre_IJVectorComm(vector);
-   int *partitioning = hypre_ParVectorPartitioning(par_vector);
    hypre_Vector *local_vector = hypre_ParVectorLocalVector(par_vector);
 
 /* If no components are to be set, perform no checking and return */
@@ -434,7 +432,6 @@ hypre_IJVectorAssemblePar(hypre_IJVector *vector)
 {
    int *IJpartitioning = hypre_IJVectorPartitioning(vector);
    hypre_ParVector *par_vector = hypre_IJVectorObject(vector);
-   MPI_Comm comm = hypre_IJVectorComm(vector);
    int *partitioning = hypre_ParVectorPartitioning(par_vector);
 
    if (!par_vector)

@@ -27,8 +27,6 @@ hypre_AuxParCSRMatrixCreate( hypre_AuxParCSRMatrix **aux_matrix,
 			     int *sizes)
 {
    hypre_AuxParCSRMatrix  *matrix;
-   int *row_space;
-   int i;
    
    matrix = hypre_CTAlloc(hypre_AuxParCSRMatrix, 1);
   
