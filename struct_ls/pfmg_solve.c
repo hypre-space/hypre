@@ -222,9 +222,19 @@ hypre_PFMGSolve( void               *pfmg_vdata,
           * Bottom
           *--------------------------------------------------*/
 
-         hypre_PFMGRelaxSetZeroGuess(relax_data_l[l], 1);
-         if (constant_coefficient) hypre_StructVectorClearBoundGhostValues( b_l[l] );
-         hypre_PFMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
+         if (active_l[l])
+         {
+            hypre_PFMGRelaxSetZeroGuess(relax_data_l[l], 1);
+            if (constant_coefficient)
+            {
+               hypre_StructVectorClearBoundGhostValues( b_l[l] );
+            }
+            hypre_PFMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
+         }
+         else
+         {
+            hypre_StructVectorSetConstantValues(x_l[l], 0.0);
+         }
 #if DEBUG
          sprintf(filename, "zout_xbottom.%02d", l);
          hypre_StructVectorPrint(filename, x_l[l], 0);

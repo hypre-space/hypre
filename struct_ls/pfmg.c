@@ -75,7 +75,10 @@ hypre_PFMGDestroy( void *pfmg_vdata )
       {
          for (l = 0; l < (pfmg_data -> num_levels); l++)
          {
+            if (pfmg_data -> active_l[l])
+            {
             hypre_PFMGRelaxDestroy(pfmg_data -> relax_data_l[l]);
+            }
             hypre_StructMatvecDestroy(pfmg_data -> matvec_data_l[l]);
          }
          for (l = 0; l < ((pfmg_data -> num_levels) - 1); l++)

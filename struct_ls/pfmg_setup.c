@@ -211,7 +211,6 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 
    (pfmg_data -> num_levels) = num_levels;
    (pfmg_data -> cdir_l)     = cdir_l;
-   (pfmg_data -> active_l)   = active_l;
    (pfmg_data -> grid_l)     = grid_l;
    (pfmg_data -> P_grid_l)   = P_grid_l;
 
@@ -370,6 +369,21 @@ hypre_PFMGSetup( void               *pfmg_vdata,
                               cindex, findex, stride);
    }
 
+   /*-----------------------------------------------------
+    * Check for zero diagonal on coarsest grid, occurs with
+    * singular problems like full Neumann or full periodic.
+    * Note that a processor with zero diagonal will set
+    * active_l =0, other processors will not. This is OK
+    * as we only want to avoid the division by zero on the
+    * one processor which owns the single coarse grid
+    * point.
+    *-----------------------------------------------------*/
+
+   if ( hypre_ZeroDiagonal(A_l[l]))
+   {
+      active_l[l] = 0;
+   }
+
    /* set up fine grid relaxation */
    relax_data_l[0] = hypre_PFMGRelaxCreate(comm);
    hypre_PFMGRelaxSetTol(relax_data_l[0], 0.0);
@@ -381,19 +395,25 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       for (l = 1; l < (num_levels - 1); l++)
       {
          /* set up relaxation */
+         if (active_l[l])
+         {
+            relax_data_l[l] = hypre_PFMGRelaxCreate(comm);
+            hypre_PFMGRelaxSetTol(relax_data_l[l], 0.0);
+            hypre_PFMGRelaxSetType(relax_data_l[l], relax_type);
+            hypre_PFMGRelaxSetTempVec(relax_data_l[l], tx_l[l]);
+            hypre_PFMGRelaxSetup(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
+         }
+      }
+      /* set up coarsest grid relaxation */
+      if (active_l[l])
+      {
          relax_data_l[l] = hypre_PFMGRelaxCreate(comm);
          hypre_PFMGRelaxSetTol(relax_data_l[l], 0.0);
-         hypre_PFMGRelaxSetType(relax_data_l[l], relax_type);
+         hypre_PFMGRelaxSetMaxIter(relax_data_l[l], 1);
+         hypre_PFMGRelaxSetType(relax_data_l[l], 0);
          hypre_PFMGRelaxSetTempVec(relax_data_l[l], tx_l[l]);
          hypre_PFMGRelaxSetup(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
       }
-      /* set up coarsest grid relaxation */
-      relax_data_l[l] = hypre_PFMGRelaxCreate(comm);
-      hypre_PFMGRelaxSetTol(relax_data_l[l], 0.0);
-      hypre_PFMGRelaxSetMaxIter(relax_data_l[l], 1);
-      hypre_PFMGRelaxSetType(relax_data_l[l], 0);
-      hypre_PFMGRelaxSetTempVec(relax_data_l[l], tx_l[l]);
-      hypre_PFMGRelaxSetup(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
    }
 
    for (l = 0; l < num_levels; l++)
@@ -403,6 +423,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       hypre_StructMatvecSetup(matvec_data_l[l], A_l[l], x_l[l]);
    }
 
+   (pfmg_data -> active_l)        = active_l;
    (pfmg_data -> relax_data_l)    = relax_data_l;
    (pfmg_data -> matvec_data_l)   = matvec_data_l;
    (pfmg_data -> restrict_data_l) = restrict_data_l;
@@ -636,4 +657,83 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
 
    return ierr;
 }
+
+/*--------------------------------------------------------------------------
+ * hypre_ZeroDiagonal
+ *
+ * Returns 1 if there is a diagonal coefficient that is zero,
+ * otherwise returns 0.
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_ZeroDiagonal( hypre_StructMatrix *A )
+{
+   hypre_BoxArray        *compute_boxes;
+   hypre_Box             *compute_box;
+
+   hypre_Index            loop_size;
+   hypre_IndexRef         start;
+   hypre_Index            stride;
+
+   double                *Ap;
+   hypre_Box             *A_dbox;
+   int                    Ai;
+
+   int                    i;
+   int                    loopi, loopj, loopk;
+
+   hypre_Index            diag_index;
+   double                 diag_product = 1.0;
+   int                    zero_diag = 0;
+
+   int                    constant_coefficient; 
+
+   /*----------------------------------------------------------
+    * Initialize some things
+    *----------------------------------------------------------*/
+
+   hypre_SetIndex(stride, 1, 1, 1);
+   hypre_SetIndex(diag_index, 0, 0, 0);
+
+   /* Need to modify here */
+   constant_coefficient = hypre_StructMatrixConstantCoefficient(A);
+
+   compute_boxes = hypre_StructGridBoxes(hypre_StructMatrixGrid(A));
+   hypre_ForBoxI(i, compute_boxes)
+      {
+         compute_box = hypre_BoxArrayBox(compute_boxes, i);
+         start  = hypre_BoxIMin(compute_box);
+         A_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
+         Ap = hypre_StructMatrixExtractPointerByIndex(A, i, diag_index);
+         hypre_BoxGetStrideSize(compute_box, stride, loop_size);
+
+         if ( constant_coefficient )
+         {
+            Ai = hypre_CCBoxIndexRank( A_dbox, start );
+            diag_product *= Ap[Ai];
+         }
+         else
+         {
+
+            hypre_BoxLoop1Begin(loop_size, A_dbox, start, stride, Ai);
+            hypre_BoxLoop1For(loopi, loopj, loopk, Ai)
+               {
+                  diag_product *= Ap[Ai];
+               }
+            hypre_BoxLoop1End(Ai);
+         }
+
+      }
+
+   if (diag_product == 0)
+   {
+      zero_diag = 1;
+   }
+   
+   return zero_diag;
+}
+
+
+
+
 

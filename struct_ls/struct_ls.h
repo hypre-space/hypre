@@ -31,15 +31,6 @@ int hypre_CyclicReduction( void *cyc_red_vdata , hypre_StructMatrix *A , hypre_S
 int hypre_CyclicReductionSetBase( void *cyc_red_vdata , hypre_Index base_index , hypre_Index base_stride );
 int hypre_CyclicReductionDestroy( void *cyc_red_vdata );
 
-/* cyclic_reduction-pragma-disjoint.c */
-void *hypre_CyclicReductionCreate( MPI_Comm comm );
-hypre_StructMatrix *hypre_CycRedCreateCoarseOp( hypre_StructMatrix *A , hypre_StructGrid *coarse_grid , int cdir );
-int hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A , hypre_StructMatrix *Ac , hypre_Index cindex , hypre_Index cstride );
-int hypre_CyclicReductionSetup( void *cyc_red_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x );
-int hypre_CyclicReduction( void *cyc_red_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x );
-int hypre_CyclicReductionSetBase( void *cyc_red_vdata , hypre_Index base_index , hypre_Index base_stride );
-int hypre_CyclicReductionDestroy( void *cyc_red_vdata );
-
 /* general.c */
 int hypre_Log2( int p );
 
@@ -279,6 +270,7 @@ int hypre_PFMGRelaxSetTempVec( void *pfmg_relax_vdata , hypre_StructVector *t );
 /* pfmg_setup.c */
 int hypre_PFMGSetup( void *pfmg_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x );
 int hypre_PFMGComputeDxyz( hypre_StructMatrix *A , double *dxyz );
+int hypre_ZeroDiagonal( hypre_StructMatrix *A );
 
 /* pfmg_setup_interp.c */
 hypre_StructMatrix *hypre_PFMGCreateInterpOp( hypre_StructMatrix *A , hypre_StructGrid *cgrid , int cdir );
@@ -395,13 +387,6 @@ int hypre_SMGRelaxSetNewMatrixStencil( void *relax_vdata , hypre_StructStencil *
 int hypre_SMGRelaxSetupBaseBoxArray( void *relax_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x );
 
 /* smg_residual.c */
-void *hypre_SMGResidualCreate( void );
-int hypre_SMGResidualSetup( void *residual_vdata , hypre_StructMatrix *A , hypre_StructVector *x , hypre_StructVector *b , hypre_StructVector *r );
-int hypre_SMGResidual( void *residual_vdata , hypre_StructMatrix *A , hypre_StructVector *x , hypre_StructVector *b , hypre_StructVector *r );
-int hypre_SMGResidualSetBase( void *residual_vdata , hypre_Index base_index , hypre_Index base_stride );
-int hypre_SMGResidualDestroy( void *residual_vdata );
-
-/* smg_residual-pragma-disjoint.c */
 void *hypre_SMGResidualCreate( void );
 int hypre_SMGResidualSetup( void *residual_vdata , hypre_StructMatrix *A , hypre_StructVector *x , hypre_StructVector *b , hypre_StructVector *r );
 int hypre_SMGResidual( void *residual_vdata , hypre_StructMatrix *A , hypre_StructVector *x , hypre_StructVector *b , hypre_StructVector *r );

@@ -849,12 +849,9 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
     * C-points and the current solution approximation at
     * F-points.  The coarse-grid solution vector contains
     * the restricted (injected) fine-grid residual.
-    * - The coarsest grid solve is built into this loop
-    * because it involves the same code as step 1.
     *--------------------------------------------------*/
  
-   /* The break out of this loop is just before step 2 below */
-   for (l = 0; ; l++)
+   for (l = 0; l < num_levels - 1 ; l++)
    {
       /* set cindex and stride */
       hypre_CycRedSetCIndex(base_index, base_stride, l, cdir, cindex);
@@ -889,9 +886,6 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
                }
             hypre_BoxLoop2End(Ai, xi);
          }
-
-      if (l == (num_levels - 1))
-         break;
 
       /* Step 2 */
       fgrid = hypre_StructVectorGrid(x_l[l]);
@@ -982,6 +976,52 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
             }
       }
    }
+   /*--------------------------------------------------
+    * Coarsest grid:
+    *
+    * Do an F-relaxation sweep with zero initial guess
+    *
+    * This is the same as step 1 in above, but is
+    * broken out as a sepecial case to add a check
+    * for zero diagonal that can occur for singlar
+    * problems like the full Neumann problem.
+    *--------------------------------------------------*/
+ 
+   /* set cindex and stride */
+   hypre_CycRedSetCIndex(base_index, base_stride, l, cdir, cindex);
+   hypre_CycRedSetStride(base_index, base_stride, l, cdir, stride);
+
+   compute_box_a = fine_points_l[l];
+   hypre_ForBoxI(fi, compute_box_a)
+      {
+         compute_box = hypre_BoxArrayBox(compute_box_a, fi);
+
+         A_dbox =
+            hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A_l[l]), fi);
+         x_dbox =
+            hypre_BoxArrayBox(hypre_StructVectorDataSpace(x_l[l]), fi);
+
+         hypre_SetIndex(index, 0, 0, 0);
+         Ap = hypre_StructMatrixExtractPointerByIndex(A_l[l], fi, index);
+         xp = hypre_StructVectorBoxData(x_l[l], fi);
+
+         hypre_CopyIndex(hypre_BoxIMin(compute_box), start);
+         hypre_BoxGetStrideSize(compute_box, stride, loop_size);
+
+         hypre_BoxLoop2Begin(loop_size,
+                             A_dbox, start, stride, Ai,
+                             x_dbox, start, stride, xi);
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,xi
+#include "hypre_box_smp_forloop.h"
+         hypre_BoxLoop2For(loopi, loopj, loopk, Ai, xi)
+            {
+               if (Ap[Ai] != 0.0)
+               {
+                  xp[xi] /= Ap[Ai]; 
+               }
+            }
+         hypre_BoxLoop2End(Ai, xi);
+      }
 
    /*--------------------------------------------------
     * Up cycle:
