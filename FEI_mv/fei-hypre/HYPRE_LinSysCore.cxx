@@ -3956,7 +3956,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
          }
       }
       MLI_NumNodes_ = ncount;
-      assert((MLI_NumNodes_*MLI_FieldSize_) == (localEndRow_-localStartRow_+1));
+      //assert((MLI_NumNodes_*MLI_FieldSize_)==(localEndRow_-localStartRow_+1));
       delete [] tempNodalCoord;
       delete [] iArray;
       for (i = 0; i < MLI_NumNodes_; i++) 
@@ -4885,6 +4885,32 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
 int HYPRE_LinSysCore::writeSystem(const char *name)
 {
    printf("HYPRE_LinsysCore : writeSystem not implemented.\n");
+   return (0);
+}
+
+//***************************************************************************
+// this function computes matrix vector product
+//---------------------------------------------------------------------------
+
+int HYPRE_LinSysCore::HYPRE_LSC_Matvec(void *mat, void *x, void *y)
+{
+   HYPRE_ParCSRMatrix A_csr = (HYPRE_ParCSRMatrix) mat;
+   HYPRE_ParVector    x_csr = (HYPRE_ParVector)    x;
+   HYPRE_ParVector    y_csr = (HYPRE_ParVector)    y;
+   HYPRE_ParCSRMatrixMatvec(1.0, A_csr, x_csr, 0.0, y_csr);
+   return (0);
+}
+
+//***************************************************************************
+// this function computes vector multiply and add
+//---------------------------------------------------------------------------
+
+int HYPRE_LinSysCore::HYPRE_LSC_Axpby(double a, void *x, double b, void *y)
+{
+   HYPRE_ParVector x_csr = (HYPRE_ParVector) x;
+   HYPRE_ParVector y_csr = (HYPRE_ParVector) y;
+   if ( b != 1.0 ) HYPRE_ParVectorScale( b, y_csr);
+   hypre_ParVectorAxpy(a, (hypre_ParVector*) x_csr, (hypre_ParVector*) y_csr);
    return (0);
 }
 

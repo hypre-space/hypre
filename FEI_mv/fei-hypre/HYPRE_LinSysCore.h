@@ -390,6 +390,8 @@ class HYPRE_LinSysCore
    void   putIntoMappedMatrix(int row, int numValues, const double* values,
                               const int* scatterIndices);
    void   getFEDataObject(void **object) { (*object) = feData_; }
+   int    HYPRE_LSC_Matvec(void *mat, void *x, void *y);
+   int    HYPRE_LSC_Axpby(double, void *, double, void *);
 
    // ----------------------------------------------------------------------
    // MLI-specific public functions
