@@ -203,6 +203,10 @@ AC_ARG_WITH(pthreads,
 )
 
 
+dnl top level source directory
+
+HYPRE_TOP_SRC_DIR=`pwd`
+
 AC_ARG_WITH(petsc,
    [  --with-petsc		use petsc],
    if test "$withval" != "no"
@@ -566,10 +570,6 @@ then
 fi
 
 CC="$PREPEND $CC"
-
-dnl top level source directory
-
-HYPRE_TOP_SRC_DIR=`pwd`
 
 dnl *********************************************************************
 dnl * This macro uses the values assigned to CASC_SET_COPT and 
