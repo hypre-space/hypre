@@ -342,7 +342,8 @@ c Set defaults for BoomerAMG
         call HYPRE_BoomerAMGSetDebugFlag(solver, debug_flag, ierr)
         call HYPRE_BoomerAMGSetup(solver, A, b, x, ierr)
         call HYPRE_BoomerAMGSolve(solver, A, b, x, ierr)
-        call HYPRE_BoomerAMGGetNumIterations(solver, num_iterations, ierr)
+        call HYPRE_BoomerAMGGetNumIterations(solver, num_iterations, 
+     &						ierr)
         call HYPRE_ParAMGGetFinalRelativeRes(solver,
      &                                       final_res_norm, ierr)
         call HYPRE_BoomerAMGDestroy(solver, ierr)
@@ -387,7 +388,8 @@ c Set defaults for BoomerAMG
           call HYPRE_BoomerAMGSetCoarsenType(precond,
      &                                    (hybrid*coarsen_type), ierr)
 
-          call HYPRE_BoomerAMGSetMeasureType(precond, measure_type, ierr)
+          call HYPRE_BoomerAMGSetMeasureType(precond, measure_type, 
+     &						ierr)
 
           call HYPRE_BoomerAMGSetStrongThreshold(precond,
      &                                        strong_threshold, ierr)
