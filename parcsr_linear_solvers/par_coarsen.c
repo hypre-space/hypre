@@ -1204,7 +1204,6 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
 
 #define CPOINT 1
 #define FPOINT -1
-#define ZPOINT -2
 #define UNDECIDED 0 
 
 
@@ -2356,7 +2355,6 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
 #define COMMON_C_PT  2
 #define CPOINT 1
 #define FPOINT -1
-#define ZPOINT -2
 #define UNDECIDED 0 
 
 
@@ -2778,7 +2776,7 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
       else
       {
          if (measure < 0) printf("negative measure!\n");
-         CF_marker[j] = ZPOINT;
+         CF_marker[j] = FPOINT;
          /* CF_marker[j] = CPOINT;
          ++coarse_size; */
          --num_left;
@@ -3029,9 +3027,9 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
 
    /* initialize measure array and graph array */
 
-   /* for (ig = 0; ig < num_variables+num_cols_offd; ig++)
+    for (ig = 0; ig < num_variables+num_cols_offd; ig++)
       graph_array[ig] = ig;
-   */
+   
    /*---------------------------------------------------
     * Initialize the C/F marker array
     * C/F marker array contains interior points in elements 0 ... 
@@ -3045,28 +3043,12 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
    cnt = 0;
    for (i=0; i < num_variables; i++)
    {
-	if ( (S_offd_i[i+1]-S_offd_i[i]) > 0 || CF_marker[i] == -1) 
+	if ( ((S_offd_i[i+1]-S_offd_i[i]) > 0 && CF_marker[i] == 1) 
+	         || CF_marker[i] == -1) 
 	{
 	   CF_marker[i] = 0;
 	}
-	if ( CF_marker[i] == ZPOINT)
-	{
-	   if ((S_diag_i[i+1]-S_diag_i[i]) > 0)
-	   {
-	      CF_marker[i] = 0;
-	      graph_array[cnt++] = i;
-	   }
-	   else
-	   {
-	      graph_size--;
-	      CF_marker[i] = FPOINT;
-	   }
-	}
-	else
-	   graph_array[cnt++] = i;
    }
-   for (i=0; i < num_cols_offd; i++)
-      graph_array[cnt++] = num_variables+i;
 
    /*---------------------------------------------------
     * Loop until all points are either fine or coarse.
