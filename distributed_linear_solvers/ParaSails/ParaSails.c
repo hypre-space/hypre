@@ -992,6 +992,58 @@ static void ComputeValuesNonsym(StoredRows *stored_rows, Matrix *mat,
 #endif
 }
 
+static void Rescale(Numbering *numb, StoredRows *stored_rows, Matrix *M)
+{
+    int len, *ind, len2, *ind2;
+    double *val, *val2, *w;
+    int row, j, i;
+    double accum, prod;
+
+    /* Allocate full-length workspace */
+    w = (double *) calloc(numb->num_ind, sizeof(double));
+
+    /* Loop over rows */
+    for (row=0; row<=M->end_row - M->beg_row; row++)
+    {
+        MatrixGetRow(M, row, &len, &ind, &val);
+
+	accum = 0.0;
+
+	/* Loop over nonzeros in row */
+        for (j=0; j<len; j++)
+        {
+	    /* Get the row of A corresponding to current nonzero */
+            StoredRowsGet(stored_rows, ind[j], &len2, &ind2, &val2);
+
+	    /* Scatter nonzeros of A */
+	    for (i=0; i<len2; i++)
+	    {
+		assert(ind2[i] < numb->num_ind);
+		w[ind2[i]] = val2[i];
+	    }
+
+	    /* Form inner product of current row with this row */
+	    prod = 0.0;
+	    for (i=0; i<len; i++)
+	    {
+		assert(ind[i] < numb->num_ind);
+		prod += val[i] * w[ind[i]];
+	    }
+
+	    accum += val[j] * prod;
+
+	    /* Reset workspace */
+	    for (i=0; i<len2; i++)
+		w[ind2[i]] = 0.0;
+        }
+
+	/* Scale the row */
+	accum = 1./sqrt(accum);
+        for (j=0; j<len; j++)
+	    val[j] *= accum;
+    }
+}
+
 /******************************************************************************
  *
  * ParaSails public functions
@@ -1314,6 +1366,8 @@ void ParaSailsFilterValues(ParaSails *ps, double filter)
 
         MatrixSetRow(F, row, j, ind, val);
     }
+
+    Rescale(ps->numb, ps->stored_rows, F);
 
     MatrixDestroy(ps->M);
     ps->M = F;
