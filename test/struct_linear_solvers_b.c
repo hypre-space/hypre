@@ -13,6 +13,7 @@
 #include "Hypre_StructVector.h"
 #include "Hypre_MPI_Com.h"
 #include "Hypre_StructJacobi.h"
+#include "Hypre_StructSMG.h"
 #include "Hypre_PCG.h"
 #include "Hypre_Solver.h"
 
@@ -57,6 +58,7 @@ main( int   argc,
    Hypre_Solver  precond;
    Hypre_StructSolver precond_S;
    Hypre_StructJacobi  solver_SJ;
+   Hypre_StructSMG solver_SMG;
    Hypre_PCG  solver_PCG;
 
    Hypre_MPI_Com comm;
@@ -778,18 +780,40 @@ main( int   argc,
       Hypre_PCG_SetParameter( solver_PCG, "relative change test", 0);
       Hypre_PCG_SetParameter( solver_PCG, "log", 1);
 
-      /*      else if (solver_id == 17) */
-      solver_id = 17;  /* the only value presently supported */
-      /* use two-step Jacobi as preconditioner */
-      solver_SJ = Hypre_StructJacobi_Constructor( comm );
-      precond_S = (Hypre_StructSolver) Hypre_StructJacobi_castTo
-         ( solver_SJ, "Hypre_StructSolver" ); 
-      Hypre_StructJacobi_SetParameter( solver_SJ, "tol", 0.0 );
-      Hypre_StructJacobi_SetParameter( solver_SJ, "max_iter", 2 );
-      Hypre_StructJacobi_SetParameter( solver_SJ, "zero guess", 0 );
-      
-      Hypre_StructJacobi_Setup( solver_SJ, A, b, x );
+      if (solver_id == 10)
+      {
+         /* use symmetric SMG as preconditioner */
+         solver_SMG = Hypre_StructSMG_Constructor( comm );
+         precond_S = (Hypre_StructSolver) Hypre_StructSMG_castTo
+            ( solver_SMG, "Hypre_StructSolver" ); 
 
+         Hypre_StructSMG_SetParameter( solver_SMG, "memory use", 0 );
+         Hypre_StructSMG_SetParameter( solver_SMG, "max iter", 1 );
+         Hypre_StructSMG_SetParameter( solver_SMG, "tol", 0.0 );
+         Hypre_StructSMG_SetParameter( solver_SMG, "zero guess", 1 );
+         Hypre_StructSMG_SetParameter( solver_SMG, "rel change", 0 );
+         Hypre_StructSMG_SetParameter( solver_SMG, "num prerelax", n_pre );
+         Hypre_StructSMG_SetParameter( solver_SMG, "num postrelax", n_post );
+         Hypre_StructSMG_SetParameter( solver_SMG, "logging", 0 );
+
+         Hypre_StructSMG_Setup( solver_SMG, A, b, x );
+      }
+      else if (solver_id == 17)
+      {
+         /* use two-step Jacobi as preconditioner */
+         solver_SJ = Hypre_StructJacobi_Constructor( comm );
+         precond_S = (Hypre_StructSolver) Hypre_StructJacobi_castTo
+            ( solver_SJ, "Hypre_StructSolver" ); 
+         Hypre_StructJacobi_SetParameter( solver_SJ, "tol", 0.0 );
+         Hypre_StructJacobi_SetParameter( solver_SJ, "max_iter", 2 );
+         Hypre_StructJacobi_SetParameter( solver_SJ, "zero guess", 0 );
+      
+         Hypre_StructJacobi_Setup( solver_SJ, A, b, x );
+      }
+      else {
+         printf( "Preconditioner not supported! Solver_id=%i\n", solver_id );
+      }
+      
       Hypre_PCG_SetPreconditioner( solver_PCG, precond_S );
 
       Hypre_PCG_Setup( solver_PCG, A, b, x );
@@ -819,11 +843,11 @@ main( int   argc,
 
       Hypre_PCG_destructor( solver_PCG );
 
-/*
       if (solver_id == 10)
       {
-         HYPRE_StructSMGDestroy(precond);
+         Hypre_StructSMG_destructor( solver_SMG );
       }
+/*
       else if (solver_id == 11)
       {
          HYPRE_StructPFMGDestroy(precond);
@@ -832,8 +856,8 @@ main( int   argc,
       {
          HYPRE_StructSparseMSGDestroy(precond);
       }
-      else if (solver_id == 17)
 */
+      else if (solver_id == 17)
       {
          Hypre_StructJacobi_destructor( solver_SJ );
       }
@@ -843,14 +867,23 @@ main( int   argc,
     * Solve the system using SMG
     *-----------------------------------------------------------*/
 
-#if 0
-/* most solvers not implemented yet (JfP jan2000) ... */
-
    if (solver_id == 0)
    {
       time_index = hypre_InitializeTiming("SMG Setup");
       hypre_BeginTiming(time_index);
 
+      solver_SMG = Hypre_StructSMG_Constructor( comm );
+
+      Hypre_StructSMG_SetParameter( solver_SMG, "memory use", 0 );
+      Hypre_StructSMG_SetParameter( solver_SMG, "max iter", 50 );
+      Hypre_StructSMG_SetParameter( solver_SMG, "tol", 1.0e-6 );
+      Hypre_StructSMG_SetParameter( solver_SMG, "rel change", 0 );
+      Hypre_StructSMG_SetParameter( solver_SMG, "num prerelax", n_pre );
+      Hypre_StructSMG_SetParameter( solver_SMG, "num postrelax", n_post );
+      Hypre_StructSMG_SetParameter( solver_SMG, "logging", 1 );
+
+      Hypre_StructSMG_Setup( solver_SMG, A, b, x );
+/*
       HYPRE_StructSMGCreate(MPI_COMM_WORLD, &solver);
       HYPRE_StructSMGSetMemoryUse(solver, 0);
       HYPRE_StructSMGSetMaxIter(solver, 50);
@@ -860,6 +893,7 @@ main( int   argc,
       HYPRE_StructSMGSetNumPostRelax(solver, n_post);
       HYPRE_StructSMGSetLogging(solver, 1);
       HYPRE_StructSMGSetup(solver, A, b, x);
+*/
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
@@ -869,17 +903,30 @@ main( int   argc,
       time_index = hypre_InitializeTiming("SMG Solve");
       hypre_BeginTiming(time_index);
 
+      Hypre_StructSMG_Apply( solver_SMG, b, &x );
+/*      
       HYPRE_StructSMGSolve(solver, A, b, x);
-
+*/
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
    
+      Hypre_StructSMG_GetConvergenceInfo(
+         solver_SMG, "num iterations", &doubtemp );
+      num_iterations = floor( 1.001*doubtemp );
+      Hypre_StructSMG_GetConvergenceInfo(
+         solver_SMG, "final relative residual norm", &final_res_norm );
+/*
       HYPRE_StructSMGGetNumIterations(solver, &num_iterations);
       HYPRE_StructSMGGetFinalRelativeResidualNorm(solver, &final_res_norm);
-      HYPRE_StructSMGDestroy(solver);
+*/
+      Hypre_StructSMG_destructor( solver_SMG );
+/*    HYPRE_StructSMGDestroy(solver); */
    }
+
+#if 0
+/* most solvers not implemented yet (JfP jan2000) ... */
 
    /*-----------------------------------------------------------
     * Solve the system using PFMG
