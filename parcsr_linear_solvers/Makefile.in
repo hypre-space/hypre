@@ -40,10 +40,12 @@ PILUT_LIBFLAGS =\
  -l_HYPRE_DistributedMatrix \
  $(BLAS_LIB)
 
+
 CFLAGS =\
  ${C_COMPILE_FLAGS}\
  -I..\
  -I../utilities\
+ -I../krylov\
  -I../seq_matrix_vector\
  -I../parcsr_matrix_vector\
  -I../distributed_matrix\
@@ -77,9 +79,6 @@ HEADERS =\
  HYPRE_parcsr_ls.h
 
 FILES =\
- bicgstab.c\
- cgnr.c\
- gmres.c\
  par_amg.c\
  par_amg_setup.c\
  par_amg_solve.c\
@@ -98,7 +97,6 @@ FILES =\
  par_rap.c\
  par_rap_communication.c\
  par_scaled_matnorm.c\
- pcg.c\
  pcg_par.c\
  transpose.c\
  HYPRE_parcsr_amg.c\

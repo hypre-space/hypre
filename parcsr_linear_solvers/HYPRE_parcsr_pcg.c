@@ -21,7 +21,22 @@
 int
 HYPRE_ParCSRPCGCreate( MPI_Comm comm, HYPRE_Solver *solver )
 {
-   *solver = ( (HYPRE_Solver) hypre_KrylovCreate( ) );
+   /* The function names with a PCG in them are in
+      parcsr_linear_solvers/pcg_par.c .  These functions do rather little -
+      e.g., cast to the correct type - before calling something else.
+      These names should be called, e.g., hypre_struct_Free, to reduce the
+      chance of name conflicts. */
+   hypre_PCGFunctions * pcg_functions =
+      hypre_PCGFunctionsCreate(
+         hypre_CAlloc, hypre_ParKrylovFree, hypre_ParKrylovCreateVector,
+         hypre_ParKrylovDestroyVector, hypre_ParKrylovMatvecCreate,
+         hypre_ParKrylovMatvec, hypre_ParKrylovMatvecDestroy,
+         hypre_ParKrylovInnerProd, hypre_ParKrylovCopyVector,
+         hypre_ParKrylovClearVector,
+         hypre_ParKrylovScaleVector, hypre_ParKrylovAxpy,
+         hypre_ParKrylovIdentitySetup, hypre_ParKrylovIdentity );
+
+   *solver = ( (HYPRE_Solver) hypre_PCGCreate( pcg_functions ) );
 
    return 0;
 }
@@ -33,7 +48,7 @@ HYPRE_ParCSRPCGCreate( MPI_Comm comm, HYPRE_Solver *solver )
 int 
 HYPRE_ParCSRPCGDestroy( HYPRE_Solver solver )
 {
-   return( hypre_KrylovDestroy( (void *) solver ) );
+   return( hypre_PCGDestroy( (void *) solver ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -46,7 +61,7 @@ HYPRE_ParCSRPCGSetup( HYPRE_Solver solver,
                       HYPRE_ParVector b,
                       HYPRE_ParVector x      )
 {
-   return( hypre_KrylovSetup( (void *) solver,
+   return( hypre_PCGSetup( (void *) solver,
                            (void *) A,
                            (void *) b,
                            (void *) x ) );
@@ -62,7 +77,7 @@ HYPRE_ParCSRPCGSolve( HYPRE_Solver solver,
                       HYPRE_ParVector b,
                       HYPRE_ParVector x      )
 {
-   return( hypre_KrylovSolve( (void *) solver,
+   return( hypre_PCGSolve( (void *) solver,
                            (void *) A,
                            (void *) b,
                            (void *) x ) );
@@ -76,7 +91,7 @@ int
 HYPRE_ParCSRPCGSetTol( HYPRE_Solver solver,
                        double             tol    )
 {
-   return( hypre_KrylovSetTol( (void *) solver, tol ) );
+   return( hypre_PCGSetTol( (void *) solver, tol ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -87,7 +102,7 @@ int
 HYPRE_ParCSRPCGSetMaxIter( HYPRE_Solver solver,
                            int                max_iter )
 {
-   return( hypre_KrylovSetMaxIter( (void *) solver, max_iter ) );
+   return( hypre_PCGSetMaxIter( (void *) solver, max_iter ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -96,9 +111,9 @@ HYPRE_ParCSRPCGSetMaxIter( HYPRE_Solver solver,
 
 int
 HYPRE_ParCSRPCGSetStopCrit( HYPRE_Solver solver,
-                           int          stop_crit )
+                            int          stop_crit )
 {
-   return( hypre_KrylovSetStopCrit( (void *) solver, stop_crit ) );
+   return( hypre_PCGSetStopCrit( (void *) solver, stop_crit ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -109,7 +124,7 @@ int
 HYPRE_ParCSRPCGSetTwoNorm( HYPRE_Solver solver,
                            int                two_norm )
 {
-   return( hypre_KrylovSetTwoNorm( (void *) solver, two_norm ) );
+   return( hypre_PCGSetTwoNorm( (void *) solver, two_norm ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -120,7 +135,7 @@ int
 HYPRE_ParCSRPCGSetRelChange( HYPRE_Solver solver,
                              int                rel_change )
 {
-   return( hypre_KrylovSetRelChange( (void *) solver, rel_change ) );
+   return( hypre_PCGSetRelChange( (void *) solver, rel_change ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -133,7 +148,7 @@ HYPRE_ParCSRPCGSetPrecond( HYPRE_Solver         solver,
                            HYPRE_PtrToSolverFcn precond_setup,
                            HYPRE_Solver         precond_solver )
 {
-   return( hypre_KrylovSetPrecond( (void *) solver,
+   return( hypre_PCGSetPrecond( (void *) solver,
                                    precond, precond_setup,
                                    (void *) precond_solver ) );
 }
@@ -146,7 +161,7 @@ int
 HYPRE_ParCSRPCGGetPrecond( HYPRE_Solver  solver,
                            HYPRE_Solver *precond_data_ptr )
 {
-   return( hypre_KrylovGetPrecond( (void *)     solver,
+   return( hypre_PCGGetPrecond( (void *)     solver,
                                    (HYPRE_Solver *) precond_data_ptr ) );
 }
 
@@ -158,7 +173,7 @@ int
 HYPRE_ParCSRPCGSetLogging( HYPRE_Solver solver,
                            int                logging )
 {
-   return( hypre_KrylovSetLogging( (void *) solver, logging ) );
+   return( hypre_PCGSetLogging( (void *) solver, logging ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -169,7 +184,7 @@ int
 HYPRE_ParCSRPCGGetNumIterations( HYPRE_Solver  solver,
                                  int                *num_iterations )
 {
-   return( hypre_KrylovGetNumIterations( (void *) solver, num_iterations ) );
+   return( hypre_PCGGetNumIterations( (void *) solver, num_iterations ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -180,7 +195,7 @@ int
 HYPRE_ParCSRPCGGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
                                              double             *norm   )
 {
-   return( hypre_KrylovGetFinalRelativeResidualNorm( (void *) solver, norm ) );
+   return( hypre_PCGGetFinalRelativeResidualNorm( (void *) solver, norm ) );
 }
 
 /*--------------------------------------------------------------------------

@@ -7,6 +7,7 @@
 #define hypre_PARCSR_LS_HEADER
 
 #include "utilities.h"
+#include "krylov.h"
 #include "seq_matrix_vector.h"
 #include "parcsr_matrix_vector.h"
 
@@ -242,36 +243,6 @@ int HYPRE_ParCSRPilutSetMaxIter( HYPRE_Solver solver , int max_iter );
 int HYPRE_ParCSRPilutSetDropTolerance( HYPRE_Solver solver , double tol );
 int HYPRE_ParCSRPilutSetFactorRowSize( HYPRE_Solver solver , int size );
 
-/* bicgstab.c */
-void *hypre_BiCGSTABCreate( void );
-int hypre_BiCGSTABDestroy( void *bicgstab_vdata );
-int hypre_BiCGSTABSetup( void *bicgstab_vdata , void *A , void *b , void *x );
-int hypre_BiCGSTABSolve( void *bicgstab_vdata , void *A , void *b , void *x );
-int hypre_BiCGSTABSetTol( void *bicgstab_vdata , double tol );
-int hypre_BiCGSTABSetMinIter( void *bicgstab_vdata , int min_iter );
-int hypre_BiCGSTABSetMaxIter( void *bicgstab_vdata , int max_iter );
-int hypre_BiCGSTABSetStopCrit( void *bicgstab_vdata , double stop_crit );
-int hypre_BiCGSTABSetPrecond( void *bicgstab_vdata , int (*precond )(), int (*precond_setup )(), void *precond_data );
-int hypre_BiCGSTABGetPrecond( void *bicgstab_vdata , HYPRE_Solver *precond_data_ptr );
-int hypre_BiCGSTABSetLogging( void *bicgstab_vdata , int logging );
-int hypre_BiCGSTABGetNumIterations( void *bicgstab_vdata , int *num_iterations );
-int hypre_BiCGSTABGetFinalRelativeResidualNorm( void *bicgstab_vdata , double *relative_residual_norm );
-
-/* cgnr.c */
-void *hypre_CGNRCreate( void );
-int hypre_CGNRDestroy( void *cgnr_vdata );
-int hypre_CGNRSetup( void *cgnr_vdata , void *A , void *b , void *x );
-int hypre_CGNRSolve( void *cgnr_vdata , void *A , void *b , void *x );
-int hypre_CGNRSetTol( void *cgnr_vdata , double tol );
-int hypre_CGNRSetMinIter( void *cgnr_vdata , int min_iter );
-int hypre_CGNRSetMaxIter( void *cgnr_vdata , int max_iter );
-int hypre_CGNRSetStopCrit( void *cgnr_vdata , int stop_crit );
-int hypre_CGNRSetPrecond( void *cgnr_vdata , int (*precond )(), int (*precondT )(), int (*precond_setup )(), void *precond_data );
-int hypre_CGNRGetPrecond( void *cgnr_vdata , HYPRE_Solver *precond_data_ptr );
-int hypre_CGNRSetLogging( void *cgnr_vdata , int logging );
-int hypre_CGNRGetNumIterations( void *cgnr_vdata , int *num_iterations );
-int hypre_CGNRGetFinalRelativeResidualNorm( void *cgnr_vdata , double *relative_residual_norm );
-
 /* driver.c */
 int main( int argc , char *argv []);
 int BuildParFromFile( int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
@@ -281,22 +252,6 @@ int BuildParFromOneFile( int argc , char *argv [], int arg_index , HYPRE_ParCSRM
 int BuildRhsParFromOneFile( int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix A , HYPRE_ParVector *b_ptr );
 int BuildParLaplacian9pt( int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
 int BuildParLaplacian27pt( int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
-
-/* gmres.c */
-void *hypre_GMRESCreate( void );
-int hypre_GMRESDestroy( void *gmres_vdata );
-int hypre_GMRESSetup( void *gmres_vdata , void *A , void *b , void *x );
-int hypre_GMRESSolve( void *gmres_vdata , void *A , void *b , void *x );
-int hypre_GMRESSetKDim( void *gmres_vdata , int k_dim );
-int hypre_GMRESSetTol( void *gmres_vdata , double tol );
-int hypre_GMRESSetMinIter( void *gmres_vdata , int min_iter );
-int hypre_GMRESSetMaxIter( void *gmres_vdata , int max_iter );
-int hypre_GMRESSetStopCrit( void *gmres_vdata , double stop_crit );
-int hypre_GMRESSetPrecond( void *gmres_vdata , int (*precond )(), int (*precond_setup )(), void *precond_data );
-int hypre_GMRESGetPrecond( void *gmres_vdata , HYPRE_Solver *precond_data_ptr );
-int hypre_GMRESSetLogging( void *gmres_vdata , int logging );
-int hypre_GMRESGetNumIterations( void *gmres_vdata , int *num_iterations );
-int hypre_GMRESGetFinalRelativeResidualNorm( void *gmres_vdata , double *relative_residual_norm );
 
 /* par_amg.c */
 void *hypre_BoomerAMGCreate( void );
@@ -395,41 +350,24 @@ int hypre_BoomerAMGWriteSolverParams( void *data );
 /* par_strength.c */
 int hypre_BoomerAMGCreateS( hypre_ParCSRMatrix *A , double strength_threshold , double max_row_sum , hypre_ParCSRMatrix **S_ptr );
 
-/* pcg.c */
-int hypre_KrylovIdentitySetup( void *vdata , void *A , void *b , void *x );
-int hypre_KrylovIdentity( void *vdata , void *A , void *b , void *x );
-void *hypre_KrylovCreate( void );
-int hypre_KrylovDestroy( void *pcg_vdata );
-int hypre_KrylovSetup( void *pcg_vdata , void *A , void *b , void *x );
-int hypre_KrylovSolve( void *pcg_vdata , void *A , void *b , void *x );
-int hypre_KrylovSetTol( void *pcg_vdata , double tol );
-int hypre_KrylovSetMaxIter( void *pcg_vdata , int max_iter );
-int hypre_KrylovSetStopCrit( void *pcg_vdata , int stop_crit );
-int hypre_KrylovSetTwoNorm( void *pcg_vdata , int two_norm );
-int hypre_KrylovSetRelChange( void *pcg_vdata , int rel_change );
-int hypre_KrylovSetPrecond( void *pcg_vdata , int (*precond )(), int (*precond_setup )(), void *precond_data );
-int hypre_KrylovGetPrecond( void *pcg_vdata , HYPRE_Solver *precond_data_ptr );
-int hypre_KrylovSetLogging( void *pcg_vdata , int logging );
-int hypre_KrylovGetNumIterations( void *pcg_vdata , int *num_iterations );
-int hypre_KrylovPrintLogging( void *pcg_vdata , int myid );
-int hypre_KrylovGetFinalRelativeResidualNorm( void *pcg_vdata , double *relative_residual_norm );
-
 /* pcg_par.c */
-char *hypre_KrylovCAlloc( int count , int elt_size );
-int hypre_KrylovFree( char *ptr );
-void *hypre_KrylovCreateVector( void *vvector );
-void *hypre_KrylovCreateVectorArray( int n , void *vvector );
-int hypre_KrylovDestroyVector( void *vvector );
-void *hypre_KrylovMatvecCreate( void *A , void *x );
-int hypre_KrylovMatvec( void *matvec_data , double alpha , void *A , void *x , double beta , void *y );
-int hypre_KrylovMatvecT( void *matvec_data , double alpha , void *A , void *x , double beta , void *y );
-int hypre_KrylovMatvecDestroy( void *matvec_data );
-double hypre_KrylovInnerProd( void *x , void *y );
-int hypre_KrylovCopyVector( void *x , void *y );
-int hypre_KrylovClearVector( void *x );
-int hypre_KrylovScaleVector( double alpha , void *x );
-int hypre_KrylovAxpy( double alpha , void *x , void *y );
-int hypre_KrylovCommInfo( void *A , int *my_id , int *num_procs );
+char *hypre_ParKrylovCAlloc( int count , int elt_size );
+int hypre_ParKrylovFree( char *ptr );
+void *hypre_ParKrylovCreateVector( void *vvector );
+void *hypre_ParKrylovCreateVectorArray( int n , void *vvector );
+int hypre_ParKrylovDestroyVector( void *vvector );
+void *hypre_ParKrylovMatvecCreate( void *A , void *x );
+int hypre_ParKrylovMatvec( void *matvec_data , double alpha , void *A , void *x , double beta , void *y );
+int hypre_ParKrylovMatvecT( void *matvec_data , double alpha , void *A , void *x , double beta , void *y );
+int hypre_ParKrylovMatvecDestroy( void *matvec_data );
+double hypre_ParKrylovInnerProd( void *x , void *y );
+int hypre_ParKrylovCopyVector( void *x , void *y );
+int hypre_ParKrylovClearVector( void *x );
+int hypre_ParKrylovScaleVector( double alpha , void *x );
+int hypre_ParKrylovAxpy( double alpha , void *x , void *y );
+int hypre_ParKrylovCommInfo( void *A , int *my_id , int *num_procs );
+int hypre_ParKrylovIdentitySetup( void *vdata , void *A , void *b , void *x );
+int hypre_ParKrylovIdentity( void *vdata , void *A , void *b , void *x );
 
 /* transpose.c */
 int hypre_CSRMatrixTranspose( hypre_CSRMatrix *A , hypre_CSRMatrix **AT );

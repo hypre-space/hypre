@@ -24,6 +24,7 @@ cat > $INTERNAL_HEADER <<@
 #define hypre_PARCSR_LS_HEADER
 
 #include "utilities.h"
+#include "krylov.h"
 #include "seq_matrix_vector.h"
 #include "parcsr_matrix_vector.h"
 

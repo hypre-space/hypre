@@ -21,7 +21,17 @@
 int
 HYPRE_ParCSRBiCGSTABCreate( MPI_Comm comm, HYPRE_Solver *solver )
 {
-   *solver = ( (HYPRE_Solver) hypre_BiCGSTABCreate( ) );
+   hypre_BiCGSTABFunctions * bicgstab_functions =
+      hypre_BiCGSTABFunctionsCreate(
+         hypre_ParKrylovCreateVector,
+         hypre_ParKrylovDestroyVector, hypre_ParKrylovMatvecCreate,
+         hypre_ParKrylovMatvec, hypre_ParKrylovMatvecDestroy,
+         hypre_ParKrylovInnerProd, hypre_ParKrylovCopyVector,
+         hypre_ParKrylovScaleVector, hypre_ParKrylovAxpy,
+         hypre_ParKrylovCommInfo,
+         hypre_ParKrylovIdentitySetup, hypre_ParKrylovIdentity );
+
+   *solver = ( (HYPRE_Solver) hypre_BiCGSTABCreate( bicgstab_functions) );
 
    return 0;
 }

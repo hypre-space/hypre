@@ -652,7 +652,7 @@ int  hypre_BoomerAMGRelaxT( hypre_ParCSRMatrix *A,
             hypre_TFree(b_vec);
             hypre_CSRMatrixDestroy(A_CSR);
             A_CSR = NULL;
-            hypre_VectorDestroy(f_vector);
+            hypre_SeqVectorDestroy(f_vector);
             f_vector = NULL;
          
          }

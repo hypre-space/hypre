@@ -1,5 +1,5 @@
 /*BHEADER**********************************************************************
- * (c) 1998   The Regents of the University of California
+ * (c) 1998-2000   The Regents of the University of California
  *
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
@@ -21,7 +21,19 @@
 int
 HYPRE_ParCSRGMRESCreate( MPI_Comm comm, HYPRE_Solver *solver )
 {
-   *solver = ( (HYPRE_Solver) hypre_GMRESCreate( ) );
+   hypre_GMRESFunctions * gmres_functions =
+      hypre_GMRESFunctionsCreate(
+         hypre_CAlloc, hypre_ParKrylovFree, hypre_ParKrylovCommInfo,
+         hypre_ParKrylovCreateVector,
+         hypre_ParKrylovCreateVectorArray,
+         hypre_ParKrylovDestroyVector, hypre_ParKrylovMatvecCreate,
+         hypre_ParKrylovMatvec, hypre_ParKrylovMatvecDestroy,
+         hypre_ParKrylovInnerProd, hypre_ParKrylovCopyVector,
+         hypre_ParKrylovClearVector,
+         hypre_ParKrylovScaleVector, hypre_ParKrylovAxpy,
+         hypre_ParKrylovIdentitySetup, hypre_ParKrylovIdentity );
+
+   *solver = ( (HYPRE_Solver) hypre_GMRESCreate( gmres_functions ) );
 
    return 0;
 }

@@ -53,11 +53,11 @@ hypre_ParCSRMatrixScaledNorm( hypre_ParCSRMatrix *A, double *scnorm)
    hypre_ParVectorInitialize(dinvsqrt);
    dis_data = hypre_VectorData(hypre_ParVectorLocalVector(dinvsqrt));
    hypre_ParVectorSetPartitioningOwner(dinvsqrt,0);
-   dis_ext = hypre_VectorCreate(num_cols_offd);
-   hypre_VectorInitialize(dis_ext);
+   dis_ext = hypre_SeqVectorCreate(num_cols_offd);
+   hypre_SeqVectorInitialize(dis_ext);
    dis_ext_data = hypre_VectorData(dis_ext);
-   sum = hypre_VectorCreate(num_rows);
-   hypre_VectorInitialize(sum);
+   sum = hypre_SeqVectorCreate(num_rows);
+   hypre_SeqVectorInitialize(sum);
    sum_data = hypre_VectorData(sum);
 
    /* generate dinvsqrt */
@@ -119,8 +119,8 @@ hypre_ParCSRMatrixScaledNorm( hypre_ParCSRMatrix *A, double *scnorm)
    MPI_Allreduce(&max_row_sum, &mat_norm, 1, MPI_DOUBLE, MPI_MAX, comm);
 
    hypre_ParVectorDestroy(dinvsqrt);
-   hypre_VectorDestroy(sum);
-   hypre_VectorDestroy(dis_ext);
+   hypre_SeqVectorDestroy(sum);
+   hypre_SeqVectorDestroy(dis_ext);
    hypre_TFree(d_buf_data);
 
    *scnorm = mat_norm;  
