@@ -200,21 +200,21 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
       A_ext_i    = hypre_CSRMatrixI(A_ext);
       A_ext_j    = hypre_CSRMatrixJ(A_ext);
       A_ext_data = hypre_CSRMatrixData(A_ext);
-   }
 
-   jj_counter = 0;
-   for (i=0; i < A_ext_i[num_cols_A_offd]; i++)
-   {
-      jj = A_ext_j[i];
-      if (jj < col_1 || jj > col_n-1)
+      jj_counter = 0;
+      for (i=0; i < A_ext_i[num_cols_A_offd]; i++)
       {
-	 jj1 = hypre_BinarySearch(col_map_offd,jj,num_cols_A_offd);
-         if (jj1 > -1) A_ext_j[i] = -jj1-2;
-	 else A_ext_j[i] = -1;
-      }
-      else
-      {
-         A_ext_j[i] = jj-col_1;
+         jj = A_ext_j[i];
+         if (jj < col_1 || jj > col_n-1)
+         {
+	    jj1 = hypre_BinarySearch(col_map_offd,jj,num_cols_A_offd);
+            if (jj1 > -1) A_ext_j[i] = -jj1-2;
+	    else A_ext_j[i] = -1;
+         }
+         else
+         {
+            A_ext_j[i] = jj-col_1;
+         }
       }
    }
    
