@@ -82,7 +82,7 @@ int    MLI_Utils_HypreMatrixReadIJAFormat(char *filename, MPI_Comm comm,
                  int blksize, void **mat, int flag, double **scaleVec);
 int    MLI_Utils_HypreParMatrixReadIJAFormat(char *filename, MPI_Comm comm, 
                  void **mat, int flag, double **scaleVec);
-int    MLI_Utils_HypreParMatrixReadHBFormat(char *filename, MPI_Comm comm, 
+int    MLI_Utils_HypreMatrixReadHBFormat(char *filename, MPI_Comm comm, 
                  void **mat);
 int    MLI_Utils_DoubleVectorRead(char *, MPI_Comm, int, int, double *vec);
 int    MLI_Utils_DoubleParVectorRead(char *, MPI_Comm, int, int, double *vec);
