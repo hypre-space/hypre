@@ -1190,8 +1190,8 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
           sscanf(params[i],"%s %s", param, param2);
           rtype = 1;
           if      ( !strcmp(param2, "jacobi" ) ) rtype = 0;
-          else if ( !strcmp(param2, "gs") )      rtype = 1;
-          else if ( !strcmp(param2, "sgs") )     rtype = 2;
+          else if ( !strcmp(param2, "sgs") )     rtype = 1;
+          else if ( !strcmp(param2, "sgsseq") )  rtype = 2;
           else if ( !strcmp(param2, "vbjacobi")) rtype = 3;
           else if ( !strcmp(param2, "vbsgs") )   rtype = 4;
           else if ( !strcmp(param2, "vbsgsseq")) rtype = 5;
