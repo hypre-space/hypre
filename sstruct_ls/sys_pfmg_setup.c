@@ -98,7 +98,12 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
    double                min_dxyz;
    int                   cdir;
    int                   d, l;
+   int                   i;
+
+   double**              sys_dxyz;
                        
+   int                   nvars;
+
    int                   ierr = 0;
 #if DEBUG
    char                  filename[255];
@@ -112,6 +117,16 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
    hypre_SStructPVectorRef(hypre_SStructVectorPVector(b_in, 0), &b);
    hypre_SStructPVectorRef(hypre_SStructVectorPVector(x_in, 0), &x);
 
+   /*--------------------------------------------------------
+    * Allocate arrays for mesh sizes for each diagonal block
+    *--------------------------------------------------------*/
+   nvars    = hypre_SStructPMatrixNVars(A);
+   sys_dxyz = hypre_TAlloc(double *, nvars);
+   for ( i = 0; i < nvars; i++)
+   {
+      sys_dxyz[i] = hypre_TAlloc(double, 3);
+   }
+   
    /*-----------------------------------------------------
     * Set up coarse grids
     *-----------------------------------------------------*/
@@ -135,7 +150,14 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
    /* compute dxyz */
    if ((dxyz[0] == 0) || (dxyz[1] == 0) || (dxyz[2] == 0))
    {
-      hypre_PFMGComputeDxyz(hypre_SStructPMatrixSMatrix(A,0,0), dxyz);
+      for ( i = 0; i < nvars; i++)
+      {
+         hypre_PFMGComputeDxyz(hypre_SStructPMatrixSMatrix(A,i,i), sys_dxyz[i]);
+         for ( d = 0; d < 3; d++)
+         {
+            dxyz[d] += sys_dxyz[i][d];
+         } 
+      }
    }
 
    grid_l = hypre_TAlloc(hypre_SStructPGrid *, max_levels);
@@ -226,6 +248,12 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
 
    /* free up some things */
    hypre_BoxDestroy(cbox);
+   for ( i = 0; i < nvars; i++)
+   {
+      hypre_TFree(sys_dxyz[i]);
+   }
+   hypre_TFree(sys_dxyz);
+   
 
    /* set all levels active if skip_relax = 0 */
    if (!skip_relax)
@@ -473,6 +501,8 @@ hypre_SysStructCoarsen( hypre_SStructPGrid  *fgrid,
                    hypre_SStructPGridPeriodic(cgrid));
 
    hypre_SStructPGridCellSGrid(cgrid) = scgrid;
+
+   hypre_SStructPGridPNeighbors(cgrid) = hypre_BoxArrayCreate(0);
 
    hypre_SStructPGridLocalSize(cgrid)  = 0;
    hypre_SStructPGridGlobalSize(cgrid) = 0;
