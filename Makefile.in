@@ -39,19 +39,16 @@ all:
 
 install:
 	@ \
-	# check that HYPRE_INSTALL_DIR is defined; \
 	if [ ! "$$HYPRE_INSTALL_DIR" ]; \
 	then \
 	   echo "Error: set the HYPRE_INSTALL_DIR environment variable"; \
 	   exit 1; \
 	fi; \
-	# Check that the install directory exists; \
 	if [ ! -d $$HYPRE_INSTALL_DIR ]; \
 	then \
 	   echo "Error: no directory HYPRE_INSTALL_DIR=$$HYPRE_INSTALL_DIR"; \
 	   exit 1; \
 	fi; \
-	# create install subdirectories; \
 	( \
 	   cd $$HYPRE_INSTALL_DIR; \
 	   DIRS="bin docs include lib"; \
@@ -61,7 +58,6 @@ install:
 	      mkdir $$i; \
 	   done \
 	); \
-	# install the libraries; \
 	for i in ${HYPRE_DIRS}; \
 	do \
 	  if [ -d $$i ]; \
