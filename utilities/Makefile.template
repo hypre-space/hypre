@@ -1,0 +1,197 @@
+# (c) 1997   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+include ../config/Makefile.config
+
+CINCLUDES = ${INCLUDES} ${MPIINCLUDE}
+CDEFS = ${TIMERDEFS} -DHYPRE_TIMING
+
+C_COMPILE_FLAGS =\
+   -I..\
+   -I$(srcdir)/..\
+   -I$(srcdir)\
+   ${CINCLUDES}\
+   ${CDEFS}
+
+##################################################################
+# Lapack Header & Object Files
+##################################################################
+${LAPACKINTERNAL}LAPACK_HEADERS = hypre_lapack.h f2c.h
+${LAPACKINTERNAL}LAPACK_FILES = \
+${LAPACKINTERNAL}dbdsqr.o\
+${LAPACKINTERNAL}dgebd2.o\
+${LAPACKINTERNAL}dgebrd.o\
+${LAPACKINTERNAL}dgelq2.o\
+${LAPACKINTERNAL}dgelqf.o\
+${LAPACKINTERNAL}dgels.o\
+${LAPACKINTERNAL}dgeqr2.o\
+${LAPACKINTERNAL}dgeqrf.o\
+${LAPACKINTERNAL}dgesvd.o\
+${LAPACKINTERNAL}dlabad.o\
+${LAPACKINTERNAL}dlabrd.o\
+${LAPACKINTERNAL}dlacpy.o\
+${LAPACKINTERNAL}dlae2.o\
+${LAPACKINTERNAL}dlaev2.o\
+${LAPACKINTERNAL}dlamch.o\
+${LAPACKINTERNAL}dlange.o\
+${LAPACKINTERNAL}dlanst.o\
+${LAPACKINTERNAL}dlansy.o\
+${LAPACKINTERNAL}dlapy2.o\
+${LAPACKINTERNAL}dlarfb.o\
+${LAPACKINTERNAL}dlarf.o\
+${LAPACKINTERNAL}dlarfg.o\
+${LAPACKINTERNAL}dlarft.o\
+${LAPACKINTERNAL}dlartg.o\
+${LAPACKINTERNAL}dlas2.o\
+${LAPACKINTERNAL}dlascl.o\
+${LAPACKINTERNAL}dlaset.o\
+${LAPACKINTERNAL}dlasq1.o\
+${LAPACKINTERNAL}dlasq2.o\
+${LAPACKINTERNAL}dlasq3.o\
+${LAPACKINTERNAL}dlasq4.o\
+${LAPACKINTERNAL}dlasq5.o\
+${LAPACKINTERNAL}dlasq6.o\
+${LAPACKINTERNAL}dlasr.o\
+${LAPACKINTERNAL}dlasrt.o\
+${LAPACKINTERNAL}dlassq.o\
+${LAPACKINTERNAL}dlasv2.o\
+${LAPACKINTERNAL}dlatrd.o\
+${LAPACKINTERNAL}dorg2l.o\
+${LAPACKINTERNAL}dorg2r.o\
+${LAPACKINTERNAL}dorgbr.o\
+${LAPACKINTERNAL}dorgl2.o\
+${LAPACKINTERNAL}dorglq.o\
+${LAPACKINTERNAL}dorgql.o\
+${LAPACKINTERNAL}dorgqr.o\
+${LAPACKINTERNAL}dorgtr.o\
+${LAPACKINTERNAL}dorm2r.o\
+${LAPACKINTERNAL}dormbr.o\
+${LAPACKINTERNAL}dorml2.o\
+${LAPACKINTERNAL}dormlq.o\
+${LAPACKINTERNAL}dormqr.o\
+${LAPACKINTERNAL}dpotf2.o\
+${LAPACKINTERNAL}dpotrf.o\
+${LAPACKINTERNAL}dpotrs.o\
+${LAPACKINTERNAL}dsteqr.o\
+${LAPACKINTERNAL}dsterf.o\
+${LAPACKINTERNAL}dsyev.o\
+${LAPACKINTERNAL}dsygs2.o\
+${LAPACKINTERNAL}dsygst.o\
+${LAPACKINTERNAL}dsygv.o\
+${LAPACKINTERNAL}dsytd2.o\
+${LAPACKINTERNAL}dsytrd.o\
+${LAPACKINTERNAL}ieeeck.o\
+${LAPACKINTERNAL}ilaenv.o\
+${LAPACKINTERNAL}lapack_utils.o\
+${LAPACKINTERNAL}lsame.o\
+${LAPACKINTERNAL}xerbla.o
+
+##################################################################
+# Blas Header & Object Files
+##################################################################
+${BLASINTERNAL}BLAS_HEADERS = hypre_blas.h f2c.h
+${BLASINTERNAL}BLAS_FILES = \
+${BLASINTERNAL}blas_utils.o\
+${BLASINTERNAL}dasum.o\
+${BLASINTERNAL}daxpy.o\
+${BLASINTERNAL}dcopy.o\
+${BLASINTERNAL}ddot.o\
+${BLASINTERNAL}dgemm.o\
+${BLASINTERNAL}dgemv.o\
+${BLASINTERNAL}dger.o\
+${BLASINTERNAL}dnrm2.o\
+${BLASINTERNAL}drot.o\
+${BLASINTERNAL}dscal.o\
+${BLASINTERNAL}dswap.o\
+${BLASINTERNAL}dsymm.o\
+${BLASINTERNAL}dsymv.o\
+${BLASINTERNAL}dsyr2.o\
+${BLASINTERNAL}dsyr2k.o\
+${BLASINTERNAL}dsyrk.o\
+${BLASINTERNAL}dtrmm.o\
+${BLASINTERNAL}dtrmv.o\
+${BLASINTERNAL}dtrsm.o\
+${BLASINTERNAL}dtrsv.o\
+${BLASINTERNAL}idamax.o
+
+##################################################################
+# Utilities Header Files
+##################################################################
+HEADERS =\
+ amg_linklist.h\
+ exchange_data.h\
+ fortran.h\
+ general.h\
+ hypre_memory.h\
+ hypre_smp_forloop.h\
+ HYPRE_utilities.h\
+ mpistubs.h\
+ threading.h\
+ thread_mpistubs.h\
+ timing.h\
+ umalloc_local.h\
+ utilities.h
+
+##################################################################
+# Utilities Files
+##################################################################
+FILES =\
+ amg_linklist.c\
+ binsearch.c\
+ exchange_data.c\
+ hypre_memory.c\
+ hypre_qsort.c\
+ memory_dmalloc.c\
+ mpistubs.c\
+ qsplit.c\
+ random.c\
+ threading.c\
+ thread_mpistubs.c\
+ timer.c\
+ timing.c\
+ umalloc_local.c
+
+OBJS = ${FILES:.c=.o}
+
+##################################################################
+# Targets
+##################################################################
+
+all: libHYPRE_utilities.a 
+	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include/.
+	cp -fp $(srcdir)/utilities.h $(HYPRE_BUILD_DIR)/include/.
+	${BLASINTERNAL}cp -fp ${BLAS_HEADERS} $(HYPRE_BUILD_DIR)/include/.
+	${LAPACKINTERNAL}cp -fp ${LAPACK_HEADERS} $(HYPRE_BUILD_DIR)/include/.
+	cp -fp libHYPRE_*.a $(HYPRE_BUILD_DIR)/lib/.
+
+install: libHYPRE_utilities.a 
+	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)/.
+	cp -fp $(srcdir)/utilities.h $(HYPRE_INC_INSTALL)/.
+	${BLASINTERNAL}cp -fp ${BLAS_HEADERS} $(HYPRE_INC_INSTALL)/.
+	${LAPACKINTERNAL}cp -fp ${LAPACK_HEADERS} $(HYPRE_INC_INSTALL)/.
+	cp -fp libHYPRE_*.a $(HYPRE_LIB_INSTALL)/.
+
+clean:
+	rm -f *.o lib*.a ${BLAS_HEADERS} ${LAPACK_HEADERS} 
+
+distclean: clean
+
+
+##################################################################
+# Rules
+##################################################################
+ 
+libHYPRE_utilities.a: ${OBJS}
+	@echo  "Building $@ ... "
+	${AR} $@ ${OBJS} ${LAPACK_FILES} ${BLAS_FILES}
+	${RANLIB} $@
+
+${OBJS}: ${HEADERS}
+
+timer.o: timer.c
+	${CC} -D_POSIX_SOURCE -o $@ -c ${C_FLAGS} $<
