@@ -367,11 +367,9 @@ c     The Queryint below checks to see if the returned object can
 c     return a Hypre.ParCSRMatrix. The "cast" is necessary because of the
 c     restrictions of the C language, and is merely to please the compiler.
 c     It is the Queryint that actually has semantic meaning.
-c     >>> keep the cast for now, take it out once this works.  This isn't C>>>
+c     ( cast removed for Fortran )
       call SIDL_BaseInterface_queryint_f(
-     1     Hypre_object, "Hypre.ParCSRMatrix", Hypre_object_tmp )
-      call SIDL_BaseInterface__cast_f(
-     1     Hypre_object_tmp, "Hypre.ParCSRMatrix", Hypre_parcsr_A )
+     1     Hypre_object, "Hypre.ParCSRMatrix", Hypre_parcsr_A )
       if ( Hypre_parcsr_A .eq. 0 ) then
          write (6,*) 'Matrix cast/QI failed\n'
          stop
