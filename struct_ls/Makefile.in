@@ -103,8 +103,8 @@ OBJS = ${FILES:.c=.o}
 all: libHYPRE_ls.a 
 
 install: all
-	@cp -f HYPRE_*.h struct_linear_solvers.h $$HYPRE_INSTALL_DIR/include
-	@cp -f libHYPRE_*.a $$HYPRE_INSTALL_DIR/lib
+	@cp -f HYPRE_*.h struct_linear_solvers.h $$HYPRE_INSTALL_DIR/include/.
+	@cp -f libHYPRE_*.a $$HYPRE_INSTALL_DIR/lib/.
 clean:
 	@rm -f *.o *.dxx 
 	@rm -f *.prj

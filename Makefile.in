@@ -64,12 +64,8 @@ HYPRE_CIPETSCPILUT_DIRS =\
 
 all:
 	@ \
-	rm -Rf hypre; \
-	mkdir hypre; \
-	for i in bin docs include lib; \
-	do \
-	   mkdir hypre/$$i; \
-	done; \
+	mkdir -p hypre/include; \
+	mkdir -p hypre/lib; \
 	HYPRE_INSTALL_DIR=`pwd`/hypre; \
 	export HYPRE_INSTALL_DIR; \
 	for i in ${HYPRE_DIRS}; \
@@ -104,16 +100,17 @@ install: all
 	@ \
 	if [ ! "$$HYPRE_INSTALL_DIR" ]; \
 	then \
-	   echo "Error: set the HYPRE_INSTALL_DIR environment variable"; \
-	   exit 1; \
+	  echo "Error: set the HYPRE_INSTALL_DIR environment variable"; \
+	  exit 1; \
 	fi; \
 	if [ ! -d $$HYPRE_INSTALL_DIR ]; \
 	then \
-	   echo "Error: no directory HYPRE_INSTALL_DIR=$$HYPRE_INSTALL_DIR"; \
-	   exit 1; \
+	  echo "Error: no directory HYPRE_INSTALL_DIR=$$HYPRE_INSTALL_DIR"; \
+	  exit 1; \
 	fi; \
 	echo "Installing hypre ..."; \
-	mv hypre/* $$HYPRE_INSTALL_DIR
+	cp -fr hypre/* $$HYPRE_INSTALL_DIR/.; \
+	rm -Rf hypre
 
 clean:
 	@ \
