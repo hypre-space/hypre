@@ -30,5 +30,3 @@ ${AMG_PROGRAM}.${AMG_ARCH}: ${AMG_OBJS}
 	@echo "Making (f) " $@
 	@${AMG_F77} -o $@ -c ${FFLAGS} $<
 
-${AMG_OBJS}: params.amg
-

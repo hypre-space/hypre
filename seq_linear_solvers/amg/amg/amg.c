@@ -30,6 +30,7 @@ char *argv[];
    Vector      *f;
    double       stop_tolerance;
    Data        *amgs01_data;
+   Data        *wjacobi_data;
    Data        *pcg_data;
 
 
@@ -67,19 +68,15 @@ char *argv[];
    /*-------------------------------------------------------
     * Debugging prints
     *-------------------------------------------------------*/
-#if 0
-   A = ProblemA(problem);
-   f = ProblemF(problem);
-   u = ProblemU(problem);
-
+#if 1
    sprintf(file_name, "%s.ysmp", GlobalsOutFileName);
    WriteYSMP(file_name, ProblemA(problem));
 
-   sprintf(file_name, "%s.rhs", GlobalsOutFileName);
-   WriteVec(file_name, ProblemF(problem));
-
    sprintf(file_name, "%s.initu", GlobalsOutFileName);
    WriteVec(file_name, ProblemU(problem));
+
+   sprintf(file_name, "%s.rhs", GlobalsOutFileName);
+   WriteVec(file_name, ProblemF(problem));
 #endif
 
    /*-------------------------------------------------------
@@ -99,6 +96,7 @@ char *argv[];
 
    stop_tolerance = SolverStopTolerance(solver);
    amgs01_data    = SolverAMGS01Data(solver);
+   wjacobi_data   = SolverWJacobiData(solver);
    pcg_data       = SolverPCGData(solver);
 
    /* call AMGS01 */
@@ -109,7 +107,7 @@ char *argv[];
       AMGS01(u, f, stop_tolerance, amgs01_data);
    }
 
-   /* call PCG */
+   /* call AMGCG */
    else if (SolverType(solver) == 1)
    {
       AMGS01Setup(problem, amgs01_data);
@@ -117,6 +115,27 @@ char *argv[];
 
       PCG(u, f, stop_tolerance, pcg_data);
    }
+
+   /* call JCG */
+   else if (SolverType(solver) == 2)
+   {
+      WJacobiSetup(problem, wjacobi_data);
+      PCGSetup(problem, WJacobi, wjacobi_data, pcg_data);
+
+      PCG(u, f, stop_tolerance, pcg_data);
+   }
+
+   /*-------------------------------------------------------
+    * Debugging prints
+    *-------------------------------------------------------*/
+#if 1
+   sprintf(file_name, "%s.lastu", GlobalsOutFileName);
+   WriteVec(file_name, ProblemU(problem));
+
+   Matvec(-1.0, ProblemA(problem), ProblemU(problem), 1.0, ProblemF(problem));
+   sprintf(file_name, "%s.res", GlobalsOutFileName);
+   WriteVec(file_name, ProblemF(problem));
+#endif
 
    return 0;
 }

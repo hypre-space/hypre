@@ -8,7 +8,8 @@ c=====================================================================
 c
       subroutine setup(levels,nstr,ecg,ncg,ewt,nwt,icdep,idump,
      *                 nun,imin,imax,u,f,a,ia,ja,iu,ip,icg,ifg,
-     *                 b,ib,jb,ipmn,ipmx,iv,xp,yp,ifc,lfname)
+     *                 b,ib,jb,ipmn,ipmx,iv,xp,yp,ifc,
+     *                 ndimu,ndimp,ndima,ndimb,lfname)
 c
 c---------------------------------------------------------------------
 c
@@ -18,7 +19,7 @@ c---------------------------------------------------------------------
 c
       implicit real*8 (a-h,o-z)
 c
-      include 'params.amg'
+c     include 'params.amg'
 c
       dimension imin(25),imax(25)
       dimension u  (*)
@@ -126,7 +127,8 @@ c=>   choose coarse grid and define interpolation
 c
       call crsgd(k-1,nstr,ecg,ncg,ewt,nwt,levels,icdep,
      *           nun,imin,imax,a,ia,ja,iu,ip,icg,ifg,
-     *           b,ib,jb,ipmn,ipmx,iv,xp,yp,ifc)
+     *           b,ib,jb,ipmn,ipmx,iv,xp,yp,ifc,
+     *           ndimu,ndimp,ndima,ndimb)
 c
 c=>   test level k-1 matrix
 c

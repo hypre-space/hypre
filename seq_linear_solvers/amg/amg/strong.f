@@ -5,7 +5,8 @@ c     the following routines are used to define strong connections
 c
 c=====================================================================
 c
-      subroutine strcnc(k,isort,estr,istr,imin,imax,a,ia,ja,iu)
+      subroutine strcnc(k,isort,estr,istr,imin,imax,a,ia,ja,iu,
+     *                  ndimu,ndimp,ndima,ndimb)
 c
 c---------------------------------------------------------------------
 c
@@ -45,7 +46,7 @@ c---------------------------------------------------------------------
 c
       implicit real*8 (a-h,o-z)
 c
-      include 'params.amg'
+c     include 'params.amg'
 c
       dimension imin(25),imax(25)
       dimension ia (*)
@@ -57,19 +58,22 @@ c---------------------------------------------------------------------
 c
 c     perform row sort
 c
-      call rowsort(k,isort,estr,imin,imax,a,ia,ja,iu)
+      call rowsort(k,isort,estr,imin,imax,a,ia,ja,iu,
+     *             ndimu,ndimp,ndima,ndimb)
 c
 c     determine strong connections & load
 c
       if(istr.eq.1) then
-        call strong1(k,imin,imax,a,ia,ja)
+        call strong1(k,imin,imax,a,ia,ja,
+     *               ndimu,ndimp,ndima,ndimb)
       else
 c       call strong2(k,imin,imax,a,ia,ja)
       endif
       return
       end
 c
-      subroutine rowsort(k,isort,eps,imin,imax,a,ia,ja,iu)
+      subroutine rowsort(k,isort,eps,imin,imax,a,ia,ja,iu,
+     *                   ndimu,ndimp,ndima,ndimb)
 c
 c---------------------------------------------------------------------
 c
@@ -85,7 +89,7 @@ c---------------------------------------------------------------------
 c
       implicit real*8 (a-h,o-z)
 c
-      include 'params.amg'
+c     include 'params.amg'
 c
       dimension imin(25),imax(25)
       dimension ia (*)
@@ -291,7 +295,8 @@ c
       return
       end
 c
-      subroutine strong1(k,imin,imax,a,ia,ja)
+      subroutine strong1(k,imin,imax,a,ia,ja,
+     *                   ndimu,ndimp,ndima,ndimb)
 c
 c---------------------------------------------------------------------
 c
@@ -319,7 +324,7 @@ c---------------------------------------------------------------------
 c
       implicit real*8 (a-h,o-z)
 c
-      include 'params.amg'
+c     include 'params.amg'
 c
       dimension imin(25),imax(25)
       dimension ia (*)

@@ -5,7 +5,8 @@ c     the following routines are used for defining restriction
 c
 c=====================================================================
 c
-      subroutine rstdf0(k,imin,imax,icg,b,ib,jb)
+      subroutine rstdf0(k,imin,imax,icg,b,ib,jb,
+     *                  ndimu,ndimp,ndima,ndimb)
 c
 c---------------------------------------------------------------------
 c
@@ -28,7 +29,7 @@ c---------------------------------------------------------------------
 c
       implicit real*8 (a-h,o-z)
 c
-      include 'params.amg'
+c     include 'params.amg'
 c
       dimension imin(25),imax(25)
       dimension icg(*)

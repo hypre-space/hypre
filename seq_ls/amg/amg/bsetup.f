@@ -5,7 +5,8 @@ c     the following routines are used for setting the form of b
 c
 c=====================================================================
 c
-      subroutine binitl(k,imin,imax,ia,ja,ifg,b,ib,jb)
+      subroutine binitl(k,imin,imax,ia,ja,ifg,b,ib,jb,
+     *                  ndimu,ndimp,ndima,ndimb)
 c
 c---------------------------------------------------------------------
 c
@@ -28,7 +29,7 @@ c---------------------------------------------------------------------
 c
       implicit real*8 (a-h,o-z)
 c
-      include 'params.amg'
+c     include 'params.amg'
 c
       dimension imin(25),imax(25)
       dimension ia (*)
@@ -141,7 +142,8 @@ c
  9920 format(' ### error in binitl: ndimb too small ###')
       end
 c
-      subroutine bloadf(k,imin,imax,a,ia,ja,icg,b,ib,jb)
+      subroutine bloadf(k,imin,imax,a,ia,ja,icg,b,ib,jb,
+     *                  ndimu,ndimp,ndima,ndimb)
 c
 c---------------------------------------------------------------------
 c
@@ -157,7 +159,7 @@ c---------------------------------------------------------------------
 c
       implicit real*8 (a-h,o-z)
 c
-      include 'params.amg'
+c     include 'params.amg'
 c
       dimension imin(25),imax(25)
       dimension ia (*)
@@ -226,7 +228,8 @@ c
  9920 format(' ### error in bloadf: ndimb too small ###')
       end
 c
-      subroutine bloadc(k,imin,imax,icg,b,ib,jb)
+      subroutine bloadc(k,imin,imax,icg,b,ib,jb,
+     *                  ndimu,ndimp,ndima,ndimb)
 c
 c---------------------------------------------------------------------
 c
@@ -240,7 +243,7 @@ c---------------------------------------------------------------------
 c
       implicit real*8 (a-h,o-z)
 c
-      include 'params.amg'
+c     include 'params.amg'
 c
       dimension imin(25),imax(25)
       dimension icg(*)

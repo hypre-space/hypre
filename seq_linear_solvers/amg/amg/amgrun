@@ -13,5 +13,5 @@ amgstrip $1.in.problem $1.in.problem.strp
 
 amg $1
 
-rm -f $1.in.solver.strp $1.in.problem.strp
+#rm -f $1.in.solver.strp $1.in.problem.strp
 

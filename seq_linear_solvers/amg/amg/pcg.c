@@ -49,11 +49,10 @@ Data     *data;
    Matrix    *A            = PCGDataA(pcg_data);
    Vector    *p            = PCGDataP(pcg_data);
    Vector    *s            = PCGDataS(pcg_data);
+   Vector    *r            = PCGDataR(pcg_data);
 
    void     (*precond)()   = PCGDataPrecond(pcg_data);
    Data      *precond_data = PCGDataPrecondData(pcg_data);
-
-   Vector    *r;
 
    double     alpha, beta;
    double     gamma, gamma_old;
@@ -72,8 +71,8 @@ Data     *data;
     * Initialize some logging variables
     *-----------------------------------------------------------------------*/
 
-   norm_log     = talloc(double, max_iter);
-   rel_norm_log = talloc(double, max_iter);
+   norm_log     = ctalloc(double, max_iter);
+   rel_norm_log = ctalloc(double, max_iter);
 
    /*-----------------------------------------------------------------------
     * Start pcg solve
@@ -94,8 +93,9 @@ Data     *data;
       eps = (tol*tol)*bi_prod;
    }
 
-   /* r = b - Ax,  (overwrite b with r) */
-   Matvec(-1.0, A, x, 1.0, (r = b));
+   /* r = b - Ax */
+   CopyVector(b, r);
+   Matvec(-1.0, A, x, 1.0, r);
 
    /* p = C*r */
    InitVector(p, 0.0);
@@ -156,7 +156,7 @@ Data     *data;
       beta = gamma / gamma_old;
 
       /* p = s + beta p */
-      Scale(beta, p);   
+      ScaleVector(beta, p);   
       Axpy(1.0, s, p);
    }
 
@@ -219,10 +219,12 @@ Data     *data;
    PCGDataA(pcg_data) = ProblemA(problem);
 
    size = VectorSize(ProblemF(problem));
-   darray = talloc(double, NDIMU(size));
+   darray = ctalloc(double, NDIMU(size));
    PCGDataP(pcg_data) = NewVector(darray, size);
-   darray = talloc(double, NDIMU(size));
+   darray = ctalloc(double, NDIMU(size));
    PCGDataS(pcg_data) = NewVector(darray, size);
+   darray = ctalloc(double, NDIMU(size));
+   PCGDataR(pcg_data) = NewVector(darray, size);
 
    PCGDataPrecond(pcg_data)     = precond;
    PCGDataPrecondData(pcg_data) = precond_data;
@@ -260,7 +262,7 @@ char  *log_file_name;
 {
    PCGData  *pcg_data;
 
-   pcg_data = talloc(PCGData, 1);
+   pcg_data = ctalloc(PCGData, 1);
 
    PCGDataMaxIter(pcg_data)     = max_iter;
    PCGDataTwoNorm(pcg_data)     = two_norm;
@@ -282,6 +284,9 @@ Data  *data;
 
    if (pcg_data)
    {
+      FreeVector(PCGDataP(pcg_data));
+      FreeVector(PCGDataS(pcg_data));
+      FreeVector(PCGDataR(pcg_data));
       tfree(pcg_data);
    }
 }

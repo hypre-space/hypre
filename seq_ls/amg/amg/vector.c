@@ -27,7 +27,7 @@ int      size;
    Vector     *new;
 
 
-   new = talloc(Vector, 1);
+   new = ctalloc(Vector, 1);
 
    VectorData(new) = data;
    VectorSize(new) = size;
@@ -68,10 +68,46 @@ double  value;
 }
 
 /*--------------------------------------------------------------------------
- * Scale
+ * InitVectorRandom
  *--------------------------------------------------------------------------*/
 
-void     Scale(alpha, y)
+void    InitVectorRandom(v)
+Vector *v;
+{
+   double     *vp = VectorData(v);
+   int         n  = VectorSize(v);
+
+   int         i;
+
+
+   for (i = 0; i < n; i++)
+      vp[i] = Rand();
+}
+
+/*--------------------------------------------------------------------------
+ * CopyVector
+ *--------------------------------------------------------------------------*/
+
+void     CopyVector(x, y)
+Vector  *x;
+Vector  *y;
+{
+   double     *xp = VectorData(x);
+   double     *yp = VectorData(y);
+   int         n  = VectorSize(x);
+
+   int         i;
+
+
+   for (i = 0; i < n; i++)
+      yp[i] = xp[i];
+}
+
+/*--------------------------------------------------------------------------
+ * ScaleVector
+ *--------------------------------------------------------------------------*/
+
+void     ScaleVector(alpha, y)
 double   alpha;
 Vector  *y;
 {

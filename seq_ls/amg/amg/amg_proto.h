@@ -52,9 +52,18 @@ void FreeSolver P((Solver *solver ));
 Vector *NewVector P((double *data , int size ));
 void FreeVector P((Vector *vector ));
 void InitVector P((Vector *v , double value ));
-void Scale P((double alpha , Vector *y ));
+void InitVectorRandom P((Vector *v ));
+void CopyVector P((Vector *x , Vector *y ));
+void ScaleVector P((double alpha , Vector *y ));
 void Axpy P((double alpha , Vector *x , Vector *y ));
 double InnerProd P((Vector *x , Vector *y ));
+
+/* wjacobi.c */
+void WJacobi P((Vector *x , Vector *b , double tol , Data *data ));
+void WJacobiSetup P((Problem *problem , Data *data ));
+Data *ReadWJacobiParams P((FILE *fp ));
+Data *NewWJacobiData P((double weight , int max_iter , char *log_file_name ));
+void FreeWJacobiData P((Data *data ));
 
 /* write.c */
 void WriteYSMP P((char *file_name , Matrix *matrix ));

@@ -29,7 +29,7 @@ int      size;
    Matrix     *new;
 
 
-   new = talloc(Matrix, 1);
+   new = ctalloc(Matrix, 1);
 
    MatrixData(new) = data;
    MatrixIA(new)   = ia;

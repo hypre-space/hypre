@@ -99,7 +99,8 @@ c
 c==============================================================
 c
       subroutine rplot(k,imin,imax,u,f,a,ia,ja,
-     *                 iu,ip,ipmn,ipmx,iv,xp,yp)
+     *                 iu,ip,ipmn,ipmx,iv,xp,yp,
+     *                 ndimu,ndimp,ndima,ndimb)
       implicit real*8(a-h,o-z)
 c
 c---------------------------------------------------------------
@@ -108,7 +109,7 @@ c     Residual plotting routine
 c
 c---------------------------------------------------------------
 c
-      include 'params.amg'
+c     include 'params.amg'
 c
       dimension u  (*)
       dimension f  (*)

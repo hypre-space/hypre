@@ -20,7 +20,7 @@
  * Static variables
  *--------------------------------------------------------------------------*/
 
-static int Seed;
+static int Seed = 13579;
 
 #define M 1048576
 #define L 1027

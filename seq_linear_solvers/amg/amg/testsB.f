@@ -6,7 +6,8 @@ c
 c=====================================================================
 c
       subroutine ftest(k,itst,ncolor,ewt,nwt,iact,npts,icdep,
-     *                 imin,imax,a,ia,ja,iu,ip,icg,ifg,ib,iv)
+     *                 imin,imax,a,ia,ja,iu,ip,icg,ifg,ib,iv,
+     *                 ndimu,ndimp,ndima,ndimb)
 c
 c---------------------------------------------------------------------
 c
@@ -20,7 +21,7 @@ c---------------------------------------------------------------------
 c
       implicit real*8 (a-h,o-z)
 c
-      include 'params.amg'
+c     include 'params.amg'
 c
       dimension imin(25),imax(25)
       dimension ia (*)
@@ -42,15 +43,18 @@ c
       go to (10,20),itst
       stop 'ftest does not exist'
 10    call ftest1(k,ncolor,ewt,nwt,iact,npts,icdep,
-     *            imin,imax,a,ia,ja,iu,ip,icg,ifg,ib,iv)
+     *            imin,imax,a,ia,ja,iu,ip,icg,ifg,ib,iv,
+     *            ndimu,ndimp,ndima,ndimb)
       return
 20    call ftest2(k,ncolor,iact,npts,icdep,
-     *            imin,imax,a,ia,ja,iu,ip,icg,ifg,ib,iv)
+     *            imin,imax,a,ia,ja,iu,ip,icg,ifg,ib,iv,
+     *            ndimu,ndimp,ndima,ndimb)
       return
       end
 c
       subroutine ftest1(k,ncolor,ewt,nwt,iact,npts,icdep,
-     *                  imin,imax,a,ia,ja,iu,ip,icg,ifg,ib,iv)
+     *                  imin,imax,a,ia,ja,iu,ip,icg,ifg,ib,iv,
+     *                  ndimu,ndimp,ndima,ndimb)
 c
 c---------------------------------------------------------------------
 c
@@ -64,7 +68,7 @@ c---------------------------------------------------------------------
 c
       implicit real*8 (a-h,o-z)
 c
-      include 'params.amg'
+c     include 'params.amg'
 c
       dimension imin(25),imax(25)
       dimension ia (*)
@@ -235,7 +239,8 @@ c     write(6,1000) k,npts,nnewpt
       end
 c
       subroutine ftest2(k,ncolor,iact,npts,icdep,
-     *                  imin,imax,a,ia,ja,iu,ip,icg,ifg,ib,iv)
+     *                  imin,imax,a,ia,ja,iu,ip,icg,ifg,ib,iv,
+     *                  ndimu,ndimp,ndima,ndimb)
 c
 c---------------------------------------------------------------------
 c
@@ -247,7 +252,7 @@ c---------------------------------------------------------------------
 c
       implicit real*8 (a-h,o-z)
 c
-      include 'params.amg'
+c     include 'params.amg'
 c
       dimension imin(25),imax(25)
       dimension ia (*)
@@ -408,7 +413,8 @@ c     the following routine tests whether the grid is coarse enough
 c
 c=====================================================================
 c
-      subroutine gtest(k,mmax,imin,imax,icg,ifg)
+      subroutine gtest(k,mmax,imin,imax,icg,ifg,
+     *                 ndimu,ndimp,ndima,ndimb)
 c
 c---------------------------------------------------------------------
 c
@@ -425,7 +431,7 @@ c---------------------------------------------------------------------
 c
       implicit real*8 (a-h,o-z)
 c
-      include 'params.amg'
+c     include 'params.amg'
 c
       dimension imin(25),imax(25)
       dimension icg(*)

@@ -46,15 +46,15 @@ char     *file_name;
 
    fscanf(fp, "%d", &size);
 
-   ia = talloc(int, NDIMU(size+1));
+   ia = ctalloc(int, NDIMU(size+1));
    for (j = 0; j < size+1; j++)
       fscanf(fp, "%d", &ia[j]);
 
-   ja = talloc(int, NDIMA(ia[size]-1));
+   ja = ctalloc(int, NDIMA(ia[size]-1));
    for (j = 0; j < ia[size]-1; j++)
       fscanf(fp, "%d", &ja[j]);
 
-   data = talloc(double, NDIMA(ia[size]-1));
+   data = ctalloc(double, NDIMA(ia[size]-1));
    for (j = 0; j < ia[size]-1; j++)
       fscanf(fp, "%le", &data[j]);
 
@@ -97,7 +97,7 @@ char     *file_name;
 
    fscanf(fp, "%d", &size);
 
-   data = talloc(double, NDIMU(size));
+   data = ctalloc(double, NDIMU(size));
    for (j = 0; j < size; j++)
       fscanf(fp, "%le", &data[j]);
 

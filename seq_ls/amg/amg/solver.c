@@ -32,7 +32,7 @@ char     *file_name;
     * Allocate the solver structure
     *----------------------------------------------------------*/
 
-   solver = talloc(Solver, 1);
+   solver = ctalloc(Solver, 1);
 
    /*----------------------------------------------------------
     * Open the solver file
@@ -52,6 +52,12 @@ char     *file_name;
     *----------------------------------------------------------*/
 
    SolverPCGData(solver) = ReadPCGParams(fp);
+
+   /*----------------------------------------------------------
+    * Weighted Jacobi input
+    *----------------------------------------------------------*/
+
+   SolverWJacobiData(solver) = ReadWJacobiParams(fp);
 
    /*----------------------------------------------------------
     * AMG input
@@ -78,6 +84,7 @@ Solver  *solver;
    if (solver)
    {
       FreePCGData(SolverPCGData(solver));
+      FreeWJacobiData(SolverPCGData(solver));
       FreeAMGS01Data(SolverAMGS01Data(solver));
       tfree(solver);
    }

@@ -40,18 +40,22 @@ c
       if(iwts.eq.0) return
       go to (10,20,30),iwts
       stop 'iwts out of range'
-10    call setw1(k,imin,imax,icg,b,ib,jb)
+10    call setw1(k,imin,imax,icg,b,ib,jb,
+     *           ndimu,ndimp,ndima,ndimb)
       return
-20    call setw2(k,ewt,nwt,imin,imax,a,ia,ja,iu,icg,ifg,b,ib,jb)
+20    call setw2(k,ewt,nwt,imin,imax,a,ia,ja,iu,icg,ifg,b,ib,jb,
+     *           ndimu,ndimp,ndima,ndimb)
       return
 30    call setw3(k,ewt,nwt,imin,imax,a,ia,ja,iu,icg,ifg,b,ib,jb,
-     *                     ipmn,ipmx,ip,iv,xp,yp)
+     *           ipmn,ipmx,ip,iv,xp,yp,
+     *           ndimu,ndimp,ndima,ndimb)
       return
       end
 c
 c---------------------------------------------------------------------
 c
-      subroutine setw1(k,imin,imax,icg,b,ib,jb)
+      subroutine setw1(k,imin,imax,icg,b,ib,jb,
+     *                 ndimu,ndimp,ndima,ndimb)
 c
 c---------------------------------------------------------------------
 c
@@ -65,7 +69,7 @@ c---------------------------------------------------------------------
 c
       implicit real*8 (a-h,o-z)
 c
-      include 'params.amg'
+c     include 'params.amg'
 c
       dimension imin(25),imax(25)
       dimension icg(*)
@@ -114,7 +118,8 @@ c
 c
 c---------------------------------------------------------------------
 c
-      subroutine setw2(k,ewt,nwt,imin,imax,a,ia,ja,iu,icg,ifg,b,ib,jb)
+      subroutine setw2(k,ewt,nwt,imin,imax,a,ia,ja,iu,icg,ifg,b,ib,jb,
+     *                 ndimu,ndimp,ndima,ndimb)
 c
 c---------------------------------------------------------------------
 c
@@ -143,7 +148,7 @@ c---------------------------------------------------------------------
 c
       implicit real*8 (a-h,o-z)
 c
-      include 'params.amg'
+c     include 'params.amg'
 c
       dimension imin(25),imax(25)
       dimension ia (*)
@@ -295,7 +300,8 @@ c
 c---------------------------------------------------------------------
 c
       subroutine setw3(k,ewt,nwt,imin,imax,a,ia,ja,iu,icg,ifg,b,ib,jb,
-     *                           ipmn,ipmx,ip,iv,xp,yp)
+     *                 ipmn,ipmx,ip,iv,xp,yp,
+     *                 ndimu,ndimp,ndima,ndimb)
 c
 c---------------------------------------------------------------------
 c
@@ -330,7 +336,7 @@ c---------------------------------------------------------------------
 c
       implicit real*8 (a-h,o-z)
 c
-      include 'params.amg'
+c     include 'params.amg'
 c
       dimension imin(25),imax(25)
       dimension ia (*)

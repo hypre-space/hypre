@@ -8,7 +8,8 @@ c=====================================================================
 c
       subroutine solve(levels,ncyc,mu,ntrlx,iprlx,ierlx,iurlx,iprtc,
      *     nun,imin,imax,u,f,a,ia,ja,iu,icg,b,ib,jb,
-     *     ipmn,ipmx,iv,ip,xp,yp,lfname)
+     *     ipmn,ipmx,iv,ip,xp,yp,
+     *     ndimu,ndimp,ndima,ndimb,lfname)
 c
 c---------------------------------------------------------------------
 c
@@ -21,7 +22,7 @@ c
 cveh next added
       integer told,tnew,ttot
 c
-      include 'params.amg'
+c     include 'params.amg'
 c
       dimension imin(25),imax(25)
       dimension u  (*)
@@ -115,7 +116,8 @@ c
       call cycle(levels,mu,ifcycl,ivstar,
      *           ntrlx,iprlx,ierlx,iurlx,iprtc,icycmp,
      *           nun,imin,imax,u,f,a,ia,ja,iu,icg,
-     *           b,ib,jb,ipmn,ipmx,iv,ip,xp,yp)
+     *           b,ib,jb,ipmn,ipmx,iv,ip,xp,yp,
+     *           ndimu,ndimp,ndima,ndimb)
 
       if(iprtc.ge.0) then
         resold=res
@@ -165,7 +167,8 @@ c
       subroutine cycle(levels,mu,ifcycl,ivstar,
      *                 ntrlx,iprlx,ierlx,iurlx,iprtc,icomp,
      *                 nun,imin,imax,u,f,a,ia,ja,iu,icg,
-     *                 b,ib,jb,ipmn,ipmx,iv,ip,xp,yp)
+     *                 b,ib,jb,ipmn,ipmx,iv,ip,xp,yp,
+     *                 ndimu,ndimp,ndima,ndimb)
 c
 c---------------------------------------------------------------------
 c
@@ -199,7 +202,7 @@ c---------------------------------------------------------------------
 c
       implicit real*8 (a-h,o-z)
 c
-      include 'params.amg'
+c     include 'params.amg'
 c
       dimension imin(25),imax(25)
       dimension u  (*)
@@ -370,7 +373,8 @@ c    *                (resv(iii),iii=1,nun1)
 c       if(nun.gt.nun1) write(6,6002) (resv(iii),iii=5,nun)
       endif
 c     call rplot(k,imin,imax,u,f,a,ia,ja,
-c    *           iu,ip,ipmn,ipmx,iv,xp,yp)
+c    *           iu,ip,ipmn,ipmx,iv,xp,yp,
+c    *           ndimu,ndimp,ndima,ndimb)
 
 120   continue
 
@@ -395,7 +399,8 @@ c
       call intad(k+1,k,ivstar,nun,imin,imax,
      *                 u,f,a,ia,ja,iu,icg,b,ib,jb)
 c     call rplot(k,imin,imax,u,f,a,ia,ja,
-c    *           iu,ip,ipmn,ipmx,iv,xp,yp)
+c    *           iu,ip,ipmn,ipmx,iv,xp,yp,
+c    *           ndimu,ndimp,ndima,ndimb)
 c
 c     set cycling parameters
 c

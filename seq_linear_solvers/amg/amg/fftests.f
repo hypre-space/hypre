@@ -8,7 +8,8 @@ c
 c=====================================================================
 c
       subroutine fftest(k,ewt,icdep,nun,imin,imax,a,
-     *                  ia,ja,iu,icg,ifg,ib)
+     *                  ia,ja,iu,icg,ifg,ib,
+     *                  ndimu,ndimp,ndima,ndimb)
 c
 c---------------------------------------------------------------------
 c
@@ -22,7 +23,7 @@ c---------------------------------------------------------------------
 c
       implicit real*8 (a-h,o-z)
 c
-      include 'params.amg'
+c     include 'params.amg'
 c
       dimension imin(25),imax(25)
       dimension ia (*)
@@ -41,9 +42,9 @@ c
 c---------------------------------------------------------------------
 c
       call fftest1(k,ewt,icdep,nun,imin,imax,a,ia,ja,iu,icg,ifg,ib,
-     *             nc,ns,nf,nff1)
+     *             nc,ns,nf,nff1,ndimu,ndimp,ndima,ndimb)
       call fftest2(k,icdep,nun,imin,imax,a,ia,ja,iu,icg,ifg,ib,
-     *             nc,ns,nf,nff2)
+     *             nc,ns,nf,nff2,ndimu,ndimp,ndima,ndimb)
 c
       write(6,1000) k
       write(6,2000)
@@ -62,7 +63,8 @@ c
       end
 c
       subroutine fftest1(k,ewt,icdep,nun,imin,imax,
-     *                   a,ia,ja,iu,icg,ifg,ib,nc,ns,nf,nff)
+     *                   a,ia,ja,iu,icg,ifg,ib,nc,ns,nf,nff,
+     *                   ndimu,ndimp,ndima,ndimb)
 c
 c---------------------------------------------------------------------
 c
@@ -80,7 +82,7 @@ c---------------------------------------------------------------------
 c
       implicit real*8 (a-h,o-z)
 c
-      include 'params.amg'
+c     include 'params.amg'
 c
       dimension imin(25),imax(25)
       dimension ia (*)
@@ -254,7 +256,8 @@ c
       end
 c
       subroutine fftest2(k,icdep,nun,imin,imax,
-     *                   a,ia,ja,iu,icg,ifg,ib,nc,ns,nf,nff)
+     *                   a,ia,ja,iu,icg,ifg,ib,nc,ns,nf,nff,
+     *                   ndimu,ndimp,ndima,ndimb)
 c
 c---------------------------------------------------------------------
 c
@@ -266,7 +269,7 @@ c---------------------------------------------------------------------
 c
       implicit real*8 (a-h,o-z)
 c
-      include 'params.amg'
+c     include 'params.amg'
 c
       dimension imin(25),imax(25)
       dimension ia (*)

@@ -35,6 +35,8 @@ typedef struct
 
    Data        *pcg_data;
 
+   Data        *wjacobi_data;
+
    Data        *amgs01_data;
    
 } Solver;
@@ -48,6 +50,8 @@ typedef struct
 #define SolverStopTolerance(solver)  ((solver) -> stop_tolerance)
 
 #define SolverPCGData(solver)        ((solver) -> pcg_data)
+
+#define SolverWJacobiData(solver)    ((solver) -> wjacobi_data)
 
 #define SolverAMGS01Data(solver)     ((solver) -> amgs01_data)
 

@@ -49,6 +49,10 @@ Data        *data;
 
    int      num_levels;
    Matrix  *A;
+   int      ndimu;
+   int      ndimp;
+   int      ndima;
+   int      ndimb;
    Matrix  *P;
    int     *icdep;
    int     *imin;
@@ -75,9 +79,16 @@ Data        *data;
    A  = ProblemA(problem);
    ia = MatrixIA(A);
 
-   b  = talloc(double, NDIMA(ia[num_variables]-1));
-   ib = talloc(int, NDIMU(num_variables+1));
-   jb = talloc(int, NDIMA(ia[num_variables]-1));
+   /* set size variables */
+   ndimu = NDIMU(num_variables);
+   ndimp = NDIMP(num_points);
+   ndima = NDIMA(ia[num_variables]-1);
+   ndimb = NDIMB(ia[num_variables]-1);
+
+
+   b  = ctalloc(double, ndimb);
+   ib = ctalloc(int, ndimu);
+   jb = ctalloc(int, ndimb);
    P  = NewMatrix(b, ib, jb, num_variables);
 
    icdep      = ctalloc(int, levmax*levmax);
@@ -85,9 +96,9 @@ Data        *data;
    imax       = ctalloc(int, levmax);
    ipmn       = ctalloc(int, levmax);
    ipmx       = ctalloc(int, levmax);
-   icg        = ctalloc(int, NDIMU(num_variables));
-   ifg        = ctalloc(int, NDIMU(num_variables));
-   ifc        = ctalloc(int, NDIMU(num_variables));
+   icg        = ctalloc(int, ndimu);
+   ifg        = ctalloc(int, ndimu);
+   ifc        = ctalloc(int, ndimu);
 
    /* set fine level point and variable bounds */
    ipmn[0] = 1;
@@ -103,6 +114,10 @@ Data        *data;
 
    AMGS01DataNumLevels(amgs01_data) = num_levels;
    AMGS01DataA(amgs01_data)         = A;
+   AMGS01DataNDIMU(amgs01_data)     = ndimu;
+   AMGS01DataNDIMP(amgs01_data)     = ndimp;
+   AMGS01DataNDIMA(amgs01_data)     = ndima;
+   AMGS01DataNDIMB(amgs01_data)     = ndimb;
    AMGS01DataP(amgs01_data)         = P;
    AMGS01DataICDep(amgs01_data)     = icdep;
    AMGS01DataIMin(amgs01_data)      = imin;
@@ -186,10 +201,9 @@ FILE  *fp;
    fscanf(fp, "%d", &ioutsol);
 
    data = NewAMGS01Data(levmax, ncg, ecg, nwt, ewt, nstr,
-			ncyc, mu,
-			ntrlx, iprlx, ierlx, iurlx,
-			ioutdat, ioutgrd, ioutmat,
-			ioutres, ioutsol, GlobalsLogFileName);
+			ncyc, mu, ntrlx, iprlx, ierlx, iurlx,
+			ioutdat, ioutgrd, ioutmat, ioutres, ioutsol,
+			GlobalsLogFileName);
 
    return data;
 }
@@ -223,7 +237,7 @@ char   *log_file_name;
 {
    AMGS01Data  *amgs01_data;
 
-   amgs01_data = talloc(AMGS01Data, 1);
+   amgs01_data = ctalloc(AMGS01Data, 1);
 
    AMGS01DataLevMax(amgs01_data)  = levmax;
    AMGS01DataNCG(amgs01_data)     = ncg;

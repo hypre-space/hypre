@@ -5,7 +5,8 @@ c     the following routine sets the vectors for the level k+1
 c
 c=====================================================================
 c
-      subroutine setc(k,imin,imax,iu,ip,icg,ifg,ipmn,ipmx,iv,xp,yp)
+      subroutine setc(k,imin,imax,iu,ip,icg,ifg,ipmn,ipmx,iv,xp,yp,
+     *                ndimu,ndimp,ndima,ndimb)
 c
 c---------------------------------------------------------------------
 c
@@ -15,7 +16,7 @@ c---------------------------------------------------------------------
 c
       implicit real*8 (a-h,o-z)
 c
-      include 'params.amg'
+c     include 'params.amg'
 c
       dimension imin(25),imax(25)
       dimension iu (*)

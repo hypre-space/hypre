@@ -29,6 +29,7 @@ typedef struct
    Matrix  *A;
    Vector  *p;
    Vector  *s;
+   Vector  *r;
 
    void   (*precond)();
    Data    *precond_data;
@@ -47,6 +48,7 @@ typedef struct
 #define PCGDataA(pcg_data)            ((pcg_data) -> A)
 #define PCGDataP(pcg_data)            ((pcg_data) -> p)
 #define PCGDataS(pcg_data)            ((pcg_data) -> s)
+#define PCGDataR(pcg_data)            ((pcg_data) -> r)
 
 #define PCGDataPrecond(pcg_data)      ((pcg_data) -> precond)
 #define PCGDataPrecondData(pcg_data)  ((pcg_data) -> precond_data)

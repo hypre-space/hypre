@@ -34,10 +34,10 @@
 #include "fortran.h"
 
 
-#define  NDIMU(nv)  (3*nv)
-#define  NDIMP(np)  (3*np)
-#define  NDIMA(na)  (5*na)
-#define  NDIMB(na)  (1*na)
+#define  NDIMU(nv)  (50*nv)
+#define  NDIMP(np)  (50*np)
+#define  NDIMA(na)  (4*na)
+#define  NDIMB(na)  (2*na)
 
 
 #endif

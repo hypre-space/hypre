@@ -31,7 +31,6 @@ misc.f
 ms.f
 opdfn.f
 outprt.f
-params.amg
 pcg.c
 pcg.h
 problem.c
@@ -55,4 +54,6 @@ testsB.f
 trunc.f
 vector.c
 vector.h
+wjacobi.c
+wjacobi.h
 write.c

@@ -53,8 +53,6 @@ char     *file_name;
    int      i, j, k;
 
 
-   SeedRand(1);
-
    /*----------------------------------------------------------
     * Open the problem file
     *----------------------------------------------------------*/
@@ -99,7 +97,7 @@ char     *file_name;
    }
    else
    {
-      data = talloc(double, NDIMU(num_variables));
+      data = ctalloc(double, NDIMU(num_variables));
 
       if (flag == 1)
       {
@@ -135,7 +133,7 @@ char     *file_name;
    }
    else
    {
-      data = talloc(double, NDIMU(num_variables));
+      data = ctalloc(double, NDIMU(num_variables));
 
       if (flag == 1)
       {
@@ -162,9 +160,9 @@ char     *file_name;
     * iu, ip, iv
     *----------------------------------------------------------*/
 
-   iu = talloc(int, NDIMU(num_variables));
-   ip = talloc(int, NDIMU(num_variables));
-   iv = talloc(int, NDIMP(num_points+1));
+   iu = ctalloc(int, NDIMU(num_variables));
+   ip = ctalloc(int, NDIMU(num_variables));
+   iv = ctalloc(int, NDIMP(num_points+1));
 
    fscanf(fp, "%d", &flag);
 
@@ -205,9 +203,9 @@ char     *file_name;
     * xp, yp, zp
     *----------------------------------------------------------*/
 
-   xp = talloc(double, NDIMP(num_points));
-   yp = talloc(double, NDIMP(num_points));
-   zp = talloc(double, NDIMP(num_points));
+   xp = ctalloc(double, NDIMP(num_points));
+   yp = ctalloc(double, NDIMP(num_points));
+   zp = ctalloc(double, NDIMP(num_points));
 
    fscanf(fp, "%d", &flag);
 
@@ -236,7 +234,7 @@ char     *file_name;
     * Set the problem structure
     *----------------------------------------------------------*/
 
-   problem = talloc(Problem, 1);
+   problem = ctalloc(Problem, 1);
 
    ProblemNumVariables(problem) = num_variables;
 

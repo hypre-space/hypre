@@ -7,7 +7,8 @@ c=====================================================================
 c
       subroutine crsgd(k,nstr,ecg,ncg,ewt,nwt,mmax,icdep,
      *                 nun,imin,imax,a,ia,ja,iu,ip,icg,ifg,
-     *                 b,ib,jb,ipmn,ipmx,iv,xp,yp,ifc)
+     *                 b,ib,jb,ipmn,ipmx,iv,xp,yp,ifc,
+     *                 ndimu,ndimp,ndima,ndimb)
 c
 c---------------------------------------------------------------------
 c
@@ -247,12 +248,14 @@ c     write(*,'(1x,i1\)') 1
 c
 c===> define the strong connections
 c
-      call strcnc(k,isort,ecg,istr,imin,imax,a,ia,ja,iu)
+      call strcnc(k,isort,ecg,istr,imin,imax,a,ia,ja,iu,
+     *            ndimu,ndimp,ndima,ndimb)
 c     write(*,'(1x,i1\)') 2
 c
 c===> set the form of b
 c
-      call binitl(k,imin,imax,ia,ja,ifg,b,ib,jb)
+      call binitl(k,imin,imax,ia,ja,ifg,b,ib,jb,
+     *            ndimu,ndimp,ndima,ndimb)
 c     write(*,'(1x,i1\)') 3
 c
 c     set initial color value
@@ -267,19 +270,22 @@ c
 c===> set the weights for coloring
 c
       call setcw(k,ncolor,jval0,jvalmx,icdep,nun,
-     *           imin,imax,ia,iu,icg,ifg,ib,jb)
+     *           imin,imax,ia,iu,icg,ifg,ib,jb,
+     *           ndimu,ndimp,ndima,ndimb)
 c     write(*,'(1x,i1\)') 5
 c
 c===> perform the coloring
 c
       call color(k,ncolor,jval0,jvalmx,icdep,
-     *           imin,imax,ia,ja,iu,ip,icg,ifg,ib,jb,iv)
+     *           imin,imax,ia,ja,iu,ip,icg,ifg,ib,jb,iv,
+     *           ndimu,ndimp,ndima,ndimb)
 c     write(*,'(1x,i1\)') 6
 c
 c===> test the resulting f-points
 c
       call ftest(k,itst,ncolor,ewt,nwt,iact,npts,icdep,
-     *           imin,imax,a,ia,ja,iu,ip,icg,ifg,ib,iv)
+     *           imin,imax,a,ia,ja,iu,ip,icg,ifg,ib,iv,
+     *           ndimu,ndimp,ndima,ndimb)
 c     write(*,'(1x,i1\)') 7
 c
 c===> return to recolor points if necessary
@@ -289,14 +295,16 @@ CCJWR >>>>>
 c
 c     perform tests for verification (run all tests)
 c
-c     call fftest(k,ewt,icdep,nun,imin,imax,a,ia,ja,iu,icg,ifg,ib)
+c     call fftest(k,ewt,icdep,nun,imin,imax,a,ia,ja,iu,icg,ifg,ib,
+c    *            ndimu,ndimp,ndima,ndimb)
 c     write(*,'(1x,i1\)') 8
 c
 CCJWR <<<<<
 c
 c===> test for grid coarse enough
 c
-      call gtest(k,mmax,imin,imax,icg,ifg)
+      call gtest(k,mmax,imin,imax,icg,ifg,
+     *           ndimu,ndimp,ndima,ndimb)
 c     write(*,'(1x,i1\)') 9
 c
 c===> return if coarsest level
@@ -305,7 +313,8 @@ c
 c
 c===> load f-rows of b with strong c-connections
 c
-      call bloadf(k,imin,imax,a,ia,ja,icg,b,ib,jb)
+      call bloadf(k,imin,imax,a,ia,ja,icg,b,ib,jb,
+     *            ndimu,ndimp,ndima,ndimb)
 c     write(*,'(1x,i1\)') 0
 c
 c===> set the interpolation weights
@@ -321,7 +330,8 @@ c     write(*,'(1x,i1\)') 4
 c
 c===> define restriction (transpose of interpolation only)
 c
-      call rstdf0(k,imin,imax,icg,b,ib,jb)
+      call rstdf0(k,imin,imax,icg,b,ib,jb,
+     *            ndimu,ndimp,ndima,ndimb)
 c     write(*,'(1x,i1\)') 5
 c
       return

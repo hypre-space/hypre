@@ -150,7 +150,8 @@ c---------------------------------------------------------------------
 c
       implicit real*8 (a-h,o-z)
 c
-      include 'params.amg'
+c     include 'params.amg'
+      common /params/ndimu,ndimp,ndima,ndimb
 c
       dimension imin(25),imax(25)
       dimension u  (*)
@@ -220,7 +221,8 @@ c---------------------------------------------------------------------
 c
       implicit real*8 (a-h,o-z)
 c
-      include 'params.amg'
+c     include 'params.amg'
+      common /params/ndimu,ndimp,ndima,ndimb
 c
       dimension imin(25),imax(25)
       dimension u  (*)
