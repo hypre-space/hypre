@@ -28,7 +28,4 @@ head solvers.testdata.tmp0 > solvers.testdata.temp
 tail -21 solvers.out.4 > solvers.testdata.tmp0
 head solvers.testdata.tmp0 > solvers.testdata.temp
 
-tail -21 solvers.out.5 > solvers.testdata.tmp0
-head solvers.testdata.tmp0 > solvers.testdata.temp
-
 rm -f solvers.testdata solvers.testdata.tmp0 solvers.testdata.temp
