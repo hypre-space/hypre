@@ -43,6 +43,7 @@ FILES = \
  box.c\
  box_algebra.c\
  box_alloc.c\
+ box_boundary.c\
  box_neighbors.c\
  communication_info.c\
  computation.c\

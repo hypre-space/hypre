@@ -132,6 +132,22 @@ hypre_max(0, (hypre_BoxIMaxD(box, d) - hypre_BoxIMinD(box, d) + 1))
 #define hypre_BoxSizeY(box)    hypre_BoxSizeD(box, 1)
 #define hypre_BoxSizeZ(box)    hypre_BoxSizeD(box, 2)
 
+#define hypre_BoxEqualP( box1, box2 ) (\
+ hypre_BoxIMinX(box1)==hypre_BoxIMinX(box1) &&\
+ hypre_BoxIMaxX(box1)==hypre_BoxIMaxX(box1) &&\
+ hypre_BoxIMinY(box1)==hypre_BoxIMinY(box1) &&\
+ hypre_BoxIMaxY(box1)==hypre_BoxIMaxY(box1) &&\
+ hypre_BoxIMinZ(box1)==hypre_BoxIMinZ(box1) &&\
+ hypre_BoxIMaxZ(box1)==hypre_BoxIMaxZ(box1) )
+
+#define hypre_IndexInBoxP( index, box ) (\
+ hypre_IndexX(index)>=hypre_BoxIMinX(box) &&\
+ hypre_IndexX(index)<=hypre_BoxIMaxX(box) &&\
+ hypre_IndexY(index)>=hypre_BoxIMinY(box) &&\
+ hypre_IndexY(index)<=hypre_BoxIMaxY(box) &&\
+ hypre_IndexZ(index)>=hypre_BoxIMinZ(box) &&\
+ hypre_IndexZ(index)<=hypre_BoxIMaxZ(box) )
+
 #define hypre_CopyBox(box1, box2) \
 ( hypre_CopyIndex(hypre_BoxIMin(box1), hypre_BoxIMin(box2)),\
   hypre_CopyIndex(hypre_BoxIMax(box1), hypre_BoxIMax(box2)) )
@@ -284,6 +300,10 @@ if (hypre__num_blocks > 1)\
       hypre__nz = hypre__div + ((hypre__mod > hypre__block) ? 1 : 0);\
    }\
 }
+
+#define hypre_BoxLoopGetIndex( index, base, i, j, k )\
+ hypre_SetIndex( index, i+hypre_IndexX(base),\
+  j+hypre_IndexY(base), k+hypre_IndexZ(base) )
 
 /*-----------------------------------*/
 

@@ -717,84 +717,74 @@ hypre_StructVectorClearGhostValues( hypre_StructVector *vector )
 
 /*--------------------------------------------------------------------------
  * hypre_StructVectorClearBoundGhostValues
- * clears vector values on the ghost zones next to the limits of the grid's
- * bounding box, which are normally the physical boundaries
+ * clears vector values on the physical boundaries
  *--------------------------------------------------------------------------*/
 
 int 
 hypre_StructVectorClearBoundGhostValues( hypre_StructVector *vector )
 {
    int    ierr = 0;
-
-   hypre_Box          *v_data_box;
-                    
    int                 vi;
    double             *vp;
-
    hypre_BoxArray     *boxes;
    hypre_Box          *box;
-   hypre_BoxArray     *diff_boxes;
-   hypre_Box          *diff_box;
+   hypre_Box          *v_data_box;
    hypre_Index         loop_size;
    hypre_IndexRef      start;
-   hypre_Index         unit_stride;
-   hypre_Box          *bounding_ghost_box;
-
-   int                 i, j, d, v1, v2;
+   hypre_Index         stride;
+   hypre_Box *bbox;
+   hypre_StructGrid   *grid;
+   hypre_BoxArray     *boundary_boxes;
+   hypre_BoxArray     *array_of_box;
+   hypre_BoxArray     *work_boxarray;
+      
+   int                 i, i2;
    int                 loopi, loopj, loopk;
-   int                *num_ghost;
 
    /*-----------------------------------------------------------------------
     * Set the vector coefficients
     *-----------------------------------------------------------------------*/
 
-   hypre_SetIndex(unit_stride, 1, 1, 1);
- 
-   boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(vector));
-   num_ghost = hypre_StructGridNumGhost(hypre_StructVectorGrid(vector));
-   bounding_ghost_box = hypre_BoxDuplicate(
-      hypre_StructGridBoundingBox(hypre_StructVectorGrid(vector)) );
-   for (d = 0; d < 3; d++)
-   {
-      hypre_BoxIMinD(bounding_ghost_box, d) -= num_ghost[2*d];
-      hypre_BoxIMaxD(bounding_ghost_box, d) += num_ghost[2*d + 1];
-   }
-   diff_boxes = hypre_BoxArrayCreate(0);
+   grid = hypre_StructVectorGrid(vector);
+   boxes = hypre_StructGridBoxes(grid);
+   hypre_SetIndex(stride, 1, 1, 1);
+
    hypre_ForBoxI(i, boxes)
       {
          box        = hypre_BoxArrayBox(boxes, i);
-
+         boundary_boxes = hypre_BoxArrayCreate( 0 );
          v_data_box =
             hypre_BoxArrayBox(hypre_StructVectorDataSpace(vector), i);
+         ierr += hypre_BoxBoundaryG( v_data_box, grid, boundary_boxes );
          vp = hypre_StructVectorBoxData(vector, i);
 
-         hypre_BoxArraySetSize(diff_boxes, 0);
-         hypre_SubtractBoxes(v_data_box, box, diff_boxes);
-         hypre_ForBoxI(j, diff_boxes)
+         /* box is a grid box, no ghost zones.
+            v_data_box is vector data box, may or may not have ghost zones
+            To get only ghost zones, subtract box from boundary_boxes.   */
+         work_boxarray = hypre_BoxArrayCreate( 0 );
+         array_of_box = hypre_BoxArrayCreate( 1 );
+         hypre_BoxArrayBoxes(array_of_box)[0] = *box;
+         hypre_SubtractBoxArrays( boundary_boxes, array_of_box, work_boxarray );
+
+         hypre_ForBoxI(i2, boundary_boxes)
             {
-               diff_box = hypre_BoxArrayBox(diff_boxes, j);
-               v1 = hypre_BoxVolume( diff_box );
-               hypre_IntersectBoxes( bounding_ghost_box, diff_box, diff_box );
-               v2 = hypre_BoxVolume( diff_box );
-               if ( hypre_BoxVolume( diff_box ) > 0 )
-               {
-                  start = hypre_BoxIMin(diff_box);
-
-                  hypre_BoxGetSize(diff_box, loop_size);
-
-                  hypre_BoxLoop1Begin(loop_size,
-                                      v_data_box, start, unit_stride, vi);
+               bbox       = hypre_BoxArrayBox(boundary_boxes, i2);
+               hypre_BoxGetSize(bbox, loop_size);
+               start = hypre_BoxIMin(bbox);
+               hypre_BoxLoop1Begin(loop_size,
+                                   v_data_box, start, stride, vi);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,vi 
 #include "hypre_box_smp_forloop.h"
-                  hypre_BoxLoop1For(loopi, loopj, loopk, vi)
-                     {
-                        vp[vi] = 0.0;
-                     }
-                  hypre_BoxLoop1End(vi);
-               }
+               hypre_BoxLoop1For(loopi, loopj, loopk, vi)
+                  {
+                     vp[vi] = 0.0;
+                  }
+               hypre_BoxLoop1End(vi);
             }
+         hypre_BoxArrayDestroy(boundary_boxes);
+         hypre_BoxArrayDestroy(work_boxarray);
+         hypre_BoxArrayDestroy(array_of_box);
       }
-   hypre_BoxArrayDestroy(diff_boxes);
 
    return ierr;
 }

@@ -146,6 +146,22 @@ hypre_max(0, (hypre_BoxIMaxD(box, d) - hypre_BoxIMinD(box, d) + 1))
 #define hypre_BoxSizeY(box)    hypre_BoxSizeD(box, 1)
 #define hypre_BoxSizeZ(box)    hypre_BoxSizeD(box, 2)
 
+#define hypre_BoxEqualP( box1, box2 ) (\
+ hypre_BoxIMinX(box1)==hypre_BoxIMinX(box1) &&\
+ hypre_BoxIMaxX(box1)==hypre_BoxIMaxX(box1) &&\
+ hypre_BoxIMinY(box1)==hypre_BoxIMinY(box1) &&\
+ hypre_BoxIMaxY(box1)==hypre_BoxIMaxY(box1) &&\
+ hypre_BoxIMinZ(box1)==hypre_BoxIMinZ(box1) &&\
+ hypre_BoxIMaxZ(box1)==hypre_BoxIMaxZ(box1) )
+
+#define hypre_IndexInBoxP( index, box ) (\
+ hypre_IndexX(index)>=hypre_BoxIMinX(box) &&\
+ hypre_IndexX(index)<=hypre_BoxIMaxX(box) &&\
+ hypre_IndexY(index)>=hypre_BoxIMinY(box) &&\
+ hypre_IndexY(index)<=hypre_BoxIMaxY(box) &&\
+ hypre_IndexZ(index)>=hypre_BoxIMinZ(box) &&\
+ hypre_IndexZ(index)<=hypre_BoxIMaxZ(box) )
+
 #define hypre_CopyBox(box1, box2) \
 ( hypre_CopyIndex(hypre_BoxIMin(box1), hypre_BoxIMin(box2)),\
   hypre_CopyIndex(hypre_BoxIMax(box1), hypre_BoxIMax(box2)) )
@@ -298,6 +314,10 @@ if (hypre__num_blocks > 1)\
       hypre__nz = hypre__div + ((hypre__mod > hypre__block) ? 1 : 0);\
    }\
 }
+
+#define hypre_BoxLoopGetIndex( index, base, i, j, k )\
+ hypre_SetIndex( index, i+hypre_IndexX(base),\
+  j+hypre_IndexY(base), k+hypre_IndexZ(base) )
 
 /*-----------------------------------*/
 
@@ -1639,6 +1659,7 @@ hypre_BoxArrayBox(hypre_StructVectorDataSpace(vector), b)
 int hypre_IntersectBoxes( hypre_Box *box1 , hypre_Box *box2 , hypre_Box *ibox );
 int hypre_SubtractBoxes( hypre_Box *box1 , hypre_Box *box2 , hypre_BoxArray *box_array );
 int hypre_SubtractBoxArrays( hypre_BoxArray *box_array1 , hypre_BoxArray *box_array2 , hypre_BoxArray *tmp_box_array );
+int hypre_SubtractBoxArraysExceptBoxes( hypre_BoxArray *box_array1 , hypre_BoxArray *box_array2 , hypre_BoxArray *tmp_box_array , hypre_Box *boxa , hypre_Box *boxb );
 int hypre_UnionBoxes( hypre_BoxArray *boxes );
 
 /* box_alloc.c */
@@ -1646,6 +1667,13 @@ int hypre_BoxInitializeMemory( const int at_a_time );
 int hypre_BoxFinalizeMemory( void );
 hypre_Box *hypre_BoxAlloc( void );
 int hypre_BoxFree( hypre_Box *box );
+
+/* box_boundary.c */
+int hypre_BoxArraySubtractAdjacentBoxArray( hypre_BoxArray *boxes1 , hypre_BoxArray *boxes2 , hypre_Box *box , int thick );
+int hypre_BoxBoundaryNT( hypre_Box *box , hypre_BoxArray *neighbor_boxes , hypre_BoxArray *boundary , int *thickness );
+int hypre_BoxBoundaryDNT( hypre_Box *box , hypre_BoxArray *neighbor_boxes , hypre_BoxArray *boundary , int ds , int thick );
+int hypre_BoxBoundaryG( hypre_Box *box , hypre_StructGrid *g , hypre_BoxArray *boundary );
+int hypre_BoxBoundaryDG( hypre_Box *box , hypre_StructGrid *g , hypre_BoxArray *boundarym , hypre_BoxArray *boundaryp , int d );
 
 /* box.c */
 hypre_Box *hypre_BoxCreate( void );
