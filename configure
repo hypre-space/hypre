@@ -6078,13 +6078,12 @@ unset ac_cv_lib_$ac_lib_var
       for casc_dir in \
  .\
  utilities\
+ struct_matrix_vector\
+ struct_linear_solvers\
  parcsr_matrix_vector\
  parcsr_linear_solvers\
  seq_matrix_vector\
- struct_matrix_vector\
- struct_linear_solvers\
  seq_linear_solvers/pamg\
- test\
  CI_struct_linear_solvers\
  CI_struct_matrix_vector\
  PETScMat_linear_solvers/pilut\
@@ -6093,6 +6092,8 @@ unset ac_cv_lib_$ac_lib_var
  distributed_matrix\
  matrix_matrix\
  bmakes\
+ test\
+ tools\
  docs; do
       if test -f $srcdir/$casc_dir/$casc_output_file.in; then
          Makefile_list="$Makefile_list $casc_dir/$casc_output_file"

@@ -649,13 +649,12 @@ dnl *********************************************************************
 CASC_CONFIG_OUTPUT_LIST(\
  .\
  utilities\
+ struct_matrix_vector\
+ struct_linear_solvers\
  parcsr_matrix_vector\
  parcsr_linear_solvers\
  seq_matrix_vector\
- struct_matrix_vector\
- struct_linear_solvers\
  seq_linear_solvers/pamg\
- test\
  CI_struct_linear_solvers\
  CI_struct_matrix_vector\
  PETScMat_linear_solvers/pilut\
@@ -664,6 +663,8 @@ CASC_CONFIG_OUTPUT_LIST(\
  distributed_matrix\
  matrix_matrix\
  bmakes\
+ test\
+ tools\
  docs)
 
 AC_OUTPUT($Makefile_list)
