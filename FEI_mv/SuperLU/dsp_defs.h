@@ -131,6 +131,9 @@ dgssvx(char *, char *, char *, SuperMatrix *, factor_param_t *,
 
 /* Supernodal LU factor related */
 extern void
+dCreate_CompRow_Matrix(SuperMatrix *, int, int, int, double *,
+		       int *, int *, Stype_t, Dtype_t, Mtype_t);
+extern void
 dCreate_CompCol_Matrix(SuperMatrix *, int, int, int, double *,
 		       int *, int *, Stype_t, Dtype_t, Mtype_t);
 extern void
