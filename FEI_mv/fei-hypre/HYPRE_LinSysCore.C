@@ -2260,7 +2260,7 @@ void HYPRE_LinSysCore::matrixLoadComplete()
        fprintf(fp, "%6d \n", nrows);
        for ( i = localStartRow_-1; i <= localEndRow_-1; i++ )
        {
-          HYPRE_IJVectorGetLocalComponents(currB_, 1, &i, NULL, &value);
+          HYPRE_IJVectorGetLocalComponents(HYb_, 1, &i, NULL, &value);
           fprintf(fp, "%6d  %e \n", i+1, value);
        }
        fclose(fp);
