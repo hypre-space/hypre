@@ -51,6 +51,7 @@ unset F77
 
 casc_user_chose_compilers=no
 casc_user_chose_mpi=no
+casc_using_mpi=yes
 casc_using_pthreads=no
 casc_using_petsc=no
 casc_using_openmp=no   
@@ -197,25 +198,15 @@ dnl *********************************************************************
 AC_ARG_WITH(MPI, [\
   --without-MPI           compiles without MPI.  This option could affect
 			  which compiler is chosen],
-  if test "$withval" = "no"
-  then
-    casc_using_mpi=no
-    AC_DEFINE(HYPRE_SEQUENTIAL)
-  else
-    casc_using_mpi=yes
-  fi
+  casc_using_mpi=no
+  AC_DEFINE(HYPRE_SEQUENTIAL)
 )
 
 AC_ARG_WITH(COMM_SIMPLE, [\
   --with-COMM_SIMPLE      Do not use MPI derived data types.  This option
                           is automatically chosen for IBM, but may be
                           selected for other platforms as well.],
-  if test "$withval" = "no"
-  then
-    CFLAGS="$CFLAGS"
-  else
-    CFLAGS="$CFLAGS -DHYPRE_COMM_SIMPLE"
-  fi
+  CFLAGS="$CFLAGS -DHYPRE_COMM_SIMPLE"
 )
 
 AC_ARG_WITH(dmalloc, [\
@@ -234,17 +225,14 @@ AC_ARG_WITH(pthreads, [\
   --with-pthreads         use pthreads-- this may affect which compiler
 			  is chosen.  Tests are done to check for the
 			  pthread library.  Supported on IBM only.],
-  if test "$withval" != "no"
+  casc_using_pthreads=yes
+  CASC_CHECK_LIB(pthread, pthread_create, ,
+    [CASC_CHECK_LIB(pthreads, pthread_create)])
+
+  if test "$ac_cv_lib_pthread_pthread_create" = "yes" ||
+     test "$ac_cv_lib_pthreads_pthread_create" = "yes"
   then
-    casc_using_pthreads=yes
-    CASC_CHECK_LIB(pthread, pthread_create, ,
-      [CASC_CHECK_LIB(pthreads, pthread_create)])
-  
-    if test "$ac_cv_lib_pthread_pthread_create" = "yes" ||
-       test "$ac_cv_lib_pthreads_pthread_create" = "yes"
-    then
-      AC_DEFINE(HYPRE_USE_PTHREADS)
-    fi
+    AC_DEFINE(HYPRE_USE_PTHREADS)
   fi
 )
 
@@ -285,19 +273,12 @@ HYPRE_TOP_SRC_DIR=`pwd`
 
 AC_ARG_WITH(petsc, [\
   --with-petsc            use petsc],
-  if test "$withval" != "no"
-  then
-    casc_using_petsc=yes
-    HYPRE_PETSCDEFS="$HYPRE_PETSCDEFS -DPETSC_AVAILABLE"
-    HYPRE_PETSCLIBDIRS="$HYPRE_TOP_SRC_DIR/PETScMat_linear_solvers/pilut \
+  casc_using_petsc=yes
+  HYPRE_PETSCDEFS="$HYPRE_PETSCDEFS -DPETSC_AVAILABLE"
+  HYPRE_PETSCLIBDIRS="$HYPRE_TOP_SRC_DIR/PETScMat_linear_solvers/pilut \
 $HYPRE_TOP_SRC_DIR/PETSc_linear_solvers/ParILUT "
-    HYPRE_PETSCLIBS=" -l_HYPRE_PETScSolverParILUT \
+  HYPRE_PETSCLIBS=" -l_HYPRE_PETScSolverParILUT \
 -l_HYPRE_PETScMatPilutSolver "
-  else
-    HYPRE_PETSCDEFS=""
-    HYPRE_PETSCLIBDIRS=""
-    HYPRE_PETSCLIBS=""
-  fi
 )
 
 AC_PROG_RANLIB
