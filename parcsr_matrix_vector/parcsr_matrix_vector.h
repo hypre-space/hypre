@@ -273,23 +273,23 @@ hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(matrix))
 # define	P(s) s
 
 /* F90_HYPRE_parcsr_matrix.c */
-void hypre_F90_IFACE P((int hypre_newparcsrmatrix ));
-void hypre_F90_IFACE P((int hypre_destroyparcsrmatrix ));
-void hypre_F90_IFACE P((int hypre_initializeparcsrmatrix ));
-void hypre_F90_IFACE P((int hypre_readparcsrmatrix ));
-void hypre_F90_IFACE P((int hypre_printparcsrmatrix ));
-void hypre_F90_IFACE P((int hypre_getcommparcsr ));
-void hypre_F90_IFACE P((int hypre_getdimsparcsr ));
-void hypre_F90_IFACE P((int hypre_getlocalrangeparcsr ));
-void hypre_F90_IFACE P((int hypre_getrowparcsrmatrix ));
-void hypre_F90_IFACE P((int hypre_restorerowparcsrmatrix ));
+void hypre_F90_IFACE P((int hypre_parcsrmatrixcreate ));
+void hypre_F90_IFACE P((int hypre_parcsrmatrixdestroy ));
+void hypre_F90_IFACE P((int hypre_parcsrmatrixinitialize ));
+void hypre_F90_IFACE P((int hypre_parcsrmatrixread ));
+void hypre_F90_IFACE P((int hypre_parcsrmatrixprint ));
+void hypre_F90_IFACE P((int hypre_parcsrmatrixgetcomm ));
+void hypre_F90_IFACE P((int hypre_parcsrmatrixgetdims ));
+void hypre_F90_IFACE P((int hypre_parcsrmatrixgetlocalrange ));
+void hypre_F90_IFACE P((int hypre_parcsrmatrixgetrow ));
+void hypre_F90_IFACE P((int hypre_parcsrmatrixrestorerow ));
 
 /* F90_HYPRE_parcsr_vector.c */
-void hypre_F90_IFACE P((int hypre_newparvector ));
-void hypre_F90_IFACE P((int hypre_destroyparvector ));
-void hypre_F90_IFACE P((int hypre_initializeparvector ));
-void hypre_F90_IFACE P((int hypre_readparvector ));
-void hypre_F90_IFACE P((int hypre_printparvector ));
+void hypre_F90_IFACE P((int hypre_parvectorcreate ));
+void hypre_F90_IFACE P((int hypre_parvectordestroy ));
+void hypre_F90_IFACE P((int hypre_parvectorinitialize ));
+void hypre_F90_IFACE P((int hypre_parvectorread ));
+void hypre_F90_IFACE P((int hypre_parvectorprint ));
 
 /* F90_par_vector.c */
 void hypre_F90_IFACE P((int hypre_createparvector ));
