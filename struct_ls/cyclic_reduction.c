@@ -75,8 +75,8 @@ typedef struct
    int                 num_levels;
 
    int                 cdir;         /* coarsening direction */
-   zzz_Index          *base_index;
-   zzz_Index          *base_stride;
+   zzz_Index           base_index;
+   zzz_Index           base_stride;
 
    zzz_StructGrid    **grid_l;
                     
@@ -107,8 +107,6 @@ zzz_CyclicReductionInitialize( MPI_Comm *comm )
    cyc_red_data = zzz_CTAlloc(zzz_CyclicReductionData, 1);
 
    (cyc_red_data -> comm) = comm;
-   (cyc_red_data -> base_index)  = zzz_NewIndex();
-   (cyc_red_data -> base_stride) = zzz_NewIndex();
    (cyc_red_data -> time_index)  = zzz_InitializeTiming("CyclicReduction");
 
    /* set defaults */
@@ -129,7 +127,7 @@ zzz_CycRedNewCoarseOp( zzz_StructMatrix *A,
 {
    zzz_StructMatrix    *Ac;
 
-   zzz_Index          **Ac_stencil_shape;
+   zzz_Index           *Ac_stencil_shape;
    zzz_StructStencil   *Ac_stencil;
    int                  Ac_stencil_size;
    int                  Ac_stencil_dim;
@@ -155,11 +153,10 @@ zzz_CycRedNewCoarseOp( zzz_StructMatrix *A,
    if (!zzz_StructMatrixSymmetric(A))
    {
       Ac_stencil_size = 3;
-      Ac_stencil_shape = zzz_CTAlloc(zzz_Index *, Ac_stencil_size);
+      Ac_stencil_shape = zzz_CTAlloc(zzz_Index, Ac_stencil_size);
       for (i = -1; i < 2; i++)
       {
          /* Storage for 3 elements (c,w,e) */
-         Ac_stencil_shape[stencil_rank] = zzz_NewIndex();
          zzz_SetIndex(Ac_stencil_shape[stencil_rank],i,0,0);
          stencil_rank++;
       }
@@ -178,12 +175,11 @@ zzz_CycRedNewCoarseOp( zzz_StructMatrix *A,
    else
    {
       Ac_stencil_size = 2;
-      Ac_stencil_shape = zzz_CTAlloc(zzz_Index *, Ac_stencil_size);
+      Ac_stencil_shape = zzz_CTAlloc(zzz_Index, Ac_stencil_size);
       for (i = -1; i < 1; i++)
       {
 
          /* Storage for 2 elements in (c,w) */
-         Ac_stencil_shape[stencil_rank] = zzz_NewIndex();
          zzz_SetIndex(Ac_stencil_shape[stencil_rank],i,0,0);
          stencil_rank++;
       }
@@ -221,23 +217,23 @@ zzz_CycRedNewCoarseOp( zzz_StructMatrix *A,
 int
 zzz_CycRedSetupCoarseOp( zzz_StructMatrix *A,
                          zzz_StructMatrix *Ac,
-                         zzz_Index        *cindex,
-                         zzz_Index        *cstride )
+                         zzz_Index         cindex,
+                         zzz_Index         cstride )
 
 {
-   zzz_Index            *index_temp;
+   zzz_Index             index_temp;
 
    zzz_StructGrid       *cgrid;
    zzz_BoxArray         *cgrid_boxes;
    zzz_Box              *cgrid_box;
-   zzz_Index            *cstart;
-   zzz_Index            *stridec;
-   zzz_Index            *fstart;
-   zzz_Index            *stridef;
-   zzz_Index            *loop_size;
+   zzz_IndexRef          cstart;
+   zzz_Index             stridec;
+   zzz_Index             fstart;
+   zzz_IndexRef          stridef;
+   zzz_Index             loop_size;
 
-   int                  i;
-   int                  loopi, loopj, loopk;
+   int                   i;
+   int                   loopi, loopj, loopk;
 
    zzz_Box              *A_data_box;
    zzz_Box              *Ac_data_box;
@@ -245,19 +241,14 @@ zzz_CycRedSetupCoarseOp( zzz_StructMatrix *A,
    double               *a_cc, *a_cw, *a_ce;
    double               *ac_cc, *ac_cw, *ac_ce;
 
-   int                  iA, iAm1, iAp1;
-   int                  iAc;
-
-   int                  xOffsetA; 
-
-   int                  ierr;
-
-   index_temp = zzz_NewIndex();
-   loop_size = zzz_NewIndex();
+   int                   iA, iAm1, iAp1;
+   int                   iAc;
+                       
+   int                   xOffsetA; 
+                       
+   int                   ierr;
 
    stridef = cstride;
-   fstart = zzz_NewIndex();
-   stridec = zzz_NewIndex();
    zzz_SetIndex(stridec, 1, 1, 1);
 
    cgrid = zzz_StructMatrixGrid(Ac);
@@ -373,11 +364,6 @@ zzz_CycRedSetupCoarseOp( zzz_StructMatrix *A,
 
    } /* end ForBoxI */
 
-   zzz_FreeIndex(index_temp);
-   zzz_FreeIndex(stridec);
-   zzz_FreeIndex(loop_size);
-   zzz_FreeIndex(fstart);
-
    zzz_AssembleStructMatrix(Ac);
 
    return ierr;
@@ -397,8 +383,8 @@ zzz_CyclicReductionSetup( void             *cyc_red_vdata,
 
    MPI_Comm             *comm        = (cyc_red_data -> comm);
    int                   cdir        = (cyc_red_data -> cdir);
-   zzz_Index            *base_index  = (cyc_red_data -> base_index);
-   zzz_Index            *base_stride = (cyc_red_data -> base_stride);
+   zzz_IndexRef          base_index  = (cyc_red_data -> base_index);
+   zzz_IndexRef          base_stride = (cyc_red_data -> base_stride);
 
    int                   num_levels;
    zzz_StructGrid      **grid_l;
@@ -412,9 +398,9 @@ zzz_CyclicReductionSetup( void             *cyc_red_vdata,
 
    zzz_BoxArray         *coarsest_boxes;
 
-   zzz_Index            *cindex;
-   zzz_Index            *findex;
-   zzz_Index            *stride;
+   zzz_Index             cindex;
+   zzz_Index             findex;
+   zzz_Index             stride;
 
    zzz_BoxArrayArray    *send_boxes;
    zzz_BoxArrayArray    *recv_boxes;
@@ -442,14 +428,6 @@ zzz_CyclicReductionSetup( void             *cyc_red_vdata,
    int                   x_num_ghost[] = {0, 0, 0, 0, 0, 0};
 
    int                   ierr;
-
-   /*-----------------------------------------------------
-    * Initialize some things
-    *-----------------------------------------------------*/
-
-   cindex = zzz_NewIndex();
-   findex = zzz_NewIndex();
-   stride = zzz_NewIndex();
 
    /*-----------------------------------------------------
     * Compute a preliminary num_levels value based on the grid
@@ -674,10 +652,6 @@ zzz_CyclicReductionSetup( void             *cyc_red_vdata,
     * Finalize some things
     *-----------------------------------------------------*/
 
-   zzz_FreeIndex(cindex);
-   zzz_FreeIndex(findex);
-   zzz_FreeIndex(stride);
-
 #if 0
    {
       char  filename[255];
@@ -713,8 +687,8 @@ zzz_CyclicReduction( void             *cyc_red_vdata,
 
    int                 num_levels         = (cyc_red_data -> num_levels);
    int                 cdir               = (cyc_red_data -> cdir);
-   zzz_Index          *base_index         = (cyc_red_data -> base_index);
-   zzz_Index          *base_stride        = (cyc_red_data -> base_stride);
+   zzz_IndexRef        base_index         = (cyc_red_data -> base_index);
+   zzz_IndexRef        base_stride        = (cyc_red_data -> base_stride);
    zzz_SBoxArray      *base_points        = (cyc_red_data -> base_points);
    zzz_SBoxArray     **fine_points_l      = (cyc_red_data -> fine_points_l);
    zzz_SBoxArray     **coarse_points_l    = (cyc_red_data -> coarse_points_l);
@@ -746,14 +720,14 @@ zzz_CyclicReduction( void             *cyc_red_vdata,
    int                 bi;
    int                 xci;
                      
-   zzz_Index          *cindex;
-   zzz_Index          *stride;
-
-   zzz_Index          *index;
-   zzz_Index          *loop_size;
-   zzz_Index          *start;
-   zzz_Index          *startc;
-   zzz_Index          *stridec;
+   zzz_Index           cindex;
+   zzz_Index           stride;
+                       
+   zzz_Index           index;
+   zzz_Index           loop_size;
+   zzz_IndexRef        start;
+   zzz_Index           startc;
+   zzz_Index           stridec;
                      
    int                 compute_i, i, j, l;
    int                 loopi, loopj, loopk;
@@ -766,15 +740,6 @@ zzz_CyclicReduction( void             *cyc_red_vdata,
     * Initialize some things
     *--------------------------------------------------*/
 
-   index = zzz_NewIndex();
-
-   loop_size  = zzz_NewIndex();
-
-   cindex  = zzz_NewIndex();
-   stride  = zzz_NewIndex();
-
-   startc  = zzz_NewIndex();
-   stridec = zzz_NewIndex();
    zzz_SetIndex(stridec, 1, 1, 1);
 
    /*--------------------------------------------------
@@ -1043,13 +1008,6 @@ zzz_CyclicReduction( void             *cyc_red_vdata,
     * Finalize some things
     *-----------------------------------------------------*/
 
-   zzz_FreeIndex(index);
-   zzz_FreeIndex(loop_size);
-   zzz_FreeIndex(cindex);
-   zzz_FreeIndex(stride);
-   zzz_FreeIndex(startc);
-   zzz_FreeIndex(stridec);
-
    zzz_IncFLOPCount(cyc_red_data -> solve_flops);
    zzz_EndTiming(cyc_red_data -> time_index);
 
@@ -1062,8 +1020,8 @@ zzz_CyclicReduction( void             *cyc_red_vdata,
  
 int
 zzz_CyclicReductionSetBase( void      *cyc_red_vdata,
-                            zzz_Index *base_index,
-                            zzz_Index *base_stride )
+                            zzz_Index  base_index,
+                            zzz_Index  base_stride )
 {
    zzz_CyclicReductionData *cyc_red_data = cyc_red_vdata;
    int                      d;
@@ -1094,9 +1052,6 @@ zzz_CyclicReductionFinalize( void *cyc_red_vdata )
 
    if (cyc_red_data)
    {
-      zzz_FreeIndex(cyc_red_data -> base_index);
-      zzz_FreeIndex(cyc_red_data -> base_stride);
-
       zzz_FreeSBoxArray(cyc_red_data -> base_points);
       for (l = 0; l < ((cyc_red_data -> num_levels) - 1); l++)
       {

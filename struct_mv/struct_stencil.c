@@ -21,7 +21,7 @@
 zzz_StructStencil *
 zzz_NewStructStencil( int         dim,
                       int         size,
-                      zzz_Index **shape )
+                      zzz_Index  *shape )
 {
    zzz_StructStencil   *stencil;
 
@@ -41,12 +41,8 @@ zzz_NewStructStencil( int         dim,
 void 
 zzz_FreeStructStencil( zzz_StructStencil *stencil )
 {
-   int  i;
-
    if (stencil)
    {
-      for (i = 0; i < zzz_StructStencilSize(stencil); i++)
-         zzz_FreeIndex(zzz_StructStencilShape(stencil)[i]);
       zzz_TFree(zzz_StructStencilShape(stencil));
       zzz_TFree(stencil);
    }
@@ -60,9 +56,9 @@ zzz_FreeStructStencil( zzz_StructStencil *stencil )
 
 int
 zzz_StructStencilElementRank( zzz_StructStencil *stencil,
-                              zzz_Index         *stencil_element )
+                              zzz_Index          stencil_element )
 {
-   zzz_Index **stencil_shape;
+   zzz_Index  *stencil_shape;
    int         rank;
    int         i;
 
@@ -95,13 +91,13 @@ zzz_StructStencilElementRank( zzz_StructStencil *stencil,
 int
 zzz_SymmetrizeStructStencil( zzz_StructStencil  *stencil,
                              zzz_StructStencil **symm_stencil_ptr,
-                             zzz_Index         **symm_elements_ptr )
+                             int               **symm_elements_ptr )
 {
-   zzz_Index         **stencil_shape = zzz_StructStencilShape(stencil);
+   zzz_Index          *stencil_shape = zzz_StructStencilShape(stencil);
    int                 stencil_size  = zzz_StructStencilSize(stencil); 
 
    zzz_StructStencil  *symm_stencil;
-   zzz_Index         **symm_stencil_shape;
+   zzz_Index          *symm_stencil_shape;
    int                 symm_stencil_size;
    int                *symm_elements;
 
@@ -114,10 +110,9 @@ zzz_SymmetrizeStructStencil( zzz_StructStencil  *stencil,
     * Copy stencil elements into `symm_stencil_shape'
     *------------------------------------------------------*/
 
-   symm_stencil_shape = zzz_CTAlloc(zzz_Index *, 2*stencil_size);
+   symm_stencil_shape = zzz_CTAlloc(zzz_Index, 2*stencil_size);
    for (i = 0; i < stencil_size; i++)
    {
-      symm_stencil_shape[i] = zzz_NewIndex();
       zzz_CopyIndex(stencil_shape[i], symm_stencil_shape[i]);
    }
 
@@ -155,7 +150,6 @@ zzz_SymmetrizeStructStencil( zzz_StructStencil  *stencil,
          if (no_symmetric_stencil_element)
          {
             /* add symmetric stencil element to `symm_stencil' */
-            symm_stencil_shape[symm_stencil_size] = zzz_NewIndex();
             for (d = 0; d < 3; d++)
             {
                zzz_IndexD(symm_stencil_shape[symm_stencil_size], d) =

@@ -61,12 +61,11 @@ ZZZ_SetStructMatrixValues( ZZZ_StructMatrix  matrix,
                            double           *values              )
 {
    zzz_StructMatrix *new_matrix = (zzz_StructMatrix *) matrix;
-   zzz_Index        *new_grid_index;
+   zzz_Index         new_grid_index;
 
    int               d;
    int               ierr;
 
-   new_grid_index = zzz_NewIndex();
    for (d = 0; d < zzz_StructGridDim(zzz_StructMatrixGrid(new_matrix)); d++)
    {
       zzz_IndexD(new_grid_index, d) = grid_index[d];
@@ -76,8 +75,6 @@ ZZZ_SetStructMatrixValues( ZZZ_StructMatrix  matrix,
                                      new_grid_index,
                                      num_stencil_indices, stencil_indices,
                                      values );
-
-   zzz_FreeIndex(new_grid_index);
 
    return (ierr);
 }
@@ -92,7 +89,7 @@ ZZZ_SetStructMatrixCoeffs( ZZZ_StructMatrix  matrix,
                            double           *values              )
 {
    zzz_StructMatrix *new_matrix = (zzz_StructMatrix *) matrix;
-   zzz_Index        *new_grid_index;
+   zzz_Index         new_grid_index;
 
    int                 d;
    int                 s;
@@ -109,7 +106,6 @@ ZZZ_SetStructMatrixCoeffs( ZZZ_StructMatrix  matrix,
        stencil_indicies[s] = s;
      }
 
-   new_grid_index = zzz_NewIndex();
    for (d = 0; d < zzz_StructGridDim(zzz_StructMatrixGrid(new_matrix)); d++)
    {
       zzz_IndexD(new_grid_index, d) = grid_index[d];
@@ -120,7 +116,6 @@ ZZZ_SetStructMatrixCoeffs( ZZZ_StructMatrix  matrix,
                                      stencil_size, stencil_indicies,
                                      values );
 
-   zzz_FreeIndex(new_grid_index);
    zzz_TFree(stencil_indicies);
 
    return (ierr);
@@ -139,15 +134,13 @@ ZZZ_SetStructMatrixBoxValues( ZZZ_StructMatrix  matrix,
                               double           *values              )
 {
    zzz_StructMatrix *new_matrix = (zzz_StructMatrix *) matrix;
-   zzz_Index        *new_ilower;
-   zzz_Index        *new_iupper;
+   zzz_Index         new_ilower;
+   zzz_Index         new_iupper;
    zzz_Box          *new_value_box;
                     
    int               d;
    int               ierr;
 
-   new_ilower = zzz_NewIndex();
-   new_iupper = zzz_NewIndex();
    for (d = 0; d < zzz_StructGridDim(zzz_StructMatrixGrid(new_matrix)); d++)
    {
       zzz_IndexD(new_ilower, d) = ilower[d];

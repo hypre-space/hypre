@@ -26,8 +26,6 @@ zzz_SMGInitialize( MPI_Comm *comm )
    smg_data = zzz_CTAlloc(zzz_SMGData, 1);
 
    (smg_data -> comm)        = comm;
-   (smg_data -> base_index)  = zzz_NewIndex();
-   (smg_data -> base_stride) = zzz_NewIndex();
    (smg_data -> time_index)  = zzz_InitializeTiming("SMG");
 
    /* set defaults */
@@ -104,15 +102,6 @@ zzz_SMGFinalize( void *smg_vdata )
       zzz_TFree(smg_data -> tb_l);
       zzz_TFree(smg_data -> tx_l);
  
-      for (l = 0; l < 2; l++)
-      {
-         zzz_FreeIndex(smg_data -> base_index_l[l]);
-         zzz_FreeIndex(smg_data -> cindex_l[l]);
-         zzz_FreeIndex(smg_data -> findex_l[l]);
-         zzz_FreeIndex(smg_data -> base_stride_l[l]);
-         zzz_FreeIndex(smg_data -> cstride_l[l]);
-         zzz_FreeIndex(smg_data -> fstride_l[l]);
-      }
       zzz_TFree(smg_data -> base_index_l);
       zzz_TFree(smg_data -> cindex_l);
       zzz_TFree(smg_data -> findex_l);
@@ -229,8 +218,8 @@ zzz_SMGSetNumPostRelax( void *smg_vdata,
  
 int
 zzz_SMGSetBase( void      *smg_vdata,
-                zzz_Index *base_index,
-                zzz_Index *base_stride )
+                zzz_Index  base_index,
+                zzz_Index  base_stride )
 {
    zzz_SMGData *smg_data = smg_vdata;
    int          d;
@@ -350,9 +339,9 @@ zzz_SMGSetStructVectorConstantValues( zzz_StructVector *vector,
    double           *vp;
 
    zzz_SBox         *sbox;
-   zzz_Index        *loop_size;
-   zzz_Index        *start;
-   zzz_Index        *stride;
+   zzz_Index         loop_size;
+   zzz_IndexRef      start;
+   zzz_IndexRef      stride;
 
    int               loopi, loopj, loopk;
    int               i;
@@ -360,8 +349,6 @@ zzz_SMGSetStructVectorConstantValues( zzz_StructVector *vector,
    /*-----------------------------------------------------------------------
     * Set the vector coefficients
     *-----------------------------------------------------------------------*/
-
-   loop_size  = zzz_NewIndex();
 
    zzz_ForSBoxI(i, sbox_array)
    {
@@ -379,8 +366,6 @@ zzz_SMGSetStructVectorConstantValues( zzz_StructVector *vector,
                       vp[vi] = values;
                    });
    }
-
-   zzz_FreeIndex(loop_size);
 
    return ierr;
 }

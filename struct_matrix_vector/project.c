@@ -25,12 +25,12 @@
 
 zzz_SBox *
 zzz_ProjectBox( zzz_Box    *box,
-                zzz_Index  *index,
-                zzz_Index  *stride )
+                zzz_Index   index,
+                zzz_Index   stride )
 {
    zzz_SBox  *new_sbox;
    zzz_Box   *new_box;
-   zzz_Index *new_stride;
+   zzz_Index  new_stride;
 
    int        il, iu, i, s, d;
 
@@ -59,7 +59,6 @@ zzz_ProjectBox( zzz_Box    *box,
     * set the strides
     *------------------------------------------------------*/
 
-   new_stride = zzz_NewIndex();
    zzz_CopyIndex(stride, new_stride);
 
    new_sbox = zzz_NewSBox(new_box, new_stride);
@@ -77,8 +76,8 @@ zzz_ProjectBox( zzz_Box    *box,
 
 zzz_SBoxArray *
 zzz_ProjectBoxArray( zzz_BoxArray  *box_array,
-                     zzz_Index     *index,
-                     zzz_Index     *stride    )
+                     zzz_Index      index,
+                     zzz_Index      stride    )
 {
    zzz_SBoxArray       *new_sbox_array;
    zzz_SBox            *new_sbox;
@@ -109,8 +108,8 @@ zzz_ProjectBoxArray( zzz_BoxArray  *box_array,
 
 zzz_SBoxArrayArray *
 zzz_ProjectBoxArrayArray( zzz_BoxArrayArray  *box_array_array,
-                          zzz_Index          *index,
-                          zzz_Index          *stride          )
+                          zzz_Index           index,
+                          zzz_Index           stride          )
 {
    zzz_SBoxArrayArray  *new_sbox_array_array;
    zzz_SBoxArray       *new_sbox_array;
@@ -143,16 +142,15 @@ zzz_ProjectBoxArrayArray( zzz_BoxArrayArray  *box_array_array,
 
 zzz_SBoxArrayArray *
 zzz_ProjectRBPoint( zzz_BoxArrayArray *box_array_array,
-                    zzz_Index         *rb[4]           )
+                    zzz_Index          rb[4]           )
 {
    zzz_SBoxArrayArray *new_sbox_array_array;
    zzz_SBoxArrayArray *tmp_sbox_array_array;
 
-   zzz_Index          *stride;
+   zzz_Index           stride;
 
    int                 i;
 
-   stride = zzz_NewIndex();
    zzz_SetIndex(stride, 2, 2, 2);
 
    new_sbox_array_array =

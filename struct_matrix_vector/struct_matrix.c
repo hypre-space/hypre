@@ -24,7 +24,7 @@
 double *
 zzz_StructMatrixExtractPointerByIndex( zzz_StructMatrix *matrix,
                                        int               b,
-                                       zzz_Index        *index  )
+                                       zzz_Index         index  )
 {
    zzz_StructStencil   *stencil;
    int                  rank;
@@ -110,7 +110,7 @@ zzz_InitializeStructMatrixShell( zzz_StructMatrix *matrix )
 
    zzz_StructStencil  *user_stencil;
    zzz_StructStencil  *stencil;
-   zzz_Index         **stencil_shape;
+   zzz_Index          *stencil_shape;
    int                 stencil_size;
    int                 num_values;
    int                *symm_elements;
@@ -274,10 +274,10 @@ zzz_InitializeStructMatrixData( zzz_StructMatrix *matrix,
 {
    zzz_BoxArray *data_boxes;
    zzz_Box      *data_box;
-   zzz_Index    *loop_size;
-   zzz_Index    *index;
-   zzz_Index    *start;
-   zzz_Index    *stride;
+   zzz_Index     loop_size;
+   zzz_Index     index;
+   zzz_IndexRef  start;
+   zzz_Index     stride;
    double       *datap;
    int           datai;
    int           i;
@@ -292,10 +292,6 @@ zzz_InitializeStructMatrixData( zzz_StructMatrix *matrix,
     * in the ghost region.
     *-------------------------------------------------*/
 
-   loop_size = zzz_NewIndex();
-
-   index = zzz_NewIndex();
-   stride = zzz_NewIndex();
    zzz_SetIndex(index, 0, 0, 0);
    zzz_SetIndex(stride, 1, 1, 1);
 
@@ -318,11 +314,6 @@ zzz_InitializeStructMatrixData( zzz_StructMatrix *matrix,
 
       }
    }
-
-   zzz_FreeIndex(index);
-   zzz_FreeIndex(stride);
-
-   zzz_FreeIndex(loop_size);
 }
 
 /*--------------------------------------------------------------------------
@@ -350,7 +341,7 @@ zzz_InitializeStructMatrix( zzz_StructMatrix *matrix )
 
 int 
 zzz_SetStructMatrixValues( zzz_StructMatrix *matrix,
-                           zzz_Index        *grid_index,
+                           zzz_Index         grid_index,
                            int               num_stencil_indices,
                            int              *stencil_indices,
                            double           *values              )
@@ -359,8 +350,6 @@ zzz_SetStructMatrixValues( zzz_StructMatrix *matrix,
 
    zzz_BoxArray     *boxes;
    zzz_Box          *box;
-   zzz_Index        *imin;
-   zzz_Index        *imax;
 
    double           *matp;
 
@@ -371,15 +360,13 @@ zzz_SetStructMatrixValues( zzz_StructMatrix *matrix,
    zzz_ForBoxI(i, boxes)
    {
       box = zzz_BoxArrayBox(boxes, i);
-      imin = zzz_BoxIMin(box);
-      imax = zzz_BoxIMax(box);
 
-      if ((zzz_IndexX(grid_index) >= zzz_IndexX(imin)) &&
-          (zzz_IndexX(grid_index) <= zzz_IndexX(imax)) &&
-          (zzz_IndexY(grid_index) >= zzz_IndexY(imin)) &&
-          (zzz_IndexY(grid_index) <= zzz_IndexY(imax)) &&
-          (zzz_IndexZ(grid_index) >= zzz_IndexZ(imin)) &&
-          (zzz_IndexZ(grid_index) <= zzz_IndexZ(imax))   )
+      if ((zzz_IndexX(grid_index) >= zzz_BoxIMinX(box)) &&
+          (zzz_IndexX(grid_index) <= zzz_BoxIMaxX(box)) &&
+          (zzz_IndexY(grid_index) >= zzz_BoxIMinY(box)) &&
+          (zzz_IndexY(grid_index) <= zzz_BoxIMaxY(box)) &&
+          (zzz_IndexZ(grid_index) >= zzz_BoxIMinZ(box)) &&
+          (zzz_IndexZ(grid_index) <= zzz_BoxIMaxZ(box))   )
       {
          for (s = 0; s < num_stencil_indices; s++)
          {
@@ -413,17 +400,17 @@ zzz_SetStructMatrixBoxValues( zzz_StructMatrix *matrix,
 
    zzz_BoxArray     *data_space;
    zzz_Box          *data_box;
-   zzz_Index        *data_start;
-   zzz_Index        *data_stride;
+   zzz_IndexRef      data_start;
+   zzz_Index         data_stride;
    int               datai;
    double           *datap;
 
    zzz_Box          *dval_box;
-   zzz_Index        *dval_start;
-   zzz_Index        *dval_stride;
+   zzz_Index         dval_start;
+   zzz_Index         dval_stride;
    int               dvali;
 
-   zzz_Index        *loop_size;
+   zzz_Index         loop_size;
 
    int               i, s;
    int               loopi, loopj, loopk;
@@ -447,18 +434,13 @@ zzz_SetStructMatrixBoxValues( zzz_StructMatrix *matrix,
 
    if (box_array)
    {
-      loop_size  = zzz_NewIndex();
-
       data_space = zzz_StructMatrixDataSpace(matrix);
-      data_stride = zzz_NewIndex();
       zzz_SetIndex(data_stride, 1, 1, 1);
 
       dval_box = zzz_DuplicateBox(value_box);
       zzz_BoxIMaxD(dval_box, 0) +=
          (num_stencil_indices - 1)*zzz_BoxSizeD(dval_box, 0);
-      dval_stride = zzz_NewIndex();
       zzz_SetIndex(dval_stride, num_stencil_indices, 1, 1);
-      dval_start = zzz_NewIndex();
 
       zzz_ForBoxI(i, box_array)
       {
@@ -489,9 +471,6 @@ zzz_SetStructMatrixBoxValues( zzz_StructMatrix *matrix,
       }
 
       zzz_FreeBox(dval_box);
-      zzz_FreeIndex(dval_start);
-      zzz_FreeIndex(dval_stride);
-      zzz_FreeIndex(data_stride);
    }
 
    zzz_FreeBoxArray(box_array);
@@ -511,7 +490,7 @@ zzz_AssembleStructMatrix( zzz_StructMatrix *matrix )
    int                 *num_ghost = zzz_StructMatrixNumGhost(matrix);
 
    zzz_StructStencil   *comm_stencil;
-   zzz_Index          **comm_stencil_shape;
+   zzz_Index           *comm_stencil_shape;
    int                  comm_stencil_size;
 
    zzz_BoxArrayArray   *send_boxes;
@@ -541,13 +520,12 @@ zzz_AssembleStructMatrix( zzz_StructMatrix *matrix )
          (num_ghost[0] + num_ghost[1] + 1) *
          (num_ghost[2] + num_ghost[3] + 1) *
          (num_ghost[4] + num_ghost[5] + 1);
-      comm_stencil_shape = zzz_CTAlloc(zzz_Index *, comm_stencil_size);
+      comm_stencil_shape = zzz_CTAlloc(zzz_Index, comm_stencil_size);
       m = 0;
       for (k = -num_ghost[4]; k <= num_ghost[5]; k++)
          for (j = -num_ghost[2]; j <= num_ghost[3]; j++)
             for (i = -num_ghost[0]; i <= num_ghost[1]; i++)
             {
-               comm_stencil_shape[m] = zzz_NewIndex();
                zzz_SetIndex(comm_stencil_shape[m], i, j, k);
                m++;
             }
@@ -616,7 +594,7 @@ zzz_PrintStructMatrix( char             *filename,
    zzz_BoxArray       *boxes;
 
    zzz_StructStencil  *stencil;
-   zzz_Index         **stencil_shape;
+   zzz_Index          *stencil_shape;
 
    int                 num_values;
 
@@ -717,7 +695,7 @@ zzz_ReadStructMatrix( MPI_Comm *comm,
    int                 dim;
 
    zzz_StructStencil  *stencil;
-   zzz_Index         **stencil_shape;
+   zzz_Index          *stencil_shape;
    int                 stencil_size;
 
    int                 num_values;
@@ -758,10 +736,9 @@ zzz_ReadStructMatrix( MPI_Comm *comm,
    fscanf(file, "\nStencil:\n");
    dim = zzz_StructGridDim(grid);
    fscanf(file, "%d\n", &stencil_size);
-   stencil_shape = zzz_CTAlloc(zzz_Index *, stencil_size);
+   stencil_shape = zzz_CTAlloc(zzz_Index, stencil_size);
    for (i = 0; i < stencil_size; i++)
    {
-      stencil_shape[i] = zzz_NewIndex();
       fscanf(file, "%d: %d %d %d\n", &idummy,
              &zzz_IndexX(stencil_shape[i]),
              &zzz_IndexY(stencil_shape[i]),

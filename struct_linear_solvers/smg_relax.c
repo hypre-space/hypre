@@ -39,8 +39,8 @@ typedef struct
    int                  *pre_space_ranks;
    int                  *reg_space_ranks;
 
-   zzz_Index            *base_index;
-   zzz_Index            *base_stride;
+   zzz_Index             base_index;
+   zzz_Index             base_stride;
    zzz_SBoxArray        *base_sbox_array;
 
    int                   stencil_dim;
@@ -82,8 +82,6 @@ zzz_SMGRelaxInitialize( MPI_Comm *comm )
    (relax_data -> setup_a_rem)    = 1;
    (relax_data -> setup_a_sol)    = 1;
    (relax_data -> comm)           = comm;
-   (relax_data -> base_index)     = zzz_NewIndex();
-   (relax_data -> base_stride)    = zzz_NewIndex();
    (relax_data -> base_sbox_array)= NULL;
    (relax_data -> time_index)     = zzz_InitializeTiming("SMGRelax");
 
@@ -205,8 +203,6 @@ zzz_SMGRelaxFinalize( void *relax_vdata )
       zzz_TFree(relax_data -> space_strides);
       zzz_TFree(relax_data -> pre_space_ranks);
       zzz_TFree(relax_data -> reg_space_ranks);
-      zzz_FreeIndex(relax_data -> base_index);
-      zzz_FreeIndex(relax_data -> base_stride);
       zzz_FreeSBoxArray(relax_data -> base_sbox_array);
 
       zzz_SMGRelaxFreeTempVec(relax_vdata);
@@ -463,15 +459,15 @@ zzz_SMGRelaxSetupARem( void             *relax_vdata,
    zzz_StructVector     *temp_vec      = (relax_data -> temp_vec);
 
    zzz_StructStencil    *stencil       = zzz_StructMatrixStencil(A);     
-   zzz_Index           **stencil_shape = zzz_StructStencilShape(stencil);
+   zzz_Index            *stencil_shape = zzz_StructStencilShape(stencil);
    int                   stencil_size  = zzz_StructStencilSize(stencil); 
    int                   stencil_dim   = zzz_StructStencilDim(stencil);
                        
    zzz_StructMatrix     *A_rem;
    void                **residual_data;
 
-   zzz_Index            *base_index;
-   zzz_Index            *base_stride;
+   zzz_Index             base_index;
+   zzz_Index             base_stride;
 
    int                   num_stencil_indices;
    int                  *stencil_indices;
@@ -490,8 +486,6 @@ zzz_SMGRelaxSetupARem( void             *relax_vdata,
     * Set up data
     *----------------------------------------------------------*/
 
-   base_index  = zzz_NewIndex();
-   base_stride = zzz_NewIndex();
    zzz_CopyIndex((relax_data -> base_index),  base_index);
    zzz_CopyIndex((relax_data -> base_stride), base_stride);
 
@@ -519,9 +513,6 @@ zzz_SMGRelaxSetupARem( void             *relax_vdata,
       zzz_SMGResidualSetBase(residual_data[i], base_index, base_stride);
       zzz_SMGResidualSetup(residual_data[i], A_rem, x, b, temp_vec);
    }
-
-   zzz_FreeIndex(base_index);
-   zzz_FreeIndex(base_stride);
 
    (relax_data -> A_rem)         = A_rem;
    (relax_data -> residual_data) = residual_data;
@@ -552,15 +543,15 @@ zzz_SMGRelaxSetupASol( void             *relax_vdata,
    int                   num_post_relax  = (relax_data -> num_post_relax);
 
    zzz_StructStencil    *stencil       = zzz_StructMatrixStencil(A);     
-   zzz_Index           **stencil_shape = zzz_StructStencilShape(stencil);
+   zzz_Index            *stencil_shape = zzz_StructStencilShape(stencil);
    int                   stencil_size  = zzz_StructStencilSize(stencil); 
    int                   stencil_dim   = zzz_StructStencilDim(stencil);
                        
    zzz_StructMatrix     *A_sol;
    void                **solve_data;
 
-   zzz_Index            *base_index;
-   zzz_Index            *base_stride;
+   zzz_Index             base_index;
+   zzz_Index             base_stride;
 
    int                   num_stencil_indices;
    int                  *stencil_indices;
@@ -579,8 +570,6 @@ zzz_SMGRelaxSetupASol( void             *relax_vdata,
     * Set up data
     *----------------------------------------------------------*/
 
-   base_index  = zzz_NewIndex();
-   base_stride = zzz_NewIndex();
    zzz_CopyIndex((relax_data -> base_index),  base_index);
    zzz_CopyIndex((relax_data -> base_stride), base_stride);
 
@@ -623,9 +612,6 @@ zzz_SMGRelaxSetupASol( void             *relax_vdata,
          zzz_CyclicReductionSetup(solve_data[i], A_sol, temp_vec, x);
       }
    }
-
-   zzz_FreeIndex(base_index);
-   zzz_FreeIndex(base_stride);
 
    (relax_data -> A_sol)      = A_sol;
    (relax_data -> solve_data) = solve_data;
@@ -883,8 +869,8 @@ zzz_SMGRelaxSetPreSpaceRank( void *relax_vdata,
  
 int
 zzz_SMGRelaxSetBase( void      *relax_vdata,
-                     zzz_Index *base_index,
-                     zzz_Index *base_stride )
+                     zzz_Index  base_index,
+                     zzz_Index  base_stride )
 {
    zzz_SMGRelaxData *relax_data = relax_vdata;
    int               d;
@@ -954,7 +940,7 @@ zzz_SMGRelaxSetNewMatrixStencil( void              *relax_vdata,
 {
    zzz_SMGRelaxData *relax_data = relax_vdata;
 
-   zzz_Index       **stencil_shape = zzz_StructStencilShape(diff_stencil);
+   zzz_Index        *stencil_shape = zzz_StructStencilShape(diff_stencil);
    int               stencil_size  = zzz_StructStencilSize(diff_stencil); 
    int               stencil_dim   = zzz_StructStencilDim(diff_stencil);
                        

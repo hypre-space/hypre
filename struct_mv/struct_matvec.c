@@ -141,13 +141,13 @@ zzz_StructMatvecCompute( void             *matvec_vdata,
                        
    zzz_BoxArray         *boxes;
    zzz_Box              *box;
-   zzz_Index            *loop_size;
-   zzz_Index            *start;
-   zzz_Index            *stride;
-   zzz_Index            *unit_stride;
+   zzz_Index             loop_size;
+   zzz_IndexRef          start;
+   zzz_IndexRef          stride;
+   zzz_Index             unit_stride;
                        
    zzz_StructStencil    *stencil;
-   zzz_Index           **stencil_shape;
+   zzz_Index            *stencil_shape;
    int                   stencil_size;
 
    double                temp;
@@ -162,9 +162,6 @@ zzz_StructMatvecCompute( void             *matvec_vdata,
    x           = (matvec_data -> x);
    compute_pkg = (matvec_data -> compute_pkg);
 
-   loop_size  = zzz_NewIndex();
-
-   unit_stride = zzz_NewIndex();
    zzz_SetIndex(unit_stride, 1, 1, 1);
 
    /*-----------------------------------------------------------------------
@@ -309,13 +306,6 @@ zzz_StructMatvecCompute( void             *matvec_vdata,
       }
    }
    
-   /*-----------------------------------------------------------------------
-    * Return
-    *-----------------------------------------------------------------------*/
-
-   zzz_FreeIndex(loop_size);
-   zzz_FreeIndex(unit_stride);
-
    return ierr;
 }
 

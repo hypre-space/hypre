@@ -20,8 +20,8 @@
 
 typedef struct
 {
-   zzz_Index         *base_index;
-   zzz_Index         *base_stride;
+   zzz_Index          base_index;
+   zzz_Index          base_stride;
 
    zzz_StructMatrix  *A;
    zzz_StructVector  *x;
@@ -46,8 +46,6 @@ zzz_SMGResidualInitialize( )
 
    residual_data = zzz_CTAlloc(zzz_SMGResidualData, 1);
 
-   (residual_data -> base_index)  = zzz_NewIndex();
-   (residual_data -> base_stride) = zzz_NewIndex();
    (residual_data -> time_index)  = zzz_InitializeTiming("SMGResidual");
 
    /* set defaults */
@@ -72,8 +70,8 @@ zzz_SMGResidualSetup( void             *residual_vdata,
 
    zzz_SMGResidualData  *residual_data = residual_vdata;
 
-   zzz_Index            *base_index  = (residual_data -> base_index);
-   zzz_Index            *base_stride = (residual_data -> base_stride);
+   zzz_IndexRef          base_index  = (residual_data -> base_index);
+   zzz_IndexRef          base_stride = (residual_data -> base_stride);
 
    zzz_StructGrid       *grid;
    zzz_StructStencil    *stencil;
@@ -160,7 +158,7 @@ zzz_SMGResidual( void             *residual_vdata,
 
    zzz_SMGResidualData  *residual_data = residual_vdata;
 
-   zzz_Index            *base_stride = (residual_data -> base_stride);
+   zzz_IndexRef          base_stride = (residual_data -> base_stride);
    zzz_SBoxArray        *base_points = (residual_data -> base_points);
    zzz_ComputePkg       *compute_pkg = (residual_data -> compute_pkg);
 
@@ -185,23 +183,17 @@ zzz_SMGResidual( void             *residual_vdata,
    double               *bp;
    double               *rp;
                        
-   zzz_Index            *loop_size;
-   zzz_Index            *start;
+   zzz_Index             loop_size;
+   zzz_IndexRef          start;
                        
    zzz_StructStencil    *stencil;
-   zzz_Index           **stencil_shape;
+   zzz_Index            *stencil_shape;
    int                   stencil_size;
 
    int                   compute_i, i, j, si;
    int                   loopi, loopj, loopk;
 
    zzz_BeginTiming(residual_data -> time_index);
-
-   /*-----------------------------------------------------------------------
-    * Initialize some things
-    *-----------------------------------------------------------------------*/
-
-   loop_size = zzz_NewIndex();
 
    /*-----------------------------------------------------------------------
     * Compute residual r = b - Ax
@@ -299,8 +291,6 @@ zzz_SMGResidual( void             *residual_vdata,
     * Return
     *-----------------------------------------------------------------------*/
 
-   zzz_FreeIndex(loop_size);
-
    zzz_IncFLOPCount(residual_data -> flops);
    zzz_EndTiming(residual_data -> time_index);
 
@@ -313,8 +303,8 @@ zzz_SMGResidual( void             *residual_vdata,
  
 int
 zzz_SMGResidualSetBase( void      *residual_vdata,
-                        zzz_Index *base_index,
-                        zzz_Index *base_stride )
+                        zzz_Index  base_index,
+                        zzz_Index  base_stride )
 {
    zzz_SMGResidualData *residual_data = residual_vdata;
    int          d;
@@ -344,8 +334,6 @@ zzz_SMGResidualFinalize( void *residual_vdata )
 
    if (residual_data)
    {
-      zzz_FreeIndex(residual_data -> base_index);
-      zzz_FreeIndex(residual_data -> base_stride);
       zzz_FreeSBoxArray(residual_data -> base_points);
       zzz_FreeComputePkg(residual_data -> compute_pkg );
       zzz_FinalizeTiming(residual_data -> time_index);

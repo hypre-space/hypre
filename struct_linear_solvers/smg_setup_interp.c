@@ -26,7 +26,7 @@ zzz_SMGNewInterpOp( zzz_StructMatrix *A,
    zzz_StructMatrix   *PT;
 
    zzz_StructStencil  *stencil;
-   zzz_Index         **stencil_shape;
+   zzz_Index          *stencil_shape;
    int                 stencil_size;
    int                 stencil_dim;
 
@@ -37,10 +37,9 @@ zzz_SMGNewInterpOp( zzz_StructMatrix *A,
    /* set up stencil */
    stencil_size = 2;
    stencil_dim = zzz_StructStencilDim(zzz_StructMatrixStencil(A));
-   stencil_shape = zzz_CTAlloc(zzz_Index *, stencil_size);
+   stencil_shape = zzz_CTAlloc(zzz_Index, stencil_size);
    for (i = 0; i < stencil_size; i++)
    {
-      stencil_shape[i] = zzz_NewIndex();
       zzz_SetIndex(stencil_shape[i], 0, 0, 0);
    }
    zzz_IndexD(stencil_shape[0], cdir) = -1;
@@ -81,18 +80,18 @@ zzz_SMGSetupInterpOp( void             *relax_data,
                       zzz_StructVector *x,
                       zzz_StructMatrix *PT,
                       int               cdir,
-                      zzz_Index        *cindex,
-                      zzz_Index        *cstride,
-                      zzz_Index        *findex,
-                      zzz_Index        *fstride    )
+                      zzz_Index         cindex,
+                      zzz_Index         cstride,
+                      zzz_Index         findex,
+                      zzz_Index         fstride    )
 {
    zzz_StructMatrix   *A_mask;
 
    zzz_StructStencil  *A_stencil;
-   zzz_Index         **A_stencil_shape;
+   zzz_Index          *A_stencil_shape;
    int                 A_stencil_size;
    zzz_StructStencil  *PT_stencil;
-   zzz_Index         **PT_stencil_shape;
+   zzz_Index          *PT_stencil_shape;
    int                 PT_stencil_size;
 
    int                *stencil_indices;
@@ -101,7 +100,7 @@ zzz_SMGSetupInterpOp( void             *relax_data,
    zzz_StructGrid     *fgrid;
 
    zzz_StructStencil  *compute_pkg_stencil;
-   zzz_Index         **compute_pkg_stencil_shape;
+   zzz_Index          *compute_pkg_stencil_shape;
    int                 compute_pkg_stencil_size = 1;
    int                 compute_pkg_stencil_dim = 1;
    zzz_ComputePkg     *compute_pkg;
@@ -131,11 +130,11 @@ zzz_SMGSetupInterpOp( void             *relax_data,
    int                 PTi;
    int                 xi;
 
-   zzz_Index          *loop_size;
-   zzz_Index          *start;
-   zzz_Index          *startc;
-   zzz_Index          *stride;
-   zzz_Index          *stridec;
+   zzz_Index           loop_size;
+   zzz_Index           start;
+   zzz_Index           startc;
+   zzz_IndexRef        stride;
+   zzz_Index           stridec;
                       
    int                 si, sj, d;
    int                 compute_i, i, j;
@@ -147,10 +146,6 @@ zzz_SMGSetupInterpOp( void             *relax_data,
     * Initialize some things
     *--------------------------------------------------------*/
 
-   loop_size  = zzz_NewIndex();
-   start = zzz_NewIndex();
-   startc = zzz_NewIndex();
-   stridec = zzz_NewIndex();
    zzz_SetIndex(stridec, 1, 1, 1);
 
    fgrid = zzz_StructMatrixGrid(A);
@@ -169,8 +164,7 @@ zzz_SMGSetupInterpOp( void             *relax_data,
    zzz_SMGRelaxSetRegSpaceRank(relax_data, 0, 1);
 
    compute_pkg_stencil_shape =
-      zzz_CTAlloc(zzz_Index *, compute_pkg_stencil_size);
-   compute_pkg_stencil_shape[0] = zzz_NewIndex();
+      zzz_CTAlloc(zzz_Index, compute_pkg_stencil_size);
    compute_pkg_stencil = zzz_NewStructStencil(compute_pkg_stencil_dim,
                                               compute_pkg_stencil_size,
                                               compute_pkg_stencil_shape);
@@ -315,10 +309,6 @@ zzz_SMGSetupInterpOp( void             *relax_data,
    zzz_SMGRelaxSetNewMatrixStencil(relax_data, PT_stencil);
 
    zzz_FreeStructStencil(compute_pkg_stencil);
-   zzz_FreeIndex(start);
-   zzz_FreeIndex(startc);
-   zzz_FreeIndex(stridec);
-   zzz_FreeIndex(loop_size);
 
    zzz_AssembleStructMatrix(PT);
 

@@ -57,8 +57,8 @@ zzz_SMGSetupRAPOp( zzz_StructMatrix *R,
                    zzz_StructMatrix *A,
                    zzz_StructMatrix *PT,
                    zzz_StructMatrix *Ac,
-                   zzz_Index        *cindex,
-                   zzz_Index        *cstride )
+                   zzz_Index         cindex,
+                   zzz_Index         cstride )
 {
    int ierr;
  

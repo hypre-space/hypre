@@ -1,5 +1,4 @@
 #include "headers.h"
-#include "smg.h"
  
 #ifdef ZZZ_DEBUG
 #include <cegdb.h>
@@ -47,12 +46,12 @@ char *argv[];
    int                 P, Q, R;
    double              dx, dy, dz;
    int                 p, q, r;
-   zzz_Index          *ilower;
-   zzz_Index          *iupper;
+   zzz_Index           ilower;
+   zzz_Index           iupper;
    zzz_Box            *box;
                      
-   zzz_Index          *ilower_temp;
-   zzz_Index          *iupper_temp;
+   zzz_Index           ilower_temp;
+   zzz_Index           iupper_temp;
    zzz_Box            *box_temp;
 
    int                 dim = 3;
@@ -64,7 +63,7 @@ char *argv[];
                      
    zzz_StructGrid     *grid;
    zzz_StructStencil  *stencil;
-   zzz_Index         **stencil_shape;
+   zzz_Index          *stencil_shape;
 
    double             *values;
    int                *stencil_indices;
@@ -121,9 +120,6 @@ char *argv[];
     * Set up the grid structure
     *-----------------------------------------------------------*/
  
-   ilower = zzz_NewIndex();
-   iupper = zzz_NewIndex();
-
    /* compute p,q,r from P,Q,R and myid */
    p = myid % P;
    q = (( myid - p)/P) % Q;
@@ -145,10 +141,9 @@ char *argv[];
     * Set up the stencil structure
     *-----------------------------------------------------------*/
  
-   stencil_shape = zzz_CTAlloc(zzz_Index *, 4);
+   stencil_shape = zzz_CTAlloc(zzz_Index, 4);
    for (i = 0; i < 4; i++)
    {
-      stencil_shape[i] = zzz_NewIndex();
       for (d = 0; d < dim; d++)
          zzz_IndexD(stencil_shape[i], d) = offsets[i][d];
    }
@@ -200,9 +195,7 @@ char *argv[];
    if( zzz_IndexZ(ilower) == 0 )
    {
        stencil_indices[0] = 0;
-       ilower_temp  = zzz_NewIndex();
        zzz_CopyIndex(ilower, ilower_temp);
-       iupper_temp = zzz_NewIndex();
        zzz_CopyIndex(iupper, iupper_temp);
        zzz_IndexZ(iupper_temp) = 0;
        box_temp = zzz_NewBox(ilower_temp, iupper_temp);
@@ -214,9 +207,7 @@ char *argv[];
    if( zzz_IndexY(ilower) == 0 )
    {
        stencil_indices[0] = 1;
-       ilower_temp  = zzz_NewIndex();
        zzz_CopyIndex(ilower, ilower_temp);
-       iupper_temp = zzz_NewIndex();
        zzz_CopyIndex(iupper, iupper_temp);
        zzz_IndexY(iupper_temp) = 0;
        box_temp = zzz_NewBox(ilower_temp, iupper_temp);
@@ -228,9 +219,7 @@ char *argv[];
    if( zzz_IndexX(ilower) == 0 )
    {
        stencil_indices[0] = 2;
-       ilower_temp  = zzz_NewIndex();
        zzz_CopyIndex(ilower, ilower_temp);
-       iupper_temp = zzz_NewIndex();
        zzz_CopyIndex(iupper, iupper_temp);
        zzz_IndexX(iupper_temp) = 0;
        box_temp = zzz_NewBox(ilower_temp, iupper_temp);

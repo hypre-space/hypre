@@ -42,12 +42,12 @@ zzz_SMGSetup( void             *smg_vdata,
 
    int                 cdir;
 
-   zzz_Index         **base_index_l;
-   zzz_Index         **base_stride_l;
-   zzz_Index         **cindex_l;
-   zzz_Index         **findex_l;
-   zzz_Index         **cstride_l;
-   zzz_Index         **fstride_l;
+   zzz_Index          *base_index_l;
+   zzz_Index          *base_stride_l;
+   zzz_Index          *cindex_l;
+   zzz_Index          *findex_l;
+   zzz_Index          *cstride_l;
+   zzz_Index          *fstride_l;
 
    zzz_StructGrid    **grid_l;
                     
@@ -117,32 +117,22 @@ zzz_SMGSetup( void             *smg_vdata,
 
    /* insure at least 2 levels of info */
    i = max(max_levels, 2);
-   base_index_l  = zzz_TAlloc(zzz_Index *, i);
-   base_stride_l = zzz_TAlloc(zzz_Index *, i);
-   cindex_l      = zzz_TAlloc(zzz_Index *, i);
-   findex_l      = zzz_TAlloc(zzz_Index *, i);
-   cstride_l     = zzz_TAlloc(zzz_Index *, i);
-   fstride_l     = zzz_TAlloc(zzz_Index *, i);
+   base_index_l  = zzz_TAlloc(zzz_Index, i);
+   base_stride_l = zzz_TAlloc(zzz_Index, i);
+   cindex_l      = zzz_TAlloc(zzz_Index, i);
+   findex_l      = zzz_TAlloc(zzz_Index, i);
+   cstride_l     = zzz_TAlloc(zzz_Index, i);
+   fstride_l     = zzz_TAlloc(zzz_Index, i);
 
    /* initialize info for the finest grid level */
-   base_index_l[0]  = (smg_data -> base_index); 
-   base_stride_l[0] = (smg_data -> base_stride);
-   cindex_l[0]  = zzz_NewIndex();
-   findex_l[0]  = zzz_NewIndex();
-   cstride_l[0] = zzz_NewIndex();
-   fstride_l[0] = zzz_NewIndex();
-   zzz_CopyIndex(base_index_l[0], cindex_l[0]);
-   zzz_CopyIndex(base_index_l[0], findex_l[0]);
-   zzz_CopyIndex(base_stride_l[0], cstride_l[0]);
-   zzz_CopyIndex(base_stride_l[0], fstride_l[0]);
+   zzz_CopyIndex((smg_data -> base_index), base_index_l[0]);
+   zzz_CopyIndex((smg_data -> base_stride), base_stride_l[0]);
+   zzz_CopyIndex((smg_data -> base_index), cindex_l[0]);
+   zzz_CopyIndex((smg_data -> base_index), findex_l[0]);
+   zzz_CopyIndex((smg_data -> base_stride), cstride_l[0]);
+   zzz_CopyIndex((smg_data -> base_stride), fstride_l[0]);
 
    /* initialize info for the 1st coarse grid level */
-   base_index_l[1]  = zzz_NewIndex();
-   base_stride_l[1] = zzz_NewIndex();
-   cindex_l[1]  = zzz_NewIndex();
-   findex_l[1]  = zzz_NewIndex();
-   cstride_l[1] = zzz_NewIndex();
-   fstride_l[1] = zzz_NewIndex();
    zzz_SetIndex(base_index_l[1], 0, 0, 0);
    zzz_SetIndex(base_stride_l[1], 1, 1, 1);
    zzz_SetIndex(cindex_l[1], 0, 0, 0);
@@ -162,12 +152,12 @@ zzz_SMGSetup( void             *smg_vdata,
    /* set coarsening info for the remaining grid levels */
    for (l = 2; l < max_levels; l++)
    {
-      base_index_l[l]  = base_index_l[1];
-      base_stride_l[l] = base_stride_l[1];
-      cindex_l[l]      = cindex_l[1];
-      findex_l[l]      = findex_l[1];
-      cstride_l[l]     = cstride_l[1];
-      fstride_l[l]     = fstride_l[1];
+      zzz_CopyIndex(base_index_l[1], base_index_l[l]);
+      zzz_CopyIndex(base_stride_l[1], base_stride_l[l]);
+      zzz_CopyIndex(cindex_l[1], cindex_l[l]);
+      zzz_CopyIndex(findex_l[1], findex_l[l]);
+      zzz_CopyIndex(cstride_l[1], cstride_l[l]);
+      zzz_CopyIndex(fstride_l[1], fstride_l[l]);
    }
 
    (smg_data -> cdir) = cdir;

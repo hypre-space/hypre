@@ -38,9 +38,9 @@ zzz_NewStructMatrixMask( zzz_StructMatrix *matrix,
    zzz_StructMatrix   *mask;
 
    zzz_StructStencil  *stencil;
-   zzz_Index         **stencil_shape;
+   zzz_Index          *stencil_shape;
    zzz_StructStencil  *mask_stencil;
-   zzz_Index         **mask_stencil_shape;
+   zzz_Index          *mask_stencil_shape;
    int                 mask_stencil_size;
 
    zzz_BoxArray       *data_space;
@@ -68,10 +68,9 @@ zzz_NewStructMatrixMask( zzz_StructMatrix *matrix,
    stencil       = zzz_StructMatrixStencil(matrix);
    stencil_shape = zzz_StructStencilShape(stencil);
    mask_stencil_size  = num_stencil_indices;
-   mask_stencil_shape = zzz_CTAlloc(zzz_Index *, num_stencil_indices);
+   mask_stencil_shape = zzz_CTAlloc(zzz_Index, num_stencil_indices);
    for (i = 0; i < num_stencil_indices; i++)
    {
-      mask_stencil_shape[i] = zzz_NewIndex();
       zzz_CopyIndex(stencil_shape[stencil_indices[i]], mask_stencil_shape[i]);
    }
    mask_stencil = zzz_NewStructStencil(zzz_StructStencilDim(stencil),

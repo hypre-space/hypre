@@ -36,18 +36,15 @@ zzz_StructInnerProd(  zzz_StructVector *x,
 
    zzz_BoxArray         *boxes;
    zzz_Box              *box;
-   zzz_Index            *loop_size;
-   zzz_Index            *start;
-   zzz_Index            *unit_stride;
+   zzz_Index             loop_size;
+   zzz_IndexRef          start;
+   zzz_Index             unit_stride;
 
    int                   i;
    int                   loopi, loopj, loopk;
 
    local_result = 0.0;
 
-   loop_size  = zzz_NewIndex();
-
-   unit_stride = zzz_NewIndex();
    zzz_SetIndex(unit_stride, 1, 1, 1);
 
    boxes = zzz_StructGridBoxes(zzz_StructVectorGrid(y));
@@ -70,9 +67,6 @@ zzz_StructInnerProd(  zzz_StructVector *x,
                       local_result += xp[xi] * yp[yi];
                    });
    }
-
-   zzz_FreeIndex(loop_size);
-   zzz_FreeIndex(unit_stride);
 
    MPI_Allreduce(&local_result, &result, 1,
                  MPI_DOUBLE, MPI_SUM, *zzz_StructVectorComm(x));

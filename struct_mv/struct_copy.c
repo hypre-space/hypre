@@ -35,16 +35,13 @@ zzz_StructCopy( zzz_StructVector *x,
 
    zzz_BoxArray         *boxes;
    zzz_Box              *box;
-   zzz_Index            *loop_size;
-   zzz_Index            *start;
-   zzz_Index            *unit_stride;
+   zzz_Index             loop_size;
+   zzz_IndexRef          start;
+   zzz_Index             unit_stride;
 
    int                   i;
    int                   loopi, loopj, loopk;
 
-   loop_size  = zzz_NewIndex();
-
-   unit_stride = zzz_NewIndex();
    zzz_SetIndex(unit_stride, 1, 1, 1);
 
    boxes = zzz_StructGridBoxes(zzz_StructVectorGrid(y));
@@ -67,9 +64,6 @@ zzz_StructCopy( zzz_StructVector *x,
                       yp[yi] = xp[xi];
                    });
    }
-
-   zzz_FreeIndex(loop_size);
-   zzz_FreeIndex(unit_stride);
 
    return ierr;
 }

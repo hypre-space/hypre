@@ -27,13 +27,10 @@ zzz_IntersectBoxes( zzz_Box *box1,
 {
    zzz_Box   *box;
 
-   zzz_Index *imin;
-   zzz_Index *imax;
+   zzz_Index  imin;
+   zzz_Index  imax;
 
    int        d;
-
-   imin = zzz_NewIndex();
-   imax = zzz_NewIndex();
 
    /* find x, y, and z bounds */
    for (d = 0; d < 3; d++)
@@ -42,8 +39,6 @@ zzz_IntersectBoxes( zzz_Box *box1,
       zzz_IndexD(imax, d) = min(zzz_BoxIMaxD(box1, d), zzz_BoxIMaxD(box2, d));
       if (zzz_IndexD(imax, d) < zzz_IndexD(imin, d))
       {
-	 zzz_FreeIndex(imin);
-	 zzz_FreeIndex(imax);
 	 return NULL;
       }
    }
@@ -208,8 +203,8 @@ zzz_UnionBoxArray( zzz_BoxArray *boxes )
    zzz_BoxArray  *box_union;
 
    zzz_Box       *box;
-   zzz_Index     *imin;
-   zzz_Index     *imax;
+   zzz_Index      imin;
+   zzz_Index      imax;
 
    int     	 *block_index[3];
    int     	  block_sz[3];
@@ -298,9 +293,6 @@ zzz_UnionBoxArray( zzz_BoxArray *boxes )
       
    block = zzz_CTAlloc(int, (block_sz[0] * block_sz[1] * block_sz[2]));
       
-   imin = zzz_NewIndex();
-   imax = zzz_NewIndex();
-
    zzz_ForBoxI(bi, boxes)
    {
       box = zzz_BoxArrayBox(boxes, bi);
@@ -334,9 +326,6 @@ zzz_UnionBoxArray( zzz_BoxArray *boxes )
       }
    }
       
-   zzz_FreeIndex(imin);
-   zzz_FreeIndex(imax);
-
    /*------------------------------------------------------
     * Join block array in x, then y, then z
     *
@@ -418,9 +407,6 @@ zzz_UnionBoxArray( zzz_BoxArray *boxes )
 	       ioff = (block[index] % factor[1])            ;
 	       joff = (block[index] % factor[2]) / factor[1];
 	       koff = (block[index]            ) / factor[2];
-
-	       imin = zzz_NewIndex();
-	       imax = zzz_NewIndex();
 
 	       zzz_IndexD(imin, 0) = block_index[0][i];
 	       zzz_IndexD(imin, 1) = block_index[1][j];

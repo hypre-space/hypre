@@ -51,7 +51,7 @@ zzz_FindBoxNeighbors( zzz_BoxArray       *boxes,
                   
    int             i, j, d, s;
                 
-   zzz_Index     **stencil_shape = zzz_StructStencilShape(stencil);
+   zzz_Index      *stencil_shape = zzz_StructStencilShape(stencil);
 
    /*-----------------------------------------------------------------------
     * Determine `neighbors' and `neighbor_ranks'
@@ -166,7 +166,7 @@ zzz_FindBoxApproxNeighbors( zzz_BoxArray       *boxes,
                   
    int             i, j, d, s;
 
-   zzz_Index     **stencil_shape = zzz_StructStencilShape(stencil);
+   zzz_Index      *stencil_shape = zzz_StructStencilShape(stencil);
 
    /*-----------------------------------------------------------------------
     * Compute min and max stencil offsets

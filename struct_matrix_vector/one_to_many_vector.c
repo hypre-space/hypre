@@ -37,7 +37,7 @@ main( int   argc,
    zzz_Box            *box;
    int                 dim;
 
-   zzz_Index           *ilower, *iupper;
+   zzz_Index           ilower, iupper;
 
    zzz_BoxArray       *data_space, *data_space_2;
 
@@ -162,8 +162,6 @@ main( int   argc,
 
    sub_grids = zzz_CTAlloc(zzz_StructGrid *, num_files);
    sub_vectors = zzz_CTAlloc(zzz_StructVector *, num_files);
-   ilower = zzz_NewIndex();
-   iupper = zzz_NewIndex();
 
    del_i = (imax - imin + 1)/sub_i;
    del_j = (jmax - jmin + 1)/sub_j;
@@ -247,8 +245,6 @@ main( int   argc,
 	     }
 	 }
      }
-   zzz_FreeIndex(ilower);
-   zzz_FreeIndex(iupper);
        
 
    /* Write the Grid information to the output files */

@@ -38,8 +38,8 @@ main( int   argc,
    int                 dim;
 
    zzz_StructStencil  *stencil, **stencils;
-   zzz_Index         **stencil_shape, ***stencil_shapes;
-   zzz_Index          *ilower, *iupper;
+   zzz_Index          *stencil_shape, **stencil_shapes;
+   zzz_Index           ilower, iupper;
    int                 stencil_size;
 
    zzz_BoxArray       *data_space, *data_space_2;
@@ -130,10 +130,9 @@ main( int   argc,
    fscanf(file_root, "\nStencil:\n");
    dim = zzz_StructGridDim(grid_root);
    fscanf(file_root, "%d\n", &stencil_size);
-   stencil_shape = zzz_CTAlloc(zzz_Index *, stencil_size);
+   stencil_shape = zzz_CTAlloc(zzz_Index, stencil_size);
    for (i = 0; i < stencil_size; i++)
      {
-       stencil_shape[i] = zzz_NewIndex();
        fscanf(file_root, "%d: %d %d %d\n", &idummy,
 	      &zzz_IndexX(stencil_shape[i]),
 	      &zzz_IndexY(stencil_shape[i]),
@@ -186,10 +185,7 @@ main( int   argc,
    sub_grids = zzz_CTAlloc(zzz_StructGrid *, num_files);
    sub_matrices = zzz_CTAlloc(zzz_StructMatrix *, num_files);
    stencils = zzz_CTAlloc(zzz_StructStencil *, num_files);
-   stencil_shapes = zzz_CTAlloc(zzz_Index **, num_files);
-
-   ilower = zzz_NewIndex();
-   iupper = zzz_NewIndex();
+   stencil_shapes = zzz_CTAlloc(zzz_Index *, num_files);
 
    del_i = (imax - imin + 1)/sub_i;
    del_j = (jmax - jmin + 1)/sub_j;
@@ -218,10 +214,9 @@ main( int   argc,
 	     {
 	       i_file += 1;
 	       sub_grids[i_file] = zzz_NewStructGrid(comm, dim);
-	       stencil_shapes[i_file] = zzz_CTAlloc(zzz_Index *, stencil_size);
+	       stencil_shapes[i_file] = zzz_CTAlloc(zzz_Index, stencil_size);
 	       for (ii = 0; ii < stencil_size; ii++)
 		 {
-		   stencil_shapes[i_file][ii] = zzz_NewIndex();
 		   zzz_IndexX(stencil_shapes[i_file][ii]) = 
 		     zzz_IndexX(stencil_shape[ii]);
 		   zzz_IndexY(stencil_shapes[i_file][ii]) = 
@@ -289,8 +284,6 @@ main( int   argc,
 	     }
 	 }
      }
-   zzz_FreeIndex(ilower);
-   zzz_FreeIndex(iupper);
        
 
    /* Write the Symmtric, Grid and Stencil information to the output files */

@@ -22,8 +22,8 @@ typedef struct
 {
    zzz_StructMatrix *R;
    zzz_ComputePkg   *compute_pkg;
-   zzz_Index        *cindex;
-   zzz_Index        *cstride;
+   zzz_Index         cindex;
+   zzz_Index         cstride;
 
    int               time_index;
 
@@ -53,10 +53,10 @@ zzz_SMGRestrictSetup( void             *restrict_vdata,
                       zzz_StructMatrix *R,
                       zzz_StructVector *r,
                       zzz_StructVector *rc,
-                      zzz_Index        *cindex,
-                      zzz_Index        *cstride,
-                      zzz_Index        *findex,
-                      zzz_Index        *fstride            )
+                      zzz_Index         cindex,
+                      zzz_Index         cstride,
+                      zzz_Index         findex,
+                      zzz_Index         fstride            )
 {
    zzz_SMGRestrictData  *restrict_data = restrict_vdata;
 
@@ -112,8 +112,8 @@ zzz_SMGRestrictSetup( void             *restrict_vdata,
 
    (restrict_data -> R)           = R;
    (restrict_data -> compute_pkg) = compute_pkg;
-   (restrict_data -> cindex)      = cindex;
-   (restrict_data -> cstride)     = cstride;
+   zzz_CopyIndex(cindex ,(restrict_data -> cindex));
+   zzz_CopyIndex(cstride ,(restrict_data -> cstride));
 
    return ierr;
 }
@@ -137,8 +137,8 @@ zzz_SMGRestrict( void             *restrict_vdata,
    zzz_SMGRestrictData  *restrict_data = restrict_vdata;
 
    zzz_ComputePkg       *compute_pkg;
-   zzz_Index            *cindex;
-   zzz_Index            *cstride;
+   zzz_IndexRef          cindex;
+   zzz_IndexRef          cstride;
 
    zzz_CommHandle       *comm_handle;
                        
@@ -158,14 +158,14 @@ zzz_SMGRestrict( void             *restrict_vdata,
    double               *rp, *rp0, *rp1;
    double               *rcp;
                        
-   zzz_Index            *loop_size;
-   zzz_Index            *start;
-   zzz_Index            *stride;
-   zzz_Index            *startc;
-   zzz_Index            *stridec;
+   zzz_Index             loop_size;
+   zzz_IndexRef          start;
+   zzz_IndexRef          stride;
+   zzz_Index             startc;
+   zzz_Index             stridec;
                        
    zzz_StructStencil    *stencil;
-   zzz_Index           **stencil_shape;
+   zzz_Index            *stencil_shape;
 
    int                   compute_i, i, j;
    int                   loopi, loopj, loopk;
@@ -183,12 +183,7 @@ zzz_SMGRestrict( void             *restrict_vdata,
    stencil       = zzz_StructMatrixStencil(R);
    stencil_shape = zzz_StructStencilShape(stencil);
 
-   loop_size  = zzz_NewIndex();
-
-   startc = zzz_NewIndex();
-
    stride = cstride;
-   stridec = zzz_NewIndex();
    zzz_SetIndex(stridec, 1, 1, 1);
 
    /*--------------------------------------------------------------------
@@ -253,10 +248,6 @@ zzz_SMGRestrict( void             *restrict_vdata,
    /*-----------------------------------------------------------------------
     * Return
     *-----------------------------------------------------------------------*/
-
-   zzz_FreeIndex(loop_size);
-   zzz_FreeIndex(startc);
-   zzz_FreeIndex(stridec);
 
    zzz_IncFLOPCount(4*zzz_StructVectorGlobalSize(rc));
    zzz_EndTiming(restrict_data -> time_index);

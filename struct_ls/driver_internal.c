@@ -1,6 +1,5 @@
 
 #include "headers.h"
-#include "smg.h"
  
 #ifdef ZZZ_DEBUG
 #include <cegdb.h>

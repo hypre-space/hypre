@@ -22,7 +22,7 @@
 
 typedef struct
 {
-   zzz_Index  **shape;   /* Description of a stencil's shape */
+   zzz_Index   *shape;   /* Description of a stencil's shape */
    int          size;    /* Number of stencil coefficients */
                 
    int          dim;     /* Number of dimensions */

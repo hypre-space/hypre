@@ -6,9 +6,9 @@
  *****************************************************************************/
 
 #include "headers.h"
-#include "smg.h"
 #include "ZZZ_struct_pcg.h"
 #include "ZZZ_pcg.h"
+#include "smg.h"                  /* this shouldn't be here */
 
 /*--------------------------------------------------------------------------
  * ZZZ_Matvec
@@ -296,10 +296,10 @@ ZZZ_PCGDiagScalePrecond( Vector *vx,
    int                 xi;
    int                 yi;
                      
-   zzz_Index          *index;
-   zzz_Index          *start;
-   zzz_Index          *stride;
-   zzz_Index          *loop_size;
+   zzz_Index           index;
+   zzz_IndexRef        start;
+   zzz_Index           stride;
+   zzz_Index           loop_size;
                      
    int                 i;
    int                 loopi, loopj, loopk;
@@ -309,8 +309,6 @@ ZZZ_PCGDiagScalePrecond( Vector *vx,
    A = ZZZ_PCGPrecondDataMatrix(precond_data);
 
    /* x = D^{-1} y */
-   index  = zzz_NewIndex();
-   stride = zzz_NewIndex();
    zzz_SetIndex(stride, 1, 1, 1);
    boxes = zzz_StructGridBoxes(zzz_StructMatrixGrid(A));
    zzz_ForBoxI(i, boxes)
@@ -337,8 +335,6 @@ ZZZ_PCGDiagScalePrecond( Vector *vx,
                       xp[xi] = yp[yi] / Ap[Ai];
                    });
    }
-   zzz_FreeIndex(index);
-   zzz_FreeIndex(stride);
 
    return ierr;
 }

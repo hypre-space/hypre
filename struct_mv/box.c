@@ -20,10 +20,10 @@
  *--------------------------------------------------------------------------*/
 
 int
-zzz_SetIndex( zzz_Index *index,
-              int        ix,
-              int        iy,
-              int        iz    )
+zzz_SetIndex( zzz_Index index,
+              int       ix,
+              int       iy,
+              int       iz    )
 {
    zzz_IndexX(index) = ix;
    zzz_IndexY(index) = iy;
@@ -37,8 +37,8 @@ zzz_SetIndex( zzz_Index *index,
  *--------------------------------------------------------------------------*/
 
 int
-zzz_CopyIndex( zzz_Index *index1,
-               zzz_Index *index2 )
+zzz_CopyIndex( zzz_Index index1,
+               zzz_Index index2 )
 {
    zzz_IndexX(index2) = zzz_IndexX(index1);
    zzz_IndexY(index2) = zzz_IndexY(index1);
@@ -52,15 +52,19 @@ zzz_CopyIndex( zzz_Index *index1,
  *--------------------------------------------------------------------------*/
 
 zzz_Box *
-zzz_NewBox( zzz_Index *imin,
-	    zzz_Index *imax )
+zzz_NewBox( zzz_Index imin,
+	    zzz_Index imax )
 {
    zzz_Box *box;
+   int      d;
 
    box = zzz_TAlloc(zzz_Box, 1);
 
-   zzz_BoxIMin(box) = imin;
-   zzz_BoxIMax(box) = imax;
+   for (d = 0; d < 3; d++)
+   {
+      zzz_BoxIMinD(box, d) = zzz_IndexD(imin, d);
+      zzz_BoxIMaxD(box, d) = zzz_IndexD(imax, d);
+   }
 
    return box;
 }
@@ -113,8 +117,6 @@ zzz_FreeBox( zzz_Box *box )
 {
    if (box)
    {
-      zzz_FreeIndex(zzz_BoxIMin(box));
-      zzz_FreeIndex(zzz_BoxIMax(box));
       zzz_TFree(box);
    }
 }
@@ -198,16 +200,7 @@ zzz_DuplicateBox( zzz_Box *box )
 {
    zzz_Box    *new_box;
 
-   zzz_Index  *imin;
-   zzz_Index  *imax;
-
-   imin = zzz_NewIndex();
-   imax = zzz_NewIndex();
-
-   zzz_CopyIndex(zzz_BoxIMin(box), imin);
-   zzz_CopyIndex(zzz_BoxIMax(box), imax);
-
-   new_box = zzz_NewBox(imin, imax);
+   new_box = zzz_NewBox(zzz_BoxIMin(box), zzz_BoxIMax(box));
 
    return new_box;
 }
@@ -378,7 +371,7 @@ zzz_AppendBoxArrayArray( zzz_BoxArrayArray *box_array_array_0,
 
 int
 zzz_GetBoxSize( zzz_Box   *box,
-                zzz_Index *size )
+                zzz_Index  size )
 {
    zzz_IndexX(size) = zzz_BoxSizeX(box);
    zzz_IndexY(size) = zzz_BoxSizeY(box);
@@ -411,8 +404,8 @@ zzz_CopyBoxArrayData( zzz_BoxArray     *box_array_in,
    int              data_box_volume_in, data_box_volume_out;
    int              datai_in, datai_out;
 
-   zzz_Index       *loop_size;
-   zzz_Index       *stride;
+   zzz_Index        loop_size;
+   zzz_Index        stride;
 
    int              j;
    int              loopi, loopj, loopk;
@@ -421,8 +414,6 @@ zzz_CopyBoxArrayData( zzz_BoxArray     *box_array_in,
     * Read data
     *----------------------------------------*/
 
-   loop_size  = zzz_NewIndex();
-   stride = zzz_NewIndex();
    zzz_SetIndex(stride, 1, 1, 1);
 
    box_in      = zzz_BoxArrayBox(box_array_in, 0);
@@ -444,8 +435,5 @@ zzz_CopyBoxArrayData( zzz_BoxArray     *box_array_in,
 		  data_out[datai_out + j*data_box_volume_out] =
 		    data_in[datai_in + j*data_box_volume_in];
 		})
-
-   zzz_FreeIndex(loop_size);
-   zzz_FreeIndex(stride);
 }
 

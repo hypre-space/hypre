@@ -58,20 +58,17 @@ ZZZ_SetStructVectorValues( ZZZ_StructVector  vector,
                            double            values     )
 {
    zzz_StructVector *new_vector = (zzz_StructVector *) vector;
-   zzz_Index        *new_grid_index;
+   zzz_Index         new_grid_index;
 
    int               d;
    int               ierr;
 
-   new_grid_index = zzz_NewIndex();
    for (d = 0;d < zzz_StructGridDim(zzz_StructVectorGrid(new_vector)); d++)
    {
       zzz_IndexD(new_grid_index, d) = grid_index[d];
    }
 
    ierr = zzz_SetStructVectorValues( new_vector, new_grid_index, values );
-
-   zzz_FreeIndex(new_grid_index);
 
    return (ierr);
 }
@@ -86,20 +83,17 @@ ZZZ_GetStructVectorValues( ZZZ_StructVector  vector,
                            double           *values     )
 {
    zzz_StructVector *new_vector = (zzz_StructVector *) vector;
-   zzz_Index        *new_grid_index;
+   zzz_Index         new_grid_index;
 
    int               d;
    int               ierr;
 
-   new_grid_index = zzz_NewIndex();
    for (d = 0;d < zzz_StructGridDim(zzz_StructVectorGrid(new_vector)); d++)
    {
       zzz_IndexD(new_grid_index, d) = grid_index[d];
    }
 
    ierr = zzz_GetStructVectorValues( new_vector, new_grid_index, values );
-
-   zzz_FreeIndex(new_grid_index);
 
    return (ierr);
 }
@@ -117,15 +111,13 @@ ZZZ_SetStructVectorBoxValues( ZZZ_StructVector  vector,
                               double           *values              )
 {
    zzz_StructVector *new_vector = (zzz_StructVector *) vector;
-   zzz_Index        *new_ilower;
-   zzz_Index        *new_iupper;
+   zzz_Index         new_ilower;
+   zzz_Index         new_iupper;
    zzz_Box          *new_value_box;
                     
    int               d;
    int               ierr;
 
-   new_ilower = zzz_NewIndex();
-   new_iupper = zzz_NewIndex();
    for (d = 0;d < zzz_StructGridDim(zzz_StructVectorGrid(new_vector)); d++)
    {
       zzz_IndexD(new_ilower, d) = ilower[d];

@@ -23,8 +23,8 @@ typedef struct
    zzz_StructMatrix *PT;
    zzz_ComputePkg   *compute_pkg;
    zzz_SBoxArray    *coarse_points;
-   zzz_Index        *cindex;
-   zzz_Index        *cstride;
+   zzz_Index         cindex;
+   zzz_Index         cstride;
 
    int               time_index;
 
@@ -55,18 +55,18 @@ zzz_SMGIntAddSetup( void             *intadd_vdata,
                     zzz_StructVector *xc,
                     zzz_StructVector *e,
                     zzz_StructVector *x,
-                    zzz_Index        *cindex,
-                    zzz_Index        *cstride,
-                    zzz_Index        *findex,
-                    zzz_Index        *fstride          )
+                    zzz_Index         cindex,
+                    zzz_Index         cstride,
+                    zzz_Index         findex,
+                    zzz_Index         fstride      )
 {
    zzz_SMGIntAddData    *intadd_data = intadd_vdata;
 
    zzz_StructGrid       *grid;
    zzz_StructStencil    *stencil_PT;
-   zzz_Index           **stencil_PT_shape;
+   zzz_Index            *stencil_PT_shape;
    zzz_StructStencil    *stencil;
-   zzz_Index           **stencil_shape;
+   zzz_Index            *stencil_shape;
    int                   stencil_size;
    int                   stencil_dim;
                        
@@ -105,8 +105,7 @@ zzz_SMGIntAddSetup( void             *intadd_vdata,
    stencil_PT_shape = zzz_StructStencilShape(stencil_PT);
    stencil_size = 1;
    stencil_dim = zzz_StructStencilDim(stencil_PT);
-   stencil_shape = zzz_CTAlloc(zzz_Index *, stencil_size);
-   stencil_shape[0] = zzz_NewIndex();
+   stencil_shape = zzz_CTAlloc(zzz_Index, stencil_size);
    zzz_CopyIndex(stencil_PT_shape[1], stencil_shape[0]);
    stencil = zzz_NewStructStencil(stencil_dim, stencil_size, stencil_shape);
 
@@ -169,8 +168,8 @@ zzz_SMGIntAddSetup( void             *intadd_vdata,
    (intadd_data -> PT)            = PT;
    (intadd_data -> compute_pkg)   = compute_pkg;
    (intadd_data -> coarse_points) = coarse_points;
-   (intadd_data -> cindex)        = cindex;
-   (intadd_data -> cstride)       = cstride;
+   zzz_CopyIndex(cindex, (intadd_data -> cindex));
+   zzz_CopyIndex(cstride, (intadd_data -> cstride));
 
    return ierr;
 }
@@ -209,8 +208,8 @@ zzz_SMGIntAdd( void             *intadd_vdata,
 
    zzz_ComputePkg       *compute_pkg;
    zzz_SBoxArray        *coarse_points;
-   zzz_Index            *cindex;
-   zzz_Index            *cstride;
+   zzz_IndexRef          cindex;
+   zzz_IndexRef          cstride;
 
    zzz_CommHandle       *comm_handle;
                        
@@ -233,14 +232,14 @@ zzz_SMGIntAdd( void             *intadd_vdata,
    double               *ep, *ep0, *ep1;
    double               *xp;
                        
-   zzz_Index            *loop_size;
-   zzz_Index            *start;
-   zzz_Index            *stride;
-   zzz_Index            *startc;
-   zzz_Index            *stridec;
+   zzz_Index             loop_size;
+   zzz_IndexRef          start;
+   zzz_IndexRef          stride;
+   zzz_Index             startc;
+   zzz_Index             stridec;
                        
    zzz_StructStencil    *stencil;
-   zzz_Index           **stencil_shape;
+   zzz_Index            *stencil_shape;
 
    int                   compute_i, i, j;
    int                   loopi, loopj, loopk;
@@ -259,12 +258,7 @@ zzz_SMGIntAdd( void             *intadd_vdata,
    stencil       = zzz_StructMatrixStencil(PT);
    stencil_shape = zzz_StructStencilShape(stencil);
 
-   loop_size  = zzz_NewIndex();
-
-   startc = zzz_NewIndex();
-
    stride = cstride;
-   stridec = zzz_NewIndex();
    zzz_SetIndex(stridec, 1, 1, 1);
 
    /*--------------------------------------------------------------------
@@ -394,10 +388,6 @@ zzz_SMGIntAdd( void             *intadd_vdata,
    /*-----------------------------------------------------------------------
     * Return
     *-----------------------------------------------------------------------*/
-
-   zzz_FreeIndex(loop_size);
-   zzz_FreeIndex(startc);
-   zzz_FreeIndex(stridec);
 
    zzz_IncFLOPCount(5*zzz_StructVectorGlobalSize(xc));
    zzz_EndTiming(intadd_data -> time_index);

@@ -43,18 +43,18 @@ typedef struct
    int                 fs;      /* fine index stride */
 
    /* base index space info */
-   zzz_Index          *base_index;
-   zzz_Index          *base_stride;
+   zzz_Index           base_index;
+   zzz_Index           base_stride;
 
    /* base index space info for each grid level */
-   zzz_Index         **base_index_l;
-   zzz_Index         **base_stride_l;
+   zzz_Index          *base_index_l;
+   zzz_Index          *base_stride_l;
 
    /* coarsening info for each grid level */
-   zzz_Index         **cindex_l;
-   zzz_Index         **findex_l;
-   zzz_Index         **cstride_l;
-   zzz_Index         **fstride_l;
+   zzz_Index          *cindex_l;
+   zzz_Index          *findex_l;
+   zzz_Index          *cstride_l;
+   zzz_Index          *fstride_l;
 
    zzz_StructGrid    **grid_l;
                     

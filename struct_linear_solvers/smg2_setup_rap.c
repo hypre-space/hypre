@@ -28,7 +28,7 @@ zzz_SMG2NewRAPOp( zzz_StructMatrix *R,
 
    zzz_StructGrid      *coarse_grid;
 
-   zzz_Index          **RAP_stencil_shape;
+   zzz_Index           *RAP_stencil_shape;
    zzz_StructStencil   *RAP_stencil;
    int                  RAP_stencil_size;
    int                  RAP_stencil_dim;
@@ -64,7 +64,7 @@ zzz_SMG2NewRAPOp( zzz_StructMatrix *R,
  *    5 or 9 point fine grid stencil produces 9 point RAP
  *--------------------------------------------------------------------------*/
       RAP_stencil_size = 9;
-      RAP_stencil_shape = zzz_CTAlloc(zzz_Index *, RAP_stencil_size);
+      RAP_stencil_shape = zzz_CTAlloc(zzz_Index, RAP_stencil_size);
       for (j = -1; j < 2; j++)
       {
           for (i = -1; i < 2; i++)
@@ -73,7 +73,6 @@ zzz_SMG2NewRAPOp( zzz_StructMatrix *R,
 /*--------------------------------------------------------------------------
  *           Storage for 9 elements (c,w,e,n,s,sw,se,nw,se)
  *--------------------------------------------------------------------------*/
-             RAP_stencil_shape[stencil_rank] = zzz_NewIndex();
              zzz_SetIndex(RAP_stencil_shape[stencil_rank],i,j,0);
              stencil_rank++;
           }
@@ -94,7 +93,7 @@ zzz_SMG2NewRAPOp( zzz_StructMatrix *R,
  *    in the standard lexicalgraphic ordering.
  *--------------------------------------------------------------------------*/
       RAP_stencil_size = 5;
-      RAP_stencil_shape = zzz_CTAlloc(zzz_Index *, RAP_stencil_size);
+      RAP_stencil_shape = zzz_CTAlloc(zzz_Index, RAP_stencil_size);
       for (j = -1; j < 1; j++)
       {
           for (i = -1; i < 2; i++)
@@ -105,7 +104,6 @@ zzz_SMG2NewRAPOp( zzz_StructMatrix *R,
  *--------------------------------------------------------------------------*/
              if( i+j <=0 )
              {
-                RAP_stencil_shape[stencil_rank] = zzz_NewIndex();
                 zzz_SetIndex(RAP_stencil_shape[stencil_rank],i,j,0);
                 stencil_rank++;
              }
@@ -155,12 +153,12 @@ zzz_SMG2BuildRAPSym( zzz_StructMatrix *A,
                      zzz_StructMatrix *PT,
                      zzz_StructMatrix *R,
                      zzz_StructMatrix *RAP,
-                     zzz_Index        *cindex,
-                     zzz_Index        *cstride )
+                     zzz_Index         cindex,
+                     zzz_Index         cstride )
 
 {
 
-   zzz_Index            *index_temp;
+   zzz_Index             index_temp;
 
    zzz_StructStencil    *fine_stencil;
    int                   fine_stencil_size;
@@ -168,11 +166,11 @@ zzz_SMG2BuildRAPSym( zzz_StructMatrix *A,
    zzz_StructGrid       *cgrid;
    zzz_BoxArray         *cgrid_boxes;
    zzz_Box              *cgrid_box;
-   zzz_Index            *cstart;
-   zzz_Index            *stridec;
-   zzz_Index            *fstart;
-   zzz_Index            *stridef;
-   zzz_Index            *loop_size;
+   zzz_IndexRef          cstart;
+   zzz_Index             stridec;
+   zzz_Index             fstart;
+   zzz_IndexRef          stridef;
+   zzz_Index             loop_size;
 
    int                  i;
    int                  loopi, loopj, loopk;
@@ -202,15 +200,10 @@ zzz_SMG2BuildRAPSym( zzz_StructMatrix *A,
 
    int                  ierr;
 
-   index_temp = zzz_NewIndex();
-   loop_size = zzz_NewIndex();
-
    fine_stencil = zzz_StructMatrixStencil(A);
    fine_stencil_size = zzz_StructStencilSize(fine_stencil);
 
    stridef = cstride;
-   fstart = zzz_NewIndex();
-   stridec = zzz_NewIndex();
    zzz_SetIndex(stridec, 1, 1, 1);
 
    cgrid = zzz_StructMatrixGrid(RAP);
@@ -454,11 +447,6 @@ zzz_SMG2BuildRAPSym( zzz_StructMatrix *A,
 
    } /* end ForBoxI */
 
-   zzz_FreeIndex(index_temp);
-   zzz_FreeIndex(stridec);
-   zzz_FreeIndex(loop_size);
-   zzz_FreeIndex(fstart);
-
    return ierr;
 }
 
@@ -470,12 +458,12 @@ zzz_SMG2BuildRAPNoSym( zzz_StructMatrix *A,
                        zzz_StructMatrix *PT,
                        zzz_StructMatrix *R,
                        zzz_StructMatrix *RAP,
-                       zzz_Index        *cindex,
-                       zzz_Index        *cstride )
+                       zzz_Index         cindex,
+                       zzz_Index         cstride )
 
 {
 
-   zzz_Index            *index_temp;
+   zzz_Index             index_temp;
 
    zzz_StructStencil    *fine_stencil;
    int                   fine_stencil_size;
@@ -483,11 +471,11 @@ zzz_SMG2BuildRAPNoSym( zzz_StructMatrix *A,
    zzz_StructGrid       *cgrid;
    zzz_BoxArray         *cgrid_boxes;
    zzz_Box              *cgrid_box;
-   zzz_Index            *cstart;
-   zzz_Index            *stridec;
-   zzz_Index            *fstart;
-   zzz_Index            *stridef;
-   zzz_Index            *loop_size;
+   zzz_IndexRef          cstart;
+   zzz_Index             stridec;
+   zzz_Index             fstart;
+   zzz_IndexRef          stridef;
+   zzz_Index             loop_size;
 
    int                  i;
    int                  loopi, loopj, loopk;
@@ -517,15 +505,10 @@ zzz_SMG2BuildRAPNoSym( zzz_StructMatrix *A,
 
    int                  ierr;
 
-   index_temp = zzz_NewIndex();
-   loop_size = zzz_NewIndex();
-
    fine_stencil = zzz_StructMatrixStencil(A);
    fine_stencil_size = zzz_StructStencilSize(fine_stencil);
 
    stridef = cstride;
-   fstart = zzz_NewIndex();
-   stridec = zzz_NewIndex();
    zzz_SetIndex(stridec, 1, 1, 1);
 
    cgrid = zzz_StructMatrixGrid(RAP);
@@ -746,11 +729,6 @@ zzz_SMG2BuildRAPNoSym( zzz_StructMatrix *A,
       } /* end switch statement */
 
    } /* end ForBoxI */
-
-   zzz_FreeIndex(index_temp);
-   zzz_FreeIndex(stridec);
-   zzz_FreeIndex(loop_size);
-   zzz_FreeIndex(fstart);
 
    return ierr;
 }

@@ -44,23 +44,23 @@ ZZZ_SetStructGridExtents( ZZZ_StructGrid  grid,
                           int            *ilower,
                           int            *iupper )
 {
-   zzz_Index *new_ilower;
-   zzz_Index *new_iupper;
+   zzz_Index  new_ilower;
+   zzz_Index  new_iupper;
 
    int        d;
 
-   new_ilower = zzz_NewIndex();
-   new_iupper = zzz_NewIndex();
    for (d = 0; d < zzz_StructGridDim((zzz_StructGrid *) grid); d++)
    {
       zzz_IndexD(new_ilower, d) = ilower[d];
       zzz_IndexD(new_iupper, d) = iupper[d];
    }
+   for (d = zzz_StructGridDim((zzz_StructGrid *) grid); d < 3; d++)
+   {
+      zzz_IndexD(new_ilower, d) = 0;
+      zzz_IndexD(new_iupper, d) = 0;
+   }
 
    zzz_SetStructGridExtents( (zzz_StructGrid *) grid, new_ilower, new_iupper );
-
-   zzz_FreeIndex(new_ilower);
-   zzz_FreeIndex(new_iupper);
 }
 
 /*--------------------------------------------------------------------------

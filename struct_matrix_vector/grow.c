@@ -30,7 +30,7 @@ zzz_GrowBoxByStencil( zzz_Box           *box,
    zzz_BoxArray   *shift_box_array;
    zzz_Box        *shift_box;
 
-   zzz_Index     **stencil_shape;
+   zzz_Index      *stencil_shape;
 
    int             s, d;
 

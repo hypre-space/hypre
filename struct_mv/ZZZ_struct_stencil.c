@@ -22,14 +22,9 @@ ZZZ_StructStencil
 ZZZ_NewStructStencil( int dim,
                       int size )
 {
-   zzz_Index **shape;
-   int         i;
+   zzz_Index  *shape;
  
-   shape = zzz_CTAlloc(zzz_Index *, size);
-   for (i = 0; i < size; i++)
-   {
-      shape[i] = zzz_NewIndex();
-   }
+   shape = zzz_CTAlloc(zzz_Index, size);
  
    return ( (ZZZ_StructStencil) zzz_NewStructStencil( dim, size, shape ) );
 }
@@ -44,7 +39,7 @@ ZZZ_SetStructStencilElement( ZZZ_StructStencil  stencil,
                              int               *offset        )
 {
    zzz_StructStencil  *new_stencil = (zzz_StructStencil *) stencil;
-   zzz_Index         **shape;
+   zzz_Index          *shape;
    int                 d;
  
    shape = zzz_StructStencilShape(new_stencil);

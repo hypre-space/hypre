@@ -37,8 +37,8 @@ zzz_SMGSetupRestrictOp( zzz_StructMatrix *A,
                         zzz_StructMatrix *R,
                         zzz_StructVector *temp_vec,
                         int               cdir,
-                        zzz_Index        *cindex,
-                        zzz_Index        *cstride  )
+                        zzz_Index         cindex,
+                        zzz_Index         cstride  )
 {
    int ierr;
 

@@ -121,29 +121,12 @@ zzz_FreeStructGrid( zzz_StructGrid *grid )
 
 void 
 zzz_SetStructGridExtents( zzz_StructGrid  *grid,
-			  zzz_Index       *ilower,
-			  zzz_Index       *iupper )
+			  zzz_Index        ilower,
+			  zzz_Index        iupper )
 {
-   zzz_Index *imin;
-   zzz_Index *imax;
-
    zzz_Box   *box;
-   int        d;
 
-   imin = zzz_NewIndex();
-   imax = zzz_NewIndex();
-   for (d = 0; d < zzz_StructGridDim(grid); d++)
-   {
-      zzz_IndexD(imin, d) = ilower[d];
-      zzz_IndexD(imax, d) = iupper[d];
-   }
-   for (d = zzz_StructGridDim(grid); d < 3; d++)
-   {
-      zzz_IndexD(imin, d) = 0;
-      zzz_IndexD(imax, d) = 0;
-   }
-
-   box = zzz_NewBox(imin, imax);
+   box = zzz_NewBox(ilower, iupper);
 
    zzz_AppendBox(box, zzz_StructGridBoxes(grid));
 }
@@ -163,8 +146,8 @@ zzz_AssembleStructGrid( zzz_StructGrid *grid )
    zzz_BoxArray   *boxes;
    zzz_Box        *box;
                   
-   zzz_Index      *imin;
-   zzz_Index      *imax;
+   zzz_Index       imin;
+   zzz_Index       imax;
                   
    int             num_procs, my_rank;
                   
@@ -231,8 +214,6 @@ zzz_AssembleStructGrid( zzz_StructGrid *grid )
    {
       processes[j++] = recvbuf[i++];
 
-      imin = zzz_NewIndex();
-      imax = zzz_NewIndex();
       for (d = 0; d < 3; d++)
       {
 	 zzz_IndexD(imin, d) = recvbuf[i++];
@@ -297,8 +278,8 @@ zzz_ReadStructGrid( MPI_Comm *comm, FILE *file )
 {
    zzz_StructGrid *grid;
 
-   zzz_Index      *ilower;
-   zzz_Index      *iupper;
+   zzz_Index       ilower;
+   zzz_Index       iupper;
 
    int             dim;
    int             num_boxes;
@@ -309,8 +290,6 @@ zzz_ReadStructGrid( MPI_Comm *comm, FILE *file )
    grid = zzz_NewStructGrid(comm, dim);
 
    fscanf(file, "%d\n", &num_boxes);
-   ilower = zzz_NewIndex();
-   iupper = zzz_NewIndex();
    for (i = 0; i < num_boxes; i++)
    {
       fscanf(file, "%d:  (%d, %d, %d)  x  (%d, %d, %d)\n", &idummy,
@@ -319,8 +298,6 @@ zzz_ReadStructGrid( MPI_Comm *comm, FILE *file )
 
       zzz_SetStructGridExtents(grid, ilower, iupper);
    }
-   zzz_FreeIndex(ilower);
-   zzz_FreeIndex(iupper);
 
    zzz_AssembleStructGrid(grid);
 

@@ -23,7 +23,7 @@
 
 zzz_SBox *
 zzz_NewSBox( zzz_Box   *box,
-             zzz_Index *stride )
+             zzz_Index  stride )
 {
    zzz_SBox *sbox;
    int       d;
@@ -31,12 +31,15 @@ zzz_NewSBox( zzz_Box   *box,
    sbox = zzz_TAlloc(zzz_SBox, 1);
 
    zzz_SBoxBox(sbox)    = box;
-   zzz_SBoxStride(sbox) = stride;
 
-   /* adjust imax */
    for (d = 0; d < 3; d++)
+   {
+      zzz_SBoxStrideD(sbox, d) = zzz_IndexD(stride, d);
+
+      /* adjust imax */
       zzz_SBoxIMaxD(sbox, d) = zzz_SBoxIMinD(sbox, d) +
          ((zzz_SBoxSizeD(sbox, d) - 1) * zzz_SBoxStrideD(sbox, d));
+   }
 
    return sbox;
 }
@@ -89,7 +92,6 @@ zzz_FreeSBox( zzz_SBox *sbox )
 {
    if (sbox)
    {
-      zzz_FreeIndex(zzz_SBoxStride(sbox));
       zzz_FreeBox(zzz_SBoxBox(sbox));
       zzz_TFree(sbox);
    }
@@ -263,9 +265,8 @@ zzz_SBox *
 zzz_ConvertToSBox( zzz_Box *box )
 {
    zzz_SBox  *sbox;
-   zzz_Index *stride;
+   zzz_Index  stride;
 
-   stride = zzz_NewIndex();
    zzz_SetIndex(stride, 1, 1, 1);
 
    sbox = zzz_NewSBox(box, stride);
@@ -418,7 +419,7 @@ zzz_AppendSBoxArrayArray( zzz_SBoxArrayArray *sbox_array_array_0,
 
 int 
 zzz_GetSBoxSize( zzz_SBox  *sbox,
-                 zzz_Index *size )
+                 zzz_Index  size )
 {
    zzz_IndexX(size) = zzz_SBoxSizeX(sbox);
    zzz_IndexY(size) = zzz_SBoxSizeY(sbox);

@@ -1,8 +1,5 @@
 
 #include "headers.h"
-#include "smg.h"
-#include "ZZZ_struct_pcg.h"
-#include "ZZZ_pcg.h"
  
 #ifdef ZZZ_DEBUG
 #include <cegdb.h>

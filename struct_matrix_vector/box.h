@@ -26,7 +26,8 @@
  *   replication.
  *--------------------------------------------------------------------------*/
 
-typedef int zzz_Index;
+typedef int zzz_Index[3];
+typedef int *zzz_IndexRef;
 
 /*--------------------------------------------------------------------------
  * zzz_Box:
@@ -35,8 +36,8 @@ typedef int zzz_Index;
 
 typedef struct
 {
-   zzz_Index *imin;           /* min bounding indices */
-   zzz_Index *imax;           /* max bounding indices */
+   zzz_Index imin;           /* min bounding indices */
+   zzz_Index imax;           /* max bounding indices */
 
 } zzz_Box;
 
@@ -76,13 +77,6 @@ typedef struct
 #define zzz_IndexX(index)     zzz_IndexD(index, 0)
 #define zzz_IndexY(index)     zzz_IndexD(index, 1)
 #define zzz_IndexZ(index)     zzz_IndexD(index, 2)
-
-/*--------------------------------------------------------------------------
- * Member macros: zzz_Index
- *--------------------------------------------------------------------------*/
-
-#define zzz_NewIndex()       zzz_CTAlloc(zzz_Index, 3)
-#define zzz_FreeIndex(index) zzz_TFree(index)
 
 /*--------------------------------------------------------------------------
  * Accessor macros: zzz_Box

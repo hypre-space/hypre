@@ -24,7 +24,7 @@
 typedef struct
 {
    zzz_Box    *box;
-   zzz_Index  *stride;       /* Striding factors */
+   zzz_Index   stride;       /* Striding factors */
 
 } zzz_SBox;
 
