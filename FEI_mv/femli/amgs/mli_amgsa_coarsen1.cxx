@@ -1547,7 +1547,7 @@ int MLI_Method_AMGSA::formGlobalGraph( hypre_ParCSRMatrix *Amat,
          if ( cInd != irow && ADiagA[jcol] != 0.0) 
          {
             colVal[length] = ADiagA[jcol];
-            colInd[length++] = jInd + startRow;
+            colInd[length++] = cInd + startRow;
          }
       }
       if (nprocs > 1)
