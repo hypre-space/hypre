@@ -185,6 +185,9 @@ void NumberingGlobalToLocal(Numbering *numb, int len, int *global, int *local)
 
 		    /* allocate more space for numbering */
 		    numb->size *= 2;
+#ifdef PARASAILS_DEBUG
+		    printf("Numbering resize %d\n", numb->size);
+#endif
 		    numb->local_to_global = (int *) 
 			realloc(numb->local_to_global, 
 			(numb->num_loc+numb->size)*sizeof(int));
