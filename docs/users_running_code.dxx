@@ -1,0 +1,25 @@
+/**@name Running the Code
+
+Once calls to smg98 routines have been placed in the application code and the 
+code has been built according to the instructions in "Building the Code", 
+simply typre the following to run the code:
+
+> mpirun -np 3 executable_filename -n 1 2 1 -P 1 3 1 -b 1 2 1 -c 0 1.0 
+
+-np 3 indicates the number of nodes which you want to run on.
+
+-n 1 2 1 indicates a problem size of 1x2x1.
+
+-P 1 3 1 indicates the partitioning in each direction.
+
+-b 1 2 1 ??????
+
+-c 0 1.0 0 ?????
+
+
+Time to execute varies depending on the parameters used.
+
+During executing of smg98 routines, progress is shown through messages printed
+to the screen.    
+ 
+*/

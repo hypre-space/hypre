@@ -1,0 +1,114 @@
+/** @name	Coding Standards
+These guidelines are based on those provided by the ISE project in CASC.
+See `file:/home/casc/software_development/html/index.html' for more info.
+
+--------------------------------------------------------------------------
+
+GENERAL GUIDELINES
+
+The guidelines given in the ISE project document `coding_style.ps'
+should be followed.  There are a few additions/changes that should
+be made here:
+
+  1. The "order of parameters" section should be modified so that
+  opaque object names always appear first in the argument list.
+  For example, a routine for setting the coefficients of a matrix
+  object should look like
+
+     HYPRE_SetMatrixCoeffs(matrix_object, ...)
+
+  even though the matrix_object is an I/O parameter.  This is
+  just to provide some consistency.
+
+  2. Guidelines for indentation are given below.
+
+  3. Guidelines for documentation are given below.
+
+  4. No function will return void.  Integer return values will be used
+  to indicate error status.  This will primarily affect "New" functions.
+
+--------------------------------------------------------------------------
+
+\begin{verbatim}
+NAMING CONVENTIONS FOR HYPRE
+
+ 1. Functions and macros with parameters should be named as follows:
+
+      HYPRE_MixedCase(...)          /* User interface routines *
+      hypre_MixedCase(...)          /* Internal non-user routines *
+
+ 2. Macros without parameters should be named as follows:
+
+      HYPRE_ALL_CAPS          /* User interface macros *
+      hypre_ALL_CAPS          /* Internal non-user macros *
+
+ 3. Types should be named as follows:
+
+      HYPRE_MixedCase          /* User interface types *
+      hypre_MixedCase          /* Internal non-user types *
+
+ 4. It is preferred that variables be named as follows:
+
+      lower_case_with_underscores
+
+    This is not a strict rule, but in general one should try
+    to adhere to this so that it is easy to distinguish variables
+    from functions and macros.
+ 
+--------------------------------------------------------------------------
+
+User interface vs. internal code
+
+The term "user" here refers to someone who wants to solve linear systems,
+but is not developing linear solvers.  The term "internal code" refers to
+code that is not part of the user interface.
+
+NOTE: It is important to clearly distinguish between supported
+routines and everything else in the library.  The mechanism described
+below is one way of making this explicit.
+
+The following convention has been used to some degree already in hypre
+for separating the two above notions.  Files containing internal
+routines are given names *without* the `hypre_' prefix and include
+only *one* internal header file with some name that is unique in the
+hypre library (Note: The SMG code currently uses the convention of
+giving this header file the same name as the user header file, but
+with a lower-case `hypre_' prefix.  See the below example).  All user
+interface routines are defined in files beginning with the prefix
+`HYPRE_'.  One user interface header file is defined that contains
+prototypes, etc., for the interface routines.
+
+By doing this, it is easy to create prototypes for internal routines and
+user interface routines.  For example,
+
+  mkproto *.c >> hypre_lib.h
+  mkproto HYPRE_*.c >> HYPRE_lib.h
+
+We should continue this convention for now.  It is possible that this
+may be changed to some other convention in the future, but if we have
+a common way of doing it now, it will be easier to change later.
+
+Note that NT does not distinguish between lower and upper case file
+names, so we will need to change the naming convention slightly.
+Suggestions?
+
+--------------------------------------------------------------------------
+
+INDENTATION
+
+  The ISE project file `sample.emacs' should be used to provide a
+  common indentation style for the library.  If you don't use emacs
+  as your editor, you can use the scripts written by Rob Falgout
+  to indent files from the shell command line.  See the README file
+  in `~falgout/tools'.
+
+  The files `sample_c_code.c' and `sample_f77_code.c' have been
+  provided as examples of indentation style for Hypre.  They are
+  modifications of those provided by the ISE project.
+
+  NOTE: the fortran source file and the fortran mode defined in
+  the `sample.emacs' file do not agree.  The fortran part of this
+  document needs work.  Volunteers?
+\end{verbatim}
+
+*/

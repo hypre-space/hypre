@@ -1,0 +1,18 @@
+/**@name Timing Issues
+
+\begin{verbatim} 
+
+All timings made by this code are via the timing.c and timer.c files in the 
+utilities directory.  Timing.c routines are used when MPI is not used and
+timer.c routines are used when MPI is used.  It is assumes that the MPI timers
+are more accurate than the system timer.  Both wall clock time and CPU time
+are calculated.  
+
+Timing calcualtions are made around each section in both the setup and solve
+phases.  The measurements are made in microseconds.
+
+
+
+\end{verbatim}
+
+*/

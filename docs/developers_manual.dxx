@@ -14,22 +14,18 @@ Center for Applied Scientific Computing
 Lawrence Livermore National Laboratory
 \end{center}
 
-\begin{center}
-\today
-\end{center}
 
 */
 
 //@{
-	//@Include:hypre_requirements.dxx
-	//@Include:hypre_design.dxx
-	//@Include:hypre_error_handle.dxx
-	//@Include:hypre_makefile.dxx
-	//@Include:hypre_documentation.dxx
-	//@Include:hypre_coding.dxx
-	//@Include:hypre_language_interop.dxx
-	//@Include:hypre_autotest.dxx
-	//@Include:hypre_QA.dxx
-	//@Include:hypre_install.dxx
-	//@Include:hypre_code_reference.dxx
+	//@Include:dev_requirements.dxx
+	//@Include:dev_design.dxx
+	//@Include:dev_error_handle.dxx
+	//@Include:dev_makefile.dxx
+	//@Include:dev_documentation.dxx
+	//@Include:dev_coding.dxx
+	//@Include:dev_language_interop.dxx
+	//@Include:dev_autotest.dxx
+	//@Include:dev_QA.dxx
+	//@Include:dev_install.dxx
 //@}

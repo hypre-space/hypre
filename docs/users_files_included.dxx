@@ -1,0 +1,100 @@
+/**@name Files in this Distribution
+
+\begin{verbatim}
+In the linear_solvers directory the following files are included:
+	HYPRE.h                                        
+	Makefile.in 
+	configure.in  
+	
+	The following subdirectories are also included:
+	docs
+	utilities
+	struct_matrix_vector
+	struct_linear_solvers
+
+In the docs directory the following files are included:
+	TBD....
+
+In the utilities directory the following files are included:
+memory_dmalloc.c      thread_wrappers.awk
+HYPRE_utilities.h     memory_dmalloc.o      threading.c
+Makefile              mpistubs.c            threading.h
+Makefile.in           mpistubs.h            threading.o
+Makefile~             mpistubs.o            timer.c
+general.h             preproc.c             timer.o
+headers               pthreads_interface.c  timing.c
+hypre_utilities.h     random.c              timing.h
+libHYPRE_utilities.a  thread_mpistubs.c     timing.o
+memory.c              thread_mpistubs.h     utilities.h
+memory.h              thread_mpistubs.o
+memory.o              thread_protos.awk
+
+In the struct_matrix_vector directory the following files are included:
+grow.o
+DevManual.dxx              headers
+HYPRE_headers              headers.h
+HYPRE_mv.h                 lap_write_matrix.m
+HYPRE_struct_grid.c        libHYPRE_mv.a
+HYPRE_struct_grid.o        one_to_many.c
+HYPRE_struct_matrix.c      one_to_many_vector.c
+HYPRE_struct_matrix.o      project.c
+HYPRE_struct_stencil.c     project.o
+HYPRE_struct_stencil.o     pthreads_c_definitions.m4
+HYPRE_struct_vector.c      read_matrix.m
+HYPRE_struct_vector.o      read_vector.m
+Makefile                   sbox.o
+Makefile.in                struct_axpy.c
+ardra_write_matrix.m       struct_axpy.o
+batch.blue                 struct_copy.c
+box.c                      struct_copy.o
+box.h                      struct_grid.c
+box.o                      struct_grid.h
+box_algebra.c              struct_grid.o
+box_algebra.o              struct_innerprod.c
+box_alloc.c                struct_innerprod.o
+box_alloc.o                struct_io.c
+box_data.c                 struct_io.o
+box_neighbors.c            struct_matrix.c
+box_neighbors.h            struct_matrix.h
+box_neighbors.o            struct_matrix.o
+box_pthreads.h             struct_matrix_mask.c
+box_pthreads.m4            struct_matrix_mask.o
+communication.c            struct_matrix_vector.h
+communication.h            struct_matvec.c
+communication.o            struct_matvec.o
+communication_info.c       struct_scale.c
+communication_info.o       struct_scale.o
+computation.c              struct_stencil.c
+computation.h              struct_stencil.h
+computation.o              struct_stencil.o
+create_2d_laplacian.c      struct_vector.c
+create_3d_laplacian.c      struct_vector.h
+dco_8.dat                  struct_vector.o
+docxx.sty                  thread_wrappers.c
+driver_internal.c          write_matrix.m
+grow.c                     write_vector.m
+
+In the struct_linear_solvers directory the following files are included:
+pcg.c                    smg_residual.o
+HYPRE_headers            pcg.o                    smg_residual_unrolled.c
+HYPRE_ls.h               pcg_struct.c             smg_restrict.c
+HYPRE_struct_pcg.c       pcg_struct.o             smg_restrict.o
+HYPRE_struct_pcg.o       smg.c                    smg_setup.c
+HYPRE_struct_smg.c       smg.h                    smg_setup.o
+HYPRE_struct_smg.o       smg.o                    smg_setup_interp.c
+Makefile                 smg2_setup_rap.c         smg_setup_interp.o
+Makefile.in              smg2_setup_rap.o         smg_setup_rap.c
+cyclic_reduction.c       smg3_setup_rap.c         smg_setup_rap.o
+cyclic_reduction.o       smg3_setup_rap.o         smg_setup_restrict.c
+general.c                smg_intadd.c             smg_setup_restrict.o
+general.o                smg_intadd.o             smg_solve.c
+headers                  smg_relax.c              smg_solve.o
+headers.h                smg_relax.o              struct_linear_solvers.h
+libHYPRE_ls.a            smg_residual.c           thread_wrappers.c
+
+
+\end{verbatim}
+
+
+
+*/
