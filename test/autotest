@@ -79,7 +79,7 @@ fi
 #=============================================================================
 
 cvs checkout -P linear_solvers
-cd $HYPRE_AUTOTEST_DIR
+#cd $HYPRE_AUTOTEST_DIR
 
 echo "setting permissions...."
 chmod -fR $HYPRE_AUTOTEST_PERMISSIONS *
@@ -93,6 +93,6 @@ cd linear_solvers
 
 cd test
 rm -f $HYPRE_AUTOTEST_LOG.FILE
-struct_linear_solvers.sh >> $HYPRE_AUTOTEST_LOG_FILE
+./struct_linear_solvers >> $HYPRE_AUTOTEST_LOG_FILE
 
 
