@@ -127,6 +127,7 @@ c     Babel-interface variables
       data   double_zero /0.0/
       double precision double_one
       data   double_one /1.0/
+      integer*8 mpi_comm
 
 
 c-----------------------------------------------------------------------
@@ -136,6 +137,9 @@ c-----------------------------------------------------------------------
       call MPI_INIT(ierr)
       call MPI_COMM_RANK(MPI_COMM_WORLD, myid, ierr)
       call MPI_COMM_SIZE(MPI_COMM_WORLD, num_procs, ierr)
+      mpi_comm = MPI_COMM_WORLD
+c     MPI_COMM_WORLD cannot be directly passed through the Babel interface
+c     because its byte length is unspecified.
 
 c-----------------------------------------------------------------------
 c     Set the former input parameters
@@ -296,7 +300,7 @@ c     to perform them.
       call bHYPRE_IJParCSRMatrix_deleteref_f( bHYPRE_parcsr_A )
 
       call bHYPRE_IJBuildMatrix_SetCommunicator_f( bHYPRE_ij_A,
-     1     MPI_COMM_WORLD, ierrtmp )
+     1     mpi_comm, ierrtmp )
       ierr = ierr + ierrtmp
 
       call bHYPRE_IJBuildMatrix_SetLocalRange_f( bHYPRE_ij_A,
@@ -402,7 +406,7 @@ c-----------------------------------------------------------------------
       call bHYPRE_IJBuildVector_addref_f( bHYPRE_ij_b )
       call bHYPRE_IJParCSRVector_deleteref_f( bHYPRE_parcsr_b )
       call bHYPRE_IJBuildVector_SetCommunicator_f( bHYPRE_ij_b,
-     1     MPI_COMM_WORLD, ierrtmp )
+     1     mpi_comm, ierrtmp )
       ierr = ierr + ierrtmp
 
       call bHYPRE_IJBuildVector_SetLocalRange_f( bHYPRE_ij_b,
@@ -457,7 +461,7 @@ c-----------------------------------------------------------------------
       endif
       call bHYPRE_IJBuildVector_addref_f( bHYPRE_ij_x )
       call bHYPRE_IJBuildVector_SetCommunicator_f( bHYPRE_ij_x,
-     1     MPI_COMM_WORLD, ierrtmp )
+     1     mpi_comm, ierrtmp )
       ierr = ierr + ierrtmp
 
       call bHYPRE_IJBuildVector_SetLocalRange_f( bHYPRE_ij_x,
@@ -543,7 +547,7 @@ c      print *, 'Solver: AMG'
       call bHYPRE_IJParCSRVector__cast2_f
      1     ( bHYPRE_parcsr_A, "bHYPRE.Operator", bHYPRE_op_A )
       call bHYPRE_BoomerAMG_SetCommunicator_f(
-     1     bHYPRE_AMG, MPI_COMM_WORLD, ierrtmp )
+     1     bHYPRE_AMG, mpi_comm, ierrtmp )
       ierr = ierr + ierrtmp
       call bHYPRE_BoomerAMG_SetOperator_f( bHYPRE_AMG, bHYPRE_op_A,
      1     ierrtmp )
