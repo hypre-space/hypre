@@ -160,6 +160,7 @@ fi
 	# create the UPDATE.tar file for updating on non-CASC machines
 	echo "creating the UPDATE.tar file ..."
 	cp UPDATE/src/linear_solvers/update .
+        rm -f UPDATE.tar
 	tar cf UPDATE.tar \
 	    update \
 	    UPDATE/VER* \
