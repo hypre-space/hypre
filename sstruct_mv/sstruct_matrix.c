@@ -604,6 +604,10 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
 
 /*--------------------------------------------------------------------------
  * hypre_SStructUMatrixSetValues
+ *
+ * (add_to > 0): add-to values
+ * (add_to = 0): set values
+ * (add_to < 0): get values
  *--------------------------------------------------------------------------*/
 
 int 
@@ -720,24 +724,34 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
       }
    }
 
-   if (add_to)
+   if (add_to > 0)
    {
       ierr = HYPRE_IJMatrixAddToValues(ijmatrix, 1, &ncoeffs, &row_coord,
                                        (const int *) col_coords,
                                        (const double *) coeffs);
    }
-   else
+   else if (add_to > -1)
    {
       ierr = HYPRE_IJMatrixSetValues(ijmatrix, 1, &ncoeffs, &row_coord,
                                      (const int *) col_coords,
                                      (const double *) coeffs);
    }
+   else
+   {
+      ierr = HYPRE_IJMatrixGetValues(ijmatrix, 1, &ncoeffs, &row_coord,
+                                     col_coords, values);
+   }
+
 
    return ierr;
 }
 
 /*--------------------------------------------------------------------------
  * Note: Entries must all be of type stencil or non-stencil, but not both.
+ *
+ * (add_to > 0): add-to values
+ * (add_to = 0): set values
+ * (add_to < 0): get values
  *--------------------------------------------------------------------------*/
 
 int 
@@ -915,19 +929,24 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
           * set IJ values one stencil entry at a time
           *------------------------------------------*/
 
-         if (add_to)
+         if (add_to > 0)
          {
             ierr = HYPRE_IJMatrixAddToValues(ijmatrix, nrows, ncols,
                                              (const int *) rows,
                                              (const int *) cols,
                                              (const double *) ijvalues);
          }
-         else
+         else if (add_to > -1)
          {
             ierr = HYPRE_IJMatrixSetValues(ijmatrix, nrows, ncols,
                                            (const int *) rows,
                                            (const int *) cols,
                                            (const double *) ijvalues);
+         }
+         else
+         {
+            ierr = HYPRE_IJMatrixGetValues(ijmatrix, nrows, ncols, rows, cols,
+                                           values);
          }
       }
 
