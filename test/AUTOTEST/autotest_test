@@ -20,7 +20,7 @@ initialize_variables ()
   Hdr="autotest"
   HYPRE_BATCH_MODE="no"
   HYPRE_SEND_MAIL="no"
-  STD_TEST_DIRS='TEST_fei/*.sh TEST_ij/*.sh TEST_sstruct/*.sh TEST_struct/*.sh'
+  STD_TEST_DIRS='TEST_fei/*.sh TEST_ij/*.sh TEST_ij_es/*.sh TEST_sstruct/*.sh TEST_struct/*.sh'
   BatchOpt=""
   MailOpt=""
   MailCmd="no"

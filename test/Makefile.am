@@ -369,7 +369,7 @@ clean-local:
 # install, put programs in to ./TEST_* directories
 install-exec-hook: all
 	@ \
-	for i in fei ij sstruct struct ; \
+	for i in fei ij ij_es sstruct struct ; \
 	do \
 	if test -x $$i$(EXEEXT) ; \
 	  then \
@@ -383,7 +383,7 @@ install-exec-hook: all
 
 uninstall-hook:
 	@ \
-	for i in fei ij sstruct struct ; \
+	for i in fei ij ij_es sstruct struct ; \
 	do \
 	    if test -d $(abs_builddir)/TEST_$$i ; \
 	    then \
