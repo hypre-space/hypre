@@ -116,10 +116,9 @@ HYPRE_INSTALL_DIR=`pwd`"/$HYPRE_DIR"
   awk 'BEGIN {FS="."} {printf "V%d.%02d.%02d\n",$1,$2,$3}' > VERSION_NAME
 )
 
-# move 'linear_solvers' directory to 'src'
-mv $HYPRE_DIR/src/linear_solvers $HYPRE_DIR/zsrc
-rmdir $HYPRE_DIR/src
-mv $HYPRE_DIR/zsrc $HYPRE_DIR/src
+# pop 'linear_solvers' directory to 'src'
+mv $HYPRE_DIR/src/linear_solvers/* $HYPRE_DIR/src
+rmdir $HYPRE_DIR/src/linear_solvers
 
 # create the hypre-${VersionId}.tar file
 echo "creating $HYPRE_DIR.tar file ..."
