@@ -27,7 +27,8 @@ FILES = \
  $(top_srcdir)/FEI_mv/femli/amgs/mli_method_amgsa.cxx\
  $(top_srcdir)/FEI_mv/femli/amgs/mli_amgsa_coarsen1.cxx\
  $(top_srcdir)/FEI_mv/femli/amgs/mli_amgsa_calib.cxx\
- $(top_srcdir)/FEI_mv/femli/amgs/mli_amgsa_substructure.cxx\
+ $(top_srcdir)/FEI_mv/femli/amgs/mli_amgsa_dd_fedata.cxx\
+ $(top_srcdir)/FEI_mv/femli/amgs/mli_amgsa_dd_sfei.cxx\
  $(top_srcdir)/FEI_mv/femli/base/mli.cxx\
  $(top_srcdir)/FEI_mv/femli/base/mli_oneLevel.cxx\
  $(top_srcdir)/FEI_mv/femli/cintface/cmli.cxx\
