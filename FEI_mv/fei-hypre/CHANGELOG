@@ -183,4 +183,7 @@
 10/30/03    2.5.2R2
             - add compatible relaxation to femli/amgrs
             - clean up some compiler complaints
+11/07/03    2.5.2R3
+            - clean up a lot compiler complaints
+            - improve on the AMGSAe capabilities.
 
