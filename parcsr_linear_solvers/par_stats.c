@@ -52,6 +52,9 @@ hypre_ParAMGSetupStats( void               *amg_vdata,
    int             *P_offd_j;
    int              num_cols_P_offd;
 
+   int		   *row_starts;
+
+   int	    numrows;
    int      num_levels; 
    int      global_nonzeros;
    int      amg_ioutdat;
@@ -141,6 +144,8 @@ hypre_ParAMGSetupStats( void               *amg_vdata,
        A_offd_j = hypre_CSRMatrixJ(A_offd);
        num_cols_A_offd = hypre_CSRMatrixNumCols(A_offd);
 
+       row_starts = hypre_ParCSRMatrixRowStarts(A_array[level]);
+
        fine_size = hypre_ParCSRMatrixGlobalNumRows(A_array[level]);
        global_nonzeros = hypre_ParCSRMatrixNumNonzeros(A_array[level]);
 
@@ -153,7 +158,7 @@ hypre_ParAMGSetupStats( void               *amg_vdata,
        min_rowsum = 0.0;
        max_rowsum = 0.0;
 
-  if (hypre_CSRMatrixNumNonzeros(A_diag))
+  if (hypre_CSRMatrixNumRows(A_diag))
   {
        min_entries = (A_diag_i[1]-A_diag_i[0])+(A_offd_i[1]-A_offd_i[0]);
        for (j = A_diag_i[0]; j < A_diag_i[1]; j++)
@@ -191,17 +196,21 @@ hypre_ParAMGSetupStats( void               *amg_vdata,
 
        if (my_id == 0)
        {
-          global_min_e = (int) gather_buff[0];
-          global_max_e = (int) gather_buff[1];
-          global_min_rsum = gather_buff[2];
-          global_max_rsum = gather_buff[3];
+          global_min_e = 1000;
+          global_max_e = 0;
+          global_min_rsum = 1000.0;
+          global_max_rsum = 0.0;
           
           for (j = 0; j < num_procs; j++)
           {
-              global_min_e = min(global_min_e, (int) gather_buff[my_id*4]);
-              global_max_e = max(global_max_e, (int) gather_buff[my_id*4 +1]);
-              global_min_rsum = min(global_min_rsum, gather_buff[my_id*4 +2]);
-              global_max_rsum = max(global_max_rsum, gather_buff[my_id*4 +3]);
+	      numrows = row_starts[j+1]-row_starts[j];
+	      if (numrows)
+	      {
+                 global_min_e = min(global_min_e, (int) gather_buff[j*4]);
+                 global_min_rsum = min(global_min_rsum, gather_buff[j*4 +2]);
+              }
+	      global_max_e = max(global_max_e, (int) gather_buff[j*4 +1]);
+              global_max_rsum = max(global_max_rsum, gather_buff[j*4 +3]);
           }
 
           fprintf(fp, "%2d %5d %7d  %0.3f  %3d %3d",
@@ -246,20 +255,22 @@ hypre_ParAMGSetupStats( void               *amg_vdata,
        P_offd_j = hypre_CSRMatrixJ(P_offd);
        num_cols_P_offd = hypre_CSRMatrixNumCols(P_offd);
 
+       row_starts = hypre_ParCSRMatrixRowStarts(P_array[level]);
+
        fine_size = hypre_ParCSRMatrixGlobalNumRows(P_array[level]);
        coarse_size = hypre_ParCSRMatrixGlobalNumCols(P_array[level]);
        global_nonzeros = hypre_ParCSRMatrixNumNonzeros(P_array[level]);
 
-       min_weight = 0.0;
+       min_weight = 1.0;
        max_weight = 0.0;
        max_rowsum = 0.0;
        min_rowsum = 0.0;
        min_entries = 0;
        max_entries = 0;
  
-  if (hypre_CSRMatrixNumNonzeros(P_diag))
+  if (hypre_CSRMatrixNumRows(P_diag))
   {
-       min_weight = P_diag_data[0];
+       if (hypre_CSRMatrixNumCols(P_diag)) min_weight = P_diag_data[0];
        for (j = P_diag_i[0]; j < P_diag_i[1]; j++)
        {
             min_weight = min(min_weight, P_diag_data[j]);
@@ -277,15 +288,14 @@ hypre_ParAMGSetupStats( void               *amg_vdata,
 
        max_rowsum = min_rowsum;
 
-/*       min_entries = (P_diag_i[1]-P_diag_i[0])+(P_offd_i[1]-P_offd_i[0]); */
-       min_entries = 2;
+       min_entries = (P_diag_i[1]-P_diag_i[0])+(P_offd_i[1]-P_offd_i[0]); 
+/*       min_entries = 2; */
        max_entries = 0;
 
        for (j = 0; j < hypre_CSRMatrixNumRows(P_diag); j++)
        {
            entries = (P_diag_i[j+1]-P_diag_i[j])+(P_offd_i[j+1]-P_offd_i[j]);
-           if (entries > 1)
-              min_entries = min(entries, min_entries);
+           min_entries = min(entries, min_entries);
            max_entries = max(entries, max_entries);
 
            rowsum = 0.0;
@@ -322,21 +332,25 @@ hypre_ParAMGSetupStats( void               *amg_vdata,
 
        if (my_id == 0)
        {
-          global_min_e = (int) gather_buff[0];
-          global_max_e = (int) gather_buff[1];
-          global_min_rsum = gather_buff[2];
-          global_max_rsum = gather_buff[3];
-          global_min_wt = gather_buff[4];
-          global_max_wt = gather_buff[5];
+          global_min_e = 1000;
+          global_max_e = 0;
+          global_min_rsum = 1000.0;
+          global_max_rsum = 0.0;
+          global_min_wt = 1000.0;
+          global_max_wt = 0.0;
           
           for (j = 0; j < num_procs; j++)
           {
-              global_min_e = min(global_min_e, (int) gather_buff[my_id*6]);
-              global_max_e = max(global_max_e, (int) gather_buff[my_id*6+1]);
-              global_min_rsum = min(global_min_rsum, gather_buff[my_id*6+2]);
-              global_max_rsum = max(global_max_rsum, gather_buff[my_id*6+3]);
-              global_min_wt = min(global_min_wt, gather_buff[my_id*6+4]);
-              global_max_wt = max(global_max_wt, gather_buff[my_id*6+5]);
+	      numrows = row_starts[j+1] - row_starts[j];
+              if (numrows)
+	      {
+		 global_min_e = min(global_min_e, (int) gather_buff[j*6]);
+                 global_min_rsum = min(global_min_rsum, gather_buff[j*6+2]);
+                 global_min_wt = min(global_min_wt, gather_buff[j*6+4]);
+	      }
+              global_max_e = max(global_max_e, (int) gather_buff[j*6+1]);
+              global_max_rsum = max(global_max_rsum, gather_buff[j*6+3]);
+              global_max_wt = max(global_max_wt, gather_buff[j*6+5]);
           }
 
           fprintf(fp, "%2d %5d x %-5d %3d %3d",
