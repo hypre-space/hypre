@@ -25,7 +25,7 @@ HYPRE_EXTRA_DIRS =\
  parcsr_matrix_vector\
  parcsr_linear_solvers\
  seq_linear_solvers/pamg\
- bmakes
+# bmakes
 
 #This is the documentation directory not yet offivially in HYPRE
 HYPRE_DOCS =\
@@ -40,7 +40,7 @@ HYPRE_SEQ_DIRS =\
  seq_matrix_vector\
  docs\
  seq_linear_solvers/pamg\
- bmakes
+# bmakes
 
 all:
 	@ \
