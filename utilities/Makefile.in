@@ -255,7 +255,6 @@ noinst_HEADERS = \
  umalloc_local.h
 
 dependent_includes = $(include_HEADERS) $(noinst_HEADERS)
-EXTRA_DIST = HYPRE_utilities.h.in
 AM_CPPFLAGS = -DHYPRE_TIMING
 
 #
