@@ -1109,7 +1109,7 @@ void HYPRE_LinSysCore::buildSlideReducedSystem()
           for (j = 0; j < rowSize2; j++) newColInd[rowSize+j] = colInd2[j];
           qsort0(newColInd, 0, newRowSize-1);
           ncnt = 0;
-          for ( j = 0; j < newRowSize; j++ ) 
+          for ( j = 1; j < newRowSize; j++ ) 
           {
              if ( newColInd[j] != newColInd[ncnt] ) 
              {
@@ -1117,6 +1117,7 @@ void HYPRE_LinSysCore::buildSlideReducedSystem()
                 newColInd[ncnt] = newColInd[j];
              }  
           }
+          if ( newRowSize > 0 ) ncnt++;
           reducedAMatSize[rowIndex++] = ncnt;
          
           HYPRE_ParCSRMatrixRestoreRow(A_csr,i,&rowSize,&colInd,&colVal);
