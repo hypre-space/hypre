@@ -3566,7 +3566,7 @@ void HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
       ierr = HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
       assert(!ierr);
       rnorm = sqrt( rnorm );
-      if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )
+      if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
          printf("HYPRE_LSC::solveUsingSuperLUX - FINAL NORM = %e.\n",rnorm);
    }
 
