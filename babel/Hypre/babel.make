@@ -9,7 +9,7 @@ IMPLSRCS = Hypre_GMRES_Impl.c Hypre_PCG_Impl.c Hypre_ParAMG_Impl.c            \
   Hypre_ParDiagScale_Impl.c Hypre_Pilut_Impl.c Hypre_StructGrid_Impl.c        \
   Hypre_StructMatrix_Impl.c Hypre_StructSMG_Impl.c Hypre_StructStencil_Impl.c \
   Hypre_StructToIJMatrix_Impl.c Hypre_StructToIJVector_Impl.c                 \
-  Hypre_StructVector_Impl.c
+  Hypre_StructVector_Impl.c Hypre_Babel_Extensions.c
 IORHDRS = Hypre_CoefficientAccess_IOR.h Hypre_GMRES_IOR.h                     \
   Hypre_IJBuildMatrix_IOR.h Hypre_IJBuildVector_IOR.h Hypre_IOR.h             \
   Hypre_Operator_IOR.h Hypre_PCG_IOR.h Hypre_ParAMG_IOR.h                     \
