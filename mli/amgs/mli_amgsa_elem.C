@@ -48,7 +48,7 @@ int MLI_Method_AMGSA::setupUsingFEData( MLI *mli )
    int          blockSize=3, nNodes, *nodeEqnList, *sortArray, elemIndex;
    int          eqnIndex, *aggrMap, currMacroNumber, elemStart, elemCount;
    int          *macroNumbers, eMatDim, ierr, matz=1, *partition, aggrSize;
-   int          localStartRow, localNRows, nMacros, *macroSizes, macroMax;
+   int          localStartRow, localNRows, nMacros, *macroSizes, nAggr;
    int          j1, k1, *macroNodeEqnList, nodeIndex, eqnInd1, eqnInd2;
    int          eqnNumber, colOffset1, colOffset2, *nodeNodeMap, elemID;
    int          macroMatDim, *macroNodeList, macroNumNodes, *elemIDs;
@@ -94,7 +94,7 @@ nullspace_dim = 6;
    MPI_Comm_rank( comm, &mypid );
    MPI_Comm_size( comm, &nprocs );
    mliAmat = mli->getSystemMatrix( level );
-   hypreA   = (hypre_ParCSRMatrix *) mliAmat->getMatrix();
+   hypreA  = (hypre_ParCSRMatrix *) mliAmat->getMatrix();
    HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) hypreA, 
                                         &partition);
    localStartRow = partition[mypid];
@@ -154,20 +154,27 @@ nullspace_dim = 6;
    nodeEqnList = NULL;
    if ( nodeEqnMap != NULL ) 
    {
-      nodeEqnList = new int[nElems*elemNNodes];
-      nodeEqnMap->getMap(nElems*elemNNodes, elemNodeList1D, nodeEqnList);
+      if ( nElems > 0 ) 
+      {
+         nodeEqnList = new int[nElems*elemNNodes];
+         nodeEqnMap->getMap(nElems*elemNNodes,elemNodeList1D,nodeEqnList);
+      }
+      else nodeEqnList = NULL;
    }
 
    /* --- sort the element to macroelement map --- */
 
-   sortArray = new int[nElems];
+   if ( nElems > 0 ) sortArray = new int[nElems];
+   else              sortArray = NULL;
    for ( i = 0; i < nElems; i++ ) sortArray[i] = i; 
    MLI_Utils_IntQSort2(macroNumbers, sortArray, 0, nElems-1);
-   nMacros = macroNumbers[nElems-1] + 1;
+   if ( nElems > 0 ) nMacros = macroNumbers[nElems-1] + 1;
+   else              nMacros = 0;
 
    /* --- get the node to equation map --- */
 
-   aggrMap = new int[localNRows];
+   if ( localNRows > 0 ) aggrMap = new int[localNRows];
+   else                  aggrMap = NULL;
    for ( i = 0; i < localNRows; i++ ) aggrMap[i] = -1; 
 
    /* --- map equation to aggregates --- */
@@ -182,21 +189,21 @@ nullspace_dim = 6;
       for ( j = 0; j < elemNNodes; j++ ) 
       {
          eqnIndex = nodeEqnList[elemIndex*elemNNodes+j] - localStartRow;
-         if ( eqnIndex >= 0 && eqnIndex < localNRows &&
-              aggrMap[eqnIndex] < 0 )
+         /* option between how aggregates are chosen in view of overlap 
+            if (eqnIndex>=0 && eqnIndex<localNRows && aggrMap[eqnIndex]<0)
+         */
+         if ( eqnIndex >= 0 && eqnIndex < localNRows )
             for ( k = 0; k < blockSize; k++ ) 
                aggrMap[eqnIndex+k] = currMacroNumber;
       }
    }
 
-   sa_data[0] = aggrMap;
-   sa_counts[0] = nMacros;
-   macroSizes = new int[nMacros];
-   for ( i = 0; i < nMacros; i++ ) macroSizes[i] = 0;
+   /* --- analyze aggregate sizes (merge small aggregates) --- */
+ 
+   if ( nElems > 0 ) macroSizes = new int[nElems];
+   else              macroSizes = NULL;
+   for ( i = 0; i < nMacros; i++ ) macroSizes[i] = 0; 
    for ( i = 0; i < localNRows; i++ ) macroSizes[aggrMap[i]]++;
-   macroMax = 0;
-   for ( i = 0; i < nMacros; i++ ) 
-      if ( macroSizes[i] > macroMax ) macroMax = macroSizes[i];
    
    /* --- compute null spaces --- */
 
@@ -232,8 +239,21 @@ nullspace_dim = 6;
       for ( i = 1; i < macroNumNodes; i++ )
          if ( macroNodeList[i] != macroNodeList[k-1] ) 
             macroNodeList[k++] = macroNodeList[i]; 
-
       macroNumNodes = k;
+
+      macroNodeEqnList = new int[macroNumNodes];
+      nodeEqnMap->getMap(macroNumNodes,macroNodeList,macroNodeEqnList);
+
+      aggrSize = 0;
+      for ( j = 0; j < macroNumNodes; j++ )
+      {
+         eqnNumber = macroNodeEqnList[j] - localStartRow;
+         if ( eqnNumber >= 0 && eqnNumber < localNRows &&
+              aggrMap[eqnNumber] == macroNumbers[elemStart] )
+            aggrSize += blockSize;
+      } 
+      if ( aggrSize == 0 ) continue;
+
       macroMatDim = macroNumNodes * blockSize;
       evectors = new double[macroMatDim*macroMatDim];
       evalues  = new double[macroMatDim];
@@ -273,34 +293,6 @@ nullspace_dim = 6;
       mli_computespectrum_(&macroMatDim, &macroMatDim, elemMats, evalues, 
                            &matz, evectors, dAux1, dAux2, &ierr);
 
-      macroNodeEqnList = new int[macroNumNodes];
-      nodeEqnMap->getMap(macroNumNodes, macroNodeList, macroNodeEqnList);
-
-      aggrSize = 0;
-      for ( j = 0; j < macroNumNodes; j++ )
-      {
-         eqnNumber = macroNodeEqnList[j] - localStartRow;
-         if ( eqnNumber >= 0 && eqnNumber < localNRows &&
-              aggrMap[eqnNumber] == macroNumbers[elemStart] )
-            aggrSize += blockSize;
-      } 
-/*
-      if ( aggrSize > 0 && aggrSize <= nullspace_dim )
-      {
-         for ( j = 0; j < macroNumNodes; j++ )
-         {
-            eqnNumber = macroNodeEqnList[j] - localStartRow;
-            if ( eqnNumber >= 0 && eqnNumber < localNRows &&
-                 aggrMap[eqnNumber] != macroNumbers[elemStart] )
-            {
-               for ( k = 0; k < blockSize; k++ )
-                  aggrMap[eqnNumber+k] = macroNumbers[elemStart];
-               aggrSize += blockSize;
-               if ( aggrSize > nullspace_dim ) break;
-            } 
-         } 
-      } 
-*/
       for ( i = 0; i < nullspace_dim; i++ )
       {
          for ( j = 0; j < macroNumNodes; j++ )
@@ -325,36 +317,45 @@ nullspace_dim = 6;
       delete [] dAux2;
       elemStart = elemCount;
    }
+
+   /* --------------------------------------------------------------- */
+   /* massage aggregate numbers and store them                        */
+   /* --------------------------------------------------------------- */
+
    for ( i = 0; i < nMacros; i++ ) macroNumbers[i] = 0; 
    for ( i = 0; i < localNRows; i++ ) macroNumbers[aggrMap[i]]++;
    for ( i = 0; i < nMacros; i++ ) 
+   {
       if ( macroNumbers[i] > 0 ) macroNumbers[i] = 1;
       else                       macroNumbers[i] = -1;
-   k = 0;
-   for ( i = 0; i < nMacros; i++ ) 
-   {
-      if ( macroNumbers[i] > 0 )
-      {
-         j = macroNumbers[i];
-         macroNumbers[i] = k;
-         k = k + j;
-      }
    }
+   nAggr = 0;
+   for ( i = 0; i < nMacros; i++ ) 
+      if ( macroNumbers[i] > 0 ) macroNumbers[i] = nAggr++;
    for ( i = 0; i < localNRows; i++ ) 
       aggrMap[i] = macroNumbers[aggrMap[i]];
 
+   sa_counts[0] = nAggr;
+   sa_data[0]   = aggrMap;
+   
    /* --------------------------------------------------------------- */
    /* clean up                                                        */
    /* --------------------------------------------------------------- */
 
-   delete [] elemMat;
-   delete [] elemNodeList1D;
-   delete [] elemNodeLists;
-   delete [] elemIDs;
-   delete [] sortArray;
-   delete [] macroSizes;
-   free( macroNumbers );
+   if ( eMatDim > 0 ) delete [] elemMat;
+   if ( nElems  > 0 ) delete [] elemNodeList1D;
+   if ( nElems  > 0 ) delete [] elemNodeLists;
+   if ( nElems  > 0 ) delete [] elemIDs;
+   if ( nElems  > 0 ) delete [] sortArray;
+   if ( nElems  > 0 ) delete [] macroSizes;
+   if ( nElems  > 0 ) free( macroNumbers );
    if ( nodeEqnList != NULL ) delete [] nodeEqnList;
+
+#ifdef MLI_DEBUG_DETAILED
+   cout << " MLI_Method_AMGSA::setupUsingFEData ends." << endl;
+   cout.flush();
+#endif
+
    return 0;
 }
 

@@ -23,6 +23,7 @@
 #include "seq_mv/seq_mv.h"
 #include "parcsr_mv/parcsr_mv.h"
 
+#include "vector/mli_vector.h"
 #include "amgs/mli_method_amgsa.h"
 #include "util/mli_utils.h"
  
@@ -58,7 +59,10 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,MLI_Matrix **Pmat_out,
    hypre_ParCSRMatrix     *Amat, *A2mat, *Pmat, *Gmat, *Jmat, *Pmat2;
    hypre_ParCSRCommPkg    *comm_pkg;
    hypre_ParCSRCommHandle *comm_handle;
+   hypre_ParVector        *hypreP, *hypreP2;
+   hypre_Vector           *hyprePLocal, *hyprePLocal2;
    MLI_Matrix             *mli_Pmat, *mli_Jmat, *mli_A2mat;
+   MLI_Vector             *mli_vecP, *mli_vecP2;
    MLI_Function           *func_ptr;
    MPI_Comm  comm;
    int       i, j, mypid, num_procs, A_start_row, A_end_row, A_global_nrows;
@@ -76,6 +80,7 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,MLI_Matrix **Pmat_out,
    double    *col_val, **P_vecs_ext, *send_buf, **P_vecs, max_eigen=0, alpha;
    double    *J_diag_data, *J_offd_data, *K_diag_data, *K_offd_data, cvalue;
    double    *new_col_val, *new_col_itmp, *q_array, *new_null, *r_array;
+   double    *hyprePData, *hyprePData2;
    char      param_string[200];
 
    /*-----------------------------------------------------------------
@@ -177,6 +182,46 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,MLI_Matrix **Pmat_out,
    }
    else eqn2aggr = node2aggr;
  
+   /*-----------------------------------------------------------------
+    * compute smoothing factor for the prolongation smoother
+    *-----------------------------------------------------------------*/
+
+   if ( P_weight != 0.0 || pre_smoother == MLI_SOLVER_MLS_ID ||
+        postsmoother == MLI_SOLVER_MLS_ID || init_aggr != NULL )
+   {
+      MLI_Utils_ComputeSpectralRadius(Amat, &max_eigen);
+      if ( mypid == 0 && output_level > 1 )
+         printf("\tEstimated spectral radius of A = %e\n", max_eigen);
+      assert ( max_eigen > 0.0 );
+      alpha = P_weight / max_eigen;
+   }
+
+   /*-----------------------------------------------------------------
+    * if element-based method is used, smooth the prolongator first
+    *-----------------------------------------------------------------*/
+
+   if ( init_aggr != NULL )
+   {
+      mli_vecP = mli_Amat->createVector();
+      hypreP = (hypre_ParVector *) mli_vecP->getVector();
+      hyprePLocal = hypre_ParVectorLocalVector( hypreP );
+      hyprePData = hypre_VectorData( hyprePLocal );
+      mli_vecP2 = mli_Amat->createVector();
+      hypreP2 = (hypre_ParVector *) mli_vecP2->getVector();
+      hyprePLocal2 = hypre_ParVectorLocalVector( hypreP2 );
+      hyprePData2 = hypre_VectorData( hyprePLocal2 );
+      for ( i = 0; i < nullspace_dim; i++ )
+      {
+         for ( irow = 0; irow < P_local_nrows; irow++ )
+            hyprePData[irow] = nullspace_vec[i*P_local_nrows+irow];
+         hypre_ParCSRMatrixMatvec(1.0, Amat, hypreP, 0.0, hypreP2);
+         for ( irow = 0; irow < P_local_nrows; irow++ )
+            nullspace_vec[i*P_local_nrows+irow] -= (alpha*hyprePData2[irow]);
+      }
+      delete mli_vecP;
+      delete mli_vecP2;
+   }
+
    /*-----------------------------------------------------------------
     * create a compact form for the null space vectors 
     * (get ready to perform QR on them)
@@ -373,9 +418,6 @@ printf("\n");
       HYPRE_IJMatrixDestroy( IJPmat );
       delete [] col_ind;
       delete [] col_val;
-      if ( pre_smoother == MLI_SOLVER_MLS_ID ||
-           postsmoother == MLI_SOLVER_MLS_ID )
-         MLI_Utils_ComputeSpectralRadius(Amat, &max_eigen);
    }
 
    /*-----------------------------------------------------------------
@@ -455,16 +497,6 @@ printf("\n");
             comm_handle = NULL;
          }
       }
-
-       *-----------------------------------------------------------------
-       * compute smoothing factor for the prolongation smoother
-       *-----------------------------------------------------------------*
-
-      MLI_Utils_ComputeSpectralRadius(Amat, &max_eigen);
-      if ( mypid == 0 && output_level > 1 )
-         printf("\tEstimated spectral radius of A = %e\n", max_eigen);
-      assert ( max_eigen > 0.0 );
-      alpha = P_weight / max_eigen;
 
        *-----------------------------------------------------------------
        * compute the Jacobi matrix (I - alpha A) 
@@ -705,12 +737,6 @@ printf("\n");
 
        * ================= old version (before Matmul debugged) =========*/
       /* ================================================================*/
-
-      MLI_Utils_ComputeSpectralRadius(Amat, &max_eigen);
-      if ( mypid == 0 && output_level > 1 )
-         printf("\tEstimated spectral radius of A = %e\n", max_eigen);
-      assert ( max_eigen > 0.0 );
-      alpha = P_weight / max_eigen;
 
       MLI_Matrix_FormJacobi(mli_Amat, alpha, &mli_Jmat);
       Jmat = (hypre_ParCSRMatrix *) mli_Jmat->getMatrix();
