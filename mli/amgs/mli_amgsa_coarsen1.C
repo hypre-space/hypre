@@ -933,6 +933,7 @@ int MLI_Method_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
             if ( count > 1 )
             {
                node2aggr[irow]  = naggr;
+               node_stat[irow]  = MLI_METHOD_AMGSA_SELECTED;
                aggr_size[naggr] = 1;
                nselected++;
                for ( icol = 0; icol < row_leng; icol++ )
@@ -1004,6 +1005,15 @@ int MLI_Method_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
          printf("\t*** Aggregation(U) P4 : no. of aggregates     = %d\n",ibuf[0]);
          printf("\t*** Aggregation(U) P4 : no. nodes aggregated  = %d\n",ibuf[1]);
       }
+   }
+   if ( ibuf[1] < global_nrows )
+   {
+      for ( irow = 0; irow < local_nrows; irow++ )
+         if ( node_stat[irow] != MLI_METHOD_AMGSA_SELECTED )
+         {
+            node2aggr[irow] = -1;
+            node_stat[irow] = MLI_METHOD_AMGSA_SELECTED;
+         }
    }
 
    /*-----------------------------------------------------------------
