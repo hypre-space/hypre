@@ -931,8 +931,8 @@ int MLI_Method_AMGSA::setNodalCoordinates(int num_nodes, int nDOF, int nsDim,
       if ( nullspaceDim_ <= 3 ) nullspaceDim_  = 6;
       if ( numNS != 3 && numNS != 6 && numNS != 9 && numNS != 12 ) 
       {
-       	 printf("setNodalCoordinates: numNS reset to 3 (%d)\n",numNS);
-	 nullspaceDim_ = numNS = 3;
+         printf("setNodalCoordinates: numNS reset to 3 (%d)\n",numNS);
+         nullspaceDim_ = numNS = 3;
       }
    }
    else
