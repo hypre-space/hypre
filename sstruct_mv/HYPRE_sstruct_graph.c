@@ -53,13 +53,12 @@ HYPRE_SStructGraphCreate( MPI_Comm             comm,
    }
    hypre_SStructGraphStencils(graph) = stencils;
 
-   hypre_SStructGraphNUVEntries(graph) = 0;
-   hypre_SStructGraphIUVEntries(graph) =
-      hypre_CTAlloc(int, hypre_SStructGridLocalSize(grid));
-   hypre_SStructGraphUVEntries(graph) =
-      hypre_CTAlloc(hypre_SStructUVEntry *, hypre_SStructGridLocalSize(grid));
+   hypre_SStructGraphNUVEntries(graph)  = 0;
+   hypre_SStructGraphAUVEntries(graph)  = 0;
+   hypre_SStructGraphIUVEntries(graph)  = NULL;
+   hypre_SStructGraphUVEntries(graph)   = NULL;
    hypre_SStructGraphTotUEntries(graph) = 0;
-   hypre_SStructGraphRefCount(graph)   = 1;
+   hypre_SStructGraphRefCount(graph)    = 1;
 
    *graph_ptr = graph;
 
@@ -162,6 +161,7 @@ HYPRE_SStructGraphAddEntries( HYPRE_SStructGraph   graph,
    hypre_SStructGrid     *grid       = hypre_SStructGraphGrid(graph);
    int                    ndim       = hypre_SStructGridNDim(grid);
    int                    nUventries = hypre_SStructGraphNUVEntries(graph);
+   int                    aUventries = hypre_SStructGraphAUVEntries(graph);
    int                   *iUventries = hypre_SStructGraphIUVEntries(graph);
    hypre_SStructUVEntry **Uventries  = hypre_SStructGraphUVEntries(graph);
    hypre_SStructUVEntry  *Uventry;
@@ -171,6 +171,25 @@ HYPRE_SStructGraphAddEntries( HYPRE_SStructGraph   graph,
    hypre_BoxMapEntry     *map_entry;
    hypre_Index            cindex;
    int                    rank, i;
+
+   if (!nUventries)
+   {
+      /* allocate space for non-stencil entries */
+      aUventries = hypre_SStructGridLocalSize(grid);
+      iUventries = hypre_TAlloc(int, aUventries);
+      Uventries = hypre_CTAlloc(hypre_SStructUVEntry *, aUventries);
+      hypre_SStructGraphAUVEntries(graph) = aUventries;
+      hypre_SStructGraphIUVEntries(graph) = iUventries;
+      hypre_SStructGraphUVEntries(graph)  = Uventries;
+   }
+   else if (nUventries >= aUventries)
+   {
+      /* need more space in iUventries array */
+      aUventries += 1000;
+      iUventries = hypre_TReAlloc(iUventries, int, aUventries);
+      hypre_SStructGraphAUVEntries(graph) = aUventries;
+      hypre_SStructGraphIUVEntries(graph) = iUventries;
+   }
 
    /* compute location (rank) for Uventry */
    hypre_CopyToCleanIndex(index, ndim, cindex);

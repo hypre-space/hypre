@@ -377,7 +377,8 @@ typedef struct hypre_SStructGraph_struct
    hypre_SStructStencil ***stencils; /* each (part, var) has a stencil */
 
    /* U-graph info: Entries are referenced via local grid-variable rank. */
-   int                     nUventries;
+   int                     nUventries;  /* number of iUventries */
+   int                     aUventries;  /* alloc size of iUventries */
    int                    *iUventries;
    hypre_SStructUVEntry  **Uventries;
    int                     totUentries;
@@ -399,6 +400,7 @@ typedef struct hypre_SStructGraph_struct
 #define hypre_SStructGraphStencils(graph)       ((graph) -> stencils)
 #define hypre_SStructGraphStencil(graph, p, v)  ((graph) -> stencils[p][v])
 #define hypre_SStructGraphNUVEntries(graph)     ((graph) -> nUventries)
+#define hypre_SStructGraphAUVEntries(graph)     ((graph) -> aUventries)
 #define hypre_SStructGraphIUVEntries(graph)     ((graph) -> iUventries)
 #define hypre_SStructGraphIUVEntry(graph, i)    ((graph) -> iUventries[i])
 #define hypre_SStructGraphUVEntries(graph)      ((graph) -> Uventries)
