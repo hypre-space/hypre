@@ -334,7 +334,10 @@ impl_Hypre_GMRES_Apply(Hypre_GMRES this, Hypre_Vector b, Hypre_Vector* xp)
    */
    /* >>>>> TO DO: put a corresponding function in the MPI_Com interface;
       call that, so we don't have to "know" what's in a MPI_Com's data table ... */
-   MPI_Comm_rank( *(gmr_data->comm->Hypre_MPI_Com_data->hcom), &my_id );
+/*   MPI_Comm_rank( *(gmr_data->comm->Hypre_MPI_Com_data->hcom), &my_id ); */
+/* TO DO: Most of the above comments can be deleted once Babel is re-run
+   and MPI_Com.c updated */
+   ierr += Hypre_MPI_Com_GetRank( gmr_data->comm, &my_id );
 
    if (logging > 0)
    {

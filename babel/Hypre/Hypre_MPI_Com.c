@@ -5,6 +5,7 @@
  *
  *********************************************************/
 
+#include "utilities.h"
 #include "Hypre_MPI_Com_Skel.h" 
 #include "Hypre_MPI_Com_Data.h" 
 
@@ -71,3 +72,11 @@ Hypre_MPI_Com  impl_Hypre_MPI_Com_Constructor(int comm) {
    return C;
 } /* end impl_Hypre_MPI_ComConstructor */
 
+/* Hypre_MPI_Com_GetRank
+ After the next Babel run, this should be turned into an impl_
+*/
+int Hypre_MPI_Com_GetRank( Hypre_MPI_Com this, int *rank )
+{
+   MPI_Comm_rank( *(this->Hypre_MPI_Com_data->hcom), rank );
+   return 0;
+}
