@@ -221,17 +221,21 @@ The following is an example session creating a beta distribution:
 \$ \textbf{pwd}\linebreak
 /home/hypre\linebreak
 \$ \textbf{cvs checkout linear\_solvers}\linebreak
-U linear\_solvers/CHANGELOG\linebreak
-U linear\_solvers/COPYRIGHT\_and\_DISCLAIMER\linebreak
- . . .\linebreak
-U linear\_solvers/utilities/utilities.h\linebreak
-U linear\_solvers/utilities/version\linebreak
+\begin{verbatim}
+U linear_solvers/CHANGELOG
+U linear_solvers/COPYRIGHT_and_DISCLAIMER
+ . . .
+U linear_solvers/utilities/utilities.h
+U linear_solvers/utilities/version
+\end{verbatim}
 \$ \textbf{cvs history -T}\linebreak
-T 2000-10-12 20:27 +0000 treadway linear\_solvers [V1-3-1b:A]\linebreak
-T 2001-01-11 20:58 +0000 treadway linear\_solvers [V1-4-0b:A]\linebreak
- . . .\linebreak
-T 2001-07-27 16:57 +0000 treadway linear\_solvers [V1-6-0:A]\linebreak
-T 2001-08-24 20:26 +0000 treadway linear\_solvers [V1-7-0a:A]\linebreak
+\begin{verbatim}
+T 2000-10-12 20:27 +0000 treadway linear_solvers [V1-3-1b:A]
+T 2001-01-11 20:58 +0000 treadway linear_solvers [V1-4-0b:A]
+ . . .
+T 2001-07-27 16:57 +0000 treadway linear_solvers [V1-6-0:A]
+T 2001-08-24 20:26 +0000 treadway linear_solvers [V1-7-0a:A]
+\end{verbatim}
 \$ \textbf{vi linear\_solvers/utilities/HYPRE\_utilities.h}\linebreak
 \begin{verbatim}
  . . .
@@ -327,11 +331,13 @@ hypre-1.2.0          hypre-1.6.0.tar.gz
 \end{verbatim}
 \$ \textbf{cp ../hypre-1.7.0b.tar.gz .}\linebreak
 \$ \textbf{../mklibs -b hypre-1.7.0b.tar.gz}\linebreak
-checking the hostname... blue\linebreak
-checking the architecture... aix\linebreak
- . . .\linebreak
-Very-cleaning FEI\_mv ...\linebreak
-Very-cleaning test ...\linebreak
+\begin{verbatim}
+checking the hostname... blue
+checking the architecture... aix
+ . . .
+Very-cleaning FEI_mv ...
+Very-cleaning test ...
+\end{verbatim}
 \$ \textbf{ls}\linebreak
 \begin{verbatim}
 AUTOTEST             hypre-1.2.0.tar.gz   hypre-1.7.0a
