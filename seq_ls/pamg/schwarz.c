@@ -456,7 +456,7 @@ int hypre_SchwarzSolve(hypre_CSRMatrix *A,
 
 {
   int ierr = 0;
-  int num_dofs;
+  /* int num_dofs; */
   int *i_dof_dof;
   int *j_dof_dof;
   double *a_dof_dof;
@@ -471,7 +471,7 @@ int hypre_SchwarzSolve(hypre_CSRMatrix *A,
 
 
   /* initiate:      ----------------------------------------------- */
-  num_dofs = hypre_CSRMatrixNumRows(A);
+  /* num_dofs = hypre_CSRMatrixNumRows(A); */
   i_dof_dof = hypre_CSRMatrixI(A);
   j_dof_dof = hypre_CSRMatrixJ(A);
   a_dof_dof = hypre_CSRMatrixData(A);
@@ -566,7 +566,7 @@ transpose_matrix_create(  int **i_face_element_pointer,
 			  int num_elements, int num_faces)
 
 {
-  FILE *f;
+  /* FILE *f; */
   int ierr =0, i, j;
 
   int *i_face_element, *j_face_element;
@@ -792,15 +792,16 @@ hypre_AMGCreateDomainDof(hypre_CSRMatrix     *A,
   double *a_dof_dof = hypre_CSRMatrixData(A);
   int num_dofs = hypre_CSRMatrixNumRows(A);
 
-  int *i_dof_to_accept_weight, *i_dof_to_prefer_weight,
+  /* int *i_dof_to_accept_weight; */
+  int *i_dof_to_prefer_weight,
     *w_dof_dof, *i_dof_weight;
   int *i_dof_to_aggregate, *i_aggregate_dof, *j_aggregate_dof;
   
   int *i_dof_index;
 
   int ierr = 0;
-  int i,j,k,l,  l_loc, k_loc, i_loc, j_loc;
-  int i_dof, j_dof;
+  int i,j,k,  l_loc, i_loc, j_loc;
+  int i_dof;
   int *i_local_to_global;
   int *i_global_to_local;
 
@@ -813,9 +814,9 @@ hypre_AMGCreateDomainDof(hypre_CSRMatrix     *A,
   double *AE, *XE;
 
   /* PCG arrays: --------------------------------------------------- */
-  double *x, *rhs, *v, *w, *d, *aux;
+  /* double *x, *rhs, *v, *w, *d, *aux;
 
-  int max_iter;
+  int max_iter; */
 
   /* --------------------------------------------------------------------- */
 
@@ -1146,14 +1147,14 @@ int hypre_AMGeAgglomerate(int *i_AE_element, int *j_AE_element,
 {
 
   int ierr = 0;
-  int i, j, k, l, m;
+  int i, j, k, l;
 
   int face_to_eliminate;
   int max_weight_old, max_weight;
 
   int AE_counter=0, AE_element_counter=0;
 
-  int i_element_face_counter;
+  /* int i_element_face_counter; */
 
   int *i_element_to_AE;
 
