@@ -24,7 +24,9 @@ hypre_thread_MPI_Init( int    *argc,
           char ***argv)
 {
   int returnval;
-  if (pthread_equal(pthread_self(),hypre_thread[0]))
+  int unthreaded = pthread_equal(initial_thread,pthread_self());
+  int I_call_mpi = unthreaded || pthread_equal(hypre_thread[0],pthread_self());
+  if (I_call_mpi)
   {
     returnval=MPI_Init(argc,argv);
   }
