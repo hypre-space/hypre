@@ -328,6 +328,8 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
             HYOutputLevel_ |= HYFEI_PRINTSOL;
          else if (!strcmp(param2, "printReducedMat")) 
             HYOutputLevel_ |= HYFEI_PRINTREDMAT;
+         else if (!strcmp(param2, "printParCSRMat")) 
+            HYOutputLevel_ |= HYFEI_PRINTPARCSRMAT;
          else if (!strcmp(param2, "printFEInfo")) 
             HYOutputLevel_ |= HYFEI_PRINTFEINFO;
          else if (!strcmp(param2, "ddilut")) 

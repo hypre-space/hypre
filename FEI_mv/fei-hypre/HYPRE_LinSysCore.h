@@ -56,6 +56,7 @@ enum HYpreconID {HYIDENTITY,HYDIAGONAL,HYPILUT,HYPARASAILS,HYBOOMERAMG,HYML,
 #define HYFEI_PRINTFEINFO           262144
 #define HYFEI_AMGDEBUG              524288
 #define HYFEI_STOPAFTERPRINT       1048576
+#define HYFEI_PRINTPARCSRMAT       2097152
 
 // *************************************************************************
 // class definition

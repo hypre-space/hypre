@@ -1794,48 +1794,66 @@ int HYPRE_LinSysCore::matrixLoadComplete()
    // diagnostics : print the matrix and rhs to files 
    //-------------------------------------------------------------------
 
-   if ( HYOutputLevel_ & HYFEI_PRINTMAT )
+   if ( (HYOutputLevel_ & HYFEI_PRINTMAT) &&
+        (!(HYOutputLevel_ & HYFEI_PRINTREDMAT) ) )
    {
-      int    rowSize, *colInd, nnz, nrows;
-      double *colVal, value;
-      char   fname[40];
-      FILE   *fp;
-      HYPRE_ParCSRMatrix A_csr;
+      if ( HYOutputLevel_ & HYFEI_PRINTPARCSRMAT )
+      {
+         char   fname[40];
+         HYPRE_ParCSRMatrix A_csr;
+         HYPRE_ParVector    b_csr;
 
-      printf("%4d : HYPRE_LSC::print the matrix and rhs to files.\n",mypid_);
-      HYPRE_IJMatrixGetObject(HYA_, (void **) &A_csr);
-      sprintf(fname, "hypre_mat.out.%d",mypid_);
-      fp = fopen(fname,"w");
-      nrows = localEndRow_ - localStartRow_ + 1;
-      nnz = 0;
-      for ( i = localStartRow_-1; i <= localEndRow_-1; i++ )
-      {
-         HYPRE_ParCSRMatrixGetRow(A_csr,i,&rowSize,&colInd,&colVal);
-         for ( j = 0; j < rowSize; j++ ) if ( colVal[j] != 0.0 ) nnz++;
-         HYPRE_ParCSRMatrixRestoreRow(A_csr,i,&rowSize,&colInd,&colVal);
+         printf("%4d : HYPRE_LSC::print the matrix/rhs to files(1)\n",mypid_);
+         HYPRE_IJMatrixGetObject(HYA_, (void **) &A_csr);
+         sprintf(fname, "HYPRE_Mat");
+         HYPRE_ParCSRMatrixPrint( A_csr, fname );
+         HYPRE_IJVectorGetObject(HYb_, (void **) &b_csr);
+         sprintf(fname, "HYPRE_RHS");
+         HYPRE_ParVectorPrint( b_csr, fname );
       }
-      fprintf(fp, "%6d  %7d \n", nrows, nnz);
-      for ( i = localStartRow_-1; i <= localEndRow_-1; i++ )
+      else
       {
-         HYPRE_ParCSRMatrixGetRow(A_csr,i,&rowSize,&colInd,&colVal);
-         for (j = 0; j < rowSize; j++)
+         int    rowSize, *colInd, nnz, nrows;
+         double *colVal, value;
+         char   fname[40];
+         FILE   *fp;
+         HYPRE_ParCSRMatrix A_csr;
+
+         printf("%4d : HYPRE_LSC::print the matrix/rhs to files(2)\n",mypid_);
+         HYPRE_IJMatrixGetObject(HYA_, (void **) &A_csr);
+         sprintf(fname, "hypre_mat.out.%d",mypid_);
+         fp = fopen(fname,"w");
+         nrows = localEndRow_ - localStartRow_ + 1;
+         nnz = 0;
+         for ( i = localStartRow_-1; i <= localEndRow_-1; i++ )
          {
-            if ( colVal[j] != 0.0 )
-               fprintf(fp, "%6d  %6d  %25.16e \n",i+1,colInd[j]+1,colVal[j]);
+            HYPRE_ParCSRMatrixGetRow(A_csr,i,&rowSize,&colInd,&colVal);
+            for ( j = 0; j < rowSize; j++ ) if ( colVal[j] != 0.0 ) nnz++;
+            HYPRE_ParCSRMatrixRestoreRow(A_csr,i,&rowSize,&colInd,&colVal);
          }
-          HYPRE_ParCSRMatrixRestoreRow(A_csr,i,&rowSize,&colInd,&colVal);
+         fprintf(fp, "%6d  %7d \n", nrows, nnz);
+         for ( i = localStartRow_-1; i <= localEndRow_-1; i++ )
+         {
+            HYPRE_ParCSRMatrixGetRow(A_csr,i,&rowSize,&colInd,&colVal);
+            for (j = 0; j < rowSize; j++)
+            {
+               if ( colVal[j] != 0.0 )
+                  fprintf(fp, "%6d  %6d  %25.16e \n",i+1,colInd[j]+1,colVal[j]);
+            }
+             HYPRE_ParCSRMatrixRestoreRow(A_csr,i,&rowSize,&colInd,&colVal);
+         }
+         fclose(fp);
+         sprintf(fname, "hypre_rhs.out.%d",mypid_);
+         fp = fopen(fname,"w");
+         fprintf(fp, "%6d \n", nrows);
+         for ( i = localStartRow_-1; i <= localEndRow_-1; i++ )
+         {
+            HYPRE_IJVectorGetValues(HYb_, 1, &i, &value);
+            fprintf(fp, "%6d  %25.16e \n", i+1, value);
+         }
+         fclose(fp);
+         MPI_Barrier(comm_);
       }
-      fclose(fp);
-      sprintf(fname, "hypre_rhs.out.%d",mypid_);
-      fp = fopen(fname,"w");
-      fprintf(fp, "%6d \n", nrows);
-      for ( i = localStartRow_-1; i <= localEndRow_-1; i++ )
-      {
-         HYPRE_IJVectorGetValues(HYb_, 1, &i, &value);
-         fprintf(fp, "%6d  %25.16e \n", i+1, value);
-      }
-      fclose(fp);
-      MPI_Barrier(comm_);
    }
 
    //-------------------------------------------------------------------
@@ -3321,47 +3339,55 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
 
    if ( HYOutputLevel_ & HYFEI_PRINTREDMAT )
    {
-      HYPRE_ParCSRMatrixGetRowPartitioning( A_csr, &procNRows );
-      startRow = procNRows[mypid_];
-      nrows = procNRows[mypid_+1] - startRow;
-      free( procNRows );
-
-      sprintf(fname, "hypre_mat.out.%d", mypid_);
-      fp = fopen( fname, "w");
-      nnz = 0;
-      for ( i = startRow; i < startRow+nrows; i++ )
+      if ( HYOutputLevel_ & HYFEI_PRINTPARCSRMAT )
       {
-         HYPRE_ParCSRMatrixGetRow(A_csr,i,&rowSize,&colInd,&colVal);
-         for ( j = 0; j < rowSize; j++ ) if ( colVal[j] != 0.0 ) nnz++;
-         HYPRE_ParCSRMatrixRestoreRow(A_csr,i,&rowSize,&colInd,&colVal);
+         printf("%4d : HYPRE_LSC::print matrix/rhs to files(A)\n",mypid_);
+         sprintf(fname, "HYPRE_Mat");
+         HYPRE_ParCSRMatrixPrint( A_csr, fname);
+         sprintf(fname, "HYPRE_RHS");
+         HYPRE_ParVectorPrint( b_csr, fname);
       }
-      fprintf(fp, "%6d  %7d \n", nrows, nnz);
-      for ( i = startRow; i < startRow+nrows; i++ )
+      else
       {
-         HYPRE_ParCSRMatrixGetRow(A_csr,i,&rowSize,&colInd,&colVal);
-         for ( j = 0; j < rowSize; j++ )
+         printf("%4d : HYPRE_LSC::print matrix/rhs to files(B)\n",mypid_);
+         HYPRE_ParCSRMatrixGetRowPartitioning( A_csr, &procNRows );
+         startRow = procNRows[mypid_];
+         nrows = procNRows[mypid_+1] - startRow;
+         free( procNRows );
+
+         sprintf(fname, "hypre_mat.out.%d", mypid_);
+         fp = fopen( fname, "w");
+         nnz = 0;
+         for ( i = startRow; i < startRow+nrows; i++ )
          {
-            if ( colVal[j] != 0.0 )
-               fprintf(fp, "%6d  %6d  %25.8e \n",i+1,colInd[j]+1, colVal[j]);
+            HYPRE_ParCSRMatrixGetRow(A_csr,i,&rowSize,&colInd,&colVal);
+            for ( j = 0; j < rowSize; j++ ) if ( colVal[j] != 0.0 ) nnz++;
+            HYPRE_ParCSRMatrixRestoreRow(A_csr,i,&rowSize,&colInd,&colVal);
          }
-         HYPRE_ParCSRMatrixRestoreRow(A_csr,i,&rowSize,&colInd,&colVal);
-      }
-      fclose(fp);
+         fprintf(fp, "%6d  %7d \n", nrows, nnz);
+         for ( i = startRow; i < startRow+nrows; i++ )
+         {
+            HYPRE_ParCSRMatrixGetRow(A_csr,i,&rowSize,&colInd,&colVal);
+            for ( j = 0; j < rowSize; j++ )
+            {
+               if ( colVal[j] != 0.0 )
+                  fprintf(fp, "%6d  %6d  %25.8e\n",i+1,colInd[j]+1,colVal[j]);
+            }
+            HYPRE_ParCSRMatrixRestoreRow(A_csr,i,&rowSize,&colInd,&colVal);
+         }
+         fclose(fp);
 
-      sprintf(fname, "hypre_rhs.out.%d", mypid_);
-      fp = fopen( fname, "w");
-      fprintf(fp, "%6d \n", nrows);
-      for ( i = startRow; i < startRow+nrows; i++ )
-      {
-         HYPRE_IJVectorGetValues(currB_, 1, &i, &ddata);
-         fprintf(fp, "%6d  %25.8e \n", i+1, ddata);
+         sprintf(fname, "hypre_rhs.out.%d", mypid_);
+         fp = fopen( fname, "w");
+         fprintf(fp, "%6d \n", nrows);
+         for ( i = startRow; i < startRow+nrows; i++ )
+         {
+            HYPRE_IJVectorGetValues(currB_, 1, &i, &ddata);
+            fprintf(fp, "%6d  %25.8e \n", i+1, ddata);
+         }
+         fclose(fp);
+         MPI_Barrier(comm_);
       }
-      fclose(fp);
-      sprintf(fname, "HYPRE_Mat");
-      HYPRE_ParCSRMatrixPrint( A_csr, fname);
-      sprintf(fname, "HYPRE_RHS");
-      HYPRE_ParVectorPrint( b_csr, fname);
-      MPI_Barrier(comm_);
       if ( HYOutputLevel_ & HYFEI_STOPAFTERPRINT ) exit(1);
    }
 #ifdef HAVE_AMGE
