@@ -93,4 +93,7 @@
 03/18/02    2.0.1R13
             - debug the schurReduction version 2
             - update with respect to FEI 2.x.12
+03/26/02    2.0.1R14
+            - optimize the matrix loading phase
+            - get rid of the old matrix stuff
  

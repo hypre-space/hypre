@@ -87,6 +87,9 @@ extern "C"
       return (MPI_Wtime());
    }
 #endif
+extern "C" {
+   int HYPRE_LSI_qsort1a( int *, int *, int, int );
+}
 
 //***************************************************************************
 // These are external functions needed internally here
@@ -139,6 +142,9 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
                   reducedB_(NULL),
                   reducedX_(NULL),
                   reducedR_(NULL),
+                  nStored_(0),
+                  storedIndices_(NULL),
+                  auxStoredIndices_(NULL),
                   matrixVectorsCreated_(0),
                   numRHSs_(1),
                   currentRHS_(0),
@@ -353,6 +359,8 @@ HYPRE_LinSysCore::~HYPRE_LinSysCore()
       rowLengths_ = NULL;
    }
    if ( rhsIDs_ != NULL ) delete [] rhsIDs_;
+   if ( storedIndices_ != NULL ) delete [] storedIndices_;
+   if ( auxStoredIndices_ != NULL ) delete [] auxStoredIndices_;
 
    //-------------------------------------------------------------------
    // clean up direct matrix access variables
@@ -611,15 +619,9 @@ int HYPRE_LinSysCore::createMatricesAndVectors(int numGlobalEqns,
    // instantiate the matrix
    //-------------------------------------------------------------------
    
-   //--old_IJ-----------------------------------------------------------
-   // ierr = HYPRE_IJMatrixCreate(comm_,&HYA_,numGlobalRows_,numGlobalRows_);
-   // ierr = HYPRE_IJMatrixSetLocalStorageType(HYA_, HYPRE_PARCSR);
-   // ierr = HYPRE_IJMatrixSetLocalSize(HYA_, numLocalEqns, numLocalEqns);
-   //--new_IJ-----------------------------------------------------------
    ierr = HYPRE_IJMatrixCreate(comm_, localStartRow_-1,localEndRow_-1,
                                localStartRow_-1,localEndRow_-1, &HYA_);
    ierr = HYPRE_IJMatrixSetObjectType(HYA_, HYPRE_PARCSR);
-   //------------------------------------------------------------------
    assert(!ierr);
 
    //-------------------------------------------------------------------
@@ -629,21 +631,11 @@ int HYPRE_LinSysCore::createMatricesAndVectors(int numGlobalEqns,
    HYbs_ = new HYPRE_IJVector[numRHSs_];
    for ( i = 0; i < numRHSs_; i++ )
    {
-      //--old_IJ--------------------------------------------------------
-      // ierr = HYPRE_IJVectorCreate(comm_, &(HYbs_[i]), numGlobalRows_);
-      // ierr = HYPRE_IJVectorSetLocalStorageType(HYbs_[i], HYPRE_PARCSR);
-      // ierr = HYPRE_IJVectorSetLocalPartitioning(HYbs_[i],localStartRow_-1,
-      //                                           localEndRow_);
-      // ierr = HYPRE_IJVectorAssemble(HYbs_[i]);
-      // ierr = HYPRE_IJVectorInitialize(HYbs_[i]);
-      // ierr = HYPRE_IJVectorZeroLocalComponents(HYbs_[i]);
-      //--new_IJ--------------------------------------------------------
       ierr = HYPRE_IJVectorCreate(comm_, localStartRow_-1, localEndRow_-1,
                                   &(HYbs_[i]));
       ierr = HYPRE_IJVectorSetObjectType(HYbs_[i], HYPRE_PARCSR);
       ierr = HYPRE_IJVectorInitialize(HYbs_[i]);
       ierr = HYPRE_IJVectorAssemble(HYbs_[i]);
-      //----------------------------------------------------------------
       assert(!ierr);
    }
    HYb_ = HYbs_[0];
@@ -652,20 +644,10 @@ int HYPRE_LinSysCore::createMatricesAndVectors(int numGlobalEqns,
    // instantiate the solution vector
    //-------------------------------------------------------------------
 
-   //--old_IJ-----------------------------------------------------------
-   // ierr = HYPRE_IJVectorCreate(comm_, &HYx_, numGlobalRows_);
-   // ierr = HYPRE_IJVectorSetLocalStorageType(HYx_, HYPRE_PARCSR);
-   // ierr = HYPRE_IJVectorSetLocalPartitioning(HYx_,localStartRow_-1,
-   //                                          localEndRow_);
-   // ierr = HYPRE_IJVectorAssemble(HYx_);
-   // ierr = HYPRE_IJVectorInitialize(HYx_);
-   // ierr = HYPRE_IJVectorZeroLocalComponents(HYx_);
-   //--new_IJ-----------------------------------------------------------
    ierr = HYPRE_IJVectorCreate(comm_, localStartRow_-1, localEndRow_-1, &HYx_);
    ierr = HYPRE_IJVectorSetObjectType(HYx_, HYPRE_PARCSR);
    ierr = HYPRE_IJVectorInitialize(HYx_);
    ierr = HYPRE_IJVectorAssemble(HYx_);
-   //-------------------------------------------------------------------
    assert(!ierr);
 
    //-------------------------------------------------------------------
@@ -683,20 +665,10 @@ int HYPRE_LinSysCore::createMatricesAndVectors(int numGlobalEqns,
    // instantiate the residual vector
    //-------------------------------------------------------------------
 
-   //--old_IJ-----------------------------------------------------------
-   // ierr = HYPRE_IJVectorCreate(comm_, &HYr_, numGlobalRows_);
-   // ierr = HYPRE_IJVectorSetLocalStorageType(HYr_, HYPRE_PARCSR);
-   // ierr = HYPRE_IJVectorSetLocalPartitioning(HYr_,localStartRow_-1,
-   //                                           localEndRow_);
-   // ierr = HYPRE_IJVectorAssemble(HYr_);
-   // ierr = HYPRE_IJVectorInitialize(HYr_);
-   // ierr = HYPRE_IJVectorZeroLocalComponents(HYr_);
-   //--new_IJ-----------------------------------------------------------
    ierr = HYPRE_IJVectorCreate(comm_, localStartRow_-1, localEndRow_-1, &HYr_);
    ierr = HYPRE_IJVectorSetObjectType(HYr_, HYPRE_PARCSR);
    ierr = HYPRE_IJVectorInitialize(HYr_);
    ierr = HYPRE_IJVectorAssemble(HYr_);
-   //-------------------------------------------------------------------
    assert(!ierr);
    matrixVectorsCreated_ = 1;
    schurReductionCreated_ = 0;
@@ -813,7 +785,7 @@ int HYPRE_LinSysCore::setLoadVectors(GlobalID elemBlock, int numElems,
 //***************************************************************************
 // Set the number of rows in the diagonal part and off diagonal part
 // of the matrix, using the structure of the matrix, stored in rows.
-// rows is an array that is 0-based.  localStartRow and localEndRow are 1-based.
+// rows is an array that is 0-based. localStartRow and localEndRow are 1-based.
 //---------------------------------------------------------------------------
 
 int HYPRE_LinSysCore::allocateMatrix(int **colIndices, int *rowLengths)
@@ -983,10 +955,10 @@ int HYPRE_LinSysCore::setPenCREqns(int penCRSetID, int numCRs,
 // same sparsity pattern.
 //---------------------------------------------------------------------------
 
-int HYPRE_LinSysCore::resetMatrixAndVector(double s)
+int HYPRE_LinSysCore::resetMatrixAndVector(double setValue)
 {
-   int    i, j, ierr, size, *indices0;
-   double *values0;
+   int    i, j, ierr, localNRows, *cols;
+   double *vals;
 
    //-------------------------------------------------------------------
    // diagnoistic message 
@@ -994,7 +966,7 @@ int HYPRE_LinSysCore::resetMatrixAndVector(double s)
 
    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
       printf("%4d : HYPRE_LSC::entering resetMatrixAndVector.\n",mypid_);
-   if ( s != 0.0 && mypid_ == 0 )
+   if ( setValue != 0.0 && mypid_ == 0 )
    {
       printf("resetMatrixAndVector ERROR : cannot take nonzeros.\n");
       exit(1);
@@ -1004,25 +976,20 @@ int HYPRE_LinSysCore::resetMatrixAndVector(double s)
    // reset vector values
    //-------------------------------------------------------------------
 
-   //--old_IJ-----------------------------------------------------------
-   // for (i = 0; i < numRHSs_; i++) 
-   //	  HYPRE_IJVectorZeroLocalComponents(HYbs_[i]);
-   //--new_IJ-----------------------------------------------------------
-   size     = localEndRow_ - localStartRow_ + 1;
-   indices0 = new int[size];
-   values0  = new double[size];
-   for (i = 0; i < size; i++)
+   localNRows = localEndRow_ - localStartRow_ + 1;
+   cols  = new int[localNRows];
+   vals  = new double[localNRows];
+   for (i = 0; i < localNRows; i++)
    {
-      indices0[i] = localStartRow_ + i - 1;
-      values0[i] = 0.0;
+      cols[i] = localStartRow_ + i - 1;
+      vals[i] = 0.0;
    }    
    for (i = 0; i < numRHSs_; i++) 
-      HYPRE_IJVectorSetValues(HYbs_[i], size, (const int *) indices0,
-                              (const double *) values0);
+      HYPRE_IJVectorSetValues(HYbs_[i], localNRows, (const int *) cols,
+                              (const double *) vals);
 
-   delete [] indices0;
-   delete [] values0;
-   //-------------------------------------------------------------------
+   delete [] cols;
+   delete [] vals;
 
    systemAssembled_ = 0;
    schurReductionCreated_ = 0;
@@ -1033,18 +1000,10 @@ int HYPRE_LinSysCore::resetMatrixAndVector(double s)
    // re-initializing the matrix, restart the whole thing
    //-------------------------------------------------------------------
 
-   //--old_IJ-----------------------------------------------------------
-   // if ( HYA_ != NULL ) HYPRE_IJMatrixDestroy(HYA_);
-   // ierr = HYPRE_IJMatrixCreate(comm_,&HYA_,numGlobalRows_,numGlobalRows_);
-   // ierr = HYPRE_IJMatrixSetLocalStorageType(HYA_, HYPRE_PARCSR);
-   // size = localEndRow_ - localStartRow_ + 1;
-   // ierr = HYPRE_IJMatrixSetLocalSize(HYA_, size, size);
-   //--new_IJ-----------------------------------------------------------
    if ( HYA_ != NULL ) HYPRE_IJMatrixDestroy(HYA_);
    ierr = HYPRE_IJMatrixCreate(comm_, localStartRow_-1, localEndRow_-1,
                                localStartRow_-1, localEndRow_-1, &HYA_);
    ierr = HYPRE_IJMatrixSetObjectType(HYA_, HYPRE_PARCSR);
-   //-------------------------------------------------------------------
    assert(!ierr);
 
    //-------------------------------------------------------------------
@@ -1073,8 +1032,8 @@ int HYPRE_LinSysCore::resetMatrixAndVector(double s)
    }
    colValues_  = NULL;
 
-   colValues_ = new double*[size];
-   for ( i = 0; i < size; i++ )
+   colValues_ = new double*[localNRows];
+   for ( i = 0; i < localNRows; i++ )
    {
       if ( rowLengths_[i] > 0 ) colValues_[i] = new double[rowLengths_[i]];
       for ( j = 0; j < rowLengths_[i]; j++ ) colValues_[i][j] = 0.0;
@@ -1093,7 +1052,7 @@ int HYPRE_LinSysCore::resetMatrixAndVector(double s)
 // new function to reset matrix independently
 //---------------------------------------------------------------------------
 
-int HYPRE_LinSysCore::resetMatrix(double s) 
+int HYPRE_LinSysCore::resetMatrix(double setValue) 
 {
    int  i, j, ierr, size;
 
@@ -1103,7 +1062,7 @@ int HYPRE_LinSysCore::resetMatrix(double s)
 
    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
       printf("%4d : HYPRE_LSC::entering resetMatrix.\n",mypid_);
-   if ( s != 0.0 && mypid_ == 0 )
+   if ( setValue != 0.0 && mypid_ == 0 )
    {
       printf("resetMatrix ERROR : cannot take nonzeros.\n");
       exit(1);
@@ -1127,19 +1086,11 @@ int HYPRE_LinSysCore::resetMatrix(double s)
    // re-initializing the matrix, restart the whole thing
    //-------------------------------------------------------------------
 
-   //--old_IJ-----------------------------------------------------------
-   // if ( HYA_ != NULL ) HYPRE_IJMatrixDestroy(HYA_);
-   // ierr = HYPRE_IJMatrixCreate(comm_,&HYA_,numGlobalRows_,numGlobalRows_);
-   // ierr = HYPRE_IJMatrixSetLocalStorageType(HYA_, HYPRE_PARCSR);
-   // size = localEndRow_ - localStartRow_ + 1;
-   // ierr = HYPRE_IJMatrixSetLocalSize(HYA_, size, size);
-   //--new_IJ-----------------------------------------------------------
    if ( HYA_ != NULL ) HYPRE_IJMatrixDestroy(HYA_);
    size = localEndRow_ - localStartRow_ + 1;
    ierr = HYPRE_IJMatrixCreate(comm_, localStartRow_-1, localEndRow_-1,
                                localStartRow_-1, localEndRow_-1, &HYA_);
    ierr = HYPRE_IJMatrixSetObjectType(HYA_, HYPRE_PARCSR);
-   //-------------------------------------------------------------------
    assert(!ierr);
 
    //-------------------------------------------------------------------
@@ -1183,10 +1134,10 @@ int HYPRE_LinSysCore::resetMatrix(double s)
 // new function to reset vectors independently
 //---------------------------------------------------------------------------
 
-int HYPRE_LinSysCore::resetRHSVector(double s) 
+int HYPRE_LinSysCore::resetRHSVector(double setValue) 
 {
-   int    i, j, ierr, size, *indices0;
-   double *values0;
+   int    i, j, ierr, localNRows, *cols;
+   double *vals;
 
    //-------------------------------------------------------------------
    // diagnostic message
@@ -1194,7 +1145,7 @@ int HYPRE_LinSysCore::resetRHSVector(double s)
 
    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
       printf("%4d : HYPRE_LSC::entering resetRHSVector.\n",mypid_);
-   if ( s != 0.0 && mypid_ == 0 )
+   if ( setValue != 0.0 && mypid_ == 0 )
    {
       printf("resetRHSVector ERROR : cannot take nonzeros.\n");
       exit(1);
@@ -1206,25 +1157,20 @@ int HYPRE_LinSysCore::resetRHSVector(double s)
 
    if ( HYbs_ != NULL )
    {
-      //--old_IJ--------------------------------------------------------
-      // for (i = 0; i < numRHSs_; i++) 
-      // if ( HYbs_[i] != NULL ) HYPRE_IJVectorZeroLocalComponents(HYbs_[i]);
-      //--new_IJ--------------------------------------------------------
-      size     = localEndRow_ - localStartRow_ + 1;
-      indices0 = new int[size];
-      values0  = new double[size];
-      for (i = 0; i < size; i++)
+      localNRows = localEndRow_ - localStartRow_ + 1;
+      cols       = new int[localNRows];
+      vals       = new double[localNRows];
+      for (i = 0; i < localNRows; i++)
       {
-         indices0[i] = localStartRow_ + i - 1;
-         values0[i] = 0.0;
+         cols[i] = localStartRow_ + i - 1;
+         vals[i] = 0.0;
       }    
       for (i = 0; i < numRHSs_; i++) 
          if ( HYbs_[i] != NULL ) 
-            HYPRE_IJVectorSetValues(HYbs_[i], size, (const int *) indices0,
-                                    (const double *) values0);
-      delete [] indices0;
-      delete [] values0;
-      //----------------------------------------------------------------
+            HYPRE_IJVectorSetValues(HYbs_[i], localNRows, (const int *) cols,
+                                    (const double *) vals);
+      delete [] cols;
+      delete [] vals;
    }
 
    //-------------------------------------------------------------------
@@ -1322,7 +1268,9 @@ int HYPRE_LinSysCore::sumIntoSystemMatrix(int numPtRows, const int* ptRows,
                             int numPtCols, const int* ptCols,
                             const double* const* values)
 {
-   int i, j, k, index, colIndex, localRow;
+   int    i, j, k, index, colIndex, localRow, orderFlag=0; 
+   int    *indptr, *auxPtCols, *newPtCols, rowLeng, useOld;
+   double *valptr, *auxValues;
 
    //-------------------------------------------------------------------
    // diagnostic message for high output level only
@@ -1357,29 +1305,78 @@ int HYPRE_LinSysCore::sumIntoSystemMatrix(int numPtRows, const int* ptRows,
    // load the local matrix
    //-------------------------------------------------------------------
 
+   useOld = orderFlag = 0;
+   if ( numPtCols == nStored_ && storedIndices_ != NULL )
+   {
+      for ( i = 0; i < numPtCols; i++ ) 
+         if ( storedIndices_[i] != ptCols[i] ) break;
+      if ( i == numPtCols ) useOld = 1;
+   }
+   if ( ! useOld ) 
+   {
+      for ( i = 1; i < numPtCols; i++ ) 
+         if ( ptCols[i] < ptCols[i-1] ) { orderFlag = 1; break; }
+      if ( orderFlag == 1 )
+      { 
+         if ( numPtCols != nStored_ )
+         {
+            if ( storedIndices_    != NULL ) delete [] storedIndices_;
+            if ( auxStoredIndices_ != NULL ) delete [] auxStoredIndices_;
+            storedIndices_ = new int[numPtCols];
+            auxStoredIndices_ = new int[numPtCols];
+            nStored_ = numPtCols;
+         }
+         for ( i = 0; i < numPtCols; i++ ) 
+         {
+            storedIndices_[i] = ptCols[i];
+            auxStoredIndices_[i] = i; 
+         }
+         HYPRE_LSI_qsort1a(storedIndices_,auxStoredIndices_,0,numPtCols-1);
+         for ( i = 0; i < numPtCols; i++ ) storedIndices_[i] = ptCols[i];
+      }
+      else
+      {
+         if ( storedIndices_    != NULL ) delete [] storedIndices_;
+         if ( auxStoredIndices_ != NULL ) delete [] auxStoredIndices_;
+         storedIndices_ = NULL;
+         auxStoredIndices_ = NULL;
+         nStored_ = 0;
+      }
+   }
    for ( i = 0; i < numPtRows; i++ ) 
    {
-      localRow = ptRows[i] - localStartRow_ + 1;
+      localRow  = ptRows[i] - localStartRow_ + 1;
+      indptr    = colIndices_[localRow];
+      valptr    = colValues_[localRow];
+      rowLeng   = rowLengths_[localRow];
+      auxValues = (double *) values[i];
+      index     = 0;
       for ( j = 0; j < numPtCols; j++ ) 
-      { 
-         colIndex = ptCols[j] + 1;
-         index    = hypre_BinarySearch(colIndices_[localRow], colIndex, 
-                                       rowLengths_[localRow]);
-         if ( index < 0 )
+      {
+         if ( storedIndices_ )
+            colIndex = storedIndices_[auxStoredIndices_[j]] + 1;
+         else
+            colIndex = ptCols[j] + 1;
+
+         while ( index < rowLeng && indptr[index] < colIndex ) index++; 
+         if ( index >= rowLeng )
          {
             printf("%4d : sumIntoSystemMatrix ERROR - loading column");
-            printf("      that has not been declared before - %d.\n",colIndex);
-            for ( k = 0; k < rowLengths_[localRow]; k++ ) 
-               printf("       available column index = %d\n",
-                       colIndices_[localRow][k]);
+            printf("      that has not been declared before - %d.\n",
+                   colIndex);
+            for ( k = 0; k < rowLeng; k++ ) 
+               printf("       available column index = %d\n", indptr[k]);
             exit(1);
          }
-         colValues_[localRow][index] += values[i][j];
+         if ( auxStoredIndices_ )
+            valptr[index] += auxValues[auxStoredIndices_[j]];
+         else
+            valptr[index] += auxValues[j];
       }
+   }
 #ifdef HAVE_AMGE
    HYPRE_LSI_AMGePutRow(localRow,numPtCols,(double*) values[i],(int*)ptCols);
 #endif
-   }
 
    //-------------------------------------------------------------------
    // diagnostic message 
@@ -1514,11 +1511,7 @@ int HYPRE_LinSysCore::getMatrixRowLength(int row, int& length)
    }
    else
    {
-      //--old_IJ---------------------------------------------------------
-      // A_csr  = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(currA_);
-      //--new_IJ---------------------------------------------------------
       HYPRE_IJMatrixGetObject(currA_, (void **) &A_csr);
-      //-----------------------------------------------------------------
       HYPRE_ParCSRMatrixGetRow(A_csr,row,&rowLeng,&colInd,&colVal);
       length = rowLeng;
       HYPRE_ParCSRMatrixRestoreRow(A_csr,row,&rowLeng,&colInd,&colVal);
@@ -1556,11 +1549,7 @@ int HYPRE_LinSysCore::getMatrixRow(int row, double* coefs, int* indices,
    }
    else
    {
-      //---old_IJ-------------------------------------------------------	
-      // A_csr  = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(currA_);
-      //---new_IJ-------------------------------------------------------	
       HYPRE_IJMatrixGetObject(currA_, (void **) &A_csr);
-      //----------------------------------------------------------------	
       rowIndex = row + 1;
       if (rowIndex < localStartRow_ || rowIndex > localEndRow_) return (-1);
       rowIndex--;
@@ -1624,12 +1613,8 @@ int HYPRE_LinSysCore::sumIntoRHSVector(int num, const double* values,
       }
    }
 
-   //---old_IJ------------------------------------------------------------	
-   //ierr = HYPRE_IJVectorAddToLocalComponents(HYb_,num,local_ind,NULL,values);
-   //---new_IJ------------------------------------------------------------	
    ierr = HYPRE_IJVectorAddToValues(HYb_, num, (const int *) local_ind, 
                                     (const double *) values);
-   //-------------------------------------------------------------------
    assert(!ierr);
 
    delete [] local_ind;
@@ -1662,12 +1647,8 @@ int HYPRE_LinSysCore::putIntoRHSVector(int num, const double* values,
    {
       index = indices[i];
       if (index < localStartRow_-1 || index >= localEndRow_) continue;
-      //---old_IJ-------------------------------------------------------	
-      // HYPRE_IJVectorSetLocalComponents(HYb_,1,&index,NULL,&(values[i]));
-      //---new_IJ-------------------------------------------------------	
       HYPRE_IJVectorSetValues(HYb_, 1, (const int *) &index,
                               (const double *) &(values[i]));
-      //----------------------------------------------------------------
    }
    return(0);
 }
@@ -1691,11 +1672,7 @@ int HYPRE_LinSysCore::getFromRHSVector(int num, double* values,
    {
       index = indices[i];
       if (index < localStartRow_-1 || index >= localEndRow_) continue;
-      //---old_IJ-------------------------------------------------------	
-      // HYPRE_IJVectorGetLocalComponents(HYb_,1,&index,NULL,&(values[i]));
-      //---new_IJ-------------------------------------------------------	
       HYPRE_IJVectorGetValues(HYb_,1,&index,&(values[i]));
-      //----------------------------------------------------------------	
    }
    return(0);
 }
@@ -1782,13 +1759,10 @@ int HYPRE_LinSysCore::matrixLoadComplete()
                newColVal[newLeng++] = colValues_[i][j];
             }
          }
-         //---old_IJ-------------------------------------------------	
-         // HYPRE_IJMatrixInsertRow(HYA_,newLeng,eqnNum,newColInd,newColVal);
-         //---new_IJ-------------------------------------------------	
          HYPRE_IJMatrixSetValues(HYA_, 1, &newLeng,(const int *) &eqnNum,
                        (const int *) newColInd, (const double *) newColVal);
-         //----------------------------------------------------------	
          delete [] colValues_[i];
+         delete [] colIndices_[i];
          nnz += newLeng;
       }
       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
@@ -1797,7 +1771,9 @@ int HYPRE_LinSysCore::matrixLoadComplete()
                  mypid_, nnz);
       }
       delete [] colValues_;
+      delete [] colIndices_;
       colValues_ = NULL;
+      colIndices_ = NULL;
       if ( maxRowLeng > 0 )
       {
          delete [] newColInd;
@@ -1825,11 +1801,7 @@ int HYPRE_LinSysCore::matrixLoadComplete()
       HYPRE_ParCSRMatrix A_csr;
 
       printf("%4d : HYPRE_LSC::print the matrix and rhs to files.\n",mypid_);
-      //---old_IJ-------------------------------------------------------	
-      // A_csr  = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(HYA_);
-      //---new_IJ-------------------------------------------------------	
       HYPRE_IJMatrixGetObject(HYA_, (void **) &A_csr);
-      //----------------------------------------------------------------	
       sprintf(fname, "hypre_mat.out.%d",mypid_);
       fp = fopen(fname,"w");
       nrows = localEndRow_ - localStartRow_ + 1;
@@ -1847,7 +1819,7 @@ int HYPRE_LinSysCore::matrixLoadComplete()
          for (j = 0; j < rowSize; j++)
          {
             if ( colVal[j] != 0.0 )
-               fprintf(fp, "%6d  %6d  %25.16e \n", i+1, colInd[j]+1, colVal[j]);
+               fprintf(fp, "%6d  %6d  %25.16e \n",i+1,colInd[j]+1,colVal[j]);
          }
           HYPRE_ParCSRMatrixRestoreRow(A_csr,i,&rowSize,&colInd,&colVal);
       }
@@ -1857,11 +1829,7 @@ int HYPRE_LinSysCore::matrixLoadComplete()
       fprintf(fp, "%6d \n", nrows);
       for ( i = localStartRow_-1; i <= localEndRow_-1; i++ )
       {
-         //---old_IJ-------------------------------------------------	
-         // HYPRE_IJVectorGetLocalComponents(HYb_, 1, &i, NULL, &value);
-         //---new_IJ-------------------------------------------------	
          HYPRE_IJVectorGetValues(HYb_, 1, &i, &value);
-         //----------------------------------------------------------	
          fprintf(fp, "%6d  %25.16e \n", i+1, value);
       }
       fclose(fp);
@@ -1952,7 +1920,7 @@ int HYPRE_LinSysCore::putNodalFieldData(int fieldID, int fieldSize,
          iTempArray = procNRows;
          procNRows  = new int[numProcs_+1];
          for ( i = 0; i <= numProcs_; i++ ) procNRows[i] = 0;
-         MPI_Allreduce(iTempArray, &(procNRows[1]), numProcs_, MPI_INT, MPI_SUM,
+         MPI_Allreduce(iTempArray,&(procNRows[1]),numProcs_,MPI_INT,MPI_SUM,
                        comm_);
          delete [] iTempArray;
          HYPRE_LSI_MLICreateNodeEqnMap(HYPrecon_, numNodes, aleNodeNumbers,
@@ -2034,20 +2002,10 @@ int HYPRE_LinSysCore::enforceEssentialBC(int* globalEqn, double* alpha,
                      {
                         rhs_term = gamma[i] / alpha[i] * colVal2[k];
                         eqnNum = colIndex - 1;
-                        //---old_IJ------------------------------------	
-                        // HYPRE_IJVectorGetLocalComponents(HYb_,1,&eqnNum, 
-                        //                                 NULL, &val);
-                        //---new_IJ------------------------------------	
                         HYPRE_IJVectorGetValues(HYb_,1,&eqnNum, &val);
-                        //---------------------------------------------	
                         val -= rhs_term;
-                        //---old_IJ------------------------------------	
-                        // HYPRE_IJVectorSetLocalComponents(HYb_,1,&eqnNum,
-                        //                                 NULL, &val);
-                        //---new_IJ------------------------------------	
                         HYPRE_IJVectorSetValues(HYb_, 1, (const int *) &eqnNum,
                                                 (const double *) &val);
-                        //---------------------------------------------	
                         colVal2[k] = 0.0;
                         break;
                      }
@@ -2059,12 +2017,8 @@ int HYPRE_LinSysCore::enforceEssentialBC(int* globalEqn, double* alpha,
          // Set rhs for boundary point
          rhs_term = gamma[i] / alpha[i];
          eqnNum = globalEqn[i];
-         //---old_IJ-------------------------------------------------	
-         // HYPRE_IJVectorSetLocalComponents(HYb_,1,&eqnNum,NULL,&rhs_term);
-         //---new_IJ-------------------------------------------------	
          HYPRE_IJVectorSetValues(HYb_, 1, (const int *) &eqnNum,
                                  (const double *) &rhs_term);
-         //----------------------------------------------------------	
       }
    }
 
@@ -2141,19 +2095,11 @@ int HYPRE_LinSysCore::enforceRemoteEssBCs(int numEqns, int* globalEqns,
          {
             if (colInd[k]-1 == colIndices[i][j]) 
             {
-               //---old_IJ----------------------------------------------	
-               // HYPRE_IJVectorGetLocalComponents(HYb_,1,&eqnNum,NULL,&bval);
-               //---new_IJ----------------------------------------------	
                HYPRE_IJVectorGetValues(HYb_,1,&eqnNum,&bval);
-               //-------------------------------------------------------	
                bval -= ( colVal[k] * coefs[i][j] );
                colVal[k] = 0.0;
-               //---old_IJ----------------------------------------------	
-               // HYPRE_IJVectorSetLocalComponents(HYb_,1,&eqnNum,NULL,&bval);
-               //---new_IJ----------------------------------------------	
                HYPRE_IJVectorSetValues(HYb_, 1, (const int *) &eqnNum,
                                        (const double *) &bval);
-               //-------------------------------------------------------	
             }
          }
       }
@@ -2227,18 +2173,10 @@ int HYPRE_LinSysCore::enforceOtherBC(int* globalEqn, double* alpha,
       // need to fetch matrix and put it back before assembled
 
       eqnNum = globalEqn[i];
-      //---old_IJ-------------------------------------------------------	
-      // HYPRE_IJVectorGetLocalComponents(HYb_,1,&eqnNum,NULL,&val);
-      //---new_IJ-------------------------------------------------------	
       HYPRE_IJVectorGetValues(HYb_,1,&eqnNum,&val);
-      //----------------------------------------------------------------	
       val += ( gamma[i] / beta[i] );
-      //---old_IJ-------------------------------------------------------	
-      // HYPRE_IJVectorSetLocalComponents(HYb_,1,&eqnNum,NULL,&val);
-      //---new_IJ-------------------------------------------------------	
       HYPRE_IJVectorSetValues(HYb_, 1, (const int *) &eqnNum,
                               (const double *) &val);
-      //----------------------------------------------------------------	
    }
 
    //-------------------------------------------------------------------
@@ -2365,18 +2303,10 @@ int HYPRE_LinSysCore::copyInRHSVector(double scalar, const Data& data)
    //-------------------------------------------------------------------
 
    HYPRE_IJVector inVec = (HYPRE_IJVector) data.getDataPtr();
-
-   //---old_IJ-------------------------------------------------------	
-   // HYPRE_ParVector srcVec = 
-   //      (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(inVec);
-   // HYPRE_ParVector destVec = 
-   //      (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(HYb_);
-   //---new_IJ-------------------------------------------------------	
    HYPRE_ParVector srcVec;
    HYPRE_ParVector destVec;
    HYPRE_IJVectorGetObject(inVec, (void **) &srcVec);
    HYPRE_IJVectorGetObject(HYb_, (void **) &destVec);
-   //----------------------------------------------------------------	
  
    HYPRE_ParVectorCopy( srcVec, destVec);
  
@@ -2414,34 +2344,17 @@ int HYPRE_LinSysCore::copyOutRHSVector(double scalar, Data& data)
    //-------------------------------------------------------------------
 
    HYPRE_IJVector newVector;
-   //---old_IJ---------------------------------------------------------
-   // ierr = HYPRE_IJVectorCreate(comm_, &newVector, numGlobalRows_);
-   // ierr = HYPRE_IJVectorSetLocalStorageType(newVector, HYPRE_PARCSR);
-   // ierr = HYPRE_IJVectorSetLocalPartitioning(newVector,localStartRow_-1,
-   //                                          localEndRow_);
-   // ierr = HYPRE_IJVectorAssemble(newVector);
-   // ierr = HYPRE_IJVectorInitialize(newVector);
-   // ierr = HYPRE_IJVectorZeroLocalComponents(newVector);
-   //---new_IJ---------------------------------------------------------
    ierr = HYPRE_IJVectorCreate(comm_, localStartRow_-1, localEndRow_-1, 
                                &newVector);
    ierr = HYPRE_IJVectorSetObjectType(newVector, HYPRE_PARCSR);
    ierr = HYPRE_IJVectorInitialize(newVector);
    ierr = HYPRE_IJVectorAssemble(newVector);
-   //------------------------------------------------------------------
    assert(!ierr);
 
-   //---old_IJ---------------------------------------------------------
-   // HYPRE_ParVector Vec1 = 
-   //      (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(HYb_);
-   // HYPRE_ParVector Vec2 = 
-   //      (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(newVector);
-   //---new_IJ---------------------------------------------------------
    HYPRE_ParVector Vec1;
    HYPRE_ParVector Vec2;
    HYPRE_IJVectorGetObject(HYb_, (void **) &Vec1);
    HYPRE_IJVectorGetObject(newVector, (void **) &Vec2);
-   //------------------------------------------------------------------
 
    HYPRE_ParVectorCopy( Vec1, Vec2);
    if ( scalar != 1.0 ) HYPRE_ParVectorScale( scalar, Vec2);
@@ -2483,18 +2396,10 @@ int HYPRE_LinSysCore::sumInRHSVector(double scalar, const Data& data)
    //-------------------------------------------------------------------
 
    HYPRE_IJVector inVec = (HYPRE_IJVector) data.getDataPtr();
-   //---old_IJ---------------------------------------------------------
-   // HYPRE_ParVector xVec = 
-   //      (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(inVec);
-   // HYPRE_ParVector yVec = 
-   //      (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(HYb_);
-   //---new_IJ---------------------------------------------------------
    HYPRE_ParVector xVec;
    HYPRE_ParVector yVec;
    HYPRE_IJVectorGetObject(inVec, (void **) &xVec);
    HYPRE_IJVectorGetObject(HYb_, (void **) &yVec);
-   //------------------------------------------------------------------
-
    hypre_ParVectorAxpy(scalar,(hypre_ParVector*)xVec,(hypre_ParVector*)yVec);
 
    //-------------------------------------------------------------------
@@ -2724,12 +2629,8 @@ int HYPRE_LinSysCore::putInitialGuess(const int* eqnNumbers,
          mapFromSolnList2_[mapFromSolnLeng_++] = (int) values[i];
       }
    }
-   //--old_IJ-----------------------------------------------------------
-   // ierr = HYPRE_IJVectorSetLocalComponents(HYx_,leng,local_ind,NULL,values);
-   //--new_IJ-----------------------------------------------------------
    ierr = HYPRE_IJVectorSetValues(HYx_, leng, (const int *) local_ind,
                                   (const double *) values);
-   //-------------------------------------------------------------------
    assert(!ierr);
 
    delete [] local_ind;
@@ -2772,11 +2673,7 @@ int HYPRE_LinSysCore::getSolution(double* answers,int leng)
    equations = new int[leng];
    for ( i = 0; i < leng; i++ ) equations[i] = i;
 
-   //--old_IJ-----------------------------------------------------------
-   //ierr = HYPRE_IJVectorGetLocalComponents(HYx_,leng,equations,NULL,answers);
-   //--new_IJ-----------------------------------------------------------
    ierr = HYPRE_IJVectorGetValues(HYx_,leng,equations,answers);
-   //-------------------------------------------------------------------
    assert(!ierr);
 
    delete [] equations;
@@ -2819,11 +2716,7 @@ int HYPRE_LinSysCore::getSolnEntry(int eqnNumber, double& answer)
       exit(1);
    }
 
-   //--old_IJ-----------------------------------------------------------
-   // ierr = HYPRE_IJVectorGetLocalComponents(HYx_,1,&equation,NULL,&val);
-   //--new_IJ-----------------------------------------------------------
    ierr = HYPRE_IJVectorGetValues(HYx_,1,&equation,&val);
-   //-------------------------------------------------------------------
    assert(!ierr);
    answer = val;
 
@@ -3273,17 +3166,10 @@ int HYPRE_LinSysCore::formResidual(double* values, int leng)
    // fetch matrix and vector pointers
    //-------------------------------------------------------------------
 
-   //--old_IJ-----------------------------------------------------------
-   // A_csr  = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(HYA_);
-   // x_csr  = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(HYx_);
-   // b_csr  = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(HYb_);
-   // r_csr  = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(HYr_);
-   //--new_IJ-----------------------------------------------------------
    HYPRE_IJMatrixGetObject(HYA_, (void **) &A_csr);
    HYPRE_IJVectorGetObject(HYx_, (void **) &x_csr);
    HYPRE_IJVectorGetObject(HYb_, (void **) &b_csr);
    HYPRE_IJVectorGetObject(HYr_, (void **) &r_csr);
-   //-------------------------------------------------------------------
 
    //-------------------------------------------------------------------
    // form residual vector
@@ -3299,11 +3185,7 @@ int HYPRE_LinSysCore::formResidual(double* values, int leng)
    for ( i = localStartRow_-1; i < localEndRow_; i++ )
    {
       index = i - localStartRow_ + 1;
-      //--old_IJ--------------------------------------------------------
-      // HYPRE_IJVectorGetLocalComponents(HYr_, 1, &i, NULL, &values[index]);
-      //--new_IJ--------------------------------------------------------
       HYPRE_IJVectorGetValues(HYr_, 1, &i, &values[index]);
-      //----------------------------------------------------------------
    }
 
    //-------------------------------------------------------------------
@@ -3369,17 +3251,10 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
    // fetch matrix and vector pointers
    //-------------------------------------------------------------------
 
-   //--old_IJ-----------------------------------------------------------
-   // A_csr  = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(currA_);
-   // x_csr  = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(currX_);
-   // b_csr  = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(currB_);
-   // r_csr  = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(currR_);
-   //--new_IJ-----------------------------------------------------------
    HYPRE_IJMatrixGetObject(currA_, (void **) &A_csr);
    HYPRE_IJVectorGetObject(currX_, (void **) &x_csr);
    HYPRE_IJVectorGetObject(currB_, (void **) &b_csr);
    HYPRE_IJVectorGetObject(currR_, (void **) &r_csr);
-   //-------------------------------------------------------------------
 
    //-------------------------------------------------------------------
    // diagnostics (print the reduced matrix to a file)
@@ -3452,7 +3327,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
          for ( j = 0; j < rowSize; j++ )
          {
             if ( colVal[j] != 0.0 )
-               fprintf(fp, "%6d  %6d  %25.16e \n", i+1, colInd[j]+1, colVal[j]);
+               fprintf(fp, "%6d  %6d  %25.16e \n",i+1,colInd[j]+1, colVal[j]);
          }
          HYPRE_ParCSRMatrixRestoreRow(A_csr,i,&rowSize,&colInd,&colVal);
       }
@@ -3463,11 +3338,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
       fprintf(fp, "%6d \n", nrows);
       for ( i = startRow; i < startRow+nrows; i++ )
       {
-         //--old_IJ-----------------------------------------------------
-         // HYPRE_IJVectorGetLocalComponents(currB_, 1, &i, NULL, &ddata);
-         //--new_IJ-----------------------------------------------------
          HYPRE_IJVectorGetValues(currB_, 1, &i, &ddata);
-         //-------------------------------------------------------------
          fprintf(fp, "%6d  %25.16e \n", i+1, ddata);
       }
       fclose(fp);
@@ -3530,6 +3401,8 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
               if ( mypid_ == 0 )
                 printf("***************************************************\n");
               HYPRE_ParCSRPCGSetLogging(HYSolver_, 1);
+              if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+                 HYPRE_ParCSRPCGSetLogging(HYSolver_, 2);
            }
            HYPRE_ParCSRPCGSetup(HYSolver_, A_csr, b_csr, x_csr);
            MPI_Barrier( comm_ );
@@ -3999,11 +3872,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
       fprintf(fp, "%6d \n", nrows);
       for ( i = startRow; i < startRow+nrows; i++ )
       {
-         //--old_IJ-----------------------------------------------------
-         // HYPRE_IJVectorGetLocalComponents(currX_, 1, &i, NULL, &ddata);
-         //--new_IJ-----------------------------------------------------
          HYPRE_IJVectorGetValues(currX_, 1, &i, &ddata);
-         //-------------------------------------------------------------
          fprintf(fp, "%6d  %25.16e \n", i+1, ddata);
       }
       fclose(fp);

@@ -504,6 +504,9 @@ class HYPRE_LinSysCore
    int             currentRHS_;
    int             *rhsIDs_;
    int             numRHSs_;
+   int             nStored_;
+   int             *storedIndices_;
+   int             *auxStoredIndices_;
 
    // ----------------------------------------------------------------------
    // flags for matrix assembly, various reductions, and projections
