@@ -34,38 +34,45 @@ main( int   argc,
 	A_in = hypre_ReadCSRMatrix("../../Parrap/fine_op");
    	printf(" read fine_op\n");
    }
-   P = hypre_CSRMatrixToParCSRMatrix(MPI_COMM_WORLD, P_in, NULL, NULL);
-   printf(" P converted\n");
 
    fine_partitioning = NULL;
    coarse_partitioning = NULL;
+/*   coarse_partitioning = hypre_CTAlloc(int,5);
+   coarse_partitioning[0] = 0;
+   coarse_partitioning[1] = 2;
+   coarse_partitioning[2] = 4;
+   coarse_partitioning[3] = 7;
+   coarse_partitioning[4] = 10;
+*/
 
-   hypre_GenerateMatvecCommunicationInfo(P,coarse_partitioning,
-		fine_partitioning);
-   printf(" generated P_CommPkg \n");
+   P = hypre_CSRMatrixToParCSRMatrix(MPI_COMM_WORLD, P_in, fine_partitioning,
+		coarse_partitioning);
+
+   printf(" P converted\n");
 
    A = hypre_CSRMatrixToParCSRMatrix(MPI_COMM_WORLD, A_in, fine_partitioning,
 	fine_partitioning);
    printf(" A converted\n");
 
-   hypre_GenerateMatvecCommunicationInfo(A,fine_partitioning,fine_partitioning);
+   hypre_GenerateMatvecCommunicationInfo(A);
    printf(" generated A_CommPkg \n");
  
-   hypre_ParAMGBuildCoarseOperator(P,A,P,&RAP,coarse_partitioning);
+   hypre_GetCommPkgRTFromCommPkgA(P,A);
+   printf(" generated P_CommPkg \n");
+
+   hypre_ParAMGBuildCoarseOperator(P,A,P,&RAP);
    printf(" did rap\n");
 
    hypre_PrintParCSRMatrix(RAP, "rap"); 
+   hypre_DestroyParCSRMatrix(RAP);
 
    hypre_DestroyParCSRMatrix(A);
    hypre_DestroyParCSRMatrix(P);
-   hypre_DestroyParCSRMatrix(RAP);
    if (my_id == 0)
    {
    	hypre_DestroyCSRMatrix(A_in);
    	hypre_DestroyCSRMatrix(P_in);
    }
-   hypre_TFree(fine_partitioning);
-   hypre_TFree(coarse_partitioning);
    /* Finalize MPI */
    MPI_Finalize();
 
