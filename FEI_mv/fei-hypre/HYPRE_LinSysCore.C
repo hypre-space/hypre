@@ -228,6 +228,14 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
     parasailsLoadbal_   = 0.0;
     parasailsReuse_     = 0;    // reuse pattern if nonzero
 
+    euclidargc_         = 2;    // parameters information for Euclid
+    euclidargv_         = new char*[euclidargc_];
+    for (int j = 0; j < euclidargc_; j++) euclidargv_[j] = new char[50];
+    strcpy(euclidargv_[0], "-level");   
+    strcpy(euclidargv_[1], "0");   
+    strcpy(euclidargv_[2], "-sparseA");   
+    strcpy(euclidargv_[3], "0.0");   
+
     superluOrdering_    = 0;    // natural ordering in SuperLU
     superluScale_[0]    = 'N';  // no scaling in SuperLUX
 
@@ -383,6 +391,9 @@ HYPRE_LinSysCore::~HYPRE_LinSysCore()
        else if ( HYPreconID_ == HYPOLY )
           HYPRE_LSI_PolyDestroy( HYPrecon_ );
 
+       else if ( HYPreconID_ == HYEUCLID )
+          HYPRE_ParCSREuclidDestroy( HYPrecon_ );
+
 #ifdef MLPACK
        else if ( HYPreconID_ == HYML )
           HYPRE_ParCSRMLDestroy( HYPrecon_ );
@@ -413,6 +424,10 @@ HYPRE_LinSysCore::~HYPRE_LinSysCore()
        delete [] selectedListAux_; 
        selectedListAux_ = NULL;
     }
+    for (i = 0; i < euclidargc_; i++) delete [] euclidargv_[i];
+    delete [] euclidargv_;
+    euclidargv_ = NULL;
+    
     FEGridInfo *gridinfo = (FEGridInfo *) fegrid;
     delete gridinfo;
     fegrid = NULL;
@@ -441,7 +456,7 @@ LinearSystemCore* HYPRE_LinSysCore::clone()
 int HYPRE_LinSysCore::parameters(int numParams, char **params)
 {
     int    i, k, nsweeps, rtype, olevel;
-    double weight;
+    double weight, dtemp;
     char   param[256], param1[256], param2[80];
 
     if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
@@ -1134,6 +1149,38 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
           {
              printf("       HYPRE_LSC::parameters parasailsReuse = %d\n",
                     parasailsReuse_);
+          }
+       }
+
+       //---------------------------------------------------------------
+       // Euclid preconditoner : fill-in 
+       //---------------------------------------------------------------
+
+       else if ( !strcmp(param1, "euclidNlevels") )
+       {
+          sscanf(params[i],"%s %d", param, &olevel);
+          if ( olevel < 0 ) olevel = 0;
+          sprintf( euclidargv_[1], "%d", olevel);
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+          {
+             printf("       HYPRE_LSC::parameters euclidNlevels = %d\n",
+                    olevel);
+          }
+       }
+
+       //---------------------------------------------------------------
+       // Euclid preconditoner : threshold 
+       //---------------------------------------------------------------
+
+       else if ( !strcmp(param1, "euclidThreshold") )
+       {
+          sscanf(params[i],"%s %lg", param, &dtemp);
+          if ( dtemp < 0.0 ) dtemp = 0.0;
+          sprintf( euclidargv_[3], "%e", dtemp);
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+          {
+             printf("       HYPRE_LSC::parameters euclidThreshold = %e\n",
+                    dtemp);
           }
        }
 
@@ -3416,6 +3463,9 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
        else if ( HYPreconID_ == HYPOLY )
           HYPRE_LSI_PolyDestroy( HYPrecon_ );
 
+       else if ( HYPreconID_ == HYEUCLID )
+          HYPRE_ParCSREuclidDestroy( HYPrecon_ );
+
 #ifdef MLPACK
        else if ( HYPreconID_ == HYML )
           HYPRE_ParCSRMLDestroy( HYPrecon_ );
@@ -3465,6 +3515,11 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
     {
        strcpy( HYPreconName_, name );
        HYPreconID_ = HYPOLY;
+    }
+    else if ( !strcmp(name, "euclid") )
+    {
+       strcpy( HYPreconName_, name );
+       HYPreconID_ = HYEUCLID;
     }
     else if ( !strcmp(name, "ml") )
     {
@@ -3538,6 +3593,11 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
 
        case HYPOLY :
             ierr = HYPRE_LSI_PolyCreate( comm_, &HYPrecon_ );
+            assert( !ierr );
+            break;
+
+       case HYEUCLID :
+            ierr = HYPRE_ParCSREuclidCreate( comm_, &HYPrecon_ );
             assert( !ierr );
             break;
 
@@ -3967,6 +4027,12 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   }
                   break;
 
+             case HYEUCLID :
+                  if ( mypid_ == 0 )
+                     printf("HYPRE_LSI : CG does not work with Euclid.\n");
+                  exit(1);
+                  break;
+
 #ifdef MLPACK
              case HYML :
 
@@ -4244,6 +4310,20 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   }
                   break;
 
+             case HYEUCLID :
+                  HYPRE_ParCSREuclidSetParams(HYPrecon_,euclidargc_*2,euclidargv_);
+                  if ( HYPreconReuse_ == 1 )
+                  {
+                     HYPRE_ParCSRGMRESSetPrecond(HYSolver_,HYPRE_ParCSREuclidSolve,
+                                      HYPRE_DummyFunction, HYPrecon_);
+                  }
+                  else
+                  {
+                     HYPRE_ParCSRGMRESSetPrecond(HYSolver_,HYPRE_ParCSREuclidSolve,
+                                      HYPRE_ParCSREuclidSetup, HYPrecon_);
+                  }
+                  break;
+
 #ifdef MLPACK
              case HYML :
 
@@ -4514,6 +4594,24 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   {
                      HYPRE_ParCSRBiCGSTABSetPrecond(HYSolver_, 
                          HYPRE_BoomerAMGSolve, HYPRE_BoomerAMGSetup, HYPrecon_);
+                  }
+                  break;
+
+             case HYEUCLID :
+                  HYPRE_ParCSREuclidSetParams(HYPrecon_,euclidargc_*2,euclidargv_);
+                  if ( HYPreconReuse_ == 1 )
+                  {
+                     HYPRE_ParCSRBiCGSTABSetPrecond(HYSolver_,
+                                                    HYPRE_ParCSREuclidSolve,
+                                                    HYPRE_DummyFunction, 
+                                                    HYPrecon_);
+                  }
+                  else
+                  {
+                     HYPRE_ParCSRBiCGSTABSetPrecond(HYSolver_,
+                                                    HYPRE_ParCSREuclidSolve,
+                                                    HYPRE_ParCSREuclidSetup, 
+                                                    HYPrecon_);
                   }
                   break;
 
@@ -4789,6 +4887,24 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   }
                   break;
 
+             case HYEUCLID :
+                  HYPRE_ParCSREuclidSetParams(HYPrecon_,euclidargc_*2,euclidargv_);
+                  if ( HYPreconReuse_ == 1 )
+                  {
+                     HYPRE_ParCSRBiCGSTABLSetPrecond(HYSolver_,
+                                                     HYPRE_ParCSREuclidSolve,
+                                                     HYPRE_DummyFunction, 
+                                                     HYPrecon_);
+                  }
+                  else
+                  {
+                     HYPRE_ParCSRBiCGSTABLSetPrecond(HYSolver_,
+                                                     HYPRE_ParCSREuclidSolve,
+                                                     HYPRE_ParCSREuclidSetup, 
+                                                     HYPrecon_);
+                  }
+                  break;
+
 #ifdef MLPACK
              case HYML :
 
@@ -5056,6 +5172,24 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   }
                   break;
 
+             case HYEUCLID :
+                  HYPRE_ParCSREuclidSetParams(HYPrecon_,euclidargc_*2,euclidargv_);
+                  if ( HYPreconReuse_ == 1 )
+                  {
+                     HYPRE_ParCSRTFQmrSetPrecond(HYSolver_,
+                                                 HYPRE_ParCSREuclidSolve,
+                                                 HYPRE_DummyFunction, 
+                                                 HYPrecon_);
+                  }
+                  else
+                  {
+                     HYPRE_ParCSRTFQmrSetPrecond(HYSolver_,
+                                                 HYPRE_ParCSREuclidSolve,
+                                                 HYPRE_ParCSREuclidSetup, 
+                                                 HYPrecon_);
+                  }
+                  break;
+
 #ifdef MLPACK
              case HYML :
 
@@ -5320,6 +5454,24 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   {
                      HYPRE_ParCSRBiCGSSetPrecond(HYSolver_, 
                          HYPRE_BoomerAMGSolve, HYPRE_BoomerAMGSetup, HYPrecon_);
+                  }
+                  break;
+
+             case HYEUCLID :
+                  HYPRE_ParCSREuclidSetParams(HYPrecon_,euclidargc_*2,euclidargv_);
+                  if ( HYPreconReuse_ == 1 )
+                  {
+                     HYPRE_ParCSRBiCGSSetPrecond(HYSolver_,
+                                                 HYPRE_ParCSREuclidSolve,
+                                                 HYPRE_DummyFunction, 
+                                                 HYPrecon_);
+                  }
+                  else
+                  {
+                     HYPRE_ParCSRBiCGSSetPrecond(HYSolver_,
+                                                 HYPRE_ParCSREuclidSolve,
+                                                 HYPRE_ParCSREuclidSetup, 
+                                                 HYPrecon_);
                   }
                   break;
 

@@ -32,7 +32,7 @@ class Lookup
 enum HYsolverID {HYPCG,HYGMRES,HYCGSTAB,HYCGSTABL,HYTFQMR,HYBICGS,HYAMG,
                  HYSUPERLU,HYSUPERLUX,HYY12M,HYAMGE};
 enum HYpreconID {HYDIAGONAL,HYPILUT,HYPARASAILS,HYBOOMERAMG,HYML,HYDDILUT,
-                 HYPOLY,HYDDICT,HYSCHWARZ};
+                 HYPOLY,HYDDICT,HYSCHWARZ,HYEUCLID};
 
 #define HYFEI_HIGHMASK      2147483647-255
 #define HYFEI_SPECIALMASK              255
@@ -553,6 +553,8 @@ class HYPRE_LinSysCore
    int             schwarzNblocks_;
    int             schwarzBlksize_;
    int             polyOrder_;
+   int             euclidargc_;
+   char            **euclidargv_;
 
    // ----------------------------------------------------------------------
    // map and others
