@@ -74,14 +74,14 @@ particular hand them back and forth between various C functions.  The
 \end{verbatim}
 
 The interface is designed so that the label \verb+subroutine_name+ is exactly
-the label of the {\slshape hypre} C-function.
-{\slshape Hypre} interlanguage C-wrappers currently
-account for related compilation/linking issues involving appended
-underscores, and for Fortran name length limitations\footnote{For C
+the label of the {\slshape hypre} C-function\footnote{For C
 function names under 32 characters in length, the Fortran name is the same
 as the C name.  For C function names over 31 characters, the Fortran
 name is condensed to less than 32 characters (see reference manual for
 Fortran name).}.
+{\slshape Hypre} interlanguage C-wrappers currently
+account for related compilation/linking issues involving appended
+underscores, and for Fortran name length limitations.
 Fortran variables like \verb+addr+
 are convenient for receiving, from C, pointers to arrays or other
 collections of data.  Such pointers need not point to data allocated by
