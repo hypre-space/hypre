@@ -17,6 +17,7 @@
  *--------------------------------------------------------------------------*/
 
 #include <assert.h>
+#include <stdlib.h>
 #include <math.h>
 #include "HYPRE.h"
 #include "util/mli_utils.h"
@@ -823,7 +824,7 @@ int MLI_Utils_HypreMatrixCompress(void *Amat, int blksize, void **Amat2)
  
 int MLI_Utils_QR(double *qArray, double *rArray, int nrows, int ncols)
 {
-   int    icol, irow, pcol;
+   int    icol, irow, pcol, retFlag=0;
    double innerProd, *currQ, *currR, *prevQ, alpha;
 
 #ifdef MLI_DEBUG_DETAILED
@@ -854,11 +855,21 @@ int MLI_Utils_QR(double *qArray, double *rArray, int nrows, int ncols)
       for ( irow = 0; irow < nrows; irow++ )
          innerProd += (currQ[irow] * currQ[irow]); 
       innerProd = sqrt( innerProd );
-      if ( innerProd < 1.0e-10 ) return (icol+1);
-      currR[icol] = innerProd;
-      alpha = 1.0 / innerProd;
-      for ( irow = 0; irow < nrows; irow++ )
-         currQ[irow] = alpha * currQ[irow]; 
+      if ( innerProd < 1.0e-10 ) 
+      {
+         if ( retFlag != 0 ) return icol + 1;
+         retFlag = icol + 1;
+         icol--;
+         for ( irow = 0; irow < nrows; irow++ )
+            currQ[irow] = 100.0 * random() / RAND_MAX;
+      }   
+      else
+      {
+         currR[icol] = innerProd;
+         alpha = 1.0 / innerProd;
+         for ( irow = 0; irow < nrows; irow++ )
+            currQ[irow] = alpha * currQ[irow]; 
+      }
    }
 #ifdef MLI_DEBUG_DETAILED
    printf("(after ) Q %6d %6d : \n", nrows, ncols);
@@ -876,7 +887,7 @@ int MLI_Utils_QR(double *qArray, double *rArray, int nrows, int ncols)
       printf("\n");
    }
 #endif
-   return 0;
+   return retFlag;
 }
 
 /***************************************************************************
