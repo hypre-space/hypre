@@ -108,7 +108,7 @@ HYPRE_ParCSRMatrixGetDims( HYPRE_ParCSRMatrix  matrix,
    int ierr = 0;
 
    *M = hypre_ParCSRMatrixGlobalNumRows((hypre_ParCSRMatrix *) matrix);
-   *N = hypre_ParCSRMatrixGlobalNumRows((hypre_ParCSRMatrix *) matrix);
+   *N = hypre_ParCSRMatrixGlobalNumCols((hypre_ParCSRMatrix *) matrix);
 
    return( ierr );
 }
