@@ -143,20 +143,21 @@ AC_ARG_WITH(mpi-flags, [\
 )
 
 AC_ARG_WITH(purify, [\
-  --with-purify           assign gcc and g++ as the C and C++ compilers 
+  --with-purify           assign cc and CC as the C and C++ compilers 
 			  if not already set by user and 
                           prepends "purify" to compile/link line-- no 
 			  checking is done to ensure purify is present on 
 			  the machine],
   if test "$casc_user_chose_compilers" = "no"
   then
-    CC=gcc
-    CXX=g++
+    CC=cc
+    CXX=CC
     CFLAGS="$CFLAGS -g"
     CXXFLAGS="$CXXFLAGS -g"
     casc_user_chose_compilers=yes
   fi
   PREPEND=purify
+  casc_using_HYPRE_blas=yes
 )
 
 AC_ARG_WITH(cegdb, [\
@@ -541,7 +542,7 @@ then
            AC_CHECK_PROGS(F77,xlf g77)
          else
 	   if test "$casc_using_pthreads" = "yes"
-         then
+           then
              AC_CHECK_PROGS(CC,xlc_r gcc)
              AC_CHECK_PROGS(CXX,xlC_r g++)
              AC_CHECK_PROGS(F77,xlf_r g77)  
@@ -713,7 +714,7 @@ fi
 
 dnl ********************************************************************
 dnl * a check to find out how to use the preprocessors.  This must
-dnl * be done AFTER compilers are set is set.
+dnl * be done AFTER compilers are set.
 dnl * ******************************************************************
 
 AC_PROG_CPP
