@@ -38,6 +38,22 @@ int HYPRE_ParAMGSetIOutDat P((HYPRE_Solver solver , int ioutdat ));
 int HYPRE_ParAMGSetLogFileName P((HYPRE_Solver solver , char *log_file_name ));
 int HYPRE_ParAMGSetLogging P((HYPRE_Solver solver , int ioutdat , char *log_file_name ));
 
+/* HYPRE_parcsr_pcg.c */
+int HYPRE_ParCSRPCGInitialize P((MPI_Comm comm , HYPRE_Solver *solver ));
+int HYPRE_ParCSRPCGFinalize P((HYPRE_Solver solver ));
+int HYPRE_ParCSRPCGSetup P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x ));
+int HYPRE_ParCSRPCGSolve P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x ));
+int HYPRE_ParCSRPCGSetTol P((HYPRE_Solver solver , double tol ));
+int HYPRE_ParCSRPCGSetMaxIter P((HYPRE_Solver solver , int max_iter ));
+int HYPRE_ParCSRPCGSetTwoNorm P((HYPRE_Solver solver , int two_norm ));
+int HYPRE_ParCSRPCGSetRelChange P((HYPRE_Solver solver , int rel_change )) ;
+int HYPRE_ParCSRPCGSetPrecond P((HYPRE_Solver solver , int (*precond )(), int (*precond_setup )(), void *precond_data ));
+int HYPRE_ParCSRPCGSetLogging P((HYPRE_Solver solver , int logging ));
+int HYPRE_ParCSRPCGGetNumIterations P((HYPRE_Solver solver , int *num_iterations));
+int HYPRE_ParCSRPCGGetFinalRelativeResidualNorm P((HYPRE_Solver solver , double *norm ));
+int HYPRE_ParCSRDiagScaleSetup P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector y , HYPRE_ParVector x ));
+int HYPRE_ParCSRDiagScale P((HYPRE_Solver solver , HYPRE_ParCSRMatrix HA , HYPRE_ParVector Hy , HYPRE_ParVector Hx ));
+ 
 /* driver.c */
 int main P((int argc , char *argv []));
 int BuildParFromFile P((int argc , char *argv [], int arg_index , hypre_ParCSRMatrix **A_ptr ));
@@ -121,6 +137,37 @@ int gselim P((double *A , double *x , int n ));
 int hypre_ParAMGSetupStats P((void *amg_vdata , hypre_ParCSRMatrix *A ));
 void hypre_WriteParAMGSolverParams P((void *data ));
 
+/* pcg.c */
+int hypre_PCGIdentitySetup P((void *vdata , void *A , void *b , void *x ));
+int hypre_PCGIdentity P((void *vdata , void *A , void *b , void *x ));
+void *hypre_PCGInitialize P((void ));
+int hypre_PCGFinalize P((void *pcg_vdata ));
+int hypre_PCGSetup P((void *pcg_vdata , void *A , void *b , void *x ));
+int hypre_PCGSolve P((void *pcg_vdata , void *A , void *b , void *x ));
+int hypre_PCGSetTol P((void *pcg_vdata , double tol ));
+int hypre_PCGSetMaxIter P((void *pcg_vdata , int max_iter ));
+int hypre_PCGSetTwoNorm P((void *pcg_vdata , int two_norm ));
+int hypre_PCGSetRelChange P((void *pcg_vdata , int rel_change ));
+int hypre_PCGSetPrecond P((void *pcg_vdata , int (*precond )(), int (*precond_setup )(), void *precond_data ));
+int hypre_PCGSetLogging P((void *pcg_vdata , int logging ));
+int hypre_PCGGetNumIterations P((void *pcg_vdata , int *num_iterations ));
+int hypre_PCGPrintLogging P((void *pcg_vdata , int myid ));
+int hypre_PCGGetFinalRelativeResidualNorm P((void *pcg_vdata , double *relative_residual_norm ));
+
+/* pcg_par.c */
+char *hypre_PCGCAlloc P((int count , int elt_size ));
+int hypre_PCGFree P((char *ptr ));
+void *hypre_PCGNewVector P((void *vvector ));
+int hypre_PCGFreeVector P((void *vvector ));
+void *hypre_PCGMatvecInitialize P((void *A , void *x ));
+int hypre_PCGMatvec P((void *matvec_data , double alpha , void *A , void *x , double beta , void *y ));
+int hypre_PCGMatvecFinalize P((void *matvec_data ));
+double hypre_PCGInnerProd P((void *x , void *y ));
+int hypre_PCGCopyVector P((void *x , void *y ));
+int hypre_PCGClearVector P((void *x ));
+int hypre_PCGScaleVector P((double alpha , void *x ));
+int hypre_PCGAxpy P((double alpha , void *x , void *y ));
+ 
 /* transpose.c */
 int hypre_CSRMatrixTranspose P((hypre_CSRMatrix *A , hypre_CSRMatrix **AT ));
 

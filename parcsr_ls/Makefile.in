@@ -67,8 +67,11 @@ FILES =\
  par_laplace_9pt.c\
  par_rap.c\
  par_rap_communication.c\
+ pcg.c\
+ pcg_par.c\
  transpose.c\
- HYPRE_parcsr_amg.c
+ HYPRE_parcsr_amg.c\
+ HYPRE_parcsr_pcg.c
 
 OBJS = ${FILES:.c=.o}
 

@@ -19,7 +19,9 @@ main( int   argc,
    int                 solver_id;
    int                 ioutdat;
    int                 ierr; 
+   int                 num_iterations; 
    double              norm;
+   double              final_res_norm;
 
 
    hypre_ParCSRMatrix *A;
@@ -27,10 +29,20 @@ main( int   argc,
    hypre_ParVector    *x;
 
    HYPRE_Solver        amg_solver;
+   HYPRE_Solver        pcg_solver;
+   HYPRE_Solver        pcg_precond;
 
    int                 num_procs, myid;
 
    int		       time_index;
+
+   /* parameters for BoomerAMG */
+   double   strong_threshold;
+   int      cycle_type;
+   int     *num_grid_sweeps;  
+   int     *grid_relax_type;   
+   int    **grid_relax_points;
+   double   relax_weight; 
 
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -116,6 +128,66 @@ main( int   argc,
       else if ( strcmp(argv[arg_index], "-help") == 0 )
       {
          print_usage = 1;
+      }
+      else
+      {
+         arg_index++;
+      }
+   }
+
+   /* defaults for BoomerAMG */
+   strong_threshold = 0.25;
+   cycle_type       = 1;
+   relax_weight = 1.0;
+
+   num_grid_sweeps = hypre_CTAlloc(int,4);
+   grid_relax_type = hypre_CTAlloc(int,4);
+   grid_relax_points = hypre_CTAlloc(int *,4);
+
+   /* fine grid */
+   num_grid_sweeps[0] = 2;
+   grid_relax_type[0] = 0; 
+   grid_relax_points[0] = hypre_CTAlloc(int, 2); 
+   grid_relax_points[0][0] = -1;
+   grid_relax_points[0][1] = 1;
+
+   /* down cycle */
+   num_grid_sweeps[1] = 2;
+   grid_relax_type[1] = 0; 
+   grid_relax_points[1] = hypre_CTAlloc(int, 2); 
+   grid_relax_points[1][0] = 1;
+   grid_relax_points[1][1] = -1;
+
+   /* up cycle */
+   num_grid_sweeps[2] = 2;
+   grid_relax_type[2] = 0; 
+   grid_relax_points[2] = hypre_CTAlloc(int, 2); 
+   grid_relax_points[2][0] = -1;
+   grid_relax_points[2][1] = 1;
+
+   /* coarsest grid */
+   num_grid_sweeps[3] = 1;
+   grid_relax_type[3] = 9;
+   grid_relax_points[3] = hypre_CTAlloc(int, 1);
+   grid_relax_points[3][0] = 0;
+
+   arg_index = 0;
+   while (arg_index < argc)
+   {
+      if ( strcmp(argv[arg_index], "-w") == 0 )
+      {
+         arg_index++;
+         relax_weight = atof(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-th") == 0 )
+      {
+         arg_index++;
+         strong_threshold  = atof(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-iout") == 0 )
+      {
+         arg_index++;
+         ioutdat  = atoi(argv[arg_index++]);
       }
       else
       {
@@ -265,76 +337,10 @@ main( int   argc,
 
    if (solver_id == 0)
    {
-      double   strong_threshold;
-      int      cycle_type;
-      int     *num_grid_sweeps;  
-      int     *grid_relax_type;   
-      int    **grid_relax_points;
-      double   relax_weight; 
-
-      strong_threshold = 0.25;
-      cycle_type       = 1;
-      relax_weight = 1.0;
-
-      num_grid_sweeps = hypre_CTAlloc(int,4);
-      grid_relax_type = hypre_CTAlloc(int,4);
-      grid_relax_points = hypre_CTAlloc(int *,4);
-
-      /* fine grid */
-      num_grid_sweeps[0] = 2;
-      grid_relax_type[0] = 0; 
-      grid_relax_points[0] = hypre_CTAlloc(int, 2); 
-      grid_relax_points[0][0] = -1;
-      grid_relax_points[0][1] = 1;
-
-      /* down cycle */
-      num_grid_sweeps[1] = 2;
-      grid_relax_type[1] = 0; 
-      grid_relax_points[1] = hypre_CTAlloc(int, 2); 
-      grid_relax_points[1][0] = 1;
-      grid_relax_points[1][1] = -1;
-
-      /* up cycle */
-      num_grid_sweeps[2] = 2;
-      grid_relax_type[2] = 0; 
-      grid_relax_points[2] = hypre_CTAlloc(int, 2); 
-      grid_relax_points[2][0] = -1;
-      grid_relax_points[2][1] = 1;
-
-      /* coarsest grid */
-      num_grid_sweeps[3] = 1;
-      grid_relax_type[3] = 9;
-      grid_relax_points[3] = hypre_CTAlloc(int, 1);
-      grid_relax_points[3][0] = 0;
-
-      arg_index = 0;
-      while (arg_index < argc)
-      {
-         if ( strcmp(argv[arg_index], "-w") == 0 )
-         {
-            arg_index++;
-            relax_weight = atof(argv[arg_index++]);
-         }
-         else if ( strcmp(argv[arg_index], "-th") == 0 )
-         {
-            arg_index++;
-            strong_threshold  = atof(argv[arg_index++]);
-         }
-         else if ( strcmp(argv[arg_index], "-iout") == 0 )
-         {
-            arg_index++;
-            ioutdat  = atoi(argv[arg_index++]);
-         }
-         else
-         {
-            arg_index++;
-         }
-      }
-
       time_index = hypre_InitializeTiming("BoomerAMG Setup");
       hypre_BeginTiming(time_index);
 
-      amg_solver = HYPRE_ParAMGInitialize();
+      amg_solver = HYPRE_ParAMGInitialize(); 
       HYPRE_ParAMGSetStrongThreshold(amg_solver, strong_threshold);
       HYPRE_ParAMGSetLogging(amg_solver, ioutdat, "driver.out.log");
       HYPRE_ParAMGSetCycleType(amg_solver, cycle_type);
@@ -363,12 +369,94 @@ main( int   argc,
    }
 
    /*-----------------------------------------------------------
+    * Solve the system using PCG 
+    *-----------------------------------------------------------*/
+
+   if (solver_id == 1 || solver_id == 2)
+   {
+      time_index = hypre_InitializeTiming("PCG Setup");
+      hypre_BeginTiming(time_index);
+ 
+      HYPRE_ParCSRPCGInitialize(MPI_COMM_WORLD, &pcg_solver);
+      HYPRE_ParCSRPCGSetMaxIter(pcg_solver, 50);
+      HYPRE_ParCSRPCGSetTol(pcg_solver, 1.0e-08);
+      HYPRE_ParCSRPCGSetTwoNorm(pcg_solver, 1);
+      HYPRE_ParCSRPCGSetRelChange(pcg_solver, 0);
+      HYPRE_ParCSRPCGSetLogging(pcg_solver, 1);
+ 
+      if (solver_id == 1)
+      {
+         /* use BoomerAMG as preconditioner */
+         pcg_precond = HYPRE_ParAMGInitialize(); 
+         HYPRE_ParAMGSetStrongThreshold(pcg_precond, strong_threshold);
+         HYPRE_ParAMGSetLogging(pcg_precond, ioutdat, "driver.out.log");
+         HYPRE_ParAMGSetMaxIter(pcg_precond, 1);
+         HYPRE_ParAMGSetCycleType(pcg_precond, cycle_type);
+         HYPRE_ParAMGSetNumGridSweeps(pcg_precond, num_grid_sweeps);
+         HYPRE_ParAMGSetGridRelaxType(pcg_precond, grid_relax_type);
+         HYPRE_ParAMGSetRelaxWeight(pcg_precond, relax_weight);
+         HYPRE_ParAMGSetGridRelaxPoints(pcg_precond, grid_relax_points);
+         HYPRE_ParAMGSetMaxLevels(pcg_precond, 25);
+         HYPRE_ParCSRPCGSetPrecond(pcg_solver,
+                                   HYPRE_ParAMGSolve,
+                                   HYPRE_ParAMGSetup,
+                                   pcg_precond);
+      }
+      else if (solver_id == 2)
+      {
+         /* use diagonal scaling as preconditioner */
+
+         pcg_precond = NULL;
+
+         HYPRE_ParCSRPCGSetPrecond(pcg_solver,
+                                   HYPRE_ParCSRDiagScale,
+                                   HYPRE_ParCSRDiagScaleSetup,
+                                   pcg_precond);
+      }
+ 
+      HYPRE_ParCSRPCGSetup(pcg_solver, A, b, x);
+ 
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+   
+      time_index = hypre_InitializeTiming("PCG Solve");
+      hypre_BeginTiming(time_index);
+ 
+      HYPRE_ParCSRPCGSolve(pcg_solver, A, b, x);
+ 
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+ 
+      HYPRE_ParCSRPCGGetNumIterations(pcg_solver, &num_iterations);
+      HYPRE_ParCSRPCGGetFinalRelativeResidualNorm(pcg_solver, &final_res_norm);
+      HYPRE_ParCSRPCGFinalize(pcg_solver);
+ 
+      if (solver_id == 1)
+      {
+         HYPRE_ParAMGFinalize(pcg_precond);
+      }
+   if (myid == 0)
+   {
+      printf("\n");
+      printf("Iterations = %d\n", num_iterations);
+      printf("Final Relative Residual Norm = %e\n", final_res_norm);
+      printf("\n");
+   }
+ 
+   }
+
+   /*-----------------------------------------------------------
     * Print the solution and other info
     *-----------------------------------------------------------*/
 
 #if 0
    hypre_PrintCSRVector(x, "driver.out.x");
 #endif
+
 
    /*-----------------------------------------------------------
     * Finalize things
