@@ -8,18 +8,20 @@
  *********************************************************************EHEADER*/
 
 #include "headers.h"
+#include "par_amg.h"
 
-/******************************************************************************
+/*****************************************************************************
  *
  * Routine for driving the setup phase of AMG
  *
- ******************************************************************************/
+ *****************************************************************************/
 
-
-int hypre_ParAMGSetup(hypre_ParAMGData   *amg_data,
-                      hypre_ParCSRMatrix *A)
+int
+hypre_ParAMGSetup(void               *vamg_data,
+                  hypre_ParCSRMatrix *A         )
 
 {
+   hypre_ParAMGData   *amg_data = (hypre_ParAMGData *) vamg_data;
 
    /* Data Structure variables */
 
