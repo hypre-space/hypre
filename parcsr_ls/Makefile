@@ -20,8 +20,9 @@ FILES =\
  indepset.c\
  par_rap.c\
  par_rap_communication.c\
+ par_interp.c\
  random.c\
- transpose.c
+ transpose.c 
 
 OBJS = ${FILES:.c=.o}
 
@@ -67,11 +68,18 @@ test_rap: driver_rap.o libParamg.a
 	@echo  "Linking" $@ "... "
 	${CC} -o test_rap driver_rap.o libParamg.a ${LFLAGS} 
 
+test_interp: driver_interp.o libParamg.a
+	@echo  "Linking" $@ "... "
+	purify ${CC} -o test_interp driver_interp.o libParamg.a ${LFLAGS} 
+
 driver.o: driver.c
 	${CC} -c driver.c ${CFLAGS}
 
 driver_rap.o: driver_rap.c
 	${CC} -c driver_rap.c ${CFLAGS}
+
+driver_interp.o: driver_interp.c
+	${CC} -c driver_interp.c ${CFLAGS}
 
 libParamg.a: ${OBJS}
 	@echo  "Building $@ ... "
