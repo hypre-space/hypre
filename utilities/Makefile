@@ -21,6 +21,7 @@ C_COMPILE_FLAGS =\
    -I$(srcdir)\
    ${CINCLUDES}\
    ${CDEFS}
+CXX_COMPILE_FLAGS = ${C_COMPILE_FLAGS}
 
 HEADERS =\
  amg_linklist.h\
@@ -56,9 +57,10 @@ FILES =\
  umalloc_local.c\
  hypre_mpi_comm_f2c.c\
  hypre_error.c\
- F90_HYPRE_error.c
+ F90_HYPRE_error.c\
+ hypre_map.cc
 
-OBJS = ${FILES:.c=.o}
+OBJS = $(patsubst %.c,%.o,$(patsubst %.cc,%.o,$(FILES)))
 
 SONAME = libHYPRE_utilities-${HYPRE_RELEASE_VERSION}.so
 

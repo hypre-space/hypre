@@ -858,6 +858,42 @@ HYPRE_Int hypre_DoubleQuickSplit ( HYPRE_Real *values , HYPRE_Int *indices , HYP
 void hypre_SeedRand ( HYPRE_Int seed );
 HYPRE_Real hypre_Rand ( void );
 
+/* hypre_map.cc */
+typedef struct HYPRE_IntSet HYPRE_IntSet;
+  // wrapper of std::set<HYPRE_Int>
+
+HYPRE_IntSet *hypre_IntSetCreate( void );
+void hypre_IntSetDestroy( HYPRE_IntSet *set );
+
+void hypre_IntSetInsert ( HYPRE_IntSet *set, HYPRE_Int x );
+
+// Support only iterator for a set at a time
+// A typical loop
+// hypre_IntSetBegin(set);
+// while (hypre_IntSetHasNext(set))
+// { i = hypre_IntSetNext(set); do_something(i); }
+void hypre_IntSetBegin( HYPRE_IntSet *set );
+HYPRE_Int hypre_IntSetNext( HYPRE_IntSet *set );
+/**
+ * @ret 1 if set has more elements to iterate
+ */
+HYPRE_Int hypre_IntSetHasNext( HYPRE_IntSet *set );
+
+typedef struct HYPRE_Int2IntSet HYPRE_Int2IntSet;
+  // wrapper of std::unordered_map<HYPRE_Int, std::set<HYPRE_Int> >
+
+HYPRE_Int2IntSet *hypre_Int2IntSetCreate();
+void hypre_Int2IntSetDestroy( HYPRE_Int2IntSet *map );
+
+void hypre_Int2IntSetInsert( HYPRE_Int2IntSet *map, HYPRE_Int key, HYPRE_Int value );
+  // map[key].insert(value)
+  // if map doesn't have key, create an empty set and insert value
+/**
+ * @ret NULL if map doesn't have key
+ * @note do not destroy the return value (it's owned by map)
+ */
+HYPRE_IntSet *hypre_Int2IntSetFind( HYPRE_Int2IntSet *map, HYPRE_Int key );
+
 #ifdef __cplusplus
 }
 #endif
