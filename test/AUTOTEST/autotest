@@ -96,7 +96,8 @@ help () {
   printf "%s\n" "     -gpsmp    Compaq gps320 system, executing OpenMP, DPCS."
   printf "%s\n" "     -ilx      Intel running Linux."
   printf "%s\n" "     -insure   CASC Linux, executing insure++."
-  printf "%s\n" "     -pengra   Intel running Linux, DPCS."
+  printf "%s\n" "     -mcr      Intel Linux, CHAOS2."
+  printf "%s\n" "     -pengra   Intel Linux, CHAOS2."
   printf "%s\n" "     -red      ASCI Red"
   printf "%s\n" "     -riptide  ASCI VIS SGI running IRIX"
   printf "%s\n" "     -tc2k     Compaq TC2K system, DPCS."
@@ -104,6 +105,7 @@ help () {
   printf "%s\n" "     -tux71    CASC Intel running RedHat 7 Linux (pgi-5.1)."
   printf "%s\n" "     -tux81    CASC Intel running RedHat 9 Linux."
   printf "%s\n" "     -tux83    CASC Intel running RedHat 7 Linux."
+  printf "%s\n" "     -tux149   CASC Intel running RedHat 7 Linux."
   printf "%s\n" "     -tuxgcc2  Linux running gcc-2.95.3 compilers"
   printf "%s\n" "     -tuxgcc30 Linux running gcc-3.0.4 compilers"
   printf "%s\n" "     -tuxgcc31 Linux running gcc-3.1.1 compilers"
@@ -292,13 +294,22 @@ do
         echo "ERROR: -nocvs option MUST be first argument! Quiting..."
         help
         exit;;
+    -mcr)
+        HYPRE_ARCH="linux"
+        HYPRE_COMPILE_MACHINE="mcr"
+        HYPRE_RUN_MACHINE="mcr"
+        HYPRE_REMOTE_DIR="/usr/casc/hypre/i686-pc-linux-gnu-chaos2/AUTOTEST"
+	  HYPRE_MACHINE_COMMANDS="-mnse 1 -l 1 -a 2 -cf"
+          HYPRE_MESSAGE='OTHER[MCR]'
+	perform_test
+        shift;;
     -pengra)
         HYPRE_ARCH="linux"
         HYPRE_COMPILE_MACHINE="pengra"
         HYPRE_RUN_MACHINE="pengra"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/i686-pc-linux-gnu-chaos2/AUTOTEST"
 	  HYPRE_MACHINE_COMMANDS="-mnse 1 -l 1 -a 2 -cf"
-          HYPRE_MESSAGE='OTHER[icc-8.0]'
+          HYPRE_MESSAGE='OTHER[Pengra]'
 	perform_test
         shift;;
     -red)
