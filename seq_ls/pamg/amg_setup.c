@@ -309,13 +309,19 @@ hypre_AMGSetup( void            *amg_vdata,
       /* begin HANS added */
       else if (coarsen_type == 4)
       {
+	 if (mode == 1 || mode == 2) S_mode = 1;
+	 hypre_AMGCreateS(A_array[level], strong_threshold, 
+			S_mode, dof_func_array[level], &S);
          hypre_AMGCoarsenwLJP(A_array[level], strong_threshold,
-                       dof_func_array[level], &S, &CF_marker, &coarse_size); 
+                       S, &CF_marker, &coarse_size); 
       }
       else if (coarsen_type == 5)
       {
+	 if (mode == 1 || mode == 2) S_mode = 1;
+	 hypre_AMGCreateS(A_array[level], strong_threshold, 
+			S_mode, dof_func_array[level], &S);
 	 hypre_AMGCoarsenRugeOnePass(A_array[level], strong_threshold,
-                       &S, &CF_marker, &coarse_size); 
+                       S, &CF_marker, &coarse_size); 
       }
       /* end HANS added */
       else if (coarsen_type == 8)
@@ -370,11 +376,11 @@ hypre_AMGSetup( void            *amg_vdata,
 	 if (mode == 1 || mode == 2) S_mode = 1;
 	 hypre_AMGCreateS(A_array[level], strong_threshold, 
 			S_mode, dof_func_array[level], &S);
-	 hypre_AMGCoarsenRugeLoL(A_array[level], -strong_threshold,
-				 S, &CF_marker, &first_coarse_size); 
+	 hypre_AMGCoarsenRugeOnePass(A_array[level], strong_threshold,
+                       S, &CF_marker, &first_coarse_size); 
 	 hypre_AMGCreate2ndS(S, first_coarse_size, CF_marker, 2, &S2);
-	 hypre_AMGCoarsenRugeLoL(S2, -strong_threshold,
-				 S2, &new_CF_marker, &coarse_size); 
+	 hypre_AMGCoarsenRugeOnePass(S2, strong_threshold,
+                       S2, &new_CF_marker, &coarse_size); 
          hypre_CSRMatrixDestroy(S2);
          hypre_AMGCorrectCFMarker(CF_marker, fine_size, new_CF_marker); 
 	 /* if (mode == 1 || mode == 2) S_mode = 1;
@@ -398,11 +404,11 @@ hypre_AMGSetup( void            *amg_vdata,
 	 if (mode == 1 || mode == 2) S_mode = 1;
 	 hypre_AMGCreateS(A_array[level], strong_threshold, 
 			S_mode, dof_func_array[level], &S);
-	 hypre_AMGCoarsenRugeLoL(A_array[level], -strong_threshold,
-				 S, &CF_marker, &first_coarse_size); 
+	 hypre_AMGCoarsenRugeOnePass(A_array[level], strong_threshold,
+                       S, &CF_marker, &first_coarse_size); 
 	 hypre_AMGCreate2ndS(S, first_coarse_size, CF_marker, 1, &S2);
-	 hypre_AMGCoarsenRugeLoL(S2, -strong_threshold,
-				 S2, &new_CF_marker, &coarse_size); 
+	 hypre_AMGCoarsenRugeOnePass(S2, strong_threshold,
+                       S2, &new_CF_marker, &coarse_size); 
          hypre_CSRMatrixDestroy(S2);
          hypre_AMGCorrectCFMarker(CF_marker, fine_size, new_CF_marker); 
 	 /* if (mode == 1 || mode == 2) S_mode = 1;
@@ -420,6 +426,19 @@ hypre_AMGSetup( void            *amg_vdata,
 	 hypre_AMGCoarsenRugeLoL(A_array[level], -strong_threshold,
 				 S, &CF_marker, &coarse_size); */
 			  /* A_array[level], &CF_marker, &coarse_size); */ 
+      }
+      else if (coarsen_type == 12)
+      {
+	 if (mode == 1 || mode == 2) S_mode = 1;
+	 hypre_AMGCreateS(A_array[level], strong_threshold, 
+			S_mode, dof_func_array[level], &S);
+         hypre_AMGCoarsenwLJP(A_array[level], strong_threshold,
+                       S, &CF_marker, &first_coarse_size); 
+	 hypre_AMGCreate2ndS(S, first_coarse_size, CF_marker, 1, &S2);
+         hypre_AMGCoarsenwLJP(S2, strong_threshold,
+                       S2, &new_CF_marker, &coarse_size); 
+         hypre_CSRMatrixDestroy(S2);
+         hypre_AMGCorrectCFMarker(CF_marker, fine_size, new_CF_marker); 
       }
       else if (coarsen_type == 3)
       {

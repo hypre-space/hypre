@@ -154,8 +154,8 @@ int hypre_CGIdentity( void *vdata , void *A , void *b , void *x );
 int hypre_AMGCoarsen( hypre_CSRMatrix *A , double strength_threshold , hypre_CSRMatrix *S , int **CF_marker_ptr , int *coarse_size_ptr );
 int hypre_AMGCoarsenRuge( hypre_CSRMatrix *A , double strength_threshold , hypre_CSRMatrix *S , int **CF_marker_ptr , int *coarse_size_ptr );
 int hypre_AMGCoarsenRugeLoL( hypre_CSRMatrix *A , double strength_threshold , hypre_CSRMatrix *S , int **CF_marker_ptr , int *coarse_size_ptr );
-int hypre_AMGCoarsenwLJP( hypre_CSRMatrix *A, double strength_threshold, int *dof_func, hypre_CSRMatrix **S_ptr, int **CF_marker_ptr, int *coarse_size_ptr);
-int hypre_AMGCoarsenRugeOnePass( hypre_CSRMatrix *A, double strength_threshold, hypre_CSRMatrix **S_ptr, int **CF_marker_ptr, int *coarse_size_ptr);
+int hypre_AMGCoarsenwLJP( hypre_CSRMatrix *A, double strength_threshold, hypre_CSRMatrix *S, int **CF_marker_ptr, int *coarse_size_ptr);
+int hypre_AMGCoarsenRugeOnePass( hypre_CSRMatrix *A, double strength_threshold, hypre_CSRMatrix *S, int **CF_marker_ptr, int *coarse_size_ptr);
 
 /* coarsenCR.c */
 int hypre_AMGCoarsenCR( hypre_CSRMatrix *A , double strength_threshold , double relax_weight , int relax_type , int num_relax_steps , int **CF_marker_ptr , int *coarse_size_ptr );

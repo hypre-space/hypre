@@ -717,7 +717,6 @@ hypre_AMGCoarsenRugeLoL( hypre_CSRMatrix    *A,
    int		    num_strong;
 
    int              ierr = 0;
-   int 		    second_pass = 1;
 
    hypre_LinkList LoL_head;
    hypre_LinkList LoL_tail;
@@ -731,10 +730,6 @@ hypre_AMGCoarsenRugeLoL( hypre_CSRMatrix    *A,
     * Initialize the C/F marker, LoL_head, LoL_tail  arrays
     *-------------------------------------------------------*/
 
-   if (strength_threshold < 0)
-   {
-      second_pass = 0;
-   }
 
    LoL_head = NULL;
    LoL_tail = NULL;
@@ -968,8 +963,6 @@ hypre_AMGCoarsenRugeLoL( hypre_CSRMatrix    *A,
 
    /* second pass, check fine points for coarse neighbors */
 
-   if (second_pass)
-   {
    for (i=0; i < num_variables; i++)
    {
       if (ci_tilde_mark |= i) ci_tilde = -1;
@@ -1026,7 +1019,6 @@ hypre_AMGCoarsenRugeLoL( hypre_CSRMatrix    *A,
 	 }
       }
    }
-   }
 
 		  	       
 
@@ -1054,8 +1046,8 @@ hypre_AMGCoarsenRugeLoL( hypre_CSRMatrix    *A,
 int
 hypre_AMGCoarsenwLJP( hypre_CSRMatrix    *A,
                   double              strength_threshold,
-                  int		     *dof_func,
-                  hypre_CSRMatrix   **S_ptr,
+                  hypre_CSRMatrix    *S,
+                  /*hypre_CSRMatrix   **S_ptr,*/
                   int               **CF_marker_ptr,
                   int                *coarse_size_ptr     )
 {
@@ -1064,7 +1056,6 @@ hypre_AMGCoarsenwLJP( hypre_CSRMatrix    *A,
    double          *A_data        = hypre_CSRMatrixData(A);
    int              num_variables = hypre_CSRMatrixNumRows(A);
                   
-   hypre_CSRMatrix *S;
    int             *S_i;
    int             *S_j;
    double          *S_data;
@@ -1105,16 +1096,16 @@ hypre_AMGCoarsenwLJP( hypre_CSRMatrix    *A,
     * to "unaccounted-for" dependence.
     *----------------------------------------------------------------*/
 
-   S = hypre_CSRMatrixCreate(num_variables, num_variables,
+   /*S = hypre_CSRMatrixCreate(num_variables, num_variables,
                              A_i[num_variables]);
-   hypre_CSRMatrixInitialize(S);
+   hypre_CSRMatrixInitialize(S);*/
 
    S_i           = hypre_CSRMatrixI(S);
    S_j           = hypre_CSRMatrixJ(S);
    S_data        = hypre_CSRMatrixData(S);
 
    /* give S same nonzero structure as A */
-   for (i = 0; i < num_variables; i++)
+   /*for (i = 0; i < num_variables; i++)
    {
       S_i[i] = A_i[i];
       for (jA = A_i[i]; jA < A_i[i+1]; jA++)
@@ -1126,10 +1117,10 @@ hypre_AMGCoarsenwLJP( hypre_CSRMatrix    *A,
 
    for (i = 0; i < num_variables; i++)
    {
-      diag = A_data[A_i[i]];
+      diag = A_data[A_i[i]];*/
 
       /* compute scaling factor */
-      row_scale = 0.0;
+      /*row_scale = 0.0;
       if (diag < 0)
       {
          for (jA = A_i[i]+1; jA < A_i[i+1]; jA++)
@@ -1145,10 +1136,10 @@ hypre_AMGCoarsenwLJP( hypre_CSRMatrix    *A,
 	   if (dof_func[i] == dof_func[A_j[jA]])
             row_scale = hypre_min(row_scale, A_data[jA]);
          }
-      }
+      }*/
 
       /* compute row entries of S */
-      S_data[A_i[i]] = 0;
+      /*S_data[A_i[i]] = 0;
       if (diag < 0) 
       { 
          for (jA = A_i[i]+1; jA < A_i[i+1]; jA++)
@@ -1172,7 +1163,7 @@ hypre_AMGCoarsenwLJP( hypre_CSRMatrix    *A,
             }
          }
       }
-   }
+   }*/
 
    /*--------------------------------------------------------------
     * "Compress" the strength matrix.
@@ -1184,7 +1175,7 @@ hypre_AMGCoarsenwLJP( hypre_CSRMatrix    *A,
     * that builds interpolation would have to be modified first.
     *----------------------------------------------------------------*/
 
-   jS = 0;
+   /*jS = 0;
    for (i = 0; i < num_variables; i++)
    {
       S_i[i] = jS;
@@ -1199,7 +1190,7 @@ hypre_AMGCoarsenwLJP( hypre_CSRMatrix    *A,
       }
    }
    S_i[num_variables] = jS;
-   hypre_CSRMatrixNumNonzeros(S) = jS;
+   hypre_CSRMatrixNumNonzeros(S) = jS;*/
 
    /*----------------------------------------------------------
     * Compute the measures
@@ -1262,7 +1253,7 @@ hypre_AMGCoarsenwLJP( hypre_CSRMatrix    *A,
       * matlab routine.
       *------------------------------------------------*/
      
-     /* #if 0 /* debugging */
+#if 0 /* debugging */
      /* print out measures */
      sprintf(filename, "coarsen.out.measures.%04d", iter);
      fp = fopen(filename, "w");
@@ -1286,7 +1277,7 @@ hypre_AMGCoarsenwLJP( hypre_CSRMatrix    *A,
      fclose(fp);
      
      iter++;
-     /* #endif*/
+#endif
      
      if(graph_size == 0) break;
 
@@ -1458,7 +1449,6 @@ hypre_AMGCoarsenwLJP( hypre_CSRMatrix    *A,
    hypre_TFree(measure_array);
    hypre_TFree(graph_array);
 
-   *S_ptr           = S;
    *CF_marker_ptr   = CF_marker;
    *coarse_size_ptr = coarse_size;
 
@@ -1472,7 +1462,8 @@ hypre_AMGCoarsenwLJP( hypre_CSRMatrix    *A,
 int
 hypre_AMGCoarsenRugeOnePass( hypre_CSRMatrix    *A,
                       double              strength_threshold,
-                      hypre_CSRMatrix   **S_ptr,
+                      /*hypre_CSRMatrix   **S_ptr,*/
+                      hypre_CSRMatrix    *S,
                       int               **CF_marker_ptr,
                       int                *coarse_size_ptr     )
 {
@@ -1481,7 +1472,7 @@ hypre_AMGCoarsenRugeOnePass( hypre_CSRMatrix    *A,
    double          *A_data        = hypre_CSRMatrixData(A);
    int              num_variables = hypre_CSRMatrixNumRows(A);
                   
-   hypre_CSRMatrix *S;
+   /*hypre_CSRMatrix *S;*/
    int             *S_i;
    int             *S_j;
                  
@@ -1530,11 +1521,13 @@ hypre_AMGCoarsenRugeOnePass( hypre_CSRMatrix    *A,
     *----------------------------------------------------------------*/
 
    num_strong = A_i[num_variables] - num_variables;
-   S = hypre_CSRMatrixCreate(num_variables, num_variables, num_strong);
+   /*S = hypre_CSRMatrixCreate(num_variables, num_variables, num_strong);*/
    ST = hypre_CSRMatrixCreate(num_variables, num_variables, num_strong);
+   S_i = hypre_CSRMatrixI(S);
+   S_j = hypre_CSRMatrixJ(S);
 
-   S_i = hypre_CTAlloc(int,num_variables+1);
-   hypre_CSRMatrixI(S) = S_i;
+   /*S_i = hypre_CTAlloc(int,num_variables+1);
+   hypre_CSRMatrixI(S) = S_i;*/
 
    ST_i = hypre_CTAlloc(int,num_variables+1);
    hypre_CSRMatrixI(ST) = ST_i;
@@ -1543,7 +1536,7 @@ hypre_AMGCoarsenRugeOnePass( hypre_CSRMatrix    *A,
    hypre_CSRMatrixJ(ST) = ST_j;
 
    /* give S same nonzero structure as A, store in ST*/
-   for (i = 0; i < num_variables; i++)
+   /*for (i = 0; i < num_variables; i++)
    {
       ST_i[i] = A_i[i];
       for (jA = A_i[i]; jA < A_i[i+1]; jA++)
@@ -1555,10 +1548,10 @@ hypre_AMGCoarsenRugeOnePass( hypre_CSRMatrix    *A,
 
    for (i = 0; i < num_variables; i++)
    {
-      diag = A_data[A_i[i]];
+      diag = A_data[A_i[i]];*/
 
       /* compute scaling factor */
-      row_scale = 0.0;
+      /*row_scale = 0.0;
       if (diag < 0)
       {
          for (jA = A_i[i]+1; jA < A_i[i+1]; jA++)
@@ -1572,10 +1565,10 @@ hypre_AMGCoarsenRugeOnePass( hypre_CSRMatrix    *A,
          {
             row_scale = hypre_min(row_scale, A_data[jA]);
          }
-      }
+      }*/
 
       /* compute row entries of S */
-      if (diag < 0) 
+      /*if (diag < 0) 
       {
          for (jA = A_i[i]+1; jA < A_i[i+1]; jA++)
          {
@@ -1600,7 +1593,7 @@ hypre_AMGCoarsenRugeOnePass( hypre_CSRMatrix    *A,
    }
 
    S_j = hypre_CTAlloc(int,num_strong);
-   hypre_CSRMatrixJ(S) = S_j;
+   hypre_CSRMatrixJ(S) = S_j;*/
 
    /*--------------------------------------------------------------
     * "Compress" the strength matrix.
@@ -1612,7 +1605,7 @@ hypre_AMGCoarsenRugeOnePass( hypre_CSRMatrix    *A,
     * that builds interpolation would have to be modified first.
     *----------------------------------------------------------------*/
 
-   jS = 0;
+   /*jS = 0;
    for (i = 0; i < num_variables; i++)
    {
       S_i[i] = jS;
@@ -1627,7 +1620,8 @@ hypre_AMGCoarsenRugeOnePass( hypre_CSRMatrix    *A,
    }
    S_i[num_variables] = jS;
    hypre_CSRMatrixNumNonzeros(S) = jS;
-   hypre_CSRMatrixNumNonzeros(ST) = jS;
+   hypre_CSRMatrixNumNonzeros(ST) = jS;*/
+   jS = hypre_CSRMatrixNumNonzeros(S);
 
    /*----------------------------------------------------------
     * generate transpose of S, ST
@@ -1840,7 +1834,6 @@ hypre_AMGCoarsenRugeOnePass( hypre_CSRMatrix    *A,
    hypre_TFree(graph_ptr);
    hypre_CSRMatrixDestroy(ST);
 
-   *S_ptr           = S;
    *CF_marker_ptr   = CF_marker;
    *coarse_size_ptr = coarse_size;
 
