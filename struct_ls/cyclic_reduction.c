@@ -468,9 +468,9 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
    for (i = 0; i < num_all_boxes; i++)
    {
       idmin =
-         min(idmin, hypre_BoxIMinD(hypre_BoxArrayBox(all_boxes, i), cdir));
+         hypre_min(idmin, hypre_BoxIMinD(hypre_BoxArrayBox(all_boxes, i), cdir));
       idmax =
-         max(idmax, hypre_BoxIMaxD(hypre_BoxArrayBox(all_boxes, i), cdir));
+         hypre_max(idmax, hypre_BoxIMaxD(hypre_BoxArrayBox(all_boxes, i), cdir));
    }
    num_levels = hypre_Log2(idmax - idmin + 1) + 2;
 
@@ -488,9 +488,9 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
       for (i = 0; i < num_all_boxes; i++)
       {
          idmin =
-            min(idmin, hypre_BoxIMinD(hypre_BoxArrayBox(all_boxes, i), cdir));
+            hypre_min(idmin, hypre_BoxIMinD(hypre_BoxArrayBox(all_boxes, i), cdir));
          idmax =
-            max(idmax, hypre_BoxIMaxD(hypre_BoxArrayBox(all_boxes, i), cdir));
+            hypre_max(idmax, hypre_BoxIMaxD(hypre_BoxArrayBox(all_boxes, i), cdir));
       }
       if ( idmin == idmax )
       {

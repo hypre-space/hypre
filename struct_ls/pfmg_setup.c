@@ -141,9 +141,9 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       idmax = hypre_BoxIMaxD(hypre_BoxArrayBox(all_boxes, 0), d);
       for (i = 0; i < num_all_boxes; i++)
       {
-         idmin = min(idmin,
+         idmin = hypre_min(idmin,
                      hypre_BoxIMinD(hypre_BoxArrayBox(all_boxes, i), d));
-         idmax = max(idmax,
+         idmax = hypre_max(idmax,
                      hypre_BoxIMaxD(hypre_BoxArrayBox(all_boxes, i), d));
       }
       hypre_BoxIMinD(cbox, d) = idmin;
@@ -162,7 +162,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       hypre_Log2(hypre_BoxSizeD(cbox, 2)) + 2;
    if ((pfmg_data -> max_levels) > 0)
    {
-      max_levels = min(max_levels, (pfmg_data -> max_levels));
+      max_levels = hypre_min(max_levels, (pfmg_data -> max_levels));
    }
    (pfmg_data -> max_levels) = max_levels;
 

@@ -136,13 +136,13 @@ hypre_SMGSetup( void               *smg_vdata,
    for (i = 0; i < num_all_boxes; i++)
    {
       idmin =
-         min(idmin, hypre_BoxIMinD(hypre_BoxArrayBox(all_boxes, i), cdir));
+         hypre_min(idmin, hypre_BoxIMinD(hypre_BoxArrayBox(all_boxes, i), cdir));
       idmax =
-         max(idmax, hypre_BoxIMaxD(hypre_BoxArrayBox(all_boxes, i), cdir));
+         hypre_max(idmax, hypre_BoxIMaxD(hypre_BoxArrayBox(all_boxes, i), cdir));
    }
    max_levels = hypre_Log2(idmax - idmin + 1) + 2;
    if ((smg_data -> max_levels) > 0)
-      max_levels = min(max_levels, (smg_data -> max_levels));
+      max_levels = hypre_min(max_levels, (smg_data -> max_levels));
    (smg_data -> max_levels) = max_levels;
 
    grid_l = hypre_TAlloc(hypre_StructGrid *, max_levels);
@@ -159,9 +159,9 @@ hypre_SMGSetup( void               *smg_vdata,
       for (i = 0; i < num_all_boxes; i++)
       {
          idmin =
-            min(idmin, hypre_BoxIMinD(hypre_BoxArrayBox(all_boxes, i), cdir));
+            hypre_min(idmin, hypre_BoxIMinD(hypre_BoxArrayBox(all_boxes, i), cdir));
          idmax =
-            max(idmax, hypre_BoxIMaxD(hypre_BoxArrayBox(all_boxes, i), cdir));
+            hypre_max(idmax, hypre_BoxIMaxD(hypre_BoxArrayBox(all_boxes, i), cdir));
       }
       if ( (idmin == idmax) || (l == (max_levels - 1)) )
       {
