@@ -1,0 +1,77 @@
+#!/bin/sh
+#BHEADER***********************************************************************
+# (c) 1999   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+#==============================================================================
+# Environment variables
+# NOTE: this should be stripped down to something more minimal
+#==============================================================================
+
+CVSROOT=/home/casc/repository
+export CVSROOT
+
+PATH=/usr/xpg4/bin:/opt/SUNWspro/bin:/usr/ccs/bin:/usr/bin:/bin
+PATH=${PATH}:/usr/sbin:/usr/ucb:/usr/apps/bin:/usr/local/scripts
+PATH=${PATH}:/usr/local/bin:/home/casc/bin
+export PATH
+
+#==============================================================================
+# Set autotest directory to current directory
+#==============================================================================
+
+HYPRE_AUTOTEST_DIR=`pwd`
+export HYPRE_AUTOTEST_DIR
+
+#==============================================================================
+# Email lists
+#==============================================================================
+
+HYPRE_DEFAULT_EMAIL="\
+ rfalgout@llnl.gov\
+ acleary@llnl.gov\
+ treadway1@llnl.gov"
+
+HYPRE_CHECKOUT_EMAIL="$HYPRE_DEFAULT_EMAIL"
+
+HYPRE_CONFIGURE_EMAIL="$HYPRE_DEFAULT_EMAIL"
+
+HYPRE_STRUCT_EMAIL="$HYPRE_DEFAULT_EMAIL\
+ jones97@llnl.gov\
+ painter1@llnl.gov\
+ lee123@llnl.gov"
+
+HYPRE_IJ_EMAIL="$HYPRE_DEFAULT_EMAIL\
+ painter1@llnl.gov\
+ hysom1@llnl.gov\
+ jones97@llnl.gov\
+ yang11@llnl.gov\
+ vhenson@llnl.gov\
+ chow8@llnl.gov\
+ mlambert@llnl.gov\
+ chtong@llnl.gov"
+
+HYPRE_FEI_EMAIL="$HYPRE_DEFAULT_EMAIL\
+ chow8@llnl.gov\
+ chtong@llnl.gov"
+
+HYPRE_ALL_EMAIL="$HYPRE_DEFAULT_EMAIL\
+ painter1@llnl.gov\
+ castilla1@llnl.gov\
+ hysom1@llnl.gov\
+ lee123@llnl.gov\
+ jones97@llnl.gov\
+ yang11@llnl.gov\
+ vhenson@llnl.gov\
+ chow8@llnl.gov\
+ mlambert@llnl.gov\
+ chtong@llnl.gov"
+
+export HYPRE_DEFAULT_EMAIL HYPRE_CHECKOUT_EMAIL HYPRE_CONFIGURE_EMAIL
+export HYPRE_STRUCT_EMAIL HYPRE_IJ_EMAIL HYPRE_FEI_EMAIL
+export HYPRE_ALL_EMAIL

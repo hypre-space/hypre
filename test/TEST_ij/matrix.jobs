@@ -1,0 +1,19 @@
+#!/bin/ksh 
+#BHEADER***********************************************************************
+# (c) 1998   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+#=============================================================================
+# ij: tests different ways of generating IJMatrix
+#=============================================================================
+
+mpirun -np 2 ./ij -rhsrand > matrix.out.0
+
+mpirun -np 2 ./ij -rhsrand -exact_size > matrix.out.1
+
+mpirun -np 2 ./ij -rhsrand -low_storage > matrix.out.2

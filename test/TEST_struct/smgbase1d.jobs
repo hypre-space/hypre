@@ -1,0 +1,19 @@
+#!/bin/ksh 
+#BHEADER***********************************************************************
+# (c) 1998   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+#=============================================================================
+# struct: Test 1d run as 2d and 3d
+#=============================================================================
+
+mpirun -np 1 ./struct -n 12 1 1  -c 1 0 0 -d 2 -solver 0 \
+ > smgbase1d.out.0
+mpirun -np 2 ./struct -n 2 1 1 -P 2 1 1 -b 3 1 1 -c 1 0 0 -solver 0 \
+ > smgbase1d.out.1
+

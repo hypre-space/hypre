@@ -1,0 +1,32 @@
+#!/bin/ksh 
+#BHEADER***********************************************************************
+# (c) 1998   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+#=============================================================================
+# struct: Run base 3d case
+#=============================================================================
+
+mpirun -np 1 ./struct -n 12 12 12 -c 2.0 3.0 40 -solver 0 > smgbase3d.out.0 
+
+#=============================================================================
+# struct: Test parallel and blocking 
+#=============================================================================
+
+mpirun -np 8 ./struct -n 6 6 6 -P 2 2 2  -c 2.0 3.0 40 -solver 0 \
+ > smgbase3d.out.1
+mpirun -np 4 ./struct -n 3 12 12 -P 4 1 1 -c 2.0 3.0 40 -solver 0 \
+ > smgbase3d.out.2
+mpirun -np 4 ./struct -n 12 3 12 -P 1 4 1 -c 2.0 3.0 40 -solver 0 \
+ > smgbase3d.out.3
+mpirun -np 4 ./struct -n 12 12 3 -P 1 1 4 -c 2.0 3.0 40 -solver 0 \
+ > smgbase3d.out.4
+mpirun -np 1 ./struct -n 3 4 3 -b 4 3 4  -c 2.0 3.0 40 -solver 0 \
+ > smgbase3d.out.5
+mpirun -np 8 ./struct -n 3 3 3 -b 2 2 2 -P 2 2 2  -c 2.0 3.0 40 -solver 0 \
+ > smgbase3d.out.6

@@ -1,0 +1,21 @@
+#!/bin/ksh 
+#BHEADER***********************************************************************
+# (c) 1998   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+#=============================================================================
+# fei: Run through solvers
+#=============================================================================
+
+mpirun -np 1 ./fei -solver 0 > solvers.out.0
+mpirun -np 1 ./fei -solver 1 > solvers.out.1
+mpirun -np 1 ./fei -solver 2 > solvers.out.2
+mpirun -np 1 ./fei -solver 4 > solvers.out.3
+mpirun -np 1 ./fei -solver 5 > solvers.out.4
+mpirun -np 1 ./fei -solver 6 > solvers.out.5
+

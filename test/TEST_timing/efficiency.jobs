@@ -1,0 +1,38 @@
+#!/bin/ksh 
+#BHEADER***********************************************************************
+# (c) 1998   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+#=============================================================================
+# struct: timing and parallel scaling efficiency test
+#=============================================================================
+
+#=============================================================================
+# Perform as a single psub process, throw away the first test in
+# each configuration
+#=============================================================================
+#BATCH
+mpirun -np 1 ./struct -n 30 30 30 -solver 11
+mpirun -np 1 ./struct -n 30 30 30 -solver 11 > efficiency.out.0
+mpirun -np 1 ./struct -n 30 30 30 -solver 11 > efficiency.out.1
+mpirun -np 1 ./struct -n 30 30 30 -solver 11 > efficiency.out.2
+#END
+
+#BATCH
+mpirun -np 8 ./struct -n 30 30 30 -P 2 2 2 -solver 11
+mpirun -np 8 ./struct -n 30 30 30 -P 2 2 2 -solver 11 > efficiency.out.3
+mpirun -np 8 ./struct -n 30 30 30 -P 2 2 2 -solver 11 > efficiency.out.4
+mpirun -np 8 ./struct -n 30 30 30 -P 2 2 2 -solver 11 > efficiency.out.5
+#END
+
+#BATCH
+mpirun -np 64 ./struct -n 30 30 30 -P 4 4 4 -solver 11
+mpirun -np 64 ./struct -n 30 30 30 -P 4 4 4 -solver 11 > efficiency.out.6
+mpirun -np 64 ./struct -n 30 30 30 -P 4 4 4 -solver 11 > efficiency.out.7
+mpirun -np 64 ./struct -n 30 30 30 -P 4 4 4 -solver 11 > efficiency.out.8
+#END

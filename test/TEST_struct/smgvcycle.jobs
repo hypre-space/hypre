@@ -1,0 +1,15 @@
+#!/bin/ksh 
+#BHEADER***********************************************************************
+# (c) 1998   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+#=============================================================================
+# struct: Test V(1,0) cycle.
+#=============================================================================
+
+mpirun -np 3 ./struct -P 1 1 3 -v 1 0 -solver 0 > smgvcycle.out.0

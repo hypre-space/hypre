@@ -1,0 +1,22 @@
+#!/bin/ksh 
+#BHEADER***********************************************************************
+# (c) 1998   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+#=============================================================================
+# struct: Run CG+PFMG with skip base 3d case
+#=============================================================================
+
+mpirun -np 1 ./struct -n 12 12 12 -solver 11 -skip 1 \
+ > cgpfmg3d.out.0
+#=============================================================================
+# struct: Run CG+PFMG with skip parallel and blocking 
+#=============================================================================
+
+mpirun -np 8 ./struct -n 3 3 3 -b 2 2 2 -P 2 2 2  -solver 11 -skip 1 \
+ > cgpfmg3d.out.1

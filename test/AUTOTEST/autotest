@@ -1,0 +1,266 @@
+#!/bin/sh -x
+#BHEADER***********************************************************************
+# (c) 1998   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+print_header()
+{
+  echo ""
+  echo "======================================================================"
+  echo "Running tests on $HYPRE_RUN_MACHINE"
+  echo "======================================================================"
+  echo ""
+}
+perform_test()
+{
+  print_header
+  echo "deleting old AUTOTEST directory...."
+  ssh ${HYPRE_COMPILE_MACHINE} "\
+    (\
+        rm -fR ${HYPRE_REMOTE_DIR}/linear_solvers;\
+    )"
+
+  echo "copying new source...."
+  scp -pr linear_solvers ${HYPRE_COMPILE_MACHINE}:${HYPRE_REMOTE_DIR}
+
+  BATFILE="autotest.`date '+%Y%m%d%H%M%S'`"
+  cat > $BATFILE <<-EOF
+        cd ${HYPRE_REMOTE_DIR};\
+	. linear_solvers/test/AUTOTEST/autotest_env;\
+	[ -f linear_solvers/test/AUTOTEST/env.${HYPRE_ARCH} ] && . linear_solvers/test/AUTOTEST/env.${HYPRE_ARCH};\
+	linear_solvers/test/AUTOTEST/autotest_test -m
+	chgrp -fR hypre ${HYPRE_REMOTE_DIR}
+	chmod -R a+rX,u+w,go-w ${HYPRE_REMOTE_DIR}
+	EOF
+  chmod +x $BATFILE 
+  scp -p $BATFILE ${HYPRE_COMPILE_MACHINE}:${HYPRE_REMOTE_DIR}
+  echo "scheduling remote autotest...."
+  ssh -f ${HYPRE_COMPILE_MACHINE} "\
+    (\
+        cd ${HYPRE_REMOTE_DIR};\
+	. linear_solvers/test/AUTOTEST/autotest_env;\
+	[ -f linear_solvers/test/AUTOTEST/env.${HYPRE_ARCH} ] && . linear_solvers/test/AUTOTEST/env.${HYPRE_ARCH};\
+        linear_solvers/test/AUTOTEST/autotest_test ${HYPRE_MACHINE_COMMANDS};\
+        at -m -f ./$BATFILE now + 12 hour;\
+    )" >/dev/null 2>&1
+  echo "returning to autotest...."
+}
+
+#==============================================================================
+# This script is the top-level script used to regression test hypre.
+#==============================================================================
+
+OldMask=`umask -S`
+umask u=rwx,g=rx,o=rx
+. ./autotest_env
+
+if [ "$1" = "-nocvs" ]
+then
+  shift
+else
+#=============================================================================
+# Check out the repository in the HYPRE_AUTOTEST_DIR directory
+#=============================================================================
+
+  if [ ! -d "$CVSROOT" ]
+  then
+    echo "Error: no CVS repository, CVSROOT = $CVSROOT"
+    exit
+  fi
+
+  cd $HYPRE_AUTOTEST_DIR
+  rm -fR linear_solvers
+  cvs -q checkout -P linear_solvers 1> $0.checkout.log 2> $0.checkout.err
+  echo "$HYPRE_CHECKOUT_EMAIL" > $0.checkout.err.email 
+  chmod -fR a+rX,u+w,go-w linear_solvers
+  chgrp -fR hypre linear_solvers
+fi
+SUBMSG=""
+export SUBMSG
+
+#==============================================================================
+# Run test suites on remote machines
+#==============================================================================
+
+while [ "$*" != "" ]
+do
+  case $1 in
+    -achilles)
+        HYPRE_ARCH="casc"
+        HYPRE_COMPILE_MACHINE="achilles"
+        HYPRE_RUN_MACHINE="achilles"
+        HYPRE_REMOTE_DIR="/usr/casc/hypre/sparc-sun-solaris2.8/AUTOTEST"
+	HYPRE_MACHINE_COMMANDS="-t 1 -ns -a 2 -dcxfy"
+	perform_test
+        shift;;
+    -blue | -bluemp)
+        HYPRE_ARCH="blue"
+        HYPRE_COMPILE_MACHINE="blue"
+        HYPRE_RUN_MACHINE="blue"
+        HYPRE_REMOTE_DIR="/usr/gapps/hypre/powerpc-ibm-aix4.3.3.0/AUTOTEST"
+        if [ "$1" = "-blue" ] ; then
+	  HYPRE_MACHINE_COMMANDS="-l -o 1 -a 2 -cf"
+        else
+          SUBMSG="from OpenMP"
+	  HYPRE_MACHINE_COMMANDS="-l -o 2"
+        fi
+	perform_test
+        shift;;
+    -frost | -frostmp)
+        HYPRE_ARCH="blue"
+        HYPRE_COMPILE_MACHINE="frost"
+        HYPRE_RUN_MACHINE="frost"
+        HYPRE_REMOTE_DIR="/usr/gapps/hypre/powerpc-ibm-aix5.1.0.0/AUTOTEST"
+        if [ "$1" = "-frost" ] ; then
+	HYPRE_MACHINE_COMMANDS="-l -o 1 -a 2 -cf"
+        else
+          SUBMSG="from OpenMP"
+	  HYPRE_MACHINE_COMMANDS="-l -o 2"
+        fi
+	perform_test
+        shift;;
+    -casc)
+        HYPRE_ARCH="casc"
+        HYPRE_COMPILE_MACHINE="perrin"
+        HYPRE_RUN_MACHINE="perrin"
+        HYPRE_REMOTE_DIR="/home/casc/software/hypre/autotest"
+	HYPRE_MACHINE_COMMANDS="-t 1 -ns -a 2 -dcxfy"
+	print_header
+        ./autotest_test $HYPRE_MACHINE_COMMANDS
+        shift;;
+    -compass | -compassmp) # obsolute
+        HYPRE_ARCH="dec"
+        HYPRE_COMPILE_MACHINE="west"
+        HYPRE_RUN_MACHINE="southeast"
+        HYPRE_REMOTE_DIR="/usr/gapps/hypre/alphaev56-dec-osf4.0f/AUTOTEST"
+        if [ "$1" = "-compass" ] ; then
+	  HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -o 1 -a 2 -cf"
+        else
+	  HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -o 2"
+        fi
+	perform_test
+        shift;;
+    -gps | -gpsmp)
+        HYPRE_ARCH="dec"
+        HYPRE_COMPILE_MACHINE="gps320"
+        HYPRE_RUN_MACHINE="gps320"
+        HYPRE_REMOTE_DIR="/usr/gapps/hypre/alphaev68-dec-osf5.1/AUTOTEST"
+        if [ "$1" = "-gps" ] ; then
+	  HYPRE_MACHINE_COMMANDS="-l -r $HYPRE_RUN_MACHINE -o 1 -a 2 -cf"
+        else
+	  HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -o 2"
+        fi
+	perform_test
+        shift;;
+    -lx)
+        HYPRE_ARCH="linux"
+        HYPRE_COMPILE_MACHINE="lx10"
+        HYPRE_RUN_MACHINE="lx10"
+        HYPRE_REMOTE_DIR="/usr/gapps/hypre/alphaev67-unknown-linux-gnu/AUTOTEST"
+	HYPRE_MACHINE_COMMANDS="-l -a 2 -cf"
+	perform_test
+        shift;;
+    -insure)
+        HYPRE_ARCH="linux"
+        HYPRE_COMPILE_MACHINE="tux71"
+        HYPRE_RUN_MACHINE="tux71"
+        HYPRE_REMOTE_DIR="/usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST"
+	HYPRE_MACHINE_COMMANDS="-dt 1 -nsa 1 -cxfy -i 2"
+#	print_header
+#	./autotest_test $HYPRE_MACHINE_COMMANDS
+	perform_test
+        shift;;
+    -pengra)
+        HYPRE_ARCH="linux"
+        HYPRE_COMPILE_MACHINE="pengra"
+        HYPRE_RUN_MACHINE="pengra"
+        HYPRE_REMOTE_DIR="/usr/gapps/hypre/i686-pc-linux-gnu-pengra/AUTOTEST"
+	HYPRE_MACHINE_COMMANDS="-l -t 1 -ns -a 2 -dcxfy"
+	perform_test
+        shift;;
+    -purify)
+        HYPRE_ARCH="casc"
+        HYPRE_COMPILE_MACHINE="perrin"
+        HYPRE_RUN_MACHINE="perrin"
+        HYPRE_REMOTE_DIR="/home/casc/software/hypre/autotest"
+	HYPRE_MACHINE_COMMANDS="-dt 1 -nsa 1 -cxfy -q 2"
+	print_header
+        ./autotest_test $HYPRE_MACHINE_COMMANDS
+        shift;;
+    -red)
+        HYPRE_ARCH="red"
+        HYPRE_COMPILE_MACHINE="sasn100"
+        HYPRE_RUN_MACHINE="janus"
+        HYPRE_REMOTE_DIR="/usr/apps/hypre/AUTOTEST"
+	HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -o 1 -a 2 -cf"
+	perform_test
+        shift;;
+    -riptide)
+        HYPRE_ARCH="sgi"
+        HYPRE_COMPILE_MACHINE="riptide"
+        HYPRE_RUN_MACHINE="riptide"
+        HYPRE_REMOTE_DIR="/usr/gapps/hypre/mips-sgi-irix6.5/AUTOTEST"
+	HYPRE_MACHINE_COMMANDS="-a 2 -cf"
+	perform_test
+        shift;;
+    -tc2k | -tc2kmp)
+        HYPRE_ARCH="dec"
+        HYPRE_COMPILE_MACHINE="tckk"
+        HYPRE_RUN_MACHINE="tckk"
+        HYPRE_REMOTE_DIR="/usr/gapps/hypre/alphaev67-dec-osf5.1/AUTOTEST"
+        if [ "$1" = "-tc2k" ] ; then
+	  HYPRE_MACHINE_COMMANDS="-l -o 1 -a 2 -cf"
+        else
+          SUBMSG="from OpenMP"
+	  HYPRE_MACHINE_COMMANDS="-l -o 2"
+        fi
+	perform_test
+        shift;;
+    -tc | -tcmp)
+        HYPRE_ARCH="dec"
+        HYPRE_COMPILE_MACHINE="tc01"
+        HYPRE_RUN_MACHINE="tc10"
+        HYPRE_REMOTE_DIR="/usr/gapps/hypre/alphaev56-dec-osf5.1/AUTOTEST"
+        if [ "$1" = "-tc" ] ; then
+	  HYPRE_MACHINE_COMMANDS="-l -o 1 -a 2 -cf"
+        else
+          SUBMSG="from OpenMP"
+	  HYPRE_MACHINE_COMMANDS="-l -o 2"
+        fi
+	perform_test
+        shift;;
+    -tux)
+        HYPRE_ARCH="linux"
+        HYPRE_COMPILE_MACHINE="tux71"
+        HYPRE_RUN_MACHINE="tux71"
+        HYPRE_REMOTE_DIR="/usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST"
+	HYPRE_MACHINE_COMMANDS="-t 1 -ns -a 2 -dcxfy"
+	perform_test
+        shift;;
+    -vivid)
+        HYPRE_ARCH="linux"
+        HYPRE_COMPILE_MACHINE="vivid"
+        HYPRE_RUN_MACHINE="vivid"
+        HYPRE_REMOTE_DIR="/usr/gapps/hypre/i686-pc-linux-gnu/AUTOTEST"
+	HYPRE_MACHINE_COMMANDS="-a 2 -cf"
+	perform_test
+        shift;;
+    *)
+        shift;;
+  esac
+
+
+done
+
+#==============================================================================
+# Autotest completion check: create "autotest finished" file
+#==============================================================================
+
+touch $HYPRE_AUTOTEST_DIR/autotest_finished
+
+umask $OldMask

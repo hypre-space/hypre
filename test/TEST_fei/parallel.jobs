@@ -1,0 +1,20 @@
+#!/bin/ksh 
+#BHEADER***********************************************************************
+# (c) 1998   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+#=============================================================================
+# fei: Run through solvers in parallel
+#=============================================================================
+
+mpirun -np 4 ./fei -solver 0 > parallel.out.0
+mpirun -np 4 ./fei -solver 1 > parallel.out.1
+mpirun -np 4 ./fei -solver 2 > parallel.out.2
+mpirun -np 4 ./fei -solver 4 > parallel.out.3
+mpirun -np 4 ./fei -solver 5 > parallel.out.4
+

@@ -1,0 +1,30 @@
+#!/bin/ksh 
+#BHEADER***********************************************************************
+# (c) 1998   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+#=============================================================================
+# ij: Run default case with different coarsenings, hybrid GS,
+#    1: Cleary_LJP
+#    2: parallel Ruge
+#    3: Ruge 3rd pass
+#    4: Falgout
+#=============================================================================
+
+mpirun -np 4 ./ij -rhsrand -n 15 15 10 -P 2 2 1 -cljp -27pt \
+ > coarsening.out.0
+
+mpirun -np 4 ./ij -rhsrand -n 15 15 10 -P 2 2 1 -ruge -27pt \
+ > coarsening.out.1
+
+mpirun -np 4 ./ij -rhsrand -n 15 15 10 -P 2 2 1 -ruge3c -gm -27pt \
+ > coarsening.out.2
+
+mpirun -np 4 ./ij -rhsrand -n 15 15 10 -P 2 2 1 -falgout -27pt \
+ > coarsening.out.3
+

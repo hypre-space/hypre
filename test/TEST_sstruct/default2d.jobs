@@ -1,0 +1,25 @@
+#!/bin/ksh 
+#BHEADER***********************************************************************
+# (c) 1998   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+#=============================================================================
+# sstruct: Run base 2d case
+#=============================================================================
+
+mpirun -np 1 ./sstruct -in sstruct.in.default_2D -r 2 2 1 -solver 19 \
+ > default2d.out.0
+
+#=============================================================================
+# sstruct: Run various blockings and distributions of default problem
+#=============================================================================
+
+mpirun -np 1 ./sstruct -in sstruct.in.default_2D -b 2 2 1 -solver 19 \
+ > default2d.out.1
+mpirun -np 2 ./sstruct -in sstruct.in.default_2D -P 1 2 1 -r 2 1 1 -solver 19 \
+ > default2d.out.2

@@ -1,0 +1,19 @@
+#!/bin/ksh 
+#BHEADER***********************************************************************
+# (c) 1998   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+#=============================================================================
+# struct: Run PFMG V(1,0) and V(0,1) cycles.
+#=============================================================================
+
+mpirun -np 3 ./struct -P 1 1 3 -v 1 0 -solver 1 \
+ > pfmgvcycle.out.0
+mpirun -np 3 ./struct -P 1 1 3 -v 0 1 -solver 1 \
+ > pfmgvcycle.out.1
+

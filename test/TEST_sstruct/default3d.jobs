@@ -1,0 +1,27 @@
+#!/bin/ksh 
+#BHEADER***********************************************************************
+# (c) 1998   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+#=============================================================================
+# sstruct: Run base 3d case
+#=============================================================================
+
+mpirun -np 1 ./sstruct -r 2 2 2 -solver 19 \
+ > default3d.out.0
+
+#=============================================================================
+# sstruct: Run various blockings and distributions of default problem
+#=============================================================================
+
+mpirun -np 1 ./sstruct -b 2 2 2 -solver 19 \
+ > default3d.out.1
+mpirun -np 2 ./sstruct -P 2 1 1 -b 1 2 1 -r 1 1 2 -solver 19 \
+ > default3d.out.2
+mpirun -np 4 ./sstruct -P 2 1 2 -r 1 2 1 -solver 19 \
+ > default3d.out.3

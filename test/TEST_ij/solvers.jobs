@@ -1,0 +1,34 @@
+#!/bin/ksh 
+#BHEADER***********************************************************************
+# (c) 1998   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+#=============================================================================
+# ij: Run default case with different solvers
+#    1: BoomerAMG_PCG
+#    2: DS_PCG
+#    3: BoomerAMG_GMRES
+#    4: DS_GMRES
+#    5: BoomerAMG_CGNR
+#    6: DS_CGNR
+#    7: PILUT_GMRES
+#    8: ParaSails_PCG
+#   20: Hybrid_PCG
+#=============================================================================
+
+mpirun -np 2 ./ij -solver 1 -rhsrand > solvers.out.0
+mpirun -np 2 ./ij -solver 2 -rhsrand > solvers.out.1
+mpirun -np 2 ./ij -solver 3 -rhsrand > solvers.out.2
+mpirun -np 2 ./ij -solver 4 -rhsrand > solvers.out.3
+mpirun -np 2 ./ij -solver 5 -rhsrand > solvers.out.4
+mpirun -np 2 ./ij -solver 6 -rhsrand > solvers.out.5
+mpirun -np 2 ./ij -solver 7 -rhsrand > solvers.out.6
+mpirun -np 2 ./ij -solver 8 -rhsrand > solvers.out.7
+mpirun -np 2 ./ij -solver 20 -rhsrand > solvers.out.8
+mpirun -np 2 ./ij -solver 20 -cf 0.5 -rhsrand > solvers.out.9
+
