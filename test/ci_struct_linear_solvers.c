@@ -3,10 +3,10 @@
 #include <math.h>
 
 #include "utilities.h"
-#include "../CI_struct_matrix_vector/HYPRE_types.h"  
-#include "../CI_struct_matrix_vector/HYPRE_protos.h"  
-#include "../CI_struct_linear_solvers/HYPRE_types.h"  
-#include "../CI_struct_linear_solvers/HYPRE_protos.h"  
+#include "../CI_struct_matrix_vector/HYPRE_CI_struct_matrix_vector_types.h"  
+#include "../CI_struct_matrix_vector/HYPRE_CI_struct_matrix_vector_protos.h"  
+#include "../CI_struct_linear_solvers/HYPRE_CI_struct_linear_solvers_types.h"  
+#include "../CI_struct_linear_solvers/HYPRE_CI_struct_linear_solvers_protos.h"  
  
 #ifdef HYPRE_DEBUG
 #include <cegdb.h>
