@@ -85,6 +85,7 @@ USR_FILES =\
  usr_manual.tex
 
 HYPRE_usr_manual/usr_manual.html: usr_manual.dvi
+	mkdir -p HYPRE_usr_manual
 	latex2html ${ONLINE_OPTS} -dir HYPRE_usr_manual usr_manual.tex 2>&1
 	@cp -f hypre_wiw.gif HYPRE_usr_manual/.
 
@@ -118,6 +119,7 @@ DEV_FILES =\
  dev_manual.tex
 
 HYPRE_dev_manual/dev_manual.html: dev_manual.dvi
+	mkdir -p HYPRE_dev_manual
 	latex2html ${ONLINE_OPTS} -dir HYPRE_dev_manual dev_manual.tex 2>&1
 	@cp -f hypre_wiw.gif HYPRE_dev_manual/.
 
@@ -136,6 +138,7 @@ dev_manual.idx: ${DEV_FILES}
 ##########
 
 HYPRE_ref_manual/index.html: vref_manual.dxx 
+	mkdir -p HYPRE_ref_manual
 	doc++ -d HYPRE_ref_manual -B hypre_wiw.html vref_manual.dxx 2>&1
 	cp -f hypre_wiw.gif HYPRE_ref_manual
 
