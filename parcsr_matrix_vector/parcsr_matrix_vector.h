@@ -231,137 +231,98 @@ hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(matrix))
 #define hypre_ParCSRMatrixGetrowactive(matrix)    ((matrix) -> getrowactive)
 
 #endif
-# define	P(s) s
-
-/* F90_HYPRE_parcsr_matrix.c */
-void hypre_F90_IFACE P((int hypre_parcsrmatrixcreate ));
-void hypre_F90_IFACE P((int hypre_parcsrmatrixdestroy ));
-void hypre_F90_IFACE P((int hypre_parcsrmatrixinitialize ));
-void hypre_F90_IFACE P((int hypre_parcsrmatrixread ));
-void hypre_F90_IFACE P((int hypre_parcsrmatrixprint ));
-void hypre_F90_IFACE P((int hypre_parcsrmatrixgetcomm ));
-void hypre_F90_IFACE P((int hypre_parcsrmatrixgetdims ));
-void hypre_F90_IFACE P((int hypre_parcsrmatrixgetlocalrange ));
-void hypre_F90_IFACE P((int hypre_parcsrmatrixgetrow ));
-void hypre_F90_IFACE P((int hypre_parcsrmatrixrestorerow ));
-void hypre_F90_IFACE P((int hypre_parcsrmatrixmatvec ));
-void hypre_F90_IFACE P((int hypre_parcsrmatrixmatvect ));
-
-/* F90_HYPRE_parcsr_vector.c */
-void hypre_F90_IFACE P((int hypre_parvectorcreate ));
-void hypre_F90_IFACE P((int hypre_parvectordestroy ));
-void hypre_F90_IFACE P((int hypre_parvectorinitialize ));
-void hypre_F90_IFACE P((int hypre_parvectorread ));
-void hypre_F90_IFACE P((int hypre_parvectorprint ));
-
-/* F90_par_vector.c */
-void hypre_F90_IFACE P((int hypre_setparvectordataowner ));
-void hypre_F90_IFACE P((int hypre_setparvectorpartitioningo ));
-void hypre_F90_IFACE P((int hypre_setparvectorconstantvalue ));
-void hypre_F90_IFACE P((int hypre_setparvectorrandomvalues ));
-void hypre_F90_IFACE P((int hypre_copyparvector ));
-void hypre_F90_IFACE P((int hypre_scaleparvector ));
-void hypre_F90_IFACE P((int hypre_paraxpy ));
-void hypre_F90_IFACE P((int hypre_parinnerprod ));
-void hypre_F90_IFACE P((int hypre_vectortoparvector ));
-void hypre_F90_IFACE P((int hypre_parvectortovectorall ));
-
-/* F90_parcsr_matrix.c */
-void hypre_F90_IFACE P((int hypre_parcsrmatrixglobalnumrows ));
-void hypre_F90_IFACE P((int hypre_parcsrmatrixrowstarts ));
 
 /* HYPRE_parcsr_matrix.c */
-int HYPRE_ParCSRMatrixCreate P((MPI_Comm comm , int global_num_rows , int global_num_cols , int *row_starts , int *col_starts , int num_cols_offd , int num_nonzeros_diag , int num_nonzeros_offd , HYPRE_ParCSRMatrix *matrix ));
-int HYPRE_ParCSRMatrixDestroy P((HYPRE_ParCSRMatrix matrix ));
-int HYPRE_ParCSRMatrixInitialize P((HYPRE_ParCSRMatrix matrix ));
-int HYPRE_ParCSRMatrixRead P((MPI_Comm comm , char *file_name , HYPRE_ParCSRMatrix *matrix ));
-int HYPRE_ParCSRMatrixPrint P((HYPRE_ParCSRMatrix matrix , char *file_name ));
-int HYPRE_ParCSRMatrixGetComm P((HYPRE_ParCSRMatrix matrix , MPI_Comm *comm ));
-int HYPRE_ParCSRMatrixGetDims P((HYPRE_ParCSRMatrix matrix , int *M , int *N ));
-int HYPRE_ParCSRMatrixGetRowPartitioning P((HYPRE_ParCSRMatrix matrix , int **row_partitioning_ptr ));
-int HYPRE_ParCSRMatrixGetColPartitioning P((HYPRE_ParCSRMatrix matrix , int **col_partitioning_ptr ));
-int HYPRE_ParCSRMatrixGetLocalRange P((HYPRE_ParCSRMatrix matrix , int *row_start , int *row_end , int *col_start , int *col_end ));
-int HYPRE_ParCSRMatrixGetRow P((HYPRE_ParCSRMatrix matrix , int row , int *size , int **col_ind , double **values ));
-int HYPRE_ParCSRMatrixRestoreRow P((HYPRE_ParCSRMatrix matrix , int row , int *size , int **col_ind , double **values ));
-int HYPRE_CSRMatrixToParCSRMatrix P((MPI_Comm comm , HYPRE_CSRMatrix A_CSR , int *row_partitioning , int *col_partitioning , HYPRE_ParCSRMatrix *matrix ));
-int HYPRE_ParCSRMatrixMatvec P((double alpha , HYPRE_ParCSRMatrix A , HYPRE_ParVector x , double beta , HYPRE_ParVector y ));
-int HYPRE_ParCSRMatrixMatvecT P((double alpha , HYPRE_ParCSRMatrix A , HYPRE_ParVector x , double beta , HYPRE_ParVector y ));
+int HYPRE_ParCSRMatrixCreate( MPI_Comm comm , int global_num_rows , int global_num_cols , int *row_starts , int *col_starts , int num_cols_offd , int num_nonzeros_diag , int num_nonzeros_offd , HYPRE_ParCSRMatrix *matrix );
+int HYPRE_ParCSRMatrixDestroy( HYPRE_ParCSRMatrix matrix );
+int HYPRE_ParCSRMatrixInitialize( HYPRE_ParCSRMatrix matrix );
+int HYPRE_ParCSRMatrixRead( MPI_Comm comm , char *file_name , HYPRE_ParCSRMatrix *matrix );
+int HYPRE_ParCSRMatrixPrint( HYPRE_ParCSRMatrix matrix , char *file_name );
+int HYPRE_ParCSRMatrixGetComm( HYPRE_ParCSRMatrix matrix , MPI_Comm *comm );
+int HYPRE_ParCSRMatrixGetDims( HYPRE_ParCSRMatrix matrix , int *M , int *N );
+int HYPRE_ParCSRMatrixGetRowPartitioning( HYPRE_ParCSRMatrix matrix , int **row_partitioning_ptr );
+int HYPRE_ParCSRMatrixGetColPartitioning( HYPRE_ParCSRMatrix matrix , int **col_partitioning_ptr );
+int HYPRE_ParCSRMatrixGetLocalRange( HYPRE_ParCSRMatrix matrix , int *row_start , int *row_end , int *col_start , int *col_end );
+int HYPRE_ParCSRMatrixGetRow( HYPRE_ParCSRMatrix matrix , int row , int *size , int **col_ind , double **values );
+int HYPRE_ParCSRMatrixRestoreRow( HYPRE_ParCSRMatrix matrix , int row , int *size , int **col_ind , double **values );
+int HYPRE_CSRMatrixToParCSRMatrix( MPI_Comm comm , HYPRE_CSRMatrix A_CSR , int *row_partitioning , int *col_partitioning , HYPRE_ParCSRMatrix *matrix );
+int HYPRE_ParCSRMatrixMatvec( double alpha , HYPRE_ParCSRMatrix A , HYPRE_ParVector x , double beta , HYPRE_ParVector y );
+int HYPRE_ParCSRMatrixMatvecT( double alpha , HYPRE_ParCSRMatrix A , HYPRE_ParVector x , double beta , HYPRE_ParVector y );
 
 /* HYPRE_parcsr_vector.c */
-int HYPRE_ParVectorCreate P((MPI_Comm comm , int global_size , int *partitioning , HYPRE_ParVector *vector ));
-int HYPRE_ParVectorDestroy P((HYPRE_ParVector vector ));
-int HYPRE_ParVectorInitialize P((HYPRE_ParVector vector ));
-int HYPRE_ParVectorRead P((MPI_Comm comm , char *file_name , HYPRE_ParVector *vector ));
-int HYPRE_ParVectorPrint P((HYPRE_ParVector vector , char *file_name ));
-int HYPRE_ParVectorSetConstantValues P((HYPRE_ParVector vector , double value ));
-int HYPRE_ParVectorSetRandomValues P((HYPRE_ParVector vector , int seed ));
-int HYPRE_ParVectorCopy P((HYPRE_ParVector x , HYPRE_ParVector y ));
-int HYPRE_ParVectorScale P((double value , HYPRE_ParVector x ));
-int HYPRE_ParVectorInnerProd P((HYPRE_ParVector x , HYPRE_ParVector y , double *prod ));
-int HYPRE_VectorToParVector P((MPI_Comm comm , HYPRE_Vector b , int *partitioning , HYPRE_ParVector *vector ));
+int HYPRE_ParVectorCreate( MPI_Comm comm , int global_size , int *partitioning , HYPRE_ParVector *vector );
+int HYPRE_ParVectorDestroy( HYPRE_ParVector vector );
+int HYPRE_ParVectorInitialize( HYPRE_ParVector vector );
+int HYPRE_ParVectorRead( MPI_Comm comm , char *file_name , HYPRE_ParVector *vector );
+int HYPRE_ParVectorPrint( HYPRE_ParVector vector , char *file_name );
+int HYPRE_ParVectorSetConstantValues( HYPRE_ParVector vector , double value );
+int HYPRE_ParVectorSetRandomValues( HYPRE_ParVector vector , int seed );
+int HYPRE_ParVectorCopy( HYPRE_ParVector x , HYPRE_ParVector y );
+int HYPRE_ParVectorScale( double value , HYPRE_ParVector x );
+int HYPRE_ParVectorInnerProd( HYPRE_ParVector x , HYPRE_ParVector y , double *prod );
+int HYPRE_VectorToParVector( MPI_Comm comm , HYPRE_Vector b , int *partitioning , HYPRE_ParVector *vector );
 
 /* communication.c */
-hypre_ParCSRCommHandle *hypre_ParCSRCommHandleCreate P((int job , hypre_ParCSRCommPkg *comm_pkg , void *send_data , void *recv_data ));
-int hypre_ParCSRCommHandleDestroy P((hypre_ParCSRCommHandle *comm_handle ));
-int hypre_MatvecCommPkgCreate P((hypre_ParCSRMatrix *A ));
-int hypre_MatvecCommPkgDestroy P((hypre_ParCSRCommPkg *comm_pkg ));
-int hypre_BuildCSRMatrixMPIDataType P((int num_nonzeros , int num_rows , double *a_data , int *a_i , int *a_j , MPI_Datatype *csr_matrix_datatype ));
-int hypre_BuildCSRJDataType P((int num_nonzeros , double *a_data , int *a_j , MPI_Datatype *csr_jdata_datatype ));
+hypre_ParCSRCommHandle *hypre_ParCSRCommHandleCreate( int job , hypre_ParCSRCommPkg *comm_pkg , void *send_data , void *recv_data );
+int hypre_ParCSRCommHandleDestroy( hypre_ParCSRCommHandle *comm_handle );
+int hypre_MatvecCommPkgCreate( hypre_ParCSRMatrix *A );
+int hypre_MatvecCommPkgDestroy( hypre_ParCSRCommPkg *comm_pkg );
+int hypre_BuildCSRMatrixMPIDataType( int num_nonzeros , int num_rows , double *a_data , int *a_i , int *a_j , MPI_Datatype *csr_matrix_datatype );
+int hypre_BuildCSRJDataType( int num_nonzeros , double *a_data , int *a_j , MPI_Datatype *csr_jdata_datatype );
 
 /* driver.c */
-int main P((int argc , char *argv []));
+int main( int argc , char *argv []);
 
 /* driver_matmul.c */
-int main P((int argc , char *argv []));
+int main( int argc , char *argv []);
 
 /* driver_matvec.c */
-int main P((int argc , char *argv []));
+int main( int argc , char *argv []);
 
 /* par_csr_matop.c */
-hypre_ParCSRMatrix *hypre_ParMatmul P((hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *B ));
-hypre_CSRMatrix *hypre_ParCSRMatrixExtractBExt P((hypre_ParCSRMatrix *B , hypre_ParCSRMatrix *A , int data ));
+hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *B );
+hypre_CSRMatrix *hypre_ParCSRMatrixExtractBExt( hypre_ParCSRMatrix *B , hypre_ParCSRMatrix *A , int data );
 
 /* par_csr_matrix.c */
-hypre_ParCSRMatrix *hypre_ParCSRMatrixCreate P((MPI_Comm comm , int global_num_rows , int global_num_cols , int *row_starts , int *col_starts , int num_cols_offd , int num_nonzeros_diag , int num_nonzeros_offd ));
-int hypre_ParCSRMatrixDestroy P((hypre_ParCSRMatrix *matrix ));
-int hypre_ParCSRMatrixInitialize P((hypre_ParCSRMatrix *matrix ));
-int hypre_ParCSRMatrixSetNumNonzeros P((hypre_ParCSRMatrix *matrix ));
-int hypre_ParCSRMatrixSetDataOwner P((hypre_ParCSRMatrix *matrix , int owns_data ));
-int hypre_ParCSRMatrixSetRowStartsOwner P((hypre_ParCSRMatrix *matrix , int owns_row_starts ));
-int hypre_ParCSRMatrixSetColStartsOwner P((hypre_ParCSRMatrix *matrix , int owns_col_starts ));
-hypre_ParCSRMatrix *hypre_ParCSRMatrixRead P((MPI_Comm comm , char *file_name ));
-int hypre_ParCSRMatrixPrint P((hypre_ParCSRMatrix *matrix , char *file_name ));
-int hypre_ParCSRMatrixGetLocalRange P((hypre_ParCSRMatrix *matrix , int *row_start , int *row_end , int *col_start , int *col_end ));
-int hypre_ParCSRMatrixGetRow P((hypre_ParCSRMatrix *mat , int row , int *size , int **col_ind , double **values ));
-int hypre_ParCSRMatrixRestoreRow P((hypre_ParCSRMatrix *matrix , int row , int *size , int **col_ind , double **values ));
-hypre_ParCSRMatrix *hypre_CSRMatrixToParCSRMatrix P((MPI_Comm comm , hypre_CSRMatrix *A , int *row_starts , int *col_starts ));
-int GenerateDiagAndOffd P((hypre_CSRMatrix *A , hypre_ParCSRMatrix *matrix , int first_col_diag , int last_col_diag ));
-hypre_CSRMatrix *hypre_MergeDiagAndOffd P((hypre_ParCSRMatrix *par_matrix ));
-hypre_CSRMatrix *hypre_ParCSRMatrixToCSRMatrixAll P((hypre_ParCSRMatrix *par_matrix ));
-int hypre_ParCSRMatrixCopy P((hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *B , int copy_data ));
+hypre_ParCSRMatrix *hypre_ParCSRMatrixCreate( MPI_Comm comm , int global_num_rows , int global_num_cols , int *row_starts , int *col_starts , int num_cols_offd , int num_nonzeros_diag , int num_nonzeros_offd );
+int hypre_ParCSRMatrixDestroy( hypre_ParCSRMatrix *matrix );
+int hypre_ParCSRMatrixInitialize( hypre_ParCSRMatrix *matrix );
+int hypre_ParCSRMatrixSetNumNonzeros( hypre_ParCSRMatrix *matrix );
+int hypre_ParCSRMatrixSetDataOwner( hypre_ParCSRMatrix *matrix , int owns_data );
+int hypre_ParCSRMatrixSetRowStartsOwner( hypre_ParCSRMatrix *matrix , int owns_row_starts );
+int hypre_ParCSRMatrixSetColStartsOwner( hypre_ParCSRMatrix *matrix , int owns_col_starts );
+hypre_ParCSRMatrix *hypre_ParCSRMatrixRead( MPI_Comm comm , char *file_name );
+int hypre_ParCSRMatrixPrint( hypre_ParCSRMatrix *matrix , char *file_name );
+int hypre_ParCSRMatrixGetLocalRange( hypre_ParCSRMatrix *matrix , int *row_start , int *row_end , int *col_start , int *col_end );
+int hypre_ParCSRMatrixGetRow( hypre_ParCSRMatrix *mat , int row , int *size , int **col_ind , double **values );
+int hypre_ParCSRMatrixRestoreRow( hypre_ParCSRMatrix *matrix , int row , int *size , int **col_ind , double **values );
+hypre_ParCSRMatrix *hypre_CSRMatrixToParCSRMatrix( MPI_Comm comm , hypre_CSRMatrix *A , int *row_starts , int *col_starts );
+int GenerateDiagAndOffd( hypre_CSRMatrix *A , hypre_ParCSRMatrix *matrix , int first_col_diag , int last_col_diag );
+hypre_CSRMatrix *hypre_MergeDiagAndOffd( hypre_ParCSRMatrix *par_matrix );
+hypre_CSRMatrix *hypre_ParCSRMatrixToCSRMatrixAll( hypre_ParCSRMatrix *par_matrix );
+int hypre_ParCSRMatrixCopy( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *B , int copy_data );
 
 /* par_csr_matvec.c */
-int hypre_ParCSRMatrixMatvec P((double alpha , hypre_ParCSRMatrix *A , hypre_ParVector *x , double beta , hypre_ParVector *y ));
-int hypre_ParCSRMatrixMatvecT P((double alpha , hypre_ParCSRMatrix *A , hypre_ParVector *x , double beta , hypre_ParVector *y ));
+int hypre_ParCSRMatrixMatvec( double alpha , hypre_ParCSRMatrix *A , hypre_ParVector *x , double beta , hypre_ParVector *y );
+int hypre_ParCSRMatrixMatvecT( double alpha , hypre_ParCSRMatrix *A , hypre_ParVector *x , double beta , hypre_ParVector *y );
 
 /* par_vector.c */
-hypre_ParVector *hypre_ParVectorCreate P((MPI_Comm comm , int global_size , int *partitioning ));
-int hypre_ParVectorDestroy P((hypre_ParVector *vector ));
-int hypre_ParVectorInitialize P((hypre_ParVector *vector ));
-int hypre_ParVectorSetDataOwner P((hypre_ParVector *vector , int owns_data ));
-int hypre_ParVectorSetPartitioningOwner P((hypre_ParVector *vector , int owns_partitioning ));
-hypre_ParVector *hypre_ParVectorRead P((MPI_Comm comm , char *file_name ));
-int hypre_ParVectorPrint P((hypre_ParVector *vector , char *file_name ));
-int hypre_ParVectorSetConstantValues P((hypre_ParVector *v , double value ));
-int hypre_ParVectorSetRandomValues P((hypre_ParVector *v , int seed ));
-int hypre_ParVectorCopy P((hypre_ParVector *x , hypre_ParVector *y ));
-int hypre_ParVectorScale P((double alpha , hypre_ParVector *y ));
-int hypre_ParVectorAxpy P((double alpha , hypre_ParVector *x , hypre_ParVector *y ));
-double hypre_ParVectorInnerProd P((hypre_ParVector *x , hypre_ParVector *y ));
-hypre_ParVector *hypre_VectorToParVector P((MPI_Comm comm , hypre_Vector *v , int *vec_starts ));
-hypre_Vector *hypre_ParVectorToVectorAll P((hypre_ParVector *par_v ));
+hypre_ParVector *hypre_ParVectorCreate( MPI_Comm comm , int global_size , int *partitioning );
+int hypre_ParVectorDestroy( hypre_ParVector *vector );
+int hypre_ParVectorInitialize( hypre_ParVector *vector );
+int hypre_ParVectorSetDataOwner( hypre_ParVector *vector , int owns_data );
+int hypre_ParVectorSetPartitioningOwner( hypre_ParVector *vector , int owns_partitioning );
+hypre_ParVector *hypre_ParVectorRead( MPI_Comm comm , char *file_name );
+int hypre_ParVectorPrint( hypre_ParVector *vector , char *file_name );
+int hypre_ParVectorSetConstantValues( hypre_ParVector *v , double value );
+int hypre_ParVectorSetRandomValues( hypre_ParVector *v , int seed );
+int hypre_ParVectorCopy( hypre_ParVector *x , hypre_ParVector *y );
+int hypre_ParVectorScale( double alpha , hypre_ParVector *y );
+int hypre_ParVectorAxpy( double alpha , hypre_ParVector *x , hypre_ParVector *y );
+double hypre_ParVectorInnerProd( hypre_ParVector *x , hypre_ParVector *y );
+hypre_ParVector *hypre_VectorToParVector( MPI_Comm comm , hypre_Vector *v , int *vec_starts );
+hypre_Vector *hypre_ParVectorToVectorAll( hypre_ParVector *par_v );
 
-#undef P
 
 #ifdef __cplusplus
 }

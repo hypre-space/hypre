@@ -45,7 +45,7 @@ cat computation.h         >> $INTERNAL_HEADER
 cat struct_matrix.h       >> $INTERNAL_HEADER	
 cat struct_vector.h       >> $INTERNAL_HEADER	
 
-../utilities/protos *.c   >> $INTERNAL_HEADER
+../utilities/protos [!F]*.c   >> $INTERNAL_HEADER
 
 #===========================================================================
 # Include guards

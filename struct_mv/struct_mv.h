@@ -1467,48 +1467,6 @@ hypre_BoxArrayBox(hypre_StructVectorDataSpace(vector), b)
 
 #endif
 
-/* F90_HYPRE_struct_grid.c */
-void hypre_F90_IFACE( int hypre_structgridcreate );
-void hypre_F90_IFACE( int hypre_structgriddestroy );
-void hypre_F90_IFACE( int hypre_structgridsetextents );
-void hypre_F90_IFACE( int hypre_structgridsetperiodic );
-void hypre_F90_IFACE( int hypre_structgridassemble );
-
-/* F90_HYPRE_struct_matrix.c */
-void hypre_F90_IFACE( int hypre_structmatrixcreate );
-void hypre_F90_IFACE( int hypre_structmatrixdestroy );
-void hypre_F90_IFACE( int hypre_structmatrixinitialize );
-void hypre_F90_IFACE( int hypre_structmatrixsetvalues );
-void hypre_F90_IFACE( int hypre_structmatrixsetboxvalues );
-void hypre_F90_IFACE( int hypre_structmatrixaddtovalues );
-void hypre_F90_IFACE( int hypre_structmatrixaddtoboxvalues );
-void hypre_F90_IFACE( int hypre_structmatrixassemble );
-void hypre_F90_IFACE( int hypre_structmatrixsetnumghost );
-void hypre_F90_IFACE( int hypre_structmatrixgetgrid );
-void hypre_F90_IFACE( int hypre_structmatrixsetsymmetric );
-
-/* F90_HYPRE_struct_stencil.c */
-void hypre_F90_IFACE( int hypre_structstencilcreate );
-void hypre_F90_IFACE( int hypre_structstencilsetelement );
-void hypre_F90_IFACE( int hypre_structstencildestroy );
-
-/* F90_HYPRE_struct_vector.c */
-void hypre_F90_IFACE( int hypre_structvectorcreate );
-void hypre_F90_IFACE( int hypre_structvectordestroy );
-void hypre_F90_IFACE( int hypre_structvectorinitialize );
-void hypre_F90_IFACE( int hypre_structvectorsetvalues );
-void hypre_F90_IFACE( int hypre_structvectorsetboxvalues );
-void hypre_F90_IFACE( int hypre_structvectoraddtovalues );
-void hypre_F90_IFACE( int hypre_structvectoraddtoboxvalues );
-void hypre_F90_IFACE( int hypre_structvectorgetvalues );
-void hypre_F90_IFACE( int hypre_structvectorgetboxvalues );
-void hypre_F90_IFACE( int hypre_structvectorassemble );
-void hypre_F90_IFACE( int hypre_structvectorsetnumghost );
-void hypre_F90_IFACE( int hypre_structvectorsetconstantva );
-void hypre_F90_IFACE( int hypre_structvectorgetmigratecom );
-void hypre_F90_IFACE( int hypre_structvectormigrate );
-void hypre_F90_IFACE( int hypre_destroycommpkg );
-
 /* HYPRE_struct_grid.c */
 int HYPRE_StructGridCreate( MPI_Comm comm , int dim , HYPRE_StructGrid *grid );
 int HYPRE_StructGridDestroy( HYPRE_StructGrid grid );

@@ -331,43 +331,6 @@ void *HYPRE_IJVectorGetLocalStorage( HYPRE_IJVector IJvector );
 int hypre_RefIJVector( HYPRE_IJVector IJvector , HYPRE_IJVector *reference );
 
 
-/* F90_HYPRE_IJMatrix.c */
-void hypre_F90_IFACE( int hypre_ijmatrixcreate );
-void hypre_F90_IFACE( int hypre_ijmatrixdestroy );
-void hypre_F90_IFACE( int hypre_ijmatrixinitialize );
-void hypre_F90_IFACE( int hypre_ijmatrixassemble );
-void hypre_F90_IFACE( int hypre_ijmatrixdistribute );
-void hypre_F90_IFACE( int hypre_ijmatrixsetlocalstoragety );
-void hypre_F90_IFACE( int hypre_ijmatrixsetlocalsize );
-void hypre_F90_IFACE( int hypre_ijmatrixsetrowsizes );
-void hypre_F90_IFACE( int hypre_ijmatrixsetdiagrowsizes );
-void hypre_F90_IFACE( int hypre_ijmatrixsetoffdiagrowsize );
-void hypre_F90_IFACE( int hypre_ijmatrixqueryinsertionsem );
-void hypre_F90_IFACE( int hypre_ijmatrixinsertblock );
-void hypre_F90_IFACE( int hypre_ijmatrixaddtoblock );
-void hypre_F90_IFACE( int hypre_ijmatrixinsertrow );
-void hypre_F90_IFACE( int hypre_ijmatrixgetlocalstorage );
-
-/* F90_HYPRE_IJVector.c */
-void hypre_F90_IFACE( int hypre_ijvectorcreate );
-void hypre_F90_IFACE( int hypre_ijvectordestroy );
-void hypre_F90_IFACE( int hypre_ijvectorsetpartitioning );
-void hypre_F90_IFACE( int hypre_ijvectorsetlocalpartition );
-void hypre_F90_IFACE( int hypre_ijvectorinitialize );
-void hypre_F90_IFACE( int hypre_ijvectordistribute );
-void hypre_F90_IFACE( int hypre_ijvectorsetlocalstoragety );
-void hypre_F90_IFACE( int hypre_ijvectorzerolocalcomps );
-void hypre_F90_IFACE( int hypre_ijvectorsetlocalcomps );
-void hypre_F90_IFACE( int hypre_ijvectorsetlocalcompsinbl );
-void hypre_F90_IFACE( int hypre_ijvectoraddtolocalcomps );
-void hypre_F90_IFACE( int hypre_ijvectoraddtolocalcompsbl );
-void hypre_F90_IFACE( int hypre_ijvectorassemble );
-void hypre_F90_IFACE( int hypre_ijvectorgetlocalcomps );
-void hypre_F90_IFACE( int hypre_ijvectorgetlocalcompsinbl );
-void hypre_F90_IFACE( int hypre_ijvectorgetlocalstoragety );
-void hypre_F90_IFACE( int hypre_ijvectorgetlocalstorage );
-
-
 #ifdef __cplusplus
 }
 #endif

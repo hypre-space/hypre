@@ -38,7 +38,7 @@ extern "C" {
 # Structures and prototypes
 #===========================================================================
 
-../utilities/protos *.c               >> $INTERNAL_HEADER
+../utilities/protos [!F]*.c               >> $INTERNAL_HEADER
 
 #===========================================================================
 # Include guards
