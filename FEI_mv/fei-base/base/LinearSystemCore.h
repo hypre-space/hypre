@@ -29,7 +29,8 @@
 
 class LinearSystemCore {
  public:
-   virtual ~LinearSystemCore();
+   LinearSystemCore(){};
+   virtual ~LinearSystemCore() {};
 
    //for cloning a LinearSystemCore instance.
    virtual LinearSystemCore* clone() = 0;
@@ -142,8 +143,12 @@ class LinearSystemCore {
 
    virtual void getSolnEntry(int eqnNumber, double& answer) = 0;
 
+   virtual void formResidual(int* eqnNumbers, double* values, int len) = 0;
+
    //function for launching the linear solver
    virtual void launchSolver(int& solveStatus, int& iterations) = 0;
+
+   virtual void writeSystem(const char* name) = 0;
 
  private:
    void LSCmessageAbort(const char* name);
