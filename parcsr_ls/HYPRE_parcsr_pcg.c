@@ -28,7 +28,8 @@ HYPRE_ParCSRPCGCreate( MPI_Comm comm, HYPRE_Solver *solver )
       chance of name conflicts. */
    hypre_PCGFunctions * pcg_functions =
       hypre_PCGFunctionsCreate(
-         hypre_CAlloc, hypre_ParKrylovFree, hypre_ParKrylovCreateVector,
+         hypre_CAlloc, hypre_ParKrylovFree, hypre_ParKrylovCommInfo,
+         hypre_ParKrylovCreateVector,
          hypre_ParKrylovDestroyVector, hypre_ParKrylovMatvecCreate,
          hypre_ParKrylovMatvec, hypre_ParKrylovMatvecDestroy,
          hypre_ParKrylovInnerProd, hypre_ParKrylovCopyVector,

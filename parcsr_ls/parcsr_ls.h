@@ -21,8 +21,7 @@ int HYPRE_EuclidCreate( MPI_Comm comm , HYPRE_Solver *solver );
 int HYPRE_EuclidDestroy( HYPRE_Solver solver );
 int HYPRE_EuclidSetup( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x );
 int HYPRE_EuclidSolve( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector bb , HYPRE_ParVector xx );
-int HYPRE_EuclidSetParams( HYPRE_Solver solver , int argc , char **argv );
-int HYPRE_EuclidSetParam( HYPRE_Solver solver , char *name, char *value );
+int HYPRE_EuclidSetParams( HYPRE_Solver solver , int argc , char *argv []);
 int HYPRE_EuclidSetParamsFromFile( HYPRE_Solver solver , char *filename );
 
 /* HYPRE_parcsr_ParaSails.c */
