@@ -283,6 +283,8 @@ clean-local:
 
 endif
 
+dist-hook:
+	touch $(distdir)/Makefile.am $(distdir)/Makefile.in
 distclean-local:
 	$(RM) -f babel_config.h
 

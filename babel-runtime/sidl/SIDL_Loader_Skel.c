@@ -2,7 +2,7 @@
  * File:          SIDL_Loader_Skel.c
  * Symbol:        SIDL.Loader-v0.8.2
  * Symbol Type:   class
- * Babel Version: 0.8.2
+ * Babel Version: 0.8.4
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Server-side glue code for SIDL.Loader
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.2
+ * babel-version = 0.8.4
  */
 
 #include "SIDL_Loader_IOR.h"

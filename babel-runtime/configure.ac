@@ -43,7 +43,7 @@ msgs="
 #
 # Basic startup stuff
 #
-AC_INIT(babel-runtime, 0.8.2, components@llnl.gov)
+AC_INIT(babel-runtime, 0.8.4, components@llnl.gov)
 AC_CONFIG_SRCDIR([sidl/SIDLArray.h])
 AC_CONFIG_AUX_DIR([config])
 AC_CANONICAL_TARGET

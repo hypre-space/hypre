@@ -775,7 +775,7 @@ namespace SIDL {
 
   // Now the template classes for built-in types.
   template<> 
-  class array< int > :
+  class array< int32_t > :
       public array_mixin< struct SIDL_int__array, int32_t, int32_t > { 
   public:
     // default constructor 
@@ -789,13 +789,13 @@ namespace SIDL {
     }
 
     // copy constructor
-    array( const array< int >& original ) { 
+    array( const array< int32_t >& original ) { 
       d_array = original.d_array;
       if ( d_array ) { addRef(); }
     }
 
     // assignment operator
-    array< int >& operator=( const array< int >& rhs ) { 
+    array< int32_t >& operator=( const array< int32_t >& rhs ) { 
       if ( d_array != rhs.d_array ) { 
 	if ( d_array ) { deleteRef(); }
 	d_array=rhs.d_array;
@@ -812,7 +812,7 @@ namespace SIDL {
     void addRef() throw ( NullIORException ) {
       if ( d_array == 0 ) { 
         throw NullIORException( ::std::string(
-          "Null IOR Pointer in 'array< int >::addRef()'"
+          "Null IOR Pointer in 'array< int32_t >::addRef()'"
         ));
       }
       SIDL_int__array_addRef( d_array );
@@ -821,7 +821,7 @@ namespace SIDL {
     void deleteRef() throw ( NullIORException ) {
       if ( d_array == 0 ) {
         throw NullIORException( ::std::string(
-          "Null IOR Pointer in 'array< int >::deleteRef()'"
+          "Null IOR Pointer in 'array< int32_t >::deleteRef()'"
         ));
       }
       SIDL_int__array_deleteRef( d_array );
@@ -829,48 +829,48 @@ namespace SIDL {
     }
        
     // static constructor: createRow
-    static array< int >
+    static array< int32_t >
     createRow(int32_t dimen, const int32_t lower[], const int32_t upper[]) {
-      array< int > retval;
+      array< int32_t > retval;
       retval._set_ior(SIDL_int__array_createRow(dimen, lower, upper) );
       return retval;
     }
     
-    static array< int >
+    static array< int32_t >
     createCol(int32_t dimen, const int32_t lower[], const int32_t upper[]) {
-      array< int > retval;
+      array< int32_t > retval;
       retval._set_ior( SIDL_int__array_createCol(dimen, lower, upper) );
       return retval;
     }
     
-    static array< int >
+    static array< int32_t >
     create1d(int32_t len) {
-      array< int > retval;
+      array< int32_t > retval;
       retval._set_ior(SIDL_int__array_create1d( len ) );
       return retval;
     }
 
-    static array< int >
+    static array< int32_t >
     create2dCol(int32_t m, int32_t n ) {
-      array< int > retval;
+      array< int32_t > retval;
       retval._set_ior( SIDL_int__array_create2dCol(m,n) );
       return retval;
     }
 
-    static array< int >
+    static array< int32_t >
     create2dRow(int32_t m, int32_t n ) {
-      array< int > retval;
+      array< int32_t > retval;
       retval._set_ior( SIDL_int__array_create2dRow(m,n) );
       return retval;
     }
 
-    array< int >
+    array< int32_t >
     slice( int32_t dimen,
            const int32_t newElem[],
            const int32_t *srcStart = 0,
            const int32_t *srcStride = 0,
            const int32_t *newStart = 0) {
-      array< int > retval;
+      array< int32_t > retval;
       retval._set_ior(  SIDL_int__array_slice( d_array, dimen, newElem,
                                            srcStart, srcStride, newStart ) );
       return retval;
@@ -890,7 +890,7 @@ namespace SIDL {
     int32_t* first() {
       return SIDL_int__array_first( _get_ior() );
     }
-    void copy( const array< int >& src ) {
+    void copy( const array< int32_t >& src ) {
       SIDL_int__array_copy( src._get_ior(), _get_ior() );
     }
 
@@ -994,7 +994,7 @@ namespace SIDL {
 
   // Now the template classes for built-in types.
   template<> 
-  class array< long > :
+  class array< int64_t > :
       public array_mixin< struct SIDL_long__array, int64_t, int64_t > { 
   public:
     // default constructor 
@@ -1008,13 +1008,13 @@ namespace SIDL {
     }
 
     // copy constructor
-    array( const array< long >& original ) { 
+    array( const array< int64_t >& original ) { 
       d_array = original.d_array;
       if ( d_array ) { addRef(); }
     }
 
     // assignment operator
-    array< long >& operator=( const array< long >& rhs ) { 
+    array< int64_t >& operator=( const array< int64_t >& rhs ) { 
       if ( d_array != rhs.d_array ) { 
 	if ( d_array ) { deleteRef(); }
 	d_array=rhs.d_array;
@@ -1031,7 +1031,7 @@ namespace SIDL {
     void addRef() throw ( NullIORException ) {
       if ( d_array == 0 ) { 
         throw NullIORException( ::std::string(
-          "Null IOR Pointer in 'array< long >::addRef()'"
+          "Null IOR Pointer in 'array< int64_t >::addRef()'"
         ));
       }
       SIDL_long__array_addRef( d_array );
@@ -1040,7 +1040,7 @@ namespace SIDL {
     void deleteRef() throw ( NullIORException ) {
       if ( d_array == 0 ) {
         throw NullIORException( ::std::string(
-          "Null IOR Pointer in 'array< long >::deleteRef()'"
+          "Null IOR Pointer in 'array< int64_t >::deleteRef()'"
         ));
       }
       SIDL_long__array_deleteRef( d_array );
@@ -1048,48 +1048,48 @@ namespace SIDL {
     }
        
     // static constructor: createRow
-    static array< long >
+    static array< int64_t >
     createRow(int32_t dimen, const int32_t lower[], const int32_t upper[]) {
-      array< long > retval;
+      array< int64_t > retval;
       retval._set_ior(SIDL_long__array_createRow(dimen, lower, upper) );
       return retval;
     }
     
-    static array< long >
+    static array< int64_t >
     createCol(int32_t dimen, const int32_t lower[], const int32_t upper[]) {
-      array< long > retval;
+      array< int64_t > retval;
       retval._set_ior( SIDL_long__array_createCol(dimen, lower, upper) );
       return retval;
     }
     
-    static array< long >
+    static array< int64_t >
     create1d(int32_t len) {
-      array< long > retval;
+      array< int64_t > retval;
       retval._set_ior(SIDL_long__array_create1d( len ) );
       return retval;
     }
 
-    static array< long >
+    static array< int64_t >
     create2dCol(int32_t m, int32_t n ) {
-      array< long > retval;
+      array< int64_t > retval;
       retval._set_ior( SIDL_long__array_create2dCol(m,n) );
       return retval;
     }
 
-    static array< long >
+    static array< int64_t >
     create2dRow(int32_t m, int32_t n ) {
-      array< long > retval;
+      array< int64_t > retval;
       retval._set_ior( SIDL_long__array_create2dRow(m,n) );
       return retval;
     }
 
-    array< long >
+    array< int64_t >
     slice( int32_t dimen,
            const int32_t newElem[],
            const int32_t *srcStart = 0,
            const int32_t *srcStride = 0,
            const int32_t *newStart = 0) {
-      array< long > retval;
+      array< int64_t > retval;
       retval._set_ior(  SIDL_long__array_slice( d_array, dimen, newElem,
                                            srcStart, srcStride, newStart ) );
       return retval;
@@ -1109,7 +1109,7 @@ namespace SIDL {
     int64_t* first() {
       return SIDL_long__array_first( _get_ior() );
     }
-    void copy( const array< long >& src ) {
+    void copy( const array< int64_t >& src ) {
       SIDL_long__array_copy( src._get_ior(), _get_ior() );
     }
 

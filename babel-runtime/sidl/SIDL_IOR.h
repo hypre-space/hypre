@@ -2,7 +2,7 @@
  * File:          SIDL_IOR.h
  * Symbol:        SIDL-v0.8.2
  * Symbol Type:   package
- * Babel Version: 0.8.2
+ * Babel Version: 0.8.4
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Intermediate Object Representation for SIDL
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.2
+ * babel-version = 0.8.4
  */
 
 #ifndef included_SIDL_IOR_h

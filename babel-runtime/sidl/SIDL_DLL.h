@@ -2,7 +2,7 @@
  * File:          SIDL_DLL.h
  * Symbol:        SIDL.DLL-v0.8.2
  * Symbol Type:   class
- * Babel Version: 0.8.2
+ * Babel Version: 0.8.4
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side glue code for SIDL.DLL
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.2
+ * babel-version = 0.8.4
  */
 
 #ifndef included_SIDL_DLL_h

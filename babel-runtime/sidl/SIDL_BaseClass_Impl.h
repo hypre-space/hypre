@@ -2,7 +2,7 @@
  * File:          SIDL_BaseClass_Impl.h
  * Symbol:        SIDL.BaseClass-v0.8.2
  * Symbol Type:   class
- * Babel Version: 0.8.2
+ * Babel Version: 0.8.4
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Server-side implementation for SIDL.BaseClass
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.8.2
+ * babel-version = 0.8.4
  */
 
 #ifndef included_SIDL_BaseClass_Impl_h

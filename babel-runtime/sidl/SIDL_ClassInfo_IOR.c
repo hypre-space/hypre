@@ -2,7 +2,7 @@
  * File:          SIDL_ClassInfo_IOR.c
  * Symbol:        SIDL.ClassInfo-v0.8.2
  * Symbol Type:   interface
- * Babel Version: 0.8.2
+ * Babel Version: 0.8.4
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Intermediate Object Representation for SIDL.ClassInfo
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.2
+ * babel-version = 0.8.4
  */
 
 #include <stdlib.h>

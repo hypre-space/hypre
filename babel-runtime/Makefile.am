@@ -167,8 +167,11 @@ clean-local-python1:
 	  fi;								\
 	fi
 	@-if test "X$(srcdir)" != "X."; then				\
-	  echo $(RM) -rf python;						\
+	  echo $(RM) -rf python;					\
 	  $(RM) -rf python;						\
+	else \
+	  echo $(RM) -rf python/build; \
+	  $(RM) -rf python/build; \
 	fi
 
 clean-local-python2:
@@ -187,8 +190,11 @@ clean-local-python2:
 	  fi;								\
 	fi
 	@-if test "X$(srcdir)" != "X."; then				\
-	  echo $(RM) -rf python;						\
+	  echo $(RM) -rf python;					\
 	  $(RM) -rf python;						\
+	else \
+	  echo $(RM) -rf python/build; \
+	  $(RM) -rf python/build; \
 	fi
 
 dist-hook-python: all-local-python

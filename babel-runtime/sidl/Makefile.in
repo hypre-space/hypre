@@ -95,6 +95,7 @@ JAVADOC = @JAVADOC@
 JAVAFLAGS = @JAVAFLAGS@
 JAVAH = @JAVAH@
 JAVAPREFIX = @JAVAPREFIX@
+JAVA_ADDCLASSPATH_FLAG = @JAVA_ADDCLASSPATH_FLAG@
 JDB = @JDB@
 JNI_INCLUDES = @JNI_INCLUDES@
 LDFLAGS = @LDFLAGS@
@@ -728,6 +729,9 @@ distdir: $(DISTFILES)
 	    || exit 1; \
 	  fi; \
 	done
+	$(MAKE) $(AM_MAKEFLAGS) \
+	  top_distdir="$(top_distdir)" distdir="$(distdir)" \
+	  dist-hook
 check-am: all-am
 check: check-am
 all-am: Makefile $(LTLIBRARIES) $(DATA) $(HEADERS) babel_config.h
@@ -851,6 +855,8 @@ $(HEADERS_INSTALL) $(HEADERS_BABEL) $(SOURCES_BABEL): babel-stamp
 @BABEL_RUNTIME_ONLY_FALSE@	$(SHELL) $(top_srcdir)/bin/remove.sh $(srcdir) $(FILES_COPY)
 @BABEL_RUNTIME_ONLY_FALSE@	test "X$(srcdir)" = "X." || rm -f babel.make
 
+dist-hook:
+	touch $(distdir)/Makefile.am $(distdir)/Makefile.in
 distclean-local:
 	$(RM) -f babel_config.h
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

@@ -25,7 +25,7 @@ dnl the compiler accepts the keyword.  Otherwise, if the compiler supports
 dnl an equivalent (like gcc's __restrict__) defines "restrict" to be that.
 dnl Otherwise, defines "restrict" to be empty.
 dnl
-dnl @version $Id$
+dnl @version (cvs ID suppressed)
 dnl @author Steven G. Johnson <stevenj@alum.mit.edu>
 
 AC_DEFUN([ACX_C_RESTRICT],
@@ -71,7 +71,7 @@ dnl The general documentation, as well as the sample configure.in, is
 dnl included in the AC_PROG_JAVA macro.
 dnl
 dnl @author Devin Weaver <ktohg@tritarget.com>
-dnl @version $Id$
+dnl @version (cvs ID suppressed)
 dnl
 AC_DEFUN([AC_JAVA_OPTIONS],[
 AC_ARG_WITH(java-prefix,
@@ -161,7 +161,7 @@ dnl
 dnl    AC_OUTPUT(Makefile)
 dnl
 dnl @author Stephane Bortzmeyer <bortzmeyer@pasteur.fr>
-dnl @version $Id$
+dnl @version (cvs ID suppressed)
 dnl
 AC_DEFUN([AC_PROG_JAVA],[
 AC_REQUIRE([AC_EXEEXT])dnl
@@ -195,7 +195,7 @@ dnl The general documentation, as well as the sample configure.in, is
 dnl included in the AC_PROG_JAVA macro.
 dnl
 dnl @author Stephane Bortzmeyer <bortzmeyer@pasteur.fr>
-dnl @version $Id$
+dnl @version (cvs ID suppressed)
 dnl
 AC_DEFUN([AC_PROG_JAVA_WORKS], [
 AC_CHECK_PROG(uudecode, uudecode$EXEEXT, yes)
@@ -304,7 +304,7 @@ dnl The general documentation, as well as the sample configure.in, is
 dnl included in the AC_PROG_JAVA macro.
 dnl
 dnl @author Stephane Bortzmeyer <bortzmeyer@pasteur.fr>
-dnl @version $Id$
+dnl @version (cvs ID suppressed)
 dnl
 AC_DEFUN([AC_CHECK_CLASS],[
 AC_REQUIRE([AC_PROG_JAVA])
@@ -416,7 +416,7 @@ dnl The general documentation, as well as the sample configure.in, is
 dnl included in the AC_PROG_JAVA macro.
 dnl
 dnl @author Stephane Bortzmeyer <bortzmeyer@pasteur.fr>
-dnl @version $Id$
+dnl @version (cvs ID suppressed)
 dnl
 AC_DEFUN([AC_CHECK_CLASSPATH],[
 if test "x$CLASSPATH" = x; then
@@ -463,7 +463,7 @@ dnl The general documentation, as well as the sample configure.in, is
 dnl included in the AC_PROG_JAVA macro.
 dnl
 dnl @author Stephane Bortzmeyer <bortzmeyer@pasteur.fr>
-dnl @version $Id$
+dnl @version (cvs ID suppressed)
 dnl
 AC_DEFUN([AC_PROG_JAVAC],[
 AC_REQUIRE([AC_EXEEXT])dnl
@@ -497,7 +497,7 @@ dnl The general documentation, as well as the sample configure.in, is
 dnl included in the AC_PROG_JAVA macro.
 dnl
 dnl @author Stephane Bortzmeyer <bortzmeyer@pasteur.fr>
-dnl @version $Id$
+dnl @version (cvs ID suppressed)
 dnl
 AC_DEFUN([AC_PROG_JAVAC_WORKS],[
 AC_CACHE_CHECK([if $JAVAC works], ac_cv_prog_javac_works, [
@@ -551,7 +551,7 @@ dnl The general documentation of those macros, as well as the sample
 dnl configure.in, is included in the AC_PROG_JAVA macro.
 dnl
 dnl @author Egon Willighagen <egonw@sci.kun.nl>
-dnl @version $Id$
+dnl @version (cvs ID suppressed)
 dnl
 AC_DEFUN([AC_PROG_JAVADOC],[
 AC_REQUIRE([AC_EXEEXT])dnl
@@ -588,7 +588,7 @@ dnl The general documentation, as well as the sample configure.in, is
 dnl included in the AC_PROG_JAVA macro.
 dnl
 dnl @author Devin Weaver <ktohg@tritarget.com>
-dnl @version $Id$
+dnl @version (cvs ID suppressed)
 dnl
 AC_DEFUN([AC_TRY_COMPILE_JAVA],[
 AC_REQUIRE([AC_PROG_JAVAC])dnl
@@ -624,7 +624,7 @@ dnl
 dnl If the compiler can prevent names clashes using namespaces, define
 dnl HAVE_NAMESPACES.
 dnl
-dnl @version $Id$
+dnl @version (cvs ID suppressed)
 dnl @author Luc Maisonobe
 dnl
 AC_DEFUN([AC_CXX_NAMESPACES],
@@ -654,7 +654,7 @@ dnl
 dnl If the compiler supports ISO C++ standard library (i.e., can include the
 dnl files iostream, map, iomanip and cmath}), define HAVE_STD.
 dnl
-dnl @version $Id$
+dnl @version (cvs ID suppressed)
 dnl @author Luc Maisonobe
 dnl
 AC_DEFUN([AC_CXX_HAVE_STD],
@@ -689,7 +689,7 @@ dnl @synopsis AC_CXX_HAVE_STL
 dnl
 dnl If the compiler supports the Standard Template Library, define HAVE_STL.
 dnl
-dnl @version $Id$
+dnl @version (cvs ID suppressed)
 dnl @author Luc Maisonobe
 dnl
 AC_DEFUN([AC_CXX_HAVE_STL],
@@ -723,7 +723,7 @@ dnl @synopsis AC_CXX_HAVE_NUMERIC_LIMITS
 dnl
 dnl If the compiler has numeric_limits<T>, define HAVE_NUMERIC_LIMITS.
 dnl
-dnl @version $Id$
+dnl @version (cvs ID suppressed)
 dnl @author Luc Maisonobe
 dnl
 AC_DEFUN([AC_CXX_HAVE_NUMERIC_LIMITS],
@@ -756,7 +756,7 @@ dnl
 dnl If the C math functions are in the cmath header file and std:: namespace,
 dnl define HAVE_MATH_FN_IN_NAMESPACE_STD.
 dnl
-dnl @version $Id$
+dnl @version (cvs ID suppressed)
 dnl @author Luc Maisonobe
 dnl
 AC_DEFUN([AC_CXX_COMPLEX_MATH_IN_NAMESPACE_STD],
@@ -791,7 +791,7 @@ dnl @synopsis AC_CXX_HAVE_COMPLEX
 dnl
 dnl If the compiler has complex<T>, define HAVE_COMPLEX.
 dnl
-dnl @version $Id$
+dnl @version (cvs ID suppressed)
 dnl @author Luc Maisonobe
 dnl
 AC_DEFUN([AC_CXX_HAVE_COMPLEX],
@@ -824,7 +824,7 @@ dnl
 dnl If the compiler has the complex math functions cos, cosh, exp, log,
 dnl pow, sin, sinh, sqrt, tan and tanh, define HAVE_COMPLEX_MATH1.
 dnl
-dnl @version $Id$
+dnl @version (cvs ID suppressed)
 dnl @author Luc Maisonobe
 dnl
 AC_DEFUN([AC_CXX_HAVE_COMPLEX_MATH1],
@@ -863,7 +863,7 @@ dnl
 dnl If the compiler has the complex math functions acos, asin,
 dnl atan, atan2 and log10, define HAVE_COMPLEX_MATH2.
 dnl
-dnl @version $Id$
+dnl @version (cvs ID suppressed)
 dnl @author Luc Maisonobe
 dnl
 AC_DEFUN([AC_CXX_HAVE_COMPLEX_MATH2],
@@ -902,7 +902,7 @@ dnl If the compiler has the double math functions acosh,
 dnl asinh, atanh, expm1, erf, erfc, isnan, j0, j1, lgamma, logb,
 dnl log1p, rint, y0 and y1, define HAVE_IEEE_MATH.
 dnl
-dnl @version $Id$
+dnl @version (cvs ID suppressed)
 dnl @author Luc Maisonobe
 dnl
 AC_DEFUN([AC_CXX_HAVE_IEEE_MATH],
@@ -1126,11 +1126,9 @@ AC_DEFUN(LLNL_CHECK_LONG_LONG,
 
 dnl *** file: config/llnl-ac-macros/llnl_prog_jar.m4
 AC_DEFUN([LLNL_CHECK_JAR],
-[dnl make sure jar accepts -u
+[dnl make sure jar works
     cp /dev/null conftest1.class && \
-    cp /dev/null conftest2.class && \
-    $1 cf conftest.jar conftest1.class >/dev/null 2>&1 && 
-    $1 uf conftest.jar conftest2.class >/dev/null 2>&1])
+    $1 cf conftest.jar conftest1.class >/dev/null 2>&1])
 
 # AC_PATH_PROG(VARIABLE, PROG-TO-CHECK-FOR, [VALUE-IF-NOT-FOUND], [PATH])
 # -----------------------------------------------------------------------
@@ -1153,7 +1151,7 @@ AC_CACHE_VAL([ac_cv_path_$1],
     break 2
   fi
 done
-rm -f conftest1.class conftest2.class conftest.jar])
+rm -f conftest1.class conftest.jar])
 dnl If no 3rd arg is given, leave the cache variable unset,
 dnl so LLNL_PROG_JAR will keep looking.
 m4_ifvaln([$3],
@@ -1165,10 +1163,7 @@ if test -n "$$1"; then
   AC_MSG_RESULT([$$1])
 else
   AC_MSG_RESULT([no])
-  AC_MSG_ERROR([Babel requires a version of jar (the Java archive tool) 
-that supports the -u option. If you have such a jar and configure did
-not find it, try setting the JAR environment variable to the absolute
-path of jar.])
+  AC_MSG_ERROR([Babel requires a working jar (the Java archive tool).])
 fi
 ])# LLNL_PROG_JAR
 
@@ -3239,34 +3234,98 @@ dnl the full path of javah.  Unlike Luc's implementation, this doesn't
 dnl update CPPFLAGS.  Instead it defines JNI_INCLUDES.
 dnl
 dnl @author Luc Maisonobe
-dnl @version $Id$
+dnl @version (cvs ID suppressed)
 dnl
 AC_DEFUN([LLNL_PROG_JAVAH],[
 AC_REQUIRE([AC_CANONICAL_HOST])dnl
 AC_REQUIRE([AC_PROG_CPP])dnl
 AC_PATH_PROG(JAVAH,javah)
 if test x"`eval 'echo $ac_cv_path_JAVAH'`" != x ; then
+  ac_cv_header_jni_h=yes
   ac_save_CPPFLAGS="$CPPFLAGS"
   if test -n "$JNI_INCLUDES"; then
     CPPFLAGS="$ac_save_CPPFLAGS $JNI_INCLUDES"
   fi 
   AC_TRY_CPP([#include <jni.h>],,[
 changequote(, )dnl
-    ac_dir=`echo $ac_cv_path_JAVAH | sed 's,\(.*\)/[^/]*/[^/]*$,\1/include,'`
+    ac_dir=`echo $ac_cv_path_JAVAH | sed 's,\(.*\)//*[^/]*//*[^/]*$,\1/include,'`
     ac_machdep=`echo $build_os | sed 's,[-0-9].*,,' | sed 's,cygwin,win32,'`
 changequote([, ])dnl
+    if test -d "$ac_dir"; then 
+	if test -d "$ac_dir/$ac_machdep"; then	
+	  :
+        else 
+	  AC_MSG_WARN([computed machine dependent dir ($ac_dir/$ac_machdep) for <jni.h> does not exist])
+        fi;
+      else 
+	AC_MSG_WARN([computed include dirs ($ac_dir) for <jni.h> do not exist])
+    fi 
     JNI_INCLUDES="$JNI_INCLUDES -I$ac_dir -I$ac_dir/$ac_machdep"
     CPPFLAGS="$ac_save_CPPFLAGS $JNI_INCLUDES"
     AC_TRY_CPP([#include <jni.h>],,[
                AC_MSG_WARN([unable to include <jni.h>])
-	       JNI_INCLUDES=])
-    ])
-    CPPFLAGS="$ac_save_CPPFLAGS"
-    AC_SUBST(JNI_INCLUDES)
+	       JNI_INCLUDES=
+	       ac_cv_header_jni_h=no])
+  ])
+  CPPFLAGS="$ac_save_CPPFLAGS"
+  AC_SUBST(JNI_INCLUDES)
 fi])
 
 
 
+
+
+
+dnl *** file: config/llnl-ac-macros/llnl_check_java_addclasspath_flag.m4
+dnl @synopsis LLNL_CHECK_JAVA_ADDCLASSPATH_FLAG
+dnl  
+dnl Defines JAVA_ADDCLASSPATH_FLAG to be either 
+dnl -addclasspath or -classpath.  Kaffe prefers former
+dnl Sun and GCJ the latter
+dnl
+dnl @author Gary Kumfert
+
+AC_DEFUN(LLNL_CHECK_JAVA_ADDCLASSPATH_FLAG, [
+  AC_REQUIRE([AC_PROG_JAVA])
+  AC_CACHE_CHECK(if $JAVA uses -addclasspath or -classpath, 
+	         llnl_cv_check_java_addclasspath, [
+    JAVA_TEST=Test.java
+    CLASS_TEST=Test.class
+    TEST=Test
+changequote(, )dnl
+cat << \EOF > $JAVA_TEST
+/* [#]line __oline__ "configure" */
+public class Test {
+public static void main (String args[]) {
+        System.exit (0);
+} }
+EOF
+changequote([, ])dnl
+    if AC_TRY_COMMAND($JAVAC $JAVACFLAGS $JAVA_TEST) && test -s $CLASS_TEST; then
+      :
+    else
+      echo "configure: failed program was:" >&AC_FD_CC
+      cat $JAVA_TEST >&AC_FD_CC
+      AC_MSG_ERROR(The Java compiler $JAVAC failed (see config.log, check the CLASSPATH?))
+    fi
+    if AC_TRY_COMMAND($JAVA $JAVAFLAGS -addclasspath . $TEST) >/dev/null 2>&1; then
+      llnl_cv_check_java_addclasspath="-addclasspath"
+      rm -fr $JAVA_TEST $CLASS_TEST
+    elif AC_TRY_COMMAND($JAVA $JAVAFLAGS -classpath . $TEST) >/dev/null 2>&1; then
+      llnl_cv_check_java_addclasspath="-classpath"
+      rm -fr $JAVA_TEST $CLASS_TEST
+    elif AC_TRY_COMMAND($JAVA $JAVAFLAGS $TEST) >/dev/null 2>&1; then
+      echo "configure: failed program was:" >&AC_FD_CC
+      cat $JAVA_TEST >&AC_FD_CC
+      AC_MSG_ERROR($JAVA $JAVAFLAGS $TEST failed with both -classpath and -addclasspath )
+    else 
+      llnl_cv_check_java_addclasspath=
+      rm -fr $JAVA_TEST $CLASS_TEST
+    fi
+  ])
+  JAVA_ADDCLASSPATH_FLAG=$llnl_cv_check_java_addclasspath
+  AC_SUBST(JAVA_ADDCLASSPATH_FLAG)
+])
 
 
 
@@ -3930,6 +3989,7 @@ AC_DEFUN([LLNL_CONFIRM_BABEL_JAVA_SUPPORT], [
   AC_CHECK_CLASSPATH
   AC_PROG_JAVAC
   AC_PROG_JAVA
+  LLNL_CHECK_JAVA_ADDCLASSPATH_FLAG
   LLNL_PROG_JAR(JAR, jar)
   
   LLNL_PROG_JDB
@@ -3939,6 +3999,7 @@ AC_DEFUN([LLNL_CONFIRM_BABEL_JAVA_SUPPORT], [
     LLNL_PROG_JAVAH
     if test "X$ac_cv_header_jni_h" = "Xno"; then
       AC_MSG_WARN([Cannot find jni.h, Java support will be disabled])
+      AC_MSG_WARN([Try setting JNI_INCLUDES and rerunning configure])
       with_java=no
       msgs="$msgs
   	  Java support disabled against request (no jni.h found!)"
