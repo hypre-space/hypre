@@ -15,6 +15,8 @@
 
 #define HYPRE_TIMING_GLOBALS
 #include "utilities.h"
+#include "timing.h"
+
 
 /*-------------------------------------------------------
  * Timing macros
