@@ -33,11 +33,7 @@ hypre_SysPFMGCreateInterpOp( hypre_SStructPMatrix *A,
    int                    nvars;
    hypre_SStructStencil **P_stencils;
 
-   int                    num_ghost[] = {1, 1, 1, 1, 1, 1};
-                        
    int                    i,s;
-
-   int                    ierr;
 
    /* set up stencil_shape */
    stencil_size = 2;
@@ -64,7 +60,7 @@ hypre_SysPFMGCreateInterpOp( hypre_SStructPMatrix *A,
    }
 
    /* create interpolation matrix */
-   ierr = hypre_SStructPMatrixCreate(hypre_SStructPMatrixComm(A), cgrid,
+   hypre_SStructPMatrixCreate(hypre_SStructPMatrixComm(A), cgrid,
                                     P_stencils, &P);
 
    hypre_TFree(stencil_shape);

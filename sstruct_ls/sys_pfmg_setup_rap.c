@@ -54,8 +54,6 @@ hypre_SysPFMGCreateRAPOp( hypre_SStructPMatrix *R,
 
    int                    P_stored_as_transpose = 0;
 
-   int                    ierr;
-
    ndim = hypre_StructStencilDim(hypre_SStructPMatrixSStencil(A, 0, 0));
    nvars = hypre_SStructPMatrixNVars(A);
 
@@ -121,7 +119,7 @@ hypre_SysPFMGCreateRAPOp( hypre_SStructPMatrix *R,
    }
 
    /* create RAP Pmatrix */
-   ierr = hypre_SStructPMatrixCreate(hypre_SStructPMatrixComm(A), 
+   hypre_SStructPMatrixCreate(hypre_SStructPMatrixComm(A), 
                                      coarse_grid, RAP_stencils, &RAP);
 
    hypre_TFree(RAP_shapes);

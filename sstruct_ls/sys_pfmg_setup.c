@@ -72,8 +72,6 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
    hypre_SStructPGrid    **grid_l;
    hypre_SStructPGrid    **P_grid_l;
                     
-   double                 *data;
-   int                     data_size = 0;
    hypre_SStructPMatrix  **A_l;
    hypre_SStructPMatrix  **P_l;
    hypre_SStructPMatrix  **RT_l;
@@ -101,9 +99,6 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
    int                   cdir;
    int                   d, l;
                        
-   int                   b_num_ghost[]  = {0, 0, 0, 0, 0, 0};
-   int                   x_num_ghost[]  = {1, 1, 1, 1, 1, 1};
-
    int                   ierr = 0;
 #if DEBUG
    char                  filename[255];
