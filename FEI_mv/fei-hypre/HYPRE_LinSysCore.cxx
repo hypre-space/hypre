@@ -113,72 +113,72 @@ extern "C" {
 
 HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) : 
                   comm_(comm),
-                  HYA_(NULL),
-                  HYA21_(NULL),
-                  HYA12_(NULL),
-                  HYinvA22_(NULL),
-                  HYb_(NULL),
-                  HYbs_(NULL),
-                  HYx_(NULL),
-                  HYr_(NULL),
-                  HYnormalA_(NULL),
-                  HYnormalB_(NULL),
-                  currA_(NULL),
-                  currB_(NULL),
-                  currX_(NULL),
-                  currR_(NULL),
-                  reducedA_(NULL),
-                  reducedB_(NULL),
-                  reducedX_(NULL),
-                  reducedR_(NULL),
-                  nStored_(0),
-                  storedIndices_(NULL),
-                  auxStoredIndices_(NULL),
-                  matrixVectorsCreated_(0),
-                  numRHSs_(1),
-                  currentRHS_(0),
-                  HYSolver_(NULL), 
-                  HYPrecon_(NULL), 
-                  HYPreconReuse_(0), 
-                  numGlobalRows_(0),
-                  localStartRow_(0),
-                  localEndRow_(-1),
-                  nConstraints_(0),
-                  constrList_(NULL),
-                  maxIterations_(1000),
-                  tolerance_(1.0e-6),
-                  normAbsRel_(0),
-                  systemAssembled_(0),
-                  HYPreconSetup_(0),
-                  slideReduction_(0),
-                  slideReductionMinNorm_(-1.0),
-                  slideReductionScaleMatrix_(0),
-                  schurReduction_(0),
-                  schurReductionCreated_(0),
-                  normalEqnFlag_(0),
-                  A21NRows_(0),
-                  A21NCols_(0),
-                  rowLengths_(NULL),
-                  colIndices_(NULL),
-                  colValues_(NULL),
-                  selectedList_(NULL),
-                  selectedListAux_(NULL),
                   HYOutputLevel_(0),
-                  lookup_(NULL),
-                  haveLookup_(0),
-                  projectionScheme_(0),
-                  projectSize_(0),
-                  projectCurrSize_(0),
-                  HYpxs_(NULL),
-                  projectionMatrix_(NULL),
+                  memOptimizerFlag_(0),
                   mapFromSolnFlag_(0),
                   mapFromSolnLeng_(0),
                   mapFromSolnLengMax_(0),
                   mapFromSolnList_(NULL),
                   mapFromSolnList2_(NULL),
-                  memOptimizerFlag_(0),
-                  matrixPartition_(0),
+                  HYA_(NULL),
+                  HYnormalA_(NULL),
+                  HYb_(NULL),
+                  HYnormalB_(NULL),
+                  HYbs_(NULL),
+                  HYx_(NULL),
+                  HYr_(NULL),
                   HYpbs_(NULL)
+                  HYpxs_(NULL),
+                  numGlobalRows_(0),
+                  localStartRow_(0),
+                  localEndRow_(-1),
+                  rowLengths_(NULL),
+                  colIndices_(NULL),
+                  colValues_(NULL),
+                  reducedA_(NULL),
+                  reducedB_(NULL),
+                  reducedX_(NULL),
+                  reducedR_(NULL),
+                  HYA21_(NULL),
+                  HYA12_(NULL),
+                  A21NRows_(0),
+                  A21NCols_(0),
+                  HYinvA22_(NULL),
+                  currA_(NULL),
+                  currB_(NULL),
+                  currX_(NULL),
+                  currR_(NULL),
+                  currentRHS_(0),
+                  numRHSs_(1),
+                  nStored_(0),
+                  storedIndices_(NULL),
+                  auxStoredIndices_(NULL),
+                  matrixVectorsCreated_(0),
+                  systemAssembled_(0),
+                  slideReduction_(0),
+                  slideReductionMinNorm_(-1.0),
+                  slideReductionScaleMatrix_(0),
+                  schurReduction_(0),
+                  schurReductionCreated_(0),
+                  projectionScheme_(0),
+                  projectSize_(0),
+                  projectCurrSize_(0),
+                  projectionMatrix_(NULL),
+                  normalEqnFlag_(0),
+                  nConstraints_(0),
+                  constrList_(NULL),
+                  selectedList_(NULL),
+                  selectedListAux_(NULL),
+                  matrixPartition_(0),
+                  HYSolver_(NULL), 
+                  maxIterations_(1000),
+                  tolerance_(1.0e-6),
+                  normAbsRel_(0),
+                  HYPrecon_(NULL), 
+                  HYPreconReuse_(0), 
+                  HYPreconSetup_(0),
+                  lookup_(NULL),
+                  haveLookup_(0),
 {
    //-------------------------------------------------------------------
    // find my processor ID 
@@ -969,7 +969,7 @@ int HYPRE_LinSysCore::setMatrixStructure(int** ptColIndices, int* ptRowLengths,
 
    int numLocalRows = localEndRow_ - localStartRow_ + 1;
    for ( i = 0; i < numLocalRows; i++ )
-      for ( int j = 0; j < ptRowLengths[i]; j++ ) ptColIndices[i][j]++;
+      for ( j = 0; j < ptRowLengths[i]; j++ ) ptColIndices[i][j]++;
 
    allocateMatrix(ptColIndices, ptRowLengths);
 
@@ -2058,10 +2058,10 @@ int HYPRE_LinSysCore::matrixLoadComplete()
 int HYPRE_LinSysCore::putNodalFieldData(int fieldID, int fieldSize,
                        int* nodeNumbers, int numNodes, const double* data)
 {
-   int    i, **nodeFieldIDs, nodeFieldID, *procNRows, nRows;
+   int    i, j, **nodeFieldIDs, nodeFieldID, *procNRows, nRows;
    int    blockID, *blockIDs, *eqnNumbers, *iTempArray;
    //int   checkFieldSize;
-   int    *aleNodeNumbers, j, index, newNumNodes;
+   int    *aleNodeNumbers, index, newNumNodes;
    double *newData;
 
    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
@@ -2085,8 +2085,8 @@ int HYPRE_LinSysCore::putNodalFieldData(int fieldID, int fieldSize,
    {
       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 4 )
       {
-         for ( int i = 0; i < numNodes; i++ )
-            for ( int j = 0; j < fieldSize; j++ )
+         for ( i = 0; i < numNodes; i++ )
+            for ( j = 0; j < fieldSize; j++ )
                printf("putNodalFieldData : %4d %2d = %e\n",i,j,
                       data[i*fieldSize+j]);
       }    
@@ -3277,6 +3277,8 @@ void HYPRE_LinSysCore::selectSolver(char* name)
            HYPRE_BoomerAMGSetCycleType(HYSolver_, 1);
            HYPRE_BoomerAMGSetMaxLevels(HYSolver_, 25);
            break;
+      default:
+           break;
    }
 
    //-------------------------------------------------------------------
@@ -3519,16 +3521,20 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
            assert( !ierr );
            break;
 
-#ifdef HAVE_ML
       case HYML :
+#ifdef HAVE_ML
            ierr = HYPRE_LSI_MLCreate( comm_, &HYPrecon_ );
-           break;
+#else
+           printf("HYPRE_LSC::selectPreconditioner - ML not supported.\n");
 #endif
-#ifdef HAVE_MLI
+           break;
       case HYMLI :
+#ifdef HAVE_MLI
            ierr = HYPRE_LSI_MLICreate( comm_, &HYPrecon_ );
-           break;
+#else
+           printf("HYPRE_LSC::selectPreconditioner - MLI not supported.\n");
 #endif
+           break;
       case HYUZAWA :
            HYPRE_LSI_UzawaCreate( comm_, &HYPrecon_ );
            break;
@@ -4507,8 +4513,8 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
       // choose AMGE (single processor) 
       //----------------------------------------------------------------
 
-#ifdef HAVE_AMGE
       case HYAMGE :
+#ifdef HAVE_AMGE
            if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
            {
               printf("***************************************************\n");
@@ -4518,8 +4524,10 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
            solveUsingAMGe(numIterations);
            if ( numIterations >= maxIterations_ ) status = 1;
            ptime  = stime;
-           break;
+#else
+           printf("AMGe not supported.\n");
 #endif
+           break;
    }
 
    //-------------------------------------------------------------------
