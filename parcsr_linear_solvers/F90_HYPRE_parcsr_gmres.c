@@ -125,29 +125,18 @@ hypre_F90_IFACE(hypre_parcsrgmressetprecond)( long int *solver,
 {
    /*------------------------------------------------------------
     * The precond_id flags mean :
-    * 2 - set up an amg preconditioner
-    * 7 - set up a pilut preconditioner
-    * 8 - set up a ds preconditioner
-    * 9 - do not set up a preconditioner
+    *  0 - no preconditioner
+    *  1 - set up a ds preconditioner
+    *  2 - set up an amg preconditioner
+    *  3 - set up a pilut preconditioner
+    *  4 - set up a parasails preconditioner
     *------------------------------------------------------------*/
 
-   if (*precond_id == 2)
+   if (*precond_id == 0)
    {
-
-   *ierr = (int) ( HYPRE_ParCSRGMRESSetPrecond( (HYPRE_Solver) *solver,
-                                                HYPRE_ParAMGSolve,
-                                                HYPRE_ParAMGSetup,
-                                                (void *)       *precond_solver ) );
+      *ierr = 0;
    }
-   else if (*precond_id == 7)
-   {
-      *ierr = (int)
-              ( HYPRE_ParCSRGMRESSetPrecond( (HYPRE_Solver) *solver,
-                                             HYPRE_ParCSRPilutSolve,
-                                             HYPRE_ParCSRPilutSetup,
-                                             (void *)       *precond_solver ) );
-   }
-   else if (*precond_id == 8)
+   if (*precond_id == 1)
    {
       *ierr = (int)
               ( HYPRE_ParCSRGMRESSetPrecond( (HYPRE_Solver) *solver,
@@ -155,9 +144,29 @@ hypre_F90_IFACE(hypre_parcsrgmressetprecond)( long int *solver,
                                              HYPRE_ParCSRDiagScaleSetup,
                                              NULL                         ) );
    }
-   else if (*precond_id == 9)
+   else if (*precond_id == 2)
    {
-      *ierr = 0;
+
+   *ierr = (int) ( HYPRE_ParCSRGMRESSetPrecond( (HYPRE_Solver) *solver,
+                                                HYPRE_ParAMGSolve,
+                                                HYPRE_ParAMGSetup,
+                                                (void *)       *precond_solver ) );
+   }
+   else if (*precond_id == 3)
+   {
+      *ierr = (int)
+              ( HYPRE_ParCSRGMRESSetPrecond( (HYPRE_Solver) *solver,
+                                             HYPRE_ParCSRPilutSolve,
+                                             HYPRE_ParCSRPilutSetup,
+                                             (void *)       *precond_solver ) );
+   }
+   else if (*precond_id == 4)
+   {
+      *ierr = (int)
+              ( HYPRE_ParCSRGMRESSetPrecond( (HYPRE_Solver) *solver,
+                                             HYPRE_ParCSRParaSailsSolve,
+                                             HYPRE_ParCSRParaSailsSetup,
+                                             (void *)       *precond_solver ) );
    }
    else
    {
