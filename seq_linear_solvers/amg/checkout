@@ -118,6 +118,4 @@ done
 #=======================================================
 
 find $AMG_SRC \( \! -name RCS \) -print | xargs chgrp amg
-find $AMG_SRC \( \! -name RCS \) -print | xargs chmod ug+rX
-find $AMG_SRC \( \! -name RCS \) -print | xargs chmod o-rwx
- 
+
