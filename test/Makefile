@@ -9,7 +9,6 @@
 
 include ../config/Makefile.config
 
-LD_LINK_FLAGS = ${LDFLAGS}
 CINCLUDES = ${INCLUDES} ${MPIINCLUDE}
 CDEFS = -DHYPRE_TIMING
 CXXDEFS = -DNOFEI -DHYPRE_TIMING -DMPICH_SKIP_MPICXX
@@ -42,7 +41,6 @@ LAPACKLIBFLAGS = ${LAPACKLIBDIRS} ${LAPACKLIBS}
 BLASLIBFLAGS = ${BLASLIBDIRS} ${BLASLIBS}
 
 LFLAGS =\
- ${LD_LINK_FLAGS}\
  -L${HYPRE_BUILD_DIR}/lib\
  -lHYPRE_sstruct_ls\
  -lHYPRE_sstruct_mv\
@@ -67,7 +65,6 @@ LFLAGS =\
 # Commpkg definitions
 ###########################################
 COMMPKG_LFLAGS =\
- ${LD_LINK_FLAGS}\
  -L${HYPRE_BUILD_DIR}/lib\
  -lHYPRE_parcsr_ls\
  -lHYPRE_parcsr_mv\
@@ -79,7 +76,6 @@ COMMPKG_LFLAGS =\
 # Struct definitions
 ###########################################
 STRUCT_LFLAGS =\
- ${LD_LINK_FLAGS}\
  -L${HYPRE_BUILD_DIR}/lib\
  -lHYPRE_struct_ls\
  -lHYPRE_struct_mv\
@@ -91,7 +87,6 @@ STRUCT_LFLAGS =\
 # Struct_es definitions
 ###########################################
 STRUCT_ES_LFLAGS =\
- ${LD_LINK_FLAGS}\
  -L${HYPRE_BUILD_DIR}/lib\
  -lHYPRE_struct_ls\
  -lHYPRE_struct_mv\
@@ -115,7 +110,6 @@ STRUCT_ES_LFLAGS =\
 # Sstruct definitions
 ###########################################
 SSTRUCT_LFLAGS =\
- ${LD_LINK_FLAGS}\
  -L${HYPRE_BUILD_DIR}/lib\
  -lHYPRE_sstruct_ls\
  -lHYPRE_sstruct_mv\
@@ -140,7 +134,6 @@ SSTRUCT_LFLAGS =\
 # Sstruct_es definitions
 ###########################################
 SSTRUCT_ES_LFLAGS =\
- ${LD_LINK_FLAGS}\
  -L${HYPRE_BUILD_DIR}/lib\
  -lHYPRE_sstruct_ls\
  -lHYPRE_sstruct_mv\
@@ -166,7 +159,6 @@ SSTRUCT_ES_LFLAGS =\
 # IJ definitions
 ###########################################
 IJ_LFLAGS =\
- ${LD_LINK_FLAGS}\
  -L${HYPRE_BUILD_DIR}/lib\
  -lHYPRE_parcsr_ls\
  -lHYPRE_DistributedMatrixPilutSolver \
@@ -187,7 +179,6 @@ IJ_LFLAGS =\
 # IJ_ES definitions
 ###########################################
 IJ_ES_LFLAGS =\
- ${LD_LINK_FLAGS}\
  -L${HYPRE_BUILD_DIR}/lib\
  -lHYPRE_parcsr_ls\
  -lHYPRE_DistributedMatrixPilutSolver \
@@ -209,7 +200,6 @@ IJ_ES_LFLAGS =\
 # IJ_MV definitions
 ###########################################
 IJ_MV_LFLAGS =\
- ${LD_LINK_FLAGS}\
  -L${HYPRE_BUILD_DIR}/lib\
  -lHYPRE_parcsr_ls\
  -lHYPRE_IJ_mv\
@@ -222,7 +212,6 @@ IJ_MV_LFLAGS =\
 # FEI definitions
 ###########################################
 FEICXX_LFLAGS =\
- ${LD_LINK_FLAGS}\
  -L${HYPRE_BUILD_DIR}/lib\
  -lHYPRE_LSI\
  -lHYPRE_superlu\
