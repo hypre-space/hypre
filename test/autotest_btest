@@ -20,7 +20,7 @@ perform_test()
 	. linear_solvers/test/autotest_benv;\
 	[ -f linear_solvers/test/env.${HYPRE_ARCH} ] && . linear_solvers/test/env.${HYPRE_ARCH};\
         . linear_solvers/test/autotest_test ${HYPRE_MACHINE_COMMANDS}\
-
+  echo "finished autotest...."
 }
 
 #==============================================================================
@@ -29,7 +29,6 @@ perform_test()
 
 OldMask=umask
 umask 007
-. ./autotest_benv
 
 #==============================================================================
 # Run test suites on remote machines
