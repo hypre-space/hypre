@@ -94,6 +94,7 @@ package Hypre {
    interface IJVectorBuilder {
       int New( in MPI_Com com, in int global_n );
       int SetPartitioning( in array<int,1> partitioning );
+      int GetPartitioning( out array<int,1> partitioning );
       int SetLocalComponents( in int num_values,
                               in array<int,1> glob_vec_indices,
  			      in array<int,1> value_indices,
@@ -151,6 +152,7 @@ package Hypre {
       int GetIntParameter( in string name );
       int SetDoubleParameter( in string name, in double value );
       int SetIntParameter( in string name, in int value );
+      int SetStringParameter( in string name, in string value );
       int New( in MPI_Com comm );
       int Setup( in LinearOperator A, in Vector b, in Vector x );
       Solver GetConstructedObject();    
@@ -161,6 +163,7 @@ package Hypre {
       int GetIntParameter( in string name );
       int SetDoubleParameter( in string name, in double value );
       int SetIntParameter( in string name, in int value );
+      int SetStringParameter( in string name, in string value );
       int New( in MPI_Com comm );
       int Setup( in LinearOperator A, in Vector b, in Vector x );
       Solver GetConstructedObject();    
@@ -323,6 +326,7 @@ package Hypre {
       static ParCSRVectorBuilder Constructor( in MPI_Com com, in int global_n );
       int New( in MPI_Com com, in int global_n );
       int SetPartitioning( in array<int,1> partitioning );
+      int GetPartitioning( out array<int,1> partitioning );
       int SetLocalComponents( in int num_values,
                               in array<int,1> glob_vec_indices,
  			      in array<int,1> value_indices,
@@ -375,6 +379,7 @@ package Hypre {
       int GetIntParameter( in string name );
       int SetDoubleParameter( in string name, in double value );
       int SetIntParameter( in string name, in int value );
+      int SetStringParameter( in string name, in string value );
       int New( in MPI_Com comm );
       int Setup( in LinearOperator A, in Vector b, in Vector x );
       static StructJacobi Constructor( in MPI_Com comm );
@@ -391,6 +396,7 @@ package Hypre {
       int GetIntParameter( in string name );
       int SetDoubleParameter( in string name, in double value );
       int SetIntParameter( in string name, in int value );
+      int SetStringParameter( in string name, in string value );
       int New( in MPI_Com comm );
       int Setup( in LinearOperator A, in Vector b, in Vector x );
       static StructSMG Constructor( in MPI_Com comm );
@@ -409,37 +415,46 @@ package Hypre {
       int GetIntParameter( in string name );
       int SetDoubleParameter( in string name, in double value );
       int SetIntParameter( in string name, in int value );
+      int SetStringParameter( in string name, in string value );
       int New( in MPI_Com comm );
       static PCG Constructor( in MPI_Com comm );
       int Setup( in LinearOperator A, in Vector b, in Vector x );
       Solver GetConstructedObject();    
 
       int SetPreconditioner( in Solver precond );
-
    };
 
-   class GMRES implements PreconditionedSolverBuilder, PreconditionedSolver { 
+   class GMRES implements PreconditionedSolver, PreconditionedSolverBuilder { 
+      int Apply( in Vector b, out Vector x );
+      LinearOperator GetSystemOperator();
+      Vector GetResidual();
+      int GetConvergenceInfo( in string name, out double value );
+
+      Solver GetPreconditioner();
+
       double GetDoubleParameter( in string name );
       int GetIntParameter( in string name );
       int SetDoubleParameter( in string name, in double value );
       int SetIntParameter( in string name, in int value );
-      int SetPreconditioner( in Solver precond );
+      int SetStringParameter( in string name, in string value );
       int New( in MPI_Com comm );
       static GMRES Constructor ( in MPI_Com comm );
       int Setup( in LinearOperator A, in Vector b, in Vector x );
       Solver GetConstructedObject();    
 
-      int Apply( in Vector b, out Vector x );
-      LinearOperator GetSystemOperator();
-      Vector GetResidual();
-      int GetConvergenceInfo( in string name, out double value );
+      int SetPreconditioner( in Solver precond );
    };
 
    class ParAMG implements SolverBuilder, Solver { 
       double GetDoubleParameter( in string name );
       int GetIntParameter( in string name );
       int SetDoubleParameter( in string name, in double value );
+      int SetDoubleArrayParameter( in string name, in array<double,1> value );
+      int SetDoubleArray2Parameter( in string name, in array<double,2> value );
       int SetIntParameter( in string name, in int value );
+      int SetIntArrayParameter( in string name, in array<int,1> value );
+      int SetIntArray2Parameter( in string name, in array<int,2> value );
+      int SetStringParameter( in string name, in string value );
       int New( in MPI_Com comm );
       static ParAMG Constructor( in MPI_Com comm );
       int Setup( in LinearOperator A, in Vector b, in Vector x );
@@ -456,6 +471,7 @@ package Hypre {
       int GetIntParameter( in string name );
       int SetDoubleParameter( in string name, in double value );
       int SetIntParameter( in string name, in int value );
+      int SetStringParameter( in string name, in string value );
       int New( in MPI_Com comm );
       static Pilut Constructor( in MPI_Com comm );
       int Setup( in LinearOperator A, in Vector b, in Vector x );
