@@ -115,7 +115,7 @@ int HYPRE_LocalAMGSolve(HYPRE_Solver solver, HYPRE_ParVector x_csr,
    LA_csr = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(localA);
    Lx_csr = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(localx);
    Lb_csr = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(localb);
-   HYPRE_ParAMGSolve( solver, LA_csr, Lb_csr, Lx_csr );
+   HYPRE_BoomerAMGSolve( solver, LA_csr, Lb_csr, Lx_csr );
 
    /* --------------------------------------------------------*/
    /* update interior nodes, leave boundary nodes unchanged   */
@@ -214,7 +214,7 @@ int HYPRE_ApplyExtension(HYPRE_Solver solver, HYPRE_ParVector x_csr,
    LA_csr = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(localA);
    Lx_csr = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(localx);
    Lb_csr = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(localb);
-   HYPRE_ParAMGSolve( solver, LA_csr, Lb_csr, Lx_csr );
+   HYPRE_BoomerAMGSolve( solver, LA_csr, Lb_csr, Lx_csr );
 
    /* --------------------------------------------------------*/
    /* update interior nodes, leave boundary nodes unchanged   */
@@ -315,7 +315,7 @@ int HYPRE_ApplyExtensionTranspose(HYPRE_Solver solver, HYPRE_ParVector x_csr,
    LA_csr  = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(localA);
    Lx_csr  = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(localx);
    Lb_csr  = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(localb);
-   HYPRE_ParAMGSolve( solver, LA_csr, Lb_csr, Lx_csr );
+   HYPRE_BoomerAMGSolve( solver, LA_csr, Lb_csr, Lx_csr );
 
    /* --------------------------------------------------------*/
    /* update boundary nodes                                   */
@@ -432,7 +432,7 @@ int HYPRE_ApplyTransform( HYPRE_Solver solver, HYPRE_ParVector x_csr,
    LA_csr = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(localA);
    Lx_csr = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(localx);
    Lb_csr = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(localb);
-   HYPRE_ParAMGSolve( solver, LA_csr, Lb_csr, Lx_csr );
+   HYPRE_BoomerAMGSolve( solver, LA_csr, Lb_csr, Lx_csr );
 
    /* --------------------------------------------------------*/
    /* update interior nodes, leave boundary nodes unchanged   */
@@ -518,7 +518,7 @@ int HYPRE_ApplyTransformTranspose(HYPRE_Solver solver, HYPRE_ParVector x_csr,
    LA_csr  = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(localA);
    Lx_csr  = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(localx);
    Lb_csr  = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(localb);
-   HYPRE_ParAMGSolve( solver, LA_csr, Lb_csr, Lx_csr );
+   HYPRE_BoomerAMGSolve( solver, LA_csr, Lb_csr, Lx_csr );
 
    /* --------------------------------------------------------*/
    /* update boundary nodes                                   */
@@ -1067,21 +1067,21 @@ int HYPRE_LSI_DDAMGSolve(HYPRE_ParCSRMatrix A_csr, HYPRE_ParVector x_csr,
    /* create an AMG context                                   */
    /* --------------------------------------------------------*/
 
-   HYPRE_ParAMGCreate(&SeqPrecon);
-   HYPRE_ParAMGSetMaxIter(SeqPrecon, 1);
-   HYPRE_ParAMGSetCycleType(SeqPrecon, 1);
-   HYPRE_ParAMGSetMaxLevels(SeqPrecon, 25);
+   HYPRE_BoomerAMGCreate(&SeqPrecon);
+   HYPRE_BoomerAMGSetMaxIter(SeqPrecon, 1);
+   HYPRE_BoomerAMGSetCycleType(SeqPrecon, 1);
+   HYPRE_BoomerAMGSetMaxLevels(SeqPrecon, 25);
    relaxType[0] = relaxType[1] = relaxType[2] = 5;
    relaxType[3] = 9;
-   HYPRE_ParAMGSetGridRelaxType(SeqPrecon, relaxType);
-   HYPRE_ParAMGSetTol(SeqPrecon, 1.0E-16);
-   HYPRE_ParAMGSetMeasureType(SeqPrecon, 0);
+   HYPRE_BoomerAMGSetGridRelaxType(SeqPrecon, relaxType);
+   HYPRE_BoomerAMGSetTol(SeqPrecon, 1.0E-16);
+   HYPRE_BoomerAMGSetMeasureType(SeqPrecon, 0);
    LA_csr  = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(localA);
    Lb_csr  = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(localb);
    Lx_csr  = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(localx);
-   /*HYPRE_ParAMGSetIOutDat(SeqPrecon, 2);*/
-   /*HYPRE_ParAMGSetDebugFlag(SeqPrecon, 1);*/
-   HYPRE_ParAMGSetup( SeqPrecon, LA_csr, Lb_csr, Lx_csr);
+   /*HYPRE_BoomerAMGSetIOutDat(SeqPrecon, 2);*/
+   /*HYPRE_BoomerAMGSetDebugFlag(SeqPrecon, 1);*/
+   HYPRE_BoomerAMGSetup( SeqPrecon, LA_csr, Lb_csr, Lx_csr);
    MPI_Barrier(MPI_COMM_WORLD);
 
    /* --------------------------------------------------------*/
@@ -1191,7 +1191,7 @@ printf("CHECK 2 = %e\n", ddata);
    HYPRE_IJMatrixDestroy(localA);
    HYPRE_IJVectorDestroy(localx);
    HYPRE_IJVectorDestroy(localb);
-   HYPRE_ParAMGDestroy(SeqPrecon);
+   HYPRE_BoomerAMGDestroy(SeqPrecon);
    HYPRE_ParCSRGMRESDestroy( PSolver );
 }
 

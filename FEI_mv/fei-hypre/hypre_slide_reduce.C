@@ -34,7 +34,7 @@
 
 extern "C" 
 {
-   int hypre_ParAMGBuildCoarseOperator(hypre_ParCSRMatrix*,
+   int hypre_BoomerAMGBuildCoarseOperator(hypre_ParCSRMatrix*,
                                        hypre_ParCSRMatrix*,
                                        hypre_ParCSRMatrix*,
                                        hypre_ParCSRMatrix**);
@@ -1003,7 +1003,7 @@ void HYPRE_LinSysCore::buildSlideReducedSystem2()
     {
        printf("%4d buildReducedSystem : Triple matrix product starts\n",mypid_);
     }
-    hypre_ParAMGBuildCoarseOperator( (hypre_ParCSRMatrix *) A21_csr,
+    hypre_BoomerAMGBuildCoarseOperator( (hypre_ParCSRMatrix *) A21_csr,
                                      (hypre_ParCSRMatrix *) invA22_csr,
                                      (hypre_ParCSRMatrix *) A21_csr,
                                      (hypre_ParCSRMatrix **) &RAP_csr);
@@ -2800,7 +2800,7 @@ void HYPRE_LinSysCore::buildSlideReducedSystem()
        printf("%4d SlideReduction : Triple matrix product starts\n",mypid_);
     }
 
-    hypre_ParAMGBuildCoarseOperator( (hypre_ParCSRMatrix *) A21_csr,
+    hypre_BoomerAMGBuildCoarseOperator( (hypre_ParCSRMatrix *) A21_csr,
                                      (hypre_ParCSRMatrix *) invA22_csr,
                                      (hypre_ParCSRMatrix *) A21_csr,
                                      (hypre_ParCSRMatrix **) &RAP_csr);

@@ -85,7 +85,7 @@ extern "C" {
 #endif
 
    int HYPRE_LSI_DDIlutSetOutputLevel(HYPRE_Solver, int);
-   int hypre_ParAMGBuildCoarseOperator(hypre_ParCSRMatrix*,
+   int hypre_BoomerAMGBuildCoarseOperator(hypre_ParCSRMatrix*,
                                        hypre_ParCSRMatrix*,
                                        hypre_ParCSRMatrix*,
                                        hypre_ParCSRMatrix**);
@@ -310,7 +310,7 @@ HYPRE_LinSysCore::~HYPRE_LinSysCore()
           HYPRE_ParCSRParaSailsDestroy( HYPrecon_ );
 
        else if ( HYPreconID_ == HYBOOMERAMG )
-          HYPRE_ParAMGDestroy( HYPrecon_ );
+          HYPRE_BoomerAMGDestroy( HYPrecon_ );
 
 #ifdef MLPACK
        else if ( HYPreconID_ == HYML )
@@ -2188,7 +2188,7 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
           HYPRE_ParCSRParaSailsDestroy( HYPrecon_ );
 
        else if ( HYPreconID_ == HYBOOMERAMG )
-          HYPRE_ParAMGDestroy( HYPrecon_ );
+          HYPRE_BoomerAMGDestroy( HYPrecon_ );
 
        else if ( HYPreconID_ == HYBOOMERAMG )
           HYPRE_LSI_DDIlutDestroy( HYPrecon_ );
@@ -2284,11 +2284,11 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
             break;
 
        case HYBOOMERAMG :
-            HYPRE_ParAMGCreate(&HYPrecon_);
-            HYPRE_ParAMGSetMaxIter(HYPrecon_, 1);
-            HYPRE_ParAMGSetCycleType(HYPrecon_, 1);
-            HYPRE_ParAMGSetMaxLevels(HYPrecon_, 25);
-            HYPRE_ParAMGSetMeasureType(HYPrecon_, 0);
+            HYPRE_BoomerAMGCreate(&HYPrecon_);
+            HYPRE_BoomerAMGSetMaxIter(HYPrecon_, 1);
+            HYPRE_BoomerAMGSetCycleType(HYPrecon_, 1);
+            HYPRE_BoomerAMGSetMaxLevels(HYPrecon_, 25);
+            HYPRE_BoomerAMGSetMeasureType(HYPrecon_, 0);
             break;
 
        case HYDDILUT :
@@ -2564,19 +2564,20 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   break;
 
              case HYBOOMERAMG :
-                  HYPRE_ParAMGSetCoarsenType(HYPrecon_, amgCoarsenType_);
-                  HYPRE_ParAMGSetStrongThreshold(HYPrecon_,amgStrongThreshold_);
+                  HYPRE_BoomerAMGSetCoarsenType(HYPrecon_, amgCoarsenType_);
+                  HYPRE_BoomerAMGSetStrongThreshold(HYPrecon_,
+                                                    amgStrongThreshold_);
                   num_sweeps = hypre_CTAlloc(int,4);
                   for ( i = 0; i < 4; i++ ) num_sweeps[i] = amgNumSweeps_[i];
 
-                  HYPRE_ParAMGSetNumGridSweeps(HYPrecon_, num_sweeps);
+                  HYPRE_BoomerAMGSetNumGridSweeps(HYPrecon_, num_sweeps);
                   relax_type = hypre_CTAlloc(int,4);
                   for ( i = 0; i < 4; i++ ) relax_type[i] = amgRelaxType_[i];
 
-                  HYPRE_ParAMGSetGridRelaxType(HYPrecon_, relax_type);
+                  HYPRE_BoomerAMGSetGridRelaxType(HYPrecon_, relax_type);
                   relax_wt = hypre_CTAlloc(double,25);
                   for ( i = 0; i < 25; i++ ) relax_wt[i] = amgRelaxWeight_[i];
-                  HYPRE_ParAMGSetRelaxWeight(HYPrecon_, relax_wt);
+                  HYPRE_BoomerAMGSetRelaxWeight(HYPrecon_, relax_wt);
                   if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
                   {
                      printf("AMG coarsen type = %d\n", amgCoarsenType_);
@@ -2587,17 +2588,17 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   }
                   if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 && mypid_ == 0)
                   {
-                     HYPRE_ParAMGSetIOutDat(HYPrecon_, 2);
+                     HYPRE_BoomerAMGSetIOutDat(HYPrecon_, 2);
                   }
                   if ( HYPreconReuse_ == 1 )
                   {
-                     HYPRE_ParCSRPCGSetPrecond(HYSolver_, HYPRE_ParAMGSolve,
+                     HYPRE_ParCSRPCGSetPrecond(HYSolver_, HYPRE_BoomerAMGSolve,
                                     HYPRE_DummyFunction, HYPrecon_);
                   }
                   else
                   {
-                     HYPRE_ParCSRPCGSetPrecond(HYSolver_, HYPRE_ParAMGSolve,
-                                    HYPRE_ParAMGSetup, HYPrecon_);
+                     HYPRE_ParCSRPCGSetPrecond(HYSolver_, HYPRE_BoomerAMGSolve,
+                                    HYPRE_BoomerAMGSetup, HYPrecon_);
                   }
                   break;
 
@@ -2765,19 +2766,20 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   break;
 
              case HYBOOMERAMG :
-                  HYPRE_ParAMGSetCoarsenType(HYPrecon_, amgCoarsenType_);
-                  HYPRE_ParAMGSetStrongThreshold(HYPrecon_,amgStrongThreshold_);
+                  HYPRE_BoomerAMGSetCoarsenType(HYPrecon_, amgCoarsenType_);
+                  HYPRE_BoomerAMGSetStrongThreshold(HYPrecon_,
+                                                    amgStrongThreshold_);
                   num_sweeps = hypre_CTAlloc(int,4);
                   for ( i = 0; i < 4; i++ ) num_sweeps[i] = amgNumSweeps_[i];
 
-                  HYPRE_ParAMGSetNumGridSweeps(HYPrecon_, num_sweeps);
+                  HYPRE_BoomerAMGSetNumGridSweeps(HYPrecon_, num_sweeps);
                   relax_type = hypre_CTAlloc(int,4);
                   for ( i = 0; i < 4; i++ ) relax_type[i] = amgRelaxType_[i];
 
-                  HYPRE_ParAMGSetGridRelaxType(HYPrecon_, relax_type);
+                  HYPRE_BoomerAMGSetGridRelaxType(HYPrecon_, relax_type);
                   relax_wt = hypre_CTAlloc(double,25);
                   for ( i = 0; i < 25; i++ ) relax_wt[i] = amgRelaxWeight_[i];
-                  HYPRE_ParAMGSetRelaxWeight(HYPrecon_, relax_wt);
+                  HYPRE_BoomerAMGSetRelaxWeight(HYPrecon_, relax_wt);
                   if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
                   {
                      printf("AMG coarsen type = %d\n", amgCoarsenType_);
@@ -2787,17 +2789,17 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                      printf("AMG relax weight = %e\n", amgRelaxWeight_[0]);
                   }
                   if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 && mypid_ == 0)
-                     HYPRE_ParAMGSetIOutDat(HYPrecon_, 2);
+                     HYPRE_BoomerAMGSetIOutDat(HYPrecon_, 2);
 
                   if ( HYPreconReuse_ == 1 )
                   {
-                     HYPRE_ParCSRGMRESSetPrecond(HYSolver_, HYPRE_ParAMGSolve,
+                     HYPRE_ParCSRGMRESSetPrecond(HYSolver_,HYPRE_BoomerAMGSolve,
                                       HYPRE_DummyFunction, HYPrecon_);
                   }
                   else
                   {
-                     HYPRE_ParCSRGMRESSetPrecond(HYSolver_, HYPRE_ParAMGSolve,
-                                      HYPRE_ParAMGSetup, HYPrecon_);
+                     HYPRE_ParCSRGMRESSetPrecond(HYSolver_, HYPRE_BoomerAMGSolve,
+                                      HYPRE_BoomerAMGSetup, HYPrecon_);
                   }
                   break;
 

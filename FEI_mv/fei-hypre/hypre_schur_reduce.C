@@ -33,7 +33,7 @@
 //---------------------------------------------------------------------------
 
 extern "C" {
-   int hypre_ParAMGBuildCoarseOperator(hypre_ParCSRMatrix*,
+   int hypre_BoomerAMGBuildCoarseOperator(hypre_ParCSRMatrix*,
                                        hypre_ParCSRMatrix*,
                                        hypre_ParCSRMatrix*,
                                        hypre_ParCSRMatrix**);
@@ -614,7 +614,7 @@ void HYPRE_LinSysCore::buildSchurReducedSystem()
     {
        printf("%4d buildSchurSystem : Triple matrix product starts\n",mypid_);
     }
-    hypre_ParAMGBuildCoarseOperator( (hypre_ParCSRMatrix *) CT_csr,
+    hypre_BoomerAMGBuildCoarseOperator( (hypre_ParCSRMatrix *) CT_csr,
                                      (hypre_ParCSRMatrix *) M_csr,
                                      (hypre_ParCSRMatrix *) CT_csr,
                                      (hypre_ParCSRMatrix **) &S_csr);
