@@ -50,9 +50,9 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    MPI_Comm              comm = (pfmg_data -> comm);
                      
    int                   relax_type = (pfmg_data -> relax_type);
-   int                   rap_type = (pfmg_data -> rap_type);
    int                   skip_relax = (pfmg_data -> skip_relax);
    double               *dxyz       = (pfmg_data -> dxyz);
+   int                   rap_type;
                      
    int                   max_iter;
    int                   max_levels;
@@ -217,6 +217,17 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    /*-----------------------------------------------------
     * Set up matrix and vector structures
     *-----------------------------------------------------*/
+
+   /*-----------------------------------------------------
+    * Modify the rap_type if red-black Gauss-Seidel is 
+    * used. Red-black gs is used only in the non-Galerkin
+    * case.
+    *-----------------------------------------------------*/
+   if (relax_type == 2 || relax_type == 3)   /* red-black gs */
+   {
+      (pfmg_data -> rap_type)= 1;
+   }
+   rap_type = (pfmg_data -> rap_type);
 
    A_l  = hypre_TAlloc(hypre_StructMatrix *, num_levels);
    P_l  = hypre_TAlloc(hypre_StructMatrix *, num_levels - 1);
