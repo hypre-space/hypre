@@ -622,7 +622,6 @@ double MLI_Method_AMGSA::genP(MLI_Matrix *mli_Amat,
                {
                   colInd[nzcnt] = P_cols[irow] + j;
                   colVal[nzcnt++] = P_vecs[j][irow];
-                  printf("p(%d,%d) = %e\n", irow+1, P_cols[irow] + j+1, P_vecs[j][irow]);
                }
             }
             rowNum = PStartRow + irow;
@@ -670,7 +669,6 @@ double MLI_Method_AMGSA::genP(MLI_Matrix *mli_Amat,
                {
                   colInd[nzcnt] = P_cols[irow] + j;
                   colVal[nzcnt++] = P_vecs[j][irow];
-                  printf("p(%d,%d) = %e\n", irow+1, P_cols[irow] + j+1, P_vecs[j][irow]);
                }
             }
             rowNum = PStartRow + irow;
