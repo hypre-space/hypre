@@ -59,24 +59,17 @@ typedef struct
 			 in diag_j , diag_data assigned to row i */  
    int     *indx_offd; /* indx_offd[i] points to first empty space of portion
 			 in offd_j , offd_data assigned to row i */  
-   int	    max_off_proc_elmts_set; /* length of off processor stash for
-					SetValues */
-   int	    current_num_elmts_set; /* current no. of elements stored in stash */
-   int	    off_proc_i_indx_set; /* pointer to first empty space in 
+   int	    max_off_proc_elmts; /* length of off processor stash set for
+					SetValues and AddTOValues */
+   int	    current_num_elmts; /* current no. of elements stored in stash */
+   int	    off_proc_i_indx; /* pointer to first empty space in 
 				set_off_proc_i_set */
-   int     *off_proc_i_set; /* length 2*num_off_procs_elmts, contains info pairs
-			(row no., no. of elmts) */
-   int     *off_proc_j_set; /* contains column indices */
-   double  *off_proc_data_set; /* contains corresponding data */
-   int	    max_off_proc_elmts_add; /* length of off processor stash for
-					SetValues */
-   int	    current_num_elmts_add; /* current no. of elements stored in stash */
-   int	    off_proc_i_indx_add; /* pointer to first empty space in 
-				off_proc_i_add */
-   int     *off_proc_i_add; /* length 2*num_off_procs_elmts, contains info pairs
-			(row no., no. of elmts) */
-   int     *off_proc_j_add; /* contains column indices */
-   double  *off_proc_data_add; /* contains corresponding data */
+   int     *off_proc_i; /* length 2*num_off_procs_elmts, contains info pairs
+			(code, no. of elmts) where code contains global
+			row no. if  SetValues, and (-global row no. -1)
+			if  AddToValues*/
+   int     *off_proc_j; /* contains column indices */
+   double  *off_proc_data; /* contains corresponding data */
 } hypre_AuxParCSRMatrix;
 
 /*--------------------------------------------------------------------------
@@ -95,18 +88,12 @@ typedef struct
 #define hypre_AuxParCSRMatrixIndxDiag(matrix)  ((matrix) -> indx_diag)
 #define hypre_AuxParCSRMatrixIndxOffd(matrix)  ((matrix) -> indx_offd)
 
-#define hypre_AuxParCSRMatrixMaxOffProcElmtsSet(matrix)  ((matrix) -> max_off_proc_elmts_set)
-#define hypre_AuxParCSRMatrixCurrentNumElmtsSet(matrix)  ((matrix) -> current_num_elmts_set)
-#define hypre_AuxParCSRMatrixOffProcIIndxSet(matrix)  ((matrix) -> off_proc_i_indx_set)
-#define hypre_AuxParCSRMatrixOffProcISet(matrix)  ((matrix) -> off_proc_i_set)
-#define hypre_AuxParCSRMatrixOffProcJSet(matrix)  ((matrix) -> off_proc_j_set)
-#define hypre_AuxParCSRMatrixOffProcDataSet(matrix)  ((matrix) -> off_proc_data_set)
-#define hypre_AuxParCSRMatrixMaxOffProcElmtsAdd(matrix)  ((matrix) -> max_off_proc_elmts_add)
-#define hypre_AuxParCSRMatrixCurrentNumElmtsAdd(matrix)  ((matrix) -> current_num_elmts_add)
-#define hypre_AuxParCSRMatrixOffProcIIndxAdd(matrix)  ((matrix) -> off_proc_i_indx_add)
-#define hypre_AuxParCSRMatrixOffProcIAdd(matrix)  ((matrix) -> off_proc_i_add)
-#define hypre_AuxParCSRMatrixOffProcJAdd(matrix)  ((matrix) -> off_proc_j_add)
-#define hypre_AuxParCSRMatrixOffProcDataAdd(matrix)  ((matrix) -> off_proc_data_add)
+#define hypre_AuxParCSRMatrixMaxOffProcElmts(matrix)  ((matrix) -> max_off_proc_elmts)
+#define hypre_AuxParCSRMatrixCurrentNumElmts(matrix)  ((matrix) -> current_num_elmts)
+#define hypre_AuxParCSRMatrixOffProcIIndx(matrix)  ((matrix) -> off_proc_i_indx)
+#define hypre_AuxParCSRMatrixOffProcI(matrix)  ((matrix) -> off_proc_i)
+#define hypre_AuxParCSRMatrixOffProcJ(matrix)  ((matrix) -> off_proc_j)
+#define hypre_AuxParCSRMatrixOffProcData(matrix)  ((matrix) -> off_proc_data)
 
 #endif
 /*BHEADER**********************************************************************
@@ -135,30 +122,21 @@ typedef struct
 
 typedef struct
 {
-   int	    max_off_proc_elmts_set; /* length of off processor stash for
-					SetValues */
-   int	    current_num_elmts_set; /* current no. of elements stored in stash */
-   int     *off_proc_i_set; /* contains column indices */
-   double  *off_proc_data_set; /* contains corresponding data */
-   int	    max_off_proc_elmts_add; /* length of off processor stash for
-					SetValues */
-   int	    current_num_elmts_add; /* current no. of elements stored in stash */
-   int     *off_proc_i_add; /* contains column indices */
-   double  *off_proc_data_add; /* contains corresponding data */
+   int	    max_off_proc_elmts; /* length of off processor stash for
+					SetValues and AddToValues*/
+   int	    current_num_elmts; /* current no. of elements stored in stash */
+   int     *off_proc_i; /* contains column indices */
+   double  *off_proc_data; /* contains corresponding data */
 } hypre_AuxParVector;
 
 /*--------------------------------------------------------------------------
  * Accessor functions for the Parallel Vector structure
  *--------------------------------------------------------------------------*/
 
-#define hypre_AuxParVectorMaxOffProcElmtsSet(matrix)  ((matrix) -> max_off_proc_elmts_set)
-#define hypre_AuxParVectorCurrentNumElmtsSet(matrix)  ((matrix) -> current_num_elmts_set)
-#define hypre_AuxParVectorOffProcISet(matrix)  ((matrix) -> off_proc_i_set)
-#define hypre_AuxParVectorOffProcDataSet(matrix)  ((matrix) -> off_proc_data_set)
-#define hypre_AuxParVectorMaxOffProcElmtsAdd(matrix)  ((matrix) -> max_off_proc_elmts_add)
-#define hypre_AuxParVectorCurrentNumElmtsAdd(matrix)  ((matrix) -> current_num_elmts_add)
-#define hypre_AuxParVectorOffProcIAdd(matrix)  ((matrix) -> off_proc_i_add)
-#define hypre_AuxParVectorOffProcDataAdd(matrix)  ((matrix) -> off_proc_data_add)
+#define hypre_AuxParVectorMaxOffProcElmts(matrix)  ((matrix) -> max_off_proc_elmts)
+#define hypre_AuxParVectorCurrentNumElmts(matrix)  ((matrix) -> current_num_elmts)
+#define hypre_AuxParVectorOffProcI(matrix)  ((matrix) -> off_proc_i)
+#define hypre_AuxParVectorOffProcData(matrix)  ((matrix) -> off_proc_data)
 
 #endif
 /*BHEADER**********************************************************************
@@ -290,15 +268,13 @@ typedef struct hypre_IJVector_struct
 int hypre_AuxParCSRMatrixCreate( hypre_AuxParCSRMatrix **aux_matrix , int local_num_rows , int local_num_cols , int *sizes );
 int hypre_AuxParCSRMatrixDestroy( hypre_AuxParCSRMatrix *matrix );
 int hypre_AuxParCSRMatrixInitialize( hypre_AuxParCSRMatrix *matrix );
-int hypre_AuxParCSRMatrixSetMaxOffPRocElmtsSet( hypre_AuxParCSRMatrix *matrix , int max_off_proc_elmts_set );
-int hypre_AuxParCSRMatrixSetMaxOffPRocElmtsAdd( hypre_AuxParCSRMatrix *matrix , int max_off_proc_elmts_add );
+int hypre_AuxParCSRMatrixSetMaxOffPRocElmts( hypre_AuxParCSRMatrix *matrix , int max_off_proc_elmts );
 
 /* aux_par_vector.c */
 int hypre_AuxParVectorCreate( hypre_AuxParVector **aux_vector );
 int hypre_AuxParVectorDestroy( hypre_AuxParVector *vector );
 int hypre_AuxParVectorInitialize( hypre_AuxParVector *vector );
-int hypre_AuxParVectorSetMaxOffPRocElmtsSet( hypre_AuxParVector *vector , int max_off_proc_elmts_set );
-int hypre_AuxParVectorSetMaxOffPRocElmtsAdd( hypre_AuxParVector *vector , int max_off_proc_elmts_add );
+int hypre_AuxParVectorSetMaxOffPRocElmts( hypre_AuxParVector *vector , int max_off_proc_elmts );
 
 
 /* IJMatrix.c */
@@ -327,7 +303,7 @@ int hypre_IJMatrixSetTotalSizeISIS( hypre_IJMatrix *matrix , int size );
 int hypre_IJMatrixCreateParCSR( hypre_IJMatrix *matrix );
 int hypre_IJMatrixSetRowSizesParCSR( hypre_IJMatrix *matrix , const int *sizes );
 int hypre_IJMatrixSetDiagOffdSizesParCSR( hypre_IJMatrix *matrix , const int *diag_sizes , const int *offdiag_sizes );
-int hypre_IJMatrixSetMaxOffProcElmtsParCSR( hypre_IJMatrix *matrix , int max_off_proc_elmts_set , int max_off_proc_elmts_add );
+int hypre_IJMatrixSetMaxOffProcElmtsParCSR( hypre_IJMatrix *matrix , int max_off_proc_elmts );
 int hypre_IJMatrixInitializeParCSR( hypre_IJMatrix *matrix );
 int hypre_IJMatrixGetRowCountsParCSR( hypre_IJMatrix *matrix , int nrows , int *rows , int *ncols );
 int hypre_IJMatrixGetValuesParCSR( hypre_IJMatrix *matrix , int nrows , int *ncols , int *rows , int *cols , double *values );
@@ -335,7 +311,7 @@ int hypre_IJMatrixSetValuesParCSR( hypre_IJMatrix *matrix , int nrows , int *nco
 int hypre_IJMatrixAddToValuesParCSR( hypre_IJMatrix *matrix , int nrows , int *ncols , const int *rows , const int *cols , const double *values );
 int hypre_IJMatrixAssembleParCSR( hypre_IJMatrix *matrix );
 int hypre_IJMatrixDestroyParCSR( hypre_IJMatrix *matrix );
-int hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix *matrix , int off_proc_i_indx , int max_off_proc_elmts , int current_num_elmts , int *off_proc_i , int *off_proc_j , double *off_proc_data , int job );
+int hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix *matrix , int off_proc_i_indx , int max_off_proc_elmts , int current_num_elmts , int *off_proc_i , int *off_proc_j , double *off_proc_data );
 int hypre_FindProc( int *list , int value , int list_length );
 
 /* IJMatrix_petsc.c */
@@ -363,14 +339,14 @@ int hypre_IJVectorZeroValues( HYPRE_IJVector vector );
 int hypre_IJVectorCreatePar( hypre_IJVector *vector , int *IJpartitioning );
 int hypre_IJVectorDestroyPar( hypre_IJVector *vector );
 int hypre_IJVectorInitializePar( hypre_IJVector *vector );
-int hypre_IJVectorSetMaxOffProcElmtsPar( hypre_IJVector *vector , int max_off_proc_elmts_set , int max_off_proc_elmts_add );
+int hypre_IJVectorSetMaxOffProcElmtsPar( hypre_IJVector *vector , int max_off_proc_elmts );
 int hypre_IJVectorDistributePar( hypre_IJVector *vector , const int *vec_starts );
 int hypre_IJVectorZeroValuesPar( hypre_IJVector *vector );
 int hypre_IJVectorSetValuesPar( hypre_IJVector *vector , int num_values , const int *indices , const double *values );
 int hypre_IJVectorAddToValuesPar( hypre_IJVector *vector , int num_values , const int *indices , const double *values );
 int hypre_IJVectorAssemblePar( hypre_IJVector *vector );
 int hypre_IJVectorGetValuesPar( hypre_IJVector *vector , int num_values , const int *indices , double *values );
-int hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector , int max_off_proc_elmts , int current_num_elmts , int *off_proc_i , double *off_proc_data , int job );
+int hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector , int max_off_proc_elmts , int current_num_elmts , int *off_proc_i , double *off_proc_data );
 
 
 /* HYPRE_IJMatrix.c */
@@ -388,7 +364,7 @@ int HYPRE_IJMatrixGetLocalRange( HYPRE_IJMatrix matrix , int *ilower , int *iupp
 int HYPRE_IJMatrixGetObject( HYPRE_IJMatrix matrix , void **object );
 int HYPRE_IJMatrixSetRowSizes( HYPRE_IJMatrix matrix , const int *sizes );
 int HYPRE_IJMatrixSetDiagOffdSizes( HYPRE_IJMatrix matrix , const int *diag_sizes , const int *offdiag_sizes );
-int HYPRE_IJMatrixSetMaxOffProcElmts( HYPRE_IJMatrix matrix , int max_off_proc_elmts_set , int max_off_proc_elmts_add );
+int HYPRE_IJMatrixSetMaxOffProcElmts( HYPRE_IJMatrix matrix , int max_off_proc_elmts );
 int HYPRE_IJMatrixRead( const char *filename , MPI_Comm comm , int type , HYPRE_IJMatrix *matrix_ptr );
 int HYPRE_IJMatrixPrint( HYPRE_IJMatrix matrix , const char *filename );
 
@@ -400,7 +376,7 @@ int HYPRE_IJVectorSetValues( HYPRE_IJVector vector , int nvalues , const int *in
 int HYPRE_IJVectorAddToValues( HYPRE_IJVector vector , int nvalues , const int *indices , const double *values );
 int HYPRE_IJVectorAssemble( HYPRE_IJVector vector );
 int HYPRE_IJVectorGetValues( HYPRE_IJVector vector , int nvalues , const int *indices , double *values );
-int HYPRE_IJVectorSetMaxOffProcElmts( HYPRE_IJVector vector , int max_off_proc_elmts_set , int max_off_proc_elmts_add );
+int HYPRE_IJVectorSetMaxOffProcElmts( HYPRE_IJVector vector , int max_off_proc_elmts );
 int HYPRE_IJVectorSetObjectType( HYPRE_IJVector vector , int type );
 int HYPRE_IJVectorGetObjectType( HYPRE_IJVector vector , int *type );
 int HYPRE_IJVectorGetLocalRange( HYPRE_IJVector vector , int *jlower , int *jupper );

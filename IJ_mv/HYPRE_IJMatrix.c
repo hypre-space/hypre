@@ -569,8 +569,7 @@ HYPRE_IJMatrixSetDiagOffdSizes( HYPRE_IJMatrix matrix,
 
 int 
 HYPRE_IJMatrixSetMaxOffProcElmts( HYPRE_IJMatrix matrix, 
-				  int max_off_proc_elmts_set,
-				  int max_off_proc_elmts_add)
+				  int max_off_proc_elmts)
 {
    hypre_IJMatrix *ijmatrix = (hypre_IJMatrix *) matrix;
 
@@ -590,7 +589,7 @@ HYPRE_IJMatrixSetMaxOffProcElmts( HYPRE_IJMatrix matrix,
 
    if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PARCSR )
       return( hypre_IJMatrixSetMaxOffProcElmtsParCSR( ijmatrix , 
-			max_off_proc_elmts_set, max_off_proc_elmts_add ) );
+			max_off_proc_elmts) );
    else
    {
       printf("Unrecognized object type -- HYPRE_IJMatrixSetMaxOffProcElmts\n");

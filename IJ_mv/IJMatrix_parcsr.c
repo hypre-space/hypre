@@ -166,8 +166,7 @@ hypre_IJMatrixSetDiagOffdSizesParCSR(hypre_IJMatrix *matrix,
 
 int
 hypre_IJMatrixSetMaxOffProcElmtsParCSR(hypre_IJMatrix *matrix,
-			      	       int max_off_proc_elmts_set, 
-			      	       int max_off_proc_elmts_add)
+			      	       int max_off_proc_elmts)
 {
    int ierr = 0;
    hypre_AuxParCSRMatrix *aux_matrix;
@@ -186,8 +185,7 @@ hypre_IJMatrixSetMaxOffProcElmtsParCSR(hypre_IJMatrix *matrix,
 				local_num_cols, NULL);
       hypre_IJMatrixTranslator(matrix) = aux_matrix;
    }
-   hypre_AuxParCSRMatrixMaxOffProcElmtsSet(aux_matrix) = max_off_proc_elmts_set;
-   hypre_AuxParCSRMatrixMaxOffProcElmtsAdd(aux_matrix) = max_off_proc_elmts_add;
+   hypre_AuxParCSRMatrixMaxOffProcElmts(aux_matrix) = max_off_proc_elmts;
    return ierr;
 }
 
@@ -815,28 +813,28 @@ hypre_IJMatrixSetValuesParCSR( hypre_IJMatrix *matrix,
          else
 	 {
    	    current_num_elmts 
-		= hypre_AuxParCSRMatrixCurrentNumElmtsSet(aux_matrix);
+		= hypre_AuxParCSRMatrixCurrentNumElmts(aux_matrix);
    	    max_off_proc_elmts
-		= hypre_AuxParCSRMatrixMaxOffProcElmtsSet(aux_matrix);
-   	    off_proc_i_indx = hypre_AuxParCSRMatrixOffProcIIndxSet(aux_matrix);
-   	    off_proc_i = hypre_AuxParCSRMatrixOffProcISet(aux_matrix);
-   	    off_proc_j = hypre_AuxParCSRMatrixOffProcJSet(aux_matrix);
-   	    off_proc_data = hypre_AuxParCSRMatrixOffProcDataSet(aux_matrix);
+		= hypre_AuxParCSRMatrixMaxOffProcElmts(aux_matrix);
+   	    off_proc_i_indx = hypre_AuxParCSRMatrixOffProcIIndx(aux_matrix);
+   	    off_proc_i = hypre_AuxParCSRMatrixOffProcI(aux_matrix);
+   	    off_proc_j = hypre_AuxParCSRMatrixOffProcJ(aux_matrix);
+   	    off_proc_data = hypre_AuxParCSRMatrixOffProcData(aux_matrix);
    	    
 	    if (!max_off_proc_elmts)
 	    {
 	       max_off_proc_elmts = hypre_max(n,1000);
-	       hypre_AuxParCSRMatrixMaxOffProcElmtsSet(aux_matrix) =
+	       hypre_AuxParCSRMatrixMaxOffProcElmts(aux_matrix) =
 	       		max_off_proc_elmts;
-   	       hypre_AuxParCSRMatrixOffProcISet(aux_matrix)
+   	       hypre_AuxParCSRMatrixOffProcI(aux_matrix)
 			= hypre_CTAlloc(int,2*max_off_proc_elmts);
-   	       hypre_AuxParCSRMatrixOffProcJSet(aux_matrix)
+   	       hypre_AuxParCSRMatrixOffProcJ(aux_matrix)
 			= hypre_CTAlloc(int,max_off_proc_elmts);
-   	       hypre_AuxParCSRMatrixOffProcDataSet(aux_matrix)
+   	       hypre_AuxParCSRMatrixOffProcData(aux_matrix)
 			= hypre_CTAlloc(double,max_off_proc_elmts);
-   	       off_proc_i = hypre_AuxParCSRMatrixOffProcISet(aux_matrix);
-   	       off_proc_j = hypre_AuxParCSRMatrixOffProcJSet(aux_matrix);
-   	       off_proc_data = hypre_AuxParCSRMatrixOffProcDataSet(aux_matrix);
+   	       off_proc_i = hypre_AuxParCSRMatrixOffProcI(aux_matrix);
+   	       off_proc_j = hypre_AuxParCSRMatrixOffProcJ(aux_matrix);
+   	       off_proc_data = hypre_AuxParCSRMatrixOffProcData(aux_matrix);
 	    }
             else if (current_num_elmts + n > max_off_proc_elmts)
             {
@@ -845,11 +843,11 @@ hypre_IJMatrixSetValuesParCSR( hypre_IJMatrix *matrix,
                off_proc_j = hypre_TReAlloc(off_proc_j,int,max_off_proc_elmts);
                off_proc_data = hypre_TReAlloc(off_proc_data,double,
 				max_off_proc_elmts);
-	       hypre_AuxParCSRMatrixMaxOffProcElmtsSet(aux_matrix)
+	       hypre_AuxParCSRMatrixMaxOffProcElmts(aux_matrix)
    	    		= max_off_proc_elmts;
-	       hypre_AuxParCSRMatrixOffProcISet(aux_matrix) = off_proc_i;
-	       hypre_AuxParCSRMatrixOffProcJSet(aux_matrix) = off_proc_j;
-	       hypre_AuxParCSRMatrixOffProcDataSet(aux_matrix) = off_proc_data;
+	       hypre_AuxParCSRMatrixOffProcI(aux_matrix) = off_proc_i;
+	       hypre_AuxParCSRMatrixOffProcJ(aux_matrix) = off_proc_j;
+	       hypre_AuxParCSRMatrixOffProcData(aux_matrix) = off_proc_data;
 	    }
             off_proc_i[off_proc_i_indx++] = row; 
             off_proc_i[off_proc_i_indx++] = n; 
@@ -858,8 +856,8 @@ hypre_IJMatrixSetValuesParCSR( hypre_IJMatrix *matrix,
 	       off_proc_j[current_num_elmts] = cols[indx];
 	       off_proc_data[current_num_elmts++] = values[indx++];
 	    }
-	    hypre_AuxParCSRMatrixOffProcIIndxSet(aux_matrix) = off_proc_i_indx; 
-	    hypre_AuxParCSRMatrixCurrentNumElmtsSet(aux_matrix)
+	    hypre_AuxParCSRMatrixOffProcIIndx(aux_matrix) = off_proc_i_indx; 
+	    hypre_AuxParCSRMatrixCurrentNumElmts(aux_matrix)
    	    	= current_num_elmts; 
 	 }
       }
@@ -1217,28 +1215,28 @@ hypre_IJMatrixAddToValuesParCSR( hypre_IJMatrix *matrix,
          else
          {
    	    current_num_elmts 
-		= hypre_AuxParCSRMatrixCurrentNumElmtsAdd(aux_matrix);
+		= hypre_AuxParCSRMatrixCurrentNumElmts(aux_matrix);
    	    max_off_proc_elmts
-		= hypre_AuxParCSRMatrixMaxOffProcElmtsAdd(aux_matrix);
-   	    off_proc_i_indx = hypre_AuxParCSRMatrixOffProcIIndxAdd(aux_matrix);
-   	    off_proc_i = hypre_AuxParCSRMatrixOffProcIAdd(aux_matrix);
-   	    off_proc_j = hypre_AuxParCSRMatrixOffProcJAdd(aux_matrix);
-   	    off_proc_data = hypre_AuxParCSRMatrixOffProcDataAdd(aux_matrix);
+		= hypre_AuxParCSRMatrixMaxOffProcElmts(aux_matrix);
+   	    off_proc_i_indx = hypre_AuxParCSRMatrixOffProcIIndx(aux_matrix);
+   	    off_proc_i = hypre_AuxParCSRMatrixOffProcI(aux_matrix);
+   	    off_proc_j = hypre_AuxParCSRMatrixOffProcJ(aux_matrix);
+   	    off_proc_data = hypre_AuxParCSRMatrixOffProcData(aux_matrix);
    	    
 	    if (!max_off_proc_elmts)
 	    {
 	       max_off_proc_elmts = hypre_max(n,1000);
-	       hypre_AuxParCSRMatrixMaxOffProcElmtsAdd(aux_matrix) =
+	       hypre_AuxParCSRMatrixMaxOffProcElmts(aux_matrix) =
 	       		max_off_proc_elmts;
-   	       hypre_AuxParCSRMatrixOffProcIAdd(aux_matrix)
+   	       hypre_AuxParCSRMatrixOffProcI(aux_matrix)
 			= hypre_CTAlloc(int,2*max_off_proc_elmts);
-   	       hypre_AuxParCSRMatrixOffProcJAdd(aux_matrix)
+   	       hypre_AuxParCSRMatrixOffProcJ(aux_matrix)
 			= hypre_CTAlloc(int,max_off_proc_elmts);
-   	       hypre_AuxParCSRMatrixOffProcDataAdd(aux_matrix)
+   	       hypre_AuxParCSRMatrixOffProcData(aux_matrix)
 			= hypre_CTAlloc(double,max_off_proc_elmts);
-   	       off_proc_i = hypre_AuxParCSRMatrixOffProcIAdd(aux_matrix);
-   	       off_proc_j = hypre_AuxParCSRMatrixOffProcJAdd(aux_matrix);
-   	       off_proc_data = hypre_AuxParCSRMatrixOffProcDataAdd(aux_matrix);
+   	       off_proc_i = hypre_AuxParCSRMatrixOffProcI(aux_matrix);
+   	       off_proc_j = hypre_AuxParCSRMatrixOffProcJ(aux_matrix);
+   	       off_proc_data = hypre_AuxParCSRMatrixOffProcData(aux_matrix);
 	    }
             else if (current_num_elmts + n > max_off_proc_elmts)
             {
@@ -1247,21 +1245,21 @@ hypre_IJMatrixAddToValuesParCSR( hypre_IJMatrix *matrix,
                off_proc_j = hypre_TReAlloc(off_proc_j,int,max_off_proc_elmts);
                off_proc_data = hypre_TReAlloc(off_proc_data,double,
 				max_off_proc_elmts);
-	       hypre_AuxParCSRMatrixMaxOffProcElmtsAdd(aux_matrix)
+	       hypre_AuxParCSRMatrixMaxOffProcElmts(aux_matrix)
    	    		= max_off_proc_elmts;
-	       hypre_AuxParCSRMatrixOffProcIAdd(aux_matrix) = off_proc_i;
-	       hypre_AuxParCSRMatrixOffProcJAdd(aux_matrix) = off_proc_j;
-	       hypre_AuxParCSRMatrixOffProcDataAdd(aux_matrix) = off_proc_data;
+	       hypre_AuxParCSRMatrixOffProcI(aux_matrix) = off_proc_i;
+	       hypre_AuxParCSRMatrixOffProcJ(aux_matrix) = off_proc_j;
+	       hypre_AuxParCSRMatrixOffProcData(aux_matrix) = off_proc_data;
 	    }
-            off_proc_i[off_proc_i_indx++] = row; 
+            off_proc_i[off_proc_i_indx++] = -row-1; 
             off_proc_i[off_proc_i_indx++] = n; 
 	    for (i=0; i < n; i++)
 	    {
 	       off_proc_j[current_num_elmts] = cols[indx];
 	       off_proc_data[current_num_elmts++] = values[indx++];
 	    }
-	    hypre_AuxParCSRMatrixOffProcIIndxAdd(aux_matrix) = off_proc_i_indx; 
-	    hypre_AuxParCSRMatrixCurrentNumElmtsAdd(aux_matrix)
+	    hypre_AuxParCSRMatrixOffProcIIndx(aux_matrix) = off_proc_i_indx; 
+	    hypre_AuxParCSRMatrixCurrentNumElmts(aux_matrix)
    	    	= current_num_elmts; 
          }
       }
@@ -1318,33 +1316,18 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
    double *off_proc_data;
    int offd_proc_elmts;
 
-   off_proc_i_indx = hypre_AuxParCSRMatrixOffProcIIndxSet(aux_matrix);
+   off_proc_i_indx = hypre_AuxParCSRMatrixOffProcIIndx(aux_matrix);
    MPI_Allreduce(&off_proc_i_indx,&offd_proc_elmts,1,MPI_INT, MPI_SUM,comm);
    if (offd_proc_elmts)
    {
-       max_off_proc_elmts=hypre_AuxParCSRMatrixMaxOffProcElmtsSet(aux_matrix);
-       current_num_elmts=hypre_AuxParCSRMatrixCurrentNumElmtsSet(aux_matrix);
-       off_proc_i=hypre_AuxParCSRMatrixOffProcISet(aux_matrix);
-       off_proc_j=hypre_AuxParCSRMatrixOffProcJSet(aux_matrix);
-       off_proc_data=hypre_AuxParCSRMatrixOffProcDataSet(aux_matrix);
+       max_off_proc_elmts=hypre_AuxParCSRMatrixMaxOffProcElmts(aux_matrix);
+       current_num_elmts=hypre_AuxParCSRMatrixCurrentNumElmts(aux_matrix);
+       off_proc_i=hypre_AuxParCSRMatrixOffProcI(aux_matrix);
+       off_proc_j=hypre_AuxParCSRMatrixOffProcJ(aux_matrix);
+       off_proc_data=hypre_AuxParCSRMatrixOffProcData(aux_matrix);
        hypre_IJMatrixAssembleOffProcValsParCSR(matrix,off_proc_i_indx,
 		max_off_proc_elmts, current_num_elmts, off_proc_i,
-		off_proc_j, off_proc_data, 0);
-   }
-
-   off_proc_i_indx = hypre_AuxParCSRMatrixOffProcIIndxAdd(aux_matrix);
-   MPI_Allreduce(&off_proc_i_indx,&offd_proc_elmts,1,MPI_INT,
-		MPI_SUM,comm);
-   if (offd_proc_elmts)
-   {
-       max_off_proc_elmts=hypre_AuxParCSRMatrixMaxOffProcElmtsAdd(aux_matrix);
-       current_num_elmts=hypre_AuxParCSRMatrixCurrentNumElmtsAdd(aux_matrix);
-       off_proc_i=hypre_AuxParCSRMatrixOffProcIAdd(aux_matrix);
-       off_proc_j=hypre_AuxParCSRMatrixOffProcJAdd(aux_matrix);
-       off_proc_data=hypre_AuxParCSRMatrixOffProcDataAdd(aux_matrix);
-       hypre_IJMatrixAssembleOffProcValsParCSR(matrix,off_proc_i_indx,
-		max_off_proc_elmts, current_num_elmts, off_proc_i,
-		off_proc_j, off_proc_data, 1);
+		off_proc_j, off_proc_data);
    }
 
    if (hypre_IJMatrixAssembleFlag(matrix) == 0)
@@ -1533,8 +1516,7 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix *matrix,
    					 int current_num_elmts,
    					 int *off_proc_i,
    					 int *off_proc_j,
-   					 double *off_proc_data,
-   					 int job)
+   					 double *off_proc_data)
 {
    int ierr = 0;
    MPI_Comm comm = hypre_IJMatrixComm(matrix);
@@ -1576,7 +1558,8 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix *matrix,
    j=0;
    for (i=0; i < off_proc_i_indx; i++)
    {
-      row = off_proc_i[i++]; 
+      row = off_proc_i[i++];
+      if (row < 0) row = -row-1; 
       n = off_proc_i[i];
       proc_id = hypre_FindProc(partitioning,row,num_procs);
       proc_id_mem[j++] = proc_id; 
@@ -1769,37 +1752,30 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix *matrix,
    hypre_TFree(recv_vec_starts);
    hypre_TFree(dbl_recv_vec_starts);
 
-   if (job == 0)
+   j = 0;
+   j2 = 0;
+   for (i=0; i < num_recvs; i++)
    {
-      j = 0;
-      j2 = 0;
-      for (i=0; i < num_recvs; i++)
+      for (ii=0; ii < recv_chunks[i]; ii++)
       {
-         for (ii=0; ii < recv_chunks[i]; ii++)
-         {
- 	    hypre_IJMatrixSetValuesParCSR(matrix,1,&recv_i[j+1],&recv_i[j],
+         row = recv_i[j];
+	 if (row < 0) 
+	 {
+	    row = -row-1;
+ 	    hypre_IJMatrixAddToValuesParCSR(matrix,1,&recv_i[j+1],&row,
 		&recv_i[j+2],&recv_data[j2]);
 	    j2 += recv_i[j+1]; 
 	    j += recv_i[j+1]+2; 
-         }
-      }
-   }
-   else
-   {
-      j = 0;
-      j2 = 0;
-      for (i=0; i < num_recvs; i++)
-      {
-         for (ii=0; ii < recv_chunks[i]; ii++)
-         {
- 	    hypre_IJMatrixAddToValuesParCSR(matrix,1,&recv_i[j+1],&recv_i[j],
+	 }
+	 else
+	 {
+ 	    hypre_IJMatrixSetValuesParCSR(matrix,1,&recv_i[j+1],&row,
 		&recv_i[j+2],&recv_data[j2]);
 	    j2 += recv_i[j+1]; 
 	    j += recv_i[j+1]+2; 
-         }
+	 }
       }
    }
-
    hypre_TFree(recv_chunks);
    hypre_TFree(recv_i);
    hypre_TFree(recv_data);
@@ -1811,7 +1787,6 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix *matrix,
 int hypre_FindProc(int *list, int value, int list_length)
 {
    int low, high, m;
-   int not_found = 1;
 
    low = 0;
    high = list_length;

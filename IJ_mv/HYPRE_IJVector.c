@@ -336,8 +336,7 @@ HYPRE_IJVectorGetValues( HYPRE_IJVector  vector,
 
 int 
 HYPRE_IJVectorSetMaxOffProcElmts( HYPRE_IJVector vector, 
-				  int max_off_proc_elmts_set,
-				  int max_off_proc_elmts_add)
+				  int max_off_proc_elmts)
 {
    hypre_IJVector *vec = (hypre_IJVector *) vector;
 
@@ -350,15 +349,15 @@ HYPRE_IJVectorSetMaxOffProcElmts( HYPRE_IJVector vector,
    /* if ( hypre_IJVectorObjectType(vec) == HYPRE_PETSC )
 
       return( hypre_IJVectorSetMaxOffProcElmtsPETSc(vec, 
-		max_off_proc_elmts_set, max_off_proc_elmts_add);
+		max_off_proc_elmts));
 
    else if ( hypre_IJVectorObjectType(vec) == HYPRE_ISIS )
       return( hypre_IJVectorSetMaxOffProcElmtsISIS(vec, 
-		max_off_proc_elmts_set, max_off_proc_elmts_add);
+		max_off_proc_elmts));
 
    else */ if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
       return( hypre_IJVectorSetMaxOffProcElmtsPar(vec, 
-		max_off_proc_elmts_set, max_off_proc_elmts_add));
+		max_off_proc_elmts));
 
    else
    {

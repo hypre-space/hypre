@@ -24,29 +24,20 @@
 
 typedef struct
 {
-   int	    max_off_proc_elmts_set; /* length of off processor stash for
-					SetValues */
-   int	    current_num_elmts_set; /* current no. of elements stored in stash */
-   int     *off_proc_i_set; /* contains column indices */
-   double  *off_proc_data_set; /* contains corresponding data */
-   int	    max_off_proc_elmts_add; /* length of off processor stash for
-					SetValues */
-   int	    current_num_elmts_add; /* current no. of elements stored in stash */
-   int     *off_proc_i_add; /* contains column indices */
-   double  *off_proc_data_add; /* contains corresponding data */
+   int	    max_off_proc_elmts; /* length of off processor stash for
+					SetValues and AddToValues*/
+   int	    current_num_elmts; /* current no. of elements stored in stash */
+   int     *off_proc_i; /* contains column indices */
+   double  *off_proc_data; /* contains corresponding data */
 } hypre_AuxParVector;
 
 /*--------------------------------------------------------------------------
  * Accessor functions for the Parallel Vector structure
  *--------------------------------------------------------------------------*/
 
-#define hypre_AuxParVectorMaxOffProcElmtsSet(matrix)  ((matrix) -> max_off_proc_elmts_set)
-#define hypre_AuxParVectorCurrentNumElmtsSet(matrix)  ((matrix) -> current_num_elmts_set)
-#define hypre_AuxParVectorOffProcISet(matrix)  ((matrix) -> off_proc_i_set)
-#define hypre_AuxParVectorOffProcDataSet(matrix)  ((matrix) -> off_proc_data_set)
-#define hypre_AuxParVectorMaxOffProcElmtsAdd(matrix)  ((matrix) -> max_off_proc_elmts_add)
-#define hypre_AuxParVectorCurrentNumElmtsAdd(matrix)  ((matrix) -> current_num_elmts_add)
-#define hypre_AuxParVectorOffProcIAdd(matrix)  ((matrix) -> off_proc_i_add)
-#define hypre_AuxParVectorOffProcDataAdd(matrix)  ((matrix) -> off_proc_data_add)
+#define hypre_AuxParVectorMaxOffProcElmts(matrix)  ((matrix) -> max_off_proc_elmts)
+#define hypre_AuxParVectorCurrentNumElmts(matrix)  ((matrix) -> current_num_elmts)
+#define hypre_AuxParVectorOffProcI(matrix)  ((matrix) -> off_proc_i)
+#define hypre_AuxParVectorOffProcData(matrix)  ((matrix) -> off_proc_data)
 
 #endif
