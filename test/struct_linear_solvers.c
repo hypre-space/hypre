@@ -242,9 +242,21 @@ main( int   argc,
     * Set up dxyz for PFMG solver
     *-----------------------------------------------------------*/
 
-   dxyz[0] = sqrt(1.0 / cx);
-   dxyz[1] = sqrt(1.0 / cy);
-   dxyz[2] = sqrt(1.0 / cz);
+   dxyz[0] = 1.0e+123;
+   dxyz[1] = 1.0e+123;
+   dxyz[2] = 1.0e+123;
+   if (cx > 0)
+   {
+      dxyz[0] = sqrt(1.0 / cx);
+   }
+   if (cy > 0)
+   {
+      dxyz[1] = sqrt(1.0 / cy);
+   }
+   if (cz > 0)
+   {
+      dxyz[2] = sqrt(1.0 / cz);
+   }
 
    /*-----------------------------------------------------------
     * Set up the grid structure
