@@ -1,0 +1,108 @@
+/*
+ * File:          Hypre_ParAMG_Impl.h
+ * Symbol:        Hypre.ParAMG-v0.1.5
+ * Symbol Type:   class
+ * Babel Version: 0.6.1
+ * SIDL Created:  20020104 15:27:10 PST
+ * Generated:     20020104 15:27:18 PST
+ * Description:   Server-side implementation for Hypre.ParAMG
+ * 
+ * WARNING: Automatically generated; only changes within splicers preserved
+ * 
+ */
+
+#ifndef included_Hypre_ParAMG_Impl_h
+#define included_Hypre_ParAMG_Impl_h
+
+#ifndef included_SIDL_header_h
+#include "SIDL_header.h"
+#endif
+#ifndef included_Hypre_Vector_h
+#include "Hypre_Vector.h"
+#endif
+#ifndef included_Hypre_Operator_h
+#include "Hypre_Operator.h"
+#endif
+#ifndef included_Hypre_ParAMG_h
+#include "Hypre_ParAMG.h"
+#endif
+
+/* DO-NOT-DELETE splicer.begin(Hypre.ParAMG._includes) */
+/* Put additional include files here... */
+/* DO-NOT-DELETE splicer.end(Hypre.ParAMG._includes) */
+
+/*
+ * Private data for class Hypre.ParAMG
+ */
+
+struct Hypre_ParAMG__data {
+  /* DO-NOT-DELETE splicer.begin(Hypre.ParAMG._data) */
+  /* Put private data members here... */
+  int ignore; /* dummy to force non-empty struct; remove if you add data */
+  /* DO-NOT-DELETE splicer.end(Hypre.ParAMG._data) */
+};
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/*
+ * Access functions for class private data and built-in methods
+ */
+
+extern struct Hypre_ParAMG__data*
+Hypre_ParAMG__get_data(
+  Hypre_ParAMG);
+
+extern void
+Hypre_ParAMG__set_data(
+  Hypre_ParAMG,
+  struct Hypre_ParAMG__data*);
+
+extern void
+impl_Hypre_ParAMG__ctor(
+  Hypre_ParAMG);
+
+extern void
+impl_Hypre_ParAMG__dtor(
+  Hypre_ParAMG);
+
+/*
+ * User-defined object methods
+ */
+
+extern int32_t
+impl_Hypre_ParAMG_Apply(
+  Hypre_ParAMG,
+  Hypre_Vector,
+  Hypre_Vector*);
+
+extern int32_t
+impl_Hypre_ParAMG_GetResidual(
+  Hypre_ParAMG,
+  Hypre_Vector*);
+
+extern int32_t
+impl_Hypre_ParAMG_SetCommunicator(
+  Hypre_ParAMG,
+  void*);
+
+extern int32_t
+impl_Hypre_ParAMG_SetOperator(
+  Hypre_ParAMG,
+  Hypre_Operator);
+
+extern int32_t
+impl_Hypre_ParAMG_SetParameter(
+  Hypre_ParAMG,
+  const char*,
+  double);
+
+extern int32_t
+impl_Hypre_ParAMG_Setup(
+  Hypre_ParAMG);
+
+#ifdef __cplusplus
+}
+#endif
+#endif
