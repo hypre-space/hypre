@@ -364,7 +364,7 @@ main( int   argc,
          break;
    } 
 
-   grid = HYPRE_NewStructGrid(MPI_COMM_WORLD, dim);
+   HYPRE_NewStructGrid(MPI_COMM_WORLD, dim, &grid);
    for (ib = 0; ib < nblocks; ib++)
    {
       HYPRE_SetStructGridExtents(grid, ilower[ib], iupper[ib]);
@@ -375,7 +375,7 @@ main( int   argc,
     * Set up the stencil structure
     *-----------------------------------------------------------*/
  
-   stencil = HYPRE_NewStructStencil(dim, dim + 1);
+   HYPRE_NewStructStencil(dim, dim + 1, &stencil);
    for (s = 0; s < dim + 1; s++)
    {
       HYPRE_SetStructStencilElement(stencil, s, offsets[s]);
@@ -385,7 +385,7 @@ main( int   argc,
     * Set up the matrix structure
     *-----------------------------------------------------------*/
  
-   A = HYPRE_NewStructMatrix(MPI_COMM_WORLD, grid, stencil);
+   HYPRE_NewStructMatrix(MPI_COMM_WORLD, grid, stencil, &A);
    HYPRE_SetStructMatrixSymmetric(A, 1);
    HYPRE_SetStructMatrixNumGhost(A, A_num_ghost);
    HYPRE_InitializeStructMatrix(A);
@@ -461,7 +461,7 @@ main( int   argc,
 
    values = hypre_CTAlloc(double, volume);
 
-   b = HYPRE_NewStructVector(MPI_COMM_WORLD, grid, stencil);
+   HYPRE_NewStructVector(MPI_COMM_WORLD, grid, stencil, &b);
    HYPRE_InitializeStructVector(b);
    for (i = 0; i < volume; i++)
    {
@@ -476,7 +476,7 @@ main( int   argc,
    HYPRE_PrintStructVector("driver.out.b", b, 0);
 #endif
 
-   x = HYPRE_NewStructVector(MPI_COMM_WORLD, grid, stencil);
+   HYPRE_NewStructVector(MPI_COMM_WORLD, grid, stencil, &x);
    HYPRE_InitializeStructVector(x);
    for (i = 0; i < volume; i++)
    {
@@ -502,7 +502,7 @@ main( int   argc,
       time_index = hypre_InitializeTiming("SMG Setup");
       hypre_BeginTiming(time_index);
 
-      smg_solver = HYPRE_StructSMGInitialize(MPI_COMM_WORLD);
+      HYPRE_StructSMGInitialize(MPI_COMM_WORLD, &smg_solver);
       HYPRE_StructSMGSetMemoryUse(smg_solver, 0);
       HYPRE_StructSMGSetMaxIter(smg_solver, 50);
       HYPRE_StructSMGSetRelChange(smg_solver, 0);
@@ -541,7 +541,7 @@ main( int   argc,
       time_index = hypre_InitializeTiming("PCG Setup");
       hypre_BeginTiming(time_index);
 
-      pcg_solver = HYPRE_StructPCGInitialize(MPI_COMM_WORLD);
+      HYPRE_StructPCGInitialize(MPI_COMM_WORLD, &pcg_solver);
       HYPRE_StructPCGSetMaxIter(pcg_solver, 50);
       HYPRE_StructPCGSetTol(pcg_solver, 1.0e-06);
       HYPRE_StructPCGSetTwoNorm(pcg_solver, 1);
@@ -551,7 +551,7 @@ main( int   argc,
       if (solver_id == 1)
       {
          /* use symmetric SMG as preconditioner */
-         pcg_precond = HYPRE_StructSMGInitialize(MPI_COMM_WORLD);
+         HYPRE_StructSMGInitialize(MPI_COMM_WORLD, &pcg_precond);
          HYPRE_StructSMGSetMemoryUse(pcg_precond, 0);
          HYPRE_StructSMGSetMaxIter(pcg_precond, 1);
          HYPRE_StructSMGSetTol(pcg_precond, 0.0);
@@ -650,5 +650,3 @@ main( int   argc,
 
    return (0);
 }
-
-
