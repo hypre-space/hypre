@@ -606,7 +606,8 @@ int HYPRE_LSI_MLISetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
    /* finally, set up                                          */
    /* -------------------------------------------------------- */ 
 
-   mli_mat = new MLI_Matrix((void*) A, "HYPRE_ParCSR", NULL);
+   strcpy( paramString, "HYPRE_ParCSR" );
+   mli_mat = new MLI_Matrix((void*) A, paramString, NULL);
    mli->setMethod( method );
    mli->setSystemMatrix( 0, mli_mat );
    mli->setOutputLevel( mli_object->outputLevel_ );
@@ -631,9 +632,11 @@ int HYPRE_LSI_MLISolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
 #ifdef HAVE_MLI
    HYPRE_LSI_MLI *mli_object;
    MLI_Vector    *sol, *rhs;
+   char          paramString[100];
 
-   sol = new MLI_Vector( (void *) x, "HYPRE_ParVector", NULL);
-   rhs = new MLI_Vector( (void *) b, "HYPRE_ParVector", NULL);
+   strcpy(paramString, "HYPRE_ParVector");
+   sol = new MLI_Vector( (void *) x, paramString, NULL);
+   rhs = new MLI_Vector( (void *) b, paramString, NULL);
 
    mli_object = (HYPRE_LSI_MLI *) solver;
    if ( mli_object->mli_ == NULL )
