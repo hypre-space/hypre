@@ -44,6 +44,7 @@ CFLAGS = -w ${C_COMPILE_FLAGS} ${CDEFS}\
  -I$(srcdir)/../../seq_mv\
  -I$(srcdir)/../../distributed_matrix\
  -I$(srcdir)/../../distributed_ls\
+ -I$(srcdir)/../../mli\
  -I$(FEI_BASE_DIR)\
  ${SUPERLU_INCLUDE}\
  ${MLPACK_INCLUDE}\
@@ -60,6 +61,7 @@ CXXFLAGS = -w ${CXX_COMPILE_FLAGS} ${CXXDEFS}\
  -I$(srcdir)/../../parcsr_mv\
  -I$(srcdir)/../../parcsr_ls\
  -I$(srcdir)/../../seq_mv\
+ -I$(srcdir)/../../mli\
  -I$(FEI_BASE_DIR)\
  ${SUPERLU_INCLUDE}\
  ${CXXINCLUDES}
@@ -95,25 +97,15 @@ LFLAGS =\
 
 FILES = HYPRE_LinSysCore.C HYPRE_LSC_aux.C cfei_hypre.C hypre_slide_reduce.C \
         hypre_schur_reduce.C hypre_lsi_misc.c hypre_lsi_ddamg.C \
-        HYPRE_parcsr_ml.c HYPRE_LSI_ddilut.c hypre_lsi_amge.c \
+        HYPRE_LSI_ml.c HYPRE_LSI_ddilut.c hypre_lsi_amge.c \
         HYPRE_parcsr_bicgstabl.c bicgstabl.c fegridinfo.C \
         HYPRE_LSI_poly.c HYPRE_LSI_ddict.c HYPRE_parcsr_TFQmr.c \
         TFQmr.c HYPRE_parcsr_bicgs.c bicgs.c HYPRE_LSI_schwarz.c \
         HYPRE_LSI_blkprec.C HYPRE_parcsr_symqmr.c SymQMR.c \
-        HYPRE_parcsr_fgmres.c fgmres.c
+        HYPRE_parcsr_fgmres.c fgmres.c HYPRE_LSI_mli.C
 
 TEMP = ${FILES:.c=.o}
 OBJS = ${TEMP:.C=.o}
-
-FILESV12 = HYPRE_LinSysCore.C HYPRE_LSC_aux.C hypre_slide_reduce.C \
-           hypre_schur_reduce.C hypre_lsi_misc.c hypre_lsi_ddamg.C \
-           HYPRE_parcsr_ml.c HYPRE_LSI_ddilut.c \
-           HYPRE_parcsr_bicgstabl.c bicgstabl.c fegridinfo.C \
-           HYPRE_LSI_poly.c HYPRE_LSI_ddict.c HYPRE_parcsr_TFQmr.c \
-           TFQmr.c HYPRE_parcsr_bicgs.c bicgs.c HYPRE_LSI_schwarz.c
-
-TEMPV12 = ${FILESV12:.c=.o}
-OBJSV12 = ${TEMPV12:.C=.o}
 
 ##################################################################
 # Main rules
@@ -137,12 +129,6 @@ driver: driver.o libHYPRE_FEI.a
 libHYPRE_FEI.a: ${OBJS}
 	@echo  "Building $@ ... "
 	@ar -rcu libHYPRE_FEI.a ${OBJS}
-	${RANLIB} $@
-
-libHYPRE_FEI_V12.a: ${OBJSV12}
-	@echo  "Building $@ ... "
-	${CXX} -o $@ -c ${CXXFLAGS} -DFEI_V1.2 HYPRE_LinSysCore.C
-	@ar -rcu libHYPRE_FEI_V12.a ${OBJSV12}
 	${RANLIB} $@
 
 ##################################################################

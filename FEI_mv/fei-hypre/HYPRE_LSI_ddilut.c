@@ -51,8 +51,8 @@ typedef struct HYPRE_LSI_DDIlut_Struct
 }
 HYPRE_LSI_DDIlut;
 
-extern HYPRE_ParCSRMLConstructMHMatrix(HYPRE_ParCSRMatrix,MH_Matrix *,
-                                       MPI_Comm, int *, MH_Context *);
+extern HYPRE_LSI_MLConstructMHMatrix(HYPRE_ParCSRMatrix,MH_Matrix *,
+                                     MPI_Comm, int *, MH_Context *);
 extern int HYPRE_LSI_DDIlutComposeOverlappedMatrix(MH_Matrix *, int *, 
                  int **recv_lengths, int **int_buf, double **dble_buf, 
                  int **sindex_array, int **sindex_array2, int *offset);
@@ -293,8 +293,8 @@ int HYPRE_LSI_DDIlutSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
    hypre_TFree( row_partition );
    mh_mat = ( MH_Matrix * ) malloc( sizeof( MH_Matrix) );
    context->Amat = mh_mat;
-   HYPRE_ParCSRMLConstructMHMatrix(A_csr,mh_mat,MPI_COMM_WORLD,
-                                   context->partition,context); 
+   HYPRE_LSI_MLConstructMHMatrix(A_csr,mh_mat,MPI_COMM_WORLD,
+                                 context->partition,context); 
 
    /* ---------------------------------------------------------------- */
    /* compose the enlarged overlapped local matrix                     */

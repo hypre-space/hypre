@@ -55,8 +55,8 @@ typedef struct HYPRE_LSI_Schwarz_Struct
    int           **blk_indices;
 } HYPRE_LSI_Schwarz;
 
-extern int  HYPRE_ParCSRMLConstructMHMatrix(HYPRE_ParCSRMatrix,MH_Matrix *,
-                                       MPI_Comm, int *, MH_Context *);
+extern int  HYPRE_LSI_MLConstructMHMatrix(HYPRE_ParCSRMatrix,MH_Matrix *,
+                                          MPI_Comm, int *, MH_Context *);
 extern int  HYPRE_LSI_SchwarzDecompose(HYPRE_LSI_Schwarz *sch_ptr,
                  MH_Matrix *Amat, int total_recv_leng, int *recv_lengths, 
                  int *ext_ja, double *ext_aa, int *map, int *map2, 
@@ -475,8 +475,8 @@ int HYPRE_LSI_SchwarzSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
    hypre_TFree( row_partition );
    mh_mat = ( MH_Matrix * ) malloc( sizeof( MH_Matrix) );
    context->Amat = mh_mat;
-   HYPRE_ParCSRMLConstructMHMatrix(A_csr, mh_mat, comm,
-                                   context->partition,context); 
+   HYPRE_LSI_MLConstructMHMatrix(A_csr, mh_mat, comm,
+                                 context->partition,context); 
    sch_ptr->Nrows = mh_mat->Nrows;
    sch_ptr->mh_mat = mh_mat;
 

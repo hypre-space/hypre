@@ -75,8 +75,8 @@ extern "C"
 extern "C" {
 
 #ifdef MLPACK
-   int HYPRE_ParCSRMLCreate( MPI_Comm, HYPRE_Solver *);
-   int HYPRE_ParCSRMLDestroy( HYPRE_Solver );
+   int HYPRE_LSI_MLCreate( MPI_Comm, HYPRE_Solver *);
+   int HYPRE_LSI_MLDestroy( HYPRE_Solver );
 #endif
 
    void qsort0(int *, int, int);
@@ -391,7 +391,7 @@ HYPRE_LinSysCore::~HYPRE_LinSysCore()
 
 #ifdef MLPACK
        else if ( HYPreconID_ == HYML )
-          HYPRE_ParCSRMLDestroy( HYPrecon_ );
+          HYPRE_LSI_MLDestroy( HYPrecon_ );
 #endif
        HYPrecon_ = NULL;
     }
@@ -2779,7 +2779,7 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
 
 #ifdef MLPACK
        else if ( HYPreconID_ == HYML )
-          HYPRE_ParCSRMLDestroy( HYPrecon_ );
+          HYPRE_LSI_MLDestroy( HYPrecon_ );
 #endif
     }
 
@@ -2933,7 +2933,7 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
 
 #ifdef MLPACK
        case HYML :
-            ierr = HYPRE_ParCSRMLCreate( comm_, &HYPrecon_ );
+            ierr = HYPRE_LSI_MLCreate( comm_, &HYPrecon_ );
             break;
 #endif
     }

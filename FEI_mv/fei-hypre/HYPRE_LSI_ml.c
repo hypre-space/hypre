@@ -6,7 +6,7 @@
  *
  *********************************************************************EHEADER*/
 /****************************************************************************/ 
-/* HYPRE_ParCSRML interface                                                 */
+/* HYPRE_LSI_ML interface                                                   */
 /*--------------------------------------------------------------------------*/
 /*  local functions :
  * 
@@ -16,20 +16,20 @@
  *        MH_ExchBdry
  *        MH_MatVec
  *        MH_GetRow
- *        HYPRE_ParCSRMLCreate
- *        HYPRE_ParCSRMLDestroy
- *        HYPRE_ParCSRMLSetup
- *        HYPRE_ParCSRMLSolve
- *        HYPRE_ParCSRMLSetStrongThreshold
- *        HYPRE_ParCSRMLSetMethod
- *        HYPRE_ParCSRMLSetNumPreSmoothings
- *        HYPRE_ParCSRMLSetNumPostSmoothings
- *        HYPRE_ParCSRMLSetPreSmoother
- *        HYPRE_ParCSRMLSetPostSmoother
- *        HYPRE_ParCSRMLSetDampingFactor
- *        HYPRE_ParCSRMLSetCoarseSolver
- *        HYPRE_ParCSRMLSetCoarsenScheme
- *        HYPRE_ParCSRMLConstructMHMatrix
+ *        HYPRE_LSI_MLCreate
+ *        HYPRE_LSI_MLDestroy
+ *        HYPRE_LSI_MLSetup
+ *        HYPRE_LSI_MLSolve
+ *        HYPRE_LSI_MLSetStrongThreshold
+ *        HYPRE_LSI_MLSetMethod
+ *        HYPRE_LSI_MLSetNumPreSmoothings
+ *        HYPRE_LSI_MLSetNumPostSmoothings
+ *        HYPRE_LSI_MLSetPreSmoother
+ *        HYPRE_LSI_MLSetPostSmoother
+ *        HYPRE_LSI_MLSetDampingFactor
+ *        HYPRE_LSI_MLSetCoarseSolver
+ *        HYPRE_LSI_MLSetCoarsenScheme
+ *        HYPRE_LSI_MLConstructMHMatrix
  ****************************************************************************/
 
 #include <stdlib.h>
@@ -52,8 +52,8 @@ extern void qsort0(int *, int, int);
 
 #include "HYPRE_MHMatrix.h"
 
-extern int  HYPRE_ParCSRMLConstructMHMatrix(HYPRE_ParCSRMatrix, MH_Matrix *,
-                                            MPI_Comm, int *,MH_Context*); 
+extern int  HYPRE_LSI_MLConstructMHMatrix(HYPRE_ParCSRMatrix, MH_Matrix *,
+                                          MPI_Comm, int *,MH_Context*); 
 
 /****************************************************************************/ 
 /* communication functions on parallel platforms                            */
@@ -355,10 +355,10 @@ int MH_GetRow(void *obj, int N_requested_rows, int requested_rows[],
 }
 
 /****************************************************************************/
-/* HYPRE_ParCSRMLCreate                                                     */
+/* HYPRE_LSI_MLCreate                                                       */
 /*--------------------------------------------------------------------------*/
 
-int HYPRE_ParCSRMLCreate( MPI_Comm comm, HYPRE_Solver *solver)
+int HYPRE_LSI_MLCreate( MPI_Comm comm, HYPRE_Solver *solver)
 {
 #ifdef MLPACK
     /* create an internal ML data structure */
@@ -398,10 +398,10 @@ int HYPRE_ParCSRMLCreate( MPI_Comm comm, HYPRE_Solver *solver)
 }
 
 /****************************************************************************/
-/* HYPRE_ParCSRMLDestroy                                                    */
+/* HYPRE_LSI_MLDestroy                                                      */
 /*--------------------------------------------------------------------------*/
 
-int HYPRE_ParCSRMLDestroy( HYPRE_Solver solver )
+int HYPRE_LSI_MLDestroy( HYPRE_Solver solver )
 {
 #ifdef MLPACK
     int       i;
@@ -440,10 +440,10 @@ int HYPRE_ParCSRMLDestroy( HYPRE_Solver solver )
 }
 
 /****************************************************************************/
-/* HYPRE_ParCSRMLSetup                                                      */
+/* HYPRE_LSI_MLSetup                                                        */
 /*--------------------------------------------------------------------------*/
 
-int HYPRE_ParCSRMLSetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
+int HYPRE_LSI_MLSetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
                          HYPRE_ParVector b,   HYPRE_ParVector x      )
 {
 #ifdef MLPACK
@@ -485,8 +485,8 @@ int HYPRE_ParCSRMLSetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
     hypre_TFree( row_partition );
     mh_mat = ( MH_Matrix * ) malloc( sizeof( MH_Matrix) );
     context->Amat = mh_mat;
-    HYPRE_ParCSRMLConstructMHMatrix(A,mh_mat,link->comm,
-                                    context->partition,context); 
+    HYPRE_LSI_MLConstructMHMatrix(A,mh_mat,link->comm,
+                                  context->partition,context); 
 
     /* -------------------------------------------------------- */ 
     /* set up the ML communicator information                   */
@@ -733,11 +733,11 @@ int HYPRE_ParCSRMLSetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
 }
 
 /****************************************************************************/
-/* HYPRE_ParCSRMLSolve                                                      */
+/* HYPRE_LSI_MLSolve                                                        */
 /*--------------------------------------------------------------------------*/
 
-int HYPRE_ParCSRMLSolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
-                         HYPRE_ParVector b,   HYPRE_ParVector x      )
+int HYPRE_LSI_MLSolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
+                       HYPRE_ParVector b, HYPRE_ParVector x )
 {
 #ifdef MLPACK
     double  *rhs, *sol;
@@ -772,17 +772,16 @@ int HYPRE_ParCSRMLSolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
 }
 
 /****************************************************************************/
-/* HYPRE_ParCSRMLSetStrongThreshold                                         */
+/* HYPRE_LSI_MLSetStrongThreshold                                           */
 /*--------------------------------------------------------------------------*/
 
-int HYPRE_ParCSRMLSetStrongThreshold(HYPRE_Solver solver,
-                                     double strong_threshold)
+int HYPRE_LSI_MLSetStrongThreshold(HYPRE_Solver solver,double strong_threshold)
 {
     MH_Link *link = (MH_Link *) solver;
   
     if ( strong_threshold < 0.0 )
     {
-       printf("HYPRE_ParCSRMLSetStrongThreshold error : reset to 0.\n");
+       printf("HYPRE_LSI_MLSetStrongThreshold WARNING : reset to 0.\n");
        link->ag_threshold = 0.0;
     } 
     else
@@ -793,10 +792,10 @@ int HYPRE_ParCSRMLSetStrongThreshold(HYPRE_Solver solver,
 }
 
 /****************************************************************************/
-/* HYPRE_ParCSRMLSetMethod                                                  */
+/* HYPRE_LSI_MLSetMethod                                                    */
 /*--------------------------------------------------------------------------*/
 
-int HYPRE_ParCSRMLSetMethod( HYPRE_Solver solver, int method )
+int HYPRE_LSI_MLSetMethod( HYPRE_Solver solver, int method )
 {
     MH_Link *link = (MH_Link *) solver;
 
@@ -806,10 +805,10 @@ int HYPRE_ParCSRMLSetMethod( HYPRE_Solver solver, int method )
 }
 
 /****************************************************************************/
-/* HYPRE_ParCSRMLSetNumPDEs                                                 */
+/* HYPRE_LSI_MLSetNumPDEs                                                   */
 /*--------------------------------------------------------------------------*/
 
-int HYPRE_ParCSRMLSetNumPDEs( HYPRE_Solver solver, int numPDE )
+int HYPRE_LSI_MLSetNumPDEs( HYPRE_Solver solver, int numPDE )
 {
     MH_Link *link = (MH_Link *) solver;
 
@@ -819,16 +818,16 @@ int HYPRE_ParCSRMLSetNumPDEs( HYPRE_Solver solver, int numPDE )
 }
 
 /****************************************************************************/
-/* HYPRE_ParCSRMLSetNumPreSmoothings                                        */
+/* HYPRE_LSI_MLSetNumPreSmoothings                                          */
 /*--------------------------------------------------------------------------*/
 
-int HYPRE_ParCSRMLSetNumPreSmoothings( HYPRE_Solver solver, int num_sweeps  )
+int HYPRE_LSI_MLSetNumPreSmoothings( HYPRE_Solver solver, int num_sweeps  )
 {
     MH_Link *link = (MH_Link *) solver;
 
     if ( num_sweeps < 0 )
     {
-       printf("HYPRE_ParCSRMLSetNumPreSmoothings error : reset to 0.\n");
+       printf("HYPRE_LSI_MLSetNumPreSmoothings WARNING : reset to 0.\n");
        link->pre_sweeps = 0;
     } 
     else
@@ -839,16 +838,16 @@ int HYPRE_ParCSRMLSetNumPreSmoothings( HYPRE_Solver solver, int num_sweeps  )
 }
 
 /****************************************************************************/
-/* HYPRE_ParCSRMLSetNumPostSmoothings                                       */
+/* HYPRE_LSI_MLSetNumPostSmoothings                                         */
 /*--------------------------------------------------------------------------*/
 
-int HYPRE_ParCSRMLSetNumPostSmoothings( HYPRE_Solver solver, int num_sweeps  )
+int HYPRE_LSI_MLSetNumPostSmoothings( HYPRE_Solver solver, int num_sweeps  )
 {
     MH_Link *link = (MH_Link *) solver;
 
     if ( num_sweeps < 0 )
     {
-       printf("HYPRE_ParCSRMLSetNumPostSmoothings error : reset to 0.\n");
+       printf("HYPRE_LSI_MLSetNumPostSmoothings WARNING : reset to 0.\n");
        link->post_sweeps = 0;
     } 
     else
@@ -859,16 +858,16 @@ int HYPRE_ParCSRMLSetNumPostSmoothings( HYPRE_Solver solver, int num_sweeps  )
 }
 
 /****************************************************************************/
-/* HYPRE_ParCSRMLSetPreSmoother                                             */
+/* HYPRE_LSI_MLSetPreSmoother                                               */
 /*--------------------------------------------------------------------------*/
 
-int HYPRE_ParCSRMLSetPreSmoother( HYPRE_Solver solver, int smoother_type  )
+int HYPRE_LSI_MLSetPreSmoother( HYPRE_Solver solver, int smoother_type  )
 {
     MH_Link *link = (MH_Link *) solver;
 
     if ( smoother_type < 0 || smoother_type > 6 )
     {
-       printf("HYPRE_ParCSRMLSetPreSmoother error : set to Jacobi.\n");
+       printf("HYPRE_LSI_MLSetPreSmoother WARNING : set to Jacobi.\n");
        link->pre = 0;
     } 
     else
@@ -879,16 +878,16 @@ int HYPRE_ParCSRMLSetPreSmoother( HYPRE_Solver solver, int smoother_type  )
 }
 
 /****************************************************************************/
-/* HYPRE_ParCSRMLSetPostSmoother                                            */
+/* HYPRE_LSI_MLSetPostSmoother                                              */
 /*--------------------------------------------------------------------------*/
 
-int HYPRE_ParCSRMLSetPostSmoother( HYPRE_Solver solver, int smoother_type  )
+int HYPRE_LSI_MLSetPostSmoother( HYPRE_Solver solver, int smoother_type  )
 {
     MH_Link *link = (MH_Link *) solver;
 
     if ( smoother_type < 0 || smoother_type > 6 )
     {
-       printf("HYPRE_ParCSRMLSetPostSmoother error : set to Jacobi.\n");
+       printf("HYPRE_LSI_MLSetPostSmoother WARNING : set to Jacobi.\n");
        link->post = 0;
     } 
     else
@@ -899,16 +898,16 @@ int HYPRE_ParCSRMLSetPostSmoother( HYPRE_Solver solver, int smoother_type  )
 }
 
 /****************************************************************************/
-/* HYPRE_ParCSRMLSetDampingFactor                                           */
+/* HYPRE_LSI_MLSetDampingFactor                                             */
 /*--------------------------------------------------------------------------*/
 
-int HYPRE_ParCSRMLSetDampingFactor( HYPRE_Solver solver, double factor  )
+int HYPRE_LSI_MLSetDampingFactor( HYPRE_Solver solver, double factor  )
 {
     MH_Link *link = (MH_Link *) solver;
 
     if ( factor < 0.0 || factor > 1.0 )
     {
-       printf("HYPRE_ParCSRMLSetDampingFactor error : set to 0.5.\n");
+       printf("HYPRE_LSI_MLSetDampingFactor WARNING : set to 0.5.\n");
        link->jacobi_wt = 0.5;
     } 
     else
@@ -919,16 +918,16 @@ int HYPRE_ParCSRMLSetDampingFactor( HYPRE_Solver solver, double factor  )
 }
 
 /****************************************************************************/
-/* HYPRE_ParCSRMLSetCoarseSolver                                            */
+/* HYPRE_LSI_MLSetCoarseSolver                                              */
 /*--------------------------------------------------------------------------*/
 
-int HYPRE_ParCSRMLSetCoarseSolver( HYPRE_Solver solver, int solver_id  )
+int HYPRE_LSI_MLSetCoarseSolver( HYPRE_Solver solver, int solver_id  )
 {
     MH_Link *link = (MH_Link *) solver;
 
     if ( solver_id < 0 || solver_id > 2 )
     {
-       printf("HYPRE_ParCSRMLSetCoarseSolver error : reset to Aggr\n");
+       printf("HYPRE_LSI_MLSetCoarseSolver WARNING : reset to Aggr\n");
        link->coarse_solver = 1;
     } 
     else
@@ -939,16 +938,16 @@ int HYPRE_ParCSRMLSetCoarseSolver( HYPRE_Solver solver, int solver_id  )
 }
 
 /****************************************************************************/
-/* HYPRE_ParCSRMLSetCoarsenScheme                                           */
+/* HYPRE_LSI_MLSetCoarsenScheme                                             */
 /*--------------------------------------------------------------------------*/
 
-int HYPRE_ParCSRMLSetCoarsenScheme( HYPRE_Solver solver, int scheme  )
+int HYPRE_LSI_MLSetCoarsenScheme( HYPRE_Solver solver, int scheme  )
 {
     MH_Link *link = (MH_Link *) solver;
 
     if ( scheme < 1 || scheme > 6 )
     {
-       printf("HYPRE_ParCSRMLSetCoarsenScheme error : reset to uncoupled\n");
+       printf("HYPRE_LSI_MLSetCoarsenScheme WARNING : reset to uncoupled\n");
        link->coarsen_scheme = 1;
     } 
     else
@@ -959,16 +958,16 @@ int HYPRE_ParCSRMLSetCoarsenScheme( HYPRE_Solver solver, int scheme  )
 }
 
 /****************************************************************************/
-/* HYPRE_ParCSRMLSetBGSBlockSize                                            */
+/* HYPRE_LSI_MLSetBGSBlockSize                                              */
 /*--------------------------------------------------------------------------*/
 
-int HYPRE_ParCSRMLSetBGSBlockSize( HYPRE_Solver solver, int size  )
+int HYPRE_LSI_MLSetBGSBlockSize( HYPRE_Solver solver, int size  )
 {
     MH_Link *link = (MH_Link *) solver;
 
     if ( size < 0 )
     {
-       printf("HYPRE_ParCSRMLSetBGSBlockSize error : reset to 1.\n");
+       printf("HYPRE_LSI_MLSetBGSBlockSize WARNING : reset to 1.\n");
        link->BGS_blocksize = 1;
     } 
     else
@@ -979,10 +978,10 @@ int HYPRE_ParCSRMLSetBGSBlockSize( HYPRE_Solver solver, int size  )
 }
 
 /****************************************************************************/
-/* HYPRE_ParCSRMLConstructMHMatrix                                          *
+/* HYPRE_LSI_MLConstructMHMatrix                                            */
 /*--------------------------------------------------------------------------*/
 
-int HYPRE_ParCSRMLConstructMHMatrix(HYPRE_ParCSRMatrix A, MH_Matrix *mh_mat,
+int HYPRE_LSI_MLConstructMHMatrix(HYPRE_ParCSRMatrix A, MH_Matrix *mh_mat,
                              MPI_Comm comm, int *partition,MH_Context *obj) 
 {
     int         i, j, index, my_id, nprocs, msgid, *tempCnt;

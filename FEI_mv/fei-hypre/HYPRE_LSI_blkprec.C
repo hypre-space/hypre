@@ -49,18 +49,18 @@
 #include "HYPRE_LSI_blkprec.h"
 #ifdef MLPACK
 extern "C" {
-   int HYPRE_ParCSRMLCreate( MPI_Comm, HYPRE_Solver *);
-   int HYPRE_ParCSRMLDestroy( HYPRE_Solver );
-   int HYPRE_ParCSRMLSetup( HYPRE_Solver, HYPRE_ParCSRMatrix,
-                            HYPRE_ParVector, HYPRE_ParVector );
-   int HYPRE_ParCSRMLSolve( HYPRE_Solver, HYPRE_ParCSRMatrix,
-                            HYPRE_ParVector, HYPRE_ParVector );
-   int HYPRE_ParCSRMLSetStrongThreshold( HYPRE_Solver, double );
-   int HYPRE_ParCSRMLSetNumPreSmoothings( HYPRE_Solver, int );
-   int HYPRE_ParCSRMLSetNumPostSmoothings( HYPRE_Solver, int );
-   int HYPRE_ParCSRMLSetPreSmoother( HYPRE_Solver, int );
-   int HYPRE_ParCSRMLSetPostSmoother( HYPRE_Solver, int );
-   int HYPRE_ParCSRMLSetCoarseSolver( HYPRE_Solver, int );
+   int HYPRE_LSI_MLCreate( MPI_Comm, HYPRE_Solver *);
+   int HYPRE_LSI_MLDestroy( HYPRE_Solver );
+   int HYPRE_LSI_MLSetup( HYPRE_Solver, HYPRE_ParCSRMatrix,
+                          HYPRE_ParVector, HYPRE_ParVector );
+   int HYPRE_LSI_MLSolve( HYPRE_Solver, HYPRE_ParCSRMatrix,
+                          HYPRE_ParVector, HYPRE_ParVector );
+   int HYPRE_LSI_MLSetStrongThreshold( HYPRE_Solver, double );
+   int HYPRE_LSI_MLSetNumPreSmoothings( HYPRE_Solver, int );
+   int HYPRE_LSI_MLSetNumPostSmoothings( HYPRE_Solver, int );
+   int HYPRE_LSI_MLSetPreSmoother( HYPRE_Solver, int );
+   int HYPRE_LSI_MLSetPostSmoother( HYPRE_Solver, int );
+   int HYPRE_LSI_MLSetCoarseSolver( HYPRE_Solver, int );
 }
 #endif
 #ifdef SUPERLU
@@ -1220,7 +1220,7 @@ int HYPRE_LSI_BlockP::destroySolverPrecond()
       else if (A11Params_.PrecondID_ == 4) HYPRE_ParCSRPilutDestroy(A11Precond_);
       else if (A11Params_.PrecondID_ == 5) HYPRE_EuclidDestroy(A11Precond_);
 #ifdef MLPACK
-      else if (A11Params_.PrecondID_ == 6) HYPRE_ParCSRMLDestroy(A11Precond_);
+      else if (A11Params_.PrecondID_ == 6) HYPRE_LSI_MLDestroy(A11Precond_);
 #endif
    }
    if ( A22Precond_ != NULL ) 
@@ -1230,7 +1230,7 @@ int HYPRE_LSI_BlockP::destroySolverPrecond()
       else if (A22Params_.PrecondID_ == 4) HYPRE_ParCSRPilutDestroy(A22Precond_);
       else if (A22Params_.PrecondID_ == 5) HYPRE_EuclidDestroy(A22Precond_);
 #ifdef MLPACK
-      else if (A22Params_.PrecondID_ == 6) HYPRE_ParCSRMLDestroy(A22Precond_);
+      else if (A22Params_.PrecondID_ == 6) HYPRE_LSI_MLDestroy(A22Precond_);
 #endif
    }
    A11Solver_  = NULL;
@@ -1751,13 +1751,13 @@ int HYPRE_LSI_BlockP::setupPrecon(HYPRE_Solver *precon, HYPRE_IJMatrix Amat,
           break;
 #ifdef MLPACK
       case 7 :
-          HYPRE_ParCSRMLCreate( mpi_comm, precon );
-          HYPRE_ParCSRMLSetCoarseSolver(*precon, 0);
-          HYPRE_ParCSRMLSetStrongThreshold(*precon, param_ptr.MLThresh_);
-          HYPRE_ParCSRMLSetNumPreSmoothings(*precon, param_ptr.MLNSweeps_);
-          HYPRE_ParCSRMLSetNumPostSmoothings(*precon,param_ptr.MLNSweeps_);
-          HYPRE_ParCSRMLSetPreSmoother(*precon, 1);
-          HYPRE_ParCSRMLSetPostSmoother(*precon, 1);
+          HYPRE_LSI_MLCreate( mpi_comm, precon );
+          HYPRE_LSI_MLSetCoarseSolver(*precon, 0);
+          HYPRE_LSI_MLSetStrongThreshold(*precon, param_ptr.MLThresh_);
+          HYPRE_LSI_MLSetNumPreSmoothings(*precon, param_ptr.MLNSweeps_);
+          HYPRE_LSI_MLSetNumPostSmoothings(*precon,param_ptr.MLNSweeps_);
+          HYPRE_LSI_MLSetPreSmoother(*precon, 1);
+          HYPRE_LSI_MLSetPostSmoother(*precon, 1);
           break;
 #endif
    }
@@ -1827,8 +1827,8 @@ int HYPRE_LSI_BlockP::setupSolver(HYPRE_Solver *solver, HYPRE_IJMatrix Amat,
                   break;
 #ifdef MLPACK
              case 7 : 
-                  HYPRE_ParCSRPCGSetPrecond(*solver,HYPRE_ParCSRMLSolve,
-                                            HYPRE_ParCSRMLSetup, precon);
+                  HYPRE_ParCSRPCGSetPrecond(*solver,HYPRE_LSI_MLSolve,
+                                            HYPRE_LSI_MLSetup, precon);
                   break;
 #endif
           }
@@ -1869,8 +1869,8 @@ int HYPRE_LSI_BlockP::setupSolver(HYPRE_Solver *solver, HYPRE_IJMatrix Amat,
                   break;
 #ifdef MLPACK
              case 7 : 
-                  HYPRE_ParCSRGMRESSetPrecond(*solver,HYPRE_ParCSRMLSolve,
-                                            HYPRE_ParCSRMLSetup, precon);
+                  HYPRE_ParCSRGMRESSetPrecond(*solver,HYPRE_LSI_MLSolve,
+                                              HYPRE_LSI_MLSetup, precon);
                   break;
 #endif
           }

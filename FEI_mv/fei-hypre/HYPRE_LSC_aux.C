@@ -59,22 +59,22 @@
 extern "C" {
 
 #ifdef MLPACK
-   int HYPRE_ParCSRMLCreate( MPI_Comm, HYPRE_Solver *);
-   int HYPRE_ParCSRMLDestroy( HYPRE_Solver );
-   int HYPRE_ParCSRMLSetup( HYPRE_Solver, HYPRE_ParCSRMatrix,
-                            HYPRE_ParVector, HYPRE_ParVector );
-   int HYPRE_ParCSRMLSolve( HYPRE_Solver, HYPRE_ParCSRMatrix,
-                            HYPRE_ParVector, HYPRE_ParVector );
-   int HYPRE_ParCSRMLSetStrongThreshold( HYPRE_Solver, double );
-   int HYPRE_ParCSRMLSetNumPreSmoothings( HYPRE_Solver, int );
-   int HYPRE_ParCSRMLSetNumPostSmoothings( HYPRE_Solver, int );
-   int HYPRE_ParCSRMLSetPreSmoother( HYPRE_Solver, int );
-   int HYPRE_ParCSRMLSetPostSmoother( HYPRE_Solver, int );
-   int HYPRE_ParCSRMLSetDampingFactor( HYPRE_Solver, double );
-   int HYPRE_ParCSRMLSetMethod( HYPRE_Solver, int );
-   int HYPRE_ParCSRMLSetCoarsenScheme( HYPRE_Solver , int );
-   int HYPRE_ParCSRMLSetCoarseSolver( HYPRE_Solver, int );
-   int HYPRE_ParCSRMLSetNumPDEs( HYPRE_Solver, int );
+   int HYPRE_LSI_MLCreate( MPI_Comm, HYPRE_Solver *);
+   int HYPRE_LSI_MLDestroy( HYPRE_Solver );
+   int HYPRE_LSI_MLSetup( HYPRE_Solver, HYPRE_ParCSRMatrix,
+                          HYPRE_ParVector, HYPRE_ParVector );
+   int HYPRE_LSI_MLSolve( HYPRE_Solver, HYPRE_ParCSRMatrix,
+                          HYPRE_ParVector, HYPRE_ParVector );
+   int HYPRE_LSI_MLSetStrongThreshold( HYPRE_Solver, double );
+   int HYPRE_LSI_MLSetNumPreSmoothings( HYPRE_Solver, int );
+   int HYPRE_LSI_MLSetNumPostSmoothings( HYPRE_Solver, int );
+   int HYPRE_LSI_MLSetPreSmoother( HYPRE_Solver, int );
+   int HYPRE_LSI_MLSetPostSmoother( HYPRE_Solver, int );
+   int HYPRE_LSI_MLSetDampingFactor( HYPRE_Solver, double );
+   int HYPRE_LSI_MLSetMethod( HYPRE_Solver, int );
+   int HYPRE_LSI_MLSetCoarsenScheme( HYPRE_Solver , int );
+   int HYPRE_LSI_MLSetCoarseSolver( HYPRE_Solver, int );
+   int HYPRE_LSI_MLSetNumPDEs( HYPRE_Solver, int );
 #endif
 
    void  qsort1(int *, double *, int, int);
@@ -1388,23 +1388,23 @@ void HYPRE_LinSysCore::setupPCGPrecon()
             }
             if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
             {
-               HYPRE_ParCSRPCGSetPrecond(HYSolver_, HYPRE_ParCSRMLSolve,
+               HYPRE_ParCSRPCGSetPrecond(HYSolver_, HYPRE_LSI_MLSolve,
                                          HYPRE_DummyFunction, HYPrecon_);
             }
             else
             {
-               HYPRE_ParCSRMLSetMethod(HYPrecon_,mlMethod_);
-               HYPRE_ParCSRMLSetCoarseSolver(HYPrecon_,mlCoarseSolver_);
-               HYPRE_ParCSRMLSetCoarsenScheme(HYPrecon_,mlCoarsenScheme_);
-               HYPRE_ParCSRMLSetStrongThreshold(HYPrecon_,mlStrongThreshold_);
-               HYPRE_ParCSRMLSetNumPreSmoothings(HYPrecon_,mlNumPreSweeps_);
-               HYPRE_ParCSRMLSetNumPostSmoothings(HYPrecon_,mlNumPostSweeps_);
-               HYPRE_ParCSRMLSetPreSmoother(HYPrecon_,mlPresmootherType_);
-               HYPRE_ParCSRMLSetPostSmoother(HYPrecon_,mlPostsmootherType_);
-               HYPRE_ParCSRMLSetDampingFactor(HYPrecon_,mlRelaxWeight_);
-               HYPRE_ParCSRMLSetNumPDEs(HYPrecon_,mlNumPDEs_);
-               HYPRE_ParCSRPCGSetPrecond(HYSolver_, HYPRE_ParCSRMLSolve,
-                                         HYPRE_ParCSRMLSetup, HYPrecon_);
+               HYPRE_LSI_MLSetMethod(HYPrecon_,mlMethod_);
+               HYPRE_LSI_MLSetCoarseSolver(HYPrecon_,mlCoarseSolver_);
+               HYPRE_LSI_MLSetCoarsenScheme(HYPrecon_,mlCoarsenScheme_);
+               HYPRE_LSI_MLSetStrongThreshold(HYPrecon_,mlStrongThreshold_);
+               HYPRE_LSI_MLSetNumPreSmoothings(HYPrecon_,mlNumPreSweeps_);
+               HYPRE_LSI_MLSetNumPostSmoothings(HYPrecon_,mlNumPostSweeps_);
+               HYPRE_LSI_MLSetPreSmoother(HYPrecon_,mlPresmootherType_);
+               HYPRE_LSI_MLSetPostSmoother(HYPrecon_,mlPostsmootherType_);
+               HYPRE_LSI_MLSetDampingFactor(HYPrecon_,mlRelaxWeight_);
+               HYPRE_LSI_MLSetNumPDEs(HYPrecon_,mlNumPDEs_);
+               HYPRE_ParCSRPCGSetPrecond(HYSolver_, HYPRE_LSI_MLSolve,
+                                         HYPRE_LSI_MLSetup, HYPrecon_);
                HYPreconSetup_ = 1;
             }
             break;
@@ -1680,23 +1680,23 @@ void HYPRE_LinSysCore::setupGMRESPrecon()
             }
             if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
             {
-               HYPRE_ParCSRGMRESSetPrecond(HYSolver_, HYPRE_ParCSRMLSolve,
+               HYPRE_ParCSRGMRESSetPrecond(HYSolver_, HYPRE_LSI_MLSolve,
                                            HYPRE_DummyFunction, HYPrecon_);
             }
             else
             {
-               HYPRE_ParCSRMLSetMethod(HYPrecon_,mlMethod_);
-               HYPRE_ParCSRMLSetCoarseSolver(HYPrecon_,mlCoarseSolver_);
-               HYPRE_ParCSRMLSetCoarsenScheme(HYPrecon_,mlCoarsenScheme_);
-               HYPRE_ParCSRMLSetStrongThreshold(HYPrecon_,mlStrongThreshold_);
-               HYPRE_ParCSRMLSetNumPreSmoothings(HYPrecon_,mlNumPreSweeps_);
-               HYPRE_ParCSRMLSetNumPostSmoothings(HYPrecon_,mlNumPostSweeps_);
-               HYPRE_ParCSRMLSetPreSmoother(HYPrecon_,mlPresmootherType_);
-               HYPRE_ParCSRMLSetPostSmoother(HYPrecon_,mlPostsmootherType_);
-               HYPRE_ParCSRMLSetDampingFactor(HYPrecon_,mlRelaxWeight_);
-               HYPRE_ParCSRMLSetNumPDEs(HYPrecon_,mlNumPDEs_);
-               HYPRE_ParCSRGMRESSetPrecond(HYSolver_,HYPRE_ParCSRMLSolve,
-                                           HYPRE_ParCSRMLSetup, HYPrecon_);
+               HYPRE_LSI_MLSetMethod(HYPrecon_,mlMethod_);
+               HYPRE_LSI_MLSetCoarseSolver(HYPrecon_,mlCoarseSolver_);
+               HYPRE_LSI_MLSetCoarsenScheme(HYPrecon_,mlCoarsenScheme_);
+               HYPRE_LSI_MLSetStrongThreshold(HYPrecon_,mlStrongThreshold_);
+               HYPRE_LSI_MLSetNumPreSmoothings(HYPrecon_,mlNumPreSweeps_);
+               HYPRE_LSI_MLSetNumPostSmoothings(HYPrecon_,mlNumPostSweeps_);
+               HYPRE_LSI_MLSetPreSmoother(HYPrecon_,mlPresmootherType_);
+               HYPRE_LSI_MLSetPostSmoother(HYPrecon_,mlPostsmootherType_);
+               HYPRE_LSI_MLSetDampingFactor(HYPrecon_,mlRelaxWeight_);
+               HYPRE_LSI_MLSetNumPDEs(HYPrecon_,mlNumPDEs_);
+               HYPRE_ParCSRGMRESSetPrecond(HYSolver_,HYPRE_LSI_MLSolve,
+                                           HYPRE_LSI_MLSetup, HYPrecon_);
                HYPreconSetup_ = 1;
             }
             break;
@@ -1987,23 +1987,23 @@ void HYPRE_LinSysCore::setupFGMRESPrecon()
             }
             if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
             {
-               HYPRE_ParCSRFGMRESSetPrecond(HYSolver_, HYPRE_ParCSRMLSolve,
+               HYPRE_ParCSRFGMRESSetPrecond(HYSolver_, HYPRE_LSI_MLSolve,
                                             HYPRE_DummyFunction, HYPrecon_);
             }
             else
             {
-               HYPRE_ParCSRMLSetMethod(HYPrecon_,mlMethod_);
-               HYPRE_ParCSRMLSetCoarseSolver(HYPrecon_,mlCoarseSolver_);
-               HYPRE_ParCSRMLSetCoarsenScheme(HYPrecon_,mlCoarsenScheme_);
-               HYPRE_ParCSRMLSetStrongThreshold(HYPrecon_,mlStrongThreshold_);
-               HYPRE_ParCSRMLSetNumPreSmoothings(HYPrecon_,mlNumPreSweeps_);
-               HYPRE_ParCSRMLSetNumPostSmoothings(HYPrecon_,mlNumPostSweeps_);
-               HYPRE_ParCSRMLSetPreSmoother(HYPrecon_,mlPresmootherType_);
-               HYPRE_ParCSRMLSetPostSmoother(HYPrecon_,mlPostsmootherType_);
-               HYPRE_ParCSRMLSetDampingFactor(HYPrecon_,mlRelaxWeight_);
-               HYPRE_ParCSRMLSetNumPDEs(HYPrecon_,mlNumPDEs_);
-               HYPRE_ParCSRFGMRESSetPrecond(HYSolver_,HYPRE_ParCSRMLSolve,
-                                            HYPRE_ParCSRMLSetup, HYPrecon_);
+               HYPRE_LSI_MLSetMethod(HYPrecon_,mlMethod_);
+               HYPRE_LSI_MLSetCoarseSolver(HYPrecon_,mlCoarseSolver_);
+               HYPRE_LSI_MLSetCoarsenScheme(HYPrecon_,mlCoarsenScheme_);
+               HYPRE_LSI_MLSetStrongThreshold(HYPrecon_,mlStrongThreshold_);
+               HYPRE_LSI_MLSetNumPreSmoothings(HYPrecon_,mlNumPreSweeps_);
+               HYPRE_LSI_MLSetNumPostSmoothings(HYPrecon_,mlNumPostSweeps_);
+               HYPRE_LSI_MLSetPreSmoother(HYPrecon_,mlPresmootherType_);
+               HYPRE_LSI_MLSetPostSmoother(HYPrecon_,mlPostsmootherType_);
+               HYPRE_LSI_MLSetDampingFactor(HYPrecon_,mlRelaxWeight_);
+               HYPRE_LSI_MLSetNumPDEs(HYPrecon_,mlNumPDEs_);
+               HYPRE_ParCSRFGMRESSetPrecond(HYSolver_,HYPRE_LSI_MLSolve,
+                                            HYPRE_LSI_MLSetup, HYPrecon_);
                HYPreconSetup_ = 1;
             }
             break;
@@ -2281,23 +2281,23 @@ void HYPRE_LinSysCore::setupBiCGSTABPrecon()
             }
             if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
             {
-               HYPRE_ParCSRBiCGSTABSetPrecond(HYSolver_, HYPRE_ParCSRMLSolve,
+               HYPRE_ParCSRBiCGSTABSetPrecond(HYSolver_, HYPRE_LSI_MLSolve,
                                               HYPRE_DummyFunction, HYPrecon_);
             }
             else
             {
-               HYPRE_ParCSRMLSetMethod(HYPrecon_,mlMethod_);
-               HYPRE_ParCSRMLSetCoarseSolver(HYPrecon_,mlCoarseSolver_);
-               HYPRE_ParCSRMLSetCoarsenScheme(HYPrecon_,mlCoarsenScheme_);
-               HYPRE_ParCSRMLSetStrongThreshold(HYPrecon_,mlStrongThreshold_);
-               HYPRE_ParCSRMLSetNumPreSmoothings(HYPrecon_,mlNumPreSweeps_);
-               HYPRE_ParCSRMLSetNumPostSmoothings(HYPrecon_,mlNumPostSweeps_);
-               HYPRE_ParCSRMLSetPreSmoother(HYPrecon_,mlPresmootherType_);
-               HYPRE_ParCSRMLSetPostSmoother(HYPrecon_,mlPostsmootherType_);
-               HYPRE_ParCSRMLSetDampingFactor(HYPrecon_,mlRelaxWeight_);
-               HYPRE_ParCSRMLSetNumPDEs(HYPrecon_,mlNumPDEs_);
-               HYPRE_ParCSRBiCGSTABSetPrecond(HYSolver_,HYPRE_ParCSRMLSolve,
-                                              HYPRE_ParCSRMLSetup, HYPrecon_);
+               HYPRE_LSI_MLSetMethod(HYPrecon_,mlMethod_);
+               HYPRE_LSI_MLSetCoarseSolver(HYPrecon_,mlCoarseSolver_);
+               HYPRE_LSI_MLSetCoarsenScheme(HYPrecon_,mlCoarsenScheme_);
+               HYPRE_LSI_MLSetStrongThreshold(HYPrecon_,mlStrongThreshold_);
+               HYPRE_LSI_MLSetNumPreSmoothings(HYPrecon_,mlNumPreSweeps_);
+               HYPRE_LSI_MLSetNumPostSmoothings(HYPrecon_,mlNumPostSweeps_);
+               HYPRE_LSI_MLSetPreSmoother(HYPrecon_,mlPresmootherType_);
+               HYPRE_LSI_MLSetPostSmoother(HYPrecon_,mlPostsmootherType_);
+               HYPRE_LSI_MLSetDampingFactor(HYPrecon_,mlRelaxWeight_);
+               HYPRE_LSI_MLSetNumPDEs(HYPrecon_,mlNumPDEs_);
+               HYPRE_ParCSRBiCGSTABSetPrecond(HYSolver_,HYPRE_LSI_MLSolve,
+                                              HYPRE_LSI_MLSetup, HYPrecon_);
                HYPreconSetup_ = 1;
             }
             break;
@@ -2576,23 +2576,23 @@ void HYPRE_LinSysCore::setupBiCGSTABLPrecon()
             }
             if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
             {
-               HYPRE_ParCSRBiCGSTABLSetPrecond(HYSolver_, HYPRE_ParCSRMLSolve,
+               HYPRE_ParCSRBiCGSTABLSetPrecond(HYSolver_, HYPRE_LSI_MLSolve,
                                                HYPRE_DummyFunction, HYPrecon_);
             }
             else
             {
-               HYPRE_ParCSRMLSetMethod(HYPrecon_,mlMethod_);
-               HYPRE_ParCSRMLSetCoarseSolver(HYPrecon_,mlCoarseSolver_);
-               HYPRE_ParCSRMLSetCoarsenScheme(HYPrecon_,mlCoarsenScheme_);
-               HYPRE_ParCSRMLSetStrongThreshold(HYPrecon_,mlStrongThreshold_);
-               HYPRE_ParCSRMLSetNumPreSmoothings(HYPrecon_,mlNumPreSweeps_);
-               HYPRE_ParCSRMLSetNumPostSmoothings(HYPrecon_,mlNumPostSweeps_);
-               HYPRE_ParCSRMLSetPreSmoother(HYPrecon_,mlPresmootherType_);
-               HYPRE_ParCSRMLSetPostSmoother(HYPrecon_,mlPostsmootherType_);
-               HYPRE_ParCSRMLSetDampingFactor(HYPrecon_,mlRelaxWeight_);
-               HYPRE_ParCSRMLSetNumPDEs(HYPrecon_,mlNumPDEs_);
-               HYPRE_ParCSRBiCGSTABLSetPrecond(HYSolver_,HYPRE_ParCSRMLSolve,
-                                               HYPRE_ParCSRMLSetup, HYPrecon_);
+               HYPRE_LSI_MLSetMethod(HYPrecon_,mlMethod_);
+               HYPRE_LSI_MLSetCoarseSolver(HYPrecon_,mlCoarseSolver_);
+               HYPRE_LSI_MLSetCoarsenScheme(HYPrecon_,mlCoarsenScheme_);
+               HYPRE_LSI_MLSetStrongThreshold(HYPrecon_,mlStrongThreshold_);
+               HYPRE_LSI_MLSetNumPreSmoothings(HYPrecon_,mlNumPreSweeps_);
+               HYPRE_LSI_MLSetNumPostSmoothings(HYPrecon_,mlNumPostSweeps_);
+               HYPRE_LSI_MLSetPreSmoother(HYPrecon_,mlPresmootherType_);
+               HYPRE_LSI_MLSetPostSmoother(HYPrecon_,mlPostsmootherType_);
+               HYPRE_LSI_MLSetDampingFactor(HYPrecon_,mlRelaxWeight_);
+               HYPRE_LSI_MLSetNumPDEs(HYPrecon_,mlNumPDEs_);
+               HYPRE_ParCSRBiCGSTABLSetPrecond(HYSolver_,HYPRE_LSI_MLSolve,
+                                               HYPRE_LSI_MLSetup, HYPrecon_);
                HYPreconSetup_ = 1;
             }
             break;
@@ -2867,23 +2867,23 @@ void HYPRE_LinSysCore::setupTFQmrPrecon()
             }
             if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
             {
-               HYPRE_ParCSRTFQmrSetPrecond(HYSolver_, HYPRE_ParCSRMLSolve,
+               HYPRE_ParCSRTFQmrSetPrecond(HYSolver_, HYPRE_LSI_MLSolve,
                                            HYPRE_DummyFunction, HYPrecon_);
             }
             else
             {
-               HYPRE_ParCSRMLSetMethod(HYPrecon_,mlMethod_);
-               HYPRE_ParCSRMLSetCoarseSolver(HYPrecon_,mlCoarseSolver_);
-               HYPRE_ParCSRMLSetCoarsenScheme(HYPrecon_,mlCoarsenScheme_);
-               HYPRE_ParCSRMLSetStrongThreshold(HYPrecon_,mlStrongThreshold_);
-               HYPRE_ParCSRMLSetNumPreSmoothings(HYPrecon_,mlNumPreSweeps_);
-               HYPRE_ParCSRMLSetNumPostSmoothings(HYPrecon_,mlNumPostSweeps_);
-               HYPRE_ParCSRMLSetPreSmoother(HYPrecon_,mlPresmootherType_);
-               HYPRE_ParCSRMLSetPostSmoother(HYPrecon_,mlPostsmootherType_);
-               HYPRE_ParCSRMLSetDampingFactor(HYPrecon_,mlRelaxWeight_);
-               HYPRE_ParCSRMLSetNumPDEs(HYPrecon_,mlNumPDEs_);
-               HYPRE_ParCSRTFQmrSetPrecond(HYSolver_,HYPRE_ParCSRMLSolve,
-                                           HYPRE_ParCSRMLSetup, HYPrecon_);
+               HYPRE_LSI_MLSetMethod(HYPrecon_,mlMethod_);
+               HYPRE_LSI_MLSetCoarseSolver(HYPrecon_,mlCoarseSolver_);
+               HYPRE_LSI_MLSetCoarsenScheme(HYPrecon_,mlCoarsenScheme_);
+               HYPRE_LSI_MLSetStrongThreshold(HYPrecon_,mlStrongThreshold_);
+               HYPRE_LSI_MLSetNumPreSmoothings(HYPrecon_,mlNumPreSweeps_);
+               HYPRE_LSI_MLSetNumPostSmoothings(HYPrecon_,mlNumPostSweeps_);
+               HYPRE_LSI_MLSetPreSmoother(HYPrecon_,mlPresmootherType_);
+               HYPRE_LSI_MLSetPostSmoother(HYPrecon_,mlPostsmootherType_);
+               HYPRE_LSI_MLSetDampingFactor(HYPrecon_,mlRelaxWeight_);
+               HYPRE_LSI_MLSetNumPDEs(HYPrecon_,mlNumPDEs_);
+               HYPRE_ParCSRTFQmrSetPrecond(HYSolver_,HYPRE_LSI_MLSolve,
+                                           HYPRE_LSI_MLSetup, HYPrecon_);
                HYPreconSetup_ = 1;
             }
             break;
@@ -3158,23 +3158,23 @@ void HYPRE_LinSysCore::setupBiCGSPrecon()
             }
             if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
             {
-               HYPRE_ParCSRBiCGSSetPrecond(HYSolver_, HYPRE_ParCSRMLSolve,
+               HYPRE_ParCSRBiCGSSetPrecond(HYSolver_, HYPRE_LSI_MLSolve,
                                            HYPRE_DummyFunction, HYPrecon_);
             }
             else
             {
-               HYPRE_ParCSRMLSetMethod(HYPrecon_,mlMethod_);
-               HYPRE_ParCSRMLSetCoarseSolver(HYPrecon_,mlCoarseSolver_);
-               HYPRE_ParCSRMLSetCoarsenScheme(HYPrecon_,mlCoarsenScheme_);
-               HYPRE_ParCSRMLSetStrongThreshold(HYPrecon_,mlStrongThreshold_);
-               HYPRE_ParCSRMLSetNumPreSmoothings(HYPrecon_,mlNumPreSweeps_);
-               HYPRE_ParCSRMLSetNumPostSmoothings(HYPrecon_,mlNumPostSweeps_);
-               HYPRE_ParCSRMLSetPreSmoother(HYPrecon_,mlPresmootherType_);
-               HYPRE_ParCSRMLSetPostSmoother(HYPrecon_,mlPostsmootherType_);
-               HYPRE_ParCSRMLSetDampingFactor(HYPrecon_,mlRelaxWeight_);
-               HYPRE_ParCSRMLSetNumPDEs(HYPrecon_,mlNumPDEs_);
-               HYPRE_ParCSRBiCGSSetPrecond(HYSolver_,HYPRE_ParCSRMLSolve,
-                                           HYPRE_ParCSRMLSetup, HYPrecon_);
+               HYPRE_LSI_MLSetMethod(HYPrecon_,mlMethod_);
+               HYPRE_LSI_MLSetCoarseSolver(HYPrecon_,mlCoarseSolver_);
+               HYPRE_LSI_MLSetCoarsenScheme(HYPrecon_,mlCoarsenScheme_);
+               HYPRE_LSI_MLSetStrongThreshold(HYPrecon_,mlStrongThreshold_);
+               HYPRE_LSI_MLSetNumPreSmoothings(HYPrecon_,mlNumPreSweeps_);
+               HYPRE_LSI_MLSetNumPostSmoothings(HYPrecon_,mlNumPostSweeps_);
+               HYPRE_LSI_MLSetPreSmoother(HYPrecon_,mlPresmootherType_);
+               HYPRE_LSI_MLSetPostSmoother(HYPrecon_,mlPostsmootherType_);
+               HYPRE_LSI_MLSetDampingFactor(HYPrecon_,mlRelaxWeight_);
+               HYPRE_LSI_MLSetNumPDEs(HYPrecon_,mlNumPDEs_);
+               HYPRE_ParCSRBiCGSSetPrecond(HYSolver_,HYPRE_LSI_MLSolve,
+                                           HYPRE_LSI_MLSetup, HYPrecon_);
                HYPreconSetup_ = 1;
             }
             break;
@@ -3395,23 +3395,23 @@ void HYPRE_LinSysCore::setupSymQMRPrecon()
             }
             if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
             {
-               HYPRE_ParCSRSymQMRSetPrecond(HYSolver_, HYPRE_ParCSRMLSolve,
+               HYPRE_ParCSRSymQMRSetPrecond(HYSolver_, HYPRE_LSI_MLSolve,
                                             HYPRE_DummyFunction, HYPrecon_);
             }
             else
             {
-               HYPRE_ParCSRMLSetMethod(HYPrecon_,mlMethod_);
-               HYPRE_ParCSRMLSetCoarseSolver(HYPrecon_,mlCoarseSolver_);
-               HYPRE_ParCSRMLSetCoarsenScheme(HYPrecon_,mlCoarsenScheme_);
-               HYPRE_ParCSRMLSetStrongThreshold(HYPrecon_,mlStrongThreshold_);
-               HYPRE_ParCSRMLSetNumPreSmoothings(HYPrecon_,mlNumPreSweeps_);
-               HYPRE_ParCSRMLSetNumPostSmoothings(HYPrecon_,mlNumPostSweeps_);
-               HYPRE_ParCSRMLSetPreSmoother(HYPrecon_,mlPresmootherType_);
-               HYPRE_ParCSRMLSetPostSmoother(HYPrecon_,mlPostsmootherType_);
-               HYPRE_ParCSRMLSetDampingFactor(HYPrecon_,mlRelaxWeight_);
-               HYPRE_ParCSRMLSetNumPDEs(HYPrecon_,mlNumPDEs_);
-               HYPRE_ParCSRSymQMRSetPrecond(HYSolver_,HYPRE_ParCSRMLSolve,
-                                            HYPRE_ParCSRMLSetup, HYPrecon_);
+               HYPRE_LSI_MLSetMethod(HYPrecon_,mlMethod_);
+               HYPRE_LSI_MLSetCoarseSolver(HYPrecon_,mlCoarseSolver_);
+               HYPRE_LSI_MLSetCoarsenScheme(HYPrecon_,mlCoarsenScheme_);
+               HYPRE_LSI_MLSetStrongThreshold(HYPrecon_,mlStrongThreshold_);
+               HYPRE_LSI_MLSetNumPreSmoothings(HYPrecon_,mlNumPreSweeps_);
+               HYPRE_LSI_MLSetNumPostSmoothings(HYPrecon_,mlNumPostSweeps_);
+               HYPRE_LSI_MLSetPreSmoother(HYPrecon_,mlPresmootherType_);
+               HYPRE_LSI_MLSetPostSmoother(HYPrecon_,mlPostsmootherType_);
+               HYPRE_LSI_MLSetDampingFactor(HYPrecon_,mlRelaxWeight_);
+               HYPRE_LSI_MLSetNumPDEs(HYPrecon_,mlNumPDEs_);
+               HYPRE_ParCSRSymQMRSetPrecond(HYSolver_,HYPRE_LSI_MLSolve,
+                                            HYPRE_LSI_MLSetup, HYPrecon_);
                HYPreconSetup_ = 1;
             }
             break;
