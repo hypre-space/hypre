@@ -124,7 +124,32 @@ hypre_SMGSolve( void               *smg_vdata,
       {
          hypre_SMGRelaxSetNonZeroGuess(relax_data_l[0]);
       }
+      /* part of convergence check */
+      if ((i == 0) && (tol > 0.0) && (rel_change))
+      {
+         /* store x in tb) */
+         if (!(smg_data -> zero_guess))
+         {
+            hypre_StructCopy(x_l[0], r_l[0]);
+         }
+      }
       hypre_SMGRelax(relax_data_l[0], A_l[0], b_l[0], x_l[0]);
+      /* part of convergence check */
+      if ((i == 0) && (tol > 0.0) && (rel_change))
+      {
+         if (!(smg_data -> zero_guess))
+         {
+            /* compute x_i+1 - x_i, (note: x_i stored in r) */
+            hypre_StructAxpy(-1.0, x_l[0], r_l[0]);
+            xx_dot_xx = hypre_StructInnerProd(r_l[0], r_l[0]);
+            x_dot_x = hypre_StructInnerProd(x_l[0], x_l[0]);
+         }
+         else
+         {
+            xx_dot_xx = 1.0;
+            x_dot_x = 1.0;
+         }
+      }
       hypre_SMGResidual(residual_data_l[0], A_l[0], x_l[0], b_l[0], r_l[0]);
 
       /* convergence check */
@@ -143,7 +168,7 @@ hypre_SMGSolve( void               *smg_vdata,
 
          if (r_dot_r < eps)
          {
-            if ((rel_change) && (i > 0))
+            if (rel_change)
             {
                if ((xx_dot_xx/x_dot_x) < (eps/b_dot_b))
                   break;
