@@ -40,6 +40,8 @@ CC = mpcc
 F77 = f77
 
 CFLAGS = -O
+# CFLAGS = -O -DZZZ_TIMING
+# CFLAGS = -g -DZZZ_TIMING
 
 FFLAGS = -O
 
