@@ -471,6 +471,7 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
       {
          printf("%4d : Available options for MLI are : \n", mypid);
          printf("\t      outputLevel <d> \n");
+         printf("\t      numLevels <d> \n");
          printf("\t      maxIterations <d> \n");
          printf("\t      cycleType <'V','W'> \n");
          printf("\t      strengthThreshold <f> \n");
@@ -487,6 +488,12 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
    else if ( !strcmp(param2, "outputLevel") )
    {
       sscanf(paramString,"%s %s %d",param1,param2,&(mli_object->outputLevel_));
+   }
+   else if ( !strcmp(param2, "numLevels") )
+   {
+      sscanf(paramString,"%s %s %d", param1, param2,
+             &(mli_object->nLevels_));
+      if ( mli_object->nLevels_ <= 0 ) mli_object->nLevels_ = 1;
    }
    else if ( !strcmp(param2, "maxIterations") )
    {
@@ -659,6 +666,9 @@ int HYPRE_LSI_MLICreateNodeEqnMap(HYPRE_Solver solver, int nNodes,
    return 0;
 #else
    (void) solver;
+   (void) nNodes;
+   (void) nodeNumbers;
+   (void) eqnNumbers;
    return 1;
 #endif
 }
