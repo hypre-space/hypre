@@ -63,7 +63,6 @@ hypre_IJVectorDestroyPar(hypre_IJVector *vector)
  * initializes IJVectorPar ParVector partitioning
  *
  *****************************************************************************/
-
 int
 hypre_IJVectorSetPartitioningPar(hypre_IJVector *vector,
                                  const int      *partitioning )
@@ -91,7 +90,6 @@ hypre_IJVectorSetPartitioningPar(hypre_IJVector *vector,
  * initializes IJVectorPar ParVector local partitioning
  *
  *****************************************************************************/
-
 int
 hypre_IJVectorSetLocalPartitioningPar(hypre_IJVector *vector,
                                       int             vec_start_this_proc,
@@ -137,7 +135,6 @@ hypre_IJVectorSetLocalPartitioningPar(hypre_IJVector *vector,
  * initializes ParVector of IJVectorPar
  *
  *****************************************************************************/
-
 int
 hypre_IJVectorInitializePar(hypre_IJVector *vector)
 {
@@ -411,7 +408,7 @@ hypre_IJVectorSetLocalComponentsInBlockPar(hypre_IJVector *vector,
 {
    int ierr = 0;
    int my_id;
-   int i, vec_start, vec_stop, local_n, local_start, local_stop;
+   int i, vec_start, vec_stop, local_start, local_stop;
    double *data;
 
    hypre_ParVector *par_vector = hypre_IJVectorLocalStorage(vector);
@@ -488,7 +485,6 @@ hypre_IJVectorSetLocalComponentsInBlockPar(hypre_IJVector *vector,
       exit(1);
    }
 
-   local_n = vec_stop - vec_start;
    local_start = glob_vec_index_start - vec_start;
    local_stop  = glob_vec_index_stop  - vec_start;
 
@@ -638,7 +634,6 @@ hypre_IJVectorAddToLocalComponentsPar(hypre_IJVector *vector,
  * adds to a contiguous set of components in an IJVectorPar
  *
  *****************************************************************************/
-
 int
 hypre_IJVectorAddToLocalComponentsInBlockPar(hypre_IJVector *vector,
                                              int             glob_vec_index_start,
@@ -648,7 +643,7 @@ hypre_IJVectorAddToLocalComponentsInBlockPar(hypre_IJVector *vector,
 {
    int ierr = 0;
    int my_id;
-   int i, vec_start, vec_stop, local_n, local_start, local_stop;
+   int i, vec_start, vec_stop, local_start, local_stop;
    double *data;
 
    hypre_ParVector *par_vector = hypre_IJVectorLocalStorage(vector);
@@ -721,7 +716,6 @@ hypre_IJVectorAddToLocalComponentsInBlockPar(hypre_IJVector *vector,
       exit(1);
    }
 
-   local_n = vec_stop - vec_start;
    local_start = glob_vec_index_start - vec_start;
    local_stop  = glob_vec_index_stop  - vec_start;
 
@@ -752,7 +746,6 @@ hypre_IJVectorAddToLocalComponentsInBlockPar(hypre_IJVector *vector,
  * assemble the partitioning of the vector
  *
  *****************************************************************************/
-
 int
 hypre_IJVectorAssemblePar(hypre_IJVector *vector)
 {
@@ -793,7 +786,6 @@ hypre_IJVectorAssemblePar(hypre_IJVector *vector)
  * get a potentially noncontiguous set of IJVectorPar components
  *
  *****************************************************************************/
-
 int
 hypre_IJVectorGetLocalComponentsPar(hypre_IJVector *vector,
                                     int             num_values,
@@ -922,7 +914,6 @@ hypre_IJVectorGetLocalComponentsPar(hypre_IJVector *vector,
  * gets a contiguous set of components in an IJVectorPar
  *
  *****************************************************************************/
-
 int
 hypre_IJVectorGetLocalComponentsInBlockPar(hypre_IJVector *vector,
                                            int             glob_vec_index_start,
@@ -932,7 +923,7 @@ hypre_IJVectorGetLocalComponentsInBlockPar(hypre_IJVector *vector,
 {
    int ierr = 0;
    int my_id;
-   int i, vec_start, vec_stop, local_n, local_start, local_stop;
+   int i, vec_start, vec_stop, local_start, local_stop;
    double *data;
 
    hypre_ParVector *par_vector = hypre_IJVectorLocalStorage(vector);
@@ -1005,7 +996,6 @@ hypre_IJVectorGetLocalComponentsInBlockPar(hypre_IJVector *vector,
       exit(1);
    }
 
-   local_n = vec_stop - vec_start;
    local_start = glob_vec_index_start - vec_start;
    local_stop  = glob_vec_index_stop  - vec_start;
 
