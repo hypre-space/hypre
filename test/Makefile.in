@@ -252,7 +252,7 @@ sstruct: sstruct.o
 new_ij: new_ij.o
 	@echo  "Building" $@ "... "
 	${CC} -o $@ $@.o ${IJ_LS_LFLAGS}
-	@if test -d  "TEST_ij then cp $@ TEST_ij; fi
+	@if test -d  "TEST_ij"; then cp $@ TEST_ij; fi
 
 ij: ij.o
 	@echo  "Building" $@ "... "
@@ -274,6 +274,10 @@ struct.C++: struct.C++.o
 sstruct.C++: sstruct.C++.o
 	@echo  "Building" $@ "... "
 	${CXX} -o $@ $@.o ${SSTRUCT_LFLAGS}
+
+new_ij.C++: new_ij.C++.o
+	@echo  "Building" $@ "... "
+	${CXX} -o $@ $@.o ${IJ_LS_LFLAGS}
 
 ij.C++: ij.C++.o
 	@echo  "Building" $@ "... "
