@@ -9,7 +9,7 @@
 
 
 
-#include "headers.h" 
+#include "headers.h"  
 
 
 
@@ -48,7 +48,9 @@ hypre_AMGBuildRBMInterp( hypre_CSRMatrix     *A,
   double *a_dof_dof = hypre_CSRMatrixData(A);
 
 
-  int *i_dof_neighbor_dof, *j_dof_neighbor_dof;
+  int *i_ext_int, *j_ext_int;
+
+  int ext_int_counter;
                          
   int *fine_to_coarse;
 
@@ -72,7 +74,7 @@ hypre_AMGBuildRBMInterp( hypre_CSRMatrix     *A,
   int local_dof_counter, max_local_dof_counter=0; 
   int fine_node_counter, coarse_node_counter;
 
-  int dof_neighbor_dof_counter = 0;
+
 
   int dof_neighbor_coarsedof_counter = 0, coarsedof_counter = 0,
     dof_counter = 0;
@@ -126,7 +128,6 @@ hypre_AMGBuildRBMInterp( hypre_CSRMatrix     *A,
       /*--------------------------------------------------------------------
        *  If i is a c-point, interpolation is the identity. 
        *--------------------------------------------------------------------*/
-
 
 
       if (CF_marker[i] >= 0)
@@ -212,27 +213,6 @@ hypre_AMGBuildRBMInterp( hypre_CSRMatrix     *A,
   i_dof_neighbor_coarsedof[num_dofs] = dof_neighbor_coarsedof_counter;
 
 
-  i_dof_neighbor_dof = hypre_CTAlloc(int, num_dofs+1);
-  j_dof_neighbor_dof = hypre_CTAlloc(int, num_dofs+dof_neighbor_coarsedof_counter);
-
-  for (i = 0; i < num_dofs; i++)
-    {
-      i_dof_neighbor_dof[i] = dof_neighbor_dof_counter;
-      j_dof_neighbor_dof[dof_neighbor_dof_counter] = i;
-      dof_neighbor_dof_counter++;
-      if (CF_marker[i] < 0)
-	for (j=i_dof_neighbor_coarsedof[i]; 
-	     j < i_dof_neighbor_coarsedof[i+1]; 
-	     j++)
-	  {
-	    j_dof_neighbor_dof[dof_neighbor_dof_counter] = 
-	      j_dof_neighbor_coarsedof[j];
-	    dof_neighbor_dof_counter++;
-	  }	
-    }
-
-  i_dof_neighbor_dof[num_dofs] = dof_neighbor_dof_counter;
-
   i_global_to_local = hypre_CTAlloc(int, num_dofs); 
 
 
@@ -244,10 +224,11 @@ hypre_AMGBuildRBMInterp( hypre_CSRMatrix     *A,
       if (CF_marker[i_dof] < 0)
 	{
 	  local_dof_counter = 0;
-	  for (j=i_dof_neighbor_dof[i_dof]; j < i_dof_neighbor_dof[i_dof+1]; 
+
+	  for (j=i_dof_dof[i_dof]; j < i_dof_dof[i_dof+1]; 
 	       j++)
 	    {
-	      j_dof = j_dof_neighbor_dof[j];
+	      j_dof = j_dof_dof[j];
 
 	      if (i_global_to_local[j_dof] < 0)
 		{
@@ -255,44 +236,18 @@ hypre_AMGBuildRBMInterp( hypre_CSRMatrix     *A,
 		  local_dof_counter++;
 		}
 
-	      i_dof_on_list = -1;
-	      for (i = i_dof_neighbor_coarsedof[i_dof]; 
-		   i < i_dof_neighbor_coarsedof[i_dof+1]; i++)
-		if (j_dof_neighbor_coarsedof[i] == j_dof)
-		  {
-		    i_dof_on_list++;
-		    break;
-		  }
-
-	      /* add dofs adjacent to non--interpolatory dofs; -------- */
-	      if (i_dof_on_list == -1)
-		{
-		  for (k=i_dof_dof[j_dof]; k < i_dof_dof[j_dof+1]; k++)
-		    {
-		      if (i_global_to_local[j_dof_dof[k]] == -1)
-			{
-			  i_global_to_local[j_dof_dof[k]] 
-			    = local_dof_counter;
-			  local_dof_counter++;
-			}
-		    }
-		}
 	    }
 	
 
 	  if (local_dof_counter > max_local_dof_counter)
 	    max_local_dof_counter = local_dof_counter;
 
-	  for (j=i_dof_neighbor_dof[i_dof]; j < i_dof_neighbor_dof[i_dof+1]; 
+	  for (j=i_dof_dof[i_dof]; j < i_dof_dof[i_dof+1]; 
 	       j++)
 	    {
-	      j_dof = j_dof_neighbor_dof[j];
+	      j_dof = j_dof_dof[j];
 	      i_global_to_local[j_dof] = -1;
-	       
-	      for (k=i_dof_dof[j_dof]; k < i_dof_dof[j_dof+1]; k++)
-		i_global_to_local[j_dof_dof[k]] = -1;
-		
-	    }
+	    }	       
 	}
 
     }
@@ -345,22 +300,26 @@ hypre_AMGBuildRBMInterp( hypre_CSRMatrix     *A,
   P_ext_int = hypre_CTAlloc(double, max_local_dof_counter *
 			    max_local_dof_counter);
 
+  for (i_loc =0; i_loc < max_local_dof_counter; i_loc++)
+    for (j_loc =0; j_loc < max_local_dof_counter; j_loc++)
+      P_ext_int[j_loc + i_loc * max_local_dof_counter] = 0.e0;
 
-  /*
-  for (i_dof =0; i_dof < num_dofs; i_dof++)
-     i_global_to_local[i_dof] = -1;
-     
-     */
 
+
+  i_ext_int = hypre_CTAlloc(int, max_local_dof_counter+1);
+  j_ext_int = hypre_CTAlloc(int, max_local_dof_counter *
+			    max_local_dof_counter);
+  
 
   for (i_dof =0; i_dof < num_dofs; i_dof++)
     {
       if (CF_marker[i_dof] < 0)
         {
           local_dof_counter = 0;
-          for (j=i_dof_neighbor_dof[i_dof]; j<i_dof_neighbor_dof[i_dof+1]; j++)
+
+          for (j=i_dof_dof[i_dof]; j<i_dof_dof[i_dof+1]; j++)
             {
-	      j_dof = j_dof_neighbor_dof[j];
+	      j_dof = j_dof_dof[j];
 
 	      if (i_global_to_local[j_dof] < 0)
 		{
@@ -368,180 +327,60 @@ hypre_AMGBuildRBMInterp( hypre_CSRMatrix     *A,
 		  i_global_to_local[j_dof] = local_dof_counter;
 		  local_dof_counter++;
 		}
-
-	      i_dof_on_list = -1;
-	      for (i = i_dof_neighbor_coarsedof[i_dof]; 
-		   i < i_dof_neighbor_coarsedof[i_dof+1]; i++)
-		if (j_dof_neighbor_coarsedof[i] == j_dof)
-		  {
-		    i_dof_on_list++;
-		    break;
-		  }
-
-
-	      if (i_dof_on_list == -1)
-		{
-		  for (k=i_dof_dof[j_dof]; k < i_dof_dof[j_dof+1]; k++)
-		    {
-		      if (i_global_to_local[j_dof_dof[k]] == -1)
-			{
-			  i_local_to_global[local_dof_counter] = j_dof_dof[k];
-			  i_global_to_local[j_dof_dof[k]] 
-				= local_dof_counter;
-			  local_dof_counter++;
-			}
-		    }
-		}
-
 	    }
+
 
           for (l_loc=0; l_loc < local_dof_counter; l_loc++)
 	    i_int[l_loc] = -1;
 
 	  dof_counter = 0;
-	  for (j=i_dof_neighbor_dof[i_dof]; j < i_dof_neighbor_dof[i_dof+1]; 
-	       j++)
+	  i_int[i_global_to_local[i_dof]]=dof_counter;
+	  dof_counter++;
+
+	  for (j = i_dof_neighbor_coarsedof[i_dof]; 
+	       j < i_dof_neighbor_coarsedof[i_dof+1]; j++)
 	    {
-	      i_int[i_global_to_local[j_dof_neighbor_dof[j]]] = dof_counter;
-	      dof_counter++;
-	    }
-
-
-	  /*
-	  printf("local_dof_counter: %d, dof_counter: %d\n",
-		 local_dof_counter, dof_counter); */
-
-	  for (l_loc=0; l_loc < local_dof_counter; l_loc++)
-	    for (k_loc=0; k_loc < local_dof_counter; k_loc++)
-              AE_neighbor_matrix[l_loc*local_dof_counter + k_loc] = 0.e0;
-
-
-	  for (l_loc=0; l_loc < local_dof_counter; l_loc++)
-	    {
-	      l = i_local_to_global[l_loc];
-	      for (j=i_dof_dof[l]; j < i_dof_dof[l+1]; j++)
+	      j_dof = j_dof_neighbor_coarsedof[j];
+	      if (i_int[i_global_to_local[j_dof]] < 0)
 		{
-		  if (i_global_to_local[j_dof_dof[j]] > -1)
-		    {
-		      j_loc = i_global_to_local[j_dof_dof[j]];
-		      AE_neighbor_matrix[l_loc+local_dof_counter*j_loc] 
-			= a_dof_dof[j];
-		    }
+		  i_int[i_global_to_local[j_dof]] = dof_counter;
+		  dof_counter++;
 		}
 	    }
 
-
-
-	  for (i_loc =0; i_loc < dof_counter; i_loc++)
-	    for (j_loc =0; j_loc < local_dof_counter; j_loc++)
-	      P_ext_int[j_loc + i_loc * local_dof_counter] = 0.e0;
-
-	  for (i_loc =0; i_loc < local_dof_counter; i_loc++)
-	    if (i_int[i_loc] >=0)
-	      P_ext_int[i_loc + i_int[i_loc] * local_dof_counter] = 1.e0;
-	    else
-	      {
-		/* find the neighbors of i_local_to_global[i_loc] */
-
-		diag = 0.e0;
-		for (k=0; k < num_RBM; k++)
-		  if (RBM[k][i_local_to_global[i_loc]] != 0.e0) break;
-		    
-		for (j=i_dof_dof[i_local_to_global[i_loc]];
-		     j<i_dof_dof[i_local_to_global[i_loc]+1]; j++)
-		  {
-		    j_dof = j_dof_dof[j];
-		    if (i_global_to_local[j_dof] >= 0)
-		      if (i_int[i_global_to_local[j_dof]] >= 0 &&
-			  RBM[k][j_dof] != 0.e0)
-			  diag +=fabs(a_dof_dof[j]);
-		  }
-
-		if (diag > 0.e0)
-		  for (j=i_dof_dof[i_local_to_global[i_loc]];
-		       j<i_dof_dof[i_local_to_global[i_loc]+1]; j++)
-		    {
-		      j_dof = j_dof_dof[j];
-		      j_loc = i_global_to_local[j_dof];
-		      if (j_loc >= 0)
-			if (i_int[j_loc] >= 0 && RBM[k][j_dof] != 0.e0)
-			  P_ext_int[i_loc + i_int[j_loc]*local_dof_counter]=
-			    fabs(a_dof_dof[j])/ diag;
-		    }
-
-	      }
-
-
-	  /* multiply AE times P_ext_int: ================================== */
-
-
-	  for (i_loc =0; i_loc < local_dof_counter; i_loc++)
-	    for (j_loc =0; j_loc < local_dof_counter; j_loc++)
-	      {
-		if (i_int[i_loc] >= 0 && i_int[j_loc] >=0)
-		  {
-		    AE[i_int[i_loc]+i_int[j_loc] * dof_counter]= 0.e0;
-		    for (l_loc =0; l_loc < local_dof_counter; l_loc++)
-		      AE[i_int[i_loc]+i_int[j_loc] * dof_counter]+=
-			AE_neighbor_matrix[i_loc + l_loc * local_dof_counter] *
-			P_ext_int[l_loc + i_int[j_loc] * local_dof_counter];
-		  }
-	      }
-
-          /* partition A into a two--level block structure: ---------------- */
+	  for (i=0; i < dof_counter; i++)
+	    i_coarse_to_global[i] = -1;
 
           coarse_node_counter = 0;
+	  for (j = i_dof_neighbor_coarsedof[i_dof]; 
+	       j < i_dof_neighbor_coarsedof[i_dof+1]; j++)
+	    {
+	      i = i_global_to_local[j_dof_neighbor_coarsedof[j]];
+
+	      i_coarse[coarse_node_counter] = i_int[i];
+	      i_coarse_to_global[i_int[i]] = coarse_node_counter; 
+	      coarse_node_counter++;
+	    }
+	  
+
           fine_node_counter = 0;
           for (i=0; i < local_dof_counter; i++)
-            {
-              if (i_int[i] > -1)
-		{
-		  if (CF_marker[i_local_to_global[i]] >=0)
-		    {
-		      /* check if it is on the neighbor list: ----------- */
+	    if (i_int[i] > -1)
+	      {
+		if (i_coarse_to_global[i_int[i]] < 0)
+		  {
+		    i_fine[fine_node_counter] = i_int[i];
 
-		      i_dof_on_list = -1;
-		      for (j = i_dof_neighbor_coarsedof[i_dof];
-			   j < i_dof_neighbor_coarsedof[i_dof+1]; j++)
-			{
-			  if (j_dof_neighbor_coarsedof[j] ==
-			      i_local_to_global[i])
-			    { 
-			      i_coarse[coarse_node_counter] = i_int[i];
+		    i_fine_to_global[i_int[i]] = fine_node_counter;
+		    fine_node_counter++;
+		  }
+	      }
 
-			      i_coarse_to_global[i_int[i]] = coarse_node_counter; 
-			      coarse_node_counter++;
-			      i_dof_on_list++;
-			    }
-
-			  if (i_dof_on_list > -1) 
-			    break;
-			}
-
-		      if (i_dof_on_list == -1)
-			{
-			  i_fine[fine_node_counter] = i_int[i];
-
-			  i_fine_to_global[i_int[i]] = fine_node_counter;
-			  fine_node_counter++;
-			}
-		    }
-
-
-
-		  if (CF_marker[i_local_to_global[i]] < 0)
-		    {
-		      i_fine[fine_node_counter] = i_int[i];
-		      i_fine_to_global[i_int[i]] = fine_node_counter; 
-		      fine_node_counter++;
-		    }
-		}
-	    }
 
           /* ============================================================
           printf("fine nodes: %d;  coarse nodes: %d\n", fine_node_counter,
                  coarse_node_counter);
-           =========================================================== */
+	   =========================================================== */
 
 
 
@@ -555,41 +394,81 @@ hypre_AMGBuildRBMInterp( hypre_CSRMatrix     *A,
 
 
 
-	  for (i=0; i< fine_node_counter; i++)
+
+	  /*
+	  printf("local_dof_counter: %d, dof_counter: %d\n",
+		 local_dof_counter, dof_counter); */
+
+	  ext_int_counter = 0;
+	  for (i_loc =0; i_loc < local_dof_counter; i_loc++)
 	    {
-	      for (j=0; j< fine_node_counter; j++)
+	      i_ext_int[i_loc] = ext_int_counter;
+
+	      if (i_int[i_loc] >=0)
 		{
-		  AE_f[i+fine_node_counter*j] = 
-		    AE[i_fine[i]+dof_counter*i_fine[j]];
+		  P_ext_int[i_loc + i_int[i_loc] * local_dof_counter] = 1.e0;
+		  j_ext_int[ext_int_counter] = i_loc;
+		  ext_int_counter++;
+		}
+	      else
+		{
+		  /* find the neighbors of i_local_to_global[i_loc] */
+
+		  diag = 0.e0;
+		  for (k=0; k < num_RBM; k++)
+		    if (RBM[k][i_local_to_global[i_loc]] != 0.e0) break;
+		  
+		  for (j=i_dof_dof[i_local_to_global[i_loc]];
+		       j<i_dof_dof[i_local_to_global[i_loc]+1]; j++)
+		    {
+		      j_dof = j_dof_dof[j];
+		      if (i_global_to_local[j_dof] >= 0)
+			if (i_int[i_global_to_local[j_dof]] >= 0 &&
+			    RBM[k][j_dof] != 0.e0)
+			  {
+			    j_ext_int[ext_int_counter]= 
+			      i_global_to_local[j_dof];
+			    ext_int_counter++;
+			    P_ext_int[i_loc + i_int[i_global_to_local[j_dof]]
+				     *local_dof_counter]= fabs(a_dof_dof[j]);
+
+			    diag +=fabs(a_dof_dof[j]);
+			  }
+		    }
+
+		  if (diag > 0.e0)
+		    for (j=i_ext_int[i_loc]; j < ext_int_counter; j++)
+		      P_ext_int[i_loc + i_int[j_ext_int[j]]*local_dof_counter]
+			/=diag;
+
 		}
 
-	      for (j=0; j< coarse_node_counter; j++)
+	    }
+
+	  i_ext_int[local_dof_counter] = ext_int_counter;
+
+	  /* multiply AE times P_ext_int: ================================== */
+
+	  for (j_loc =0; j_loc < dof_counter; j_loc++)
+	    AE[i_int[i_global_to_local[i_dof]]+j_loc * dof_counter]= 0.e0;
+
+	  i_loc = i_global_to_local[i_dof];
+
+	  /* for (l_loc =0; l_loc < local_dof_counter; l_loc++) */
+
+	  for (i=i_dof_dof[i_dof]; i < i_dof_dof[i_dof+1]; i++)
+	    {
+	      l_loc = i_global_to_local[j_dof_dof[i]];
+	      for (j=i_ext_int[l_loc]; j < i_ext_int[l_loc+1]; j++)
 		{
-		  AE_fc[i+fine_node_counter*j] = 
-		    AE[i_fine[i]+dof_counter *i_coarse[j]];
-				      
+		  j_loc = j_ext_int[j];
+		  AE[i_int[i_loc]+i_int[j_loc] * dof_counter]+=
+		    a_dof_dof[i] * 
+		    /* AE_neighbor_matrix[i_loc+l_loc*local_dof_counter] * */
+		    P_ext_int[l_loc + i_int[j_loc] * local_dof_counter];
 		}
 	    }
 
-
-          /* prolongation matrix P  = -(AE_f)^{-1} AE_{fc};  */
-
-
-	  /* prolongation matrix P  = -(AE_f)^{-1} AE_{fc};  */
-
-	  /* invert AE_f: ------------------------------------------------*/
-	  ierr = matinv(XE_f, AE_f, fine_node_counter);
-	  
-	  if (ierr < 0) printf("ierr_matinv: %d\n", ierr);
-
-	}
-      
-      if (CF_marker[i_dof] < 0)
-	{
-	  i_row = i_fine_to_global[i_int[i_global_to_local[i_dof]]];
-
-	  ierr = row_mat_rectmat_prod(P_coeff, XE_f, AE_fc, i_row,
-				      fine_node_counter, coarse_node_counter); 
 	}
 
       for (i = i_dof_neighbor_coarsedof[i_dof]; 
@@ -600,20 +479,25 @@ hypre_AMGBuildRBMInterp( hypre_CSRMatrix     *A,
               j_loc= i_coarse_to_global[i_int[i_global_to_local[
 			        j_dof_neighbor_coarsedof[i]]]]; 
 
-	      Prolong_coeff[i] = P_coeff[j_loc];
+
+	      if (AE[i_fine[0]+dof_counter*i_fine[0]] !=0.e0)
+		Prolong_coeff[i] = -AE[i_fine[0]+dof_counter *i_coarse[j_loc]]
+		  /AE[i_fine[0]+dof_counter*i_fine[0]];
+	      else 
+		Prolong_coeff[i] = 0.e0;	
 
 	    }
           else 
             Prolong_coeff[i] = 1.e0;
         }
 
-      for (j=i_dof_neighbor_dof[i_dof]; j<i_dof_neighbor_dof[i_dof+1]; j++)
+
+      for (j=i_dof_dof[i_dof]; j < i_dof_dof[i_dof+1]; 
+	   j++)
 	{
-	  j_dof = j_dof_neighbor_dof[j];
+	  j_dof = j_dof_dof[j];
 	  i_global_to_local[j_dof] = -1;
-	  for (k=i_dof_dof[j_dof]; k < i_dof_dof[j_dof+1]; k++)
-	    i_global_to_local[j_dof_dof[k]] = -1;
-	}
+	}	       
 
     }
 
@@ -671,7 +555,6 @@ hypre_AMGBuildRBMInterp( hypre_CSRMatrix     *A,
 
 
 
-
    *P_ptr = P;
 
 
@@ -681,25 +564,20 @@ hypre_AMGBuildRBMInterp( hypre_CSRMatrix     *A,
   hypre_TFree(i_coarse);
   hypre_TFree(i_fine);
 
-  hypre_TFree(i_dof_neighbor_dof);
-  hypre_TFree(j_dof_neighbor_dof);
-
-
-
-
   hypre_TFree(i_coarse_to_global);
   hypre_TFree(i_fine_to_global);
 
 
-
-
   hypre_TFree(AE_neighbor_matrix);
   hypre_TFree(AE);
-  hypre_TFree(P_ext_int);
+
   hypre_TFree(XE_f);
   hypre_TFree(AE_f);
   hypre_TFree(AE_fc);
 
+  hypre_TFree(i_ext_int);
+  hypre_TFree(j_ext_int);
+  hypre_TFree(P_ext_int);
 
 
   hypre_TFree(P_coeff);
