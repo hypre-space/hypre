@@ -23,13 +23,12 @@
 
 MLI_Solver_HSGS::MLI_Solver_HSGS(char *name) : MLI_Solver(name)
 {
-   Amat_            = NULL;
-   nSweeps_         = 1;
-   relaxWeights_    = new double[1];
-   relaxWeights_[0] = 1.0;
-   mliVec_          = NULL;
-   calcOmega_       = 1;
-   printRNorm_      = 0;
+   Amat_         = NULL;
+   nSweeps_      = 1;
+   relaxWeights_ = 1.0;
+   relaxOmega_   = 1.0;
+   mliVec_       = NULL;
+   calcOmega_    = 1;
 }
 
 /******************************************************************************
@@ -38,9 +37,8 @@ MLI_Solver_HSGS::MLI_Solver_HSGS(char *name) : MLI_Solver(name)
 
 MLI_Solver_HSGS::~MLI_Solver_HSGS()
 {
-   if ( relaxWeights_ != NULL ) delete [] relaxWeights_;
-   relaxWeights_ = NULL;
-   if ( mliVec_ != NULL ) delete mliVec_;
+   if (mliVec_ != NULL) delete mliVec_;
+   mliVec_ = NULL;
 }
 
 /******************************************************************************
@@ -49,9 +47,10 @@ MLI_Solver_HSGS::~MLI_Solver_HSGS()
 
 int MLI_Solver_HSGS::setup(MLI_Matrix *mat)
 {
-   Amat_   = mat;
+   Amat_ = mat;
+   if (mliVec_ != NULL) delete mliVec_;
    mliVec_ = Amat_->createVector();
-   if ( calcOmega_ == 1 ) calcOmega();
+   if (calcOmega_ == 1) calcOmega();
    return 0;
 }
 
@@ -61,180 +60,35 @@ int MLI_Solver_HSGS::setup(MLI_Matrix *mat)
 
 int MLI_Solver_HSGS::solve(MLI_Vector *fIn, MLI_Vector *uIn)
 {
-   int                 *ADiagI, *ADiagJ, *AOffdI, *AOffdJ;
-   double              *ADiagA, *AOffdA, *uData, *fData;
-   register int        iStart, iEnd, jj;
-   int                 i, j, is, localNRows, extNRows, *tmpJ, relaxError=0;
-   int                 index, nprocs, mypid, nSends, start;
-   register double     res;
-   double              zero = 0.0, relaxWeight, rnorm;
-   double              *vBufData=NULL, *tmpData, *vExtData=NULL;
-   MPI_Comm            comm;
-   hypre_ParCSRMatrix     *A;
-   hypre_CSRMatrix        *ADiag, *AOffd;
-   hypre_ParVector        *f, *u, *hypreR;
-   hypre_ParCSRCommPkg    *commPkg;
-   hypre_ParCSRCommHandle *commHandle;
-   MLI_Vector             *mliRvec;
+   int                relaxType=6, relaxPts=0, iS;
+   hypre_ParCSRMatrix *A;
+   hypre_ParVector    *f, *u, *vTemp;
 
    /*-----------------------------------------------------------------
     * fetch machine and smoother parameters
     *-----------------------------------------------------------------*/
 
-   A          = (hypre_ParCSRMatrix *) Amat_->getMatrix();
-   comm       = hypre_ParCSRMatrixComm(A);
-   commPkg    = hypre_ParCSRMatrixCommPkg(A);
-   ADiag      = hypre_ParCSRMatrixDiag(A);
-   localNRows = hypre_CSRMatrixNumRows(ADiag);
-   ADiagI     = hypre_CSRMatrixI(ADiag);
-   ADiagJ     = hypre_CSRMatrixJ(ADiag);
-   ADiagA     = hypre_CSRMatrixData(ADiag);
-   AOffd      = hypre_ParCSRMatrixOffd(A);
-   extNRows   = hypre_CSRMatrixNumCols(AOffd);
-   AOffdI     = hypre_CSRMatrixI(AOffd);
-   AOffdJ     = hypre_CSRMatrixJ(AOffd);
-   AOffdA     = hypre_CSRMatrixData(AOffd);
-   u          = (hypre_ParVector *) uIn->getVector();
-   uData      = hypre_VectorData(hypre_ParVectorLocalVector(u));
-   f          = (hypre_ParVector *) fIn->getVector();
-   fData      = hypre_VectorData(hypre_ParVectorLocalVector(f));
-   MPI_Comm_size(comm,&nprocs);  
-   MPI_Comm_rank(comm,&mypid);  
-
-   /*-----------------------------------------------------------------
-    * setting up for interprocessor communication
-    *-----------------------------------------------------------------*/
-
-   if (nprocs > 1)
-   {
-      nSends = hypre_ParCSRCommPkgNumSends(commPkg);
-      if ( nSends > 0 )
-         vBufData = new double[hypre_ParCSRCommPkgSendMapStart(commPkg,nSends)];
-      else vBufData = NULL;
-      if ( extNRows > 0 ) vExtData = new double[extNRows];
-      else                vExtData = NULL;
-   }
-   if ( printRNorm_ == 1 )
-   {
-      mliRvec = Amat_->createVector();
-      hypreR  = (hypre_ParVector *) mliRvec->getVector();
-   }
-
-   /*-----------------------------------------------------------------
-    * perform SGS sweeps
-    *-----------------------------------------------------------------*/
- 
-   relaxWeight = 1.0;
-   for( is = 0; is < nSweeps_; is++ )
-   {
-      if ( relaxWeights_ != NULL ) relaxWeight = relaxWeights_[is];
-      if ( relaxWeight <= 0.0 ) relaxWeight = 1.0;
-
-      /*-----------------------------------------------------------------
-       * forward sweep
-       *-----------------------------------------------------------------*/
-
-      if (nprocs > 1)
-      {
-         index = 0;
-         for (i = 0; i < nSends; i++)
-         {
-            start = hypre_ParCSRCommPkgSendMapStart(commPkg, i);
-            for (j=start;j<hypre_ParCSRCommPkgSendMapStart(commPkg,i+1);j++)
-               vBufData[index++]
-                   = uData[hypre_ParCSRCommPkgSendMapElmt(commPkg,j)];
-         }
-         commHandle = hypre_ParCSRCommHandleCreate(1,commPkg,vBufData,
-                                                   vExtData);
-         hypre_ParCSRCommHandleDestroy(commHandle);
-         commHandle = NULL;
-      }
-
-      for (i = 0; i < localNRows; i++)
-      {
-         if ( ADiagA[ADiagI[i]] != zero)
-         {
-            res      = fData[i];
-            iStart   = ADiagI[i];
-            iEnd     = ADiagI[i+1];
-            tmpJ    = &(ADiagJ[iStart]);
-            tmpData = &(ADiagA[iStart]);
-            for (jj = iStart; jj < iEnd; jj++)
-               res -= (*tmpData++) * uData[*tmpJ++];
-            if ( nprocs > 1 )
-            {
-               iStart  = AOffdI[i];
-               iEnd    = AOffdI[i+1];
-               tmpJ    = &(AOffdJ[iStart]);
-               tmpData = &(AOffdA[iStart]);
-               for (jj = iStart; jj < iEnd; jj++)
-                  res -= (*tmpData++) * vExtData[*tmpJ++];
-            }
-            uData[i] += relaxWeight * res / ADiagA[ADiagI[i]];
-         }
-         else printf("MLI_Solver_HSGS error : diag = 0.\n");
-      }
-
-      /*-----------------------------------------------------------------
-       * backward sweep
-       *-----------------------------------------------------------------*/
-
-      for (i = localNRows-1; i > -1; i--)
-      {
-         if ( ADiagA[ADiagI[i]] != zero)
-         {
-            res     = fData[i];
-            iStart  = ADiagI[i];
-            iEnd    = ADiagI[i+1];
-            tmpJ    = &(ADiagJ[iStart]);
-            tmpData = &(ADiagA[iStart]);
-            for (jj = iStart; jj < iEnd; jj++)
-               res -= (*tmpData++) * uData[*tmpJ++];
-            if ( nprocs > 1 )
-            {
-               iStart  = AOffdI[i];
-               iEnd    = AOffdI[i+1];
-               tmpJ    = &(AOffdJ[iStart]);
-               tmpData = &(AOffdA[iStart]);
-               for (jj = iStart; jj < iEnd; jj++)
-                  res -= (*tmpData++) * vExtData[*tmpJ++];
-            }
-            uData[i] += relaxWeight * res / ADiagA[ADiagI[i]];
-         }
-      }
-      if ( printRNorm_ == 1 )
-      {
-         hypre_ParVectorCopy( f, hypreR );
-         hypre_ParCSRMatrixMatvec( -1.0, A, u, 1.0, hypreR );
-         rnorm = sqrt(hypre_ParVectorInnerProd( hypreR, hypreR ));
-         if ( mypid == 0 )
-            printf("\tMLI_Solver_HSGS iter = %4d, rnorm = %e (omega=%e)\n", 
-                   is, rnorm, relaxWeight);
-      }
-   }
-   if ( printRNorm_ == 1 ) delete mliRvec;
-
-   /*-----------------------------------------------------------------
-    * clean up and return
-    *-----------------------------------------------------------------*/
-
-   if ( vExtData != NULL ) delete [] vExtData;
-   if ( vBufData != NULL ) delete [] vBufData;
-   return(relaxError); 
+   A     = (hypre_ParCSRMatrix *) Amat_->getMatrix();
+   u     = (hypre_ParVector *) uIn->getVector();
+   f     = (hypre_ParVector *) fIn->getVector();
+   vTemp = (hypre_ParVector *) mliVec_->getVector();
+   for (iS = 0; iS < nSweeps_; iS++)
+      hypre_BoomerAMGRelax(A,f,NULL,relaxType,relaxPts,relaxWeights_,
+                           relaxOmega_,u,vTemp);
+   return 0;
 }
 
 /******************************************************************************
  * set SGS parameters
  *---------------------------------------------------------------------------*/
 
-int MLI_Solver_HSGS::setParams( char *paramString, int argc, char **argv )
+int MLI_Solver_HSGS::setParams(char *paramString, int argc, char **argv)
 {
-   int    i;
    double *weights;
    char   param1[100];
 
    sscanf(paramString, "%s", param1);
-   if ( !strcmp(param1, "numSweeps") )
+   if (!strcmp(param1, "numSweeps"))
    {
       if ( argc != 1 ) 
       {
@@ -243,9 +97,6 @@ int MLI_Solver_HSGS::setParams( char *paramString, int argc, char **argv )
       }
       nSweeps_ = *(int*) argv[0];
       if ( nSweeps_ < 1 ) nSweeps_ = 1;
-      if ( relaxWeights_ != NULL ) delete [] relaxWeights_;
-      relaxWeights_ = new double[nSweeps_];
-      for ( i = 0; i < nSweeps_; i++ ) relaxWeights_[i] = 1.0;
       return 0;
    }
    else if ( !strcmp(param1, "relaxWeight") )
@@ -258,17 +109,7 @@ int MLI_Solver_HSGS::setParams( char *paramString, int argc, char **argv )
       if ( argc >= 1 ) nSweeps_ = *(int*)  argv[0];
       if ( argc == 2 ) weights = (double*) argv[1];
       if ( nSweeps_ < 1 ) nSweeps_ = 1;
-      if ( relaxWeights_ != NULL ) delete [] relaxWeights_;
-      relaxWeights_ = NULL;
-      if ( weights != NULL )
-      {
-         relaxWeights_ = new double[nSweeps_];
-         for ( i = 0; i < nSweeps_; i++ ) relaxWeights_[i] = weights[i];
-      }
-   }
-   else if ( !strcmp(param1, "printRNorm") )
-   {
-      printRNorm_ = 1;
+      if ( weights != NULL ) relaxWeights_ = weights[0]; 
    }
    else if ( !strcmp(param1, "calcOmega") )
    {
@@ -290,7 +131,7 @@ int MLI_Solver_HSGS::setParams( char *paramString, int argc, char **argv )
 int MLI_Solver_HSGS::calcOmega()
 {
    int                i, relaxType=6, relaxTypes[2], level=0, numCGSweeps=10;
-   double             relaxWt;
+   double             relaxOmega;
    hypre_ParCSRMatrix *A;
    hypre_ParVector    *vTemp;
    hypre_ParAMGData   *amgData;
@@ -308,9 +149,8 @@ int MLI_Solver_HSGS::calcOmega()
    amgData->grid_relax_type = relaxTypes;
    amgData->smooth_num_levels = 0;
    amgData->smooth_type = 0;
-   hypre_BoomerAMGCGRelaxWt((void *) amgData, level, numCGSweeps, &relaxWt);
-   for ( i = 0; i < nSweeps_; i++ ) relaxWeights_[i] = relaxWt;
-   printf("HSGS : relaxWt = %e\n", relaxWt);
+   hypre_BoomerAMGCGRelaxWt((void *) amgData,level,numCGSweeps,&relaxOmega_);
+   printf("HYPRE/FEI/MLI HSGS : relaxOmega = %e\n", relaxOmega_);
    delete [] amgData->A_array;
    delete [] amgData->CF_marker_array;
    hypre_TFree(amgData);

@@ -25,7 +25,8 @@ class MLI_Solver_HSGS : public MLI_Solver
    int         nSweeps_;
    int         printRNorm_;
    int         calcOmega_;
-   double      *relaxWeights_;
+   double      relaxWeights_;
+   double      relaxOmega_;
    MLI_Vector  *mliVec_;
 
 public :
