@@ -129,6 +129,7 @@ int HYPRE_ParCSRPCGSetup( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_Par
 int HYPRE_ParCSRPCGSolve( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x );
 int HYPRE_ParCSRPCGSetTol( HYPRE_Solver solver , double tol );
 int HYPRE_ParCSRPCGSetMaxIter( HYPRE_Solver solver , int max_iter );
+int HYPRE_ParCSRPCGSetStopCrit( HYPRE_Solver solver , int stop_crit );
 int HYPRE_ParCSRPCGSetTwoNorm( HYPRE_Solver solver , int two_norm );
 int HYPRE_ParCSRPCGSetRelChange( HYPRE_Solver solver , int rel_change );
 int HYPRE_ParCSRPCGSetPrecond( HYPRE_Solver solver , int (*precond )(HYPRE_Solver sol ,HYPRE_ParCSRMatrix matrix ,HYPRE_ParVector b ,HYPRE_ParVector x ), int (*precond_setup )(HYPRE_Solver sol ,HYPRE_ParCSRMatrix matrix ,HYPRE_ParVector b ,HYPRE_ParVector x ), void *precond_data );

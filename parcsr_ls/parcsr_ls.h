@@ -222,6 +222,7 @@ int HYPRE_ParCSRPCGSetup( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_Par
 int HYPRE_ParCSRPCGSolve( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x );
 int HYPRE_ParCSRPCGSetTol( HYPRE_Solver solver , double tol );
 int HYPRE_ParCSRPCGSetMaxIter( HYPRE_Solver solver , int max_iter );
+int HYPRE_ParCSRPCGSetStopCrit( HYPRE_Solver solver , int stop_crit );
 int HYPRE_ParCSRPCGSetTwoNorm( HYPRE_Solver solver , int two_norm );
 int HYPRE_ParCSRPCGSetRelChange( HYPRE_Solver solver , int rel_change );
 int HYPRE_ParCSRPCGSetPrecond( HYPRE_Solver solver , int (*precond )(HYPRE_Solver sol ,HYPRE_ParCSRMatrix matrix ,HYPRE_ParVector b ,HYPRE_ParVector x ), int (*precond_setup )(HYPRE_Solver sol ,HYPRE_ParCSRMatrix matrix ,HYPRE_ParVector b ,HYPRE_ParVector x ), void *precond_data );
@@ -407,6 +408,7 @@ int hypre_KrylovSetup( void *pcg_vdata , void *A , void *b , void *x );
 int hypre_KrylovSolve( void *pcg_vdata , void *A , void *b , void *x );
 int hypre_KrylovSetTol( void *pcg_vdata , double tol );
 int hypre_KrylovSetMaxIter( void *pcg_vdata , int max_iter );
+int hypre_KrylovSetStopCrit( void *pcg_vdata , int stop_crit );
 int hypre_KrylovSetTwoNorm( void *pcg_vdata , int two_norm );
 int hypre_KrylovSetRelChange( void *pcg_vdata , int rel_change );
 int hypre_KrylovSetPrecond( void *pcg_vdata , int (*precond )(), int (*precond_setup )(), void *precond_data );

@@ -52,6 +52,7 @@ typedef struct
    int      max_iter;
    int      two_norm;
    int      rel_change;
+   int      stop_crit;
 
    void    *A;
    void    *p;
@@ -127,6 +128,7 @@ hypre_KrylovCreate( )
    (pcg_data -> max_iter)     = 1000;
    (pcg_data -> two_norm)     = 0;
    (pcg_data -> rel_change)   = 0;
+   (pcg_data -> stop_crit)    = 0; /* relative norm */
    (pcg_data -> matvec_data)  = NULL;
    (pcg_data -> precond)       = hypre_KrylovIdentity;
    (pcg_data -> precond_setup) = hypre_KrylovIdentitySetup;
@@ -244,6 +246,7 @@ hypre_KrylovSolve( void *pcg_vdata,
    int             max_iter     = (pcg_data -> max_iter);
    int             two_norm     = (pcg_data -> two_norm);
    int             rel_change   = (pcg_data -> rel_change);
+   int             stop_crit    = (pcg_data -> stop_crit);
    void           *p            = (pcg_data -> p);
    void           *s            = (pcg_data -> s);
    void           *r            = (pcg_data -> r);
@@ -330,18 +333,43 @@ hypre_KrylovSolve( void *pcg_vdata,
    gamma = hypre_KrylovInnerProd(r,p);
 
    if (bi_prod > 0.0)
-       eps = (tol*tol)*bi_prod;
+   {
+       if ( stop_crit && !rel_change ) eps = tol*tol;
+       else                            eps = (tol*tol)*bi_prod;
+   }
    else
-      {if (two_norm)
-          {eps = (tol*tol)*hypre_KrylovInnerProd(r,r);
-           if (logging > 0 && my_id == 0)
-              {printf("Exiting when ||r||_2 < tol * ||r0||_2\n");
-               printf("Initial ||r0||_2: %e\n",norms[0]);};}
-       else
-          {eps = (tol*tol)*gamma;
-           if (logging > 0 && my_id == 0)
-              {printf("Exiting when ||r||_C < tol * ||r0||_C\n");
-               printf("Initial ||r0||_C: %e\n",sqrt(gamma));};};};
+   {
+      if (two_norm)
+      {
+         if ( stop_crit && !rel_change ) 
+         {
+            eps = tol*tol;
+            if (logging > 0 && my_id == 0)
+            {
+               printf("Exiting when ||r||_2 < tol \n");
+               printf("Initial ||r0||_2: %e\n",norms[0]);
+            }
+         }
+         else
+         {
+            eps = (tol*tol)*hypre_KrylovInnerProd(r,r);
+            if (logging > 0 && my_id == 0)
+            {
+               printf("Exiting when ||r||_2 < tol * ||r0||_2\n");
+               printf("Initial ||r0||_2: %e\n",norms[0]);
+            }
+         }
+      }
+      else
+      {
+         eps = (tol*tol)*gamma;
+         if (logging > 0 && my_id == 0)
+         {
+            printf("Exiting when ||r||_C < tol * ||r0||_C\n");
+            printf("Initial ||r0||_C: %e\n",sqrt(gamma));
+         }
+      }
+   }
 
    while ((i+1) <= max_iter)
    {
@@ -432,21 +460,40 @@ hypre_KrylovSolve( void *pcg_vdata,
       if (bi_prod > 0.0)
          {if (two_norm)
              {
-              printf("\n\n");
-              printf("Iters       ||r||_2      conv.rate  ||r||_2/||b||_2\n");
-              printf("-----    ------------    ---------  ------------ \n");
+              if ( stop_crit && !rel_change )
+              {
+                printf("\n\n");
+                printf("Iters       ||r||_2      conv.rate\n");
+                printf("-----    ------------    ---------\n");
+                for (j = 1; j <= i; j++)
+                {
+                   printf("% 5d    %e    %f\n", j, norms[j], norms[j]/ 
+		       norms[j-1]);
+                }
+              }
+              else
+              {
+                printf("\n\n");
+                printf("Iters       ||r||_2      conv.rate  ||r||_2/||b||_2\n");
+                printf("-----    ------------    ---------  ------------ \n");
+                for (j = 1; j <= i; j++)
+                {
+                   printf("% 5d    %e    %f   %e\n", j, norms[j], norms[j]/ 
+		       norms[j-1], rel_norms[j]);
+                }
+              }
              }
           else
              {
               printf("\n\n");
               printf("Iters       ||r||_C      conv.rate  ||r||_C/||b||_C\n");
               printf("-----    ------------    ---------  ------------ \n");
-         }
-         for (j = 1; j <= i; j++)
-         {
-            printf("% 5d    %e    %f   %e\n", j, norms[j], norms[j]/ 
-		norms[j-1], rel_norms[j]);
-         }
+              for (j = 1; j <= i; j++)
+              {
+                 printf("% 5d    %e    %f   %e\n", j, norms[j], norms[j]/ 
+		     norms[j-1], rel_norms[j]);
+              }
+             }
          printf("\n\n");}
       /* fclose(fp);}; */
       else
@@ -506,6 +553,22 @@ hypre_KrylovSetMaxIter( void *pcg_vdata,
    int            ierr = 0;
  
    (pcg_data -> max_iter) = max_iter;
+ 
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_GMRESSetStopCrit
+ *--------------------------------------------------------------------------*/
+ 
+int
+hypre_KrylovSetStopCrit( void  *pcg_vdata,
+                         int   stop_crit       )
+{
+   hypre_PCGData *pcg_data = pcg_vdata;
+   int            ierr = 0;
+ 
+   (pcg_data -> stop_crit) = stop_crit;
  
    return ierr;
 }

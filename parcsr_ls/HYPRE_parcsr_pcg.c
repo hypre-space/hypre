@@ -91,6 +91,17 @@ HYPRE_ParCSRPCGSetMaxIter( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ParCSRPCGSetStopCrit
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParCSRPCGSetStopCrit( HYPRE_Solver solver,
+                           int          stop_crit )
+{
+   return( hypre_KrylovSetStopCrit( (void *) solver, stop_crit ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_ParCSRPCGSetTwoNorm
  *--------------------------------------------------------------------------*/
 
