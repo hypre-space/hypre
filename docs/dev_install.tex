@@ -137,109 +137,109 @@ Build the \hypre{} distribution:
 \label{Installation Example}
 
 The following is an example session creating a beta distribution:
-\begin{kbd}
-$ pwd
-/home/hypre
-$ cvs checkout linear_solvers
-U linear_solvers/CHANGELOG
-U linear_solvers/COPYRIGHT_and_DISCLAIMER
- . . .
-U linear_solvers/utilities/utilities.h
-U linear_solvers/utilities/version
-$ cvs history -T
-T 2000-09-18 23:56 +0000 treadway linear_solvers [V1-0-0b1:A]
-T 2000-09-20 17:00 +0000 treadway linear_solvers [V1-0-0b1:D]
-T 2000-09-20 20:08 +0000 treadway linear_solvers [V1-0-0b1:D]
-T 2000-09-20 20:09 +0000 treadway linear_solvers [V1-0-0b1:D]
-T 2000-10-12 20:27 +0000 treadway linear_solvers [V1-3-1b:A]
-T 2001-01-11 20:58 +0000 treadway linear_solvers [V1-4-0b:A]
-T 2001-01-11 22:07 +0000 treadway linear_solvers [V1-4-0b:A]
-T 2001-01-11 22:12 +0000 treadway linear_solvers [V1-4-0b:D]
-T 2001-01-11 22:15 +0000 treadway linear_solvers [V1-4-0b:A]
-$ vi linear_solvers/utilities/HYPRE_utilities.h
- . . .
-#define HYPRE_Version() "HYPRE 1.4.0b $Date$ Compiled: " _
-_DATE__ " " __TIME__
- . . .
-#define HYPRE_Version() "HYPRE 1.4.0b $Date$ Compiled: " _
-_DATE__ " " __TIME__
-"linear_solvers/utilities/HYPRE_utilities.h" 60 lines, 1570 characters
-$ cvs commit linear_solvers/utilities/HYPRE_utilities.h
-beta release 1.5.0b
-CVS: ----------------------------------------------------------------------
-CVS: Enter Log.	 Lines beginning with `CVS:' are removed automatically
-CVS:
-CVS: Committing in linear_solvers/utilities
-CVS:
-CVS: Modified Files:
-CVS:	HYPRE_utilities.h
-CVS: ----------------------------------------------------------------------
-~
-""/tmp/cvsAAABga42v" 9 lines, 345 characters
-Checking in linear_solvers/utilities/HYPRE_utilities.h;
-/home/casc/repository/linear_solvers/utilities/HYPRE_utilities.h,v  <--  HYPRE_utilities.h
-new revision: 2.2; previous revision: 2.1
-done
-$ linear_solvers/utilities/version -number
-1.5.0b
-$ cvs rtag V1-5-0b linear_solvers
-$ ./mkdist V1-5-0b
-U linear_solvers/CHANGELOG
-U linear_solvers/COPYRIGHT_and_DISCLAIMER
- . . .
-U linear_solvers/utilities/utilities.h
-U linear_solvers/utilities/version
-checking the hostname... perrin
-checking the architecture... solaris
- . . .
-creating hypre-1.5.0b.tar file ...
-$ ls -l hypre-1.5*
--rw-rw-r--   1 treadway treadway 1532225 Jul 11 15:17 hypre-1.5.0b.tar.gz
-
-hypre-1.5.0b:
-total 20
--rw-rw----   1 treadway treadway    4384 Jul 11 15:17 CHANGELOG
--rw-rw----   1 treadway treadway    1645 Jul 11 15:17 COPYRIGHT_and_DISCLAIMER
-drwxrwxr-x   2 treadway treadway     512 Jul 11 15:17 bin
-drwxrwxr-x   4 treadway treadway     512 Jul 11 15:17 docs
-drwxrwxr-x  27 treadway treadway    1024 Jul 11 15:17 src
-$ cp hypre-1.5.0b.tar.gz hypre/sparc-sun-solaris2.7/
-$ cd hypre-1.5.0b/src/tools/mklibs hypre/sparc-sun-solaris2.7/
-$ cd hypre/sparc-sun-solaris2.7/
-$ ls
-AUTOTEST             hypre-1.5.0b.tar.gz  mklibs
-$ ./mklibs -b hypre-1.5.0b.tar.gz
-checking the hostname... perrin
-checking the architecture... solaris
- . . .
-Very-cleaning FEI_mv ...
-Very-cleaning test ...
-$ ls
-AUTOTEST             hypre-1.5.0b.tar.gz
-hypre-1.5.0b         mklibs
-$ ls hypre-1.5.0b
-CHANGELOG                 debug                     lib
-COPYRIGHT_and_DISCLAIMER  docs                      src
-bin                       include
-$ ls hypre-1.5.0b/lib
-libHYPRE_DistributedMatrix.a
-libHYPRE_DistributedMatrixPilutSolver.a
-libHYPRE_Euclid.a
-libHYPRE_FEI.a
-libHYPRE_IJ_mv.a
-libHYPRE_LSI.a
-libHYPRE_MatrixMatrix.a
-libHYPRE_ParaSails.a
-libHYPRE_blas.a
-libHYPRE_parcsr_ls.a
-libHYPRE_parcsr_mv.a
-libHYPRE_seq_mv.a
-libHYPRE_sstruct_ls.a
-libHYPRE_sstruct_mv.a
-libHYPRE_struct_ls.a
-libHYPRE_struct_mv.a
-libHYPRE_superlu.a
-libHYPRE_utilities.a
-libkrylov.a
-$ 
-\end{kbd}
+\begin{ttfamily}
+\$ \bfseries{pwd}\linebreak
+/home/hypre\linebreak
+\$ \bfseries{cvs checkout linear\_solvers}\linebreak
+U linear\_solvers/CHANGELOG\linebreak
+U linear\_solvers/COPYRIGHT\_and\_DISCLAIMER\linebreak
+ . . .\linebreak
+U linear\_solvers/utilities/utilities.h\linebreak
+U linear\_solvers/utilities/version\linebreak
+\$ \bfseries{cvs history -T}\linebreak
+T 2000-09-18 23:56 +0000 treadway linear\_solvers [V1-0-0b1:A]\linebreak
+T 2000-09-20 17:00 +0000 treadway linear\_solvers [V1-0-0b1:D]\linebreak
+T 2000-09-20 20:08 +0000 treadway linear\_solvers [V1-0-0b1:D]\linebreak
+T 2000-09-20 20:09 +0000 treadway linear\_solvers [V1-0-0b1:D]\linebreak
+T 2000-10-12 20:27 +0000 treadway linear\_solvers [V1-3-1b:A]\linebreak
+T 2001-01-11 20:58 +0000 treadway linear\_solvers [V1-4-0b:A]\linebreak
+T 2001-01-11 22:07 +0000 treadway linear\_solvers [V1-4-0b:A]\linebreak
+T 2001-01-11 22:12 +0000 treadway linear\_solvers [V1-4-0b:D]\linebreak
+T 2001-01-11 22:15 +0000 treadway linear\_solvers [V1-4-0b:A]\linebreak
+\$ \bfseries{vi linear\_solvers/utilities/HYPRE\_utilities.h}\linebreak
+ . . .\linebreak
+\#define HYPRE\_Version() "HYPRE 1.4.0b \$Date$ Compiled: " \_\linebreak
+\_DATE\_\_ " " \_\_TIME\_\_\linebreak
+ . . .\linebreak
+#define HYPRE\_Version() "HYPRE 1.4.0b \$Date$ Compiled: " \_\linebreak
+\_DATE\_\_ " " \_\_TIME\_\_\linebreak
+"linear\_solvers/utilities/HYPRE\_utilities.h" 60 lines, 1570 characters\linebreak
+\$ \bfseries{cvs commit linear\_solvers/utilities/HYPRE\_utilities.h\linebreak
+beta release 1.5.0b}\linebreak
+CVS: ----------------------------------------------------------------------\linebreak
+CVS: Enter Log.	 Lines beginning with `CVS:' are removed automatically\linebreak
+CVS:\linebreak
+CVS: Committing in linear\_solvers/utilities\linebreak
+CVS:\linebreak
+CVS: Modified Files:\linebreak
+CVS:	HYPRE\_utilities.h\linebreak
+CVS: ----------------------------------------------------------------------\linebreak
+~\linebreak
+""/tmp/cvsAAABga42v" 9 lines, 345 characters\linebreak
+Checking in linear\_solvers/utilities/HYPRE\_utilities.h;\linebreak
+/home/casc/repository/linear\_solvers/utilities/HYPRE\_utilities.h,v  <--  HYPRE\_utilities.h\linebreak
+new revision: 2.2; previous revision: 2.1\linebreak
+done\linebreak
+\$ \bfseries{linear\_solvers/utilities/version -number\linebreak
+1.5.0b}\linebreak
+\$ \bfseries{cvs rtag V1-5-0b linear\_solvers}\linebreak
+\$ \bfseries{./mkdist V1-5-0b}\linebreak
+U linear\_solvers/CHANGELOG\linebreak
+U linear\_solvers/COPYRIGHT\_and\_DISCLAIMER\linebreak
+ . . .\linebreak
+U linear\_solvers/utilities/utilities.h\linebreak
+U linear\_solvers/utilities/version\linebreak
+checking the hostname... perrin\linebreak
+checking the architecture... solaris\linebreak
+ . . .\linebreak
+creating hypre-1.5.0b.tar file ...\linebreak
+\$ \bfseries{ls -l hypre-1.5*}\linebreak
+-rw-rw-r--   1 treadway treadway 1532225 Jul 11 15:17 hypre-1.5.0b.tar.gz\linebreak
+\linebreak
+hypre-1.5.0b:\linebreak
+total 20\linebreak
+-rw-rw----   1 treadway treadway    4384 Jul 11 15:17 CHANGELOG\linebreak
+-rw-rw----   1 treadway treadway    1645 Jul 11 15:17 COPYRIGHT\_and\_DISCLAIMER\linebreak
+drwxrwxr-x   2 treadway treadway     512 Jul 11 15:17 bin\linebreak
+drwxrwxr-x   4 treadway treadway     512 Jul 11 15:17 docs\linebreak
+drwxrwxr-x  27 treadway treadway    1024 Jul 11 15:17 src\linebreak
+\$ \bfseries{cp hypre-1.5.0b.tar.gz hypre/sparc-sun-solaris2.7/}\linebreak
+\$ \bfseries{cd hypre-1.5.0b/src/tools/mklibs hypre/sparc-sun-solaris2.7/}\linebreak
+\$ \bfseries{cd hypre/sparc-sun-solaris2.7/}\linebreak
+\$ \bfseries{ls}\linebreak
+AUTOTEST             hypre-1.5.0b.tar.gz  mklibs\linebreak
+\$ \bfseries{./mklibs -b hypre-1.5.0b.tar.gz}\linebreak
+checking the hostname... perrin\linebreak
+checking the architecture... solaris\linebreak
+ . . .\linebreak
+Very-cleaning FEI\_mv ...\linebreak
+Very-cleaning test ...\linebreak
+\$ \bfseries{ls}\linebreak
+AUTOTEST             hypre-1.5.0b.tar.gz\linebreak
+hypre-1.5.0b         mklibs\linebreak
+\$ \bfseries{ls hypre-1.5.0b}\linebreak
+CHANGELOG                 debug                     lib\linebreak
+COPYRIGHT\_and\_DISCLAIMER  docs                      src\linebreak
+bin                       include\linebreak
+\$ \bfseries{ls hypre-1.5.0b/lib}\linebreak
+libHYPRE\_DistributedMatrix.a\linebreak
+libHYPRE\_DistributedMatrixPilutSolver.a\linebreak
+libHYPRE\_Euclid.a\linebreak
+libHYPRE\_FEI.a\linebreak
+libHYPRE\_IJ_mv.a\linebreak
+libHYPRE\_LSI.a\linebreak
+libHYPRE\_MatrixMatrix.a\linebreak
+libHYPRE\_ParaSails.a\linebreak
+libHYPRE\_blas.a\linebreak
+libHYPRE\_parcsr\_ls.a\linebreak
+libHYPRE\_parcsr\_mv.a\linebreak
+libHYPRE\_seq\_mv.a\linebreak
+libHYPRE\_sstruct\_ls.a\linebreak
+libHYPRE\_sstruct\_mv.a\linebreak
+libHYPRE\_struct\_ls.a\linebreak
+libHYPRE\_struct\_mv.a\linebreak
+libHYPRE\_superlu.a\linebreak
+libHYPRE\_utilities.a\linebreak
+libkrylov.a\linebreak
+\$ \linebreak
+\end{ttfamily}
