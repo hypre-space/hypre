@@ -54,6 +54,7 @@ extern "C" {
 #define MPI_UNDEFINED       hypre_MPI_UNDEFINED        
 #define MPI_REQUEST_NULL    hypre_MPI_REQUEST_NULL        
 #define MPI_ANY_SOURCE      hypre_MPI_ANY_SOURCE        
+#define MPI_ANY_TAG         hypre_MPI_ANY_TAG
 
 #define MPI_Init            hypre_MPI_Init             
 #define MPI_Finalize        hypre_MPI_Finalize         
@@ -134,6 +135,7 @@ typedef int  hypre_MPI_Aint;
 #define  hypre_MPI_UNDEFINED -9999
 #define  hypre_MPI_REQUEST_NULL  0
 #define  hypre_MPI_ANY_SOURCE    1
+#define  hypre_MPI_ANY_TAG       1
 
 /*--------------------------------------------------------------------------
  * Prototypes
