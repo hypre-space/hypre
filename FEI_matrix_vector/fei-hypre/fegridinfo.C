@@ -606,11 +606,11 @@ int FEGridInfo::loadNodeEssBCs(int nnodes, int *nodeIDs, int *dofList,
       printf("FEGridInfo ERROR : loadNodeEssBCs - beginInitNodeSet ?\n");
       return 0;
    }
-   else if ( nodeBCList_ == NULL || nodeBCValues_ == NULL )
-   {
-      printf("FEGridInfo ERROR : loadNodeEssBCs - nodeBC not initialized.\n");
-      return 0;
-   }
+   //else if ( nodeBCList_ == NULL || nodeBCValues_ == NULL )
+   //{
+   //   printf("FEGridInfo ERROR : loadNodeEssBCs - nodeBC not initialized.\n");
+   //   return 0;
+   //}
    if ( nnodes <= 0 )
    {
       printf("FEGridInfo ERROR : loadNodeEssBCs - invalid input.\n");
