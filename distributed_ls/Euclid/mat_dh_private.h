@@ -37,7 +37,7 @@ extern void readVec(Vec_dh *bout, char *fileType, char *fileName, int ignore);
 extern void writeMat(Mat_dh Ain, char *fileType, char *fileName);
 extern void writeVec(Vec_dh b, char *fileType, char *fileName);
 
-/* Next function is primarily (??) for testing/development/debugging.
+/* Next function is primarily (?) for testing/development/debugging.
    P_0 reads and partitions the matrix, then distributes 
    amongst the other processors.
 */

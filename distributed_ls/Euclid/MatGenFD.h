@@ -38,7 +38,7 @@ boundary conditions:
 
 Misc.
      -debug_matgen
-     -striped (may not work??)
+     -striped (may not work?)
 =====================================================================*/
 
 

@@ -15,7 +15,7 @@ static void setup_matvec_receives_private(Mat_dh mat, int *beg_rows, int *end_ro
 
 #if 0
 
-partial (??) implementation below; not used anyplace, I think;
+partial (?) implementation below; not used anyplace, I think;
 for future expansion?  [mar 21, 2K+1]
 
 static void Mat_dhAllocate_getRow_private(Mat_dh A);
