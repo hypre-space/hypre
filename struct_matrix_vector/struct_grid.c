@@ -177,7 +177,7 @@ hypre_AssembleStructGrid( hypre_StructGrid *grid )
    int                  ierr = 0;
 
    MPI_Comm             comm  = hypre_StructGridComm(grid);
-   hypre_BoxArray      *boxes = hypre_StructGridBoxes(grid);
+   hypre_BoxArray      *boxes;
    int                  global_size;
    int                  local_size;
    hypre_BoxNeighbors  *neighbors;
@@ -192,6 +192,15 @@ hypre_AssembleStructGrid( hypre_StructGrid *grid )
    hypre_BoxArray      *periodic_all_boxes;
    int                 *periodic_processes;
 
+   /* If I don't own any boxes, need to add a "zero-sized" */
+   if (hypre_StructGridBoxes(grid) == NULL)
+   {
+      hypre_Index  ilower, iupper;
+
+      hypre_SetIndex(ilower,  99,  99,  99);
+      hypre_SetIndex(iupper, -99, -99, -99);
+      hypre_SetStructGridExtents(grid, ilower, iupper);
+   }
    boxes = hypre_StructGridBoxes(grid);
 
    if (hypre_StructGridAllBoxes(grid) == NULL)
