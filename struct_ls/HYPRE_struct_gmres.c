@@ -157,7 +157,7 @@ int
 HYPRE_StructGMRESSetTol( HYPRE_StructSolver solver,
                        double             tol    )
 {
-   return( hypre_GMRESSetTol( (void *) solver, tol ) );
+   return( HYPRE_GMRESSetTol( (HYPRE_Solver) solver, tol ) );
 }
 
 /*==========================================================================*/
@@ -181,7 +181,7 @@ int
 HYPRE_StructGMRESSetMaxIter( HYPRE_StructSolver solver,
                            int                max_iter )
 {
-   return( hypre_GMRESSetMaxIter( (void *) solver, max_iter ) );
+   return( HYPRE_GMRESSetMaxIter( (HYPRE_Solver) solver, max_iter ) );
 }
 
 
@@ -213,9 +213,10 @@ HYPRE_StructGMRESSetPrecond( HYPRE_StructSolver         solver,
                            HYPRE_PtrToStructSolverFcn precond_setup,
                            HYPRE_StructSolver         precond_solver )
 {
-   return( hypre_GMRESSetPrecond( (void *) solver,
-                                precond, precond_setup,
-                                (void *) precond_solver ) );
+   return( HYPRE_GMRESSetPrecond( (HYPRE_Solver) solver,
+                                (HYPRE_PtrToSolverFcn) precond,
+                                (HYPRE_PtrToSolverFcn) precond_setup,
+                                (HYPRE_Solver) precond_solver ) );
 }
 
 /*==========================================================================*/
@@ -241,7 +242,7 @@ int
 HYPRE_StructGMRESSetLogging( HYPRE_StructSolver solver,
                            int                logging )
 {
-   return( hypre_GMRESSetLogging( (void *) solver, logging ) );
+   return( HYPRE_GMRESSetLogging( (HYPRE_Solver) solver, logging ) );
 }
 
 /*==========================================================================*/
@@ -265,7 +266,7 @@ int
 HYPRE_StructGMRESGetNumIterations( HYPRE_StructSolver  solver,
                                  int                *num_iterations )
 {
-   return( hypre_GMRESGetNumIterations( (void *) solver, num_iterations ) );
+   return( HYPRE_GMRESGetNumIterations( (HYPRE_Solver) solver, num_iterations ) );
 }
 
 /*==========================================================================*/
@@ -289,7 +290,7 @@ int
 HYPRE_StructGMRESGetFinalRelativeResidualNorm( HYPRE_StructSolver  solver,
                                              double             *norm   )
 {
-   return( hypre_GMRESGetFinalRelativeResidualNorm( (void *) solver, norm ) );
+   return( HYPRE_GMRESGetFinalRelativeResidualNorm( (HYPRE_Solver) solver, norm ) );
 }
 
 
