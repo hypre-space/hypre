@@ -6,6 +6,7 @@
 #include "HYPRE_sstruct_ls.h"
 #include "krylov.h"
 #include "sstruct_mv.h"
+#include "sstruct_ls.h"
  
 #define DEBUG 0
 
@@ -106,6 +107,60 @@ typedef struct
 
 } ProblemData;
  
+/*--------------------------------------------------------------------------
+ * Compute new box based on variable type
+ *--------------------------------------------------------------------------*/
+                                                                                                                                                    
+int
+GetVariableBox( Index  cell_ilower,
+                Index  cell_iupper,
+                int    int_vartype,
+                Index  var_ilower,
+                Index  var_iupper )
+{
+   int ierr = 0;
+   HYPRE_SStructVariable  vartype = (HYPRE_SStructVariable) int_vartype;
+                                                                                                                                                    
+   var_ilower[0] = cell_ilower[0];
+   var_ilower[1] = cell_ilower[1];
+   var_ilower[2] = cell_ilower[2];
+   var_iupper[0] = cell_iupper[0];
+   var_iupper[1] = cell_iupper[1];
+   var_iupper[2] = cell_iupper[2];
+                                                                                                                                                    
+   switch(vartype)
+   {
+      case HYPRE_SSTRUCT_VARIABLE_CELL:
+      var_ilower[0] -= 0; var_ilower[1] -= 0; var_ilower[2] -= 0;
+      break;
+      case HYPRE_SSTRUCT_VARIABLE_NODE:
+      var_ilower[0] -= 1; var_ilower[1] -= 1; var_ilower[2] -= 1;
+      break;
+      case HYPRE_SSTRUCT_VARIABLE_XFACE:
+      var_ilower[0] -= 1; var_ilower[1] -= 0; var_ilower[2] -= 0;
+      break;
+      case HYPRE_SSTRUCT_VARIABLE_YFACE:
+      var_ilower[0] -= 0; var_ilower[1] -= 1; var_ilower[2] -= 0;
+      break;
+      case HYPRE_SSTRUCT_VARIABLE_ZFACE:
+      var_ilower[0] -= 0; var_ilower[1] -= 0; var_ilower[2] -= 1;
+      break;
+      case HYPRE_SSTRUCT_VARIABLE_XEDGE:
+      var_ilower[0] -= 0; var_ilower[1] -= 1; var_ilower[2] -= 1;
+      break;
+      case HYPRE_SSTRUCT_VARIABLE_YEDGE:
+      var_ilower[0] -= 1; var_ilower[1] -= 0; var_ilower[2] -= 1;
+      break;
+      case HYPRE_SSTRUCT_VARIABLE_ZEDGE:
+      var_ilower[0] -= 1; var_ilower[1] -= 1; var_ilower[2] -= 0;
+      break;
+      case HYPRE_SSTRUCT_VARIABLE_UNDEFINED:
+      break;
+   }
+                                                                                                                                                    
+   return ierr;
+}
+
 /*--------------------------------------------------------------------------
  * Read routines
  *--------------------------------------------------------------------------*/
@@ -1177,105 +1232,6 @@ DestroyData( ProblemData   data )
 }
 
 /*--------------------------------------------------------------------------
- * Compute new box based on variable type
- *--------------------------------------------------------------------------*/
-
-int
-GetVariableBox( Index  cell_ilower,
-                Index  cell_iupper,
-                int    int_vartype,
-                Index  var_ilower,
-                Index  var_iupper )
-{
-   int ierr = 0;
-   HYPRE_SStructVariable  vartype = (HYPRE_SStructVariable) int_vartype;
-
-   var_ilower[0] = cell_ilower[0];
-   var_ilower[1] = cell_ilower[1];
-   var_ilower[2] = cell_ilower[2];
-   var_iupper[0] = cell_iupper[0];
-   var_iupper[1] = cell_iupper[1];
-   var_iupper[2] = cell_iupper[2];
-
-   switch(vartype)
-   {
-      case HYPRE_SSTRUCT_VARIABLE_CELL:
-      var_ilower[0] -= 0; var_ilower[1] -= 0; var_ilower[2] -= 0;
-      break;
-      case HYPRE_SSTRUCT_VARIABLE_NODE:
-      var_ilower[0] -= 1; var_ilower[1] -= 1; var_ilower[2] -= 1;
-      break;
-      case HYPRE_SSTRUCT_VARIABLE_XFACE:
-      var_ilower[0] -= 1; var_ilower[1] -= 0; var_ilower[2] -= 0;
-      break;
-      case HYPRE_SSTRUCT_VARIABLE_YFACE:
-      var_ilower[0] -= 0; var_ilower[1] -= 1; var_ilower[2] -= 0;
-      break;
-      case HYPRE_SSTRUCT_VARIABLE_ZFACE:
-      var_ilower[0] -= 0; var_ilower[1] -= 0; var_ilower[2] -= 1;
-      break;
-      case HYPRE_SSTRUCT_VARIABLE_XEDGE:
-      var_ilower[0] -= 0; var_ilower[1] -= 1; var_ilower[2] -= 1;
-      break;
-      case HYPRE_SSTRUCT_VARIABLE_YEDGE:
-      var_ilower[0] -= 1; var_ilower[1] -= 0; var_ilower[2] -= 1;
-      break;
-      case HYPRE_SSTRUCT_VARIABLE_ZEDGE:
-      var_ilower[0] -= 1; var_ilower[1] -= 1; var_ilower[2] -= 0;
-      break;
-      case HYPRE_SSTRUCT_VARIABLE_UNDEFINED:
-      break;
-   }
-
-   return ierr;
-}
- 
-/*--------------------------------------------------------------------------
- * Print usage info
- *--------------------------------------------------------------------------*/
-
-int
-PrintUsage( char *progname,
-            int   myid )
-{
-   if ( myid == 0 )
-   {
-      printf("\n");
-      printf("Usage: %s [<options>]\n", progname);
-      printf("\n");
-      printf("  -in <filename> : input file (default is `%s')\n",
-             infile_default);
-      printf("\n");
-      printf("  -pt <pt1> <pt2> ... : set part(s) for subsequent options\n");
-      printf("  -r <rx> <ry> <rz>   : refine part(s)\n");
-      printf("  -P <Px> <Py> <Pz>   : refine and distribute part(s)\n");
-      printf("  -b <bx> <by> <bz>   : refine and block part(s)\n");
-      printf("  -solver <ID>        : solver ID (default = 39)\n");
-      printf("                         1 - SysPFMG\n");
-      printf("                        10 - PCG with SMG split precond\n");
-      printf("                        11 - PCG with PFMG split precond\n");
-      printf("                        18 - PCG with diagonal scaling\n");
-      printf("                        19 - PCG\n");
-      printf("                        20 - PCG with BoomerAMG precond\n");
-      printf("                        22 - PCG with ParaSails precond\n");
-      printf("                        30 - GMRES with SMG split precond\n");
-      printf("                        31 - GMRES with PFMG split precond\n");
-      printf("                        38 - GMRES with diagonal scaling\n");
-      printf("                        39 - GMRES\n");
-      printf("                        40 - GMRES with BoomerAMG precond\n");
-      printf("                        41 - GMRES with PILUT precond\n");
-      printf("                        42 - GMRES with ParaSails precond\n");
-      printf("  -print             : print out the system\n");
-      printf("  -v <n_pre> <n_post>: SysPFMG # of pre and post relax\n");
-      printf("  -skip <s>          : SysPFMG skip relaxation (0 or 1)\n");
-
-      printf("\n");
-   }
-
-   return 0;
-}
-
-/*--------------------------------------------------------------------------
  * Test driver for semi-structured matrix interface
  *--------------------------------------------------------------------------*/
  
@@ -1304,7 +1260,6 @@ main( int   argc,
    HYPRE_SStructVector   x, x_amg;
    HYPRE_StructVector    sx;
    HYPRE_SStructSolver   solver;
-   HYPRE_SStructSolver   precond;
 
    HYPRE_ParCSRMatrix    par_A;
    HYPRE_ParVector       par_b;
@@ -1467,12 +1422,6 @@ main( int   argc,
          arg_index++;
          n_pre = atoi(argv[arg_index++]);
          n_post = atoi(argv[arg_index++]);
-      }
-      else if ( strcmp(argv[arg_index], "-help") == 0 )
-      {
-         PrintUsage(argv[0], myid);
-         exit(1);
-         break;
       }
       else
       {
