@@ -376,11 +376,11 @@ AC_ARG_WITH(strict-checking,
   AC_DEFINE(HYPRE_SEQUENTIAL,1,[No MPI being used.])
 ], [])
 
-AC_ARG_WITH(mpi-include,
-  AS_HELP_STRING([  --with-mpi-include=DIR],
+AC_ARG_WITH(MPI-include,
+  AS_HELP_STRING([  --with-MPI-include=DIR],
                  [ User specifies that mpi.h is in DIR.  The options
-                   --with-mpi-include --with-mpi-libs and 
-                   --with-mpi-lib-dirs must be used together.]),
+                   --with-MPI-include --with-MPI-libs and 
+                   --with-MPI-lib-dirs must be used together.]),
 [for mpi_dir in $withval; do
    MPIINCLUDE="$MPIINCLUDE -I$mpi_dir"
  done;
@@ -388,39 +388,39 @@ AC_ARG_WITH(mpi-include,
 [casc_user_chose_mpi=no]
 )
 
-AC_ARG_WITH(mpi-libs,
-  AS_HELP_STRING([  --with-mpi-libs=LIBS],
+AC_ARG_WITH(MPI-libs,
+  AS_HELP_STRING([  --with-MPI-libs=LIBS],
                  [ LIBS is space-separated list of library names
                    needed for MPI, e.g. <nsl socket mpi>.  The
-                   options --with-mpi-include --with-mpi-libs and
-                   --with-mpi-lib-dirs must be used together.]),
+                   options --with-MPI-include --with-MPI-libs and
+                   --with-MPI-lib-dirs must be used together.]),
 [for mpi_lib in $withval; do
    MPILIBS="$MPILIBS -l$mpi_lib"
  done;
  casc_user_chose_mpi=yes]
 )
 
-AC_ARG_WITH(mpi-lib-dirs,
-  AS_HELP_STRING([  --with-mpi-lib-dirs=DIRS],
+AC_ARG_WITH(MPI-lib-dirs,
+  AS_HELP_STRING([  --with-MPI-lib-dirs=DIRS],
                  [ DIRS is space-separated list of directories
-                   containing the libraries specified by --with-mpi-libs,
+                   containing the libraries specified by --with-MPI-libs,
                    e.g <usr/lib /usr/local/mpi/lib>.  The options
-                   --with-mpi-include --with-mpi-libs and
-                   --with-mpi-lib-dirs must be used together.]),
+                   --with-MPI-include --with-MPI-libs and
+                   --with-MPI-lib-dirs must be used together.]),
 [for mpi_lib_dir in $withval; do
    MPILIBDIRS="-L$mpi_lib_dir $MPILIBDIRS"
  done;
  casc_user_chose_mpi=yes]
 )
 
-AC_ARG_WITH(mpi-flags,
-  AS_HELP_STRING([  --with-mpi-flags=FLAGS],
+AC_ARG_WITH(MPI-flags,
+  AS_HELP_STRING([  --with-MPI-flags=FLAGS],
                  [ FLAGS is a space separated list of whatever flags
                    other than -l and -L are needed to link with MPI
                    libraries-- Does not de-activate autosearch for other
-                   MPI information. May be used with the other three mpi
+                   MPI information. May be used with the other three MPI
                    options or alone in conjunction with the automatic
-                   mpi search.]),
+                   MPI search.]),
 [case "${withval}" in
    yes) MPIFLAGS="" ;;
    no)  MPIFLAGS="" ;;
@@ -602,9 +602,9 @@ then
       AC_CHECK_PROGS(F77, mpguidef77 guidef77 ifort pgf77 xlf f77)
    elif test "$casc_using_mpi" = "no"
    then
-      AC_CHECK_PROGS(CC, icc pgcc xlc cc gcc kcc)
-      AC_CHECK_PROGS(CXX, icc pgCC xlC cxx CC c++ KCC cl g++ gcc)
-      AC_CHECK_PROGS(F77, ifort pgf77 xlf f77 kf77 fort77 fort g77)
+      AC_CHECK_PROGS(CC, gcc icc pgcc xlc cc kcc)
+      AC_CHECK_PROGS(CXX, g++ gcc icc pgCC xlC cxx CC c++ KCC cl)
+      AC_CHECK_PROGS(F77, g77 ifort pgf77 xlf f77 kf77 fort77 fort)
    else
       AC_CHECK_PROGS(CC, mpcc mpikcc mpicc hcc icc pgcc xlc cc kcc c89 gcc)
       AC_CHECK_PROGS(CXX, mpCC mpiKCC mpicxx mpiCC hcp icc pgCC xlC cxx CC c++ KCC g++)
@@ -692,6 +692,11 @@ then
 fi
 
 dnl *********************************************************************
+dnl * Find libg2c.a
+dnl *********************************************************************
+HYPRE_FIND_G2C
+
+dnl *********************************************************************
 dnl * Find BLAS library if not already set by the user 
 dnl * If user specified --without-blas or a system one cannot be found,
 dnl * default to internal HYPRE routines
@@ -699,7 +704,7 @@ dnl *********************************************************************
 if test "$casc_user_chose_blas" = "no"
 then
    HYPRE_FIND_BLAS
-   if test "$BLASLIBS" = "no"
+   if test "$BLASLIBS" = "null"
    then
       AC_MSG_WARN([***************************************])
       AC_MSG_WARN([Cannot find BLAS library])
@@ -720,7 +725,6 @@ then
    else
       BLASNEEDED="\##"
       AC_DEFINE(HAVE_BLAS, 1, [BLAS library is system provided.])
-      BLASLIBDIRS="-L/usr/lib -L/usr/local/lib"
    fi
 fi
 
@@ -732,7 +736,7 @@ dnl *********************************************************************
 if test "$casc_user_chose_lapack" = "no"
 then
    HYPRE_FIND_LAPACK
-   if test "$LAPACKLIBS" = "no"
+   if test "$LAPACKLIBS" = "null"
    then
       AC_MSG_WARN([***************************************])
       AC_MSG_WARN([Cannot find LAPACK library])
@@ -753,7 +757,6 @@ then
    else
       LAPACKNEEDED="\##"
       AC_DEFINE(HAVE_LAPACK, 1, [LAPACK library is system provided.])
-      LAPACKLIBDIRS="-L/usr/lib -L/usr/local/lib"
    fi
 fi
 
@@ -761,11 +764,6 @@ dnl *********************************************************************
 dnl * Find libm.a
 dnl *********************************************************************
 AC_CHECK_LIB(m, cabs, LIBS="$LIBS -lm")
-
-dnl *********************************************************************
-dnl * Find g2c library
-dnl *********************************************************************
-AC_CHECK_LIB(g2c, e_wsfe, LIBS="$LIBS -lg2c")
 
 dnl *********************************************************************
 dnl * Set debug/optimization flags  

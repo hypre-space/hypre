@@ -31,104 +31,97 @@ dnl @author Steven G. Johnson <stevenj@alum.mit.edu>
 dnl
 AC_DEFUN([HYPRE_FIND_BLAS],
 [
-  AC_PREREQ(2.50)
   AC_REQUIRE([AC_F77_LIBRARY_LDFLAGS])
 
-  hypre_blas_ok=no
+#***************************************************************
+#   Initialize return variables
+#***************************************************************
+  BLASLIBS="null"
+  BLASLIBDIRS="null"
 
   AC_ARG_WITH(blas,
 	[AS_HELP_STRING([  --with-blas], [Find a system-provided BLAS library])])
 
   case $with_blas in
       yes | "") ;;
-	     *) BLASLIBS="internal";
-                hypre_blas_ok=internal ;;
+	     *) BLASLIBS="internal" ;;
   esac
 
-  hypre_blas_save_LIBS="$LIBS"
+#***************************************************************
+#   Save incoming LIBS and LDFLAGS values to be restored 
+#***************************************************************
+  hypre_save_LIBS="$LIBS"
+  hypre_save_LDFLGS="$LDFLAGS"
   LIBS="$LIBS $FLIBS"
 
-# Get fortran linker names of BLAS functions to check for.
+#***************************************************************
+#   Get fortran linker names for a BLAS function
+#***************************************************************
   AC_F77_FUNC(dgemm)
 
-# Is BLASLIBS environment variable set?
-  if test $hypre_blas_ok = no; then
-    if test "x$BLASLIBS" != x; then
-        save_LIBS="$LIBS"; LIBS="$BLASLIBS $LIBS"
-	AC_MSG_CHECKING([for $dgemm in $BLASLIBS])
-	AC_TRY_LINK_FUNC($dgemm, [hypre_blas_ok=yes], [BLASLIBS=""])
-	AC_MSG_RESULT($hypre_blas_ok)
-        LIBS="$save_LIBS"
-    fi
+#***************************************************************
+#   Set possible BLAS library names
+#***************************************************************
+  BLAS_LIB_NAMES="blas essl dxml cxml mkl scs atlas complib.sgimath sunmath"
+
+#***************************************************************
+#   Set search paths for BLAS library
+#***************************************************************
+  temp_FLAGS="-L/usr/lib -L/usr/local/lib -L/lib -L/opt/intel/mkl70/lib/32"
+  LDFLAGS="$temp_FLAGS $LDFLAGS"
+
+#***************************************************************
+#   Check for function dgemm in BLAS_LIB_NAMES
+#***************************************************************
+  for lib in $BLAS_LIB_NAMES; do
+     if test "$BLASLIBS" = "null"; then
+        AC_CHECK_LIB($lib, $dgemm, [BLASLIBS=$lib])
+     fi
+  done
+
+#***************************************************************
+#   Set path to selected BLAS library 
+#***************************************************************
+  BLAS_SEARCH_DIRS="/usr/lib /usr/local/lib /lib /opt/intel/mkl70/lib/32"
+
+  if test "$BLASLIBS" != "null"; then
+     for dir in $BLAS_SEARCH_DIRS; do
+         if test "$BLASLIBDIRS" = "null" -a -f $dir/lib$BLASLIBS.a; then
+            BLASLIBDIRS=$dir
+         fi
+
+         if test "$BLASLIBDIRS" = "null" -a -f $dir/lib$BLASLIBS.so; then
+            BLASLIBDIRS=$dir
+         fi
+     done
   fi
 
-# BLAS linked to by default?  (happens on some supercomputers)
-  if test $hypre_blas_ok = no; then
-        save_LIBS="$LIBS"; LIBS="$LIBS"
-	AC_CHECK_FUNC($dgemm, [hypre_blas_ok=yes; BLASLIBS="$LIBS"])
-        LIBS="$save_LIBS"
+#***************************************************************
+#   Set variables if ATLAS or DMXL libraries are used 
+#***************************************************************
+  if test "$BLASLIBS" = "dxml"; then
+     AC_DEFINE(HYPRE_USING_DXML, 1, [Using dxml for Blas])
   fi
 
-# Generic BLAS library? 
-  if test $hypre_blas_ok = no; then
-	AC_CHECK_LIB(blas, $dgemm, [hypre_blas_ok=yes; BLASLIBS="-lblas"])
+  if test "$BLASLIBS" = "essl"; then
+     AC_DEFINE(HYPRE_USING_ESSL, 1, [Using essl for Blas])
   fi
 
-# BLAS in ATLAS library? (http://math-atlas.sourceforge.net/)
-  if test $hypre_blas_ok = no; then
-	AC_CHECK_LIB(atlas, ATL_xerbla,
-		[AC_CHECK_LIB(f77blas, $dgemm,
-		[AC_CHECK_LIB(cblas, cblas_dgemm,
-			[hypre_blas_ok=yes
-			 BLASLIBS="-lcblas -lf77blas -latlas"],
-			[], [-lf77blas -latlas])],
-			[], [-latlas])])
+#***************************************************************
+#   Add -L and -l prefixes if values found
+#***************************************************************
+  if test "$BLASLIBS" != "null" -a "$BLASLIBS" != "internal"; then
+     BLASLIBS="-l$BLASLIBS"
   fi
 
-# BLAS in Alpha CXML library?
-  if test $hypre_blas_ok = no; then
-	AC_CHECK_LIB(cxml, $dgemm, [hypre_blas_ok=yes;BLASLIBS="-lcxml"])
+  if test "$BLASLIBDIRS" != "null"; then
+     BLASLIBDIRS="-L$BLASLIBDIRS"
   fi
 
-# BLAS in Alpha DXML library? (now called CXML, see above)
-  if test $hypre_blas_ok = no; then
-	AC_CHECK_LIB(dxml, $dgemm, [hypre_blas_ok=yes;BLASLIBS="-ldxml"
-	AC_DEFINE(HYPRE_USING_DXML, 1, [Using dxml for Blas])])
-  fi
-
-# BLAS in Sun Performance library?
-  if test $hypre_blas_ok = no; then
-	if test "x$GCC" != xyes; then # only works with Sun CC
-		AC_CHECK_LIB(sunmath, acosp,
-			[AC_CHECK_LIB(sunperf, $dgemm,
-        			[BLASLIBS="-xlic_lib=sunperf -lsunmath"
-                                 hypre_blas_ok=yes],[],[-lsunmath])])
-	fi
-  fi
-
-# BLAS in SCSL library?  (SGI/Cray Scientific Library)
-  if test $hypre_blas_ok = no; then
-	AC_CHECK_LIB(scs, $dgemm, [hypre_blas_ok=yes; BLASLIBS="-lscs"])
-  fi
-
-# BLAS in SGIMATH library?
-  if test $hypre_blas_ok = no; then
-	AC_CHECK_LIB(complib.sgimath, $dgemm,
-		     [hypre_blas_ok=yes; BLASLIBS="-lcomplib.sgimath"])
-  fi
-
-# BLAS in IBM ESSL library? 
-  if test $hypre_blas_ok = no; then
-	AC_CHECK_LIB(essl, $dgemm,
-			[hypre_blas_ok=yes; BLASLIBS="-lessl"
-	AC_DEFINE(HYPRE_USING_ESSL, 1, [Using essl for Blas])])
-  fi
-
-LIBS="$hypre_blas_save_LIBS"
-
-### if no blas library was found; set to force configuring without-blas
-  if test $hypre_blas_ok = no; then
-         BLASLIBS="no"
-  fi
+#***************************************************************
+#   Restore incoming LIBS and LDFLAGS values
+#***************************************************************
+  LIBS="$hypre_save_LIBS"
+  LDFLAGS="$hypre_save_LDFLGS"
 
 ])dnl HYPRE_FIND_BLAS

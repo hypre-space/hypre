@@ -31,74 +31,84 @@ AC_DEFUN([HYPRE_FIND_LAPACK],
 [
   AC_REQUIRE([AC_F77_LIBRARY_LDFLAGS])
 
-  hypre_lapack_ok=no
+#***************************************************************
+#   Initialize return variables
+#***************************************************************
+  LAPACKLIBS="null"
+  LAPACKLIBDIRS="null"
 
   AC_ARG_WITH(lapack,
         [AS_HELP_STRING([  --with-lapack], [Find a system-provided LAPACK library])])
 
   case $with_lapack in
       yes | "") ;;
-             *) LAPACKLIBS="internal";
-                hypre_lapack_ok=internal ;;
+             *) LAPACKLIBS="internal" ;;
   esac
 
+#***************************************************************
+#   Save incoming LIBS and LDFLAGS values to be restored
+#***************************************************************
+  hypre_save_LIBS="$LIBS"
+  hypre_save_LDFLGS="$LDFLAGS"
+  LIBS="$LIBS $FLIBS"
+
+#***************************************************************
 # Get fortran linker name of LAPACK function to check for.
+#***************************************************************
   AC_F77_FUNC(dsygv)
 
-  hypre_lapack_save_LIBS="$LIBS"
+#***************************************************************
+#   Set possible LAPACK library names
+#***************************************************************
+  LAPACK_LIB_NAMES="lapack lapack_rs6k"
 
-# Is LAPACKLIBS environment variable set?
-  if test $hypre_lapack_ok = no; then
-    if test "x$LAPACKLIBS" != x; then
-        save_LIBS="$LIBS"; LIBS="$LAPACKLIBS $BLASLIBS $LIBS $FLIBS"
-        AC_MSG_CHECKING([for $dsygv in $LAPACKLIBS])
-        AC_TRY_LINK_FUNC($dsygv, [hypre_lapack_ok=yes], [LAPACKLIBS=""])
-        AC_MSG_RESULT($hypre_lapack_ok)
-        LIBS="$save_LIBS"
-    fi
+#***************************************************************
+#   Set search paths for LAPACK library 
+#***************************************************************
+  temp_FLAGS="-L/usr/lib -L/usr/local/lib -L/lib"
+  LDFLAGS="$temp_FLAGS $LDFLAGS"
+
+#***************************************************************
+#   Check for function dsygv in LAPACK_LIB_NAMES
+#***************************************************************
+  for lib in $LAPACK_LIB_NAMES; do
+     if test "$LAPACKLIBS" = "null"; then
+        AC_CHECK_LIB($lib, $dsygv, [LAPACKLIBS=$lib], [], [-lblas])
+     fi
+  done
+
+#***************************************************************
+#   Set path to selected LAPACK library
+#***************************************************************
+  LAPACK_SEARCH_DIRS="/usr/lib /usr/local/lib /lib"
+
+  if test "$LAPACKLIBS" != "null"; then
+     for dir in $LAPACK_SEARCH_DIRS; do
+         if test "$LAPACKLIBDIRS" = "null" -a -f $dir/lib$LAPACKLIBS.a; then
+            LAPACKLIBDIRS=$dir
+         fi
+
+         if test "$LAPACKLIBDIRS" = "null" -a -f $dir/lib$LAPACKLIBS.so; then
+            LAPACKLIBDIRS=$dir
+         fi
+     done
   fi
 
-# LAPACK included in BLAS lib?
-  if test $hypre_lapack_ok = no; then
-        save_LIBS="$LIBS"; LIBS="$LIBS $BLASLIBS $FLIBS"
-        AC_CHECK_FUNC($dsygv, [hypre_lapack_ok=yes; LAPACKLIBS="$BLASLIBS"])
-        LIBS="$save_LIBS"
+#***************************************************************
+#   Add -L and -l prefixes if values found
+#***************************************************************
+  if test "$LAPACKLIBS" != "null" -a "$LAPACKLIBS" != "internal"; then
+     LAPACKLIBS="-l$LAPACKLIBS"
   fi
 
-# LAPACK linked to by default? 
-  if test $hypre_lapack_ok = no; then
-        save_LIBS="$LIBS"; LIBS="$LIBS"
-        AC_CHECK_FUNC($dsygv, [hypre_lapack_ok=yes; LAPACKLIBS="$LIBS"])
-        LIBS="$save_LIBS"
+  if test "$LAPACKLIBDIRS" != "null"; then
+     LAPACKLIBDIRS="-L$LAPACKLIBDIRS"
   fi
 
-# Generic LAPACK library
-  if test $hypre_lapack_ok = no; then
-     save_LIBS="$LIBS"; LIBS="$LIBS $FLIBS"
-     save_LDFLAGS="$LDFLAGS"
-     LDFLAGS="-L/usr/lib -L/usr/local/lib $LDFLAGS"
-     AC_CHECK_LIB(lapack, $dsygv, [hypre_lapack_ok=yes; LAPACKLIBS="-llapack"],
-                              [], [-lblas])
-     LIBS="$save_LIBS"
-     LDFLAGS="$save_LDFLAGS"
-  fi
-
-# Generic LAPACK_RS6K library
-  if test $hypre_lapack_ok = no; then
-     save_LIBS="$LIBS"; LIBS="$LIBS $FLIBS"
-     save_LDFLAGS="$LDFLAGS"
-     LDFLAGS="-L/usr/lib -L/usr/local/lib $LDFLAGS"
-     AC_CHECK_LIB(lapack_rs6k, $dsygv, [hypre_lapack_ok=yes; LAPACKLIBS="-llapack_rs6k"],
-                              [], [-lblas])
-     LIBS="$save_LIBS"
-     LDFLAGS="$save_LDFLAGS"
-  fi
-
-  LIBS="$hypre_lapack_save_libs"
-
-### if no lapack library is found; set to force configuring without-lapack.
-if test $hypre_lapack_ok = no; then
-         LAPACKLIBS="no"
-fi
+#***************************************************************
+#   Restore incoming LIBS and LDFLAGS values
+#***************************************************************
+  LIBS="$hypre_save_LIBS"
+  LDFLAGS="$hypre_save_LDFLGS"
 
 ])dnl HYPRE_FIND_LAPACK

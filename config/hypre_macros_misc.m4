@@ -89,6 +89,35 @@ esac],[casc_using_openmp=no])
 ])
 
 dnl **********************************************************************
+dnl * HYPRE_FIND_G2C
+dnl *
+dnl try to find libg2c.a
+dnl
+AC_DEFUN([HYPRE_FIND_G2C],
+[
+ AC_REQUIRE([AC_F77_LIBRARY_LDFLAGS])
+
+  hypre_save_LIBS="$LIBS"
+  LIBS="$LIBS $FLIBS"
+
+  found_g2c=no
+
+  g2c_GCC_PATH="-L/usr/lib/gcc-lib/i386-redhat-linux/3.2.3"
+  g2c_SEARCH_PATHS="$g2c_GCC_PATH -L/usr/lib -L/usr/local/lib -L/usr/apps/lib -L/lib"
+
+  LDFLAGS="$g2c_SEARCH_PATHS $LDFLAGS"
+
+  AC_CHECK_LIB(g2c, e_wsfe, [found_g2c=yes])
+
+  if test "$found_g2c" = "yes"; then
+     LIBS="-lg2c $hypre_save_LIBS"
+  else
+     LIBS="$hypre_save_LIBS"
+  fi
+
+])
+
+dnl **********************************************************************
 dnl * ACX_OPTIMIZATION_FLAGS
 dnl *
 dnl try and determine what the optimized compile FLAGS
