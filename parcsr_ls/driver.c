@@ -594,7 +594,8 @@ main( int   argc,
  
       HYPRE_ParCSRPCGInitialize(MPI_COMM_WORLD, &pcg_solver);
       HYPRE_ParCSRPCGSetMaxIter(pcg_solver, 500);
-      HYPRE_ParCSRPCGSetTol(pcg_solver, 1.0e-08);
+/*      HYPRE_ParCSRPCGSetTol(pcg_solver, 1.0e-08);  */
+      HYPRE_ParCSRPCGSetTol(pcg_solver, tol);
       HYPRE_ParCSRPCGSetTwoNorm(pcg_solver, 1);
       HYPRE_ParCSRPCGSetRelChange(pcg_solver, 0);
       HYPRE_ParCSRPCGSetLogging(pcg_solver, 1);
@@ -679,7 +680,8 @@ main( int   argc,
       HYPRE_ParCSRGMRESInitialize(MPI_COMM_WORLD, &pcg_solver);
       HYPRE_ParCSRGMRESSetKDim(pcg_solver, k_dim);
       HYPRE_ParCSRGMRESSetMaxIter(pcg_solver, 100);
-      HYPRE_ParCSRGMRESSetTol(pcg_solver, 1.0e-08);
+/*      HYPRE_ParCSRGMRESSetTol(pcg_solver, 1.0e-08);   */
+      HYPRE_ParCSRGMRESSetTol(pcg_solver, tol);
       HYPRE_ParCSRGMRESSetLogging(pcg_solver, 1);
  
       if (solver_id == 3)
