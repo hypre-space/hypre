@@ -192,5 +192,6 @@ int  impl_Hypre_StructGrid_Setup(Hypre_StructGrid this) {
    hypre_StructGrid *g = (hypre_StructGrid *) *G;
 
    hypre_StructGridAssemble( g );
+   return 0;
 } /* end impl_Hypre_StructGridSetup */
 
