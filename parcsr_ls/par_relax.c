@@ -29,6 +29,7 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
                         hypre_ParVector    *u,
                         hypre_ParVector    *Vtemp )
 {
+   MPI_Comm	   comm = hypre_ParCSRMatrixComm(A);
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
    double         *A_diag_data  = hypre_CSRMatrixData(A_diag);
    int            *A_diag_i     = hypre_CSRMatrixI(A_diag);
@@ -64,12 +65,19 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
    hypre_Vector    *f_vector;
    double	   *f_vector_data;
 
-   int             i, j;
+   int             i, j, jr;
    int             ii, jj;
    int             column;
    int             relax_error = 0;
    int		   num_sends;
+   int		   num_recvs;
    int		   index, start;
+   int		   num_procs, my_id, ip, p;
+   int		   vec_start, vec_len;
+   int		   send_flag = 1;
+   int		   recv_flag = 0;
+   MPI_Status     *status;
+   MPI_Request    *requests;
 
    double         *A_mat;
    double         *b_vec;
@@ -79,13 +87,16 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
    double          one_minus_weight;
 
    one_minus_weight = 1.0 - relax_weight;
-  
+   MPI_Comm_size(comm,&num_procs);  
+   MPI_Comm_rank(comm,&my_id);  
    /*-----------------------------------------------------------------------
     * Switch statement to direct control based on relax_type:
     *     relax_type = 0 -> Jacobi or CF-Jacobi
     *     relax_type = 2 -> Jacobi (uses ParMatvec)
-    *     relax_type = 1 -> Gauss-Siedel <--- currently not implemented
-    *     relax_type = 3 -> hybrid: Jacobi off-processor, GS on-processor
+    *     relax_type = 1 -> Gauss-Seidel <--- very slow, sequential
+    *     relax_type = 3 -> hybrid: GS-J mix off-processor, GS on-processor
+    *     relax_type = 4 -> Gauss_Seidel: interior points in parallel ,
+    *			 	   	  boundary sequential 
     *     relax_type = 9 -> Direct Solve
     *-----------------------------------------------------------------------*/
    
@@ -230,7 +241,7 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
       break;
       
       
-      case 3: /* Hybrid: weighted Jacobi off-processor, 
+      case 3: /* Hybrid: Jacobi off-processor, 
                          Gauss-Seidel on-processor       */
       {
    	num_sends = hypre_CommPkgNumSends(comm_pkg);
@@ -261,12 +272,6 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
          /*-----------------------------------------------------------------
           * Copy current approximation into temporary vector.
           *-----------------------------------------------------------------*/
-         
-         for (i = 0; i < n; i++)
-         {
-            Vtemp_data[i] = u_data[i];
-         }
- 
    	 hypre_FinalizeCommunication(comm_handle);
 
          /*-----------------------------------------------------------------
@@ -275,14 +280,141 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
 
          if (relax_points == 0)
          {
-            for (i = 0; i < n; i++)
+            for (i = 0; i < n; i++)	/* interior points first */
             {
 
                /*-----------------------------------------------------------
                 * If diagonal is nonzero, relax point i; otherwise, skip it.
                 *-----------------------------------------------------------*/
              
-               if (A_diag_data[A_diag_i[i]] != zero)
+               if ( A_diag_data[A_diag_i[i]] != zero)
+               {
+                  res = f_data[i];
+                  for (jj = A_diag_i[i]+1; jj < A_diag_i[i+1]; jj++)
+                  {
+                     ii = A_diag_j[jj];
+                     res -= A_diag_data[jj] * u_data[ii];
+                  }
+                  for (jj = A_offd_i[i]; jj < A_offd_i[i+1]; jj++)
+                  {
+                     ii = A_offd_j[jj];
+                     res -= A_offd_data[jj] * Vext_data[ii];
+                  }
+                  u_data[i] = res / A_diag_data[A_diag_i[i]];
+               }
+            }
+         }
+
+         /*-----------------------------------------------------------------
+          * Relax only C or F points as determined by relax_points.
+          *-----------------------------------------------------------------*/
+
+         else
+         {
+            for (i = 0; i < n; i++) /* relax interior points */
+            {
+
+               /*-----------------------------------------------------------
+                * If i is of the right type ( C or F ) and diagonal is
+                * nonzero, relax point i; otherwise, skip it.
+                *-----------------------------------------------------------*/
+             
+               if (cf_marker[i] == relax_points 
+				&& A_diag_data[A_diag_i[i]] != zero)
+               {
+                  res = f_data[i];
+                  for (jj = A_diag_i[i]+1; jj < A_diag_i[i+1]; jj++)
+                  {
+                     ii = A_diag_j[jj];
+                     res -= A_diag_data[jj] * u_data[ii];
+                  }
+                  for (jj = A_offd_i[i]; jj < A_offd_i[i+1]; jj++)
+                  {
+                     ii = A_offd_j[jj];
+                     res -= A_offd_data[jj] * Vext_data[ii];
+                  }
+                  u_data[i] = res / A_diag_data[A_diag_i[i]];
+               }
+            }     
+         }
+	 hypre_TFree(Vext_data);
+	 hypre_TFree(v_buf_data);
+      }
+      break;
+
+      case 1: /* Gauss-Seidel VERY SLOW */
+      {
+   	num_sends = hypre_CommPkgNumSends(comm_pkg);
+   	num_recvs = hypre_CommPkgNumRecvs(comm_pkg);
+
+   	v_buf_data = hypre_CTAlloc(double, 
+			hypre_CommPkgSendMapStart(comm_pkg, num_sends));
+
+	Vext_data = hypre_CTAlloc(double,num_cols_offd);
+        
+	status = hypre_CTAlloc(MPI_Status,num_recvs);
+	requests = hypre_CTAlloc(MPI_Request, num_recvs);
+
+	if (num_cols_offd)
+	{
+		A_offd_j = hypre_CSRMatrixJ(A_offd);
+		A_offd_data = hypre_CSRMatrixData(A_offd);
+	}
+ 
+         /*-----------------------------------------------------------------
+          * Copy current approximation into temporary vector.
+          *-----------------------------------------------------------------*/
+        /* 
+         for (i = 0; i < n; i++)
+         {
+            Vtemp_data[i] = u_data[i];
+         } */
+ 
+         /*-----------------------------------------------------------------
+          * Relax all points.
+          *-----------------------------------------------------------------*/
+	for (p = 0; p < num_procs; p++)
+	{
+	jr = 0;
+	if (p != my_id)
+	{
+   	  for (i = 0; i < num_sends; i++)
+   	  {
+            ip = hypre_CommPkgSendProc(comm_pkg, i);
+	    if (ip == p)
+	    {
+               vec_start = hypre_CommPkgSendMapStart(comm_pkg, i);
+	       vec_len = hypre_CommPkgSendMapStart(comm_pkg, i+1)-vec_start;
+               for (j=vec_start; j < vec_start+vec_len; j++)
+                  v_buf_data[j] = u_data[hypre_CommPkgSendMapElmt(comm_pkg,j)];
+	       MPI_Isend(&v_buf_data[vec_start], vec_len, MPI_DOUBLE,
+                        ip, 0, comm, &requests[jr++]);
+	    }
+   	  }
+	  MPI_Waitall(jr,requests,status);
+	  MPI_Barrier(comm);
+        }
+	else
+        {
+          for (i = 0; i < num_recvs; i++)
+          {
+             ip = hypre_CommPkgRecvProc(comm_pkg, i);
+             vec_start = hypre_CommPkgRecvVecStart(comm_pkg,i);
+             vec_len = hypre_CommPkgRecvVecStart(comm_pkg,i+1)-vec_start;
+             MPI_Irecv(&Vext_data[vec_start], vec_len, MPI_DOUBLE,
+                        ip, 0, comm, &requests[jr++]);
+	  }
+	  MPI_Waitall(jr,requests,status);
+          if (relax_points == 0)
+          {
+            for (i = 0; i < n; i++)	
+            {
+
+               /*-----------------------------------------------------------
+                * If diagonal is nonzero, relax point i; otherwise, skip it.
+                *-----------------------------------------------------------*/
+             
+               if ( A_diag_data[A_diag_i[i]] != zero)
                {
                   res = f_data[i];
                   for (jj = A_diag_i[i]+1; jj < A_diag_i[i+1]; jj++)
@@ -331,9 +463,195 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
                   u_data[i] = res / A_diag_data[A_diag_i[i]];
                }
             }     
+          }
+	  MPI_Barrier(comm);
+	 }
+	}
+	hypre_TFree(Vext_data);
+	hypre_TFree(v_buf_data);
+	hypre_TFree(status);
+	hypre_TFree(requests);
+      }
+      break;
+
+      case 4: /* Gauss-Seidel: relax interior points in parallel, boundary
+				sequentially */
+      {
+   	num_sends = hypre_CommPkgNumSends(comm_pkg);
+   	num_recvs = hypre_CommPkgNumRecvs(comm_pkg);
+
+   	v_buf_data = hypre_CTAlloc(double, 
+			hypre_CommPkgSendMapStart(comm_pkg, num_sends));
+
+	Vext_data = hypre_CTAlloc(double,num_cols_offd);
+        
+	status = hypre_CTAlloc(MPI_Status,num_recvs);
+	requests = hypre_CTAlloc(MPI_Request, num_recvs);
+
+	if (num_cols_offd)
+	{
+		A_offd_j = hypre_CSRMatrixJ(A_offd);
+		A_offd_data = hypre_CSRMatrixData(A_offd);
+	}
+ 
+         /*-----------------------------------------------------------------
+          * Copy current approximation into temporary vector.
+          *-----------------------------------------------------------------*/
+        /* 
+         for (i = 0; i < n; i++)
+         {
+            Vtemp_data[i] = u_data[i];
+         } */
+ 
+         /*-----------------------------------------------------------------
+          * Relax interior points first
+          *-----------------------------------------------------------------*/
+          if (relax_points == 0)
+          {
+            for (i = 0; i < n; i++)	
+            {
+
+               /*-----------------------------------------------------------
+                * If diagonal is nonzero, relax point i; otherwise, skip it.
+                *-----------------------------------------------------------*/
+             
+               if ((A_offd_i[i+1]-A_offd_i[i]) == zero &&
+               		A_diag_data[A_diag_i[i]] != zero)
+               {
+                  res = f_data[i];
+                  for (jj = A_diag_i[i]+1; jj < A_diag_i[i+1]; jj++)
+                  {
+                     ii = A_diag_j[jj];
+                     res -= A_diag_data[jj] * u_data[ii];
+                  }
+                  u_data[i] = res / A_diag_data[A_diag_i[i]];
+               }
+            }
+          }
+          else
+          {
+            for (i = 0; i < n; i++)
+            {
+
+               /*-----------------------------------------------------------
+                * If i is of the right type ( C or F ) and diagonal is
+                * nonzero, relax point i; otherwise, skip it.
+                *-----------------------------------------------------------*/
+             
+               if (cf_marker[i] == relax_points 
+               			&& (A_offd_i[i+1]-A_offd_i[i]) == zero 
+				&& A_diag_data[A_diag_i[i]] != zero)
+               {
+                  res = f_data[i];
+                  for (jj = A_diag_i[i]+1; jj < A_diag_i[i+1]; jj++)
+                  {
+                     ii = A_diag_j[jj];
+                     res -= A_diag_data[jj] * u_data[ii];
+                  }
+                  u_data[i] = res / A_diag_data[A_diag_i[i]];
+               }
+            }     
+          }
+	for (p = 0; p < num_procs; p++)
+	{
+	jr = 0;
+	if (p != my_id)
+	{
+   	  for (i = 0; i < num_sends; i++)
+   	  {
+            ip = hypre_CommPkgSendProc(comm_pkg, i);
+	    if (ip == p)
+	    {
+               vec_start = hypre_CommPkgSendMapStart(comm_pkg, i);
+	       vec_len = hypre_CommPkgSendMapStart(comm_pkg, i+1)-vec_start;
+               for (j=vec_start; j < vec_start+vec_len; j++)
+                  v_buf_data[j] = u_data[hypre_CommPkgSendMapElmt(comm_pkg,j)];
+	       MPI_Isend(&v_buf_data[vec_start], vec_len, MPI_DOUBLE,
+                        ip, 0, comm, &requests[jr++]);
+	    }
+   	  }
+	  MPI_Waitall(jr,requests,status);
+	  MPI_Barrier(comm);
+        }
+	else
+        {
+          for (i = 0; i < num_recvs; i++)
+          {
+             ip = hypre_CommPkgRecvProc(comm_pkg, i);
+             vec_start = hypre_CommPkgRecvVecStart(comm_pkg,i);
+             vec_len = hypre_CommPkgRecvVecStart(comm_pkg,i+1)-vec_start;
+             MPI_Irecv(&Vext_data[vec_start], vec_len, MPI_DOUBLE,
+                        ip, 0, comm, &requests[jr++]);
+	  }
+	  MPI_Waitall(jr,requests,status);
+          if (relax_points == 0)
+          {
+            for (i = 0; i < n; i++)	
+            {
+
+               /*-----------------------------------------------------------
+                * If diagonal is nonzero, relax point i; otherwise, skip it.
+                *-----------------------------------------------------------*/
+             
+               if ((A_offd_i[i+1]-A_offd_i[i]) != zero &&
+               		A_diag_data[A_diag_i[i]] != zero)
+               {
+                  res = f_data[i];
+                  for (jj = A_diag_i[i]+1; jj < A_diag_i[i+1]; jj++)
+                  {
+                     ii = A_diag_j[jj];
+                     res -= A_diag_data[jj] * u_data[ii];
+                  }
+                  for (jj = A_offd_i[i]; jj < A_offd_i[i+1]; jj++)
+                  {
+                     ii = A_offd_j[jj];
+                     res -= A_offd_data[jj] * Vext_data[ii];
+                  }
+                  u_data[i] = res / A_diag_data[A_diag_i[i]];
+               }
+            }
          }
-	 hypre_TFree(Vext_data);
-	 hypre_TFree(v_buf_data);
+
+         /*-----------------------------------------------------------------
+          * Relax only C or F points as determined by relax_points.
+          *-----------------------------------------------------------------*/
+
+         else
+         {
+            for (i = 0; i < n; i++)
+            {
+
+               /*-----------------------------------------------------------
+                * If i is of the right type ( C or F ) and diagonal is
+                * nonzero, relax point i; otherwise, skip it.
+                *-----------------------------------------------------------*/
+             
+               if (cf_marker[i] == relax_points 
+               			&& (A_offd_i[i+1]-A_offd_i[i]) != zero 
+				&& A_diag_data[A_diag_i[i]] != zero)
+               {
+                  res = f_data[i];
+                  for (jj = A_diag_i[i]+1; jj < A_diag_i[i+1]; jj++)
+                  {
+                     ii = A_diag_j[jj];
+                     res -= A_diag_data[jj] * u_data[ii];
+                  }
+                  for (jj = A_offd_i[i]; jj < A_offd_i[i+1]; jj++)
+                  {
+                     ii = A_offd_j[jj];
+                     res -= A_offd_data[jj] * Vext_data[ii];
+                  }
+                  u_data[i] = res / A_diag_data[A_diag_i[i]];
+               }
+            }     
+          }
+	  MPI_Barrier(comm);
+	 }
+	}
+	hypre_TFree(Vext_data);
+	hypre_TFree(v_buf_data);
+	hypre_TFree(status);
+	hypre_TFree(requests);
       }
       break;
 
