@@ -3,6 +3,8 @@ c     Test driver for unstructured matrix interface (structured storage)
 c-----------------------------------------------------------------------
 c     jfp: Babel code added.  Inputs hardwired in.  Code using other values
 c     of the inputs deleted.  The idea is to narrow this down for simplicity.
+c     Feb 2005: By now Babel has changed.  Babel rarrays would be better 
+c     than normal sidl arrays.
       
 c-----------------------------------------------------------------------
 c     Standard 7-point laplacian in 3D with grid and anisotropy determined
