@@ -1358,6 +1358,9 @@ int MLI_Method_AMGSA::formLocalGraph( hypre_ParCSRMatrix *Amat,
    AdiagRPtr  = hypre_CSRMatrixI(AdiagBlock);
    AdiagCols  = hypre_CSRMatrixJ(AdiagBlock);
    AdiagVals  = hypre_CSRMatrixData(AdiagBlock);
+
+#if 0
+// seems to give some problems (12/31/03)
    if ( useSAMGeFlag_ )
    {
       if ( saLabels_ != NULL && saLabels_[currLevel_] != NULL )
@@ -1379,6 +1382,7 @@ int MLI_Method_AMGSA::formLocalGraph( hypre_ParCSRMatrix *Amat,
          }
       }
    }
+#endif
    
    /*-----------------------------------------------------------------
     * construct the diagonal array (diagData) 

@@ -832,7 +832,7 @@ int MLI_Method_AMGSA::setup( MLI *mli )
    mli_Amat = mli->getSystemMatrix(level);
    strcpy(paramString, "nrows");
    mli_Amat->getMatrixInfo(paramString, nRows, dtemp);
-   if (nRows > 6000)
+   if (nRows > 10000)
    {
       if ( outputLevel_ > 1 && mypid == 0 )
          printf("ML_Method_AMGSA::message - nCoarse too large => GMRESSGS.\n"); 
