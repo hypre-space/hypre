@@ -35,19 +35,14 @@ HYPRE_AUTOTEST_DIR="/home/casc/software/hypre/autotest"
 #=============================================================================
 
 if [ ! -d "$CVSROOT" ]
-then
-    echo "Error: no CVS repository, CVSROOT = $CVSROOT"
+then    echo "Error: no CVS repository, CVSROOT = $CVSROOT"
     exit
 fi
 
 cd $HYPRE_AUTOTEST_DIR
 rm -fR linear_solvers
 cvs checkout -P linear_solvers 1> $0.checkout.log 2> $0.checkout.err
-if [ -s "$0.checkout.err" ]
-then
-   RECIPIENTS="dwalker@llnl.gov rfalgout@llnl.gov"
-   $HYPRE_MAIL -s "Error(s) in checkout" $RECIPIENTS < $0.checkout.err
-fi
+echo "dwalker@llnl.gov rfalgout@llnl.gov" > $0.checkout.err.email 
 
 #=============================================================================
 # Make libraries and test drivers (using configure)
@@ -56,43 +51,23 @@ fi
 cd $HYPRE_AUTOTEST_DIR/linear_solvers
 rm config.cache
 ./configure 1> $0.configure.log 2> $0.configure.err
-if [ -s "$0.configure.err" ]
-then
-   RECIPIENTS="dwalker@llnl.gov rfalgout@llnl.gov elliott22@llnl.gov"
-   $HYPRE_MAIL -s "Error(s) in configure" $RECIPIENTS < $0.configure.err
-fi
+echo "dwalker@llnl.gov rfalgout@llnl.gov elliott22@llnl.gov" > $0.configure.err.email 
 
 make veryclean
 
 make struct 1> $0.struct.log 2> $0.struct.err
-if [ -s "$0.struct.err" ]
-then
-   RECIPIENTS="dwalker@llnl.gov rfalgout@llnl.gov jones97@llnl.gov"
-   $HYPRE_MAIL -s "Error(s) in make struct" $RECIPIENTS < $0.struct.err
-fi
+echo "dwalker@llnl.gov rfalgout@llnl.gov jones97@llnl.gov" > $0.struct.err.email 
 
 make
 
 make parcsr 1> $0.parcsr.log 2> $0.parcsr.err
-if [ -s "$0.parcsr.err" ]
-then
-   RECIPIENTS="dwalker@llnl.gov yang11@llnl.gov vhenson@llnl.gov"
-   $HYPRE_MAIL -s "Error(s) in make parcsr" $RECIPIENTS < $0.parcsr.err
-fi
+echo "dwalker@llnl.gov yang11@llnl.gov vhenson@llnl.gov" > $0.parcsr.err.email 
 
 #make ci_struct 1> $0.ci_struct.log 2> $0.ci_struct.err
-#if [ -s "$0.ci_struct.err" ]
-#then
-#   RECIPIENTS="dwalker@llnl.gov cleary1@llnl.gov"
-#   $HYPRE_MAIL -s "Error(s) in make ci_struct" $RECIPIENTS < $0.ci_struct.err
-#fi
+#echo "dwalker@llnl.gov cleary1@llnl.gov" > $0.ci_struct.err.email 
 
 make seq 1> $0.seq.log 2> $0.seq.err
-if [ -s "$0.seq.err" ]
-then
-   RECIPIENTS="dwalker@llnl.gov yang11@llnl.gov vhenson@llnl.gov rfalgout@llnl.gov"
-   $HYPRE_MAIL -s "Error(s) in make seq" $RECIPIENTS < $0.seq.err
-fi
+echo "dwalker@llnl.gov yang11@llnl.gov vhenson@llnl.gov" > $0.seq.err.email 
 
 make beta
 
@@ -103,15 +78,19 @@ make beta
 # Run test suites
 #==============================
 
-cd $HYPRE_AUTOTEST_DIR/linear_solvers/test
-./test_drivers.sh -mail
+#cd $HYPRE_AUTOTEST_DIR/linear_solvers/test
+#./test_drivers.sh -mail
 
 #==============================
 # Make C++ test drivers
 #==============================
 
-(cd test; make all++)
-(cd test; make beta++)
+cd $HYPRE_AUTOTEST_DIR/linear_solvers/test
+make all++ 1> $0.all++.log 2> $0.all++.err
+echo "dwalker@llnl.gov rfalgout@llnl.gov" > $0.all++.err.email 
+cd $HYPRE_AUTOTEST_DIR/linear_solvers/test
+make beta++ 1> $0.beta++.log 2> $0.beta++.err
+echo "dwalker@llnl.gov rfalgout@llnl.gov" > $0.beta++.err.email 
 
 #==============================
 # Run test suites
@@ -127,43 +106,23 @@ cd $HYPRE_AUTOTEST_DIR/linear_solvers/test
 cd $HYPRE_AUTOTEST_DIR/linear_solvers
 rm config.cache
 ./configure --with-pthreads 1> $0.configure_threads.log 2> $0.configure_threads.err
-if [ -s "$0.configure_threads.err" ]
-then
-   RECIPIENTS="dwalker@llnl.gov rfalgout@llnl.gov elliott22@llnl.gov"
-   $HYPRE_MAIL -s "Error(s) in configure --with -pthreads" $RECIPIENTS < $0.configure_threads.err
-fi
+echo "dwalker@llnl.gov rfalgout@llnl.gov elliott22@llnl.gov" > $0.configure_threads.err.email 
 
 make veryclean
 
 make struct 1> $0.struct_threads.log 2> $0.struct_threads.err
-if [ -s "$0.struct_threads.err" ]
-then
-   RECIPIENTS="dwalker@llnl.gov rfalgout@llnl.gov jones97@llnl.gov elliott22@llnl.gov"
-   $HYPRE_MAIL -s "Error(s) in make struct (with pthreads)" $RECIPIENTS < $0.struct_threads.err
-fi
+echo "dwalker@llnl.gov rfalgout@llnl.gov jones97@llnl.gov elliott22@llnl.gov" > $0.struct_threads.err.email 
 
 make
 
 make parcsr 1> $0.parcsr_threads.log 2> $0.parcsr_threads.err
-if [ -s "$0.parcsr_threads.err" ]
-then
-   RECIPIENTS="dwalker@llnl.gov yang11@llnl.gov vhenson@llnl.gov"
-   $HYPRE_MAIL -s "Error(s) in make parcsr (with pthreads)" $RECIPIENTS < $0.parcsr_threads.err
-fi
+echo "dwalker@llnl.gov yang11@llnl.gov vhenson@llnl.gov" > $0.parcsr_threads.err.email 
 
 #make ci_struct 1> $0.ci_struct_threads.log 2> $0.ci_struct_threads.err
-#if [ -s "$0.parcsr_ci_struct.err" ]
-#then
-#   RECIPIENTS="dwalker@llnl.gov cleary1@llnl.gov"
-#   $HYPRE_MAIL -s "Error(s) in make ci_struct (with pthreads)" $RECIPIENTS < $0.ci_struct_threads.err
-#fi
+#echo "dwalker@llnl.gov cleary1@llnl.gov" > $0.ci_struct_threads.err.email 
 
 make seq 1> $0.seq_threads.log 2> $0.seq_threads.err
-if [ -s "$0.seq_threads.err" ]
-then
-   RECIPIENTS="dwalker@llnl.gov yang11@llnl.gov vhenson@llnl.gov rfalgout@llnl.gov"
-   $HYPRE_MAIL -s "Error(s) in make seq (with threads)" $RECIPIENTS < $0.seq_threads.err
-fi
+echo "dwalker@llnl.gov yang11@llnl.gov vhenson@llnl.gov rfalgout@llnl.gov" > $0.seq_threads.err.email 
 
 make beta
 
@@ -181,54 +140,29 @@ make beta
 cd $HYPRE_AUTOTEST_DIR/linear_solvers
 rm config.cache
 ./configure --without-MPI 1> $0.configure_no_mpi.log 2> $0.configure_no_mpi.err
-if [ -s "$0.configure_no_mpi.err" ]
-then
-   RECIPIENTS="dwalker@llnl.gov rfalgout@llnl.gov elliott22@llnl.gov"
-   $HYPRE_MAIL -s "Error(s) in configure --without-MPI" $RECIPIENTS < $0.configure_no_mpi.err
-fi
+echo "dwalker@llnl.gov rfalgout@llnl.gov elliott22@llnl.gov" > $0.configure_no_mpi.err.email 
 
 make veryclean
 
 make struct 1> $0.struct_no_mpi.log 2> $0.struct_no_mpi.err
-if [ -s "$0.struct_no_mpi.err" ]
-then
-   RECIPIENTS="dwalker@llnl.gov rfalgout@llnl.gov jones97@llnl.gov"
-   $HYPRE_MAIL -s "Error(s) in make struct without MPI" $RECIPIENTS < $0.struct_no_mpi.err
-fi
+echo "dwalker@llnl.gov rfalgout@llnl.gov jones97@llnl.gov" > $0.struct_no_mpi.err.email 
 
 make
 
 make parcsr 1> $0.parcsr_no_mpi.log 2> $0.parcsr_no_mpi.err
-if [ -s "$0.parcsr_no_mpi.err" ]
-then
-   RECIPIENTS="dwalker@llnl.gov yang11@llnl.gov vhenson@llnl.gov"
-   $HYPRE_MAIL -s "Error(s) in make parcsr without MPI" $RECIPIENTS < $0.parcsr_no_mpi.err
-fi
-
+echo "dwalker@llnl.gov yang11@llnl.gov vhenson@llnl.gov" > $0.parcsr_no_mpi.err.email 
 
 #make ci_struct 1> $0.ci_struct_no_mpi.log 2> $0.ci_struct_no_mpi.err
-#if [ -s "$0.ci_struct_no_mpi.err" ]
-#then
-#   RECIPIENTS="dwalker@llnl.gov cleary1@llnl.gov"
-#   $HYPRE_MAIL -s "Error(s) in make ci_struct without MPI" $RECIPIENTS < $0.ci_struct_no_mpi.err
-#fi
+#echo "dwalker@llnl.gov cleary1@llnl.gov" > $0.ci_struct_no_mpi.err.email 
 
 make seq 1> $0.seq_no_mpi.log 2> $0.seq_no_mpi.err
-if [ -s "$0.seq_no_mpi.err" ]
-then
-   RECIPIENTS="dwalker@llnl.gov yang11@llnl.gov vhenson@llnl.gov rfalgout@llnl.gov"
-   $HYPRE_MAIL -s "Error(s) in make seq without MPI" $RECIPIENTS < $0.seq_no_mpi.err
-fi
+echo "dwalker@llnl.gov rfalgout@llnl.gov yang11@llnl.gov vhenson@llnl.gov" > $0.seq_no_mpi.err.email 
 
 make docs
 
 cd $HYPRE_AUTOTEST_DIR/linear_solvers/test
 make 1> $0.test_no_mpi.log 2> $0.test_no_mpi.err
-if [ -s "$0.test_no_mpi.err" ]
-then
-   RECIPIENTS="dwalker@llnl.gov rfalgout@llnl.gov"
-   $HYPRE_MAIL -s "Error(s) in make test without MPI" $RECIPIENTS < $0.test_no_mpi.err
-fi
+echo "dwalker@llnl.gov rfalgout@llnl.gov" > $0.test_no_mpi.err.email 
 
 make beta
 
@@ -254,6 +188,30 @@ make clean
 
 echo "setting permissions...."
 chmod -fR a+rX,ug+w $HYPRE_AUTOTEST_DIR
+
+#===========================================================================
+# Check for errors and send appropriate email
+# NOTE: HYPRE_MAIL must support `-s' subject option
+#===========================================================================
+
+    HYPRE_MAIL=/usr/ucb/Mail
+    case $HYPRE_ARCH in
+	dec)
+	    HYPRE_MAIL=/usr/ucb/Mail;;
+	blue)
+	    HYPRE_MAIL=/usr/ucb/Mail;;
+	red)
+	    HYPRE_MAIL=/usr/ucb/Mail;;
+    esac
+
+for i in *.err 
+do 
+if [ -s $i ] 
+then 
+RECIPIENTS=`cat ${i}.email` 
+${HYPRE_MAIL} -s "Autotest error(s); see file $i" $RECIPIENTS < $i 
+fi 
+done 
 
 #==============================================================================
 # Run test suites on remote machines
