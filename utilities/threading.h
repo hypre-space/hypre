@@ -38,12 +38,13 @@ typedef struct hypre_workqueue_struct {
    void *argqueue[MAX_QUEUE];
 } *hypre_workqueue_t;
 
-void hypre_work_put(hypre_work_proc_t funcptr, void *argptr);
-void hypre_work_wait(void);
-int HYPRE_InitPthreads (MPI_Comm comm);
-void HYPRE_DestroyPthreads (void);
-void hypre_pthread_worker (int threadid);
-
+void hypre_work_put( hypre_work_proc_t funcptr, void *argptr );
+void hypre_work_wait( void );
+int HYPRE_InitPthreads( MPI_Comm comm );
+void HYPRE_DestroyPthreads( void );
+void hypre_pthread_worker( int threadid );
+int ifetchadd( int *w, pthread_mutex_t *mutex_fetchadd );
+int hypre_fetch_and_add( int *w );
 
 pthread_t hypre_thread[NUM_THREADS];
 pthread_cond_t hypre_cond_boxloops;

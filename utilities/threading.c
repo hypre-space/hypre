@@ -13,10 +13,8 @@
 #include "mpi.h"
 #include "threading.h"
 
-void ifetchadd(int*,pthread_mutex_t*);
 
-
-int HYPRE_InitPthreads (MPI_Comm comm)
+int HYPRE_InitPthreads( MPI_Comm comm )
 {
    int err;
    int i;
@@ -39,13 +37,13 @@ int HYPRE_InitPthreads (MPI_Comm comm)
       }
    }
 
-   pthread_mutex_init(&hypre_mutex_boxloops)
-   phtread_cond_init(&hypre_cond_boxloops)
+   pthread_mutex_init(&hypre_mutex_boxloops, NULL);
+   pthread_cond_init(&hypre_cond_boxloops, NULL);
 
    return (err);
 }   
 
-void HYPRE_DestroyPthreads (void)
+void HYPRE_DestroyPthreads( void )
 {
    int i,x;
 
@@ -62,7 +60,7 @@ void HYPRE_DestroyPthreads (void)
    free (hypre_qptr);
 }
 
-void hypre_pthread_worker (int threadid)
+void hypre_pthread_worker( int threadid )
 {
    void *argptr;
    hypre_work_proc_t funcptr;
@@ -94,7 +92,8 @@ void hypre_pthread_worker (int threadid)
    }
 }
 
-void hypre_work_put(hypre_work_proc_t funcptr, void *argptr)
+void
+hypre_work_put( hypre_work_proc_t funcptr, void *argptr )
 {
    pthread_mutex_lock(&hypre_qptr->lock);
    if (hypre_qptr->n_waiting) {
@@ -112,7 +111,8 @@ void hypre_work_put(hypre_work_proc_t funcptr, void *argptr)
 
 
 /* Wait until all work is done and workers quiesce. */
-void hypre_work_wait(void)
+void
+hypre_work_wait( void )
 {       
    pthread_mutex_lock(&hypre_qptr->lock);
    while(hypre_qptr->n_queue !=0 || hypre_qptr->n_working != 0)
@@ -121,3 +121,26 @@ void hypre_work_wait(void)
 }                               
 
 
+int
+hypre_fetch_and_add( int *w )
+{
+   int temp;
+
+   temp = *w;
+   *w += 1;
+   
+   return temp;
+}
+   
+int
+ifetchadd( int *w, pthread_mutex_t *mutex_fetchadd )
+{
+   int n;
+    
+   
+   pthread_mutex_lock(mutex_fetchadd);
+   n = hypre_fetch_and_add(w);
+   pthread_mutex_unlock(mutex_fetchadd);
+ 
+   return n;
+}
