@@ -1,0 +1,185 @@
+package Hypre {
+
+   // Definition of Hypre interface.  JfP dec99
+   // Sources: partial design chart from Andy Cleary,
+   // an earlier IDL file given me by Brent Smolinski
+   // The case of the package name is chosen to prevent name conflicts.
+
+   class vector;
+   class StructuredGrid;
+   interface StructuredGridBuilder;
+   interface Stencil;
+   class StructStencil;
+   class StructMatrix;
+   class StructVector;
+   class Box;
+   class MPI_Com;
+   interface Solver;
+   
+   class Box {
+      int NewBox( in array<int,1> lower, in array<int,1> upper,
+                  in int dimension );
+      void print();
+   };
+
+   // The "print" functions in this file print brief information
+   // to stdout for debugging use.  To do: write "Print" functions
+   // which connect to the Hypre "Print" functions - they print
+   // complete information to a file, require MPI.
+
+   class MPI_Com 
+   {};
+   
+
+   interface Operator {
+      vector Apply( in vector b );
+   };
+
+   interface LinearOperator extends Operator {
+      vector Apply( in vector b );
+   };
+
+   interface StructuredGridMatrixBuilder {
+      int SetGrid( in StructuredGrid grid ); // was SetStructuredGrid
+      int SetStencil( in StructStencil stencil );
+      int SetValues( in Box box, in array<int,1> stencil_indices,
+                     in array<double,1> values );
+      // ... this is basically how it works now, except that ilower, iupper,
+      // and dim are combined into a Box object.  Probably it would be better
+      // to encode the "values" data structure in a more natural form.
+      int Setup( in StructuredGrid grid, in StructStencil stencil,
+                          in int symmetric );
+      StructMatrix GetConstructedObject();
+   };
+
+   class StructMatrix implements StructuredGridMatrixBuilder, LinearOperator {
+      StructMatrix NewMatrix( in StructuredGrid grid, in StructStencil stencil,
+                              in int symmetric );
+      int Setup( in StructuredGrid grid, in StructStencil stencil,
+                          in int symmetric );
+      void print();
+      int SetGrid( in StructuredGrid grid ); // was SetStructuredGrid
+      int SetStencil( in StructStencil stencil );
+      int SetValues( in Box box, in array<int,1> stencil_indices,
+                     in array<double,1> values );
+      vector Apply( in vector b );
+      StructMatrix GetConstructedObject();
+      };
+
+   class StructVector implements StructuredGridMatrixBuilder, LinearOperator {
+      StructVector NewVector( in StructuredGrid grid );
+      int Setup( in StructuredGrid grid, in StructStencil stencil,
+                          in int symmetric );
+      void print();
+      int SetGrid( in StructuredGrid grid ); // was SetStructuredGrid
+      int SetStencil( in StructStencil stencil );
+      // ... not needed, except to prevent Babel from making this
+      // an abstract class; not implemented
+      int SetValues( in Box box, in array<int,1> stencil_indices,
+                     in array<double,1> values );
+      // ... stencil_indices not needed; here for compatibility with
+      // StructuredGridMatrixBuilder
+      vector Apply( in vector b );
+      StructMatrix GetConstructedObject();
+   };
+
+   interface StructuredGridBuilder 
+   {
+      int SetGridExtents( in Box box );
+      int Assemble();
+      StructuredGrid GetConstructedObject();
+   };
+   
+   class StructuredGrid implements StructuredGridBuilder
+   {
+      StructuredGrid NewGrid( in MPI_Com com, in int dimension );
+      void print();
+      int SetGridExtents( in Box box );
+      int Assemble();
+      StructuredGrid GetConstructedObject();
+   };
+   
+         
+   interface Stencil {
+      int SetElement( in int element_index, inout array<int,1> element_offset );
+   };
+
+   class StructStencil implements Stencil 
+   {
+      StructStencil NewStencil( in int dimension, in int size );
+      void print();
+      int SetElement( in int element_index, inout array<int,1> element_offset );
+   };
+   
+  interface Solver extends LinearOperator {
+     vector Apply( in vector b );
+     StructMatrix GetSystemOperator();
+     StructVector GetResidual();
+     void GetConvergenceInfo(); /* not finished */
+  };
+
+  interface PreconditionedSolver {
+     vector Apply( in vector b );
+     StructMatrix GetSystemOperator();
+     StructVector GetResidual();
+     void GetConvergenceInfo(); /* not finished */
+
+     Solver GetPreconditioner();
+  };
+
+  interface SolverBuilder {
+     // looks like a factory object, except for the inheritance relationship
+     // Discuss with Andy Cleary what he is thinking.
+     void SetSystemOperator( in StructMatrix op );
+     void SetParameters(); /* not finished */
+     // ... a bit of a problem, as every solver needs this, but they
+     // will all work differently
+     void Setup();         /* not finished */
+     SolverBuilder GetConstructedObject();    
+  };
+
+  interface PreconditionedSolverBuilder extends SolverBuilder {
+     void SetSystemOperator( in StructMatrix op );
+     void SetParameters(); /* not finished */
+     void Setup();         /* not finished */
+     SolverBuilder GetConstructedObject();    
+
+     void SetPreconditioner( in Solver precond );
+  };
+
+  class StructJacobi implements Solver, SolverBuilder {
+     vector Apply( in vector b );
+     StructMatrix GetSystemOperator();
+     StructVector GetResidual();
+     void GetConvergenceInfo(); /* not finished */
+
+     void SetSystemOperator( in StructMatrix op );
+     void SetParameters(); /* not finished */
+     void Setup();         /* not finished */
+     SolverBuilder GetConstructedObject();    
+  };
+
+  class PCG implements PreconditionedSolver, PreconditionedSolverBuilder {
+     // Preconditioned Conjugant Gradient
+     vector Apply( in vector b );
+     StructMatrix GetSystemOperator();
+     StructVector GetResidual();
+     void GetConvergenceInfo(); /* not finished */
+
+     Solver GetPreconditioner();
+
+     void SetSystemOperator( in StructMatrix op );
+     void SetParameters(); /* not finished */
+     void Setup();         /* not finished */
+     SolverBuilder GetConstructedObject();    
+
+     void SetPreconditioner( in Solver precond );
+
+  };
+
+
+
+
+
+}
+;
