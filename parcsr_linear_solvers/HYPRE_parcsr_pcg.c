@@ -182,9 +182,9 @@ HYPRE_ParCSRDiagScale( HYPRE_Solver solver,
                        HYPRE_ParVector Hy,
                        HYPRE_ParVector Hx      )
 {
-   hypre_ParCSRMatrix   *A = (hypre_ParCSRMatrix *) HA;
-   hypre_ParVector   *y = (hypre_ParVector *) Hy;
-   hypre_ParVector   *x = (hypre_ParVector *) Hx;
+   hypre_ParCSRMatrix *A = (hypre_ParCSRMatrix *) HA;
+   hypre_ParVector    *y = (hypre_ParVector *) Hy;
+   hypre_ParVector    *x = (hypre_ParVector *) Hx;
    double *x_data = hypre_VectorData(hypre_ParVectorLocalVector(x));
    double *y_data = hypre_VectorData(hypre_ParVectorLocalVector(y));
    double *A_data = hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(A));
@@ -200,3 +200,46 @@ HYPRE_ParCSRDiagScale( HYPRE_Solver solver,
    return ierr;
 }
 
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRSymPrecondSetup
+ *--------------------------------------------------------------------------*/
+ 
+/*
+
+int 
+HYPRE_ParCSRSymPrecondSetup( HYPRE_Solver solver,
+                             HYPRE_ParCSRMatrix A,
+                             HYPRE_ParVector b,
+                             HYPRE_ParVector x      )
+{
+   hypre_ParCSRMatrix *A = (hypre_ParCSRMatrix *) A;
+   hypre_ParVector    *y = (hypre_ParVector *) b;
+   hypre_ParVector    *x = (hypre_ParVector *) x;
+
+   double *x_data = hypre_VectorData(hypre_ParVectorLocalVector(x));
+   double *y_data = hypre_VectorData(hypre_ParVectorLocalVector(y));
+   double *A_diag = hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(A));
+   double *A_offd = hypre_CSRMatrixData(hypre_ParCSRMatrixOffD(A));
+
+   int i, ierr = 0;
+   hypre_ParCSRMatrix *Asym;
+   MPI_Comm comm;
+   int global_num_rows;
+   int global_num_cols;
+   int *row_starts;
+   int *col_starts;
+   int num_cols_offd;
+   int num_nonzeros_diag;
+   int num_nonzeros_offd;
+
+   Asym = hypre_CreateParCSRMatrix(comm, global_num_rows, global_num_cols,
+                                   row_starts, col_starts, num_cols_offd,
+                                   num_nonzeros_diag, num_nonzeros_offd);
+
+   for (i=0; i < hypre_VectorSize(hypre_ParVectorLocalVector(x)); i++)
+   {
+	x_data[i] = y_data[i]/A_data[A_i[i]];
+   } 
+ 
+   return ierr;
+} */
