@@ -94,8 +94,6 @@ void  impl_Hypre_StructStencil_New
 
    HYPRE_StructStencilCreate( dimension, size, SS );
 
-   return this;
-
 } /* end impl_Hypre_StructStencilNew */
 
 /* ********************************************************
