@@ -1109,6 +1109,9 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
 	coarse_partitioning, coarse_partitioning,
 	num_cols_offd_RAP, RAP_diag_size, RAP_offd_size);
 
+/* Have RAP own coarse_partitioning instead of P */
+   hypre_SetParCSRMatrixColStartsOwner(P,0);
+
    RAP_diag = hypre_ParCSRMatrixDiag(RAP);
    hypre_CSRMatrixData(RAP_diag) = RAP_diag_data; 
    hypre_CSRMatrixI(RAP_diag) = RAP_diag_i; 
