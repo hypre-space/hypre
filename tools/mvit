@@ -225,3 +225,4 @@ done
 for i in $(find . -type f);do
   chmod a-w,o-rx $i
 done
+find . -name fileattr -exec chmod ug+rw {} \;
