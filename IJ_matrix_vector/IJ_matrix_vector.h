@@ -7,6 +7,7 @@
 #include "utilities.h"
 #include "seq_matrix_vector.h"
 #include "parcsr_matrix_vector.h"
+#include "parcsr_linear_solvers.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -38,29 +39,26 @@ extern "C" {
 
 typedef struct
 {
-   int     local_num_rows;   /* defines number of rows on this processors */
-   int     local_num_cols;   /* defines number of cols of diag */
+   int      local_num_rows;   /* defines number of rows on this processors */
+   int      local_num_cols;   /* defines number of cols of diag */
 
-   int	   diag_size;	    /* size of aux_diag_j or aux_diag_data */
-   int	   indx_diag;	   /* first empty element of aux_diag_j(data) */
-   int	   nnz_diag;   /* number of nonzeros entered into the structure */
-   int    *row_start_diag; /* row_start_diag[i] points to first element 
-				of i-th row */
-   int    *row_end_diag; /* row_end_diag[i] points to last element 
-				of i-th row */
-   int    *aux_diag_j;	/* contains collected column indices */
-   double *aux_diag_data; /* contains collected data */
+   int      need_aux; /* if need_aux = 1, aux_j, aux_data are used to
+			generate the parcsr matrix (default),
+			for need_aux = 0, data is put directly into
+			parcsr structure (requires the knowledge of
+			offd_i and diag_i ) */
 
-   int	   offd_size; /* size of aux_offd_j or aux_offd_data */
-   int	   indx_offd; /* first empty element of aux_offd_j(data) */
-   int	   nnz_offd;  /* number of nonzeros entered into the structure */
-   int    *row_start_offd;  /* row_start_offd[i] points to first element 
-                                of i-th row */
-   int    *row_end_offd;  /* row_end_offd[i] points to last element 
-                                of i-th row */
-   int    *aux_offd_j;  /* contains collected column indices */
-   double *aux_offd_data;  /* contains collected data */
+   int     *row_length; /* row_length_diag[i] contains number of stored
+				elements in i-th row */
+   int     *row_space; /* row_space_diag[i] contains space allocated to
+				i-th row */
+   int    **aux_j;	/* contains collected column indices */
+   double **aux_data; /* contains collected data */
 
+   int     *indx_diag; /* indx_diag[i] points to first empty space of portion
+			 in diag_j , diag_data assigned to row i */  
+   int     *indx_offd; /* indx_offd[i] points to first empty space of portion
+			 in offd_j , offd_data assigned to row i */  
 } hypre_AuxParCSRMatrix;
 
 /*--------------------------------------------------------------------------
@@ -70,21 +68,14 @@ typedef struct
 #define hypre_AuxParCSRMatrixLocalNumRows(matrix)  ((matrix) -> local_num_rows)
 #define hypre_AuxParCSRMatrixLocalNumCols(matrix)  ((matrix) -> local_num_cols)
 
-#define hypre_AuxParCSRMatrixDiagSize(matrix)      ((matrix) -> diag_size)
-#define hypre_AuxParCSRMatrixIndxDiag(matrix)      ((matrix) -> indx_diag)
-#define hypre_AuxParCSRMatrixNnzDiag(matrix)       ((matrix) -> nnz_diag)
-#define hypre_AuxParCSRMatrixRowStartDiag(matrix)  ((matrix) -> row_start_diag)
-#define hypre_AuxParCSRMatrixRowEndDiag(matrix)    ((matrix) -> row_end_diag)
-#define hypre_AuxParCSRMatrixAuxDiagJ(matrix)  	   ((matrix) -> aux_diag_j)
-#define hypre_AuxParCSRMatrixAuxDiagData(matrix)   ((matrix) -> aux_diag_data)
+#define hypre_AuxParCSRMatrixNeedAux(matrix)   ((matrix) -> need_aux)
+#define hypre_AuxParCSRMatrixRowLength(matrix) ((matrix) -> row_length)
+#define hypre_AuxParCSRMatrixRowSpace(matrix)  ((matrix) -> row_space)
+#define hypre_AuxParCSRMatrixAuxJ(matrix)      ((matrix) -> aux_j)
+#define hypre_AuxParCSRMatrixAuxData(matrix)   ((matrix) -> aux_data)
 
-#define hypre_AuxParCSRMatrixOffdSize(matrix)      ((matrix) -> offd_size)
-#define hypre_AuxParCSRMatrixIndxOffd(matrix)      ((matrix) -> indx_offd)
-#define hypre_AuxParCSRMatrixNnzOffd(matrix)       ((matrix) -> nnz_offd)
-#define hypre_AuxParCSRMatrixRowStartOffd(matrix)  ((matrix) -> row_start_offd)
-#define hypre_AuxParCSRMatrixRowEndOffd(matrix)    ((matrix) -> row_end_offd)
-#define hypre_AuxParCSRMatrixAuxOffdJ(matrix)  	   ((matrix) -> aux_offd_j)
-#define hypre_AuxParCSRMatrixAuxOffdData(matrix)   ((matrix) -> aux_offd_data)
+#define hypre_AuxParCSRMatrixIndxDiag(matrix)  ((matrix) -> indx_diag)
+#define hypre_AuxParCSRMatrixIndxOffd(matrix)  ((matrix) -> indx_offd)
 
 #endif
 /*BHEADER**********************************************************************
@@ -93,7 +84,11 @@ typedef struct
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
+<<<<<<< IJ_matrix_vector.h
  * $Revision$
+=======
+ * $Revision$
+>>>>>>> 1.4
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -158,6 +153,24 @@ typedef struct
 #endif
 # define	P(s) s
 
+<<<<<<< IJ_matrix_vector.h
+/* F90_HYPRE_IJMatrix.c */
+void hypre_F90_IFACE P((int hypre_newijmatrix ));
+void hypre_F90_IFACE P((int hypre_freeijmatrix ));
+void hypre_F90_IFACE P((int hypre_initializeijmatrix ));
+void hypre_F90_IFACE P((int hypre_assembleijmatrix ));
+void hypre_F90_IFACE P((int hypre_distributeijmatrix ));
+void hypre_F90_IFACE P((int hypre_setijmatrixlocalstoragetype ));
+void hypre_F90_IFACE P((int hypre_setijmatrixlocalsize ));
+void hypre_F90_IFACE P((int hypre_setijmatrixdiagrowsizes ));
+void hypre_F90_IFACE P((int hypre_setijmatrixoffdiagrowsizes ));
+void hypre_F90_IFACE P((int hypre_setijmatrixtotalsize ));
+void hypre_F90_IFACE P((int hypre_queryijmatrixinsertionsem ));
+void hypre_F90_IFACE P((int hypre_insertijmatrixblock ));
+void hypre_F90_IFACE P((int hypre_addblocktoijmatrix ));
+void hypre_F90_IFACE P((int hypre_insertijmatrixrow ));
+
+=======
 /* F90_HYPRE_IJMatrix.c */
 void hypre_F90_IFACE P((int hypre_newijmatrix ));
 void hypre_F90_IFACE P((int hypre_freeijmatrix ));
@@ -174,6 +187,7 @@ void hypre_F90_IFACE P((int hypre_insertijmatrixblock ));
 void hypre_F90_IFACE P((int hypre_addblocktoijmatrix ));
 void hypre_F90_IFACE P((int hypre_insertijmatrixrow ));
 
+>>>>>>> 1.4
 /* HYPRE_IJMatrix.c */
 int HYPRE_NewIJMatrix P((HYPRE_IJMatrix *in_matrix_ptr , MPI_Comm comm , int global_m , int global_n ));
 int HYPRE_FreeIJMatrix P((HYPRE_IJMatrix IJmatrix ));
@@ -182,6 +196,7 @@ int HYPRE_AssembleIJMatrix P((HYPRE_IJMatrix IJmatrix ));
 int HYPRE_DistributeIJMatrix P((HYPRE_IJMatrix IJmatrix , int *row_starts , int *col_starts ));
 int HYPRE_SetIJMatrixLocalStorageType P((HYPRE_IJMatrix IJmatrix , int type ));
 int HYPRE_SetIJMatrixLocalSize P((HYPRE_IJMatrix IJmatrix , int local_m , int local_n ));
+int HYPRE_SetIJMatrixRowSizes P((HYPRE_IJMatrix IJmatrix , int *sizes ));
 int HYPRE_SetIJMatrixDiagRowSizes P((HYPRE_IJMatrix IJmatrix , int *sizes ));
 int HYPRE_SetIJMatrixOffDiagRowSizes P((HYPRE_IJMatrix IJmatrix , int *sizes ));
 int HYPRE_SetIJMatrixTotalSize P((HYPRE_IJMatrix IJmatrix , int size ));
@@ -197,7 +212,7 @@ int IJMatrixBuildParLaplacian9pt P((int argc , char *argv [], int arg_index , hy
 int map2 P((int ix , int iy , int p , int q , int P , int Q , int *nx_part , int *ny_part , int *global_part ));
 
 /* aux_parcsr_matrix.c */
-hypre_AuxParCSRMatrix *hypre_CreateAuxParCSRMatrix P((int local_num_rows , int local_num_cols , int diag_size , int offd_size ));
+hypre_AuxParCSRMatrix *hypre_CreateAuxParCSRMatrix P((int local_num_rows , int local_num_cols , int *sizes ));
 int hypre_DestroyAuxParCSRMatrix P((hypre_AuxParCSRMatrix *matrix ));
 int hypre_InitializeAuxParCSRMatrix P((hypre_AuxParCSRMatrix *matrix ));
 
@@ -214,8 +229,7 @@ int BuildParLaplacian27pt P((int argc , char *argv [], int arg_index , hypre_Par
 /* hypre_IJMatrix_parcsr.c */
 int hypre_SetIJMatrixLocalSizeParcsr P((hypre_IJMatrix *matrix , int local_m , int local_n ));
 int hypre_NewIJMatrixParcsr P((hypre_IJMatrix *matrix ));
-int hypre_SetIJMatrixDiagRowSizesParcsr P((hypre_IJMatrix *matrix , int *sizes ));
-int hypre_SetIJMatrixOffDiagRowSizesParcsr P((hypre_IJMatrix *matrix , int *sizes ));
+int hypre_SetIJMatrixRowSizesParcsr P((hypre_IJMatrix *matrix , int *sizes ));
 int hypre_InitializeIJMatrixParcsr P((hypre_IJMatrix *matrix ));
 int hypre_SetIJMatrixBlockParcsr P((hypre_IJMatrix *matrix , int m , int n , int *rows , int *cols , double *coeffs ));
 int hypre_AddBlockToIJMatrixParcsr P((hypre_IJMatrix *matrix , int m , int n , int *rows , int *cols , double *coeffs ));
@@ -226,6 +240,12 @@ int hypre_DistributeIJMatrixParcsr P((hypre_IJMatrix *matrix , int *row_starts ,
 int hypre_ApplyIJMatrixParcsr P((hypre_IJMatrix *matrix , hypre_ParVector *x , hypre_ParVector *b ));
 int hypre_FreeIJMatrixParcsr P((hypre_IJMatrix *matrix ));
 int hypre_SetIJMatrixTotalSizeParcsr P((hypre_IJMatrix *matrix , int size ));
+
+/* qsort.c */
+void qsort0 P((int *v , int left , int right ));
+void qsort1 P((int *v , double *w , int left , int right ));
+void swap P((int *v , int i , int j ));
+void swap2 P((int *v , double *w , int i , int j ));
 
 #undef P
 
