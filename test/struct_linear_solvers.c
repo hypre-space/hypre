@@ -239,12 +239,7 @@ main( int   argc,
       exit(1);
    }
 
-   if (px != 0)
-   {
-      printf("Error: Periodic in x not implemented \n");
-      periodic_error++;
-   }
-   if ((px+py) != 0 && solver_id != 0 )
+   if ((px+py+pz) != 0 && solver_id != 0 )
    {
       printf("Error: Periodic implemented only for solver 0, SMG \n");
       periodic_error++;
@@ -522,10 +517,31 @@ main( int   argc,
 
    HYPRE_NewStructVector(MPI_COMM_WORLD, grid, stencil, &b);
    HYPRE_InitializeStructVector(b);
-   for (i = 0; i < volume; i++)
+
+   /*-----------------------------------------------------------
+    * For periodic b.c. in all directions, need rhs to satisfy 
+    * compatibility condition. Achieved by setting a source and
+    *  sink of equal strength.  All other problems have rhs = 1.
+    *-----------------------------------------------------------*/
+
+   if ((dim == 2 && px != 0 && py != 0) ||
+       (dim == 3 && px != 0 && py != 0 && pz != 0))
    {
-      values[i] = 1.0;
+      for (i = 0; i < volume; i++)
+      {
+         values[i] = 0.0;
+      }
+      values[0]          =  1.0;
+      values[volume - 1] = -1.0;
    }
+   else
+   {
+      for (i = 0; i < volume; i++)
+      {
+         values[i] = 1.0;
+      }
+   }
+
    for (ib = 0; ib < nblocks; ib++)
    {
       HYPRE_SetStructVectorBoxValues(b, ilower[ib], iupper[ib], values);
