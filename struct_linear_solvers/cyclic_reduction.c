@@ -393,6 +393,95 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
 
    hypre_AssembleStructMatrix(Ac);
 
+   /*-----------------------------------------------------------------------
+    * Collapse stencil in periodic direction on coarsest grid.
+    *-----------------------------------------------------------------------*/
+
+   if (hypre_IndexX(hypre_StructGridPeriodic(cgrid)) == 1)
+   {
+      hypre_ForBoxI(i, cgrid_boxes)
+      {
+         cgrid_box = hypre_BoxArrayBox(cgrid_boxes, i);
+
+         cstart = hypre_BoxIMin(cgrid_box);
+
+         Ac_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(Ac), i);
+
+         /*-----------------------------------------------
+          * Extract pointers for coarse grid operator - always 3-point:
+          *
+          * If A is symmetric so is Ac.  We build only the
+          * lower triangular part (plus diagonal).
+          *
+          * ac_cc is pointer for center coefficient (etc.)
+          *-----------------------------------------------*/
+
+         hypre_SetIndex(index_temp,0,0,0);
+         ac_cc = hypre_StructMatrixExtractPointerByIndex(Ac, i, index_temp);
+
+         hypre_SetIndex(index_temp,-1,0,0);
+         ac_cw = hypre_StructMatrixExtractPointerByIndex(Ac, i, index_temp);
+
+         if(!hypre_StructMatrixSymmetric(A))
+         {
+            hypre_SetIndex(index_temp,1,0,0);
+            ac_ce = hypre_StructMatrixExtractPointerByIndex(Ac, i, index_temp);
+         }
+
+
+         /*-----------------------------------------------
+          * non-symmetric case
+          *-----------------------------------------------*/
+
+         if(!hypre_StructMatrixSymmetric(A))
+         {
+            hypre_GetBoxSize(cgrid_box, loop_size);
+
+            hypre_BoxLoop1Begin(loop_size,
+                                Ac_data_box, cstart, stridec, iAc);
+
+#define HYPRE_SMP_PRIVATE loopi,loopj,iAc
+#include "hypre_smp_forloop.h"
+
+            hypre_BoxLoop1For(loopi, loopj, loopk, iAc)
+              {
+                 ac_cc[iAc] += (ac_cw[iAc] + ac_ce[iAc]);
+                 ac_cw[iAc]  =  0.0;
+                 ac_ce[iAc]  =  0.0;
+              }
+
+            hypre_BoxLoopEnd;
+         }
+
+         /*-----------------------------------------------
+          * symmetric case
+          *-----------------------------------------------*/
+
+         else
+         {
+            hypre_GetBoxSize(cgrid_box, loop_size);
+
+            hypre_BoxLoop1Begin(loop_size,
+                                Ac_data_box, cstart, stridec, iAc);
+
+#define HYPRE_SMP_PRIVATE loopi,loopj,iAc
+#include "hypre_smp_forloop.h"
+
+            hypre_BoxLoop1For(loopi, loopj, loopk, iAc)
+              {
+                 ac_cc[iAc] += (2.0  *  ac_cw[iAc]);
+                 ac_cw[iAc]  =  0.0;
+              }
+
+            hypre_BoxLoopEnd;
+         }
+
+      } /* end ForBoxI */
+
+   }
+
+   hypre_AssembleStructMatrix(Ac);
+
    return ierr;
 }
 
@@ -456,6 +545,8 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
                          
    int                     x_num_ghost[] = {0, 0, 0, 0, 0, 0};
                          
+   hypre_Index             periodic;
+
    int                     ierr = 0;
 
    /*-----------------------------------------------------
@@ -551,6 +642,13 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
       hypre_SetStructGridGlobalInfo(grid_l[l+1],
                                     all_boxes, processes, box_ranks,
                                     base_all_boxes, pindex, pstride);
+
+      /* set periodicity on coarser grid */
+      hypre_CopyIndex(hypre_StructGridPeriodic(grid_l[l]), periodic);
+      hypre_IndexD(periodic, cdir) =
+            (hypre_IndexD(periodic, cdir) + 1)/2;
+      hypre_SetStructGridPeriodic(grid_l[l+1], periodic);
+
       hypre_AssembleStructGrid(grid_l[l+1]);
    }
    num_levels = l + 1;
