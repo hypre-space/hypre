@@ -20,28 +20,100 @@
  * HYPRE_IJMatrixCreate
  *--------------------------------------------------------------------------*/
 
-int HYPRE_IJMatrixCreate( MPI_Comm comm, HYPRE_IJMatrix *in_matrix_ptr, 
-          int global_m, int global_n)
+int HYPRE_IJMatrixCreate( MPI_Comm comm, int ilower, int iupper, 
+			  int jlower, int jupper, HYPRE_IJMatrix *matrix) 
 
 {
    int ierr=0;
+   int *row_partitioning;
+   int *col_partitioning;
+   int *info;
+   int *recv_buf;
+   int num_procs;
+   int i, i4;
+   int square;
 
-   hypre_IJMatrix    *matrix;
+   hypre_IJMatrix *ijmatrix;
 
-   matrix = hypre_CTAlloc(hypre_IJMatrix, 1);
+   ijmatrix = hypre_CTAlloc(hypre_IJMatrix, 1);
 
-   hypre_IJMatrixContext(matrix) = comm;
-   hypre_IJMatrixM(matrix)    = global_m;
-   hypre_IJMatrixN(matrix)    = global_n;
-   hypre_IJMatrixLocalStorage(matrix) = NULL;
-   hypre_IJMatrixTranslator(matrix) = NULL;
-   hypre_IJMatrixLocalStorageType(matrix) = HYPRE_UNITIALIZED;
-   hypre_IJMatrixInsertionSemantics(matrix) = 0;
-   hypre_IJMatrixReferenceCount(matrix) = 1;
+   hypre_IJMatrixComm(ijmatrix)         = comm;
+   hypre_IJMatrixObject(ijmatrix)       = NULL;
+   hypre_IJMatrixTranslator(ijmatrix)   = NULL;
+   hypre_IJMatrixObjectType(ijmatrix)   = HYPRE_UNITIALIZED;
+   hypre_IJMatrixAssembleFlag(ijmatrix) = 0;
 
-   *in_matrix_ptr = (HYPRE_IJMatrix) matrix;
+   MPI_Comm_size(comm,&num_procs);
+ 
+   info = hypre_CTAlloc(int,4);
+   recv_buf = hypre_CTAlloc(int,4*num_procs);
+   row_partitioning = hypre_CTAlloc(int, num_procs+1);
+
+   info[0] = ilower;
+   info[1] = iupper;
+   info[2] = jlower;
+   info[3] = jupper;
+
+   /* Generate row- and column-partitioning through information exchange
+      across all processors, check whether the matrix is square, and
+      if the partitionings match. i.e. no overlaps or gaps,
+      if there are overlaps or gaps in the row partitioning or column
+      partitioning , ierr will be set to -9 or -10, respectively */
+
+   MPI_Allgather(info,4,MPI_INT,recv_buf,4,MPI_INT,comm);
+
+   row_partitioning[0] = recv_buf[0];
+   square = 1;
+   for (i=0; i < num_procs-1; i++)
+   {
+      i4 = 4*i;
+      if ( recv_buf[i4+1] != (recv_buf[i4+4]-1) )
+      {
+	 ierr = -9;
+	 break;
+      }
+      else
+	 row_partitioning[i+1] = recv_buf[i4+4];
+	 
+      if (square && (recv_buf[i4]   != recv_buf[i4+2]) ||
+                    (recv_buf[i4+1] != recv_buf[i4+3])  )
+      {
+         square = 0;
+      }
+   }	
+   i4 = (num_procs-1)*4;
+   row_partitioning[num_procs] = recv_buf[i4+1]+1;
+ 
+   if (square && ((recv_buf[i4] != recv_buf[i4+2]) ||
+                        (recv_buf[i4+1] != recv_buf[i4+3])))
+      col_partitioning = row_partitioning;
+   else
+   {   
+      col_partitioning = hypre_CTAlloc(int,num_procs+1);
+      col_partitioning[0] = recv_buf[2];
+      for (i=0; i < num_procs-1; i++)
+      {
+         i4 = 4*i;
+         if (recv_buf[i4+3] != recv_buf[i4+6]-1)
+         {
+   	   ierr = -10;
+   	   break;
+         }
+         else
+   	   col_partitioning[i+1] = recv_buf[i4+6];
+      }
+      col_partitioning[num_procs] = recv_buf[num_procs*4-1]+1;
+   }
+
+   hypre_TFree(info);
+   hypre_TFree(recv_buf);
+   
+   hypre_IJMatrixRowPartitioning(ijmatrix) = row_partitioning;
+   hypre_IJMatrixColPartitioning(ijmatrix) = col_partitioning;
+
+   *matrix = (HYPRE_IJMatrix) ijmatrix;
   
-   return( ierr ); 
+   return ierr; 
 }
 
 /*--------------------------------------------------------------------------
@@ -49,37 +121,47 @@ int HYPRE_IJMatrixCreate( MPI_Comm comm, HYPRE_IJMatrix *in_matrix_ptr,
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_IJMatrixDestroy( HYPRE_IJMatrix IJmatrix )
+HYPRE_IJMatrixDestroy( HYPRE_IJMatrix matrix )
 {
    int ierr = 0;
-   hypre_IJMatrix *matrix = (hypre_IJMatrix *) IJmatrix;
+   hypre_IJMatrix *ijmatrix = (hypre_IJMatrix *) matrix;
 
-   if (matrix)
+   if (!ijmatrix)
    {
-      hypre_IJMatrixReferenceCount( matrix ) --;
-   
-      if ( hypre_IJMatrixReferenceCount( matrix ) <= 0 )
-      {
-	/*
-         if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PETSC )
-            ierr = hypre_IJMatrixDestroyPETSc( matrix );
-         else if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_ISIS )
-            ierr = hypre_IJMatrixDestroyISIS( matrix );
-         else */ 
-	 if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PARCSR )
-            ierr = hypre_IJMatrixDestroyParCSR( matrix );
-         else
-            ierr = -1;
+      printf("Variable ijmatrix is NULL -- HYPRE_IJMatrixDestroy\n");
+      exit(1);
+   }
 
-         hypre_TFree(matrix);
+   if (ijmatrix)
+   {
+      if (hypre_IJMatrixRowPartitioning(ijmatrix) ==
+                      hypre_IJMatrixColPartitioning(ijmatrix))
+         hypre_TFree(hypre_IJMatrixRowPartitioning(ijmatrix));
+      else
+      {
+         hypre_TFree(hypre_IJMatrixRowPartitioning(ijmatrix));
+         hypre_TFree(hypre_IJMatrixColPartitioning(ijmatrix));
+      }
+
+      /*
+      if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PETSC )
+         ierr = hypre_IJMatrixDestroyPETSc( ijmatrix );
+      else if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_ISIS )
+         ierr = hypre_IJMatrixDestroyISIS( ijmatrix );
+      else */ 
+
+      if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PARCSR )
+         ierr = hypre_IJMatrixDestroyParCSR( ijmatrix );
+      else
+      {
+         printf("Unrecognized object type -- HYPRE_IJMatrixDestroy\n");
+         exit(1);
       }
    }
-   else
-   {
-      ierr = -1;
-   }
 
-   return(ierr);
+   hypre_TFree(ijmatrix); 
+
+   return ierr;
 }
 
 /*--------------------------------------------------------------------------
@@ -87,316 +169,30 @@ HYPRE_IJMatrixDestroy( HYPRE_IJMatrix IJmatrix )
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_IJMatrixInitialize( HYPRE_IJMatrix IJmatrix )
+HYPRE_IJMatrixInitialize( HYPRE_IJMatrix matrix )
 {
-   int ierr = 0;
-   hypre_IJMatrix *matrix = (hypre_IJMatrix *) IJmatrix;
+   hypre_IJMatrix *ijmatrix = (hypre_IJMatrix *) matrix;
 
-   /* if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PETSC )
-      ierr = hypre_IJMatrixInitializePETSc( matrix );
-   else if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_ISIS )
-      ierr = hypre_IJMatrixInitializeISIS( matrix );
-   else */ if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PARCSR )
-      ierr = hypre_IJMatrixInitializeParCSR( matrix );
+   if (!ijmatrix)
+   {
+      printf("Variable ijmatrix is NULL -- HYPRE_IJMatrixInitialize\n");
+      exit(1);
+   }
+
+   /* if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PETSC )
+      return( hypre_IJMatrixInitializePETSc( ijmatrix ) );
+   else if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_ISIS )
+      return( hypre_IJMatrixInitializeISIS( ijmatrix ) );
+   else */
+
+   if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PARCSR )
+      return( hypre_IJMatrixInitializeParCSR( ijmatrix ) );
    else
-      ierr = -1;
+   {
+      printf("Unrecognized object type -- HYPRE_IJMatrixInitialize\n");
+      exit(1);
+   }
 
-   return(ierr);
-}
-
-/*--------------------------------------------------------------------------
- * HYPRE_IJMatrixAssemble
- *--------------------------------------------------------------------------*/
-
-int 
-HYPRE_IJMatrixAssemble( HYPRE_IJMatrix IJmatrix )
-{
-   int ierr = 0;
-   hypre_IJMatrix *matrix = (hypre_IJMatrix *) IJmatrix;
-
-   if( (hypre_IJMatrixM(matrix) < 0 ) ||
-       (hypre_IJMatrixN(matrix) < 0 ) )
-      return(-1);
-
-   /* if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PETSC )
-      ierr = hypre_IJMatrixAssemblePETSc( matrix );
-   else if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_ISIS )
-      ierr = hypre_IJMatrixAssembleISIS( matrix );
-   else */ if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PARCSR )
-      ierr = hypre_IJMatrixAssembleParCSR( matrix );
-   else
-      ierr = -1;
-
-   return(ierr);
-}
-
-/*--------------------------------------------------------------------------
- * HYPRE_IJMatrixDistribute
- *--------------------------------------------------------------------------*/
-
-int 
-HYPRE_IJMatrixDistribute( HYPRE_IJMatrix IJmatrix, 
-			  const int     *row_starts,
-			  const int     *col_starts )
-{
-   int ierr = 0;
-   hypre_IJMatrix *matrix = (hypre_IJMatrix *) IJmatrix;
-
-   if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PARCSR )
-      ierr = hypre_IJMatrixDistributeParCSR( matrix, row_starts, col_starts );
-   else
-      ierr = -1;
-
-   return(ierr);
-}
-
-/*--------------------------------------------------------------------------
- * HYPRE_IJMatrixSetLocalStorageType
- *--------------------------------------------------------------------------*/
-
-int 
-HYPRE_IJMatrixSetLocalStorageType( HYPRE_IJMatrix IJmatrix, int type )
-{
-   int ierr = 0;
-   hypre_IJMatrix *matrix = (hypre_IJMatrix *) IJmatrix;
-
-   hypre_IJMatrixLocalStorageType(matrix) = type;
-
-   return(ierr);
-}
-
-/*--------------------------------------------------------------------------
- * HYPRE_IJMatrixSetLocalSize
- *--------------------------------------------------------------------------*/
-
-int 
-HYPRE_IJMatrixSetLocalSize( HYPRE_IJMatrix IJmatrix, int local_m, int local_n )
-{
-   int ierr = 0;
-   hypre_IJMatrix *matrix = (hypre_IJMatrix *) IJmatrix;
-
-   /* if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PETSC )
-      ierr = hypre_IJMatrixSetLocalSizePETSc (matrix, local_m, local_n);
-   if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_ISIS )
-      ierr = hypre_IJMatrixSetLocalSizeISIS (matrix, local_m, local_n);
-      */
-   if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PARCSR )
-      ierr = hypre_IJMatrixSetLocalSizeParCSR (matrix, local_m, local_n);
-   else
-      ierr = -1;
-
-   return(ierr);
-}
-
-/*--------------------------------------------------------------------------
- * HYPRE_IJMatrixSetRowSizes
- *--------------------------------------------------------------------------*/
-
-int 
-HYPRE_IJMatrixSetRowSizes( HYPRE_IJMatrix IJmatrix, const int *sizes )
-{
-   int ierr = 0;
-   hypre_IJMatrix *matrix = (hypre_IJMatrix *) IJmatrix;
-
-   /* if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PETSC )
-      ierr = hypre_IJMatrixSetRowSizesPETSc( matrix , sizes );
-   else if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_ISIS )
-      ierr = hypre_IJMatrixSetRowSizesISIS( matrix , sizes );
-   else */ if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PARCSR )
-      ierr = hypre_IJMatrixSetRowSizesParCSR( matrix , sizes );
-   else
-      ierr = -1;
-
-   return(ierr);
-}
-
-
-/*--------------------------------------------------------------------------
- * HYPRE_IJMatrixSetDiagRowSizes
- *--------------------------------------------------------------------------*/
-
-int 
-HYPRE_IJMatrixSetDiagRowSizes( HYPRE_IJMatrix IJmatrix, const int *sizes )
-{
-   int ierr = 0;
-   hypre_IJMatrix *matrix = (hypre_IJMatrix *) IJmatrix;
-
-   /* if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PETSC )
-      ierr = hypre_IJMatrixSetDiagRowSizesPETSc( matrix , sizes );
-   else if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_ISIS )
-      ierr = hypre_IJMatrixSetDiagRowSizesISIS( matrix , sizes );
-   else */ if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PARCSR )
-      ierr = hypre_IJMatrixSetDiagRowSizesParCSR( matrix , sizes );
-   else
-      ierr = -1;
-
-   return(ierr);
-}
-
-
-/*--------------------------------------------------------------------------
- * HYPRE_IJMatrixSetOffDiagRowSizes
- *--------------------------------------------------------------------------*/
-
-
-int 
-HYPRE_IJMatrixSetOffDiagRowSizes( HYPRE_IJMatrix IJmatrix, const int *sizes )
-{
-   int ierr = 0;
-   hypre_IJMatrix *matrix = (hypre_IJMatrix *) IJmatrix;
-
-   /* if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PETSC )
-      ierr = hypre_IJMatrixSetOffDiagRowSizesPETSc( matrix , sizes );
-   else if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_ISIS )
-      ierr = hypre_IJMatrixSetOffDiagRowSizesISIS( matrix , sizes );
-   else */ if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PARCSR )
-      ierr = hypre_IJMatrixSetOffDiagRowSizesParCSR( matrix , sizes );
-   else
-      ierr = -1;
-
-   return(ierr);
-}
-
-/*--------------------------------------------------------------------------
- * HYPRE_IJMatrixQueryInsertionSemantics
- *--------------------------------------------------------------------------*/
-
-
-int 
-HYPRE_IJMatrixQueryInsertionSemantics( HYPRE_IJMatrix IJmatrix, int *level )
-{
-   int ierr = 0;
-   hypre_IJMatrix *matrix = (hypre_IJMatrix *) IJmatrix;
-
-   *level = hypre_IJMatrixInsertionSemantics(matrix);
-
-   return(ierr);
-
-}
-
-/*--------------------------------------------------------------------------
- * HYPRE_IJMatrixInsertBlock
- *--------------------------------------------------------------------------*/
-
-
-int 
-HYPRE_IJMatrixInsertBlock( HYPRE_IJMatrix IJmatrix, int m, int n,
-                           const int *rows, const int *cols, 
-			   const double *values)
-{
-   int ierr = 0;
-   hypre_IJMatrix *matrix = (hypre_IJMatrix *) IJmatrix;
-
-   /*  if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PETSC )
-      ierr = hypre_IJMatrixInsertBlockPETSc( matrix, m, n, rows, cols, values );
-   else if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_ISIS )
-      ierr = hypre_IJMatrixInsertBlockISIS( matrix, m, n, rows, cols, values );
-   else */ if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PARCSR )
-      ierr = hypre_IJMatrixInsertBlockParCSR( matrix, m, n, rows, cols, values );
-   else
-      ierr = -1;
-
-   return(ierr);
-}
-
-/*--------------------------------------------------------------------------
- * HYPRE_IJMatrixAddToBlock
- *--------------------------------------------------------------------------*/
-
-
-int 
-HYPRE_IJMatrixAddToBlock( HYPRE_IJMatrix IJmatrix, int m, int n,
-                          const int *rows, const int *cols, 
-			  const double *values)
-{
-   int ierr = 0;
-   hypre_IJMatrix *matrix = (hypre_IJMatrix *) IJmatrix;
-
-   /* if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PETSC )
-      ierr = hypre_IJMatrixAddToBlockPETSc( matrix, m, n, rows, cols, values );
-   else if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_ISIS )
-      ierr = hypre_IJMatrixAddToBlockISIS( matrix, m, n, rows, cols, values );
-   else */ if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PARCSR )
-      ierr = hypre_IJMatrixAddToBlockParCSR( matrix, m, n, rows, cols, values );
-   else
-      ierr = -1;
-
-   return(ierr);
-}
-
-/*--------------------------------------------------------------------------
- * HYPRE_IJMatrixInsertRow
- *--------------------------------------------------------------------------*/
-
-
-int 
-HYPRE_IJMatrixInsertRow( HYPRE_IJMatrix IJmatrix, int n,
-                           int row, const int *cols, const double *values)
-{
-   int ierr = 0;
-   hypre_IJMatrix *matrix = (hypre_IJMatrix *) IJmatrix;
-
-   /* if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PETSC )
-      ierr = hypre_IJMatrixInsertRowPETSc( matrix, n, row, cols, values );
-   else if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_ISIS )
-      ierr = hypre_IJMatrixInsertRowISIS( matrix, n, row, cols, values );
-   else */ if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PARCSR )
-     /* Currently a slight mismatch between "Insert" and "Set" */
-      ierr = hypre_IJMatrixInsertRowParCSR( matrix, n, row, cols, values );
-   else
-      ierr = -1;
-
-   return(ierr);
-}
-
-/*--------------------------------------------------------------------------
- * HYPRE_IJMatrixAddToRow
- *--------------------------------------------------------------------------*/
-
-
-int 
-HYPRE_IJMatrixAddToRow( HYPRE_IJMatrix IJmatrix, int n,
-                           int row, const int *cols, const double *values)
-{
-   int ierr = 0;
-   hypre_IJMatrix *matrix = (hypre_IJMatrix *) IJmatrix;
-
-   /* if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PETSC )
-      ierr = hypre_IJMatrixAddToRowPETSc( matrix, n, row, cols, values );
-   else if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_ISIS )
-      ierr = hypre_IJMatrixAddToRowISIS( matrix, n, row, cols, values );
-   else */ if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PARCSR )
-     /* Currently a slight mismatch between "Insert" and "Set" */
-      ierr = hypre_IJMatrixAddToRowParCSR( matrix, n, row, cols, values );
-   else
-      ierr = -1;
-
-   return(ierr);
-}
-
-/*--------------------------------------------------------------------------
- * HYPRE_IJMatrixAddToRowAfter
- *--------------------------------------------------------------------------*/
-
-
-int 
-HYPRE_IJMatrixAddToRowAfter( HYPRE_IJMatrix IJmatrix, int n,
-                           int row, const int *cols, const double *values)
-{
-   int ierr = 0;
-   hypre_IJMatrix *matrix = (hypre_IJMatrix *) IJmatrix;
-
-   /* if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PETSC )
-      ierr = hypre_IJMatrixAddToRowafterPETSc( matrix, n, row, cols, values );
-   else if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_ISIS )
-      ierr = hypre_IJMatrixAddToRowAfterISIS( matrix, n, row, cols, values );
-   else */ if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PARCSR )
-     /* Currently a slight mismatch between "Insert" and "Set" */
-      ierr = hypre_IJMatrixAddToRowAfterParCSR( matrix, n, row, cols, values );
-   else
-      ierr = -1;
-
-   return(ierr);
 }
 
 /*--------------------------------------------------------------------------
@@ -404,255 +200,342 @@ HYPRE_IJMatrixAddToRowAfter( HYPRE_IJMatrix IJmatrix, int n,
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_IJMatrixSetValues( HYPRE_IJMatrix IJmatrix,
-                         int            n,
-                         int            row,
-                         const int     *cols, 
-                         const double  *values )
+HYPRE_IJMatrixSetValues( HYPRE_IJMatrix matrix, int nrows,
+                         int *ncols, const int *rows,
+                         const int *cols, const double *values)
 {
-   int ierr = 0;
-   hypre_IJMatrix *matrix = (hypre_IJMatrix *) IJmatrix;
+   hypre_IJMatrix *ijmatrix = (hypre_IJMatrix *) matrix;
 
-   /* if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PETSC )
+   if (!ijmatrix)
    {
-      ierr = hypre_IJMatrixSetValuesPETSc( matrix, n, row, cols, values, 0 );
+      printf("Variable ijmatrix is NULL -- HYPRE_IJMatrixSetValues\n");
+      exit(1);
    }
-   else if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_ISIS )
-   {
-      ierr = hypre_IJMatrixSetValuesISIS( matrix, n, row, cols, values, 0 );
-   }
-   else */ if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PARCSR )
-   {
-      ierr = hypre_IJMatrixSetValuesParCSR( matrix, n, row, cols, values, 0 );
-   }
+
+   /* if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PETSC )
+      return( hypre_IJMatrixSetValuesPETSc( ijmatrix, nrows, ncols, 
+                                            rows, cols, values ) );
+   else if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_ISIS )
+      return( hypre_IJMatrixSetValuesISIS( ijmatrix, nrows, ncols, 
+                                           rows, cols, values ) );
+   else */
+
+   if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PARCSR )
+      return( hypre_IJMatrixSetValuesParCSR( ijmatrix, nrows, ncols,
+                                             rows, cols, values ) );
    else
    {
-      ierr = -1;
+      printf("Unrecognized object type -- HYPRE_IJMatrixSetValues\n");
+      exit(1);
    }
-
-   return(ierr);
+    
+   return -99;
 }
 
 /*--------------------------------------------------------------------------
  * HYPRE_IJMatrixAddToValues
  *--------------------------------------------------------------------------*/
 
-int 
-HYPRE_IJMatrixAddToValues( HYPRE_IJMatrix IJmatrix,
-                           int            n,
-                           int            row,
-                           const int     *cols, 
-                           const double  *values )
-{
-   int ierr = 0;
-   hypre_IJMatrix *matrix = (hypre_IJMatrix *) IJmatrix;
 
-   /* if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PETSC )
+int 
+HYPRE_IJMatrixAddToValues( HYPRE_IJMatrix matrix, int nrows,
+                           int *ncols, const int *rows,
+                           const int *cols, const double *values)
+{
+   hypre_IJMatrix *ijmatrix = (hypre_IJMatrix *) matrix;
+
+   if (!ijmatrix)
    {
-      ierr = hypre_IJMatrixSetValuesPETSc( matrix, n, row, cols, values, 1 );
+      printf("Variable ijmatrix is NULL -- HYPRE_IJMatrixAddToValues\n");
+      exit(1);
    }
-   else if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_ISIS )
-   {
-      ierr = hypre_IJMatrixSetValuesISIS( matrix, n, row, cols, values, 1 );
-   }
-   else */ if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PARCSR )
-   {
-      ierr = hypre_IJMatrixSetValuesParCSR( matrix, n, row, cols, values, 1 );
-   }
+
+   /* if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PETSC )
+      return( hypre_IJMatrixAddToValuesPETSc( ijmatrix, nrows, ncols, 
+                                              rows, cols, values ) );
+   else if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_ISIS )
+      return( hypre_IJMatrixAddToValuesISIS( ijmatrix, nrows, ncols, 
+                                             rows, cols, values ) );
+   else */ if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PARCSR )
+      return( hypre_IJMatrixAddToValuesParCSR( ijmatrix, nrows, ncols,
+                                               rows, cols, values ) );
    else
    {
-      ierr = -1;
+      printf("Unrecognized object type -- HYPRE_IJMatrixAddToValues\n");
+      exit(1);
    }
 
-   return(ierr);
+   return -99;
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_IJMatrixSetBlockValues
- *--------------------------------------------------------------------------*/
-
-int 
-HYPRE_IJMatrixSetBlockValues( HYPRE_IJMatrix IJmatrix,
-                              int            m,
-                              int            n,
-                              const int     *rows,
-                              const int     *cols, 
-                              const double  *values )
-{
-   int ierr = 0;
-   hypre_IJMatrix *matrix = (hypre_IJMatrix *) IJmatrix;
-
-   /* if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PETSC )
-   {
-      ierr = hypre_IJMatrixSetBlockValuesPETSc( matrix, m, n,
-                                                rows, cols, values, 0 );
-   }
-   else if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_ISIS )
-   {
-      ierr = hypre_IJMatrixSetBlockValuesISIS( matrix, m, n,
-                                               rows, cols, values, 0 );
-   }
-   else */ if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PARCSR )
-   {
-      ierr = hypre_IJMatrixSetBlockValuesParCSR( matrix, m, n,
-                                                 rows, cols, values, 0 );
-   }
-   else
-   {
-      ierr = -1;
-   }
-
-   return(ierr);
-}
-
-/*--------------------------------------------------------------------------
- * HYPRE_IJMatrixAddToBlockValues
+ * HYPRE_IJMatrixAssemble
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_IJMatrixAddToBlockValues( HYPRE_IJMatrix IJmatrix,
-                                int            m,
-                                int            n,
-                                const int     *rows,
-                                const int     *cols, 
-                                const double  *values )
+HYPRE_IJMatrixAssemble( HYPRE_IJMatrix matrix )
 {
-   int ierr = 0;
-   hypre_IJMatrix *matrix = (hypre_IJMatrix *) IJmatrix;
+   hypre_IJMatrix *ijmatrix = (hypre_IJMatrix *) matrix;
 
-   /* if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PETSC )
+   if (!ijmatrix)
    {
-      ierr = hypre_IJMatrixSetBlockValuesPETSc( matrix, m, n,
-                                                rows, cols, values, 1 );
+      printf("Variable ijmatrix is NULL -- HYPRE_IJMatrixAssemble\n");
+      exit(1);
    }
-   else if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_ISIS )
-   {
-      ierr = hypre_IJMatrixSetBlockValuesISIS( matrix, m, n,
-                                               rows, cols, values, 1 );
-   }
-   else */ if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PARCSR )
-   {
-      ierr = hypre_IJMatrixSetBlockValuesParCSR( matrix, m, n,
-                                                 rows, cols, values, 1 );
-   }
+
+   /* if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PETSC )
+      return( hypre_IJMatrixAssemblePETSc( ijmatrix ) );
+   else if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_ISIS )
+      return( hypre_IJMatrixAssembleISIS( ijmatrix ) );
+   else */
+
+   if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PARCSR )
+      return( hypre_IJMatrixAssembleParCSR( ijmatrix ) );
    else
    {
-      ierr = -1;
+      printf("Unrecognized object type -- HYPRE_IJMatrixAssemble\n");
+      exit(1);
    }
 
-   return(ierr);
+   return -99;
 }
 
-/***************************************************************************
- * The following are routines that are not generally used by or supported
- * for users
- ***************************************************************************/
-
-
 /*--------------------------------------------------------------------------
- * hypre_RefIJMatrix
+ * HYPRE_IJMatrixGetValues
  *--------------------------------------------------------------------------*/
-
-/**
-Sets a reference to point to an IJMatrix.
-
-@return integer error code
-@param IJMatrix [IN]
-The matrix to be pointed to.
-@param reference [OUT]
-The pointer to be set to point to IJMatrix.
-*/
 
 int 
-hypre_RefIJMatrix( HYPRE_IJMatrix IJmatrix, HYPRE_IJMatrix *reference )
+HYPRE_IJMatrixGetValues( HYPRE_IJMatrix matrix, int nrows, int *ncols,
+                         int *rows, int *cols, double *values)
 {
    int ierr = 0;
-   hypre_IJMatrix *matrix = (hypre_IJMatrix *) IJmatrix;
+   hypre_IJMatrix *ijmatrix = (hypre_IJMatrix *) matrix;
 
-   hypre_IJMatrixReferenceCount(matrix) ++;
+   if (!ijmatrix)
+   {
+      printf("Variable ijmatrix is NULL -- HYPRE_IJMatrixGetValues\n");
+      exit(1);
+   }
 
-   *reference = IJmatrix;
+   /* if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PETSC )
+      ierr = hypre_IJMatrixGetValuesPETSc( ijmatrix, nrows, ncols, 
+					   rows, cols, values );
+   else if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_ISIS )
+      ierr = hypre_IJMatrixGetValuesISIS( ijmatrix, nrows, ncols, 
+					  rows, cols, values );
+   else */
 
-   return(ierr);
-}
-
-/*--------------------------------------------------------------------------
- * HYPRE_IJMatrixGetLocalStorage
- *--------------------------------------------------------------------------*/
-
-/**
-Returns a pointer to an underlying matrix type used to implement IJMatrix.
-Assumes that the implementation has an underlying matrix, so it would not
-work with a direct implementation of IJMatrix. 
-
-@return integer error code
-@param IJMatrix [IN]
-The matrix to be pointed to.
-*/
-
-void *
-HYPRE_IJMatrixGetLocalStorage( HYPRE_IJMatrix IJmatrix )
-{
-   hypre_IJMatrix *matrix = (hypre_IJMatrix *) IJmatrix;
-
-   return( hypre_IJMatrixLocalStorage( matrix ) );
-
-}
-
-/*--------------------------------------------------------------------------
- * HYPRE_IJMatrixGetRowPartitioning
- *--------------------------------------------------------------------------*/
-
-/**
-Returns a pointer to the row partitioning if IJmatrix has an underlying
-parcsr matrix
-
-@return integer error code
-@param IJMatrix [IN]
-The matrix to be pointed to.
-*/
-
-int
-HYPRE_IJMatrixGetRowPartitioning( HYPRE_IJMatrix IJmatrix ,
-				  const int    **row_partitioning )
-{
-   int ierr = 0;
-   hypre_IJMatrix *matrix = (hypre_IJMatrix *) IJmatrix;
-
-   if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PARCSR )
-      ierr = hypre_IJMatrixGetRowPartitioningParCSR( matrix ,
-                                                     row_partitioning );
+   if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PARCSR )
+      ierr = hypre_IJMatrixGetValuesParCSR( ijmatrix, nrows, ncols,
+					    rows, cols, values );
    else
-      ierr = -1;
+   {
+      printf("Unrecognized object type -- HYPRE_IJMatrixGetValues\n");
+      exit(1);
+   }
 
    return ierr;
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_IJMatrixGetColPartitioning
+ * HYPRE_IJMatrixSetObjectType
+ *--------------------------------------------------------------------------*/
+
+int 
+HYPRE_IJMatrixSetObjectType( HYPRE_IJMatrix matrix, int type )
+{
+   hypre_IJMatrix *ijmatrix = (hypre_IJMatrix *) matrix;
+
+   if (!ijmatrix)
+   {
+      printf("Variable ijmatrix is NULL -- HYPRE_IJMatrixSetObjectType\n");
+      exit(1);
+   }
+
+   hypre_IJMatrixObjectType(ijmatrix) = type;
+
+   return 0;
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_IJMatrixGetObjectType
+ *--------------------------------------------------------------------------*/
+
+int 
+HYPRE_IJMatrixGetObjectType( HYPRE_IJMatrix matrix, int *type )
+{
+   hypre_IJMatrix *ijmatrix = (hypre_IJMatrix *) matrix;
+
+   if (!ijmatrix)
+   {
+      printf("Variable ijmatrix is NULL -- HYPRE_IJMatrixGetObjectType\n");
+      exit(1);
+   }
+
+   *type = hypre_IJMatrixObjectType(ijmatrix);
+
+   return 0;
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_IJMatrixGetObject
  *--------------------------------------------------------------------------*/
 
 /**
-Returns a pointer to the column partitioning if IJmatrix has an underlying
-parcsr matrix
+Returns a pointer to an underlying ijmatrix type used to implement IJMatrix.
+Assumes that the implementation has an underlying matrix, so it would not
+work with a direct implementation of IJMatrix. 
 
 @return integer error code
 @param IJMatrix [IN]
-The matrix to be pointed to.
+The ijmatrix to be pointed to.
 */
 
 int
-HYPRE_IJMatrixGetColPartitioning( HYPRE_IJMatrix IJmatrix ,
-				  const int    **col_partitioning )
+HYPRE_IJMatrixGetObject( HYPRE_IJMatrix matrix, void **object )
+{
+   hypre_IJMatrix *ijmatrix = (hypre_IJMatrix *) matrix;
+
+   if (!ijmatrix)
+   {
+      printf("Variable ijmatrix is NULL -- HYPRE_IJMatrixGetObject\n");
+      exit(1);
+   }
+
+   *object = hypre_IJMatrixObject( ijmatrix );
+
+   return 0;
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_IJMatrixSetRowSizes
+ *--------------------------------------------------------------------------*/
+
+int 
+HYPRE_IJMatrixSetRowSizes( HYPRE_IJMatrix matrix, const int *sizes )
+{
+   hypre_IJMatrix *ijmatrix = (hypre_IJMatrix *) matrix;
+
+   if (!ijmatrix)
+   {
+      printf("Variable ijmatrix is NULL -- HYPRE_IJMatrixSetRowSizes\n");
+      exit(1);
+   }
+
+   /* if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PETSC )
+      return( hypre_IJMatrixSetRowSizesPETSc( ijmatrix , sizes ) );
+   else if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_ISIS )
+      return( hypre_IJMatrixSetRowSizesISIS( ijmatrix , sizes ) );
+   else */
+
+   if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PARCSR )
+      return( hypre_IJMatrixSetRowSizesParCSR( ijmatrix , sizes ) );
+   else
+   {
+      printf("Unrecognized object type -- HYPRE_IJMatrixSetRowSizes\n");
+      exit(1);
+   }
+
+   return -99;
+}
+
+
+/*--------------------------------------------------------------------------
+ * HYPRE_IJMatrixSetDiagOffdSizes
+ *--------------------------------------------------------------------------*/
+
+int 
+HYPRE_IJMatrixSetDiagOffdSizes( HYPRE_IJMatrix matrix, 
+				const int *diag_sizes,
+				const int *offdiag_sizes )
 {
    int ierr = 0;
-   hypre_IJMatrix *matrix = (hypre_IJMatrix *) IJmatrix;
+   hypre_IJMatrix *ijmatrix = (hypre_IJMatrix *) matrix;
 
-   if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PARCSR )
-      ierr = hypre_IJMatrixGetColPartitioningParCSR( matrix ,
-                                                     col_partitioning );
+   if (!ijmatrix)
+   {
+      printf("Variable ijmatrix is NULL -- HYPRE_IJMatrixSetDiagOffdSizes\n");
+      exit(1);
+   }
+
+   /* if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PETSC )
+      ierr = hypre_IJMatrixSetDiagOffdSizesPETSc( ijmatrix , diag_sizes ,
+						offdiag_sizes );
+   else if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_ISIS )
+      ierr = hypre_IJMatrixSetDiagOffdSizesISIS( ijmatrix , diag_sizes ,
+						offdiag_sizes );
+   else */
+
+   if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PARCSR )
+      ierr  = hypre_IJMatrixSetDiagOffdSizesParCSR( ijmatrix , diag_sizes ,
+							offdiag_sizes );
    else
-      ierr = -1;
+   {
+      printf("Unrecognized object type -- HYPRE_IJMatrixSetDiagOffdSizes\n");
+      exit(1);
+   }
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_IJMatrixRead
+ *--------------------------------------------------------------------------*/
+
+int 
+HYPRE_IJMatrixRead( char *filename, MPI_Comm comm, int type,
+		    HYPRE_IJMatrix *matrix)
+{
+   int ierr = 0;
+   hypre_IJMatrix *ijmatrix;
+
+   /* if ( type == HYPRE_PETSC )
+      ierr = hypre_IJMatrixReadPETSc( comm, filename, &ijmatrix );
+   else if ( type == HYPRE_ISIS )
+      ierr = hypre_IJMatrixReadISIS( comm, filename, &ijmatrix );
+   else */ if ( type == HYPRE_PARCSR )
+      ierr = hypre_IJMatrixReadParCSR( comm, filename, &ijmatrix );
+   else 
+   {
+      printf("Unrecognized object type -- HYPRE_IJMatrixRead\n");
+      exit(1);
+   }
+
+   *matrix = (HYPRE_IJMatrix ) ijmatrix;
+   hypre_IJMatrixAssembleFlag(ijmatrix) = 1;
+ 
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_IJMatrixPrint
+ *--------------------------------------------------------------------------*/
+
+int 
+HYPRE_IJMatrixPrint( HYPRE_IJMatrix matrix, char *filename)
+{
+   int ierr = 0;
+   hypre_IJMatrix *ijmatrix = (hypre_IJMatrix *) matrix;
+
+   if (!ijmatrix)
+   {
+      printf("Variable ijmatrix is NULL -- HYPRE_IJMatrixPrint\n");
+      exit(1);
+   }
+
+   /* if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PETSC )
+      ierr = hypre_IJMatrixPrintPETSc( ijmatrix , filename );
+   else if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_ISIS )
+      ierr = hypre_IJMatrixPrintISIS( ijmatrix , filename );
+   else */
+
+   if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PARCSR )
+      ierr = hypre_IJMatrixPrintParCSR( ijmatrix , filename );
+   else
+   {
+      printf("Unrecognized object type -- HYPRE_IJMatrixPrint\n");
+      exit(1);
+   }
 
    return ierr;
 }

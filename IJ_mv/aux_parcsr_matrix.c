@@ -37,12 +37,7 @@ hypre_AuxParCSRMatrixCreate( hypre_AuxParCSRMatrix **aux_matrix,
 
    if (sizes)
    {
-      row_space = hypre_CTAlloc (int, local_num_rows);
-      for (i=0 ; i < local_num_rows; i++)
-      {
-	 row_space[i] = sizes[i];
-      }
-      hypre_AuxParCSRMatrixRowSpace(matrix) = row_space;
+      hypre_AuxParCSRMatrixRowSpace(matrix) = sizes;
    }
    else
    {
@@ -70,10 +65,11 @@ hypre_AuxParCSRMatrixDestroy( hypre_AuxParCSRMatrix *matrix )
 {
    int ierr=0;
    int i;
-   int num_rows = hypre_AuxParCSRMatrixLocalNumRows(matrix);
+   int num_rows;
 
    if (matrix)
    {
+      num_rows = hypre_AuxParCSRMatrixLocalNumRows(matrix);
       if (hypre_AuxParCSRMatrixRowLength(matrix))
          hypre_TFree(hypre_AuxParCSRMatrixRowLength(matrix));
       if (hypre_AuxParCSRMatrixRowSpace(matrix))

@@ -21,30 +21,27 @@
 
 typedef struct
 {
-   MPI_Comm      context;
+   MPI_Comm      comm;
 
-   int N;                                  /* number of rows in column vector */
+   int 		*partitioning;      /* Indicates partitioning over tasks */
 
+   int           object_type;       /* Indicates the type of "local storage" */
 
-   void         *local_storage;            /* Structure for storing local portio
-n */
-   int           local_storage_type;       /* Indicates the type of "local stora
-ge" */
-   int           ref_count;                /* reference count for memory managem
-ent */
+   void         *object;            /* Structure for storing local portion */
+
 } hypre_IJVector;
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_IJVector
  *--------------------------------------------------------------------------*/
 
-#define hypre_IJVectorContext(vector)              ((vector) -> context)
-#define hypre_IJVectorN(vector)                    ((vector) -> N)
+#define hypre_IJVectorComm(vector)           ((vector) -> comm)
 
-#define hypre_IJVectorLocalStorageType(vector)     ((vector) -> local_storage_type)
-#define hypre_IJVectorLocalStorage(vector)         ((vector) -> local_storage)
+#define hypre_IJVectorPartitioning(vector)   ((vector) -> partitioning)
 
-#define hypre_IJVectorReferenceCount(vector)       ((vector) -> ref_count)
+#define hypre_IJVectorObjectType(vector)     ((vector) -> object_type)
+
+#define hypre_IJVectorObject(vector)         ((vector) -> object)
 
 /*--------------------------------------------------------------------------
  * prototypes for operations on local objects

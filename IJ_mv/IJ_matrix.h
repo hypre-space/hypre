@@ -21,38 +21,33 @@
 
 typedef struct
 {
-   MPI_Comm      context;
+   MPI_Comm    comm;
 
-   int M, N;                               /* number of rows and cols in matrix */
+   int        *row_partitioning;    /* distribution of rows across processors */
+   int        *col_partitioning;    /* distribution of columns */
 
-
-   void         *local_storage;            /* Structure for storing local portion */
-   int      	 local_storage_type;       /* Indicates the type of "local storage" */
-   void         *translator;               /* optional storage_type specfic structure
-                                              for holding additional local info */
-
-   int           insertion_semantics;      /* Flag that indicates for the current
-                                              object to what extent values can be set
-                                              from different processors than the one that
-                                              stores the row. */
-                                           /* 0: minimum definition, values can only be set on-processor. */
-   int           ref_count;                /* reference count for memory management */
+   int         object_type;         /* Indicates the type of "object" */
+   void       *object;              /* Structure for storing local portion */
+   void       *translator;          /* optional storage_type specfic structure
+                                       for holding additional local info */
+   int         assemble_flag;       /* indicates whether matrix has been 
+				       assembled */
 } hypre_IJMatrix;
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_IJMatrix
  *--------------------------------------------------------------------------*/
 
-#define hypre_IJMatrixContext(matrix)              ((matrix) -> context)
-#define hypre_IJMatrixM(matrix)                    ((matrix) -> M)
-#define hypre_IJMatrixN(matrix)                    ((matrix) -> N)
+#define hypre_IJMatrixComm(matrix)              ((matrix) -> comm)
 
-#define hypre_IJMatrixLocalStorageType(matrix)     ((matrix) -> local_storage_type)
-#define hypre_IJMatrixTranslator(matrix)           ((matrix) -> translator)
-#define hypre_IJMatrixLocalStorage(matrix)         ((matrix) -> local_storage)
+#define hypre_IJMatrixRowPartitioning(matrix)   ((matrix) -> row_partitioning)
+#define hypre_IJMatrixColPartitioning(matrix)   ((matrix) -> col_partitioning)
 
-#define hypre_IJMatrixInsertionSemantics(matrix)   ((matrix) -> insertion_semantics)
-#define hypre_IJMatrixReferenceCount(matrix)       ((matrix) -> ref_count)
+#define hypre_IJMatrixObjectType(matrix)        ((matrix) -> object_type)
+#define hypre_IJMatrixObject(matrix)            ((matrix) -> object)
+#define hypre_IJMatrixTranslator(matrix)        ((matrix) -> translator)
+
+#define hypre_IJMatrixAssembleFlag(matrix)      ((matrix) -> assemble_flag)
 
 /*--------------------------------------------------------------------------
  * prototypes for operations on local objects

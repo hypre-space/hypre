@@ -21,25 +21,63 @@
  *--------------------------------------------------------------------------*/
 
 int HYPRE_IJVectorCreate( MPI_Comm comm,
-                       HYPRE_IJVector *in_vector_ptr, 
-                       int global_n)
-
+                          int jlower,
+                          int jupper,
+                          HYPRE_IJVector *vector )
 {
-   int ierr=0;
+   hypre_IJVector *vec;
+   int num_procs, my_id, *partitioning;
+   int ierr, i, i2;
+   int *info;
+   int *recv_buf;
 
-   hypre_IJVector    *vector;
+   vec = hypre_CTAlloc(hypre_IJVector, 1);
+   
+   if (!vec)
+   {  
+      printf("Out of memory -- HYPRE_IJVectorCreate\n");
+      exit(1);
+   }
 
-   vector = hypre_CTAlloc(hypre_IJVector, 1);
+   MPI_Comm_size(comm, &num_procs);
+   MPI_Comm_rank(comm, &my_id);
 
-   hypre_IJVectorContext(vector) = comm;
-   hypre_IJVectorN(vector)       = global_n;
-   hypre_IJVectorLocalStorage(vector) = NULL;
-   hypre_IJVectorLocalStorageType(vector) = HYPRE_UNITIALIZED;
-   hypre_IJVectorReferenceCount(vector) = 1;
+   info = hypre_CTAlloc(int,2);
+   recv_buf = hypre_CTAlloc(int, 2*num_procs);
+   partitioning = hypre_CTAlloc(int, num_procs+1);
 
-   *in_vector_ptr = (HYPRE_IJVector) vector;
+   info[0] = jlower;
+   info[1] = jupper;
+
+   ierr = MPI_Allgather(info, 2, MPI_INT, recv_buf, 2, MPI_INT, comm);
+
+   partitioning[0] = recv_buf[0];
+   for (i=0; i < num_procs-1; i++)
+   {
+      i2 = i+i;
+      if (recv_buf[i2+1] != (recv_buf[i2+2]-1))
+      {
+         printf("Inconsistent partitioning -- HYPRE_IJVectorCreate\n");  
+	 ierr = -9;
+	 return ierr;
+      }
+      else
+	 partitioning[i+1] = recv_buf[i2+2];
+   }
+   i2 = (num_procs-1)*2;
+   partitioning[num_procs] = recv_buf[i2+1]+1;
+
+   hypre_TFree(info);
+   hypre_TFree(recv_buf);
+
+   hypre_IJVectorComm(vec)         = comm;
+   hypre_IJVectorPartitioning(vec) = partitioning;
+   hypre_IJVectorObject(vec)       = NULL;
+   hypre_IJVectorObjectType(vec)   = HYPRE_UNITIALIZED;
+
+   *vector = (HYPRE_IJVector) vec;
   
-   return( ierr ); 
+   return ierr; 
 }
 
 /*--------------------------------------------------------------------------
@@ -47,117 +85,43 @@ int HYPRE_IJVectorCreate( MPI_Comm comm,
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_IJVectorDestroy( HYPRE_IJVector IJvector )
+HYPRE_IJVectorDestroy( HYPRE_IJVector vector )
 {
+   hypre_IJVector *vec = (hypre_IJVector *) vector;
    int ierr = 0;
-   hypre_IJVector *vector = (hypre_IJVector *) IJvector;
 
-   if (vector)
+   if (!vec)
    {
-      hypre_IJVectorReferenceCount(vector) --;
-   
-      if ( hypre_IJVectorReferenceCount(vector) <= 0 )
-      {
-	/*
-         if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PETSC )
-            ierr = hypre_IJVectorDestroyPETSc(vector);
-         else if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_ISIS )
-            ierr = hypre_IJVectorDestroyISIS(vector);
-         else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR )
-            ierr = hypre_IJVectorDestroyPar(vector);
-         else
-            ierr = -1;
+     printf("Vector variable is NULL -- HYPRE_IJVectorDestroy\n");
+     exit(1);
+   } 
 
-         hypre_TFree(vector);
-      }
-   }
+   if (hypre_IJVectorPartitioning(vec))
+      hypre_TFree(hypre_IJVectorPartitioning(vec));
+
+   /* if ( hypre_IJVectorObjectType(vec) == HYPRE_PETSC )
+
+      ierr = hypre_IJVectorDestroyPETSc(vec) ;
+
+   else if ( hypre_IJVectorObjectType(vec) == HYPRE_ISIS )
+
+      ierr = hypre_IJVectorDestroyISIS(vec) ;
+
+   else */
+
+   if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
+
+      ierr = hypre_IJVectorDestroyPar(vec) ;
+
    else
    {
-      ierr = -1;
+      printf("Unrecognized object type -- HYPRE_IJVectorDestroy\n");
+      exit(1);
    }
 
-   return(ierr);
-}
+   hypre_TFree(vec);
 
-/*--------------------------------------------------------------------------
- * HYPRE_IJVectorSetPartitioning
- *--------------------------------------------------------------------------*/
-
-int 
-HYPRE_IJVectorSetPartitioning( HYPRE_IJVector  IJvector,
-                               const int      *partitioning )
-{
-   int ierr = 0;
-   hypre_IJVector *vector = (hypre_IJVector *) IJvector;
-
-   /* if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PETSC )
-   {
-      if (!hypre_IJVectorLocalStorage(vector)) hypre_CreateIJVectorPETSc(vector);
-
-      ierr += hypre_SetIJVectorPETScPartitioning(vector,
-                                                 partitioning);
-   }
-   else if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_ISIS )
-   {
-      if (!hypre_IJVectorLocalStorage(vector)) hypre_CreateIJVectorISIS(vector);
-
-      ierr += hypre_SetIJVectorISISPartitioning(vector,
-                                                partitioning);
-   }
-   else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR )
-   {
-      if (!hypre_IJVectorLocalStorage(vector)) 
-	 ierr = hypre_IJVectorCreatePar(vector, partitioning);
-      else
-         ierr = hypre_IJVectorSetPartitioningPar(vector, partitioning);
-   }
-   else
-      ++ierr;
-
-   return(ierr);
-}
-
-/*--------------------------------------------------------------------------
- * HYPRE_IJVectorSetLocalPartitioning
- *--------------------------------------------------------------------------*/
-
-int 
-HYPRE_IJVectorSetLocalPartitioning( HYPRE_IJVector IJvector,
-                                    int            vec_start_this_proc,
-                                    int            vec_start_next_proc  )
-{
-   int ierr = 0;
-   hypre_IJVector *vector = (hypre_IJVector *) IJvector;
-
-   /* if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PETSC )
-   {
-      if (!hypre_IJVectorLocalStorage(vector)) hypre_CreateIJVectorPETSc(vector);
-
-      ierr += hypre_SetIJVectorPETScLocalPartitioning(vector,
-                                                      vec_start_this_proc,
-                                                      vec_start_next_proc  );
-   }
-   else if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_ISIS )
-   {
-      if (!hypre_IJVectorLocalStorage(vector)) hypre_CreateIJVectorISIS(vector);
-
-      ierr += hypre_SetIJVectorISISLocalPartitioning(vector,
-                                                     vec_start_this_proc,
-                                                     vec_start_next_proc  );
-   }
-   else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR )
-   {
-      if (!hypre_IJVectorLocalStorage(vector)) 
-	   hypre_IJVectorCreatePar(vector, NULL);
-
-      ierr += hypre_IJVectorSetLocalPartitioningPar(vector,
-                                                    vec_start_this_proc,
-                                                    vec_start_next_proc  );
-   }
-   else
-      ++ierr;
-
-   return(ierr);
+   return ierr;
 }
 
 /*--------------------------------------------------------------------------
@@ -165,233 +129,124 @@ HYPRE_IJVectorSetLocalPartitioning( HYPRE_IJVector IJvector,
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_IJVectorInitialize( HYPRE_IJVector IJvector )
+HYPRE_IJVectorInitialize( HYPRE_IJVector vector )
 {
    int ierr = 0;
-   hypre_IJVector *vector = (hypre_IJVector *) IJvector;
+   hypre_IJVector *vec = (hypre_IJVector *) vector;
 
-   /* if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PETSC )
-      ierr += hypre_IJVectorInitializePETSc(vector);
-   else if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_ISIS )
-      ierr += hypre_IJVectorInitializeISIS(vector);
-   else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR )
+   if (!vec)
    {
-      if (!hypre_IJVectorLocalStorage(vector))
-	 ierr = hypre_IJVectorCreatePar(vector, NULL);
-      ierr += hypre_IJVectorInitializePar(vector);
+     printf("Vector variable is NULL -- HYPRE_IJVectorInitialize\n");
+     exit(1);
+   } 
+
+   /* if ( hypre_IJVectorObjectType(vec) == HYPRE_PETSC )
+
+      return( hypre_IJVectorInitializePETSc(vec) );
+
+   else if ( hypre_IJVectorObjectType(vec) == HYPRE_ISIS )
+
+      return( hypre_IJVectorInitializeISIS(vec) );
+
+   else */
+
+   if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
+   {
+      if (!hypre_IJVectorObject(vec))
+	 ierr += hypre_IJVectorCreatePar(vec,
+                          hypre_IJVectorPartitioning(vec));
+
+      ierr += hypre_IJVectorInitializePar(vec);
+
+      return ierr;
    }
    else
-      ++ierr;
+   {
+      printf("Unrecognized object type -- HYPRE_IJVectorInitialize\n");
+      exit(1);
+   }
 
-   return(ierr);
+   return -99;
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_IJVectorDistribute
+ * HYPRE_IJVectorSetValues
  *--------------------------------------------------------------------------*/
 
-
 int 
-HYPRE_IJVectorDistribute( HYPRE_IJVector IJvector, const int *vec_starts )
+HYPRE_IJVectorSetValues( HYPRE_IJVector  vector,
+                         int             nvalues,
+                         const int      *indices,
+                         const double   *values   )
 {
-   int ierr = 0;
-   hypre_IJVector *vector = (hypre_IJVector *) IJvector;
+   hypre_IJVector *vec = (hypre_IJVector *) vector;
 
-   if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR )
-      ierr += hypre_IJVectorDistributePar(vector, vec_starts);
+   if (!vec)
+   {
+     printf("Variable vec is NULL -- HYPRE_IJVectorSetValues\n");
+     exit(1);
+   } 
+
+   /*  if ( hypre_IJVectorObjectType(vec) == HYPRE_PETSC )
+
+      return( hypre_IJVectorSetValuesPETSc(vec, nvalues, indices, values) );
+
+   else if ( hypre_IJVectorObjectType(vec) == HYPRE_ISIS )
+
+      return( hypre_IJVectorSetValuesISIS(vec, nvalues, indices, values) );
+
+   else */
+
+   if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
+
+      return( hypre_IJVectorSetValuesPar(vec, nvalues, indices, values) );
+
    else
-      ++ierr;
+   {
+      printf("Unrecognized object type -- HYPRE_IJVectorSetValues\n");
+      exit(1);
+   }
 
-   return(ierr);
+   return -99;
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_IJVectorSetLocalStorageType
+ * HYPRE_IJVectorAddToValues
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_IJVectorSetLocalStorageType( HYPRE_IJVector IJvector, int type )
+HYPRE_IJVectorAddToValues( HYPRE_IJVector  vector,
+                           int             nvalues,
+                           const int      *indices,
+                           const double   *values      )
 {
-   int ierr = 0;
-   hypre_IJVector *vector = (hypre_IJVector *) IJvector;
+   hypre_IJVector *vec = (hypre_IJVector *) vector;
 
-   hypre_IJVectorLocalStorageType(vector) = type;
+   if (!vec)
+   {
+     printf("Variable vec is NULL -- HYPRE_IJVectorAddToValues\n");
+     exit(1);
+   } 
 
-   return(ierr);
-}
+   /* if ( hypre_IJVectorObjectType(vec) == HYPRE_PETSC )
 
-/*--------------------------------------------------------------------------
- * HYPRE_IJVectorZeroLocalComponents
- *--------------------------------------------------------------------------*/
+      return( hypre_IJVectorAddToValuesPETSc(vec, nvalues, indices, values) );
 
-int 
-HYPRE_IJVectorZeroLocalComponents( HYPRE_IJVector  IJvector)
-{
-   int ierr = 0;
-   hypre_IJVector *vector = (hypre_IJVector *) IJvector;
+   else if ( hypre_IJVectorObjectType(vec) == HYPRE_ISIS )
 
-   /*  if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PETSC )
-      ierr = hypre_ZeroIJVectorPETScLocalComponents(vector);
-   else if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_ISIS )
-      ierr = hypre_ZeroIJVectorISISLocalComponents(vector);
-   else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR )
-      ierr = hypre_IJVectorZeroLocalComponentsPar(vector);
+      return( hypre_IJVectorAddToValuesISIS(vec, nvalues, indices, values) );
+
+   else */ if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
+
+      return( hypre_IJVectorAddToValuesPar(vec, nvalues, indices, values) );
+
    else
-      ierr = -1;
+   {
+      printf("Unrecognized object type -- HYPRE_IJVectorAddToValues\n");
+      exit(1);
+   }
 
-   return(ierr);
-}
-
-/*--------------------------------------------------------------------------
- * HYPRE_IJVectorSetLocalComponents
- *--------------------------------------------------------------------------*/
-
-int 
-HYPRE_IJVectorSetLocalComponents( HYPRE_IJVector  IJvector,
-                                  int             num_values,
-                                  const int      *glob_vec_indices,
-                                  const int      *value_indices,
-                                  const double   *values            )
-{
-   int ierr = 0;
-   hypre_IJVector *vector = (hypre_IJVector *) IJvector;
-
-   /*  if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PETSC )
-      ierr = hypre_SetIJVectorPETScLocalComponents(vector,
-                                                   num_values,
-                                                   glob_vec_indices,
-                                                   value_indices,
-                                                   values);
-   else if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_ISIS )
-      ierr = hypre_SetIJVectorISISLocalComponents(vector,
-                                                  num_values,
-                                                  glob_vec_indices,
-                                                  value_indices,
-                                                  values);
-   else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR )
-      ierr = hypre_IJVectorSetLocalComponentsPar(vector,
-                                                 num_values,
-                                                 glob_vec_indices,
-                                                 value_indices,
-                                                 values);
-   else
-      ierr = -1;
-
-   return(ierr);
-}
-
-/*--------------------------------------------------------------------------
- * HYPRE_IJVectorSetLocalComponentsInBlock
- *--------------------------------------------------------------------------*/
-
-int 
-HYPRE_IJVectorSetLocalComponentsInBlock( HYPRE_IJVector  IJvector,
-                                         int             glob_vec_index_start, 
-                                         int             glob_vec_index_stop,
-                                         const int      *value_indices,
-                                         const double   *values                )
-{
-   int ierr = 0;
-   hypre_IJVector *vector = (hypre_IJVector *) IJvector;
-
-   /*  if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PETSC )
-      ierr = hypre_SetIJVectorPETScLocalComponentsInBlock(vector,
-                                                          glob_vec_index_start,
-                                                          glob_vec_index_stop,
-                                                          value_indices,
-                                                          values);
-   else if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_ISIS )
-      ierr = hypre_SetIJVectorISISLocalComponentsInBlock(vector,
-                                                         glob_vec_index_start,
-                                                         glob_vec_index_stop,
-                                                         value_indices,
-                                                         values);
-   else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR )
-      ierr = hypre_IJVectorSetLocalComponentsInBlockPar(vector,
-                                                        glob_vec_index_start,
-                                                        glob_vec_index_stop,
-                                                        value_indices,
-                                                        values);
-   else
-      ierr = -1;
-
-   return(ierr);
-}
-
-/*--------------------------------------------------------------------------
- * HYPRE_IJVectorAddToLocalComponents
- *--------------------------------------------------------------------------*/
-
-int 
-HYPRE_IJVectorAddToLocalComponents( HYPRE_IJVector  IJvector,
-                                    int             num_values,
-                                    const int      *glob_vec_indices,
-                                    const int      *value_indices,
-                                    const double   *values            )
-{
-   int ierr = 0;
-   hypre_IJVector *vector = (hypre_IJVector *) IJvector;
-
-   /* if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PETSC )
-      ierr = hypre_AddToIJVectorPETScLocalComponents(vector,
-                                                     num_values,
-                                                     glob_vec_indices,
-                                                     value_indices,
-                                                     values);
-   else if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_ISIS )
-      ierr = hypre_AddToIJVectorISISLocalComponents(vector,
-                                                    num_values,
-                                                    glob_vec_indices,
-                                                    value_indices,
-                                                    values);
-   else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR )
-      ierr = hypre_IJVectorAddToLocalComponentsPar(vector,
-                                                   num_values,
-                                                   glob_vec_indices,
-                                                   value_indices,
-                                                   values);
-   else
-      ierr = -1;
-
-   return(ierr);
-}
-
-/*--------------------------------------------------------------------------
- * HYPRE_IJVectorAddToLocalComponentsInBlock
- *--------------------------------------------------------------------------*/
-
-int 
-HYPRE_IJVectorAddToLocalComponentsInBlock( HYPRE_IJVector  IJvector,
-                                           int             glob_vec_index_start, 
-                                           int             glob_vec_index_stop,
-                                           const int      *value_indices,
-                                           const double   *values                )
-{
-   int ierr = 0;
-   hypre_IJVector *vector = (hypre_IJVector *) IJvector;
-
-   /*  if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PETSC )
-      ierr = hypre_AddToIJVectorPETScLocalComponentsInBlock(vector,
-                                                            glob_vec_index_start,
-                                                            glob_vec_index_stop,
-                                                            value_indices,
-                                                            values);
-   else if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_ISIS )
-      ierr = hypre_AddToIJVectorISISLocalComponentsInBlock(vector,
-                                                           glob_vec_index_start,
-                                                           glob_vec_index_stop,
-                                                           value_indices,
-                                                           values);
-   else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR )
-      ierr = hypre_IJVectorAddToLocalComponentsInBlockPar(vector,
-                                                          glob_vec_index_start,
-                                                          glob_vec_index_stop,
-                                                          value_indices,
-                                                          values);
-   else
-      ierr = -1;
-
-   return(ierr);
+   return -99;
 }
 
 /*--------------------------------------------------------------------------
@@ -399,144 +254,202 @@ HYPRE_IJVectorAddToLocalComponentsInBlock( HYPRE_IJVector  IJvector,
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_IJVectorAssemble( HYPRE_IJVector  IJvector )
+HYPRE_IJVectorAssemble( HYPRE_IJVector  vector )
 {
-   hypre_IJVector *vector = (hypre_IJVector *) IJvector;
+   hypre_IJVector *vec = (hypre_IJVector *) vector;
 
-   /* if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PETSC )
-      return( hypre_AssembleIJVectorPETSc( vector ) );
-   else if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_ISIS )
-      return( hypre_AssembleIJVectorISIS( vector ) );
-   else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR )
-      return(  hypre_IJVectorAssemblePar( vector ) );
+   if (!vec)
+   {
+     printf("Variable vec is NULL -- HYPRE_IJVectorAssemble\n");
+     exit(1);
+   } 
+
+   /* if ( hypre_IJVectorObjectType(vec) == HYPRE_PETSC )
+
+      return( hypre_IJVectorAssemblePETSc(vec) );
+
+   else if ( hypre_IJVectorObjectType(vec) == HYPRE_ISIS )
+
+      return( hypre_IJVectorAssembleISIS(vec) );
+
+   else */ if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
+
+      return( hypre_IJVectorAssemblePar(vec) );
+
    else 
-      return(0);
+   {
+      printf("Unrecognized object type -- HYPRE_IJVectorAssemble\n");
+      exit(1);
+   }
+
+   return -99;
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_IJVectorGetLocalComponents
+ * HYPRE_IJVectorGetValues
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_IJVectorGetLocalComponents( HYPRE_IJVector  IJvector,
-                                  int             num_values,
-                                  const int      *glob_vec_indices,
-                                  const int      *value_indices,
-                                  double         *values            )
+HYPRE_IJVectorGetValues( HYPRE_IJVector  vector,
+                         int             nvalues,
+                         const int      *indices,
+                         double         *values   )
 {
-   int ierr = 0;
-   hypre_IJVector *vector = (hypre_IJVector *) IJvector;
+   hypre_IJVector *vec = (hypre_IJVector *) vector;
 
-   /* if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PETSC )
-      ierr = hypre_GetIJVectorPETScLocalComponents(vector,
-                                                   num_values,
-                                                   glob_vec_indices,
-                                                   value_indices,
-                                                   values);
-   else if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_ISIS )
-      ierr = hypre_GetIJVectorISISLocalComponents(vector,
-                                                  num_values,
-                                                  glob_vec_indices,
-                                                  value_indices,
-                                                  values);
-   else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR )
-      ierr = hypre_IJVectorGetLocalComponentsPar(vector,
-                                                 num_values,
-                                                 glob_vec_indices,
-                                                 value_indices,
-                                                 values);
+   if (!vec)
+   {
+     printf("Variable vec is NULL -- HYPRE_IJVectorGetValues\n");
+     exit(1);
+   } 
+
+   /* if ( hypre_IJVectorObjectType(vec) == HYPRE_PETSC )
+
+      return( hypre_GetIJVectorPETScLocalComponents(vec, nvalues, indices, values) );
+
+   else if ( hypre_IJVectorObjectType(vec) == HYPRE_ISIS )
+
+      return( hypre_IJVectorGetValuesISIS(vec, nvalues, indices, values) );
+
+   else */ if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
+
+      return( hypre_IJVectorGetValuesPar(vec, nvalues, indices, values) );
+
    else
-      ++ierr;
+   {
+      printf("Unrecognized object type -- HYPRE_IJVectorGetValues\n");
+      exit(1);
+   }
 
-   return(ierr);
+   return -99;
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_IJVectorGetLocalComponentsInBlock
+ * HYPRE_IJVectorSetObjectType
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_IJVectorGetLocalComponentsInBlock( HYPRE_IJVector  IJvector,
-                                         int             glob_vec_index_start, 
-                                         int             glob_vec_index_stop,
-                                         const int      *value_indices,
-                                         double         *values                )
+HYPRE_IJVectorSetObjectType( HYPRE_IJVector vector, int type )
 {
-   int ierr = 0;
-   hypre_IJVector *vector = (hypre_IJVector *) IJvector;
+   hypre_IJVector *vec = (hypre_IJVector *) vector;
 
-   /*  if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PETSC )
-      ierr = hypre_GetIJVectorPETScLocalComponentsInBlock(vector,
-                                                          glob_vec_index_start,
-                                                          glob_vec_index_stop,
-                                                          value_indices,
-                                                          values);
-   else if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_ISIS )
-      ierr = hypre_GetIJVectorISISLocalComponentsInBlock(vector,
-                                                         glob_vec_index_start,
-                                                         glob_vec_index_stop,
-                                                         value_indices,
-                                                         values);
-   else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR )
-      ierr = hypre_IJVectorGetLocalComponentsInBlockPar(vector,
-                                                        glob_vec_index_start,
-                                                        glob_vec_index_stop,
-                                                        value_indices,
-                                                        values);
-   else
-      ++ierr;
+   if (!vec)
+   {
+     printf("Variable vec is NULL -- HYPRE_IJVectorSetObjectType\n");
+     exit(1);
+   } 
 
-   return(ierr);
+   hypre_IJVectorObjectType(vec) = type;
+
+   return 0;
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_IJVectorGetLocalStorageType
+ * HYPRE_IJVectorGetObjectType
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_IJVectorGetLocalStorageType( HYPRE_IJVector IJvector, int *type )
+HYPRE_IJVectorGetObjectType( HYPRE_IJVector vector, int *type )
+{
+   hypre_IJVector *vec = (hypre_IJVector *) vector;
+
+   if (!vec)
+   {
+     printf("Variable vec is NULL -- HYPRE_IJVectorGetObjectType\n");
+     exit(1);
+   } 
+
+   *type = hypre_IJVectorObjectType(vec);
+
+   return 0;
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_IJVectorGetObject
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_IJVectorGetObject( HYPRE_IJVector vector, void **object )
+{
+   hypre_IJVector *vec = (hypre_IJVector *) vector;
+
+   if (!vec)
+   {
+     printf("Variable vec is NULL -- HYPRE_IJVectorGetObject\n");
+     exit(1);
+   } 
+
+   *object = hypre_IJVectorObject(vec);
+
+   if (*object != NULL)
+     return 0; 
+
+   return -1;
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_IJVectorRead
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_IJVectorRead( char           *filename,
+                    MPI_Comm        comm,
+                    int             object_type,
+                    HYPRE_IJVector *vector )
 {
    int ierr = 0;
-   hypre_IJVector *vector = (hypre_IJVector *) IJvector;
+   hypre_IJVector *vec;
 
-   if (vector)
-      *type = hypre_IJVectorLocalStorageType(vector);
+   /* if ( object_type == HYPRE_PETSC )
+      ierr =  hypre_IJVectorReadPETSc( comm, filename, &vec );
+   else if ( object_type == HYPRE_ISIS )
+      ierr = hypre_IJVectorReadISIS( comm, filename, &vec );
+   else */
+
+   if ( object_type == HYPRE_PARCSR )
+      ierr = hypre_IJVectorReadPar( comm, filename, &vec );
    else
-      ++ierr;
+   {
+      printf("Unrecognized object type -- HYPRE_IJVectorRead\n");
+      exit(1);
+   }
 
-   return(ierr);
+   hypre_IJVectorObjectType(vec) = object_type;
+
+   *vector =  (HYPRE_IJVector) vec;
+
+   return ierr;
 }
 
-/*********************************************************************************/
-/* The following are functions not generally used by or supported for users */
-
-
 /*--------------------------------------------------------------------------
- * hypre_RefIJVector
+ * HYPRE_IJVectorPrint
  *--------------------------------------------------------------------------*/
 
-/*--------------------------------------------------------------------------
- * HYPRE_IJVectorGetLocalStorage
- *--------------------------------------------------------------------------*/
-
-void *
-HYPRE_IJVectorGetLocalStorage( HYPRE_IJVector IJvector )
-{
-   hypre_IJVector *vector = (hypre_IJVector *) IJvector;
-
-   return( hypre_IJVectorLocalStorage(vector) );
-}
-
-
-int 
-hypre_RefIJVector( HYPRE_IJVector IJvector, HYPRE_IJVector *reference )
+int
+HYPRE_IJVectorPrint( HYPRE_IJVector vector, char *filename )
 {
    int ierr = 0;
-   hypre_IJVector *vector = (hypre_IJVector *) IJvector;
+   hypre_IJVector *vec = (hypre_IJVector *) vector;
 
-   hypre_IJVectorReferenceCount(vector) ++;
+   if (!vec)
+   {
+      printf("Variable vec is NULL -- HYPRE_IJVectorPrint\n");
+      exit(1);
+   } 
 
-   *reference = IJvector;
+   /* if ( hypre_IJVectorObjectType(vec) == HYPRE_PETSC )
+      ierr =  hypre_IJVectorPrintPETSc( vec, filename );
+   else if ( hypre_IJVectorObjectType(vec) == HYPRE_ISIS )
+      ierr = hypre_IJVectorPrintISIS( vec, filename );
+   else */
 
-   return(ierr);
+   if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
+      ierr = hypre_IJVectorPrintPar( vec, filename );
+   else
+   {
+      printf("Unrecognized object type -- HYPRE_IJVectorPrint\n");
+      exit(1);
+   }
+
+   return ierr;
 }

@@ -20,14 +20,17 @@
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_ijvectorcreate, HYPRE_IJVECTORCREATE)( int      *comm,
-                                       long int *vector,
-                                       int      *global_n,
-                                       int      *ierr      )
+hypre_F90_IFACE(hypre_ijvectorcreate, HYPRE_IJVECTORCREATE)(
+                                                    int      *comm,
+                                                    int      *jlower,
+                                                    int      *jupper,
+                                                    long int *vector,
+                                                    int      *ierr    )
 {
    *ierr = (int) ( HYPRE_IJVectorCreate( (MPI_Comm)         *comm,
-                                         (HYPRE_IJVector *)  vector,
-                                         (int)              *global_n  ) );
+                                         (int)              *jlower,
+                                         (int)              *jupper, 
+                                         (HYPRE_IJVector *)  vector  ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -35,38 +38,11 @@ hypre_F90_IFACE(hypre_ijvectorcreate, HYPRE_IJVECTORCREATE)( int      *comm,
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_ijvectordestroy, HYPRE_IJVECTORDESTROY)( long int *vector,
-                                        int      *ierr    )
+hypre_F90_IFACE(hypre_ijvectordestroy, HYPRE_IJVECTORDESTROY)(
+                                                    long int *vector,
+                                                    int      *ierr    )
 {
    *ierr = (int) ( HYPRE_IJVectorDestroy( (HYPRE_IJVector) *vector ) );
-}
-
-/*--------------------------------------------------------------------------
- * HYPRE_IJVectorSetPartitioning
- *--------------------------------------------------------------------------*/
-
-void 
-hypre_F90_IFACE(hypre_ijvectorsetpartitioning, HYPRE_IJVECTORSETPARTITIONING)( long int *vector,
-                                                long int *partitioning,
-                                                int      *ierr    )
-{
-   *ierr = (int) ( HYPRE_IJVectorSetPartitioning( (HYPRE_IJVector) *vector,
-                                                  (const int *)    *partitioning ) );
-}
-
-/*--------------------------------------------------------------------------
- * HYPRE_IJVectorSetLocalPartitioning
- *--------------------------------------------------------------------------*/
-
-void 
-hypre_F90_IFACE(hypre_ijvectorsetlocalpartition, HYPRE_IJVECTORSETLOCALPARTITION)( long int *vector,
-                                                  int      *vec_start_this_proc,
-                                                  int      *vec_start_next_proc,
-                                                  int      *ierr    )
-{
-   *ierr = (int) ( HYPRE_IJVectorSetLocalPartitioning( (HYPRE_IJVector) *vector,
-                                                       (int)            *vec_start_this_proc,
-                                                       (int)            *vec_start_next_proc ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -74,128 +50,47 @@ hypre_F90_IFACE(hypre_ijvectorsetlocalpartition, HYPRE_IJVECTORSETLOCALPARTITION
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_ijvectorinitialize, HYPRE_IJVECTORINITIALIZE)( long int *vector,
-                                           int      *ierr    )
+hypre_F90_IFACE(hypre_ijvectorinitialize, HYPRE_IJVECTORINITIALIZE)(
+                                                    long int *vector,
+                                                    int      *ierr    )
 {
    *ierr = (int) ( HYPRE_IJVectorInitialize( (HYPRE_IJVector) *vector ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_IJVectorDistribute
- *--------------------------------------------------------------------------*/
-
-void 
-hypre_F90_IFACE(hypre_ijvectordistribute, HYPRE_IJVECTORDISTRIBUTE)( long int *vector,
-                                           int      *vec_starts,
-                                           int      *ierr        )
-{
-   *ierr = (int) ( HYPRE_IJVectorDistribute( (HYPRE_IJVector) *vector,
-                                             (int *)           vec_starts ) );
-}
-
-/*--------------------------------------------------------------------------
- * HYPRE_IJVectorSetLocalStorageType
- *--------------------------------------------------------------------------*/
-
-void 
-hypre_F90_IFACE(hypre_ijvectorsetlocalstoragety, HYPRE_IJVECTORSETLOCALSTORAGETY)( long int *vector,
-                                                  int      *type,
-                                                  int      *ierr    )
-{
-   *ierr = (int) ( HYPRE_IJVectorSetLocalStorageType( (HYPRE_IJVector) *vector,
-                                                      (int)            *type    ) );
-}
-
-/*--------------------------------------------------------------------------
- * HYPRE_IJVectorZeroLocalComponents
+ * HYPRE_IJVectorSetValues
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_ijvectorzerolocalcomps, HYPRE_IJVECTORZEROLOCALCOMPS)( long int *vector,
-                                               int      *ierr    )
+hypre_F90_IFACE(hypre_ijvectorsetvalues, HYPRE_IJVECTORSETVALUES)(
+                                                    long int *vector,
+                                                    int      *num_values,
+                                                    int      *indices,
+                                                    double   *values,
+                                                    int      *ierr        )
 {
-   *ierr = (int) ( HYPRE_IJVectorZeroLocalComponents(
-                         (HYPRE_IJVector) *vector ) );
+   *ierr = (int) ( HYPRE_IJVectorSetValues( (HYPRE_IJVector) *vector,
+                                            (int)            *num_values,
+                                            (const int *)     indices,
+                                            (const double *)  values      ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_IJVectorSetLocalComponents
+ * HYPRE_IJVectorAddToValues
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_ijvectorsetlocalcomps, HYPRE_IJVECTORSETLOCALCOMPS)( long int *vector,
-                                           int      *num_values,
-                                           int      *glob_vec_indices,
-                                           int      *value_indices,
-                                           double   *values,
-                                           int      *ierr              )
+hypre_F90_IFACE(hypre_ijvectoraddtovalues, HYPRE_IJVECTORADDTOVALUES)(
+                                                    long int *vector,
+                                                    int      *num_values,
+                                                    int      *indices,
+                                                    double   *values,
+                                                    int      *ierr        )
 {
-   *ierr = (int) ( HYPRE_IJVectorSetLocalComponents(
-                         (HYPRE_IJVector) *vector,
-                         (int)            *num_values,
-                         (const int *)     glob_vec_indices,
-                         (const int *)     value_indices,
-                         (const double *)  values            ) );
-}
-
-/*--------------------------------------------------------------------------
- * HYPRE_IJVectorSetLocalComponentsInBlock
- *--------------------------------------------------------------------------*/
-
-void
-hypre_F90_IFACE(hypre_ijvectorsetlocalcompsinbl, HYPRE_IJVECTORSETLOCALCOMPSINBL)( long int *vector,
-                                                  int      *glob_vec_start,
-                                                  int      *glob_vec_stop,
-                                                  int      *value_indices,
-                                                  double   *values,
-                                                  int      *ierr            )
-{
-   *ierr = (int) ( HYPRE_IJVectorSetLocalComponentsInBlock(
-                          (HYPRE_IJVector) *vector,
-                          (int)            *glob_vec_start,
-                          (int)            *glob_vec_stop,
-                          (const int *)     value_indices,
-                          (const double *)  values          ) );
-}
-
-/*--------------------------------------------------------------------------
- * HYPRE_IJVectorAddToLocalComps
- *--------------------------------------------------------------------------*/
-
-void
-hypre_F90_IFACE(hypre_ijvectoraddtolocalcomps, HYPRE_IJVECTORADDTOLOCALCOMPS)( long int *vector,
-                                                int      *num_values,
-                                                int      *glob_vec_indices,
-                                                int      *value_indices,
-                                                double   *values,
-                                                int      *ierr              )
-{
-   *ierr = (int) ( HYPRE_IJVectorAddToLocalComponents(
-                         (HYPRE_IJVector) *vector,
-                         (int)            *num_values,
-                         (const int *)     glob_vec_indices,
-                         (const int *)     value_indices,
-                         (const double *)  values          ) );
-}
-
-/*--------------------------------------------------------------------------
- * HYPRE_IJVectorAddToLocalCompsBl
- *--------------------------------------------------------------------------*/
-
-void
-hypre_F90_IFACE(hypre_ijvectoraddtolocalcompsbl, HYPRE_IJVECTORADDTOLOCALCOMPSBL)( long int *vector,
-                                                  int      *glob_vec_start,
-                                                  int      *glob_vec_stop,
-                                                  int      *value_indices,
-                                                  double   *values,
-                                                  int      *ierr            )
-{
-   *ierr = (int) ( HYPRE_IJVectorAddToLocalComponentsInBlock(
-                         (HYPRE_IJVector) *vector,
-                         (int)            *glob_vec_start,
-                         (int)            *glob_vec_stop,
-                         (const int *)     value_indices,
-                         (const double *)  values          ) );
+   *ierr = (int) ( HYPRE_IJVectorAddToValues( (HYPRE_IJVector) *vector,
+                                              (int)            *num_values,
+                                              (const int *)     indices,
+                                              (const double *)  values      ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -203,83 +98,99 @@ hypre_F90_IFACE(hypre_ijvectoraddtolocalcompsbl, HYPRE_IJVECTORADDTOLOCALCOMPSBL
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_ijvectorassemble, HYPRE_IJVECTORASSEMBLE)( long int *vector,
-                                         int      *ierr    )
+hypre_F90_IFACE(hypre_ijvectorassemble, HYPRE_IJVECTORASSEMBLE)(
+                                                    long int *vector,
+                                                    int      *ierr    )
 {
    *ierr = (int) ( HYPRE_IJVectorAssemble( (HYPRE_IJVector) *vector ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_IJVectorGetLocalComponents
+ * HYPRE_IJVectorGetValues
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_ijvectorgetlocalcomps, HYPRE_IJVECTORGETLOCALCOMPS)( long int *vector,
-                                              int      *num_values,
-                                              int      *glob_vec_indices,
-                                              int      *value_indices,
-                                              double   *values,
-                                              int      *ierr              )
+hypre_F90_IFACE(hypre_ijvectorgetvalues, HYPRE_IJVECTORGETVALUES)(
+                                                    long int  *vector,
+                                                    const int *num_values,
+                                                    const int *indices,
+                                                    double   *values,
+                                                    int      *ierr        )
 {
-   *ierr = (int) ( HYPRE_IJVectorGetLocalComponents(
-                         (HYPRE_IJVector) *vector,
-                         (int)            *num_values,
-                         (const int *)     glob_vec_indices,
-                         (const int *)     value_indices,
-                         (double *)        values            ) );
+   *ierr = (int) ( HYPRE_IJVectorGetValues( (HYPRE_IJVector) *vector,
+                                            (int)            *num_values,
+                                            (const int *)     indices,
+                                            (double *)        values      ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_IJVectorGetLocalComponentsInBlock
+ * HYPRE_IJVectorSetObjectType
  *--------------------------------------------------------------------------*/
 
-void
-hypre_F90_IFACE(hypre_ijvectorgetlocalcompsinbl, HYPRE_IJVECTORGETLOCALCOMPSINBL)( long int *vector,
-                                                  int      *glob_vec_start,
-                                                  int      *glob_vec_stop,
-                                                  int      *value_indices,
-                                                  double   *values,
-                                                  int      *ierr            )
+void 
+hypre_F90_IFACE(hypre_ijvectorsetobjecttype, HYPRE_IJVECTORSETOBJECTTYPE)(
+                                                    long int  *vector,
+                                                    const int *type,
+                                                    int       *ierr    )
 {
-   *ierr = (int) (HYPRE_IJVectorGetLocalComponentsInBlock(
-                        (HYPRE_IJVector) *vector,
-                        (int)            *glob_vec_start,
-                        (int)            *glob_vec_stop,
-                        (const int *)     value_indices,
-                        (double *)        values          ) );
-
+   *ierr = (int) ( HYPRE_IJVectorSetObjectType( (HYPRE_IJVector) *vector,
+                                                (int)            *type    ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_IJVectorGetLocalStorageType
+ * HYPRE_IJVectorGetObjectType
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_ijvectorgetlocalstoragety, HYPRE_IJVECTORGETLOCALSTORAGETY)( long int *vector,
-                                                  int      *type,
-                                                  int      *ierr    )
+hypre_F90_IFACE(hypre_ijvectorgetobjecttype, HYPRE_IJVECTORGETOBJECTTYPE)(
+                                                    long int *vector,
+                                                    int      *type,
+                                                    int      *ierr    )
 {
-   *ierr = (int) (HYPRE_IJVectorGetLocalStorageType(
-                        (HYPRE_IJVector) *vector,
-                        (int *)           type    ) );
-
+   *ierr = (int) (HYPRE_IJVectorGetObjectType( (HYPRE_IJVector) *vector,
+                                               (int *)           type    ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_IJVectorGetLocalStorage
+ * HYPRE_IJVectorGetObject
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_ijvectorgetlocalstorage, HYPRE_IJVECTORGETLOCALSTORAGE)( long int *vector,
-                                                long int *local_storage,
-                                                int      *ierr           )
+hypre_F90_IFACE(hypre_ijvectorgetobject, HYPRE_IJVECTORGETOBJECT)(
+                                                    long int *vector,
+                                                    long int *object,
+                                                    int      *ierr    )
 {
-   *ierr = 0;
-
-   *local_storage = (long int) (HYPRE_IJVectorGetLocalStorage(
-                                      (HYPRE_IJVector) *vector ) );
-
-   if (!(*local_storage)) ++(*ierr);
+   *ierr = (long int) (HYPRE_IJVectorGetObject( (HYPRE_IJVector) *vector,
+                                                (void **)         object  ) );
 }
 
+/*--------------------------------------------------------------------------
+ * HYPRE_IJVectorRead
+ *--------------------------------------------------------------------------*/
 
+void
+hypre_F90_IFACE(hypre_ijvectorread, HYPRE_IJVECTORREAD)( char     *filename,
+                                                         long int *comm,
+                                                         int      *object_type,
+                                                         long int *vector,
+                                                         int      *ierr      )
+{
+   *ierr = (int) (HYPRE_IJVectorRead( (char *)            filename,
+                                      (MPI_Comm)         *comm,
+                                      (int)              *object_type,
+                                      (HYPRE_IJVector *)  vector       ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_IJVectorPrint
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_ijvectorprint, HYPRE_IJVECTORPRINT)( long int *vector,
+                                                           char     *filename,
+                                                           int      *ierr      )
+{
+   *ierr = (int) (HYPRE_IJVectorPrint( (HYPRE_IJVector) *vector,
+                                       (char *)          filename ) );
+}
