@@ -100,9 +100,10 @@ int
 hypre_AssembleDistributedMatrix( hypre_DistributedMatrix *matrix )
 {
 
-   if( (hypre_DistributedMatrixLocalStorageType(matrix) != HYPRE_PETSC_MATRIX ))
-     return(-1);
-   else if (hypre_DistributedMatrixLocalStorageType(matrix) != HYPRE_ISIS_MATRIX )
+   if( 
+       (hypre_DistributedMatrixLocalStorageType(matrix) != HYPRE_PETSC_MATRIX )
+    && (hypre_DistributedMatrixLocalStorageType(matrix) != HYPRE_ISIS_MATRIX )
+     )
      return(-1);
 
 
