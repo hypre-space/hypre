@@ -21,9 +21,9 @@
 
 void
 hypre_F90_IFACE(hypre_ijvectorcreate)( int      *comm,
-                                    long int *vector,
-                                    int      *global_n,
-                                    int      *ierr      )
+                                       long int *vector,
+                                       int      *global_n,
+                                       int      *ierr      )
 {
    *ierr = (int) ( HYPRE_IJVectorCreate( (MPI_Comm)         *comm,
                                       (HYPRE_IJVector *)  vector,
@@ -36,7 +36,7 @@ hypre_F90_IFACE(hypre_ijvectorcreate)( int      *comm,
 
 void 
 hypre_F90_IFACE(hypre_ijvectordestroy)( long int *vector,
-                                     int      *ierr    )
+                                        int      *ierr    )
 {
    *ierr = (int) ( HYPRE_IJVectorDestroy( (HYPRE_IJVector) *vector ) );
 }
@@ -47,11 +47,11 @@ hypre_F90_IFACE(hypre_ijvectordestroy)( long int *vector,
 
 void 
 hypre_F90_IFACE(hypre_ijvectorsetpartitioning)( long int *vector,
-                                                int      *partitioning,
+                                                long int *partitioning,
                                                 int      *ierr    )
 {
    *ierr = (int) ( HYPRE_IJVectorSetPartitioning( (HYPRE_IJVector) *vector,
-                                                  (int *)           partitioning ) );
+                                                  (const int *)    *partitioning ) );
 }
 
 /*--------------------------------------------------------------------------
