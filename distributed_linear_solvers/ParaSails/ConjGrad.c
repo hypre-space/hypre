@@ -74,7 +74,7 @@ static void Axpy(int n, double alpha, double *x, double *y)
 }
 
 /* use NULL for ps if unpreconditioned */
-/* will stop at step 100 if rel. resid. norm reduction is not less than 0.1 */
+/* will stop at step 500 if rel. resid. norm reduction is not less than 0.1 */
 
 void PCG_ParaSails(Matrix *mat, ParaSails *ps, double *b, double *x,
    double tol, int max_iter)
@@ -161,7 +161,7 @@ void PCG_ParaSails(Matrix *mat, ParaSails *ps, double *b, double *x,
          break;
 
       /* non-convergence test */
-      if (i >= 100 && i_prod/bi_prod > 0.01)
+      if (i >= 500 && i_prod/bi_prod > 0.01)
       {
          if (mype == 0)
             printf("Aborting solve due to slow or no convergence.\n");
