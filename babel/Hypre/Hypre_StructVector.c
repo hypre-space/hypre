@@ -126,7 +126,7 @@ int  impl_Hypre_StructVector_Copy(Hypre_StructVector this, Hypre_Vector x) {
    hypre_StructVector * vx;
 
    SVx = (Hypre_StructVector) Hypre_Vector_castTo( x, "Hypre_StructVector" );
-   if ( SVx==NULL ) return -1;
+   if ( SVx==NULL ) return 1;
    SVxp = SVx->d_table;
    Vx = SVxp->hsvec;
    vx = (hypre_StructVector *) *Vx;
@@ -247,7 +247,7 @@ int  impl_Hypre_StructVector_Dot(Hypre_StructVector this, Hypre_Vector x, double
    hypre_StructVector * vx;
 
    SVx = (Hypre_StructVector) Hypre_Vector_castTo( x, "Hypre_StructVector" );
-   if ( SVx==NULL ) return -1;
+   if ( SVx==NULL ) return 1;
    SVxp = SVx->d_table;
    Vx = SVxp->hsvec;
    vx = (hypre_StructVector *) *Vx;
@@ -272,7 +272,7 @@ int  impl_Hypre_StructVector_Axpy(Hypre_StructVector this, double a, Hypre_Vecto
    hypre_StructVector * vx;
 
    SVx = (Hypre_StructVector) Hypre_Vector_castTo( x, "Hypre_StructVector" );
-   if ( SVx==NULL ) return -1;
+   if ( SVx==NULL ) return 1;
    SVxp = SVx->d_table;
    Vx = SVxp->hsvec;
    vx = (hypre_StructVector *) *Vx;

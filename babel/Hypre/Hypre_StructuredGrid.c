@@ -92,7 +92,7 @@ int  impl_Hypre_StructuredGrid_SetDoubleParameter
 (Hypre_StructuredGrid this, char* name, double value) {
    printf( "Hypre_StructuredGrid_SetDoubleParameter does not recognize name %s\n",
            name );
-   return -1;
+   return 1;
 } /* end impl_Hypre_StructuredGridSetDoubleParameter */
 
 /* ********************************************************
@@ -103,7 +103,7 @@ int  impl_Hypre_StructuredGrid_SetIntParameter
 
    printf( "Hypre_StructuredGrid_SetIntParameter does not recognize name %s\n", name );
 
-   return -1;
+   return 1;
 } /* end impl_Hypre_StructuredGridSetIntParameter */
 
 /* ********************************************************
@@ -121,10 +121,10 @@ int  impl_Hypre_StructuredGrid_GetIntParameter
    else  {
       printf( "Hypre_StructuredGrid_GetIntParameter does not recognize name %s\n",
               name );
-      return -1;
+      return 1;
    }
 
-   return -1;
+   return 1;
 } /* end impl_Hypre_StructuredGridGetIntParameter */
 
 /* ********************************************************
@@ -142,7 +142,7 @@ int  impl_Hypre_StructuredGrid_SetIntArrayParameter
    else  {
       printf( "Hypre_StructuredGrid_SetIntArrayParameter does not recognize name %s\n",
               name );
-      return -1;
+      return 1;
    }
 } /* end impl_Hypre_StructuredGridSetIntArrayParameter */
 

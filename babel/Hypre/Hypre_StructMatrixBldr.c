@@ -81,7 +81,7 @@ int  impl_Hypre_StructMatrixBldr_SetValues
    hypre_Box * B;
 
    Hypre_StructMatrix SM = this->d_table->newmat;
-   if ( SM == NULL ) return -1;
+   if ( SM == NULL ) return 1;
    
    SMp = SM->d_table;
    M = SMp->hsmat;
@@ -191,7 +191,7 @@ int  impl_Hypre_StructMatrixBldr_Setup(Hypre_StructMatrixBldr this) {
    HYPRE_StructMatrix * M;
 
    Hypre_StructMatrix SM = this->d_table->newmat;
-   if ( SM == NULL ) return -1;
+   if ( SM == NULL ) return 1;
 
    SMp = SM->d_table;
    M = SMp->hsmat;

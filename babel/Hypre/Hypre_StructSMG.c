@@ -61,10 +61,10 @@ int  impl_Hypre_StructSMG_Apply
    HYPRE_StructVector *Vb, *Vx;
 
    Sb = (Hypre_StructVector) Hypre_Vector_castTo( b, "Hypre_StructVector" );
-   if ( Sb == NULL ) return -1;
+   if ( Sb == NULL ) return 1;
 
    Sx = (Hypre_StructVector) Hypre_Vector_castTo( *x, "Hypre_StructVector" );
-   if ( Sx == NULL ) return -1;
+   if ( Sx == NULL ) return 1;
 
    SVbp = Sb->d_table;
    Vb = SVbp->hsvec;
@@ -275,11 +275,11 @@ int  impl_Hypre_StructSMG_Setup
    HYPRE_StructSolver *S = HSMGp->hssolver;
 
    SM = (Hypre_StructMatrix) Hypre_LinearOperator_castTo( A, "Hypre_StructMatrix" );
-   if ( SM==NULL ) return -1;
+   if ( SM==NULL ) return 1;
    SVb = (Hypre_StructVector) Hypre_Vector_castTo( b, "Hypre_StructVector" );
-   if ( SVb==NULL ) return -1;
+   if ( SVb==NULL ) return 1;
    SVx = (Hypre_StructVector) Hypre_Vector_castTo( x, "Hypre_StructVector" );
-   if ( SVb==NULL ) return -1;
+   if ( SVb==NULL ) return 1;
 
    SMp = SM->d_table;
    MA = SMp->hsmat;

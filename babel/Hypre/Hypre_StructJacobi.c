@@ -79,9 +79,9 @@ int  impl_Hypre_StructJacobi_Apply
    HYPRE_StructMatrix *MA = SMp->hsmat;
 
    SVb = (Hypre_StructVector) Hypre_Vector_castTo( b, "Hypre_StructVector" );
-   if ( SVb==NULL ) return -1;
+   if ( SVb==NULL ) return 1;
    SVx = (Hypre_StructVector) Hypre_Vector_castTo( *x, "Hypre_StructVector" );
-   if ( SVb==NULL ) return -1;
+   if ( SVb==NULL ) return 1;
 
    SVbp = SVb->d_table;
    Vb = SVbp->hsvec;
@@ -280,11 +280,11 @@ int  impl_Hypre_StructJacobi_Setup
    HYPRE_StructSolver *S = HSJp->hssolver;
 
    SM = (Hypre_StructMatrix) Hypre_LinearOperator_castTo( A, "Hypre_StructMatrix" );
-   if ( SM==NULL ) return -1;
+   if ( SM==NULL ) return 1;
    SVb = (Hypre_StructVector) Hypre_Vector_castTo( b, "Hypre_StructVector" );
-   if ( SVb==NULL ) return -1;
+   if ( SVb==NULL ) return 1;
    SVx = (Hypre_StructVector) Hypre_Vector_castTo( x, "Hypre_StructVector" );
-   if ( SVb==NULL ) return -1;
+   if ( SVb==NULL ) return 1;
 
    SMp = SM->d_table;
    MA = SMp->hsmat;

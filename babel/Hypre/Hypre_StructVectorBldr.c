@@ -58,7 +58,7 @@ int  impl_Hypre_StructVectorBldr_SetValues
    hypre_Box * B;
 
    Hypre_StructVector SV = this->d_table->newvec;
-   if ( SV == NULL ) return -1;
+   if ( SV == NULL ) return 1;
 
    SVp = SV->d_table;
    V = SVp->hsvec;
@@ -84,7 +84,7 @@ int  impl_Hypre_StructVectorBldr_SetNumGhost
    int * num_ghost = &(values.data[*(values.lower)]);
    HYPRE_StructVector * V;
    Hypre_StructVector SV = this->d_table->newvec;
-   if ( SV == NULL ) return -1;
+   if ( SV == NULL ) return 1;
    V = SV->d_table->hsvec;
 
    return HYPRE_StructVectorSetNumGhost( *V, num_ghost );
@@ -161,7 +161,7 @@ int  impl_Hypre_StructVectorBldr_Setup(Hypre_StructVectorBldr this) {
    HYPRE_StructVector * V;
 
    Hypre_StructVector SV = this->d_table->newvec;
-   if ( SV == NULL ) return -1;
+   if ( SV == NULL ) return 1;
    
    SVp = SV->d_table;
    V = SVp->hsvec;

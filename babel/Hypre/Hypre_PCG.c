@@ -374,7 +374,7 @@ int  impl_Hypre_PCG_GetConvergenceInfo(Hypre_PCG this, char* name, double* value
       }
       else {
          *value = -1;
-         return -1;
+         return 1;
       }
    }
    else {
@@ -382,7 +382,7 @@ int  impl_Hypre_PCG_GetConvergenceInfo(Hypre_PCG this, char* name, double* value
          "Don't understand keyword %s to Hypre_PCG_GetConvergenceInfo\n",
          name );
       *value = 0;
-      return -1;
+      return 1;
    }
 } /* end impl_Hypre_PCGGetConvergenceInfo */
 
@@ -409,7 +409,7 @@ double  impl_Hypre_PCG_GetDoubleParameter(Hypre_PCG this, char* name) {
    else {
       printf( "Don't understand keyword %s to Hypre_PCG_GetDoubleParameter\n",
               name );
-      return -1;
+      return 1;
    }
 } /* end impl_Hypre_PCGGetDoubleParameter */
 
@@ -438,7 +438,7 @@ int  impl_Hypre_PCG_GetIntParameter(Hypre_PCG this, char* name) {
    else {
       printf( "Don't understand keyword %s to Hypre_PCG_GetIntParameter\n",
               name );
-      return -1;
+      return 1;
    }
 } /* end impl_Hypre_PCGGetIntParameter */
 
@@ -458,7 +458,7 @@ int  impl_Hypre_PCG_SetDoubleParameter(Hypre_PCG this, char* name, double value)
    else {
       printf( "Don't understand keyword %s to Hypre_PCG_GetDoubleParameter\n",
               name );
-      return -1;
+      return 1;
    }
 } /* end impl_Hypre_PCGSetDoubleParameter */
 
@@ -488,7 +488,7 @@ int  impl_Hypre_PCG_SetIntParameter(Hypre_PCG this, char* name, int value)
    else {
       printf( "Don't understand keyword %s to Hypre_PCG_SetIntParameter\n",
               name );
-      return -1;
+      return 1;
    }
 } /* end impl_Hypre_PCGSetIntParameter */
 
