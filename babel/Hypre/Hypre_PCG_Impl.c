@@ -165,6 +165,7 @@ impl_Hypre_PCG__dtor(
    struct Hypre_PCG__data * data;
    data = Hypre_PCG__get_data( self );
 
+/* >>> TO DO switch according to vector type; it's not always ParCSR */
    ierr += HYPRE_ParCSRPCGDestroy( data->solver );
    Hypre_Operator_deleteReference( data->matrix );
    /* delete any nontrivial data components here */
@@ -355,7 +356,6 @@ impl_Hypre_PCG_GetIntValue(
    assert( data->solver != NULL );
    solver = data->solver;
 
-   printf("data->maxiter=%i\n",data->maxiter);
    if ( strcmp(name,"NumIterations")==0 || strcmp(name,"Num Iterations")==0
       || strcmp(name,"Number of Iterations")==0 ) {
       ierr += HYPRE_PCGGetNumIterations( solver, value );
