@@ -1169,7 +1169,8 @@ int MLI_Utils_SVD(double *uArray, double *sArray, double *vtArray,
     int  info;
 
     hypre_F90_NAME_BLAS(dgesvd, DGESVD)(&jobu, &jobvt, &m, &n, uArray,
-        &m, sArray, NULL, &m, vtArray, &dim, workArray, &workLen, &info);
+        &m, sArray, (double *) NULL, &m, vtArray, &dim, workArray, 
+        &workLen, &info);
 #endif
 
     return info;
