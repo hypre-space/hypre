@@ -6,7 +6,7 @@
 
 /**
 Returns a reference to the ParVector used to implement IJVector
-in the case that the local storage type for IJVector is HYPRE_PAR_VECTOR.
+in the case that the local storage type for IJVector is HYPRE_PARCSR.
 
 @return integer error code
 @param IJVector [IN]

@@ -64,6 +64,19 @@ typedef struct
 /*--------------------------------------------------------------------------
  * prototypes for operations on local objects
  *--------------------------------------------------------------------------*/
+
+#ifdef PETSC_AVAILABLE
+/* IJMatrix_petsc.c */
+int
+hypre_GetIJMatrixParCSRMatrix( HYPRE_IJMatrix IJmatrix, Mat *reference )
+#endif
+  
+#ifdef ISIS_AVAILABLE
+/* IJMatrix_isis.c */
+int
+hypre_GetIJMatrixISISMatrix( HYPRE_IJMatrix IJmatrix, RowMatrix *reference )
+#endif
+
 /* #include "./internal_protos.h" */
 
 #endif

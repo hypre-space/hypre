@@ -63,6 +63,9 @@ FILES =\
  aux_parcsr_matrix.c\
  hypre_IJMatrix_parcsr.c\
  hypre_IJVector_parcsr.c\
+ IJMatrix_isis.c\
+ IJMatrix_petsc.c\
+ IJMatrix_parcsr.c\
  HYPRE_IJMatrix.c\
  HYPRE_IJVector.c\
  F90_HYPRE_IJMatrix.c\

@@ -1,12 +1,17 @@
 /*--------------------------------------------------------------------------
- * hypre_GetIJMatrixParCsrMatrix
+ * hypre_GetIJMatrixPETScMatrix
  *--------------------------------------------------------------------------*/
 
 #include "headers.h"
 
+#ifdef PETSC_AVAILABLE
+
+/* Matrix structure from PETSc */
+#include "sles.h"
+
 /**
 Returns a reference to the ParCsrMatrix used to implement IJMatrix
-in the case that the local storage type for IJMatrix is HYPRE_PARCSR_MATRIX.
+in the case that the local storage type for IJMatrix is HYPRE_PETSC
 
 @return integer error code
 @param IJMatrix [IN]
@@ -15,7 +20,7 @@ The assembled HYPRE_IJMatrix.
 The pointer to be set to point to IJMatrix.
 */
 int 
-hypre_GetIJMatrixParCSRMatrix( HYPRE_IJMatrix IJmatrix, HYPRE_ParCSRMatrix *reference )
+hypre_GetIJMatrixParCSRMatrix( HYPRE_IJMatrix IJmatrix, Mat *reference )
 {
    int ierr = 0;
    hypre_IJMatrix *matrix = (hypre_IJMatrix *) IJmatrix;
@@ -23,12 +28,11 @@ hypre_GetIJMatrixParCSRMatrix( HYPRE_IJMatrix IJmatrix, HYPRE_ParCSRMatrix *refe
    /* Note: the following line only works if local_storage is used to point
       directly at a parcsr matrix. If that is not true, this would need to
       be modified. -AJC */
-   HYPRE_ParCSRMatrix parcsr_matrix = hypre_IJMatrixLocalStorage( matrix );
+   Mat petsc_matrix = hypre_IJMatrixLocalStorage( matrix );
 
-   /* This assume a routine in ParCsrMatrix that gives a reference. In the
-      absence of such a routine, we would just *reference = parcsr_matrix */
-   ierr = hypre_RefParCSRMatrix( parcsr_matrix, reference);
+   *reference = petsc_matrix;
 
    return(ierr);
 }
 
+#endif

@@ -1,12 +1,17 @@
 /*--------------------------------------------------------------------------
- * hypre_GetIJMatrixParCsrMatrix
+ * hypre_GetIJMatrixISISMatrix
  *--------------------------------------------------------------------------*/
 
 #include "headers.h"
 
+#ifdef ISIS_AVAILABLE
+
+#include "iostream.h"
+#include "RowMatrix.h" // ISIS++ header file
+
 /**
 Returns a reference to the ParCsrMatrix used to implement IJMatrix
-in the case that the local storage type for IJMatrix is HYPRE_PARCSR_MATRIX.
+in the case that the local storage type for IJMatrix is HYPRE_ISIS.
 
 @return integer error code
 @param IJMatrix [IN]
@@ -15,20 +20,15 @@ The assembled HYPRE_IJMatrix.
 The pointer to be set to point to IJMatrix.
 */
 int 
-hypre_GetIJMatrixParCSRMatrix( HYPRE_IJMatrix IJmatrix, HYPRE_ParCSRMatrix *reference )
+hypre_GetIJMatrixISISMatrix( HYPRE_IJMatrix IJmatrix, RowMatrix *reference )
 {
    int ierr = 0;
    hypre_IJMatrix *matrix = (hypre_IJMatrix *) IJmatrix;
 
-   /* Note: the following line only works if local_storage is used to point
-      directly at a parcsr matrix. If that is not true, this would need to
-      be modified. -AJC */
-   HYPRE_ParCSRMatrix parcsr_matrix = hypre_IJMatrixLocalStorage( matrix );
+   RowMatrix isis_matrix = hypre_IJMatrixLocalStorage( matrix );
 
-   /* This assume a routine in ParCsrMatrix that gives a reference. In the
-      absence of such a routine, we would just *reference = parcsr_matrix */
-   ierr = hypre_RefParCSRMatrix( parcsr_matrix, reference);
+   *reference = isis_matrix
 
    return(ierr);
 }
-
+#endif

@@ -6,7 +6,7 @@
 
 /**
 Returns a reference to the ParCsrMatrix used to implement IJMatrix
-in the case that the local storage type for IJMatrix is HYPRE_PARCSR_MATRIX.
+in the case that the local storage type for IJMatrix is HYPRE_PARCSR.
 
 @return integer error code
 @param IJMatrix [IN]
