@@ -34,9 +34,7 @@ dnl * flag, etc for each supported architecture.  If ARCH is unknown
 dnl * then default settings will apply.
 dnl *********************************************************************
 
-
 HYPRE_GUESS_ARCH
-
 
 dnl *********************************************************************
 dnl * If the user has specified a c, c++, or fortran compiler on the 
@@ -98,7 +96,6 @@ AC_ARG_WITH(F77FLAGS, [\
   --with-F77FLAGS=ARG     User can manually set f77 compiler flags],
   F77FLAGS=$withval
 )
-
 
 AC_ARG_WITH(mpi-include, [\
   --with-mpi-include=DIR  User specifies that mpi.h is in DIR.  The options
@@ -175,7 +172,6 @@ AC_ARG_WITH(cegdb, [\
   )
 )
 
-
 AC_ARG_WITH(gdb, [\
   --with-gdb              assign gcc and g++ as the C and c++ compilers
 			  and -g and the compiler flag and link in -lgdb and
@@ -198,7 +194,6 @@ dnl * options and assigns yes or no values to appropriate macros.  These
 dnl * values will be used to determine compilers, flags and libraries needed.
 dnl *********************************************************************
 
-
 AC_ARG_WITH(MPI, [\
   --without-MPI           compiles without MPI.  This option could affect
 			  which compiler is chosen],
@@ -208,10 +203,20 @@ AC_ARG_WITH(MPI, [\
     AC_DEFINE(HYPRE_SEQUENTIAL)
   else
     casc_using_mpi=yes
-  fi,
-  casc_using_mpi=yes
+  fi
 )
 
+AC_ARG_WITH(COMM_SIMPLE, [\
+  --with-COMM_SIMPLE      Do not use MPI derived data types.  This option
+                          is automatically chosen for IBM, but may be
+                          selected for other platforms as well.],
+  if test "$withval" = "no"
+  then
+    CFLAGS="$CFLAGS"
+  else
+    CFLAGS="$CFLAGS -DHYPRE_COMM_SIMPLE"
+  fi
+)
 
 AC_ARG_WITH(dmalloc, [\
   --with-dmalloc          use dmalloc package--no checking is done to ensure
@@ -219,7 +224,6 @@ AC_ARG_WITH(dmalloc, [\
   CASC_ADD_LIB(dmalloc, malloc, /home/casc/lib /usr/local/lib,
     LD,  AC_DEFINE(HYPRE_MEMORY_DMALLOC) )
 )
-
 
 AC_ARG_WITH(timing, [\
   --with-timing           use HYPRE timing routines],
@@ -243,7 +247,6 @@ AC_ARG_WITH(pthreads, [\
     fi
   fi
 )
-
 
 AC_ARG_WITH(openmp,
    [  --with-openmp           use openMP--this may affect which compiler is 
@@ -277,9 +280,7 @@ AC_ARG_WITH(HYPRE_blas,
    casc_using_HYPRE_blas=yes
 )
 
-
 dnl top level source directory
-
 HYPRE_TOP_SRC_DIR=`pwd`
 
 AC_ARG_WITH(petsc, [\
@@ -517,19 +518,6 @@ then
 
    rs6000)
 
-     AC_ARG_WITH(COMM_SIMPLE, [\
-     --without-COMM_SIMPLE  Do not use MPI derived data types.  This option
-                            is automatically chosen for IBM, but may be
-                            selected for other platforms as well.],
-     if test "$withval" = "no"
-     then
-       CFLAGS="$CFLAGS"
-     else
-       CFLAGS="$CFLAGS -DHYPRE_COMM_SIMPLE"
-     fi,
-       CFLAGS="$CFLAGS -DHYPRE_COMM_SIMPLE"
-     )
-
      if test "$casc_user_chose_compilers" = "no"
      then
        if test "$casc_using_mpi" = "no"
@@ -585,7 +573,7 @@ then
      CASC_SET_FDEBUG(-g) 
      CASC_SET_CXXOPT(-O3 -qstrict)
      CASC_SET_CXXDEBUG(-g)
-     CFLAGS="$CFLAGS -qmaxmem=8192"
+     CFLAGS="$CFLAGS -qmaxmem=8192 -DHYPRE_COMM_SIMPLE"
 
      AC_DEFINE(HYPRE_RS6000)
 
