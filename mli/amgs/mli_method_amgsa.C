@@ -344,7 +344,6 @@ int MLI_Method_AMGSA::setup( MLI *mli )
    double          start_time, elapsed_time, max_eigen;
    char            param_string[100], *targv[10];
    MLI_Matrix      *mli_Pmat, *mli_Rmat, *mli_Amat, *mli_cAmat;
-   MLI_OneLevel    *single_level, *next_level;
    MLI_Solver      *smoother_ptr, *csolve_ptr;
    MPI_Comm        comm;
 
@@ -376,12 +375,12 @@ int MLI_Method_AMGSA::setup( MLI *mli )
    /* traverse all levels                                             */
    /* --------------------------------------------------------------- */
 
-   comm = getComm();
+   RAP_time = 0.0;
+   level    = 0;
+   comm     = getComm();
    MPI_Comm_rank( comm, &mypid );
-   single_level = mli->getOneLevelObject( 0 );
-   mli_Amat     = single_level->getAmat();
-   total_time   = MLI_Utils_WTime();
-   RAP_time     = 0.0;
+   mli_Amat   = mli->getSystemMatrix(level);
+   total_time = MLI_Utils_WTime();
 
    for (level = 0; level < num_levels; level++ )
    {
@@ -391,17 +390,15 @@ int MLI_Method_AMGSA::setup( MLI *mli )
          printf("\t*** Aggregation (uncoupled) : level = %d\n", level);
          printf("\t---------------------------------------------------------\n");
       }
-      curr_level   = level;
+      curr_level = level;
       if ( level == num_levels-1 ) break;
-      single_level = mli->getOneLevelObject( level );
-      next_level   = mli->getOneLevelObject( level+1 );
 
-      // ----- fetch fine grid matrix
+      /* ------fetch fine grid matrix----------------------------------- */
 
-      mli_Amat     = single_level->getAmat();
+      mli_Amat = mli->getSystemMatrix(level);
       assert ( mli_Amat != NULL );
 
-      // ----- perform coarsening
+      /* ------perform coarsening--------------------------------------- */
 
       switch ( coarsen_scheme )
       {
@@ -413,7 +410,7 @@ int MLI_Method_AMGSA::setup( MLI *mli )
       if ( mli_Pmat == NULL ) break;
       start_time = MLI_Utils_WTime();
 
-      // ----- construct and set the coarse grid matrix
+      /* ------construct and set the coarse grid matrix----------------- */
 
       if ( mypid == 0 && output_level > 0 ) cout << "\tComputing RAP\n";
       MLI_Matrix_ComputePtAP(mli_Pmat, mli_Amat, &mli_cAmat);
@@ -424,41 +421,45 @@ int MLI_Method_AMGSA::setup( MLI *mli )
       //mli_Amat->print("Amat");
       //mli_Pmat->print("Pmat");
       //mli_cAmat->print("cAmat");
-      next_level->setAmat( mli_cAmat );
+      mli->setSystemMatrix(level+1, mli_cAmat);
 
-      // ----- set the prolongation matrix
+      /* ------set the prolongation matrix------------------------------ */
 
-      next_level->setPmat( mli_Pmat );
+      mli->setProlongation(level+1, mli_Pmat);
 
-      // ----- set the restriction matrix
+      /* ------set the restriction matrix------------------------------- */
 
       sprintf(param_string, "HYPRE_ParCSRT");
       mli_Rmat = new MLI_Matrix(mli_Pmat->getMatrix(), param_string, NULL);
-      single_level->setRmat( mli_Rmat );
+      mli->setRestriction(level, mli_Rmat);
 
-      // ----- set the smoothers 
+      /* ------if MLS smoother, need to give the spectral radius-------- */
 
       if ( pre_smoother == MLI_SOLVER_MLS_ID ) 
          pre_smoother_wgt[0] = max_eigen;
       if ( postsmoother == MLI_SOLVER_MLS_ID ) 
          postsmoother_wgt[0] = max_eigen;
+
+      /* ------set the smoothers---------------------------------------- */
+
       smoother_ptr = MLI_Solver_CreateFromID( pre_smoother );
       targv[0] = (char *) &pre_smoother_num;
       targv[1] = (char *) pre_smoother_wgt;
       sprintf( param_string, "relaxWeight" );
       smoother_ptr->setParams(param_string, 2, targv);
       smoother_ptr->setup(mli_Amat);
-      single_level->setSmoother( MLI_SMOOTHER_PRE, smoother_ptr );
+      mli->setSmoother( level, MLI_SMOOTHER_PRE, smoother_ptr );
+
       smoother_ptr = MLI_Solver_CreateFromID( postsmoother );
       targv[0] = (char *) &postsmoother_num;
       targv[1] = (char *) postsmoother_wgt;
       sprintf( param_string, "relaxWeight" );
       smoother_ptr->setParams(param_string, 2, targv);
       smoother_ptr->setup(mli_Amat);
-      single_level->setSmoother( MLI_SMOOTHER_POST, smoother_ptr );
+      mli->setSmoother( level, MLI_SMOOTHER_POST, smoother_ptr );
    }
 
-   // ----- set the coarse grid solver 
+   /* ------set the coarse grid solver---------------------------------- */
 
    if ( mypid == 0 && output_level > 0 ) printf("\tCoarse level = %d\n", level);
    if (coarse_solver == MLI_SOLVER_MLS_ID) coarse_solver_wgt[0] = max_eigen;
@@ -470,10 +471,9 @@ int MLI_Method_AMGSA::setup( MLI *mli )
       sprintf( param_string, "relaxWeight" );
       csolve_ptr->setParams(param_string, 2, targv);
    }
-   single_level = mli->getOneLevelObject( level );
-   mli_Amat     = single_level->getAmat();
+   mli_Amat = mli->getSystemMatrix(level);
    csolve_ptr->setup(mli_Amat);
-   single_level->setCoarseSolve( csolve_ptr );
+   mli->setCoarseSolve(csolve_ptr);
    total_time = MLI_Utils_WTime() - total_time;
 
    /* --------------------------------------------------------------- */
@@ -892,7 +892,6 @@ int MLI_Method_AMGSA::printStatistics(MLI *mli)
    double       max_val, min_val, dtemp;
    char         param_string[100];
    MLI_Matrix   *mli_Amat, *mli_Pmat;
-   MLI_OneLevel *single_level;
    MPI_Comm     comm = getComm();
 
    /* --------------------------------------------------------------- */
@@ -924,8 +923,7 @@ int MLI_Method_AMGSA::printStatistics(MLI *mli)
    tot_nnz = tot_nrows = 0;
    for ( level = 0; level <= curr_level; level++ )
    {
-      single_level = mli->getOneLevelObject( level );
-      mli_Amat     = single_level->getAmat();
+      mli_Amat = mli->getSystemMatrix( level );
       sprintf(param_string, "nrows");
       mli_Amat->getMatrixInfo(param_string, global_nrows, dtemp);
       sprintf(param_string, "maxnnz");
@@ -961,8 +959,7 @@ int MLI_Method_AMGSA::printStatistics(MLI *mli)
    }
    for ( level = 1; level <= curr_level; level++ )
    {
-      single_level = mli->getOneLevelObject( level );
-      mli_Pmat     = single_level->getPmat();
+      mli_Pmat = mli->getProlongation( level );
       sprintf(param_string, "nrows");
       mli_Pmat->getMatrixInfo(param_string, global_nrows, dtemp);
       sprintf(param_string, "maxnnz");
