@@ -200,14 +200,15 @@ else
   echo "$HYPRE_CHECKOUT_EMAIL" > $0.checkout.err.email 
   chmod -f a+rX,u+w,go-w $0.checkout.*
   chgrp -f hypre $0.checkout.*
-  if test "${HYPRE_AUTOTEST_DIR}" &&
-     test -d $HYPRE_AUTOTEST_DIR
-  then
-    cd $HYPRE_AUTOTEST_DIR
-    rm -fR linear_solvers $0.checkout.*
-    cp -p $StartingDir/$0.checkout.* $HYPRE_AUTOTEST_DIR
-    cp -pr $StartingDir/linear_solvers $HYPRE_AUTOTEST_DIR
-  fi
+##if test "${HYPRE_AUTOTEST_DIR}" &&
+##   test -d $HYPRE_AUTOTEST_DIR
+##then
+##  cd $HYPRE_AUTOTEST_DIR
+##  rm -fR linear_solvers $0.checkout.*
+##  cp -p $StartingDir/$0.checkout.* $HYPRE_AUTOTEST_DIR
+##  cp -pr $StartingDir/linear_solvers $HYPRE_AUTOTEST_DIR
+##  cd $StartingDir
+##fi
 fi
 if [ "$1" = "-automake" ]
 then
