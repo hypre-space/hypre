@@ -35,8 +35,6 @@ when necessary to insure that the autotest runs also do not fail.
 \section{Using CVS Branches}
 \label{Using CVS Branches}
 
-NOTE: THIS HAS NOT BEEN TESTED, SO DO NOT USE QUITE YET!
-
 Sometimes a large change needs to be made to the repository that
 involves several developers coordinating their efforts.  Here, it
 would be useful to use CVS to share code during the development
@@ -94,5 +92,8 @@ cvs commit .
 
 \item Remove the temporary tag, '\code{foo}', so that this branch is
 not accidentally used to make additional changes to the repository.
+\begin{verbatim}
+cvs rtag -d foo linear_solvers
+\end{verbatim}
 
 \end{itemize}
