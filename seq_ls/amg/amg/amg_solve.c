@@ -56,11 +56,14 @@ void        *data;
    int      total_coeffs;
    int      total_variables;
 
+   double   alpha = 1.0;
+   double   beta = -1.0;
    double   cycle_cmplxty;
    double   operat_cmplxty;
    double   grid_cmplxty;
    double   conv_factor;
    double   resid_nrm;
+   double   resid_nrm_tmp;
    double   resid_nrm_init;
    double   relative_resid;
    double   rhs_norm;
@@ -72,6 +75,7 @@ void        *data;
 
    Vector **F_array;
    Vector **U_array;
+   Vector  *Vtemp;
 
    AMGData  *amg_data = data;
 
@@ -93,6 +97,9 @@ void        *data;
  
    F_array[0] = f;
    U_array[0] = u;
+
+
+   Vtemp = AMGDataVtemp(amg_data);
 
    for (j = 1; j < num_levels; j++)
    {
@@ -161,10 +168,12 @@ void        *data;
 
 
 /*--------------------------------------------------------------------------
- *    Find initial residual and print to logfile
+ *    Compute initial fine-grid residual and print to logfile
  *--------------------------------------------------------------------------*/
 
-   CALL_RESIDUAL(energy,resid_nrm,resv,U_array,F_array,A_array,amg_data);
+   CopyVector(F_array[0],Vtemp);
+   Matvec(alpha,A_array[0],U_array[0],beta,Vtemp);
+   resid_nrm = sqrt(InnerProd(Vtemp,Vtemp));
 
    resid_nrm_init = resid_nrm;
    rhs_norm = sqrt(InnerProd(f,f));
@@ -194,7 +203,13 @@ void        *data;
          old_energy = energy;
          old_resid = resid_nrm;
 
-         CALL_RESIDUAL(energy,resid_nrm,resv,U_array,F_array,A_array,amg_data);
+         /*---------------------------------------------------------------
+          *    Compute  fine-grid residual and residual norm
+          *----------------------------------------------------------------*/
+
+         CopyVector(F_array[0],Vtemp);
+         Matvec(alpha,A_array[0],U_array[0],beta,Vtemp);
+         resid_nrm = sqrt(InnerProd(Vtemp,Vtemp));
 
          conv_factor = resid_nrm / old_resid;
          relative_resid = resid_nrm / rhs_norm;
