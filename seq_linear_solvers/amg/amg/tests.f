@@ -55,15 +55,15 @@ c
  30   continue
       return
 
- 4000 format(3x,' matrix    block       sizes',
+ 4000 format(2x,'matrix    block       sizes',
      *     6 x,'   entries per row        block row sums'/
-     *     3x,' k  i  j    rows     entries  sparse  ',
+     *     2x,'k  i  j    rows     entries  sparse  ',
      *     'min   max  avg       min          max')
- 4001 format(4x,74('='))
+ 4001 format(2x,74('='))
  4002 format(//'Interpolation statistics:'/
-     *     3x,' matrix      entries',24x,
+     *     2x,'matrix      entries',24x,
      *     2x,' minimum    maximum'/
-     *     3x,' k  i   rows min max  min weight  max weight',
+     *     2x,'k  i   rows min max  min weight  max weight',
      *     2x,' row sum    row sum')
       end
 
@@ -152,7 +152,7 @@ c
  80      continue
  90   continue
       return
- 1000 format(3x,i2,2(2x,i1),3x,i7,3x,i7,3x,
+ 1000 format(1x,i2,2(2x,i1),3x,i7,3x,i7,3x,
      *     f5.3,1x,i3,3x,i3,1x,f5.1,2(3x,e10.3))
       end
 
@@ -239,5 +239,5 @@ c
  90   continue
 
       return
- 1000 format(3x,i2,2x,i1,2x,i5,2i3,3x,4(2x,d9.3))
+ 1000 format(1x,i2,2x,i1,1x,i6,2i3,3x,4(2x,d9.3))
       end

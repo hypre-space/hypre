@@ -45,9 +45,6 @@ Matrix  *matrix;
 
    fp = fopen(file_name, "w");
 
-   /* write junk line */
-   fprintf(fp, "1 1\n");
-
    fprintf(fp, "%d\n", size);
 
    for (j = 0; j < size+1; j++)
@@ -89,9 +86,6 @@ Vector  *vector;
 
    fp = fopen(file_name, "w");
 
-   /* write junk line */
-   fprintf(fp, "1 1\n");
-
    fprintf(fp, "%d\n", size);
 
    for (j = 0; j < size; j++)
@@ -127,9 +121,6 @@ VectorInt  *vector;
    size = VectorIntSize(vector);
 
    fp = fopen(file_name, "w");
-
-   /* write junk line */
-   fprintf(fp, "1 1\n");
 
    fprintf(fp, "%d\n", size);
 
@@ -247,6 +238,7 @@ double   tol;
  
    /* amg solve params */
    int      amg_ncyc;
+   int      amg_levmax;
    int     *amg_mu;
    int     *amg_ntrlx;
    int     *amg_iprlx;
@@ -269,6 +261,7 @@ double   tol;
 
 
    amg_ncyc    = AMGDataNCyc(amg_data);
+   amg_levmax  = AMGDataLevMax(amg_data);
    amg_mu      = AMGDataMU(amg_data);
    amg_ntrlx   = AMGDataNTRLX(amg_data);
    amg_iprlx   = AMGDataIPRLX(amg_data);
@@ -298,7 +291,7 @@ double   tol;
       fprintf(fp, "    Stopping Tolerance:                  %e \n",
                    stop_tolerance); 
       fprintf(fp, "    W-cycling parameter (mu): ");
-      for (j = 0; j < 10; j++)
+      for (j = 0; j < amg_levmax; j++)
 	 fprintf(fp, "%d ", amg_mu[j]);
       fprintf(fp, "\n");
       fprintf(fp, "    Relaxation Parameters:\n");

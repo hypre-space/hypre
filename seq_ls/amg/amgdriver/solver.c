@@ -122,7 +122,7 @@ char     *file_name;
    
    fscanf(fp, "%d", &amg_ncyc);
    amg_mu = ctalloc(int, amg_levmax);
-   for (i = 0; i < 10; i++)
+   for (i = 0; i < amg_levmax; i++)
       fscanf(fp, "%d", &amg_mu[i]);
    amg_ntrlx = ctalloc(int, 4);
    for (i = 0; i < 4; i++)
@@ -363,7 +363,7 @@ Solver  *solver;
       fprintf(fp, "    Stopping Tolerance                   %e \n",
                    stop_tolerance); 
       fprintf(fp, "    W-cycling parameter (mu): ");
-      for (j = 0; j < 10; j++)
+      for (j = 0; j < amg_levmax; j++)
 	 fprintf(fp, "%d ", amg_mu[j]);
       fprintf(fp, "\n");
       fprintf(fp, "    Relaxation Parameters:\n");
