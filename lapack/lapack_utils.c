@@ -128,7 +128,7 @@ return 0;
 */
 
     printf("** On entry to %6s, parameter number %2i had an illegal value\n",
-		srname, *info);
+		srname, (int)*info);
 
 /*     End of XERBLA */
 
@@ -8242,7 +8242,7 @@ L110:
 
 /*        Use blocked code */
 
-	if (left && notran || ! left && ! notran) {
+	if ((left && notran) || (! left && ! notran)) {
 	    i1 = 1;
 	    i2 = *k;
 	    i3 = nb;
