@@ -78,7 +78,7 @@ do
         HYPRE_COMPILE_MACHINE="blue"
         HYPRE_RUN_MACHINE="blue"
         HYPRE_REMOTE_DIR="/usr/gapps/hypre/powerpc-ibm-aix4.3.3.0/AUTOTEST"
-	HYPRE_MACHINE_COMMANDS="-m -a 2 -cf -o 1"
+	HYPRE_MACHINE_COMMANDS="-m -o 1 -a 2 -cf"
 	perform_test
         shift;;
     -frost)
@@ -86,7 +86,7 @@ do
         HYPRE_COMPILE_MACHINE="frost"
         HYPRE_RUN_MACHINE="frost"
         HYPRE_REMOTE_DIR="/usr/gapps/hypre/powerpcll-ibm-aix4.3.3.0/AUTOTEST"
-	HYPRE_MACHINE_COMMANDS="-m -a 2 -cf -o 1"
+	HYPRE_MACHINE_COMMANDS="-m -o 1 -a 2 -cf"
 	perform_test
         shift;;
     -casc)
@@ -94,7 +94,7 @@ do
         HYPRE_COMPILE_MACHINE="perrin"
         HYPRE_RUN_MACHINE="perrin"
         HYPRE_REMOTE_DIR="/home/casc/software/hypre/autotest"
-	HYPRE_MACHINE_COMMANDS="-m -a 2 -dcxfy -t 1 -ns"
+	HYPRE_MACHINE_COMMANDS="-m -t 1 -ns -a 2 -dcxfy"
 	print_header
         ./autotest_test $HYPRE_MACHINE_COMMANDS
         shift;;
@@ -103,7 +103,7 @@ do
         HYPRE_COMPILE_MACHINE="west"
         HYPRE_RUN_MACHINE="southeast"
         HYPRE_REMOTE_DIR="/usr/gapps/hypre/alphaev56-dec-osf4.0f/AUTOTEST"
-	HYPRE_MACHINE_COMMANDS="-m -r $HYPRE_RUN_MACHINE -a 2 -cf -o 1"
+	HYPRE_MACHINE_COMMANDS="-m -r $HYPRE_RUN_MACHINE -o 1 -a 2 -cf"
 	perform_test
         shift;;
     -lx)
@@ -119,7 +119,7 @@ do
         HYPRE_COMPILE_MACHINE="perrin"
         HYPRE_RUN_MACHINE="perrin"
         HYPRE_REMOTE_DIR="/home/casc/software/hypre/autotest"
-	HYPRE_MACHINE_COMMANDS="-m -q 2 -da 1 -cxfy -t 1 -ns"
+	HYPRE_MACHINE_COMMANDS="-m -q 2 -dt 1 -nsa 1 -cxfy"
 	print_header
         ./autotest_test $HYPRE_MACHINE_COMMANDS
         shift;;
@@ -128,7 +128,7 @@ do
         HYPRE_COMPILE_MACHINE="sasn100"
         HYPRE_RUN_MACHINE="janus"
         HYPRE_REMOTE_DIR="/usr/apps/hypre/AUTOTEST"
-	HYPRE_MACHINE_COMMANDS="-m -r $HYPRE_RUN_MACHINE -a 2 -cf -o 1"
+	HYPRE_MACHINE_COMMANDS="-m -r $HYPRE_RUN_MACHINE -o 1 -a 2 -cf"
 	perform_test
         shift;;
     -riptide)
@@ -144,7 +144,7 @@ do
         HYPRE_COMPILE_MACHINE="tc2k"
         HYPRE_RUN_MACHINE="tc2k"
         HYPRE_REMOTE_DIR="/usr/gapps/hypre/alphaev67-dec-osf5.1/AUTOTEST"
-	HYPRE_MACHINE_COMMANDS="-m -a 2 -cf -o 1"
+	HYPRE_MACHINE_COMMANDS="-m -o 1 -a 2 -cf"
 	perform_test
         shift;;
     -tc)
@@ -152,7 +152,7 @@ do
         HYPRE_COMPILE_MACHINE="tc01"
         HYPRE_RUN_MACHINE="tc01"
         HYPRE_REMOTE_DIR="/usr/gapps/hypre/alphaev56-dec-osf5.1/AUTOTEST"
-	HYPRE_MACHINE_COMMANDS="-m -a 2 -cf -o 1"
+	HYPRE_MACHINE_COMMANDS="-m -o 1 -a 2 -cf"
 	perform_test
         shift;;
     -tux)
@@ -160,7 +160,7 @@ do
         HYPRE_COMPILE_MACHINE="tux22"
         HYPRE_RUN_MACHINE="tux22"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/AUTOTEST"
-	HYPRE_MACHINE_COMMANDS="-m -a 2 -dcxfy -t 1 -ns"
+	HYPRE_MACHINE_COMMANDS="-m -t 1 -ns -a 2 -dcxfy"
 	perform_test
         shift;;
     -vivid)
