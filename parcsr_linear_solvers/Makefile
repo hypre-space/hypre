@@ -15,7 +15,8 @@ HEADERS =\
  protos.h
 
 FILES =\
- par_rap.c
+ par_rap.c\
+ transpose.c
 
 OBJS = ${FILES:.c=.o}
 
@@ -37,7 +38,11 @@ LFLAGS =\
  -L/usr/local/mpi/mpich/lib/solaris/ch_p4\
  -L.\
  -L../utilities\
+ -L../seq_matrix_vector\
+ -L../parcsr_matrix_vector\
  -lHYPRE_memory\
+ -lHYPRE_mv\
+ -lHYPRE_parmv\
  -lnsl -lsocket -lmpi -lmpe\
  -lf2c\
  -lcegdb\
@@ -49,14 +54,14 @@ LFLAGS =\
 # Main rules
 ##################################################################
 
-test_rap: driver_rap.o libCodes.a
+test_rap: driver_rap.o libParamg.a
 	@echo  "Linking" $@ "... "
-	${CC} -o test_rap driver_rap.o libCodes.a ${LFLAGS} 
+	${CC} -o test_rap driver_rap.o libParamg.a ${LFLAGS} 
 
 driver_rap.o: driver_rap.c
 	${CC} -c driver_rap.c ${CFLAGS}
 
-libCodes.a: ${OBJS}
+libParamg.a: ${OBJS}
 	@echo  "Building $@ ... "
 	ar -ru $@ ${OBJS}
 	ranlib $@
@@ -78,8 +83,8 @@ libCodes.a: ${OBJS}
 ##################################################################
 
 veryclean: clean
-	@rm -f libCodes.a
-	@rm -f test driver.o
+	@rm -f libParamg.a
+	@rm -f test_rap driver_rap.o
 
 clean:
 	@rm -f *.o

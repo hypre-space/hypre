@@ -13,7 +13,7 @@
 HEADERS =\
  communication.h\
  headers.h\
- protos.h\
+ protos.h
 
 FILES =\
  communication.c\
@@ -41,7 +41,9 @@ LFLAGS =\
  -L/usr/local/mpi/mpich/lib/solaris/ch_p4\
  -L.\
  -L../utilities\
+ -L../seq_matrix_vector\
  -lHYPRE_memory\
+ -lHYPRE_mv\
  -lnsl -lsocket -lmpi -lmpe\
  -lf2c\
  -lcegdb\
@@ -53,13 +55,13 @@ LFLAGS =\
 # Main rules
 ##################################################################
 
-test: driver.o libCodes.a 
+test: driver.o libHYPRE_parmv.a 
 	@echo  "Linking" $@ "... "
-	${CC} -o test driver.o libCodes.a ${LFLAGS} 
+	${CC} -o test driver.o libHYPRE_parmv.a ${LFLAGS} 
 
-test_matvec: driver_matvec.o libCodes.a
+test_matvec: driver_matvec.o libHYPRE_parmv.a
 	@echo  "Linking" $@ "... "
-	${CC} -o test_matvec driver_matvec.o libCodes.a ${LFLAGS} 
+	${CC} -o test_matvec driver_matvec.o libHYPRE_parmv.a ${LFLAGS} 
 
 driver.o: driver.c
 	${CC} -c driver.c ${CFLAGS}
@@ -67,7 +69,7 @@ driver.o: driver.c
 driver_matvec.o: driver_matvec.c
 	${CC} -c driver_matvec.c ${CFLAGS}
 
-libCodes.a: ${OBJS}
+libHYPRE_parmv.a: ${OBJS}
 	@echo  "Building $@ ... "
 	ar -ru $@ ${OBJS}
 	ranlib $@
@@ -89,8 +91,8 @@ libCodes.a: ${OBJS}
 ##################################################################
 
 veryclean: clean
-	@rm -f libCodes.a
-	@rm -f test driver.o
+	@rm -f libHYPRE_parmv.a
+	@rm -f test test_matvec driver.o driver_matvec.o
 
 clean:
 	@rm -f *.o
