@@ -96,7 +96,7 @@ void LDUSolve(DataDistType *ddist, FactorMatType *ldu, double *x, double *b,
         for (j=auxsptr[i], l=0;   j<sptr[i+1] && sind[j]<nnodes[ii];   j++, l++) 
           gatherbuf[l] = lx[sind[j]];
 
-	MPI_Send( gatherbuf, l, MPI_DOUBLE_PRECISION,
+	MPI_Send( gatherbuf, l, MPI_DOUBLE,
 		  spes[i], TAG, pilut_comm );
 
         auxsptr[i] = j;
@@ -109,7 +109,7 @@ void LDUSolve(DataDistType *ddist, FactorMatType *ldu, double *x, double *b,
     /* Recv the required lx elements from the appropriate processors */
     for (i=0; i<rnbrpes; i++) {
       if ( rnum[i] > 0 ) { /* Something to recv */
-	MPI_Recv( raddr[i]+rdone[i], rnum[i], MPI_DOUBLE_PRECISION,
+	MPI_Recv( raddr[i]+rdone[i], rnum[i], MPI_DOUBLE,
 		  rpes[i], TAG, pilut_comm, &Status );
 
 	rdone[i] += rnum[i] ;
@@ -169,7 +169,7 @@ void LDUSolve(DataDistType *ddist, FactorMatType *ldu, double *x, double *b,
         for (j=auxsptr[i], l=0;   j<sptr[i+1] && sind[j]>=nnodes[ii-1];   j++, l++) 
           gatherbuf[l] = ux[sind[j]];
 
-	MPI_Send( gatherbuf, l, MPI_DOUBLE_PRECISION,
+	MPI_Send( gatherbuf, l, MPI_DOUBLE,
 		  spes[i], TAG, pilut_comm );
 
         auxsptr[i] = j;
@@ -182,7 +182,7 @@ void LDUSolve(DataDistType *ddist, FactorMatType *ldu, double *x, double *b,
     /* Recv the required ux elements from the appropriate processors */
     for (i=0; i<rnbrpes; i++) {
       if ( rnum[i] > 0 ) { /* Something to recv */
-	MPI_Recv( raddr[i]+rdone[i], rnum[i], MPI_DOUBLE_PRECISION,
+	MPI_Recv( raddr[i]+rdone[i], rnum[i], MPI_DOUBLE,
 		  rpes[i], TAG, pilut_comm, &Status );
 
 	rdone[i] += rnum[i] ;
@@ -320,8 +320,8 @@ void SetUpFactor(DataDistType *ddist, FactorMatType *ldu, int maxnz,
   }
   TriSolveComm->rnbrpes = rnbrpes ;
 
-  MPI_Alltoall( petotal, 1, MPI_INTEGER,
-		lu_recv, 1, MPI_INTEGER, pilut_comm );
+  MPI_Alltoall( petotal, 1, MPI_INT,
+		lu_recv, 1, MPI_INT, pilut_comm );
 
   /* Determine to how many processors you will be sending data */
   snbrpes = 0;
@@ -372,7 +372,7 @@ void SetUpFactor(DataDistType *ddist, FactorMatType *ldu, int maxnz,
   k = 0;
   for (i=0; i<npes; i++) {
     if (petotal[i] > 0) {
-      MPI_Send( rind+k, petotal[i], MPI_INTEGER ,
+      MPI_Send( rind+k, petotal[i], MPI_INT ,
 		i, TAG_SetUp_rind, pilut_comm );
 
       /* recv info for LDUSolve */
@@ -389,7 +389,7 @@ void SetUpFactor(DataDistType *ddist, FactorMatType *ldu, int maxnz,
   assert( TriSolveComm->rnbrpes == rnbrpes );
 
   for (i=0; i<snbrpes; i++) {
-    MPI_Recv( sind+sptr[i], sptr[i+1]-sptr[i], MPI_INTEGER,
+    MPI_Recv( sind+sptr[i], sptr[i+1]-sptr[i], MPI_INT,
 	      spes[i], TAG_SetUp_rind, pilut_comm, &Status );
   }
 
@@ -420,7 +420,7 @@ void SetUpFactor(DataDistType *ddist, FactorMatType *ldu, int maxnz,
 
   /* Write them back to the processors that send them to me */
   for (i=0; i<snbrpes; i++) {
-    MPI_Send( sind+sptr[i], sptr[i+1]-sptr[i], MPI_INTEGER,
+    MPI_Send( sind+sptr[i], sptr[i+1]-sptr[i], MPI_INT,
 	      spes[i], TAG_SetUp_reord, pilut_comm );
   }
 
@@ -428,7 +428,7 @@ void SetUpFactor(DataDistType *ddist, FactorMatType *ldu, int maxnz,
   k = 0;
   for (i=0; i<npes; i++) {
     if (petotal[i] > 0) {
-      MPI_Recv( rind+k, petotal[i], MPI_INTEGER,
+      MPI_Recv( rind+k, petotal[i], MPI_INT,
 	        i, TAG_SetUp_reord, pilut_comm, &Status );
       k += petotal[i];
     }
@@ -477,14 +477,14 @@ void SetUpFactor(DataDistType *ddist, FactorMatType *ldu, int maxnz,
       }
     }
 
-    MPI_Send( rnum, nlevels, MPI_INTEGER,
+    MPI_Send( rnum, nlevels, MPI_INT,
 	      spes[i], TAG_SetUp_rnum, pilut_comm );
   }
 
   if (rnum) free(rnum);
 
   /* recieve data as columns rather than rows */
-  MPI_Type_vector( nlevels, 1, rnbrpes, MPI_INTEGER, &MyColType_rnbr );
+  MPI_Type_vector( nlevels, 1, rnbrpes, MPI_INT, &MyColType_rnbr );
   MPI_Type_commit( &MyColType_rnbr );
 
   /* recieve each column */

@@ -232,8 +232,8 @@ void ComputeCommInfo(ReduceMatType *rmat, CommInfoType *cinfo, int *rowdist,
   for (i=0; i<rnnbr; i++)
     pilu_send[rnbrind[i]] = rnbrptr[i+1]-rnbrptr[i];    /* The # of rows I need */
 
-  MPI_Alltoall( pilu_send, 1, MPI_INTEGER,
-		pilu_recv, 1, MPI_INTEGER, pilut_comm );
+  MPI_Alltoall( pilu_send, 1, MPI_INT,
+		pilu_recv, 1, MPI_INT, pilut_comm );
 
   nsend = 0;
   snnbr = 0;
@@ -261,13 +261,13 @@ void ComputeCommInfo(ReduceMatType *rmat, CommInfoType *cinfo, int *rowdist,
 
   /* OK, now I go and send the rrowind to the processor */
   for (i=0; i<rnnbr; i++) {
-    MPI_Send( rrowind+rnbrptr[i], rnbrptr[i+1]-rnbrptr[i], MPI_INTEGER,
+    MPI_Send( rrowind+rnbrptr[i], rnbrptr[i+1]-rnbrptr[i], MPI_INT,
 	      rnbrind[i], TAG_Comm_rrowind, pilut_comm );
   }
 
   /* issue corresponding recieves (assumes buffering) */
   for (i=0; i<snnbr; i++) {
-    MPI_Recv( srowind+snbrptr[i], snbrptr[i+1]-snbrptr[i], MPI_INTEGER,
+    MPI_Recv( srowind+snbrptr[i], snbrptr[i+1]-snbrptr[i], MPI_INT,
 	      snbrind[i], TAG_Comm_rrowind, pilut_comm, &Status ) ;
   }
 }
@@ -425,10 +425,10 @@ void SendFactoredRows(FactorMatType *ldu, CommInfoType *cinfo,
   for (i=0; i<rnnbr; i++) {
     penum = rnbrind[i];
 
-    MPI_Irecv( incolind+j, cnt, MPI_INTEGER,
+    MPI_Irecv( incolind+j, cnt, MPI_INT,
 	      penum, TAG_Send_colind, pilut_comm, &index_requests[i] );
 
-    MPI_Irecv( invalues+j, cnt, MPI_DOUBLE_PRECISION,
+    MPI_Irecv( invalues+j, cnt, MPI_DOUBLE,
 	      penum, TAG_Send_values, pilut_comm, &value_requests[i] );
 
     j += cnt;
@@ -454,7 +454,7 @@ void SendFactoredRows(FactorMatType *ldu, CommInfoType *cinfo,
 
   /* send colind to each neighbor */
   for (i=0; i<snnbr; i++) {
-    MPI_Send( sgatherbuf, l, MPI_INTEGER,
+    MPI_Send( sgatherbuf, l, MPI_INT,
 	      snbrind[i], TAG_Send_colind, pilut_comm );
   }
 
@@ -475,7 +475,7 @@ void SendFactoredRows(FactorMatType *ldu, CommInfoType *cinfo,
 
   /* send values to each neighbor */
   for (i=0; i<snnbr; i++) {
-    MPI_Send( dgatherbuf, l, MPI_DOUBLE_PRECISION,
+    MPI_Send( dgatherbuf, l, MPI_DOUBLE,
 	      snbrind[i], TAG_Send_values, pilut_comm );
   }
 
@@ -488,7 +488,7 @@ void SendFactoredRows(FactorMatType *ldu, CommInfoType *cinfo,
     MPI_Wait( &index_requests[i], &Status);
 
     /* save where each row is recieved into the map */
-    MPI_Get_count( &Status, MPI_INTEGER, &inCnt );
+    MPI_Get_count( &Status, MPI_INT, &inCnt );
     rnbrptr[i] = inCnt;
     for (k=0; k<inCnt; k += global_maxnz+2)
       map[incolind[j+k+1]] = ((j+k)<<1) + 1; /* pack MIS flag in LSB */
