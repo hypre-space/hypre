@@ -15,7 +15,6 @@
 #ifdef MLI_SUPERLU
 
 #include <string.h>
-#include <strings.h>
 #include "mli_solver_superlu.h"
 
 /* ****************************************************************************

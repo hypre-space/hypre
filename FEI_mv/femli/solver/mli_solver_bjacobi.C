@@ -8,7 +8,6 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <strings.h>
 #include "solver/mli_solver_bjacobi.h"
 #ifdef HAVE_ESSL
 #include <essl.h>

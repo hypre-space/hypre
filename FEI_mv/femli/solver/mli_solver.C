@@ -19,7 +19,6 @@
  *--------------------------------------------------------------------------*/
 
 #include <string.h>
-#include <strings.h>
 #include "parcsr_mv/parcsr_mv.h"
 #include "seq_mv/seq_mv.h"
 #include "solver/mli_solver.h"
