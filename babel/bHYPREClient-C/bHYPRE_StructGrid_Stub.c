@@ -3,14 +3,14 @@
  * Symbol:        bHYPRE.StructGrid-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * sidl Created:  20050225 15:45:42 PST
- * Generated:     20050225 15:45:43 PST
+ * sidl Created:  20050317 11:17:45 PST
+ * Generated:     20050317 11:17:47 PST
  * Description:   Client-side glue code for bHYPRE.StructGrid
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.9.8
- * source-line   = 1101
+ * source-line   = 1106
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
@@ -250,6 +250,20 @@ bHYPRE_StructGrid_SetPeriodic(
   return (*self->d_epv->f_SetPeriodic)(
     self,
     periodic);
+}
+
+/*
+ * Method:  SetNumGhost[]
+ */
+
+int32_t
+bHYPRE_StructGrid_SetNumGhost(
+  bHYPRE_StructGrid self,
+  /*in*/ struct sidl_int__array* num_ghost)
+{
+  return (*self->d_epv->f_SetNumGhost)(
+    self,
+    num_ghost);
 }
 
 /*

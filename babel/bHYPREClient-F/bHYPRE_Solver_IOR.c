@@ -3,14 +3,14 @@
  * Symbol:        bHYPRE.Solver-v1.0.0
  * Symbol Type:   interface
  * Babel Version: 0.9.8
- * sidl Created:  20050225 15:45:46 PST
- * Generated:     20050225 15:45:47 PST
+ * sidl Created:  20050317 11:17:50 PST
+ * Generated:     20050317 11:17:51 PST
  * Description:   Intermediate Object Representation for bHYPRE.Solver
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.9.8
- * source-line   = 708
+ * source-line   = 713
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 

@@ -3,8 +3,8 @@
  * Symbol:        bHYPRE.IJBuildMatrix-v1.0.0
  * Symbol Type:   interface
  * Babel Version: 0.9.8
- * sidl Created:  20050225 15:45:41 PST
- * Generated:     20050225 15:45:43 PST
+ * sidl Created:  20050317 11:17:45 PST
+ * Generated:     20050317 11:17:47 PST
  * Description:   Intermediate Object Representation for bHYPRE.IJBuildMatrix
  * 
  * WARNING: Automatically generated; changes will be lost

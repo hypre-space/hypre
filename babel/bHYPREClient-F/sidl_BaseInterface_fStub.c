@@ -4,7 +4,7 @@
  * Symbol Type:   interface
  * Babel Version: 0.9.8
  * sidl Created:  20050204 10:21:31 PST
- * Generated:     20050225 15:45:50 PST
+ * Generated:     20050317 11:17:54 PST
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side glue code for sidl.BaseInterface

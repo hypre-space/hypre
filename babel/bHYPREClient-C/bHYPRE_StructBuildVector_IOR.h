@@ -3,14 +3,14 @@
  * Symbol:        bHYPRE.StructBuildVector-v1.0.0
  * Symbol Type:   interface
  * Babel Version: 0.9.8
- * sidl Created:  20050225 15:45:41 PST
- * Generated:     20050225 15:45:43 PST
+ * sidl Created:  20050317 11:17:45 PST
+ * Generated:     20050317 11:17:46 PST
  * Description:   Intermediate Object Representation for bHYPRE.StructBuildVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.9.8
- * source-line   = 568
+ * source-line   = 573
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 

@@ -3,14 +3,14 @@
  * Symbol:        bHYPRE.StructMatrix-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * sidl Created:  20050225 15:45:42 PST
- * Generated:     20050225 15:45:42 PST
+ * sidl Created:  20050317 11:17:45 PST
+ * Generated:     20050317 11:17:46 PST
  * Description:   Intermediate Object Representation for bHYPRE.StructMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.9.8
- * source-line   = 1124
+ * source-line   = 1135
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
@@ -189,6 +189,8 @@ static void bHYPRE_StructMatrix__init_epv(
   epv->f_SetBoxValues             = NULL;
   epv->f_SetNumGhost              = NULL;
   epv->f_SetSymmetric             = NULL;
+  epv->f_SetConstantEntries       = NULL;
+  epv->f_SetConstantValues        = NULL;
 
   bHYPRE_StructMatrix__set_epv(epv);
 
@@ -246,34 +248,38 @@ static void bHYPRE_StructMatrix__init_epv(
   e1->f_GetObject       = (int32_t (*)(void*,
     struct sidl_BaseInterface__object**)) epv->f_GetObject;
 
-  e2->f__cast           = (void* (*)(void*,const char*)) epv->f__cast;
-  e2->f__delete         = (void (*)(void*)) epv->f__delete;
-  e2->f_addRef          = (void (*)(void*)) epv->f_addRef;
-  e2->f_deleteRef       = (void (*)(void*)) epv->f_deleteRef;
-  e2->f_isSame          = (sidl_bool (*)(void*,
+  e2->f__cast              = (void* (*)(void*,const char*)) epv->f__cast;
+  e2->f__delete            = (void (*)(void*)) epv->f__delete;
+  e2->f_addRef             = (void (*)(void*)) epv->f_addRef;
+  e2->f_deleteRef          = (void (*)(void*)) epv->f_deleteRef;
+  e2->f_isSame             = (sidl_bool (*)(void*,
     struct sidl_BaseInterface__object*)) epv->f_isSame;
-  e2->f_queryInt        = (struct sidl_BaseInterface__object* (*)(void*,
+  e2->f_queryInt           = (struct sidl_BaseInterface__object* (*)(void*,
     const char*)) epv->f_queryInt;
-  e2->f_isType          = (sidl_bool (*)(void*,const char*)) epv->f_isType;
-  e2->f_getClassInfo    = (struct sidl_ClassInfo__object* (*)(void*)) 
+  e2->f_isType             = (sidl_bool (*)(void*,const char*)) epv->f_isType;
+  e2->f_getClassInfo       = (struct sidl_ClassInfo__object* (*)(void*)) 
     epv->f_getClassInfo;
-  e2->f_SetCommunicator = (int32_t (*)(void*,void*)) epv->f_SetCommunicator;
-  e2->f_Initialize      = (int32_t (*)(void*)) epv->f_Initialize;
-  e2->f_Assemble        = (int32_t (*)(void*)) epv->f_Assemble;
-  e2->f_GetObject       = (int32_t (*)(void*,
+  e2->f_SetCommunicator    = (int32_t (*)(void*,void*)) epv->f_SetCommunicator;
+  e2->f_Initialize         = (int32_t (*)(void*)) epv->f_Initialize;
+  e2->f_Assemble           = (int32_t (*)(void*)) epv->f_Assemble;
+  e2->f_GetObject          = (int32_t (*)(void*,
     struct sidl_BaseInterface__object**)) epv->f_GetObject;
-  e2->f_SetGrid         = (int32_t (*)(void*,
+  e2->f_SetGrid            = (int32_t (*)(void*,
     struct bHYPRE_StructGrid__object*)) epv->f_SetGrid;
-  e2->f_SetStencil      = (int32_t (*)(void*,
+  e2->f_SetStencil         = (int32_t (*)(void*,
     struct bHYPRE_StructStencil__object*)) epv->f_SetStencil;
-  e2->f_SetValues       = (int32_t (*)(void*,struct sidl_int__array*,int32_t,
+  e2->f_SetValues          = (int32_t (*)(void*,struct sidl_int__array*,int32_t,
     struct sidl_int__array*,struct sidl_double__array*)) epv->f_SetValues;
-  e2->f_SetBoxValues    = (int32_t (*)(void*,struct sidl_int__array*,
+  e2->f_SetBoxValues       = (int32_t (*)(void*,struct sidl_int__array*,
     struct sidl_int__array*,int32_t,struct sidl_int__array*,
     struct sidl_double__array*)) epv->f_SetBoxValues;
-  e2->f_SetNumGhost     = (int32_t (*)(void*,
+  e2->f_SetNumGhost        = (int32_t (*)(void*,
     struct sidl_int__array*)) epv->f_SetNumGhost;
-  e2->f_SetSymmetric    = (int32_t (*)(void*,int32_t)) epv->f_SetSymmetric;
+  e2->f_SetSymmetric       = (int32_t (*)(void*,int32_t)) epv->f_SetSymmetric;
+  e2->f_SetConstantEntries = (int32_t (*)(void*,int32_t,
+    struct sidl_int__array*)) epv->f_SetConstantEntries;
+  e2->f_SetConstantValues  = (int32_t (*)(void*,int32_t,struct sidl_int__array*,
+    struct sidl_double__array*)) epv->f_SetConstantValues;
 
   e3->f__cast        = (void* (*)(struct sidl_BaseClass__object*,
     const char*)) epv->f__cast;
@@ -813,6 +819,33 @@ remote_bHYPRE_StructMatrix_SetSymmetric(
 }
 
 /*
+ * REMOTE METHOD STUB:SetConstantEntries
+ */
+
+static int32_t
+remote_bHYPRE_StructMatrix_SetConstantEntries(
+  struct bHYPRE_StructMatrix__object* self,
+  int32_t num_stencil_constant_points,
+  struct sidl_int__array* stencil_constant_points)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:SetConstantValues
+ */
+
+static int32_t
+remote_bHYPRE_StructMatrix_SetConstantValues(
+  struct bHYPRE_StructMatrix__object* self,
+  int32_t num_stencil_indices,
+  struct sidl_int__array* stencil_indices,
+  struct sidl_double__array* values)
+{
+  return 0;
+}
+
+/*
  * REMOTE EPV: create remote entry point vectors (EPVs).
  */
 
@@ -862,6 +895,10 @@ static void bHYPRE_StructMatrix__init_remote_epv(void)
   epv->f_SetBoxValues             = remote_bHYPRE_StructMatrix_SetBoxValues;
   epv->f_SetNumGhost              = remote_bHYPRE_StructMatrix_SetNumGhost;
   epv->f_SetSymmetric             = remote_bHYPRE_StructMatrix_SetSymmetric;
+  epv->f_SetConstantEntries       = 
+    remote_bHYPRE_StructMatrix_SetConstantEntries;
+  epv->f_SetConstantValues        = 
+    remote_bHYPRE_StructMatrix_SetConstantValues;
 
   e0->f__cast                    = (void* (*)(void*,const char*)) epv->f__cast;
   e0->f__delete                  = (void (*)(void*)) epv->f__delete;
@@ -917,34 +954,38 @@ static void bHYPRE_StructMatrix__init_remote_epv(void)
   e1->f_GetObject       = (int32_t (*)(void*,
     struct sidl_BaseInterface__object**)) epv->f_GetObject;
 
-  e2->f__cast           = (void* (*)(void*,const char*)) epv->f__cast;
-  e2->f__delete         = (void (*)(void*)) epv->f__delete;
-  e2->f_addRef          = (void (*)(void*)) epv->f_addRef;
-  e2->f_deleteRef       = (void (*)(void*)) epv->f_deleteRef;
-  e2->f_isSame          = (sidl_bool (*)(void*,
+  e2->f__cast              = (void* (*)(void*,const char*)) epv->f__cast;
+  e2->f__delete            = (void (*)(void*)) epv->f__delete;
+  e2->f_addRef             = (void (*)(void*)) epv->f_addRef;
+  e2->f_deleteRef          = (void (*)(void*)) epv->f_deleteRef;
+  e2->f_isSame             = (sidl_bool (*)(void*,
     struct sidl_BaseInterface__object*)) epv->f_isSame;
-  e2->f_queryInt        = (struct sidl_BaseInterface__object* (*)(void*,
+  e2->f_queryInt           = (struct sidl_BaseInterface__object* (*)(void*,
     const char*)) epv->f_queryInt;
-  e2->f_isType          = (sidl_bool (*)(void*,const char*)) epv->f_isType;
-  e2->f_getClassInfo    = (struct sidl_ClassInfo__object* (*)(void*)) 
+  e2->f_isType             = (sidl_bool (*)(void*,const char*)) epv->f_isType;
+  e2->f_getClassInfo       = (struct sidl_ClassInfo__object* (*)(void*)) 
     epv->f_getClassInfo;
-  e2->f_SetCommunicator = (int32_t (*)(void*,void*)) epv->f_SetCommunicator;
-  e2->f_Initialize      = (int32_t (*)(void*)) epv->f_Initialize;
-  e2->f_Assemble        = (int32_t (*)(void*)) epv->f_Assemble;
-  e2->f_GetObject       = (int32_t (*)(void*,
+  e2->f_SetCommunicator    = (int32_t (*)(void*,void*)) epv->f_SetCommunicator;
+  e2->f_Initialize         = (int32_t (*)(void*)) epv->f_Initialize;
+  e2->f_Assemble           = (int32_t (*)(void*)) epv->f_Assemble;
+  e2->f_GetObject          = (int32_t (*)(void*,
     struct sidl_BaseInterface__object**)) epv->f_GetObject;
-  e2->f_SetGrid         = (int32_t (*)(void*,
+  e2->f_SetGrid            = (int32_t (*)(void*,
     struct bHYPRE_StructGrid__object*)) epv->f_SetGrid;
-  e2->f_SetStencil      = (int32_t (*)(void*,
+  e2->f_SetStencil         = (int32_t (*)(void*,
     struct bHYPRE_StructStencil__object*)) epv->f_SetStencil;
-  e2->f_SetValues       = (int32_t (*)(void*,struct sidl_int__array*,int32_t,
+  e2->f_SetValues          = (int32_t (*)(void*,struct sidl_int__array*,int32_t,
     struct sidl_int__array*,struct sidl_double__array*)) epv->f_SetValues;
-  e2->f_SetBoxValues    = (int32_t (*)(void*,struct sidl_int__array*,
+  e2->f_SetBoxValues       = (int32_t (*)(void*,struct sidl_int__array*,
     struct sidl_int__array*,int32_t,struct sidl_int__array*,
     struct sidl_double__array*)) epv->f_SetBoxValues;
-  e2->f_SetNumGhost     = (int32_t (*)(void*,
+  e2->f_SetNumGhost        = (int32_t (*)(void*,
     struct sidl_int__array*)) epv->f_SetNumGhost;
-  e2->f_SetSymmetric    = (int32_t (*)(void*,int32_t)) epv->f_SetSymmetric;
+  e2->f_SetSymmetric       = (int32_t (*)(void*,int32_t)) epv->f_SetSymmetric;
+  e2->f_SetConstantEntries = (int32_t (*)(void*,int32_t,
+    struct sidl_int__array*)) epv->f_SetConstantEntries;
+  e2->f_SetConstantValues  = (int32_t (*)(void*,int32_t,struct sidl_int__array*,
+    struct sidl_double__array*)) epv->f_SetConstantValues;
 
   e3->f__cast        = (void* (*)(struct sidl_BaseClass__object*,
     const char*)) epv->f__cast;

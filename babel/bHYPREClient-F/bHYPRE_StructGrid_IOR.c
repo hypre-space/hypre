@@ -3,14 +3,14 @@
  * Symbol:        bHYPRE.StructGrid-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * sidl Created:  20050225 15:45:46 PST
- * Generated:     20050225 15:45:47 PST
+ * sidl Created:  20050317 11:17:50 PST
+ * Generated:     20050317 11:17:51 PST
  * Description:   Intermediate Object Representation for bHYPRE.StructGrid
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.9.8
- * source-line   = 1101
+ * source-line   = 1106
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
@@ -153,6 +153,7 @@ static void bHYPRE_StructGrid__init_epv(
   epv->f_SetDimension    = NULL;
   epv->f_SetExtents      = NULL;
   epv->f_SetPeriodic     = NULL;
+  epv->f_SetNumGhost     = NULL;
   epv->f_Assemble        = NULL;
 
   bHYPRE_StructGrid__set_epv(epv);
@@ -467,6 +468,18 @@ remote_bHYPRE_StructGrid_SetPeriodic(
 }
 
 /*
+ * REMOTE METHOD STUB:SetNumGhost
+ */
+
+static int32_t
+remote_bHYPRE_StructGrid_SetNumGhost(
+  struct bHYPRE_StructGrid__object* self,
+  struct sidl_int__array* num_ghost)
+{
+  return 0;
+}
+
+/*
  * REMOTE METHOD STUB:Assemble
  */
 
@@ -501,6 +514,7 @@ static void bHYPRE_StructGrid__init_remote_epv(void)
   epv->f_SetDimension    = remote_bHYPRE_StructGrid_SetDimension;
   epv->f_SetExtents      = remote_bHYPRE_StructGrid_SetExtents;
   epv->f_SetPeriodic     = remote_bHYPRE_StructGrid_SetPeriodic;
+  epv->f_SetNumGhost     = remote_bHYPRE_StructGrid_SetNumGhost;
   epv->f_Assemble        = remote_bHYPRE_StructGrid_Assemble;
 
   e0->f__cast        = (void* (*)(struct sidl_BaseClass__object*,

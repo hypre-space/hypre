@@ -3,8 +3,8 @@
  * Symbol:        bHYPRE.StructBuildMatrix-v1.0.0
  * Symbol Type:   interface
  * Babel Version: 0.9.8
- * sidl Created:  20050225 15:45:46 PST
- * Generated:     20050225 15:45:48 PST
+ * sidl Created:  20050317 11:17:50 PST
+ * Generated:     20050317 11:17:52 PST
  * Description:   Intermediate Object Representation for bHYPRE.StructBuildMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -111,6 +111,15 @@ struct bHYPRE_StructBuildMatrix__epv {
   int32_t (*f_SetSymmetric)(
     void* self,
     int32_t symmetric);
+  int32_t (*f_SetConstantEntries)(
+    void* self,
+    int32_t num_stencil_constant_points,
+    struct sidl_int__array* stencil_constant_points);
+  int32_t (*f_SetConstantValues)(
+    void* self,
+    int32_t num_stencil_indices,
+    struct sidl_int__array* stencil_indices,
+    struct sidl_double__array* values);
 };
 
 /*

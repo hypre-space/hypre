@@ -3,8 +3,8 @@
  * Symbol:        bHYPRE.StructBuildMatrix-v1.0.0
  * Symbol Type:   interface
  * Babel Version: 0.9.8
- * sidl Created:  20050225 15:45:46 PST
- * Generated:     20050225 15:45:50 PST
+ * sidl Created:  20050317 11:17:50 PST
+ * Generated:     20050317 11:17:54 PST
  * Description:   Client-side glue code for bHYPRE.StructBuildMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -605,6 +605,74 @@ SIDLFortran77Symbol(bhypre_structbuildmatrix_setsymmetric_f,BHYPRE_STRUCTBUILDMA
     (*(_epv->f_SetSymmetric))(
       _proxy_self->d_object,
       *symmetric
+    );
+}
+
+/*
+ * Method:  SetConstantEntries[]
+ */
+
+void
+SIDLFortran77Symbol(bhypre_structbuildmatrix_setconstantentries_f,BHYPRE_STRUCTBUILDMATRIX_SETCONSTANTENTRIES_F,bHYPRE_StructBuildMatrix_SetConstantEntries_f)
+(
+  int64_t *self,
+  int32_t *num_stencil_constant_points,
+  int64_t *stencil_constant_points,
+  int32_t *retval
+)
+{
+  struct bHYPRE_StructBuildMatrix__epv *_epv = NULL;
+  struct bHYPRE_StructBuildMatrix__object* _proxy_self = NULL;
+  struct sidl_int__array* _proxy_stencil_constant_points = NULL;
+  _proxy_self =
+    (struct bHYPRE_StructBuildMatrix__object*)
+    (ptrdiff_t)(*self);
+  _proxy_stencil_constant_points =
+    (struct sidl_int__array*)
+    (ptrdiff_t)(*stencil_constant_points);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_SetConstantEntries))(
+      _proxy_self->d_object,
+      *num_stencil_constant_points,
+      _proxy_stencil_constant_points
+    );
+}
+
+/*
+ * Method:  SetConstantValues[]
+ */
+
+void
+SIDLFortran77Symbol(bhypre_structbuildmatrix_setconstantvalues_f,BHYPRE_STRUCTBUILDMATRIX_SETCONSTANTVALUES_F,bHYPRE_StructBuildMatrix_SetConstantValues_f)
+(
+  int64_t *self,
+  int32_t *num_stencil_indices,
+  int64_t *stencil_indices,
+  int64_t *values,
+  int32_t *retval
+)
+{
+  struct bHYPRE_StructBuildMatrix__epv *_epv = NULL;
+  struct bHYPRE_StructBuildMatrix__object* _proxy_self = NULL;
+  struct sidl_int__array* _proxy_stencil_indices = NULL;
+  struct sidl_double__array* _proxy_values = NULL;
+  _proxy_self =
+    (struct bHYPRE_StructBuildMatrix__object*)
+    (ptrdiff_t)(*self);
+  _proxy_stencil_indices =
+    (struct sidl_int__array*)
+    (ptrdiff_t)(*stencil_indices);
+  _proxy_values =
+    (struct sidl_double__array*)
+    (ptrdiff_t)(*values);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_SetConstantValues))(
+      _proxy_self->d_object,
+      *num_stencil_indices,
+      _proxy_stencil_indices,
+      _proxy_values
     );
 }
 

@@ -3,14 +3,14 @@
  * Symbol:        bHYPRE.BoomerAMG-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * sidl Created:  20050225 15:45:46 PST
- * Generated:     20050225 15:45:49 PST
+ * sidl Created:  20050317 11:17:50 PST
+ * Generated:     20050317 11:17:53 PST
  * Description:   Client-side glue code for bHYPRE.BoomerAMG
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.9.8
- * source-line   = 1217
+ * source-line   = 1229
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 

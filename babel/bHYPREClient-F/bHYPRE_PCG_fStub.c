@@ -3,14 +3,14 @@
  * Symbol:        bHYPRE.PCG-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * sidl Created:  20050225 15:45:46 PST
- * Generated:     20050225 15:45:50 PST
+ * sidl Created:  20050317 11:17:50 PST
+ * Generated:     20050317 11:17:54 PST
  * Description:   Client-side glue code for bHYPRE.PCG
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.9.8
- * source-line   = 1237
+ * source-line   = 1249
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 

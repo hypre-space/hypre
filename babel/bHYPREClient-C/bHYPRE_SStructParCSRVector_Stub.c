@@ -3,14 +3,14 @@
  * Symbol:        bHYPRE.SStructParCSRVector-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * sidl Created:  20050225 15:45:41 PST
- * Generated:     20050225 15:45:44 PST
+ * sidl Created:  20050317 11:17:45 PST
+ * Generated:     20050317 11:17:48 PST
  * Description:   Client-side glue code for bHYPRE.SStructParCSRVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.9.8
- * source-line   = 837
+ * source-line   = 842
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 

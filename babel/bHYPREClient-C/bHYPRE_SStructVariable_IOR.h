@@ -3,14 +3,14 @@
  * Symbol:        bHYPRE.SStructVariable-v1.0.0
  * Symbol Type:   enumeration
  * Babel Version: 0.9.8
- * sidl Created:  20050225 15:45:42 PST
- * Generated:     20050225 15:45:43 PST
+ * sidl Created:  20050317 11:17:45 PST
+ * Generated:     20050317 11:17:47 PST
  * Description:   Intermediate Object Representation for bHYPRE.SStructVariable
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.9.8
- * source-line   = 888
+ * source-line   = 893
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 

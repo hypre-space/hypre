@@ -3,8 +3,8 @@ C       File:          bHYPRE_StructBuildMatrix_Impl.f
 C       Symbol:        bHYPRE.StructBuildMatrix-v1.0.0
 C       Symbol Type:   interface
 C       Babel Version: 0.9.8
-C       sidl Created:  20050225 15:45:46 PST
-C       Generated:     20050225 15:45:50 PST
+C       sidl Created:  20050317 11:17:50 PST
+C       Generated:     20050317 11:17:55 PST
 C       Description:   Client-side documentation text for bHYPRE.StructBuildMatrix
 C       
 C       WARNING: Automatically generated; changes will be lost
@@ -336,6 +336,44 @@ C       in bHYPRE.StructBuildMatrix self
         integer*8 self
 C       in int symmetric
         integer*4 symmetric
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Method:  SetConstantEntries[]
+C       
+
+        subroutine bHYPRE_StructBuildMatrix_SetConstantEntries_f(self,
+     &     num_stencil_constant_points, stencil_constant_points, retval)
+        implicit none
+C       in bHYPRE.StructBuildMatrix self
+        integer*8 self
+C       in int num_stencil_constant_points
+        integer*4 num_stencil_constant_points
+C       in array<int,column-major> stencil_constant_points
+        integer*8 stencil_constant_points
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Method:  SetConstantValues[]
+C       
+
+        subroutine bHYPRE_StructBuildMatrix_SetConstantValues_f(self,
+     &     num_stencil_indices, stencil_indices, values, retval)
+        implicit none
+C       in bHYPRE.StructBuildMatrix self
+        integer*8 self
+C       in int num_stencil_indices
+        integer*4 num_stencil_indices
+C       in array<int,column-major> stencil_indices
+        integer*8 stencil_indices
+C       in array<double,column-major> values
+        integer*8 values
 C       out int retval
         integer*4 retval
         end

@@ -3,14 +3,14 @@
  * Symbol:        bHYPRE.StructGrid-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * sidl Created:  20050225 15:45:46 PST
- * Generated:     20050225 15:45:48 PST
+ * sidl Created:  20050317 11:17:50 PST
+ * Generated:     20050317 11:17:52 PST
  * Description:   Client-side glue code for bHYPRE.StructGrid
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.9.8
- * source-line   = 1101
+ * source-line   = 1106
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
@@ -459,6 +459,35 @@ SIDLFortran77Symbol(bhypre_structgrid_setperiodic_f,BHYPRE_STRUCTGRID_SETPERIODI
     (*(_epv->f_SetPeriodic))(
       _proxy_self,
       _proxy_periodic
+    );
+}
+
+/*
+ * Method:  SetNumGhost[]
+ */
+
+void
+SIDLFortran77Symbol(bhypre_structgrid_setnumghost_f,BHYPRE_STRUCTGRID_SETNUMGHOST_F,bHYPRE_StructGrid_SetNumGhost_f)
+(
+  int64_t *self,
+  int64_t *num_ghost,
+  int32_t *retval
+)
+{
+  struct bHYPRE_StructGrid__epv *_epv = NULL;
+  struct bHYPRE_StructGrid__object* _proxy_self = NULL;
+  struct sidl_int__array* _proxy_num_ghost = NULL;
+  _proxy_self =
+    (struct bHYPRE_StructGrid__object*)
+    (ptrdiff_t)(*self);
+  _proxy_num_ghost =
+    (struct sidl_int__array*)
+    (ptrdiff_t)(*num_ghost);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_SetNumGhost))(
+      _proxy_self,
+      _proxy_num_ghost
     );
 }
 

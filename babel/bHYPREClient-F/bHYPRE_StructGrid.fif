@@ -3,14 +3,14 @@ C       File:          bHYPRE_StructGrid_Impl.f
 C       Symbol:        bHYPRE.StructGrid-v1.0.0
 C       Symbol Type:   class
 C       Babel Version: 0.9.8
-C       sidl Created:  20050225 15:45:46 PST
-C       Generated:     20050225 15:45:48 PST
+C       sidl Created:  20050317 11:17:50 PST
+C       Generated:     20050317 11:17:52 PST
 C       Description:   Client-side documentation text for bHYPRE.StructGrid
 C       
 C       WARNING: Automatically generated; changes will be lost
 C       
 C       babel-version = 0.9.8
-C       source-line   = 1101
+C       source-line   = 1106
 C       source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
 C       
 
@@ -231,6 +231,22 @@ C       in bHYPRE.StructGrid self
         integer*8 self
 C       in array<int,column-major> periodic
         integer*8 periodic
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Method:  SetNumGhost[]
+C       
+
+        subroutine bHYPRE_StructGrid_SetNumGhost_f(self, num_ghost,
+     &     retval)
+        implicit none
+C       in bHYPRE.StructGrid self
+        integer*8 self
+C       in array<int,column-major> num_ghost
+        integer*8 num_ghost
 C       out int retval
         integer*4 retval
         end

@@ -3,8 +3,8 @@
  * Symbol:        bHYPRE.StructBuildMatrix-v1.0.0
  * Symbol Type:   interface
  * Babel Version: 0.9.8
- * sidl Created:  20050225 15:45:41 PST
- * Generated:     20050225 15:45:44 PST
+ * sidl Created:  20050317 11:17:45 PST
+ * Generated:     20050317 11:17:48 PST
  * Description:   Client-side glue code for bHYPRE.StructBuildMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -147,6 +147,25 @@ int32_t
 bHYPRE_StructBuildMatrix_SetSymmetric(
   /*in*/ bHYPRE_StructBuildMatrix self,
   /*in*/ int32_t symmetric);
+
+/**
+ * Method:  SetConstantEntries[]
+ */
+int32_t
+bHYPRE_StructBuildMatrix_SetConstantEntries(
+  /*in*/ bHYPRE_StructBuildMatrix self,
+  /*in*/ int32_t num_stencil_constant_points,
+  /*in*/ struct sidl_int__array* stencil_constant_points);
+
+/**
+ * Method:  SetConstantValues[]
+ */
+int32_t
+bHYPRE_StructBuildMatrix_SetConstantValues(
+  /*in*/ bHYPRE_StructBuildMatrix self,
+  /*in*/ int32_t num_stencil_indices,
+  /*in*/ struct sidl_int__array* stencil_indices,
+  /*in*/ struct sidl_double__array* values);
 
 /**
  * Cast method for interface and class type conversions.

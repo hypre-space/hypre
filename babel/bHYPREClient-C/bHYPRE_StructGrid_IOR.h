@@ -3,14 +3,14 @@
  * Symbol:        bHYPRE.StructGrid-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * sidl Created:  20050225 15:45:42 PST
- * Generated:     20050225 15:45:42 PST
+ * sidl Created:  20050317 11:17:45 PST
+ * Generated:     20050317 11:17:46 PST
  * Description:   Intermediate Object Representation for bHYPRE.StructGrid
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.9.8
- * source-line   = 1101
+ * source-line   = 1106
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
@@ -105,6 +105,9 @@ struct bHYPRE_StructGrid__epv {
   int32_t (*f_SetPeriodic)(
     struct bHYPRE_StructGrid__object* self,
     struct sidl_int__array* periodic);
+  int32_t (*f_SetNumGhost)(
+    struct bHYPRE_StructGrid__object* self,
+    struct sidl_int__array* num_ghost);
   int32_t (*f_Assemble)(
     struct bHYPRE_StructGrid__object* self);
 };
