@@ -16,10 +16,9 @@ as the Fortran compiler doesn't support Fortran90.
 Note that Python is also disabled even if you configure hypre with --enable-shared
 because Numerical Python (NumPy) isn't installed!
 
-On CASC Linux machines, define a path to java by:
-setenv JAVAPREFIX /usr/java/j2sdk1.4.2_01/bin/
-  Also _don't_ have CLASSPATH defined, or (not tried) make sure that "."
-is in your CLASSPATH.
+On CASC Linux machines, make sure you have your Java environment set
+up by doing source /usr/apps/java/default/setup.csh (or setup.sh if
+you run bash)
 
   Some build system bugs which need to be fixed...
 ****** In subdirectory sidl there are 2 empty .c files.  I had to make
