@@ -58,15 +58,19 @@ hypre_GMRESCreate( )
    gmres_data = hypre_CTAlloc(hypre_GMRESData, 1);
  
    /* set defaults */
-   (gmres_data -> k_dim)        = 5;
-   (gmres_data -> tol)          = 1.0e-06;
-   (gmres_data -> max_iter)     = 1000;
-   (gmres_data -> matvec_data)  = NULL;
-   (gmres_data -> precond)      = hypre_KrylovIdentity;
-   (gmres_data -> precond_setup)= hypre_KrylovIdentitySetup;
-   (gmres_data -> precond_data) = NULL;
-   (gmres_data -> logging)      = 0;
-   (gmres_data -> norms)        = NULL;
+   (gmres_data -> k_dim)         = 5;
+   (gmres_data -> tol)           = 1.0e-06;
+   (gmres_data -> max_iter)      = 1000;
+   (gmres_data -> precond)       = hypre_KrylovIdentity;
+   (gmres_data -> precond_setup) = hypre_KrylovIdentitySetup;
+   (gmres_data -> precond_data)  = NULL;
+   (gmres_data -> logging)       = 0;
+   (gmres_data -> p)             = NULL;
+   (gmres_data -> r)             = NULL;
+   (gmres_data -> w)             = NULL;
+   (gmres_data -> matvec_data)   = NULL;
+   (gmres_data -> norms)         = NULL;
+   (gmres_data -> log_file_name) = NULL;
  
    return (void *) gmres_data;
 }
@@ -129,11 +133,15 @@ hypre_GMRESSetup( void *gmres_vdata,
     * compute phases of matvec and the preconditioner.
     *--------------------------------------------------*/
  
-   (gmres_data -> p) = hypre_KrylovCreateVectorArray(k_dim+1,x);
-   (gmres_data -> r) = hypre_KrylovCreateVector(b);
-   (gmres_data -> w) = hypre_KrylovCreateVector(b);
+   if ((gmres_data -> p) == NULL)
+      (gmres_data -> p) = hypre_KrylovCreateVectorArray(k_dim+1,x);
+   if ((gmres_data -> r) == NULL)
+      (gmres_data -> r) = hypre_KrylovCreateVector(b);
+   if ((gmres_data -> w) == NULL)
+      (gmres_data -> w) = hypre_KrylovCreateVector(b);
  
-   (gmres_data -> matvec_data) = hypre_KrylovMatvecCreate(A, x);
+   if ((gmres_data -> matvec_data) == NULL)
+      (gmres_data -> matvec_data) = hypre_KrylovMatvecCreate(A, x);
  
    precond_setup(precond_data, A, b, x);
  
@@ -143,8 +151,10 @@ hypre_GMRESSetup( void *gmres_vdata,
  
    if ((gmres_data -> logging) > 0)
    {
-      (gmres_data -> norms)         = hypre_CTAlloc(double, max_iter + 1);
-      (gmres_data -> log_file_name) = "gmres.out.log";
+      if ((gmres_data -> norms) == NULL)
+         (gmres_data -> norms) = hypre_CTAlloc(double, max_iter + 1);
+      if ((gmres_data -> log_file_name == NULL)
+         (gmres_data -> log_file_name) = "gmres.out.log";
    }
  
    return ierr;
