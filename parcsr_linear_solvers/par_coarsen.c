@@ -2776,8 +2776,9 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
       else
       {
          if (measure < 0) printf("negative measure!\n");
-         CF_marker[j] = CPOINT;
-         ++coarse_size;
+         CF_marker[j] = FPOINT;
+         /* CF_marker[j] = CPOINT;
+         ++coarse_size; */
          --num_left;
       }
    }
