@@ -6,8 +6,11 @@
 double log();
 double d_lg10(x) doublereal *x;
 #else
+/*
 #undef abs
 #include "math.h"
+*/
+double log(double); /* declaration added 2/17/00 */
 double d_lg10(doublereal *x)
 #endif
 {
@@ -6294,4 +6297,5 @@ for(i = 0 ; i < n ; ++i)
 	}
 while(--ll >= 0)
 	*lp++ = ' ';
+return 0;
 }
