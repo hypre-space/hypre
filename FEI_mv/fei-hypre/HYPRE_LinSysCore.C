@@ -1898,7 +1898,11 @@ void HYPRE_LinSysCore::resetRHSVector(double s)
        exit(1);
     }
 
-    for (i = 0; i < numRHSs_; i++) HYPRE_IJVectorZeroLocalComponents(HYbs_[i]);
+    if ( HYbs_ != NULL )
+    {
+       for (i = 0; i < numRHSs_; i++) 
+          if ( HYbs_[i] != NULL ) HYPRE_IJVectorZeroLocalComponents(HYbs_[i]);
+    }
 
     if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
     {
@@ -2027,7 +2031,7 @@ void HYPRE_LinSysCore::sumIntoSystemMatrix(int numPtRows, const int* ptRows,
           {
              printf("%4d : sumIntoSystemMatrix ERROR - loading column");
              printf("      that has not been declared before - %d.\n",colIndex);
-             for ( k = 0; j < rowLengths_[localRow]; j++ ) 
+             for ( k = 0; k < rowLengths_[localRow]; k++ ) 
                 printf("       available column index = %d\n",
                         colIndices_[localRow][k]);
              exit(1);
