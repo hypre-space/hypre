@@ -352,8 +352,27 @@ hypre_MPI_Iprobe( int               source,
 }
 
 int
+hypre_MPI_Test( hypre_MPI_Request *request,
+                int               *flag,
+                hypre_MPI_Status  *status )
+{
+   *flag = 1;
+   return(0);
+}
+
+int
+hypre_MPI_Testall( int                count,
+                   hypre_MPI_Request *array_of_requests,
+                   int               *flag,
+                   hypre_MPI_Status  *array_of_statuses )
+{
+   *flag = 1;
+   return(0);
+}
+
+int
 hypre_MPI_Wait( hypre_MPI_Request *request,
-                hypre_MPI_Status  *status  )
+                hypre_MPI_Status  *status )
 {
    return(0);
 }

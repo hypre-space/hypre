@@ -131,6 +131,8 @@ extern "C" {
 #define MPI_Startall        hypre_MPI_Startall             
 #define MPI_Probe           hypre_MPI_Probe             
 #define MPI_Iprobe          hypre_MPI_Iprobe             
+#define MPI_Test            hypre_MPI_Test             
+#define MPI_Testall         hypre_MPI_Testall
 #define MPI_Wait            hypre_MPI_Wait             
 #define MPI_Waitall         hypre_MPI_Waitall          
 #define MPI_Waitany         hypre_MPI_Waitany          
@@ -212,6 +214,8 @@ int hypre_MPI_Irsend( void *buf , int count , hypre_MPI_Datatype datatype , int 
 int hypre_MPI_Startall( int count , hypre_MPI_Request *array_of_requests );
 int hypre_MPI_Probe( int source , int tag , hypre_MPI_Comm comm , hypre_MPI_Status *status );
 int hypre_MPI_Iprobe( int source , int tag , hypre_MPI_Comm comm , int *flag , hypre_MPI_Status *status );
+int hypre_MPI_Test( hypre_MPI_Request *request , int *flag , hypre_MPI_Status *status );
+int hypre_MPI_Testall( int count , hypre_MPI_Request *array_of_requests , int *flag , hypre_MPI_Status *array_of_statuses );
 int hypre_MPI_Wait( hypre_MPI_Request *request , hypre_MPI_Status *status );
 int hypre_MPI_Waitall( int count , hypre_MPI_Request *array_of_requests , hypre_MPI_Status *array_of_statuses );
 int hypre_MPI_Waitany( int count , hypre_MPI_Request *array_of_requests , int *index , hypre_MPI_Status *status );
