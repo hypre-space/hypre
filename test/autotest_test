@@ -52,6 +52,9 @@ initialize_variables ()
 # Define HYPRE_ARCH
 #
   . $StdTestDir/hypre_arch.sh
+  if [ -r $StdTestDir/env.${HYPRE_ARCH} ] ; then
+    . $StdTestDir/env.${HYPRE_ARCH}
+  fi
 #
 # If NOT started by autotest (hence no HYPRE_*_EMAIL variable
 # defined) default mail to UID only.
@@ -390,7 +393,7 @@ if [ ${BuildOpt} -ne $Skip ] ; then
       ssh ${HYPRE_RUN_MACHINE} "\
       (\
         cd ${HYPRE_AUTOTEST_DIR}/${SRC}/test;\
-        [ -f ./env.${HYPRE_ARCH} ] && . ./env.${HYPRE_ARCH};\
+        [ -r ./env.${HYPRE_ARCH} ] && . ./env.${HYPRE_ARCH};\
         ./test_drivers.sh $MailOpt\
     )"
     fi
@@ -411,7 +414,7 @@ then
   seconds; TIME=$SECS
   echo "Autotest starting make of $MessageStr"
   cd $StdBuildDir/$MakeDir
-  if [ -f ./Makefile ] ; then
+  if [ -r ./Makefile ] ; then
     cd $StdBuildDir
     ./configure 1> ${Hdr}.${MessageStr}.configure.log \
 	2> ${Hdr}.${MessageStr}.configure.err
