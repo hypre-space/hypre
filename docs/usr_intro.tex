@@ -23,13 +23,13 @@ large sparse linear systems. \hypre{} includes ``grey-box'' algorithms that use 
 than just the matrix to solve certain classes of problems more efficiently
 than
 general-purpose libraries. This includes algorithms such as 
-structured multigrid and element-base algebraic multigrid.
+structured multigrid and element-based algebraic multigrid.
 
 \item
 {\bf Suite of Common Iterative Methods Provides Options for a Spectrum of Problems:}
 \hypre{} provides 
-an assortment of the most widely used Krylov-based iterative methods to be used
-in conjunction with the 
+several of the most commonly used Krylov-based iterative methods to be used
+in conjunction with our 
 scalable preconditioners. This includes methods for nonsymmetric systems
 such as GMRES and
 methods for 
@@ -77,12 +77,11 @@ and ISIS++ (see below),
 the ability to change required libraries such as MPI and BLAS, a
 serial-machine mode, and modes 
 enabling threads for certain solvers. On most systems, however, \hypre{} can be
-built by simply typing 
-"configure" followed by "make".
+built by simply typing ``configure" followed by ``make".
 
 \item
-{\bf Compatibility/Interoperability with Other Libraries Allows Plug and Play with
-and Importing from 
+{\bf Compatibility/Interoperability with Other Libraries Allows Plug and Play
+with
 other major solver libraries:} \hypre{} has been co-designed with the Equation
 Solver Interface forum, a 
 consortium of developers of sparse linear system libraries. The goal of the
@@ -121,7 +120,7 @@ interfaces for both Fortran and C users.
 {\bf \hypre{} is designed for large, sparse, linear systems on parallel
 computers.}  Small linear systems, 
 systems that are solvable on a sequential computer, and dense systems are all
-better addressed by libraries designed specifically for them. 
+better addressed by other libraries that are designed specifically for them. 
 
 \item
 To run in parallel, {\bf \hypre{} requires an installation of the Message Passing Interface (MPI).}
@@ -151,11 +150,11 @@ with the emerging Equation Solver Interface, etc.
 
 \chapter{General Structure of Usage}
 
-The following code sample serves as a typical example of usage
+The following code sample serves as a typical example of the usage
 of \hypre{}. In this example, the structured grid interface (discussed
 in Chapter
 ~\ref{Structured-Grid Interface}) is used to enter the problem
-into \hypre{} and the ``PF'' Multigrid solver is used to solve
+into \hypre{}, and the ``PF'' Multigrid solver is used to solve
 the system.
 
 \begin{display}
@@ -278,7 +277,7 @@ will involve much more user work and prevent access to some grid-type-specific
 preconditioners.
 
 \item 
-{\bf Choose a desired solver/preconditioner combination.} For the typical user,
+{\bf Choose your desired solver strategy. } For the typical user,
 this will mean a single 
 Krylov method and a single preconditioner. Some common combinations have been
 prewrapped as a 
@@ -293,8 +292,8 @@ single solver to make them easier to use.
 specific solver and 
 preconditioner has requirements from the input matrix. This 
 information is provided in several places (Developer's Guide, source comments,
-headers) in the form 
-of type information.
+headers) as 
+type information.
 
 \item 
 {\bf Choose a matrix class that is compatible with your solvers/preconditioners and your
@@ -359,7 +358,7 @@ iterations is typically available, though it may differ from solver to solver.
 \section{Bug Reporting}
 
 \hypre{} has an automated bug reporting mechanism in place that may be used 
-as a resource for submitting bugs, desired featured, and documentation
+as a resource for submitting bugs, desired features, and documentation
 problems, as well as querying the status of previous reports.  Access
 \htmladdnormallink{http://apollo.llnl.gov:8080/bugs}{http://apollo.llnl.gov:8080/bugs}
 for full bug tracking details or to submit or query a bug report.
