@@ -26,25 +26,31 @@
 class MLI;
 
 /****************************************************************************
- * MLI_Method data structure declaration
+ * MLI_Method abstract class definition
  *--------------------------------------------------------------------------*/
 
 class MLI_Method
 {
-   char     name[200];
+   char     method_name[200];
    int      method_id;
-   void     *method_data;
    MPI_Comm mpi_comm;
 
 public :
 
-   MLI_Method( char *str, MPI_Comm comm );
-   ~MLI_Method();
-   int  setup( MLI *mli );
-   char *getName()      { return name; }
-   int  setParams(char *name, int argc, char *argv[]);
-   int  getParams(char *name, int **intvec, double **dblevec);
-   int  setName( char *str );
+   MLI_Method( MPI_Comm comm ) 
+            {mpi_comm = comm; method_id = -1; strcpy(method_name, "MLI_NONE");}
+   ~MLI_Method()                                              { }
+
+   virtual int setup( MLI *mli )                              {return -1;}
+   virtual int setParams(char *name, int argc, char *argv[])  {return -1;}
+   virtual int getParams(char *name, int *argc, char *argv[]) {return -1;}
+
+   char     *getName()                    {return method_name;}
+   int      setName( char *in_name )                                      
+            {strcpy( method_name, in_name); return 0;}
+   int      setID( int in_id )            {method_id = in_id; return 0;}
+   int      getID()                       {return method_id;}
+   MPI_Comm getComm()                     {return mpi_comm;}
 };
 
 #endif

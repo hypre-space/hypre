@@ -217,7 +217,7 @@ void MLI_Coarsen_ElementAgglomerationLocal(MLI_Matrix *elemMatrix,
 void IncFlowElementAgglomeration(int nElem, int *ElemIA, int *ElemJA,
                                  int *ElemAA, int **macroLabels_out)
 {
-   int  ii, jj, nmacros, *macroSizes, *macroLists, tempIndex[20];
+   int  ii, jj, nmacros, *macroLists, tempIndex[20];
    int  colIndex, *macroLabels, *denseRow, maxWeight, curWeight, curIndex;
    int  elemCount, elemIndex, macroNumber, curBegin, curEnd, loopflag;
    int  nextElem, connects, parent, neigh_cnt, min_neighs, secondchance;
@@ -532,7 +532,6 @@ void IncFlowElementAgglomeration(int nElem, int *ElemIA, int *ElemJA,
    {
       if ( macroLabels[ii] < 0 ) /* element still has not been agglomerated */
       {
-         macroSizes[nmacros] = 1;
          macroLabels[ii] = nmacros++;
       }
    }

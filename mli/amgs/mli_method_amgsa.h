@@ -8,30 +8,29 @@
 
 /******************************************************************************
  *
- * Header info for the top level MLI data structure
+ * Header info for the smoothed aggregation data structure
  *
  *****************************************************************************/
 
-#ifndef __MLIAMGSAH__
-#define __MLIAMGSAH__
+#ifndef __MLIMETHODAMGSAH__
+#define __MLIMETHODAMGSAH__
 
 #include "utilities/utilities.h"
 #include <mpi.h>
 #include "parcsr_mv/parcsr_mv.h"
 #include "../base/mli.h"
 #include "../base/mli_defs.h"
+#include "mli_method.h"
 #include "../matrix/mli_matrix.h"
 
-#define MLI_AMGSA_LOCAL 0
+#define MLI_METHOD_AMGSA_LOCAL 0
 
 /* ***********************************************************************
  * definition of the aggregation based AMG data structure
  * ----------------------------------------------------------------------*/
 
-class MLI_AMGSA
+class MLI_Method_AMGSA : public MLI_Method
 {
-   MPI_Comm mpi_comm;
-   char     method_name[80];         /* store name of the AMG method     */
    int      max_levels;              /* the finest level is 0            */
    int      num_levels;              /* number of levels requested       */
    int      curr_level;              /* current level being processed    */
@@ -64,8 +63,12 @@ class MLI_AMGSA
 
 public :
 
-   MLI_AMGSA( MPI_Comm comm );
-   ~MLI_AMGSA();
+   MLI_Method_AMGSA( MPI_Comm comm );
+   ~MLI_Method_AMGSA();
+   int    setup( MLI *mli );
+   int    setParams(char *name, int argc, char *argv[]);
+   int    getParams(char *name, int *argc, char *argv[]);
+
    int    setOutputLevel( int output_level );
    int    setNumLevels( int nlevels );
    int    setSmoother( int pre_post, int set_id, int num, double *wgt );
@@ -78,16 +81,15 @@ public :
    int    setNullSpace(int node_dofs, int num_ns, double *null_vec, int length);
    int    setNodalCoordinates(int nnodes,int ndofs,double *coor,double *scale);
    int    setCalibrationSize(int size);
-   int    genMLStructure( MLI *mli );
-   int    genMLStructureCalibration( MLI *mli );
+   int    setupCalibration( MLI *mli );
    int    print();
    int    printStatistics(MLI *mli);
-   double genPLocal( MLI_Matrix *Amat, MLI_Matrix **Pmat );
    int    getNullSpace(int &node_dofs,int &num_ns,double *&null_vec, int &leng);
-   int    reinitialize();
+   int    copy( MLI_Method_AMGSA * );
 
 private :
 
+   double genPLocal( MLI_Matrix *Amat, MLI_Matrix **Pmat );
    int    formLocalGraph( hypre_ParCSRMatrix *Amat, hypre_ParCSRMatrix **graph);
    int    coarsenLocal( hypre_ParCSRMatrix *graph, int *naggr, int **aggr_info);
 };

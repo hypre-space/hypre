@@ -17,21 +17,22 @@
 #include <string.h>
 #include <iostream.h>
 #include <assert.h>
-#include "../util/mli_utils.h"
 #include "HYPRE.h"
-#include "IJ_mv/HYPRE_IJ_mv.h"
-#include "parcsr_mv/parcsr_mv.h"
 #include "utilities/utilities.h"
+#include "IJ_mv/HYPRE_IJ_mv.h"
 #include "seq_mv/seq_mv.h"
-#include "mli_amgsa.h"
+#include "parcsr_mv/parcsr_mv.h"
+
+#include "mli_method_amgsa.h"
+#include "../util/mli_utils.h"
  
 // *********************************************************************
 // local defines
 // ---------------------------------------------------------------------
 
-#define MLI_AMGSA_READY     -1
-#define MLI_AMGSA_SELECTED  -2
-#define MLI_AMGSA_PENDING   -3
+#define MLI_METHOD_AMGSA_READY     -1
+#define MLI_METHOD_AMGSA_SELECTED  -2
+#define MLI_METHOD_AMGSA_PENDING   -3
 
 #define dabs(x) ((x > 0 ) ? x : -(x))
 
@@ -49,7 +50,7 @@ extern "C"
  *             corresponding Pmat using the local aggregation scheme 
  * ------------------------------------------------------------------- */
 
-double MLI_AMGSA::genPLocal(MLI_Matrix *mli_Amat, MLI_Matrix **Pmat_out)
+double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,MLI_Matrix **Pmat_out)
 {
    HYPRE_IJMatrix         IJPmat;
    hypre_CSRMatrix        *A_offd, *J_diag, *J_offd;
@@ -346,7 +347,7 @@ printf("\n");
       assert( !ierr );
       HYPRE_IJMatrixGetObject(IJPmat, (void **) &Pmat);
       //hypre_MatvecCommPkgCreate((hypre_ParCSRMatrix *) Pmat);
-      HYPRE_IJMatrixSetObjectType(IJPmat, -16);
+      HYPRE_IJMatrixSetObjectType(IJPmat, -1);
       HYPRE_IJMatrixDestroy( IJPmat );
       delete [] col_ind;
       delete [] col_val;
@@ -648,7 +649,7 @@ printf("\n");
       assert( !ierr );
       HYPRE_IJMatrixGetObject(IJPmat, (void **) &Pmat);
       //hypre_MatvecCommPkgCreate((hypre_ParCSRMatrix *) Pmat);
-      HYPRE_IJMatrixSetObjectType(IJPmat, -16);
+      HYPRE_IJMatrixSetObjectType(IJPmat, -1);
       HYPRE_IJMatrixDestroy( IJPmat );
       //sprintf( param_string, "Pmat" );
       //MLI_Utils_HypreMatrixPrint(Pmat, param_string);
@@ -710,8 +711,8 @@ printf("\n");
  * local coarsening scheme (Given a graph, aggregate on the local subgraph)
  * --------------------------------------------------------------------- */
 
-int MLI_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
-                            int *mli_aggr_leng, int **mli_aggr_array)
+int MLI_Method_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
+                                   int *mli_aggr_leng, int **mli_aggr_array)
 {
    MPI_Comm  comm;
    int       mypid, num_procs, *partition, start_row, end_row;
@@ -753,7 +754,7 @@ int MLI_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
       {
          aggr_size[irow] = 0;
          node2aggr[irow] = -1;
-         node_stat[irow] = MLI_AMGSA_READY;
+         node_stat[irow] = MLI_METHOD_AMGSA_READY;
       }
    }
    else node2aggr = aggr_size = node_stat = NULL;
@@ -764,7 +765,7 @@ int MLI_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
 
    for ( irow = 0; irow < local_nrows; irow++ )
    {
-      if ( node_stat[irow] == MLI_AMGSA_READY )
+      if ( node_stat[irow] == MLI_METHOD_AMGSA_READY )
       {
          row_num = start_row + irow;
          hypre_ParCSRMatrixGetRow(hypre_graph,row_num,&row_leng,&cols,NULL);
@@ -775,7 +776,7 @@ int MLI_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
             col_num = cols[icol] - start_row;
             if ( col_num >= 0 && col_num < local_nrows )
             {
-               if ( node_stat[col_num] != MLI_AMGSA_READY )
+               if ( node_stat[col_num] != MLI_METHOD_AMGSA_READY )
                {
                   select_flag = 0;
                   break;
@@ -788,14 +789,14 @@ int MLI_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
             nselected++;
             node2aggr[irow]  = naggr;
             aggr_size[naggr] = 1;
-            node_stat[irow]  = MLI_AMGSA_SELECTED;
+            node_stat[irow]  = MLI_METHOD_AMGSA_SELECTED;
             for ( icol = 0; icol < row_leng; icol++ )
             {
                col_num = cols[icol] - start_row;
                if ( col_num >= 0 && col_num < local_nrows )
                {
                   node2aggr[col_num] = naggr;
-                  node_stat[col_num] = MLI_AMGSA_SELECTED;
+                  node_stat[col_num] = MLI_METHOD_AMGSA_SELECTED;
                   aggr_size[naggr]++;
                   nselected++;
                }
@@ -822,7 +823,7 @@ int MLI_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
    {
       for ( irow = 0; irow < local_nrows; irow++ )
       {
-         if ( node_stat[irow] == MLI_AMGSA_READY )
+         if ( node_stat[irow] == MLI_METHOD_AMGSA_READY )
          {
             row_num = start_row + irow;
             hypre_ParCSRMatrixGetRow(hypre_graph,row_num,&row_leng,&cols,NULL);
@@ -831,11 +832,11 @@ int MLI_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
                col_num = cols[icol] - start_row;
                if ( col_num >= 0 && col_num < local_nrows )
                {
-                  if ( node_stat[col_num] == MLI_AMGSA_SELECTED )
+                  if ( node_stat[col_num] == MLI_METHOD_AMGSA_SELECTED )
                   {
-                  if ( node_stat[col_num] == MLI_AMGSA_SELECTED )
+                  if ( node_stat[col_num] == MLI_METHOD_AMGSA_SELECTED )
                      node2aggr[irow] = node2aggr[col_num];
-                     node_stat[irow] = MLI_AMGSA_PENDING;
+                     node_stat[irow] = MLI_METHOD_AMGSA_PENDING;
                      aggr_size[node2aggr[col_num]]++;
                      break;
                   }
@@ -847,9 +848,9 @@ int MLI_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
       }
       for ( irow = 0; irow < local_nrows; irow++ )
       {
-         if ( node_stat[irow] == MLI_AMGSA_PENDING )
+         if ( node_stat[irow] == MLI_METHOD_AMGSA_PENDING )
          {
-            node_stat[irow] = MLI_AMGSA_SELECTED;
+            node_stat[irow] = MLI_METHOD_AMGSA_SELECTED;
             nselected++;
          }
       } 
@@ -871,7 +872,7 @@ int MLI_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
    {
       for ( irow = 0; irow < local_nrows; irow++ )
       {
-         if ( node_stat[irow] == MLI_AMGSA_READY )
+         if ( node_stat[irow] == MLI_METHOD_AMGSA_READY )
          {
             row_num = start_row + irow;
             hypre_ParCSRMatrixGetRow(hypre_graph,row_num,&row_leng,&cols,NULL);
@@ -881,7 +882,7 @@ int MLI_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
                col_num = cols[icol] - start_row;
                if ( col_num >= 0 && col_num < local_nrows )
                {
-                  if ( node_stat[col_num] == MLI_AMGSA_READY ) count++;
+                  if ( node_stat[col_num] == MLI_METHOD_AMGSA_READY ) count++;
                }
             }
             if ( count > 1 )
@@ -894,9 +895,9 @@ int MLI_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
                   col_num = cols[icol] - start_row;
                   if ( col_num >= 0 && col_num < local_nrows )
                   {
-                     if ( node_stat[col_num] == MLI_AMGSA_READY )
+                     if ( node_stat[col_num] == MLI_METHOD_AMGSA_READY )
                      {
-                        node_stat[col_num] = MLI_AMGSA_SELECTED;
+                        node_stat[col_num] = MLI_METHOD_AMGSA_SELECTED;
                         node2aggr[col_num] = naggr;
                         aggr_size[naggr]++;
                         nselected++;
@@ -927,7 +928,7 @@ int MLI_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
    {
       for ( irow = 0; irow < local_nrows; irow++ )
       {
-         if ( node_stat[irow] == MLI_AMGSA_READY )
+         if ( node_stat[irow] == MLI_METHOD_AMGSA_READY )
          {
             row_num = start_row + irow;
             hypre_ParCSRMatrixGetRow(hypre_graph,row_num,&row_leng,&cols,NULL);
@@ -937,10 +938,10 @@ int MLI_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
                col_num = cols[icol] - start_row;
                if ( col_num >= 0 && col_num < local_nrows )
                {
-                  if ( node_stat[col_num] == MLI_AMGSA_SELECTED )
+                  if ( node_stat[col_num] == MLI_METHOD_AMGSA_SELECTED )
                   {
                      node2aggr[irow] = node2aggr[col_num];
-                     node_stat[irow] = MLI_AMGSA_SELECTED;
+                     node_stat[irow] = MLI_METHOD_AMGSA_SELECTED;
                      aggr_size[node2aggr[col_num]]++;
                      break;
                   }
@@ -968,7 +969,7 @@ int MLI_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
    {
       for ( irow = 0; irow < local_nrows; irow++ )
       {
-         if ( node_stat[irow] != MLI_AMGSA_SELECTED )
+         if ( node_stat[irow] != MLI_METHOD_AMGSA_SELECTED )
          {
             row_num = start_row + irow;
 #ifdef MLI_DEBUG_DETAILED
@@ -1002,7 +1003,7 @@ int MLI_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
  * form graph from matrix (internal subroutine)
  * ------------------------------------------------------------------- */
 
-int MLI_AMGSA::formLocalGraph( hypre_ParCSRMatrix *Amat,
+int MLI_Method_AMGSA::formLocalGraph( hypre_ParCSRMatrix *Amat,
                                hypre_ParCSRMatrix **graph_in)
 {
    HYPRE_IJMatrix     IJGraph;
@@ -1175,7 +1176,7 @@ int MLI_AMGSA::formLocalGraph( hypre_ParCSRMatrix *Amat,
     *-----------------------------------------------------------------*/
 
    HYPRE_IJMatrixGetObject(IJGraph, (void **) &graph);
-   HYPRE_IJMatrixSetObjectType(IJGraph, -16);
+   HYPRE_IJMatrixSetObjectType(IJGraph, -1);
    HYPRE_IJMatrixDestroy(IJGraph);
    (*graph_in) = graph;
    delete [] col_ind;
@@ -1184,7 +1185,7 @@ int MLI_AMGSA::formLocalGraph( hypre_ParCSRMatrix *Amat,
    return 0;
 }
 
-#undef MLI_AMGSA_READY
-#undef MLI_AMGSA_SELECTED
-#undef MLI_AMGSA_PENDING
+#undef MLI_METHOD_AMGSA_READY
+#undef MLI_METHOD_AMGSA_SELECTED
+#undef MLI_METHOD_AMGSA_PENDING
 

@@ -45,11 +45,12 @@ CXXFLAGS =\
  
 HEADERS =\
  mli_method.h\
- mli_amgsa.h
+ mli_methodAgent.h\
+ mli_method_amgsa.h
 
 FILES =\
- mli_method.C\
- mli_amgsa.C\
+ mli_methodAgent.C\
+ mli_method_amgsa.C\
  mli_amgsa_coarsen1.C\
  mli_amgsa_calib.C\
  mli_elem_aggl.c

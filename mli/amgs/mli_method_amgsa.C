@@ -15,24 +15,27 @@
 #include "../vector/mli_vector.h"
 #include "../solver/mli_solver.h"
 #include "../base/mli_defs.h"
-#include "mli_amgsa.h"
+#include "mli_method_amgsa.h"
  
 /* ********************************************************************* *
  * constructor
  * --------------------------------------------------------------------- */
 
-MLI_AMGSA::MLI_AMGSA( MPI_Comm comm )
+MLI_Method_AMGSA::MLI_Method_AMGSA( MPI_Comm comm ) : MLI_Method( comm ) 
 {
-   mpi_comm          = comm;
-   strcpy(method_name, "MLI_AMGSA");
+   char name[100];
+
+   strcpy(name, "MLI_METHOD_AMGSA");
+   setName( name );
    max_levels        = 40;
    num_levels        = 40;
    curr_level        = 0;
    output_level      = 1;
    node_dofs         = 3;
    threshold         = 0.0;
-   nullspace_dim     = 3;
+   nullspace_dim     = 1;
    nullspace_vec     = NULL;
+   nullspace_len     = 0;
    P_weight          = 4.0/3.0;
    drop_tol_for_P    = 0.0;            /* tolerance to sparsify P*/
    sa_counts         = new int[40];    /* number of aggregates   */
@@ -42,7 +45,7 @@ MLI_AMGSA::MLI_AMGSA( MPI_Comm comm )
    for ( int k = 0; k < 40; k++ ) spectral_norms[k] = 0.0;
    calc_norm_scheme  = 0;              /* use matrix rowsum norm */
    min_coarse_size   = 5;              /* smallest coarse grid   */
-   coarsen_scheme    = MLI_AMGSA_LOCAL;
+   coarsen_scheme    = MLI_METHOD_AMGSA_LOCAL;
    pre_smoother      = MLI_SOLVER_JACOBI_ID;
    postsmoother      = MLI_SOLVER_JACOBI_ID;
    pre_smoother_num  = 10;
@@ -55,7 +58,7 @@ MLI_AMGSA::MLI_AMGSA( MPI_Comm comm )
    coarse_solver_num   = 20;
    coarse_solver_wgt   = new double[20];
    for ( int j = 0; j < 20; j++ ) coarse_solver_wgt[j] = 1.0;
-   calibration_size  = 1;
+   calibration_size  = 0;
    RAP_time          = 0.0;
    total_time        = 0.0;
 }
@@ -64,7 +67,7 @@ MLI_AMGSA::MLI_AMGSA( MPI_Comm comm )
  * destructor
  * --------------------------------------------------------------------- */
 
-MLI_AMGSA::~MLI_AMGSA()
+MLI_Method_AMGSA::~MLI_Method_AMGSA()
 {
    if ( nullspace_vec != NULL )
    {
@@ -110,10 +113,386 @@ MLI_AMGSA::~MLI_AMGSA()
 }
 
 /* ********************************************************************* *
+ * set parameters
+ * --------------------------------------------------------------------- */
+
+int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
+{
+   int        level, size, ndofs, num_ns, length, nsweeps=1, set_id;
+   int        pre_post, nnodes;
+   double     thresh, pweight, *nullspace, *weights=NULL, *coords, *scales;
+   char       param1[256], param2[256];
+
+   sscanf(in_name, "%s", param1);
+   if ( !strcmp(param1, "setOutputLevel" ))
+   {
+      sscanf(in_name,"%s %d", param1, &level);
+      return ( setOutputLevel( level ) );
+   }
+   else if ( !strcmp(param1, "setNumLevels" ))
+   {
+      sscanf(in_name,"%s %d", param1, &level);
+      return ( setNumLevels( level ) );
+   }
+   else if ( !strcmp(param1, "setCoarsenScheme" ))
+   {
+      sscanf(in_name,"%s %s", param1, param2);
+      if ( !strcmp(param2, "local" ) )
+         return ( setCoarsenScheme( MLI_METHOD_AMGSA_LOCAL ) );
+      else      
+      {
+         cout << "MLI_Method_AMGSA ERROR : coarsen scheme not valid." << endl;
+         cout << "     valid options are : local\n";
+         return 1;
+      }
+   }
+   else if ( !strcmp(param1, "setMinCoarseSize" ))
+   {
+      sscanf(in_name,"%s %d", param1, &size);
+      return ( setMinCoarseSize( size ) );
+   }
+   else if ( !strcmp(param1, "setStrengthThreshold" ))
+   {
+      sscanf(in_name,"%s %lg", param1, &thresh);
+      return ( setStrengthThreshold( thresh ) );
+   }
+   else if ( !strcmp(param1, "setPweight" ))
+   {
+      sscanf(in_name,"%s %lg", param1, &pweight);
+      return ( setPweight( pweight ) );
+   }
+   else if ( !strcmp(param1, "setCalcSpectralNorm" ))
+   {
+      return ( setCalcSpectralNorm() );
+   }
+   else if ( !strcmp(param1, "setCalibrationSize" ))
+   {
+      sscanf(in_name,"%s %d", param1, &size);
+      return ( setCalibrationSize( size ) );
+   }
+   else if ( !strcmp(param1, "setPreSmoother" ))
+   {
+      sscanf(in_name,"%s %s", param1, param2);
+      if      (!strcmp(param2, "Jacobi"))    set_id = MLI_SOLVER_JACOBI_ID;
+      else if (!strcmp(param2, "GS"))        set_id = MLI_SOLVER_GS_ID;
+      else if (!strcmp(param2, "SGS"))       set_id = MLI_SOLVER_SGS_ID;
+      else if (!strcmp(param2, "Schwarz"))   set_id = MLI_SOLVER_SCHWARZ_ID;
+      else if (!strcmp(param2, "MLS"))       set_id = MLI_SOLVER_MLS_ID;
+      else if (!strcmp(param2, "ParaSails")) set_id = MLI_SOLVER_PARASAILS_ID;
+      else 
+      {
+         cout << "MLI_Method_AMGSA ERROR : setSmoother - invalid smoother.\n";
+         cout << "     valid options are : Jacobi, GS, SGS, Schwarz\n";
+         cout << "                         MLS, ParaSails\n";
+         return 1;
+      } 
+      if ( argc != 2 )
+      {
+         cout << "MLI_Method_AMGSA ERROR : setSmoother needs 2 arguments.\n";
+         cout << "     argument[0] : number of relaxation sweeps \n";
+         cout << "     argument[1] : relaxation weights\n";
+         return 1;
+      } 
+      pre_post = MLI_SMOOTHER_PRE;
+      nsweeps   = *(int *)   argv[0];
+      weights   = (double *) argv[1];
+      return ( setSmoother(pre_post,set_id,nsweeps,weights) );
+   }
+   else if ( !strcmp(param1, "setPostSmoother" ))
+   {
+      sscanf(in_name,"%s %s", param1, param2);
+      if      (!strcmp(param2, "Jacobi"))    set_id = MLI_SOLVER_JACOBI_ID;
+      else if (!strcmp(param2, "GS"))        set_id = MLI_SOLVER_GS_ID;
+      else if (!strcmp(param2, "SGS"))       set_id = MLI_SOLVER_SGS_ID;
+      else if (!strcmp(param2, "Schwarz"))   set_id = MLI_SOLVER_SCHWARZ_ID;
+      else if (!strcmp(param2, "MLS"))       set_id = MLI_SOLVER_MLS_ID;
+      else if (!strcmp(param2, "ParaSails")) set_id = MLI_SOLVER_PARASAILS_ID;
+      else 
+      {
+         cout << "MLI_Method_AMGSA ERROR : setSmoother - invalid smoother.\n";
+         cout << "     valid options are : Jacobi, GS, SGS, Schwarz\n";
+         cout << "                         MLS, ParaSails\n";
+         return 1;
+      } 
+      if ( argc != 2 )
+      {
+         cout << "MLI_Method_AMGSA ERROR : setSmoother needs 2 arguments.\n";
+         cout << "     argument[0] : number of relaxation sweeps \n";
+         cout << "     argument[1] : relaxation weights\n";
+         return 1;
+      } 
+      pre_post = MLI_SMOOTHER_POST;
+      nsweeps  = *(int *)   argv[0];
+      weights  = (double *) argv[1];
+      return ( setSmoother(pre_post,set_id,nsweeps,weights) );
+   }
+   else if ( !strcmp(param1, "setCoarseSolver" ))
+   {
+      sscanf(in_name,"%s %s", param1, param2);
+      if      (!strcmp(param2, "Jacobi"))    set_id = MLI_SOLVER_JACOBI_ID;
+      else if (!strcmp(param2, "GS"))        set_id = MLI_SOLVER_GS_ID;
+      else if (!strcmp(param2, "SGS"))       set_id = MLI_SOLVER_SGS_ID;
+      else if (!strcmp(param2, "Schwarz"))   set_id = MLI_SOLVER_SCHWARZ_ID;
+      else if (!strcmp(param2, "ParaSails")) set_id = MLI_SOLVER_PARASAILS_ID;
+      else if (!strcmp(param2, "SuperLU"))   set_id = MLI_SOLVER_SUPERLU_ID;
+      else 
+      {
+         cout << "MLI_Method_AMGSA ERROR : setCoarseSolver - invalid solver\n";
+         cout << "     valid options are : Jacobi, GS, SGS, Schwarz\n";
+         cout << "                         ParaSails, SuperLu\n";
+         return 1;
+      } 
+      if ( set_id != MLI_SOLVER_SUPERLU_ID && argc != 2 )
+      {
+         cout << "MLI_Method_AMGSA ERROR : setCoarseSolver needs 2 arguments.\n";
+         cout << "     argument[0] : number of relaxation sweeps \n";
+         cout << "     argument[1] : relaxation weights\n";
+         return 1;
+      } 
+      else if ( set_id != MLI_SOLVER_SUPERLU_ID )
+      {
+         nsweeps   = *(int *)   argv[0];
+         weights   = (double *) argv[1];
+      }
+      else if ( set_id == MLI_SOLVER_SUPERLU_ID )
+      {
+         nsweeps = 1;
+         weights = NULL;
+      }
+      return ( setCoarseSolver(set_id,nsweeps,weights) );
+   }
+   else if ( !strcmp(param1, "setNullSpace" ))
+   {
+      if ( argc != 4 )
+      {
+         cout << "MLI_Method_AMGSA ERROR : setNullSpace needs 4 arguments.\n";
+         cout << "     argument[0] : node degree of freedom\n";
+         cout << "     argument[1] : number of null space vectors\n";
+         cout << "     argument[2] : null space information\n";
+         cout << "     argument[3] : vector length\n";
+         return 1;
+      } 
+      ndofs     = *(int *)   argv[0];
+      num_ns    = *(int *)   argv[1];
+      nullspace = (double *) argv[2];
+      length    = *(int *)   argv[3];
+      return ( setNullSpace(ndofs,num_ns,nullspace,length) );
+   }
+   else if ( !strcmp(param1, "setNodalCoord" ))
+   {
+      if ( argc != 3 && argc != 4 )
+      {
+         cout << "MLI_Method_AMGSA ERROR : setNodalCoord needs 4 arguments.\n";
+         cout << "     argument[0] : number of nodes\n";
+         cout << "     argument[1] : node degree of freedom\n";
+         cout << "     argument[2] : coordinate information\n";
+         cout << "     argument[3] : scalings (can be null)\n";
+         return 1;
+      } 
+      nnodes = *(int *)   argv[0];
+      ndofs  = *(int *)   argv[1];
+      coords = (double *) argv[2];
+      if ( argc == 4 ) scales = (double *) argv[3]; else scales = NULL;
+      return ( setNodalCoordinates(nnodes,ndofs,coords,scales) );
+   }
+   else if ( !strcmp(param1, "print" ))
+   {
+      return ( print() );
+   }
+   return 1;
+}
+
+/*****************************************************************************
+ * get parameters 
+ *--------------------------------------------------------------------------*/
+
+int MLI_Method_AMGSA::getParams(char *in_name, int *argc, char *argv[])
+{
+   int    node_dofs, num_ns, length;
+   double *nullspace;
+
+   if ( !strcmp(in_name, "getNullSpace" ))
+   {
+      if ( (*argc) < 4 )
+      {
+         cout << "MLI_Method_AMGSA ERROR : getNullSpace needs 4 args.\n";
+         exit(1);
+      }
+      getNullSpace(node_dofs,num_ns,nullspace,length);
+      argv[0] = (char *) &node_dofs;
+      argv[1] = (char *) &num_ns;
+      argv[2] = (char *) nullspace;
+      argv[3] = (char *) &length;
+      (*argc) = 4;
+      return 0;
+   }
+   else
+   {
+      cout << "MLI_Method_AMGSA ERROR : getParams string not valid.\n";
+      return 1;
+   }
+}
+
+/***********************************************************************
+ * generate multilevel structure
+ * --------------------------------------------------------------------- */
+
+int MLI_Method_AMGSA::setup( MLI *mli ) 
+{
+   int          level, nsweeps, mypid;
+   double       start_time, elapsed_time, max_eigen;
+   char         param_string[100], *targv[10];
+   MLI_Matrix   *mli_Pmat, *mli_Rmat, *mli_Amat, *mli_cAmat;
+   MLI_OneLevel *single_level, *next_level;
+   MLI_Solver   *smoother_ptr, *csolve_ptr;
+   MPI_Comm     mpi_comm;
+
+#ifdef MLI_DEBUG_DETAILED
+   cout << " MLI_Method_AMGSA::setup begins..." << endl;
+   cout.flush();
+#endif
+
+   /* --------------------------------------------------------------- */
+   /* clean up some mess made previously                              */
+   /* --------------------------------------------------------------- */
+
+   if ( sa_data != NULL )
+   {
+      for ( level = 0; level < max_levels; level++ )
+      {
+         if ( sa_data[level] != NULL ) delete [] sa_data[level];
+         sa_data[level] = NULL;
+      }
+   }
+
+   /* --------------------------------------------------------------- */
+   /* call calibration if calibration size > 0                        */
+   /* --------------------------------------------------------------- */
+
+   if ( calibration_size > 0 ) return( setupCalibration( mli ) );
+      
+   /* --------------------------------------------------------------- */
+   /* traverse all levels                                             */
+   /* --------------------------------------------------------------- */
+
+   mpi_comm = getComm();
+   MPI_Comm_rank( mpi_comm, &mypid );
+   single_level = mli->getOneLevelObject( 0 );
+   mli_Amat     = single_level->getAmat();
+   total_time   = MLI_Utils_WTime();
+   RAP_time     = 0.0;
+
+   for (level = 0; level < num_levels; level++ )
+   {
+      if ( mypid == 0 && output_level > 0 )
+      {
+         printf("\t*********************************************************\n");
+         printf("\t*** Aggregation (uncoupled) : level = %d\n", level);
+         printf("\t---------------------------------------------------------\n");
+      }
+      curr_level   = level;
+      if ( level == num_levels-1 ) break;
+      single_level = mli->getOneLevelObject( level );
+      next_level   = mli->getOneLevelObject( level+1 );
+
+      // ----- fetch fine grid matrix
+
+      mli_Amat     = single_level->getAmat();
+      assert ( mli_Amat != NULL );
+
+      // ----- perform coarsening
+
+      switch ( coarsen_scheme )
+      {
+         case MLI_METHOD_AMGSA_LOCAL :
+              max_eigen = genPLocal(mli_Amat, &mli_Pmat); 
+              break;
+      }
+      if ( max_eigen != 0.0 ) spectral_norms[level] = max_eigen;
+      if ( mli_Pmat == NULL ) break;
+      start_time = MLI_Utils_WTime();
+
+      // ----- construct and set the coarse grid matrix
+
+      if ( mypid == 0 && output_level > 0 ) cout << "\tComputing RAP\n";
+      MLI_Matrix_ComputePtAP(mli_Pmat, mli_Amat, &mli_cAmat);
+      elapsed_time = (MLI_Utils_WTime() - start_time);
+      RAP_time += elapsed_time;
+      if ( mypid == 0 && output_level > 0 ) 
+         cout << "\tRAP computed, time = " << elapsed_time << endl;
+      //mli_Amat->print("Amat");
+      //mli_Pmat->print("Pmat");
+      //mli_cAmat->print("cAmat");
+      next_level->setAmat( mli_cAmat );
+
+      // ----- set the prolongation matrix
+
+      next_level->setPmat( mli_Pmat );
+
+      // ----- set the restriction matrix
+
+      sprintf(param_string, "HYPRE_ParCSRT");
+      mli_Rmat = new MLI_Matrix(mli_Pmat->getMatrix(), param_string, NULL);
+      single_level->setRmat( mli_Rmat );
+
+      // ----- set the smoothers 
+
+      if ( pre_smoother == MLI_SOLVER_MLS_ID ) 
+         pre_smoother_wgt[0] = max_eigen;
+      if ( postsmoother == MLI_SOLVER_MLS_ID ) 
+         postsmoother_wgt[0] = max_eigen;
+      smoother_ptr = MLI_Solver_Construct(pre_smoother);
+      targv[0] = (char *) &pre_smoother_num;
+      targv[1] = (char *) pre_smoother_wgt;
+      sprintf( param_string, "relaxWeight" );
+      smoother_ptr->setParams(param_string, 2, targv);
+      smoother_ptr->setup(mli_Amat);
+      single_level->setSmoother( MLI_SMOOTHER_PRE, smoother_ptr );
+      smoother_ptr = MLI_Solver_Construct(postsmoother);
+      targv[0] = (char *) &postsmoother_num;
+      targv[1] = (char *) postsmoother_wgt;
+      sprintf( param_string, "relaxWeight" );
+      smoother_ptr->setParams(param_string, 2, targv);
+      smoother_ptr->setup(mli_Amat);
+      single_level->setSmoother( MLI_SMOOTHER_POST, smoother_ptr );
+   }
+
+   // ----- set the coarse grid solver 
+
+   if ( mypid == 0 && output_level > 0 ) printf("Coarse level = %d\n", level);
+   if (coarse_solver == MLI_SOLVER_MLS_ID) coarse_solver_wgt[0] = max_eigen;
+   csolve_ptr = MLI_Solver_Construct(coarse_solver);
+   if (coarse_solver != MLI_SOLVER_SUPERLU_ID) 
+   {
+      targv[0] = (char *) &coarse_solver_num;
+      targv[1] = (char *) coarse_solver_wgt;
+      sprintf( param_string, "relaxWeight" );
+      csolve_ptr->setParams(param_string, 2, targv);
+   }
+   single_level = mli->getOneLevelObject( level );
+   mli_Amat     = single_level->getAmat();
+   csolve_ptr->setup(mli_Amat);
+   single_level->setCoarseSolve( csolve_ptr );
+   total_time = MLI_Utils_WTime() - total_time;
+
+   /* --------------------------------------------------------------- */
+   /* return the coarsest grid level number                           */
+   /* --------------------------------------------------------------- */
+
+   printStatistics(mli);
+
+#ifdef MLI_DEBUG_DETAILED
+   cout << " MLI_Method_AMGSA::setup ends." << endl;
+   cout.flush();
+#endif
+   return (level+1);
+}
+
+/* ********************************************************************* *
  * set diagnostics output level
  * --------------------------------------------------------------------- */
 
-int MLI_AMGSA::setOutputLevel( int level )
+int MLI_Method_AMGSA::setOutputLevel( int level )
 {
    output_level = level;
    return 0;
@@ -123,7 +502,7 @@ int MLI_AMGSA::setOutputLevel( int level )
  * set number of levels 
  * --------------------------------------------------------------------- */
 
-int MLI_AMGSA::setNumLevels( int nlevels )
+int MLI_Method_AMGSA::setNumLevels( int nlevels )
 {
    if ( nlevels < max_levels && nlevels > 0 ) num_levels = nlevels;
    return 0;
@@ -133,14 +512,14 @@ int MLI_AMGSA::setNumLevels( int nlevels )
  * set smoother
  * --------------------------------------------------------------------- */
 
-int MLI_AMGSA::setSmoother( int pre_post, int set_id, int num, double *wgt )
+int MLI_Method_AMGSA::setSmoother(int pre_post,int set_id,int num,double *wgt)
 {
    int i;
 
    if ( pre_post != MLI_SMOOTHER_PRE && pre_post != MLI_SMOOTHER_BOTH &&
         pre_post != MLI_SMOOTHER_POST )
    {
-      cout << "MLI_AMGSA:setSmoother ERROR - invalid info (1)." << endl;
+      cout << "MLI_Method_AMGSA:setSmoother ERROR - invalid info (1).\n";
       cout.flush();
       return 1;
    }
@@ -160,7 +539,7 @@ int MLI_AMGSA::setSmoother( int pre_post, int set_id, int num, double *wgt )
                                         break;
          case MLI_SOLVER_MLS_ID       : pre_smoother = MLI_SOLVER_MLS_ID;
                                         break;
-         default : cout << "MLI_AMGSA::setSmoother ERROR(2)\n";
+         default : cout << "MLI_Method_AMGSA::setSmoother ERROR(2)\n";
                    exit(1);
       }
       if ( num > 0 ) pre_smoother_num = num; else pre_smoother_num = 1;
@@ -187,7 +566,7 @@ int MLI_AMGSA::setSmoother( int pre_post, int set_id, int num, double *wgt )
                                         break;
          case MLI_SOLVER_MLS_ID       : postsmoother = MLI_SOLVER_MLS_ID;
                                         break;
-         default : cout << "MLI_AMGSA::setSmoother ERROR(3)\n";
+         default : cout << "MLI_Method_AMGSA::setSmoother ERROR(3)\n";
                    exit(1);
       }
       if ( num > 0 ) postsmoother_num = num; else postsmoother_num = 1;
@@ -205,7 +584,7 @@ int MLI_AMGSA::setSmoother( int pre_post, int set_id, int num, double *wgt )
  * set coarse solver 
  * --------------------------------------------------------------------- */
 
-int MLI_AMGSA::setCoarseSolver( int set_id, int num, double *wgt )
+int MLI_Method_AMGSA::setCoarseSolver( int set_id, int num, double *wgt )
 {
    int i;
 
@@ -225,7 +604,7 @@ int MLI_AMGSA::setCoarseSolver( int set_id, int num, double *wgt )
                                      break;
       case MLI_SOLVER_SUPERLU_ID   : coarse_solver = MLI_SOLVER_SUPERLU_ID;
                                      break;
-      default : cout << "MLI_AMGSA::setCoarseSolver ERROR : invalid\n";
+      default : cout << "MLI_Method_AMGSA::setCoarseSolver ERROR : invalid\n";
                 exit(1);
    }
    if ( num > 0 ) coarse_solver_num = num; else coarse_solver_num = 1;
@@ -243,16 +622,16 @@ int MLI_AMGSA::setCoarseSolver( int set_id, int num, double *wgt )
  * set coarsening scheme 
  * --------------------------------------------------------------------- */
 
-int MLI_AMGSA::setCoarsenScheme( int scheme )
+int MLI_Method_AMGSA::setCoarsenScheme( int scheme )
 {
-   if ( scheme == MLI_AMGSA_LOCAL ) 
+   if ( scheme == MLI_METHOD_AMGSA_LOCAL ) 
    {
-      coarsen_scheme = MLI_AMGSA_LOCAL;
+      coarsen_scheme = MLI_METHOD_AMGSA_LOCAL;
       return 0;
    }
    else
    {
-      cout << "MLI_AMGSA:setCoarsenScheme ERROR - invalid scheme." << endl;
+      cout << "MLI_Method_AMGSA:setCoarsenScheme ERROR - invalid scheme.\n";
       cout.flush();
       return 1;
    }
@@ -262,7 +641,7 @@ int MLI_AMGSA::setCoarsenScheme( int scheme )
  * set minimum coarse size
  * --------------------------------------------------------------------- */
 
-int MLI_AMGSA::setMinCoarseSize( int coarse_size  )
+int MLI_Method_AMGSA::setMinCoarseSize( int coarse_size )
 {
    if ( coarse_size > 0 ) min_coarse_size = coarse_size;
    return 0;
@@ -272,7 +651,7 @@ int MLI_AMGSA::setMinCoarseSize( int coarse_size  )
  * set coarsening threshold
  * --------------------------------------------------------------------- */
 
-int MLI_AMGSA::setStrengthThreshold( double thresh )
+int MLI_Method_AMGSA::setStrengthThreshold( double thresh )
 {
    if ( thresh > 0.0 ) threshold = thresh;
    else                threshold = 0.0;
@@ -283,7 +662,7 @@ int MLI_AMGSA::setStrengthThreshold( double thresh )
  * set damping factor for smoother prolongator
  * --------------------------------------------------------------------- */
 
-int MLI_AMGSA::setPweight( double weight )
+int MLI_Method_AMGSA::setPweight( double weight )
 {
    if ( weight >= 0.0 && weight <= 2.0 ) P_weight = weight;
    return 0;
@@ -293,7 +672,7 @@ int MLI_AMGSA::setPweight( double weight )
  * indicate spectral norm is to be calculated
  * --------------------------------------------------------------------- */
 
-int MLI_AMGSA::setCalcSpectralNorm()
+int MLI_Method_AMGSA::setCalcSpectralNorm()
 {
    calc_norm_scheme = 1;
    return 0;
@@ -303,8 +682,8 @@ int MLI_AMGSA::setCalcSpectralNorm()
  * load the null space
  * --------------------------------------------------------------------- */
 
-int MLI_AMGSA::setNullSpace( int ndofs, int ndim, double *nullvec, 
-                             int length ) 
+int MLI_Method_AMGSA::setNullSpace( int ndofs, int ndim, double *nullvec, 
+                                    int length ) 
 {
    if ( (nullvec == NULL) && (ndofs != ndim) )
    {
@@ -332,8 +711,8 @@ int MLI_AMGSA::setNullSpace( int ndofs, int ndim, double *nullvec,
  * (abridged from similar function in ML)
  * --------------------------------------------------------------------- */
 
-int MLI_AMGSA::setNodalCoordinates( int num_nodes, int ndofs, 
-                                    double *coords, double *scalings)
+int MLI_Method_AMGSA::setNodalCoordinates( int num_nodes, int ndofs, 
+                                           double *coords, double *scalings)
 {
    int i, j, k, offset, voffset;
 
@@ -408,155 +787,26 @@ int MLI_AMGSA::setNodalCoordinates( int num_nodes, int ndofs,
  * set parameter for calibration AMG 
  * --------------------------------------------------------------------- */
 
-int MLI_AMGSA::setCalibrationSize( int size )
+int MLI_Method_AMGSA::setCalibrationSize( int size )
 {
    if ( size > 0 ) calibration_size = size;
    return 0;
-}
-
-/***********************************************************************
- * generate multilevel structure
- * --------------------------------------------------------------------- */
-
-int MLI_AMGSA::genMLStructure( MLI *mli ) 
-{
-   int          level, nsweeps, mypid;
-   double       start_time, elapsed_time, max_eigen;
-   char         param_string[100], *targv[10];
-   MLI_Matrix   *mli_Pmat, *mli_Rmat, *mli_Amat, *mli_cAmat;
-   MLI_OneLevel *single_level, *next_level;
-   MLI_Solver   *smoother_ptr, *csolve_ptr;
-
-#ifdef MLI_DEBUG_DETAILED
-   cout << " MLI_AMGSA::genMLStructure begins..." << endl;
-   cout.flush();
-#endif
-
-   /* --------------------------------------------------------------- */
-   /* traverse all levels                                             */
-   /* --------------------------------------------------------------- */
-
-   MPI_Comm_rank( mpi_comm, &mypid );
-   single_level = mli->getOneLevelObject( 0 );
-   mli_Amat     = single_level->getAmat();
-   total_time   = MLI_Utils_WTime();
-   RAP_time     = 0.0;
-
-   for (level = 0; level < num_levels; level++ )
-   {
-      if ( mypid == 0 && output_level > 0 )
-      {
-         printf("\t*************************************************************\n");
-         printf("\t*** Aggregation (uncoupled) : level = %d\n", level);
-         printf("\t-------------------------------------------------------------\n");
-      }
-      curr_level   = level;
-      if ( level == num_levels-1 ) break;
-      single_level = mli->getOneLevelObject( level );
-      next_level   = mli->getOneLevelObject( level+1 );
-
-      // ----- fetch fine grid matrix
-
-      mli_Amat     = single_level->getAmat();
-      assert ( mli_Amat != NULL );
-
-      // ----- perform coarsening
-
-      switch ( coarsen_scheme )
-      {
-         case MLI_AMGSA_LOCAL :
-              max_eigen = genPLocal(mli_Amat, &mli_Pmat); 
-              break;
-      }
-      if ( max_eigen != 0.0 ) spectral_norms[level] = max_eigen;
-      if ( mli_Pmat == NULL ) break;
-      start_time = MLI_Utils_WTime();
-
-      // ----- construct and set the coarse grid matrix
-
-      if ( mypid == 0 && output_level > 0 ) cout << "\tComputing RAP\n";
-      MLI_Matrix_ComputePtAP(mli_Pmat, mli_Amat, &mli_cAmat);
-      elapsed_time = (MLI_Utils_WTime() - start_time);
-      RAP_time += elapsed_time;
-      if ( mypid == 0 && output_level > 0 ) 
-         cout << "\tRAP computed, time = " << elapsed_time << endl;
-      //mli_Amat->print("Amat");
-      //mli_Pmat->print("Pmat");
-      //mli_cAmat->print("cAmat");
-      next_level->setAmat( mli_cAmat );
-
-      // ----- set the prolongation matrix
-
-      next_level->setPmat( mli_Pmat );
-
-      // ----- set the restriction matrix
-
-      sprintf(param_string, "HYPRE_ParCSRT");
-      mli_Rmat = new MLI_Matrix(mli_Pmat->getMatrix(), param_string, NULL);
-      single_level->setRmat( mli_Rmat );
-
-      // ----- set the smoothers 
-
-      if ( pre_smoother == MLI_SOLVER_MLS_ID ) 
-         pre_smoother_wgt[0] = max_eigen;
-      if ( postsmoother == MLI_SOLVER_MLS_ID ) 
-         postsmoother_wgt[0] = max_eigen;
-      smoother_ptr = MLI_Solver_Construct(pre_smoother);
-      targv[0] = (char *) &pre_smoother_num;
-      targv[1] = (char *) pre_smoother_wgt;
-      sprintf( param_string, "relaxWeight" );
-      smoother_ptr->setParams(param_string, 2, targv);
-      smoother_ptr->setup(mli_Amat);
-      single_level->setSmoother( MLI_SMOOTHER_PRE, smoother_ptr );
-      smoother_ptr = MLI_Solver_Construct(postsmoother);
-      targv[0] = (char *) &postsmoother_num;
-      targv[1] = (char *) postsmoother_wgt;
-      sprintf( param_string, "relaxWeight" );
-      smoother_ptr->setParams(param_string, 2, targv);
-      smoother_ptr->setup(mli_Amat);
-      single_level->setSmoother( MLI_SMOOTHER_POST, smoother_ptr );
-   }
-
-   // ----- set the coarse grid solver 
-
-   if ( mypid == 0 && output_level > 0 ) printf("Coarse level = %d\n", level);
-   if (coarse_solver == MLI_SOLVER_MLS_ID) coarse_solver_wgt[0] = max_eigen;
-   csolve_ptr = MLI_Solver_Construct(coarse_solver);
-   targv[0] = (char *) &coarse_solver_num;
-   targv[1] = (char *) coarse_solver_wgt;
-   sprintf( param_string, "relaxWeight" );
-   csolve_ptr->setParams(param_string, 2, targv);
-   single_level = mli->getOneLevelObject( level );
-   mli_Amat     = single_level->getAmat();
-   csolve_ptr->setup(mli_Amat);
-   single_level->setCoarseSolve( csolve_ptr );
-   total_time = MLI_Utils_WTime() - total_time;
-
-   /* --------------------------------------------------------------- */
-   /* return the coarsest grid level number                           */
-   /* --------------------------------------------------------------- */
-
-   printStatistics(mli);
-
-#ifdef MLI_DEBUG_DETAILED
-   cout << " MLI_AMGSA::genMLStructure ends." << endl;
-   cout.flush();
-#endif
-   return (level+1);
 }
 
 /* ********************************************************************* *
  * print AMGSA information
  * --------------------------------------------------------------------- */
 
-int MLI_AMGSA::print()
+int MLI_Method_AMGSA::print()
 {
-   int mypid;
-   MPI_Comm_rank( mpi_comm, &mypid);
+   int      mypid;
+   MPI_Comm comm = getComm();
+
+   MPI_Comm_rank( comm, &mypid);
    if ( mypid == 0 )
    {
-      cout << "\t*************************************************************\n";
-      cout << "\t*** method name             = " << method_name << endl;
+      cout << "\t************************************************************\n";
+      cout << "\t*** method name             = " << getName() << endl;
       cout << "\t*** number of levels        = " << num_levels << endl;
       cout << "\t*** coarsen_scheme          = " << coarsen_scheme << endl;
       cout << "\t*** nodal degree of freedom = " << node_dofs << endl;
@@ -568,7 +818,7 @@ int MLI_AMGSA::print()
       cout << "\t*** minimum coarse size     = " << min_coarse_size << endl;
       cout << "\t*** pre  smoother type      = " << pre_smoother << endl;
       cout << "\t*** post smoother type      = " << postsmoother << endl;
-      cout << "\t*************************************************************\n";
+      cout << "\t************************************************************\n";
       cout.flush();
    }
    return 0;
@@ -578,14 +828,15 @@ int MLI_AMGSA::print()
  * print AMGSA statistics information
  * --------------------------------------------------------------------- */
 
-int MLI_AMGSA::printStatistics(MLI *mli)
+int MLI_Method_AMGSA::printStatistics(MLI *mli)
 {
-   int                mypid, level, global_nrows, tot_nrows, fine_nrows;
-   int                max_nnz, min_nnz, fine_nnz, tot_nnz, this_nnz, itemp;
-   double             max_val, min_val, dtemp;
-   char               param_string[100];
-   MLI_Matrix         *mli_Amat, *mli_Pmat;
-   MLI_OneLevel       *single_level;
+   int          mypid, level, global_nrows, tot_nrows, fine_nrows;
+   int          max_nnz, min_nnz, fine_nnz, tot_nnz, this_nnz, itemp;
+   double       max_val, min_val, dtemp;
+   char         param_string[100];
+   MLI_Matrix   *mli_Amat, *mli_Pmat;
+   MLI_OneLevel *single_level;
+   MPI_Comm     mpi_comm = getComm();
 
    /* --------------------------------------------------------------- */
    /* output header                                                   */
@@ -593,7 +844,7 @@ int MLI_AMGSA::printStatistics(MLI *mli)
 
    MPI_Comm_rank( mpi_comm, &mypid);
    if ( mypid == 0 )
-      cout << "\t********************* AMGSA Statistics **********************\n";
+      cout << "\t******************** AMGSA Statistics **********************\n";
 
    /* --------------------------------------------------------------- */
    /* output processing time                                          */
@@ -604,8 +855,8 @@ int MLI_AMGSA::printStatistics(MLI *mli)
       cout << "\t*** number of levels = " << curr_level+1 << endl;
       cout << "\t*** total RAP   time = " << RAP_time     << " seconds\n";
       cout << "\t*** total GenML time = " << total_time   << " seconds\n";
-      cout << "\t*********************** Amatrix *****************************\n";
-      cout << "\t*level   Nrows MaxNnz MinNnz TotalNnz   maxValue   minValue *\n";
+      cout << "\t********************** Amatrix *****************************\n";
+      cout << "\t*level   Nrows MaxNnz MinNnz TotalNnz   maxValue   minValue*\n";
       cout.flush();
    }
 
@@ -647,8 +898,8 @@ int MLI_AMGSA::printStatistics(MLI *mli)
 
    if ( mypid == 0 )
    {
-      cout << "\t*********************** Pmatrix *****************************\n";
-      cout << "\t*level   Nrows MaxNnz MinNnz TotalNnz   maxValue   minValue *\n";
+      cout << "\t********************** Pmatrix *****************************\n";
+      cout << "\t*level   Nrows MaxNnz MinNnz TotalNnz   maxValue   minValue*\n";
       cout.flush();
    }
    for ( level = 1; level <= curr_level; level++ )
@@ -680,12 +931,12 @@ int MLI_AMGSA::printStatistics(MLI *mli)
 
    if ( mypid == 0 )
    {
-      cout << "\t*************************************************************\n";
+      cout << "\t************************************************************\n";
       dtemp = (double) tot_nnz / (double) fine_nnz;
       cout << "\t*** Amat complexity  = " << dtemp << endl;
       dtemp = (double) tot_nrows / (double) fine_nrows;
       cout << "\t*** grid complexity  = " << dtemp << endl;
-      cout << "\t*************************************************************\n";
+      cout << "\t************************************************************\n";
       cout.flush();
    }
    return 0;
@@ -695,7 +946,8 @@ int MLI_AMGSA::printStatistics(MLI *mli)
  * get the null space
  * --------------------------------------------------------------------- */
 
-int MLI_AMGSA::getNullSpace(int &ndofs,int &ndim,double *&nullvec,int &leng) 
+int MLI_Method_AMGSA::getNullSpace(int &ndofs,int &ndim,double *&nullvec,
+                                   int &leng) 
 {
    ndofs   = node_dofs;
    ndim    = nullspace_dim;
@@ -705,19 +957,26 @@ int MLI_AMGSA::getNullSpace(int &ndofs,int &ndim,double *&nullvec,int &leng)
 }
 
 /* ********************************************************************* *
- * reinitialize
+ * clone another object
  * --------------------------------------------------------------------- */
 
-int MLI_AMGSA::reinitialize()
+int MLI_Method_AMGSA::copy( MLI_Method_AMGSA *new_obj )
 {
-   curr_level = 0;
-   for ( int i = 0; i < 40; i++ ) 
-   {
-      if ( sa_data[i] != NULL ) delete [] sa_data[i];
-      sa_data[i] = NULL;
-   }
-   RAP_time   = 0.0;
-   total_time = 0.0;
+   new_obj->max_levels = max_levels;
+   new_obj->setOutputLevel( output_level );
+   new_obj->setNumLevels( num_levels );
+   new_obj->setSmoother( MLI_SMOOTHER_PRE, pre_smoother, pre_smoother_num, 
+                         pre_smoother_wgt );
+   new_obj->setSmoother( MLI_SMOOTHER_POST, postsmoother, postsmoother_num, 
+                         postsmoother_wgt );
+   new_obj->setCoarseSolver(coarse_solver,coarse_solver_num,coarse_solver_wgt); 
+   new_obj->setCoarsenScheme( coarsen_scheme );
+   new_obj->setMinCoarseSize( min_coarse_size );
+   if ( calc_norm_scheme ) new_obj->setCalcSpectralNorm();
+   new_obj->setPweight( P_weight );
+   new_obj->setPweight( P_weight );
+   new_obj->setNullSpace(node_dofs,nullspace_dim,nullspace_vec,nullspace_len);
+   new_obj->setStrengthThreshold( threshold );
    return 0;
 }
 
