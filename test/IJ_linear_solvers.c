@@ -60,9 +60,6 @@ main( int   argc,
    HYPRE_IJVector      ij_b;
    HYPRE_IJVector      ij_x;
 
-   int                 ij_mat_obj_type = HYPRE_PARCSR;
-   int                 ij_vec_obj_type = HYPRE_PARCSR;
-
    HYPRE_ParCSRMatrix  parcsr_A;
    HYPRE_ParVector     b;
    HYPRE_ParVector     x;
@@ -73,8 +70,6 @@ main( int   argc,
 
    int                 num_procs, myid;
    int                 local_row;
-   int                *partitioning;
-   int                *indices;
    int                *row_sizes;
    int                *diag_sizes;
    int                *offdiag_sizes;
@@ -241,7 +236,6 @@ main( int   argc,
       else if ( strcmp(argv[arg_index], "-concrete_parcsr") == 0 )
       {
          arg_index++;
-         ij_mat_obj_type = HYPRE_PARCSR;
          build_matrix_arg_index = arg_index;
       }
       else if ( strcmp(argv[arg_index], "-solver") == 0 )
@@ -729,7 +723,7 @@ main( int   argc,
    if (myid == 0)
    {
       printf("Running with these driver parameters:\n");
-      printf("  solver ID    = %d\n", solver_id);
+      printf("  solver ID    = %d\n\n", solver_id);
    }
 
    /*-----------------------------------------------------------
@@ -782,7 +776,7 @@ main( int   argc,
     * Copy the parcsr matrix into the IJMatrix through interface calls
     *-----------------------------------------------------------*/
 
-   time_index = hypre_InitializeTiming("IJ Interface");
+   time_index = hypre_InitializeTiming("IJ Matrix Setup");
    hypre_BeginTiming(time_index);
 
    if (build_matrix_type < 2)
@@ -902,6 +896,11 @@ main( int   argc,
 
    }
 
+   hypre_EndTiming(time_index);
+   hypre_PrintTiming("IJ Matrix Setup", MPI_COMM_WORLD);
+   hypre_FinalizeTiming(time_index);
+   hypre_ClearTiming();
+   
    /* This is to emphasize that one can IJMatrixAddToValues after an
       IJMatrixRead or an IJMatrixAssemble.  After an IJMatrixRead,
       assembly is unnecessary if the sparsity pattern of the matrix is
@@ -920,10 +919,11 @@ main( int   argc,
 
    for (i = first_local_row; i <= last_local_row; i++)
    {
-     rows[i-first_local_row] = i;
-     ncols[i-first_local_row] = 1;
-     col_inds[i-first_local_row] = i;
-     values[i-first_local_row] = val;
+     j = i - first_local_row;
+     rows[j] = i;
+     ncols[j] = 1;
+     col_inds[j] = i;
+     values[j] = val;
    }
       
    for (i = first_local_row; i <= last_local_row; i++)
@@ -965,15 +965,20 @@ main( int   argc,
     * Set up the RHS and initial guess
     *-----------------------------------------------------------*/
 
-#if 0
-   ierr += HYPRE_ParCSRMatrixGetRowPartitioning(parcsr_A, &partitioning);
-#endif
+   time_index = hypre_InitializeTiming("IJ Vector Setup");
+   hypre_BeginTiming(time_index);
 
    local_num_rows = last_local_row - first_local_row + 1;
    local_num_cols = last_local_col - first_local_col + 1;
 
    if ( build_rhs_type == 0 )
    {
+      if (myid == 0)
+      {
+        printf("  RHS vector read from file %s\n", argv[build_rhs_arg_index]);
+        printf("  Initial guess is 0\n");
+      }
+
 /* RHS */
       ierr = HYPRE_IJVectorRead( argv[build_rhs_arg_index], MPI_COMM_WORLD, 
                                  HYPRE_PARCSR, &ij_b );
@@ -982,7 +987,7 @@ main( int   argc,
 
 /* Initial guess */
       HYPRE_IJVectorCreate(MPI_COMM_WORLD, first_local_col, last_local_col, &ij_x);
-      HYPRE_IJVectorSetObjectType(ij_x, ij_vec_obj_type);
+      HYPRE_IJVectorSetObjectType(ij_x, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize(ij_x);
 
       values = hypre_CTAlloc(double, local_num_cols);
@@ -1002,27 +1007,19 @@ main( int   argc,
 #if 0
 /* RHS */
       BuildRhsParFromOneFile(argc, argv, build_rhs_arg_index, part_b, &b);
-
-/* Initial guess */
-      HYPRE_IJVectorCreate(MPI_COMM_WORLD, first_local_col, last_local_col, &ij_x);
-      HYPRE_IJVectorSetObjectType(ij_x, ij_vec_obj_type);
-      HYPRE_IJVectorInitialize(ij_x);
-
-      values = hypre_CTAlloc(double, local_num_cols);
-      for (i = 0; i < local_num_cols; i++)
-         values[i] = 0.;
-      HYPRE_IJVectorSetValues(ij_x, local_num_cols, NULL, values);
-      hypre_TFree(values);
-
-      ierr = HYPRE_IJVectorGetObject( ij_x, &object );
-      x = (HYPRE_ParVector) object;
 #endif
    }
    else if ( build_rhs_type == 2 )
    {
+      if (myid == 0)
+      {
+        printf("  RHS vector has unit components\n");
+        printf("  Initial guess is 0\n");
+      }
+
 /* RHS */
       HYPRE_IJVectorCreate(MPI_COMM_WORLD, first_local_row, last_local_row, &ij_b);
-      HYPRE_IJVectorSetObjectType(ij_b, ij_vec_obj_type);
+      HYPRE_IJVectorSetObjectType(ij_b, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize(ij_b);
 
       values = hypre_CTAlloc(double, local_num_rows);
@@ -1036,7 +1033,7 @@ main( int   argc,
 
 /* Initial guess */
       HYPRE_IJVectorCreate(MPI_COMM_WORLD, first_local_col, last_local_col, &ij_x);
-      HYPRE_IJVectorSetObjectType(ij_x, ij_vec_obj_type);
+      HYPRE_IJVectorSetObjectType(ij_x, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize(ij_x);
 
       values = hypre_CTAlloc(double, local_num_cols);
@@ -1050,9 +1047,15 @@ main( int   argc,
    }
    else if ( build_rhs_type == 3 )
    {
+      if (myid == 0)
+      {
+        printf("  RHS vector has random components and unit 2-norm\n");
+        printf("  Initial guess is 0\n");
+      }
+
 /* RHS */
       HYPRE_IJVectorCreate(MPI_COMM_WORLD, first_local_row, last_local_row, &ij_b); 
-      HYPRE_IJVectorSetObjectType(ij_b, ij_vec_obj_type);
+      HYPRE_IJVectorSetObjectType(ij_b, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize(ij_b);
       ierr = HYPRE_IJVectorGetObject( ij_b, &object );
       b = (HYPRE_ParVector) object;
@@ -1069,7 +1072,7 @@ main( int   argc,
 
 /* Initial guess */
       HYPRE_IJVectorCreate(MPI_COMM_WORLD, first_local_col, last_local_col, &ij_x);
-      HYPRE_IJVectorSetObjectType(ij_x, ij_vec_obj_type);
+      HYPRE_IJVectorSetObjectType(ij_x, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize(ij_x);
 
       values = hypre_CTAlloc(double, local_num_cols);
@@ -1083,9 +1086,15 @@ main( int   argc,
    }
    else if ( build_rhs_type == 4 )
    {
-/* Initial guess */
+      if (myid == 0)
+      {
+        printf("  RHS vector set for solution with unit components\n");
+        printf("  Initial guess is 0\n");
+      }
+
+/* Temporary use of solution vector */
       HYPRE_IJVectorCreate(MPI_COMM_WORLD, first_local_col, last_local_col, &ij_x);
-      HYPRE_IJVectorSetObjectType(ij_x, ij_vec_obj_type);
+      HYPRE_IJVectorSetObjectType(ij_x, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize(ij_x);
 
       values = hypre_CTAlloc(double, local_num_cols);
@@ -1099,13 +1108,14 @@ main( int   argc,
 
 /* RHS */
       HYPRE_IJVectorCreate(MPI_COMM_WORLD, first_local_row, last_local_row, &ij_b); 
-      HYPRE_IJVectorSetObjectType(ij_b, ij_vec_obj_type);
+      HYPRE_IJVectorSetObjectType(ij_b, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize(ij_b);
       ierr = HYPRE_IJVectorGetObject( ij_b, &object );
       b = (HYPRE_ParVector) object;
 
       HYPRE_ParCSRMatrixMatvec(1.,parcsr_A,x,0.,b);
 
+/* Initial guess */
       values = hypre_CTAlloc(double, local_num_cols);
       for (i = 0; i < local_num_cols; i++)
          values[i] = 0.;
@@ -1114,9 +1124,15 @@ main( int   argc,
    }
    else if ( build_rhs_type == 5 )
    {
+      if (myid == 0)
+      {
+        printf("  RHS vector is 0\n");
+        printf("  Initial guess has unit components\n");
+      }
+
 /* RHS */
       HYPRE_IJVectorCreate(MPI_COMM_WORLD, first_local_row, last_local_row, &ij_b);
-      HYPRE_IJVectorSetObjectType(ij_b, ij_vec_obj_type);
+      HYPRE_IJVectorSetObjectType(ij_b, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize(ij_b);
 
       values = hypre_CTAlloc(double, local_num_rows);
@@ -1130,7 +1146,7 @@ main( int   argc,
 
 /* Initial guess */
       HYPRE_IJVectorCreate(MPI_COMM_WORLD, first_local_col, last_local_col, &ij_x);
-      HYPRE_IJVectorSetObjectType(ij_x, ij_vec_obj_type);
+      HYPRE_IJVectorSetObjectType(ij_x, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize(ij_x);
 
       values = hypre_CTAlloc(double, local_num_cols);
@@ -1145,35 +1161,26 @@ main( int   argc,
 
    if ( build_src_type == 0 )
    {
-      printf("build_rhs_type == 1 not currently implemented\n");
-      return(-1);
-
 #if 0
 /* RHS */
-      BuildRHSParFromFile(argc, argv, build_src_arg_index, &b);
-
-      HYPRE_IJVectorCreate(MPI_COMM_WORLD, first_local_col, last_local_col, &ij_x);
-      HYPRE_IJVectorSetObjectType(ij_x, ij_vec_obj_type);
-      HYPRE_IJVectorInitialize(ij_x);
-
-      values = hypre_CTAlloc(double, local_num_cols);
-      for (i = 0; i < local_num_cols; i++)
-         values[i] = 1.;
-      HYPRE_IJVectorSetValues(ij_x, local_num_cols, NULL, values);
-      hypre_TFree(values);
-
-      ierr = HYPRE_IJVectorGetObject( ij_x, &object );
-      x = (HYPRE_ParVector) object;
-#endif
-   }
-   else if ( build_src_type == 1 )
-   {
-#if 0
-      BuildRhsParFromOneFile(argc, argv, build_src_arg_index, part_b, &b);
+      BuildRhsParFromFile(argc, argv, build_src_arg_index, &b);
 #endif
 
+      if (myid == 0)
+      {
+        printf("  Source vector read from file %s\n", argv[build_src_arg_index]);
+        printf("  Initial unknown vector in evolution is 0\n");
+      }
+
+      ierr = HYPRE_IJVectorRead( argv[build_src_arg_index], MPI_COMM_WORLD, 
+                                 HYPRE_PARCSR, &ij_b );
+
+      ierr = HYPRE_IJVectorGetObject( ij_b, &object );
+      b = (HYPRE_ParVector) object;
+
+/* Initial unknown vector */
       HYPRE_IJVectorCreate(MPI_COMM_WORLD, first_local_col, last_local_col, &ij_x);
-      HYPRE_IJVectorSetObjectType(ij_x, ij_vec_obj_type);
+      HYPRE_IJVectorSetObjectType(ij_x, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize(ij_x);
 
       values = hypre_CTAlloc(double, local_num_cols);
@@ -1185,17 +1192,26 @@ main( int   argc,
       ierr = HYPRE_IJVectorGetObject( ij_x, &object );
       x = (HYPRE_ParVector) object;
    }
+   else if ( build_src_type == 1 )
+   {
+      printf("build_src_type == 1 not currently implemented\n");
+      return(-1);
+
+#if 0
+      BuildRhsParFromOneFile(argc, argv, build_src_arg_index, part_b, &b);
+#endif
+   }
    else if ( build_src_type == 2 )
    {
       if (myid == 0)
       {
         printf("  Source vector has unit components\n");
-        printf("  Initial unknown vector in evolution is 0\n");
+        printf("  Initial unknown vector is 0\n");
       }
 
 /* RHS */
       HYPRE_IJVectorCreate(MPI_COMM_WORLD, first_local_row, last_local_row, &ij_b);
-      HYPRE_IJVectorSetObjectType(ij_b, ij_vec_obj_type);
+      HYPRE_IJVectorSetObjectType(ij_b, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize(ij_b);
 
       values = hypre_CTAlloc(double, local_num_rows);
@@ -1209,7 +1225,7 @@ main( int   argc,
 
 /* Initial guess */
       HYPRE_IJVectorCreate(MPI_COMM_WORLD, first_local_col, last_local_col, &ij_x);
-      HYPRE_IJVectorSetObjectType(ij_x, ij_vec_obj_type);
+      HYPRE_IJVectorSetObjectType(ij_x, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize(ij_x);
 
 /* For backward Euler the previous backward Euler iterate (assumed
@@ -1228,12 +1244,12 @@ main( int   argc,
       if (myid == 0)
       {
         printf("  Source vector has random components in range 0 - 1\n");
-        printf("  Initial unknown vector in evolution is 0\n");
+        printf("  Initial unknown vector is 0\n");
       }
 
 /* RHS */
       HYPRE_IJVectorCreate(MPI_COMM_WORLD, first_local_row, last_local_row, &ij_b);
-      HYPRE_IJVectorSetObjectType(ij_b, ij_vec_obj_type);
+      HYPRE_IJVectorSetObjectType(ij_b, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize(ij_b);
       values = hypre_CTAlloc(double, local_num_rows);
 
@@ -1249,7 +1265,7 @@ main( int   argc,
 
 /* Initial guess */
       HYPRE_IJVectorCreate(MPI_COMM_WORLD, first_local_col, last_local_col, &ij_x);
-      HYPRE_IJVectorSetObjectType(ij_x, ij_vec_obj_type);
+      HYPRE_IJVectorSetObjectType(ij_x, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize(ij_x);
 
 /* For backward Euler the previous backward Euler iterate (assumed
@@ -1273,7 +1289,7 @@ main( int   argc,
 
 /* RHS */
       HYPRE_IJVectorCreate(MPI_COMM_WORLD, first_local_row, last_local_row, &ij_b);
-      HYPRE_IJVectorSetObjectType(ij_b, ij_vec_obj_type);
+      HYPRE_IJVectorSetObjectType(ij_b, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize(ij_b);
 
       values = hypre_CTAlloc(double, local_num_rows);
@@ -1288,7 +1304,7 @@ main( int   argc,
 
 /* Initial guess */
       HYPRE_IJVectorCreate(MPI_COMM_WORLD, first_local_col, last_local_col, &ij_x);
-      HYPRE_IJVectorSetObjectType(ij_x, ij_vec_obj_type);
+      HYPRE_IJVectorSetObjectType(ij_x, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize(ij_x);
 
 /* For backward Euler the previous backward Euler iterate (assumed
@@ -1305,7 +1321,7 @@ main( int   argc,
    }
 
    hypre_EndTiming(time_index);
-   hypre_PrintTiming("IJ Interface", MPI_COMM_WORLD);
+   hypre_PrintTiming("IJ Vector Setup", MPI_COMM_WORLD);
    hypre_FinalizeTiming(time_index);
    hypre_ClearTiming();
    
@@ -2235,7 +2251,7 @@ BuildParLaplacian( int                  argc,
       printf("  Laplacian:\n");
       printf("    (nx, ny, nz) = (%d, %d, %d)\n", nx, ny, nz);
       printf("    (Px, Py, Pz) = (%d, %d, %d)\n", P,  Q,  R);
-      printf("    (cx, cy, cz) = (%f, %f, %f)\n", cx, cy, cz);
+      printf("    (cx, cy, cz) = (%f, %f, %f)\n\n", cx, cy, cz);
    }
 
    /*-----------------------------------------------------------
@@ -2400,7 +2416,7 @@ BuildParDifConv( int                  argc,
       printf("    (nx, ny, nz) = (%d, %d, %d)\n", nx, ny, nz);
       printf("    (Px, Py, Pz) = (%d, %d, %d)\n", P,  Q,  R);
       printf("    (cx, cy, cz) = (%f, %f, %f)\n", cx, cy, cz);
-      printf("    (ax, ay, az) = (%f, %f, %f)\n", ax, ay, az);
+      printf("    (ax, ay, az) = (%f, %f, %f)\n\n", ax, ay, az);
    }
 
    /*-----------------------------------------------------------
@@ -2771,7 +2787,7 @@ BuildParLaplacian9pt( int                  argc,
    {
       printf("  Laplacian 9pt:\n");
       printf("    (nx, ny) = (%d, %d)\n", nx, ny);
-      printf("    (Px, Py) = (%d, %d)\n", P,  Q);
+      printf("    (Px, Py) = (%d, %d)\n\n", P,  Q);
    }
 
    /*-----------------------------------------------------------
@@ -2896,7 +2912,7 @@ BuildParLaplacian27pt( int                  argc,
    {
       printf("  Laplacian_27pt:\n");
       printf("    (nx, ny, nz) = (%d, %d, %d)\n", nx, ny, nz);
-      printf("    (Px, Py, Pz) = (%d, %d, %d)\n", P,  Q,  R);
+      printf("    (Px, Py, Pz) = (%d, %d, %d)\n\n", P,  Q,  R);
    }
 
    /*-----------------------------------------------------------
