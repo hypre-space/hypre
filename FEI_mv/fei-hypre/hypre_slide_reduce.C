@@ -16,13 +16,19 @@
 #include "Data.h"
 #include "basicTypes.h"
 
+#define FEI_V15 1
+
 #if defined(FEI_V13)
 #include "LinearSystemCore.1.3.h"
 #elseif defined(FEI_V14)
 #include "LinearSystemCore.1.4.h"
-#else
+#elseif defined(FEI_V15)
 #include "LinearSystemCore.h"
 #include "LSC.h"
+#else
+#ifndef NOFEI
+#include "LinearSystemCore.h"
+#endif
 #endif
 
 #include "HYPRE.h"
