@@ -324,7 +324,7 @@ nodist_struct_C___SOURCES = struct.C++.cxx
 struct_C___CXXFLAGS = $(AM_CXXFLAGS)
 struct_C___LDADD = $(struct_libraries)
 
-all-local: ij$(EXEEXT) ij_mv$(EXEEXT) new_ij$(EXEEXT) \
+all-local: ij$(EXEEXT) ij_es$(EXEEXT) ij_mv$(EXEEXT) new_ij$(EXEEXT) \
 		struct$(EXEEXT) sstruct$(EXEEXT)
 
 fei++: fei$(EXEEXT)
@@ -338,6 +338,7 @@ babel: f77_ij_b$(EXEEXT) ij_b$(EXEEXT) # f77_struct_b$(EXEEXT) struct_b$(EXEEXT)
 
 # some simple dependency checking
 $(ij_OBJECTS): $(ij_dependencies)
+$(ij_es_OBJECTS): $(ij_es_dependencies)
 $(ij_mv_OBJECTS): $(ij_mv_dependencies)
 $(new_ij_OBJECTS): $(ij_dependencies)
 $(sstruct_OBJECTS): $(sstruct_dependencies)
