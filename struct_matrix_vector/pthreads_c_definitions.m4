@@ -84,18 +84,22 @@ define(PLOOP,
         $1 = ifetchadd(&$4[$5], &$7) + $2) {\
       $9\
    }\
-   ifetchadd(&$6, &$7);\
    pthread_mutex_lock(&$7);\
+      $6++;\
    if ($6 < NUM_THREADS) {\
       pthread_mutex_unlock(&$7);\
-      sem_wait(&hypre_sem);\
+      while (!hypre_thread_release);\
+      pthread_mutex_lock(&$7);\
+      $6--;\
+      pthread_mutex_unlock(&$7);\
    }\
    else if ($6 == NUM_THREADS) {\
-      for(i=1;i<NUM_THREADS;i++)\
-         sem_post(&hypre_sem);\
+      $6--;\
       $4[$5] = 0;\
-      $6 = 0;\
       pthread_mutex_unlock(&$7);\
+      hypre_thread_release=1;\
+      while ($6);\
+      hypre_thread_release=0;\
    }\>>)
 
 

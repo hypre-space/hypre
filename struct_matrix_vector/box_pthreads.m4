@@ -18,7 +18,6 @@ sinclude(pthreads_c_definitions.m4)
 #ifndef hypre_BOX_PTHREADS_HEADER
 #define hypre_BOX_PTHREADS_HEADER
 #include <pthread.h>
-#include <semaphore.h>
 #include "threading.h"
 
 /*--------------------------------------------------------------------------

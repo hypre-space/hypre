@@ -92,7 +92,6 @@ Arguments:  $1 -- the name of the increment variable for the loop
 #ifndef hypre_BOX_PTHREADS_HEADER
 #define hypre_BOX_PTHREADS_HEADER
 #include <pthread.h>
-#include <semaphore.h>
 #include "threading.h"
 
 /*--------------------------------------------------------------------------
@@ -170,18 +169,22 @@ int iteration_counter[3]={0,0,0};
       }\
     \
    }\
-   ifetchadd(&hypre_thread_counter, &hypre_mutex_boxloops);\
    pthread_mutex_lock(&hypre_mutex_boxloops);\
+      hypre_thread_counter++;\
    if (hypre_thread_counter < NUM_THREADS) {\
       pthread_mutex_unlock(&hypre_mutex_boxloops);\
-      sem_wait(&hypre_sem);\
+      while (!hypre_thread_release);\
+      pthread_mutex_lock(&hypre_mutex_boxloops);\
+      hypre_thread_counter--;\
+      pthread_mutex_unlock(&hypre_mutex_boxloops);\
    }\
    else if (hypre_thread_counter == NUM_THREADS) {\
-      for(i=1;i<NUM_THREADS;i++)\
-         sem_post(&hypre_sem);\
+      hypre_thread_counter--;\
       iteration_counter[0] = 0;\
-      hypre_thread_counter = 0;\
       pthread_mutex_unlock(&hypre_mutex_boxloops);\
+      hypre_thread_release=1;\
+      while (hypre_thread_counter);\
+      hypre_thread_release=0;\
    }\
 }
 
@@ -222,18 +225,22 @@ int iteration_counter[3]={0,0,0};
          i1 += hypre__kinc1;\
       }\
    }\
-   ifetchadd(&hypre_thread_counter, &hypre_mutex_boxloops);\
    pthread_mutex_lock(&hypre_mutex_boxloops);\
+      hypre_thread_counter++;\
    if (hypre_thread_counter < NUM_THREADS) {\
       pthread_mutex_unlock(&hypre_mutex_boxloops);\
-      sem_wait(&hypre_sem);\
+      while (!hypre_thread_release);\
+      pthread_mutex_lock(&hypre_mutex_boxloops);\
+      hypre_thread_counter--;\
+      pthread_mutex_unlock(&hypre_mutex_boxloops);\
    }\
    else if (hypre_thread_counter == NUM_THREADS) {\
-      for(i=1;i<NUM_THREADS;i++)\
-         sem_post(&hypre_sem);\
+      hypre_thread_counter--;\
       iteration_counter[0] = 0;\
-      hypre_thread_counter = 0;\
       pthread_mutex_unlock(&hypre_mutex_boxloops);\
+      hypre_thread_release=1;\
+      while (hypre_thread_counter);\
+      hypre_thread_release=0;\
    }\
 }
 
@@ -286,18 +293,22 @@ int iteration_counter[3]={0,0,0};
       }\
     \
    }\
-   ifetchadd(&hypre_thread_counter, &hypre_mutex_boxloops);\
    pthread_mutex_lock(&hypre_mutex_boxloops);\
+      hypre_thread_counter++;\
    if (hypre_thread_counter < NUM_THREADS) {\
       pthread_mutex_unlock(&hypre_mutex_boxloops);\
-      sem_wait(&hypre_sem);\
+      while (!hypre_thread_release);\
+      pthread_mutex_lock(&hypre_mutex_boxloops);\
+      hypre_thread_counter--;\
+      pthread_mutex_unlock(&hypre_mutex_boxloops);\
    }\
    else if (hypre_thread_counter == NUM_THREADS) {\
-      for(i=1;i<NUM_THREADS;i++)\
-         sem_post(&hypre_sem);\
+      hypre_thread_counter--;\
       iteration_counter[0] = 0;\
-      hypre_thread_counter = 0;\
       pthread_mutex_unlock(&hypre_mutex_boxloops);\
+      hypre_thread_release=1;\
+      while (hypre_thread_counter);\
+      hypre_thread_release=0;\
    }\
 }
 
@@ -361,18 +372,22 @@ int iteration_counter[3]={0,0,0};
       }\
     \
    }\
-   ifetchadd(&hypre_thread_counter, &hypre_mutex_boxloops);\
    pthread_mutex_lock(&hypre_mutex_boxloops);\
+      hypre_thread_counter++;\
    if (hypre_thread_counter < NUM_THREADS) {\
       pthread_mutex_unlock(&hypre_mutex_boxloops);\
-      sem_wait(&hypre_sem);\
+      while (!hypre_thread_release);\
+      pthread_mutex_lock(&hypre_mutex_boxloops);\
+      hypre_thread_counter--;\
+      pthread_mutex_unlock(&hypre_mutex_boxloops);\
    }\
    else if (hypre_thread_counter == NUM_THREADS) {\
-      for(i=1;i<NUM_THREADS;i++)\
-         sem_post(&hypre_sem);\
+      hypre_thread_counter--;\
       iteration_counter[0] = 0;\
-      hypre_thread_counter = 0;\
       pthread_mutex_unlock(&hypre_mutex_boxloops);\
+      hypre_thread_release=1;\
+      while (hypre_thread_counter);\
+      hypre_thread_release=0;\
    }\
 }
 
@@ -447,18 +462,22 @@ int iteration_counter[3]={0,0,0};
       }\
     \
    }\
-   ifetchadd(&hypre_thread_counter, &hypre_mutex_boxloops);\
    pthread_mutex_lock(&hypre_mutex_boxloops);\
+      hypre_thread_counter++;\
    if (hypre_thread_counter < NUM_THREADS) {\
       pthread_mutex_unlock(&hypre_mutex_boxloops);\
-      sem_wait(&hypre_sem);\
+      while (!hypre_thread_release);\
+      pthread_mutex_lock(&hypre_mutex_boxloops);\
+      hypre_thread_counter--;\
+      pthread_mutex_unlock(&hypre_mutex_boxloops);\
    }\
    else if (hypre_thread_counter == NUM_THREADS) {\
-      for(i=1;i<NUM_THREADS;i++)\
-         sem_post(&hypre_sem);\
+      hypre_thread_counter--;\
       iteration_counter[0] = 0;\
-      hypre_thread_counter = 0;\
       pthread_mutex_unlock(&hypre_mutex_boxloops);\
+      hypre_thread_release=1;\
+      while (hypre_thread_counter);\
+      hypre_thread_release=0;\
    }\
 }
 
