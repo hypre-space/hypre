@@ -722,26 +722,24 @@ int MLI_ParCSRBooleanMatrixRestoreRow( MLI_ParCSRBooleanMatrix *matrix,
  *--------------------------------------------------------------------------*/
 
 int
-MLI_BuildCSRBooleanMatrixMPIDataType
-( int num_nonzeros, int num_rows, int *a_i, int *a_j, 
-  MPI_Datatype *csr_matrix_datatype)
+MLI_BuildCSRBooleanMatrixMPIDataType(
+   int num_nonzeros, int num_rows, int *a_i, int *a_j, 
+   MPI_Datatype *csr_matrix_datatype )
 {
-   int		block_lens[3];
-   MPI_Aint	displ[3];
-   MPI_Datatype	types[3];
+   int		block_lens[2];
+   MPI_Aint	displ[2];
+   MPI_Datatype	types[2];
    int		ierr = 0;
 
-   block_lens[0] = num_nonzeros;
-   block_lens[1] = num_rows+1;
-   block_lens[2] = num_nonzeros;
+   block_lens[0] = num_rows+1;
+   block_lens[1] = num_nonzeros;
 
-   types[0] = MPI_DOUBLE;
+   types[0] = MPI_INT;
    types[1] = MPI_INT;
-   types[2] = MPI_INT;
 
-   MPI_Address(a_i, &displ[1]);
-   MPI_Address(a_j, &displ[2]);
-   MPI_Type_struct(3,block_lens,displ,types,csr_matrix_datatype);
+   MPI_Address(a_i, &displ[0]);
+   MPI_Address(a_j, &displ[1]);
+   MPI_Type_struct(2,block_lens,displ,types,csr_matrix_datatype);
    MPI_Type_commit(csr_matrix_datatype);
 
    return ierr;
