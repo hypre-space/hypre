@@ -11,17 +11,21 @@
 .SUFFIXES:
 .SUFFIXES: .c .f .o
 
-# Declarations for this installation site
-include ../bmakes/base
-
 ##################################################################
-# Main rules
+# Default
 ##################################################################
 
 #DRIVER = StructMatrixAndyDriver
 DRIVER = PETScSolverParILUTDriver
 
 default: $(DRIVER)
+
+##################################################################
+# Main rules
+##################################################################
+
+# Declarations for this installation site
+include ../bmakes/base
 
 $(DRIVER): $(DRIVER).o
 	@echo  "Linking" $@ "... "
