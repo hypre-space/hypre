@@ -25,6 +25,7 @@ CXXDEFS =
 # FC_LIB contains the libraries for a CLINKER to use for code containing
 # FORTRAN code (such as I/O or special Fortran runtimes).
 #
+# e.g. BLAS_LIB = -lHYPRE_blas
 FC_LIB         = -L/opt/SUNWspro/SC4.2/lib -lF77 -lM77 -lsunmath
 BLAS_LIB       =  @BLASLIBFLAGS@
 
@@ -57,6 +58,7 @@ CXXFLAGS =\
 RANLIB= @RANLIB@
  
 MPILIBFLAGS = @MPILIBDIRS@ @MPILIBS@ @MPIFLAGS@
+## e.g. LIBFLAGS = -llapack -lblas -lg2c -lm (on linux)
 LIBFLAGS = @LIBDIRS@ @LIBS@
 LDLIBFLAGS = @LDLIBDIRS@ @LDLIBS@
 BLASLIBFLAGS =  @BLASLIBFLAGS@
@@ -73,6 +75,7 @@ LFLAGS =\
  -lHYPRE_seq_mv\
  -lHYPRE_utilities\
  -lHYPRE_superlu\
+ -lHYPRE_ParaSails\
  -lHYPRE_blas\
  ${BLASLIBFLAGS} \
  ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
