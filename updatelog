@@ -86,4 +86,8 @@ New internal installation: V1.00.00
 - The main header files have been restructured to be more readable.
   They will soon include full documentation for their interfaces.
 
+Version 1.1.0 released, 2000/09/07.
 
+Version 1.2.0 released, 2000/09/22.
+
+- Fixed a bug in PILUT that effected multiprocessor runs.
