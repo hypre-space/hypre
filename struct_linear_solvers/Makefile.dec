@@ -35,18 +35,21 @@ smg_solve.c
 OBJS = ${FILES:.c=.o}
 
 CC = mpicc
-F77 = f77
+F77 = mpif77
 
-CFLAGS = -g
+CFLAGS = -O
 
-FFLAGS =
+FFLAGS = -O
 
 LFLAGS =\
  -L/usr/local/lib\
  -L.\
  -L../struct_matrix_vector\
+ -L../utilities\
  -lZZZ_ls\
  -lZZZ_mv\
+ -lZZZ_timing\
+ -lZZZ_memory\
  -lm
 
 

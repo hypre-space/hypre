@@ -49,14 +49,17 @@ OBJS = ${FILES:.c=.o}
 CC = mpicc
 F77 = mpif77
 
-CFLAGS = -g
+CFLAGS = -O
 
-FFLAGS = -g -d
+FFLAGS = -O
 
 LFLAGS =\
  -L/usr/local/lib\
  -L.\
+ -L../utilities\
  -lZZZ_mv\
+ -lZZZ_timing\
+ -lZZZ_memory\
  -lm
 
 
