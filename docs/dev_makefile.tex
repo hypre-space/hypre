@@ -4,38 +4,23 @@
 \label{The HYPRE Build System}
 
 
-The \hypre{} build system uses GNU Autotools (Autoconf, Automake, libtool and a
-few related scripts) to configure, make and install the library.  These tools
-are very inter-dependent and need to be executed in a specific order. A shell 
-script named \file{bootstrap}, is provided in the \file{config} subdirectory to
-relieve developers of needing to know the Autotools constraints.  It is run 
-whenever changes are made to the M4 files or the \file{configure.ac} script.
+The \hypre{} build system uses GNU Autoconf and a few related scripts to 
+create a \file{configure} script. 
 
-Developers are responsible for:
-\begin{enumerate}
-\item Creating a file named \file{Makefile.am} in each new subdirectory for which 
-      they are responsible.  Usually an existing \file{Makefile.am} can be 
-      copied and edited. An existing \file{Makefile.am} must be edited when 
-      new source files are added to an existing directory.
 
-\item Adding the name of new source code files to the \file{configure.ac} script 
-      (located in the \file{config} subdirectory) and the top-level \file{Makefile.am}.
-
-\item Adding the names of any new files to the \file{Makefile.am} in the \file{lib} subdirectory.
-
-\item Ensuring all changes are made in the appropriate scripts.
-
-\item Running the \file{bootstrap} script to generate a new \file{configure} script.
-
-\item Testing the changes.
-
-\item Committing the changes to the repository.
-
-\end{enumerate}
+configure, make and install the library.  These tools are very inter-
+dependent and need to be executed in a specific order. A shell script named 
+\file{bootstrap}, is provided in the \file{config} subdirectory to relieve 
+developers of needing to know the required versions or constraints.  It is run 
+whenever changes are made to the M4 files or the \file{configure.in} script.
 
 %==========================================================================
 \section{Makefile Requirements}
 \label{Makefile Requirements}
+
+
+There is one file stored in the \file{config} subdirectory, named \file{Makefile.config.in},
+
 
 
 Autotools expect a file named \file{Makefile.am} to be in every direcotry, whether
