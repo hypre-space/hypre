@@ -16,7 +16,7 @@ int HYPRE_DistributedMatrixPilutSolverSetFactorRowSize P((HYPRE_DistributedMatri
 int HYPRE_DistributedMatrixPilutSolverSetDropTolerance P((HYPRE_DistributedMatrixPilutSolver in_ptr , double tolerance ));
 int HYPRE_DistributedMatrixPilutSolverSetMaxIts P((HYPRE_DistributedMatrixPilutSolver in_ptr , int its ));
 int HYPRE_DistributedMatrixPilutSolverSetup P((HYPRE_DistributedMatrixPilutSolver in_ptr ));
-int HYPRE_DistributedMatrixPilutSolverSolve P((HYPRE_DistributedMatrixPilutSolver in_ptr , double *x , const double *b ));
+int HYPRE_DistributedMatrixPilutSolverSolve P((HYPRE_DistributedMatrixPilutSolver in_ptr , double *x , double *b ));
 
 /* comm.c */
 int GlobalSEMax P((int value , MPI_Comm MPI_Context ));

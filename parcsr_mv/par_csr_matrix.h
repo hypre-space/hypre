@@ -55,6 +55,11 @@ typedef struct
 
    int      num_nonzeros;
 
+   /* Buffers used by GetRow to hold row currently being accessed. AJC, 4/99 */
+   int     *rowindices;
+   double  *rowvalues;
+   int      getrowactive;
+
 } hypre_ParCSRMatrix;
 
 /*--------------------------------------------------------------------------
@@ -80,5 +85,8 @@ hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(matrix))
 #define hypre_ParCSRMatrixNumCols(matrix) \
 hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(matrix))
 #define hypre_ParCSRMatrixNumNonzeros(matrix)     ((matrix) -> num_nonzeros)
+#define hypre_ParCSRMatrixRowindices(matrix)      ((matrix) -> rowindices)
+#define hypre_ParCSRMatrixRowvalues(matrix)       ((matrix) -> rowvalues)
+#define hypre_ParCSRMatrixGetrowactive(matrix)    ((matrix) -> getrowactive)
 
 #endif

@@ -204,6 +204,11 @@ typedef struct
 
    int      num_nonzeros;
 
+   /* Buffers used by GetRow to hold row currently being accessed. AJC, 4/99 */
+   int     *rowindices;
+   double  *rowvalues;
+   int      getrowactive;
+
 } hypre_ParCSRMatrix;
 
 /*--------------------------------------------------------------------------
@@ -229,6 +234,9 @@ hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(matrix))
 #define hypre_ParCSRMatrixNumCols(matrix) \
 hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(matrix))
 #define hypre_ParCSRMatrixNumNonzeros(matrix)     ((matrix) -> num_nonzeros)
+#define hypre_ParCSRMatrixRowindices(matrix)      ((matrix) -> rowindices)
+#define hypre_ParCSRMatrixRowvalues(matrix)       ((matrix) -> rowvalues)
+#define hypre_ParCSRMatrixGetrowactive(matrix)    ((matrix) -> getrowactive)
 
 #endif
 #ifdef __STDC__
@@ -243,6 +251,9 @@ HYPRE_ParCSRMatrix HYPRE_CreateParCSRMatrix P((MPI_Comm comm , int global_num_ro
 int HYPRE_DestroyParCSRMatrix P((HYPRE_ParCSRMatrix matrix ));
 int HYPRE_InitializeParCSRMatrix P((HYPRE_ParCSRMatrix matrix ));
 void HYPRE_PrintParCSRMatrix P((HYPRE_ParCSRMatrix matrix , char *file_name ));
+int HYPRE_GetLocalRangeParcsr P((HYPRE_ParCSRMatrix matrix , int *start , int *end ));
+int HYPRE_GetRowParCSRMatrix P((HYPRE_ParCSRMatrix matrix , int row , int *size , int **col_ind , double **values ));
+int HYPRE_RestoreRowParCSRMatrix P((HYPRE_ParCSRMatrix matrix , int row , int *size , int **col_ind , double **values ));
 
 /* HYPRE_parcsr_vector.c */
 HYPRE_ParVector HYPRE_CreateParVector P((MPI_Comm comm , int global_size , int *partitioning ));
@@ -281,6 +292,9 @@ int hypre_SetParCSRMatrixRowStartsOwner P((hypre_ParCSRMatrix *matrix , int owns
 int hypre_SetParCSRMatrixColStartsOwner P((hypre_ParCSRMatrix *matrix , int owns_col_starts ));
 hypre_ParCSRMatrix *hypre_ReadParCSRMatrix P((MPI_Comm comm , char *file_name ));
 int hypre_PrintParCSRMatrix P((hypre_ParCSRMatrix *matrix , char *file_name ));
+int hypre_GetLocalRangeParCSRMatrix P((hypre_ParCSRMatrix *matrix , int *start , int *end ));
+int hypre_GetRowParCSRMatrix P((hypre_ParCSRMatrix *mat , int row , int *size , int **col_ind , double **values ));
+int hypre_RestoreRowParCSRMatrix P((hypre_ParCSRMatrix *matrix , int row , int *size , int **col_ind , double **values ));
 hypre_ParCSRMatrix *hypre_CSRMatrixToParCSRMatrix P((MPI_Comm comm , hypre_CSRMatrix *A , int *row_starts , int *col_starts ));
 int GenerateDiagAndOffd P((hypre_CSRMatrix *A , hypre_ParCSRMatrix *matrix , int first_col_diag , int last_col_diag ));
 hypre_CSRMatrix *hypre_MergeDiagAndOffd P((hypre_ParCSRMatrix *par_matrix ));

@@ -14,6 +14,14 @@
 
 #include "headers.h"
 
+#include "../seq_matrix_vector/HYPRE_mv.h"
+/* In addition to publically accessible interface in HYPRE_mv.h, the implementation
+   in this file uses accessor macros into the sequential matrix structure, and
+   so includes the .h that defines that structure. Should those accessor functions
+   become proper functions at some later date, this will not be necessary. AJC 4/99
+*/
+#include "../seq_matrix_vector/csr_matrix.h"
+
 /*--------------------------------------------------------------------------
  * hypre_CreateParCSRMatrix
  *--------------------------------------------------------------------------*/
@@ -80,6 +88,10 @@ hypre_CreateParCSRMatrix( MPI_Comm comm,
    if (row_starts == col_starts)
    	hypre_ParCSRMatrixOwnsColStarts(matrix) = 0;
 
+   hypre_ParCSRMatrixRowindices(matrix) = NULL;
+   hypre_ParCSRMatrixRowvalues(matrix) = NULL;
+   hypre_ParCSRMatrixGetrowactive(matrix) = 0;
+
    return matrix;
 }
 
@@ -107,6 +119,10 @@ hypre_DestroyParCSRMatrix( hypre_ParCSRMatrix *matrix )
       	      hypre_TFree(hypre_ParCSRMatrixRowStarts(matrix));
       if ( hypre_ParCSRMatrixOwnsColStarts(matrix) )
       	      hypre_TFree(hypre_ParCSRMatrixColStarts(matrix));
+
+      hypre_TFree(hypre_ParCSRMatrixRowindices(matrix));
+      hypre_TFree(hypre_ParCSRMatrixRowvalues(matrix));
+
       hypre_TFree(matrix);
    }
 
@@ -340,6 +356,186 @@ hypre_PrintParCSRMatrix( hypre_ParCSRMatrix *matrix,
    fclose(fp);
 
    return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_GetLocalRangeParCSRMatrix
+ * returns the row numbers of the rows stored on this processor.
+ * "End" is actually the row number of the first row on the next processor,
+ *  not the row number of the last row on this processor.
+ *--------------------------------------------------------------------------*/
+
+int 
+hypre_GetLocalRangeParCSRMatrix( hypre_ParCSRMatrix *matrix,
+                         int               *start,
+                         int               *end )
+{  
+   int ierr=0;
+   int my_id;
+
+   MPI_Comm_rank( hypre_ParCSRMatrixComm(matrix), &my_id );
+
+   *start = hypre_ParCSRMatrixRowStarts(matrix)[ my_id ];
+   *end = hypre_ParCSRMatrixRowStarts(matrix)[ my_id + 1 ];
+
+   return( ierr );
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_GetRowParCSRMatrix
+ * Returns global column indices and/or values for a given row in the global
+ * matrix. Global row number is used, but the row must be stored locally or
+ * an error is returned. This implementation copies from the two matrices that
+ * store the local data, storing them in the hypre_ParCSRMatrix structure.
+ * Only a single row can be accessed via this function at any one time; the
+ * corresponding RestoreRow function must be called, to avoid bleeding memory,
+ * and to be able to look at another row.
+ * Either one of col_ind and values can be left null, and those values will
+ * not be returned.
+ * All indices are returned in 0-based indexing, no matter what is used under
+ * the hood. EXCEPTION: currently this only works if the local CSR matrices
+ * use 0-based indexing.
+ * This code, semantics, implementation, etc., are all based on PETSc's MPI_AIJ
+ * matrix code, adjusted for our data and software structures.
+ * AJC 4/99.
+ *--------------------------------------------------------------------------*/
+
+int 
+hypre_GetRowParCSRMatrix( hypre_ParCSRMatrix  *mat,
+                         int                row,
+                         int               *size,
+                         int               **col_ind,
+                         double            **values )
+{  
+   int ierr;
+   int my_id;
+   int row_start, row_end;
+   hypre_CSRMatrix *Aa = (hypre_CSRMatrix *) hypre_ParCSRMatrixDiag(mat);
+   hypre_CSRMatrix *Ba = (hypre_CSRMatrix *) hypre_ParCSRMatrixOffd(mat);
+   
+
+   if (hypre_ParCSRMatrixGetrowactive(mat)) return(-1);
+
+   MPI_Comm_rank( hypre_ParCSRMatrixComm(mat), &my_id );
+
+   hypre_ParCSRMatrixGetrowactive(mat) = 1;
+
+   row_end = hypre_ParCSRMatrixRowStarts(mat)[ my_id + 1 ];
+   row_start = hypre_ParCSRMatrixRowStarts(mat)[ my_id ];
+
+   if (row < row_start || row >= row_end) return(-1);
+
+   /* if buffer is not allocated and some information is requested,
+      allocate buffer */
+   if (!hypre_ParCSRMatrixRowvalues(mat) && ( col_ind || values )) 
+   {
+    /*
+        allocate enough space to hold information from the longest row.
+    */
+     int     max = 1,tmp;
+     int i;
+     int     m = row_end-row_start;
+
+     for ( i=0; i<m; i++ ) {
+       tmp = hypre_CSRMatrixI(Aa)[i+1] - hypre_CSRMatrixI(Aa)[i] + 
+             hypre_CSRMatrixI(Ba)[i+1] - hypre_CSRMatrixI(Ba)[i];
+       if (max < tmp) { max = tmp; }
+     }
+
+     hypre_ParCSRMatrixRowvalues(mat) = (double *) hypre_CTAlloc
+                             ( double, mat ); 
+     hypre_ParCSRMatrixRowindices(mat) = (int *) hypre_CTAlloc
+                             ( int, mat ); 
+   }
+
+   /* Copy from dual sequential matrices into buffer */
+   {
+   double     *vworkA, *vworkB, **pvA, **pvB,*v_p;
+   int        i, ierr, *cworkA, *cworkB, **pcA, **pcB, 
+              cstart = hypre_ParCSRMatrixFirstColDiag(mat);
+   int        nztot, nzA, nzB, lrow=row-row_start;
+   int        *cmap, *idx_p;
+
+   pvA = &vworkA; pcA = &cworkA; pvB = &vworkB; pcB = &cworkB;
+   if (!values)   {pvA = 0; pvB = 0;}
+   if (!col_ind) {pcA = 0; if (!values) pcB = 0;}
+
+   nzA = hypre_CSRMatrixI(Aa)[lrow+1]-hypre_CSRMatrixI(Aa)[lrow];
+   pcA = &( hypre_CSRMatrixJ(Aa) );
+   pvA = &( hypre_CSRMatrixData(Aa) );
+
+   nzB = hypre_CSRMatrixI(Ba)[lrow+1]-hypre_CSRMatrixI(Ba)[lrow];
+   pcB = &( hypre_CSRMatrixJ(Ba) );
+   pvB = &( hypre_CSRMatrixData(Ba) );
+
+   nztot = nzA + nzB;
+
+   cmap  = hypre_ParCSRMatrixColMapOffd(mat);
+
+   if (values  || col_ind) {
+     if (nztot) {
+       /* Sort by increasing column numbers, assuming A and B already sorted */
+       int imark = -1;
+       if (values) {
+         *values = v_p = hypre_ParCSRMatrixRowvalues(mat);
+         for ( i=0; i<nzB; i++ ) {
+           if (cmap[cworkB[i]] < cstart)   v_p[i] = vworkB[i];
+           else break;
+         }
+         imark = i;
+         for ( i=0; i<nzA; i++ )     v_p[imark+i] = vworkA[i];
+         for ( i=imark; i<nzB; i++ ) v_p[nzA+i]   = vworkB[i];
+       }
+       if (col_ind) {
+         *col_ind = idx_p = hypre_ParCSRMatrixRowindices(mat);
+         if (imark > -1) {
+           for ( i=0; i<imark; i++ ) {
+             idx_p[i] = cmap[cworkB[i]];
+           }
+         } else {
+           for ( i=0; i<nzB; i++ ) {
+             if (cmap[cworkB[i]] < cstart)   idx_p[i] = cmap[cworkB[i]];
+             else break;
+           }
+           imark = i;
+         }
+         for ( i=0; i<nzA; i++ )     idx_p[imark+i] = cstart + cworkA[i];
+         for ( i=imark; i<nzB; i++ ) idx_p[nzA+i]   = cmap[cworkB[i]];
+       } 
+     } 
+     else {
+       if (col_ind) *col_ind = 0; 
+       if (values)   *values   = 0;
+     }
+   }
+   *size = nztot;
+
+   } /* End of copy */
+
+
+   return( ierr );
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_RestoreRowParCSRMatrix
+ *--------------------------------------------------------------------------*/
+
+int 
+hypre_RestoreRowParCSRMatrix( hypre_ParCSRMatrix *matrix,
+                         int                row,
+                         int               *size,
+                         int               **col_ind,
+                         double            **values )
+{  
+   int ierr=0;
+
+  if (!hypre_ParCSRMatrixGetrowactive(matrix)) {
+    return( -1 );
+  }
+
+  hypre_ParCSRMatrixGetrowactive(matrix)=1;
+
+   return( ierr );
 }
 
 /*--------------------------------------------------------------------------

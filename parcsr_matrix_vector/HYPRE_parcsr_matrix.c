@@ -69,3 +69,54 @@ HYPRE_PrintParCSRMatrix( HYPRE_ParCSRMatrix  matrix,
                             file_name );
 }
 
+/*--------------------------------------------------------------------------
+ * HYPRE_GetLocalRangeParcsr
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_GetLocalRangeParcsr( HYPRE_ParCSRMatrix  matrix,
+                         int               *start,
+                         int               *end )
+{  
+   int ierr;
+
+   ierr = hypre_GetLocalRangeParcsr( (hypre_ParCSRMatrix *) matrix,
+                            start, end );
+   return( ierr );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_GetRowParCSRMatrix
+ *--------------------------------------------------------------------------*/
+
+int 
+HYPRE_GetRowParCSRMatrix( HYPRE_ParCSRMatrix  matrix,
+                         int                row,
+                         int               *size,
+                         int               **col_ind,
+                         double            **values )
+{  
+   int ierr=0;
+   
+   ierr = hypre_GetRowParCSRMatrix( (hypre_ParCSRMatrix *) matrix,
+                            row, size, col_ind, values );
+   return( ierr );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_RestoreRowParCSRMatrix
+ *--------------------------------------------------------------------------*/
+
+int 
+HYPRE_RestoreRowParCSRMatrix( HYPRE_ParCSRMatrix  matrix,
+                         int                row,
+                         int               *size,
+                         int               **col_ind,
+                         double            **values )
+{  
+   int ierr;
+
+   ierr = hypre_RestoreRowParCSRMatrix( (hypre_ParCSRMatrix *) matrix,
+                            row, size, col_ind, values );
+   return( ierr );
+}
