@@ -1,3 +1,4 @@
+
 #include "utilities.h"
 
 #include "HYPRE_struct_mv.h"
@@ -1718,7 +1719,7 @@ int hypre_CreateComputeInfo( hypre_StructGrid *grid , hypre_StructStencil *stenc
 int hypre_ComputePkgCreate( hypre_ComputeInfo *compute_info , hypre_BoxArray *data_space , int num_values , hypre_StructGrid *grid , hypre_ComputePkg **compute_pkg_ptr );
 int hypre_ComputePkgDestroy( hypre_ComputePkg *compute_pkg );
 int hypre_InitializeIndtComputations( hypre_ComputePkg *compute_pkg , double *data , hypre_CommHandle **comm_handle_ptr );
-int hypre_FinalizeIndtComputations( hypre_CommHandle *comm_handle );
+int hypre_FinalizeIndtComputations( hypre_CommHandle *comm_handle , int constant_coefficient );
 
 /* grow.c */
 hypre_BoxArray *hypre_GrowBoxByStencil( hypre_Box *box , hypre_StructStencil *stencil , int transpose );
@@ -1779,11 +1780,11 @@ int hypre_ProjectBoxArrayArray( hypre_BoxArrayArray *box_array_array , hypre_Ind
 int hypre_StructAxpy( double alpha , hypre_StructVector *x , hypre_StructVector *y );
 
 /* struct_communication.c */
-int hypre_CommPkgCreate( hypre_CommInfo *comm_info , hypre_BoxArray *send_data_space , hypre_BoxArray *recv_data_space , int num_values , MPI_Comm comm , hypre_CommPkg **comm_pkg_ptr );
-int hypre_CommTypeSetEntries( hypre_CommType *comm_type , int *boxnums , hypre_Box *boxes , hypre_Index stride , int num_values , hypre_BoxArray *data_space , int *data_offsets );
-int hypre_CommTypeSetEntry( hypre_Box *box , hypre_Index stride , hypre_Box *data_box , int num_values , int data_box_offset , hypre_CommEntryType *comm_entry );
+int hypre_CommPkgCreate( hypre_CommInfo *comm_info , hypre_BoxArray *send_data_space , hypre_BoxArray *recv_data_space , int num_values , int constant_coefficient , int diag_rank , MPI_Comm comm , hypre_CommPkg **comm_pkg_ptr );
+int hypre_CommTypeSetEntries( hypre_CommType *comm_type , int *boxnums , hypre_Box *boxes , hypre_Index stride , int num_values , hypre_BoxArray *data_space , int *data_offsets , int constant_coefficient );
+int hypre_CommTypeSetEntry( hypre_Box *box , hypre_Index stride , hypre_Box *data_box , int num_values , int data_box_offset , int constant_coefficient , hypre_CommEntryType *comm_entry );
 int hypre_InitializeCommunication( hypre_CommPkg *comm_pkg , double *send_data , double *recv_data , hypre_CommHandle **comm_handle_ptr );
-int hypre_FinalizeCommunication( hypre_CommHandle *comm_handle );
+int hypre_FinalizeCommunication( hypre_CommHandle *comm_handle , int constant_coefficient );
 int hypre_ExchangeLocalData( hypre_CommPkg *comm_pkg , double *send_data , double *recv_data );
 int hypre_CommPkgDestroy( hypre_CommPkg *comm_pkg );
 

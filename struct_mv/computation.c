@@ -293,7 +293,7 @@ hypre_ComputePkgCreate( hypre_ComputeInfo     *compute_info,
    compute_pkg = hypre_CTAlloc(hypre_ComputePkg, 1);
 
    hypre_CommPkgCreate(hypre_ComputeInfoCommInfo(compute_info),
-                       data_space, data_space, num_values,
+                       data_space, data_space, num_values, 0, 0,
                        hypre_StructGridComm(grid), &comm_pkg);
    hypre_ComputePkgCommPkg(compute_pkg) = comm_pkg;
 
@@ -364,11 +364,12 @@ hypre_InitializeIndtComputations( hypre_ComputePkg  *compute_pkg,
  *--------------------------------------------------------------------------*/
 
 int
-hypre_FinalizeIndtComputations( hypre_CommHandle *comm_handle )
+hypre_FinalizeIndtComputations( hypre_CommHandle *comm_handle,
+                                int constant_coefficient )
 {
    int ierr = 0;
 
-   ierr = hypre_FinalizeCommunication(comm_handle);
+   ierr = hypre_FinalizeCommunication(comm_handle, constant_coefficient );
 
    return ierr;
 }
