@@ -13,7 +13,6 @@
 
 
     /* System generated locals */
-    integer a_dim1, a_offset, i__1, i__2;
 
     /* Local variables */
     static integer info;
@@ -177,12 +176,10 @@
 /*        Form  A  when A is stored in the upper triangle. */
 
 	if (*incx == 1 && *incy == 1) {
-	    i__1 = *n;
 	    for (j = 1; j <= *n; ++j) {
 		if (X(j) != 0. || Y(j) != 0.) {
 		    temp1 = *alpha * Y(j);
 		    temp2 = *alpha * X(j);
-		    i__2 = j;
 		    for (i = 1; i <= j; ++i) {
 			A(i,j) = A(i,j) + X(i) * temp1 
 				+ Y(i) * temp2;
@@ -192,14 +189,12 @@
 /* L20: */
 	    }
 	} else {
-	    i__1 = *n;
 	    for (j = 1; j <= *n; ++j) {
 		if (X(jx) != 0. || Y(jy) != 0.) {
 		    temp1 = *alpha * Y(jy);
 		    temp2 = *alpha * X(jx);
 		    ix = kx;
 		    iy = ky;
-		    i__2 = j;
 		    for (i = 1; i <= j; ++i) {
 			A(i,j) = A(i,j) + X(ix) * temp1 
 				+ Y(iy) * temp2;
@@ -218,12 +213,10 @@
 /*        Form  A  when A is stored in the lower triangle. */
 
 	if (*incx == 1 && *incy == 1) {
-	    i__1 = *n;
 	    for (j = 1; j <= *n; ++j) {
 		if (X(j) != 0. || Y(j) != 0.) {
 		    temp1 = *alpha * Y(j);
 		    temp2 = *alpha * X(j);
-		    i__2 = *n;
 		    for (i = j; i <= *n; ++i) {
 			A(i,j) = A(i,j) + X(i) * temp1 
 				+ Y(i) * temp2;
@@ -233,14 +226,12 @@
 /* L60: */
 	    }
 	} else {
-	    i__1 = *n;
 	    for (j = 1; j <= *n; ++j) {
 		if (X(jx) != 0. || Y(jy) != 0.) {
 		    temp1 = *alpha * Y(jy);
 		    temp2 = *alpha * X(jx);
 		    ix = jx;
 		    iy = jy;
-		    i__2 = *n;
 		    for (i = j; i <= *n; ++i) {
 			A(i,j) = A(i,j) + X(ix) * temp1 
 				+ Y(iy) * temp2;
