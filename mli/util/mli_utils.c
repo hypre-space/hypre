@@ -197,7 +197,7 @@ int MLI_Utils_GenPartition(MPI_Comm comm, int nlocal, int **row_part)
 int MLI_Utils_ComputeSpectralRadius(hypre_ParCSRMatrix *Amat, double *max_eigen)
 {
    int             mypid, nprocs, *partition, global_nrows, start_row, end_row;
-   int             it, maxits=10, ierr;
+   int             it, maxits=50, ierr;
    double          norm2, lambda;
    MPI_Comm        comm;
    HYPRE_IJVector  IJvec1, IJvec2;
@@ -237,11 +237,16 @@ int MLI_Utils_ComputeSpectralRadius(hypre_ParCSRMatrix *Amat, double *max_eigen)
    ierr += HYPRE_IJVectorGetObject(IJvec2, (void **) &vec2);
    assert(!ierr);
    HYPRE_ParVectorSetRandomValues( vec1, 2934731 );
+/*
+   HYPRE_ParVectorSetConstantValues( vec1, 1.0 );
+*/
    HYPRE_ParCSRMatrixMatvec(1.0,(HYPRE_ParCSRMatrix) Amat,vec1,0.0,vec2 );
    HYPRE_ParVectorInnerProd( vec2, vec2, &norm2);
+printf("Utils : radius = %e\n", norm2);
    for ( it = 0; it < maxits; it++ )
    {
       HYPRE_ParVectorInnerProd( vec2, vec2, &norm2);
+printf("Utils : radius = %e\n", norm2);
       HYPRE_ParVectorCopy( vec2, vec1);
       norm2 = 1.0 / sqrt(norm2);
       HYPRE_ParVectorScale( norm2, vec1 );
@@ -580,12 +585,12 @@ int MLI_Utils_QR(double *q_array, double *r_array, int nrows, int ncols)
  *--------------------------------------------------------------------------*/
  
 int MLI_Utils_HypreMatrixRead(char *filename, MPI_Comm mpi_comm, int blksize,
-                              void **Amat)
+                              void **Amat, int scale_flag, double **scale_vec)
 {
    int    mypid, nprocs, curr_proc, global_nrows, local_nrows, start_row;
    int    irow, col_num, *inds, *mat_ia, *mat_ja, *temp_ja, length, row_num;
    int    j, nnz, curr_bufsize, *row_lengths, ierr;
-   double col_val, *vals, *mat_aa, *temp_aa;
+   double col_val, *vals, *mat_aa, *temp_aa, *diag=NULL, *diag2=NULL, scale;
    FILE   *fp;
    hypre_ParCSRMatrix *hypreA;
    HYPRE_IJMatrix     IJmat;
@@ -619,6 +624,7 @@ int MLI_Utils_HypreMatrixRead(char *filename, MPI_Comm mpi_comm, int blksize,
          start_row   = local_nrows * mypid;
          if ( mypid == nprocs - 1 ) local_nrows = global_nrows - start_row;
 
+         if (scale_flag) diag = (double *) malloc(sizeof(double)*global_nrows);
          for ( irow = 0; irow < start_row; irow++ )
          {
             fscanf( fp, "%ld", &col_num );
@@ -626,6 +632,7 @@ int MLI_Utils_HypreMatrixRead(char *filename, MPI_Comm mpi_comm, int blksize,
             {
                fscanf( fp, "%lg", &col_val );
                fscanf( fp, "%ld", &col_num );
+               if ( scale_flag && col_num == irow ) diag[irow] = col_val;
             } 
          } 
 
@@ -643,6 +650,7 @@ int MLI_Utils_HypreMatrixRead(char *filename, MPI_Comm mpi_comm, int blksize,
                fscanf( fp, "%lg", &col_val );
                mat_ja[nnz] = col_num;
                mat_aa[nnz++] = col_val;
+               if ( scale_flag && col_num == irow ) diag[irow] = col_val;
                if ( nnz >= curr_bufsize )
                {
                   temp_ja = mat_ja;
@@ -662,6 +670,16 @@ int MLI_Utils_HypreMatrixRead(char *filename, MPI_Comm mpi_comm, int blksize,
             } 
             mat_ia[irow-start_row+1] = nnz;
          }
+         for ( irow = start_row+local_nrows; irow < global_nrows; irow++ )
+         {
+            fscanf( fp, "%ld", &col_num );
+            while ( col_num != -1 )
+            {
+               fscanf( fp, "%lg", &col_val );
+               fscanf( fp, "%ld", &col_num );
+               if ( scale_flag && col_num == irow ) diag[irow] = col_val;
+            } 
+         } 
          fclose( fp );
       }
       MPI_Barrier( mpi_comm );
@@ -686,6 +704,12 @@ int MLI_Utils_HypreMatrixRead(char *filename, MPI_Comm mpi_comm, int blksize,
       row_num = irow + start_row;
       inds = &(mat_ja[mat_ia[irow]]);
       vals = &(mat_aa[mat_ia[irow]]);
+      if ( scale_flag ) 
+      {
+         scale = 1.0 / sqrt( diag[irow] );
+         for ( j = 0; j < length; j++ )
+            vals[j] = vals[j] * scale / ( sqrt(diag[inds[j]]) );
+      }
       ierr = HYPRE_IJMatrixSetValues(IJmat, 1, &length,(const int *) &row_num,
                 (const int *) inds, (const double *) vals);
       assert( !ierr );
@@ -701,6 +725,14 @@ int MLI_Utils_HypreMatrixRead(char *filename, MPI_Comm mpi_comm, int blksize,
    HYPRE_IJMatrixSetObjectType(IJmat, -16);
    HYPRE_IJMatrixDestroy(IJmat);
    (*Amat) = (void *) hypreA;
+   if ( scale_flag )
+   {
+      diag2 = (double *) malloc( sizeof(double) * local_nrows);
+      for ( irow = 0; irow < local_nrows; irow++ )
+         diag2[irow] = diag[start_row+irow];
+      free( diag );
+   }
+   (*scale_vec) = diag2;
    return ierr;
 }
 
@@ -712,7 +744,7 @@ int MLI_Utils_DoubleVectorRead(char *filename, MPI_Comm mpi_comm,
                                int length, int start, double *vec)
 {
    int    mypid, nprocs, curr_proc, global_nrows;
-   int    irow, row_num, k;
+   int    irow, row_num, k, k2, numparams=2;
    double value;
    FILE   *fp;
 
@@ -742,18 +774,24 @@ int MLI_Utils_DoubleVectorRead(char *filename, MPI_Comm mpi_comm,
                    start, length);
             exit(1);
          }
+         fscanf( fp, "%ld %lg %ld", &k, &value, &k2 );
+         if ( k2 != 1 ) numparams = 3;
+         fclose( fp );
+         fp = fopen( filename, "r" );
+         fscanf( fp, "%ld", &global_nrows );
          for ( irow = 0; irow < start; irow++ )
          {
             fscanf( fp, "%ld", &k );
             fscanf( fp, "%lg", &value );
-            fscanf( fp, "%ld", &k );
+            if ( numparams == 3 ) fscanf( fp, "%ld", &k2 );
          } 
          for ( irow = start; irow < start+length; irow++ )
          {
             fscanf( fp, "%ld", &k );
-            if ( irow != k ) printf("VectorRead Warning : index mismatch.\n");
+            if ( irow != k )
+               printf("Utils::VectorRead Warning : index mismatch.\n");
             fscanf( fp, "%lg", &value );
-            fscanf( fp, "%ld", &k );
+            if ( numparams == 3 ) fscanf( fp, "%ld", &k2 );
             vec[irow-start] = value;
          }
          fclose( fp );
