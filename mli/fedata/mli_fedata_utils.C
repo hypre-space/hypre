@@ -725,12 +725,13 @@ void MLI_FEDataAgglomerateElemsLocal(MLI_Matrix *elemMatrix,
    for ( ii = 0; ii < localNElems; ii++ )
    {
       rowNum = startElem + ii;
-      hypre_ParCSRMatrixGetRow(hypreEE,rowNum,&neighCnt,NULL,NULL);
+      hypre_ParCSRMatrixGetRow(hypreEE,rowNum,&neighCnt,&cols,NULL);
       if ( neighCnt < minNeighs )
       {
          minNeighs = neighCnt;
          nextElem = ii;
       }
+      hypre_ParCSRMatrixRestoreRow(hypreEE,rowNum,&neighCnt,&cols,NULL);
    }
 
    /* ------------------------------------------------------------------- */
@@ -971,6 +972,7 @@ void MLI_FEDataAgglomerateElemsLocal(MLI_Matrix *elemMatrix,
                   break;
                }
             }
+            hypre_ParCSRMatrixRestoreRow(hypreEE,rowNum,&rowLeng,&cols,&vals);
          }
       }
       for ( ii = 0; ii < localNElems; ii++ )
