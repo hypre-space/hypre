@@ -9,18 +9,46 @@
 #EHEADER***********************************************************************
 
 #=============================================================================
+# Set install directories:
+#=============================================================================
+
+HYPRE_CASC_INSTALL_DIR="/home/casc/software/hypre"
+HYPRE_DEC_INSTALL_DIR="/usr/apps/hypre"
+HYPRE_BLUE_INSTALL_DIR="/usr/apps/hypre"
+HYPRE_RED_INSTALL_DIR="/usr/apps/hypre"
+
+#=============================================================================
 # Parse arguments
 #=============================================================================
 
 case $1 in
     -h|-help) 
-	echo "$0 internal|external [-dec|-blue|-red] [install]"
 	echo 
-	echo "Where:"
-	echo "-dec            LC DEC cluster"
-	echo "-blue           ASCI Blue-Pacific"
-	echo "-red            ASCI Red"
-	echo " install        builds, installs, and cleans source"
+	echo "$0 -h|-help"
+	echo "  prints usage information"
+	echo 
+	echo "(or)"
+	echo 
+	echo "$0 -dirs"
+	echo "  prints current list of install directories"
+	echo 
+	echo "(or)"
+	echo 
+	echo "$0 internal|external [-dec|-blue|-red] [install]"
+	echo "  -dec            LC DEC cluster"
+	echo "  -blue           ASCI Blue-Pacific"
+	echo "  -red            ASCI Red"
+	echo "   install        builds, installs, and cleans source"
+	echo 
+	exit;;
+    -dirs) 
+	echo 
+	echo "internal          $HYPRE_CASC_INSTALL_DIR/internal"
+	echo "external          $HYPRE_CASC_INSTALL_DIR/external"
+	echo "external -dec     $HYPRE_DEC_INSTALL_DIR"
+	echo "external -blue    $HYPRE_BLUE_INSTALL_DIR"
+	echo "external -red     $HYPRE_RED_INSTALL_DIR"
+	echo 
 	exit;;
 esac
 
@@ -40,15 +68,15 @@ do
 case $1 in
     -dec)
 	HYPRE_ARCH="dec"
-	HYPRE_INSTALL_DIR="/usr/apps/hypre"
+	HYPRE_INSTALL_DIR=$HYPRE_DEC_INSTALL_DIR
 	shift;;
     -blue)
 	HYPRE_ARCH="blue"
-	HYPRE_INSTALL_DIR="/usr/apps/hypre"
+	HYPRE_INSTALL_DIR=$HYPRE_BLUE_INSTALL_DIR
 	shift;;
     -red)
 	HYPRE_ARCH="red"
-	HYPRE_INSTALL_DIR="/usr/apps/hypre"
+	HYPRE_INSTALL_DIR=$HYPRE_RED_INSTALL_DIR
 	shift;;
     install) 
 	HYPRE_INSTALL="install"
@@ -65,9 +93,9 @@ then
     HYPRE_ARCH="opt"
     if [ "$HYPRE_INSTALL_TYPE" = "internal" ]
     then
-	HYPRE_INSTALL_DIR="/home/casc/software/hypre/internal"
+	HYPRE_INSTALL_DIR=$HYPRE_CASC_INSTALL_DIR/internal
     else
-	HYPRE_INSTALL_DIR="/home/casc/software/hypre/external"
+	HYPRE_INSTALL_DIR=$HYPRE_CASC_INSTALL_DIR/external
     fi
 fi
 
