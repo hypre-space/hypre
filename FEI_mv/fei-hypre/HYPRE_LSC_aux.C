@@ -148,7 +148,7 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
    double weight, dtemp;
    char   param[256], param1[256], param2[80], param3[80];
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 0 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
    {
       printf("%4d : HYPRE_LSC::entering parameters function.\n",mypid_);
       if ( mypid_ == 0 )
