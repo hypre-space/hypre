@@ -24,12 +24,6 @@
 #include "mpi.h"
 
 
-#define hypre_TimingThreadWrapper(body)\
-   if (pthread_equal(pthread_self(), initial_thread) ||\
-       pthread_equal(pthread_self(), hypre_thread[0])) {\
-      body;\
-   }
-
 #define hypre_BarrierThreadWrapper(body) \
    body;\
    hypre_barrier(&talloc_mtx, pthread_equal(pthread_self(), initial_thread))
