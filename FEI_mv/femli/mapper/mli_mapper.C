@@ -57,6 +57,26 @@ int MLI_Mapper::setMap(int nItems, int *itemList, int *mapList)
 }
 
 /***************************************************************************
+ * adjust map offset (This is used for slide surface reduction)
+ *--------------------------------------------------------------------------*/
+
+int MLI_Mapper::adjustMapOffset(MPI_Comm comm, int *procNRows, 
+                                int *procOffsets)
+{
+   int i, j, nprocs;
+
+   if ( nEntries <= 0 ) return -1;
+   MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
+   for ( i = 0; i < nEntries; i++ ) 
+   {
+      for ( j = 0; j < nprocs; j++ ) 
+         if ( tokenList[i] < procNRows[j] ) break;
+      tokenMap[i] -= procOffsets[j-1];
+   }
+   return 0;
+}
+
+/***************************************************************************
  * get map
  *--------------------------------------------------------------------------*/
 

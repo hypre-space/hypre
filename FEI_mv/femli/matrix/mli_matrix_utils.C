@@ -16,6 +16,10 @@
 #include "matrix/mli_matrix.h"
 #include "util/mli_utils.h"
 
+extern "C" {
+   void qsort0(int *, int, int);
+}
+
 /***************************************************************************
  * compute triple matrix product function 
  *--------------------------------------------------------------------------*/
@@ -24,10 +28,10 @@ int MLI_Matrix_ComputePtAP(MLI_Matrix *Pmat, MLI_Matrix *Amat,
                            MLI_Matrix **RAPmat_out)
 {
    int          ierr;
-   char         param_string[200];
+   char         paramString[200];
    void         *Pmat2, *Amat2, *RAPmat2;
    MLI_Matrix   *RAPmat;
-   MLI_Function *func_ptr;
+   MLI_Function *funcPtr;
 
    if ( strcmp(Pmat->getName(),"HYPRE_ParCSR") || 
         strcmp(Amat->getName(),"HYPRE_ParCSR") )
@@ -39,11 +43,11 @@ int MLI_Matrix_ComputePtAP(MLI_Matrix *Pmat, MLI_Matrix *Amat,
    Amat2 = (void *) Amat->getMatrix();
    ierr = MLI_Utils_HypreMatrixComputeRAP(Pmat2,Amat2,&RAPmat2);
    if ( ierr ) cout << "ERROR in MLI_Matrix_ComputePtAP\n";
-   sprintf(param_string, "HYPRE_ParCSR");
-   func_ptr = new MLI_Function();
-   MLI_Utils_HypreMatrixGetDestroyFunc(func_ptr);
-   RAPmat = new MLI_Matrix(RAPmat2,param_string,func_ptr);
-   delete func_ptr;
+   sprintf(paramString, "HYPRE_ParCSR");
+   funcPtr = new MLI_Function();
+   MLI_Utils_HypreMatrixGetDestroyFunc(funcPtr);
+   RAPmat = new MLI_Matrix(RAPmat2,paramString,funcPtr);
+   delete funcPtr;
    (*RAPmat_out) = RAPmat;
    return 0;
 }
@@ -55,9 +59,9 @@ int MLI_Matrix_ComputePtAP(MLI_Matrix *Pmat, MLI_Matrix *Amat,
 int MLI_Matrix_FormJacobi(MLI_Matrix *Amat, double alpha, MLI_Matrix **Jmat)
 {
    int          ierr;
-   char         param_string[200];
+   char         paramString[200];
    void         *A, *J;
-   MLI_Function *func_ptr;
+   MLI_Function *funcPtr;
    
    if ( strcmp(Amat->getName(),"HYPRE_ParCSR") ) 
    {
@@ -67,11 +71,11 @@ int MLI_Matrix_FormJacobi(MLI_Matrix *Amat, double alpha, MLI_Matrix **Jmat)
    A = (void *) Amat->getMatrix();;
    ierr = MLI_Utils_HypreMatrixFormJacobi(A, alpha, &J);
    if ( ierr ) cout << "ERROR in MLI_Matrix_FormJacobi\n";
-   sprintf(param_string, "HYPRE_ParCSR");
-   func_ptr = new MLI_Function();
-   MLI_Utils_HypreMatrixGetDestroyFunc(func_ptr);
-   (*Jmat) = new MLI_Matrix(J,param_string,func_ptr);
-   delete func_ptr;
+   sprintf(paramString, "HYPRE_ParCSR");
+   funcPtr = new MLI_Function();
+   MLI_Utils_HypreMatrixGetDestroyFunc(funcPtr);
+   (*Jmat) = new MLI_Matrix(J,paramString,funcPtr);
+   delete funcPtr;
    return ierr;
 }
 
@@ -82,9 +86,9 @@ int MLI_Matrix_FormJacobi(MLI_Matrix *Amat, double alpha, MLI_Matrix **Jmat)
 int MLI_Matrix_Compress(MLI_Matrix *Amat, int blksize, MLI_Matrix **Amat2)
 {
    int          ierr;
-   char         param_string[200];
+   char         paramString[200];
    void         *A, *A2;
-   MLI_Function *func_ptr;
+   MLI_Function *funcPtr;
    
    if ( strcmp(Amat->getName(),"HYPRE_ParCSR") ) 
    {
@@ -100,11 +104,323 @@ int MLI_Matrix_Compress(MLI_Matrix *Amat, int blksize, MLI_Matrix **Amat2)
    A = (void *) Amat->getMatrix();;
    ierr = MLI_Utils_HypreMatrixCompress(A, blksize, &A2);
    if ( ierr ) cout << "ERROR in MLI_Matrix_Compress\n";
-   sprintf(param_string, "HYPRE_ParCSR");
-   func_ptr = new MLI_Function();
-   MLI_Utils_HypreMatrixGetDestroyFunc(func_ptr);
-   (*Amat2) = new MLI_Matrix(A2,param_string,func_ptr);
-   delete func_ptr;
+   sprintf(paramString, "HYPRE_ParCSR");
+   funcPtr = new MLI_Function();
+   MLI_Utils_HypreMatrixGetDestroyFunc(funcPtr);
+   (*Amat2) = new MLI_Matrix(A2,paramString,funcPtr);
+   delete funcPtr;
    return ierr;
+}
+
+/***************************************************************************
+ * get submatrix given row indices
+ *--------------------------------------------------------------------------*/
+
+int MLI_Matrix_GetSubMatrix(MLI_Matrix *A_in, int nRows, int *rowIndices,
+                            int *newNRows, double **newAA)
+{
+   int        mypid, nprocs, *partition, startRow, endRow, localNRows;
+   int        i, j, myNRows, irow, rowInd, rowLeng, *cols, *myRowIndices;
+   double     *AA, *vals;
+   hypre_ParCSRMatrix *A;
+   MPI_Comm           comm;
+
+   /*-----------------------------------------------------------------
+    * fetch machine and matrix parameters (off_offset)
+    *-----------------------------------------------------------------*/
+
+   A = (hypre_ParCSRMatrix *) A_in;
+   comm = hypre_ParCSRMatrixComm(A);
+   MPI_Comm_rank(comm, &mypid);  
+   MPI_Comm_size(comm, &nprocs);  
+   HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) A, &partition);
+   startRow = partition[mypid];
+   endRow   = partition[mypid+1] - 1;
+   localNRows = endRow - startRow + 1;
+   free( partition );
+
+   myNRows = 0;
+   for ( irow = 0; irow < nRows; irow++ )
+   {
+      rowInd = rowIndices[irow];
+      if ( rowInd >= startRow && rowInd < endRow )
+      {
+         hypre_ParCSRMatrixGetRow(A,rowInd,&rowLeng,&cols,NULL);
+         myNRows += rowLeng;
+         hypre_ParCSRMatrixRestoreRow(A,rowInd,&rowLeng,&cols,NULL);
+      }
+   }
+
+   myRowIndices = new int[myNRows]; 
+   myNRows = 0;
+   for ( irow = 0; irow < nRows; irow++ )
+   {
+      rowInd = rowIndices[irow];
+      if ( rowInd >= startRow && rowInd < endRow )
+      {
+         hypre_ParCSRMatrixGetRow(A,rowInd,&rowLeng,&cols,NULL);
+         for ( i = 0; i < rowLeng; i++ )
+            myRowIndices[myNRows++] = cols[i];
+         hypre_ParCSRMatrixRestoreRow(A,rowInd,&rowLeng,&cols,NULL);
+      }
+   }
+
+   qsort0(myRowIndices, 0, myNRows-1);
+   j = 1;
+   for ( i = 1; i < myNRows; i++ )
+      if ( myRowIndices[i] != myRowIndices[j-1] ) 
+         myRowIndices[j++] = myRowIndices[i]; 
+   myNRows = j;
+
+   AA = new double[myNRows*myNRows];
+   for ( irow = 0; irow < myNRows*myNRows; irow++ ) AA[i] = 0.0;
+
+   for ( irow = 0; irow < myNRows; irow++ )
+   {
+      rowInd = myRowIndices[irow];
+      if ( rowInd >= startRow && rowInd < endRow )
+      {
+         hypre_ParCSRMatrixGetRow(A,rowInd,&rowLeng,&cols,&vals);
+         for ( i = 0; i < rowLeng; i++ )
+            AA[(cols[i]-startRow)*myNRows+irow]; 
+         hypre_ParCSRMatrixRestoreRow(A,rowInd,&rowLeng,&cols,&vals);
+      }
+   }
+
+   (*newAA) = AA;
+   (*newNRows) = myNRows;
+   return 0;
+}
+
+/***************************************************************************
+ * get submatrix given row indices
+ *--------------------------------------------------------------------------*/
+
+int MLI_Matrix_GetOverlappedMatrix(MLI_Matrix *mli_mat, int *offNRows, 
+                 int **offRowLengths, int **offCols, double **offVals)
+{
+   int         i, j, k, mypid, nprocs, *partition, startRow, endRow;
+   int         localNrows, extNrows, nSends, *sendProcs, nRecvs;
+   int         *recvProcs, *recvStarts, proc, offset, length, reqNum; 
+   int         totalSendNnz, totalRecvNnz, index, base, totalSends;
+   int         totalRecvs, rowNum, rowLength, *colInd, *sendStarts;
+   int         localNRows, limit, *isendBuf, *cols, curNnz, *rowIndices; 
+   double      *dsendBuf, *vals, *colVal;
+   hypre_ParCSRMatrix  *A;
+   MPI_Comm            comm;
+   MPI_Request         *requests;
+   MPI_Status          *status;
+   hypre_ParCSRCommPkg *commPkg;
+
+   /*-----------------------------------------------------------------
+    * fetch machine and matrix parameters (off_offset)
+    *-----------------------------------------------------------------*/
+
+   A    = (hypre_ParCSRMatrix *) mli_mat->getMatrix();
+   comm = hypre_ParCSRMatrixComm(A);
+   MPI_Comm_rank(comm,&mypid);  
+   MPI_Comm_size(comm,&nprocs);  
+   if ( nprocs == 1 )
+   {
+      (*offNRows) = 0;
+      (*offRowLengths) = NULL;
+      (*offCols) = NULL;
+      (*offVals) = NULL;
+      return 0;
+   }
+   HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) A, &partition);
+   startRow   = partition[mypid];
+   endRow     = partition[mypid+1] - 1;
+   localNRows = endRow - startRow + 1;
+   hypre_TFree( partition );
+
+   /*-----------------------------------------------------------------
+    * fetch matrix communication information (off_nrows)
+    *-----------------------------------------------------------------*/
+
+   hypre_MatvecCommPkgCreate((hypre_ParCSRMatrix *) A);
+   commPkg    = hypre_ParCSRMatrixCommPkg(A);
+   nSends     = hypre_ParCSRCommPkgNumSends(commPkg);
+   sendProcs  = hypre_ParCSRCommPkgSendProcs(commPkg);
+   sendStarts = hypre_ParCSRCommPkgSendMapStarts(commPkg);
+   nRecvs     = hypre_ParCSRCommPkgNumRecvs(commPkg);
+   recvProcs  = hypre_ParCSRCommPkgRecvProcs(commPkg);
+   recvStarts = hypre_ParCSRCommPkgRecvVecStarts(commPkg);
+   requests = hypre_CTAlloc( MPI_Request, nRecvs+nSends );
+   totalSends  = sendStarts[nSends];
+   totalRecvs  = recvStarts[nRecvs];
+   (*offNRows) = totalRecvs;
+
+   /*-----------------------------------------------------------------
+    * construct offRowLengths 
+    *-----------------------------------------------------------------*/
+
+   if ( totalRecvs > 0 ) (*offRowLengths) = new int[totalRecvs];
+   else                  (*offRowLengths) = NULL;
+   reqNum = 0;
+   for (i = 0; i < nRecvs; i++)
+   {
+      proc   = recvProcs[i];
+      offset = recvStarts[i];
+      length = recvStarts[i+1] - offset;
+      MPI_Irecv(&((*offRowLengths)[offset]),length,MPI_INT,proc,13278,comm, 
+                &requests[reqNum++]);
+   }
+   if ( totalSends > 0 ) isendBuf = hypre_CTAlloc( int, totalSends );
+   index = totalSendNnz = 0;
+   for (i = 0; i < nSends; i++)
+   {
+      proc   = sendProcs[i];
+      offset = sendStarts[i];
+      limit  = sendStarts[i+1];
+      length = limit - offset;
+      for (j = offset; j < limit; j++)
+      {
+         rowNum = hypre_ParCSRCommPkgSendMapElmt(commPkg,j) + startRow;
+         hypre_ParCSRMatrixGetRow(A,rowNum,&rowLength,&colInd,NULL);
+         isendBuf[index++] = rowLength;
+         totalSendNnz += rowLength;
+         hypre_ParCSRMatrixRestoreRow(A,rowNum,&rowLength,&colInd,NULL);
+      }
+      MPI_Isend(&isendBuf[offset], length, MPI_INT, proc, 13278, comm, 
+                &requests[reqNum++]);
+   }
+   status = hypre_CTAlloc(MPI_Status, reqNum);
+   MPI_Waitall( reqNum, requests, status );
+   hypre_TFree( status );
+   if ( totalSends > 0 ) hypre_TFree( isendBuf );
+
+   /*-----------------------------------------------------------------
+    * construct row indices 
+    *-----------------------------------------------------------------*/
+
+   if ( totalRecvs > 0 ) rowIndices = new int[totalRecvs];
+   else                  rowIndices = NULL;
+   reqNum = 0;
+   for (i = 0; i < nRecvs; i++)
+   {
+      proc   = recvProcs[i];
+      offset = recvStarts[i];
+      length = recvStarts[i+1] - offset;
+      MPI_Irecv(&(rowIndices[offset]), length, MPI_INT, proc, 13279, comm, 
+                &requests[reqNum++]);
+   }
+   if ( totalSends > 0 ) isendBuf = hypre_CTAlloc( int, totalSends );
+   index = 0;
+   for (i = 0; i < nSends; i++)
+   {
+      proc   = sendProcs[i];
+      offset = sendStarts[i];
+      limit  = sendStarts[i+1];
+      length = limit - offset;
+      for (j = offset; j < limit; j++)
+      {
+         rowNum = hypre_ParCSRCommPkgSendMapElmt(commPkg,j) + startRow;
+         isendBuf[index++] = rowNum;
+      }
+      MPI_Isend(&isendBuf[offset], length, MPI_INT, proc, 13279, comm, 
+                &requests[reqNum++]);
+   }
+   status = hypre_CTAlloc(MPI_Status, reqNum);
+   MPI_Waitall( reqNum, requests, status );
+   hypre_TFree( status );
+   if ( totalSends > 0 ) hypre_TFree( isendBuf );
+
+   /*-----------------------------------------------------------------
+    * construct offCols 
+    *-----------------------------------------------------------------*/
+
+   totalRecvNnz = 0;
+   for (i = 0; i < totalRecvs; i++) totalRecvNnz += (*offRowLengths)[i];
+   if ( totalRecvNnz > 0 )
+   {
+      cols = new int[totalRecvNnz];
+      vals = new double[totalRecvNnz];
+   }
+   reqNum = totalRecvNnz = 0;
+   for (i = 0; i < nRecvs; i++)
+   {
+      proc    = recvProcs[i];
+      offset  = recvStarts[i];
+      length  = recvStarts[i+1] - offset;
+      curNnz = 0;
+      for (j = 0; j < length; j++) curNnz += (*offRowLengths)[offset+j];
+      MPI_Irecv(&cols[totalRecvNnz], curNnz, MPI_INT, proc, 13280, comm, 
+                &requests[reqNum++]);
+      totalRecvNnz += curNnz;
+   }
+   if ( totalSendNnz > 0 ) isendBuf = hypre_CTAlloc( int, totalSendNnz );
+   index = totalSendNnz = 0;
+   for (i = 0; i < nSends; i++)
+   {
+      proc   = sendProcs[i];
+      offset = sendStarts[i];
+      limit  = sendStarts[i+1];
+      length = limit - offset;
+      base   = totalSendNnz;
+      for (j = offset; j < limit; j++)
+      {
+         rowNum = hypre_ParCSRCommPkgSendMapElmt(commPkg,j) + startRow;
+         hypre_ParCSRMatrixGetRow(A,rowNum,&rowLength,&colInd,NULL);
+         for (k = 0; k < rowLength; k++) 
+            isendBuf[totalSendNnz++] = colInd[k];
+         hypre_ParCSRMatrixRestoreRow(A,rowNum,&rowLength,&colInd,NULL);
+      }
+      length = totalSendNnz - base;
+      MPI_Isend(&isendBuf[base], length, MPI_INT, proc, 13280, comm, 
+                &requests[reqNum++]);
+   }
+   status = hypre_CTAlloc(MPI_Status, reqNum);
+   MPI_Waitall( reqNum, requests, status );
+   hypre_TFree( status );
+   if ( totalSendNnz > 0 ) hypre_TFree( isendBuf );
+
+   /*-----------------------------------------------------------------
+    * construct offVals 
+    *-----------------------------------------------------------------*/
+
+   reqNum = totalRecvNnz = 0;
+   for (i = 0; i < nRecvs; i++)
+   {
+      proc   = recvProcs[i];
+      offset = recvStarts[i];
+      length = recvStarts[i+1] - offset;
+      curNnz = 0;
+      for (j = 0; j < length; j++) curNnz += (*offRowLengths)[offset+j];
+      MPI_Irecv(&vals[totalRecvNnz], curNnz, MPI_DOUBLE, proc, 13281, comm, 
+                &requests[reqNum++]);
+      totalRecvNnz += curNnz;
+   }
+   if ( totalSendNnz > 0 ) dsendBuf = hypre_CTAlloc( double, totalSendNnz );
+   index = totalSendNnz = 0;
+   for (i = 0; i < nSends; i++)
+   {
+      proc   = sendProcs[i];
+      offset = sendStarts[i];
+      limit  = sendStarts[i+1];
+      length = limit - offset;
+      base   = totalSendNnz;
+      for (j = offset; j < limit; j++)
+      {
+         rowNum = hypre_ParCSRCommPkgSendMapElmt(commPkg,j) + startRow;
+         hypre_ParCSRMatrixGetRow(A,rowNum,&rowLength,NULL,&colVal);
+         for (k = 0; k < rowLength; k++) 
+            dsendBuf[totalSendNnz++] = colVal[k];
+         hypre_ParCSRMatrixRestoreRow(A,rowNum,&rowLength,NULL,&colVal);
+      }
+      length = totalSendNnz - base;
+      MPI_Isend(&dsendBuf[base], length, MPI_DOUBLE, proc, 13281, comm, 
+                &requests[reqNum++]);
+   }
+   status = hypre_CTAlloc(MPI_Status, reqNum);
+   MPI_Waitall( reqNum, requests, status );
+   hypre_TFree( status );
+   if ( totalSendNnz > 0 ) hypre_TFree( dsendBuf );
+
+   if ( nSends+nRecvs > 0 ) hypre_TFree( requests );
+
+   (*offCols) = cols;
+   (*offVals) = vals;
+   return 0;
 }
 

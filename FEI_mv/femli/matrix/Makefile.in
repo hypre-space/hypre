@@ -31,6 +31,7 @@ CFLAGS =\
  -I$(srcdir)/../../../utilities\
  -I$(srcdir)/../../../parcsr_mv\
  -I$(srcdir)/../../../seq_mv\
+ -I$(srcdir)/../../../IJ_mv\
  ${CINCLUDES}\
  ${CDEFS}
  
@@ -43,9 +44,26 @@ CXXFLAGS =\
  -I$(srcdir)/../../../utilities\
  -I$(srcdir)/../../../parcsr_mv\
  -I$(srcdir)/../../../seq_mv\
+ -I$(srcdir)/../../../IJ_mv\
  ${CXXINCLUDES}\
  ${CXXDEFS}
  
+MPILIBFLAGS =  -L/usr/local/mpich-1.1.2shm/build/alpha/ch_shmem/lib  -lpmpich -lmpich -lrpc -lgs -lpthread  
+LIBFLAGS =   -lm
+LDLIBFLAGS =  
+BLASLIBFLAGS =  -lHYPRE_blas
+
+LFLAGS =\
+ -L.\
+ -L../../hypre/lib\
+ -L../lib\
+ -lHYPRE_mli\
+ -lHYPRE_LSI\
+ -lHYPRE_superlu\
+ -lHYPRE_blas\
+ ${BLASLIBFLAGS} \
+ ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
+
 HEADERS =\
  mli_matrix.h
 
@@ -53,7 +71,11 @@ FILES =\
  mli_matrix.C \
  mli_matrix_utils.C
 
+DRIVER_FILES = driver.C
+
 OBJS = ${FILES:.C=.o}
+
+DRIVER_OBJS = ${DRIVERS_FILE:.C=.o}
 
 ##################################################################
 # Targets
@@ -61,6 +83,10 @@ OBJS = ${FILES:.C=.o}
 
 all: ${OBJS}
  
+driver: ${DRIVER_OBJS} ../lib/libHYPRE_mli.a
+	@echo  "Building" $@ "... "
+	${CXX} -o driver $@.o ${OBJS} ${LFLAGS}
+
 install: all
 	@cp -f *.o ../lib
 #@cp -f $(srcdir)/*.h $$HYPRE_INSTALL_DIR/include/.
