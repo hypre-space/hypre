@@ -29,7 +29,7 @@ perform_test()
   scp -pr linear_solvers ${HYPRE_COMPILE_MACHINE}:${HYPRE_REMOTE_DIR}
 
   echo "scheduling remote autotest...."
-  ssh ${HYPRE_COMPILE_MACHINE} "\
+  ssh -f ${HYPRE_COMPILE_MACHINE} "\
     (\
         cd ${HYPRE_REMOTE_DIR};\
 	. linear_solvers/test/autotest_env;\
@@ -37,7 +37,7 @@ perform_test()
         . linear_solvers/test/autotest_test ${HYPRE_MACHINE_COMMANDS};\
         chgrp -fR hypre ${HYPRE_REMOTE_DIR};\
         chmod -R a+rX,u+w,go-w ${HYPRE_REMOTE_DIR};\
-    )" &
+    )" >/dev/null 2>&1
   echo "returning to autotest...."
 }
 
