@@ -1040,6 +1040,9 @@ void HYPRE_LinSysCore::buildSchurReducedSystem()
        HYPRE_IJMatrixSetValues(reducedA_, 1, &newRowSize, (const int *) &i,
 		(const int *) newColInd, (const double *) newColVal);
        //------------------------------------------------------------------
+
+       delete [] newColInd;
+       delete [] newColVal;
     }
     HYPRE_IJMatrixAssemble(reducedA_);
 
