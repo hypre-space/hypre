@@ -27,10 +27,9 @@
 
 RECIPIENTS="\
  rfalgout@llnl.gov\
- cleary1@llnl.gov\
- treadway1@llnl.gov"
+ treadway@llnl.gov"
 
-HYPRE_MAIL=/usr/ucb/Mail
+HYPRE_MAIL=/usr/bin/mailx
 
 if [ ! -f "$HYPRE_AUTOTEST_DIR/autotest_finished" ]
 then
