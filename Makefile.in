@@ -34,7 +34,7 @@ HYPRE_IJ_DIRS =\
 
 #These are the directories for FEI interface
 HYPRE_FEI_DIRS =\
- FEI_matrix_vector/fei-hypre ${HYPRE_IJ_DIRS}
+ FEI_matrix_vector/fei-hypre
 # FEI_matrix_vector/fei-base\
 # FEI_matrix_vector/isis-mv 
 
@@ -107,9 +107,6 @@ IJ: base
 	    echo ""; \
 	  fi; \
 	done
-
-fei: base
-	@ \
 	HYPRE_INSTALL_DIR=`pwd`/hypre; \
 	export HYPRE_INSTALL_DIR; \
 	for i in ${HYPRE_FEI_DIRS}; \
@@ -117,6 +114,33 @@ fei: base
 	  if [ -d $$i ]; \
 	  then \
 	    echo "Making $$i ..."; \
+	    (cd $$i; make DEFINES=-DNOFEI install); \
+	    echo ""; \
+	  fi; \
+	done; \
+	mkdir -p hypre/tmp; \
+	for i in ${HYPRE_FEI_LIBFILES}; \
+	do \
+	   (cp hypre/lib/$$i hypre/tmp; cd hypre/tmp; ar x $$i; rm -f ___*;);\
+	   if [ $$i = "libHYPRE_DistributedMatrixPilutSolver.a" ]; then \
+	      (cd hypre/tmp; mv -f qsort.o psort.o;); \
+	      (cd hypre/tmp; mv -f qsort_si.o psort_si.o;); \
+	   fi; \
+	done; \
+	(cd hypre/tmp; ar rcu ../lib/libHYPRE_LSI.a *.o;); \
+	rm -rf hypre/tmp; \
+	echo ""
+
+fei: base
+	@ \
+	HYPRE_INSTALL_DIR=`pwd`/hypre; \
+	export HYPRE_INSTALL_DIR; \
+	for i in ${HYPRE_IJ_DIRS} ${HYPRE_FEI_DIRS}; \
+	do \
+	  if [ -d $$i ]; \
+	  then \
+	    echo "Making $$i ..."; \
+	    (cd $$i; make veryclean); \
 	    (cd $$i; make install); \
 	    echo ""; \
 	  fi; \
