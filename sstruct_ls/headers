@@ -37,7 +37,10 @@ extern "C" {
 #===========================================================================
 # Structures and prototypes
 #===========================================================================
-
+cat sstruct_owninfo.h     >> $INTERNAL_HEADER
+cat sstruct_recvinfo.h    >> $INTERNAL_HEADER
+cat sstruct_sendinfo.h    >> $INTERNAL_HEADER
+                                                                                                            
 ../utilities/protos [!F]*.c   >> $INTERNAL_HEADER
 
 #===========================================================================
