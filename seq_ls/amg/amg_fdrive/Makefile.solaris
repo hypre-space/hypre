@@ -14,18 +14,17 @@
 # Configuration for Solaris
 ##################################################################
 
-AMG_DIR = ..
+#AMG_DIR = ..
 
 CC     = gcc
 CFLAGS = -I${AMG_DIR}/include -I/usr/local/include
 
-F77    = f77
-FFLAGS = -silent
+F77    = /home/casc/g77/bin/g77
+FFLAGS = 
 
 LINK   = gcc
 LFLAGS = -L${AMG_DIR}/lib -lamg \
-         -L/usr/local/lib -L/opt/SUNWspro/SC4.0/lib \
-         -lF77 -lsunmath -lm"
+         -L/usr/local/lib -L/home/casc/g77/lib -lf2c -lm
 
 ##################################################################
 # Main Rules
@@ -35,7 +34,7 @@ all: amg_fdrive amg_fdrive2
 
 amg_fdrive: amg_fdrive.o
 	@echo  "Linking" $@ "... "
-	@${LINK} -o $@ amg_fdrive.o ${LFLAGS}
+	${LINK} -o $@ amg_fdrive.o ${LFLAGS}
 
 amg_fdrive2: amg_fdrive2.o
 	@echo  "Linking" $@ "... "
@@ -47,11 +46,11 @@ amg_fdrive2: amg_fdrive2.o
 
 .c.o:
 	@echo "Making (c) " $@
-	@${CC} -o $@ -c ${CFLAGS} $<
+	${CC} -o $@ -c ${CFLAGS} $<
 
 .f.o:
 	@echo "Making (f) " $@
-	@${F77} -o $@ -c ${FFLAGS} $<
+	${F77} -o $@ -c ${FFLAGS} $<
 
 ##################################################################
 # Miscellaneous rules
