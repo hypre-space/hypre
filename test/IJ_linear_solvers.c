@@ -1473,7 +1473,8 @@ main( int   argc,
       HYPRE_BoomerAMGSetStrongThreshold(amg_solver, strong_threshold);
       HYPRE_BoomerAMGSetTruncFactor(amg_solver, trunc_factor);
 /* note: log is written to standard output, not to file */
-      HYPRE_BoomerAMGSetLogging(amg_solver, ioutdat, "driver.out.log"); 
+      HYPRE_BoomerAMGSetPrintLevel(amg_solver, ioutdat);
+      HYPRE_BoomerAMGSetPrintFileName(amg_solver, "driver.out.log"); 
       HYPRE_BoomerAMGSetCycleType(amg_solver, cycle_type);
       HYPRE_BoomerAMGSetNumGridSweeps(amg_solver, num_grid_sweeps);
       HYPRE_BoomerAMGSetGridRelaxType(amg_solver, grid_relax_type);
@@ -1566,7 +1567,8 @@ main( int   argc,
       HYPRE_BoomerAMGSetStrongThreshold(amg_solver, strong_threshold);
       HYPRE_BoomerAMGSetTruncFactor(amg_solver, trunc_factor);
 /* note: log is written to standard output, not to file */
-      HYPRE_BoomerAMGSetLogging(amg_solver, ioutdat, "driver.out.log");
+      HYPRE_BoomerAMGSetPrintLevel(amg_solver, ioutdat);
+      HYPRE_BoomerAMGSetPrintFileName(amg_solver, "driver.out.log");
       HYPRE_BoomerAMGSetCycleType(amg_solver, cycle_type);
       HYPRE_BoomerAMGSetNumGridSweeps(amg_solver, num_grid_sweeps);
       HYPRE_BoomerAMGSetGridRelaxType(amg_solver, grid_relax_type);
@@ -1665,7 +1667,8 @@ main( int   argc,
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
          HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
-         HYPRE_BoomerAMGSetLogging(pcg_precond, poutdat, "driver.out.log");
+         HYPRE_BoomerAMGSetPrintLevel(pcg_precond, poutdat);
+         HYPRE_BoomerAMGSetPrintFileName(pcg_precond, "driver.out.log");
          HYPRE_BoomerAMGSetMaxIter(pcg_precond, 1);
          HYPRE_BoomerAMGSetCycleType(pcg_precond, cycle_type);
          HYPRE_BoomerAMGSetNumGridSweeps(pcg_precond, num_grid_sweeps);
@@ -1775,7 +1778,8 @@ main( int   argc,
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
          HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
-         HYPRE_BoomerAMGSetLogging(pcg_precond, poutdat, "driver.out.log");
+         HYPRE_BoomerAMGSetPrintLevel(pcg_precond, poutdat);
+         HYPRE_BoomerAMGSetPrintFileName(pcg_precond, "driver.out.log");
          HYPRE_BoomerAMGSetMaxIter(pcg_precond, 1);
          HYPRE_BoomerAMGSetCycleType(pcg_precond, cycle_type);
          HYPRE_BoomerAMGSetNumGridSweeps(pcg_precond, num_grid_sweeps);
@@ -1915,7 +1919,8 @@ main( int   argc,
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
          HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
-         HYPRE_BoomerAMGSetLogging(pcg_precond, poutdat, "driver.out.log");
+         HYPRE_BoomerAMGSetPrintLevel(pcg_precond, poutdat);
+         HYPRE_BoomerAMGSetPrintFileName(pcg_precond, "driver.out.log");
          HYPRE_BoomerAMGSetMaxIter(pcg_precond, 1);
          HYPRE_BoomerAMGSetCycleType(pcg_precond, cycle_type);
          HYPRE_BoomerAMGSetNumGridSweeps(pcg_precond, num_grid_sweeps);
@@ -2100,7 +2105,8 @@ main( int   argc,
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
          HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
-         HYPRE_BoomerAMGSetLogging(pcg_precond, poutdat, "driver.out.log");
+         HYPRE_BoomerAMGSetPrintLevel(pcg_precond, poutdat);
+         HYPRE_BoomerAMGSetPrintFileName(pcg_precond, "driver.out.log");
          HYPRE_BoomerAMGSetMaxIter(pcg_precond, 1);
          HYPRE_BoomerAMGSetCycleType(pcg_precond, cycle_type);
          HYPRE_BoomerAMGSetNumGridSweeps(pcg_precond, num_grid_sweeps);
@@ -2253,7 +2259,8 @@ main( int   argc,
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
          HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
-         HYPRE_BoomerAMGSetLogging(pcg_precond, poutdat, "driver.out.log");
+         HYPRE_BoomerAMGSetPrintLevel(pcg_precond, poutdat);
+         HYPRE_BoomerAMGSetPrintFileName(pcg_precond, "driver.out.log");
          HYPRE_BoomerAMGSetMaxIter(pcg_precond, 1);
          HYPRE_BoomerAMGSetCycleType(pcg_precond, cycle_type);
          HYPRE_BoomerAMGSetNumGridSweeps(pcg_precond, num_grid_sweeps);

@@ -1945,7 +1945,8 @@ main( int   argc,
          HYPRE_BoomerAMGSetCoarsenType(par_precond, 6);
          HYPRE_BoomerAMGSetStrongThreshold(par_precond, 0.25);
          HYPRE_BoomerAMGSetTol(par_precond, 0.0);
-         HYPRE_BoomerAMGSetLogging(par_precond, 1, "sstruct.out.log");
+         HYPRE_BoomerAMGSetPrintLevel(par_precond, 1);
+         HYPRE_BoomerAMGSetPrintFileName(par_precond, "sstruct.out.log");
          HYPRE_BoomerAMGSetMaxIter(par_precond, 1);
          HYPRE_PCGSetPrecond( par_solver,
                              (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,
@@ -2102,7 +2103,8 @@ main( int   argc,
          HYPRE_BoomerAMGSetCoarsenType(par_precond, 6);
          HYPRE_BoomerAMGSetStrongThreshold(par_precond, 0.25);
          HYPRE_BoomerAMGSetTol(par_precond, 0.0);
-         HYPRE_BoomerAMGSetLogging(par_precond, 1, "sstruct.out.log");
+         HYPRE_BoomerAMGSetPrintLevel(par_precond, 1);
+         HYPRE_BoomerAMGSetPrintFileName(par_precond, "sstruct.out.log");
          HYPRE_BoomerAMGSetMaxIter(par_precond, 1);
          HYPRE_GMRESSetPrecond( par_solver,
                                 (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,
