@@ -34,8 +34,8 @@ veryclean: clean
 	@/bin/rm -f  usr_manual.ps
 	@/bin/rm -fr dev_manual
 	@/bin/rm -f  dev_manual.ps
-	@/bin/rm -f  code_ref.tex code code_ref.ps
 	@/bin/rm -fr code_ref_html
+	@/bin/rm -f  code_ref.tex code_ref.ps
 
 ##################################################################
 # Rules
@@ -78,6 +78,37 @@ usr_manual.idx: ${USR_FILES}
 
 ##########
 
+DEV_FILES =\
+ dev_QA.tex\
+ dev_autotest.tex\
+ dev_coding.tex\
+ dev_design.tex\
+ dev_documentation.tex\
+ dev_error_handling.tex\
+ dev_install.tex\
+ dev_language_interop.tex\
+ dev_makefile.tex\
+ dev_manual.tex\
+ dev_reference.tex\
+ dev_requirements.tex
+
+dev_manual/dev_manual.html: dev_manual.dvi
+	latex2html ${ONLINE_OPTS} dev_manual.tex
+
+dev_manual.ps: dev_manual.dvi
+	dvips -o dev_manual.ps dev_manual
+
+dev_manual.dvi: version.tex dev_manual.idx
+	latex dev_manual
+	latex dev_manual
+
+dev_manual.idx: ${DEV_FILES}
+	latex dev_manual
+	#bibtex dev_manual
+	makeindex dev_manual.idx
+
+##########
+
 INTERFACE_DOCIFIED_FILES =\
  ../struct_linear_solvers/HYPRE_struct_pcg.c
 
@@ -112,37 +143,6 @@ code_ref.dvi: code_ref.tex
 
 code_ref.ps: code_ref.dvi
 	dvips -o code_ref.ps code_ref.dvi 		
-
-##########
-
-DEV_FILES =\
- dev_QA.tex\
- dev_autotest.tex\
- dev_coding.tex\
- dev_design.tex\
- dev_documentation.tex\
- dev_error_handling.tex\
- dev_install.tex\
- dev_language_interop.tex\
- dev_makefile.tex\
- dev_manual.tex\
- dev_reference.tex\
- dev_requirements.tex
-
-dev_manual/dev_manual.html: dev_manual.dvi
-	latex2html ${ONLINE_OPTS} dev_manual.tex
-
-dev_manual.ps: dev_manual.dvi
-	dvips -o dev_manual.ps dev_manual
-
-dev_manual.dvi: version.tex dev_manual.idx
-	latex dev_manual
-	latex dev_manual
-
-dev_manual.idx: ${DEV_FILES}
-	latex dev_manual
-	#bibtex dev_manual
-	makeindex dev_manual.idx
 
 ##########
 
