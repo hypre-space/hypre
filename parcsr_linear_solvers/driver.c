@@ -39,6 +39,7 @@ main( int   argc,
 
    /* parameters for BoomerAMG */
    double   strong_threshold;
+   double   trunc_factor;
    int      cycle_type;
    int      coarsen_type = 0;
    int      measure_type = 0;
@@ -197,7 +198,8 @@ main( int   argc,
 
    /* defaults for BoomerAMG */
    strong_threshold = 0.25;
-   cycle_type       = 1;
+   trunc_factor = 0.25;
+   cycle_type = 1;
    relax_weight = 1.0;
 
    num_grid_sweeps = hypre_CTAlloc(int,4);
@@ -207,28 +209,31 @@ main( int   argc,
    if (coarsen_type == -2)
    {
       /* fine grid */
-      num_grid_sweeps[0] = 3;
+      num_grid_sweeps[0] = 4;
       grid_relax_type[0] = relax_default; 
       grid_relax_points[0] = hypre_CTAlloc(int, 4); 
       grid_relax_points[0][0] = -2;
-      grid_relax_points[0][1] = -1;
-      grid_relax_points[0][2] = 1;
+      grid_relax_points[0][1] = -2;
+      grid_relax_points[0][2] = -1;
+      grid_relax_points[0][3] = 1;
    
       /* down cycle */
-      num_grid_sweeps[1] = 3;
+      num_grid_sweeps[1] = 4;
       grid_relax_type[1] = relax_default; 
       grid_relax_points[1] = hypre_CTAlloc(int, 4); 
       grid_relax_points[1][0] = -2;
       grid_relax_points[1][1] = 1;
-      grid_relax_points[1][2] = -1;
+      grid_relax_points[1][2] = -2;
+      grid_relax_points[1][3] = -1;
    
       /* up cycle */
-      num_grid_sweeps[2] = 3;
+      num_grid_sweeps[2] = 4;
       grid_relax_type[2] = relax_default; 
       grid_relax_points[2] = hypre_CTAlloc(int, 4); 
-      grid_relax_points[2][1] = -1;
-      grid_relax_points[2][2] = 1;
       grid_relax_points[2][0] = -2;
+      grid_relax_points[2][1] = -2;
+      grid_relax_points[2][2] = -1;
+      grid_relax_points[2][3] = 1;
    }
    else
    {   
@@ -281,6 +286,11 @@ main( int   argc,
          arg_index++;
          strong_threshold  = atof(argv[arg_index++]);
       }
+      else if ( strcmp(argv[arg_index], "-tr") == 0 )
+      {
+         arg_index++;
+         trunc_factor  = atof(argv[arg_index++]);
+      }
       else if ( strcmp(argv[arg_index], "-iout") == 0 )
       {
          arg_index++;
@@ -331,6 +341,7 @@ main( int   argc,
       printf("       3=Hybrid Jacobi/Gauss-Seidel  \n");
       printf("\n");  
       printf("  -th <val>              : set AMG threshold Theta = val \n");
+      printf("  -tr <val>              : set AMG interpolation truncation factor = val \n");
       printf("  -w  <val>              : set Jacobi relax weight = val\n");
       printf("  -k  <val>              : dimension Krylov space for GMRES\n");
       printf("\n");  
@@ -339,7 +350,7 @@ main( int   argc,
       printf("       2=cycle stats  3=matrix & cycle stats\n"); 
       printf("\n");  
       printf("  -dbg <val>             : set debug flag\n");
-      printf("       0=no debugging 1=internal timing\n");
+      printf("       0=no debugging\n       1=internal timing\n       2=interpolation truncation\n       3=more detailed timing in coarsening routine\n");
       exit(1);
    }
 
@@ -486,6 +497,7 @@ main( int   argc,
       HYPRE_ParAMGSetCoarsenType(amg_solver, coarsen_type);
       HYPRE_ParAMGSetMeasureType(amg_solver, measure_type);
       HYPRE_ParAMGSetStrongThreshold(amg_solver, strong_threshold);
+      HYPRE_ParAMGSetTruncFactor(amg_solver, trunc_factor);
       HYPRE_ParAMGSetLogging(amg_solver, ioutdat, "driver.out.log");
       HYPRE_ParAMGSetCycleType(amg_solver, cycle_type);
       HYPRE_ParAMGSetNumGridSweeps(amg_solver, num_grid_sweeps);
