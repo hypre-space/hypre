@@ -24,29 +24,26 @@
 
 typedef struct
 {
-   int     local_num_rows;   /* defines number of rows on this processors */
-   int     local_num_cols;   /* defines number of cols of diag */
+   int      local_num_rows;   /* defines number of rows on this processors */
+   int      local_num_cols;   /* defines number of cols of diag */
 
-   int	   diag_size;	    /* size of aux_diag_j or aux_diag_data */
-   int	   indx_diag;	   /* first empty element of aux_diag_j(data) */
-   int	   nnz_diag;   /* number of nonzeros entered into the structure */
-   int    *row_start_diag; /* row_start_diag[i] points to first element 
-				of i-th row */
-   int    *row_end_diag; /* row_end_diag[i] points to last element 
-				of i-th row */
-   int    *aux_diag_j;	/* contains collected column indices */
-   double *aux_diag_data; /* contains collected data */
+   int      need_aux; /* if need_aux = 1, aux_j, aux_data are used to
+			generate the parcsr matrix (default),
+			for need_aux = 0, data is put directly into
+			parcsr structure (requires the knowledge of
+			offd_i and diag_i ) */
 
-   int	   offd_size; /* size of aux_offd_j or aux_offd_data */
-   int	   indx_offd; /* first empty element of aux_offd_j(data) */
-   int	   nnz_offd;  /* number of nonzeros entered into the structure */
-   int    *row_start_offd;  /* row_start_offd[i] points to first element 
-                                of i-th row */
-   int    *row_end_offd;  /* row_end_offd[i] points to last element 
-                                of i-th row */
-   int    *aux_offd_j;  /* contains collected column indices */
-   double *aux_offd_data;  /* contains collected data */
+   int     *row_length; /* row_length_diag[i] contains number of stored
+				elements in i-th row */
+   int     *row_space; /* row_space_diag[i] contains space allocated to
+				i-th row */
+   int    **aux_j;	/* contains collected column indices */
+   double **aux_data; /* contains collected data */
 
+   int     *indx_diag; /* indx_diag[i] points to first empty space of portion
+			 in diag_j , diag_data assigned to row i */  
+   int     *indx_offd; /* indx_offd[i] points to first empty space of portion
+			 in offd_j , offd_data assigned to row i */  
 } hypre_AuxParCSRMatrix;
 
 /*--------------------------------------------------------------------------
@@ -56,20 +53,13 @@ typedef struct
 #define hypre_AuxParCSRMatrixLocalNumRows(matrix)  ((matrix) -> local_num_rows)
 #define hypre_AuxParCSRMatrixLocalNumCols(matrix)  ((matrix) -> local_num_cols)
 
-#define hypre_AuxParCSRMatrixDiagSize(matrix)      ((matrix) -> diag_size)
-#define hypre_AuxParCSRMatrixIndxDiag(matrix)      ((matrix) -> indx_diag)
-#define hypre_AuxParCSRMatrixNnzDiag(matrix)       ((matrix) -> nnz_diag)
-#define hypre_AuxParCSRMatrixRowStartDiag(matrix)  ((matrix) -> row_start_diag)
-#define hypre_AuxParCSRMatrixRowEndDiag(matrix)    ((matrix) -> row_end_diag)
-#define hypre_AuxParCSRMatrixAuxDiagJ(matrix)  	   ((matrix) -> aux_diag_j)
-#define hypre_AuxParCSRMatrixAuxDiagData(matrix)   ((matrix) -> aux_diag_data)
+#define hypre_AuxParCSRMatrixNeedAux(matrix)   ((matrix) -> need_aux)
+#define hypre_AuxParCSRMatrixRowLength(matrix) ((matrix) -> row_length)
+#define hypre_AuxParCSRMatrixRowSpace(matrix)  ((matrix) -> row_space)
+#define hypre_AuxParCSRMatrixAuxJ(matrix)      ((matrix) -> aux_j)
+#define hypre_AuxParCSRMatrixAuxData(matrix)   ((matrix) -> aux_data)
 
-#define hypre_AuxParCSRMatrixOffdSize(matrix)      ((matrix) -> offd_size)
-#define hypre_AuxParCSRMatrixIndxOffd(matrix)      ((matrix) -> indx_offd)
-#define hypre_AuxParCSRMatrixNnzOffd(matrix)       ((matrix) -> nnz_offd)
-#define hypre_AuxParCSRMatrixRowStartOffd(matrix)  ((matrix) -> row_start_offd)
-#define hypre_AuxParCSRMatrixRowEndOffd(matrix)    ((matrix) -> row_end_offd)
-#define hypre_AuxParCSRMatrixAuxOffdJ(matrix)  	   ((matrix) -> aux_offd_j)
-#define hypre_AuxParCSRMatrixAuxOffdData(matrix)   ((matrix) -> aux_offd_data)
+#define hypre_AuxParCSRMatrixIndxDiag(matrix)  ((matrix) -> indx_diag)
+#define hypre_AuxParCSRMatrixIndxOffd(matrix)  ((matrix) -> indx_offd)
 
 #endif
