@@ -16,6 +16,35 @@ package Hypre {
    class MPI_Com;
    interface Solver;
    
+   interface Operator {
+      void Apply( in StructVector x, out StructVector b );
+   };
+   // ... Things which inherit from Operator include Matrix, Solver, Vector.
+
+   //   When interpreted as operators, a matrix or solver (inverse matrix)
+   // normally multiplies an input vector to produce an output vector.
+   //   Vectors have more varied common interpretations as operators - multiply
+   // a scalar to get a scalar or vector, or multiply a vector to get a scalar
+   // (dot product), vector (cross product, not normally seen except in 3D), or
+   // matrix (outer product).  Part of this ambiguity arises because a vector,
+   // if seen as a matrix, is ambiguously equivalent to its transpose.
+   //   But even a matrix has alternative interpretations, e.g. scalar to matrix
+   // and matrix to matrix.
+   //   If we choose the Operator interface's Apply to be "right" for a matrix,
+   // that leaves us with the cross product, a poor choice.
+   //   I think that Vector would best not inherit from Operator, despite its
+   // conceptual similarity to Matrix.  It would best be a data member of
+   // operators, as a Matrix can be a data member of a Solver.
+
+   interface LinearOperator extends Operator {
+      void Apply( in StructVector x, out StructVector b );
+   };
+
+   class MPI_Com 
+   {};
+   
+   // ---------------- Grid, matrix, vector interfaces, classes
+
    class Box {
       int NewBox( in array<int,1> lower, in array<int,1> upper,
                   in int dimension );
@@ -26,18 +55,6 @@ package Hypre {
    // to stdout for debugging use.  To do: write "Print" functions
    // which connect to the Hypre "Print" functions - they print
    // complete information to a file, require MPI.
-
-   class MPI_Com 
-   {};
-   
-
-   interface Operator {
-      void Apply( in StructVector x, out StructVector b );
-   };
-
-   interface LinearOperator extends Operator {
-      void Apply( in StructVector x, out StructVector b );
-   };
 
    interface StructuredGridMatrixBuilder {
       int SetGrid( in StructuredGrid grid ); // was SetStructuredGrid
@@ -62,7 +79,7 @@ package Hypre {
       int SetStencil( in StructStencil stencil );
       int SetValues( in Box box, in array<int,1> stencil_indices,
                      in array<double,1> values );
-      void Apply( in StructVector x, out StructVector b );
+      void Apply( in StructVector b, out StructVector x );
       StructMatrix GetConstructedObject();
       };
 
@@ -112,18 +129,25 @@ package Hypre {
       int SetElement( in int element_index, inout array<int,1> element_offset );
    };
    
+  // ---------------- Solver and related interfaces, classes
+
+  // Some "standard" functions can be expected to work differently on different
+  // solvers, hence have keyword strings in their argument lists.
+  // The generic parameter type is a double because that's easily converted
+  // to int but not vice versa.
+
   interface Solver extends LinearOperator {
      void Apply( in StructVector b, out StructVector x );
      StructMatrix GetSystemOperator();
      StructVector GetResidual();
-     void GetConvergenceInfo(); /* not finished */
+     void GetConvergenceInfo( in string name, out double value );
   };
 
   interface PreconditionedSolver {
      void Apply( in StructVector b, out StructVector x );
      StructMatrix GetSystemOperator();
      StructVector GetResidual();
-     void GetConvergenceInfo(); /* not finished */
+     void GetConvergenceInfo( in string name, out double value );
 
      Solver GetPreconditioner();
   };
@@ -153,7 +177,7 @@ package Hypre {
      void Apply( in StructVector b, out StructVector x );
      StructMatrix GetSystemOperator();
      StructVector GetResidual();
-     void GetConvergenceInfo(); /* not finished */
+     void GetConvergenceInfo( in string name, out double value );
 
      void SetSystemOperator( in StructMatrix op );
      double GetParameter( in string name );
@@ -168,7 +192,7 @@ package Hypre {
      void Apply( in StructVector b, out StructVector x );
      StructMatrix GetSystemOperator();
      StructVector GetResidual();
-     void GetConvergenceInfo(); /* not finished */
+     void GetConvergenceInfo( in string name, out double value );
 
      Solver GetPreconditioner();
 
