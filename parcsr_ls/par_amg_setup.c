@@ -234,7 +234,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 	 {
 	    hypre_BoomerAMGCreateSmoothDirs(amg_vdata, A_array[level],
 	       hypre_ParAMGDataNumGridSweeps(amg_data)[1], strong_threshold, 
-               num_functions, dof_func_array[level], &S);
+               level, num_functions, dof_func_array[level], &S);
 	 }
 
          if (coarsen_type == 6)

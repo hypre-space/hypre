@@ -245,7 +245,7 @@ int hypre_ParCSRMatrixFillSmooth( int nsamples , double *samples , hypre_ParCSRM
 int hypre_ParCSRMatrixFillSmoothIncrementally( int nsamples , double *samples , hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *A , double thresh );
 double hypre_ParCSRMatrixChooseThresh( hypre_ParCSRMatrix *S );
 int hypre_ParCSRMatrixThreshold( hypre_ParCSRMatrix *A , double thresh );
-int hypre_BoomerAMGCreateSmoothDirs( void *datay , hypre_ParCSRMatrix *A , int num_sweeps , double thresh , int num_functions , int *dof_func , hypre_ParCSRMatrix **S_ptr );
+int hypre_BoomerAMGCreateSmoothDirs( void *datay , hypre_ParCSRMatrix *A , int num_sweeps , double thresh , int level , int num_functions , int *dof_func , hypre_ParCSRMatrix **S_ptr );
 int hypre_BoomerAMGBuildInterpLinear( void *data , hypre_ParCSRMatrix *P , int *CF_marker );
 int is_strong( hypre_ParCSRMatrix *S , int i , int j );
 double mat_entry( hypre_ParCSRMatrix *S , int i , int j );

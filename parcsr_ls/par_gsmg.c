@@ -487,7 +487,9 @@ hypre_BoomerAMGCreateSmoothDirs(void *datay,
                        hypre_ParCSRMatrix *A,
                        int                    num_sweeps,
                        double                 thresh,
+/**** change ****/
                        int                    level,
+/**** change ****/
                        int                    num_functions, 
                        int                   *dof_func,
                        hypre_ParCSRMatrix   **S_ptr)
