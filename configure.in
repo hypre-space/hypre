@@ -1091,7 +1091,9 @@ case $ARCH in
         if test "$casc_using_openmp" = "yes" ; then
           CFLAGS="$CFLAGS -qsmp=omp "
         fi
+        CFLAGS="$CFLAGS -qmaxmem=8192"
       fi
+      CFLAGS="$CFLAGS -DHYPRE_COMM_SIMPLE"
     fi
     if test -z "$CXXFLAGS"; then
       if test "$CXX" = "g++" ; then
@@ -1099,12 +1101,15 @@ case $ARCH in
       elif test "$CXX" = "KCC" ||
            test "$CXX" = "mpKCC" ; then
         CASC_SET_COPT(+K2)
+        CXXFLAGS="$CXXFLAGS -qmaxmem=8192"
       else
         CASC_SET_CXXOPT(-O3 -qstrict)
         if test "$casc_using_openmp" = "yes" ; then
           CXXFLAGS="$CXXFLAGS -qsmp=omp "
         fi
+        CXXFLAGS="$CXXFLAGS -qmaxmem=8192"
       fi
+      CXXFLAGS="$CXXFLAGS -DHYPRE_COMM_SIMPLE"
     fi
     if test -z "$F77FLAGS"; then
       if test "$F77" = "g77" ; then
@@ -1113,8 +1118,6 @@ case $ARCH in
         CASC_SET_FOPT(-O3 -qstrict)
       fi
     fi
-    CFLAGS="$CFLAGS -qmaxmem=8192 -DHYPRE_COMM_SIMPLE"
-    CXXFLAGS="$CXXFLAGS -qmaxmem=8192 -DHYPRE_COMM_SIMPLE"
     CASC_SET_CDEBUG(-g)
     CASC_SET_CXXDEBUG(-g)
     CASC_SET_FDEBUG(-g) 
