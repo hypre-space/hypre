@@ -1,5 +1,5 @@
 /*BHEADER**********************************************************************
- * (c) 1999   The Regents of the University of California
+ * (c) 2001   The Regents of the University of California
  *
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
@@ -94,7 +94,7 @@ extern "C" {
 #endif
 
    void qsort0(int *, int, int);
-   int  HYPRE_LSI_Sort(int*, int, int *, double *);
+   void qsort1(int *, double *, int, int);
 
 #ifdef HAVE_AMGE
     int HYPRE_LSI_AMGeCreate();
@@ -1396,7 +1396,7 @@ int HYPRE_LinSysCore::putIntoSystemMatrix(int numPtRows, const int* ptRows,
           else tempVal[index] = values[i][j];
        }
        newLeng  = rowLengths_[localRow];
-       HYPRE_LSI_Sort(tempInd, newLeng, NULL, tempVal);
+       qsort1( tempInd, tempVal, 0, newLeng-1 );
     }
     return(0);
 }
@@ -2752,7 +2752,12 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
     // check for the validity of the preconditioner name
     //-------------------------------------------------------------------
 
-    if ( !strcmp(name, "diagonal"  ) )
+    if ( !strcmp(name, "identity"  ) )
+    {
+       strcpy( HYPreconName_, name );
+       HYPreconID_ = HYIDENTITY;
+    }
+    else if ( !strcmp(name, "diagonal"  ) )
     {
        strcpy( HYPreconName_, name );
        HYPreconID_ = HYDIAGONAL;
@@ -2829,6 +2834,10 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
 
     switch ( HYPreconID_ )
     {
+       case HYIDENTITY :
+            HYPrecon_ = NULL;
+            break;
+
        case HYDIAGONAL :
             HYPrecon_ = NULL;
             break;

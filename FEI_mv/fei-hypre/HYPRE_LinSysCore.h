@@ -1,3 +1,11 @@
+/*BHEADER**********************************************************************
+ * (c) 2001   The Regents of the University of California
+ *
+ * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+ * notice, contact person, and disclaimer.
+ *
+ *********************************************************************EHEADER*/
+
 // *************************************************************************
 // This is the HYPRE implementation of LinearSystemCore.
 // *************************************************************************
@@ -5,7 +13,7 @@
 #ifndef _HYPRE_LinSysCore_h_
 #define _HYPRE_LinSysCore_h_
 
-#define HYPRE_FEI_Version() "FEI/HYPRE 2.0.1R4"
+#define HYPRE_FEI_Version() "FEI/HYPRE 2.0.1R5"
 
 // *************************************************************************
 // system libraries used
@@ -31,8 +39,8 @@ class Lookup
 
 enum HYsolverID {HYPCG,HYGMRES,HYCGSTAB,HYCGSTABL,HYTFQMR,HYBICGS,HYAMG,
                  HYSUPERLU,HYSUPERLUX,HYY12M,HYAMGE};
-enum HYpreconID {HYDIAGONAL,HYPILUT,HYPARASAILS,HYBOOMERAMG,HYML,HYDDILUT,
-                 HYPOLY,HYDDICT,HYSCHWARZ,HYEUCLID};
+enum HYpreconID {HYIDENTITY,HYDIAGONAL,HYPILUT,HYPARASAILS,HYBOOMERAMG,HYML,
+                 HYDDILUT, HYPOLY,HYDDICT,HYSCHWARZ,HYEUCLID,HYBLOCK};
 
 #define HYFEI_HIGHMASK      2147483647-255
 #define HYFEI_SPECIALMASK              255

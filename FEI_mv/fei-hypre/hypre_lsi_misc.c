@@ -14,6 +14,7 @@
 #include "utilities/utilities.h"
 #include "IJ_mv/HYPRE_IJ_mv.h"
 #include "parcsr_mv/parcsr_mv.h"
+#include "parcsr_ls/parcsr_ls.h"
 
 extern void qsort1(int*, double*, int, int);
 
@@ -349,226 +350,41 @@ int getMatrixCSR(HYPRE_IJMatrix Amat, int nrows, int nnz, int *ia_ptr,
 }
 
 /* ******************************************************************** */
-/* taken from ML                                                        */
+/* sort integers                                                        */
 /* -------------------------------------------------------------------- */
 
-void HYPRE_LSI_Sort(int list[], int N, int list2[], double list3[])
+void HYPRE_LSI_qsort1a( int *ilist, int *ilist2, int left, int right)
 {
+   int i, last, mid, itemp;
 
-  /* local variables */
-
-  int    l, r, RR, K, j, i, flag;
-  int    RR2;
-  double RR3;
-
-  /*********************** execution begins ******************************/
-
-  if (N <= 1) return;
-
-  l   = N / 2 + 1;
-  r   = N - 1;
-  l   = l - 1;
-  RR  = list[l - 1];
-  K   = list[l - 1];
-
-  if ((list2 != NULL) && (list3 != NULL)) {
-    RR2 = list2[l - 1];
-    RR3 = list3[l - 1];
-    while (r != 0) {
-      j = l;
-      flag = 1;
-
-      while (flag == 1) {
-        i = j;
-        j = j + j;
-
-        if (j > r + 1)
-          flag = 0;
-        else {
-          if (j < r + 1)
-            if (list[j] > list[j - 1]) j = j + 1;
-
-          if (list[j - 1] > K) {
-            list[ i - 1] = list[ j - 1];
-            list2[i - 1] = list2[j - 1];
-            list3[i - 1] = list3[j - 1];
-          }
-          else {
-            flag = 0;
-          }
-        }
-      }
-
-      list[ i - 1] = RR;
-      list2[i - 1] = RR2;
-      list3[i - 1] = RR3;
-
-      if (l == 1) {
-        RR  = list [r];
-        RR2 = list2[r];
-        RR3 = list3[r];
-
-        K = list[r];
-        list[r ] = list[0];
-        list2[r] = list2[0];
-        list3[r] = list3[0];
-        r = r - 1;
-      }
-      else {
-        l   = l - 1;
-        RR  = list[ l - 1];
-        RR2 = list2[l - 1];
-        RR3 = list3[l - 1];
-        K   = list[l - 1];
-      }
-    }
-
-    list[ 0] = RR;
-    list2[0] = RR2;
-    list3[0] = RR3;
-  }
-  else if (list2 != NULL) {
-    RR2 = list2[l - 1];
-    while (r != 0) {
-      j = l;
-      flag = 1;
-
-      while (flag == 1) {
-        i = j;
-        j = j + j;
-
-        if (j > r + 1)
-          flag = 0;
-        else {
-          if (j < r + 1)
-            if (list[j] > list[j - 1]) j = j + 1;
-
-          if (list[j - 1] > K) {
-            list[ i - 1] = list[ j - 1];
-            list2[i - 1] = list2[j - 1];
-          }
-          else {
-            flag = 0;
-          }
-        }
-      }
-
-      list[ i - 1] = RR;
-      list2[i - 1] = RR2;
-
-      if (l == 1) {
-        RR  = list [r];
-        RR2 = list2[r];
-
-        K = list[r];
-        list[r ] = list[0];
-        list2[r] = list2[0];
-        r = r - 1;
-      }
-      else {
-        l   = l - 1;
-        RR  = list[ l - 1];
-        RR2 = list2[l - 1];
-        K   = list[l - 1];
-      }
-    }
-
-    list[ 0] = RR;
-    list2[0] = RR2;
-  }
-  else if (list3 != NULL) {
-    RR3 = list3[l - 1];
-    while (r != 0) {
-      j = l;
-      flag = 1;
-
-      while (flag == 1) {
-        i = j;
-        j = j + j;
-
-        if (j > r + 1)
-          flag = 0;
-        else {
-          if (j < r + 1)
-            if (list[j] > list[j - 1]) j = j + 1;
-
-          if (list[j - 1] > K) {
-            list[ i - 1] = list[ j - 1];
-            list3[i - 1] = list3[j - 1];
-          }
-          else {
-            flag = 0;
-          }
-        }
-      }
-
-      list[ i - 1] = RR;
-      list3[i - 1] = RR3;
-
-      if (l == 1) {
-        RR  = list [r];
-        RR3 = list3[r];
-
-        K = list[r];
-        list[r ] = list[0];
-        list3[r] = list3[0];
-        r = r - 1;
-      }
-      else {
-        l   = l - 1;
-        RR  = list[ l - 1];
-        RR3 = list3[l - 1];
-        K   = list[l - 1];
-      }
-    }
-
-    list[ 0] = RR;
-    list3[0] = RR3;
-
-  }
-  else {
-    while (r != 0) {
-      j = l;
-      flag = 1;
-
-      while (flag == 1) {
-        i = j;
-        j = j + j;
-
-        if (j > r + 1)
-          flag = 0;
-        else {
-          if (j < r + 1)
-            if (list[j] > list[j - 1]) j = j + 1;
-
-          if (list[j - 1] > K) {
-            list[ i - 1] = list[ j - 1];
-          }
-          else {
-            flag = 0;
-          }
-        }
-      }
-
-      list[ i - 1] = RR;
-
-      if (l == 1) {
-        RR  = list [r];
-
-        K = list[r];
-        list[r ] = list[0];
-        r = r - 1;
-      }
-      else {
-        l   = l - 1;
-        RR  = list[ l - 1];
-        K   = list[l - 1];
-      }
-    }
-
-    list[ 0] = RR;
-  }
-
+   if (left >= right) return;
+   mid          = (left + right) / 2;
+   itemp        = ilist[left];
+   ilist[left]  = ilist[mid];
+   ilist[mid]   = itemp;
+   itemp        = ilist2[left];
+   ilist2[left] = ilist2[mid];
+   ilist2[mid]  = itemp;
+   last         = left;
+   for (i = left+1; i <= right; i++)
+   if (ilist[i] < ilist[left])
+   {
+      last++;
+      itemp        = ilist[last];
+      ilist[last]  = ilist[i];
+      ilist[i]     = itemp;
+      itemp        = ilist2[last];
+      ilist2[last] = ilist2[i];
+      ilist2[i]    = itemp;
+   }
+   itemp        = ilist[left];
+   ilist[left]  = ilist[last];
+   ilist[last]  = itemp;
+   itemp        = ilist2[left];
+   ilist2[left] = ilist2[last];
+   ilist2[last] = itemp;
+   HYPRE_LSI_qsort1a(ilist, ilist2, left, last-1);
+   HYPRE_LSI_qsort1a(ilist, ilist2, last+1, right);
 }
 
 /* ******************************************************************** */
@@ -695,4 +511,16 @@ int HYPRE_LSI_SplitDSort(double *dlist, int nlist, int *ilist, int limit)
    return 0;
 }
 
+/* ******************************************************************** */
+/* copy from one vector to another (identity preconditioning)           */
+/* -------------------------------------------------------------------- */
+
+int HYPRE_LSI_SolveIdentity(HYPRE_Solver solver, HYPRE_ParCSRMatrix Amat,
+                            HYPRE_ParVector b, HYPRE_ParVector x)
+{
+   (void) solver;
+   (void) Amat;
+   HYPRE_ParVectorCopy( b, x );
+   return 0;
+}
 
