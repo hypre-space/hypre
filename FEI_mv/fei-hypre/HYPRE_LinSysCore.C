@@ -79,6 +79,11 @@ extern "C" {
    int HYPRE_LSI_MLDestroy( HYPRE_Solver );
 #endif
 
+#ifdef HAVE_MLI
+   int HYPRE_LSI_MLICreate( MPI_Comm, HYPRE_Solver *);
+   int HYPRE_LSI_MLIDestroy( HYPRE_Solver );
+#endif
+
    void qsort0(int *, int, int);
    void qsort1(int *, double *, int, int);
 
@@ -392,6 +397,10 @@ HYPRE_LinSysCore::~HYPRE_LinSysCore()
 #ifdef HAVE_ML
        else if ( HYPreconID_ == HYML )
           HYPRE_LSI_MLDestroy( HYPrecon_ );
+#endif
+#ifdef HAVE_MLI
+       else if ( HYPreconID_ == HYMLI )
+          HYPRE_LSI_MLIDestroy( HYPrecon_ );
 #endif
        HYPrecon_ = NULL;
     }
@@ -2781,6 +2790,10 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
        else if ( HYPreconID_ == HYML )
           HYPRE_LSI_MLDestroy( HYPrecon_ );
 #endif
+#ifdef HAVE_ML
+       else if ( HYPreconID_ == HYMLI )
+          HYPRE_LSI_MLIDestroy( HYPrecon_ );
+#endif
     }
 
     //-------------------------------------------------------------------
@@ -2851,6 +2864,21 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
        if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
        {
           printf("selectPreconditioner - MLPACK not declared.\n");
+          printf("                       set default to diagonal.\n");
+       }
+       strcpy( HYPreconName_, "diagonal" );
+       HYPreconID_ = HYDIAGONAL;
+#endif
+    }
+    else if ( !strcmp(name, "mli") )
+    {
+#ifdef HAVE_MLI
+       strcpy( HYPreconName_, name );
+       HYPreconID_ = HYMLI;
+#else
+       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+       {
+          printf("selectPreconditioner - MLI not declared.\n");
           printf("                       set default to diagonal.\n");
        }
        strcpy( HYPreconName_, "diagonal" );
@@ -2934,6 +2962,11 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
 #ifdef HAVE_ML
        case HYML :
             ierr = HYPRE_LSI_MLCreate( comm_, &HYPrecon_ );
+            break;
+#endif
+#ifdef HAVE_MLI
+       case HYMLI :
+            ierr = HYPRE_LSI_MLICreate( comm_, &HYPrecon_ );
             break;
 #endif
     }
