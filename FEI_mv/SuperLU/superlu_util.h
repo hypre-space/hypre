@@ -1,10 +1,17 @@
 #ifndef __SUPERLU_UTIL /* allow multiple inclusions */
 #define __SUPERLU_UTIL
 
+#include "HYPRE_config.h"
 #include <stdio.h>
+#if HAVE_STDLIB_H
 #include <stdlib.h>
+#endif
+#if HAVE_STRING_H
 #include <string.h>
+#endif
+#if HAVE_MALLOC_H
 #include <malloc.h>
+#endif
 #include <assert.h>
 
 #include "fortran.h"
