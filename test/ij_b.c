@@ -1203,7 +1203,7 @@ main( int   argc,
       Hypre_values = SIDL_double__array_create1d( local_num_rows );
       for ( i=0; i<local_num_rows; ++i )
       {
-         SIDL_int__array_set1( Hypre_indices, i, i );
+         SIDL_int__array_set1( Hypre_indices, i, i+first_local_row );
          SIDL_double__array_set1( Hypre_values, i, 1 );
       }
       Hypre_IJBuildVector_SetValues( Hypre_ij_b, local_num_rows,
@@ -1241,7 +1241,7 @@ main( int   argc,
       Hypre_values = SIDL_double__array_create1d( local_num_cols );
       for ( i=0; i<local_num_cols; ++i )
       {
-         SIDL_int__array_set1( Hypre_indices, i, i );
+         SIDL_int__array_set1( Hypre_indices, i, i+first_local_col );
          SIDL_double__array_set1( Hypre_values, i, 0 );
       }
       Hypre_IJBuildVector_SetValues( Hypre_ij_x, local_num_cols,
@@ -1651,7 +1651,7 @@ main( int   argc,
       Hypre_values = SIDL_double__array_create1d( local_num_cols );
       for ( i=0; i<local_num_cols; ++i )
       {
-         SIDL_int__array_set1( Hypre_indices, i, i );
+         SIDL_int__array_set1( Hypre_indices, i, i+first_local_col );
          SIDL_double__array_set1( Hypre_values, i, 1.0 );
       }
       Hypre_IJBuildVector_SetValues( Hypre_ij_x, local_num_cols, Hypre_indices, Hypre_values );
@@ -1680,6 +1680,8 @@ main( int   argc,
       ierr += Hypre_IJBuildVector_Initialize( Hypre_ij_y2 );
       Hypre_IJParCSRVector_Read( Hypre_y2, "test.clone", (void *)comm );
       Hypre_IJParCSRVector_Print( Hypre_y2, "test.read" );
+/*del by Rob, probably because Gary told him the cast shouldn't create a reference:
+      Hypre_IJBuildVector_deleteRef( Hypre_ij_y2 );*/
       Hypre_IJParCSRVector_deleteRef( Hypre_y2 );
 
       /* Scale, x=2*x; result is all 2's */
@@ -1688,7 +1690,7 @@ main( int   argc,
 
       /* Dot, tmp = b.x; at this point all b[i]==1, all x[i]==2 */
       Hypre_IJParCSRVector_Dot( Hypre_b, Hypre_Vector_x, &tmp );
-      assert( tmp==2*local_num_cols );
+      assert( tmp==2*N );
 
       /* Axpy, b=b-0.5*x; result is all 0's */
       Hypre_IJParCSRVector_Axpy( Hypre_b, -0.5, Hypre_Vector_x );
@@ -1702,7 +1704,7 @@ main( int   argc,
       Hypre_values = SIDL_double__array_create1d( local_num_cols );
       for ( i=0; i<local_num_cols; ++i )
       {
-         SIDL_int__array_set1( Hypre_indices, i, i );
+         SIDL_int__array_set1( Hypre_indices, i, i+first_local_col );
          SIDL_double__array_set1( Hypre_values, i, 1.0 );
       }
       Hypre_IJParCSRVector_Clear( Hypre_b );
