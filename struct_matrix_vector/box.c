@@ -438,7 +438,7 @@ zzz_CopyBoxArrayData( zzz_BoxArray     *box_array_in,
 
    zzz_GetBoxSize(box_out, loop_size);
    zzz_BoxLoop2(loop_index, loop_size,
-		data_box_in, zzz_BoxIMin(box_in), stride, datai_in,
+		data_box_in, zzz_BoxIMin(box_out), stride, datai_in,
 		data_box_out, zzz_BoxIMin(box_out), stride, datai_out,\
 		for (j = 0; j < num_values_out; j++)
 		{
