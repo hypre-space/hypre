@@ -1374,7 +1374,7 @@ if test "${with_strict_checking+set}" = set; then
  CXX=KCC
  CFLAGS="$CFLAGS --c --strict --lint --display_error_number"
  CFLAGS="$CFLAGS --diag_suppress 45,236,450,826"
- CFLAGS="$CFLAGS,1018,1021,1022,1023,1024,1030,1041"
+ CFLAGS="$CFLAGS,1018,1021,1022,1023,1024,1025,1030,1041"
  CXXFLAGS="$CXXFLAGS --c++ --strict --lint --display_error_number"
  CXXFLAGS="$CXXFLAGS --diag_suppress 236,381,450,826"
  CXXFLAGS="$CXXFLAGS,1018,1022,1023,1024,1025,1029,1030"
@@ -3849,7 +3849,7 @@ done
 
     fi
     if test -z "$F77FLAGS"; then
-      if test "$F77" != "g77"
+      if test "$F77" != "g77"; then
         
    if test -z "$FOPT"; then
       FOPT="-O -silent"
