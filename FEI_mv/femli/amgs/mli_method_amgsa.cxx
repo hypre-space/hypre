@@ -503,7 +503,7 @@ int MLI_Method_AMGSA::getParams(char *in_name, int *argc, char *argv[])
 
 int MLI_Method_AMGSA::setup( MLI *mli ) 
 {
-   int             level, mypid;
+   int             level, mypid, nRows;
    double          startTime, elapsedTime, maxEigen, maxEigenT;
    char            paramString[100], *targv[10];
    MLI_Matrix      *mli_Pmat, *mli_Rmat, *mli_Amat, *mli_ATmat, *mli_cAmat;
@@ -795,18 +795,30 @@ int MLI_Method_AMGSA::setup( MLI *mli )
    /* --------------------------------------------------------------- */
 
    if (mypid == 0 && outputLevel_ > 0) printf("\tCoarse level = %d\n",level);
-   csolvePtr = MLI_Solver_CreateFromName( coarseSolver_ );
-   if (strcmp(coarseSolver_, "SuperLU"))
+   mli_Amat = mli->getSystemMatrix(level);
+   mli_Amat->getMatrixInfo(paramString, nRows, dtemp);
+   if (nRows > 6000)
    {
-      targv[0] = (char *) &coarseSolverNum_;
-      targv[1] = (char *) coarseSolverWgt_ ;
-      sprintf( paramString, "relaxWeight" );
-      csolvePtr->setParams(paramString, 2, targv);
-      if (!strcmp(coarseSolver_, "MLS"))
+      strcpy(coarseSolver_, "GMRESSGS");
+      csolvePtr = MLI_Solver_CreateFromName( coarseSolver_ );
+      sprintf(paramString, "maxIterations %d", coarseSolverNum_);
+      csolvePtr->setParams(paramString, 0, NULL);
+   }
+   else
+   {
+      csolvePtr = MLI_Solver_CreateFromName( coarseSolver_ );
+      if (strcmp(coarseSolver_, "SuperLU"))
       {
-         sprintf(paramString, "maxEigen");
-         targv[0] = (char *) &maxEigen;
-         csolvePtr->setParams(paramString, 1, targv);
+         targv[0] = (char *) &coarseSolverNum_;
+         targv[1] = (char *) coarseSolverWgt_ ;
+         sprintf( paramString, "relaxWeight" );
+         csolvePtr->setParams(paramString, 2, targv);
+         if (!strcmp(coarseSolver_, "MLS"))
+         {
+            sprintf(paramString, "maxEigen");
+            targv[0] = (char *) &maxEigen;
+            csolvePtr->setParams(paramString, 1, targv);
+         }
       }
    }
    mli_Amat = mli->getSystemMatrix(level);
