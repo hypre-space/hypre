@@ -138,8 +138,8 @@ export SUBMSG
 HYPRE_MESSAGE=""
 export HYPRE_MESSAGE
 # OpenSSH to F-Secure communication for RSA authentication
-SSH_COMMND="ssh -1"
-SCP_COMMND="scp -q -oProtocol=1"
+SSH_COMMAND="ssh -1"
+SCP_COMMAND="scp -q -oProtocol=1"
 
 #==============================================================================
 # Run test suites on remote machines
