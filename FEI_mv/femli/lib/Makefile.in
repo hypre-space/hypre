@@ -89,6 +89,7 @@ am__libHYPRE_mli_a_SOURCES_DIST =  \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_hschwarz.cxx \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_parasails.cxx \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_mls.cxx \
+	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_mli.cxx \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_chebyshev.cxx \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_cg.cxx \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_gmres.cxx \
@@ -111,9 +112,10 @@ am__objects_1 = mli_utils.$(OBJEXT) mli_amgsa_calib.$(OBJEXT) \
 	mli_solver_sgs.$(OBJEXT) mli_solver_bsgs.$(OBJEXT) \
 	mli_solver_hsgs.$(OBJEXT) mli_solver_hschwarz.$(OBJEXT) \
 	mli_solver_parasails.$(OBJEXT) mli_solver_mls.$(OBJEXT) \
-	mli_solver_chebyshev.$(OBJEXT) mli_solver_cg.$(OBJEXT) \
-	mli_solver_gmres.$(OBJEXT) mli_solver_kaczmarz.$(OBJEXT) \
-	mli_solver_superlu.$(OBJEXT) mli_solver_seqsuperlu.$(OBJEXT) \
+	mli_solver_mli.$(OBJEXT) mli_solver_chebyshev.$(OBJEXT) \
+	mli_solver_cg.$(OBJEXT) mli_solver_gmres.$(OBJEXT) \
+	mli_solver_kaczmarz.$(OBJEXT) mli_solver_superlu.$(OBJEXT) \
+	mli_solver_seqsuperlu.$(OBJEXT) \
 	mli_solver_arpacksuperlu.$(OBJEXT) mli_vector.$(OBJEXT)
 @STATICONLY_TRUE@am_libHYPRE_mli_a_OBJECTS = $(am__objects_1)
 libHYPRE_mli_a_OBJECTS = $(am_libHYPRE_mli_a_OBJECTS)
@@ -151,6 +153,7 @@ am__libHYPRE_mli_la_SOURCES_DIST =  \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_hschwarz.cxx \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_parasails.cxx \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_mls.cxx \
+	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_mli.cxx \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_chebyshev.cxx \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_cg.cxx \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_gmres.cxx \
@@ -168,8 +171,8 @@ am__objects_2 = mli_utils.lo mli_amgsa_calib.lo mli_amgsa_coarsen1.lo \
 	mli_solver_jacobi.lo mli_solver_bjacobi.lo mli_solver_gs.lo \
 	mli_solver_sgs.lo mli_solver_bsgs.lo mli_solver_hsgs.lo \
 	mli_solver_hschwarz.lo mli_solver_parasails.lo \
-	mli_solver_mls.lo mli_solver_chebyshev.lo mli_solver_cg.lo \
-	mli_solver_gmres.lo mli_solver_kaczmarz.lo \
+	mli_solver_mls.lo mli_solver_mli.lo mli_solver_chebyshev.lo \
+	mli_solver_cg.lo mli_solver_gmres.lo mli_solver_kaczmarz.lo \
 	mli_solver_superlu.lo mli_solver_seqsuperlu.lo \
 	mli_solver_arpacksuperlu.lo mli_vector.lo
 @STATICONLY_FALSE@am_libHYPRE_mli_la_OBJECTS = $(am__objects_2)
@@ -363,6 +366,7 @@ noinst_HEADERS = \
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_hschwarz.h\
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_parasails.h\
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_mls.h\
+ $(top_srcdir)/FEI_mv/femli/solver/mli_solver_mli.h\
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_chebyshev.h\
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_cg.h\
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_gmres.h\
@@ -381,7 +385,7 @@ AM_CPPFLAGS = -DMLI_SUPERLU \
  -I$(top_srcdir)/FEI_mv/femli\
  -I$(top_srcdir)/IJ_mv\
  -I$(top_srcdir)/krylov\
- -I$(top_srcdir)/eigensolvers/krylov\
+ -I$(top_srcdir)/parcsr_es/LOBPCG\
  -I$(top_srcdir)/parcsr_mv\
  -I$(top_srcdir)/parcsr_ls\
  -I$(top_srcdir)/seq_mv\
@@ -423,6 +427,7 @@ FILES = \
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_hschwarz.cxx\
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_parasails.cxx\
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_mls.cxx\
+ $(top_srcdir)/FEI_mv/femli/solver/mli_solver_mli.cxx\
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_chebyshev.cxx\
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_cg.cxx\
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_gmres.cxx\
@@ -821,6 +826,15 @@ mli_solver_mls.obj: $(top_srcdir)/FEI_mv/femli/solver/mli_solver_mls.cxx
 
 mli_solver_mls.lo: $(top_srcdir)/FEI_mv/femli/solver/mli_solver_mls.cxx
 	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mli_solver_mls.lo `test -f '$(top_srcdir)/FEI_mv/femli/solver/mli_solver_mls.cxx' || echo '$(srcdir)/'`$(top_srcdir)/FEI_mv/femli/solver/mli_solver_mls.cxx
+
+mli_solver_mli.o: $(top_srcdir)/FEI_mv/femli/solver/mli_solver_mli.cxx
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mli_solver_mli.o `test -f '$(top_srcdir)/FEI_mv/femli/solver/mli_solver_mli.cxx' || echo '$(srcdir)/'`$(top_srcdir)/FEI_mv/femli/solver/mli_solver_mli.cxx
+
+mli_solver_mli.obj: $(top_srcdir)/FEI_mv/femli/solver/mli_solver_mli.cxx
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mli_solver_mli.obj `if test -f '$(top_srcdir)/FEI_mv/femli/solver/mli_solver_mli.cxx'; then $(CYGPATH_W) '$(top_srcdir)/FEI_mv/femli/solver/mli_solver_mli.cxx'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/FEI_mv/femli/solver/mli_solver_mli.cxx'; fi`
+
+mli_solver_mli.lo: $(top_srcdir)/FEI_mv/femli/solver/mli_solver_mli.cxx
+	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mli_solver_mli.lo `test -f '$(top_srcdir)/FEI_mv/femli/solver/mli_solver_mli.cxx' || echo '$(srcdir)/'`$(top_srcdir)/FEI_mv/femli/solver/mli_solver_mli.cxx
 
 mli_solver_chebyshev.o: $(top_srcdir)/FEI_mv/femli/solver/mli_solver_chebyshev.cxx
 	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mli_solver_chebyshev.o `test -f '$(top_srcdir)/FEI_mv/femli/solver/mli_solver_chebyshev.cxx' || echo '$(srcdir)/'`$(top_srcdir)/FEI_mv/femli/solver/mli_solver_chebyshev.cxx

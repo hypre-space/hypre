@@ -38,6 +38,7 @@ noinst_HEADERS = \
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_hschwarz.h\
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_parasails.h\
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_mls.h\
+ $(top_srcdir)/FEI_mv/femli/solver/mli_solver_mli.h\
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_chebyshev.h\
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_cg.h\
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_gmres.h\
@@ -56,7 +57,7 @@ AM_CPPFLAGS = -DMLI_SUPERLU \
  -I$(top_srcdir)/FEI_mv/femli\
  -I$(top_srcdir)/IJ_mv\
  -I$(top_srcdir)/krylov\
- -I$(top_srcdir)/eigensolvers/krylov\
+ -I$(top_srcdir)/parcsr_es/LOBPCG\
  -I$(top_srcdir)/parcsr_mv\
  -I$(top_srcdir)/parcsr_ls\
  -I$(top_srcdir)/seq_mv\
@@ -98,6 +99,7 @@ FILES = \
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_hschwarz.cxx\
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_parasails.cxx\
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_mls.cxx\
+ $(top_srcdir)/FEI_mv/femli/solver/mli_solver_mli.cxx\
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_chebyshev.cxx\
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_cg.cxx\
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_gmres.cxx\
