@@ -1198,7 +1198,7 @@ int HYPRE_LSI_Uzawa::buildA11A12Mat()
       A12MatSize[irow-startRow] = A12RowSize;
       maxA11RowSize = (A11RowSize > maxA11RowSize) ? A11RowSize : maxA11RowSize;
       maxA12RowSize = (A12RowSize > maxA12RowSize) ? A12RowSize : maxA12RowSize;
-      HYPRE_ParCSRMatrixRestoreRow(Amat_,rowIndex,&rowSize,&colInd,NULL);
+      HYPRE_ParCSRMatrixRestoreRow(Amat_,irow,&rowSize,&colInd,NULL);
    }
 
    //------------------------------------------------------------------
