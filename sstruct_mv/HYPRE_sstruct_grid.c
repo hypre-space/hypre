@@ -371,9 +371,10 @@ HYPRE_SStructGridAssemble( HYPRE_SStructGrid grid )
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-int HYPRE_SStructGridSetPeriodic(HYPRE_SStructGrid  grid,
-                                 int                part,
-                                 int               *periodic)
+int
+HYPRE_SStructGridSetPeriodic( HYPRE_SStructGrid  grid,
+                              int                part,
+                              int               *periodic )
 {
    int ierr = 0;
 
