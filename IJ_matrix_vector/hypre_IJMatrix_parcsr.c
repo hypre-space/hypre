@@ -429,7 +429,7 @@ hypre_IJMatrixInsertRowParCSR(hypre_IJMatrix *matrix,
          offd_data = hypre_CSRMatrixData(offd);
 	 offd_indx = offd_i[row_local];
 	 indx_0 = diag_i[row_local];
-	 diag_indx = indx_0+1;
+	 diag_indx = indx_0;
 	 indx_offd_0 = offd_indx;
 	 
   	 for (i=0; i < n; i++)
