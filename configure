@@ -7325,7 +7325,7 @@ else
 echo "configure:7326: checking for Fortran libraries" >&5
             echo "      END" > conftest.f
   foutput=`${F77-f77} -v -o conftest conftest.f 2>&1`
-            xlf_p=`echo $foutput | grep xlfentry`
+            xlf_p=`echo $foutput | sed -n -e '/xlfentry/p'`
   if test -n "$xlf_p"; then
     foutput=`echo $foutput | sed 's/,/ /g'`
   fi
