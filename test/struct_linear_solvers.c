@@ -31,7 +31,7 @@ main( int   argc,
    double              cx, cy, cz;
    int                 solver_id;
 
-   double              dxyz[3];
+   /*double              dxyz[3];*/
 
    int                 A_num_ghost[6] = {0, 0, 0, 0, 0, 0};
                      
@@ -315,6 +315,7 @@ main( int   argc,
     * Set up dxyz for PFMG solver
     *-----------------------------------------------------------*/
 
+#if 0
    dxyz[0] = 1.0e+123;
    dxyz[1] = 1.0e+123;
    dxyz[2] = 1.0e+123;
@@ -330,6 +331,7 @@ main( int   argc,
    {
       dxyz[2] = sqrt(1.0 / cz);
    }
+#endif
 
    /*-----------------------------------------------------------
     * Set up the grid structure
