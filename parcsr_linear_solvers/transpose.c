@@ -56,7 +56,7 @@ int hypre_CSRMatrixTranspose(hypre_CSRMatrix   *A, hypre_CSRMatrix   **AT)
       max_col = 0;
       for (i = 0; i < num_rowsA; ++i)
       {
-          for (j = A_i[i]; j < A_i[j+1]; j++)
+          for (j = A_i[i]; j < A_i[i+1]; j++)
           {
               if (A_j[j] > max_col)
                  max_col = A_j[j];
