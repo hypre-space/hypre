@@ -138,16 +138,10 @@ HYPRE_StructHybridSetRelChange( HYPRE_StructSolver solver,
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_StructHybridSetPrecond( HYPRE_StructSolver  solver,
-                              int  (*precond)(HYPRE_StructSolver,
-                                              HYPRE_StructMatrix,
-                                              HYPRE_StructVector,
-                                              HYPRE_StructVector),
-                              int  (*precond_setup)(HYPRE_StructSolver,
-                                                    HYPRE_StructMatrix,
-                                                    HYPRE_StructVector,
-                                                    HYPRE_StructVector),
-                              HYPRE_StructSolver  precond_solver   )
+HYPRE_StructHybridSetPrecond( HYPRE_StructSolver         solver,
+                              hypre_PtrToStructSolverFcn precond,
+                              hypre_PtrToStructSolverFcn precond_setup,
+                              HYPRE_StructSolver         precond_solver )
 {
    return( hypre_HybridSetPrecond( (void *) solver,
                                    precond, precond_setup,

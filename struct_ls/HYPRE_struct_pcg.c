@@ -10,19 +10,19 @@
 #include "headers.h"
 
 /*==========================================================================*/
-/** Returns a default PCG solver structure.
+/** Creates a new PCG solver object.
 
 {\bf Input files:}
 headers.h
 
-@return integer 0
+@return Error code.
 
-@param comm []
+@param comm [IN]
   MPI communicator
-@param *solver []
+@param *solver [OUT]
   solver structure
 
-@see HYPRE_StructPCGSolve, HYPRE_StructPCGSetup */
+@see HYPRE_StructPCGFinalize */
 /*--------------------------------------------------------------------------*/
 
 int
@@ -35,17 +35,17 @@ HYPRE_StructPCGInitialize( MPI_Comm comm, HYPRE_StructSolver *solver )
 
 /*==========================================================================*/
 /*==========================================================================*/
-/** Free a PCG solver structure.
+/** Destroys a PCG solver object.
 
 {\bf Input files:}
 headers.h
 
-@return integer error code
+@return Error code.
 
-@param solver []
+@param solver [IN/OUT]
   solver structure
 
-@see HYPRE_StructPCGSolve, HYPRE_StructPCGSetup */
+@see HYPRE_StructPCGInitialize */
 /*--------------------------------------------------------------------------*/
 
 int 
@@ -56,25 +56,26 @@ HYPRE_StructPCGFinalize( HYPRE_StructSolver solver )
 
 /*==========================================================================*/
 /*==========================================================================*/
-/** Gets the matrix data. Will comlpete any remianing tasks needed to do the
-    solve such as set up the NewVector arguments, initialize the Matvec,
-    set up the precondioner, and allocate space for log info.
+/** Precomputes tasks necessary for doing the solve.  This routine
+ensures that the setup for the preconditioner is also called.
+
+NOTE: This is supposed to be an optional call, but currently is required.
 
 {\bf Input files:}
 headers.h
 
-@return integer error code
+@return Error code.
 
-@param solver []
+@param solver [IN/OUT]
   solver structure
-@param A []
-  structured matrix
-@param b []
-  structured vector
-@param x []
-  structured vector
+@param A [IN]
+  coefficient matrix
+@param b [IN]
+  right-hand-side vector
+@param x [IN]
+  unknown vector
 
-@see HYPRE_StructPCGSolve, HYPRE_StructPCGSetup */
+@see HYPRE_StructPCGSolve */
 /*--------------------------------------------------------------------------*/
 
 int 
@@ -96,18 +97,18 @@ HYPRE_StructPCGSetup( HYPRE_StructSolver solver,
 {\bf Input files:}
 headers.h
 
-@return integer error code
+@return Error code.
 
-@param solver []
+@param solver [IN/OUT]
   solver structure
-@param A []
-  structured matrix
-@param b []
-  structured vector
-@param x []
-  structured vector
+@param A [IN]
+  coefficient matrix
+@param b [IN]
+  right-hand-side vector
+@param x [IN]
+  unknown vector
 
-@see HYPRE_StructPCGSolve, HYPRE_StructPCGSetup */
+@see HYPRE_StructPCGSetup */
 /*--------------------------------------------------------------------------*/
 
 int 
@@ -124,16 +125,16 @@ HYPRE_StructPCGSolve( HYPRE_StructSolver solver,
 
 /*==========================================================================*/
 /*==========================================================================*/
-/** An optional call to set the PCG solver tolerance.
+/** (Optional) Set the stopping tolerance.
 
 {\bf Input files:}
 headers.h
 
-@return integer error code
+@return Error code.
 
-@param solver []
+@param solver [IN/OUT]
   solver structure
-@param tol []
+@param tol [IN]
   PCG solver tolerance
 
 @see HYPRE_StructPCGSolve, HYPRE_StructPCGSetup   */
@@ -148,16 +149,16 @@ HYPRE_StructPCGSetTol( HYPRE_StructSolver solver,
 
 /*==========================================================================*/
 /*==========================================================================*/
-/** An optional call to set the PCG solver maximum number of iterations.
+/** (Optional) Set the maximum number of iterations.
 
 {\bf Input files:}
 headers.h
 
-@return integer error code
+@return Error code.
 
-@param solver []
+@param solver [IN/OUT]
   solver structure
-@param max_iter
+@param max_iter [IN]
   PCG solver maximum number of iterations
 
 @see HYPRE_StructPCGSolve, HYPRE_StructPCGSetup */
@@ -172,17 +173,19 @@ HYPRE_StructPCGSetMaxIter( HYPRE_StructSolver solver,
 
 /*==========================================================================*/
 /*==========================================================================*/
-/** Optional call to set the PCG solver ???? .
+/** (Optional) Set the type of norm to use in the stopping criteria.
+If parameter two\_norm is set to 0, the preconditioner norm is used.
+If set to 1, the two-norm is used.
 
 {\bf Input files:}
 headers.h
 
-@return integer error code
+@return Error code.
 
-@param solver []
+@param solver [IN/OUT]
   solver structure
-@param two_norm []
-  ????
+@param two_norm [IN]
+  boolean indicating whether or not to use the two-norm
 
 @see HYPRE_StructPCGSolve, HYPRE_StructPCGSetup */
 /*--------------------------------------------------------------------------*/
@@ -196,17 +199,19 @@ HYPRE_StructPCGSetTwoNorm( HYPRE_StructSolver solver,
 
 /*==========================================================================*/
 /*==========================================================================*/
-/** Optional call to set the PCG solver relative change parameter.
+/** (Optional) Set whether or not to do an additional relative change
+stopping test.  If parameter rel\_change is set to 0, no additional
+stopping test is done.  If set to 1, the additional test is done.
 
 {\bf Input files:}
 headers.h
 
-@return integer error code
+@return Error code.
 
-@param solver []
+@param solver [IN/OUT]
   solver structure
-@param rel_change
-  PCG solver relative change
+@param rel_change [IN]
+  boolean indicating whether or not to do relative change test
 
 @see HYPRE_StructPCGSolve, HYPRE_StructPCGSetup */
 /*--------------------------------------------------------------------------*/
@@ -220,36 +225,31 @@ HYPRE_StructPCGSetRelChange( HYPRE_StructSolver solver,
 
 /*==========================================================================*/
 /*==========================================================================*/
-/** Optional call to apply a precondioner prior to the solve.
+/** (Optional) Sets the precondioner to use in PCG.  The Default is no
+preconditioner, i.e. the solver is just conjugate gradients (CG).
 
 {\bf Input files:}
 headers.h
 
-@return integer error code
+@return Error code.
 
-@param solver []
+@param solver [IN/OUT]
   solver structure
-@param *precond() []
-  the preconditioner to be applied
-@param *precond_setup() []
-  routine to setup the preconditioner
-@param *precond_data []
-  data needed by the preconditioner
+@param precond [IN]
+  pointer to the preconditioner solve function
+@param precond_setup [IN]
+  pointer to the preconditioner setup function
+@param precond_solver [IN/OUT]
+  preconditioner solver structure
 
 @see HYPRE_StructPCGSolve, HYPRE_StructPCGSetup*/
 /*--------------------------------------------------------------------------*/
 
 int
-HYPRE_StructPCGSetPrecond( HYPRE_StructSolver  solver,
-                           int               (*precond)(HYPRE_StructSolver,
-							HYPRE_StructMatrix,
-							HYPRE_StructVector,
-							HYPRE_StructVector),
-                           int             (*precond_setup)(HYPRE_StructSolver,
-							HYPRE_StructMatrix,
-							HYPRE_StructVector,
-							HYPRE_StructVector),
-                           HYPRE_StructSolver  precond_solver   )
+HYPRE_StructPCGSetPrecond( HYPRE_StructSolver         solver,
+                           hypre_PtrToStructSolverFcn precond,
+                           hypre_PtrToStructSolverFcn precond_setup,
+                           HYPRE_StructSolver         precond_solver )
 {
    return( hypre_PCGSetPrecond( (void *) solver,
                                 precond, precond_setup,
@@ -258,17 +258,19 @@ HYPRE_StructPCGSetPrecond( HYPRE_StructSolver  solver,
 
 /*==========================================================================*/
 /*==========================================================================*/
-/** Optional call to ???? .
+/** (Optional) Set the type of logging to do.  Currently, if parameter
+logging is set to 0, no logging is done.  If set to 1, the norms and
+relative norms for each iteration are saved.
 
 {\bf Input files:}
 headers.h
 
-@return integer error code
+@return Error code.
 
-@param solver []
+@param solver [IN/OUT]
   solver structure
-@param logging
-  ????
+@param logging [IN]
+  integer indicating what type of logging to do
 
 @see HYPRE_StructPCGSolve, HYPRE_StructPCGSetup */
 /*--------------------------------------------------------------------------*/
@@ -282,17 +284,17 @@ HYPRE_StructPCGSetLogging( HYPRE_StructSolver solver,
 
 /*==========================================================================*/
 /*==========================================================================*/
-/** Optional call to get the number of ierations of the PCG solve.
+/** (Optional) Gets the number of iterations done in the solve.
 
 {\bf Input files:}
 headers.h
 
-@return integer error code
+@return Error code.
 
-@param solver []
+@param solver [IN]
   solver structure
-@param *num_iterations
-  number of iterations of the PCG solve
+@param num_iterations [OUT]
+  number of iterations
 
 @see HYPRE_StructPCGSolve, HYPRE_StructPCGSetup */
 /*--------------------------------------------------------------------------*/
@@ -306,18 +308,17 @@ HYPRE_StructPCGGetNumIterations( HYPRE_StructSolver  solver,
 
 /*==========================================================================*/
 /*==========================================================================*/
-/** Optional call to retrieve the final relative residual norms of the
-    PCG solve.
+/** (Optional) Gets the final relative residual norm for the solve.
 
 {\bf Input files:}
 headers.h
 
-@return integer error code
+@return Error code.
 
-@param solver []
+@param solver [IN]
   solver structure
-@param *norm []
-  ????
+@param norm [OUT]
+  final relative residual norm
 
 @see HYPRE_StructPCGSolve, HYPRE_StructPCGSetup */
 /*--------------------------------------------------------------------------*/
@@ -331,22 +332,21 @@ HYPRE_StructPCGGetFinalRelativeResidualNorm( HYPRE_StructSolver  solver,
 
 /*==========================================================================*/
 /*==========================================================================*/
-/** Gets the matrix data.  Completes any remaining tasks needed for the
-    DiagScale such as ????. 
+/** Setup routine for diagonally scaling a vector.
 
 {\bf Input files:}
 headers.h
 
-@return integer 0
+@return Error code.
 
-@param solver []
+@param solver [IN/OUT]
   solver structure
-@param A []
-  structured matrix
-@param b []
-  structured vector
-@param x []
-  structured vector
+@param A [IN]
+  coefficient matrix
+@param b [IN]
+  right-hand-side vector
+@param x [IN]
+  unknown vector
 
 @see HYPRE_StructDiagScale */
 /*--------------------------------------------------------------------------*/
@@ -362,21 +362,21 @@ HYPRE_StructDiagScaleSetup( HYPRE_StructSolver solver,
 
 /*==========================================================================*/
 /*==========================================================================*/
-/** ????.
+/** Diagonally scale a vector.
 
 {\bf Input files:}
 headers.h
 
-@return integer error code
+@return Error code.
 
-@param solver []
+@param solver [IN/OUT]
   solver structure
-@param HA []
-  structured solver
-@param Hy []
-  structured vector
-@param Hx []
-  structured vector
+@param A [IN]
+  coefficient matrix
+@param b [IN]
+  right-hand-side vector
+@param x [IN]
+  unknown vector
 
 @see HYPRE_StructDiagScaleSetup */
 /*--------------------------------------------------------------------------*/

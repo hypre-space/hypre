@@ -111,8 +111,11 @@ HYPRE_StructJacobiSetNonZeroGuess( HYPRE_StructSolver solver )
    return( hypre_JacobiSetZeroGuess( (void *) solver, 0 ) );
 }
 
+
+
+
+
 /* NOT YET IMPLEMENTED */
-#if 0
 
 /*--------------------------------------------------------------------------
  * HYPRE_StructJacobiGetNumIterations
@@ -122,7 +125,10 @@ int
 HYPRE_StructJacobiGetNumIterations( HYPRE_StructSolver  solver,
                                  int                *num_iterations )
 {
+#if 0
    return( hypre_JacobiGetNumIterations( (void *) solver, num_iterations ) );
+#endif
+   return 0;
 }
 
 /*--------------------------------------------------------------------------
@@ -133,8 +139,8 @@ int
 HYPRE_StructJacobiGetFinalRelativeResidualNorm( HYPRE_StructSolver  solver,
                                              double             *norm   )
 {
+#if 0
    return( hypre_JacobiGetFinalRelativeResidualNorm( (void *) solver, norm ) );
-}
-
 #endif
-
+   return 0;
+}

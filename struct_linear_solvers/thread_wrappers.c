@@ -472,14 +472,8 @@ HYPRE_StructHybridSetRelChangePush(
 
 typedef struct {
    HYPRE_StructSolverArray *solver;
-   int (*precond )(HYPRE_StructSolver;
-   HYPRE_StructMatrix;
-   HYPRE_StructVector;
-   ;
-   int (*precond_setup )(HYPRE_StructSolver;
-   HYPRE_StructMatrix;
-   HYPRE_StructVector;
-   ;
+   hypre_PtrToStructSolverFcn precond;
+   hypre_PtrToStructSolverFcn precond_setup;
    HYPRE_StructSolverArray *precond_solver;
    int  returnvalue[hypre_MAX_THREADS];
 } HYPRE_StructHybridSetPrecondArgs;
@@ -495,28 +489,16 @@ HYPRE_StructHybridSetPrecondVoidPtr( void *argptr )
    (localargs -> returnvalue[threadid]) =
       HYPRE_StructHybridSetPrecond(
          (*(localargs -> solver))[threadid],
-         localargs -> HYPRE_StructSolver,
-         localargs -> HYPRE_StructMatrix,
-         localargs -> HYPRE_StructVector,
-         localargs -> ,
-         localargs -> HYPRE_StructSolver,
-         localargs -> HYPRE_StructMatrix,
-         localargs -> HYPRE_StructVector,
-         localargs -> ,
+         localargs -> precond,
+         localargs -> precond_setup,
          (*(localargs -> precond_solver))[threadid] );
 }
 
 int 
 HYPRE_StructHybridSetPrecondPush(
    HYPRE_StructSolverArray solver,
-   int (*precond )(HYPRE_StructSolver,
-   HYPRE_StructMatrix,
-   HYPRE_StructVector,
-   ,
-   int (*precond_setup )(HYPRE_StructSolver,
-   HYPRE_StructMatrix,
-   HYPRE_StructVector,
-   ,
+   hypre_PtrToStructSolverFcn precond,
+   hypre_PtrToStructSolverFcn precond_setup,
    HYPRE_StructSolverArray precond_solver )
 {
    HYPRE_StructHybridSetPrecondArgs pushargs;
@@ -524,14 +506,8 @@ HYPRE_StructHybridSetPrecondPush(
    int  returnvalue;
 
    pushargs.solver = (HYPRE_StructSolverArray *)solver;
-   pushargs.HYPRE_StructSolver = HYPRE_StructSolver;
-   pushargs.HYPRE_StructMatrix = HYPRE_StructMatrix;
-   pushargs.HYPRE_StructVector = HYPRE_StructVector;
-   pushargs. = ;
-   pushargs.HYPRE_StructSolver = HYPRE_StructSolver;
-   pushargs.HYPRE_StructMatrix = HYPRE_StructMatrix;
-   pushargs.HYPRE_StructVector = HYPRE_StructVector;
-   pushargs. = ;
+   pushargs.precond = precond;
+   pushargs.precond_setup = precond_setup;
    pushargs.precond_solver = (HYPRE_StructSolverArray *)precond_solver;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_StructHybridSetPrecondVoidPtr, (void *)&pushargs );
@@ -1600,14 +1576,8 @@ HYPRE_StructPCGSetRelChangePush(
 
 typedef struct {
    HYPRE_StructSolverArray *solver;
-   int (*precond )(HYPRE_StructSolver;
-   HYPRE_StructMatrix;
-   HYPRE_StructVector;
-   ;
-   int (*precond_setup )(HYPRE_StructSolver;
-   HYPRE_StructMatrix;
-   HYPRE_StructVector;
-   ;
+   hypre_PtrToStructSolverFcn precond;
+   hypre_PtrToStructSolverFcn precond_setup;
    HYPRE_StructSolverArray *precond_solver;
    int  returnvalue[hypre_MAX_THREADS];
 } HYPRE_StructPCGSetPrecondArgs;
@@ -1623,28 +1593,16 @@ HYPRE_StructPCGSetPrecondVoidPtr( void *argptr )
    (localargs -> returnvalue[threadid]) =
       HYPRE_StructPCGSetPrecond(
          (*(localargs -> solver))[threadid],
-         localargs -> HYPRE_StructSolver,
-         localargs -> HYPRE_StructMatrix,
-         localargs -> HYPRE_StructVector,
-         localargs -> ,
-         localargs -> HYPRE_StructSolver,
-         localargs -> HYPRE_StructMatrix,
-         localargs -> HYPRE_StructVector,
-         localargs -> ,
+         localargs -> precond,
+         localargs -> precond_setup,
          (*(localargs -> precond_solver))[threadid] );
 }
 
 int 
 HYPRE_StructPCGSetPrecondPush(
    HYPRE_StructSolverArray solver,
-   int (*precond )(HYPRE_StructSolver,
-   HYPRE_StructMatrix,
-   HYPRE_StructVector,
-   ,
-   int (*precond_setup )(HYPRE_StructSolver,
-   HYPRE_StructMatrix,
-   HYPRE_StructVector,
-   ,
+   hypre_PtrToStructSolverFcn precond,
+   hypre_PtrToStructSolverFcn precond_setup,
    HYPRE_StructSolverArray precond_solver )
 {
    HYPRE_StructPCGSetPrecondArgs pushargs;
@@ -1652,14 +1610,8 @@ HYPRE_StructPCGSetPrecondPush(
    int  returnvalue;
 
    pushargs.solver = (HYPRE_StructSolverArray *)solver;
-   pushargs.HYPRE_StructSolver = HYPRE_StructSolver;
-   pushargs.HYPRE_StructMatrix = HYPRE_StructMatrix;
-   pushargs.HYPRE_StructVector = HYPRE_StructVector;
-   pushargs. = ;
-   pushargs.HYPRE_StructSolver = HYPRE_StructSolver;
-   pushargs.HYPRE_StructMatrix = HYPRE_StructMatrix;
-   pushargs.HYPRE_StructVector = HYPRE_StructVector;
-   pushargs. = ;
+   pushargs.precond = precond;
+   pushargs.precond_setup = precond_setup;
    pushargs.precond_solver = (HYPRE_StructSolverArray *)precond_solver;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_StructPCGSetPrecondVoidPtr, (void *)&pushargs );
@@ -2448,6 +2400,51 @@ HYPRE_StructPFMGSetNumPostRelaxPush(
    pushargs.num_post_relax = num_post_relax;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_StructPFMGSetNumPostRelaxVoidPtr, (void *)&pushargs );
+
+   hypre_work_wait();
+
+   returnvalue = pushargs.returnvalue[0];
+
+   return returnvalue;
+}
+
+/*----------------------------------------------------------------
+ * HYPRE_StructPFMGSetSkipRelax thread wrappers
+ *----------------------------------------------------------------*/
+
+typedef struct {
+   HYPRE_StructSolverArray *solver;
+   int skip_relax;
+   int  returnvalue[hypre_MAX_THREADS];
+} HYPRE_StructPFMGSetSkipRelaxArgs;
+
+void
+HYPRE_StructPFMGSetSkipRelaxVoidPtr( void *argptr )
+{
+   int threadid = hypre_GetThreadID();
+
+   HYPRE_StructPFMGSetSkipRelaxArgs *localargs =
+      (HYPRE_StructPFMGSetSkipRelaxArgs *) argptr;
+
+   (localargs -> returnvalue[threadid]) =
+      HYPRE_StructPFMGSetSkipRelax(
+         (*(localargs -> solver))[threadid],
+         localargs -> skip_relax );
+}
+
+int 
+HYPRE_StructPFMGSetSkipRelaxPush(
+   HYPRE_StructSolverArray solver,
+   int skip_relax )
+{
+   HYPRE_StructPFMGSetSkipRelaxArgs pushargs;
+   int i;
+   int  returnvalue;
+
+   pushargs.solver = (HYPRE_StructSolverArray *)solver;
+   pushargs.skip_relax = skip_relax;
+   for (i = 0; i < hypre_NumThreads; i++)
+      hypre_work_put( HYPRE_StructPFMGSetSkipRelaxVoidPtr, (void *)&pushargs );
 
    hypre_work_wait();
 
