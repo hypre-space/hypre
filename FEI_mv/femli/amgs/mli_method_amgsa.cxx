@@ -730,6 +730,11 @@ int MLI_Method_AMGSA::setup( MLI *mli )
          targv[1] = (char *) preSmootherWgt_;
          sprintf( paramString, "relaxWeight" );
          smootherPtr->setParams(paramString, 2, targv);
+         if ( !strcmp(preSmoother_, "Jacobi") ) 
+         {
+            sprintf( paramString, "setModifiedDiag" );
+            smootherPtr->setParams(paramString, 0, NULL);
+         }
          if ( !strcmp(preSmoother_, "MLS") ) 
          {
             sprintf( paramString, "maxEigen" );

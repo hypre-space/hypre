@@ -44,7 +44,7 @@ MLI_Method_AMGRS::MLI_Method_AMGRS( MPI_Comm comm ) : MLI_Method( comm )
    maxLevels_        = 25;
    numLevels_        = 25;
    currLevel_        = 0;
-   coarsenScheme_    = 3;              /* default : CLJP */
+   coarsenScheme_    = MLI_METHOD_AMGRS_FALGOUT;
    measureType_      = 0;              /* default : local measure */
    threshold_        = 0.5;
    nodeDOF_          = 1;
