@@ -61,7 +61,7 @@ enum HYpreconID {HYIDENTITY,HYDIAGONAL,HYPILUT,HYPARASAILS,HYBOOMERAMG,HYML,
 #define HYFEI_IMPOSENOBC           4194304
 
 #ifdef NOFEI
-#undefine NOFEI
+#undef NOFEI
 #endif
 
 // *************************************************************************
