@@ -28,7 +28,8 @@
 RECIPIENTS="\
  dwalker@llnl.gov\
  rfalgout@llnl.gov\
- cleary1@llnl.gov"
+ cleary1@llnl.gov\
+ treadway1@llnl.gov"
 
 HYPRE_MAIL=/usr/ucb/Mail
 
