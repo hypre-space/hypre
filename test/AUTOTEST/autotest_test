@@ -29,6 +29,7 @@ initialize_variables ()
   Run=2
   PurifytoFile="--with-purify-to-file"
   InsuretoFile="--with-insure-to-file"
+  InsureSelected=0
   if [ -z "$MAKE" -o "$MAKE" = "" ] ; then
     MAKE="make -i"
   fi
@@ -160,6 +161,8 @@ usage () {
   printf "-c       C++; make all++ (no configure, or execute).\n"
   printf "-d       Docs; make the documentation directory.\n"
   printf "-f       F77; make all77 (no configure, or execute).\n"
+  printf "-i opt   Insure++; perform configure --with-insure. Output \n"
+  printf "         is appended to a file called insure.log.\n"
   printf "-l       use DPCS Scheduling.\n"
   printf "-h       Help; display this help message.\n"
   printf "-m       Mail; mail error summary to developers.\n"
@@ -209,7 +212,7 @@ mail_summary () {
   printf "%s\n" "--------------------------------------------" >> $SUMFILE
   printf "Compile summary: Status: Warnings: Errors\n" >> $SUMFILE
   for ConfOpt in default beta no_mpi openmp petac \
-           pthreads purify strict_checking \
+           pthreads insure purify strict_checking \
            docs all++ all77 beta++ beta77
   do
     printf "%-15s: " $ConfOpt >> $SUMFILE
@@ -278,16 +281,18 @@ mail_summary () {
         ErrFile=`echo $j | sed -e 's/\.sh$/.err/'`
         OutFile=`echo $j | sed -e 's/\.sh$/.out/'`
 # look for non-zero length subtest, TEST_*/test.err.* files
-        for k in ${ErrFile}.*; do
-          if [ -s "${k}" ] ; then
-            AutotestFailureCount=`expr $AutotestFailureCount + 1`
-            TotalFailureCount=`expr $TotalFailureCount + 1`
-            TestCaseFailedCount=`expr $TestCaseFailedCount + 1`
-            ELIST="${ELIST}${k}\n"
-            TestCaseFailedFlag=1
-            break
-          fi
-        done
+        if [ "InsureSelected" = "0" ] ; then
+          for k in ${ErrFile}.*; do
+            if [ -s "${k}" ] ; then
+              AutotestFailureCount=`expr $AutotestFailureCount + 1`
+              TotalFailureCount=`expr $TotalFailureCount + 1`
+              TestCaseFailedCount=`expr $TestCaseFailedCount + 1`
+              ELIST="${ELIST}${k}\n"
+              TestCaseFailedFlag=1
+              break
+            fi
+          done
+        fi
         if [ "$TestCaseFailedFlag" = "0" ] ; then
 # look for all of the TEST_*/test.out.* files
           for k in ${OutFile}.*; do
@@ -318,7 +323,6 @@ mail_summary () {
         fi
       done
       if [ "$TestCaseFailedCount" != "0" ] ; then
-        printf "Failed\n" >> $SUMFILE
         printf "Failed:    %2d   :   %2d\n" $TestCaseSuccessCount $TestCaseFailedCount >> $SUMFILE
       elif [ "$TestCaseSuccessCount" != "0" ] ; then
         printf "Passed:    %2d\n" $TestCaseSuccessCount >> $SUMFILE
@@ -396,6 +400,7 @@ then				# don't need extra purify status messages
   $MAKE $MakeStr 1> ${Hdr}.${MessageStr}.${MakeStr}.log 2>&1
 elif [ "$MessageStr" = "insure" ]
 then				# don't need extra insure status messages
+  InsureSelected=1
   $MAKE $MakeStr 1> ${Hdr}.${MessageStr}.${MakeStr}.log 2>&1
 else
   $MAKE $MakeStr 1> ${Hdr}.${MessageStr}.${MakeStr}.log \
@@ -424,8 +429,8 @@ if [ ${BuildOpt} -ne $Skip ] ; then
     echo "$HYPRE_CONFIGURE_EMAIL" > ${Hdr}.${MessageStr}.configure.err.email
 
     if [ "$MessageStr" != "insure" ]
-    then				# don't need extra purify status messages
-      $MAKE veryclean
+    then			# don't want to delete previous build
+      $MAKE veryclean		# assumed working with --enable-debug build
     fi
 
     if [ $IJOpt -ne $Skip ] ; then
