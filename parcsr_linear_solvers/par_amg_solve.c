@@ -88,14 +88,14 @@ hypre_ParAMGSolve( void               *amg_vdata,
    num_coeffs = hypre_CTAlloc(int, num_levels);
    num_variables = hypre_CTAlloc(int, num_levels);
    num_coeffs[0]    = hypre_ParCSRMatrixNumNonzeros(A_array[0]);
-   num_variables[0] = hypre_ParCSRMatrixNumRows(A_array[0]);
+   num_variables[0] = hypre_ParCSRMatrixGlobalNumRows(A_array[0]);
  
    A_array[0] = A;
    F_array[0] = f;
    U_array[0] = u;
 
    Vtemp = hypre_CreateParVector(hypre_ParCSRMatrixComm(A_array[0]),
-                                 hypre_ParCSRMatrixNumRows(A_array[0]),
+                                 hypre_ParCSRMatrixGlobalNumRows(A_array[0]),
                                  hypre_ParCSRMatrixRowStarts(A_array[0]));
    hypre_InitializeParVector(Vtemp);
    hypre_SetParVectorPartitioningOwner(Vtemp,0);
@@ -104,7 +104,7 @@ hypre_ParAMGSolve( void               *amg_vdata,
    for (j = 1; j < num_levels; j++)
    {
       num_coeffs[j]    = hypre_ParCSRMatrixNumNonzeros(A_array[j]);
-      num_variables[j] = hypre_ParCSRMatrixNumRows(A_array[j]);
+      num_variables[j] = hypre_ParCSRMatrixGlobalNumRows(A_array[j]);
    }
 
    /*-----------------------------------------------------------------------
@@ -221,9 +221,13 @@ hypre_ParAMGSolve( void               *amg_vdata,
 
    cycle_op_count = hypre_ParAMGDataCycleOpCount(amg_data);
 
-   grid_cmplxty = ((double) total_variables) / ((double) num_variables[0]);
-   operat_cmplxty = ((double) total_coeffs) / ((double) num_coeffs[0]);
-   cycle_cmplxty = ((double) cycle_op_count) / ((double) num_coeffs[0]);
+   if (num_variables[0])
+      grid_cmplxty = ((double) total_variables) / ((double) num_variables[0]);
+   if (num_coeffs[0])
+   {
+      operat_cmplxty = ((double) total_coeffs) / ((double) num_coeffs[0]);
+      cycle_cmplxty = ((double) cycle_op_count) / ((double) num_coeffs[0]);
+   }
 
    if (my_id == 0 && amg_ioutdat >= 1)
    {
