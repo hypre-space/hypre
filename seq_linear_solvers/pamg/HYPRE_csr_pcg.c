@@ -13,6 +13,7 @@
  *
  *****************************************************************************/
 #include "headers.h"
+#include "krylov.h"
 
 /*--------------------------------------------------------------------------
  * HYPRE_CSRPCGCreate
@@ -60,10 +61,9 @@ HYPRE_CSRPCGSetup( HYPRE_Solver solver,
                       HYPRE_Vector b,
                       HYPRE_Vector x      )
 {
-   return( hypre_PCGSetup( (void *) solver,
-                           (void *) A,
-                           (void *) b,
-                           (void *) x ) );
+   return( HYPRE_PCGSetup( solver,
+                           (HYPRE_Matrix) A,
+                           b, x ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -76,10 +76,9 @@ HYPRE_CSRPCGSolve( HYPRE_Solver solver,
                       HYPRE_Vector b,
                       HYPRE_Vector x      )
 {
-   return( hypre_PCGSolve( (void *) solver,
-                           (void *) A,
-                           (void *) b,
-                           (void *) x ) );
+   return( HYPRE_PCGSolve( solver,
+                           (HYPRE_Matrix) A,
+                           b, x ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -90,7 +89,7 @@ int
 HYPRE_CSRPCGSetTol( HYPRE_Solver solver,
                        double             tol    )
 {
-   return( hypre_PCGSetTol( (void *) solver, tol ) );
+   return( HYPRE_PCGSetTol( solver, tol ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -101,7 +100,7 @@ int
 HYPRE_CSRPCGSetMaxIter( HYPRE_Solver solver,
                            int                max_iter )
 {
-   return( hypre_PCGSetMaxIter( (void *) solver, max_iter ) );
+   return( HYPRE_PCGSetMaxIter( solver, max_iter ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -127,7 +126,7 @@ int
 HYPRE_CSRPCGSetTwoNorm( HYPRE_Solver solver,
                            int                two_norm )
 {
-   return( hypre_PCGSetTwoNorm( (void *) solver, two_norm ) );
+   return( HYPRE_PCGSetTwoNorm( solver, two_norm ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -138,7 +137,7 @@ int
 HYPRE_CSRPCGSetRelChange( HYPRE_Solver solver,
                              int                rel_change )
 {
-   return( hypre_PCGSetRelChange( (void *) solver, rel_change ) );
+   return( HYPRE_PCGSetRelChange( solver, rel_change ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -157,8 +156,10 @@ HYPRE_CSRPCGSetPrecond( HYPRE_Solver  solver,
 						HYPRE_Vector x),
                            void                *precond_data )
 {
-   return( hypre_PCGSetPrecond( (void *) solver,
-                                precond, precond_setup, precond_data ) );
+   return( HYPRE_PCGSetPrecond( solver,
+                                (HYPRE_PtrToSolverFcn) precond,
+                                (HYPRE_PtrToSolverFcn) precond_setup,
+                                (HYPRE_Solver) precond_data ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -169,8 +170,7 @@ int
 HYPRE_CSRPCGGetPrecond( HYPRE_Solver  solver,
                            HYPRE_Solver *precond_data_ptr )
 {
-   return( hypre_PCGGetPrecond( (void *)     solver,
-                                   (HYPRE_Solver *) precond_data_ptr ) );
+   return( HYPRE_PCGGetPrecond( solver, precond_data_ptr ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -181,7 +181,7 @@ int
 HYPRE_CSRPCGSetLogging( HYPRE_Solver solver,
                            int                logging )
 {
-   return( hypre_PCGSetLogging( (void *) solver, logging ) );
+   return( HYPRE_PCGSetLogging( solver, logging ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -192,7 +192,7 @@ int
 HYPRE_CSRPCGGetNumIterations( HYPRE_Solver  solver,
                                  int                *num_iterations )
 {
-   return( hypre_PCGGetNumIterations( (void *) solver, num_iterations ) );
+   return( HYPRE_PCGGetNumIterations( solver, num_iterations ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -203,7 +203,7 @@ int
 HYPRE_CSRPCGGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
                                              double             *norm   )
 {
-   return( hypre_PCGGetFinalRelativeResidualNorm( (void *) solver, norm ) );
+   return( HYPRE_PCGGetFinalRelativeResidualNorm( solver, norm ) );
 }
 
 /*--------------------------------------------------------------------------

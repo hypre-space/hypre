@@ -1,5 +1,6 @@
 
 #include "headers.h"
+#include "krylov.h"
 
 /*--------------------------------------------------------------------------
  * Test driver for unstructured matrix interface (csr storage).
@@ -546,11 +547,11 @@ main( int   argc,
       hypre_BeginTiming(time_index); */
 
       HYPRE_CSRPCGCreate( &pcg_solver);
-      HYPRE_CSRPCGSetMaxIter(pcg_solver, 500);
-      HYPRE_CSRPCGSetTol(pcg_solver, tol);
-      HYPRE_CSRPCGSetTwoNorm(pcg_solver, 1);
-      HYPRE_CSRPCGSetRelChange(pcg_solver, 0);
-      HYPRE_CSRPCGSetLogging(pcg_solver, 1);
+      HYPRE_PCGSetMaxIter(pcg_solver, 500);
+      HYPRE_PCGSetTol(pcg_solver, tol);
+      HYPRE_PCGSetTwoNorm(pcg_solver, 1);
+      HYPRE_PCGSetRelChange(pcg_solver, 0);
+      HYPRE_PCGSetLogging(pcg_solver, 1);
 
       if (solver_id == 1)
       {
@@ -572,20 +573,22 @@ main( int   argc,
          HYPRE_AMGSetInterpType(pcg_precond, interp_type);
          HYPRE_AMGSetNumFunctions(pcg_precond, num_functions);
          HYPRE_AMGSetDofFunc(pcg_precond, dof_func);
-         HYPRE_CSRPCGSetPrecond(pcg_solver, HYPRE_AMGSolve, HYPRE_AMGSetup, 
-				pcg_precond);
+         HYPRE_PCGSetPrecond( pcg_solver, (HYPRE_PtrToSolverFcn) HYPRE_AMGSolve,
+                              (HYPRE_PtrToSolverFcn) HYPRE_AMGSetup, 
+                              pcg_precond);
       }
       else if (solver_id == 2)
       {
 	 /* use diagonal scaling as preconditioner */
 	 printf ("Solver: DS-PCG\n");
 	 pcg_precond = NULL;
-	 HYPRE_CSRPCGSetPrecond(pcg_solver, HYPRE_CSRDiagScale, 
-				HYPRE_CSRDiagScaleSetup, pcg_precond);
+	 HYPRE_PCGSetPrecond( pcg_solver, (HYPRE_PtrToSolverFcn) HYPRE_CSRDiagScale,
+                              (HYPRE_PtrToSolverFcn) HYPRE_CSRDiagScaleSetup,
+                              pcg_precond);
       }
 
-      HYPRE_CSRPCGSetup(pcg_solver, (HYPRE_CSRMatrix) A, (HYPRE_Vector) b, 
-			(HYPRE_Vector) x);
+      HYPRE_PCGSetup( pcg_solver, (HYPRE_Matrix) A, (HYPRE_Vector) b, 
+                      (HYPRE_Vector) x);
       /* hypre_EndTiming(time_index);
       hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
@@ -594,7 +597,7 @@ main( int   argc,
       time_index = hypre_InitializeTiming("PCG Solve");
       hypre_BeginTiming(time_index); */
 
-      HYPRE_CSRPCGSolve(pcg_solver, (HYPRE_CSRMatrix) A, (HYPRE_Vector) b, 
+      HYPRE_PCGSolve( pcg_solver, (HYPRE_Matrix) A, (HYPRE_Vector) b, 
 			(HYPRE_Vector) x);
 
       /* hypre_EndTiming(time_index);
@@ -602,8 +605,8 @@ main( int   argc,
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming(); */
 
-      HYPRE_CSRPCGGetNumIterations(pcg_solver, &num_iterations);
-      HYPRE_CSRPCGGetFinalRelativeResidualNorm(pcg_solver, &final_res_norm);
+      HYPRE_PCGGetNumIterations(pcg_solver, &num_iterations);
+      HYPRE_PCGGetFinalRelativeResidualNorm(pcg_solver, &final_res_norm);
 
       HYPRE_CSRPCGDestroy(pcg_solver);
  
@@ -628,10 +631,10 @@ main( int   argc,
       hypre_BeginTiming(time_index); */
 
       HYPRE_CSRGMRESCreate( &pcg_solver);
-      HYPRE_CSRGMRESSetMaxIter(pcg_solver, 500);
-      HYPRE_CSRGMRESSetTol(pcg_solver, tol);
-      HYPRE_CSRGMRESSetKDim(pcg_solver, k_dim);
-      HYPRE_CSRGMRESSetLogging(pcg_solver, 1);
+      HYPRE_GMRESSetMaxIter(pcg_solver, 500);
+      HYPRE_GMRESSetTol(pcg_solver, tol);
+      HYPRE_GMRESSetKDim(pcg_solver, k_dim);
+      HYPRE_GMRESSetLogging(pcg_solver, 1);
 
       if (solver_id == 3)
       {
@@ -653,7 +656,8 @@ main( int   argc,
          HYPRE_AMGSetInterpType(pcg_precond, interp_type);
          HYPRE_AMGSetNumFunctions(pcg_precond, num_functions);
          HYPRE_AMGSetDofFunc(pcg_precond, dof_func);
-         HYPRE_CSRGMRESSetPrecond(pcg_solver, HYPRE_AMGSolve, HYPRE_AMGSetup, 
+         HYPRE_GMRESSetPrecond( pcg_solver, (HYPRE_PtrToSolverFcn) HYPRE_AMGSolve,
+                                (HYPRE_PtrToSolverFcn) HYPRE_AMGSetup, 
 				pcg_precond);
       }
       else if (solver_id == 2)
@@ -661,11 +665,12 @@ main( int   argc,
 	 /* use diagonal scaling as preconditioner */
 	 printf ("Solver: DS-GMRES\n");
 	 pcg_precond = NULL;
-	 HYPRE_CSRGMRESSetPrecond(pcg_solver, HYPRE_CSRDiagScale, 
-				HYPRE_CSRDiagScaleSetup, pcg_precond);
+	 HYPRE_GMRESSetPrecond( pcg_solver, (HYPRE_PtrToSolverFcn) HYPRE_CSRDiagScale,
+				(HYPRE_PtrToSolverFcn) HYPRE_CSRDiagScaleSetup,
+                                pcg_precond);
       }
 
-      HYPRE_CSRGMRESSetup(pcg_solver, (HYPRE_CSRMatrix) A, (HYPRE_Vector) b, 
+      HYPRE_GMRESSetup( pcg_solver, (HYPRE_Matrix) A, (HYPRE_Vector) b, 
 			(HYPRE_Vector) x);
       /* hypre_EndTiming(time_index);
       hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
@@ -675,7 +680,7 @@ main( int   argc,
       time_index = hypre_InitializeTiming("GMRES Solve");
       hypre_BeginTiming(time_index); */
 
-      HYPRE_CSRGMRESSolve(pcg_solver, (HYPRE_CSRMatrix) A, (HYPRE_Vector) b, 
+      HYPRE_GMRESSolve( pcg_solver, (HYPRE_Matrix) A, (HYPRE_Vector) b, 
 			(HYPRE_Vector) x);
 
       /* hypre_EndTiming(time_index);
@@ -683,8 +688,8 @@ main( int   argc,
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming(); */
 
-      HYPRE_CSRGMRESGetNumIterations(pcg_solver, &num_iterations);
-      HYPRE_CSRGMRESGetFinalRelativeResidualNorm(pcg_solver, &final_res_norm);
+      HYPRE_GMRESGetNumIterations(pcg_solver, &num_iterations);
+      HYPRE_GMRESGetFinalRelativeResidualNorm(pcg_solver, &final_res_norm);
 
       HYPRE_CSRGMRESDestroy(pcg_solver);
  

@@ -13,11 +13,11 @@
 
 srcdir = .
  
-CC =  kcc
+CC =  mpicc
 
-C_COMPILE_FLAGS= --c --strict --lint --display_error_number --diag_suppress 236,826,1018,1021,1022,1023,1024,1030,1041  
-CXX_COMPILE_FLAGS= --strict --lint --display_error_number  
-F77_COMPILE_FLAGS=   
+C_COMPILE_FLAGS=  -g
+CXX_COMPILE_FLAGS=-DNOFEI  -g
+F77_COMPILE_FLAGS=  -g -silent 
 CINCLUDES= 
 CDEFS =
 
