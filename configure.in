@@ -820,7 +820,7 @@ CASC_CONFIG_OUTPUT_LIST(\
  FEI_matrix_vector/isis-mv\
  PETScMat_linear_solvers/pilut\
  PETSc_linear_solvers/ParILUT\
- distributed_linear_solvers/ParaSAILS\
+ distributed_linear_solvers/ParaSails\
  test\
  tools\
  docs)
