@@ -116,8 +116,10 @@ hypre_StructMapCoarseToFine( hypre_Index cindex,
  * 6. Boxes of size zero must also be considered when determining
  * neighborhood information exchanges.
  *
- * 7. This routine will work only if the coarsening factor is less
- * than or equal to twice the perimeter (= 2*max_distance).
+ * 7. This routine will work only if the coarsening factor is <= 2.
+ * To extend this algorithm to work with larger coarsening factors,
+ * more than one exchange of neighbor information will be needed after
+ * each processor coarsens its own neighborhood.
  *
  *--------------------------------------------------------------------------*/
 
