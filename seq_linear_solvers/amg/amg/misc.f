@@ -316,7 +316,7 @@ c
       dimension jb (*)
 c
       dimension ippt(10)
-      dimension iarr(20)
+cveh  dimension iarr(20)
       dimension aa(10),jja(10),iiu(10)
 c
       character*1 icpt,ifpt,ippt,ispt
@@ -2485,7 +2485,7 @@ c     in reports, only oldname is used.
 c
 c---------------------------------------------------------------------
 c
-      integer nhigh
+cveh  integer nhigh
       character*(*) oldname,newname
       character*10  name,alias
 
