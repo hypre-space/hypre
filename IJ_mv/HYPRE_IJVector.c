@@ -96,6 +96,62 @@ HYPRE_FreeIJVector( HYPRE_IJVector IJvector )
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_SetIJVectorPartitioning
+ *--------------------------------------------------------------------------*/
+
+int 
+HYPRE_SetIJVectorPartitioning( HYPRE_IJVector  IJvector,
+                               int            *partitioning )
+{
+   int ierr = 0;
+   hypre_IJVector *vector = (hypre_IJVector *) IJvector;
+
+   /* if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PETSC )
+      ierr = hypre_SetIJVectorPETScPartitioning(vector,
+                                                partitioning);
+   else if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_ISIS )
+      ierr = hypre_SetIJVectorISISPartitioning(vector,
+                                               partitioning);
+   else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR )
+      ierr = hypre_SetIJVectorParPartitioning(vector,
+                                              partitioning);
+   else
+      ierr = -1;
+
+   return(ierr);
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_SetIJVectorLocalPartitioning
+ *--------------------------------------------------------------------------*/
+
+int 
+HYPRE_SetIJVectorLocalPartitioning( HYPRE_IJVector IJvector,
+                                    int            vec_start,
+                                    int            vec_stop   )
+{
+   int ierr = 0;
+   hypre_IJVector *vector = (hypre_IJVector *) IJvector;
+
+   /* if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PETSC )
+      ierr = hypre_SetIJVectorPETScLocalPartitioning(vector,
+                                                     vec_start,
+                                                     vec_stop   );
+   else if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_ISIS )
+      ierr = hypre_SetIJVectorISISLocalPartitioning(vector,
+                                                    vec_start,
+                                                    vec_stop   );
+   else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR )
+      ierr = hypre_SetIJVectorParLocalPartitioning(vector,
+                                                   vec_start,
+                                                   vec_stop   );
+   else
+      ierr = -1;
+
+   return(ierr);
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_InitializeIJVector
  *--------------------------------------------------------------------------*/
 
