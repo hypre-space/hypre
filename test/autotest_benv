@@ -1,0 +1,40 @@
+#!/bin/sh
+#BHEADER***********************************************************************
+# (c) 2001   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+#==============================================================================
+# Set autotest directory to current directory
+#==============================================================================
+
+HYPRE_AUTOTEST_DIR=`pwd`
+export HYPRE_AUTOTEST_DIR
+
+#==============================================================================
+# Email lists
+#==============================================================================
+
+HYPRE_DEFAULT_EMAIL="\
+ rfalgout@llnl.gov\
+ treadway@llnl.gov"
+
+HYPRE_CHECKOUT_EMAIL="$HYPRE_DEFAULT_EMAIL"
+
+HYPRE_CONFIGURE_EMAIL="$HYPRE_DEFAULT_EMAIL"
+
+HYPRE_STRUCT_EMAIL="$HYPRE_DEFAULT_EMAIL"
+
+HYPRE_IJ_EMAIL="$HYPRE_DEFAULT_EMAIL"
+
+HYPRE_FEI_EMAIL="$HYPRE_DEFAULT_EMAIL"
+
+HYPRE_ALL_EMAIL="$HYPRE_IJ_EMAIL"
+
+export HYPRE_DEFAULT_EMAIL HYPRE_CHECKOUT_EMAIL HYPRE_CONFIGURE_EMAIL
+export HYPRE_STRUCT_EMAIL HYPRE_IJ_EMAIL HYPRE_FEI_EMAIL
+export HYPRE_ALL_EMAIL

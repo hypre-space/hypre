@@ -1,0 +1,111 @@
+#!/usr/bin/sh
+#BHEADER***********************************************************************
+# (c) 2001   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+perform_test()
+{
+  echo ""
+  echo "======================================================================"
+  echo "Running Hypre Beta testing on $HYPRE_RUN_MACHINE"
+  echo "======================================================================"
+  echo ""
+
+  echo "running autotest...."
+	. linear_solvers/test/autotest_benv;\
+	[ -f linear_solvers/test/env.${HYPRE_ARCH} ] && . linear_solvers/test/env.${HYPRE_ARCH};\
+        . linear_solvers/test/autotest_test ${HYPRE_MACHINE_COMMANDS}\
+
+}
+
+#==============================================================================
+# This script is the top-level script used to regression test hypre.
+#==============================================================================
+
+OldMask=umask
+umask 007
+. ./autotest_benv
+
+#==============================================================================
+# Run test suites on remote machines
+#==============================================================================
+
+while [ "$*" != "" ]
+do
+  case $1 in
+    -blue)
+        HYPRE_ARCH="blue"
+        HYPRE_COMPILE_MACHINE="blue"
+        HYPRE_RUN_MACHINE="blue"
+        HYPRE_REMOTE_DIR="/usr/gapps/hypre/powerpc-ibm-aix4.3.3.0/AUTOTEST"
+	HYPRE_MACHINE_COMMANDS="-m -a 2 -cf -o 1"
+	perform_test
+        shift;;
+    -casc)
+	HYPRE_MACHINE_COMMANDS="-m -a 2 -dcxfy -t 1 -ns"
+        shift;;
+    -dec)
+        HYPRE_ARCH="dec"
+        HYPRE_COMPILE_MACHINE="west"
+        HYPRE_RUN_MACHINE="southeast"
+        HYPRE_REMOTE_DIR="/usr/gapps/hypre/alphaev56-dec-osf4.0f/AUTOTEST"
+	HYPRE_MACHINE_COMMANDS="-m -r $HYPRE_RUN_MACHINE -a 2 -cf -o 1"
+	perform_test
+        shift;;
+    -lx)
+        HYPRE_ARCH="linux"
+        HYPRE_COMPILE_MACHINE="lx10"
+        HYPRE_RUN_MACHINE="lx10"
+        HYPRE_REMOTE_DIR="/usr/gapps/hypre/alphaev67-unknown-linux-gnu/AUTOTEST"
+	HYPRE_MACHINE_COMMANDS="-m -a 2 -cf -o 1"
+	perform_test
+        shift;;
+    -purify)
+	HYPRE_MACHINE_COMMANDS="-m -q 2 -a 1 -dcxfy -t 1 -ns"
+        shift;;
+    -red)
+        HYPRE_ARCH="red"
+        HYPRE_COMPILE_MACHINE="sasn100"
+        HYPRE_RUN_MACHINE="janus"
+        HYPRE_REMOTE_DIR="/usr/apps/hypre/AUTOTEST"
+	HYPRE_MACHINE_COMMANDS="-m -r $HYPRE_RUN_MACHINE -a 2 -cf -o 1"
+	perform_test
+        shift;;
+    -sgi)
+        HYPRE_ARCH="sgi"
+        HYPRE_COMPILE_MACHINE="wicked"
+        HYPRE_RUN_MACHINE="wicked"
+        HYPRE_REMOTE_DIR="/home/treadway/AUTOTEST"
+	HYPRE_MACHINE_COMMANDS="-m -a 2 -cf -o 1"
+	perform_test
+        shift;;
+    -tc2k)
+        HYPRE_ARCH="dec"
+        HYPRE_COMPILE_MACHINE="tckk126"
+        HYPRE_RUN_MACHINE="tckk100"
+        HYPRE_REMOTE_DIR="/usr/gapps/hypre/alphaev57-dec-osf5.0/AUTOTEST"
+	HYPRE_MACHINE_COMMANDS="-m -a 2 -cf -o 1"
+	perform_test
+        shift;;
+    -tc)
+        HYPRE_ARCH="dec"
+        HYPRE_COMPILE_MACHINE="tc04"
+        HYPRE_RUN_MACHINE="tc10"
+        HYPRE_REMOTE_DIR="/usr/gapps/hypre/alphaev56-dec-osf4.0f/AUTOTEST"
+	HYPRE_MACHINE_COMMANDS="-m -a 2 -cf -o 1"
+	perform_test
+        shift;;
+  esac
+
+done
+
+#==============================================================================
+# Autotest completion check: create "autotest finished" file
+#==============================================================================
+
+umask $OldMask
