@@ -53,13 +53,11 @@ hypre_BoomerAMGCGRelaxWt( void              *amg_vdata,
 
 
    int      *grid_relax_type;   
-   int     **grid_relax_points;  
  
    /* Local variables  */
 
    int       Solve_err_flag;
    int       i, j, jj;
-   int       fine_grid;
    int       num_sweep;
    int       relax_type;
    int       local_size;
@@ -117,7 +115,6 @@ hypre_BoomerAMGCGRelaxWt( void              *amg_vdata,
    hypre_ParVectorSetPartitioningOwner(Ztemp,0);
 
    grid_relax_type     = hypre_ParAMGDataGridRelaxType(amg_data);
-   grid_relax_points   = hypre_ParAMGDataGridRelaxPoints(amg_data);
    smooth_option       = hypre_ParAMGDataSmoothOption(amg_data)[level]; 
 
    /* Initialize */
