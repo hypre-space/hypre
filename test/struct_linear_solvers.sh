@@ -336,14 +336,22 @@ fi
 
 $MPIRUN -np 3 $DRIVER -P 1 1 3 -solver 10
 $MPIRUN -np 3 $DRIVER -P 1 3 1 -solver 11
-$MPIRUN -np 3 $DRIVER -P 3 1 1 -solver 18
+$MPIRUN -np 3 $DRIVER -P 3 1 1 -solver 17
+$MPIRUN -np 1 $DRIVER -P 1 1 1 -solver 18
 $MPIRUN -np 1 $DRIVER -P 1 1 1 -solver 19
 
 # Test Hybrid without the switch
 $MPIRUN -np 1 $DRIVER -P 1 1 1 -solver 20
-# Test Hybrid with the switch
-$MPIRUN -np 1 $DRIVER -n 30 30 30 -P 1 1 1 -solver 20
-
 $MPIRUN -np 1 $DRIVER -P 1 1 1 -solver 21
 $MPIRUN -np 1 $DRIVER -P 1 1 1 -solver 25
 
+# Test Hybrid with the switch
+$MPIRUN -np 1 $DRIVER -n 30 30 30 -P 1 1 1 -solver 20
+$MPIRUN -np 1 $DRIVER -n 30 30 30 -P 1 1 1 -solver 21
+$MPIRUN -np 1 $DRIVER -n 30 30 30 -P 1 1 1 -solver 25
+
+$MPIRUN -np 3 $DRIVER -P 1 1 3 -solver 30
+$MPIRUN -np 3 $DRIVER -P 1 3 1 -solver 31
+$MPIRUN -np 3 $DRIVER -P 3 1 1 -solver 37
+$MPIRUN -np 1 $DRIVER -P 1 1 1 -solver 38
+$MPIRUN -np 1 $DRIVER -P 1 1 1 -solver 39
