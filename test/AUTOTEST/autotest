@@ -214,6 +214,25 @@ do
   HYPRE_DIST_DIR=""
   COMPILERSELECT=""
   case $1 in
+    -achilles)
+        HYPRE_ARCH="casc"
+        HYPRE_COMPILE_MACHINE="sunup"
+        HYPRE_RUN_MACHINE="sunup"
+        HYPRE_REMOTE_DIR="/usr/casc/hypre/sparc-sun-solaris2.8/AUTOTEST"
+        if [ "$AUTOMAKEMODE" = "yes" ] ; then
+	  HYPRE_MACHINE_COMMANDS="-mne 1 -a 1 -cfl 2"
+          HYPRE_MESSAGE='TEST[autotest-Solaris8]'
+        else
+	  HYPRE_MACHINE_COMMANDS="-mb 1 -ne 1 -a 2 -cf"
+          HYPRE_MESSAGE='SECONDARY[cc-5.3]'
+        fi
+        if [ "$DEBUGMODE" = "yes" ] ; then
+          HYPRE_MACHINE_COMMANDS="-D $HYPRE_MACHINE_COMMANDS"
+        fi
+   	print_header
+        ./autotest_test $HYPRE_MACHINE_COMMANDS -v $HYPRE_MESSAGE
+##	perform_test
+        shift;;
     -automake)
         if [ -x linear_solvers/config/bootstrap ] ; then
   	  (PATH=$HOME/mnt/`/usr/casc/hypre/config.guess`/bin:$PATH;\
@@ -281,7 +300,7 @@ do
           HYPRE_MACHINE_COMMANDS="-D $HYPRE_MACHINE_COMMANDS"
         fi
    	print_header
-        ./autotest_test $HYPRE_MACHINE_COMMANDS
+        ./autotest_test $HYPRE_MACHINE_COMMANDS -v $HYPRE_MESSAGE
 ##	perform_test
         shift;;
     -compass | -compassmp) # obsolute
