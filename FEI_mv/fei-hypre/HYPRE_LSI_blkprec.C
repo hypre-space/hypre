@@ -2056,6 +2056,7 @@ int HYPRE_LSI_BlockP::solveBLUSolve(HYPRE_IJVector x1,HYPRE_IJVector x2,
       HYPRE_ParCSRPCGSolve(A11Solver_, A11mat_csr, f1_csr, x1_csr);
    else if ( A11Params_.SolverID_ == 1 )
       HYPRE_ParCSRGMRESSolve(A11Solver_, A11mat_csr, f1_csr, x1_csr);
+   else
    {
       printf("HYPRE_LSI_BlockP ERROR : invalid A11 solver.\n");
       exit(1);
@@ -2065,6 +2066,7 @@ int HYPRE_LSI_BlockP::solveBLUSolve(HYPRE_IJVector x1,HYPRE_IJVector x2,
       HYPRE_ParCSRPCGSolve(A22Solver_, A22mat_csr, f2_csr, x2_csr);
    else if ( A11Params_.SolverID_ == 1 )
       HYPRE_ParCSRGMRESSolve(A22Solver_, A22mat_csr, f2_csr, x2_csr);
+   else
    {
       printf("HYPRE_LSI_BlockP ERROR : invalid A22 solver.\n");
       exit(1);
@@ -2074,6 +2076,7 @@ int HYPRE_LSI_BlockP::solveBLUSolve(HYPRE_IJVector x1,HYPRE_IJVector x2,
       HYPRE_ParCSRPCGSolve(A11Solver_, A11mat_csr, f1_csr, x1_csr);
    else if ( A11Params_.SolverID_ == 1 )
       HYPRE_ParCSRGMRESSolve(A11Solver_, A11mat_csr, f1_csr, x1_csr);
+   else
    {
       printf("HYPRE_LSI_BlockP ERROR : invalid A11 solver.\n");
       exit(1);
