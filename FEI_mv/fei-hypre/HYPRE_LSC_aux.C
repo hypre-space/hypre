@@ -77,6 +77,13 @@ extern "C" {
    int HYPRE_LSI_MLSetNumPDEs( HYPRE_Solver, int );
 #endif
 
+#ifdef HAVE_MLI
+   int HYPRE_LSI_MLISetup( HYPRE_Solver, HYPRE_ParCSRMatrix,
+                           HYPRE_ParVector, HYPRE_ParVector );
+   int HYPRE_LSI_MLISolve( HYPRE_Solver, HYPRE_ParCSRMatrix,
+                           HYPRE_ParVector, HYPRE_ParVector );
+#endif
+
    void  qsort1(int *, double *, int, int);
    int   HYPRE_DummyFunction(HYPRE_Solver, HYPRE_ParCSRMatrix,
                             HYPRE_ParVector, HYPRE_ParVector) {return 0;}
@@ -1409,6 +1416,22 @@ void HYPRE_LinSysCore::setupPCGPrecon()
             }
             break;
 #endif
+
+#ifdef HAVE_MLI
+       case HYMLI :
+            if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
+               printf("MLI preconditioner used \n");
+            if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
+               HYPRE_ParCSRPCGSetPrecond(HYSolver_, HYPRE_LSI_MLISolve,
+                                         HYPRE_DummyFunction, HYPrecon_);
+            else
+            {
+               HYPRE_ParCSRPCGSetPrecond(HYSolver_,HYPRE_LSI_MLISolve,
+                                         HYPRE_LSI_MLISetup, HYPrecon_);
+               HYPreconSetup_ = 1;
+            }
+            break;
+#endif
     }
     return;
 }
@@ -1697,6 +1720,22 @@ void HYPRE_LinSysCore::setupGMRESPrecon()
                HYPRE_LSI_MLSetNumPDEs(HYPrecon_,mlNumPDEs_);
                HYPRE_ParCSRGMRESSetPrecond(HYSolver_,HYPRE_LSI_MLSolve,
                                            HYPRE_LSI_MLSetup, HYPrecon_);
+               HYPreconSetup_ = 1;
+            }
+            break;
+#endif
+
+#ifdef HAVE_MLI
+       case HYMLI :
+            if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
+               printf("MLI preconditioner used \n");
+            if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
+               HYPRE_ParCSRGMRESSetPrecond(HYSolver_, HYPRE_LSI_MLISolve,
+                                           HYPRE_DummyFunction, HYPrecon_);
+            else
+            {
+               HYPRE_ParCSRGMRESSetPrecond(HYSolver_,HYPRE_LSI_MLISolve,
+                                           HYPRE_LSI_MLISetup, HYPrecon_);
                HYPreconSetup_ = 1;
             }
             break;
@@ -2008,6 +2047,22 @@ void HYPRE_LinSysCore::setupFGMRESPrecon()
             }
             break;
 #endif
+
+#ifdef HAVE_MLI
+       case HYMLI :
+            if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
+               printf("MLI preconditioner used \n");
+            if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
+               HYPRE_ParCSRFGMRESSetPrecond(HYSolver_, HYPRE_LSI_MLISolve,
+                                            HYPRE_DummyFunction, HYPrecon_);
+            else
+            {
+               HYPRE_ParCSRFGMRESSetPrecond(HYSolver_,HYPRE_LSI_MLISolve,
+                                            HYPRE_LSI_MLISetup, HYPrecon_);
+               HYPreconSetup_ = 1;
+            }
+            break;
+#endif
     }
     return;
 }
@@ -2298,6 +2353,22 @@ void HYPRE_LinSysCore::setupBiCGSTABPrecon()
                HYPRE_LSI_MLSetNumPDEs(HYPrecon_,mlNumPDEs_);
                HYPRE_ParCSRBiCGSTABSetPrecond(HYSolver_,HYPRE_LSI_MLSolve,
                                               HYPRE_LSI_MLSetup, HYPrecon_);
+               HYPreconSetup_ = 1;
+            }
+            break;
+#endif
+
+#ifdef HAVE_MLI
+       case HYMLI :
+            if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
+               printf("MLI preconditioner used \n");
+            if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
+               HYPRE_ParCSRBiCGSTABSetPrecond(HYSolver_, HYPRE_LSI_MLISolve,
+                                              HYPRE_DummyFunction, HYPrecon_);
+            else
+            {
+               HYPRE_ParCSRBiCGSTABSetPrecond(HYSolver_,HYPRE_LSI_MLISolve,
+                                              HYPRE_LSI_MLISetup, HYPrecon_);
                HYPreconSetup_ = 1;
             }
             break;
@@ -2597,6 +2668,22 @@ void HYPRE_LinSysCore::setupBiCGSTABLPrecon()
             }
             break;
 #endif
+
+#ifdef HAVE_MLI
+       case HYMLI :
+            if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
+               printf("MLI preconditioner used \n");
+            if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
+               HYPRE_ParCSRBiCGSTABLSetPrecond(HYSolver_, HYPRE_LSI_MLISolve,
+                                               HYPRE_DummyFunction, HYPrecon_);
+            else
+            {
+               HYPRE_ParCSRBiCGSTABLSetPrecond(HYSolver_,HYPRE_LSI_MLISolve,
+                                               HYPRE_LSI_MLISetup, HYPrecon_);
+               HYPreconSetup_ = 1;
+            }
+            break;
+#endif
     }
     return;
 }
@@ -2884,6 +2971,22 @@ void HYPRE_LinSysCore::setupTFQmrPrecon()
                HYPRE_LSI_MLSetNumPDEs(HYPrecon_,mlNumPDEs_);
                HYPRE_ParCSRTFQmrSetPrecond(HYSolver_,HYPRE_LSI_MLSolve,
                                            HYPRE_LSI_MLSetup, HYPrecon_);
+               HYPreconSetup_ = 1;
+            }
+            break;
+#endif
+
+#ifdef HAVE_MLI
+       case HYMLI :
+            if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
+               printf("MLI preconditioner used \n");
+            if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
+               HYPRE_ParCSRTFQmrSetPrecond(HYSolver_, HYPRE_LSI_MLISolve,
+                                           HYPRE_DummyFunction, HYPrecon_);
+            else
+            {
+               HYPRE_ParCSRTFQmrSetPrecond(HYSolver_,HYPRE_LSI_MLISolve,
+                                           HYPRE_LSI_MLISetup, HYPrecon_);
                HYPreconSetup_ = 1;
             }
             break;
@@ -3179,6 +3282,22 @@ void HYPRE_LinSysCore::setupBiCGSPrecon()
             }
             break;
 #endif
+
+#ifdef HAVE_MLI
+       case HYMLI :
+            if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
+               printf("MLI preconditioner used \n");
+            if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
+               HYPRE_ParCSRBiCGSSetPrecond(HYSolver_, HYPRE_LSI_MLISolve,
+                                           HYPRE_DummyFunction, HYPrecon_);
+            else
+            {
+               HYPRE_ParCSRBiCGSSetPrecond(HYSolver_,HYPRE_LSI_MLISolve,
+                                           HYPRE_LSI_MLISetup, HYPrecon_);
+               HYPreconSetup_ = 1;
+            }
+            break;
+#endif
     }
     return;
 }
@@ -3412,6 +3531,22 @@ void HYPRE_LinSysCore::setupSymQMRPrecon()
                HYPRE_LSI_MLSetNumPDEs(HYPrecon_,mlNumPDEs_);
                HYPRE_ParCSRSymQMRSetPrecond(HYSolver_,HYPRE_LSI_MLSolve,
                                             HYPRE_LSI_MLSetup, HYPrecon_);
+               HYPreconSetup_ = 1;
+            }
+            break;
+#endif
+
+#ifdef HAVE_MLI
+       case HYMLI :
+            if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
+               printf("MLI preconditioner used \n");
+            if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
+               HYPRE_ParCSRSymQMRSetPrecond(HYSolver_, HYPRE_LSI_MLISolve,
+                                            HYPRE_DummyFunction, HYPrecon_);
+            else
+            {
+               HYPRE_ParCSRSymQMRSetPrecond(HYSolver_,HYPRE_LSI_MLISolve,
+                                            HYPRE_LSI_MLISetup, HYPrecon_);
                HYPreconSetup_ = 1;
             }
             break;

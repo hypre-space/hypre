@@ -64,7 +64,10 @@ typedef struct HYPRE_LSI_MLI_Struct
    MLI      *mli_;
 #endif
    MPI_Comm mpiComm_;
+   int      outputLevel_;         /* for diagnostics */
    int      nLevels_;             /* max number of levels */
+   int      cycleType_;           /* 1 for V and 2 for W */
+   int      maxIterations_;       /* default - 1 iteration */
    int      method_;              /* default - smoothed aggregation */
    int      numPDEs_;             /* default - 1 */
    int      preSmoother_;         /* default - Gauss Seidel */
@@ -77,6 +80,7 @@ typedef struct HYPRE_LSI_MLI_Struct
    int      coarseSolver_;        /* default = SuperLU */
    int      coarseSolverNSweeps_;
    double   *coarseSolverWts_;
+   int      minCoarseSize_;       /* minimum coarse grid size */
    int      nodeDOF_;
    int      nSpaceDim_;           /* number of null vectors */
    double   *nSpaceVects_;
@@ -94,7 +98,10 @@ int HYPRE_LSI_MLICreate( MPI_Comm comm, HYPRE_Solver *solver )
    HYPRE_LSI_MLI *mli_object = (HYPRE_LSI_MLI *) malloc(sizeof(HYPRE_LSI_MLI));
    *solver = (HYPRE_Solver) mli_object;
    mli_object->mpiComm_             = comm;
+   mli_object->outputLevel_         = 0;
    mli_object->nLevels_             = 30;
+   mli_object->maxIterations_       = 1;
+   mli_object->cycleType_           = 1;
    mli_object->method_              = MLI_METHOD_AMGSA_ID;
    mli_object->numPDEs_             = 1;
    mli_object->preSmoother_         = MLI_SOLVER_SGS_ID;
@@ -104,11 +111,12 @@ int HYPRE_LSI_MLICreate( MPI_Comm comm, HYPRE_Solver *solver )
    mli_object->preSmootherWts_      = NULL;
    mli_object->postSmootherWts_     = NULL;
    mli_object->strengthThreshold_   = 0.08;
-   mli_object->coarseSolver_        = 0;
+   mli_object->coarseSolver_        = MLI_SOLVER_SUPERLU_ID;
    mli_object->coarseSolverNSweeps_ = 0;
    mli_object->coarseSolverWts_     = NULL;
-   mli_object->nodeDOF_             = 0;
-   mli_object->nSpaceDim_           = 0;
+   mli_object->minCoarseSize_       = 20;
+   mli_object->nodeDOF_             = 1;
+   mli_object->nSpaceDim_           = 1;
    mli_object->nSpaceVects_         = NULL;
    mli_object->localNEqns_          = 0;
 #ifdef HAVE_MLI
@@ -159,7 +167,7 @@ int HYPRE_LSI_MLISetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
                         HYPRE_ParVector b,   HYPRE_ParVector x )
 {
 #ifdef HAVE_MLI
-   int           targc, maxIterations=1;
+   int           targc;
    double        tol=1.0e-8;
    char          *targv[4], paramString[100];;
    HYPRE_LSI_MLI *mli_object;
@@ -183,7 +191,6 @@ int HYPRE_LSI_MLISetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
    /* -------------------------------------------------------- */ 
 
    mli->setNumLevels( mli_object->nLevels_ );
-   mli->setMaxIterations( maxIterations );
    mli->setTolerance( tol );
 
    /* -------------------------------------------------------- */ 
@@ -274,9 +281,16 @@ int HYPRE_LSI_MLISetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
            sprintf(paramString, "setCoarseSolver SuperLU" ); break;
    }
    targc    = 2;
-   targv[0] = (char *) &mli_object->coarseSolverNSweeps_;
+   targv[0] = (char *) &(mli_object->coarseSolverNSweeps_);
    targv[1] = (char *) mli_object->coarseSolverWts_;
    method->setParams( paramString, targc, targv );
+
+   /* -------------------------------------------------------- */ 
+   /* load minimum coarse grid size                            */
+   /* -------------------------------------------------------- */ 
+
+   sprintf( paramString, "setMinCoarseSize %d", mli_object->minCoarseSize_ );
+   method->setParams( paramString, 0, NULL );
 
    /* -------------------------------------------------------- */ 
    /* load null space, if there is any                         */
@@ -300,8 +314,15 @@ int HYPRE_LSI_MLISetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
    mli_mat = new MLI_Matrix((void*) A, "HYPRE_ParCSR", NULL);
    mli->setMethod( method );
    mli->setSystemMatrix( 0, mli_mat );
+   mli->setOutputLevel( mli_object->outputLevel_ );
    mli->setup();
-
+   mli->setMaxIterations( mli_object->maxIterations_ );
+   mli->setCyclesAtLevel( -1, mli_object->cycleType_ );
+   if ( mli_object->outputLevel_ >= 1 )
+   {
+      strcpy( paramString, "print" );
+      method->setParams( paramString, 0, NULL );
+   }
    return 0;
 #else
    printf("MLI not available.\n");
@@ -357,9 +378,25 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
       return 1;
    }
    sscanf(paramString,"%s %s", param1, param2);
-   if ( !strcmp(param2, "strengthThreshold") )
+   if ( !strcmp(param2, "outputLevel") )
    {
-      sscanf(paramString,"%s %s %lg",param1,param2,
+      sscanf(paramString,"%s %s %d",param1,param2,&(mli_object->outputLevel_));
+   }
+   else if ( !strcmp(param2, "maxIterations") )
+   {
+      sscanf(paramString,"%s %s %d", param1, param2,
+             &(mli_object->maxIterations_));
+      if ( mli_object->maxIterations_ <= 0 ) mli_object->maxIterations_ = 1;
+   }
+   else if ( !strcmp(param2, "cycleType") )
+   {
+      sscanf(paramString,"%s %s %s", param1, param2, param3);
+      if ( ! strcmp( param3, "V" ) )      mli_object->cycleType_ = 1;
+      else if ( ! strcmp( param3, "W" ) ) mli_object->cycleType_ = 2;
+   }
+   else if ( !strcmp(param2, "strengthThreshold") )
+   {
+      sscanf(paramString,"%s %s %lg", param1, param2,
              &(mli_object->strengthThreshold_));
       if ( mli_object->strengthThreshold_ < 0.0 )
          mli_object->strengthThreshold_ = 0.0;
@@ -436,9 +473,40 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
       if ( mli_object->preNSweeps_ <= 0 ) mli_object->preNSweeps_ = 1;
       mli_object->postNSweeps_ = mli_object->preNSweeps_; 
    }
+   else if ( !strcmp(param2, "minCoarseSize") )
+   {
+      sscanf(paramString,"%s %s %d",param1,param2,
+             &(mli_object->minCoarseSize_));
+      if ( mli_object->minCoarseSize_ <= 0 ) mli_object->minCoarseSize_ = 20;
+   }
+   else if ( !strcmp(param2, "nodeDOF") )
+   {
+      sscanf(paramString,"%s %s %d",param1,param2,
+             &(mli_object->nodeDOF_));
+      if ( mli_object->nodeDOF_ <= 0 ) mli_object->nodeDOF_ = 1;
+   }
+   else if ( !strcmp(param2, "nullSpaceDim") )
+   {
+      sscanf(paramString,"%s %s %d",param1,param2,
+             &(mli_object->nSpaceDim_));
+      if ( mli_object->nSpaceDim_ <= 0 ) mli_object->nSpaceDim_ = 1;
+   }
    else 
    {
       printf("HYPRE_LSI_MLISetParams ERROR : unrecognized request.\n");
+      printf("    offending request = %s.\n", paramString);
+      printf("Available ones : \n");
+      printf("      outputLevel <d> \n");
+      printf("      maxIterations <d> \n");
+      printf("      cycleType <'V','W'> \n");
+      printf("      strengthThreshold <f> \n");
+      printf("      method AMGSA \n");
+      printf("      smoother <Jacobi,GS,...> \n");
+      printf("      coarseSolver <Jacobi,GS,...> \n");
+      printf("      numSweeps <d> \n");
+      printf("      minCoarseSize <d> \n");
+      printf("      nodeDOF <d> \n");
+      printf("      nullSpaceDim <d> \n");
       exit(1);
    }
    return 0;
