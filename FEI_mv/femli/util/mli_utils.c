@@ -1184,15 +1184,17 @@ int MLI_Utils_SVD(double *uArray, double *sArray, double *vtArray,
 int MLI_Utils_singular_vectors(int n, double *uArray)
 {
     int info;
+
+#ifdef HYPRE_USING_ESSL
+    info = -1;
+#else
+
     char jobu  = 'O'; /* overwrite input with U */
     char jobvt = 'N';
     double *sArray = (double *) malloc(n*sizeof(double));
     int workLen = 5*n;
     double *workArray = (double *) malloc(workLen*sizeof(double));
 
-#ifdef HYPRE_USING_ESSL
-    info = -1;
-#else
     void hypre_F90_NAME_BLAS(dgesvd, DGESVD)(char *, char *, int *,
         int *, double *, int *, double *, double *, int *,
         double *, int *, double *, int *, int *);
@@ -1225,7 +1227,6 @@ int MLI_Utils_ComputeLowEnergyLanczos(hypre_ParCSRMatrix *A,
    double   rnorm, *alphaArray, *rnormArray, **Tmat;
    double   one=1.0, *rData;
    MPI_Comm comm;
-   hypre_CSRMatrix *ADiag;
    hypre_ParVector *rVec, *zVec, *pVec, *apVec;
    double *lanczos, *lanczos_p, *Umat, *ptr, *Uptr, *curr_le_vector;
    double rVecNorm;
@@ -1238,7 +1239,6 @@ int MLI_Utils_ComputeLowEnergyLanczos(hypre_ParCSRMatrix *A,
    MPI_Comm_rank(comm,&mypid);  
    MPI_Comm_size(comm,&nprocs);  
 
-   ADiag      = hypre_ParCSRMatrixDiag(A);
    HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) A, &partition);
    startRow    = partition[mypid];
    endRow      = partition[mypid+1] - 1;
