@@ -78,7 +78,8 @@ extern "C" {
  * Types, etc.
  *--------------------------------------------------------------------------*/
 
-typedef int hypre_MPI_Comm;
+typedef struct {int dummy;} hypre_MPI_Comm;
+
 typedef int hypre_MPI_Status;
 typedef int hypre_MPI_Request;
 typedef int hypre_MPI_Op;
