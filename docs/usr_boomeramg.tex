@@ -5,6 +5,8 @@ BoomerAMG is a parallel implementation of algebraic multigrid.
 It can be used both as a solver or as a preconditioner.
 The user can choose between various different parallel coarsening techniques
 and relaxation schemes.
+See \cite{Henson_Yang:2000} for a detailed description of the coarsening 
+algorithms, the interpolation and nueemerical results.
 The following coarsening techniques are available:
 \begin{itemize}
 \item the Cleary-Luby-Jones-Plassman (CLJP) coarsening,
@@ -15,9 +17,11 @@ classical RS coarsening algorithm.
 The following relaxation techniques are available:
 \begin{itemize}
 \item weighted Jacobi relaxation,
-\item a hybrid Gauss-Seidel / Jacobi relaxation scheme, and
+\item a hybrid Gauss-Seidel / Jacobi relaxation scheme, 
+\item a symmetric hybrid Gauss-Seidel / Jacobi relaxation scheme, and
 \item sequential Gauss-Seidel relaxation.
 \end{itemize}
+
 
 \subsection{Synopsis}
 
@@ -153,7 +157,9 @@ The following options are possible for grid\_relax\_type[k]:
 
 \begin{tabular}{l l}
  0 & weighted Jacobi \\
+ 1 & sequential Gauss-Seidel (very slow!) \\
  3 & Gauss-Seidel / Jacobi hybrid method (default) \\
+ 6 & symmetric Gauss-Seidel / Jacobi hybrid method \\
  9 & Gaussian elimination (only for the coarsest level (k=3), not recommended\\ 
  & if the system on the coarsest level is large)\\
 \end{tabular}
@@ -165,12 +171,12 @@ int HYPRE_BoomerAMGSetGridRelaxPoints( HYPRE_Solver solver,
 	int** grid_relax_points);
 \end{verbatim}
 \end{display}
-grid\_relax\_points[k][l] defines which points are to be relaxed during
-the (l+1)-th sweep on the fine 
-grid (k=0), the down cycle (k=1), the up cycle (k=2) and the coarse grid (k=3),
+grid\_relax\_points[i][j] defines which points are to be relaxed during
+the (j+1)-th sweep on the fine 
+grid (i=0), the down cycle (i=1), the up cycle (i=2) and the coarse grid (i=3),
 e.g. if grid\_relax\_points[1][0] is -1, all points marked -1 (which are in
 general fine points) are relaxed on the first sweep of the down cycle.
-Note: grid\_relax\_points[3][l] needs to be 0 always, since the concept of 
+Note: grid\_relax\_points[3][j] needs to be 0 always, since the concept of 
 coarse and fine points does not exist on the coarsest grid. If the user
 sets it to another value, it will be automatically set to 0 and a warning
 printed, unless the direct solver is used.
