@@ -303,8 +303,6 @@ hypre_StructMatrixInitializeShell( hypre_StructMatrix *matrix )
             }
          }
 
-      /* jfp debugging, this line sdnt be needed >>>> */
-      data_size *= 2;
       hypre_StructMatrixDataIndices(matrix) = data_indices;
       hypre_StructMatrixDataSize(matrix)    = data_size;
    }
