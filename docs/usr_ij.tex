@@ -3,7 +3,7 @@
 \label{IJ}
 
 The IJ linear system (IJ) interface is the lowest common
-denominator for enumeration of an 
+denominator for specification of an 
 unaugmented\footnote{An example of an augmented
 linear system of equations would be a 
 a linear system plus the stiffness matrices from which the matrix
@@ -15,14 +15,14 @@ pattern of a linear system passed through the IJ interface.
 Like all {\slshape hypre} interfaces, it is designed
 to insulate the user from underlying implementation details.
 
-One would typically use the IJ interface to enumerate the linear
+One would typically use the IJ interface to specify the linear
 system originating from an unstructured grid PDE discretization.
 However, the interface can be used for discretizations from more
 structured grids, with consequent solver inefficiencies from lack
 of built-in sparsity assumptions.
 
 IJ matrix interface calls facilitate creation and destruction of 
-matrix interface objects; enumeration, manipulation and retrieval
+matrix interface objects; specification, manipulation and retrieval
 of rows and blocks of linear system coefficients; and determination
 and querying of underlying linear system data structure formats.
 {\slshape Hypre} supports multiple underlying data structure formats
@@ -33,7 +33,7 @@ One format is abbreviated {\itshape ParCSR}, meaning {\itshape Par}allel
 {\itshape C}ompressed {\itshape S}parse {\itshape R}ow.
 
 IJ vector interface calls facilitate creation and destruction of
-vector interface objects, as well as enumeration, manipulation,
+vector interface objects, as well as specification, manipulation,
 and retrieval of right-hand side and initial guess vector components.
 
 Currently, {\slshape hypre} solvers which operate directly on linear
