@@ -1998,7 +1998,6 @@ int HYPRE_LinSysCore::putNodalFieldData(int fieldID, int fieldSize,
       }    
       if ( HYPreconID_ == HYMLI )
       {
-printf("calling Nodal Coordinates\n");
          HYPRE_LSI_MLISetNodalCoordinates(HYPrecon_, numNodes, fieldSize,  
                                           (double *) data, NULL);
       }    
