@@ -389,6 +389,51 @@ MPI_Type_commit( MPI_Datatype *datatype )
    return(0);
 }
 
+int
+MPI_Request_free(MPI_Request *request)
+{
+   return 0;
+}
+
+int
+MPI_Send_init(void *buf, int count, MPI_Datatype datatype, int dest, int tag, 
+  MPI_Comm comm, MPI_Request *request)
+{
+   return 0;
+}
+
+int
+MPI_Recv_init(void *buf, int count, MPI_Datatype datatype, int dest, int tag, 
+  MPI_Comm comm, MPI_Request *request)
+{
+   return 0;
+}
+
+int
+MPI_Startall(int count, MPI_Request *array_of_requests)
+{
+   return 0;
+}
+
+int
+MPI_Iprobe(int source, int tag, MPI_Comm comm, int *flag, MPI_Status *status)
+{
+   return 0;
+}
+
+int
+MPI_Probe(int source, int tag, MPI_Comm comm, MPI_Status *status)
+{
+   return 0;
+}
+
+int
+MPI_Irsend(void *buf, int count, MPI_Datatype datatype, int dest, int tag, 
+  MPI_Comm comm, MPI_Request *request)
+{
+   return 0;
+}
+
 #else
 
 /* this is used only to eliminate compiler warnings */

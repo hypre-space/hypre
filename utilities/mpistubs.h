@@ -42,6 +42,7 @@ extern "C" {
 #define MPI_DOUBLE          hypre_MPI_DOUBLE           
 #define MPI_INT             hypre_MPI_INT              
 #define MPI_CHAR            hypre_MPI_CHAR             
+#define MPI_LONG            hypre_MPI_LONG             
 
 #define MPI_SUM             hypre_MPI_SUM              
 #define MPI_MIN             hypre_MPI_MIN              
@@ -49,6 +50,8 @@ extern "C" {
 #define MPI_LOR             hypre_MPI_LOR              
 
 #define MPI_UNDEFINED       hypre_MPI_UNDEFINED        
+#define MPI_REQUEST_NULL    hypre_MPI_REQUEST_NULL        
+#define MPI_ANY_SOURCE      hypre_MPI_ANY_SOURCE        
 
 #define MPI_Init            hypre_MPI_Init             
 #define MPI_Wtime           hypre_MPI_Wtime            
@@ -88,7 +91,7 @@ extern "C" {
 
 typedef struct {int dummy;}  hypre_MPI_Comm;
 
-typedef int  hypre_MPI_Status;
+typedef struct { int MPI_SOURCE; } hypre_MPI_Status;
 typedef int  hypre_MPI_Request;
 typedef int  hypre_MPI_Op;
 typedef int  hypre_MPI_Datatype;
@@ -102,6 +105,7 @@ typedef int  hypre_MPI_Aint;
 #define  hypre_MPI_DOUBLE 0
 #define  hypre_MPI_INT 1
 #define  hypre_MPI_CHAR 2
+#define  hypre_MPI_LONG 3
 
 #define  hypre_MPI_SUM 0
 #define  hypre_MPI_MIN 1
@@ -109,6 +113,8 @@ typedef int  hypre_MPI_Aint;
 #define  hypre_MPI_LOR 3
 
 #define  hypre_MPI_UNDEFINED -9999
+#define  hypre_MPI_REQUEST_NULL  0
+#define  hypre_MPI_ANY_SOURCE    1
 
 /*--------------------------------------------------------------------------
  * Prototypes
@@ -151,6 +157,13 @@ int MPI_Type_hvector P((int count , int blocklength , MPI_Aint stride , MPI_Data
 int MPI_Type_struct P((int count , int *array_of_blocklengths , MPI_Aint *array_of_displacements , MPI_Datatype *array_of_types , MPI_Datatype *newtype ));
 int MPI_Type_free P((MPI_Datatype *datatype ));
 int MPI_Type_commit P((MPI_Datatype *datatype ));
+int MPI_Request_free P((MPI_Request *request ));
+int MPI_Send_init P((void *buf , int count , MPI_Datatype datatype , int dest , int tag , MPI_Comm comm , MPI_Request *request ));
+int MPI_Recv_init P((void *buf , int count , MPI_Datatype datatype , int dest , int tag , MPI_Comm comm , MPI_Request *request ));
+int MPI_Startall P((int int , MPI_Request *request ));
+int MPI_Iprobe P((int source , int tag , MPI_Comm comm , int *flag , MPI_Status *status ));
+int MPI_Probe P((int source , int tag , MPI_Comm comm , MPI_Status *status ));
+int MPI_Irsend P((void *buf , int count , MPI_Datatype datatype , int dest , int tag , MPI_Comm comm , MPI_Request *request ));
 
 #undef P
 
