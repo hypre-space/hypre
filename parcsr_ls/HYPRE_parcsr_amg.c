@@ -87,6 +87,17 @@ HYPRE_ParAMGSolveT( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ParAMGSetRestriction
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParAMGSetRestriction( HYPRE_Solver solver,
+                          int          restr_par  )
+{
+   return( hypre_ParAMGSetRestriction( (void *) solver, restr_par ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_ParAMGSetMaxLevels
  *--------------------------------------------------------------------------*/
 
@@ -129,6 +140,17 @@ HYPRE_ParAMGSetMaxIter( HYPRE_Solver solver,
                         int          max_iter  )
 {
    return( hypre_ParAMGSetMaxIter( (void *) solver, max_iter ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParAMGSetCoarsenType
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParAMGSetCoarsenType( HYPRE_Solver solver,
+                          int          coarsen_type  )
+{
+   return( hypre_ParAMGSetCoarsenType( (void *) solver, coarsen_type ) );
 }
 
 /*--------------------------------------------------------------------------
