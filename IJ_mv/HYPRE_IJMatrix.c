@@ -631,8 +631,155 @@ HYPRE_IJMatrixAddToRowAfter( HYPRE_IJMatrix IJmatrix, int n,
 
    return(ierr);
 }
-/*********************************************************************************/
-/* The following are routines that are not generally used by or supported for users */
+
+/*--------------------------------------------------------------------------
+ * HYPRE_IJMatrixSetValues
+ *--------------------------------------------------------------------------*/
+
+int 
+HYPRE_IJMatrixSetValues( HYPRE_IJMatrix IJmatrix,
+                         int            n,
+                         int            row,
+                         const int     *cols, 
+                         const double  *values )
+{
+   int ierr = 0;
+   hypre_IJMatrix *matrix = (hypre_IJMatrix *) IJmatrix;
+
+   /* if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PETSC )
+   {
+      ierr = hypre_IJMatrixSetValuesPETSc( matrix, n, row, cols, values, 0 );
+   }
+   else if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_ISIS )
+   {
+      ierr = hypre_IJMatrixSetValuesISIS( matrix, n, row, cols, values, 0 );
+   }
+   else */ if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PARCSR )
+   {
+      ierr = hypre_IJMatrixSetValuesParCSR( matrix, n, row, cols, values, 0 );
+   }
+   else
+   {
+      ierr = -1;
+   }
+
+   return(ierr);
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_IJMatrixAddToValues
+ *--------------------------------------------------------------------------*/
+
+int 
+HYPRE_IJMatrixAddToValues( HYPRE_IJMatrix IJmatrix,
+                           int            n,
+                           int            row,
+                           const int     *cols, 
+                           const double  *values )
+{
+   int ierr = 0;
+   hypre_IJMatrix *matrix = (hypre_IJMatrix *) IJmatrix;
+
+   /* if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PETSC )
+   {
+      ierr = hypre_IJMatrixSetValuesPETSc( matrix, n, row, cols, values, 1 );
+   }
+   else if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_ISIS )
+   {
+      ierr = hypre_IJMatrixSetValuesISIS( matrix, n, row, cols, values, 1 );
+   }
+   else */ if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PARCSR )
+   {
+      ierr = hypre_IJMatrixSetValuesParCSR( matrix, n, row, cols, values, 1 );
+   }
+   else
+   {
+      ierr = -1;
+   }
+
+   return(ierr);
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_IJMatrixSetBlockValues
+ *--------------------------------------------------------------------------*/
+
+int 
+HYPRE_IJMatrixSetBlockValues( HYPRE_IJMatrix IJmatrix,
+                              int            m,
+                              int            n,
+                              const int     *rows,
+                              const int     *cols, 
+                              const double  *values )
+{
+   int ierr = 0;
+   hypre_IJMatrix *matrix = (hypre_IJMatrix *) IJmatrix;
+
+   /* if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PETSC )
+   {
+      ierr = hypre_IJMatrixSetBlockValuesPETSc( matrix, m, n,
+                                                rows, cols, values, 0 );
+   }
+   else if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_ISIS )
+   {
+      ierr = hypre_IJMatrixSetBlockValuesISIS( matrix, m, n,
+                                               rows, cols, values, 0 );
+   }
+   else */ if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PARCSR )
+   {
+      ierr = hypre_IJMatrixSetBlockValuesParCSR( matrix, m, n,
+                                                 rows, cols, values, 0 );
+   }
+   else
+   {
+      ierr = -1;
+   }
+
+   return(ierr);
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_IJMatrixAddToBlockValues
+ *--------------------------------------------------------------------------*/
+
+int 
+HYPRE_IJMatrixAddToBlockValues( HYPRE_IJMatrix IJmatrix,
+                                int            m,
+                                int            n,
+                                const int     *rows,
+                                const int     *cols, 
+                                const double  *values )
+{
+   int ierr = 0;
+   hypre_IJMatrix *matrix = (hypre_IJMatrix *) IJmatrix;
+
+   /* if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PETSC )
+   {
+      ierr = hypre_IJMatrixSetBlockValuesPETSc( matrix, m, n,
+                                                rows, cols, values, 1 );
+   }
+   else if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_ISIS )
+   {
+      ierr = hypre_IJMatrixSetBlockValuesISIS( matrix, m, n,
+                                               rows, cols, values, 1 );
+   }
+   else */ if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PARCSR )
+   {
+      ierr = hypre_IJMatrixSetBlockValuesParCSR( matrix, m, n,
+                                                 rows, cols, values, 1 );
+   }
+   else
+   {
+      ierr = -1;
+   }
+
+   return(ierr);
+}
+
+/***************************************************************************
+ * The following are routines that are not generally used by or supported
+ * for users
+ ***************************************************************************/
 
 
 /*--------------------------------------------------------------------------

@@ -34,6 +34,7 @@ typedef struct hypre_IJVector_struct *HYPRE_IJVector;
  * Prototypes
  *--------------------------------------------------------------------------*/
 
+
 /* HYPRE_IJMatrix.c */
 int HYPRE_IJMatrixCreate( MPI_Comm comm , HYPRE_IJMatrix *in_matrix_ptr , int global_m , int global_n );
 int HYPRE_IJMatrixDestroy( HYPRE_IJMatrix IJmatrix );
@@ -51,6 +52,10 @@ int HYPRE_IJMatrixAddToBlock( HYPRE_IJMatrix IJmatrix , int m , int n , const in
 int HYPRE_IJMatrixInsertRow( HYPRE_IJMatrix IJmatrix , int n , int row , const int *cols , const double *values );
 int HYPRE_IJMatrixAddToRow( HYPRE_IJMatrix IJmatrix , int n , int row , const int *cols , const double *values );
 int HYPRE_IJMatrixAddToRowAfter( HYPRE_IJMatrix IJmatrix , int n , int row , const int *cols , const double *values );
+int HYPRE_IJMatrixSetValues( HYPRE_IJMatrix IJmatrix , int n , int row , const int *cols , const double *values );
+int HYPRE_IJMatrixAddToValues( HYPRE_IJMatrix IJmatrix , int n , int row , const int *cols , const double *values );
+int HYPRE_IJMatrixSetBlockValues( HYPRE_IJMatrix IJmatrix , int m , int n , const int *rows , const int *cols , const double *values );
+int HYPRE_IJMatrixAddToBlockValues( HYPRE_IJMatrix IJmatrix , int m , int n , const int *rows , const int *cols , const double *values );
 int hypre_RefIJMatrix( HYPRE_IJMatrix IJmatrix , HYPRE_IJMatrix *reference );
 void *HYPRE_IJMatrixGetLocalStorage( HYPRE_IJMatrix IJmatrix );
 int HYPRE_IJMatrixGetRowPartitioning( HYPRE_IJMatrix IJmatrix , const int **row_partitioning );
