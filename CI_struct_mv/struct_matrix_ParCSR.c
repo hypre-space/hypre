@@ -14,7 +14,7 @@
 
 #include "headers.h"
 
-#include "../parcsr_matrix_vector/HYPRE_parcsr_mv.h"
+#include "HYPRE_parcsr_mv.h"
 
 
 #define hypre_AddStructStencilEltToStructGridpoint( stencil_shape, index, new_index ) \
