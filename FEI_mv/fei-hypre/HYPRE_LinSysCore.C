@@ -89,8 +89,15 @@ extern "C" {
                 int*,int*, double*,int*,double*,int*);
 #endif
 #ifdef HAVE_AMGE
+    int HYPRE_LSI_AMGeCreate();
+    int HYPRE_LSI_AMGeDestroy();
+    int HYPRE_LSI_AMGeSetNNodes(int);
+    int HYPRE_LSI_AMGeSetNElements(int);
+    int HYPRE_LSI_AMGeSetSystemSize(int);
+    int HYPRE_LSI_AMGePutRow(int,int,double*,int*);
     int HYPRE_LSI_AMGeSolve( double *rhs, double *sol ); 
     int HYPRE_LSI_AMGeSetBoundary( int leng, int *colInd );
+    int HYPRE_LSI_AMGeWriteToFile();
 #endif
 }
 
@@ -285,6 +292,9 @@ HYPRE_LinSysCore::~HYPRE_LinSysCore()
     }
     delete [] HYSolverName_;
     HYSolverName_ = NULL;
+#ifdef HAVE_AMGE
+    if ( HYSolverID_ == HYAMGE ) HYPRE_LSI_AMGeDestroy();
+#endif
 
     //-------------------------------------------------------------------
     // call preconditioner destructors
@@ -423,6 +433,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
           if (!strcmp(param2, "printSol")) HYOutputLevel_ |= HYFEI_PRINTSOL;
           if (!strcmp(param2, "printReducedMat")) 
              HYOutputLevel_ |= HYFEI_PRINTREDMAT;
+          if (!strcmp(param2, "printFEInfo")) HYOutputLevel_ |= HYFEI_PRINTFEINFO;
           if (!strcmp(param2, "ddilut")) HYOutputLevel_ |= HYFEI_DDILUT;
           if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
           {
@@ -1087,6 +1098,17 @@ void HYPRE_LinSysCore::createMatricesAndVectors(int numGlobalEqns,
     assert(!ierr);
 
     //-------------------------------------------------------------------
+    // for amge
+    //-------------------------------------------------------------------
+
+#ifdef HAVE_AMGE
+    HYPRE_LSI_AMGeCreate();
+    HYPRE_LSI_AMGeSetNNodes(numGlobalRows_);
+    HYPRE_LSI_AMGeSetNElements(numGlobalRows_);
+    HYPRE_LSI_AMGeSetSystemSize(1);
+#endif 
+
+    //-------------------------------------------------------------------
     // instantiate the residual vector
     //-------------------------------------------------------------------
 
@@ -1296,6 +1318,10 @@ void HYPRE_LinSysCore::sumIntoSystemMatrix(int row, int numValues,
        }
        colValues_[localRow][index] += values[i];
     }
+
+#ifdef HAVE_AMGE
+    HYPRE_LSI_AMGePutRow(row, numValues, (double*) values, (int*)scatterIndices);
+#endif
 
     if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
     {
@@ -1551,13 +1577,10 @@ void HYPRE_LinSysCore::enforceEssentialBC(int* globalEqn, double* alpha,
     //-------------------------------------------------------------------
 
 #ifdef HAVE_AMGE
-    if ( HYSolverID_ == HYAMGE )
-    {
-       colInd = new int[leng];
-       for( i = 0; i < leng; i++ ) colInd[i] = globalEqn[i] - 1;
-       HYPRE_LSI_AMGeSetBoundary( leng, colInd );
-       delete [] colInd;
-    } 
+    colInd = new int[leng];
+    for( i = 0; i < leng; i++ ) colInd[i] = globalEqn[i] - 1;
+    HYPRE_LSI_AMGeSetBoundary( leng, colInd );
+    delete [] colInd;
 #endif
 
     if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
@@ -2185,6 +2208,7 @@ void HYPRE_LinSysCore::selectSolver(char* name)
        case HYGMRES :
             HYPRE_ParCSRGMRESCreate(comm_, &HYSolver_);
             break;
+       case HYAMGE :
     }
 
     if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
@@ -2557,6 +2581,12 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
        fclose(fp);
        MPI_Barrier(MPI_COMM_WORLD);
     }
+#ifdef HAVE_AMGE
+    if ( HYOutputLevel_ & HYFEI_PRINTFEINFO )
+    {
+       HYPRE_LSI_AMGeWriteToFile();
+    }
+#endif
 
     //*******************************************************************
     // choose PCG, GMRES or direct solver
@@ -2991,6 +3021,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
              printf("%4d : launchSolver(SuperLU)\n",mypid_);
           solveUsingSuperLU(status);
           iterations = 1;
+          ptime  = stime;
           //printf("SuperLU solver - return status = %d\n",status);
           break;
 
@@ -3018,6 +3049,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
              printf("%4d : launchSolver(Y12M)\n",mypid_);
           solveUsingY12M(status);
           iterations = 1;
+          ptime  = stime;
           //printf("Y12M solver - return status = %d\n",status);
           break;
 
@@ -3037,6 +3069,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
           if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
              printf("%4d : launchSolver(AMGe)\n",mypid_);
           solveUsingAMGe(iterations);
+          ptime  = stime;
           break;
 #endif
 

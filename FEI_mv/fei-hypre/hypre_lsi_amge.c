@@ -143,7 +143,9 @@ int HYPRE_LSI_AMGeSetBoundary(int size, int *list)
 {
    int i;
 
-   for ( i = 0; i < size; i++ ) i_node_on_boundary[list[i]] = 0;
+   for ( i = 0; i < size; i++ ) 
+      if (list[i] >= 0 && list[i] < num_nodes) i_node_on_boundary[list[i]] = 0;
+      else printf("AMGeSetBoundary ERROR : %d\n", list[i]);
    return 0;
 }
 
@@ -151,21 +153,24 @@ int HYPRE_LSI_AMGeSetBoundary(int size, int *list)
 /* load a row into this module                                           */
 /* ********************************************************************* */
 
-int HYPRE_LSI_AMGePutRoW(int row, int length, const double *colVal,
+int HYPRE_LSI_AMGePutRow(int row, int length, const double *colVal,
                           const int *colInd)
 {
    int i, nbytes;
 
    if ( rowLeng == 0 )
    {
+      if ( element_count < 0 || element_count >= num_elements )
+         printf("ERROR : element count too large %d\n",element_count);
       temp_elem_node_cnt[element_count] = length / system_size;
       nbytes = length / system_size * sizeof(int);
-      temp_elem_node[i] = (int *) malloc( nbytes );
-      for ( i = 0; i < length; i*=system_size ) 
-         temp_elem_node[i/system_size] = colInd[i] / system_size;
+      temp_elem_node[element_count] = (int *) malloc( nbytes );
+      for ( i = 0; i < length; i+=system_size ) 
+         temp_elem_node[element_count][i/system_size] = (colInd[i]-1) / system_size;
       nbytes = length * length * sizeof(double);
       temp_elem_data[element_count] = (double *) malloc(nbytes);
       temp_elemat_cnt = 0;
+      rowLeng = length;
    }
    for ( i = 0; i < length; i++ ) 
       temp_elem_data[element_count][temp_elemat_cnt++] = colVal[i];
@@ -181,12 +186,12 @@ int HYPRE_LSI_AMGePutRoW(int row, int length, const double *colVal,
 /* Solve                                                                 */
 /* ********************************************************************* */
 
-int HYPRE_LSI_AMGESolve(double *rhs, double *x)
+int HYPRE_LSI_AMGeSolve(double *rhs, double *x)
 {
    int    i, j, l, counter, ierr, total_length;
    int    *Num_nodes, *Num_elements, *Num_dofs, level;
    int    max_level, Max_level;
-   double multiplier;
+   int    multiplier;
 
    /* coarsenode information and coarsenode neighborhood information */
 
@@ -258,6 +263,7 @@ int HYPRE_LSI_AMGESolve(double *rhs, double *x)
    /* fill up i_node_on_boundary (0 - boundary, -1 otherwise)        */
    /* ===============================================================*/
 
+   num_elements = element_count;
    if ( num_nodes == 0 || num_elements == 0 )
    {
       printf("HYPRE_LSI_AMGe ERROR : num_nodes or num_elements not set.\n");
@@ -275,7 +281,7 @@ int HYPRE_LSI_AMGESolve(double *rhs, double *x)
    {
       multiplier = temp_elem_node_cnt[i] * system_size;
       multiplier *= multiplier;
-      for ( j = 0; j < multiplier; i++ )
+      for ( j = 0; j < multiplier; j++ )
          element_data[counter++] = temp_elem_data[i][j];
       free(temp_elem_data[i]);
    }  
@@ -284,7 +290,7 @@ int HYPRE_LSI_AMGESolve(double *rhs, double *x)
 
    total_length = 0;
    for (i = 0; i < num_elements; i++) total_length += temp_elem_node_cnt[i];
-   i_element_node_0 = (int *) malloc(num_elements * sizeof(int));
+   i_element_node_0 = (int *) malloc((num_elements + 1) * sizeof(int));
    j_element_node_0 = (int *) malloc(total_length * sizeof(int));
    counter = 0;
    for (i = 0; i < num_elements; i++) 
@@ -294,6 +300,7 @@ int HYPRE_LSI_AMGESolve(double *rhs, double *x)
          j_element_node_0[counter++] = temp_elem_node[i][j];
       free(temp_elem_node[i]);
    } 
+   i_element_node_0[num_elements] = counter;
    free(temp_elem_node);
    temp_elem_node = NULL;
 
@@ -307,6 +314,15 @@ int HYPRE_LSI_AMGESolve(double *rhs, double *x)
    Num_nodes    = hypre_CTAlloc(int, Max_level);
    Num_dofs     = hypre_CTAlloc(int, Max_level);
    Num_blocks   = hypre_CTAlloc(int, Max_level);
+
+   for (i = 0; i < Max_level; i++)
+   {
+      Num_dofs[i] = 0;
+      Num_elements[i] = 0;
+   }
+
+   Num_nodes[0] = num_nodes;
+   Num_elements[0] = num_elements;
 
    /* -------------------------------------------------------------- */
    /* set up matrix topology for the fine matrix                     */
@@ -357,7 +373,6 @@ int HYPRE_LSI_AMGESolve(double *rhs, double *x)
    ierr = transpose_matrix_create(&i_node_dof_0, &j_node_dof_0,
                    i_dof_node_0, j_dof_node_0, Num_dofs[0], Num_nodes[0]);
 
-
    if (system_size == 1)
    {
       i_element_dof_0 = i_element_node_0;
@@ -367,7 +382,6 @@ int HYPRE_LSI_AMGESolve(double *rhs, double *x)
       ierr = matrix_matrix_product(&i_element_dof_0, &j_element_dof_0,
                 i_element_node_0,j_element_node_0,i_node_dof_0,j_node_dof_0,
                 Num_elements[0], Num_nodes[0], Num_dofs[0]);
-
 
    /* -------------------------------------------------------------- */
    /* store element matrices in element_chord format                 */
@@ -398,7 +412,6 @@ int HYPRE_LSI_AMGESolve(double *rhs, double *x)
                 i_node_dof_0, j_node_dof_0, &i_node_dof, &j_node_dof,
 
                 Num_elements, Num_nodes, Num_dofs);
-
 
    hypre_TFree(i_dof_on_boundary);
    hypre_TFree(i_dof_node_0);
@@ -600,6 +613,54 @@ int HYPRE_LSI_AMGESolve(double *rhs, double *x)
 
    hypre_TFree(i_node_neighbor_coarsenode);
    hypre_TFree(j_node_neighbor_coarsenode);
+   free(element_data);
+
+   return 0;
+}
+
+/* ********************************************************************* */
+/* local variables to this module                                        */
+/* ********************************************************************* */
+
+int HYPRE_LSI_AMGeWriteToFile()
+{
+   int  i, j, k, length;
+   FILE *fp;
+
+   fp = fopen("elem_mat", "w");
+
+   for ( i = 0; i < element_count; i++ )
+   {
+      length = temp_elem_node_cnt[i] * system_size;
+      for ( j = 0; j < length; j++ )
+      {
+         for ( k = 0; k < length; k++ )
+            fprintf(fp, "%13.6e ", temp_elem_data[i][j*length+k]);
+         fprintf(fp, "\n");
+      }
+      fprintf(fp, "\n");
+   }  
+   fclose(fp);
+
+   fp = fopen("elem_node", "w");
+   
+   fprintf(fp, "%d %d\n", element_count, num_nodes);
+   for (i = 0; i < element_count; i++) 
+   {
+      for (j = 0; j < temp_elem_node_cnt[i]; j++) 
+         fprintf(fp, "%d ", temp_elem_node[i][j]+1);
+      fprintf(fp,"\n");
+   } 
+
+   fclose(fp);
+
+   fp = fopen("node_bc", "w");
+
+   for (i = 0; i < num_nodes; i++) 
+   {
+      fprintf(fp, "%d\n", i_node_on_boundary[i]);
+   }
+   fclose(fp);
 
    return 0;
 }
