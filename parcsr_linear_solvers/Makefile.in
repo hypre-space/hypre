@@ -29,7 +29,7 @@ HYPRE_DIR = @HYPRE_TOP_SRC_DIR@
 # FORTRAN code (such as I/O or special Fortran runtimes).
 #
 FC_LIB         = -L/opt/SUNWspro/SC4.2/lib -lF77 -lM77 -lsunmath
-BLAS_LIB       =  -lsunperf ${FC_LIB} -lSUNWPro_lic
+BLAS_LIB       =  @BLASLIBFLAGS@
 
 PILUT_LIBFLAGS =\
  -L${HYPRE_DIR}/distributed_linear_solvers/pilut\

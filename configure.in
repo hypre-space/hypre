@@ -601,6 +601,12 @@ CXXFLAGS="$CXXFLAGS $CXXOPT $CXXDEBUG"
 F77FLAGS="$F77FLAGS $FOPT $FDEBUG"
 
 dnl *********************************************************************
+dnl * Find the BLAS libraries
+dnl *********************************************************************
+
+CASC_FIND_BLAS
+
+dnl *********************************************************************
 dnl * Add flags to LIBS and LIBDIRS
 dnl * Note:  CASC_ADD_LIB calls should be placed in the order you want the
 dnl *        libraries to appear on the linking line.
@@ -664,6 +670,8 @@ AC_SUBST(HYPRE_PETSCLIBDIRS)
 
 
 AC_SUBST(HYPRE_TOP_SRC_DIR)
+
+AC_SUBST(BLASLIBFLAGS)
 
 dnl *********************************************************************
 dnl * Use CASC_CONFIG_OUTPUT_LIST with AC_OUTPUT if you want to handle the
