@@ -231,6 +231,7 @@ int MLI_Method_AMGRS::setup( MLI *mli )
    int             *reduceArray1, *reduceArray2, *rowLengs, ierr, zeroNRows;
    int             startCol, localNCols, colInd, rowNum;
    int             globalCoarseNRows, numTrials;
+   int             *mapStoA;
    double          startTime, elapsedTime, colVal=1.0;
    char            paramString[100], *targv[10];
    MLI_Matrix      *mli_Pmat, *mli_Rmat, *mli_APmat, *mli_Amat, *mli_cAmat;
@@ -307,6 +308,12 @@ int MLI_Method_AMGRS::setup( MLI *mli )
       }
       hypre_BoomerAMGCreateS(hypreA, threshold_, maxRowSum_, nodeDOF_,
                              dofArray, &hypreS);
+      if ( threshold_ > 0 )
+      {
+         hypre_BoomerAMGCreateSCommPkg(hypreA, hypreS, &mapStoA);
+      }
+      else mapStoA = NULL;
+
       if ( coarsenScheme_ == MLI_METHOD_AMGRS_CR )
       {
          hypre_BoomerAMGCreateS(hypreA, 1.0e-16, maxRowSum_, nodeDOF_,
@@ -456,7 +463,7 @@ int MLI_Method_AMGRS::setup( MLI *mli )
       {
          hypre_BoomerAMGBuildInterp(hypreA, CFMarkers, hypreS, 
                      coarsePartition, nodeDOF_, dofArray, outputLevel_, 
-                     truncFactor_, &hypreP);
+                     truncFactor_, mapStoA, &hypreP);
          funcPtr = new MLI_Function();
          MLI_Utils_HypreParCSRMatrixGetDestroyFunc(funcPtr);
          sprintf(paramString, "HYPRE_ParCSR" ); 
@@ -521,7 +528,7 @@ int MLI_Method_AMGRS::setup( MLI *mli )
       {
          hypre_BoomerAMGBuildInterp(hypreAT, CFMarkers, hypreST, 
                      coarsePartition, nodeDOF_, dofArray, outputLevel_, 
-                     truncFactor_, &hypreRT);
+                     truncFactor_, mapStoA, &hypreRT);
          hypreRT->owns_col_starts = 0;
          hypre_ParCSRMatrixTranspose( hypreRT, &hypreR, one );
          funcPtr = new MLI_Function();
