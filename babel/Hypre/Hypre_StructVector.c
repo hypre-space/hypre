@@ -63,6 +63,10 @@ Hypre_StructVector  impl__Hypre_StructVector_NewVector(
 
    HYPRE_StructVectorInitialize( *V );
 
+   /* I don't want to put this in the interface (makes it too unnatural or
+      complicated for a user), so I'm trying to call it multiple times.
+      This may not work. (JfP 130100) */
+   HYPRE_StructVectorAssemble( *V );
 }
 
 void  impl__Hypre_StructVector_print(Hypre_StructVector this) {
@@ -137,6 +141,10 @@ int  impl__Hypre_StructVector_SetValues(
    HYPRE_StructVectorSetBoxValues( *V, lower, upper,
                                    &(values.data[*(values.lower)]) );
 
+   /* I don't want to put this in the interface (makes it too unnatural or
+      complicated for a user), so I'm trying to call it multiple times.
+      This may not work. (JfP 130100) */
+   HYPRE_StructVectorAssemble( *V );
 }
 
 int  impl__Hypre_StructVector_Setup(
@@ -147,7 +155,7 @@ int  impl__Hypre_StructVector_Setup(
    return 0;
 }
 
-Hypre_vector  impl__Hypre_StructVector_Apply(Hypre_StructVector this, Hypre_vector b) {
+void  impl__Hypre_StructVector_Apply(Hypre_StructVector this, Hypre_StructVector x, Hypre_StructVector* b) {
 
 	/*#*******************************************************
 	#

@@ -105,8 +105,8 @@ int  impl__Hypre_StructuredGrid_Assemble(Hypre_StructuredGrid this) {
    /* I don't know what this is for, but it's probably only for
    multiprocessing use - the actual code in struct_grid.c looks like that.
    I can't build a working code which uses this in sequential mode.  (JfP)
-   */
-#ifndef HYPRE_SEQUENTIAL
+   JfP 130100: it works now, I don't know why */
+/*#ifndef HYPRE_SEQUENTIAL*/
 
    Hypre_StructuredGrid_Private GP = this->d_table;
    struct Hypre_StructuredGrid_private *Gp = GP;
@@ -114,7 +114,7 @@ int  impl__Hypre_StructuredGrid_Assemble(Hypre_StructuredGrid this) {
    hypre_StructGrid *g = (hypre_StructGrid *) *G;
 
    hypre_StructGridAssemble( g );
-#endif
+/*#endif*/
 }
 
 Hypre_StructuredGrid  impl__Hypre_StructuredGrid_GetConstructedObject(Hypre_StructuredGrid this) {

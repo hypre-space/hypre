@@ -68,6 +68,11 @@ Hypre_StructMatrix  impl__Hypre_StructMatrix_NewMatrix(
 
    HYPRE_StructMatrixInitialize( *M );
 
+   /* I don't want to put this in the interface (makes it too unnatural or
+      complicated for a user), so I'm trying to call it multiple times.
+      This may not work. (JfP 130100) */
+   HYPRE_StructMatrixAssemble( *M );
+
    return this;
 }
 
@@ -155,6 +160,10 @@ int  impl__Hypre_StructMatrix_SetValues(
       &(stencil_indices.data[*(stencil_indices.lower)]),
       &(values.data[*(values.lower)]) );
 
+   /* I don't want to put this in the interface (makes it too unnatural or
+      complicated for a user), so I'm trying to call it multiple times.
+      This may not work. (JfP 130100) */
+   HYPRE_StructMatrixAssemble( *M );
 }
 
 int  impl__Hypre_StructMatrix_Setup(
@@ -165,7 +174,7 @@ int  impl__Hypre_StructMatrix_Setup(
    return 0;
 }
 
-Hypre_vector  impl__Hypre_StructMatrix_Apply(Hypre_StructMatrix this, Hypre_vector b) {
+void  impl__Hypre_StructMatrix_Apply(Hypre_StructMatrix this, Hypre_StructVector x, Hypre_StructVector* b) {
 
 	/*#*******************************************************
 	#

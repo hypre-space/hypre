@@ -10,6 +10,7 @@
 #include "Hypre_StructMatrix.h"
 #include "Hypre_StructVector.h"
 #include "Hypre_MPI_Com.h"
+#include "Hypre_StructJacobi.h"
 
 Hypre_StructMatrix Hypre_StructMatrix_new();
 /* ... without this, compiler thinks Hypre_StructMatrix_new returns
@@ -35,6 +36,7 @@ main( int argc, char *argv[] )
    Hypre_StructuredGrid grid;
    Hypre_StructMatrix mat;
    Hypre_StructVector vecb, vecx;
+   Hypre_StructJacobi solver;
    
    int resultCode, size, i, d, s, symmetric;
    int dim = 3;
@@ -218,8 +220,6 @@ main( int argc, char *argv[] )
 
    Hypre_StructVector_print( vecb );
 
-   /* hypre_vector_AssembleVector(vecb); */
-
    vecx = Hypre_StructVector_new();
    Hypre_StructVector_NewVector( vecx, grid );
 
@@ -233,7 +233,21 @@ main( int argc, char *argv[] )
 
    Hypre_StructVector_print( vecx );
    
-   /* hypre_vector_AssembleVector(vecb); */
+   /* Make a linear solver */
+
+   solver = Hypre_StructJacobi_new();
+/* First call of Setup is to call HYPRE_StructJacobiCreate (args are
+   solver and comm), which is needed before SetParameter.
+   Second call of Setup is to call HYPRE_StructJacobiSetup, which apparantly
+   should be called once parameters are set.
+   This needs to be reorganized! */
+   Hypre_StructJacobi_Setup( solver, mat, vecb, vecx, comm );
+   Hypre_StructJacobi_SetParameter( solver, "tol", 1.0e-4 );
+   Hypre_StructJacobi_SetParameter( solver, "max_iter", 40 );
+   Hypre_StructJacobi_Setup( solver, mat, vecb, vecx, comm );
+   Hypre_StructJacobi_Apply( solver, vecb, &vecx );
+
+   Hypre_StructVector_print( vecx );
 
    return( 0 );
 }

@@ -32,7 +32,7 @@ stub.o:
 	${CC} -DHYPRE_SEQUENTIAL -c $(OPT) stub.c -I${BABEL_INCLUDE} ${HYPRE_INCLUDES} -I${CLASS_DIR} -I${CLASS_DIR} -I${SKEL_DIR} -I${BABEL_DIR} -I${BABEL_SKEL_DIR} -I${BABEL_STRUCT_DIR} 
 
 testum: testum.o objects
-	${PURIFY} ${CC} testum.o -otestum -L. -lhypre_class -L${BABEL_DIR} -lbabel -L/home/painter/babel-0.1/babel_runtime -lbabel_env -L${BABEL_DIR}/babel__proxies -lbabel_skel ${HYPRE_LIBFLAGS} -lHYPRE_mv -lHYPRE_utilities ${MPILIBS}
+	${PURIFY} ${CC} testum.o -otestum -L. -lhypre_class -L${BABEL_DIR} -lbabel -L/home/painter/babel-0.1/babel_runtime -lbabel_env -L${BABEL_DIR}/babel__proxies -lbabel_skel ${HYPRE_LIBFLAGS} -lHYPRE_ls -lHYPRE_mv -lHYPRE_utilities ${MPILIBS} -lm
 
 test: testum
 
