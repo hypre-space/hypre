@@ -31,8 +31,11 @@ struct hypre_MappedMatrix_struct;
 typedef struct hypre_MappedMatrix_struct *HYPRE_MappedMatrix;
 struct hypre_MultiblockMatrix_struct;
 typedef struct hypre_MultiblockMatrix_struct *HYPRE_MultiblockMatrix;
+#ifndef HYPRE_VECTOR_STRUCT
+#define HYPRE_VECTOR_STRUCT
 struct hypre_Vector_struct;
 typedef struct hypre_Vector_struct *HYPRE_Vector;
+#endif
 
 /*--------------------------------------------------------------------------
  * Prototypes
