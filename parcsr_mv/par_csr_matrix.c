@@ -82,6 +82,7 @@ hypre_CreateParCSRMatrix( MPI_Comm comm,
 
    /* set defaults */
    hypre_ParCSRMatrixOwnsData(matrix) = 1;
+   hypre_ParCSRMatrixOwnsPartitioning(matrix) = 1;
 
    return matrix;
 }
@@ -97,18 +98,25 @@ hypre_DestroyParCSRMatrix( hypre_ParCSRMatrix *matrix )
 
    if (matrix)
    {
-      if ( hypre_CSRMatrixOwnsData(matrix) )
+      if ( hypre_ParCSRMatrixOwnsData(matrix) )
       {
          hypre_DestroyCSRMatrix(hypre_ParCSRMatrixDiag(matrix));
          hypre_DestroyCSRMatrix(hypre_ParCSRMatrixOffd(matrix));
       	 if (hypre_ParCSRMatrixColMapOffd(matrix))
       	      hypre_TFree(hypre_ParCSRMatrixColMapOffd(matrix));
-      	 if (hypre_ParCSRMatrixRowStarts(matrix))
-      	      hypre_TFree(hypre_ParCSRMatrixRowStarts(matrix));
-      	 if (hypre_ParCSRMatrixColStarts(matrix))
-      	      hypre_TFree(hypre_ParCSRMatrixColStarts(matrix));
          if (hypre_ParCSRMatrixCommPkg(matrix))
 	      hypre_DestroyMatvecCommPkg(hypre_ParCSRMatrixCommPkg(matrix));
+      }
+      if ( hypre_ParCSRMatrixOwnsPartitioning(matrix) )
+      {
+      	 if (hypre_ParCSRMatrixRowStarts(matrix) == 
+			hypre_ParCSRMatrixColStarts(matrix))
+      	      hypre_TFree(hypre_ParCSRMatrixRowStarts(matrix));
+      	 else
+	 {
+      	      hypre_TFree(hypre_ParCSRMatrixRowStarts(matrix));
+      	      hypre_TFree(hypre_ParCSRMatrixColStarts(matrix));
+	 }
       }
       hypre_TFree(matrix);
    }
@@ -148,6 +156,21 @@ hypre_SetParCSRMatrixDataOwner( hypre_ParCSRMatrix *matrix,
    int    ierr=0;
 
    hypre_ParCSRMatrixOwnsData(matrix) = owns_data;
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_SetParCSRMatrixPartitioningOwner
+ *--------------------------------------------------------------------------*/
+
+int 
+hypre_SetParCSRMatrixPartitioningOwner( hypre_ParCSRMatrix *matrix,
+                                	int              owns_partitioning )
+{
+   int    ierr=0;
+
+   hypre_ParCSRMatrixOwnsPartitioning(matrix) = owns_partitioning;
 
    return ierr;
 }
