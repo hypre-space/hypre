@@ -36,7 +36,7 @@ AC_CANONICAL_HOST
 AC_DISABLE_SHARED
 AM_MAINTAINER_MODE
 
-AM_INIT_AUTOMAKE([1.7.5 foreign no-dependencies no-installinfo no-installman no-texinfo.tex])
+AM_INIT_AUTOMAKE([1.7.5 foreign no-installinfo no-installman no-texinfo.tex])
 dnl Change the default prefix (/usr/local) to ./hypre
 AC_PREFIX_DEFAULT("HYPRE_TOP_SRC_DIR/hypre")
 m4_pattern_allow([HYPRE_[A-Z_]+])
