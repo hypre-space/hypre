@@ -1577,6 +1577,7 @@ int MLI_Utils_HypreMatrixReadHBFormat(char *filename, MPI_Comm mpiComm,
 {
    int    *matIA, *matJA, *rowLengths, length, rowNum, startRow,*inds; 
    int    irow, lineLeng=200, localNRows, localNCols, localNnz, ierr;
+   int    rhsl;
    double *matAA, *vals;
    char   line[200], junk[100];
    FILE   *fp;
@@ -1591,13 +1592,14 @@ int MLI_Utils_HypreMatrixReadHBFormat(char *filename, MPI_Comm mpiComm,
    }
    fgets(line, lineLeng, fp);
    fgets(line, lineLeng, fp);
+   sscanf(line, "%d %d %d %d %d", junk, junk, junk, junk, &rhsl );
    fgets(line, lineLeng, fp);
    sscanf(line, "%s %d %d %d", junk, &localNRows, &localNCols, &localNnz );
-   printf("matrix info = %d %d %d", localNRows, localNCols, localNnz);
+   printf("matrix info = %d %d %d\n", localNRows, localNCols, localNnz);
    fgets(line, lineLeng, fp);
-/*
-   fgets(line, lineLeng, fp);
-*/
+   if (rhsl)
+      fgets(line, lineLeng, fp);
+
    matIA = (int *) malloc((localNRows+1) * sizeof(int));
    matJA = (int *) malloc(localNnz * sizeof(int));
    matAA = (double *) malloc(localNnz * sizeof(double));
