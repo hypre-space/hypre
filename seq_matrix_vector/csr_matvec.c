@@ -26,9 +26,9 @@ hypre_Matvec( double           alpha,
               hypre_Vector    *y     )
 {
    double     *A_data   = hypre_CSRMatrixData(A);
-   int        *A_i      = hypre_CSRMatrixIA(A);
-   int        *A_j      = hypre_CSRMatrixJA(A);
-   int         num_rows = hypre_CSRMatrixSize(A);
+   int        *A_i      = hypre_CSRMatrixI(A);
+   int        *A_j      = hypre_CSRMatrixJ(A);
+   int         num_rows = hypre_CSRMatrixNumRows(A);
 
    double     *x_data = hypre_VectorData(x);
    double     *y_data = hypre_VectorData(y);
@@ -48,7 +48,7 @@ hypre_Matvec( double           alpha,
       for (i = 0; i < num_rows; i++)
 	 y_data[i] *= beta;
 
-      return;
+      return ierr;
    }
 
    /*-----------------------------------------------------------------------
@@ -113,9 +113,9 @@ hypre_MatvecT( double           alpha,
                hypre_Vector    *y     )
 {
    double     *A_data    = hypre_CSRMatrixData(A);
-   int        *A_i       = hypre_CSRMatrixIA(A);
-   int        *A_j       = hypre_CSRMatrixJA(A);
-   int         num_rows  = hypre_CSRMatrixSize(A);
+   int        *A_i       = hypre_CSRMatrixI(A);
+   int        *A_j       = hypre_CSRMatrixJ(A);
+   int         num_rows  = hypre_CSRMatrixNumRows(A);
 
    double     *x_data = hypre_VectorData(x);
    double     *y_data = hypre_VectorData(y);
@@ -135,7 +135,7 @@ hypre_MatvecT( double           alpha,
       for (i = 0; i < num_rows; i++)
 	 y_data[i] *= beta;
 
-      return;
+      return ierr;
    }
 
    /*-----------------------------------------------------------------------
