@@ -2600,9 +2600,7 @@ int HYPRE_LinSysCore::copyInMatrix(double scalar, const Data& data)
 int HYPRE_LinSysCore::copyOutMatrix(double scalar, Data& data) 
 {
    (void) scalar;
-   (void) data;
-   printf("%4d : HYPRE_LSC::copyOutMatrix ERROR - not implemented.\n",mypid_);
-   exit(1);
+   data.setDataPtr( HYA_ );
    return (0);
 }
 #endif
