@@ -25,33 +25,33 @@ extern "C" {
 
 #ifndef HYPRE_USING_THREAD_MPISTUBS
 
-#define MPI_Init           thread_MPI_Init             
-#define MPI_Wtime          thread_MPI_Wtime            
-#define MPI_Wtick          thread_MPI_Wtick            
-#define MPI_Barrier        thread_MPI_Barrier          
-#define MPI_Finalize       thread_MPI_Finalize         
-#define MPI_Comm_group     thread_MPI_Comm_group       
-#define MPI_Comm_dup       thread_MPI_Comm_dup         
-#define MPI_Group_incl     thread_MPI_Group_incl       
-#define MPI_Comm_create    thread_MPI_Comm_create      
-#define MPI_Allgather      thread_MPI_Allgather        
-#define MPI_Allgatherv     thread_MPI_Allgatherv       
-#define MPI_Bcast          thread_MPI_Bcast            
-#define MPI_Send           thread_MPI_Send             
-#define MPI_Recv           thread_MPI_Recv             
+#define MPI_Init           hypre_thread_MPI_Init             
+#define MPI_Wtime          hypre_thread_MPI_Wtime            
+#define MPI_Wtick          hypre_thread_MPI_Wtick            
+#define MPI_Barrier        hypre_thread_MPI_Barrier          
+#define MPI_Finalize       hypre_thread_MPI_Finalize         
+#define MPI_Comm_group     hypre_thread_MPI_Comm_group       
+#define MPI_Comm_dup       hypre_thread_MPI_Comm_dup         
+#define MPI_Group_incl     hypre_thread_MPI_Group_incl       
+#define MPI_Comm_create    hypre_thread_MPI_Comm_create      
+#define MPI_Allgather      hypre_thread_MPI_Allgather        
+#define MPI_Allgatherv     hypre_thread_MPI_Allgatherv       
+#define MPI_Bcast          hypre_thread_MPI_Bcast            
+#define MPI_Send           hypre_thread_MPI_Send             
+#define MPI_Recv           hypre_thread_MPI_Recv             
 
-#define MPI_Isend          thread_MPI_Isend            
-#define MPI_Irecv          thread_MPI_Irecv            
-#define MPI_Wait           thread_MPI_Wait             
-#define MPI_Waitall        thread_MPI_Waitall          
-#define MPI_Waitany        thread_MPI_Waitany          
-#define MPI_Comm_size      thread_MPI_Comm_size        
-#define MPI_Comm_rank      thread_MPI_Comm_rank        
-#define MPI_Allreduce      thread_MPI_Allreduce        
-#define MPI_Type_hvector   thread_MPI_Type_hvector     
-#define MPI_Type_struct    thread_MPI_Type_struct      
-#define MPI_Type_free      thread_MPI_Type_free        
-#define MPI_Type_commit    thread_MPI_Type_commit        
+#define MPI_Isend          hypre_thread_MPI_Isend            
+#define MPI_Irecv          hypre_thread_MPI_Irecv            
+#define MPI_Wait           hypre_thread_MPI_Wait             
+#define MPI_Waitall        hypre_thread_MPI_Waitall          
+#define MPI_Waitany        hypre_thread_MPI_Waitany          
+#define MPI_Comm_size      hypre_thread_MPI_Comm_size        
+#define MPI_Comm_rank      hypre_thread_MPI_Comm_rank        
+#define MPI_Allreduce      hypre_thread_MPI_Allreduce        
+#define MPI_Type_hvector   hypre_thread_MPI_Type_hvector     
+#define MPI_Type_struct    hypre_thread_MPI_Type_struct      
+#define MPI_Type_free      hypre_thread_MPI_Type_free        
+#define MPI_Type_commit    hypre_thread_MPI_Type_commit        
 
 #endif
 
