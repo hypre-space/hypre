@@ -30,10 +30,7 @@ CFLAGS =\
 RANLIB = @RANLIB@
 
 HEADERS =\
- gmres.h\
- pcg.h\
- bicgstab.h\
- cgnr.h
+ krylov.h
 
 FILES =\
  gmres.c\
@@ -50,7 +47,7 @@ OBJS = ${FILES:.c=.o}
 all: libkrylov.a 
 
 install: all
-	@cp -f *.h krylov.h $$HYPRE_INSTALL_DIR/include/.
+	@cp -f krylov.h $$HYPRE_INSTALL_DIR/include/.
 	@cp -f lib*.a $$HYPRE_INSTALL_DIR/lib/.
 clean:
 	@rm -f *.o *.dxx 

@@ -22,7 +22,7 @@
    version iterates with a special stopping criterion
 */
 
-#include "pcg.h"
+#include "krylov.h"
 
 /*--------------------------------------------------------------------------
  * hypre_PCGFunctionsCreate

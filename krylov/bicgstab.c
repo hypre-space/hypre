@@ -12,7 +12,7 @@
  *
  *****************************************************************************/
 
-#include "bicgstab.h"
+#include "krylov.h"
 #include "utilities.h"
 
 
