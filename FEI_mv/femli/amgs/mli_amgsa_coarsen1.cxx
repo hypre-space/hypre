@@ -16,6 +16,7 @@
 
 #include <string.h>
 #include <assert.h>
+#include <stdlib.h>
 #include "HYPRE.h"
 #include "utilities/utilities.h"
 #include "IJ_mv/HYPRE_IJ_mv.h"
@@ -85,6 +86,11 @@ double MLI_Method_AMGSA::genP(MLI_Matrix *mli_Amat,
    free( partition );
    if ( AGlobalNRows < minCoarseSize_ ) 
    {
+      if ( mypid == 0 && outputLevel_ > 2 )
+      {
+         printf("\tMETHOD_AMGSA::genP - stop coarsening (less than min %d)\n",
+                minCoarseSize_);
+      }
       (*Pmat_out) = NULL;
       return 0.0;
    }
@@ -141,8 +147,7 @@ double MLI_Method_AMGSA::genP(MLI_Matrix *mli_Amat,
    if ( initAggr == NULL ) 
    {
       GGlobalNRows = hypre_ParCSRMatrixGlobalNumRows(A2mat);
-      if ( GGlobalNRows <= minAggrSize_*numProcs/2 && 
-           coarsenScheme_ == MLI_METHOD_AMGSA_HYBRID )
+      if ( GGlobalNRows <= minAggrSize_*numProcs/2 ) 
       {
          formGlobalGraph(A2mat, &Gmat);
          coarsenGlobal(Gmat, &naggr, &node2aggr);
@@ -153,15 +158,6 @@ double MLI_Method_AMGSA::genP(MLI_Matrix *mli_Amat,
          formLocalGraph(A2mat, &Gmat, localLabels);
          coarsenLocal(Gmat, &naggr, &node2aggr);
          hypre_ParCSRMatrixDestroy(Gmat);
-      }
-      else 
-      {
-         if (blkSize > 1 && scalar_ == 0 ) 
-            if ( saLabels_ != NULL && saLabels_[currLevel_] != NULL )
-               if (localLabels != NULL) delete [] localLabels;
-         if (mli_A2mat != NULL) delete mli_A2mat;
-         (*Pmat_out) = NULL;
-         return 0.0;
       }
       if ( blkSize > 1 && scalar_ == 0 ) 
       {
@@ -184,8 +180,7 @@ double MLI_Method_AMGSA::genP(MLI_Matrix *mli_Amat,
 
    if ( initAggr == NULL ) 
    {
-      if ( GGlobalNRows <= minAggrSize_*numProcs/2 && 
-           coarsenScheme_ == MLI_METHOD_AMGSA_HYBRID )
+      if ( GGlobalNRows <= minAggrSize_*numProcs/2 ) 
       {
          genPGlobal(Amat, Pmat_out, naggr, node2aggr);
          if (node2aggr != NULL) delete [] node2aggr;
@@ -203,11 +198,14 @@ double MLI_Method_AMGSA::genP(MLI_Matrix *mli_Amat,
    PStartCol    = partition[mypid];
    PGlobalNCols = partition[numProcs];
    free( partition );
-   if ( PGlobalNCols/nullspaceDim_ <= numProcs || 
-        AGlobalNRows == PGlobalNCols)
+   if ( AGlobalNRows == PGlobalNCols )
    {
       (*Pmat_out) = NULL;
       delete [] node2aggr;
+      if ( mypid == 0 && outputLevel_ > 2 )
+      {
+         printf("METHOD_AMGSA::genP - cannot coarsen any further.\n");
+      }
       return 0.0;
    }
    PLocalNRows = ALocalNRows;
@@ -733,7 +731,7 @@ double MLI_Method_AMGSA::genPGlobal(hypre_ParCSRMatrix *Amat,
    int      mypid, nprocs, *partition, *aggrCnt, PLocalNRows, PStartRow;
    int      irow, jcol, nzcnt, ierr;
    int      PLocalNCols, PStartCol, *rowLengths, rowInd, *colInd;
-   double   *colVal, dtemp;
+   double   *colVal, dtemp, *accum, *accum2;
    char     paramString[50];
    MPI_Comm comm;
    hypre_ParCSRMatrix  *Pmat;
@@ -782,6 +780,35 @@ double MLI_Method_AMGSA::genPGlobal(hypre_ParCSRMatrix *Amat,
    delete [] rowLengths;
 
    /*-----------------------------------------------------------------
+    * create scaling array
+    *-----------------------------------------------------------------*/
+
+   accum  = new double[nprocs*nullspaceDim_];
+   accum2 = new double[nprocs*nullspaceDim_];
+   for ( irow = 0; irow < nprocs*nullspaceDim_; irow++ ) accum[irow] = 0.0;
+   for ( irow = 0; irow < nprocs*nullspaceDim_; irow++ ) accum2[irow] = 0.0;
+   for ( irow = 0; irow < PLocalNRows; irow++ )
+   {
+      for ( jcol = 0; jcol < nullspaceDim_; jcol++ )
+      {
+         dtemp = nullspaceVec_[jcol*PLocalNRows+irow];
+         accum[mypid*nullspaceDim_+jcol] += (dtemp * dtemp);
+      }
+   }
+   MPI_Allreduce(accum, accum2, nullspaceDim_, MPI_DOUBLE, MPI_SUM, comm);
+   for ( irow = 0; irow < nullspaceDim_; irow++ ) accum[irow] = 0.0;
+   for ( irow = 0; irow < nprocs; irow++ )
+   {
+      if ( aggrMap[irow] == aggrMap[mypid] )
+      {
+         for ( jcol = 0; jcol < nullspaceDim_; jcol++ )
+            accum[jcol] += accum2[irow*nullspaceDim_+jcol];
+      }
+   }
+   for ( irow = 0; irow < nullspaceDim_; irow++ )
+      accum[jcol] = 1.0 / sqrt(accum[jcol]);
+
+   /*-----------------------------------------------------------------
     * load P matrix
     *-----------------------------------------------------------------*/
 
@@ -795,8 +822,8 @@ double MLI_Method_AMGSA::genPGlobal(hypre_ParCSRMatrix *Amat,
          dtemp = nullspaceVec_[jcol*PLocalNRows+irow];
 	 if ( dtemp != 0.0 )
          {
-            colInd[nzcnt] = aggrMap[mypid];
-            colVal[nzcnt++] = dtemp;
+            colInd[nzcnt] = aggrMap[mypid] * nullspaceDim_ + jcol;
+            colVal[nzcnt++] = dtemp * accum[jcol];
          }
       }
       rowInd = PStartRow + irow;
@@ -805,6 +832,8 @@ double MLI_Method_AMGSA::genPGlobal(hypre_ParCSRMatrix *Amat,
    }
    delete [] colInd;
    delete [] colVal;
+   delete [] accum;
+   delete [] accum2;
 
    /*-----------------------------------------------------------------
     * assemble and create the MLI_Matrix format of the P matrix
@@ -1236,7 +1265,7 @@ int MLI_Method_AMGSA::coarsenGlobal(hypre_ParCSRMatrix *Gmat,
          else aggrCnts[nAggr] = 0;
       }
    }
-   for ( i = 0; i < nAggr; i++ )
+   for ( i = 0; i < nprocs; i++ )
    {
       if (aggrInds[i] == -1)
       {
@@ -1244,6 +1273,15 @@ int MLI_Method_AMGSA::coarsenGlobal(hypre_ParCSRMatrix *Gmat,
          aggrCnts[nAggr] += rowCounts[i];
          if (aggrCnts[nAggr] >= minAggrSize_) nAggr++;
       }
+   }
+   for ( i = 0; i < nprocs; i++ )
+   {
+      if (aggrInds[i] == nAggr) aggrInds[i] = nAggr - 1;
+   }
+   if ( outputLevel_ > 2 )
+   {
+      printf("METHOD_AMGSA::coarsenGlobal - Label(P=%d) = %d\n", mypid,
+             aggrInds[mypid]);
    }
    delete [] aggrCnts;
    delete [] rowCounts;
