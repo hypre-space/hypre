@@ -46,5 +46,5 @@ include ../../bmakes/Makefile
 ##################################################################
 
 lib:    $(PROTOS) $(OBJS)
-	ar -r lib_HYPRE_DistributedMatrixPilutSolver.a $(OBJS)
+	ar -rcu lib_HYPRE_DistributedMatrixPilutSolver.a $(OBJS)
 
