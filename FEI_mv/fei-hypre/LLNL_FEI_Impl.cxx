@@ -8,14 +8,6 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <math.h>
-/*
-#include "utilities.h"
-#include "HYPRE.h"
-#include "LLNL_FEI_Fei.h"
-#include "LLNL_FEI_LSCore.h"
-#include "LLNL_FEI_Solver.h"
-#include "LLNL_FEI_Matrix.h"
-*/
 #include "LLNL_FEI_Impl.h"
 
 /*-------------------------------------------------------------------------
@@ -82,7 +74,6 @@ int LLNL_FEI_Impl::parameters(int numParams, char **paramString)
          delete solverPtr_;
          solverPtr_ = NULL;
       }
-      //if ( solverLibID_ == (SOLVERLOCK+1) ) solver = HYPRE;
       param3 = new char[30];
       strcpy( param3, "matrixNoOverlap" );
       feiPtr_->parameters(iOne,&param3);
@@ -104,206 +95,6 @@ int LLNL_FEI_Impl::parameters(int numParams, char **paramString)
    if (solverPtr_ != NULL) solverPtr_->parameters(numParams,paramString); 
    if (lscPtr_    != NULL) lscPtr_->parameters(numParams,paramString); 
    return 0;
-}
-
-/**************************************************************************
- set solver type 
- -------------------------------------------------------------------------*/
-int LLNL_FEI_Impl::setSolveType(int solveType)
-{ 
-   (void) solveType; 
-   return 0;
-}
-
-/**************************************************************************
- initialize the fields
- -------------------------------------------------------------------------*/
-int LLNL_FEI_Impl::initFields(int numFields, int *fieldSizes, int *fieldIDs)
-{
-   return feiPtr_->initFields(numFields,fieldSizes,fieldIDs);
-}
-
-/**************************************************************************
- initialize element blocks
- -------------------------------------------------------------------------*/
-int LLNL_FEI_Impl::initElemBlock(int elemBlockID, int numElements, 
-                      int numNodesPerElement, int *numFieldsPerNode, 
-                      int **nodalFieldIDs, int numElemDOFFieldsPerElement, 
-                      int *elemDOFFieldIDs, int interleaveStrategy)
-{
-   return feiPtr_->initElemBlock(elemBlockID, numElements, 
-                   numNodesPerElement, numFieldsPerNode, nodalFieldIDs, 
-                   numElemDOFFieldsPerElement, elemDOFFieldIDs, 
-                   interleaveStrategy);
-}
-
-/**************************************************************************
- initialize an element
- -------------------------------------------------------------------------*/
-int LLNL_FEI_Impl::initElem(int elemBlockID, int elemID, int *elemConn) 
-{
-   (void) elemBlockID;
-   (void) elemID;
-   (void) elemConn;
-   return 0;
-}
-
-/**************************************************************************
- initialize shared nodes
- -------------------------------------------------------------------------*/
-int LLNL_FEI_Impl::initSharedNodes(int nShared, int *sharedIDs, 
-                                   int *sharedLeng, int **sharedProcs)
-{
-   return feiPtr_->initSharedNodes(nShared,sharedIDs,sharedLeng,
-                                   sharedProcs);
-}
-
-/**************************************************************************
- initialize complete 
- -------------------------------------------------------------------------*/
-int LLNL_FEI_Impl::initComplete()
-{
-   return feiPtr_->initComplete();
-}
-
-/**************************************************************************
- reset the matrix and vectors 
- -------------------------------------------------------------------------*/
-int LLNL_FEI_Impl::resetSystem(double s)
-{
-   return feiPtr_->resetSystem(s);
-}
-
-/**************************************************************************
- reset the matrix 
- -------------------------------------------------------------------------*/
-int LLNL_FEI_Impl::resetMatrix(double s)
-{
-   return feiPtr_->resetMatrix(s);
-}
-
-/**************************************************************************
- reset the rhs vector 
- -------------------------------------------------------------------------*/
-int LLNL_FEI_Impl::resetRHSVector(double s)
-{
-   return feiPtr_->resetRHSVector(s);
-}
-
-/**************************************************************************
- reset the initial solution
- -------------------------------------------------------------------------*/
-int LLNL_FEI_Impl::resetInitialGuess(double s) 
-{
-   return feiPtr_->resetInitialGuess(s);
-}
-
-/**************************************************************************
- load boundary conditions
- -------------------------------------------------------------------------*/
-int LLNL_FEI_Impl::loadNodeBCs(int nNodes, int *nodeIDs, int fieldID, 
-                             double **alpha, double **beta, double **gamma)
-{
-   return feiPtr_->loadNodeBCs(nNodes,nodeIDs,fieldID,alpha,beta,gamma);
-}
-
-/**************************************************************************
- put element matrices into global matrix
- -------------------------------------------------------------------------*/
-int LLNL_FEI_Impl::sumInElem(int elemBlock, int elemID, int *elemConn, 
-                       double **elemStiff, double *elemLoad, int elemFormat)
-{
-   return feiPtr_->sumInElem(elemBlock,elemID,elemConn,elemStiff,elemLoad,
-   elemFormat);
-}
-
-/**************************************************************************
- put element matrices into global matrix
- -------------------------------------------------------------------------*/
-int LLNL_FEI_Impl::sumInElemMatrix(int elemBlock, int elemID, int* elemConn, 
-                                   double **elemStiffness, int elemFormat)
-{
-   return feiPtr_->sumInElemMatrix(elemBlock,elemID,elemConn,elemStiffness,
-                                   elemFormat);
-}
-
-/**************************************************************************
- put element right hand side to global rhs
- -------------------------------------------------------------------------*/
-int LLNL_FEI_Impl::sumInElemRHS(int elemBlock, int elemID, int *elemConn,
-                                double *elemLoad)
-{
-   return feiPtr_->sumInElemRHS(elemBlock,elemID,elemConn,elemLoad);
-}
-
-/**************************************************************************
- load complete
- -------------------------------------------------------------------------*/
-int LLNL_FEI_Impl::loadComplete()
-{
-   return feiPtr_->loadComplete();
-}
-
-/**************************************************************************
- get iteration count
- -------------------------------------------------------------------------*/
-int LLNL_FEI_Impl::iterations(int *iterTaken) 
-{
-   return solverPtr_->iterations(iterTaken);
-}
-
-/**************************************************************************
- get active nodes
- -------------------------------------------------------------------------*/
-int LLNL_FEI_Impl::getNumBlockActNodes(int blockID, int *nNodes)
-{
-   return feiPtr_->getNumBlockActNodes(blockID,nNodes);
-}
-
-/**************************************************************************
- get number of active equations
- -------------------------------------------------------------------------*/
-int LLNL_FEI_Impl::getNumBlockActEqns(int blockID, int *nEqns)
-{
-   return feiPtr_->getNumBlockActEqns(blockID,nEqns);
-}
-
-/**************************************************************************
- get node IDs
- -------------------------------------------------------------------------*/
-int LLNL_FEI_Impl::getBlockNodeIDList(int blockID, int numNodes, 
-                                      int *nodeIDList)
-{
-   return feiPtr_->getBlockNodeIDList(blockID,numNodes,nodeIDList);
-}
-
-/**************************************************************************
- get solution
- -------------------------------------------------------------------------*/
-int LLNL_FEI_Impl::getBlockNodeSolution(int blockID, int numNodes, 
-                      int *nodeIDList, int *solnOffsets, double *solnValues)
-{
-   return feiPtr_->getBlockNodeSolution(blockID,numNodes,nodeIDList,
-                                        solnOffsets,solnValues);
-}
-
-/**************************************************************************
- initialize constraint relations
- -------------------------------------------------------------------------*/
-int LLNL_FEI_Impl::initCRMult(int CRListLen,int *CRNodeList,int *CRFieldList,
-                              int *CRID)
-{
-   return feiPtr_->initCRMult(CRListLen,CRNodeList,CRFieldList,CRID);
-}
-
-/**************************************************************************
- load constraint relations
- -------------------------------------------------------------------------*/
-int LLNL_FEI_Impl::loadCRMult(int CRID, int CRListLen, int *CRNodeList, 
-                   int *CRFieldList, double *CRWeightList, double CRValue)
-{
-   return feiPtr_->loadCRMult(CRID,CRListLen,CRNodeList,CRFieldList,
-                              CRWeightList,CRValue);
 }
 
 /**************************************************************************
@@ -404,5 +195,4 @@ int LLNL_FEI_Impl::residualNorm(int whichNorm, int numFields, int *fieldIDs,
    matPtr_->residualNorm(whichNorm,solnVec,rhsVec,norms);
    return 0;
 }
-
 
