@@ -180,7 +180,7 @@ mail_summary () {
     HYPRE_RUN_MACHINE=`hostname`
   fi
   printf "%s\n" "--------------------------------------------" > $SUMFILE
-  printf "Autotest error summary for %s\n" `date` >> $SUMFILE
+  printf "Autotest error summary for `date`\n" >> $SUMFILE
   printf "Target architecure: %s\n" $HYPRE_ARCH >> $SUMFILE
   printf "Compile machine:    %s\n" $HYPRE_COMPILE_MACHINE >> $SUMFILE
   printf "Execute machine:    %s\n" $HYPRE_RUN_MACHINE >> $SUMFILE
@@ -230,7 +230,7 @@ mail_summary () {
   printf "%2d test total\n" $CTOTCNT >> $SUMFILE
   if [ "$CLIST" != "" ] ; then
     printf "non zero error log file(s):\n" >> $SUMFILE
-    printf "%s" ${CLIST} >> $SUMFILE
+    printf "${CLIST}" >> $SUMFILE
   fi
   printf "%s\n" "--------------------------------------------" >> $SUMFILE
   printf "Execute summary:\n" >> $SUMFILE
@@ -265,7 +265,7 @@ mail_summary () {
   printf "%2d test total\n" $ETOTCNT >> $SUMFILE
   if [ "$ELIST" != "" ] ; then
     printf "non zero error log file(s):\n" >> $SUMFILE
-    printf "%s" ${ELIST} >> $SUMFILE
+    printf "${ELIST}" >> $SUMFILE
   fi
   printf "%s\n" "--------------------------------------------" >> $SUMFILE
   if [ "$TOTCNT" = "0" ] ; then
