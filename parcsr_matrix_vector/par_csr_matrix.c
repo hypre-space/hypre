@@ -376,7 +376,7 @@ hypre_GetLocalRangeParCSRMatrix( hypre_ParCSRMatrix *matrix,
    MPI_Comm_rank( hypre_ParCSRMatrixComm(matrix), &my_id );
 
    *start = hypre_ParCSRMatrixRowStarts(matrix)[ my_id ];
-   *end = hypre_ParCSRMatrixRowStarts(matrix)[ my_id + 1 ];
+   *end = hypre_ParCSRMatrixRowStarts(matrix)[ my_id + 1 ]-1;
 
    return( ierr );
 }
