@@ -40,6 +40,7 @@ typedef struct
     int             nlevels;
     double          filter;
     int             sym;
+    double          tparam;
 }
 Secret;
 
@@ -65,6 +66,7 @@ HYPRE_ParCSRParaSailsCreate( MPI_Comm comm, HYPRE_Solver *solver )
    secret->nlevels = 1;
    secret->filter  = 0.0; /* 0.05 has been suggested */
    secret->sym     = 1;   /* defaults is symmetric */
+   secret->tparam  = 0.0;
 
    *solver = (HYPRE_Solver) secret;
 
@@ -112,6 +114,10 @@ HYPRE_ParCSRParaSailsSetup( HYPRE_Solver solver,
    ierr = HYPRE_ParaSailsCreate(secret->comm, matrix, &secret->obj);
    if (ierr) return ierr;
 
+   if (secret->tparam != 0.0)
+       ierr = HYPRE_ParaSailsSelectThresh(secret->obj, secret->tparam,
+           &secret->thresh);
+
    ierr = HYPRE_ParaSailsSetup(secret->obj, secret->sym, secret->thresh, 
        secret->nlevels, secret->filter);
 
@@ -154,6 +160,24 @@ HYPRE_ParCSRParaSailsSetParams(HYPRE_Solver solver,
 
    secret->thresh  = thresh;
    secret->nlevels = nlevels;
+
+   return 0;
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRParaSailsSelectThresh - Set the parameter tparam.  If set to 
+ * nonzero, then indicates that a threshold should be selected automatically
+ * and the threshold passed to HYPRE_ParCSRParaSailsSetParams will be
+ * overwritten.  Suggested value: 0.75 to 0.9.  Larger values indicate more
+ * dropping.
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParCSRParaSailsSelectThresh(HYPRE_Solver solver, double tparam)
+{
+   Secret *secret = (Secret *) solver;
+
+   secret->tparam = tparam;
 
    return 0;
 }

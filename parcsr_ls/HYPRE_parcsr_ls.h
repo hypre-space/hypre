@@ -132,6 +132,8 @@ int HYPRE_ParCSRParaSailsSetParams P((HYPRE_Solver solver , double thresh , int 
 int HYPRE_ParCSRParaSailsSetFilter P((HYPRE_Solver solver, double filter));
 int
 HYPRE_ParCSRParaSailsSetSym P((HYPRE_Solver solver, int sym));
+int
+HYPRE_ParCSRParaSailsSelectThresh P((HYPRE_Solver solver, double param));
 
 /* par_laplace.c */
 HYPRE_ParCSRMatrix GenerateLaplacian P((MPI_Comm comm , int nx , int ny , int nz
