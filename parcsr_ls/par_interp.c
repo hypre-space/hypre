@@ -641,6 +641,10 @@ if (num_procs > 1)
 
            
       }
+
+/*   change !!!!! */
+      strong_f_marker--;
+
       P_offd_i[i+1] = jj_counter_offd;
    }
    P_diag_i[i] = jj_counter; 
