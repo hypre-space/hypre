@@ -635,7 +635,7 @@ case $ARCH in
       if test "$casc_using_mpi" = "no" &&
         test "$casc_using_openmp" = "no"
       then
-        AC_CHECK_PROGS(CC, cc gcc kcc)
+        AC_CHECK_PROGS(CC, ccc cc gcc kcc)
       else
         if test "$casc_using_openmp" = "no" ; then
           AC_CHECK_PROGS(CC, mpicc)
@@ -664,7 +664,7 @@ case $ARCH in
       if test "$casc_using_mpi" = "no" &&
         test "$casc_using_openmp" = "no"
       then
-        AC_CHECK_PROGS(F77, f77 g77)
+        AC_CHECK_PROGS(F77, fort f77 g77)
       else
         if test "$casc_using_openmp" = "no" ; then
           AC_CHECK_PROGS(F77, mpif77)
@@ -709,7 +709,7 @@ case $ARCH in
         AC_CHECK_PROGS(CXX,cxx KCC g++)
       else
         if test "$casc_using_openmp" = "no" ; then
-          AC_CHECK_PROGS(CXX,mpiCC cxx KCC) 
+          AC_CHECK_PROGS(CXX,mpicxx cxx KCC) 
         else
           AC_CHECK_PROGS(CXX,guidec++) 
         fi
@@ -754,7 +754,7 @@ case $ARCH in
     fi
     if test -z "$CXXFLAGS"; then
       if test "$CXX" = "cxx" ||
-        test "$CXX" = "mpiCC" ; then
+        test "$CXX" = "mpicxx" ; then
         CASC_SET_CXXOPT(-fast)
       else 
         CASC_SET_CXXOPT(-O)
@@ -768,9 +768,9 @@ case $ARCH in
         CASC_SET_FOPT(-O)
       fi
     fi
-#   CASC_SET_CDEBUG(-g)
-#   CASC_SET_CXXDEBUG(-g)
-#   CASC_SET_FDEBUG()
+    CASC_SET_CDEBUG(-g)
+    CASC_SET_CXXDEBUG(-g)
+    CASC_SET_FDEBUG()
   ;;
 
   rs6000)
@@ -868,6 +868,9 @@ case $ARCH in
         CASC_SET_COPT(-O)
       else
         CASC_SET_COPT(-O3 -qstrict)
+        if test "$casc_using_openmp" = "yes" ; then
+          CFLAGS="$CFLAGS -qsmp=omp "
+        fi
       fi
     fi
     if test -z "$CXXFLAGS"; then
@@ -875,6 +878,9 @@ case $ARCH in
         CASC_SET_CXXOPT(-O)
       else
         CASC_SET_CXXOPT(-O3 -qstrict)
+        if test "$casc_using_openmp" = "yes" ; then
+          CXXFLAGS="$CXXFLAGS -qsmp=omp "
+        fi
       fi
     fi
     if test -z "$F77FLAGS"; then
@@ -885,6 +891,7 @@ case $ARCH in
       fi
     fi
     CFLAGS="$CFLAGS -qmaxmem=8192 -DHYPRE_COMM_SIMPLE"
+    CXXFLAGS="$CXXFLAGS -qmaxmem=8192 -DHYPRE_COMM_SIMPLE"
     CASC_SET_CDEBUG(-g)
     CASC_SET_CXXDEBUG(-g)
     CASC_SET_FDEBUG(-g) 
