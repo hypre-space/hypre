@@ -89,7 +89,7 @@ lib: ${OBJS}
 ##################################################################
 
 clean:
-	@rm -f *.o *.dxx
+	@rm -rf *.o ti_files driver
 
 veryclean: clean
 	@rm -f libHYPRE_*.a
