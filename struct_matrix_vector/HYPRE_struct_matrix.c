@@ -82,50 +82,6 @@ HYPRE_SetStructMatrixValues( HYPRE_StructMatrix  matrix,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SetStructMatrixCoeffs
- *--------------------------------------------------------------------------*/
-
-int 
-HYPRE_SetStructMatrixCoeffs( HYPRE_StructMatrix  matrix,
-                             int                *grid_index,
-                             double             *values              )
-{
-   hypre_StructMatrix   *new_matrix = (hypre_StructMatrix *) matrix;
-   hypre_Index           new_grid_index;
-                        
-   int                   d;
-   int                   s;
-   int                   ierr;
-   int                   stencil_size;
-   hypre_StructStencil  *stencil;
-   int                  *stencil_indicies;
-
-   stencil = hypre_StructMatrixStencil(new_matrix);
-   stencil_size = hypre_StructStencilSize(stencil);
-   stencil_indicies = hypre_CTAlloc(int, stencil_size);
-   for (s = 0; s < stencil_size; s++)
-   {
-      stencil_indicies[s] = s;
-   }
-
-   for (d = 0;
-        d < hypre_StructGridDim(hypre_StructMatrixGrid(new_matrix));
-        d++)
-   {
-      hypre_IndexD(new_grid_index, d) = grid_index[d];
-   }
-
-   ierr = hypre_SetStructMatrixValues( new_matrix,
-                                       new_grid_index,
-                                       stencil_size, stencil_indicies,
-                                       values );
-
-   hypre_TFree(stencil_indicies);
-
-   return (ierr);
-}
-
-/*--------------------------------------------------------------------------
  * HYPRE_SetStructMatrixBoxValues
  *--------------------------------------------------------------------------*/
 
