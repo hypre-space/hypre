@@ -394,6 +394,7 @@ FILES = \
  $(top_srcdir)/parcsr_mv/par_csr_matrix.c\
  $(top_srcdir)/parcsr_mv/par_csr_matvec.c\
  $(top_srcdir)/parcsr_mv/par_vector.c\
+ $(top_srcdir)/parcsr_mv/new_commpkg.c\
  $(top_srcdir)/seq_mv/HYPRE_csr_matrix.c\
  $(top_srcdir)/seq_mv/HYPRE_mapped_matrix.c\
  $(top_srcdir)/seq_mv/HYPRE_vector.c\
@@ -520,6 +521,7 @@ FILES = \
  $(top_srcdir)/struct_mv/struct_vector.c\
  $(top_srcdir)/utilities/amg_linklist.c\
  $(top_srcdir)/utilities/binsearch.c\
+ $(top_srcdir)/utilities/exchange_data.c\
  $(top_srcdir)/utilities/hypre_memory.c\
  $(top_srcdir)/utilities/hypre_qsort.c\
  $(top_srcdir)/utilities/memory_dmalloc.c\

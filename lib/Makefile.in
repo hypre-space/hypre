@@ -352,6 +352,7 @@ am__libHYPRE_a_SOURCES_DIST = $(top_srcdir)/blas/dasum.c \
 	$(top_srcdir)/parcsr_mv/par_csr_matrix.c \
 	$(top_srcdir)/parcsr_mv/par_csr_matvec.c \
 	$(top_srcdir)/parcsr_mv/par_vector.c \
+	$(top_srcdir)/parcsr_mv/new_commpkg.c \
 	$(top_srcdir)/seq_mv/HYPRE_csr_matrix.c \
 	$(top_srcdir)/seq_mv/HYPRE_mapped_matrix.c \
 	$(top_srcdir)/seq_mv/HYPRE_vector.c \
@@ -478,6 +479,7 @@ am__libHYPRE_a_SOURCES_DIST = $(top_srcdir)/blas/dasum.c \
 	$(top_srcdir)/struct_mv/struct_vector.c \
 	$(top_srcdir)/utilities/amg_linklist.c \
 	$(top_srcdir)/utilities/binsearch.c \
+	$(top_srcdir)/utilities/exchange_data.c \
 	$(top_srcdir)/utilities/hypre_memory.c \
 	$(top_srcdir)/utilities/hypre_qsort.c \
 	$(top_srcdir)/utilities/memory_dmalloc.c \
@@ -650,15 +652,16 @@ am__objects_3 = $(am__objects_1) $(am__objects_2) colamd.$(OBJEXT) \
 	par_csr_bool_matop.$(OBJEXT) par_csr_bool_matrix.$(OBJEXT) \
 	par_csr_communication.$(OBJEXT) par_csr_matop.$(OBJEXT) \
 	par_csr_matrix.$(OBJEXT) par_csr_matvec.$(OBJEXT) \
-	par_vector.$(OBJEXT) HYPRE_csr_matrix.$(OBJEXT) \
-	HYPRE_mapped_matrix.$(OBJEXT) HYPRE_vector.$(OBJEXT) \
-	HYPRE_multiblock_matrix.$(OBJEXT) csr_matop.$(OBJEXT) \
-	csr_matrix.$(OBJEXT) csr_matvec.$(OBJEXT) genpart.$(OBJEXT) \
-	mapped_matrix.$(OBJEXT) multiblock_matrix.$(OBJEXT) \
-	vector.$(OBJEXT) HYPRE_sstruct_bicgstab.$(OBJEXT) \
-	HYPRE_sstruct_gmres.$(OBJEXT) HYPRE_sstruct_pcg.$(OBJEXT) \
-	HYPRE_sstruct_split.$(OBJEXT) HYPRE_sstruct_sys_pfmg.$(OBJEXT) \
-	krylov.$(OBJEXT) krylov_sstruct.$(OBJEXT) node_relax.$(OBJEXT) \
+	par_vector.$(OBJEXT) new_commpkg.$(OBJEXT) \
+	HYPRE_csr_matrix.$(OBJEXT) HYPRE_mapped_matrix.$(OBJEXT) \
+	HYPRE_vector.$(OBJEXT) HYPRE_multiblock_matrix.$(OBJEXT) \
+	csr_matop.$(OBJEXT) csr_matrix.$(OBJEXT) csr_matvec.$(OBJEXT) \
+	genpart.$(OBJEXT) mapped_matrix.$(OBJEXT) \
+	multiblock_matrix.$(OBJEXT) vector.$(OBJEXT) \
+	HYPRE_sstruct_bicgstab.$(OBJEXT) HYPRE_sstruct_gmres.$(OBJEXT) \
+	HYPRE_sstruct_pcg.$(OBJEXT) HYPRE_sstruct_split.$(OBJEXT) \
+	HYPRE_sstruct_sys_pfmg.$(OBJEXT) krylov.$(OBJEXT) \
+	krylov_sstruct.$(OBJEXT) node_relax.$(OBJEXT) \
 	sys_pfmg.$(OBJEXT) sys_pfmg_relax.$(OBJEXT) \
 	sys_pfmg_setup.$(OBJEXT) sys_pfmg_setup_interp.$(OBJEXT) \
 	sys_pfmg_setup_rap.$(OBJEXT) sys_pfmg_solve.$(OBJEXT) \
@@ -712,11 +715,11 @@ am__objects_3 = $(am__objects_1) $(am__objects_2) colamd.$(OBJEXT) \
 	struct_matrix_mask.$(OBJEXT) struct_matvec.$(OBJEXT) \
 	struct_scale.$(OBJEXT) struct_stencil.$(OBJEXT) \
 	struct_vector.$(OBJEXT) amg_linklist.$(OBJEXT) \
-	binsearch.$(OBJEXT) hypre_memory.$(OBJEXT) \
-	hypre_qsort.$(OBJEXT) memory_dmalloc.$(OBJEXT) \
-	mpistubs.$(OBJEXT) qsplit.$(OBJEXT) random.$(OBJEXT) \
-	thread_mpistubs.$(OBJEXT) threading.$(OBJEXT) timer.$(OBJEXT) \
-	timing.$(OBJEXT) umalloc_local.$(OBJEXT)
+	binsearch.$(OBJEXT) exchange_data.$(OBJEXT) \
+	hypre_memory.$(OBJEXT) hypre_qsort.$(OBJEXT) \
+	memory_dmalloc.$(OBJEXT) mpistubs.$(OBJEXT) qsplit.$(OBJEXT) \
+	random.$(OBJEXT) thread_mpistubs.$(OBJEXT) threading.$(OBJEXT) \
+	timer.$(OBJEXT) timing.$(OBJEXT) umalloc_local.$(OBJEXT)
 @STATICONLY_TRUE@am_libHYPRE_a_OBJECTS = $(am__objects_3)
 libHYPRE_a_OBJECTS = $(am_libHYPRE_a_OBJECTS)
 libHYPRE_LSI_a_AR = $(AR) $(ARFLAGS)
@@ -1017,6 +1020,7 @@ am__libHYPRE_LSI_a_SOURCES_DIST = $(top_srcdir)/blas/dasum.c \
 	$(top_srcdir)/parcsr_mv/par_csr_matrix.c \
 	$(top_srcdir)/parcsr_mv/par_csr_matvec.c \
 	$(top_srcdir)/parcsr_mv/par_vector.c \
+	$(top_srcdir)/parcsr_mv/new_commpkg.c \
 	$(top_srcdir)/seq_mv/HYPRE_csr_matrix.c \
 	$(top_srcdir)/seq_mv/HYPRE_mapped_matrix.c \
 	$(top_srcdir)/seq_mv/HYPRE_vector.c \
@@ -1143,6 +1147,7 @@ am__libHYPRE_LSI_a_SOURCES_DIST = $(top_srcdir)/blas/dasum.c \
 	$(top_srcdir)/struct_mv/struct_vector.c \
 	$(top_srcdir)/utilities/amg_linklist.c \
 	$(top_srcdir)/utilities/binsearch.c \
+	$(top_srcdir)/utilities/exchange_data.c \
 	$(top_srcdir)/utilities/hypre_memory.c \
 	$(top_srcdir)/utilities/hypre_qsort.c \
 	$(top_srcdir)/utilities/memory_dmalloc.c \
@@ -1455,6 +1460,7 @@ am__libHYPRE_la_SOURCES_DIST = $(top_srcdir)/blas/dasum.c \
 	$(top_srcdir)/parcsr_mv/par_csr_matrix.c \
 	$(top_srcdir)/parcsr_mv/par_csr_matvec.c \
 	$(top_srcdir)/parcsr_mv/par_vector.c \
+	$(top_srcdir)/parcsr_mv/new_commpkg.c \
 	$(top_srcdir)/seq_mv/HYPRE_csr_matrix.c \
 	$(top_srcdir)/seq_mv/HYPRE_mapped_matrix.c \
 	$(top_srcdir)/seq_mv/HYPRE_vector.c \
@@ -1581,6 +1587,7 @@ am__libHYPRE_la_SOURCES_DIST = $(top_srcdir)/blas/dasum.c \
 	$(top_srcdir)/struct_mv/struct_vector.c \
 	$(top_srcdir)/utilities/amg_linklist.c \
 	$(top_srcdir)/utilities/binsearch.c \
+	$(top_srcdir)/utilities/exchange_data.c \
 	$(top_srcdir)/utilities/hypre_memory.c \
 	$(top_srcdir)/utilities/hypre_qsort.c \
 	$(top_srcdir)/utilities/memory_dmalloc.c \
@@ -1694,8 +1701,8 @@ am__objects_6 = $(am__objects_4) $(am__objects_5) colamd.lo \
 	HYPRE_parcsr_vector.lo communicationT.lo numbers.lo \
 	par_csr_aat.lo par_csr_bool_matop.lo par_csr_bool_matrix.lo \
 	par_csr_communication.lo par_csr_matop.lo par_csr_matrix.lo \
-	par_csr_matvec.lo par_vector.lo HYPRE_csr_matrix.lo \
-	HYPRE_mapped_matrix.lo HYPRE_vector.lo \
+	par_csr_matvec.lo par_vector.lo new_commpkg.lo \
+	HYPRE_csr_matrix.lo HYPRE_mapped_matrix.lo HYPRE_vector.lo \
 	HYPRE_multiblock_matrix.lo csr_matop.lo csr_matrix.lo \
 	csr_matvec.lo genpart.lo mapped_matrix.lo multiblock_matrix.lo \
 	vector.lo HYPRE_sstruct_bicgstab.lo HYPRE_sstruct_gmres.lo \
@@ -1739,9 +1746,10 @@ am__objects_6 = $(am__objects_4) $(am__objects_5) colamd.lo \
 	struct_io.lo struct_innerprod.lo struct_matrix.lo \
 	struct_matrix_mask.lo struct_matvec.lo struct_scale.lo \
 	struct_stencil.lo struct_vector.lo amg_linklist.lo \
-	binsearch.lo hypre_memory.lo hypre_qsort.lo memory_dmalloc.lo \
-	mpistubs.lo qsplit.lo random.lo thread_mpistubs.lo \
-	threading.lo timer.lo timing.lo umalloc_local.lo
+	binsearch.lo exchange_data.lo hypre_memory.lo hypre_qsort.lo \
+	memory_dmalloc.lo mpistubs.lo qsplit.lo random.lo \
+	thread_mpistubs.lo threading.lo timer.lo timing.lo \
+	umalloc_local.lo
 @STATICONLY_FALSE@am_libHYPRE_la_OBJECTS = $(am__objects_6)
 libHYPRE_la_OBJECTS = $(am_libHYPRE_la_OBJECTS)
 libHYPRE_LSI_la_LIBADD =
@@ -2041,6 +2049,7 @@ am__libHYPRE_LSI_la_SOURCES_DIST = $(top_srcdir)/blas/dasum.c \
 	$(top_srcdir)/parcsr_mv/par_csr_matrix.c \
 	$(top_srcdir)/parcsr_mv/par_csr_matvec.c \
 	$(top_srcdir)/parcsr_mv/par_vector.c \
+	$(top_srcdir)/parcsr_mv/new_commpkg.c \
 	$(top_srcdir)/seq_mv/HYPRE_csr_matrix.c \
 	$(top_srcdir)/seq_mv/HYPRE_mapped_matrix.c \
 	$(top_srcdir)/seq_mv/HYPRE_vector.c \
@@ -2167,6 +2176,7 @@ am__libHYPRE_LSI_la_SOURCES_DIST = $(top_srcdir)/blas/dasum.c \
 	$(top_srcdir)/struct_mv/struct_vector.c \
 	$(top_srcdir)/utilities/amg_linklist.c \
 	$(top_srcdir)/utilities/binsearch.c \
+	$(top_srcdir)/utilities/exchange_data.c \
 	$(top_srcdir)/utilities/hypre_memory.c \
 	$(top_srcdir)/utilities/hypre_qsort.c \
 	$(top_srcdir)/utilities/memory_dmalloc.c \
@@ -2726,6 +2736,7 @@ FILES = \
  $(top_srcdir)/parcsr_mv/par_csr_matrix.c\
  $(top_srcdir)/parcsr_mv/par_csr_matvec.c\
  $(top_srcdir)/parcsr_mv/par_vector.c\
+ $(top_srcdir)/parcsr_mv/new_commpkg.c\
  $(top_srcdir)/seq_mv/HYPRE_csr_matrix.c\
  $(top_srcdir)/seq_mv/HYPRE_mapped_matrix.c\
  $(top_srcdir)/seq_mv/HYPRE_vector.c\
@@ -2852,6 +2863,7 @@ FILES = \
  $(top_srcdir)/struct_mv/struct_vector.c\
  $(top_srcdir)/utilities/amg_linklist.c\
  $(top_srcdir)/utilities/binsearch.c\
+ $(top_srcdir)/utilities/exchange_data.c\
  $(top_srcdir)/utilities/hypre_memory.c\
  $(top_srcdir)/utilities/hypre_qsort.c\
  $(top_srcdir)/utilities/memory_dmalloc.c\
@@ -5566,6 +5578,15 @@ par_vector.obj: $(top_srcdir)/parcsr_mv/par_vector.c
 par_vector.lo: $(top_srcdir)/parcsr_mv/par_vector.c
 	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o par_vector.lo `test -f '$(top_srcdir)/parcsr_mv/par_vector.c' || echo '$(srcdir)/'`$(top_srcdir)/parcsr_mv/par_vector.c
 
+new_commpkg.o: $(top_srcdir)/parcsr_mv/new_commpkg.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o new_commpkg.o `test -f '$(top_srcdir)/parcsr_mv/new_commpkg.c' || echo '$(srcdir)/'`$(top_srcdir)/parcsr_mv/new_commpkg.c
+
+new_commpkg.obj: $(top_srcdir)/parcsr_mv/new_commpkg.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o new_commpkg.obj `if test -f '$(top_srcdir)/parcsr_mv/new_commpkg.c'; then $(CYGPATH_W) '$(top_srcdir)/parcsr_mv/new_commpkg.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/parcsr_mv/new_commpkg.c'; fi`
+
+new_commpkg.lo: $(top_srcdir)/parcsr_mv/new_commpkg.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o new_commpkg.lo `test -f '$(top_srcdir)/parcsr_mv/new_commpkg.c' || echo '$(srcdir)/'`$(top_srcdir)/parcsr_mv/new_commpkg.c
+
 HYPRE_csr_matrix.o: $(top_srcdir)/seq_mv/HYPRE_csr_matrix.c
 	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o HYPRE_csr_matrix.o `test -f '$(top_srcdir)/seq_mv/HYPRE_csr_matrix.c' || echo '$(srcdir)/'`$(top_srcdir)/seq_mv/HYPRE_csr_matrix.c
 
@@ -6699,6 +6720,15 @@ binsearch.obj: $(top_srcdir)/utilities/binsearch.c
 
 binsearch.lo: $(top_srcdir)/utilities/binsearch.c
 	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o binsearch.lo `test -f '$(top_srcdir)/utilities/binsearch.c' || echo '$(srcdir)/'`$(top_srcdir)/utilities/binsearch.c
+
+exchange_data.o: $(top_srcdir)/utilities/exchange_data.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o exchange_data.o `test -f '$(top_srcdir)/utilities/exchange_data.c' || echo '$(srcdir)/'`$(top_srcdir)/utilities/exchange_data.c
+
+exchange_data.obj: $(top_srcdir)/utilities/exchange_data.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o exchange_data.obj `if test -f '$(top_srcdir)/utilities/exchange_data.c'; then $(CYGPATH_W) '$(top_srcdir)/utilities/exchange_data.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/utilities/exchange_data.c'; fi`
+
+exchange_data.lo: $(top_srcdir)/utilities/exchange_data.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o exchange_data.lo `test -f '$(top_srcdir)/utilities/exchange_data.c' || echo '$(srcdir)/'`$(top_srcdir)/utilities/exchange_data.c
 
 hypre_memory.o: $(top_srcdir)/utilities/hypre_memory.c
 	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o hypre_memory.o `test -f '$(top_srcdir)/utilities/hypre_memory.c' || echo '$(srcdir)/'`$(top_srcdir)/utilities/hypre_memory.c
