@@ -52,7 +52,14 @@
 #define MLI_SOLVER_SUPERLU_ID   6 
 #define MLI_METHOD_AMGSA_ID     7
 #endif
+#define GlobalID int
 #include "HYPRE_LSI_mli.h"
+
+extern "C" 
+{
+void mli_computespectrum_(int *,int *,double *, double *, int *, double *, 
+                     double *, double *, int *);
+}
 
 /****************************************************************************/ 
 /* HYPRE_LSI_MLI data structure                                             */
@@ -87,6 +94,25 @@ typedef struct HYPRE_LSI_MLI_Struct
    int      localNEqns_;
 } 
 HYPRE_LSI_MLI;
+
+/****************************************************************************/ 
+/* HYPRE_LSI_MLI data structure                                             */
+/*--------------------------------------------------------------------------*/
+
+typedef struct HYPRE_MLI_FEData_Struct
+{
+#ifdef HAVE_MLI
+   MPI_Comm   comm;
+   MLI_FEData *fedata_;
+   int        *fedataElemIDs_;
+   int        fedataElemCnt_;
+   int        fedataRowCnt_;
+   int        fedataMatDim_;
+   double     *fedataValues_;
+   Lookup     *lookup_;
+#endif
+}
+HYPRE_MLI_FEData;
 
 /****************************************************************************/
 /* HYPRE_LSI_MLICreate                                                      */
@@ -124,6 +150,7 @@ int HYPRE_LSI_MLICreate( MPI_Comm comm, HYPRE_Solver *solver )
    return 0;
 #else
    printf("MLI not available.\n");
+   exit(1);
    return -1;
 #endif
 }
@@ -730,4 +757,272 @@ int HYPRE_LSI_MLISetNullSpaces( HYPRE_Solver solver, int nodeDOF,
    mli_object->localNEqns_  = numEqns;
    return 0;
 } 
+
+/****************************************************************************/
+/* HYPRE_LSI_MLICreateFEData                                                */
+/*--------------------------------------------------------------------------*/
+
+extern "C"
+void *HYPRE_LSI_MLIFEDataCreate( MPI_Comm mpi_comm )
+{
+#ifdef HAVE_MLI
+   HYPRE_MLI_FEData *hypre_fedata;
+   hypre_fedata = (HYPRE_MLI_FEData *) malloc( sizeof(HYPRE_MLI_FEData) );  
+   hypre_fedata->fedataElemIDs_ = NULL;
+   hypre_fedata->fedataElemCnt_ = 0;
+   hypre_fedata->fedataRowCnt_  = 0;
+   hypre_fedata->fedataMatDim_  = 0;
+   hypre_fedata->fedataValues_  = NULL;
+   hypre_fedata->comm           = mpi_comm;
+   hypre_fedata->fedata_        = new MLI_FEData(mpi_comm);
+   hypre_fedata->lookup_        = NULL;
+   return ((void *) hypre_fedata);
+#else
+   return NULL;
+#endif 
+}
+
+/****************************************************************************/
+/* HYPRE_LSI_MLIDestroyFEData                                               */
+/*--------------------------------------------------------------------------*/
+
+extern "C"
+int HYPRE_LSI_MLIFEDataDestroy( void *object )
+{
+#ifdef HAVE_MLI
+   HYPRE_MLI_FEData *hypre_fedata = (HYPRE_MLI_FEData *) object;
+   if ( hypre_fedata->fedata_ != NULL ) delete hypre_fedata->fedata_;
+   if ( hypre_fedata->fedataElemIDs_ != NULL ) 
+      delete [] hypre_fedata->fedataElemIDs_;
+   if ( hypre_fedata->fedataValues_ != NULL ) 
+      delete [] hypre_fedata->fedataValues_;
+   hypre_fedata->fedata_        = NULL;
+   hypre_fedata->fedataElemIDs_ = NULL;
+   hypre_fedata->fedataValues_  = NULL;
+   free( hypre_fedata );
+   return 0;
+#else
+   return 1;
+#endif 
+}
+
+/****************************************************************************/
+/* HYPRE_LSI_MLIDestroyFEData                                               */
+/* (1) setLookup (called by FEI_initComplete) which calls this function     */ 
+/* (2) setGlobalOffsets in HYPRE_LinSysCore.C (next sequence of calls)      */
+/* (3) setConnectivies in HYPRE_LinSysCore.C (next sequence of calls)      */
+/*--------------------------------------------------------------------------*/
+
+extern "C"
+int HYPRE_LSI_MLIFEDataInit( void *object, Lookup *lookup )
+{
+#ifdef HAVE_MLI
+   int              i, nFields, blockID=0, interleaveStrategy, lumpingStrategy;
+   int              numElemDOF, numElemBlocks, numElements, numNodesPerElem;
+   int              numEqnsPerElem, *nodeFieldIDs, nodeNumFields, numProcs;
+   int              nSharedNodes, *sharedProcLengs, **sharedProcIDs;
+   const int        *intArray, *fieldIDs, *fieldSizes, *sharedNodeIDs;
+   const int* const *intArray2;
+   HYPRE_MLI_FEData *hypre_fedata = (HYPRE_MLI_FEData *) object;
+   MLI_FEData       *fedata = (MLI_FEData *) hypre_fedata->fedata_;
+
+   hypre_fedata->lookup_ = lookup;
+   if ( lookup == NULL ) return 1;
+   numElemBlocks = lookup->getNumElemBlocks();
+   nFields       = lookup->getNumFields();
+   if ( fedata != NULL && numElemBlocks == 1 && nFields == 1 )
+   {
+      fieldIDs      = lookup->getFieldIDsPtr();
+      fieldSizes    = lookup->getFieldSizesPtr();
+      lookup->getElemBlockInfo(blockID, interleaveStrategy, lumpingStrategy,
+                               numElemDOF, numElements, numNodesPerElem,
+                               numEqnsPerElem);
+      intArray = lookup->getNumFieldsPerNode(blockID);
+      nodeNumFields = intArray[0];
+      intArray2 = lookup->getFieldIDsTable(blockID);
+      nodeFieldIDs = new int[nodeNumFields];
+      for ( i = 0;i < nodeNumFields; i++ ) nodeFieldIDs[i] = intArray2[0][i];
+      fedata->initFields(nFields, fieldSizes, fieldIDs);
+      fedata->initElemBlock(numElements, numNodesPerElem, nodeNumFields,
+                            nodeFieldIDs, 0, NULL);
+      delete [] nodeFieldIDs;
+      hypre_fedata->fedataElemIDs_ = new int[numElements];
+      hypre_fedata->fedataElemCnt_ = 0;
+printf("nFields = %d\n", nFields);
+printf("FieldID = %d\n", fieldIDs[0]);
+printf("FieldSize = %d\n", fieldSizes[0]);
+printf("blockID = %d\n", blockID);
+printf("interleave = %d\n", interleaveStrategy);
+printf("lumpingStrategy = %d\n", lumpingStrategy);
+printf("numElemDOF = %d\n", numElemDOF);
+printf("numElements = %d\n", numElements);
+printf("numNodesPerElem = %d\n", numNodesPerElem);
+printf("numEqnsPerElem = %d\n", numEqnsPerElem);
+   }
+   return 0;
+#else
+   return 1;
+#endif
+}
+
+/****************************************************************************/
+/* HYPRE_LSI_MLIFEDataSetElemNodeList                                       */
+/*--------------------------------------------------------------------------*/
+
+extern "C"
+int HYPRE_LSI_MLIFEDataSetElemNodeList( void *object, int numElements,
+                       int numNodesPerElem, const int* elemIDs,
+                       const int* const* connNodes)
+{
+#ifdef HAVE_MLI
+   HYPRE_MLI_FEData *hypre_fedata = (HYPRE_MLI_FEData *) object;
+   MLI_FEData *fedata = (MLI_FEData *) hypre_fedata->fedata_;
+   if ( fedata != NULL )
+   {
+      for ( int i = 0; i < numElements; i++ )
+      {
+         fedata->initElemNodeList(elemIDs[i], numNodesPerElem,
+                                  connNodes[i], 3, NULL);
+         hypre_fedata->fedataElemIDs_[hypre_fedata->fedataElemCnt_++]=elemIDs[i];
+      }
+   }
+   return 0;
+#else
+   return 1;
+#endif
+}
+
+/****************************************************************************/
+/* HYPRE_LSI_MLIFEDataInitComplete                                          */
+/*--------------------------------------------------------------------------*/
+
+extern "C"
+int HYPRE_LSI_MLIFEDataInitComplete( void *object )
+{
+#ifdef HAVE_MLI
+   int              i, j;
+   int              numProcs, nSharedNodes, *sharedProcLengs, **sharedProcIDs;
+   const int        *intArray, *sharedNodeIDs;
+   HYPRE_MLI_FEData *hypre_fedata = (HYPRE_MLI_FEData *) object;
+   MLI_FEData       *fedata = (MLI_FEData *) hypre_fedata->fedata_;
+   Lookup           *lookup;
+
+   if ( fedata != NULL )
+   {
+      MPI_Comm_size( hypre_fedata->comm, &numProcs );
+      lookup = hypre_fedata->lookup_;
+      if ( numProcs > 1 )
+      {
+         nSharedNodes    = hypre_fedata->lookup_->getNumSharedNodes();
+         sharedNodeIDs   = hypre_fedata->lookup_->getSharedNodeNumbers();
+         sharedProcIDs   = new int*[nSharedNodes];
+         sharedProcLengs = new int[nSharedNodes];
+         for ( i = 0; i < nSharedNodes; i++ )
+         {
+            sharedProcLengs[i] = lookup->getNumSharingProcs(sharedNodeIDs[i]);
+            sharedProcIDs[i] = new int[sharedProcLengs[i]];
+            intArray = lookup->getSharedNodeProcs( sharedNodeIDs[i] );
+            for ( j = 0; j < sharedProcLengs[i]; j++ )
+               sharedProcIDs[i][j] = intArray[j];
+         }
+         fedata->initSharedNodes(nSharedNodes, sharedNodeIDs, sharedProcLengs,
+                                 sharedProcIDs);
+         delete [] sharedProcLengs;
+         for ( i = 0; i < nSharedNodes; i++ ) delete [] sharedProcIDs[i];
+         delete [] sharedProcIDs;
+      }
+      fedata->initComplete();
+      hypre_fedata->fedataElemCnt_ = 0;
+      hypre_fedata->fedataRowCnt_  = 0;
+      hypre_fedata->fedataValues_  = NULL;
+      hypre_fedata->fedataMatDim_  = 0;
+   }
+   return 0;
+#else
+   return 1;
+#endif
+}
+
+/****************************************************************************/
+/* HYPRE_LSI_MLIFEDataAccumulateElemMatrix                                  */
+/*--------------------------------------------------------------------------*/
+
+extern "C"
+int HYPRE_LSI_MLIFEDataAccumulateElemMatrix(void *object, int nrows, int ncols,
+                                            const double * const *inValues)
+{
+#ifdef HAVE_MLI
+   int              nElems, elemID, i, j, rowCnt, matz=0, ierr;
+   double           *elemMat, *evalues, *evectors, *dAux1, *dAux2;
+   HYPRE_MLI_FEData *hypre_fedata = (HYPRE_MLI_FEData *) object;
+   MLI_FEData       *fedata = (MLI_FEData *) hypre_fedata->fedata_;
+
+   if (hypre_fedata->fedataMatDim_ != 0 && hypre_fedata->fedataMatDim_ != ncols)
+   {
+      printf("HYPRE_LSI_MLIFEDataAccumulateElemMatrix ERROR:MatDim mismatch\n");
+      exit(1);
+   }
+   if (hypre_fedata->fedataMatDim_ == 0 )
+   {
+      hypre_fedata->fedataMatDim_ = ncols;
+      if ( hypre_fedata->fedataValues_ != NULL )
+         delete [] hypre_fedata->fedataValues_;
+      hypre_fedata->fedataValues_ = new double[ncols*ncols];
+   }
+   rowCnt  = hypre_fedata->fedataRowCnt_;
+   elemMat = hypre_fedata->fedataValues_;
+   for ( i = 0; i < nrows; i++ )
+   {
+      for ( j = 0; j < ncols; j++ )
+         elemMat[j*ncols+rowCnt] = inValues[i][j];
+      rowCnt++;
+   }
+   hypre_fedata->fedataRowCnt_ = rowCnt;
+   if ( rowCnt == ncols )
+   {
+      fedata->getNumElements(nElems);
+      if ( hypre_fedata->fedataElemCnt_ >= nElems )
+      {
+         printf("HYPRE_LSI_MLIFEDataAccumulateElemMatrix ERROR:nElems > max \n");
+         exit(1);
+      }
+      elemID = hypre_fedata->fedataElemIDs_[hypre_fedata->fedataElemCnt_++];
+      fedata->loadElemMatrix(elemID, ncols, elemMat);
+      hypre_fedata->fedataRowCnt_ = 0;
+      evalues  = new double[ncols];
+      evectors = new double[ncols*ncols];
+      dAux1    = new double[ncols];
+      dAux2    = new double[ncols];
+      mli_computespectrum_(&ncols, &ncols, elemMat, evalues, &matz, evectors,
+                           dAux1, dAux2, &ierr);
+      for ( i = 0; i < ncols; i++ )
+         printf("Element %5d : eigenvalue = %e\n", elemID, evalues[i]);
+      delete [] evalues;
+      delete [] evectors;
+      delete [] dAux1;
+      delete [] dAux2;
+   }
+   return 0;
+#else
+   return 1;
+#endif
+}
+
+/****************************************************************************/
+/* HYPRE_LSI_MLIFEDataWriteToFile                                           */
+/*--------------------------------------------------------------------------*/
+
+extern "C"
+int HYPRE_LSI_MLIFEDataWriteToFile( void *object, char *filename )
+{
+#ifdef HAVE_MLI
+   HYPRE_MLI_FEData *hypre_fedata = (HYPRE_MLI_FEData *) object;
+   MLI_FEData       *fedata = (MLI_FEData *) hypre_fedata->fedata_;
+
+   if ( fedata != NULL ) fedata->writeToFile( filename );
+   return 0;
+#else
+   return 1;
+#endif
+}
 

@@ -582,6 +582,7 @@ class HYPRE_LinSysCore
    // ----------------------------------------------------------------------
 
    void            *feGrid_;
+   int             haveFEGrid_;
    Lookup          *lookup_;
    int             haveLookup_;
    double          **projectionMatrix_; 

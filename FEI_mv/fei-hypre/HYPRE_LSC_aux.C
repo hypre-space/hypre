@@ -116,7 +116,7 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
     double weight, dtemp;
     char   param[256], param1[256], param2[80];
 
-    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 0 )
     {
        printf("%4d : HYPRE_LSC::entering parameters function.\n",mypid_);
        if ( mypid_ == 0 )
@@ -145,10 +145,73 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
        sscanf(params[i],"%s", param1);
        
        //----------------------------------------------------------------
+       // help menu 
+       //----------------------------------------------------------------
+
+       if ( !strcmp(param1, "help") )
+       {
+          printf("HYPRE_LinSysCore::parameters - available parameters : \n");
+          printf(" - outputLevel <d> \n");
+          printf(" - setDebug <slideReduction1,amgDebug,printMat,printFEInfo>\n");
+          printf(" - haveFEData <0,1>\n");
+          printf(" - schurReduction\n");
+          printf(" - slideReduction\n");
+          printf(" - AConjugateProjection <dsize>\n");
+          printf(" - minResProjection <dsize>\n");
+          printf(" - solver <cg,gmres,bicgstab,boomeramg,superlux,..>\n");
+          printf(" - maxIterations <d>\n");
+          printf(" - tolerance <f>\n");
+          printf(" - gmresDim <d>\n");
+          printf(" - stopCrit <absolute,relative>\n");
+          printf(" - preconditioner <identity,diagonal,pilut,parasails,..\n");
+          printf(" -      boomeramg,ddilut,schwarz,ddict,poly,euclid,...\n");
+          printf(" -      blockP,ml,mli,reuse,parasails_reuse,override>\n");
+          printf(" - pilutFillin <d>\n");
+          printf(" - pilutDropTol <f>\n");
+          printf(" - ddilutFillin <f>\n");
+          printf(" - ddilutDropTol <f> (f*sparsity(A))\n");
+          printf(" - ddilutReorder <f>\n");
+          printf(" - ddictFillin <f>\n");
+          printf(" - ddictDropTol <f> (f*sparsity(A))\n");
+          printf(" - schwarzNBlocks <d>\n");
+          printf(" - schwarzBlockSize <d>\n");
+          printf(" - polyorder <d>\n");
+          printf(" - superluOrdering <natural,mmd>\n");
+          printf(" - superluScale <y,n>\n");
+          printf(" - amgCoarsenType <cljp,falgout,ruge,ruge3c>\n");
+          printf(" - amgMeasureType <global,local>\n");
+          printf(" - amgRelaxType <jacobi,gsSlow,gsFast,hybrid,hybridsym>\n");
+          printf(" - amgNumSweeps <d>\n");
+          printf(" - amgRelaxWeight <f>\n");
+          printf(" - amgStrongThreshold <f>\n");
+          printf(" - amgSystemSize <d>\n");
+          printf(" - amgMaxIterations <d>\n");
+          printf(" - parasailsThreshold <f>\n");
+          printf(" - parasailsNlevels <d>\n");
+          printf(" - parasailsFilter <f>\n");
+          printf(" - parasailsLoadbal <f>\n");
+          printf(" - parasailsSymmetric\n");
+          printf(" - parasailsUnSymmetric\n");
+          printf(" - parasailsReuse\n");
+          printf(" - euclidNlevels <d>\n");
+          printf(" - euclidThreshold <f>\n");
+          printf(" - blockP help (to get blockP options) \n");
+          printf(" - MLI help (to get MLI options) \n");
+          printf(" - mlNumSweeps <d>\n");
+          printf(" - mlRelaxType <jacobi,sgs,vbsgs>\n");
+          printf(" - mlRelaxWeight <f>\n");
+          printf(" - mlStrongThreshold <f>\n");
+          printf(" - mlMethod <amg>\n");
+          printf(" - mlCoarseSolver <superlu,aggregation,GS>\n");
+          printf(" - mlCoarsenScheme <uncoupled,coupled,mis>\n");
+          printf(" - mlNumPDEs <d>\n");
+       }
+
+       //----------------------------------------------------------------
        // output level
        //----------------------------------------------------------------
 
-       if ( !strcmp(param1, "outputLevel") )
+       else if ( !strcmp(param1, "outputLevel") )
        {
           sscanf(params[i],"%s %d", param, &olevel);
           if ( olevel < 0 ) olevel = 0;
@@ -168,29 +231,49 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
        else if ( !strcmp(param1, "setDebug") )
        {
           sscanf(params[i],"%s %s", param, param2);
-          if (!strcmp(param2, "slideReduction1")) 
+          if      (!strcmp(param2, "slideReduction1")) 
              HYOutputLevel_ |= HYFEI_SLIDEREDUCE1;
-          if (!strcmp(param2, "slideReduction2")) 
+          else if (!strcmp(param2, "slideReduction2")) 
              HYOutputLevel_ |= HYFEI_SLIDEREDUCE2;
-          if (!strcmp(param2, "slideReduction3")) 
+          else if (!strcmp(param2, "slideReduction3")) 
              HYOutputLevel_ |= HYFEI_SLIDEREDUCE3;
-          if (!strcmp(param2, "schurReduction1")) 
+          else if (!strcmp(param2, "schurReduction1")) 
              HYOutputLevel_ |= HYFEI_SCHURREDUCE1;
-          if (!strcmp(param2, "schurReduction2")) 
+          else if (!strcmp(param2, "schurReduction2")) 
              HYOutputLevel_ |= HYFEI_SCHURREDUCE2;
-          if (!strcmp(param2, "schurReduction3")) 
+          else if (!strcmp(param2, "schurReduction3")) 
              HYOutputLevel_ |= HYFEI_SCHURREDUCE3;
-          if (!strcmp(param2, "amgDebug")) HYOutputLevel_ |= HYFEI_AMGDEBUG;
-          if (!strcmp(param2, "printMat")) HYOutputLevel_ |= HYFEI_PRINTMAT;
-          if (!strcmp(param2, "printSol")) HYOutputLevel_ |= HYFEI_PRINTSOL;
-          if (!strcmp(param2, "printReducedMat")) 
+          else if (!strcmp(param2, "amgDebug")) 
+             HYOutputLevel_ |= HYFEI_AMGDEBUG;
+          else if (!strcmp(param2, "printMat")) 
+             HYOutputLevel_ |= HYFEI_PRINTMAT;
+          else if (!strcmp(param2, "printSol")) 
+             HYOutputLevel_ |= HYFEI_PRINTSOL;
+          else if (!strcmp(param2, "printReducedMat")) 
              HYOutputLevel_ |= HYFEI_PRINTREDMAT;
-          if (!strcmp(param2, "printFEInfo")) 
+          else if (!strcmp(param2, "printFEInfo")) 
              HYOutputLevel_ |= HYFEI_PRINTFEINFO;
-          if (!strcmp(param2, "ddilut")) HYOutputLevel_ |= HYFEI_DDILUT;
+          else if (!strcmp(param2, "ddilut")) 
+             HYOutputLevel_ |= HYFEI_DDILUT;
+          else if (!strcmp(param2, "off")) 
+             HYOutputLevel_ = 0;
           if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
           {
-             printf("       HYPRE_LSC::parameters setDebug.\n");
+             printf("       HYPRE_LSC::parameters setDebug %s.\n", param2);
+          }
+       }
+
+       //----------------------------------------------------------------
+       // turn on MLI's FEData module
+       //----------------------------------------------------------------
+
+       else if ( !strcmp(param1, "haveFEData") )
+       {
+          sscanf(params[i],"%s %d", param, &haveFEGrid_);
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+          {
+             printf("       HYPRE_LSC::parameters haveFEData = %d\n",
+                    haveFEGrid_);
           }
        }
 
@@ -353,7 +436,7 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
           
           if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
           {
-             printf("       HYPRE_LSC::parameters gmresStopCrit = %s\n",
+             printf("       HYPRE_LSC::parameters stopCrit = %s\n",
                     param2);
           }
        }
@@ -890,34 +973,22 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
        }
 
        //---------------------------------------------------------------
-       // block preconditoner 
+       // block preconditoner (hold this until this end) 
        //---------------------------------------------------------------
 
        else if ( !strcmp(param1, "blockP") )
        {
-          if (HYPreconID_ == HYBLOCK && HYPrecon_ != NULL )
-          {
-             HYPRE_LSI_BlockPrecondSetParams(HYPrecon_, params[i]); 
-             if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
-                printf("       HYPRE_LSC::set blockP parameter.\n");
-          }
-          else if (HYPreconID_ != HYBLOCK ) blockP_ind[blockP_leng++] = i;
+          blockP_ind[blockP_leng++] = i;
        }
 
        //---------------------------------------------------------------
-       // MLI preconditoners 
+       // MLI preconditoners  (hold this until the end)
        //---------------------------------------------------------------
 
        else if ( !strcmp(param1, "MLI") )
        {
 #ifdef HAVE_MLI
-          if (HYPreconID_ == HYMLI && HYPrecon_ != NULL )
-          {
-             HYPRE_LSI_MLISetParams(HYPrecon_, params[i]); 
-             if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
-                printf("       HYPRE_LSC::set MLI parameter.\n");
-          }
-          else if (HYPreconID_ != HYMLI ) MLI_ind[MLI_leng++] = i;
+          MLI_ind[MLI_leng++] = i;
 #else
           if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 && mypid_ == 0 )
              printf("       HYPRE_LSC::MLI SetParams - MLI unavailable.\n");
@@ -1145,13 +1216,23 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
     if (HYPreconID_ == HYBLOCK && blockP_leng > 0 )
     {
        for ( i = 0; i < blockP_leng; i++ )
+       {
           HYPRE_LSI_BlockPrecondSetParams(HYPrecon_, params[blockP_ind[i]]); 
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+             printf("       HYPRE_LSC::set blockP parameter = %s.\n",
+                    params[blockP_ind[i]]);
+       }
     }
 #ifdef HAVE_MLI
     if (HYPreconID_ == HYMLI && MLI_leng > 0 )
     {
        for ( i = 0; i < MLI_leng; i++ ) 
+       {
           HYPRE_LSI_MLISetParams(HYPrecon_, params[MLI_ind[i]]); 
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+             printf("       HYPRE_LSC::set MLI parameter = %s.\n",
+                    params[MLI_ind[i]]);
+       }
     }
 #endif
     delete [] blockP_ind;
