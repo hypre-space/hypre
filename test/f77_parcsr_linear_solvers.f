@@ -312,40 +312,40 @@ c Set defaults for BoomerAMG
 
         print *, 'AMG'
 
-        call HYPRE_ParAMGCreate(solver, ierr)
-        call HYPRE_ParAMGSetCoarsenType(solver,
+        call HYPRE_BoomerAMGCreate(solver, ierr)
+        call HYPRE_BoomerAMGSetCoarsenType(solver,
      &                                  (hybrid*coarsen_type), ierr)
-        call HYPRE_ParAMGSetMeasureType(solver, measure_type, ierr)
-        call HYPRE_ParAMGSetTol(solver, tol, ierr)
-        call HYPRE_ParAMGSetStrongThreshold(solver,
+        call HYPRE_BoomerAMGSetMeasureType(solver, measure_type, ierr)
+        call HYPRE_BoomerAMGSetTol(solver, tol, ierr)
+        call HYPRE_BoomerAMGSetStrongThreshold(solver,
      &                                      strong_threshold, ierr)
-        call HYPRE_ParAMGSetTruncFactor(solver, trunc_factor, ierr)
-        call HYPRE_ParAMGSetLogging(solver, ioutdat,
+        call HYPRE_BoomerAMGSetTruncFactor(solver, trunc_factor, ierr)
+        call HYPRE_BoomerAMGSetLogging(solver, ioutdat,
      &                              "test.out.log", ierr)
-        call HYPRE_ParAMGSetMaxIter(solver, maxiter, ierr)
-        call HYPRE_ParAMGSetCycleType(solver, cycle_type, ierr)
-        call HYPRE_ParAMGInitGridRelaxation(num_grid_sweeps,
+        call HYPRE_BoomerAMGSetMaxIter(solver, maxiter, ierr)
+        call HYPRE_BoomerAMGSetCycleType(solver, cycle_type, ierr)
+        call HYPRE_BoomerAMGInitGridRelaxation(num_grid_sweeps,
      &                                      grid_relax_type,
      &                                      grid_relax_points,
      &                                      coarsen_type, 
      &                                      relax_weight,
      &                                      MAXLEVELS,ierr)
-        call HYPRE_ParAMGSetNumGridSweeps(solver,
+        call HYPRE_BoomerAMGSetNumGridSweeps(solver,
      &                                    num_grid_sweeps, ierr)
-        call HYPRE_ParAMGSetGridRelaxType(solver,
+        call HYPRE_BoomerAMGSetGridRelaxType(solver,
      &                                    grid_relax_type, ierr)
-        call HYPRE_ParAMGSetRelaxWeight(solver,
+        call HYPRE_BoomerAMGSetRelaxWeight(solver,
      &                                  relax_weight, ierr)
-        call HYPRE_ParAMGSetGridRelaxPoints(solver,
+        call HYPRE_BoomerAMGSetGridRelaxPoints(solver,
      &                                      grid_relax_points, ierr)
-        call HYPRE_ParAMGSetMaxLevels(solver, MAXLEVELS, ierr)
-        call HYPRE_ParAMGSetDebugFlag(solver, debug_flag, ierr)
-        call HYPRE_ParAMGSetup(solver, A, b, x, ierr)
-        call HYPRE_ParAMGSolve(solver, A, b, x, ierr)
-        call HYPRE_ParAMGGetNumIterations(solver, num_iterations, ierr)
+        call HYPRE_BoomerAMGSetMaxLevels(solver, MAXLEVELS, ierr)
+        call HYPRE_BoomerAMGSetDebugFlag(solver, debug_flag, ierr)
+        call HYPRE_BoomerAMGSetup(solver, A, b, x, ierr)
+        call HYPRE_BoomerAMGSolve(solver, A, b, x, ierr)
+        call HYPRE_BoomerAMGGetNumIterations(solver, num_iterations, ierr)
         call HYPRE_ParAMGGetFinalRelativeRes(solver,
      &                                       final_res_norm, ierr)
-        call HYPRE_ParAMGDestroy(solver, ierr)
+        call HYPRE_BoomerAMGDestroy(solver, ierr)
 
       endif
 
@@ -382,45 +382,45 @@ c Set defaults for BoomerAMG
           trunc_factor = 0.0
           cycle_type = 1
 
-          call HYPRE_ParAMGCreate(precond, ierr)
+          call HYPRE_BoomerAMGCreate(precond, ierr)
 
-          call HYPRE_ParAMGSetCoarsenType(precond,
+          call HYPRE_BoomerAMGSetCoarsenType(precond,
      &                                    (hybrid*coarsen_type), ierr)
 
-          call HYPRE_ParAMGSetMeasureType(precond, measure_type, ierr)
+          call HYPRE_BoomerAMGSetMeasureType(precond, measure_type, ierr)
 
-          call HYPRE_ParAMGSetStrongThreshold(precond,
+          call HYPRE_BoomerAMGSetStrongThreshold(precond,
      &                                        strong_threshold, ierr)
 
-c         call HYPRE_ParAMGSetTruncFactor(precond, trunc_factor, ierr)
+c         call HYPRE_BoomerAMGSetTruncFactor(precond, trunc_factor, ierr)
 
-          call HYPRE_ParAMGSetLogging(precond, ioutdat,
+          call HYPRE_BoomerAMGSetLogging(precond, ioutdat,
      &                                "test.out.log", ierr)
 
-          call HYPRE_ParAMGSetMaxIter(precond, maxiter, ierr)
+          call HYPRE_BoomerAMGSetMaxIter(precond, maxiter, ierr)
 
-          call HYPRE_ParAMGSetCycleType(precond, cycle_type, ierr)
+          call HYPRE_BoomerAMGSetCycleType(precond, cycle_type, ierr)
 
-          call HYPRE_ParAMGInitGridRelaxation(num_grid_sweeps,
+          call HYPRE_BoomerAMGInitGridRelaxation(num_grid_sweeps,
      &                                        grid_relax_type,
      &                                        grid_relax_points,
      &                                        coarsen_type,
      &                                        relax_weight,
      &                                        MAXLEVELS,ierr)
 
-          call HYPRE_ParAMGSetNumGridSweeps(precond,
+          call HYPRE_BoomerAMGSetNumGridSweeps(precond,
      &                                      num_grid_sweeps, ierr)
 
-          call HYPRE_ParAMGSetGridRelaxType(precond,
+          call HYPRE_BoomerAMGSetGridRelaxType(precond,
      &                                      grid_relax_type, ierr)
 
-          call HYPRE_ParAMGSetRelaxWeight(precond,
+          call HYPRE_BoomerAMGSetRelaxWeight(precond,
      &                                    relax_weight, ierr)
 
-          call HYPRE_ParAMGSetGridRelaxPoints(precond,
+          call HYPRE_BoomerAMGSetGridRelaxPoints(precond,
      &                                        grid_relax_points, ierr)
 
-          call HYPRE_ParAMGSetMaxLevels(precond,
+          call HYPRE_BoomerAMGSetMaxLevels(precond,
      &                                  MAXLEVELS, ierr)
 
           call HYPRE_ParCSRGMRESSetPrecond(solver, precond_id,
