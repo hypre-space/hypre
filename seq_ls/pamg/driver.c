@@ -20,6 +20,7 @@ main( int   argc,
    int                 solver_id;
    int                 relax_default;
    int                 coarsen_type;
+   int                 max_levels;
    double	       norm;
    int		       ierr = 0;
 
@@ -69,6 +70,7 @@ main( int   argc,
    relax_default = 0;
 
    solver_id = 0;
+   max_levels = 25;
 
    /*-----------------------------------------------------------
     * Parse command line
@@ -146,6 +148,11 @@ main( int   argc,
       {
          arg_index++;
          relax_default = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-maxlev") == 0 )
+      {
+         arg_index++;
+         max_levels = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-help") == 0 )
       {
@@ -374,7 +381,7 @@ main( int   argc,
       HYPRE_AMGSetGridRelaxType(amg_solver, grid_relax_type);
       HYPRE_AMGSetGridRelaxPoints(amg_solver, grid_relax_points);
       HYPRE_AMGSetRelaxWeight(amg_solver, relax_weight);
-      HYPRE_AMGSetMaxLevels(amg_solver, 25);
+      HYPRE_AMGSetMaxLevels(amg_solver, max_levels);
       HYPRE_AMGSetup(amg_solver, A, b, x);
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
