@@ -15,6 +15,11 @@ export SHELL
 #=============================================================================
 
 AMG_ALL_FLAG=1
+AMG_INSTALL_FLAG=""
+AMG_CLEAN_FLAG=""
+AMG_VERYCLEAN_FLAG=""
+AMG_DEBUG_FLAG=""
+
 
 if [ -n "$1" ]
 then
