@@ -15,6 +15,8 @@ C
       character*15 FYSMP,FRHS,FINITU
 
       integer data
+      integer*4 time_ticks, cpu_ticks
+
 C
 C     READ INPUT FILES WITH MATRIX, RIGHT-HAND SIDE, PROBLEM SPECS,
 C     INITIAL GUESS.
@@ -30,7 +32,6 @@ CVEH
 C     READ IN MATRIX FROM AMG.in.ysmp
 CVEH
       open (8,FILE=FYSMP,STATUS='OLD')
-      read (8,*) junk
       read (8,*) nv
       read (8,*) (ia(j), j=1,nv+1)
       read (8,*) (ja(j), j=1,ia(nv+1)-1)
@@ -43,7 +44,6 @@ CVEH
 C     READ IN RHS FROM AMG.in.rhs
 CVEH
       open (8,FILE=FRHS,STATUS='OLD')
-      read (8,*) junk
       read (8,*) nv1
       if (nv1 .ne. nv) then
          write (6,*) 'Right hand side incompatible with matrix'
@@ -58,7 +58,6 @@ CVEH
 C     READ IN INITIAL GUESS FROM AMG.in.initu
 CVEH
       open (8,FILE=FINITU,STATUS='OLD')
-      read (8,*) junk
       read (8,*) nv1
       if (nv1 .ne. nv) then 
          write (6,*) 'Right hand side incompatible with matrix'
@@ -75,11 +74,25 @@ CVEH
 
       call amg_setlogging(3, "AMG.runlog", data)
 
+      call amg_clock_init()
+      call amg_clock(time_ticks)
+      call amg_cpuclock(cpu_ticks)
+
+      timeold= time_ticks
+      cpuold = cpu_ticks
+
       call amg_setup(isterr,a,ia,ja,nv,data)
       print *, 'Setup error flag = ', isterr
 
       call amg_solve(isverr,u,f,nv,tol,data)
       print *, 'Solve error flag = ', isverr
+
+      call amg_clock(time_ticks)
+      call amg_cpuclock(cpu_ticks)
+      time=time_ticks - timeold
+      cpu = cpu_ticks - cpuold
+c
+       call amg_printtiming(time, cpu)
 
       call amg_finalize(data)
 

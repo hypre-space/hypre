@@ -1,14 +1,12 @@
-3   305                # numu (unknowns) nump (points)
+3  125                 # numu (unknowns) nump (points)
 1.0e-7                 # tol
-23                     # levmax
-30012  0.25            # ncg; ecg
+3                     # levmax
+30012  0.5             # ncg; ecg
 31111  0.35            # nwt; ewt
 11                     # nstr
-1040                   # ncyc
-1 1 1 1 1 1 1 1 1 1    # mu(1:10)   
+1010                   # ncyc
+1 1 1    # mu(1:25)   
 133   133  133   19    # ntr[f,d,u,c]
  31    31   13    2    # ipr[f,d,u,c]
- 99    99   99    9    # ier[f,d,u,c]
- 99    99   99    9    # iur[f,d,u,c]
 3                      # ioutdat
 

@@ -14,17 +14,17 @@
 # Configuration for Solaris
 ##################################################################
 
-AMG_DIR = ..
+#AMG_DIR = ..
 
-CC     = gcc
-CFLAGS = -I${AMG_DIR}/include -I/usr/local/include
+CC     = cc
+CFLAGS = -I${AMG_DIR}/include -I/usr/local/include -g 
 
 F77    = f77
-FFLAGS = ""
+FFLAGS = -g
 
-LINK   = gcc
+LINK   = cc
 LFLAGS = -L${AMG_DIR}/lib -lamg \
-         -lF77 -lU77 -lI77 -lisam -lfpe -lm
+         -lF77 -lI77 -lisam -lm
 
 ##################################################################
 # Main Rules
@@ -32,13 +32,13 @@ LFLAGS = -L${AMG_DIR}/lib -lamg \
 
 all: amg_fdrive amg_fdrive2
 
-amg_fdrive: amg_fdrive.o
+amg_fdrive: amg_fdrive.o 
 	@echo  "Linking" $@ "... "
-	@${LINK} -o $@ amg_fdrive.o ${LFLAGS}
+	${LINK} -o $@ amg_fdrive.o   ${LFLAGS}
 
-amg_fdrive2: amg_fdrive2.o
+amg_fdrive2: amg_fdrive2.o 
 	@echo  "Linking" $@ "... "
-	@${LINK} -o $@ amg_fdrive2.o ${LFLAGS}
+	@${LINK} -o $@ amg_fdrive2.o  ${LFLAGS}
 
 ##################################################################
 # Generic Rules
@@ -46,11 +46,11 @@ amg_fdrive2: amg_fdrive2.o
 
 .c.o:
 	@echo "Making (c) " $@
-	@${CC} -o $@ -c ${CFLAGS} $<
+	${CC} -o $@ -c ${CFLAGS} $<
 
 .f.o:
 	@echo "Making (f) " $@
-	@${F77} -o $@ -c ${FFLAGS} $<
+	${F77} -o $@ -c ${FFLAGS} $<
 
 ##################################################################
 # Miscellaneous rules

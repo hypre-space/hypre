@@ -17,10 +17,10 @@
 #AMG_DIR = ..
 
 CC     = gcc
-CFLAGS = -I${AMG_DIR}/include -I/usr/local/include
+CFLAGS = -I${AMG_DIR}/include -I/usr/local/include -g 
 
 F77    = /home/casc/g77/bin/g77
-FFLAGS = 
+FFLAGS = -g
 
 LINK   = gcc
 LFLAGS = -L${AMG_DIR}/lib -lamg \
@@ -32,13 +32,13 @@ LFLAGS = -L${AMG_DIR}/lib -lamg \
 
 all: amg_fdrive amg_fdrive2
 
-amg_fdrive: amg_fdrive.o
+amg_fdrive: amg_fdrive.o 
 	@echo  "Linking" $@ "... "
-	${LINK} -o $@ amg_fdrive.o ${LFLAGS}
+	${LINK} -o $@ amg_fdrive.o   ${LFLAGS}
 
-amg_fdrive2: amg_fdrive2.o
+amg_fdrive2: amg_fdrive2.o 
 	@echo  "Linking" $@ "... "
-	@${LINK} -o $@ amg_fdrive2.o ${LFLAGS}
+	@${LINK} -o $@ amg_fdrive2.o  ${LFLAGS}
 
 ##################################################################
 # Generic Rules
