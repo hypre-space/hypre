@@ -7,9 +7,9 @@
 # $Revision$
 #EHEADER***********************************************************************
 
-ARCH = alpha
-
 .SUFFIXES: .cc .c .f .o
+
+HYPRE_ARCH = @ARCH@
 
 srcdir = @srcdir@
 
@@ -42,23 +42,16 @@ MPILIBFLAGS = @MPILIBDIRS@ @MPILIBS@ @MPIFLAGS@
 LIBFLAGS = @LIBDIRS@ @LIBS@
 LDLIBFLAGS = @LDLIBDIRS@ @LDLIBS@
 
+MPI_LIBS = -lpmpich -lmpich -lrpc -lgs -lpthread
+
 RANLIB = @RANLIB@
 
 LFLAGS =\
  -L.\
- -L../isis-mv\
- -L../../IJ_matrix_vector\
- -L../../utilities\
- -L../../parcsr_matrix_vector\
- -L../../parcsr_linear_solvers\
- -L../../seq_matrix_vector\
- -L../../distributed_matrix\
- -L../../distributed_linear_solvers/pilut\
- -L../../distributed_linear_solvers/ParaSails\
- -L../../matrix_matrix\
- -L../fei-base/lib/$(ARCH)\
+ -L../../hypre/lib\
  ${SUPERLU_LIB} ${MLPACK_LIB}\
- -lfei_isis\
+ -lHYPRE_FEI\
+ -lHYPRE_FEI_BASE\
  -lHYPRE_parcsr_ls \
  -lHYPRE_ParaSails \
  -lHYPRE_FEI_isismv \
@@ -71,7 +64,7 @@ LFLAGS =\
  -lHYPRE_DistributedMatrixPilutSolver \
  -lsuperlu_alpha \
  -lHYPRE_seq_mv \
- ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}\
+ ${MPILIBFLAGS} ${MPI_LIBS} ${LIBFLAGS} ${LDLIBFLAGS}\
  -ldxml -lm
 
 FILES = HYPRE_LinSysCore.cc cfei.cc hypre_fei_reduce.cc hypre_fei_schur.cc \
