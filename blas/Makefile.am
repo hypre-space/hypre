@@ -28,5 +28,6 @@ FILES = \
  idamax.c \
  s_cmp.c \
  s_copy.c \
+ hypre_blas.h \
  f2c.h
 
