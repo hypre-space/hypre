@@ -123,6 +123,8 @@ hypre_BoxNeighborsAssemble( hypre_BoxNeighbors *neighbors,
 
    int                  keep_box;
    int                  num_boxes;
+   int                  num_saved_boxes;
+   int                  initial_num_boxes;
 
    hypre_RankLink      *rank_link;
 
@@ -133,7 +135,9 @@ hypre_BoxNeighborsAssemble( hypre_BoxNeighbors *neighbors,
    int                  distance_index[3];
 
    int                  diff;
-   int                  i, j, d, ilocal, inew;
+   int                  i, j, d, ilocal, inew, ii , inear;
+
+   int                  proc_zero_done = 0;
 
    int                  ierr = 0;
 
@@ -141,19 +145,22 @@ hypre_BoxNeighborsAssemble( hypre_BoxNeighbors *neighbors,
     * Find neighboring boxes
     *---------------------------------------------*/
 
-   boxes           = hypre_BoxNeighborsBoxes(neighbors);
-   procs           = hypre_BoxNeighborsProcs(neighbors);
-   ids             = hypre_BoxNeighborsIDs(neighbors);
-   first_local     = hypre_BoxNeighborsFirstLocal(neighbors);
-   num_local       = hypre_BoxNeighborsNumLocal(neighbors);
-   num_periodic    = hypre_BoxNeighborsNumPeriodic(neighbors);
+   boxes             = hypre_BoxNeighborsBoxes(neighbors);
+   procs             = hypre_BoxNeighborsProcs(neighbors);
+   ids               = hypre_BoxNeighborsIDs(neighbors);
+   first_local       = hypre_BoxNeighborsFirstLocal(neighbors);
+   num_local         = hypre_BoxNeighborsNumLocal(neighbors);
+   num_periodic      = hypre_BoxNeighborsNumPeriodic(neighbors);
+   initial_num_boxes = hypre_BoxArraySize(boxes);
 
    /*---------------------------------------------
     * Find neighboring boxes
     *---------------------------------------------*/
 
    inew = 0;
+   inear = 0;
    num_boxes = 0;
+   num_saved_boxes = 0;
    hypre_ForBoxI(i, boxes)
       {
          keep_box = 0;
@@ -214,6 +221,130 @@ hypre_BoxNeighborsAssemble( hypre_BoxNeighbors *neighbors,
             }
          }
 
+#if 1
+         /*-----------------------------------------------------------------
+          * Here, if pruning is on, we keep boxes that are nearby and
+          * all other boxes on the same processor as the nearby box.
+          *-----------------------------------------------------------------*/
+
+         if (prune)
+         {
+            if (keep_box)
+            {
+               /*-----------------------------------------------------------
+                * If this is the first box on processor P that is nearby,
+                * we mark all boxes (also on processor P) to be saved by
+                * setting procs = -procs. We create a linked list structure
+                * in the procs array. If nonpositive, box is saved, and a
+                * positive entry following a nonpositive points to next
+                * saved box. 
+                *-----------------------------------------------------------*/
+               if (procs[i] > 0 || (procs[i] == 0 && !proc_zero_done))
+               {
+                  num_boxes = num_saved_boxes;
+                  /* save all boxes up to i that are on same proc as i  */
+                  ii = i-1;
+                  while (ii > -1 && procs[ii] == procs[i])
+                  {
+                     procs[ii] = -procs[ii];
+                     num_saved_boxes++;
+                     num_boxes++;
+                     ii--;
+                  }
+                  /* update pointer to saved boxes */
+                  if (inew < ii+1)
+                  {
+                     procs[inew] = ii+1;
+                  }
+                  /* save  box i */
+                  procs[i] = -procs[i];
+                  num_saved_boxes++;
+                  /* save all boxes after i  that are on same proc as i */
+                  ii = i+1;
+                  while (ii < initial_num_boxes && procs[ii] == -procs[i])
+                  {
+                     procs[ii] = -procs[ii];
+                     num_saved_boxes++;
+                     ii++;
+                  }
+                  /* update location for pointer to saved boxes */ 
+                  inew = ii;
+                  /* processor zero's boxes can only be the first execution */
+                  proc_zero_done = 1;
+               }
+
+               /*-----------------------------------------------------------
+                * This is a box on processor P that is nearby. Already we
+                * had a nearby box on processor P. Here we just update
+                * num_boxes used to reset RankLinkRanks. This is done by
+                * comparing current box (i) to last nearby box (inear).
+                *-----------------------------------------------------------*/
+               else
+               {
+                  num_boxes =  num_boxes + (i - inear);
+               }
+              
+               /*-----------------------------------------------------------
+                * Reset RankLinkRanks to reflect final ordering of
+                * boxes. Currently implemented by looping over local
+                * boxes a second time.
+                *-----------------------------------------------------------*/
+               for (j = 0; j < num_local + num_periodic; j++)
+               {
+                  ilocal = first_local + j;
+                  if (i != ilocal)
+                  {
+                     local_box = hypre_BoxArrayBox(boxes, ilocal);
+                     neighbor_box = hypre_BoxArrayBox(boxes, i);
+
+                     /* compute distance info */
+                     distance = 0;
+                     for (d = 0; d < 3; d++)
+                     {
+                        distance_index[d] = 0;
+      
+                        diff = hypre_BoxIMinD(neighbor_box, d) -
+                           hypre_BoxIMaxD(local_box, d);
+                        if (diff > 0)
+                        {
+                           distance_index[d] = 1;
+                           distance = hypre_max(distance, diff);
+                        }
+
+                        diff = hypre_BoxIMinD(local_box, d) -
+                           hypre_BoxIMaxD(neighbor_box, d);
+                        if (diff > 0)
+                        {
+                           distance_index[d] = -1;
+                           distance = hypre_max(distance, diff);
+                        }
+                     }
+
+                     /*  reset rank_link_rank */
+                     if (distance <= max_distance)
+                     {
+                        if (j < num_local)
+                        {
+                           hypre_RankLinkRank(
+                           hypre_BoxNeighborsRankLink(neighbors, j,
+                                                      distance_index[0],
+                                                      distance_index[1],
+                                                      distance_index[2]))
+                                                    = num_boxes;
+                        }
+                     }
+                  }
+               }
+
+               /* update last nearby box */
+               inear = i;
+            }
+         }
+#else
+         /*-----------------------------------------------------------------
+          * Here, if pruning is on, we keep only  boxes that are nearby.
+          *-----------------------------------------------------------------*/
+
          if (prune)
          {
             /* use procs array to store which boxes to keep */
@@ -229,12 +360,15 @@ hypre_BoxNeighborsAssemble( hypre_BoxNeighbors *neighbors,
                num_boxes++;
             }
          }
+#endif
          else
          {
             /* keep all of the boxes */
             num_boxes++;
          }
       }
+
+   num_boxes = hypre_max(num_boxes, num_saved_boxes);
 
    if (prune)
    {
