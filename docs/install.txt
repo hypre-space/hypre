@@ -1,0 +1,75 @@
+
+    Instructions for updating and maintaining installations of hypre
+
+----------------------------------------------------------------------------
+
+GENERAL COMMENTS:
+
+There are two types of hypre installations that are updated and
+maintained by members of the Scalable Linear Solvers project:
+
+  1. The "internal" installation:
+
+    - intended to give users access to relatively recent changes.
+    - updated somewhat frequently (about once a week).
+    - may be relatively unstable.
+    - one old installation is retained.
+    - installed on:
+        CASC workstation cluster
+
+  2. The "external" installation:
+
+    - intended to give users consistent access across several platforms.
+    - updated less frequently than internal installation.
+    - should be relatively stable.
+    - a few old installations are retained.
+    - installed on:
+        CASC workstation cluster
+        LC Compass cluster
+        Blue-Pacific
+
+Rob Falgout is maintaining two lists of users who want to receive
+notification of installation updates: one for "internal" updates and
+one for "external" updates.  Users should send email to Rob at
+rfalgout@llnl.gov to get on either list.
+
+----------------------------------------------------------------------------
+
+INSTALLATION PROCEDURES:
+
+All installations are done with the `update' Bourne-shell script
+located in the top-level directory of the hypre repository.  To
+get general usage info, do `update -help'.
+
+Internal installation:
+
+  (on CASC cluster only)
+
+  1. Do `update internal' - this checks out the current version of
+     the repository, tags it with a date (file VERSION_DATE), and
+     compiles it.  This also creates the tar file `UPDATE.tar', which
+     is currently only used in the external installation.
+  2. Do `update internal install' - this saves the previously
+     installed version, installs the new version, and possibly
+     deletes some older installations.  Permissions are set to
+     appropriate values.  Note that step 1 is not actually
+     needed, but is recommended in case something doesn't work
+     as planned (e.g., failed checkout, failed compile, ...).
+  3. Send email to appropriate users indicating the update.
+
+External installation:
+
+  (on CASC cluster)
+
+  1. Do `update external'
+  2. Do `update external install'
+
+  (on all other supported machines, e.g. the Compass cluster)
+
+  1. FTP the file `UPDATE.tar' to west (for example), and put it
+     in the install directory (do `update -dirs' for a list).
+  2. Do `tar xf UPDATE.tar'
+  3. Do `update external -dec '
+  4. Do `update external -dec install'
+
+----------------------------------------------------------------------------
