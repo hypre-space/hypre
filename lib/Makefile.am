@@ -128,7 +128,7 @@ HYPRE_SRC_DIRS = \
  distributed_matrix\
  krylov\
  matrix_matrix\
- parcsr_es/LOBPCG\
+ eigensolvers/lib\
  parcsr_ls\
  parcsr_mv\
  seq_mv\
@@ -245,7 +245,6 @@ MOSTFILES = \
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_jacobi.cxx\
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_kaczmarz.cxx\
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_mls.cxx\
- $(top_srcdir)/FEI_mv/femli/solver/mli_solver_mli.cxx\
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_parasails.cxx\
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_seqsuperlu.cxx\
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_sgs.cxx\
@@ -262,6 +261,7 @@ MOSTFILES = \
  $(top_srcdir)/IJ_mv/IJVector.c\
  $(top_srcdir)/IJ_mv/IJVector_parcsr.c\
  $(top_srcdir)/IJ_mv/aux_parcsr_matrix.c\
+ $(top_srcdir)/IJ_mv/aux_par_vector.c\
  $(top_srcdir)/distributed_ls/Euclid/Euclid_apply.c\
  $(top_srcdir)/distributed_ls/Euclid/Euclid_dh.c\
  $(top_srcdir)/distributed_ls/Euclid/ExternalRows_dh.c\
@@ -331,9 +331,14 @@ MOSTFILES = \
  $(top_srcdir)/krylov/pcg.c\
  $(top_srcdir)/matrix_matrix/HYPRE_ConvertPETScMatrixToDistributedMatrix.c\
  $(top_srcdir)/matrix_matrix/HYPRE_ConvertParCSRMatrixToDistributedMatrix.c\
- $(top_srcdir)/parcsr_es/LOBPCG/lobpcg.c\
- $(top_srcdir)/parcsr_es/LOBPCG/lobpcg_matrix.c\
- $(top_srcdir)/parcsr_es/LOBPCG/lobpcg_utilities.c\
+ $(top_srcdir)/eigensolvers/krylov/HYPRE_lobpcg.c\
+ $(top_srcdir)/eigensolvers/krylov/lobpcg.c\
+ $(top_srcdir)/eigensolvers/multivector/multivector.c\
+ $(top_srcdir)/eigensolvers/multivector/temp_multivector.c\
+ $(top_srcdir)/eigensolvers/parcsr_ls/HYPRE_parcsr_int.c\
+ $(top_srcdir)/eigensolvers/struct_ls/HYPRE_struct_int.c\
+ $(top_srcdir)/eigensolvers/sstruct_ls/HYPRE_sstruct_int.c\
+ $(top_srcdir)/eigensolvers/utilities/fortran_matrix.c\
  $(top_srcdir)/parcsr_ls/F90_HYPRE_parcsr_ParaSails.c\
  $(top_srcdir)/parcsr_ls/F90_HYPRE_parcsr_amg.c\
  $(top_srcdir)/parcsr_ls/F90_HYPRE_parcsr_bicgstab.c\
@@ -564,4 +569,3 @@ copy-objects:
 	    done; \
 	  fi; \
 	done
-
