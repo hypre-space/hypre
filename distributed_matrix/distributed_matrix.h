@@ -37,7 +37,9 @@ typedef struct
    int      	 local_storage_type;       /* Indicates the type of "local storage" */
    void         *translator;               /* optional storage_type specfic structure
                                               for holding additional local info */
-
+#ifdef HYPRE_TIMING
+   int           GetRow_timer;
+#endif
 } hypre_DistributedMatrix;
 
 /*--------------------------------------------------------------------------

@@ -38,6 +38,10 @@ hypre_DistributedMatrixCreate( MPI_Comm     context  )
    hypre_DistributedMatrixTranslator(matrix) = NULL;
    hypre_DistributedMatrixLocalStorageType(matrix) = HYPRE_UNITIALIZED;
 
+#ifdef HYPRE_TIMING
+   matrix->GetRow_timer = hypre_InitializeTiming( "GetRow" );
+#endif
+
    return matrix;
 }
 
@@ -58,6 +62,9 @@ hypre_DistributedMatrixDestroy( hypre_DistributedMatrix *matrix )
    else
       return(-1);
 
+#ifdef HYPRE_TIMING
+   hypre_FinalizeTiming ( matrix->GetRow_timer );
+#endif
    hypre_TFree(matrix);
 
    return(0);
@@ -287,20 +294,27 @@ hypre_DistributedMatrixGetRow( hypre_DistributedMatrix *matrix,
 {
    int ierr = 0;
 
+#ifdef HYPRE_TIMING
+   hypre_BeginTiming( matrix->GetRow_timer );
+#endif
+
    if ( hypre_DistributedMatrixLocalStorageType(matrix) == HYPRE_PETSC ) {
       ierr = hypre_DistributedMatrixGetRowPETSc( matrix, row, size, col_ind, values );
-      return( ierr );
    }
    else if ( hypre_DistributedMatrixLocalStorageType(matrix) == HYPRE_ISIS ) {
       ierr = hypre_GetDistributedMatrixRowISIS( matrix, row, size, col_ind, values );
-      return( ierr );
    }
    else if ( hypre_DistributedMatrixLocalStorageType(matrix) == HYPRE_PARCSR ) {
       ierr = hypre_DistributedMatrixGetRowParCSR( matrix, row, size, col_ind, values );
-      return( ierr );
    }
    else
-      return(-1);
+      ierr = -1;
+
+#ifdef HYPRE_TIMING
+   hypre_EndTiming( matrix->GetRow_timer );
+#endif
+
+   return( ierr );
 }
 
 /*--------------------------------------------------------------------------
@@ -314,12 +328,24 @@ hypre_DistributedMatrixRestoreRow( hypre_DistributedMatrix *matrix,
                              int **col_ind,
                              double **values )
 {
+   int ierr = 0;
+
+#ifdef HYPRE_TIMING
+   hypre_BeginTiming( matrix->GetRow_timer );
+#endif
+
    if ( hypre_DistributedMatrixLocalStorageType(matrix) == HYPRE_PETSC )
-      return( hypre_DistributedMatrixRestoreRowPETSc( matrix, row, size, col_ind, values ) );
+      ierr = hypre_DistributedMatrixRestoreRowPETSc( matrix, row, size, col_ind, values );
    else if ( hypre_DistributedMatrixLocalStorageType(matrix) == HYPRE_ISIS )
-      return( hypre_RestoreDistributedMatrixRowISIS( matrix, row, size, col_ind, values ) );
+      ierr = hypre_RestoreDistributedMatrixRowISIS( matrix, row, size, col_ind, values );
    else if ( hypre_DistributedMatrixLocalStorageType(matrix) == HYPRE_PARCSR )
-      return( hypre_DistributedMatrixRestoreRowParCSR( matrix, row, size, col_ind, values ) );
+      ierr = hypre_DistributedMatrixRestoreRowParCSR( matrix, row, size, col_ind, values );
    else
-      return(-1);
+      ierr = -1;
+
+#ifdef HYPRE_TIMING
+   hypre_EndTiming( matrix->GetRow_timer );
+#endif
+
+   return( ierr );
 }

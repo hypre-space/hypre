@@ -43,6 +43,11 @@ HYPRE_ConvertParCSRMatrixToDistributedMatrix(
    MPI_Comm comm;
    int M, N;
 
+#ifdef HYPRE_TIMING
+   int           timer;
+   timer = hypre_InitializeTiming( "ConvertParCSRMatrisToDistributedMatrix");
+   hypre_BeginTiming( timer );
+#endif
 
 
    if (!parcsr_matrix) return(-1);
@@ -67,6 +72,11 @@ HYPRE_ConvertParCSRMatrixToDistributedMatrix(
 
    ierr = HYPRE_DistributedMatrixAssemble( *DistributedMatrix );
    if(ierr) return(ierr);
+
+#ifdef HYPRE_TIMING
+   hypre_EndTiming( timer );
+   /* hypre_FinalizeTiming( timer ); */
+#endif
 
    return(0);
 }

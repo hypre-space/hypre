@@ -77,6 +77,10 @@ void LDUSolve(DataDistType *ddist, FactorMatType *ldu, double *x, double *b,
   colind = ldu->lcolind;
   values = ldu->lvalues;
 
+#ifdef HYPRE_TIMING
+  hypre_BeginTiming( globals->Ll_timer );
+#endif
+
   /* Do the local first.
    * For forward substitution we do local+1st MIS == nnodes[1] (NOT [0]!) */
   for (i=0; i<nnodes[hypre_max(0,hypre_min(1,nlevels))]; i++) {
@@ -85,10 +89,17 @@ void LDUSolve(DataDistType *ddist, FactorMatType *ldu, double *x, double *b,
       xx += values[j]*lx[colind[j]];
     lx[i] = b[perm[i]] - xx;
   }
+#ifdef HYPRE_TIMING
+  hypre_EndTiming( globals->Ll_timer );
+#endif
+
 
   /* Allocate requests */
   receive_requests = hypre_CTAlloc( MPI_Request, npes );
 
+#ifdef HYPRE_TIMING
+  hypre_BeginTiming( globals->Lp_timer );
+#endif
   /* Do the distributed next */
   for (ii=1; ii<nlevels; ii++) {
     /* make MPI LX tags unique for this level (so we don't have to sync) */
@@ -137,6 +148,9 @@ void LDUSolve(DataDistType *ddist, FactorMatType *ldu, double *x, double *b,
       lx[i] = b[perm[i]] - xx;
     }
   }
+#ifdef HYPRE_TIMING
+  hypre_EndTiming( globals->Lp_timer );
+#endif
 
 
   /******************************************************************
@@ -160,6 +174,9 @@ void LDUSolve(DataDistType *ddist, FactorMatType *ldu, double *x, double *b,
   colind = ldu->ucolind;
   values = ldu->uvalues;
 
+#ifdef HYPRE_TIMING
+  hypre_BeginTiming( globals->Up_timer );
+#endif
   /* Do the distributed */
   for (ii=nlevels; ii>0; ii--) {
     /* Solve for this MIS set
@@ -209,6 +226,14 @@ void LDUSolve(DataDistType *ddist, FactorMatType *ldu, double *x, double *b,
 
   }
 
+
+
+#ifdef HYPRE_TIMING
+  hypre_EndTiming( globals->Up_timer );
+#endif
+#ifdef HYPRE_TIMING
+  hypre_BeginTiming( globals->Ul_timer );
+#endif
   /* Do the local next */
   for (i=nnodes[0]-1; i>=0; i--) {
     xx = 0.0;
@@ -216,6 +241,9 @@ void LDUSolve(DataDistType *ddist, FactorMatType *ldu, double *x, double *b,
       xx += values[j]*ux[colind[j]];
     ux[i] = dvalues[i]*(lx[i] - xx);
   }
+#ifdef HYPRE_TIMING
+  hypre_EndTiming( globals->Ul_timer );
+#endif
 
 
   /* Permute the solution to back to x */
@@ -243,13 +271,39 @@ int SetUpLUFactor(DataDistType *ddist, FactorMatType *ldu, int maxnz,
   /* This is the global maximum for both L and U */
   maxsend = 0;
 
+#ifdef HYPRE_TIMING
+{
+   int Ltimer;
+
+   Ltimer = hypre_InitializeTiming( "SetUpFactor for L" );
+
+   hypre_BeginTiming( Ltimer );
+#endif
   /* Work on L first */
   SetUpFactor( ddist, ldu, maxnz,   petotal, rind, imap, &maxsend,   true,
                globals  );
+#ifdef HYPRE_TIMING
+   hypre_EndTiming( Ltimer );
+   /* hypre_FinalizeTiming( Ltimer ); */
+}
+#endif
 
+#ifdef HYPRE_TIMING
+ {
+   int Utimer;
+
+   Utimer = hypre_InitializeTiming( "SetUpFactor for U" );
+
+   hypre_BeginTiming( Utimer );
+#endif
   /* Now work on U   */
   SetUpFactor( ddist, ldu, maxnz,   petotal, rind, imap, &maxsend,   false,
                globals );
+#ifdef HYPRE_TIMING
+   hypre_EndTiming( Utimer );
+   /* hypre_FinalizeTiming( Utimer ); */
+ }
+#endif
 
   /* Allocate memory for the gather buffer. This is an overestimate */
   ldu->gatherbuf = fp_malloc(maxsend, "SetUpLUFactor: ldu->gatherbuf");

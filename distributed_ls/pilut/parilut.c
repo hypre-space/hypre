@@ -167,6 +167,9 @@ void ComputeCommInfo(ReduceMatType *rmat, CommInfoType *cinfo, int *rowdist,
 #ifdef HYPRE_DEBUG
   PrintLine("ComputeCommInfo", globals);
 #endif
+#ifdef HYPRE_TIMING
+  hypre_BeginTiming( globals->CCI_timer  );
+#endif
 
   rnz = rmat->rmat_rnz;
 
@@ -285,6 +288,9 @@ void ComputeCommInfo(ReduceMatType *rmat, CommInfoType *cinfo, int *rowdist,
     MPI_Wait( &index_requests[i], &Status ) ;
   }
 
+#ifdef HYPRE_TIMING
+  hypre_EndTiming( globals->CCI_timer  );
+#endif
   /* clean up memory */
   hypre_TFree(index_requests);
 }
@@ -324,6 +330,9 @@ int SelectSet(ReduceMatType *rmat, CommInfoType *cinfo,
 
 #ifdef HYPRE_DEBUG
   PrintLine("SelectSet", globals);
+#endif
+#ifdef HYPRE_TIMING
+  hypre_BeginTiming( globals->SS_timer  );
 #endif
 
   snnbr    = cinfo->snnbr;
@@ -380,6 +389,9 @@ int SelectSet(ReduceMatType *rmat, CommInfoType *cinfo,
     }
   }
 
+#ifdef HYPRE_TIMING
+  hypre_EndTiming( globals->SS_timer  );
+#endif
 #ifndef NDEBUG
   /* DEBUGGING: check map is zero outside of local rows */
   for (i=0; i<firstrow; i++)
@@ -414,6 +426,9 @@ void SendFactoredRows(FactorMatType *ldu, CommInfoType *cinfo,
 #ifdef HYPRE_DEBUG
   PrintLine("SendFactoredRows", globals);
 #endif
+#ifdef HYPRE_TIMING
+  hypre_BeginTiming( globals->SFR_timer  );
+#endif 
 
   snnbr   = cinfo->snnbr;
   snbrind = cinfo->snbrind;
@@ -519,6 +534,9 @@ void SendFactoredRows(FactorMatType *ldu, CommInfoType *cinfo,
     j += cnt;
     CheckBounds(0, j, (cinfo->maxnrecv)*(global_maxnz+2)+2, globals);
   }
+#ifdef HYPRE_TIMING
+  hypre_EndTiming( globals->SFR_timer  );
+#endif 
 
   /* clean up memory */
   hypre_TFree(index_requests);
@@ -550,6 +568,9 @@ void ComputeRmat(FactorMatType *ldu, ReduceMatType *rmat,
 #ifdef HYPRE_DEBUG
   PrintLine("ComputeRmat", globals);
 #endif
+#ifdef HYPRE_TIMING
+  hypre_BeginTiming( globals->CR_timer  );
+#endif 
 
   usrowptr = ldu->usrowptr;
   uerowptr = ldu->uerowptr;
@@ -702,6 +723,10 @@ void ComputeRmat(FactorMatType *ldu, ReduceMatType *rmat,
     FormNRmat( inr++, m, nrmat, global_maxnz, rrowlen, rcolind, rvalues, globals );
     /* FormNRmat( inr++, m, nrmat, 3*global_maxnz, rcolind, rvalues, globals ); */
   }
+#ifdef HYPRE_TIMING
+  hypre_EndTiming( globals->CR_timer  );
+#endif 
+
 }
 
 
@@ -725,6 +750,10 @@ void FactorLocal(FactorMatType *ldu, ReduceMatType *rmat,
 #ifdef HYPRE_DEBUG
   PrintLine("FactorLocal", globals);
 #endif
+#ifdef HYPRE_TIMING
+  hypre_BeginTiming( globals->FL_timer  );
+#endif 
+
 
   assert( rmat  != nrmat    );
   assert( perm  != newperm  );
@@ -829,6 +858,9 @@ void FactorLocal(FactorMatType *ldu, ReduceMatType *rmat,
     UpdateL( i, m, ldu, globals );
     FormDU( i, m, ldu, rcolind, rvalues, tol, globals );
   }
+#ifdef HYPRE_TIMING
+  hypre_EndTiming( globals->FL_timer  );
+#endif 
 }
 
 
@@ -876,6 +908,10 @@ int SeperateLU_byDIAG( int diag, int *newiperm,
 {
   int first, last, itmp;
   double dtmp;
+
+#ifdef HYPRE_TIMING
+  hypre_BeginTiming( globals->SLUD_timer  );
+#endif 
 
   /* Perform a Qsort type pass to seperate L and U (rmat) entries. */
   if (lastjr == 1)
@@ -932,6 +968,10 @@ int SeperateLU_byDIAG( int diag, int *newiperm,
   }
   assert(last == first);
 #endif
+#ifdef HYPRE_TIMING
+  hypre_EndTiming( globals->SLUD_timer  );
+#endif 
+
 
   return first;
 }
@@ -952,6 +992,10 @@ int SeperateLU_byMIS( hypre_PilutSolverGlobals *globals )
 {
   int first, last, itmp;
   double dtmp;
+
+#ifdef HYPRE_TIMING
+  hypre_BeginTiming( globals->SLUM_timer  );
+#endif 
 
   /* Perform a Qsort type pass to seperate L and U (rmat) entries. */
   if (lastjr == 1)
@@ -994,6 +1038,11 @@ int SeperateLU_byMIS( hypre_PilutSolverGlobals *globals )
   assert(last == first);
 #endif
 
+#ifdef HYPRE_TIMING
+  hypre_EndTiming( globals->SLUM_timer  );
+#endif 
+
+
   return first;
 }
 
@@ -1010,6 +1059,10 @@ void UpdateL(int lrow, int last, FactorMatType *ldu,
   int i, j, min, start, end;
   int *lcolind;
   double *lvalues;
+
+#ifdef HYPRE_TIMING
+  hypre_BeginTiming( globals->UL_timer  );
+#endif 
 
   lcolind = ldu->lcolind;
   lvalues = ldu->lvalues;
@@ -1039,6 +1092,10 @@ void UpdateL(int lrow, int last, FactorMatType *ldu,
   }
   ldu->lerowptr[lrow] = end;
   CheckBounds(0, end-start, global_maxnz+1, globals);
+#ifdef HYPRE_TIMING
+  hypre_EndTiming( globals->UL_timer  );
+#endif 
+
 }
 
 
@@ -1058,6 +1115,10 @@ void FormNRmat(int rrow, int first, ReduceMatType *nrmat,
 {
   int nz, max, j, out_rowlen, *rcolind;
   double *rvalues;
+
+#ifdef HYPRE_TIMING
+  hypre_BeginTiming( globals->FNR_timer  );
+#endif 
 
   assert(in_colind[0] == jw[0]);  /* diagonal at the beginning */
 
@@ -1108,6 +1169,11 @@ void FormNRmat(int rrow, int first, ReduceMatType *nrmat,
   nrmat->rmat_rrowlen[rrow] = out_rowlen;
   nrmat->rmat_rcolind[rrow] = rcolind;
   nrmat->rmat_rvalues[rrow] = rvalues;
+
+#ifdef HYPRE_TIMING
+  hypre_EndTiming( globals->FNR_timer  );
+#endif 
+
 }
 
 
@@ -1267,4 +1333,5 @@ void ParINIT( ReduceMatType *nrmat, CommInfoType *cinfo, int *rowdist,
 
   /* ---- ComputeMIS ---- */
   cinfo->gatherbuf = fp_malloc(ntogo*(global_maxnz+2), "ComputeMIS: gatherbuf");
+
 }

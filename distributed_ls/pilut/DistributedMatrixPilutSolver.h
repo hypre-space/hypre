@@ -45,6 +45,25 @@ int pilu_recv[MAX_NPES];
 int pilu_send[MAX_NPES];
 int lu_recv[MAX_NPES];
 
+#ifdef HYPRE_TIMING
+  /* factorization */
+int CCI_timer;
+int SS_timer;
+int SFR_timer;
+int CR_timer;
+int FL_timer;
+int SLUD_timer;
+int SLUM_timer;
+int UL_timer;
+int FNR_timer;
+
+  /* solves */
+int Ll_timer;
+int Lp_timer;
+int Up_timer;
+int Ul_timer;
+#endif
+
 } hypre_PilutSolverGlobals;
 
 /* DEFINES for global variables */

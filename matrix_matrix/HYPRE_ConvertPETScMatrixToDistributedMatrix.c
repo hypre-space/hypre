@@ -48,6 +48,13 @@ HYPRE_ConvertPETScMatrixToDistributedMatrix(
 
    if (!PETSc_matrix) return(-1);
 
+#ifdef HYPRE_TIMING
+   int           timer;
+   timer = hypre_InitializeTiming( "ConvertPETScMatrisToDistributedMatrix");
+   hypre_BeginTiming( timer );
+#endif
+
+
    ierr = PetscObjectGetComm( (PetscObject) PETSc_matrix, &MPI_Comm); CHKERRA(ierr);
 
    ierr = HYPRE_DistributedMatrixCreate( MPI_Comm, DistributedMatrix );
@@ -73,6 +80,11 @@ HYPRE_ConvertPETScMatrixToDistributedMatrix(
 
    ierr = HYPRE_DistributedMatrixAssemble( *DistributedMatrix );
    if(ierr) return(ierr);
+
+#ifdef HYPRE_TIMING
+   hypre_EndTiming( timer );
+   /* hypre_FinalizeTiming( timer ); */
+#endif
 
    return(0);
 }

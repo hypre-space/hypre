@@ -67,7 +67,22 @@ int SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
   w  =  fp_malloc(nrows, "SerILUT: w" );
 
   /* Find structural union of local rows */
+
+#ifdef HYPRE_TIMING
+{
+   int           FSUtimer;
+   FSUtimer = hypre_InitializeTiming( "FindStructuralUnion");
+   hypre_BeginTiming( FSUtimer );
+#endif
+
   ierr = FindStructuralUnion( matrix, &structural_union, globals );
+
+#ifdef HYPRE_TIMING
+   hypre_EndTiming( FSUtimer );
+   /* hypre_FinalizeTiming( FSUtimer ); */
+}
+#endif
+
   if(ierr) return(ierr);
 
   /* Exchange structural unions with other processors */
@@ -75,8 +90,19 @@ int SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
   if(ierr) return(ierr);
 
   /* Select the rows to be factored */
+#ifdef HYPRE_TIMING
+  {
+   int           SItimer;
+   SItimer = hypre_InitializeTiming( "SelectInterior");
+   hypre_BeginTiming( SItimer );
+#endif
   nlocal = SelectInterior( lnrows, matrix, structural_union,
                            perm, iperm, globals );
+#ifdef HYPRE_TIMING
+   hypre_EndTiming( SItimer );
+   /* hypre_FinalizeTiming( SItimer ); */
+  }
+#endif
 
   /* Structural Union no longer required */
   hypre_TFree( structural_union );
@@ -88,6 +114,12 @@ int SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
 
   ldu->nnodes[0] = nlocal;
 
+#ifdef HYPRE_TIMING
+  {
+   int           LFtimer;
+   LFtimer = hypre_InitializeTiming( "Local factorization computational stage");
+   hypre_BeginTiming( LFtimer );
+#endif
   /* myprintf("Nlocal: %d, Nbnd: %d\n", nlocal, nbnd); */
 
   /*******************************************************************/
@@ -167,6 +199,18 @@ int SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
     /* Apply 2nd dropping rule -- forms L and U */
     SecondDrop(maxnz, rtol, i+firstrow, perm, iperm, ldu, globals );
   }
+
+#ifdef HYPRE_TIMING
+   hypre_EndTiming( LFtimer );
+   /* hypre_FinalizeTiming( LFtimer ); */
+  }
+#endif
+#ifdef HYPRE_TIMING
+  {
+   int           FRtimer;
+   FRtimer = hypre_InitializeTiming( "Local factorization Schur complement stage");
+   hypre_BeginTiming( FRtimer );
+#endif
 
   /******************************************************************/
   /* Form the reduced matrix                                        */
@@ -257,6 +301,12 @@ int SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
 		     rtol, i+firstrow,
 		     nlocal, perm, iperm, ldu, rmat, globals);
   }
+
+#ifdef HYPRE_TIMING
+   hypre_EndTiming( FRtimer );
+   /* hypre_FinalizeTiming( FRtimer ); */
+  }
+#endif
 
   free_multi(jr, jw, lr, w, -1);
 

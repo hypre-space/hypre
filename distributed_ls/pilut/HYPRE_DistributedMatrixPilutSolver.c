@@ -39,6 +39,23 @@ int  HYPRE_NewDistributedMatrixPilutSolver(
    MPI_Comm_rank( comm, &myid );
    mype = myid;
 
+#ifdef HYPRE_TIMING
+  globals->CCI_timer = hypre_InitializeTiming( "ComputeCommInfo" );
+  globals->SS_timer = hypre_InitializeTiming( "SelectSet" );
+  globals->SFR_timer = hypre_InitializeTiming( "SendFactoredRows" );
+  globals->CR_timer = hypre_InitializeTiming( "ComputeRmat" );
+  globals->FL_timer = hypre_InitializeTiming( "FactorLocal" );
+  globals->SLUD_timer = hypre_InitializeTiming( "SeparateLU_byDIAG" );
+  globals->SLUM_timer = hypre_InitializeTiming( "SeparateLU_byMIS" );
+  globals->UL_timer = hypre_InitializeTiming( "UpdateL" );
+  globals->FNR_timer = hypre_InitializeTiming( "FormNRmat" );
+
+  globals->Ll_timer = hypre_InitializeTiming( "Local part of front solve" );
+  globals->Lp_timer = hypre_InitializeTiming( "Parallel part of front solve" );
+  globals->Up_timer = hypre_InitializeTiming( "Parallel part of back solve" );
+  globals->Ul_timer = hypre_InitializeTiming( "Local part of back solve" );
+#endif
+
    /* Data distribution structure */
    DataDistTypeRowdist(hypre_DistributedMatrixPilutSolverDataDist(solver))
        = (int *) hypre_CTAlloc( int, nprocs+1 );
@@ -70,9 +87,12 @@ int HYPRE_FreeDistributedMatrixPilutSolver (
 {
   FactorMatType *ldu;
   int i;
+   hypre_PilutSolverGlobals *globals;
 
    hypre_DistributedMatrixPilutSolver *solver = 
       (hypre_DistributedMatrixPilutSolver *) in_ptr;
+
+  globals = hypre_DistributedMatrixPilutSolverGlobals(solver);
 
   hypre_TFree( DataDistTypeRowdist(hypre_DistributedMatrixPilutSolverDataDist(solver)));
   hypre_TFree( hypre_DistributedMatrixPilutSolverDataDist(solver) );
@@ -128,6 +148,23 @@ int HYPRE_FreeDistributedMatrixPilutSolver (
 
   hypre_TFree( hypre_DistributedMatrixPilutSolverFactorMat(solver) );
   /* End of FactorMat member */
+
+#ifdef HYPRE_TIMING
+  hypre_FinalizeTiming( globals->CCI_timer );
+  hypre_FinalizeTiming( globals->SS_timer  );
+  hypre_FinalizeTiming( globals->SFR_timer );
+  hypre_FinalizeTiming( globals->CR_timer );
+  hypre_FinalizeTiming( globals->FL_timer  );
+  hypre_FinalizeTiming( globals->SLUD_timer  );
+  hypre_FinalizeTiming( globals->SLUM_timer );
+  hypre_FinalizeTiming( globals->UL_timer  );
+  hypre_FinalizeTiming( globals->FNR_timer  );
+
+  hypre_FinalizeTiming( globals->Ll_timer  );
+  hypre_FinalizeTiming( globals->Lp_timer );
+  hypre_FinalizeTiming( globals->Up_timer );
+  hypre_FinalizeTiming( globals->Ul_timer );
+#endif
 
   hypre_TFree( hypre_DistributedMatrixPilutSolverGlobals(solver) );
 
@@ -295,6 +332,14 @@ int HYPRE_DistributedMatrixPilutSolverSetup( HYPRE_DistributedMatrixPilutSolver 
 
    rowdist[ nprocs ] = n;
 
+#ifdef HYPRE_TIMING
+{
+   int ilut_timer;
+
+   ilut_timer = hypre_InitializeTiming( "ILUT factorization" );
+
+   hypre_BeginTiming( ilut_timer );
+#endif
 
    /* Perform approximate factorization */
    ierr = ILUT( hypre_DistributedMatrixPilutSolverDataDist (solver),
@@ -304,12 +349,35 @@ int HYPRE_DistributedMatrixPilutSolverSetup( HYPRE_DistributedMatrixPilutSolver 
          hypre_DistributedMatrixPilutSolverTol (solver),
          hypre_DistributedMatrixPilutSolverGlobals (solver)
        );
+
+#ifdef HYPRE_TIMING
+   hypre_EndTiming( ilut_timer );
+   /* hypre_FinalizeTiming( ilut_timer ); */
+}
+#endif
+
    if (ierr) return(ierr);
+
+#ifdef HYPRE_TIMING
+{
+   int Setup_timer;
+
+   Setup_timer = hypre_InitializeTiming( "SetUpLUFactor: setup for triangular solvers");
+
+   hypre_BeginTiming( Setup_timer );
+#endif
 
    ierr = SetUpLUFactor( hypre_DistributedMatrixPilutSolverDataDist (solver), 
                hypre_DistributedMatrixPilutSolverFactorMat (solver),
                hypre_DistributedMatrixPilutSolverGmaxnz (solver),
                hypre_DistributedMatrixPilutSolverGlobals (solver) );
+
+#ifdef HYPRE_TIMING
+   hypre_EndTiming( Setup_timer );
+   /* hypre_FinalizeTiming( Setup_timer ); */
+}
+#endif
+
    if (ierr) return(ierr);
 
 #ifdef HYPRE_DEBUG
@@ -341,12 +409,27 @@ int HYPRE_DistributedMatrixPilutSolverSolve( HYPRE_DistributedMatrixPilutSolver 
    /* It should be obvious, but the current treatment of vectors is pretty
       insufficient. -AC 2/12/98 
    */
+#ifdef HYPRE_TIMING
+{
+   int LDUSolve_timer;
+
+   LDUSolve_timer = hypre_InitializeTiming( "ILUT application" );
+
+   hypre_BeginTiming( LDUSolve_timer );
+#endif
+
    LDUSolve( hypre_DistributedMatrixPilutSolverDataDist (solver),
          hypre_DistributedMatrixPilutSolverFactorMat (solver),
          x,
          b,
          hypre_DistributedMatrixPilutSolverGlobals (solver)
        );
+#ifdef HYPRE_TIMING
+   hypre_EndTiming( LDUSolve_timer );
+   /* hypre_FinalizeTiming ( LDUSolve_timer ); */
+}
+#endif
+
 
   return(0);
 }

@@ -64,18 +64,46 @@ int ILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix, FactorMatType *ldu
   }
 
   /* Factor the internal nodes first */
-  MPI_Barrier( pilut_comm ); starttimer(SerTmr);
+  MPI_Barrier( pilut_comm );
+
+#ifdef HYPRE_TIMING
+  {
+   int SerILUT_timer;
+
+   SerILUT_timer = hypre_InitializeTiming( "Sequential ILUT done on each proc" );
+
+   hypre_BeginTiming( SerILUT_timer );
+#endif
 
   SerILUT(ddist, matrix, ldu, &rmat, maxnz, tol, globals);
 
-  MPI_Barrier( pilut_comm ); stoptimer(SerTmr);
+  MPI_Barrier( pilut_comm );
+
+#ifdef HYPRE_TIMING
+   hypre_EndTiming( SerILUT_timer );
+   /* hypre_FinalizeTiming( SerILUT_timer ); */
+  }
+#endif
 
   /* Factor the interface nodes */
-  MPI_Barrier( pilut_comm ); starttimer(ParTmr);
+#ifdef HYPRE_TIMING
+  {
+   int ParILUT_timer;
+
+   ParILUT_timer = hypre_InitializeTiming( "Parallel portion of ILUT factorization" );
+
+   hypre_BeginTiming( ParILUT_timer );
+#endif
 
   ParILUT(ddist, ldu, &rmat, maxnz, tol, globals);
 
-  MPI_Barrier( pilut_comm ); stoptimer(ParTmr);
+  MPI_Barrier( pilut_comm );
+
+#ifdef HYPRE_TIMING
+   hypre_EndTiming( ParILUT_timer );
+   /* hypre_FinalizeTiming( ParILUT_timer ); */
+  }
+#endif
 
   free_multi(rmat.rmat_rnz, rmat.rmat_rrowlen, 
              rmat.rmat_rcolind, rmat.rmat_rvalues, -1);
