@@ -42,7 +42,7 @@ int MLI_Method_AMGSA::setupCalibration( MLI *mli )
    MLI_Vector   *mli_rhs, *mli_sol;
    MLI_OneLevel *single_level;
    MLI          *new_mli;
-   MPI_Comm     mpi_comm;
+   MPI_Comm     comm;
    MLI_Method         *new_amgsa;
    hypre_Vector       *sol_local;
    hypre_ParVector    *trial_sol, *zero_rhs;
@@ -57,9 +57,9 @@ int MLI_Method_AMGSA::setupCalibration( MLI *mli )
    /* fetch machine and matrix information                            */
    /* --------------------------------------------------------------- */
 
-   mpi_comm = getComm();
-   MPI_Comm_rank( mpi_comm, &mypid );
-   MPI_Comm_size( mpi_comm, &nprocs );
+   comm = getComm();
+   MPI_Comm_rank( comm, &mypid );
+   MPI_Comm_size( comm, &nprocs );
    single_level = mli->getOneLevelObject( 0 );
    mli_Amat     = single_level->getAmat();
    hypreA       = (hypre_ParCSRMatrix *) mli_Amat->getMatrix();
@@ -71,12 +71,12 @@ int MLI_Method_AMGSA::setupCalibration( MLI *mli )
 
    HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) hypreA, 
                                         &partition);
-   trial_sol = hypre_ParVectorCreate(mpi_comm, partition[nprocs], partition);
+   trial_sol = hypre_ParVectorCreate(comm, partition[nprocs], partition);
    hypre_ParVectorInitialize( trial_sol );
    HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) hypreA, 
                                         &partition);
    local_nrows = partition[mypid+1] - partition[mypid];
-   zero_rhs = hypre_ParVectorCreate(mpi_comm, partition[nprocs], partition);
+   zero_rhs = hypre_ParVectorCreate(comm, partition[nprocs], partition);
    hypre_ParVectorInitialize( zero_rhs );
    hypre_ParVectorSetConstantValues( zero_rhs, 0.0 );
    sol_local = hypre_ParVectorLocalVector(trial_sol);
@@ -113,7 +113,7 @@ int MLI_Method_AMGSA::setupCalibration( MLI *mli )
    relax_num = 20;
    relax_wts = new double[relax_num];
    for ( i = 0; i < relax_num; i++ ) relax_wts[i] = 1.0;
-   new_amgsa = MLI_Method_CreateFromID( MLI_METHOD_AMGSA_ID, mpi_comm );
+   new_amgsa = MLI_Method_CreateFromID( MLI_METHOD_AMGSA_ID, comm );
    sprintf( param_string, "setCoarseSolver SGS" );
    targc = 2;
    targv[0] = (char *) &relax_num;
@@ -121,7 +121,7 @@ int MLI_Method_AMGSA::setupCalibration( MLI *mli )
    new_amgsa->setParams( param_string, targc, targv );
    Q_array = new double[nrows*(n_null+calibration_size)];
    R_array = new double[(n_null+calibration_size)*(n_null+calibration_size)];
-   new_mli = new MLI( mpi_comm );
+   new_mli = new MLI( comm );
    new_mli->setMaxIterations(2);
    new_mli->setMethod( new_amgsa );
    new_mli->setSystemMatrix( 0, mli_Amat );
