@@ -140,7 +140,7 @@ do
         HYPRE_ARCH="dec"
         HYPRE_COMPILE_MACHINE="tc2k"
         HYPRE_RUN_MACHINE="tc2k"
-        HYPRE_REMOTE_DIR="/usr/gapps/hypre/alphaev57-dec-osf5.0/AUTOTEST"
+        HYPRE_REMOTE_DIR="/usr/gapps/hypre/alphaev67-dec-osf5.0/AUTOTEST"
 	HYPRE_MACHINE_COMMANDS="-m -a 2 -cf -o 1"
 	perform_test
 	HYPRE_MACHINE_COMMANDS="-m -a 2 -dcxfy -t 1 -ns"
