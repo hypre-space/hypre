@@ -51,7 +51,7 @@ hypre_NewIJVectorPar(hypre_IJVector *vector)
  *****************************************************************************/
 
 int
-hypre_InitializeIJVectorParPartitioning(hypre_IJVector *vector,
+hypre_SetIJVectorParPartitioning(hypre_IJVector *vector,
                                         int            *partitioning )
 {
    int ierr = 0;
@@ -71,7 +71,7 @@ hypre_InitializeIJVectorParPartitioning(hypre_IJVector *vector,
  *****************************************************************************/
 
 int
-hypre_InitializeIJVectorParLocalPartitioning(hypre_IJVector *vector,
+hypre_SetIJVectorParLocalPartitioning(hypre_IJVector *vector,
                                              int             vec_start,
                                              int             vec_stop   )
 {

@@ -189,7 +189,11 @@ HYPRE_InitializeIJVector( HYPRE_IJVector IJvector )
    else if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_ISIS )
       ierr += hypre_InitializeIJVectorISIS(vector);
    else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR )
+   {
+      if (!hypre_IJVectorLocalStorage(vector))
+	 ierr = hypre_NewIJVectorPar(vector);
       ierr += hypre_InitializeIJVectorPar(vector);
+   }
    else
       ++ierr;
 
@@ -276,9 +280,9 @@ HYPRE_SetIJVectorLocalSize( HYPRE_IJVector IJvector, int local_n )
    if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_ISIS )
       ierr = hypre_SetIJVectorLocalSizeISIS(vector, local_n);
       */
-   if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR )
-      ierr = hypre_SetIJVectorLocalSizePar(vector, local_n);
-   else
+/*   if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR )
+      ierr = hypre_SetIJVectorLocalSizePar(vector, local_n); 
+   else */
       ierr = -1;
 
    return(ierr);

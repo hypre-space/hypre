@@ -258,11 +258,11 @@ void hypre_F90_IFACE P((int hypre_insertijmatrixrow ));
 void hypre_F90_IFACE P((int hypre_newijvector ));
 void hypre_F90_IFACE P((int hypre_freeijvector ));
 void hypre_F90_IFACE P((int hypre_setijvectorpartitioning ));
+void hypre_F90_IFACE P((int hypre_setijvectorlocalpartition ));
 void hypre_F90_IFACE P((int hypre_initializeijvector ));
 void hypre_F90_IFACE P((int hypre_distributeijvector ));
 void hypre_F90_IFACE P((int hypre_setijvectorlocalstoragety ));
 void hypre_F90_IFACE P((int hypre_setijvectorlocalsize ));
-void hypre_F90_IFACE P((int hypre_queryijvectorinsertionsem ));
 void hypre_F90_IFACE P((int hypre_setijveclocalcomps ));
 void hypre_F90_IFACE P((int hypre_setijveclocalcompsinbk ));
 void hypre_F90_IFACE P((int hypre_insertijveclocalcomps ));
@@ -289,7 +289,7 @@ int HYPRE_InsertIJMatrixBlock P((HYPRE_IJMatrix IJmatrix , int m , int n , int *
 int HYPRE_AddBlockToIJMatrix P((HYPRE_IJMatrix IJmatrix , int m , int n , int *rows , int *cols , double *values ));
 int HYPRE_InsertIJMatrixRow P((HYPRE_IJMatrix IJmatrix , int n , int row , int *cols , double *values ));
 int hypre_RefIJMatrix P((HYPRE_IJMatrix IJmatrix , HYPRE_IJMatrix *reference ));
-void *hypre_GetIJMatrixLocalStorage P((HYPRE_IJMatrix IJmatrix ));
+void *HYPRE_GetIJMatrixLocalStorage P((HYPRE_IJMatrix IJmatrix ));
 
 /* HYPRE_IJVector.c */
 int HYPRE_NewIJVector P((MPI_Comm comm , HYPRE_IJVector *in_vector_ptr , int global_n ));
@@ -332,16 +332,6 @@ int map2 P((int ix , int iy , int p , int q , int P , int Q , int *nx_part , int
 hypre_AuxParCSRMatrix *hypre_CreateAuxParCSRMatrix P((int local_num_rows , int local_num_cols , int *sizes ));
 int hypre_DestroyAuxParCSRMatrix P((hypre_AuxParCSRMatrix *matrix ));
 int hypre_InitializeAuxParCSRMatrix P((hypre_AuxParCSRMatrix *matrix ));
-
-/* driver.c */
-int main P((int argc , char *argv []));
-int BuildParFromFile P((int argc , char *argv [], int arg_index , hypre_ParCSRMatrix **A_ptr ));
-int BuildParLaplacian P((int argc , char *argv [], int arg_index , hypre_ParCSRMatrix **A_ptr ));
-int BuildParDifConv P((int argc , char *argv [], int arg_index , hypre_ParCSRMatrix **A_ptr ));
-int BuildParFromOneFile P((int argc , char *argv [], int arg_index , hypre_ParCSRMatrix **A_ptr ));
-int BuildRhsParFromOneFile P((int argc , char *argv [], int arg_index , hypre_ParCSRMatrix *A , hypre_ParVector **b_ptr ));
-int BuildParLaplacian9pt P((int argc , char *argv [], int arg_index , hypre_ParCSRMatrix **A_ptr ));
-int BuildParLaplacian27pt P((int argc , char *argv [], int arg_index , hypre_ParCSRMatrix **A_ptr ));
 
 /* hypre_IJMatrix_isis.c */
 int hypre_SetIJMatrixLocalSizeISIS P((hypre_IJMatrix *matrix , int local_m , int local_n ));
@@ -396,8 +386,8 @@ int hypre_SetIJMatrixTotalSizePETSc P((hypre_IJMatrix *matrix , int size ));
 
 /* hypre_IJVector_parcsr.c */
 int hypre_NewIJVectorPar P((hypre_IJVector *vector ));
-int hypre_InitializeIJVectorParPartitioning P((hypre_IJVector *vector , int *partitioning ));
-int hypre_InitializeIJVectorParLocalPartitioning P((hypre_IJVector *vector , int vec_start , int vec_stop ));
+int hypre_SetIJVectorParPartitioning P((hypre_IJVector *vector , int *partitioning ));
+int hypre_SetIJVectorParLocalPartitioning P((hypre_IJVector *vector , int vec_start , int vec_stop ));
 int hypre_InitializeIJVectorPar P((hypre_IJVector *vector ));
 int hypre_SetIJVectorParLocalComponents P((hypre_IJVector *vector , int num_values , int *glob_vec_indices , double value ));
 int hypre_SetIJVectorParLocalComponentsInBlock P((hypre_IJVector *vector , int glob_vec_index_start , int glob_vec_index_stop , double value ));

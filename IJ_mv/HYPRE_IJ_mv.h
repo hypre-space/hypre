@@ -58,7 +58,7 @@ int HYPRE_InsertIJMatrixBlock P((HYPRE_IJMatrix IJmatrix , int m , int n , int *
 int HYPRE_AddBlockToIJMatrix P((HYPRE_IJMatrix IJmatrix , int m , int n , int *rows , int *cols , double *values ));
 int HYPRE_InsertIJMatrixRow P((HYPRE_IJMatrix IJmatrix , int n , int row , int *cols , double *values ));
 int hypre_RefIJMatrix P((HYPRE_IJMatrix IJmatrix , HYPRE_IJMatrix *reference ));
-void *hypre_GetIJMatrixLocalStorage P((HYPRE_IJMatrix IJmatrix ));
+void *HYPRE_GetIJMatrixLocalStorage P((HYPRE_IJMatrix IJmatrix ));
 
 /* HYPRE_IJVector.c */
 int HYPRE_NewIJVector P((MPI_Comm comm, HYPRE_IJVector *in_vector_ptr , int global_n ));
@@ -80,7 +80,7 @@ int HYPRE_GetIJVectorLocalComponents P((HYPRE_IJVector IJvector , int num_values
 int HYPRE_GetIJVectorLocalComponentsInBlock P((HYPRE_IJVector IJvector , int global_vec_index_start, int glob_vec_index_stop, int *value_indices, double *values )); 
 
 int hypre_RefIJVector P((HYPRE_IJVector IJvector , HYPRE_IJVector *reference ));
-void *hypre_GetIJVectorLocalStorage P((HYPRE_IJVector IJvector ));
+void *HYPRE_GetIJVectorLocalStorage P((HYPRE_IJVector IJvector ));
 
 #undef P
 
