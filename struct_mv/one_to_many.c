@@ -41,7 +41,6 @@ main( int   argc,
 
    zzz_BoxArray       *data_space, *data_space_2;
 
-   FILE               **files;
    FILE               *file, *file_root;
    int                 sub_i, sub_j, sub_k; 
                             /* Number of subdivisions to use for i,j,k */
@@ -212,7 +211,7 @@ main( int   argc,
 	       zzz_IndexY(ilower) = jmin + j*del_j;
 	       zzz_IndexZ(ilower) = kmin + k*del_k;
 	       /* Coding to handle an odd number of points in i,j,k */
-	       if (i+1 == imax)
+	       if (i+1 == sub_i)
 		 {
 		   zzz_IndexX(iupper) = imax;
 		 }
@@ -220,7 +219,7 @@ main( int   argc,
 		 {
 		   zzz_IndexX(iupper) = imin + (i+1)*del_i - 1;
 		 }
-	       if (j+1 == jmax)
+	       if (j+1 == sub_j)
 		 {
 		   zzz_IndexY(iupper) = jmax;
 		 }
@@ -228,7 +227,7 @@ main( int   argc,
 		 {
 		   zzz_IndexY(iupper) = jmin + (j+1)*del_j - 1;
 		 }
-	       if (k+1 == kmax)
+	       if (k+1 == sub_k)
 		 {
 		   zzz_IndexZ(iupper) = kmax;
 		 }
@@ -268,12 +267,7 @@ main( int   argc,
    zzz_FreeIndex(iupper);
        
 
-   /*-----------------------------------------------------------
-    * Open all the matrix files to be written and assign a
-    * file i/o unit number to each file.
-    *-----------------------------------------------------------*/
-
-   files = zzz_CTAlloc(FILE *, num_files);
+   /* Write the Symmtric, Grid and Stencil information to the output files */
    for (i_file = 0; i_file < num_files; i_file++)
      {
        sprintf(filename, "%s.%05d", filename_root, i_file);
@@ -282,15 +276,6 @@ main( int   argc,
 	   printf("Error: can't open output file %s\n", filename);
 	   exit(1);
 	 }
-       files[i_file] = file;
-     }
-
-   /* Allocate storage to hold all the above information */
-
-   /* Write the Symmtric, Grid and Stencil information to the output files */
-   for (i_file = 0; i_file < num_files; i_file++)
-     {
-       file = files[i_file];
        fprintf(file, "StructMatrix\n");
 
        fprintf(file, "\nSymmetric: %d\n", symmetric);
@@ -318,6 +303,7 @@ main( int   argc,
        zzz_PrintBoxArrayData(file, boxes_2, data_space_2, num_values_2,
 			     zzz_StructMatrixData(sub_matrices[i_file]));
 
+       fclose(file);
      }
 
 
