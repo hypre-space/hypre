@@ -12,7 +12,7 @@
 # Parse arguments
 #=============================================================================
 
-HYPRE_ARCH=""
+HYPRE_ARCH="default"
 HYPRE_INSTALL_FLAG=""
 HYPRE_CLEAN_FLAG=""
 HYPRE_VERYCLEAN_FLAG=""
