@@ -8,7 +8,7 @@
 #EHEADER***********************************************************************
 
 .SUFFIXES:
-.SUFFIXES: .dxx .html
+.SUFFIXES: .dxx .html .tex
 
 srcdir = @srcdir@
 VPATH = @srcdir@
@@ -53,9 +53,13 @@ install: all
 
 clean:
 	@rm -f *.html
+	@rm -f developers_manual.tex
 
 veryclean: clean
 	@rm -r html 
+	@rm -f developers_manual.tex
+	@rm -f developers_manual.dvi
+	@rm -f developers_manual.ps
 
 ##################################################################
 # Rules
@@ -63,6 +67,10 @@ veryclean: clean
 
 html: 
 	doc++ -d html developers_manual.dxx
+
+developers_manual.tex:
+	doc++ -t -o developers_manual.tex developers_manual.dxx
+
 ##################################################################
 # Generic rules
 ##################################################################
