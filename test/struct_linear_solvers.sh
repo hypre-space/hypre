@@ -139,38 +139,38 @@ fi
 # PFMG: Run base 3d case
 #=============================================================================
 
-#$MPIRUN -np 1 $SLS -n 12 12 12 -c 2.0 3.0 40 -solver 1
-#tail -3 $SLS.log > $SLS.testdata
+$MPIRUN -np 1 $SLS -n 12 12 12 -c 2.0 3.0 40 -solver 1
+tail -3 $SLS.log > $SLS.testdata
 
 #=============================================================================
 # PFMG: Test parallel and blocking by diffing against base 3d case
 #=============================================================================
 
-#$MPIRUN -np 8 $SLS -n 6 6 6 -P 2 2 2  -c 2.0 3.0 40 -solver 1
-#tail -3 $SLS.log > $SLS.testdata.temp
-#diff $SLS.testdata $SLS.testdata.temp >&2
-#
-#$MPIRUN -np 4 $SLS -n 3 12 12 -P 4 1 1 -c 2.0 3.0 40 -solver 1
-#tail -3 $SLS.log > $SLS.testdata.temp
-#diff $SLS.testdata $SLS.testdata.temp >&2
-#
-#$MPIRUN -np 4 $SLS -n 12 3 12 -P 1 4 1 -c 2.0 3.0 40 -solver 1
-#tail -3 $SLS.log > $SLS.testdata.temp
-#diff $SLS.testdata $SLS.testdata.temp >&2
-#
-#$MPIRUN -np 4 $SLS -n 12 12 3 -P 1 1 4 -c 2.0 3.0 40 -solver 1
-#tail -3 $SLS.log > $SLS.testdata.temp
-#diff $SLS.testdata $SLS.testdata.temp >&2
-#
-#$MPIRUN -np 1 $SLS -n 3 4 3 -b 4 3 4  -c 2.0 3.0 40 -solver 1
-#tail -3 $SLS.log > $SLS.testdata.temp
-#diff $SLS.testdata $SLS.testdata.temp >&2
-#
-#$MPIRUN -np 8 $SLS -n 3 3 3 -b 2 2 2 -P 2 2 2  -c 2.0 3.0 40 -solver 1
-#tail -3 $SLS.log > $SLS.testdata.temp
-#diff $SLS.testdata $SLS.testdata.temp >&2
-#
-#rm -f $SLS.testdata $SLS.testdata.temp
+$MPIRUN -np 8 $SLS -n 6 6 6 -P 2 2 2  -c 2.0 3.0 40 -solver 1
+tail -3 $SLS.log > $SLS.testdata.temp
+diff $SLS.testdata $SLS.testdata.temp >&2
+
+$MPIRUN -np 4 $SLS -n 3 12 12 -P 4 1 1 -c 2.0 3.0 40 -solver 1
+tail -3 $SLS.log > $SLS.testdata.temp
+diff $SLS.testdata $SLS.testdata.temp >&2
+
+$MPIRUN -np 4 $SLS -n 12 3 12 -P 1 4 1 -c 2.0 3.0 40 -solver 1
+tail -3 $SLS.log > $SLS.testdata.temp
+diff $SLS.testdata $SLS.testdata.temp >&2
+
+$MPIRUN -np 4 $SLS -n 12 12 3 -P 1 1 4 -c 2.0 3.0 40 -solver 1
+tail -3 $SLS.log > $SLS.testdata.temp
+diff $SLS.testdata $SLS.testdata.temp >&2
+
+$MPIRUN -np 1 $SLS -n 3 4 3 -b 4 3 4  -c 2.0 3.0 40 -solver 1
+tail -3 $SLS.log > $SLS.testdata.temp
+diff $SLS.testdata $SLS.testdata.temp >&2
+
+$MPIRUN -np 8 $SLS -n 3 3 3 -b 2 2 2 -P 2 2 2  -c 2.0 3.0 40 -solver 1
+tail -3 $SLS.log > $SLS.testdata.temp
+diff $SLS.testdata $SLS.testdata.temp >&2
+
+rm -f $SLS.testdata $SLS.testdata.temp
 
 #=============================================================================
 # PFMG: Run base "true" 2d case
@@ -264,11 +264,12 @@ then
 fi
 
 #=============================================================================
-# Test SMG-CG, PFMG-CG, DSCG, and CG.
+# Test SMG-CG, PFMG-CG, DSCG, CG, and Hybrid.
 #=============================================================================
 
 $MPIRUN -np 3 $SLS -P 1 1 3 -solver 10
 $MPIRUN -np 3 $SLS -P 1 3 1 -solver 11
 $MPIRUN -np 3 $SLS -P 3 1 1 -solver 18
-$MPIRUN -np 3 $SLS -P 3 1 1 -solver 19
+$MPIRUN -np 1 $SLS -P 1 1 1 -solver 19
+$MPIRUN -np 1 $SLS -P 1 1 1 -solver 20
 
