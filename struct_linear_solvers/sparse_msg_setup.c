@@ -602,6 +602,7 @@ hypre_SparseMSGSetup( void               *SparseMSG_vdata,
             if ((level <= jump) && (level != 0))
             {
                hypre_FreeStructMatrix(A_array[index]);
+               A_array[index] = NULL;
             }
             
             for (lx = 1; lx <= (num_levels[0]-1); lx++)
@@ -717,6 +718,7 @@ hypre_SparseMSGSetup( void               *SparseMSG_vdata,
                   if (level <= jump)
                   {
                      hypre_FreeStructMatrix(A_array[index]);
+                     A_array[index] = NULL;
                   }
                }
             }
