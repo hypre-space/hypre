@@ -168,6 +168,25 @@ diff $SLS.testdata $SLS.testdata.temp >&2
 rm -f $SLS.testdata $SLS.testdata.temp
 
 #=============================================================================
+# Periodic SMG: Run base 3d case (periodic in x), test parallel and blocking,
+# and run a full periodic case. Note: driver sets up right hand size for
+# full periodic case that satifies compatibility condition, it (the rhs)
+# is dependent on blocking and parallel partitioning. Thus results will
+# differ with number of blocks and processors. 
+#=============================================================================
+
+$MPIRUN -np 1 $SLS -n 8 8 8 -p 8 0 0 -solver 0
+tail -3 $SLS.log > $SLS.testdata
+
+$MPIRUN -np 8 $SLS -n 2 2 2 -P 2 2 2  -p 8 0 0 -b 2 2 2 -solver 0
+tail -3 $SLS.log > $SLS.testdata.temp
+diff $SLS.testdata $SLS.testdata.temp >&2
+
+$MPIRUN -np 4 $SLS -n 4 8 4 -P 2 1 2  -p 8 8 8 -solver 0
+
+rm -f $SLS.testdata $SLS.testdata.temp
+
+#=============================================================================
 # PFMG: Run base 3d case
 #=============================================================================
 
