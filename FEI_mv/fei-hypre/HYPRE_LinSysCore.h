@@ -65,9 +65,9 @@ enum HYpreconID {HYIDENTITY,HYDIAGONAL,HYPILUT,HYPARASAILS,HYBOOMERAMG,HYML,
 // -------------------------------------------------------------------------
 
 class HYPRE_LinSysCore
-#ifndef NOFEI
+//#ifndef NOFEI
            : public LinearSystemCore 
-#endif
+//#endif
 {
  public:
    HYPRE_LinSysCore(MPI_Comm comm);
@@ -77,9 +77,9 @@ class HYPRE_LinSysCore
    // for creating another one, w/o knowing the run-time type of 'this' one.
    // ----------------------------------------------------------------------
 
-#ifndef NOFEI
+//#ifndef NOFEI
    LinearSystemCore* clone();
-#endif
+//#endif
 
    // ----------------------------------------------------------------------
    // parameters : for setting generic argc/argv style parameters.

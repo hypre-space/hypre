@@ -503,12 +503,12 @@ HYPRE_LinSysCore::~HYPRE_LinSysCore()
 // clone a copy of HYPRE_LinSysCore
 //---------------------------------------------------------------------------
 
-#ifndef NOFEI
+//#ifndef NOFEI
 LinearSystemCore* HYPRE_LinSysCore::clone() 
 {
    return(new HYPRE_LinSysCore(comm_));
 }
-#endif
+//#endif
 
 //***************************************************************************
 // passing a lookup table to this object
