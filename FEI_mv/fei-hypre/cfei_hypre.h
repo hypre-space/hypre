@@ -6,6 +6,21 @@
    uses the LinSysCore struct pointer, which is used by FEI_create.
 */
 
+#ifndef CFEI_LinSysCore_DEFINED
+#define CFEI_LinSysCore_DEFINED
+
+/*
+  First we define the LinSysCore struct which is kind of like an
+  abstract type. ISIS_LinSysCore_create produces an instance of LinSysCore.
+*/
+
+struct LinSysCore_struct {
+   void* lsc_;
+};
+typedef struct LinSysCore_struct LinSysCore;
+
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif

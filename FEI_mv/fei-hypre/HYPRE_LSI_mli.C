@@ -66,7 +66,9 @@
 #define MLI_METHOD_AMGSA_ID     7
 #define MLI_METHOD_AMGSAE_ID    8
 #endif
+#ifdef NOFEI
 #define GlobalID int
+#endif
 #include "HYPRE_LSI_mli.h"
 
 /****************************************************************************/ 

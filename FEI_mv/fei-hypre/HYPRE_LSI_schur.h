@@ -31,8 +31,10 @@
 
 #include "fei_defs.h"
 #include "Data.h"
-#include "basicTypes.h"
+//#include "basicTypes.h"
+#ifdef NOFEI
 #define  GlobalID int
+#endif
 #include "Lookup.h"
 
 // *************************************************************************

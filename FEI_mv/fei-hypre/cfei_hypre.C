@@ -6,7 +6,7 @@
 
 #include "fei_defs.h"
 #include "Data.h"
-#include "basicTypes.h"
+//#include "basicTypes.h"
 
 //############### 1.5 includes #################
 //#ifndef NOFEI 
@@ -21,7 +21,7 @@
 #endif
 //##############################################
 
-#include "cfei.h"
+//#include "cfei.h"
 #include "cfei_hypre.h"
 #include "HYPRE.h"
 #include "../../IJ_mv/HYPRE_IJ_mv.h"

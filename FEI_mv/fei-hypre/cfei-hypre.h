@@ -31,8 +31,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "basicTypes.h"
-#include "cfei.h"
+//#include "basicTypes.h"
+//#include "cfei.h"
 #include "cfei_hypre.h"
 
 #endif /*cfei_hypre_h_included*/
