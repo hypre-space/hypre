@@ -896,9 +896,12 @@ if test "${with_insure+set}" = set; then
    casc_user_chose_compilers=yes
  fi
  case "${withval}" in
-   yes) PREPEND="insure" ;;
+   yes) PREPEND="" ;;
    no)  PREPEND="" ;;
-   *)   PREPEND="insure $withval" ;;
+   *)   PREPEND=""
+      CFLAGS="$CFLAGS $withval"
+      CXXFLAGS="$CXXFLAGS $withval"
+      ;;
  esac
 else
   PREPEND=""
@@ -940,9 +943,12 @@ if test "${with_insure_to_file+set}" = set; then
    casc_user_chose_compilers=yes
  fi
  case "${withval}" in
-   yes) PREPEND="insure -Zoi \"report_file insure.log\"";;
+   yes) PREPEND=""";;
    no)  PREPEND="" ;;
-   *)   PREPEND="insure $withval" ;;
+   *)   PREPEND=""
+      CFLAGS="$CFLAGS $withval"
+      CXXFLAGS="$CXXFLAGS $withval"
+      ;;
  esac
 
 fi
