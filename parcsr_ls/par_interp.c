@@ -2549,10 +2549,13 @@ hypre_BoomerAMGBuildDirInterp( hypre_ParCSRMatrix   *A,
          for (jj = A_diag_i[i]+1; jj < A_diag_i[i+1]; jj++)
          {
             i1 = A_diag_j[jj];
-	    if (A_diag_data[jj] > 0)
-	       sum_N_pos += A_diag_data[jj];
-	    else
-	       sum_N_neg += A_diag_data[jj];
+	    if (dof_func[i1] == dof_func[i])
+	    { 
+	       if (A_diag_data[jj] > 0)
+	          sum_N_pos += A_diag_data[jj];
+	       else
+	          sum_N_neg += A_diag_data[jj];
+	    } 
             /*--------------------------------------------------------------
              * Case 1: neighbor i1 is a C-point and strongly influences i,
              * accumulate a_{i,i1} into the interpolation weight.
@@ -2580,10 +2583,13 @@ hypre_BoomerAMGBuildDirInterp( hypre_ParCSRMatrix   *A,
             for (jj = A_offd_i[i]; jj < A_offd_i[i+1]; jj++)
             {
                i1 = A_offd_j[jj];
-	       if (A_offd_data[jj] > 0)
-	          sum_N_pos += A_offd_data[jj];
-	       else
-	          sum_N_neg += A_offd_data[jj];
+	       if (dof_func_offd[i1] == dof_func[i])
+	       { 
+	          if (A_offd_data[jj] > 0)
+	             sum_N_pos += A_offd_data[jj];
+	          else
+	             sum_N_neg += A_offd_data[jj];
+	       } 
 
             /*--------------------------------------------------------------
              * Case 1: neighbor i1 is a C-point and strongly influences i,
