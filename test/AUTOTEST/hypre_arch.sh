@@ -22,7 +22,6 @@ HYPRE_ARCH=""
 if [ -f "/bin/uname" ] 
 then
     HYPRE_OS="`/bin/uname -s`"
-    HYPRE_OS_Release="`/bin/uname -r`"
 fi
 
 #=============================================================================
@@ -32,8 +31,6 @@ fi
 if [ -z "$HYPRE_ARCH" ]
 then
     case "$HYPRE_OS" in
-	SunOS)
-	    HYPRE_ARCH="casc";;
 	OSF1)
 	    HYPRE_ARCH="dec";;
 	AIX)
