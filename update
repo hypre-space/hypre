@@ -134,7 +134,7 @@ fi
 		echo "Error: no CVS repository, CVSROOT = $CVSROOT"
 		exit
 	    fi
-	    (cd UPDATE/src; cvs checkout linear_solvers)
+	    (cd UPDATE/src; cvs checkout -P linear_solvers)
 	    # store a representative date for this version of the source
 	    date > UPDATE/VERSION_DATE
 	    # store a representative name for this version
