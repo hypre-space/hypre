@@ -750,13 +750,13 @@ int HYPRE_ParCSRMLConstructMHMatrix(HYPRE_ParCSRMatrix A, MH_Matrix *mh_mat,
        for (j = 0; j < rowLeng; j++)
           if ( colInd[j] < startRow || colInd[j] > endRow )
           {
-             /*if ( colVal[j] != 0.0 ) offdiagSize[i-startRow]++;*/
-             offdiagSize[i-startRow]++;
+             if ( colVal[j] != 0.0 ) offdiagSize[i-startRow]++;
+             /*offdiagSize[i-startRow]++;*/
           }
           else
           {
-             /*if ( colVal[j] != 0.0 ) diagSize[i-startRow]++;*/
-             diagSize[i-startRow]++;
+             if ( colVal[j] != 0.0 ) diagSize[i-startRow]++;
+             /*diagSize[i-startRow]++;*/
           }
        HYPRE_ParCSRMatrixRestoreRow(A, i, &rowLeng, &colInd, &colVal);
        if ( diagSize[i-startRow] + offdiagSize[i-startRow] == 1 ) num_bdry++;
@@ -778,8 +778,10 @@ int HYPRE_ParCSRMLConstructMHMatrix(HYPRE_ParCSRMatrix A, MH_Matrix *mh_mat,
        for (j = 0; j < rowLeng; j++)
        {
           if ( colInd[j] < startRow || colInd[j] > endRow )
-             /*if ( colVal[j] != 0.0 ) externList[externLeng++] = colInd[j];*/
+             if ( colVal[j] != 0.0 ) externList[externLeng++] = colInd[j];
+/*
              externList[externLeng++] = colInd[j];
+*/
        }
        HYPRE_ParCSRMatrixRestoreRow(A, i, &rowLeng, &colInd, &colVal);
     }
@@ -819,7 +821,7 @@ int HYPRE_ParCSRMLConstructMHMatrix(HYPRE_ParCSRMatrix A, MH_Matrix *mh_mat,
        for (j = 0; j < rowLeng; j++)
        {
           index = colInd[j];
-          /*if ( colVal[j] != 0.0 ) */
+          if ( colVal[j] != 0.0 ) 
           {
              if ( index < startRow || index > endRow )
              {
@@ -968,21 +970,28 @@ int HYPRE_ParCSRMLConstructMHMatrix(HYPRE_ParCSRMatrix A, MH_Matrix *mh_mat,
        /* send the global equation numbers                      */
        /* ----------------------------------------------------- */ 
 
+       if ( sendProcCnt > 0 )
+          Request = (MPI_Request *) malloc(sendProcCnt * sizeof(MPI_Request));
+
        msgid = 540;
+       for ( i = 0; i < sendProcCnt; i++ ) 
+       {
+          MPI_Irecv((void*)sendList[i],sendLeng[i],MPI_INT,sendProc[i],
+                    msgid,comm,&Request[i]);
+       }
        for ( i = 0; i < recvProcCnt; i++ ) 
        {
           if ( recvProc[i] == 0 ) j = 0;
           else                    j = tempCnt[recvProc[i]-1];
           rowLeng = recvLeng[i];
-          MPI_Send((void*) &externList[j],rowLeng,MPI_INT,recvProc[i],
-                    msgid,comm);
+          MPI_Send((void*) &externList[j], rowLeng, MPI_INT, recvProc[i],
+                   msgid, comm);
        }
        for ( i = 0; i < sendProcCnt; i++ ) 
        {
-          rowLeng = sendLeng[i];
-          MPI_Recv((void*)sendList[i],rowLeng,MPI_INT,sendProc[i],
-                   msgid,comm,&status);
+          MPI_Wait( &Request[i], &status );
        }
+       if ( sendProcCnt > 0 ) free( Request );
 
        /* ----------------------------------------------------- */ 
        /* convert the send list from global to local numbers    */
