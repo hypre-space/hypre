@@ -447,6 +447,11 @@ hypre_PCGSolve( void *pcg_vdata,
          if (weight * cf_ave_1 > cf_tol) break;
       }
 
+      if ( gamma==0 ) break;
+      /* ... gamma==0 means no hope of progress, probably because most
+         everything's nearly 0 anyway; and if we go on we'll start computing
+         0/0 */
+
       /* beta = gamma / gamma_old */
       beta = gamma / gamma_old;
 
