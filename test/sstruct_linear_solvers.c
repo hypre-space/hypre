@@ -68,6 +68,14 @@ typedef struct
    double                *graph_values;
    int                   *graph_boxsizes;
 
+   int                    matrix_nentries;
+   ProblemIndex          *matrix_ilowers;
+   ProblemIndex          *matrix_iuppers;
+   Index                 *matrix_strides;
+   int                   *matrix_vars;
+   int                   *matrix_entries;
+   double                *matrix_values;
+
 } ProblemPartData;
  
 typedef struct
@@ -436,6 +444,46 @@ ReadData( char         *filename,
             pdata.graph_nentries++;
             data.pdata[part] = pdata;
          }
+         else if ( strcmp(key, "MatrixSetValues:") == 0 )
+         {
+            part = strtol(sdata_ptr, &sdata_ptr, 10);
+            pdata = data.pdata[part];
+            if ((pdata.matrix_nentries % 10) == 0)
+            {
+               size = pdata.matrix_nentries + 10;
+               pdata.matrix_ilowers =
+                  hypre_TReAlloc(pdata.matrix_ilowers, ProblemIndex, size);
+               pdata.matrix_iuppers =
+                  hypre_TReAlloc(pdata.matrix_iuppers, ProblemIndex, size);
+               pdata.matrix_strides =
+                  hypre_TReAlloc(pdata.matrix_strides, Index, size);
+               pdata.matrix_vars =
+                  hypre_TReAlloc(pdata.matrix_vars, int, size);
+               pdata.matrix_entries =
+                  hypre_TReAlloc(pdata.matrix_entries, int, size);
+               pdata.matrix_values =
+                  hypre_TReAlloc(pdata.matrix_values, double, size);
+            }
+            SScanProblemIndex(sdata_ptr, &sdata_ptr, data.ndim,
+                              pdata.matrix_ilowers[pdata.matrix_nentries]);
+            SScanProblemIndex(sdata_ptr, &sdata_ptr, data.ndim,
+                              pdata.matrix_iuppers[pdata.matrix_nentries]);
+            SScanIntArray(sdata_ptr, &sdata_ptr, data.ndim,
+                          pdata.matrix_strides[pdata.matrix_nentries]);
+            for (i = data.ndim; i < 3; i++)
+            {
+               pdata.matrix_strides[pdata.matrix_nentries][i] = 1;
+            }
+            pdata.matrix_vars[pdata.matrix_nentries] =
+               strtol(sdata_ptr, &sdata_ptr, 10);
+            pdata.matrix_entries[pdata.matrix_nentries] =
+               strtol(sdata_ptr, &sdata_ptr, 10);
+            pdata.matrix_values[pdata.matrix_nentries] =
+               strtod(sdata_ptr, &sdata_ptr);
+            pdata.matrix_nentries++;
+            data.pdata[part] = pdata;
+         }
+
          else if ( strcmp(key, "ProcessPoolCreate:") == 0 )
          {
             data.npools = strtol(sdata_ptr, &sdata_ptr, 10);
@@ -553,6 +601,7 @@ DistributeData( ProblemData   global_data,
          /* none of this part data lives on this process */
          pdata.nboxes = 0;
          pdata.graph_nentries = 0;
+         pdata.matrix_nentries = 0;
       }
       else
       {
@@ -577,6 +626,11 @@ DistributeData( ProblemData   global_data,
                mmap[2] = m[pdata.graph_index_maps[entry][2]];
                MapProblemIndex(pdata.graph_to_ilowers[entry], mmap);
                MapProblemIndex(pdata.graph_to_iuppers[entry], mmap);
+            }
+            for (entry = 0; entry < pdata.matrix_nentries; entry++)
+            {
+               MapProblemIndex(pdata.matrix_ilowers[entry], m);
+               MapProblemIndex(pdata.matrix_iuppers[entry], m);
             }
          }
 
@@ -661,6 +715,39 @@ DistributeData( ProblemData   global_data,
                }
             }
             pdata.graph_nentries = i;
+
+            i = 0;
+            for (entry = 0; entry < pdata.matrix_nentries; entry++)
+            {
+               MapProblemIndex(pdata.matrix_ilowers[entry], m);
+               MapProblemIndex(pdata.matrix_iuppers[entry], m);
+
+               for (box = 0; box < pdata.nboxes; box++)
+               {
+                  size = IntersectBoxes(pdata.matrix_ilowers[entry],
+                                        pdata.matrix_iuppers[entry],
+                                        pdata.ilowers[box],
+                                        pdata.iuppers[box],
+                                        int_ilower, int_iupper);
+                  if (size > 0)
+                  {
+                     /* if there is an intersection, it is the only one */
+                     for (d = 0; d < 3; d++)
+                     {
+                        pdata.matrix_ilowers[i][d] = int_ilower[d];
+                        pdata.matrix_iuppers[i][d] = int_iupper[d];
+                        pdata.matrix_strides[i][d] =
+                           pdata.matrix_strides[entry][d];
+                     }
+                     pdata.matrix_vars[i]    = pdata.matrix_vars[entry];
+                     pdata.matrix_entries[i]  = pdata.matrix_entries[entry];
+                     pdata.matrix_values[i]   = pdata.matrix_values[entry];
+                     i++;
+                     break;
+                  }
+               }
+            }
+            pdata.matrix_nentries = i;
          }
 
          /* refine and block boxes */
@@ -715,6 +802,11 @@ DistributeData( ProblemData   global_data,
                mmap[2] = m[pdata.graph_index_maps[entry][2]];
                MapProblemIndex(pdata.graph_to_ilowers[entry], mmap);
                MapProblemIndex(pdata.graph_to_iuppers[entry], mmap);
+            }
+            for (entry = 0; entry < pdata.matrix_nentries; entry++)
+            {
+               MapProblemIndex(pdata.matrix_ilowers[entry], m);
+               MapProblemIndex(pdata.matrix_iuppers[entry], m);
             }
          }
 
@@ -785,6 +877,16 @@ DistributeData( ProblemData   global_data,
          hypre_TFree(pdata.graph_entries);
          hypre_TFree(pdata.graph_values);
          hypre_TFree(pdata.graph_boxsizes);
+      }
+
+      if (pdata.matrix_nentries == 0)
+      {
+         hypre_TFree(pdata.matrix_ilowers);
+         hypre_TFree(pdata.matrix_iuppers);
+         hypre_TFree(pdata.matrix_strides);
+         hypre_TFree(pdata.matrix_vars);
+         hypre_TFree(pdata.matrix_entries);
+         hypre_TFree(pdata.matrix_values);
       }
 
       data.pdata[part] = pdata;
@@ -867,6 +969,17 @@ DestroyData( ProblemData   data )
          hypre_TFree(pdata.graph_values);
          hypre_TFree(pdata.graph_boxsizes);
       }
+
+      if (pdata.matrix_nentries > 0)
+      {
+         hypre_TFree(pdata.matrix_ilowers);
+         hypre_TFree(pdata.matrix_iuppers);
+         hypre_TFree(pdata.matrix_strides);
+         hypre_TFree(pdata.matrix_vars);
+         hypre_TFree(pdata.matrix_entries);
+         hypre_TFree(pdata.matrix_values);
+      }
+
    }
    hypre_TFree(data.pdata);
 
@@ -1259,7 +1372,7 @@ main( int   argc,
                      k = pdata.graph_index_signs[entry][i];
                      to_index[j] = pdata.graph_to_ilowers[entry][j] + k *
                         (index[i] - pdata.graph_ilowers[entry][i]) *
-                        (pdata.graph_to_strides[entry][j] /
+                        (1.0*pdata.graph_to_strides[entry][j] /
                          pdata.graph_strides[entry][i]);
                   }
                   HYPRE_SStructGraphAddEntries(graph, part, index,
@@ -1355,6 +1468,34 @@ main( int   argc,
                                                pdata.graph_vars[entry],
                                                1, &pdata.graph_entries[entry],
                                                &pdata.graph_values[entry]);
+               }
+            }
+         }
+      }
+   }
+
+   /* reset matrix values */
+   for (part = 0; part < data.nparts; part++)
+   {
+      pdata = data.pdata[part];
+      for (entry = 0; entry < pdata.matrix_nentries; entry++)
+      {
+         for (index[2] = pdata.matrix_ilowers[entry][2];
+              index[2] <= pdata.matrix_iuppers[entry][2];
+              index[2] += pdata.matrix_strides[entry][2])
+         {
+            for (index[1] = pdata.matrix_ilowers[entry][1];
+                 index[1] <= pdata.matrix_iuppers[entry][1];
+                 index[1] += pdata.matrix_strides[entry][1])
+            {
+               for (index[0] = pdata.matrix_ilowers[entry][0];
+                    index[0] <= pdata.matrix_iuppers[entry][0];
+                    index[0] += pdata.matrix_strides[entry][0])
+               {
+                  HYPRE_SStructMatrixSetValues(A, part, index,
+                                               pdata.matrix_vars[entry],
+                                               1, &pdata.matrix_entries[entry],
+                                               &pdata.matrix_values[entry]);
                }
             }
          }
