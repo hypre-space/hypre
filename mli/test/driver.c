@@ -4,18 +4,22 @@
 #include "../util/mli_utils.h"
 #include "../base/mli_defs.h"
 #include "../cintface/cmli.h"
+#include "HYPRE.h"
 #include "parcsr_mv/parcsr_mv.h"
+#include "IJ_mv/HYPRE_IJ_mv.h"
 #include "parcsr_ls/HYPRE_parcsr_ls.h"
 #include "krylov/krylov.h"
 
 int main(int argc, char **argv)
 {
 
-   int                j, nx=27, ny=27, P, Q, p, q, nprocs, mypid, start_row;
-   int                *partition, global_size, local_size, nsweeps;
+   int                j, nx=64, ny=64, P, Q, p, q, nprocs, mypid, start_row;
+   int                *partition, global_size, local_size, nsweeps, row_size;
+   int                *col_ind, k, *proc_cnts, *offsets, *row_cnts;
    int                ndofs=3, null_dim=6, test_prob=0, solver=1, scale_flag=1;
    char               *targv[10];
-   double             *values, *null_vects, *scale_vec;
+   double             *values, *null_vects, *scale_vec, *col_val, *gscale_vec;
+   HYPRE_IJMatrix     newIJA;
    HYPRE_ParCSRMatrix HYPRE_A;
    hypre_ParCSRMatrix *hypre_A;
    hypre_ParVector    *sol, *rhs;
@@ -52,14 +56,70 @@ int main(int argc, char **argv)
       HYPRE_A = (HYPRE_ParCSRMatrix) GenerateLaplacian9pt(MPI_COMM_WORLD, 
                                              nx, ny, P, Q, p, q, values); 
       free( values );
-      hypre_A = (hypre_ParCSRMatrix *) HYPRE_A;
-      HYPRE_ParCSRMatrixGetDims( HYPRE_A, &global_size, &j );
+      HYPRE_ParCSRMatrixGetRowPartitioning(HYPRE_A, &partition);
+      global_size = partition[nprocs];
+      start_row   = partition[mypid];
+      local_size  = partition[mypid+1] - start_row;
+      free( partition );
+      if ( scale_flag ) 
+      {
+         scale_vec  = (double *) malloc(local_size*sizeof(double));
+         gscale_vec = (double *) malloc(global_size*sizeof(double));
+         for ( j = start_row; j < start_row+local_size; j++ ) 
+         {
+            HYPRE_ParCSRMatrixGetRow(HYPRE_A,j,&row_size,&col_ind,&col_val);
+            for (k = 0; k < row_size; k++)
+               if ( col_ind[k] == j ) scale_vec[j-start_row] = col_val[k]; 
+            HYPRE_ParCSRMatrixRestoreRow(HYPRE_A,j,&row_size,&col_ind,&col_val);
+         }
+         for (j = 0; j < local_size; j++) scale_vec[j] = 1.0/sqrt(scale_vec[j]); 
+         proc_cnts = (int *) malloc( nprocs * sizeof(int) );
+         offsets   = (int *) malloc( nprocs * sizeof(int) );
+         MPI_Allgather(&local_size,1,MPI_INT,proc_cnts,1,MPI_INT,MPI_COMM_WORLD);
+         offsets[0] = 0;
+         for ( j = 1; j < nprocs; j++ )
+            offsets[j] = offsets[j-1] + proc_cnts[j-1];
+         MPI_Allgatherv(scale_vec, local_size, MPI_DOUBLE, gscale_vec,
+                        proc_cnts, offsets, MPI_DOUBLE, MPI_COMM_WORLD);
+         free( proc_cnts );
+         free( offsets );
+         HYPRE_IJMatrixCreate(MPI_COMM_WORLD, start_row, start_row+local_size-1,
+                              start_row, start_row+local_size-1, &newIJA);
+         HYPRE_IJMatrixSetObjectType(newIJA, HYPRE_PARCSR);
+         row_cnts = (int *) malloc( local_size * sizeof(int) );
+         for ( j = start_row; j < start_row+local_size; j++ ) 
+         {
+            HYPRE_ParCSRMatrixGetRow(HYPRE_A,j,&row_size,&col_ind,NULL);
+            row_cnts[j-start_row] = row_size;
+            HYPRE_ParCSRMatrixRestoreRow(HYPRE_A,j,&row_size,&col_ind,NULL);
+         }
+         HYPRE_IJMatrixSetRowSizes(newIJA, row_cnts);
+         HYPRE_IJMatrixInitialize(newIJA);
+         free( row_cnts );
+         for ( j = start_row; j < start_row+local_size; j++ ) 
+         {
+            HYPRE_ParCSRMatrixGetRow(HYPRE_A,j,&row_size,&col_ind,&col_val);
+            for ( k = 0; k < row_size; k++ ) 
+               col_val[k] = col_val[k] * gscale_vec[col_ind[k]] * gscale_vec[j];
+            HYPRE_IJMatrixSetValues(newIJA, 1, &row_size, (const int *) &j,
+                   (const int *) col_ind, (const double *) col_val);
+            HYPRE_ParCSRMatrixRestoreRow(HYPRE_A,j,&row_size,&col_ind,&col_val);
+         }
+         HYPRE_IJMatrixAssemble(newIJA);
+         HYPRE_ParCSRMatrixDestroy(HYPRE_A);
+         HYPRE_IJMatrixGetObject(newIJA, (void **) &HYPRE_A);
+         HYPRE_IJMatrixSetObjectType(newIJA, -1);
+         HYPRE_IJMatrixDestroy(newIJA);
+         free( gscale_vec );
+         null_vects = ( double *) malloc(local_size * sizeof(double));
+         for ( j = 0; j < local_size; j++ ) null_vects[j] = 1.0 / scale_vec[j]; 
+         free( scale_vec );
+      } else null_vects = NULL;
    }
    else if ( test_prob == 1 )
    {
       MLI_Utils_HypreMatrixRead(".data",MPI_COMM_WORLD,ndofs,(void **) &HYPRE_A,
                                 scale_flag, &scale_vec);
-      hypre_A = (hypre_ParCSRMatrix *) HYPRE_A;
       HYPRE_ParCSRMatrixGetRowPartitioning(HYPRE_A, &partition);
       global_size = partition[nprocs];
       start_row   = partition[mypid];
@@ -102,6 +162,7 @@ int main(int argc, char **argv)
       }
    }
 
+   hypre_A = (hypre_ParCSRMatrix *) HYPRE_A;
    HYPRE_ParCSRMatrixGetRowPartitioning(HYPRE_A, &partition);
    sol = hypre_ParVectorCreate(MPI_COMM_WORLD, global_size, partition);
    hypre_ParVectorInitialize( sol );
@@ -132,14 +193,25 @@ int main(int argc, char **argv)
    nsweeps = 2;
    targv[0] = (char *) &nsweeps;
    targv[1] = (char *) NULL;
-   MLI_MethodSetParams( cmli_method, "setNumLevels 4", 0, NULL );
-   MLI_MethodSetParams( cmli_method, "setPreSmoother SGS", 2, targv );
-   MLI_MethodSetParams( cmli_method, "setPostSmoother SGS", 2, targv );
+   MLI_MethodSetParams( cmli_method, "setNumLevels 2", 0, NULL );
+   MLI_MethodSetParams( cmli_method, "setPreSmoother MLS", 2, targv );
+   MLI_MethodSetParams( cmli_method, "setPostSmoother MLS", 2, targv );
    nsweeps = 20;
    targv[0] = (char *) &nsweeps;
    targv[1] = (char *) NULL;
    MLI_MethodSetParams( cmli_method, "setCoarseSolver SuperLU", 2, targv );
-   MLI_MethodSetParams( cmli_method, "setCalibrationSize 1", 0, NULL );
+   MLI_MethodSetParams( cmli_method, "setCalibrationSize 0", 0, NULL );
+   if ( test_prob == 0 )
+   {
+      ndofs      = 1;
+      null_dim   = 1;
+      targv[0] = (char *) &ndofs;
+      targv[1] = (char *) &null_dim;
+      targv[2] = (char *) null_vects;
+      targv[3] = (char *) &local_size;
+      MLI_MethodSetParams( cmli_method, "setNullSpace", 4, targv );
+      free( null_vects );
+   }
    if ( test_prob == 1 )
    {
       targv[0] = (char *) &ndofs;
@@ -160,7 +232,7 @@ int main(int argc, char **argv)
    } 
    else
    {
-      MLI_Utils_HyprePCGSolve(cmli, (HYPRE_Matrix) HYPRE_A, 
+      MLI_Utils_HypreGMRESSolve(cmli, (HYPRE_Matrix) HYPRE_A, 
                               (HYPRE_Vector) rhs, (HYPRE_Vector) sol);
    }
    MLI_Print( cmli );
