@@ -17,13 +17,15 @@ install:all
 CC = @CC@
 CXX = @CXX@
 
+CXX_COMPILE_FLAGS = @CXXFLAGS@
+
 CFLAGS =\
  -I../..\
- -I../fei-isis
+ -I../fei-base
 
-CXXFLAGS =\
+CXXFLAGS = ${CXX_COMPILE_FLAGS} \
  -I../..\
- -I../fei-isis
+ -I../fei-base
 
 HEADERS =\
  CommInfo.h\
@@ -49,7 +51,7 @@ LOCALFILES =
 FILES = $(HYPREFILES) $(LOCALFILES)
 
 
-OBJS = ${FILES:.c=.o} ${FILES:.cc=.o}
+OBJS = ${FILES:.cc=.o}
 
 ${OBJS}: ${HEADERS}
 
@@ -60,9 +62,11 @@ ${OBJS}: ${HEADERS}
 
 lib: ${OBJS}
 	@echo  "Building $@ ... "
-	@echo  "Building ${OBJS} ... "
 	@ar -rcu libHYPRE_FEI_isismv.a ${OBJS}
 	@ranlib libHYPRE_FEI_isismv.a 
+
+install: lib
+	@cp -f *.a $$HYPRE_INSTALL_DIR/lib
 
 clean:
 	@touch erase.tmp
