@@ -98,7 +98,16 @@ void  impl_Hypre_StructuredGrid_SetDoubleParameter
  **********************************************************/
 void  impl_Hypre_StructuredGrid_SetIntParameter
 (Hypre_StructuredGrid this, char* name, int value) {
-   printf( "Hypre_StructuredGrid_SetIntParameter does not recognize name ~s\n", name );
+   struct Hypre_StructuredGrid_private_type *Gp = this->d_table;
+   HYPRE_StructGrid *G = Gp->hsgrid;
+
+   if ( !strcmp(name,"periodic") ) {
+      HYPRE_StructGridSetPeriodic( *G, value );
+   }
+   else  {
+      printf( "Hypre_StructuredGrid_SetIntParameter does not recognize name ~s\n", name );
+   }
+   return;
 } /* end impl_Hypre_StructuredGridSetIntParameter */
 
 /* ********************************************************
