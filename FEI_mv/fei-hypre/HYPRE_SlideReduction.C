@@ -1590,9 +1590,9 @@ int HYPRE_SlideReduction::buildReducedSolnVector(HYPRE_IJVector x,
    localNRows   = endRow - startRow + 1;
    nConstraints = procNConstr_[mypid+1] - procNConstr_[mypid];
    newEndRow    = endRow - nConstraints;
-   if ( procNConstr_ == NULL || procNConstr_[nprocs] == 0 )
+   if (outputLevel_ >= 1 && (procNConstr_==NULL || procNConstr_[nprocs]==0))
    {
-      printf("%4d : buildReducedSolnVector WARNING - no local entries.\n",mypid);
+      printf("%4d : buildReducedSolnVector WARNING - no local entry.\n",mypid);
       return 1;
    }
 
