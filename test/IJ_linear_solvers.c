@@ -840,6 +840,7 @@ main( int   argc,
    
    if (num_functions > 1)
    {
+      dof_func = NULL;
       if (build_funcs_type)
       {
          printf (" Not implemented yet!");
@@ -1527,8 +1528,6 @@ main( int   argc,
       HYPRE_IJVectorDestroy(ij_x);
    else
       HYPRE_ParVectorDestroy(x);
-   if (num_functions > 1)
-      hypre_TFree (dof_func);
 /*
    hypre_FinalizeMemoryDebug();
 */
@@ -1925,7 +1924,7 @@ BuildParFromOneFile( int                  argc,
    char               *filename;
 
    HYPRE_ParCSRMatrix  A;
-   HYPRE_CSRMatrix  A_CSR;
+   HYPRE_CSRMatrix  A_CSR = NULL;
 
    int                 myid;
 
@@ -1967,7 +1966,7 @@ BuildParFromOneFile( int                  argc,
 
    *A_ptr = A;
 
-   HYPRE_CSRMatrixDestroy(A_CSR);
+   if (myid == 0) HYPRE_CSRMatrixDestroy(A_CSR);
 
    return (0);
 }
