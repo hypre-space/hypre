@@ -46,6 +46,7 @@ typedef struct
 	   col_starts[num_procs] = global_num_cols */
 
    hypre_ParCSRCommPkg	*comm_pkg;
+   hypre_ParCSRCommPkg	*comm_pkgT;
    
    /* Does the ParCSRMatrix create/destroy `diag', `offd', `col_map_offd'? */
    int      owns_data;
@@ -77,6 +78,7 @@ typedef struct
 #define hypre_ParCSRMatrixRowStarts(matrix)       ((matrix) -> row_starts)
 #define hypre_ParCSRMatrixColStarts(matrix)       ((matrix) -> col_starts)
 #define hypre_ParCSRMatrixCommPkg(matrix)	  ((matrix) -> comm_pkg)
+#define hypre_ParCSRMatrixCommPkgT(matrix)	  ((matrix) -> comm_pkgT)
 #define hypre_ParCSRMatrixOwnsData(matrix)        ((matrix) -> owns_data)
 #define hypre_ParCSRMatrixOwnsRowStarts(matrix)   ((matrix) -> owns_row_starts)
 #define hypre_ParCSRMatrixOwnsColStarts(matrix)   ((matrix) -> owns_col_starts)

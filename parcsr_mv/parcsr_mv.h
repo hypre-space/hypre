@@ -191,6 +191,7 @@ typedef struct
 	   col_starts[num_procs] = global_num_cols */
 
    hypre_ParCSRCommPkg	*comm_pkg;
+   hypre_ParCSRCommPkg	*comm_pkgT;
    
    /* Does the ParCSRMatrix create/destroy `diag', `offd', `col_map_offd'? */
    int      owns_data;
@@ -222,6 +223,7 @@ typedef struct
 #define hypre_ParCSRMatrixRowStarts(matrix)       ((matrix) -> row_starts)
 #define hypre_ParCSRMatrixColStarts(matrix)       ((matrix) -> col_starts)
 #define hypre_ParCSRMatrixCommPkg(matrix)	  ((matrix) -> comm_pkg)
+#define hypre_ParCSRMatrixCommPkgT(matrix)	  ((matrix) -> comm_pkgT)
 #define hypre_ParCSRMatrixOwnsData(matrix)        ((matrix) -> owns_data)
 #define hypre_ParCSRMatrixOwnsRowStarts(matrix)   ((matrix) -> owns_row_starts)
 #define hypre_ParCSRMatrixOwnsColStarts(matrix)   ((matrix) -> owns_col_starts)
@@ -274,7 +276,14 @@ int hypre_MatvecCommPkgDestroy( hypre_ParCSRCommPkg *comm_pkg );
 int hypre_BuildCSRMatrixMPIDataType( int num_nonzeros , int num_rows , double *a_data , int *a_i , int *a_j , MPI_Datatype *csr_matrix_datatype );
 int hypre_BuildCSRJDataType( int num_nonzeros , double *a_data , int *a_j , MPI_Datatype *csr_jdata_datatype );
 
+/* communicationT.c */
+void RowsWithColumn( int *rowmin , int *rowmax , int column , hypre_ParCSRMatrix *A );
+int hypre_MatTCommPkgCreate( hypre_ParCSRMatrix *A );
+
 /* driver.c */
+int main( int argc , char *argv []);
+
+/* driver_aat.c */
 int main( int argc , char *argv []);
 
 /* driver_matmul.c */
@@ -282,6 +291,11 @@ int main( int argc , char *argv []);
 
 /* driver_matvec.c */
 int main( int argc , char *argv []);
+
+/* par_csr_aat.c */
+void hypre_ParAat_RowSizes( int **C_diag_i , int **C_offd_i , int *B_marker , int *A_diag_i , int *A_diag_j , int *A_offd_i , int *A_offd_j , int *A_col_map_offd , int *A_ext_i , int *A_ext_j , int *C_diag_size , int *C_offd_size , int num_rows_diag_A , int num_cols_offd_A , int num_rows_A_ext , int first_col_diag_A , int first_row_index_A , int first_row_index_A_ext );
+hypre_ParCSRMatrix *hypre_ParCSRAAt( hypre_ParCSRMatrix *A );
+hypre_CSRMatrix *hypre_ParCSRMatrixExtractAExt( hypre_ParCSRMatrix *A , int data );
 
 /* par_csr_matop.c */
 void hypre_ParMatmul_RowSizes( int **C_diag_i , int **C_offd_i , int **B_marker , int *A_diag_i , int *A_diag_j , int *A_offd_i , int *A_offd_j , int *B_diag_i , int *B_diag_j , int *B_offd_i , int *B_offd_j , int *B_ext_i , int *B_ext_j , int *col_map_offd_B , int *C_diag_size , int *C_offd_size , int num_rows_diag_A , int num_cols_offd_A , int first_col_diag_B , int n_cols_B , int num_cols_offd_B , int num_cols_diag_B );
