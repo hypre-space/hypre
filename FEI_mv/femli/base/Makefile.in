@@ -12,46 +12,6 @@
 srcdir = @srcdir@
 VPATH = @srcdir@
  
-CC = @CC@
-CXX = @CXX@
- 
-C_COMPILE_FLAGS=@CFLAGS@
-CXX_COMPILE_FLAGS=@CXXFLAGS@
-CINCLUDES=@INCLUDES@ @MPIINCLUDE@
-CXXINCLUDES=@INCLUDES@ @MPIINCLUDE@
-#CDEFS = -DMLI_DEBUG_DETAILED
-#CXXDEFS = -DMLI_DEBUG_DETAILED
-CDEFS = 
-CXXDEFS = -DMPICH_SKIP_MPICXX
- 
-CFLAGS =\
- ${C_COMPILE_FLAGS}\
- -I../../..\
- -I$(srcdir)\
- -I$(srcdir)/..\
- -I$(srcdir)/../..\
- -I$(srcdir)/../../..\
- -I$(srcdir)/../../../utilities\
- -I$(srcdir)/../../../parcsr_mv\
- -I$(srcdir)/../../../seq_mv\
- -I$(srcdir)/../../../IJ_mv\
- ${CINCLUDES}\
- ${CDEFS}
- 
-CXXFLAGS =\
- ${CXX_COMPILE_FLAGS}\
- -I../../..\
- -I$(srcdir)\
- -I$(srcdir)/..\
- -I$(srcdir)/../..\
- -I$(srcdir)/../../..\
- -I$(srcdir)/../../../utilities\
- -I$(srcdir)/../../../parcsr_mv\
- -I$(srcdir)/../../../seq_mv\
- -I$(srcdir)/../../../IJ_mv\
- ${CXXINCLUDES}\
- ${CXXDEFS}
- 
 HEADERS =\
  mli.h\
  mli_defs.h\
@@ -61,36 +21,17 @@ FILES =\
  mli.cxx\
  mli_oneLevel.cxx
 
-OBJS = ${FILES:.cxx=.o}
-
 ##################################################################
 # Targets
 ##################################################################
 
-all: ${OBJS} 
+all: 
  
 install: all
 ##	@cp -f *.o ../lib
 #@cp -f $(srcdir)/*.h $$HYPRE_INSTALL_DIR/include/.
  
 clean:
-	@rm -f *.o
 
 veryclean: clean
-	@rm -f *.o
-
-##################################################################
-# Rules
-##################################################################
-
-${OBJS}: ${HEADERS}
- 
-##################################################################
-# Generic rules
-##################################################################
-
-.c.o:
-	${CC} -o $@ -c ${CFLAGS} $<
-.cxx.o:
-	${CXX} -o $@ -c ${CXXFLAGS} $<
 

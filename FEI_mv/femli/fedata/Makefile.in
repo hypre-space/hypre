@@ -12,30 +12,8 @@
 srcdir = @srcdir@
 VPATH = @srcdir@
  
-CC = @CC@
 CXX = @CXX@
- 
-C_COMPILE_FLAGS=@CFLAGS@
-CXX_COMPILE_FLAGS=@CXXFLAGS@
-CINCLUDES=@INCLUDES@ @MPIINCLUDE@
-CXXINCLUDES=@INCLUDES@ @MPIINCLUDE@
-CDEFS =
-CXXDEFS = -DMPICH_SKIP_MPICXX
- 
-CFLAGS =\
- ${C_COMPILE_FLAGS}\
- -I../../..\
- -I$(srcdir)\
- -I$(srcdir)/..\
- -I$(srcdir)/../..\
- -I$(srcdir)/../../..\
- -I$(srcdir)/../../../utilities\
- -I$(srcdir)/../../../IJ_mv\
- -I$(srcdir)/../../../seq_mv\
- -I$(srcdir)/../../../parcsr_mv\
- ${CINCLUDES}\
- ${CDEFS}
- 
+
 CXXFLAGS =\
  ${CXX_COMPILE_FLAGS}\
  -I../../..\
@@ -59,41 +37,25 @@ FILES =\
 
 DRIVER_FILES = driver.cxx
 
-OBJS = ${FILES:.cxx=.o}
-
 DRIVER_OBJS = ${DRIVER_FILES:.cxx=.o}
 
 ##################################################################
 # Targets
 ##################################################################
 
-driver: ${DRIVER_OBJS} mli_fedata.o
+driver: ${DRIVER_OBJS} 
 	@echo  "Building" $@ "... "
 	${CXX} -o driver $@.o mli_fedata.o ${LFLAGS}
 
-all: ${OBJS} 
+all: 
  
 install: all
 ##	@cp -f *.o ../lib
-#@cp -f $(srcdir)/*.h $$HYPRE_INSTALL_DIR/include/.
+#	@cp -f $(srcdir)/*.h $$HYPRE_INSTALL_DIR/include/.
  
 clean:
-	@rm -f *.o
-
+	@rm -f driver mli_fedata.o
 veryclean: clean
 
-##################################################################
-# Rules
-##################################################################
-
-${OBJS}: ${HEADERS}
- 
-##################################################################
-# Generic rules
-##################################################################
-
-.c.o:
-	${CC} -o $@ -c ${CFLAGS} $<
 .cxx.o:
 	${CXX} -o $@ -c ${CXXFLAGS} $<
-

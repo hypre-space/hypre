@@ -12,44 +12,6 @@
 srcdir = @srcdir@
 VPATH = @srcdir@
  
-CC = @CC@
-CXX = @CXX@
- 
-C_COMPILE_FLAGS=@CFLAGS@
-CXX_COMPILE_FLAGS=@CXXFLAGS@
-CINCLUDES=@INCLUDES@ @MPIINCLUDE@
-CXXINCLUDES=@INCLUDES@ @MPIINCLUDE@
-CDEFS =
-CXXDEFS = -DMPICH_SKIP_MPICXX
- 
-CFLAGS =\
- ${C_COMPILE_FLAGS}\
- -I../../..\
- -I$(srcdir)\
- -I$(srcdir)/..\
- -I$(srcdir)/../..\
- -I$(srcdir)/../../..\
- -I$(srcdir)/../../../utilities\
- -I$(srcdir)/../../../parcsr_mv\
- -I$(srcdir)/../../../seq_mv\
- -I$(srcdir)/../../../IJ_mv\
- ${CINCLUDES}\
- ${CDEFS}
- 
-CXXFLAGS =\
- ${CXX_COMPILE_FLAGS}\
- -I../../..\
- -I$(srcdir)\
- -I$(srcdir)/..\
- -I$(srcdir)/../..\
- -I$(srcdir)/../../..\
- -I$(srcdir)/../../../utilities\
- -I$(srcdir)/../../../parcsr_mv\
- -I$(srcdir)/../../../seq_mv\
- -I$(srcdir)/../../../IJ_mv\
- ${CXXINCLUDES}\
- ${CXXDEFS}
- 
 MPILIBFLAGS =  -L/usr/local/mpich-1.1.2shm/build/alpha/ch_shmem/lib  -lpmpich -lmpich -lrpc -lgs -lpthread  
 LIBFLAGS =   -lm
 LDLIBFLAGS =  
@@ -76,15 +38,13 @@ FILES =\
 
 DRIVER_FILES = driver.cxx
 
-OBJS = ${FILES:.cxx=.o}
-
 DRIVER_OBJS = ${DRIVERS_FILE:.cxx=.o}
 
 ##################################################################
 # Targets
 ##################################################################
 
-all: ${OBJS}
+all: ${FILES}
  
 driver: ${DRIVER_OBJS} ../lib/libHYPRE_mli.a
 	@echo  "Building" $@ "... "
@@ -95,22 +55,7 @@ install: all
 #@cp -f $(srcdir)/*.h $$HYPRE_INSTALL_DIR/include/.
  
 clean:
-	@rm -f *.o
+	@rm -f driver driver.o
 
 veryclean: clean
-
-##################################################################
-# Rules
-##################################################################
-
-${OBJS}: ${HEADERS}
- 
-##################################################################
-# Generic rules
-##################################################################
-
-.c.o:
-	${CC} -o $@ -c ${CFLAGS} $<
-.cxx.o:
-	${CXX} -o $@ -c ${CXXFLAGS} $<
 

@@ -12,46 +12,6 @@
 srcdir = @srcdir@
 VPATH = @srcdir@
  
-CC  = @CC@
-CXX = @CXX@
- 
-C_COMPILE_FLAGS=@CFLAGS@
-CXX_COMPILE_FLAGS=@CXXFLAGS@
-CINCLUDES=@INCLUDES@ @MPIINCLUDE@
-CXXINCLUDES=@INCLUDES@ @MPIINCLUDE@
-CDEFS =
-CXXDEFS = -DMPICH_SKIP_MPICXX
- 
-CFLAGS =\
- ${C_COMPILE_FLAGS}\
- -I../../..\
- -I$(srcdir)\
- -I$(srcdir)/..\
- -I$(srcdir)/../..\
- -I$(srcdir)/../../..\
- -I$(srcdir)/../../../utilities\
- -I$(srcdir)/../../../parcsr_mv\
- -I$(srcdir)/../../../seq_mv\
- -I$(srcdir)/../../../IJ_mv\
- ${CINCLUDES}\
- ${CDEFS}
- 
-CXXFLAGS =\
- ${CXX_COMPILE_FLAGS}\
- -I../../..\
- -I$(srcdir)\
- -I$(srcdir)/..\
- -I$(srcdir)/../..\
- -I$(srcdir)/../../..\
- -I$(srcdir)/../../../utilities\
- -I$(srcdir)/../../../parcsr_mv\
- -I$(srcdir)/../../../seq_mv\
- -I$(srcdir)/../../../IJ_mv\
- -I$(srcdir)/../../../parcsr_ls\
- -I$(srcdir)/../../../krylov\
- ${CXXINCLUDES}\
- ${CXXDEFS}
- 
 HEADERS =\
  mli_method.h\
  mli_method_amgrs.h\
@@ -65,37 +25,17 @@ FILES =\
  mli_amgsa_calib.cxx\
  mli_amgsa_substructure.cxx
 
-TEMP = ${FILES:.c=.o}
-OBJS = ${TEMP:.cxx=.o}
-
 ##################################################################
 # Targets
 ##################################################################
 
-all: ${OBJS} 
+all: 
  
 install: all
 ##	@cp -f *.o ../lib
 #@cp -f $(srcdir)/*.h $$HYPRE_INSTALL_DIR/include/.
  
 clean:
-	@rm -f *.o
 
 veryclean: clean
-	@rm -f *.o
-
-##################################################################
-# Rules
-##################################################################
-
-${OBJS}: ${HEADERS}
- 
-##################################################################
-# Generic rules
-##################################################################
-
-.c.o:
-	${CC} -o $@ -c ${CFLAGS} $<
-.cxx.o:
-	${CXX} -o $@ -c ${CXXFLAGS} $<
 

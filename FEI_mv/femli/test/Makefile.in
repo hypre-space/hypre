@@ -12,48 +12,12 @@
 srcdir = @srcdir@
 VPATH = @srcdir@
  
-CC  = @CC@
-CXX = @CXX@
- 
-C_COMPILE_FLAGS=@CFLAGS@
-CXX_COMPILE_FLAGS=@CXXFLAGS@
-CINCLUDES=@INCLUDES@ @MPIINCLUDE@
-CXXINCLUDES=@INCLUDES@ @MPIINCLUDE@
-CDEFS =
-CXXDEFS =
- 
 # FC_LIB contains the libraries for a CLINKER to use for code containing
 # FORTRAN code (such as I/O or special Fortran runtimes).
 #
 # e.g. BLAS_LIB = -lHYPRE_blas
 FC_LIB         = -L/opt/SUNWspro/SC4.2/lib -lF77 -lM77 -lsunmath
 BLAS_LIB       =  @BLASLIBFLAGS@
-
-CFLAGS =\
- ${C_COMPILE_FLAGS}\
- -I$(srcdir)\
- -I$(srcdir)/..\
- -I$(srcdir)/../..\
- -I$(srcdir)/../../..\
- -I$(srcdir)/../../../IJ_mv\
- -I$(srcdir)/../../../seq_mv\
- -I$(srcdir)/../../../parcsr_mv\
- -I$(srcdir)/../../../utilities\
- ${CINCLUDES}\
- ${CDEFS}
- 
-CXXFLAGS =\
- ${CXX_COMPILE_FLAGS}\
- -I$(srcdir)\
- -I$(srcdir)/..\
- -I$(srcdir)/../..\
- -I$(srcdir)/../../..\
- -I$(srcdir)/../../../IJ_mv\
- -I$(srcdir)/../../../seq_mv\
- -I$(srcdir)/../../../parcsr_mv\
- -I$(srcdir)/../../../utilities\
- ${CXXINCLUDES}\
- ${CXXDEFS}
 
 RANLIB= @RANLIB@
  
@@ -80,14 +44,9 @@ LFLAGS =\
  ${BLASLIBFLAGS} \
  ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
 
-HEADERS =
-
-FILES =
-
 DRIVER_FILES = \
  driver.c
 
-OBJS = ${FILES:.c=.o}
 DRIVER_OBJS = ${DRIVER_FILES:.c=.o}
 
 ##################################################################
@@ -103,14 +62,4 @@ clean:
 
 veryclean: clean
 	@rm -f driver
-
-##################################################################
-# Generic rules
-##################################################################
-
-.c.o:
-	${CC} -o $@ -c ${CFLAGS} $<
-
-.C.o:
-	${CXX} -o $@ -c ${CXXFLAGS} $<
 

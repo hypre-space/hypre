@@ -12,48 +12,6 @@
 srcdir = @srcdir@
 VPATH = @srcdir@
  
-CC = @CC@
-CXX = @CXX@
- 
-SUPERLU_INCLUDE = -I$(srcdir)/../../SuperLU
-
-C_COMPILE_FLAGS=@CFLAGS@
-CXX_COMPILE_FLAGS=@CXXFLAGS@
-CINCLUDES=@INCLUDES@ @MPIINCLUDE@ ${SUPERLU_INCLUDE}
-CXXINCLUDES=@INCLUDES@ @MPIINCLUDE@ ${SUPERLU_INCLUDE}
-CDEFS = -DMLI_SUPERLU
-CXXDEFS = -DMLI_SUPERLU -DMPICH_SKIP_MPICXX
- 
-CFLAGS =\
- ${C_COMPILE_FLAGS}\
- -I../../../\
- -I$(srcdir)\
- -I$(srcdir)/..\
- -I$(srcdir)/../..\
- -I$(srcdir)/../../..\
- -I$(srcdir)/../../../utilities\
- -I$(srcdir)/../../../parcsr_mv\
- -I$(srcdir)/../../../seq_mv\
- -I$(srcdir)/../../../IJ_mv\
- ${CINCLUDES}\
- ${CDEFS}
- 
-CXXFLAGS =\
- ${CXX_COMPILE_FLAGS}\
- -I../../../\
- -I$(srcdir)\
- -I$(srcdir)/..\
- -I$(srcdir)/../..\
- -I$(srcdir)/../../..\
- -I$(srcdir)/../../../utilities\
- -I$(srcdir)/../../../parcsr_mv\
- -I$(srcdir)/../../../parcsr_ls\
- -I$(srcdir)/../../../krylov\
- -I$(srcdir)/../../../seq_mv\
- -I$(srcdir)/../../../IJ_mv\
- ${CXXINCLUDES}\
- ${CXXDEFS}
- 
 HEADERS =\
  mli_solver.h \
  mli_solver_jacobi.h \
@@ -90,35 +48,17 @@ FILES =\
  mli_solver_seqsuperlu.cxx \
  mli_solver_arpacksuperlu.cxx
 
-OBJS = ${FILES:.cxx=.o}
-
 ##################################################################
 # Targets
 ##################################################################
 
-all: ${OBJS} 
+all: 
  
 install: all
 ##	@cp -f *.o ../lib
 #@cp -f $(srcdir)/*.h $$HYPRE_INSTALL_DIR/include/.
  
 clean:
-	@rm -f *.o
 
 veryclean: clean
-
-##################################################################
-# Rules
-##################################################################
-
-${OBJS}: ${HEADERS}
- 
-##################################################################
-# Generic rules
-##################################################################
-
-.c.o:
-	${CC} -o $@ -c ${CFLAGS} $<
-.cxx.o:
-	${CXX} -o $@ -c ${CXXFLAGS} $<
 
