@@ -190,12 +190,12 @@ int MLI_Solver_Chebyshev::setParams(char *paramString, int argc, char **argv)
    char param1[200];
 
    sscanf( paramString, "%s", param1 ); 
-   if ( !strcasecmp(param1, "relaxWeight") )
+   if ( !strcmp(param1, "relaxWeight") )
    {
       if ( argc >= 1 ) degree_ = *(int*)  argv[0];
       if ( degree_ < 3 ) degree_ = 3;
    }
-   else if ( !strcasecmp(param1, "degree") )
+   else if ( !strcmp(param1, "degree") )
    {
       if ( argc != 1 ) 
       {
@@ -205,7 +205,7 @@ int MLI_Solver_Chebyshev::setParams(char *paramString, int argc, char **argv)
       degree_ = *(int*) argv[0];
       if ( degree_ < 3 ) degree_ = 3;
    }
-   else if ( !strcasecmp(param1, "zeroInitialGuess") )
+   else if ( !strcmp(param1, "zeroInitialGuess") )
    {
       zeroInitialGuess_ = 1;
    }
