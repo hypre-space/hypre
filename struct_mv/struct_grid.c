@@ -188,7 +188,10 @@ hypre_AssembleStructGrid( hypre_StructGrid *grid )
 
    hypre_Box           *box;
    int                  i;
-                     
+
+   hypre_BoxArray      *periodic_all_boxes;
+   int                 *periodic_processes;
+
    boxes = hypre_StructGridBoxes(grid);
 
    if (hypre_StructGridAllBoxes(grid) == NULL)
@@ -224,13 +227,21 @@ hypre_AssembleStructGrid( hypre_StructGrid *grid )
       }
    hypre_StructGridLocalSize(grid) = local_size;
 
+   /* duplicate all_boxes as required for periodicity */
+
+   hypre_StructGridPeriodicAllBoxes(grid,
+                                   &periodic_all_boxes, &periodic_processes);
+
    /* compute neighbors */
    neighbors = hypre_StructGridNeighbors(grid);
    hypre_FreeBoxNeighbors(hypre_StructGridNeighbors(grid));
    hypre_StructGridNeighbors(grid) =
       hypre_NewBoxNeighbors( box_ranks, hypre_BoxArraySize(boxes),
-                             all_boxes, processes,
+                             periodic_all_boxes, periodic_processes,
                              hypre_StructGridMaxDistance(grid));
+
+   hypre_FreeBoxArray(periodic_all_boxes);
+   hypre_TFree(periodic_processes);
 
    return ierr;
 }
@@ -440,3 +451,110 @@ hypre_ReadStructGrid( MPI_Comm  comm,
    return grid;
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_StructGridPeriodicAllBoxes
+ *--------------------------------------------------------------------------*/
+
+int 
+hypre_StructGridPeriodicAllBoxes( hypre_StructGrid  *grid,
+                                  hypre_BoxArray   **p_all_boxes_ptr,
+                                  int              **p_processes_ptr )
+{
+   int               ierr = 0;
+
+
+   hypre_BoxArray   *all_boxes;
+   int              *processes;
+
+   hypre_BoxArray   *p_boxes;
+   int              *p_processes;
+
+   int               ip, jp, kp;
+
+   int               px = hypre_IndexX(hypre_StructGridPeriodic(grid));
+   int               py = hypre_IndexY(hypre_StructGridPeriodic(grid));
+   int               pz = hypre_IndexZ(hypre_StructGridPeriodic(grid));
+
+   int               i_periodic = 0;
+   int               j_periodic = 0;
+   int               k_periodic = 0;
+
+   int               num_pbox;
+   int               i_pbox = 0;
+
+   int               i;
+
+   if (px != 0)
+      i_periodic = 1;
+   if (py != 0)
+      j_periodic = 1;
+   if (pz != 0)
+      k_periodic = 1;
+
+   all_boxes = hypre_StructGridAllBoxes(grid);
+   processes = hypre_StructGridProcesses(grid);
+
+   num_pbox  = hypre_BoxArraySize(all_boxes);
+   num_pbox *= (1+2*i_periodic) * (1+2*j_periodic) * (1+2*k_periodic);
+
+   p_boxes = hypre_NewBoxArray(num_pbox);
+   p_processes = hypre_TAlloc(int, num_pbox);
+   
+   /* copy all_boxes into p_boxes */
+   hypre_ForBoxI(i, all_boxes)
+      {
+         hypre_CopyBox(hypre_BoxArrayBox(all_boxes, i),
+                       hypre_BoxArrayBox(p_boxes, i_pbox));
+         p_processes[i_pbox] = processes[i];
+         i_pbox++;
+      }
+      
+   /* additional boxes required for periodicity */
+   for (ip = -i_periodic; ip <= i_periodic; ip++)
+   {
+      for (jp = -j_periodic; jp <= j_periodic; jp++)
+      {
+         for (kp = -k_periodic; kp <= k_periodic; kp++)
+         {
+            if( !(ip == 0 && jp == 0 && kp == 0) )
+            {
+               hypre_ForBoxI(i, all_boxes)
+               {
+                  hypre_CopyBox(hypre_BoxArrayBox(all_boxes, i),
+                                hypre_BoxArrayBox(p_boxes, i_pbox));
+
+                  /* shift box */
+                  hypre_BoxIMinD(hypre_BoxArrayBox(p_boxes, i_pbox), 0) =
+                   hypre_BoxIMinD(hypre_BoxArrayBox(p_boxes, i_pbox), 0) +
+                    (ip * px);
+                  hypre_BoxIMinD(hypre_BoxArrayBox(p_boxes, i_pbox), 1) =
+                   hypre_BoxIMinD(hypre_BoxArrayBox(p_boxes, i_pbox), 1) +
+                    (jp * py);
+                  hypre_BoxIMinD(hypre_BoxArrayBox(p_boxes, i_pbox), 2) =
+                   hypre_BoxIMinD(hypre_BoxArrayBox(p_boxes, i_pbox), 2) +
+                    (kp * pz);
+                  hypre_BoxIMaxD(hypre_BoxArrayBox(p_boxes, i_pbox), 0) =
+                   hypre_BoxIMaxD(hypre_BoxArrayBox(p_boxes, i_pbox), 0) +
+                    (ip * px);
+                  hypre_BoxIMaxD(hypre_BoxArrayBox(p_boxes, i_pbox), 1) =
+                   hypre_BoxIMaxD(hypre_BoxArrayBox(p_boxes, i_pbox), 1) +
+                    (jp * py);
+                  hypre_BoxIMaxD(hypre_BoxArrayBox(p_boxes, i_pbox), 2) =
+                   hypre_BoxIMaxD(hypre_BoxArrayBox(p_boxes, i_pbox), 2) +
+                    (kp * pz);
+
+                  p_processes[i_pbox] = processes[i];
+
+                  i_pbox++;
+               }
+            }
+         }
+      }
+   }
+
+   *p_all_boxes_ptr = p_boxes;
+   *p_processes_ptr = p_processes;
+
+
+   return ierr;
+}

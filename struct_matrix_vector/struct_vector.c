@@ -682,7 +682,10 @@ hypre_GetMigrateStructVectorCommPkg( hypre_StructVector *from_vector,
                                hypre_StructVectorDataSpace(to_vector),
                                send_processes, recv_processes,
                                num_values,
-                               hypre_StructVectorComm(from_vector));
+                               hypre_StructVectorComm(from_vector),
+                               hypre_StructGridPeriodic(
+                               hypre_StructVectorGrid(from_vector)));
+                               /* is this correct for periodic? */
 
    return comm_pkg;
 }

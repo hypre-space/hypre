@@ -292,7 +292,8 @@ hypre_NewComputePkg( hypre_BoxArrayArray   *send_boxes,
                        send_stride, recv_stride,
                        data_space, data_space,
                        send_processes, recv_processes,
-                       num_values, hypre_StructGridComm(grid));
+                       num_values, hypre_StructGridComm(grid),
+                       hypre_StructGridPeriodic(grid));
 
    hypre_ComputePkgIndtBoxes(compute_pkg)   = indt_boxes;
    hypre_ComputePkgDeptBoxes(compute_pkg)   = dept_boxes;

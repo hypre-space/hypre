@@ -70,7 +70,8 @@ hypre_NewCommPkg( hypre_BoxArrayArray   *send_boxes,
                   int                  **send_processes,
                   int                  **recv_processes,
                   int                    num_values,
-                  MPI_Comm               comm            )
+                  MPI_Comm               comm,
+                  hypre_Index            periodic            )
 {
    hypre_CommPkg    *comm_pkg;
                   
@@ -101,7 +102,7 @@ hypre_NewCommPkg( hypre_BoxArrayArray   *send_boxes,
 
    hypre_NewCommPkgInfo(send_boxes, send_stride,
                         send_data_space, send_processes,
-                        num_values, comm,
+                        num_values, comm, periodic,
                         &num_sends, &send_procs,
                         &send_types, &copy_from_type);
 
@@ -112,7 +113,7 @@ hypre_NewCommPkg( hypre_BoxArrayArray   *send_boxes,
 
    hypre_NewCommPkgInfo(recv_boxes, recv_stride,
                         recv_data_space, recv_processes,
-                        num_values, comm,
+                        num_values, comm,  periodic,
                         &num_recvs, &recv_procs,
                         &recv_types, &copy_to_type);
 
@@ -1035,6 +1036,7 @@ hypre_NewCommPkgInfo( hypre_BoxArrayArray   *boxes,
                       int                  **processes,
                       int                    num_values,
                       MPI_Comm               comm,
+                      hypre_Index            periodic,
                       int                   *num_comms_ptr,
                       int                  **comm_processes_ptr,
                       hypre_CommType      ***comm_types_ptr,
@@ -1149,7 +1151,7 @@ hypre_NewCommPkgInfo( hypre_BoxArrayArray   *boxes,
    {
       p = comm_processes[m];
       comm_types[m] = hypre_NewCommType(comm_entries[p], num_entries[p]);
-      hypre_SortCommType(comm_types[m]);
+      hypre_SortCommType(comm_types[m], periodic);
    }
 
    /*------------------------------------------------------
@@ -1160,7 +1162,7 @@ hypre_NewCommPkgInfo( hypre_BoxArrayArray   *boxes,
    {
       p = my_proc;
       copy_type = hypre_NewCommType(comm_entries[p], num_entries[p]);
-      hypre_SortCommType(copy_type);
+      hypre_SortCommType(copy_type, periodic);
    }
    else
    {
@@ -1204,7 +1206,8 @@ communication type.
 /*--------------------------------------------------------------------------*/
 
 int
-hypre_SortCommType( hypre_CommType  *comm_type )
+hypre_SortCommType( hypre_CommType  *comm_type,
+                    hypre_Index      periodic )
 {
    hypre_CommTypeEntry  **comm_entries = hypre_CommTypeCommEntries(comm_type);
    int                    num_entries  = hypre_CommTypeNumEntries(comm_type);
@@ -1216,6 +1219,7 @@ hypre_SortCommType( hypre_CommType  *comm_type )
    int                    i, j, ii, jj;
    int                    ierr = 0;
                       
+#if 1
    /*------------------------------------------------
     * Sort by imin:
     *------------------------------------------------*/
@@ -1227,19 +1231,24 @@ hypre_SortCommType( hypre_CommType  *comm_type )
          swap = 0;
          imin0 = hypre_CommTypeEntryIMin(comm_entries[j]);
          imin1 = hypre_CommTypeEntryIMin(comm_entries[j+1]);
-         if ( hypre_IndexZ(imin0) > hypre_IndexZ(imin1) )
+         if ( hypre_IModPeriodZ(imin0, periodic) > 
+                 hypre_IModPeriodZ(imin1, periodic) )
          {
             swap = 1;
          }
-         else if ( hypre_IndexZ(imin0) == hypre_IndexZ(imin1) )
+         else if ( hypre_IModPeriodZ(imin0, periodic) == 
+                      hypre_IModPeriodZ(imin1, periodic) )
          {
-            if ( hypre_IndexY(imin0) > hypre_IndexY(imin1) )
+            if ( hypre_IModPeriodY(imin0, periodic) > 
+                    hypre_IModPeriodY(imin1, periodic) )
             {
                swap = 1;
             }
-            else if ( hypre_IndexY(imin0) == hypre_IndexY(imin1) )
+            else if ( hypre_IModPeriodY(imin0, periodic) == 
+                         hypre_IModPeriodY(imin1, periodic) )
             {
-               if ( hypre_IndexX(imin0) > hypre_IndexX(imin1) )
+               if ( hypre_IModPeriodX(imin0, periodic) > 
+                       hypre_IModPeriodX(imin1, periodic) )
                {
                   swap = 1;
                }
@@ -1266,9 +1275,12 @@ hypre_SortCommType( hypre_CommType  *comm_type )
       for (jj = (ii + 1); jj < num_entries; jj++)
       {
          imin1 = hypre_CommTypeEntryIMin(comm_entries[jj]);
-         if ( ( hypre_IndexX(imin0) != hypre_IndexX(imin1) ) ||
-              ( hypre_IndexY(imin0) != hypre_IndexY(imin1) ) ||
-              ( hypre_IndexZ(imin0) != hypre_IndexZ(imin1) ) )
+         if ( ( hypre_IModPeriodX(imin0, periodic) !=
+                   hypre_IModPeriodX(imin1, periodic) ) ||
+              ( hypre_IModPeriodY(imin0, periodic) != 
+                   hypre_IModPeriodY(imin1, periodic) ) ||
+              ( hypre_IModPeriodZ(imin0, periodic) !=
+                   hypre_IModPeriodZ(imin1, periodic) ) )
          {
             break;
          }
@@ -1282,19 +1294,24 @@ hypre_SortCommType( hypre_CommType  *comm_type )
             swap = 0;
             imax0 = hypre_CommTypeEntryIMax(comm_entries[j]);
             imax1 = hypre_CommTypeEntryIMax(comm_entries[j+1]);
-            if ( hypre_IndexZ(imax0) > hypre_IndexZ(imax1) )
+            if ( hypre_IModPeriodZ(imax0, periodic) >
+                    hypre_IModPeriodZ(imax1, periodic) )
             {
                swap = 1;
             }
-            else if ( hypre_IndexZ(imax0) == hypre_IndexZ(imax1) )
+            else if ( hypre_IModPeriodZ(imax0, periodic) ==
+                         hypre_IModPeriodZ(imax1, periodic) )
             {
-               if ( hypre_IndexY(imax0) > hypre_IndexY(imax1) )
+               if ( hypre_IModPeriodY(imax0, periodic) >
+                       hypre_IModPeriodY(imax1, periodic) )
                {
                   swap = 1;
                }
-               else if ( hypre_IndexY(imax0) == hypre_IndexY(imax1) )
+               else if ( hypre_IModPeriodY(imax0, periodic) ==
+                            hypre_IModPeriodY(imax1, periodic) )
                {
-                  if ( hypre_IndexX(imax0) > hypre_IndexX(imax1) )
+                  if ( hypre_IModPeriodX(imax0, periodic) >
+                          hypre_IModPeriodX(imax1, periodic) )
                   {
                      swap = 1;
                   }
@@ -1311,6 +1328,7 @@ hypre_SortCommType( hypre_CommType  *comm_type )
       }
    }
 
+#endif
    return ierr;
 }
 

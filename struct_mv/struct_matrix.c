@@ -574,7 +574,9 @@ hypre_AssembleStructMatrix( hypre_StructMatrix *matrix )
                                   hypre_StructMatrixDataSpace(matrix),
                                   send_processes, recv_processes,
                                   hypre_StructMatrixNumValues(matrix),
-                                  hypre_StructMatrixComm(matrix));
+                                  hypre_StructMatrixComm(matrix),
+                                  hypre_StructGridPeriodic(
+                                  hypre_StructMatrixGrid(matrix)));
 
       hypre_StructMatrixCommPkg(matrix) = comm_pkg;
    }
@@ -754,7 +756,10 @@ hypre_MigrateStructMatrix( hypre_StructMatrix *from_matrix,
                                hypre_StructMatrixDataSpace(to_matrix),
                                send_processes, recv_processes,
                                hypre_StructMatrixNumValues(from_matrix),
-                               hypre_StructMatrixComm(from_matrix));
+                               hypre_StructMatrixComm(from_matrix),
+                               hypre_StructGridPeriodic(
+                               hypre_StructMatrixGrid(from_matrix)));
+                               /* is this correct for periodic? */
 
    /*-----------------------------------------------------------------------
     * Migrate the matrix data
