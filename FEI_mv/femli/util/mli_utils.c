@@ -266,7 +266,7 @@ int MLI_Utils_ScaleVec(hypre_ParCSRMatrix *Amat, hypre_ParVector *vec)
    hypre_ParCSRMatrixMatvec(1.0, Amat, vec, 0.0, temp);
    norm2 = hypre_ParVectorInnerProd(vec, temp);
    hypre_ParVectorScale(norm1/norm2, vec);
-   // printf("Rayleigh quotient: %f\n", norm2/norm1);
+   /* printf("Rayleigh quotient: %f\n", norm2/norm1); */
 
    hypre_ParVectorDestroy(temp);
    return 0;
