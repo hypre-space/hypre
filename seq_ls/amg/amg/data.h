@@ -85,6 +85,7 @@ typedef struct
    int     *nump;
 
    /* data generated in the solve phase */
+   Vector   *Vtemp;
    double   *vtmp;
    int       cycle_op_count;
 
@@ -163,6 +164,7 @@ typedef struct
 				      
 /* data generated in the solve phase */
 #define AMGDataVecTemp(amg_data)      ((amg_data) -> vtmp)
+#define AMGDataVtemp(amg_data)        ((amg_data) -> Vtemp)
 #define AMGDataCycleOpCount(amg_data) ((amg_data) -> cycle_op_count)  
 
 #endif
