@@ -18,7 +18,6 @@ CC = @CC@
 
 C_COMPILE_FLAGS=@CFLAGS@
 CXX_COMPILE_FLAGS=@CXXFLAGS@
-F77_COMPILE_FLAGS=@F77FLAGS@ 
 CINCLUDES=@INCLUDES@ @MPIINCLUDE@
 CDEFS =
  
@@ -100,7 +99,4 @@ ${OBJS}: ${HEADERS}
 
 .c.o:
 	${CC} -o $@ -c ${CFLAGS} $<
-
-.f.o:
-	${F77} -o $@ -c ${FFLAGS} $<
 
