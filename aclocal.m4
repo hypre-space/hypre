@@ -7539,6 +7539,9 @@ if test $acx_blas_ok = no; then
 fi
 
 # Generic BLAS library?
+if test $acx_blas_ok = no; then
+	AC_CHECK_LIB(blas, $dgemm, [acx_blas_ok=yes; BLAS_LIBS="-lblas"])
+fi
 
 AC_SUBST(BLAS_LIBS)
 
