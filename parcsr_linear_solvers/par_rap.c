@@ -201,7 +201,7 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
     *  and needed locally for triple matrix product 
     *-----------------------------------------------------------------------*/
 
-   if (num_cols_diag_A != n_fine) 
+   if (num_procs > 1) 
    {
    	Ps_ext = hypre_ExtractBExt(P,A,1);
    	Ps_ext_data = hypre_CSRMatrixData(Ps_ext);
@@ -254,7 +254,7 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
 	    P_ext_diag_data[cnt_diag++] = Ps_ext_data[j];
          }
    }
-   if (num_cols_diag_A != n_fine) hypre_DestroyCSRMatrix(Ps_ext);
+   if (num_procs > 1) hypre_DestroyCSRMatrix(Ps_ext);
 
    if (P_ext_offd_size || num_cols_offd_P)
    {
