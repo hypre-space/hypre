@@ -72,7 +72,6 @@ FILES =\
  F90_par_vector.c\
  F90_HYPRE_parcsr_matrix.c\
  F90_HYPRE_parcsr_vector.c\
- par_csr_at.c\
  par_csr_aat.c\
  communicationT.c
 
