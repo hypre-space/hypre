@@ -48,9 +48,6 @@ Version 1.8.3a released, 2004/01/21.
 - Fixed the PFMG and SMG solvers to work in the case of pure Neumann
   boundary conditions.
 
-- Added new coarsening options in BoomerAMG.  These options can lead
-  to reduced complexity, and hence reduced storage and solution time.
-
 Version 1.8.2b released, 2003/10/22.
 
 - Performance improvements for Struct solvers when there are many
