@@ -452,7 +452,7 @@ main( int   argc,
     * Set up the RHS and initial guess
     *-----------------------------------------------------------*/
 
-#if 1
+#if 0
    hypre_PrintParCSRMatrix(A, "driver.out.A");
 #endif
 
