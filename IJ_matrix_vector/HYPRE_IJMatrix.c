@@ -176,7 +176,7 @@ HYPRE_SetIJMatrixLocalStorageType( HYPRE_IJMatrix IJmatrix, int type )
    int ierr = 0;
    hypre_IJMatrix *matrix = (hypre_IJMatrix *) IJmatrix;
 
-   hypre_IJMatrixLocalStorage(matrix) = local_storage;
+   hypre_IJMatrixLocalStorageType(matrix) = type;
 
    return(ierr);
 }
@@ -209,11 +209,11 @@ HYPRE_SetIJMatrixDiagRowSizes( HYPRE_IJMatrix IJmatrix, int *sizes )
    hypre_IJMatrix *matrix = (hypre_IJMatrix *) IJmatrix;
 
    if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PETSC_MATRIX )
-      ierr = hypre_SetIJMatrixDiagRowSizesPETSc( matrix );
+      ierr = hypre_SetIJMatrixDiagRowSizesPETSc( matrix , sizes );
    else if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_ISIS_MATRIX )
-      ierr = hypre_SetIJMatrixDiagRowSizesISIS( matrix );
+      ierr = hypre_SetIJMatrixDiagRowSizesISIS( matrix , sizes );
    else if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PARCSR_MATRIX )
-      ierr = hypre_SetIJMatrixDiagRowSizesParcsr( matrix );
+      ierr = hypre_SetIJMatrixDiagRowSizesParcsr( matrix , sizes );
    else
       ierr = -1;
 
@@ -250,11 +250,11 @@ HYPRE_SetIJMatrixOffDiagRowSizes( HYPRE_IJMatrix IJmatrix, int *sizes )
    hypre_IJMatrix *matrix = (hypre_IJMatrix *) IJmatrix;
 
    if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PETSC_MATRIX )
-      ierr = hypre_SetIJMatrixOffDiagRowSizesPETSc( matrix );
+      ierr = hypre_SetIJMatrixOffDiagRowSizesPETSc( matrix , sizes );
    else if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_ISIS_MATRIX )
-      ierr = hypre_SetIJMatrixOffDiagRowSizesISIS( matrix );
+      ierr = hypre_SetIJMatrixOffDiagRowSizesISIS( matrix , sizes );
    else if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PARCSR_MATRIX )
-      ierr = hypre_SetIJMatrixOffDiagRowSizesParcsr( matrix );
+      ierr = hypre_SetIJMatrixOffDiagRowSizesParcsr( matrix , sizes );
    else
       ierr = -1;
 
@@ -288,11 +288,11 @@ HYPRE_SetIJMatrixTotalSize( HYPRE_IJMatrix IJmatrix, int size )
    hypre_IJMatrix *matrix = (hypre_IJMatrix *) IJmatrix;
 
    if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PETSC_MATRIX )
-      ierr = hypre_SetIJMatrixTotalSizePETSc( matrix );
+      ierr = hypre_SetIJMatrixTotalSizePETSc( matrix , size );
    else if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_ISIS_MATRIX )
-      ierr = hypre_SetIJMatrixTotalSizeISIS( matrix );
+      ierr = hypre_SetIJMatrixTotalSizeISIS( matrix , size );
    else if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PARCSR_MATRIX )
-      ierr = hypre_SetIJMatrixTotalSizeParcsr( matrix );
+      ierr = hypre_SetIJMatrixTotalSizeParcsr( matrix , size );
    else
       ierr = -1;
 
@@ -451,11 +451,10 @@ Not collective.
 @return integer error code
 @param HYPRE_IJMatrix &matrix [IN]
 the matrix to be operated on.
-@param int m, n [IN]
-the size of the block of values to be added.
-@param int *rows [IN]
-an integer vector of length m giving the indices in the global matrix
-corresponding to the rows in "values".
+@param int n [IN]
+the number of values in the row to be inserted.
+@param int row [IN]
+index of row to be inserted.
 @param int *cols [IN]
 an integer vector of length n giving the indices in the global matrix
 corresponding to the columns in "values".
