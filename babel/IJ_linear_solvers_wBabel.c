@@ -1669,7 +1669,6 @@ main( int   argc,
       Hypre_ij_y2 = (Hypre_IJBuildVector) Hypre_ParCSRVector__cast2
          ( Hypre_y2, "Hypre.IJBuildVector" );
       Hypre_IJBuildVector_addReference( Hypre_ij_y2 );
-      Hypre_ParCSRVector_deleteReference( Hypre_y2 );
       ierr += Hypre_IJBuildVector_SetCommunicator( Hypre_ij_y2, (void *)comm );
       ierr += Hypre_IJBuildVector_Create( Hypre_ij_y2, (void *)comm,
                                           first_local_col,last_local_col );
@@ -1677,6 +1676,7 @@ main( int   argc,
       Hypre_ParCSRVector_Read( Hypre_y2, "test.clone", (void *)comm );
       Hypre_ParCSRVector_Print( Hypre_y2, "test.read" );
       Hypre_IJBuildVector_deleteReference( Hypre_ij_y2 );
+      Hypre_ParCSRVector_deleteReference( Hypre_y2 );
 
       /* GetRow, b[i], tested but not printed */
       dimsl[0] = 0;   dimsu[0] = local_num_cols;
@@ -1745,7 +1745,6 @@ main( int   argc,
       ierr += Hypre_ParAMG_SetCommunicator( Hypre_AMG, (void *)comm );
       Hypre_ParAMG_SetOperator( Hypre_AMG, Hypre_op_A );
 
-      printf("**** before calling Hypre_ParAMGSet*Parameter\n");
       Hypre_ParAMG_SetIntParameter( Hypre_AMG, "CoarsenType", (hybrid*coarsen_type));
       Hypre_ParAMG_SetIntParameter( Hypre_AMG, "MeasureType", measure_type);
       Hypre_ParAMG_SetDoubleParameter( Hypre_AMG, "Tol", tol);
@@ -2618,9 +2617,11 @@ main( int   argc,
    HYPRE_IJVectorDestroy(ij_b);
    HYPRE_IJVectorDestroy(ij_x);
 
+   if (num_grid_sweeps)
+      hypre_TFree(num_grid_sweeps);
 
-   if( Hypre_num_grid_sweeps )
-      SIDL_int__array_deleteReference( Hypre_num_grid_sweeps );
+   /* this is in Hypre_AMG, will be deleted there: if( Hypre_num_grid_sweeps )
+      SIDL_int__array_deleteReference( Hypre_num_grid_sweeps );*/
    if( Hypre_grid_relax_type )
       SIDL_int__array_deleteReference( Hypre_grid_relax_type );
    if( Hypre_relax_weight )
@@ -2629,7 +2630,10 @@ main( int   argc,
       SIDL_int__array_deleteReference( Hypre_grid_relax_points );
    if( Hypre_dof_func )
       SIDL_int__array_deleteReference( Hypre_dof_func );
-
+   if( Hypre_AMG )
+      Hypre_ParAMG_deleteReference( Hypre_AMG );
+   if( Hypre_values )
+      SIDL_double__array_deleteReference( Hypre_values );
 
 /*
    hypre_FinalizeMemoryDebug();
