@@ -397,8 +397,6 @@ static void ExchangePrunedRows(MPI_Comm comm, Matrix *M, Numbering *numb,
   PrunedRows *pruned_rows, int num_levels)
 {
     RowPatt *patt;
-    int *ind_global;
-    int  ind_global_size = 1000;
     int row, len, *ind;
 
     int num_requests;
@@ -425,7 +423,6 @@ static void ExchangePrunedRows(MPI_Comm comm, Matrix *M, Numbering *numb,
     /* Merged pattern of pruned rows on this processor */
 
     patt = RowPattCreate(PARASAILS_MAXLEN);
-    ind_global = (int *) malloc(ind_global_size * sizeof(int));
 
     for (row=0; row<=M->end_row - M->beg_row; row++)
     {
@@ -446,17 +443,11 @@ static void ExchangePrunedRows(MPI_Comm comm, Matrix *M, Numbering *numb,
         RowPattPrevLevel(patt, &len, &ind);
 
 	/* Convert local row numbers to global row numbers */
-        if (len > ind_global_size)
-        {
-	    free(ind_global);
-	    ind_global_size = len;
-            ind_global = (int *) malloc(ind_global_size * sizeof(int));
-        }
-        NumberingLocalToGlobal(numb, len, ind, ind_global);
+        NumberingLocalToGlobal(numb, len, ind, ind);
 
         replies_list = (int *) calloc(npes, sizeof(int));
 
-        SendRequests(comm, M, len, ind_global, &num_requests, replies_list);
+        SendRequests(comm, M, len, ind, &num_requests, replies_list);
 
         num_replies = FindNumReplies(comm, replies_list);
         free(replies_list);
@@ -481,7 +472,6 @@ static void ExchangePrunedRows(MPI_Comm comm, Matrix *M, Numbering *numb,
     }
 
     RowPattDestroy(patt);
-    free(ind_global);
     free(buffer);
     free(requests);
     free(statuses);
@@ -495,8 +485,6 @@ static void ExchangeStoredRows(MPI_Comm comm, Matrix *A, Matrix *M,
   Numbering *numb, StoredRows *stored_rows, LoadBal *load_bal)
 {
     RowPatt *patt;
-    int *ind_global;
-    int  ind_global_size = 1000;
     int row, len, *ind;
     double *val;
 
@@ -521,7 +509,6 @@ static void ExchangeStoredRows(MPI_Comm comm, Matrix *A, Matrix *M,
     /* The merged pattern is not already known, since M is triangular */
 
     patt = RowPattCreate(PARASAILS_MAXLEN);
-    ind_global = (int *) malloc(ind_global_size * sizeof(int));
 
     for (row=load_bal->beg_row; row<=M->end_row; row++)
     {
@@ -544,17 +531,11 @@ static void ExchangeStoredRows(MPI_Comm comm, Matrix *A, Matrix *M,
     RowPattGet(patt, &len, &ind);
 
     /* Convert local row numbers to global row numbers */
-    if (len > ind_global_size)
-    {
-	free(ind_global);
-	ind_global_size = len;
-        ind_global = (int *) malloc(ind_global_size * sizeof(int));
-    }
-    NumberingLocalToGlobal(numb, len, ind, ind_global);
+    NumberingLocalToGlobal(numb, len, ind, ind);
 
     replies_list = (int *) calloc(npes, sizeof(int));
 
-    SendRequests(comm, A, len, ind_global, &num_requests, replies_list);
+    SendRequests(comm, A, len, ind, &num_requests, replies_list);
 
     num_replies = FindNumReplies(comm, replies_list);
     free(replies_list);

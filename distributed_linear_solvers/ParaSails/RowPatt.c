@@ -58,6 +58,8 @@ RowPatt *RowPattCreate(int maxlen)
     p->prev_len = 0;
     p->ind      = (int *) malloc(maxlen * sizeof(int));
     p->mark     = (int *) malloc(maxlen * sizeof(int));
+    p->buffer   = NULL;
+    p->buflen   = 0;
 
     for (i=0; i<maxlen; i++)
         p->mark[i] = -1;
@@ -106,8 +108,7 @@ void RowPattMerge(RowPatt *p, int len, int *ind)
 
 	if (p->mark[ind[i]] == -1)
 	{
-	    if (p->len >= p->maxlen)
-		resize(p, p->len*2);
+	    assert(p->len < p->maxlen);
 
 	    p->mark[ind[i]] = p->len;
             p->ind[p->len] = ind[i];
@@ -136,8 +137,7 @@ void RowPattMergeExt(RowPatt *p, int len, int *ind, int num_loc)
 
 	if (p->mark[ind[i]] == -1)
 	{
-	    if (p->len >= p->maxlen)
-		resize(p, p->len*2);
+	    assert(p->len < p->maxlen);
 
 	    p->mark[ind[i]] = p->len;
             p->ind[p->len] = ind[i];
@@ -149,12 +149,27 @@ void RowPattMergeExt(RowPatt *p, int len, int *ind, int num_loc)
 /*--------------------------------------------------------------------------
  * RowPattGet - Return the pattern of "p".  The length and pointer to the
  * pattern indices are returned through the parameters "lenp" and "indp".
+ * A copy of the indices is returned; this copy is destroyed on the next
+ * call to RowPattGet or RowPattPrevLevel.
  *--------------------------------------------------------------------------*/
 
 void RowPattGet(RowPatt *p, int *lenp, int **indp)
 {
-    *lenp = p->len;
-    *indp = p->ind;
+    int len;
+
+    len = p->len;
+
+    if (len > p->buflen)
+    {
+	free(p->buffer);
+	p->buflen = len + 100;
+	p->buffer = (int *) malloc(p->buflen * sizeof(int));
+    }
+
+    memcpy(p->buffer, p->ind, len*sizeof(int));
+
+    *lenp = len;
+    *indp = p->buffer;
 }
 
 /*--------------------------------------------------------------------------
@@ -162,12 +177,27 @@ void RowPattGet(RowPatt *p, int *lenp, int **indp)
  * since the last call to RowPattPrevLevel (or all the indices if never
  * called).  The length and pointer to the pattern indices are returned 
  * through the parameters "lenp" and "indp".
+ * A copy of the indices is returned; this copy is destroyed on the next
+ * call to RowPattGet or RowPattPrevLevel.
  *--------------------------------------------------------------------------*/
 
 void RowPattPrevLevel(RowPatt *p, int *lenp, int **indp)
 {
-    *lenp = p->len - p->prev_len;
-    *indp = &p->ind[p->prev_len];
+    int len;
+
+    len = p->len - p->prev_len;
+
+    if (len > p->buflen)
+    {
+	free(p->buffer);
+	p->buflen = len + 100;
+	p->buffer = (int *) malloc(p->buflen * sizeof(int));
+    }
+
+    memcpy(p->buffer, &p->ind[p->prev_len], len*sizeof(int));
+
+    *lenp = len;
+    *indp = p->buffer;
 
     p->prev_len = p->len;
 }

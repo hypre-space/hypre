@@ -24,6 +24,8 @@ typedef struct
     int  prev_len;
     int *ind;
     int *mark;
+    int *buffer; /* buffer used for outputting indices */
+    int  buflen; /* length of this buffer */
 }
 RowPatt;
 
