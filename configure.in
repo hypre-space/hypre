@@ -147,6 +147,50 @@ AC_ARG_WITH(extra-ldpath,
 [LDFLAGS="-L`echo ${withval}|sed 's/ /\ -L/g'` ${LDFLAGS}"]
 )
 
+AC_ARG_WITH(insure,
+[  --with-insure=FLAGS     FLAGS are optional to pass to insure, e.g.
+			  -Zoi \"report_file stderr\"
+			  will send output to standard error, while
+			  -Zoi \"report_file insure.log\"
+			  will send output to a file.
+			  assign cc and CC as the C and C++ compilers 
+			  if not already set by user and 
+			  prepends "insure" to compile/link line-- no 
+			  checking is done to ensure insure is present on 
+			  the machine],
+[if test "$casc_user_chose_compilers" = "no"
+ then
+   CC=insure
+   CXX=insure
+   CFLAGS="$CFLAGS -g"
+   CXXFLAGS="$CXXFLAGS -g"
+   casc_user_chose_compilers=yes
+ fi
+ case "${withval}" in
+   yes) PREPEND="insure" ;;
+   no)  PREPEND="" ;;
+   *)   PREPEND="insure $withval" ;;
+ esac],
+[PREPEND=""]
+)
+
+AC_ARG_WITH(insure-to-file,
+[  --with-insure-to-file   direct insure output to the file \"insure.log\"],
+[if test "$casc_user_chose_compilers" = "no"
+ then
+   CC=insure
+   CXX=insure
+   CFLAGS="$CFLAGS -Zoi \"report_file insure.log\""
+   CXXFLAGS="$CXXFLAGS -Zoi \"report_file insure.log\""
+   casc_user_chose_compilers=yes
+ fi
+ case "${withval}" in
+   yes) PREPEND="insure -Zoi \"report_file insure.log\"";;
+   no)  PREPEND="" ;;
+   *)   PREPEND="insure $withval" ;;
+ esac]
+)
+
 AC_ARG_WITH(purify,
 [  --with-purify=FLAGS     FLAGS are optional to pass to purify, e.g.
 			  \"-log-file=struct_ls.purify 
@@ -675,23 +719,35 @@ case $ARCH in
 
     if test "$casc_using_openmp" = "no" ; then
       if test -z "$CFLAGS"; then
-        CASC_SET_COPT(-O)
+        if test "$CC" = "pgcc ; then
+          CASC_SET_COPT(-fast)
+        else
+          CASC_SET_COPT(-O)
+        fi
       fi
       if test -z "$CXXFLAGS"; then
-        CASC_SET_CXXOPT(-O)
+        if test "$CXX" = "pgCC ; then
+          CASC_SET_CXXOPT(-fast)
+        else
+          CASC_SET_CXXOPT(-O)
+        fi
       fi
       if test -z "$F77FLAGS"; then
-        CASC_SET_FOPT(-O)
+        if test "$F77" = "pgf77 ; then
+          CASC_SET_FOPT(-fast)
+        else
+          CASC_SET_FOPT(-O)
+        fi
       fi
     else
       if test -z "$CFLAGS"; then
-        CASC_SET_COPT(-mp -I/usr/include -I/usr/apps/pgi/3.2/linux86/include)
+        CASC_SET_COPT(-fast -mp -I/usr/include -I/usr/apps/pgi/3.2/linux86/include)
       fi
       if test -z "$CXXFLAGS"; then
-        CASC_SET_CXXOPT(-mp -I/usr/include -I/usr/apps/pgi/3.2/linux86/include -I/usr/apps/pgi/3.2/linux86/include/CC)
+        CASC_SET_CXXOPT(-fast -mp -I/usr/include -I/usr/apps/pgi/3.2/linux86/include -I/usr/apps/pgi/3.2/linux86/include/CC)
       fi
       if test -z "$F77FLAGS"; then
-        CASC_SET_FOPT(-mp)
+        CASC_SET_FOPT(-fast -mp)
       fi
     fi
     CASC_SET_CDEBUG(-g)
