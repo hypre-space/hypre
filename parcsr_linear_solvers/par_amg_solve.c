@@ -133,28 +133,39 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
     *     write some initial info
     *-----------------------------------------------------------------------*/
 
-   if (my_id == 0 && amg_ioutdat > 1) printf("\n\nAMG SOLUTION INFO:\n");
+   if (my_id == 0 && amg_ioutdat > 1 && tol > 0.)
+     printf("\n\nAMG SOLUTION INFO:\n");
 
    /*-----------------------------------------------------------------------
     *    Compute initial fine-grid residual and print 
     *-----------------------------------------------------------------------*/
 
-   hypre_ParVectorCopy(F_array[0], Vtemp);
-   hypre_ParCSRMatrixMatvec(alpha, A_array[0], U_array[0], beta, Vtemp);
-   resid_nrm = sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
-
-   resid_nrm_init = resid_nrm;
-   rhs_norm = sqrt(hypre_ParVectorInnerProd(f, f));
-   if (rhs_norm)
+   if (tol > 0.)
    {
-      relative_resid = resid_nrm_init / rhs_norm;
+     hypre_ParVectorCopy(F_array[0], Vtemp);
+     hypre_ParCSRMatrixMatvec(alpha, A_array[0], U_array[0], beta, Vtemp);
+     resid_nrm = sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
+
+     resid_nrm_init = resid_nrm;
+     rhs_norm = sqrt(hypre_ParVectorInnerProd(f, f));
+     if (rhs_norm)
+     {
+       relative_resid = resid_nrm_init / rhs_norm;
+     }
+     else
+     {
+       relative_resid = resid_nrm_init;
+     }
    }
    else
    {
-      relative_resid = resid_nrm_init;
+     resid_nrm = 0.9*tol;
+     resid_nrm_init = resid_nrm;
+     relative_resid = 1.;
+     rhs_norm = 1.;
    }
 
-   if (my_id ==0 && (amg_ioutdat > 1))
+   if (my_id == 0 && amg_ioutdat > 1 && tol > 0.)
    {     
       printf("                                            relative\n");
       printf("               residual        factor       residual\n");
@@ -182,18 +193,27 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
        *    Compute  fine-grid residual and residual norm
        *----------------------------------------------------------------*/
 
-      hypre_ParVectorCopy(F_array[0], Vtemp);
-      hypre_ParCSRMatrixMatvec(alpha, A_array[0], U_array[0], beta, Vtemp);
-      resid_nrm = sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
-
-      conv_factor = resid_nrm / old_resid;
-      if (rhs_norm)
+      if (tol > 0.)
       {
-         relative_resid = resid_nrm / rhs_norm;
+        hypre_ParVectorCopy(F_array[0], Vtemp);
+        hypre_ParCSRMatrixMatvec(alpha, A_array[0], U_array[0], beta, Vtemp);
+        resid_nrm = sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
+
+        conv_factor = resid_nrm / old_resid;
+        if (rhs_norm)
+        {
+           relative_resid = resid_nrm / rhs_norm;
+        }
+        else
+        {
+           relative_resid = resid_nrm;
+        }
       }
       else
       {
-         relative_resid = resid_nrm;
+        resid_nrm = 0.9*tol;
+        conv_factor = resid_nrm / old_resid;
+        relative_resid = 1.;
       }
 
       ++cycle_count;
@@ -201,7 +221,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
       hypre_ParAMGDataNumIterations(amg_data) = cycle_count;
       hypre_ParAMGDataRelativeResidualNorm(amg_data) = relative_resid;
 
-      if (my_id == 0 && (amg_ioutdat > 1))
+      if (my_id == 0 && amg_ioutdat > 1 && tol > 0.)
       { 
          printf("    Cycle %2d   %e    %f     %e \n", cycle_count,
                  resid_nrm, conv_factor, relative_resid);
@@ -214,7 +234,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
     *    Compute closing statistics
     *-----------------------------------------------------------------------*/
 
-   if (cycle_count > 0) 
+   if (cycle_count > 0 && tol > 0.) 
      conv_factor = pow((resid_nrm/resid_nrm_init),(1.0/((double) cycle_count)));
    else
      conv_factor = 1.;
@@ -236,7 +256,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
       cycle_cmplxty = ((double) cycle_op_count) / ((double) num_coeffs[0]);
    }
 
-   if (my_id == 0 && amg_ioutdat > 1)
+   if (my_id == 0 && amg_ioutdat > 1 && tol > 0.)
    {
       if (Solve_err_flag == 1)
       {
