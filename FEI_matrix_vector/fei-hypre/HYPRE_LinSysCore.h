@@ -368,9 +368,11 @@ class HYPRE_LinSysCore
                               HYPRE_ParVector b, double& nrm1, double& nrm2);
    void  addToProjectionSpace(HYPRE_IJVector x, HYPRE_IJVector b);
    void  getVersion(char**);
-   void  createMapFromSoln();
+   void  beginCreateMapFromSoln();
+   void  endCreateMapFromSoln();
    void  putIntoMappedMatrix(int row, int numValues, const double* values,
                              const int* scatterIndices);
+   void  getFEGridObject(void **object) { (*object) = fegrid; }
 
  private:        //functions
 
@@ -408,6 +410,16 @@ class HYPRE_LinSysCore
    int             numProcs_;           // number of processors
    int             mypid_;              // my processor ID
    int             HYOutputLevel_;      // control print information
+
+   // ----------------------------------------------------------------------
+   // for storing information about how to load matrix directly
+   // ----------------------------------------------------------------------
+
+   int             mapFromSolnFlag_;
+   int             mapFromSolnLeng_;
+   int             mapFromSolnLengMax_;
+   int             *mapFromSolnList_;
+   int             *mapFromSolnList2_;
 
    // ----------------------------------------------------------------------
    // matrix and vectors
@@ -527,7 +539,7 @@ class HYPRE_LinSysCore
    // map and others 
    // ----------------------------------------------------------------------
 
-   int             *node2EqnMap;
+   void            *fegrid;
    Lookup          *lookup_;
    int             haveLookup_;
    double          **projectionMatrix_; 

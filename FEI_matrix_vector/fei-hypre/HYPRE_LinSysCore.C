@@ -31,6 +31,7 @@
 #include "../../parcsr_linear_solvers/HYPRE_parcsr_ls.h"
 #include "HYPRE_parcsr_bicgstabl.h"
 #include "HYPRE_LinSysCore.h"
+#include "fegridinfo.h"
 
 #define abs(x) (((x) > 0.0) ? x : -(x))
 
@@ -148,7 +149,6 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
                   colValues_(NULL),
                   selectedList_(NULL),
                   selectedListAux_(NULL),
-                  node2EqnMap(NULL),
                   HYOutputLevel_(0),
                   lookup_(NULL),
                   haveLookup_(0),
@@ -157,6 +157,11 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
                   projectCurrSize_(0),
                   HYpxs_(NULL),
                   projectionMatrix_(NULL),
+                  mapFromSolnFlag_(0),
+                  mapFromSolnLeng_(0),
+                  mapFromSolnLengMax_(0),
+                  mapFromSolnList_(NULL),
+                  mapFromSolnList2_(NULL),
                   HYpbs_(NULL)
 {
     //-------------------------------------------------------------------
@@ -229,6 +234,9 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
     rhsIDs_             = new int[1];
     rhsIDs_[0]          = 0;
 
+    FEGridInfo *gridinfo = new FEGridInfo(mypid_);
+    fegrid               = (void *) gridinfo;
+
 #ifdef DEBUG
     printf("%4d : HYPRE_LSC::leaving  constructor.\n",mypid_);
 #endif
@@ -296,8 +304,6 @@ HYPRE_LinSysCore::~HYPRE_LinSysCore()
     systemAssembled_ = 0;
     projectCurrSize_ = 0;
 
-    if ( node2EqnMap != NULL ) delete [] node2EqnMap;
-
     if ( colIndices_ != NULL )
     {
        for ( int i = 0; i < localEndRow_-localStartRow_+1; i++ )
@@ -316,6 +322,16 @@ HYPRE_LinSysCore::~HYPRE_LinSysCore()
     {
        delete [] rowLengths_;
        rowLengths_ = NULL;
+    }
+    if ( mapFromSolnList_ != NULL ) 
+    {
+       delete [] mapFromSolnList_;
+       mapFromSolnList_ = NULL;
+    }
+    if ( mapFromSolnList2_ != NULL ) 
+    {
+       delete [] mapFromSolnList2_;
+       mapFromSolnList2_ = NULL;
     }
 
     //-------------------------------------------------------------------
@@ -382,6 +398,9 @@ HYPRE_LinSysCore::~HYPRE_LinSysCore()
        delete [] selectedListAux_; 
        selectedListAux_ = NULL;
     }
+    FEGridInfo *gridinfo = (FEGridInfo *) fegrid;
+    delete gridinfo;
+    fegrid = NULL;
     if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
     {
        printf("%4d : HYPRE_LSC::leaving  destructor.\n",mypid_);
@@ -601,6 +620,20 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
           }
        }
 
+       else if ( !strcmp(param1, "stopCrit") )
+       {
+          sscanf(params[i],"%s %s", param, param2);
+          if      ( !strcmp(param2, "absolute" ) ) normAbsRel_ = 1;
+          else if ( !strcmp(param2, "relative" ) ) normAbsRel_ = 0;
+          else                                     normAbsRel_ = 0;   
+          
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+          {
+             printf("       HYPRE_LSC::parameters gmresStopCrit = %s\n",
+                    param2);
+          }
+       }
+
        //----------------------------------------------------------------
        // preconditioner reuse
        //----------------------------------------------------------------
@@ -776,9 +809,9 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
           }
        }
 
-      //----------------------------------------------------------------
-      // amg preconditoner : no of relaxation sweeps per level
-      //----------------------------------------------------------------
+       //----------------------------------------------------------------
+       // amg preconditoner : no of relaxation sweeps per level
+       //----------------------------------------------------------------
 
        else if ( !strcmp(param1, "amgNumSweeps") )
        {
@@ -1814,7 +1847,7 @@ void HYPRE_LinSysCore::sumIntoRHSVector(int num, const double* values,
     local_ind = new int[num];
     for ( i = 0; i < num; i++ ) // change to 0-based
     {
-#if defined(FEI_V13) || defined(FEI_V14)
+#if defined(FEI_V13) || defined(FEI_V14) || defined(NOFEI)
        if ( indices[i] >= localStartRow_  && indices[i] <= localEndRow_ )
           local_ind[i] = indices[i] - 1;
 #else
@@ -2572,13 +2605,30 @@ void HYPRE_LinSysCore::setRHSID(int rhsID)
 void HYPRE_LinSysCore::putInitialGuess(const int* eqnNumbers,
                                        const double* values, int leng) 
 {
-    int i, ierr, *local_ind;
+    int i, ierr, *local_ind, *iarray, *iarray2;
 
-    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 0 )
     {
        printf("%4d : HYPRE_LSC::entering putInitalGuess.\n",mypid_);
     }
 
+    if ( mapFromSolnFlag_ == 1 )
+    {
+       if ( (mapFromSolnLeng_+leng) >= mapFromSolnLengMax_ )
+       {
+          iarray  = mapFromSolnList_;
+          iarray2 = mapFromSolnList2_;
+          mapFromSolnLengMax_ = mapFromSolnLengMax_ + 2 * leng;
+          for ( i = 0; i < mapFromSolnLeng_; i++ ) 
+          {
+             mapFromSolnList_[i] = iarray[i];
+             mapFromSolnList2_[i] = iarray2[i];
+          }
+          if ( iarray  != NULL ) delete [] iarray;
+          if ( iarray2 != NULL ) delete [] iarray2;
+       }
+    }
+ 
     local_ind = new int[leng];
     for ( i = 0; i < leng; i++ ) // change to 0-based
     {
@@ -2594,6 +2644,8 @@ void HYPRE_LinSysCore::putInitialGuess(const int* eqnNumbers,
                        mypid_, eqnNumbers[i]);
           exit(1);
        }
+       mapFromSolnList_[mapFromSolnLeng_] = eqnNumbers[i];
+       mapFromSolnList2_[mapFromSolnLeng_++] = (int) values[i];
     }
 
     ierr = HYPRE_IJVectorSetLocalComponents(HYx_,leng,local_ind,NULL,values);
@@ -2601,7 +2653,7 @@ void HYPRE_LinSysCore::putInitialGuess(const int* eqnNumbers,
 
     delete [] local_ind;
 
-    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 0 )
     {
        printf("%4d : HYPRE_LSC::leaving  putInitalGuess.\n",mypid_);
     }
@@ -3450,6 +3502,8 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
           HYPRE_ParCSRPCGSetTol(HYSolver_, tolerance_*oldnorm/newnorm);
           HYPRE_ParCSRPCGSetRelChange(HYSolver_, 0);
           HYPRE_ParCSRPCGSetTwoNorm(HYSolver_, 1);
+          if ( normAbsRel_ == 0 ) HYPRE_ParCSRPCGSetStopCrit(HYSolver_,0);
+          else                    HYPRE_ParCSRPCGSetStopCrit(HYSolver_,1);
           if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
           {
              printf("***************************************************\n");
@@ -5061,37 +5115,51 @@ void HYPRE_LinSysCore::getVersion(char **name)
 // create a node to equation map from the solution vector
 //---------------------------------------------------------------------------
 
-void HYPRE_LinSysCore::createMapFromSoln()
+void HYPRE_LinSysCore::beginCreateMapFromSoln()
 {
-    int    i, ierr, *equations, local_nrows;
-    double *answers;
+   mapFromSolnFlag_    = 1;
+   mapFromSolnLengMax_ = 10;
+   mapFromSolnLeng_    = 0;
+   mapFromSolnList_    = new int[mapFromSolnLeng_];
+   mapFromSolnList2_   = new int[mapFromSolnLeng_];
+   return;
+}
+
+//***************************************************************************
+// create a node to equation map from the solution vector
+//---------------------------------------------------------------------------
+
+void HYPRE_LinSysCore::endCreateMapFromSoln()
+{
+    int    i, ierr, *equations, local_nrows, *iarray;
+    double *darray, *answers;
 
     if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
     {
-       printf("%4d : HYPRE_LSC::entering createMapSoln.\n",mypid_);
+       printf("%4d : HYPRE_LSC::entering endCreateMapFromSoln.\n",mypid_);
     }
 
-    local_nrows = localEndRow_ - localStartRow_ + 1;
-    equations   = new int[local_nrows];
-    answers     = new double[local_nrows];
-    node2EqnMap = new int[local_nrows];
+    mapFromSolnFlag_ = 0;
+    if ( mapFromSolnLeng_ > 0 )
+       darray = new double[mapFromSolnLeng_];
+    for ( i = 0; i < mapFromSolnLeng_; i++ )
+       darray[i] = (double) mapFromSolnList_[i];
 
-    for (i = 0; i < local_nrows; i++) equations[i] = localStartRow_ + i - 1; 
-    ierr = HYPRE_IJVectorGetLocalComponents(HYx_,local_nrows,equations,NULL,
-                                            answers);
-    assert(!ierr);
-    delete [] equations;
-    for (i = 0; i < local_nrows; i++) 
-    {
-       node2EqnMap[i] = (int) answers[i];
-       if ( node2EqnMap[i] < localStartRow_-1 || node2EqnMap[i] > localEndRow_ )
-          printf("%4d : createMapFromSoln WARNING : map index out of range\n",
-                 mypid_);
-    }
+    qsort1(mapFromSolnList2_, darray, 0, mapFromSolnLeng_-1);
+    iarray = mapFromSolnList2_;
+    mapFromSolnList2_ = mapFromSolnList_;
+    mapFromSolnList_ = iarray;
+    for ( i = 0; i < mapFromSolnLeng_; i++ )
+       mapFromSolnList2_[i] = (int) darray[i];
+    delete [] darray;
+
+    for ( i = 0; i < mapFromSolnLeng_; i++ )
+       printf("HYPRE_LSC::mapFromSoln %d = %d\n",mapFromSolnList_[i],
+              mapFromSolnList2_[i]);
 
     if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
     {
-       printf("%4d : HYPRE_LSC::leaving  createMapFromSoln.\n",mypid_);
+       printf("%4d : HYPRE_LSC::leaving  endCreateMapFromSoln.\n",mypid_);
     }
 }
 
@@ -5103,7 +5171,7 @@ void HYPRE_LinSysCore::putIntoMappedMatrix(int row, int numValues,
                   const double* values, const int* scatterIndices)
 {
     int    i, index, colIndex, localRow, mappedRow, mappedCol, newLeng;
-    int    *tempInd;
+    int    *tempInd, ind2;
     double *tempVal;
 
     //-------------------------------------------------------------------
@@ -5120,9 +5188,11 @@ void HYPRE_LinSysCore::putIntoMappedMatrix(int row, int numValues,
        printf("putIntoMappedMatrix ERROR : invalid row number %d.\n",row);
        exit(1);
     }
-    if ( node2EqnMap != NULL ) mappedRow = node2EqnMap[row];
-    else                       mappedRow = row;
-    localRow = mappedRow - localStartRow_;
+    index = HYPRE_LSI_Search(mapFromSolnList_, row, mapFromSolnLeng_);
+
+    if ( index >= 0 ) mappedRow = mapFromSolnList2_[index];
+    else              mappedRow = row;
+    localRow = mappedRow - localStartRow_ + 1;
 
     //-------------------------------------------------------------------
     // load the local matrix
@@ -5147,14 +5217,17 @@ void HYPRE_LinSysCore::putIntoMappedMatrix(int row, int numValues,
     {
        colIndex = scatterIndices[i];
 
-       // this only works in serial for now
-       if ( node2EqnMap != NULL ) mappedCol = node2EqnMap[colIndex];
-       else                       mappedCol = colIndex;
+       ind2 = HYPRE_LSI_Search(mapFromSolnList_,colIndex,mapFromSolnLeng_);
+       if ( mapFromSolnList_ != NULL ) mappedCol = mapFromSolnList2_[ind2];
+       else                            mappedCol = colIndex;
 
        colIndices_[localRow][index] = mappedCol;
        colValues_[localRow][index++] = values[i];
+       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 0 )
+          printf("%4d : putIntoMappedMatrix : row, col = %8d %8d %e\n",
+                 mypid_, localRow, colIndices_[localRow][index-1],
+                 colValues_[localRow][index-1]);
     }
-
     rowLengths_[localRow] = newLeng;
 }
 
