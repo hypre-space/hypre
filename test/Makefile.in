@@ -1063,15 +1063,15 @@ uninstall-info: uninstall-info-recursive
 	uninstall-info-am
 
 
-all: ij ij_mv new_ij struct sstruct
+all: ij$(EXEEXT) ij_mv$(EXEEXT) new_ij$(EXEEXT) struct$(EXEEXT) sstruct$(EXEEXT)
 
-fei++: fei
+fei++: fei$(EXEEXT)
 
-all++: ij.C++ ij_mv.C++ struct.C++ sstruct.C++
+all++: ij.C++$(EXEEXT) ij_mv.C++$(EXEEXT) struct.C++$(EXEEXT) sstruct.C++$(EXEEXT)
 
-all77: f77_ij f77_ij_mv f77_struct
+all77: f77_ij$(EXEEXT) f77_ij_mv$(EXEEXT) f77_struct$(EXEEXT)
 
-babel: f77_ij_b ij_b # f77_struct_b struct_b
+babel: f77_ij_b$(EXEEXT) ij_b$(EXEEXT) # f77_struct_b$(EXEEXT) struct_b$(EXEEXT)
 
 # some simple dependency checking
 $(ij_OBJECTS): $(ij_dependencies)
