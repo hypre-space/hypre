@@ -439,8 +439,6 @@ int HYPRE_LSI_MLISetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
    if ( mli_object->feData_ != NULL )
       mli->setFEData( 0, mli_object->feData_, mli_object->mapper_ );
    if ( mli_object->sfei_ != NULL ) mli->setSFEI(0, mli_object->sfei_);
-   mli_object->mapper_ = NULL;
-   mli_object->feData_ = NULL;
 
    /* -------------------------------------------------------- */ 
    /* load null space, if there is any                         */
@@ -902,6 +900,11 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
       sscanf(paramString,"%s %s %lg",param1,param2,
              &(mli_object->arpackTol_));
       if ( mli_object->arpackTol_ <= 0.0 ) mli_object->arpackTol_ = 0.0; 
+   }
+   else if ( !strcmp(param2, "incrNullSpaceDim") )
+   {
+      sscanf(paramString,"%s %s %d",param1,param2, &i);
+      mli_object->nSpaceDim_ += i;
    }
    else 
    {

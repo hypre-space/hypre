@@ -1219,6 +1219,32 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
       // MLI preconditoners  (hold this until the end)
       //---------------------------------------------------------------
 
+      else if ( !strcmp(param1, "MLI_Hybrid") )
+      {
+         MLI_Hybrid_GSA_ = 1;
+      }
+      else if ( !strcmp(param1, "MLI_Hybrid_NSIncr") )
+      {
+         sscanf(params[i],"%s %d", param, &MLI_Hybrid_NSIncr_);
+         if ( MLI_Hybrid_NSIncr_ <= 0 ) MLI_Hybrid_NSIncr_ = 1;
+         if ( MLI_Hybrid_NSIncr_ > 10 ) MLI_Hybrid_NSIncr_ = 10;
+      }
+      else if ( !strcmp(param1, "MLI_Hybrid_MaxIter") )
+      {
+         sscanf(params[i],"%s %d", param, &MLI_Hybrid_MaxIter_);
+         if ( MLI_Hybrid_MaxIter_ <=  0 ) MLI_Hybrid_MaxIter_ = 10;
+      }
+      else if ( !strcmp(param1, "MLI_Hybrid_NTrials") )
+      {
+         sscanf(params[i],"%s %d", param, &MLI_Hybrid_NTrials_);
+         if ( MLI_Hybrid_NTrials_ <=  0 ) MLI_Hybrid_NTrials_ = 1;
+      }
+      else if ( !strcmp(param1, "MLI_Hybrid_ConvRate") )
+      {
+         sscanf(params[i],"%s %lg", param, &MLI_Hybrid_ConvRate_);
+         if ( MLI_Hybrid_ConvRate_ >=  1.0 ) MLI_Hybrid_ConvRate_ = 1.0;
+         if ( MLI_Hybrid_ConvRate_ <=  0.0 ) MLI_Hybrid_ConvRate_ = 0.0;
+      }
       else if ( !strcmp(param1, "MLI") )
       {
 #ifdef HAVE_MLI

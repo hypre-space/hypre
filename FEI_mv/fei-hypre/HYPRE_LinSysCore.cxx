@@ -295,6 +295,11 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
    MLI_FieldSize_      = 0;
    MLI_NodalCoord_     = NULL;
    MLI_EqnNumbers_     = NULL;
+   MLI_Hybrid_GSA_     = 0;
+   MLI_Hybrid_NSIncr_   = 2;
+   MLI_Hybrid_MaxIter_  = 100;
+   MLI_Hybrid_ConvRate_ = 0.95;
+   MLI_Hybrid_NTrials_  = 5;
 }
 
 //***************************************************************************
@@ -3630,10 +3635,11 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
    int                *constrMap, *constrEqns;
 #endif
    int                *numSweeps, *relaxType;
-   int                *matSizes, *rowInd, retFlag;
+   int                *matSizes, *rowInd, retFlag, tempIter, nTrials;
    double             rnorm=0.0, ddata, *colVal, *relaxWt, *diagVals;
    double             stime, etime, ptime, rtime1, rtime2, newnorm;
-   char               fname[40];
+   double             rnorm0, rnorm1, convRate, rateThresh;
+   char               fname[40], paramString[100];
    FILE               *fp;
    HYPRE_IJMatrix     TempA, IJI;
    HYPRE_IJVector     TempX, TempB, TempR;
@@ -4003,21 +4009,84 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
               printf("HYPRE_LSC::launchSolver ERROR : in PCG setup.\n");
               return retFlag;
            }
-
+           // if variable mli preconditioner (SA and GSA)
+           if ( MLI_Hybrid_GSA_ && HYPreconID_ == HYMLI )
+           {
+              if ( normAbsRel_ == 0 )
+              {
+                 HYPRE_ParVectorCopy( b_csr, r_csr );
+                 HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
+                 HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm0);
+                 rnorm0 = sqrt( rnorm0 );
+              }
+              else rnorm0 = 1.0;
+              HYPRE_ParCSRPCGSetMaxIter(HYSolver_, MLI_Hybrid_MaxIter_);
+              rateThresh = 1.0;
+              for ( i = 0; i < MLI_Hybrid_MaxIter_; i++ )
+                 rateThresh *= MLI_Hybrid_ConvRate_;
+           }
            MPI_Barrier( comm_ );
            ptime  = LSC_Wtime();
-
            retFlag = HYPRE_ParCSRPCGSolve(HYSolver_, A_csr, b_csr, x_csr);
-           if ( retFlag != 0 )
-           {
-              printf("HYPRE_LSC::launchSolver ERROR : in PCG solve.\n");
-              return retFlag;
-           }
            HYPRE_ParCSRPCGGetNumIterations(HYSolver_, &numIterations);
            HYPRE_ParVectorCopy( b_csr, r_csr );
            HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
            HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
            rnorm = sqrt( rnorm );
+           // if variable mli preconditioner (SA and GSA)
+           if ( MLI_Hybrid_GSA_ && HYPreconID_ == HYMLI )
+           {
+              nTrials = 1;
+              if (rnorm/rnorm0 >= tolerance_)
+              {
+                 HYPRE_ParCSRPCGSolve(HYSolver_, A_csr, b_csr, x_csr);
+                 HYPRE_ParCSRPCGGetNumIterations(HYSolver_, &tempIter);
+                 numIterations += tempIter;
+                 HYPRE_ParVectorCopy( b_csr, r_csr );
+                 HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
+                 HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm1);
+                 rnorm1 = sqrt( rnorm1 );
+                 convRate = rnorm1 / rnorm;
+                 rnorm = rnorm1;
+              }
+              while ((rnorm/rnorm0)>=tolerance_ && nTrials<MLI_Hybrid_NTrials_)
+              {
+                 nTrials++;
+                 if ( convRate > rateThresh )
+                 {
+                    if ( MLI_Hybrid_NSIncr_ > 1 )
+                       sprintf(paramString, "MLI incrNullSpaceDim %d", 
+                               MLI_Hybrid_NSIncr_);
+                    else
+                       sprintf(paramString, "MLI incrNullSpaceDim 2");
+                    HYPRE_LSI_MLISetParams(HYPrecon_, paramString);
+                    HYPRE_ParCSRPCGSetup(HYSolver_, A_csr, b_csr, x_csr);
+                 }
+                 HYPRE_ParCSRPCGSolve(HYSolver_, A_csr, b_csr, x_csr);
+                 HYPRE_ParCSRPCGGetNumIterations(HYSolver_, &tempIter);
+                 numIterations += tempIter;
+                 HYPRE_ParVectorCopy( b_csr, r_csr );
+                 HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
+                 rnorm1 = rnorm;
+                 HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
+                 rnorm = sqrt( rnorm );
+                 convRate = rnorm / rnorm1;
+              }
+              if (rnorm/rnorm0 < tolerance_) retFlag = 0;
+              else if (numIterations < maxIterations_)
+              {
+                 HYPRE_ParCSRPCGSetMaxIter(HYSolver_,maxIterations_-numIterations);
+                 retFlag = HYPRE_ParCSRPCGSolve(HYSolver_, A_csr, b_csr, x_csr);
+                 HYPRE_ParCSRPCGGetNumIterations(HYSolver_, &tempIter);
+                 numIterations += tempIter;
+              }
+              else retFlag = 1;
+           }
+           if ( retFlag != 0 )
+           {
+              printf("HYPRE_LSC::launchSolver ERROR : in PCG solve.\n");
+              return retFlag;
+           }
            switch ( projectionScheme_ )
            {
               case 1 : addToAConjProjectionSpace(currX_,currB_);  break;
@@ -4176,19 +4245,86 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
               printf("HYPRE_LSC::launchSolver ERROR : in GMRES setup.\n");
               return retFlag;
            }
+           // if variable mli preconditioner (SA and GSA)
+           if ( MLI_Hybrid_GSA_ && HYPreconID_ == HYMLI )
+           {
+              if ( normAbsRel_ == 0 )
+              {
+                 HYPRE_ParVectorCopy( b_csr, r_csr );
+                 HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
+                 HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm0);
+                 rnorm0 = sqrt( rnorm0 );
+              }
+              else rnorm0 = 1.0;
+              HYPRE_ParCSRGMRESSetMaxIter(HYSolver_, MLI_Hybrid_MaxIter_);
+              rateThresh = 1.0;
+              for ( i = 0; i < MLI_Hybrid_MaxIter_; i++ )
+                 rateThresh *= MLI_Hybrid_ConvRate_;
+           }
            MPI_Barrier( comm_ );
            ptime  = LSC_Wtime();
            retFlag = HYPRE_ParCSRGMRESSolve(HYSolver_, A_csr, b_csr, x_csr);
-           if ( retFlag != 0 )
-           {
-              printf("HYPRE_LSC::launchSolver ERROR : in GMRES solve.\n");
-              return retFlag;
-           }
            HYPRE_ParCSRGMRESGetNumIterations(HYSolver_, &numIterations);
            HYPRE_ParVectorCopy( b_csr, r_csr );
            HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
            HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
            rnorm = sqrt( rnorm );
+           // if variable mli preconditioner (SA and GSA)
+           if ( MLI_Hybrid_GSA_ && HYPreconID_ == HYMLI )
+           {
+              nTrials = 1;
+              if (rnorm/rnorm0 >= tolerance_)
+              {
+                 HYPRE_ParCSRGMRESSolve(HYSolver_, A_csr, b_csr, x_csr);
+                 HYPRE_ParCSRGMRESGetNumIterations(HYSolver_, &tempIter);
+                 numIterations += tempIter;
+                 HYPRE_ParVectorCopy( b_csr, r_csr );
+                 HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
+                 HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm1);
+                 rnorm1 = sqrt( rnorm1 );
+                 convRate = rnorm1 / rnorm;
+                 rnorm = rnorm1;
+              }
+              while ((rnorm/rnorm0)>=tolerance_ && nTrials<MLI_Hybrid_NTrials_)
+              {
+                 nTrials++;
+printf("LSC: convRate = %e(%e) : %d\n",convRate,rateThresh,MLI_Hybrid_NSIncr_);
+                 if ( convRate > rateThresh )
+                 {
+                    if ( MLI_Hybrid_NSIncr_ > 1 )
+                       sprintf(paramString, "MLI incrNullSpaceDim %d", 
+                               MLI_Hybrid_NSIncr_);
+                    else
+                       sprintf(paramString, "MLI incrNullSpaceDim 2");
+                    HYPRE_LSI_MLISetParams(HYPrecon_, paramString);
+                    HYPRE_ParCSRGMRESSetup(HYSolver_, A_csr, b_csr, x_csr);
+                 }
+                 HYPRE_ParCSRGMRESSolve(HYSolver_, A_csr, b_csr, x_csr);
+                 HYPRE_ParCSRGMRESGetNumIterations(HYSolver_, &tempIter);
+                 numIterations += tempIter;
+                 HYPRE_ParVectorCopy( b_csr, r_csr );
+                 HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
+                 rnorm1 = rnorm;
+                 HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
+                 rnorm = sqrt( rnorm );
+                 convRate = rnorm / rnorm1;
+              }
+              if (rnorm/rnorm0 < tolerance_) retFlag = 0;
+              else if (numIterations < maxIterations_)
+              {
+                 HYPRE_ParCSRGMRESSetMaxIter(HYSolver_,
+                                             maxIterations_-numIterations);
+                 retFlag = HYPRE_ParCSRGMRESSolve(HYSolver_,A_csr,b_csr,x_csr);
+                 HYPRE_ParCSRGMRESGetNumIterations(HYSolver_, &tempIter);
+                 numIterations += tempIter;
+              }
+              else retFlag = 1;
+           }
+           if ( retFlag != 0 )
+           {
+              printf("HYPRE_LSC::launchSolver ERROR : in GMRES solve.\n");
+              return retFlag;
+           }
            switch ( projectionScheme_ )
            {
               case 1 : addToAConjProjectionSpace(currX_,currB_);  break;

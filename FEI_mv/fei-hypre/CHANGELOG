@@ -219,4 +219,6 @@
             - change semantics for with-blas and with-lapack
             - add domain decomposition algorithm, mli smoothing
             - add tolerance for arpack
+11/11/04    2.6.1R2
+            - add hybrid SA/GSA preconditioner to CG and GMRES
 

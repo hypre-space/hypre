@@ -655,6 +655,11 @@ class HYPRE_LinSysCore
    int             MLI_FieldSize_;
    int             *MLI_EqnNumbers_;
    double          *MLI_NodalCoord_;
+   int             MLI_Hybrid_NSIncr_;
+   int             MLI_Hybrid_GSA_;
+   int             MLI_Hybrid_MaxIter_;
+   double          MLI_Hybrid_ConvRate_;
+   int             MLI_Hybrid_NTrials_;
 
    // ----------------------------------------------------------------------
    // temporary functions for testing purposes
