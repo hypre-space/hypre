@@ -24,7 +24,7 @@
 
 extern void qsort1(int*, double*, int, int);
 
-#define abs(x) ((x) > 0.0 ? x : -(x))
+#define habs(x) ((x) > 0.0 ? x : -(x))
 
 /***************************************************************************/
 /* reading a matrix from a file in ija format (first row : nrows, nnz)     */
@@ -678,7 +678,7 @@ int HYPRE_LSI_MatrixInverse( double **Amat, int ndim, double ***Cmat )
    (*Cmat) = NULL;
    if ( ndim == 1 ) 
    {
-      if ( abs(Amat[0][0]) <= 1.0e-16 ) return -1;
+      if ( habs(Amat[0][0]) <= 1.0e-16 ) return -1;
       Bmat = (double **) malloc( ndim * sizeof(double*) );
       for ( i = 0; i < ndim; i++ ) 
          Bmat[i] = (double *) malloc( ndim * sizeof(double) ); 
@@ -689,7 +689,7 @@ int HYPRE_LSI_MatrixInverse( double **Amat, int ndim, double ***Cmat )
    if ( ndim == 2 )
    {
       denom = Amat[0][0] * Amat[1][1] - Amat[0][1] * Amat[1][0];
-      if ( abs( denom ) <= 1.0e-16 ) return -1;
+      if ( habs( denom ) <= 1.0e-16 ) return -1;
       Bmat = (double **) malloc( ndim * sizeof(double*) );
       for ( i = 0; i < ndim; i++ ) 
          Bmat[i] = (double *) malloc( ndim * sizeof(double) ); 
@@ -713,7 +713,7 @@ int HYPRE_LSI_MatrixInverse( double **Amat, int ndim, double ***Cmat )
       {
          for ( j = 0; j < i; j++ ) 
          {
-            if ( abs(Amat[j][j]) < 1.0e-16 ) return -1;
+            if ( habs(Amat[j][j]) < 1.0e-16 ) return -1;
             denom = Amat[i][j] / Amat[j][j];
             for ( k = 0; k < ndim; k++ ) 
             {
@@ -726,7 +726,7 @@ int HYPRE_LSI_MatrixInverse( double **Amat, int ndim, double ***Cmat )
       {
          for ( j = ndim-1; j >= i+1; j-- ) 
          {
-            if ( abs(Amat[j][j]) < 1.0e-16 ) return -1;
+            if ( habs(Amat[j][j]) < 1.0e-16 ) return -1;
             denom = Amat[i][j] / Amat[j][j];
             for ( k = 0; k < ndim; k++ ) 
             {
@@ -738,21 +738,21 @@ int HYPRE_LSI_MatrixInverse( double **Amat, int ndim, double ***Cmat )
       for ( i = 0; i < ndim; i++ ) 
       {
          denom = Amat[i][i];
-         if ( abs(denom) < 1.0e-16 ) return -1;
+         if ( habs(denom) < 1.0e-16 ) return -1;
          for ( j = 0; j < ndim; j++ ) Bmat[i][j] /= denom;
       }
 
       for ( i = 0; i < ndim; i++ ) 
          for ( j = 0; j < ndim; j++ ) 
-            if ( abs(Bmat[i][j]) < 1.0e-17 ) Bmat[i][j] = 0.0;
+            if ( habs(Bmat[i][j]) < 1.0e-17 ) Bmat[i][j] = 0.0;
       dmax = 0.0;
       for ( i = 0; i < ndim; i++ ) 
       {
          for ( j = 0; j < ndim; j++ ) 
-            if ( abs(Bmat[i][j]) > dmax ) dmax = abs(Bmat[i][j]);
+            if ( habs(Bmat[i][j]) > dmax ) dmax = habs(Bmat[i][j]);
 /*
          for ( j = 0; j < ndim; j++ ) 
-            if ( abs(Bmat[i][j]/dmax) < 1.0e-15 ) Bmat[i][j] = 0.0;
+            if ( habs(Bmat[i][j]/dmax) < 1.0e-15 ) Bmat[i][j] = 0.0;
 */
       }
       (*Cmat) = Bmat;
