@@ -140,7 +140,10 @@ double MPI_Wtime()
 
 #include "FEI_HYPRE_Impl.h"
 
-extern int HYPRE_LSI_Search(int *, int, int);
+extern "C"
+{
+  int HYPRE_LSI_Search(int *, int, int);
+}
 
 #define habs(x) ((x > 0) ? x : -(x))
 
