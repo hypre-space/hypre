@@ -43,6 +43,7 @@
 #include "parcsr_matrix_vector/parcsr_matrix_vector.h"
 #include "hypre_lsi_ddilut.h"
 #include "hypre_lsi_poly.h"
+#include "hypre_lsi_mssor.h"
 
 #ifdef SUPERLU
 #include "dsp_defs.h"
@@ -216,6 +217,7 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
     ddilutDropTol_      = 1.0e-8;
 
     polyOrder_          = 8;    // order of polynomial preconditioner
+    mssorNumSweeps_     = 3;
 
     parasailsSym_       = 0;    // default is nonsymmetric
     parasailsThreshold_ = 0.1;
@@ -376,6 +378,9 @@ HYPRE_LinSysCore::~HYPRE_LinSysCore()
 
        else if ( HYPreconID_ == HYPOLY )
           HYPRE_LSI_PolyDestroy( HYPrecon_ );
+
+       else if ( HYPreconID_ == HYMSSOR )
+          HYPRE_LSI_MSSORDestroy( HYPrecon_ );
 
 #ifdef MLPACK
        else if ( HYPreconID_ == HYML )
@@ -781,6 +786,21 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
           {
              printf("       HYPRE_LSC::parameters polyOrder = %d\n",
                     polyOrder_);
+          }
+       }
+
+       //----------------------------------------------------------------
+       // MSSOR number of sweeps
+       //----------------------------------------------------------------
+
+       else if ( !strcmp(param1, "mssorNumSweeps") )
+       {
+          sscanf(params[i],"%s %d", param, &mssorNumSweeps_);
+          if ( mssorNumSweeps_ < 0 ) polyOrder_ = 1;
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+          {
+             printf("       HYPRE_LSC::parameters mssorNumSweeps = %d\n",
+                    mssorNumSweeps_);
           }
        }
 
@@ -2982,6 +3002,9 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
        else if ( HYPreconID_ == HYPOLY )
           HYPRE_LSI_PolyDestroy( HYPrecon_ );
 
+       else if ( HYPreconID_ == HYMSSOR )
+          HYPRE_LSI_MSSORDestroy( HYPrecon_ );
+
 #ifdef MLPACK
        else if ( HYPreconID_ == HYML )
           HYPRE_ParCSRMLDestroy( HYPrecon_ );
@@ -3026,6 +3049,11 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
     {
        strcpy( HYPreconName_, name );
        HYPreconID_ = HYPOLY;
+    }
+    else if ( !strcmp(name, "mssor") )
+    {
+       strcpy( HYPreconName_, name );
+       HYPreconID_ = HYMSSOR;
     }
     else if ( !strcmp(name, "ml") )
     {
@@ -3101,6 +3129,11 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
 
        case HYPOLY :
             ierr = HYPRE_LSI_PolyCreate( comm_, &HYPrecon_ );
+            assert( !ierr );
+            break;
+
+       case HYMSSOR :
+            ierr = HYPRE_LSI_MSSORCreate( comm_, &HYPrecon_ );
             assert( !ierr );
             break;
 
@@ -3470,6 +3503,8 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   break;
 
              case HYPOLY :
+                  if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
+                     printf("POLY - order = %d\n", polyOrder_);
                   HYPRE_LSI_PolySetOrder(HYPrecon_, polyOrder_);
                   if ( HYPreconReuse_ == 1 )
                   {
@@ -3481,6 +3516,14 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                      HYPRE_ParCSRPCGSetPrecond(HYSolver_,HYPRE_LSI_PolySolve,
                                       HYPRE_LSI_PolySetup, HYPrecon_);
                   }
+                  break;
+
+             case HYMSSOR :
+                  if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
+                     printf("MSSOR - numsweeps = %d\n",mssorNumSweeps_);
+                  HYPRE_LSI_MSSORSetNumSweeps(HYPrecon_, mssorNumSweeps_);
+                  HYPRE_ParCSRPCGSetPrecond(HYSolver_,HYPRE_LSI_MSSORSolve,
+                                      HYPRE_DummyFunction, HYPrecon_);
                   break;
 
              case HYPARASAILS :
@@ -3697,6 +3740,8 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   break;
 
              case HYPOLY :
+                  if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
+                     printf("POLY - order = %d\n", polyOrder_);
                   HYPRE_LSI_PolySetOrder(HYPrecon_, polyOrder_);
                   if ( HYPreconReuse_ == 1 )
                   {
@@ -3708,6 +3753,14 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                      HYPRE_ParCSRGMRESSetPrecond(HYSolver_,HYPRE_LSI_PolySolve,
                                       HYPRE_LSI_PolySetup, HYPrecon_);
                   }
+                  break;
+
+             case HYMSSOR :
+                  if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
+                     printf("MSSOR - numsweeps = %d\n",mssorNumSweeps_);
+                  HYPRE_LSI_MSSORSetNumSweeps(HYPrecon_, mssorNumSweeps_);
+                  HYPRE_ParCSRGMRESSetPrecond(HYSolver_,HYPRE_LSI_MSSORSolve,
+                                      HYPRE_DummyFunction, HYPrecon_);
                   break;
 
              case HYPARASAILS :
@@ -3923,6 +3976,8 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   break;
 
              case HYPOLY :
+                  if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
+                     printf("POLY - order = %d\n", polyOrder_);
                   HYPRE_LSI_PolySetOrder(HYPrecon_, polyOrder_);
                   if ( HYPreconReuse_ == 1 )
                   {
@@ -3934,6 +3989,14 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                      HYPRE_ParCSRBiCGSTABSetPrecond(HYSolver_,HYPRE_LSI_PolySolve,
                                       HYPRE_LSI_PolySetup, HYPrecon_);
                   }
+                  break;
+
+             case HYMSSOR :
+                  if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
+                     printf("MSSOR - numsweeps = %d\n",mssorNumSweeps_);
+                  HYPRE_LSI_MSSORSetNumSweeps(HYPrecon_, mssorNumSweeps_);
+                  HYPRE_ParCSRBiCGSTABSetPrecond(HYSolver_,HYPRE_LSI_MSSORSolve,
+                                      HYPRE_DummyFunction, HYPrecon_);
                   break;
 
              case HYPARASAILS :
@@ -4148,6 +4211,8 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   break;
 
              case HYPOLY :
+                  if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
+                     printf("POLY - order = %d\n", polyOrder_);
                   HYPRE_LSI_PolySetOrder(HYPrecon_, polyOrder_);
                   if ( HYPreconReuse_ == 1 )
                   {
@@ -4159,6 +4224,14 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                      HYPRE_ParCSRBiCGSTABLSetPrecond(HYSolver_,HYPRE_LSI_PolySolve,
                                       HYPRE_LSI_PolySetup, HYPrecon_);
                   }
+                  break;
+
+             case HYMSSOR :
+                  if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
+                     printf("MSSOR - numsweeps = %d\n",mssorNumSweeps_);
+                  HYPRE_LSI_MSSORSetNumSweeps(HYPrecon_, mssorNumSweeps_);
+                  HYPRE_ParCSRBiCGSTABLSetPrecond(HYSolver_,HYPRE_LSI_MSSORSolve,
+                                      HYPRE_DummyFunction, HYPrecon_);
                   break;
 
              case HYPARASAILS :
@@ -4510,7 +4583,7 @@ void HYPRE_LinSysCore::solveUsingBoomeramg(int& status)
        printf("Boomeramg relax weight = %e\n", amgRelaxWeight_[0]);
     }
     if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 && mypid_ == 0)
-       HYPRE_BoomerAMGSetIOutDat(HYSolver_, 1);
+       HYPRE_BoomerAMGSetIOutDat(HYSolver_, 2);
 
     HYPRE_BoomerAMGSetMaxIter(HYSolver_, maxIterations_);
     HYPRE_BoomerAMGSetMeasureType(HYSolver_, 0);
