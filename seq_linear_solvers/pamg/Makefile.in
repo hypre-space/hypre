@@ -48,7 +48,7 @@ HEADERS =\
  headers.h\
  amg.h\
  pcg.h\
- hypre_ls.h\
+ ls.h\
  HYPRE_ls.h
 
 FILES =\
@@ -62,6 +62,7 @@ FILES =\
  indepset.c\
  interp.c\
  laplace.c\
+ laplace_9pt.c\
  random.c\
  rap.c \
  relax.c\
