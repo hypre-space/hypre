@@ -45,6 +45,8 @@ int amg_Setup P((Matrix *A , void *data ));
 /* amg_solve.c */
 int amg_Solve P((Vector *u , Vector *f , double tol , void *data ));
 
+/* config.cygwin32 */
+
 /* data.c */
 AMGData *amg_NewData P((int levmax , int ncg , double ecg , int nwt , double ewt , int nstr , int ncyc , int *mu , int *ntrlx , int *iprlx , int *ierlx , int *iurlx , int ioutdat , int cycle_op_count , char *log_file_name ));
 void amg_FreeData P((AMGData *amg_data ));
@@ -73,6 +75,7 @@ double InnerProd P((Vector *x , Vector *y ));
 /* write.c */
 void WriteYSMP P((char *file_name , Matrix *matrix ));
 void WriteVec P((char *file_name , Vector *vector ));
+void WriteVecInt P((char *file_name , VectorInt *vector ));
 void WriteSetupParams P((void *data ));
 void WriteSolverParams P((double tol , void *data ));
 
