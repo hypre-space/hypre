@@ -853,7 +853,8 @@ main( int   argc,
      Hypre_parcsr_A = Hypre_ParCSRMatrix__create();
      printf("finished __create\n");
 
-     Hypre_ij_A = Hypre_cast_ParCSRMatrix_to_IJBuildMatrix( Hypre_parcsr_A );
+     Hypre_ij_A = Hypre_ParCSRMatrix_Get_IJBuildMatrix( Hypre_parcsr_A );
+     /* was Hypre_ij_A = Hypre_cast_ParCSRMatrix_to_IJBuildMatrix( Hypre_parcsr_A );*/
      printf("finished cast\n");
      if ( Hypre_ij_A == NULL )
      {
