@@ -84,7 +84,7 @@ main( int   argc,
    Hypre_ParCSRVector     Hypre_y2;
    Hypre_Vector        y,Hypre_Vector_x, Hypre_Vector_b;
 
-   HYPRE_Solver        amg_solver;
+/* not used   HYPRE_Solver        amg_solver;*/
    HYPRE_Solver        pcg_solver;
    HYPRE_Solver        pcg_precond, pcg_precond_gotten;
    Hypre_ParAMG        Hypre_AMG;
@@ -94,7 +94,7 @@ main( int   argc,
 
    int                 num_procs, myid;
    int                 local_row;
-   int                *row_sizes;
+/* not used   int                *row_sizes;*/
    struct SIDL_int__array* Hypre_row_sizes;
    int                *diag_sizes;
    struct SIDL_int__array* Hypre_diag_sizes;
@@ -864,7 +864,7 @@ main( int   argc,
      if ( Hypre_ij_A == NULL )
      {
         printf("Cast failed\n");
-        return;
+        return 1;
      }
 
      /* The following will cancel each other out, but it is good practice
@@ -1132,7 +1132,7 @@ main( int   argc,
    if ( Hypre_parcsr_A == NULL )
    {
       printf("Cast/QI failed\n");
-      return;
+      return 1;
    }
 
    {
@@ -1235,7 +1235,7 @@ main( int   argc,
         "Hypre.ParCSRVector" );
      if ( Hypre_b == NULL ) {
         printf("Cast/QI failed\n");
-        return;
+        return 1;
      }
 
       /* Break encapsulation so that the rest of the driver stays the same */
@@ -1279,7 +1279,7 @@ main( int   argc,
         "Hypre.ParCSRVector" );
      if ( Hypre_x == NULL ) {
         printf("Cast/QI failed\n");
-        return;
+        return 1;
      }
 
 
@@ -1622,8 +1622,8 @@ main( int   argc,
 #define DEBUG 1
 #if DEBUG
    {
-      FILE *file;
-      char  filename[255];
+/* not used      FILE *file;*/
+/* not used      char  filename[255];*/
                        
       /*  Apply, y=A*b: result is 1's on the interior of the grid */
       Hypre_y = Hypre_ParCSRVector__create();
