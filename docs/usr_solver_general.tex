@@ -6,6 +6,9 @@ the same. We will refer to them both as solvers in the sequel except when noted.
 In normal usage, 
 the preconditioner is chosen and constructed before the solver,
 and then handed to the solver as part of the solver's setup.
+In the following, we assume the most common usage pattern in which
+a single linear system is set up and then solved with a single righthand
+side. We comment later on considerations for other usage patterns.
 
 {\bf Setup:}
 
@@ -17,10 +20,10 @@ has passed this information into a matrix through one of the conceptual interfac
 setting up the solver. In this situation, the problem definition information is then passed to
 the solver by passing the constructed matrix into the solver. As described before, the matrix
 and solver must be compatible, in that the matrix must provide the services needed by
-the solver. Krylov solvers, for example, need only the matrix-vector multiplication operation,
-contained in the \code{LinearOperator} interface. 
+the solver. Krylov solvers, for example, need only a matrix-vector multiplication. 
 Most preconditioners, on the other hand, have additional requirements such as access to the
-coefficients of the matrix, e.g. the GetRow function in the \code{HYPRE\_DistributedMatrix} interface.
+coefficients of the matrix, e.g. the GetRow function in the \code{HYPRE\_DistributedMatrix} 
+class.
 
 \item
 {\bf Choose parameters that control construction of the preconditioner/solver.} 
@@ -54,8 +57,10 @@ Like all parameters, reasonable defaults are used. Generally speaking, Krylov so
 default to a tolerance-based convergence criteria, while solvers used traditionally as
 preconditioners default to convergence based on the number of iterations (usually a single
 iteration). Users are free to change these, though care must be taken. Some Krylov solvers,
-for example, are not guaranteed to converge unless the preconditioner is a constant operator
-requires a fixed number of iterations. For these solvers, a preconditioner
+for example, are not guaranteed to converge unless the preconditioner is a constant operator,
+which is only satisfied for iterative methods if a fixed number of iterations
+(typically one) is taken.
+For these solvers, a preconditioner
 with a tolerance-based convergence criteria will not usually work.
 
 \item

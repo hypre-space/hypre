@@ -4,8 +4,8 @@
 
 \section{What are conceptual interfaces?}
 
-In Figure \ref{fig-conceptual-interface} we present an illustration
-of the philosophy behind conceptual interfaces.
+%In Figure \ref{fig-conceptual-interface} we present an illustration
+%of the philosophy behind conceptual interfaces.
 
 %[Cut and paste from Rob's paper. Now it needs editing].
 
@@ -32,7 +32,7 @@ convenient utilities for helping a user build a matrix data structure
 for \hypre{} solvers and preconditioners.
 For
 example, applications that use structured grids (such as in the left-most
-interface in the Figure ~\ref{fig-conceptual-interface})
+interface in the Figure \ref{fig-conceptual-interface})
 typically view their linear problems in terms of
 stencils and grids.  On the other hand, applications that use unstructured
 grids and finite elements typically view their linear problems in terms of
@@ -40,14 +40,14 @@ elements and element stiffness matrices.  Finally, the right-most interface is
 the standard linear-algebraic (matrix rows/columns) way of viewing the
 linear problem.
 
-The second row of Figure ~\ref{fig-conceptual-interface} is a set of linear solver algorithms.
+The second row of Figure \ref{fig-conceptual-interface} is a set of linear solver algorithms.
 Each linear solver group requires different information from the user through
 the conceptual interfaces.  So, the geometric multigrid algorithm (GMG) listed
 in the left-most box, for example, can only be used with the left-most conceptual
 interface.  On the other hand, the ILU algorithm in the right-most box may be
 used with any conceptual interface. 
 
-The third row of Figure ~\ref{fig-conceptual-interface} is a list of data layouts or matrix/vector storage
+The third row of Figure \ref{fig-conceptual-interface} is a list of data layouts or matrix/vector storage
 schemes.  The relationship between linear solver and storage scheme is similar
 to that of interface and linear solver.
 
@@ -57,15 +57,6 @@ to that of interface and linear solver.
 \hypre{} currently supports three conceptual interfaces:
 
 \begin{itemize}
-
-\item
-\code{Finite Element Interface:}
-This is appropriate for users who form their linear systems from
-a finite element discretization.
-The interface mirrors typical finite element data structures,
-including element stiffness matrices.
-Though this interface is provided in \hypre{}, its definition
-was determined elsewhere (www.z.ca.sandia.gov/fei).
 
 \item
 \code{Structured Grid Interface:}
@@ -90,9 +81,18 @@ Our experience is that users with legacy codes, in which they already
 have code for building matrices in particular formats, find the
 IJ interface relatively easy to use.
 
+\item
+\code{Finite Element Interface:}
+This is appropriate for users who form their linear systems from
+a finite element discretization.
+The interface mirrors typical finite element data structures,
+including element stiffness matrices.
+Though this interface is provided in \hypre{}, its definition
+was determined elsewhere (www.z.ca.sandia.gov/fei).
+
 \end{itemize}
 
 Generally, a user should choose the most specific interface
 that matches their application, because this will allow them
-to use more specialized and more efficient solvers and preconditioners
+to use specialized and more efficient solvers and preconditioners
 without losing access to more general solvers.
