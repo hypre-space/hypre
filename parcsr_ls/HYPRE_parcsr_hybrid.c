@@ -112,6 +112,28 @@ HYPRE_ParCSRHybridSetPCGMaxIter( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetSolverType
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParCSRHybridSetSolverType( HYPRE_Solver solver,
+                                 int                solver_type )
+{
+   return( hypre_AMGHybridSetSolverType( (void *) solver, solver_type ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetKDim
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParCSRHybridSetKDim( HYPRE_Solver solver,
+                              int                k_dim    )
+{
+   return( hypre_AMGHybridSetKDim( (void *) solver, k_dim ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_ParCSRHybridSetTwoNorm
  *--------------------------------------------------------------------------*/
 
