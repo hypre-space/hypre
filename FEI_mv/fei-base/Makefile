@@ -239,7 +239,7 @@ have-permission:
 # clean rules
 #
 #######################################################################
-clean cleandir:
+clean cleandir veryclean:
 	@touch erase.this
 	-$(RM) -f PI* erase.* *.out #* *~ emake.log
 	@cd other; make clean FEI_ROOT="$(FEI_ROOT)"
