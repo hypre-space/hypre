@@ -157,11 +157,17 @@ int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
 {
    int        level, size, nDOF, numNS, length, nSweeps=1, offset, nsDim;
    int        prePost, nnodes, nAggr, *aggrInfo, *labels, is, *indices;
+   int        mypid;
    double     thresh, pweight, *nullspace, *weights=NULL, *coords, *scales;
    double     *nsAdjust;
    char       param1[256], param2[256], *param3;
+   MPI_Comm   comm;
 
+   comm = getComm();
+   MPI_Comm_rank( comm, &mypid );
    sscanf(in_name, "%s", param1);
+   if ( outputLevel_ >= 1 && mypid == 0 ) 
+      printf("\tMLI_Method_AMGSA::setParam = %s\n", in_name);
    if ( !strcasecmp(param1, "setOutputLevel" ))
    {
       sscanf(in_name,"%s %d", param1, &level);

@@ -813,7 +813,7 @@ int MLI_Method_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
       printf("\t*** Aggregation(U) P4 : no. of aggregates     = %d\n",ibuf[0]);
       printf("\t*** Aggregation(U) P4 : no. nodes aggregated  = %d\n",ibuf[1]);
    }
-   if ( nselected < local_nrows )
+   if ( nselected < local_nrows && (local_nrows-nselected) >= min_aggr_size )
    {
       count = (local_nrows - nselected) / min_aggr_size;
       if ( count == 0 ) count = 1;
@@ -836,6 +836,14 @@ int MLI_Method_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
          irow++;
       }
       naggr = count;
+   }
+   itmp[0] = naggr;
+   itmp[1] = nselected;
+   if ( outputLevel_ > 1 ) MPI_Allreduce(itmp,ibuf,2,MPI_INT,MPI_SUM,comm);
+   if ( mypid == 0 && outputLevel_ > 1 )
+   {
+      printf("\t*** Aggregation(U) P5 : no. of aggregates     = %d\n",ibuf[0]);
+      printf("\t*** Aggregation(U) P5 : no. nodes aggregated  = %d\n",ibuf[1]);
    }
 
    /*-----------------------------------------------------------------
