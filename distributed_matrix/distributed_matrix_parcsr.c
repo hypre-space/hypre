@@ -80,8 +80,10 @@ hypre_PrintDistributedMatrixParcsr( hypre_DistributedMatrix *matrix )
 
 int 
 hypre_GetDistributedMatrixLocalRangeParcsr( hypre_DistributedMatrix *matrix,
-                             int *start,
-                             int *end )
+                             int *row_start,
+                             int *row_end,
+                             int *col_start,
+                             int *col_end )
 {
    int ierr=0;
    HYPRE_ParCSRMatrix Parcsr_matrix = (HYPRE_ParCSRMatrix) hypre_DistributedMatrixLocalStorage(matrix);
@@ -89,7 +91,8 @@ hypre_GetDistributedMatrixLocalRangeParcsr( hypre_DistributedMatrix *matrix,
    if (!Parcsr_matrix) return(-1);
 
 
-   ierr = HYPRE_GetLocalRangeParcsr( Parcsr_matrix, start, end );
+   ierr = HYPRE_GetLocalRangeParcsr( Parcsr_matrix, row_start, row_end, 
+					col_start, col_end );
 
    return(ierr);
 }

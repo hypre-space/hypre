@@ -18,7 +18,7 @@ MPI_Comm HYPRE_GetDistributedMatrixContext P((HYPRE_DistributedMatrix matrix ));
 int HYPRE_GetDistributedMatrixDims P((HYPRE_DistributedMatrix matrix , int *M , int *N ));
 int HYPRE_SetDistributedMatrixDims P((HYPRE_DistributedMatrix matrix , int M , int N ));
 int HYPRE_PrintDistributedMatrix P((HYPRE_DistributedMatrix matrix ));
-int HYPRE_GetDistributedMatrixLocalRange P((HYPRE_DistributedMatrix matrix , int *start , int *end ));
+int HYPRE_GetDistributedMatrixLocalRange P((HYPRE_DistributedMatrix matrix , int *row_start , int *row_end, int *col_start, int *col_end ));
 int HYPRE_GetDistributedMatrixRow P((HYPRE_DistributedMatrix matrix , int row , int *size , int **col_ind , double **values ));
 int HYPRE_RestoreDistributedMatrixRow P((HYPRE_DistributedMatrix matrix , int row , int *size , int **col_ind , double **values ));
 
@@ -37,7 +37,7 @@ void *hypre_GetDistributedMatrixTranslator P((hypre_DistributedMatrix *matrix ))
 int hypre_SetDistributedMatrixAuxiliaryData P((hypre_DistributedMatrix *matrix , void *auxiliary_data ));
 void *hypre_GetDistributedMatrixAuxiliaryData P((hypre_DistributedMatrix *matrix ));
 int hypre_PrintDistributedMatrix P((hypre_DistributedMatrix *matrix ));
-int hypre_GetDistributedMatrixLocalRange P((hypre_DistributedMatrix *matrix , int *start , int *end ));
+int hypre_GetDistributedMatrixLocalRange P((hypre_DistributedMatrix *matrix , int *row_start , int *row_end, int *col_start, int *col_end ));
 int hypre_GetDistributedMatrixRow P((hypre_DistributedMatrix *matrix , int row , int *size , int **col_ind , double **values ));
 int hypre_RestoreDistributedMatrixRow P((hypre_DistributedMatrix *matrix , int row , int *size , int **col_ind , double **values ));
 

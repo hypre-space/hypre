@@ -223,10 +223,11 @@ HYPRE_PrintDistributedMatrix( HYPRE_DistributedMatrix matrix )
 
 int
 HYPRE_GetDistributedMatrixLocalRange( HYPRE_DistributedMatrix matrix, 
-                               int *start, int *end )
+                               int *row_start, int *row_end ,
+                               int *col_start, int *col_end )
 {
    return( hypre_GetDistributedMatrixLocalRange( (hypre_DistributedMatrix *) matrix,
-                             start, end ) );
+                             row_start, row_end, col_start, col_end ) );
 }
 
 /*--------------------------------------------------------------------------

@@ -256,15 +256,17 @@ hypre_PrintDistributedMatrix( hypre_DistributedMatrix *matrix )
 
 int 
 hypre_GetDistributedMatrixLocalRange( hypre_DistributedMatrix *matrix,
-                             int *start,
-                             int *end )
+                             int *row_start,
+                             int *row_end,
+                             int *col_start,
+                             int *col_end )
 {
    if ( hypre_DistributedMatrixLocalStorageType(matrix) == HYPRE_PETSC_MATRIX )
-      return( hypre_GetDistributedMatrixLocalRangePETSc( matrix, start, end ) );
+      return( hypre_GetDistributedMatrixLocalRangePETSc( matrix, row_start, row_end ) );
    else if ( hypre_DistributedMatrixLocalStorageType(matrix) == HYPRE_ISIS_MATRIX )
-      return( hypre_GetDistributedMatrixLocalRangeISIS( matrix, start, end ) );
+      return( hypre_GetDistributedMatrixLocalRangeISIS( matrix, row_start, row_end ) );
    else if ( hypre_DistributedMatrixLocalStorageType(matrix) == HYPRE_PARCSR_MATRIX )
-      return( hypre_GetDistributedMatrixLocalRangeParcsr( matrix, start, end ) );
+      return( hypre_GetDistributedMatrixLocalRangeParcsr( matrix, row_start, row_end, col_start, col_end ) );
    else
       return(-1);
 }
