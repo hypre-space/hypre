@@ -118,19 +118,20 @@ int MLI_Solver_BSGS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
    int     iP, jP, iC, nRecvs, *recvProcs, *recvStarts, nRecvBefore;
    int     blockStartRow, iB, iS, blockEndRow, blkLeng;
    int     localNRows, iStart, iEnd, irow, jcol, colIndex, index, mypid;
-   int     nSends, numColsOffd, start, relaxError=0;
+   int     nSends, numColsOffd, start, relaxError=0, length;
    int     nprocs, *partition, startRow, endRow, offOffset, *tmpJ;
    int     *ADiagI, *ADiagJ, *AOffdI, *AOffdJ, offIRow, totalOffNNZ;
-   double  *ADiagA, *AOffdA, *uData, *fData, *tmpA, *fExtData;
-   double  relaxWeight, *vBufData, *vExtData, res, *dbleX, *dbleB;
+   double  *ADiagA, *AOffdA, *uData, *fData, *tmpA, *fExtData=NULL;
+   double  relaxWeight, *vBufData=NULL, *vExtData=NULL, res;
+   double  *dbleX=NULL, *dbleB=NULL;
    MPI_Comm               comm;
    hypre_ParCSRMatrix     *A;
    hypre_CSRMatrix        *ADiag, *AOffd;
    hypre_ParCSRCommPkg    *commPkg;
    hypre_ParCSRCommHandle *commHandle;
    hypre_ParVector        *f, *u;
-   hypre_Vector           *sluB, *sluX;
-   MLI_Vector             *mliX, *mliB;
+   hypre_Vector           *sluB=NULL, *sluX=NULL;
+   MLI_Vector             *mliX=NULL, *mliB=NULL;
 
    /*-----------------------------------------------------------------
     * fetch machine and matrix parameters
@@ -183,9 +184,13 @@ int MLI_Solver_BSGS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
    if (nprocs > 1)
    {
       nSends = hypre_ParCSRCommPkgNumSends(commPkg);
-      vBufData = new double[hypre_ParCSRCommPkgSendMapStart(commPkg,nSends)];
-      vExtData = new double[numColsOffd];
-      fExtData = new double[numColsOffd];
+      length = hypre_ParCSRCommPkgSendMapStart(commPkg,nSends);
+      if ( length > 0 ) vBufData = new double[length];
+      if ( numColsOffd > 0 )
+      {
+         vExtData = new double[numColsOffd];
+         fExtData = new double[numColsOffd];
+      }
       for ( irow = 0; irow < numColsOffd; irow++ ) vExtData[irow] = 0.0;
    }
 
@@ -212,16 +217,22 @@ int MLI_Solver_BSGS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
       commHandle = NULL;
    }
 
-   dbleB = new double[maxBlkLeng_];
-   dbleX = new double[maxBlkLeng_];
+   if ( maxBlkLeng_ > 0 )
+   {
+      dbleB = new double[maxBlkLeng_];
+      dbleX = new double[maxBlkLeng_];
+   }
 #ifdef HAVE_ESSL
    if ( blockSize_ > switchSize )
    {
 #endif
-   sluB  = hypre_SeqVectorCreate( maxBlkLeng_ );
-   sluX  = hypre_SeqVectorCreate( maxBlkLeng_ );
-   hypre_VectorData(sluB) = dbleB;
-   hypre_VectorData(sluX) = dbleX;
+      if ( maxBlkLeng_ > 0 )
+      {
+         sluB  = hypre_SeqVectorCreate( maxBlkLeng_ );
+         sluX  = hypre_SeqVectorCreate( maxBlkLeng_ );
+      }
+      hypre_VectorData(sluB) = dbleB;
+      hypre_VectorData(sluX) = dbleX;
 #ifdef HAVE_ESSL
    }
 #endif
@@ -505,18 +516,15 @@ int MLI_Solver_BSGS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
     * clean up and return
     *-----------------------------------------------------------------*/
 
-   if (nprocs > 1)
-   {
-      delete [] vExtData;
-      delete [] vBufData;
-      delete [] fExtData;
-   }
+   if ( vExtData != NULL ) delete [] vExtData;
+   if ( vBufData != NULL ) delete [] vBufData;
+   if ( fExtData != NULL ) delete [] fExtData;
 #ifdef HAVE_ESSL
    if ( blockSize_ > switchSize )
    {
 #endif
-   hypre_SeqVectorDestroy( sluX );
-   hypre_SeqVectorDestroy( sluB );
+      if ( sluX != NULL ) hypre_SeqVectorDestroy( sluX );
+      if ( sluB != NULL ) hypre_SeqVectorDestroy( sluB );
 #ifdef HAVE_ESSL
    }
 #endif

@@ -93,13 +93,14 @@ int MLI_Solver_BJacobi::setup(MLI_Matrix *Amat_in)
 int MLI_Solver_BJacobi::solve(MLI_Vector *f_in, MLI_Vector *u_in)
 {
    int     iP, jP, nRecvs, *recvProcs, *recvStarts, nRecvBefore;
-   int     blockStartRow, iB, iS, blockEndRow, blkLeng;
+   int     blockStartRow, iB, iS, blockEndRow, blkLeng, length;
    int     localNRows, iStart, iEnd, irow, jcol, colIndex, index, mypid;
    int     nSends, numColsOffd, start, relaxError=0;
    int     nprocs, *partition, startRow, endRow, offOffset, *tmpJ;
    int     *ADiagI, *ADiagJ, *AOffdI, *AOffdJ, offIRow;
    double  *ADiagA, *AOffdA, *uData, *fData, *tmpA, *fExtData=NULL;
-   double  relaxWeight, *vBufData=NULL, *vExtData=NULL, res, *dbleX, *dbleB;
+   double  relaxWeight, *vBufData=NULL, *vExtData=NULL, res;
+   double  *dbleX=NULL, *dbleB=NULL;
    MPI_Comm               comm;
    hypre_ParCSRMatrix     *A;
    hypre_CSRMatrix        *ADiag, *AOffd;
@@ -159,9 +160,13 @@ int MLI_Solver_BJacobi::solve(MLI_Vector *f_in, MLI_Vector *u_in)
    if (nprocs > 1)
    {
       nSends = hypre_ParCSRCommPkgNumSends(commPkg);
-      vBufData = new double[hypre_ParCSRCommPkgSendMapStart(commPkg,nSends)];
-      vExtData = new double[numColsOffd];
-      fExtData = new double[numColsOffd];
+      length = hypre_ParCSRCommPkgSendMapStart(commPkg,nSends);
+      if ( length > 0 ) vBufData = new double[length];
+      if ( numColsOffd > 0 )
+      {
+         vExtData = new double[numColsOffd];
+         fExtData = new double[numColsOffd];
+      }
       for ( irow = 0; irow < numColsOffd; irow++ ) vExtData[irow] = 0.0;
    }
 
@@ -188,12 +193,18 @@ int MLI_Solver_BJacobi::solve(MLI_Vector *f_in, MLI_Vector *u_in)
       commHandle = NULL;
    }
 
-   dbleB = new double[maxBlkLeng_];
-   dbleX = new double[maxBlkLeng_];
+   if ( maxBlkLeng_ > 0 )
+   {
+      dbleB = new double[maxBlkLeng_];
+      dbleX = new double[maxBlkLeng_];
+   }
    if ( blkScheme_ == 0 )
    {
-      sluB  = hypre_SeqVectorCreate( maxBlkLeng_ );
-      sluX  = hypre_SeqVectorCreate( maxBlkLeng_ );
+      if ( maxBlkLeng_ > 0 )
+      {
+         sluB  = hypre_SeqVectorCreate( maxBlkLeng_ );
+         sluX  = hypre_SeqVectorCreate( maxBlkLeng_ );
+      }
       hypre_VectorData(sluB) = dbleB;
       hypre_VectorData(sluX) = dbleX;
    }

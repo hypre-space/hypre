@@ -58,7 +58,7 @@ int MLI_Solver_GS::solve(MLI_Vector *fIn, MLI_Vector *uIn)
    int                 *ADiagI, *ADiagJ, *AOffdI, *AOffdJ;
    double              *ADiagA, *AOffdA, *uData, *fData;
    int                 i, j, is, localNRows, relaxError=0;
-   int                 ii, jj, nprocs, nthreads, start;
+   int                 ii, jj, nprocs, nthreads, start, length;
    int                 nSends, extNRows, index, size, ns, ne, rest;
    double              zero = 0.0, relaxWeight, res;
    double              *vBufData;
@@ -96,19 +96,15 @@ int MLI_Solver_GS::solve(MLI_Vector *fIn, MLI_Vector *uIn)
     * setting up for interprocessor communication
     *-----------------------------------------------------------------*/
 
+   vBufData = vExtData = tmpData  = NULL;
    if (nprocs > 1)
    {
       nSends = hypre_ParCSRCommPkgNumSends(commPkg);
-      vBufData = new double[hypre_ParCSRCommPkgSendMapStart(commPkg,nSends)];
-      vExtData = new double[extNRows];
-
-      if (extNRows)
-      {
-         AOffdJ = hypre_CSRMatrixJ(AOffd);
-         AOffdA = hypre_CSRMatrixData(AOffd);
-      }
+      length = hypre_ParCSRCommPkgSendMapStart(commPkg,nSends);
+      if ( length > 0 ) vBufData = new double[length];
+      if ( extNRows > 0 ) vExtData = new double[extNRows];
    }
-   if (nthreads > 1) tmpData = new double[localNRows];
+   if (nthreads > 1 && localNRows > 0) tmpData = new double[localNRows];
 
    /*-----------------------------------------------------------------
     * perform GS sweeps
@@ -216,12 +212,9 @@ int MLI_Solver_GS::solve(MLI_Vector *fIn, MLI_Vector *uIn)
     * clean up and return
     *-----------------------------------------------------------------*/
 
-   if (nprocs > 1)
-   {
-      delete [] vExtData;
-      delete [] vBufData;
-   }
-   if (nthreads > 1) delete [] tmpData;
+   if ( vExtData != NULL ) delete [] vExtData;
+   if ( vBufData != NULL ) delete [] vBufData;
+   if ( tmpData  != NULL ) delete [] tmpData;
    return(relaxError); 
 }
 
@@ -260,7 +253,6 @@ int MLI_Solver_GS::setParams(char *paramString, int argc, char **argv)
             if ( weights[i] > 0.0 ) relaxWeights_[i] = weights[i];
             else                    relaxWeights_[i] = 1.0;
          }
-printf("GS : set relaxwe = %e\n", relaxWeights_[0]);
       }
    }
    else if ( strcmp(paramString, "zeroInitialGuess") )

@@ -128,8 +128,11 @@ int MLI_Solver_SGS::solve(MLI_Vector *fIn, MLI_Vector *uIn)
    if (nprocs > 1)
    {
       nSends = hypre_ParCSRCommPkgNumSends(commPkg);
-      vBufData = new double[hypre_ParCSRCommPkgSendMapStart(commPkg,nSends)];
-      vExtData = new double[extNRows];
+      if ( nSends > 0 )
+         vBufData = new double[hypre_ParCSRCommPkgSendMapStart(commPkg,nSends)];
+      else vBufData = NULL;
+      if ( extNRows > 0 ) vExtData = new double[extNRows];
+      else                vExtData = NULL;
    }
 
    /*-----------------------------------------------------------------
@@ -275,8 +278,8 @@ int MLI_Solver_SGS::solve(MLI_Vector *fIn, MLI_Vector *uIn)
 
    if (nprocs > 1)
    {
-      delete [] vExtData;
-      delete [] vBufData;
+      if ( vExtData != NULL ) delete [] vExtData;
+      if ( vBufData != NULL ) delete [] vBufData;
    }
    return(relaxError); 
 }
@@ -461,7 +464,8 @@ int MLI_Solver_SGS::doProcColoring()
    for ( j = 0; j < nprocs; j++ ) 
       if ( colors[j]+1 > numColors_ ) numColors_ = colors[j]+1;
    delete [] colors;
-printf("MLI_Solver_SGS : number of colors = %d\n", numColors_);
+   if ( mypid == 0 )
+      printf("\tMLI_Solver_SGS : number of colors = %d\n", numColors_);
    return 0;
 }
 
