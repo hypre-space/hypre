@@ -53,11 +53,11 @@ FILES =\
 
 OBJS = ${FILES:.c=.o}
 
-CC = mpicc
-F77 = mpif77
+CC = cicc
+F77 = ci77
 
-CFLAGS = -O
-# CFLAGS = -O -DHYPRE_TIMING
+# CFLAGS = -O
+CFLAGS = -O -DHYPRE_TIMING
 # CFLAGS = -g -DHYPRE_TIMING
 
 FFLAGS = -O
@@ -69,6 +69,7 @@ LFLAGS =\
  -lHYPRE_mv\
  -lHYPRE_timing\
  -lHYPRE_memory\
+ -lmpi\
  -lm
 
 
