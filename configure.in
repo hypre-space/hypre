@@ -692,8 +692,6 @@ then
    CASC_FIND_PETSC
 fi
 
-CC="$PREPEND $CC"
-
 dnl *********************************************************************
 dnl * This macro uses the values assigned to CASC_SET_COPT and 
 dnl * CASC_SET_CDEBUG (and C++ and Fortan counterparts) to set either
@@ -733,6 +731,8 @@ dnl *********************************************************************
 dnl ********************************************************************
 dnl * The following macros are exported and may be used in Makefile.in's
 dnl ********************************************************************
+
+CC="$PREPEND $CC"
 
 dnl * General purpose header files and libraries and directories for
 dnl * those libraries.  
