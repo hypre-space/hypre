@@ -139,7 +139,17 @@ int
 HYPRE_SStructPCGSetLogging( HYPRE_SStructSolver solver,
                             int                 logging )
 {
-   return( HYPRE_PCGSetPrintLevel( (HYPRE_Solver) solver, logging ) );
+   return( HYPRE_PCGSetLogging( (HYPRE_Solver) solver, logging ) );
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_SStructPCGSetPrintLevel( HYPRE_SStructSolver solver,
+                            int                 level )
+{
+   return( HYPRE_PCGSetPrintLevel( (HYPRE_Solver) solver, level ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -160,6 +170,16 @@ HYPRE_SStructPCGGetFinalRelativeResidualNorm( HYPRE_SStructSolver  solver,
                                               double              *norm )
 {
    return( HYPRE_PCGGetFinalRelativeResidualNorm( (HYPRE_Solver) solver, norm ) );
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_SStructPCGGetResidual( HYPRE_SStructSolver  solver,
+                              void              **residual )
+{
+   return( HYPRE_PCGGetResidual( (HYPRE_Solver) solver, residual ) );
 }
 
 /*--------------------------------------------------------------------------

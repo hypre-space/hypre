@@ -136,6 +136,12 @@ int HYPRE_SStructPCGSetLogging(HYPRE_SStructSolver solver,
                                int                 logging);
 
 /**
+ * (Optional) Set the print level.
+ **/
+int HYPRE_SStructPCGSetPrintLevel(HYPRE_SStructSolver solver,
+                               int                 level);
+
+/**
  * Return the number of iterations taken.
  **/
 int HYPRE_SStructPCGGetNumIterations(HYPRE_SStructSolver  solver,
@@ -146,6 +152,12 @@ int HYPRE_SStructPCGGetNumIterations(HYPRE_SStructSolver  solver,
  **/
 int HYPRE_SStructPCGGetFinalRelativeResidualNorm(HYPRE_SStructSolver  solver,
                                                  double              *norm);
+
+/**
+ * Return the residual.
+ **/
+int HYPRE_SStructPCGGetResidual(HYPRE_SStructSolver  solver,
+                                void  **residual);
 
 int HYPRE_SStructDiagScaleSetup( HYPRE_SStructSolver solver,
                                  HYPRE_SStructMatrix A,
@@ -158,6 +170,110 @@ int HYPRE_SStructDiagScale( HYPRE_SStructSolver solver,
                             HYPRE_SStructVector x      );
 
 
+
+/*@}*/
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+/**
+ * @name SStruct BiCGSTAB Solver
+ **/
+/*@{*/
+
+/**
+ * Create a solver object.
+ **/
+int HYPRE_SStructBiCGSTABCreate(MPI_Comm             comm,
+                             HYPRE_SStructSolver *solver);
+
+/**
+ * Destroy a solver object.  An object should be explicitly destroyed
+ * using this destructor when the user's code no longer needs direct
+ * access to it.  Once destroyed, the object must not be referenced
+ * again.  Note that the object may not be deallocated at the
+ * completion of this call, since there may be internal package
+ * references to the object.  The object will then be destroyed when
+ * all internal reference counts go to zero.
+ **/
+int HYPRE_SStructBiCGSTABDestroy(HYPRE_SStructSolver solver);
+
+/**
+ **/
+int HYPRE_SStructBiCGSTABSetup(HYPRE_SStructSolver solver,
+                            HYPRE_SStructMatrix A,
+                            HYPRE_SStructVector b,
+                            HYPRE_SStructVector x);
+
+/**
+ * Solve the system.
+ **/
+int HYPRE_SStructBiCGSTABSolve(HYPRE_SStructSolver solver,
+                            HYPRE_SStructMatrix A,
+                            HYPRE_SStructVector b,
+                            HYPRE_SStructVector x);
+
+/**
+ * (Optional) Set the convergence tolerance.
+ **/
+int HYPRE_SStructBiCGSTABSetTol(HYPRE_SStructSolver solver,
+                             double              tol);
+
+/*
+ * RE-VISIT
+ **/
+int HYPRE_SStructBiCGSTABSetMinIter(HYPRE_SStructSolver solver,
+                                 int                 min_iter);
+
+/**
+ * (Optional) Set maximum number of iterations.
+ **/
+int HYPRE_SStructBiCGSTABSetMaxIter(HYPRE_SStructSolver solver,
+                                 int                 max_iter);
+
+/*
+ * RE-VISIT
+ **/
+int HYPRE_SStructBiCGSTABSetStopCrit(HYPRE_SStructSolver solver,
+                                  int                 stop_crit);
+
+/**
+ * (Optional) Set the preconditioner to use.
+ **/
+int HYPRE_SStructBiCGSTABSetPrecond(HYPRE_SStructSolver          solver,
+                                 HYPRE_PtrToSStructSolverFcn  precond,
+                                 HYPRE_PtrToSStructSolverFcn  precond_setup,
+                                 void                        *precond_solver);
+
+/**
+ * (Optional) Set the amount of logging to do.
+ **/
+int HYPRE_SStructBiCGSTABSetLogging(HYPRE_SStructSolver solver,
+                                 int                 logging);
+
+/**
+ * (Optional) Set the print level
+ **/
+int HYPRE_SStructBiCGSTABSetPrintLevel(HYPRE_SStructSolver solver,
+                                 int                 level);
+
+/**
+ * Return the number of iterations taken.
+ **/
+int HYPRE_SStructBiCGSTABGetNumIterations(HYPRE_SStructSolver  solver,
+                                       int                 *num_iterations);
+
+/**
+ * Return the norm of the final relative residual.
+ **/
+int HYPRE_SStructBiCGSTABGetFinalRelativeResidualNorm(HYPRE_SStructSolver  solver,
+                                                   double              *norm);
+
+/**
+ * Return the residual.
+ **/
+int HYPRE_SStructBiCGSTABGetResidual(HYPRE_SStructSolver  solver,
+                                    void   **residual);
 
 /*@}*/
 
@@ -246,6 +362,12 @@ int HYPRE_SStructGMRESSetLogging(HYPRE_SStructSolver solver,
                                  int                 logging);
 
 /**
+ * (Optional) Set the print level
+ **/
+int HYPRE_SStructGMRESSetPrintLevel(HYPRE_SStructSolver solver,
+                                 int                 level);
+
+/**
  * Return the number of iterations taken.
  **/
 int HYPRE_SStructGMRESGetNumIterations(HYPRE_SStructSolver  solver,
@@ -256,6 +378,12 @@ int HYPRE_SStructGMRESGetNumIterations(HYPRE_SStructSolver  solver,
  **/
 int HYPRE_SStructGMRESGetFinalRelativeResidualNorm(HYPRE_SStructSolver  solver,
                                                    double              *norm);
+
+/**
+ * Return the residual.
+ **/
+int HYPRE_SStructGMRESGetResidual(HYPRE_SStructSolver  solver,
+                                  void   **residual);
 
 /*@}*/
 

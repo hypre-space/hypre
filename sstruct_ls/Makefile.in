@@ -45,6 +45,7 @@ HEADERS =\
  headers.h
 
 FILES =\
+ HYPRE_sstruct_bicgstab.c\
  HYPRE_sstruct_gmres.c\
  HYPRE_sstruct_pcg.c\
  HYPRE_sstruct_split.c\
