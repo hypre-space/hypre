@@ -1,0 +1,21 @@
+#BHEADER***********************************************************************
+# (c) 1996   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+#=============================================================================
+# Configuration file for Sun Solaris systems
+#=============================================================================
+
+AMG_CC="cc"
+
+AMG_F77="f77"
+#AMG_F77="/home/casc/g77/bin/g77"
+AMG_F77_FLAGS=""
+AMG_F77_OPT="-O"
+AMG_F77_DEBUG="-g"
+
