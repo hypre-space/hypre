@@ -2565,7 +2565,7 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
          {
             S_offd_j[jS_offd]    = S_offd_j[jA];
             S_offd_data[jS_offd] = S_offd_data[jA];
-            jS++;
+            jS_offd++;
          }
       }
    }
