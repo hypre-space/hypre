@@ -1,9 +1,0 @@
-
-AMG: Getting Started
---------------------
- 
-The directory `amg' contains the library source (`src'),
-documentation (`docs'), and example drivers (`examples').
-See the User's Manual in the `docs' subdirectory for details
-on how to compile and use the AMG library.
-
