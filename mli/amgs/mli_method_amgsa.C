@@ -21,12 +21,13 @@
  * constructor
  * --------------------------------------------------------------------- */
 
-MLI_Method_AMGSA::MLI_Method_AMGSA( MPI_Comm comm ) : MLI_Method( comm ) 
+MLI_Method_AMGSA::MLI_Method_AMGSA( MPI_Comm comm ) : MLI_Method( comm )
 {
    char name[100];
 
-   strcpy(name, "MLI_METHOD_AMGSA");
+   strcpy(name, "AMGSA");
    setName( name );
+   setID( MLI_METHOD_AMGSA_ID );
    max_levels        = 40;
    num_levels        = 40;
    curr_level        = 0;
@@ -339,13 +340,13 @@ int MLI_Method_AMGSA::getParams(char *in_name, int *argc, char *argv[])
 
 int MLI_Method_AMGSA::setup( MLI *mli ) 
 {
-   int          level, nsweeps, mypid;
-   double       start_time, elapsed_time, max_eigen;
-   char         param_string[100], *targv[10];
-   MLI_Matrix   *mli_Pmat, *mli_Rmat, *mli_Amat, *mli_cAmat;
-   MLI_OneLevel *single_level, *next_level;
-   MLI_Solver   *smoother_ptr, *csolve_ptr;
-   MPI_Comm     mpi_comm;
+   int             level, nsweeps, mypid;
+   double          start_time, elapsed_time, max_eigen;
+   char            param_string[100], *targv[10];
+   MLI_Matrix      *mli_Pmat, *mli_Rmat, *mli_Amat, *mli_cAmat;
+   MLI_OneLevel    *single_level, *next_level;
+   MLI_Solver      *smoother_ptr, *csolve_ptr;
+   MPI_Comm        mpi_comm;
 
 #ifdef MLI_DEBUG_DETAILED
    cout << " MLI_Method_AMGSA::setup begins..." << endl;
@@ -441,14 +442,14 @@ int MLI_Method_AMGSA::setup( MLI *mli )
          pre_smoother_wgt[0] = max_eigen;
       if ( postsmoother == MLI_SOLVER_MLS_ID ) 
          postsmoother_wgt[0] = max_eigen;
-      smoother_ptr = MLI_Solver_Construct(pre_smoother);
+      smoother_ptr = MLI_Solver_CreateFromID( pre_smoother );
       targv[0] = (char *) &pre_smoother_num;
       targv[1] = (char *) pre_smoother_wgt;
       sprintf( param_string, "relaxWeight" );
       smoother_ptr->setParams(param_string, 2, targv);
       smoother_ptr->setup(mli_Amat);
       single_level->setSmoother( MLI_SMOOTHER_PRE, smoother_ptr );
-      smoother_ptr = MLI_Solver_Construct(postsmoother);
+      smoother_ptr = MLI_Solver_CreateFromID( postsmoother );
       targv[0] = (char *) &postsmoother_num;
       targv[1] = (char *) postsmoother_wgt;
       sprintf( param_string, "relaxWeight" );
@@ -459,9 +460,9 @@ int MLI_Method_AMGSA::setup( MLI *mli )
 
    // ----- set the coarse grid solver 
 
-   if ( mypid == 0 && output_level > 0 ) printf("Coarse level = %d\n", level);
+   if ( mypid == 0 && output_level > 0 ) printf("\tCoarse level = %d\n", level);
    if (coarse_solver == MLI_SOLVER_MLS_ID) coarse_solver_wgt[0] = max_eigen;
-   csolve_ptr = MLI_Solver_Construct(coarse_solver);
+   csolve_ptr = MLI_Solver_CreateFromID( coarse_solver );
    if (coarse_solver != MLI_SOLVER_SUPERLU_ID) 
    {
       targv[0] = (char *) &coarse_solver_num;
@@ -816,8 +817,64 @@ int MLI_Method_AMGSA::print()
       cout << "\t*** drop tolerance for P    = " << drop_tol_for_P << endl;
       cout << "\t*** calc_norm_scheme        = " << calc_norm_scheme << endl;
       cout << "\t*** minimum coarse size     = " << min_coarse_size << endl;
-      cout << "\t*** pre  smoother type      = " << pre_smoother << endl;
-      cout << "\t*** post smoother type      = " << postsmoother << endl;
+      switch ( pre_smoother )
+      {
+         case MLI_SOLVER_JACOBI_ID :
+              cout << "\t*** pre  smoother type      = Jacobi\n"; break;
+         case MLI_SOLVER_GS_ID :
+              cout << "\t*** pre  smoother type      = Gauss Seidel\n"; break;
+         case MLI_SOLVER_SGS_ID :
+              cout << "\t*** pre  smoother type      = symm Gauss Seidel\n"; 
+              break;
+         case MLI_SOLVER_PARASAILS_ID :
+              cout << "\t*** pre  smoother type      = ParaSails\n"; break; 
+         case MLI_SOLVER_SCHWARZ_ID :
+              cout << "\t*** pre  smoother type      = Schwarz\n"; break; 
+         case MLI_SOLVER_MLS_ID :
+              cout << "\t*** pre  smoother type      = MLS\n"; break; 
+         case MLI_SOLVER_SUPERLU_ID :
+              cout << "\t*** pre  smoother type      = SuperLU\n"; break; 
+      }
+      cout << "\t*** pre  smoother nsweeps   = " << pre_smoother_num << endl;  
+      switch ( postsmoother )
+      {
+         case MLI_SOLVER_JACOBI_ID :
+              cout << "\t*** post smoother type      = Jacobi\n"; break;
+         case MLI_SOLVER_GS_ID :
+              cout << "\t*** post smoother type      = Gauss Seidel\n"; break;
+         case MLI_SOLVER_SGS_ID :
+              cout << "\t*** post smoother type      = symm Gauss Seidel\n"; 
+              break;
+         case MLI_SOLVER_PARASAILS_ID :
+              cout << "\t*** post smoother type      = ParaSails\n"; break; 
+         case MLI_SOLVER_SCHWARZ_ID :
+              cout << "\t*** post smoother type      = Schwarz\n"; break; 
+         case MLI_SOLVER_MLS_ID :
+              cout << "\t*** post smoother type      = MLS\n"; break; 
+         case MLI_SOLVER_SUPERLU_ID :
+              cout << "\t*** post smoother type      = SuperLU\n"; break; 
+      }
+      cout << "\t*** post smoother nsweeps   = " << postsmoother_num << endl;  
+      switch ( coarse_solver )
+      {
+         case MLI_SOLVER_JACOBI_ID :
+              cout << "\t*** coarse solver type      = Jacobi\n"; break;
+         case MLI_SOLVER_GS_ID :
+              cout << "\t*** coarse solver type      = Gauss Seidel\n"; break;
+         case MLI_SOLVER_SGS_ID :
+              cout << "\t*** coarse solver type      = symm Gauss Seidel\n"; 
+              break;
+         case MLI_SOLVER_PARASAILS_ID :
+              cout << "\t*** coarse solver type      = ParaSails\n"; break; 
+         case MLI_SOLVER_SCHWARZ_ID :
+              cout << "\t*** coarse solver type      = Schwarz\n"; break; 
+         case MLI_SOLVER_MLS_ID :
+              cout << "\t*** coarse solver type      = MLS\n"; break; 
+         case MLI_SOLVER_SUPERLU_ID :
+              cout << "\t*** coarse solver type      = SuperLU\n"; break; 
+      }
+      cout << "\t*** coarse solver nsweeps   = " << coarse_solver_num << endl;  
+      cout << "\t*** calibration size        = " << calibration_size << endl;  
       cout << "\t************************************************************\n";
       cout.flush();
    }

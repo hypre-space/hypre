@@ -19,6 +19,7 @@
  * include files 
  *--------------------------------------------------------------------------*/
 
+#include <string.h>
 #include "utilities/utilities.h"
 
 #include "../matrix/mli_matrix.h"
@@ -30,21 +31,30 @@
 
 class MLI_Solver
 {
+   char solver_name[100];
+   int  solver_id;
+
 public :
 
-   MLI_Solver()                      { }
-   virtual ~MLI_Solver()             { }
+   MLI_Solver(char *name);
+   MLI_Solver(int  id);
+   ~MLI_Solver()             { }
+
+   char* getName()           { return solver_name; }
+   int   getID()             { return solver_id; }
+
    virtual int setup(MLI_Matrix *)=0;
    virtual int solve(MLI_Vector *, MLI_Vector *)=0;
-   virtual int setParams(char *param_string, int argc, char **argv) 
-                                     { printf("called\n");return -1; }
+   virtual int setParams(char *param_string,int argc,char **argv)  {return -1;}
+   virtual int getParams(char *param_string,int *argc,char **argv) {return -1;}
 };
 
 /*--------------------------------------------------------------------------
  * MLI_Solver functions 
  *--------------------------------------------------------------------------*/
 
-extern MLI_Solver *MLI_Solver_Construct(int);
+extern MLI_Solver *MLI_Solver_CreateFromName(char *);
+extern MLI_Solver *MLI_Solver_CreateFromID(int);
 
 #endif
 

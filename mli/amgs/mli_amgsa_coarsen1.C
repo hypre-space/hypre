@@ -254,7 +254,7 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,MLI_Matrix **Pmat_out)
             for ( k = 0; k < nullspace_dim; k++ ) 
                q_array[agg_size*k+j] = P_vecs[k][agg_ind_array[i][j]]; 
          }
-if (i == -1)
+if (i == 0)
 {
 for ( j = 0; j < agg_size; j++ ) 
 {

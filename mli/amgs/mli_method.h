@@ -38,7 +38,7 @@ class MLI_Method
 public :
 
    MLI_Method( MPI_Comm comm ) 
-            {mpi_comm = comm; method_id = -1; strcpy(method_name, "MLI_NONE");}
+            {printf("CHECK\n");mpi_comm = comm; method_id = -1; strcpy(method_name, "MLI_NONE");}
    ~MLI_Method()                                              { }
 
    virtual int setup( MLI *mli )                              {return -1;}
@@ -52,6 +52,9 @@ public :
    int      getID()                       {return method_id;}
    MPI_Comm getComm()                     {return mpi_comm;}
 };
+
+extern MLI_Method *MLI_Method_CreateFromName(char *,MPI_Comm);
+extern MLI_Method *MLI_Method_CreateFromID(int,MPI_Comm);
 
 #endif
 

@@ -25,7 +25,6 @@
 #include "parcsr_mv/parcsr_mv.h"
 
 #include "mli_method_amgsa.h"
-#include "mli_methodAgent.h"
 #include "../util/mli_utils.h"
  
 /***********************************************************************
@@ -35,7 +34,7 @@
 int MLI_Method_AMGSA::setupCalibration( MLI *mli ) 
 {
    int          mypid, nprocs, *partition, ndofs, nrows, n_null;
-   int          i, j, k, level, local_nrows, relax_num, targc;
+   int          i, j, k, level, local_nrows, relax_num, targc, calib_size_tmp;
    double       *dble_array, *relax_wts, start_time;
    double       *sol_data, *nullspace_store, dtime, *Q_array, *R_array;
    char         param_string[100], **targv;
@@ -44,7 +43,6 @@ int MLI_Method_AMGSA::setupCalibration( MLI *mli )
    MLI_OneLevel *single_level;
    MLI          *new_mli;
    MPI_Comm     mpi_comm;
-   MLI_MethodAgent    *new_method;
    MLI_Method         *new_amgsa;
    hypre_Vector       *sol_local;
    hypre_ParVector    *trial_sol, *zero_rhs;
@@ -89,15 +87,16 @@ int MLI_Method_AMGSA::setupCalibration( MLI *mli )
    /* --------------------------------------------------------------- */
 
    getNullSpace(ndofs, n_null, nullspace_store, nrows);
-   dble_array = nullspace_store;
-   nullspace_store = new double[nrows*(n_null+calibration_size)];
-   if ( dble_array != NULL )
+   if ( nullspace_store != NULL )
    {
+      dble_array = nullspace_store;
+      nullspace_store = new double[nrows*(n_null+calibration_size)];
       for (i = 0; i < nrows*n_null; i++) nullspace_store[i] = dble_array[i]; 
-      delete [] dble_array;
    }
    else
    {
+      nrows = local_nrows;
+      nullspace_store = new double[nrows*(n_null+calibration_size)];
       for ( j = 0; j < n_null; j++ ) 
       {
          for ( k = 0; k < nrows; k++ ) 
@@ -111,20 +110,21 @@ int MLI_Method_AMGSA::setupCalibration( MLI *mli )
    /* And allocate temporaray arrays for QR decomposition.            */
    /* --------------------------------------------------------------- */
 
-   new_method = new MLI_MethodAgent( mpi_comm );
-   sprintf( param_string, "MLI_METHOD_AMGSA" );
-   new_method->createMethod( param_string );
-   sprintf( param_string, "setCoarseSolver SGS" );
    relax_num = 20;
    relax_wts = new double[relax_num];
    for ( i = 0; i < relax_num; i++ ) relax_wts[i] = 1.0;
+   new_amgsa = MLI_Method_CreateFromID( MLI_METHOD_AMGSA_ID, mpi_comm );
+   sprintf( param_string, "setCoarseSolver SGS" );
    targc = 2;
    targv[0] = (char *) &relax_num;
    targv[1] = (char *) relax_wts;
-   new_method->setParams( param_string, targc, targv );
-   delete [] relax_wts;
+   new_amgsa->setParams( param_string, targc, targv );
    Q_array = new double[nrows*(n_null+calibration_size)];
    R_array = new double[(n_null+calibration_size)*(n_null+calibration_size)];
+   new_mli = new MLI( mpi_comm );
+   new_mli->setMaxIterations(2);
+   new_mli->setMethod( new_amgsa );
+   new_mli->setSystemMatrix( 0, mli_Amat );
 
    /* --------------------------------------------------------------- */
    /* recover the other null space vectors                            */
@@ -135,21 +135,16 @@ int MLI_Method_AMGSA::setupCalibration( MLI *mli )
    for ( i = 0; i < calibration_size; i++ )
    {
       sprintf( param_string, "setNullSpace" );
-      targc = 2;
+      targc = 4;
       targv[0] = (char *) &ndofs;  
       targv[1] = (char *) &n_null;  
       targv[2] = (char *) nullspace_store;  
       targv[3] = (char *) &nrows;  
-      new_method->setParams( param_string, targc, targv );
-      new_amgsa = new_method->takeMethod();
+      new_amgsa->setParams( param_string, targc, targv );
 
       dtime = time_getWallclockSeconds();
       hypre_ParVectorSetRandomValues( trial_sol, (int) dtime );
 
-      new_mli = new MLI( mpi_comm );
-      new_mli->setMaxIterations(2);
-      new_mli->setMethod( new_amgsa );
-      new_mli->setSystemMatrix( 0, mli_Amat );
       new_mli->setup();
 
       sprintf(param_string, "HYPRE_ParVector");
@@ -157,8 +152,6 @@ int MLI_Method_AMGSA::setupCalibration( MLI *mli )
       mli_rhs = new MLI_Vector( (void*) zero_rhs, param_string, NULL );
       new_mli->cycle( mli_sol, mli_rhs );
 
-      new_mli->resetSystemMatrix(0);
-      delete new_mli;
 
       for ( j = nrows*n_null; j < nrows*(n_null+1); j++ )
          nullspace_store[j] = sol_data[j-nrows*n_null];
@@ -170,13 +163,19 @@ int MLI_Method_AMGSA::setupCalibration( MLI *mli )
          printf("P%d : Norm of Null %d = %e\n", mypid,j,R_array[j*n_null+j]);
 */
    }
+   new_mli->resetSystemMatrix(0);
+   delete new_mli;
    total_time += ( MLI_Utils_WTime() - start_time );
    delete [] Q_array;
    delete [] R_array;
-   delete [] nullspace_store;
+   delete [] relax_wts;
    delete [] targv;
-   delete new_method;
+   setNullSpace(ndofs, n_null, nullspace_store, nrows);
+   delete [] nullspace_store;
+   calib_size_tmp = calibration_size;
+   calibration_size = 0;
    level = setup( mli );
+   calibration_size = calib_size_tmp;
    hypre_ParVectorDestroy( trial_sol );
    hypre_ParVectorDestroy( zero_rhs );
    return level;

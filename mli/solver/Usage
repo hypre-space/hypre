@@ -1,18 +1,19 @@
 To create a smoother/solver,
 
-1. instantiate the common class solver
+1. instantiate the solver agent
 
-   solver = new MLI_Solver_Construct( solver_id );
+   solver = new MLI_SolverCreateFromID( id );
+   solver = new MLI_SolverCreateFromName( name );
   
-   where solver_id is one of :
+   where solver_id (solver_name) is one of :
 
-      MLI_SOLVER_JACOBI_ID    : 301
-      MLI_SOLVER_GS_ID        : 302
-      MLI_SOLVER_SGS_ID       : 303
-      MLI_SOLVER_PARASAILS_ID : 304
-      MLI_SOLVER_SCHWARZ_ID   : 305
-      MLI_SOLVER_MLS_ID       : 306
-      MLI_SOLVER_SUPERLU_ID   : 307
+      MLI_SOLVER_JACOBI (Jacobi)
+      MLI_SOLVER_GS (GS)
+      MLI_SOLVER_SGS_ID (SGS)
+      MLI_SOLVER_PARASAILS (ParaSails)
+      MLI_SOLVER_SCHWARZ_ID (Schwarz)
+      MLI_SOLVER_MLS_ID (MLS)
+      MLI_SOLVER_SUPERLU_ID (SuperLU)
 
 2. call setParams to set specific parameters
 
@@ -20,7 +21,7 @@ To create a smoother/solver,
 
 3. call setup
 
-   solver->setup();
+   solver->setup(MLI_Matrix *mat);
 
 4. call solve
 

@@ -20,8 +20,8 @@
 #include "parcsr_mv/parcsr_mv.h"
 #include "../base/mli.h"
 #include "../base/mli_defs.h"
-#include "mli_method.h"
 #include "../matrix/mli_matrix.h"
+#include "mli_method.h"
 
 #define MLI_METHOD_AMGSA_LOCAL 0
 
