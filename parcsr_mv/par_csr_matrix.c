@@ -735,9 +735,12 @@ hypre_CSRMatrixToParCSRMatrix( MPI_Comm comm, hypre_CSRMatrix *A,
    GenerateDiagAndOffd(local_A, par_matrix, first_col_diag, last_col_diag);
 
    /* set pointers back to NULL before destroying */
-   hypre_CSRMatrixData(local_A) = NULL;
-   hypre_CSRMatrixI(local_A) = NULL;
-   hypre_CSRMatrixJ(local_A) = NULL;
+   if (my_id == 0)
+   {      
+      hypre_CSRMatrixData(local_A) = NULL;
+      hypre_CSRMatrixI(local_A) = NULL;
+      hypre_CSRMatrixJ(local_A) = NULL; 
+   }      
    hypre_CSRMatrixDestroy(local_A);
    hypre_TFree(local_num_rows);
    hypre_TFree(csr_matrix_datatypes);
