@@ -6300,7 +6300,7 @@ echo "configure:6106: checking for Fortran libraries" >&5
         end
 EOF
 
-   $F77 -c testflib_.f
+   $F77 -c testflib_.f 2>&5 
 
    # Mangle testflib's name appropriatiately
    case $NAMESTYLE in
@@ -6409,7 +6409,7 @@ fi
         end
 EOF
 
-   $F77 -c testflib_.f
+   $F77 -c testflib_.f 2>&5 
 
    # Mangle testflib's name appropriatiately
    case $NAMESTYLE in
@@ -6497,7 +6497,7 @@ fi
         end
 EOF
 
-   $F77 -c testflib_.f
+   $F77 -c testflib_.f 2>&5 
 
    # Mangle testflib's name appropriatiately
    case $NAMESTYLE in
@@ -6587,7 +6587,7 @@ fi
         end
 EOF
 
-   $F77 -c testflib_.f
+   $F77 -c testflib_.f 2>&5 
 
    # Mangle testflib's name appropriatiately
    case $NAMESTYLE in
@@ -6674,7 +6674,7 @@ fi
         end
 EOF
 
-   $F77 -c testflib_.f
+   $F77 -c testflib_.f 2>&5 
 
    # Mangle testflib's name appropriatiately
    case $NAMESTYLE in
@@ -6761,7 +6761,7 @@ fi
         end
 EOF
 
-   $F77 -c testflib_.f
+   $F77 -c testflib_.f 2>&5 
 
    # Mangle testflib's name appropriatiately
    case $NAMESTYLE in
@@ -7170,6 +7170,10 @@ fi
 
                fi
             fi
+
+            if test "$casc_blas_found" = "no"; then
+               casc_cv_blasflags=none
+            fi
          fi
       fi
    
@@ -7195,7 +7199,7 @@ echo "$ac_t""$casc_cv_blasflags" 1>&6
    # check for the library from first argument.  If linking is successful
    # the first time, the job is done, otherwise loop through DIRECTORY-LIST
    echo $ac_n "checking for main in -lm""... $ac_c" 1>&6
-echo "configure:7199: checking for main in -lm" >&5
+echo "configure:7203: checking for main in -lm" >&5
 ac_lib_var=`echo m'_'main | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -7203,14 +7207,14 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="$LIBDIRS $LIBS $LIBS -lm"
 cat > conftest.$ac_ext <<EOF
-#line 7207 "configure"
+#line 7211 "configure"
 #include "confdefs.h"
 
 int main() {
 main()
 ; return 0; }
 EOF
-if { (eval echo configure:7214: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:7218: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -7235,7 +7239,7 @@ unset ac_cv_lib_$ac_lib_var
       for casc_lib_dir in /usr/lib /usr/ccs/lib; do
 
          echo $ac_n "checking for main in -lm""... $ac_c" 1>&6
-echo "configure:7239: checking for main in -lm" >&5
+echo "configure:7243: checking for main in -lm" >&5
 ac_lib_var=`echo m'_'main | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -7243,14 +7247,14 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-L$casc_lib_dir $LIBDIRS $LIBS -lm $LIBS -lm"
 cat > conftest.$ac_ext <<EOF
-#line 7247 "configure"
+#line 7251 "configure"
 #include "confdefs.h"
 
 int main() {
 main()
 ; return 0; }
 EOF
-if { (eval echo configure:7254: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:7258: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
