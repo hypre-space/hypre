@@ -148,8 +148,8 @@ veryclean: clean
 ##################################################################
 
 .C.o:
-	${CXX} -o $@ -c ${CXXFLAGS} $<
+	${CXX} -o $@ ${DEFINES} -c ${CXXFLAGS} $<
 
 .c.o:
-	${CC} -o $@ -c ${CFLAGS} $<
+	${CC} -o $@ ${DEFINES} -c ${CFLAGS} $<
 
