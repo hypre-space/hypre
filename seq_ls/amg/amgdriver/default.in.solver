@@ -68,8 +68,8 @@
 # ncyc
 1040
 
-# mu[10]
-1 1 1 1 1 1 1 1 1 1
+# mu[25]
+1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
 
 # ntr[f,d,u,c]; ipr[f,d,u,c]; ier[f,d,u,c]; iur[f,d,u,c]
 133   133  133   19
@@ -80,6 +80,6 @@
 #-----------------
 # AMG output data:
 
-# ioutdat; ioutgrd; ioutmat; ioutres
+# ioutdat
 3
 
