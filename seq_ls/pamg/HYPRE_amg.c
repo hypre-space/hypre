@@ -91,6 +91,17 @@ HYPRE_AMGSetStrongThreshold( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_AMGSetCoarsenType
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_AMGSetCoarsenType( HYPRE_Solver solver,
+                         int          coarsen_type  )
+{
+   return( hypre_AMGSetCoarsenType( (void *) solver, coarsen_type ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_AMGSetInterpType
  *--------------------------------------------------------------------------*/
 
@@ -165,6 +176,17 @@ HYPRE_AMGSetGridRelaxPoints( HYPRE_Solver   solver,
                              int          **grid_relax_points  )
 {
    return( hypre_AMGSetGridRelaxPoints( (void *) solver, grid_relax_points ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_AMGSetRelaxWeight
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_AMGSetRelaxWeight( HYPRE_Solver   solver,
+                         double         relax_weight  )
+{
+   return( hypre_AMGSetRelaxWeight( (void *) solver, relax_weight ) );
 }
 
 /*--------------------------------------------------------------------------
