@@ -180,7 +180,7 @@ then
         # store a representative date for this version of the source
         date > UPDATE/VERSION_DATE
         # store a representative name for this version
-        date '+V%y-%m-%d' > UPDATE/VERSION_NAME
+        date '+V%Y-%m-%d' > UPDATE/VERSION_NAME
 
         # create the UPDATE.tar file
         echo "creating the UPDATE.tar file ..."
@@ -321,7 +321,7 @@ then
     echo "removing old installations ..."
     NUM_COPIES=3
     # note: `*' will expand alphabetically in the Bourne shell
-    set - V[0-9]*
+    set - V[1-8]*
     COUNT=`expr $# - $NUM_COPIES`
     while [ $COUNT -gt 0 ]
     do
