@@ -560,7 +560,9 @@ int hypre_DataExchangeList(int num_contacts,
 
       hypre_TFree(response_requests);
       hypre_TFree(response_statuses);
-
+      hypre_TFree(contact_requests);
+      hypre_TFree(contact_statuses);
+      
 
    }
 
