@@ -13,11 +13,6 @@
 
 #include "../utilities/memory.h"
 #include "../utilities/timing.h"
-#include "../struct_matrix_vector/headers.h"
-
-#include "HYPRE_ls.h"
-
-#include "general.h"
-
-#include "protos.h"
+#include "../struct_matrix_vector/hypre_mv.h"
+#include "hypre_ls.h"
 

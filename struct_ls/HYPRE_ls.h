@@ -15,6 +15,8 @@
 #ifndef HYPRE_LS_HEADER
 #define HYPRE_LS_HEADER
 
+#include "mpi.h"
+
 #include "HYPRE_struct_pcg.h"
 #include "HYPRE_pcg.h"
 

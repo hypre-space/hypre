@@ -7,22 +7,31 @@
 # $Revision$
 #EHEADER***********************************************************************
 
-CC = mpcc
-F77 = f77
+CC = gcc
+F77 = /home/casc/g77/bin/g77
 
-CFLAGS = -O
-# CFLAGS = -O -DHYPRE_TIMING
-# CFLAGS = -g -DHYPRE_TIMING
+CFLAGS =\
+ -I/usr/local/include\
+ -I/home/casc/include\
+ -I/usr/local/mpi/mpich/include\
+ -O -Wall -DHYPRE_TIMING
 
 FFLAGS = -O
 
 LFLAGS =\
  -L/usr/local/lib\
+ -L/home/casc/lib\
+ -L/home/casc/g77/lib\
+ -L/usr/local/mpi/mpich/lib/solaris/ch_p4\
  -L.\
+ -L../struct_matrix_vector\
  -L../utilities\
+ -lHYPRE_ls\
  -lHYPRE_mv\
  -lHYPRE_timing\
  -lHYPRE_memory\
+ -lnsl -lsocket -lmpi\
+ -lf2c\
  -lm
 
 include Makefile.generic

@@ -1,3 +1,47 @@
+
+#ifndef hypre_LS_HEADER
+#define hypre_LS_HEADER
+
+#include "mpi.h"
+#include "HYPRE_ls.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/*BHEADER**********************************************************************
+ * (c) 1997   The Regents of the University of California
+ *
+ * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+ * notice, contact person, and disclaimer.
+ *
+ * $Revision$
+ *********************************************************************EHEADER*/
+/******************************************************************************
+ *
+ * General structures and values
+ *
+ *****************************************************************************/
+
+#ifndef hypre_GENERAL_HEADER
+#define hypre_GENERAL_HEADER
+
+/*--------------------------------------------------------------------------
+ * Define various functions
+ *--------------------------------------------------------------------------*/
+
+#ifndef max
+#define max(a,b)  (((a)<(b)) ? (b) : (a))
+#endif
+#ifndef min
+#define min(a,b)  (((a)<(b)) ? (a) : (b))
+#endif
+
+#ifndef round
+#define round(x)  ( ((x) < 0.0) ? ((int)(x - 0.5)) : ((int)(x + 0.5)) )
+#endif
+
+#endif
 #ifdef __STDC__
 # define	P(s) s
 #else
@@ -46,6 +90,9 @@ int hypre_CyclicReduction P((void *cyc_red_vdata , hypre_StructMatrix *A , hypre
 int hypre_CyclicReductionSetBase P((void *cyc_red_vdata , hypre_Index base_index , hypre_Index base_stride ));
 int hypre_CyclicReductionFinalize P((void *cyc_red_vdata ));
 
+/* driver.c */
+int main P((int argc , char *argv []));
+
 /* driver_internal.c */
 int main P((int argc , char *argv []));
 
@@ -55,10 +102,11 @@ int main P((int argc , char *argv []));
 /* driver_internal_const_coef.c */
 int main P((int argc , char *argv []));
 
+/* driver_internal_overlap.c */
+int main P((int argc , char *argv []));
+
 /* general.c */
 int hypre_Log2 P((int p ));
-
-/* linear_interface.c */
 
 /* smg.c */
 void *hypre_SMGInitialize P((MPI_Comm comm ));
@@ -129,6 +177,13 @@ int hypre_SMGResidual P((void *residual_vdata , hypre_StructMatrix *A , hypre_St
 int hypre_SMGResidualSetBase P((void *residual_vdata , hypre_Index base_index , hypre_Index base_stride ));
 int hypre_SMGResidualFinalize P((void *residual_vdata ));
 
+/* smg_residual_unrolled.c */
+void *hypre_SMGResidualInitialize P((void ));
+int hypre_SMGResidualSetup P((void *residual_vdata , hypre_StructMatrix *A , hypre_StructVector *x , hypre_StructVector *b , hypre_StructVector *r ));
+int hypre_SMGResidual P((void *residual_vdata , hypre_StructMatrix *A , hypre_StructVector *x , hypre_StructVector *b , hypre_StructVector *r ));
+int hypre_SMGResidualSetBase P((void *residual_vdata , hypre_Index base_index , hypre_Index base_stride ));
+int hypre_SMGResidualFinalize P((void *residual_vdata ));
+
 /* smg_restrict.c */
 void *hypre_SMGRestrictInitialize P((void ));
 int hypre_SMGRestrictSetup P((void *restrict_vdata , hypre_StructMatrix *R , hypre_StructVector *r , hypre_StructVector *rc , hypre_Index cindex , hypre_Index cstride , hypre_Index findex , hypre_Index fstride ));
@@ -154,3 +209,10 @@ int hypre_SMGSetupRestrictOp P((hypre_StructMatrix *A , hypre_StructMatrix *R , 
 int hypre_SMGSolve P((void *smg_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x ));
 
 #undef P
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif
+
