@@ -97,7 +97,7 @@ STRUCT_LFLAGS =\
  -lHYPRE_parcsr_mv\
  -lHYPRE_seq_mv\
  -lHYPRE_krylov\
- -lHYPRE_lobpcg \
+ -lHYPRE_multivector \
  -lHYPRE_utilities\
  ${LAPACKLIBFLAGS} \
  ${BLASLIBFLAGS} \
@@ -122,7 +122,7 @@ SSTRUCT_LFLAGS =\
  -lHYPRE_parcsr_mv\
  -lHYPRE_seq_mv\
  -lHYPRE_krylov\
- -lHYPRE_lobpcg\
+ -lHYPRE_multivector\
  -lHYPRE_utilities\
  ${LAPACKLIBFLAGS} \
  ${BLASLIBFLAGS} \
@@ -143,7 +143,7 @@ IJ_LFLAGS =\
  -lHYPRE_parcsr_mv\
  -lHYPRE_seq_mv\
  -lHYPRE_krylov\
- -lHYPRE_lobpcg\
+ -lHYPRE_multivector\
  -lHYPRE_utilities\
  ${LAPACKLIBFLAGS} \
  ${BLASLIBFLAGS} \
