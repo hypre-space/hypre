@@ -46,6 +46,7 @@ HYPRE_DIRS =\
 # These are directories that are not yet officially in HYPRE
 HYPRE_EXTRA_DIRS =\
  seq_linear_solvers/pamg\
+ structIJ_matrix_vector\
  CI_struct_matrix_vector\
  CI_struct_linear_solvers @HYPRE_PETSCLIBDIRS@
 
