@@ -342,7 +342,16 @@ package Hypre {
   {
      int SetOperator (in Operator A);
      int GetResidual (out Vector r);
-     /* ... error if logging level is not high enough (0,1 are too low) */
+     /* ... Depending on the solver, this may not be guaranteed to return an
+        actual residual.  What it returns is an array which the solver uses
+        like a residual in some sense.  It may be an actual residual, a
+        residual multiplied by a preconditioning matrix, or a cheap approximation
+        to such a vector.  Check each particular solver's documentation about
+        what this does.
+        The error flag will be set if nothing reasonable can be returned.
+        If the logging level is not 2 or above, the solver probably will not
+        have saved its residual vector, so the error flag will be set.  */
+
      int SetLogging ( in int level );
      /* ... logging levels; defaults to 0.
      /* 0=no logging, 1=minimal cheap logging, >=2=do some work */
@@ -360,6 +369,7 @@ package Hypre {
   {
      int SetPreconditioner (in Solver s);
      int GetPreconditionedResidual (out Vector r);
+     /* ... may do nothing but set an error flag; check the solver's documentation */
   }
 
   /**
