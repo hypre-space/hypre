@@ -568,7 +568,7 @@ MLI_ParCSRBooleanMatrix * MLI_ParBooleanAAt( MLI_ParCSRBooleanMatrix  * A )
     	*--------------------------------------------------------------------*/
    	if (!MLI_ParCSRBooleanMatrix_Get_CommPkg(A))
    	{
-        	hypre_MatTCommPkgCreate(A);
+        	MLI_BooleanMatTCommPkgCreate(A);
    	}
 
    	A_ext = MLI_ParCSRBooleanMatrixExtractAExt( A, &A_ext_row_map );
@@ -953,3 +953,69 @@ MLI_ParCSRBooleanMatrix * MLI_ParBooleanAAt( MLI_ParCSRBooleanMatrix  * A )
 }            
 
 
+/* ----------------------------------------------------------------------
+ * hypre_BooleanMatTCommPkgCreate
+ * generates a special comm_pkg for a Boolean matrix A - for use in multiplying
+ * by its transpose, A * A^T
+ * if no row and/or column partitioning is given, the routine determines
+ * them with MPE_Decomp1d 
+ * ---------------------------------------------------------------------*/
+
+int
+MLI_BooleanMatTCommPkgCreate ( MLI_ParCSRBooleanMatrix *A)
+{
+   hypre_ParCSRCommPkg	*comm_pkg;
+   
+   MPI_Comm             comm = MLI_ParCSRBooleanMatrix_Get_Comm(A);
+/*   MPI_Datatype         *recv_mpi_types;
+   MPI_Datatype         *send_mpi_types;
+*/
+   int			num_sends;
+   int			*send_procs;
+   int			*send_map_starts;
+   int			*send_map_elmts;
+   int			num_recvs;
+   int			*recv_procs;
+   int			*recv_vec_starts;
+   
+   int  *col_map_offd = MLI_ParCSRBooleanMatrix_Get_ColMapOffd(A);
+   int  first_col_diag = MLI_ParCSRBooleanMatrix_Get_FirstColDiag(A);
+   int  *col_starts = MLI_ParCSRBooleanMatrix_Get_ColStarts(A);
+
+   int	ierr = 0;
+   int	num_rows_diag = MLI_CSRBooleanMatrix_Get_NRows(MLI_ParCSRBooleanMatrix_Get_Diag(A));
+   int	num_cols_diag = MLI_CSRBooleanMatrix_Get_NCols(MLI_ParCSRBooleanMatrix_Get_Diag(A));
+   int	num_cols_offd = MLI_CSRBooleanMatrix_Get_NCols(MLI_ParCSRBooleanMatrix_Get_Offd(A));
+   int * row_starts = MLI_ParCSRBooleanMatrix_Get_RowStarts(A);
+
+   hypre_MatTCommPkgCreate_core (
+      comm, col_map_offd, first_col_diag, col_starts,
+      num_rows_diag, num_cols_diag, num_cols_offd, row_starts,
+      MLI_ParCSRBooleanMatrix_Get_FirstColDiag(A),
+      MLI_ParCSRBooleanMatrix_Get_ColMapOffd(A),
+      MLI_CSRBooleanMatrix_Get_I( MLI_ParCSRBooleanMatrix_Get_Diag(A) ),
+      MLI_CSRBooleanMatrix_Get_J( MLI_ParCSRBooleanMatrix_Get_Diag(A) ),
+      MLI_CSRBooleanMatrix_Get_I( MLI_ParCSRBooleanMatrix_Get_Offd(A) ),
+      MLI_CSRBooleanMatrix_Get_J( MLI_ParCSRBooleanMatrix_Get_Offd(A) ),
+      0,
+      &num_recvs, &recv_procs, &recv_vec_starts,
+      &num_sends, &send_procs, &send_map_starts,
+      &send_map_elmts
+      );
+
+   comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg, 1);
+
+   hypre_ParCSRCommPkgComm(comm_pkg) = comm;
+
+   hypre_ParCSRCommPkgNumRecvs(comm_pkg) = num_recvs;
+   hypre_ParCSRCommPkgRecvProcs(comm_pkg) = recv_procs;
+   hypre_ParCSRCommPkgRecvVecStarts(comm_pkg) = recv_vec_starts;
+   hypre_ParCSRCommPkgNumSends(comm_pkg) = num_sends;
+   hypre_ParCSRCommPkgSendProcs(comm_pkg) = send_procs;
+   hypre_ParCSRCommPkgSendMapStarts(comm_pkg) = send_map_starts;
+   hypre_ParCSRCommPkgSendMapElmts(comm_pkg) = send_map_elmts;
+
+   MLI_ParCSRBooleanMatrix_Get_CommPkgT(A) = comm_pkg;
+
+   return ierr;
+}
