@@ -261,8 +261,13 @@ install: all
 	  exit 1; \
 	fi; \
 	echo "Installing hypre ..."; \
-	cp -fr hypre/* $$HYPRE_INSTALL_DIR/.; \
-	rm -Rf hypre
+        if [ "$$HYPRE_INSTALL_DIR" = "`pwd`/hypre" ]; \
+        then \
+          echo "Installation exist, skipping ..."; \
+        else \
+	  cp -fr hypre/* $$HYPRE_INSTALL_DIR; \
+	  rm -Rf hypre; \
+        fi
 
 clean:
 	@ \
