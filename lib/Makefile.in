@@ -167,6 +167,11 @@ am__libHYPRE_a_SOURCES_DIST = $(top_srcdir)/blas/dasum.c \
 	$(top_srcdir)/FEI_mv/fei-hypre/hypre_schur_reduce.cxx \
 	$(top_srcdir)/FEI_mv/fei-hypre/hypre_slide_reduce.cxx \
 	$(top_srcdir)/FEI_mv/fei-hypre/lsicg.c \
+	$(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Fei.cxx \
+	$(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Impl.cxx \
+	$(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_LSCore.cxx \
+	$(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Matrix.cxx \
+	$(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Solver.cxx \
 	$(top_srcdir)/FEI_mv/femli/util/mli_utils.c \
 	$(top_srcdir)/FEI_mv/femli/amgs/mli_amgsa_calib.cxx \
 	$(top_srcdir)/FEI_mv/femli/amgs/mli_amgsa_coarsen1.cxx \
@@ -555,14 +560,17 @@ am__objects_4 = bicgs.$(OBJEXT) bicgstabl.$(OBJEXT) \
 	cfei_hypre.$(OBJEXT) fgmres.$(OBJEXT) hypre_lsi_amge.$(OBJEXT) \
 	hypre_lsi_ddamg.$(OBJEXT) hypre_lsi_misc.$(OBJEXT) \
 	hypre_schur_reduce.$(OBJEXT) hypre_slide_reduce.$(OBJEXT) \
-	lsicg.$(OBJEXT) mli_utils.$(OBJEXT) mli_amgsa_calib.$(OBJEXT) \
-	mli_amgsa_coarsen1.$(OBJEXT) mli_amgsa_dd_fedata.$(OBJEXT) \
-	mli_amgsa_dd_sfei.$(OBJEXT) mli_method.$(OBJEXT) \
-	mli_method_amgcr.$(OBJEXT) mli_method_amgrs.$(OBJEXT) \
-	mli_method_amgsa.$(OBJEXT) mli.$(OBJEXT) \
-	mli_oneLevel.$(OBJEXT) cmli.$(OBJEXT) mli_febase.$(OBJEXT) \
-	mli_fedata.$(OBJEXT) mli_fedata_utils.$(OBJEXT) \
-	mli_sfei.$(OBJEXT) mli_mapper.$(OBJEXT) mli_matrix.$(OBJEXT) \
+	lsicg.$(OBJEXT) LLNL_FEI_Fei.$(OBJEXT) LLNL_FEI_Impl.$(OBJEXT) \
+	LLNL_FEI_LSCore.$(OBJEXT) LLNL_FEI_Matrix.$(OBJEXT) \
+	LLNL_FEI_Solver.$(OBJEXT) mli_utils.$(OBJEXT) \
+	mli_amgsa_calib.$(OBJEXT) mli_amgsa_coarsen1.$(OBJEXT) \
+	mli_amgsa_dd_fedata.$(OBJEXT) mli_amgsa_dd_sfei.$(OBJEXT) \
+	mli_method.$(OBJEXT) mli_method_amgcr.$(OBJEXT) \
+	mli_method_amgrs.$(OBJEXT) mli_method_amgsa.$(OBJEXT) \
+	mli.$(OBJEXT) mli_oneLevel.$(OBJEXT) cmli.$(OBJEXT) \
+	mli_febase.$(OBJEXT) mli_fedata.$(OBJEXT) \
+	mli_fedata_utils.$(OBJEXT) mli_sfei.$(OBJEXT) \
+	mli_mapper.$(OBJEXT) mli_matrix.$(OBJEXT) \
 	mli_matrix_mult.$(OBJEXT) mli_matrix_utils.$(OBJEXT) \
 	mli_solver.$(OBJEXT) mli_solver_arpacksuperlu.$(OBJEXT) \
 	mli_solver_bjacobi.$(OBJEXT) mli_solver_bsgs.$(OBJEXT) \
@@ -747,6 +755,11 @@ am__libHYPRE_LSI_a_SOURCES_DIST =  \
 	$(top_srcdir)/FEI_mv/fei-hypre/hypre_schur_reduce.cxx \
 	$(top_srcdir)/FEI_mv/fei-hypre/hypre_slide_reduce.cxx \
 	$(top_srcdir)/FEI_mv/fei-hypre/lsicg.c \
+	$(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Fei.cxx \
+	$(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Impl.cxx \
+	$(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_LSCore.cxx \
+	$(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Matrix.cxx \
+	$(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Solver.cxx \
 	$(top_srcdir)/FEI_mv/femli/util/mli_utils.c \
 	$(top_srcdir)/FEI_mv/femli/amgs/mli_amgsa_calib.cxx \
 	$(top_srcdir)/FEI_mv/femli/amgs/mli_amgsa_coarsen1.cxx \
@@ -1181,6 +1194,11 @@ am__libHYPRE_la_SOURCES_DIST = $(top_srcdir)/blas/dasum.c \
 	$(top_srcdir)/FEI_mv/fei-hypre/hypre_schur_reduce.cxx \
 	$(top_srcdir)/FEI_mv/fei-hypre/hypre_slide_reduce.cxx \
 	$(top_srcdir)/FEI_mv/fei-hypre/lsicg.c \
+	$(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Fei.cxx \
+	$(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Impl.cxx \
+	$(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_LSCore.cxx \
+	$(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Matrix.cxx \
+	$(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Solver.cxx \
 	$(top_srcdir)/FEI_mv/femli/util/mli_utils.c \
 	$(top_srcdir)/FEI_mv/femli/amgs/mli_amgsa_calib.cxx \
 	$(top_srcdir)/FEI_mv/femli/amgs/mli_amgsa_coarsen1.cxx \
@@ -1540,7 +1558,9 @@ am__objects_10 = bicgs.lo bicgstabl.lo FEI_HYPRE_Impl.lo \
 	HYPRE_parcsr_symqmr.lo SymQMR.lo TFQmr.lo cfei_hypre.lo \
 	fgmres.lo hypre_lsi_amge.lo hypre_lsi_ddamg.lo \
 	hypre_lsi_misc.lo hypre_schur_reduce.lo hypre_slide_reduce.lo \
-	lsicg.lo mli_utils.lo mli_amgsa_calib.lo mli_amgsa_coarsen1.lo \
+	lsicg.lo LLNL_FEI_Fei.lo LLNL_FEI_Impl.lo LLNL_FEI_LSCore.lo \
+	LLNL_FEI_Matrix.lo LLNL_FEI_Solver.lo mli_utils.lo \
+	mli_amgsa_calib.lo mli_amgsa_coarsen1.lo \
 	mli_amgsa_dd_fedata.lo mli_amgsa_dd_sfei.lo mli_method.lo \
 	mli_method_amgcr.lo mli_method_amgrs.lo mli_method_amgsa.lo \
 	mli.lo mli_oneLevel.lo cmli.lo mli_febase.lo mli_fedata.lo \
@@ -1684,6 +1704,11 @@ am__libHYPRE_LSI_la_SOURCES_DIST =  \
 	$(top_srcdir)/FEI_mv/fei-hypre/hypre_schur_reduce.cxx \
 	$(top_srcdir)/FEI_mv/fei-hypre/hypre_slide_reduce.cxx \
 	$(top_srcdir)/FEI_mv/fei-hypre/lsicg.c \
+	$(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Fei.cxx \
+	$(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Impl.cxx \
+	$(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_LSCore.cxx \
+	$(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Matrix.cxx \
+	$(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Solver.cxx \
 	$(top_srcdir)/FEI_mv/femli/util/mli_utils.c \
 	$(top_srcdir)/FEI_mv/femli/amgs/mli_amgsa_calib.cxx \
 	$(top_srcdir)/FEI_mv/femli/amgs/mli_amgsa_coarsen1.cxx \
@@ -2363,6 +2388,11 @@ MOSTFILES = \
  $(top_srcdir)/FEI_mv/fei-hypre/hypre_schur_reduce.cxx\
  $(top_srcdir)/FEI_mv/fei-hypre/hypre_slide_reduce.cxx\
  $(top_srcdir)/FEI_mv/fei-hypre/lsicg.c\
+ $(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Fei.cxx\
+ $(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Impl.cxx\
+ $(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_LSCore.cxx\
+ $(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Matrix.cxx\
+ $(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Solver.cxx\
  $(top_srcdir)/FEI_mv/femli/util/mli_utils.c\
  $(top_srcdir)/FEI_mv/femli/amgs/mli_amgsa_calib.cxx\
  $(top_srcdir)/FEI_mv/femli/amgs/mli_amgsa_coarsen1.cxx\
@@ -6723,6 +6753,51 @@ hypre_slide_reduce.obj: $(top_srcdir)/FEI_mv/fei-hypre/hypre_slide_reduce.cxx
 
 hypre_slide_reduce.lo: $(top_srcdir)/FEI_mv/fei-hypre/hypre_slide_reduce.cxx
 	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o hypre_slide_reduce.lo `test -f '$(top_srcdir)/FEI_mv/fei-hypre/hypre_slide_reduce.cxx' || echo '$(srcdir)/'`$(top_srcdir)/FEI_mv/fei-hypre/hypre_slide_reduce.cxx
+
+LLNL_FEI_Fei.o: $(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Fei.cxx
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o LLNL_FEI_Fei.o `test -f '$(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Fei.cxx' || echo '$(srcdir)/'`$(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Fei.cxx
+
+LLNL_FEI_Fei.obj: $(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Fei.cxx
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o LLNL_FEI_Fei.obj `if test -f '$(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Fei.cxx'; then $(CYGPATH_W) '$(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Fei.cxx'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Fei.cxx'; fi`
+
+LLNL_FEI_Fei.lo: $(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Fei.cxx
+	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o LLNL_FEI_Fei.lo `test -f '$(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Fei.cxx' || echo '$(srcdir)/'`$(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Fei.cxx
+
+LLNL_FEI_Impl.o: $(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Impl.cxx
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o LLNL_FEI_Impl.o `test -f '$(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Impl.cxx' || echo '$(srcdir)/'`$(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Impl.cxx
+
+LLNL_FEI_Impl.obj: $(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Impl.cxx
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o LLNL_FEI_Impl.obj `if test -f '$(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Impl.cxx'; then $(CYGPATH_W) '$(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Impl.cxx'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Impl.cxx'; fi`
+
+LLNL_FEI_Impl.lo: $(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Impl.cxx
+	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o LLNL_FEI_Impl.lo `test -f '$(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Impl.cxx' || echo '$(srcdir)/'`$(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Impl.cxx
+
+LLNL_FEI_LSCore.o: $(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_LSCore.cxx
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o LLNL_FEI_LSCore.o `test -f '$(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_LSCore.cxx' || echo '$(srcdir)/'`$(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_LSCore.cxx
+
+LLNL_FEI_LSCore.obj: $(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_LSCore.cxx
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o LLNL_FEI_LSCore.obj `if test -f '$(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_LSCore.cxx'; then $(CYGPATH_W) '$(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_LSCore.cxx'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_LSCore.cxx'; fi`
+
+LLNL_FEI_LSCore.lo: $(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_LSCore.cxx
+	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o LLNL_FEI_LSCore.lo `test -f '$(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_LSCore.cxx' || echo '$(srcdir)/'`$(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_LSCore.cxx
+
+LLNL_FEI_Matrix.o: $(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Matrix.cxx
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o LLNL_FEI_Matrix.o `test -f '$(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Matrix.cxx' || echo '$(srcdir)/'`$(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Matrix.cxx
+
+LLNL_FEI_Matrix.obj: $(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Matrix.cxx
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o LLNL_FEI_Matrix.obj `if test -f '$(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Matrix.cxx'; then $(CYGPATH_W) '$(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Matrix.cxx'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Matrix.cxx'; fi`
+
+LLNL_FEI_Matrix.lo: $(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Matrix.cxx
+	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o LLNL_FEI_Matrix.lo `test -f '$(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Matrix.cxx' || echo '$(srcdir)/'`$(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Matrix.cxx
+
+LLNL_FEI_Solver.o: $(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Solver.cxx
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o LLNL_FEI_Solver.o `test -f '$(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Solver.cxx' || echo '$(srcdir)/'`$(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Solver.cxx
+
+LLNL_FEI_Solver.obj: $(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Solver.cxx
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o LLNL_FEI_Solver.obj `if test -f '$(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Solver.cxx'; then $(CYGPATH_W) '$(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Solver.cxx'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Solver.cxx'; fi`
+
+LLNL_FEI_Solver.lo: $(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Solver.cxx
+	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o LLNL_FEI_Solver.lo `test -f '$(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Solver.cxx' || echo '$(srcdir)/'`$(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Solver.cxx
 
 mli_amgsa_calib.o: $(top_srcdir)/FEI_mv/femli/amgs/mli_amgsa_calib.cxx
 	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mli_amgsa_calib.o `test -f '$(top_srcdir)/FEI_mv/femli/amgs/mli_amgsa_calib.cxx' || echo '$(srcdir)/'`$(top_srcdir)/FEI_mv/femli/amgs/mli_amgsa_calib.cxx

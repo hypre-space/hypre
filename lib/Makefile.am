@@ -207,6 +207,11 @@ MOSTFILES = \
  $(top_srcdir)/FEI_mv/fei-hypre/hypre_schur_reduce.cxx\
  $(top_srcdir)/FEI_mv/fei-hypre/hypre_slide_reduce.cxx\
  $(top_srcdir)/FEI_mv/fei-hypre/lsicg.c\
+ $(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Fei.cxx\
+ $(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Impl.cxx\
+ $(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_LSCore.cxx\
+ $(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Matrix.cxx\
+ $(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Solver.cxx\
  $(top_srcdir)/FEI_mv/femli/util/mli_utils.c\
  $(top_srcdir)/FEI_mv/femli/amgs/mli_amgsa_calib.cxx\
  $(top_srcdir)/FEI_mv/femli/amgs/mli_amgsa_coarsen1.cxx\
