@@ -16,7 +16,7 @@
 #include "mpi.h"
 #include "threading.h"
 
-int iteration_counter[3] = {0,0,0};
+int iteration_counter = 0;
 int hypre_thread_counter;
 
 int HYPRE_InitPthreads( MPI_Comm comm )
