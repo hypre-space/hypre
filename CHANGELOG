@@ -16,8 +16,13 @@
 
 Version 1.8.0b released, 2003/04/08.
 
+- New Babelized HYPRE interface introduced.  Babel is a tool that
+  provides language interoperability.  HYPRE will eventually migrate
+  to using Babel exclusively.  See 'docs/babel_transition_info.txt' for
+  information on how to use the new interface.
 - PFMG: bug fix for red/black relaxation.
-- LOBPCG has been added. 
+- Eigenvalue solver LOBPCG has been added.  See 'docs/lobpcg_info.txt'
+  for documentation.
 
 Version 1.7.11a released, 2003/03/14.
 
