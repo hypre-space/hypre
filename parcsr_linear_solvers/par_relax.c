@@ -85,6 +85,7 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
     *     relax_type = 0 -> Jacobi or CF-Jacobi
     *     relax_type = 2 -> Jacobi (uses ParMatvec)
     *     relax_type = 1 -> Gauss-Siedel <--- currently not implemented
+    *     relax_type = 3 -> hybrid: Jacobi off-processor, GS on-processor
     *     relax_type = 9 -> Direct Solve
     *-----------------------------------------------------------------------*/
    
@@ -190,6 +191,113 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
                   }
                   u_data[i] *= one_minus_weight; 
                   u_data[i] += relax_weight * res / A_diag_data[A_diag_i[i]];
+               }
+            }     
+         }
+	 hypre_TFree(Vext_data);
+	 hypre_TFree(v_buf_data);
+      }
+      break;
+
+      case 3: /* Hybrid: weighted Jacobi off-processor, 
+                         Gauss-Seidel on-processor       */
+      {
+   	num_sends = hypre_CommPkgNumSends(comm_pkg);
+
+   	v_buf_data = hypre_CTAlloc(double, 
+			hypre_CommPkgSendMapStart(comm_pkg, num_sends));
+
+	Vext_data = hypre_CTAlloc(double,num_cols_offd);
+        
+	if (num_cols_offd)
+	{
+		A_offd_j = hypre_CSRMatrixJ(A_offd);
+		A_offd_data = hypre_CSRMatrixData(A_offd);
+	}
+ 
+   	index = 0;
+   	for (i = 0; i < num_sends; i++)
+   	{
+        	start = hypre_CommPkgSendMapStart(comm_pkg, i);
+        	for (j=start; j < hypre_CommPkgSendMapStart(comm_pkg,i+1); j++)
+                	v_buf_data[index++] 
+                 	= u_data[hypre_CommPkgSendMapElmt(comm_pkg,j)];
+   	}
+ 
+   	comm_handle = hypre_InitializeCommunication( 1, comm_pkg, v_buf_data, 
+        	Vext_data);
+
+         /*-----------------------------------------------------------------
+          * Copy current approximation into temporary vector.
+          *-----------------------------------------------------------------*/
+         
+         for (i = 0; i < n; i++)
+         {
+            Vtemp_data[i] = u_data[i];
+         }
+ 
+   	 hypre_FinalizeCommunication(comm_handle);
+
+         /*-----------------------------------------------------------------
+          * Relax all points.
+          *-----------------------------------------------------------------*/
+
+         if (relax_points == 0)
+         {
+            for (i = 0; i < n; i++)
+            {
+
+               /*-----------------------------------------------------------
+                * If diagonal is nonzero, relax point i; otherwise, skip it.
+                *-----------------------------------------------------------*/
+             
+               if (A_diag_data[A_diag_i[i]] != zero)
+               {
+                  res = f_data[i];
+                  for (jj = A_diag_i[i]+1; jj < A_diag_i[i+1]; jj++)
+                  {
+                     ii = A_diag_j[jj];
+                     res -= A_diag_data[jj] * u_data[ii];
+                  }
+                  for (jj = A_offd_i[i]; jj < A_offd_i[i+1]; jj++)
+                  {
+                     ii = A_offd_j[jj];
+                     res -= A_offd_data[jj] * Vext_data[ii];
+                  }
+                  u_data[i] = res / A_diag_data[A_diag_i[i]];
+               }
+            }
+         }
+
+         /*-----------------------------------------------------------------
+          * Relax only C or F points as determined by relax_points.
+          *-----------------------------------------------------------------*/
+
+         else
+         {
+            for (i = 0; i < n; i++)
+            {
+
+               /*-----------------------------------------------------------
+                * If i is of the right type ( C or F ) and diagonal is
+                * nonzero, relax point i; otherwise, skip it.
+                *-----------------------------------------------------------*/
+             
+               if (cf_marker[i] == relax_points 
+				&& A_diag_data[A_diag_i[i]] != zero)
+               {
+                  res = f_data[i];
+                  for (jj = A_diag_i[i]+1; jj < A_diag_i[i+1]; jj++)
+                  {
+                     ii = A_diag_j[jj];
+                     res -= A_diag_data[jj] * u_data[ii];
+                  }
+                  for (jj = A_offd_i[i]; jj < A_offd_i[i+1]; jj++)
+                  {
+                     ii = A_offd_j[jj];
+                     res -= A_offd_data[jj] * Vext_data[ii];
+                  }
+                  u_data[i] = res / A_diag_data[A_diag_i[i]];
                }
             }     
          }
