@@ -93,7 +93,7 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
                   nConstraints_(0),
                   constrList_(NULL),
                   maxIterations_(1000),
-                  tolerance_(1.0e-8),
+                  tolerance_(1.0e-12),
                   systemAssembled_(0),
                   finalResNorm_(0.0),
                   rowLengths_(NULL),
@@ -198,6 +198,9 @@ HYPRE_LinSysCore::~HYPRE_LinSysCore()
           if ( colIndices_[i] != NULL ) delete [] colIndices_[i];
        delete [] colIndices_;
        colIndices_ = NULL;
+    }
+    if ( colValues_ != NULL )
+    {
        for ( int j = 0; j < localEndRow_-localStartRow_+1; j++ )
           if ( colValues_[j] != NULL ) delete [] colValues_[j];
        delete [] colValues_;
@@ -289,6 +292,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
     if ( Utils::getParam("solver",numParams,params,param) == 1)
     {
        sscanf(param,"%s",HYSolverName_);
+       selectSolver(HYSolverName_);
     }
 
     //-------------------------------------------------------------------
@@ -308,6 +312,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
     if ( Utils::getParam("preconditioner",numParams,params,param) == 1)
     {
        sscanf(param,"%s",HYPreconName_);
+       selectPreconditioner(HYPreconName_);
     }
 
     //-------------------------------------------------------------------
@@ -475,6 +480,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
        else if ( !strcmp(param2, "gs") )      rtype = 1;
        else if ( !strcmp(param2, "sgs") )     rtype = 2;
        else if ( !strcmp(param2, "bgs") )     rtype = 3;
+       else if ( !strcmp(param2, "bjacobi") ) rtype = 4;
        mlPresmootherType_  = rtype;
     }
     if (Utils::getParam("mlPostsmootherType",numParams,params,param) == 1)
@@ -485,6 +491,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
        else if ( !strcmp(param2, "gs") )      rtype = 1;
        else if ( !strcmp(param2, "sgs") )     rtype = 2;
        else if ( !strcmp(param2, "bgs") )     rtype = 3;
+       else if ( !strcmp(param2, "bjacobi") ) rtype = 4;
        mlPostsmootherType_  = rtype;
     }
     if (Utils::getParam("mlRelaxType",numParams,params,param) == 1)
@@ -495,6 +502,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
        else if ( !strcmp(param2, "gs") )      rtype = 1;
        else if ( !strcmp(param2, "sgs") )     rtype = 2;
        else if ( !strcmp(param2, "bgs") )     rtype = 3;
+       else if ( !strcmp(param2, "bjacobi") ) rtype = 4;
        mlPresmootherType_  = rtype;
        mlPostsmootherType_ = rtype;
     }
@@ -880,7 +888,7 @@ void HYPRE_LinSysCore::sumIntoRHSVector(int num, const double* values,
 
 void HYPRE_LinSysCore::matrixLoadComplete()
 {
-    int i, numLocalEqns, leng, eqnNum;
+    int i, j, numLocalEqns, leng, eqnNum;
 #ifdef DEBUG
     printf("%4d : HYPRE_LinSysCore::entering matrixLoadComplete.\n",mypid_);
 #endif
@@ -894,7 +902,9 @@ void HYPRE_LinSysCore::matrixLoadComplete()
     {
        eqnNum = localStartRow_ - 1 + i;
        leng   = rowLengths_[i];
+       for ( j = 0; j < leng; j++ ) colIndices_[i][j]--;
        HYPRE_IJMatrixInsertRow(HYA_,leng,eqnNum,colIndices_[i],colValues_[i]);
+       for ( j = 0; j < leng; j++ ) colIndices_[i][j]++;
        delete [] colValues_[i];
     }
     delete [] colValues_;
@@ -1312,7 +1322,7 @@ void HYPRE_LinSysCore::destroyMatrixData(Data& data)
 
     if (strcmp("IJ_Matrix", data.getTypeName()))
     {
-       printf("destroyMatrixData: data doesn't contain a DCRS_Matrix.\n");
+       printf("destroyMatrixData: data doesn't contain a IJ_Matrix.\n");
        exit(1);
     }
     HYPRE_IJMatrix mat = (HYPRE_IJMatrix) data.getDataPtr();
@@ -1320,6 +1330,28 @@ void HYPRE_LinSysCore::destroyMatrixData(Data& data)
 
 #ifdef DEBUG
     printf("%4d : HYPRE_LinSysCore::leaving  destroyMatrixData.\n",mypid_);
+#endif
+}
+
+//***************************************************************************
+
+void HYPRE_LinSysCore::destroyVectorData(Data& data) 
+{
+#ifdef DEBUG
+    printf("%4d : HYPRE_LinSysCore::entering destroyVectorData.\n",mypid_);
+#endif
+
+    if (strcmp("IJ_Vector", data.getTypeName()))
+    {
+       printf("destroyVectorData: data doesn't contain a IJ_Vector.");
+       exit(1);
+    }
+
+    HYPRE_IJVector vec = (HYPRE_IJVector) data.getDataPtr();
+    if ( vec != NULL ) HYPRE_IJVectorDestroy(vec);
+
+#ifdef DEBUG
+    printf("%4d : HYPRE_LinSysCore::leaving  destroyVectorData.\n",mypid_);
 #endif
 }
 
@@ -1523,8 +1555,8 @@ void HYPRE_LinSysCore::selectSolver(char* name)
     {
        case HYPCG :
             HYPRE_ParCSRPCGCreate(comm_, &HYSolver_);
-            //HYPRE_ParCSRPCGSetTwoNorm(HYSolver_, 1);
-            //HYPRE_ParCSRPCGSetRelChange(HYSolver_, 0);
+            HYPRE_ParCSRPCGSetTwoNorm(HYSolver_, 1);
+            HYPRE_ParCSRPCGSetRelChange(HYSolver_, 0);
             //HYPRE_ParCSRPCGSetLogging(HYSolver_, 1);
             break;
 
@@ -2673,7 +2705,7 @@ int HYPRE_LinSysCore::getMatrixCSR(int nrows, int nnz, int *ia_ptr,
 // HYFEI_BinarySearch - this is a modification of hypre_BinarySearch
 //---------------------------------------------------------------------------
 
-int HYFEI_BinarySearch(int *list, int value, int list_length)
+int HYPRE_LinSysCore::HYFEI_BinarySearch(int *list,int value,int list_length)
 {
    int low, high, m;
    int not_found = 1;
@@ -3559,5 +3591,304 @@ void HYPRE_LinSysCore::buildReducedSystem()
     delete [] selectedList;
     delete [] ProcNRows;
     delete [] ProcNConstr;
+}
+
+//***************************************************************************
+// reading a matrix from a file in ija format (first row : nrows, nnz)
+// (read by a single processor)
+//---------------------------------------------------------------------------
+
+void HYPRE_LinSysCore::HYFEI_Get_IJAMatrixFromFile(double **val, int **ia, 
+             int **ja, int *N, double **rhs, char *matfile, char *rhsfile)
+{
+    int    i, j, Nrows, nnz, icount, rowindex, colindex, curr_row;
+    int    k, m, *mat_ia, *mat_ja, ncnt, rnum;
+    double dtemp, *mat_a, value, *rhs_local;
+    FILE   *fp;
+
+    //------------------------------------------------------------------
+    // read matrix file 
+    //------------------------------------------------------------------
+
+    printf("Reading matrix file = %s \n", matfile );
+    fp = fopen( matfile, "r" );
+    if ( fp == NULL ) {
+       printf("Error : file open error (filename=%s).\n", matfile);
+       exit(1);
+    }
+    fscanf(fp, "%d %d", &Nrows, &nnz);
+    if ( Nrows <= 0 || nnz <= 0 ) {
+       printf("Error : nrows,nnz = %d %d\n", Nrows, nnz);
+       exit(1);
+    }
+    mat_ia = new int[Nrows+1];
+    mat_ja = new int[nnz];
+    mat_a  = new double[nnz];
+    mat_ia[0] = 0;
+
+    curr_row = 0;
+    icount   = 0;
+    for ( i = 0; i < nnz; i++ ) {
+       fscanf(fp, "%d %d %lg", &rowindex, &colindex, &value);
+       rowindex--;
+       colindex--;
+       if ( rowindex != curr_row ) mat_ia[++curr_row] = icount;
+       if ( rowindex < 0 || rowindex >= Nrows )
+          printf("Error reading row %d (curr_row = %d)\n", rowindex, curr_row);
+       if ( colindex < 0 || colindex >= Nrows )
+          printf("Error reading col %d (rowindex = %d)\n", colindex, rowindex);
+         if ( value != 0.0 ) {
+          mat_ja[icount] = colindex;
+          mat_a[icount++]  = value;
+         }
+    }
+    fclose(fp);
+    for ( i = curr_row+1; i <= Nrows; i++ ) mat_ia[i] = icount;
+    (*val) = mat_a;
+    (*ia)  = mat_ia;
+    (*ja)  = mat_ja;
+    (*N) = Nrows;
+    printf("matrix has %6d rows and %7d nonzeros\n", Nrows, mat_ia[Nrows]);
+
+    //------------------------------------------------------------------
+    // read rhs file 
+    //------------------------------------------------------------------
+
+    printf("reading rhs file = %s \n", rhsfile );
+    fp = fopen( rhsfile, "r" );
+    if ( fp == NULL ) {
+       printf("Error : file open error (filename=%s).\n", rhsfile);
+       exit(1);
+    }
+    fscanf(fp, "%d", &ncnt);
+    if ( ncnt <= 0 || ncnt != Nrows) {
+       printf("Error : nrows = %d \n", ncnt);
+       exit(1);
+    }
+    fflush(stdout);
+    rhs_local = new double[Nrows];
+    m = 0;
+    for ( k = 0; k < ncnt; k++ ) {
+       fscanf(fp, "%d %lg", &rnum, &dtemp);
+       rhs_local[rnum-1] = dtemp; m++;
+    }
+    fflush(stdout);
+    ncnt = m;
+    fclose(fp);
+    (*rhs) = rhs_local;
+    printf("reading rhs done \n");
+    for ( i = 0; i < Nrows; i++ ) {
+       for ( j = mat_ia[i]; j < mat_ia[i+1]; j++ )
+          mat_ja[j]++;
+    }
+    printf("returning \n");
+}
+
+//***************************************************************************
+//***************************************************************************
+//***************************************************************************
+// The following is a test function for the above routines
+//***************************************************************************
+//***************************************************************************
+//***************************************************************************
+
+void fei_hypre_test(int argc, char *argv[])
+{
+    int    i, j, k, my_rank, num_procs, nrows, nnz, mybegin, myend, status;
+    int    *ia, *ja, ncnt, index, chunksize, iterations, local_nrows;
+    int    *rowLengths, **colIndices;
+    double *val, *rhs, *diag, ddata;
+
+    //------------------------------------------------------------------
+    // initialize parallel platform
+    //------------------------------------------------------------------
+
+    MPI_Init(&argc, &argv);
+    MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
+
+    HYPRE_LinSysCore H(MPI_COMM_WORLD);
+
+    //------------------------------------------------------------------
+    // read the matrix and rhs and broadcast
+    //------------------------------------------------------------------
+
+    if ( my_rank == 0 ) {
+       H.HYFEI_Get_IJAMatrixFromFile(&val, &ia, &ja, &nrows,
+                                &rhs, "matrix.data", "rhs.data");
+       nnz = ia[nrows];
+       MPI_Bcast(&nrows, 1, MPI_INT, 0, MPI_COMM_WORLD);
+       MPI_Bcast(&nnz,   1, MPI_INT, 0, MPI_COMM_WORLD);
+
+       MPI_Bcast(ia,  nrows+1, MPI_INT,    0, MPI_COMM_WORLD);
+       MPI_Bcast(ja,  nnz,     MPI_INT,    0, MPI_COMM_WORLD);
+       MPI_Bcast(val, nnz,     MPI_DOUBLE, 0, MPI_COMM_WORLD);
+       MPI_Bcast(rhs, nrows,   MPI_DOUBLE, 0, MPI_COMM_WORLD);
+
+    } else {
+       MPI_Bcast(&nrows, 1, MPI_INT, 0, MPI_COMM_WORLD);
+       MPI_Bcast(&nnz,   1, MPI_INT, 0, MPI_COMM_WORLD);
+       ia  = new int[nrows+1];
+       ja  = new int[nnz];
+       val = new double[nnz];
+       rhs = new double[nrows];
+
+       MPI_Bcast(ia,  nrows+1, MPI_INT,    0, MPI_COMM_WORLD);
+       MPI_Bcast(ja,  nnz,     MPI_INT,    0, MPI_COMM_WORLD);
+       MPI_Bcast(val, nnz,     MPI_DOUBLE, 0, MPI_COMM_WORLD);
+       MPI_Bcast(rhs, nrows,   MPI_DOUBLE, 0, MPI_COMM_WORLD);
+    }
+    /*
+    diag = new double[Nrows];
+    for ( i = 0; i < nrows; i++ ) {
+       for ( j = ia[i]; j < ia[i+1]; j++ ) {
+          if ( (ja[j]-1) == i ) diag[i] = 1.0 / sqrt(val[j]);
+       }
+    }
+
+    for ( i = 0; i < nrows; i++ ) {
+       for ( j = ia[i]; j < ia[i+1]; j++ ) {
+          val[j] = diag[i] * val[j] * diag[ja[j]-1];
+       }
+       rhs[i] *= diag[i];
+    }
+    delete [] diag;
+    */
+    //if (my_rank == 0 )
+    //{
+    //   for ( i = 0; i < 5; i++ ) {
+    //      for ( j = ia[i]; j < ia[i+1]; j++ ) {
+    //         printf("ROW %4d, COL = %5d, data = %e\n", i+1, ja[j],val[j]);
+    //      }
+    //   }
+    //}
+    chunksize = nrows / 1;
+    if ( chunksize * 1 != nrows )
+    {
+       printf("Cannot put into matrix blocks with block size 3\n");
+       exit(1);
+    }
+    chunksize = chunksize / num_procs;
+    mybegin = chunksize * my_rank * 1;
+    myend   = chunksize * (my_rank + 1) * 1 - 1;
+    if ( my_rank == num_procs-1 ) myend = nrows - 1;
+    printf("Processor %d : begin/end = %d %d\n", my_rank, mybegin, myend);
+    fflush(stdout);
+
+    //------------------------------------------------------------------
+    // create matrix in the HYPRE context
+    //------------------------------------------------------------------
+
+    local_nrows = myend - mybegin + 1;
+    H.createMatricesAndVectors(nrows, mybegin+1, local_nrows);
+
+    rowLengths = new int[local_nrows];
+    colIndices = new int*[local_nrows];
+    for ( i = mybegin; i < myend+1; i++ ) 
+    {
+       ncnt = ia[i+1] - ia[i];
+       rowLengths[i-mybegin] = ncnt;
+       colIndices[i-mybegin] = new int[ncnt];
+       k = 0;
+       for (j = ia[i]; j < ia[i+1]; j++) colIndices[i-mybegin][k++] = ja[j];
+    }
+
+    H.allocateMatrix(colIndices, rowLengths);
+
+    for ( i = mybegin; i < myend+1; i++ ) delete [] colIndices[i-mybegin];
+    delete [] colIndices;
+    delete [] rowLengths;
+
+    //------------------------------------------------------------------
+    // load the matrix 
+    //------------------------------------------------------------------
+
+    for ( i = mybegin; i <= myend; i++ ) {
+       ncnt = ia[i+1] - ia[i];
+       index = i + 1;
+       H.sumIntoSystemMatrix(index, ncnt, &val[ia[i]], &ja[ia[i]]);
+    }
+    H.matrixLoadComplete();
+    delete [] ia;
+    delete [] ja;
+    delete [] val;
+
+    //------------------------------------------------------------------
+    // load the right hand side 
+    //------------------------------------------------------------------
+
+    for ( i = mybegin; i <= myend; i++ ) 
+    {
+       index = i + 1;
+       H.sumIntoRHSVector(1, &rhs[i], &index);
+    }
+    delete [] rhs;
+
+    //------------------------------------------------------------------
+    // set other parameters
+    //------------------------------------------------------------------
+
+    char *paramString = new char[100];
+
+    strcpy(paramString, "solver gmres");
+    H.parameters(1, &paramString);
+    strcpy(paramString, "preconditioner ml");
+    H.parameters(1, &paramString);
+    strcpy(paramString, "gmresDim 200");
+    H.parameters(1, &paramString);
+    strcpy(paramString, "maxIterations 100");
+    H.parameters(1, &paramString);
+
+    strcpy(paramString, "amgRelaxType hybrid");
+    H.parameters(1, &paramString);
+    strcpy(paramString, "amgRelaxWeight 0.5");
+    H.parameters(1, &paramString);
+
+    strcpy(paramString, "mlNumPresweeps 2");
+    H.parameters(1, &paramString);
+    strcpy(paramString, "mlNumPostsweeps 2");
+    H.parameters(1, &paramString);
+    strcpy(paramString, "mlPresmootherType bjacobi");
+    H.parameters(1, &paramString);
+    strcpy(paramString, "mlPostsmootherType bjacobi");
+    H.parameters(1, &paramString);
+    strcpy(paramString, "mlRelaxWeight 0.1");
+    H.parameters(1, &paramString);
+    strcpy(paramString, "mlStrongThreshold 0.25");
+    H.parameters(1, &paramString);
+
+    strcpy(paramString, "parasailsNlevels 1");
+    H.parameters(1, &paramString);
+
+    //------------------------------------------------------------------
+    // solve the system
+    //------------------------------------------------------------------
+
+    H.launchSolver(status, iterations);
+
+    if ( status != 1 )
+    {
+       printf("%4d : HYPRE_SLE : solve unsuccessful.\n", my_rank);
+    } 
+    else if ( my_rank == 0 )
+    {
+       printf("%4d : HYPRE_SLE : solve successful.\n", my_rank);
+       printf("                  iteration count = %4d\n", iterations);
+    }
+
+    if ( my_rank == 0 )
+    {
+       for ( i = 1; i <= 0; i++ )
+       {
+          H.getSolnEntry(i, ddata);
+          printf("sol(%d): %e\n", i, ddata);
+       }
+    }
+
+    //------------------------------------------------------------------
+    // clean up 
+    //------------------------------------------------------------------
+
+    MPI_Finalize();
 }
 

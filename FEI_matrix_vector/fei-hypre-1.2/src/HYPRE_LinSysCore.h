@@ -178,6 +178,8 @@ class HYPRE_LinSysCore: public LinearSystemCore {
    void  solveUsingY12M(int&);
    int   getMatrixCSR(int nrows, int nnz, int *ia, int *ja, double *val);
    int   HYFEI_BinarySearch(int*, int, int);
+   void  HYFEI_Get_IJAMatrixFromFile(double **val, int **ia, int **ja, 
+                  int *N, double **rhs, char *matfile, char *rhsfile);
 
  private:            //variables
 
@@ -239,6 +241,9 @@ class HYPRE_LinSysCore: public LinearSystemCore {
    double          mlStrongThreshold_;
    int             superluOrdering_;
    char            superluScale_[1];
+
+friend void fei_hypre_test(int argc, char *argv[]);
+
 };
 
 #endif
