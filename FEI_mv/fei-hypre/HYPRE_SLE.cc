@@ -653,7 +653,8 @@ void HYPRE_SLE::createLinearAlgebraCore(int globalNumEqns,
     ierr = HYPRE_IJMatrixSetLocalStorageType(HY_A, HYPRE_PARCSR);
     assert(!ierr);
     ierr = HYPRE_IJMatrixSetLocalSize(HY_A, localEndRow-localStartRow+1, 
-                                      localEndCol-localStartCol+1);
+                                      localEndRow-localStartRow+1);
+    //                                  localEndCol-localStartCol+1);
     assert(!ierr);
 
     //--------------------------------------------------
@@ -3175,9 +3176,9 @@ void fei_hypre_test(int argc, char *argv[])
     HYPRE_SLE H(MPI_COMM_WORLD, 0);
 
     if (my_rank == 0)
-        H.createLinearAlgebraCore(6, 1, 3, 1, 3);
+        H.createLinearAlgebraCore(6, 1, 3, 1, 6);
     else
-        H.createLinearAlgebraCore(6, 4, 6, 4, 6);
+        H.createLinearAlgebraCore(6, 4, 6, 6, 6);
 
     H.matrixConfigure(rows);
 
@@ -3302,7 +3303,7 @@ void fei_hypre_test2(int argc, char *argv[])
     // create matrix and rhs in the hypre context 
     //======================================================
 
-    H.createLinearAlgebraCore(nrows, mybegin+1, myend+1, mybegin+1, myend+1);
+    H.createLinearAlgebraCore(nrows, mybegin+1, myend+1, 1, nrows);
 
     IntArray  *rows;
     double    zero=0.0;
