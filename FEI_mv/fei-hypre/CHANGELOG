@@ -98,4 +98,8 @@
             - get rid of the old matrix stuff
 04/26/02    2.0.1R15
             - add new slide reduction capability 
- 
+05/17/02    2.0.1R16
+            - add Uzawa algorithm 
+            - debug/improve slide reduction capability
+            - debug problems on blue (abs function)
+
