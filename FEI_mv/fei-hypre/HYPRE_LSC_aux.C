@@ -78,6 +78,7 @@ extern "C" {
                             HYPRE_ParVector, HYPRE_ParVector) {return 0;}
    int   HYPRE_LSI_Search(int*, int, int);
    int   HYPRE_LSI_Sort(int*, int, int *, double *);
+   int   getMatrixCSR(HYPRE_IJMatrix,int nrows,int nnz,int*,int*,double*);
 
 #ifdef Y12M
    void y12maf_(int*,int*,double*,int*,int*,int*,int*,double*,
