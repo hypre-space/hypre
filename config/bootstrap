@@ -1,9 +1,14 @@
 #!/bin/sh
 #set -x
+PATH=/usr/apps/autoconf/2.59/bin
+PATH=$PATH:/usr/apps/automake/1.8.2/bin
+PATH=$PATH:/usr/apps/libtool/1.5/bin
+PATH=$PATH:/usr/bin:/bin
 rm -Rf aclocal.m4 configure autom4te.cache config/acinclude.m4
+cp /usr/apps/libtool/1.5/share/aclocal/libtool.m4 aclocal.m4
 cp /usr/apps/libtool/1.5/share/aclocal/libtool.m4 config/acinclude.m4
-aclocal -I config
 libtoolize --force --copy
+aclocal -I config
 autoheader --force --include=config
 automake --add-missing --copy --force-missing --foreign 2>&1|grep -v "created both with libtool and without"
 autoconf --include=config

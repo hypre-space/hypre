@@ -249,7 +249,7 @@ AC_SUBST(LIBTOOL_DEPS)
 AC_HEADER_DIRENT
 AC_HEADER_STDC
 AC_HEADER_SYS_WAIT
-AC_CHECK_HEADERS([float.h inttypes.h limits.h malloc.h memory.h netdb.h netinet/in.h stddef.h stdlib.h string.h strings.h sys/param.h sys/socket.h sys/time.h unistd.h])
+AC_CHECK_HEADERS([float.h inttypes.h limits.h malloc.h memory.h stddef.h stdlib.h string.h strings.h sys/param.h sys/time.h unistd.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL
@@ -268,7 +268,7 @@ AC_TYPE_SIGNAL
 AC_FUNC_STAT
 AC_FUNC_STRTOD
 AC_FUNC_VPRINTF
-AC_CHECK_FUNCS([atexit bzero floor getcwd gethostbyname gethostname gethrtime gettimeofday memset pow rint socket sqrt strcasecmp strchr strcspn strdup strrchr strspn strtol])
+AC_CHECK_FUNCS([atexit bzero floor getcwd gethrtime gettimeofday memset pow rint sqrt strcasecmp strchr strcspn strdup strrchr strspn strtol])
 
 AC_ARG_WITH(COMM_SIMPLE,
 AC_HELP_STRING([--with-COMM_SIMPLE],
