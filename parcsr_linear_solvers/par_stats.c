@@ -112,6 +112,9 @@ hypre_ParAMGSetupStats( void               *amg_vdata,
       printf(" Num levels = %d\n\n",num_levels);
       printf(" Strength Threshhold = %f\n\n", 
                          hypre_ParAMGDataStrongThreshold(amg_data));
+      if (hypre_ParAMGDataDebugFlag(amg_data) == 2)
+	printf(" Truncation Factor = %f\n\n", 
+                         hypre_ParAMGDataTruncFactor(amg_data));
       if (coarsen_type == 0)
       {
 	printf(" Coarsening Type = Luby-Jones-Plassman\n");
@@ -127,6 +130,10 @@ hypre_ParAMGSetupStats( void               *amg_vdata,
       else if (coarsen_type == 3) 
       {
 	printf(" Coarsening Type = Ruge3\n");
+      }
+      else if (coarsen_type == -2) 
+      {
+	printf(" Coarsening Type = Ruge relax special points\n");
       }
       if (coarsen_type)
       	printf(" measures are determined %s\n\n", 
