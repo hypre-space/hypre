@@ -30,6 +30,7 @@ hypre_ParAMGInitialize()
    double   strong_threshold;
    int      interp_type;
    int      coarsen_type;
+   int      measure_type;
 
    /* solve params */
    int      max_iter;
@@ -59,6 +60,7 @@ hypre_ParAMGInitialize()
    strong_threshold = 0.25;
    interp_type = 200;
    coarsen_type = 0;
+   measure_type = 0;
 
    /* solve params */
    max_iter  = 20;
@@ -98,6 +100,7 @@ hypre_ParAMGInitialize()
    hypre_ParAMGSetStrongThreshold(amg_data, strong_threshold);
    hypre_ParAMGSetInterpType(amg_data, interp_type);
    hypre_ParAMGSetCoarsenType(amg_data, coarsen_type);
+   hypre_ParAMGSetMeasureType(amg_data, measure_type);
 
    hypre_ParAMGSetMaxIter(amg_data, max_iter);
    hypre_ParAMGSetCycleType(amg_data, cycle_type);
@@ -225,6 +228,18 @@ hypre_ParAMGSetCoarsenType( void  *data,
    hypre_ParAMGData  *amg_data = data;
 
    hypre_ParAMGDataCoarsenType(amg_data) = coarsen_type;
+
+   return (ierr);
+}
+
+int
+hypre_ParAMGSetMeasureType( void  *data,
+                            int    measure_type )
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+
+   hypre_ParAMGDataMeasureType(amg_data) = measure_type;
 
    return (ierr);
 }
