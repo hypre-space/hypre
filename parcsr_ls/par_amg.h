@@ -35,6 +35,7 @@ typedef struct
    int     *num_grid_sweeps;  
    int     *grid_relax_type;   
    int    **grid_relax_points;
+   int      relax_order;
    int      user_coarse_relax_type;   
    double  *relax_weight; 
    double  *omega;
@@ -132,6 +133,7 @@ typedef struct
 #define hypre_ParAMGDataGridRelaxType(amg_data) ((amg_data)->grid_relax_type)
 #define hypre_ParAMGDataGridRelaxPoints(amg_data) \
 ((amg_data)->grid_relax_points)
+#define hypre_ParAMGDataRelaxOrder(amg_data) ((amg_data)->relax_order)
 #define hypre_ParAMGDataRelaxWeight(amg_data) ((amg_data)->relax_weight)
 #define hypre_ParAMGDataOmega(amg_data) ((amg_data)->omega)
 

@@ -315,6 +315,109 @@ HYPRE_ParCSRHybridSetGridRelaxPoints( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetNumSweeps
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParCSRHybridSetNumSweeps( HYPRE_Solver solver,
+                                int          num_sweeps    )
+{
+   return( hypre_AMGHybridSetNumSweeps( (void *) solver, num_sweeps ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetCycleNumSweeps
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParCSRHybridSetCycleNumSweeps( HYPRE_Solver solver,
+                                     int          num_sweeps ,
+                                     int          k )
+{
+   return( hypre_AMGHybridSetCycleNumSweeps( (void *) solver, num_sweeps, k ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetRelaxType
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParCSRHybridSetRelaxType( HYPRE_Solver solver,
+                                int          relax_type    )
+{
+   return( hypre_AMGHybridSetRelaxType( (void *) solver, relax_type ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetCycleRelaxType
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParCSRHybridSetCycleRelaxType( HYPRE_Solver solver,
+                                     int          relax_type ,
+                                     int          k )
+{
+   return( hypre_AMGHybridSetCycleRelaxType( (void *) solver, relax_type, k ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetRelaxOrder
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParCSRHybridSetRelaxOrder( HYPRE_Solver solver,
+                                 int          relax_order    )
+{
+   return( hypre_AMGHybridSetRelaxOrder( (void *) solver, relax_order ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetRelaxWt
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParCSRHybridSetRelaxWt( HYPRE_Solver solver,
+                              double       relax_wt    )
+{
+   return( hypre_AMGHybridSetRelaxWt( (void *) solver, relax_wt ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetLevelRelaxWt
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParCSRHybridSetLevelRelaxWt( HYPRE_Solver solver,
+                              double       relax_wt,
+                              int          level )
+{
+   return( hypre_AMGHybridSetLevelRelaxWt( (void *) solver, relax_wt, level ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetOuterWt
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParCSRHybridSetOuterWt( HYPRE_Solver solver,
+                              double       outer_wt    )
+{
+   return( hypre_AMGHybridSetOuterWt( (void *) solver, outer_wt ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetLevelOuterWt
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParCSRHybridSetLevelOuterWt( HYPRE_Solver solver,
+                              double       outer_wt,
+                              int          level )
+{
+   return( hypre_AMGHybridSetLevelOuterWt( (void *) solver, outer_wt, level ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_ParCSRHybridSetRelaxWeight
  *--------------------------------------------------------------------------*/
 

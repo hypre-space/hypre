@@ -151,10 +151,42 @@ int HYPRE_BoomerAMGSetNumGridSweeps(HYPRE_Solver  solver,
                                     int          *num_grid_sweeps);
 
 /**
+ * (Optional) Defines the number of sweeps for fine and coarse grid, up and down cycle.
+ **/
+int HYPRE_BoomerAMGSetNumSweeps(HYPRE_Solver  solver,
+                                int           num_sweeps);
+
+/**
+ * (Optional) Defines the number of sweeps for user defined cycle.
+ **/
+int HYPRE_BoomerAMGSetCycleNumSweeps(HYPRE_Solver  solver,
+                                     int           num_sweeps,
+                                     int           k);
+
+/**
  * (Optional) Defines which smoother is used on fine and coarse grid, up and down cycle.
  **/
 int HYPRE_BoomerAMGSetGridRelaxType(HYPRE_Solver  solver,
                                     int          *grid_relax_type);
+
+/**
+ * (Optional) Defines which smoother is used on fine and coarse grid, up and down cycle.
+ **/
+int HYPRE_BoomerAMGSetRelaxType(HYPRE_Solver  solver,
+                                int           relax_type);
+
+/**
+ * (Optional) Defines which smoother is used on user defined cycle.
+ **/
+int HYPRE_BoomerAMGSetCycleRelaxType(HYPRE_Solver  solver,
+                                     int           relax_type,
+                                     int           k);
+
+/**
+ * (Optional) Defines whether CF relaxation is used
+ **/
+int HYPRE_BoomerAMGSetRelaxOrder(HYPRE_Solver  solver,
+                                 int           relax_order);
 
 /**
  * (Optional) Defines in which order points are relaxed.
@@ -169,10 +201,37 @@ int HYPRE_BoomerAMGSetRelaxWeight(HYPRE_Solver  solver,
                                   double       *relax_weight);
 
 /**
+ * (Optional) Defines the relaxation weight for smoothed Jacobi and hybrid SOR on all levels.
+ **/
+int HYPRE_BoomerAMGSetRelaxWt(HYPRE_Solver  solver,
+                              double        relax_weight);
+
+/**
+ * (Optional) Defines the relaxation weight for smoothed Jacobi and hybrid SOR
+on a user defined level.
+ **/
+int HYPRE_BoomerAMGSetLevelRelaxWt(HYPRE_Solver  solver,
+                                   double        relax_weight,
+                                   int		 level);
+
+/**
  * (Optional) Defines the outer relaxation weight for hybrid SOR.
  **/
 int HYPRE_BoomerAMGSetOmega(HYPRE_Solver  solver,
                             double       *omega);
+
+/**
+ * (Optional) Defines the outer relaxation weight for hybrid SOR on all levels.
+ **/
+int HYPRE_BoomerAMGSetOuterWt(HYPRE_Solver  solver,
+                              double        omega);
+
+/**
+ * (Optional) Defines the outer relaxation weight for hybrid SOR on a specified level.
+ **/
+int HYPRE_BoomerAMGSetLevelOuterWt(HYPRE_Solver  solver,
+                                   double        omega,
+                                   int           level);
 
 /**
  * (Optional)
@@ -1336,6 +1395,46 @@ HYPRE_ParCSRHybridSetGridRelaxType( HYPRE_Solver solver,
 int
 HYPRE_ParCSRHybridSetGridRelaxPoints( HYPRE_Solver solver,
                               int              **grid_relax_points    );
+ 
+int
+HYPRE_ParCSRHybridSetNumSweeps( HYPRE_Solver solver,
+                                int          num_sweeps    );
+ 
+int
+HYPRE_ParCSRHybridSetCycleNumSweeps( HYPRE_Solver solver,
+                                     int          num_sweeps,
+                                     int          k    );
+ 
+int
+HYPRE_ParCSRHybridSetRelaxType( HYPRE_Solver solver,
+                                int          relax_type    );
+ 
+int
+HYPRE_ParCSRHybridSetCycleRelaxType( HYPRE_Solver solver,
+                                     int          relax_type,
+                                     int          k   );
+ 
+int
+HYPRE_ParCSRHybridSetRelaxOrder( HYPRE_Solver solver,
+                                 int          relax_order    );
+
+int
+HYPRE_ParCSRHybridSetRelaxWt( HYPRE_Solver solver,
+                              double       relax_wt    );
+ 
+int
+HYPRE_ParCSRHybridSetLevelRelaxWt( HYPRE_Solver solver,
+                                   double       relax_wt,
+                                   int          level    );
+ 
+int
+HYPRE_ParCSRHybridSetOuterWt( HYPRE_Solver solver,
+                              double       outer_wt    );
+ 
+int
+HYPRE_ParCSRHybridSetLevelOuterWt( HYPRE_Solver solver,
+                                   double       outer_wt,
+                                   int          level    );
  
 int
 HYPRE_ParCSRHybridSetRelaxWeight( HYPRE_Solver solver,

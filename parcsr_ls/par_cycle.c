@@ -72,6 +72,9 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    int       cg_num_sweep = 1;
    int       relax_type;
    int       relax_points;
+   int       relax_order;
+   int       relax_local;
+   int       old_version = 0;
    double   *relax_weight;
    double   *omega;
    double    alfa, beta, gammaold;
@@ -105,6 +108,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    num_grid_sweeps     = hypre_ParAMGDataNumGridSweeps(amg_data);
    grid_relax_type     = hypre_ParAMGDataGridRelaxType(amg_data);
    grid_relax_points   = hypre_ParAMGDataGridRelaxPoints(amg_data);
+   relax_order         = hypre_ParAMGDataRelaxOrder(amg_data);
    relax_weight        = hypre_ParAMGDataRelaxWeight(amg_data); 
    omega               = hypre_ParAMGDataOmega(amg_data); 
    smooth_type         = hypre_ParAMGDataSmoothType(amg_data); 
@@ -118,6 +122,8 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    /* Initialize */
 
    Solve_err_flag = 0;
+
+   if (grid_relax_points) old_version = 1;
 
    num_coeffs = hypre_CTAlloc(int, num_levels);
    num_coeffs[0]    = hypre_ParCSRMatrixNumNonzeros(A_array[0]);
@@ -233,15 +239,22 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
          for (j = 0; j < num_sweep; j++)
          {
             if (num_levels == 1 && max_levels > 1)
+            {
                relax_points = 0;
+               relax_local = 0;
+            }
             else
-               relax_points = grid_relax_points[cycle_param][j];
+            {
+               if (old_version)
+		  relax_points = grid_relax_points[cycle_param][j];
+               relax_local = relax_order;
+            }
 
             /*-----------------------------------------------
              * VERY sloppy approximation to cycle complexity
              *-----------------------------------------------*/
 
-            if (level < num_levels -1)
+            if (old_version && level < num_levels -1)
             {
                switch (relax_points)
                {
@@ -286,13 +299,26 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                                  (HYPRE_ParCSRMatrix) A_array[level],
                                  (HYPRE_ParVector) Aux_F,
                                  (HYPRE_ParVector) Aux_U);
-	    else
+	    else if (old_version)
 	    {
                Solve_err_flag = hypre_BoomerAMGRelax(A_array[level], 
                                             Aux_F,
                                             CF_marker_array[level],
                                             relax_type,
                                             relax_points,
+                                            relax_weight[level],
+                                            omega[level],
+                                            Aux_U,
+                                            Vtemp);
+	    }
+	    else 
+	    {
+               Solve_err_flag = hypre_BoomerAMGRelaxIF(A_array[level], 
+                                            Aux_F,
+                                            CF_marker_array[level],
+                                            relax_type,
+                                            relax_local,
+                                            cycle_param,
                                             relax_weight[level],
                                             omega[level],
                                             Aux_U,
@@ -363,7 +389,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
 
       else if (level != 0)
       {
-                            /*---------------------------------------------------------------
+         /*---------------------------------------------------------------
           * Visit finer level next.
           * Interpolate and add correction using hypre_ParCSRMatrixMatvec.
           * Reset counters and cycling parameters for finer level.

@@ -53,6 +53,7 @@ typedef struct
    int			measure_type;
    int			coarsen_type;
    int			cycle_type;
+   int		        relax_order;
    int		       *num_grid_sweeps;
    int		       *grid_relax_type;
    int		      **grid_relax_points;
@@ -103,6 +104,7 @@ hypre_AMGHybridCreate( )
    (AMGhybrid_data -> measure_type)  = 0;
    (AMGhybrid_data -> coarsen_type)  = 6;
    (AMGhybrid_data -> cycle_type)  = 1;
+   (AMGhybrid_data -> relax_order)  = 1;
    (AMGhybrid_data -> num_grid_sweeps)  = NULL;
    (AMGhybrid_data -> grid_relax_type)  = NULL;
    (AMGhybrid_data -> grid_relax_points)  = NULL;
@@ -467,6 +469,133 @@ hypre_AMGHybridSetCycleType( void *AMGhybrid_vdata,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_AMGHybridSetNumSweeps
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_AMGHybridSetNumSweeps( void *AMGhybrid_vdata,
+                        int   num_sweeps  )
+{
+   hypre_AMGHybridData *AMGhybrid_data = AMGhybrid_vdata;
+   int                 *num_grid_sweeps;
+   int               i,ierr = 0;
+
+   if ((AMGhybrid_data -> num_grid_sweeps) == NULL)
+      (AMGhybrid_data -> num_grid_sweeps) = hypre_CTAlloc(int,4);
+   num_grid_sweeps = (AMGhybrid_data -> num_grid_sweeps);
+   for (i=0; i < 3; i++)
+   {
+      num_grid_sweeps[i] = num_sweeps;
+   }
+   num_grid_sweeps[3] = 1;
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_AMGHybridSetCycleNumSweeps
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_AMGHybridSetCycleNumSweeps( void *AMGhybrid_vdata,
+                                  int   num_sweeps,
+                                  int   k)
+{
+   hypre_AMGHybridData *AMGhybrid_data = AMGhybrid_vdata;
+   int                 *num_grid_sweeps;
+   int               i,ierr = 0;
+
+   if (k < 0 || k > 3)
+   {
+      printf (" Warning! Invalid cycle! num_sweeps not set!\n");
+      return -99;
+   }
+
+   num_grid_sweeps = (AMGhybrid_data -> num_grid_sweeps);
+   if (num_grid_sweeps == NULL)
+   {
+      (AMGhybrid_data -> num_grid_sweeps) = hypre_CTAlloc(int,4);
+      num_grid_sweeps = (AMGhybrid_data -> num_grid_sweeps);
+      for (i=0; i < 4; i++)
+      {
+          num_grid_sweeps[i] = 1;
+      }
+   }
+   num_grid_sweeps[k] = num_sweeps;
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_AMGHybridSetRelaxType
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_AMGHybridSetRelaxType( void *AMGhybrid_vdata,
+                        int  relax_type  )
+{
+   hypre_AMGHybridData *AMGhybrid_data = AMGhybrid_vdata;
+   int               *grid_relax_type;
+   int               i, ierr = 0;
+
+   if ((AMGhybrid_data -> grid_relax_type) == NULL )
+      (AMGhybrid_data -> grid_relax_type) = hypre_CTAlloc(int,4);
+   grid_relax_type = (AMGhybrid_data -> grid_relax_type);
+   for (i=0; i < 3; i++)
+      grid_relax_type[i] = relax_type;
+   grid_relax_type[3] = 9;
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_AMGHybridSetCycleRelaxType
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_AMGHybridSetCycleRelaxType( void *AMGhybrid_vdata,
+                                  int   relax_type,
+                                  int   k  )
+{
+   hypre_AMGHybridData *AMGhybrid_data = AMGhybrid_vdata;
+   int                 *grid_relax_type;
+   int                 i, ierr = 0;
+
+   if (k<0 || k > 3)
+   {
+      printf (" Warning! Invalid cycle! Relax type not set!\n");
+      return -99;
+   }
+
+   grid_relax_type = (AMGhybrid_data -> grid_relax_type);
+   if (grid_relax_type == NULL )
+   {
+      (AMGhybrid_data -> grid_relax_type) = hypre_CTAlloc(int,4);
+      grid_relax_type = (AMGhybrid_data -> grid_relax_type);
+      for (i=0; i < 3; i++)
+         grid_relax_type[i] = 3;
+      grid_relax_type[3] = 9;
+   }
+   grid_relax_type[k] = relax_type;
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_AMGHybridSetRelaxOrder
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_AMGHybridSetRelaxOrder( void *AMGhybrid_vdata,
+                              int   relax_order  )
+{
+   hypre_AMGHybridData *AMGhybrid_data = AMGhybrid_vdata;
+   int               ierr = 0;
+
+   (AMGhybrid_data -> relax_order) = relax_order;
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_AMGHybridSetNumGridSweeps
  *--------------------------------------------------------------------------*/
 
@@ -552,6 +681,120 @@ hypre_AMGHybridSetOmega( void *AMGhybrid_vdata,
    if ((AMGhybrid_data -> omega) != NULL )
       hypre_TFree((AMGhybrid_data -> omega));
    (AMGhybrid_data -> omega) = omega;
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_AMGHybridSetRelaxWt
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_AMGHybridSetRelaxWt( void *AMGhybrid_vdata,
+                        double  relax_wt  )
+{
+   hypre_AMGHybridData *AMGhybrid_data = AMGhybrid_vdata;
+   int               ierr = 0, i , num_levels;
+   double	       *relax_wt_array;
+
+   num_levels = (AMGhybrid_data -> max_levels);
+   relax_wt_array = (AMGhybrid_data -> relax_weight);
+   if (relax_wt_array == NULL)
+   {
+      relax_wt_array = hypre_CTAlloc(double,num_levels);
+      (AMGhybrid_data -> relax_weight) = relax_wt_array;
+   }
+   for (i=0; i < num_levels; i++)
+      relax_wt_array[i] = relax_wt;
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_AMGHybridSetLevelRelaxWt
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_AMGHybridSetLevelRelaxWt( void   *AMGhybrid_vdata,
+                                double  relax_wt,
+                                int     level  )
+{
+   hypre_AMGHybridData *AMGhybrid_data = AMGhybrid_vdata;
+   int               ierr = 0, i , num_levels;
+   double	       *relax_wt_array;
+
+   num_levels = (AMGhybrid_data -> max_levels);
+   if (level > num_levels-1) 
+   {
+      printf (" Warning! Invalid level! Relax weight not set!\n");
+      return -99;
+   }
+   relax_wt_array = (AMGhybrid_data -> relax_weight);
+   if (relax_wt_array == NULL)
+   {
+      relax_wt_array = hypre_CTAlloc(double,num_levels);
+      for (i=0; i < num_levels; i++)
+         relax_wt_array[i] = 1.0;
+      (AMGhybrid_data -> relax_weight) = relax_wt_array;
+   }
+   relax_wt_array[level] = relax_wt;
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_AMGHybridSetOuterWt
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_AMGHybridSetOuterWt( void *AMGhybrid_vdata,
+                        double  outer_wt  )
+{
+   hypre_AMGHybridData *AMGhybrid_data = AMGhybrid_vdata;
+   int               ierr = 0, i , num_levels;
+   double	       *outer_wt_array;
+
+   num_levels = (AMGhybrid_data -> max_levels);
+   outer_wt_array = (AMGhybrid_data -> omega);
+   if (outer_wt_array == NULL)
+   {
+      outer_wt_array = hypre_CTAlloc(double,num_levels);
+      (AMGhybrid_data -> omega) = outer_wt_array;
+   }
+   for (i=0; i < num_levels; i++)
+      outer_wt_array[i] = outer_wt;
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_AMGHybridSetLevelOuterWt
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_AMGHybridSetLevelOuterWt( void   *AMGhybrid_vdata,
+                                double  outer_wt,
+                                int     level  )
+{
+   hypre_AMGHybridData *AMGhybrid_data = AMGhybrid_vdata;
+   int               ierr = 0, i , num_levels;
+   double	       *outer_wt_array;
+
+   num_levels = (AMGhybrid_data -> max_levels);
+   if (level > num_levels-1) 
+   {
+      printf (" Warning! Invalid level! Outer weight not set!\n");
+      return -99;
+   }
+   outer_wt_array = (AMGhybrid_data -> omega);
+   if (outer_wt_array == NULL)
+   {
+      outer_wt_array = hypre_CTAlloc(double,num_levels);
+      for (i=0; i < num_levels; i++)
+         outer_wt_array[i] = 1.0;
+      (AMGhybrid_data -> omega) = outer_wt_array;
+   }
+   outer_wt_array[level] = outer_wt;
 
    return ierr;
 }

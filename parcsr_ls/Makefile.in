@@ -98,6 +98,7 @@ FILES =\
  par_coarsen.c\
  par_coarse_parms.c\
  par_relax.c\
+ par_relax_interface.c\
  par_indepset.c\
  par_laplace.c\
  par_laplace_9pt.c\

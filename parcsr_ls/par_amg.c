@@ -44,11 +44,11 @@ hypre_BoomerAMGCreate()
  
    double   tol;
 
-   int     *num_grid_sweeps;  
-   int     *grid_relax_type;   
-   int    **grid_relax_points; 
-   double  *relax_weight;
-   double  *omega;
+   int      num_sweeps;  
+   int      relax_type;   
+   int      relax_order;   
+   double   relax_wt;
+   double   outer_wt;
    int      smooth_type;
    int      smooth_num_levels;
    int      smooth_num_sweeps;
@@ -70,8 +70,6 @@ hypre_BoomerAMGCreate()
    /* int      cycle_op_count; */
    char     log_file_name[256];
    int      debug_flag;
-
-   int      j;
 
    /*-----------------------------------------------------------------------
     * Setup default values for parameters
@@ -110,30 +108,11 @@ hypre_BoomerAMGCreate()
    cycle_type = 1;
    tol = 1.0e-7;
 
-   num_grid_sweeps = hypre_CTAlloc(int,4);
-   grid_relax_type = hypre_CTAlloc(int,4);
-   grid_relax_points = hypre_CTAlloc(int *,4);
-   relax_weight = hypre_CTAlloc(double,max_levels);
-   omega = hypre_CTAlloc(double,max_levels);
-
-   for (j = 0; j < max_levels; j++)
-   {
-      relax_weight[j] = 1.0;
-      omega[j] = 1.0;
-   }
-
-   for (j = 0; j < 3; j++)
-   {
-      num_grid_sweeps[j] = 2;
-      grid_relax_type[j] = 3; 
-      grid_relax_points[j] = hypre_CTAlloc(int,2); 
-      grid_relax_points[j][0] = 1;
-      grid_relax_points[j][1] = -1;
-   }
-   num_grid_sweeps[3] = 1;
-   grid_relax_type[3] = 9;
-   grid_relax_points[3] = hypre_CTAlloc(int,1);
-   grid_relax_points[3][0] = 0;
+   num_sweeps = 1;
+   relax_type = 3;
+   relax_order = 1;
+   relax_wt = 1.0;
+   outer_wt = 1.0;
 
    /* log info */
    num_iterations = 0;
@@ -177,11 +156,11 @@ hypre_BoomerAMGCreate()
    hypre_BoomerAMGSetMaxIter(amg_data, max_iter);
    hypre_BoomerAMGSetCycleType(amg_data, cycle_type);
    hypre_BoomerAMGSetTol(amg_data, tol); 
-   hypre_BoomerAMGSetNumGridSweeps(amg_data, num_grid_sweeps);
-   hypre_BoomerAMGSetGridRelaxType(amg_data, grid_relax_type);
-   hypre_BoomerAMGSetGridRelaxPoints(amg_data, grid_relax_points);
-   hypre_BoomerAMGSetRelaxWeight(amg_data, relax_weight);
-   hypre_BoomerAMGSetOmega(amg_data, omega);
+   hypre_BoomerAMGSetNumSweeps(amg_data, num_sweeps);
+   hypre_BoomerAMGSetRelaxType(amg_data, relax_type);
+   hypre_BoomerAMGSetRelaxOrder(amg_data, relax_order);
+   hypre_BoomerAMGSetRelaxWt(amg_data, relax_wt);
+   hypre_BoomerAMGSetOuterWt(amg_data, outer_wt);
    hypre_BoomerAMGSetSmoothType(amg_data, smooth_type);
    hypre_BoomerAMGSetSmoothNumLevels(amg_data, smooth_num_levels);
    hypre_BoomerAMGSetSmoothNumSweeps(amg_data, smooth_num_sweeps);
@@ -519,6 +498,54 @@ hypre_BoomerAMGSetTol( void     *data,
 }
 
 int
+hypre_BoomerAMGSetNumSweeps( void     *data,
+                              int      num_sweeps )
+{
+   int ierr = 0, i;
+   int *num_grid_sweeps;
+   hypre_ParAMGData  *amg_data = data;
+
+   if (hypre_ParAMGDataNumGridSweeps(amg_data) == NULL)
+       hypre_ParAMGDataNumGridSweeps(amg_data) = hypre_CTAlloc(int,4);
+       
+   num_grid_sweeps = hypre_ParAMGDataNumGridSweeps(amg_data);
+
+   for (i=0; i < 3; i++)
+      num_grid_sweeps[i] = num_sweeps;
+   num_grid_sweeps[3] = 1;
+
+   return (ierr);
+}
+ 
+int
+hypre_BoomerAMGSetCycleNumSweeps( void     *data,
+                                  int      num_sweeps,
+                                  int      k )
+{
+   int ierr = 0, i;
+   int *num_grid_sweeps;
+   hypre_ParAMGData  *amg_data = data;
+
+   if (k < 0 || k > 3)
+   {
+      printf (" Warning! Invalid cycle! num_sweeps not set!\n");
+      return -99;
+   }
+
+   if (hypre_ParAMGDataNumGridSweeps(amg_data) == NULL)
+   {
+       num_grid_sweeps = hypre_CTAlloc(int,4);
+       for (i=0; i < 4; i++)
+	  num_grid_sweeps[i] = 1;
+       hypre_ParAMGDataNumGridSweeps(amg_data) = num_grid_sweeps;
+   }
+       
+   hypre_ParAMGDataNumGridSweeps(amg_data)[k] = num_sweeps;
+
+   return (ierr);
+}
+ 
+int
 hypre_BoomerAMGSetNumGridSweeps( void     *data,
                               int      *num_grid_sweeps )
 {
@@ -532,6 +559,69 @@ hypre_BoomerAMGSetNumGridSweeps( void     *data,
    return (ierr);
 }
  
+int
+hypre_BoomerAMGSetRelaxType( void     *data,
+                              int      relax_type )
+{
+   int ierr = 0, i;
+   int *grid_relax_type;
+   hypre_ParAMGData  *amg_data = data;
+
+   if (hypre_ParAMGDataGridRelaxType(amg_data) == NULL)
+       hypre_ParAMGDataGridRelaxType(amg_data) = hypre_CTAlloc(int,4);
+   grid_relax_type = hypre_ParAMGDataGridRelaxType(amg_data);
+
+   for (i=0; i < 3; i++)
+      grid_relax_type[i] = relax_type;
+   grid_relax_type[3] = 9;
+   hypre_ParAMGDataUserCoarseRelaxType(amg_data) = 9;
+
+   return (ierr);
+}
+
+int
+hypre_BoomerAMGSetCycleRelaxType( void     *data,
+                                  int      relax_type,
+                                  int      k )
+{
+   int ierr = 0, i;
+   int *grid_relax_type;
+   hypre_ParAMGData  *amg_data = data;
+
+   if (k < 0 || k > 3)
+   {
+      printf (" Warning! Invalid cycle! relax_type not set!\n");
+      return -99;
+   }
+
+   if (hypre_ParAMGDataGridRelaxType(amg_data) == NULL)
+   {
+      grid_relax_type = hypre_CTAlloc(int,4);
+      for (i=0; i < 3; i++)
+         grid_relax_type[i] = 3;
+      grid_relax_type[3] = 9;
+      hypre_ParAMGDataGridRelaxType(amg_data) = grid_relax_type;
+   }
+      
+   hypre_ParAMGDataGridRelaxType(amg_data)[k] = relax_type;
+   if (k == 3)
+      hypre_ParAMGDataUserCoarseRelaxType(amg_data) = relax_type;
+
+   return (ierr);
+}
+
+int
+hypre_BoomerAMGSetRelaxOrder( void     *data,
+                              int       relax_order)
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+
+   hypre_ParAMGDataRelaxOrder(amg_data) = relax_order;
+
+   return (ierr);
+}
+
 int
 hypre_BoomerAMGSetGridRelaxType( void     *data,
                               int      *grid_relax_type )
@@ -567,14 +657,58 @@ hypre_BoomerAMGSetGridRelaxPoints( void     *data,
 
 int
 hypre_BoomerAMGSetRelaxWeight( void     *data,
-                            double   *relax_weight )
+                               double   *relax_weight )
 {
    int ierr = 0;
    hypre_ParAMGData  *amg_data = data;
-               
+
    if (hypre_ParAMGDataRelaxWeight(amg_data))
       hypre_TFree(hypre_ParAMGDataRelaxWeight(amg_data));
    hypre_ParAMGDataRelaxWeight(amg_data) = relax_weight;
+
+   return (ierr);
+}
+
+int
+hypre_BoomerAMGSetRelaxWt( void     *data,
+                           double    relax_weight )
+{
+   int ierr = 0, i, num_levels;
+   double *relax_weight_array;
+   hypre_ParAMGData  *amg_data = data;
+
+   num_levels = hypre_ParAMGDataMaxLevels(amg_data);
+   if (hypre_ParAMGDataRelaxWeight(amg_data) == NULL)
+      hypre_ParAMGDataRelaxWeight(amg_data) = hypre_CTAlloc(double,num_levels);
+                     
+   relax_weight_array = hypre_ParAMGDataRelaxWeight(amg_data);
+   for (i=0; i < num_levels; i++)
+      relax_weight_array[i] = relax_weight;
+   
+   return (ierr);
+}
+
+int
+hypre_BoomerAMGSetLevelRelaxWt( void    *data,
+                                double   relax_weight,
+                                int      level )
+{
+   int ierr = 0, i, num_levels;
+   hypre_ParAMGData  *amg_data = data;
+   num_levels = hypre_ParAMGDataMaxLevels(amg_data);
+   if (level > num_levels-1) 
+   {
+      printf (" Warning! Invalid level! Relax weight not set!\n");
+      return -99;
+   }
+   if (hypre_ParAMGDataRelaxWeight(amg_data) == NULL)
+   {
+      hypre_ParAMGDataRelaxWeight(amg_data) = hypre_CTAlloc(double,num_levels);
+      for (i=0; i < num_levels; i++)
+         hypre_ParAMGDataRelaxWeight(amg_data)[i] = 1.0;
+   }
+               
+   hypre_ParAMGDataRelaxWeight(amg_data)[level] = relax_weight;
    
    return (ierr);
 }
@@ -585,10 +719,54 @@ hypre_BoomerAMGSetOmega( void     *data,
 {
    int ierr = 0;
    hypre_ParAMGData  *amg_data = data;
-               
+
    if (hypre_ParAMGDataOmega(amg_data))
       hypre_TFree(hypre_ParAMGDataOmega(amg_data));
    hypre_ParAMGDataOmega(amg_data) = omega;
+
+   return (ierr);
+}
+
+int
+hypre_BoomerAMGSetOuterWt( void     *data,
+                           double    omega )
+{
+   int ierr = 0, i, num_levels;
+   double *omega_array;
+   hypre_ParAMGData  *amg_data = data;
+
+   num_levels = hypre_ParAMGDataMaxLevels(amg_data);
+   if (hypre_ParAMGDataOmega(amg_data) == NULL)
+      hypre_ParAMGDataOmega(amg_data) = hypre_CTAlloc(double,num_levels);
+                     
+   omega_array = hypre_ParAMGDataOmega(amg_data);
+   for (i=0; i < num_levels; i++)
+      omega_array[i] = omega;
+   
+   return (ierr);
+}
+
+int
+hypre_BoomerAMGSetLevelOuterWt( void    *data,
+                                double   omega,
+                                int      level )
+{
+   int ierr = 0, i, num_levels;
+   hypre_ParAMGData  *amg_data = data;
+   num_levels = hypre_ParAMGDataMaxLevels(amg_data);
+   if (level > num_levels-1) 
+   {
+      printf (" Warning! Invalid level! Outer weight not set!\n");
+      return -99;
+   }
+   if (hypre_ParAMGDataOmega(amg_data) == NULL)
+   {
+      hypre_ParAMGDataOmega(amg_data) = hypre_CTAlloc(double,num_levels);
+      for (i=0; i < num_levels; i++)
+         hypre_ParAMGDataOmega(amg_data)[i] = 1.0;
+   }
+               
+   hypre_ParAMGDataOmega(amg_data)[level] = omega;
    
    return (ierr);
 }
