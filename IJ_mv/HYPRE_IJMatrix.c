@@ -559,7 +559,7 @@ hypre_RefIJMatrix( HYPRE_IJMatrix IJmatrix, HYPRE_IJMatrix *reference )
 
    hypre_IJMatrixReferenceCount(matrix) ++;
 
-   *reference = IJMatrix;
+   *reference = IJmatrix;
 
    return(ierr);
 }
