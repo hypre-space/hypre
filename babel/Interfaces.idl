@@ -1,21 +1,53 @@
 package Hypre {
 
-   // Version designed to allow a generic PCG solver to be defined.
-   //
-   // Definition of Hypre interface.  JfP dec99 - feb00
-   // Sources: partial design chart from Andy Cleary,
-   // an earlier IDL file given me by Brent Smolinski
+   //   TO DO: I have changed GetParameterInt, GetParameterDouble, GetResidual,
+   // GetConstructedObject, GetPreconditioner, GetSystemOperator to return an
+   // int error code and return the gotten value in an argument.  I need to
+   // change the implementations to correspond.
+   // Make sure every function returns an error code of 0 (good)
+   // or 1 (bad).  This means changing GetConstructed Object, GetParameterMoo,
+   //   TO DO: replace printf's with a function call which I can easily make
+   // do something else (e.g. throw an exception or assert(false)) if needed
+   // And generally try to make sure all error behavior is consistent and
+   // reasonable.
+   //   TO DO: Operator returns something about its domain & range
+   // (e.g. size, dims)
+   //   TO DO: Map class as in ESI (or call it Partitioning as in HYPRE)
+   // functions to return index range for a given processor, etc.
+   // GetLocalRange, GetRowPartition
+   // Operator will contain Maps, via GetDomainMap, GetRangeMap functions
+   // (aka GetColumnMap, GetRowMap)
+   //   TO DO: consider changing names New() and Setup(), especially New().
+   // For a builder, Start() or Reset() and Finish() are alternatives.
+   // For a self-building class, Initialize() makes sense.
+   //   TO DO: For StructVectorBuilder, try to eliminate duplicate provisions
+   // of "grid" in New and Constructor. (a problem: grid is needed by present
+   // New, which is called by Constructor if same class implements Vector and
+   // VectorBuilder)
+
+   // To do in future, as needed:
+   // add SetDefault functions to builders
+
+   // Definition of Hypre interface.  dec1999 - may2000
+   // complaints to Jeff Painter
+
    // The case of the package name is chosen to prevent name conflicts.
+   // All functions (other than the convenience function Constructor)
+   // return an error code: 0 for good, 1 (or, in principle, >1) for bad.
 
    // These forward declarations are needed for the interface definitions
    // but are not otherwise needed for class declarations.
    // None of these classes cannot be taken out of the interface definitions
    // as long as we don't change Hypre - they all contain data which some
    // Babel/Hypre function passes on to a HYPRE function.
+   // Note that even though I have declared a StructuredGrid interface,
+   // we still need to forward-declare the class: the matrix and vector
+   // builders really care about the data in the grid class, they couldn't care
+   // less about its interface.
    class MPI_Com;
    class Box;
+   class StructGrid;
    class StructStencil;
-   class StructuredGrid;
    
 // ---------------- Interfaces ----------------
 
@@ -30,36 +62,50 @@ package Hypre {
 
    interface Operator {
       int Apply( in Vector x, out Vector b );
+      int GetDims( out int m, out int n );
    };
    // ... Things which inherit from Operator include Matrix, Solver.
 
    interface LinearOperator extends Operator {
       int Apply( in Vector x, out Vector b );
+      int GetDims( out int m, out int n );
    };
 
+   interface RowAccess {
+      int GetRow (in  int row,
+                  out int size,
+                  out array<int,1> col_ind,
+                  out array<double,1> values);
+      int RestoreRow (in int row,
+                      in int size,
+                      in array<int,1> col_ind,
+                      in array<double,1> values);
+   };
+ 
    interface StructuredGridVectorBuilder {
-      int SetValues( in Box box, in array<double,1> values );
+      int SetValue( in array<int,1> where, in double value );
+      int SetBoxValues( in Box box, in array<double,1> values );
       // ... this is basically how the HYPRE functions work, except that
       // ilower, iupper, and dim are combined into a Box object.  Probably
       // it would be better to encode the "values" data structure in a more
       // natural form.
-      int New( in StructuredGrid grid );
+      int New( in StructGrid grid );
       int Setup();
-      Vector GetConstructedObject();
+      int GetConstructedObject(out Vector obj);
    };
 
    interface StructuredGridMatrixBuilder {
-      int SetStencil( in StructStencil stencil );
-      int SetValues( in Box box, in array<int,1> stencil_indices,
-                     in array<double,1> values );
+      int SetValue( in array<int,1> where, in double value );
+      int SetBoxValues( in Box box, in array<int,1> stencil_indices,
+                        in array<double,1> values );
       // ... this is basically how the HYPRE functions work, except that
       // ilower, iupper, and dim are combined into a Box object.  Probably
       // it would be better to encode the "values" data structure in a more
       // natural form.
-      int New( in StructuredGrid grid, in StructStencil stencil,
+      int New( in StructGrid grid, in StructStencil stencil,
                in int symmetric, in array<int,1> num_ghost );
       int Setup();
-      LinearOperator GetConstructedObject();
+      int GetConstructedObject(out LinearOperator obj);
    };
 
    interface IJMatrixBuilder {
@@ -88,7 +134,7 @@ package Hypre {
                        in array<double,1> values );
       int GetRowPartitioning( out array<int,1> partitioning );
       int Setup();
-      LinearOperator GetConstructedObject();
+      int GetConstructedObject(out LinearOperator obj);
    };
 
    interface IJVectorBuilder {
@@ -112,17 +158,20 @@ package Hypre {
                                        in array<int,1> value_indices,
                                        in array<double,1> values );
       int Setup();
-      Vector GetConstructedObject();
+      int GetConstructedObject(out Vector obj);
+   };
+
+   interface StructuredGrid {
    };
 
    interface StructuredGridBuilder 
    {
       int SetGridExtents( in Box box );
-      int SetDoubleParameter( in string name, in double value );
-      int SetIntParameter( in string name, in int value );
-      int SetIntArrayParameter( in string name, in array<int,1> value );
-      int GetIntParameter( in string name );
-      StructuredGrid GetConstructedObject();
+      int SetParameterDouble( in string name, in double value );
+      int SetParameterInt( in string name, in int value );
+      int SetParameterIntArray( in string name, in array<int,1> value );
+      int GetParameterInt( in string name, out int value );
+      int GetConstructedObject(out StructuredGrid obj);
       int New( in MPI_Com com, in int dimension );
       int Setup();
    };
@@ -133,40 +182,42 @@ package Hypre {
 
    interface Solver extends LinearOperator {
       int Apply( in Vector b, out Vector x );
-      LinearOperator GetSystemOperator();
-      Vector GetResidual();
+      int GetDims( out int m, out int n );
+      int GetSystemOperator(out LinearOperator op);
+      int GetResidual(out Vector resid);
       int GetConvergenceInfo( in string name, out double value );
    };
 
    interface PreconditionedSolver extends Solver {
       int Apply( in Vector b, out Vector x );
-      LinearOperator GetSystemOperator();
-      Vector GetResidual();
+      int GetDims( out int m, out int n );
+      int GetSystemOperator(out LinearOperator op);
+      int GetResidual(out Vector resid);
       int GetConvergenceInfo( in string name, out double value );
 
-      Solver GetPreconditioner();
+      int GetPreconditioner( out Solver precond );
    };
 
    interface SolverBuilder {
-      double GetDoubleParameter( in string name );
-      int GetIntParameter( in string name );
-      int SetDoubleParameter( in string name, in double value );
-      int SetIntParameter( in string name, in int value );
-      int SetStringParameter( in string name, in string value );
+      int GetParameterDouble( in string name, out double value );
+      int GetParameterInt( in string name, out int value );
+      int SetParameterDouble( in string name, in double value );
+      int SetParameterInt( in string name, in int value );
+      int SetParameterString( in string name, in string value );
       int New( in MPI_Com comm );
       int Setup( in LinearOperator A, in Vector b, in Vector x );
-      Solver GetConstructedObject();    
+      int GetConstructedObject(out Solver obj);    
    };
 
    interface PreconditionedSolverBuilder extends SolverBuilder {
-      double GetDoubleParameter( in string name );
-      int GetIntParameter( in string name );
-      int SetDoubleParameter( in string name, in double value );
-      int SetIntParameter( in string name, in int value );
-      int SetStringParameter( in string name, in string value );
+      int GetParameterDouble( in string name, out double value );
+      int GetParameterInt( in string name, out int value );
+      int SetParameterDouble( in string name, in double value );
+      int SetParameterInt( in string name, in int value );
+      int SetParameterString( in string name, in string value );
       int New( in MPI_Com comm );
       int Setup( in LinearOperator A, in Vector b, in Vector x );
-      Solver GetConstructedObject();    
+      int GetConstructedObject(out Solver obj);    
 
       int SetPreconditioner( in Solver precond );
    };
@@ -186,7 +237,7 @@ package Hypre {
 //  builder's New(...) makes an object and does basic initialization
 //  builder's Set functions put data into the new object
 //  builder's Setup(...) finishes building the object
-//  builder's GetConstructedObject() returns that object
+//  builder's GetConstructedObject(...) returns that object
 //
 // If you use an object which implements its own builder interface, the
 // way things work is simply:
@@ -196,7 +247,10 @@ package Hypre {
 //
 // Internally, the Constructor() combines the Babel constructor() and New(...).
 // But there is no reason for a user to call them separately or even know that
-// they exist.  Nevertheless, the New() function must be implemented even when
+// they exist. (except: in a future distributed version of Babel, the Babel
+// new() will need to be separately called.  The following New(...) function
+// will then be required.)
+// Nevertheless, the New() function must be implemented even when
 // an object is its own builder.  This is because it is needed by any separate
 // builder, hence it must be declared in the builder interface.
 
@@ -237,13 +291,14 @@ package Hypre {
       int Setup();
    };
    
-   class StructVectorBldr implements StructuredGridVectorBuilder {
+   class StructVectorBuilder implements StructuredGridVectorBuilder {
       void print();
-      int SetValues( in Box box, in array<double,1> values );
+      int SetValue( in array<int,1> where, in double value );
+      int SetBoxValues( in Box box, in array<double,1> values );
       int SetNumGhost( in array<int,1> values );
-      Vector GetConstructedObject();
-      int New( in StructuredGrid grid );
-      static StructVectorBldr Constructor( in StructuredGrid grid );
+      int GetConstructedObject(out Vector obj);
+      int New( in StructGrid grid );
+      static StructVectorBuilder Constructor( in StructGrid grid );
       int Setup();
    };
 
@@ -257,36 +312,40 @@ package Hypre {
       int Axpy (in double a, in Vector x);
    };
 
-   class StructMatrixBldr implements StructuredGridMatrixBuilder {
+   class StructMatrixBuilder implements StructuredGridMatrixBuilder {
       int SetStencil( in StructStencil stencil );
-      int SetValues( in Box box, in array<int,1> stencil_indices,
-                     in array<double,1> values );
-      int Apply( in StructVector b, out StructVector x );
-      LinearOperator GetConstructedObject();
-      int New( in StructuredGrid grid, in StructStencil stencil,
+      int SetValue( in array<int,1> where, in double value );
+      int SetBoxValues( in Box box, in array<int,1> stencil_indices,
+                        in array<double,1> values );
+      int GetDims( out int m, out int n );
+      int GetConstructedObject(out LinearOperator obj);
+      int New( in StructGrid grid, in StructStencil stencil,
                in int symmetric, in array<int,1> num_ghost  );
-      static StructMatrixBldr Constructor
-      ( in StructuredGrid grid, in StructStencil stencil, in int symmetric,
+      static StructMatrixBuilder Constructor
+      ( in StructGrid grid, in StructStencil stencil, in int symmetric,
         in array<int,1> num_ghost );
       int Setup();
    };
 
-   class StructMatrix implements LinearOperator {
+   class StructMatrix implements LinearOperator, RowAccess {
       void print();
       int Apply( in Vector x, out Vector b );
+      int GetDims( out int m, out int n );
+      int GetLocalRange( out int row_start, out int row_end,
+                         out int col_start, out int col_end );
    };
 
-   class StructuredGrid implements StructuredGridBuilder
+   class StructGrid implements StructuredGridBuilder, StructuredGrid
    {
       void print();
       int SetGridExtents( in Box box );
-      int SetDoubleParameter( in string name, in double value );
-      int SetIntParameter( in string name, in int value );
-      int SetIntArrayParameter( in string name, in array<int,1> value );
-      int GetIntParameter( in string name );
-      StructuredGrid GetConstructedObject();
+      int SetParameterDouble( in string name, in double value );
+      int SetParameterInt( in string name, in int value );
+      int SetParameterIntArray( in string name, in array<int,1> value );
+      int GetParameterInt( in string name, out int value );
+      int GetConstructedObject(out StructuredGrid obj);
       int New( in MPI_Com com, in int dimension );
-      static StructuredGrid Constructor( in MPI_Com com, in int dimension );
+      static StructGrid Constructor( in MPI_Com com, in int dimension );
       int Setup();
    };
    
@@ -319,7 +378,7 @@ package Hypre {
                        in array<double,1> values );
       int GetRowPartitioning( out array<int,1> partitioning );
       int Setup();
-      LinearOperator GetConstructedObject();
+      int GetConstructedObject(out LinearOperator obj);
    };
 
    class ParCSRVectorBuilder implements IJVectorBuilder {
@@ -344,11 +403,14 @@ package Hypre {
                                        in array<int,1> value_indices,
                                        in array<double,1> values );
       int Setup();
-      Vector GetConstructedObject();
+      int GetConstructedObject(out Vector obj);
    };
 
-   class ParCSRMatrix implements LinearOperator { 
+   class ParCSRMatrix implements LinearOperator, RowAccess { 
       int Apply( in Vector x, out Vector y );
+      int GetDims( out int m, out int n );
+      int GetLocalRange( out int row_start, out int row_end,
+                         out int col_start, out int col_end );
    };
 
    class ParCSRVector implements Vector { 
@@ -371,115 +433,121 @@ package Hypre {
 
    class StructJacobi implements Solver, SolverBuilder {
       int Apply( in Vector b, out Vector x );
-      LinearOperator GetSystemOperator();
-      Vector GetResidual();
+      int GetDims( out int m, out int n );
+      int GetSystemOperator(out LinearOperator op);
+      int GetResidual(out Vector resid);
       int GetConvergenceInfo( in string name, out double value );
 
-      double GetDoubleParameter( in string name );
-      int GetIntParameter( in string name );
-      int SetDoubleParameter( in string name, in double value );
-      int SetIntParameter( in string name, in int value );
-      int SetStringParameter( in string name, in string value );
+      int GetParameterDouble( in string name, out double value );
+      int GetParameterInt( in string name, out int value );
+      int SetParameterDouble( in string name, in double value );
+      int SetParameterInt( in string name, in int value );
+      int SetParameterString( in string name, in string value );
       int New( in MPI_Com comm );
       int Setup( in LinearOperator A, in Vector b, in Vector x );
       static StructJacobi Constructor( in MPI_Com comm );
-      Solver GetConstructedObject();
+      int GetConstructedObject(out Solver obj);
    };
 
    class StructSMG implements Solver, SolverBuilder {
       int Apply( in Vector b, out Vector x );
-      LinearOperator GetSystemOperator();
-      Vector GetResidual();
+      int GetDims( out int m, out int n );
+      int GetSystemOperator( out LinearOperator op);
+      int GetResidual( out Vector resid );
       int GetConvergenceInfo( in string name, out double value );
 
-      double GetDoubleParameter( in string name );
-      int GetIntParameter( in string name );
-      int SetDoubleParameter( in string name, in double value );
-      int SetIntParameter( in string name, in int value );
-      int SetStringParameter( in string name, in string value );
+      int GetParameterDouble( in string name, out double value );
+      int GetParameterInt( in string name, out int value );
+      int SetParameterDouble( in string name, in double value );
+      int SetParameterInt( in string name, in int value );
+      int SetParameterString( in string name, in string value );
       int New( in MPI_Com comm );
       int Setup( in LinearOperator A, in Vector b, in Vector x );
       static StructSMG Constructor( in MPI_Com comm );
-      Solver GetConstructedObject();
+      int GetConstructedObject(out Solver obj);
    };
 
    class PCG implements PreconditionedSolver, PreconditionedSolverBuilder {
       int Apply( in Vector b, out Vector x );
-      LinearOperator GetSystemOperator();
-      Vector GetResidual();
+      int GetDims( out int m, out int n );
+      int GetSystemOperator( out LinearOperator op );
+      int GetResidual( out Vector resid );
       int GetConvergenceInfo( in string name, out double value );
 
-      Solver GetPreconditioner();
+      int GetPreconditioner( out Solver precond );
 
-      double GetDoubleParameter( in string name );
-      int GetIntParameter( in string name );
-      int SetDoubleParameter( in string name, in double value );
-      int SetIntParameter( in string name, in int value );
-      int SetStringParameter( in string name, in string value );
+      int GetParameterDouble( in string name, out double value );
+      int GetParameterInt( in string name, out int value );
+      int SetParameterDouble( in string name, in double value );
+      int SetParameterInt( in string name, in int value );
+      int SetParameterString( in string name, in string value );
       int New( in MPI_Com comm );
       static PCG Constructor( in MPI_Com comm );
       int Setup( in LinearOperator A, in Vector b, in Vector x );
-      Solver GetConstructedObject();    
+      int GetConstructedObject(out Solver obj);    
 
       int SetPreconditioner( in Solver precond );
    };
 
    class GMRES implements PreconditionedSolver, PreconditionedSolverBuilder { 
       int Apply( in Vector b, out Vector x );
-      LinearOperator GetSystemOperator();
-      Vector GetResidual();
+      int GetDims( out int m, out int n );
+      int GetSystemOperator( out LinearOperator op );
+      int GetResidual( out Vector resid );
       int GetConvergenceInfo( in string name, out double value );
 
-      Solver GetPreconditioner();
+      int GetPreconditioner( out Solver precond );
 
-      double GetDoubleParameter( in string name );
-      int GetIntParameter( in string name );
-      int SetDoubleParameter( in string name, in double value );
-      int SetIntParameter( in string name, in int value );
-      int SetStringParameter( in string name, in string value );
+      int GetParameterDouble( in string name, out double value );
+      int GetParameterInt( in string name, out int value );
+      int SetParameterDouble( in string name, in double value );
+      int SetParameterInt( in string name, in int value );
+      int SetParameterString( in string name, in string value );
       int New( in MPI_Com comm );
       static GMRES Constructor ( in MPI_Com comm );
       int Setup( in LinearOperator A, in Vector b, in Vector x );
-      Solver GetConstructedObject();    
+      int GetConstructedObject(out Solver obj);    
 
       int SetPreconditioner( in Solver precond );
    };
 
    class ParAMG implements SolverBuilder, Solver { 
-      double GetDoubleParameter( in string name );
-      int GetIntParameter( in string name );
-      int SetDoubleParameter( in string name, in double value );
-      int SetDoubleArrayParameter( in string name, in array<double,1> value );
-      int SetDoubleArray2Parameter( in string name, in array<double,2> value );
-      int SetIntParameter( in string name, in int value );
-      int SetIntArrayParameter( in string name, in array<int,1> value );
-      int SetIntArray2Parameter( in string name, in array<int,2> value );
-      int SetStringParameter( in string name, in string value );
+      int GetParameterDouble( in string name, out double value );
+      int GetParameterInt( in string name, out int value );
+      int SetParameterDouble( in string name, in double value );
+      int SetParameterDoubleArray( in string name, in array<double,1> value );
+      int SetParameterDoubleArray2( in string name, in array<double,2> value );
+      int SetParameterInt( in string name, in int value );
+      int SetParameterIntArray( in string name, in array<int,1> value );
+      int SetParameterIntArray2( in string name, in array<int,2> value );
+      int SetParameterString( in string name, in string value );
       int New( in MPI_Com comm );
       static ParAMG Constructor( in MPI_Com comm );
       int Setup( in LinearOperator A, in Vector b, in Vector x );
-      Solver GetConstructedObject();    
+      int GetConstructedObject(out Solver obj);    
 
       int Apply( in Vector b, out Vector x );
-      LinearOperator GetSystemOperator();
-      Vector GetResidual();
+      int GetDims( out int m, out int n );
+      int GetSystemOperator( out LinearOperator op );
+      int GetResidual( out Vector resid );
       int GetConvergenceInfo( in string name, out double value );
    };
 
    class Pilut implements SolverBuilder, Solver { 
-      double GetDoubleParameter( in string name );
-      int GetIntParameter( in string name );
-      int SetDoubleParameter( in string name, in double value );
-      int SetIntParameter( in string name, in int value );
-      int SetStringParameter( in string name, in string value );
+      int GetParameterDouble( in string name, out double value );
+      int GetParameterInt( in string name, out int value );
+      int SetParameterDouble( in string name, in double value );
+      int SetParameterInt( in string name, in int value );
+      int SetParameterString( in string name, in string value );
       int New( in MPI_Com comm );
       static Pilut Constructor( in MPI_Com comm );
       int Setup( in LinearOperator A, in Vector b, in Vector x );
-      Solver GetConstructedObject();    
+      int GetConstructedObject(out Solver obj);    
 
       int Apply( in Vector b, out Vector x );
-      LinearOperator GetSystemOperator();
-      Vector GetResidual();
+      int GetDims( out int m, out int n );
+      int GetSystemOperator( out LinearOperator op );
+      int GetResidual( out Vector resid );
       int GetConvergenceInfo( in string name, out double value );
    };
 
