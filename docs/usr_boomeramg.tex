@@ -1,0 +1,198 @@
+%==========================================================================
+\section{BoomerAMG}
+
+BoomerAMG is a parallel implementation of algebraic multigrid.
+It can be used both as a solver or as a preconditioner.
+The user can choose between various different parallel coarsening techniques
+and relaxation schemes.
+The following coarsening techniques are available:
+\begin{itemize}
+\item the Cleary-Luby-Jones-Plassman (CLJP) coarsening,
+\item various variants of the classical Ruge-Stueben (RS) coarsening algorithm, and
+\item the Falgout coarsening which is a combination of CLJP and the
+classical RS coarsening algorithm.
+\end{itemize}
+The following relaxation techniques are available:
+\begin{itemize}
+\item weighted Jacobi relaxation,
+\item a hybrid Gauss-Seidel / Jacobi relaxation scheme, and
+\item sequential Gauss-Seidel relaxation.
+\end{itemize}
+
+
+
+\subsection{Synopsis}
+
+\begin{display}
+\begin{verbatim}
+#include "HYPRE_parcsr_ls.h"
+
+int HYPRE_ParAMGCreate(HYPRE_Solver *solver); 
+
+<set certain parameters if desired >
+
+int HYPRE_ParAMGSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
+  HYPRE_ParVector b, HYPRE_ParVector x);
+int HYPRE_ParAMGSolve(HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
+  HYPRE_ParVector b, HYPRE_ParVector x);
+int HYPRE_ParAMGDestroy(HYPRE_Solver solver);
+\end{verbatim}
+\end{display}
+
+\subsection{Interface functions}
+
+Parameters for setting up the code are specified using the following routines:
+
+\subsubsection*{HYPRE$\_$ParAMGSetMaxLevels}
+\begin{display}
+\begin{verbatim}
+int HYPRE_ParAMGSetMaxLevels( HYPRE_Solver solver, int max_levels);
+\end{verbatim}
+\end{display}
+where max$\_$levels defines the maximal number of multigrid levels allowed.
+The default is 25.
+
+\subsubsection*{HYPRE$\_$ParAMGSetMinIter}
+\begin{display}
+\begin{verbatim}
+int HYPRE_ParAMGSetMinIter( HYPRE_Solver solver, int min_iter);
+\end{verbatim}
+\end{display}
+where min$\_$iter defines the minimal number of iterations allowed.
+The default is 0.
+
+\subsubsection*{HYPRE$\_$ParAMGSetMaxIter}
+\begin{display}
+\begin{verbatim}
+int HYPRE_ParAMGSetMaxIter( HYPRE_Solver solver, int max_iter);
+\end{verbatim}
+\end{display}
+where max$\_$iter defines the maximal number of iterations allowed.
+The default is 20.
+
+\subsubsection*{HYPRE$\_$ParAMGSetTol}
+\begin{display}
+\begin{verbatim}
+int HYPRE_ParAMGSetTol( HYPRE_Solver solver, double tol);
+\end{verbatim}
+\end{display}
+defines the tolerance needed for the stopping criterion. The default is 1.0e-7.
+
+\subsubsection*{HYPRE$\_$ParAMGSetStrongThreshold}
+\begin{display}
+\begin{verbatim}
+int HYPRE_ParAMGSetStrongThreshold( HYPRE_Solver solver,
+	double strong_threshold);
+\end{verbatim}
+\end{display}
+The default value is 0.25, which appears to be a good choice for 2-dimensional
+problems. A better choice for 3-dimensional problems appears to be 0.5. However,
+the choice of the strength threshold is problem dependent and therefore
+there could be better choices than the two suggested ones.
+
+\subsubsection*{HYPRE$\_$ParAMGSetMaxRowSum}
+\begin{display}
+\begin{verbatim}
+int HYPRE_ParAMGSetMaxRowSum( HYPRE_Solver solver, double max_row_sum);
+\end{verbatim}
+\end{display}
+If the absolute row sum of row i weighted by the diagonal
+is greater than max$\_$row$\_$sum all dependencies of variable i are set
+to be weak. This feature leads to a more efficient treatment of very
+diagonally dominant portions of the matrix.
+It can be switched off by setting max$\_$row$\_$sum to 1.0.
+The default is 0.9.
+
+\subsubsection*{HYPRE$\_$ParAMGSetCoarsenType}
+\begin{display}
+\begin{verbatim}
+int HYPRE_ParAMGSetCoarsenType( HYPRE_Solver solver, int coarsen_type  );
+\end{verbatim}
+\end{display}
+where coarsen$\_$type defines the coarsening used. The following options 
+are possible:
+
+\begin{tabular}{l l}
+  0 & CLJP-coarsening (default) \\
+  1& 	Ruge-Stueben coarsening without boundary treatment \\
+  3& 	Ruge-Stueben coarsening with a 3rd 'second' pass on the boundaries \\
+ 6 & 	Falgout coarsening. \\
+\end{tabular}
+
+\subsubsection*{HYPRE$\_$ParAMGSetMeasureType}
+\begin{display}
+\begin{verbatim}
+int HYPRE_ParAMGSetMeasureType( HYPRE_Solver solver, int measure_type  );
+\end{verbatim}
+\end{display}
+defines whether local (measure$\_$type = 0, default) or global measures 
+(measure$\_$type = 1) are used within the coarsening 
+algorithm. This feature is ignored for the CLJP and the Falgout coarsening.
+
+\subsubsection*{HYPRE$\_$ParAMGSetNumGridSweeps}
+\begin{display}
+\begin{verbatim}
+int HYPRE_ParAMGSetNumGridSweeps( HYPRE_Solver solver, int* num_grid_sweeps );
+\end{verbatim}
+\end{display}
+num$\_$grid$\_$sweeps[k] defines the number of sweeps over the grid on the fine 
+grid (k=0), the down cycle (k=1), the up cycle (k=2) and the coarse grid (k=3).
+
+\subsubsection*{HYPRE$\_$ParAMGSetGridRelaxType}
+\begin{display}
+\begin{verbatim}
+int HYPRE_ParAMGSetGridRelaxType( HYPRE_Solver solver, int* grid_relax_type );
+\end{verbatim}
+\end{display}
+grid$\_$relax$\_$type[k] defines the relaxation used on the fine 
+grid (k=0), the down cycle (k=1), the up cycle (k=2) and the coarse grid (k=3).
+The following options are possible for grid$\_$relax$\_$type[k]:
+
+\begin{tabular}{l l}
+ 0 & weighted Jacobi \\
+ 1 & Gauss-Seidel (run sequentially, very slow!) \\
+ 3 & Gauss-Seidel / Jacobi hybrid method (default) \\
+ 9 & Gaussian elimination (only for the coarsest level (k=3), not recommended\\ 
+ & if the system on the coarsest level is large)\\
+\end{tabular}
+
+\subsubsection*{HYPRE$\_$ParAMGSetGridRelaxPoints}
+\begin{display}
+\begin{verbatim}
+int HYPRE_ParAMGSetGridRelaxPoints( HYPRE_Solver solver, 
+	int** grid_relax_points);
+\end{verbatim}
+\end{display}
+grid$\_$relax$\_$points[k][l] defines which points are to be relaxed during
+the l-th sweep on the fine 
+grid (k=0), the down cycle (k=1), the up cycle (k=2) and the coarse grid (k=3),
+e.g. if grid$\_$relax$\_$points[1][0] is -1, all points marked -1 (which are in
+general fine points) are relaxed on the first sweep of the down cycle.
+
+\subsubsection*{HYPRE$\_$ParAMGSetRelaxWeight}
+\begin{display}
+\begin{verbatim}
+int HYPRE_ParAMGSetRelaxWeight( HYPRE_Solver solver, double* relax_weight);
+\end{verbatim}
+\end{display}
+defines the relaxation weights used on each level, if weighted Jacobi is used
+as relaxation method. The default relaxation weight is 1.0 on each level.
+
+\subsubsection*{HYPRE$\_$ParAMGSetIOutDat}
+\begin{display}
+\begin{verbatim}
+int HYPRE_ParAMGSetIOutDat( HYPRE_Solver solver, int ioutdat);
+\end{verbatim}
+\end{display}
+where ioutdat determines whether statistics information is generated and 
+printed. The following options are possible:
+
+\begin{tabular}{l l}
+ 0 & no output (default) \\
+ 1 & matrix statistics (includes information on interpolation operators and \\
+ & matrices generated on each level) \\
+ 2 & cycle statistics (includes residuals generated during solve phase) \\
+ 3 & matrix and cycles statistics \\
+\end{tabular}
+
+%==========================================================================
