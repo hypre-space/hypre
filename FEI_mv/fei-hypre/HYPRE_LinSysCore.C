@@ -2581,7 +2581,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                      printf("ParaSails - threshold = %e\n",parasailsThreshold_);
                      printf("ParaSails - filter    = %e\n",parasailsFilter_);
                      printf("ParaSails - sym       = %d\n",parasailsSym_);
-                     printf("ParaSails - loadbal   = %d\n",parasailsLoadbal_);
+                     printf("ParaSails - loadbal   = %e\n",parasailsLoadbal_);
                   }
                   HYPRE_ParCSRParaSailsSetSym(HYPrecon_,parasailsSym_);
                   HYPRE_ParCSRParaSailsSetParams(HYPrecon_,parasailsThreshold_, 
@@ -2783,7 +2783,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                      printf("ParaSails - threshold = %e\n",parasailsThreshold_);
                      printf("ParaSails - filter    = %e\n",parasailsFilter_);
                      printf("ParaSails - sym       = %d\n",parasailsSym_);
-                     printf("ParaSails - loadbal   = %d\n",parasailsLoadbal_);
+                     printf("ParaSails - loadbal   = %e\n",parasailsLoadbal_);
                   }
                   HYPRE_ParCSRParaSailsSetSym(HYPrecon_,parasailsSym_);
                   HYPRE_ParCSRParaSailsSetParams(HYPrecon_,parasailsThreshold_,
