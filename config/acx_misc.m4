@@ -349,7 +349,7 @@ esac],[casc_using_openmp=no])
 dnl **********************************************************************
 dnl * ACX_RT_ARGS
 dnl *
-dnl determine if user is providind compiles, or conpiler flag arguments
+dnl determine if user is providing compilers, or compiler flag arguments
 dnl
 AC_DEFUN([ACX_RT_ARGS],
 [AC_PREREQ(2.57)dnl
@@ -376,6 +376,16 @@ else
   casc_user_chose_fflags=no
 fi
 ])
+
+dnl **********************************************************************
+dnl * ACX_LIBG2C
+dnl *
+dnl *       Set variable for library g2c 
+AC_DEFUN([ACX_LIBG2C],
+[AC_PREREQ(2.57)dnl
+LIBG2C="-lg2c"
+])# ACX_LIBG2C
+
 
 dnl **********************************************************************
 dnl * ACX_OPTIMIZATION_FLAGS
