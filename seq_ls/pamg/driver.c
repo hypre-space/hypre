@@ -14,7 +14,13 @@ main( int   argc,
    int                 print_usage;
    int                 build_matrix_type;
    int                 build_matrix_arg_index;
+   int                 build_rhs_type;
+   int                 build_rhs_arg_index;
    int                 solver_id;
+   int                 relax_default;
+   int                 coarsen_type;
+   double	       norm;
+   int		       ierr = 0;
 
 #if 0
    hypre_ParCSRMatrix *A;
@@ -47,15 +53,19 @@ main( int   argc,
 
    num_procs = 1;
    myid = 0;
-
+/*
    hypre_InitMemoryDebug(myid);
-
+*/
    /*-----------------------------------------------------------
     * Set defaults
     *-----------------------------------------------------------*/
  
    build_matrix_type      = 1;
    build_matrix_arg_index = argc;
+   build_rhs_type      = 0;
+   build_rhs_arg_index = argc;
+   coarsen_type      = 0;
+   relax_default = 0;
 
    solver_id = 0;
 
@@ -90,6 +100,34 @@ main( int   argc,
       {
          arg_index++;
          solver_id = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-rhsfromfile") == 0 )
+      {
+         arg_index++;
+         build_rhs_type      = 1;
+         build_rhs_arg_index = arg_index;
+      }
+      else if ( strcmp(argv[arg_index], "-rhsrand") == 0 )
+      {
+         arg_index++;
+         build_rhs_type      = 3;
+         build_rhs_arg_index = arg_index;
+      }    
+      else if ( strcmp(argv[arg_index], "-xisone") == 0 )
+      {
+         arg_index++;
+         build_rhs_type      = 4;
+         build_rhs_arg_index = arg_index;
+      }    
+      else if ( strcmp(argv[arg_index], "-ruge") == 0 )
+      {
+         arg_index++;
+         coarsen_type = 1;
+      }
+      else if ( strcmp(argv[arg_index], "-rlx") == 0 )
+      {
+         arg_index++;
+         relax_default = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-help") == 0 )
       {
@@ -182,14 +220,49 @@ main( int   argc,
    hypre_InitializeParVector(x);
    hypre_SetParVectorConstantValues(x,0.0);
 #endif
-   b = hypre_CreateVector(hypre_CSRMatrixNumRows(A));
-   hypre_InitializeVector(b);
-   hypre_SetVectorConstantValues(b, 0.0);
 
-   x = hypre_CreateVector(hypre_CSRMatrixNumRows(A));
-   hypre_InitializeVector(x);
-   hypre_SetVectorConstantValues(x, 1.0);
+   if ( build_rhs_type == 1 )
+   {
+      BuildRhsFromFile(argc, argv, build_rhs_arg_index, A, &b);
+ 
+      x = hypre_CreateVector( hypre_CSRMatrixNumRows(A));
+      hypre_InitializeVector(x);
+      hypre_SetVectorConstantValues(x, 0.0);      
+   }
+   else if ( build_rhs_type == 3 )
+   {
+      b = hypre_CreateVector( hypre_CSRMatrixNumRows(A));
+      hypre_InitializeVector(b);
+      hypre_SetVectorRandomValues(b, 22775);
+      norm = 1.0/sqrt(hypre_InnerProd(b,b));
+      ierr = hypre_ScaleVector(norm, b);      
+ 
+      x = hypre_CreateVector( hypre_CSRMatrixNumRows(A));
+      hypre_InitializeVector(x);
+      hypre_SetVectorConstantValues(x, 0.0);      
+   }
+   else if ( build_rhs_type == 4 )
+   {
+      x = hypre_CreateVector( hypre_CSRMatrixNumRows(A));
+      hypre_InitializeVector(x);
+      hypre_SetVectorConstantValues(x, 1.0);      
+ 
+      b = hypre_CreateVector( hypre_CSRMatrixNumRows(A));
+      hypre_InitializeVector(b);
+      hypre_Matvec(1.0,A,x,0.0,b);
+ 
+      hypre_SetVectorConstantValues(x, 0.0);      
+   }
+   else
+   {
+      b = hypre_CreateVector(hypre_CSRMatrixNumRows(A));
+      hypre_InitializeVector(b);
+      hypre_SetVectorConstantValues(b, 0.0);
 
+      x = hypre_CreateVector(hypre_CSRMatrixNumRows(A));
+      hypre_InitializeVector(x);
+      hypre_SetVectorConstantValues(x, 1.0);
+   }
    /*-----------------------------------------------------------
     * Solve the system using AMG
     *-----------------------------------------------------------*/
@@ -215,21 +288,21 @@ main( int   argc,
 
       /* fine grid */
       num_grid_sweeps[0] = 2;
-      grid_relax_type[0] = 1; 
+      grid_relax_type[0] = relax_default; 
       grid_relax_points[0] = hypre_CTAlloc(int, 2); 
       grid_relax_points[0][0] = -1;
       grid_relax_points[0][1] = 1;
 
       /* down cycle */
       num_grid_sweeps[1] = 2;
-      grid_relax_type[1] = 1; 
+      grid_relax_type[1] = relax_default; 
       grid_relax_points[1] = hypre_CTAlloc(int, 2); 
       grid_relax_points[1][0] = 1;
       grid_relax_points[1][1] = -1;
 
       /* up cycle */
       num_grid_sweeps[2] = 2;
-      grid_relax_type[2] = 1; 
+      grid_relax_type[2] = relax_default; 
       grid_relax_points[2] = hypre_CTAlloc(int, 2); 
       grid_relax_points[2][0] = -1;
       grid_relax_points[2][1] = 1;
@@ -265,12 +338,14 @@ main( int   argc,
       }
 
       amg_solver = HYPRE_AMGInitialize();
+      HYPRE_AMGSetCoarsenType(amg_solver, coarsen_type);
       HYPRE_AMGSetStrongThreshold(amg_solver, strong_threshold);
       HYPRE_AMGSetLogging(amg_solver, ioutdat, "driver.out.log");
       HYPRE_AMGSetCycleType(amg_solver, cycle_type);
       HYPRE_AMGSetNumGridSweeps(amg_solver, num_grid_sweeps);
       HYPRE_AMGSetGridRelaxType(amg_solver, grid_relax_type);
       HYPRE_AMGSetGridRelaxPoints(amg_solver, grid_relax_points);
+      HYPRE_AMGSetRelaxWeight(amg_solver, relax_weight);
       HYPRE_AMGSetMaxLevels(amg_solver, 25);
       HYPRE_AMGSetup(amg_solver, A, b, x);
 
@@ -303,9 +378,9 @@ main( int   argc,
 #if 0
    hypre_TFree(global_part);
 #endif
-
+/*
    hypre_FinalizeMemoryDebug();
-
+*/
 #if 0
    /* Finalize MPI */
    MPI_Finalize();
@@ -679,6 +754,48 @@ BuildLaplacian9pt( int               argc,
    *global_part_ptr = global_part;
 #endif
 
+   return (0);
+}
+
+int
+BuildRhsFromFile( int                  argc,
+                  char                *argv[],
+                  int                  arg_index,
+                  hypre_CSRMatrix  *A,
+                  hypre_Vector    **b_ptr     )
+{
+   char               *filename;
+ 
+   hypre_Vector *b;
+ 
+   /*-----------------------------------------------------------
+    * Parse command line
+    *-----------------------------------------------------------*/
+ 
+   if (arg_index < argc)
+   {
+      filename = argv[arg_index];
+   }
+   else
+   {
+      printf("Error: No filename specified \n");
+      exit(1);
+   }
+ 
+   /*-----------------------------------------------------------
+    * Print driver parameters
+    *-----------------------------------------------------------*/
+ 
+   printf("  Rhs FromFile: %s\n", filename);
+ 
+   /*-----------------------------------------------------------
+    * Generate the matrix 
+    *-----------------------------------------------------------*/
+ 
+   b = hypre_ReadVector(filename);
+ 
+   *b_ptr = b;
+ 
    return (0);
 }
 
