@@ -15,15 +15,6 @@
 #include <assert.h>
 #include <math.h>
 
-#ifndef NOFEI
-#if defined(FEI_V14) || defined(FEI_V13)
-class Lookup
-{
-   int bogus;
-};
-#endif
-#endif
-
 #ifdef NOFEI
 #define GlobalID int
 class Lookup
@@ -63,11 +54,7 @@ enum HYpreconID {HYDIAGONAL,HYPILUT,HYPARASAILS,HYBOOMERAMG,HYML,HYDDILUT,
 
 class HYPRE_LinSysCore
 #ifndef NOFEI
-#if defined(FEI_V14) || defined(FEI_V13) 
-           : public LinearSystemCore 
-#else
            : public LSC 
-#endif
 #endif
 {
  public:
@@ -348,11 +335,7 @@ class HYPRE_LinSysCore
    // other functions
    // ----------------------------------------------------------------------
 
-#ifdef FEI_V13
-   void  writeSystem(char *);
-#else
    void  writeSystem(const char *);
-#endif
 
    // ----------------------------------------------------------------------
    // HYPRE-specific public functions
