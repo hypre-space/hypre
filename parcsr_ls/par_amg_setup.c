@@ -96,9 +96,6 @@ hypre_ParAMGSetup( void               *amg_vdata,
       hypre_ParAMGCoarsen(A_array[level], strong_threshold,
                           &S, &CF_marker, &coarse_size); 
 
-      /* if no coarse-grid, stop coarsening */
-      if (coarse_size == 0)
-         break;
 
       CF_marker_array[level] = CF_marker;
       
@@ -110,6 +107,11 @@ hypre_ParAMGSetup( void               *amg_vdata,
       P_array[level] = P; 
       hypre_DestroyParCSRMatrix(S);
       coarse_size = hypre_ParCSRMatrixGlobalNumCols(P);
+
+      /* if no coarse-grid, stop coarsening */
+      if (coarse_size == 0)
+         break; 
+
       /*-------------------------------------------------------------
        * Build coarse-grid operator, A_array[level+1] by R*A*P
        *--------------------------------------------------------------*/
