@@ -496,12 +496,12 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
 
    if (num_cols_offd_C)
    {
-   	C_offd = hypre_ParCSRMatrixOffd(C);
-	hypre_CSRMatrixData(C_offd) = C_offd_data; 
-   	hypre_CSRMatrixI(C_offd) = C_offd_i; 
-   	hypre_CSRMatrixJ(C_offd) = C_offd_j; 
-   	hypre_ParCSRMatrixOffd(C) = C_offd;
-   	hypre_ParCSRMatrixColMapOffd(C) = col_map_offd_C;
+      C_offd = hypre_ParCSRMatrixOffd(C);
+      hypre_CSRMatrixData(C_offd) = C_offd_data; 
+      hypre_CSRMatrixI(C_offd) = C_offd_i; 
+      hypre_CSRMatrixJ(C_offd) = C_offd_j; 
+      hypre_ParCSRMatrixOffd(C) = C_offd;
+      hypre_ParCSRMatrixColMapOffd(C) = col_map_offd_C;
 
    }
    else
@@ -511,7 +511,11 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
     *  Free B_ext and marker array.
     *-----------------------------------------------------------------------*/
 
-   if (num_cols_offd_A) hypre_CSRMatrixDestroy(B_ext);
+   if (num_cols_offd_A)
+   {
+      hypre_CSRMatrixDestroy(B_ext);
+      B_ext = NULL;
+   }
    hypre_TFree(B_marker);   
 
    return C;
@@ -675,6 +679,7 @@ hypre_ParCSRMatrixExtractBExt( hypre_ParCSRMatrix *B, hypre_ParCSRMatrix *A, int
    hypre_ParCSRCommPkgSendMapStarts(tmp_comm_pkg) = jdata_send_map_starts; 
 
    hypre_ParCSRCommHandleDestroy(comm_handle);
+   comm_handle = NULL;
 
 /*--------------------------------------------------------------------------
  * after communication exchange B_ext_i[j+1] contains the number of elements
@@ -724,12 +729,14 @@ hypre_ParCSRMatrixExtractBExt( hypre_ParCSRMatrix *B, hypre_ParCSRMatrix *A, int
 
    comm_handle = hypre_ParCSRCommHandleCreate(11,tmp_comm_pkg,B_int_j,B_ext_j);
    hypre_ParCSRCommHandleDestroy(comm_handle);
+   comm_handle = NULL;
 
    if (data)
    {
       comm_handle = hypre_ParCSRCommHandleCreate(1,tmp_comm_pkg,B_int_data,
 						B_ext_data);
       hypre_ParCSRCommHandleDestroy(comm_handle);
+      comm_handle = NULL;
    }
 
    hypre_CSRMatrixI(B_ext) = B_ext_i;

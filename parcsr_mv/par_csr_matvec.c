@@ -96,10 +96,12 @@ hypre_ParCSRMatrixMatvec( double           alpha,
    hypre_CSRMatrixMatvec( alpha, diag, x_local, beta, y_local);
    
    hypre_ParCSRCommHandleDestroy(comm_handle);
+   comm_handle = NULL;
 	
    if (num_cols_offd) hypre_CSRMatrixMatvec( alpha, offd, x_tmp, 1.0, y_local);    
 
    hypre_VectorDestroy(x_tmp);
+   x_tmp = NULL;
    hypre_TFree(x_buf_data);
   
    return ierr;
@@ -188,6 +190,7 @@ hypre_ParCSRMatrixMatvecT( double           alpha,
    hypre_CSRMatrixMatvecT(alpha, diag, x_local, beta, y_local);
 
    hypre_ParCSRCommHandleDestroy(comm_handle);   
+   comm_handle = NULL;
 
    index = 0;
    for (i = 0; i < num_sends; i++)
@@ -199,6 +202,7 @@ hypre_ParCSRMatrixMatvecT( double           alpha,
    }
 	
    hypre_VectorDestroy(y_tmp);
+   y_tmp = NULL;
    hypre_TFree(y_buf_data);
 
    return ierr;
