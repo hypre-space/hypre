@@ -104,6 +104,7 @@ typedef struct HYPRE_LSI_MLI_Struct
    double   *nCoordinates_;       /* for storing nodal coordinates */
    double   *nullScales_;         /* scaling vector for null space */
    int      calibrationSize_;     /* for calibration smoothed aggregation */
+   double   Pweight_;
 } 
 HYPRE_LSI_MLI;
 
@@ -157,6 +158,7 @@ int HYPRE_LSI_MLICreate( MPI_Comm comm, HYPRE_Solver *solver )
    mli_object->nCoordAccept_        = 0;
    mli_object->nullScales_          = NULL;
    mli_object->calibrationSize_     = 0;
+   mli_object->Pweight_             = 1.333;
 #ifdef HAVE_MLI
    mli_object->mli_                 = NULL;
    mli_object->feData_              = NULL;
@@ -339,6 +341,8 @@ int HYPRE_LSI_MLISetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
 
    sprintf( paramString, "setMinCoarseSize %d", mli_object->minCoarseSize_ );
    method->setParams( paramString, 0, NULL );
+   sprintf( paramString, "setPweight %e", mli_object->Pweight_ );
+   method->setParams( paramString, 0, NULL );
 
    /* -------------------------------------------------------- */ 
    /* load calibration size                                    */
@@ -469,6 +473,7 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
          printf("\t      coarseSolver <Jacobi,GS,...> \n");
          printf("\t      numSweeps <d> \n");
          printf("\t      minCoarseSize <d> \n");
+         printf("\t      Pweight <f> \n");
          printf("\t      nodeDOF <d> \n");
          printf("\t      nullSpaceDim <d> \n");
          printf("\t      useNodalCoord <on,off> \n");
@@ -582,6 +587,12 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
       sscanf(paramString,"%s %s %d",param1,param2,
              &(mli_object->minCoarseSize_));
       if ( mli_object->minCoarseSize_ <= 0 ) mli_object->minCoarseSize_ = 20;
+   }
+   else if ( !strcmp(param2, "setPweight") )
+   {
+      sscanf(paramString,"%s %s %lg",param1,param2,
+             &(mli_object->Pweight_));
+      if ( mli_object->Pweight_ < 0. ) mli_object->Pweight_ = 1.333;
    }
    else if ( !strcmp(param2, "nodeDOF") )
    {

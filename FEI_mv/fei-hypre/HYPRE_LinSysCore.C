@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <iostream.h>
 #include <assert.h>
 #include <math.h>
 
@@ -2645,7 +2646,6 @@ int HYPRE_LinSysCore::setRHSID(int rhsID)
          return (0);
       }
    }
-
    printf("setRHSID ERROR : rhsID %d not found.\n", rhsID);
    exit(1);
    return (0);
@@ -3554,7 +3554,8 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
            {
               if ( mypid_ == 0 )
                 printf("***************************************************\n");
-              HYPRE_ParCSRGMRESSetLogging(HYSolver_, 1);
+              if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+                 HYPRE_ParCSRGMRESSetLogging(HYSolver_, 2);
            }
            HYPRE_ParCSRGMRESSetup(HYSolver_, A_csr, b_csr, x_csr);
            MPI_Barrier( comm_ );
