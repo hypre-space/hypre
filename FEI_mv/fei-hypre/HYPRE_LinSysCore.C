@@ -5530,7 +5530,7 @@ void HYPRE_LinSysCore::solveUsingSuperLU(int& status)
     nrows     = end_row - start_row + 1;
 
     nnz   = 0;
-    for ( i = start_row; i < end_row; i++ )
+    for ( i = start_row; i <= end_row; i++ )
     {
        HYPRE_ParCSRMatrixGetRow(A_csr,i,&rowSize,&colInd,&colVal);
        nnz += rowSize;
