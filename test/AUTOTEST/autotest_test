@@ -128,27 +128,25 @@ parse_arguments () {
   do
     argcur=$arg
     case $arg in
-      a) confbuildtest $OPTARG  " "             "default"   0 0 0 0 1 0 1;;
-      b) confbuildtest $OPTARG  "--with-babel"  "babel"     0 0 0 0 1 0 0;;
+      a) confbuildtest $OPTARG  " "             "default";;
+      b) confbuildtest $OPTARG  "--with-babel"  "babel";;
       c) build $Build "all++"   "all++"         "test";;
       D) DEBUG_MODE="yes";;
       d) build $Build "all"     "docs"          "docs";;
-      e) confbuildtest $OPTARG  "--enable-debug" "debug"    0 0 0 0 1 0 1;;
+      e) confbuildtest $OPTARG  "--enable-debug" "debug";;
       f) build $Build "all77"   "all77"         "test";;
       h) usage; exit 2;;
-      i) confbuildtest 1        "--enable-debug" "debug"    0 0 0 0 1 0 1
-         confbuildtest $OPTARG  "--with-insure" "insure"    0 0 0 0 1 0 1;;
-     +i) confbuildtest $OPTARG  "--with-insure-to-file" \
-                                                "insure"    0 0 0 0 1 0 1;;
-      l) confbuildtest $OPTARG  "--enable-shared" "shared"  0 0 0 0 1 0 1;;
+      i) confbuildtest 1        "--enable-debug" "debug"
+         confbuildtest $OPTARG  "--with-insure" "insure";;
+     +i) confbuildtest $OPTARG  "--with-insure-to-file" "insure";;
+      l) confbuildtest $OPTARG  "--enable-shared" "shared";;
       m) HYPRE_SEND_MAIL="no"; MailOpt=""; MailCmd="yes";;
      +m) HYPRE_SEND_MAIL="yes"; MailOpt="-mail"; MailCmd="yes";;
-      n) confbuildtest $Build   "--without-MPI" "no_mpi"    0 0 0 0 1 0 0;;
-      o) confbuildtest $OPTARG  "--with-openmp" "openmp"    0 0 0 0 1 0 1;;
+      n) confbuildtest $Build   "--without-MPI" "no_mpi";;
+      o) confbuildtest $OPTARG  "--with-openmp" "openmp";;
       p) HYPRE_DST_DIR=$OPTARG;;
       r) HYPRE_RUN_MACHINE=$OPTARG;;
-      s) confbuildtest $Build   "--with-strict-checking" \
-                                         "strict_checking"  0 0 0 0 1 0 0;;
+      s) confbuildtest $Build   "--with-strict-checking" "strict_checking";;
       v) HYPRE_MESSAGE=$OPTARG;;
       :) echo "$0: \"$argcur\" requires a value"; exit 2;;
      \?) echo "$0: INVALID option \"$argcur\" at $OPTIND"; exit 2;;
