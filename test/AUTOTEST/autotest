@@ -20,16 +20,16 @@ perform_test()
 {
   print_header
   echo "deleting old AUTOTEST directory...."
-  ssh ${HYPRE_COMPILE_MACHINE} "\
+  ${SSH_COMMAND} ${HYPRE_COMPILE_MACHINE} "\
     (\
         rm -fR ${HYPRE_REMOTE_DIR}/linear_solvers;\
     )"
 
   echo "copying new source...."
-  scp -pr linear_solvers ${HYPRE_COMPILE_MACHINE}:${HYPRE_REMOTE_DIR}
+  ${SCP_COMMAND} -pr linear_solvers ${HYPRE_COMPILE_MACHINE}:${HYPRE_REMOTE_DIR}
 
   echo "scheduling remote autotest...."
-  ssh -f ${HYPRE_COMPILE_MACHINE} "\
+  ${SSH_COMMAND} -f ${HYPRE_COMPILE_MACHINE} "\
     (\
         cd ${HYPRE_REMOTE_DIR};\
 	. linear_solvers/test/AUTOTEST/autotest_env;\
@@ -137,6 +137,9 @@ SUBMSG=""
 export SUBMSG
 HYPRE_MESSAGE=""
 export HYPRE_MESSAGE
+# OpenSSH to F-Secure communication for RSA authentication
+SSH_COMMND="ssh -1"
+SCP_COMMND="scp -q -oProtocol=1"
 
 #==============================================================================
 # Run test suites on remote machines
@@ -191,8 +194,9 @@ do
         HYPRE_REMOTE_DIR="/usr/casc/hypre/sparc-sun-solaris2.7/AUTOTEST"
 	HYPRE_MACHINE_COMMANDS="-m -t 1 -ns -a 2 -dcxfy"
         HYPRE_MESSAGE="SECONDARY (cc-5.0)"
-	print_header
-        ./autotest_test $HYPRE_MACHINE_COMMANDS
+###	print_header
+###     ./autotest_test $HYPRE_MACHINE_COMMANDS
+	perform_test
         shift;;
     -compass | -compassmp) # obsolute
         HYPRE_ARCH="dec"
@@ -244,10 +248,10 @@ do
         HYPRE_RUN_MACHINE="tux83"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST"
 	HYPRE_MACHINE_COMMANDS="-m -dt 1 -nsa 1 -cxfy -i 2"
-        HYPRE_MESSAGE="PRIMARY (insure++)"
-#	print_header
-#	./autotest_test $HYPRE_MACHINE_COMMANDS
-	perform_test
+        HYPRE_MESSAGE='PRIMARY (insure++)'
+ 	print_header
+ 	./autotest_test $HYPRE_MACHINE_COMMANDS
+###	perform_test
         shift;;
     -pengra)
         HYPRE_ARCH="linux"
@@ -255,7 +259,7 @@ do
         HYPRE_RUN_MACHINE="pengra"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/i686-pc-linux-gnu-pengra/AUTOTEST"
 	HYPRE_MACHINE_COMMANDS="-m -l -t 1 -ns -a 2 -dcxfy"
-        HYPRE_MESSAGE="OTHER (icc-6.0)"
+        HYPRE_MESSAGE='OTHER (icc-6.0)'
 	perform_test
         shift;;
     -purify)
@@ -264,9 +268,10 @@ do
         HYPRE_RUN_MACHINE="poincare"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/sparc-sun-solaris2.7/AUTOTEST"
 	HYPRE_MACHINE_COMMANDS="-m -dt 1 -nsa 1 -cxfy -q 2"
-        HYPRE_MESSAGE="SECONDARY"
-	print_header
-        ./autotest_test $HYPRE_MACHINE_COMMANDS
+        HYPRE_MESSAGE='SECONDARY (purify)'
+###     print_header
+###     ./autotest_test $HYPRE_MACHINE_COMMANDS
+	perform_test
         shift;;
     -red)
         HYPRE_ARCH="red"
@@ -319,8 +324,10 @@ do
         HYPRE_RUN_MACHINE="tux83"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST"
 	HYPRE_MACHINE_COMMANDS="-m -dt 1 -ns -a 2 -cxfy"
-        HYPRE_MESSAGE="PRIMARY"
-	perform_test
+        HYPRE_MESSAGE='PRIMARY'
+        print_header
+        ./autotest_test $HYPRE_MACHINE_COMMANDS
+###	perform_test
         shift;;
     -tux71)
         HYPRE_ARCH="linux"
@@ -328,7 +335,7 @@ do
         HYPRE_RUN_MACHINE="tux71"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/i686-pc-linux-gnu-gcc3.3/AUTOTEST"
 	HYPRE_MACHINE_COMMANDS="-m -dt 1 -n -a 2 -cxfy"
-        HYPRE_MESSAGE="SECONDARY (gcc-3.3)"
+        HYPRE_MESSAGE='SECONDARY (gcc-3.3)'
 	perform_test
         shift;;
     -tux)
@@ -337,7 +344,7 @@ do
         HYPRE_RUN_MACHINE="tux83"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/i686-pc-linux-gnu-pgi3.3/AUTOTEST"
 	HYPRE_MACHINE_COMMANDS="-m -dt 1 -ns -a 2 -cxfy"
-        HYPRE_MESSAGE="SECONDARY (pgi-3.3)"
+        HYPRE_MESSAGE='SECONDARY (pgi-3.3)'
 	perform_test
         shift;;
     -vivid)
