@@ -448,7 +448,6 @@ function StartCrunch
 }
 
 # main
-. ./AUTOTEST/hypre_arch.sh
 while [ "$*" ]
 do case $1 in
     -h|-help)
