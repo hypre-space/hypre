@@ -19,8 +19,7 @@ perform_test()
   echo "creating new AUTOTEST directory...."
   ssh ${HYPRE_COMPILE_MACHINE} "\
     (\
-        rm -fR ${HYPRE_REMOTE_DIR};\
-        mkdir ${HYPRE_REMOTE_DIR}\
+        rm -fR ${HYPRE_REMOTE_DIR}/linear_solvers;\
     )"
 
   echo "copying new source...."
@@ -33,8 +32,8 @@ perform_test()
 	. linear_solvers/test/autotest_env;\
 	[ -f linear_solvers/test/env.${HYPRE_ARCH} ] && . linear_solvers/test/env.${HYPRE_ARCH};\
         . linear_solvers/test/autotest_test ${HYPRE_MACHINE_COMMANDS};\
-        chgrp -fR hypre linear_solvers\
-        chmod -R a+rX,u+w,go-w linear_solvers;\
+        chgrp -fR hypre ${HYPRE_REMOTE_DIR};\
+        chmod -R a+rX,u+w,go-w ${HYPRE_REMOTE_DIR};\
     )"
   echo "finished autotest...."
 }
@@ -76,6 +75,14 @@ do
         HYPRE_COMPILE_MACHINE="blue"
         HYPRE_RUN_MACHINE="blue"
         HYPRE_REMOTE_DIR="/usr/gapps/hypre/powerpc-ibm-aix4.3.3.0/AUTOTEST"
+	HYPRE_MACHINE_COMMANDS="-m -a 2 -cf -o 1"
+	perform_test
+        shift;;
+    -frost)
+        HYPRE_ARCH="blue"
+        HYPRE_COMPILE_MACHINE="frost"
+        HYPRE_RUN_MACHINE="frost"
+        HYPRE_REMOTE_DIR="/usr/gapps/hypre/powerpcll-ibm-aix4.3.3.0/AUTOTEST"
 	HYPRE_MACHINE_COMMANDS="-m -a 2 -cf -o 1"
 	perform_test
         shift;;
