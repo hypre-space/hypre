@@ -44,6 +44,7 @@ ij_LDADD = \
  -lHYPRE_seq_mv\
  -lHYPRE_krylov\
  -lHYPRE_utilities\
+ $(LAPACKLIBFLAGS)\
  $(BLASLIBFLAGS)\
  $(LIBM)
 ij_mv_LDADD = \
@@ -59,6 +60,7 @@ ij_mv_LDADD = \
  -lHYPRE_seq_mv\
  -lHYPRE_krylov\
  -lHYPRE_utilities\
+ $(LAPACKLIBFLAGS)\
  $(BLASLIBFLAGS)\
  $(LIBM)
 new_ij_LDADD = \
@@ -74,6 +76,7 @@ new_ij_LDADD = \
  -lHYPRE_seq_mv\
  -lHYPRE_krylov\
  -lHYPRE_utilities\
+ $(LAPACKLIBFLAGS)\
  $(BLASLIBFLAGS)\
  $(LIBM)
 sstruct_LDADD = \
@@ -93,6 +96,7 @@ sstruct_LDADD = \
  -lHYPRE_seq_mv\
  -lHYPRE_krylov\
  -lHYPRE_utilities\
+ $(LAPACKLIBFLAGS)\
  $(BLASLIBFLAGS)\
  $(LIBM)
 struct_LDADD = \
@@ -156,6 +160,7 @@ f77_ij_LDADD = \
  -lHYPRE_seq_mv\
  -lHYPRE_krylov\
  -lHYPRE_utilities\
+ $(LAPACKLIBFLAGS)\
  $(BLASLIBFLAGS)\
  @FLIBS@\
  $(LIBM)
@@ -173,6 +178,7 @@ f77_ij_b_LDADD = \
  -lHYPRE_seq_mv\
  -lHYPRE_krylov\
  -lHYPRE_utilities\
+ $(LAPACKLIBFLAGS)\
  $(BLASLIBFLAGS)\
  @FLIBS@\
  $(LIBM)
@@ -189,6 +195,7 @@ f77_ij_mv_LDADD = \
  -lHYPRE_seq_mv\
  -lHYPRE_krylov\
  -lHYPRE_utilities\
+ $(LAPACKLIBFLAGS)\
  $(BLASLIBFLAGS)\
  @FLIBS@\
  $(LIBM)
@@ -211,6 +218,7 @@ fei_LDADD = \
  -L$(libdir)\
  -lHYPRE_LSI\
  -lHYPRE_superlu\
+ $(LAPACKLIBFLAGS)\
  $(BLASLIBFLAGS)\
  $(LIBM)
 ij_b_LDADD = \
@@ -227,6 +235,7 @@ ij_b_LDADD = \
  -lHYPRE_seq_mv\
  -lHYPRE_krylov\
  -lHYPRE_utilities\
+ $(LAPACKLIBFLAGS)\
  $(BLASLIBFLAGS)\
  $(LIBM)
 #struct_b_LDADD = \
@@ -249,6 +258,7 @@ ij_C___LDADD = \
  -lHYPRE_seq_mv\
  -lHYPRE_krylov\
  -lHYPRE_utilities\
+ $(LAPACKLIBFLAGS)\
  $(BLASLIBFLAGS)\
  $(LIBM)
 ij_mv_C___LDADD = \
@@ -264,6 +274,7 @@ ij_mv_C___LDADD = \
  -lHYPRE_seq_mv\
  -lHYPRE_krylov\
  -lHYPRE_utilities\
+ $(LAPACKLIBFLAGS)\
  $(BLASLIBFLAGS)\
  $(LIBM)
 new_ij_C___LDADD = \
@@ -279,6 +290,7 @@ new_ij_C___LDADD = \
  -lHYPRE_seq_mv\
  -lHYPRE_krylov\
  -lHYPRE_utilities\
+ $(LAPACKLIBFLAGS)\
  $(BLASLIBFLAGS)\
  $(LIBM)
 sstruct_C___LDADD = \
@@ -298,6 +310,7 @@ sstruct_C___LDADD = \
  -lHYPRE_seq_mv\
  -lHYPRE_krylov\
  -lHYPRE_utilities\
+ $(LAPACKLIBFLAGS)\
  $(BLASLIBFLAGS)\
  $(LIBM)
 struct_C___LDADD = \
