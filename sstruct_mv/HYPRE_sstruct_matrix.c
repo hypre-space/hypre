@@ -393,6 +393,98 @@ HYPRE_SStructMatrixSetBoxValues( HYPRE_SStructMatrix  matrix,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
+int
+HYPRE_SStructMatrixGetValues( HYPRE_SStructMatrix  matrix,
+                              int                  part,
+                              int                 *index,
+                              int                  var,
+                              int                  nentries,
+                              int                 *entries,
+                              double              *values )
+{
+   int ierr = 0;
+   int                   ndim  = hypre_SStructMatrixNDim(matrix);
+   int                  *Sentries;
+   int                  *Uentries;
+   int                   nSentries;
+   int                   nUentries;
+   hypre_SStructPMatrix *pmatrix;
+   hypre_Index           cindex;
+
+   hypre_SStructMatrixSplitEntries(matrix, part, var, nentries, entries,
+                                   &nSentries, &Sentries,
+                                   &nUentries, &Uentries);
+
+   hypre_CopyToCleanIndex(index, ndim, cindex);
+
+   /* S-matrix */
+   if (nSentries > 0)
+   {
+      pmatrix = hypre_SStructMatrixPMatrix(matrix, part);
+      hypre_SStructPMatrixSetValues(pmatrix, cindex, var,
+                                    nSentries, Sentries, values, -1);
+   }
+   /* U-matrix */
+   if (nUentries > 0)
+   {
+      hypre_SStructUMatrixSetValues(matrix, part, cindex, var,
+                                    nUentries, Uentries, values, -1);
+   }
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_SStructMatrixGetBoxValues( HYPRE_SStructMatrix  matrix,
+                                 int                  part,
+                                 int                 *ilower,
+                                 int                 *iupper,
+                                 int                  var,
+                                 int                  nentries,
+                                 int                 *entries,
+                                 double              *values )
+{
+   int ierr = 0;
+   int                   ndim  = hypre_SStructMatrixNDim(matrix);
+   int                  *Sentries;
+   int                  *Uentries;
+   int                   nSentries;
+   int                   nUentries;
+   hypre_SStructPMatrix *pmatrix;
+   hypre_Index           cilower;
+   hypre_Index           ciupper;
+   int                   action;
+
+   hypre_SStructMatrixSplitEntries(matrix, part, var, nentries, entries,
+                                   &nSentries, &Sentries,
+                                   &nUentries, &Uentries);
+
+   hypre_CopyToCleanIndex(ilower, ndim, cilower);
+   hypre_CopyToCleanIndex(iupper, ndim, ciupper);
+
+   action= -2;   /* action < -1: get values */
+   /* S-matrix */
+   if (nSentries > 0)
+   {
+      pmatrix = hypre_SStructMatrixPMatrix(matrix, part);
+      hypre_SStructPMatrixSetBoxValues(pmatrix, cilower, ciupper, var,
+                                       nSentries, Sentries, values, action);
+   }
+   /* U-matrix */
+   if (nUentries > 0)
+   {
+      hypre_SStructUMatrixSetBoxValues(matrix, part, cilower, ciupper, var,
+                                       nUentries, Uentries, values, action);
+   }
+
+   return ierr;
+}
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
 int 
 HYPRE_SStructMatrixAddToValues( HYPRE_SStructMatrix  matrix,
                                 int                  part,
