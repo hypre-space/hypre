@@ -9,7 +9,7 @@
  */
 #include <math.h>
 #include "dsp_defs.h"
-#include "util.h"
+#include "superlu_util.h"
 
 double
 dPivotGrowth(int ncols, SuperMatrix *A, int *perm_c, 

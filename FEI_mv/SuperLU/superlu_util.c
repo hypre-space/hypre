@@ -22,7 +22,7 @@
 #include <math.h>
 #include <HYPRE_config.h>
 #include "dsp_defs.h"
-#include "util.h"
+#include "superlu_util.h"
 
 /* 
  * Global statistics variale

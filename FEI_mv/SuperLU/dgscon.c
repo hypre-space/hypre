@@ -12,7 +12,7 @@
  * History:     Modified from lapack routines DGECON.
  */
 #include <math.h>
-#include "util.h"
+#include "superlu_util.h"
 #include "dsp_defs.h"
 
 void

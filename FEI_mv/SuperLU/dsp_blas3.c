@@ -13,7 +13,7 @@
  */
 
 #include "dsp_defs.h"
-#include "util.h"
+#include "superlu_util.h"
 
 int
 sp_dgemm(char *transa, char *transb, int m, int n, int k, 

@@ -6,7 +6,7 @@
  *
  */
 #include "supermatrix.h"
-#include "util.h"
+#include "superlu_util.h"
 #include "colamd.h"
 
 extern int  genmmd_(int *, int *, int *, int *, int *, int *, int *, 

@@ -13,7 +13,7 @@
  */
 #include <math.h>
 #include "dsp_defs.h"
-#include "util.h"
+#include "superlu_util.h"
 
 void
 dgsrfs(char *trans, SuperMatrix *A, SuperMatrix *L, SuperMatrix *U,

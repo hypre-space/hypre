@@ -13,7 +13,7 @@
  */
 #include <math.h>
 #include "dsp_defs.h"
-#include "util.h"
+#include "superlu_util.h"
 
 void
 dlaqgs(SuperMatrix *A, double *r, double *c, 

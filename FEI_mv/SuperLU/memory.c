@@ -8,7 +8,7 @@
 /** Precision-independent memory-related routines.
     (Shared by [sdcz]memory.c) **/
 
-#include "util.h"
+#include "superlu_util.h"
 
 /*
  * Set up pointers for integer working arrays.

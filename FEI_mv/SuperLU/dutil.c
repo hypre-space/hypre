@@ -22,7 +22,7 @@
 
 #include <math.h>
 #include "dsp_defs.h"
-#include "util.h"
+#include "superlu_util.h"
 
 void
 dCreate_CompCol_Matrix(SuperMatrix *A, int m, int n, int nnz, 

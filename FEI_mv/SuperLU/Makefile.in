@@ -42,7 +42,7 @@ HEADERS =\
  colamd.h \
  dsp_defs.h \
  supermatrix.h \
- util.h
+ superlu_util.h
 
 FILES =\
  colamd.c \
@@ -79,7 +79,7 @@ FILES =\
  sp_ienv.c \
  sp_preorder.c \
  superlu_timer.c \
- util.c
+ superlu_util.c
 
 OBJS = ${FILES:.c=.o}
 

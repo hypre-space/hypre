@@ -21,7 +21,7 @@
 */
 
 #include "dsp_defs.h"
-#include "util.h"
+#include "superlu_util.h"
 
 void
 dgstrf (char *refact, SuperMatrix *A, double diag_pivot_thresh, 

@@ -8,7 +8,7 @@
  *
  */
 #include "dsp_defs.h"
-#include "util.h"
+#include "superlu_util.h"
 
 void
 dgssv(SuperMatrix *A, int *perm_c, int *perm_r, SuperMatrix *L,

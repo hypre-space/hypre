@@ -1,6 +1,6 @@
 #include "dsp_defs.h"
 #include "supermatrix.h"
-#include "util.h"
+#include "superlu_util.h"
 
 void
 sp_preorder(char *refact,  SuperMatrix *A, int *perm_c, 
