@@ -47,8 +47,26 @@ manual.
 
 \section{IJ Matrix Interface}
 
-Following are examples of function calls necessary for use of the
-IJ matrix interface.  The variables and parameters in the
+\subsection{Creation and destruction of interface object}
+
+An IJ matrix interface object can be created and destroyed with
+the following functions;
+\begin{verbatim}
+  int HYPRE_IJMatrixCreate(MPI_Comm *communicator,
+                           HYPRE_IJMatrix **ij_matrix,
+                           int global_m, int global_n);
+
+  int HYPRE_IJMatrixDestroy(HYPRE_IJMatrix *ij_matrix);
+\end{verbatim}
+\noindent The \verb+MPI_Comm+ pointer \verb+communicator+
+points to interprocessor communication information needed by MPI.
+Integers \verb+global_m+ and \verb+global_n+ specify the global
+number of rows and columns in the coefficient matrix, over all processors.
+
+\subsection{Typical implementation}
+
+Following are example uses of the IJ matrix interface functions.
+Variables and parameters in the
 function calls would be associated with the following declarations:
 
 \begin{verbatim}
@@ -63,24 +81,6 @@ function calls would be associated with the following declarations:
 \noindent In reference to a row, variable \verb+num_cols+ specifies
 the number of columns with nonzero entries.
 Integer \verb+ierr+ carries program error state information. 
-
-\subsection{Creation and destruction of interface object}
-
-An IJ matrix interface object can be created and destroyed as
-follows:
-\begin{verbatim}
-  ierr = HYPRE_IJMatrixCreate(communicator, &ij_matrix,
-                              global_m, global_n);
-
-  ierr = HYPRE_IJMatrixDestroy(ij_matrix);
-\end{verbatim}
-\noindent The \verb+MPI_Comm+ variable \verb+communicator+
-is used to carry
-interprocessor communication information needed by MPI.
-Integers \verb+global_m+ and \verb+global_n+ specify the global
-number of rows and columns in the coefficient matrix, over all processors.
-
-\subsection{Typical implementation}
 
 \begin{verbatim}
   ierr = HYPRE_IJMatrixCreate(communicator, &ij_matrix_ptr,
@@ -124,6 +124,26 @@ object are solved after this point.  After solution, the
 
 \section{IJ Vector Interface}
 
+\subsection{Creation and destruction of interface object}
+
+An IJ vector interface object can be created and destroyed with
+the following functions;
+\begin{verbatim}
+   int HYPRE_IJVectorCreate(MPI_Comm *communicator,
+                            HYPRE_IJVector **ij_x,
+                            int global_m);
+
+   int HYPRE_IJVectorDestroy(HYPRE_IJVector *ij_x);
+\end{verbatim}
+
+\noindent As expected, the global number of components of the
+vector is the same as the global number of rows in the matrix,
+\verb+global_m+.
+Similarly for the right-hand side IJ vector object to a linear
+system.
+
+\subsection{Typical setup of right-hand side and solution vectors}
+
 Following are examples of function calls necessary for use of the
 IJ vector interface.  The variables and parameters in the
 function calls would be associated with the following declarations:
@@ -140,24 +160,6 @@ function calls would be associated with the following declarations:
 \noindent Integers \verb+domain_pt_start+ and \verb+next_domain_pt_start+
 specify the global indices of the first unknown on the local processor
 and on the next processor in the domain decomposition, respectively.
-
-\subsection{Creation and destruction of interface object}
-
-An IJ vector object for the solution can be created and destroyed
-as follows:
-\begin{verbatim}
-   ierr = HYPRE_IJVectorCreate(communicator, &ij_x, global_m);
-
-   ierr = HYPRE_IJVectorDestroy(ij_x);
-\end{verbatim}
-
-\noindent As expected, the global number of components of the
-vector is the same as the global number of rows in the matrix,
-\verb+global_m+.
-Similarly for the right-hand side IJ vector object to a linear
-system.
-
-\subsection{Typical setup of right-hand side and solution vectors}
 
 \begin{verbatim}
    ierr = HYPRE_IJVectorCreate(communicator, ij_b, global_m);
@@ -228,35 +230,35 @@ and \verb+glob_vec_index_stop+ \verb+=+\verb+next_domain_pt_start-1+.
 \begin{figure}
 \label{loc_comps_blk}
 \centerline{\epsfig{figure=loc_cmps_blk.eps,height=2.5in}}
-\parbox{6in}{\hspace{1in}
-             {\tt ierr = HYPRE\_IJVectorSetLocalComponentsInBlock(ij\_vec,}}
-\parbox{6in}{\hspace{2.5in}
-             {\tt glob\_vec\_index\_start, glob\_vec\_index\_stop,}}
-\parbox{6in}{\hspace{2.5in}
-             {\tt value\_indices, values);}}
+\parbox{6.5in}{\hspace{1in}
+  {\tt int HYPRE\_IJVectorSetLocalComponentsInBlock(HYPRE\_IJVector *ij\_vec,}}
+\parbox{6.5in}{\hspace{2in}
+  {\tt int glob\_vec\_index\_start, int glob\_vec\_index\_stop,}}
+\parbox{6.5in}{\hspace{2in}
+  {\tt int *value\_indices, double *values);}}
 \caption{Mapping between external array values and
-    internal vector data for
-    {\tt HYPRE\_IJVectorSet\linebreak[0]LocalComponentsInBlock}
-    (rightward arrows) and
-    {\tt HYPRE\_IJVectorGet\linebreak[0]LocalComponentsInBlock}
-    (leftward arrows)}
+  internal vector data for
+  {\tt HYPRE\_IJVectorSet\linebreak[0]LocalComponentsInBlock}
+  (rightward arrows) and
+  {\tt HYPRE\_IJVectorGet\linebreak[0]LocalComponentsInBlock}
+  (leftward arrows)}
 \end{figure}
 
-\begin{figure}[b]
+\begin{figure}
 \label{loc_comps}
 \centerline{\epsfig{figure=loc_cmps.eps,height=2.4in}}
-\parbox{6in}{\hspace{1in}
-             {\tt ierr = HYPRE\_IJVectorSetLocalComponents(ij\_vec,}}
-\parbox{6in}{\hspace{2.5in}
-             {\tt num\_values, glob\_vec\_indices,}}
-\parbox{6in}{\hspace{2.5in}
-             {\tt value\_indices, values);}}
+\parbox{6.5in}{\hspace{1in}
+   {\tt int HYPRE\_IJVectorSetLocalComponents(HYPRE\_IJVector *ij\_vec,}}
+\parbox{6.5in}{\hspace{2in}
+   {\tt int num\_values, int *glob\_vec\_indices,}}
+\parbox{6.5in}{\hspace{2in}
+   {\tt int *value\_indices, double *values);}}
 \caption{Mapping between external array values and
-    internal vector data for
-    {\tt HYPRE\_IJVectorSet\linebreak[0]LocalComponents}
-    (rightward arrows) and
-    {\tt HYPRE\_IJVectorGet\linebreak[0]LocalComponents}
-    (leftward arrows)}
+   internal vector data for
+   {\tt HYPRE\_IJVectorSet\linebreak[0]LocalComponents}
+   (rightward arrows) and
+   {\tt HYPRE\_IJVectorGet\linebreak[0]LocalComponents}
+   (leftward arrows)}
 \end{figure}
 
 One can also add to vector components that are already set, in
