@@ -171,26 +171,27 @@ usage () {
 #=============================================================================
 
 mail_summary () {
+  echo "Autotest mailing error summary"
   CTOTCNT=0; ETOTCNT=0
   CLOGCNT=0; ELOGCNT=0
   CERRCNT=0; EERRCNT=0; TOTCNT=0
   CLIST=""; ELIST=""
-  SUMFILE="autotest.${HYPRE_RUN_MACHINE}.sum"
   cd $HYPRE_AUTOTEST_DIR
-  echo "Autotest mailing error summary"
-  printf "\n" > $SUMFILE
+  SUMFILE="autotest.$HYPRE_ARCH.$(date '+%Y%m%d')"
+  printf "--------------------------------------------\n" > $SUMFILE
   printf "Autotest error summary for `date`\n" >> $SUMFILE
-  printf "Target architecure=$HYPRE_ARCH\n" >> $SUMFILE
-  printf "Compile machine=$HYPRE_COMPILE_MACHINE\n" >> $SUMFILE
-  printf "Execute machine=$HYPRE_RUN_MACHINE\n" >> $SUMFILE
-  printf "Directory=${HYPRE_AUTOTEST_DIR}\n" >> $SUMFILE
-  printf "\n" >> $SUMFILE
+  printf "Target architecure: $HYPRE_ARCH\n" >> $SUMFILE
+  printf "Compile machine:    $HYPRE_COMPILE_MACHINE\n" >> $SUMFILE
+  printf "Execute machine:    $HYPRE_RUN_MACHINE\n" >> $SUMFILE
+  printf "Directory:          ${HYPRE_AUTOTEST_DIR}\n" >> $SUMFILE
+  printf "--------------------------------------------\n" >> $SUMFILE
   printf "Compile summary:\n" >> $SUMFILE
   for ConfOpt in default beta no_mpi openmp petac \
            pthreads purify strict_checking \
            docs all++ all77 beta++ beta77
   do
-    printf "$ConfOpt\t" >> $SUMFILE
+    printf "%-15s: " $ConfOpt >> $SUMFILE
+    COLFLG=0; COLCNT=0;
     for MakeOpt in ""  all beta configure IJ fei++ fei nofei sstruct struct
     do
       FILE=autotest.$ConfOpt.$MakeOpt
@@ -204,61 +205,74 @@ mail_summary () {
           EFILE=${i%%log}err
           if test -s "${EFILE}"
           then
-            printf "  O  " >> $SUMFILE
             TOTCNT=`expr $TOTCNT + 1`
             CERRCNT=`expr $CERRCNT + 1`
+            COLCNT=`expr $COLCNT + 1`
             CLIST="${CLIST}${EFILE}\n"
           else
-            printf "  +  " >> $SUMFILE
             CLOGCNT=`expr $CLOGCNT + 1`
+            COLFLG=`expr $COLFLG + 1`
           fi
         fi
       done
     done
-    printf "\n" >> $SUMFILE
+    if [ "$COLCNT" != "0" ] ; then
+      printf "Failed\n" >> $SUMFILE
+    elif [ "$COLFLG" != "0" ] ; then
+      printf "Passed\n" >> $SUMFILE
+    else
+      printf "N/A\n" >> $SUMFILE
+    fi
   done
   printf "\n" >> $SUMFILE
-  printf "$CTOTCNT total test performed\n" >> $SUMFILE
-  printf "$CERRCNT test failed\n" >> $SUMFILE
-  printf "$CLOGCNT test succeeded\n" >> $SUMFILE
+  printf "%2d %s\n" $CERRCNT "test failed" >> $SUMFILE
+  printf "%2d %s\n" $CLOGCNT "test succeeded" >> $SUMFILE
+  printf "%2d %s\n" $CTOTCNT "test total" >> $SUMFILE
   if [ "$CLIST" != "" ]
   then
     printf "non zero error log file(s):\n" >> $SUMFILE
-    printf "${CLIST}\n" >> $SUMFILE
+    printf "${CLIST}" >> $SUMFILE
   fi
-  printf "\n" >> $SUMFILE
+  printf "--------------------------------------------\n" >> $SUMFILE
   printf "Execute summary:\n" >> $SUMFILE
   for i in IJ fei sstruct struct
   do
     LFILE=${SRC}/test/${i}_linear_solvers.log
     if test -r "${LFILE}"
     then
-      printf "$i\t" >> $SUMFILE
+      printf "%-15s: " $i >> $SUMFILE
+      COLFLG=0; COLCNT=0;
       ETOTCNT=`expr $ETOTCNT + 1`
       EFILE=${SRC}/test/${i}_linear_solvers.err
       if test -s "${EFILE}"
       then
-        printf "  O  " >> $SUMFILE
         TOTCNT=`expr $TOTCNT + 1`
         EERRCNT=`expr $EERRCNT + 1`
+        COLCNT=`expr $COLCNT + 1`
         ELIST="${ELIST}${EFILE}\n"
       else
-        printf "  +  " >> $SUMFILE
         ELOGCNT=`expr $ELOGCNT + 1`
+        COLFLG=`expr $COLFLG + 1`
       fi
-      printf "\n" >> $SUMFILE
+      if [ "$COLCNT" != "0" ] ; then
+        printf "Failed\n" >> $SUMFILE
+      elif [ "$COLFLG" != "0" ] ; then
+        printf "Passed\n" >> $SUMFILE
+      else
+        printf "N/A\n" >> $SUMFILE
+      fi
     fi
   done
   printf "\n" >> $SUMFILE
-  printf "$ETOTCNT total test performed\n" >> $SUMFILE
-  printf "$EERRCNT test failed\n" >> $SUMFILE
-  printf "$ELOGCNT test succeeded\n" >> $SUMFILE
+  printf "%2d %s\n" $EERRCNT "test failed" >> $SUMFILE
+  printf "%2d %s\n" $ELOGCNT "test succeeded" >> $SUMFILE
+  printf "%2d %s\n" $ETOTCNT "test total" >> $SUMFILE
   if [ "$ELIST" != "" ]
   then
     printf "non zero error log file(s):\n" >> $SUMFILE
-    printf "${ELIST}\n" >> $SUMFILE
+    printf "${ELIST}" >> $SUMFILE
   fi
-  printf "\n" >> $SUMFILE
+  printf "--------------------------------------------\n" >> $SUMFILE
   if [ "$TOTCNT" = "0" ]
   then
     SUBJECT="Autotest NO Errors ($HYPRE_ARCH)"
