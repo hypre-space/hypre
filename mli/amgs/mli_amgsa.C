@@ -30,7 +30,7 @@ MLI_AMGSA::MLI_AMGSA( MPI_Comm comm )
    curr_level        = 0;
    output_level      = 1;
    node_dofs         = 3;
-   threshold         = 0.08;
+   threshold         = 0.0;
    nullspace_dim     = 3;
    nullspace_vec     = NULL;
    P_weight          = 4.0/3.0;
@@ -41,7 +41,7 @@ MLI_AMGSA::MLI_AMGSA( MPI_Comm comm )
    spectral_norms    = new double[40]; /* calculated max eigen   */
    for ( int k = 0; k < 40; k++ ) spectral_norms[k] = 0.0;
    calc_norm_scheme  = 0;              /* use matrix rowsum norm */
-   min_coarse_size   = 20;             /* smallest coarse grid   */
+   min_coarse_size   = 5;              /* smallest coarse grid   */
    coarsen_scheme    = MLI_AMGSA_LOCAL;
    pre_smoother      = MLI_SOLVER_JACOBI_ID;
    postsmoother      = MLI_SOLVER_JACOBI_ID;
@@ -374,6 +374,7 @@ int MLI_AMGSA::genMLStructure( MLI *mli )
          printf("\t-------------------------------------------------------------\n");
       }
       curr_level   = level;
+      if ( level == num_levels-1 ) break;
       single_level = mli->getOneLevelObject( level );
       next_level   = mli->getOneLevelObject( level+1 );
 
@@ -441,6 +442,7 @@ int MLI_AMGSA::genMLStructure( MLI *mli )
 
    // ----- set the coarse grid solver 
 
+   if ( mypid == 0 && output_level > 0 ) printf("Coarse level = %d\n", level);
    if (coarse_solver == MLI_SOLVER_MLS_ID) coarse_solver_wgt[0] = max_eigen;
    csolve_ptr = MLI_Solver_Construct(coarse_solver);
    targv[0] = (char *) &coarse_solver_num;
