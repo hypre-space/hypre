@@ -43,6 +43,14 @@ hypre_InitializeCommunication( int 	      job,
       		MPI_Irecv(&recv_data[vec_start], vec_len, MPI_DOUBLE,
 			ip, 0, comm, &requests[j++]);
    	}
+   	for (i = 0; i < num_sends; i++)
+   	{
+	    vec_start = hypre_CommPkgSendMapStart(comm_pkg, i);
+	    vec_len = hypre_CommPkgSendMapStart(comm_pkg, i+1)-vec_start;
+      	    ip = hypre_CommPkgSendProc(comm_pkg, i); 
+   	    MPI_Isend(&send_data[vec_start], vec_len, MPI_DOUBLE,
+			ip, 0, comm, &requests[j++]);
+   	}
 	break;
    }
    case  2:
@@ -55,36 +63,6 @@ hypre_InitializeCommunication( int 	      job,
    	    MPI_Irecv(&recv_data[vec_start], vec_len, MPI_DOUBLE,
 			ip, 0, comm, &requests[j++]);
    	}
-	break;
-   }
-   default :
-   {
-   	for (i = 0; i < num_recvs; i++)
-   	{
-      		ip = hypre_CommPkgRecvProc(comm_pkg, i); 
-      		MPI_Irecv(MPI_BOTTOM, 1, 
-                	hypre_CommPkgRecvMPIType(comm_pkg, ip), 
-			ip, 0, comm, &requests[j++]);
-   	}
-	break;
-   }
-   }
-   switch (job)
-   {
-   case  1 :
-   {
-   	for (i = 0; i < num_sends; i++)
-   	{
-	    vec_start = hypre_CommPkgSendMapStart(comm_pkg, i);
-	    vec_len = hypre_CommPkgSendMapStart(comm_pkg, i+1)-vec_start;
-      	    ip = hypre_CommPkgSendProc(comm_pkg, i); 
-   	    MPI_Isend(&send_data[vec_start], vec_len, MPI_DOUBLE,
-			ip, 0, comm, &requests[j++]);
-   	}
-	break;
-   }
-   case  2 :
-   {
    	for (i = 0; i < num_recvs; i++)
    	{
       		ip = hypre_CommPkgRecvProc(comm_pkg, i); 
@@ -97,11 +75,18 @@ hypre_InitializeCommunication( int 	      job,
    }
    default :
    {
+   	for (i = 0; i < num_recvs; i++)
+   	{
+      		ip = hypre_CommPkgRecvProc(comm_pkg, i); 
+      		MPI_Irecv(MPI_BOTTOM, 1, 
+                	hypre_CommPkgRecvMPIType(comm_pkg, i), 
+			ip, 0, comm, &requests[j++]);
+   	}
    	for (i = 0; i < num_sends; i++)
    	{
       		ip = hypre_CommPkgSendProc(comm_pkg, i); 
       		MPI_Isend(MPI_BOTTOM, 1, 
-                	hypre_CommPkgSendMPIType(comm_pkg, num_recvs), 
+                	hypre_CommPkgSendMPIType(comm_pkg, i), 
 			ip, 0, comm, &requests[j++]);
    	}
 	break;
