@@ -245,12 +245,15 @@ if (num_procs > 1)
             }
          }
 
-         for (jj = S_offd_i[i]; jj < S_offd_i[i+1]; jj++)
+         if (num_cols_S_offd)
          {
-            i1 = S_offd_j[jj];           
-            if (CF_marker_offd[i1] >= 0)
+            for (jj = S_offd_i[i]; jj < S_offd_i[i+1]; jj++)
             {
-               jj_counter_offd++;
+               i1 = S_offd_j[jj];           
+               if (CF_marker_offd[i1] >= 0)
+               {
+                  jj_counter_offd++;
+               }
             }
          }
       }
@@ -388,32 +391,35 @@ if (num_procs > 1)
          P_offd_i[i] = jj_counter_offd;
          jj_begin_row_offd = jj_counter_offd;
 
-         for (jj = S_offd_i[i]; jj < S_offd_i[i+1]; jj++)
+         if (num_cols_S_offd)
          {
-            i1 = S_offd_j[jj];   
-
-            /*--------------------------------------------------------------
-             * If neighbor i1 is a C-point, set column number in P_offd_j
-             * and initialize interpolation weight to zero.
-             *--------------------------------------------------------------*/
-
-            if (CF_marker_offd[i1] >= 0)
+            for (jj = S_offd_i[i]; jj < S_offd_i[i+1]; jj++)
             {
-               P_marker_offd[i1] = jj_counter_offd;
-               P_offd_j[jj_counter_offd]  = fine_to_coarse_offd[i1];
-               P_offd_data[jj_counter_offd] = zero;
-               jj_counter_offd++;
+               i1 = S_offd_j[jj];   
+
+               /*--------------------------------------------------------------
+                * If neighbor i1 is a C-point, set column number in P_offd_j
+                * and initialize interpolation weight to zero.
+                *--------------------------------------------------------------*/
+
+               if (CF_marker_offd[i1] >= 0)
+               {
+                  P_marker_offd[i1] = jj_counter_offd;
+                  P_offd_j[jj_counter_offd]  = fine_to_coarse_offd[i1];
+                  P_offd_data[jj_counter_offd] = zero;
+                  jj_counter_offd++;
+               }
+
+               /*--------------------------------------------------------------
+                * If neighbor i1 is an F-point, mark it as a strong F-point
+                * whose connection needs to be distributed.
+                *--------------------------------------------------------------*/
+
+               else
+               {
+                  P_marker_offd[i1] = strong_f_marker;
+               }            
             }
-
-            /*--------------------------------------------------------------
-             * If neighbor i1 is an F-point, mark it as a strong F-point
-             * whose connection needs to be distributed.
-             *--------------------------------------------------------------*/
-
-            else
-            {
-               P_marker_offd[i1] = strong_f_marker;
-            }            
          }
       
          jj_end_row_offd = jj_counter_offd;
@@ -462,15 +468,18 @@ if (num_procs > 1)
                   }
                }
 
-               /* Off-Diagonal block part of row i1 */               
-               for (jj1 = A_offd_i[i1]; jj1 < A_offd_i[i1+1]; jj1++)
-               {
-                  i2 = A_offd_j[jj1];
-                  if (P_marker_offd[i2] >= jj_begin_row_offd)
+               /* Off-Diagonal block part of row i1 */  
+               if (num_cols_A_offd)
+               {             
+                  for (jj1 = A_offd_i[i1]; jj1 < A_offd_i[i1+1]; jj1++)
                   {
-                     sum += A_offd_data[jj1];
-                  }
-               } 
+                     i2 = A_offd_j[jj1];
+                     if (P_marker_offd[i2] >= jj_begin_row_offd)
+                     {
+                        sum += A_offd_data[jj1];
+                     }
+                  } 
+               }
 
                distribute = A_diag_data[jj] / sum;
                
@@ -490,13 +499,16 @@ if (num_procs > 1)
                }
 
                /* Off-Diagonal block part of row i1 */
-               for (jj1 = A_offd_i[i1]; jj1 < A_offd_i[i1+1]; jj1++)
+               if (num_cols_A_offd)
                {
-                  i2 = A_offd_j[jj1];
-                  if (P_marker_offd[i2] >= jj_begin_row_offd)
+                  for (jj1 = A_offd_i[i1]; jj1 < A_offd_i[i1+1]; jj1++)
                   {
-                      P_offd_data[P_marker_offd[i2]]    
-                                  += distribute * A_offd_data[jj1]; 
+                     i2 = A_offd_j[jj1];
+                     if (P_marker_offd[i2] >= jj_begin_row_offd)
+                     {
+                        P_offd_data[P_marker_offd[i2]]    
+                               += distribute * A_offd_data[jj1]; 
+                     }
                   }
                }
             }
@@ -519,19 +531,21 @@ if (num_procs > 1)
            * off-diagonal part of A 
            *---------------------------------------------------------------*/
 
-         for (jj = A_offd_i[i]; jj < A_offd_i[i+1]; jj++)
+         if (num_cols_A_offd)
          {
-            i1 = A_offd_j[jj];
+            for (jj = A_offd_i[i]; jj < A_offd_i[i+1]; jj++)
+            {
+               i1 = A_offd_j[jj];
 
             /*--------------------------------------------------------------
              * Case 1: neighbor i1 is a C-point and strongly influences i,
              * accumulate a_{i,i1} into the interpolation weight.
              *--------------------------------------------------------------*/
 
-            if (P_marker_offd[i1] >= jj_begin_row_offd)
-            {
-               P_offd_data[P_marker_offd[i1]] += A_offd_data[jj];
-            }
+               if (P_marker_offd[i1] >= jj_begin_row_offd)
+               {
+                  P_offd_data[P_marker_offd[i1]] += A_offd_data[jj];
+               }
 
             /*--------------------------------------------------------------
              * Case 2: neighbor i1 is an F-point and strongly influences i,
@@ -539,48 +553,48 @@ if (num_procs > 1)
              * Note: currently no distribution to the diagonal in this case.
              *--------------------------------------------------------------*/
             
-            else if (P_marker_offd[i1] == strong_f_marker)
-            {
-               sum = zero;
+               else if (P_marker_offd[i1] == strong_f_marker)
+               {
+                  sum = zero;
                
                /*-----------------------------------------------------------
                 * Loop over row of A_ext for point i1 and calculate the sum
                 * of the connections to c-points that strongly influence i.
                 *-----------------------------------------------------------*/
 
-               /* find row number */
-               c_num = A_offd_j[jj];
-               g_num = CF_marker_offd[c_num];    /*g_num is global row num */
+                  /* find row number */
+                  c_num = A_offd_j[jj];
+                  g_num = CF_marker_offd[c_num];    /*g_num is global row num */
 
-               for (jj1 = A_ext_i[c_num]; jj1 < A_ext_i[c_num+1]; jj1++)
-               {
-                  i2 = A_ext_j[jj1];
+                  for (jj1 = A_ext_i[c_num]; jj1 < A_ext_i[c_num+1]; jj1++)
+                  {
+                     i2 = A_ext_j[jj1];
                                          
-                  if (i2 >= col_1 && i2 < col_n)    
-                  {                            
+                     if (i2 >= col_1 && i2 < col_n)    
+                     {                            
                                               /* in the diagonal block */
-                     if (P_marker[i2-col_1] >= jj_begin_row)
-                     {
-                        sum += A_ext_data[jj1];
+                        if (P_marker[i2-col_1] >= jj_begin_row)
+                        {
+                           sum += A_ext_data[jj1];
+                        }
                      }
-                  }
-                  else                       
-                  {                          
+                     else                       
+                     {                          
                                              /* in the off_diagonal block  */
-                     for (j = 0; j < num_cols_A_offd; j++)
-                     {
-                         if (i2 == abs(CF_marker_offd[j]) 
+                        for (j = 0; j < num_cols_A_offd; j++)
+                        {
+                           if (i2 == abs(CF_marker_offd[j]) 
                                     && P_marker_offd[j] >= jj_begin_row_offd)
-                         { 
-                             sum += A_ext_data[jj1];
-                         }
-                     }
+                           { 
+                              sum += A_ext_data[jj1];
+                           }
+                        }
  
+                     }
+
                   }
 
-               }
-
-               distribute = A_offd_data[jj] / sum;   
+                  distribute = A_offd_data[jj] / sum;   
          
                /*-----------------------------------------------------------
                 * Loop over row of A_ext for point i1 and do the distribution.
@@ -588,47 +602,48 @@ if (num_procs > 1)
 
                /* Diagonal block part of row i1 */
                           
-               for (jj1 = A_ext_i[c_num]; jj1 < A_ext_i[c_num+1]; jj1++)
-               {
-                  i2 = A_ext_j[jj1];
+                  for (jj1 = A_ext_i[c_num]; jj1 < A_ext_i[c_num+1]; jj1++)
+                  {
+                     i2 = A_ext_j[jj1];
 
-                  if (i2 >= col_1 && i2 < col_n) /* in the diagonal block */           
-                  {
-                     if (P_marker[i2-col_1] >= jj_begin_row)
+                     if (i2 >= col_1 && i2 < col_n) /* in the diagonal block */           
                      {
-                        P_diag_data[P_marker[i2-col_1]]
+                        if (P_marker[i2-col_1] >= jj_begin_row)
+                        {
+                           P_diag_data[P_marker[i2-col_1]]
                                   += distribute * A_ext_data[jj1];
+                        }
                      }
-                  }
-                  else
-                  {
-                     /* check to see if it is in the off_diagonal block  */
-                     for (j = 0; j < num_cols_A_offd; j++)
+                     else
                      {
-                         if (i2 == abs(CF_marker_offd[j]) 
+                     /* check to see if it is in the off_diagonal block  */
+                        for (j = 0; j < num_cols_A_offd; j++)
+                        {
+                           if (i2 == abs(CF_marker_offd[j]) 
                                     && P_marker_offd[j] >= jj_begin_row_offd)
-                         { 
-                            P_offd_data[P_marker_offd[j]]
+                           { 
+                              P_offd_data[P_marker_offd[j]]
                                   += distribute * A_ext_data[jj1];
-                         }
+                           }
+                        }
                      }
                   }
                }
-            }
             
             /*--------------------------------------------------------------
              * Case 3: neighbor i1 weakly influences i, accumulate a_{i,i1}
              * into the diagonal.
              *--------------------------------------------------------------*/
 
-            else
-            {
-               diagonal += A_diag_data[jj];
-            } 
+               else
+               {
+                  diagonal += A_diag_data[jj];
+               } 
 
-         }           
+            }           
 
-        /*-----------------------------------------------------------------
+         }
+         /*-----------------------------------------------------------------
           * Set interpolation weight by dividing by the diagonal.
           *-----------------------------------------------------------------*/
 
@@ -653,7 +668,7 @@ if (num_procs > 1)
    {
       if (num_cols_P_offd < P_offd_j[i]) num_cols_P_offd = P_offd_j[i];     
    }
-   num_cols_P_offd++;
+   if (num_cols_P_offd) num_cols_P_offd++;
 
    /*----------------------------------------------------------------------
     *  Determine the col_map_offd_P
