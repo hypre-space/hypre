@@ -198,7 +198,6 @@ then
             UPDATE/src/linear_solvers/struct_linear_solvers \
             UPDATE/src/linear_solvers/test
         rm -f update
-        chmod $HYPRE_INSTALL_PERMISSIONS UPDATE.tar
     fi
 fi
 
@@ -221,6 +220,17 @@ if [ ! -f UPDATE/VERSION_NAME ]
 then
     echo "Error: invalid update source in $HYPRE_INSTALL_DIR/UPDATE"
     exit
+fi
+
+#===========================================================================
+# Make sure permissions are right on UPDATE.tar
+#===========================================================================
+
+cd $HYPRE_INSTALL_DIR
+
+if [ -f UPDATE.tar ]
+then
+    chmod $HYPRE_INSTALL_PERMISSIONS UPDATE.tar
 fi
 
 #===========================================================================
