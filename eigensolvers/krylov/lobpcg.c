@@ -98,7 +98,11 @@ lobpcg_solve( hypre_MultiVectorPtr blockVectorX, /* eigenvectors */
   int*				activeMask; /* soft locking mask */
 
   int				i; /* short loop counter */
+
+#if 0
   long				n; /* dimension 1 of X */
+  /* had to remove because n is not available in some interfaces */ 
+#endif 
 
   hypre_MultiVectorPtr		blockVectorR; /* residuals */
   hypre_MultiVectorPtr		blockVectorP; /* conjugate directions */
@@ -167,17 +171,18 @@ lobpcg_solve( hypre_MultiVectorPtr blockVectorX, /* eigenvectors */
   noYFlag = sizeY == 0;
 
   sizeX = hypre_MultiVectorWidth( blockVectorX );
+
+#if 0
+  /* had to remove because n is not available in some interfaces */ 
   n = hypre_MultiVectorHeight( blockVectorX );
 
-  /* had to remove because n is not available in some interfaces */ 
-  /*
-    if ( n < 5*sizeX ) {
+  if ( n < 5*sizeX ) {
     exitFlag = PROBLEM_SIZE_TOO_SMALL;
     lobpcg_errorMessage( verbosityLevel,
-    "The problem size is too small compared to the block size for LOBPCG.\n" );
+			 "Problem size too small compared to block size\n" );
     return exitFlag;
-    }
-  */
+  }
+#endif
   
   if ( sizeX < 1 ) {
     exitFlag = WRONG_BLOCK_SIZE;
@@ -859,8 +864,10 @@ int* activeMask
 void
 lobpcg_errorMessage( int verbosityLevel, char* message )
 {
-  if ( verbosityLevel )
+  if ( verbosityLevel ) {
+    fprintf( stderr, "Error in LOBPCG:\n" );
     fprintf( stderr, message );
+  }
 }
 
 

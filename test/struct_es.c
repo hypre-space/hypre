@@ -20,10 +20,13 @@
 /* begin lobpcg */
 
 #define NO_SOLVER -9198
+
+#include <time.h>
  
 #include "fortran_matrix.h"
 #include "HYPRE_lobpcg.h"
 #include "HYPRE_interpreter.h"
+#include "HYPRE_struct_int.h"
 
 /* end lobpcg */
 
@@ -41,8 +44,6 @@ int AddValuesVector( hypre_StructGrid  *gridvector,
                      hypre_StructVector *zvector,
                      int                *period, 
                      double             value  )  ;
-
-int HYPRE_StructSetupInterpreter( HYPRE_InterfaceInterpreter *i );
 
 /*--------------------------------------------------------------------------
  * Test driver for structured matrix interface (structured storage)
@@ -138,7 +139,7 @@ main( int   argc,
    int maxIterations = 100;
    int checkOrtho = 0;
    int printLevel = 0;
-   int pcgIterations = 1;
+   int pcgIterations = 0;
    int pcgMode = 0;
    double tol = 1e-6;
    double pcgTol = 1e-2;
@@ -231,9 +232,9 @@ main( int   argc,
 /*    istart[0] = 1; */
 /*    istart[1] = 1; */
 /*    istart[2] = 1; */
-   istart[0] = 1;
-   istart[1] = 1;
-   istart[2] = 1;
+   istart[0] = -3;
+   istart[1] = -3;
+   istart[2] = -3;
 
    px = 0;
    py = 0;
@@ -575,6 +576,8 @@ main( int   argc,
       printf("  -vout 2             : in addition to the above, write the eigenvalues history (the matrix whose\n");
       printf("                        i-th column contains eigenvalues at (i+1)-th iteration) to val_hist.txt and\n");
       printf("                        residuals history to res_hist.txt\n");
+      printf("\nNOTE: in this test driver LOBPCG only works with solvers 10, 11, 12, 17 and 18\n");
+      printf("\ndefault solver is 10\n");
       printf("\n");
 
       /* end lobpcg */
@@ -1720,7 +1723,7 @@ main( int   argc,
        if ( lobpcgSeed )
 	 hypre_MultiVectorSetRandom( eigenvectors, lobpcgSeed );
        else
-	 hypre_MultiVectorSetRandom( eigenvectors, (unsigned int)time_index );
+	 hypre_MultiVectorSetRandom( eigenvectors, (unsigned int)time(0) );
 
        time_index = hypre_InitializeTiming("LOBPCG Solve");
        hypre_BeginTiming(time_index);
@@ -1938,7 +1941,7 @@ main( int   argc,
        if ( lobpcgSeed )
 	 hypre_MultiVectorSetRandom( eigenvectors, lobpcgSeed );
        else
-	 hypre_MultiVectorSetRandom( eigenvectors, (unsigned int)time_index);
+	 hypre_MultiVectorSetRandom( eigenvectors, (unsigned int)time(0) );
        
        time_index = hypre_InitializeTiming("PCG Solve");
        hypre_BeginTiming(time_index);
@@ -2459,7 +2462,7 @@ main( int   argc,
       HYPRE_StructVectorPrint("struct.out.x", x, 0);
    }
 
-   if (myid == 0 && rep==reps-1)
+   if (myid == 0 && rep==reps-1 /* begin lobpcg */ && !lobpcgFlag /* end lobpcg */)
    {
       printf("\n");
       printf("Iterations = %d\n", num_iterations);

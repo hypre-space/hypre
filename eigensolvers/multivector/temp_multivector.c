@@ -125,8 +125,8 @@ hypre_TempMultiVectorSetRandom( void* x_, int seed ) {
   srand( seed );
   for ( i = 0; i < x->numVectors; i++ ) {
     if ( x->mask == NULL || (x->mask)[i] ) {
-      seed = rand();
-      (x->interpreter->SetRandomValues)(x->vector[i],seed);
+      /*      seed = rand();*/
+      (x->interpreter->SetRandomValues)(x->vector[i], seed+i);
     }
   }
 }

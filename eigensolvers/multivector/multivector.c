@@ -7,7 +7,6 @@ hypre_MultiVectorPtr
 hypre_MultiVectorCreateFromSampleVector( void* ii_, int n, void* sample ) { 
 
   hypre_MultiVector* x;
-  void* data;
   HYPRE_InterfaceInterpreter* ii = (HYPRE_InterfaceInterpreter*)ii_;
 
   x = (hypre_MultiVector*) malloc(sizeof(hypre_MultiVector));

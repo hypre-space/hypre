@@ -57,6 +57,12 @@ extern "C" {
 #endif
 
 int
+lobpcg_initialize( lobpcg_Data* data );
+
+int
+lobpcg_clean( lobpcg_Data* data );
+
+int
 lobpcg_solve( hypre_MultiVectorPtr blockVectorX,
 	      void* operatorAData,
 	      void (*operatorA)( void*, hypre_MultiVectorPtr, hypre_MultiVectorPtr ),
@@ -113,6 +119,9 @@ utilities_FortranMatrix* mtxA,
 utilities_FortranMatrix* mtxB,
 utilities_FortranMatrix* eigVal
 );
+
+int
+lobpcg_chol( utilities_FortranMatrix* a );
 
 void
 lobpcg_errorMessage( int, char* );

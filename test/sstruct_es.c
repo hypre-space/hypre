@@ -8,12 +8,13 @@
 #include "sstruct_mv.h"
 
 /* begin lobpcg */
+
+#include <time.h>
  
 #include "fortran_matrix.h"
 #include "HYPRE_lobpcg.h"
 #include "HYPRE_interpreter.h"
-
-int HYPRE_SStructSetupInterpreter( HYPRE_InterfaceInterpreter *i );
+#include "HYPRE_sstruct_int.h"
 
 #define NO_SOLVER -9198
 
@@ -1360,7 +1361,7 @@ PrintUsage( char *progname,
 
       /* begin lobpcg */
 
-      printf("LOBPCG options:\n");
+      printf("\nLOBPCG options:\n");
       printf("\n");
       printf("  -lobpcg            : run LOBPCG instead of PCG\n");
       printf("\n");
@@ -1394,6 +1395,8 @@ PrintUsage( char *progname,
       printf("  -vout 2            : in addition to the above, write the eigenvalues history (the matrix whose\n");
       printf("                       i-th column contains eigenvalues at (i+1)-th iteration) to val_hist.txt and\n");
       printf("                       residuals history to res_hist.txt\n");
+      printf("\nNOTE: in this test driver LOBPCG only works with solvers 10, 11, 13, and 18\n");
+      printf("\ndefault solver is 10\n");
       
       /* end lobpcg */
 
@@ -1467,7 +1470,7 @@ main( int   argc,
    int maxIterations = 100;
    int checkOrtho = 0;
    int printLevel = 0;
-   int pcgIterations = 1;
+   int pcgIterations = 0;
    int pcgMode = 0;
    double tol = 1e-6;
    double pcgTol = 1e-2;
@@ -1650,7 +1653,6 @@ main( int   argc,
       {
          PrintUsage(argv[0], myid);
          exit(1);
-         break;
       }
       /* begin lobpcg */
       else if ( strcmp(argv[arg_index], "-lobpcg") == 0 ) 
@@ -1715,7 +1717,7 @@ main( int   argc,
       }
    }
 
-   if ( solver_id == 0 && lobpcgFlag )
+   if ( solver_id == 39 && lobpcgFlag )
      solver_id = 10;
 
    /* end lobpcg */
@@ -1723,10 +1725,11 @@ main( int   argc,
    /*-----------------------------------------------------------
     * Print driver parameters TODO
     *-----------------------------------------------------------*/
- 
+   /* 
    if (myid == 0)
    {
    }
+   */
 
    /*-----------------------------------------------------------
     * Distribute data
@@ -2351,7 +2354,10 @@ main( int   argc,
     * Solve the eigenvalue problem using LOBPCG
     *-----------------------------------------------------------*/
 
-   if ( lobpcgFlag ) {
+   if ( lobpcgFlag && ( solver_id < 10 || solver_id >= 20 ) && verbosity )
+     printf("\nLOBPCG works with solvers 10, 11, 13 and 18 only\n");
+
+   if ( lobpcgFlag && (solver_id >= 10) && (solver_id < 20) ) {
 
      interpreter = hypre_CTAlloc(HYPRE_InterfaceInterpreter,1);
 
@@ -2421,6 +2427,12 @@ main( int   argc,
 				(HYPRE_PtrToSolverFcn) HYPRE_SStructDiagScaleSetup,
 				(HYPRE_Solver) precond);
 	 }
+       else if (solver_id != NO_SOLVER )
+	 {
+	   if ( verbosity )
+	     printf("Solver ID not recognized - running inner PCG iterations without preconditioner\n\n");
+	 }
+
 
        hypre_EndTiming(time_index);
        hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
@@ -2449,7 +2461,7 @@ main( int   argc,
        if ( lobpcgSeed )
 	 hypre_MultiVectorSetRandom( eigenvectors, lobpcgSeed );
        else
-	 hypre_MultiVectorSetRandom( eigenvectors, (unsigned int)time_index );
+	 hypre_MultiVectorSetRandom( eigenvectors, (unsigned int)time(0) );
        
        time_index = hypre_InitializeTiming("PCG Solve");
        hypre_BeginTiming(time_index);
@@ -2599,6 +2611,11 @@ main( int   argc,
 				   (HYPRE_PtrToSolverFcn) HYPRE_SStructDiagScaleSetup,
 				   (HYPRE_Solver) precond);
 	 }
+       else if (solver_id != NO_SOLVER )
+	 {
+	   if ( verbosity )
+	     printf("Solver ID not recognized - running LOBPCG without preconditioner\n\n");
+	 }
        
        HYPRE_LOBPCGSetup( (HYPRE_Solver) solver, (HYPRE_Matrix) A,
 			  (HYPRE_Vector) b, (HYPRE_Vector) x);
@@ -2616,7 +2633,7 @@ main( int   argc,
        if ( lobpcgSeed )
 	 hypre_MultiVectorSetRandom( eigenvectors, lobpcgSeed );
        else
-	 hypre_MultiVectorSetRandom( eigenvectors, (unsigned int)time_index);
+	 hypre_MultiVectorSetRandom( eigenvectors, (unsigned int)time(0) );
        
        time_index = hypre_InitializeTiming("LOBPCG Solve");
        hypre_BeginTiming(time_index);
@@ -3186,7 +3203,7 @@ main( int   argc,
       HYPRE_SStructVectorPrint("sstruct.out.x", x, 0);
    }
 
-   if (myid == 0)
+   if (myid == 0 /* begin lobpcg */ && !lobpcgFlag /* end lobpcg */)
    {
       printf("\n");
       printf("Iterations = %d\n", num_iterations);

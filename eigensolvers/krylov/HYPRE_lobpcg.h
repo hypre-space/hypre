@@ -82,10 +82,10 @@ int
 HYPRE_LOBPCGSetupT( HYPRE_Solver solver, 
 		   HYPRE_Matrix T, HYPRE_Vector x );
 
-  /* The solver */
+  /* Solves A x = lambda B x, y'x = 0 */
 int 
-HYPRE_LOBPCGSolve( HYPRE_Solver data, hypre_MultiVectorPtr constraints, 
-		   hypre_MultiVectorPtr eigenvectors, double* eigenvalues );
+HYPRE_LOBPCGSolve( HYPRE_Solver data, hypre_MultiVectorPtr y, 
+		   hypre_MultiVectorPtr x, double* lambda );
 
   /* Sets the absolute tolerance */
 int 
@@ -150,18 +150,14 @@ hypre_LOBPCGSetPrecond( void *pcg_vdata,
 			void *precond_data );
 
 int 
+hypre_LOBPCGSetPrecondUsageMode( void* data, int mode );
+
+int 
 hypre_LOBPCGSetPrintLevel( void *pcg_vdata, int level );
 
 int 
 hypre_LOBPCGSolve( void *pcg_vdata, hypre_MultiVectorPtr, 
 		   hypre_MultiVectorPtr, double* );
-
-int
-lobpcg_solveGEVP( 
-utilities_FortranMatrix* mtxA, 
-utilities_FortranMatrix* mtxB,
-utilities_FortranMatrix* eigVal
-);
 
 utilities_FortranMatrix*
 hypre_LOBPCGResidualNorms( void *pcg_vdata );
@@ -174,6 +170,40 @@ hypre_LOBPCGEigenvaluesHistory( void *pcg_vdata );
 
 int
 hypre_LOBPCGIterations( void* pcg_vdata );
+
+  /* applies the preconditioner T to a vector x: y = Tx */
+void
+hypre_LOBPCGPreconditioner( void *vdata, void* x, void* y );
+
+  /* applies the operator A to a vector x: y = Ax */
+void
+hypre_LOBPCGOperatorA( void *pcg_vdata, void* x, void* y );
+
+  /* applies the operator B to a vector x: y = Bx */
+void
+hypre_LOBPCGOperatorB( void *pcg_vdata, void* x, void* y );
+
+  /* applies the preconditioner T to a multivector x: y = Tx */
+void
+hypre_LOBPCGMultiPreconditioner( void *data, hypre_MultiVectorPtr x, hypre_MultiVectorPtr y );
+
+  /* applies the operator A to a multivector x: y = Ax */
+void
+hypre_LOBPCGMultiOperatorA( void *data, hypre_MultiVectorPtr x, hypre_MultiVectorPtr y );
+
+  /* applies the operator B to a multivector x: y = Bx */
+void
+hypre_LOBPCGMultiOperatorB( void *data, hypre_MultiVectorPtr x, hypre_MultiVectorPtr y );
+
+  /* solves the generalized eigenvalue problem mtxA x = lambda mtxB x using DSYGV */
+int
+lobpcg_solveGEVP( 
+utilities_FortranMatrix* mtxA, 
+utilities_FortranMatrix* mtxB,
+utilities_FortranMatrix* lambda
+);
+
+  /* prototypes for DSYGV and DPOTRF routines from LAPACK */
 
 #include "HYPRE_config.h"
 

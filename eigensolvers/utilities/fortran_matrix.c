@@ -3,16 +3,15 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+/*
 #include "fortran.h"
-/*  #include "hypre_blas.h"  */
+#include "hypre_blas.h"
+*/
 
 #include "fortran_matrix.h"
 
-/*****************************************************************************/
-/* Fortran Matrices */
-
 utilities_FortranMatrix*
-utilities_FortranMatrixCreate() {
+utilities_FortranMatrixCreate(void) {
 
   utilities_FortranMatrix* mtx;
 
@@ -738,8 +737,8 @@ utilities_FortranMatrixPrint( utilities_FortranMatrix* mtx, char fileName[] ) {
   h = mtx->height;
   w = mtx->width;
   
-  fprintf(fp,"%d\n",h);
-  fprintf(fp,"%d\n",w);
+  fprintf(fp,"%ld\n",h);
+  fprintf(fp,"%ld\n",w);
   
   jump = mtx->globalHeight - h;
 	

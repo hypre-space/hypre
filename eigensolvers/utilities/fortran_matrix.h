@@ -15,7 +15,7 @@ extern "C" {
 #endif
 
 utilities_FortranMatrix* 
-utilities_FortranMatrixCreate();
+utilities_FortranMatrixCreate(void);
 void 
 utilities_FortranMatrixAllocateData( long h, long w, 
 				     utilities_FortranMatrix* mtx );

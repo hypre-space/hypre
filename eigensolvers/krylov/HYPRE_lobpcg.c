@@ -190,11 +190,12 @@ hypre_LOBPCGSetup( void *pcg_vdata, void *A, void *b, void *x )
     (*(ii->MatvecDestroy))(pcg_data->matvecData);
   (pcg_data->matvecData) = (*(ii->MatvecCreate))(A, x);
 
-  if ( precond_setup != NULL )
+  if ( precond_setup != NULL ) {
     if ( pcg_data->T == NULL )
       precond_setup(precond_data, A, b, x);
     else
       precond_setup(precond_data, pcg_data->T, b, x);
+  }
 
   return ierr;
 }
@@ -204,8 +205,6 @@ hypre_LOBPCGSetupB( void *pcg_vdata, void *B, void *x )
 {
   hypre_LOBPCGData *pcg_data = pcg_vdata;
   HYPRE_InterfaceInterpreter* ii = pcg_data->interpreter;
-  int (*precond_setup)() = (pcg_data->precondFunctions).PrecondSetup;
-  void *precond_data = (pcg_data->precondData);
   int ierr = 0;
 
   (pcg_data->B) = B;
@@ -226,8 +225,6 @@ hypre_LOBPCGSetupT( void *pcg_vdata, void *T, void *x )
 {
   hypre_LOBPCGData *pcg_data = pcg_vdata;
   HYPRE_InterfaceInterpreter* ii = pcg_data->interpreter;
-  int (*precond_setup)() = (pcg_data->precondFunctions).PrecondSetup;
-  void *precond_data = (pcg_data->precondData);
   int ierr = 0;
 
   (pcg_data -> T) = T;
@@ -478,6 +475,8 @@ hypre_LOBPCGIterations( void* vdata )
   return (lobpcg_iterationNumber(data->lobpcgData));
 }
 
+#ifdef HYPRE_USING_ESSL
+
 int
 lobpcg_solveGEVP( 
 utilities_FortranMatrix* mtxA, 
@@ -485,8 +484,7 @@ utilities_FortranMatrix* mtxB,
 utilities_FortranMatrix* eigVal
 ){
 
-  int n, lda, ldb, itype, lwork, info;
-  char jobz, uplo;
+  int n, lda, ldb, lwork, info;
   double* work;
   double* a;
   double* b;
@@ -503,27 +501,55 @@ utilities_FortranMatrix* eigVal
 
   work = (double*)calloc( lwork, sizeof(double) );
 
-#ifdef HYPRE_USING_ESSL
-
   info = 0;
   dsygv( 1, a, lda, b, ldb, lmd, a, lda, n, work, lwork );
-
-#else
-
-  itype = 1;
-  jobz = 'V';
-  uplo = 'L';
-    
-  hypre_F90_NAME_BLAS( dsygv, DSYGV )( &itype, &jobz, &uplo, &n, 
-				       a, &lda, b, &ldb,
-				       lmd, &work[0], &lwork, &info );
-
-#endif
 
   free( work );
   return info;
 
 }
+
+#else
+
+int
+lobpcg_solveGEVP( 
+utilities_FortranMatrix* mtxA, 
+utilities_FortranMatrix* mtxB,
+utilities_FortranMatrix* eigVal
+){
+
+  int n, lda, ldb, itype, lwork, info;
+  char jobz, uplo;
+  double* work;
+  double* a;
+  double* b;
+  double* lmd;
+
+  itype = 1;
+  jobz = 'V';
+  uplo = 'L';
+    
+  a = utilities_FortranMatrixValues( mtxA );
+  b = utilities_FortranMatrixValues( mtxB );
+  lmd = utilities_FortranMatrixValues( eigVal );
+
+  n = utilities_FortranMatrixHeight( mtxA );
+  lda = utilities_FortranMatrixGlobalHeight( mtxA );
+  ldb = utilities_FortranMatrixGlobalHeight( mtxB );
+  lwork = 10*n;
+
+  work = (double*)calloc( lwork, sizeof(double) );
+
+  hypre_F90_NAME_BLAS( dsygv, DSYGV )( &itype, &jobz, &uplo, &n, 
+				       a, &lda, b, &ldb,
+				       lmd, &work[0], &lwork, &info );
+
+  free( work );
+  return info;
+
+}
+
+#endif
 
 int
 lobpcg_chol( utilities_FortranMatrix* a ) {

@@ -23,6 +23,7 @@
 #define NO_SOLVER -9198
 
 #include <assert.h>
+#include <time.h>
 
 #include "fortran_matrix.h"
 #include "HYPRE_lobpcg.h"
@@ -37,13 +38,12 @@ BuildParIsoLaplacian( int argc, char** argv, HYPRE_ParCSRMatrix *A_ptr );
 int BuildParFromFile (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
 int BuildParLaplacian (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
 int BuildParDifConv (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
-int BuildParFromOneFile2(int argc , char *argv [], int arg_index , int num_functions , HYPRE_ParCSRMatrix *A_ptr );
+int BuildParFromOneFile (int argc , char *argv [], int arg_index , int num_functions , HYPRE_ParCSRMatrix *A_ptr );
 int BuildFuncsFromFiles (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix A , int **dof_func_ptr );
 int BuildFuncsFromOneFile (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix A , int **dof_func_ptr );
-int BuildRhsParFromOneFile2(int argc , char *argv [], int arg_index , int *partitioning , HYPRE_ParVector *b_ptr );
+int BuildRhsParFromOneFile (int argc , char *argv [], int arg_index , int *partitioning , HYPRE_ParVector *b_ptr );
 int BuildParLaplacian9pt (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
 int BuildParLaplacian27pt (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
-void hypre_LOBPCGMultiOperatorB(void *data, hypre_MultiVectorPtr x, hypre_MultiVectorPtr y );
 
 #define SECOND_TIME 0
  
@@ -1040,6 +1040,7 @@ main( int   argc,
       printf("                            i-th column contains eigenvalues at\n");
       printf("                            (i+1)-th iteration) to val_hist.txt and\n");
       printf("                            residuals history to res_hist.txt\n");
+      printf("\nNOTE: in this test driver LOBPCG only works with solvers 1, 2, 8, 12, 14 and 43\n");
       printf("\ndefault solver is 1\n");
       printf("\n");
 
@@ -1079,7 +1080,7 @@ main( int   argc,
    }
    else if ( build_matrix_type == 1 )
    {
-      BuildParFromOneFile2(argc, argv, build_matrix_arg_index, num_functions,
+      BuildParFromOneFile(argc, argv, build_matrix_arg_index, num_functions,
 	&parcsr_A);
    }
    else if ( build_matrix_type == 2 )
@@ -1322,7 +1323,7 @@ main( int   argc,
 
 #if 0
 /* RHS */
-      BuildRhsParFromOneFile2(argc, argv, build_rhs_arg_index, part_b, &b);
+      BuildRhsParFromOneFile(argc, argv, build_rhs_arg_index, part_b, &b);
 #endif
    }
    else if ( build_rhs_type == 2 )
@@ -1514,7 +1515,7 @@ main( int   argc,
       return(-1);
 
 #if 0
-      BuildRhsParFromOneFile2(argc, argv, build_src_arg_index, part_b, &b);
+      BuildRhsParFromOneFile(argc, argv, build_src_arg_index, part_b, &b);
 #endif
    }
    else if ( build_src_type == 2 )
@@ -2585,7 +2586,7 @@ main( int   argc,
 	 if ( lobpcgSeed )
 	   hypre_MultiVectorSetRandom( eigenvectors, lobpcgSeed );
 	 else
-	   hypre_MultiVectorSetRandom( eigenvectors, (unsigned int)time_index );
+	   hypre_MultiVectorSetRandom( eigenvectors, (unsigned int)time(0) );
        }
 
        if ( constrained ) {
@@ -2946,7 +2947,7 @@ main( int   argc,
 	 if ( lobpcgSeed )
 	   hypre_MultiVectorSetRandom( eigenvectors, lobpcgSeed );
 	 else
-	   hypre_MultiVectorSetRandom( eigenvectors, (unsigned int)time_index);
+	   hypre_MultiVectorSetRandom( eigenvectors, (unsigned int)time(0) );
        }
 	
        if ( constrained ) {
@@ -3625,7 +3626,7 @@ main( int   argc,
       {
          HYPRE_BoomerAMGDestroy(pcg_precond);
       }
-      if (myid == 0)
+      if (myid == 0 /* begin lobpcg */ && !lobpcgFlag /* end lobpcg */)
       {
          printf("\n");
          printf("Iterations = %d\n", num_iterations);
@@ -4038,7 +4039,7 @@ BuildParDifConv( int                  argc,
  *----------------------------------------------------------------------*/
 
 int
-BuildParFromOneFile2( int                  argc,
+BuildParFromOneFile( int                  argc,
                      char                *argv[],
                      int                  arg_index,
                      int                  num_functions,
@@ -4249,7 +4250,7 @@ BuildFuncsFromOneFile(  int                  argc,
  *----------------------------------------------------------------------*/
 
 int
-BuildRhsParFromOneFile2( int                  argc,
+BuildRhsParFromOneFile( int                  argc,
                         char                *argv[],
                         int                  arg_index,
                         int                 *partitioning,
