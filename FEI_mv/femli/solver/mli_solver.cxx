@@ -33,6 +33,7 @@
 #include "solver/mli_solver_mls.h"
 #include "solver/mli_solver_chebyshev.h"
 #include "solver/mli_solver_cg.h"
+#include "solver/mli_solver_gmres.h"
 #include "solver/mli_solver_superlu.h"
 #include "solver/mli_solver_seqsuperlu.h"
 #include "solver/mli_solver_arpacksuperlu.h"
@@ -102,6 +103,18 @@ MLI_Solver *MLI_Solver_CreateFromName( char *str )
       strcpy( paramString, "baseMethod BSGS");
       solver_ptr->setParams( paramString, 0, NULL);
    }
+   else if (!strcmp(str,"GMRESJacobi")) 
+   {
+      solver_ptr = new MLI_Solver_GMRES(str);
+      strcpy( paramString, "baseMethod Jacobi");
+      solver_ptr->setParams( paramString, 0, NULL);
+   }
+   else if (!strcmp(str,"GMRESSGS")) 
+   {
+      solver_ptr = new MLI_Solver_GMRES(str);
+      strcpy( paramString, "baseMethod SGS");
+      solver_ptr->setParams( paramString, 0, NULL);
+   }
    else if (!strcmp(str, "Kaczmarz"))   
    {
       solver_ptr = new MLI_Solver_Kaczmarz(str);
@@ -153,6 +166,8 @@ MLI_Solver *MLI_Solver_CreateFromName( char *str )
       printf("\t CGBJacobi \n");
       printf("\t CGSGS \n");
       printf("\t CGBSGS \n");
+      printf("\t GMRESJacobi \n");
+      printf("\t GMRESSGS \n");
       printf("\t Kaczmarz\n"); 
       printf("\t SuperLU\n");
       printf("\t SeqSuperLU\n");
