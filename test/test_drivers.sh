@@ -8,13 +8,60 @@
 # $Revision$
 #EHEADER***********************************************************************
 
-#===========================================================================
-# Define test driver names
-#===========================================================================
+#=============================================================================
+# Set hypre test driver prefixes
+#
+# NOTE: Assumes test driver names are of the form <prefix>_linear_solvers
+#=============================================================================
 
-TEST_DRIVERS="\
- IJ_linear_solvers\
-"
+HYPRE_TESTS="struct IJ fei"
+ 
+#=============================================================================
+# Parse arguments and define test driver names
+#=============================================================================
+
+# set help line
+HYPRE_HELP=""
+for i in $HYPRE_TESTS
+do
+    HYPRE_HELP="$HYPRE_HELP[${i}] "
+done
+
+HYPRE_TEST_ARGS=""
+while [ "$*" != "" ]
+do
+case $1 in
+    -h|-help) 
+        echo 
+        echo "$0 [-h|-help] [-mail] $HYPRE_HELP"
+        echo "  -help          prints usage information"
+        echo "  -mail          sends email if test suites fail"
+        echo 
+        exit;;
+    -mail)
+        HYPRE_SEND_MAIL="yes"
+        shift;;
+    *)
+        HYPRE_TEST_ARGS="$HYPRE_TEST_ARGS $1"
+        shift;;
+esac
+done
+
+#=============================================================================
+# Define test driver names
+#=============================================================================
+
+# if no driver arguments, run all drivers
+if [ "$HYPRE_TEST_ARGS" = "" ]
+then
+    HYPRE_TEST_ARGS="$HYPRE_TESTS"
+fi
+
+HYPRE_TEST_DRIVERS=""
+for i in $HYPRE_TEST_ARGS
+do
+    HYPRE_TEST_DRIVERS="$HYPRE_TEST_DRIVERS ${i}_linear_solvers"
+done
 
 #===========================================================================
 # Define HYPRE_ARCH
@@ -26,7 +73,7 @@ TEST_DRIVERS="\
 # Run test drivers and log results and errors to file
 #===========================================================================
 
-for i in $TEST_DRIVERS
+for i in $HYPRE_TEST_DRIVERS
 do
     echo "running ${i} test suite..."
     ./${i}.sh 1> ${i}.log 2> ${i}.err
@@ -37,7 +84,7 @@ done
 # NOTE: HYPRE_MAIL must support `-s' subject option
 #===========================================================================
 
-if [ "$1" = "-mail" ]
+if [ "$HYPRE_SEND_MAIL" = "yes" ]
 then
     echo "checking for errors..."
 
@@ -51,7 +98,7 @@ then
 	    HYPRE_MAIL=/usr/ucb/Mail;;
     esac
 
-    for i in $TEST_DRIVERS
+    for i in $HYPRE_TEST_DRIVERS
     do
     if [ -s "${i}.err" ]
     then
