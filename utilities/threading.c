@@ -171,4 +171,4 @@ void hypre_barrier(pthread_mutex_t *mpi_mtx,
 }
 
 
-#ifdef HYPRE_USE_PTHREADS
+#endif
