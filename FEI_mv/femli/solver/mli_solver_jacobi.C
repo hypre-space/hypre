@@ -116,7 +116,7 @@ int MLI_Solver_Jacobi::setup(MLI_Matrix *Amat)
       delete [] ritzValues;
    }
    if ( relaxWeights_ == NULL ) relaxWeights_ = new double[nSweeps_];
-   for (i = 0; i < nSweeps_; i++) relaxWeights_[i] = 4.0 / (3.0*maxEigen_);
+   for (i = 0; i < nSweeps_; i++) relaxWeights_[i] = 1.0 / maxEigen_;
    return 0;
 }
 
@@ -222,12 +222,14 @@ int MLI_Solver_Jacobi::setParams( char *paramString, int argc, char **argv )
       zeroInitialGuess_ = 1;
       return 0;
    }
+#if 0
    else
    {   
       printf("MLI_Solver_Jacobi::setParams - parameter not recognized.\n");
       printf("                Params = %s\n", paramString);
       return 1;
    }
+#endif
    return 0;
 }
 
