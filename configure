@@ -322,7 +322,7 @@ ac_includes_default="\
 #endif"
 
 ac_subdirs_all="$ac_subdirs_all babel-runtime"
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os PACKAGE_DATETIME HYPRE_TOP_SRCDIR CC CXX F77 RANLIB ac_ct_RANLIB INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA AWK CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP LN_S SET_MAKE CXXFLAGS ac_ct_CXX FFLAGS ac_ct_F77 FLIBS CXXCPP FPP EGREP POW_LIB LIBOBJS MPILIBS subdirs BABELDIR HYPRE_ARCH HOSTNAME HYPRE_LIBINSTALL HYPRE_INCINSTALL INCLUDES LIBDIRS MPIINCLUDE MPILIBDIRS MPIFLAGS TIMERDEFS LDLIBS LDLIBDIRS F77FLAGS PREPEND FEILIBS FEILIBDIRS FEIINCLUDE FEINEEDED MLI_DIR MLILIBS MLILIBDIRS MLIINCLUDE BLASLIBDIRS BLASLIBS BLASNEEDED LAPACKLIBDIRS LAPACKLIBS LAPACKNEEDED LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os PACKAGE_DATETIME HYPRE_TOP_SRCDIR HYPRE_RELEASEVERSION HYPRE_RELEASEDATE HYPRE_RELEASETIME HYPRE_RELEASEDATETIME CC CXX F77 RANLIB ac_ct_RANLIB INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA AWK CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP LN_S SET_MAKE CXXFLAGS ac_ct_CXX FFLAGS ac_ct_F77 FLIBS CXXCPP FPP EGREP POW_LIB LIBOBJS MPILIBS subdirs BABELDIR HYPRE_ARCH HOSTNAME HYPRE_INSTALLDIR HYPRE_LIBINSTALL HYPRE_INCINSTALL INCLUDES LIBDIRS MPIINCLUDE MPILIBDIRS MPIFLAGS TIMERDEFS LDLIBS LDLIBDIRS F77FLAGS PREPEND FEILIBS FEILIBDIRS FEIINCLUDE FEINEEDED MLI_DIR MLILIBS MLILIBDIRS MLIINCLUDE BLASLIBDIRS BLASLIBS BLASNEEDED LAPACKLIBDIRS LAPACKLIBS LAPACKNEEDED LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -1568,23 +1568,31 @@ host_os=`echo $ac_cv_host | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\3/'`
 
 
 cat >>confdefs.h <<\_ACEOF
-#define PACKAGE_DATE "2005/01/18"
+#define PACKAGE_DATE "2005/01/20"
 _ACEOF
 
 
 cat >>confdefs.h <<\_ACEOF
-#define PACKAGE_TIME "15:00:00"
+#define PACKAGE_TIME "09:45:00"
 _ACEOF
 
 
 cat >>confdefs.h <<\_ACEOF
-#define PACKAGE_DATETIME "2005/01/18 15:00:00"
+#define PACKAGE_DATETIME "2005/01/20 09:45:00"
 _ACEOF
 
-PACKAGE_DATETIME="2005/01/18 15:00:00"
+PACKAGE_DATETIME="2005/01/20 09:45:00"
 
 
 HYPRE_TOP_SRCDIR="`pwd`"
+
+
+HYPRE_RELEASEVERSION="1.9.0a"
+HYPRE_RELEASEDATE="2005/01/20"
+HYPRE_RELEASETIME="09:45:00"
+HYPRE_RELEASEDATETIME="2005/01/20 09:45:00"
+
+
 
 
 # Check whether --enable-debug or --disable-debug was given.
@@ -5183,7 +5191,7 @@ fi
 
 
 # Provide some information about the compiler.
-echo "$as_me:5186:" \
+echo "$as_me:5194:" \
      "checking for Fortran 77 compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -5379,7 +5387,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_verb"
-(eval echo $as_me:5382: \"$ac_link\") >&5
+(eval echo $as_me:5390: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -5457,7 +5465,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_cv_prog_f77_v"
-(eval echo $as_me:5460: \"$ac_link\") >&5
+(eval echo $as_me:5468: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -9126,25 +9134,9 @@ then
 fi
 fi
 
-if test "$prefix" = "NONE"
-then
-   prefix="`pwd`/hypre"
-   exec_prefix="`pwd`/hypre"
-fi
-
-if test "$libdir" = "${exec_prefix}/lib"
-then
-   HYPRE_LIBINSTALL="${exec_prefix}/lib"
-else
-   HYPRE_LIBINSTALL="${libdir}"
-fi
-
-if test "$includedir" = "${prefix}/lib"
-then
-   HYPRE_INCINSTALL="${prefix}/include"
-else
-   HYPRE_INCINSTALL="${includedir}"
-fi
+HYPRE_INSTALLDIR="${prefix}"
+HYPRE_LIBINSTALL="${libdir}"
+HYPRE_INCINSTALL="${includedir}"
 
 
    echo "$as_me:$LINENO: checking the hostname" >&5
@@ -9304,10 +9296,6 @@ CXX="$PREPEND $CXX"
 
 
 
-if test -d docs; then
-                       ac_config_files="$ac_config_files docs/bref_manual.dxx docs/ref_manual.dxx"
-
-fi
 
 if test -d babel || test "$casc_using_babel" = "yes"; then
                                            ac_config_files="$ac_config_files babel/Makefile babel/bHYPRE/Makefile babel/bHYPREClient-C/Makefile babel/bHYPREClient-F/Makefile"
@@ -9849,8 +9837,6 @@ for ac_config_target in $ac_config_targets
 do
   case "$ac_config_target" in
   # Handling of arguments.
-  "docs/bref_manual.dxx" ) CONFIG_FILES="$CONFIG_FILES docs/bref_manual.dxx" ;;
-  "docs/ref_manual.dxx" ) CONFIG_FILES="$CONFIG_FILES docs/ref_manual.dxx" ;;
   "babel/Makefile" ) CONFIG_FILES="$CONFIG_FILES babel/Makefile" ;;
   "babel/bHYPRE/Makefile" ) CONFIG_FILES="$CONFIG_FILES babel/bHYPRE/Makefile" ;;
   "babel/bHYPREClient-C/Makefile" ) CONFIG_FILES="$CONFIG_FILES babel/bHYPREClient-C/Makefile" ;;
@@ -9951,6 +9937,10 @@ s,@host_vendor@,$host_vendor,;t t
 s,@host_os@,$host_os,;t t
 s,@PACKAGE_DATETIME@,$PACKAGE_DATETIME,;t t
 s,@HYPRE_TOP_SRCDIR@,$HYPRE_TOP_SRCDIR,;t t
+s,@HYPRE_RELEASEVERSION@,$HYPRE_RELEASEVERSION,;t t
+s,@HYPRE_RELEASEDATE@,$HYPRE_RELEASEDATE,;t t
+s,@HYPRE_RELEASETIME@,$HYPRE_RELEASETIME,;t t
+s,@HYPRE_RELEASEDATETIME@,$HYPRE_RELEASEDATETIME,;t t
 s,@CC@,$CC,;t t
 s,@CXX@,$CXX,;t t
 s,@F77@,$F77,;t t
@@ -9984,6 +9974,7 @@ s,@subdirs@,$subdirs,;t t
 s,@BABELDIR@,$BABELDIR,;t t
 s,@HYPRE_ARCH@,$HYPRE_ARCH,;t t
 s,@HOSTNAME@,$HOSTNAME,;t t
+s,@HYPRE_INSTALLDIR@,$HYPRE_INSTALLDIR,;t t
 s,@HYPRE_LIBINSTALL@,$HYPRE_LIBINSTALL,;t t
 s,@HYPRE_INCINSTALL@,$HYPRE_INCINSTALL,;t t
 s,@INCLUDES@,$INCLUDES,;t t
