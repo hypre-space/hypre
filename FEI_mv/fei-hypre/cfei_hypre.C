@@ -8,16 +8,16 @@
 #include "basicTypes.h"
 
 //############### 1.5 includes #################
-#ifndef NOFEI 
-#include "LinearSystemCore.h"
-#include "LSC.h"
-#endif
+//#ifndef NOFEI 
+//#include "LinearSystemCore.h"
+//#include "LSC.h"
+//#endif
 //##############################################
 
 //############### 2.0 includes #################
-//#ifndef NOFEI 
-//#include "LinearSystemCore.h"
-//#endif
+#ifndef NOFEI 
+#include "LinearSystemCore.h"
+#endif
 //##############################################
 
 #include "cfei.h"
