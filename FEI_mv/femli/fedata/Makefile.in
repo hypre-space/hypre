@@ -27,10 +27,11 @@ CFLAGS =\
  -I$(srcdir)\
  -I$(srcdir)/..\
  -I$(srcdir)/../..\
- -I$(srcdir)/../../utilities\
- -I$(srcdir)/../../IJ_mv\
- -I$(srcdir)/../../seq_mv\
- -I$(srcdir)/../../parcsr_mv\
+ -I$(srcdir)/../../..\
+ -I$(srcdir)/../../../utilities\
+ -I$(srcdir)/../../../IJ_mv\
+ -I$(srcdir)/../../../seq_mv\
+ -I$(srcdir)/../../../parcsr_mv\
  ${CINCLUDES}\
  ${CDEFS}
  
@@ -38,11 +39,11 @@ CXXFLAGS =\
  ${CXX_COMPILE_FLAGS}\
  -I$(srcdir)\
  -I$(srcdir)/..\
- -I$(srcdir)/../..\
- -I$(srcdir)/../../utilities\
- -I$(srcdir)/../../IJ_mv\
- -I$(srcdir)/../../seq_mv\
- -I$(srcdir)/../../parcsr_mv\
+ -I$(srcdir)/../../..\
+ -I$(srcdir)/../../../utilities\
+ -I$(srcdir)/../../../IJ_mv\
+ -I$(srcdir)/../../../seq_mv\
+ -I$(srcdir)/../../../parcsr_mv\
  ${CXXINCLUDES}\
  ${CXXDEFS}
  

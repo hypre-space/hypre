@@ -27,9 +27,10 @@ CFLAGS =\
  -I$(srcdir)\
  -I$(srcdir)/..\
  -I$(srcdir)/../..\
- -I$(srcdir)/../../utilities\
- -I$(srcdir)/../../parcsr_mv\
- -I$(srcdir)/../../seq_mv\
+ -I$(srcdir)/../../..\
+ -I$(srcdir)/../../../utilities\
+ -I$(srcdir)/../../../parcsr_mv\
+ -I$(srcdir)/../../../seq_mv\
  ${CINCLUDES}\
  ${CDEFS}
  
@@ -38,9 +39,10 @@ CXXFLAGS =\
  -I$(srcdir)\
  -I$(srcdir)/..\
  -I$(srcdir)/../..\
- -I$(srcdir)/../../utilities\
- -I$(srcdir)/../../parcsr_mv\
- -I$(srcdir)/../../seq_mv\
+ -I$(srcdir)/../../..\
+ -I$(srcdir)/../../../utilities\
+ -I$(srcdir)/../../../parcsr_mv\
+ -I$(srcdir)/../../../seq_mv\
  ${CXXINCLUDES}\
  ${CXXDEFS}
  
