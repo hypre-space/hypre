@@ -59,15 +59,20 @@ define(IWAIT,<<
  until a synch. point. guarantees all threads have exited.
 
 Usage: PLOOP(increment_variable, loop_initial_value, loop_stopping value,
-             number_of_threads, index_array_name, array_index,
-             <<loop_body>>)
+             index_array_name, array_index, thread_counter, mutex_object,
+             cond_object <<loop_body>>)
 Arguments:  $1 -- the name of the increment variable for the loop
             $2 -- the initial value for the increment variable
             $3 -- the stopping value for the increment variable
                   (loop will not be entered when increment reaches this value)
             $4 -- the name of an array of indices
             $5 -- an index of the given array
-            $6 -- The body of the loop (enclose between << and >> )
+            $6 -- an integer counter to count each thread as it passes
+            $7 -- a pthread_mutex_t object (must be initialized
+                  externally, will be destroyed inside this macro)
+            $8 -- a pthread_cond_t object (must be initialized externally,
+                  will be destroyed inside this macro)
+            $9 -- The body of the loop (enclose between << and >> )
 */
 
 define(PLOOP,<<
@@ -79,17 +84,32 @@ $5
          enddo
          if ( $1 .eq. $3+msg_nthreads ) indx($4)=0
 */
-   pthread_mutex_init(&$7, NULL);
+
 
    for ($1 = ifetchadd(&$4[$5], &$7) + $2; 
         $1 <  $3;
         $1 = ifetchadd(&$4[$5], &$7) + $2) {
-      $6
+      $9
    }
-   pthread_mutex_destroy(&$7);
+
+   ifetchadd(&$6, &$7);
+
+   pthread_mutex_lock(&$7);
+
+   if ($6 < NUM_THREADS)
+      pthread_cond_wait(&$8, &$7);
+   else if ($6 == NUM_THREADS)
+      pthread_cond_broadcast(&$8);
+
+   pthread_mutex_unlock(&$7);
 
    if ($1 == $3)
       $4[$5] =0;
+
+   pthread_mutex_destroy(&$7);
+   pthread_cond_destroy(&$8);
+
+
 >>)
 
 
@@ -118,6 +138,8 @@ $5
    for ($1 = $2; $1 < $3; $1++) {
       $6
    }
+
+
 >>)
 
 
