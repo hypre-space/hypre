@@ -196,6 +196,7 @@ dnl *           parcsr_linear_solvers/Makefile \
 dnl *           seq_matrix_vector/Makefile \
 dnl *           struct_matrix_vector/Makefile \
 dnl *           struct_linear_solvers/Makefile \
+dnl *           seq_linear_solvers/pamg/Makefile \
 dnl *           test/Makefile \
 dnl *		docs/Makefile)
 
@@ -212,6 +213,7 @@ CASC_CONFIG_OUTPUT_LIST(\
  seq_matrix_vector\
  struct_matrix_vector\
  struct_linear_solvers\
+ seq_linear_solvers/pamg\
  test\
  docs)
 
@@ -232,5 +234,6 @@ dnl parcsr_linear_solvers/Makefile.$ARCH:parcsr_linear_solvers/Makefile.in\
 dnl seq_matrix_vector/Makefile.$ARCH:seq_matrix_vector/Makefile.in \
 dnl struct_matrix_vector/Makefile.$ARCH:struct_matrix_vector/Makefile.in \
 dnl struct_linear_solvers/Makefile.$ARCH:struct_linear_solvers/Makefile.in\
+dnl seq_linear_solvers/pamg/Makefile.$ARCH:seq_linear_solvers/pamg/Makefile.in\
 dnl test/Makefile.$ARCH:test/Makefile.in \
 dnl docs/Makefile.$ARCH:docs/Makefile.in)
