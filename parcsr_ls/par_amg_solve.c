@@ -244,7 +244,7 @@ hypre_ParAMGSolve( void               *amg_vdata,
     * Close the output file (if open)
     *----------------------------------------------------------*/
 
-   if (my_id == 0 && amg_ioutdat >= 0)
+   if (my_id == 0 && amg_ioutdat >= 1)
    { 
       fclose(fp); 
    }
