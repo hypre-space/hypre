@@ -127,6 +127,30 @@ veryclean: clean
 	@rm -f libHYPRE_parcsr_ls.a
 
 ##################################################################
+# Temporary Targets
+##################################################################
+
+####################
+# AMGe
+####################
+
+AMGE_HEADERS =\
+ amge1.h\
+ amge2.h
+
+AMGE_FILES =\
+ amge1.c\
+ amge2.c
+
+AMGE_OBJS = ${AMGE_FILES:.c=.o}
+
+amge: all ${AMGE_OBJS}
+	@echo  "Linking" $@ "... "
+	${CC} -o amge ${AMGE_OBJS} ${LFLAGS} 
+
+${AMGE_OBJS}: ${AMGE_HEADERS}
+ 
+##################################################################
 # Rules
 ##################################################################
 
