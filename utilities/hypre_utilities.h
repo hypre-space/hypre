@@ -305,7 +305,7 @@ void hypre_Free P((char *ptr ));
  *  Fake mpi stubs to generate serial codes without mpi
  *
  *****************************************************************************/
-
+/*just a test comment*/
 #ifndef hypre_thread_MPISTUBS
 #define hypre_thread_MPISTUBS
 
