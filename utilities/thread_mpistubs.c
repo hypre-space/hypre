@@ -79,7 +79,6 @@ hypre_thread_MPI_Barrier( MPI_Comm comm )
   int returnval;
   int unthreaded = pthread_equal(initial_thread,pthread_self());
   int I_call_mpi = unthreaded || pthread_equal(hypre_thread[0],pthread_self());
-  hypre_barrier(&mpi_mtx, unthreaded);
   if (I_call_mpi)
   {
     returnval=MPI_Barrier(comm);
@@ -499,7 +498,6 @@ hypre_thread_MPI_Type_hvector( int           count,
   {
    returnval=0;
   }
-  hypre_barrier(&mpi_mtx, unthreaded);
   return returnval;
 }
 
@@ -522,7 +520,6 @@ hypre_thread_MPI_Type_struct( int           count,
   {
    returnval=0;
   }
-  hypre_barrier(&mpi_mtx, unthreaded);
   return returnval;
 }
 
@@ -532,7 +529,6 @@ hypre_thread_MPI_Type_free( MPI_Datatype *datatype )
   int returnval;
   int unthreaded = pthread_equal(initial_thread,pthread_self());
   int I_call_mpi = unthreaded || pthread_equal(hypre_thread[0],pthread_self());
-  hypre_barrier(&mpi_mtx, unthreaded);
   if (I_call_mpi)
   {
     returnval=MPI_Type_free(datatype);
@@ -541,7 +537,6 @@ hypre_thread_MPI_Type_free( MPI_Datatype *datatype )
   {
    returnval=0;
   }
-  hypre_barrier(&mpi_mtx, unthreaded);
   return returnval;
 }
 
@@ -559,7 +554,6 @@ hypre_thread_MPI_Type_commit( MPI_Datatype *datatype )
   {
    returnval=0;
   }
-  hypre_barrier(&mpi_mtx, unthreaded);
   return returnval;
 }
 

@@ -19,6 +19,8 @@
 
 int iteration_counter = 0;
 volatile int hypre_thread_counter;
+volatile int work_continue = 1;
+
 
 int HYPRE_InitPthreads( int num_threads )
 {
@@ -56,12 +58,17 @@ int HYPRE_InitPthreads( int num_threads )
    return (err);
 }   
 
+void hypre_StopWorker(void *i)
+{
+   work_continue = 0;
+}
+
 void HYPRE_DestroyPthreads( void )
 {
-   int i,x;
+   int i;
 
    for (i=0; i < hypre_NumThreads; i++) {
-      x= pthread_cancel(hypre_thread[i]);
+      hypre_work_put(hypre_StopWorker, (void *) &i);
    }
 
    pthread_mutex_destroy(&hypre_qptr->lock);
@@ -75,6 +82,7 @@ void HYPRE_DestroyPthreads( void )
    free (hypre_qptr);
 }
 
+
 void hypre_pthread_worker( int threadid )
 {
    void *argptr;
@@ -84,7 +92,7 @@ void hypre_pthread_worker( int threadid )
 
    hypre_qptr->n_working++;
 
-   for(;;) {
+   while(work_continue) {
       while (hypre_qptr->n_queue == 0) {
          if (--hypre_qptr->n_working == 0)
             pthread_cond_signal(&hypre_qptr->finish_wait);         
@@ -105,7 +113,8 @@ void hypre_pthread_worker( int threadid )
 
       hypre_barrier(&worker_mtx, 0);
 
-      pthread_mutex_lock(&hypre_qptr->lock);
+      if (work_continue)
+         pthread_mutex_lock(&hypre_qptr->lock);
    }
 }
 
