@@ -1492,6 +1492,7 @@ double slupow_di(double *ap, int *bp)
     }
     return(pow);
 }
+#endif
 
 /*
  * -- SuperLU routine (version 2.0) --
@@ -1722,4 +1723,3 @@ double *Mxvec;	/* in/out */
 	
 }
 
-#endif
