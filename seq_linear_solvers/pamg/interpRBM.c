@@ -62,7 +62,8 @@ hypre_AMGBuildRBMInterp( hypre_CSRMatrix     *A,
   int num_dofs = hypre_CSRMatrixNumRows(A);
 
 
-  int ierr, i,j,k,l, l_loc,k_loc, i_loc, j_loc, i_row;
+  int ierr = 0;
+  int i,j,k,l, l_loc,k_loc, i_loc, j_loc, i_row;
   int i_dof, j_dof;
   int *i_local_to_global;
   int *i_global_to_local;
