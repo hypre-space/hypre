@@ -748,10 +748,10 @@ void hypre_FactorLocal(FactorMatType *ldu, ReduceMatType *rmat,
 		 int *newperm, int *newiperm, int nmis, double tol,
                  hypre_PilutSolverGlobals *globals)
 {
-  int i, ir, j, k, kk, l, m, nnz, diag;
+  int i, ir, k, kk, l, m, nnz, diag;
   int *usrowptr, *uerowptr, *ucolind, *rcolind;
   double *uvalues, *nrm2s, *rvalues, *dvalues;
-  double mult, nval, rtol;
+  double mult, rtol;
 
 #ifdef HYPRE_DEBUG
   hypre_PrintLine("hypre_FactorLocal", globals);

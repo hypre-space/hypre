@@ -44,12 +44,12 @@ long hypre_IDX_Checksum(const int *v, int len, const char *msg, int tag,
 {
   static int numChk = 0;
   int i;
-  long sum = 0;
+  unsigned long sum = 0;
 
   for (i=0; i<len; i++)
     sum += v[i] * i;
 
-  printf("PE %d [i%3d] %15s/%3d chk: %16x [len %4d]\n", 
+  printf("PE %d [i%3d] %15s/%3d chk: %16lx [len %4d]\n", 
 	 mype, numChk, msg, tag, sum, len);
   fflush(0);
 
@@ -66,12 +66,12 @@ long hypre_INT_Checksum(const int *v, int len, const char *msg, int tag,
 {
   static int numChk = 0;
   int i;
-  long sum = 0;
+  unsigned long sum = 0;
 
   for (i=0; i<len; i++)
     sum += v[i] * i;
 
-  printf("PE %d [d%3d] %15s/%3d chk: %16x [len %4d]\n",
+  printf("PE %d [d%3d] %15s/%3d chk: %16lx [len %4d]\n",
 	 mype, numChk, msg, tag, sum, len);
   fflush(0);
 
@@ -88,13 +88,13 @@ long hypre_FP_Checksum(const double *v, int len, const char *msg, int tag,
 {
   static int numChk = 0;
   int i;
-  long sum = 0;
+  unsigned long sum = 0;
   int *vv = (int*)v;
 
   for (i=0; i<len; i++)
     sum += vv[i] * i;
 
-  printf("PE %d [f%3d] %15s/%3d chk: %16x [len %4d]\n",
+  printf("PE %d [f%3d] %15s/%3d chk: %16lx [len %4d]\n",
 	 mype, numChk, msg, tag, sum, len);
   fflush(0);
 
@@ -154,7 +154,7 @@ long hypre_LDU_Checksum(const FactorMatType *ldu,
           hypre_PilutSolverGlobals *globals)
 {
   int i, j;
-  long lisum=0, ldsum=0, uisum=0, udsum=0, dsum=0, nsum=0;
+  unsigned long lisum=0, ldsum=0, uisum=0, udsum=0, dsum=0;
   static int numChk = 0;
 
   if (ldu->lsrowptr == NULL  ||
@@ -188,7 +188,7 @@ long hypre_LDU_Checksum(const FactorMatType *ldu,
       dsum += (long)ldu->dvalues[i];
   }
 
-  printf("PE %d [S%3d] LDU check [%16x %16x] [%16x] [%16x %16x]\n",
+  printf("PE %d [S%3d] LDU check [%16lx %16lx] [%16lx] [%16lx %16lx]\n",
 	 mype, numChk, lisum, ldsum, dsum, uisum, udsum);
   fflush(0);
 

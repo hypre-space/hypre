@@ -441,7 +441,7 @@ int ExchangeStructuralUnions( DataDistType *ddist,
                     int **structural_union,
                     hypre_PilutSolverGlobals *globals )
 { 
-  int ierr=0, i, *recv_unions;
+  int ierr=0, *recv_unions;
 
   /* allocate space for receiving unions */
   recv_unions = hypre_CTAlloc( int, nrows );
