@@ -1,0 +1,227 @@
+#!/bin/ksh
+#
+# rename CVS directories in linear_solvers (hypre-1.3.0b+)
+#
+# This script was used to perform the directory renaming on 12/14/00.
+#
+# *_linear_solvers -> *_ls
+# *_matrix_vector -> *_mv
+#
+# assume repository at: cd /home/casc/repository/linear_solvers
+CVSROOT=/home/casc/repository
+#CVSROOT=~/repository
+MODUL=linear_solvers
+#MODUL=hypre
+REPOS=$CVSROOT/$MODUL
+GREP=grep
+#
+cd $HOME
+cvs checkout $MODUL
+# process the linear_solvers directories
+cd ~/$MODUL
+for i in *_linear_solvers; do
+  cd $REPOS
+  cp -Rp $i ${i%%_linear_solvers}_ls
+  cd ~/$MODUL/$i
+  for j in *; do
+    if [ ! -d "$j" ]
+    then
+      cvs remove -f $j
+      cvs commit -m 'removing *_linear_solvers directories and files' $j
+    fi
+  done
+done
+# process all the linear_solvers subdirectories
+cd ~/$MODUL
+for i in PETScMat_linear_solvers/pilut \
+	PETSc_linear_solvers/Block_Preconditioned \
+	PETSc_linear_solvers/ParILUT \
+	distributed_linear_solvers/Euclid \
+	distributed_linear_solvers/Euclid/include \
+	distributed_linear_solvers/Euclid/src \
+	distributed_linear_solvers/ParaSails \
+	distributed_linear_solvers/pilut \
+	seq_linear_solvers/amg seq_linear_solvers/amg/amg \
+	seq_linear_solvers/amg/amg_fdrive seq_linear_solvers/amg/amgdriver \
+	seq_linear_solvers/amg/config seq_linear_solvers/amg/docs \
+	seq_linear_solvers/amg/tools seq_linear_solvers/amge \
+	seq_linear_solvers/amge_ag seq_linear_solvers/ict \
+	seq_linear_solvers/ilut seq_linear_solvers/pamg \
+	seq_linear_solvers/sparskit; do
+  cd ~/$MODUL/$i
+  for j in *; do
+    if [ ! -d "$j" ]
+    then
+      cvs remove -f $j
+      cvs commit -m 'removing *_linear_solvers directories and files' $j
+    fi
+  done
+done
+# rename the *_linear_solvers.h include files
+cd $REPOS
+for i in *_ls/*_linear_solvers*; do
+  mv $i $(echo $i|sed s/_linear_solvers/_ls/)
+done
+# now do the "matrix_vector"
+cd ~/$MODUL
+for k in *_matrix_vector; do
+  cd $REPOS
+  cp -Rp $k ${k%%_matrix_vector}_mv
+  cd ~/$MODUL/$k
+  for l in *; do
+    if [ ! -d "$l" ]
+    then
+      cvs remove -f $l
+      cvs commit -m 'removing *_matrix_vector directories and files' $l
+    fi
+  done
+done
+# now do all the "matrix_vector" subdirectories by name
+cd ~/$MODUL
+for k in FEI_matrix_vector/fei-base FEI_matrix_vector/fei-hypre; do 
+  cd ~/$MODUL/$k
+  for l in *; do
+    if [ ! -d "$l" ]
+    then
+      cvs remove -f $l
+      cvs commit -m 'removing *_matrix_vector directories and files' $l
+    fi
+  done
+done
+# rename the *_matrix_vector.h include files
+cd $REPOS
+for i in *_mv/*_matrix_vector*; do
+  mv $i $(echo $i|sed s/_matrix_vector/_mv/)
+done
+#
+cd $HOME
+cvs update $MODUL
+#
+cd ~/$MODUL
+# edit files _linear_solvers=>_ls and _matrix_vector=>_mv translations
+for i in Makefile.in configure configure.in mkdist \
+	CI_struct_ls/Makefile.in CI_struct_ls/headers.h \
+	IJ_mv/Makefile.in docs/ref_manual.dxx \
+	parcsr_ls/HYPRE_parcsr_Euclid.c parcsr_ls/HYPRE_parcsr_ParaSails.c \
+	parcsr_ls/HYPRE_parcsr_pilut.c parcsr_ls/Makefile.in parcsr_ls/headers \
+	sstruct_ls/Makefile.in sstruct_ls/headers \
+	structIJ_mv/Makefile.in struct_ls/Makefile.in struct_ls/headers \
+	FEI_mv/fei-hypre/HYPRE_Builder.h \
+	FEI_mv/fei-hypre/HYPRE_LSI_ddict.c \
+	FEI_mv/fei-hypre/HYPRE_LSI_ddict.h \
+	FEI_mv/fei-hypre/HYPRE_LSI_ddilut.c \
+	FEI_mv/fei-hypre/HYPRE_LSI_ddilut.h \
+	FEI_mv/fei-hypre/HYPRE_LSI_poly.c \
+	FEI_mv/fei-hypre/HYPRE_LSI_poly.h \
+	FEI_mv/fei-hypre/HYPRE_LSI_schwarz.c \
+	FEI_mv/fei-hypre/HYPRE_LSI_schwarz.h \
+	FEI_mv/fei-hypre/HYPRE_LinSysCore.C \
+	FEI_mv/fei-hypre/HYPRE_LinSysCore.C.1.4 \
+	FEI_mv/fei-hypre/HYPRE_LinSysCore.C.2.0 \
+	FEI_mv/fei-hypre/HYPRE_LinSysCore.h.1.4 \
+	FEI_mv/fei-hypre/HYPRE_parcsr_TFQmr.c \
+	FEI_mv/fei-hypre/HYPRE_parcsr_bicgs.c \
+	FEI_mv/fei-hypre/HYPRE_parcsr_bicgstabl.c \
+	FEI_mv/fei-hypre/HYPRE_parcsr_ml.c \
+	FEI_mv/fei-hypre/Makefile.in \
+	FEI_mv/fei-hypre/TFQmr.c \
+	FEI_mv/fei-hypre/bicgs.c \
+	FEI_mv/fei-hypre/bicgstabl.c \
+	FEI_mv/fei-hypre/cfei_hypre.C \
+	FEI_mv/fei-hypre/driver.C \
+	FEI_mv/fei-hypre/hypre_lsi_amge.c \
+	FEI_mv/fei-hypre/hypre_lsi_ddamg.c \
+	FEI_mv/fei-hypre/hypre_schur_reduce.C \
+	FEI_mv/fei-hypre/hypre_slide_reduce.C \
+	PETSc_ls/Block_Preconditioned/makefile \
+	seq_ls/pamg/Build seq_ls/pamg/BuildIRIX; do
+  cvs edit $i
+  sed -e 's/_linear_solvers/_ls/g' -e 's/_matrix_vector/_mv/g' $i > $i.tmp
+  mv $i.tmp $i
+  cvs commit -m '_linear_solvers=>_ls and _matrix_vector=>_mv translations' $i
+done
+# edit files containing _linear_solvers only
+for i in krylov/pcg.c \
+	parcsr_ls/HYPRE_parcsr_pcg.c parcsr_ls/headers.h \
+	sstruct_ls/headers.h \
+	structIJ_mv/driver.c \
+	struct_ls/HYPRE_struct_pcg.c struct_ls/headers.h \
+	PETScMat_ls/pilut/Makefile.in \
+	PETSc_ls/ParILUT/Makefile.in \
+	babel/Hypre/Hypre_ParAMG_Data.h \
+	babel/Hypre/Hypre_StructJacobi_Data.h \
+	babel/Hypre/Hypre_StructSMG_Data.h \
+	babel/Hypre/Hypre_StructSolver_Data.h \
+	distributed_ls/Euclid/README.hypre distributed_ls/Euclid/driver.c \
+	seq_ls/amge/driver_amge.c seq_ls/amge/driver_amge_triangles.c \
+	seq_ls/amge_ag/driver_amge_ag_Schwarz.c \
+	seq_ls/pamg/HYPRE_csr_pcg.c; do
+  cvs edit $i
+  sed -e 's/_linear_solvers/_ls/g' $i > $i.tmp
+  mv $i.tmp $i
+  cvs commit -m '_linear_solvers=>_ls translations' $i
+done
+# edit files containing _matrix_vector only
+for i in CI_struct_ls/CI_struct_ls.h \
+	CI_struct_mv/HYPRE_CI_mv.h CI_struct_mv/Makefile.in \
+	CI_struct_mv/headers.h CI_struct_mv/struct_matrix_ParCSR.c \
+	IJ_mv/F90_HYPRE_IJMatrix.c IJ_mv/F90_HYPRE_IJVector.c \
+	IJ_mv/HYPRE_IJMatrix.c IJ_mv/HYPRE_IJVector.c \
+	IJ_mv/IJ_mv.h \
+	IJ_mv/aux_parcsr_matrix.c \
+	IJ_mv/headers IJ_mv/headers.h \
+	IJ_mv/hypre_IJVector_parcsr.c \
+	distributed_matrix/Makefile.in \
+	matrix_matrix/HYPRE_BuildIJMatrixFromDistributedMatrix.c \
+	matrix_matrix/Makefile.in \
+	parcsr_ls/HYPRE_parcsr_ml.cpp parcsr_ls/parcsr_ls.h \
+	parcsr_mv/Makefile.in parcsr_mv/headers \
+	parcsr_mv/headers.h parcsr_mv/par_csr_matrix.c parcsr_mv/parcsr_mv.h \
+	seq_mv/Makefile.in seq_mv/headers seq_mv/headers.h \
+	sstruct_ls/sstruct_ls.h \
+	sstruct_mv/Makefile.in sstruct_mv/headers sstruct_mv/headers.h \
+	sstruct_mv/sstruct_mv.h \
+	structIJ_mv/HYPRE_structIJ_mv.h structIJ_mv/headers.h \
+	structIJ_mv/structIJ_mv.h \
+	struct_ls/struct_ls.h \
+	struct_mv/Makefile.in struct_mv/headers struct_mv/headers.h \
+	test/IJ_linear_solvers_b.c \
+	test/sstruct_linear_solvers.c \
+	tools/Makefile.in \
+	FEI_mv/fei-base/Makefile.in FEI_mv/fei-hypre/hypre_lsi_misc.c \
+	babel/Hypre/Hypre_Box_Data.h babel/Hypre/Hypre_ParAMG.c \
+	babel/Hypre/Hypre_ParCSRMatrix.c \
+	babel/Hypre/Hypre_ParCSRMatrixBuilder.c \
+	babel/Hypre/Hypre_ParCSRVector.c \
+	babel/Hypre/Hypre_ParCSRVectorBuilder.c \
+	babel/Hypre/Hypre_StructGrid_Data.h \
+	babel/Hypre/Hypre_StructMatrixBuilder.c \
+	babel/Hypre/Hypre_StructMatrix_Data.h \
+	babel/Hypre/Hypre_StructStencil_Data.h \
+	babel/Hypre/Hypre_StructVectorBuilder.c \
+	babel/Hypre/Hypre_StructVector_Data.h \
+	babel/Hypre/Makefile.am babel/Hypre/Makefile.in \
+	babel/test/Makefile.am babel/test/Makefile.in \
+	distributed_ls/Euclid/Makefile.in \
+	seq_ls/amge/AMGe_matrix_topology.h \
+	seq_ls/amge/Makefile.in seq_ls/amge/headers.h \
+	seq_ls/amge_ag/AMGe_matrix_topology.h seq_ls/amge_ag/Makefile.in \
+	seq_ls/amge_ag/Makefile_Schwarz seq_ls/amge_ag/headers.h \
+	seq_ls/pamg/MakeIRIX seq_ls/pamg/MakePCG \
+	seq_ls/pamg/Makefile.in seq_ls/pamg/headers seq_ls/pamg/pamg.h; do
+  cvs edit $i
+  sed -e 's/_matrix_vector/_mv/g' $i > $i.tmp
+  mv $i.tmp $i
+  cvs commit -m '_matrix_vector=>_mv translations' $i
+done
+# mark all files with a new revision number
+cvs commit -r 2.0 -f -R -m 'after _linear_solvers/_matrix_vector rename' *
+# clean up some of the repository permissions
+cd $REPOS
+for i in $(find . -type d);do
+  chmod g+s,o-rwx $i
+done
+for i in $(find . -type f);do
+  chmod a-w,o-rx $i
+done
+chown -Rf falgout:hypre *
