@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "utilities/memory.h"
+#include "../utilities/hypre_utilities.h"
 #include "HYPRE_mv.h"
 
 /* #include "general.h" */
