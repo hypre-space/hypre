@@ -20,7 +20,7 @@ OBJS = mli.o                mli_oneLevel.o         cmli.o \
        mli_solver_sgs.o     mli_solver_parasails.o mli_solver_schwarz.o \
        mli_solver_mls.o     mli_solver_superlu.o   mli_method.o \
        mli_method_amgsa.o   mli_amgsa_coarsen1.o   mli_amgsa_calib.o \
-       mli_utils_fortran.o
+       mli_utils_fortran.o  mli_mapper.o
 
 ##################################################################
 # Targets
