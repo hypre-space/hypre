@@ -576,17 +576,18 @@ hypre_AddIJMatrixRowParCSR(hypre_IJMatrix *matrix,
 	 }
 	 qsort1(tmp_j,tmp_data,0,tmp_indx-1);
 	 indx = 0;
-	 size = 1; /* account for diagonal_element */
+	 size = row_length[row_local]; 
+	 if (size == 0) size = 1; /* account for diagonal_element */
 	 for (i=1; i < row_length[row_local]; i++)
 	 {
-	    while (local_j[i] > tmp_j[indx])
+	    while (indx < tmp_indx && local_j[i] > tmp_j[indx])
 	    {
 	       size++;
 	       indx++;
 	    }
+	    if (indx == tmp_indx) break;
 	    if (local_j[i] == tmp_j[indx])
 	    {
-	       size++;
 	       indx++;
 	    }
 	 }
@@ -601,6 +602,8 @@ hypre_AddIJMatrixRowParCSR(hypre_IJMatrix *matrix,
 	    aux_data[row_local] = hypre_TReAlloc(aux_data[row_local],
 					double,size);
             row_space[row_local] = size;
+            local_j = aux_j[row_local];
+            local_data = aux_data[row_local];
          }
         /* merge local and tmp into local */
 
@@ -610,11 +613,12 @@ hypre_AddIJMatrixRowParCSR(hypre_IJMatrix *matrix,
 
 	 for (i=1; i < old_size; i++)
 	 {
-	    while (local_j[i] > tmp_j[indx])
+	    while (indx < tmp_indx && local_j[i] > tmp_j[indx])
 	    {
 	       local_j[cnt] = tmp_j[indx];
 	       local_data[cnt++] = tmp_data[indx++];
 	    }
+	    if (indx == tmp_indx) break;
 	    if (local_j[i] == tmp_j[indx])
 	    {
 	       local_j[i] = tmp_j[indx];
@@ -629,7 +633,7 @@ hypre_AddIJMatrixRowParCSR(hypre_IJMatrix *matrix,
    
       /* sort data according to column indices, except for first element */
 
-         qsort1(local_j,local_data,1,n-1);
+         qsort1(local_j,local_data,1,cnt-1);
 	 hypre_TFree(tmp_j); 
 	 hypre_TFree(tmp_data); 
       }
@@ -683,11 +687,12 @@ hypre_AddIJMatrixRowParCSR(hypre_IJMatrix *matrix,
 	 indx = 0;
 	 for (i=diag_i[row_local]+1; i < diag_indx; i++)
 	 {
-	    while (diag_j[i] > tmp_diag_j[indx])
+	    while (indx < cnt_diag && diag_j[i] > tmp_diag_j[indx])
 	    {
 	       diag_j[cnt] = tmp_diag_j[indx];
 	       diag_data[cnt++] = tmp_diag_data[indx++];
 	    }
+	    if (indx == cnt_diag) break;
 	    if (diag_j[i] == tmp_diag_j[indx])
 	    {
 	       diag_j[i] = tmp_diag_j[indx];
@@ -715,11 +720,12 @@ hypre_AddIJMatrixRowParCSR(hypre_IJMatrix *matrix,
 	 indx = 0;
 	 for (i=offd_i[row_local]; i < offd_indx; i++)
 	 {
-	    while (offd_j[i] > tmp_offd_j[indx])
+	    while (indx < cnt_offd && offd_j[i] > tmp_offd_j[indx])
 	    {
 	       offd_j[cnt] = tmp_offd_j[indx];
 	       offd_data[cnt++] = tmp_offd_data[indx++];
 	    }
+	    if (indx == cnt_offd) break;
 	    if (offd_j[i] == tmp_offd_j[indx])
 	    {
 	       offd_j[i] = tmp_offd_j[indx];
