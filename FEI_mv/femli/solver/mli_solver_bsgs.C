@@ -124,6 +124,7 @@ int MLI_Solver_BSGS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
    double  *ADiagA, *AOffdA, *uData, *fData, *tmpA, *fExtData=NULL;
    double  relaxWeight, *vBufData=NULL, *vExtData=NULL, res;
    double  *dbleX=NULL, *dbleB=NULL;
+   char    vecName[30];
    MPI_Comm               comm;
    hypre_ParCSRMatrix     *A;
    hypre_CSRMatrix        *ADiag, *AOffd;
@@ -337,8 +338,9 @@ int MLI_Solver_BSGS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
 #endif
                hypre_VectorSize(sluB) = blkLeng;
                hypre_VectorSize(sluX) = blkLeng;
-               mliB = new MLI_Vector((void*) sluB, "HYPRE_Vector", NULL);
-               mliX = new MLI_Vector((void*) sluX, "HYPRE_Vector", NULL);
+               strcpy( vecName, "HYPRE_Vector" );
+               mliB = new MLI_Vector((void*) sluB, vecName, NULL);
+               mliX = new MLI_Vector((void*) sluX, vecName, NULL);
 
                blockSolvers_[iB]->solve( mliB, mliX );
 
@@ -456,8 +458,9 @@ int MLI_Solver_BSGS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
 #endif
                hypre_VectorSize(sluB) = blkLeng;
                hypre_VectorSize(sluX) = blkLeng;
-               mliB = new MLI_Vector((void*) sluB, "HYPRE_Vector", NULL);
-               mliX = new MLI_Vector((void*) sluX, "HYPRE_Vector", NULL);
+               strcpy( vecName, "HYPRE_Vector" );
+               mliB = new MLI_Vector((void*) sluB, vecName, NULL);
+               mliX = new MLI_Vector((void*) sluX, vecName, NULL);
 
                blockSolvers_[iB]->solve( mliB, mliX );
 
@@ -952,7 +955,8 @@ int MLI_Solver_BSGS::buildBlocks()
       hypre_CSRMatrixJ(seqA)    = csrJA;
       hypre_CSRMatrixData(seqA) = csrAA;
       MLI_Utils_HypreCSRMatrixGetDestroyFunc(funcPtr);
-      mliMat = new MLI_Matrix((void*) seqA,"HYPRE_CSR",funcPtr);
+      strcpy( sName, "HYPRE_CSR" );
+      mliMat = new MLI_Matrix((void*) seqA, sName, funcPtr);
       blockSolvers_[iB]->setup( mliMat );
       delete mliMat;
 #ifdef HAVE_ESSL
