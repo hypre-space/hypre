@@ -49,11 +49,13 @@ int dataExchangeList(int num_contacts,
        contact_send_buf[contact_send_buf_starts[j]], and this buffer is
        of size (contact_send_buf_starts[j+1] - contact_send_buf_starts[j]).
                                       
-  contact_obj_size = sizeof() one data item (int, double, etc.) in 
-      contact_send_buf  
+  contact_obj_size = sizeof() one data item (int, double, structure, etc.) in 
+      contact_send_buf.   THIS NEEDS TO BE THE SAME
+      NUMBER FOR ALL PROCESSORS.
 
   response_obj_size = sizeof() one data item in response_recv_buf(int,
-      double, etc.)
+      double, structure, etc.)  THIS NEEDS TO BE THE SAME
+      NUMBER FOR ALL PROCESSORS.
 
   response_obj = this will give us the function we need to fill the
       response as well as any data we might need to
@@ -74,7 +76,8 @@ int dataExchangeList(int num_contacts,
   rnum = two consecutive calls to this function should have
       different rnums. Recommend alternating rnum = 1 and rnum=2 - these
       flags will be even (so odd numbered tags could be used in calling
-      code in between)
+      code in between). THIS NEEDS TO BE THE SAME
+      NUMBER FOR ALL PROCESSORS.
   
 
   comm = MPI_COMM 
@@ -124,7 +127,7 @@ typedef struct
     indicate the size of the response in response_message_size.  Note
     that response_message_size and contact_size are NOT in bytes - but
     rather the number of objects sent (i.e. contact size = 4 if four
-    integers were sent).
+    integers or structures were sent).
 
     Note 1: If the desired response to contact messages is a NULL
     response (a confirmation), simply assign response_message_size to
@@ -139,7 +142,7 @@ typedef struct
      larger amount of data than is available.  If more storage is needed
      then adjust the send_response_storage variable to indicate the new size
      desired. Then realloc response_buf to size (send_response_storage +
-     send_response_overhead).
+     send_response_overhead)*(size of response object).
 
   send_response_overhead - this is extra overhead needed by
      dataExchangeList.  Include this if you need to realloc response_buf
