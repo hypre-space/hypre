@@ -65,53 +65,6 @@ LFLAGS =\
  ${BLASLIBFLAGS} \
  ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
 
-###########################################
-# Beta definitions
-###########################################
-
-BETA_CFLAGS = ${CFLAGS}
-
-BETA_LFLAGS =\
- ${LD_LINK_FLAGS}\
- -L../hypre/lib\
- -lHYPRE_sstruct_ls\
- -lHYPRE_sstruct_mv\
- -lHYPRE_struct_ls\
- -lHYPRE_struct_mv\
- -lHYPRE_parcsr_ls\
- -lHYPRE_DistributedMatrixPilutSolver \
- -lHYPRE_ParaSails \
- -lHYPRE_Euclid \
- -lHYPRE_MatrixMatrix \
- -lHYPRE_DistributedMatrix \
- -lHYPRE_IJ_mv\
- -lHYPRE_parcsr_mv\
- -lHYPRE_seq_mv\
- -lHYPRE_krylov\
- -lHYPRE_utilities\
- ${BLASLIBFLAGS} \
- ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
-
-BETA77_LFLAGS =\
- ${LD_LINK_FLAGS}\
- -L.\
- -L../hypre/lib\
- -lHYPRE_parcsr_ls\
- -lHYPRE_DistributedMatrixPilutSolver \
- -lHYPRE_ParaSails \
- -lHYPRE_Euclid \
- -lHYPRE_MatrixMatrix \
- -lHYPRE_DistributedMatrix \
- -lHYPRE_IJ_mv\
- -lHYPRE_parcsr_mv\
- -lHYPRE_seq_mv\
- -lHYPRE_struct_ls\
- -lHYPRE_struct_mv\
- -lHYPRE_utilities\
- -lHYPRE_krylov\
- ${BLASLIBFLAGS} \
- ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
-
 STRUCT_LFLAGS =\
  ${LD_LINK_FLAGS}\
  -L../hypre/lib\
@@ -211,10 +164,6 @@ HYPRE_BABEL_DRIVERS_CXX =
 HYPRE_BABEL_DRIVERS_F77 =\
  f77_ij_b.f
 
-HYPRE_BETA_DRIVERS =
-
-HYPRE_BETA_DRIVERS_F77 =
-
 #ifndef is gmake only, can't be used...
 #ifndef BABELLIBFLAGS
  HYPRE_DRIVERS = ${HYPRE_STANDARD_DRIVERS}
@@ -227,15 +176,11 @@ HYPRE_BETA_DRIVERS_F77 =
 HYPRE_DRIVER_OBJS=${HYPRE_DRIVERS:.c=.o}
 HYPRE_DRIVER_CXX_OBJS=${HYPRE_DRIVERS_CXX:.C=.o}
 HYPRE_DRIVER_F77_OBJS=${HYPRE_DRIVERS_F77:.f=.o}
-HYPRE_BETA_DRIVER_OBJS=${HYPRE_BETA_DRIVERS:.c=.o}
-HYPRE_BETA_DRIVER_F77_OBJS=${HYPRE_BETA_DRIVERS_F77:.f=.o}
 HYPRE_FEI_DRIVER_CXX_OBJS=${HYPRE_FEI_DRIVERS_CXX:.C=.o}
 
 HYPRE_DRIVER_EXECS=${HYPRE_DRIVERS:.c=}
 HYPRE_DRIVER_CXX_EXECS=${HYPRE_DRIVERS_CXX:.C=}
 HYPRE_DRIVER_F77_EXECS=${HYPRE_DRIVERS_F77:.f=}
-HYPRE_BETA_DRIVER_EXECS=${HYPRE_BETA_DRIVERS:.c=}
-HYPRE_BETA_DRIVER_F77_EXECS=${HYPRE_BETA_DRIVERS_F77:.f=}
 HYPRE_FEI_DRIVER_CXX_EXECS=${HYPRE_FEI_DRIVERS_CXX:.C=}
 
 HYPRE_BABEL_DRIVER_OBJS=${HYPRE_BABEL_DRIVERS:.c=.o}
@@ -252,13 +197,7 @@ all++: ${HYPRE_DRIVER_CXX_EXECS}
 
 all77: ${HYPRE_DRIVER_F77_EXECS}
 
-beta: all ${HYPRE_BETA_DRIVER_EXECS}
-
-beta++: all++
-
 fei++: ${HYPRE_FEI_DRIVER_CXX_EXECS}
-
-beta77: all77 ${HYPRE_BETA_DRIVER_F77_EXECS}
 
 babel: ${HYPRE_BABEL_DRIVER_EXECS} ${HYPRE_BABEL_DRIVER_F77_EXECS}
 
@@ -274,8 +213,6 @@ veryclean: clean
 	@rm -f ${HYPRE_BABEL_DRIVER_EXECS}
 	@rm -f ${HYPRE_BABEL_DRIVER_CXX_EXECS}
 	@rm -f ${HYPRE_BABEL_DRIVER_F77_EXECS}
-	@rm -f ${HYPRE_BETA_DRIVER_EXECS}
-	@rm -f ${HYPRE_BETA_DRIVER_F77_EXECS}
 	@rm -f ${HYPRE_FEI_DRIVER_CXX_EXECS}
 
 ##################################################################
@@ -366,18 +303,6 @@ ${HYPRE_BABEL_DRIVER_EXECS}: ${HYPRE_BABEL_DRIVER_OBJS}
 ${HYPRE_BABEL_DRIVER_F77_EXECS}: ${HYPRE_BABEL_DRIVER_F77_OBJS}
 	@echo  "Building" $@ "... "
 	${F77} -o $@ $@.o ${FFLAGS} ${BABELLIBFLAGS} ${LFLAGS}
-
-##################################################################
-# Beta rules
-##################################################################
-
-#${HYPRE_BETA_DRIVER_EXECS}: ${HYPRE_BETA_DRIVER_OBJS}
-#	@echo  "Building" $@ "... "
-#	${CC} -o $@ $@.o ${BETA_CFLAGS} ${BETA_LFLAGS}
-
-#${HYPRE_BETA_DRIVER_F77_EXECS}: ${HYPRE_BETA_DRIVER_F77_OBJS}
-#	@echo  "Building" $@ "... "
-#	${F77} -o $@ $@.o ${FFLAGS} ${BETA77_LFLAGS}
 
 ##################################################################
 # Generic rules

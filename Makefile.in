@@ -77,23 +77,6 @@ all: krylov struct sstruct IJ fei
 	(cd test; $(MAKE) veryclean; $(MAKE)); \
 	echo ""
 
-beta: all
-	@ \
-	HYPRE_INSTALL_DIR=`pwd`/hypre; \
-	export HYPRE_INSTALL_DIR; \
-	for i in ${HYPRE_EXTRA_DIRS}; \
-	do \
-	  if [ -d $$i ]; \
-	  then \
-	    echo "Making $$i ..."; \
-	    (cd $$i; $(MAKE) install); \
-	    echo ""; \
-	  fi; \
-	done; \
-	echo "Making beta test drivers ..."; \
-	(cd test; $(MAKE) beta); \
-	echo ""
-
 krylov: base
 	@ \
 	HYPRE_INSTALL_DIR=`pwd`/hypre; \

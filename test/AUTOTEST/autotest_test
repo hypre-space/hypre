@@ -108,7 +108,6 @@ parse_arguments () {
     argcur=$arg
     case $arg in
       a) confbuildtest $OPTARG  " "             "default"   1 1 1 1 1 1 1;;
-      b) confbuildtest $OPTARG  " "             "beta"      0 0 0 0 0 1 1;;
       c) build $Build "all++"   "all++"         "test";;
       D) DEBUG_MODE="yes";;
       d) build $Build "all"     "docs"          "docs";;
@@ -130,8 +129,6 @@ parse_arguments () {
       s) confbuildtest $Build   "--with-strict-checking" \
                                          "strict_checking"  1 1 1 1 1 1 0;;
       v) HYPRE_MESSAGE=$OPTARG;;
-      x) build $Build   "beta++" "beta++" "test";;
-      y) build $Build   "beta77" "beta77" "test";;
       :) echo "$0: \"$argcur\" requires a value"; exit 2;;
      \?) echo "$0: INVALID option \"$argcur\" at $OPTIND"; exit 2;;
     esac
@@ -156,10 +153,8 @@ usage () {
   printf "  2=configure, make and run.\n"
   printf "\n"
   printf "%s\n" "-a opt   All; the (default) configure, make, and execute. Also"
-  printf "         performs make struct, IJ, fei, all, beta, nofei, and\n"
+  printf "         performs make struct, IJ, fei, all, nofei, and\n"
   printf "         fei++, followed by the runtest script (when opt=2).\n"
-  printf "%s\n" "-b opt   Beta; perform the (default) configure, make beta,"
-  printf "         nofei, fei++, followed by the runtest script (when opt=2).\n"
   printf "%s\n" "-c       C++; make all++ (no configure, or execute)."
   printf "%s\n" "-D       Turn on debug messages."
   printf "%s\n" "-d       Docs; make the documentation directory."
@@ -171,17 +166,15 @@ usage () {
   printf "%s\n" "-m       Mail; mail error summary to developers."
   printf "%s\n" "+m       Mail+; mail error logs to developers."
   printf "%s\n" "-n       NoMPI; configure --without-MPI, make struct, IJ,"
-  printf "         all, and beta (no execute option).\n"
-  printf "%s\n" "-o opt   openMP; configure --with-openmp, make beta."
+  printf "         and all (no execute option).\n"
+  printf "%s\n" "-o opt   openMP; configure --with-openmp, make."
   printf "%s\n" "-q opt   Purify; perform configure --with-purify-to-file."
   printf "         Output is appended to a file called purify.log.\n"
   printf "%s\n" "+q opt   Purify; no file output option (interactive)."
   printf "%s\n" "-r host  Remote; remote exection is performed on "host"."
   printf "%s\n" "-s       Strict; configure --with-strict-checking,"
-  printf "         followed by make struct, IJ, all, beta(no execute option).\n"
+  printf "         followed by make struct, IJ, all(no execute option).\n"
   printf "%s\n" "-v text  Additional test to prefix to email subject line."
-  printf "%s\n" "-x       BetaC++; make beta++ (no configure, or execute)."
-  printf "%s\n" "-y       BetaF77; make beta77 (no configure, or execute)."
 }
 
 #=============================================================================
@@ -247,14 +240,14 @@ mail_summary () {
   printf "Directory:          %s\n" ${HYPRE_AUTOTEST_DIR} >> $SUMFILE
   printf "%s\n" "--------------------------------------------" >> $SUMFILE
   printf "Compile summary: Status: Warnings: Errors\n" >> $SUMFILE
-  for ConfOpt in default beta no_mpi openmp petac \
-           pthreads insure purify strict_checking \
-           docs all++ all77 beta++ beta77
+  for ConfOpt in default no_mpi openmp \
+           insure purify strict_checking \
+           docs all++ all77
   do
     printf "%-15s: " $ConfOpt >> $SUMFILE
     TestCaseSuccessCount=0; TestCaseFailedCount=0;
     DWRNCNT=0; DERRCNT=0;
-    for MakeOpt in ""  all beta configure IJ fei++ \
+    for MakeOpt in ""  all configure IJ fei++ \
            fei nofei sstruct struct
     do
       FILE=autotest.$ConfOpt.$MakeOpt
@@ -545,9 +538,6 @@ if [ ${BuildOpt} -ne $Skip ] ; then
       makeit "all" $MessageStr "$HYPRE_DEFAULT_EMAIL"
     fi
 
-    if [ $BetaOpt -ne $Skip ] ; then
-      makeit "beta" $MessageStr "$HYPRE_DEFAULT_EMAIL"
-    fi
   fi
   if [ ${BuildOpt} -eq $Run ] ; then
     echo "Autotest starting execution of $MessageStr"
