@@ -64,5 +64,6 @@ cat <<@
 
 rm -f $TEMP_FILE
 
-../utilities/protos HYPRE*.c > $TEMP_FILE
+../utilities/protos HYPRE*.c
+
 
