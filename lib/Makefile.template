@@ -527,13 +527,12 @@ all:
 	@echo  "Building libHYPRE_LSI.a ... "
 	${AR} libHYPRE_LSI.a ${FILES_LSI}
 	${RANLIB} libHYPRE_LSI.a
-	cp -fp libHYPRE* ${HYPRE_BUILD_DIR}/lib/.
+	cp -fp libHYPRE* ${HYPRE_BUILD_DIR}/lib
 
 install: all
-	cp -fp libHYPRE* ${HYPRE_LIB_INSTALL}/.
+	cp -fp libHYPRE* ${HYPRE_LIB_INSTALL}
 
 clean:
-	rm -f *.o lib*.a
 
-distclean: clean
-	rm -f Makefile
+distclean:
+	rm -f *.o lib*.a Makefile
