@@ -2475,46 +2475,40 @@ int MLI_Utils_HypreFGMRESSolve(void *precon, HYPRE_Matrix A,
       for (i = 0; i < 25; i++) relaxOmega[i] = 1.0;
       HYPRE_BoomerAMGSetOmega(gmresPrecond, relaxOmega);
       HYPRE_ParCSRFGMRESSetMaxIter(gmresSolver, maxIter);
-      HYPRE_ParCSRFGMRESSetPrecond(gmresSolver,
-                       (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,
-                       (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup,
-                       gmresPrecond);
+      HYPRE_ParCSRFGMRESSetPrecond(gmresSolver, HYPRE_BoomerAMGSolve,
+                       HYPRE_BoomerAMGSetup, gmresPrecond);
    }
    else if (!strcmp(pname, "mli"))
    {
       cmli = (CMLI *) precon;
       MLI_SetMaxIterations(cmli, 1);
       gmresPrecond = (HYPRE_Solver) cmli;
-      HYPRE_ParCSRFGMRESSetPrecond(gmresSolver,
-                       (HYPRE_PtrToSolverFcn) MLI_Utils_ParCSRMLISolve,
-                       (HYPRE_PtrToSolverFcn) MLI_Utils_ParCSRMLISetup,
-                       gmresPrecond);
+      HYPRE_ParCSRFGMRESSetPrecond(gmresSolver, MLI_Utils_ParCSRMLISolve,
+                       MLI_Utils_ParCSRMLISetup, gmresPrecond);
    }
    else if (!strcmp(pname, "pJacobi"))
    {
       gmresPrecond = (HYPRE_Solver) precon;
       HYPRE_ParCSRFGMRESSetMaxIter(gmresSolver, 10);
       HYPRE_ParCSRFGMRESSetLogging(gmresSolver, 0);
-      HYPRE_ParCSRFGMRESSetPrecond(gmresSolver,
-                       (HYPRE_PtrToSolverFcn) MLI_Utils_mJacobiSolve,
-                       (HYPRE_PtrToSolverFcn) MLI_Utils_mJacobiSetup,
-                       gmresPrecond);
+      HYPRE_ParCSRFGMRESSetPrecond(gmresSolver, MLI_Utils_mJacobiSolve,
+                       MLI_Utils_mJacobiSetup, gmresPrecond);
    }
    else if (!strcmp(pname, "mJacobi"))
    {
       gmresPrecond = (HYPRE_Solver) precon;
       HYPRE_ParCSRFGMRESSetMaxIter(gmresSolver, 5); /* change this in amgcr too */
       HYPRE_ParCSRFGMRESSetLogging(gmresSolver, 0);
-      HYPRE_ParCSRFGMRESSetPrecond(gmresSolver,
-                       (HYPRE_PtrToSolverFcn) MLI_Utils_mJacobiSolve,
-                       (HYPRE_PtrToSolverFcn) MLI_Utils_mJacobiSetup,
-                       gmresPrecond);
+      HYPRE_ParCSRFGMRESSetPrecond(gmresSolver, MLI_Utils_mJacobiSolve, 
+                       MLI_Utils_mJacobiSetup, gmresPrecond);
    }
    setupTime = MLI_Utils_WTime();
-   HYPRE_ParCSRFGMRESSetup(gmresSolver, A, b, x);
+   HYPRE_ParCSRFGMRESSetup(gmresSolver, hypreA, (HYPRE_ParVector) b, 
+                           (HYPRE_ParVector) x);
    solveTime = MLI_Utils_WTime();
    setupTime = solveTime - setupTime;
-   HYPRE_ParCSRFGMRESSolve(gmresSolver, A, b, x);
+   HYPRE_ParCSRFGMRESSolve(gmresSolver, hypreA, (HYPRE_ParVector) b,
+                           (HYPRE_ParVector) x);
    solveTime = MLI_Utils_WTime() - solveTime;
    HYPRE_ParCSRFGMRESGetNumIterations(gmresSolver, &numIterations);
    HYPRE_ParCSRFGMRESGetFinalRelativeResidualNorm(gmresSolver, &norm);
