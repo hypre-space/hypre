@@ -2208,7 +2208,6 @@ void HYPRE_LinSysCore::selectSolver(char* name)
        case HYGMRES :
             HYPRE_ParCSRGMRESCreate(comm_, &HYSolver_);
             break;
-       case HYAMGE :
     }
 
     if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
