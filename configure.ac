@@ -59,9 +59,9 @@ AC_HELP_STRING([--with-babel],[use babel]),
     -I HYPRE_TOP_SRC_DIR/babel/bHYPRE"
     BABEL_LIB_DIR="HYPRE_TOP_SRC_DIR/hypre/lib"
     BABELLIBFLAGS="\
-    -L HYPRE_TOP_SRC_DIR/babel/bHYPREClient-C -lbHYPREClient-C\
-    -L HYPRE_TOP_SRC_DIR/babel/bHYPREClient-F -lbHYPREClient-F\
-    -L HYPRE_TOP_SRC_DIR/babel/bHYPRE -lbHYPRE\
+    -L/HYPRE_TOP_SRC_DIR/babel/bHYPREClient-C -lbHYPREClient-C\
+    -L/HYPRE_TOP_SRC_DIR/babel/bHYPREClient-F -lbHYPREClient-F\
+    -L/HYPRE_TOP_SRC_DIR/babel/bHYPRE -lbHYPRE\
     -L${BABEL_LIB_DIR} -lsidl"
  
     babeldir="${BABEL_INSTALL_DIR}"
