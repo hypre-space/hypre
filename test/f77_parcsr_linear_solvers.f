@@ -162,19 +162,24 @@ c     Compute some grid and processor information
 c-----------------------------------------------------------------------
 
       if (dim .eq. 1) then
+
          volume  = nx
          nblocks = bx
 
 c        compute p from Px and myid
          p = mod(myid,Px)
+
       elseif (dim .eq. 2) then
+
          volume  = nx*ny
          nblocks = bx*by
 
 c        compute p,q from Px, Py and myid
          p = mod(myid,Px)
          q = mod(((myid - p)/Px),Py)
+
       elseif (dim .eq. 3) then
+
          volume  = nx*ny*nz
          nblocks = bx*by*bz
 
@@ -182,6 +187,7 @@ c        compute p,q,r from Px,Py,Pz and myid
          p = mod(myid,Px)
          q = mod((( myid - p)/Px),Py)
          r = (myid - (p + Px*q))/(Px*Py)
+
       endif
 
 c----------------------------------------------------------------------
@@ -191,12 +197,15 @@ c----------------------------------------------------------------------
 
       ib = 1
       if (dim .eq. 1) then
+
          do ix=0,bx-1
             ilower(1,ib) = istart(1) + nx*(bx*p+ix)
             iupper(1,ib) = istart(1) + nx*(bx*p+ix+1)-1
             ib = ib + 1
          enddo
+
       elseif (dim .eq. 2) then
+
          do iy=0,by-1
             do ix=0,bx-1
                ilower(1,ib) = istart(1) + nx*(bx*p+ix)
@@ -206,7 +215,9 @@ c----------------------------------------------------------------------
                ib = ib + 1
             enddo
          enddo
+
       elseif (dim .eq. 3) then
+
          do iz=0,bz-1
             do iy=0,by-1
                do ix=0,bx-1
@@ -220,6 +231,7 @@ c----------------------------------------------------------------------
                enddo
             enddo
          enddo
+
       endif 
 
 c----------------------------------------------------------------------
@@ -227,16 +239,21 @@ c     Compute the offsets and set up the stencil structure.
 c----------------------------------------------------------------------
 
       if (dim .eq. 1) then
+
          offsets(1,1) = -1
          offsets(1,2) =  0
+
       elseif (dim .eq. 2) then
+
          offsets(1,1) = -1
          offsets(2,1) =  0 
          offsets(1,2) =  0
          offsets(2,2) = -1 
          offsets(1,3) =  0
          offsets(2,3) =  0
+
       elseif (dim .eq. 3) then
+
          offsets(1,1) = -1
          offsets(2,1) =  0
          offsets(3,1) =  0
@@ -249,16 +266,17 @@ c----------------------------------------------------------------------
          offsets(1,4) =  0
          offsets(2,4) =  0
          offsets(3,4) =  0
+
       endif
  
 c-----------------------------------------------------------------------
 c     Set up the matrix structure
 c-----------------------------------------------------------------------
 
-      call HYPRE_CreateParCSRMatrix(MPI_COMM_WORLD, gnrows, gncols,
-     &   rstarts, cstarts, ncoloffdg, nonzsdg, nonzsoffdg)
-      call HYPRE_InitializeParCSRMatrix(MPI_COMM_WORLD, gnrows, gncols,
-     &   starts, cstarts, ncoloffdg, nonzsdg, nonzsoffdg)
+      call HYPRE_NewParCSRMatrix(MPI_COMM_WORLD, gnrows, gncols,
+     &   rstarts, cstarts, ncoloffdg, nonzsdg, nonzsoffdg, A, ierr)
+
+      call HYPRE_InitializeParCSRMatrix(A, ierr)
 
 c-----------------------------------------------------------------------
 c     Set up the rhs and initial guess
