@@ -245,7 +245,10 @@ main( int   argc,
       printf("                         21 - Hybrid with PFMG precond\n");
       printf("                         22 - Hybrid with SparseMSG precond\n");
       printf("\n");
+   }
 
+   if ( print_usage )
+   {
       exit(1);
    }
 
