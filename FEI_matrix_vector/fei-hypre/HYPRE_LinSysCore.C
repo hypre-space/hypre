@@ -2384,7 +2384,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
     int                i, j, num_iterations, status, *num_sweeps, *relax_type;
     int                ierr, localNRows, rowNum, index, x2NRows;
     int                startRow, *int_array, *gint_array, startRow2;
-    int                globalNConstrs, rowSize, *colInd, nnz, nrows;
+    int                rowSize, *colInd, nnz, nrows;
     double             rnorm, *relax_wt, ddata, *colVal, value;
     double             stime, etime, ptime, rtime1, rtime2;
     char               fname[40];
@@ -2411,9 +2411,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
        buildSchurReducedSystem();
     }
 
-    MPI_Allreduce(&nConstraints_, &globalNConstrs,1,MPI_INT,MPI_SUM,comm_);
-    
-    if ( schurReduction_ == 0 && globalNConstrs != 0 )
+    if ( schurReduction_ == 0 && slideReduction_ == 1 )
     {
        if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 && mypid_ == 0 )
        {
