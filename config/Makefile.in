@@ -41,6 +41,8 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 host_triplet = @host@
 ACLOCAL = @ACLOCAL@
+AMDEP_FALSE = @AMDEP_FALSE@
+AMDEP_TRUE = @AMDEP_TRUE@
 AMTAR = @AMTAR@
 AR = @AR@
 AS = @AS@
@@ -57,6 +59,7 @@ BLASNEEDED_FALSE = @BLASNEEDED_FALSE@
 BLASNEEDED_TRUE = @BLASNEEDED_TRUE@
 BLAS_LIBS = @BLAS_LIBS@
 CC = @CC@
+CCDEPMODE = @CCDEPMODE@
 CCLD = @CCLD@
 CFLAGS = @CFLAGS@
 CPP = @CPP@
@@ -64,10 +67,12 @@ CPPFLAGS = @CPPFLAGS@
 CSUPERLUFLAGS = @CSUPERLUFLAGS@
 CXX = @CXX@
 CXXCPP = @CXXCPP@
+CXXDEPMODE = @CXXDEPMODE@
 CXXFLAGS = @CXXFLAGS@
 CXXLD = @CXXLD@
 CYGPATH_W = @CYGPATH_W@
 DEFS = @DEFS@
+DEPDIR = @DEPDIR@
 DLLTOOL = @DLLTOOL@
 ECHO = @ECHO@
 ECHO_C = @ECHO_C@
@@ -137,7 +142,13 @@ ac_ct_F77 = @ac_ct_F77@
 ac_ct_OBJDUMP = @ac_ct_OBJDUMP@
 ac_ct_RANLIB = @ac_ct_RANLIB@
 ac_ct_STRIP = @ac_ct_STRIP@
+am__fastdepCC_FALSE = @am__fastdepCC_FALSE@
+am__fastdepCC_TRUE = @am__fastdepCC_TRUE@
+am__fastdepCXX_FALSE = @am__fastdepCXX_FALSE@
+am__fastdepCXX_TRUE = @am__fastdepCXX_TRUE@
+am__include = @am__include@
 am__leading_dot = @am__leading_dot@
+am__quote = @am__quote@
 babeldir = @babeldir@
 bindir = @bindir@
 build = @build@
@@ -188,11 +199,9 @@ ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/HYPRE_config.h
 CONFIG_CLEAN_FILES =
-depcomp =
-am__depfiles_maybe =
 DIST_SOURCES =
 DIST_COMMON = $(srcdir)/Makefile.in Makefile.am config.guess config.sub \
-	install-sh ltmain.sh missing mkinstalldirs
+	depcomp install-sh ltmain.sh missing mkinstalldirs
 all: all-am
 
 .SUFFIXES:

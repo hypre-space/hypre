@@ -37,6 +37,8 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 host_triplet = @host@
 ACLOCAL = @ACLOCAL@
+AMDEP_FALSE = @AMDEP_FALSE@
+AMDEP_TRUE = @AMDEP_TRUE@
 AMTAR = @AMTAR@
 AR = @AR@
 AS = @AS@
@@ -53,6 +55,7 @@ BLASNEEDED_FALSE = @BLASNEEDED_FALSE@
 BLASNEEDED_TRUE = @BLASNEEDED_TRUE@
 BLAS_LIBS = @BLAS_LIBS@
 CC = @CC@
+CCDEPMODE = @CCDEPMODE@
 CCLD = @CCLD@
 CFLAGS = @CFLAGS@
 CPP = @CPP@
@@ -60,10 +63,12 @@ CPPFLAGS = @CPPFLAGS@
 CSUPERLUFLAGS = @CSUPERLUFLAGS@
 CXX = @CXX@
 CXXCPP = @CXXCPP@
+CXXDEPMODE = @CXXDEPMODE@
 CXXFLAGS = @CXXFLAGS@
 CXXLD = @CXXLD@
 CYGPATH_W = @CYGPATH_W@
 DEFS = @DEFS@
+DEPDIR = @DEPDIR@
 DLLTOOL = @DLLTOOL@
 ECHO = @ECHO@
 ECHO_C = @ECHO_C@
@@ -133,7 +138,13 @@ ac_ct_F77 = @ac_ct_F77@
 ac_ct_OBJDUMP = @ac_ct_OBJDUMP@
 ac_ct_RANLIB = @ac_ct_RANLIB@
 ac_ct_STRIP = @ac_ct_STRIP@
+am__fastdepCC_FALSE = @am__fastdepCC_FALSE@
+am__fastdepCC_TRUE = @am__fastdepCC_TRUE@
+am__fastdepCXX_FALSE = @am__fastdepCXX_FALSE@
+am__fastdepCXX_TRUE = @am__fastdepCXX_TRUE@
+am__include = @am__include@
 am__leading_dot = @am__leading_dot@
+am__quote = @am__quote@
 babeldir = @babeldir@
 bindir = @bindir@
 build = @build@
@@ -306,8 +317,76 @@ am_libbHYPREClient_F_la_OBJECTS = $(am__objects_4)
 libbHYPREClient_F_la_OBJECTS = $(am_libbHYPREClient_F_la_OBJECTS)
 
 DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
-depcomp =
-am__depfiles_maybe =
+depcomp = $(SHELL) $(top_srcdir)/config/depcomp
+am__depfiles_maybe = depfiles
+@AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/SIDL_BaseClass_fStub.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/SIDL_BaseException_fStub.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/SIDL_BaseInterface_fStub.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/SIDL_ClassInfoI_fStub.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/SIDL_ClassInfo_fStub.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/SIDL_DLL_fStub.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/SIDL_Loader_fStub.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/bHYPRE_BoomerAMG_IOR.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/bHYPRE_BoomerAMG_fStub.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/bHYPRE_CoefficientAccess_IOR.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/bHYPRE_CoefficientAccess_fStub.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/bHYPRE_GMRES_IOR.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/bHYPRE_GMRES_fStub.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/bHYPRE_IJBuildMatrix_IOR.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/bHYPRE_IJBuildMatrix_fStub.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/bHYPRE_IJBuildVector_IOR.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/bHYPRE_IJBuildVector_fStub.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/bHYPRE_IJParCSRMatrix_IOR.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/bHYPRE_IJParCSRMatrix_fStub.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/bHYPRE_IJParCSRVector_IOR.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/bHYPRE_IJParCSRVector_fStub.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/bHYPRE_Operator_IOR.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/bHYPRE_Operator_fStub.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/bHYPRE_PCG_IOR.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/bHYPRE_PCG_fStub.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/bHYPRE_ParCSRDiagScale_IOR.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/bHYPRE_ParCSRDiagScale_fStub.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/bHYPRE_Pilut_IOR.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/bHYPRE_Pilut_fStub.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/bHYPRE_PreconditionedSolver_IOR.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/bHYPRE_PreconditionedSolver_fStub.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/bHYPRE_ProblemDefinition_IOR.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/bHYPRE_ProblemDefinition_fStub.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/bHYPRE_SStructBuildMatrix_IOR.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/bHYPRE_SStructBuildMatrix_fStub.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/bHYPRE_SStructBuildVector_IOR.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/bHYPRE_SStructBuildVector_fStub.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/bHYPRE_SStructGraph_IOR.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/bHYPRE_SStructGraph_fStub.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/bHYPRE_SStructGrid_IOR.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/bHYPRE_SStructGrid_fStub.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/bHYPRE_SStructMatrix_IOR.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/bHYPRE_SStructMatrix_fStub.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/bHYPRE_SStructParCSRMatrix_IOR.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/bHYPRE_SStructParCSRMatrix_fStub.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/bHYPRE_SStructParCSRVector_IOR.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/bHYPRE_SStructParCSRVector_fStub.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/bHYPRE_SStructStencil_IOR.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/bHYPRE_SStructStencil_fStub.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/bHYPRE_SStructVariable_fStub.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/bHYPRE_SStructVector_IOR.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/bHYPRE_SStructVector_fStub.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/bHYPRE_Solver_IOR.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/bHYPRE_Solver_fStub.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/bHYPRE_StructBuildMatrix_IOR.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/bHYPRE_StructBuildMatrix_fStub.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/bHYPRE_StructBuildVector_IOR.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/bHYPRE_StructBuildVector_fStub.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/bHYPRE_StructGrid_IOR.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/bHYPRE_StructGrid_fStub.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/bHYPRE_StructMatrix_IOR.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/bHYPRE_StructMatrix_fStub.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/bHYPRE_StructStencil_IOR.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/bHYPRE_StructStencil_fStub.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/bHYPRE_StructVector_IOR.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/bHYPRE_StructVector_fStub.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/bHYPRE_Vector_IOR.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/bHYPRE_Vector_fStub.Plo
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) \
@@ -364,14 +443,107 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SIDL_BaseClass_fStub.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SIDL_BaseException_fStub.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SIDL_BaseInterface_fStub.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SIDL_ClassInfoI_fStub.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SIDL_ClassInfo_fStub.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SIDL_DLL_fStub.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SIDL_Loader_fStub.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bHYPRE_BoomerAMG_IOR.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bHYPRE_BoomerAMG_fStub.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bHYPRE_CoefficientAccess_IOR.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bHYPRE_CoefficientAccess_fStub.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bHYPRE_GMRES_IOR.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bHYPRE_GMRES_fStub.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bHYPRE_IJBuildMatrix_IOR.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bHYPRE_IJBuildMatrix_fStub.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bHYPRE_IJBuildVector_IOR.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bHYPRE_IJBuildVector_fStub.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bHYPRE_IJParCSRMatrix_IOR.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bHYPRE_IJParCSRMatrix_fStub.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bHYPRE_IJParCSRVector_IOR.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bHYPRE_IJParCSRVector_fStub.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bHYPRE_Operator_IOR.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bHYPRE_Operator_fStub.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bHYPRE_PCG_IOR.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bHYPRE_PCG_fStub.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bHYPRE_ParCSRDiagScale_IOR.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bHYPRE_ParCSRDiagScale_fStub.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bHYPRE_Pilut_IOR.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bHYPRE_Pilut_fStub.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bHYPRE_PreconditionedSolver_IOR.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bHYPRE_PreconditionedSolver_fStub.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bHYPRE_ProblemDefinition_IOR.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bHYPRE_ProblemDefinition_fStub.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bHYPRE_SStructBuildMatrix_IOR.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bHYPRE_SStructBuildMatrix_fStub.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bHYPRE_SStructBuildVector_IOR.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bHYPRE_SStructBuildVector_fStub.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bHYPRE_SStructGraph_IOR.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bHYPRE_SStructGraph_fStub.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bHYPRE_SStructGrid_IOR.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bHYPRE_SStructGrid_fStub.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bHYPRE_SStructMatrix_IOR.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bHYPRE_SStructMatrix_fStub.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bHYPRE_SStructParCSRMatrix_IOR.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bHYPRE_SStructParCSRMatrix_fStub.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bHYPRE_SStructParCSRVector_IOR.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bHYPRE_SStructParCSRVector_fStub.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bHYPRE_SStructStencil_IOR.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bHYPRE_SStructStencil_fStub.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bHYPRE_SStructVariable_fStub.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bHYPRE_SStructVector_IOR.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bHYPRE_SStructVector_fStub.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bHYPRE_Solver_IOR.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bHYPRE_Solver_fStub.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bHYPRE_StructBuildMatrix_IOR.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bHYPRE_StructBuildMatrix_fStub.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bHYPRE_StructBuildVector_IOR.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bHYPRE_StructBuildVector_fStub.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bHYPRE_StructGrid_IOR.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bHYPRE_StructGrid_fStub.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bHYPRE_StructMatrix_IOR.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bHYPRE_StructMatrix_fStub.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bHYPRE_StructStencil_IOR.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bHYPRE_StructStencil_fStub.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bHYPRE_StructVector_IOR.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bHYPRE_StructVector_fStub.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bHYPRE_Vector_IOR.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bHYPRE_Vector_fStub.Plo@am__quote@
+
 .c.o:
-	$(COMPILE) -c `test -f '$<' || echo '$(srcdir)/'`$<
+@am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" \
+@am__fastdepCC_TRUE@	  -c -o $@ `test -f '$<' || echo '$(srcdir)/'`$<; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; \
+@am__fastdepCC_TRUE@	else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; \
+@am__fastdepCC_TRUE@	fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(COMPILE) -c `test -f '$<' || echo '$(srcdir)/'`$<
 
 .c.obj:
-	$(COMPILE) -c `if test -f '$<'; then $(CYGPATH_W) '$<'; else $(CYGPATH_W) '$(srcdir)/$<'; fi`
+@am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" \
+@am__fastdepCC_TRUE@	  -c -o $@ `if test -f '$<'; then $(CYGPATH_W) '$<'; else $(CYGPATH_W) '$(srcdir)/$<'; fi`; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; \
+@am__fastdepCC_TRUE@	else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; \
+@am__fastdepCC_TRUE@	fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(COMPILE) -c `if test -f '$<'; then $(CYGPATH_W) '$<'; else $(CYGPATH_W) '$(srcdir)/$<'; fi`
 
 .c.lo:
-	$(LTCOMPILE) -c -o $@ `test -f '$<' || echo '$(srcdir)/'`$<
+@am__fastdepCC_TRUE@	if $(LTCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" \
+@am__fastdepCC_TRUE@	  -c -o $@ `test -f '$<' || echo '$(srcdir)/'`$<; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Plo"; \
+@am__fastdepCC_TRUE@	else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; \
+@am__fastdepCC_TRUE@	fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/$*.Plo' tmpdepfile='$(DEPDIR)/$*.TPlo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ `test -f '$<' || echo '$(srcdir)/'`$<
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -504,6 +676,7 @@ clean-am: clean-generic clean-libLTLIBRARIES clean-libtool \
 	mostlyclean-am
 
 distclean: distclean-am
+	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
 
 distclean-am: clean-am distclean-compile distclean-generic \
@@ -528,6 +701,7 @@ install-man:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
+	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
 
 maintainer-clean-am: distclean-am maintainer-clean-generic
