@@ -502,15 +502,11 @@ FILES = \
  $(top_srcdir)/utilities/timing.c\
  $(top_srcdir)/utilities/umalloc_local.c
 
-BUILT_SOURCES = hypre-stamp
+BUILT_SOURCES = copy-objects
 
-clean-local:
-	rm -f hypre-stamp
-
-hypre-stamp:
+copy-objects:
 	@ \
-	touch hypre-stamp; \
-	mkdir .libs; \
+	test -d .libs || mkdir .libs; \
 	for i in ${HYPRE_SRC_DIRS}; \
 	do \
 	  if [ -d ../$$i ]; \

@@ -18,8 +18,6 @@
 # Makefile.am --- automake input file for Hypre
 #
 
-#SUFFIXES = .C++.cxx .C++.o
-
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
 VPATH = @srcdir@
@@ -202,15 +200,28 @@ ij_mv_SOURCES = ij_mv.c
 new_ij_SOURCES = new_ij.c
 sstruct_SOURCES = sstruct.c
 struct_SOURCES = struct.c
+ij_DEPENDENCIES = \
+ $(libdir)/libHYPRE_parcsr_ls.la\
+ $(libdir)/libHYPRE_DistributedMatrixPilutSolver.la\
+ $(libdir)/libHYPRE_ParaSails.la\
+ $(libdir)/libHYPRE_Euclid.la\
+ $(libdir)/libHYPRE_IJ_mv.la\
+ $(libdir)/libHYPRE_MatrixMatrix.la\
+ $(libdir)/libHYPRE_DistributedMatrix.la\
+ $(libdir)/libHYPRE_parcsr_mv.la\
+ $(libdir)/libHYPRE_seq_mv.la\
+ $(libdir)/libHYPRE_krylov.la\
+ $(libdir)/libHYPRE_utilities.la
+
 ij_LDADD = \
  -L$(libdir)\
  -lHYPRE_parcsr_ls\
- -lHYPRE_DistributedMatrixPilutSolver \
- -lHYPRE_ParaSails \
- -lHYPRE_Euclid \
+ -lHYPRE_DistributedMatrixPilutSolver\
+ -lHYPRE_ParaSails\
+ -lHYPRE_Euclid\
  -lHYPRE_IJ_mv\
- -lHYPRE_MatrixMatrix \
- -lHYPRE_DistributedMatrix \
+ -lHYPRE_MatrixMatrix\
+ -lHYPRE_DistributedMatrix\
  -lHYPRE_parcsr_mv\
  -lHYPRE_seq_mv\
  -lHYPRE_krylov\
@@ -218,16 +229,29 @@ ij_LDADD = \
  $(LAPACKLIBFLAGS)\
  $(BLASLIBFLAGS)\
  $(LIBM)
+
+ij_mv_DEPENDENCIES = \
+ $(libdir)/libHYPRE_parcsr_ls.la\
+ $(libdir)/libHYPRE_DistributedMatrixPilutSolver.la\
+ $(libdir)/libHYPRE_ParaSails.la\
+ $(libdir)/libHYPRE_Euclid.la\
+ $(libdir)/libHYPRE_IJ_mv.la\
+ $(libdir)/libHYPRE_MatrixMatrix.la\
+ $(libdir)/libHYPRE_DistributedMatrix.la\
+ $(libdir)/libHYPRE_parcsr_mv.la\
+ $(libdir)/libHYPRE_seq_mv.la\
+ $(libdir)/libHYPRE_krylov.la\
+ $(libdir)/libHYPRE_utilities.la
 
 ij_mv_LDADD = \
  -L$(libdir)\
  -lHYPRE_parcsr_ls\
- -lHYPRE_DistributedMatrixPilutSolver \
- -lHYPRE_ParaSails \
- -lHYPRE_Euclid \
+ -lHYPRE_DistributedMatrixPilutSolver\
+ -lHYPRE_ParaSails\
+ -lHYPRE_Euclid\
  -lHYPRE_IJ_mv\
- -lHYPRE_MatrixMatrix \
- -lHYPRE_DistributedMatrix \
+ -lHYPRE_MatrixMatrix\
+ -lHYPRE_DistributedMatrix\
  -lHYPRE_parcsr_mv\
  -lHYPRE_seq_mv\
  -lHYPRE_krylov\
@@ -236,15 +260,28 @@ ij_mv_LDADD = \
  $(BLASLIBFLAGS)\
  $(LIBM)
 
+new_ij_DEPENDENCIES = \
+ $(libdir)/libHYPRE_parcsr_ls.la\
+ $(libdir)/libHYPRE_DistributedMatrixPilutSolver.la\
+ $(libdir)/libHYPRE_ParaSails.la\
+ $(libdir)/libHYPRE_Euclid.la\
+ $(libdir)/libHYPRE_IJ_mv.la\
+ $(libdir)/libHYPRE_MatrixMatrix.la\
+ $(libdir)/libHYPRE_DistributedMatrix.la\
+ $(libdir)/libHYPRE_parcsr_mv.la\
+ $(libdir)/libHYPRE_seq_mv.la\
+ $(libdir)/libHYPRE_krylov.la\
+ $(libdir)/libHYPRE_utilities.la
+
 new_ij_LDADD = \
  -L$(libdir)\
  -lHYPRE_parcsr_ls\
- -lHYPRE_DistributedMatrixPilutSolver \
- -lHYPRE_ParaSails \
- -lHYPRE_Euclid \
+ -lHYPRE_DistributedMatrixPilutSolver\
+ -lHYPRE_ParaSails\
+ -lHYPRE_Euclid\
  -lHYPRE_IJ_mv\
- -lHYPRE_MatrixMatrix \
- -lHYPRE_DistributedMatrix \
+ -lHYPRE_MatrixMatrix\
+ -lHYPRE_DistributedMatrix\
  -lHYPRE_parcsr_mv\
  -lHYPRE_seq_mv\
  -lHYPRE_krylov\
@@ -252,6 +289,23 @@ new_ij_LDADD = \
  $(LAPACKLIBFLAGS)\
  $(BLASLIBFLAGS)\
  $(LIBM)
+
+sstruct_DEPENDENCIES = \
+ $(libdir)/libHYPRE_sstruct_ls.la\
+ $(libdir)/libHYPRE_sstruct_mv.la\
+ $(libdir)/libHYPRE_struct_ls.la\
+ $(libdir)/libHYPRE_struct_mv.la\
+ $(libdir)/libHYPRE_parcsr_ls.la\
+ $(libdir)/libHYPRE_DistributedMatrixPilutSolver.la\
+ $(libdir)/libHYPRE_ParaSails.la\
+ $(libdir)/libHYPRE_Euclid.la\
+ $(libdir)/libHYPRE_MatrixMatrix.la\
+ $(libdir)/libHYPRE_DistributedMatrix.la\
+ $(libdir)/libHYPRE_IJ_mv.la\
+ $(libdir)/libHYPRE_parcsr_mv.la\
+ $(libdir)/libHYPRE_seq_mv.la\
+ $(libdir)/libHYPRE_krylov.la\
+ $(libdir)/libHYPRE_utilities.la
 
 sstruct_LDADD = \
  -L$(libdir)\
@@ -260,11 +314,11 @@ sstruct_LDADD = \
  -lHYPRE_struct_ls\
  -lHYPRE_struct_mv\
  -lHYPRE_parcsr_ls\
- -lHYPRE_DistributedMatrixPilutSolver \
- -lHYPRE_ParaSails \
- -lHYPRE_Euclid \
- -lHYPRE_MatrixMatrix \
- -lHYPRE_DistributedMatrix \
+ -lHYPRE_DistributedMatrixPilutSolver\
+ -lHYPRE_ParaSails\
+ -lHYPRE_Euclid\
+ -lHYPRE_MatrixMatrix\
+ -lHYPRE_DistributedMatrix\
  -lHYPRE_IJ_mv\
  -lHYPRE_parcsr_mv\
  -lHYPRE_seq_mv\
@@ -273,6 +327,12 @@ sstruct_LDADD = \
  $(LAPACKLIBFLAGS)\
  $(BLASLIBFLAGS)\
  $(LIBM)
+
+struct_DEPENDENCIES = \
+ $(libdir)/libHYPRE_struct_ls.la\
+ $(libdir)/libHYPRE_struct_mv.la\
+ $(libdir)/libHYPRE_krylov.la\
+ $(libdir)/libHYPRE_utilities.la
 
 struct_LDADD = \
  -L$(libdir)\
@@ -325,6 +385,19 @@ nodist_new_ij_C___SOURCES = new_ij.C++.cxx
 nodist_ij_mv_C___SOURCES = ij_mv.C++.cxx
 nodist_struct_C___SOURCES = struct.C++.cxx
 nodist_sstruct_C___SOURCES = sstruct.C++.cxx
+f77_ij_DEPENDENCIES = \
+ $(libdir)/libHYPRE_parcsr_ls.la\
+ $(libdir)/libHYPRE_DistributedMatrixPilutSolver.la\
+ $(libdir)/libHYPRE_ParaSails.la\
+ $(libdir)/libHYPRE_Euclid.la\
+ $(libdir)/libHYPRE_IJ_mv.la\
+ $(libdir)/libHYPRE_MatrixMatrix.la\
+ $(libdir)/libHYPRE_DistributedMatrix.la\
+ $(libdir)/libHYPRE_parcsr_mv.la\
+ $(libdir)/libHYPRE_seq_mv.la\
+ $(libdir)/libHYPRE_krylov.la\
+ $(libdir)/libHYPRE_utilities.la
+
 f77_ij_LDADD = \
  -L$(libdir)\
  -lHYPRE_parcsr_ls\
@@ -342,6 +415,19 @@ f77_ij_LDADD = \
  $(BLASLIBFLAGS)\
  @FLIBS@\
  $(LIBM)
+
+f77_ij_b_DEPENDENCIES = \
+ $(libdir)/libHYPRE_parcsr_ls.la\
+ $(libdir)/libHYPRE_DistributedMatrixPilutSolver.la\
+ $(libdir)/libHYPRE_ParaSails.la\
+ $(libdir)/libHYPRE_Euclid.la\
+ $(libdir)/libHYPRE_IJ_mv.la\
+ $(libdir)/libHYPRE_MatrixMatrix.la\
+ $(libdir)/libHYPRE_DistributedMatrix.la\
+ $(libdir)/libHYPRE_parcsr_mv.la\
+ $(libdir)/libHYPRE_seq_mv.la\
+ $(libdir)/libHYPRE_krylov.la\
+ $(libdir)/libHYPRE_utilities.la
 
 f77_ij_b_LDADD = \
  @BABELLIBFLAGS@\
@@ -362,6 +448,19 @@ f77_ij_b_LDADD = \
  @FLIBS@\
  $(LIBM)
 
+f77_ij_mv_DEPENDENCIES = \
+ $(libdir)/libHYPRE_parcsr_ls.la\
+ $(libdir)/libHYPRE_DistributedMatrixPilutSolver.la\
+ $(libdir)/libHYPRE_ParaSails.la\
+ $(libdir)/libHYPRE_Euclid.la\
+ $(libdir)/libHYPRE_IJ_mv.la\
+ $(libdir)/libHYPRE_MatrixMatrix.la\
+ $(libdir)/libHYPRE_DistributedMatrix.la\
+ $(libdir)/libHYPRE_parcsr_mv.la\
+ $(libdir)/libHYPRE_seq_mv.la\
+ $(libdir)/libHYPRE_krylov.la\
+ $(libdir)/libHYPRE_utilities.la
+
 f77_ij_mv_LDADD = \
  -L$(libdir)\
  -lHYPRE_parcsr_ls\
@@ -380,6 +479,12 @@ f77_ij_mv_LDADD = \
  @FLIBS@\
  $(LIBM)
 
+f77_struct_DEPENDENCIES = \
+ $(libdir)/libHYPRE_struct_ls.la\
+ $(libdir)/libHYPRE_struct_mv.la\
+ $(libdir)/libHYPRE_krylov.la\
+ $(libdir)/libHYPRE_utilities.la
+
 f77_struct_LDADD = \
  -L$(libdir)\
  -lHYPRE_struct_ls\
@@ -389,6 +494,11 @@ f77_struct_LDADD = \
  @FLIBS@\
  $(LIBM)
 
+#f77_struct_b_DEPENDENCIES = \
+# $(libdir)/libHYPRE_struct_ls.la\
+# $(libdir)/libHYPRE_struct_mv.la\
+# $(libdir)/libHYPRE_krylov.la\
+# $(libdir)/libHYPRE_utilities.la
 #f77_struct_b_LDADD = \
 # -L$(libdir)\
 # -lHYPRE_struct_ls\
@@ -396,6 +506,10 @@ f77_struct_LDADD = \
 # -lHYPRE_krylov\
 # -lHYPRE_utilities\
 # @FLIBS@
+fei_DEPENDENCIES = \
+ $(libdir)/libHYPRE_LSI.la\
+ $(libdir)/libHYPRE_superlu.la
+
 fei_LDADD = \
  -L$(libdir)\
  -lHYPRE_LSI\
@@ -403,6 +517,19 @@ fei_LDADD = \
  $(LAPACKLIBFLAGS)\
  $(BLASLIBFLAGS)\
  $(LIBM)
+
+ij_b_DEPENDENCIES = \
+ $(libdir)/libHYPRE_parcsr_ls.la\
+ $(libdir)/libHYPRE_DistributedMatrixPilutSolver.la\
+ $(libdir)/libHYPRE_ParaSails.la\
+ $(libdir)/libHYPRE_Euclid.la\
+ $(libdir)/libHYPRE_IJ_mv.la\
+ $(libdir)/libHYPRE_MatrixMatrix.la\
+ $(libdir)/libHYPRE_DistributedMatrix.la\
+ $(libdir)/libHYPRE_parcsr_mv.la\
+ $(libdir)/libHYPRE_seq_mv.la\
+ $(libdir)/libHYPRE_krylov.la\
+ $(libdir)/libHYPRE_utilities.la
 
 ij_b_LDADD = \
  @BABELLIBFLAGS@\
@@ -422,6 +549,11 @@ ij_b_LDADD = \
  $(BLASLIBFLAGS)\
  $(LIBM)
 
+#struct_b_DEPENDENCIES = \
+# $(libdir)/libHYPRE_struct_ls.la\
+# $(libdir)/libHYPRE_struct_mv.la\
+# $(libdir)/libHYPRE_krylov.la\
+# $(libdir)/libHYPRE_utilities.la
 #struct_b_LDADD = \
 # -L$(libdir)\
 # -lHYPRE_struct_ls\
@@ -429,6 +561,19 @@ ij_b_LDADD = \
 # -lHYPRE_krylov\
 # -lHYPRE_utilities\
 # $(LIBM)
+ij_C___DEPENDENCIES = \
+ $(libdir)/libHYPRE_parcsr_ls.la\
+ $(libdir)/libHYPRE_DistributedMatrixPilutSolver.la\
+ $(libdir)/libHYPRE_ParaSails.la\
+ $(libdir)/libHYPRE_Euclid.la\
+ $(libdir)/libHYPRE_IJ_mv.la\
+ $(libdir)/libHYPRE_MatrixMatrix.la\
+ $(libdir)/libHYPRE_DistributedMatrix.la\
+ $(libdir)/libHYPRE_parcsr_mv.la\
+ $(libdir)/libHYPRE_seq_mv.la\
+ $(libdir)/libHYPRE_krylov.la\
+ $(libdir)/libHYPRE_utilities.la
+
 ij_C___LDADD = \
  -L$(libdir)\
  -lHYPRE_parcsr_ls\
@@ -445,6 +590,19 @@ ij_C___LDADD = \
  $(LAPACKLIBFLAGS)\
  $(BLASLIBFLAGS)\
  $(LIBM)
+
+ij_mv_C___DEPENDENCIES = \
+ $(libdir)/libHYPRE_parcsr_ls.la\
+ $(libdir)/libHYPRE_DistributedMatrixPilutSolver.la\
+ $(libdir)/libHYPRE_ParaSails.la\
+ $(libdir)/libHYPRE_Euclid.la\
+ $(libdir)/libHYPRE_IJ_mv.la\
+ $(libdir)/libHYPRE_MatrixMatrix.la\
+ $(libdir)/libHYPRE_DistributedMatrix.la\
+ $(libdir)/libHYPRE_parcsr_mv.la\
+ $(libdir)/libHYPRE_seq_mv.la\
+ $(libdir)/libHYPRE_krylov.la\
+ $(libdir)/libHYPRE_utilities.la
 
 ij_mv_C___LDADD = \
  -L$(libdir)\
@@ -463,6 +621,19 @@ ij_mv_C___LDADD = \
  $(BLASLIBFLAGS)\
  $(LIBM)
 
+new_ij_C___DEPENDENCIES = \
+ $(libdir)/libHYPRE_parcsr_ls.la\
+ $(libdir)/libHYPRE_DistributedMatrixPilutSolver.la\
+ $(libdir)/libHYPRE_ParaSails.la\
+ $(libdir)/libHYPRE_Euclid.la\
+ $(libdir)/libHYPRE_IJ_mv.la\
+ $(libdir)/libHYPRE_MatrixMatrix.la\
+ $(libdir)/libHYPRE_DistributedMatrix.la\
+ $(libdir)/libHYPRE_parcsr_mv.la\
+ $(libdir)/libHYPRE_seq_mv.la\
+ $(libdir)/libHYPRE_krylov.la\
+ $(libdir)/libHYPRE_utilities.la
+
 new_ij_C___LDADD = \
  -L$(libdir)\
  -lHYPRE_parcsr_ls\
@@ -479,6 +650,23 @@ new_ij_C___LDADD = \
  $(LAPACKLIBFLAGS)\
  $(BLASLIBFLAGS)\
  $(LIBM)
+
+sstruct_C___DEPENDENCIES = \
+ $(libdir)/libHYPRE_sstruct_ls.la\
+ $(libdir)/libHYPRE_sstruct_mv.la\
+ $(libdir)/libHYPRE_struct_ls.la\
+ $(libdir)/libHYPRE_struct_mv.la\
+ $(libdir)/libHYPRE_parcsr_ls.la\
+ $(libdir)/libHYPRE_DistributedMatrixPilutSolver.la\
+ $(libdir)/libHYPRE_ParaSails.la\
+ $(libdir)/libHYPRE_Euclid.la\
+ $(libdir)/libHYPRE_MatrixMatrix.la\
+ $(libdir)/libHYPRE_DistributedMatrix.la\
+ $(libdir)/libHYPRE_IJ_mv.la\
+ $(libdir)/libHYPRE_parcsr_mv.la\
+ $(libdir)/libHYPRE_seq_mv.la\
+ $(libdir)/libHYPRE_krylov.la\
+ $(libdir)/libHYPRE_utilities.la
 
 sstruct_C___LDADD = \
  -L$(libdir)\
@@ -500,6 +688,12 @@ sstruct_C___LDADD = \
  $(LAPACKLIBFLAGS)\
  $(BLASLIBFLAGS)\
  $(LIBM)
+
+struct_C___DEPENDENCIES = \
+ $(libdir)/libHYPRE_struct_ls.la\
+ $(libdir)/libHYPRE_struct_mv.la\
+ $(libdir)/libHYPRE_krylov.la\
+ $(libdir)/libHYPRE_utilities.la
 
 struct_C___LDADD = \
  -L$(libdir)\
@@ -535,67 +729,51 @@ PROGRAMS = $(bin_PROGRAMS)
 
 am_f77_ij_OBJECTS = f77_ij.$(OBJEXT)
 f77_ij_OBJECTS = $(am_f77_ij_OBJECTS)
-f77_ij_DEPENDENCIES =
 f77_ij_LDFLAGS =
 am_f77_ij_b_OBJECTS = f77_ij_b.$(OBJEXT)
 f77_ij_b_OBJECTS = $(am_f77_ij_b_OBJECTS)
-f77_ij_b_DEPENDENCIES =
 f77_ij_b_LDFLAGS =
 am_f77_ij_mv_OBJECTS = f77_ij_mv.$(OBJEXT)
 f77_ij_mv_OBJECTS = $(am_f77_ij_mv_OBJECTS)
-f77_ij_mv_DEPENDENCIES =
 f77_ij_mv_LDFLAGS =
 am_f77_struct_OBJECTS = f77_struct.$(OBJEXT)
 f77_struct_OBJECTS = $(am_f77_struct_OBJECTS)
-f77_struct_DEPENDENCIES =
 f77_struct_LDFLAGS =
 am_fei_OBJECTS = fei-fei.$(OBJEXT)
 fei_OBJECTS = $(am_fei_OBJECTS)
-fei_DEPENDENCIES =
 fei_LDFLAGS =
 am_ij_OBJECTS = ij.$(OBJEXT)
 ij_OBJECTS = $(am_ij_OBJECTS)
-ij_DEPENDENCIES =
 ij_LDFLAGS =
 nodist_ij_C___OBJECTS = ij.C++.$(OBJEXT)
 ij_C___OBJECTS = $(nodist_ij_C___OBJECTS)
-ij_C___DEPENDENCIES =
 ij_C___LDFLAGS =
 am_ij_b_OBJECTS = ij_b.$(OBJEXT)
 ij_b_OBJECTS = $(am_ij_b_OBJECTS)
-ij_b_DEPENDENCIES =
 ij_b_LDFLAGS =
 am_ij_mv_OBJECTS = ij_mv.$(OBJEXT)
 ij_mv_OBJECTS = $(am_ij_mv_OBJECTS)
-ij_mv_DEPENDENCIES =
 ij_mv_LDFLAGS =
 nodist_ij_mv_C___OBJECTS = ij_mv.C++.$(OBJEXT)
 ij_mv_C___OBJECTS = $(nodist_ij_mv_C___OBJECTS)
-ij_mv_C___DEPENDENCIES =
 ij_mv_C___LDFLAGS =
 am_new_ij_OBJECTS = new_ij.$(OBJEXT)
 new_ij_OBJECTS = $(am_new_ij_OBJECTS)
-new_ij_DEPENDENCIES =
 new_ij_LDFLAGS =
 nodist_new_ij_C___OBJECTS = new_ij.C++.$(OBJEXT)
 new_ij_C___OBJECTS = $(nodist_new_ij_C___OBJECTS)
-new_ij_C___DEPENDENCIES =
 new_ij_C___LDFLAGS =
 am_sstruct_OBJECTS = sstruct.$(OBJEXT)
 sstruct_OBJECTS = $(am_sstruct_OBJECTS)
-sstruct_DEPENDENCIES =
 sstruct_LDFLAGS =
 nodist_sstruct_C___OBJECTS = sstruct.C++.$(OBJEXT)
 sstruct_C___OBJECTS = $(nodist_sstruct_C___OBJECTS)
-sstruct_C___DEPENDENCIES =
 sstruct_C___LDFLAGS =
 am_struct_OBJECTS = struct.$(OBJEXT)
 struct_OBJECTS = $(am_struct_OBJECTS)
-struct_DEPENDENCIES =
 struct_LDFLAGS =
 nodist_struct_C___OBJECTS = struct.C++.$(OBJEXT)
 struct_C___OBJECTS = $(nodist_struct_C___OBJECTS)
-struct_C___DEPENDENCIES =
 struct_C___LDFLAGS =
 
 DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)

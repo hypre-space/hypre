@@ -664,7 +664,7 @@ FILES = \
  $(top_srcdir)/utilities/umalloc_local.c
 
 
-BUILT_SOURCES = hypre-stamp
+BUILT_SOURCES = copy-objects
 subdir = lib
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
@@ -5965,7 +5965,7 @@ maintainer-clean-generic:
 	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
 clean: clean-am
 
-clean-am: clean-generic clean-libLTLIBRARIES clean-libtool clean-local \
+clean-am: clean-generic clean-libLTLIBRARIES clean-libtool \
 	mostlyclean-am
 
 distclean: distclean-am
@@ -6013,7 +6013,7 @@ ps-am:
 uninstall-am: uninstall-libLTLIBRARIES
 
 .PHONY: CTAGS GTAGS all all-am check check-am clean clean-generic \
-	clean-libLTLIBRARIES clean-libtool clean-local ctags distclean \
+	clean-libLTLIBRARIES clean-libtool ctags distclean \
 	distclean-compile distclean-generic distclean-libtool \
 	distclean-tags distdir dvi dvi-am info info-am install \
 	install-am install-data install-data-am install-exec \
@@ -6026,13 +6026,9 @@ uninstall-am: uninstall-libLTLIBRARIES
 	uninstall-libLTLIBRARIES
 
 
-clean-local:
-	rm -f hypre-stamp
-
-hypre-stamp:
+copy-objects:
 	@ \
-	touch hypre-stamp; \
-	mkdir .libs; \
+	test -d .libs || mkdir .libs; \
 	for i in ${HYPRE_SRC_DIRS}; \
 	do \
 	  if [ -d ../$$i ]; \

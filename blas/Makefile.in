@@ -220,7 +220,7 @@ LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) \
 LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
 DIST_SOURCES = $(libHYPRE_blas_la_SOURCES)
-DIST_COMMON = $(srcdir)/Makefile.in Makefile.am
+DIST_COMMON = README $(srcdir)/Makefile.in Makefile.am
 SOURCES = $(libHYPRE_blas_la_SOURCES)
 
 all: all-am
