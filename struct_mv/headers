@@ -38,13 +38,10 @@ extern "C" {
 cat box.h                 >> $INTERNAL_HEADER	
 cat box_pthreads.h        >> $INTERNAL_HEADER	
 cat box_neighbors.h       >> $INTERNAL_HEADER	
-		          
-cat struct_stencil.h      >> $INTERNAL_HEADER	
 cat struct_grid.h         >> $INTERNAL_HEADER	
-		          
+cat struct_stencil.h      >> $INTERNAL_HEADER	
 cat communication.h       >> $INTERNAL_HEADER	
 cat computation.h         >> $INTERNAL_HEADER	
-		          
 cat struct_matrix.h       >> $INTERNAL_HEADER	
 cat struct_vector.h       >> $INTERNAL_HEADER	
 
