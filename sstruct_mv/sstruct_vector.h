@@ -32,9 +32,9 @@ typedef struct
 
    int                     ref_count;
 
-   int                    *dataindices  /* GEC1002 array for starting index of the 
+   int                    *dataindices;  /* GEC1002 array for starting index of the 
                                             svector. pdataindices[varx] */
-   int                     datasize     /* Size of the pvector = sums size of svectors */
+   int                     datasize;     /* Size of the pvector = sums size of svectors */
 
 } hypre_SStructPVector;
 
