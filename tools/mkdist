@@ -86,14 +86,14 @@ fi
 
         # create dist directory
 HYPRE_DIR="hypre-${VersionId}"
-HYPRE_INSTALL_DIR=`pwd`"/$HYPRE_DIR"
-export HYPRE_INSTALL_DIR
-mkdir -p $HYPRE_INSTALL_DIR
-mkdir $HYPRE_INSTALL_DIR/src
+HYPRE_DIST_INSTALL_DIR=`pwd`"/$HYPRE_DIR"
+export HYPRE_DIST_INSTALL_DIR
+mkdir -p $HYPRE_DIST_INSTALL_DIR
+mkdir $HYPRE_DIST_INSTALL_DIR/src
     
 
 (       # checkout the source from the repository
-  cd $HYPRE_INSTALL_DIR/src
+  cd $HYPRE_DIST_INSTALL_DIR/src
   if [ ! -d "$CVSROOT" ]
   then
     echo "Error: no CVS repository, CVSROOT = $CVSROOT"
@@ -116,17 +116,17 @@ then
 fi
 mv $HYPRE_DIR "hypre-${Version}"
 HYPRE_DIR="hypre-${Version}"
-HYPRE_INSTALL_DIR=`pwd`"/$HYPRE_DIR"
+HYPRE_DIST_INSTALL_DIR=`pwd`"/$HYPRE_DIR"
     
 (       # build documentation and tools and install
-  cd $HYPRE_INSTALL_DIR/src/linear_solvers
-  ./configure --prefix=$HYPRE_INSTALL_DIR --with-babel
+  cd $HYPRE_DIST_INSTALL_DIR/src/linear_solvers
+  ./configure --prefix=$HYPRE_DIST_INSTALL_DIR --with-babel
   (make docs; cd docs;  make -i install; make clean)
   make distclean
 )
     
 (       # store version info
-  cd $HYPRE_INSTALL_DIR
+  cd $HYPRE_DIST_INSTALL_DIR
   cp src/linear_solvers/COPYRIGHT_and_DISCLAIMER .
   cp src/linear_solvers/CHANGELOG .
   cp src/linear_solvers/INSTALL .
@@ -144,12 +144,11 @@ tar cf $HYPRE_DIR.tar \
     $HYPRE_DIR/COPYRIGHT_and_DISCLAIMER \
     $HYPRE_DIR/INSTALL \
     $HYPRE_DIR/README \
-    $HYPRE_DIR/docs \
+    $HYPRE_DIR/src/docs \
     $HYPRE_DIR/src/FEI_mv \
     $HYPRE_DIR/src/HYPRE.h \
     $HYPRE_DIR/src/IJ_mv \
-    $HYPRE_DIR/src/Makefile.in \
-    $HYPRE_DIR/src/Makefile.am \
+    $HYPRE_DIR/src/Makefile \
     $HYPRE_DIR/src/aclocal.m4 \
     $HYPRE_DIR/src/babel \
     $HYPRE_DIR/src/babel-runtime \
@@ -158,6 +157,7 @@ tar cf $HYPRE_DIR.tar \
     $HYPRE_DIR/src/configure \
     $HYPRE_DIR/src/distributed_ls \
     $HYPRE_DIR/src/distributed_matrix \
+    $HYPRE_DIR/src/eigensolvers \
     $HYPRE_DIR/src/krylov \
     $HYPRE_DIR/src/lapack \
     $HYPRE_DIR/src/lib \
