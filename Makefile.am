@@ -83,9 +83,12 @@ config\
  IJ_mv distributed_ls parcsr_ls parcsr_es\
  FEI_mv babel babel-runtime test lib docs .
 
-test:
+test-local:
+	echo "no automated test suite available yet."
+	echo "To compile test drivers enter: make tests"
+
+tests:
 	@ \
-	$(MAKE) $(AM_MAKEFLAGS) all; \
 	$(MAKE) $(AM_MAKEFLAGS) install; \
 	(cd test && $(MAKE) $(AM_MAKEFLAGS) all)
 
