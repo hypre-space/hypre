@@ -12,15 +12,9 @@
  *
  *****************************************************************************/
 
+#include "headers.h"
 #ifdef HYPRE_USE_PTHREADS
-#undef HYPRE_USE_PTHREADS
-#include "headers.h"
-#define HYPRE_USE_PTHREADS
-#include <pthread.h>
-extern pthread_t  initial_thread;
-extern pthread_t *hypre_thread;
-#else
-#include "headers.h"
+#include "box_pthreads.h"
 #endif
 
 /*--------------------------------------------------------------------------
@@ -28,14 +22,16 @@ extern pthread_t *hypre_thread;
  *--------------------------------------------------------------------------*/
 
 #ifdef HYPRE_USE_PTHREADS
-double global_result;
+double           global_result[hypre_MAX_THREADS];
 #endif
+
+double           final_innerprod_result;
+
 
 double
 hypre_StructInnerProd(  hypre_StructVector *x,
                         hypre_StructVector *y )
 {
-   double           result;
    double           local_result;
                    
    hypre_Box       *x_data_box;
@@ -55,8 +51,15 @@ hypre_StructInnerProd(  hypre_StructVector *x,
                    
    int              i;
    int              loopi, loopj, loopk;
+#ifdef HYPRE_USE_PTHREADS
+   int              threadid = hypre_GetThreadID();
+#endif
 
    local_result = 0.0;
+
+#ifdef HYPRE_USE_PTHREADS
+   global_result[threadid] = 0.0;
+#endif
 
    hypre_SetIndex(unit_stride, 1, 1, 1);
 
@@ -74,31 +77,42 @@ hypre_StructInnerProd(  hypre_StructVector *x,
 
          hypre_GetBoxSize(box, loop_size);
 
+#ifdef HYPRE_USE_PTHREADS
+         hypre_BoxLoop2(loopi, loopj, loopk, loop_size,
+                        x_data_box, start, unit_stride, xi,
+                        y_data_box, start, unit_stride, yi,
+                        {
+                           global_result[threadid] += xp[xi] * yp[yi];
+                        });
+#else
          hypre_BoxLoop2(loopi, loopj, loopk, loop_size,
                         x_data_box, start, unit_stride, xi,
                         y_data_box, start, unit_stride, yi,
                         {
                            local_result += xp[xi] * yp[yi];
                         });
+#endif
       }
 
 #ifdef HYPRE_USE_PTHREADS
-   MPI_Allreduce(&local_result, &global_result, 1,
-                 MPI_DOUBLE, MPI_SUM, hypre_StructVectorComm(x));
-
-   result = global_result;
-#else
-   MPI_Allreduce(&local_result, &result, 1,
-                 MPI_DOUBLE, MPI_SUM, hypre_StructVectorComm(x));
+   if (threadid == 0)
+   {
+      for (i = 0; i < hypre_NumThreads; i++)
+         local_result += global_result[i];
+   }
+   else if (threadid == hypre_NumThreads)
+      local_result = global_result[threadid];
 #endif
+
+
+   MPI_Allreduce(&local_result, &final_innerprod_result, 1,
+                 MPI_DOUBLE, MPI_SUM, hypre_StructVectorComm(x));
 
 
 #ifdef HYPRE_USE_PTHREADS
-   if (pthread_equal(pthread_self(), initial_thread) ||
-       pthread_equal(pthread_self(), hypre_thread[0]))
+   if (threadid == 0 || threadid == hypre_NumThreads)
 #endif
    hypre_IncFLOPCount(2*hypre_StructVectorGlobalSize(x));
 
-   return result;
+   return final_innerprod_result;
 }
-

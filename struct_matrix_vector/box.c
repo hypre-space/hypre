@@ -27,7 +27,7 @@ hypre_NewBox( )
 {
    hypre_Box *box;
 
-#ifdef 1
+#if 1
    box = hypre_TAlloc(hypre_Box, 1);
 #else
    box = hypre_BoxAlloc();
@@ -135,7 +135,7 @@ hypre_FreeBox( hypre_Box *box )
 
    if (box)
    {
-#ifdef 1
+#if 1
       hypre_TFree(box);
 #else
       hypre_BoxFree(box);
