@@ -234,7 +234,10 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *S,
    }
 
    /* this augments the measures */
-   hypre_BoomerAMGIndepSetInit(S, measure_array);
+   if (CF_init == 2)
+      hypre_BoomerAMGIndepSetInit(S, measure_array, 1);
+   else
+      hypre_BoomerAMGIndepSetInit(S, measure_array, 0);
 
    /*---------------------------------------------------
     * Initialize the graph array
@@ -261,7 +264,7 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *S,
 
    graph_offd_size = num_cols_offd;
 
-   if (CF_init)
+   if (CF_init==1)
    {
       CF_marker = *CF_marker_ptr;
       cnt = 0;
@@ -385,7 +388,7 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *S,
        * Set F-pts and update subgraph
        *------------------------------------------------*/
  
-      if (iter || !CF_init)
+      if (iter || (CF_init != 1))
       {
          for (ig = 0; ig < graph_size; ig++)
          {
@@ -498,7 +501,7 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *S,
        * Pick an independent set of points with
        * maximal measure.
        *------------------------------------------------*/
-      if (iter || !CF_init)
+      if (iter || (CF_init != 1))
          hypre_BoomerAMGIndepSet(S, S_ext, measure_array, graph_array, 
 				graph_size, 
 				graph_array_offd, graph_offd_size,

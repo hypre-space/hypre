@@ -393,7 +393,7 @@ int hypre_BoomerAMGBuildInterpLS( hypre_ParCSRMatrix *A , int *CF_marker , hypre
 int hypre_BoomerAMGBuildInterpGSMG( hypre_ParCSRMatrix *A , int *CF_marker , hypre_ParCSRMatrix *S , int *num_cpts_global , int num_functions , int *dof_func , int debug_flag , double trunc_factor , hypre_ParCSRMatrix **P_ptr );
 
 /* par_indepset.c */
-int hypre_BoomerAMGIndepSetInit( hypre_ParCSRMatrix *S , double *measure_array );
+int hypre_BoomerAMGIndepSetInit( hypre_ParCSRMatrix *S , double *measure_array , int seq_rand );
 int hypre_BoomerAMGIndepSet( hypre_ParCSRMatrix *S , hypre_CSRMatrix *S_ext , double *measure_array , int *graph_array , int graph_array_size , int *graph_array_offd , int graph_array_offd_size , int *IS_marker , int *IS_marker_offd );
 
 /* par_interp.c */

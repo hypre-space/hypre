@@ -32,17 +32,20 @@
 
 int
 hypre_BoomerAMGIndepSetInit( hypre_ParCSRMatrix *S,
-                          double             *measure_array )
+                          double             *measure_array ,
+                          int   seq_rand)
 {
    hypre_CSRMatrix *S_diag = hypre_ParCSRMatrixDiag(S);
    int              S_num_nodes = hypre_CSRMatrixNumRows(S_diag);
-   int              first_index = hypre_ParCSRMatrixFirstRowIndex(S);
    int              i;
    int              ierr = 0;
 
    hypre_SeedRand(2747);
-   for (i = 0; i < first_index; i++)
-	hypre_Rand();
+   if (seq_rand)
+   {
+      for (i = 0; i < hypre_ParCSRMatrixFirstRowIndex(S); i++)
+	hypre_Rand(); 
+   }
    for (i = 0; i < S_num_nodes; i++)
    {
       measure_array[i] += hypre_Rand();
