@@ -152,6 +152,14 @@ do
 #	./autotest_test $HYPRE_MACHINE_COMMANDS
 	perform_test
         shift;;
+    -pengra)
+        HYPRE_ARCH="linux"
+        HYPRE_COMPILE_MACHINE="pengra"
+        HYPRE_RUN_MACHINE="pengra"
+        HYPRE_REMOTE_DIR="/usr/casc/hypre/i686-pc-linux-gnu-pengra/AUTOTEST"
+	HYPRE_MACHINE_COMMANDS="-ml -t 1 -ns -a 2 -dcxfy"
+	perform_test
+        shift;;
     -purify)
         HYPRE_ARCH="casc"
         HYPRE_COMPILE_MACHINE="perrin"

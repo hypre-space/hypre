@@ -3,6 +3,6 @@
 0 1 * * 2 cd /home/casc/software/hypre/autotest/; ./autotest -frostmp -tc2kmp -purify | tee autotest.cron.log
 0 1 * * 3 cd /home/casc/software/hypre/autotest/; ./autotest -blue -tux -casc | tee autotest.cron.log
 0 1 * * 4 cd /home/casc/software/hypre/autotest/; ./autotest -frost -gps -insure -casc | tee autotest.cron.log
-0 1 * * 5 cd /home/casc/software/hypre/autotest/; ./autotest -tc -tux -casc | tee autotest.cron.log
+0 1 * * 5 cd /home/casc/software/hypre/autotest/; ./autotest -tc -pengra -tux -casc | tee autotest.cron.log
 0 1 * * 6 cd /home/casc/software/hypre/autotest/; ./autotest -lx -vivid -casc | tee autotest.cron.log
 0 12 * * * cd /home/casc/software/hypre/autotest/; ./autotest_check

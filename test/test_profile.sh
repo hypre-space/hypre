@@ -23,6 +23,8 @@ function CalcNodes
       ;;
     tckk*) CPUS_PER_NODE=4
       ;;
+    peng*) CPUS_PER_NODE=2
+      ;;
     gps*) CPUS_PER_NODE=4
       ;;
     lx*) CPUS_PER_NODE=2
@@ -72,6 +74,8 @@ function PsubCmdStub
       PsubCmd="$PsubCmd -ln $NumNodes -g $NumProcs"
       ;;
     tckk*) PsubCmd="psub -c tc2k,pbatch -b casc -r $RunName -ln $NumProcs"
+      ;;
+    peng*) PsubCmd="psub -c pengra,pbatch -b casc -r $RunName -ln $NumProcs"
       ;;
     gps*) PsubCmd="psub -c gps320 -b casc -r $RunName -cpn $NumProcs"
       ;;
