@@ -8,7 +8,7 @@
 # $Revision$
 #EHEADER***********************************************************************
 
-INTERNAL_HEADER=hypre_ls.h
+INTERNAL_HEADER=pamg.h
 
 #===========================================================================
 # Include guards and other includes
@@ -22,7 +22,7 @@ cat > $INTERNAL_HEADER <<@
 #define hypre_LS_HEADER
 
 #include "utilities.h"
-#include "hypre_mv.h"
+#include "seq_matrix_vector.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -77,9 +77,13 @@ void hypre_WriteSolverParams P((void *data ));
 /* coarsen.c */
 int hypre_AMGCoarsen P((hypre_CSRMatrix *A , double strength_threshold , hypre_CSRMatrix **S_ptr , int **CF_marker_ptr , int *coarse_size_ptr ));
 int hypre_AMGCoarsenRuge P((hypre_CSRMatrix *A , double strength_threshold , hypre_CSRMatrix **S_ptr , int **CF_marker_ptr , int *coarse_size_ptr ));
+int hypre_AMGCoarsenRugeLoL P((hypre_CSRMatrix *A , double strength_threshold , hypre_CSRMatrix **S_ptr , int **CF_marker_ptr , int *coarse_size_ptr ));
 
 /* cycle.c */
 int hypre_AMGCycle P((void *amg_vdata , hypre_Vector **F_array , hypre_Vector **U_array ));
+
+/* difconv.c */
+hypre_CSRMatrix *hypre_GenerateDifConv P((int nx , int ny , int nz , int P , int Q , int R , double *value ));
 
 /* driver.c */
 int main P((int argc , char *argv []));
@@ -87,7 +91,8 @@ int BuildFromFile P((int argc , char *argv [], int arg_index , hypre_CSRMatrix *
 int BuildLaplacian P((int argc , char *argv [], int arg_index , hypre_CSRMatrix **A_ptr ));
 int BuildLaplacian9pt P((int argc , char *argv [], int arg_index , hypre_CSRMatrix **A_ptr ));
 int BuildLaplacian27pt P((int argc , char *argv [], int arg_index , hypre_CSRMatrix **A_ptr ));
-int BuildRhsFromFile P((int argc , char *argv [], int arg_index , hypre_CSRMatrix *A, hypre_Vector **b_ptr ));
+int BuildDifConv P((int argc , char *argv [], int arg_index , hypre_CSRMatrix **A_ptr ));
+int BuildRhsFromFile P((int argc , char *argv [], int arg_index , hypre_CSRMatrix *A , hypre_Vector **b_ptr ));
 
 /* indepset.c */
 int hypre_InitAMGIndepSet P((hypre_CSRMatrix *S , double *measure_array ));
@@ -100,13 +105,13 @@ int hypre_AMGBuildInterp P((hypre_CSRMatrix *A , int *CF_marker , hypre_CSRMatri
 hypre_CSRMatrix *hypre_GenerateLaplacian P((int nx , int ny , int nz , int P , int Q , int R , double *value ));
 int map P((int ix , int iy , int iz , int p , int q , int r , int P , int Q , int R , int *nx_part , int *ny_part , int *nz_part , int *global_part ));
 
-/* laplace_9pt.c */
-hypre_CSRMatrix *hypre_GenerateLaplacian9pt P((int nx , int ny , int P , int Q , double *value ));
-int map2 P((int ix , int iy , int p , int q , int P , int Q , int *nx_part , int *ny_part , int *global_part ));
-
 /* laplace_27pt.c */
 hypre_CSRMatrix *hypre_GenerateLaplacian27pt P((int nx , int ny , int nz , int P , int Q , int R , double *value ));
 int map3 P((int ix , int iy , int iz , int p , int q , int r , int P , int Q , int R , int *nx_part , int *ny_part , int *nz_part , int *global_part ));
+
+/* laplace_9pt.c */
+hypre_CSRMatrix *hypre_GenerateLaplacian9pt P((int nx , int ny , int P , int Q , double *value ));
+int map2 P((int ix , int iy , int p , int q , int P , int Q , int *nx_part , int *ny_part , int *global_part ));
 
 /* pcg.c */
 void PCG P((hypre_Vector *x , hypre_Vector *b , double tol , void *data ));
@@ -120,7 +125,7 @@ double hypre_Rand P((void ));
 int hypre_AMGBuildCoarseOperator P((hypre_CSRMatrix *RT , hypre_CSRMatrix *A , hypre_CSRMatrix *P , hypre_CSRMatrix **RAP_ptr ));
 
 /* relax.c */
-int hypre_AMGRelax P((hypre_CSRMatrix *A , hypre_Vector *f , int *cf_marker , int relax_type , int relax_points , double relax_weight, hypre_Vector *u , hypre_Vector *Vtemp ));
+int hypre_AMGRelax P((hypre_CSRMatrix *A , hypre_Vector *f , int *cf_marker , int relax_type , int relax_points , double relax_weight , hypre_Vector *u , hypre_Vector *Vtemp ));
 int gselim P((double *A , double *x , int n ));
 
 /* transpose.c */
