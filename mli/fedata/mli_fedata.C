@@ -18,8 +18,8 @@
 #include <string.h>
 #include <mpi.h>
 
-#include "mli_fedata.h"
-#include "../util/mli_utils.h"
+#include "fedata/mli_fedata.h"
+#include "util/mli_utils.h"
 
 /**************************************************************************
  * constructor 

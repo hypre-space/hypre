@@ -16,7 +16,7 @@
 #include <stdlib.h>
 #include <iostream.h>
 #include <mpi.h>
-#include "mli_fedata.h"
+#include "fedata/mli_fedata.h"
 
 /**************************************************************************
  functions to be defined later

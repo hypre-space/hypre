@@ -28,6 +28,7 @@ CXXDEFS =
 CFLAGS =\
  ${C_COMPILE_FLAGS}\
  -I$(srcdir)\
+ -I$(srcdir)/..\
  -I$(srcdir)/../..\
  -I$(srcdir)/../../utilities\
  ${CINCLUDES}\
@@ -36,6 +37,7 @@ CFLAGS =\
 CXXFLAGS =\
  ${C_COMPILE_FLAGS}\
  -I$(srcdir)\
+ -I$(srcdir)/..\
  -I$(srcdir)/../..\
  -I$(srcdir)/../../utilities\
  ${CXXINCLUDES}\

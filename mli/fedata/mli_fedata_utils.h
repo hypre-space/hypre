@@ -18,8 +18,8 @@
 #include "HYPRE.h"
 #include <mpi.h>
 #include "parcsr_mv/parcsr_mv.h"
-#include "mli_fedata.h"
-#include "../matrix/mli_matrix.h"
+#include "fedata/mli_fedata.h"
+#include "matrix/mli_matrix.h"
 
 /**************************************************************************
  * functions 

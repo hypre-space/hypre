@@ -11,8 +11,8 @@
 #include <assert.h>
 #include "utilities/utilities.h"
 #include "HYPRE.h"
-#include "mli_mapper.h"
-#include "../util/mli_utils.h"
+#include "mapper/mli_mapper.h"
+#include "util/mli_utils.h"
 
 /***************************************************************************
  * constructor function for the MLI_Mapper 

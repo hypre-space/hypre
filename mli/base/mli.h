@@ -25,14 +25,14 @@
 #include <mpi.h>
 #include "utilities/utilities.h"
 
-#include "mli_defs.h"
-#include "mli_oneLevel.h"
-#include "../solver/mli_solver.h"
-#include "../amgs/mli_method.h"
-#include "../matrix/mli_matrix.h"
-#include "../vector/mli_vector.h"
-#include "../fedata/mli_fedata.h"
-#include "../mapper/mli_mapper.h"
+#include "base/mli_defs.h"
+#include "solver/mli_solver.h"
+#include "amgs/mli_method.h"
+#include "matrix/mli_matrix.h"
+#include "vector/mli_vector.h"
+#include "fedata/mli_fedata.h"
+#include "mapper/mli_mapper.h"
+#include "base/mli_oneLevel.h"
 
 class MLI_OneLevel;
 class MLI_Method;

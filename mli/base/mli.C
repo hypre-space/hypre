@@ -16,8 +16,8 @@
 #include <iostream.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "mli.h"
-#include "../util/mli_utils.h"
+#include "base/mli.h"
+#include "util/mli_utils.h"
 
 /*****************************************************************************
  * constructor 

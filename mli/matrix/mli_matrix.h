@@ -21,8 +21,8 @@
 
 #include "utilities/utilities.h"
 
-#include "../vector/mli_vector.h"
-#include "../util/mli_utils.h"
+#include "vector/mli_vector.h"
+#include "util/mli_utils.h"
 
 /*--------------------------------------------------------------------------
  * MLI_Matrix data structure declaration

@@ -32,7 +32,7 @@ typedef struct CMLI_Solver_Struct CMLI_Solver;
 typedef struct CMLI_FEData_Struct CMLI_FEData;
 typedef struct CMLI_Method_Struct CMLI_Method;
 
-#include "../util/mli_utils.h"
+#include "util/mli_utils.h"
 
 /******************************************************************************
  * structure prototypes

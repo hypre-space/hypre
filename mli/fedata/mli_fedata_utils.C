@@ -16,9 +16,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <mpi.h>
-#include "mli_fedata_utils.h"
+#include "fedata/mli_fedata_utils.h"
 #include "IJ_mv/HYPRE_IJ_mv.h"
-#include "../util/mli_utils.h"
+#include "util/mli_utils.h"
 
 /**************************************************************************
  * Function  : MLI_FEDataConstructElemNodeMatrix

@@ -17,13 +17,13 @@
 #include <stdlib.h>
 
 #include "cmli.h"
-#include "../base/mli.h"
-#include "../vector/mli_vector.h"
-#include "../matrix/mli_matrix.h"
-#include "../solver/mli_solver.h"
-#include "../amgs/mli_method.h"
-#include "../fedata/mli_fedata.h"
-#include "../fedata/mli_fedata_utils.h"
+#include "base/mli.h"
+#include "vector/mli_vector.h"
+#include "matrix/mli_matrix.h"
+#include "solver/mli_solver.h"
+#include "amgs/mli_method.h"
+#include "fedata/mli_fedata.h"
+#include "fedata/mli_fedata_utils.h"
 
 /*****************************************************************************
  * CMLI : constructor 

@@ -9,7 +9,7 @@
 #ifndef __MLIFEDATAH__
 #define __MLIFEDATAH__
 
-#include "mli_festruct.h"
+#include "fedata/mli_festruct.h"
 
 /****************************************************************************/ 
 /* data structures for Finite element grid information                      */
