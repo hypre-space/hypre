@@ -16,12 +16,7 @@
 #include "HYPRE_IJ_mv.h"
 #include "HYPRE_parcsr_ls.h"
 
-#ifdef __STDC__
 # define	P(s) s
-#else
-# define P(s) ()
-#endif
-
 
 int BuildParFromFile P((int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr ));
 int BuildParLaplacian P((int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr ));
