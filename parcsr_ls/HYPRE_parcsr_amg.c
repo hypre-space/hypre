@@ -359,3 +359,25 @@ HYPRE_ParAMGSetDebugFlag( HYPRE_Solver solver,
    return( hypre_ParAMGSetDebugFlag( (void *) solver, debug_flag ) );
 }
 
+/*--------------------------------------------------------------------------
+ * HYPRE_ParAMGGetNumIterations
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParAMGGetNumIterations( HYPRE_Solver  solver,
+                              int          *num_iterations  )
+{
+   return( hypre_ParAMGGetNumIterations( (void *) solver, num_iterations ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParAMGGetFinalRelativeResidualNorm
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParAMGGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
+                                          double       *rel_resid_norm  )
+{
+   return( hypre_ParAMGGetRelativeResidualNorm( (void *) solver, rel_resid_norm ) );
+}
+

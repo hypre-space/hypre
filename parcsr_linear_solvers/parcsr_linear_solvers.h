@@ -39,6 +39,8 @@ void hypre_F90_IFACE P((int hypre_paramgsetioutdat ));
 void hypre_F90_IFACE P((int hypre_paramgsetlogfilename ));
 void hypre_F90_IFACE P((int hypre_paramgsetlogging ));
 void hypre_F90_IFACE P((int hypre_paramgsetdebugflag ));
+void hypre_F90_IFACE P((int hypre_paramggetnumiterations ));
+void hypre_F90_IFACE P((int hypre_paramggetfinalrelativeres ));
 
 /* F90_HYPRE_parcsr_cgnr.c */
 void hypre_F90_IFACE P((int hypre_parcsrcgnrinitialize ));
@@ -118,6 +120,7 @@ int HYPRE_ParAMGSetIOutDat P((HYPRE_Solver solver , int ioutdat ));
 int HYPRE_ParAMGSetLogFileName P((HYPRE_Solver solver , char *log_file_name ));
 int HYPRE_ParAMGSetLogging P((HYPRE_Solver solver , int ioutdat , char *log_file_name ));
 int HYPRE_ParAMGSetDebugFlag P((HYPRE_Solver solver , int debug_flag ));
+int HYPRE_ParAMGGetNumIterations P((HYPRE_Solver solver , int *num_iterations ));
 
 /* HYPRE_parcsr_cgnr.c */
 int HYPRE_ParCSRCGNRInitialize P((MPI_Comm comm , HYPRE_Solver *solver ));
@@ -227,6 +230,7 @@ int hypre_ParAMGSetNumGridSweeps P((void *data , int *num_grid_sweeps ));
 int hypre_ParAMGSetGridRelaxType P((void *data , int *grid_relax_type ));
 int hypre_ParAMGSetGridRelaxPoints P((void *data , int **grid_relax_points ));
 int hypre_ParAMGSetRelaxWeight P((void *data , double *relax_weight ));
+int hypre_ParAMGSetNumIterations P((void *data , int num_iterations ));
 int hypre_ParAMGSetIOutDat P((void *data , int ioutdat ));
 int hypre_ParAMGSetLogFileName P((void *data , char *log_file_name ));
 int hypre_ParAMGSetLogging P((void *data , int ioutdat , char *log_file_name ));
@@ -236,6 +240,8 @@ int hypre_ParAMGSetNumPoints P((void *data , int num_points ));
 int hypre_ParAMGSetUnknownMap P((void *data , int *unknown_map ));
 int hypre_ParAMGSetPointMap P((void *data , int *point_map ));
 int hypre_ParAMGSetVatPoint P((void *data , int *v_at_point ));
+int hypre_ParAMGGetNumIterations P((void *data , int *num_iterations ));
+int hypre_ParAMGGetRelativeResidualNorm P((void *data , double *rel_resid_norm ));
 
 /* par_amg_setup.c */
 int hypre_ParAMGSetup P((void *amg_vdata , hypre_ParCSRMatrix *A , hypre_ParVector *f , hypre_ParVector *u ));

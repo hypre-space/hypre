@@ -61,6 +61,9 @@ typedef struct
    hypre_Vector      *Vtemp_local;
    double            *Vtemp_local_data;
    int                cycle_op_count;                                                   
+   /* log info */
+   int      num_iterations;
+   double   rel_resid_norm;
 
    /* output params */
    int      ioutdat;
@@ -121,6 +124,10 @@ typedef struct
 #define hypre_ParAMGDataVtempLocal(amg_data) ((amg_data)->Vtemp_local)
 #define hypre_ParAMGDataVtemplocalData(amg_data) ((amg_data)->Vtemp_local_data)
 #define hypre_ParAMGDataCycleOpCount(amg_data) ((amg_data)->cycle_op_count)
+
+/* log info data */
+#define hypre_ParAMGDataNumIterations(amg_data) ((amg_data)->num_iterations)
+#define hypre_ParAMGDataRelativeResidualNorm(amg_data) ((amg_data)->rel_resid_norm)
 
 /* output parameters */
 #define hypre_ParAMGDataIOutDat(amg_data) ((amg_data)->ioutdat)

@@ -193,7 +193,7 @@ hypre_F90_IFACE(hypre_parcsrgmresgetnumiteratio)( long int *solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParCSRGMRESGetFinalRel
+ * HYPRE_ParCSRGMRESGetFinalRelati
  *--------------------------------------------------------------------------*/
 
 void

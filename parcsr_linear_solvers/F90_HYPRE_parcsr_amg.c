@@ -215,7 +215,7 @@ hypre_F90_IFACE(hypre_paramgsetcycletype)( long int *solver,
 
 void
 hypre_F90_IFACE(hypre_paramgsettol)( long int *solver,
-                                     long int *tol,
+                                     double   *tol,
                                      int      *ierr    )
 {
    *ierr = (int) ( HYPRE_ParAMGSetTol( (HYPRE_Solver) *solver,
@@ -347,3 +347,29 @@ hypre_F90_IFACE(hypre_paramgsetdebugflag)( long int *solver,
                                              (int)          *debug_flag ) );
 }
 
+/*--------------------------------------------------------------------------
+ * HYPRE_ParAMGGetNumIterations
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_paramggetnumiterations)( long int *solver,
+                                               int      *num_iterations,
+                                               int      *ierr     )
+{
+   *ierr = (int) ( HYPRE_ParAMGGetNumIterations( (HYPRE_Solver) *solver,
+                                                 (int *)         num_iterations ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParAMGGetFinalRelativeRes
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_paramggetfinalrelativeres)( long int *solver,
+                                                  double   *rel_resid_norm,
+                                                  int      *ierr            )
+{
+   *ierr = (int) ( HYPRE_ParAMGGetFinalRelativeResidualNorm(
+                                (HYPRE_Solver) *solver,
+                                (double *)      rel_resid_norm ) );
+}

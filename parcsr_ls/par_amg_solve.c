@@ -142,10 +142,13 @@ hypre_ParAMGSolve( void               *amg_vdata,
 
    resid_nrm_init = resid_nrm;
    rhs_norm = sqrt(hypre_ParInnerProd(f, f));
-   relative_resid = 9999;
    if (rhs_norm)
    {
       relative_resid = resid_nrm_init / rhs_norm;
+   }
+   else
+   {
+      relative_resid = resid_nrm_init;
    }
 
    if (my_id ==0 && (amg_ioutdat > 1))
@@ -180,13 +183,19 @@ hypre_ParAMGSolve( void               *amg_vdata,
       resid_nrm = sqrt(hypre_ParInnerProd(Vtemp, Vtemp));
 
       conv_factor = resid_nrm / old_resid;
-      relative_resid = 9999;
       if (rhs_norm)
       {
          relative_resid = resid_nrm / rhs_norm;
       }
+      else
+      {
+         relative_resid = resid_nrm;
+      }
 
       ++cycle_count;
+
+      hypre_ParAMGDataNumIterations(amg_data) = cycle_count;
+      hypre_ParAMGDataRelativeResidualNorm(amg_data) = relative_resid;
 
       if (my_id == 0 && (amg_ioutdat > 1))
       { 

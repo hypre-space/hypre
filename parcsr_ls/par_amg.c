@@ -44,6 +44,8 @@ hypre_ParAMGInitialize()
    int    **grid_relax_points; 
    double  *relax_weight;
 
+   /* log info */
+   int      num_iterations;
 
    /* output params */
    int      ioutdat;
@@ -93,6 +95,9 @@ hypre_ParAMGInitialize()
    grid_relax_points[3] = hypre_CTAlloc(int,1);
    grid_relax_points[3][0] = 9;
 
+   /* log info */
+   num_iterations = 0;
+
    /* output params */
    ioutdat = 0;
    sprintf(log_file_name, "%s", "amg.out.log");
@@ -120,6 +125,7 @@ hypre_ParAMGInitialize()
    hypre_ParAMGSetGridRelaxPoints(amg_data, grid_relax_points);
    hypre_ParAMGSetRelaxWeight(amg_data, relax_weight);
 
+   hypre_ParAMGSetNumIterations(amg_data, num_iterations);
    hypre_ParAMGSetIOutDat(amg_data, ioutdat);
    hypre_ParAMGSetLogFileName(amg_data, log_file_name); 
    hypre_ParAMGSetDebugFlag(amg_data, debug_flag);
@@ -367,6 +373,18 @@ hypre_ParAMGSetLogFileName( void   *data,
 }
 
 int
+hypre_ParAMGSetNumIterations( void    *data,
+                              int      num_iterations )
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+
+   hypre_ParAMGDataNumIterations(amg_data) = num_iterations;
+
+   return (ierr);
+}
+
+int
 hypre_ParAMGSetLogging( void     *data,
                         int       ioutdat,
                         char     *log_file_name )
@@ -471,3 +489,26 @@ hypre_ParAMGSetVatPoint( void     *data,
    return (ierr);
 }
 
+int
+hypre_ParAMGGetNumIterations( void     *data,
+                              int      *num_iterations )
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+
+   *num_iterations = hypre_ParAMGDataNumIterations(amg_data);
+
+   return (ierr);
+}
+
+int
+hypre_ParAMGGetRelativeResidualNorm( void     *data,
+                                     double   *rel_resid_norm )
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+
+   *rel_resid_norm = hypre_ParAMGDataRelativeResidualNorm(amg_data);
+
+   return (ierr);
+}
