@@ -65,6 +65,7 @@ class MLI_Method_AMGSA : public MLI_Method
    int      *saCounts_;              /* store aggregation information at */
    int      **saData_;               /* each level                       */
    int      **saLabels_;             /* labels for aggregation           */
+   int      **saDataAux_;            /* for subdomain aggregates         */
    double   *spectralNorms_;         /* computed matrix norms            */
    int      calcNormScheme_;         /* method to estimate matrix norm   */
    int      minCoarseSize_;          /* tell when to stop aggregation    */
@@ -116,9 +117,12 @@ public :
                               int numNS, double *scale);
    int    setCalibrationSize(int size);
    int    setupCalibration( MLI *mli );
-   int    setupSubdomainNullSpaceUsingFEData( MLI *mli );
-   int    setupDDFormSubdomainAggregate( MLI *mli );
-   int    setupDDSuperLUSmoother( MLI *mli, int level );
+   int    setupFEDataBasedNullSpaces( MLI *mli );
+   int    setupFEDataBasedAggregates( MLI *mli );
+   int    setupFEDataBasedSuperLUSmoother( MLI *mli, int level );
+   int    setupSFEIBasedNullSpaces( MLI *mli );
+   int    setupSFEIBasedAggregates( MLI *mli );
+   int    setupSFEIBasedSuperLUSmoother( MLI *mli, int level );
    int    print();
    int    printStatistics(MLI *mli);
    int    getNullSpace(int &nodeDOF,int &numNS,double *&nullVec, int &leng);

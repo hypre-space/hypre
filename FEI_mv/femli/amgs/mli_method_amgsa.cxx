@@ -59,6 +59,7 @@ MLI_Method_AMGSA::MLI_Method_AMGSA( MPI_Comm comm ) : MLI_Method( comm )
    dropTolForP_   = 0.0;            /* tolerance to sparsify P*/
    saCounts_      = new int[40];    /* number of aggregates   */
    saData_        = new int*[40];   /* node to aggregate data */
+   saDataAux_     = NULL;
    spectralNorms_ = new double[40]; /* calculated max eigen   */
    for ( int i = 0; i < 40; i++ ) 
    {
@@ -105,6 +106,12 @@ MLI_Method_AMGSA::~MLI_Method_AMGSA()
    char paramString[20];
 
    if ( nullspaceVec_ != NULL ) delete [] nullspaceVec_;
+   if ( saDataAux_ != NULL )
+   {
+      for ( int j = 0; j < saCounts_[0]; j++ )
+         if ( saDataAux_[j] != NULL ) delete [] saDataAux_[j];
+      delete [] saDataAux_;
+   }
    if ( saCounts_ != NULL ) delete [] saCounts_;
    if ( saData_ != NULL )
    {
@@ -118,9 +125,9 @@ MLI_Method_AMGSA::~MLI_Method_AMGSA()
    }
    if ( saLabels_ != NULL )
    {
-      for ( int i = 0; i < maxLevels_; i++ )
+      for ( int k = 0; k < maxLevels_; k++ )
       {
-         if ( saLabels_[i] != NULL ) delete [] saLabels_[i];
+         if ( saLabels_[k] != NULL ) delete [] saLabels_[k];
          else break;
       }
       delete [] saLabels_;
@@ -477,37 +484,75 @@ int MLI_Method_AMGSA::setup( MLI *mli )
    MPI_Comm        comm;
    MLI_Function    *funcPtr;
    hypre_ParCSRMatrix *hypreRT;
+   MLI_FEData      *fedata;
+   MLI_SFEI        *sfei;
 
 #ifdef MLI_DEBUG_DETAILED
    printf("MLI_Method_AMGSA::setup begins...\n");
 #endif
 
    /* --------------------------------------------------------------- */
-   /* clean up some mess made previously                              */
+   /* clean up some mess made previously for levels other than the    */
+   /* finest level                                                    */
    /* --------------------------------------------------------------- */
 
-   if ( saData_ != NULL )
+   if (saData_ != NULL)
    {
-      for ( level = 1; level < maxLevels_; level++ )
+      for (level = 1; level < maxLevels_; level++)
       {
-         if ( saData_[level] != NULL ) delete [] saData_[level];
+         if (saData_[level] != NULL) delete [] saData_[level];
          saData_[level] = NULL;
       }
    }
 
    /* --------------------------------------------------------------- */
-   /* call SAe and/or setupDD if flag is set                          */
+   /* if requested, compute null spaces from finite element stiffness */
+   /* matrices                                                        */
    /* --------------------------------------------------------------- */
 
-   if ( useSAMGeFlag_ )  setupSubdomainNullSpaceUsingFEData(mli);
-   if ( useSAMGDDFlag_ ) setupDDFormSubdomainAggregate(mli);
+   if (useSAMGeFlag_)  
+   {
+      level = 0;
+      fedata = mli->getFEData( level );
+      if (fedata != NULL) setupFEDataBasedNullSpaces(mli);
+      else
+      {
+         sfei = mli->getSFEI( level );
+         if (sfei != NULL) setupSFEIBasedNullSpaces(mli);
+      }
+   }
+
+   /* --------------------------------------------------------------- */
+   /* if domain decomposition requested, compute aggregate based on   */
+   /* subdomains                                                      */
+   /* --------------------------------------------------------------- */
+
+   if (useSAMGDDFlag_) 
+   {
+      level = 0;
+      fedata = mli->getFEData( level );
+      if (fedata != NULL) setupFEDataBasedAggregates(mli);
+      else
+      {
+         sfei = mli->getSFEI( level );
+         if (sfei != NULL) setupSFEIBasedAggregates(mli);
+      }
+   }
 
    /* --------------------------------------------------------------- */
    /* call calibration if calibration size > 0                        */
    /* --------------------------------------------------------------- */
 
-   if ( calibrationSize_ > 0 ) return( setupCalibration( mli ) );
+   if (calibrationSize_ > 0) return(setupCalibration(mli));
       
+   /* --------------------------------------------------------------- */
+   /* if no null spaces have been provided nor computed, set null     */
+   /* space dimension equal to node degree of freedom                 */
+   /* --------------------------------------------------------------- */
+
+   if (nullspaceDim_ != nodeDofs_ && nullspaceVec_ == NULL)
+      nullspaceDim_ = nodeDofs_;
+
    /* --------------------------------------------------------------- */
    /* traverse all levels                                             */
    /* --------------------------------------------------------------- */
@@ -518,8 +563,6 @@ int MLI_Method_AMGSA::setup( MLI *mli )
    MPI_Comm_rank( comm, &mypid );
    mli_Amat   = mli->getSystemMatrix(level);
    totalTime_ = MLI_Utils_WTime();
-   if ( nullspaceDim_ != nodeDofs_ && nullspaceVec_ == NULL )
-      nullspaceDim_ = nodeDofs_;
 
 #if HAVE_LOBPCG
    relaxNullSpaces(mli_Amat);
@@ -527,44 +570,50 @@ int MLI_Method_AMGSA::setup( MLI *mli )
    
    for (level = 0; level < numLevels_; level++ )
    {
-      if ( mypid == 0 && outputLevel_ > 0 )
+      if (mypid == 0 && outputLevel_ > 0)
       {
          printf("\t*****************************************************\n");
          printf("\t*** Aggregation (uncoupled) : level = %d\n", level);
          printf("\t-----------------------------------------------------\n");
       }
       currLevel_ = level;
-      if ( level == numLevels_-1 ) break;
+      if (level == numLevels_-1) break;
 
-      /* ------fetch fine grid matrix----------------------------------- */
+      /* -------------------------------------------------- */
+      /* fetch fine grid matrix                             */
+      /* -------------------------------------------------- */
 
       mli_Amat = mli->getSystemMatrix(level);
-      assert ( mli_Amat != NULL );
+      assert (mli_Amat != NULL);
 
-      /* ------perform coarsening--------------------------------------- */
+      /* -------------------------------------------------- */
+      /* perform coarsening                                 */
+      /* -------------------------------------------------- */
 
-      switch ( coarsenScheme_ )
+      switch (coarsenScheme_)
       {
          case MLI_METHOD_AMGSA_LOCAL :
-              if ( level == 0 )
+              if (level == 0)
                  maxEigen = genPLocal(mli_Amat, &mli_Pmat, saCounts_[0], 
-                                       saData_[0]); 
+                                      saData_[0]); 
               else
                  maxEigen = genPLocal(mli_Amat, &mli_Pmat, 0, NULL); 
               break;
       }
-      if ( maxEigen != 0.0 ) spectralNorms_[level] = maxEigen;
-      if ( mli_Pmat == NULL ) break;
+      if (maxEigen != 0.0) spectralNorms_[level] = maxEigen;
+      if (mli_Pmat == NULL) break;
       start_time = MLI_Utils_WTime();
 
-      /* ------construct and set the coarse grid matrix----------------- */
+      /* -------------------------------------------------- */
+      /* construct and set the coarse grid matrix           */
+      /* -------------------------------------------------- */
 
-      if ( mypid == 0 && outputLevel_ > 0 ) printf("\tComputing RAP\n");
+      if (mypid == 0 && outputLevel_ > 0) printf("\tComputing RAP\n");
       MLI_Matrix_ComputePtAP(mli_Pmat, mli_Amat, &mli_cAmat);
       mli->setSystemMatrix(level+1, mli_cAmat);
       elapsed_time = (MLI_Utils_WTime() - start_time);
       RAPTime_ += elapsed_time;
-      if ( mypid == 0 && outputLevel_ > 0 ) 
+      if (mypid == 0 && outputLevel_ > 0) 
          printf("\tRAP computed, time = %e seconds.\n", elapsed_time);
 
 #if 0
@@ -573,22 +622,27 @@ int MLI_Method_AMGSA::setup( MLI *mli )
       mli_cAmat->print("cAmat");
 #endif
 
-      /* ------set the prolongation matrix------------------------------ */
+      /* -------------------------------------------------- */
+      /* set the prolongation matrix                        */
+      /* -------------------------------------------------- */
 
       mli->setProlongation(level+1, mli_Pmat);
 
-      /* ------if nonsymmetric, generate a different R------------------ */
+      /* -------------------------------------------------- */
+      /* if nonsymmetric, generate a different R            */
+      /* then set restriction operator                      */
+      /* -------------------------------------------------- */
 
-      if ( symmetric_ == 0 && Pweight_ != 0.0 )
+      if (symmetric_ == 0 && Pweight_ != 0.0)
       {
-         MLI_Matrix_Transpose( mli_Amat, &mli_ATmat );
-         switch ( coarsenScheme_ )
+         MLI_Matrix_Transpose(mli_Amat, &mli_ATmat);
+         switch (coarsenScheme_)
          {
             case MLI_METHOD_AMGSA_LOCAL :
                  maxEigenT = genPLocal(mli_ATmat, &mli_Rmat, saCounts_[level], 
-                                        saData_[level]); 
+                                       saData_[level]); 
                  if ( maxEigenT < 0.0 ) 
-                    printf("MLI_Method_AMGSA::setup ERROR : maxEigenT < 0.");
+                    printf("MLI_Method_AMGSA::setup ERROR : maxEigenT < 0.\n");
                  break;
          }
          delete mli_ATmat;
@@ -608,12 +662,19 @@ int MLI_Method_AMGSA::setup( MLI *mli )
       }
       mli->setRestriction(level, mli_Rmat);
 
-      /* ------set the smoothers---------------------------------------- */
+      /* -------------------------------------------------- */
+      /* set the smoothers                                  */
+      /* (if domain decomposition and ARPACKA SuperLU       */
+      /* smoothers is requested, perform special treatment, */
+      /* and if domain decomposition and SuperLU smoother   */
+      /* is requested with multiple local subdomains, again */
+      /* perform special treatment.)                        */
+      /* -------------------------------------------------- */
 
       if ( useSAMGDDFlag_ && numLevels_ == 2 && 
            !strcmp(preSmoother_, "ARPACKSuperLU") )
       {
-         setupDDSuperLUSmoother(mli, level);
+         setupFEDataBasedSuperLUSmoother(mli, level);
          smootherPtr = MLI_Solver_CreateFromName(preSmoother_);
          targv[0] = (char *) ddObj_;
          sprintf( paramString, "ARPACKSuperLUObject" );
@@ -628,38 +689,27 @@ int MLI_Method_AMGSA::setup( MLI *mli )
 #endif
          continue;
       }
-      smootherPtr = MLI_Solver_CreateFromName( preSmoother_ );
-      targv[0] = (char *) &preSmootherNum_;
-      targv[1] = (char *) preSmootherWgt_;
-      sprintf( paramString, "relaxWeight" );
-      smootherPtr->setParams(paramString, 2, targv);
-      if ( !strcmp(preSmoother_, "MLS") ) 
+      else if ( useSAMGDDFlag_ && numLevels_ == 2 && 
+                !strcmp(preSmoother_, "SeqSuperLU") && saDataAux_ != NULL)
       {
-         sprintf( paramString, "maxEigen" );
-         targv[0] = (char *) &maxEigen;
-         smootherPtr->setParams(paramString, 1, targv);
+         smootherPtr = MLI_Solver_CreateFromName(preSmoother_);
+         sprintf( paramString, "setSubProblems" );
+         targv[0] = (char *) &(saDataAux_[0][0]); 
+         targv[1] = (char *) &(saDataAux_[0][1]); 
+         targv[2] = (char *) &(saDataAux_[1]); 
+         smootherPtr->setParams(paramString, 3, targv);
+         smootherPtr->setup(mli_Amat);
+         mli->setSmoother(level, MLI_SMOOTHER_PRE, smootherPtr);
+         mli->setSmoother(level, MLI_SMOOTHER_POST, NULL);
       }
-      if ( smootherPrintRNorm_ == 1 )
+      else
       {
-         sprintf( paramString, "printRNorm" );
-         smootherPtr->setParams(paramString, 0, NULL);
-      }
-      if ( smootherFindOmega_ == 1 )
-      {
-         sprintf( paramString, "findOmega" );
-         smootherPtr->setParams(paramString, 0, NULL);
-      }
-      smootherPtr->setup(mli_Amat);
-      mli->setSmoother( level, MLI_SMOOTHER_PRE, smootherPtr );
-
-      if ( strcmp(preSmoother_, postSmoother_) )
-      {
-         smootherPtr = MLI_Solver_CreateFromName( postSmoother_ );
-         targv[0] = (char *) &postSmootherNum_;
-         targv[1] = (char *) postSmootherWgt_;
+         smootherPtr = MLI_Solver_CreateFromName( preSmoother_ );
+         targv[0] = (char *) &preSmootherNum_;
+         targv[1] = (char *) preSmootherWgt_;
          sprintf( paramString, "relaxWeight" );
          smootherPtr->setParams(paramString, 2, targv);
-         if ( !strcmp(postSmoother_, "MLS") ) 
+         if ( !strcmp(preSmoother_, "MLS") ) 
          {
             sprintf( paramString, "maxEigen" );
             targv[0] = (char *) &maxEigen;
@@ -676,23 +726,52 @@ int MLI_Method_AMGSA::setup( MLI *mli )
             smootherPtr->setParams(paramString, 0, NULL);
          }
          smootherPtr->setup(mli_Amat);
+         mli->setSmoother( level, MLI_SMOOTHER_PRE, smootherPtr );
+
+         if ( strcmp(preSmoother_, postSmoother_) )
+         {
+            smootherPtr = MLI_Solver_CreateFromName( postSmoother_ );
+            targv[0] = (char *) &postSmootherNum_;
+            targv[1] = (char *) postSmootherWgt_;
+            sprintf( paramString, "relaxWeight" );
+            smootherPtr->setParams(paramString, 2, targv);
+            if ( !strcmp(postSmoother_, "MLS") ) 
+            {
+               sprintf( paramString, "maxEigen" );
+               targv[0] = (char *) &maxEigen;
+               smootherPtr->setParams(paramString, 1, targv);
+            }
+            if ( smootherPrintRNorm_ == 1 )
+            {
+               sprintf( paramString, "printRNorm" );
+               smootherPtr->setParams(paramString, 0, NULL);
+            }
+            if ( smootherFindOmega_ == 1 )
+            {
+               sprintf( paramString, "findOmega" );
+               smootherPtr->setParams(paramString, 0, NULL);
+            }
+            smootherPtr->setup(mli_Amat);
+         }
+         mli->setSmoother( level, MLI_SMOOTHER_POST, smootherPtr );
       }
-      mli->setSmoother( level, MLI_SMOOTHER_POST, smootherPtr );
    }
 
-   /* ------set the coarse grid solver---------------------------------- */
+   /* --------------------------------------------------------------- */
+   /* set the coarse grid solver                                      */
+   /* --------------------------------------------------------------- */
 
    if (mypid == 0 && outputLevel_ > 0) printf("\tCoarse level = %d\n",level);
    csolvePtr = MLI_Solver_CreateFromName( coarseSolver_ );
-   if ( strcmp(coarseSolver_, "SuperLU") )
+   if (strcmp(coarseSolver_, "SuperLU"))
    {
       targv[0] = (char *) &coarseSolverNum_;
       targv[1] = (char *) coarseSolverWgt_ ;
       sprintf( paramString, "relaxWeight" );
       csolvePtr->setParams(paramString, 2, targv);
-      if ( !strcmp(coarseSolver_, "MLS") )
+      if (!strcmp(coarseSolver_, "MLS"))
       {
-         sprintf( paramString, "maxEigen" );
+         sprintf(paramString, "maxEigen");
          targv[0] = (char *) &maxEigen;
          csolvePtr->setParams(paramString, 1, targv);
       }
