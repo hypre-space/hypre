@@ -82,3 +82,18 @@ HYPRE_CSRMatrixPrint( HYPRE_CSRMatrix  matrix,
                          file_name );
 }
 
+/*--------------------------------------------------------------------------
+ * HYPRE_CSRMatrixGetNumRows
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_CSRMatrixGetNumRows( HYPRE_CSRMatrix matrix, int *num_rows )
+{
+   hypre_CSRMatrix *csr_matrix = (hypre_CSRMatrix *) matrix;
+
+   *num_rows =  hypre_CSRMatrixNumRows( csr_matrix );
+
+   return 0;
+}
+
+
