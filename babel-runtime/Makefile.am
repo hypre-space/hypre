@@ -154,47 +154,47 @@ python/babel-stamp2:
 clean-local-python1:
 	@if test -d python; then					\
           cd python;                                                    \
-          echo $(RM) -f sedscript Makefile Makefile.pre Makefile.pre.in    \
+          echo rm -f sedscript Makefile Makefile.pre Makefile.pre.in    \
             Setup config.c *setup.installed;                            \
-          $(RM) -f sedscript Makefile Makefile.pre Makefile.pre.in Setup   \
+          rm -f sedscript Makefile Makefile.pre Makefile.pre.in Setup   \
              config.c *setup.installed;         			\
-          echo $(RM) -f babel-stamp *.so *.dll *.a *.o *~;                 \
-	  $(RM) -f babel-stamp *.so *.dll *.a *.o *~;			\
+          echo rm -f babel-stamp *.so *.dll *.a *.o *~;                 \
+	  rm -f babel-stamp *.so *.dll *.a *.o *~;			\
 	  if test -d SIDL; then						\
 	    cd SIDL;							\
-	    echo $(RM) -f config.c *.so *.dll *.a *.o *~ *.c *.h __init__.*;\
-	    $(RM) -f config.c *.so *.dll *.a *.o *~ *.c *.h __init__.*;	\
+	    echo rm -f config.c *.so *.dll *.a *.o *~ *.c *.h __init__.*;\
+	    rm -f config.c *.so *.dll *.a *.o *~ *.c *.h __init__.*;	\
 	  fi;								\
 	fi
 	@-if test "X$(srcdir)" != "X."; then				\
-	  echo $(RM) -rf python;					\
-	  $(RM) -rf python;						\
+	  echo rm -rf python;					\
+	  rm -rf python;						\
 	else \
-	  echo $(RM) -rf python/build; \
-	  $(RM) -rf python/build; \
+	  echo rm -rf python/build; \
+	  rm -rf python/build; \
 	fi
 
 clean-local-python2:
 	@if test -d python; then					\
           cd python;                                                    \
-          echo $(RM) -f sedscript Makefile Makefile.pre Makefile.pre.in    \
+          echo rm -f sedscript Makefile Makefile.pre Makefile.pre.in    \
             Setup config.c *setup.installed;                            \
-          $(RM) -f sedscript Makefile Makefile.pre Makefile.pre.in Setup   \
+          rm -f sedscript Makefile Makefile.pre Makefile.pre.in Setup   \
              config.c *setup.installed;         			\
-          echo $(RM) -f babel-stamp *.so *.dll *.a *.o *~;                 \
-	  $(RM) -f babel-stamp *.so *.dll *.a *.o *~;			\
+          echo rm -f babel-stamp *.so *.dll *.a *.o *~;                 \
+	  rm -f babel-stamp *.so *.dll *.a *.o *~;			\
 	  if test -d SIDL; then						\
 	    cd SIDL;							\
-	    echo $(RM) -f config.c *.so *.dll *.a *.o *~  ;		\
-	    $(RM) -f config.c *.so *.dll *.a *.o *~;			\
+	    echo rm -f config.c *.so *.dll *.a *.o *~  ;		\
+	    rm -f config.c *.so *.dll *.a *.o *~;			\
 	  fi;								\
 	fi
 	@-if test "X$(srcdir)" != "X."; then				\
-	  echo $(RM) -rf python;					\
-	  $(RM) -rf python;						\
+	  echo rm -rf python;					\
+	  rm -rf python;						\
 	else \
-	  echo $(RM) -rf python/build; \
-	  $(RM) -rf python/build; \
+	  echo rm -rf python/build; \
+	  rm -rf python/build; \
 	fi
 
 dist-hook-python: all-local-python
@@ -233,6 +233,6 @@ install-data-am-python:
 uninstall-data-am-python:
 	@$(NORMAL_UNINSTALL)
 	@test -d python && test -f python/setup.installed &&		\
-	 $(RM) -f `cat python/setup.installed`
+	 rm -f `cat python/setup.installed`
 	@test -d python && test -f python/sidlsetup.installed &&	\
-	 $(RM) -f `cat python/sidlsetup.installed`
+	 rm -f `cat python/sidlsetup.installed`

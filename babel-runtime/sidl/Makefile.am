@@ -263,7 +263,7 @@ babel-stamp:
 	touch babel-stamp
 
 clean-local:
-	$(RM) -f babel-stamp babel-compile stamp-h1 *.o *.lo
+	rm -f babel-stamp babel-compile stamp-h1 *.o *.lo
 else
 babel-compile: babel-stamp
 	touch babel-compile
@@ -276,8 +276,8 @@ babel-stamp: $(srcdir)/sidl.sidl $(SRCDIR_SIDLX_SIDL)
 	touch babel-stamp
 
 clean-local:
-	$(RM) -f $(HEADERS_BABEL) $(OBJECTS_BABEL) $(SOURCES_BABEL)
-	$(RM) -f babel-stamp babel-compile stamp-h1
+	rm -f $(HEADERS_BABEL) $(OBJECTS_BABEL) $(SOURCES_BABEL)
+	rm -f babel-stamp babel-compile stamp-h1
 	$(SHELL) $(top_srcdir)/bin/remove.sh $(srcdir) $(FILES_COPY)
 	test "X$(srcdir)" = "X." || rm -f babel.make
 
@@ -286,13 +286,13 @@ endif
 dist-hook:
 	touch $(distdir)/Makefile.am $(distdir)/Makefile.in
 distclean-local:
-	$(RM) -f babel_config.h
+	rm -f babel_config.h
 
 AUTOHEADER = @AUTOHEADER@ \
 	     && cd config \
 	     && @PERL@ -p -i.bak \
 	          -e "s/^\#undef (.*)$$/\#ifndef \1\n\#undef \1\n\#endif/" \
 	          babel_config.h.in \
-             && $(RM) -f babel_config.h.in.bak
+             && rm -f babel_config.h.in.bak
 
 include babel.make
