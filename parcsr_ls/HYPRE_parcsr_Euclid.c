@@ -1,5 +1,6 @@
 #include "./HYPRE_parcsr_ls.h"
 #include "../matrix_matrix/HYPRE_matrix_matrix_protos.h"
+#include "../utilities/mpistubs.h"
 
 /* Must include implementation definition for ParVector since no data access
   functions are publically provided. AJC, 5/99 */
