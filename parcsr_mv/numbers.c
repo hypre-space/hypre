@@ -1,7 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#include <mpi.h>
 #include <assert.h>
 
 #include "utilities.h"
@@ -64,7 +63,6 @@ int hypre_NumbersNEntered( hypre_NumbersNode * node )
 int hypre_NumbersQuery( hypre_NumbersNode * node, const int n )
 /* returns 1 if n is on the tree with root 'node', 0 otherwise */
 {
-   int i, new=0;
    int q = n/10;
    int r = n%10;
    assert( n>=0 );
