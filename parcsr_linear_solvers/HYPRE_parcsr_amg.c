@@ -215,11 +215,27 @@ HYPRE_ParAMGSetNumGridSweeps( HYPRE_Solver  solver,
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_ParAMGInitGridRelaxation( int  *num_grid_sweeps,
-                                int  *grid_relax_type,
-                                int **grid_relax_points,
-                                int   coarsen_type  )
-{
+HYPRE_ParAMGInitGridRelaxation( int     **num_grid_sweeps_ptr,
+                                int     **grid_relax_type_ptr,
+                                int    ***grid_relax_points_ptr,
+                                int       coarsen_type,
+                                double  **relax_weights_ptr,
+                                int       max_levels         )
+{  int i;
+   int *num_grid_sweeps;
+   int *grid_relax_type;
+   int **grid_relax_points;
+   double *relax_weights;
+
+   *num_grid_sweeps_ptr   = hypre_CTAlloc(int, 4);
+   *grid_relax_type_ptr   = hypre_CTAlloc(int, 4);
+   *grid_relax_points_ptr = hypre_CTAlloc(int*, 4);
+   *relax_weights_ptr     = hypre_CTAlloc(double, max_levels);
+
+   num_grid_sweeps   = *num_grid_sweeps_ptr;
+   grid_relax_type   = *grid_relax_type_ptr;
+   grid_relax_points = *grid_relax_points_ptr;
+   relax_weights     = *relax_weights_ptr;
 
    if (coarsen_type == 5)
    {
@@ -278,6 +294,9 @@ HYPRE_ParAMGInitGridRelaxation( int  *num_grid_sweeps,
    grid_relax_points[3] = hypre_CTAlloc(int, 1);
    grid_relax_points[3][0] = 0;
 
+   for (i = 0; i < max_levels; i++)
+      relax_weights[i] = 0.;
+
    return 0;
 }
 
@@ -300,8 +319,7 @@ int
 HYPRE_ParAMGSetGridRelaxPoints( HYPRE_Solver   solver,
                                 int          **grid_relax_points  )
 {
-   return( hypre_ParAMGSetGridRelaxPoints( (void *) solver,
-                                           grid_relax_points ) );
+   return( hypre_ParAMGSetGridRelaxPoints( (void *) solver, grid_relax_points ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -309,7 +327,7 @@ HYPRE_ParAMGSetGridRelaxPoints( HYPRE_Solver   solver,
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_ParAMGSetRelaxWeight( HYPRE_Solver solver,
+HYPRE_ParAMGSetRelaxWeight( HYPRE_Solver  solver,
                             double       *relax_weight  )
 {
    return( hypre_ParAMGSetRelaxWeight( (void *) solver, relax_weight ) );
