@@ -1853,14 +1853,12 @@ main( int   argc,
 
       else if (solver_id == 18)
       {
-#if 0 /* TODO */
          /* use diagonal scaling as preconditioner */
          precond = NULL;
          HYPRE_PCGSetPrecond( (HYPRE_Solver) solver,
                               (HYPRE_PtrToSolverFcn) HYPRE_SStructDiagScale,
                               (HYPRE_PtrToSolverFcn) HYPRE_SStructDiagScaleSetup,
                               (HYPRE_Solver) precond);
-#endif
       }
 
       HYPRE_PCGSetup( (HYPRE_Solver) solver, (HYPRE_Matrix) A,
@@ -1930,6 +1928,15 @@ main( int   argc,
                               (HYPRE_PtrToSolverFcn) HYPRE_ParCSRParaSailsSolve,
                               (HYPRE_PtrToSolverFcn) HYPRE_ParCSRParaSailsSetup,
                               par_precond );
+      }
+      else if (solver_id == 28)
+      {
+         /* use diagonal scaling as preconditioner */
+         par_precond = NULL;
+         HYPRE_PCGSetPrecond(  par_solver,
+                              (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScale,
+                              (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScaleSetup,
+                               par_precond );
       }
 
       HYPRE_PCGSetup( par_solver, (HYPRE_Matrix) par_A,
@@ -2003,14 +2010,12 @@ main( int   argc,
 
       else if (solver_id == 38)
       {
-#if 0 /* TODO */
          /* use diagonal scaling as preconditioner */
          precond = NULL;
          HYPRE_GMRESSetPrecond( (HYPRE_Solver) solver,
                                 (HYPRE_PtrToSolverFcn) HYPRE_SStructDiagScale,
                                 (HYPRE_PtrToSolverFcn) HYPRE_SStructDiagScaleSetup,
                                 (HYPRE_Solver) precond );
-#endif
       }
 
       HYPRE_GMRESSetup( (HYPRE_Solver) solver, (HYPRE_Matrix) A,
@@ -2165,10 +2170,10 @@ main( int   argc,
       HYPRE_SStructStencilDestroy(stencils[s]);
    }
    hypre_TFree(stencils);
-   HYPRE_SStructGraphDestroy(graph);
    HYPRE_SStructMatrixDestroy(A);
    HYPRE_SStructVectorDestroy(b);
    HYPRE_SStructVectorDestroy(x);
+   HYPRE_SStructGraphDestroy(graph);
 
    DestroyData(data);
 
