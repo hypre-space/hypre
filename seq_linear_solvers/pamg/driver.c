@@ -1,10 +1,5 @@
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-
-#include "utilities.h"
-#include "ls.h"
+#include "headers.h"
 
 /*--------------------------------------------------------------------------
  * Test driver for unstructured matrix interface (csr storage).
