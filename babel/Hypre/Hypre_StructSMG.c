@@ -96,6 +96,8 @@ impl_Hypre_StructSMG_GetResidual(Hypre_StructSMG this) {
   /*
     The present HYPRE_struct_smg.c code in Hypre doesn't provide a residual.
     I haven't bothered to look at other Hypre SMG files. (jfp)
+    If we implement this function, the way to do it would be to compute it,
+    using saved matrix and vectors.
     
     For now, all we do is make a dummy object and return it.  It can't even be
     of the right size because the grid information is quite buried and it's not
@@ -142,7 +144,7 @@ double  impl_Hypre_StructSMG_GetDoubleParameter(Hypre_StructSMG this, char* name
    double value;
    int ivalue;
    printf( "Hypre_StructJacobi_GetDoubleParameter does not recognize name %s\n", name );
-   return 0;
+   return 1;
 } /* end impl_Hypre_StructSMGGetDoubleParameter */
 
 /* ********************************************************
@@ -161,7 +163,7 @@ int  impl_Hypre_StructSMG_GetIntParameter(Hypre_StructSMG this, char* name) {
 int  impl_Hypre_StructSMG_SetDoubleParameter
 (Hypre_StructSMG this, char* name, double value) {
 
-/* JFP: This function just dispatches to the parameter's set function. */
+/* This function just dispatches to the parameter's set function. */
 
    struct Hypre_StructSMG_private_type *HSMGp = this->d_table;
    HYPRE_StructSolver *S = HSMGp->hssolver;
@@ -185,7 +187,7 @@ int  impl_Hypre_StructSMG_SetDoubleParameter
 int impl_Hypre_StructSMG_SetIntParameter
 (Hypre_StructSMG this, char* name, int value) {
 
-/* JFP: This function just dispatches to the parameter's set function. */
+/* This function just dispatches to the parameter's set function. */
 
    struct Hypre_StructSMG_private_type *HSMGp = this->d_table;
    HYPRE_StructSolver *S = HSMGp->hssolver;
@@ -225,22 +227,11 @@ int impl_Hypre_StructSMG_SetIntParameter
  * impl_Hypre_StructSMGNew
  **********************************************************/
 int impl_Hypre_StructSMG_New(Hypre_StructSMG this, Hypre_MPI_Com comm) {
-
    struct Hypre_StructSMG_private_type *HSMGp = this->d_table;
    HYPRE_StructSolver *S = HSMGp->hssolver;
 
    struct Hypre_MPI_Com_private_type * HMCp = comm->d_table;
    MPI_Comm *C = HMCp->hcom;
-
-/* the StructSolver this inherits from keeps its own pointer to the
-   underlying HYPRE object.  Make sure they are the same.
- JFP 10mar2000: StructSolver may not be needed any more, as Cal's new PCG
- _only_ uses interfaces.
-   Hypre_StructSolver HSS = Hypre_StructSMG_castTo
-      ( this, "Hypre_StructSolver" );
-   struct Hypre_StructSolver_private_type *HSSp = HSS->d_table;
-   HSSp->hssolver = S;
-*/
 
    return HYPRE_StructSMGCreate( *C, S );
 } /* end impl_Hypre_StructSMGNew */
