@@ -264,7 +264,7 @@ int MLI_Method_AMGSA::setupSFEIBasedNullSpaces( MLI *mli )
 
       for ( iR = 0; iR < csrIA[csrNrows]; iR++ ) csrJA[iR]++;
       for ( iR = 0; iR <= csrNrows; iR++ ) csrIA[iR]++;
-#if 1
+#if 0
       FILE *fptr = fopen("arpackMat", "w");
       for ( iR = 0; iR < csrNrows; iR++ ) 
          for ( k = csrIA[iR]; k < csrIA[iR+1]; k++ )
@@ -287,10 +287,12 @@ int MLI_Method_AMGSA::setupSFEIBasedNullSpaces( MLI *mli )
       sigmaI = 0.0e-1;
       dnstev_(&csrNrows, &nullspaceDim_, which, &sigmaR, &sigmaI, 
            csrIA, csrJA, csrAA, eigenR, eigenI, eigenV, &csrNrows, &info);
-      if ( mypid == 0 && outputLevel_ > 0 && iD == 0 )
+      if ( mypid == 0 && outputLevel_ > 0 )
       {
+         printf("Subdomain %3d (%3d) : \n", iD, nSubdomains);
          for ( k = 0; k < nullspaceDim_; k++ )
-         printf("\tARPACK eigenvalues %2d = %e\n", k, eigenR[k]);
+         printf("\tARPACK eigenvalues %2d = %16.8e %16.8e\n", k, eigenR[k],
+                eigenI[k]);
       }
 #else
       printf("MLI_Method_AMGSA::FATAL ERROR : ARPACK not installed.\n");
@@ -336,12 +338,16 @@ int MLI_Method_AMGSA::setupSFEIBasedNullSpaces( MLI *mli )
          }
       }
       delete [] elemNodeList1D;
-#if 0
+#if 1
       FILE *fptr2 = fopen("arpackEigenV", "w");
       for ( k = 0; k < nullspaceDim_; k++ ) 
+      {
+         fprintf(fptr2,"ev%d = [\n", k);
          for ( int k2 = 0; k2 < nullspaceLen_; k2++ )
-            fprintf(fptr2,"%10d %18.10\n", saLabels_[0][k2], 
+            fprintf(fptr2,"%10d %18.10e\n", saLabels_[0][k2], 
                     nullspaceVec_[nullspaceLen_*k+k2]);
+         fprintf(fptr2,"];\n");
+      }
       fclose(fptr2);
 #endif
 
