@@ -84,7 +84,7 @@ nofei:
 
 dist-hook:
 	@ \
-	for i in $(BABELDIR); \
+	for i in babel babel-runtime; \
 	do \
 	  if [ -d $$i ]; \
 	  then \
