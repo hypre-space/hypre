@@ -248,12 +248,21 @@ c-----------------------------------------------------------------------
 
 c     General solver parameters, passing hard coded constants
 c     will break the interface.
+
       maxiter = 50
       tol = 0.000001
       convtol = 0.9
       debug_flag = 0
 
       if (solver_id .eq. 0) then
+
+c Set defaults for BoomerAMG
+        coarsen_type = 0
+        hybrid = 1
+        measure_type = 0
+        strong_threshold = 0.25
+        trunc_factor = 0.0
+        cycle_type = 1
 
         print *, 'AMG'
 
