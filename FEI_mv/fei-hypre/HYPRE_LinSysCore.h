@@ -364,6 +364,8 @@ class HYPRE_LinSysCore
    double buildSlideReducedSoln();
    double buildSlideReducedSoln2();
    void   buildSchurReducedSystem();
+   void   buildSchurReducedSystem2();
+   int    HYPRE_Schur_Search(int,int,int*,int*,int);
    void   buildSchurReducedRHS();
    double buildSchurReducedSoln();
    void   computeMinResProjection(HYPRE_ParCSRMatrix A_csr, HYPRE_ParVector x, 
