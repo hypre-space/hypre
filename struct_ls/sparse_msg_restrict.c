@@ -191,7 +191,7 @@ hypre_SparseMSGRestrict( void               *restrict_vdata,
 
          case 1:
          {
-            hypre_FinalizeIndtComputations(comm_handle,0);
+            hypre_FinalizeIndtComputations(comm_handle);
             compute_box_aa = hypre_ComputePkgDeptBoxes(compute_pkg);
          }
          break;

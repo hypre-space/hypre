@@ -909,7 +909,7 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
 
             case 1:
             {
-               hypre_FinalizeIndtComputations(comm_handle,0);
+               hypre_FinalizeIndtComputations(comm_handle);
                compute_box_aa =
                   hypre_ComputePkgDeptBoxes(down_compute_pkg_l[l]);
             }
@@ -1098,7 +1098,7 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
 
             case 1:
             {
-               hypre_FinalizeIndtComputations(comm_handle,0);
+               hypre_FinalizeIndtComputations(comm_handle);
                compute_box_aa =
                   hypre_ComputePkgDeptBoxes(up_compute_pkg_l[l]);
             }
