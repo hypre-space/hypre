@@ -39,7 +39,7 @@ build_general ()
     rm -fR $HYPRE_INSTALL_DIR/$i
     ln -s $DIST_DIR/$i ../$i
   done
-  for i in serial share threads 
+  for i in serial shared threads
   do
     if [ -d $DIST_DIR/$i ]
     then
@@ -57,7 +57,7 @@ build_beta ()
     rm -fR $HYPRE_INSTALL_DIR/$i
     ln -s $DIST_DIR/$i $HYPRE_INSTALL_DIR/$i
   done
-  for i in serial share threads
+  for i in serial shared threads
   do
     if [ -d $DIST_DIR/$i ]
     then
@@ -77,7 +77,7 @@ build_alpha ()
       rm -fR $HYPRE_INSTALL_DIR/$i
       ln -s $DIST_DIR/$i $HYPRE_INSTALL_DIR/$i
     done
-    for i in serial share threads
+    for i in serial shared threads
     do
       if [ -d $DIST_DIR/$i ]
       then
@@ -149,7 +149,7 @@ fi
 
 DIST_DIR=`pwd`/${TAR_FILE%.tar.gz}
 SYS_TYPE=`uname -s`
-CONFIGURE="./configure"
+CONFIGURE="./configure --with-babel"
 MAKE="make -i"
 
 #===========================================================================
