@@ -16,8 +16,14 @@
 #include "Data.h"
 #include "basicTypes.h"
 
-#ifndef NOFEI
+
+#if defined(FEI_V13) 
+#include "LinearSystemCore.1.3.h"
+#elseif defined(FEI_V14)
+#include "LinearSystemCore.1.4.h"
+#else
 #include "LinearSystemCore.h"
+#include "LSC.h"
 #endif
 
 #include "HYPRE.h"
