@@ -70,21 +70,21 @@ MLI_Method_AMGSA::MLI_Method_AMGSA( MPI_Comm comm ) : MLI_Method( comm )
       spectralNorms_[i] = 0.0;
    }
    calcNormScheme_ = 0;              /* use matrix rowsum norm */
-   minCoarseSize_  = 5;              /* smallest coarse grid   */
+   minCoarseSize_  = 500;            /* smallest coarse grid   */
    minAggrSize_    = 3;              /* smallest aggregate size */
    coarsenScheme_  = MLI_METHOD_AMGSA_LOCAL;
-   strcpy(preSmoother_, "Jacobi");
-   strcpy(postSmoother_, "Jacobi");
+   strcpy(preSmoother_, "HSGS");
+   strcpy(postSmoother_, "HSGS");
    preSmootherNum_  = 2;
    postSmootherNum_  = 2;
    preSmootherWgt_  = new double[2];
    postSmootherWgt_  = new double[2];
-   preSmootherWgt_[0] = preSmootherWgt_[1] = 0.667;
-   postSmootherWgt_[0] = postSmootherWgt_[1] = 0.667;
+   preSmootherWgt_[0] = preSmootherWgt_[1] = 1.0;
+   postSmootherWgt_[0] = postSmootherWgt_[1] = 1.0;
    smootherPrintRNorm_ = 0;
    smootherFindOmega_  = 0;
-   strcpy(coarseSolver_, "SGS");
-   coarseSolverNum_    = 20;
+   strcpy(coarseSolver_, "SuperLU");
+   coarseSolverNum_    = 1;
    coarseSolverWgt_    = new double[20];
    for ( int j = 0; j < 20; j++ ) coarseSolverWgt_ [j] = 1.0;
    calibrationSize_    = 0;
