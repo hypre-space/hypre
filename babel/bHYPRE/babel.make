@@ -39,7 +39,7 @@ IORSRCS = bHYPRE_BoomerAMG_IOR.c bHYPRE_CoefficientAccess_IOR.c               \
   bHYPRE_SStructBuildVector_IOR.c bHYPRE_SStructGraph_IOR.c                   \
   bHYPRE_SStructGrid_IOR.c bHYPRE_SStructMatrix_IOR.c                         \
   bHYPRE_SStructParCSRMatrix_IOR.c bHYPRE_SStructParCSRVector_IOR.c           \
-  bHYPRE_SStructStencil_IOR.c bHYPRE_SStructVariable_IOR.c                    \
+  bHYPRE_SStructStencil_IOR.c                                                 \
   bHYPRE_SStructVector_IOR.c bHYPRE_Solver_IOR.c                              \
   bHYPRE_StructBuildMatrix_IOR.c bHYPRE_StructBuildVector_IOR.c               \
   bHYPRE_StructGrid_IOR.c bHYPRE_StructMatrix_IOR.c bHYPRE_StructSMG_IOR.c    \
