@@ -30,8 +30,8 @@
 #ifndef _COMMON_H
 #define _COMMON_H
 
-#define PARASAILS_MAXLEN   1000 /* maximum nz in a pattern - can grow */
-#define PARASAILS_NROWS   50000 /* maximum rows stored per proc - can grow */
+#define PARASAILS_MAXLEN  300000 /* maximum nz in a pattern - can grow */
+#define PARASAILS_NROWS   300000 /* maximum rows stored per proc - can grow */
 
 #ifndef ABS
 #define ABS(x) (((x)<0)?(-(x)):(x))
