@@ -133,19 +133,11 @@ hypre_ParAMGSetupStats( void               *amg_vdata,
       }
       else if (coarsen_type == 4) 
       {
-	printf(" Coarsening Type = Ruge (list based)\n");
-      }
-      else if (coarsen_type == 5) 
-      {
-	printf(" Coarsening Type = Ruge2B (list based)\n");
-      }
-      else if (coarsen_type == 6) 
-      {
-	printf(" Coarsening Type = Ruge3 (list based)\n");
-      }
-      else if (coarsen_type == -2) 
-      {
 	printf(" Coarsening Type = Ruge relax special points\n");
+      }
+      else if (coarsen_type == -6) 
+      {
+	printf(" Coarsening Type = local Ruge followed by LJP\n");
       }
 
       if (coarsen_type)
