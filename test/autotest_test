@@ -22,6 +22,7 @@ initialize_variables ()
   Build=1
   Run=2
   PurifytoFile="--with-purify-to-file"
+  InsuretoFile="--with-insure-to-file"
   if [ -z "$MAKE" -o "$MAKE" = "" ] ; then
     MAKE="make -i"
   fi
@@ -90,7 +91,7 @@ parse_arguments () {
 # probably implement the obsolute getopt) then
 # getopts(1) will be used.
 #
-  while getopts :a:b:cDdfhmno:p:q:r:st:xy arg
+  while getopts :a:b:cDdfhi:mno:p:q:r:st:xy arg
   do
     argcur=$arg
     case $arg in
@@ -101,6 +102,9 @@ parse_arguments () {
       d) build $Build " "       "docs"          "docs";;
       f) build $Build "all77"   "all77"         "test";;
       h) usage; exit 2;;
+      i) confbuildtest $OPTARG  "--with-insure-to-file" \
+                                                "insure"    0 0 0 0 1 0 1;;
+     +i) confbuildtest $OPTARG  "--with-insure" "insure"    0 0 0 0 1 0 1;;
       m) HYPRE_SEND_MAIL="no"; MailOpt="";;
      +m) HYPRE_SEND_MAIL="yes"; MailOpt="-mail";;
       n) confbuildtest $Build   "--without-MPI" "no_mpi"    1 0 1 1 1 1 0;;

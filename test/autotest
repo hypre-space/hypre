@@ -122,6 +122,15 @@ do
 	HYPRE_MACHINE_COMMANDS="-m -a 2 -cf"
 	perform_test
         shift;;
+    -insure)
+        HYPRE_ARCH="casc"
+        HYPRE_COMPILE_MACHINE="tux03"
+        HYPRE_RUN_MACHINE="tux03"
+        HYPRE_REMOTE_DIR="/usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST"
+	HYPRE_MACHINE_COMMANDS="-m -i 2 -dt 1 -nsa 1 -cxfy"
+	print_header
+        ./autotest_test $HYPRE_MACHINE_COMMANDS
+        shift;;
     -purify)
         HYPRE_ARCH="casc"
         HYPRE_COMPILE_MACHINE="perrin"
