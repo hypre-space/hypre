@@ -127,6 +127,16 @@ typedef struct hypre_BoxArrayArray_struct
 #define hypre_BoxIMin(box)     ((box) -> imin)
 #define hypre_BoxIMax(box)     ((box) -> imax)
 
+#define hypre_AddIndex(index1, index2, index3) \
+( hypre_IndexX(index3) = hypre_IndexX(index2) + hypre_IndexX(index1),\
+  hypre_IndexY(index3) = hypre_IndexY(index2) + hypre_IndexY(index1),\
+  hypre_IndexZ(index3) = hypre_IndexZ(index2) + hypre_IndexZ(index1) )
+
+#define hypre_SubtractIndex(index1, index2, index3) \
+( hypre_IndexX(index3) = hypre_IndexX(index1) - hypre_IndexX(index2),\
+  hypre_IndexY(index3) = hypre_IndexY(index1) - hypre_IndexY(index2),\
+  hypre_IndexZ(index3) = hypre_IndexZ(index1) - hypre_IndexZ(index2) )
+
 #define hypre_BoxIMinD(box, d) (hypre_IndexD(hypre_BoxIMin(box), d))
 #define hypre_BoxIMaxD(box, d) (hypre_IndexD(hypre_BoxIMax(box), d))
 #define hypre_BoxSizeD(box, d) \
@@ -1659,6 +1669,7 @@ int hypre_SubtractBoxes( hypre_Box *box1 , hypre_Box *box2 , hypre_BoxArray *box
 int hypre_SubtractBoxArrays( hypre_BoxArray *box_array1 , hypre_BoxArray *box_array2 , hypre_BoxArray *tmp_box_array );
 int hypre_SubtractBoxArraysExceptBoxes( hypre_BoxArray *box_array1 , hypre_BoxArray *box_array2 , hypre_BoxArray *tmp_box_array , hypre_Box *boxa , hypre_Box *boxb );
 int hypre_UnionBoxes( hypre_BoxArray *boxes );
+int hypre_MinUnionBoxes( hypre_BoxArray *boxes );
 
 /* box_alloc.c */
 int hypre_BoxInitializeMemory( const int at_a_time );
@@ -1669,8 +1680,8 @@ int hypre_BoxFree( hypre_Box *box );
 /* box_boundary.c */
 int hypre_BoxArraySubtractAdjacentBoxArray( hypre_BoxArray *boxes1 , hypre_BoxArray *boxes2 , hypre_Box *box , int thick );
 int hypre_BoxArraySubtractAdjacentBoxArrayD( hypre_BoxArray *boxes1 , hypre_BoxArray *boxes2 , hypre_Box *box , int ds , int thick );
-int hypre_BoxBoundaryNT( hypre_Box *box , hypre_BoxArray *neighbor_boxes , hypre_BoxArray *boundary , int *thickness );
 int hypre_BoxBoundaryDNT( hypre_Box *box , hypre_BoxArray *neighbor_boxes , hypre_BoxArray *boundary , int ds , int thick );
+int hypre_BoxBoundaryNT( hypre_Box *box , hypre_BoxArray *neighbor_boxes , hypre_BoxArray *boundary , int *thickness );
 int hypre_BoxBoundaryG( hypre_Box *box , hypre_StructGrid *g , hypre_BoxArray *boundary );
 int hypre_BoxBoundaryDG( hypre_Box *box , hypre_StructGrid *g , hypre_BoxArray *boundarym , hypre_BoxArray *boundaryp , int d );
 
@@ -1793,6 +1804,7 @@ int hypre_CommPkgDestroy( hypre_CommPkg *comm_pkg );
 
 /* struct_copy.c */
 int hypre_StructCopy( hypre_StructVector *x , hypre_StructVector *y );
+int hypre_StructPartialCopy( hypre_StructVector *x , hypre_StructVector *y , hypre_BoxArrayArray *array_boxes );
 
 /* struct_grid.c */
 int hypre_StructGridCreate( MPI_Comm comm , int dim , hypre_StructGrid **grid_ptr );
@@ -1847,6 +1859,9 @@ int hypre_StructMatvecSetup( void *matvec_vdata , hypre_StructMatrix *A , hypre_
 int hypre_StructMatvecCompute( void *matvec_vdata , double alpha , hypre_StructMatrix *A , hypre_StructVector *x , double beta , hypre_StructVector *y );
 int hypre_StructMatvecDestroy( void *matvec_vdata );
 int hypre_StructMatvec( double alpha , hypre_StructMatrix *A , hypre_StructVector *x , double beta , hypre_StructVector *y );
+
+/* struct_overlap_innerprod.c */
+double hypre_StructOverlapInnerProd( hypre_StructVector *x , hypre_StructVector *y );
 
 /* struct_scale.c */
 int hypre_StructScale( double alpha , hypre_StructVector *y );
