@@ -1,9 +1,8 @@
 package Hypre {
 
    //   TO DO: replace printf's with a function call which I can easily make
-   // do something else (e.g. throw an exception or assert(false)) if needed
-   // And generally try to make sure all error behavior is consistent and
-   // reasonable.
+   // do something else (e.g. throw an exception or assert(false)) if needed.
+   // (Actually, this would be useful for Hypre in general).
    //   TO DO: Operator returns more about its domain & range
    // (presently returns dimensions; could also return some sort of size)
    //   TO DO: Map class as in ESI (or call it Partitioning as in HYPRE)
@@ -11,24 +10,20 @@ package Hypre {
    // GetLocalRange, GetRowPartition
    // Operator will contain Maps, via GetDomainMap, GetRangeMap functions
    // (aka GetColumnMap, GetRowMap)
-   //   TO DO: consider changing names New() and Setup(), especially New().
+   //   TO DO: consider changing names Start() and Setup().
+   // Start was formerly called New, but that is now a Babel reserved word.
    // For a builder, Start() or Reset() and Finish() are alternatives.
    // For a self-building class, Initialize() makes sense.
-   // 10may: Babel 0.4.0 uses New(); our function is changed to Start() for now.
-   //   TO DO: For StructVectorBuilder, try to eliminate duplicate provisions
-   // of "grid" in New and Constructor. (a problem: grid is needed by present
-   // New, which is called by Constructor if same class implements Vector and
-   // VectorBuilder)
-
 
    // To do in future, as needed:
    // add SetDefault functions to builders
 
-   // Definition of Hypre interface.  dec1999 - may2000
+   // Definition of Hypre interface.  dec1999 - jun2000
    // complaints to Jeff Painter
 
    // The case of the package name is chosen to prevent name conflicts.
-   // All functions (other than the convenience function Constructor)
+   // All functions (other than the Babel-provided functions and the
+   // convenience function Constructor)
    // return an error code: 0 for good, 1 (or, in principle, >1) for bad.
 
    // These forward declarations are needed for the interface definitions
@@ -235,12 +230,6 @@ package Hypre {
    };
 
    interface PreconditionedSolver extends Solver {
-      int Apply( in Vector b, out Vector x );
-      int GetDims( out int m, out int n );
-      int GetSystemOperator(out LinearOperator op);
-      int GetResidual(out Vector resid);
-      int GetConvergenceInfo( in string name, out double value );
-
       int GetPreconditioner( out Solver precond );
    };
 
@@ -256,15 +245,6 @@ package Hypre {
    };
 
    interface PreconditionedSolverBuilder extends SolverBuilder {
-      int GetParameterDouble( in string name, out double value );
-      int GetParameterInt( in string name, out int value );
-      int SetParameterDouble( in string name, in double value );
-      int SetParameterInt( in string name, in int value );
-      int SetParameterString( in string name, in string value );
-      int Start( in MPI_Com comm );
-      int Setup( in LinearOperator A, in Vector b, in Vector x );
-      int GetConstructedObject(out Solver obj);    
-
       int SetPreconditioner( in Solver precond );
    };
 
@@ -279,26 +259,25 @@ package Hypre {
 // begins by calling a constructor.
 //
 // If you use a separate builder, the way things work is:
-//  builder's Constructor() makes a builder
+//  builder's New() makes a builder
 //  builder's Start(...) makes an object and does basic initialization
 //  builder's Set functions put data into the new object
 //  builder's Setup(...) finishes building the object
 //  builder's GetConstructedObject(...) returns that object
 //
 // If you use an object which implements its own builder interface, the
-// way things work is simply:
-//  object's Constructor(...) makes the object and does basic initialization
+// way things work is:
+//  object's New() makes a basic uninitialized object
+//  object's Start(...) starts building of a valid version of the object
 //  object's Set functions put data into the new object
 //  object's Setup(...) finishes building the object
 //
-// Internally, the Constructor() combines the Babel constructor() and Start(...).
-// But there is no reason for a user to call them separately or even know that
-// they exist. (except: in a future distributed version of Babel, the Babel
-// new() will need to be separately called.  The following Start(...) function
-// will then be required.)
-// Nevertheless, the Start() function must be implemented even when
-// an object is its own builder.  This is because it is needed by any separate
-// builder, hence it must be declared in the builder interface.
+// In many cases the object has a convenience function Constructor(...) which
+// simply combines the New() and Start(...) functions.  It is declared static
+// (i.e., belongs to the class, not to any particular object instantiating the
+// class).  We may eliminate the Constructor(...) functions in the future -
+// they make user code more compact but have caused some confusion and
+// cannot be expected to work in a future distributed version of Babel.
 
    class MPI_Com 
    {
@@ -309,6 +288,7 @@ package Hypre {
       // The problem is that I have to build into this the "secret"
       // knowledge that an MPI communicator handle is really an integer.
       int Start( in int comm );
+      int GetRank( out int rank );
       static MPI_Com Constructor( in int comm );
    };
    
@@ -379,19 +359,11 @@ package Hypre {
       int Setup();
    };
 
-   class StructMatrix implements LinearOperator, RowAccess {
+   class StructMatrix implements LinearOperator {
       void print();
       int GetMap( out Map map );
       int Apply( in Vector x, out Vector b );
       int GetDims( out int m, out int n );
-      int GetRow( in  int row,
-                  out int size,
-                  out array<int,1> col_ind,
-                  out array<double,1> values);
-      int RestoreRow( in int row,
-                      in int size,
-                      in array<int,1> col_ind,
-                      in array<double,1> values);
    };
 
    class StructGrid implements StructuredGridBuilder, StructuredGrid
@@ -410,8 +382,8 @@ package Hypre {
    
          
    class ParCSRMatrixBuilder implements IJMatrixBuilder {
-      static ParCSRMatrixBuilder Constructor (in MPI_Com com, 
-                                              in int global_m,                                                                in int global_n);
+      static ParCSRMatrixBuilder Constructor( in MPI_Com com,
+                                              in int global_m, in int global_n);
       int Start( in MPI_Com com, in int global_m, in int global_n );
       int SetLocalSize( in int local_m, in int local_n );
       int SetRowSizes( in array<int,1> sizes );
