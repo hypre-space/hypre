@@ -269,8 +269,8 @@ hypre_IJVectorSetLocalComponentsPar(hypre_IJVector *vector,
   
 /* Determine whether *glob_vec_indices points to local indices only */
    for (i = 0; i < num_values; i++)
-   { ierr += (glob_vec_indices[i] >= vec_start);
-     ierr += (glob_vec_indices[i] <  vec_stop);
+   { ierr += !(glob_vec_indices[i] >= vec_start);
+     ierr += !(glob_vec_indices[i] <  vec_stop);
    };
     
    data = hypre_VectorData(local_vector);
@@ -409,8 +409,8 @@ hypre_IJVectorAddToLocalComponentsPar(hypre_IJVector *vector,
 
 /* Determine whether *glob_vec_indices points to local indices only */
    for (i = 0; i < num_values; i++)
-   { ierr += (glob_vec_indices[i] >= vec_start);
-     ierr += (glob_vec_indices[i] <  vec_stop);
+   { ierr += !(glob_vec_indices[i] >= vec_start);
+     ierr += !(glob_vec_indices[i] <  vec_stop);
    };
     
    data = hypre_VectorData(local_vector);
@@ -581,8 +581,8 @@ hypre_IJVectorGetLocalComponentsPar(hypre_IJVector *vector,
 
 /* Determine whether *glob_vec_indices points to local indices only */
    for (i = 0; i < num_values; i++)
-   { ierr += (glob_vec_indices[i] >= vec_start);
-     ierr += (glob_vec_indices[i] <  vec_stop);
+   { ierr += !(glob_vec_indices[i] >= vec_start);
+     ierr += !(glob_vec_indices[i] <  vec_stop);
    };
     
    data = hypre_VectorData(local_vector);
