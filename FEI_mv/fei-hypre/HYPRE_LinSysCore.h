@@ -5,7 +5,7 @@
 #ifndef _HYPRE_LinSysCore_h_
 #define _HYPRE_LinSysCore_h_
 
-#define HYPRE_FEI_Version() "FEI/HYPRE 2.0.0R10"
+#define HYPRE_FEI_Version() "FEI/HYPRE 2.0.0R11"
 
 // *************************************************************************
 // system libraries used
@@ -415,6 +415,11 @@ class HYPRE_LinSysCore
    void  solveUsingSuperLUX(int&);
    void  solveUsingY12M(int&);
    void  solveUsingAMGe(int&);
+   void  buildSlideReducedSystemPartA(int*,int*,int,int,int*,int*);
+   void  buildSlideReducedSystemPartB(int*,int*,int,int,int*,int*,
+                                      HYPRE_ParCSRMatrix *);
+   void  buildSlideReducedSystemPartC(int*,int*,int,int,int*,int*,
+                                      HYPRE_ParCSRMatrix);
 
  private:        //variables
 

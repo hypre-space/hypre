@@ -51,4 +51,7 @@
 05/10/01    2.0.0R10
             - re-work launchSolver parameter setting for preconditioners.
             - add diagnostic information to SuperLUX
-          
+06/14/01    2.0.0R11
+            - re-work hypre_slide_reduce.C to give smaller subroutines
+            - output matrices to file in longer precision
+ 

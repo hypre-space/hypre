@@ -1590,7 +1590,7 @@ int HYPRE_LinSysCore::matrixLoadComplete()
           for (j = 0; j < rowSize; j++)
           {
              if ( colVal[j] != 0.0 )
-                fprintf(fp, "%6d  %6d  %e \n", i+1, colInd[j]+1, colVal[j]);
+                fprintf(fp, "%6d  %6d  %25.16e \n", i+1, colInd[j]+1, colVal[j]);
           }
           HYPRE_ParCSRMatrixRestoreRow(A_csr,i,&rowSize,&colInd,&colVal);
        }
@@ -1601,7 +1601,7 @@ int HYPRE_LinSysCore::matrixLoadComplete()
        for ( i = localStartRow_-1; i <= localEndRow_-1; i++ )
        {
           HYPRE_IJVectorGetLocalComponents(HYb_, 1, &i, NULL, &value);
-          fprintf(fp, "%6d  %e \n", i+1, value);
+          fprintf(fp, "%6d  %25.16e \n", i+1, value);
        }
        fclose(fp);
        MPI_Barrier(comm_);
@@ -2773,7 +2773,6 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
 
     MPI_Barrier(comm_);
     rtime1  = MPI_Wtime();
-
     if ( schurReduction_ == 1 && schurReductionCreated_ == 0 )
     {
        buildSchurReducedSystem();
@@ -2872,7 +2871,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
           for ( j = 0; j < rowSize; j++ )
           {
              if ( colVal[j] != 0.0 )
-                fprintf(fp, "%6d  %6d  %e \n", i+1, colInd[j]+1, colVal[j]);
+                fprintf(fp, "%6d  %6d  %25.16e \n", i+1, colInd[j]+1, colVal[j]);
           }
           HYPRE_ParCSRMatrixRestoreRow(A_csr,i,&rowSize,&colInd,&colVal);
        }
@@ -2883,7 +2882,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
        for ( i = startRow; i < startRow+nrows; i++ )
        {
           HYPRE_IJVectorGetLocalComponents(currB_, 1, &i, NULL, &ddata);
-          fprintf(fp, "%6d  %e \n", i+1, ddata);
+          fprintf(fp, "%6d  %25.16e \n", i+1, ddata);
        }
        fclose(fp);
        MPI_Barrier(comm_);
@@ -3308,11 +3307,10 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
        for ( i = startRow; i < startRow+nrows; i++ )
        {
           HYPRE_IJVectorGetLocalComponents(currX_, 1, &i, NULL, &ddata);
-          fprintf(fp, "%6d  %e \n", i+1, ddata);
+          fprintf(fp, "%6d  %25.16e \n", i+1, ddata);
        }
        fclose(fp);
        MPI_Barrier(comm_);
-       exit(0);
     }
 
     if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
