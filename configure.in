@@ -25,8 +25,8 @@ define([AC_CACHE_SAVE], )dnl
 
 AC_INIT(utilities/memory.c)
 AC_CONFIG_HEADER(HYPRE_config.h)
-AC_CONFIG_AUX_DIR(config)
-AC_PREFIX_DEFAULT("..")
+dnl AC_CONFIG_AUX_DIR(config)
+AC_PREFIX_DEFAULT(`pwd`/hypre)
 
 
 dnl *********************************************************************
@@ -273,13 +273,14 @@ AC_ARG_WITH(strict-checking,
 			  warnings can be suppressed using --diag_suppress
 			  and the error numbers provided by 
 			  --display_error_number],
-[CC=kcc
+[CC=KCC
  CXX=KCC
  CFLAGS="$CFLAGS --c --strict --lint --display_error_number"
  CFLAGS="$CFLAGS --diag_suppress 45,236,450,826"
  CFLAGS="$CFLAGS,1018,1021,1022,1023,1024,1030,1041"
- CXXFLAGS="$CXXFLAGS --strict --lint --display_error_number"
- CXXFLAGS="$CXXFLAGS --diag_suppress 381,450"
+ CXXFLAGS="$CXXFLAGS --c++ --strict --lint --display_error_number"
+ CXXFLAGS="$CXXFLAGS --diag_suppress 236,381,450,826"
+ CXXFLAGS="$CXXFLAGS,1018,1022,1023,1024,1025,1030"
  casc_users_chose_compilers=yes
  casc_using_mpi=no
  AC_DEFINE(HYPRE_SEQUENTIAL)]
@@ -393,8 +394,8 @@ AC_ARG_WITH(pthreads,
 			  pthread library.  Supported on IBM only.],
 [case "${withval}" in
    yes) casc_using_pthreads=yes
-     CASC_CHECK_LIB(pthread, pthread_create, ,
-       CASC_CHECK_LIB(pthreads, pthread_create))
+     CHECK_LIB(pthread, pthread_create, ,
+       CHECK_LIB(pthreads, pthread_create))
      if test "$ac_cv_lib_pthread_pthread_create" = "yes" ||
        test "$ac_cv_lib_pthreads_pthread_create" = "yes"
      then
