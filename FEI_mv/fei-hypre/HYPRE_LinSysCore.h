@@ -534,6 +534,7 @@ class HYPRE_LinSysCore
    int             mlPostsmootherType_;
    double          mlRelaxWeight_;
    double          mlStrongThreshold_;
+   int             mlCoarseSolver_;
    int             superluOrdering_;
    char            superluScale_[1];
    double          ddilutFillin_;
