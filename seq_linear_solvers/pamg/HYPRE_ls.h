@@ -26,8 +26,11 @@ extern "C" {
  * Structures
  *--------------------------------------------------------------------------*/
 
+#ifndef HYPRE_SOLVER_STRUCT
+#define HYPRE_SOLVER_STRUCT
 struct hypre_Solver_struct;
 typedef struct hypre_Solver_struct *HYPRE_Solver;
+#endif
 
 /*--------------------------------------------------------------------------
  * Prototypes

@@ -220,9 +220,9 @@ hypre_AMGCycle( void           *amg_vdata,
          fine_grid = level;
          coarse_grid = level + 1;
 
-         hypre_VectorSetConstantValues(U_array[coarse_grid], 0.0);
+         hypre_SeqVectorSetConstantValues(U_array[coarse_grid], 0.0);
           
-         hypre_VectorCopy(F_array[fine_grid],Vtemp);
+         hypre_SeqVectorCopy(F_array[fine_grid],Vtemp);
          alpha = -1.0;
          beta = 1.0;
          hypre_CSRMatrixMatvec(alpha, A_array[fine_grid], U_array[fine_grid],

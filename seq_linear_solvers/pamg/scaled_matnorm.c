@@ -35,11 +35,11 @@ hypre_CSRMatrixScaledNorm( hypre_CSRMatrix *A, double *scnorm)
 
    double      mat_norm;
 
-   dinvsqrt = hypre_VectorCreate(num_rows);
-   hypre_VectorInitialize(dinvsqrt);
+   dinvsqrt = hypre_SeqVectorCreate(num_rows);
+   hypre_SeqVectorInitialize(dinvsqrt);
    dis_data = hypre_VectorData(dinvsqrt);
-   sum = hypre_VectorCreate(num_rows);
-   hypre_VectorInitialize(sum);
+   sum = hypre_SeqVectorCreate(num_rows);
+   hypre_SeqVectorInitialize(sum);
    sum_data = hypre_VectorData(sum);
 
    /* generate dinvsqrt */
@@ -63,8 +63,8 @@ hypre_CSRMatrixScaledNorm( hypre_CSRMatrix *A, double *scnorm)
 	 mat_norm = sum_data[i];
    }	
 
-   hypre_VectorDestroy(dinvsqrt);
-   hypre_VectorDestroy(sum);
+   hypre_SeqVectorDestroy(dinvsqrt);
+   hypre_SeqVectorDestroy(sum);
 
    *scnorm = mat_norm;  
    return 0;

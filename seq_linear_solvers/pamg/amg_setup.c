@@ -293,11 +293,11 @@ hypre_AMGSetup( void            *amg_vdata,
 
    for (j = 1; j < num_levels; j++)
    {
-      F_array[j] = hypre_VectorCreate(hypre_CSRMatrixNumRows(A_array[j]));
-      hypre_VectorInitialize(F_array[j]);
+      F_array[j] = hypre_SeqVectorCreate(hypre_CSRMatrixNumRows(A_array[j]));
+      hypre_SeqVectorInitialize(F_array[j]);
 
-      U_array[j] = hypre_VectorCreate(hypre_CSRMatrixNumRows(A_array[j]));
-      hypre_VectorInitialize(U_array[j]);
+      U_array[j] = hypre_SeqVectorCreate(hypre_CSRMatrixNumRows(A_array[j]));
+      hypre_SeqVectorInitialize(U_array[j]);
    }
 
    hypre_AMGDataFArray(amg_data) = F_array;

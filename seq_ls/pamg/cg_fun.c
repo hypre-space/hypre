@@ -50,8 +50,8 @@ hypre_CGCreateVector( void *vvector )
    hypre_Vector *vector = vvector;
    hypre_Vector *new_vector;
 
-   new_vector = hypre_VectorCreate( hypre_VectorSize(vector));
-   hypre_VectorInitialize(new_vector);
+   new_vector = hypre_SeqVectorCreate( hypre_VectorSize(vector));
+   hypre_SeqVectorInitialize(new_vector);
 
    return ( (void *) new_vector );
 }
@@ -70,8 +70,8 @@ hypre_CGCreateVectorArray(int n, void *vvector )
    new_vector = hypre_CTAlloc(hypre_Vector*,n);
    for (i=0; i < n; i++)
    {
-      new_vector[i] = hypre_VectorCreate( hypre_VectorSize(vector));
-      hypre_VectorInitialize(new_vector[i]);
+      new_vector[i] = hypre_SeqVectorCreate( hypre_VectorSize(vector));
+      hypre_SeqVectorInitialize(new_vector[i]);
    }
 
    return ( (void *) new_vector );
@@ -86,7 +86,7 @@ hypre_CGDestroyVector( void *vvector )
 {
    hypre_Vector *vector = vvector;
 
-   return( hypre_VectorDestroy( vector ) );
+   return( hypre_SeqVectorDestroy( vector ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -160,7 +160,7 @@ double
 hypre_CGInnerProd( void *x, 
                     void *y )
 {
-   return ( hypre_VectorInnerProd( (hypre_Vector *) x,
+   return ( hypre_SeqVectorInnerProd( (hypre_Vector *) x,
                                 (hypre_Vector *) y ) );
 }
 
@@ -173,7 +173,7 @@ int
 hypre_CGCopyVector( void *x, 
                      void *y )
 {
-   return ( hypre_VectorCopy( (hypre_Vector *) x,
+   return ( hypre_SeqVectorCopy( (hypre_Vector *) x,
                                  (hypre_Vector *) y ) );
 }
 
@@ -184,7 +184,7 @@ hypre_CGCopyVector( void *x,
 int
 hypre_CGClearVector( void *x )
 {
-   return ( hypre_VectorSetConstantValues( (hypre_Vector *) x, 0.0 ) );
+   return ( hypre_SeqVectorSetConstantValues( (hypre_Vector *) x, 0.0 ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -195,7 +195,7 @@ int
 hypre_CGScaleVector( double  alpha,
                       void   *x     )
 {
-   return ( hypre_VectorScale( alpha, (hypre_Vector *) x ) );
+   return ( hypre_SeqVectorScale( alpha, (hypre_Vector *) x ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -207,8 +207,48 @@ hypre_CGAxpy( double alpha,
                void   *x,
                void   *y )
 {
-   return ( hypre_VectorAxpy( alpha, (hypre_Vector *) x,
+   return ( hypre_SeqVectorAxpy( alpha, (hypre_Vector *) x,
                               (hypre_Vector *) y ) );
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_CGCommInfo
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_CGCommInfo( void   *A, int *my_id, int *num_procs)
+{
+   *num_procs = 1;
+   *my_id = 0;
+   return 0;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_CGIdentitySetup
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_CGIdentitySetup( void *vdata,
+                        void *A,
+                        void *b,
+                        void *x     )
+
+{
+   return 0;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_CGIdentity
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_CGIdentity( void *vdata,
+                   void *A,
+                   void *b,
+                   void *x     )
+
+{
+   return( hypre_CGCopyVector( b, x ) );
 }
 
 

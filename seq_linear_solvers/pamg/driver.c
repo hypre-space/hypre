@@ -329,43 +329,43 @@ main( int   argc,
    {
       BuildRhsFromFile(argc, argv, build_rhs_arg_index, A, &b);
  
-      x = hypre_VectorCreate( hypre_CSRMatrixNumRows(A));
-      hypre_VectorInitialize(x);
-      hypre_VectorSetConstantValues(x, 0.0);      
+      x = hypre_SeqVectorCreate( hypre_CSRMatrixNumRows(A));
+      hypre_SeqVectorInitialize(x);
+      hypre_SeqVectorSetConstantValues(x, 0.0);      
    }
    else if ( build_rhs_type == 3 )
    {
-      b = hypre_VectorCreate( hypre_CSRMatrixNumRows(A));
-      hypre_VectorInitialize(b);
-      hypre_VectorSetRandomValues(b, 22775);
-      norm = 1.0/sqrt(hypre_VectorInnerProd(b,b));
-      ierr = hypre_VectorScale(norm, b);      
+      b = hypre_SeqVectorCreate( hypre_CSRMatrixNumRows(A));
+      hypre_SeqVectorInitialize(b);
+      hypre_SeqVectorSetRandomValues(b, 22775);
+      norm = 1.0/sqrt(hypre_SeqVectorInnerProd(b,b));
+      ierr = hypre_SeqVectorScale(norm, b);      
  
-      x = hypre_VectorCreate( hypre_CSRMatrixNumRows(A));
-      hypre_VectorInitialize(x);
-      hypre_VectorSetConstantValues(x, 0.0);      
+      x = hypre_SeqVectorCreate( hypre_CSRMatrixNumRows(A));
+      hypre_SeqVectorInitialize(x);
+      hypre_SeqVectorSetConstantValues(x, 0.0);      
    }
    else if ( build_rhs_type == 4 )
    {
-      x = hypre_VectorCreate( hypre_CSRMatrixNumRows(A));
-      hypre_VectorInitialize(x);
-      hypre_VectorSetConstantValues(x, 1.0);      
+      x = hypre_SeqVectorCreate( hypre_CSRMatrixNumRows(A));
+      hypre_SeqVectorInitialize(x);
+      hypre_SeqVectorSetConstantValues(x, 1.0);      
  
-      b = hypre_VectorCreate( hypre_CSRMatrixNumRows(A));
-      hypre_VectorInitialize(b);
+      b = hypre_SeqVectorCreate( hypre_CSRMatrixNumRows(A));
+      hypre_SeqVectorInitialize(b);
       hypre_CSRMatrixMatvec(1.0,A,x,0.0,b);
  
-      hypre_VectorSetConstantValues(x, 0.0);      
+      hypre_SeqVectorSetConstantValues(x, 0.0);      
    }
    else
    {
-      b = hypre_VectorCreate(hypre_CSRMatrixNumRows(A));
-      hypre_VectorInitialize(b);
-      hypre_VectorSetConstantValues(b, 0.0);
+      b = hypre_SeqVectorCreate(hypre_CSRMatrixNumRows(A));
+      hypre_SeqVectorInitialize(b);
+      hypre_SeqVectorSetConstantValues(b, 0.0);
 
-      x = hypre_VectorCreate(hypre_CSRMatrixNumRows(A));
-      hypre_VectorInitialize(x);
-      hypre_VectorSetConstantValues(x, 1.0);
+      x = hypre_SeqVectorCreate(hypre_CSRMatrixNumRows(A));
+      hypre_SeqVectorInitialize(x);
+      hypre_SeqVectorSetConstantValues(x, 1.0);
    }
    if ( build_funcs_type == 1 )
    {
@@ -713,8 +713,8 @@ main( int   argc,
    hypre_DestroyParVector(x);
 #endif
    hypre_CSRMatrixDestroy(A);
-   hypre_VectorDestroy(b);
-   hypre_VectorDestroy(x);
+   hypre_SeqVectorDestroy(b);
+   hypre_SeqVectorDestroy(x);
 
 #if 0
    hypre_TFree(global_part);
@@ -1437,7 +1437,7 @@ BuildRhsFromFile( int                  argc,
     * Generate the matrix 
     *-----------------------------------------------------------*/
  
-   b = hypre_VectorRead(filename);
+   b = hypre_SeqVectorRead(filename);
  
    *b_ptr = b;
  

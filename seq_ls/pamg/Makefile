@@ -5,99 +5,53 @@
 # See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
 # notice, contact person, and disclaimer.
 #
-<<<<<<< Makefile
 # $Revision$
-=======
-# $Revision$
->>>>>>> 1.6
 #EHEADER***********************************************************************
 
 .SUFFIXES:
-<<<<<<< Makefile
 .SUFFIXES: .c .f .o
 
 srcdir = .
  
-CC = gcc
- 
-CINCLUDES=  -I/usr/local/apps/mpich-1.1/include
-COPT= -O3 -qstrict -qarch=ppcgr -qtune=604
-CDEBUG = 
-CDEFS =  -DHYPRE_TIMING
+CC =  mpicc
+
+C_COMPILE_FLAGS=  -g
+CXX_COMPILE_FLAGS=-DNOFEI  -g
+F77_COMPILE_FLAGS=  -g -silent 
+CINCLUDES= 
+CDEFS =
 
 CFLAGS =\
+ ${C_COMPILE_FLAGS}\
+ -I../..\
  -I../../utilities\
+ -I../../krylov\
  -I../../seq_matrix_vector\
- -I../../parcsr_matrix_vector\
  ${CINCLUDES}\
- ${COPT}\
- ${CDEBUG}\
  ${CDEFS}
  
 RANLIB= ranlib
  
-MPILIBFLAGS =  -L/usr/local/apps/mpich-1.1/lib/rs6000/ch_mpl -L/usr/lpp/ppe.poe/lib  -lmpich -lmpi -lvtd  
+MPILIBFLAGS =   
 LIBFLAGS =   -lm
 LDLIBFLAGS =  
  
 LFLAGS =\
  -L.\
- -L../../parcsr_matrix_vector\
  -L../../seq_matrix_vector\
  -L../../utilities\
- -lHYPRE_ls\
- -lHYPRE_parcsr_mv\
- -lHYPRE_mv\
+ -lHYPRE_amg_ls\
+ -lHYPRE_seq_mv\
  -lHYPRE_utilities\
- -lmpe\
+ -L../../krylov -lkrylov\
  ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
  
-=======
-.SUFFIXES: .c .f .o
-
-srcdir = .
- 
-CC = gcc
- 
-CINCLUDES= -I/home/casc/include  -I/usr/local/mpi/mpich-1.1.1/include -I/usr/local/mpi/mpich-1.1.1/lib/solaris/ch_p4
-COPT= 
-CDEBUG = -g -Wall
-CDEFS =  -DHYPRE_MEMORY_DMALLOC -DHYPRE_TIMING
-
-CFLAGS =\
- -I../../utilities\
- -I../../seq_matrix_vector\
- -I../../parcsr_matrix_vector\
- ${CINCLUDES}\
- ${COPT}\
- ${CDEBUG}\
- ${CDEFS}
- 
-RANLIB= ranlib
- 
-MPILIBFLAGS =  -L/usr/local/mpi/mpich-1.1.1/lib/solaris/ch_p4  -lpmpich -lmpich -lsocket -lnsl -lpthread  
-LIBFLAGS =   -lm
-LDLIBFLAGS = -L/home/casc/lib   -lcegdb -ldmalloc
- 
-LFLAGS =\
- -L.\
- -L../../parcsr_matrix_vector\
- -L../../seq_matrix_vector\
- -L../../utilities\
- -lHYPRE_ls\
- -lHYPRE_parcsr_mv\
- -lHYPRE_mv\
- -lHYPRE_utilities\
- -lmpe\
- ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
- 
->>>>>>> 1.6
 
 HEADERS =\
  headers.h\
  amg.h\
  pcg.h\
- hypre_ls.h\
+ pamg.h\
  HYPRE_ls.h
 
 FILES =\
@@ -106,20 +60,30 @@ FILES =\
  amgstats.c\
  amg_setup.c\
  amg_solve.c \
+ cg_fun.c\
  coarsen.c\
+ coarsenCR.c\
  cycle.c\
+ difconv.c\
  indepset.c\
  interp.c\
+ interpCR.c\
+ interpRBM.c\
  laplace.c\
+ laplace_9pt.c\
+ laplace_27pt.c\
  random.c\
  rap.c \
  relax.c\
+ schwarz.c\
+ scaled_matnorm.c\
  transpose.c\
- HYPRE_amg.c
+ HYPRE_amg.c\
+ HYPRE_csr_pcg.c\
+ HYPRE_csr_gmres.c
 
 OBJS = ${FILES:.c=.o}
 
-CC = gcc
 
 
 
@@ -127,7 +91,7 @@ CC = gcc
 # Targets
 ##################################################################
 
-all: libHYPRE_ls.a driver
+all: libHYPRE_amg_ls.a driver
 
 install: all
 
@@ -136,20 +100,20 @@ clean:
 
 veryclean: clean
 	@rm -f driver
-	@rm -f libHYPRE_ls.a
+	@rm -f libHYPRE_amg_ls.a
 
 ##################################################################
 # Rules
 ##################################################################
 
-driver: driver.o libHYPRE_ls.a
+driver: driver.o libHYPRE_amg_ls.a
 	@echo  "Linking" $@ "... "
 	${CC} -o driver driver.o ${LFLAGS}
 
-libHYPRE_ls.a: ${OBJS}
+libHYPRE_amg_ls.a: ${OBJS}
 	@echo  "Building $@ ... "
-	ar -ru $@ ${OBJS}
-	ranlib $@
+	ar -rcu $@ ${OBJS}
+	${RANLIB} $@
 
 ${OBJS}: ${HEADERS}
 
@@ -158,6 +122,5 @@ ${OBJS}: ${HEADERS}
 ##################################################################
 
 .c.o:
-	@echo "Making (c) " $@
-	@${CC} -o $@ -c ${CFLAGS} $<
+	${CC} -o $@ -c ${CFLAGS} $<
 

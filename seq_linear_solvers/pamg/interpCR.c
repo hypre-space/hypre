@@ -140,12 +140,12 @@ hypre_AMGBuildCRInterp( hypre_CSRMatrix  *A,
 
    P_j    = hypre_CTAlloc(int, P_size);
    P_data = hypre_CTAlloc(double, P_size);
-   zero_vector = hypre_VectorCreate(n_fine);
-   x_vector = hypre_VectorCreate(n_fine);
-   tmp_vector = hypre_VectorCreate(n_fine);
-   hypre_VectorInitialize(zero_vector);
-   hypre_VectorInitialize(x_vector);
-   hypre_VectorInitialize(tmp_vector);
+   zero_vector = hypre_SeqVectorCreate(n_fine);
+   x_vector = hypre_SeqVectorCreate(n_fine);
+   tmp_vector = hypre_SeqVectorCreate(n_fine);
+   hypre_SeqVectorInitialize(zero_vector);
+   hypre_SeqVectorInitialize(x_vector);
+   hypre_SeqVectorInitialize(tmp_vector);
    x_data = hypre_VectorData(x_vector);
 
    /*-----------------------------------------------------------------------
@@ -180,7 +180,7 @@ hypre_AMGBuildCRInterp( hypre_CSRMatrix  *A,
             }
          }
       }
-      hypre_VectorSetConstantValues(x_vector, 0.0);
+      hypre_SeqVectorSetConstantValues(x_vector, 0.0);
       x_data[i] = 1.0;
       for (jj = 0; jj < num_relax_steps; jj++) 
          hypre_AMGRelax(A, zero_vector, P_marker, relax_type, i2,
@@ -206,7 +206,7 @@ hypre_AMGBuildCRInterp( hypre_CSRMatrix  *A,
     *  global compatible relaxation
     *--------------------------------------------------------------------*/
 
-   hypre_VectorSetConstantValues(x_vector, 1.0);
+   hypre_SeqVectorSetConstantValues(x_vector, 1.0);
    for (jj = 0; jj < num_relax_steps; jj++) 
        hypre_AMGRelax(A, zero_vector, CF_marker, relax_type, -1,
 		      relax_weight, x_vector, tmp_vector);
@@ -249,9 +249,9 @@ hypre_AMGBuildCRInterp( hypre_CSRMatrix  *A,
 
    hypre_TFree(P_marker);   
    hypre_TFree(coarse_to_fine);   
-   hypre_VectorDestroy(tmp_vector);   
-   hypre_VectorDestroy(x_vector);   
-   hypre_VectorDestroy(zero_vector);   
+   hypre_SeqVectorDestroy(tmp_vector);   
+   hypre_SeqVectorDestroy(x_vector);   
+   hypre_SeqVectorDestroy(zero_vector);   
 
    return(0);
 }            

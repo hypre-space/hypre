@@ -21,7 +21,19 @@
 int
 HYPRE_CSRGMRESCreate( HYPRE_Solver *solver )
 {
-   *solver = ( (HYPRE_Solver) hypre_GMRCreate( ) );
+   hypre_GMRESFunctions * gmres_functions =
+      hypre_GMRESFunctionsCreate(
+         hypre_CAlloc, hypre_CGFree, hypre_CGCommInfo,
+         hypre_CGCreateVector,
+         hypre_CGCreateVectorArray,
+         hypre_CGDestroyVector, hypre_CGMatvecCreate,
+         hypre_CGMatvec, hypre_CGMatvecDestroy,
+         hypre_CGInnerProd, hypre_CGCopyVector,
+         hypre_CGClearVector,
+         hypre_CGScaleVector, hypre_CGAxpy,
+         hypre_CGIdentitySetup, hypre_CGIdentity );
+
+   *solver = ( (HYPRE_Solver) hypre_GMRESCreate( gmres_functions ) );
 
    return 0;
 }
@@ -33,7 +45,7 @@ HYPRE_CSRGMRESCreate( HYPRE_Solver *solver )
 int 
 HYPRE_CSRGMRESDestroy( HYPRE_Solver solver )
 {
-   return( hypre_GMRDestroy( (void *) solver ) );
+   return( hypre_GMRESDestroy( (void *) solver ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -46,7 +58,7 @@ HYPRE_CSRGMRESSetup( HYPRE_Solver solver,
                         HYPRE_Vector b,
                         HYPRE_Vector x      )
 {
-   return( hypre_GMRSetup( (void *) solver,
+   return( hypre_GMRESSetup( (void *) solver,
                              (void *) A,
                              (void *) b,
                              (void *) x ) );
@@ -62,7 +74,7 @@ HYPRE_CSRGMRESSolve( HYPRE_Solver solver,
                         HYPRE_Vector b,
                         HYPRE_Vector x      )
 {
-   return( hypre_GMRSolve( (void *) solver,
+   return( hypre_GMRESSolve( (void *) solver,
                              (void *) A,
                              (void *) b,
                              (void *) x ) );
@@ -76,7 +88,7 @@ int
 HYPRE_CSRGMRESSetKDim( HYPRE_Solver solver,
                           int             k_dim    )
 {
-   return( hypre_GMRSetKDim( (void *) solver, k_dim ) );
+   return( hypre_GMRESSetKDim( (void *) solver, k_dim ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -87,7 +99,7 @@ int
 HYPRE_CSRGMRESSetTol( HYPRE_Solver solver,
                          double             tol    )
 {
-   return( hypre_GMRSetTol( (void *) solver, tol ) );
+   return( hypre_GMRESSetTol( (void *) solver, tol ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -98,7 +110,7 @@ int
 HYPRE_CSRGMRESSetMinIter( HYPRE_Solver solver,
                              int          min_iter )
 {
-   return( hypre_GMRSetMinIter( (void *) solver, min_iter ) );
+   return( hypre_GMRESSetMinIter( (void *) solver, min_iter ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -109,7 +121,7 @@ int
 HYPRE_CSRGMRESSetMaxIter( HYPRE_Solver solver,
                              int          max_iter )
 {
-   return( hypre_GMRSetMaxIter( (void *) solver, max_iter ) );
+   return( hypre_GMRESSetMaxIter( (void *) solver, max_iter ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -120,7 +132,7 @@ int
 HYPRE_CSRGMRESSetStopCrit( HYPRE_Solver solver,
                               int          stop_crit )
 {
-   return( hypre_GMRSetStopCrit( (void *) solver, stop_crit ) );
+   return( hypre_GMRESSetStopCrit( (void *) solver, stop_crit ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -139,7 +151,7 @@ HYPRE_CSRGMRESSetPrecond( HYPRE_Solver  solver,
 						  HYPRE_Vector x),
                              void               *precond_data )
 {
-   return( hypre_GMRSetPrecond( (void *) solver,
+   return( hypre_GMRESSetPrecond( (void *) solver,
                                 precond, precond_setup, precond_data ) );
 }
 
@@ -151,7 +163,7 @@ int
 HYPRE_CSRGMRESGetPrecond( HYPRE_Solver  solver,
                              HYPRE_Solver *precond_data_ptr )
 {
-   return( hypre_GMRGetPrecond( (void *)     solver,
+   return( hypre_GMRESGetPrecond( (void *)     solver,
                                   (HYPRE_Solver *) precond_data_ptr ) );
 }
 
@@ -163,7 +175,7 @@ int
 HYPRE_CSRGMRESSetLogging( HYPRE_Solver solver,
                              int logging)
 {
-   return( hypre_GMRSetLogging( (void *) solver, logging ) );
+   return( hypre_GMRESSetLogging( (void *) solver, logging ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -174,7 +186,7 @@ int
 HYPRE_CSRGMRESGetNumIterations( HYPRE_Solver  solver,
                                    int                *num_iterations )
 {
-   return( hypre_GMRGetNumIterations( (void *) solver, num_iterations ) );
+   return( hypre_GMRESGetNumIterations( (void *) solver, num_iterations ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -185,5 +197,5 @@ int
 HYPRE_CSRGMRESGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
                                                double             *norm   )
 {
-   return( hypre_GMRGetFinalRelativeResidualNorm( (void *) solver, norm ) );
+   return( hypre_GMRESGetFinalRelativeResidualNorm( (void *) solver, norm ) );
 }

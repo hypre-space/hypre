@@ -167,14 +167,14 @@ hypre_AMGFinalize( void *data )
 
    for (i=1; i < num_levels; i++)
    {
-      hypre_VectorDestroy(hypre_AMGDataFArray(amg_data)[i]);
-      hypre_VectorDestroy(hypre_AMGDataUArray(amg_data)[i]);
+      hypre_SeqVectorDestroy(hypre_AMGDataFArray(amg_data)[i]);
+      hypre_SeqVectorDestroy(hypre_AMGDataUArray(amg_data)[i]);
       hypre_CSRMatrixDestroy(hypre_AMGDataAArray(amg_data)[i]);
       hypre_CSRMatrixDestroy(hypre_AMGDataPArray(amg_data)[i-1]);
       hypre_TFree(hypre_AMGDataCFMarkerArray(amg_data)[i-1]);
       hypre_TFree(hypre_AMGDataDofFuncArray(amg_data)[i-1]);
    }
-   hypre_VectorDestroy(hypre_AMGDataVtemp(amg_data));
+   hypre_SeqVectorDestroy(hypre_AMGDataVtemp(amg_data));
    hypre_TFree(hypre_AMGDataFArray(amg_data));
    hypre_TFree(hypre_AMGDataUArray(amg_data));
    hypre_TFree(hypre_AMGDataAArray(amg_data));

@@ -99,21 +99,21 @@ main( int   argc,
    
 
    amg_data = hypre_AMGInitialize();
-   hypre_AMGSetStrongThreshold(strong_threshold, amg_data);
-   hypre_AMGSetLogging(3,"amg.out.log",amg_data);
-   hypre_AMGSetCycleType(cycle_type, amg_data);
+   hypre_AMGSetStrongThreshold(amg_data, strong_threshold);
+   hypre_AMGSetLogging(amg_data,3,"amg.out.log");
+   hypre_AMGSetCycleType(amg_data, cycle_type);
 
    filename = argv[1];
    A = hypre_CSRMatrixRead(filename);
 
    num_fine = hypre_CSRMatrixNumRows(A);
 
-   f = hypre_VectorCreate(num_fine);
-   hypre_VectorInitialize(f);
-   hypre_VectorSetConstantValues(f, 1.0);
+   f = hypre_SeqVectorCreate(num_fine);
+   hypre_SeqVectorInitialize(f);
+   hypre_SeqVectorSetConstantValues(f, 1.0);
                               
-   u = hypre_VectorCreate(num_fine);
-   hypre_VectorInitialize(u);
+   u = hypre_SeqVectorCreate(num_fine);
+   hypre_SeqVectorInitialize(u);
 
    tmp = hypre_CTAlloc(double, num_fine);
 
@@ -124,7 +124,7 @@ main( int   argc,
    hypre_VectorData(u) = tmp;  
 
 
-/*   hypre_VectorSetConstantValues(u, 0.0); */
+/*   hypre_SeqVectorSetConstantValues(u, 0.0); */
 
    /* Set the relaxation parameters for symmetric cycle */
 
@@ -145,13 +145,13 @@ main( int   argc,
 
 /*   stop_tol = hypre_AMGDataTol(amg_data); */
    stop_tol = 1.0e-7;
-   hypre_AMGSetTol(0.0, amg_data);
-   hypre_AMGSetMaxIter(1, amg_data);
+   hypre_AMGSetTol(amg_data, 0.0);
+   hypre_AMGSetMaxIter(amg_data, 1);
    
 
    /* Perform the PCG and AMG setups */
 
-   hypre_AMGSetup(amg_data, A);
+   hypre_AMGSetup(amg_data, A, f, u);
    
    PCGSetup(A, hypre_AMGSolve, amg_data, pcg_data);
 

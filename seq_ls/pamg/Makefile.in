@@ -25,6 +25,7 @@ CFLAGS =\
  ${C_COMPILE_FLAGS}\
  -I../..\
  -I../../utilities\
+ -I../../krylov\
  -I../../seq_matrix_vector\
  ${CINCLUDES}\
  ${CDEFS}
@@ -42,6 +43,7 @@ LFLAGS =\
  -lHYPRE_amg_ls\
  -lHYPRE_seq_mv\
  -lHYPRE_utilities\
+ -L../../krylov -lkrylov\
  ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
  
 
@@ -58,13 +60,11 @@ FILES =\
  amgstats.c\
  amg_setup.c\
  amg_solve.c \
- cg.c\
  cg_fun.c\
  coarsen.c\
  coarsenCR.c\
  cycle.c\
  difconv.c\
- gmres.c\
  indepset.c\
  interp.c\
  interpCR.c\

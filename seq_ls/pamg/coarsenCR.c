@@ -138,13 +138,13 @@ hypre_AMGCoarsenCR( hypre_CSRMatrix    *A,
 
    CF_marker = hypre_CTAlloc(int, num_variables);
 
-   measure_vector = hypre_VectorCreate(num_variables);
-   zero_vector = hypre_VectorCreate(num_variables);
-   tmp_vector = hypre_VectorCreate(num_variables);
-   hypre_VectorInitialize(measure_vector);
-   hypre_VectorInitialize(zero_vector);
-   hypre_VectorInitialize(tmp_vector);
-   hypre_VectorSetConstantValues(measure_vector, 1.0);
+   measure_vector = hypre_SeqVectorCreate(num_variables);
+   zero_vector = hypre_SeqVectorCreate(num_variables);
+   tmp_vector = hypre_SeqVectorCreate(num_variables);
+   hypre_SeqVectorInitialize(measure_vector);
+   hypre_SeqVectorInitialize(zero_vector);
+   hypre_SeqVectorInitialize(tmp_vector);
+   hypre_SeqVectorSetConstantValues(measure_vector, 1.0);
    measure_array = hypre_VectorData(measure_vector);
 
    for (i=0; i < num_relax_steps; i++)
@@ -199,7 +199,7 @@ hypre_AMGCoarsenCR( hypre_CSRMatrix    *A,
 			tmp_array, tmp_size, CF_marker);
 */
 
-      hypre_VectorSetConstantValues(measure_vector, 0.0);
+      hypre_SeqVectorSetConstantValues(measure_vector, 0.0);
 
       for (i = 0; i < num_variables; i++)
       {
@@ -242,9 +242,9 @@ hypre_AMGCoarsenCR( hypre_CSRMatrix    *A,
     * Clean up and return
     *---------------------------------------------------*/
 
-   hypre_VectorDestroy(measure_vector);
-   hypre_VectorDestroy(zero_vector);
-   hypre_VectorDestroy(tmp_vector);
+   hypre_SeqVectorDestroy(measure_vector);
+   hypre_SeqVectorDestroy(zero_vector);
+   hypre_SeqVectorDestroy(tmp_vector);
    hypre_TFree(graph_array);
 /*    hypre_TFree(tmp_array); */
 
