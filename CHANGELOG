@@ -21,6 +21,8 @@ Version 1.7.8b, work in progress.
   not implemented before anyway).  The new interface allows much more
   flexibility in controlling which parts of the matrix are symmetric.
 
+- PCG: Option to combine relative and absolute tolerance in convergence test.
+
 Version 1.7.7b released, 2002/08/08.
 
 - limited release SStruct optimizations testing
