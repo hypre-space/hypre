@@ -135,6 +135,7 @@ int HYPRE_SStructPCGSetPrecond(HYPRE_SStructSolver          solver,
 int HYPRE_SStructPCGSetLogging(HYPRE_SStructSolver solver,
                                int                 logging);
 
+
 /**
  * (Optional) Set the print level.
  **/
@@ -362,12 +363,21 @@ int HYPRE_SStructGMRESSetLogging(HYPRE_SStructSolver solver,
                                  int                 logging);
 
 /**
+<<<<<<< HYPRE_sstruct_ls.h
+ * (Optional) It allows printing to the screen when print_level > 0.
+ **/
+int HYPRE_SStructGMRESSetPrintLevel(HYPRE_SStructSolver solver,
+                                 int               print_level);
+
+/**
+=======
  * (Optional) Set the print level
  **/
 int HYPRE_SStructGMRESSetPrintLevel(HYPRE_SStructSolver solver,
                                  int                 level);
 
 /**
+>>>>>>> 2.3
  * Return the number of iterations taken.
  **/
 int HYPRE_SStructGMRESGetNumIterations(HYPRE_SStructSolver  solver,
@@ -485,6 +495,13 @@ int HYPRE_SStructSysPFMGSetDxyz(HYPRE_SStructSolver  solver,
  **/
 int HYPRE_SStructSysPFMGSetLogging(HYPRE_SStructSolver solver,
                                    int                 logging);
+
+/**
+ * (Optional) It allows printing to the screen when print_level > 0.
+ **/
+int HYPRE_SStructSysPFMGSetPrintLevel(HYPRE_SStructSolver solver,
+                                   int          print_level);
+
 
 /**
  * Return the number of iterations taken.

@@ -96,6 +96,7 @@ int HYPRE_SStructSysPFMGSetNumPostRelax( HYPRE_SStructSolver solver , int num_po
 int HYPRE_SStructSysPFMGSetSkipRelax( HYPRE_SStructSolver solver , int skip_relax );
 int HYPRE_SStructSysPFMGSetDxyz( HYPRE_SStructSolver solver , double *dxyz );
 int HYPRE_SStructSysPFMGSetLogging( HYPRE_SStructSolver solver , int logging );
+int HYPRE_SStructSysPFMGSetPrintLevel( HYPRE_SStructSolver solver , int print_level );
 int HYPRE_SStructSysPFMGGetNumIterations( HYPRE_SStructSolver solver , int *num_iterations );
 int HYPRE_SStructSysPFMGGetFinalRelativeResidualNorm( HYPRE_SStructSolver solver , double *norm );
 
@@ -146,6 +147,7 @@ int hypre_SysPFMGSetNumPostRelax( void *sys_pfmg_vdata , int num_post_relax );
 int hypre_SysPFMGSetSkipRelax( void *sys_pfmg_vdata , int skip_relax );
 int hypre_SysPFMGSetDxyz( void *sys_pfmg_vdata , double *dxyz );
 int hypre_SysPFMGSetLogging( void *sys_pfmg_vdata , int logging );
+int hypre_SysPFMGSetPrintLevel( void *sys_pfmg_vdata , int print_level );
 int hypre_SysPFMGGetNumIterations( void *sys_pfmg_vdata , int *num_iterations );
 int hypre_SysPFMGPrintLogging( void *sys_pfmg_vdata , int myid );
 int hypre_SysPFMGGetFinalRelativeResidualNorm( void *sys_pfmg_vdata , double *relative_residual_norm );
