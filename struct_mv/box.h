@@ -115,6 +115,16 @@ typedef struct hypre_BoxArrayArray_struct
 #define hypre_BoxIMin(box)     ((box) -> imin)
 #define hypre_BoxIMax(box)     ((box) -> imax)
 
+#define hypre_AddIndex(index1, index2, index3) \
+( hypre_IndexX(index3) = hypre_IndexX(index2) + hypre_IndexX(index1),\
+  hypre_IndexY(index3) = hypre_IndexY(index2) + hypre_IndexY(index1),\
+  hypre_IndexZ(index3) = hypre_IndexZ(index2) + hypre_IndexZ(index1) )
+
+#define hypre_SubtractIndex(index1, index2, index3) \
+( hypre_IndexX(index3) = hypre_IndexX(index1) - hypre_IndexX(index2),\
+  hypre_IndexY(index3) = hypre_IndexY(index1) - hypre_IndexY(index2),\
+  hypre_IndexZ(index3) = hypre_IndexZ(index1) - hypre_IndexZ(index2) )
+
 #define hypre_BoxIMinD(box, d) (hypre_IndexD(hypre_BoxIMin(box), d))
 #define hypre_BoxIMaxD(box, d) (hypre_IndexD(hypre_BoxIMax(box), d))
 #define hypre_BoxSizeD(box, d) \
