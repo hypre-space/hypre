@@ -52,7 +52,7 @@ void hypre_ParILUT(DataDistType *ddist, FactorMatType *ldu,
 	     ReduceMatType *rmat, int gmaxnz, double tol, 
              hypre_PilutSolverGlobals *globals )
 {
-  int nmis, i, j, k, l, nlevel, nbnd;
+  int nmis, nlevel;
   CommInfoType cinfo;
   int *perm, *iperm, *newiperm, *newperm; 
   ReduceMatType *rmats[2], nrmat;
@@ -72,7 +72,6 @@ void hypre_ParILUT(DataDistType *ddist, FactorMatType *ldu,
   iperm = ldu->iperm;
 
   ndone = rmat->rmat_ndone;
-  nbnd = ntogo = rmat->rmat_ntogo;
   nleft = hypre_GlobalSESum(ntogo, pilut_comm);
 
   rmats[0] = rmat;
@@ -162,8 +161,8 @@ void hypre_ParILUT(DataDistType *ddist, FactorMatType *ldu,
 void hypre_ComputeCommInfo(ReduceMatType *rmat, CommInfoType *cinfo, int *rowdist,
              hypre_PilutSolverGlobals *globals)
 {
-  int i, ir, j, k, midpt, penum;
-  int nrecv, nsend, rnnbr, snnbr, maxnrecv, maxnsend, maxnrand;
+  int i, ir, j, k, penum;
+  int nrecv, nsend, rnnbr, snnbr, maxnrecv, maxnsend;
   int *rnz, *rcolind;
   int *rrowind,  *rnbrptr,  *rnbrind, *srowind, *snbrind, *snbrptr;
   MPI_Status Status ;
@@ -187,7 +186,6 @@ void hypre_ComputeCommInfo(ReduceMatType *rmat, CommInfoType *cinfo, int *rowdis
 
   /* Determine the indices that are needed */
   nrecv  = 0;
-  midpt = (firstrow + lastrow)/2;
   for (ir=0; ir<ntogo; ir++) {
     rcolind = rmat->rmat_rcolind[ir];
     for (j=1; j<rnz[ir]; j++) {
@@ -329,7 +327,7 @@ int hypre_SelectSet(ReduceMatType *rmat, CommInfoType *cinfo,
 	      int *newperm, int *newiperm,
               hypre_PilutSolverGlobals *globals)
 {
-  int ir, i, j, k, l, num, midpt, pe;
+  int ir, i, j, k, l, num;
   int nnz, snnbr;
   int *rcolind, *snbrind, *snbrptr, *srowind;
 
@@ -347,7 +345,6 @@ int hypre_SelectSet(ReduceMatType *rmat, CommInfoType *cinfo,
 
   /* determine local rows that do not have non-zeros on higher numbered PEs. */
   num = 0;
-  midpt = (firstrow+lastrow)/2;
   for (ir=0; ir<ntogo; ir++) {
     i = perm[ir+ndone]+firstrow;
 
@@ -565,10 +562,10 @@ void hypre_ComputeRmat(FactorMatType *ldu, ReduceMatType *rmat,
 		 int *newperm, int *newiperm, int nmis, double tol,
                  hypre_PilutSolverGlobals *globals)
 {
-  int i, ir, inr, start, j, k, kk, l, m, end, nnz;
+  int i, ir, inr, start, k, kk, l, m, end, nnz;
   int *usrowptr, *uerowptr, *ucolind, *incolind, *rcolind, rrowlen;
   double *uvalues, *nrm2s, *invalues, *rvalues, *dvalues;
-  double mult, nval, rtol;
+  double mult, rtol;
 
 #ifdef HYPRE_DEBUG
   hypre_PrintLine("hypre_ComputeRmat", globals);

@@ -20,7 +20,6 @@
 void hypre_errexit( char *f_str, ...)
 {
   va_list argp;
-  int nprow, npcol;
 
   /*fprintf(stdout,"[%3d]", mype);*/
 
@@ -200,7 +199,7 @@ void hypre_memcpy_idx( int *dest, const int *src, size_t n )
 **************************************************************************/
 void hypre_memcpy_fp( double *dest, const double *src, size_t n )
 {
-  int i, inc=1;
+  int i;
 
   /*SCOPY(&n, src, &inc, dest, &inc);*/
   for (i=0; i<n; i++) dest[i] = src[i];

@@ -254,7 +254,6 @@ static void sdqst(int *base, int *max)
   register int *j;
   register int *jj;
   register int *mid;
-  register int ii;
   register int c;
   int *tmp;
   int lo;

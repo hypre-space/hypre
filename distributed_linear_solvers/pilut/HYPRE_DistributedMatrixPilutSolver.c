@@ -107,13 +107,14 @@ int HYPRE_FreeDistributedMatrixPilutSolver (
                   HYPRE_DistributedMatrixPilutSolver in_ptr )
 {
   FactorMatType *ldu;
-  int i;
-   hypre_PilutSolverGlobals *globals;
 
    hypre_DistributedMatrixPilutSolver *solver = 
       (hypre_DistributedMatrixPilutSolver *) in_ptr;
 
+#ifdef HYPRE_TIMING
+   hypre_PilutSolverGlobals *globals;
   globals = hypre_DistributedMatrixPilutSolverGlobals(solver);
+#endif
 
   hypre_TFree( DataDistTypeRowdist(hypre_DistributedMatrixPilutSolverDataDist(solver)));
   hypre_TFree( hypre_DistributedMatrixPilutSolverDataDist(solver) );

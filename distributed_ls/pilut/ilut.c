@@ -18,9 +18,9 @@
 int hypre_ILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix, FactorMatType *ldu, 
           int maxnz, double tol, hypre_PilutSolverGlobals *globals )
 {
-  int i, j, k, ierr;
+  int i, ierr;
   ReduceMatType rmat;
-  int dummy_row_ptr[2], *col_ind, size;
+  int dummy_row_ptr[2], size;
   double *values;
 
 #ifdef HYPRE_DEBUG
@@ -139,7 +139,7 @@ int hypre_ILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix, FactorMatTyp
 **************************************************************************/
 void hypre_ComputeAdd2Nrms(int num_rows, int *rowptr, double *values, double *nrm2s)
 {
-  int i, j, n, incx=1;
+  int i, j, n;
   double sum;
 
   for (i=0; i<num_rows; i++) {

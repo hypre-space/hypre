@@ -35,7 +35,7 @@
 void hypre_LDUSolve(DataDistType *ddist, FactorMatType *ldu, double *x, double *b,
                    hypre_PilutSolverGlobals *globals)
 {
-  int ii, i, j, k, l, TAG;
+  int ii, i, j, l, TAG;
   int nlevels, snbrpes, rnbrpes;
   int *perm, *iperm, *nnodes, *rowptr, *colind,
     *spes, *sptr, *sind, *auxsptr, *rpes, *rdone, *rnum;
@@ -261,7 +261,7 @@ void hypre_LDUSolve(DataDistType *ddist, FactorMatType *ldu, double *x, double *
 int hypre_SetUpLUFactor(DataDistType *ddist, FactorMatType *ldu, int maxnz,
                    hypre_PilutSolverGlobals *globals )
 {
-  int i, maxsend;
+  int maxsend;
   int *petotal, *rind, *imap;
 
   petotal = hypre_idx_malloc(npes+1,       "hypre_SetUpLUFactor: petotal");

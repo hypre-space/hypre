@@ -37,7 +37,6 @@ double hypre_p_ddot(DataDistType *ddist, double *x, double *y,
               hypre_PilutSolverGlobals *globals)
 {
   int incx=1;
-  double sum;
 
   return hypre_GlobalSESumDouble(SDOT(&(ddist->ddist_lnrows), x, &incx, y, &incx), 
          pilut_comm );
@@ -86,7 +85,7 @@ void hypre_p_daxbyz(DataDistType *ddist, double alpha, double *x, double beta,
 **************************************************************************/
 hypre_p_vprintf(DataDistType *ddist, double *x, hypre_PilutSolverGlobals *globals )
 {
-  int pe, i, j, k;
+  int pe, i;
 
   for (pe=0; pe<npes; pe++) {
     if (mype == pe) {

@@ -37,10 +37,9 @@ int hypre_SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
 {
   int i, ii, j, k, kk, l, m, ierr, diag_present;
   int *perm, *iperm, 
-          *usrowptr, *uerowptr, *ucolind,
-          *rnz, **rcolind;
+          *usrowptr, *uerowptr, *ucolind;
   int row_size, *col_ind;
-  double *values, *uvalues, *dvalues, *nrm2s, **rvalues;
+  double *values, *uvalues, *dvalues, *nrm2s;
   int nlocal, nbnd;
   double mult, rtol;
   int *structural_union;
@@ -228,12 +227,9 @@ int hypre_SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
   /* Form the reduced matrix                                        */
   /******************************************************************/
   /* Allocate memory for the reduced matrix */
-  rnz =
     rmat->rmat_rnz     = hypre_idx_malloc(nbnd, "hypre_SerILUT: rmat->rmat_rnz"    );
   rmat->rmat_rrowlen   = hypre_idx_malloc(nbnd, "hypre_SerILUT: rmat->rmat_rrowlen");
-  rcolind =
     rmat->rmat_rcolind = (int **)hypre_mymalloc(sizeof(int *)*nbnd, "hypre_SerILUT: rmat->rmat_rcolind");
-  rvalues =
     rmat->rmat_rvalues =  (double **)hypre_mymalloc(sizeof(double *)*nbnd, "hypre_SerILUT: rmat->rmat_rvalues");
   rmat->rmat_ndone = nlocal;
   rmat->rmat_ntogo = nbnd;
@@ -445,7 +441,7 @@ int ExchangeStructuralUnions( DataDistType *ddist,
                     int **structural_union,
                     hypre_PilutSolverGlobals *globals )
 { 
-  int ierr=0, i, j, *recv_unions;
+  int ierr=0, i, *recv_unions;
 
   /* allocate space for receiving unions */
   recv_unions = hypre_CTAlloc( int, nrows );
@@ -476,7 +472,7 @@ void hypre_SecondDrop(int maxnz, double tol, int row,
 		FactorMatType *ldu, hypre_PilutSolverGlobals *globals)
 {
   int i, j, ierr;
-  int max, nz, diag, lrow;
+  int diag, lrow;
   int first, last, itmp;
   double dtmp;
 
@@ -558,7 +554,7 @@ void hypre_SecondDrop(int maxnz, double tol, int row,
   /* Now, I want to keep maxnz elements of L. Go and extract them */
 
   ierr = hypre_DoubleQuickSplit( w, jw, last, maxnz ); 
-  if (ierr) exit;
+  if (ierr) return;
   for ( j= hypre_max(0,last-maxnz); j< last; j++ ) 
   {
      ldu->lcolind[ldu->lerowptr[lrow]] = jw[ j ];
@@ -586,7 +582,7 @@ void hypre_SecondDrop(int maxnz, double tol, int row,
 
   /* Now, I want to keep maxnz elements of U. Go and extract them */
   ierr = hypre_DoubleQuickSplit( w+first, jw+first, lastjr-first, maxnz ); 
-  if (ierr) exit;
+  if (ierr) return;
   for ( j=hypre_max(first, lastjr-maxnz); j< lastjr; j++ ) 
   {
      ldu->ucolind[ldu->uerowptr[lrow]] = jw[ j ];
@@ -630,7 +626,7 @@ void hypre_SecondDropUpdate(int maxnz, int maxnzkeep, double tol, int row,
 		      FactorMatType *ldu, ReduceMatType *rmat,
                       hypre_PilutSolverGlobals *globals )
 {
-  int i, j, k, nl;
+  int i, j, nl;
   int max, nz, lrow, rrow;
   int last, first, itmp;
   double dtmp;
@@ -712,7 +708,7 @@ void hypre_SecondDropUpdate(int maxnz, int maxnzkeep, double tol, int row,
 
   /* Keep large maxnz elements of L */
   ierr = hypre_DoubleQuickSplit( w+1, jw+1, last-1, maxnz ); 
-  if (ierr) exit;
+  if (ierr) return;
   for ( j= hypre_max(1,last-maxnz); j< last; j++ ) 
   {
      ldu->lcolind[ldu->lerowptr[lrow]] = jw[ j ];

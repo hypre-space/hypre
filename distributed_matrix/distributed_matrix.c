@@ -176,7 +176,7 @@ hypre_DistributedMatrixSetLocalStorage( hypre_DistributedMatrix *matrix,
 
    hypre_DistributedMatrixLocalStorage(matrix) = local_storage;
 
-   return(0);
+   return(ierr);
 }
 
 /*--------------------------------------------------------------------------
