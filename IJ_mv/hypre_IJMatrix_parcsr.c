@@ -98,15 +98,10 @@ hypre_NewIJMatrixParCSR(hypre_IJMatrix *matrix)
    {
       row_starts = hypre_CTAlloc(int,num_procs+1);
 
-      if (my_id == 0 && local_m == global_m)
-      {
-         row_starts[1] = local_m;
-      }
-      else
-      {
+      if (num_procs > 1)
          MPI_Allgather(&local_m,1,MPI_INT,&row_starts[1],1,MPI_INT,comm);
-      }
-
+      else
+         row_starts[1] = global_m;
    }
    if (local_n < 0)
    {
@@ -116,14 +111,10 @@ hypre_NewIJMatrixParCSR(hypre_IJMatrix *matrix)
    {
       col_starts = hypre_CTAlloc(int,num_procs+1);
 
-      if (my_id == 0 && local_n == global_n)
-      {
-         col_starts[1] = local_n;
-      }
-      else
-      {
+      if (num_procs > 1)
          MPI_Allgather(&local_n,1,MPI_INT,&col_starts[1],1,MPI_INT,comm);
-      }
+      else
+         col_starts[1] = global_n;
    }
 
    if (row_starts && col_starts)
