@@ -54,8 +54,8 @@ define(IWAIT,<<
 
 /* PLOOP parallel loop macro.
  Example:
-     PLOOP(z,lz,mz,num_threads,indx,3,<<body>>)
- The indx used ($4) must not be reused for a loop
+     PLOOP(z,lz,mz,indx,3,<<body>>)
+ The indx used ($5) must not be reused for a loop
  until a synch. point. guarantees all threads have exited.
 
 Usage: PLOOP(increment_variable, loop_initial_value, loop_stopping value,
@@ -65,10 +65,9 @@ Arguments:  $1 -- the name of the increment variable for the loop
             $2 -- the initial value for the increment variable
             $3 -- the stopping value for the increment variable
                   (loop will not be entered when increment reaches this value)
-            $4 -- the number of threads being used 
-            $5 -- the name of an array of indices
-            $6 -- an index of the given array
-            $7 -- The body of the loop (enclose between << and >> )
+            $4 -- the name of an array of indices
+            $5 -- an index of the given array
+            $6 -- The body of the loop (enclose between << and >> )
 */
 
 define(PLOOP,<<
@@ -82,14 +81,14 @@ $5
 */
 
 
-   for ($1 = ifetchadd(&$5[$6]) + $2; 
+   for ($1 = ifetchadd(&$4[$5]) + $2; 
         $1 <  $3;
-        $1 = ifetchadd(&$5[$6]) + $2) {
-      $7
+        $1 = ifetchadd(&$4[$5]) + $2) {
+      $6
    }
 
    if ($1 == $3)
-      $5[$6] =0;
+      $4[$5] =0;
 >>)
 
 
@@ -104,7 +103,7 @@ define(IWAIT,<<>>)
 
 /* PLOOP parallel loop macro.
  Example:
-     PLOOP(z,lz,mz,num_threads,indx,3,<<body>>)
+     PLOOP(z,lz,mz,indx,3,<<body>>)
 */
 define(PLOOP,<<
 /*
@@ -116,7 +115,7 @@ $5
 */
 
    for ($1 = $2; $1 < $3; $1++) {
-      $7
+      $6
    }
 >>)
 
