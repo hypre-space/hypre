@@ -384,7 +384,7 @@ hypre_NewCommInfoFromNumGhost( hypre_StructGrid      *grid,
    max_num_ghost = 0;
    for (i = 0; i < 6; i++)
    {
-      max_num_ghost = max(max_num_ghost, num_ghost[i]);
+      max_num_ghost = hypre_max(max_num_ghost, num_ghost[i]);
    }
 
    if (max_num_ghost > hypre_BoxNeighborsMaxDistance(neighbors))

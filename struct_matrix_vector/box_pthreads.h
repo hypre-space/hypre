@@ -87,7 +87,7 @@ extern int iteration_counter;
    int clstart[3];\
    int clfinish[3];\
    int chunkcount;\
-   target_vol    = min(max((hypre__nx * hypre__ny * hypre__nz) / CHUNK_GOAL,\
+   target_vol    = hypre_min(hypre_max((hypre__nx * hypre__ny * hypre__nz) / CHUNK_GOAL,\
                            MIN_VOL), MAX_VOL);\
    cbrt_tar_vol  = (int) (pow ((double)target_vol, 1./3.));\
    edge_divisor  = hypre__nz / cbrt_tar_vol + !!(hypre__nz % cbrt_tar_vol);\

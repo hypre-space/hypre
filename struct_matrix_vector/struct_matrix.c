@@ -213,9 +213,9 @@ hypre_InitializeStructMatrixShell( hypre_StructMatrix *matrix )
          for (d = 0; d < 3; d++)
          {
             extra_ghost[2*d] =
-               max(extra_ghost[2*d], -hypre_IndexD(stencil_shape[i], d));
+               hypre_max(extra_ghost[2*d], -hypre_IndexD(stencil_shape[i], d));
             extra_ghost[2*d + 1] =
-               max(extra_ghost[2*d + 1],  hypre_IndexD(stencil_shape[i], d));
+               hypre_max(extra_ghost[2*d + 1],  hypre_IndexD(stencil_shape[i], d));
          }
       }
    }

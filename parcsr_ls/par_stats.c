@@ -199,8 +199,8 @@ hypre_ParAMGSetupStats( void               *amg_vdata,
        for (j = 0; j < hypre_CSRMatrixNumRows(A_diag); j++)
        {
            entries = (A_diag_i[j+1]-A_diag_i[j])+(A_offd_i[j+1]-A_offd_i[j]);
-           min_entries = min(entries, min_entries);
-           max_entries = max(entries, max_entries);
+           min_entries = hypre_min(entries, min_entries);
+           max_entries = hypre_max(entries, max_entries);
 
            rowsum = 0.0;
            for (i = A_diag_i[j]; i < A_diag_i[j+1]; i++)
@@ -209,8 +209,8 @@ hypre_ParAMGSetupStats( void               *amg_vdata,
            for (i = A_offd_i[j]; i < A_offd_i[j+1]; i++)
                rowsum += A_offd_data[i];
 
-           min_rowsum = min(rowsum, min_rowsum);
-           max_rowsum = max(rowsum, max_rowsum);
+           min_rowsum = hypre_min(rowsum, min_rowsum);
+           max_rowsum = hypre_max(rowsum, max_rowsum);
        }
   }
        avg_entries = ((double) global_nonzeros) / ((double) fine_size);
@@ -234,11 +234,11 @@ hypre_ParAMGSetupStats( void               *amg_vdata,
 	      numrows = row_starts[j+1]-row_starts[j];
 	      if (numrows)
 	      {
-                 global_min_e = min(global_min_e, (int) gather_buff[j*4]);
-                 global_min_rsum = min(global_min_rsum, gather_buff[j*4 +2]);
+                 global_min_e = hypre_min(global_min_e, (int) gather_buff[j*4]);
+                 global_min_rsum = hypre_min(global_min_rsum, gather_buff[j*4 +2]);
               }
-	      global_max_e = max(global_max_e, (int) gather_buff[j*4 +1]);
-              global_max_rsum = max(global_max_rsum, gather_buff[j*4 +3]);
+	      global_max_e = hypre_max(global_max_e, (int) gather_buff[j*4 +1]);
+              global_max_rsum = hypre_max(global_max_rsum, gather_buff[j*4 +3]);
           }
 
           printf( "%2d %7d %8d  %0.3f  %4d %4d",
@@ -301,16 +301,16 @@ hypre_ParAMGSetupStats( void               *amg_vdata,
        if (hypre_CSRMatrixNumCols(P_diag)) min_weight = P_diag_data[0];
        for (j = P_diag_i[0]; j < P_diag_i[1]; j++)
        {
-            min_weight = min(min_weight, P_diag_data[j]);
+            min_weight = hypre_min(min_weight, P_diag_data[j]);
             if (P_diag_data[j] != 1.0)
-                max_weight = max(max_weight, P_diag_data[j]);
+                max_weight = hypre_max(max_weight, P_diag_data[j]);
             min_rowsum += P_diag_data[j];
        }
        for (j = P_offd_i[0]; j < P_offd_i[1]; j++)
        {        
-             min_weight = min(min_weight, P_offd_data[j]); 
+             min_weight = hypre_min(min_weight, P_offd_data[j]); 
              if (P_offd_data[j] != 1.0)
-                  max_weight = max(max_weight, P_offd_data[j]);     
+                  max_weight = hypre_max(max_weight, P_offd_data[j]);     
              min_rowsum += P_offd_data[j];
        }
 
@@ -323,27 +323,27 @@ hypre_ParAMGSetupStats( void               *amg_vdata,
        for (j = 0; j < hypre_CSRMatrixNumRows(P_diag); j++)
        {
            entries = (P_diag_i[j+1]-P_diag_i[j])+(P_offd_i[j+1]-P_offd_i[j]);
-           min_entries = min(entries, min_entries);
-           max_entries = max(entries, max_entries);
+           min_entries = hypre_min(entries, min_entries);
+           max_entries = hypre_max(entries, max_entries);
 
            rowsum = 0.0;
            for (i = P_diag_i[j]; i < P_diag_i[j+1]; i++)
            {
-               min_weight = min(min_weight, P_diag_data[i]);
+               min_weight = hypre_min(min_weight, P_diag_data[i]);
                if (P_diag_data[i] != 1.0)
-                     max_weight = max(max_weight, P_diag_data[i]);
+                     max_weight = hypre_max(max_weight, P_diag_data[i]);
                rowsum += P_diag_data[i];
            }
 
            for (i = P_offd_i[j]; i < P_offd_i[j+1]; i++)
            {
-               min_weight = min(min_weight, P_offd_data[i]);
+               min_weight = hypre_min(min_weight, P_offd_data[i]);
                if (P_offd_data[i] != 1.0) 
-                     max_weight = max(max_weight, P_offd_data[i]);
+                     max_weight = hypre_max(max_weight, P_offd_data[i]);
                rowsum += P_offd_data[i];
            }
-           min_rowsum = min(rowsum, min_rowsum);
-           max_rowsum = max(rowsum, max_rowsum);
+           min_rowsum = hypre_min(rowsum, min_rowsum);
+           max_rowsum = hypre_max(rowsum, max_rowsum);
        }
 
   }
@@ -372,13 +372,13 @@ hypre_ParAMGSetupStats( void               *amg_vdata,
 	      numrows = row_starts[j+1] - row_starts[j];
               if (numrows)
 	      {
-		 global_min_e = min(global_min_e, (int) gather_buff[j*6]);
-                 global_min_rsum = min(global_min_rsum, gather_buff[j*6+2]);
-                 global_min_wt = min(global_min_wt, gather_buff[j*6+4]);
+		 global_min_e = hypre_min(global_min_e, (int) gather_buff[j*6]);
+                 global_min_rsum = hypre_min(global_min_rsum, gather_buff[j*6+2]);
+                 global_min_wt = hypre_min(global_min_wt, gather_buff[j*6+4]);
 	      }
-              global_max_e = max(global_max_e, (int) gather_buff[j*6+1]);
-              global_max_rsum = max(global_max_rsum, gather_buff[j*6+3]);
-              global_max_wt = max(global_max_wt, gather_buff[j*6+5]);
+              global_max_e = hypre_max(global_max_e, (int) gather_buff[j*6+1]);
+              global_max_rsum = hypre_max(global_max_rsum, gather_buff[j*6+3]);
+              global_max_wt = hypre_max(global_max_wt, gather_buff[j*6+5]);
           }
 
           printf( "%2d %5d x %-5d %3d %3d",

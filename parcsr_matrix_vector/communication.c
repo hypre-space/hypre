@@ -252,7 +252,7 @@ hypre_GenerateMatvecCommunicationInfo ( hypre_ParCSRMatrix *A)
    {
 	offd_col = col_map_offd[i];
 	proc_num = 0;
-	if (num_cols_diag) proc_num = min(num_procs-1,offd_col / num_cols_diag);
+	if (num_cols_diag) proc_num = hypre_min(num_procs-1,offd_col / num_cols_diag);
 	while (col_starts[proc_num] > offd_col )
 		proc_num = proc_num-1;
 	while (col_starts[proc_num+1]-1 < offd_col )

@@ -33,9 +33,9 @@ hypre_IntersectBoxes( hypre_Box *box1,
    for (d = 0; d < 3; d++)
    {
       hypre_BoxIMinD(ibox, d) =
-         max(hypre_BoxIMinD(box1, d), hypre_BoxIMinD(box2, d));
+         hypre_max(hypre_BoxIMinD(box1, d), hypre_BoxIMinD(box2, d));
       hypre_BoxIMaxD(ibox, d) =
-         min(hypre_BoxIMaxD(box1, d), hypre_BoxIMaxD(box2, d));
+         hypre_min(hypre_BoxIMaxD(box1, d), hypre_BoxIMaxD(box2, d));
    }
 
    return ierr;

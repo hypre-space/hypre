@@ -113,7 +113,7 @@ hypre_NewBoxNeighbors( int             *local_ranks,
                   if (diff > 0)
                   {
                      distance_index[d] = 1;
-                     distance = max(distance, diff);
+                     distance = hypre_max(distance, diff);
                   }
 
                   diff = hypre_BoxIMinD(local_box, d) -
@@ -121,7 +121,7 @@ hypre_NewBoxNeighbors( int             *local_ranks,
                   if (diff > 0)
                   {
                      distance_index[d] = -1;
-                     distance = max(distance, diff);
+                     distance = hypre_max(distance, diff);
                   }
                }
 

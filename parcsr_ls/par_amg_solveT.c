@@ -472,7 +472,7 @@ hypre_ParAMGCycleT( void              *amg_vdata,
                           beta,F_array[coarse_grid]);
 
          ++level;
-         lev_counter[level] = max(lev_counter[level],cycle_type);
+         lev_counter[level] = hypre_max(lev_counter[level],cycle_type);
          cycle_param = 1;
          if (level == num_levels-1) cycle_param = 3;
       }

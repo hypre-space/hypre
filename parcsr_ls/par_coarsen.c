@@ -178,9 +178,9 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
     *
     * For now, the "strength" of dependence/influence is defined in
     * the following way: i depends on j if
-    *     aij > max (k != i) aik,    aii < 0
+    *     aij > hypre_max (k != i) aik,    aii < 0
     * or
-    *     aij < min (k != i) aik,    aii >= 0
+    *     aij < hypre_min (k != i) aik,    aii >= 0
     * Then S_ij = 1, else S_ij = 0.
     *
     * NOTE: the entries are negative initially, corresponding
@@ -253,22 +253,22 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
       {
          for (jA = A_diag_i[i]+1; jA < A_diag_i[i+1]; jA++)
          {
-            row_scale = max(row_scale, A_diag_data[jA]);
+            row_scale = hypre_max(row_scale, A_diag_data[jA]);
          }
          for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
          {
-            row_scale = max(row_scale, A_offd_data[jA]);
+            row_scale = hypre_max(row_scale, A_offd_data[jA]);
          }
       }
       else
       {
          for (jA = A_diag_i[i]+1; jA < A_diag_i[i+1]; jA++)
          {
-            row_scale = min(row_scale, A_diag_data[jA]);
+            row_scale = hypre_min(row_scale, A_diag_data[jA]);
          }
          for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
          {
-            row_scale = min(row_scale, A_offd_data[jA]);
+            row_scale = hypre_min(row_scale, A_offd_data[jA]);
          }
       }
 
@@ -1278,9 +1278,9 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
     *
     * For now, the "strength" of dependence/influence is defined in
     * the following way: i depends on j if
-    *     aij > max (k != i) aik,    aii < 0
+    *     aij > hypre_max (k != i) aik,    aii < 0
     * or
-    *     aij < min (k != i) aik,    aii >= 0
+    *     aij < hypre_min (k != i) aik,    aii >= 0
     * Then S_ij = 1, else S_ij = 0.
     *
     * NOTE: the entries are negative initially, corresponding
@@ -1359,22 +1359,22 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
       {
          for (jA = A_i[i]+1; jA < A_i[i+1]; jA++)
          {
-            row_scale = max(row_scale, A_data[jA]);
+            row_scale = hypre_max(row_scale, A_data[jA]);
          }
          for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
          {
-            row_scale = max(row_scale, A_offd_data[jA]);
+            row_scale = hypre_max(row_scale, A_offd_data[jA]);
          }
       }
       else
       {
          for (jA = A_i[i]+1; jA < A_i[i+1]; jA++)
          {
-            row_scale = min(row_scale, A_data[jA]);
+            row_scale = hypre_min(row_scale, A_data[jA]);
          }
          for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
          {
-            row_scale = min(row_scale, A_offd_data[jA]);
+            row_scale = hypre_min(row_scale, A_offd_data[jA]);
          }
       }
 
@@ -2467,22 +2467,22 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
       {
          for (jA = A_diag_i[i]+1; jA < A_diag_i[i+1]; jA++)
          {
-            row_scale = max(row_scale, A_diag_data[jA]);
+            row_scale = hypre_max(row_scale, A_diag_data[jA]);
          }
          for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
          {
-            row_scale = max(row_scale, A_offd_data[jA]);
+            row_scale = hypre_max(row_scale, A_offd_data[jA]);
          }
       }
       else
       {
          for (jA = A_diag_i[i]+1; jA < A_diag_i[i+1]; jA++)
          {
-            row_scale = min(row_scale, A_diag_data[jA]);
+            row_scale = hypre_min(row_scale, A_diag_data[jA]);
          }
          for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
          {
-            row_scale = min(row_scale, A_offd_data[jA]);
+            row_scale = hypre_min(row_scale, A_offd_data[jA]);
          }
       }
 

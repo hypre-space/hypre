@@ -109,16 +109,16 @@ hypre_AMGSetupStats( void *amg_vdata )
        for (j = 0; j < fine_size; j++)
        {
            entries = A_i[j+1] - A_i[j];
-           min_entries = min(entries, min_entries);
-           max_entries = max(entries, max_entries);
+           min_entries = hypre_min(entries, min_entries);
+           max_entries = hypre_max(entries, max_entries);
            total_entries += entries;
 
            rowsum = 0.0;
            for (i = A_i[j]; i < A_i[j+1]; i++)
                rowsum += A_data[i];
 
-           min_rowsum = min(rowsum, min_rowsum);
-           max_rowsum = max(rowsum, max_rowsum);
+           min_rowsum = hypre_min(rowsum, min_rowsum);
+           max_rowsum = hypre_max(rowsum, max_rowsum);
        }
 
        avg_entries = ((double) total_entries) / ((double) fine_size);
@@ -171,24 +171,24 @@ hypre_AMGSetupStats( void *amg_vdata )
        {
           if (P_data[j] != 1.0)
           {
-             min_weight = min(min_weight,P_data[j]);
-             max_weight = max(max_weight,P_data[j]);
+             min_weight = hypre_min(min_weight,P_data[j]);
+             max_weight = hypre_max(max_weight,P_data[j]);
           }
        }
 
        for (j = 0; j < fine_size; j++)
        {
            entries = P_i[j+1] - P_i[j];
-           min_entries = min(entries, min_entries);
-           max_entries = max(entries, max_entries);
+           min_entries = hypre_min(entries, min_entries);
+           max_entries = hypre_max(entries, max_entries);
            total_entries += entries;
 
            rowsum = 0.0;
            for (i = P_i[j]; i < P_i[j+1]; i++)
                rowsum += P_data[i];
 
-           min_rowsum = min(rowsum, min_rowsum);
-           max_rowsum = max(rowsum, max_rowsum);
+           min_rowsum = hypre_min(rowsum, min_rowsum);
+           max_rowsum = hypre_max(rowsum, max_rowsum);
        }
 
        fprintf(fp, "%2d %5d x %-5d %3d %3d",

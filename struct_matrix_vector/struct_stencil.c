@@ -43,7 +43,7 @@ hypre_NewStructStencil( int           dim,
       {
          abs_offset = hypre_IndexD(shape[s], d);
          abs_offset = (abs_offset < 0) ? -abs_offset : abs_offset;
-         max_offset = max(abs_offset, max_offset);
+         max_offset = hypre_max(abs_offset, max_offset);
       }
    }
    hypre_StructStencilMaxOffset(stencil) = max_offset;

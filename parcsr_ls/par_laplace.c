@@ -97,9 +97,9 @@ hypre_GenerateLaplacian( MPI_Comm comm,
    diag_i = hypre_CTAlloc(int, local_num_rows+1);
    offd_i = hypre_CTAlloc(int, local_num_rows+1);
 
-   P_busy = min(nx,P);
-   Q_busy = min(ny,Q);
-   R_busy = min(nz,R);
+   P_busy = hypre_min(nx,P);
+   Q_busy = hypre_min(ny,Q);
+   R_busy = hypre_min(nz,R);
 
    num_cols_offd = 0;
    if (p) num_cols_offd += ny_local*nz_local;
