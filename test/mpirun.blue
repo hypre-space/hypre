@@ -10,11 +10,15 @@
 
 DRIVER_ARGS=""
 POE_NUM_PROCS="1"
+POE_NUM_NODES="1"
+CPUS_PER_NODE="4"
 while [ "$*" != "" ]
 do
 case $1 in
     -np)
 	POE_NUM_PROCS=$2
+	POE_NUM_NODES=`expr $POE_NUM_PROCS + $CPUS_PER_NODE - 1`
+	POE_NUM_NODES=`expr $POE_NUM_NODES / $CPUS_PER_NODE`
 	shift
         shift;;
     *)
@@ -23,5 +27,5 @@ case $1 in
 esac
 done
 
-poe $DRIVER_ARGS -procs $POE_NUM_PROCS
+poe $DRIVER_ARGS -procs $POE_NUM_PROCS -nodes $POE_NUM_NODES
 
