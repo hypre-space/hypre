@@ -87,29 +87,51 @@ AC_DEFUN([ACX_INSURE],
 [AC_ARG_WITH([insure],
 AC_HELP_STRING(
 [--with-insure=FLAGS],
-[FLAGS are optionals to pass to insure, the default is for 
-FLAG="-Zoi \"report_file insure.log\" which sends output to a file
-called insure.log. To redirect output to standard error, use
--Zoi \"report_file insure.log\". Reassign cc and CC compilers
+[FLAGS are optionals to pass to insure. To redirect output to a
+file; FLAG="-Zoi \"report_file insure.log\". Its probably best
+to supply options to insure through the .psrc file.
 -- no checking is done to ensure insure is present on the machine]),
 [case "${withval}" in
-  yes) CC=insure
-    CXX=insure
+  yes) PREPEND=insure
     CFLAGS="$CFLAGS -g"
     CXXFLAGS="$CXXFLAGS -g"
-    XCFLAGS="-Zoi \"report_file insure.log\""
-    XCXXFLAGS="-Zoi \"report_file insure.log\""
-    casc_user_chose_compilers=yes
+    casc_using_debug=yes
+    casc_using_mpi=no
     ;;
   no) casc_user_chose_compilers=no
     ;;
-  *) CC=insure
-    CXX=insure
+  *) PREPEND=insure
     CFLAGS="$CFLAGS -g"
     CXXFLAGS="$CXXFLAGS -g"
-    XCFLAGS="$withval"
-    XCXXFLAGS="$CXX $withval"
-    casc_user_chose_compilers=yes
+    XCCFLAGS="$withval"
+    XCXXFLAGS="$withval"
+    casc_using_debug=yes
+    casc_using_mpi=no
+    ;;
+esac])
+
+AC_ARG_WITH([insure-to-file],
+AC_HELP_STRING(
+[--with-insure-to-file],
+[direct insure output to the file \"insure.log\"]),
+[case "${withval}" in
+  yes) PREPEND=insure
+    CFLAGS="$CFLAGS -g"
+    CXXFLAGS="$CXXFLAGS -g"
+    XCCFLAGS="-Zoi \"report_file insure.log\""
+    XCXXFLAGS="-Zoi \"report_file insure.log\""
+    casc_using_debug=yes
+    casc_using_mpi=no
+    ;;
+  no) casc_user_chose_compilers=no
+    ;;
+  *) PREPEND=insure
+    CFLAGS="$CFLAGS -g"
+    CXXFLAGS="$CXXFLAGS -g"
+    XCCFLAGS="-Zoi \"report_file insure.log\""
+    XCXXFLAGS="-Zoi \"report_file insure.log\""
+    casc_using_debug=yes
+    casc_using_mpi=no
     ;;
 esac])
 ])
@@ -136,32 +158,50 @@ AC_DEFUN([ACX_PURIFY],
 [AC_ARG_WITH([purify],
 AC_HELP_STRING(
 [--with-purify=FLAGS],
-[FLAGS are optionals to pass to insure, the default is for 
-FLAG="-log-file=purify.log -append-logfile=yes -best-effort" which 
-appends output to a file called purify.log. To redirect output to 
-the Viewer, use FLAGS=\"-windows=yes\". Assign cc and CC as the C 
-and C++ compilers and prepends "purify" to compile/link line-- no 
-checking is done to ensure purify is present on the machine]),
+[FLAGS are optionals to pass to insure. To appends output to a file
+use FLAG="-log-file=purify.log -append-logfile=yes -best-effort".
+To redirect output to the Viewer, use FLAGS=\"-windows=yes\". 
+-- no checking is done to ensure purify is present on the machine]),
 [case "${withval}" in
   yes) PREPEND="purify"
     CFLAGS="$CFLAGS -g"
     CXXFLAGS="$CXXFLAGS -g"
-    XCFLAGS="-log-file=purify.log -append-logfile=yes -best-effort"
-    XCXXFLAGS="-log-file=purify.log -append-logfile=yes -best-effort"
-    CC="$PREPEND cc"
-    CXX="$PREPEND CC"
-    casc_user_chose_compilers=yes
+    casc_using_debug=yes
+    casc_using_mpi=no
     ;;
   no) casc_user_chose_compilers=no
     ;;
   *) PREPEND="purify"
     CFLAGS="$CFLAGS -g"
     CXXFLAGS="$CXXFLAGS -g"
-    XCFLAGS="$withval"
+    XCCFLAGS="$withval"
     XCXXFLAGS="$withval"
-    CC="$PREPEND cc"
-    CXX="$PREPEND CC" 
-    casc_user_chose_compilers=yes
+    casc_using_debug=yes
+    casc_using_mpi=no
+    ;;
+esac])
+AC_ARG_WITH([purify-to-file],
+AC_HELP_STRING(
+[--with-purify-to-file],
+[direct purify output to the file \"purify.log\"]),
+[case "${withval}" in
+  yes) PREPEND="purify"
+    CFLAGS="$CFLAGS -g"
+    CXXFLAGS="$CXXFLAGS -g"
+    XCCFLAGS="-log-file=purify.log -append-logfile=yes -best-effort"
+    XCXXFLAGS="-log-file=purify.log -append-logfile=yes -best-effort"
+    casc_using_debug=yes
+    casc_using_mpi=no
+    ;;
+  no) casc_user_chose_compilers=no
+    ;;
+  *) PREPEND="purify"
+    CFLAGS="$CFLAGS -g"
+    CXXFLAGS="$CXXFLAGS -g"
+    XCCFLAGS="-log-file=purify.log -append-logfile=yes -best-effort"
+    XCXXFLAGS="-log-file=purify.log -append-logfile=yes -best-effort"
+    casc_using_debug=yes
+    casc_using_mpi=no
     ;;
 esac])
 ])
@@ -182,17 +222,11 @@ AC_DEFUN([ACX_STRICT_CHECKING],
 [AC_ARG_WITH([strict-checking],
 AC_HELP_STRING(
 [--with-strict-checking],
-[compiles with out MPI ('--without-MPI') and assigns KCC
-as the c and c++ compilers, unless CC and CXX are already set to
-gcc and g++.For C compiles KCC uses --c --strict as the compiler
-flag this enforces syntax described by ISO 9899-1990, the C language
-standard. Additional compiler flags, --display_error_number --lint
-are enabled for lint-type checking. Individual types of warnings
-can be suppressed using --diag_suppress and the error numbers
-provided by --display_error_number]),
+[Try to find a compiler option that warns when a function prototype
+is not fully defined, as many other non-ANSI features as possible.
+Currently this macro knows about GCC, and KCC.]),
 [ if test "x$GCC" = "xyes"; then
-  CFLAGS="$CFLAGS -Wall -Wunused -Wmissing-prototypes"
-  CFLAGS="$CFLAGS -Wmissing-declarations -ansi -pedantic"
+  CFLAGS="$CFLAGS -Wall -ansi -pedantic"
   CXXFLAGS="$CXXFLAGS -Wall -Wshadow -fno-implicit-templates"
   CXXFLAGS="$CXXFLAGS -Woverloaded-virtual -ansi -pedantic"
 else
@@ -203,10 +237,10 @@ else
   CFLAGS="$CFLAGS,1018,1021,1022,1023,1024,1030,1041"
   CXXFLAGS="$CXXFLAGS --strict --lint --display_error_number"
   CXXFLAGS="$CXXFLAGS --diag_suppress 381,450,1023,1024"
+  casc_user_chose_compilers=yes
+  casc_using_mpi=no
 fi
-casc_user_chose_compilers=yes
-casc_using_mpi=no])
-])
+])])
 dnl **********************************************************************
 dnl * ACX_CHECK_MPI
 dnl *

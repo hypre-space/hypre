@@ -48,6 +48,10 @@ ACX_TIMING
 
 ACX_OPENMP
 
+ACX_INSURE
+
+ACX_PURIFY
+
 AC_ARG_WITH(babel,
 AC_HELP_STRING([--with-babel],[use babel]),
 [ if test "$withval" = "yes"; then
@@ -142,10 +146,6 @@ AC_PROG_CXX
 AC_PROG_F77
 AC_F77_LIBRARY_LDFLAGS
 AC_EXEEXT
-
-ACX_INSURE
-
-ACX_PURIFY
 
 ACX_STRICT_CHECKING
 
@@ -289,17 +289,22 @@ AC_SUBST(BLASLIBFLAGS)
 AC_CHECK_LIBM
 AC_SUBST(LIBM)
 
-if test "$casc_user_chose_compilers" = "yes" ; then
-  if test -z "$PREPEND" ; then
-    CC="$CC $XCFLAGS"
-    CXX="$CXX $XCXXFLAGS"
-  else			# deal with libtool quirks
-    CC="--tag=CC $PREPEND $XCFLAGS cc"
-    CXX="--tag=CXX $PREPEND $XCXXFLAGS CC"
+CCLD="--tag=CC $CC"
+CXXLD="--tag=CXX $CXX"
+if test "$casc_using_debug" = "yes" ; then
+# deal with libtool quirks
+  if test "$PREPEND" = "insure" ; then
+    CCLD="--tag=CC $PREPEND $XCCFLAGS"
+    CXXLD="--tag=CXX $PREPEND $XCXXFLAGS"
+  elif test "$PREPEND" = "purify" ; then
+    CCLD="--tag=CC $PREPEND $XCCFLAGS $CC"
+    CXXLD="--tag=CXX $PREPEND $XCXXFLAGS $CXX"
   fi
+else
+  ACX_OPTIMIZATION_FLAGS
 fi
-
-ACX_OPTIMIZATION_FLAGS
+AC_SUBST(CCLD)
+AC_SUBST(CXXLD)
 
 dnl *BABEL-related header files, libraries and directories for those
 dnl * libraries
