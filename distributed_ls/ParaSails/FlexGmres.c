@@ -160,7 +160,7 @@ void FGMRES_ParaSails(Matrix *mat, ParaSails *ps, double *b, double *x,
 
             rel_resid = ABS(s[i+1]) / resid0;
 #ifdef PARASAILS_CG_PRINT
-            if (mype == 0)
+            if (mype == 0 && iter % 10 == 0)
                printf("Iter (%d): rel. resid. norm: %e\n", iter, rel_resid);
 #endif
             if (rel_resid <= tol)

@@ -134,7 +134,7 @@ void PCG_ParaSails(Matrix *mat, ParaSails *ps, double *b, double *x,
       i_prod = InnerProd(n, r, r, comm);
 
 #ifdef PARASAILS_CG_PRINT
-      if (mype == 0)
+      if (mype == 0 && i % 10 == 0)
          printf("Iter (%d): rel. resid. norm: %e\n", i, sqrt(i_prod/bi_prod));
 #endif
 
