@@ -27,10 +27,10 @@ void Hypre_MPI_Com_constructor(Hypre_MPI_Com this) {
    all we have to allocate is a short chain of pointers, and maybe an
    int MPI handle. */
 
-   this->d_table = (struct Hypre_MPI_Com_private_type *)
+   this->Hypre_MPI_Com_data = (struct Hypre_MPI_Com_private_type *)
      malloc(sizeof(struct Hypre_MPI_Com_private_type)) ;
 
-   this->d_table->hcom = (MPI_Comm *)
+   this->Hypre_MPI_Com_data->hcom = (MPI_Comm *)
       (malloc(sizeof(MPI_Comm)));
 } /* end constructor */
 
@@ -40,7 +40,7 @@ void Hypre_MPI_Com_constructor(Hypre_MPI_Com this) {
  ***************************************************/
 void Hypre_MPI_Com_destructor(Hypre_MPI_Com this) {
 
-   struct Hypre_MPI_Com_private_type * HMCp = this->d_table;
+   struct Hypre_MPI_Com_private_type * HMCp = this->Hypre_MPI_Com_data;
    MPI_Comm *C = HMCp->hcom; /* gkk: HMCp was CP??? */
 
    free(C);
@@ -49,25 +49,25 @@ void Hypre_MPI_Com_destructor(Hypre_MPI_Com this) {
 } /* end destructor */
 
 /* ********************************************************
- * impl_Hypre_MPI_ComNew
+ * impl_Hypre_MPI_Com_Start
  **********************************************************/
-int  impl_Hypre_MPI_Com_New(Hypre_MPI_Com this, int comm) {
+int  impl_Hypre_MPI_Com_Start(Hypre_MPI_Com this, int comm) {
 /* For multiprocessing code, the int comm should really be an
    MPI handle such as MPI_COMM_WORLD.  For sequential code it
    should really be the appropriate pointer to a dummy struct
    (or, maybe, comm=0) */
-   MPI_Comm * MCp = this->d_table->hcom;
+   MPI_Comm * MCp = this->Hypre_MPI_Com_data->hcom;
    *MCp = (MPI_Comm) comm;
    return 0;
-} /* end impl_Hypre_MPI_ComNew */
+} /* end impl_Hypre_MPI_Com_Start */
 
 /* ********************************************************
  * impl_Hypre_MPI_ComConstructor
  **********************************************************/
 Hypre_MPI_Com  impl_Hypre_MPI_Com_Constructor(int comm) {
-   /* declared static; just combines the new and New functions */
-   Hypre_MPI_Com C = Hypre_MPI_Com_new();
-   Hypre_MPI_Com_New( C, comm );
+   /* declared static; just combines the new and Start functions */
+   Hypre_MPI_Com C = Hypre_MPI_Com_New();
+   Hypre_MPI_Com_Start( C, comm );
    return C;
 } /* end impl_Hypre_MPI_ComConstructor */
 

@@ -34,10 +34,10 @@
  ***************************************************/
 void Hypre_StructJacobi_constructor(Hypre_StructJacobi this) {
   
-   this->d_table = (struct Hypre_StructJacobi_private_type *)
+   this->Hypre_StructJacobi_data = (struct Hypre_StructJacobi_private_type *)
       malloc( sizeof( struct Hypre_StructJacobi_private_type ) );
 
-   this->d_table->hssolver = (HYPRE_StructSolver *)
+   this->Hypre_StructJacobi_data->hssolver = (HYPRE_StructSolver *)
      malloc( sizeof( HYPRE_StructSolver ) );
 
 } /* end constructor */
@@ -48,11 +48,11 @@ void Hypre_StructJacobi_constructor(Hypre_StructJacobi this) {
  ***************************************************/
 void Hypre_StructJacobi_destructor(Hypre_StructJacobi this) {
 
-   struct Hypre_StructJacobi_private_type *HSJp = this->d_table;
+   struct Hypre_StructJacobi_private_type *HSJp = this->Hypre_StructJacobi_data;
    HYPRE_StructSolver *S = HSJp->hssolver;
 
    HYPRE_StructJacobiDestroy( *S );
-   free(this->d_table);
+   free(this->Hypre_StructJacobi_data);
 
 } /* end destructor */
 
@@ -71,11 +71,11 @@ int  impl_Hypre_StructJacobi_Apply
    struct Hypre_StructVector_private_type * SVxp;
    HYPRE_StructVector * Vx;
 
-   struct Hypre_StructJacobi_private_type *HSJp = this->d_table;
+   struct Hypre_StructJacobi_private_type *HSJp = this->Hypre_StructJacobi_data;
    HYPRE_StructSolver *S = HSJp->hssolver;
 
-   Hypre_StructMatrix A = this->d_table->hsmatrix;
-   struct Hypre_StructMatrix_private_type *SMp = A->d_table;
+   Hypre_StructMatrix A = this->Hypre_StructJacobi_data->hsmatrix;
+   struct Hypre_StructMatrix_private_type *SMp = A->Hypre_StructMatrix_data;
    HYPRE_StructMatrix *MA = SMp->hsmat;
 
    SVb = (Hypre_StructVector) Hypre_Vector_castTo( b, "Hypre_StructVector" );
@@ -83,10 +83,10 @@ int  impl_Hypre_StructJacobi_Apply
    SVx = (Hypre_StructVector) Hypre_Vector_castTo( *x, "Hypre_StructVector" );
    if ( SVb==NULL ) return 1;
 
-   SVbp = SVb->d_table;
+   SVbp = SVb->Hypre_StructVector_data;
    Vb = SVbp->hsvec;
 
-   SVxp = SVx->d_table;
+   SVxp = SVx->Hypre_StructVector_data;
    Vx = SVxp->hsvec;
 
    return HYPRE_StructJacobiSolve( *S, *MA, *Vb, *Vx );
@@ -97,7 +97,7 @@ int  impl_Hypre_StructJacobi_Apply
  * impl_Hypre_StructJacobiGetDims
  **********************************************************/
 int  impl_Hypre_StructJacobi_GetDims(Hypre_StructJacobi this, int* m, int* n) {
-   Hypre_StructMatrix hsmatrix = this->d_table->hsmatrix;
+   Hypre_StructMatrix hsmatrix = this->Hypre_StructJacobi_data->hsmatrix;
    return Hypre_StructMatrix_GetDims( hsmatrix, m, n );
 } /* end impl_Hypre_StructJacobiGetDims */
 
@@ -107,7 +107,7 @@ int  impl_Hypre_StructJacobi_GetDims(Hypre_StructJacobi this, int* m, int* n) {
 int impl_Hypre_StructJacobi_GetSystemOperator
 ( Hypre_StructJacobi this, Hypre_LinearOperator *op ) 
 {
-   Hypre_StructMatrix SM = this->d_table->hsmatrix;
+   Hypre_StructMatrix SM = this->Hypre_StructJacobi_data->hsmatrix;
    Hypre_LinearOperator LO = (Hypre_LinearOperator)
       Hypre_StructMatrix_castTo( SM, "Hypre_LinearOperator" );
 
@@ -133,7 +133,7 @@ int impl_Hypre_StructJacobi_GetResidual
     doesn't work.
   */
 
-   *resid = Hypre_Vector_new();
+   *resid = (Hypre_Vector) NULL;
 
    printf( "called Hypre_StructJacobi_GetResidual, which doesn't work!\n");
 
@@ -152,7 +152,7 @@ int  impl_Hypre_StructJacobi_GetConvergenceInfo
 
    int ivalue, ierr;
 
-   struct Hypre_StructJacobi_private_type *HSJp = this->d_table;
+   struct Hypre_StructJacobi_private_type *HSJp = this->Hypre_StructJacobi_data;
    HYPRE_StructSolver *S = HSJp->hssolver;
 
    if ( !strcmp(name,"number of iterations") ) {
@@ -199,7 +199,7 @@ int impl_Hypre_StructJacobi_SetParameterDouble
 
 /* JFP: This function just dispatches to the parameter's set function. */
 
-   struct Hypre_StructJacobi_private_type *HSJp = this->d_table;
+   struct Hypre_StructJacobi_private_type *HSJp = this->Hypre_StructJacobi_data;
    HYPRE_StructSolver *S = HSJp->hssolver;
 
    if ( !strcmp(name,"tol") ) {
@@ -224,7 +224,7 @@ int  impl_Hypre_StructJacobi_SetParameterInt
 
 /* JFP: This function just dispatches to the parameter's set function. */
 
-   struct Hypre_StructJacobi_private_type *HSJp = this->d_table;
+   struct Hypre_StructJacobi_private_type *HSJp = this->Hypre_StructJacobi_data;
    HYPRE_StructSolver *S = HSJp->hssolver;
 
    if ( !strcmp(name,"max_iter" )) {
@@ -254,27 +254,27 @@ int impl_Hypre_StructJacobi_SetParameterString
 } /* end impl_Hypre_StructJacobiSetParameterString */
 
 /* ********************************************************
- * impl_Hypre_StructJacobiNew
+ * impl_Hypre_StructJacobi_Start
  **********************************************************/
-int  impl_Hypre_StructJacobi_New(Hypre_StructJacobi this, Hypre_MPI_Com comm) {
+int  impl_Hypre_StructJacobi_Start(Hypre_StructJacobi this, Hypre_MPI_Com comm) {
 
-   struct Hypre_StructJacobi_private_type *HSJp = this->d_table;
+   struct Hypre_StructJacobi_private_type *HSJp = this->Hypre_StructJacobi_data;
    HYPRE_StructSolver *S = HSJp->hssolver;
 
-   struct Hypre_MPI_Com_private_type * HMCp = comm->d_table;
+   struct Hypre_MPI_Com_private_type * HMCp = comm->Hypre_MPI_Com_data;
    MPI_Comm *C = HMCp->hcom; /*gkk: ??? HMCp was CP */
 
 /* the StructSolver this inherits from keeps its own pointer to the
    underlying HYPRE object.  Make sure they are the same.
    Hypre_StructSolver HSS = Hypre_StructJacobi_castTo
       ( this, "Hypre_StructSolver" );
-   struct Hypre_StructSolver_private_type *HSSp = HSS->d_table;
+   struct Hypre_StructSolver_private_type *HSSp = HSS->Hypre_StructSolver_data;
    HSSp->hssolver = S;
 */
 
    return HYPRE_StructJacobiCreate( *C, S );
 
-} /* end impl_Hypre_StructJacobiNew */
+} /* end impl_Hypre_StructJacobiStart */
 
 /* ********************************************************
  * impl_Hypre_StructJacobiSetup
@@ -300,7 +300,7 @@ int  impl_Hypre_StructJacobi_Setup
    struct Hypre_StructVector_private_type * SVxp;
    HYPRE_StructVector * Vx;
 
-   struct Hypre_StructJacobi_private_type *HSJp = this->d_table;
+   struct Hypre_StructJacobi_private_type *HSJp = this->Hypre_StructJacobi_data;
    HYPRE_StructSolver *S = HSJp->hssolver;
 
    SM = (Hypre_StructMatrix) Hypre_LinearOperator_castTo( A, "Hypre_StructMatrix" );
@@ -310,16 +310,16 @@ int  impl_Hypre_StructJacobi_Setup
    SVx = (Hypre_StructVector) Hypre_Vector_castTo( x, "Hypre_StructVector" );
    if ( SVb==NULL ) return 1;
 
-   SMp = SM->d_table;
+   SMp = SM->Hypre_StructMatrix_data;
    MA = SMp->hsmat;
 
-   SVbp = SVb->d_table;
+   SVbp = SVb->Hypre_StructVector_data;
    Vb = SVbp->hsvec;
 
-   SVxp = SVx->d_table;
+   SVxp = SVx->Hypre_StructVector_data;
    Vx = SVxp->hsvec;
 
-   this->d_table->hsmatrix = SM;
+   this->Hypre_StructJacobi_data->hsmatrix = SM;
 
    return HYPRE_StructJacobiSetup( *S, *MA, *Vb, *Vx );
 
@@ -329,9 +329,9 @@ int  impl_Hypre_StructJacobi_Setup
  * impl_Hypre_StructJacobiConstructor
  **********************************************************/
 Hypre_StructJacobi  impl_Hypre_StructJacobi_Constructor(Hypre_MPI_Com comm) {
-   /* declared static; just combines the new and New functions */
-   Hypre_StructJacobi SJ = Hypre_StructJacobi_new();
-   Hypre_StructJacobi_New( SJ, comm );
+   /* declared static; just combines the New and Start functions */
+   Hypre_StructJacobi SJ = Hypre_StructJacobi_New();
+   Hypre_StructJacobi_Start( SJ, comm );
    return SJ;
 } /* end impl_Hypre_StructJacobiConstructor */
 

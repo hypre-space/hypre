@@ -28,10 +28,10 @@
  *    and initialize here
  ***************************************************/
 void Hypre_StructMatrixBuilder_constructor(Hypre_StructMatrixBuilder this) {
-   this->d_table = (struct Hypre_StructMatrixBuilder_private_type *)
+   this->Hypre_StructMatrixBuilder_data = (struct Hypre_StructMatrixBuilder_private_type *)
       malloc( sizeof( struct Hypre_StructMatrixBuilder_private_type ) );
-   this->d_table->newmat = NULL;
-   this->d_table->matgood = 0;
+   this->Hypre_StructMatrixBuilder_data->newmat = NULL;
+   this->Hypre_StructMatrixBuilder_data->matgood = 0;
 } /* end constructor */
 
 /* *************************************************
@@ -39,11 +39,11 @@ void Hypre_StructMatrixBuilder_constructor(Hypre_StructMatrixBuilder this) {
  *      deallocate memory for private data here.
  ***************************************************/
 void Hypre_StructMatrixBuilder_destructor(Hypre_StructMatrixBuilder this) {
-   if ( this->d_table->newmat != NULL ) {
-      Hypre_StructMatrix_deleteReference( this->d_table->newmat );
+   if ( this->Hypre_StructMatrixBuilder_data->newmat != NULL ) {
+      Hypre_StructMatrix_deleteReference( this->Hypre_StructMatrixBuilder_data->newmat );
       /* ... will delete newmat if there are no other references to it */
       };
-   free(this->d_table);
+   free(this->Hypre_StructMatrixBuilder_data);
 } /* end destructor */
 
 /* ********************************************************
@@ -77,19 +77,19 @@ int  impl_Hypre_StructMatrixBuilder_SetBoxValues
    struct Hypre_StructMatrix_private_type * SMp;
    HYPRE_StructMatrix * M;
    hypre_StructMatrix * m;
-   struct Hypre_Box_object_ BO;
+   struct Hypre_Box_ior BO;
    struct Hypre_Box_private_type * Bp;
    hypre_Box * B;
 
-   Hypre_StructMatrix SM = this->d_table->newmat;
+   Hypre_StructMatrix SM = this->Hypre_StructMatrixBuilder_data->newmat;
    if ( SM == NULL ) return 1;
    
-   SMp = SM->d_table;
+   SMp = SM->Hypre_StructMatrix_data;
    M = SMp->hsmat;
    m = (hypre_StructMatrix *) *M;
 
    BO = *box;
-   Bp = BO.d_table;
+   Bp = BO.Hypre_Box_data;
    B = Bp->hbox;
 
    for ( i=0; i<Bp->dimension; ++i ) {
@@ -120,8 +120,8 @@ int  impl_Hypre_StructMatrixBuilder_GetDims
  **********************************************************/
 int  impl_Hypre_StructMatrixBuilder_GetConstructedObject
 (Hypre_StructMatrixBuilder this, Hypre_LinearOperator* obj) {
-   Hypre_StructMatrix newmat = this->d_table->newmat;
-   if ( newmat==NULL  ||  this->d_table->matgood==0 ) {
+   Hypre_StructMatrix newmat = this->Hypre_StructMatrixBuilder_data->newmat;
+   if ( newmat==NULL  ||  this->Hypre_StructMatrixBuilder_data->matgood==0 ) {
       *obj = (Hypre_LinearOperator) NULL;
       return 1;
    };
@@ -131,17 +131,17 @@ int  impl_Hypre_StructMatrixBuilder_GetConstructedObject
 } /* end impl_Hypre_StructMatrixBuilderGetConstructedObject */
 
 /* ********************************************************
- * impl_Hypre_StructMatrixBuilderNew
+ * impl_Hypre_StructMatrixBuilder_Start
  **********************************************************/
-int  impl_Hypre_StructMatrixBuilder_New
+int  impl_Hypre_StructMatrixBuilder_Start
 (Hypre_StructMatrixBuilder this, Hypre_StructGrid grid,
  Hypre_StructStencil stencil, int symmetric, array1int num_ghost) {
 
-   struct Hypre_StructGrid_private_type *Gp = grid->d_table;
+   struct Hypre_StructGrid_private_type *Gp = grid->Hypre_StructGrid_data;
    HYPRE_StructGrid *G = Gp->hsgrid;
    hypre_StructGrid *g = (hypre_StructGrid *) *G;
 
-   struct Hypre_StructStencil_private_type *SSp = stencil->d_table;
+   struct Hypre_StructStencil_private_type *SSp = stencil->Hypre_StructStencil_data;
    HYPRE_StructStencil *SS = SSp->hsstencil;
 
    MPI_Comm comm = hypre_StructGridComm( g );
@@ -150,13 +150,13 @@ int  impl_Hypre_StructMatrixBuilder_New
    HYPRE_StructMatrix * M;
    int ierr = 0;
 
-   if ( this->d_table->newmat != NULL )
-      Hypre_StructMatrix_deleteReference( this->d_table->newmat );
-   this->d_table->newmat = Hypre_StructMatrix_new();
-   this->d_table->matgood = 0;
-   Hypre_StructMatrix_addReference( this->d_table->newmat );
+   if ( this->Hypre_StructMatrixBuilder_data->newmat != NULL )
+      Hypre_StructMatrix_deleteReference( this->Hypre_StructMatrixBuilder_data->newmat );
+   this->Hypre_StructMatrixBuilder_data->newmat = Hypre_StructMatrix_New();
+   this->Hypre_StructMatrixBuilder_data->matgood = 0;
+   Hypre_StructMatrix_addReference( this->Hypre_StructMatrixBuilder_data->newmat );
 
-   SMp = this->d_table->newmat->d_table;
+   SMp = this->Hypre_StructMatrixBuilder_data->newmat->Hypre_StructMatrix_data;
    M = SMp->hsmat;
 
    ierr += HYPRE_StructMatrixCreate( comm, *G, *SS, M );
@@ -167,21 +167,21 @@ int  impl_Hypre_StructMatrixBuilder_New
    ierr += HYPRE_StructMatrixInitialize( *M );
 
    return ierr;
-} /* end impl_Hypre_StructMatrixBuilderNew */
+} /* end impl_Hypre_StructMatrixBuilder_Start */
 
 /* ********************************************************
  * impl_Hypre_StructMatrixBuilderConstructor
  *
- * The arguments are ignored; they really belong in the New function
+ * The arguments are ignored; they really belong in the Start function
  * which is separately called.
  * However, the arguments must be in the interface because if a matrix
- * class be its own builder, then the Constructor will call New directly,
+ * class be its own builder, then the Constructor will call Start directly,
  * and it needs the arguments for that call.
  **********************************************************/
 Hypre_StructMatrixBuilder  impl_Hypre_StructMatrixBuilder_Constructor
 (Hypre_StructGrid grid, Hypre_StructStencil stencil,
  int symmetric, array1int num_ghost) {
-   return Hypre_StructMatrixBuilder_new();
+   return Hypre_StructMatrixBuilder_New();
 } /* end impl_Hypre_StructMatrixBuilderConstructor */
 
 /* ********************************************************
@@ -192,15 +192,15 @@ int  impl_Hypre_StructMatrixBuilder_Setup(Hypre_StructMatrixBuilder this) {
    struct Hypre_StructMatrix_private_type * SMp;
    HYPRE_StructMatrix * M;
 
-   Hypre_StructMatrix SM = this->d_table->newmat;
+   Hypre_StructMatrix SM = this->Hypre_StructMatrixBuilder_data->newmat;
    if ( SM == NULL ) return 1;
 
-   SMp = SM->d_table;
+   SMp = SM->Hypre_StructMatrix_data;
    M = SMp->hsmat;
 
    ierr = HYPRE_StructMatrixAssemble( *M );
 
-   if ( ierr==0 ) this->d_table->matgood = 1;
+   if ( ierr==0 ) this->Hypre_StructMatrixBuilder_data->matgood = 1;
    return ierr;
 
 } /* end impl_Hypre_StructMatrixBuilderSetup */

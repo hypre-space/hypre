@@ -16,17 +16,16 @@
 #include "HYPRE_IJ_mv.h"
 #include "IJ_matrix_vector.h"
 
-
 /* *************************************************
  * Constructor
  *    Allocate Memory for private data
  *    and initialize here
  ***************************************************/
 void Hypre_ParAMG_constructor(Hypre_ParAMG this) {
-   this->d_table = (struct Hypre_ParAMG_private_type *)
+   this->Hypre_ParAMG_data = (struct Hypre_ParAMG_private_type *)
       malloc( sizeof( struct Hypre_ParAMG_private_type ) );
 
-   this->d_table->Hsolver = (HYPRE_Solver *)
+   this->Hypre_ParAMG_data->Hsolver = (HYPRE_Solver *)
      malloc( sizeof( HYPRE_Solver ) );
 
 } /* end constructor */
@@ -36,11 +35,11 @@ void Hypre_ParAMG_constructor(Hypre_ParAMG this) {
  *      deallocate memory for private data here.
  ***************************************************/
 void Hypre_ParAMG_destructor(Hypre_ParAMG this) {
-   struct Hypre_ParAMG_private_type *HSp = this->d_table;
+   struct Hypre_ParAMG_private_type *HSp = this->Hypre_ParAMG_data;
    HYPRE_Solver *S = HSp->Hsolver;
 
    HYPRE_BoomerAMGDestroy( *S );
-   free(this->d_table);
+   free(this->Hypre_ParAMG_data);
 } /* end destructor */
 
 /* ********************************************************
@@ -69,7 +68,7 @@ int impl_Hypre_ParAMG_GetParameterInt
 int  impl_Hypre_ParAMG_SetParameterDouble
 ( Hypre_ParAMG this, char* name, double value ) {
 /* This function just dispatches to the parameter's set function. */
-   struct Hypre_ParAMG_private_type *HSp = this->d_table;
+   struct Hypre_ParAMG_private_type *HSp = this->Hypre_ParAMG_data;
    HYPRE_Solver *S = HSp->Hsolver;
 
    if ( !strcmp(name,"tol") ) {
@@ -95,7 +94,7 @@ int  impl_Hypre_ParAMG_SetParameterDouble
  **********************************************************/
 int impl_Hypre_ParAMG_SetParameterDoubleArray
 ( Hypre_ParAMG this, char* name, array1double value ) {
-   struct Hypre_ParAMG_private_type *HSp = this->d_table;
+   struct Hypre_ParAMG_private_type *HSp = this->Hypre_ParAMG_data;
    HYPRE_Solver *S = HSp->Hsolver;
 
    if ( !strcmp(name,"relax weight") ) {
@@ -122,7 +121,7 @@ int  impl_Hypre_ParAMG_SetParameterDoubleArray2
  * impl_Hypre_ParAMGSetParameterInt
  **********************************************************/
 int  impl_Hypre_ParAMG_SetParameterInt(Hypre_ParAMG this, char* name, int value) {
-   struct Hypre_ParAMG_private_type *HSp = this->d_table;
+   struct Hypre_ParAMG_private_type *HSp = this->Hypre_ParAMG_data;
    HYPRE_Solver *S = HSp->Hsolver;
 
    if ( !strcmp(name,"restriction") ) {
@@ -170,7 +169,7 @@ int  impl_Hypre_ParAMG_SetParameterInt(Hypre_ParAMG this, char* name, int value)
  **********************************************************/
 int  impl_Hypre_ParAMG_SetParameterIntArray
 ( Hypre_ParAMG this, char* name, array1int value ) {
-   struct Hypre_ParAMG_private_type *HSp = this->d_table;
+   struct Hypre_ParAMG_private_type *HSp = this->Hypre_ParAMG_data;
    HYPRE_Solver *S = HSp->Hsolver;
 
    if ( !strcmp(name,"num grid sweeps") ) {
@@ -193,7 +192,7 @@ int  impl_Hypre_ParAMG_SetParameterIntArray2
 ( Hypre_ParAMG this, char* name, array2int value ) {
    int dim0, dim1, i, j;
    int ** valuepp;
-   struct Hypre_ParAMG_private_type *HSp = this->d_table;
+   struct Hypre_ParAMG_private_type *HSp = this->Hypre_ParAMG_data;
    HYPRE_Solver *S = HSp->Hsolver;
 
    if ( !strcmp(name,"grid relax points") ) {
@@ -229,7 +228,7 @@ int  impl_Hypre_ParAMG_SetParameterIntArray2
  **********************************************************/
 int  impl_Hypre_ParAMG_SetParameterString
 ( Hypre_ParAMG this, char* name, char* value ) {
-   struct Hypre_ParAMG_private_type *HSp = this->d_table;
+   struct Hypre_ParAMG_private_type *HSp = this->Hypre_ParAMG_data;
    HYPRE_Solver *S = HSp->Hsolver;
 
    if ( !strcmp(name,"log file name") ) {
@@ -242,22 +241,22 @@ int  impl_Hypre_ParAMG_SetParameterString
 } /* end impl_Hypre_ParAMGSetParameterString */
 
 /* ********************************************************
- * impl_Hypre_ParAMGNew
+ * impl_Hypre_ParAMG_Start
  **********************************************************/
-int  impl_Hypre_ParAMG_New(Hypre_ParAMG this, Hypre_MPI_Com comm) {
-   struct Hypre_ParAMG_private_type *HSp = this->d_table;
+int  impl_Hypre_ParAMG_Start(Hypre_ParAMG this, Hypre_MPI_Com comm) {
+   struct Hypre_ParAMG_private_type *HSp = this->Hypre_ParAMG_data;
    HYPRE_Solver *S = HSp->Hsolver;
 
    return HYPRE_BoomerAMGCreate( S );
-} /* end impl_Hypre_ParAMGNew */
+} /* end impl_Hypre_ParAMG_Start */
 
 /* ********************************************************
  * impl_Hypre_ParAMGConstructor
  **********************************************************/
 Hypre_ParAMG  impl_Hypre_ParAMG_Constructor(Hypre_MPI_Com comm) {
-   /* declared static; just combines the new and New functions */
-   Hypre_ParAMG PS = Hypre_ParAMG_new();
-   Hypre_ParAMG_New( PS, comm );
+   /* declared static; just combines the New and Start functions */
+   Hypre_ParAMG PS = Hypre_ParAMG_New();
+   Hypre_ParAMG_Start( PS, comm );
    return PS;
 
 } /* end impl_Hypre_ParAMGConstructor */
@@ -267,7 +266,7 @@ Hypre_ParAMG  impl_Hypre_ParAMG_Constructor(Hypre_MPI_Com comm) {
  **********************************************************/
 int  impl_Hypre_ParAMG_Setup
 (Hypre_ParAMG this, Hypre_LinearOperator A, Hypre_Vector b, Hypre_Vector x) {
-   struct Hypre_ParAMG_private_type *HSp = this->d_table;
+   struct Hypre_ParAMG_private_type *HSp = this->Hypre_ParAMG_data;
    HYPRE_Solver *S = HSp->Hsolver;
 
    Hypre_ParCSRMatrix M;
@@ -292,22 +291,22 @@ int  impl_Hypre_ParAMG_Setup
    VPx = (Hypre_ParCSRVector) Hypre_Vector_castTo( x, "Hypre_ParCSRVector" );
    if ( VPx==NULL ) return 1;
 
-   Mp = M->d_table;
+   Mp = M->Hypre_ParCSRMatrix_data;
    MIJ = Mp->Hmat;
    Mij = (hypre_IJMatrix *) (*MIJ);
    parM = hypre_IJMatrixLocalStorage(Mij);
 
-   Vbp = VPb->d_table;
+   Vbp = VPb->Hypre_ParCSRVector_data;
    Vb = Vbp->Hvec;
    vb = (hypre_IJVector *) *Vb;
    b_par = hypre_IJVectorLocalStorage(vb);
 
-   Vxp = VPx->d_table;
+   Vxp = VPx->Hypre_ParCSRVector_data;
    Vx = Vxp->Hvec;
    vx = (hypre_IJVector *) *Vx;
    x_par = hypre_IJVectorLocalStorage(vx);
 
-   this->d_table->Hmatrix = M;
+   this->Hypre_ParAMG_data->Hmatrix = M;
 
 /* it's easier to create the hypre_ParCSR* objects than the HYPRE_ParCSR* objects,
    so we go directly to the hypre-level solver ... 
@@ -329,7 +328,7 @@ int impl_Hypre_ParAMG_GetConstructedObject
  * impl_Hypre_ParAMGGetDims
  **********************************************************/
 int  impl_Hypre_ParAMG_GetDims(Hypre_ParAMG this, int* m, int* n) {
-   Hypre_ParCSRMatrix Hmatrix = this->d_table->Hmatrix;
+   Hypre_ParCSRMatrix Hmatrix = this->Hypre_ParAMG_data->Hmatrix;
    return Hypre_ParCSRMatrix_GetDims( Hmatrix, m, n );
 } /* end impl_Hypre_ParAMGGetDims */
 
@@ -338,7 +337,7 @@ int  impl_Hypre_ParAMG_GetDims(Hypre_ParAMG this, int* m, int* n) {
  *       solves Mx=b for x, where this=M
  **********************************************************/
 int  impl_Hypre_ParAMG_Apply(Hypre_ParAMG this, Hypre_Vector b, Hypre_Vector* x) {
-   struct Hypre_ParAMG_private_type *HSp = this->d_table;
+   struct Hypre_ParAMG_private_type *HSp = this->Hypre_ParAMG_data;
    HYPRE_Solver *S = HSp->Hsolver;
 
    Hypre_ParCSRMatrix M;
@@ -361,18 +360,18 @@ int  impl_Hypre_ParAMG_Apply(Hypre_ParAMG this, Hypre_Vector b, Hypre_Vector* x)
    VPx = (Hypre_ParCSRVector) Hypre_Vector_castTo( *x, "Hypre_ParCSRVector" );
    if ( VPx==NULL ) return 1;
 
-   M = this->d_table->Hmatrix;
-   Mp = M->d_table;
+   M = this->Hypre_ParAMG_data->Hmatrix;
+   Mp = M->Hypre_ParCSRMatrix_data;
    MIJ = Mp->Hmat;
    Mij = (hypre_IJMatrix *) (*MIJ);
    parM = hypre_IJMatrixLocalStorage(Mij);
 
-   Vbp = VPb->d_table;
+   Vbp = VPb->Hypre_ParCSRVector_data;
    Vb = Vbp->Hvec;
    vb = (hypre_IJVector *) *Vb;
    b_par = hypre_IJVectorLocalStorage(vb);
 
-   Vxp = VPx->d_table;
+   Vxp = VPx->Hypre_ParCSRVector_data;
    Vx = Vxp->Hvec;
    vx = (hypre_IJVector *) *Vx;
    x_par = hypre_IJVectorLocalStorage(vx);
@@ -387,7 +386,7 @@ int  impl_Hypre_ParAMG_Apply(Hypre_ParAMG this, Hypre_Vector b, Hypre_Vector* x)
  **********************************************************/
 int impl_Hypre_ParAMG_GetSystemOperator
 ( Hypre_ParAMG this, Hypre_LinearOperator *op ) {
-   Hypre_ParCSRMatrix mat =  this->d_table->Hmatrix;
+   Hypre_ParCSRMatrix mat =  this->Hypre_ParAMG_data->Hmatrix;
    
    *op = (Hypre_LinearOperator)
       Hypre_ParCSRMatrix_castTo( mat, "Hypre_LinearOperator" );
@@ -400,7 +399,7 @@ int impl_Hypre_ParAMG_GetSystemOperator
  * the way to implement this function would be to recompute it.
  **********************************************************/
 int impl_Hypre_ParAMG_GetResidual( Hypre_ParAMG this, Hypre_Vector *resid ) {
-   *resid = Hypre_Vector_new(); /* legal type but certain to be incorrect */
+   *resid = (Hypre_Vector) NULL; /* legal type but certain to be incorrect */
    printf( "called Hypre_parAMG_GetResidual, which doesn't work!\n");
    return 1;
 } /* end impl_Hypre_ParAMGGetResidual */
@@ -411,7 +410,7 @@ int impl_Hypre_ParAMG_GetResidual( Hypre_ParAMG this, Hypre_Vector *resid ) {
  **********************************************************/
 int  impl_Hypre_ParAMG_GetConvergenceInfo(Hypre_ParAMG this, char* name, double* value) {
    int ivalue, ierr;
-   struct Hypre_ParAMG_private_type *HSp = this->d_table;
+   struct Hypre_ParAMG_private_type *HSp = this->Hypre_ParAMG_data;
    HYPRE_Solver *S = HSp->Hsolver;
 
    if ( !strcmp(name,"num iterations") ) {

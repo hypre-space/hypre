@@ -7,7 +7,7 @@
 #ifndef Hypre_ParCSRVectorBuilder_DataMembers_
 #define Hypre_ParCSRVectorBuilder_DataMembers_
 
-#include "Hypre_ParCSRVector.h"
+#include "Hypre_ParCSRVector_IOR.h"
 
 struct Hypre_ParCSRVectorBuilder_private_type
 {

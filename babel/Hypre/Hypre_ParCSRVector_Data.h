@@ -8,7 +8,7 @@
 #define Hypre_ParCSRVector_DataMembers_
 
 #include "HYPRE_IJ_mv.h"
-#include "Hypre_MPI_Com.h"
+#include "Hypre_MPI_Com_IOR.h"
 
 struct Hypre_ParCSRVector_private_type
 {

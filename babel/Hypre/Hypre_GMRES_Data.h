@@ -7,10 +7,10 @@
 #ifndef Hypre_GMRES_DataMembers_
 #define Hypre_GMRES_DataMembers_
 
-#include "Hypre_Vector.h"
-#include "Hypre_LinearOperator.h"
-#include "Hypre_Solver.h"
-#include "Hypre_MPI_Com.h"
+#include "Hypre_Vector_IOR.h"
+#include "Hypre_LinearOperator_IOR.h"
+#include "Hypre_Solver_IOR.h"
+#include "Hypre_MPI_Com_IOR.h"
 
 struct Hypre_GMRES_private_type
 {

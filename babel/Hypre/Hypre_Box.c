@@ -17,15 +17,15 @@
 void Hypre_Box_constructor(Hypre_Box this) {
 /* some relevant code segments:
 
-typedef struct Hypre_Box_object__ *Hypre_Box;
-struct Hypre_Box_object__ { ... Hypre_Box_Private d_table; ... };
+typedef struct Hypre_Box_ior *Hypre_Box;
+struct Hypre_Box_ior { ... Hypre_Box_Private Hypre_Box_data; ... };
 typedef struct Hypre_Box_private *Hypre_Box_Private;
 struct Hypre_Box_private { hypre_Box *hbox; }
 */
 
-   this->d_table = (struct Hypre_Box_private_type*) 
+   this->Hypre_Box_data = (struct Hypre_Box_private_type*) 
      malloc(sizeof(struct Hypre_Box_private_type));
-   this->d_table->hbox = hypre_BoxCreate();
+   this->Hypre_Box_data->hbox = hypre_BoxCreate();
 } /* end constructor */
 
 /* *************************************************
@@ -37,22 +37,22 @@ void Hypre_Box_destructor(Hypre_Box this) {
       Delete the Hypre object this object refers to, then delete
       this object's data table. */
 
-   struct Hypre_Box_private_type *Bp = this->d_table;
+   struct Hypre_Box_private_type *Bp = this->Hypre_Box_data;
    hypre_Box * B = Bp->hbox;
    hypre_BoxDestroy( B );
-   free(this->d_table);
+   free(this->Hypre_Box_data);
 } /* end destructor */
 
 /* ********************************************************
- * impl_Hypre_BoxNew
+ * impl_Hypre_Box_Start
  **********************************************************/
-int  impl_Hypre_Box_New
+int  impl_Hypre_Box_Start
 (Hypre_Box this, array1int lower, array1int upper, int dimension) {
 /* JFP: This function initializes the data in a box. */
 
    int i;
-   struct Hypre_Box_object_ BO = *this;
-   Hypre_Box_Private BP = BO.d_table;
+   struct Hypre_Box_ior BO = *this;
+   Hypre_Box_Private BP = BO.Hypre_Box_data;
    struct Hypre_Box_private_type *Bp = BP;
    hypre_Box *B = Bp->hbox;
 
@@ -62,7 +62,7 @@ int  impl_Hypre_Box_New
       B->imax[i] = upper.data[i];
    };
 
-} /* end impl_Hypre_BoxNew */
+} /* end impl_Hypre_Box_Start */
 
 /* ********************************************************
  * impl_Hypre_BoxConstructor
@@ -70,9 +70,9 @@ int  impl_Hypre_Box_New
 Hypre_Box  impl_Hypre_Box_Constructor
 (array1int lower, array1int upper, int dimension)
 {
-   /* declared static; just combines the new and New functions */
-   Hypre_Box box = Hypre_Box_new();
-   Hypre_Box_New( box, lower, upper, dimension );
+   /* declared static; just combines the new and Start functions */
+   Hypre_Box box = Hypre_Box_New();
+   Hypre_Box_Start( box, lower, upper, dimension );
    return box;
 } /* end impl_Hypre_BoxConstructor */
 
@@ -92,14 +92,14 @@ void  impl_Hypre_Box_print(Hypre_Box this) {
 
 /* some relevant code segments:
 
-typedef struct Hypre_Box_object__ *Hypre_Box;
-struct Hypre_Box_object__ { ... Hypre_Box_Private d_table; ... };
+typedef struct Hypre_Box_ior *Hypre_Box;
+struct Hypre_Box_ior { ... Hypre_Box_Private Hypre_Box_data; ... };
 typedef struct Hypre_Box_private *Hypre_Box_Private;
 struct Hypre_Box_private { hypre_Box *hbox; }
 */
    int i;
-   struct Hypre_Box_object_ BO = *this;
-   Hypre_Box_Private BP = BO.d_table;
+   struct Hypre_Box_ior BO = *this;
+   Hypre_Box_Private BP = BO.Hypre_Box_data;
    struct Hypre_Box_private_type *Bp = BP;
    hypre_Box *B = Bp->hbox;
 

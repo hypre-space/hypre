@@ -6,6 +6,7 @@
  *********************************************************/
 
 #include "Hypre_PCG_Skel.h" 
+#include "Hypre_PCG_Stub.h" 
 #include "Hypre_PCG_Data.h" 
 
 #include "math.h"
@@ -26,13 +27,13 @@ void Hypre_PCG_constructor(Hypre_PCG this) {
   int size;
 
    size = sizeof( struct Hypre_PCG_private_type );
-   this->d_table = (struct Hypre_PCG_private_type *) malloc( size );
-   if ( this->d_table==NULL ) {
+   this->Hypre_PCG_data = (struct Hypre_PCG_private_type *) malloc( size );
+   if ( this->Hypre_PCG_data==NULL ) {
       hypre_OutOfMemory( size );
       return;
    };
 */
-   this->d_table = hypre_CTAlloc( struct Hypre_PCG_private_type, 1 );
+   this->Hypre_PCG_data = hypre_CTAlloc( struct Hypre_PCG_private_type, 1 );
 
    /* Space for the contained data is allocated through Setup (p,s,r,norms,
       relnorms).  Space for matvec will have been allocated by the function
@@ -109,8 +110,8 @@ impl_Hypre_PCG_Apply(Hypre_PCG this, Hypre_Vector b, Hypre_Vector* xp)
    Hypre_Vector    r            = (pcg_data -> r);
    Hypre_LinearOperator  matvec = (pcg_data -> matvec);
    Hypre_Solver    precond      = (pcg_data -> preconditioner);
-   Hypre_LinearOperator precond_solver = Hypre_Solver_castTo( precond,
-                                                              "Hypre_LinearOperator" );
+   Hypre_LinearOperator precond_solver = (Hypre_LinearOperator)
+      Hypre_Solver_castTo( precond, "Hypre_LinearOperator" );
 
    int             logging      = (pcg_data -> logging);
    double         *norms        = (pcg_data -> norms);
@@ -525,9 +526,9 @@ int  impl_Hypre_PCG_SetParameterString
 } /* end impl_Hypre_PCGSetStringParameter */
 
 /* ********************************************************
- * impl_Hypre_PCGNew
+ * impl_Hypre_PCG_Start
  **********************************************************/
-int impl_Hypre_PCG_New( Hypre_PCG this, Hypre_MPI_Com comm ) {
+int impl_Hypre_PCG_Start( Hypre_PCG this, Hypre_MPI_Com comm ) {
 
    Hypre_PCG_Private pcg_data = Hypre_PCG_getPrivate (this);
 
@@ -541,15 +542,15 @@ int impl_Hypre_PCG_New( Hypre_PCG this, Hypre_MPI_Com comm ) {
    (pcg_data -> rel_norms)    = NULL;
 
    return 0;
-} /* end impl_Hypre_PCGNew */
+} /* end impl_Hypre_PCG_Start
 
 /* ********************************************************
  * impl_Hypre_PCGConstructor
  **********************************************************/
 Hypre_PCG  impl_Hypre_PCG_Constructor(Hypre_MPI_Com comm) {
-/* Hypre_PCG_new calls Hypre_PCG_constructor and does a whole lot more ... */
-   Hypre_PCG pcg = Hypre_PCG_new();
-   Hypre_PCG_New( pcg, comm );
+/* Hypre_PCG_New calls Hypre_PCG_constructor and does a whole lot more ... */
+   Hypre_PCG pcg = Hypre_PCG_New();
+   Hypre_PCG_Start( pcg, comm );
    return pcg;
 } /* end impl_Hypre_PCGConstructor */
 

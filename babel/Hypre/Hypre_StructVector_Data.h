@@ -9,7 +9,7 @@
 
 #include "HYPRE_mv.h"
 #include "struct_matrix_vector.h"
-#include "Hypre_StructGrid.h"
+#include "Hypre_StructGrid_IOR.h"
 
 struct Hypre_StructVector_private_type
 {

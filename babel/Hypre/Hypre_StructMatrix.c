@@ -24,10 +24,10 @@
  *    and initialize here
  ***************************************************/
 void Hypre_StructMatrix_constructor(Hypre_StructMatrix this) {
-   this->d_table = (struct Hypre_StructMatrix_private_type *)
+   this->Hypre_StructMatrix_data = (struct Hypre_StructMatrix_private_type *)
       malloc( sizeof( struct Hypre_StructMatrix_private_type ) );
 
-   this->d_table->hsmat = (HYPRE_StructMatrix *)
+   this->Hypre_StructMatrix_data->hsmat = (HYPRE_StructMatrix *)
       malloc( sizeof( HYPRE_StructMatrix ) );
 
 } /* end constructor */
@@ -37,11 +37,11 @@ void Hypre_StructMatrix_constructor(Hypre_StructMatrix this) {
  *      deallocate memory for private data here.
  ***************************************************/
 void Hypre_StructMatrix_destructor(Hypre_StructMatrix this) {
-   struct Hypre_StructMatrix_private_type *SMp = this->d_table;
+   struct Hypre_StructMatrix_private_type *SMp = this->Hypre_StructMatrix_data;
    HYPRE_StructMatrix *M = SMp->hsmat;
 
    HYPRE_StructMatrixDestroy( *M );
-   free(this->d_table);
+   free(this->Hypre_StructMatrix_data);
 
 } /* end destructor */
 
@@ -53,7 +53,7 @@ void  impl_Hypre_StructMatrix_print(Hypre_StructMatrix this) {
    int boxarray_size;
    FILE * file;
 
-   struct Hypre_StructMatrix_private_type *SMp = this->d_table;
+   struct Hypre_StructMatrix_private_type *SMp = this->Hypre_StructMatrix_data;
    HYPRE_StructMatrix *M = SMp->hsmat;
    hypre_StructMatrix *m = (hypre_StructMatrix *) *M;
 
@@ -86,7 +86,7 @@ int impl_Hypre_StructMatrix_Apply
 /* was...
 (Hypre_StructMatrix this, Hypre_StructVector b, Hypre_StructVector* x) */
 
-   struct Hypre_StructMatrix_private_type *SMp = this->d_table;
+   struct Hypre_StructMatrix_private_type *SMp = this->Hypre_StructMatrix_data;
    HYPRE_StructMatrix *M = SMp->hsmat;
    hypre_StructMatrix *hA = (hypre_StructMatrix *) *M;
 
@@ -103,11 +103,11 @@ int impl_Hypre_StructMatrix_Apply
    SVx = (Hypre_StructVector) Hypre_Vector_castTo( *x, "Hypre_StructVector" );
    if ( SVb==NULL ) return 1;
 
-   SVxp = SVx->d_table;
+   SVxp = SVx->Hypre_StructVector_data;
    Vx = SVxp->hsvec;
    hx = (hypre_StructVector *) *Vx;
 
-   SVbp = SVb->d_table;
+   SVbp = SVb->Hypre_StructVector_data;
    Vb = SVbp->hsvec;
    hb = (hypre_StructVector *) *Vb;
 
@@ -119,7 +119,7 @@ int impl_Hypre_StructMatrix_Apply
  * impl_Hypre_StructMatrixGetDims
  **********************************************************/
 int  impl_Hypre_StructMatrix_GetDims(Hypre_StructMatrix this, int* m, int* n) {
-   struct Hypre_StructMatrix_private_type *SMp = this->d_table;
+   struct Hypre_StructMatrix_private_type *SMp = this->Hypre_StructMatrix_data;
    HYPRE_StructMatrix *Hmat = SMp->hsmat;
    hypre_StructMatrix *hmat = (hypre_StructMatrix *) *Hmat;
    int size = hypre_StructMatrixGlobalSize(hmat);

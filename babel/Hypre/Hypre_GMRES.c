@@ -7,7 +7,7 @@
 
 #include "Hypre_GMRES_Skel.h" 
 #include "Hypre_GMRES_Data.h" 
-
+#include "Hypre_GMRES_Stub.h"
 #include "math.h"
 #include "utilities.h"
 #include "Hypre_MPI_Com_Skel.h"
@@ -19,7 +19,7 @@
  *    and initialize here
  ***************************************************/
 void Hypre_GMRES_constructor(Hypre_GMRES this) {
-   this->d_table = hypre_CTAlloc( struct Hypre_GMRES_private_type, 1 );
+   this->Hypre_GMRES_data = hypre_CTAlloc( struct Hypre_GMRES_private_type, 1 );
    /* Setup allocates p,r,w,norms, log_file_name.  Calling functions
     allocate matvec and preconditioner */
 } /* end constructor */
@@ -29,7 +29,7 @@ void Hypre_GMRES_constructor(Hypre_GMRES this) {
  *      deallocate memory for private data here.
  ***************************************************/
 void Hypre_GMRES_destructor(Hypre_GMRES this) {
-   hypre_TFree( this->d_table );
+   hypre_TFree( this->Hypre_GMRES_data );
 
    return;
 } /* end destructor */
@@ -177,10 +177,10 @@ int impl_Hypre_GMRES_GetPreconditioner
 } /* end impl_Hypre_PCGGetPreconditioner */
 
 /* ********************************************************
- * impl_Hypre_GMRES_New
+ * impl_Hypre_GMRES_Start
  **********************************************************/
 int  
-impl_Hypre_GMRES_New( Hypre_GMRES this, Hypre_MPI_Com comm )
+impl_Hypre_GMRES_Start( Hypre_GMRES this, Hypre_MPI_Com comm )
 {
    Hypre_GMRES_Private gmr_data = Hypre_GMRES_getPrivate(this);
 
@@ -198,15 +198,15 @@ impl_Hypre_GMRES_New( Hypre_GMRES this, Hypre_MPI_Com comm )
    (gmr_data -> comm )          = comm;
 
    return 0;
-} /* end impl_Hypre_GMRES_New */
+} /* end impl_Hypre_GMRES_Start */
 
 
 /* ********************************************************
  * impl_Hypre_GMRESConstructor
  **********************************************************/
 Hypre_GMRES  impl_Hypre_GMRES_Constructor(Hypre_MPI_Com comm) {
-   Hypre_GMRES gmr = Hypre_GMRES_new();
-   Hypre_GMRES_New( gmr, comm );
+   Hypre_GMRES gmr = Hypre_GMRES_New();
+   Hypre_GMRES_Start( gmr, comm );
    return gmr;
 } /* end impl_Hypre_GMRESConstructor */
 
@@ -326,15 +326,15 @@ impl_Hypre_GMRES_Apply(Hypre_GMRES this, Hypre_Vector b, Hypre_Vector* xp)
       this solver, but
 
         (1) we don't currently save that communicator when it's passed
-		to New().  This is easily fixed. (jfp: done, 26apr00)
+		to Start().  This is easily fixed. (jfp: done, 26apr00)
         (2) we need a GetCommunicator method, to ask a Solver what
 		communicator it's associated with.  Maybe this method
 		needs to be inherited from higher up, like from Hypre_Object
    MPI_Comm_rank (MPI_COMM_WORLD, &my_id);
    */
    /* >>>>> TO DO: put a corresponding function in the MPI_Com interface;
-      call that, so we don't have to "know" what's in a MPI_Com's d_table ... */
-   MPI_Comm_rank( *(gmr_data->comm->d_table->hcom), &my_id );
+      call that, so we don't have to "know" what's in a MPI_Com's data table ... */
+   MPI_Comm_rank( *(gmr_data->comm->Hypre_MPI_Com_data->hcom), &my_id );
 
    if (logging > 0)
    {

@@ -7,7 +7,7 @@
 #ifndef Hypre_StructVectorBuilder_DataMembers_
 #define Hypre_StructVectorBuilder_DataMembers_
 
-#include "Hypre_StructVector.h"
+#include "Hypre_StructVector_IOR.h"
 
 struct Hypre_StructVectorBuilder_private_type
 {

@@ -7,7 +7,7 @@
 #ifndef Hypre_StructMatrixBuilder_DataMembers_
 #define Hypre_StructMatrixBuilder_DataMembers_
 
-#include "Hypre_StructMatrix.h"
+#include "Hypre_StructMatrix_IOR.h"
 
 struct Hypre_StructMatrixBuilder_private_type
 {

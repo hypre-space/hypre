@@ -22,10 +22,10 @@
  *    and initialize here
  ***************************************************/
 void Hypre_ParCSRVectorBuilder_constructor(Hypre_ParCSRVectorBuilder this) {
-   this->d_table = (struct Hypre_ParCSRVectorBuilder_private_type *)
+   this->Hypre_ParCSRVectorBuilder_data = (struct Hypre_ParCSRVectorBuilder_private_type *)
       malloc( sizeof( struct Hypre_ParCSRVectorBuilder_private_type ) );
-   this->d_table->newvec = NULL;
-   this->d_table->vecgood = 0;
+   this->Hypre_ParCSRVectorBuilder_data->newvec = NULL;
+   this->Hypre_ParCSRVectorBuilder_data->vecgood = 0;
 } /* end constructor */
 
 /* *************************************************
@@ -33,11 +33,11 @@ void Hypre_ParCSRVectorBuilder_constructor(Hypre_ParCSRVectorBuilder this) {
  *      deallocate memory for private data here.
  ***************************************************/
 void Hypre_ParCSRVectorBuilder_destructor(Hypre_ParCSRVectorBuilder this) {
-   if ( this->d_table->newvec != NULL ) {
-      Hypre_ParCSRVector_deleteReference( this->d_table->newvec );
+   if ( this->Hypre_ParCSRVectorBuilder_data->newvec != NULL ) {
+      Hypre_ParCSRVector_deleteReference( this->Hypre_ParCSRVectorBuilder_data->newvec );
       /* ... will delete newvec if there are no other references to it */
    };
-   free(this->d_table);
+   free(this->Hypre_ParCSRVectorBuilder_data);
 } /* end destructor */
 
 /* ********************************************************
@@ -45,29 +45,29 @@ void Hypre_ParCSRVectorBuilder_destructor(Hypre_ParCSRVectorBuilder this) {
  **********************************************************/
 Hypre_ParCSRVectorBuilder  impl_Hypre_ParCSRVectorBuilder_Constructor
 (Hypre_MPI_Com com, int global_n) {
-   return Hypre_ParCSRVectorBuilder_new();
+   return Hypre_ParCSRVectorBuilder_New();
 } /* end impl_Hypre_ParCSRVectorBuilderConstructor */
 
 /* ********************************************************
- * impl_Hypre_ParCSRVectorBuilderNew
+ * impl_Hypre_ParCSRVectorBuilder_Start
  **********************************************************/
-int impl_Hypre_ParCSRVectorBuilder_New
+int impl_Hypre_ParCSRVectorBuilder_Start
 ( Hypre_ParCSRVectorBuilder this, Hypre_MPI_Com com, int global_n) {
 
    int ierr = 0;
 
-   struct Hypre_MPI_Com_private_type * HMCp = com->d_table;
+   struct Hypre_MPI_Com_private_type * HMCp = com->Hypre_MPI_Com_data;
    MPI_Comm * comm = HMCp->hcom;
 
    struct Hypre_ParCSRVector_private_type * Vp;
    HYPRE_IJVector * V;
-   if ( this->d_table->newvec != NULL )
-      Hypre_ParCSRVector_deleteReference( this->d_table->newvec );
-   this->d_table->newvec = Hypre_ParCSRVector_new();
-   this->d_table->vecgood = 0;
-   Hypre_ParCSRVector_addReference( this->d_table->newvec );
+   if ( this->Hypre_ParCSRVectorBuilder_data->newvec != NULL )
+      Hypre_ParCSRVector_deleteReference( this->Hypre_ParCSRVectorBuilder_data->newvec );
+   this->Hypre_ParCSRVectorBuilder_data->newvec = Hypre_ParCSRVector_New();
+   this->Hypre_ParCSRVectorBuilder_data->vecgood = 0;
+   Hypre_ParCSRVector_addReference( this->Hypre_ParCSRVectorBuilder_data->newvec );
 
-   Vp = this->d_table->newvec->d_table;
+   Vp = this->Hypre_ParCSRVectorBuilder_data->newvec->Hypre_ParCSRVector_data;
    V = Vp->Hvec;
    Vp->comm = com;
 
@@ -76,7 +76,7 @@ int impl_Hypre_ParCSRVectorBuilder_New
 
    return ierr;
 
-} /* end impl_Hypre_ParCSRVectorBuilderNew */
+} /* end impl_Hypre_ParCSRVectorBuilder_Start */
 
 /* ********************************************************
  * impl_Hypre_ParCSRVectorBuilderSetPartitioning
@@ -92,11 +92,11 @@ int impl_Hypre_ParCSRVectorBuilder_New
  **********************************************************/
 int  impl_Hypre_ParCSRVectorBuilder_SetPartitioning
 ( Hypre_ParCSRVectorBuilder this, array1int partitioning ) {
-   Hypre_ParCSRVector vec = this->d_table->newvec;
-   HYPRE_IJVector * Hvec = vec->d_table->Hvec;
+   Hypre_ParCSRVector vec = this->Hypre_ParCSRVectorBuilder_data->newvec;
+   HYPRE_IJVector * Hvec = vec->Hypre_ParCSRVector_data->Hvec;
    int * partition_data = &(partitioning.data[*(partitioning.lower)]);
 
-   if (this->d_table->vecgood==1) {
+   if (this->Hypre_ParCSRVectorBuilder_data->vecgood==1) {
       /* ... error to set partitioning on a fully built vector */
       /* This check would better be done by a design-by-contract style "Require"
          There are many such cases in this code. */
@@ -112,7 +112,7 @@ int  impl_Hypre_ParCSRVectorBuilder_SetPartitioning
  **********************************************************/
 int  impl_Hypre_ParCSRVectorBuilder_GetPartitioning
 (Hypre_ParCSRVectorBuilder this, array1int* partitioning) {
-   Hypre_ParCSRVector vec = this->d_table->newvec;
+   Hypre_ParCSRVector vec = this->Hypre_ParCSRVectorBuilder_data->newvec;
    return Hypre_ParCSRVector_GetPartitioning( vec, partitioning );
 } /* end impl_Hypre_ParCSRVectorBuilderGetPartitioning */
 
@@ -123,8 +123,8 @@ int  impl_Hypre_ParCSRVectorBuilder_SetLocalComponents
 ( Hypre_ParCSRVectorBuilder this, int num_values,
   array1int glob_vec_indices, array1int value_indices, array1double values) {
 
-   Hypre_ParCSRVector vec = this->d_table->newvec;
-   HYPRE_IJVector * Hvec = vec->d_table->Hvec;
+   Hypre_ParCSRVector vec = this->Hypre_ParCSRVectorBuilder_data->newvec;
+   HYPRE_IJVector * Hvec = vec->Hypre_ParCSRVector_data->Hvec;
    int * glob_vec_indices_data = &(glob_vec_indices.data[*(glob_vec_indices.lower)]);
    int * value_indices_data = &(value_indices.data[*(value_indices.lower)]);
    double * values_data = &(values.data[*(values.lower)]);
@@ -141,8 +141,8 @@ int  impl_Hypre_ParCSRVectorBuilder_AddtoLocalComponents
 ( Hypre_ParCSRVectorBuilder this, int num_values,
   array1int glob_vec_indices, array1int value_indices, array1double values) {
 
-   Hypre_ParCSRVector vec = this->d_table->newvec;
-   HYPRE_IJVector * Hvec = vec->d_table->Hvec;
+   Hypre_ParCSRVector vec = this->Hypre_ParCSRVectorBuilder_data->newvec;
+   HYPRE_IJVector * Hvec = vec->Hypre_ParCSRVector_data->Hvec;
    int * glob_vec_indices_data = &(glob_vec_indices.data[*(glob_vec_indices.lower)]);
    int * value_indices_data = &(value_indices.data[*(value_indices.lower)]);
    double * values_data = &(values.data[*(values.lower)]);
@@ -160,8 +160,8 @@ int  impl_Hypre_ParCSRVectorBuilder_SetLocalComponentsInBlock
   int glob_vec_index_start, int glob_vec_index_stop,
   array1int value_indices, array1double values) {
 
-   Hypre_ParCSRVector vec = this->d_table->newvec;
-   HYPRE_IJVector * Hvec = vec->d_table->Hvec;
+   Hypre_ParCSRVector vec = this->Hypre_ParCSRVectorBuilder_data->newvec;
+   HYPRE_IJVector * Hvec = vec->Hypre_ParCSRVector_data->Hvec;
    int * value_indices_data = &(value_indices.data[*(value_indices.lower)]);
    double * values_data = &(values.data[*(values.lower)]);
 
@@ -179,8 +179,8 @@ int  impl_Hypre_ParCSRVectorBuilder_AddToLocalComponentsInBlock
  int glob_vec_index_start, int glob_vec_index_stop,
  array1int value_indices, array1double values) {
 
-   Hypre_ParCSRVector vec = this->d_table->newvec;
-   HYPRE_IJVector * Hvec = vec->d_table->Hvec;
+   Hypre_ParCSRVector vec = this->Hypre_ParCSRVectorBuilder_data->newvec;
+   HYPRE_IJVector * Hvec = vec->Hypre_ParCSRVector_data->Hvec;
    int * value_indices_data = &(value_indices.data[*(value_indices.lower)]);
    double * values_data = &(values.data[*(values.lower)]);
 
@@ -195,14 +195,15 @@ int  impl_Hypre_ParCSRVectorBuilder_AddToLocalComponentsInBlock
  **********************************************************/
 int  impl_Hypre_ParCSRVectorBuilder_Setup(Hypre_ParCSRVectorBuilder this) {
    int ierr = 0;
-   struct Hypre_ParCSRVector_private_type * Vp = this->d_table->newvec->d_table;
+   struct Hypre_ParCSRVector_private_type * Vp =
+      this->Hypre_ParCSRVectorBuilder_data->newvec->Hypre_ParCSRVector_data;
    HYPRE_IJVector * V = Vp->Hvec;
 
    ierr += HYPRE_IJVectorInitialize( *V );
    ierr += HYPRE_IJVectorAssemble( *V );
    /* ... the one sample code using HYPRE_IJVector's which I looked at did not
       call Assemble.  But it's needed when more than one processor is running. */
-   if ( ierr==0 ) this->d_table->vecgood = 1;
+   if ( ierr==0 ) this->Hypre_ParCSRVectorBuilder_data->vecgood = 1;
    return ierr;
 } /* end impl_Hypre_ParCSRVectorBuilderSetup */
 
@@ -211,8 +212,8 @@ int  impl_Hypre_ParCSRVectorBuilder_Setup(Hypre_ParCSRVectorBuilder this) {
  **********************************************************/
 int impl_Hypre_ParCSRVectorBuilder_GetConstructedObject
 ( Hypre_ParCSRVectorBuilder this, Hypre_Vector *obj ) {
-   Hypre_ParCSRVector newvec = this->d_table->newvec;
-   if ( newvec==NULL || this->d_table->vecgood==0 ) {
+   Hypre_ParCSRVector newvec = this->Hypre_ParCSRVectorBuilder_data->newvec;
+   if ( newvec==NULL || this->Hypre_ParCSRVectorBuilder_data->vecgood==0 ) {
       printf( "Hypre_ParCSRVectorBuilder: object not constructed yet\n");
       *obj = (Hypre_Vector) NULL;
       return 1;
@@ -248,17 +249,17 @@ int Hypre_ParCSRVectorBuilder_New_fromHYPRE
    int ierr = 0;
 
    struct Hypre_ParCSRVector_private_type * Vp;
-   if ( this->d_table->newvec != NULL )
-      Hypre_ParCSRVector_deleteReference( this->d_table->newvec );
-   this->d_table->newvec = Hypre_ParCSRVector_new();
-   this->d_table->vecgood = 0;
-   Hypre_ParCSRVector_addReference( this->d_table->newvec );
+   if ( this->Hypre_ParCSRVectorBuilder_data->newvec != NULL )
+      Hypre_ParCSRVector_deleteReference( this->Hypre_ParCSRVectorBuilder_data->newvec );
+   this->Hypre_ParCSRVectorBuilder_data->newvec = Hypre_ParCSRVector_New();
+   this->Hypre_ParCSRVectorBuilder_data->vecgood = 0;
+   Hypre_ParCSRVector_addReference( this->Hypre_ParCSRVectorBuilder_data->newvec );
 
-   Vp = this->d_table->newvec->d_table;
+   Vp = this->Hypre_ParCSRVectorBuilder_data->newvec->Hypre_ParCSRVector_data;
    Vp->Hvec = V;
    Vp->comm = com;
-   this->d_table->vecgood = 1;
+   this->Hypre_ParCSRVectorBuilder_data->vecgood = 1;
 
    return ierr;
 
-} /* end impl_Hypre_ParCSRVectorBuilderNew */
+} /* end impl_Hypre_ParCSRVectorBuilder_New_fromHYPRE */

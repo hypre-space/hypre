@@ -28,10 +28,10 @@
  *    and initialize here
  ***************************************************/
 void Hypre_StructVector_constructor(Hypre_StructVector this) {
-   this->d_table = (struct Hypre_StructVector_private_type *)
+   this->Hypre_StructVector_data = (struct Hypre_StructVector_private_type *)
       malloc( sizeof( struct Hypre_StructVector_private_type ) );
 
-   this->d_table->hsvec = (HYPRE_StructVector *)
+   this->Hypre_StructVector_data->hsvec = (HYPRE_StructVector *)
       malloc( sizeof( HYPRE_StructVector ) );
 
 } /* end constructor */
@@ -41,12 +41,12 @@ void Hypre_StructVector_constructor(Hypre_StructVector this) {
  *      deallocate memory for private data here.
  ***************************************************/
 void Hypre_StructVector_destructor(Hypre_StructVector this) {
-   struct Hypre_StructVector_private_type *SVp = this->d_table;
+   struct Hypre_StructVector_private_type *SVp = this->Hypre_StructVector_data;
    HYPRE_StructVector *V = SVp->hsvec;
 
    HYPRE_StructVectorDestroy( *V );
 
-   free(this->d_table);
+   free(this->Hypre_StructVector_data);
 
 } /* end destructor */
 
@@ -58,7 +58,7 @@ int  impl_Hypre_StructVector_GetNumGhost
 {
    int  i;
    int * num_ghost = &(values.data[*(values.lower)]);
-   HYPRE_StructVector *V = this->d_table->hsvec;
+   HYPRE_StructVector *V = this->Hypre_StructVector_data->hsvec;
    hypre_StructVector * vector = (hypre_StructVector *) (*V);
 
    for (i = 0; i < 6; i++)
@@ -75,7 +75,7 @@ void  impl_Hypre_StructVector_print(Hypre_StructVector this) {
    int boxarray_size;
    FILE * file;
 
-   struct Hypre_StructVector_private_type *SVp = this->d_table;
+   struct Hypre_StructVector_private_type *SVp = this->Hypre_StructVector_data;
    HYPRE_StructVector *V = SVp->hsvec;
    hypre_StructVector *v = (hypre_StructVector *) *V;
 
@@ -103,7 +103,7 @@ void  impl_Hypre_StructVector_print(Hypre_StructVector this) {
  **********************************************************/
 int  impl_Hypre_StructVector_Clear(Hypre_StructVector this) {
 
-   struct Hypre_StructVector_private_type *SVp = this->d_table;
+   struct Hypre_StructVector_private_type *SVp = this->Hypre_StructVector_data;
    HYPRE_StructVector *V = SVp->hsvec;
    hypre_StructVector *v = (hypre_StructVector *) *V;
 
@@ -116,7 +116,7 @@ int  impl_Hypre_StructVector_Clear(Hypre_StructVector this) {
  *    int Copy (in Vector x);                // y <- x 
  **********************************************************/
 int  impl_Hypre_StructVector_Copy(Hypre_StructVector this, Hypre_Vector x) {
-   struct Hypre_StructVector_private_type *SVyp = this->d_table;
+   struct Hypre_StructVector_private_type *SVyp = this->Hypre_StructVector_data;
    HYPRE_StructVector *Vy = SVyp->hsvec;
    hypre_StructVector *vy = (hypre_StructVector *) *Vy;
 
@@ -127,7 +127,7 @@ int  impl_Hypre_StructVector_Copy(Hypre_StructVector this, Hypre_Vector x) {
 
    SVx = (Hypre_StructVector) Hypre_Vector_castTo( x, "Hypre_StructVector" );
    if ( SVx==NULL ) return 1;
-   SVxp = SVx->d_table;
+   SVxp = SVx->Hypre_StructVector_data;
    Vx = SVxp->hsvec;
    vx = (hypre_StructVector *) *Vx;
 
@@ -144,7 +144,7 @@ int  impl_Hypre_StructVector_Clone(Hypre_StructVector this, Hypre_Vector* x) {
    int numghost_data[6] = {0, 0, 0, 0, 0, 0};
    array1int num_ghost;
    int dim;
-   struct Hypre_StructVector_private_type *SVyp = this->d_table;
+   struct Hypre_StructVector_private_type *SVyp = this->Hypre_StructVector_data;
    HYPRE_StructVector *Vy = SVyp->hsvec;
    hypre_StructVector *vy = (hypre_StructVector *) *Vy;
    Hypre_StructGrid G = SVyp->grid;
@@ -152,7 +152,7 @@ int  impl_Hypre_StructVector_Clone(Hypre_StructVector this, Hypre_Vector* x) {
    /* ... SVB ignores G */
 
    ierr += Hypre_StructGrid_GetParameterInt( G, "dim", &dim );
-   Hypre_StructVectorBuilder_New( SVB, G );
+   Hypre_StructVectorBuilder_Start( SVB, G );
 
    num_ghost.lower[0] = 0;
    num_ghost.upper[0] = 2*dim;
@@ -225,7 +225,7 @@ hypre_StructVectorScaleAllValues( hypre_StructVector *vector, double a )
  *    int Scale (in double a);               // y <- a*y 
  **********************************************************/
 int  impl_Hypre_StructVector_Scale(Hypre_StructVector this, double a) {
-   struct Hypre_StructVector_private_type *SVyp = this->d_table;
+   struct Hypre_StructVector_private_type *SVyp = this->Hypre_StructVector_data;
    HYPRE_StructVector *Vy = SVyp->hsvec;
    hypre_StructVector *vy = (hypre_StructVector *) *Vy;
 
@@ -238,7 +238,7 @@ int  impl_Hypre_StructVector_Scale(Hypre_StructVector this, double a) {
  *    int Dot (in Vector x, out double d);   // d <- (y,x)
  **********************************************************/
 int  impl_Hypre_StructVector_Dot(Hypre_StructVector this, Hypre_Vector x, double* d) {
-   struct Hypre_StructVector_private_type *SVyp = this->d_table;
+   struct Hypre_StructVector_private_type *SVyp = this->Hypre_StructVector_data;
    HYPRE_StructVector *Vy = SVyp->hsvec;
    hypre_StructVector *vy = (hypre_StructVector *) *Vy;
 
@@ -249,7 +249,7 @@ int  impl_Hypre_StructVector_Dot(Hypre_StructVector this, Hypre_Vector x, double
 
    SVx = (Hypre_StructVector) Hypre_Vector_castTo( x, "Hypre_StructVector" );
    if ( SVx==NULL ) return 1;
-   SVxp = SVx->d_table;
+   SVxp = SVx->Hypre_StructVector_data;
    Vx = SVxp->hsvec;
    vx = (hypre_StructVector *) *Vx;
 
@@ -263,7 +263,7 @@ int  impl_Hypre_StructVector_Dot(Hypre_StructVector this, Hypre_Vector x, double
  *    int Axpy (in double a, in Vector x);   // y <- a*x + y
  **********************************************************/
 int  impl_Hypre_StructVector_Axpy(Hypre_StructVector this, double a, Hypre_Vector x) {
-   struct Hypre_StructVector_private_type *SVyp = this->d_table;
+   struct Hypre_StructVector_private_type *SVyp = this->Hypre_StructVector_data;
    HYPRE_StructVector *Vy = SVyp->hsvec;
    hypre_StructVector *vy = (hypre_StructVector *) *Vy;
 
@@ -274,7 +274,7 @@ int  impl_Hypre_StructVector_Axpy(Hypre_StructVector this, double a, Hypre_Vecto
 
    SVx = (Hypre_StructVector) Hypre_Vector_castTo( x, "Hypre_StructVector" );
    if ( SVx==NULL ) return 1;
-   SVxp = SVx->d_table;
+   SVxp = SVx->Hypre_StructVector_data;
    Vx = SVxp->hsvec;
    vx = (hypre_StructVector *) *Vx;
 

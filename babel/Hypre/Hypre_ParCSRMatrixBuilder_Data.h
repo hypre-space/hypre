@@ -7,7 +7,7 @@
 #ifndef Hypre_ParCSRMatrixBuilder_DataMembers_
 #define Hypre_ParCSRMatrixBuilder_DataMembers_
 
-#include "Hypre_ParCSRMatrix.h"
+#include "Hypre_ParCSRMatrix_IOR.h"
 
 struct Hypre_ParCSRMatrixBuilder_private_type
 {

@@ -8,7 +8,7 @@
 #define Hypre_StructJacobi_DataMembers_
 
 #include "struct_linear_solvers.h"
-#include "Hypre_StructMatrix.h"
+#include "Hypre_StructMatrix_IOR.h"
 
 struct Hypre_StructJacobi_private_type
 {

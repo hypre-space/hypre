@@ -7,9 +7,9 @@
 #ifndef Hypre_PCG_DataMembers_
 #define Hypre_PCG_DataMembers_
 
-#include "Hypre_Vector.h"
-#include "Hypre_LinearOperator.h"
-#include "Hypre_Solver.h"
+#include "Hypre_Vector_IOR.h"
+#include "Hypre_LinearOperator_IOR.h"
+#include "Hypre_Solver_IOR.h"
 
 struct Hypre_PCG_private_type
 {

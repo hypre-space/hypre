@@ -19,10 +19,11 @@
  *    and initialize here
  ***************************************************/
 void Hypre_ParCSRMatrix_constructor(Hypre_ParCSRMatrix this) {
-   this->d_table = (struct Hypre_ParCSRMatrix_private_type *)
+   this->Hypre_ParCSRMatrix_data = (struct Hypre_ParCSRMatrix_private_type *)
       malloc( sizeof( struct Hypre_ParCSRMatrix_private_type ) );
 
-   this->d_table->Hmat = (HYPRE_IJMatrix *) malloc( sizeof( HYPRE_IJMatrix ) );
+   this->Hypre_ParCSRMatrix_data->Hmat = (HYPRE_IJMatrix *)
+      malloc( sizeof( HYPRE_IJMatrix ) );
 
 } /* end constructor */
 
@@ -31,11 +32,11 @@ void Hypre_ParCSRMatrix_constructor(Hypre_ParCSRMatrix this) {
  *      deallocate memory for private data here.
  ***************************************************/
 void Hypre_ParCSRMatrix_destructor(Hypre_ParCSRMatrix this) {
-   struct Hypre_ParCSRMatrix_private_type *Mp = this->d_table;
+   struct Hypre_ParCSRMatrix_private_type *Mp = this->Hypre_ParCSRMatrix_data;
    HYPRE_IJMatrix *M = Mp->Hmat;
 
    HYPRE_IJMatrixDestroy( *M );
-   free(this->d_table);
+   free(this->Hypre_ParCSRMatrix_data);
 
 } /* end destructor */
 
@@ -52,7 +53,7 @@ int  impl_Hypre_ParCSRMatrix_Apply
    There are lots of places where there could be more defensive coding,
    asserts, requires, etc.
 */
-   struct Hypre_ParCSRMatrix_private_type *Mp = this->d_table;
+   struct Hypre_ParCSRMatrix_private_type *Mp = this->Hypre_ParCSRMatrix_data;
    HYPRE_IJMatrix *HM = Mp->Hmat;
    hypre_IJMatrix *hM = (hypre_IJMatrix *) (*HM);
    hypre_ParCSRMatrix *parM;
@@ -74,7 +75,7 @@ int  impl_Hypre_ParCSRMatrix_Apply
 
    xin = (Hypre_ParCSRVector) Hypre_Vector_castTo( x, "Hypre_ParCSRVector" );
    if ( xin==NULL ) return 1;
-   HPx = xin->d_table;
+   HPx = xin->Hypre_ParCSRVector_data;
    Hx = HPx->Hvec;
    hx = (hypre_IJVector *) *Hx;
    assert( hypre_IJVectorLocalStorage(hx) );
@@ -82,7 +83,7 @@ int  impl_Hypre_ParCSRMatrix_Apply
 
    yin = (Hypre_ParCSRVector) Hypre_Vector_castTo( *y, "Hypre_ParCSRVector" );
    if ( yin==NULL ) return 1;
-   HPy = yin->d_table;
+   HPy = yin->Hypre_ParCSRVector_data;
    Hy = HPy->Hvec;
    hy = (hypre_IJVector *) *Hy;
    assert( hypre_IJVectorLocalStorage(hy) );
@@ -97,7 +98,7 @@ int  impl_Hypre_ParCSRMatrix_Apply
  * impl_Hypre_ParCSRMatrixGetDims
  **********************************************************/
 int impl_Hypre_ParCSRMatrix_GetDims(Hypre_ParCSRMatrix this, int* m, int* n) {
-   struct Hypre_ParCSRMatrix_private_type * Mp = this->d_table;
+   struct Hypre_ParCSRMatrix_private_type * Mp = this->Hypre_ParCSRMatrix_data;
    HYPRE_IJMatrix * MIJ = Mp->Hmat;
    hypre_IJMatrix * Mij = (hypre_IJMatrix *) (*MIJ);
    hypre_ParCSRMatrix *parM = hypre_IJMatrixLocalStorage(Mij);

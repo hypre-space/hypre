@@ -22,10 +22,10 @@
  *    and initialize here
  ***************************************************/
 void Hypre_StructSMG_constructor(Hypre_StructSMG this) {
-   this->d_table = (struct Hypre_StructSMG_private_type *)
+   this->Hypre_StructSMG_data = (struct Hypre_StructSMG_private_type *)
       malloc( sizeof( struct Hypre_StructSMG_private_type ) );
 
-   this->d_table->hssolver = (HYPRE_StructSolver *)
+   this->Hypre_StructSMG_data->hssolver = (HYPRE_StructSolver *)
      malloc( sizeof( HYPRE_StructSolver ) );
 } /* end constructor */
 
@@ -34,11 +34,11 @@ void Hypre_StructSMG_constructor(Hypre_StructSMG this) {
  *      deallocate memory for private data here.
  ***************************************************/
 void Hypre_StructSMG_destructor(Hypre_StructSMG this) {
-   struct Hypre_StructSMG_private_type *HSJp = this->d_table;
+   struct Hypre_StructSMG_private_type *HSJp = this->Hypre_StructSMG_data;
    HYPRE_StructSolver *S = HSJp->hssolver;
 
    HYPRE_StructSMGDestroy( *S );
-   free(this->d_table);
+   free(this->Hypre_StructSMG_data);
 
 } /* end destructor */
 
@@ -49,11 +49,11 @@ void Hypre_StructSMG_destructor(Hypre_StructSMG this) {
  **********************************************************/
 int  impl_Hypre_StructSMG_Apply
 (Hypre_StructSMG this, Hypre_Vector b, Hypre_Vector* x) {
-   struct Hypre_StructSMG_private_type *HSMGp = this->d_table;
+   struct Hypre_StructSMG_private_type *HSMGp = this->Hypre_StructSMG_data;
    HYPRE_StructSolver *S = HSMGp->hssolver;
 
-   Hypre_StructMatrix A = this->d_table->hsmatrix;
-   struct Hypre_StructMatrix_private_type *SMp = A->d_table;
+   Hypre_StructMatrix A = this->Hypre_StructSMG_data->hsmatrix;
+   struct Hypre_StructMatrix_private_type *SMp = A->Hypre_StructMatrix_data;
    HYPRE_StructMatrix *MA = SMp->hsmat;
 
    Hypre_StructVector Sb, Sx;
@@ -66,10 +66,10 @@ int  impl_Hypre_StructSMG_Apply
    Sx = (Hypre_StructVector) Hypre_Vector_castTo( *x, "Hypre_StructVector" );
    if ( Sx == NULL ) return 1;
 
-   SVbp = Sb->d_table;
+   SVbp = Sb->Hypre_StructVector_data;
    Vb = SVbp->hsvec;
 
-   SVxp = Sx->d_table;
+   SVxp = Sx->Hypre_StructVector_data;
    Vx = SVxp->hsvec;
 
    return HYPRE_StructSMGSolve( *S, *MA, *Vb, *Vx );
@@ -79,7 +79,7 @@ int  impl_Hypre_StructSMG_Apply
  * impl_Hypre_StructSMGGetDims
  **********************************************************/
 int  impl_Hypre_StructSMG_GetDims(Hypre_StructSMG this, int* m, int* n) {
-   Hypre_StructMatrix hsmatrix = this->d_table->hsmatrix;
+   Hypre_StructMatrix hsmatrix = this->Hypre_StructSMG_data->hsmatrix;
    return Hypre_StructMatrix_GetDims( hsmatrix, m, n );
 } /* end impl_Hypre_StructSMGGetDims */
 
@@ -89,7 +89,7 @@ int  impl_Hypre_StructSMG_GetDims(Hypre_StructSMG this, int* m, int* n) {
 int impl_Hypre_StructSMG_GetSystemOperator
 ( Hypre_StructSMG this, Hypre_LinearOperator *op ) {
 
-   Hypre_StructMatrix mat =  this->d_table->hsmatrix;
+   Hypre_StructMatrix mat =  this->Hypre_StructSMG_data->hsmatrix;
    
    *op = (Hypre_LinearOperator)
       Hypre_StructMatrix_castTo( mat, "Hypre_LinearOperator" );
@@ -114,7 +114,7 @@ int impl_Hypre_StructSMG_GetResidual
     doesn't work.
   */
 
-   *resid = Hypre_Vector_new();
+   *resid = (Hypre_Vector) NULL;
 
    printf( "called Hypre_StructSMG_GetResidual, which doesn't work!\n");
 
@@ -128,7 +128,7 @@ int  impl_Hypre_StructSMG_GetConvergenceInfo
 (Hypre_StructSMG this, char* name, double* value) {
    int ivalue, ierr;
 
-   struct Hypre_StructSMG_private_type *HSMGp = this->d_table;
+   struct Hypre_StructSMG_private_type *HSMGp = this->Hypre_StructSMG_data;
    HYPRE_StructSolver *S = HSMGp->hssolver;
 
    if ( !strcmp(name,"num iterations") ) {
@@ -172,7 +172,7 @@ int  impl_Hypre_StructSMG_SetParameterDouble
 
 /* This function just dispatches to the parameter's set function. */
 
-   struct Hypre_StructSMG_private_type *HSMGp = this->d_table;
+   struct Hypre_StructSMG_private_type *HSMGp = this->Hypre_StructSMG_data;
    HYPRE_StructSolver *S = HSMGp->hssolver;
 
    if ( !strcmp(name,"tol") ) {
@@ -196,7 +196,7 @@ int impl_Hypre_StructSMG_SetParameterInt
 
 /* This function just dispatches to the parameter's set function. */
 
-   struct Hypre_StructSMG_private_type *HSMGp = this->d_table;
+   struct Hypre_StructSMG_private_type *HSMGp = this->Hypre_StructSMG_data;
    HYPRE_StructSolver *S = HSMGp->hssolver;
 
    if ( !strcmp(name,"max_iter" )) {
@@ -242,17 +242,17 @@ int  impl_Hypre_StructSMG_SetParameterString
 } /* end impl_Hypre_StructSMGSetParameterString */
 
 /* ********************************************************
- * impl_Hypre_StructSMGNew
+ * impl_Hypre_StructSMG_Start
  **********************************************************/
-int impl_Hypre_StructSMG_New(Hypre_StructSMG this, Hypre_MPI_Com comm) {
-   struct Hypre_StructSMG_private_type *HSMGp = this->d_table;
+int impl_Hypre_StructSMG_Start(Hypre_StructSMG this, Hypre_MPI_Com comm) {
+   struct Hypre_StructSMG_private_type *HSMGp = this->Hypre_StructSMG_data;
    HYPRE_StructSolver *S = HSMGp->hssolver;
 
-   struct Hypre_MPI_Com_private_type * HMCp = comm->d_table;
+   struct Hypre_MPI_Com_private_type * HMCp = comm->Hypre_MPI_Com_data;
    MPI_Comm *C = HMCp->hcom;
 
    return HYPRE_StructSMGCreate( *C, S );
-} /* end impl_Hypre_StructSMGNew */
+} /* end impl_Hypre_StructSMG_Start */
 
 /* ********************************************************
  * impl_Hypre_StructSMGSetup
@@ -280,7 +280,7 @@ int  impl_Hypre_StructSMG_Setup
    struct Hypre_StructVector_private_type * SVxp;
    HYPRE_StructVector * Vx;
 
-   struct Hypre_StructSMG_private_type *HSMGp = this->d_table;
+   struct Hypre_StructSMG_private_type *HSMGp = this->Hypre_StructSMG_data;
    HYPRE_StructSolver *S = HSMGp->hssolver;
 
    SM = (Hypre_StructMatrix) Hypre_LinearOperator_castTo( A, "Hypre_StructMatrix" );
@@ -290,16 +290,16 @@ int  impl_Hypre_StructSMG_Setup
    SVx = (Hypre_StructVector) Hypre_Vector_castTo( x, "Hypre_StructVector" );
    if ( SVb==NULL ) return 1;
 
-   SMp = SM->d_table;
+   SMp = SM->Hypre_StructMatrix_data;
    MA = SMp->hsmat;
 
-   SVbp = SVb->d_table;
+   SVbp = SVb->Hypre_StructVector_data;
    Vb = SVbp->hsvec;
 
-   SVxp = SVx->d_table;
+   SVxp = SVx->Hypre_StructVector_data;
    Vx = SVxp->hsvec;
 
-   this->d_table->hsmatrix = SM;
+   this->Hypre_StructSMG_data->hsmatrix = SM;
 
    return HYPRE_StructSMGSetup( *S, *MA, *Vb, *Vx );
 } /* end impl_Hypre_StructSMGSetup */
@@ -308,9 +308,9 @@ int  impl_Hypre_StructSMG_Setup
  * impl_Hypre_StructSMGConstructor
  **********************************************************/
 Hypre_StructSMG  impl_Hypre_StructSMG_Constructor(Hypre_MPI_Com comm) {
-   /* declared static; just combines the new and New functions */
-   Hypre_StructSMG SMG = Hypre_StructSMG_new();
-   Hypre_StructSMG_New( SMG, comm );
+   /* declared static; just combines the New and Start functions */
+   Hypre_StructSMG SMG = Hypre_StructSMG_New();
+   Hypre_StructSMG_Start( SMG, comm );
    return SMG;
 } /* end impl_Hypre_StructSMGConstructor */
 
