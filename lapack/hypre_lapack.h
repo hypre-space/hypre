@@ -4,6 +4,91 @@
 #define HYPRE_LAPACK_H
 #include "f2c.h"
 
+/* --------------------------------------------------------------------------
+ *  Change all names to hypre_ to avoid link conflicts
+ * --------------------------------------------------------------------------*/
+
+#define dgebd2  hypre_dgebd2
+#define dgebrd  hypre_dgebrd
+#define dgelq2  hypre_dgelq2
+#define dgelqf  hypre_dgelqf
+#define dgels   hypre_dgels
+#define dgeqr2  hypre_dgeqr2
+#define dgeqrf  hypre_dgeqrf
+#define dgesvd  hypre_dgesvd
+#define dlabad  hypre_dlabad
+#define dlabrd  hypre_dlabrd
+#define dlae2   hypre_dlae2
+#define dlaev2  hypre_dlaev2
+#define dlamch  hypre_dlamch
+#define dlamc1  hypre_dlamc1
+#define dlamc2  hypre_dlamc2
+#define dlamc3  hypre_dlamc3
+#define dlamc4  hypre_dlamc4
+#define dlamc5  hypre_dlamc5
+#define dlange  hypre_dlange
+#define dlanst  hypre_dlanst
+#define dlansy  hypre_dlansy
+#define dlapy2  hypre_dlapy2
+#define dlarf   hypre_dlarf
+#define dlarfb  hypre_dlarfb
+#define dlarfg  hypre_dlarfg
+#define dlarft  hypre_dlarft
+#define dlartg  hypre_dlartg
+#define dlascl  hypre_dlascl
+#define dlaset  hypre_dlaset
+#define dlasr   hypre_dlasr
+#define dlasrt  hypre_dlasrt
+#define dlassq  hypre_dlassq
+#define dlatrd  hypre_dlatrd
+#define dorg2l  hypre_dorg2l
+#define dorg2r  hypre_dorg2r
+#define dorgql  hypre_dorgql
+#define dorgqr  hypre_dorgqr
+#define dorgtr  hypre_dorgtr
+#define dorm2r  hypre_dorm2r
+#define dorml2  hypre_dorml2
+#define dormlq  hypre_dormlq
+#define dormqr  hypre_dormqr
+#define dpotf2  hypre_dpotf2
+#define dpotrf  hypre_dpotrf
+#define dpotrs  hypre_dpotrs
+#define dsteqr  hypre_dsteqr
+#define dsterf  hypre_dsterf
+#define dsyev   hypre_dsyev
+#define dsygst  hypre_dsygst
+#define dsygv   hypre_dsygv
+#define dsytd2  hypre_dsytd2
+#define dsytrd  hypre_dsytrd
+#define ieeeck  hypre_ieeeck
+#define ilaenv  hypre_ilaenv
+#define d_lg10  hypre_d_lg10
+#define d_sign  hypre_d_sign
+#define pow_di  hypre_pow_di
+#define pow_dd  hypre_pow_dd
+#define s_cat   hypre_s_cat
+#define lsame   hypre_lsame
+#define xerbla  hypre_xerbla
+#define dbdsqr  hypre_dbdsqr
+#define dorgbr  hypre_dorgbr
+#define dsygs2  hypre_dsygs2
+#define dorglq  hypre_dorglq
+#define dlacpy  hypre_dlacpy
+#define dormbr  hypre_dormbr
+#define dlasq1  hypre_dlasq1
+#define dlas2   hypre_dlas2
+#define dlasv2  hypre_dlasv2
+#define dorgl2  hypre_dorgl2
+#define dlasq2  hypre_dlasq2
+#define dlasq3  hypre_dlasq3
+#define dlasq4  hypre_dlasq4
+#define dlasq5  hypre_dlasq5
+#define dlasq6  hypre_dlasq6
+
+/* --------------------------------------------------------------------------
+ *           Prototypes
+ * --------------------------------------------------------------------------*/
+
 /* dgebd2.c */
 int dgebd2_ ( integer *m , integer *n , doublereal *a , integer *lda , doublereal *d__ , doublereal *e , doublereal *tauq , doublereal *taup , doublereal *work , integer *info );
 

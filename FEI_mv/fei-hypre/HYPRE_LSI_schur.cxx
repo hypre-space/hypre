@@ -11,10 +11,7 @@
 #include <stdio.h>
 #include <assert.h>
 
-#include "fei_defs.h"
-#include "Data.h"
-//#include "basicTypes.h"
-#include "Lookup.h"
+#include "HYPRE_FEI_includes.h"
 
 #include "HYPRE.h"
 #include "utilities/utilities.h"

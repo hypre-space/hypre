@@ -79,7 +79,7 @@ initialize_variables ()
 #
 # Architecure specific configurations
 #
-  if [ "$HYPRE_ARCH" = "blue" ] ; then
+  if [ "$HYPRE_ARCH"="frost" ||  "$HYPRE_ARCH"="uv"] ; then
     CONFIGURE="./nopoe ./configure"
   else
     CONFIGURE="./configure"
@@ -328,8 +328,7 @@ apply_error_filters () {
   if [ -s "${ErrorFile}" ] ; then
     HOST=`hostname`
     case $HOST in
-      fros*|blue*)
-###   if [ "$HYPRE_ARCH" = "blue" ] ; then
+      fros*|uv*)
         for ii in \
           '===\ End\ of\ Compilation'\
           'Compilation\ successful'\
@@ -350,7 +349,6 @@ apply_error_filters () {
           ':\ error\ \#172:'
         do multi_line_delete $ErrorFile 4 "${ii}"
         done
-###   fi   # blue
         ;;
       peng*)
         for ii in \
@@ -365,25 +363,8 @@ apply_error_filters () {
           '\ remark:\ '
         do process_filter $ErrorFile "${ii}"
         done
-#       for ii in \
-#         '266:\ function\ declared\ implicitly'
-#       do multi_line_delete $ErrorFile 3 "${ii}"
-#       done
-#       for ii in \
-#         '\ :\ Terminating\ a\ DO\ loop\ with\ a\ statement\ other\ than\ '\
-#         '\ :\ Type\ size\ specifiers\ are\ an\ extension\ to\ standard '\
-#         '\ :\ DO\ loops\ sharing\ the\ same\ terminating\ statement\ is\ '
-#       do multi_line_bakdelete $ErrorFile 3 "${ii}"
-#       done
       ;;
-      riptide*)
-        for ii in \
-          '\ is\ not\ used\ for\ resolving\ any\ symbol'\
-          'ld64:\ WARNING\ 84\ :\ '
-        do process_filter $ErrorFile "${ii}"
-        done
-      ;;
-      tckk*|tc2k*|gps*)
+      gps*)
         for ii in \
           '^No\ suffix\ list'\
           '^stty:\ tcgetattr:\ Not\ a\ typewriter'\

@@ -1,12 +1,38 @@
-/* hypre_blas.h  --  Contains BLAS prototypes needed by Hypre */
+/* blas.h  --  Contains BLAS prototypes needed by Hypre */
 
 #ifndef HYPRE_BLAS_H
 #define HYPRE_BLAS_H
 #include "f2c.h"
 
+/* --------------------------------------------------------------------------
+ *   Change all names to  to avoid link conflicts
+ * --------------------------------------------------------------------------*/
+
+#define dasum   dasum
+#define daxpy   daxpy
+#define dcopy   dcopy
+#define ddot    ddot
+#define dgemm   dgemm
+#define dgemv   dgemv
+#define dger    dger
+#define dnrm2   dnrm2
+#define drot    drot
+#define dscal   dscal
+#define dswap   dswap
+#define dsymm   dsymm
+#define dsymv   dsymv
+#define dsyr2   dsyr2
+#define dsyr2k  dsyr2k
+#define dsyrk   dsyrk
+#define dtrmm   dtrmm
+#define dtrmv   dtrmv
+#define dtrsm   dtrsm
+#define dtrsv   dtrsv
+#define idamax  idamax
+
 /* blas_utils.c */
-logical hypre_lsame_ ( char *ca , char *cb );
-int hypre_xerbla_ ( char *srname , integer *info );
+logical lsame_ ( char *ca , char *cb );
+int xerbla_ ( char *srname , integer *info );
 integer s_cmp ( char *a0 , char *b0 , ftnlen la , ftnlen lb );
 VOID s_copy ( char *a , char *b , ftnlen la , ftnlen lb );
 

@@ -14,10 +14,30 @@
 #
 #=============================================================================
 
+Version 1.8.4a released, 2004/12/01.
+
+- Removed all automake & libtool use from build system.  Autoconf reads 
+  configure.in to create the configure script.  The Makefiles are created by
+  configure from Makefile.in in each subdirectory.
+
+- NOTE: link lines may need changing depending on configure options used
+
+- to view the allowed configure options run './configure --help'
+
+- shared libraries can NOT be created with this version
+
+- the makefile target nofei has been removed as it is now the default
+
+- internal blas and lapack routines are included in the libHYPRE_utilities.a 
+  file if needed, rather than in separate libraries.
+
+************************
+
 -added new parallel coarsening schemes PMIS and HMIS with reduced complexities
  as well as the option of using one pass of Ruge-Stueben only
 
 -added capability to set values from any processor for IJ matrices and vectors
+************************
 
 Version 1.8.3a released, 2004/01/21.
 

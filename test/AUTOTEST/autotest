@@ -74,7 +74,7 @@ perform_test()
 # Function for display of help/usage
 #=============================================================================
 help () {
-  printf "Usage: %s [-nocvs|-rev Rev#] [-automake] [-debug] host [host ... ]\n" $0
+  printf "Usage: %s [-nocvs|-rev Rev#] [-debug] host [host ... ]\n" $0
   printf "\n"
   printf "HYPRE autotest script. This is the high level autotest_test wrapper\n"
   printf "script, usually run nightly from cron. This script determines which\n"
@@ -84,11 +84,8 @@ help () {
   printf "%s\n" "-nocvs    Do not perform cvs checkout, use existing"
   printf "                 ./linear_solvers/ directory for autotest.\n"
   printf "%s\n" "-rev Rev# Check out revision or tag." 
-  printf "%s\n" "-automake Run automake/autoconf."
   printf "host   Host ID or configuration on which autotest is to be run.\n"
   printf "       Valid host IDs are:\n"
-  printf "%s\n" "     -blue     ASCI Blue, DPCS."
-  printf "%s\n" "     -bluemp   ASCI Blue executing OpenMP versions, DPCS."
   printf "%s\n" "     -debug    Turn on debug mode."
   printf "%s\n" "     -frost    ASCI Frost, DPCS."
   printf "%s\n" "     -frostmp  ASCI Frost executing OpenMP, DPCS."
@@ -99,9 +96,6 @@ help () {
   printf "%s\n" "     -mcr      Intel Linux, CHAOS2."
   printf "%s\n" "     -pengra   Intel Linux, CHAOS2."
   printf "%s\n" "     -red      ASCI Red"
-  printf "%s\n" "     -riptide  ASCI VIS SGI running IRIX"
-  printf "%s\n" "     -tc2k     Compaq TC2K system, DPCS."
-  printf "%s\n" "     -tc2kmp   Compaq TC2K system, executing OpenMP, DPCS."
   printf "%s\n" "     -tux71    CASC Intel running RedHat 7 Linux (pgi-5.1)."
   printf "%s\n" "     -tux81    CASC Intel running RedHat 9 Linux."
   printf "%s\n" "     -tux83    CASC Intel running RedHat 7 Linux."
@@ -114,7 +108,7 @@ help () {
   printf "%s\n" "     -tuxpgi   Linux running PGI-5.1 compilers"
   printf "%s\n" "     -tuxabsoftLinux running Absoft-Pro8.0 Fortran 90"
   printf "%s\n" "     -tuxlahey Linux running Lahey Frotran compiler"
-  printf "%s\n" "     -tuxintel Linux running Intel-7.0 compilers"
+  printf "%s\n" "     -tuxintel Linux running Intel-8.0 compilers"
   printf "%s\n" "     -tuxkai   Linux running KAI KCC-4.0f compiler"
   printf "%s\n" "     -vivid    ASCI VIS Intel running RedHat Linux."
   printf "\n"
@@ -122,7 +116,7 @@ help () {
 
 usage ()
 {
-  printf "usage: $0 [-nocvs|-rev Rev#|-help] [-automake] HostOptions [Hostoptions . . .]\n"
+  printf "usage: $0 [-nocvs|-rev Rev#|-help] HostOptions [Hostoptions . . .]\n"
 }
 
 #==============================================================================
@@ -195,11 +189,6 @@ else
   chgrp -f hypre $0.checkout.*
 fi
 
-if [ "$1" = "-automake" ]
-then
-    AUTOMAKEMODE=yes
-  shift
-fi
 chmod -fR a+rX,u+w,go-w linear_solvers
 chgrp -fR hypre linear_solvers
 
@@ -212,30 +201,12 @@ do
   HYPRE_DIST_DIR=""
   COMPILERSELECT=""
   case $1 in
-    -automake)
-          AUTOMAKEMODE=yes
-        shift;;
-    -blue | -bluemp)
-        HYPRE_ARCH="blue"
-        HYPRE_COMPILE_MACHINE="blue"
-        HYPRE_RUN_MACHINE="blue"
-        HYPRE_REMOTE_DIR="/usr/casc/hypre/powerpc-ibm-aix5.1.0.0/AUTOTEST"
-        if [ "$1" = "-bluemp" ] ; then
-          SUBMSG="from OpenMP"
-	  HYPRE_MACHINE_COMMANDS="-mnse 1 -a 1 -cfo 2"
-          HYPRE_MESSAGE='SECONDARY[OpenMP-ASCI-Blue]'
-        else
-	  HYPRE_MACHINE_COMMANDS="-mb 1 -nse 1 -o 1 -l 1 -a 2 -cf"
-          HYPRE_MESSAGE='SECONDARY[ASCI-Blue]'
-        fi
-	perform_test
-        shift;;
     -d|-debug) 
         DEBUGMODE="yes"
         set -xv
         shift;;
     -frost | -frostmp)
-        HYPRE_ARCH="blue"
+        HYPRE_ARCH="frost"
         HYPRE_COMPILE_MACHINE="frost"
         HYPRE_RUN_MACHINE="frost"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/powerpcll-ibm-aix5.1.0.0/AUTOTEST"
@@ -244,7 +215,7 @@ do
 	  HYPRE_MACHINE_COMMANDS="-mnse 1 -a 1 -cfo 2"
           HYPRE_MESSAGE='SECONDARY[OpenMP-ASCI-Frost]'
         else
-	  HYPRE_MACHINE_COMMANDS="-me 1 -nsb 1 -o 1 -l 1 -a 2 -cf"
+	  HYPRE_MACHINE_COMMANDS="-me 1 -nsb 1 -o 1 -a 2 -cf"
           HYPRE_MESSAGE='SECONDARY[ASCI-Frost]'
         fi
 	perform_test
@@ -254,10 +225,7 @@ do
         HYPRE_COMPILE_MACHINE="gps"
         HYPRE_RUN_MACHINE="gps320"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/alphaev68-dec-osf5.1/AUTOTEST"
-        if [ "$AUTOMAKEMODE" = "yes" ] ; then
-	  HYPRE_MACHINE_COMMANDS="-m -r $HYPRE_RUN_MACHINE -nse 1 -o 1 -a 1 -cfl 1"
-          HYPRE_MESSAGE='OTHER[autotest-OSF1V5.1]'
-        elif [ "$1" = "-gps" ] ; then
+        if [ "$1" = "-gps" ] ; then
 	  HYPRE_MACHINE_COMMANDS="-m -r $HYPRE_RUN_MACHINE -nse 1 -o 1 -a 2 -cf"
           HYPRE_MESSAGE='SECONDARY[OSF1V5.1]'
         else
@@ -299,7 +267,7 @@ do
         HYPRE_COMPILE_MACHINE="mcr"
         HYPRE_RUN_MACHINE="mcr"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/i686-pc-linux-gnu-chaos2/AUTOTEST"
-	  HYPRE_MACHINE_COMMANDS="-mnse 1 -l 1 -a 2 -cf"
+	  HYPRE_MACHINE_COMMANDS="-mnse 1 -a 2 -cf"
           HYPRE_MESSAGE='OTHER[MCR]'
 	perform_test
         shift;;
@@ -324,47 +292,14 @@ do
         echo "ERROR: -rev option MUST be first argument! Quiting..."
         help
         exit;;
-    -riptide)
-        HYPRE_ARCH="sgi"
-        HYPRE_COMPILE_MACHINE="riptide"
-        HYPRE_RUN_MACHINE="riptide"
-        HYPRE_REMOTE_DIR="/usr/casc/hypre/mips-sgi-irix6.5/AUTOTEST"
-        if [ "$AUTOMAKEMODE" = "yes" ] ; then
-	  HYPRE_MACHINE_COMMANDS="-mne 1 -a 1 -cfl 1"
-          HYPRE_MESSAGE='OTHER[automake-IRIX64]'
-        else
-	  HYPRE_MACHINE_COMMANDS="-mne 1 -a 2 -cf"
-          HYPRE_MESSAGE='OTHER[automake-IRIX64]'
-        fi
-	perform_test
-        shift;;
-    -tc2k | -tc2kmp)
-        HYPRE_ARCH="dec"
-        HYPRE_COMPILE_MACHINE="tckk"
-        HYPRE_RUN_MACHINE="tckk"
-        HYPRE_REMOTE_DIR="/usr/casc/hypre/alphaev67-dec-osf5.1/AUTOTEST"
-        if [ "$AUTOMAKEMODE" = "yes" ] ; then
-	  HYPRE_MACHINE_COMMANDS="-mnse 1 -o 1 -a 1 -cfl 1"
-          HYPRE_MESSAGE='OTHER[OSF1]'
-        elif [ "$1" = "-tc2k" ] ; then
-	  HYPRE_MACHINE_COMMANDS="-mnse 1 -o 1 -a 2 -cf"
-          HYPRE_MESSAGE='SECONDARY[OSF1]'
-        else
-          SUBMSG="from OpenMP"
-	  HYPRE_MACHINE_COMMANDS="-m -o 2"
-          HYPRE_MESSAGE='SECONDARY[OpenMP-OSF1]'
-        fi
-	perform_test
-        shift;;
     -tux71)
         HYPRE_ARCH="linux"
         HYPRE_COMPILE_MACHINE="tux71"
         HYPRE_RUN_MACHINE="tux71"
         HYPRE_REMOTE_DIR="/usr/tmp"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST"
-	  HYPRE_MACHINE_COMMANDS="-mb 1 -nsde 1 -l 1 -a 2 -cf"
+	  HYPRE_MACHINE_COMMANDS="-mb 1 -nsde 1 -a 2 -cf"
           HYPRE_MESSAGE='PRIMARY[gcc-2.96]'
-##      ./autotest_test $HYPRE_MACHINE_COMMANDS -v $HYPRE_MESSAGE
         COMPILERSELECT="gcc2"
 	perform_test
         shift;;
@@ -374,7 +309,7 @@ do
         HYPRE_RUN_MACHINE="tux83"
         HYPRE_REMOTE_DIR="/usr/tmp"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-gcc3.x/AUTOTEST"
-	  HYPRE_MACHINE_COMMANDS="-mb 1 -ndse 1 -l 1 -a 2 -cf"
+	  HYPRE_MACHINE_COMMANDS="-mb 1 -ndse 1 -a 2 -cf"
           HYPRE_MESSAGE='SECONDARY[gcc-2.95.3]'
         COMPILERSELECT="gcc2"
 	perform_test
@@ -385,7 +320,7 @@ do
         HYPRE_RUN_MACHINE="tux83"
         HYPRE_REMOTE_DIR="/usr/tmp"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-gcc3.x/AUTOTEST"
-	  HYPRE_MACHINE_COMMANDS="-mb 1 -ndse 1 -l 1 -a 2 -cf"
+	  HYPRE_MACHINE_COMMANDS="-mb 1 -ndse 1 -a 2 -cf"
           HYPRE_MESSAGE='SECONDARY[gcc-3.0.4]'
         COMPILERSELECT="gcc30"
 	perform_test
@@ -396,7 +331,7 @@ do
         HYPRE_RUN_MACHINE="tux83"
         HYPRE_REMOTE_DIR="/usr/tmp"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-gcc3.x/AUTOTEST"
-	  HYPRE_MACHINE_COMMANDS="-mb 1 -ndse 1 -l 1 -a 2 -cf"
+	  HYPRE_MACHINE_COMMANDS="-mb 1 -ndse 1 -a 2 -cf"
           HYPRE_MESSAGE='SECONDARY[gcc-3.1.1]'
         COMPILERSELECT="gcc31"
 	perform_test
@@ -407,7 +342,7 @@ do
         HYPRE_RUN_MACHINE="tux83"
         HYPRE_REMOTE_DIR="/usr/tmp"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-gcc3.x/AUTOTEST"
-	  HYPRE_MACHINE_COMMANDS="-mb 1 -ndse 1 -l 1 -a 2 -cf"
+	  HYPRE_MACHINE_COMMANDS="-mb 1 -ndse 1 -a 2 -cf"
           HYPRE_MESSAGE='SECONDARY[gcc-3.2.2]'
         COMPILERSELECT="gcc32"
 	perform_test
@@ -418,7 +353,7 @@ do
         HYPRE_RUN_MACHINE="tux83"
         HYPRE_REMOTE_DIR="/usr/tmp"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-gcc3.x/AUTOTEST"
-	  HYPRE_MACHINE_COMMANDS="-mb 1 -ndse 1 -l 1 -a 2 -cf"
+	  HYPRE_MACHINE_COMMANDS="-mb 1 -ndse 1 -a 2 -cf"
           HYPRE_MESSAGE='SECONDARY[gcc-3.3.x]'
         COMPILERSELECT="gcc33"
 	perform_test
@@ -429,7 +364,7 @@ do
         HYPRE_RUN_MACHINE="tux83"
         HYPRE_REMOTE_DIR="/usr/tmp"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-pgi5.x/AUTOTEST"
-	  HYPRE_MACHINE_COMMANDS="-mndse 1 -l 1 -a 2 -cf"
+	  HYPRE_MACHINE_COMMANDS="-mndse 1 -a 2 -cf"
           HYPRE_MESSAGE='SECONDARY[pgi-5.1]'
         COMPILERSELECT="pgi"
 	perform_test
@@ -440,7 +375,7 @@ do
         HYPRE_RUN_MACHINE="tux83"
         HYPRE_REMOTE_DIR="/usr/tmp"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-gcc3.x/AUTOTEST"
-	  HYPRE_MACHINE_COMMANDS="-mb 1 -nde 1 -l 1 -a 2 -cf"
+	  HYPRE_MACHINE_COMMANDS="-mb 1 -nde 1 -a 2 -cf"
           HYPRE_MESSAGE='SECONDARY[Absoft-Pro8.0]'
         COMPILERSELECT="absoft"
 	perform_test
@@ -451,7 +386,7 @@ do
         HYPRE_RUN_MACHINE="tux83"
         HYPRE_REMOTE_DIR="/usr/tmp"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-gcc3.x/AUTOTEST"
-	  HYPRE_MACHINE_COMMANDS="-mb 1 -nde 1 -l 1 -a 2 -cf"
+	  HYPRE_MACHINE_COMMANDS="-mb 1 -nde 1 -a 2 -cf"
           HYPRE_MESSAGE='SECONDARY[lahey]'
         COMPILERSELECT="lahey"
 	perform_test
@@ -462,8 +397,8 @@ do
         HYPRE_RUN_MACHINE="tux83"
         HYPRE_REMOTE_DIR="/usr/tmp"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-gcc3.x/AUTOTEST"
-	  HYPRE_MACHINE_COMMANDS="-mb 1 -nde 1 -l 1 -a 2 -cf"
-          HYPRE_MESSAGE='SECONDARY[Intel-7.0]'
+	  HYPRE_MACHINE_COMMANDS="-mb 1 -nde 1 -a 2 -cf"
+          HYPRE_MESSAGE='SECONDARY[Intel-8.0]'
         COMPILERSELECT="intel"
 	perform_test
         shift;;
@@ -473,7 +408,7 @@ do
         HYPRE_RUN_MACHINE="tux83"
         HYPRE_REMOTE_DIR="/usr/tmp"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-gcc3.x/AUTOTEST"
-	  HYPRE_MACHINE_COMMANDS="-mb 1 -nde 1 -l 1 -a 2 -cf"
+	  HYPRE_MACHINE_COMMANDS="-mb 1 -nde 1 -a 2 -cf"
           HYPRE_MESSAGE='SECONDARY[KCC-4.0f]'
         COMPILERSELECT="kai"
 	perform_test
@@ -484,9 +419,8 @@ do
         HYPRE_RUN_MACHINE="tux81"
         HYPRE_REMOTE_DIR="/usr/tmp"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-redhat8/AUTOTEST"
-	  HYPRE_MACHINE_COMMANDS="-mndse 1 -l 1 -a 2 -cf"
+	  HYPRE_MACHINE_COMMANDS="-mndse 1 -a 2 -cf"
           HYPRE_MESSAGE='SECONDARY[redhat8-gcc-3.2.3]'
-##      ./autotest_test $HYPRE_MACHINE_COMMANDS -v $HYPRE_MESSAGE
         COMPILERSELECT="default"
 	perform_test
         shift;;
@@ -496,9 +430,8 @@ do
         HYPRE_RUN_MACHINE="tux83"
         HYPRE_REMOTE_DIR="/usr/tmp"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-pgi5.x/AUTOTEST"
-	  HYPRE_MACHINE_COMMANDS="-mndse 1 -l 1 -a 2 -cf"
+	  HYPRE_MACHINE_COMMANDS="-mndse 1 -a 2 -cf"
           HYPRE_MESSAGE='SECONDARY[pgi-5.1]'
-##      ./autotest_test $HYPRE_MACHINE_COMMANDS -v $HYPRE_MESSAGE
         COMPILERSELECT="pgi"
 	perform_test
         shift;;
@@ -508,18 +441,17 @@ do
         HYPRE_RUN_MACHINE="tux149"
         HYPRE_REMOTE_DIR="/usr/tmp"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST"
-	  HYPRE_MACHINE_COMMANDS="-mndse 1 -l 1 -a 2 -cf"
+	  HYPRE_MACHINE_COMMANDS="-mndse 1 -a 2 -cf"
           HYPRE_MESSAGE='SECONDARY[gcc]'
           COMPILERSELECT="default"
         ./autotest_test $HYPRE_MACHINE_COMMANDS -v $HYPRE_MESSAGE
-##      perform_test
         shift;;
     -vivid)
         HYPRE_ARCH="linux"
         HYPRE_COMPILE_MACHINE="vivid"
         HYPRE_RUN_MACHINE="vivid"
         HYPRE_REMOTE_DIR="vivid:/usr/gapps/hypre/i686-pc-linux-gnu-vivid/AUTOTEST"
-	  HYPRE_MACHINE_COMMANDS="-mne 1 -l 1 -a 2 -cf"
+	  HYPRE_MACHINE_COMMANDS="-mne 1 -a 2 -cf"
           HYPRE_MESSAGE='OTHER'
         SCP_COMMAND="scp -q"
 	perform_test
@@ -549,12 +481,10 @@ HYPRE_MESSAGE='SECONDARY[Building Docs Only]'
 COMPILERSELECT="default"
 ./autotest_test $HYPRE_MACHINE_COMMANDS -v $HYPRE_MESSAGE
 
-
 #==============================================================================
 # Autotest completion check: create "autotest finished" file
 #==============================================================================
 
-#touch $HYPRE_AUTOTEST_DIR/autotest_finished
 chmod -fR a+rX,ug+w,o-w linear_solvers
 chgrp -fR hypre linear_solvers
 

@@ -7,13 +7,7 @@
 # $Revision$
 #EHEADER***********************************************************************
 
-.SUFFIXES:
-.SUFFIXES: .c .f .o
-
-srcdir = @srcdir@
-VPATH = @srcdir@
- 
-CC = @CC@
+include ../../config/Makefile.config
 
 C_COMPILE_FLAGS=@CFLAGS@
 CXX_COMPILE_FLAGS=@CXXFLAGS@
@@ -31,8 +25,6 @@ CFLAGS =\
  -I$(srcdir)/../../seq_mv\
  ${CINCLUDES}\
  ${CDEFS}
- 
-RANLIB= @RANLIB@
  
 MPILIBFLAGS = @MPILIBDIRS@ @MPILIBS@ @MPIFLAGS@
 LIBFLAGS = @LIBDIRS@ @LIBS@
@@ -97,13 +89,11 @@ FILES =\
 OBJS = ${FILES:.c=.o}
 
 
-
-
 ##################################################################
 # Targets
 ##################################################################
 
-all: libHYPRE_amg_ls.a driver
+all: libHYPRE_amg_ls.a
 
 install: all
 
@@ -111,16 +101,11 @@ clean:
 	@rm -f *.o
 
 veryclean: clean
-	@rm -f driver
 	@rm -f libHYPRE_amg_ls.a
 
 ##################################################################
 # Rules
 ##################################################################
-
-driver: driver.o libHYPRE_amg_ls.a
-	@echo  "Linking" $@ "... "
-	${CC} -o driver driver.o ${LFLAGS}
 
 libHYPRE_amg_ls.a: ${OBJS}
 	@echo  "Building $@ ... "
@@ -128,11 +113,3 @@ libHYPRE_amg_ls.a: ${OBJS}
 	${RANLIB} $@
 
 ${OBJS}: ${HEADERS}
-
-##################################################################
-# Generic rules
-##################################################################
-
-.c.o:
-	${CC} -o $@ -c ${CFLAGS} $<
-

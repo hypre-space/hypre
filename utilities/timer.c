@@ -31,7 +31,7 @@ double time_getWallclockSeconds(void)
 #else
    struct tms usage;
    long wallclock = times(&usage);
-   return(((double) wallclock)/((double) CLK_TCK));
+   return(((double) wallclock)/((double) CLOCKS_PER_SEC));
 #endif
 }
 

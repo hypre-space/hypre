@@ -6,7 +6,7 @@
 #ifndef _LLNL_FEI_LSCORE_H_
 #define _LLNL_FEI_LSCORE_H_
 
-#include "LinearSystemCore.h"
+#include "HYPRE_FEI_includes.h"
 #include "cfei_hypre.h"
 
 typedef enum {

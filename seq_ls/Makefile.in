@@ -7,10 +7,7 @@
 # $Revision$
 #EHEADER***********************************************************************
 
-SHELL = /bin/sh
-
-srcdir = @srcdir@
-VPATH = @srcdir@
+include ../config/Makefile.config
 
 # These are directories that are not yet officially in HYPRE
 HYPRE_EXTRA_DIRS =\
@@ -23,7 +20,7 @@ all:
 	  if [ -d $$i ]; \
 	  then \
 	    echo "Making $$i ..."; \
-	    (cd $$i; $(MAKE) install); \
+	    (cd $$i && $(MAKE) $@); \
 	    echo ""; \
 	  fi; \
 	done; \
@@ -39,7 +36,7 @@ clean:
 	do \
 	  if [ -d $$i ]; \
 	  then \
-	    (cd $$i; $(MAKE) clean); \
+	    (cd $$i && $(MAKE) $@); \
 	  fi; \
 	done
 
@@ -49,7 +46,7 @@ veryclean:
 	do \
 	  if [ -d $$i ]; \
 	  then \
-	    (cd $$i; $(MAKE) veryclean); \
+	    (cd $$i && $(MAKE) $@); \
 	  fi; \
 	done
 

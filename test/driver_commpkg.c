@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#include <mpi.h>
+/*   #include <mpi.h>   */
 
 #include "utilities.h"
 #include "parcsr_mv.h"

@@ -1,5 +1,5 @@
 0 4 * * 0 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest -tuxgcc30 -gpsmp -insure | tee autotest.cron.Sun.log
-0 1 * * 1 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest -riptide -frost -tuxgcc31 -tux71 | tee autotest.cron.Mon.log
+0 1 * * 1 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest -frost -tuxgcc31 -tux71 | tee autotest.cron.Mon.log
 0 1 * * 2 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest -mcr -frostmp -tuxgcc32 -insure | tee autotest.cron.Tue.log
 0 1 * * 3 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest -ilx -tuxpgi -tux81 -insure | tee autotest.cron.Wed.log
 0 1 * * 4 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest -gps -frost -tux71 -tuxabsoft | tee autotest.cron.Thu.log
