@@ -39,7 +39,7 @@ hypre_CSRMatrixMatvec( double           alpha,
    int         x_size = hypre_VectorSize(x);
    int         y_size = hypre_VectorSize(y);
 
-   double      temp;
+   double      temp, tempx;
 
    int         i, j, jj;
 
@@ -48,6 +48,7 @@ hypre_CSRMatrixMatvec( double           alpha,
    double     xpar=0.7;
 
    int         ierr = 0;
+
 
    /*---------------------------------------------------------------------
     *  Check for size compatibility.  Matvec returns ierr = 1 if
@@ -121,11 +122,17 @@ hypre_CSRMatrixMatvec( double           alpha,
        for (i = 0; i < num_rownnz; i++)
        {
          m = A_rownnz[i];
-         for (jj = A_i[m]; jj < A_i[m+1]; jj++)
-         {
-         j = A_j[jj];
-         y_data[m] += A_data[jj] * x_data[j];
-         }
+         tempx = y_data[m];
+
+	 /*
+	  * for (jj = A_i[m]; jj < A_i[m+1]; jj++)
+	  * {
+	  *         j = A_j[jj];   
+	  *  y_data[m] += A_data[jj] * x_data[j];
+          * } */
+         for (jj = A_i[m]; jj < A_i[m+1]; jj++) 
+	   tempx +=  A_data[jj] * x_data[A_j[jj]];
+         y_data[m] = tempx;
        }
 
    }
@@ -139,6 +146,7 @@ hypre_CSRMatrixMatvec( double           alpha,
           y_data[i] = temp;
        }
    }
+
 
    /*-----------------------------------------------------------------
     * y = alpha*y
