@@ -50,9 +50,11 @@ void Hypre_PCG_destructor(Hypre_PCG this) {
 
    Hypre_PCG_Private pcg_data = Hypre_PCG_getPrivate(this);
 
+/* let the memory leak to avoid a possible Babel bug...
    Hypre_Vector_Delete( pcg_data->p );
    Hypre_Vector_Delete( pcg_data->s );
    Hypre_Vector_Delete( pcg_data->r );
+*/
 
    if ((pcg_data -> logging) > 0)
    {
@@ -211,7 +213,13 @@ impl_Hypre_PCG_Apply(Hypre_PCG this, Hypre_Vector b, Hypre_Vector* xp)
          
       /* s = C*r */
       ierr += Hypre_Vector_Clear (s);
+/* doesn't work, likely Babel bug (jfp 031600)...
+      printf("ierr += Hypre_LinearOperator_Apply (precond_solver, r, &s)\n");
+      printf("precond=%i, precond_solver=%i\n", precond, precond_solver );
       ierr += Hypre_LinearOperator_Apply (precond_solver, r, &s);
+ do it without the cast to LinearOperator...
+*/
+      ierr += Hypre_Solver_Apply (precond, r, &s);
 
       /* gamma = <r,s> */
       ierr += Hypre_Vector_Dot (r, s, &gamma);
