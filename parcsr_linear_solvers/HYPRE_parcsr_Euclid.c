@@ -53,7 +53,7 @@
  * (ie, you can set logFuncsToFile = true, logFuncsToSterr = true).
  *
  *--------------------------------------------------------------------------*/
-#define ENABLE_EUCLID_LOGGING
+#undef ENABLE_EUCLID_LOGGING
 
 #if !defined(ENABLE_EUCLID_LOGGING)
 #undef START_FUNC_DH
