@@ -73,7 +73,7 @@ hypre_ParMatvec( double           alpha,
     *--------------------------------------------------------------------*/
    if (!comm_pkg)
    {
-	hypre_GenerateMatvecCommunicationInfo(A, NULL, NULL);
+	hypre_GenerateMatvecCommunicationInfo(A);
 	comm_pkg = hypre_ParCSRMatrixCommPkg(A); 
    }
 
@@ -170,7 +170,7 @@ hypre_ParMatvecT( double           alpha,
     *--------------------------------------------------------------------*/
    if (!comm_pkg)
    {
-	hypre_GenerateMatvecCommunicationInfo(A, NULL, NULL);
+	hypre_GenerateMatvecCommunicationInfo(A);
 	comm_pkg = hypre_ParCSRMatrixCommPkg(A); 
    }
 
