@@ -15,6 +15,8 @@
 #ifndef hypre_thread_MPISTUBS
 #define hypre_thread_MPISTUBS
 
+#ifdef HYPRE_USE_PTHREADS
+
 #include "mpi.h"
 
 #ifdef __cplusplus
@@ -98,4 +100,4 @@ int MPI_Type_commit P((MPI_Datatype *datatype ));
 
 #endif
 
-
+#endif

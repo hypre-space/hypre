@@ -53,6 +53,8 @@ veryclean: clean
 UTILITIES_HEADERS =\
  memory.h\
  mpistubs.h\
+ thread_mpistubs.h\
+ threading.h\
  timing.h
 
 UTILITIES_FILES =\
@@ -68,7 +70,7 @@ libHYPRE_utilities.a: ${UTILITIES_OBJS}
 	@echo  "Building $@ ... "
 	ar -ru $@ ${UTILITIES_OBJS}
 	ranlib $@
- 
+
 ${UTILITIES_OBJS}: ${UTILITIES_HEADERS}
 
 ##################################################################

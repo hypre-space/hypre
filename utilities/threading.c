@@ -6,6 +6,9 @@
  *
  * $Revision$
 *********************************************************************EHEADER*/
+
+#ifdef HYPRE_USE_PTHREADS
+
 #include <malloc.h>
 #include <assert.h>
 #include <stdio.h>
@@ -168,3 +171,4 @@ void hypre_barrier(pthread_mutex_t *mpi_mtx,
 }
 
 
+#ifdef HYPRE_USE_PTHREADS

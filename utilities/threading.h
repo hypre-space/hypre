@@ -10,6 +10,8 @@
 #ifndef hypre_THREADING_HEADER
 #define hypre_THREADING_HEADER
 
+#ifdef HYPRE_USE_PTHREADS
+
 #ifndef NUM_THREADS
 #define NUM_THREADS 4
 #endif
@@ -53,5 +55,7 @@ pthread_mutex_t hypre_mutex_boxloops;
 hypre_workqueue_t hypre_qptr;
 pthread_mutex_t mpi_mtx;
 pthread_cond_t mpi_cnd;
+
+#endif
 
 #endif

@@ -12,6 +12,8 @@
  *
  *****************************************************************************/
 
+#ifdef HYPRE_USE_PTHREADS
+
 #define MPI_DEFINED 
 
 #include "thread_mpistubs.h"
@@ -565,3 +567,4 @@ thread_MPI_Type_commit( MPI_Datatype *datatype )
   hypre_barrier(&mpi_mtx,&mpi_cnd,&th_sem);
 }
 
+#endif
