@@ -293,9 +293,13 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
    for (i = 0; i < n_fine; i++)
    {      
       P_marker[i] = -1;
+   }
+ 
+   for (i = 0; i < num_cols_A_offd; i++)
+   {      
       P_marker_offd[i] = -1;
    }
-   
+  
    strong_f_marker = -2;
 
    /*-----------------------------------------------------------------------
@@ -303,8 +307,6 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
     *-----------------------------------------------------------------------*/ 
 
    fine_to_coarse_offd = hypre_CTAlloc(int, num_cols_A_offd); 
-
-/* Test TEST TEST */ 
 
    for (i = 0; i < n_fine; i++) fine_to_coarse[i] += my_first_cpt;
    index = 0;
@@ -322,8 +324,6 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
    hypre_FinalizeCommunication(comm_handle);   
 
    for (i = 0; i < n_fine; i++) fine_to_coarse[i] -= my_first_cpt;
-
-/*ETEST ETEST ETEST */
 
    /*-----------------------------------------------------------------------
     *  Loop over fine grid points.
