@@ -55,6 +55,9 @@ CC = mpicc
 F77 = mpif77
 
 CFLAGS = -O
+# CFLAGS = -g
+# CFLAGS = -O -DZZZ_TIMING
+# CFLAGS = -g -DZZZ_TIMING
 
 FFLAGS = -O
 
