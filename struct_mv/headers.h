@@ -7,10 +7,13 @@
  * $Revision$
  *********************************************************************EHEADER*/
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
 
 #include "mpi.h"
+#include "../utilities/memory.h"
+#include "../utilities/timing.h"
 /*#include "ZZZ_mv.h"*/
 
 #include "general.h"

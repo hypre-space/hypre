@@ -47,18 +47,19 @@ FILES =\
 OBJS = ${FILES:.c=.o}
 
 CC = mpcc
-#CC = /usr/local/apps/mpi/lib/rs6000/ch_mpl/mpicc
 F77 = f77
 
-#CFLAGS = -g
-CFLAGS =
+CFLAGS = -O
 
-FFLAGS = -g -d
+FFLAGS = -O
 
 LFLAGS =\
  -L/usr/local/lib\
  -L.\
+ -L../utilities\
  -lZZZ_mv\
+ -lZZZ_timing\
+ -lZZZ_memory\
  -lm
 
 

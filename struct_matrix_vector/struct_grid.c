@@ -83,7 +83,7 @@ zzz_NewAssembledStructGrid( MPI_Comm      *comm,
 
       global_size += box_volume;
    }
-   box_ranks = zzz_TRealloc(box_ranks, int, zzz_BoxArraySize(boxes));
+   box_ranks = zzz_TReAlloc(box_ranks, int, zzz_BoxArraySize(boxes));
 
    zzz_StructGridAllBoxes(grid)  = all_boxes;
    zzz_StructGridProcesses(grid) = processes;

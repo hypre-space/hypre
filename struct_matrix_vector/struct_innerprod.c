@@ -79,6 +79,8 @@ zzz_StructInnerProd(  zzz_StructVector *x,
    MPI_Allreduce(&local_result, &result, 1,
                  MPI_DOUBLE, MPI_SUM, *zzz_StructVectorComm(x));
 
+   zzz_IncFLOPCount(2*zzz_StructVectorGlobalSize(x));
+
    return result;
 }
 
