@@ -856,7 +856,6 @@ int MLI_Utils_HyprePCGSolve( CMLI *cmli, HYPRE_Matrix A,
 
    hypreA = (HYPRE_ParCSRMatrix) A;
    MLI_SetMaxIterations( cmli, 1 );
-   MLI_SetOutputLevel( cmli, 1 );
    HYPRE_ParCSRMatrixGetComm( hypreA , &mpi_comm );
    HYPRE_ParCSRPCGCreate(mpi_comm, &pcg_solver);
    HYPRE_PCGSetMaxIter(pcg_solver, max_iter );
@@ -897,7 +896,6 @@ int MLI_Utils_HypreGMRESSolve( CMLI *cmli, HYPRE_Matrix A,
 
    hypreA = (HYPRE_ParCSRMatrix) A;
    MLI_SetMaxIterations( cmli, 1 );
-   MLI_SetOutputLevel( cmli, 1 );
    HYPRE_ParCSRMatrixGetComm( hypreA , &mpi_comm );
    HYPRE_ParCSRGMRESCreate(mpi_comm, &gmres_solver);
    HYPRE_GMRESSetMaxIter(gmres_solver, max_iter );
