@@ -198,8 +198,8 @@ int MLI_Matrix_GetSubMatrix(MLI_Matrix *A_in, int nRows, int *rowIndices,
 int MLI_Matrix_GetOverlappedMatrix(MLI_Matrix *mli_mat, int *offNRows, 
                  int **offRowLengths, int **offCols, double **offVals)
 {
-   int         i, j, k, mypid, nprocs, *partition, startRow, endRow;
-   int         localNrows, nSends, *sendProcs, nRecvs;
+   int         i, j, k, mypid, nprocs, *partition, startRow;
+   int         nSends, *sendProcs, nRecvs;
    int         *recvProcs, *recvStarts, proc, offset, length, reqNum; 
    int         totalSendNnz, totalRecvNnz, index, base, totalSends;
    int         totalRecvs, rowNum, rowLength, *colInd, *sendStarts;
@@ -229,7 +229,6 @@ int MLI_Matrix_GetOverlappedMatrix(MLI_Matrix *mli_mat, int *offNRows,
    }
    HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) A, &partition);
    startRow   = partition[mypid];
-   endRow     = partition[mypid+1] - 1;
    hypre_TFree( partition );
 
    /*-----------------------------------------------------------------

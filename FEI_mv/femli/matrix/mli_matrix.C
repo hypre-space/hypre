@@ -134,7 +134,7 @@ int MLI_Matrix::apply(double alpha, MLI_Vector *vec1, double beta,
 
 MLI_Vector *MLI_Matrix::createVector()
 {
-   int                mypid, nprocs, start_row, end_row, global_nrows;
+   int                mypid, nprocs, start_row, end_row;
    int                ierr, *partitioning;
    char               param_string[100];
    MPI_Comm           comm;
@@ -154,7 +154,6 @@ MLI_Vector *MLI_Matrix::createVector()
    MPI_Comm_rank(comm, &mypid);
    MPI_Comm_size(comm, &nprocs);
    HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix)hypreA,&partitioning);
-   global_nrows = partitioning[nprocs];
    start_row    = partitioning[mypid];
    end_row      = partitioning[mypid+1];
    free( partitioning );

@@ -119,7 +119,7 @@ int MLI_Solver_Schwarz::solve(MLI_Vector *f_in, MLI_Vector *u_in)
    int     nprocs, *tmpJ, *partition, startRow, endRow;
    int     *ADiagI, *ADiagJ, *AOffdI, *AOffdJ;
    double  *ADiagA, *AOffdA, *uData, *fData;
-   double  zero=0.0, relaxWeight, *vBufData, *tmpA, *vExtData, res, *Ax;
+   double  relaxWeight, *vBufData, *tmpA, *vExtData, res, *Ax;
    MPI_Comm               comm;
    hypre_ParCSRMatrix     *A;
    hypre_CSRMatrix        *ADiag, *AOffd;
@@ -610,15 +610,13 @@ int MLI_Solver_Schwarz::buildBlocks(int offNRows,
                           int *offCols, double *offVals)
 {
    int         ib, ii, ip, mypid, nprocs, *partition, startRow, endRow;
-   int         localNRows, extNRows, nSends, *sendProcs, nRecvs, offset;
-   int         *recvProcs, *recvStarts, nRecvBefore=0, length, reqNum; 
+   int         localNRows, nRecvs;
+   int         *recvProcs, *recvStarts, nRecvBefore=0; 
    int         blockSize, rowOffset, nnzOffset, blockStartRow, blockEndRow;
-   int         irow, jcol, colIndex, rowSize, *colInd, *sendStarts;
+   int         irow, jcol, colIndex, rowSize, *colInd;
    int         maxBlkSize, blkLeng;
    double      *colVal, **tempBlock, **tempBlockInverse;
    MPI_Comm    comm;
-   MPI_Request *requests;
-   MPI_Status  *status;
    hypre_ParCSRCommPkg *commPkg;
    hypre_ParCSRMatrix  *A = (hypre_ParCSRMatrix *) Amat_->getMatrix();
 
@@ -710,7 +708,6 @@ int MLI_Solver_Schwarz::buildBlocks(int offNRows,
       blkLeng       = blockLengths_[ib];
       blockStartRow = ib * blockSize + startRow - nRecvBefore;
       blockEndRow   = blockStartRow + blkLeng - 1;
-printf("blockRow  = %d %d\n", blockStartRow, blockEndRow);
       for ( irow = 0; irow < blkLeng; irow++ )
          for ( jcol = 0; jcol < blkLeng; jcol++ )
             tempBlock[irow][jcol] = 0.0;

@@ -57,33 +57,39 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,
                                    int init_count, int *init_aggr)
 {
    HYPRE_IJMatrix         IJPmat;
-   hypre_CSRMatrix        *A_offd, *J_diag, *J_offd;
    hypre_ParCSRMatrix     *Amat, *A2mat, *Pmat, *Gmat, *Jmat, *Pmat2;
    hypre_ParCSRCommPkg    *comm_pkg;
-   hypre_ParCSRCommHandle *comm_handle;
    MLI_Matrix             *mli_Pmat, *mli_Jmat, *mli_A2mat;
    MLI_Function           *func_ptr;
    MPI_Comm  comm;
    int       i, j, mypid, num_procs, A_start_row, A_end_row, A_global_nrows;
    int       A_local_nrows, *partition, naggr, *node2aggr, *eqn2aggr, ierr;
-   int       P_local_ncols, P_start_col, P_global_ncols, P_global_nrows;
-   int       P_local_nrows, P_start_row, A_offd_ncols, *P_cols_ext, offset;
-   int       k, irow, *col_ind, num_sends, send_leng, *send_ibuf, *P_cols;
-   int       index, map_start_i, map_start_ip1, *row_lengths, J_ncols_ext;
-   int       *J_diag_i, *J_diag_j, *J_offd_i, *J_offd_j, J_offd_ncols;
-   int       *K_diag_j, *K_offd_j, row_size, row_num, J_start_row, nnz_cnt;
-   int       J_local_nrows, cindex, max_nnz, max_nnz_diag, max_nnz_offd;
-   int       *new_col_ind, *K_diag_i, *K_offd_i, old_index, old_offset;
+   int       P_local_ncols, P_start_col, P_global_ncols;
+   int       P_local_nrows, P_start_row, *row_lengths, row_num;
+   int       k, irow, *col_ind, send_leng, *send_ibuf, *P_cols, index;
    int       blk_size, max_agg_size, *agg_cnt_array, **agg_ind_array;
-   int       agg_size, info, row_leng, *cols, nzcnt, *local_labels;
+   int       agg_size, info, nzcnt, *local_labels;
    double    *col_val, **P_vecs_ext, *send_buf, **P_vecs, max_eigen=0, alpha;
-   double    *J_diag_data, *J_offd_data, *K_diag_data, *K_offd_data, cvalue;
-   double    *new_col_val, *new_col_itmp, *q_array, *new_null, *r_array;
+   double    *q_array, *new_null, *r_array;
    char      param_string[200];
-   MLI_Vector      *mli_vecP, *mli_vecP2;
-   hypre_ParVector *hypreP, *hypreP2;
-   hypre_Vector    *hyprePLocal, *hyprePLocal2;
-   double          *hyprePData, *hyprePData2;
+
+#if 0
+hypre_CSRMatrix        *A_offd, *J_diag, *J_offd;
+hypre_ParCSRCommHandle *comm_handle;
+int    send_leng, *send_ibuf, row_leng, *cols;
+int    map_start_i, map_start_ip1, J_ncols_ext;
+int    *J_diag_i, *J_diag_j, *J_offd_i, *J_offd_j, J_offd_ncols;
+int    *K_diag_j, *K_offd_j, row_size, row_num, J_start_row, nnz_cnt;
+int    J_local_nrows, cindex, max_nnz, max_nnz_diag, max_nnz_offd;
+int    *new_col_ind, *K_diag_i, *K_offd_i, old_index, old_offset;
+int    A_offd_ncols, *P_cols_ext, **P_vecs_ext, offset, num_sends;
+double *J_diag_data, *J_offd_data, *K_diag_data, *K_offd_data, cvalue;
+double *send_buf, *new_col_val, *new_col_itmp;
+MLI_Vector      *mli_vecP, *mli_vecP2;
+hypre_ParVector *hypreP, *hypreP2;
+hypre_Vector    *hyprePLocal, *hyprePLocal2;
+double          *hyprePData, *hyprePData2;
+#endif
 
    /*-----------------------------------------------------------------
     * fetch matrix and machine information
@@ -186,7 +192,6 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,
       delete [] node2aggr;
       return 0.0;
    }
-   P_global_nrows = A_global_nrows;
    P_local_nrows  = A_local_nrows;
    P_start_row    = A_start_row;
    ierr = HYPRE_IJMatrixCreate(comm,P_start_row,P_start_row+P_local_nrows-1,
@@ -886,7 +891,7 @@ int MLI_Method_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
 {
    MPI_Comm  comm;
    int       mypid, num_procs, *partition, start_row, end_row;
-   int       i, local_nrows, naggr=0, *node2aggr, *aggr_size;
+   int       local_nrows, naggr=0, *node2aggr, *aggr_size;
    int       irow, icol, col_num, row_num, row_leng, *cols, global_nrows;
    int       *node_stat, select_flag, nselected=0, count;
    int       ibuf[2], itmp[2];
@@ -1137,7 +1142,7 @@ int MLI_Method_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
          if ( node_stat[irow] != MLI_METHOD_AMGSA_SELECTED )
          {
             node2aggr[irow] = -1;
-            node_stat[irow] != MLI_METHOD_AMGSA_SELECTED;
+            node_stat[irow] = MLI_METHOD_AMGSA_SELECTED;
          }
    }
 
@@ -1197,9 +1202,8 @@ int MLI_Method_AMGSA::formLocalGraph( hypre_ParCSRMatrix *Amat,
    hypre_ParCSRMatrix *graph;
    MPI_Comm           comm;
    int                i, j, jj, index, mypid, num_procs, *partition;
-   int                start_row, end_row, local_nrow, *row_lengths;
+   int                start_row, end_row, *row_lengths;
    int                *Adiag_rptr, *Adiag_cols, Adiag_nrows, length;
-   int                Aoffd_nrows, global_nrows, global_ncols;
    int                irow, max_row_nnz, ierr, *col_ind, labeli, labelj;
    double             *diag_data=NULL, *col_val;
    double             *Adiag_vals, dcomp1, dcomp2, epsilon;
@@ -1217,8 +1221,6 @@ int MLI_Method_AMGSA::formLocalGraph( hypre_ParCSRMatrix *Amat,
    start_row    = partition[mypid];
    end_row      = partition[mypid+1] - 1;
    free( partition );
-   global_nrows = hypre_ParCSRMatrixGlobalNumRows(Amat);
-   global_ncols = hypre_ParCSRMatrixGlobalNumCols(Amat);
    Adiag_block  = hypre_ParCSRMatrixDiag(Amat);
    Adiag_nrows  = hypre_CSRMatrixNumRows(Adiag_block);
    Adiag_rptr   = hypre_CSRMatrixI(Adiag_block);

@@ -63,10 +63,10 @@ int MLI_Method_AMGSA::setupSubdomainNullSpaceUsingFEData( MLI *mli )
    int          nodeFieldID, elemNNodes, **elemNodeLists, *elemNodeList1D;
    int          blockSize, *nodeEqnList, eMatDim, *partition, localStartRow;
    int          localNRows, rowInd1, rowInd2, colInd1, colInd2;
-   int          colOffset1, colOffset2, elemID, *elemIDs, info, rowSize;
+   int          colOffset1, colOffset2, elemID, *elemIDs, rowSize;
    int          csrNrows, *csrIA, *csrJA, totalNNodes, sInd1, sInd2, offset;
    int          *newNodeEqnList, *newElemNodeList, *orderArray, newNNodes;
-   double       *elemMat, *elemMats, *csrAA, sigmaR, sigmaI;
+   double       *elemMat, *csrAA;
    double       *eigenR, *eigenI, *eigenV;
    char         which[20];
    char         *targv[1];
@@ -75,6 +75,10 @@ int MLI_Method_AMGSA::setupSubdomainNullSpaceUsingFEData( MLI *mli )
    MLI_Mapper   *nodeEqnMap;
    MLI_Matrix   *mliAmat;
    hypre_ParCSRMatrix *hypreA;
+#ifdef MLI_ARPACK
+   int          info;
+   double       sigmaR, sigmaI;
+#endif
 
 #ifdef MLI_DEBUG_DETAILED
    cout << " MLI_Method_AMGSA::setupSubdomainNullSpaceUsingFEData begins.\n";
@@ -294,14 +298,14 @@ int MLI_Method_AMGSA::setupSubdomainNullSpaceUsingFEData( MLI *mli )
    /* --------------------------------------------------------------- */
 
    strcpy( which, "shift" );
-   sigmaR = 1.0e-5;
-   sigmaI = 0.0e-1;
    eigenR = new double[nullspace_dim+1];
    eigenI = new double[nullspace_dim+1];
    eigenV = new double[csrNrows*(nullspace_dim+1)];
    assert((long) eigenV);
 
 #ifdef MLI_ARPACK
+   sigmaR = 1.0e-5;
+   sigmaI = 0.0e-1;
    dnstev_(&csrNrows, &nullspace_dim, which, &sigmaR, &sigmaI, 
            csrIA, csrJA, csrAA, eigenR, eigenI, eigenV, &csrNrows, &info);
 #else

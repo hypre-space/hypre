@@ -61,7 +61,7 @@ int MLI_Solver_Jacobi::solve(MLI_Vector *f_in, MLI_Vector *u_in)
    double              *u_data, *Vtemp_data;
    hypre_ParVector     *Vtemp;
    int                 i, n, relax_error = 0, global_size, *partitioning1;
-   int                 is, num_procs, num_threads, *partitioning2;
+   int                 is, num_procs, *partitioning2;
    double              zero = 0.0, relax_weight;
    MPI_Comm            comm;
    hypre_ParVector     *f, *u;
@@ -70,7 +70,6 @@ int MLI_Solver_Jacobi::solve(MLI_Vector *f_in, MLI_Vector *u_in)
     * fetch machine and smoother parameters
     *-----------------------------------------------------------------*/
 
-   num_threads     = hypre_NumThreads();
    A               = (hypre_ParCSRMatrix *) Amat->getMatrix();
    comm            = hypre_ParCSRMatrixComm(A);
    A_diag          = hypre_ParCSRMatrixDiag(A);

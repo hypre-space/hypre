@@ -64,8 +64,7 @@ int MLI_Solver_GS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
    double              *f_data;
    hypre_ParVector     *Vtemp;
    hypre_Vector        *Vtemp_local;
-   double              *Vtemp_data;
-   int                 i, j, n, is, relax_error = 0, global_size, *partitioning1;
+   int                 i, j, n, is, relax_error=0, global_size, *partitioning1;
    int                 ii, jj, num_procs, num_threads, *partitioning2;
    int                 num_sends, num_cols_offd, index, size, ns, ne, rest;
    int                 start;
@@ -114,7 +113,6 @@ int MLI_Solver_GS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
    Vtemp = hypre_ParVectorCreate(comm, global_size, partitioning2);
    hypre_ParVectorInitialize(Vtemp);
    Vtemp_local = hypre_ParVectorLocalVector(Vtemp);
-   Vtemp_data  = hypre_VectorData(Vtemp_local);
 
    /*-----------------------------------------------------------------
     * Copy f into temporary vector.
