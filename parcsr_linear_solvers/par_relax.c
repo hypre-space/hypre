@@ -232,45 +232,45 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
           *  Generate CSR matrix from ParCSRMatrix A
           *-----------------------------------------------------------------*/
 
-	 A_CSR = hypre_ParCSRMatrixToCSRMatrixAll(A);
-	 f_vector = hypre_ParVectorToVectorAll(f);
- 	 A_CSR_i = hypre_CSRMatrixI(A_CSR);
- 	 A_CSR_j = hypre_CSRMatrixJ(A_CSR);
- 	 A_CSR_data = hypre_CSRMatrixData(A_CSR);
-   	 f_vector_data = hypre_VectorData(f_vector);
-
-         A_mat = hypre_CTAlloc(double, n_global*n_global);
-         b_vec = hypre_CTAlloc(double, n_global);    
-
-         /*-----------------------------------------------------------------
-          *  Load CSR matrix into A_mat.
-          *-----------------------------------------------------------------*/
-
-         for (i = 0; i < n_global; i++)
-         {
-            for (jj = A_CSR_i[i]; jj < A_CSR_i[i+1]; jj++)
-            {
-               column = A_CSR_j[jj];
-               A_mat[i*n_global+column] = A_CSR_data[jj];
-            }
-            b_vec[i] = f_vector_data[i];
-         }
-
-         relax_error = gselim(A_mat,b_vec,n_global);
-
-         for (i = 0; i < n; i++)
-         {
-            u_data[i] = b_vec[first_index+i];
-         }
-
-         if (n)
+	 if (n)
 	 {
+	    A_CSR = hypre_ParCSRMatrixToCSRMatrixAll(A);
+	    f_vector = hypre_ParVectorToVectorAll(f);
+ 	    A_CSR_i = hypre_CSRMatrixI(A_CSR);
+ 	    A_CSR_j = hypre_CSRMatrixJ(A_CSR);
+ 	    A_CSR_data = hypre_CSRMatrixData(A_CSR);
+   	    f_vector_data = hypre_VectorData(f_vector);
+
+            A_mat = hypre_CTAlloc(double, n_global*n_global);
+            b_vec = hypre_CTAlloc(double, n_global);    
+
+            /*---------------------------------------------------------------
+             *  Load CSR matrix into A_mat.
+             *---------------------------------------------------------------*/
+
+            for (i = 0; i < n_global; i++)
+            {
+               for (jj = A_CSR_i[i]; jj < A_CSR_i[i+1]; jj++)
+               {
+                  column = A_CSR_j[jj];
+                  A_mat[i*n_global+column] = A_CSR_data[jj];
+               }
+               b_vec[i] = f_vector_data[i];
+            }
+
+            relax_error = gselim(A_mat,b_vec,n_global);
+
+            for (i = 0; i < n; i++)
+            {
+               u_data[i] = b_vec[first_index+i];
+            }
+
 	    hypre_TFree(A_mat); 
             hypre_TFree(b_vec);
             hypre_DestroyCSRMatrix(A_CSR);
             hypre_DestroyVector(f_vector);
-	 }
          
+         }
       }
       break;   
    }
