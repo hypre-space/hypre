@@ -43,6 +43,7 @@ int    hypre_PCGAxpy( double alpha, void *x, void *y );
 typedef struct
 {
    double   tol;
+   double   rel_residual_norm;
    int      max_iter;
    int      two_norm;
    int      rel_change;
@@ -65,6 +66,7 @@ typedef struct
    int      logging;
    double  *norms;
    double  *rel_norms;
+   char    *log_file_name;
 
 } hypre_PCGData;
 
@@ -199,6 +201,7 @@ hypre_PCGSetup( void *pcg_vdata,
    {
       (pcg_data -> norms)     = hypre_CTAlloc(double, max_iter + 1);
       (pcg_data -> rel_norms) = hypre_CTAlloc(double, max_iter + 1);
+      (pcg_data -> log_file_name) = "pcg.out.log";
    }
 
    return ierr;
@@ -249,12 +252,20 @@ hypre_PCGSolve( void *pcg_vdata,
    double          bi_prod, i_prod, eps;
    double          pi_prod, xi_prod;
                 
-   int             i = 0;
+   int             i = 0, j;
    int             ierr = 0;
+   char		  *log_file_name;
+   FILE		  *fp;
 
    /*-----------------------------------------------------------------------
     * Start pcg solve
     *-----------------------------------------------------------------------*/
+
+   if (logging > 0)
+   {
+      log_file_name = (pcg_data -> log_file_name);
+      fp = fopen(log_file_name,"w");
+   }
 
    /* compute eps */
    if (two_norm)
@@ -335,10 +346,10 @@ hypre_PCGSolve( void *pcg_vdata,
 
 #if 0
       if (two_norm)
-	 printf("Iter (%d): ||r||_2 = %e, ||r||_2/||b||_2 = %e\n",
+	 fprintf(fp,"Iter (%d): ||r||_2 = %e, ||r||_2/||b||_2 = %e\n",
 		i, sqrt(i_prod), (bi_prod ? sqrt(i_prod/bi_prod) : 0));
       else
-	 printf("Iter (%d): ||r||_C = %e, ||r||_C/||b||_C = %e\n",
+	 fprintf(fp,"Iter (%d): ||r||_C = %e, ||r||_C/||b||_C = %e\n",
 		i, sqrt(i_prod), (bi_prod ? sqrt(i_prod/bi_prod) : 0));
 #endif
  
@@ -375,10 +386,10 @@ hypre_PCGSolve( void *pcg_vdata,
 
 #if 0
    if (two_norm)
-      printf("Iterations = %d: ||r||_2 = %e, ||r||_2/||b||_2 = %e\n",
+      fprintf(fp, "Iterations = %d: ||r||_2 = %e, ||r||_2/||b||_2 = %e\n",
 	     i, sqrt(i_prod), (bi_prod ? sqrt(i_prod/bi_prod) : 0));
    else
-      printf("Iterations = %d: ||r||_C = %e, ||r||_C/||b||_C = %e\n",
+      fprintf(fp, "Iterations = %d: ||r||_C = %e, ||r||_C/||b||_C = %e\n",
 	     i, sqrt(i_prod), (bi_prod ? sqrt(i_prod/bi_prod) : 0));
 #endif
 
@@ -386,27 +397,28 @@ hypre_PCGSolve( void *pcg_vdata,
     * Print log
     *-----------------------------------------------------------------------*/
 
-#if 0
    if (logging > 0)
    {
       if (two_norm)
       {
-         printf("Iters       ||r||_2    ||r||_2/||b||_2\n");
-         printf("-----    ------------    ------------ \n");
+         fprintf(fp,"Iters       ||r||_2      conv.rate  ||r||_2/||b||_2\n");
+         fprintf(fp,"-----    ------------    ---------  ------------ \n");
       }
       else
       {
-         printf("Iters       ||r||_C    ||r||_C/||b||_C\n");
-         printf("-----    ------------    ------------ \n");
+         fprintf(fp,"Iters       ||r||_C      conv.rate  ||r||_C/||b||_C\n");
+         fprintf(fp,"-----    ------------    ---------  ------------ \n");
       }
       for (j = 1; j <= i; j++)
       {
-         printf("% 5d    %e    %e\n", j, norms[j], rel_norms[j]);
+         fprintf(fp,"% 5d    %e    %f   %e\n", j, norms[j], norms[j]/ 
+		norms[j-1], rel_norms[j]);
       }
+      fclose(fp);
    }
-#endif
 
    (pcg_data -> num_iterations) = i;
+   (pcg_data -> rel_residual_norm) = rel_norms[i];
 
    return ierr;
 }
