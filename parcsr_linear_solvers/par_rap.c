@@ -617,17 +617,21 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
 		{
 		   jcol = RAP_ext_j[k];
 		   if (jcol < first_col_diag_RAP || jcol > last_col_diag_RAP)
+		   {
 		   	if (P_marker[jcol] < jj_row_begin_offd)
 			{
 			 	P_marker[jcol] = jj_count_offd;
 				jj_count_offd++;
 			}
+		   }
 		   else
+		   {
 		   	if (P_marker[jcol] < jj_row_begin_diag)
 			{
 			 	P_marker[jcol] = jj_count_diag;
 				jj_count_diag++;
 			}
+		   }
 	    	}
 		break;
 	    }
@@ -679,19 +683,21 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
                    *--------------------------------------------------------*/
 
 		  if (i3 < first_col_diag_RAP || i3 > last_col_diag_RAP)
- 
+		  { 
                   	if (P_marker[i3] < jj_row_begin_offd)
                   	{
                      		P_marker[i3] = jj_count_offd;
                      		jj_count_offd++;
                   	}
+		  } 
 		  else
+		  { 
                   	if (P_marker[i3] < jj_row_begin_diag)
                   	{
                      		P_marker[i3] = jj_count_diag;
                      		jj_count_diag++;
                   	}
-
+		  } 
                }
             }
            }
@@ -1116,6 +1122,8 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
    	hypre_ParCSRMatrixOffd(RAP) = RAP_offd;
    	hypre_ParCSRMatrixColMapOffd(RAP) = col_map_offd_RAP;
    }
+   else
+	hypre_TFree(RAP_offd_i);
 
 /*   if (num_procs > 1)
    	hypre_GenerateRAPCommPkg(RAP, A, coarse_partitioning);
@@ -1128,10 +1136,11 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
 
    hypre_DestroyCSRMatrix(R_diag);
    if (num_cols_offd_RT) 
-   {
 	hypre_DestroyCSRMatrix(R_offd);
+
+   if (num_sends_RT) 
 	hypre_DestroyCSRMatrix(RAP_ext);
-   }
+
    if (num_cols_offd_A) hypre_DestroyCSRMatrix(P_ext);
    hypre_TFree(P_marker);   
    hypre_TFree(A_marker);
@@ -1498,9 +1507,9 @@ hypre_ExchangeRAPData( 	hypre_CSRMatrix *RAP_int,
 			  &recv_matrix_types[i]);	
    }
  
-   for (i=0; i < num_recvs; i++)
-	for (j = recv_vec_starts[i]; j < recv_vec_starts[i+1]; j++)
-		RAP_int_i[j+1] -= RAP_int_i[j];
+   for (i=num_recvs; i > 0; i--)
+	for (j = recv_vec_starts[i]; j > recv_vec_starts[i-1]; j--)
+		RAP_int_i[j] -= RAP_int_i[j-1];
 
    for (i=0; i < num_sends; i++)
    {
