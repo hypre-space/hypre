@@ -158,7 +158,6 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
                   normalEqnFlag_(0),
                   A21NRows_(0),
                   A21NCols_(0),
-                  finalResNorm_(0.0),
                   rowLengths_(NULL),
                   colIndices_(NULL),
                   colValues_(NULL),

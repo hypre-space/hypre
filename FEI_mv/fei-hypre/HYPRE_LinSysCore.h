@@ -571,7 +571,6 @@ class HYPRE_LinSysCore
    int             gmresDim_;
    int             fgmresUpdateTol_;
    int             maxIterations_;
-   int             finalResNorm_;
    double          tolerance_;
    int             normAbsRel_;
 
