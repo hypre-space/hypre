@@ -1239,7 +1239,7 @@ void HYPRE_LinSysCore::buildSchurReducedRHS()
              HYPRE_IJVectorGetLocalComponents(HYb_, 1, &i, NULL, &ddata);
              HYPRE_ParCSRMatrixGetRow(M_csr,rowCount,&rowSize,&colInd,&colVal);
              if ( rowSize != 1 ) printf("buildReducedRHS : WARNING.\n");
-             if ( colVal[0] != 0.0 ) ddata /= colVal[0];
+             if ( colVal[0] != 0.0 ) ddata *= colVal[0];
              ierr = HYPRE_IJVectorSetLocalComponents(f1,1,&rowCount,NULL,&ddata);
              HYPRE_ParCSRMatrixRestoreRow(M_csr,rowCount,&rowSize,&colInd,&colVal);
              assert( !ierr );
