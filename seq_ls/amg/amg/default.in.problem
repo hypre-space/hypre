@@ -1,0 +1,31 @@
+#BHEADER***********************************************************************
+# (c) 1996   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+# number of variables
+500
+
+# matrix file
+test4.in.ysmp
+
+# rhs (zero)
+1
+
+# initial guess (random)
+1
+
+# number of unknowns, number of points
+1 500
+
+# iu, ip, iv (standard)
+1
+
+# xyz file
+0
+test4.in.xyz
+
