@@ -1114,19 +1114,15 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
    hypre_CSRMatrixI(RAP_diag) = RAP_diag_i; 
    hypre_CSRMatrixJ(RAP_diag) = RAP_diag_j; 
 
+   RAP_offd = hypre_ParCSRMatrixOffd(RAP);
+   hypre_CSRMatrixI(RAP_offd) = RAP_offd_i; 
    if (num_cols_offd_RAP)
    {
-   	RAP_offd = hypre_ParCSRMatrixOffd(RAP);
 	hypre_CSRMatrixData(RAP_offd) = RAP_offd_data; 
-   	hypre_CSRMatrixI(RAP_offd) = RAP_offd_i; 
    	hypre_CSRMatrixJ(RAP_offd) = RAP_offd_j; 
-   	hypre_ParCSRMatrixOffd(RAP) = RAP_offd;
    	hypre_ParCSRMatrixColMapOffd(RAP) = col_map_offd_RAP;
    	hypre_GenerateRAPCommPkg(RAP, A);
-
    }
-   else
-	hypre_TFree(RAP_offd_i);
 
    *RAP_ptr = RAP;
 
@@ -1195,192 +1191,6 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
  *               temporarily? 
  *--------------------------------------------------------------------------*/
          
-
-
-hypre_CSRMatrix * 
-hypre_GeneratePExt( hypre_ParCSRMatrix *P, hypre_ParCSRMatrix *A)
-{
-   MPI_Comm comm = hypre_ParCSRMatrixComm(P);
-   int first_col_diag = hypre_ParCSRMatrixFirstColDiag(P);
-   int *col_map_offd = hypre_ParCSRMatrixColMapOffd(P);
-
-   hypre_CommPkg *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
-   int num_recvs = hypre_CommPkgNumRecvs(comm_pkg);
-   int *recv_vec_starts = hypre_CommPkgRecvVecStarts(comm_pkg);
-   int num_sends = hypre_CommPkgNumSends(comm_pkg);
-   int *send_map_starts = hypre_CommPkgSendMapStarts(comm_pkg);
-   int *send_map_elmts = hypre_CommPkgSendMapElmts(comm_pkg);
-
-   MPI_Datatype *recv_matrix_types;
-   MPI_Datatype *send_matrix_types;
-   hypre_CommHandle *comm_handle;
-   hypre_CommPkg *tmp_comm_pkg;
-
-   hypre_CSRMatrix *diag = hypre_ParCSRMatrixDiag(P);
-
-   int *diag_i = hypre_CSRMatrixI(diag);
-   int *diag_j = hypre_CSRMatrixJ(diag);
-   double *diag_data = hypre_CSRMatrixData(diag);
-
-   int num_cols_diag = hypre_CSRMatrixNumCols(diag);
-
-   hypre_CSRMatrix *offd = hypre_ParCSRMatrixOffd(P);
-
-   int *offd_i = hypre_CSRMatrixI(offd);
-   int *offd_j = hypre_CSRMatrixJ(offd);
-   double *offd_data = hypre_CSRMatrixData(offd);
-
-   int num_cols_offd = hypre_CSRMatrixNumCols(offd);
-
-   int *p_int_i;
-   int *p_int_j;
-   double *p_int_data;
-
-   int num_cols_p_int, num_nonzeros;
-   int num_rows_p_ext;
-   int num_procs, my_id;
-
-   hypre_CSRMatrix *P_ext;
-
-   int *p_ext_i;
-   int *p_ext_j;
-   double *p_ext_data;
-  
-   int i, j, k, counter;
-   int start_index;
-   int j_cnt, jrow;
-
-   MPI_Comm_size(comm,&num_procs);
-   MPI_Comm_rank(comm,&my_id);
-
-   num_cols_p_int = num_cols_diag + num_cols_offd;
-   num_rows_p_ext = recv_vec_starts[num_recvs];
-   p_int_i = hypre_CTAlloc(int, send_map_starts[num_sends]+1);
-   send_matrix_types = hypre_CTAlloc(MPI_Datatype, num_sends);
-   p_ext_i = hypre_CTAlloc(int, num_rows_p_ext+1);
-   recv_matrix_types = hypre_CTAlloc(MPI_Datatype, num_recvs);
-  
-/*--------------------------------------------------------------------------
- * generate p_int_i through adding number of row-elements of offd and diag
- * for corresponding rows. p_int_i[j+1] contains the number of elements of
- * a row j (which is determined through send_map_elmts) 
- *--------------------------------------------------------------------------*/
-   p_int_i[0] = 0;
-   j_cnt = 0;
-   num_nonzeros = 0;
-   for (i=0; i < num_sends; i++)
-   {
-	for (j = send_map_starts[i]; j < send_map_starts[i+1]; j++)
-	{
-	    jrow = send_map_elmts[j];
-	    p_int_i[++j_cnt] = offd_i[jrow+1] - offd_i[jrow]
-			  + diag_i[jrow+1] - diag_i[jrow];
-	    num_nonzeros += p_int_i[j_cnt];
-	}
-   }
-
-/*--------------------------------------------------------------------------
- * initialize communication 
- *--------------------------------------------------------------------------*/
-   comm_handle = hypre_InitializeCommunication(11,comm_pkg,
-		&p_int_i[1],&p_ext_i[1]);
-
-   p_int_j = hypre_CTAlloc(int, num_nonzeros);
-   p_int_data = hypre_CTAlloc(double, num_nonzeros);
-
-   start_index = p_int_i[0];
-   counter = 0;
-   for (i=0; i < num_sends; i++)
-   {
-	num_nonzeros = counter;
-	for (j = send_map_starts[i]; j < send_map_starts[i+1]; j++)
-	{
-	    jrow = send_map_elmts[j];
-	    for (k=diag_i[jrow]; k < diag_i[jrow+1]; k++) 
-	    {
-		p_int_j[counter] = diag_j[k]+first_col_diag;
-		p_int_data[counter] = diag_data[k];
-		counter++;
-  	    }
-	    for (k=offd_i[jrow]; k < offd_i[jrow+1]; k++) 
-	    {
-		p_int_j[counter] = col_map_offd[offd_j[k]];
-		p_int_data[counter] = offd_data[k];
-		counter++;
-  	    }
-	   
-	}
-	num_nonzeros = counter - num_nonzeros;
-	hypre_BuildCSRJDataType(num_nonzeros, 
-			  &p_int_data[start_index], 
-			  &p_int_j[start_index], 
-			  &send_matrix_types[i]);	
-	start_index += num_nonzeros;
-   }
-
-   tmp_comm_pkg = hypre_CTAlloc(hypre_CommPkg,1);
-   hypre_CommPkgComm(tmp_comm_pkg) = comm;
-   hypre_CommPkgNumSends(tmp_comm_pkg) = num_sends;
-   hypre_CommPkgNumRecvs(tmp_comm_pkg) = num_recvs;
-   hypre_CommPkgSendProcs(tmp_comm_pkg) = hypre_CommPkgSendProcs(comm_pkg);
-   hypre_CommPkgRecvProcs(tmp_comm_pkg) = hypre_CommPkgRecvProcs(comm_pkg);
-   hypre_CommPkgSendMPITypes(tmp_comm_pkg) = send_matrix_types;	
-
-   hypre_FinalizeCommunication(comm_handle);
-
-/*--------------------------------------------------------------------------
- * after communication exchange p_ext_i[j+1] contains the number of elements
- * of a row j ! 
- * evaluate p_ext_i and compute num_nonzeros for p_ext 
- *--------------------------------------------------------------------------*/
-
-   for (i=0; i < num_recvs; i++)
-	for (j = recv_vec_starts[i]; j < recv_vec_starts[i+1]; j++)
-		p_ext_i[j+1] += p_ext_i[j];
-
-   num_nonzeros = p_ext_i[num_rows_p_ext];
-
-   P_ext = hypre_CreateCSRMatrix(num_rows_p_ext,num_cols_p_int,num_nonzeros);
-   p_ext_j = hypre_CTAlloc(int, num_nonzeros);
-   p_ext_data = hypre_CTAlloc(double, num_nonzeros);
-
-   for (i=0; i < num_recvs; i++)
-   {
-	start_index = p_ext_i[recv_vec_starts[i]];
-	num_nonzeros = p_ext_i[recv_vec_starts[i+1]]-start_index;
-	hypre_BuildCSRJDataType(num_nonzeros, 
-			  &p_ext_data[start_index], 
-			  &p_ext_j[start_index], 
-			  &recv_matrix_types[i]);	
-   }
-
-   hypre_CommPkgRecvMPITypes(tmp_comm_pkg) = recv_matrix_types;	
-
-   comm_handle = hypre_InitializeCommunication(0,tmp_comm_pkg,NULL,NULL);
-
-   hypre_CSRMatrixI(P_ext) = p_ext_i;
-   hypre_CSRMatrixJ(P_ext) = p_ext_j;
-   hypre_CSRMatrixData(P_ext) = p_ext_data;
-
-   hypre_FinalizeCommunication(comm_handle); 
-
-   hypre_TFree(p_int_i);
-   hypre_TFree(p_int_j);
-   hypre_TFree(p_int_data);
-
-   for (i=0; i < num_sends; i++)
-	MPI_Type_free(&send_matrix_types[i]);
-
-   for (i=0; i < num_recvs; i++)
-	MPI_Type_free(&recv_matrix_types[i]);
-
-   hypre_TFree(send_matrix_types);
-   hypre_TFree(recv_matrix_types);
-   hypre_TFree(tmp_comm_pkg);
-
-   return P_ext;
-}
-
 hypre_CSRMatrix *
 hypre_ExchangeRAPData( 	hypre_CSRMatrix *RAP_int,
 			hypre_CommPkg *comm_pkg_RT)
