@@ -48,6 +48,7 @@ hypre_ParAMGSetup( void               *amg_vdata,
    int       num_levels;
    int       level;
    int       coarse_size;
+   int       coarsen_type;
    int       fine_size;
    int       not_finished_coarsening = 1;
    int       Setup_err_flag;
@@ -60,6 +61,7 @@ hypre_ParAMGSetup( void               *amg_vdata,
 
    max_levels = hypre_ParAMGDataMaxLevels(amg_data);
    amg_ioutdat = hypre_ParAMGDataIOutDat(amg_data);
+   coarsen_type = hypre_ParAMGDataCoarsenType(amg_data);
    
    A_array = hypre_CTAlloc(hypre_ParCSRMatrix*, max_levels);
    P_array = hypre_CTAlloc(hypre_ParCSRMatrix*, max_levels-1);
@@ -93,8 +95,16 @@ hypre_ParAMGSetup( void               *amg_vdata,
        * for the level.  Returns strength matrix, S  
        *--------------------------------------------------------------*/
 
-      hypre_ParAMGCoarsen(A_array[level], strong_threshold,
+      if (coarsen_type)
+      {
+	 hypre_ParAMGCoarsenRuge(A_array[level], strong_threshold,
                           &S, &CF_marker, &coarse_size); 
+      }
+      else
+      {
+	 hypre_ParAMGCoarsen(A_array[level], strong_threshold,
+                          &S, &CF_marker, &coarse_size); 
+      }
 
 
       CF_marker_array[level] = CF_marker;
@@ -143,6 +153,7 @@ hypre_ParAMGSetup( void               *amg_vdata,
    hypre_ParAMGDataCFMarkerArray(amg_data) = CF_marker_array;
    hypre_ParAMGDataAArray(amg_data) = A_array;
    hypre_ParAMGDataPArray(amg_data) = P_array;
+   hypre_ParAMGDataRArray(amg_data) = P_array;
 
    /*-----------------------------------------------------------------------
     * Setup F and U arrays
