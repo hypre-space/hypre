@@ -41,7 +41,7 @@ HEADERS =\
  sstruct_matrix.h\
  sstruct_stencil.h\
  sstruct_vector.h\
- struct_map.h
+ box_map.h
 
 FILES =\
  HYPRE_sstruct_graph.c\
@@ -59,7 +59,7 @@ FILES =\
  sstruct_scale.c\
  sstruct_stencil.c\
  sstruct_vector.c\
- struct_map.c
+ box_map.c
 
 OBJS = ${FILES:.c=.o}
 

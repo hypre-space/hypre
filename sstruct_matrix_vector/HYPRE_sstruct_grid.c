@@ -30,7 +30,6 @@ HYPRE_SStructGridCreate( MPI_Comm           comm,
    hypre_SStructPGrid     **pgrids;
    hypre_SStructPGrid      *pgrid;
    hypre_SStructNeighbor ***neighbors;
-   int                     *offsets;
    int                      i;
 
    grid = hypre_TAlloc(hypre_SStructGrid, 1);
@@ -51,14 +50,8 @@ HYPRE_SStructGridCreate( MPI_Comm           comm,
    hypre_SStructGridNUCVars(grid) = 0;
    hypre_SStructGridUCVars(grid)  = NULL;
 
-   offsets  = hypre_TAlloc(int, nparts);
-   for (i = 0; i < nparts; i++)
-   {
-      offsets[i] = NULL;
-   }
-   hypre_SStructGridOffsets(grid)   = offsets;
-   hypre_SStructGridUOffset(grid)   = 0;
-   hypre_SStructGridStartRank(grid) = 0;
+   hypre_SStructGridMaps(grid) = NULL;
+   hypre_SStructGridInfo(grid) = NULL;
 
    /* miscellaneous */
    hypre_SStructGridLocalSize(grid)     = 0;
@@ -79,11 +72,14 @@ HYPRE_SStructGridDestroy( HYPRE_SStructGrid grid )
 {
    int ierr = 0;
 
-   int                      nparts;
-   hypre_SStructPGrid     **pgrids;
-   hypre_SStructNeighbor ***neighbors;
-   hypre_SStructNeighbor   *neighbor;
-   int                      part, i;
+   int                        nparts;
+   hypre_SStructPGrid       **pgrids;
+   hypre_SStructNeighbor   ***neighbors;
+   hypre_SStructNeighbor     *neighbor;
+   hypre_BoxMap            ***maps;
+   hypre_SStructBoxMapInfo ***info;
+   int                        nvars;
+   int                        part, var, i;
 
    if (grid)
    {
@@ -93,10 +89,10 @@ HYPRE_SStructGridDestroy( HYPRE_SStructGrid grid )
          nparts  = hypre_SStructGridNParts(grid);
          pgrids  = hypre_SStructGridPGrids(grid);
          neighbors = hypre_SStructGridNeighbors(grid);
-         hypre_TFree(hypre_SStructGridOffsets(grid));
+         maps = hypre_SStructGridMaps(grid);
+         info = hypre_SStructGridInfo(grid);
          for (part = 0; part < nparts; part++)
          {
-            hypre_SStructPGridDestroy(pgrids[part]);
             if (neighbors[part] != NULL)
             {
                for (i = 0; i < nparts; i++)
@@ -107,9 +103,20 @@ HYPRE_SStructGridDestroy( HYPRE_SStructGrid grid )
                }
                hypre_TFree(neighbors[part]);
             }
+            nvars = hypre_SStructPGridNVars(pgrids[part]);
+            for (var = 0; var < nvars; var++)
+            {
+               hypre_BoxMapDestroy(maps[part][var]);
+               hypre_TFree(info[part][var]);
+            }
+            hypre_SStructPGridDestroy(pgrids[part]);
+            hypre_TFree(maps[part]);
+            hypre_TFree(info[part]);
          }
          hypre_TFree(pgrids);
          hypre_TFree(neighbors);
+         hypre_TFree(maps);
+         hypre_TFree(info);
          hypre_TFree(grid);
       }
    }
@@ -308,12 +315,9 @@ HYPRE_SStructGridAssemble( HYPRE_SStructGrid grid )
    /*hypre_SStructNeighbor   *neighbor;*/
    /*hypre_BoxArray          *neighbor_boxes;*/
    /*hypre_Index             *neighbor_ilowers;*/
-   int                     *offsets = hypre_SStructGridOffsets(grid);
-   int                      uoffset;
-   int                      start_rank;
 
    hypre_SStructPGrid      *pgrid;
-   int                      part, offset;
+   int                      part;
 
    /*-------------------------------------------------------------
     * use neighbor info to crop pgrids TODO
@@ -351,30 +355,6 @@ HYPRE_SStructGridAssemble( HYPRE_SStructGrid grid )
 
    /* TODO */
 
-   /*-------------------------------------------------
-    * Set up the map info
-    *-------------------------------------------------*/
-
-   offset = 0;
-   start_rank = 0;
-   for (part = 0; part < nparts; part++)
-   {
-      offsets[part] = offset;
-      offset += hypre_SStructPGridLocalSize(pgrids[part]);
-      start_rank += hypre_SStructPGridStartRank(pgrids[part]);
-   }
-   for (part = 0; part < nparts; part++)
-   {
-      offsets[part] += 
-         start_rank - hypre_SStructPGridStartRank(pgrids[part]);
-   }
-
-   /* set up uoffset - TODO */
-   uoffset = 0;
-
-   hypre_SStructGridUOffset(grid)   = uoffset;
-   hypre_SStructGridStartRank(grid) = start_rank + uoffset;
-
    /*-------------------------------------------------------------
     * set up the size info
     *-------------------------------------------------------------*/
@@ -385,6 +365,12 @@ HYPRE_SStructGridAssemble( HYPRE_SStructGrid grid )
       hypre_SStructGridLocalSize(grid)  += hypre_SStructPGridLocalSize(pgrid);
       hypre_SStructGridGlobalSize(grid) += hypre_SStructPGridGlobalSize(pgrid);
    }
+
+   /*-------------------------------------------------
+    * Assemble the map info
+    *-------------------------------------------------*/
+
+   hypre_SStructGridAssembleMaps(grid);
 
    return ierr;
 }

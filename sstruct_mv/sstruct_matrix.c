@@ -442,14 +442,15 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
    hypre_IndexRef        offset;
    hypre_Index           to_index;
    hypre_SStructUVEntry *Uventry;
+   hypre_BoxMapEntry    *map_entry;
    int                   row_coord;
    int                  *col_coords;
    int                   ncoeffs;
    double               *coeffs;
-   int                   i, box, entry;
+   int                   i, entry;
 
-   hypre_SStructGridIndexToBox(grid, part, index, var, &box);
-   if (box == -1)
+   hypre_SStructGridFindMapEntry(grid, part, index, var, &map_entry);
+   if (map_entry == NULL)
    {
       printf("Warning: Attempt to set coeffs for point not in grid\n");
       printf("hypre_SStructUMatrixSetValues call aborted for grid point\n");
@@ -459,7 +460,7 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
              hypre_IndexD(index,2) );
       return(0);
    }
-   hypre_SStructGridSVarIndexToRank(grid, box, part, index, var, &row_coord);
+   hypre_SStructBoxMapEntryGetGlobalRank(map_entry, index, &row_coord);
 
    col_coords = hypre_CTAlloc(int,    nentries);
    coeffs     = hypre_CTAlloc(double, nentries);
@@ -476,13 +477,13 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
          hypre_IndexY(to_index) = hypre_IndexY(index) + hypre_IndexY(offset);
          hypre_IndexZ(to_index) = hypre_IndexZ(index) + hypre_IndexZ(offset);
          
-         hypre_SStructGridIndexToBox(grid, part, to_index, vars[entry], &box);
+         hypre_SStructGridFindMapEntry(grid, part, to_index, vars[entry],
+                                       &map_entry);
          
-         if (box > -1)
+         if (map_entry != NULL)
          {
-            hypre_SStructGridSVarIndexToRank(grid, box,
-                                             part, to_index, vars[entry],
-                                             &col_coords[ncoeffs]);
+            hypre_SStructBoxMapEntryGetGlobalRank(map_entry, to_index,
+                                                  &col_coords[ncoeffs]);
             coeffs[ncoeffs] = values[i];
             ncoeffs++;
          }

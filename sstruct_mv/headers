@@ -38,7 +38,7 @@ extern "C" {
 # Structures and prototypes
 #===========================================================================
 
-cat struct_map.h          >> $INTERNAL_HEADER	
+cat box_map.h             >> $INTERNAL_HEADER	
 cat sstruct_grid.h        >> $INTERNAL_HEADER	
 cat sstruct_stencil.h     >> $INTERNAL_HEADER	
 cat sstruct_graph.h       >> $INTERNAL_HEADER	

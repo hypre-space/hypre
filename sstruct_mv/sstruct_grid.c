@@ -99,12 +99,6 @@ hypre_SStructPGridCreate( MPI_Comm             comm,
    HYPRE_StructGridCreate(comm, ndim, &sgrid);
    hypre_SStructPGridCellSGrid(pgrid) = sgrid;
    
-   for (t = 0; t < 8; t++)
-   {
-      hypre_SStructPGridVTMap(pgrid, t) = NULL;
-   }
-   hypre_SStructPGridOffsets(pgrid)   = NULL;
-   hypre_SStructPGridStartRank(pgrid) = 0;
    hypre_SStructPGridLocalSize(pgrid)  = 0;
    hypre_SStructPGridGlobalSize(pgrid) = 0;
    
@@ -124,22 +118,18 @@ hypre_SStructPGridDestroy( hypre_SStructPGrid *pgrid )
 
    hypre_StructGrid **sgrids;
    hypre_BoxArray   **iboxarrays;
-   hypre_StructMap  **maps;
    int                t;
 
    if (pgrid)
    {
       sgrids     = hypre_SStructPGridSGrids(pgrid);
       iboxarrays = hypre_SStructPGridIBoxArrays(pgrid);
-      maps       = hypre_SStructPGridMaps(pgrid);
       hypre_TFree(hypre_SStructPGridVarTypes(pgrid));
       for (t = 0; t < 8; t++)
       {
          HYPRE_StructGridDestroy(sgrids[t]);
          hypre_BoxArrayDestroy(iboxarrays[t]);
-         hypre_StructMapDestroy(maps[t]);
       }
-      hypre_TFree(hypre_SStructPGridOffsets(pgrid));
       hypre_TFree(pgrid);
    }
 
@@ -202,9 +192,6 @@ hypre_SStructPGridAssemble( hypre_SStructPGrid  *pgrid )
    HYPRE_SStructVariable *vartypes   = hypre_SStructPGridVarTypes(pgrid);
    hypre_StructGrid     **sgrids     = hypre_SStructPGridSGrids(pgrid);
    hypre_BoxArray       **iboxarrays = hypre_SStructPGridIBoxArrays(pgrid);
-   hypre_StructMap      **maps       = hypre_SStructPGridMaps(pgrid);
-   int                   *offsets;
-   int                    start_rank;
 
    hypre_StructGrid      *cell_sgrid;
    hypre_StructGrid      *sgrid;
@@ -222,9 +209,8 @@ hypre_SStructPGridAssemble( hypre_SStructPGrid  *pgrid )
    hypre_BoxArray        *tmp_boxes;
    hypre_BoxArray        *tmp_boxes_ref;
    hypre_Index            varoffset;
-   int                    offset;
 
-   int  t, var, i, j, k;
+   int                    t, var, i, j, k;
 
    /*-------------------------------------------------------------
     * set up the uniquely distributed sgrids for each vartype
@@ -334,39 +320,6 @@ hypre_SStructPGridAssemble( hypre_SStructPGrid  *pgrid )
    }
 
    /*-------------------------------------------------------------
-    * Set up the struct maps
-    *-------------------------------------------------------------*/
-
-   for (t = 0; t < 8; t++)
-   {
-      if (sgrids[t] != NULL)
-      {
-         hypre_StructMapCreate(sgrids[t], &maps[t]);
-      }
-   }
-
-   /*-------------------------------------------------------------
-    * Set up the offsets and start rank
-    *-------------------------------------------------------------*/
-
-   offsets = hypre_CTAlloc(int, nvars);
-   offset = 0;
-   start_rank = 0;
-   for (var = 0; var < nvars; var++)
-   {
-      offsets[var] = offset;
-      offset += hypre_StructGridLocalSize(sgrids[vartypes[var]]);
-      start_rank += hypre_StructMapStartRank(maps[vartypes[var]]);
-   }
-   for (var = 0; var < nvars; var++)
-   {
-      offsets[var] +=
-         start_rank - hypre_StructMapStartRank(maps[vartypes[var]]);
-   }
-   hypre_SStructPGridOffsets(pgrid)   = offsets;
-   hypre_SStructPGridStartRank(pgrid) = start_rank;
-
-   /*-------------------------------------------------------------
     * set up the size info
     *-------------------------------------------------------------*/
 
@@ -399,68 +352,165 @@ hypre_SStructGridRef( hypre_SStructGrid  *grid,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructGridIndexToBox
  *--------------------------------------------------------------------------*/
 
 int
-hypre_SStructGridIndexToBox( hypre_SStructGrid  *grid,
-                             int                 part,
-                             hypre_Index         index,
-                             int                 var,
-                             int                *box_ptr )
+hypre_SStructGridAssembleMaps( hypre_SStructGrid *grid )
 {
-   int  ierr = 0;
+   int ierr = 0;
 
-   hypre_SStructPGrid *pgrid = hypre_SStructGridPGrid(grid, part);
-   hypre_StructMap    *map   = hypre_SStructPGridMap(pgrid, var);
+   MPI_Comm                   comm       = hypre_SStructGridComm(grid);
+   int                        nparts     = hypre_SStructGridNParts(grid);
+   int                        local_size = hypre_SStructGridLocalSize(grid);
+   hypre_BoxMap            ***maps;
+   hypre_SStructBoxMapInfo ***info;
+   hypre_SStructPGrid        *pgrid;
+   int                        nvars;
+   hypre_StructGrid          *sgrid;
+   hypre_Box                 *bounding_box;
 
-   hypre_StructMapIndexToBox(map, index, box_ptr);
+   int                       *offsets;
+   hypre_SStructBoxMapInfo   *entry_info;
+   hypre_BoxArray            *boxes;
+   hypre_Box                 *box;
+   int                       *procs;
+   int                        first_local;
+
+   int                        nprocs, myproc;
+   int                        proc, part, var, b;
+
+   /*------------------------------------------------------
+    * Compute starting ranks
+    *------------------------------------------------------*/
+
+   MPI_Comm_size(comm, &nprocs);
+   MPI_Comm_rank(comm, &myproc);
+   offsets = hypre_TAlloc(int, nprocs + 1);
+   offsets[0] = 0;
+   MPI_Allgather(&local_size, 1, MPI_INT, &offsets[1], 1, MPI_INT, comm);
+   for (proc = 1; proc < (nprocs + 1); proc++)
+   {
+      offsets[proc] += offsets[proc-1];
+   }
+   hypre_SStructGridStartRank(grid) = offsets[myproc];
+
+   maps = hypre_TAlloc(hypre_BoxMap **, nparts);
+   info = hypre_TAlloc(hypre_SStructBoxMapInfo **, nparts);
+   for (part = 0; part < nparts; part++)
+   {
+      pgrid = hypre_SStructGridPGrid(grid, part);
+      nvars = hypre_SStructPGridNVars(pgrid);
+
+      maps[part] = hypre_TAlloc(hypre_BoxMap *, nvars);
+      info[part] = hypre_TAlloc(hypre_SStructBoxMapInfo *, nvars);
+      for (var = 0; var < nvars; var++)
+      {
+         sgrid = hypre_SStructPGridSGrid(pgrid, var);
+
+         /* NOTE: With neighborhood info from user, don't need all gather */
+         hypre_GatherAllBoxes(comm, hypre_StructGridBoxes(sgrid),
+                              &boxes, &procs, &first_local);
+         bounding_box = hypre_StructGridBoundingBox(sgrid);
+
+         hypre_BoxMapCreate(hypre_BoxArraySize(boxes),
+                            hypre_BoxIMin(bounding_box),
+                            hypre_BoxIMax(bounding_box),
+                            &maps[part][var]);
+         info[part][var] = hypre_TAlloc(hypre_SStructBoxMapInfo,
+                                        hypre_BoxArraySize(boxes));
+
+         for (b = 0; b < hypre_BoxArraySize(boxes); b++)
+         {
+            box = hypre_BoxArrayBox(boxes, b);
+            proc = procs[b];
+            
+            entry_info = &info[part][var][b];
+            hypre_SStructBoxMapInfoProc(entry_info)   = proc;
+            hypre_SStructBoxMapInfoOffset(entry_info) = offsets[proc];
+            
+            hypre_BoxMapAddEntry(maps[part][var],
+                                 hypre_BoxIMin(box),
+                                 hypre_BoxIMax(box),
+                                 entry_info);
+
+            offsets[proc] += hypre_BoxVolume(box);
+         }
+
+         hypre_BoxArrayDestroy(boxes);
+         hypre_TFree(procs);
+
+         hypre_BoxMapAssemble(maps[part][var]);
+      }
+   }
+   hypre_SStructGridMaps(grid) = maps;
+   hypre_SStructGridInfo(grid) = info;
+
+   hypre_TFree(offsets);
 
    return ierr;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructGridSVarIndexToRank
+ * This routine return a NULL 'entry_ptr' if an entry is not found
  *--------------------------------------------------------------------------*/
 
 int
-hypre_SStructGridSVarIndexToRank( hypre_SStructGrid  *grid,
-                                  int                 box,
-                                  int                 part,
-                                  hypre_Index         index,
-                                  int                 var,
-                                  int                *rank_ptr )
+hypre_SStructGridFindMapEntry( hypre_SStructGrid  *grid,
+                               int                 part,
+                               hypre_Index         index,
+                               int                 var,
+                               hypre_BoxMapEntry **entry_ptr )
 {
-   int  ierr = 0;
+   int ierr = 0;
 
-   hypre_SStructPGrid *pgrid = hypre_SStructGridPGrid(grid, part);
-   hypre_StructMap    *map   = hypre_SStructPGridMap(pgrid, var);
-
-   hypre_StructMapIndexToRank(map, box, index, rank_ptr);
-   *rank_ptr += hypre_SStructPGridOffset(pgrid, var);
-   *rank_ptr += hypre_SStructGridOffset(grid, part);
+   hypre_BoxMapFindEntry(hypre_SStructGridMap(grid, part, var),
+                         index, entry_ptr);
 
    return ierr;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructGridIndexToProc
  *--------------------------------------------------------------------------*/
 
 int
-hypre_SStructGridIndexToProc( hypre_SStructGrid  *grid,
-                              int                 box,
-                              int                 part,
-                              hypre_Index         index,
-                              int                 var,
-                              int                *proc_ptr )
+hypre_SStructBoxMapEntryGetGlobalRank( hypre_BoxMapEntry *entry,
+                                       hypre_Index        index,
+                                       int               *rank_ptr )
 {
-   int  ierr = 0;
+   int ierr = 0;
 
-   hypre_SStructPGrid *pgrid = hypre_SStructGridPGrid(grid, part);
-   hypre_StructMap    *map   = hypre_SStructPGridMap(pgrid, var);
+   hypre_Index              imin;
+   hypre_Index              imax;
+   hypre_SStructBoxMapInfo *entry_info;
+   int                      offset, stride2, stride1;
 
-   hypre_StructMapIndexToProc(map, box, index, proc_ptr);
+   hypre_BoxMapEntryGetInfo(entry, (void **) &entry_info);
+   hypre_BoxMapEntryGetExtents(entry, imin, imax);
+   offset = hypre_SStructBoxMapInfoOffset(entry_info);
+   stride1 = (hypre_IndexD(imax, 0) - hypre_IndexD(imin, 0) + 1);
+   stride2 = (hypre_IndexD(imax, 1) - hypre_IndexD(imin, 1) + 1) * stride1;
+
+   *rank_ptr = offset +
+      (hypre_IndexD(index, 2) - hypre_IndexD(imin, 2)) * stride2 +
+      (hypre_IndexD(index, 1) - hypre_IndexD(imin, 1)) * stride1 +
+      (hypre_IndexD(index, 0) - hypre_IndexD(imin, 0));
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_SStructBoxMapEntryGetProcess( hypre_BoxMapEntry *entry,
+                                    int               *proc_ptr )
+{
+   int ierr = 0;
+
+   hypre_SStructBoxMapInfo *entry_info;
+
+   hypre_BoxMapEntryGetInfo(entry, (void **) &entry_info);
+   *proc_ptr = hypre_SStructBoxMapInfoProc(entry_info);
 
    return ierr;
 }
