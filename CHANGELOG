@@ -1,0 +1,100 @@
+#BHEADER***********************************************************************
+# (c) 2000   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+#=============================================================================
+#
+# This file chronicles user-level changes/additions to hypre, beginning
+# with the most recent release.
+#
+#=============================================================================
+
+Version V1.3.0.b released.
+
+- The number of threads to use in an OpenMP run can now be specified via
+  either the OMP_NUM_THREADS environment variable, or by the routine
+  omp_set_num_threads().
+
+- Added fortran interface support for compilers that mangle names with
+  all capitals (e.g., Cray fortran compilers).  To use, specify the
+  '--with-CFLAGS=-DHYPRE_CRAY' option on the 'configure' line.
+
+Version V1.2.0 released.
+
+Version V1.1.0 released.
+
+- Setup time for PILUT has been dramatically reduced in the case of
+  very small drop tolerances, and memory problems that were causing
+  coredumps on >2 processors have been fixed.
+
+- Changed Struct interface include file names to be consistent with
+  the rest of the library.  They are now:
+
+    HYPRE_struct_mv.h
+    HYPRE_struct_ls.h
+
+  The Struct library names have also changed similarly.
+
+- Removed the `stencil' argument from `HYPRE_StructVectorCreate'.
+
+- Added a new interface for semi-structured grids.  This is still very
+  much a beta implementation, and should be used with extreme caution
+  until further notice.
+
+- The main header files have been restructured to be more readable.
+  They will soon include full documentation for their interfaces.
+
+New internal installation: V1.0.0
+
+- Now installing both optimized and debugging versions of the library.
+  The optimized library is in the usual place; the debugging library
+  is in the subdirectory 'debug'.
+
+- Added support for the FEI v1.4, with additional capabilities for handling
+  parallel slide surface reduction and general Schur complement reduction. 
+
+- Using a new version numbering scheme.  The C macro HYPRE_Version()
+  may be used to retrieve version information.
+
+New internal installation: V2000-05-31
+
+- OpenMP threading added to BoomerAMG.
+
+- Changed ParAMG names to BoomerAMG.  A script, 'hypre_update_boomeramg',
+  is provided to convert code to use the new names.
+
+- Changed default coarsening type for BoomerAMG.  This version does
+  Ruge/Stueben coarsening on the interior of each processor to generate
+  an initial independent set for the CLJP coarsening algorithm.
+
+- Various BoomerAMG optimizations.
+
+New internal installation: V2000-03-30
+
+- New AddToValues and AddToBoxValues routines for Struct interface.
+
+- Fairly extensive changes to SMG/PFMG codes to fix setup phase
+  scalability problems.  These changes should result in slightly
+  slower setup phase times for small-scale problems, but much
+  improved setup phase times for very large-scale (greater than
+  1000 processors) problems.
+
+- AMG and GMRES solvers have minor fixes for reproducibility under
+  restart.
+
+- A subtle coarse grid operator bug in AMG was removed.  AMG no longer
+  frees from an uninitialized pointer to an empty domain coarse grid
+  operator.
+
+- Minimum iteration count controls have been installed for AMG, GMRES,
+  and CGNR.
+
+- Fortran interface wrappers have been made for ParCSRMatrixMatvec and
+  ParCSRMatrixMatvecT calls
+
+New internal installation: V2000-01-14
