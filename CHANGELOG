@@ -14,12 +14,14 @@
 #
 #=============================================================================
 
-- Added SetRelChange option to GMRES solver.
+Version 1.5.0b released, 2001/07/18.
 
 - New draft of the IJ interface: This new draft is not backward compatible
-  with the previous draft.  See the file `TRANSITION_INFO' for details
-  on transitioning to the new interface.  See the User's Manual and
-  Reference Manual for usage information.
+  with the previous draft.  See the file `docs/V1.5.0b.IJ_transition_info'
+  for details on transitioning to the new interface.  See the User's Manual
+  and Reference Manual for usage information.
+
+- Added SetRelChange option to GMRES solver.
 
 Version 1.4.0b released, 2001/01/10.
 
@@ -92,8 +94,8 @@ New internal installation: V2000-05-31
 
 - OpenMP threading added to BoomerAMG.
 
-- Changed ParAMG names to BoomerAMG.  A script, 'hypre_update_boomeramg',
-  is provided to convert code to use the new names.
+- Changed ParAMG names to BoomerAMG.  Use 'bin/V2000-05-31.hypre_convert'
+  to convert code to use the new names.
 
 - Changed default coarsening type for BoomerAMG.  This version does
   Ruge/Stueben coarsening on the interior of each processor to generate
