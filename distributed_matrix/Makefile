@@ -20,7 +20,8 @@ HYPREFILES =\
 
 LOCALFILES =\
  distributed_matrix.c\
- distributed_matrix_PETSc.c
+ distributed_matrix_PETSc.c\
+ distributed_matrix_ISIS.cc
 
 FILES = $(HYPREFILES) $(LOCALFILES)
 

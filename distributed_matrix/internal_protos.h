@@ -53,6 +53,14 @@ int hypre_GetDistributedMatrixLocalRangePETSc P((hypre_DistributedMatrix *matrix
 int hypre_GetDistributedMatrixRowPETSc P((hypre_DistributedMatrix *matrix , int row , int *size , int **col_ind , double **values ));
 int hypre_RestoreDistributedMatrixRowPETSc P((hypre_DistributedMatrix *matrix , int row , int *size , int **col_ind , double **values ));
 
+/* distributed_matrix_ISIS.c */
+int hypre_InitializeDistributedMatrixISIS P((hypre_DistributedMatrix *));
+int hypre_FreeDistributedMatrixISIS P((hypre_DistributedMatrix *distributed_matrix ));
+int hypre_PrintDistributedMatrixISIS P((hypre_DistributedMatrix *matrix ));
+int hypre_GetDistributedMatrixLocalRangeISIS P((hypre_DistributedMatrix *matrix , int *start , int *end ));
+int hypre_GetDistributedMatrixRowISIS P((hypre_DistributedMatrix *matrix , int row , int *size , int **col_ind , double **values ));
+int hypre_RestoreDistributedMatrixRowISIS P((hypre_DistributedMatrix *matrix , int row , int *size , int **col_ind , double **values ));
+
 /* hypre.c */
 
 #undef P
