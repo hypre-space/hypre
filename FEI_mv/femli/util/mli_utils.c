@@ -352,6 +352,8 @@ int MLI_Utils_ComputeExtremeRitzValues(hypre_ParCSRMatrix *A, double *ritz,
    hypre_CSRMatrix *ADiag;
    hypre_ParVector *rVec, *zVec, *pVec, *apVec;
 
+   double   *pData, *apData;
+
    /*-----------------------------------------------------------------
     * fetch matrix information 
     *-----------------------------------------------------------------*/
@@ -393,6 +395,9 @@ int MLI_Utils_ComputeExtremeRitzValues(hypre_ParCSRMatrix *A, double *ritz,
       hypre_ParVectorInitialize(apVec);
       zData  = hypre_VectorData( hypre_ParVectorLocalVector(zVec) );
       rData  = hypre_VectorData( hypre_ParVectorLocalVector(rVec) );
+
+      pData  = hypre_VectorData( hypre_ParVectorLocalVector(pVec) );
+      apData  = hypre_VectorData( hypre_ParVectorLocalVector(apVec) );
    }
    HYPRE_ParVectorSetRandomValues((HYPRE_ParVector) rVec, 1209873 );
    alphaArray = (double  *) malloc( (maxIter+1) * sizeof(double) );
@@ -431,11 +436,13 @@ int MLI_Utils_ComputeExtremeRitzValues(hypre_ParCSRMatrix *A, double *ritz,
 
    for ( its = 0; its < maxIter; its++ )
    {
-      if ( scaleFlag )
+      if ( 0 ) /* if scaleFlag */
       {
          for ( i = 0; i < localNRows; i++ )
+         {
             if (ADiagA[ADiagI[i]] != 0.0) 
                zData[i] = rData[i]/sqrt(ADiagA[ADiagI[i]]);
+         }
       }
       else 
          for ( i = 0; i < localNRows; i++ ) zData[i] = rData[i];
@@ -450,7 +457,23 @@ int MLI_Utils_ComputeExtremeRitzValues(hypre_ParCSRMatrix *A, double *ritz,
       }
       HYPRE_ParVectorScale( beta, (HYPRE_ParVector) pVec );
       hypre_ParVectorAxpy( one, zVec, pVec );
+
+      if (scaleFlag)
+        for ( i = 0; i < localNRows; i++ )
+          pData[i] = pData[i]/sqrt(ADiagA[ADiagI[i]]);
+
       hypre_ParCSRMatrixMatvec(one, A, pVec, 0.0, apVec);
+
+      if (scaleFlag)
+      {
+        /* restore p */
+        for ( i = 0; i < localNRows; i++ )
+          pData[i] = pData[i]*sqrt(ADiagA[ADiagI[i]]);
+
+        for ( i = 0; i < localNRows; i++ )
+          apData[i] = apData[i]/sqrt(ADiagA[ADiagI[i]]);
+      }
+
       sigma = hypre_ParVectorInnerProd(pVec, apVec); 
       alpha  = rho / sigma;
       alphaArray[its] = sigma;
