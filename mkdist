@@ -116,32 +116,38 @@ HYPRE_INSTALL_DIR=`pwd`"/$HYPRE_DIR"
   awk 'BEGIN {FS="."} {printf "V%d.%02d.%02d\n",$1,$2,$3}' > VERSION_NAME
 )
 
-        # create the hypre-${VersionId}.tar file
+# move 'linear_solvers' directory to 'src'
+mv $HYPRE_DIR/src/linear_solvers $HYPRE_DIR/zsrc
+rmdir $HYPRE_DIR/src
+mv $HYPRE_DIR/zsrc $HYPRE_DIR/src
+
+# create the hypre-${VersionId}.tar file
 echo "creating $HYPRE_DIR.tar file ..."
 tar cf $HYPRE_DIR.tar \
     $HYPRE_DIR/VER* \
     $HYPRE_DIR/docs \
     $HYPRE_DIR/bin \
-    $HYPRE_DIR/src/linear_solvers/configure \
-    $HYPRE_DIR/src/linear_solvers/tarch \
-    $HYPRE_DIR/src/linear_solvers/Makefile.in \
-    $HYPRE_DIR/src/linear_solvers/HYPRE.h \
-    $HYPRE_DIR/src/linear_solvers/HYPRE_config.h.in \
-    $HYPRE_DIR/src/linear_solvers/blas \
-    $HYPRE_DIR/src/linear_solvers/utilities \
-    $HYPRE_DIR/src/linear_solvers/struct_matrix_vector \
-    $HYPRE_DIR/src/linear_solvers/struct_linear_solvers \
-    $HYPRE_DIR/src/linear_solvers/sstruct_matrix_vector \
-    $HYPRE_DIR/src/linear_solvers/sstruct_linear_solvers \
-    $HYPRE_DIR/src/linear_solvers/seq_matrix_vector \
-    $HYPRE_DIR/src/linear_solvers/parcsr_matrix_vector \
-    $HYPRE_DIR/src/linear_solvers/distributed_matrix \
-    $HYPRE_DIR/src/linear_solvers/matrix_matrix \
-    $HYPRE_DIR/src/linear_solvers/IJ_matrix_vector \
-    $HYPRE_DIR/src/linear_solvers/distributed_linear_solvers/pilut \
-    $HYPRE_DIR/src/linear_solvers/distributed_linear_solvers/ParaSails \
-    $HYPRE_DIR/src/linear_solvers/parcsr_linear_solvers \
-    $HYPRE_DIR/src/linear_solvers/FEI_matrix_vector \
-    $HYPRE_DIR/src/linear_solvers/test
+    $HYPRE_DIR/src/configure \
+    $HYPRE_DIR/src/tarch \
+    $HYPRE_DIR/src/Makefile.in \
+    $HYPRE_DIR/src/HYPRE.h \
+    $HYPRE_DIR/src/HYPRE_config.h.in \
+    $HYPRE_DIR/src/blas \
+    $HYPRE_DIR/src/utilities \
+    $HYPRE_DIR/src/struct_matrix_vector \
+    $HYPRE_DIR/src/struct_linear_solvers \
+    $HYPRE_DIR/src/sstruct_matrix_vector \
+    $HYPRE_DIR/src/sstruct_linear_solvers \
+    $HYPRE_DIR/src/seq_matrix_vector \
+    $HYPRE_DIR/src/parcsr_matrix_vector \
+    $HYPRE_DIR/src/distributed_matrix \
+    $HYPRE_DIR/src/matrix_matrix \
+    $HYPRE_DIR/src/IJ_matrix_vector \
+    $HYPRE_DIR/src/distributed_linear_solvers/pilut \
+    $HYPRE_DIR/src/distributed_linear_solvers/ParaSails \
+    $HYPRE_DIR/src/parcsr_linear_solvers \
+    $HYPRE_DIR/src/FEI_matrix_vector \
+    $HYPRE_DIR/src/test
 
 gzip $HYPRE_DIR.tar
+
