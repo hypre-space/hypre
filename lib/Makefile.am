@@ -197,6 +197,7 @@ MOSTFILES = \
  $(top_srcdir)/FEI_mv/fei-hypre/HYPRE_parcsr_fgmres.c\
  $(top_srcdir)/FEI_mv/fei-hypre/HYPRE_parcsr_lsicg.c\
  $(top_srcdir)/FEI_mv/fei-hypre/HYPRE_parcsr_symqmr.c\
+ $(top_srcdir)/FEI_mv/fei-hypre/HYPRE_parcsr_superlu.c\
  $(top_srcdir)/FEI_mv/fei-hypre/SymQMR.c\
  $(top_srcdir)/FEI_mv/fei-hypre/TFQmr.c\
  $(top_srcdir)/FEI_mv/fei-hypre/cfei_hypre.cxx\
