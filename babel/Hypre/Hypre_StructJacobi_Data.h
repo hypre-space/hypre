@@ -1,21 +1,20 @@
-/*#*****************************************************
-#
-#	File:  Hypre_StructJacobi_DataMembers.h
-#
-#********************************************************/
+/* *****************************************************
+ *
+ *	File:  Hypre_StructJacobi_DataMembers.h
+ *
+ *********************************************************/
 
-#ifndef Hypre_StructJacobi_DataMembers__
-#define Hypre_StructJacobi_DataMembers__
+#ifndef Hypre_StructJacobi_DataMembers_
+#define Hypre_StructJacobi_DataMembers_
 
-/* JFP ... */
 #include "struct_linear_solvers.h"
 #include "Hypre_StructMatrix.h"
 
-struct Hypre_StructJacobi_private_type /* gkk: added "_type" */
+struct Hypre_StructJacobi_private_type
 {
    HYPRE_StructSolver * hssolver;
    Hypre_StructMatrix hsmatrix;
-};
-
+}
+;
 #endif
 

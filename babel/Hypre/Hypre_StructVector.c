@@ -1,76 +1,51 @@
-/*#*****************************************************
-#
-#	File:  Hypre_StructVector.c
-#
-#********************************************************/
+
+/******************************************************
+ *
+ *  File:  Hypre_StructVector.c
+ *
+ *********************************************************/
 
 #include "Hypre_StructVector_Skel.h" 
-#include "Hypre_StructVector_Data.h"   /*gkk: added*/
-#include "Hypre_Box_Skel.h"            /*gkk: added*/
-#include "Hypre_Box_Data.h"            /*gkk: added*/
-#include "Hypre_StructuredGrid_Skel.h" /*gkk: added*/
-#include "Hypre_StructuredGrid_Data.h" /*gkk: added*/
+#include "Hypre_StructVector_Data.h" 
 
+            /*gkk: added...*/
+#include "Hypre_Box_Skel.h"
+#include "Hypre_Box_Data.h"
+#include "Hypre_StructuredGrid_Skel.h"
+#include "Hypre_StructuredGrid_Data.h"
 
-/*#************************************************
-#	Constructor
-#**************************************************/
-
+/* *************************************************
+ * Constructor
+ *    Allocate Memory for private data
+ *    and initialize here
+ ***************************************************/
 void Hypre_StructVector_constructor(Hypre_StructVector this) {
-
-/* JFP: Allocates Memory */
    this->d_table = (struct Hypre_StructVector_private_type *)
       malloc( sizeof( struct Hypre_StructVector_private_type ) );
 
    this->d_table->hsvec = (HYPRE_StructVector *)
       malloc( sizeof( HYPRE_StructVector ) );
-}
 
+} /* end constructor */
 
-/*#************************************************
-#	Destructor
-#**************************************************/
-
+/* *************************************************
+ *  Destructor
+ *      deallocate memory for private data here.
+ ***************************************************/
 void Hypre_StructVector_destructor(Hypre_StructVector this) {
-
-   /* JFP: Deallocates memory. */
-
    struct Hypre_StructVector_private_type *SVp = this->d_table;
    HYPRE_StructVector *V = SVp->hsvec;
 
    HYPRE_StructVectorDestroy( *V );
 
    free(this->d_table);
-}
 
-Hypre_StructVector  impl_Hypre_StructVector_NewVector(
-   Hypre_StructVector this, Hypre_StructuredGrid grid ) {
+} /* end destructor */
 
-   struct Hypre_StructVector_private_type *SVp = this->d_table;
-   HYPRE_StructVector *V = SVp->hsvec;
-
-   struct Hypre_StructuredGrid_private_type *Gp = grid->d_table;
-   HYPRE_StructGrid *G = Gp->hsgrid;
-   hypre_StructGrid *g = (hypre_StructGrid *) *G;
-
-   MPI_Comm comm = hypre_StructGridComm( g );
-
-
-/*    HYPRE_StructVectorCreate( comm, *G, *SS, V );
-      ... This function doesn't use the stencil.  Here we reproduce
-      its internals so as not to have to suppy it ... */
-   *V = (HYPRE_StructVector) hypre_StructVectorCreate( comm, g ) ;
-
-   HYPRE_StructVectorInitialize( *V );
-
-   /* I don't want to put this in the interface (makes it too unnatural or
-      complicated for a user), so I'm trying to call it multiple times.
-      This may not work. (JfP 130100) */
-   HYPRE_StructVectorAssemble( *V );
-}
-
+/* ********************************************************
+ * impl_Hypre_StructVectorprint
+ **********************************************************/
 void  impl_Hypre_StructVector_print(Hypre_StructVector this) {
-
    int boxarray_size;
    FILE * file;
 
@@ -94,29 +69,27 @@ void  impl_Hypre_StructVector_print(Hypre_StructVector this) {
       hypre_StructVectorData(v) );
    fflush(file);
    fclose(file);
+} /* end impl_Hypre_StructVectorprint */
 
-}
-
-int  impl_Hypre_StructVector_SetGrid(Hypre_StructVector this, Hypre_StructuredGrid grid) {
+/* ********************************************************
+ * impl_Hypre_StructVectorSetGrid
+ **********************************************************/
+int  impl_Hypre_StructVector_SetGrid
+(Hypre_StructVector this, Hypre_StructuredGrid grid) {
 
 /* not implemented; this functionality isn't in Hypre (though doesn't
    look too hard to put in)
    */
    printf( "unimplemented function, Hypre_StructVector_SetGrid, was called" );
-}
 
-int  impl_Hypre_StructVector_SetStencil(Hypre_StructVector this, Hypre_StructStencil stencil) {
+} /* end impl_Hypre_StructVectorSetGrid */
 
-/* This doesn't make sense for a Vector (it makes sense for a Matrix,
-   which has the same interface)
-   */
-   printf( "silly function, Hypre_StructVector_SetStencil, was called" );
-
-}
-
-int  impl_Hypre_StructVector_SetValues(
-   Hypre_StructVector this, Hypre_Box box,
-   array1int stencil_indices, array1double values) {
+/* ********************************************************
+ * impl_Hypre_StructVectorSetValues
+ *    Note that Setup needs to be called afterwards.
+ **********************************************************/
+int  impl_Hypre_StructVector_SetValues
+(Hypre_StructVector this, Hypre_Box box, array1double values) {
 
    int i, ssize, lower[3], upper[3];
 
@@ -134,37 +107,56 @@ int  impl_Hypre_StructVector_SetValues(
    HYPRE_StructVectorSetBoxValues( *V, lower, upper,
                                    &(values.data[*(values.lower)]) );
 
-   /* I don't want to put this in the interface (makes it too unnatural or
-      complicated for a user), so I'm trying to call it multiple times.
-      This may not work. (JfP 130100) */
+} /* end impl_Hypre_StructVectorSetValues */
+
+/* ********************************************************
+ * impl_Hypre_StructVectorGetConstructedObject
+ **********************************************************/
+Hypre_StructVector
+impl_Hypre_StructVector_GetConstructedObject(Hypre_StructVector this) {
+   return this;
+} /* end impl_Hypre_StructVectorGetConstructedObject */
+
+/* ********************************************************
+ * impl_Hypre_StructVectorNew
+ *     Note that Setup also must be called.
+ **********************************************************/
+void  impl_Hypre_StructVector_New
+(Hypre_StructVector this, Hypre_StructuredGrid grid) {
+   struct Hypre_StructVector_private_type *SVp = this->d_table;
+   HYPRE_StructVector *V = SVp->hsvec;
+
+   struct Hypre_StructuredGrid_private_type *Gp = grid->d_table;
+   HYPRE_StructGrid *G = Gp->hsgrid;
+   hypre_StructGrid *g = (hypre_StructGrid *) *G;
+
+   MPI_Comm comm = hypre_StructGridComm( g );
+
+/*    HYPRE_StructVectorCreate( comm, *G, *SS, V );
+      ... This function doesn't use the stencil.  Here we reproduce
+      its internals so as not to have to suppy it ... */
+   *V = (HYPRE_StructVector) hypre_StructVectorCreate( comm, g ) ;
+
+   HYPRE_StructVectorInitialize( *V );
+
+} /* end impl_Hypre_StructVectorNew */
+
+/* ********************************************************
+ * impl_Hypre_StructVectorConstructor
+ **********************************************************/
+Hypre_StructVector  impl_Hypre_StructVector_Constructor(Hypre_StructuredGrid grid) {
+   /* declared static; just combines the new and New functions */
+   Hypre_StructVector SV = Hypre_StructVector_new();
+   Hypre_StructVector_New( SV, grid );
+   return SV;
+} /* end impl_Hypre_StructVectorConstructor */
+
+/* ********************************************************
+ * impl_Hypre_StructVectorSetup
+ **********************************************************/
+int  impl_Hypre_StructVector_Setup(Hypre_StructVector this, Hypre_StructuredGrid grid) {
+   struct Hypre_StructVector_private_type *SVp = this->d_table;
+   HYPRE_StructVector *V = SVp->hsvec;
    HYPRE_StructVectorAssemble( *V );
-}
-
-int  impl_Hypre_StructVector_Setup(
-   Hypre_StructVector this, Hypre_StructuredGrid grid,
-   Hypre_StructStencil stencil, int symmetric) {
-
-   impl_Hypre_StructVector_NewVector( this, grid );
-   return 0;
-}
-
-void  impl_Hypre_StructVector_Apply
-(Hypre_StructVector this, Hypre_StructVector x, Hypre_StructVector* b) {
-
-/*
-  There is nothing reasonable for this function to do.
-  See my comment in Interfaces.idl.
-  */
-   printf( "I don't know what you think Hypre_StructVector_Apply should do!\n");
-
-}
-
-Hypre_StructMatrix  impl_Hypre_StructVector_GetConstructedObject(Hypre_StructVector this) {
-
-/* Next Babel run will have this return a Hypre_StructVector 
-   At that time, uncomment the following line: */
-/* return this; */
-
-}
-
+} /* end impl_Hypre_StructVectorSetup */
 

@@ -83,6 +83,20 @@ void  impl_Hypre_PCG_SetParameter(Hypre_PCG this, char* name, double value) {
 } /* end impl_Hypre_PCGSetParameter */
 
 /* ********************************************************
+ * impl_Hypre_PCGNew
+ *       insert the library code below
+ **********************************************************/
+void  impl_Hypre_PCG_New(Hypre_PCG this, Hypre_MPI_Com comm) {
+} /* end impl_Hypre_PCGNew */
+
+/* ********************************************************
+ * impl_Hypre_PCGConstructor
+ *       insert the library code below
+ **********************************************************/
+Hypre_PCG  impl_Hypre_PCG_Constructor(Hypre_MPI_Com comm) {
+} /* end impl_Hypre_PCGConstructor */
+
+/* ********************************************************
  * impl_Hypre_PCGSetup
  *       insert the library code below
  **********************************************************/

@@ -1,16 +1,13 @@
-/*#*****************************************************
-#
-#	File:  Hypre_Box_DataMembers.h
-#
-#********************************************************/
+/* *****************************************************
+ *
+ *	File:  Hypre_Box_DataMembers.h
+ *
+ *********************************************************/
 
-#ifndef Hypre_Box_DataMembers__
-#define Hypre_Box_DataMembers__
+#ifndef Hypre_Box_DataMembers_
+#define Hypre_Box_DataMembers_
 
-#include "struct_matrix_vector.h" /*gkk:  also defines hypre_Box in hypre/include dir ??? */
-/* JFP... */
-/* #include "box.h"   /* can be found in hypre's struct_matrix_vector directory */
-/* can't make this work: typedef hypre_Box Hypre_Box_private; */
+#include "struct_matrix_vector.h"
 
 struct Hypre_Box_private_type
 {

@@ -1,63 +1,48 @@
-/*#*****************************************************
-#
-#	File:  Hypre_StructuredGrid.c
-#
-#********************************************************/
+
+/******************************************************
+ *
+ *  File:  Hypre_StructuredGrid.c
+ *
+ *********************************************************/
 
 #include "Hypre_StructuredGrid_Skel.h" 
-#include "Hypre_StructuredGrid_Data.h"  /*gkk: added*/
-#include "Hypre_MPI_Com_Skel.h"         /*gkk: added*/
-#include "Hypre_MPI_Com_Data.h"         /*gkk: added*/
-#include "Hypre_Box_Skel.h"             /*gkk: added*/
-#include "Hypre_Box_Data.h"             /*gkk: added*/
+#include "Hypre_StructuredGrid_Data.h" 
 
-/*#************************************************
-#	Constructor
-#**************************************************/
+         /*gkk: added...*/
+#include "Hypre_MPI_Com_Skel.h"
+#include "Hypre_MPI_Com_Data.h"
+#include "Hypre_Box_Skel.h"
+#include "Hypre_Box_Data.h"
 
+/* *************************************************
+ * Constructor
+ *    Allocate Memory for private data
+ *    and initialize here
+ ***************************************************/
 void Hypre_StructuredGrid_constructor(Hypre_StructuredGrid this) {
-
-/* JFP: Allocates Memory */
    this->d_table = (struct Hypre_StructuredGrid_private_type *)
       malloc( sizeof( struct Hypre_StructuredGrid_private_type ) );
 
    this->d_table->hsgrid = (HYPRE_StructGrid *)
       malloc( sizeof( HYPRE_StructGrid ) );
+} /* end constructor */
 
-}
-
-
-/*#************************************************
-#	Destructor
-#**************************************************/
-
+/* *************************************************
+ *  Destructor
+ *      deallocate memory for private data here.
+ ***************************************************/
 void Hypre_StructuredGrid_destructor(Hypre_StructuredGrid this) {
-
-   /* JFP: Deallocates memory. */
-
    struct Hypre_StructuredGrid_private_type *Gp = this->d_table;
    HYPRE_StructGrid *G = Gp->hsgrid;
 
    HYPRE_StructGridDestroy( *G );
 
    free(this->d_table);
-}
+} /* end destructor */
 
-Hypre_StructuredGrid  impl_Hypre_StructuredGrid_NewGrid(
-   Hypre_StructuredGrid this, Hypre_MPI_Com com, int dimension) {
-
-   struct Hypre_StructuredGrid_private_type *Gp = this->d_table;
-   HYPRE_StructGrid *G = Gp->hsgrid;
-
-   struct Hypre_MPI_Com_private_type *Cp = com->d_table;
-   MPI_Comm *C = Cp->hcom; /*gkk: ??? was CP->hcom */
-
-   HYPRE_StructGridCreate( *C, dimension, G );
-
-   return this;
-
-}
-
+/* ********************************************************
+ * impl_Hypre_StructuredGridprint
+ **********************************************************/
 void  impl_Hypre_StructuredGrid_print(Hypre_StructuredGrid this) {
 
    int i, d ;
@@ -81,10 +66,13 @@ void  impl_Hypre_StructuredGrid_print(Hypre_StructuredGrid this) {
       printf( "\n" );
    };
 
-}
+} /* end impl_Hypre_StructuredGridprint */
 
-int  impl_Hypre_StructuredGrid_SetGridExtents(
-   Hypre_StructuredGrid this, Hypre_Box box) {
+/* ********************************************************
+ * impl_Hypre_StructuredGridSetGridExtents
+ **********************************************************/
+int  impl_Hypre_StructuredGrid_SetGridExtents
+(Hypre_StructuredGrid this, Hypre_Box box) {
 
    struct Hypre_StructuredGrid_private_type *Gp = this->d_table;
    HYPRE_StructGrid *G = Gp->hsgrid;
@@ -94,29 +82,59 @@ int  impl_Hypre_StructuredGrid_SetGridExtents(
    hypre_Box *B = Bp->hbox;
 
    return HYPRE_StructGridSetExtents( *G, B->imin, B->imax );
-}
 
-int  impl_Hypre_StructuredGrid_Assemble(Hypre_StructuredGrid this) {
-   /* I don't know what this is for, but it's probably only for
-   multiprocessing use - the actual code in struct_grid.c looks like that.
-   I can't build a working code which uses this in sequential mode.  (JfP)
-   JfP 130100: it works now, I don't know why */
-/*#ifndef HYPRE_SEQUENTIAL*/
+} /* end impl_Hypre_StructuredGridSetGridExtents */
 
+/* ********************************************************
+ * impl_Hypre_StructuredGridSetParameter
+ **********************************************************/
+void  impl_Hypre_StructuredGrid_SetParameter
+(Hypre_StructuredGrid this, char* name, double value) {
+   printf( "Hypre_StructuredGrid_SetParameter does not recognize name ~s\n", name );
+} /* end impl_Hypre_StructuredGridSetParameter */
+
+/* ********************************************************
+ * impl_Hypre_StructuredGridGetConstructedObject
+ **********************************************************/
+Hypre_StructuredGrid
+impl_Hypre_StructuredGrid_GetConstructedObject(Hypre_StructuredGrid this) {
+   return this;
+} /* end impl_Hypre_StructuredGridGetConstructedObject */
+
+/* ********************************************************
+ * impl_Hypre_StructuredGridNew
+ **********************************************************/
+void  impl_Hypre_StructuredGrid_New
+(Hypre_StructuredGrid this, Hypre_MPI_Com com, int dimension) {
+   struct Hypre_StructuredGrid_private_type *Gp = this->d_table;
+   HYPRE_StructGrid *G = Gp->hsgrid;
+
+   struct Hypre_MPI_Com_private_type *Cp = com->d_table;
+   MPI_Comm *C = Cp->hcom; /*gkk: ??? was CP->hcom */
+
+   HYPRE_StructGridCreate( *C, dimension, G );
+
+} /* end impl_Hypre_StructuredGridNew */
+
+/* ********************************************************
+ * impl_Hypre_StructuredGridConstructor
+ **********************************************************/
+Hypre_StructuredGrid  impl_Hypre_StructuredGrid_Constructor
+(Hypre_MPI_Com com, int dimension) {
+   /* declared static; just combines the new and New functions */
+   Hypre_StructuredGrid SG = Hypre_StructuredGrid_new();
+   Hypre_StructuredGrid_New( SG, com, dimension );
+   return SG;
+} /* end impl_Hypre_StructuredGridConstructor */
+
+/* ********************************************************
+ * impl_Hypre_StructuredGridSetup
+ **********************************************************/
+int  impl_Hypre_StructuredGrid_Setup(Hypre_StructuredGrid this) {
    struct Hypre_StructuredGrid_private_type *Gp = this->d_table;
    HYPRE_StructGrid *G = Gp->hsgrid;
    hypre_StructGrid *g = (hypre_StructGrid *) *G;
 
    hypre_StructGridAssemble( g );
-/*#endif*/
-}
-
-void  impl_Hypre_StructuredGrid_SetParameter
-(Hypre_StructuredGrid this, char* name, double value) {
-}
-
-Hypre_StructuredGrid  impl_Hypre_StructuredGrid_GetConstructedObject(Hypre_StructuredGrid this) {
-   return this;
-}
-
+} /* end impl_Hypre_StructuredGridSetup */
 

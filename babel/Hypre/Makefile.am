@@ -48,6 +48,7 @@ GENERATED_SRCS = Hypre_Box_Skel.c\
 	Hypre_StructVector_Skel.c\
 	Hypre_StructuredGridBuilder_Skel.c\
 	Hypre_StructuredGridMatrixBuilder_Skel.c\
+	Hypre_StructuredGridVectorBuilder_Skel.c\
 	Hypre_StructuredGrid_Skel.c
 
 GENERATED_HDRS = Hypre.h\
@@ -83,6 +84,7 @@ GENERATED_HDRS = Hypre.h\
 	Hypre_StructuredGridBuilder_Skel.h\
 	Hypre_StructuredGridMatrixBuilder.h\
 	Hypre_StructuredGridMatrixBuilder_Skel.h\
+	Hypre_StructuredGridVectorBuilder_Skel.h\
 	Hypre_StructVector.h\
 	Hypre_StructVector_Skel.h
 
