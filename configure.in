@@ -1365,6 +1365,12 @@ then
  export JNI_INCLUDES
  # Default C and Fortran compilers differ for this configure file and the Babel
  # runtime configure file on LLNL MP AIX machines:
+ if test -z "$F77" ; then
+    AC_MSG_WARN([Fortran compiler not found-- try setting --with-F77])
+ fi
+ if test -z "$CC" ; then
+    AC_MSG_WARN([C compiler not found-- try setting --with-CC])
+ fi
  export F77
  export CC
  # Other language environment variables should also be set here.

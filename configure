@@ -7890,6 +7890,12 @@ then
  export JNI_INCLUDES
  # Default C and Fortran compilers differ for this configure file and the Babel
  # runtime configure file on LLNL MP AIX machines:
+ if test -z "$F77" ; then
+    echo "configure: warning: Fortran compiler not found-- try setting --with-F77" 1>&2
+ fi
+ if test -z "$CC" ; then
+    echo "configure: warning: C compiler not found-- try setting --with-CC" 1>&2
+ fi
  export F77
  export CC
  # Other language environment variables should also be set here.
@@ -7950,6 +7956,7 @@ subdirs="$config_babel_runtime"
  krylov\
  matrix_matrix\
  parcsr_ls\
+ parcsr_es/LOBPCG\
  parcsr_mv\
  PETSc_ls\
  PETSc_ls/ParILUT\
