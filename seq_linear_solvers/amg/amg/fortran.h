@@ -153,6 +153,7 @@ void cycle_(int *, int *, int *, int *, int *, int *, int *,
 relax_(&Solve_err_flag,\
        &ity[k], &ipt[k], &ieq[k], &iun[k],\
        &imin[level],&imax[level],\
+       AMGDataVecTemp(amg_data),\
        VectorData(U_array[level]),\
        VectorData(F_array[level]),\
        MatrixData(A_array[level]),\
@@ -166,7 +167,7 @@ relax_(&Solve_err_flag,\
 
  
 void relax_(int *, int *, int *, int *, int *, int *, int *, 
-	    double *, double *, double *,
+	    double *, double *, double *, double *,
 	    int *, int *, int *, int *, int *, int *, int *);
 
 
