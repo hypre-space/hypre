@@ -44,8 +44,10 @@ typedef struct
 
    hypre_CommPkg	*comm_pkg;
    
-   /* Does the CSRMatrix create/destroy `data', `i', `j'? */
+   /* Does the ParCSRMatrix create/destroy `diag', `offd', `col_map_offd'? */
    int      owns_data;
+   /* Does the ParCSRMatrix create/destroy `row_starts', `col_starts'? */
+   int      owns_partitioning;
 
 } hypre_ParCSRMatrix;
 
@@ -53,16 +55,17 @@ typedef struct
  * Accessor functions for the Parallel CSR Matrix structure
  *--------------------------------------------------------------------------*/
 
-#define hypre_ParCSRMatrixComm(matrix)		((matrix) -> comm)
-#define hypre_ParCSRMatrixGlobalNumRows(matrix) ((matrix) -> global_num_rows)
-#define hypre_ParCSRMatrixGlobalNumCols(matrix) ((matrix) -> global_num_cols)
-#define hypre_ParCSRMatrixFirstRowIndex(matrix) ((matrix) -> first_row_index)
-#define hypre_ParCSRMatrixFirstColDiag(matrix)  ((matrix) -> first_col_diag)
-#define hypre_ParCSRMatrixDiag(matrix)  	((matrix) -> diag)
-#define hypre_ParCSRMatrixOffd(matrix)  	((matrix) -> offd)
-#define hypre_ParCSRMatrixColMapOffd(matrix)  	((matrix) -> col_map_offd)
-#define hypre_ParCSRMatrixRowStarts(matrix)     ((matrix) -> row_starts)
-#define hypre_ParCSRMatrixColStarts(matrix)     ((matrix) -> col_starts)
-#define hypre_ParCSRMatrixCommPkg(matrix)	((matrix) -> comm_pkg)
-#define hypre_ParCSRMatrixOwnsData(matrix)      ((matrix) -> owns_data)
+#define hypre_ParCSRMatrixComm(matrix)		  ((matrix) -> comm)
+#define hypre_ParCSRMatrixGlobalNumRows(matrix)   ((matrix) -> global_num_rows)
+#define hypre_ParCSRMatrixGlobalNumCols(matrix)   ((matrix) -> global_num_cols)
+#define hypre_ParCSRMatrixFirstRowIndex(matrix)   ((matrix) -> first_row_index)
+#define hypre_ParCSRMatrixFirstColDiag(matrix)    ((matrix) -> first_col_diag)
+#define hypre_ParCSRMatrixDiag(matrix)  	  ((matrix) -> diag)
+#define hypre_ParCSRMatrixOffd(matrix)  	  ((matrix) -> offd)
+#define hypre_ParCSRMatrixColMapOffd(matrix)  	  ((matrix) -> col_map_offd)
+#define hypre_ParCSRMatrixRowStarts(matrix)       ((matrix) -> row_starts)
+#define hypre_ParCSRMatrixColStarts(matrix)       ((matrix) -> col_starts)
+#define hypre_ParCSRMatrixCommPkg(matrix)	  ((matrix) -> comm_pkg)
+#define hypre_ParCSRMatrixOwnsData(matrix)        ((matrix) -> owns_data)
+#define hypre_ParCSRMatrixOwnsPartitioning(matrix)((matrix) -> owns_partitioning)
 
