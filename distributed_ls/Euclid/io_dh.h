@@ -40,6 +40,5 @@ extern void io_dh_print_ebin_vec_private(int n, int beg_row, double *vals,
 extern void io_dh_read_ebin_vec_private(int *n, double **vals, char *filename);
 
 
-
 #endif
 
