@@ -186,17 +186,17 @@ c-----------------------------------------------------------------------
       call HYPRE_NewParVector(MPI_COMM_WORLD, 
      &                        hypre_ParCSRMatrixGlobalNumRows(A),
      &                        hypre_ParCSRMatrixRowStarts(A), b, ierr)
-      call hypre_SetParVectorPartioningOwner(b, 0, ierr)
+      call hypre_SetParVectorPartitioningO(b, 0, ierr)
       call HYPRE_InitializeParVector(b, ierr)
-      call hypre_SetParVectorConstantValues(b, 0.0, ierr)
+      call hypre_SetParVectorConstantValue(b, 0.0, ierr)
 c     call HYPRE_PrintParVector("driver.out.b", b, zero, ierr)
 
       call HYPRE_NewParVector(MPI_COMM_WORLD, 
      &                        hypre_ParCSRMatrixGlobalNumRows(A),
      &                        hypre_ParCSRMatrixRowStarts(A), x, ierr)
-      call hypre_SetParVectorPartioningOwner(x, 0, ierr)
+      call hypre_SetParVectorPartitioningO(x, 0, ierr)
       call HYPRE_InitializeParVector(x, ierr)
-      call hypre_SetParVectorConstantValues(x, 1.0, ierr)
+      call hypre_SetParVectorConstantValue(x, 1.0, ierr)
 c     call HYPRE_PrintParVector("driver.out.x0", x, zero, ierr)
 
 c-----------------------------------------------------------------------
@@ -218,7 +218,6 @@ c       Solve the system using preconditioned GMRES
         call HYPRE_ParCSRGMRESInitialize(MPI_COMM_WORLD, solver, ierr)
         call HYPRE_ParCSRGMRESSetMaxIter(solver, maxiter, ierr)
         call HYPRE_ParCSRGMRESSetTol(solver, tol, ierr)
-        call HYPRE_ParCSRGMRESSetRelChange(solver, zero, ierr)
         call HYPRE_ParCSRGMRESSetLogging(solver, solver, one, ierr)
 
         if (solver_id .eq. 3) then
@@ -285,8 +284,8 @@ c         Use BoomerAMG as preconditioner
      &                                     gmres_precond, ierr)
 
            if (drop_tol .ge. 0.)
-     &         call HYPRE_ParCSRPilutSetDropTolerance(gmres_precond,
-     &                                                drop_tol, ierr)
+     &         call HYPRE_ParCSRPilutSetDropToleran(gmres_precond,
+     &                                              drop_tol, ierr)
 
         endif
 
@@ -294,11 +293,11 @@ c         Use BoomerAMG as preconditioner
 
         call HYPRE_ParCSRGMRESSolve(solver, A, b, x, ierr)
 
-        call HYPRE_ParCSRGMRESGetNumIterations(solver,
-     &                                          num_iterations, ierr)
+        call HYPRE_ParCSRGMRESGetNumIteratio(solver,
+     &                                       num_iterations, ierr)
 
-        call HYPRE_ParCSRGMRESGetFinalRelative(solver,
-     &                                          final_res_norm, ierr)
+        call HYPRE_ParCSRGMRESGetFinalRelati(solver,
+     &                                       final_res_norm, ierr)
 
         call HYPRE_ParCSRGMRESFinalize(solver, ierr)
 
