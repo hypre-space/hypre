@@ -23,14 +23,26 @@ perform_test()
     set -xv
   fi
   print_header
+
+#=============================================================================
+#   Running tests on same machine as that executing this script
+#=============================================================================
   if [ "${HYPRE_COMPILE_MACHINE}" = "`hostname | sed 's/\..*$//'`" ]
   then
+    echo "deleting old AUTOTEST directory on host machine and copying new source...."
+    rm -fR ${HYPRE_DIST_DIR}/linear_solvers
+    cp -pr linear_solvers ${HYPRE_DIST_DIR}
+    cd ${HYPRE_DIST_DIR}
     [ -f linear_solvers/test/AUTOTEST/autotest_env ] && \
       . linear_solvers/test/AUTOTEST/autotest_env;\
     [ -f linear_solvers/test/AUTOTEST/env.${HYPRE_ARCH} ] && \
       . linear_solvers/test/AUTOTEST/env.${HYPRE_ARCH} ${COMPILERSELECT};\
     linear_solvers/test/AUTOTEST/autotest_test \
       ${HYPRE_MACHINE_COMMANDS} -v ${HYPRE_MESSAGE};\
+
+#=============================================================================
+#   Running tests on remote machine
+#=============================================================================
   else
     echo "deleting old AUTOTEST directory...."
     ${SSH_COMMAND} ${HYPRE_COMPILE_MACHINE} "\
@@ -255,7 +267,6 @@ do
         HYPRE_ARCH="linux"
         HYPRE_COMPILE_MACHINE="tux149"
         HYPRE_RUN_MACHINE="tux149"
-        HYPRE_REMOTE_DIR="/usr/tmp"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST"
 	HYPRE_MACHINE_COMMANDS="-mnsd -a 1 -cf -i 2"
         HYPRE_MESSAGE='PRIMARY[insure++]'
@@ -311,7 +322,6 @@ do
         HYPRE_ARCH="linux"
         HYPRE_COMPILE_MACHINE="tux149"
         HYPRE_RUN_MACHINE="tux149"
-        HYPRE_REMOTE_DIR="/usr/tmp"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST"
         HYPRE_MACHINE_COMMANDS="-mb 1 -nsde 1 -a 2 -cf"
         HYPRE_MESSAGE='PRIMARY[default]'
@@ -322,7 +332,6 @@ do
         HYPRE_ARCH="linux"
         HYPRE_COMPILE_MACHINE="tux149"
         HYPRE_RUN_MACHINE="tux149"
-        HYPRE_REMOTE_DIR="/usr/tmp"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST"
         HYPRE_MACHINE_COMMANDS="-nds -a 2 -cf"
         HYPRE_MESSAGE='LOCAL TEST[default]'
@@ -333,7 +342,6 @@ do
         HYPRE_ARCH="linux"
         HYPRE_COMPILE_MACHINE="tux149"
         HYPRE_RUN_MACHINE="tux149"
-        HYPRE_REMOTE_DIR="/usr/tmp"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-pgi5.x/AUTOTEST"
         HYPRE_MACHINE_COMMANDS="-mndse 1 -a 2 -cf"
         HYPRE_MESSAGE='SECONDARY[pgi]'
@@ -344,7 +352,6 @@ do
         HYPRE_ARCH="linux"
         HYPRE_COMPILE_MACHINE="tux149"
         HYPRE_RUN_MACHINE="tux149"
-        HYPRE_REMOTE_DIR="/usr/tmp"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-gcc3.x/AUTOTEST"
         HYPRE_MACHINE_COMMANDS="-mb 1 -nde 1 -a 2 -cf"
         HYPRE_MESSAGE='SECONDARY[Absoft-Pro8.0]'
@@ -355,7 +362,6 @@ do
         HYPRE_ARCH="linux"
         HYPRE_COMPILE_MACHINE="tux149"
         HYPRE_RUN_MACHINE="tux149"
-        HYPRE_REMOTE_DIR="/usr/tmp"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-gcc3.x/AUTOTEST"
         HYPRE_MACHINE_COMMANDS="-mb 1 -nde 1 -a 2 -cf"
         HYPRE_MESSAGE='SECONDARY[lahey]'
@@ -366,7 +372,6 @@ do
         HYPRE_ARCH="linux"
         HYPRE_COMPILE_MACHINE="tux149"
         HYPRE_RUN_MACHINE="tux149"
-        HYPRE_REMOTE_DIR="/usr/tmp"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-gcc3.x/AUTOTEST"
         HYPRE_MACHINE_COMMANDS="-mb 1 -nde 1 -a 2 -cf"
         HYPRE_MESSAGE='SECONDARY[Intel-8.0]'
@@ -377,7 +382,6 @@ do
         HYPRE_ARCH="linux"
         HYPRE_COMPILE_MACHINE="tux149"
         HYPRE_RUN_MACHINE="tux149"
-        HYPRE_REMOTE_DIR="/usr/tmp"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-kai/AUTOTEST"
 	HYPRE_MACHINE_COMMANDS="-mb 1 -nde 1 -a 2 -cf"
         HYPRE_MESSAGE='SECONDARY[KCC]'
@@ -421,7 +425,6 @@ done
 HYPRE_ARCH="linux"
 HYPRE_COMPILE_MACHINE="tux149"
 HYPRE_RUN_MACHINE="tux149"
-HYPRE_REMOTE_DIR="/usr/tmp"
 HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST"
 HYPRE_MACHINE_COMMANDS=" -a 1 -d"
 HYPRE_MESSAGE='SECONDARY[Building Docs Only]'
