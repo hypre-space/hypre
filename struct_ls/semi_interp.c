@@ -235,7 +235,7 @@ hypre_SemiInterp( void               *interp_vdata,
 
          case 1:
          {
-            hypre_FinalizeIndtComputations(comm_handle,constant_coefficient);
+            hypre_FinalizeIndtComputations(comm_handle,0);
             compute_box_aa = hypre_ComputePkgDeptBoxes(compute_pkg);
          }
          break;

@@ -561,7 +561,9 @@ hypre_PointRelax( void               *relax_vdata,
 
             case 1:
             {
-               hypre_FinalizeIndtComputations(comm_handle,constant_coefficient);
+               /* This FinalizeIndtCompuations is for xp, a vector, so the
+                  "constant_coefficient" argument should be 0 .*/
+               hypre_FinalizeIndtComputations(comm_handle,0);
                compute_box_aa = hypre_ComputePkgDeptBoxes(compute_pkg);
             }
             break;
