@@ -154,7 +154,7 @@ hypre_VectorPrint( hypre_Vector *vector,
 
    for (j = 0; j < size; j++)
    {
-      fprintf(fp, "%e\n", data[j]);
+      fprintf(fp, "%le\n", data[j]);
    }
 
    fclose(fp);
