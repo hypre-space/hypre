@@ -54,7 +54,7 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,MLI_Matrix **Pmat_out)
 {
    HYPRE_IJMatrix         IJPmat;
    hypre_CSRMatrix        *A_offd, *J_diag, *J_offd;
-   hypre_ParCSRMatrix     *Amat, *A2mat, *Pmat, *Gmat, *Jmat;
+   hypre_ParCSRMatrix     *Amat, *A2mat, *Pmat, *Gmat, *Jmat, *Pmat2;
    hypre_ParCSRCommPkg    *comm_pkg;
    hypre_ParCSRCommHandle *comm_handle;
    MLI_Matrix             *mli_Pmat, *mli_Jmat, *mli_A2mat;
@@ -351,7 +351,6 @@ printf("\n");
       HYPRE_IJMatrixDestroy( IJPmat );
       delete [] col_ind;
       delete [] col_val;
-printf("psmoother = 5d %d\n", pre_smoother, postsmoother);
       if ( pre_smoother == MLI_SOLVER_MLS_ID ||
            postsmoother == MLI_SOLVER_MLS_ID )
          MLI_Utils_ComputeSpectralRadius(Amat, &max_eigen);
@@ -363,9 +362,11 @@ printf("psmoother = 5d %d\n", pre_smoother, postsmoother);
 
    else
    {
-      /*--------------------------------------------------------------
+      /* ================================================================*/
+      /* ================= old version (before Matmul debugged) ==========
+       *--------------------------------------------------------------
        * fetch communication pattern of A and set up communication buffer 
-       *--------------------------------------------------------------*/
+       *--------------------------------------------------------------*
 
       comm_pkg = hypre_ParCSRMatrixCommPkg(Amat);
       if (!comm_pkg)
@@ -395,10 +396,10 @@ printf("psmoother = 5d %d\n", pre_smoother, postsmoother);
          P_vecs_ext   = NULL;
       }
 
-      /*-----------------------------------------------------------------
+      *-----------------------------------------------------------------
        * load communication buffer and send/receive
        * (to fetch the off-diagonal part of P_vecs)
-       *-----------------------------------------------------------------*/
+       *-----------------------------------------------------------------*
 
       if ( num_sends > 0 )
       {
@@ -433,9 +434,9 @@ printf("psmoother = 5d %d\n", pre_smoother, postsmoother);
          }
       }
 
-      /*-----------------------------------------------------------------
+       *-----------------------------------------------------------------
        * compute smoothing factor for the prolongation smoother
-       *-----------------------------------------------------------------*/
+       *-----------------------------------------------------------------*
 
       MLI_Utils_ComputeSpectralRadius(Amat, &max_eigen);
       if ( mypid == 0 && output_level > 0 )
@@ -443,23 +444,23 @@ printf("psmoother = 5d %d\n", pre_smoother, postsmoother);
       assert ( max_eigen > 0.0 );
       alpha = P_weight / max_eigen;
 
-      /*-----------------------------------------------------------------
+       *-----------------------------------------------------------------
        * compute the Jacobi matrix (I - alpha A) 
-       *-----------------------------------------------------------------*/
+       *-----------------------------------------------------------------*
 
       MLI_Matrix_FormJacobi(mli_Amat, alpha, &mli_Jmat);
       Jmat = (hypre_ParCSRMatrix *) mli_Jmat->getMatrix();
 
-      /*-----------------------------------------------------------------
+       *-----------------------------------------------------------------
        * compute the smoothed prolongator (J * P)
        * Now :
        *  - P_vecs, P_cols has column numbers and values of tentative P
        *  - P_vecs_ext and P_cols_ext has column numbers and values of
        *    tentative P from external processors
        *  - P_cols and P_cols_ext have global column numbers
-       *-----------------------------------------------------------------*/
+       *-----------------------------------------------------------------*
 
-      /* ----- fetch diagonal and off-diagonal blocks of J ----- */
+       * ----- fetch diagonal and off-diagonal blocks of J ----- *
 
       J_diag        = hypre_ParCSRMatrixDiag(Jmat);
       J_offd        = hypre_ParCSRMatrixOffd(Jmat);
@@ -479,7 +480,7 @@ printf("psmoother = 5d %d\n", pre_smoother, postsmoother);
       K_diag_j      = new int[J_diag_i[J_local_nrows]];
       K_diag_data   = new double[J_diag_i[J_local_nrows]*nullspace_dim];
 
-      /* ----- loop all rows of the J matrix ----- */
+       * ----- loop all rows of the J matrix ----- *
 
       max_nnz = 0;
       for ( irow = 0; irow < J_local_nrows; irow++ )
@@ -508,7 +509,7 @@ printf("psmoother = 5d %d\n", pre_smoother, postsmoother);
             max_nnz = max_nnz_diag + max_nnz_offd;
       }
 
-      /* ----- allocate temporary storage space ----- */
+       * ----- allocate temporary storage space ----- *
 
       max_nnz = max_nnz * nullspace_dim;
       new_col_ind  = new int[max_nnz];
@@ -516,13 +517,13 @@ printf("psmoother = 5d %d\n", pre_smoother, postsmoother);
       new_col_val  = new double[max_nnz];
       row_lengths  = new int[P_local_nrows];
 
-      /* ----- sum up each row to remove duplicate column indices ----- */
+       * ----- sum up each row to remove duplicate column indices ----- *
 
       K_diag_i[0] = 0;
       K_offd_i[0] = 0;
       for ( irow = 0; irow < J_local_nrows; irow++ )
       {
-         /* ----- handle the diagonal part ----- */
+         * ----- handle the diagonal part ----- *
 
          k = 0;
          for ( i = J_diag_i[irow]; i < J_diag_i[irow+1]; i++ )
@@ -568,7 +569,7 @@ printf("psmoother = 5d %d\n", pre_smoother, postsmoother);
          row_lengths[irow] = nnz_cnt - K_diag_i[irow];
          K_diag_i[irow+1] = nnz_cnt;
  
-         /* ----- handle the off-diagonal part ----- */
+         * ----- handle the off-diagonal part ----- *
 
          k = 0; 
          for ( i = J_offd_i[irow]; i < J_offd_i[irow+1]; i++ )
@@ -616,7 +617,7 @@ printf("psmoother = 5d %d\n", pre_smoother, postsmoother);
          K_offd_i[irow+1] = nnz_cnt;
       }
 
-      /* set up the row sizes of the P matrix */
+      * set up the row sizes of the P matrix *
 
       ierr = HYPRE_IJMatrixSetRowSizes(IJPmat, row_lengths);
       ierr = HYPRE_IJMatrixInitialize(IJPmat);
@@ -624,7 +625,7 @@ printf("psmoother = 5d %d\n", pre_smoother, postsmoother);
       delete [] row_lengths;
       delete [] new_col_itmp;
 
-      /* ----- now load the smoothed prolongator ----- */
+      * ----- now load the smoothed prolongator ----- *
 
       for ( irow = 0; irow < J_local_nrows; irow++ )
       {
@@ -658,9 +659,9 @@ printf("psmoother = 5d %d\n", pre_smoother, postsmoother);
       //sprintf( param_string, "Pmat" );
       //MLI_Utils_HypreMatrixPrint(Pmat, param_string);
 
-      /*-----------------------------------------------------------------
+       *-----------------------------------------------------------------
        * clean up 
-       *-----------------------------------------------------------------*/
+       *-----------------------------------------------------------------*
 
       delete [] new_col_ind;
       delete [] new_col_val;
@@ -680,8 +681,48 @@ printf("psmoother = 5d %d\n", pre_smoother, postsmoother);
       delete [] K_offd_j;
       delete [] K_offd_data;
 
-      //Pmat = hypre_ParMatmul( Jmat, Pmat2);
-      //hypre_ParCSRMatrixDestroy(Pmat2);
+       * ================= old version (before Matmul debugged) =========*/
+      /* ================================================================*/
+
+      MLI_Utils_ComputeSpectralRadius(Amat, &max_eigen);
+      if ( mypid == 0 && output_level > 0 )
+         printf("\tEstimated spectral radius of A = %e\n", max_eigen);
+      assert ( max_eigen > 0.0 );
+      alpha = P_weight / max_eigen;
+
+      MLI_Matrix_FormJacobi(mli_Amat, alpha, &mli_Jmat);
+      Jmat = (hypre_ParCSRMatrix *) mli_Jmat->getMatrix();
+      row_lengths = new int[P_local_nrows];
+      for ( i = 0; i < P_local_nrows; i++ ) row_lengths[i] = nullspace_dim;
+      ierr = HYPRE_IJMatrixSetRowSizes(IJPmat, row_lengths);
+      ierr = HYPRE_IJMatrixInitialize(IJPmat);
+      assert(!ierr);
+      delete [] row_lengths;
+      col_ind = new int[nullspace_dim];
+      col_val = new double[nullspace_dim];
+      for ( irow = 0; irow < P_local_nrows; irow++ )
+      {
+         for ( j = 0; j < nullspace_dim; j++ )
+         {
+            col_ind[j] = P_cols[irow] + j;
+            col_val[j] = P_vecs[j][irow];
+         }
+         row_num = P_start_row + irow;
+         HYPRE_IJMatrixSetValues(IJPmat, 1, &nullspace_dim, 
+                             (const int *) &row_num, (const int *) col_ind, 
+                             (const double *) col_val);
+      }
+      ierr = HYPRE_IJMatrixAssemble(IJPmat);
+      assert( !ierr );
+      HYPRE_IJMatrixGetObject(IJPmat, (void **) &Pmat2);
+      HYPRE_IJMatrixSetObjectType(IJPmat, -1);
+      HYPRE_IJMatrixDestroy( IJPmat );
+      delete [] col_ind;
+      delete [] col_val;
+      Pmat = hypre_ParMatmul( Jmat, Pmat2);
+      hypre_ParCSRMatrixOwnsRowStarts(Jmat) = 0; 
+      hypre_ParCSRMatrixOwnsColStarts(Pmat2) = 0;
+      hypre_ParCSRMatrixDestroy(Pmat2);
       delete mli_Jmat;
    }
 
