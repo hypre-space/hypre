@@ -108,6 +108,10 @@ int hypre_GenerateRAPCommPkg P((hypre_ParCSRMatrix *RAP , hypre_ParCSRMatrix *A 
 int hypre_ParAMGRelax P(( hypre_ParCSRMatrix *A , hypre_ParVector *f , int *cf_marker, int relax_type , int relax_points , hypre_ParVector *u , hypre_ParVector *Vtemp ));
 int gselim P(( double *A , double *x , int n ));
  
+/* par_stats.c */
+int hypre_ParAMGSetupStats P(( void *amg_vdata, hypre_ParCSRMatrix *A )); 
+void hypre_WriteParAMGSolverParams P((void *data ));
+
 /* random.c */
 void hypre_SeedRand P((int seed ));
 double hypre_Rand P((void ));
