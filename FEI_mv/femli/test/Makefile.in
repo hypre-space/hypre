@@ -1,0 +1,111 @@
+#BHEADER***********************************************************************
+# (c) 2001   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+#EHEADER***********************************************************************
+
+.SUFFIXES:
+.SUFFIXES: .C .c .o
+
+srcdir = @srcdir@
+VPATH = @srcdir@
+ 
+CC  = @CC@
+CXX = @CXX@
+ 
+C_COMPILE_FLAGS=@CFLAGS@
+CXX_COMPILE_FLAGS=@CXXFLAGS@
+CINCLUDES=@INCLUDES@ @MPIINCLUDE@
+CXXINCLUDES=@INCLUDES@ @MPIINCLUDE@
+CDEFS =
+CXXDEFS =
+ 
+# FC_LIB contains the libraries for a CLINKER to use for code containing
+# FORTRAN code (such as I/O or special Fortran runtimes).
+#
+FC_LIB         = -L/opt/SUNWspro/SC4.2/lib -lF77 -lM77 -lsunmath
+BLAS_LIB       =  @BLASLIBFLAGS@
+
+CFLAGS =\
+ ${C_COMPILE_FLAGS}\
+ -I$(srcdir)\
+ -I$(srcdir)/..\
+ -I$(srcdir)/../..\
+ -I$(srcdir)/../../..\
+ -I$(srcdir)/../../../seq_mv\
+ -I$(srcdir)/../../../parcsr_mv\
+ -I$(srcdir)/../../../utilities\
+ ${CINCLUDES}\
+ ${CDEFS}
+ 
+CXXFLAGS =\
+ ${CXX_COMPILE_FLAGS}\
+ -I$(srcdir)\
+ -I$(srcdir)/..\
+ -I$(srcdir)/../..\
+ -I$(srcdir)/../../..\
+ -I$(srcdir)/../../../seq_mv\
+ -I$(srcdir)/../../../parcsr_mv\
+ -I$(srcdir)/../../../utilities\
+ ${CXXINCLUDES}\
+ ${CXXDEFS}
+
+RANLIB= @RANLIB@
+ 
+MPILIBFLAGS = @MPILIBDIRS@ @MPILIBS@ @MPIFLAGS@
+LIBFLAGS = @LIBDIRS@ @LIBS@
+LDLIBFLAGS = @LDLIBDIRS@ @LDLIBS@
+BLASLIBFLAGS =  @BLASLIBFLAGS@
+
+LFLAGS =\
+ -L.\
+ -L../../hypre/lib\
+ -L../lib\
+ -lHYPRE_mli\
+ -lkrylov\
+ -lHYPRE_IJ_mv\
+ -lHYPRE_parcsr_ls\
+ -lHYPRE_parcsr_mv\
+ -lHYPRE_seq_mv\
+ -lHYPRE_utilities\
+ -lHYPRE_superlu\
+ -lHYPRE_blas\
+ ${BLASLIBFLAGS} \
+ ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
+
+HEADERS =
+
+FILES =
+
+DRIVER_FILES = \
+ driver.c
+
+OBJS = ${FILES:.c=.o}
+DRIVER_OBJS = ${DRIVER_FILES:.c=.o}
+
+##################################################################
+# Targets
+##################################################################
+
+driver: ${DRIVER_OBJS} ../lib/libHYPRE_mli.a
+	@echo  "Building" $@ "... "
+	${CXX} -o driver $@.o ${LFLAGS}
+ 
+clean:
+	@rm -f *.o
+
+veryclean: clean
+	@rm -f driver
+
+##################################################################
+# Generic rules
+##################################################################
+
+.c.o:
+	${CC} -o $@ -c ${CFLAGS} $<
+
+.C.o:
+	${CXX} -o $@ -c ${CXXFLAGS} $<
+

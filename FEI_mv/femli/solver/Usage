@@ -1,0 +1,29 @@
+To create a smoother/solver,
+
+1. instantiate the solver agent
+
+   solver = new MLI_SolverCreateFromID( id );
+   solver = new MLI_SolverCreateFromName( name );
+  
+   where solver_id (solver_name) is one of :
+
+      MLI_SOLVER_JACOBI (Jacobi)
+      MLI_SOLVER_GS (GS)
+      MLI_SOLVER_SGS_ID (SGS)
+      MLI_SOLVER_PARASAILS (ParaSails)
+      MLI_SOLVER_SCHWARZ_ID (Schwarz)
+      MLI_SOLVER_MLS_ID (MLS)
+      MLI_SOLVER_SUPERLU_ID (SuperLU)
+
+2. call setParams to set specific parameters
+
+   solver->setParams( param_string, argc, argv );
+
+3. call setup
+
+   solver->setup(MLI_Matrix *mat);
+
+4. call solve
+
+   solver->solve(MLI_Vector *, MLI_Vector *);
+
