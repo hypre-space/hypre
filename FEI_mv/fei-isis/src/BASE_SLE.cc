@@ -50,6 +50,8 @@
 BASE_SLE::BASE_SLE(MPI_Comm PASSED_COMM_WORLD, int masterRank) : 
     FEI() {
 
+    blockRoster = NULL; // added by edmond 9-24-99
+
 //  start the wall clock time recording
 
     baseTime_ = MPI_Wtime();
