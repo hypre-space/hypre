@@ -188,7 +188,7 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
    if (debug_flag==4)
    {
       wall_time = time_getWallclockSeconds() - wall_time;
-      printf("Proc = %d     Interp: Comm 2   Get A_ext =  %f\n",
+      printf("Proc = %d  Interp: Comm 2   Get A_ext =  %f\n",
                     my_id, wall_time);
       fflush(NULL);
    }
@@ -645,10 +645,13 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
                                            /* in the off_diagonal block  */
                         for (j = 0; j < num_cols_A_offd; j++)
                         {
-                            if (i2 == abs(CF_marker_offd[j]) 
-                                     && P_marker_offd[j] >= jj_begin_row_offd)
+                            if (i2 == abs(CF_marker_offd[j]) )
                             { 
-                                sum += A_ext_data[jj1];
+                                if (P_marker_offd[j] >= jj_begin_row_offd)
+                                {
+				   sum += A_ext_data[jj1];
+                                }
+				break;
                             }
                         }
  
@@ -683,10 +686,10 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
                         /* check to see if it is in the off_diagonal block  */
                         for (j = 0; j < num_cols_A_offd; j++)
                         {
-                            if (i2 == abs(CF_marker_offd[j]) 
-                                    && P_marker_offd[j] >= jj_begin_row_offd)
+                            if (i2 == abs(CF_marker_offd[j])) 
                             { 
-                               P_offd_data[P_marker_offd[j]]
+                               if (P_marker_offd[j] >= jj_begin_row_offd)
+                                  P_offd_data[P_marker_offd[j]]
                                      += distribute * A_ext_data[jj1];
                                break;
                             }
