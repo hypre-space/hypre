@@ -227,6 +227,9 @@ veryclean: clean
 	@rm -f ${HYPRE_BABEL_DRIVER_F77_EXECS}
 	@rm -f ${HYPRE_FEI_DRIVER_CXX_EXECS}
 
+distclean: veryclean
+
+
 ##################################################################
 # Rules
 ##################################################################
@@ -249,7 +252,7 @@ sstruct: sstruct.o
 new_ij: new_ij.o
 	@echo  "Building" $@ "... "
 	${CC} -o $@ $@.o ${IJ_LS_LFLAGS}
-	@if test -d  "TEST_$@"; then cp $@ TEST_$@/.; fi
+	@if test -d  "TEST_ij then cp $@ TEST_ij; fi
 
 ij: ij.o
 	@echo  "Building" $@ "... "
@@ -328,7 +331,7 @@ ${HYPRE_BABEL_DRIVER_F77_EXECS}: ${HYPRE_BABEL_DRIVER_F77_OBJS}
 .c.o:
 	${CC} -o $@ -c ${CFLAGS} $<
 
-.C.o:
+.cxx.o:
 	${CXX} -o $@ -c -DNOFEI ${CXXFLAGS} $<
 
 .f.o:
