@@ -149,6 +149,60 @@ typedef struct
 } ProblemData;
  
 /*--------------------------------------------------------------------------
+ * Compute new box based on variable type
+ *--------------------------------------------------------------------------*/
+
+int
+GetVariableBox( Index  cell_ilower,
+                Index  cell_iupper,
+                int    int_vartype,
+                Index  var_ilower,
+                Index  var_iupper )
+{
+   int ierr = 0;
+   HYPRE_SStructVariable  vartype = (HYPRE_SStructVariable) int_vartype;
+
+   var_ilower[0] = cell_ilower[0];
+   var_ilower[1] = cell_ilower[1];
+   var_ilower[2] = cell_ilower[2];
+   var_iupper[0] = cell_iupper[0];
+   var_iupper[1] = cell_iupper[1];
+   var_iupper[2] = cell_iupper[2];
+
+   switch(vartype)
+   {
+      case HYPRE_SSTRUCT_VARIABLE_CELL:
+      var_ilower[0] -= 0; var_ilower[1] -= 0; var_ilower[2] -= 0;
+      break;
+      case HYPRE_SSTRUCT_VARIABLE_NODE:
+      var_ilower[0] -= 1; var_ilower[1] -= 1; var_ilower[2] -= 1;
+      break;
+      case HYPRE_SSTRUCT_VARIABLE_XFACE:
+      var_ilower[0] -= 1; var_ilower[1] -= 0; var_ilower[2] -= 0;
+      break;
+      case HYPRE_SSTRUCT_VARIABLE_YFACE:
+      var_ilower[0] -= 0; var_ilower[1] -= 1; var_ilower[2] -= 0;
+      break;
+      case HYPRE_SSTRUCT_VARIABLE_ZFACE:
+      var_ilower[0] -= 0; var_ilower[1] -= 0; var_ilower[2] -= 1;
+      break;
+      case HYPRE_SSTRUCT_VARIABLE_XEDGE:
+      var_ilower[0] -= 0; var_ilower[1] -= 1; var_ilower[2] -= 1;
+      break;
+      case HYPRE_SSTRUCT_VARIABLE_YEDGE:
+      var_ilower[0] -= 1; var_ilower[1] -= 0; var_ilower[2] -= 1;
+      break;
+      case HYPRE_SSTRUCT_VARIABLE_ZEDGE:
+      var_ilower[0] -= 1; var_ilower[1] -= 1; var_ilower[2] -= 0;
+      break;
+      case HYPRE_SSTRUCT_VARIABLE_UNDEFINED:
+      break;
+   }
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
  * Read routines
  *--------------------------------------------------------------------------*/
 
@@ -734,9 +788,10 @@ DistributeData( ProblemData   global_data,
    ProblemPartData  pdata;
    int             *pool_procs;
    int              np, pid;
-   int              pool, part, box, entry, p, q, r, i, d, dmap, sign, size;
+   int              pool, part, box, entry, p, q, r, i, d;
+   int              dmap, sign, size;
    Index            m, mmap, n;
-   ProblemIndex     int_ilower, int_iupper;
+   ProblemIndex     ilower, iupper, int_ilower, int_iupper;
 
    /* determine first process number in each pool */
    pool_procs = hypre_CTAlloc(int, (data.npools+1));
@@ -850,10 +905,13 @@ DistributeData( ProblemData   global_data,
 
                for (box = 0; box < pdata.nboxes; box++)
                {
+                  /* first convert the box extents based on vartype */
+                  GetVariableBox(pdata.ilowers[box], pdata.iuppers[box],
+                                 pdata.vartypes[pdata.graph_vars[entry]],
+                                 ilower, iupper);
                   size = IntersectBoxes(pdata.graph_ilowers[entry],
                                         pdata.graph_iuppers[entry],
-                                        pdata.ilowers[box],
-                                        pdata.iuppers[box],
+                                        ilower, iupper,
                                         int_ilower, int_iupper);
                   if (size > 0)
                   {
@@ -862,12 +920,16 @@ DistributeData( ProblemData   global_data,
                      {
                         dmap = pdata.graph_index_maps[entry][d];
                         sign = pdata.graph_index_signs[entry][d];
-                        pdata.graph_to_iuppers[i][dmap] =
-                           pdata.graph_to_ilowers[entry][dmap] + sign *
-                           (int_iupper[d] - pdata.graph_ilowers[entry][d]);
                         pdata.graph_to_ilowers[i][dmap] =
-                           pdata.graph_to_ilowers[entry][dmap] + sign *
-                           (int_ilower[d] - pdata.graph_ilowers[entry][d]);
+                           pdata.graph_to_ilowers[entry][dmap] +
+                           sign * pdata.graph_to_strides[entry][d] *
+                           ((int_ilower[d] - pdata.graph_ilowers[entry][d]) /
+                            pdata.graph_strides[entry][d]);
+                        pdata.graph_to_iuppers[i][dmap] =
+                           pdata.graph_to_iuppers[entry][dmap] +
+                           sign * pdata.graph_to_strides[entry][d] *
+                           ((int_iupper[d] - pdata.graph_iuppers[entry][d]) /
+                            pdata.graph_strides[entry][d]);
                         pdata.graph_ilowers[i][d] = int_ilower[d];
                         pdata.graph_iuppers[i][d] = int_iupper[d];
                         pdata.graph_strides[i][d] =
@@ -908,10 +970,13 @@ DistributeData( ProblemData   global_data,
 
                for (box = 0; box < pdata.nboxes; box++)
                {
+                  /* first convert the box extents based on vartype */
+                  GetVariableBox(pdata.ilowers[box], pdata.iuppers[box],
+                                 pdata.vartypes[pdata.matrix_vars[entry]],
+                                 ilower, iupper);
                   size = IntersectBoxes(pdata.matrix_ilowers[entry],
                                         pdata.matrix_iuppers[entry],
-                                        pdata.ilowers[box],
-                                        pdata.iuppers[box],
+                                        ilower, iupper,
                                         int_ilower, int_iupper);
                   if (size > 0)
                   {
@@ -930,7 +995,7 @@ DistributeData( ProblemData   global_data,
                         pdata.matrix_iuppers[i][d] =
                            pdata.matrix_iuppers[entry][d];
                      }
-                     pdata.matrix_vars[i]    = pdata.matrix_vars[entry];
+                     pdata.matrix_vars[i]     = pdata.matrix_vars[entry];
                      pdata.matrix_entries[i]  = pdata.matrix_entries[entry];
                      pdata.matrix_values[i]   = pdata.matrix_values[entry];
                      i++;
@@ -1215,59 +1280,6 @@ DestroyData( ProblemData   data )
    return 0;
 }
 
-/*--------------------------------------------------------------------------
- * Compute new box based on variable type
- *--------------------------------------------------------------------------*/
-
-int
-GetVariableBox( Index  cell_ilower,
-                Index  cell_iupper,
-                int    int_vartype,
-                Index  var_ilower,
-                Index  var_iupper )
-{
-   int ierr = 0;
-   HYPRE_SStructVariable  vartype = (HYPRE_SStructVariable) int_vartype;
-
-   var_ilower[0] = cell_ilower[0];
-   var_ilower[1] = cell_ilower[1];
-   var_ilower[2] = cell_ilower[2];
-   var_iupper[0] = cell_iupper[0];
-   var_iupper[1] = cell_iupper[1];
-   var_iupper[2] = cell_iupper[2];
-
-   switch(vartype)
-   {
-      case HYPRE_SSTRUCT_VARIABLE_CELL:
-      var_ilower[0] -= 0; var_ilower[1] -= 0; var_ilower[2] -= 0;
-      break;
-      case HYPRE_SSTRUCT_VARIABLE_NODE:
-      var_ilower[0] -= 1; var_ilower[1] -= 1; var_ilower[2] -= 1;
-      break;
-      case HYPRE_SSTRUCT_VARIABLE_XFACE:
-      var_ilower[0] -= 1; var_ilower[1] -= 0; var_ilower[2] -= 0;
-      break;
-      case HYPRE_SSTRUCT_VARIABLE_YFACE:
-      var_ilower[0] -= 0; var_ilower[1] -= 1; var_ilower[2] -= 0;
-      break;
-      case HYPRE_SSTRUCT_VARIABLE_ZFACE:
-      var_ilower[0] -= 0; var_ilower[1] -= 0; var_ilower[2] -= 1;
-      break;
-      case HYPRE_SSTRUCT_VARIABLE_XEDGE:
-      var_ilower[0] -= 0; var_ilower[1] -= 1; var_ilower[2] -= 1;
-      break;
-      case HYPRE_SSTRUCT_VARIABLE_YEDGE:
-      var_ilower[0] -= 1; var_ilower[1] -= 0; var_ilower[2] -= 1;
-      break;
-      case HYPRE_SSTRUCT_VARIABLE_ZEDGE:
-      var_ilower[0] -= 1; var_ilower[1] -= 1; var_ilower[2] -= 0;
-      break;
-      case HYPRE_SSTRUCT_VARIABLE_UNDEFINED:
-      break;
-   }
-
-   return ierr;
-}
 /*--------------------------------------------------------------------------
  * Routine to load cosine function
  *--------------------------------------------------------------------------*/
