@@ -82,8 +82,6 @@ typedef struct
   int (*ScaleVector)( double alpha , void *x );
   int (*Axpy)( double alpha , void *x , void *y );
   int (*CommInfo)( void *A , int *my_id , int *num_procs );
-  int (*IdentitySetup)( void *vdata , void *A , void *b , void *x );
-  int (*Identity)( void *vdata , void *A , void *b , void *x );
   int (*precond_setup)();
   int (*precond)();
 
