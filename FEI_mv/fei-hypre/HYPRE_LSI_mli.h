@@ -47,8 +47,8 @@ extern int  HYPRE_LSI_MLISetup( HYPRE_Solver, HYPRE_ParCSRMatrix,
 extern int  HYPRE_LSI_MLISolve( HYPRE_Solver, HYPRE_ParCSRMatrix,
                                 HYPRE_ParVector,   HYPRE_ParVector);
 extern int  HYPRE_LSI_MLISetParams( HYPRE_Solver, char * );
+extern int  HYPRE_LSI_MLICreateNodeEqnMap( HYPRE_Solver, int, int *, int * );
 extern int  HYPRE_LSI_MLISetFEData( HYPRE_Solver, void * );
-extern int  HYPRE_LSI_MLICreateMapper( HYPRE_Solver, Lookup *, void *fedata );
 extern int  HYPRE_LSI_MLISetStrengthThreshold( HYPRE_Solver, double );
 extern int  HYPRE_LSI_MLISetMethod( HYPRE_Solver, char * );
 extern int  HYPRE_LSI_MLISetSmoother( HYPRE_Solver, int, int, int, char ** );

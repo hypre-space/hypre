@@ -5041,11 +5041,7 @@ void HYPRE_LinSysCore::FE_initComplete()
 {
 #ifdef HAVE_MLI
    if ( haveFEData_ && feData_ != NULL )
-   {
       HYPRE_LSI_MLIFEDataInitComplete(feData_);
-      if ( lookup_ != NULL && HYPreconID_ == HYMLI ) 
-         HYPRE_LSI_MLICreateMapper(HYPrecon_, lookup_, feData_);
-   }
 #endif
    return;
 }

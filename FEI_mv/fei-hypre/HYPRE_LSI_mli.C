@@ -16,6 +16,7 @@
  *        HYPRE_LSI_MLISolve
  *        HYPRE_LSI_MLISetParams
  *--------------------------------------------------------------------------
+ *        HYPRE_LSI_MLICreateNodeEqnMap
  *        HYPRE_LSI_MLISetFEData
  *        HYPRE_LSI_MLISetStrengthThreshold
  *        HYPRE_LSI_MLISetMethod
@@ -74,8 +75,6 @@ extern "C"
 {
 void mli_computespectrum_(int *,int *,double *, double *, int *, double *, 
                           double *, double *, int *);
-int  HYPRE_LSI_qsort1a(int *, int *, int, int);
-void qsort0(int *, int, int);
 }
 
 /****************************************************************************/ 
@@ -363,6 +362,7 @@ int HYPRE_LSI_MLISetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
    /* -------------------------------------------------------- */ 
 
    mli->setFEData( 0, mli_object->feData_, mli_object->mapper_ );
+   mli_object->mapper_ = NULL;
    mli_object->feData_ = NULL;
 
    /* -------------------------------------------------------- */ 
@@ -638,129 +638,48 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
 }
 
 /****************************************************************************/
+/* HYPRE_LSI_MLICreateMapper                                                */
+/*--------------------------------------------------------------------------*/
+
+extern "C"
+int HYPRE_LSI_MLICreateNodeEqnMap(HYPRE_Solver solver, int nNodes, 
+                                  int *nodeNumbers, int *eqnNumbers)
+{
+#ifdef HAVE_MLI
+   int           mypid;
+   MLI_Mapper    *mapper;
+   HYPRE_LSI_MLI *mli_object = (HYPRE_LSI_MLI *) solver;
+
+   if ( mli_object == NULL ) return 1;
+   if ( mli_object->mapper_ != NULL ) delete mli_object->mapper_;
+   mapper = new MLI_Mapper();
+   mapper->setMap( nNodes, nodeNumbers, eqnNumbers );
+   MPI_Comm_rank( mli_object->mpiComm_, &mypid );
+   mli_object->mapper_ = mapper;
+   return 0;
+#else
+   (void) mli_object;
+   return 1;
+#endif
+}
+
+/****************************************************************************/
 /* HYPRE_LSI_MLISetFEData                                                   */
 /*--------------------------------------------------------------------------*/
 
 extern "C"
 int HYPRE_LSI_MLISetFEData(HYPRE_Solver solver, void *object)
 {
+#ifdef HAVE_MLI
    HYPRE_LSI_MLI *mli_object = (HYPRE_LSI_MLI *) solver;
    HYPRE_MLI_FEData *hypre_fedata = (HYPRE_MLI_FEData *) object;
-#ifdef HAVE_MLI
    mli_object->feData_      = hypre_fedata->fedata_; 
    hypre_fedata->fedata_    = NULL; 
    hypre_fedata->fedataOwn_ = 0;
-#endif
-   return 0;
-}
-
-/****************************************************************************/
-/* HYPRE_LSI_MLICreateMapper                                                */
-/*--------------------------------------------------------------------------*/
-
-extern "C"
-int HYPRE_LSI_MLICreateMapper(HYPRE_Solver solver, Lookup *lookup, 
-                              void *fedata_in)
-{
-   HYPRE_LSI_MLI *mli_object = (HYPRE_LSI_MLI *) solver;
-#ifdef HAVE_MLI
-   int  i, j, nElems, *elemIDs, elemNNodes, **elemNodeLists, nBlocks;
-   int  *blockIDs, blockID, **nodeFieldIDs, newFieldID, first, last;
-   int  *nodeNumbers, *eqnNumbers, *intArray, counter, counter2, index;
-   int  mypid;
-   HYPRE_MLI_FEData *hypre_fedata = (HYPRE_MLI_FEData *) fedata_in;
-   MLI_FEData *fedata = hypre_fedata->fedata_;
-   mli_object->feData_ = fedata; 
-
-   /* -------------------------------------------------------- */ 
-   /* fetch FEData and create mapper                           */
-   /* -------------------------------------------------------- */ 
-
-   MPI_Comm_rank(mli_object->mpiComm_, &mypid);
-   if ( fedata == NULL ) return 1;
-   if ( lookup == NULL ) return 1;
-   MLI_Mapper *mapper = new MLI_Mapper();
-
-   /* -------------------------------------------------------- */ 
-   /* fetch element connectivity information                   */
-   /* -------------------------------------------------------- */ 
-
-   fedata->getNumElements(nElems);
-   elemIDs = new int[nElems];
-   fedata->getElemBlockGlobalIDs(nElems, elemIDs);
-   fedata->getElemNumNodes(elemNNodes);
-   elemNodeLists = new int*[nElems];
-   for ( i = 0; i < nElems; i++ ) elemNodeLists[i] = new int[elemNNodes];
-   fedata->getElemBlockNodeLists(nElems, elemNNodes, elemNodeLists);
-   nBlocks = lookup->getNumElemBlocks();
-   blockIDs = (int *) lookup->getElemBlockIDs();
-   blockID = blockIDs[0];
-   nodeFieldIDs = (int **) lookup->getFieldIDsTable(blockID);
-   newFieldID = nodeFieldIDs[0][0];
-
-   /* -------------------------------------------------------- */ 
-   /* create the map                                           */
-   /* -------------------------------------------------------- */ 
-
-   nodeNumbers = new int[nElems*elemNNodes]; 
-   eqnNumbers  = new int[nElems*elemNNodes]; 
-
-   for ( i = 0; i < nElems; i++ ) 
-   {
-      intArray = elemNodeLists[i];
-      for ( j = 0; j < elemNNodes; j++ ) 
-      {
-         index = lookup->getEqnNumber(intArray[j], newFieldID);
-         nodeNumbers[i*elemNNodes+j] = intArray[j];
-         eqnNumbers[i*elemNNodes+j] = index;
-      }
-   }
-   HYPRE_LSI_qsort1a( nodeNumbers, eqnNumbers, 0, nElems*elemNNodes-1 );
-   counter = 0;
-   while ( counter < nElems*elemNNodes )
-   {
-      index = nodeNumbers[counter];
-      first = counter;
-      last  = counter + 1;
-      while (last < nElems*elemNNodes && nodeNumbers[last] == index) last++;
-      qsort0( &(eqnNumbers[first]), 0, last-first-1 );
-      counter2 = first;
-      for ( j = first+1; j < last; j++ )
-      {
-         if ( eqnNumbers[j] != eqnNumbers[counter2] )
-         {
-            counter2++;
-            eqnNumbers[counter2] = eqnNumbers[j];
-         }
-      }
-      for ( j = counter2+1; j < last; j++ ) eqnNumbers[j] = -2;
-      counter = last;
-   }
-   counter = 0;
-   for ( i = 0; i < nElems*elemNNodes; i++ ) 
-   {
-      printf("%5d : %d map(%5d) = %5d\n", mypid, i, nodeNumbers[i], 
-             eqnNumbers[i]);
-      if ( eqnNumbers[i] != -2 )
-      {
-         nodeNumbers[counter]  = nodeNumbers[i];
-         eqnNumbers[counter++] = eqnNumbers[i];
-      }
-   }
-
-   /* -------------------------------------------------------- */ 
-   /* save the map                                             */
-   /* -------------------------------------------------------- */ 
-
-   mapper->setMap( counter, nodeNumbers, eqnNumbers );
-   mli_object->mapper_ = mapper;
-   for ( i = 0; i < nElems; i++ ) delete [] elemNodeLists[i];
-   delete [] elemNodeLists;
-   delete [] elemIDs;
-   delete [] nodeNumbers;
-   delete [] eqnNumbers;
    return 0;
 #else
+   (void) solver;
+   (void) object;
    return 1;
 #endif
 }
@@ -1270,6 +1189,7 @@ int HYPRE_LSI_MLIFEDataLoadElemMatrix(void *object, int elemID, int nNodes,
 
    if ( hypre_fedata->computeNull_ <= 0 ) return 0;
 
+/* This section to be moved to MLI
    evalues  = new double[matDim];
    evectors = new double[matDim*matDim];
    dAux1    = new double[matDim];
@@ -1306,9 +1226,7 @@ int HYPRE_LSI_MLIFEDataLoadElemMatrix(void *object, int elemID, int nNodes,
    
    for ( i = 0; i < matDim; i++ ) 
    {
-/*
       index = cols[i];
-*/
       for ( j = 0; j < nDim; j++ ) 
          nSpace[index+length*j] += evectors[j*matDim+i];
       nCnts[index]++;
@@ -1328,6 +1246,7 @@ int HYPRE_LSI_MLIFEDataLoadElemMatrix(void *object, int elemID, int nNodes,
    delete [] evectors;
    delete [] dAux1;
    delete [] dAux2;
+*/
    return 0;
 #else
    (void) object;
@@ -1472,4 +1391,5 @@ int HYPRE_LSI_MLIFEDataWriteToFile( void *object, char *filename )
    return 1;
 #endif
 }
+
 
