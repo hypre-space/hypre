@@ -109,8 +109,12 @@ HYPRE_SStructGraphDestroy( HYPRE_SStructGraph graph )
          for (i = 0; i < nUventries; i++)
          {
             Uventry = Uventries[iUventries[i]];
-            hypre_TFree(hypre_SStructUVEntryUEntries(Uventry));
-            hypre_TFree(Uventry);
+            if (Uventry)
+            {
+               hypre_TFree(hypre_SStructUVEntryUEntries(Uventry));
+               hypre_TFree(Uventry);
+            }
+            Uventries[iUventries[i]] = NULL;
          }
          hypre_TFree(iUventries);
          hypre_TFree(Uventries);
@@ -166,7 +170,7 @@ HYPRE_SStructGraphAddEntries( HYPRE_SStructGraph   graph,
 
    hypre_Index            cindex;
    int                    box, rank;
-   int                    i, d, first;
+   int                    i, j, first;
 
    /* compute location (rank) for Uventry */
    hypre_CopyToCleanIndex(index, ndim, cindex);
@@ -184,27 +188,26 @@ HYPRE_SStructGraphAddEntries( HYPRE_SStructGraph   graph,
       hypre_SStructUVEntryVar(Uventry) = var;
       first = 0;
       nUentries = nentries;
-      hypre_SStructUVEntryNUEntries(Uventry) = nUentries;
       Uentries = hypre_TAlloc(hypre_SStructUEntry, nUentries);
-      hypre_SStructUVEntryUEntries(Uventry) = Uentries;
    }
    else
    {
       Uventry = Uventries[rank];
-      first = nentries;
-      nUentries = hypre_SStructUVEntryNUEntries(Uventry) + nentries;
-      hypre_SStructUVEntryNUEntries(Uventry) = nUentries;
+      first = hypre_SStructUVEntryNUEntries(Uventry);
+      nUentries = first + nentries;
       Uentries = hypre_SStructUVEntryUEntries(Uventry);
       Uentries = hypre_TReAlloc(Uentries, hypre_SStructUEntry, nUentries);
-      hypre_SStructUVEntryUEntries(Uventry) = Uentries;
    }
+   hypre_SStructUVEntryNUEntries(Uventry) = nUentries;
+   hypre_SStructUVEntryUEntries(Uventry)  = Uentries;
 
-   for (i = first; i < nUentries; i++)
+   for (i = 0; i < nentries; i++)
    {
-      hypre_SStructUVEntryToPart(Uventry, i) = to_part;
+      j = first + i;
+      hypre_SStructUVEntryToPart(Uventry, j) = to_part;
       hypre_CopyToCleanIndex(to_indexes[i], ndim,
-                             hypre_SStructUVEntryToIndex(Uventry, i));
-      hypre_SStructUVEntryToVar(Uventry, i) = to_var;
+                             hypre_SStructUVEntryToIndex(Uventry, j));
+      hypre_SStructUVEntryToVar(Uventry, j) = to_var;
    }
 
    Uventries[rank] = Uventry;
