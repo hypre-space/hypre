@@ -23,7 +23,7 @@ dnl *********************************************************************
 define([AC_CACHE_LOAD], )dnl
 define([AC_CACHE_SAVE], )dnl
 
-AC_INIT(utilities/memory.c)
+AC_INIT(utilities/hypre_memory.c)
 AC_CONFIG_HEADER(HYPRE_config.h)
 AC_CONFIG_AUX_DIR(config)
 AC_PREFIX_DEFAULT(`pwd`/hypre)
