@@ -1023,7 +1023,7 @@ int MLI_Utils_QR(double *qArray, double *rArray, int nrows, int ncols)
          retFlag = icol + 1;
          icol--;
          for ( irow = 0; irow < nrows; irow++ )
-            currQ[irow] = 100.0 * random() / RAND_MAX;
+            currQ[irow] = 0.1 * irow;
       }   
       else
       {
