@@ -3,8 +3,8 @@
  * Symbol:        Hypre.ParCSRVector-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.7.4
- * SIDL Created:  20021101 15:14:28 PST
- * Generated:     20021101 15:14:33 PST
+ * SIDL Created:  20021217 16:01:16 PST
+ * Generated:     20021217 16:01:23 PST
  * Description:   Client-side glue code for Hypre.ParCSRVector
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -163,26 +163,6 @@ Hypre_ParCSRVector_isInstanceOf(
 }
 
 /*
- * Method:  GetRow[]
- */
-
-int32_t
-Hypre_ParCSRVector_GetRow(
-  Hypre_ParCSRVector self,
-  int32_t row,
-  int32_t* size,
-  struct SIDL_int__array** col_ind,
-  struct SIDL_double__array** values)
-{
-  return (*self->d_epv->f_GetRow)(
-    self,
-    row,
-    size,
-    col_ind,
-    values);
-}
-
-/*
  * y <- 0 (where y=self)
  */
 
@@ -266,6 +246,26 @@ Hypre_ParCSRVector_Axpy(
     self,
     a,
     x);
+}
+
+/*
+ * Method:  GetRow[]
+ */
+
+int32_t
+Hypre_ParCSRVector_GetRow(
+  Hypre_ParCSRVector self,
+  int32_t row,
+  int32_t* size,
+  struct SIDL_int__array** col_ind,
+  struct SIDL_double__array** values)
+{
+  return (*self->d_epv->f_GetRow)(
+    self,
+    row,
+    size,
+    col_ind,
+    values);
 }
 
 /*

@@ -3,8 +3,8 @@
  * Symbol:        Hypre.GMRES-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.7.4
- * SIDL Created:  20021101 15:14:28 PST
- * Generated:     20021101 15:14:29 PST
+ * SIDL Created:  20021217 16:01:16 PST
+ * Generated:     20021217 16:01:17 PST
  * Description:   Intermediate Object Representation for Hypre.GMRES
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -129,12 +129,12 @@ struct Hypre_GMRES__epv {
     struct SIDL_double__array* value);
   int32_t (*f_Setup)(
     struct Hypre_GMRES__object* self,
-    struct Hypre_Vector__object* x,
-    struct Hypre_Vector__object* y);
+    struct Hypre_Vector__object* b,
+    struct Hypre_Vector__object* x);
   int32_t (*f_Apply)(
     struct Hypre_GMRES__object* self,
-    struct Hypre_Vector__object* x,
-    struct Hypre_Vector__object** y);
+    struct Hypre_Vector__object* b,
+    struct Hypre_Vector__object** x);
   /* Methods introduced in Hypre.Solver-v0.1.5 */
   int32_t (*f_SetOperator)(
     struct Hypre_GMRES__object* self,

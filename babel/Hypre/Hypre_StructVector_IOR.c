@@ -3,8 +3,8 @@
  * Symbol:        Hypre.StructVector-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.7.4
- * SIDL Created:  20021101 15:14:28 PST
- * Generated:     20021101 15:14:30 PST
+ * SIDL Created:  20021217 16:01:16 PST
+ * Generated:     20021217 16:01:18 PST
  * Description:   Intermediate Object Representation for Hypre.StructVector
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -137,6 +137,12 @@ static void Hypre_StructVector__init_epv(
     Hypre_StructVector__object*,const char*)) s1->d_epv->f_queryInterface;
   epv->f_isInstanceOf    = (SIDL_bool (*)(struct Hypre_StructVector__object*,
     const char*)) s1->d_epv->f_isInstanceOf;
+  epv->f_Clear           = NULL;
+  epv->f_Copy            = NULL;
+  epv->f_Clone           = NULL;
+  epv->f_Scale           = NULL;
+  epv->f_Dot             = NULL;
+  epv->f_Axpy            = NULL;
   epv->f_SetCommunicator = NULL;
   epv->f_Initialize      = NULL;
   epv->f_Assemble        = NULL;
@@ -145,12 +151,6 @@ static void Hypre_StructVector__init_epv(
   epv->f_SetStencil      = NULL;
   epv->f_SetValue        = NULL;
   epv->f_SetBoxValues    = NULL;
-  epv->f_Clear           = NULL;
-  epv->f_Copy            = NULL;
-  epv->f_Clone           = NULL;
-  epv->f_Scale           = NULL;
-  epv->f_Dot             = NULL;
-  epv->f_Axpy            = NULL;
 
   Hypre_StructVector__set_epv(epv);
 
@@ -409,6 +409,79 @@ remote_Hypre_StructVector_isInstanceOf(
 }
 
 /*
+ * REMOTE METHOD STUB:Clear
+ */
+
+static int32_t
+remote_Hypre_StructVector_Clear(
+  struct Hypre_StructVector__object* self)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:Copy
+ */
+
+static int32_t
+remote_Hypre_StructVector_Copy(
+  struct Hypre_StructVector__object* self,
+  struct Hypre_Vector__object* x)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:Clone
+ */
+
+static int32_t
+remote_Hypre_StructVector_Clone(
+  struct Hypre_StructVector__object* self,
+  struct Hypre_Vector__object** x)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:Scale
+ */
+
+static int32_t
+remote_Hypre_StructVector_Scale(
+  struct Hypre_StructVector__object* self,
+  double a)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:Dot
+ */
+
+static int32_t
+remote_Hypre_StructVector_Dot(
+  struct Hypre_StructVector__object* self,
+  struct Hypre_Vector__object* x,
+  double* d)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:Axpy
+ */
+
+static int32_t
+remote_Hypre_StructVector_Axpy(
+  struct Hypre_StructVector__object* self,
+  double a,
+  struct Hypre_Vector__object* x)
+{
+  return 0;
+}
+
+/*
  * REMOTE METHOD STUB:SetCommunicator
  */
 
@@ -506,79 +579,6 @@ remote_Hypre_StructVector_SetBoxValues(
 }
 
 /*
- * REMOTE METHOD STUB:Clear
- */
-
-static int32_t
-remote_Hypre_StructVector_Clear(
-  struct Hypre_StructVector__object* self)
-{
-  return 0;
-}
-
-/*
- * REMOTE METHOD STUB:Copy
- */
-
-static int32_t
-remote_Hypre_StructVector_Copy(
-  struct Hypre_StructVector__object* self,
-  struct Hypre_Vector__object* x)
-{
-  return 0;
-}
-
-/*
- * REMOTE METHOD STUB:Clone
- */
-
-static int32_t
-remote_Hypre_StructVector_Clone(
-  struct Hypre_StructVector__object* self,
-  struct Hypre_Vector__object** x)
-{
-  return 0;
-}
-
-/*
- * REMOTE METHOD STUB:Scale
- */
-
-static int32_t
-remote_Hypre_StructVector_Scale(
-  struct Hypre_StructVector__object* self,
-  double a)
-{
-  return 0;
-}
-
-/*
- * REMOTE METHOD STUB:Dot
- */
-
-static int32_t
-remote_Hypre_StructVector_Dot(
-  struct Hypre_StructVector__object* self,
-  struct Hypre_Vector__object* x,
-  double* d)
-{
-  return 0;
-}
-
-/*
- * REMOTE METHOD STUB:Axpy
- */
-
-static int32_t
-remote_Hypre_StructVector_Axpy(
-  struct Hypre_StructVector__object* self,
-  double a,
-  struct Hypre_Vector__object* x)
-{
-  return 0;
-}
-
-/*
  * REMOTE EPV: create remote entry point vectors (EPVs).
  */
 
@@ -602,6 +602,12 @@ static void Hypre_StructVector__init_remote_epv(void)
   epv->f_isSame          = remote_Hypre_StructVector_isSame;
   epv->f_queryInterface  = remote_Hypre_StructVector_queryInterface;
   epv->f_isInstanceOf    = remote_Hypre_StructVector_isInstanceOf;
+  epv->f_Clear           = remote_Hypre_StructVector_Clear;
+  epv->f_Copy            = remote_Hypre_StructVector_Copy;
+  epv->f_Clone           = remote_Hypre_StructVector_Clone;
+  epv->f_Scale           = remote_Hypre_StructVector_Scale;
+  epv->f_Dot             = remote_Hypre_StructVector_Dot;
+  epv->f_Axpy            = remote_Hypre_StructVector_Axpy;
   epv->f_SetCommunicator = remote_Hypre_StructVector_SetCommunicator;
   epv->f_Initialize      = remote_Hypre_StructVector_Initialize;
   epv->f_Assemble        = remote_Hypre_StructVector_Assemble;
@@ -610,12 +616,6 @@ static void Hypre_StructVector__init_remote_epv(void)
   epv->f_SetStencil      = remote_Hypre_StructVector_SetStencil;
   epv->f_SetValue        = remote_Hypre_StructVector_SetValue;
   epv->f_SetBoxValues    = remote_Hypre_StructVector_SetBoxValues;
-  epv->f_Clear           = remote_Hypre_StructVector_Clear;
-  epv->f_Copy            = remote_Hypre_StructVector_Copy;
-  epv->f_Clone           = remote_Hypre_StructVector_Clone;
-  epv->f_Scale           = remote_Hypre_StructVector_Scale;
-  epv->f_Dot             = remote_Hypre_StructVector_Dot;
-  epv->f_Axpy            = remote_Hypre_StructVector_Axpy;
 
   e0->f__cast           = (void* (*)(void*,const char*)) epv->f__cast;
   e0->f__delete         = (void (*)(void*)) epv->f__delete;

@@ -3,8 +3,8 @@
  * Symbol:        Hypre.ParCSRMatrix-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.7.4
- * SIDL Created:  20021101 15:14:28 PST
- * Generated:     20021101 15:14:31 PST
+ * SIDL Created:  20021217 16:01:16 PST
+ * Generated:     20021217 16:01:20 PST
  * Description:   Client-side glue code for Hypre.ParCSRMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -115,104 +115,12 @@ Hypre_ParCSRMatrix_isInstanceOf(
   const char* name);
 
 /**
- * Method:  GetRow[]
- */
-int32_t
-Hypre_ParCSRMatrix_GetRow(
-  Hypre_ParCSRMatrix self,
-  int32_t row,
-  int32_t* size,
-  struct SIDL_int__array** col_ind,
-  struct SIDL_double__array** values);
-
-/**
  * Method:  SetCommunicator[]
  */
 int32_t
 Hypre_ParCSRMatrix_SetCommunicator(
   Hypre_ParCSRMatrix self,
-  void* comm);
-
-/**
- * Method:  GetDoubleValue[]
- */
-int32_t
-Hypre_ParCSRMatrix_GetDoubleValue(
-  Hypre_ParCSRMatrix self,
-  const char* name,
-  double* value);
-
-/**
- * Method:  GetIntValue[]
- */
-int32_t
-Hypre_ParCSRMatrix_GetIntValue(
-  Hypre_ParCSRMatrix self,
-  const char* name,
-  int32_t* value);
-
-/**
- * Method:  SetDoubleParameter[]
- */
-int32_t
-Hypre_ParCSRMatrix_SetDoubleParameter(
-  Hypre_ParCSRMatrix self,
-  const char* name,
-  double value);
-
-/**
- * Method:  SetIntParameter[]
- */
-int32_t
-Hypre_ParCSRMatrix_SetIntParameter(
-  Hypre_ParCSRMatrix self,
-  const char* name,
-  int32_t value);
-
-/**
- * Method:  SetStringParameter[]
- */
-int32_t
-Hypre_ParCSRMatrix_SetStringParameter(
-  Hypre_ParCSRMatrix self,
-  const char* name,
-  const char* value);
-
-/**
- * Method:  SetIntArrayParameter[]
- */
-int32_t
-Hypre_ParCSRMatrix_SetIntArrayParameter(
-  Hypre_ParCSRMatrix self,
-  const char* name,
-  struct SIDL_int__array* value);
-
-/**
- * Method:  SetDoubleArrayParameter[]
- */
-int32_t
-Hypre_ParCSRMatrix_SetDoubleArrayParameter(
-  Hypre_ParCSRMatrix self,
-  const char* name,
-  struct SIDL_double__array* value);
-
-/**
- * Method:  Setup[]
- */
-int32_t
-Hypre_ParCSRMatrix_Setup(
-  Hypre_ParCSRMatrix self,
-  Hypre_Vector x,
-  Hypre_Vector y);
-
-/**
- * Method:  Apply[]
- */
-int32_t
-Hypre_ParCSRMatrix_Apply(
-  Hypre_ParCSRMatrix self,
-  Hypre_Vector x,
-  Hypre_Vector* y);
+  void* mpi_comm);
 
 /**
  * Prepare an object for setting coefficient values, whether for
@@ -379,6 +287,98 @@ int32_t
 Hypre_ParCSRMatrix_Print(
   Hypre_ParCSRMatrix self,
   const char* filename);
+
+/**
+ * Method:  GetRow[]
+ */
+int32_t
+Hypre_ParCSRMatrix_GetRow(
+  Hypre_ParCSRMatrix self,
+  int32_t row,
+  int32_t* size,
+  struct SIDL_int__array** col_ind,
+  struct SIDL_double__array** values);
+
+/**
+ * Method:  GetDoubleValue[]
+ */
+int32_t
+Hypre_ParCSRMatrix_GetDoubleValue(
+  Hypre_ParCSRMatrix self,
+  const char* name,
+  double* value);
+
+/**
+ * Method:  GetIntValue[]
+ */
+int32_t
+Hypre_ParCSRMatrix_GetIntValue(
+  Hypre_ParCSRMatrix self,
+  const char* name,
+  int32_t* value);
+
+/**
+ * Method:  SetDoubleParameter[]
+ */
+int32_t
+Hypre_ParCSRMatrix_SetDoubleParameter(
+  Hypre_ParCSRMatrix self,
+  const char* name,
+  double value);
+
+/**
+ * Method:  SetIntParameter[]
+ */
+int32_t
+Hypre_ParCSRMatrix_SetIntParameter(
+  Hypre_ParCSRMatrix self,
+  const char* name,
+  int32_t value);
+
+/**
+ * Method:  SetStringParameter[]
+ */
+int32_t
+Hypre_ParCSRMatrix_SetStringParameter(
+  Hypre_ParCSRMatrix self,
+  const char* name,
+  const char* value);
+
+/**
+ * Method:  SetIntArrayParameter[]
+ */
+int32_t
+Hypre_ParCSRMatrix_SetIntArrayParameter(
+  Hypre_ParCSRMatrix self,
+  const char* name,
+  struct SIDL_int__array* value);
+
+/**
+ * Method:  SetDoubleArrayParameter[]
+ */
+int32_t
+Hypre_ParCSRMatrix_SetDoubleArrayParameter(
+  Hypre_ParCSRMatrix self,
+  const char* name,
+  struct SIDL_double__array* value);
+
+/**
+ * Method:  Setup[]
+ */
+int32_t
+Hypre_ParCSRMatrix_Setup(
+  Hypre_ParCSRMatrix self,
+  Hypre_Vector b,
+  Hypre_Vector x);
+
+/**
+ * Method:  Apply[]
+ */
+int32_t
+Hypre_ParCSRMatrix_Apply(
+  Hypre_ParCSRMatrix self,
+  Hypre_Vector b,
+  Hypre_Vector* x);
 
 /**
  * Cast method for interface and class type conversions.

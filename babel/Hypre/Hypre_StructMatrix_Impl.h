@@ -3,8 +3,8 @@
  * Symbol:        Hypre.StructMatrix-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.7.4
- * SIDL Created:  20021101 15:14:28 PST
- * Generated:     20021101 15:14:35 PST
+ * SIDL Created:  20021217 16:01:16 PST
+ * Generated:     20021217 16:01:25 PST
  * Description:   Server-side implementation for Hypre.StructMatrix
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -20,20 +20,20 @@
 #ifndef included_SIDL_header_h
 #include "SIDL_header.h"
 #endif
-#ifndef included_Hypre_StructGrid_h
-#include "Hypre_StructGrid.h"
-#endif
 #ifndef included_Hypre_Vector_h
 #include "Hypre_Vector.h"
-#endif
-#ifndef included_Hypre_StructMatrix_h
-#include "Hypre_StructMatrix.h"
 #endif
 #ifndef included_Hypre_StructStencil_h
 #include "Hypre_StructStencil.h"
 #endif
 #ifndef included_SIDL_BaseInterface_h
 #include "SIDL_BaseInterface.h"
+#endif
+#ifndef included_Hypre_StructGrid_h
+#include "Hypre_StructGrid.h"
+#endif
+#ifndef included_Hypre_StructMatrix_h
+#include "Hypre_StructMatrix.h"
 #endif
 
 /* DO-NOT-DELETE splicer.begin(Hypre.StructMatrix._includes) */

@@ -3,8 +3,8 @@
  * Symbol:        Hypre.ParCSRMatrix-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.7.4
- * SIDL Created:  20021101 15:14:28 PST
- * Generated:     20021101 15:14:34 PST
+ * SIDL Created:  20021217 16:01:16 PST
+ * Generated:     20021217 16:01:24 PST
  * Description:   Server-side implementation for Hypre.ParCSRMatrix
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -91,52 +91,6 @@ impl_Hypre_ParCSRMatrix__dtor(
 }
 
 /*
- * Method:  GetRow[]
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_ParCSRMatrix_GetRow"
-
-int32_t
-impl_Hypre_ParCSRMatrix_GetRow(
-  Hypre_ParCSRMatrix self, int32_t row, int32_t* size,
-    struct SIDL_int__array** col_ind, struct SIDL_double__array** values)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRMatrix.GetRow) */
-  /* Insert the implementation of the GetRow method here... */
-   int ierr=0;
-   void * object;
-   struct Hypre_ParCSRMatrix__data * data;
-   HYPRE_IJMatrix ij_A;
-   HYPRE_ParCSRMatrix HypreP_A;
-   int * iindices[1];
-   double * dvalues[1];
-   int lower[1];
-   lower[0] = 0;
-
-   data = Hypre_ParCSRMatrix__get_data( self );
-
-   ij_A = data -> ij_A;
-   ierr += HYPRE_IJMatrixGetObject( ij_A, &object );
-   HypreP_A = (HYPRE_ParCSRMatrix) object;
-
-   *col_ind = SIDL_int__array_create1d( size[0] );
-   *values = SIDL_double__array_create1d( size[0] );
-
-   *iindices = SIDLArrayAddr1( *col_ind, 0 );
-   *dvalues = SIDLArrayAddr1( *values, 0 );
-
-   /* RestoreRow doesn't do anything but reset a parameter.  Its function is to
-      make sure the user who calls GetRow is aware that the data in the output
-      arrays will be changed. */
-   HYPRE_ParCSRMatrixRestoreRow( HypreP_A, row, size, iindices, dvalues );
-   ierr += HYPRE_ParCSRMatrixGetRow( HypreP_A, row, size, iindices, dvalues );
-
-   return( ierr );
-  /* DO-NOT-DELETE splicer.end(Hypre.ParCSRMatrix.GetRow) */
-}
-
-/*
  * Method:  SetCommunicator[]
  */
 
@@ -145,7 +99,7 @@ impl_Hypre_ParCSRMatrix_GetRow(
 
 int32_t
 impl_Hypre_ParCSRMatrix_SetCommunicator(
-  Hypre_ParCSRMatrix self, void* comm)
+  Hypre_ParCSRMatrix self, void* mpi_comm)
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRMatrix.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
@@ -162,285 +116,10 @@ impl_Hypre_ParCSRMatrix_SetCommunicator(
    printf("impl_Hypre_ParCSRMatrix_SetCommunicator\n");
 #endif
    
-   data -> comm = (MPI_Comm) comm;
+   data -> comm = (MPI_Comm) mpi_comm;
 
    return( ierr );
   /* DO-NOT-DELETE splicer.end(Hypre.ParCSRMatrix.SetCommunicator) */
-}
-
-/*
- * Method:  GetDoubleValue[]
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_ParCSRMatrix_GetDoubleValue"
-
-int32_t
-impl_Hypre_ParCSRMatrix_GetDoubleValue(
-  Hypre_ParCSRMatrix self, const char* name, double* value)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRMatrix.GetDoubleValue) */
-  /* Insert the implementation of the GetDoubleValue method here... */
-  /* DO-NOT-DELETE splicer.end(Hypre.ParCSRMatrix.GetDoubleValue) */
-}
-
-/*
- * Method:  GetIntValue[]
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_ParCSRMatrix_GetIntValue"
-
-int32_t
-impl_Hypre_ParCSRMatrix_GetIntValue(
-  Hypre_ParCSRMatrix self, const char* name, int32_t* value)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRMatrix.GetIntValue) */
-  /* Insert the implementation of the GetIntValue method here... */
-  /* DO-NOT-DELETE splicer.end(Hypre.ParCSRMatrix.GetIntValue) */
-}
-
-/*
- * Method:  SetDoubleParameter[]
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_ParCSRMatrix_SetDoubleParameter"
-
-int32_t
-impl_Hypre_ParCSRMatrix_SetDoubleParameter(
-  Hypre_ParCSRMatrix self, const char* name, double value)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRMatrix.SetDoubleParameter) */
-  /* Insert the implementation of the SetDoubleParameter method here... */
-   int ierr=0;
-   struct Hypre_ParCSRMatrix__data * data;
-   HYPRE_IJMatrix ij_A;
-
-   data = Hypre_ParCSRMatrix__get_data( self );
-
-   ij_A = data -> ij_A;
-
-   printf("impl_Hypre_ParCSRMatrix_SetDoubleParameter\n");
-   printf( "Stub\n");
-
-   return ierr;
-  /* DO-NOT-DELETE splicer.end(Hypre.ParCSRMatrix.SetDoubleParameter) */
-}
-
-/*
- * Method:  SetIntParameter[]
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_ParCSRMatrix_SetIntParameter"
-
-int32_t
-impl_Hypre_ParCSRMatrix_SetIntParameter(
-  Hypre_ParCSRMatrix self, const char* name, int32_t value)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRMatrix.SetIntParameter) */
-  /* Insert the implementation of the SetIntParameter method here... */
-   int ierr=0;
-   struct Hypre_ParCSRMatrix__data * data;
-   HYPRE_IJMatrix ij_A;
-
-   data = Hypre_ParCSRMatrix__get_data( self );
-
-   ij_A = data -> ij_A;
-
-   printf("impl_Hypre_ParCSRMatrix_SetIntParameter\n");
-   printf( "Stub\n");
-
-   return ierr;
-  /* DO-NOT-DELETE splicer.end(Hypre.ParCSRMatrix.SetIntParameter) */
-}
-
-/*
- * Method:  SetStringParameter[]
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_ParCSRMatrix_SetStringParameter"
-
-int32_t
-impl_Hypre_ParCSRMatrix_SetStringParameter(
-  Hypre_ParCSRMatrix self, const char* name, const char* value)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRMatrix.SetStringParameter) */
-  /* Insert the implementation of the SetStringParameter method here... */
-   int ierr=0;
-   struct Hypre_ParCSRMatrix__data * data;
-   HYPRE_IJMatrix ij_A;
-
-   data = Hypre_ParCSRMatrix__get_data( self );
-
-   ij_A = data -> ij_A;
-
-   printf("impl_Hypre_ParCSRMatrix_SetStringParameter\n");
-   printf( "Stub\n");
-
-   return ierr;
-  /* DO-NOT-DELETE splicer.end(Hypre.ParCSRMatrix.SetStringParameter) */
-}
-
-/*
- * Method:  SetIntArrayParameter[]
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_ParCSRMatrix_SetIntArrayParameter"
-
-int32_t
-impl_Hypre_ParCSRMatrix_SetIntArrayParameter(
-  Hypre_ParCSRMatrix self, const char* name, struct SIDL_int__array* value)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRMatrix.SetIntArrayParameter) */
-  /* Insert the implementation of the SetIntArrayParameter method here... */
-   int ierr=0;
-   struct Hypre_ParCSRMatrix__data * data;
-   HYPRE_IJMatrix ij_A;
-
-   data = Hypre_ParCSRMatrix__get_data( self );
-
-   ij_A = data -> ij_A;
-
-   printf("impl_Hypre_ParCSRMatrix_SetIntArrayParameter\n");
-   printf( "Stub\n");
-
-   return ierr;
-  /* DO-NOT-DELETE splicer.end(Hypre.ParCSRMatrix.SetIntArrayParameter) */
-}
-
-/*
- * Method:  SetDoubleArrayParameter[]
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_ParCSRMatrix_SetDoubleArrayParameter"
-
-int32_t
-impl_Hypre_ParCSRMatrix_SetDoubleArrayParameter(
-  Hypre_ParCSRMatrix self, const char* name, struct SIDL_double__array* value)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRMatrix.SetDoubleArrayParameter) */
-  /* Insert the implementation of the SetDoubleArrayParameter method here... */
-   int ierr=0;
-   struct Hypre_ParCSRMatrix__data * data;
-   HYPRE_IJMatrix ij_A;
-
-   data = Hypre_ParCSRMatrix__get_data( self );
-
-   ij_A = data -> ij_A;
-
-   printf("impl_Hypre_ParCSRMatrix_SetDoubleArrayParameter\n");
-   printf( "Stub\n");
-
-   return ierr;
-  /* DO-NOT-DELETE splicer.end(Hypre.ParCSRMatrix.SetDoubleArrayParameter) */
-}
-
-/*
- * Method:  Setup[]
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_ParCSRMatrix_Setup"
-
-int32_t
-impl_Hypre_ParCSRMatrix_Setup(
-  Hypre_ParCSRMatrix self, Hypre_Vector x, Hypre_Vector y)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRMatrix.Setup) */
-  /* Insert the implementation of the Setup method here... */
-   int ierr=0;
-   struct Hypre_ParCSRMatrix__data * data;
-   HYPRE_IJMatrix ij_A;
-
-   data = Hypre_ParCSRMatrix__get_data( self );
-
-   ij_A = data -> ij_A;
-
-   ierr = HYPRE_IJMatrixAssemble( ij_A );
-
-   return( ierr );
-
-  /* DO-NOT-DELETE splicer.end(Hypre.ParCSRMatrix.Setup) */
-}
-
-/*
- * Method:  Apply[]
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_ParCSRMatrix_Apply"
-
-int32_t
-impl_Hypre_ParCSRMatrix_Apply(
-  Hypre_ParCSRMatrix self, Hypre_Vector x, Hypre_Vector* y)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRMatrix.Apply) */
-  /* Insert the implementation of the Apply method here... */
-   /* Apply means to multiply by a vector, y = A*x .
-      We do it by calling the HYPRE function which performs Matvec,
-      y = a*A*x + b*y , here with a=1 and b=0.
-   */
-   int ierr=0;
-   void * object;
-   struct Hypre_ParCSRMatrix__data * data;
-   struct Hypre_ParCSRVector__data * data_y, * data_x;
-   Hypre_ParCSRVector HypreP_x, HypreP_y;
-   HYPRE_IJMatrix ij_A;
-   HYPRE_IJVector ij_y, ij_x;
-   HYPRE_ParVector yy, xx;
-   HYPRE_ParCSRMatrix A;
-
-   data = Hypre_ParCSRMatrix__get_data( self );
-   ij_A = data -> ij_A;
-   ierr += HYPRE_IJMatrixGetObject( ij_A, &object );
-   A = (HYPRE_ParCSRMatrix) object;
-
-   /*  A Hypre_Vector is just an interface, we have no knowledge of its contents.
-       Check whether it's something we know how to handle.  If not, die. */
-   if ( Hypre_Vector_queryInterface(x, "Hypre.ParCSRVector" ) ) {
-      HypreP_x = Hypre_Vector__cast2( x, "Hypre.ParCSRVector" );
-   }
-   else {
-      assert( "Unrecognized vector type."==(char *)x );
-   }
-   /* This is the old code for the above.  It seems that queryInterface has been
-      changed to return TRUE or FALSE rather than the object (jfp Oct2002)
-      HypreP_x = Hypre_Vector__cast2( Hypre_Vector_queryInterface( x, "Hypre.ParCSRVector"),
-                                     "Hypre.ParCSRVector" );
-      assert( HypreP_x!=NULL );
-   */
-
-   if ( Hypre_Vector_queryInterface( *y, "Hypre.ParCSRVector" ) ) {
-      HypreP_y = Hypre_Vector__cast2( *y, "Hypre.ParCSRVector" );
-   }
-   else {
-      assert( "Unrecognized vector type."==(char *)y );
-   }
-   /* This is the old code for the above.  It seems that queryInterface has been
-      changed to return TRUE or FALSE rather than the object (jfp Oct2002)
-      HypreP_y = Hypre_Vector__cast2( Hypre_Vector_queryInterface( *y, "Hypre.ParCSRVector"),
-                                     "Hypre.ParCSRVector" );
-      assert( HypreP_y!=NULL );
-   */
-
-   data_y = Hypre_ParCSRVector__get_data( HypreP_y );
-   ij_y = data_y -> ij_b;
-   ierr += HYPRE_IJVectorGetObject( ij_y, &object );
-   yy = (HYPRE_ParVector) object;
-   data_x = Hypre_ParCSRVector__get_data( HypreP_x );
-   ij_x = data_x -> ij_b;
-   ierr += HYPRE_IJVectorGetObject( ij_x, &object );
-   xx = (HYPRE_ParVector) object;
-
-   ierr += HYPRE_ParCSRMatrixMatvec( 1.0, A, xx, 0.0, yy );
-
-   return( ierr );
-  /* DO-NOT-DELETE splicer.end(Hypre.ParCSRMatrix.Apply) */
 }
 
 /*
@@ -826,4 +505,325 @@ impl_Hypre_ParCSRMatrix_Print(
    ierr = HYPRE_IJMatrixPrint( ij_A, filename);
 
   /* DO-NOT-DELETE splicer.end(Hypre.ParCSRMatrix.Print) */
+}
+
+/*
+ * Method:  GetRow[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_ParCSRMatrix_GetRow"
+
+int32_t
+impl_Hypre_ParCSRMatrix_GetRow(
+  Hypre_ParCSRMatrix self, int32_t row, int32_t* size,
+    struct SIDL_int__array** col_ind, struct SIDL_double__array** values)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRMatrix.GetRow) */
+  /* Insert the implementation of the GetRow method here... */
+   int ierr=0;
+   void * object;
+   struct Hypre_ParCSRMatrix__data * data;
+   HYPRE_IJMatrix ij_A;
+   HYPRE_ParCSRMatrix HypreP_A;
+   int * iindices[1];
+   double * dvalues[1];
+   int lower[1];
+   lower[0] = 0;
+
+   data = Hypre_ParCSRMatrix__get_data( self );
+
+   ij_A = data -> ij_A;
+   ierr += HYPRE_IJMatrixGetObject( ij_A, &object );
+   HypreP_A = (HYPRE_ParCSRMatrix) object;
+
+   *col_ind = SIDL_int__array_create1d( size[0] );
+   *values = SIDL_double__array_create1d( size[0] );
+
+   *iindices = SIDLArrayAddr1( *col_ind, 0 );
+   *dvalues = SIDLArrayAddr1( *values, 0 );
+
+   /* RestoreRow doesn't do anything but reset a parameter.  Its function is to
+      make sure the user who calls GetRow is aware that the data in the output
+      arrays will be changed. */
+   HYPRE_ParCSRMatrixRestoreRow( HypreP_A, row, size, iindices, dvalues );
+   ierr += HYPRE_ParCSRMatrixGetRow( HypreP_A, row, size, iindices, dvalues );
+
+   return( ierr );
+  /* DO-NOT-DELETE splicer.end(Hypre.ParCSRMatrix.GetRow) */
+}
+
+/*
+ * Method:  GetDoubleValue[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_ParCSRMatrix_GetDoubleValue"
+
+int32_t
+impl_Hypre_ParCSRMatrix_GetDoubleValue(
+  Hypre_ParCSRMatrix self, const char* name, double* value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRMatrix.GetDoubleValue) */
+  /* Insert the implementation of the GetDoubleValue method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.ParCSRMatrix.GetDoubleValue) */
+}
+
+/*
+ * Method:  GetIntValue[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_ParCSRMatrix_GetIntValue"
+
+int32_t
+impl_Hypre_ParCSRMatrix_GetIntValue(
+  Hypre_ParCSRMatrix self, const char* name, int32_t* value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRMatrix.GetIntValue) */
+  /* Insert the implementation of the GetIntValue method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.ParCSRMatrix.GetIntValue) */
+}
+
+/*
+ * Method:  SetDoubleParameter[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_ParCSRMatrix_SetDoubleParameter"
+
+int32_t
+impl_Hypre_ParCSRMatrix_SetDoubleParameter(
+  Hypre_ParCSRMatrix self, const char* name, double value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRMatrix.SetDoubleParameter) */
+  /* Insert the implementation of the SetDoubleParameter method here... */
+   int ierr=0;
+   struct Hypre_ParCSRMatrix__data * data;
+   HYPRE_IJMatrix ij_A;
+
+   data = Hypre_ParCSRMatrix__get_data( self );
+
+   ij_A = data -> ij_A;
+
+   printf("impl_Hypre_ParCSRMatrix_SetDoubleParameter\n");
+   printf( "Stub\n");
+
+   return ierr;
+  /* DO-NOT-DELETE splicer.end(Hypre.ParCSRMatrix.SetDoubleParameter) */
+}
+
+/*
+ * Method:  SetIntParameter[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_ParCSRMatrix_SetIntParameter"
+
+int32_t
+impl_Hypre_ParCSRMatrix_SetIntParameter(
+  Hypre_ParCSRMatrix self, const char* name, int32_t value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRMatrix.SetIntParameter) */
+  /* Insert the implementation of the SetIntParameter method here... */
+   int ierr=0;
+   struct Hypre_ParCSRMatrix__data * data;
+   HYPRE_IJMatrix ij_A;
+
+   data = Hypre_ParCSRMatrix__get_data( self );
+
+   ij_A = data -> ij_A;
+
+   printf("impl_Hypre_ParCSRMatrix_SetIntParameter\n");
+   printf( "Stub\n");
+
+   return ierr;
+  /* DO-NOT-DELETE splicer.end(Hypre.ParCSRMatrix.SetIntParameter) */
+}
+
+/*
+ * Method:  SetStringParameter[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_ParCSRMatrix_SetStringParameter"
+
+int32_t
+impl_Hypre_ParCSRMatrix_SetStringParameter(
+  Hypre_ParCSRMatrix self, const char* name, const char* value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRMatrix.SetStringParameter) */
+  /* Insert the implementation of the SetStringParameter method here... */
+   int ierr=0;
+   struct Hypre_ParCSRMatrix__data * data;
+   HYPRE_IJMatrix ij_A;
+
+   data = Hypre_ParCSRMatrix__get_data( self );
+
+   ij_A = data -> ij_A;
+
+   printf("impl_Hypre_ParCSRMatrix_SetStringParameter\n");
+   printf( "Stub\n");
+
+   return ierr;
+  /* DO-NOT-DELETE splicer.end(Hypre.ParCSRMatrix.SetStringParameter) */
+}
+
+/*
+ * Method:  SetIntArrayParameter[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_ParCSRMatrix_SetIntArrayParameter"
+
+int32_t
+impl_Hypre_ParCSRMatrix_SetIntArrayParameter(
+  Hypre_ParCSRMatrix self, const char* name, struct SIDL_int__array* value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRMatrix.SetIntArrayParameter) */
+  /* Insert the implementation of the SetIntArrayParameter method here... */
+   int ierr=0;
+   struct Hypre_ParCSRMatrix__data * data;
+   HYPRE_IJMatrix ij_A;
+
+   data = Hypre_ParCSRMatrix__get_data( self );
+
+   ij_A = data -> ij_A;
+
+   printf("impl_Hypre_ParCSRMatrix_SetIntArrayParameter\n");
+   printf( "Stub\n");
+
+   return ierr;
+  /* DO-NOT-DELETE splicer.end(Hypre.ParCSRMatrix.SetIntArrayParameter) */
+}
+
+/*
+ * Method:  SetDoubleArrayParameter[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_ParCSRMatrix_SetDoubleArrayParameter"
+
+int32_t
+impl_Hypre_ParCSRMatrix_SetDoubleArrayParameter(
+  Hypre_ParCSRMatrix self, const char* name, struct SIDL_double__array* value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRMatrix.SetDoubleArrayParameter) */
+  /* Insert the implementation of the SetDoubleArrayParameter method here... */
+   int ierr=0;
+   struct Hypre_ParCSRMatrix__data * data;
+   HYPRE_IJMatrix ij_A;
+
+   data = Hypre_ParCSRMatrix__get_data( self );
+
+   ij_A = data -> ij_A;
+
+   printf("impl_Hypre_ParCSRMatrix_SetDoubleArrayParameter\n");
+   printf( "Stub\n");
+
+   return ierr;
+  /* DO-NOT-DELETE splicer.end(Hypre.ParCSRMatrix.SetDoubleArrayParameter) */
+}
+
+/*
+ * Method:  Setup[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_ParCSRMatrix_Setup"
+
+int32_t
+impl_Hypre_ParCSRMatrix_Setup(
+  Hypre_ParCSRMatrix self, Hypre_Vector b, Hypre_Vector x)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRMatrix.Setup) */
+  /* Insert the implementation of the Setup method here... */
+   int ierr=0;
+   struct Hypre_ParCSRMatrix__data * data;
+   HYPRE_IJMatrix ij_A;
+
+   data = Hypre_ParCSRMatrix__get_data( self );
+
+   ij_A = data -> ij_A;
+
+   ierr = HYPRE_IJMatrixAssemble( ij_A );
+
+   return( ierr );
+
+  /* DO-NOT-DELETE splicer.end(Hypre.ParCSRMatrix.Setup) */
+}
+
+/*
+ * Method:  Apply[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_ParCSRMatrix_Apply"
+
+int32_t
+impl_Hypre_ParCSRMatrix_Apply(
+  Hypre_ParCSRMatrix self, Hypre_Vector b, Hypre_Vector* x)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRMatrix.Apply) */
+  /* Insert the implementation of the Apply method here... */
+   /* Apply means to multiply by a vector, y = A*x .
+      We do it by calling the HYPRE function which performs Matvec,
+      y = a*A*x + b*y , here with a=1 and b=0.
+   */
+   int ierr=0;
+   void * object;
+   struct Hypre_ParCSRMatrix__data * data;
+   struct Hypre_ParCSRVector__data * data_x, * data_b;
+   Hypre_ParCSRVector HypreP_b, HypreP_x;
+   HYPRE_IJMatrix ij_A;
+   HYPRE_IJVector ij_x, ij_b;
+   HYPRE_ParVector xx, bb;
+   HYPRE_ParCSRMatrix A;
+
+   data = Hypre_ParCSRMatrix__get_data( self );
+   ij_A = data -> ij_A;
+   ierr += HYPRE_IJMatrixGetObject( ij_A, &object );
+   A = (HYPRE_ParCSRMatrix) object;
+
+   /*  A Hypre_Vector is just an interface, we have no knowledge of its contents.
+       Check whether it's something we know how to handle.  If not, die. */
+   if ( Hypre_Vector_queryInterface(b, "Hypre.ParCSRVector" ) ) {
+      HypreP_b = Hypre_Vector__cast2( b, "Hypre.ParCSRVector" );
+   }
+   else {
+      assert( "Unrecognized vector type."==(char *)b );
+   }
+   /* This is the old code for the above.  It seems that queryInterface has been
+      changed to return TRUE or FALSE rather than the object (jfp Oct2002)
+      HypreP_b = Hypre_Vector__cast2( Hypre_Vector_queryInterface( b, "Hypre.ParCSRVector"),
+                                     "Hypre.ParCSRVector" );
+      assert( HypreP_b!=NULL );
+   */
+
+   if ( Hypre_Vector_queryInterface( *x, "Hypre.ParCSRVector" ) ) {
+      HypreP_x = Hypre_Vector__cast2( *x, "Hypre.ParCSRVector" );
+   }
+   else {
+      assert( "Unrecognized vector type."==(char *)x );
+   }
+   /* This is the old code for the above.  It seems that queryInterface has been
+      changed to return TRUE or FALSE rather than the object (jfp Oct2002)
+      HypreP_x = Hypre_Vector__cast2( Hypre_Vector_queryInterface( *x, "Hypre.ParCSRVector"),
+                                     "Hypre.ParCSRVector" );
+      assert( HypreP_x!=NULL );
+   */
+
+   data_x = Hypre_ParCSRVector__get_data( HypreP_x );
+   ij_x = data_x -> ij_b;
+   ierr += HYPRE_IJVectorGetObject( ij_x, &object );
+   xx = (HYPRE_ParVector) object;
+   data_b = Hypre_ParCSRVector__get_data( HypreP_b );
+   ij_b = data_b -> ij_b;
+   ierr += HYPRE_IJVectorGetObject( ij_b, &object );
+   bb = (HYPRE_ParVector) object;
+
+   ierr += HYPRE_ParCSRMatrixMatvec( 1.0, A, bb, 0.0, xx );
+
+   return( ierr );
+  /* DO-NOT-DELETE splicer.end(Hypre.ParCSRMatrix.Apply) */
 }

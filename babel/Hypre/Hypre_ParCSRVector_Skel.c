@@ -3,8 +3,8 @@
  * Symbol:        Hypre.ParCSRVector-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.7.4
- * SIDL Created:  20021101 15:14:28 PST
- * Generated:     20021101 15:14:36 PST
+ * SIDL Created:  20021217 16:01:16 PST
+ * Generated:     20021217 16:01:26 PST
  * Description:   Server-side glue code for Hypre.ParCSRVector
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -25,14 +25,6 @@ impl_Hypre_ParCSRVector__ctor(
 extern void
 impl_Hypre_ParCSRVector__dtor(
   Hypre_ParCSRVector);
-
-extern int32_t
-impl_Hypre_ParCSRVector_GetRow(
-  Hypre_ParCSRVector,
-  int32_t,
-  int32_t*,
-  struct SIDL_int__array**,
-  struct SIDL_double__array**);
 
 extern int32_t
 impl_Hypre_ParCSRVector_Clear(
@@ -64,6 +56,14 @@ impl_Hypre_ParCSRVector_Axpy(
   Hypre_ParCSRVector,
   double,
   Hypre_Vector);
+
+extern int32_t
+impl_Hypre_ParCSRVector_GetRow(
+  Hypre_ParCSRVector,
+  int32_t,
+  int32_t*,
+  struct SIDL_int__array**,
+  struct SIDL_double__array**);
 
 extern int32_t
 impl_Hypre_ParCSRVector_SetCommunicator(
@@ -162,13 +162,13 @@ Hypre_ParCSRVector__set_epv(struct Hypre_ParCSRVector__epv *epv)
 {
   epv->f__ctor = impl_Hypre_ParCSRVector__ctor;
   epv->f__dtor = impl_Hypre_ParCSRVector__dtor;
-  epv->f_GetRow = impl_Hypre_ParCSRVector_GetRow;
   epv->f_Clear = impl_Hypre_ParCSRVector_Clear;
   epv->f_Copy = impl_Hypre_ParCSRVector_Copy;
   epv->f_Clone = impl_Hypre_ParCSRVector_Clone;
   epv->f_Scale = impl_Hypre_ParCSRVector_Scale;
   epv->f_Dot = impl_Hypre_ParCSRVector_Dot;
   epv->f_Axpy = impl_Hypre_ParCSRVector_Axpy;
+  epv->f_GetRow = impl_Hypre_ParCSRVector_GetRow;
   epv->f_SetCommunicator = impl_Hypre_ParCSRVector_SetCommunicator;
   epv->f_Initialize = impl_Hypre_ParCSRVector_Initialize;
   epv->f_Assemble = impl_Hypre_ParCSRVector_Assemble;

@@ -3,8 +3,8 @@
  * Symbol:        Hypre.GMRES-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.7.4
- * SIDL Created:  20021101 15:14:28 PST
- * Generated:     20021101 15:14:35 PST
+ * SIDL Created:  20021217 16:01:16 PST
+ * Generated:     20021217 16:01:23 PST
  * Description:   Server-side implementation for Hypre.GMRES
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -399,7 +399,7 @@ impl_Hypre_GMRES_SetDoubleArrayParameter(
 
 int32_t
 impl_Hypre_GMRES_Setup(
-  Hypre_GMRES self, Hypre_Vector x, Hypre_Vector y)
+  Hypre_GMRES self, Hypre_Vector b, Hypre_Vector x)
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.GMRES.Setup) */
   /* Insert the implementation of the Setup method here... */
@@ -417,7 +417,7 @@ impl_Hypre_GMRES_Setup(
 
 int32_t
 impl_Hypre_GMRES_Apply(
-  Hypre_GMRES self, Hypre_Vector x, Hypre_Vector* y)
+  Hypre_GMRES self, Hypre_Vector b, Hypre_Vector* x)
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.GMRES.Apply) */
   /* Insert the implementation of the Apply method here... */
@@ -437,13 +437,13 @@ impl_Hypre_GMRES_Apply(
    Hypre_ParCSRMatrix HypreP_A;
    HYPRE_ParCSRMatrix AA;
    HYPRE_IJMatrix ij_A;
-   HYPRE_Vector HYPRE_y, HYPRE_x;
-   Hypre_ParCSRVector HypreP_x, HypreP_y;
-   HYPRE_ParVector xx, yy;
-   HYPRE_IJVector ij_x, ij_y;
+   HYPRE_Vector HYPRE_x, HYPRE_b;
+   Hypre_ParCSRVector HypreP_b, HypreP_x;
+   HYPRE_ParVector bb, xx;
+   HYPRE_IJVector ij_b, ij_x;
    struct Hypre_ParCSRMatrix__data * dataA;
-   struct Hypre_ParCSRVector__data * datax, * datay;
-   void * objectA, * objectx, * objecty;
+   struct Hypre_ParCSRVector__data * datab, * datax;
+   void * objectA, * objectb, * objectx;
 
    data = Hypre_GMRES__get_data( self );
    comm = data->comm;
@@ -454,7 +454,7 @@ impl_Hypre_GMRES_Apply(
    if ( data -> vector_type == NULL ) {
       /* This is the first time this Babel GMRES object has seen a vector.
          So we are ready to create the Hypre GMRES object. */
-      if ( Hypre_Vector_queryInterface( x, "Hypre.ParCSRVector") ) {
+      if ( Hypre_Vector_queryInterface( b, "Hypre.ParCSRVector") ) {
          data -> vector_type = "ParVector";
          HYPRE_ParCSRGMRESCreate( comm, psolver );
          assert( solver != NULL );
@@ -476,23 +476,23 @@ impl_Hypre_GMRES_Apply(
       the HYPRE struct exists, so we copy the parameters to it. */
    ierr += impl_Hypre_GMRES_Copy_Parameters_to_HYPRE_struct( self );
    if ( data->vector_type == "ParVector" ) {
+         HypreP_b = Hypre_Vector__cast2
+            ( Hypre_Vector_queryInterface( b, "Hypre.ParCSRVector"),
+              "Hypre.ParCSRVector" );
+         datab = Hypre_ParCSRVector__get_data( HypreP_b );
+         ij_b = datab -> ij_b;
+         ierr += HYPRE_IJVectorGetObject( ij_b, &objectb );
+         bb = (HYPRE_ParVector) objectb;
+         HYPRE_b = (HYPRE_Vector) bb;
+
          HypreP_x = Hypre_Vector__cast2
-            ( Hypre_Vector_queryInterface( x, "Hypre.ParCSRVector"),
+            ( Hypre_Vector_queryInterface( *x, "Hypre.ParCSRVector"),
               "Hypre.ParCSRVector" );
          datax = Hypre_ParCSRVector__get_data( HypreP_x );
          ij_x = datax -> ij_b;
          ierr += HYPRE_IJVectorGetObject( ij_x, &objectx );
          xx = (HYPRE_ParVector) objectx;
          HYPRE_x = (HYPRE_Vector) xx;
-
-         HypreP_y = Hypre_Vector__cast2
-            ( Hypre_Vector_queryInterface( *y, "Hypre.ParCSRVector"),
-              "Hypre.ParCSRVector" );
-         datay = Hypre_ParCSRVector__get_data( HypreP_y );
-         ij_y = datay -> ij_b;
-         ierr += HYPRE_IJVectorGetObject( ij_y, &objecty );
-         yy = (HYPRE_ParVector) objecty;
-         HYPRE_y = (HYPRE_Vector) yy;
 
          HypreP_A = Hypre_Operator__cast2
             ( Hypre_Operator_queryInterface( mat, "Hypre.ParCSRMatrix"),
@@ -511,8 +511,8 @@ impl_Hypre_GMRES_Apply(
       
    ierr += HYPRE_GMRESSetPrecond( solver, data->precond, data->precond_setup,
                                 *(data->solverprecond) );
-   HYPRE_GMRESSetup( solver, HYPRE_A, HYPRE_x, HYPRE_y );
-   HYPRE_GMRESSolve( solver, HYPRE_A, HYPRE_x, HYPRE_y );
+   HYPRE_GMRESSetup( solver, HYPRE_A, HYPRE_b, HYPRE_x );
+   HYPRE_GMRESSolve( solver, HYPRE_A, HYPRE_b, HYPRE_x );
 
    return ierr;
   /* DO-NOT-DELETE splicer.end(Hypre.GMRES.Apply) */

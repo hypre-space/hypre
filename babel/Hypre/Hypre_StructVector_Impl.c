@@ -3,8 +3,8 @@
  * Symbol:        Hypre.StructVector-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.7.4
- * SIDL Created:  20021101 15:14:28 PST
- * Generated:     20021101 15:14:36 PST
+ * SIDL Created:  20021217 16:01:16 PST
+ * Generated:     20021217 16:01:24 PST
  * Description:   Server-side implementation for Hypre.StructVector
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -59,6 +59,102 @@ impl_Hypre_StructVector__dtor(
   /* DO-NOT-DELETE splicer.begin(Hypre.StructVector._dtor) */
   /* Insert the implementation of the destructor method here... */
   /* DO-NOT-DELETE splicer.end(Hypre.StructVector._dtor) */
+}
+
+/*
+ * y <- 0 (where y=self)
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_StructVector_Clear"
+
+int32_t
+impl_Hypre_StructVector_Clear(
+  Hypre_StructVector self)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.StructVector.Clear) */
+  /* Insert the implementation of the Clear method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.StructVector.Clear) */
+}
+
+/*
+ * y <- x 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_StructVector_Copy"
+
+int32_t
+impl_Hypre_StructVector_Copy(
+  Hypre_StructVector self, Hypre_Vector x)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.StructVector.Copy) */
+  /* Insert the implementation of the Copy method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.StructVector.Copy) */
+}
+
+/*
+ * create an x compatible with y
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_StructVector_Clone"
+
+int32_t
+impl_Hypre_StructVector_Clone(
+  Hypre_StructVector self, Hypre_Vector* x)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.StructVector.Clone) */
+  /* Insert the implementation of the Clone method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.StructVector.Clone) */
+}
+
+/*
+ * y <- a*y 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_StructVector_Scale"
+
+int32_t
+impl_Hypre_StructVector_Scale(
+  Hypre_StructVector self, double a)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.StructVector.Scale) */
+  /* Insert the implementation of the Scale method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.StructVector.Scale) */
+}
+
+/*
+ * d <- (y,x)
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_StructVector_Dot"
+
+int32_t
+impl_Hypre_StructVector_Dot(
+  Hypre_StructVector self, Hypre_Vector x, double* d)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.StructVector.Dot) */
+  /* Insert the implementation of the Dot method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.StructVector.Dot) */
+}
+
+/*
+ * y <- a*x + y
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_StructVector_Axpy"
+
+int32_t
+impl_Hypre_StructVector_Axpy(
+  Hypre_StructVector self, double a, Hypre_Vector x)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.StructVector.Axpy) */
+  /* Insert the implementation of the Axpy method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.StructVector.Axpy) */
 }
 
 /*
@@ -204,100 +300,4 @@ impl_Hypre_StructVector_SetBoxValues(
   /* DO-NOT-DELETE splicer.begin(Hypre.StructVector.SetBoxValues) */
   /* Insert the implementation of the SetBoxValues method here... */
   /* DO-NOT-DELETE splicer.end(Hypre.StructVector.SetBoxValues) */
-}
-
-/*
- * y <- 0 (where y=self)
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_StructVector_Clear"
-
-int32_t
-impl_Hypre_StructVector_Clear(
-  Hypre_StructVector self)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.StructVector.Clear) */
-  /* Insert the implementation of the Clear method here... */
-  /* DO-NOT-DELETE splicer.end(Hypre.StructVector.Clear) */
-}
-
-/*
- * y <- x 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_StructVector_Copy"
-
-int32_t
-impl_Hypre_StructVector_Copy(
-  Hypre_StructVector self, Hypre_Vector x)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.StructVector.Copy) */
-  /* Insert the implementation of the Copy method here... */
-  /* DO-NOT-DELETE splicer.end(Hypre.StructVector.Copy) */
-}
-
-/*
- * create an x compatible with y
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_StructVector_Clone"
-
-int32_t
-impl_Hypre_StructVector_Clone(
-  Hypre_StructVector self, Hypre_Vector* x)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.StructVector.Clone) */
-  /* Insert the implementation of the Clone method here... */
-  /* DO-NOT-DELETE splicer.end(Hypre.StructVector.Clone) */
-}
-
-/*
- * y <- a*y 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_StructVector_Scale"
-
-int32_t
-impl_Hypre_StructVector_Scale(
-  Hypre_StructVector self, double a)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.StructVector.Scale) */
-  /* Insert the implementation of the Scale method here... */
-  /* DO-NOT-DELETE splicer.end(Hypre.StructVector.Scale) */
-}
-
-/*
- * d <- (y,x)
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_StructVector_Dot"
-
-int32_t
-impl_Hypre_StructVector_Dot(
-  Hypre_StructVector self, Hypre_Vector x, double* d)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.StructVector.Dot) */
-  /* Insert the implementation of the Dot method here... */
-  /* DO-NOT-DELETE splicer.end(Hypre.StructVector.Dot) */
-}
-
-/*
- * y <- a*x + y
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_StructVector_Axpy"
-
-int32_t
-impl_Hypre_StructVector_Axpy(
-  Hypre_StructVector self, double a, Hypre_Vector x)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.StructVector.Axpy) */
-  /* Insert the implementation of the Axpy method here... */
-  /* DO-NOT-DELETE splicer.end(Hypre.StructVector.Axpy) */
 }

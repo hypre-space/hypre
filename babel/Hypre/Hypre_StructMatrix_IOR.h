@@ -3,8 +3,8 @@
  * Symbol:        Hypre.StructMatrix-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.7.4
- * SIDL Created:  20021101 15:14:28 PST
- * Generated:     20021101 15:14:28 PST
+ * SIDL Created:  20021217 16:01:16 PST
+ * Generated:     20021217 16:01:18 PST
  * Description:   Intermediate Object Representation for Hypre.StructMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -136,12 +136,12 @@ struct Hypre_StructMatrix__epv {
     struct SIDL_double__array* value);
   int32_t (*f_Setup)(
     struct Hypre_StructMatrix__object* self,
-    struct Hypre_Vector__object* x,
-    struct Hypre_Vector__object* y);
+    struct Hypre_Vector__object* b,
+    struct Hypre_Vector__object* x);
   int32_t (*f_Apply)(
     struct Hypre_StructMatrix__object* self,
-    struct Hypre_Vector__object* x,
-    struct Hypre_Vector__object** y);
+    struct Hypre_Vector__object* b,
+    struct Hypre_Vector__object** x);
   /* Methods introduced in SIDL.BaseInterface-v0.7.4 */
   /* Methods introduced in Hypre.ProblemDefinition-v0.1.5 */
   int32_t (*f_Initialize)(

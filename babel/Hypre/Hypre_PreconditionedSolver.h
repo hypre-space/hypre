@@ -3,8 +3,8 @@
  * Symbol:        Hypre.PreconditionedSolver-v0.1.5
  * Symbol Type:   interface
  * Babel Version: 0.7.4
- * SIDL Created:  20021101 15:14:28 PST
- * Generated:     20021101 15:14:33 PST
+ * SIDL Created:  20021217 16:01:16 PST
+ * Generated:     20021217 16:01:22 PST
  * Description:   Client-side glue code for Hypre.PreconditionedSolver
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -188,8 +188,8 @@ Hypre_PreconditionedSolver_SetDoubleArrayParameter(
 int32_t
 Hypre_PreconditionedSolver_Setup(
   Hypre_PreconditionedSolver self,
-  Hypre_Vector x,
-  Hypre_Vector y);
+  Hypre_Vector b,
+  Hypre_Vector x);
 
 /**
  * Method:  Apply[]
@@ -197,8 +197,8 @@ Hypre_PreconditionedSolver_Setup(
 int32_t
 Hypre_PreconditionedSolver_Apply(
   Hypre_PreconditionedSolver self,
-  Hypre_Vector x,
-  Hypre_Vector* y);
+  Hypre_Vector b,
+  Hypre_Vector* x);
 
 /**
  * Method:  SetOperator[]

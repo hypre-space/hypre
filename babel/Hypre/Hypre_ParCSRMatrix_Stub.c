@@ -3,8 +3,8 @@
  * Symbol:        Hypre.ParCSRMatrix-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.7.4
- * SIDL Created:  20021101 15:14:28 PST
- * Generated:     20021101 15:14:31 PST
+ * SIDL Created:  20021217 16:01:16 PST
+ * Generated:     20021217 16:01:20 PST
  * Description:   Client-side glue code for Hypre.ParCSRMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -163,181 +163,17 @@ Hypre_ParCSRMatrix_isInstanceOf(
 }
 
 /*
- * Method:  GetRow[]
- */
-
-int32_t
-Hypre_ParCSRMatrix_GetRow(
-  Hypre_ParCSRMatrix self,
-  int32_t row,
-  int32_t* size,
-  struct SIDL_int__array** col_ind,
-  struct SIDL_double__array** values)
-{
-  return (*self->d_epv->f_GetRow)(
-    self,
-    row,
-    size,
-    col_ind,
-    values);
-}
-
-/*
  * Method:  SetCommunicator[]
  */
 
 int32_t
 Hypre_ParCSRMatrix_SetCommunicator(
   Hypre_ParCSRMatrix self,
-  void* comm)
+  void* mpi_comm)
 {
   return (*self->d_epv->f_SetCommunicator)(
     self,
-    comm);
-}
-
-/*
- * Method:  GetDoubleValue[]
- */
-
-int32_t
-Hypre_ParCSRMatrix_GetDoubleValue(
-  Hypre_ParCSRMatrix self,
-  const char* name,
-  double* value)
-{
-  return (*self->d_epv->f_GetDoubleValue)(
-    self,
-    name,
-    value);
-}
-
-/*
- * Method:  GetIntValue[]
- */
-
-int32_t
-Hypre_ParCSRMatrix_GetIntValue(
-  Hypre_ParCSRMatrix self,
-  const char* name,
-  int32_t* value)
-{
-  return (*self->d_epv->f_GetIntValue)(
-    self,
-    name,
-    value);
-}
-
-/*
- * Method:  SetDoubleParameter[]
- */
-
-int32_t
-Hypre_ParCSRMatrix_SetDoubleParameter(
-  Hypre_ParCSRMatrix self,
-  const char* name,
-  double value)
-{
-  return (*self->d_epv->f_SetDoubleParameter)(
-    self,
-    name,
-    value);
-}
-
-/*
- * Method:  SetIntParameter[]
- */
-
-int32_t
-Hypre_ParCSRMatrix_SetIntParameter(
-  Hypre_ParCSRMatrix self,
-  const char* name,
-  int32_t value)
-{
-  return (*self->d_epv->f_SetIntParameter)(
-    self,
-    name,
-    value);
-}
-
-/*
- * Method:  SetStringParameter[]
- */
-
-int32_t
-Hypre_ParCSRMatrix_SetStringParameter(
-  Hypre_ParCSRMatrix self,
-  const char* name,
-  const char* value)
-{
-  return (*self->d_epv->f_SetStringParameter)(
-    self,
-    name,
-    value);
-}
-
-/*
- * Method:  SetIntArrayParameter[]
- */
-
-int32_t
-Hypre_ParCSRMatrix_SetIntArrayParameter(
-  Hypre_ParCSRMatrix self,
-  const char* name,
-  struct SIDL_int__array* value)
-{
-  return (*self->d_epv->f_SetIntArrayParameter)(
-    self,
-    name,
-    value);
-}
-
-/*
- * Method:  SetDoubleArrayParameter[]
- */
-
-int32_t
-Hypre_ParCSRMatrix_SetDoubleArrayParameter(
-  Hypre_ParCSRMatrix self,
-  const char* name,
-  struct SIDL_double__array* value)
-{
-  return (*self->d_epv->f_SetDoubleArrayParameter)(
-    self,
-    name,
-    value);
-}
-
-/*
- * Method:  Setup[]
- */
-
-int32_t
-Hypre_ParCSRMatrix_Setup(
-  Hypre_ParCSRMatrix self,
-  Hypre_Vector x,
-  Hypre_Vector y)
-{
-  return (*self->d_epv->f_Setup)(
-    self,
-    x,
-    y);
-}
-
-/*
- * Method:  Apply[]
- */
-
-int32_t
-Hypre_ParCSRMatrix_Apply(
-  Hypre_ParCSRMatrix self,
-  Hypre_Vector x,
-  Hypre_Vector* y)
-{
-  return (*self->d_epv->f_Apply)(
-    self,
-    x,
-    y);
+    mpi_comm);
 }
 
 /*
@@ -575,6 +411,170 @@ Hypre_ParCSRMatrix_Print(
   return (*self->d_epv->f_Print)(
     self,
     filename);
+}
+
+/*
+ * Method:  GetRow[]
+ */
+
+int32_t
+Hypre_ParCSRMatrix_GetRow(
+  Hypre_ParCSRMatrix self,
+  int32_t row,
+  int32_t* size,
+  struct SIDL_int__array** col_ind,
+  struct SIDL_double__array** values)
+{
+  return (*self->d_epv->f_GetRow)(
+    self,
+    row,
+    size,
+    col_ind,
+    values);
+}
+
+/*
+ * Method:  GetDoubleValue[]
+ */
+
+int32_t
+Hypre_ParCSRMatrix_GetDoubleValue(
+  Hypre_ParCSRMatrix self,
+  const char* name,
+  double* value)
+{
+  return (*self->d_epv->f_GetDoubleValue)(
+    self,
+    name,
+    value);
+}
+
+/*
+ * Method:  GetIntValue[]
+ */
+
+int32_t
+Hypre_ParCSRMatrix_GetIntValue(
+  Hypre_ParCSRMatrix self,
+  const char* name,
+  int32_t* value)
+{
+  return (*self->d_epv->f_GetIntValue)(
+    self,
+    name,
+    value);
+}
+
+/*
+ * Method:  SetDoubleParameter[]
+ */
+
+int32_t
+Hypre_ParCSRMatrix_SetDoubleParameter(
+  Hypre_ParCSRMatrix self,
+  const char* name,
+  double value)
+{
+  return (*self->d_epv->f_SetDoubleParameter)(
+    self,
+    name,
+    value);
+}
+
+/*
+ * Method:  SetIntParameter[]
+ */
+
+int32_t
+Hypre_ParCSRMatrix_SetIntParameter(
+  Hypre_ParCSRMatrix self,
+  const char* name,
+  int32_t value)
+{
+  return (*self->d_epv->f_SetIntParameter)(
+    self,
+    name,
+    value);
+}
+
+/*
+ * Method:  SetStringParameter[]
+ */
+
+int32_t
+Hypre_ParCSRMatrix_SetStringParameter(
+  Hypre_ParCSRMatrix self,
+  const char* name,
+  const char* value)
+{
+  return (*self->d_epv->f_SetStringParameter)(
+    self,
+    name,
+    value);
+}
+
+/*
+ * Method:  SetIntArrayParameter[]
+ */
+
+int32_t
+Hypre_ParCSRMatrix_SetIntArrayParameter(
+  Hypre_ParCSRMatrix self,
+  const char* name,
+  struct SIDL_int__array* value)
+{
+  return (*self->d_epv->f_SetIntArrayParameter)(
+    self,
+    name,
+    value);
+}
+
+/*
+ * Method:  SetDoubleArrayParameter[]
+ */
+
+int32_t
+Hypre_ParCSRMatrix_SetDoubleArrayParameter(
+  Hypre_ParCSRMatrix self,
+  const char* name,
+  struct SIDL_double__array* value)
+{
+  return (*self->d_epv->f_SetDoubleArrayParameter)(
+    self,
+    name,
+    value);
+}
+
+/*
+ * Method:  Setup[]
+ */
+
+int32_t
+Hypre_ParCSRMatrix_Setup(
+  Hypre_ParCSRMatrix self,
+  Hypre_Vector b,
+  Hypre_Vector x)
+{
+  return (*self->d_epv->f_Setup)(
+    self,
+    b,
+    x);
+}
+
+/*
+ * Method:  Apply[]
+ */
+
+int32_t
+Hypre_ParCSRMatrix_Apply(
+  Hypre_ParCSRMatrix self,
+  Hypre_Vector b,
+  Hypre_Vector* x)
+{
+  return (*self->d_epv->f_Apply)(
+    self,
+    b,
+    x);
 }
 
 /*

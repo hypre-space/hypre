@@ -3,8 +3,8 @@
  * Symbol:        Hypre.Operator-v0.1.5
  * Symbol Type:   interface
  * Babel Version: 0.7.4
- * SIDL Created:  20021101 15:14:28 PST
- * Generated:     20021101 15:14:31 PST
+ * SIDL Created:  20021217 16:01:16 PST
+ * Generated:     20021217 16:01:18 PST
  * Description:   Intermediate Object Representation for Hypre.Operator
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -218,8 +218,8 @@ remote_Hypre_Operator_SetDoubleArrayParameter(
 static int32_t
 remote_Hypre_Operator_Setup(
   void* self,
-  struct Hypre_Vector__object* x,
-  struct Hypre_Vector__object* y)
+  struct Hypre_Vector__object* b,
+  struct Hypre_Vector__object* x)
 {
   return 0;
 }
@@ -231,8 +231,8 @@ remote_Hypre_Operator_Setup(
 static int32_t
 remote_Hypre_Operator_Apply(
   void* self,
-  struct Hypre_Vector__object* x,
-  struct Hypre_Vector__object** y)
+  struct Hypre_Vector__object* b,
+  struct Hypre_Vector__object** x)
 {
   return 0;
 }

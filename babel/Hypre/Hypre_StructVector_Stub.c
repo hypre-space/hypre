@@ -3,8 +3,8 @@
  * Symbol:        Hypre.StructVector-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.7.4
- * SIDL Created:  20021101 15:14:28 PST
- * Generated:     20021101 15:14:33 PST
+ * SIDL Created:  20021217 16:01:16 PST
+ * Generated:     20021217 16:01:21 PST
  * Description:   Client-side glue code for Hypre.StructVector
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -163,6 +163,92 @@ Hypre_StructVector_isInstanceOf(
 }
 
 /*
+ * y <- 0 (where y=self)
+ */
+
+int32_t
+Hypre_StructVector_Clear(
+  Hypre_StructVector self)
+{
+  return (*self->d_epv->f_Clear)(
+    self);
+}
+
+/*
+ * y <- x 
+ */
+
+int32_t
+Hypre_StructVector_Copy(
+  Hypre_StructVector self,
+  Hypre_Vector x)
+{
+  return (*self->d_epv->f_Copy)(
+    self,
+    x);
+}
+
+/*
+ * create an x compatible with y
+ */
+
+int32_t
+Hypre_StructVector_Clone(
+  Hypre_StructVector self,
+  Hypre_Vector* x)
+{
+  return (*self->d_epv->f_Clone)(
+    self,
+    x);
+}
+
+/*
+ * y <- a*y 
+ */
+
+int32_t
+Hypre_StructVector_Scale(
+  Hypre_StructVector self,
+  double a)
+{
+  return (*self->d_epv->f_Scale)(
+    self,
+    a);
+}
+
+/*
+ * d <- (y,x)
+ */
+
+int32_t
+Hypre_StructVector_Dot(
+  Hypre_StructVector self,
+  Hypre_Vector x,
+  double* d)
+{
+  return (*self->d_epv->f_Dot)(
+    self,
+    x,
+    d);
+}
+
+/*
+ * y <- a*x + y
+ */
+
+int32_t
+Hypre_StructVector_Axpy(
+  Hypre_StructVector self,
+  double a,
+  Hypre_Vector x)
+{
+  return (*self->d_epv->f_Axpy)(
+    self,
+    a,
+    x);
+}
+
+/*
  * Method:  SetCommunicator[]
  */
 
@@ -290,92 +376,6 @@ Hypre_StructVector_SetBoxValues(
     ilower,
     iupper,
     values);
-}
-
-/*
- * y <- 0 (where y=self)
- */
-
-int32_t
-Hypre_StructVector_Clear(
-  Hypre_StructVector self)
-{
-  return (*self->d_epv->f_Clear)(
-    self);
-}
-
-/*
- * y <- x 
- */
-
-int32_t
-Hypre_StructVector_Copy(
-  Hypre_StructVector self,
-  Hypre_Vector x)
-{
-  return (*self->d_epv->f_Copy)(
-    self,
-    x);
-}
-
-/*
- * create an x compatible with y
- */
-
-int32_t
-Hypre_StructVector_Clone(
-  Hypre_StructVector self,
-  Hypre_Vector* x)
-{
-  return (*self->d_epv->f_Clone)(
-    self,
-    x);
-}
-
-/*
- * y <- a*y 
- */
-
-int32_t
-Hypre_StructVector_Scale(
-  Hypre_StructVector self,
-  double a)
-{
-  return (*self->d_epv->f_Scale)(
-    self,
-    a);
-}
-
-/*
- * d <- (y,x)
- */
-
-int32_t
-Hypre_StructVector_Dot(
-  Hypre_StructVector self,
-  Hypre_Vector x,
-  double* d)
-{
-  return (*self->d_epv->f_Dot)(
-    self,
-    x,
-    d);
-}
-
-/*
- * y <- a*x + y
- */
-
-int32_t
-Hypre_StructVector_Axpy(
-  Hypre_StructVector self,
-  double a,
-  Hypre_Vector x)
-{
-  return (*self->d_epv->f_Axpy)(
-    self,
-    a,
-    x);
 }
 
 /*

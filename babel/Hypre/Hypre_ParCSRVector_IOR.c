@@ -3,8 +3,8 @@
  * Symbol:        Hypre.ParCSRVector-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.7.4
- * SIDL Created:  20021101 15:14:28 PST
- * Generated:     20021101 15:14:30 PST
+ * SIDL Created:  20021217 16:01:16 PST
+ * Generated:     20021217 16:01:19 PST
  * Description:   Intermediate Object Representation for Hypre.ParCSRVector
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -141,13 +141,13 @@ static void Hypre_ParCSRVector__init_epv(
     const char*)) s1->d_epv->f_queryInterface;
   epv->f_isInstanceOf                = (SIDL_bool (*)(struct 
     Hypre_ParCSRVector__object*,const char*)) s1->d_epv->f_isInstanceOf;
-  epv->f_GetRow                      = NULL;
   epv->f_Clear                       = NULL;
   epv->f_Copy                        = NULL;
   epv->f_Clone                       = NULL;
   epv->f_Scale                       = NULL;
   epv->f_Dot                         = NULL;
   epv->f_Axpy                        = NULL;
+  epv->f_GetRow                      = NULL;
   epv->f_SetCommunicator             = NULL;
   epv->f_Initialize                  = NULL;
   epv->f_Assemble                    = NULL;
@@ -456,21 +456,6 @@ remote_Hypre_ParCSRVector_isInstanceOf(
 }
 
 /*
- * REMOTE METHOD STUB:GetRow
- */
-
-static int32_t
-remote_Hypre_ParCSRVector_GetRow(
-  struct Hypre_ParCSRVector__object* self,
-  int32_t row,
-  int32_t* size,
-  struct SIDL_int__array** col_ind,
-  struct SIDL_double__array** values)
-{
-  return 0;
-}
-
-/*
  * REMOTE METHOD STUB:Clear
  */
 
@@ -539,6 +524,21 @@ remote_Hypre_ParCSRVector_Axpy(
   struct Hypre_ParCSRVector__object* self,
   double a,
   struct Hypre_Vector__object* x)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:GetRow
+ */
+
+static int32_t
+remote_Hypre_ParCSRVector_GetRow(
+  struct Hypre_ParCSRVector__object* self,
+  int32_t row,
+  int32_t* size,
+  struct SIDL_int__array** col_ind,
+  struct SIDL_double__array** values)
 {
   return 0;
 }
@@ -764,13 +764,13 @@ static void Hypre_ParCSRVector__init_remote_epv(void)
   epv->f_isSame                      = remote_Hypre_ParCSRVector_isSame;
   epv->f_queryInterface              = remote_Hypre_ParCSRVector_queryInterface;
   epv->f_isInstanceOf                = remote_Hypre_ParCSRVector_isInstanceOf;
-  epv->f_GetRow                      = remote_Hypre_ParCSRVector_GetRow;
   epv->f_Clear                       = remote_Hypre_ParCSRVector_Clear;
   epv->f_Copy                        = remote_Hypre_ParCSRVector_Copy;
   epv->f_Clone                       = remote_Hypre_ParCSRVector_Clone;
   epv->f_Scale                       = remote_Hypre_ParCSRVector_Scale;
   epv->f_Dot                         = remote_Hypre_ParCSRVector_Dot;
   epv->f_Axpy                        = remote_Hypre_ParCSRVector_Axpy;
+  epv->f_GetRow                      = remote_Hypre_ParCSRVector_GetRow;
   epv->f_SetCommunicator             = 
     remote_Hypre_ParCSRVector_SetCommunicator;
   epv->f_Initialize                  = remote_Hypre_ParCSRVector_Initialize;

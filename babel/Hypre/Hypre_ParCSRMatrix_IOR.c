@@ -3,8 +3,8 @@
  * Symbol:        Hypre.ParCSRMatrix-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.7.4
- * SIDL Created:  20021101 15:14:28 PST
- * Generated:     20021101 15:14:28 PST
+ * SIDL Created:  20021217 16:01:16 PST
+ * Generated:     20021217 16:01:17 PST
  * Description:   Intermediate Object Representation for Hypre.ParCSRMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -141,17 +141,7 @@ static void Hypre_ParCSRMatrix__init_epv(
     const char*)) s1->d_epv->f_queryInterface;
   epv->f_isInstanceOf            = (SIDL_bool (*)(struct 
     Hypre_ParCSRMatrix__object*,const char*)) s1->d_epv->f_isInstanceOf;
-  epv->f_GetRow                  = NULL;
   epv->f_SetCommunicator         = NULL;
-  epv->f_GetDoubleValue          = NULL;
-  epv->f_GetIntValue             = NULL;
-  epv->f_SetDoubleParameter      = NULL;
-  epv->f_SetIntParameter         = NULL;
-  epv->f_SetStringParameter      = NULL;
-  epv->f_SetIntArrayParameter    = NULL;
-  epv->f_SetDoubleArrayParameter = NULL;
-  epv->f_Setup                   = NULL;
-  epv->f_Apply                   = NULL;
   epv->f_Initialize              = NULL;
   epv->f_Assemble                = NULL;
   epv->f_GetObject               = NULL;
@@ -162,6 +152,16 @@ static void Hypre_ParCSRMatrix__init_epv(
   epv->f_SetDiagOffdSizes        = NULL;
   epv->f_Read                    = NULL;
   epv->f_Print                   = NULL;
+  epv->f_GetRow                  = NULL;
+  epv->f_GetDoubleValue          = NULL;
+  epv->f_GetIntValue             = NULL;
+  epv->f_SetDoubleParameter      = NULL;
+  epv->f_SetIntParameter         = NULL;
+  epv->f_SetStringParameter      = NULL;
+  epv->f_SetIntArrayParameter    = NULL;
+  epv->f_SetDoubleArrayParameter = NULL;
+  epv->f_Setup                   = NULL;
+  epv->f_Apply                   = NULL;
 
   Hypre_ParCSRMatrix__set_epv(epv);
 
@@ -451,145 +451,13 @@ remote_Hypre_ParCSRMatrix_isInstanceOf(
 }
 
 /*
- * REMOTE METHOD STUB:GetRow
- */
-
-static int32_t
-remote_Hypre_ParCSRMatrix_GetRow(
-  struct Hypre_ParCSRMatrix__object* self,
-  int32_t row,
-  int32_t* size,
-  struct SIDL_int__array** col_ind,
-  struct SIDL_double__array** values)
-{
-  return 0;
-}
-
-/*
  * REMOTE METHOD STUB:SetCommunicator
  */
 
 static int32_t
 remote_Hypre_ParCSRMatrix_SetCommunicator(
   struct Hypre_ParCSRMatrix__object* self,
-  void* comm)
-{
-  return 0;
-}
-
-/*
- * REMOTE METHOD STUB:GetDoubleValue
- */
-
-static int32_t
-remote_Hypre_ParCSRMatrix_GetDoubleValue(
-  struct Hypre_ParCSRMatrix__object* self,
-  const char* name,
-  double* value)
-{
-  return 0;
-}
-
-/*
- * REMOTE METHOD STUB:GetIntValue
- */
-
-static int32_t
-remote_Hypre_ParCSRMatrix_GetIntValue(
-  struct Hypre_ParCSRMatrix__object* self,
-  const char* name,
-  int32_t* value)
-{
-  return 0;
-}
-
-/*
- * REMOTE METHOD STUB:SetDoubleParameter
- */
-
-static int32_t
-remote_Hypre_ParCSRMatrix_SetDoubleParameter(
-  struct Hypre_ParCSRMatrix__object* self,
-  const char* name,
-  double value)
-{
-  return 0;
-}
-
-/*
- * REMOTE METHOD STUB:SetIntParameter
- */
-
-static int32_t
-remote_Hypre_ParCSRMatrix_SetIntParameter(
-  struct Hypre_ParCSRMatrix__object* self,
-  const char* name,
-  int32_t value)
-{
-  return 0;
-}
-
-/*
- * REMOTE METHOD STUB:SetStringParameter
- */
-
-static int32_t
-remote_Hypre_ParCSRMatrix_SetStringParameter(
-  struct Hypre_ParCSRMatrix__object* self,
-  const char* name,
-  const char* value)
-{
-  return 0;
-}
-
-/*
- * REMOTE METHOD STUB:SetIntArrayParameter
- */
-
-static int32_t
-remote_Hypre_ParCSRMatrix_SetIntArrayParameter(
-  struct Hypre_ParCSRMatrix__object* self,
-  const char* name,
-  struct SIDL_int__array* value)
-{
-  return 0;
-}
-
-/*
- * REMOTE METHOD STUB:SetDoubleArrayParameter
- */
-
-static int32_t
-remote_Hypre_ParCSRMatrix_SetDoubleArrayParameter(
-  struct Hypre_ParCSRMatrix__object* self,
-  const char* name,
-  struct SIDL_double__array* value)
-{
-  return 0;
-}
-
-/*
- * REMOTE METHOD STUB:Setup
- */
-
-static int32_t
-remote_Hypre_ParCSRMatrix_Setup(
-  struct Hypre_ParCSRMatrix__object* self,
-  struct Hypre_Vector__object* x,
-  struct Hypre_Vector__object* y)
-{
-  return 0;
-}
-
-/*
- * REMOTE METHOD STUB:Apply
- */
-
-static int32_t
-remote_Hypre_ParCSRMatrix_Apply(
-  struct Hypre_ParCSRMatrix__object* self,
-  struct Hypre_Vector__object* x,
-  struct Hypre_Vector__object** y)
+  void* mpi_comm)
 {
   return 0;
 }
@@ -726,6 +594,138 @@ remote_Hypre_ParCSRMatrix_Print(
 }
 
 /*
+ * REMOTE METHOD STUB:GetRow
+ */
+
+static int32_t
+remote_Hypre_ParCSRMatrix_GetRow(
+  struct Hypre_ParCSRMatrix__object* self,
+  int32_t row,
+  int32_t* size,
+  struct SIDL_int__array** col_ind,
+  struct SIDL_double__array** values)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:GetDoubleValue
+ */
+
+static int32_t
+remote_Hypre_ParCSRMatrix_GetDoubleValue(
+  struct Hypre_ParCSRMatrix__object* self,
+  const char* name,
+  double* value)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:GetIntValue
+ */
+
+static int32_t
+remote_Hypre_ParCSRMatrix_GetIntValue(
+  struct Hypre_ParCSRMatrix__object* self,
+  const char* name,
+  int32_t* value)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:SetDoubleParameter
+ */
+
+static int32_t
+remote_Hypre_ParCSRMatrix_SetDoubleParameter(
+  struct Hypre_ParCSRMatrix__object* self,
+  const char* name,
+  double value)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:SetIntParameter
+ */
+
+static int32_t
+remote_Hypre_ParCSRMatrix_SetIntParameter(
+  struct Hypre_ParCSRMatrix__object* self,
+  const char* name,
+  int32_t value)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:SetStringParameter
+ */
+
+static int32_t
+remote_Hypre_ParCSRMatrix_SetStringParameter(
+  struct Hypre_ParCSRMatrix__object* self,
+  const char* name,
+  const char* value)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:SetIntArrayParameter
+ */
+
+static int32_t
+remote_Hypre_ParCSRMatrix_SetIntArrayParameter(
+  struct Hypre_ParCSRMatrix__object* self,
+  const char* name,
+  struct SIDL_int__array* value)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:SetDoubleArrayParameter
+ */
+
+static int32_t
+remote_Hypre_ParCSRMatrix_SetDoubleArrayParameter(
+  struct Hypre_ParCSRMatrix__object* self,
+  const char* name,
+  struct SIDL_double__array* value)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:Setup
+ */
+
+static int32_t
+remote_Hypre_ParCSRMatrix_Setup(
+  struct Hypre_ParCSRMatrix__object* self,
+  struct Hypre_Vector__object* b,
+  struct Hypre_Vector__object* x)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:Apply
+ */
+
+static int32_t
+remote_Hypre_ParCSRMatrix_Apply(
+  struct Hypre_ParCSRMatrix__object* self,
+  struct Hypre_Vector__object* b,
+  struct Hypre_Vector__object** x)
+{
+  return 0;
+}
+
+/*
  * REMOTE EPV: create remote entry point vectors (EPVs).
  */
 
@@ -748,8 +748,18 @@ static void Hypre_ParCSRMatrix__init_remote_epv(void)
   epv->f_isSame                  = remote_Hypre_ParCSRMatrix_isSame;
   epv->f_queryInterface          = remote_Hypre_ParCSRMatrix_queryInterface;
   epv->f_isInstanceOf            = remote_Hypre_ParCSRMatrix_isInstanceOf;
-  epv->f_GetRow                  = remote_Hypre_ParCSRMatrix_GetRow;
   epv->f_SetCommunicator         = remote_Hypre_ParCSRMatrix_SetCommunicator;
+  epv->f_Initialize              = remote_Hypre_ParCSRMatrix_Initialize;
+  epv->f_Assemble                = remote_Hypre_ParCSRMatrix_Assemble;
+  epv->f_GetObject               = remote_Hypre_ParCSRMatrix_GetObject;
+  epv->f_Create                  = remote_Hypre_ParCSRMatrix_Create;
+  epv->f_SetValues               = remote_Hypre_ParCSRMatrix_SetValues;
+  epv->f_AddToValues             = remote_Hypre_ParCSRMatrix_AddToValues;
+  epv->f_SetRowSizes             = remote_Hypre_ParCSRMatrix_SetRowSizes;
+  epv->f_SetDiagOffdSizes        = remote_Hypre_ParCSRMatrix_SetDiagOffdSizes;
+  epv->f_Read                    = remote_Hypre_ParCSRMatrix_Read;
+  epv->f_Print                   = remote_Hypre_ParCSRMatrix_Print;
+  epv->f_GetRow                  = remote_Hypre_ParCSRMatrix_GetRow;
   epv->f_GetDoubleValue          = remote_Hypre_ParCSRMatrix_GetDoubleValue;
   epv->f_GetIntValue             = remote_Hypre_ParCSRMatrix_GetIntValue;
   epv->f_SetDoubleParameter      = remote_Hypre_ParCSRMatrix_SetDoubleParameter;
@@ -761,16 +771,6 @@ static void Hypre_ParCSRMatrix__init_remote_epv(void)
     remote_Hypre_ParCSRMatrix_SetDoubleArrayParameter;
   epv->f_Setup                   = remote_Hypre_ParCSRMatrix_Setup;
   epv->f_Apply                   = remote_Hypre_ParCSRMatrix_Apply;
-  epv->f_Initialize              = remote_Hypre_ParCSRMatrix_Initialize;
-  epv->f_Assemble                = remote_Hypre_ParCSRMatrix_Assemble;
-  epv->f_GetObject               = remote_Hypre_ParCSRMatrix_GetObject;
-  epv->f_Create                  = remote_Hypre_ParCSRMatrix_Create;
-  epv->f_SetValues               = remote_Hypre_ParCSRMatrix_SetValues;
-  epv->f_AddToValues             = remote_Hypre_ParCSRMatrix_AddToValues;
-  epv->f_SetRowSizes             = remote_Hypre_ParCSRMatrix_SetRowSizes;
-  epv->f_SetDiagOffdSizes        = remote_Hypre_ParCSRMatrix_SetDiagOffdSizes;
-  epv->f_Read                    = remote_Hypre_ParCSRMatrix_Read;
-  epv->f_Print                   = remote_Hypre_ParCSRMatrix_Print;
 
   e0->f__cast           = (void* (*)(void*,const char*)) epv->f__cast;
   e0->f__delete         = (void (*)(void*)) epv->f__delete;

@@ -3,8 +3,8 @@
  * Symbol:        Hypre.CoefficientAccess-v0.1.5
  * Symbol Type:   interface
  * Babel Version: 0.7.4
- * SIDL Created:  20021101 15:14:28 PST
- * Generated:     20021101 15:14:28 PST
+ * SIDL Created:  20021217 16:01:16 PST
+ * Generated:     20021217 16:01:17 PST
  * Description:   Intermediate Object Representation for Hypre.CoefficientAccess
  * 
  * WARNING: Automatically generated; changes will be lost

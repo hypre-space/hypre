@@ -3,8 +3,8 @@
  * Symbol:        Hypre.StructVector-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.7.4
- * SIDL Created:  20021101 15:14:28 PST
- * Generated:     20021101 15:14:33 PST
+ * SIDL Created:  20021217 16:01:16 PST
+ * Generated:     20021217 16:01:21 PST
  * Description:   Client-side glue code for Hypre.StructVector
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -118,6 +118,55 @@ Hypre_StructVector_isInstanceOf(
   const char* name);
 
 /**
+ * y <- 0 (where y=self)
+ */
+int32_t
+Hypre_StructVector_Clear(
+  Hypre_StructVector self);
+
+/**
+ * y <- x 
+ */
+int32_t
+Hypre_StructVector_Copy(
+  Hypre_StructVector self,
+  Hypre_Vector x);
+
+/**
+ * create an x compatible with y
+ */
+int32_t
+Hypre_StructVector_Clone(
+  Hypre_StructVector self,
+  Hypre_Vector* x);
+
+/**
+ * y <- a*y 
+ */
+int32_t
+Hypre_StructVector_Scale(
+  Hypre_StructVector self,
+  double a);
+
+/**
+ * d <- (y,x)
+ */
+int32_t
+Hypre_StructVector_Dot(
+  Hypre_StructVector self,
+  Hypre_Vector x,
+  double* d);
+
+/**
+ * y <- a*x + y
+ */
+int32_t
+Hypre_StructVector_Axpy(
+  Hypre_StructVector self,
+  double a,
+  Hypre_Vector x);
+
+/**
  * Method:  SetCommunicator[]
  */
 int32_t
@@ -197,55 +246,6 @@ Hypre_StructVector_SetBoxValues(
   struct SIDL_int__array* ilower,
   struct SIDL_int__array* iupper,
   struct SIDL_double__array* values);
-
-/**
- * y <- 0 (where y=self)
- */
-int32_t
-Hypre_StructVector_Clear(
-  Hypre_StructVector self);
-
-/**
- * y <- x 
- */
-int32_t
-Hypre_StructVector_Copy(
-  Hypre_StructVector self,
-  Hypre_Vector x);
-
-/**
- * create an x compatible with y
- */
-int32_t
-Hypre_StructVector_Clone(
-  Hypre_StructVector self,
-  Hypre_Vector* x);
-
-/**
- * y <- a*y 
- */
-int32_t
-Hypre_StructVector_Scale(
-  Hypre_StructVector self,
-  double a);
-
-/**
- * d <- (y,x)
- */
-int32_t
-Hypre_StructVector_Dot(
-  Hypre_StructVector self,
-  Hypre_Vector x,
-  double* d);
-
-/**
- * y <- a*x + y
- */
-int32_t
-Hypre_StructVector_Axpy(
-  Hypre_StructVector self,
-  double a,
-  Hypre_Vector x);
 
 /**
  * Cast method for interface and class type conversions.

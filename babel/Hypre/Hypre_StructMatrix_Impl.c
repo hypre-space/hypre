@@ -3,8 +3,8 @@
  * Symbol:        Hypre.StructMatrix-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.7.4
- * SIDL Created:  20021101 15:14:28 PST
- * Generated:     20021101 15:14:35 PST
+ * SIDL Created:  20021217 16:01:16 PST
+ * Generated:     20021217 16:01:25 PST
  * Description:   Server-side implementation for Hypre.StructMatrix
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -365,7 +365,7 @@ impl_Hypre_StructMatrix_SetDoubleArrayParameter(
 
 int32_t
 impl_Hypre_StructMatrix_Setup(
-  Hypre_StructMatrix self, Hypre_Vector x, Hypre_Vector y)
+  Hypre_StructMatrix self, Hypre_Vector b, Hypre_Vector x)
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructMatrix.Setup) */
   /* Insert the implementation of the Setup method here... */
@@ -381,7 +381,7 @@ impl_Hypre_StructMatrix_Setup(
 
 int32_t
 impl_Hypre_StructMatrix_Apply(
-  Hypre_StructMatrix self, Hypre_Vector x, Hypre_Vector* y)
+  Hypre_StructMatrix self, Hypre_Vector b, Hypre_Vector* x)
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructMatrix.Apply) */
   /* Insert the implementation of the Apply method here... */

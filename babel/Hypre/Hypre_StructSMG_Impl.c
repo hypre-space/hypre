@@ -3,8 +3,8 @@
  * Symbol:        Hypre.StructSMG-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.7.4
- * SIDL Created:  20021101 15:14:28 PST
- * Generated:     20021101 15:14:37 PST
+ * SIDL Created:  20021217 16:01:16 PST
+ * Generated:     20021217 16:01:24 PST
  * Description:   Server-side implementation for Hypre.StructSMG
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -198,7 +198,7 @@ impl_Hypre_StructSMG_SetDoubleArrayParameter(
 
 int32_t
 impl_Hypre_StructSMG_Setup(
-  Hypre_StructSMG self, Hypre_Vector x, Hypre_Vector y)
+  Hypre_StructSMG self, Hypre_Vector b, Hypre_Vector x)
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructSMG.Setup) */
   /* Insert the implementation of the Setup method here... */
@@ -214,7 +214,7 @@ impl_Hypre_StructSMG_Setup(
 
 int32_t
 impl_Hypre_StructSMG_Apply(
-  Hypre_StructSMG self, Hypre_Vector x, Hypre_Vector* y)
+  Hypre_StructSMG self, Hypre_Vector b, Hypre_Vector* x)
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructSMG.Apply) */
   /* Insert the implementation of the Apply method here... */

@@ -3,8 +3,8 @@
  * Symbol:        Hypre.ParCSRVector-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.7.4
- * SIDL Created:  20021101 15:14:28 PST
- * Generated:     20021101 15:14:36 PST
+ * SIDL Created:  20021217 16:01:16 PST
+ * Generated:     20021217 16:01:26 PST
  * Description:   Server-side implementation for Hypre.ParCSRVector
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -23,11 +23,11 @@
 #ifndef included_Hypre_Vector_h
 #include "Hypre_Vector.h"
 #endif
-#ifndef included_Hypre_ParCSRVector_h
-#include "Hypre_ParCSRVector.h"
-#endif
 #ifndef included_SIDL_BaseInterface_h
 #include "SIDL_BaseInterface.h"
+#endif
+#ifndef included_Hypre_ParCSRVector_h
+#include "Hypre_ParCSRVector.h"
 #endif
 
 /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRVector._includes) */
@@ -79,14 +79,6 @@ impl_Hypre_ParCSRVector__dtor(
  */
 
 extern int32_t
-impl_Hypre_ParCSRVector_GetRow(
-  Hypre_ParCSRVector,
-  int32_t,
-  int32_t*,
-  struct SIDL_int__array**,
-  struct SIDL_double__array**);
-
-extern int32_t
 impl_Hypre_ParCSRVector_Clear(
   Hypre_ParCSRVector);
 
@@ -116,6 +108,14 @@ impl_Hypre_ParCSRVector_Axpy(
   Hypre_ParCSRVector,
   double,
   Hypre_Vector);
+
+extern int32_t
+impl_Hypre_ParCSRVector_GetRow(
+  Hypre_ParCSRVector,
+  int32_t,
+  int32_t*,
+  struct SIDL_int__array**,
+  struct SIDL_double__array**);
 
 extern int32_t
 impl_Hypre_ParCSRVector_SetCommunicator(

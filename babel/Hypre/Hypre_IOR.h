@@ -3,8 +3,8 @@
  * Symbol:        Hypre-v0.1.5
  * Symbol Type:   package
  * Babel Version: 0.7.4
- * SIDL Created:  20021101 15:14:27 PST
- * Generated:     20021101 15:14:30 PST
+ * SIDL Created:  20021217 16:01:15 PST
+ * Generated:     20021217 16:01:19 PST
  * Description:   Intermediate Object Representation for Hypre
  * 
  * WARNING: Automatically generated; changes will be lost

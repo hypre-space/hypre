@@ -3,8 +3,8 @@
  * Symbol:        Hypre.StructSMG-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.7.4
- * SIDL Created:  20021101 15:14:28 PST
- * Generated:     20021101 15:14:37 PST
+ * SIDL Created:  20021217 16:01:16 PST
+ * Generated:     20021217 16:01:24 PST
  * Description:   Server-side implementation for Hypre.StructSMG
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -23,11 +23,11 @@
 #ifndef included_Hypre_Vector_h
 #include "Hypre_Vector.h"
 #endif
-#ifndef included_Hypre_Operator_h
-#include "Hypre_Operator.h"
-#endif
 #ifndef included_Hypre_StructSMG_h
 #include "Hypre_StructSMG.h"
+#endif
+#ifndef included_Hypre_Operator_h
+#include "Hypre_Operator.h"
 #endif
 
 /* DO-NOT-DELETE splicer.begin(Hypre.StructSMG._includes) */

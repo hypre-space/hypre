@@ -3,8 +3,8 @@
  * Symbol:        Hypre.Operator-v0.1.5
  * Symbol Type:   interface
  * Babel Version: 0.7.4
- * SIDL Created:  20021101 15:14:28 PST
- * Generated:     20021101 15:14:34 PST
+ * SIDL Created:  20021217 16:01:16 PST
+ * Generated:     20021217 16:01:22 PST
  * Description:   Client-side glue code for Hypre.Operator
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -252,13 +252,13 @@ Hypre_Operator_SetDoubleArrayParameter(
 int32_t
 Hypre_Operator_Setup(
   Hypre_Operator self,
-  Hypre_Vector x,
-  Hypre_Vector y)
+  Hypre_Vector b,
+  Hypre_Vector x)
 {
   return (*self->d_epv->f_Setup)(
     self->d_object,
-    x,
-    y);
+    b,
+    x);
 }
 
 /*
@@ -268,13 +268,13 @@ Hypre_Operator_Setup(
 int32_t
 Hypre_Operator_Apply(
   Hypre_Operator self,
-  Hypre_Vector x,
-  Hypre_Vector* y)
+  Hypre_Vector b,
+  Hypre_Vector* x)
 {
   return (*self->d_epv->f_Apply)(
     self->d_object,
-    x,
-    y);
+    b,
+    x);
 }
 
 /*

@@ -3,8 +3,8 @@
  * Symbol:        Hypre.ParAMG-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.7.4
- * SIDL Created:  20021101 15:14:28 PST
- * Generated:     20021101 15:14:35 PST
+ * SIDL Created:  20021217 16:01:16 PST
+ * Generated:     20021217 16:01:26 PST
  * Description:   Server-side implementation for Hypre.ParAMG
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -412,7 +412,7 @@ impl_Hypre_ParAMG_SetDoubleArrayParameter(
 
 int32_t
 impl_Hypre_ParAMG_Setup(
-  Hypre_ParAMG self, Hypre_Vector x, Hypre_Vector y)
+  Hypre_ParAMG self, Hypre_Vector b, Hypre_Vector x)
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.ParAMG.Setup) */
   /* Insert the implementation of the Setup method here... */
@@ -432,22 +432,22 @@ impl_Hypre_ParAMG_Setup(
 
 int32_t
 impl_Hypre_ParAMG_Apply(
-  Hypre_ParAMG self, Hypre_Vector x, Hypre_Vector* y)
+  Hypre_ParAMG self, Hypre_Vector b, Hypre_Vector* x)
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.ParAMG.Apply) */
   /* Insert the implementation of the Apply method here... */
    int ierr = 0;
-   void * objectA, * objectx, * objecty;
+   void * objectA, * objectb, * objectx;
    HYPRE_Solver solver;
    struct Hypre_ParAMG__data * data;
    struct Hypre_ParCSRMatrix__data * dataA;
-   struct Hypre_ParCSRVector__data * datax, * datay;
+   struct Hypre_ParCSRVector__data * datab, * datax;
    Hypre_ParCSRMatrix A;
    HYPRE_IJMatrix ij_A;
    HYPRE_ParCSRMatrix HypreP_A;
-   Hypre_ParCSRVector HypreP_x, HypreP_y;
-   HYPRE_ParVector xx, yy;
-   HYPRE_IJVector ij_x, ij_y;
+   Hypre_ParCSRVector HypreP_b, HypreP_x;
+   HYPRE_ParVector bb, xx;
+   HYPRE_IJVector ij_b, ij_x;
 
    data = Hypre_ParAMG__get_data( self );
    solver = data->solver;
@@ -458,17 +458,48 @@ impl_Hypre_ParAMG_Apply(
    ierr += HYPRE_IJMatrixGetObject( ij_A, &objectA );
    HypreP_A = (HYPRE_ParCSRMatrix) objectA;
 
-   if ( Hypre_Vector_queryInterface(x, "Hypre.ParCSRVector" ) ) {
+   if ( Hypre_Vector_queryInterface(b, "Hypre.ParCSRVector" ) ) {
       /* perhaps Hypre_Vector_isInstanceOf( x, "ParCSRVector" ) might do the same job */
-      HypreP_x = Hypre_Vector__cast2( x, "Hypre.ParCSRVector" );
+      HypreP_b = Hypre_Vector__cast2( b, "Hypre.ParCSRVector" );
    }
    else {
       assert( "Unrecognized vector type."==(char *)x );
    }
    /* This is the old code for the above.  It seems that queryInterface has been
       changed to return TRUE or FALSE rather than the object (jfp Oct2002)
+      HypreP_b = Hypre_Vector__cast2
+         ( Hypre_Vector_queryInterface( b, "Hypre.ParCSRVector"), "Hypre.ParCSRVector" );
+      assert( HypreP_b!=NULL );
+   */
+
+   datab = Hypre_ParCSRVector__get_data( HypreP_b );
+   ij_b = datab -> ij_b;
+   ierr += HYPRE_IJVectorGetObject( ij_b, &objectb );
+   bb = (HYPRE_ParVector) objectb;
+
+/* >>>> In the SIDL specification of Apply, y is an output argument.  That means the whole vector,
+   not just its data.
+   Therefore we must _always_ make a new vector (could let the user provide a Builder which provides
+   us with an old one), or at least remember the old one and return it with a higher reference
+   count.  Or we could change the SIDL spec, make x inout.  But Andy Cleary prefers output only.
+   Cf the email conversation of Tuesday November 19.  >>>> TO DO: change this to be correct.<<<<
+   But don't forget to accomodate typical big-code users who like to use the same vector over
+   and over again. Note Dec10: the user may well want to specify the initial value of x
+   (tremendous performance advantage is you're doing multiple similar problems).
+   Thus x MUST be input/output.  */
+   if ( *x==NULL ) {
+      Hypre_Vector_Clone( b, x );
+   }
+   if ( Hypre_Vector_queryInterface( *x, "Hypre.ParCSRVector" ) ) {
+      HypreP_x = Hypre_Vector__cast2( *x, "Hypre.ParCSRVector" );
+   }
+   else {
+      assert( "Unrecognized vector type."==(char *)(*x) );
+   }
+   /* This is the old code for the above.  It seems that queryInterface has been
+      changed to return TRUE or FALSE rather than the object (jfp Oct2002)
       HypreP_x = Hypre_Vector__cast2
-         ( Hypre_Vector_queryInterface( x, "Hypre.ParCSRVector"), "Hypre.ParCSRVector" );
+         ( Hypre_Vector_queryInterface( *x, "Hypre.ParCSRVector"), "Hypre.ParCSRVector" );
       assert( HypreP_x!=NULL );
    */
 
@@ -477,39 +508,8 @@ impl_Hypre_ParAMG_Apply(
    ierr += HYPRE_IJVectorGetObject( ij_x, &objectx );
    xx = (HYPRE_ParVector) objectx;
 
-/* >>>> In the SIDL specification of Apply, y is an output argument.  That means the whole vector,
-   not just its data.
-   Therefore we must _always_ make a new vector (could let the user provide a Builder which provides
-   us with an old one), or at least remember the old one and return it with a higher reference
-   count.  Or we could change the SIDL spec, make y inout.  But Andy Cleary prefers output only.
-   Cf the email conversation of Tuesday November 19.  >>>> TO DO: change this to be correct.<<<<
-   But don't forget to accomodate typical big-code users who like to use the same vector over
-   and over again. Note Dec10: the user may well want to specify the initial value of y
-   (tremendous performance advantage is you're doing multiple similar problems).
-   Thus y MUST be input/output.  */
-   if ( *y==NULL ) {
-      Hypre_Vector_Clone( x, y );
-   }
-   if ( Hypre_Vector_queryInterface( *y, "Hypre.ParCSRVector" ) ) {
-      HypreP_y = Hypre_Vector__cast2( *y, "Hypre.ParCSRVector" );
-   }
-   else {
-      assert( "Unrecognized vector type."==(char *)(*y) );
-   }
-   /* This is the old code for the above.  It seems that queryInterface has been
-      changed to return TRUE or FALSE rather than the object (jfp Oct2002)
-      HypreP_y = Hypre_Vector__cast2
-         ( Hypre_Vector_queryInterface( *y, "Hypre.ParCSRVector"), "Hypre.ParCSRVector" );
-      assert( HypreP_y!=NULL );
-   */
-
-   datay = Hypre_ParCSRVector__get_data( HypreP_y );
-   ij_y = datay -> ij_b;
-   ierr += HYPRE_IJVectorGetObject( ij_y, &objecty );
-   yy = (HYPRE_ParVector) objecty;
-
-   ierr += HYPRE_BoomerAMGSetup( solver, HypreP_A, xx, yy );
-   ierr += HYPRE_BoomerAMGSolve( solver, HypreP_A, xx, yy );
+   ierr += HYPRE_BoomerAMGSetup( solver, HypreP_A, bb, xx );
+   ierr += HYPRE_BoomerAMGSolve( solver, HypreP_A, bb, xx );
 
    return ierr;
 

@@ -3,8 +3,8 @@
  * Symbol:        Hypre.Pilut-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.7.4
- * SIDL Created:  20021101 15:14:28 PST
- * Generated:     20021101 15:14:30 PST
+ * SIDL Created:  20021217 16:01:16 PST
+ * Generated:     20021217 16:01:18 PST
  * Description:   Intermediate Object Representation for Hypre.Pilut
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -513,8 +513,8 @@ remote_Hypre_Pilut_SetDoubleArrayParameter(
 static int32_t
 remote_Hypre_Pilut_Setup(
   struct Hypre_Pilut__object* self,
-  struct Hypre_Vector__object* x,
-  struct Hypre_Vector__object* y)
+  struct Hypre_Vector__object* b,
+  struct Hypre_Vector__object* x)
 {
   return 0;
 }
@@ -526,8 +526,8 @@ remote_Hypre_Pilut_Setup(
 static int32_t
 remote_Hypre_Pilut_Apply(
   struct Hypre_Pilut__object* self,
-  struct Hypre_Vector__object* x,
-  struct Hypre_Vector__object** y)
+  struct Hypre_Vector__object* b,
+  struct Hypre_Vector__object** x)
 {
   return 0;
 }

@@ -3,8 +3,8 @@
  * Symbol:        Hypre.StructVector-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.7.4
- * SIDL Created:  20021101 15:14:28 PST
- * Generated:     20021101 15:14:36 PST
+ * SIDL Created:  20021217 16:01:16 PST
+ * Generated:     20021217 16:01:24 PST
  * Description:   Server-side implementation for Hypre.StructVector
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -20,12 +20,6 @@
 #ifndef included_SIDL_header_h
 #include "SIDL_header.h"
 #endif
-#ifndef included_Hypre_StructGrid_h
-#include "Hypre_StructGrid.h"
-#endif
-#ifndef included_Hypre_StructVector_h
-#include "Hypre_StructVector.h"
-#endif
 #ifndef included_Hypre_Vector_h
 #include "Hypre_Vector.h"
 #endif
@@ -34,6 +28,12 @@
 #endif
 #ifndef included_SIDL_BaseInterface_h
 #include "SIDL_BaseInterface.h"
+#endif
+#ifndef included_Hypre_StructGrid_h
+#include "Hypre_StructGrid.h"
+#endif
+#ifndef included_Hypre_StructVector_h
+#include "Hypre_StructVector.h"
 #endif
 
 /* DO-NOT-DELETE splicer.begin(Hypre.StructVector._includes) */
@@ -81,6 +81,37 @@ impl_Hypre_StructVector__dtor(
  */
 
 extern int32_t
+impl_Hypre_StructVector_Clear(
+  Hypre_StructVector);
+
+extern int32_t
+impl_Hypre_StructVector_Copy(
+  Hypre_StructVector,
+  Hypre_Vector);
+
+extern int32_t
+impl_Hypre_StructVector_Clone(
+  Hypre_StructVector,
+  Hypre_Vector*);
+
+extern int32_t
+impl_Hypre_StructVector_Scale(
+  Hypre_StructVector,
+  double);
+
+extern int32_t
+impl_Hypre_StructVector_Dot(
+  Hypre_StructVector,
+  Hypre_Vector,
+  double*);
+
+extern int32_t
+impl_Hypre_StructVector_Axpy(
+  Hypre_StructVector,
+  double,
+  Hypre_Vector);
+
+extern int32_t
 impl_Hypre_StructVector_SetCommunicator(
   Hypre_StructVector,
   void*);
@@ -120,37 +151,6 @@ impl_Hypre_StructVector_SetBoxValues(
   struct SIDL_int__array*,
   struct SIDL_int__array*,
   struct SIDL_double__array*);
-
-extern int32_t
-impl_Hypre_StructVector_Clear(
-  Hypre_StructVector);
-
-extern int32_t
-impl_Hypre_StructVector_Copy(
-  Hypre_StructVector,
-  Hypre_Vector);
-
-extern int32_t
-impl_Hypre_StructVector_Clone(
-  Hypre_StructVector,
-  Hypre_Vector*);
-
-extern int32_t
-impl_Hypre_StructVector_Scale(
-  Hypre_StructVector,
-  double);
-
-extern int32_t
-impl_Hypre_StructVector_Dot(
-  Hypre_StructVector,
-  Hypre_Vector,
-  double*);
-
-extern int32_t
-impl_Hypre_StructVector_Axpy(
-  Hypre_StructVector,
-  double,
-  Hypre_Vector);
 
 #ifdef __cplusplus
 }
