@@ -12,21 +12,15 @@
 #
 # Usage:  amgmvio <prefix1> <prefix2>
 #
-# Result: cp <prefix1>.in.problem  <prefix2>.in.problem
-#         cp <prefix1>.in.solver   <prefix2>.in.solver
+# Result: mv <prefix1>.in.problem  <prefix2>.in.problem
+#         mv <prefix1>.in.solver   <prefix2>.in.solver
 #         mv <prefix1>.out*        <prefix2>.out*
 #
 #=============================================================================
 
 if [ "$2" != "" ]; then
 
-for i in $1.in.problem $1.in.solver
-do
-  EXT=`echo $i $1 | awk '{print substr($1,length($2)+1)}'`
-  cp $i $2${EXT}
-done
-
-for i in $1.out*
+for i in $1.in.problem $1.in.solver $1.out*
 do
   EXT=`echo $i $1 | awk '{print substr($1,length($2)+1)}'`
   mv $i $2${EXT}
@@ -36,8 +30,8 @@ done
 else
 
   echo 'usage:  amgmvio <prefix1> <prefix2>'
-  echo 'result: cp <prefix1>.in.problem  <prefix2>.in.problem'
-  echo '        cp <prefix1>.in.solver   <prefix2>.in.solver'
+  echo 'result: mv <prefix1>.in.problem  <prefix2>.in.problem'
+  echo '        mv <prefix1>.in.solver   <prefix2>.in.solver'
   echo '        mv <prefix1>.out*        <prefix2>.out*'
 
 fi
