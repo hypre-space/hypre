@@ -624,6 +624,97 @@ case $HOSTNAME in
       
    ;;
         
+  tckk* )
+    if test -z "$CC"; then
+      if test "$casc_using_mpi" = "no" &&
+        test "$casc_using_openmp" = "no"
+      then
+        AC_CHECK_PROGS(CC,cc kcc gcc c89)
+      else
+        if test "$casc_using_openmp" = "no" ; then
+          AC_CHECK_PROGS(CC,cc kcc gcc c89) 
+        else
+          AC_CHECK_PROGS(CC,guidec) 
+        fi
+      fi
+    fi
+    if test -z "$CXX"; then
+      if test "$casc_using_mpi" = "no" &&
+        test "$casc_using_openmp" = "no"
+      then
+        AC_CHECK_PROGS(CXX,cxx KCC g++)
+      else
+        if test "$casc_using_openmp" = "no" ; then
+          AC_CHECK_PROGS(CXX,cxx KCC g++) 
+        else
+          AC_CHECK_PROGS(CXX,guidec++) 
+        fi
+      fi
+    fi
+    if test -z "$F77"; then
+      if test "$casc_using_mpi" = "no" &&
+        test "$casc_using_openmp" = "no"
+      then
+        AC_CHECK_PROGS(F77,f77 kf77 g77)
+      else
+        if test "$casc_using_openmp" = "no" ; then
+          AC_CHECK_PROGS(F77,f77 kf77 g77)
+        else
+          AC_CHECK_PROGS(F77,guidef77)
+        fi
+      fi
+    fi
+
+    if test "$casc_user_chose_mpi" = "no" &&
+        test "$casc_using_mpi" = "yes" &&
+        test "$CC" != "mpicc"
+    then
+      CASC_CHECK_HEADER(mpi.h, /usr/include)
+      MPIINCLUDE="$MPIINCLUDE $INCLUDES"
+      CASC_ADD_LIB(rt, main, /usr/lib)
+      CASC_ADD_LIB(mpi, main, /usr/lib, MPI)
+      if test -z "$MPILIBS"
+      then
+        AC_MSG_WARN([MPI not found--in alpha test-must set manually using --with-flags])
+      fi
+    fi
+
+    if test -z "$CFLAGS"; then
+      if test "$CC" = "cc" ||
+        test "$CC" = "mpicc" ; then
+        CASC_SET_COPT(-fast)
+        if test "$casc_using_openmp" = "yes"; then
+          CASC_SET_COPT(-fast -omp)
+        fi
+      elif test "$CC" = "kcc" ; then
+        CASC_SET_COPT(-o=5)
+      else 
+        CASC_SET_COPT(-O)
+      fi
+    fi
+    if test -z "$CXXFLAGS"; then
+      if test "$CXX" = "cxx" ||
+        test "$CXX" = "mpicxx" ; then
+        CASC_SET_CXXOPT(-fast)
+        if test "$casc_using_openmp" = "yes"; then
+          CASC_SET_CXXOPT(-fast -omp)
+        fi
+      else 
+        CASC_SET_CXXOPT(-O)
+      fi
+    fi
+    if test -z "$F77FLAGS"; then
+      if test "$F77" = "f77" ||
+        test "$F77" = "mpif77" ; then
+        CASC_SET_FOPT(-fast)
+      else 
+        CASC_SET_FOPT(-O)
+      fi
+    fi
+    CASC_SET_CDEBUG(-g)
+    CASC_SET_CXXDEBUG(-g)
+    CASC_SET_FDEBUG()
+  ;;
 esac
 
 case $ARCH in
@@ -654,7 +745,7 @@ case $ARCH in
       CASC_SET_COPT(-O)
     fi
     if test -z "$CXXFLAGS"; then
-      CASC_SET_CXXOPT(-O)
+      CASC_SET_CXXOPT(-O -DMPICH_SKIP_MPICXX)
     fi
     if test -z "$F77FLAGS"; then
       CASC_SET_FOPT(-O -silent)
@@ -669,7 +760,7 @@ case $ARCH in
       if test "$casc_using_mpi" = "no" &&
         test "$casc_using_openmp" = "no"
       then
-        AC_CHECK_PROGS(CC, ccc icc pgcc cc gcc kcc KCC)
+        AC_CHECK_PROGS(CC, ccc icc pgcc gcc cc kcc KCC)
       else
         if test "$casc_using_openmp" = "no" ; then
           AC_CHECK_PROGS(CC, mpiicc mpipgcc icc mpicc)
@@ -730,7 +821,7 @@ case $ARCH in
         elif test "$CXX" = "icc" ; then
           CASC_SET_CXXOPT(-O3 -xW -tpp7)
         else
-          CASC_SET_CXXOPT(-O)
+          CASC_SET_CXXOPT(-O -DMPICH_SKIP_MPICXX)
         fi
       fi
       if test -z "$F77FLAGS"; then
