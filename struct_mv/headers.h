@@ -19,6 +19,7 @@
 #include "general.h"
 
 #include "box.h"
+#include "box_neighbors.h"
 #include "sbox.h"
 
 #include "struct_stencil.h"
@@ -31,8 +32,4 @@
 #include "struct_vector.h"
 
 #include "protos.h"
-
-#ifdef HYPRE_DEBUG
-#include <gmalloc.h>
-#endif
 

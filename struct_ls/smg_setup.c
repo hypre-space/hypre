@@ -26,7 +26,7 @@ hypre_SMGSetup( void               *smg_vdata,
 {
    hypre_SMGData        *smg_data = smg_vdata;
 
-   MPI_Comm             *comm = (smg_data -> comm);
+   MPI_Comm              comm = (smg_data -> comm);
    int                   ci   = (smg_data -> ci);
    int                   fi   = (smg_data -> fi);
    int                   cs   = (smg_data -> cs);

@@ -24,7 +24,7 @@ int HYPRE_PCGDiagScalePrecond P((Vector *vx , Vector *vy , double dummy , void *
 void HYPRE_FreePCGDiagScaleData P((void *data ));
 
 /* HYPRE_struct_smg.c */
-HYPRE_StructSolver HYPRE_StructSMGInitialize P((MPI_Comm *comm ));
+HYPRE_StructSolver HYPRE_StructSMGInitialize P((MPI_Comm comm ));
 int HYPRE_StructSMGFinalize P((HYPRE_StructSolver solver ));
 int HYPRE_StructSMGSetup P((HYPRE_StructSolver solver , HYPRE_StructMatrix A , HYPRE_StructVector b , HYPRE_StructVector x ));
 int HYPRE_StructSMGSolve P((HYPRE_StructSolver solver , HYPRE_StructMatrix A , HYPRE_StructVector b , HYPRE_StructVector x ));
@@ -32,11 +32,13 @@ int HYPRE_SMGSetMemoryUse P((HYPRE_StructSolver solver , int memory_use ));
 int HYPRE_SMGSetTol P((HYPRE_StructSolver solver , double tol ));
 int HYPRE_SMGSetMaxIter P((HYPRE_StructSolver solver , int max_iter ));
 int HYPRE_SMGSetZeroGuess P((HYPRE_StructSolver solver ));
+int HYPRE_SMGSetNumPreRelax P((HYPRE_StructSolver solver , int num_pre_relax ));
+int HYPRE_SMGSetNumPostRelax P((HYPRE_StructSolver solver , int num_post_relax ));
 int HYPRE_SMGGetNumIterations P((HYPRE_StructSolver solver , int *num_iterations ));
-int HYPRE_SMGGetFinalRelativeResidualNorm P((HYPRE_StructSolver solver , double *relative_residual_norm ));
+int HYPRE_SMGGetFinalRelativeResidualNorm P((HYPRE_StructSolver solver , double *norm ));
 
 /* cyclic_reduction.c */
-void *hypre_CyclicReductionInitialize P((MPI_Comm *comm ));
+void *hypre_CyclicReductionInitialize P((MPI_Comm comm ));
 hypre_StructMatrix *hypre_CycRedNewCoarseOp P((hypre_StructMatrix *A , hypre_StructGrid *coarse_grid , int cdir ));
 int hypre_CycRedSetupCoarseOp P((hypre_StructMatrix *A , hypre_StructMatrix *Ac , hypre_Index cindex , hypre_Index cstride ));
 int hypre_CyclicReductionSetup P((void *cyc_red_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x ));
@@ -59,7 +61,7 @@ int hypre_Log2 P((int p ));
 /* linear_interface.c */
 
 /* smg.c */
-void *hypre_SMGInitialize P((MPI_Comm *comm ));
+void *hypre_SMGInitialize P((MPI_Comm comm ));
 int hypre_SMGFinalize P((void *smg_vdata ));
 int hypre_SMGSetMemoryUse P((void *smg_vdata , int memory_use ));
 int hypre_SMGSetTol P((void *smg_vdata , double tol ));
@@ -89,10 +91,10 @@ void *hypre_SMGIntAddInitialize P((void ));
 int hypre_SMGIntAddSetup P((void *intadd_vdata , hypre_StructMatrix *PT , hypre_StructVector *xc , hypre_StructVector *e , hypre_StructVector *x , hypre_Index cindex , hypre_Index cstride , hypre_Index findex , hypre_Index fstride ));
 int hypre_SMGIntAdd P((void *intadd_vdata , hypre_StructMatrix *PT , hypre_StructVector *xc , hypre_StructVector *e , hypre_StructVector *x ));
 int hypre_SMGIntAddFinalize P((void *intadd_vdata ));
-void hypre_AppendSBoxArrayArrayAndRanks P((int **box_ranks_0 , int **box_ranks_1 , hypre_SBoxArrayArray *sbox_array_array_0 , hypre_SBoxArrayArray *sbox_array_array_1 , int ***box_ranks_ptr ));
+void hypre_AppendSBoxArrayArrayAndProcs P((int **processes_0 , int **processes_1 , hypre_SBoxArrayArray *sbox_array_array_0 , hypre_SBoxArrayArray *sbox_array_array_1 , int ***processes_ptr ));
 
 /* smg_relax.c */
-void *hypre_SMGRelaxInitialize P((MPI_Comm *comm ));
+void *hypre_SMGRelaxInitialize P((MPI_Comm comm ));
 int hypre_SMGRelaxFreeTempVec P((void *relax_vdata ));
 int hypre_SMGRelaxFreeARem P((void *relax_vdata ));
 int hypre_SMGRelaxFreeASol P((void *relax_vdata ));

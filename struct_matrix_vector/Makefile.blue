@@ -12,6 +12,7 @@
 
 HEADERS =\
  box.h\
+ box_neighbors.h\
  communication.h\
  computation.h\
  general.h\
@@ -27,10 +28,11 @@ HEADERS =\
 FILES =\
  box.c\
  box_algebra.c\
+ box_neighbors.c\
  communication.c\
+ communication_info.c\
  computation.c\
  grow.c\
- neighbors.c\
  project.c\
  sbox.c\
  struct_grid.c\

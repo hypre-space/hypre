@@ -23,6 +23,7 @@ typedef struct
 {
    hypre_Index   *shape;   /* Description of a stencil's shape */
    int            size;    /* Number of stencil coefficients */
+   int            max_offset;
                 
    int            dim;     /* Number of dimensions */
 
@@ -32,8 +33,9 @@ typedef struct
  * Accessor functions for the hypre_StructStencil structure
  *--------------------------------------------------------------------------*/
 
-#define hypre_StructStencilShape(stencil) ((stencil) -> shape)
-#define hypre_StructStencilSize(stencil)  ((stencil) -> size)
+#define hypre_StructStencilShape(stencil)      ((stencil) -> shape)
+#define hypre_StructStencilSize(stencil)       ((stencil) -> size)
+#define hypre_StructStencilMaxOffset(stencil)  ((stencil) -> max_offset)
 
 #define hypre_StructStencilDim(stencil)   ((stencil) -> dim)
 

@@ -19,7 +19,7 @@
  *--------------------------------------------------------------------------*/
 
 HYPRE_StructSolver
-HYPRE_StructSMGInitialize( MPI_Comm *comm )
+HYPRE_StructSMGInitialize( MPI_Comm comm )
 {
    return ( (HYPRE_StructSolver) hypre_SMGInitialize( comm ) );
 }

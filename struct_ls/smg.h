@@ -21,7 +21,7 @@
 
 typedef struct
 {
-   MPI_Comm             *comm;
+   MPI_Comm              comm;
                       
    int                   memory_use;
    double                tol;

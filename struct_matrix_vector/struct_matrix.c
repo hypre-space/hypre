@@ -43,7 +43,7 @@ hypre_StructMatrixExtractPointerByIndex( hypre_StructMatrix *matrix,
  *--------------------------------------------------------------------------*/
 
 hypre_StructMatrix *
-hypre_NewStructMatrix( MPI_Comm            *comm,
+hypre_NewStructMatrix( MPI_Comm             comm,
                        hypre_StructGrid    *grid,
                        hypre_StructStencil *user_stencil )
 {
@@ -141,34 +141,41 @@ hypre_InitializeStructMatrixShell( hypre_StructMatrix *matrix )
     *    stored as the transpose coefficient at a neighboring grid point.
     *-----------------------------------------------------------------------*/
 
-   user_stencil = hypre_StructMatrixUserStencil(matrix);
-
-   hypre_SymmetrizeStructStencil(user_stencil, &stencil, &symm_elements);
-
-   stencil_shape = hypre_StructStencilShape(stencil);
-   stencil_size  = hypre_StructStencilSize(stencil);
-
-   if (!hypre_StructMatrixSymmetric(matrix))
+   if (hypre_StructMatrixStencil(matrix) == NULL)
    {
-      /* store all element data */
-      for (i = 0; i < stencil_size; i++)
-         symm_elements[i] = -1;
-      num_values = stencil_size;
-   }
-   else
-   {
-      num_values = (stencil_size + 1) / 2;
-   }
+      user_stencil = hypre_StructMatrixUserStencil(matrix);
 
-   hypre_StructMatrixStencil(matrix)   = stencil;
-   hypre_StructMatrixSymmElements(matrix) = symm_elements;
-   hypre_StructMatrixNumValues(matrix) = num_values;
+      hypre_SymmetrizeStructStencil(user_stencil, &stencil, &symm_elements);
+
+      stencil_shape = hypre_StructStencilShape(stencil);
+      stencil_size  = hypre_StructStencilSize(stencil);
+
+      if (!hypre_StructMatrixSymmetric(matrix))
+      {
+         /* store all element data */
+         for (i = 0; i < stencil_size; i++)
+            symm_elements[i] = -1;
+         num_values = stencil_size;
+      }
+      else
+      {
+         num_values = (stencil_size + 1) / 2;
+      }
+
+      hypre_StructMatrixStencil(matrix)   = stencil;
+      hypre_StructMatrixSymmElements(matrix) = symm_elements;
+      hypre_StructMatrixNumValues(matrix) = num_values;
+   }
 
    /*-----------------------------------------------------------------------
     * Set ghost-layer size for symmetric storage
     *-----------------------------------------------------------------------*/
 
-   num_ghost = hypre_StructMatrixNumGhost(matrix);
+   num_ghost     = hypre_StructMatrixNumGhost(matrix);
+   stencil       = hypre_StructMatrixStencil(matrix);
+   stencil_shape = hypre_StructStencilShape(stencil);
+   stencil_size  = hypre_StructStencilSize(stencil);
+   symm_elements = hypre_StructMatrixSymmElements(matrix);
 
    for (i = 0; i < stencil_size; i++)
    {
@@ -190,65 +197,72 @@ hypre_InitializeStructMatrixShell( hypre_StructMatrix *matrix )
     * Set up data_space
     *-----------------------------------------------------------------------*/
 
-   boxes = hypre_StructGridBoxes(grid);
-   data_space = hypre_NewBoxArray();
+   if (hypre_StructMatrixDataSpace(matrix) == NULL)
+   {
+      boxes = hypre_StructGridBoxes(grid);
+      data_space = hypre_NewBoxArray();
 
-   hypre_ForBoxI(i, boxes)
-      {
-         box = hypre_BoxArrayBox(boxes, i);
-
-         data_box = hypre_DuplicateBox(box);
-         if (hypre_BoxVolume(data_box))
+      hypre_ForBoxI(i, boxes)
          {
-            for (d = 0; d < 3; d++)
+            box = hypre_BoxArrayBox(boxes, i);
+
+            data_box = hypre_DuplicateBox(box);
+            if (hypre_BoxVolume(data_box))
             {
-               hypre_BoxIMinD(data_box, d) -= num_ghost[2*d];
-               hypre_BoxIMaxD(data_box, d) += num_ghost[2*d + 1];
+               for (d = 0; d < 3; d++)
+               {
+                  hypre_BoxIMinD(data_box, d) -= num_ghost[2*d];
+                  hypre_BoxIMaxD(data_box, d) += num_ghost[2*d + 1];
+               }
             }
+
+            hypre_AppendBox(data_box, data_space);
          }
 
-         hypre_AppendBox(data_box, data_space);
-      }
-
-   hypre_StructMatrixDataSpace(matrix) = data_space;
+      hypre_StructMatrixDataSpace(matrix) = data_space;
+   }
 
    /*-----------------------------------------------------------------------
     * Set up data_indices array and data-size
     *-----------------------------------------------------------------------*/
 
-   data_indices = hypre_CTAlloc(int *, hypre_BoxArraySize(data_space));
+   if (hypre_StructMatrixDataIndices(matrix) == NULL)
+   {
+      data_space = hypre_StructMatrixDataSpace(matrix);
+      data_indices = hypre_CTAlloc(int *, hypre_BoxArraySize(data_space));
 
-   data_size = 0;
-   hypre_ForBoxI(i, data_space)
-      {
-         data_box = hypre_BoxArrayBox(data_space, i);
-         data_box_volume  = hypre_BoxVolume(data_box);
-
-         data_indices[i] = hypre_CTAlloc(int, stencil_size);
-
-         /* set pointers for "stored" coefficients */
-         for (j = 0; j < stencil_size; j++)
+      data_size = 0;
+      hypre_ForBoxI(i, data_space)
          {
-            if (symm_elements[j] < 0)
+            data_box = hypre_BoxArrayBox(data_space, i);
+            data_box_volume  = hypre_BoxVolume(data_box);
+
+            data_indices[i] = hypre_CTAlloc(int, stencil_size);
+
+            /* set pointers for "stored" coefficients */
+            for (j = 0; j < stencil_size; j++)
             {
-               data_indices[i][j] = data_size;
-               data_size += data_box_volume;
+               if (symm_elements[j] < 0)
+               {
+                  data_indices[i][j] = data_size;
+                  data_size += data_box_volume;
+               }
+            }
+
+            /* set pointers for "symmetric" coefficients */
+            for (j = 0; j < stencil_size; j++)
+            {
+               if (symm_elements[j] >= 0)
+               {
+                  data_indices[i][j] = data_indices[i][symm_elements[j]] +
+                     hypre_BoxOffsetDistance(data_box, stencil_shape[j]);
+               }
             }
          }
 
-         /* set pointers for "symmetric" coefficients */
-         for (j = 0; j < stencil_size; j++)
-         {
-            if (symm_elements[j] >= 0)
-            {
-               data_indices[i][j] = data_indices[i][symm_elements[j]] +
-                  hypre_BoxOffsetDistance(data_box, stencil_shape[j]);
-            }
-         }
-      }
-
-   hypre_StructMatrixDataIndices(matrix) = data_indices;
-   hypre_StructMatrixDataSize(matrix)    = data_size;
+      hypre_StructMatrixDataIndices(matrix) = data_indices;
+      hypre_StructMatrixDataSize(matrix)    = data_size;
+   }
 
    /*-----------------------------------------------------------------------
     * Set total number of nonzero coefficients
@@ -500,9 +514,9 @@ hypre_AssembleStructMatrix( hypre_StructMatrix *matrix )
 
    hypre_SBoxArrayArray  *send_sboxes;
    hypre_SBoxArrayArray  *recv_sboxes;
-   int                  **send_box_ranks;
+   int                  **send_processes;
+   int                  **recv_processes;
 
-   int                  **recv_box_ranks;
    hypre_CommPkg         *comm_pkg;
 
    int                    i, j, k, m;
@@ -536,19 +550,20 @@ hypre_AssembleStructMatrix( hypre_StructMatrix *matrix )
 
       /* Set up the CommPkg */
 
-      hypre_GetCommInfo(&send_boxes, &recv_boxes,
-                        &send_box_ranks, &recv_box_ranks,
-                        hypre_StructMatrixGrid(matrix),
-                        comm_stencil);
+      hypre_NewCommInfoFromStencil(&send_boxes, &recv_boxes,
+                                   &send_processes, &recv_processes,
+                                   hypre_StructMatrixGrid(matrix),
+                                   comm_stencil);
 
       send_sboxes = hypre_ConvertToSBoxArrayArray(send_boxes);
       recv_sboxes = hypre_ConvertToSBoxArrayArray(recv_boxes);
 
       comm_pkg = hypre_NewCommPkg(send_sboxes, recv_sboxes,
-                                  send_box_ranks, recv_box_ranks,
-                                  hypre_StructMatrixGrid(matrix),
                                   hypre_StructMatrixDataSpace(matrix),
-                                  hypre_StructMatrixNumValues(matrix));
+                                  hypre_StructMatrixDataSpace(matrix),
+                                  send_processes, recv_processes,
+                                  hypre_StructMatrixNumValues(matrix),
+                                  hypre_StructMatrixComm(matrix));
 
       hypre_StructMatrixCommPkg(matrix) = comm_pkg;
 
@@ -559,8 +574,9 @@ hypre_AssembleStructMatrix( hypre_StructMatrix *matrix )
     * Update the ghost data
     *-----------------------------------------------------------------------*/
 
-   comm_handle =
-      hypre_InitializeCommunication(comm_pkg, hypre_StructMatrixData(matrix));
+   comm_handle = hypre_InitializeCommunication(comm_pkg,
+                                               hypre_StructMatrixData(matrix),
+                                               hypre_StructMatrixData(matrix));
    hypre_FinalizeCommunication(comm_handle);
 
    return(ierr);
@@ -613,7 +629,7 @@ hypre_PrintStructMatrix( char               *filename,
     * Open file
     *----------------------------------------*/
  
-   MPI_Comm_rank(*hypre_StructMatrixComm(matrix), &myid );
+   MPI_Comm_rank(hypre_StructMatrixComm(matrix), &myid );
    sprintf(new_filename, "%s.%05d", filename, myid);
  
    if ((file = fopen(new_filename, "w")) == NULL)
@@ -679,11 +695,64 @@ hypre_PrintStructMatrix( char               *filename,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_MigrateStructMatrix
+ *--------------------------------------------------------------------------*/
+
+int 
+hypre_MigrateStructMatrix( hypre_StructMatrix *from_matrix,
+                           hypre_StructMatrix *to_matrix   )
+{
+   hypre_BoxArrayArray   *send_boxes;
+   hypre_BoxArrayArray   *recv_boxes;
+
+   hypre_SBoxArrayArray  *send_sboxes;
+   hypre_SBoxArrayArray  *recv_sboxes;
+   int                  **send_processes;
+   int                  **recv_processes;
+
+   hypre_CommPkg         *comm_pkg;
+   hypre_CommHandle      *comm_handle;
+
+   int                    ierr = 0;
+
+   /*------------------------------------------------------
+    * Set up hypre_CommPkg
+    *------------------------------------------------------*/
+ 
+   hypre_NewCommInfoFromGrids(&send_boxes, &recv_boxes,
+                              &send_processes, &recv_processes,
+                              hypre_StructMatrixGrid(from_matrix),
+                              hypre_StructMatrixGrid(to_matrix)   );
+
+   send_sboxes = hypre_ConvertToSBoxArrayArray(send_boxes);
+   recv_sboxes = hypre_ConvertToSBoxArrayArray(recv_boxes);
+
+   comm_pkg = hypre_NewCommPkg(send_sboxes, recv_sboxes,
+                               hypre_StructMatrixDataSpace(from_matrix),
+                               hypre_StructMatrixDataSpace(to_matrix),
+                               send_processes, recv_processes,
+                               hypre_StructMatrixNumValues(from_matrix),
+                               hypre_StructMatrixComm(from_matrix));
+
+   /*-----------------------------------------------------------------------
+    * Migrate the matrix data
+    *-----------------------------------------------------------------------*/
+ 
+   comm_handle =
+      hypre_InitializeCommunication(comm_pkg,
+                                    hypre_StructMatrixData(from_matrix),
+                                    hypre_StructMatrixData(to_matrix));
+   hypre_FinalizeCommunication(comm_handle);
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_ReadStructMatrix
  *--------------------------------------------------------------------------*/
 
 hypre_StructMatrix *
-hypre_ReadStructMatrix( MPI_Comm  *comm,
+hypre_ReadStructMatrix( MPI_Comm   comm,
                         char      *filename,
                         int       *num_ghost )
 {
@@ -714,7 +783,7 @@ hypre_ReadStructMatrix( MPI_Comm  *comm,
     * Open file
     *----------------------------------------*/
  
-   MPI_Comm_rank(*comm, &myid );
+   MPI_Comm_rank(comm, &myid );
    sprintf(new_filename, "%s.%05d", filename, myid);
  
    if ((file = fopen(new_filename, "r")) == NULL)

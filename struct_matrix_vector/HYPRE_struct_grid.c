@@ -19,7 +19,7 @@
  *--------------------------------------------------------------------------*/
 
 HYPRE_StructGrid
-HYPRE_NewStructGrid( MPI_Comm *comm,
+HYPRE_NewStructGrid( MPI_Comm  comm,
                      int       dim )
 {
    return ( (HYPRE_StructGrid) hypre_NewStructGrid( comm, dim ) );

@@ -107,8 +107,8 @@ hypre_SMGSetupInterpOp( void               *relax_data,
  
    hypre_BoxArrayArray  *send_boxes;
    hypre_BoxArrayArray  *recv_boxes;
-   int                 **send_box_ranks;
-   int                 **recv_box_ranks;
+   int                 **send_processes;
+   int                 **recv_processes;
    hypre_BoxArrayArray  *indt_boxes;
    hypre_BoxArrayArray  *dept_boxes;
                      
@@ -218,7 +218,7 @@ hypre_SMGSetupInterpOp( void               *relax_data,
 
       hypre_CopyIndex(PT_stencil_shape[si], compute_pkg_stencil_shape[0]);
       hypre_GetComputeInfo(&send_boxes, &recv_boxes,
-                           &send_box_ranks, &recv_box_ranks,
+                           &send_processes, &recv_processes,
                            &indt_boxes, &dept_boxes,
                            fgrid, compute_pkg_stencil);
  
@@ -228,7 +228,7 @@ hypre_SMGSetupInterpOp( void               *relax_data,
       dept_sboxes = hypre_ProjectBoxArrayArray(dept_boxes, cindex, cstride);
       compute_pkg =
          hypre_NewComputePkg(send_sboxes, recv_sboxes,
-                             send_box_ranks, recv_box_ranks,
+                             send_processes, recv_processes,
                              indt_sboxes, dept_sboxes,
                              fgrid, hypre_StructVectorDataSpace(x), 1);
 

@@ -69,7 +69,7 @@ hypre_StructInnerProd(  hypre_StructVector *x,
       }
 
    MPI_Allreduce(&local_result, &result, 1,
-                 MPI_DOUBLE, MPI_SUM, *hypre_StructVectorComm(x));
+                 MPI_DOUBLE, MPI_SUM, hypre_StructVectorComm(x));
 
    hypre_IncFLOPCount(2*hypre_StructVectorGlobalSize(x));
 

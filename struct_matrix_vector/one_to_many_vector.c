@@ -5,10 +5,6 @@
 #include <cegdb.h>
 #endif
 
-#ifdef HYPRE_DEBUG
-char malloc_logpath_memory[256];
-#endif
- 
 /*--------------------------------------------------------------------------
  * Driver to convert an input vector file for the parallel smg code into 
  * several input vector files for the parallel smg code to use.
@@ -27,7 +23,6 @@ int
 main( int   argc,
       char *argv[] )
 {
-   MPI_Comm           *comm;
    int                 vector_num_ghost[6] = { 0, 0, 0, 0, 0, 0};
 
    hypre_StructVector   *vector_root, **sub_vectors;
@@ -62,19 +57,14 @@ main( int   argc,
    /* Initialize MPI */
    MPI_Init(&argc, &argv);
 
-   comm = hypre_TAlloc(MPI_Comm, 1);
-   MPI_Comm_dup(MPI_COMM_WORLD, comm);
-   MPI_Comm_size(*comm, &num_procs );
-   MPI_Comm_rank(*comm, &myid );
+   MPI_Comm_size(MPI_COMM_WORLD, &num_procs );
+   MPI_Comm_rank(MPI_COMM_WORLD, &myid );
 
 #ifdef HYPRE_DEBUG
    cegdb(&argc, &argv, myid);
 #endif
 
-#ifdef HYPRE_DEBUG
-   malloc_logpath = malloc_logpath_memory;
-   sprintf(malloc_logpath, "malloc.log.%04d", myid);
-#endif
+   hypre_InitMemoryDebug(myid);
 
    /* set number of subdivisions to use in decomposing the vector into
       several different files */
@@ -117,14 +107,14 @@ main( int   argc,
 
    /* read grid info */
    fscanf(file_root, "\nGrid:\n");
-   grid_root = hypre_ReadStructGrid(comm, file_root);
+   grid_root = hypre_ReadStructGrid(MPI_COMM_WORLD, file_root);
    dim = hypre_StructGridDim(grid_root);
 
    /*----------------------------------------
     * Initialize the vector
     *----------------------------------------*/
 
-   vector_root = hypre_NewStructVector(comm, grid_root);
+   vector_root = hypre_NewStructVector(MPI_COMM_WORLD, grid_root);
    hypre_SetStructVectorNumGhost(vector_root, vector_num_ghost);
    hypre_InitializeStructVector(vector_root);
 
@@ -189,7 +179,7 @@ main( int   argc,
 	   for (i = 0; i < sub_i; i++)
 	     {
 	       i_file += 1;
-	       sub_grids[i_file] = hypre_NewStructGrid(comm, dim);
+	       sub_grids[i_file] = hypre_NewStructGrid(MPI_COMM_WORLD, dim);
 
 	       hypre_IndexX(ilower) = imin + i*del_i;
 	       hypre_IndexY(ilower) = jmin + j*del_j;
@@ -224,7 +214,7 @@ main( int   argc,
 	       hypre_AssembleStructGrid(sub_grids[i_file]);
 
 	       sub_vectors[i_file] = 
-		 hypre_NewStructVector(comm, sub_grids[i_file]); 
+		 hypre_NewStructVector(MPI_COMM_WORLD, sub_grids[i_file]); 
 	       hypre_SetStructVectorNumGhost(sub_vectors[i_file], 
 					   vector_num_ghost); 
 	       hypre_InitializeStructVector(sub_vectors[i_file]);
@@ -288,12 +278,8 @@ main( int   argc,
      }
    hypre_TFree(sub_grids);
    hypre_TFree(sub_vectors);
-   hypre_TFree(comm);
 
-#ifdef HYPRE_DEBUG
-   malloc_verify(0);
-   malloc_shutdown();
-#endif
+   hypre_FinalizeMemoryDebug();
 
    /* Finalize MPI */
    MPI_Finalize();

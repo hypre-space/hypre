@@ -1,13 +1,10 @@
+
 #include "headers.h"
  
 #ifdef HYPRE_DEBUG
 #include <cegdb.h>
 #endif
 
-#ifdef HYPRE_DEBUG
-char malloc_logpath_memory[256];
-#endif
- 
 /*--------------------------------------------------------------------------
  * Test driver for structured matrix interface (structured storage)
  *--------------------------------------------------------------------------*/
@@ -26,8 +23,6 @@ int   main(argc, argv)
 int   argc;
 char *argv[];
 {
-   MPI_Comm           *comm;
-
    int                 A_num_ghost[6] = { 1, 1, 1, 1, 1, 1};
    int                 b_num_ghost[6] = { 0, 0, 0, 0, 0, 0};
    int                 x_num_ghost[6] = { 1, 1, 1, 1, 1, 1};
@@ -70,8 +65,6 @@ char *argv[];
 
    int                 i, d;
 
-   double              local_wall_time, wall_time;
-
    /*-----------------------------------------------------------
     * Initialize some stuff
     *-----------------------------------------------------------*/
@@ -79,19 +72,14 @@ char *argv[];
    /* Initialize MPI */
    MPI_Init(&argc, &argv);
 
-   comm = hypre_TAlloc(MPI_Comm, 1);
-   MPI_Comm_dup(MPI_COMM_WORLD, comm);
-   MPI_Comm_size(*comm, &num_procs );
-   MPI_Comm_rank(*comm, &myid );
+   MPI_Comm_size(MPI_COMM_WORLD, &num_procs );
+   MPI_Comm_rank(MPI_COMM_WORLD, &myid );
 
 #ifdef HYPRE_DEBUG
    cegdb(&argc, &argv, myid);
 #endif
 
-#ifdef HYPRE_DEBUG
-   malloc_logpath = malloc_logpath_memory;
-   sprintf(malloc_logpath, "malloc.log.%04d", myid);
-#endif
+   hypre_InitMemoryDebug(myid);
 
    if (argc > 9)
    {
@@ -133,7 +121,7 @@ char *argv[];
    hypre_IndexZ(ilower) = nz*r;
    hypre_IndexZ(iupper) = nz*(r+1) - 1;
 
-   grid = hypre_NewStructGrid(comm, dim);
+   grid = hypre_NewStructGrid(MPI_COMM_WORLD, dim);
    hypre_SetStructGridExtents(grid, ilower, iupper);
    hypre_AssembleStructGrid(grid);
 
@@ -153,7 +141,7 @@ char *argv[];
     * Set up the matrix structure
     *-----------------------------------------------------------*/
  
-   A = hypre_NewStructMatrix(comm, grid, stencil);
+   A = hypre_NewStructMatrix(MPI_COMM_WORLD, grid, stencil);
    hypre_StructMatrixSymmetric(A) = 1;
    hypre_SetStructMatrixNumGhost(A, A_num_ghost);
    hypre_InitializeStructMatrix(A);
@@ -230,6 +218,7 @@ char *argv[];
    }
 
    hypre_FreeBox(box);
+   hypre_TFree(stencil_indices);
 
    hypre_AssembleStructMatrix(A);
 
@@ -237,13 +226,13 @@ char *argv[];
     * Set up the linear system
     *-----------------------------------------------------------*/
 
-   b = hypre_NewStructVector(comm, hypre_StructMatrixGrid(A));
+   b = hypre_NewStructVector(MPI_COMM_WORLD, hypre_StructMatrixGrid(A));
    hypre_SetStructVectorNumGhost(b, b_num_ghost);
    hypre_InitializeStructVector(b);
    hypre_AssembleStructVector(b);
    hypre_SetStructVectorConstantValues(b, 1.0);
 
-   x = hypre_NewStructVector(comm, hypre_StructMatrixGrid(A));
+   x = hypre_NewStructVector(MPI_COMM_WORLD, hypre_StructMatrixGrid(A));
    hypre_SetStructVectorNumGhost(x, x_num_ghost);
    hypre_InitializeStructVector(x);
    hypre_AssembleStructVector(x);
@@ -253,7 +242,10 @@ char *argv[];
     * Solve the system
     *-----------------------------------------------------------*/
 
-   smg_data = hypre_SMGInitialize(comm);
+   time_index = hypre_InitializeTiming("SMG Setup");
+   hypre_BeginTiming(time_index);
+
+   smg_data = hypre_SMGInitialize(MPI_COMM_WORLD);
    hypre_SMGSetMemoryUse(smg_data, 0);
    hypre_SMGSetMaxIter(smg_data, 50);
    hypre_SMGSetTol(smg_data, 1.0e-06);
@@ -262,13 +254,21 @@ char *argv[];
    hypre_SMGSetLogging(smg_data, 0);
    hypre_SMGSetup(smg_data, A, b, x);
 
-   time_index = hypre_InitializeTiming("Driver");
-   hypre_BeginTiming(time_index);
-   local_wall_time = - time_getWallclockSeconds();
-   hypre_SMGSolve(smg_data, A, b, x);
-   local_wall_time += time_getWallclockSeconds();
    hypre_EndTiming(time_index);
+   hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
+   hypre_FinalizeTiming(time_index);
+   hypre_ClearTiming();
+   
+   time_index = hypre_InitializeTiming("SMG Solve");
+   hypre_BeginTiming(time_index);
 
+   hypre_SMGSolve(smg_data, A, b, x);
+
+   hypre_EndTiming(time_index);
+   hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
+   hypre_FinalizeTiming(time_index);
+   hypre_ClearTiming();
+   
    /*-----------------------------------------------------------
     * Print the solution and other info
     *-----------------------------------------------------------*/
@@ -278,36 +278,24 @@ char *argv[];
    hypre_SMGGetNumIterations(smg_data, &num_iterations);
    if (myid == 0)
    {
+      printf("\n");
       printf("Iterations = %d\n", num_iterations);
+      printf("\n");
    }
 
-   MPI_Allreduce(&local_wall_time, &wall_time, 1,
-                 MPI_DOUBLE, MPI_MAX, *comm);
-   if (myid == 0)
-   {
-      printf("Time = %f seconds\n", wall_time);
-   }
-
-   hypre_PrintTiming(comm);
-   
    hypre_SMGPrintLogging(smg_data, myid);
 
    /*-----------------------------------------------------------
     * Finalize things
     *-----------------------------------------------------------*/
 
-   hypre_FinalizeTiming(time_index);
    hypre_SMGFinalize(smg_data);
    hypre_FreeStructGrid(hypre_StructMatrixGrid(A));
    hypre_FreeStructMatrix(A);
    hypre_FreeStructVector(b);
    hypre_FreeStructVector(x);
-   hypre_TFree(comm);
 
-#ifdef HYPRE_DEBUG
-   malloc_verify(0);
-   malloc_shutdown();
-#endif
+   hypre_FinalizeMemoryDebug();
 
    /* Finalize MPI */
    MPI_Finalize();

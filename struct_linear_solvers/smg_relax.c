@@ -23,7 +23,7 @@ typedef struct
    int                     setup_a_rem;
    int                     setup_a_sol;
                        
-   MPI_Comm               *comm;
+   MPI_Comm                comm;
                        
    int                     memory_use;
    double                  tol;
@@ -72,7 +72,7 @@ typedef struct
  *--------------------------------------------------------------------------*/
 
 void *
-hypre_SMGRelaxInitialize( MPI_Comm *comm )
+hypre_SMGRelaxInitialize( MPI_Comm  comm )
 {
    hypre_SMGRelaxData *relax_data;
 

@@ -5,10 +5,6 @@
 #include <cegdb.h>
 #endif
 
-#ifdef HYPRE_DEBUG
-char malloc_logpath_memory[256];
-#endif
- 
 /*--------------------------------------------------------------------------
  * Driver to convert an input matrix file for the parallel smg code into
  * several input matrix files for the parallel smg code to use.
@@ -27,7 +23,6 @@ int
 main( int   argc,
       char *argv[] )
 {
-   MPI_Comm           *comm;
    int                 matrix_num_ghost[6] = { 0, 0, 0, 0, 0, 0};
 
    hypre_StructMatrix   *matrix_root, **sub_matrices;
@@ -66,19 +61,14 @@ main( int   argc,
    /* Initialize MPI */
    MPI_Init(&argc, &argv);
 
-   comm = hypre_TAlloc(MPI_Comm, 1);
-   MPI_Comm_dup(MPI_COMM_WORLD, comm);
-   MPI_Comm_size(*comm, &num_procs );
-   MPI_Comm_rank(*comm, &myid );
+   MPI_Comm_size(MPI_COMM_WORLD, &num_procs );
+   MPI_Comm_rank(MPI_COMM_WORLD, &myid );
 
 #ifdef HYPRE_DEBUG
    cegdb(&argc, &argv, myid);
 #endif
 
-#ifdef HYPRE_DEBUG
-   malloc_logpath = malloc_logpath_memory;
-   sprintf(malloc_logpath, "malloc.log.%04d", myid);
-#endif
+   hypre_InitMemoryDebug(myid);
 
    /* set number of subdivisions to use in decomposing the matrix into
       several different files */
@@ -124,7 +114,7 @@ main( int   argc,
 
    /* read grid info */
    fscanf(file_root, "\nGrid:\n");
-   grid_root = hypre_ReadStructGrid(comm, file_root);
+   grid_root = hypre_ReadStructGrid(MPI_COMM_WORLD, file_root);
 
    /* read stencil info */
    fscanf(file_root, "\nStencil:\n");
@@ -144,7 +134,7 @@ main( int   argc,
     * Initialize the matrix
     *----------------------------------------*/
 
-   matrix_root = hypre_NewStructMatrix(comm, grid_root, stencil);
+   matrix_root = hypre_NewStructMatrix(MPI_COMM_WORLD, grid_root, stencil);
    hypre_StructMatrixSymmetric(matrix_root) = symmetric;
    hypre_SetStructMatrixNumGhost(matrix_root, matrix_num_ghost);
    hypre_InitializeStructMatrix(matrix_root);
@@ -213,7 +203,7 @@ main( int   argc,
 	   for (i = 0; i < sub_i; i++)
 	     {
 	       i_file += 1;
-	       sub_grids[i_file] = hypre_NewStructGrid(comm, dim);
+	       sub_grids[i_file] = hypre_NewStructGrid(MPI_COMM_WORLD, dim);
 	       stencil_shapes[i_file] = hypre_CTAlloc(hypre_Index, stencil_size);
 	       for (ii = 0; ii < stencil_size; ii++)
 		 {
@@ -260,7 +250,7 @@ main( int   argc,
 	       hypre_AssembleStructGrid(sub_grids[i_file]);
 
 	       sub_matrices[i_file] = 
-		 hypre_NewStructMatrix(comm, sub_grids[i_file],
+		 hypre_NewStructMatrix(MPI_COMM_WORLD, sub_grids[i_file],
 				     stencils[i_file]); 
 	       hypre_StructMatrixSymmetric(sub_matrices[i_file]) = symmetric;
 	       hypre_SetStructMatrixNumGhost(sub_matrices[i_file], 
@@ -343,12 +333,8 @@ main( int   argc,
    hypre_TFree(sub_matrices);
    hypre_TFree(stencils);
    hypre_TFree(stencil_shapes);
-   hypre_TFree(comm);
 
-#ifdef HYPRE_DEBUG
-   malloc_verify(0);
-   malloc_shutdown();
-#endif
+   hypre_FinalizeMemoryDebug();
 
    /* Finalize MPI */
    MPI_Finalize();

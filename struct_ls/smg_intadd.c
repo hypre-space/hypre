@@ -72,10 +72,10 @@ hypre_SMGIntAddSetup( void               *intadd_vdata,
                        
    hypre_BoxArrayArray    *send_boxes;
    hypre_BoxArrayArray    *recv_boxes;
-   int                   **temp_send_box_ranks;
-   int                   **temp_recv_box_ranks;
-   int                   **send_box_ranks;
-   int                   **recv_box_ranks;
+   int                   **temp_send_processes;
+   int                   **temp_recv_processes;
+   int                   **send_processes;
+   int                   **recv_processes;
    hypre_BoxArrayArray    *indt_boxes;
    hypre_BoxArrayArray    *dept_boxes;
                        
@@ -89,6 +89,7 @@ hypre_SMGIntAddSetup( void               *intadd_vdata,
    hypre_ComputePkg       *compute_pkg;
    hypre_SBoxArray        *coarse_points;
 
+   int                     i;
    int                     ierr;
 
    /*----------------------------------------------------------
@@ -110,7 +111,7 @@ hypre_SMGIntAddSetup( void               *intadd_vdata,
    stencil = hypre_NewStructStencil(stencil_dim, stencil_size, stencil_shape);
 
    hypre_GetComputeInfo(&send_boxes, &recv_boxes,
-                        &temp_send_box_ranks, &temp_recv_box_ranks,
+                        &temp_send_processes, &temp_recv_processes,
                         &indt_boxes, &dept_boxes,
                         grid, stencil);
 
@@ -136,21 +137,31 @@ hypre_SMGIntAddSetup( void               *intadd_vdata,
     * sends and recieves for coarse points. 
     *----------------------------------------------------------*/
 
-   hypre_AppendSBoxArrayArrayAndRanks(temp_recv_box_ranks, temp_send_box_ranks,
+   hypre_AppendSBoxArrayArrayAndProcs(temp_recv_processes, temp_send_processes,
                                       f_recv_sboxes, send_sboxes,
-                                      &send_box_ranks);
-   hypre_AppendSBoxArrayArrayAndRanks(temp_send_box_ranks, temp_recv_box_ranks,
+                                      &send_processes);
+   hypre_AppendSBoxArrayArrayAndProcs(temp_send_processes, temp_recv_processes,
                                       f_send_sboxes, recv_sboxes,
-                                      &recv_box_ranks);
+                                      &recv_processes);
 
+   hypre_ForSBoxArrayI(i, f_send_sboxes)
+      {
+         hypre_FreeSBoxArrayShell(hypre_SBoxArrayArraySBoxArray(
+            f_send_sboxes, i));
+      }
    hypre_FreeSBoxArrayArrayShell(f_send_sboxes);
+   hypre_ForSBoxArrayI(i, f_recv_sboxes)
+      {
+         hypre_FreeSBoxArrayShell(hypre_SBoxArrayArraySBoxArray(
+            f_recv_sboxes, i));
+      }
    hypre_FreeSBoxArrayArrayShell(f_recv_sboxes);
 
-   hypre_TFree(temp_send_box_ranks);
-   hypre_TFree(temp_recv_box_ranks);
+   hypre_TFree(temp_send_processes);
+   hypre_TFree(temp_recv_processes);
 
    compute_pkg = hypre_NewComputePkg(send_sboxes, recv_sboxes,
-                                     send_box_ranks, recv_box_ranks,
+                                     send_processes, recv_processes,
                                      indt_sboxes, dept_sboxes,
                                      grid, hypre_StructVectorDataSpace(e), 1);
 
@@ -420,21 +431,20 @@ hypre_SMGIntAddFinalize( void *intadd_vdata )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_AppendSBoxArrayArrayAndRanks:
+ * hypre_AppendSBoxArrayArrayAndProcs:
  *   Append sbox_array_array_0 to sbox_array_array_1.
  *   The two SBoxArrayArrays must be the same length.
- *   Additionally create an appended version of box
- *   ranks.
+ *   Additionally create an appended version of processes.
  *--------------------------------------------------------------------------*/
  
 void
-hypre_AppendSBoxArrayArrayAndRanks( int                    **box_ranks_0,
-                                    int                    **box_ranks_1,
+hypre_AppendSBoxArrayArrayAndProcs( int                   **processes_0,
+                                    int                   **processes_1,
                                     hypre_SBoxArrayArray   *sbox_array_array_0,
                                     hypre_SBoxArrayArray   *sbox_array_array_1,
-                                    int                  ***box_ranks_ptr)
+                                    int                  ***processes_ptr)
 {
-   int              **box_ranks;
+   int              **processes;
    int                sbox_array_array_size; 
    hypre_SBoxArray   *sbox_array_0;
    hypre_SBoxArray   *sbox_array_1;
@@ -445,7 +455,7 @@ hypre_AppendSBoxArrayArrayAndRanks( int                    **box_ranks_0,
    int                k;
  
    sbox_array_array_size = hypre_SBoxArrayArraySize(sbox_array_array_0);
-   box_ranks = hypre_CTAlloc(int *, sbox_array_array_size);
+   processes = hypre_CTAlloc(int *, sbox_array_array_size);
 
    hypre_ForSBoxArrayI(i, sbox_array_array_0)
       {
@@ -453,15 +463,15 @@ hypre_AppendSBoxArrayArrayAndRanks( int                    **box_ranks_0,
          sbox_array_1 = hypre_SBoxArrayArraySBoxArray(sbox_array_array_1, i);  
          sbox_array_size_0 = hypre_SBoxArraySize(sbox_array_0);
          sbox_array_size_1 = hypre_SBoxArraySize(sbox_array_1);
-         box_ranks[i] =
+         processes[i] =
             hypre_CTAlloc(int, sbox_array_size_0 + sbox_array_size_1);
          for ( j=0 ; j < sbox_array_size_1; j++)
-            box_ranks[i][j] = box_ranks_1[i][j];
+            processes[i][j] = processes_1[i][j];
          for ( k=0 ; k < sbox_array_size_0; k++)
-            box_ranks[i][k+sbox_array_size_1] = box_ranks_0[i][k];
+            processes[i][k+sbox_array_size_1] = processes_0[i][k];
          hypre_AppendSBoxArray(sbox_array_0, sbox_array_1);
       }
 
-   *box_ranks_ptr = box_ranks;
+   *processes_ptr = processes;
 }
 

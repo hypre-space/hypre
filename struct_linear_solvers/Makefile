@@ -32,11 +32,9 @@ FILES =\
  smg_setup_rap.c\
  smg_setup_restrict.c\
  smg_solve.c\
- HYPRE_struct_smg.c \
- HYPRE_pcg.c \
+ HYPRE_struct_smg.c\
+ HYPRE_pcg.c\
  HYPRE_struct_pcg.c 
-
-#smg1_setup_rap.c\
 
 OBJS = ${FILES:.c=.o}
 
@@ -47,7 +45,7 @@ CFLAGS =\
  -I/usr/local/include\
  -I/home/casc/include\
  -I/usr/local/mpi/mpich/include\
- -g -Wall -DHYPRE_DEBUG -DHYPRE_TIMING
+ -g -Wall -DHYPRE_DEBUG -DHYPRE_TIMING -DHYPRE_MEMORY_DMALLOC
 
 FFLAGS = -g
 
@@ -66,7 +64,7 @@ LFLAGS =\
  -lnsl -lsocket -lmpi\
  -lf2c\
  -lcegdb\
- -lmalloc\
+ -ldmalloc\
  -lm
 
 

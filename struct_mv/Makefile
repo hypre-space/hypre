@@ -12,6 +12,7 @@
 
 HEADERS =\
  box.h\
+ box_neighbors.h\
  communication.h\
  computation.h\
  general.h\
@@ -27,10 +28,11 @@ HEADERS =\
 FILES =\
  box.c\
  box_algebra.c\
+ box_neighbors.c\
  communication.c\
+ communication_info.c\
  computation.c\
  grow.c\
- neighbors.c\
  project.c\
  sbox.c\
  struct_grid.c\
@@ -58,7 +60,7 @@ CFLAGS =\
  -I/usr/local/include\
  -I/home/casc/include\
  -I/usr/local/mpi/mpich/include\
- -g -Wall -DHYPRE_DEBUG -DHYPRE_TIMING
+ -g -Wall -DHYPRE_DEBUG -DHYPRE_TIMING -DHYPRE_MEMORY_DMALLOC
 
 FFLAGS = -g
 
@@ -75,7 +77,7 @@ LFLAGS =\
  -lnsl -lsocket -lmpi\
  -lf2c\
  -lcegdb\
- -lmalloc\
+ -ldmalloc\
  -lm
 
 

@@ -19,7 +19,7 @@
  *--------------------------------------------------------------------------*/
 
 HYPRE_StructMatrix 
-HYPRE_NewStructMatrix( MPI_Comm            *comm,
+HYPRE_NewStructMatrix( MPI_Comm             comm,
                        HYPRE_StructGrid     grid,
                        HYPRE_StructStencil  stencil )
 {

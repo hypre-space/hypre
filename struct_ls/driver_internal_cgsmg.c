@@ -5,10 +5,6 @@
 #include <cegdb.h>
 #endif
 
-#ifdef HYPRE_DEBUG
-char malloc_logpath_memory[256];
-#endif
- 
 /*--------------------------------------------------------------------------
  * Test driver for structured matrix interface (structured storage)
  *--------------------------------------------------------------------------*/
@@ -24,8 +20,6 @@ int   main(argc, argv)
 int   argc;
 char *argv[];
 {
-   MPI_Comm           *comm;
-
    int                 A_num_ghost[6] = { 1, 1, 1, 1, 1, 1};
    /* int                 b_num_ghost[6] = { 0, 0, 0, 0, 0, 0}; */
    int                 b_num_ghost[6] = { 1, 1, 1, 1, 1, 1};
@@ -54,19 +48,14 @@ char *argv[];
    /* Initialize MPI */
    MPI_Init(&argc, &argv);
 
-   comm = hypre_TAlloc(MPI_Comm, 1);
-   MPI_Comm_dup(MPI_COMM_WORLD, comm);
-   MPI_Comm_size(*comm, &num_procs );
-   MPI_Comm_rank(*comm, &myid );
+   MPI_Comm_size(MPI_COMM_WORLD, &num_procs );
+   MPI_Comm_rank(MPI_COMM_WORLD, &myid );
 
 #ifdef HYPRE_DEBUG
    cegdb(&argc, &argv, myid);
 #endif
 
-#ifdef HYPRE_DEBUG
-   malloc_logpath = malloc_logpath_memory;
-   sprintf(malloc_logpath, "malloc.log.%04d", myid);
-#endif
+   hypre_InitMemoryDebug(myid);
 
    if (argc > 1)
    {
@@ -83,21 +72,24 @@ char *argv[];
     * Set up the linear system
     *-----------------------------------------------------------*/
 
-   /* A = hypre_ReadStructMatrix(comm, "Ares_Matrix", A_num_ghost); */
+#if 0
+   A = hypre_ReadStructMatrix(MPI_COMM_WORLD, "Ares_Matrix", A_num_ghost);
 
-   /* b = hypre_ReadStructVector(comm, "Ares_Rhs", b_num_ghost); */
+   b = hypre_ReadStructVector(MPI_COMM_WORLD, "Ares_Rhs", b_num_ghost);
 
-   /* x = hypre_ReadStructVector(comm, "Ares_InitialGuess", x_num_ghost); */
+   x = hypre_ReadStructVector(MPI_COMM_WORLD,
+                              "Ares_InitialGuess", x_num_ghost);
+#endif
  
-   A = hypre_ReadStructMatrix(comm, filename, A_num_ghost);
+   A = hypre_ReadStructMatrix(MPI_COMM_WORLD, filename, A_num_ghost);
 
-   b = hypre_NewStructVector(comm, hypre_StructMatrixGrid(A));
+   b = hypre_NewStructVector(MPI_COMM_WORLD, hypre_StructMatrixGrid(A));
    hypre_SetStructVectorNumGhost(b, b_num_ghost);
    hypre_InitializeStructVector(b);
    hypre_AssembleStructVector(b);
    hypre_SetStructVectorConstantValues(b, 1.0);
 
-   x = hypre_NewStructVector(comm, hypre_StructMatrixGrid(A));
+   x = hypre_NewStructVector(MPI_COMM_WORLD, hypre_StructMatrixGrid(A));
    hypre_SetStructVectorNumGhost(x, x_num_ghost);
    hypre_InitializeStructVector(x);
    hypre_AssembleStructVector(x);
@@ -107,13 +99,13 @@ char *argv[];
     * Allocate work vectors for preconditioner
     *-----------------------------------------------------------*/
 
-   b_l = hypre_NewStructVector(comm, hypre_StructMatrixGrid(A));
+   b_l = hypre_NewStructVector(MPI_COMM_WORLD, hypre_StructMatrixGrid(A));
    hypre_SetStructVectorNumGhost(b_l, b_num_ghost);
    hypre_InitializeStructVector(b_l);
    hypre_AssembleStructVector(b_l);
    hypre_SetStructVectorConstantValues(b_l, 1.0);
 
-   x_l = hypre_NewStructVector(comm, hypre_StructMatrixGrid(A));
+   x_l = hypre_NewStructVector(MPI_COMM_WORLD, hypre_StructMatrixGrid(A));
    hypre_SetStructVectorNumGhost(x_l, x_num_ghost);
    hypre_InitializeStructVector(x_l);
    hypre_AssembleStructVector(x_l);
@@ -168,12 +160,8 @@ char *argv[];
    /* Already freed in HYPRE_FreePCGSMGData call */
    /* hypre_FreeStructVector(b_l); */
    /* hypre_FreeStructVector(x_l); */
-   hypre_TFree(comm);
 
-#ifdef HYPRE_DEBUG
-   malloc_verify(0);
-   malloc_shutdown();
-#endif
+   hypre_FinalizeMemoryDebug();
 
    /* Finalize MPI */
    MPI_Finalize();

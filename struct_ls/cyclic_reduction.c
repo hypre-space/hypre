@@ -70,7 +70,7 @@
 
 typedef struct
 {
-   MPI_Comm             *comm;
+   MPI_Comm              comm;
                       
    int                   num_levels;
                       
@@ -100,7 +100,7 @@ typedef struct
  *--------------------------------------------------------------------------*/
 
 void *
-hypre_CyclicReductionInitialize( MPI_Comm *comm )
+hypre_CyclicReductionInitialize( MPI_Comm  comm )
 {
    hypre_CyclicReductionData *cyc_red_data;
 
@@ -381,7 +381,7 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
 {
    hypre_CyclicReductionData *cyc_red_data = cyc_red_vdata;
 
-   MPI_Comm               *comm        = (cyc_red_data -> comm);
+   MPI_Comm                comm        = (cyc_red_data -> comm);
    int                     cdir        = (cyc_red_data -> cdir);
    hypre_IndexRef          base_index  = (cyc_red_data -> base_index);
    hypre_IndexRef          base_stride = (cyc_red_data -> base_stride);
@@ -404,8 +404,8 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
 
    hypre_BoxArrayArray    *send_boxes;
    hypre_BoxArrayArray    *recv_boxes;
-   int                   **send_box_ranks;
-   int                   **recv_box_ranks;
+   int                   **send_processes;
+   int                   **recv_processes;
    hypre_BoxArrayArray    *indt_boxes;
    hypre_BoxArrayArray    *dept_boxes;
                        
@@ -592,7 +592,7 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
       hypre_CycRedSetStride(base_index, base_stride, l, cdir, stride);
 
       hypre_GetComputeInfo(&send_boxes, &recv_boxes,
-                           &send_box_ranks, &recv_box_ranks,
+                           &send_processes, &recv_processes,
                            &indt_boxes, &dept_boxes,
                            grid_l[l], hypre_StructMatrixStencil(A_l[l]));
  
@@ -603,7 +603,7 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
       dept_sboxes = hypre_ProjectBoxArrayArray(dept_boxes, cindex, stride);
       down_compute_pkg_l[l] =
          hypre_NewComputePkg(send_sboxes, recv_sboxes,
-                             send_box_ranks, recv_box_ranks,
+                             send_processes, recv_processes,
                              indt_sboxes, dept_sboxes,
                              grid_l[l],
                              hypre_StructVectorDataSpace(x_l[l]), 1);
@@ -614,7 +614,7 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
       hypre_FreeBoxArrayArray(dept_boxes);
 
       hypre_GetComputeInfo(&send_boxes, &recv_boxes,
-                           &send_box_ranks, &recv_box_ranks,
+                           &send_processes, &recv_processes,
                            &indt_boxes, &dept_boxes,
                            grid_l[l], hypre_StructMatrixStencil(A_l[l]));
 
@@ -625,7 +625,7 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
       dept_sboxes = hypre_ProjectBoxArrayArray(dept_boxes, findex, stride);
       up_compute_pkg_l[l] =
          hypre_NewComputePkg(send_sboxes, recv_sboxes,
-                             send_box_ranks, recv_box_ranks,
+                             send_processes, recv_processes,
                              indt_sboxes, dept_sboxes,
                              grid_l[l],
                              hypre_StructVectorDataSpace(x_l[l]), 1);

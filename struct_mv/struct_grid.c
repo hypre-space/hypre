@@ -19,21 +19,21 @@
  *--------------------------------------------------------------------------*/
 
 hypre_StructGrid *
-hypre_NewStructGrid( MPI_Comm *comm,
+hypre_NewStructGrid( MPI_Comm  comm,
                      int       dim  )
 {
    hypre_StructGrid    *grid;
 
    grid = hypre_TAlloc(hypre_StructGrid, 1);
 
-   hypre_StructGridComm(grid)      = comm;
-   hypre_StructGridAllBoxes(grid)  = NULL;
-   hypre_StructGridProcesses(grid) = NULL;
-   hypre_StructGridBoxes(grid)     = hypre_NewBoxArray();
-   hypre_StructGridBoxRanks(grid)  = NULL;
-   hypre_StructGridDim(grid)       = dim;
-   hypre_StructGridGlobalSize(grid)= 0;
-   hypre_StructGridLocalSize(grid) = 0;
+   hypre_StructGridComm(grid)       = comm;
+   hypre_StructGridAllBoxes(grid)   = NULL;
+   hypre_StructGridProcesses(grid)  = NULL;
+   hypre_StructGridBoxes(grid)      = hypre_NewBoxArray();
+   hypre_StructGridBoxRanks(grid)   = NULL;
+   hypre_StructGridDim(grid)        = dim;
+   hypre_StructGridGlobalSize(grid) = 0;
+   hypre_StructGridLocalSize(grid)  = 0;
 
    return grid;
 }
@@ -43,7 +43,7 @@ hypre_NewStructGrid( MPI_Comm *comm,
  *--------------------------------------------------------------------------*/
 
 hypre_StructGrid *
-hypre_NewAssembledStructGrid( MPI_Comm        *comm,
+hypre_NewAssembledStructGrid( MPI_Comm         comm,
                               int              dim,
                               hypre_BoxArray  *all_boxes,
                               int             *processes )
@@ -61,7 +61,7 @@ hypre_NewAssembledStructGrid( MPI_Comm        *comm,
 
    grid = hypre_TAlloc(hypre_StructGrid, 1);
 
-   MPI_Comm_rank(*comm, &my_rank);
+   MPI_Comm_rank(comm, &my_rank);
 
    global_size = 0;
    local_size = 0;
@@ -94,6 +94,8 @@ hypre_NewAssembledStructGrid( MPI_Comm        *comm,
    hypre_StructGridLocalSize(grid) = local_size;
    hypre_StructGridComm(grid)      = comm;
 
+   hypre_NewStructGridNeighbors(grid, 5);
+
    return grid;
 }
 
@@ -104,6 +106,8 @@ hypre_NewAssembledStructGrid( MPI_Comm        *comm,
 void 
 hypre_FreeStructGrid( hypre_StructGrid *grid )
 {
+   hypre_FreeStructGridNeighbors(grid);
+
    hypre_FreeBoxArray(hypre_StructGridAllBoxes(grid));
    hypre_TFree(hypre_StructGridProcesses(grid));
 
@@ -138,7 +142,7 @@ hypre_SetStructGridExtents( hypre_StructGrid  *grid,
 void 
 hypre_AssembleStructGrid( hypre_StructGrid *grid )
 {
-   MPI_Comm          *comm = hypre_StructGridComm(grid);
+   MPI_Comm           comm = hypre_StructGridComm(grid);
 
    hypre_StructGrid  *new_grid;
    hypre_BoxArray    *all_boxes;
@@ -162,8 +166,8 @@ hypre_AssembleStructGrid( hypre_StructGrid *grid )
 
    boxes = hypre_StructGridBoxes(grid);
 
-   MPI_Comm_size(*comm, &num_procs);
-   MPI_Comm_rank(*comm, &my_rank);
+   MPI_Comm_size(comm, &num_procs);
+   MPI_Comm_rank(comm, &my_rank);
 
    /* allocate sendbuf */
    sendcount = 7*hypre_BoxArraySize(boxes);
@@ -173,7 +177,7 @@ hypre_AssembleStructGrid( hypre_StructGrid *grid )
    recvcounts = hypre_TAlloc(int, num_procs);
    displs = hypre_TAlloc(int, num_procs);
    MPI_Allgather(&sendcount, 1, MPI_INT,
-		 recvcounts, 1, MPI_INT, *comm);
+		 recvcounts, 1, MPI_INT, comm);
    displs[0] = 0;
    recvbuf_size = recvcounts[0];
    for (i = 1; i < num_procs; i++)
@@ -201,7 +205,7 @@ hypre_AssembleStructGrid( hypre_StructGrid *grid )
 
    /* get global grid info */
    MPI_Allgatherv(sendbuf, sendcount, MPI_INT,
-		  recvbuf, recvcounts, displs, MPI_INT, *comm);
+		  recvbuf, recvcounts, displs, MPI_INT, comm);
 
    /* sort recvbuf by process rank? */
 
@@ -240,6 +244,9 @@ hypre_AssembleStructGrid( hypre_StructGrid *grid )
    hypre_StructGridBoxRanks(grid)  = hypre_StructGridBoxRanks(new_grid);
    hypre_StructGridGlobalSize(grid)= hypre_StructGridGlobalSize(new_grid);
    hypre_StructGridLocalSize(grid) = hypre_StructGridLocalSize(new_grid);
+   hypre_StructGridNeighbors(grid) = hypre_StructGridNeighbors(new_grid);
+   hypre_StructGridMaxNeighborDistance(grid) =
+      hypre_StructGridMaxNeighborDistance(new_grid);
    hypre_TFree(new_grid);
 }
 
@@ -279,7 +286,7 @@ hypre_PrintStructGrid( FILE             *file,
  *--------------------------------------------------------------------------*/
  
 hypre_StructGrid *
-hypre_ReadStructGrid( MPI_Comm *comm,
+hypre_ReadStructGrid( MPI_Comm  comm,
                       FILE     *file )
 {
    hypre_StructGrid *grid;
@@ -313,4 +320,55 @@ hypre_ReadStructGrid( MPI_Comm *comm,
    hypre_AssembleStructGrid(grid);
 
    return grid;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_NewStructGridNeighbors
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_NewStructGridNeighbors( hypre_StructGrid *grid,
+                              int               max_neighbor_distance )
+{
+   hypre_BoxArray       *all_boxes = hypre_StructGridAllBoxes(grid);
+   hypre_BoxArray       *boxes     = hypre_StructGridBoxes(grid);
+   int                  *box_ranks = hypre_StructGridBoxRanks(grid);
+                       
+   hypre_BoxNeighbors  **neighbors;
+   int                   i;
+   int                   ierr = 0;
+
+   neighbors = hypre_TAlloc(hypre_BoxNeighbors *, hypre_BoxArraySize(boxes));
+   hypre_ForBoxI(i, boxes)
+      {
+         neighbors[i] = hypre_NewBoxNeighbors(all_boxes, box_ranks[i],
+                                              max_neighbor_distance);
+      }
+
+   hypre_StructGridNeighbors(grid)           = neighbors;
+   hypre_StructGridMaxNeighborDistance(grid) = max_neighbor_distance;
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_FreeStructGridNeighbors
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_FreeStructGridNeighbors( hypre_StructGrid *grid )
+{
+   hypre_BoxArray       *boxes     = hypre_StructGridBoxes(grid);
+   hypre_BoxNeighbors  **neighbors = hypre_StructGridNeighbors(grid);
+
+   int                   i;
+   int                   ierr = 0;
+
+   hypre_ForBoxI(i, boxes)
+      {
+         hypre_FreeBoxNeighbors(neighbors[i]);
+      }
+   hypre_TFree(neighbors);
+
+   return ierr;
 }

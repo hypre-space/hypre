@@ -5,10 +5,6 @@
 #include <cegdb.h>
 #endif
 
-#ifdef HYPRE_DEBUG
-char malloc_logpath_memory[256];
-#endif
- 
 /*--------------------------------------------------------------------------
  * Test driver for structured matrix interface (structured storage)
  *--------------------------------------------------------------------------*/
@@ -22,13 +18,15 @@ int
 main( int   argc,
       char *argv[] )
 {
-   MPI_Comm             *comm;
    int                   matrix_num_ghost[6] = { 0, 0, 0, 0, 0, 0};
    int                   vector_num_ghost[6] = { 1, 1, 1, 1, 1, 1};
                      
    hypre_StructMatrix   *matrix;
    hypre_StructVector   *vector;
    hypre_StructVector   *tmp_vector;
+
+   hypre_StructGrid     *matrix_grid;
+   hypre_StructGrid     *vector_grid;
 
    int                   num_procs, myid;
 
@@ -39,25 +37,22 @@ main( int   argc,
    /* Initialize MPI */
    MPI_Init(&argc, &argv);
 
-   comm = hypre_TAlloc(MPI_Comm, 1);
-   MPI_Comm_dup(MPI_COMM_WORLD, comm);
-   MPI_Comm_size(*comm, &num_procs );
-   MPI_Comm_rank(*comm, &myid );
+   MPI_Comm_size(MPI_COMM_WORLD, &num_procs );
+   MPI_Comm_rank(MPI_COMM_WORLD, &myid );
 
 #ifdef HYPRE_DEBUG
    cegdb(&argc, &argv, myid);
 #endif
 
-#ifdef HYPRE_DEBUG
-   malloc_logpath = malloc_logpath_memory;
-   sprintf(malloc_logpath, "malloc.log.%04d", myid);
-#endif
+   hypre_InitMemoryDebug(myid);
 
    /*-----------------------------------------------------------
     * Read in the matrix
     *-----------------------------------------------------------*/
 
-   matrix = hypre_ReadStructMatrix(comm, "zin_matrix", matrix_num_ghost);
+   matrix = hypre_ReadStructMatrix(MPI_COMM_WORLD,
+                                   "zin_matrix", matrix_num_ghost);
+   matrix_grid = hypre_StructMatrixGrid(matrix);
  
    hypre_PrintStructMatrix("zout_matrix", matrix, 0);
 
@@ -65,7 +60,9 @@ main( int   argc,
     * Read in the vector
     *-----------------------------------------------------------*/
 
-   vector = hypre_ReadStructVector(comm, "zin_vector", vector_num_ghost);
+   vector = hypre_ReadStructVector(MPI_COMM_WORLD,
+                                   "zin_vector", vector_num_ghost);
+   vector_grid = hypre_StructVectorGrid(vector);
  
    hypre_PrintStructVector("zout_vector", vector, 0);
 
@@ -73,8 +70,7 @@ main( int   argc,
     * Do a matvec
     *-----------------------------------------------------------*/
 
-   tmp_vector =
-      hypre_NewStructVector(comm, hypre_StructVectorGrid(vector));
+   tmp_vector = hypre_NewStructVector(MPI_COMM_WORLD, vector_grid);
    hypre_InitializeStructVector(tmp_vector);
    hypre_AssembleStructVector(tmp_vector);
 
@@ -110,17 +106,14 @@ main( int   argc,
     * Finalize things
     *-----------------------------------------------------------*/
 
-   hypre_FreeStructGrid(hypre_StructMatrixGrid(matrix));
    hypre_FreeStructMatrix(matrix);
-   hypre_FreeStructGrid(hypre_StructVectorGrid(vector));
    hypre_FreeStructVector(vector);
    hypre_FreeStructVector(tmp_vector);
-   hypre_TFree(comm);
 
-#ifdef HYPRE_DEBUG
-   malloc_verify(0);
-   malloc_shutdown();
-#endif
+   hypre_FreeStructGrid(matrix_grid);
+   hypre_FreeStructGrid(vector_grid);
+
+   hypre_FinalizeMemoryDebug();
 
    /* Finalize MPI */
    MPI_Finalize();

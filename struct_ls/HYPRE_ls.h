@@ -29,14 +29,14 @@ typedef void *HYPRE_StructSolver;
  *--------------------------------------------------------------------------*/
 
 #ifdef __STDC__
-# define        P(s) s
+# define	P(s) s
 #else
 # define P(s) ()
 #endif
- 
- 
+
+
 /* HYPRE_struct_smg.c */
-HYPRE_StructSolver HYPRE_StructSMGInitialize P((MPI_Comm *comm ));
+HYPRE_StructSolver HYPRE_StructSMGInitialize P((MPI_Comm comm ));
 int HYPRE_StructSMGFinalize P((HYPRE_StructSolver solver ));
 int HYPRE_StructSMGSetup P((HYPRE_StructSolver solver , HYPRE_StructMatrix A , HYPRE_StructVector b , HYPRE_StructVector x ));
 int HYPRE_StructSMGSolve P((HYPRE_StructSolver solver , HYPRE_StructMatrix A , HYPRE_StructVector b , HYPRE_StructVector x ));
@@ -48,7 +48,7 @@ int HYPRE_SMGSetNumPreRelax P((HYPRE_StructSolver solver , int num_pre_relax ));
 int HYPRE_SMGSetNumPostRelax P((HYPRE_StructSolver solver , int num_post_relax ));
 int HYPRE_SMGGetNumIterations P((HYPRE_StructSolver solver , int *num_iterations ));
 int HYPRE_SMGGetFinalRelativeResidualNorm P((HYPRE_StructSolver solver , double *norm ));
- 
+
 #undef P
 
 #endif

@@ -21,7 +21,7 @@
 
 typedef struct
 {
-   MPI_Comm             *comm;
+   MPI_Comm              comm;
 
    hypre_StructGrid     *grid;
    hypre_StructStencil  *user_stencil;

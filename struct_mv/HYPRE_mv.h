@@ -36,13 +36,13 @@ typedef void *HYPRE_StructVector;
 
 
 /* HYPRE_struct_grid.c */
-HYPRE_StructGrid HYPRE_NewStructGrid P((MPI_Comm *comm , int dim ));
+HYPRE_StructGrid HYPRE_NewStructGrid P((MPI_Comm comm , int dim ));
 void HYPRE_FreeStructGrid P((HYPRE_StructGrid grid ));
 void HYPRE_SetStructGridExtents P((HYPRE_StructGrid grid , int *ilower , int *iupper ));
 void HYPRE_AssembleStructGrid P((HYPRE_StructGrid grid ));
 
 /* HYPRE_struct_matrix.c */
-HYPRE_StructMatrix HYPRE_NewStructMatrix P((MPI_Comm *comm , HYPRE_StructGrid grid , HYPRE_StructStencil stencil ));
+HYPRE_StructMatrix HYPRE_NewStructMatrix P((MPI_Comm comm , HYPRE_StructGrid grid , HYPRE_StructStencil stencil ));
 int HYPRE_FreeStructMatrix P((HYPRE_StructMatrix matrix ));
 int HYPRE_InitializeStructMatrix P((HYPRE_StructMatrix matrix ));
 int HYPRE_SetStructMatrixValues P((HYPRE_StructMatrix matrix , int *grid_index , int num_stencil_indices , int *stencil_indices , double *values ));
@@ -59,7 +59,7 @@ void HYPRE_SetStructStencilElement P((HYPRE_StructStencil stencil , int element_
 void HYPRE_FreeStructStencil P((HYPRE_StructStencil stencil ));
 
 /* HYPRE_struct_vector.c */
-HYPRE_StructVector HYPRE_NewStructVector P((MPI_Comm *comm , HYPRE_StructGrid grid , HYPRE_StructStencil stencil ));
+HYPRE_StructVector HYPRE_NewStructVector P((MPI_Comm comm , HYPRE_StructGrid grid , HYPRE_StructStencil stencil ));
 int HYPRE_FreeStructVector P((HYPRE_StructVector struct_vector ));
 int HYPRE_InitializeStructVector P((HYPRE_StructVector vector ));
 int HYPRE_SetStructVectorValues P((HYPRE_StructVector vector , int *grid_index , double values ));
@@ -74,4 +74,3 @@ int HYPRE_SetStructVectorConstantValues P((HYPRE_StructMatrix vector , double va
 #undef P
 
 #endif
-

@@ -78,8 +78,8 @@ hypre_SMGResidualSetup( void               *residual_vdata,
                        
    hypre_BoxArrayArray    *send_boxes;
    hypre_BoxArrayArray    *recv_boxes;
-   int                   **send_box_ranks;
-   int                   **recv_box_ranks;
+   int                   **send_processes;
+   int                   **recv_processes;
    hypre_BoxArrayArray    *indt_boxes;
    hypre_BoxArrayArray    *dept_boxes;
                        
@@ -102,7 +102,7 @@ hypre_SMGResidualSetup( void               *residual_vdata,
                                        base_index, base_stride);
 
    hypre_GetComputeInfo(&send_boxes, &recv_boxes,
-                        &send_box_ranks, &recv_box_ranks,
+                        &send_processes, &recv_processes,
                         &indt_boxes, &dept_boxes,
                         grid, stencil);
 
@@ -117,7 +117,7 @@ hypre_SMGResidualSetup( void               *residual_vdata,
    hypre_FreeBoxArrayArray(dept_boxes);
 
    compute_pkg = hypre_NewComputePkg(send_sboxes, recv_sboxes,
-                                     send_box_ranks, recv_box_ranks,
+                                     send_processes, recv_processes,
                                      indt_sboxes, dept_sboxes,
                                      grid, hypre_StructVectorDataSpace(x), 1);
 

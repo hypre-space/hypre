@@ -19,8 +19,8 @@
 void
 hypre_GetComputeInfo( hypre_BoxArrayArray  **send_boxes_ptr,
                       hypre_BoxArrayArray  **recv_boxes_ptr,
-                      int                 ***send_box_ranks_ptr,
-                      int                 ***recv_box_ranks_ptr,
+                      int                 ***send_processes_ptr,
+                      int                 ***recv_processes_ptr,
                       hypre_BoxArrayArray  **indt_boxes_ptr,
                       hypre_BoxArrayArray  **dept_boxes_ptr,
                       hypre_StructGrid      *grid,
@@ -29,8 +29,8 @@ hypre_GetComputeInfo( hypre_BoxArrayArray  **send_boxes_ptr,
    /* output variables */
    hypre_BoxArrayArray     *send_boxes;
    hypre_BoxArrayArray     *recv_boxes;
-   int                    **send_box_ranks;
-   int                    **recv_box_ranks;
+   int                    **send_processes;
+   int                    **recv_processes;
    hypre_BoxArrayArray     *indt_boxes;
    hypre_BoxArrayArray     *dept_boxes;
 
@@ -66,9 +66,9 @@ hypre_GetComputeInfo( hypre_BoxArrayArray  **send_boxes_ptr,
     * Get communication info
     *------------------------------------------------------*/
 
-   hypre_GetCommInfo(&send_boxes, &recv_boxes,
-                     &send_box_ranks, &recv_box_ranks,
-                     grid, stencil );
+   hypre_NewCommInfoFromStencil(&send_boxes, &recv_boxes,
+                                &send_processes, &recv_processes,
+                                grid, stencil );
 
    /*------------------------------------------------------
     * Set up the dependent boxes
@@ -177,8 +177,8 @@ hypre_GetComputeInfo( hypre_BoxArrayArray  **send_boxes_ptr,
 
    *send_boxes_ptr = send_boxes;
    *recv_boxes_ptr = recv_boxes;
-   *send_box_ranks_ptr = send_box_ranks;
-   *recv_box_ranks_ptr = recv_box_ranks;
+   *send_processes_ptr = send_processes;
+   *recv_processes_ptr = recv_processes;
    *indt_boxes_ptr = indt_boxes;
    *dept_boxes_ptr = dept_boxes;
 }
@@ -190,8 +190,8 @@ hypre_GetComputeInfo( hypre_BoxArrayArray  **send_boxes_ptr,
 hypre_ComputePkg *
 hypre_NewComputePkg( hypre_SBoxArrayArray  *send_sboxes,
                      hypre_SBoxArrayArray  *recv_sboxes,
-                     int                  **send_box_ranks,
-                     int                  **recv_box_ranks,
+                     int                  **send_processes,
+                     int                  **recv_processes,
                      hypre_SBoxArrayArray  *indt_sboxes,
                      hypre_SBoxArrayArray  *dept_sboxes,
                      hypre_StructGrid      *grid,
@@ -204,8 +204,9 @@ hypre_NewComputePkg( hypre_SBoxArrayArray  *send_sboxes,
 
    hypre_ComputePkgCommPkg(compute_pkg)     =
       hypre_NewCommPkg(send_sboxes, recv_sboxes,
-                       send_box_ranks, recv_box_ranks,
-                       grid, data_space, num_values);
+                       data_space, data_space,
+                       send_processes, recv_processes,
+                       num_values, hypre_StructGridComm(grid));
 
    hypre_ComputePkgIndtSBoxes(compute_pkg)   = indt_sboxes;
    hypre_ComputePkgDeptSBoxes(compute_pkg)   = dept_sboxes;
@@ -245,7 +246,7 @@ hypre_InitializeIndtComputations( hypre_ComputePkg *compute_pkg,
 {
    hypre_CommPkg *comm_pkg = hypre_ComputePkgCommPkg(compute_pkg);
 
-   return hypre_InitializeCommunication(comm_pkg, data);
+   return hypre_InitializeCommunication(comm_pkg, data, data);
 }
 
 /*--------------------------------------------------------------------------
