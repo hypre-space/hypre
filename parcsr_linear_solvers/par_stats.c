@@ -59,6 +59,7 @@ hypre_ParAMGSetupStats( void               *amg_vdata,
    int      global_nonzeros;
    int      amg_ioutdat;
    int      coarsen_type;
+   int      measure_type;
 
    double  *send_buff;
    double  *gather_buff;
@@ -104,6 +105,7 @@ hypre_ParAMGSetupStats( void               *amg_vdata,
    amg_ioutdat = hypre_ParAMGDataIOutDat(amg_data);
    log_file_name = hypre_ParAMGDataLogFileName(amg_data);
    coarsen_type = hypre_ParAMGDataCoarsenType(amg_data);
+   measure_type = hypre_ParAMGDataMeasureType(amg_data);
 
    send_buff     = hypre_CTAlloc(double, 6);
    gather_buff = hypre_CTAlloc(double,6*num_procs); 
@@ -117,8 +119,25 @@ hypre_ParAMGSetupStats( void               *amg_vdata,
       fprintf(fp," Num levels = %d\n\n",num_levels);
       fprintf(fp," Strength Threshhold = %f\n\n", 
                          hypre_ParAMGDataStrongThreshold(amg_data));
-      fprintf(fp," Coarsening Type = %s\n\n", 
-                  (coarsen_type ? "Ruge" : "Luby-Jones-Plassman"));
+      if (coarsen_type == 0)
+      {
+	fprintf(fp," Coarsening Type = Luby-Jones-Plassman\n");
+      }
+      else if (coarsen_type == 1) 
+      {
+	fprintf(fp," Coarsening Type = Ruge\n");
+      }
+      else if (coarsen_type == 2) 
+      {
+	fprintf(fp," Coarsening Type = Ruge2B\n");
+      }
+      else if (coarsen_type == 3) 
+      {
+	fprintf(fp," Coarsening Type = Ruge3\n");
+      }
+      if (coarsen_type)
+      	fprintf(fp," measures are determined %s\n\n", 
+                  (measure_type ? "globally" : "locally"));
 
       fprintf(fp, "\nOperator Matrix Information:\n\n");
 
