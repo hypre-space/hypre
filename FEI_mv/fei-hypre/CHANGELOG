@@ -212,4 +212,6 @@
             - separate superlu and blas and lapack from HYPRE_LSI
             - better amgsa coarsening
             - deal with lsame and xerbla multiply defined problems
+07/31/04    2.5.5R3
+            - add error flag return to satisfy Al Nichols' need
 
