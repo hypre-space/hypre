@@ -76,7 +76,7 @@ hypre_CSRMatrixInitialize( hypre_CSRMatrix *matrix )
 {
    int  num_rows     = hypre_CSRMatrixNumRows(matrix);
    int  num_nonzeros = hypre_CSRMatrixNumNonzeros(matrix);
-   int  num_rownnz = hypre_CSRMatrixNumRownnz(matrix);
+/*   int  num_rownnz = hypre_CSRMatrixNumRownnz(matrix); */
 
    int  ierr=0;
 
