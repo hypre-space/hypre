@@ -7,7 +7,7 @@ c=====================================================================
 c
       subroutine setw(ierr,k,ewt,nwt,iwts,imin,imax,a,ia,ja,
      *                 iu,icg,ifg,b,ib,jb,
-     *                 ipmn,ipmx,ip,iv,xp,yp)
+     *                 ipmn,ipmx,ip,iv)
 c
 c---------------------------------------------------------------------
 c
@@ -32,8 +32,6 @@ c
       dimension ipmn(*),ipmx(*)
       dimension ip (*)
       dimension iv (*)
-      dimension xp (*)
-      dimension yp (*)
 c
 c---------------------------------------------------------------------
 c
@@ -49,12 +47,12 @@ c
      *           ndimu,ndimp,ndima,ndimb)
       return
 30    call setw3(k,ewt,nwt,imin,imax,a,ia,ja,iu,icg,ifg,b,ib,jb,
-     *           ipmn,ipmx,ip,iv,xp,yp,
+     *           ipmn,ipmx,ip,iv,
      *           ndimu,ndimp,ndima,ndimb)
       return
 40    call setw4(ierr,k,ewt,nwt,imin,imax,a,ia,ja,iu,icg,
      *           ifg,b,ib,jb,
-     *           ipmn,ipmx,ip,iv,xp,yp,
+     *           ipmn,ipmx,ip,iv,
      *           ndimu,ndimp,ndima,ndimb)
       return
       end
@@ -546,7 +544,7 @@ c---------------------------------------------------------------------
 c
       subroutine setw4(ierr,k,ewt,nwt,imin,imax,a,ia,ja,iu,icg,
      *                 ifg,b,ib,jb,
-     *                 ipmn,ipmx,ip,iv,xp,yp,
+     *                 ipmn,ipmx,ip,iv,
      *                 ndimu,ndimp,ndima,ndimb)
 c
 c---------------------------------------------------------------------
@@ -597,8 +595,6 @@ c
       dimension ipmn(*),ipmx(*)
       dimension ip (*)
       dimension iv (*)
-      dimension xp (*)
-      dimension yp (*)
 c
 c---------------------------------------------------------------------
 c

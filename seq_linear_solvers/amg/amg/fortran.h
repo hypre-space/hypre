@@ -52,8 +52,6 @@ hypre_NAME_FORTRAN_FOR_C(setup)(&Setup_err_flag,\
 			  hypre_AMGDataIPMN(amg_data),\
 			  hypre_AMGDataIPMX(amg_data),\
 			  hypre_AMGDataIV(amg_data),\
-			  hypre_AMGDataXP(amg_data),\
-			  hypre_AMGDataYP(amg_data),\
 			  &hypre_AMGDataNDIMU(amg_data),\
 			  &hypre_AMGDataNDIMP(amg_data),\
 			  &hypre_AMGDataNDIMA(amg_data),\
@@ -68,7 +66,6 @@ void hypre_NAME_FORTRAN_FOR_C(setup)(int *, int *, int *,
 			       int *, int *, int *, int *,
 			       double *, int *, int *,
 			       int *, int *, int *,
-			       double *, double *,
 			       int *, int *, int *, int *,
 			       char *, long);
 

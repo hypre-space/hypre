@@ -271,6 +271,9 @@ char *argv[];
    hypre_WriteVec(file_name, f);
 #endif
 
+
+   HYPRE_AMGFinalize(amg_data);
+   FreeGlobals();
    return 0;
 }
 

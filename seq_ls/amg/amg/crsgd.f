@@ -2,7 +2,7 @@ c=====================================================================
 c     
       subroutine crsgd(ierr,k,nstr,ecg,ncg,ewt,nwt,mmax,icdep,
      *     nun,imin,imax,a,ia,ja,iu,ip,icg,ifg,
-     *     b,ib,jb,ipmn,ipmx,iv,xp,yp,
+     *     b,ib,jb,ipmn,ipmx,iv,
      *     ndimu,ndimp,ndima,ndimb,coarsen_cpu,RPdef_cpu)
 c     
 c---------------------------------------------------------------------
@@ -200,8 +200,6 @@ c
 
       dimension ipmn(*),ipmx(*)
       dimension iv (*)
-      real*8 xp (*)
-      real*8 yp (*)
 
       dimension ib (*)
       dimension b  (*)
@@ -316,12 +314,12 @@ c===  > set the interpolation weights
 c     
       call setw(ierr,k,ewt,nwt,iwts,imin,imax,a,ia,ja,
      *     iu,icg,ifg,b,ib,jb,
-     *     ipmn,ipmx,ip,iv,xp,yp)
+     *     ipmn,ipmx,ip,iv)
       if (ierr .ne. 0) return
 c     
 c===  > set the pointers for the coarse grid
 c     
-      call setc(k,imin,imax,iu,ip,icg,ifg,ipmn,ipmx,iv,xp,yp)
+      call setc(k,imin,imax,iu,ip,icg,ifg,ipmn,ipmx,iv)
 c     
 c===  > define restriction (transpose of interpolation only)
 c     

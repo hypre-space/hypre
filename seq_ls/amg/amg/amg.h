@@ -66,9 +66,6 @@ void HYPRE_AMGSetNumPoints P((int num_points , void *data ));
 void HYPRE_AMGSetIU P((int *iu , void *data ));
 void HYPRE_AMGSetIP P((int *ip , void *data ));
 void HYPRE_AMGSetIV P((int *iv , void *data ));
-void HYPRE_AMGSetXP P((double *xp , void *data ));
-void HYPRE_AMGSetYP P((double *yp , void *data ));
-void HYPRE_AMGSetZP P((double *zp , void *data ));
 
 /* amg_setup.c */
 int HYPRE_AMGSetup P((hypre_Matrix *A , void *data ));

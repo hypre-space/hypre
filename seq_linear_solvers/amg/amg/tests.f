@@ -8,7 +8,7 @@ c
 c---------------------------------------------------------------------
       subroutine fstats(ierr,nl,levels,
      *     nun,imin,imax,a,ia,ja,iu,ip,icg,ifg,
-     *     b,ib,jb,ipmn,ipmx,iv,xp,yp)
+     *     b,ib,jb,ipmn,ipmx,iv)
 c     
 c     
 c     print matrix, interpolation statistics statistics
@@ -28,8 +28,6 @@ c
 
       dimension ipmn(*),ipmx(*)
       dimension iv (*)
-      real*8 xp (*)
-      real*8 yp (*)
 
       dimension ib (*)
       dimension b  (*)

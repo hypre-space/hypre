@@ -49,9 +49,6 @@ char     *log_file_name;
    HYPRE_AMGSetIU(ProblemIU(problem), amg_data);
    HYPRE_AMGSetIP(ProblemIP(problem), amg_data);
    HYPRE_AMGSetIV(ProblemIV(problem), amg_data);
-   HYPRE_AMGSetXP(ProblemXP(problem), amg_data);
-   HYPRE_AMGSetYP(ProblemYP(problem), amg_data);
-   HYPRE_AMGSetZP(ProblemZP(problem), amg_data);
    
    return amg_data;
 }

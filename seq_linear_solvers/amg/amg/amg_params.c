@@ -198,33 +198,4 @@ void     *data;
    hypre_AMGDataIV(amg_data) = iv;
 }
 
-void      HYPRE_AMGSetXP(xp, data)
-double   *xp;            
-void     *data;
-{
-   hypre_AMGData  *amg_data = data;
- 
-   hypre_TFree(hypre_AMGDataXP(amg_data));
-   hypre_AMGDataXP(amg_data) = xp;
-}
-
-void      HYPRE_AMGSetYP(yp, data)
-double   *yp;            
-void     *data;
-{
-   hypre_AMGData  *amg_data = data;
- 
-   hypre_TFree(hypre_AMGDataYP(amg_data));
-   hypre_AMGDataYP(amg_data) = yp;
-}
-
-void      HYPRE_AMGSetZP(zp, data)
-double   *zp;            
-void     *data;
-{
-   hypre_AMGData  *amg_data = data;
- 
-   hypre_TFree(hypre_AMGDataZP(amg_data));
-   hypre_AMGDataZP(amg_data) = zp;
-}
 

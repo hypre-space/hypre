@@ -40,10 +40,6 @@ char     *file_name;
    int     *ip;
    int     *iv;
 
-   double  *xp;
-   double  *yp;
-   double  *zp;
-
    char     temp_file_name[256];
    FILE    *temp_fp;
    int      flag;
@@ -208,39 +204,6 @@ char     *file_name;
       iv = NULL;
    }
 
-   /*----------------------------------------------------------
-    * xp, yp, zp
-    *----------------------------------------------------------*/
-
-   fscanf(fp, "%d", &flag);
-   ProblemXYZPFlag(problem) = flag;
-
-   if (flag == 0)
-   {
-      xp = hypre_CTAlloc(double, hypre_NDIMP(num_points));
-      yp = hypre_CTAlloc(double, hypre_NDIMP(num_points));
-      zp = hypre_CTAlloc(double, hypre_NDIMP(num_points));
-
-      fscanf(fp, "%s", temp_file_name);
-      temp_fp = fopen(temp_file_name, "r");
-
-      for (j = 0; j < num_points; j++)
-	 fscanf(temp_fp, "%le", &xp[j]);
-      for (j = 0; j < num_points; j++)
-	 fscanf(temp_fp, "%le", &yp[j]);
-      for (j = 0; j < num_points; j++)
-	 fscanf(temp_fp, "%le", &zp[j]);
-
-      fclose(temp_fp);
-
-      sprintf(ProblemXYZPInput(problem), "%s", temp_file_name);
-   }
-   else
-   {
-      xp = NULL;
-      yp = NULL;
-      zp = NULL;
-   }
 
    /*----------------------------------------------------------
     * Close the problem file
@@ -265,10 +228,6 @@ char     *file_name;
    ProblemIP(problem)           = ip;
    ProblemIV(problem)           = iv;
 
-   ProblemXP(problem)           = xp;
-   ProblemYP(problem)           = yp;
-   ProblemZP(problem)           = zp;
-
    return problem;
 }
 
@@ -284,9 +243,6 @@ Problem  *problem;
       hypre_TFree(ProblemIU(problem));
       hypre_TFree(ProblemIP(problem));
       hypre_TFree(ProblemIV(problem));
-      hypre_TFree(ProblemXP(problem));
-      hypre_TFree(ProblemYP(problem));
-      hypre_TFree(ProblemZP(problem));
       hypre_TFree(problem);
    }
 }
@@ -390,16 +346,6 @@ Problem *problem;
       fprintf(fp, "    Pointers iu, iv, ip defined in standard way. \n");
    }
 
-   /*----------------------------------------------------------
-    * xp, yp, zp
-    *----------------------------------------------------------*/
-
-   flag = ProblemXYZPFlag(problem);
-   if (flag == 0)
-   {
-      sscanf(ProblemXYZPInput(problem), "%s", temp_file_name); 
-      fprintf(fp, "    x, y, z data read from file: %s \n", temp_file_name);
-   }
  
    /*----------------------------------------------------------
     * Close the output file

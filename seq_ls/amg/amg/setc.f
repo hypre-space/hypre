@@ -5,7 +5,7 @@ c     the following routine sets the vectors for the level k+1
 c     
 c=====================================================================
 c     
-      subroutine setc(k,imin,imax,iu,ip,icg,ifg,ipmn,ipmx,iv,xp,yp,
+      subroutine setc(k,imin,imax,iu,ip,icg,ifg,ipmn,ipmx,iv,
      *     ndimu,ndimp,ndima,ndimb)
 c     
 c---------------------------------------------------------------------
@@ -26,8 +26,6 @@ c
 
       dimension ipmn(*),ipmx(*)
       dimension iv (*)
-      real*8 xp (*)
-      real*8 yp (*)
 c     
 c---------------------------------------------------------------------
 c     
@@ -48,8 +46,6 @@ c
          ipc=ipc+1
          ipold=ipf
          iv(ipc)=ic
-         xp(ipc)=xp(ipf)
-         yp(ipc)=yp(ipf)
  200     ip(ic)=ipc
          icg(i)=ic
          ifg(ic)=i

@@ -33,9 +33,6 @@ void HYPRE_AMGSetNumPoints P((int num_points , void *data ));
 void HYPRE_AMGSetIU P((int *iu , void *data ));
 void HYPRE_AMGSetIP P((int *ip , void *data ));
 void HYPRE_AMGSetIV P((int *iv , void *data ));
-void HYPRE_AMGSetXP P((double *xp , void *data ));
-void HYPRE_AMGSetYP P((double *yp , void *data ));
-void HYPRE_AMGSetZP P((double *zp , void *data ));
 
 /* amg_relax.c */
 int hypre_AMGRelax P((hypre_Vector *u , hypre_Vector *f , hypre_Matrix *A , hypre_VectorInt *ICG , hypre_VectorInt *IV , int min_point , int max_point , int point_type , int relax_type , double *D_mat , double *S_vec ));
@@ -63,6 +60,7 @@ void hypre_MatvecT P((double alpha , hypre_Matrix *A , hypre_Vector *x , double 
 void hypre_SeedRand P((int seed ));
 double hypre_Rand P((void ));
 
+
 /* vector.c */
 hypre_Vector *hypre_NewVector P((double *data , int size ));
 void hypre_FreeVector P((hypre_Vector *vector ));
@@ -74,6 +72,12 @@ void hypre_CopyVector P((hypre_Vector *x , hypre_Vector *y ));
 void hypre_ScaleVector P((double alpha , hypre_Vector *y ));
 void hypre_Axpy P((double alpha , hypre_Vector *x , hypre_Vector *y ));
 double hypre_InnerProd P((hypre_Vector *x , hypre_Vector *y ));
+
+/* timing.c */
+void HYPRE_AMGClock_init P((void ));
+amg_Clock_t HYPRE_AMGClock P((void ));
+amg_CPUClock_t HYPRE_AMGCPUClock P((void ));
+void HYPRE_AMGPrintTiming P((double time_ticks , double cpu_ticks ));
 
 /* write.c */
 void hypre_WriteYSMP P((char *file_name , hypre_Matrix *matrix ));

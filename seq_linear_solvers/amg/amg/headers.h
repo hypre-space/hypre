@@ -24,6 +24,7 @@
 
 #include "general.h"
 #include "data.h"
+#include "timing.h"
 
 #include "protos.h"
 

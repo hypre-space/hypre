@@ -6,7 +6,7 @@ c=====================================================================
 c     
       subroutine setup(ierr,levels,nstr,ecg,ncg,ewt,nwt,icdep,ioutdat,
      *     nun,imin,imax,a,ia,ja,iu,ip,icg,ifg,
-     *     b,ib,jb,ipmn,ipmx,iv,xp,yp,
+     *     b,ib,jb,ipmn,ipmx,iv,
      *     ndimu,ndimp,ndima,ndimb,lfname)
 c     
 c---------------------------------------------------------------------
@@ -28,8 +28,6 @@ c
 
       dimension ipmn(*),ipmx(*)
       dimension iv (*)
-      real*8 xp (*)
-      real*8 yp (*)
 
       dimension ib (*)
       dimension b  (*)
@@ -96,7 +94,7 @@ c     =>   choose coarse grid and define interpolation
 c     
       call crsgd(ierr,k-1,nstr,ecg,ncg,ewt,nwt,levels,icdep,
      *     nun,imin,imax,a,ia,ja,iu,ip,icg,ifg,
-     *     b,ib,jb,ipmn,ipmx,iv,xp,yp,
+     *     b,ib,jb,ipmn,ipmx,iv,
      *     ndimu,ndimp,ndima,ndimb,coarsen_cpu,RPdef_cpu)
 
       if (ierr .ne. 0) return
@@ -133,7 +131,7 @@ c     compute & print statistics after coarsening
       if (ioutdat .ge. 2) then
          call fstats(ierr,k-1,levels,
      *        nun,imin,imax,a,ia,ja,iu,ip,icg,ifg,
-     *        b,ib,jb,ipmn,ipmx,iv,xp,yp)
+     *        b,ib,jb,ipmn,ipmx,iv)
 
       write (9,100) dfloat(coarsen_cpu)/100.0,
      *              dfloat(opdef_cpu)/100.0,

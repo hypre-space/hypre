@@ -31,9 +31,6 @@ void    *data;
    int     *iu;
    int     *ip;
    int     *iv;
-   double  *xp;
-   double  *yp;
-   double  *zp;
    
    int      num_levels;
    int      ndimu;
@@ -93,9 +90,6 @@ void    *data;
    iu   	 = hypre_AMGDataIU(amg_data);
    ip   	 = hypre_AMGDataIP(amg_data);
    iv   	 = hypre_AMGDataIV(amg_data);
-   xp   	 = hypre_AMGDataXP(amg_data);
-   yp   	 = hypre_AMGDataYP(amg_data);
-   zp   	 = hypre_AMGDataZP(amg_data);
 
    /* set default number of unknowns */
    if (!num_unknowns)
@@ -142,12 +136,6 @@ void    *data;
       }
    }
 
-   if (!xp || !yp || !zp)
-   {
-      xp = hypre_CTAlloc(double, hypre_NDIMP(num_points));
-      yp = hypre_CTAlloc(double, hypre_NDIMP(num_points));
-      zp = hypre_CTAlloc(double, hypre_NDIMP(num_points));
-   }
 
    hypre_AMGDataA(amg_data)            = A;
    hypre_AMGDataNumVariables(amg_data) = num_variables;
@@ -156,9 +144,6 @@ void    *data;
    hypre_AMGDataIU(amg_data)    	 = iu;
    hypre_AMGDataIP(amg_data)    	 = ip;
    hypre_AMGDataIV(amg_data)    	 = iv;
-   hypre_AMGDataXP(amg_data)    	 = xp;
-   hypre_AMGDataYP(amg_data)    	 = yp;
-   hypre_AMGDataZP(amg_data)    	 = zp;
 
    /*----------------------------------------------------------
     * Initialize remainder of hypre_AMGData

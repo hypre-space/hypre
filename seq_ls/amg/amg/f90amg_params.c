@@ -149,24 +149,4 @@ int      *data;
    HYPRE_AMGSetIV(iv, (void *) *data);
 }
 
-void      hypre_NAME_C_FOR_FORTRAN(amg_setxp)(xp, data)
-double   *xp;            
-int      *data;
-{
-   HYPRE_AMGSetXP(xp, (void *) *data);
-}
-
-void      hypre_NAME_C_FOR_FORTRAN(amg_setyp)(yp, data)
-double   *yp;            
-int      *data;
-{
-   HYPRE_AMGSetYP(yp, (void *) *data);
-}
-
-void      hypre_NAME_C_FOR_FORTRAN(amg_setzp)(zp, data)
-double   *zp;            
-int      *data;
-{
-   HYPRE_AMGSetZP(zp, (void *) *data);
-}
 

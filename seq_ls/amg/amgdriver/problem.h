@@ -45,12 +45,6 @@ typedef struct
    int      iupv_flag;
    char     iupv_input[256];
 
-   double  *xp;
-   double  *yp;
-   double  *zp;
-   int      xyzp_flag;
-   char     xyzp_input[256];
-
 } Problem;
 
 /*--------------------------------------------------------------------------
@@ -78,12 +72,5 @@ typedef struct
 #define ProblemIV(problem)             ((problem) -> iv)
 #define ProblemIUPVFlag(problem)       ((problem) -> iupv_flag)
 #define ProblemIUPVInput(problem)      ((problem) -> iupv_input)
-
-#define ProblemXP(problem)             ((problem) -> xp)
-#define ProblemYP(problem)             ((problem) -> yp)
-#define ProblemZP(problem)             ((problem) -> zp)
-#define ProblemXYZPFlag(problem)       ((problem) -> xyzp_flag)
-#define ProblemXYZPInput(problem)      ((problem) -> xyzp_input)
-
 
 #endif

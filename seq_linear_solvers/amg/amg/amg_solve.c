@@ -68,7 +68,6 @@ void        *data;
    double   relative_resid;
    double   rhs_norm;
    double   energy;
-   double  *resv;
    double  *tmpvec;
    double   old_energy;
    double   old_resid;
@@ -90,7 +89,6 @@ void        *data;
    levv          = hypre_AMGDataLevV(amg_data);
    
    iarr = hypre_CTAlloc(int, 10);
-   resv = hypre_CTAlloc(double, num_unknowns);
 
    F_array = hypre_TAlloc(hypre_Vector*, num_levels);
    U_array = hypre_TAlloc(hypre_Vector*, num_levels);
@@ -269,6 +267,11 @@ void        *data;
     { 
        fclose(fp);
     }
+
+   hypre_TFree(iarr);
+
+   hypre_TFree(F_array);
+   hypre_TFree(U_array);
 
    return(Solve_err_flag);
 }
