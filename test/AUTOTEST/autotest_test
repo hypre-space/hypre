@@ -706,10 +706,6 @@ if [ ${BuildOpt} -ne $Skip ] ; then
   echo "Autotest starting configure and make of $MessageStr"
   if [ ${BuildOpt} -eq $Build -o ${BuildOpt} -eq $Run ] ; then
     cd $StdBuildDir
-    if [ "$MessageStr" != "insure" ]
-    then			# don't want to delete previous build
-        $MAKE clean	        # assumed working with --enable-debug build
-    fi
     [ -f config.cache ] && rm config.cache
     if [ "$ConfigOption" != " " ]
     then
@@ -724,6 +720,11 @@ if [ ${BuildOpt} -ne $Skip ] ; then
 	2> ${Hdr}.${MessageStr}.configure.err
     fi
     echo "$HYPRE_CONFIGURE_EMAIL" > ${Hdr}.${MessageStr}.configure.err.email
+
+    if [ "$MessageStr" != "insure" ]
+    then			# don't want to delete previous build
+        $MAKE clean	        # assumed working with --enable-debug build
+    fi
 
     makeit "all" $MessageStr "$HYPRE_DEFAULT_EMAIL"
   fi

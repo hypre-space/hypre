@@ -330,7 +330,7 @@ do
         HYPRE_COMPILE_MACHINE="tux149"
         HYPRE_RUN_MACHINE="tux149"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST"
-        HYPRE_MACHINE_COMMANDS="-nds -a 2 -cf"
+        HYPRE_MACHINE_COMMANDS="-ndsb 1 -a 2 -cf"
         HYPRE_MESSAGE='LOCAL TEST[default]'
         COMPILERSELECT="default"
         ./autotest_test $HYPRE_MACHINE_COMMANDS -v $HYPRE_MESSAGE
