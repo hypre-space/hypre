@@ -42,15 +42,7 @@ OBJS = ${FILES:.c=.o}
 # Main rules
 ##################################################################
 
-default: libHYPRE_ls.a driver
-
-driver_internal: driver_internal.o libHYPRE_ls.a
-	@echo  "Linking" $@ "... "
-	${CC} -o driver_internal driver_internal.o ${LFLAGS}
-
-driver_internal_cgsmg: driver_internal_cgsmg.o libHYPRE_ls.a
-	@echo  "Linking" $@ "... "
-	${CC} -o driver_internal_cgsmg driver_internal_cgsmg.o ${LFLAGS}
+default: libHYPRE_ls.a
 
 libHYPRE_ls.a: ${OBJS}
 	@echo  "Building $@ ... "
@@ -77,7 +69,6 @@ ${OBJS}: ${HEADERS}
 
 veryclean: clean
 	@rm -f libHYPRE_ls.a
-	@rm -f driver driver_internal
 
 clean:
 	@rm -f *.o
