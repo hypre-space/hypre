@@ -54,7 +54,7 @@ int    MLI_Utils_HypreMatrixComputeRAP(void *P, void *A, void **RAP);
 int    MLI_Utils_HypreMatrixCompress(void *A, int blksize, void **A2);
 int    MLI_Utils_QR(double *Q, double *R, int nrows, int ncols);
 int    MLI_Utils_HypreMatrixRead(char *filename, MPI_Comm comm, int blksize,
-                                 void **mat);
+                                 void **mat, int flag, double **scale_vec);
 int    MLI_Utils_DoubleVectorRead(char *, MPI_Comm, int, int, double *vec);
 int    MLI_Utils_ParCSRMLISetup(HYPRE_Solver, HYPRE_ParCSRMatrix, 
                                 HYPRE_ParVector, HYPRE_ParVector);
