@@ -215,6 +215,14 @@ void  impl_Hypre_StructJacobi_New(Hypre_StructJacobi this, Hypre_MPI_Com comm) {
    struct Hypre_MPI_Com_private_type * HMCp = comm->d_table;
    MPI_Comm *C = HMCp->hcom; /*gkk: ??? HMCp was CP */
 
+/* the StructSolver this inherits from keeps its own pointer to the
+   underlying HYPRE object.  Make sure they are the same.
+*/
+   Hypre_StructSolver HSS = Hypre_StructJacobi_castTo
+      ( this, "Hypre_StructSolver" );
+   struct Hypre_StructSolver_private_type *HSSp = HSS->d_table;
+   HSSp->hssolver = S;
+
    HYPRE_StructJacobiCreate( *C, S );
 
 } /* end impl_Hypre_StructJacobiNew */
