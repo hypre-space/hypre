@@ -321,6 +321,8 @@ void *hypre_PointRelaxCreate( MPI_Comm comm );
 int hypre_PointRelaxDestroy( void *relax_vdata );
 int hypre_PointRelaxSetup( void *relax_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x );
 int hypre_PointRelax( void *relax_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x );
+int hypre_PointRelax_core0( void *relax_vdata , hypre_StructMatrix *A , int constant_coefficient , hypre_Box *compute_box , double *bp , double *xp , double *tp , int boxarray_id , hypre_Box *A_data_box , hypre_Box *b_data_box , hypre_Box *x_data_box , hypre_Box *t_data_box , hypre_IndexRef stride );
+int hypre_PointRelax_core12( void *relax_vdata , hypre_StructMatrix *A , int constant_coefficient , hypre_Box *compute_box , double *bp , double *xp , double *tp , int boxarray_id , hypre_Box *A_data_box , hypre_Box *b_data_box , hypre_Box *x_data_box , hypre_Box *t_data_box , hypre_IndexRef stride );
 int hypre_PointRelaxSetTol( void *relax_vdata , double tol );
 int hypre_PointRelaxSetMaxIter( void *relax_vdata , int max_iter );
 int hypre_PointRelaxSetZeroGuess( void *relax_vdata , int zero_guess );
