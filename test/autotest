@@ -169,7 +169,7 @@ do
         HYPRE_ARCH="linux"
         HYPRE_COMPILE_MACHINE="pengra"
         HYPRE_RUN_MACHINE="pengra"
-        HYPRE_REMOTE_DIR="/usr/apps/hypre/i686-pc-linux-gnu-pengra/AUTOTEST"
+        HYPRE_REMOTE_DIR="/usr/gapps/hypre/i686-pc-linux-gnu-pengra/AUTOTEST"
 	HYPRE_MACHINE_COMMANDS="-ml -t 1 -ns -a 2 -dcxfy"
 	perform_test
         shift;;
