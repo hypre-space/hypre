@@ -272,7 +272,7 @@ zzz_SMGIntAdd( void             *intadd_vdata,
     * off-diagonal coefficients of P^T.  Interleave the results.
     *--------------------------------------------------------------------*/
 
-   zzz_ClearStructVectorGhostValues(e);
+   zzz_ClearStructVectorAllValues(e);
 
    compute_sbox_a = coarse_points;
    zzz_ForSBoxI(i, compute_sbox_a)

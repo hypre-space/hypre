@@ -48,6 +48,7 @@ int zzz_SMGSetLogging P((void *smg_vdata , int logging ));
 int zzz_SMGGetNumIterations P((void *smg_vdata , int *num_iterations ));
 int zzz_SMGPrintLogging P((void *smg_vdata , int myid ));
 int zzz_SMGGetFinalRelativeResidualNorm P((void *smg_vdata , double *relative_residual_norm ));
+int zzz_SMGSetStructVectorConstantValues P((zzz_StructVector *vector , double values , zzz_SBoxArray *sbox_array ));
 
 /* smg2_setup_rap.c */
 zzz_StructMatrix *zzz_SMG2NewRAPOp P((zzz_StructMatrix *R , zzz_StructMatrix *A , zzz_StructMatrix *PT ));
@@ -90,7 +91,11 @@ int zzz_SMGRelaxSetSpace P((void *relax_vdata , int i , int space_index , int sp
 int zzz_SMGRelaxSetRegSpaceRank P((void *relax_vdata , int i , int reg_space_rank ));
 int zzz_SMGRelaxSetPreSpaceRank P((void *relax_vdata , int i , int pre_space_rank ));
 int zzz_SMGRelaxSetBase P((void *relax_vdata , zzz_Index *base_index , zzz_Index *base_stride ));
+int zzz_SMGRelaxSetNumPreRelax P((void *relax_vdata , int num_pre_relax ));
+int zzz_SMGRelaxSetNumPostRelax P((void *relax_vdata , int num_post_relax ));
 int zzz_SMGRelaxSetNewMatrixStencil P((void *relax_vdata , zzz_StructStencil *diff_stencil ));
+int zzz_SMGRelaxSetupBaseSBoxArray P((void *relax_vdata , zzz_StructMatrix *A , zzz_StructVector *b , zzz_StructVector *x ));
+
 
 /* smg_residual.c */
 void *zzz_SMGResidualInitialize P((void ));

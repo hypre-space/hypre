@@ -32,6 +32,9 @@ zzz_SMGSetup( void             *smg_vdata,
    int                 cs   = (smg_data -> cs);
    int                 fs   = (smg_data -> fs);
 
+   int                 n_pre   = (smg_data -> num_pre_relax);
+   int                 n_post  = (smg_data -> num_post_relax);
+
    int                 max_iter;
    int                 max_levels;
                     
@@ -336,6 +339,8 @@ zzz_SMGSetup( void             *smg_vdata,
       zzz_SMGRelaxSetSpace(relax_data_l[l], 0, ci, cs);
       zzz_SMGRelaxSetSpace(relax_data_l[l], 1, fi, fs);
       zzz_SMGRelaxSetTempVec(relax_data_l[l], tb_l[l]);
+      zzz_SMGRelaxSetNumPreRelax( relax_data_l[l], n_pre);
+      zzz_SMGRelaxSetNumPostRelax( relax_data_l[l], n_post);
       zzz_SMGRelaxSetup(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
 
       zzz_SMGSetupInterpOp(relax_data_l[l], A_l[l], b_l[l], x_l[l],
@@ -381,6 +386,8 @@ zzz_SMGSetup( void             *smg_vdata,
    zzz_SMGRelaxSetTol(relax_data_l[l], 0.0);
    zzz_SMGRelaxSetMaxIter(relax_data_l[l], 1);
    zzz_SMGRelaxSetTempVec(relax_data_l[l], tb_l[l]);
+   zzz_SMGRelaxSetNumPreRelax( relax_data_l[l], n_pre);
+   zzz_SMGRelaxSetNumPostRelax( relax_data_l[l], n_post);
    zzz_SMGRelaxSetup(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
 
    /* set the data for x_l[0] and b_l[0] the way they were */
@@ -407,6 +414,8 @@ zzz_SMGSetup( void             *smg_vdata,
 
 #if 0
 {
+   if(zzz_StructGridDim(grid_l[0]) == 3)
+   {
    char  filename[255];
 
    /* debugging stuff */
@@ -419,6 +428,7 @@ zzz_SMGSetup( void             *smg_vdata,
    }
    sprintf(filename, "zout_A.%02d", l);
    zzz_PrintStructMatrix(filename, A_l[l], 0);
+   }
 }
 #endif
 

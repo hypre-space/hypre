@@ -41,6 +41,7 @@ typedef struct
 
    zzz_Index            *base_index;
    zzz_Index            *base_stride;
+   zzz_SBoxArray        *base_sbox_array;
 
    int                   stencil_dim;
                        
@@ -61,6 +62,9 @@ typedef struct
    int                   num_iterations;
    int                   time_index;
 
+   int                   num_pre_relax;
+   int                   num_post_relax;
+
 } zzz_SMGRelaxData;
 
 /*--------------------------------------------------------------------------
@@ -80,6 +84,7 @@ zzz_SMGRelaxInitialize( MPI_Comm *comm )
    (relax_data -> comm)           = comm;
    (relax_data -> base_index)     = zzz_NewIndex();
    (relax_data -> base_stride)    = zzz_NewIndex();
+   (relax_data -> base_sbox_array)= NULL;
    (relax_data -> time_index)     = zzz_InitializeTiming("SMGRelax");
 
    /* set defaults */
@@ -101,6 +106,9 @@ zzz_SMGRelaxInitialize( MPI_Comm *comm )
    zzz_SetIndex((relax_data -> base_stride), 1, 1, 1);
    (relax_data -> temp_vec)           = NULL;
    (relax_data -> temp_vec_allocated) = 1;
+
+   (relax_data -> num_pre_relax) = 1;
+   (relax_data -> num_post_relax) = 1;
 
    return (void *) relax_data;
 }
@@ -199,6 +207,7 @@ zzz_SMGRelaxFinalize( void *relax_vdata )
       zzz_TFree(relax_data -> reg_space_ranks);
       zzz_FreeIndex(relax_data -> base_index);
       zzz_FreeIndex(relax_data -> base_stride);
+      zzz_FreeSBoxArray(relax_data -> base_sbox_array);
 
       zzz_SMGRelaxFreeTempVec(relax_vdata);
       zzz_SMGRelaxFreeARem(relax_vdata);
@@ -231,12 +240,14 @@ zzz_SMGRelax( void             *relax_vdata,
    void              **residual_data;
    void              **solve_data;
 
+   zzz_SBoxArray      *base_sbox_a;
+   double              zero = 0.0;
+
    int                 max_iter;
    int                 num_spaces;
    int                *space_ranks;
 
    int                 i, j, k, is;
-   int                 first_residual = 1;
 
    int                 ierr;
 
@@ -269,6 +280,17 @@ zzz_SMGRelax( void             *relax_vdata,
    residual_data   = (relax_data -> residual_data);
    solve_data      = (relax_data -> solve_data);
 
+
+   /*----------------------------------------------------------
+    * Set zero values
+    *----------------------------------------------------------*/
+
+   if (zero_guess)
+   {
+      base_sbox_a = (relax_data -> base_sbox_array);
+      ierr = zzz_SMGSetStructVectorConstantValues(x, zero, base_sbox_a); 
+   }
+
    /*----------------------------------------------------------
     * Iterate
     *----------------------------------------------------------*/
@@ -298,18 +320,7 @@ zzz_SMGRelax( void             *relax_vdata,
          {
             is = space_ranks[j];
 
-            if (zero_guess && first_residual)
-            {
-               if (zzz_StructVectorData(temp_vec) != zzz_StructVectorData(b))
-               {
-                  zzz_StructCopy(b, temp_vec);
-               }
-               first_residual = 0;
-            }
-            else
-            {
-               zzz_SMGResidual(residual_data[is], A_rem, x, b, temp_vec);
-            }
+            zzz_SMGResidual(residual_data[is], A_rem, x, b, temp_vec);
 
             if (stencil_dim > 2)
                zzz_SMGSolve(solve_data[is], A_sol, temp_vec, x);
@@ -391,6 +402,12 @@ zzz_SMGRelaxSetup( void             *relax_vdata,
    {
       ierr = zzz_SMGRelaxSetupASol(relax_vdata, A, b, x);
    }
+
+   if ((relax_data -> base_sbox_array) == NULL)
+   {
+      ierr = zzz_SMGRelaxSetupBaseSBoxArray(relax_vdata, A, b, x);
+   }
+   
 
    return ierr;
 }
@@ -531,6 +548,9 @@ zzz_SMGRelaxSetupASol( void             *relax_vdata,
    int                  *space_strides = (relax_data -> space_strides);
    zzz_StructVector     *temp_vec      = (relax_data -> temp_vec);
 
+   int                   num_pre_relax   = (relax_data -> num_pre_relax);
+   int                   num_post_relax  = (relax_data -> num_post_relax);
+
    zzz_StructStencil    *stencil       = zzz_StructMatrixStencil(A);     
    zzz_Index           **stencil_shape = zzz_StructStencilShape(stencil);
    int                   stencil_size  = zzz_StructStencilSize(stencil); 
@@ -588,6 +608,8 @@ zzz_SMGRelaxSetupASol( void             *relax_vdata,
       if (stencil_dim > 2)
       {
          solve_data[i] = zzz_SMGInitialize(relax_data -> comm);
+         zzz_SMGSetNumPreRelax( solve_data[i], num_pre_relax);
+         zzz_SMGSetNumPostRelax( solve_data[i], num_post_relax);
          zzz_SMGSetBase(solve_data[i], base_index, base_stride);
          zzz_SMGSetMemoryUse(solve_data[i], (relax_data -> memory_use));
          zzz_SMGSetTol(solve_data[i], 0.0);
@@ -876,9 +898,48 @@ zzz_SMGRelaxSetBase( void      *relax_vdata,
          zzz_IndexD(base_stride, d);
    }
  
+   if ((relax_data -> base_sbox_array) != NULL)
+   {
+      zzz_FreeSBoxArray((relax_data -> base_sbox_array));
+      (relax_data -> base_sbox_array) = NULL;
+   }
+
    (relax_data -> setup_temp_vec) = 1;
    (relax_data -> setup_a_rem)    = 1;
    (relax_data -> setup_a_sol)    = 1;
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * zzz_SMGRelaxSetNumPreRelax
+ * Note that we require at least 1 pre-relax sweep.
+ *--------------------------------------------------------------------------*/
+
+int
+zzz_SMGRelaxSetNumPreRelax( void *relax_vdata,
+                            int   num_pre_relax )
+{
+   zzz_SMGRelaxData *relax_data = relax_vdata;
+   int               ierr = 0;
+
+   (relax_data -> num_pre_relax) = max(num_pre_relax,1);
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * zzz_SMGRelaxSetNumPostRelax
+ *--------------------------------------------------------------------------*/
+
+int
+zzz_SMGRelaxSetNumPostRelax( void *relax_vdata,
+                             int   num_post_relax )
+{
+   zzz_SMGRelaxData *relax_data = relax_vdata;
+   int          ierr = 0;
+
+   (relax_data -> num_post_relax) = num_post_relax;
 
    return ierr;
 }
@@ -912,6 +973,37 @@ zzz_SMGRelaxSetNewMatrixStencil( void              *relax_vdata,
          (relax_data -> setup_a_sol) = 1;
       }
    }
+
+   return ierr;
+}
+
+
+/*--------------------------------------------------------------------------
+ * zzz_SMGRelaxSetupBaseSBoxArray
+ *--------------------------------------------------------------------------*/
+
+int
+zzz_SMGRelaxSetupBaseSBoxArray( void             *relax_vdata,
+                                zzz_StructMatrix *A,
+                                zzz_StructVector *b,
+                                zzz_StructVector *x           )
+{
+   zzz_SMGRelaxData     *relax_data = relax_vdata;
+
+   zzz_StructGrid       *grid;
+   zzz_BoxArray         *boxes;
+   zzz_SBoxArray        *sboxes;
+
+   int                   ierr;
+
+   grid  = zzz_StructVectorGrid(x);
+   boxes = zzz_StructGridBoxes(grid);
+
+   sboxes = zzz_ProjectBoxArray( boxes, 
+                                 (relax_data -> base_index),
+                                 (relax_data -> base_stride) );
+
+   (relax_data -> base_sbox_array) = sboxes;
 
    return ierr;
 }

@@ -333,3 +333,56 @@ zzz_SMGGetFinalRelativeResidualNorm( void   *smg_vdata,
    return ierr;
 }
 
+/*--------------------------------------------------------------------------
+ * zzz_SMGSetStructVectorConstantValues
+ *--------------------------------------------------------------------------*/
+
+int
+zzz_SMGSetStructVectorConstantValues( zzz_StructVector *vector,
+                                      double            values,
+                                      zzz_SBoxArray    *sbox_array )
+{
+   int    ierr;
+
+   zzz_Box          *v_data_box;
+
+   int               vi;
+   double           *vp;
+
+   zzz_SBox         *sbox;
+   zzz_Index        *loop_size;
+   zzz_Index        *start;
+   zzz_Index        *stride;
+
+   int               loopi, loopj, loopk;
+   int               i;
+
+   /*-----------------------------------------------------------------------
+    * Set the vector coefficients
+    *-----------------------------------------------------------------------*/
+
+   loop_size  = zzz_NewIndex();
+
+   zzz_ForSBoxI(i, sbox_array)
+   {
+      sbox  = zzz_SBoxArraySBox(sbox_array, i);
+      start = zzz_SBoxIMin(sbox);
+      stride = zzz_SBoxStride(sbox);
+
+      v_data_box = zzz_BoxArrayBox(zzz_StructVectorDataSpace(vector), i);
+      vp = zzz_StructVectorBoxData(vector, i);
+
+      zzz_GetSBoxSize(sbox, loop_size);
+      zzz_BoxLoop1(loopi, loopj, loopk, loop_size,
+                   v_data_box, start, stride, vi,
+                   {
+                      vp[vi] = values;
+                   });
+   }
+
+   zzz_FreeIndex(loop_size);
+
+   return ierr;
+}
+
+
