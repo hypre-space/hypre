@@ -261,3 +261,15 @@ HYPRE_ParCSRMatrixMatvec( double alpha, HYPRE_ParCSRMatrix A, HYPRE_ParVector x,
    return ( hypre_ParCSRMatrixMatvec( alpha, (hypre_ParCSRMatrix *) A,
 		(hypre_ParVector *) x, beta, (hypre_ParVector *) y) );
 }
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRMatrixMatvecT
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParCSRMatrixMatvecT( double alpha, HYPRE_ParCSRMatrix A, HYPRE_ParVector x,
+		 double beta, HYPRE_ParVector y)
+{
+   return ( hypre_ParCSRMatrixMatvecT( alpha, (hypre_ParCSRMatrix *) A,
+		(hypre_ParVector *) x, beta, (hypre_ParVector *) y) );
+}
