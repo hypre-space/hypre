@@ -233,7 +233,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
       	t = 1.0 / r_norm;
 	hypre_PCGScaleVector(t,p[0]);
 	i = 0;
-	while (i < k_dim && r_norm > epsilon)
+	while (i < k_dim && r_norm > epsilon && iter < max_iter)
 	{
 		i++;
 		iter++;
