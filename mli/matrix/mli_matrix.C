@@ -163,7 +163,7 @@ MLI_Vector *MLI_Matrix::createVector()
    ierr = HYPRE_IJVectorInitialize(IJvec);
    ierr = HYPRE_IJVectorAssemble(IJvec);
    ierr = HYPRE_IJVectorGetObject(IJvec, (void **) &new_vec);
-   ierr = HYPRE_IJVectorSetObjectType(IJvec, -16);
+   ierr = HYPRE_IJVectorSetObjectType(IJvec, -1);
    ierr = HYPRE_IJVectorDestroy(IJvec);
    HYPRE_ParVectorSetConstantValues( new_vec, 0.0 );
    sprintf( param_string, "HYPRE_ParVector" );
