@@ -685,7 +685,8 @@ zzz_SetStructMatrixNumGhost( zzz_StructMatrix *matrix,
  *--------------------------------------------------------------------------*/
 
 void
-zzz_PrintStructMatrix( char             *filename,
+zzz_PrintStructMatrix( MPI_Comm         *comm,
+		       char             *filename,
                        zzz_StructMatrix *matrix,
                        int               all      )
 {
@@ -707,12 +708,13 @@ zzz_PrintStructMatrix( char             *filename,
    int                 i, j;
 
    int                 myid;
- 
+
+
    /*----------------------------------------
     * Open file
     *----------------------------------------*/
  
-   MPI_Comm_rank(MPI_COMM_WORLD, &myid );
+   MPI_Comm_rank(*comm, &myid );
    sprintf(new_filename, "%s.%05d", filename, myid);
  
    if ((file = fopen(new_filename, "w")) == NULL)
@@ -782,7 +784,8 @@ zzz_PrintStructMatrix( char             *filename,
  *--------------------------------------------------------------------------*/
 
 zzz_StructMatrix *
-zzz_ReadStructMatrix( char *filename,
+zzz_ReadStructMatrix( MPI_Comm *comm,
+		      char *filename,
                       int  *num_ghost )
 {
    FILE               *file;
@@ -807,12 +810,11 @@ zzz_ReadStructMatrix( char *filename,
    int                 i, idummy;
 
    int                 myid;
- 
    /*----------------------------------------
     * Open file
     *----------------------------------------*/
  
-   MPI_Comm_rank(MPI_COMM_WORLD, &myid );
+   MPI_Comm_rank(*comm, &myid );
    sprintf(new_filename, "%s.%05d", filename, myid);
  
    if ((file = fopen(new_filename, "r")) == NULL)
@@ -831,7 +833,7 @@ zzz_ReadStructMatrix( char *filename,
 
    /* read grid info */
    fscanf(file, "\nGrid:\n");
-   grid = zzz_ReadStructGrid(file);
+   grid = zzz_ReadStructGrid(comm,file);
 
    /* read stencil info */
    fscanf(file, "\nStencil:\n");
@@ -852,7 +854,7 @@ zzz_ReadStructMatrix( char *filename,
     * Initialize the matrix
     *----------------------------------------*/
 
-   matrix = zzz_NewStructMatrix(&MPI_COMM_WORLD, grid, stencil);
+   matrix = zzz_NewStructMatrix(comm, grid, stencil);
    zzz_StructMatrixSymmetric(matrix) = symmetric;
    zzz_SetStructMatrixNumGhost(matrix, num_ghost);
    zzz_InitializeStructMatrix(matrix);

@@ -416,7 +416,8 @@ zzz_SetStructVectorNumGhost( zzz_StructVector *vector,
  *--------------------------------------------------------------------------*/
 
 void
-zzz_PrintStructVector( char             *filename,
+zzz_PrintStructVector( MPI_Comm         *comm,
+		       char             *filename,
                        zzz_StructVector *vector,
                        int               all      )
 {
@@ -429,12 +430,12 @@ zzz_PrintStructVector( char             *filename,
    zzz_BoxArray    *data_space;
 
    int              myid;
- 
+
    /*----------------------------------------
     * Open file
     *----------------------------------------*/
  
-   MPI_Comm_rank(MPI_COMM_WORLD, &myid );
+   MPI_Comm_rank(*comm, &myid );
    sprintf(new_filename, "%s.%05d", filename, myid);
  
    if ((file = fopen(new_filename, "w")) == NULL)
@@ -482,7 +483,8 @@ zzz_PrintStructVector( char             *filename,
  *--------------------------------------------------------------------------*/
 
 zzz_StructVector *
-zzz_ReadStructVector( char *filename,
+zzz_ReadStructVector( MPI_Comm *comm,
+		      char *filename,
                       int  *num_ghost )
 {
    FILE               *file;
@@ -501,7 +503,7 @@ zzz_ReadStructVector( char *filename,
     * Open file
     *----------------------------------------*/
  
-   MPI_Comm_rank(MPI_COMM_WORLD, &myid );
+   MPI_Comm_rank(*comm, &myid );
    sprintf(new_filename, "%s.%05d", filename, myid);
  
    if ((file = fopen(new_filename, "r")) == NULL)
@@ -518,13 +520,13 @@ zzz_ReadStructVector( char *filename,
 
    /* read grid info */
    fscanf(file, "\nGrid:\n");
-   grid = zzz_ReadStructGrid(file);
+   grid = zzz_ReadStructGrid(comm,file);
 
    /*----------------------------------------
     * Initialize the vector
     *----------------------------------------*/
 
-   vector = zzz_NewStructVector(&MPI_COMM_WORLD, grid);
+   vector = zzz_NewStructVector(comm, grid);
    zzz_SetStructVectorNumGhost(vector, num_ghost);
    zzz_InitializeStructVector(vector);
 
