@@ -103,7 +103,7 @@ parse_arguments () {
       h) usage; exit 2;;
       m) HYPRE_SEND_MAIL="yes"; MailOpt="-mail";;
      +m) HYPRE_SEND_MAIL="no"; MailOpt="";;
-      n) confbuildtest $Build   "--without-MPI" "no_mpi"    1 1 1 0 1 1 0;;
+      n) confbuildtest $Build   "--without-MPI" "no_mpi"    1 0 1 1 1 1 0;;
       o) confbuildtest $OPTARG  "--with-openmp" "openmp"    0 0 0 0 0 1 0;;
       p) confbuildtest $OPTARG  "--with-petac"  "petac"     0 0 0 0 1 0 0;;
       q) confbuildtest $OPTARG  "--with-purify-to-file" \
@@ -112,7 +112,7 @@ parse_arguments () {
       r) HYPRE_RUN_MACHINE=$OPTARG;;
       s) confbuildtest $Build   "--with-strict-checking" \
                                          "strict_checking"  1 1 1 1 1 1 0;;
-      t) confbuildtest $OPTARG "--with-pthreads" "pthreads" 1 0 0 0 0 0 0;;
+      t) confbuildtest $OPTARG "--with-pthreads" "pthreads" 0 0 1 0 0 0 0;;
       x) build $Build   "beta++" "beta++" "test";;
       y) build $Build   "beta77" "beta77" "test";;
       :) echo "$0: \"$argcur\" requires a value"; exit 2;;
@@ -221,7 +221,7 @@ echo "$MailGroup" > ${Hdr}.${MessageStr}.${MakeOpt}.err.email
 confbuildtest () 
 {
 BuildOpt=$1	 ConfigOption=$2	 MessageStr=$3
-StructOpt=$4	 SstructOpt=$5	 IJOpt=$6	 FeiOpt=$7
+IJOpt=$4	 FeiOpt=$5	StructOpt=$6	 SstructOpt=$7	 
 MakeOpt=$8	 BetaOpt=$9
 shift
 NoFeiOpt=$9
@@ -238,16 +238,6 @@ then
 
     $MAKE veryclean
 
-    if [ $StructOpt -ne $Skip ]
-    then
-      makeit "struct" $MessageStr "$HYPRE_STRUCT_EMAIL"
-    fi
-
-    if [ $SstructOpt -ne $Skip ]
-    then
-      makeit "sstruct" $MessageStr "$HYPRE_STRUCT_EMAIL"
-    fi
-
     if [ $IJOpt -ne $Skip ]
     then
       makeit "IJ" $MessageStr "$HYPRE_IJ_EMAIL"
@@ -256,6 +246,16 @@ then
     if [ $FeiOpt -ne $Skip ]
     then
       makeit "fei" $MessageStr "$HYPRE_FEI_EMAIL"
+    fi
+
+    if [ $StructOpt -ne $Skip ]
+    then
+      makeit "struct" $MessageStr "$HYPRE_STRUCT_EMAIL"
+    fi
+
+    if [ $SstructOpt -ne $Skip ]
+    then
+      makeit "sstruct" $MessageStr "$HYPRE_STRUCT_EMAIL"
     fi
 
     if [ $MakeOpt -ne $Skip ]
