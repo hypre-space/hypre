@@ -127,7 +127,7 @@ create_3d_laplacian: create_3d_laplacian.o libHYPRE_mv.a
 
 libHYPRE_mv.a: ${OBJS}
 	@echo  "Building $@ ... "
-	ar -ru $@ ${OBJS}
+	ar -rcu $@ ${OBJS}
 	${RANLIB} $@
 
 ${OBJS}: ${HEADERS}

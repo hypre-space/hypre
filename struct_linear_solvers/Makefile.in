@@ -96,7 +96,7 @@ veryclean: clean
 
 libHYPRE_ls.a: ${OBJS}
 	@echo  "Building $@ ... "
-	ar -ru $@ ${OBJS}
+	ar -rcu $@ ${OBJS}
 	${RANLIB} $@
 
 ${OBJS}: ${HEADERS}
