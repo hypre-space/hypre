@@ -12,7 +12,10 @@
  *
  *****************************************************************************/
 
+#define NO_PTHREAD_MANGLING
+
 #include "headers.h"
+#include "threading.h"
 
 /*--------------------------------------------------------------------------
  * HYPRE_NewStructVector
@@ -109,6 +112,14 @@ HYPRE_GetStructVectorValues( HYPRE_StructVector  vector,
  * HYPRE_SetStructVectorBoxValues
  *--------------------------------------------------------------------------*/
 
+typedef struct {
+   HYPRE_StructVector  vector;
+   int                *ilower;
+   int                *iupper;
+   double             *values;
+   int                *returnvalue;
+} HYPRE_SetStructVectorBoxValuesArgs;
+
 int 
 HYPRE_SetStructVectorBoxValues( HYPRE_StructVector  vector,
                                 int                *ilower,
@@ -141,9 +152,58 @@ HYPRE_SetStructVectorBoxValues( HYPRE_StructVector  vector,
    return (ierr);
 }
 
+void
+HYPRE_SetStructVectorBoxValuesVoidPtr( void *argptr )
+{
+   HYPRE_SetStructVectorBoxValuesArgs *localargs =
+                              (HYPRE_SetStructVectorBoxValuesArgs *) argptr;
+
+   *(localargs->returnvalue) = 
+                 HYPRE_SetStructVectorBoxValues( localargs->vector,
+                                                 localargs->ilower,
+                                                 localargs->iupper,
+                                                 localargs->values );
+}
+
+int
+HYPRE_SetStructVectorBoxValuesPush( HYPRE_StructVector  vector,
+                                    int                *ilower,
+                                    int                *iupper,
+                                    double             *values )
+{
+   HYPRE_SetStructVectorBoxValuesArgs  pushargs;
+   int                                 i;
+   int                                 returnvalue;
+
+   pushargs.vector = vector;
+   pushargs.ilower = ilower;
+   pushargs.iupper = iupper;
+   pushargs.values = values;
+   pushargs.returnvalue = (int *) malloc(sizeof(int));
+
+   for (i=0; i<NUM_THREADS; i++)
+      hypre_work_put( HYPRE_SetStructVectorBoxValuesVoidPtr, (void *)&pushargs);
+
+   hypre_work_wait();
+
+   returnvalue = *(pushargs.returnvalue);
+
+   free( pushargs.returnvalue );
+
+   return returnvalue;
+}
+
 /*--------------------------------------------------------------------------
  * HYPRE_GetStructVectorBoxValues
  *--------------------------------------------------------------------------*/
+
+typedef struct {
+   HYPRE_StructVector  vector;
+   int                *ilower;
+   int                *iupper;
+   double            **values_ptr;
+   int                *returnvalue;
+} HYPRE_GetStructVectorBoxValuesArgs;
 
 int 
 HYPRE_GetStructVectorBoxValues( HYPRE_StructVector  vector,
@@ -176,6 +236,47 @@ HYPRE_GetStructVectorBoxValues( HYPRE_StructVector  vector,
    hypre_FreeBox(new_value_box);
 
    return (ierr);
+}
+
+void
+HYPRE_GetStructVectorBoxValuesVoidPtr( void *argptr )
+{
+   HYPRE_GetStructVectorBoxValuesArgs *localargs =
+                              (HYPRE_GetStructVectorBoxValuesArgs *) argptr;
+
+   *(localargs->returnvalue) = 
+                 HYPRE_GetStructVectorBoxValues( localargs->vector,
+                                                 localargs->ilower,
+                                                 localargs->iupper,
+                                                 localargs->values_ptr );
+}
+
+int
+HYPRE_GetStructVectorBoxValuesPush( HYPRE_StructVector  vector,
+                                    int                *ilower,
+                                    int                *iupper,
+                                    double            **values_ptr )
+{
+   HYPRE_GetStructVectorBoxValuesArgs  pushargs;
+   int                                 i;
+   int                                 returnvalue;
+
+   pushargs.vector     = vector;
+   pushargs.ilower     = ilower;
+   pushargs.iupper     = iupper;
+   pushargs.values_ptr = values_ptr;
+   pushargs.returnvalue = (int *) malloc(sizeof(int));
+
+   for (i=0; i<NUM_THREADS; i++)
+      hypre_work_put( HYPRE_GetStructVectorBoxValuesVoidPtr, (void *)&pushargs);
+
+   hypre_work_wait();
+
+   returnvalue = *(pushargs.returnvalue);
+
+   free( pushargs.returnvalue );
+
+   return returnvalue;
 }
 
 /*--------------------------------------------------------------------------
@@ -214,6 +315,12 @@ HYPRE_SetStructVectorNumGhost( HYPRE_StructVector  vector,
 /*--------------------------------------------------------------------------
  * HYPRE_SetStructVectorConstantValues
  *--------------------------------------------------------------------------*/
+
+typedef struct {
+   HYPRE_StructVector  vector;
+   double              values;
+   int                *returnvalue;
+} HYPRE_SetStructVectorConstantValuesArgs;
  
 int
 HYPRE_SetStructVectorConstantValues( HYPRE_StructVector  vector,
@@ -221,6 +328,42 @@ HYPRE_SetStructVectorConstantValues( HYPRE_StructVector  vector,
 {
    return( hypre_SetStructVectorConstantValues( (hypre_StructVector *) vector,
                                                 values) );
+}
+
+void
+HYPRE_SetStructVectorConstantValuesVoidPtr( void *argptr )
+{
+   HYPRE_SetStructVectorConstantValuesArgs *localargs =
+                           (HYPRE_SetStructVectorConstantValuesArgs *) argptr;
+
+   *(localargs->returnvalue) = 
+                 HYPRE_SetStructVectorConstantValues( localargs->vector,
+                                                      localargs->values );
+}
+
+int
+HYPRE_SetStructVectorConstantValuesPush( HYPRE_StructVector  vector,
+                                         double              values )
+{
+   HYPRE_SetStructVectorConstantValuesArgs  pushargs;
+   int                                 i;
+   int                                 returnvalue;
+
+   pushargs.vector = vector;
+   pushargs.values = values;
+   pushargs.returnvalue = (int *) malloc(sizeof(int));
+
+   for (i=0; i<NUM_THREADS; i++)
+      hypre_work_put( HYPRE_SetStructVectorConstantValuesVoidPtr, 
+                      (void *)&pushargs );
+
+   hypre_work_wait();
+
+   returnvalue = *(pushargs.returnvalue);
+
+   free( pushargs.returnvalue );
+
+   return returnvalue;
 }
 
 /*--------------------------------------------------------------------------

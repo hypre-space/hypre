@@ -270,10 +270,45 @@ HYPRE_SetStructMatrixSymmetric( HYPRE_StructMatrix  matrix,
  * HYPRE_PrintStructMatrix
  *--------------------------------------------------------------------------*/
 
+typedef struct {
+   char *filename;
+   HYPRE_StructMatrix matrix;
+   int all;
+} HYPRE_PrintStructMatrixArgs;
+
 void 
 HYPRE_PrintStructMatrix( char               *filename,
                          HYPRE_StructMatrix  matrix,
                          int                 all )
 {
    hypre_PrintStructMatrix( filename, (hypre_StructMatrix *) matrix, all );
+}
+
+void
+HYPRE_PrintStructMatrixVoidPtr( void *argptr )
+{
+   HYPRE_PrintStructMatrixArgs *localargs = 
+                                    (HYPRE_PrintStructMatrixArgs *) argptr;
+
+   HYPRE_PrintStructMatrix( localargs->filename, 
+                            localargs->matrix,
+                            localargs->all );
+}
+
+void
+HYPRE_PrintStructMatrixPush( char               *filename,
+                             HYPRE_StructMatrix  matrix,
+                             int                 all )
+{
+   HYPRE_PrintStructMatrixArgs  pushargs;
+   int                          i;
+
+   pushargs.filename = filename;
+   pushargs.matrix   = matrix;
+   pushargs.all      = all;
+
+   for (i = 0; i < NUM_THREADS; i++)
+      hypre_work_put( HYPRE_PrintStructMatrixVoidPtr, (void *)&pushargs );
+
+   hypre_work_wait();
 }
