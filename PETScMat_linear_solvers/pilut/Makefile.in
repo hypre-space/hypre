@@ -44,11 +44,11 @@ CINCLUDES=@INCLUDES@ @MPIINCLUDE@
 CDEFS = @HYPRE_PETSCDEFS@ -DHYPRE_NO_PTHREAD_MANGLING
 
 CFLAGS = \
- -I..\
- -I../utilities\
+ -I../..\
+ -I../../utilities\
  -I.\
  -I../../distributed_matrix\
- -I../../distributed_linear_solvers/pilut
+ -I../../distributed_linear_solvers/pilut \
  @PETSCINCLUDE@ \
  ${C_COMPILE_FLAGS}\
  ${CINCLUDES}\
