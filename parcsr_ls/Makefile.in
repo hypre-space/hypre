@@ -59,6 +59,7 @@ FILES =\
  par_amg.c\
  par_amg_setup.c\
  par_amg_solve.c\
+ par_amg_solveT.c\
  par_stats.c\
  par_cycle.c\
  par_interp.c\
