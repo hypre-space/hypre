@@ -1,5 +1,3 @@
-
-
 /*
  * -- SuperLU routine (version 2.0) --
  * Univ. of California Berkeley, Xerox Palo Alto Research Center,
@@ -14,6 +12,12 @@
  * Note:
  *     This is only used when the system lacks an efficient BLAS library.
  */
+
+/* dmyblas2.c */
+void dlsolve ( int ldm , int ncol , double *M , double *rhs );
+void dusolve ( int ldm , int ncol , double *M , double *rhs );
+void dmatvec ( int ldm , int nrow , int ncol , double *M , 
+               double *vec , double *Mxvec );
 
 /*
  * Solves a dense UNIT lower triangular system. The unit lower 

@@ -1,4 +1,5 @@
 #include "f2c.h"
+#include "hypre_blas.h"
 
 /* Subroutine */ int dswap_(integer *n, doublereal *dx, integer *incx, 
 	doublereal *dy, integer *incy)
@@ -231,7 +232,7 @@ L40:
 	return 0;
     }
 /*     Quick return if possible. */
-    if (*m == 0 || *n == 0 || *alpha == 0. && *beta == 1.) {
+    if (*m == 0 || *n == 0 || (*alpha == 0. && *beta == 1.)) {
 	return 0;
     }
 /*     And when  alpha.eq.zero. */
@@ -521,7 +522,7 @@ L40:
 	return 0;
     }
 /*     Quick return if possible. */
-    if (*n == 0 || (*alpha == 0. || *k == 0) && *beta == 1.) {
+    if (*n == 0 || ((*alpha == 0. || *k == 0) && (*beta == 1.))) {
 	return 0;
     }
 /*     And when  alpha.eq.zero. */
@@ -2725,7 +2726,7 @@ doublereal dlanst_(char *norm, integer *n, doublereal *d__, doublereal *e)
 	*info = -1;
     } else if (*n < 0) {
 	*info = -2;
-    } else if (*ldz < 1 || icompz > 0 && *ldz < max(1,*n)) {
+    } else if ((*ldz < 1) || ((icompz > 0) && (*ldz < max(1,*n)))) {
 	*info = -6;
     }
     if (*info != 0) {

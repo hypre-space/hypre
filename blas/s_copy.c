@@ -1,4 +1,5 @@
 #include "f2c.h"
+#include "hypre_blas.h"
 
 /* assign strings:  a = b */
 

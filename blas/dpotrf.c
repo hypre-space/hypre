@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "f2c.h"
+#include "hypre_blas.h"
 
 /* Subroutine */ int dpotrf_(char *uplo, integer *n, doublereal *a, integer *
 	lda, integer *info)
@@ -741,7 +742,7 @@ integer ilaenv_(integer *ispec, char *name, char *opts, integer *n1, integer *
        System generated locals */
     integer ret_val;
     /* Builtin functions   
-       Subroutine */ int s_copy(char *, char *, ftnlen, ftnlen);
+       Subroutine */ /*int s_copy(char *, char *, ftnlen, ftnlen);*/
     integer s_cmp(char *, char *, ftnlen, ftnlen);
     /* Local variables */
     static integer i;
@@ -796,13 +797,13 @@ L100:
 
 /*        EBCDIC character set */
 
-	if (ic >= 129 && ic <= 137 || ic >= 145 && ic <= 153 || ic >= 162 && 
-		ic <= 169) {
+	if ((ic >= 129 && ic <= 137) || (ic >= 145 && ic <= 153) || 
+            (ic >= 162 && ic <= 169)) {
 	    *(unsigned char *)subnam = (char) (ic + 64);
 	    for (i = 2; i <= 6; ++i) {
 		ic = *(unsigned char *)&subnam[i - 1];
-		if (ic >= 129 && ic <= 137 || ic >= 145 && ic <= 153 || ic >= 
-			162 && ic <= 169) {
+		if ((ic >= 129 && ic <= 137) || (ic >= 145 && ic <= 153) || 
+                    (ic >= 162 && ic <= 169)) {
 		    *(unsigned char *)&subnam[i - 1] = (char) (ic + 64);
 		}
 /* L20: */
@@ -1250,12 +1251,12 @@ r
  or   
           upper case 'Z'. */
 
-	if (inta >= 129 && inta <= 137 || inta >= 145 && inta <= 153 || inta 
-		>= 162 && inta <= 169) {
+	if ((inta >= 129 && inta <= 137) || (inta >= 145 && inta <= 153) || 
+            (inta >= 162 && inta <= 169)) {
 	    inta += 64;
 	}
-	if (intb >= 129 && intb <= 137 || intb >= 145 && intb <= 153 || intb 
-		>= 162 && intb <= 169) {
+	if ((intb >= 129 && intb <= 137) || (intb >= 145 && intb <= 153) || 
+            (intb >= 162 && intb <= 169)) {
 	    intb += 64;
 	}
 

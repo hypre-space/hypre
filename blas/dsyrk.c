@@ -5,6 +5,7 @@
 */
 
 #include "f2c.h"
+#include "hypre_blas.h"
 
 /* Subroutine */ int dsyrk_(char *uplo, char *trans, integer *n, integer *k, 
 	doublereal *alpha, doublereal *a, integer *lda, doublereal *beta, 
@@ -201,7 +202,7 @@
 
 /*     Quick return if possible. */
 
-    if (*n == 0 || (*alpha == 0. || *k == 0) && *beta == 1.) {
+    if (*n == 0 || ((*alpha == 0. || *k == 0) && (*beta == 1.))) {
 	return 0;
     }
 

@@ -5,6 +5,7 @@
 */
 
 #include "f2c.h"
+#include "hypre_blas.h"
 
 /* Subroutine */ int dsymv_(char *uplo, integer *n, doublereal *alpha, 
 	doublereal *a, integer *lda, doublereal *x, integer *incx, doublereal 
@@ -145,7 +146,7 @@
 
 /*     Quick return if possible. */
 
-    if (*n == 0 || *alpha == 0. && *beta == 1.) {
+    if (*n == 0 || (*alpha == 0. && *beta == 1.)) {
 	return 0;
     }
 
