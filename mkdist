@@ -1,0 +1,149 @@
+#!/bin/ksh
+#BHEADER***********************************************************************
+# (c) 2000   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+help ()
+{
+  printf "$0: [-help] | VersionId\n"
+  printf "  where: VersionId is the desired version identification\n"
+  printf "  (e.g., hypre-VersionId.tar.gz, hypre-1.00.00.tar.gz).\n"
+  printf "  By convension, VersionId use the following syntax \"M.mm.rr\".\n"
+  printf "  The \"M\" is the major release number, \"mm\" is the minor\n"
+  printf "  relases number, and the \"rr\" an update number. VersionId\n"
+  printf "  is used for the name of the release creation and is used\n"
+  printf "  in the tar file name and root directory for the distribution.\n"
+  printf "  If VersionId can be mapped into a valid rtag branch from the\n"
+  printf "  source repository. It is assumed that the rtag id will follow\n"
+  printf "  naming convension, \"VM-nn-rr\", note: the leading (capital)\n"
+  printf "  \"V\" and the version number separated with \"-\" replacing\n"
+  printf "  the \".\"s. If the VersionId can not be mapped to a current\n"
+  printf "  rtag id, then an error message is generated.\n"
+  printf "  and VersionId will be ued for the distribution labeling.\n"
+  printf "  If VersionId is not provided then the version will be derived\n"
+  printf "  from the main trunk archive it self (either patchlevel.h or\n"
+  printf "  utilites/HYPRE_utilites.h.\n"
+}
+
+usage ()
+{
+  printf "usage: $0 VersionId\n"
+}
+
+#=============================================================================
+# Define install permissions:
+#   - give everybody read/execute permission
+#   - give user/group write permission
+#=============================================================================
+
+OldMask=umask
+umask 002
+
+#=============================================================================
+# Parse arguments
+#=============================================================================
+
+case $1 in
+    -h|-help) 
+        help
+        exit;;
+esac
+
+if [ $# -gt 0 ]
+then
+  VersionId=$1
+  RtagVersionId="`echo ${VersionId} | tr '.' '-'`"
+  RtagVersionId="V${RtagVersionId}"
+else
+  usage
+  exit
+fi
+
+#===========================================================================
+# Update the source
+#===========================================================================
+
+        # create dist directory
+HYPRE_DIR="hypre-${VersionId}"
+HYPRE_INSTALL_DIR=`pwd`"/$HYPRE_DIR"
+export HYPRE_INSTALL_DIR
+mkdir -p $HYPRE_INSTALL_DIR
+mkdir $HYPRE_INSTALL_DIR/src
+    
+
+(       # checkout the source from the repository
+  cd $HYPRE_INSTALL_DIR/src
+  if [ ! -d "$CVSROOT" ]
+  then
+    echo "Error: no CVS repository, CVSROOT = $CVSROOT"
+    exit
+  fi
+  cvs export -r ${RtagVersionId} linear_solvers
+  if [  $? -ne 0 ]
+  then
+    echo "Error: Rtag Version=${RtagVersionId} not found in CVS repository"
+    exit
+  fi
+)
+
+Version=`$HYPRE_INSTALL_DIR/src/linear_solvers/utilities/version -number`
+if [  $? -ne 0 ]
+then
+  echo "Error: CVS repository defective"
+  exit
+fi
+mv $HYPRE_DIR "hypre-${Version}"
+HYPRE_DIR="hypre-${Version}"
+HYPRE_INSTALL_DIR=`pwd`"/$HYPRE_DIR"
+    
+(       # build documentation and tools and install
+  mkdir $HYPRE_INSTALL_DIR/bin
+  mkdir $HYPRE_INSTALL_DIR/docs
+  cd $HYPRE_INSTALL_DIR/src/linear_solvers
+  ./configure
+  (cd docs;  make -i install; make veryclean)
+  (cd tools; make install; make veryclean)
+)
+    
+(       # store version info
+  cd $HYPRE_INSTALL_DIR
+  src/linear_solvers/utilities/version > VERSION
+  # store version name with syntax VX.XX.XX (for sorting purposes)
+  src/linear_solvers/utilities/version -number | \
+  awk 'BEGIN {FS="."} {printf "V%d.%02d.%02d\n",$1,$2,$3}' > VERSION_NAME
+)
+
+        # create the hypre-${VersionId}.tar file
+echo "creating $HYPRE_DIR.tar file ..."
+tar cf $HYPRE_DIR.tar \
+    $HYPRE_DIR/VER* \
+    $HYPRE_DIR/docs \
+    $HYPRE_DIR/bin \
+    $HYPRE_DIR/src/linear_solvers/configure \
+    $HYPRE_DIR/src/linear_solvers/tarch \
+    $HYPRE_DIR/src/linear_solvers/Makefile.in \
+    $HYPRE_DIR/src/linear_solvers/HYPRE.h \
+    $HYPRE_DIR/src/linear_solvers/HYPRE_config.h.in \
+    $HYPRE_DIR/src/linear_solvers/blas \
+    $HYPRE_DIR/src/linear_solvers/utilities \
+    $HYPRE_DIR/src/linear_solvers/struct_matrix_vector \
+    $HYPRE_DIR/src/linear_solvers/struct_linear_solvers \
+    $HYPRE_DIR/src/linear_solvers/sstruct_matrix_vector \
+    $HYPRE_DIR/src/linear_solvers/sstruct_linear_solvers \
+    $HYPRE_DIR/src/linear_solvers/seq_matrix_vector \
+    $HYPRE_DIR/src/linear_solvers/parcsr_matrix_vector \
+    $HYPRE_DIR/src/linear_solvers/distributed_matrix \
+    $HYPRE_DIR/src/linear_solvers/matrix_matrix \
+    $HYPRE_DIR/src/linear_solvers/IJ_matrix_vector \
+    $HYPRE_DIR/src/linear_solvers/distributed_linear_solvers/pilut \
+    $HYPRE_DIR/src/linear_solvers/distributed_linear_solvers/ParaSails \
+    $HYPRE_DIR/src/linear_solvers/parcsr_linear_solvers \
+    $HYPRE_DIR/src/linear_solvers/FEI_matrix_vector \
+    $HYPRE_DIR/src/linear_solvers/test
+
+gzip $HYPRE_DIR.tar
