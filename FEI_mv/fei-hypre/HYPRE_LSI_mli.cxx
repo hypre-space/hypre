@@ -381,9 +381,19 @@ int HYPRE_LSI_MLISetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
    /* load null space, if there is any                         */
    /* -------------------------------------------------------- */ 
 
-   if ( mli_object->printNullSpace_ == 1 )
+   if ((mli_object->printNullSpace_ & 1) == 1 )
    {
       strcpy( paramString, "printNullSpace" );
+      method->setParams( paramString, 0, NULL );
+   }
+   if ((mli_object->printNullSpace_ & 2) == 2 )
+   {
+      strcpy( paramString, "printElemNodeList" );
+      method->setParams( paramString, 0, NULL );
+   }
+   if ((mli_object->printNullSpace_ & 4) == 4 )
+   {
+      strcpy( paramString, "printNodalCoord" );
       method->setParams( paramString, 0, NULL );
    }
    if ( mli_object->nCoordinates_ != NULL )
@@ -586,7 +596,6 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
 {
    int           i, mypid;
    double        weight;
-   MPI_Comm      mpiComm;
    HYPRE_LSI_MLI *mli_object;
    char          param1[256], param2[256], param3[256];
 
@@ -625,7 +634,9 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
          printf("\t      saAMGCalibrationSize <d> \n");
          printf("\t      rsAMGSymmetric <d> \n");
          printf("\t      rsAMGInjectionForR\n");
-         printf("\t      printNullSpace <d> \n");
+         printf("\t      printNullSpace\n");
+         printf("\t      printElemNodeList \n");
+         printf("\t      printNodalCoord \n");
          printf("\t      paramFile <s> \n");
       }
    }
@@ -771,7 +782,15 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
    }
    else if ( !strcmp(param2, "printNullSpace") )
    {
-      mli_object->printNullSpace_ = 1;
+      mli_object->printNullSpace_ |= 1;
+   }
+   else if ( !strcmp(param2, "printElemNodeList") )
+   {
+      mli_object->printNullSpace_ |= 2;
+   }
+   else if ( !strcmp(param2, "printNodalCoord") )
+   {
+      mli_object->printNullSpace_ |= 4;
    }
    else if ( !strcmp(param2, "paramFile") )
    {
@@ -806,6 +825,8 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
          printf("\t      rsAMGSymmetric <d> \n"); 
          printf("\t      rsAMGInjectionForR\n"); 
          printf("\t      printNullSpace\n");
+         printf("\t      printElemNodeList\n");
+         printf("\t      printNodalCoord\n");
          printf("\t      paramFile <s> \n");
          exit(1);
       }
