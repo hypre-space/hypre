@@ -334,8 +334,8 @@ package Hypre {
      int SetStringParameter (in string name, in string value);
      int SetIntArrayParameter (in string name, in array<int> value);
      int SetDoubleArrayParameter (in string name, in array<double> value);
-     int Setup (in Vector x, in Vector y);
-     int Apply (in Vector x, out Vector y);
+     int Setup (in Vector b, in Vector x);
+     int Apply (in Vector b, out Vector x);
   }
 
   interface Solver extends Operator
