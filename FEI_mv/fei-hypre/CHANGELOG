@@ -60,4 +60,7 @@
 07/17/01    2.0.1R2
             - improve the projection methods 
             - add amgMaxIter 
+07/19/01    2.0.1R3
+            - fix a bug in the lower and upper bounds of MatrixCreate
+            - fix problems with the projection methods 
  
