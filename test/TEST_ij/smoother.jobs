@@ -1,0 +1,30 @@
+#!/bin/ksh 
+#BHEADER***********************************************************************
+# (c) 1998   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+#=============================================================================
+# ij: Run default case with different coarsenings, hybrid GS,
+#    1: hybrid SOR on 3 procs
+#    2: hybrid scaled symGS on 4 procs. with scaled opt. outer wt on fine level
+#    3: hybrid GS on 4 procs with backward solve GS on up cycle
+#    4: hybrid GS, no CF-relaxation, on 4 procs
+#=============================================================================
+
+mpirun -np 3 ./new_ij -rhsrand -n 15 30 10 -w 1.1 -wl 1.0 0 \
+ > smoother.out.0
+
+mpirun -np 4 ./new_ij -rhsrand -n 15 15 10 -P 2 2 1 -rlx 6 -owl -10 0 \
+ > coarsening.out.1
+
+mpirun -np 4 ./new_ij -rhsrand -n 20 20 10 -P 2 2 1 -rlx_up 4 \
+ > coarsening.out.2
+
+mpirun -np 4 ./new_ij -rhsrand -n 20 20 10 -P 2 2 1 -CF_off \
+ > coarsening.out.3
+
