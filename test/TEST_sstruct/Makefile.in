@@ -197,6 +197,8 @@ FILES = \
  periodic.sh\
  solvers.jobs\
  solvers.sh\
+ sstruct_struct.jobs\
+ sstruct_struct.sh\
  sstruct.in.bcube\
  sstruct.in.block\
  sstruct.in.cube\
@@ -211,6 +213,7 @@ FILES = \
  sstruct.in.pcube\
  sstruct.in.periodic\
  sstruct.in.periodic.2D\
+ sstruct.in.struct\
  sstruct.in.symm0\
  sstruct.in.symm0.2D\
  sstruct.in.symm1\
