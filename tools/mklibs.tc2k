@@ -165,13 +165,13 @@ then
         HYPRE_INSTALL_DIR=$DIST_DIR
         export HYPRE_INSTALL_DIR
         cd src
-        $CONFIGURE --with-CC=cc --with-CXX=cxx --with-F77=f77 \
-          --with-CFLAGS="-fast -I/usr/include" \
-          --with-CXXFLAGS="-fast -I/usr/include" \
-          --with-LDFLAGS="-L/usr/lib -lmpi"
+        $CONFIGURE --prefix=$HYPRE_INSTALL_DIR \
+	  CC=cc CXX=cxx F77=f77 \
+          CFLAGS="-fast -I/usr/include" \
+          CXXFLAGS="-fast -I/usr/include" \
+          LDFLAGS="-L/usr/lib -lmpi"
         $MAKE install
-        $MAKE clean
-        $MAKE veryclean
+        $MAKE distclean
     )
     (
         HYPRE_INSTALL_DIR=$DIST_DIR/debug
@@ -179,13 +179,13 @@ then
 	mkdir -p $HYPRE_INSTALL_DIR
         
         cd src
-        $CONFIGURE --enable-debug --with-CC=cc --with-CXX=cxx --with-F77=f77 \
-          --with-CFLAGS="-fast -I/usr/include" \
-          --with-CXXFLAGS="-fast -I/usr/include" \
-          --with-LDFLAGS="-L/usr/lib -lmpi"
+        $CONFIGURE --enable-debug --prefix=$HYPRE_INSTALL_DIR \
+	  CC=cc CXX=cxx F77=f77 \
+          CFLAGS="-fast -I/usr/include" \
+          CXXFLAGS="-fast -I/usr/include" \
+          LDFLAGS="-L/usr/lib -lmpi"
         $MAKE install
-        $MAKE clean
-        $MAKE veryclean
+        $MAKE distclean
     )
 fi
 
@@ -198,10 +198,9 @@ then
 	mkdir -p $HYPRE_INSTALL_DIR
         
         cd src
-        $CONFIGURE --without-MPI --with-COMM_SIMPLE
+        $CONFIGURE --without-MPI --with-COMM_SIMPLE --prefix=$HYPRE_INSTALL_DIR 
         $MAKE install
-        $MAKE clean
-        $MAKE veryclean
+        $MAKE distclean
     )
     (
         HYPRE_INSTALL_DIR=$DIST_DIR/serial/debug
@@ -209,10 +208,9 @@ then
 	mkdir -p $HYPRE_INSTALL_DIR
         
         cd src
-        $CONFIGURE --without-MPI --with-COMM_SIMPLE --enable-debug
+        $CONFIGURE --without-MPI --with-COMM_SIMPLE --enable-debug --prefix=$HYPRE_INSTALL_DIR 
         $MAKE install
-        $MAKE clean
-        $MAKE veryclean
+        $MAKE distclean
     )
 fi
 
@@ -229,10 +227,9 @@ then
 	mkdir -p $HYPRE_INSTALL_DIR
         
         cd src
-        $CONFIGURE --with-openmp
+        $CONFIGURE --with-openmp --prefix=$HYPRE_INSTALL_DIR 
         $MAKE install
-        $MAKE clean
-        $MAKE veryclean
+        $MAKE distclean
     )
     (
         HYPRE_INSTALL_DIR=$DIST_DIR/threads/debug
@@ -240,10 +237,9 @@ then
 	mkdir -p $HYPRE_INSTALL_DIR
         
         cd src
-        $CONFIGURE --with-openmp --enable-debug
+        $CONFIGURE --with-openmp --enable-debug --prefix=$HYPRE_INSTALL_DIR 
         $MAKE install
-        $MAKE clean
-        $MAKE veryclean
+        $MAKE distclean
     )
   fi
 fi

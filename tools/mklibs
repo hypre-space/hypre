@@ -39,7 +39,7 @@ build_general ()
     rm -fR $HYPRE_INSTALL_DIR/$i
     ln -s $DIST_DIR/$i ../$i
   done
-  for i in serial share threads 
+  for i in serial shared threads
   do
     if [ -d $DIST_DIR/$i ]
     then
@@ -57,7 +57,7 @@ build_beta ()
     rm -fR $HYPRE_INSTALL_DIR/$i
     ln -s $DIST_DIR/$i $HYPRE_INSTALL_DIR/$i
   done
-  for i in serial share threads
+  for i in serial shared threads
   do
     if [ -d $DIST_DIR/$i ]
     then
@@ -77,7 +77,7 @@ build_alpha ()
       rm -fR $HYPRE_INSTALL_DIR/$i
       ln -s $DIST_DIR/$i $HYPRE_INSTALL_DIR/$i
     done
-    for i in serial share threads
+    for i in serial shared threads
     do
       if [ -d $DIST_DIR/$i ]
       then
@@ -165,7 +165,7 @@ then
         HYPRE_INSTALL_DIR=$DIST_DIR
         export HYPRE_INSTALL_DIR
         cd src
-        $CONFIGURE
+        $CONFIGURE --prefix=$HYPRE_INSTALL_DIR 
         $MAKE install
         $MAKE distclean
     )
@@ -175,7 +175,7 @@ then
 	mkdir -p $HYPRE_INSTALL_DIR
         
         cd src
-        $CONFIGURE --enable-debug
+        $CONFIGURE --enable-debug --prefix=$HYPRE_INSTALL_DIR
         $MAKE install
         $MAKE distclean
     )
@@ -190,7 +190,7 @@ then
 	mkdir -p $HYPRE_INSTALL_DIR
         
         cd src
-        $CONFIGURE --without-MPI --with-COMM_SIMPLE
+        $CONFIGURE --without-MPI --with-COMM_SIMPLE --prefix=$HYPRE_INSTALL_DIR 
         $MAKE install
         $MAKE distclean
     )
@@ -200,7 +200,7 @@ then
 	mkdir -p $HYPRE_INSTALL_DIR
         
         cd src
-        $CONFIGURE --without-MPI --with-COMM_SIMPLE --enable-debug
+        $CONFIGURE --without-MPI --with-COMM_SIMPLE --enable-debug --prefix=$HYPRE_INSTALL_DIR 
         $MAKE install
         $MAKE distclean
     )
@@ -219,7 +219,7 @@ then
 	mkdir -p $HYPRE_INSTALL_DIR
         
         cd src
-        $CONFIGURE --with-openmp
+        $CONFIGURE --with-openmp --prefix=$HYPRE_INSTALL_DIR 
         $MAKE install
         $MAKE distclean
     )
@@ -229,7 +229,7 @@ then
 	mkdir -p $HYPRE_INSTALL_DIR
         
         cd src
-        $CONFIGURE --with-openmp --enable-debug
+        $CONFIGURE --with-openmp --enable-debug --prefix=$HYPRE_INSTALL_DIR 
         $MAKE install
         $MAKE distclean
     )
