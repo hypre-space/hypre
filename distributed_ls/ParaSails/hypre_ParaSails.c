@@ -19,6 +19,11 @@
 #include "Matrix.h"
 #include "ParaSails.h"
 
+/* these includes required for hypre_ParaSailsIJMatrix */
+#include "../../IJ_mv/HYPRE_IJ_mv.h"
+#include "../../HYPRE.h"
+#include "../../utilities/utilities.h"
+
 typedef struct
 {
     MPI_Comm   comm;
@@ -313,3 +318,72 @@ int hypre_ParaSailsApplyTrans(hypre_ParaSails obj, double *u, double *v)
     return 0;
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_ParaSailsIJMatrix - Return the IJ matrix which is the sparse
+ * approximate inverse (or its factor).  This matrix is a copy of the
+ * matrix that is in ParaSails Matrix format.
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_ParaSailsBuildIJMatrix(hypre_ParaSails obj, HYPRE_IJMatrix *pij_A)
+{
+     hypre_ParaSails_struct *internal = (hypre_ParaSails_struct *) obj;
+     ParaSails *ps = internal->ps;
+     Matrix *mat = internal->ps->M;
+
+     int *diag_sizes, *offdiag_sizes, local_row, i, j;
+     int size;
+     int *col_inds;
+     double *values;
+     int ierr = 0;
+
+     ierr += HYPRE_IJMatrixCreate( ps->comm, ps->beg_row, ps->end_row,
+                                   ps->beg_row, ps->end_row,
+                                   pij_A );
+
+     ierr += HYPRE_IJMatrixSetObjectType( *pij_A, HYPRE_PARCSR );
+
+     diag_sizes = hypre_CTAlloc(int, ps->end_row - ps->beg_row + 1);
+     offdiag_sizes = hypre_CTAlloc(int, ps->end_row - ps->beg_row + 1);
+     local_row = 0;
+     for (i=ps->beg_row; i<= ps->end_row; i++)
+     {
+         MatrixGetRow(mat, local_row, &size, &col_inds, &values);
+         NumberingLocalToGlobal(ps->numb, size, col_inds, col_inds);
+
+         for (j=0; j < size; j++)
+         {
+           if (col_inds[j] < ps->beg_row || col_inds[j] > ps->end_row)
+             offdiag_sizes[local_row]++;
+           else
+             diag_sizes[local_row]++;
+         }
+
+         local_row++;
+     }
+     ierr += HYPRE_IJMatrixSetDiagOffdSizes( *pij_A,
+                                        (const int *) diag_sizes,
+                                        (const int *) offdiag_sizes );
+     hypre_TFree(diag_sizes);
+     hypre_TFree(offdiag_sizes);
+
+     ierr = HYPRE_IJMatrixInitialize( *pij_A );
+
+     local_row = 0;
+     for (i=ps->beg_row; i<= ps->end_row; i++)
+     {
+         MatrixGetRow(mat, local_row, &size, &col_inds, &values);
+
+         ierr += HYPRE_IJMatrixSetValues( *pij_A, 1, &size, &i,
+                                          (const int *) col_inds,
+                                          (const double *) values );
+
+         NumberingGlobalToLocal(ps->numb, size, col_inds, col_inds);
+
+         local_row++;
+     }
+
+     ierr += HYPRE_IJMatrixAssemble( *pij_A );
+
+     return ierr;
+}

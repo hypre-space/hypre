@@ -13,6 +13,7 @@
  *****************************************************************************/
 
 #include "HYPRE_distributed_matrix_protos.h"
+#include "../../IJ_mv/HYPRE_IJ_mv.h"
 
 typedef void *hypre_ParaSails;
 
@@ -29,3 +30,5 @@ int hypre_ParaSailsSetupValues(hypre_ParaSails obj,
   int logging);
 int hypre_ParaSailsApply(hypre_ParaSails ps, double *u, double *v);
 int hypre_ParaSailsApplyTrans(hypre_ParaSails ps, double *u, double *v);
+int hypre_ParaSailsBuildIJMatrix(hypre_ParaSails obj, HYPRE_IJMatrix *pij_A);
+
