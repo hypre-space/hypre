@@ -12,6 +12,7 @@
   /* These are what we need from Euclid */
 #include "../distributed_ls/Euclid/Euclid_dh.h"
 #include "../distributed_ls/Euclid/Mem_dh.h"
+#include "../distributed_ls/Euclid/io_dh.h"
 
 /*------------------------------------------------------------------
  * Error checking
@@ -128,11 +129,62 @@ HYPRE_ParCSREuclidDestroy( HYPRE_Solver solver )
   START_FUNC_DH
   Euclid_dh eu = (Euclid_dh)solver;
   bool printMemReport = false;
+  bool printStats = false;
+  bool logging = eu->logging;
 
+  /*---------------------------------------------------------------- 
+     this block is for printing test data; this is used
+     for diffing in autotests.
+   *---------------------------------------------------------------- */
+  if (Parser_dhHasSwitch(parser_dh, "-printTestData")) {
+    FILE *fp;
+
+    /* get filename to which to write report */
+    char fname[] = "test_data_dh.temp", *fnamePtr = fname;
+    Parser_dhReadString(parser_dh, "-printTestData", &fnamePtr); HYPRE_EUCLID_ERRCHKA;
+    if (!strcmp(fnamePtr, "1")) {  /* in case usr didn't supply a name! */
+      fnamePtr = fname;
+    }
+
+    /* print the report */
+    fp = openFile_dh(fnamePtr, "w"); HYPRE_EUCLID_ERRCHKA;
+    Euclid_dhPrintTestData(eu, fp); HYPRE_EUCLID_ERRCHKA;
+    closeFile_dh(fp); HYPRE_EUCLID_ERRCHKA;
+   
+    printf_dh("\n@@@@@ Euclid test data was printed to file: %s\n\n", fnamePtr);
+  }
+
+
+  /*---------------------------------------------------------------- 
+     determine which of Euclid's internal reports to print
+   *----------------------------------------------------------------*/
+  if (logging) {
+    printStats = true;
+    printMemReport = true;
+  }
+  if (parser_dh != NULL) {
+    if (Parser_dhHasSwitch(parser_dh, "-eu_stats")) {
+      printStats = true;
+    }
+    if (Parser_dhHasSwitch(parser_dh, "-eu_mem")) {
+      printMemReport = true;
+    }
+  }
+
+  /*------------------------------------------------------------------ 
+     print Euclid's internal report, then destroy the Euclid object 
+   *------------------------------------------------------------------ */
+  if (printStats) {
+    Euclid_dhPrintHypreReport(eu, stdout); HYPRE_EUCLID_ERRCHKA;
+  }
   Euclid_dhDestroy(eu); HYPRE_EUCLID_ERRCHKA;
 
+
+  /*------------------------------------------------------------------ 
+     destroy all remaining Euclid library objects 
+     (except the memory object)
+   *------------------------------------------------------------------ */
   if (parser_dh != NULL) {
-    printMemReport = Parser_dhHasSwitch(parser_dh, "-printMemReport"); HYPRE_EUCLID_ERRCHKA;  
     Parser_dhDestroy(parser_dh); HYPRE_EUCLID_ERRCHKA;
     parser_dh = NULL;
   }
@@ -142,6 +194,10 @@ HYPRE_ParCSREuclidDestroy( HYPRE_Solver solver )
     tlog_dh = NULL;
   }
 
+  /*------------------------------------------------------------------ 
+     optionally print Euclid's memory report, 
+     then destroy the memory object.
+   *------------------------------------------------------------------ */
   if (mem_dh != NULL) {
     if (printMemReport) { 
       Mem_dhPrint(mem_dh, stdout, false); HYPRE_EUCLID_ERRCHKA; 
