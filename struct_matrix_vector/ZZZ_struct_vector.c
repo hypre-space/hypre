@@ -150,3 +150,16 @@ ZZZ_AssembleStructVector( ZZZ_StructVector vector )
    return( zzz_AssembleStructVector( (zzz_StructVector *) vector ) );
 }
 
+/*--------------------------------------------------------------------------
+ * ZZZ_PrintStructVector
+ *--------------------------------------------------------------------------*/
+
+void
+ZZZ_PrintStructVector( char            *filename,
+                       ZZZ_StructVector vector,
+                       int              all )
+{
+   zzz_PrintStructVector( filename,
+			  (zzz_StructVector *) vector, 
+			  all );
+}
