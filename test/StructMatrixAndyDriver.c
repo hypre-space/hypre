@@ -156,7 +156,8 @@ char *argv[];
    ierr = HYPRE_StructSolverInitialize( solver );
    if( ierr ) {printf("Error returned by StructSolverInitialize\n"); return;}
 
-   ierr = HYPRE_StructSolverSetDropTolerance( solver, 0.0 ); 
+   ierr = HYPRE_StructSolverSetDropTolerance( solver, 0.00001 ); 
+   ierr = HYPRE_StructSolverSetFactorRowSize( solver, 5 ); 
 
    ierr = HYPRE_StructSolverSetup( solver, matrix, soln, rhs );
    if( ierr ) {printf("Error returned by StructSolverSetup\n"); return;}
