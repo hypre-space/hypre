@@ -748,7 +748,7 @@ main( int   argc,
       HYPRE_PCGSetTol( (HYPRE_Solver)solver, 1.0e-06 );
       HYPRE_PCGSetTwoNorm( (HYPRE_Solver)solver, 1 );
       HYPRE_PCGSetRelChange( (HYPRE_Solver)solver, 0 );
-      HYPRE_PCGSetLogging( (HYPRE_Solver)solver, 1 );
+      HYPRE_PCGSetPrintLevel( (HYPRE_Solver)solver, 1 );
 
       if (solver_id == 10)
       {

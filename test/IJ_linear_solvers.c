@@ -1670,7 +1670,7 @@ main( int   argc,
       HYPRE_PCGSetTol(pcg_solver, tol);
       HYPRE_PCGSetTwoNorm(pcg_solver, 1);
       HYPRE_PCGSetRelChange(pcg_solver, 0);
-      HYPRE_PCGSetLogging(pcg_solver, ioutdat);
+      HYPRE_PCGSetPrintLevel(pcg_solver, ioutdat);
  
       if (solver_id == 1)
       {
