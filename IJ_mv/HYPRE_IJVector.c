@@ -50,9 +50,7 @@ int HYPRE_NewIJVector( MPI_Comm comm,
    hypre_IJVectorContext(vector) = comm;
    hypre_IJVectorN(vector)       = global_n;
    hypre_IJVectorLocalStorage(vector) = NULL;
-   hypre_IJVectorTranslator(vector) = NULL;
    hypre_IJVectorLocalStorageType(vector) = HYPRE_UNITIALIZED;
-   hypre_IJVectorInsertionSemantics(vector) = 0;
    hypre_IJVectorReferenceCount(vector) = 1;
 
    *in_vector_ptr = (HYPRE_IJVector) vector;
@@ -238,14 +236,17 @@ HYPRE_SetIJVectorLocalComponents( HYPRE_IJVector  IJvector,
 
    /*  if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PETSC )
       ierr = hypre_SetIJVectorPETScLocalComponents(vector,
+                                                   num_values,
                                                    glob_vec_indices,
                                                    value);
    else if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_ISIS )
       ierr = hypre_SetIJVectorISISLocalComponents(vector,
+                                                  num_values,
                                                   glob_vec_indices,
                                                   value);
    else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR )
       ierr = hypre_SetIJVectorParLocalComponents(vector,
+                                                 num_values,
                                                  glob_vec_indices,
                                                  value);
    else
