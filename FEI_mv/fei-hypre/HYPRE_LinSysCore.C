@@ -72,24 +72,9 @@ extern "C" {
    int HYPRE_ParCSRMLSetCoarseSolver( HYPRE_Solver, int );
 #endif
 
-   int hypre_BoomerAMGBuildCoarseOperator(hypre_ParCSRMatrix*,
-                   hypre_ParCSRMatrix*, hypre_ParCSRMatrix*,
-                   hypre_ParCSRMatrix**);
    void qsort0(int *, int, int);
-   void qsort1(int *, double *, int, int);
-   int  HYPRE_DummyFunction(HYPRE_Solver, HYPRE_ParCSRMatrix,
-                            HYPRE_ParVector, HYPRE_ParVector) {return 0;}
+   int  HYPRE_LSI_Sort(int*, int, int *, double *);
 
-   int   getMatrixCSR(HYPRE_IJMatrix,int nrows,int nnz,int*,int*,double*);
-   int   HYPRE_LSI_Search(int*, int, int);
-   int   HYPRE_LSI_Sort(int*, int, int *, double *);
-   void  HYPRE_LSI_Get_IJAMatrixFromFile(double **val, int **ia, int **ja, 
-                  int *N, double **rhs, char *matfile, char *rhsfile);
-
-#ifdef Y12M
-   void y12maf_(int*,int*,double*,int*,int*,int*,int*,double*,
-                int*,int*, double*,int*,double*,int*);
-#endif
 #ifdef HAVE_AMGE
     int HYPRE_LSI_AMGeCreate();
     int HYPRE_LSI_AMGeDestroy();
