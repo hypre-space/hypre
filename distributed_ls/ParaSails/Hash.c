@@ -76,7 +76,9 @@ int HashLookup(Hash *h, int key)
 {
     int loc;
 
-    loc = key % h->size;
+    /* loc = key % h->size; */
+    double keyd = key * 0.6180339887;
+    loc = (int) (h->size * (keyd - (int) keyd));
 
     while (h->table[loc] != key)
     {
@@ -98,7 +100,9 @@ void HashInsert(Hash *h, int key, int data)
 {
     int loc;
 
-    loc = key % h->size;
+    /* loc = key % h->size; */
+    double keyd = (double) key * 0.6180339887;
+    loc = (int) ((double) h->size * (keyd - (int) keyd));
 
     while (h->table[loc] != key)
     {
@@ -146,3 +150,25 @@ void HashReset(Hash *h)
     for (i=0; i<h->size; i++)
 	*p++ = HASH_EMPTY;
 }
+
+/*--------------------------------------------------------------------------
+ * HashPrint - Print hash table to stdout.
+ *--------------------------------------------------------------------------*/
+
+void HashPrint(Hash *h)
+{
+    int i, j, *p;
+    int lines = h->size/38;
+
+    printf("Hash size: %d\n", h->size);
+
+    p = h->table;
+    for (i=0; i<lines; i++)
+    {
+	for (j=0; j<38; j++)
+	    printf("%d ", ((*p++ == HASH_EMPTY) ? 0 : 1));
+	    /*printf("%d ", *p++);*/
+	printf("\n");
+    }
+}
+

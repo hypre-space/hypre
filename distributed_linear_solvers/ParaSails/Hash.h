@@ -36,5 +36,6 @@ int   HashLookup(Hash *h, int key);
 void  HashInsert(Hash *h, int key, int data);
 void  HashRehash(Hash *old, Hash *new);
 void  HashReset(Hash *h);
+void  HashPrint(Hash *h);
 
 #endif /* _HASH_H */
