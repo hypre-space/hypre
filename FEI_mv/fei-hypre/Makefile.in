@@ -16,6 +16,7 @@ CC = @CC@
 CXX = @CXX@
 
 FEI_BASE_DIR = @FEI_BASE_DIR@
+#FEI_BASE_DIR = $(srcdir)/../fei-base
 SUPERLU_INCLUDE = -I$(srcdir)/../SuperLU
 SUPERLU_LIB     = -L$(srcdir)/../SuperLU
 MLPACK_INCLUDE  = 
@@ -43,7 +44,7 @@ CFLAGS = -w ${C_COMPILE_FLAGS} ${CDEFS}\
  -I$(srcdir)/../../distributed_matrix\
  -I$(srcdir)/../../distributed_ls\
  -I$(srcdir)/../femli\
- -I$(srcdir)/../../$(FEI_BASE_DIR)\
+ -I$(FEI_BASE_DIR)\
  ${SUPERLU_INCLUDE}\
  ${MLPACK_INCLUDE}\
  ${CINCLUDES}
@@ -60,7 +61,7 @@ CXXFLAGS = -w ${CXX_COMPILE_FLAGS} ${CXXDEFS}\
  -I$(srcdir)/../../parcsr_ls\
  -I$(srcdir)/../../seq_mv\
  -I$(srcdir)/../femli\
- -I$(srcdir)/../../$(FEI_BASE_DIR)\
+ -I$(FEI_BASE_DIR)\
  ${SUPERLU_INCLUDE}\
  ${CXXINCLUDES}
 
