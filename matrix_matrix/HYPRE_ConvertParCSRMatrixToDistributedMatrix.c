@@ -16,6 +16,8 @@
 #include <gmalloc.h>
 #endif
 
+#include <HYPRE_config.h>
+
 #include "general.h"
 
 #include "../HYPRE.h"

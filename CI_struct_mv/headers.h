@@ -7,6 +7,8 @@
  * $Revision$
  *********************************************************************EHEADER*/
 
+#include <../HYPRE_config.h>
+
 #include "../utilities/general.h"
 
 #ifdef HYPRE_DEBUG

@@ -1,3 +1,4 @@
+#include <../HYPRE_config.h>
 
 #include "../utilities/general.h"
 

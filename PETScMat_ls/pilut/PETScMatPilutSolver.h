@@ -15,6 +15,8 @@
 #ifndef hypre_PETSC_MAT_PILUT_SOLVER_HEADER
 #define hypre_PETSC_MAT_PILUT_SOLVER_HEADER
 
+#include <../../HYPRE_config.h>
+
 #include "../../utilities/general.h"
 #include "../../utilities/utilities.h"
 #ifdef HYPRE_DEBUG
