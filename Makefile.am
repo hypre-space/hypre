@@ -90,9 +90,8 @@ config\
  IJ_mv distributed_ls parcsr_ls parcsr_es\
  FEI_mv $(BABELDIR) test lib $(DOCSDIR) .
 
-test:
+test: install
 	@ \
-	$(MAKE) $(AM_MAKEFLAGS) install; \
 	(test -d test && cd test && $(MAKE) $(AM_MAKEFLAGS))
 
 docs: dvi ps pdf html

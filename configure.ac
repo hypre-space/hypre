@@ -9,23 +9,6 @@ m4_define(HYPRE_DATETIME, [HYPRE_DATE HYPRE_TIME])
 m4_define(HYPRE_BUGS,http://www-casc.llnl.gov/bugs/enter_bug.cgi?product=HYPRE)
 m4_define(HYPRE_TOP_SRC_DIR, `pwd`)
 
-# Variable Initialization
-casc_user_chose_compilers=no
-casc_user_chose_blas=no
-casc_user_chose_lapack=no
-casc_user_chose_cflags=no
-casc_user_chose_cxxflags=no
-casc_user_chose_fflags=no
-casc_using_mpi=yes
-casc_using_debug=no
-casc_using_openmp=no   
-casc_using_babel=no   
-casc_using_libdir=yes
-HYPRE_BABELLIBDIR=""
-BABEL_RUNTIME_DIR=""
-BABELDIR=""
-#casc_using_mli=no   
-
 AC_PREREQ(2.59)
 AC_REVISION($Id$)
 AC_INIT(HYPRE_NAME, HYPRE_VERSION, HYPRE_BUGS, HYPRE_NAME)
@@ -50,21 +33,14 @@ AM_INIT_AUTOMAKE([1.8 foreign no-dependencies no-installinfo no-installman no-te
 dnl Change the default prefix (/usr/local) to ./hypre
 AC_PREFIX_DEFAULT("HYPRE_TOP_SRC_DIR/hypre")
 m4_pattern_allow([HYPRE_[A-Z_]+])
+# Variable Initialization
 AC_DEFINE([PACKAGE_DATE], ["HYPRE_DATE"], [Date of release])
 AC_DEFINE([PACKAGE_TIME], ["HYPRE_TIME"], [Time of release])
 AC_DEFINE([PACKAGE_DATETIME], ["HYPRE_DATETIME"], [Date and time of release])
 PACKAGE_DATETIME="HYPRE_DATE HYPRE_TIME"
 AC_SUBST([PACKAGE_DATETIME])
 
-if test "x$CFLAGS" != "x" ; then
-  casc_user_chose_cflags=yes
-fi
-if test "x$CXXFLAGS" != "x" ; then
-  casc_user_chose_cxxflags=yes
-fi
-if test "x$FFLAGS" != "x" ; then
-  casc_user_chose_fflags=yes
-fi
+ACX_RT_ARGS
 
 ACX_DEBUG
 
@@ -82,6 +58,9 @@ ACX_PURIFY
 
 ACX_ASCI_HOST
 
+HYPRE_BABELLIBDIR=""
+BABEL_RUNTIME_DIR=""
+BABELDIR=""
 AC_ARG_WITH(babel,
 AC_HELP_STRING([--with-babel],[use babel]),
 [ if test "$withval" = "yes"; then
@@ -103,15 +82,20 @@ AC_HELP_STRING([--with-babel],[use babel]),
 
     HYPRE_BABELLIBDIR="HYPRE_TOP_SRC_DIR/babel"
     BABEL_RUNTIME_DIR="HYPRE_TOP_SRC_DIR/babel-runtime"
+
+    BABELDIR=babel
+    BABELDIR="$BABELDIR babel-runtime"
+    export CC CXX F77 F90 CPP LD
+    export CFLAGS CXXFLAGS FFLAGS F90FLAGS CPPFLAGS LDFLAGS 
+    AC_CONFIG_SUBDIRS(babel-runtime)
   fi], [casc_using_babel=no]
 )
-if test "$casc_using_babel" = "yes"; then
-  BABELDIR=babel
-  BABELDIR="$BABELDIR babel-runtime"
-  export CC CXX F77 F90 CPP LD
-  export CFLAGS CXXFLAGS FFLAGS F90FLAGS CPPFLAGS LDFLAGS 
-  AC_CONFIG_SUBDIRS(babel-runtime)
-fi
+dnl *BABEL-related header files, libraries and directories for those
+dnl * libraries
+AC_SUBST(BABEL_DIR)
+AC_SUBST(BABEL_HYPRE_INCLUDES)
+AC_SUBST(BABELLIBFLAGS)
+AC_SUBST(HYPRE_BABELLIBDIR)
 AC_SUBST(BABELDIR)
 
 AC_ARG_WITH(libdir,
@@ -352,18 +336,12 @@ if test "$casc_using_debug" = "yes" ; then
     CXXLD="--tag=CXX $PREPEND $XCXXFLAGS $CXX"
     LIBS="$LIBS $FLIBS"
   fi
+  ACX_DEBUG_FLAGS
 else
   ACX_OPTIMIZATION_FLAGS
 fi
 AC_SUBST(CCLD)
 AC_SUBST(CXXLD)
-
-dnl *BABEL-related header files, libraries and directories for those
-dnl * libraries
-AC_SUBST(BABEL_DIR)
-AC_SUBST(BABEL_HYPRE_INCLUDES)
-AC_SUBST(BABELLIBFLAGS)
-AC_SUBST(HYPRE_BABELLIBDIR)
 
 dnl *MLI-related header files, libraries and directories for those
 dnl * libraries

@@ -725,9 +725,8 @@ uninstall-info: uninstall-info-recursive
 	uninstall-includeHEADERS uninstall-info-am
 
 
-test:
+test: install
 	@ \
-	$(MAKE) $(AM_MAKEFLAGS) install; \
 	(test -d test && cd test && $(MAKE) $(AM_MAKEFLAGS))
 
 docs: dvi ps pdf html
