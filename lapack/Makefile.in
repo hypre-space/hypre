@@ -93,7 +93,6 @@ LAPACK_FILES = hypre_no_lapack.c
 @LAPACKNEEDED@xerbla.c
 
 OBJS = ${LAPACK_FILES:.c=.o}
-HEADERS = ${LAPACK_LOCAL_HEADER} ${LAPACK_HEADER}
 
 #################################################################
 # Targets
@@ -120,4 +119,4 @@ veryclean: clean
 # Rules
 #################################################################
 
-${OBJS}: ${HEADERS}
+${OBJS}: ${LAPACK_HEADER}

@@ -48,7 +48,6 @@ BLAS_FILES = hypre_no_blas.c
 @BLASNEEDED@idamax.c
 
 OBJS = ${BLAS_FILES:.c=.o}
-HEADERS = ${BLAS_LOCAL_HEADER} ${BLAS_HEADER}
 
 ##################################################################
 # Targets
@@ -60,8 +59,8 @@ all: ${OBJS}
 	do \
 	 (cp -fp $$file ../utilities); \
 	done; \
-	cp -fp ${BLAS_LOCAL_HEADER} ../utilities
-	cp -fp ${BLAS_HEADER} ../utilities
+	@cp -fp ${BLAS_LOCAL_HEADER} ../utilities
+	@cp -fp ${BLAS_HEADER} ../utilities
 
 install: all
 
@@ -75,4 +74,4 @@ veryclean: clean
 # Rules
 ##################################################################
 
-${OBJS}: ${HEADERS}
+${OBJS}: ${BLAS_HEADER}
