@@ -50,7 +50,7 @@ hypre_FreeDistributedMatrix( hypre_DistributedMatrix *matrix )
 {
 
    if ( hypre_DistributedMatrixLocalStorageType(matrix) == HYPRE_PETSC_MATRIX )
-      ;//hypre_FreeDistributedMatrixPETSc( matrix );
+      hypre_FreeDistributedMatrixPETSc( matrix );
    else if ( hypre_DistributedMatrixLocalStorageType(matrix) == HYPRE_ISIS_MATRIX )
       hypre_FreeDistributedMatrixISIS( matrix );
    else
@@ -99,11 +99,12 @@ hypre_InitializeDistributedMatrix( hypre_DistributedMatrix *matrix )
 int 
 hypre_AssembleDistributedMatrix( hypre_DistributedMatrix *matrix )
 {
-#if 0
-   if( (hypre_DistributedMatrixLocalStorageType(matrix) != HYPRE_PETSC_MATRIX )
-     )
+
+   if( (hypre_DistributedMatrixLocalStorageType(matrix) != HYPRE_PETSC_MATRIX ))
      return(-1);
-#endif
+   else if (hypre_DistributedMatrixLocalStorageType(matrix) != HYPRE_ISIS_MATRIX )
+     return(-1);
+
 
    if( hypre_DistributedMatrixLocalStorage(matrix) == NULL )
      return(-1);
