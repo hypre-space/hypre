@@ -263,20 +263,9 @@ hypre_InitializeIJMatrixParCSR(hypre_IJMatrix *matrix)
    hypre_AuxParCSRMatrix *aux_matrix = hypre_IJMatrixTranslator(matrix);
    int local_num_rows = hypre_AuxParCSRMatrixLocalNumRows(aux_matrix);
    int local_num_cols = hypre_AuxParCSRMatrixLocalNumCols(aux_matrix);
-   int *row_space = hypre_AuxParCSRMatrixRowSpace(aux_matrix);
-   int num_nonzeros;
-   int local_nnz;
-   int num_procs, my_id;
-   MPI_Comm  comm = hypre_IJMatrixContext(matrix);
-   int global_num_rows = hypre_IJMatrixM(matrix);
 
-   MPI_Comm_size(comm,&num_procs);
-   MPI_Comm_rank(comm,&my_id);
-   
    if (par_matrix)
    {
-      num_nonzeros = hypre_ParCSRMatrixNumNonzeros(par_matrix);
-      local_nnz = (num_nonzeros/global_num_rows+1)*local_num_rows;
       if (local_num_rows < 0)
          hypre_AuxParCSRMatrixLocalNumRows(aux_matrix) = 
 		hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(par_matrix));
@@ -289,7 +278,7 @@ hypre_InitializeIJMatrixParCSR(hypre_IJMatrix *matrix)
       ierr = hypre_NewIJMatrixParCSR(matrix);
       par_matrix = hypre_IJMatrixLocalStorage(matrix);
    }
-   ierr = hypre_InitializeParCSRMatrix(par_matrix);
+   ierr += hypre_InitializeParCSRMatrix(par_matrix);
    ierr += hypre_InitializeAuxParCSRMatrix(aux_matrix);
    return ierr;
 }
