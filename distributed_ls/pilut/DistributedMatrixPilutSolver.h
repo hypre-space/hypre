@@ -152,7 +152,6 @@ typedef struct
 #define hypre_DistributedMatrixPilutSolverGlobals(solver)         ((solver) -> globals)
 
 /* Include internal prototypes */
-#include "./hypre_protos.h"
 #include "./internal_protos.h"
 
 #endif

@@ -17,10 +17,8 @@
 #include "HYPRE_parcsr_ls.h"
 #include "HYPRE_LinSysCore.h"
 
-# define	P(s) s
-int BuildParLaplacian27pt P((int argc , char *argv [], int arg_index , 
-                             HYPRE_ParCSRMatrix *A_ptr ));
-#undef P
+int BuildParLaplacian27pt (int argc , char *argv [], int arg_index , 
+                             HYPRE_ParCSRMatrix *A_ptr );
 
 #define SECOND_TIME 0
  
