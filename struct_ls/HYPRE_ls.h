@@ -15,8 +15,8 @@
 #ifndef HYPRE_LS_HEADER
 #define HYPRE_LS_HEADER
 
-#include "utilities.h"
-#include "struct_matrix_vector.h"
+#include "HYPRE_utilities.h"
+#include "HYPRE_mv.h"
 
 #ifdef __cplusplus
 extern "C" {
