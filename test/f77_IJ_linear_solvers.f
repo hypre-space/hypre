@@ -349,7 +349,8 @@ c Set defaults for BoomerAMG
      &                         x_storage, ierr)
         call HYPRE_BoomerAMGSolve(solver, A_storage, b_storage,
      &                         x_storage, ierr)
-        call HYPRE_BoomerAMGGetNumIterations(solver, num_iterations, ierr)
+        call HYPRE_BoomerAMGGetNumIterations(solver, num_iterations, 
+     &						ierr)
         call HYPRE_ParAMGGetFinalRelativeRes(solver,
      &                                       final_res_norm, ierr)
         call HYPRE_BoomerAMGDestroy(solver, ierr)
@@ -393,7 +394,8 @@ c Set defaults for BoomerAMG
           call HYPRE_BoomerAMGCreate(precond, ierr)
           call HYPRE_BoomerAMGSetCoarsenType(precond,
      &                                    (hybrid*coarsen_type), ierr)
-          call HYPRE_BoomerAMGSetMeasureType(precond, measure_type, ierr)
+          call HYPRE_BoomerAMGSetMeasureType(precond, measure_type, 
+     &						ierr)
           call HYPRE_BoomerAMGSetStrongThreshold(precond,
      &                                        strong_threshold, ierr)
 c         call HYPRE_BoomerAMGSetTruncFactor(precond, trunc_factor, ierr)
