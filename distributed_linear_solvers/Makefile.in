@@ -26,13 +26,10 @@ all:
 	  then \
 	    echo "Making $$i ..."; \
 	    (cd $$i; make install); \
-	    echo ""; \
 	  fi; \
 	done
 
 install: all
-	@ \
-	echo ""
 
 clean:
 	@ \

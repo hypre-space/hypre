@@ -24,14 +24,10 @@ all:
 	  then \
 	    echo "Making $$i ..."; \
 	    (cd $$i; make install); \
-	    echo ""; \
 	  fi; \
-	done; \
-	echo ""
+	done;
 
 install: all
-	@ \
-	echo ""
 
 clean:
 	@ \
