@@ -41,7 +41,7 @@
 /*--------------------------------------------------------------------------*/
 
 #include <string.h>
-#include <iostream.h>
+#include <strings.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>

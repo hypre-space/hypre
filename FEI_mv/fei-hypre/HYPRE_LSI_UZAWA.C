@@ -14,7 +14,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <iostream.h>
+#include <strings.h>
 #include <stdio.h>
 #include <assert.h>
 
