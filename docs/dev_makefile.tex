@@ -17,6 +17,60 @@ subdirectories must be added to the list in the
 \end{verbatim}
 macro of the \file{linear_solvers/configure.in} file.
 
+\begin{verbatim}
+New Makefile.in's may use the following macros from configure:
+
+General purpose header files and libraries and directories for
+those libraries 
+INCLUDES  	produces a -I
+LIBS		produces a -l
+LIBDIRS		produces a -L
+
+MPI-related header files and libraries and directories for those libraries
+MPIINCLUDE	produces a -I
+MPILIBS		produces a -l
+MPILIBDIRS	produces a -L
+MPIFLAGS	produces a -l
+
+Macro definitions that should be included on compile line
+HYPREDEFS	produces a -D
+TIMERDEFS	produces a -D
+HYPRE_PETSCDEFS produces a -D
+
+Libraries and their directories that must be used at compile time 
+LDLIBS
+LDLIBDIRS
+
+Ranlib found by configure
+RANLIB		will assign ranlib or maybe empty
+
+Contain compiler flags such as optimization or debugging flags
+CFLAGS		usually assigns -O or -g
+CXXFLAGS	usually assigns -O or -g
+F77FLAGS	usually assigns -O or -g
+
+Needed when compiling with another command prior to the compiler command
+for example: purify cc ....
+PREPEND 	currently only used for purify
+
+
+PETSC-related header files, libraries and directories for those libraries
+PETSCLIBS	produces a -l
+PETSCLIBDIRS	produces a -L
+PETSCINCLUDE 	produces a -I
+
+Needed for Petsc to locate hypre
+HYPRE_TOP_SRC_DIR 
+
+These may be referenced in a Makefile.in as follows:
+  
+	 CC=@CC@
+
+This will replace ${CC} in your Makefile.in with whatever is assigned
+to CC in configure-- perhaps gcc, mpicc, etc.
+
+\end{verbatim}
+
 Anytime changes are made to either the \file{configure.in} or
 \file{aclocal.m4} files, it is necessary to run \kbd{autoconf} to
 generate a new \file{configure} script, and this new script must also
