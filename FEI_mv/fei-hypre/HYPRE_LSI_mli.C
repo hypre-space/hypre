@@ -108,6 +108,7 @@ typedef struct HYPRE_LSI_MLI_Struct
    int      nCoordAccept_;        /* flag to accept nodal coordinate or not */ 
    double   *nCoordinates_;       /* for storing nodal coordinates */
    double   *nullScales_;         /* scaling vector for null space */
+   int      calibrationSize_;     /* for calibration smoothed aggregation */
 } 
 HYPRE_LSI_MLI;
 
@@ -172,6 +173,7 @@ int HYPRE_LSI_MLICreate( MPI_Comm comm, HYPRE_Solver *solver )
    mli_object->nCoordinates_        = NULL;
    mli_object->nCoordAccept_        = 0;
    mli_object->nullScales_          = NULL;
+   mli_object->calibrationSize_     = 0;
 #ifdef HAVE_MLI
    mli_object->mli_                 = NULL;
    return 0;
@@ -347,6 +349,13 @@ int HYPRE_LSI_MLISetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
    /* -------------------------------------------------------- */ 
 
    sprintf( paramString, "setMinCoarseSize %d", mli_object->minCoarseSize_ );
+   method->setParams( paramString, 0, NULL );
+
+   /* -------------------------------------------------------- */ 
+   /* load calibration size                                    */
+   /* -------------------------------------------------------- */ 
+
+   sprintf(paramString, "setCalibrationSize %d", mli_object->calibrationSize_);
    method->setParams( paramString, 0, NULL );
 
    /* -------------------------------------------------------- */ 
@@ -594,6 +603,13 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
       if ( !strcmp(param3, "on") ) mli_object->nCoordAccept_ = 1;
       else                         mli_object->nCoordAccept_ = 0;
    }
+   else if ( !strcmp(param2, "saAMGCalibrationSize") )
+   {
+      sscanf(paramString,"%s %s %d",param1,param2,
+             &(mli_object->calibrationSize_));
+      if ( mli_object->calibrationSize_ < 0 ) 
+         mli_object->calibrationSize_ = 0; 
+   }
    else 
    {
       if ( mypid == 0 )
@@ -614,6 +630,7 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
          printf("\t      nodeDOF <d> \n");
          printf("\t      nullSpaceDim <d> \n");
          printf("\t      useNodalCoord <on,off> \n");
+         printf("\t      saAMGCalibrationSize <d> \n");
          exit(1);
       }
    }
@@ -984,11 +1001,11 @@ extern "C"
 int HYPRE_LSI_MLIFEDataInit( void *object, Lookup *lookup )
 {
 #ifdef HAVE_MLI
-   int              i, blockID=0, interleaveStrategy, lumpingStrategy;
+   int              i, blockID, interleaveStrategy, lumpingStrategy;
    int              numElemDOF, numElemBlocks, numElements, numNodesPerElem;
    int              numEqnsPerElem, *nodeFieldIDs, nodeNumFields, numProcs;
    int              nSharedNodes, *sharedProcLengs, **sharedProcIDs, mypid;
-   int              nodeFieldSize;
+   int              nodeFieldSize, *blockIDs;
    const int        *intArray, *sharedNodeIDs;
    const int* const *intArray2;
    HYPRE_MLI_FEData *hypre_fedata = (HYPRE_MLI_FEData *) object;
@@ -1021,6 +1038,8 @@ int HYPRE_LSI_MLIFEDataInit( void *object, Lookup *lookup )
 
    hypre_fedata->lookup_ = lookup;
    numElemBlocks = lookup->getNumElemBlocks();
+   blockIDs = (int *) lookup->getElemBlockIDs();
+   blockID = blockIDs[0];
    lookup->getElemBlockInfo(blockID, interleaveStrategy, lumpingStrategy,
                             numElemDOF, numElements, numNodesPerElem,
                             numEqnsPerElem);

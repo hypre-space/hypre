@@ -4983,11 +4983,16 @@ void HYPRE_LinSysCore::FE_loadElemMatrix(int elemID, int nNodes,
                          int *elemNodeList, int matDim, double **elemMat)
 {
 #ifdef HAVE_MLI
-   int   i, j, blockID=0, *cols, nDOF, fieldID, **nodeFieldIDs;
+   int   i, j, blockID, *cols, nDOF, fieldID, **nodeFieldIDs;
+   int   nBlocks, *blockIDs;
 
    if ( lookup_ == NULL ) return;
    if ( haveFEData_ && feData_ != NULL )
    {
+      nBlocks = lookup_->getNumElemBlocks();
+      if ( nBlocks != 1 ) return;
+      blockIDs = (int *) lookup_->getElemBlockIDs();
+      blockID = blockIDs[0];
       nodeFieldIDs = (int **) lookup_->getFieldIDsTable(blockID);
       fieldID = nodeFieldIDs[0][0];
       cols = new int[matDim];

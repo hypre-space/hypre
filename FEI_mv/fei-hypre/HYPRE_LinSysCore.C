@@ -1923,6 +1923,10 @@ int HYPRE_LinSysCore::matrixLoadComplete()
 int HYPRE_LinSysCore::putNodalFieldData(int fieldID, int fieldSize,
                        int* nodeNumbers, int numNodes, const double* data)
 {
+   int    nEqns, **nodeFieldIDs, eqnNumber, newFieldID, nBlocks;
+   int    blockID, *blockIDs, localNNodes;
+   double *nullData;
+
    if ( fieldID == -25333 )
    {
       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 4 )
@@ -1934,9 +1938,30 @@ int HYPRE_LinSysCore::putNodalFieldData(int fieldID, int fieldSize,
                printf("putNodalFieldData : %4d %2d = %e\n",i,j,
                       data[i*fieldSize+j]);
       }    
-      if ( HYPreconID_ == HYMLI )
-         HYPRE_LSI_MLISetNodalCoordinates(HYPrecon_, numNodes, fieldSize,  
-                                          (double *) data, NULL);
+      if ( HYPreconID_ == HYMLI && lookup_ != NULL )
+      {
+         nEqns = localEndRow_ - localStartRow_ + 1,
+         nullData = new double[nEqns];
+         nBlocks = lookup_->getNumElemBlocks();
+         blockIDs = (int *) lookup_->getElemBlockIDs();
+         blockID = blockIDs[0];
+         nodeFieldIDs = (int **) lookup_->getFieldIDsTable(blockID);
+         newFieldID = nodeFieldIDs[0][0];
+         localNNodes = 0;
+         for ( int i = 0; i < numNodes; i++ )
+         {
+            eqnNumber = lookup_->getEqnNumber(nodeNumbers[i], newFieldID);
+            if ( (eqnNumber+1) >= localStartRow_ && eqnNumber < localEndRow_ )
+            {
+               for ( int j = 0; j < fieldSize; j++ )
+                  nullData[eqnNumber+1-localStartRow_+j] = data[i*fieldSize+j];
+               localNNodes++;
+            }
+         }
+         HYPRE_LSI_MLISetNodalCoordinates(HYPrecon_, localNNodes, fieldSize,  
+                                          nullData, NULL);
+         delete [] nullData;
+      }    
    }    
    return (0);
 }
