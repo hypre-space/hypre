@@ -448,6 +448,17 @@ impl_Hypre_ParAMG_Apply(
    ierr += HYPRE_IJVectorGetObject( ij_x, &objectx );
    xx = (HYPRE_ParVector) objectx;
 
+/* >>>> In the SIDL specification of Apply, y is an output argument.  That means the whole vector,
+   not just its data.
+   Therefore we must _always_ make a new vector (could let the user provide a Builder which provides
+   us with an old one), or at least remember the old one and return it with a higher reference
+   count.  Or we could change the SIDL spec, make y inout.  But Andy Cleary prefers output only.
+   Cf the email conversation of Tuesday November 19.  >>>> TO DO: change this to be correct.<<<<
+   But don't forget to accomodate typical big-code users who like to use the same vector over
+   and over again. */
+   if ( *y==NULL ) {
+      Hypre_Vector_Clone( x, y );
+   }
    if ( Hypre_Vector_queryInterface( *y, "Hypre.ParCSRVector" ) ) {
       HypreP_y = Hypre_Vector__cast2( *y, "Hypre.ParCSRVector" );
    }
