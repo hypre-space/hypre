@@ -15,6 +15,7 @@ include_HEADERS = struct_ls.h HYPRE_struct_ls.h
 noinst_HEADERS = \
  headers.h\
  pfmg.h\
+ red_black_gs.h\
  smg.h\
  sparse_msg.h
 dependent_includes = $(include_HEADERS) $(noinst_HEADERS)
@@ -57,6 +58,8 @@ FILES = \
  pfmg_setup_rap7.c\
  pfmg_solve.c\
  point_relax.c\
+ red_black_gs.c\
+ red_black_constantcoef_gs.c\
  semi_interp.c\
  semi_restrict.c\
  semi_setup_rap.c\
