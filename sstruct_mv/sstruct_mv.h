@@ -42,7 +42,6 @@ typedef struct
    int   offset;
    int   stridej;
    int   stridek;
-   int   proc;
 
 } hypre_StructMapEntry;
 
@@ -68,7 +67,7 @@ typedef struct
 #define hypre_StructMapEntries(map)        ((map) -> entries)
 #define hypre_StructMapEntry(map, b)      &((map) -> entries[b])
 #define hypre_StructMapProcs(map)          ((map) -> procs)
-#define hypre_StructMapProc(map)           ((map) -> procs[b])
+#define hypre_StructMapProc(map, b)        ((map) -> procs[b])
 #define hypre_StructMapTable(map)          ((map) -> table)
 #define hypre_StructMapIndexes(map)        ((map) -> indexes)
 #define hypre_StructMapSize(map)           ((map) -> size)
@@ -378,6 +377,7 @@ typedef struct hypre_SStructGraph_struct
    int                     nUventries;
    int                    *iUventries;
    hypre_SStructUVEntry  **Uventries;
+   int                     totUentries;
 
    int                     ref_count;
 
@@ -400,6 +400,7 @@ typedef struct hypre_SStructGraph_struct
 #define hypre_SStructGraphIUVEntry(graph, i)    ((graph) -> iUventries[i])
 #define hypre_SStructGraphUVEntries(graph)      ((graph) -> Uventries)
 #define hypre_SStructGraphUVEntry(graph, i)     ((graph) -> Uventries[i])
+#define hypre_SStructGraphTotUEntries(graph)    ((graph) -> totUentries)
 #define hypre_SStructGraphRefCount(graph)       ((graph) -> ref_count)
 
 /*--------------------------------------------------------------------------
@@ -411,10 +412,20 @@ typedef struct hypre_SStructGraph_struct
 #define hypre_SStructUVEntryVar(Uv)         ((Uv) -> var)
 #define hypre_SStructUVEntryNUEntries(Uv)   ((Uv) -> nUentries)
 #define hypre_SStructUVEntryUEntries(Uv)    ((Uv) -> Uentries)
+#define hypre_SStructUVEntryUEntry(Uv, i)  &((Uv) -> Uentries[i])
 #define hypre_SStructUVEntryToPart(Uv, i)   ((Uv) -> Uentries[i].to_part)
 #define hypre_SStructUVEntryToIndex(Uv, i)  ((Uv) -> Uentries[i].to_index)
 #define hypre_SStructUVEntryToVar(Uv, i)    ((Uv) -> Uentries[i].to_var)
 #define hypre_SStructUVEntryRank(Uv, i)     ((Uv) -> Uentries[i].rank)
+
+/*--------------------------------------------------------------------------
+ * Accessor macros: hypre_SStructUEntry
+ *--------------------------------------------------------------------------*/
+
+#define hypre_SStructUEntryToPart(U)   ((U) -> to_part)
+#define hypre_SStructUEntryToIndex(U)  ((U) -> to_index)
+#define hypre_SStructUEntryToVar(U)    ((U) -> to_var)
+#define hypre_SStructUEntryRank(U)     ((U) -> rank)
 
 #endif
 
@@ -453,6 +464,8 @@ typedef struct
    /* temporary storage for SetValues routines */
    int                    *sentries;
 
+   int                     complex;      /* Is the matrix complex */
+
 } hypre_SStructPMatrix;
 
 typedef struct hypre_SStructMatrix_struct
@@ -475,6 +488,7 @@ typedef struct hypre_SStructMatrix_struct
    int                    *Uentries;
 
    int                     symmetric;    /* Is the matrix symmetric */
+   int                     complex;      /* Is the matrix complex */
    int                     global_size;  /* Total number of nonzero coeffs */
 
    int                     ref_count;
@@ -498,6 +512,7 @@ typedef struct hypre_SStructMatrix_struct
 #define hypre_SStructMatrixSEntries(mat)       ((mat) -> Sentries)
 #define hypre_SStructMatrixUEntries(mat)       ((mat) -> Uentries)
 #define hypre_SStructMatrixSymmetric(mat)      ((mat) -> symmetric)
+#define hypre_SStructMatrixComplex(mat)        ((mat) -> complex)
 #define hypre_SStructMatrixGlobalSize(mat)     ((mat) -> global_size)
 #define hypre_SStructMatrixRefCount(mat)       ((mat) -> ref_count)
 
@@ -520,6 +535,7 @@ typedef struct hypre_SStructMatrix_struct
 ((pmat) -> smatrices[vi][vj])
 #define hypre_SStructPMatrixNSEntries(pmat)         ((pmat) -> nsentries)
 #define hypre_SStructPMatrixSEntries(pmat)          ((pmat) -> sentries)
+#define hypre_SStructPMatrixComplex(pmat)           ((pmat) -> complex)
 
 #endif
 /*BHEADER**********************************************************************
@@ -552,6 +568,8 @@ typedef struct
    hypre_StructVector    **svectors;     /* nvar array of svectors */
    hypre_CommPkg         **comm_pkgs;    /* nvar array of comm pkgs */
 
+   int                     complex;      /* Is the vector complex */
+
 } hypre_SStructPVector;
 
 typedef struct hypre_SStructVector_struct
@@ -569,6 +587,7 @@ typedef struct hypre_SStructVector_struct
    HYPRE_IJVector          ijvector;
    hypre_ParVector        *parvector;
 
+   int                     complex;      /* Is the vector complex */
    int                     global_size;  /* Total number coefficients */
 
    int                     ref_count;
@@ -588,6 +607,7 @@ typedef struct hypre_SStructVector_struct
 #define hypre_SStructVectorPVector(vec, part)  ((vec) -> pvectors[part])
 #define hypre_SStructVectorIJVector(vec)       ((vec) -> ijvector)
 #define hypre_SStructVectorParVector(vec)      ((vec) -> parvector)
+#define hypre_SStructVectorComplex(vec)        ((vec) -> complex)
 #define hypre_SStructVectorGlobalSize(vec)     ((vec) -> global_size)
 #define hypre_SStructVectorRefCount(vec)       ((vec) -> ref_count)
 
@@ -602,6 +622,7 @@ typedef struct hypre_SStructVector_struct
 #define hypre_SStructPVectorSVector(pvec, v)  ((pvec) -> svectors[v])
 #define hypre_SStructPVectorCommPkgs(pvec)    ((pvec) -> comm_pkgs)
 #define hypre_SStructPVectorCommPkg(pvec, v)  ((pvec) -> comm_pkgs[v])
+#define hypre_SStructPVectorComplex(pvec)     ((pvec) -> complex)
 
 #endif
 
@@ -679,6 +700,7 @@ int hypre_SStructPGridAssemble( hypre_SStructPGrid *pgrid );
 int hypre_SStructGridRef( hypre_SStructGrid *grid , hypre_SStructGrid **grid_ref );
 int hypre_SStructGridIndexToBox( hypre_SStructGrid *grid , int part , hypre_Index index , int var , int *box_ptr );
 int hypre_SStructGridSVarIndexToRank( hypre_SStructGrid *grid , int box , int part , hypre_Index index , int var , int *rank_ptr );
+int hypre_SStructGridIndexToProc( hypre_SStructGrid *grid , int box , int part , hypre_Index index , int var , int *proc_ptr );
 
 /* sstruct_innerprod.c */
 int hypre_SStructPInnerProd( hypre_SStructPVector *px , hypre_SStructPVector *py , double *presult_ptr );
@@ -740,6 +762,7 @@ int hypre_StructMapCreate( hypre_StructGrid *sgrid , hypre_StructMap **map_ptr )
 int hypre_StructMapDestroy( hypre_StructMap *map );
 int hypre_StructMapIndexToBox( hypre_StructMap *map , hypre_Index index , int *box_ptr );
 int hypre_StructMapIndexToRank( hypre_StructMap *map , int box , hypre_Index index , int *rank_ptr );
+int hypre_StructMapIndexToProc( hypre_StructMap *map , int box , hypre_Index index , int *proc_ptr );
 
 
 #ifdef __cplusplus

@@ -339,3 +339,20 @@ hypre_StructMapIndexToRank( hypre_StructMap       *map,
    return ierr;
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_StructMapIndexToProc
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_StructMapIndexToProc( hypre_StructMap       *map,
+                            int                    box,
+                            hypre_Index            index,
+                            int                   *proc_ptr )
+{
+   int ierr = 0;
+
+   *proc_ptr = hypre_StructMapProc(map, box);
+
+   return ierr;
+}
+

@@ -51,6 +51,7 @@ typedef struct hypre_SStructGraph_struct
    int                     nUventries;
    int                    *iUventries;
    hypre_SStructUVEntry  **Uventries;
+   int                     totUentries;
 
    int                     ref_count;
 
@@ -73,6 +74,7 @@ typedef struct hypre_SStructGraph_struct
 #define hypre_SStructGraphIUVEntry(graph, i)    ((graph) -> iUventries[i])
 #define hypre_SStructGraphUVEntries(graph)      ((graph) -> Uventries)
 #define hypre_SStructGraphUVEntry(graph, i)     ((graph) -> Uventries[i])
+#define hypre_SStructGraphTotUEntries(graph)    ((graph) -> totUentries)
 #define hypre_SStructGraphRefCount(graph)       ((graph) -> ref_count)
 
 /*--------------------------------------------------------------------------
@@ -84,10 +86,20 @@ typedef struct hypre_SStructGraph_struct
 #define hypre_SStructUVEntryVar(Uv)         ((Uv) -> var)
 #define hypre_SStructUVEntryNUEntries(Uv)   ((Uv) -> nUentries)
 #define hypre_SStructUVEntryUEntries(Uv)    ((Uv) -> Uentries)
+#define hypre_SStructUVEntryUEntry(Uv, i)  &((Uv) -> Uentries[i])
 #define hypre_SStructUVEntryToPart(Uv, i)   ((Uv) -> Uentries[i].to_part)
 #define hypre_SStructUVEntryToIndex(Uv, i)  ((Uv) -> Uentries[i].to_index)
 #define hypre_SStructUVEntryToVar(Uv, i)    ((Uv) -> Uentries[i].to_var)
 #define hypre_SStructUVEntryRank(Uv, i)     ((Uv) -> Uentries[i].rank)
+
+/*--------------------------------------------------------------------------
+ * Accessor macros: hypre_SStructUEntry
+ *--------------------------------------------------------------------------*/
+
+#define hypre_SStructUEntryToPart(U)   ((U) -> to_part)
+#define hypre_SStructUEntryToIndex(U)  ((U) -> to_index)
+#define hypre_SStructUEntryToVar(U)    ((U) -> to_var)
+#define hypre_SStructUEntryRank(U)     ((U) -> rank)
 
 #endif
 

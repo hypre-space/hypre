@@ -443,3 +443,25 @@ hypre_SStructGridSVarIndexToRank( hypre_SStructGrid  *grid,
    return ierr;
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_SStructGridIndexToProc
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_SStructGridIndexToProc( hypre_SStructGrid  *grid,
+                              int                 box,
+                              int                 part,
+                              hypre_Index         index,
+                              int                 var,
+                              int                *proc_ptr )
+{
+   int  ierr = 0;
+
+   hypre_SStructPGrid *pgrid = hypre_SStructGridPGrid(grid, part);
+   hypre_StructMap    *map   = hypre_SStructPGridMap(pgrid, var);
+
+   hypre_StructMapIndexToProc(map, box, index, proc_ptr);
+
+   return ierr;
+}
+

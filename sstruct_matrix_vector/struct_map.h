@@ -25,7 +25,6 @@ typedef struct
    int   offset;
    int   stridej;
    int   stridek;
-   int   proc;
 
 } hypre_StructMapEntry;
 
@@ -51,7 +50,7 @@ typedef struct
 #define hypre_StructMapEntries(map)        ((map) -> entries)
 #define hypre_StructMapEntry(map, b)      &((map) -> entries[b])
 #define hypre_StructMapProcs(map)          ((map) -> procs)
-#define hypre_StructMapProc(map)           ((map) -> procs[b])
+#define hypre_StructMapProc(map, b)        ((map) -> procs[b])
 #define hypre_StructMapTable(map)          ((map) -> table)
 #define hypre_StructMapIndexes(map)        ((map) -> indexes)
 #define hypre_StructMapSize(map)           ((map) -> size)
