@@ -8,7 +8,7 @@
 # $Revision$
 #EHEADER***********************************************************************
 
-INTERNAL_HEADER=hypre_parcsr_ls.h
+INTERNAL_HEADER=parcsr_linear_solvers.h
 
 #===========================================================================
 # Include guards and other includes
@@ -22,9 +22,8 @@ cat > $INTERNAL_HEADER <<@
 #define hypre_PARCSR_LS_HEADER
 
 #include "utilities.h"
-#include "mpe.h"                   /* need to get rid of this */
-#include "hypre_mv.h"
-#include "hypre_parcsr_mv.h"
+#include "seq_matrix_vector.h"
+#include "parcsr_matrix_vector.h"
 
 #ifdef __cplusplus
 extern "C" {
