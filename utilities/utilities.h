@@ -811,9 +811,13 @@ int hypre_DoubleQuickSplit( double *values , int *indices , int list_length , in
 void swap( int *v , int i , int j );
 void swap2( int *v , double *w , int i , int j );
 void hypre_swap2i( int *v , int *w , int i , int j );
+void hypre_swap3i(int  *v, int  *w, int  *z, int  i, int  j );
+
 void qsort0( int *v , int left , int right );
 void qsort1( int *v , double *w , int left , int right );
 void hypre_qsort2i( int *v , int *w , int left , int right );
+void hypre_qsort2( int *v, double *w, int left, int right);
+void hypre_qsort3i( int *v, int*w, int*z, int left, int right);
 
 
 #ifdef __cplusplus
