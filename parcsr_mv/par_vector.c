@@ -190,10 +190,11 @@ double   hypre_ParInnerProd( MPI_Comm comm,
    hypre_Vector *x_local = hypre_ParVectorLocalVector(x);
    hypre_Vector *y_local = hypre_ParVectorLocalVector(y);
            
-   double local_result = hypre_InnerProd(x_local, y_local);
    double result = 0.0;
+   double local_result = hypre_InnerProd(x_local, y_local);
+   
    MPI_Allreduce(&local_result, &result, 1, MPI_DOUBLE, MPI_SUM, comm);
-  
+   
    return result;
 }
 
@@ -202,7 +203,8 @@ double   hypre_ParInnerProd( MPI_Comm comm,
  *--------------------------------------------------------------------------*/
 
 hypre_ParVector *
-hypre_VectorToParVector (MPI_Comm comm, hypre_Vector *v)
+hypre_VectorToParVector (MPI_Comm comm, hypre_Vector *v,
+			 int *vec_starts)
 {
    int 			global_size = hypre_VectorSize(v);
    int 			local_size;
@@ -210,7 +212,6 @@ hypre_VectorToParVector (MPI_Comm comm, hypre_Vector *v)
    MPI_Datatype   	*vector_mpi_types;
    hypre_ParVector  	*par_vector;
    hypre_Vector     	*local_vector;
-   int             	*vec_starts;
    double          	*v_data = hypre_VectorData(v);
    double		*local_data;
    MPI_Request		*requests;
@@ -221,7 +222,8 @@ hypre_VectorToParVector (MPI_Comm comm, hypre_Vector *v)
    MPI_Comm_size(comm,&num_procs);
    MPI_Comm_rank(comm,&my_id);
 
-   vector_comm_pkg = hypre_InitializeVectorCommPkg(comm, global_size);
+   vector_comm_pkg = hypre_InitializeVectorCommPkg(comm, global_size,
+		vec_starts);
 
    vector_mpi_types = hypre_VectorCommPkgVectorMPITypes(vector_comm_pkg);
    vec_starts = hypre_VectorCommPkgVecStarts(vector_comm_pkg);
