@@ -66,6 +66,9 @@ main( int   argc,
    if (matrix1) hypre_PrintCSRMatrix(matrix1, file_name);
 
    hypre_PrintParCSRMatrix(par_matrix,"matrix");
+
+   par_matrix = hypre_ReadParCSRMatrix(MPI_COMM_WORLD,"matrix");
+
    global_num_cols = hypre_ParCSRMatrixGlobalNumCols(par_matrix);
    printf(" global_num_cols %d\n", global_num_cols);
    global_num_rows = hypre_ParCSRMatrixGlobalNumRows(par_matrix);
@@ -74,29 +77,29 @@ main( int   argc,
    first_index = col_starts[my_id];
    local_size = col_starts[my_id+1] - first_index;
 
-   x = hypre_CreateParVector(MPI_COMM_WORLD,global_num_cols,
-                                first_index,local_size);
+   x = hypre_CreateParVector(MPI_COMM_WORLD,global_num_cols,col_starts);
+   hypre_SetParVectorPartitioningOwner(x,0);
    hypre_InitializeParVector(x);
    x_local = hypre_ParVectorLocalVector(x);
    data = hypre_VectorData(x_local);
  
    for (i=0; i < local_size; i++)
         data[i] = first_index+i+1;
-   x2 = hypre_CreateParVector(MPI_COMM_WORLD,global_num_cols,
-                                first_index,local_size);
+   x2 = hypre_CreateParVector(MPI_COMM_WORLD,global_num_cols,col_starts);
+   hypre_SetParVectorPartitioningOwner(x2,0);
    hypre_InitializeParVector(x2);
    hypre_SetParVectorConstantValues(x2,2.0);
 
    row_starts = hypre_ParCSRMatrixRowStarts(par_matrix);
    first_index = row_starts[my_id];
    local_size = row_starts[my_id+1] - first_index;
-   y = hypre_CreateParVector(MPI_COMM_WORLD,global_num_rows,
-                                first_index,local_size);
+   y = hypre_CreateParVector(MPI_COMM_WORLD,global_num_rows,row_starts);
+   hypre_SetParVectorPartitioningOwner(y,0);
    hypre_InitializeParVector(y);
    y_local = hypre_ParVectorLocalVector(y);
 
-   y2 = hypre_CreateParVector(MPI_COMM_WORLD,global_num_rows,
-                                first_index,local_size);
+   y2 = hypre_CreateParVector(MPI_COMM_WORLD,global_num_rows,row_starts);
+   hypre_SetParVectorPartitioningOwner(y2,0);
    hypre_InitializeParVector(y2);
    y2_local = hypre_ParVectorLocalVector(y2);
    data2 = hypre_VectorData(y2_local);
