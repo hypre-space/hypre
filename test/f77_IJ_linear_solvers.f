@@ -259,7 +259,8 @@ c        call HYPRE_ParCSRMatrixInitialize(A_storage, ierr)
      &                               matfile, ierr)
       endif
 
-      call HYPRE_ParCSRMatrixPrint(A_storage, "driver.out.A", ierr)
+      call HYPRE_ParCSRMatrixPrint(A_storage, "driver.out.A", 
+     &                             len("driver.out.A"), ierr)
 
       call hypre_ParCSRMatrixGlobalNumRows(A_storage, num_rows, ierr)
       call hypre_ParCSRMatrixRowStarts(A_storage, row_starts, ierr)
@@ -276,7 +277,8 @@ c-----------------------------------------------------------------------
 c Set up a Dirichlet 0 problem
         call HYPRE_IJVectorZeroLocalComps(b, ierr)
         call HYPRE_IJVectorGetLocalStorage(b, b_storage, ierr)
-        call HYPRE_ParVectorPrint(b_storage, "driver.out.b", ierr)
+        call HYPRE_ParVectorPrint(b_storage, "driver.out.b",
+     &                            len("driver.out.b"), ierr)
       else
         call HYPRE_ParVectorRead(MPI_COMM_WORLD, b, rhsfile, ierr)
       endif
@@ -290,7 +292,8 @@ c Set up a Dirichlet 0 problem
 c Choose a nonzero initial guess
       call HYPRE_IJVectorGetLocalStorage(x, x_storage, ierr)
       call hypre_SetParVectorConstantValue(x_storage, 1d0, ierr)
-      call HYPRE_ParVectorPrint(x_storage, "driver.out.x0", ierr)
+      call HYPRE_ParVectorPrint(x_storage, "driver.out.x0",
+     &                          len("driver.out.x0"), ierr)
 
 c-----------------------------------------------------------------------
 c     Solve the linear system
@@ -495,7 +498,8 @@ c-----------------------------------------------------------------------
 c     Print the solution and other info
 c-----------------------------------------------------------------------
 
-      call HYPRE_ParVectorPrint(x_storage, "driver.out.x", ierr)
+      call HYPRE_ParVectorPrint(x_storage, "driver.out.x",
+     &                          len("driver.out.x"), ierr)
 
       if (myid .eq. 0) then
          print *, 'Iterations = ', num_iterations
