@@ -14,7 +14,12 @@ VPATH = @srcdir@
 
 # These are directories that are not yet officially in HYPRE
 HYPRE_MLI_DIRS =\
- matrix
+ amgs \
+ base \
+ matrix \
+ solver \
+ vector \
+ util
 
 all: 
 	@ \
