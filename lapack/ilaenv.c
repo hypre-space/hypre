@@ -178,7 +178,7 @@ L100:
 		ic = *(unsigned char *)&subnam[i__ - 1];
 		if (((ic >= 129) && (ic <= 137)) || 
                     ((ic >= 145) && (ic <= 153)) || 
-                    ((ic >= 162) && ic <= 169))) {
+                    ((ic >= 162) && (ic <= 169))) {
 		    *(unsigned char *)&subnam[i__ - 1] = (char) (ic + 64);
 		}
 /* L20: */
