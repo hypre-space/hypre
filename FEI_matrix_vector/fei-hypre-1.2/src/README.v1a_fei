@@ -1,0 +1,123 @@
+Things to consider when upgrading to the v1.0-interim version of the FEI:
+
+===========================================================================
+initSolveStep()
+
+The call to initSolveStep() has a redefined second parameter solvType. 
+For now, there is only one acceptable solvType, namely solvType = 0 => 
+solve Ax=b. Other solution types will generate a warning, and will 
+eventually generate errors once new solution types (e.g., eigensolution) 
+are implemented.
+
+    int initSolveStep(int numElemBlocks, int solvType); 
+
+
+===========================================================================
+beginInitNodeSets()
+
+The call to beginInitNodeSets() has lost one parameter, as the former
+two arguments "numExtSendNodeSets" and "numExtRecvNodeSets" have been
+coalesced into one argument "numExtNodeSets".
+
+    int beginInitNodeSets(int numEssBCNodeSets, int numSharedNodeSets, 
+                          int numExtNodeSets);
+
+===========================================================================
+initExtSendNodeSet() and initExtRecvNodeSet()
+
+The two methods "initExtSendNodeSet" and "initExtRecvNodeSet" have been 
+replaced with the generic single method "initExtNodeSet".  Programs
+(e.g., the sample external-communications application distExtBeamDriver.cc)
+that utilize the older send/recv architecture can preserve the distinction
+between send and recv nodes internally simply by calling the new generic 
+function initExtNodeSet() each time either initExtSendNodeSet() or
+initExtSendNodeSet() was called before.
+
+   int initExtNodeSet(const GlobalID *extNodeIDs,  
+                      int lenExtNodeIDs, 
+                      const int *const *extProcIDs, 
+                      const int *lenExtProcIDs); 
+
+
+===========================================================================
+loadElementData()
+
+Element stiffness formats are now taken seriously in loadElementData(), 
+with the following C/C++ row-oriented formats handled:
+
+   format = 0 => dense storage, contiguous rows
+   format = 1 => packed symmetric storage, upper-triangle, contiguous rows
+   format = 2 => packed symmetric storage, lower-triangle, contiguous rows
+   
+
+===========================================================================
+loadBCSet(), loadCRMult(), and loadCRPen() sign convention reversals
+
+The sign convention for the non-homogenous terms in these class methods
+has been reversed, in order to facilitate handling the most common form
+of constraints (e.g., non-homogenous essential boundary conditions).  The
+arguments affected by this sign reversal are:
+
+    gammaBCDataTable  in loadBCSet()
+    CRValueList       in loadCRMult() and loadCRPen()
+    
+Only the sign conventions for these non-homogenous terms have been
+changed, so no other modifications to these methods are required.  To 
+summarize, the previous interpretation looked like:
+
+  [loadBCSet()]
+    alpha*soln_param + beta*derived_param + gamma = 0 
+    
+  [loadCRMult() and loadCRPen()]
+    sum (weight*soln_param) + value = 0     
+    
+The new reversed convention is of the form:
+
+  [loadBCSet()]
+    alpha*soln_param + beta*derived_param = gamma           
+
+  [loadCRMult() and loadCRPen()]
+    sum (weight*soln_param) = value
+
+
+===========================================================================
+new class methods to support initial solution vector estimates
+
+The following "put" methods have been added to the FEI specification in 
+order to handle passing initial guesses to an iterative solver.
+
+// put nodal-based solution to FE analysis on a block-by-block basis
+ 
+    int putBlockNodeSolution(GlobalID elemBlockID,  
+                             const GlobalID *nodeIDList, 
+                             int lenNodeIDList, 
+                             const int *offset, 
+                             const double *estimates);
+         
+// put element-based solution to FE analysis on a block-by-block basis 
+
+    int putElemBlockSolution(GlobalID elemBlockID,  
+                             const GlobalID *elemIDList, 
+                             int lenElemIDList, 
+                             const int *offset, 
+                             const double *estimates, 
+                             int numElemDOF);
+  
+// put Lagrange solution to FE analysis on a constraint-set basis 
+
+    int putCRMultParam(int CRMultID, int numMultCRs,
+                       const double *multEstimates);
+ 
+
+The following utility methods have been added to the FEI specification
+to support the "put" methods listed above.  Respectively, they return 
+the element ID list for a given block, and the active node list 
+associated with a given element block.
+
+    int getBlockElemIDList(GlobalID elemBlockID, 
+                           GlobalID *elemIDList, 
+                           int& lenElemIDList);
+
+    int getBlockNodeIDList(GlobalID elemBlockID,
+                           GlobalID *nodeIDList, 
+                           int& lenNodeIDList);
