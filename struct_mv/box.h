@@ -95,6 +95,19 @@ typedef struct hypre_BoxArrayArray_struct
   hypre_IndexY(index2) = hypre_IndexY(index1),\
   hypre_IndexZ(index2) = hypre_IndexZ(index1) )
 
+#define hypre_CopyToCleanIndex(in_index, ndim, out_index) \
+{\
+   int d;\
+   for (d = 0; d < ndim; d++)\
+   {\
+      hypre_IndexD(out_index, d) = hypre_IndexD(in_index, d);\
+   }\
+   for (d = ndim; d < 3; d++)\
+   {\
+      hypre_IndexD(out_index, d) = 0;\
+   }\
+}
+
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_Box
  *--------------------------------------------------------------------------*/

@@ -1,0 +1,85 @@
+#BHEADER***********************************************************************
+# (c) 2000   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+.SUFFIXES:
+.SUFFIXES: .c .f .o
+
+srcdir = @srcdir@
+VPATH = @srcdir@
+
+
+CC = @CC@
+
+C_COMPILE_FLAGS=@CFLAGS@
+CXX_COMPILE_FLAGS=@CXXFLAGS@
+CINCLUDES=@INCLUDES@ @MPIINCLUDE@
+CDEFS = -DHYPRE_NO_PTHREAD_MANGLING
+
+CFLAGS =\
+ ${C_COMPILE_FLAGS}\
+ -I..\
+ -I../utilities\
+ -I../struct_matrix_vector\
+ -I../seq_matrix_vector\
+ -I../parcsr_matrix_vector\
+ -I../IJ_matrix_vector\
+ -I../sstruct_matrix_vector\
+ ${CINCLUDES}\
+ ${CDEFS}
+
+RANLIB= @RANLIB@
+
+HEADERS =\
+ HYPRE_sstruct_ls.h\
+ headers.h
+
+FILES =\
+ HYPRE_sstruct_gmres.c\
+ gmres.c\
+ krylov.c\
+ krylov_sstruct.c
+
+OBJS = ${FILES:.c=.o}
+
+##################################################################
+# Targets
+##################################################################
+
+all: libHYPRE_sstruct_ls.a
+
+install: all
+	@cp -f HYPRE_*.h sstruct_linear_solvers.h $$HYPRE_INSTALL_DIR/include/.
+	@cp -f libHYPRE_*.a $$HYPRE_INSTALL_DIR/lib/.
+
+clean:
+	@rm -f *.o
+	@rm -f *.prj
+	@rm -f *.kdd
+
+veryclean: clean
+	@rm -f libHYPRE_*.a
+
+##################################################################
+# Rules
+##################################################################
+
+libHYPRE_sstruct_ls.a: ${OBJS}
+	@echo  "Building $@ ... "
+	ar -rcu $@ ${OBJS}
+	${RANLIB} $@
+
+${OBJS}: ${HEADERS}
+
+##################################################################
+# Generic rules
+##################################################################
+
+.c.o:
+	${CC} -o $@ -c ${CFLAGS} $<
+

@@ -869,6 +869,8 @@ CASC_CONFIG_OUTPUT_LIST(\
  utilities\
  struct_matrix_vector\
  struct_linear_solvers\
+ sstruct_matrix_vector\
+ sstruct_linear_solvers\
  seq_matrix_vector\
  parcsr_matrix_vector\
  distributed_matrix\
