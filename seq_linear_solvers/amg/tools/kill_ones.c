@@ -93,14 +93,14 @@ char *argv[];
 
    if (argc < 2)
    {
-      fprintf(stderr, "Usage:  amg <run name>\n");
+      fprintf(stderr, "Usage:  kill_ones  <ysmp file name>\n");
       exit(1);
    }
 
    run_name = argv[1];
 
-   sprintf(file_name_old, "%s.ysmp", run_name);
-   sprintf(file_name_new, "%s.ysmp.new", run_name);
+   sprintf(file_name_old, "%s", run_name);
+   sprintf(file_name_new, "%s.new", run_name);
 
    A = RYSMP(file_name_old);
    WriteYSMP(file_name_new,A);
