@@ -29,6 +29,7 @@ HYPRE_IJ_DIRS =\
  matrix_matrix\
  IJ_matrix_vector\
  distributed_linear_solvers/pilut\
+ distributed_linear_solvers/ParaSails\
  parcsr_linear_solvers
 
 # These are directories that are officially in HYPRE
@@ -39,7 +40,6 @@ HYPRE_DIRS =\
 # These are directories that are not yet officially in HYPRE
 HYPRE_EXTRA_DIRS =\
  seq_linear_solvers/pamg\
- distributed_linear_solvers/ParaSails\
  CI_struct_matrix_vector\
  CI_struct_linear_solvers @HYPRE_PETSCLIBDIRS@
 
