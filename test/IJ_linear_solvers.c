@@ -450,10 +450,11 @@ main( int   argc,
       printf("   -xisone               : solution of all ones\n");
       printf("\n");
       printf("  -solver <ID>           : solver ID\n");
-      printf("       1=AMG-PCG     2=DS-PCG        \n");
-      printf("       3=AMG-GMRES   4=DS-GMRES      \n");     
-      printf("       5=AMG-CGNR    6=DS-CGNR       \n");     
-      printf("       7=PILUT-GMRES 8=ParaSails-PCG \n");     
+      printf("       0=AMG         1=AMG-PCG       \n");
+      printf("       2=DS-PCG      3=AMG-GMRES     \n");
+      printf("       4=DS-GMRES    5=AMG-CGNR      \n");     
+      printf("       6=DS-CGNR     7=PILUT-GMRES   \n");     
+      printf("       8=ParaSails-PCG \n");     
       printf("\n");
       printf("   -ruge                 : Ruge coarsening (local)\n");
       printf("   -ruge3                : third pass on boundary\n");
@@ -770,6 +771,7 @@ main( int   argc,
 
    if (solver_id == 0)
    {
+      printf("Solver:  AMG\n");
       time_index = hypre_InitializeTiming("BoomerAMG Setup");
       hypre_BeginTiming(time_index);
 
@@ -828,6 +830,7 @@ main( int   argc,
       if (solver_id == 1)
       {
          /* use BoomerAMG as preconditioner */
+         printf("Solver: AMG-PCG\n");
          HYPRE_ParAMGCreate(&pcg_precond); 
          HYPRE_ParAMGSetCoarsenType(pcg_precond, (hybrid*coarsen_type));
          HYPRE_ParAMGSetMeasureType(pcg_precond, measure_type);
@@ -847,8 +850,9 @@ main( int   argc,
       }
       else if (solver_id == 2)
       {
+         
          /* use diagonal scaling as preconditioner */
-
+         printf("Solver: DS-PCG\n");
          pcg_precond = NULL;
 
          HYPRE_ParCSRPCGSetPrecond(pcg_solver,
@@ -859,6 +863,7 @@ main( int   argc,
       else if (solver_id == 8)
       {
          /* use ParaSails preconditioner */
+         printf("Solver: ParaSails-PCG\n");
 
 	 HYPRE_ParCSRParaSailsCreate(MPI_COMM_WORLD, &pcg_precond);
 	 HYPRE_ParCSRParaSailsSetParams(pcg_precond, 0.1, 1);
@@ -927,6 +932,7 @@ main( int   argc,
       if (solver_id == 3)
       {
          /* use BoomerAMG as preconditioner */
+         printf("Solver: AMG-GMRES\n");
 
          HYPRE_ParAMGCreate(&pcg_precond); 
          HYPRE_ParAMGSetCoarsenType(pcg_precond, (hybrid*coarsen_type));
@@ -948,17 +954,19 @@ main( int   argc,
       else if (solver_id == 4)
       {
          /* use diagonal scaling as preconditioner */
-
+         printf("Solver: DS-GMRES\n");
          pcg_precond = NULL;
 
          HYPRE_ParCSRGMRESSetPrecond(pcg_solver,
-                                   HYPRE_ParCSRDiagScale,
-                                   HYPRE_ParCSRDiagScaleSetup,
-                                   pcg_precond);
+                                     HYPRE_ParCSRDiagScale,
+                                     HYPRE_ParCSRDiagScaleSetup,
+                                     pcg_precond);
       }
-         /* use PILUT as preconditioner */
       else if (solver_id == 7)
       {
+         /* use PILUT as preconditioner */
+         printf("Solver: Pilut-GMRES\n");
+
          ierr = HYPRE_ParCSRPilutCreate( MPI_COMM_WORLD, &pcg_precond ); 
          if (ierr) {
 	   printf("Error in ParPilutCreate\n");
@@ -1034,6 +1042,8 @@ main( int   argc,
       if (solver_id == 5)
       {
          /* use BoomerAMG as preconditioner */
+         printf("Solver: AMG-CGNR\n");
+
          HYPRE_ParAMGCreate(&pcg_precond); 
          HYPRE_ParAMGSetCoarsenType(pcg_precond, (hybrid*coarsen_type));
          HYPRE_ParAMGSetMeasureType(pcg_precond, measure_type);
@@ -1055,7 +1065,7 @@ main( int   argc,
       else if (solver_id == 6)
       {
          /* use diagonal scaling as preconditioner */
-
+         printf("Solver: DS-CGNR\n");
          pcg_precond = NULL;
 
          HYPRE_ParCSRCGNRSetPrecond(pcg_solver,
