@@ -607,7 +607,7 @@ hypre_RefIJMatrix( HYPRE_IJMatrix IJmatrix, HYPRE_IJMatrix *reference )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_GetIJMatrixLocalStorage
+ * HYPRE_GetIJMatrixLocalStorage
  *--------------------------------------------------------------------------*/
 
 /**
@@ -621,7 +621,7 @@ The matrix to be pointed to.
 */
 
 void *
-hypre_GetIJMatrixLocalStorage( HYPRE_IJMatrix IJmatrix )
+HYPRE_GetIJMatrixLocalStorage( HYPRE_IJMatrix IJmatrix )
 {
    int ierr = 0;
    hypre_IJMatrix *matrix = (hypre_IJMatrix *) IJmatrix;
