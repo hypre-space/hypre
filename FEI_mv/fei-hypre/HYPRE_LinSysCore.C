@@ -3245,12 +3245,8 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
          slideObj->getReducedSolnVector(&currX_);
          slideObj->getReducedRHSVector(&currB_);
          slideObj->getReducedAuxVector(&currR_);
-HYPRE_IJVectorGetObject(currB_, (void **) &b_csr);
-HYPRE_ParVectorInnerProd( b_csr, b_csr, &rnorm);
-printf("rnorm = %e\n", sqrt(rnorm));
          if ( currA_ == NULL )
          {
-printf("REPLACE AGAIN\n");
             currA_ = TempA;
             currX_ = TempX;
             currB_ = TempB;
@@ -3350,9 +3346,6 @@ printf("REPLACE AGAIN\n");
       HYPRE_LSI_MLISetFEData( HYPrecon_, feData_ );
 #endif
 
-HYPRE_IJVectorGetObject(currB_, (void **) &b_csr);
-HYPRE_ParVectorInnerProd( b_csr, b_csr, &rnorm);
-printf("(2) rnorm = %e\n", sqrt(rnorm));
    switch ( HYSolverID_ )
    {
       //----------------------------------------------------------------
