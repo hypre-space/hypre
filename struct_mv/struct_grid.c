@@ -202,4 +202,67 @@ zzz_AssembleStructGrid( zzz_StructGrid *grid )
    tfree(recvbuf);
 }
 
+/*--------------------------------------------------------------------------
+ * zzz_PrintStructGrid
+ *--------------------------------------------------------------------------*/
+ 
+void
+zzz_PrintStructGrid( FILE           *file,
+                     zzz_StructGrid *grid )
+{
+   zzz_BoxArray    *boxes;
+   zzz_Box         *box;
 
+   int              i;
+
+   fprintf(file, "%d\n", zzz_StructGridDim(grid));
+
+   boxes = zzz_StructGridBoxes(grid);
+   fprintf(file, "%d\n", zzz_BoxArraySize(boxes));
+   zzz_ForBoxI(i, boxes)
+   {
+      box = zzz_BoxArrayBox(boxes, i);
+      fprintf(file, "%d:  (%d, %d, %d)  x  (%d, %d, %d)\n", i,
+              zzz_BoxIMinX(box), zzz_BoxIMinY(box), zzz_BoxIMinZ(box),
+              zzz_BoxIMaxX(box), zzz_BoxIMaxY(box), zzz_BoxIMaxZ(box));
+   }
+}
+
+/*--------------------------------------------------------------------------
+ * zzz_ReadStructGrid
+ *--------------------------------------------------------------------------*/
+ 
+zzz_StructGrid *
+zzz_ReadStructGrid( FILE *file )
+{
+   zzz_StructGrid *grid;
+
+   zzz_Index      *ilower;
+   zzz_Index      *iupper;
+
+   int             dim;
+   int             num_boxes;
+
+   int             i, idummy;
+
+   fscanf(file, "%d\n", &dim);
+   grid = zzz_NewStructGrid(MPI_COMM_WORLD, dim);
+
+   fscanf(file, "%d\n", &num_boxes);
+   ilower = zzz_NewIndex();
+   iupper = zzz_NewIndex();
+   for (i = 0; i < num_boxes; i++)
+   {
+      fscanf(file, "%d:  (%d, %d, %d)  x  (%d, %d, %d)\n", &idummy,
+             &zzz_IndexX(ilower), &zzz_IndexY(ilower), &zzz_IndexZ(ilower),
+             &zzz_IndexX(iupper), &zzz_IndexY(iupper), &zzz_IndexZ(iupper));
+
+      zzz_SetStructGridExtents(grid, ilower, iupper);
+   }
+   zzz_FreeIndex(ilower);
+   zzz_FreeIndex(iupper);
+
+   zzz_AssembleStructGrid(grid);
+
+   return grid;
+}

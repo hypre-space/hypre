@@ -87,9 +87,12 @@ zzz_StructGrid *zzz_NewStructGrid P((MPI_Comm context , int dim ));
 void zzz_FreeStructGrid P((zzz_StructGrid *grid ));
 void zzz_SetStructGridExtents P((zzz_StructGrid *grid , zzz_Index *ilower , zzz_Index *iupper ));
 void zzz_AssembleStructGrid P((zzz_StructGrid *grid ));
+void zzz_PrintStructGrid P((FILE *file , zzz_StructGrid *grid ));
+zzz_StructGrid *zzz_ReadStructGrid P((FILE *file ));
 
 /* struct_io.c */
 void zzz_PrintBoxArrayData P((FILE *file , zzz_BoxArray *box_array , zzz_BoxArray *data_space , int num_values , double *data ));
+void zzz_ReadBoxArrayData P((FILE *file , zzz_BoxArray *box_array , zzz_BoxArray *data_space , int num_values , double *data ));
 
 /* struct_matrix.c */
 zzz_StructMatrix *zzz_NewStructMatrix P((zzz_StructGrid *grid , zzz_StructStencil *user_stencil ));
@@ -103,6 +106,7 @@ int zzz_AssembleStructMatrix P((zzz_StructMatrix *matrix ));
 void zzz_SetStructMatrixStencilSpace P((zzz_StructMatrix *matrix , zzz_SBoxArray *stencil_space ));
 void zzz_SetStructMatrixNumGhost P((zzz_StructMatrix *matrix , int *num_ghost ));
 void zzz_PrintStructMatrix P((char *filename , zzz_StructMatrix *matrix , int all ));
+zzz_StructMatrix *zzz_ReadStructMatrix P((char *filename , int *num_ghost ));
 
 /* struct_stencil.c */
 zzz_StructStencil *zzz_NewStructStencil P((int dim , int size , zzz_Index **shape ));
@@ -117,6 +121,8 @@ int zzz_InitializeStructVector P((zzz_StructVector *vector ));
 int zzz_SetStructVectorValues P((zzz_StructVector *vector , zzz_Index *grid_index , double values ));
 int zzz_SetStructVectorBoxValues P((zzz_StructVector *vector , zzz_Box *value_box , double *values ));
 int zzz_AssembleStructVector P((zzz_StructVector *vector ));
+void zzz_SetStructVectorNumGhost P((zzz_StructVector *vector , int *num_ghost ));
 void zzz_PrintStructVector P((char *filename , zzz_StructVector *vector , int all ));
+zzz_StructVector *zzz_ReadStructVector P((char *filename , int *num_ghost ));
 
 #undef P

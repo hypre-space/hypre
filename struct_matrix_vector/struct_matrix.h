@@ -25,6 +25,7 @@ typedef struct
    zzz_StructGrid     *grid;
    zzz_StructStencil  *user_stencil;
    zzz_StructStencil  *stencil;
+   int                 num_values;   /* Number of "stored" coefficients */
 
    zzz_SBoxArray      *stencil_space;
    zzz_BoxArray       *data_space;
@@ -54,6 +55,7 @@ typedef struct
 #define zzz_StructMatrixGrid(matrix)          ((matrix) -> grid)
 #define zzz_StructMatrixUserStencil(matrix)   ((matrix) -> user_stencil)
 #define zzz_StructMatrixStencil(matrix)       ((matrix) -> stencil)
+#define zzz_StructMatrixNumValues(matrix)     ((matrix) -> num_values)
 
 #define zzz_StructMatrixStencilSpace(matrix)  ((matrix) -> stencil_space)
 #define zzz_StructMatrixDataSpace(matrix)     ((matrix) -> data_space)

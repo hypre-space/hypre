@@ -221,21 +221,24 @@ zzz_SetStructVectorBoxValues( zzz_StructVector *vector,
 {
    int    ierr;
 
-
+   zzz_BoxArray     *grid_boxes;
+   zzz_Box          *grid_box;
    zzz_BoxArray     *box_array;
    zzz_Box          *box;
-   zzz_BoxArray     *box_a0;
-   zzz_BoxArray     *box_a1;
 
    zzz_BoxArray     *data_space;
    zzz_Box          *data_box;
+   zzz_Index        *data_start;
+   zzz_Index        *data_stride;
+   int               datai;
+   double           *datap;
+
+   zzz_Box          *dval_box;
+   zzz_Index        *dval_start;
+   zzz_Index        *dval_stride;
+   int               dvali;
+
    zzz_Index        *index;
-   zzz_Index        *stride;
-
-   double           *vecp;
-   int               veci;
-
-   int               value_index;
 
    int               i, s, d;
 
@@ -243,13 +246,14 @@ zzz_SetStructVectorBoxValues( zzz_StructVector *vector,
     * Set up `box_array' by intersecting `box' with the grid boxes
     *-----------------------------------------------------------------------*/
 
-   box_a0 = zzz_NewBoxArray();
-   zzz_AppendBox(value_box, box_a0);
-   box_a1 = zzz_StructGridBoxes(zzz_StructVectorGrid(vector));
-
-   box_array = zzz_IntersectBoxArrays(box_a0, box_a1);
-
-   zzz_FreeBoxArrayShell(box_a0);
+   box_array = zzz_NewBoxArray();
+   grid_boxes = zzz_StructGridBoxes(zzz_StructVectorGrid(vector));
+   zzz_ForBoxI(i, grid_boxes)
+   {
+      grid_box = zzz_BoxArrayBox(grid_boxes, i);
+      box = zzz_IntersectBoxes(value_box, grid_box);
+      zzz_AppendBox(box, box_array);
+   }
 
    /*-----------------------------------------------------------------------
     * Set the vector coefficients
@@ -257,35 +261,52 @@ zzz_SetStructVectorBoxValues( zzz_StructVector *vector,
 
    if (box_array)
    {
-      data_space = zzz_StructVectorDataSpace(vector);
-
       index = zzz_NewIndex();
-
-      stride = zzz_NewIndex();
-      for (d = 0; d < 3; d++)
-         zzz_IndexD(stride, d) = 1;
-
+ 
+      data_space = zzz_StructVectorDataSpace(vector);
+      data_stride = zzz_NewIndex();
+      zzz_IndexD(data_stride, 0) = 1;
+      zzz_IndexD(data_stride, 1) = 1;
+      zzz_IndexD(data_stride, 2) = 1;
+ 
+      dval_box = zzz_DuplicateBox(value_box);
+      dval_stride = zzz_NewIndex();
+      zzz_IndexD(dval_stride, 0) = 1;
+      zzz_IndexD(dval_stride, 1) = 1;
+      zzz_IndexD(dval_stride, 2) = 1;
+      dval_start = zzz_NewIndex();
+ 
       zzz_ForBoxI(i, box_array)
       {
          box      = zzz_BoxArrayBox(box_array, i);
          data_box = zzz_BoxArrayBox(data_space, i);
  
-         vecp = zzz_StructVectorBoxData(vector, i);
-
-         value_index = 0;
-         zzz_BoxLoop1(box, index,
-                      data_box, zzz_BoxIMin(box), stride, veci,
-                      {
-                         vecp[veci] = values[value_index];
-                         value_index ++;
-                      });
+         /* if there was an intersection */
+         if (box)
+         {
+            data_start = zzz_BoxIMin(box);
+            for (d = 0; d < 3; d++)
+               zzz_IndexD(dval_start, d) = zzz_IndexD(data_start, d);
+ 
+            datap = zzz_StructVectorBoxData(vector, i);
+ 
+            zzz_BoxLoop2(box, index,
+                         data_box, data_start, data_stride, datai,
+                         dval_box, dval_start, dval_stride, dvali,
+                         {
+                            datap[datai] = values[dvali];
+                         });
+         }
       }
 
-      zzz_FreeIndex(stride);
+      zzz_FreeBox(dval_box);
+      zzz_FreeIndex(dval_start);
+      zzz_FreeIndex(dval_stride);
+      zzz_FreeIndex(data_stride);
       zzz_FreeIndex(index);
-
-      zzz_FreeBoxArray(box_array);
    }
+ 
+   zzz_FreeBoxArray(box_array);
 
    return ierr;
 }
@@ -303,6 +324,20 @@ zzz_AssembleStructVector( zzz_StructVector *vector )
 }
 
 /*--------------------------------------------------------------------------
+ * zzz_SetStructVectorNumGhost
+ *--------------------------------------------------------------------------*/
+ 
+void
+zzz_SetStructVectorNumGhost( zzz_StructVector *vector,
+                             int              *num_ghost )
+{
+   int  i;
+ 
+   for (i = 0; i < 6; i++)
+      zzz_StructVectorNumGhost(vector)[i] = num_ghost[i];
+}
+
+/*--------------------------------------------------------------------------
  * zzz_PrintStructVector
  *--------------------------------------------------------------------------*/
 
@@ -314,8 +349,10 @@ zzz_PrintStructVector( char             *filename,
    FILE            *file;
    char             new_filename[255];
 
-   zzz_BoxArray        *boxes;
-   zzz_BoxArray        *data_space;
+   zzz_StructGrid  *grid;
+   zzz_BoxArray    *boxes;
+
+   zzz_BoxArray    *data_space;
 
    int              myid;
  
@@ -338,8 +375,10 @@ zzz_PrintStructVector( char             *filename,
 
    fprintf(file, "StructVector\n");
 
-   fprintf(file, "\nNumValues:\n");
-   fprintf(file, "1\n");
+   /* print grid info */
+   fprintf(file, "\nGrid:\n");
+   grid = zzz_StructVectorGrid(vector);
+   zzz_PrintStructGrid(file, grid);
 
    /*----------------------------------------
     * Print data
@@ -350,7 +389,7 @@ zzz_PrintStructVector( char             *filename,
    if (all)
       boxes = data_space;
    else
-      boxes = zzz_StructGridBoxes(zzz_StructVectorGrid(vector));
+      boxes = zzz_StructGridBoxes(grid);
 
    fprintf(file, "\nData:\n");
    zzz_PrintBoxArrayData(file, boxes, data_space, 1,
@@ -363,3 +402,81 @@ zzz_PrintStructVector( char             *filename,
    fflush(file);
    fclose(file);
 }
+
+/*--------------------------------------------------------------------------
+ * zzz_ReadStructVector
+ *--------------------------------------------------------------------------*/
+
+zzz_StructVector *
+zzz_ReadStructVector( char *filename,
+                      int  *num_ghost )
+{
+   FILE               *file;
+   char                new_filename[255];
+                      
+   zzz_StructVector   *vector;
+
+   zzz_StructGrid     *grid;
+   zzz_BoxArray       *boxes;
+
+   zzz_BoxArray       *data_space;
+
+   int                 myid;
+ 
+   /*----------------------------------------
+    * Open file
+    *----------------------------------------*/
+ 
+   MPI_Comm_rank(MPI_COMM_WORLD, &myid );
+   sprintf(new_filename, "%s.%05d", filename, myid);
+ 
+   if ((file = fopen(new_filename, "r")) == NULL)
+   {
+      printf("Error: can't open output file %s\n", new_filename);
+      exit(1);
+   }
+
+   /*----------------------------------------
+    * Read header info
+    *----------------------------------------*/
+
+   fscanf(file, "StructVector\n");
+
+   /* read grid info */
+   fscanf(file, "\nGrid:\n");
+   grid = zzz_ReadStructGrid(file);
+
+   /*----------------------------------------
+    * Initialize the vector
+    *----------------------------------------*/
+
+   vector = zzz_NewStructVector(grid);
+   zzz_SetStructVectorNumGhost(vector, num_ghost);
+   zzz_InitializeStructVector(vector);
+
+   /*----------------------------------------
+    * Read data
+    *----------------------------------------*/
+
+   boxes      = zzz_StructGridBoxes(grid);
+   data_space = zzz_StructVectorDataSpace(vector);
+ 
+   fscanf(file, "\nData:\n");
+   zzz_ReadBoxArrayData(file, boxes, data_space, 1,
+                        zzz_StructVectorData(vector));
+
+   /*----------------------------------------
+    * Assemble the vector
+    *----------------------------------------*/
+
+   zzz_AssembleStructVector(vector);
+
+   /*----------------------------------------
+    * Close file
+    *----------------------------------------*/
+ 
+   fclose(file);
+
+   return vector;
+}
+

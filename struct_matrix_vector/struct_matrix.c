@@ -93,6 +93,7 @@ zzz_InitializeStructMatrixShell( zzz_StructMatrix *matrix )
    zzz_StructStencil  *user_stencil;
    zzz_Index         **user_stencil_shape;
    int                 user_stencil_size;
+   int                 num_values;
    int                *symm_coeff;
    int                 no_symmetric_stencil_element;
 
@@ -140,6 +141,8 @@ zzz_InitializeStructMatrixShell( zzz_StructMatrix *matrix )
       stencil = user_stencil;
       stencil_size  = zzz_StructStencilSize(stencil);
       stencil_shape = zzz_StructStencilShape(stencil);
+
+      num_values = stencil_size;
    }
 
    /* symmetric case */
@@ -204,9 +207,12 @@ zzz_InitializeStructMatrixShell( zzz_StructMatrix *matrix )
       stencil = zzz_NewStructStencil(zzz_StructStencilDim(user_stencil),
                                      stencil_size, stencil_shape);
       zzz_StructMatrixSymmCoeff(matrix) = symm_coeff;
+
+      num_values = (stencil_size + 1) / 2;
    }
 
    zzz_StructMatrixStencil(matrix) = stencil;
+   zzz_StructMatrixNumValues(matrix) = num_values;
 
    /*-----------------------------------------------------------------------
     * Set ghost-layer size for symmetric storage
@@ -538,7 +544,6 @@ zzz_AssembleStructMatrix( zzz_StructMatrix *matrix )
    zzz_SBoxArrayArray  *recv_sboxes;
    int                **send_sbox_ranks;
    int                **recv_sbox_ranks;
-   int                  num_values;
    zzz_CommPkg         *comm_pkg;
 
    int                  i, d;
@@ -592,14 +597,11 @@ zzz_AssembleStructMatrix( zzz_StructMatrix *matrix )
       send_sboxes = zzz_ConvertToSBoxArrayArray(send_boxes);
       recv_sboxes = zzz_ConvertToSBoxArrayArray(recv_boxes);
 
-      num_values = zzz_StructStencilSize(zzz_StructMatrixStencil(matrix));
-      if (zzz_StructMatrixSymmetric(matrix))
-         num_values = (num_values + 1) / 2;
       comm_pkg = zzz_NewCommPkg(send_sboxes, recv_sboxes,
                                 send_sbox_ranks, recv_sbox_ranks,
                                 zzz_StructMatrixGrid(matrix),
                                 zzz_StructMatrixDataSpace(matrix),
-                                num_values);
+                                zzz_StructMatrixNumValues(matrix));
 
       zzz_StructMatrixCommPkg(matrix) = comm_pkg;
 
@@ -662,17 +664,20 @@ zzz_PrintStructMatrix( char             *filename,
                        zzz_StructMatrix *matrix,
                        int               all      )
 {
-   FILE                *file;
-   char                 new_filename[255];
-                      
-   zzz_BoxArray        *boxes;
-   zzz_BoxArray        *data_space;
+   FILE               *file;
+   char                new_filename[255];
+
+   zzz_StructGrid     *grid;
+   zzz_BoxArray       *boxes;
 
    zzz_StructStencil  *stencil;
-   zzz_Index         **shape;
-   int                *symm_coeff;
+   zzz_Index         **stencil_shape;
 
    int                 num_values;
+
+   zzz_BoxArray       *data_space;
+
+   int                *symm_coeff;
 
    int                 i, j;
 
@@ -697,28 +702,35 @@ zzz_PrintStructMatrix( char             *filename,
 
    fprintf(file, "StructMatrix\n");
 
+   fprintf(file, "\nSymmetric: %d\n", zzz_StructMatrixSymmetric(matrix));
+
+   /* print grid info */
+   fprintf(file, "\nGrid:\n");
+   grid = zzz_StructMatrixGrid(matrix);
+   zzz_PrintStructGrid(file, grid);
+
+   /* print stencil info */
    fprintf(file, "\nStencil:\n");
    stencil = zzz_StructMatrixStencil(matrix);
-   shape = zzz_StructStencilShape(stencil);
+   stencil_shape = zzz_StructStencilShape(stencil);
 
    /* symmetric case */
-   num_values = zzz_StructStencilSize(stencil);
+   num_values = zzz_StructMatrixNumValues(matrix);
+   fprintf(file, "%d\n", num_values);
    if (zzz_StructMatrixSymmetric(matrix))
    {
-      symm_coeff = zzz_StructMatrixSymmCoeff(matrix);
-
       j = 0;
+      symm_coeff = zzz_StructMatrixSymmCoeff(matrix);
       for (i = 0; i < zzz_StructStencilSize(stencil); i++)
       {
          if (!symm_coeff[i])
          {
             fprintf(file, "%d: %d %d %d\n", j++,
-                    zzz_IndexX(shape[i]),
-                    zzz_IndexY(shape[i]),
-                    zzz_IndexZ(shape[i]));
+                    zzz_IndexX(stencil_shape[i]),
+                    zzz_IndexY(stencil_shape[i]),
+                    zzz_IndexZ(stencil_shape[i]));
          }
       }
-      num_values = (num_values + 1) / 2;
    }
 
    /* non-symmetric case */
@@ -727,9 +739,9 @@ zzz_PrintStructMatrix( char             *filename,
       for (i = 0; i < zzz_StructStencilSize(stencil); i++)
       {
          fprintf(file, "%d: %d %d %d\n", i,
-                 zzz_IndexX(shape[i]),
-                 zzz_IndexY(shape[i]),
-                 zzz_IndexZ(shape[i]));
+                 zzz_IndexX(stencil_shape[i]),
+                 zzz_IndexY(stencil_shape[i]),
+                 zzz_IndexZ(stencil_shape[i]));
       }
    }
 
@@ -742,7 +754,7 @@ zzz_PrintStructMatrix( char             *filename,
    if (all)
       boxes = data_space;
    else
-      boxes = zzz_StructGridBoxes(zzz_StructMatrixGrid(matrix));
+      boxes = zzz_StructGridBoxes(grid);
  
    fprintf(file, "\nData:\n");
    zzz_PrintBoxArrayData(file, boxes, data_space, num_values,
@@ -755,3 +767,112 @@ zzz_PrintStructMatrix( char             *filename,
    fflush(file);
    fclose(file);
 }
+
+/*--------------------------------------------------------------------------
+ * zzz_ReadStructMatrix
+ *--------------------------------------------------------------------------*/
+
+zzz_StructMatrix *
+zzz_ReadStructMatrix( char *filename,
+                      int  *num_ghost )
+{
+   FILE               *file;
+   char                new_filename[255];
+                      
+   zzz_StructMatrix   *matrix;
+
+   zzz_StructGrid     *grid;
+   zzz_BoxArray       *boxes;
+   int                 dim;
+
+   zzz_StructStencil  *stencil;
+   zzz_Index         **stencil_shape;
+   int                 stencil_size;
+
+   int                 num_values;
+
+   zzz_BoxArray       *data_space;
+
+   int                 symmetric;
+   int                *symm_coeff;
+
+   int                 i, j, idummy;
+
+   int                 myid;
+ 
+   /*----------------------------------------
+    * Open file
+    *----------------------------------------*/
+ 
+   MPI_Comm_rank(MPI_COMM_WORLD, &myid );
+   sprintf(new_filename, "%s.%05d", filename, myid);
+ 
+   if ((file = fopen(new_filename, "r")) == NULL)
+   {
+      printf("Error: can't open output file %s\n", new_filename);
+      exit(1);
+   }
+
+   /*----------------------------------------
+    * Read header info
+    *----------------------------------------*/
+
+   fscanf(file, "StructMatrix\n");
+
+   fscanf(file, "\nSymmetric: %d\n", &symmetric);
+
+   /* read grid info */
+   fscanf(file, "\nGrid:\n");
+   grid = zzz_ReadStructGrid(file);
+
+   /* read stencil info */
+   fscanf(file, "\nStencil:\n");
+   dim = zzz_StructGridDim(grid);
+   fscanf(file, "%d\n", &stencil_size);
+   stencil_shape = ctalloc(zzz_Index *, stencil_size);
+   for (i = 0; i < stencil_size; i++)
+   {
+      stencil_shape[i] = zzz_NewIndex();
+      fscanf(file, "%d: %d %d %d\n", &idummy,
+             &zzz_IndexX(stencil_shape[i]),
+             &zzz_IndexY(stencil_shape[i]),
+             &zzz_IndexZ(stencil_shape[i]));
+   }
+   stencil = zzz_NewStructStencil(dim, stencil_size, stencil_shape);
+
+   /*----------------------------------------
+    * Initialize the matrix
+    *----------------------------------------*/
+
+   matrix = zzz_NewStructMatrix(grid, stencil);
+   zzz_StructMatrixSymmetric(matrix) = symmetric;
+   zzz_SetStructMatrixNumGhost(matrix, num_ghost);
+   zzz_InitializeStructMatrix(matrix);
+
+   /*----------------------------------------
+    * Read data
+    *----------------------------------------*/
+
+   boxes      = zzz_StructGridBoxes(grid);
+   data_space = zzz_StructMatrixDataSpace(matrix);
+   num_values = zzz_StructMatrixNumValues(matrix);
+ 
+   fscanf(file, "\nData:\n");
+   zzz_ReadBoxArrayData(file, boxes, data_space, num_values,
+                        zzz_StructMatrixData(matrix));
+
+   /*----------------------------------------
+    * Assemble the matrix
+    *----------------------------------------*/
+
+   zzz_AssembleStructMatrix(matrix);
+
+   /*----------------------------------------
+    * Close file
+    *----------------------------------------*/
+ 
+   fclose(file);
+
+   return matrix;
+}
+
