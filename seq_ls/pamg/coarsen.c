@@ -696,10 +696,10 @@ hypre_AMGCoarsenRuge( hypre_CSRMatrix    *A,
        * pick an i with maximal measure
        *------------------------------------------------*/
 
-      max_measure = 0;
+      max_measure = -1;
       for (ic=0; ic < num_variables; ic++)
       {
-	 if (measure_array[ic] > max_measure)
+	 if (graph_array[ic] && measure_array[ic] >= max_measure)
 	 {
 	    i = ic;
 	    max_measure = measure_array[ic];
@@ -788,6 +788,7 @@ hypre_AMGCoarsenRuge( hypre_CSRMatrix    *A,
 		  if (C_i_nonempty)
 		  {
 		     CF_marker[i] = 1;
+		     coarse_size++;
 		     for (jj=max_ci_size ; jj < ci_tilde_size; jj++)
 		     {
 			CF_marker[graph_array[jj]] = -1;
