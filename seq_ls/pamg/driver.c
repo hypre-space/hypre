@@ -198,12 +198,16 @@ main( int   argc,
    {
       double   strong_threshold;
       int      cycle_type;
+      int      ioutdat;
       int     *num_grid_sweeps;  
       int     *grid_relax_type;   
       int    **grid_relax_points; 
+      double   relax_weight;
 
       strong_threshold = 0.25;
       cycle_type       = 1;
+      relax_weight = 1.0;
+      ioutdat = 3;
 
       num_grid_sweeps = hypre_CTAlloc(int,4);
       grid_relax_type = hypre_CTAlloc(int,4);
@@ -211,21 +215,21 @@ main( int   argc,
 
       /* fine grid */
       num_grid_sweeps[0] = 2;
-      grid_relax_type[0] = 0; 
+      grid_relax_type[0] = 1; 
       grid_relax_points[0] = hypre_CTAlloc(int, 2); 
       grid_relax_points[0][0] = -1;
       grid_relax_points[0][1] = 1;
 
       /* down cycle */
       num_grid_sweeps[1] = 2;
-      grid_relax_type[1] = 0; 
+      grid_relax_type[1] = 1; 
       grid_relax_points[1] = hypre_CTAlloc(int, 2); 
       grid_relax_points[1][0] = 1;
       grid_relax_points[1][1] = -1;
 
       /* up cycle */
       num_grid_sweeps[2] = 2;
-      grid_relax_type[2] = 0; 
+      grid_relax_type[2] = 1; 
       grid_relax_points[2] = hypre_CTAlloc(int, 2); 
       grid_relax_points[2][0] = -1;
       grid_relax_points[2][1] = 1;
@@ -236,9 +240,33 @@ main( int   argc,
       grid_relax_points[3] = hypre_CTAlloc(int, 1);
       grid_relax_points[3][0] = 0;
 
+      arg_index = 0;
+      while (arg_index < argc)
+      {
+         if ( strcmp(argv[arg_index], "-w") == 0 )
+         {
+            arg_index++;
+            relax_weight = atof(argv[arg_index++]);
+         }
+         else if ( strcmp(argv[arg_index], "-th") == 0 )
+         {
+            arg_index++;
+            strong_threshold  = atof(argv[arg_index++]);
+         }
+         else if ( strcmp(argv[arg_index], "-iout") == 0 )
+         {
+            arg_index++;
+            ioutdat  = atoi(argv[arg_index++]);
+         }
+         else
+         {
+            arg_index++;
+         }
+      }
+
       amg_solver = HYPRE_AMGInitialize();
       HYPRE_AMGSetStrongThreshold(amg_solver, strong_threshold);
-      HYPRE_AMGSetLogging(amg_solver, 3, "driver.out.log");
+      HYPRE_AMGSetLogging(amg_solver, ioutdat, "driver.out.log");
       HYPRE_AMGSetCycleType(amg_solver, cycle_type);
       HYPRE_AMGSetNumGridSweeps(amg_solver, num_grid_sweeps);
       HYPRE_AMGSetGridRelaxType(amg_solver, grid_relax_type);
