@@ -72,8 +72,6 @@ main( int   argc,
    int                 i, s, d;
    int                 ix, iy, iz, ib;
 
-   int                 periodic_error = 0;
-
    /*-----------------------------------------------------------
     * Initialize some stuff
     *-----------------------------------------------------------*/
@@ -271,14 +269,9 @@ main( int   argc,
 
    if ((px+py+pz) != 0 && solver_id != 0 )
    {
-      printf("Error: Periodic implemented only for solver 0, SMG \n");
-      periodic_error++;
+      printf("\n*** Warning: Periodic implemented only for solver 0 ***\n\n");
+      /* exit(1); */
    }
-   if (periodic_error != 0)
-   {
-      exit(1);
-   }
-
 
    /*-----------------------------------------------------------
     * Print driver parameters
