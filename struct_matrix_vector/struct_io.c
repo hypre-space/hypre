@@ -31,7 +31,9 @@ zzz_PrintBoxArrayData( FILE             *file,
    int              data_box_volume;
    int              datai;
 
-   zzz_Index       *index;
+   zzz_Index       *loop_index;
+   zzz_Index       *loop_size;
+   zzz_Index       *start;
    zzz_Index       *stride;
 
    int              i, j;
@@ -40,7 +42,8 @@ zzz_PrintBoxArrayData( FILE             *file,
     * Print data
     *----------------------------------------*/
 
-   index = zzz_NewIndex();
+   loop_index = zzz_NewIndex();
+   loop_size  = zzz_NewIndex();
    stride = zzz_NewIndex();
    zzz_SetIndex(stride, 1, 1, 1);
 
@@ -49,17 +52,19 @@ zzz_PrintBoxArrayData( FILE             *file,
       box      = zzz_BoxArrayBox(box_array, i);
       data_box = zzz_BoxArrayBox(data_space, i);
 
+      start = zzz_BoxIMin(box);
       data_box_volume = zzz_BoxVolume(data_box);
 
-      zzz_BoxLoop1(box, index,
-                   data_box, zzz_BoxIMin(box), stride, datai,
+      zzz_GetBoxSize(box, loop_size);
+      zzz_BoxLoop1(loop_index, loop_size,
+                   data_box, start, stride, datai,
                    {
                       for (j = 0; j < num_values; j++)
                       {
                          fprintf(file, "%d: (%d, %d, %d; %d) %e\n", i,
-                                 zzz_IndexX(index),
-                                 zzz_IndexY(index),
-                                 zzz_IndexZ(index),
+                                 zzz_IndexX(start) + zzz_IndexX(loop_index),
+                                 zzz_IndexY(start) + zzz_IndexY(loop_index),
+                                 zzz_IndexZ(start) + zzz_IndexZ(loop_index),
                                  j, data[datai + j*data_box_volume]);
                       }
                    });
@@ -67,7 +72,8 @@ zzz_PrintBoxArrayData( FILE             *file,
       data += num_values*data_box_volume;
    }
 
-   zzz_FreeIndex(index);
+   zzz_FreeIndex(loop_index);
+   zzz_FreeIndex(loop_size);
    zzz_FreeIndex(stride);
 }
 
@@ -88,7 +94,9 @@ zzz_ReadBoxArrayData( FILE             *file,
    int              data_box_volume;
    int              datai;
 
-   zzz_Index       *index;
+   zzz_Index       *loop_index;
+   zzz_Index       *loop_size;
+   zzz_Index       *start;
    zzz_Index       *stride;
 
    int              i, j, idummy;
@@ -97,7 +105,8 @@ zzz_ReadBoxArrayData( FILE             *file,
     * Read data
     *----------------------------------------*/
 
-   index = zzz_NewIndex();
+   loop_index = zzz_NewIndex();
+   loop_size  = zzz_NewIndex();
    stride = zzz_NewIndex();
    zzz_SetIndex(stride, 1, 1, 1);
 
@@ -106,10 +115,12 @@ zzz_ReadBoxArrayData( FILE             *file,
       box      = zzz_BoxArrayBox(box_array, i);
       data_box = zzz_BoxArrayBox(data_space, i);
 
+      start = zzz_BoxIMin(box);
       data_box_volume = zzz_BoxVolume(data_box);
 
-      zzz_BoxLoop1(box, index,
-                   data_box, zzz_BoxIMin(box), stride, datai,
+      zzz_GetBoxSize(box, loop_size);
+      zzz_BoxLoop1(loop_index, loop_size,
+                   data_box, start, stride, datai,
                    {
                       for (j = 0; j < num_values; j++)
                       {
@@ -124,6 +135,7 @@ zzz_ReadBoxArrayData( FILE             *file,
       data += num_values*data_box_volume;
    }
 
-   zzz_FreeIndex(index);
+   zzz_FreeIndex(loop_index);
+   zzz_FreeIndex(loop_size);
    zzz_FreeIndex(stride);
 }

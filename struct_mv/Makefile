@@ -36,6 +36,7 @@ FILES =\
  struct_io.c\
  struct_axpy.c\
  struct_copy.c\
+ struct_innerprod.c\
  struct_matrix.c\
  struct_matrix_mask.c\
  struct_matvec.c\

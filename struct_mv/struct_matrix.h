@@ -22,7 +22,7 @@
 
 typedef struct
 {
-   MPI_Comm      *comm;
+   MPI_Comm           *comm;
 
    zzz_StructGrid     *grid;
    zzz_StructStencil  *user_stencil;

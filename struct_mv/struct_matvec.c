@@ -141,7 +141,8 @@ zzz_StructMatvecCompute( void             *matvec_vdata,
                        
    zzz_BoxArray         *boxes;
    zzz_Box              *box;
-   zzz_Index            *index;
+   zzz_Index            *loop_index;
+   zzz_Index            *loop_size;
    zzz_Index            *start;
    zzz_Index            *stride;
    zzz_Index            *unit_stride;
@@ -161,7 +162,8 @@ zzz_StructMatvecCompute( void             *matvec_vdata,
    x           = (matvec_data -> x);
    compute_pkg = (matvec_data -> compute_pkg);
 
-   index = zzz_NewIndex();
+   loop_index = zzz_NewIndex();
+   loop_size  = zzz_NewIndex();
 
    unit_stride = zzz_NewIndex();
    zzz_SetIndex(unit_stride, 1, 1, 1);
@@ -181,7 +183,8 @@ zzz_StructMatvecCompute( void             *matvec_vdata,
          y_data_box = zzz_BoxArrayBox(zzz_StructVectorDataSpace(y), i);
          yp = zzz_StructVectorBoxData(y, i);
 
-         zzz_BoxLoop1(box, index,
+         zzz_GetBoxSize(box, loop_size);
+         zzz_BoxLoop1(loop_index, loop_size,
                       y_data_box, start, unit_stride, yi,
                       {
                          yp[yi] *= beta;
@@ -228,7 +231,8 @@ zzz_StructMatvecCompute( void             *matvec_vdata,
 
                   if (temp == 0.0)
                   {
-                     zzz_BoxLoop1(box, index,
+                     zzz_GetBoxSize(box, loop_size);
+                     zzz_BoxLoop1(loop_index, loop_size,
                                   y_data_box, start, unit_stride, yi,
                                   {
                                      yp[yi] = 0.0;
@@ -236,7 +240,8 @@ zzz_StructMatvecCompute( void             *matvec_vdata,
                   }
                   else
                   {
-                     zzz_BoxLoop1(box, index,
+                     zzz_GetBoxSize(box, loop_size);
+                     zzz_BoxLoop1(loop_index, loop_size,
                                   y_data_box, start, unit_stride, yi,
                                   {
                                      yp[yi] *= temp;
@@ -284,7 +289,8 @@ zzz_StructMatvecCompute( void             *matvec_vdata,
 
                xoffset = zzz_BoxOffsetDistance(x_data_box, stencil_shape[si]);
 
-               zzz_BoxLoop3(box, index,
+               zzz_GetBoxSize(box, loop_size);
+               zzz_BoxLoop3(loop_index, loop_size,
                             A_data_box, start, stride, Ai,
                             x_data_box, start, stride, xi,
                             y_data_box, start, stride, yi,
@@ -295,7 +301,8 @@ zzz_StructMatvecCompute( void             *matvec_vdata,
 
             if (alpha != 1.0)
             {
-               zzz_BoxLoop1(box, index,
+               zzz_GetBoxSize(box, loop_size);
+               zzz_BoxLoop1(loop_index, loop_size,
                             y_data_box, start, stride, yi,
                             {
                                yp[yi] *= alpha;
@@ -309,7 +316,8 @@ zzz_StructMatvecCompute( void             *matvec_vdata,
     * Return
     *-----------------------------------------------------------------------*/
 
-   zzz_FreeIndex(index);
+   zzz_FreeIndex(loop_index);
+   zzz_FreeIndex(loop_size);
    zzz_FreeIndex(unit_stride);
 
    return ierr;

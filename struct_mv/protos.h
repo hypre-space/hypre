@@ -96,6 +96,9 @@ void zzz_AssembleStructGrid P((zzz_StructGrid *grid ));
 void zzz_PrintStructGrid P((FILE *file , zzz_StructGrid *grid ));
 zzz_StructGrid *zzz_ReadStructGrid P((FILE *file ));
 
+/* struct_innerprod.c */
+double zzz_StructInnerProd P((zzz_StructVector *x , zzz_StructVector *y ));
+
 /* struct_io.c */
 void zzz_PrintBoxArrayData P((FILE *file , zzz_BoxArray *box_array , zzz_BoxArray *data_space , int num_values , double *data ));
 void zzz_ReadBoxArrayData P((FILE *file , zzz_BoxArray *box_array , zzz_BoxArray *data_space , int num_values , double *data ));
@@ -134,6 +137,7 @@ int zzz_StructStencilElementRank P((zzz_StructStencil *stencil , zzz_Index *sten
 
 /* struct_vector.c */
 zzz_StructVector *zzz_NewStructVector P((MPI_Comm *comm , zzz_StructGrid *grid ));
+int zzz_FreeStructVectorShell P((zzz_StructVector *vector ));
 int zzz_FreeStructVector P((zzz_StructVector *vector ));
 int zzz_InitializeStructVectorShell P((zzz_StructVector *vector ));
 void zzz_InitializeStructVectorData P((zzz_StructVector *vector , double *data ));

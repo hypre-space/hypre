@@ -8,22 +8,22 @@
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
- * Structured axpy routine
+ * Structured inner product routine
  *
  *****************************************************************************/
 
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * zzz_StructAxpy
+ * zzz_StructInnerProd
  *--------------------------------------------------------------------------*/
 
-int
-zzz_StructAxpy( double            alpha,
-                zzz_StructVector *x,
-                zzz_StructVector *y     )
+double
+zzz_StructInnerProd(  zzz_StructVector *x,
+                      zzz_StructVector *y )
 {
-   int ierr;
+   double                result;
+   double                local_result;
 
    zzz_Box              *x_data_box;
    zzz_Box              *y_data_box;
@@ -42,6 +42,8 @@ zzz_StructAxpy( double            alpha,
    zzz_Index            *unit_stride;
 
    int                   i;
+
+   local_result = 0.0;
 
    loop_index = zzz_NewIndex();
    loop_size  = zzz_NewIndex();
@@ -66,7 +68,7 @@ zzz_StructAxpy( double            alpha,
                    x_data_box, start, unit_stride, xi,
                    y_data_box, start, unit_stride, yi,
                    {
-                      yp[yi] += alpha * xp[xi];
+                      local_result += xp[xi] * yp[yi];
                    });
    }
 
@@ -74,5 +76,9 @@ zzz_StructAxpy( double            alpha,
    zzz_FreeIndex(loop_size);
    zzz_FreeIndex(unit_stride);
 
-   return ierr;
+   MPI_Allreduce(&local_result, &result, 1,
+                 MPI_DOUBLE, MPI_SUM, *zzz_StructVectorComm(x));
+
+   return result;
 }
+

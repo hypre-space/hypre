@@ -36,13 +36,15 @@ zzz_StructAxpy( double            alpha,
 
    zzz_BoxArray         *boxes;
    zzz_Box              *box;
-   zzz_Index            *index;
+   zzz_Index            *loop_index;
+   zzz_Index            *loop_size;
    zzz_Index            *start;
    zzz_Index            *unit_stride;
 
    int                   i;
 
-   index = zzz_NewIndex();
+   loop_index = zzz_NewIndex();
+   loop_size  = zzz_NewIndex();
 
    unit_stride = zzz_NewIndex();
    zzz_SetIndex(unit_stride, 1, 1, 1);
@@ -59,7 +61,8 @@ zzz_StructAxpy( double            alpha,
       xp = zzz_StructVectorBoxData(x, i);
       yp = zzz_StructVectorBoxData(y, i);
 
-      zzz_BoxLoop2(box, index,
+      zzz_GetBoxSize(box, loop_size);
+      zzz_BoxLoop2(loop_index, loop_size,
                    x_data_box, start, unit_stride, xi,
                    y_data_box, start, unit_stride, yi,
                    {
@@ -67,7 +70,8 @@ zzz_StructAxpy( double            alpha,
                    });
    }
 
-   zzz_FreeIndex(index);
+   zzz_FreeIndex(loop_index);
+   zzz_FreeIndex(loop_size);
    zzz_FreeIndex(unit_stride);
 
    return ierr;

@@ -364,7 +364,8 @@ zzz_CopyBoxArrayData( zzz_BoxArray     *box_array_in,
    int              data_box_volume_in, data_box_volume_out;
    int              datai_in, datai_out;
 
-   zzz_Index       *index;
+   zzz_Index       *loop_index;
+   zzz_Index       *loop_size;
    zzz_Index       *stride;
 
    int              j;
@@ -373,7 +374,8 @@ zzz_CopyBoxArrayData( zzz_BoxArray     *box_array_in,
     * Read data
     *----------------------------------------*/
 
-   index = zzz_NewIndex();
+   loop_index = zzz_NewIndex();
+   loop_size  = zzz_NewIndex();
    stride = zzz_NewIndex();
    zzz_SetIndex(stride, 1, 1, 1);
 
@@ -387,7 +389,8 @@ zzz_CopyBoxArrayData( zzz_BoxArray     *box_array_in,
    
    data_box_volume_out = zzz_BoxVolume(data_box_out);
 
-   zzz_BoxLoop2(box_out, index,
+   zzz_GetBoxSize(box_out, loop_size);
+   zzz_BoxLoop2(loop_index, loop_size,
 		data_box_in, zzz_BoxIMin(box_in), stride, datai_in,
 		data_box_out, zzz_BoxIMin(box_out), stride, datai_out,\
 		for (j = 0; j < num_values_out; j++)
@@ -396,7 +399,8 @@ zzz_CopyBoxArrayData( zzz_BoxArray     *box_array_in,
 		    data_in[datai_in + j*data_box_volume_in];
 		})
 
-   zzz_FreeIndex(index);
+   zzz_FreeIndex(loop_index);
+   zzz_FreeIndex(loop_size);
    zzz_FreeIndex(stride);
 }
 

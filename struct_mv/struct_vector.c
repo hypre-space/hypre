@@ -39,6 +39,25 @@ zzz_NewStructVector( MPI_Comm       *comm,
 }
 
 /*--------------------------------------------------------------------------
+ * zzz_FreeStructVectorShell
+ *--------------------------------------------------------------------------*/
+
+int 
+zzz_FreeStructVectorShell( zzz_StructVector *vector )
+{
+   int  ierr;
+
+   if (vector)
+   {
+      zzz_TFree(zzz_StructVectorDataIndices(vector));
+      zzz_FreeBoxArray(zzz_StructVectorDataSpace(vector));
+      zzz_TFree(vector);
+   }
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
  * zzz_FreeStructVector
  *--------------------------------------------------------------------------*/
 
@@ -49,12 +68,8 @@ zzz_FreeStructVector( zzz_StructVector *vector )
 
    if (vector)
    {
-      zzz_TFree(zzz_StructVectorDataIndices(vector));
       zzz_TFree(zzz_StructVectorData(vector));
- 
-      zzz_FreeBoxArray(zzz_StructVectorDataSpace(vector));
- 
-      zzz_TFree(vector);
+      zzz_FreeStructVectorShell(vector);
    }
 
    return ierr;
@@ -240,7 +255,8 @@ zzz_SetStructVectorBoxValues( zzz_StructVector *vector,
    zzz_Index        *dval_stride;
    int               dvali;
 
-   zzz_Index        *index;
+   zzz_Index        *loop_index;
+   zzz_Index        *loop_size;
 
    int               i;
 
@@ -263,7 +279,8 @@ zzz_SetStructVectorBoxValues( zzz_StructVector *vector,
 
    if (box_array)
    {
-      index = zzz_NewIndex();
+      loop_index = zzz_NewIndex();
+      loop_size  = zzz_NewIndex();
  
       data_space = zzz_StructVectorDataSpace(vector);
       data_stride = zzz_NewIndex();
@@ -287,7 +304,8 @@ zzz_SetStructVectorBoxValues( zzz_StructVector *vector,
  
             datap = zzz_StructVectorBoxData(vector, i);
  
-            zzz_BoxLoop2(box, index,
+            zzz_GetBoxSize(box, loop_size);
+            zzz_BoxLoop2(loop_index, loop_size,
                          data_box, data_start, data_stride, datai,
                          dval_box, dval_start, dval_stride, dvali,
                          {
@@ -300,7 +318,8 @@ zzz_SetStructVectorBoxValues( zzz_StructVector *vector,
       zzz_FreeIndex(dval_start);
       zzz_FreeIndex(dval_stride);
       zzz_FreeIndex(data_stride);
-      zzz_FreeIndex(index);
+      zzz_FreeIndex(loop_index);
+      zzz_FreeIndex(loop_size);
    }
  
    zzz_FreeBoxArray(box_array);
