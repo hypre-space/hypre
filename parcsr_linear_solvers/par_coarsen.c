@@ -1575,6 +1575,10 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
     *                  move k to the list in LoL with measure one
     *                  greater than it occupies (creating new LoL
     *                  entry if necessary)
+    *        3) For each point, j,  in S_i,
+    *                  move j to the list in LoL with measure one
+    *                  smaller than it occupies (creating new LoL
+    *                  entry if necessary)
     *
     ****************************************************************/
 
@@ -1616,6 +1620,20 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
                                  nabor_two, lists, where);
                }
             }
+         }
+      }
+      for (j = S_i[index]; j < S_i[index+1]; j++)
+      {
+         nabor = S_j[j];
+         if (CF_marker[nabor] == UNDECIDED)
+         {
+            measure = measure_array[nabor];
+
+            remove_point(&LoL_head, &LoL_tail, measure, nabor, lists, where);
+
+            measure_array[nabor] = --measure;
+
+            enter_on_lists(&LoL_head, &LoL_tail, measure, nabor, lists, where);
          }
       }
 
@@ -1734,6 +1752,7 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
                            coarse_size--;
                         }
                         ci_tilde_size = 0;
+                        C_i_nonempty = 0;
                         break_var = 0;
                         break;
                      }
@@ -1807,6 +1826,7 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
                            }
                            ci_tilde_size = 0;
                            ci_tilde_size_offd = 0;
+                           C_i_nonempty = 0;
                            break;
                         }
                         else
@@ -1869,6 +1889,7 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
    		           coarse_size--;
    		        }
    		        ci_tilde_size = 0;
+   	    		C_i_nonempty = 0;
    		        break;
    		     }
    		     else
@@ -2002,6 +2023,7 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
    		           }
    		           ci_tilde_size = 0;
    		           ci_tilde_size_offd = 0;
+                           C_i_nonempty = 0;
    		           break;
    		        }
    		        else
@@ -2068,6 +2090,7 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
    		           }
    		           ci_tilde_size = 0;
    		           ci_tilde_size_offd = 0;
+                           C_i_nonempty = 0;
    		           break;
    		        }
    		        else
@@ -2240,6 +2263,7 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
                      if (C_i_nonempty)
                      {
                         CF_marker[i] = -2;
+                        C_i_nonempty = 0;
                         break;
                      }
                      else
@@ -2829,6 +2853,7 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
    		        coarse_size--;
    		     }
    		     ci_tilde_size = 0;
+                     C_i_nonempty = 0;
    		     break;
    		  }
    		  else
