@@ -269,4 +269,6 @@ $MPIRUN -np 3 $SLS -P 1 3 1 -solver 11
 $MPIRUN -np 3 $SLS -P 3 1 1 -solver 18
 $MPIRUN -np 1 $SLS -P 1 1 1 -solver 19
 $MPIRUN -np 1 $SLS -P 1 1 1 -solver 20
+$MPIRUN -np 1 $SLS -P 1 1 1 -solver 21
+$MPIRUN -np 1 $SLS -P 1 1 1 -solver 25
 
