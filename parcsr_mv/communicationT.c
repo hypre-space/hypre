@@ -143,7 +143,7 @@ hypre_MatTCommPkgCreate_core (
    int			*recv_procs;
    int			*recv_vec_starts;
    int	i, j, j2, k, ir, rowmin, rowmax;
-   int	*tmp, *recv_buf, *displs, *info, *send_buf, *all_num_sends2;
+   int	*tmp, *recv_buf, *displs, *info, *send_buf, *all_num_sends3;
    int	num_procs, my_id, num_elmts;
    int	local_info, index, index2;
    int pmatch, col, kc, p;
@@ -383,15 +383,15 @@ hypre_MatTCommPkgCreate_core (
      may be much slower than Allgather or may be a bit faster depending on
      implementations
 */
-   send_buf = hypre_CTAlloc( int, 2*num_sends );
-   all_num_sends2 = hypre_CTAlloc( int, num_procs );
+   send_buf = hypre_CTAlloc( int, 3*num_sends );
+   all_num_sends3 = hypre_CTAlloc( int, num_procs );
 
    /* scatter-gather num_sends, to set up the size for the main comm. step */
-   i = 2*num_sends;
-   MPI_Allgather( &i, 1, MPI_INT, all_num_sends2, 1, MPI_INT, comm );
+   i = 3*num_sends;
+   MPI_Allgather( &i, 1, MPI_INT, all_num_sends3, 1, MPI_INT, comm );
    displs[0] = 0;
    for ( p=0; p<num_procs; ++p ) {
-      displs[p+1] = displs[p] + all_num_sends2[p];
+      displs[p+1] = displs[p] + all_num_sends3[p];
    };
    recv_sz_buf = hypre_CTAlloc( int, displs[num_procs] );
    
@@ -399,36 +399,49 @@ hypre_MatTCommPkgCreate_core (
    index = 0;
    for ( i=0; i<num_sends; ++i ) {
       send_buf[index++] = send_procs[i];   /* processor to send to */
+      send_buf[index++] = my_id;
       send_buf[index++] = send_map_starts[i+1] - send_map_starts[i];
       /* ... sizes of info to send */
    };
-#if 0
-      printf("num_procs=%i send_map_starts (%i):",num_procs,num_sends+1);
-      for( i=0; i<=num_sends; ++i ) printf(" %i", send_map_starts[i] );
-      printf("\n");
-      printf("my_id=%i num_sends=%i send_buf[0,1]=%i %i",
-             my_id, num_sends, send_buf[0], send_buf[1] );
-      printf(" all_num_sends2[0,1]=%i %i\n", all_num_sends2[0], all_num_sends2[1] );
-#endif
-   MPI_Allgatherv( send_buf, 2*num_sends, MPI_INT,
-                   recv_sz_buf, all_num_sends2, displs, MPI_INT, comm);
+
+   MPI_Allgatherv( send_buf, 3*num_sends, MPI_INT,
+                   recv_sz_buf, all_num_sends3, displs, MPI_INT, comm);
+
    recv_vec_starts[0] = 0;
    j2 = 0;  j = 0;
-   for ( p=0; p<num_procs; ++p ) {
+   for ( i=0; i<displs[num_procs]; i=i+3 ) {
+      j = i;
       if ( recv_sz_buf[j++]==my_id ) {
-         recv_procs[j2] = p;
+         recv_procs[j2] = recv_sz_buf[j++];
          recv_vec_starts[j2+1] = recv_vec_starts[j2] + recv_sz_buf[j++];
          j2++;
       }
-      else {
-         j++;
-      }
    }
-   /* fill in the rest of recv_vec_starts to indicate no more data */
-   for ( j=j2+1; j<num_recvs+1; ++j ) recv_vec_starts[j] = recv_vec_starts[j2];
+   num_recvs = j2;
+
+#if 0
+   printf("num_procs=%i send_map_starts (%i):",num_procs,num_sends+1);
+   for( i=0; i<=num_sends; ++i ) printf(" %i", send_map_starts[i] );
+   printf("  send_procs (%i):",num_sends);
+   for( i=0; i<num_sends; ++i ) printf(" %i", send_procs[i] );
+   printf("\n");
+   printf("my_id=%i num_sends=%i send_buf[0,1,2]=%i %i %i",
+          my_id, num_sends, send_buf[0], send_buf[1], send_buf[2] );
+   printf(" all_num_sends3[0,1]=%i %i\n", all_num_sends3[0], all_num_sends3[1] );
+   printf("my_id=%i rcv_sz_buf (%i):", my_id, displs[num_procs] );
+   for( i=0; i<displs[num_procs]; ++i ) printf(" %i", recv_sz_buf[i] );
+   printf("\n");
+   printf("my_id=%i recv_vec_starts (%i):",my_id,num_recvs+1);
+   for( i=0; i<=num_recvs; ++i ) printf(" %i", recv_vec_starts[i] );
+   printf("  recv_procs (%i):",num_recvs);
+   for( i=0; i<num_recvs; ++i ) printf(" %i", recv_procs[i] );
+   printf("\n");
+   printf("my_id=%i num_recvs=%i recv_sz_buf[0,1,2]=%i %i %i\n",
+          my_id, num_recvs, recv_sz_buf[0], recv_sz_buf[1], recv_sz_buf[2] );
+#endif
 
    hypre_TFree(send_buf);
-   hypre_TFree(all_num_sends2);
+   hypre_TFree(all_num_sends3);
    hypre_TFree(tmp);
    hypre_TFree(recv_buf);
    hypre_TFree(displs);
