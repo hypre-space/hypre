@@ -361,14 +361,12 @@ hypre_GMRESSolve(void  *gmres_vdata,
           printf("\n\n"); };
        /* fclose(fp); };  */
    }
-   }
 
    (gmres_data -> num_iterations) = iter;
    if (b_norm > 0.0)
-       (gmres_data -> rel_residual_norm) = r_norm/b_norm;
+      (gmres_data -> rel_residual_norm) = r_norm/b_norm;
    if (b_norm == 0.0)
-       (gmres_data -> rel_residual_norm) = r_norm;
-       
+      (gmres_data -> rel_residual_norm) = r_norm;
 
    if (iter >= max_iter && r_norm > epsilon) ierr = 1;
 
