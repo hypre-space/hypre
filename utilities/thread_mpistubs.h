@@ -15,6 +15,8 @@
 #ifndef hypre_thread_MPISTUBS
 #define hypre_thread_MPISTUBS
 
+#include "mpi.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
