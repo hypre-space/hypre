@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
     double time0, time1;
 
     double *x, *y, *b;
-    int i;
+    int i, j;
     double thresh;
     double selparam;
     int nlevels;
@@ -59,6 +59,10 @@ int main(int argc, char *argv[])
         for (i=0; i<end_row-beg_row+1; i++)
             x[i] = 0.0;
 
+#if ONE_TIME
+        selparam = 1.0;
+	nlevels = 0;
+#else
         if (mype == 0)
         {
 	    fflush(stdout);
@@ -73,6 +77,7 @@ int main(int argc, char *argv[])
 
         if (nlevels < 0)
             break;
+#endif
 
         time0 = MPI_Wtime();
         ps = ParaSailsCreate(A);
@@ -82,16 +87,21 @@ int main(int argc, char *argv[])
         time1 = MPI_Wtime();
         printf("%d: Total time for ParaSails: %f\n", mype, time1-time0);
         i = MatrixNnz(ps->M);
-        if (mype == 0) printf("number of nonzeros: %d\n", i);
+        j = (MatrixNnz(A) - n) / 2 + n;
+        if (mype == 0) printf("number of nonzeros: %d (%.2f)\n", i, i/(double)j);
         /*MatrixPrint(ps->M, "M");*/
 
         time0 = MPI_Wtime();
-        PCG_ParaSails(A, ps, b, x, 1.e-9, 1500);
+        PCG_ParaSails(A, ps, b, x, 1.e-8, 1500);
         time1 = MPI_Wtime();
         printf("%d: Total time for it sol: %f\n", mype, time1-time0);
 
         MatrixMatvecComplete(A); /* convert matrix back to global numbering */
         ParaSailsDestroy(ps);
+
+#if ONE_TIME
+        break;
+#endif
     }
 
     free(x);
