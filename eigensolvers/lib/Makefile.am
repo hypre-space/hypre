@@ -17,9 +17,7 @@ include_HEADERS = \
  $(top_srcdir)/eigensolvers/krylov/lobpcg.h\
  $(top_srcdir)/eigensolvers/multivector/multivector.h\
  $(top_srcdir)/eigensolvers/utilities/fortran_matrix.h\
- $(top_srcdir)/utilities/fortran.h
-
-noinst_HEADERS = \
+ $(top_srcdir)/utilities/fortran.h\
  $(top_srcdir)/eigensolvers/parcsr_ls/HYPRE_parcsr_int.h\
  $(top_srcdir)/eigensolvers/sstruct_ls/HYPRE_sstruct_int.h\
  $(top_srcdir)/eigensolvers/struct_ls/HYPRE_struct_int.h

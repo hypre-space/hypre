@@ -40,8 +40,8 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 host_triplet = @host@
 subdir = eigensolvers/lib
-DIST_COMMON = $(include_HEADERS) $(noinst_HEADERS) \
-	$(srcdir)/Makefile.am $(srcdir)/Makefile.in
+DIST_COMMON = $(include_HEADERS) $(srcdir)/Makefile.am \
+	$(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/config/acinclude.m4 \
 	$(top_srcdir)/config/acx_blas.m4 \
@@ -104,7 +104,7 @@ SOURCES = $(libHYPRE_lobpcg_a_SOURCES) $(libHYPRE_lobpcg_la_SOURCES)
 DIST_SOURCES = $(am__libHYPRE_lobpcg_a_SOURCES_DIST) \
 	$(am__libHYPRE_lobpcg_la_SOURCES_DIST)
 includeHEADERS_INSTALL = $(INSTALL_HEADER)
-HEADERS = $(include_HEADERS) $(noinst_HEADERS)
+HEADERS = $(include_HEADERS)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -252,9 +252,7 @@ include_HEADERS = \
  $(top_srcdir)/eigensolvers/krylov/lobpcg.h\
  $(top_srcdir)/eigensolvers/multivector/multivector.h\
  $(top_srcdir)/eigensolvers/utilities/fortran_matrix.h\
- $(top_srcdir)/utilities/fortran.h
-
-noinst_HEADERS = \
+ $(top_srcdir)/utilities/fortran.h\
  $(top_srcdir)/eigensolvers/parcsr_ls/HYPRE_parcsr_int.h\
  $(top_srcdir)/eigensolvers/sstruct_ls/HYPRE_sstruct_int.h\
  $(top_srcdir)/eigensolvers/struct_ls/HYPRE_struct_int.h
