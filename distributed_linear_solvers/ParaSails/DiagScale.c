@@ -153,9 +153,9 @@ DiagScale *DiagScaleCreate(Matrix *A, Numbering *numb)
 {
     MPI_Request *requests;
     MPI_Status  *statuses;
-    int npes, row, i, j, num_requests, num_replies, *replies_list;
+    int npes, row, j, num_requests, num_replies, *replies_list;
     int len, *ind;
-    double *val;
+    double *val, *temp;
 
     DiagScale *p = (DiagScale *) malloc(sizeof(DiagScale));
 
@@ -208,9 +208,19 @@ DiagScale *DiagScaleCreate(Matrix *A, Numbering *numb)
     MPI_Waitall(num_requests, requests, statuses);
     free(requests);
     free(statuses);
-    free(ind);
 
     p->offset = A->end_row - A->beg_row + 1;
+
+    /* ind contains global indices corresponding to order that entries
+       are stored in ext_diags.  Reorder ext_diags in original ordering */
+    NumberingGlobalToLocal(numb, len, ind, ind);
+    temp = (double *) malloc(len * sizeof(double));
+    for (j=0; j<len; j++)
+	temp[ind[j]-p->offset] = p->ext_diags[j];
+
+    free(ind);
+    free(p->ext_diags);
+    p->ext_diags = temp;
 
     return p;
 }
