@@ -25,6 +25,7 @@ f90amg_setup.c
 f90amg_solve.c
 f90amg_timing.c
 fortran.h
+fortran_setup.h
 general.h
 headers.h
 iinvert.f

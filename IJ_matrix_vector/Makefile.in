@@ -18,7 +18,6 @@ CC = @CC@
 
 C_COMPILE_FLAGS=@CFLAGS@
 CXX_COMPILE_FLAGS=@CXXFLAGS@
-F77_COMPILE_FLAGS=@F77FLAGS@
 CINCLUDES=@INCLUDES@ @MPIINCLUDE@
 CDEFS = -DHYPRE_NO_PTHREAD_MANGLING
 
@@ -54,7 +53,6 @@ LFLAGS =\
 
 HEADERS =\
  aux_parcsr_matrix.h\
- fortran.h\
  HYPRE_IJ_mv.h \
  IJ_matrix_vector.h \
  IJ_matrix.h
@@ -108,6 +106,3 @@ ${OBJS}: ${HEADERS}
 
 .c.o:
 	${CC} -o $@ -c ${CFLAGS} $<
-
-.f.o:
-	${F77} -o $@ -c ${FFLAGS} $<

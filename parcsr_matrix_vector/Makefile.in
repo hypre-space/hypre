@@ -21,7 +21,7 @@ F77_COMPILE_FLAGS=@F77FLAGS@
 CINCLUDES=@INCLUDES@ @MPIINCLUDE@
 CDEFS = 
  
-CFLAGS = \
+CFLAGS =\
  ${C_COMPILE_FLAGS}\
  -I..\
  -I../utilities\
@@ -43,11 +43,9 @@ LFLAGS =\
  -lHYPRE_seq_mv\
  -lHYPRE_utilities\
  ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
- 
 
 HEADERS =\
  communication.h\
- fortran.h\
  headers.h\
  par_csr_matrix.h\
  par_vector.h\

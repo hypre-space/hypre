@@ -22,7 +22,7 @@ F77_COMPILE_FLAGS=@F77FLAGS@
 CINCLUDES=@INCLUDES@ @MPIINCLUDE@
 CDEFS = -DHYPRE_NO_PTHREAD_MANGLING
  
-CFLAGS = \
+CFLAGS =\
  ${C_COMPILE_FLAGS}\
  -I..\
  -I../utilities\
@@ -45,9 +45,7 @@ LFLAGS =\
  -lHYPRE_utilities\
  ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
 
-
 HEADERS =\
- fortran.h\
  headers.h\
  pfmg.h\
  sparse_msg.h\
@@ -140,8 +138,4 @@ ${OBJS}: ${HEADERS}
 
 .c.o:
 	${CC} -o $@ -c ${CFLAGS} $<
-
-.f.o:
-	${F77} -o $@ -c ${FFLAGS} $<
-
 

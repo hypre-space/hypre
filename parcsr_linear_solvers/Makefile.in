@@ -71,7 +71,6 @@ LFLAGS =\
  ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
  
 HEADERS =\
- fortran.h\
  headers.h\
  par_amg.h\
  parcsr_linear_solvers.h\

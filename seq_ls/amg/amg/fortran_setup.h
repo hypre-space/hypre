@@ -13,17 +13,7 @@
  *
  *****************************************************************************/
 
-#ifndef HYPRE_AMG_FORTRAN_HEADER
-#define HYPRE_AMG_FORTRAN_HEADER
-
-
-#if defined(IRIX) || defined(DEC)
-#define hypre_NAME_C_FOR_FORTRAN(name) name##_
-#define hypre_NAME_FORTRAN_FOR_C(name) name##_
-#else
-#define hypre_NAME_C_FOR_FORTRAN(name) name##__
-#define hypre_NAME_FORTRAN_FOR_C(name) name##_
-#endif
+#include "fortran.h"
 
 /* setup */
 #define hypre_CALL_SETUP(Setup_err_flag, A, amg_data) \

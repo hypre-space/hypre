@@ -28,7 +28,7 @@
 
 #include "protos.h"
 
-#include "fortran.h"
+#include "fortran_setup.h"
 
 /* malloc debug stuff */
 #ifdef AMG_MALLOC_DEBUG
