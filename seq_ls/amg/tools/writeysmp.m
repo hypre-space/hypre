@@ -1,11 +1,17 @@
-function writeysmp(nv,ia,ja,a,fname)
-%  function writeysmp(nv,ia,ja,a,fname)
+function [nv,ia,ja,a] = writeysmp(filename,A,nv,ia,ja,a)
+%  function [nv,ia,ja,a] = writeysmp(nv,ia,ja,a,filename)
 %
-%  writes ysmp file in 'fname' (no
-%  qualifiers added, eg. not 'fname.ysmp')
+%  writes ysmp file in 'filename' (no qualifiers added,
+%  eg. not 'filename.ysmp')
+%
+%  arguments nv, ia, ja, and a are optional.
 %
 
-outdat = [fname];
+if nargin < 6
+   [nv,ia,ja,a] = manalyze(A);
+end;
+
+outdat = [filename];
 fid=fopen(outdat,'w');
 
 fprintf(fid,'1 1\n'); % dummy row
