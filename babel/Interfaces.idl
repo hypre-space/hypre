@@ -132,16 +132,18 @@ package Hypre {
      // looks like a factory object, except for the inheritance relationship
      // Discuss with Andy Cleary what he is thinking.
      void SetSystemOperator( in StructMatrix op );
+     double GetParameter( in string name );
      void SetParameter( in string name, in double value );
      // ... int parameters input as double, will be converted back to real
-     void Setup( in StructMatrix A, in StructVector b, in StructVector x, in MPI_Com comm );
+     void Setup( in StructMatrix A, in StructVector b, in StructVector x );
      SolverBuilder GetConstructedObject();    
   };
 
   interface PreconditionedSolverBuilder extends SolverBuilder {
      void SetSystemOperator( in StructMatrix op );
+     double GetParameter( in string name );
      void SetParameter( in string name, in double value );
-     void Setup( in StructMatrix A, in StructVector b, in StructVector x, in MPI_Com comm );
+     void Setup( in StructMatrix A, in StructVector b, in StructVector x );
      SolverBuilder GetConstructedObject();    
 
      void SetPreconditioner( in Solver precond );
@@ -154,8 +156,10 @@ package Hypre {
      void GetConvergenceInfo(); /* not finished */
 
      void SetSystemOperator( in StructMatrix op );
+     double GetParameter( in string name );
      void SetParameter( in string name, in double value );
-     void Setup( in StructMatrix A, in StructVector b, in StructVector x, in MPI_Com comm );
+     void NewSolver( in MPI_Com comm );
+     void Setup( in StructMatrix A, in StructVector b, in StructVector x );
      SolverBuilder GetConstructedObject();    
   };
 
@@ -169,8 +173,9 @@ package Hypre {
      Solver GetPreconditioner();
 
      void SetSystemOperator( in StructMatrix op );
+     double GetParameter( in string name );
      void SetParameter( in string name, in double value );
-     void Setup( in StructMatrix A, in StructVector b, in StructVector x, in MPI_Com comm );
+     void Setup( in StructMatrix A, in StructVector b, in StructVector x );
      SolverBuilder GetConstructedObject();    
 
      void SetPreconditioner( in Solver precond );
