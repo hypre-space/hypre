@@ -3,9 +3,9 @@
 
 #include "HYPRE.h"
 #include "utilities/utilities.h"
-#include "../../IJ_mv/HYPRE_IJ_mv.h"
-#include "../../parcsr_mv/HYPRE_parcsr_mv.h"
-#include "../../parcsr_ls/HYPRE_parcsr_ls.h"
+#include "IJ_mv/HYPRE_IJ_mv.h"
+#include "parcsr_mv/HYPRE_parcsr_mv.h"
+#include "parcsr_ls/HYPRE_parcsr_ls.h"
 #include "LinearSystemCore.h"
 #include "HYPRE_LinSysCore.h"
 #include "cfei_hypre.h"
