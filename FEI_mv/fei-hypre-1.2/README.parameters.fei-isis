@@ -19,7 +19,16 @@ outputLevel                 0   (no screen output)
 debugOutput                 <path>   (<path> is the location in which to
                                       dump trace-type debugging output files.
                                       This also causes the assembled matrix
-                                      to be dumped out (in A_ISIS.mtx....).)
+                                      to be dumped out (in A_ISIS.mtx....).
+                                      i.e., dumpMatrix below is also set.)
+
+dumpMatrix                  <path>  (<path> is the location in which to
+                                     dump the matrix and vector files. Use this
+                                     option if you want to dump the matrix files
+                                     but don't want to dump the debugOutput
+                                     files above. (The debugOutput files can be
+                                     very large, and there's a file for each
+                                     processor.))
 
 solver                      cg
                             cgs
