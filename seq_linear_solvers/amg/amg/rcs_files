@@ -26,7 +26,6 @@ matrix.h
 matvec.f
 misc.f
 opdfn.f
-outprt.f
 protos
 protos.h
 random.c
@@ -46,3 +45,4 @@ trunc.f
 vcopy.f
 vector.c
 vector.h
+write.c

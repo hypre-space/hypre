@@ -1,13 +1,18 @@
 c     
-      subroutine iinvert(a,n,nd)
+      subroutine iinvert(ierr,a,n,nd)
       implicit real*8 (a-h,o-z)
       dimension a(nd,nd)
       dimension d(100)
+
+c
+c     ierr = 7 indicates dimension problem in invert
+c
+      if((n.gt.nd) .or. (n.gt.100)) then
+        ierr = 7
+        return
+      endif
 c     
-      if(n.gt.100) stop 'matrix too large in invert'
-      if(n.gt.nd)  stop 'dimension problem in invert'
-c     
-c     foreward elimination
+c     forward elimination
 c     
       do 40 i=1,n-1
          do 30 j=i+1,n

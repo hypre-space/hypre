@@ -20,7 +20,8 @@
  * amg_Setup
  *--------------------------------------------------------------------------*/
 
-void     amg_Setup_(a_data, ia, ja, n, data)
+void     amg_setup_(Setup_err_flag, a_data, ia, ja, n, data)
+int     *Setup_err_flag;
 double  *a_data;
 int     *ia;
 int     *ja;
@@ -30,10 +31,11 @@ int     *data;
    Matrix  *A;
 
 
-   tfree(AMGDataA((AMGData *) data));
+   tfree(AMGDataA((AMGData *) *data));
    A = NewMatrix(a_data, ia, ja, *n);
 
-   amg_Setup(A, (void *) *data);
+   *Setup_err_flag = amg_Setup(A, (void *) *data);
 }
+
 
 

@@ -4,7 +4,7 @@ c     SETUP: setup for systems
 c     
 c=====================================================================
 c     
-      subroutine setup(levels,nstr,ecg,ncg,ewt,nwt,icdep,ioutdat,
+      subroutine setup(ierr,levels,nstr,ecg,ncg,ewt,nwt,icdep,ioutdat,
      *     nun,imin,imax,a,ia,ja,iu,ip,icg,ifg,
      *     b,ib,jb,ipmn,ipmx,iv,xp,yp,
      *     ndimu,ndimp,ndima,ndimb,lfname)
@@ -16,9 +16,7 @@ c
 c---------------------------------------------------------------------
 c     
       implicit real*8 (a-h,o-z)
-c     
-c     include 'params.amg'
-c     
+     
       dimension imin(*),imax(*)
       dimension ia (*)
       dimension a  (*)
@@ -42,12 +40,18 @@ c
       character*(*)  lfname
 
 c---------------------------------------------------------------------
+c     initialize the error flag to zero
+c---------------------------------------------------------------------
+
+      ierr = 0
+
+c---------------------------------------------------------------------
 c     open the log file and write some initial info
 c---------------------------------------------------------------------
 
       if (ioutdat .ge. 2) then
-         open(6,file=lfname,access='append')
-         write(6,9000)
+         open(9,file=lfname,access='append')
+         write(9,9000)
       endif
  9000 format(/'AMG SETUP INFO:'/)
 
@@ -66,7 +70,7 @@ c
       call symm(1,1,imin,imax,a,ia,ja,icg,ifg)
 c     
       if(levels.le.1) then
-         if (ioutdat .ne. 0) close(6)
+         if (ioutdat .ne. 0) close(9)
          return
       endif
 c     
@@ -76,10 +80,12 @@ c
 c     
 c     =>   choose coarse grid and define interpolation
 c     
-      call crsgd(k-1,nstr,ecg,ncg,ewt,nwt,levels,icdep,
+      call crsgd(ierr,k-1,nstr,ecg,ncg,ewt,nwt,levels,icdep,
      *     nun,imin,imax,a,ia,ja,iu,ip,icg,ifg,
      *     b,ib,jb,ipmn,ipmx,iv,xp,yp,
      *     ndimu,ndimp,ndima,ndimb)
+
+      if (ierr .ne. 0) return
 c     
 c     =>   test for coarsest grid
 c     
@@ -87,8 +93,9 @@ c
 c     
 c     =>   compute coarse grid matrix
 c     
-      call opdfn(k,levels,ierr,ndima,
+      call opdfn(ierr,k,levels,ndima,
      *     imin,imax,a,ia,ja,icg,ifg,b,ib,jb)
+      if (ierr .ne. 0) return
 c     
 c     =>   set form of coarse grid matrix
 c     
@@ -103,11 +110,11 @@ c
 c     compute & print statistics after coarsening
     
       if (ioutdat .ge. 2) then
-         call fstats(k-1,levels,
+         call fstats(ierr,k-1,levels,
      *        nun,imin,imax,a,ia,ja,iu,ip,icg,ifg,
      *        b,ib,jb,ipmn,ipmx,iv,xp,yp)
 
-          close(6)
+          close(9)
       endif
 
       return

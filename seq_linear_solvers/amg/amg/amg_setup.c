@@ -20,7 +20,7 @@
  * amg_Setup
  *--------------------------------------------------------------------------*/
 
-void     amg_Setup(A, data)
+int      amg_Setup(A, data)
 Matrix  *A;
 void    *data;
 {
@@ -76,6 +76,7 @@ void    *data;
    double  *vtmp;
 
    char     fnam[255];
+   int Setup_err_flag;
    
    
    /*----------------------------------------------------------
@@ -205,8 +206,9 @@ void    *data;
    /*----------------------------------------------------------
     * Call the setup phase code
     *----------------------------------------------------------*/
-   
-   CALL_SETUP(A, amg_data);
+
+   WriteSetupParams(amg_data);   
+   CALL_SETUP(Setup_err_flag, A, amg_data);
    
    /*----------------------------------------------------------
     * Set some local variables
@@ -430,6 +432,8 @@ void    *data;
          WriteYSMP(fnam, P_array[j]);
       }
    }
+   
+   return(Setup_err_flag);
 }
 
 

@@ -18,8 +18,9 @@
 
 
 /* setup */
-#define CALL_SETUP(A, amg_data) \
-setup_(&AMGDataNumLevels(amg_data),\
+#define CALL_SETUP(Setup_err_flag, A, amg_data) \
+setup_(&Setup_err_flag,\
+       &AMGDataNumLevels(amg_data),\
        &AMGDataNSTR(amg_data),\
        &AMGDataECG(amg_data),\
        &AMGDataNCG(amg_data),\
@@ -52,7 +53,7 @@ setup_(&AMGDataNumLevels(amg_data),\
        AMGDataLogFileName(amg_data),\
        strlen(AMGDataLogFileName(amg_data)))
 
-void setup_(int *, int *, double *, int *, double *, int *,
+void setup_(int *, int *, int *, double *, int *, double *, int *,
 	    int *, int *, int *, int *, int *,
 	    double *, int *, int *,
 	    int *, int *, int *, int *,
@@ -63,8 +64,9 @@ void setup_(int *, int *, double *, int *, double *, int *,
 	    char *, long);
 
 /* solve */
-#define CALL_SOLVE(u, f, tol, amg_data) \
-solve_(&tol,\
+#define CALL_SOLVE(Solve_err_flag, u, f, tol, amg_data) \
+solve_(&Solve_err_flag,\
+       &tol,\
        &AMGDataNumLevels(amg_data),\
        &AMGDataNCyc(amg_data),\
        AMGDataMU(amg_data),\
@@ -109,7 +111,8 @@ solve_(&tol,\
        AMGDataLogFileName(amg_data),\
        strlen(AMGDataLogFileName(amg_data)));
 
-void solve_(double *, int *, int *, int *, int *, int *, int *, int *,
+void solve_(int *, double *, int *, int *, int *, int *, int *, 
+            int *, int *,
 	    int *, int *, int *, int *,
 	    double *, double *, double *,
 	    double *, int *, int *,

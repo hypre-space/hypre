@@ -5,7 +5,7 @@ c     CG operator computation
 c     
 c=====================================================================
 c     
-      subroutine opdfn(k,levels,ierr,ndima,imin,imax,
+      subroutine opdfn(ierr,k,levels,ndima,imin,imax,
      *     a,ia,ja,icg,ifg,b,ib,jb)
 c     
 c---------------------------------------------------------------------
@@ -146,12 +146,8 @@ c
       imax(k)=ic
       return
 c     
-c===  > error messages
+c===  > ierr = 1:  error in opdfn: ndima too small
 c     
- 9901 write(6,9910)
-      ierr=1
+ 9901 ierr=1
       return
-c     
- 9000 format(' opdfn: grid #',i2,' completed')
- 9910 format(' ### error in opdfn: ndima too small ###')
       end

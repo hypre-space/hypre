@@ -5,7 +5,7 @@ c     routines to test the f-points from coloring
 c     
 c=====================================================================
 c     
-      subroutine ftest(k,itst,ncolor,ewt,nwt,iact,npts,icdep,
+      subroutine ftest(ierr,k,itst,ncolor,ewt,nwt,iact,npts,icdep,
      *     imin,imax,a,ia,ja,iu,ip,icg,ifg,ib,iv,
      *     ndimu,ndimp,ndima,ndimb)
 c     
@@ -20,8 +20,6 @@ c
 c---------------------------------------------------------------------
 c     
       implicit real*8 (a-h,o-z)
-c     
-c     include 'params.amg'
 c     
       dimension imin(*),imax(*)
       dimension ia (*)
@@ -41,7 +39,11 @@ c---------------------------------------------------------------------
 c     
       if(itst.eq.0) return
       go to (10,20),itst
-      stop 'ftest does not exist'
+      ierr = 12
+      return
+c
+c     ierr = 12 indicates illegal value requested for itst
+c
  10   call ftest1(k,ncolor,ewt,nwt,iact,npts,icdep,
      *     imin,imax,a,ia,ja,iu,ip,icg,ifg,ib,iv,
      *     ndimu,ndimp,ndima,ndimb)
@@ -224,8 +226,6 @@ c
             ifg(ja(j))=0
  290     continue
  300  continue
- 1000 format('  ftest1  k=',i2,' # tested points =',i4,
-     *     ' # added points =',i4)
       return
       end
 c     
@@ -242,8 +242,6 @@ c
 c---------------------------------------------------------------------
 c     
       implicit real*8 (a-h,o-z)
-c     
-c     include 'params.amg'
 c     
       dimension imin(*),imax(*)
       dimension ia (*)
@@ -262,8 +260,6 @@ c
 c     
 c---------------------------------------------------------------------
 c     
-c     print *,' ftest2 - k=',k
-      ilo=imin(k)
       ihi=imax(k)
       ishift=ihi-ilo+2
 
@@ -390,8 +386,6 @@ c
             ifg(ja(j))=0
  290     continue
  300  continue
- 1000 format('  ftest2  k=',i2,' # tested/failed/added points =',3i5)
- 2000 format('    unknowns tested/failed:',3(3x,'iu=',i1,2i5))
       return
       end
 c     
@@ -418,8 +412,6 @@ c
 c---------------------------------------------------------------------
 c     
       implicit real*8 (a-h,o-z)
-c     
-c     include 'params.amg'
 c     
       dimension imin(*),imax(*)
       dimension icg(*)

@@ -6,7 +6,7 @@ c
 c=====================================================================
 c     
 c---------------------------------------------------------------------
-      subroutine fstats(nl,levels,
+      subroutine fstats(ierr,nl,levels,
      *     nun,imin,imax,a,ia,ja,iu,ip,icg,ifg,
      *     b,ib,jb,ipmn,ipmx,iv,xp,yp)
 c     
@@ -42,16 +42,16 @@ c
 c     print matrix/interpolation info
 c     
 
-      write(6,4000)
-      write(6,4001)
+      write(9,4000)
+      write(9,4001)
       do 20, k=1,nl
-         call testsy(k,nun,imin,imax,a,ia,ja,iu)
+         call testsy(ierr,k,nun,imin,imax,a,ia,ja,iu)
  20   continue
 
-      write(6,4002)
-      write(6,4001)
+      write(9,4002)
+      write(9,4001)
       do 30, k=1,nl
-         call testb(k,nun,imin,imax,b,ib,jb,iu,icg)
+         call testb(ierr,k,nun,imin,imax,b,ib,jb,iu,icg)
  30   continue
       return
 
@@ -66,7 +66,7 @@ c
 
 c---------------------------------------------------------------------
 c     
-      subroutine testsy(k,nun,imin,imax,a,ia,ja,iu)
+      subroutine testsy(ierr,k,nun,imin,imax,a,ia,ja,iu)
 c     
 c     test blocks
 c     
@@ -100,25 +100,28 @@ c
       ihi=imax(k)
       do 60 i=ilo,ihi
          n1=iu(i)
+c
+c    ierr = 10 indicates ERROR IN TESTSY 
+c
          if(n1.le.0.or.n1.gt.nun) then
-CVEH   NEEDS TO BE REPLACED BY FLAG
-            write(6,'(/''  ERROR IN TESTSY -- IU('',i5,'')='',i5)') i,n1
-            stop
+            ierr = 10
+            return
          endif
          do 30 n=1,10
             rs(n)=0.e0
             nc(n)=0
  30      continue
          npts(n1)=npts(n1)+1
- 9871    format('  testsy - i,iu,npts=',3i5)
          jlo=ia(i)
          jhi=ia(i+1)-1
          do 40 j=jlo,jhi
             ii=ja(j)
             if(j.eq.jlo.or.ii.ne.i) go to 39
-CVEH   NEEDS TO BE REPLACED BY FLAG
-            write(6,3900) i
- 3900       format(/' ERROR: row ',i4,' contains duplicate entries')
+            ierr = -1
+c
+c        ierr = -1 indicates duplicate entries in some row.  Warning,
+c        and does not stop processing
+c
  39         n2=iu(ii)
             rs(n2)=rs(n2)+a(j)
             nnze(n1,n2)=nnze(n1,n2)+1
@@ -140,7 +143,7 @@ CVEH   NEEDS TO BE REPLACED BY FLAG
             if(npts(n2).eq.0) go to 90
             rsav=float(nnze(n1,n2))/float(npts(n1))
             spar=float(nnze(n1,n2))/float(npts(n1)**2)
-            write(6,1000) k,n1,n2,npts(n1),nnze(n1,n2),spar,ncmn(n1,n2),
+            write(9,1000) k,n1,n2,npts(n1),nnze(n1,n2),spar,ncmn(n1,n2),
      *           ncmx(n1,n2),rsav,rsmn(n1,n2),rsmx(n1,n2)
  80      continue
  90   continue
@@ -151,7 +154,7 @@ CVEH   NEEDS TO BE REPLACED BY FLAG
 
 c==============================================================
 c     
-      subroutine testb(k,nun,imin,imax,b,ib,jb,iu,icg)
+      subroutine testb(ierr,k,nun,imin,imax,b,ib,jb,iu,icg)
       implicit real*8 (a-h,o-z)
 c     
 c---------------------------------------------------------------------
@@ -172,8 +175,6 @@ c
 c     
 c---------------------------------------------------------------------
 c     
- 9876 format('  testb  - k,imin,imax=',3i5)
-c     
 c     initialize stats
 c     
       do 20 n1=1,nun
@@ -187,7 +188,7 @@ c
          nimx(n1)=0
  20   continue
       
-     i        lo=imin(k)
+      ilo=imin(k)
       ihi=imax(k)
       nmax=0
 c     
@@ -199,10 +200,12 @@ c
          n1=iu(i)
          npts(n1)=npts(n1)+1
          if(n1.gt.nmax) nmax=n1
+c
+c     ierr = 11 indicates fatal ERROR IN TESTB
+c
          if(n1.le.0.or.n1.gt.nun) then
-CVEH NEEDS TO BE REPLACED BY A FLAG
-            write(6,'(/''  ERROR IN TESTB -- IU('',i5,'')='',i5)') i,n1
-            stop
+            ierr = 11
+            return
          endif
          jlo=ib(i)
          jhi=ib(i+1)-1
@@ -227,7 +230,7 @@ c
  60   continue
 
       do 90 n1=1,nmax
-         write(6,1000) k,n1,npts(n1),nimn(n1),nimx(n1),
+         write(9,1000) k,n1,npts(n1),nimn(n1),nimx(n1),
      *        wmn(n1),wmx(n1),wsmn(n1),wsmx(n1)
  90   continue
 

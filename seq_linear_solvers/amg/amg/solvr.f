@@ -3,7 +3,7 @@ c=====================================================================
 c     main solver routine
 c=====================================================================
 
-      subroutine solve(stoptol,levels,ncyc,mu,ntrlx,iprlx,
+      subroutine solve(ierr,stoptol,levels,ncyc,mu,ntrlx,iprlx,
      *     ierlx,iurlx,ioutdat,
      *     nun,imin,imax,u,f,vtmp,a,ia,ja,iu,icg,b,ib,jb,
      *     ipmn,ipmx,iv,ip,xp,yp,
@@ -71,12 +71,18 @@ c     work space
       dimension iarr(10)
 
 c---------------------------------------------------------------------
+c     initialize the error flag to zero
+c---------------------------------------------------------------------
+
+      ierr = 0
+
+c---------------------------------------------------------------------
 c     open the log file and write some initial info
 c---------------------------------------------------------------------
 
-      if (ioutdat .ne. 0) then
-         open(6,file=lfname,access='append')
-         write(6,9000)
+      if (ioutdat .gt. 0) then
+         open(9,file=lfname,access='append')
+         write(9,9000)
  9000 format(//'AMG SOLUTION INFO:'/)
       endif
 c
@@ -89,7 +95,7 @@ c===  > decode ncyc
       ifcycl=iarr(2)
       ncycle=iarr(3)
       if(ncycle.eq.0) then
-         close(6)
+         close(9)
          return
       endif
 
@@ -99,8 +105,8 @@ c===  > find initial residual
      *        imin,imax,u,f,a,ia,ja,iu)
          resi = res
       if((ioutdat .eq.1) .or. (ioutdat .eq. 3)) then
-         write(6,1000)
-         write(6,1100) res,enrg
+         write(9,1000)
+         write(9,1100) res,enrg
       endif
 
 c===  > veh: compute 2-norm of rhs for relative residual
@@ -120,38 +126,46 @@ c===  > cycling
 
          icycmp=0
 
-         call cycle(levels,mu,ifcycl,ivstar,
+         call cycle(ierr,levels,mu,ifcycl,ivstar,
      *        ntrlx,iprlx,ierlx,iurlx,icycmp,
      *        nun,imin,imax,u,f,vtmp,a,ia,ja,iu,icg,
      *        b,ib,jb,ipmn,ipmx,iv,ip,xp,yp,
      *        ndimu,ndimp,ndima,ndimb,
      *        leva, levb, levv, levp, levi,
      *        numa, numb, numv, nump)
+         if (ierr .ne. 0) return
 
-            engold = enrg
-            resold=res
-            call rsdl(1,enrg,res,resv,vtmp,
+         engold = enrg
+         resold=res
+         call rsdl(1,enrg,res,resv,vtmp,
      *           imin,imax,u,f,a,ia,ja,iu)
-            factor=res/resold
-            relres = res/fnorm
-            delteng=enrg-engold
-            if((ioutdat .eq.1) .or. (ioutdat .eq. 3)) then
-               write(6,1200) ncy,res,enrg,factor,relres
-            endif
-            if (relres .lt. stoptol) go to 101
+         factor=res/resold
+         relres = res/fnorm
+         delteng=enrg-engold
+         if((ioutdat .eq.1) .or. (ioutdat .eq. 3)) then
+            write(9,1200) ncy,res,enrg,factor,relres
+         endif
+         if (relres .lt. stoptol) go to 101
          
 
  100  continue
 
+c
+cveh     set ierr = 1 (allowed number of cycles reached 
+cveh                   without reaching convergence)
+c
+         ierr = 1
+
+
  101  if (ncy .gt. ncycle) ncy = ncycle
 
       afactor=(res/resi)**(1.e0/float(ncy))
-      if (ioutdat .ne. 0) then
-         write(6,1300) afactor
+      if (ioutdat .gt. 0) then
+         write(9,1300) afactor
          call ctime(tnew)
          ttot=ttot+tnew-told
          tcyc=float(ttot)/float(ncy)
-         write(6,2000) tcyc,ttot
+         write(9,2000) tcyc,ttot
          ntotv=0
          ntota=0
          do 500 k=1,levels
@@ -161,9 +175,9 @@ c===  > cycling
          cmpgr=float(ntotv)/numv(1)
          cmpop=float(ntota)/numa(1)
          cmpcy=float(icycmp)/numa(1)
-         write(6,3000) cmpgr,cmpop,cmpcy
+         write(9,3000) cmpgr,cmpop,cmpcy
+         close(9)
       endif
-      close(6)
 
       return
 
@@ -212,7 +226,7 @@ c     c. During cycling, when going down to level k,
 c     nc(k) is set to max0(nc(k),mu(k-1))
 c=====================================================================
 
-      subroutine cycle(levels,mu,ifcycl,ivstar,
+      subroutine cycle(ierr,levels,mu,ifcycl,ivstar,
      *     ntrlx,iprlx,ierlx,iurlx,icomp,
      *     nun,imin,imax,u,f,vtmp,a,ia,ja,iu,icg,
      *     b,ib,jb,ipmn,ipmx,iv,ip,xp,yp,
@@ -347,15 +361,27 @@ c     decode ntrx (number & type of relaxation sweeps)
  110  continue
 
 c===  > decode and test additional relaxation parameters
+c     a value of ierr = 7 will be returned if an error
+c     occurs in the decoding of the parameters, i.e. if
+c     ndig .lt. ii in in the decoding of iuns, ieqs, or ipts.
 
       call idec(iuns,9,ndig,iun)
-      if(ndig.lt.ii) stop 'iuns'
+      if(ndig.lt.ii) then
+        ierr = 7
+        return
+      endif
 
       call idec(ieqs,9,ndig,ieq)
-      if(ndig.lt.ii) stop 'ieqs'
+      if(ndig.lt.ii) then
+        ierr = 7
+        return
+      endif
 
       call idec(ipts,9,ndig,ipt)
-      if(ndig.lt.ii) stop 'ipts'
+      if(ndig.lt.ii) then
+        ierr = 7
+        return
+      endif
 
 c===  > relaxation
 
@@ -366,13 +392,14 @@ c===  > relaxation
 c     perform partial sweeps
 
          do 120 i=1,ii
-            call relax(1,ity(i),ipt(i),ieq(i),iun(i),
+            call relax(ierr,1,ity(i),ipt(i),ieq(i),iun(i),
      *           imin(k),imax(k),
      *           u(levv(k)),f(levv(k)),
      *           a(leva(k)),ia(levi(k)),ja(leva(k)),iu(levv(k)),
      *           icg(levv(k)),
      *           ipmn(k),ipmx(k),
      *           iv(levp(k)))
+            if (ierr .ne. 0) return
  120     continue
 
  130  continue

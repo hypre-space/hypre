@@ -5,8 +5,8 @@ c     the following routines are used for defining interpolation
 c
 c=====================================================================
 c
-      subroutine setw(k,ewt,nwt,iwts,
-     *                 imin,imax,a,ia,ja,iu,icg,ifg,b,ib,jb,
+      subroutine setw(ierr,k,ewt,nwt,iwts,imin,imax,a,ia,ja,
+     *                 iu,icg,ifg,b,ib,jb,
      *                 ipmn,ipmx,ip,iv,xp,yp)
 c
 c---------------------------------------------------------------------
@@ -39,7 +39,9 @@ c---------------------------------------------------------------------
 c
       if(iwts.eq.0) return
       go to (10,20,30,40),iwts
-      stop 'iwts out of range'
+      ierr = 6
+      return
+
 10    call setw1(k,imin,imax,icg,b,ib,jb,
      *           ndimu,ndimp,ndima,ndimb)
       return
@@ -50,7 +52,8 @@ c
      *           ipmn,ipmx,ip,iv,xp,yp,
      *           ndimu,ndimp,ndima,ndimb)
       return
-40    call setw4(k,ewt,nwt,imin,imax,a,ia,ja,iu,icg,ifg,b,ib,jb,
+40    call setw4(ierr,k,ewt,nwt,imin,imax,a,ia,ja,iu,icg,
+     *           ifg,b,ib,jb,
      *           ipmn,ipmx,ip,iv,xp,yp,
      *           ndimu,ndimp,ndima,ndimb)
       return
@@ -72,9 +75,7 @@ c
 c---------------------------------------------------------------------
 c
       implicit real*8 (a-h,o-z)
-c
-c     include 'params.amg'
-c
+
       dimension imin(*),imax(*)
       dimension icg(*)
 
@@ -152,9 +153,7 @@ c
 c---------------------------------------------------------------------
 c
       implicit real*8 (a-h,o-z)
-c
-c     include 'params.amg'
-c
+
       dimension imin(*),imax(*)
       dimension ia (*)
       dimension a  (*)
@@ -173,7 +172,6 @@ c---------------------------------------------------------------------
 c
 c     decompose the parameters
 c
-c     print *,'  nwt=',nwt
       call idec(nwt,3,ndig,iarr)
       iddst=iarr(2)
       ispt =iarr(3)
@@ -345,12 +343,9 @@ c
 c
 c---------------------------------------------------------------------
 c
-c     write(6,1357) k
-1357  format(2x,'subroutine setw73 entered ... k=',i2)
 c
 c     decompose the parameters
 c
-c     print *,'  nnwt=',nwt
       call idec(nwt,7,ndig,iarr)
       nswp=iarr(2)
       nout=iarr(3)
@@ -392,9 +387,9 @@ c
               kb=kb+1
             endif
 10        continue
-          if(sum.eq.0.0) then
-            print *,'  sum=0 - i=',i
-          endif
+cveh          if(sum.eq.0.0) then
+cveh            print *,'  sum=0 - i=',i
+cveh          endif
           do 15 j=ib(i),kb-1
 15        b(j) = b(j)/sum
         endif
@@ -472,9 +467,9 @@ c
                 jjlo=ia(ii)+1
                 jjhi=ia(ii+1)-1
                 do 140 jj=jjlo,jjhi
-                  if(a(ia(ii)).eq.0.0) then
-                    print *,'  a(ia(i))=0.0 - i=',i
-                  endif
+cveh                  if(a(ia(ii)).eq.0.0) then
+cveh                    print *,'  a(ia(i))=0.0 - i=',i
+cveh                  endif
                   if(ipos.gt.0.and.a(jj)/a(ia(ii)).ge.0.0) go to 140
                   if(ifg(ja(jj)).gt.0) sum=sum+a(jj)
                   if(icpt.eq.2) then
@@ -487,9 +482,9 @@ c
                 else
                   w=a(j)/sum
                   do 150 jj=jjlo,jjhi
-                    if(a(ia(ii)).eq.0.0) then
-                      print *,'  a(ia(i))=0.0 - i=',i
-                    endif
+cveh                    if(a(ia(ii)).eq.0.0) then
+cveh                      print *,'  a(ia(i))=0.0 - i=',i
+cveh                    endif
                     if(ipos.gt.0.and.a(jj)/a(ia(ii)).ge.0.0) go to 150
                     if(ifg(ja(jj)).gt.0)
      *                b(ifg(ja(jj)))=b(ifg(ja(jj)))+a(jj)*w
@@ -504,9 +499,9 @@ c
 c
 c         Compute weights for point i (and zero out ifg)
 c
-          if(bdiag.eq.0.0) then
-            print *,' bdiag=0 - i=',i
-          endif
+cveh          if(bdiag.eq.0.0) then
+cveh            print *,' bdiag=0 - i=',i
+cveh          endif
           bdiag=-1.d0/bdiag
           do 210 j=jblo,jbhi
             b(j)=b(j)*bdiag
@@ -539,9 +534,9 @@ c
               kb=kb+1
             endif
 410       continue
-          if(kb.eq.ib(i)) then
-            print *,' empty row - i=',i
-          endif
+cveh          if(kb.eq.ib(i)) then
+cveh            print *,' empty row - i=',i
+cveh          endif
         endif
 420   continue
       ib(imax(k)+1)=kb
@@ -549,7 +544,8 @@ c
       end
 c---------------------------------------------------------------------
 c
-      subroutine setw4(k,ewt,nwt,imin,imax,a,ia,ja,iu,icg,ifg,b,ib,jb,
+      subroutine setw4(ierr,k,ewt,nwt,imin,imax,a,ia,ja,iu,icg,
+     *                 ifg,b,ib,jb,
      *                 ipmn,ipmx,ip,iv,xp,yp,
      *                 ndimu,ndimp,ndima,ndimb)
 c
@@ -585,9 +581,7 @@ c
 c---------------------------------------------------------------------
 c
       implicit real*8 (a-h,o-z)
-c
-c     include 'params.amg'
-c
+
       dimension imin(*),imax(*)
       dimension ia (*)
       dimension a  (*)
@@ -616,7 +610,6 @@ c---------------------------------------------------------------------
 c
 c     decompose the parameters
 c
-c     print *,'  nwt=',nwt
       call idec(nwt,3,ndig,iarr)
       iddst=iarr(2)
       ispt =iarr(3)
@@ -642,7 +635,6 @@ c
       ibc=0
       itop=0
       do 20 i=iv(ipt),iv(ipt+1)-1
-c     if(icg(i).lt.0) then
       if(icg(i).le.0) then
         ibf=ibf+1
         ifg(i)=ibf
@@ -651,13 +643,9 @@ c     if(icg(i).lt.0) then
         ipp(1)=ipt
       elseif(icg(i).gt.0) then
         ibc=ibc+1
-c     else
-c       ibs=ibs+1
       endif
 20    continue
       npi = iv(ipt+1)-iv(ipt)
-      write(*,*) '  IPT = ',ipt,'  #pts=',npi,'  ibf,ibc=',
-     *           ibf,ibc
 c
 c     All C or S-variables. Set B-rows
 c
@@ -743,7 +731,6 @@ c     i=ifg(ir)
 c
 c       Perform distribution
 c
-c       if(s.eq.0.0) stop 'no distribution'
         if(s.eq.0.0) then
           bb(ir,ir)=bb(ir,ir)+a(j)
           go to 200
@@ -761,33 +748,14 @@ c
 190   continue
 200   continue
 c
-c     print intermediate interpolation
-c
-      write(*,*) ' IPT=',ipt,'  ibf=',ibf,'  ibc=',ibc
-      nrows=(ibc-1)/7+1
-      do 202 nr=1,nrows
-      iblo=(nr-1)*7+1
-      ibhi=min0(7*nr,ibc)
-      write(*,2111) (jbb(kkk),ifg(jbb(kkk)),kkk=iblo,ibhi)
-      do 201 irw=1,ibf
-      write(*,2112) (bb(irw,kkk),kkk=iblo,ibhi)
-201   continue
-202   continue
-2111  format(1x,14i5)
-2112  format(1x,1p,7(1x,d9.2))
-c
 c     Eliminate small entries
 c
 c     (to be added)
 c
 c     invert diagonal block
 c
-      call iinvert(bb,ibf,10)
-      write(*,*) ' Inverse of diagonal block'
-      write(*,2111) (jbb(kkk),ifg(jbb(kkk)),kkk=1,ibf)
-      do 204 irw=1,ibf
-      write(*,2112) (bb(irw,kkk),kkk=1,ibf)
-204   continue
+      call iinvert(ierr,bb,ibf,10)
+      if (ierr .ne. 0) return
 c
 c     Load B-rows for variables at point ipt
 c

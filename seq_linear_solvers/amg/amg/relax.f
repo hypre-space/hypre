@@ -4,7 +4,7 @@ c     relaxation routines
 c     
 c=====================================================================
 c     
-      subroutine relax(k,itrel,iprel,ierel,iurel,
+      subroutine relax(ierr,k,itrel,iprel,ierel,iurel,
      *     imin,imax,u,f,a,ia,ja,iu,icg,ipmn,ipmx,iv)
 c     
 c---------------------------------------------------------------------
@@ -46,7 +46,7 @@ c
 c     
 c     Gauss-Seidel relaxation
 c     
- 100  call relax1(k,iprel,ierel,imin,imax,u,f,a,ia,ja,iu,icg)
+ 100  call relax1(ierr,k,iprel,ierel,imin,imax,u,f,a,ia,ja,iu,icg)
       return
 c     
 c     Kaczmarz relaxation (removed)
@@ -54,7 +54,7 @@ c
 c     
 c     Point Gauss-Seidel relaxation
 c     
- 300  call relax3(k,iprel,u,f,a,ia,ja,iv,ipmn,ipmx,icg)
+ 300  call relax3(ierr,k,iprel,u,f,a,ia,ja,iv,ipmn,ipmx,icg)
       return
 c     
 c     Collective relaxation (removed)
@@ -62,17 +62,17 @@ c
 c     
 c     Normalization
 c     
- 800  call norml(k,iurel,imin,imax,u,iu)
+ 800  call norml(ierr,k,iurel,imin,imax,u,iu)
       return
 c     
 c     Direct solution (low storage)
 c     
- 900  call dirslv(k,imin,imax,u,f,a,ia,ja)
+ 900  call dirslv(ierr,k,imin,imax,u,f,a,ia,ja)
       return
  999  return
       end
 c     
-      subroutine relax1(k,iprel,ierel,imin,imax,u,f,a,ia,ja,iu,icg)
+      subroutine relax1(ierr,k,iprel,ierel,imin,imax,u,f,a,ia,ja,iu,icg)
 c     
 c---------------------------------------------------------------------
 c     
@@ -106,7 +106,10 @@ c
       ilo=imin(k)
       ihi=imax(k)
       go to (100,200,300) iprel
-      stop 'bad iprel in relax1'
+      ierr = 5
+      return
+c
+c     ierr = 5 indicates user has requested illegal value for iprel 
 c     
 c     F-variable relaxation
 c     
@@ -153,7 +156,7 @@ c
       return
       end
 c     
-      subroutine relax3(k,iprel,u,f,a,ia,ja,iv,ipmn,ipmx,icg)
+      subroutine relax3(ierr,k,iprel,u,f,a,ia,ja,iv,ipmn,ipmx,icg)
 c     
 c---------------------------------------------------------------------
 c     
@@ -190,6 +193,10 @@ c
       iplo=ipmn(k)
       iphi=ipmx(k)
       go to (100,200,300,400,500), iprel
+      ierr = 6
+      return
+c     
+c       ierr = 6 indicates user has requested illegal value for iprel
 c     
 c     Relax points with first variable in F
 c     
@@ -227,7 +234,8 @@ c
  140           s(n)=s(n)-a(j)*u(iii)
  150        continue
  160     continue
-         call gselim(d,s,nhi)
+         call gselim(ierr,d,s,nhi)
+         if (ierr .ne. 0) return
          n=0
          do 170 i=ilo,ihi
             n=n+1
@@ -271,7 +279,8 @@ c
  240           s(n)=s(n)-a(j)*u(iii)
  250        continue
  260     continue
-         call gselim(d,s,nhi)
+         call gselim(ierr,d,s,nhi)
+         if (ierr .ne. 0) return
          n=0
          do 270 i=ilo,ihi
             n=n+1
@@ -316,7 +325,8 @@ c
  340           s(n)=s(n)-a(j)*u(iii)
  350        continue
  360     continue
-         call gselim(d,s,nhi)
+         call gselim(ierr,d,s,nhi)
+         if (ierr .ne. 0) return
          n=0
          do 370 i=ilo,ihi
             n=n+1
@@ -366,7 +376,8 @@ c
  440           s(n)=s(n)-a(j)*u(iii)
  450        continue
  460     continue
-         call gselim(d,s,n)
+         call gselim(ierr,d,s,n)
+         if (ierr .ne. 0) return
          n=0
          do 470 i=ilo,ihi
             n=n+1
@@ -427,7 +438,8 @@ c
                d(n,nc2)=d(n,nc1)
  546        continue
  547     continue
- 548     call gselim(d,s,nr)
+ 548     call gselim(ierr,d,s,nr)
+         if (ierr .ne. 0) return
          n=0
          do 570 i=ilo,ihi
             if(icg(i).le.0) go to 570
@@ -438,10 +450,13 @@ c
       return
       end
 c     
-      subroutine gselim(c,d,npts)
+      subroutine gselim(ierr,c,d,npts)
       implicit real*8 (a-h,o-z)
       dimension c(10,10),d(10)
-      if(npts.gt.10) stop 'npts too large in gselim'
+      if(npts.gt.10) then
+        ierr = 4
+        return
+      endif
       if(npts.gt.1) go to 10
       d(1)=d(1)/c(1,1)
       return
@@ -474,7 +489,7 @@ c
       return
       end
 c     
-      subroutine norml(k,iurel,imin,imax,u,iu)
+      subroutine norml(ierr,k,iurel,imin,imax,u,iu)
 c     
 c---------------------------------------------------------------------
 c     

@@ -20,7 +20,8 @@
  * amg_Solve
  *--------------------------------------------------------------------------*/
 
-void      amg_Solve_(u_data, f_data, n, tol, data)
+void      amg_solve_(Solve_err_flag, u_data, f_data, n, tol, data)
+int      *Solve_err_flag;
 double   *u_data;
 double   *f_data;
 int      *n;
@@ -34,6 +35,6 @@ int      *data;
    u = NewVector(u_data, *n);
    f = NewVector(f_data, *n);
 
-   amg_Solve(u, f, *tol, (void *) *data);
+   *Solve_err_flag =  amg_Solve(u, f, *tol, (void *) *data);
 }
 

@@ -59,8 +59,8 @@ char   *log_file_name;
    				    
    AMGDataIOutDat(amg_data) = ioutdat;
 
-   sprintf(AMGDataLogFileName(amg_data), "%s", log_file_name);
-   
+   sprintf(AMGDataLogFileName(amg_data), "%s", log_file_name); 
+
    return amg_data;
 }
 

@@ -5,7 +5,7 @@ c     the following routines are used to define strong connections
 c     
 c=====================================================================
 c     
-      subroutine strcnc(k,isort,estr,istr,imin,imax,a,ia,ja,iu,
+      subroutine strcnc(ierr,k,isort,estr,istr,imin,imax,a,ia,ja,iu,
      *     ndimu,ndimp,ndima,ndimb)
 c     
 c---------------------------------------------------------------------
@@ -64,7 +64,7 @@ c
 c     determine strong connections & load
 c     
       if(istr.eq.1) then
-         call strong1(k,imin,imax,a,ia,ja,
+         call strong1(ierr,k,imin,imax,a,ia,ja,
      *        ndimu,ndimp,ndima,ndimb)
       endif
       return
@@ -286,7 +286,7 @@ c
       return
       end
 c     
-      subroutine strong1(k,imin,imax,a,ia,ja,
+      subroutine strong1(ierr,k,imin,imax,a,ia,ja,
      *     ndimu,ndimp,ndima,ndimb)
 c     
 c---------------------------------------------------------------------
@@ -334,7 +334,10 @@ c
       i1lo=i0lo+ishift
       i1hi=i0hi+ishift
 c===  > check ndimu for overflow
-      if(i1hi.gt.ndimu) go to 9903
+      if(i1hi.gt.ndimu) then
+        ierr = 2
+        return
+      endif
       do 20 i1=i1lo,i1hi
          i0=i1-ishift
 c     
@@ -359,7 +362,10 @@ c
          ja(ia(i1))=ka-1
  20   continue
       ia(i1hi+1)=ka
-      if(ka.gt.ndima) go to 9901
+      if(ka.gt.ndima) then
+        ierr = 1
+        return
+      endif
 c     
 c     reset ja(ia(i)) to i
 c     
@@ -368,14 +374,4 @@ c
  30   continue
 c     
       return
-c     
-c===  > error messages
-c     
- 9901 write(6,9910) ndima
-      stop
- 9903 write(6,9930) ndimu
-      stop
-c     
- 9910 format(' ### error in strong: ndima too small ###',i5)
- 9930 format(' ### error in strong: ndimu too small ###',i5)
       end

@@ -1,5 +1,5 @@
 c     
-      subroutine color(k,ncolor,jval0,jvalmx,icdep,
+      subroutine color(ierr,k,ncolor,jval0,jvalmx,icdep,
      *     imin,imax,ia,ja,iu,ip,icg,ifg,ib,jb,iv,
      *     ndimu,ndimp,ndima,ndimb)
 c     
@@ -52,8 +52,6 @@ c---------------------------------------------------------------------
 c     
       implicit real*8 (a-h,o-z)
 c     
-c     include 'params.amg'
-c     
       dimension imin(*),imax(*)
       dimension ia (*)
       dimension ja (*)
@@ -73,7 +71,6 @@ c
 c     
 c---------------------------------------------------------------------
 c     
-c     print *,' color  - k=',k
 c     set parameters isub and itob internally
 c     
 c     cjwr 4/12/96      isub=0
@@ -137,7 +134,13 @@ c
 c     put variable on appropriate list
 c     
             jv=ifg(i)
-            if(jv.lt.jval0.or.jv.gt.jvalxx) stop 'COLOR - out of range'
+            if(jv.lt.jval0.or.jv.gt.jvalxx) then
+              ierr = 8
+              return
+            endif
+c
+c     ierr = 8 indicates 'COLOR - out of range'
+c
             icg(i1)=icg(jv)
             ifg(i1)=jv
             icg(jv)=i1
@@ -161,8 +164,13 @@ c
          if(i1.gt.0) then
             i0=i1-ishift
             jv=ifg(i0)
-            if(jv.lt.jval0.or.jv.gt.jvalxx)
-     *           stop 'COLOR - jv out of range'
+            if(jv.lt.jval0.or.jv.gt.jvalxx) then
+              ierr = 8
+              return
+            endif
+c
+c    ierr = 8 indicates jv out of range'
+c
             icg(i1)=icg(jv)
             ifg(i1)=jv
             icg(jv)=i1
@@ -194,11 +202,13 @@ c     c-variable found
 c     
       iic0=iic1-ishift
       if(ifg(iic0).lt.jval0.or.ifg(iic0).gt.jvalxx) then
-         print *,'STOP - ifg out of bounds for chosen C-point ',iic0
-         print *,'iic0,ifg,icg  = ',iic0,ifg(iic0),icg(iic0)
-         print *,'jval0/mx/xx   = ',jval0,jvalmx,jvalxx
-         stop
+        ierr = 9
+        return
       endif
+c
+c     ierr = 9 indicates ifg out of bounds for chosen C-point 
+c     early versions have debugging print statements
+c
       ncu(iu(iic0))=ncu(iu(iic0))+1
 c     
 c     check for coupling/dependence.
@@ -258,11 +268,9 @@ c     put i0 in F & remove from lists
 c     
 c     check for i0 on or off lists.
 c     if ifg(i0)=0, no points should depend on i0
-c     
-            if(ifg(i0).eq.0) then
-               print *,' point off lists - (old) attempt to remove'
-               go to 140
-            endif
+c     if ifg(i0)=0, point off lists - (old) attempt to remove'
+c
+            if(ifg(i0).eq.0) go to 140
 
             icg(i0)=ncolor
             icg(ifg(i1))=icg(i1)
@@ -278,7 +286,7 @@ c
                do 110 ii0=ii0lo,ii0hi
                   iu4=iu(ii0)
                   if(icdep(iu4,iu3).eq.2) icg(ii0)=ncolor
-                  if(ifg(ii0).ne.0) print *,' fully dep. var has ifg#0'
+cveh              if(ifg(ii0).ne.0) print *,' fully dep. var has ifg#0'
  110           continue
             endif
 c     
@@ -287,12 +295,8 @@ c
             jjlo=ia(i1)+1
             jjhi=ia(i1+1)-1
             do 130 jj=jjlo,jjhi
-c     jwr  >>>>> Bug fix 4/24/96
-c     ii1=ja(jj)
-c     ii0=ii1-ishift
                ii0=ja(jj)
                ii1=ii0+ishift
-c     jwr  <<<<<
 c     
 c     check for:
 c     undecided variable
@@ -310,7 +314,7 @@ c     increment weight for ii0
 c     
                ii1=ii0+ishift
                if(ifg(ii0).eq.0) then
-                  print *,'attempt to increase ifg when ifg=0'
+cveh              print *,'attempt to increase ifg when ifg=0'
                   go to 130
                endif
                ifg(ii0)=ifg(ii0)+1
@@ -351,12 +355,17 @@ c
       itop=-1
  180  if(ii.le.0) go to 100
       i=ii-ishift
-c     cjwr >>>>> 1/26/95 - Is this right? indicates special point.
+c
 c     should reset only undecided pts (icg=-1)
-c     if(icg(i).ne.0) go to 190
+c
       if(icg(i).ne.-1) go to 190
-      if(ifg(i).eq.0) stop ' undecided point has ifg=0'
-c     cjwr <<<<<
+      if(ifg(i).eq.0) then
+        ierr = 9
+        return
+      endif
+c     
+c     ierr = 9 indicates undecided point has ifg=0
+c
       nru(iu(i))=nru(iu(i))+1
       ifg(icg(ii))=ifg(ii)
       icg(ifg(ii))=icg(ii)
@@ -393,13 +402,5 @@ c
 
       go to 210
  250  continue
-c     write(6,8000) k,ncolor,nncpts,nspts
-c     write(6,8001) (j,ncu(j),nfu(j),nru(j),j=1,3)
-c     write(6,8001) (j,ncu(j),nfu(j),nru(j),j=1,1)
-c     flush(6)
       return
- 8000 format('  crsgd  k=',i2,'  ncolor=',i2,'  # c-points=',i4,
-     *     '  sp pts=',i4)
- 8001 format('    unknowns forced (c/f/r) :',3(3x,'iu=',i1,3i5))
- 9000 format('  crsgd: grid #',i2,' completed')
       end

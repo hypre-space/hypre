@@ -5,7 +5,7 @@ c     routine for setting icdep array (coupled/dependent coarsening)
 c     
 c=====================================================================
 c     
-      subroutine setdep(idep,idun,nun,icdep)
+      subroutine setdep(ierr,idep,idun,nun,icdep)
 c     
 c---------------------------------------------------------------------
 c     
@@ -70,8 +70,11 @@ c
 c---------------------------------------------------------------------
 c     
       go to (100,200,300),idep
-      stop ' idep out of range'
-c     
+      ierr = 5
+      return
+c
+c     ierr = 5 indicates illegal value for idep has been requested
+c
 c     separate coarsening for each unknown
 c     
  100  do 120 i=1,nun
@@ -101,12 +104,5 @@ c
  310     continue
          icdep(i,i)=2
  320  continue
-      return
-c     
- 900  write(6,'(1x)')
-      write(6,'(/''  Coarsening Dependence/Coupling array:''/)')
-      do 910 iu1=1,nun
-         write(6,'(5x,10i2)') (icdep(iu1,iu2),iu2=1,nun)
- 910  continue
       return
       end

@@ -26,8 +26,7 @@ void amg_SetNTRLX P((int *ntrlx , void *data ));
 void amg_SetIPRLX P((int *iprlx , void *data ));
 void amg_SetIERLX P((int *ierlx , void *data ));
 void amg_SetIURLX P((int *iurlx , void *data ));
-void amg_SetIOutDat P((int ioutdat , void *data ));
-void amg_SetLogFileName P((char *log_file_name , void *data ));
+void amg_SetLogging P((int ioutdat , char *log_file_name , void *data ));
 void amg_SetNumUnknowns P((int num_unknowns , void *data ));
 void amg_SetNumPoints P((int num_points , void *data ));
 void amg_SetIU P((int *iu , void *data ));
@@ -38,10 +37,10 @@ void amg_SetYP P((double *yp , void *data ));
 void amg_SetZP P((double *zp , void *data ));
 
 /* amg_setup.c */
-void amg_Setup P((Matrix *A , void *data ));
+int amg_Setup P((Matrix *A , void *data ));
 
 /* amg_solve.c */
-void amg_Solve P((Vector *u , Vector *f , double tol , void *data ));
+int amg_Solve P((Vector *u , Vector *f , double tol , void *data ));
 
 /* data.c */
 AMGData *amg_NewData P((int levmax , int ncg , double ecg , int nwt , double ewt , int nstr , int ncyc , int *mu , int *ntrlx , int *iprlx , int *ierlx , int *iurlx , int ioutdat , char *log_file_name ));
@@ -67,6 +66,12 @@ void CopyVector P((Vector *x , Vector *y ));
 void ScaleVector P((double alpha , Vector *y ));
 void Axpy P((double alpha , Vector *x , Vector *y ));
 double InnerProd P((Vector *x , Vector *y ));
+
+/* write.c */
+void WriteYSMP P((char *file_name , Matrix *matrix ));
+void WriteVec P((char *file_name , Vector *vector ));
+void WriteSetupParams P((void *data ));
+void WriteSolverParams P((double tol , void *data ));
 
 #undef P
 

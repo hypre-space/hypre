@@ -24,6 +24,7 @@ void  *amg_Initialize(port_data)
 void  *port_data;
 {
    AMGData  *amg_data;
+   FILE     *fp;
 
    /* setup params */
    int      levmax;
@@ -89,7 +90,7 @@ void  *port_data;
    iurlx[3] = 9;
 
    /* output params */
-   ioutdat = 3;
+   ioutdat = 0;
 
 
    /*-----------------------------------------------------------------------
@@ -99,7 +100,8 @@ void  *port_data;
    amg_data = amg_NewData(levmax, ncg, ecg, nwt, ewt, nstr,
 			  ncyc, mu, ntrlx, iprlx, ierlx, iurlx,
 			  ioutdat, 
-			  "amg.out.log");
+			  "amg.out.log"); 
+
    
    return (void *)amg_data;
 }

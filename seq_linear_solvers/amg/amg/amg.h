@@ -73,10 +73,10 @@ void amg_SetYP P((double *yp , void *data ));
 void amg_SetZP P((double *zp , void *data ));
 
 /* amg_setup.c */
-void amg_Setup P((Matrix *A , void *data ));
+int amg_Setup P((Matrix *A , void *data ));
 
 /* amg_solve.c */
-void amg_Solve P((Vector *u , Vector *f , double tol , void *data ));
+int amg_Solve P((Vector *u , Vector *f , double tol , void *data ));
 
 /* vector.c */
 Vector *NewVector P((double *data , int size ));

@@ -5,7 +5,7 @@ c     routines for performing coloring
 c     
 c=====================================================================
 c     
-      subroutine setcw(k,ncolor,jval0,jvalmx,icdep,nun,
+      subroutine setcw(ierr,k,ncolor,jval0,jvalmx,icdep,nun,
      *     imin,imax,ia,iu,icg,ifg,ib,jb,
      *     ndimu,ndimp,ndima,ndimb)
 c     
@@ -116,7 +116,6 @@ c
 c     
 c---------------------------------------------------------------------
 c     
-c     print *,' setcw  - k=',k
       i0lo=imin(k)
       i0hi=imax(k)
 c     
@@ -154,7 +153,13 @@ c
       jval0=i0hi+ishift+1
       jvalmx=jval0+nsmax*nstmax+1
       jvalxx=jvalmx+1
-      if(jvalxx.gt.ndimu) go to 9903
+c
+c     ierr  = 2 indicates ndimu too small 
+c
+      if(jvalxx.gt.ndimu) then
+        ierr = 2
+        return
+      endif
 c     
 c     set weights for variables
 c     jvalxx for forced c-points      (icg=1)
@@ -212,11 +217,4 @@ c
  150  continue
 
       go to 110
-c     
-c===  > error messages
-c     
- 9903 write(6,9930)
-      stop
-c     
- 9930 format(' ### error in setcw: ndimu too small ###')
       end

@@ -20,15 +20,20 @@
  * amg_Solve
  *--------------------------------------------------------------------------*/
 
-void         amg_Solve(u, f, tol, data)
+int         amg_Solve(u, f, tol, data)
 Vector      *u;
 Vector      *f;
 double       tol;
 void        *data;
 {
+   int Solve_err_flag;
+
    AMGData  *amg_data = data;
 
+   WriteSolverParams(tol, amg_data);
 
-   CALL_SOLVE(u, f, tol, amg_data);
+   CALL_SOLVE(Solve_err_flag, u, f, tol, amg_data);
+
+   return(Solve_err_flag);
 }
 

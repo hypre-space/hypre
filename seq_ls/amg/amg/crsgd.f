@@ -1,11 +1,6 @@
-C     C### filename: CG.FOR
-c==== FILE CG.FOR ====================================================
-c     
-c     CRSGD: coarsening routines for systems
-c     
 c=====================================================================
 c     
-      subroutine crsgd(k,nstr,ecg,ncg,ewt,nwt,mmax,icdep,
+      subroutine crsgd(ierr,k,nstr,ecg,ncg,ewt,nwt,mmax,icdep,
      *     nun,imin,imax,a,ia,ja,iu,ip,icg,ifg,
      *     b,ib,jb,ipmn,ipmx,iv,xp,yp,
      *     ndimu,ndimp,ndima,ndimb)
@@ -237,17 +232,20 @@ c
 c     
 c===  > set array for coupled/dependent coarsening
 c     
-      call setdep(idep,idun,nun,icdep)
+      call setdep(ierr,idep,idun,nun,icdep)
+      if (ierr .ne. 0) return
 c     
 c===  > define the strong connections
 c     
-      call strcnc(k,isort,ecg,istr,imin,imax,a,ia,ja,iu,
+      call strcnc(ierr,k,isort,ecg,istr,imin,imax,a,ia,ja,iu,
      *     ndimu,ndimp,ndima,ndimb)
+      if (ierr .ne. 0) return
 c     
 c===  > set the form of b
 c     
-      call binitl(k,imin,imax,ia,ja,ifg,b,ib,jb,
+      call binitl(ierr,k,imin,imax,ia,ja,ifg,b,ib,jb,
      *     ndimu,ndimp,ndima,ndimb)
+      if (ierr .ne. 0) return
 c     
 c     set initial color value
 c     
@@ -259,21 +257,24 @@ c
 c     
 c===  > set the weights for coloring
 c     
-      call setcw(k,ncolor,jval0,jvalmx,icdep,nun,
+      call setcw(ierr,k,ncolor,jval0,jvalmx,icdep,nun,
      *     imin,imax,ia,iu,icg,ifg,ib,jb,
      *     ndimu,ndimp,ndima,ndimb)
+      if (ierr .ne. 0) return
 c     
 c===  > perform the coloring
 c     
-      call color(k,ncolor,jval0,jvalmx,icdep,
+      call color(ierr,k,ncolor,jval0,jvalmx,icdep,
      *     imin,imax,ia,ja,iu,ip,icg,ifg,ib,jb,iv,
      *     ndimu,ndimp,ndima,ndimb)
+      if (ierr .ne. 0) return
 c     
 c===  > test the resulting f-points
 c     
-      call ftest(k,itst,ncolor,ewt,nwt,iact,npts,icdep,
+      call ftest(ierr,k,itst,ncolor,ewt,nwt,iact,npts,icdep,
      *     imin,imax,a,ia,ja,iu,ip,icg,ifg,ib,iv,
      *     ndimu,ndimp,ndima,ndimb)
+      if (ierr .ne. 0) return
 c     
 c===  > return to recolor points if necessary
 c     
@@ -290,13 +291,16 @@ c
 c     
 c===  > load f-rows of b with strong c-connections
 c     
-      call bloadf(k,imin,imax,a,ia,ja,icg,b,ib,jb,
+      call bloadf(ierr,k,imin,imax,a,ia,ja,icg,b,ib,jb,
      *     ndimu,ndimp,ndima,ndimb)
+      if (ierr .ne. 0) return
 c     
 c===  > set the interpolation weights
 c     
-      call setw(k,ewt,nwt,iwts,imin,imax,a,ia,ja,iu,icg,ifg,b,ib,jb,
+      call setw(ierr,k,ewt,nwt,iwts,imin,imax,a,ia,ja,
+     *     iu,icg,ifg,b,ib,jb,
      *     ipmn,ipmx,ip,iv,xp,yp)
+      if (ierr .ne. 0) return
 c     
 c===  > set the pointers for the coarse grid
 c     

@@ -1,5 +1,5 @@
 c     
-      subroutine dirslv(k,imin,imax,u,f,a,ia,ja)
+      subroutine dirslv(ierr,k,imin,imax,u,f,a,ia,ja)
 c     
 c---------------------------------------------------------------------
 c     
@@ -42,7 +42,10 @@ c
       u(ilo)=f(ilo)/a(ia(ilo))
       return
 
- 1    if(npts.gt.600) stop 'drslv4'
+ 1    if(npts.gt.600) then
+        ierr = 2
+        return
+      endif
 c     
 c     load the matrix and right hand side
 c     
@@ -67,15 +70,20 @@ c
          do 20 jc=jmn,jmx
             c(kc)=0.
             kc=kc+1
-            if(kc.gt.ndimmat) stop 'drslv4'
+            if(kc.gt.ndimmat) then
+              ierr = 3
+              return
+            endif
  20      continue
          do 30 j=jlo,jhi
             c(ja(j)+jshft)=a(j)
  30      continue
          d(i+ishft)=f(i)
  40   continue
-c     print *,'  drslv4 -- storage used =',kc
       ic(npts+1)=kc
+
+c     storage used  is the value of kc at this point
+
 c     
 c     find icmx
 c     
@@ -121,7 +129,5 @@ c
       do 300 n=1,npts
          u(n-ishft)=d(n)
  300  continue
-c     write(6,1234) npts,dnorm
-c     1234 format(' drslv2 -- npts=',i2,' dnorm=',1p,e9.2)
       return
       end
