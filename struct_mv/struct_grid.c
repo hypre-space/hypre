@@ -66,7 +66,7 @@ zzz_NewAssembledStructGrid( MPI_Comm      *comm,
    global_size = 0;
    local_size = 0;
    boxes = zzz_NewBoxArray();
-   box_ranks = zzz_TAlloc(int, zzz_BoxArraySize(boxes));
+   box_ranks = zzz_TAlloc(int, zzz_BoxArraySize(all_boxes));
 
    j = 0;
    zzz_ForBoxI(i, all_boxes)
@@ -74,7 +74,7 @@ zzz_NewAssembledStructGrid( MPI_Comm      *comm,
       box = zzz_BoxArrayBox(all_boxes, i);
       box_volume = zzz_BoxVolume(box);
 
-      if (zzz_StructGridProcess(grid, i) == my_rank)
+      if (processes[i] == my_rank)
       {
 	 zzz_AppendBox(box, boxes);
 	 box_ranks[j++] = i;
