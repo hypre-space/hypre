@@ -2820,10 +2820,23 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
        strcpy( HYPreconName_, name );
        HYPreconID_ = HYEUCLID;
     }
-    else if ( !strcmp(name, "block") )
+    else if ( !strcmp(name, "blockD") )
     {
        strcpy( HYPreconName_, name );
-       HYPreconID_ = HYBLOCK;
+       HYPreconID_  = HYBLOCK;
+       blockScheme_ = 0;
+    }
+    else if ( !strcmp(name, "blockT") )
+    {
+       strcpy( HYPreconName_, name );
+       HYPreconID_  = HYBLOCK;
+       blockScheme_ = 1;
+    }
+    else if ( !strcmp(name, "blockLU") )
+    {
+       strcpy( HYPreconName_, name );
+       HYPreconID_  = HYBLOCK;
+       blockScheme_ = 2;
     }
     else if ( !strcmp(name, "ml") )
     {
