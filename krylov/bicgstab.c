@@ -32,8 +32,8 @@ hypre_BiCGSTABFunctionsCreate(
    int (*ScaleVector)( double alpha , void *x ),
    int (*Axpy)( double alpha , void *x , void *y ),
    int (*CommInfo)( void *A , int *my_id , int *num_procs ),
-   int    (*precond)(),
-   int    (*precond_setup)()
+   int (*PrecondSetup)(  void *vdata, void *A, void *b, void *x ),
+   int (*Precond)( void *vdata, void *A, void *b, void *x )
    )
 {
    hypre_BiCGSTABFunctions * bicgstab_functions;
@@ -50,8 +50,8 @@ hypre_BiCGSTABFunctionsCreate(
    bicgstab_functions->ScaleVector = ScaleVector;
    bicgstab_functions->Axpy = Axpy;
    bicgstab_functions->CommInfo = CommInfo;
-   bicgstab_functions->precond = precond;
-   bicgstab_functions->precond_setup = precond_setup;
+   bicgstab_functions->precond_setup = PrecondSetup;
+   bicgstab_functions->precond = Precond;
 
    return bicgstab_functions;
 }
@@ -184,8 +184,7 @@ hypre_BiCGSTABSetup( void *bicgstab_vdata,
    return ierr;
 }
  
-/*--------------------------------------------------------------------------
- * hypre_BiCGSTABSolve
+/*-------------------------------------------------------------------------- * hypre_BiCGSTABSolve
  *-------------------------------------------------------------------------*/
 
 int

@@ -123,8 +123,8 @@ int hypre_ParKrylovClearVector( void *x );
   int hypre_ParKrylovScaleVector( double alpha , void *x );
   int hypre_ParKrylovAxpy( double alpha , void *x , void *y );
   int hypre_ParKrylovCommInfo( void *A , int *my_id , int *num_procs );
-  int hypre_ParKrylovIdentitySetup( void *vdata , void *A , void *b , void *x );
   int hypre_ParKrylovIdentity( void *vdata , void *A , void *b , void *x );
+  int hypre_ParKrylovIdentitySetup( void *vdata , void *A , void *b , void *x );
 */
 
 typedef struct
@@ -139,12 +139,8 @@ typedef struct
   int (*ScaleVector)( double alpha , void *x );
   int (*Axpy)( double alpha , void *x , void *y );
   int (*CommInfo)( void *A , int *my_id , int *num_procs );
-  int (*IdentitySetup)( void *vdata , void *A , void *b , void *x );
-  int (*Identity)( void *vdata , void *A , void *b , void *x );
-
-   int    (*precond)();
-   int    (*precond_setup)();
-
+  int (*precond_setup)();
+  int (*precond)();
 } hypre_BiCGSTABFunctions;
 
 /**
@@ -211,8 +207,8 @@ extern "C" {
       int (*ScaleVector)( double alpha , void *x ),
       int (*Axpy)( double alpha , void *x , void *y ),
       int (*CommInfo)( void *A , int *my_id , int *num_procs ),
-      int    (*precond)(),
-      int    (*precond_setup)()
+      int (*PrecondSetup)( void *vdata , void *A , void *b , void *x ),
+      int (*Precond)( void *vdata , void *A , void *b , void *x )
       );
 
 
