@@ -103,6 +103,7 @@ int HYPRE_BoomerAMGSetEuclidFile( HYPRE_Solver solver , char *euclidfile );
 int HYPRE_BoomerAMGSetNumFunctions( HYPRE_Solver solver , int num_functions );
 int HYPRE_BoomerAMGSetDofFunc( HYPRE_Solver solver , int *dof_func );
 int HYPRE_BoomerAMGSetGSMG( HYPRE_Solver solver , int gsmg );
+int HYPRE_BoomerAMGSetGSMGNumSamples( HYPRE_Solver solver , int gsmg );
 
 /* HYPRE_parcsr_bicgstab.c */
 int HYPRE_ParCSRBiCGSTABCreate( MPI_Comm comm , HYPRE_Solver *solver );
@@ -326,6 +327,7 @@ HYPRE_ParCSRMatrix GenerateDifConv( MPI_Comm comm , int nx , int ny , int nz , i
 
 /* par_gsmg.c */
 int hypre_BoomerAMGSetGSMG( void *data , int par );
+int hypre_BoomerAMGSetGSMGNumSamples( void *data , int par );
 int hypre_ParCSRMatrixClone( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix **Sp , int copy_data );
 int hypre_ParCSRMatrixFillSmooth( int nsamples , double *samples , hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *A , int num_functions , int *dof_func );
 double hypre_ParCSRMatrixChooseThresh( hypre_ParCSRMatrix *S );

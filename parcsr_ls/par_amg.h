@@ -84,6 +84,7 @@ typedef struct
    int                cycle_op_count;                                                   
    /* fields used by GSMG */
    int                 gsmg; /* nonzero indicates use of GSMG */
+   int                 gsmg_samples; /* number of sample vectors */
 
    /* log info */
    int      log_level;

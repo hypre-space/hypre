@@ -347,9 +347,16 @@ int HYPRE_BoomerAMGSetEuclidFile(HYPRE_Solver solver,
                          	 char        *euclidfile); 
 
 /*
- * (Optional)
+ * (Optional) Specifies the use of GSMG - geometrically smooth 
+ * coarsening and interpolation.
  **/
 int HYPRE_BoomerAMGSetGSMG(HYPRE_Solver solver,
+                                int    gsmg);
+
+/*
+ * (Optional) Defines the number of sample vectors used in GSMG.
+ **/
+int HYPRE_BoomerAMGSetGSMGNumSamples(HYPRE_Solver solver,
                                 int    gsmg);
 
 /*@}*/

@@ -57,6 +57,22 @@ hypre_BoomerAMGSetGSMG( void *data,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_BoomerAMGSetGSMGNumSamples
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_BoomerAMGSetGSMGNumSamples( void *data,
+                        int   par )
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+
+   amg_data->gsmg_samples = par;
+
+   return (ierr);
+}
+
+/*--------------------------------------------------------------------------
  * hypre_ParCSRMatrixClone
  *--------------------------------------------------------------------------*/
 
@@ -475,7 +491,7 @@ hypre_BoomerAMGCreateSmoothDirs(void         *data,
    int   *starts = hypre_ParCSRMatrixRowStarts(A);
 
    int sample;
-   int nsamples = 20; /* hard-coded number of samples */
+   int nsamples = amg_data->gsmg_samples;
    int ret;
    double *datax, *bp, *p;
    double minimax;
