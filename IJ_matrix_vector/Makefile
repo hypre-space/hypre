@@ -26,6 +26,7 @@ CFLAGS = \
  -I../utilities\
  -I../seq_matrix_vector\
  -I../parcsr_matrix_vector\
+ -I../parcsr_linear_solvers\
  ${CINCLUDES}\
  ${CDEFS}
  

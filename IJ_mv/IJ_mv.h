@@ -153,41 +153,22 @@ typedef struct
 #endif
 # define	P(s) s
 
-<<<<<<< IJ_matrix_vector.h
 /* F90_HYPRE_IJMatrix.c */
 void hypre_F90_IFACE P((int hypre_newijmatrix ));
 void hypre_F90_IFACE P((int hypre_freeijmatrix ));
 void hypre_F90_IFACE P((int hypre_initializeijmatrix ));
 void hypre_F90_IFACE P((int hypre_assembleijmatrix ));
 void hypre_F90_IFACE P((int hypre_distributeijmatrix ));
-void hypre_F90_IFACE P((int hypre_setijmatrixlocalstoragetype ));
+void hypre_F90_IFACE P((int hypre_setijmatrixlocalstoragety ));
 void hypre_F90_IFACE P((int hypre_setijmatrixlocalsize ));
 void hypre_F90_IFACE P((int hypre_setijmatrixdiagrowsizes ));
-void hypre_F90_IFACE P((int hypre_setijmatrixoffdiagrowsizes ));
+void hypre_F90_IFACE P((int hypre_setijmatrixoffdiagrowsize ));
 void hypre_F90_IFACE P((int hypre_setijmatrixtotalsize ));
 void hypre_F90_IFACE P((int hypre_queryijmatrixinsertionsem ));
 void hypre_F90_IFACE P((int hypre_insertijmatrixblock ));
 void hypre_F90_IFACE P((int hypre_addblocktoijmatrix ));
 void hypre_F90_IFACE P((int hypre_insertijmatrixrow ));
 
-=======
-/* F90_HYPRE_IJMatrix.c */
-void hypre_F90_IFACE P((int hypre_newijmatrix ));
-void hypre_F90_IFACE P((int hypre_freeijmatrix ));
-void hypre_F90_IFACE P((int hypre_initializeijmatrix ));
-void hypre_F90_IFACE P((int hypre_assembleijmatrix ));
-void hypre_F90_IFACE P((int hypre_distributeijmatrix ));
-void hypre_F90_IFACE P((int hypre_setijmatrixlocalstoraget ));
-void hypre_F90_IFACE P((int hypre_setijmatrixlocalsize ));
-void hypre_F90_IFACE P((int hypre_setijmatrixdiagrowsizes ));
-void hypre_F90_IFACE P((int hypre_setijmatrixoffdiagrowsiz ));
-void hypre_F90_IFACE P((int hypre_setijmatrixtotalsize ));
-void hypre_F90_IFACE P((int hypre_queryijmatrixinsertionse ));
-void hypre_F90_IFACE P((int hypre_insertijmatrixblock ));
-void hypre_F90_IFACE P((int hypre_addblocktoijmatrix ));
-void hypre_F90_IFACE P((int hypre_insertijmatrixrow ));
-
->>>>>>> 1.4
 /* HYPRE_IJMatrix.c */
 int HYPRE_NewIJMatrix P((HYPRE_IJMatrix *in_matrix_ptr , MPI_Comm comm , int global_m , int global_n ));
 int HYPRE_FreeIJMatrix P((HYPRE_IJMatrix IJmatrix ));
