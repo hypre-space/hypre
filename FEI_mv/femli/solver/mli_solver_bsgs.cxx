@@ -880,8 +880,8 @@ int MLI_Solver_BSGS::buildBlocks()
    }
    else
    {
-	   esslMatrices_ = new double*[nBlocks_];
-	for ( iB = 0; iB < nBlocks_; iB++ ) esslMatrices_[iB] = NULL;
+      esslMatrices_ = new double*[nBlocks_];
+      for ( iB = 0; iB < nBlocks_; iB++ ) esslMatrices_[iB] = NULL;
    }
 #endif
 
