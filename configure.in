@@ -165,9 +165,9 @@ AC_ARG_WITH(insure,
    casc_user_chose_compilers=yes
  fi
  case "${withval}" in
-   yes) PREPEND="insure" ;;
+   yes) PREPEND="" ;;
    no)  PREPEND="" ;;
-   *)   PREPEND="insure $withval" ;;
+   *)   PREPEND="" ;;
  esac],
 [PREPEND=""]
 )
@@ -208,9 +208,9 @@ AC_ARG_WITH(insure-to-file,
    casc_user_chose_compilers=yes
  fi
  case "${withval}" in
-   yes) PREPEND="insure -Zoi \"report_file insure.log\"";;
+   yes) PREPEND=""";;
    no)  PREPEND="" ;;
-   *)   PREPEND="insure $withval" ;;
+   *)   PREPEND="" ;;
  esac]
 )
 
