@@ -6,6 +6,7 @@
  *
  * $Revision$
  *********************************************************************EHEADER*/
+
 /******************************************************************************
  *
  * HYPRE_ParCSRParaSails interface
@@ -257,7 +258,7 @@ HYPRE_ParCSRParaSailsSetLogging(HYPRE_Solver solver,
 
 /******************************************************************************
  *
- * Some of HYPRE_ParaSails interface (rest in distributed_ls/ParaSails
+ * HYPRE_ParaSails interface
  *
  *****************************************************************************/
 

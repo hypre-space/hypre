@@ -311,155 +311,6 @@ int HYPRE_BoomerAMGGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
 /**
  * Create a ParaSails preconditioner.
  **/
-int HYPRE_ParCSRParaSailsCreate(MPI_Comm      comm,
-                                HYPRE_Solver *solver);
-
-/**
- * Destroy a ParaSails preconditioner.
- **/
-int HYPRE_ParCSRParaSailsDestroy(HYPRE_Solver solver);
-
-/**
- * Set up the ParaSails preconditioner.  This function should be passed
- * to the iterative solver {\tt SetPrecond} function.
- *
- * @param solver [IN] Preconditioner object to set up.
- * @param A [IN] ParCSR matrix used to construct the preconditioner.
- * @param b Ignored by this function.
- * @param x Ignored by this function.
- **/
-int HYPRE_ParCSRParaSailsSetup(HYPRE_Solver       solver,
-                               HYPRE_ParCSRMatrix A,
-                               HYPRE_ParVector    b,
-                               HYPRE_ParVector    x);
-
-/**
- * Apply the ParaSails preconditioner.  This function should be passed
- * to the iterative solver {\tt SetPrecond} function.
- *
- * @param solver [IN] Preconditioner object to apply.
- * @param A Ignored by this function.
- * @param b [IN] Vector to precondition.
- * @param x [OUT] Preconditioned vector.
- **/
-int HYPRE_ParCSRParaSailsSolve(HYPRE_Solver       solver,
-                               HYPRE_ParCSRMatrix A,
-                               HYPRE_ParVector    b,
-                               HYPRE_ParVector    x);
-
-/**
- * Set the threshold and levels parameter for the ParaSails
- * preconditioner.  The accuracy and cost of ParaSails are
- * parameterized by these two parameters.  Lower values of the
- * threshold parameter and higher values of levels parameter 
- * lead to more accurate, but more expensive preconditioners.
- *
- * @param solver [IN] Preconditioner object for which to set parameters.
- * @param thresh [IN] Value of threshold parameter, $0 \le$ thresh $\le 1$.
- *                    The default value is 0.1.
- * @param nlevels [IN] Value of levels parameter, $0 \le$ nlevels.  
- *                     The default value is 1.
- **/
-int HYPRE_ParCSRParaSailsSetParams(HYPRE_Solver solver,
-                                   double       thresh,
-                                   int          nlevels);
-
-/**
- * Set the filter parameter for the 
- * ParaSails preconditioner.
- *
- * @param solver [IN] Preconditioner object for which to set filter parameter.
- * @param filter [IN] Value of filter parameter.  The filter parameter is
- *                    used to drop small nonzeros in the preconditioner,
- *                    to reduce the cost of applying the preconditioner.
- *                    Values from 0.05 to 0.1 are recommended.
- *                    The default value is 0.1.
- **/
-int HYPRE_ParCSRParaSailsSetFilter(HYPRE_Solver solver,
-                                   double       filter);
-
-/**
- * Set the symmetry parameter for the
- * ParaSails preconditioner.
- *
- * @param solver [IN] Preconditioner object for which to set symmetry parameter.
- * @param sym [IN] Value of the symmetry parameter:
- * \begin{tabular}{|c|l|} \hline
- * value & meaning \\ \hline
- * 0 & nonsymmetric and/or indefinite problem, and nonsymmetric preconditioner\\
- * 1 & SPD problem, and SPD (factored) preconditioner \\
- * 2 & nonsymmetric, definite problem, and SPD (factored) preconditioner \\
- * \hline
- * \end{tabular}
- **/
-int HYPRE_ParCSRParaSailsSetSym(HYPRE_Solver solver,
-                                int          sym);
-
-/**
- * Set the load balance parameter for the
- * ParaSails preconditioner.
- *
- * @param solver [IN] Preconditioner object for which to set the load balance
- *                    parameter.
- * @param loadbal [IN] Value of the load balance parameter, 
- *                     $0 \le$ loadbal $\le 1$.  A zero value indicates that
- *                     no load balance is attempted; a value of unity indicates
- *                     that perfect load balance will be attempted.  The 
- *                     recommended value is 0.9 to balance the overhead of
- *                     data exchanges for load balancing.  No load balancing
- *                     is needed if the preconditioner is very sparse and
- *                     fast to construct.  The default value when this 
- *                     parameter is not set is 0.
- **/
-int HYPRE_ParCSRParaSailsSetLoadbal(HYPRE_Solver solver,
-                                    double       loadbal);
-
-/**
- * Set the pattern reuse parameter for the
- * ParaSails preconditioner.
- *
- * @param solver [IN] Preconditioner object for which to set the pattern reuse 
- *                    parameter.
- * @param reuse [IN] Value of the pattern reuse parameter.  A nonzero value
- *                   indicates that the pattern of the preconditioner should
- *                   be reused for subsequent constructions of the 
- *                   preconditioner.  A zero value indicates that the 
- *                   preconditioner should be constructed from scratch.
- *                   The default value when this parameter is not set is 0.
- **/
-int HYPRE_ParCSRParaSailsSetReuse(HYPRE_Solver solver,
-                                  int          reuse);
-
-/**
- * Set the logging parameter for the
- * ParaSails preconditioner.
- *
- * @param solver [IN] Preconditioner object for which to set the logging
- *                    parameter.
- * @param logging [IN] Value of the logging parameter.  A nonzero value
- *                     sends statistics of the setup procedure to stdout.
- *                     The default value when this parameter is not set is 0.
- **/
-int HYPRE_ParCSRParaSailsSetLogging(HYPRE_Solver solver,
-                                    int          logging);
-
-/*@}*/
-
-/*--------------------------------------------------------------------------
- * Why is this in the ParCSR header file?  -RDF
- *--------------------------------------------------------------------------*/
-
-/**
- * @name ParaSails Preconditioner
- *
- * Parallel sparse approximate inverse preconditioner for the
- * ParCSR matrix format.
- **/
-/*@{*/
-
-/**
- * Create a ParaSails preconditioner.
- **/
 int HYPRE_ParaSailsCreate(MPI_Comm      comm,
                           HYPRE_Solver *solver);
 
@@ -597,7 +448,7 @@ int HYPRE_ParaSailsSetLogging(HYPRE_Solver solver,
  *--------------------------------------------------------------------------*/
 
 /**
- * @name Euclid Preconditioner 
+ * @name ParCSR Euclid Preconditioner 
  *
  * MPI Parallel ILU preconditioner 
  **/
@@ -673,7 +524,7 @@ int HYPRE_EuclidSetParams(HYPRE_Solver solver,
  * -blockJacobi 3 \\
  * -matFile     /home/hysom/myfile.euclid \\
  * -doSomething true \\
- * -xx\_coeff -1.0 \\
+ * -xx\_coeff -1.0
  *
  * See Euclid documentation for comprehensive listing
  * of settable parameters.
@@ -1221,6 +1072,149 @@ HYPRE_ParCSRMatrix GenerateDifConv(MPI_Comm comm,
  *--------------------------------------------------------------------------*/
 
 /*@}*/
+
+/*
+ * ParCSR ParaSails Preconditioner
+ *
+ * Parallel sparse approximate inverse preconditioner for the
+ * ParCSR matrix format.
+ **/
+
+/*
+ * Create a ParaSails preconditioner.
+ **/
+int HYPRE_ParCSRParaSailsCreate(MPI_Comm      comm,
+                                HYPRE_Solver *solver);
+
+/*
+ * Destroy a ParaSails preconditioner.
+ **/
+int HYPRE_ParCSRParaSailsDestroy(HYPRE_Solver solver);
+
+/*
+ * Set up the ParaSails preconditioner.  This function should be passed
+ * to the iterative solver {\tt SetPrecond} function.
+ *
+ * @param solver [IN] Preconditioner object to set up.
+ * @param A [IN] ParCSR matrix used to construct the preconditioner.
+ * @param b Ignored by this function.
+ * @param x Ignored by this function.
+ **/
+int HYPRE_ParCSRParaSailsSetup(HYPRE_Solver       solver,
+                               HYPRE_ParCSRMatrix A,
+                               HYPRE_ParVector    b,
+                               HYPRE_ParVector    x);
+
+/*
+ * Apply the ParaSails preconditioner.  This function should be passed
+ * to the iterative solver {\tt SetPrecond} function.
+ *
+ * @param solver [IN] Preconditioner object to apply.
+ * @param A Ignored by this function.
+ * @param b [IN] Vector to precondition.
+ * @param x [OUT] Preconditioned vector.
+ **/
+int HYPRE_ParCSRParaSailsSolve(HYPRE_Solver       solver,
+                               HYPRE_ParCSRMatrix A,
+                               HYPRE_ParVector    b,
+                               HYPRE_ParVector    x);
+
+/*
+ * Set the threshold and levels parameter for the ParaSails
+ * preconditioner.  The accuracy and cost of ParaSails are
+ * parameterized by these two parameters.  Lower values of the
+ * threshold parameter and higher values of levels parameter 
+ * lead to more accurate, but more expensive preconditioners.
+ *
+ * @param solver [IN] Preconditioner object for which to set parameters.
+ * @param thresh [IN] Value of threshold parameter, $0 \le$ thresh $\le 1$.
+ *                    The default value is 0.1.
+ * @param nlevels [IN] Value of levels parameter, $0 \le$ nlevels.  
+ *                     The default value is 1.
+ **/
+int HYPRE_ParCSRParaSailsSetParams(HYPRE_Solver solver,
+                                   double       thresh,
+                                   int          nlevels);
+
+/*
+ * Set the filter parameter for the 
+ * ParaSails preconditioner.
+ *
+ * @param solver [IN] Preconditioner object for which to set filter parameter.
+ * @param filter [IN] Value of filter parameter.  The filter parameter is
+ *                    used to drop small nonzeros in the preconditioner,
+ *                    to reduce the cost of applying the preconditioner.
+ *                    Values from 0.05 to 0.1 are recommended.
+ *                    The default value is 0.1.
+ **/
+int HYPRE_ParCSRParaSailsSetFilter(HYPRE_Solver solver,
+                                   double       filter);
+
+/*
+ * Set the symmetry parameter for the
+ * ParaSails preconditioner.
+ *
+ * @param solver [IN] Preconditioner object for which to set symmetry parameter.
+ * @param sym [IN] Value of the symmetry parameter:
+ * \begin{tabular}{|c|l|} \hline
+ * value & meaning \\ \hline
+ * 0 & nonsymmetric and/or indefinite problem, and nonsymmetric preconditioner\\
+ * 1 & SPD problem, and SPD (factored) preconditioner \\
+ * 2 & nonsymmetric, definite problem, and SPD (factored) preconditioner \\
+ * \hline
+ * \end{tabular}
+ **/
+int HYPRE_ParCSRParaSailsSetSym(HYPRE_Solver solver,
+                                int          sym);
+
+/*
+ * Set the load balance parameter for the
+ * ParaSails preconditioner.
+ *
+ * @param solver [IN] Preconditioner object for which to set the load balance
+ *                    parameter.
+ * @param loadbal [IN] Value of the load balance parameter, 
+ *                     $0 \le$ loadbal $\le 1$.  A zero value indicates that
+ *                     no load balance is attempted; a value of unity indicates
+ *                     that perfect load balance will be attempted.  The 
+ *                     recommended value is 0.9 to balance the overhead of
+ *                     data exchanges for load balancing.  No load balancing
+ *                     is needed if the preconditioner is very sparse and
+ *                     fast to construct.  The default value when this 
+ *                     parameter is not set is 0.
+ **/
+int HYPRE_ParCSRParaSailsSetLoadbal(HYPRE_Solver solver,
+                                    double       loadbal);
+
+/*
+ * Set the pattern reuse parameter for the
+ * ParaSails preconditioner.
+ *
+ * @param solver [IN] Preconditioner object for which to set the pattern reuse 
+ *                    parameter.
+ * @param reuse [IN] Value of the pattern reuse parameter.  A nonzero value
+ *                   indicates that the pattern of the preconditioner should
+ *                   be reused for subsequent constructions of the 
+ *                   preconditioner.  A zero value indicates that the 
+ *                   preconditioner should be constructed from scratch.
+ *                   The default value when this parameter is not set is 0.
+ **/
+int HYPRE_ParCSRParaSailsSetReuse(HYPRE_Solver solver,
+                                  int          reuse);
+
+/*
+ * Set the logging parameter for the
+ * ParaSails preconditioner.
+ *
+ * @param solver [IN] Preconditioner object for which to set the logging
+ *                    parameter.
+ * @param logging [IN] Value of the logging parameter.  A nonzero value
+ *                     sends statistics of the setup procedure to stdout.
+ *                     The default value when this parameter is not set is 0.
+ **/
+int HYPRE_ParCSRParaSailsSetLogging(HYPRE_Solver solver,
+                                    int          logging);
+
 
 #ifdef __cplusplus
 }
