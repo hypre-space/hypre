@@ -55,7 +55,7 @@
  *--------------------------------------------------------------------------*/
 
 static void SendRequests(MPI_Comm comm, Matrix *mat, int reqlen, int *reqind, 
-  int *num_requests)
+  int *num_requests, int *replies_list)
 {
     MPI_Request request;
     int i, j, this_pe;
@@ -83,6 +83,9 @@ static void SendRequests(MPI_Comm comm, Matrix *mat, int reqlen, int *reqind,
             comm, &request);
         MPI_Request_free(&request);
         (*num_requests)++;
+
+        if (replies_list != NULL)
+            replies_list[this_pe] = 1;
 
 #ifdef DEBUG
         {
@@ -379,10 +382,12 @@ static void ExchangePrunedRows(MPI_Comm comm, Matrix *M,
     int count;
     MPI_Request *requests;
     MPI_Status *statuses;
-    int npes;
+    int mype, npes;
+    int num_replies, *replies_list, *replies_list2;
 
     Mem *mem;
 
+    MPI_Comm_rank(comm, &mype);
     MPI_Comm_size(comm, &npes);
     requests = (MPI_Request *) malloc(npes * sizeof(MPI_Request));
     statuses = (MPI_Status *) malloc(npes * sizeof(MPI_Status));
@@ -409,9 +414,18 @@ static void ExchangePrunedRows(MPI_Comm comm, Matrix *M,
         /* Get list of indices that were just merged */
         RowPattPrevLevel(patt, &len, &ind);
 
-        SendRequests(comm, M, len, ind, &num_requests);
+        /* Find the number of replies */
+        replies_list = (int *) calloc(npes, sizeof(int));
+        replies_list2 = (int *) malloc(npes * sizeof(int));
 
-        for (i=0; i<num_requests; i++)
+        SendRequests(comm, M, len, ind, &num_requests, replies_list);
+
+        MPI_Allreduce(replies_list,replies_list2, npes, MPI_INT, MPI_SUM, comm);
+        num_replies = replies_list2[mype];
+        free(replies_list);
+        free(replies_list2);
+
+        for (i=0; i<num_replies; i++)
         {
             /* Receive count indices stored in buffer */
             ReceiveRequest(comm, &source, &buffer, &bufferlen, &count);
@@ -426,7 +440,7 @@ static void ExchangePrunedRows(MPI_Comm comm, Matrix *M,
             ReceiveReplyPrunedRows(comm, pruned_rows, patt, M);
         }
 
-        MPI_Waitall(num_requests, requests, statuses);
+        MPI_Waitall(num_replies, requests, statuses);
         MemDestroy(mem);
     }
 
@@ -476,7 +490,7 @@ static void ExchangeStoredRows(MPI_Comm comm, Matrix *A, Matrix *M,
 
     RowPattGet(patt, &len, &ind);
 
-    SendRequests(comm, A, len, ind, &num_requests);
+    SendRequests(comm, A, len, ind, &num_requests, NULL);
 
     bufferlen = 10; /* size will grow if get a long msg */
     buffer = (int *) malloc(bufferlen * sizeof(int));
@@ -968,8 +982,12 @@ double ParaSailsSelectThresh(ParaSails *ps, double param)
 	/* Copy the scaled absolute values into a work buffer */
         temp = DiagScaleGet(ps->diag_scale, ps->A, row);
 	for (i=0; i<len; i++)
+	{
 	    buffer[i] = temp*ABS(val[i])*DiagScaleGet(ps->diag_scale, 
-               ps->A, ind[i]);
+                ps->A, ind[i]);
+	    if (ind[i] == row)
+		buffer[i] = 0.0; /* diagonal is not same scale as off-diag */
+	}
 
         /* Compute which element to select */
 	i = (int) (len * param) + 1;
