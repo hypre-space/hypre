@@ -553,5 +553,7 @@ void fei_hypre_test(int argc, char *argv[])
     
     MPI_Finalize();
 
+    H.sysMatIndices = NULL;
+
     // note implicit call to destructor at end of scope
 }
