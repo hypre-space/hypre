@@ -325,6 +325,7 @@ am__libHYPRE_a_SOURCES_DIST = $(top_srcdir)/blas/dasum.c \
 	$(top_srcdir)/parcsr_ls/par_laplace.c \
 	$(top_srcdir)/parcsr_ls/par_laplace_27pt.c \
 	$(top_srcdir)/parcsr_ls/par_laplace_9pt.c \
+	$(top_srcdir)/parcsr_ls/par_nodal_systems.c \
 	$(top_srcdir)/parcsr_ls/par_rap.c \
 	$(top_srcdir)/parcsr_ls/par_rap_communication.c \
 	$(top_srcdir)/parcsr_ls/par_relax.c \
@@ -636,12 +637,12 @@ am__objects_3 = $(am__objects_1) $(am__objects_2) colamd.$(OBJEXT) \
 	par_difconv.$(OBJEXT) par_gsmg.$(OBJEXT) \
 	par_indepset.$(OBJEXT) par_interp.$(OBJEXT) \
 	par_laplace.$(OBJEXT) par_laplace_27pt.$(OBJEXT) \
-	par_laplace_9pt.$(OBJEXT) par_rap.$(OBJEXT) \
-	par_rap_communication.$(OBJEXT) par_relax.$(OBJEXT) \
-	par_relax_interface.$(OBJEXT) par_scaled_matnorm.$(OBJEXT) \
-	par_schwarz.$(OBJEXT) par_stats.$(OBJEXT) \
-	par_strength.$(OBJEXT) pcg_par.$(OBJEXT) schwarz.$(OBJEXT) \
-	F90_HYPRE_parcsr_matrix.$(OBJEXT) \
+	par_laplace_9pt.$(OBJEXT) par_nodal_systems.$(OBJEXT) \
+	par_rap.$(OBJEXT) par_rap_communication.$(OBJEXT) \
+	par_relax.$(OBJEXT) par_relax_interface.$(OBJEXT) \
+	par_scaled_matnorm.$(OBJEXT) par_schwarz.$(OBJEXT) \
+	par_stats.$(OBJEXT) par_strength.$(OBJEXT) pcg_par.$(OBJEXT) \
+	schwarz.$(OBJEXT) F90_HYPRE_parcsr_matrix.$(OBJEXT) \
 	F90_HYPRE_parcsr_vector.$(OBJEXT) F90_par_vector.$(OBJEXT) \
 	F90_parcsr_matrix.$(OBJEXT) HYPRE_parcsr_matrix.$(OBJEXT) \
 	HYPRE_parcsr_vector.$(OBJEXT) communicationT.$(OBJEXT) \
@@ -989,6 +990,7 @@ am__libHYPRE_LSI_a_SOURCES_DIST = $(top_srcdir)/blas/dasum.c \
 	$(top_srcdir)/parcsr_ls/par_laplace.c \
 	$(top_srcdir)/parcsr_ls/par_laplace_27pt.c \
 	$(top_srcdir)/parcsr_ls/par_laplace_9pt.c \
+	$(top_srcdir)/parcsr_ls/par_nodal_systems.c \
 	$(top_srcdir)/parcsr_ls/par_rap.c \
 	$(top_srcdir)/parcsr_ls/par_rap_communication.c \
 	$(top_srcdir)/parcsr_ls/par_relax.c \
@@ -1426,6 +1428,7 @@ am__libHYPRE_la_SOURCES_DIST = $(top_srcdir)/blas/dasum.c \
 	$(top_srcdir)/parcsr_ls/par_laplace.c \
 	$(top_srcdir)/parcsr_ls/par_laplace_27pt.c \
 	$(top_srcdir)/parcsr_ls/par_laplace_9pt.c \
+	$(top_srcdir)/parcsr_ls/par_nodal_systems.c \
 	$(top_srcdir)/parcsr_ls/par_rap.c \
 	$(top_srcdir)/parcsr_ls/par_rap_communication.c \
 	$(top_srcdir)/parcsr_ls/par_relax.c \
@@ -1682,12 +1685,12 @@ am__objects_6 = $(am__objects_4) $(am__objects_5) colamd.lo \
 	par_cg_relax_wt.lo par_coarse_parms.lo par_coarsen.lo \
 	par_cycle.lo par_difconv.lo par_gsmg.lo par_indepset.lo \
 	par_interp.lo par_laplace.lo par_laplace_27pt.lo \
-	par_laplace_9pt.lo par_rap.lo par_rap_communication.lo \
-	par_relax.lo par_relax_interface.lo par_scaled_matnorm.lo \
-	par_schwarz.lo par_stats.lo par_strength.lo pcg_par.lo \
-	schwarz.lo F90_HYPRE_parcsr_matrix.lo \
-	F90_HYPRE_parcsr_vector.lo F90_par_vector.lo \
-	F90_parcsr_matrix.lo HYPRE_parcsr_matrix.lo \
+	par_laplace_9pt.lo par_nodal_systems.lo par_rap.lo \
+	par_rap_communication.lo par_relax.lo par_relax_interface.lo \
+	par_scaled_matnorm.lo par_schwarz.lo par_stats.lo \
+	par_strength.lo pcg_par.lo schwarz.lo \
+	F90_HYPRE_parcsr_matrix.lo F90_HYPRE_parcsr_vector.lo \
+	F90_par_vector.lo F90_parcsr_matrix.lo HYPRE_parcsr_matrix.lo \
 	HYPRE_parcsr_vector.lo communicationT.lo numbers.lo \
 	par_csr_aat.lo par_csr_bool_matop.lo par_csr_bool_matrix.lo \
 	par_csr_communication.lo par_csr_matop.lo par_csr_matrix.lo \
@@ -2011,6 +2014,7 @@ am__libHYPRE_LSI_la_SOURCES_DIST = $(top_srcdir)/blas/dasum.c \
 	$(top_srcdir)/parcsr_ls/par_laplace.c \
 	$(top_srcdir)/parcsr_ls/par_laplace_27pt.c \
 	$(top_srcdir)/parcsr_ls/par_laplace_9pt.c \
+	$(top_srcdir)/parcsr_ls/par_nodal_systems.c \
 	$(top_srcdir)/parcsr_ls/par_rap.c \
 	$(top_srcdir)/parcsr_ls/par_rap_communication.c \
 	$(top_srcdir)/parcsr_ls/par_relax.c \
@@ -2695,6 +2699,7 @@ FILES = \
  $(top_srcdir)/parcsr_ls/par_laplace.c\
  $(top_srcdir)/parcsr_ls/par_laplace_27pt.c\
  $(top_srcdir)/parcsr_ls/par_laplace_9pt.c\
+ $(top_srcdir)/parcsr_ls/par_nodal_systems.c\
  $(top_srcdir)/parcsr_ls/par_rap.c\
  $(top_srcdir)/parcsr_ls/par_rap_communication.c\
  $(top_srcdir)/parcsr_ls/par_relax.c\
@@ -5317,6 +5322,15 @@ par_laplace_9pt.obj: $(top_srcdir)/parcsr_ls/par_laplace_9pt.c
 
 par_laplace_9pt.lo: $(top_srcdir)/parcsr_ls/par_laplace_9pt.c
 	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o par_laplace_9pt.lo `test -f '$(top_srcdir)/parcsr_ls/par_laplace_9pt.c' || echo '$(srcdir)/'`$(top_srcdir)/parcsr_ls/par_laplace_9pt.c
+
+par_nodal_systems.o: $(top_srcdir)/parcsr_ls/par_nodal_systems.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o par_nodal_systems.o `test -f '$(top_srcdir)/parcsr_ls/par_nodal_systems.c' || echo '$(srcdir)/'`$(top_srcdir)/parcsr_ls/par_nodal_systems.c
+
+par_nodal_systems.obj: $(top_srcdir)/parcsr_ls/par_nodal_systems.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o par_nodal_systems.obj `if test -f '$(top_srcdir)/parcsr_ls/par_nodal_systems.c'; then $(CYGPATH_W) '$(top_srcdir)/parcsr_ls/par_nodal_systems.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/parcsr_ls/par_nodal_systems.c'; fi`
+
+par_nodal_systems.lo: $(top_srcdir)/parcsr_ls/par_nodal_systems.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o par_nodal_systems.lo `test -f '$(top_srcdir)/parcsr_ls/par_nodal_systems.c' || echo '$(srcdir)/'`$(top_srcdir)/parcsr_ls/par_nodal_systems.c
 
 par_rap.o: $(top_srcdir)/parcsr_ls/par_rap.c
 	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o par_rap.o `test -f '$(top_srcdir)/parcsr_ls/par_rap.c' || echo '$(srcdir)/'`$(top_srcdir)/parcsr_ls/par_rap.c
