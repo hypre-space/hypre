@@ -1716,6 +1716,7 @@ int HYPRE_SlideReduction::buildReducedMatrix()
    int    rowSize2, *colInd2, newRowSize, rowIndex, searchIndex, uBound;
    int    procIndex, colIndex, ierr, *newColInd, totalNNZ;
    double *colVal, *colVal2, *newColVal;
+   char   fname[40];
    HYPRE_ParCSRMatrix A_csr, A21_csr, invA22_csr, RAP_csr, reducedA_csr;
 
    //------------------------------------------------------------------
@@ -1769,7 +1770,6 @@ int HYPRE_SlideReduction::buildReducedMatrix()
 
    if ( outputLevel_ >= 4 )
    {
-      char fname[40];
       sprintf(fname, "rap.%d", mypid);
       FILE *fp = fopen(fname, "w");
 
@@ -1974,7 +1974,6 @@ int HYPRE_SlideReduction::buildReducedMatrix()
 
    if ( outputLevel_ >= 5 )
    {
-      char fname[40];
       sprintf(fname, "reducedA.%d", mypid);
       FILE *fp = fopen(fname, "w");
 
@@ -2368,6 +2367,7 @@ int HYPRE_SlideReduction::buildA21Mat()
    int    rowSize, *colInd, newRowSize, jcol, colIndex, searchIndex;
    int    nnzA21, *newColInd, procIndex, ncnt, newColIndex;
    double *colVal, *newColVal;
+   char   fname[40];
    HYPRE_ParCSRMatrix A_csr, A21_csr;
 
    //------------------------------------------------------------------
@@ -2611,7 +2611,6 @@ int HYPRE_SlideReduction::buildA21Mat()
 
    if ( outputLevel_ >= 5 )
    {
-      char fname[40];
       sprintf(fname, "A21.%d", mypid);
       FILE *fp = fopen(fname, "w");
 
@@ -2654,6 +2653,7 @@ int HYPRE_SlideReduction::buildInvA22Mat()
    int    nGroups, *groupIDs, **groupRowNums, *groupSizes, *iTempList;
    int     rowCount, *colInd2, rowSize2;
    double *colVal, *colVal2, **Imat, **Imat2, *newColVal;
+   char   fname[40];
    HYPRE_ParCSRMatrix A_csr, invA22_csr;
 
    //------------------------------------------------------------------
@@ -3164,7 +3164,6 @@ fclose(fp2);
    HYPRE_ParCSRMatrix hypreCBC;
 
 #if 0
-   char fname[30];
    strcpy( fname, "hypreCT" );
    HYPRE_ParCSRMatrixPrint((HYPRE_ParCSRMatrix) hypreCT, fname);
    strcpy( fname, "hypreB" );
@@ -3213,7 +3212,6 @@ fclose(fp2);
    int invA22NCols       = invA22NRows;
    int invA22StartRow    = 2 * procNConstr_[mypid];
    int invA22StartCol    = invA22StartRow;
-   int invA22GlobalNRows = 2 * globalNRows;
    int *invA22MatSize=NULL;
 
    //------------------------------------------------------------------
@@ -3382,7 +3380,6 @@ fclose(fp2);
 
    if ( outputLevel_ >= 5 )
    {
-      char fname[40];
       sprintf( fname, "invA.%d", mypid );
       FILE *fp = fopen( fname, "w");
 
@@ -3913,6 +3910,7 @@ int HYPRE_SlideReduction::buildReducedMatrix2()
    int    nnzA21, *newColInd, procIndex, ncnt, uBound, *colInd2, rowSize2;
    int    newColIndex, *rowTags=NULL;
    double *colVal, *newColVal, mat2X2[4], denom, *colVal2;
+   char   fname[40];
    HYPRE_ParCSRMatrix A_csr, A21_csr, invA22_csr, RAP_csr, reducedA_csr;
 
    //------------------------------------------------------------------
@@ -4155,7 +4153,6 @@ int HYPRE_SlideReduction::buildReducedMatrix2()
 
    if ( outputLevel_ >= 5 )
    {
-      char fname[40];
       sprintf(fname, "A21.%d", mypid);
       FILE *fp = fopen(fname, "w");
 
@@ -4583,7 +4580,6 @@ int HYPRE_SlideReduction::buildReducedMatrix2()
    //------------------------------------------------------------------
 
    HYPRE_ParCSRMatrix hypreCBC;
-   char fname[30];
 
    strcpy( fname, "hypreCT" );
    HYPRE_ParCSRMatrixPrint((HYPRE_ParCSRMatrix) hypreCT, fname);
@@ -4631,7 +4627,6 @@ int HYPRE_SlideReduction::buildReducedMatrix2()
    int invA22NCols       = invA22NRows;
    int invA22StartRow    = A21StartRow;
    int invA22StartCol    = invA22StartRow;
-   int invA22GlobalNRows = A21GlobalNRows;
    int *invA22MatSize;
 
    //------------------------------------------------------------------
@@ -4798,7 +4793,6 @@ int HYPRE_SlideReduction::buildReducedMatrix2()
 
    if ( outputLevel_ >= 5 )
    {
-      char fname[40];
       sprintf(fname, "invA22.%d", mypid);
       FILE *fp = fopen(fname, "w");
 
@@ -4844,7 +4838,6 @@ int HYPRE_SlideReduction::buildReducedMatrix2()
 
    if ( outputLevel_ >= 4 )
    {
-      char fname[40];
       sprintf(fname, "rap.%d", mypid);
       FILE *fp = fopen(fname, "w");
 
