@@ -18,7 +18,6 @@ config.sunos
 crsgd.f
 data.c
 data.h
-dirslv.f
 f90amg.c
 f90amg_params.c
 f90amg_setup.c
@@ -30,15 +29,12 @@ headers.h
 iinvert.f
 matrix.c
 matrix.h
-matvec.f
 misc.f
 opdfn.f
 protos
 protos.h
 random.c
 relaxC.c
-relax.f
-resint.f
 rstdf0.f
 setc.f
 setcw.f
