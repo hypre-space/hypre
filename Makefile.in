@@ -122,13 +122,11 @@ fei: base
 	  fi; \
 	done; \
 	mkdir -p hypre/tmp; \
-	mv -f hypre/lib/*.a hypre/tmp; \
-	mv hypre/tmp/libHYPRE_blas.a hypre/lib; \
 	for i in ${HYPRE_FEI_LIBFILES}; \
 	do \
-	   (cd hypre/tmp; ar x $$i; rm -f ___*;) \
+	   (cp hypre/lib/$$i hypre/tmp; cd hypre/tmp; ar x $$i; rm -f ___*;) \
 	done; \
-	(cd hypre/tmp; ar ru ../lib/libHYPRE_LSI.a *.o;); \
+	(cd hypre/tmp; ar rcu ../lib/libHYPRE_LSI.a *.o;); \
 	rm -rf hypre/tmp; \
 	echo ""
 
