@@ -1043,20 +1043,6 @@ HYPRE_ParCSRMatrix GenerateLaplacian(MPI_Comm comm,
                                      int      r,
                                      double  *value);
 
-int hypre_map(int ix,
-        int iy,
-        int iz,
-        int p,
-        int q,
-        int r,
-        int P,
-        int Q,
-        int R,
-        int *nx_part,
-        int *ny_part,
-        int *nz_part,
-        int *global_part);
-
 HYPRE_ParCSRMatrix GenerateLaplacian27pt(MPI_Comm comm,
                                          int      nx,
                                          int      ny,
@@ -1069,20 +1055,6 @@ HYPRE_ParCSRMatrix GenerateLaplacian27pt(MPI_Comm comm,
                                          int      r,
                                          double  *value);
 
-int hypre_map3(int ix,
-         int iy,
-         int iz,
-         int p,
-         int q,
-         int r,
-         int P,
-         int Q,
-         int R,
-         int *nx_part,
-         int *ny_part,
-         int *nz_part,
-         int *global_part);
-
 HYPRE_ParCSRMatrix GenerateLaplacian9pt(MPI_Comm comm,
                                         int      nx,
                                         int      ny,
@@ -1091,16 +1063,6 @@ HYPRE_ParCSRMatrix GenerateLaplacian9pt(MPI_Comm comm,
                                         int      p,
                                         int      q,
                                         double  *value);
-
-int hypre_map2(int ix,
-         int iy,
-         int p,
-         int q,
-         int P,
-         int Q,
-         int *nx_part,
-         int *ny_part,
-         int *global_part);
 
 HYPRE_ParCSRMatrix GenerateDifConv(MPI_Comm comm,
                                    int      nx,
