@@ -120,10 +120,15 @@ hypre_PCGDestroy( void *pcg_vdata )
 
    if (pcg_data)
    {
-      if ( (pcg_data->log_level>0) || (pcg_data->printlevel) > 0 )
+      if ( (pcg_data -> norms) != NULL )
       {
          hypre_TFreeF( pcg_data -> norms, pcg_functions );
+         pcg_data -> norms = NULL;
+      } 
+      if ( (pcg_data -> rel_norms) != NULL )
+      {
          hypre_TFreeF( pcg_data -> rel_norms, pcg_functions );
+         pcg_data -> rel_norms = NULL;
       }
 
       (*(pcg_functions->MatvecDestroy))(pcg_data -> matvec_data);
