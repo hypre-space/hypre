@@ -7,7 +7,6 @@
  *********************************************************************EHEADER*/
 
 #include <string.h>
-#include <iostream.h>
 #include <assert.h>
 #include "utilities/utilities.h"
 #include "HYPRE.h"
@@ -55,7 +54,7 @@ void MLI_Matrix_MatMatMult( MLI_Matrix *Amat, MLI_Matrix *Bmat,
    if ( strcmp(Amat->getName(),"HYPRE_ParCSR") ||
         strcmp(Bmat->getName(),"HYPRE_ParCSR") )
    {
-      cout << "MLI_Matrix_MatMatMult ERROR - matrix has invalid type.\n";
+      printf("MLI_Matrix_MatMatMult ERROR - matrix has invalid type.\n");
       exit(1);
    }
    hypreA  = (hypre_ParCSRMatrix *) Amat->getMatrix();
@@ -612,8 +611,7 @@ void MLI_Matrix_GetExtRows( MLI_Matrix *Amat, MLI_Matrix *Bmat, int *extNRowsP,
    MPI_Comm            mpiComm;
 
 #ifdef MLI_DEBUG_DETAILED
-   cout << "MLI_Matrix_GetExtRows begins... " << endl;
-   cout.flush();
+   printf("MLI_Matrix_GetExtRows begins... \n");
 #endif
 
    /* -----------------------------------------------------------------------

@@ -7,7 +7,6 @@
  *********************************************************************EHEADER*/
 
 #include <string.h>
-#include <iostream.h>
 #include <assert.h>
 #include "utilities/utilities.h"
 #include "HYPRE.h"
@@ -23,8 +22,7 @@
 MLI_Matrix::MLI_Matrix(void *in_matrix,char *in_name, MLI_Function *func)
 {
 #ifdef MLI_DEBUG_DETAILED
-   cout << "MLI_Matrix::MLI_Matrix : " << in_name << endl;
-   cout.flush();
+   printf("MLI_Matrix::MLI_Matrix : %s \n", in_name);
 #endif
    matrix = in_matrix;
    if ( func != NULL ) destroy_func = (int (*)(void *)) func->func_;
@@ -45,8 +43,7 @@ MLI_Matrix::MLI_Matrix(void *in_matrix,char *in_name, MLI_Function *func)
 MLI_Matrix::~MLI_Matrix()
 {
 #ifdef MLI_DEBUG
-   cout << "MLI_Matrix::~MLI_Matrix : " << name << endl;
-   cout.flush();
+   printf("MLI_Matrix::~MLI_Matrix : %s\n", name);
 #endif
    if ( matrix != NULL && destroy_func != NULL ) destroy_func(matrix);
    matrix       = NULL;
@@ -65,9 +62,8 @@ int MLI_Matrix::apply(double alpha, MLI_Vector *vec1, double beta,
    hypre_ParVector    *hypreV1, *hypreV2, *hypreV3;
    hypre_ParCSRMatrix *hypreA = (hypre_ParCSRMatrix *) matrix;
 
-#ifdef MLI_DEBUG_DETAILED
-   cout << "MLI_Matrix::MLI_Matrix apply : " << name << endl;
-   cout.flush();
+#ifdef MLI_DEBUG
+   printf("MLI_Matrix::apply : %s\n", name);
 #endif
 
    /* -----------------------------------------------------------------------
@@ -76,14 +72,14 @@ int MLI_Matrix::apply(double alpha, MLI_Vector *vec1, double beta,
 
    if ( !strcmp(name, "HYPRE_ParCSR") && !strcmp(name, "HYPRE_ParCSRT") )
    {
-      cout << "MLI_Matrix::apply ERROR : matrix not HYPRE_ParCSR." << endl;
+      printf("MLI_Matrix::apply ERROR : matrix not HYPRE_ParCSR.\n");
       exit(1);
    }
    vname = vec1->getName();
    if ( strcmp(vname, "HYPRE_ParVector") )
    {
-      cout << "MLI_Matrix::apply ERROR : vec1 not HYPRE_ParVector." << endl;
-      cout << "MLI_Matrix::vec1 of type = " << vname << endl;
+      printf("MLI_Matrix::apply ERROR : vec1 not HYPRE_ParVector.\n");
+      printf("MLI_Matrix::vec1 of type = %s\n", vname);
       exit(1);
    }
    if ( vec2 != NULL )
@@ -91,14 +87,14 @@ int MLI_Matrix::apply(double alpha, MLI_Vector *vec1, double beta,
       vname = vec2->getName();
       if ( strcmp(vname, "HYPRE_ParVector") )
       {
-         cout << "MLI_Matrix::apply ERROR : vec2 not HYPRE_ParVector." << endl;
+         printf("MLI_Matrix::apply ERROR : vec2 not HYPRE_ParVector.\n");
          exit(1);
       }
    }
    vname = vec3->getName();
    if ( strcmp(vname, "HYPRE_ParVector") )
    {
-      cout << "MLI_Matrix::apply ERROR : vec3 not HYPRE_ParVector." << endl;
+      printf("MLI_Matrix::apply ERROR : vec3 not HYPRE_ParVector.\n");
       exit(1);
    }
 
@@ -146,7 +142,7 @@ MLI_Vector *MLI_Matrix::createVector()
 
    if ( strcmp( name, "HYPRE_ParCSR" ) )
    {
-      cout << "MLI_Matrix::createVector ERROR - matrix has invalid type.\n";
+      printf("MLI_Matrix::createVector ERROR - matrix has invalid type.\n");
       exit(1);
    }
    hypreA = (hypre_ParCSRMatrix *) matrix;
@@ -186,7 +182,7 @@ int MLI_Matrix::getMatrixInfo(char *param_string, int &int_param,
 
    if ( !strcmp(name, "HYPRE_ParCSR") && !strcmp(name, "HYPRE_ParCSRT") )
    {
-      cout << "MLI_Matrix::getInfo ERROR : matrix not HYPRE_ParCSR." << endl;
+      printf("MLI_Matrix::getInfo ERROR : matrix not HYPRE_ParCSR.\n");
       int_param  = -1;
       dble_param = 0.0;
       return 1;
@@ -220,7 +216,7 @@ int MLI_Matrix::print(char *filename)
 {
    if ( !strcmp(name, "HYPRE_ParCSR") && !strcmp(name, "HYPRE_ParCSRT") )
    {
-      cout << "MLI_Matrix::print ERROR : matrix not HYPRE_ParCSR." << endl;
+      printf("MLI_Matrix::print ERROR : matrix not HYPRE_ParCSR.\n");
       return 1;
    }
    MLI_Utils_HypreMatrixPrint((void *) matrix, filename);

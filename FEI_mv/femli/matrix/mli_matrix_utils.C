@@ -7,7 +7,6 @@
  *********************************************************************EHEADER*/
 
 #include <string.h>
-#include <iostream.h>
 #include <assert.h>
 #include "HYPRE.h"
 #include "utilities/utilities.h"
@@ -36,13 +35,13 @@ int MLI_Matrix_ComputePtAP(MLI_Matrix *Pmat, MLI_Matrix *Amat,
    if ( strcmp(Pmat->getName(),"HYPRE_ParCSR") || 
         strcmp(Amat->getName(),"HYPRE_ParCSR") )
    {
-      cout << "MLI_Matrix_computePtAP ERROR - matrix has invalid type.\n";
+      printf("MLI_Matrix_computePtAP ERROR - matrix has invalid type.\n");
       exit(1);
    }
    Pmat2 = (void *) Pmat->getMatrix();
    Amat2 = (void *) Amat->getMatrix();
    ierr = MLI_Utils_HypreMatrixComputeRAP(Pmat2,Amat2,&RAPmat2);
-   if ( ierr ) cout << "ERROR in MLI_Matrix_ComputePtAP\n";
+   if ( ierr ) printf("ERROR in MLI_Matrix_ComputePtAP\n");
    sprintf(paramString, "HYPRE_ParCSR");
    funcPtr = new MLI_Function();
    MLI_Utils_HypreMatrixGetDestroyFunc(funcPtr);
@@ -65,12 +64,12 @@ int MLI_Matrix_FormJacobi(MLI_Matrix *Amat, double alpha, MLI_Matrix **Jmat)
    
    if ( strcmp(Amat->getName(),"HYPRE_ParCSR") ) 
    {
-      cout << "MLI_Matrix_FormJacobi ERROR - matrix has invalid type.\n";
+      printf("MLI_Matrix_FormJacobi ERROR - matrix has invalid type.\n");
       exit(1);
    }
    A = (void *) Amat->getMatrix();;
    ierr = MLI_Utils_HypreMatrixFormJacobi(A, alpha, &J);
-   if ( ierr ) cout << "ERROR in MLI_Matrix_FormJacobi\n";
+   if ( ierr ) printf("ERROR in MLI_Matrix_FormJacobi\n");
    sprintf(paramString, "HYPRE_ParCSR");
    funcPtr = new MLI_Function();
    MLI_Utils_HypreMatrixGetDestroyFunc(funcPtr);
@@ -92,18 +91,18 @@ int MLI_Matrix_Compress(MLI_Matrix *Amat, int blksize, MLI_Matrix **Amat2)
    
    if ( strcmp(Amat->getName(),"HYPRE_ParCSR") ) 
    {
-      cout << "MLI_Matrix_Compress ERROR - matrix has invalid type.\n";
+      printf("MLI_Matrix_Compress ERROR - matrix has invalid type.\n");
       exit(1);
    }
    if ( blksize <= 1 )
    {
-      cout << "MLI_Matrix_Compress WARNING - blksize <= 1.\n";
+      printf("MLI_Matrix_Compress WARNING - blksize <= 1.\n");
       (*Amat2) = NULL;
       return 1;
    }
    A = (void *) Amat->getMatrix();;
    ierr = MLI_Utils_HypreMatrixCompress(A, blksize, &A2);
-   if ( ierr ) cout << "ERROR in MLI_Matrix_Compress\n";
+   if ( ierr ) printf("ERROR in MLI_Matrix_Compress\n");
    sprintf(paramString, "HYPRE_ParCSR");
    funcPtr = new MLI_Function();
    MLI_Utils_HypreMatrixGetDestroyFunc(funcPtr);

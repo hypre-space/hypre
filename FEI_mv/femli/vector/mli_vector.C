@@ -7,7 +7,6 @@
  *********************************************************************EHEADER*/
 
 #include <string.h>
-#include <iostream.h>
 #include <stdlib.h>
 #include <math.h>
 
@@ -48,7 +47,7 @@ int MLI_Vector::setConstantValue(double value)
 {
    if ( strcmp( name, "HYPRE_ParVector" ) )
    {
-      cout << "MLI_Vector::setConstantValue ERROR - type not HYPRE_ParVector.\n";
+      printf("MLI_Vector::setConstantValue ERROR - type not HYPRE_ParVector\n");
       exit(1);
    }
    hypre_ParVector *vec = (hypre_ParVector *) vector;
@@ -63,12 +62,12 @@ int MLI_Vector::copy(MLI_Vector *vec2)
 {
    if ( strcmp( name, "HYPRE_ParVector" ) )
    {
-      cout << "MLI_Vector::copy ERROR - invalid type (from)." << endl;
+      printf("MLI_Vector::copy ERROR - invalid type (from).\n");
       exit(1);
    }
    if ( strcmp( vec2->getName(), "HYPRE_ParVector" ) )
    {
-      cout << "MLI_Vector::copy ERROR - invalid type (to)." << endl;
+      printf("MLI_Vector::copy ERROR - invalid type (to).\n");
       exit(1);
    }
    hypre_ParVector *hypreV1 = (hypre_ParVector *) vector;
@@ -85,7 +84,7 @@ int MLI_Vector::print(char *filename)
 {
    if ( strcmp( name, "HYPRE_ParVector" ) )
    {
-      cout << "MLI_Vector::innerProduct ERROR - invalid type." << endl;
+      printf("MLI_Vector::innerProduct ERROR - invalid type.\n");
       exit(1);
    }
    if ( filename == NULL ) return 1;
@@ -102,7 +101,7 @@ double MLI_Vector::norm2()
 {
    if ( strcmp( name, "HYPRE_ParVector" ) )
    {
-      cout << "MLI_Vector::innerProduct ERROR - invalid type." << endl;
+      printf("MLI_Vector::innerProduct ERROR - invalid type.\n");
       exit(1);
    }
    hypre_ParVector *vec = (hypre_ParVector *) vector;
@@ -126,7 +125,7 @@ MLI_Vector *MLI_Vector::clone()
 
    if ( strcmp( name, "HYPRE_ParVector" ) )
    {
-      cout << "MLI_Vector::clone ERROR - invalid type." << endl;
+      printf("MLI_Vector::clone ERROR - invalid type.\n");
       exit(1);
    }
    hypre_ParVector *vec = (hypre_ParVector *) vector;
