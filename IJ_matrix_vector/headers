@@ -16,14 +16,13 @@ INTERNAL_HEADER=IJ_matrix_vector.h
 
 cat > $INTERNAL_HEADER <<@
 
-#include "HYPRE_IJMatrix.h"
-
 #ifndef hypre_IJ_HEADER
 #define hypre_IJ_HEADER
 
-#include "utilities.h"
-#include "seq_matrix_vector.h"
-#include "parcsr_matrix_vector.h"
+#include "../utilities/utilities.h"
+#include "../seq_matrix_vector/seq_matrix_vector.h"
+#include "../parcsr_matrix_vector/parcsr_matrix_vector.h"
+#include "./HYPRE_IJ_mv.h"
 
 #ifdef __cplusplus
 extern "C" {
