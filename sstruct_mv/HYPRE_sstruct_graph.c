@@ -317,19 +317,22 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
     * Sort the iUventries array and eliminate duplicates.
     *---------------------------------------------------------*/
 
-   qsort0(iUventries, 0, nUventries - 1);
-
-   j = 1;
-   for (i = 1; i < nUventries; i++)
+   if (nUventries > 1)
    {
-      if (iUventries[i] > iUventries[i-1])
+      qsort0(iUventries, 0, nUventries - 1);
+
+      j = 1;
+      for (i = 1; i < nUventries; i++)
       {
-         iUventries[j] = iUventries[i];
-         j++;
+         if (iUventries[i] > iUventries[i-1])
+         {
+            iUventries[j] = iUventries[i];
+            j++;
+         }
       }
+      nUventries = j;
+      hypre_SStructGraphNUVEntries(graph) = nUventries;
    }
-   nUventries = j;
-   hypre_SStructGraphNUVEntries(graph) = nUventries;
 
    /*---------------------------------------------------------
     * Compute non-stencil column numbers (if possible), and
