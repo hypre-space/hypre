@@ -10,12 +10,12 @@
 #include "../HYPRE.h"
 #include "../distributed_matrix/HYPRE_distributed_matrix_types.h"
 #include "../distributed_matrix/HYPRE_distributed_matrix_protos.h"
-#include "../parcsr_matrix_vector/HYPRE_parcsr_mv.h"
+#include "HYPRE_parcsr_mv.h"
 /* Users and test drivers shouldn't do the following; fix later. AJC */
-#include "../seq_matrix_vector/csr_matrix.h"
-#include "../seq_matrix_vector/vector.h"
-#include "../seq_matrix_vector/seq_matrix_vector.h"
-#include "../parcsr_matrix_vector/parcsr_matrix_vector.h"
+#include "csr_matrix.h"
+#include "vector.h"
+#include "seq_matrix_vector.h"
+#include "parcsr_matrix_vector.h"
 
 #include "../IJ_matrix_vector/HYPRE_IJ_mv.h"
 #include "../parcsr_linear_solvers/HYPRE_parcsr_ls.h"
