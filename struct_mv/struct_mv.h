@@ -180,7 +180,11 @@ hypre_max(0, (hypre_BoxIMaxD(box, d) - hypre_BoxIMinD(box, d) + 1))
     hypre_BoxSizeY(box))) * \
   hypre_BoxSizeX(box))
 
+/* The first hypre_CCBoxIndexRank is better style because it keeps
+   its similarity to the variable coefficient hypre_BoxIndexRank.
+   The second one sometimes avoids compiler warnings...*/
 #define hypre_CCBoxIndexRank(box, index) 0
+#define hypre_CCBoxIndexRank_noargs() 0
 
 #define hypre_BoxOffsetDistance(box, index) \
 (hypre_IndexX(index) + \
@@ -387,6 +391,83 @@ if (hypre__num_blocks > 1)\
    }\
    }\
 }
+
+/* incomplete BoxLoop2 macros leave out the inner loop so it can be hand-coded */
+#define hypre_BoxLoop2For_INC(i, j, k, i1, i2)\
+   for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)\
+   {\
+   hypre_BoxLoopSet(i, j, k);\
+   i1 = hypre__i1start + i*hypre__sx1 + j*hypre__sy1 + k*hypre__sz1;\
+   i2 = hypre__i2start + i*hypre__sx2 + j*hypre__sy2 + k*hypre__sz2;\
+   for (k = 0; k < hypre__nz; k++)\
+   {\
+      for (j = 0; j < hypre__ny; j++)\
+      {
+
+#define hypre_BoxLoop2End_INC(i1, i2)\
+         i1 += hypre__sy1 - hypre__nx*hypre__sx1;\
+         i2 += hypre__sy2 - hypre__nx*hypre__sx2;\
+      }\
+      i1 += hypre__sz1 - hypre__ny*hypre__sy1;\
+      i2 += hypre__sz2 - hypre__ny*hypre__sy2;\
+   }\
+   }\
+}
+
+/* BoxLoop2 macros, but only for when all strides are equal.  To improve
+ runtime, only one index is computed in the innermost loop, the internal
+ index i.
+ Since only the internal index, i, is updated in the innermost loop, you
+ can't reference i1, i2 inside the innermost loop. To get the effect of i1, i2
+ you have to use a macro (see below) to do pointer aliasing.  It works because
+ you know that i has the same stride as i1, i2.
+ This macro set invokes the user-defined macro hypre_UserOutsideInnerLoop inside
+ the outer loops, just before the innermost loop.  The user can define this macro
+ for pointer aliasing.
+ It's safer to redefine hypre_UserOutsideInnerLoop to do nothing afterwards.
+ The Begin_OneStride macro isn't really  needed, the Begin macro does the same
+ thing, but without ensuring that the strides are the same.
+ */
+
+#define hypre_UserOutsideInnerLoop
+
+#define hypre_BoxLoop2Begin_OneStride(loop_size, stride1,\
+			    dbox1, start1, i1,\
+			    dbox2, start2, i2)\
+{\
+   int  hypre__i1start = hypre_BoxIndexRank(dbox1, start1);\
+   int  hypre__i2start = hypre_BoxIndexRank(dbox2, start2);\
+   hypre_BoxLoopDeclareS(dbox1, stride1, hypre__sx1, hypre__sy1, hypre__sz1);\
+   hypre_BoxLoopDeclareS(dbox2, stride1, hypre__sx2, hypre__sy2, hypre__sz2);\
+   hypre_BoxLoopDeclareN(loop_size);
+
+#define hypre_BoxLoop2For_OneStride(i, j, k, i1, i2)\
+   for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)\
+   {\
+   hypre_BoxLoopSet(i, j, k);\
+   i1 = hypre__i1start + i*hypre__sx1 + j*hypre__sy1 + k*hypre__sz1;\
+   i2 = hypre__i2start + i*hypre__sx2 + j*hypre__sy2 + k*hypre__sz2;\
+   for (k = 0; k < hypre__nz; k++)\
+   {\
+      for (j = 0; j < hypre__ny; j++)\
+      {\
+         hypre_UserOutsideInnerLoop;\
+         for ( i=0; i<hypre__nx*hypre__sx1; i+=hypre__sx1 )\
+         {
+
+#define hypre_BoxLoop2End_OneStride(i1, i2)\
+         }\
+         i1 += hypre__sy1;\
+         i2 += hypre__sy2;\
+      }\
+      i1 += hypre__sz1 - hypre__ny*hypre__sy1;\
+      i2 += hypre__sz2 - hypre__ny*hypre__sy2;\
+   }\
+   }\
+}
+
+
+
 
 /*-----------------------------------*/
 

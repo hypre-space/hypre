@@ -132,6 +132,13 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
    double                  *Ap4;
    double                  *Ap5;
    double                  *Ap6;
+   double                  AAp0;
+   double                  AAp1;
+   double                  AAp2;
+   double                  AAp3;
+   double                  AAp4;
+   double                  AAp5;
+   double                  AAp6;
    double                  *xp;
    double                  *yp;
                           
@@ -205,94 +212,103 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
    {
       switch(compute_i)
       {
-         case 0:
+      case 0:
+      {
+         xp = hypre_StructVectorData(x);
+         hypre_InitializeIndtComputations(compute_pkg, xp, &comm_handle);
+         compute_box_aa = hypre_ComputePkgIndtBoxes(compute_pkg);
+
+         /*--------------------------------------------------------------
+          * initialize y= (beta/alpha)*y normally (where everything
+          * is multiplied by alpha at the end),
+          * beta*y for constant coefficient (where only Ax gets multiplied by alpha)
+          *--------------------------------------------------------------*/
+
+         if ( constant_coefficient )
          {
-            xp = hypre_StructVectorData(x);
-            hypre_InitializeIndtComputations(compute_pkg, xp, &comm_handle);
-            compute_box_aa = hypre_ComputePkgIndtBoxes(compute_pkg);
-
-            /*--------------------------------------------------------------
-             * initialize y= (beta/alpha)*y
-             *--------------------------------------------------------------*/
-
+            temp = beta;
+         }
+         else
+         {
             temp = beta / alpha;
-            if (temp != 1.0)
-            {
-               boxes = hypre_StructGridBoxes(hypre_StructMatrixGrid(A));
-               hypre_ForBoxI(i, boxes)
-                  {
-                     box   = hypre_BoxArrayBox(boxes, i);
-                     start = hypre_BoxIMin(box);
-
-                     y_data_box =
-                        hypre_BoxArrayBox(hypre_StructVectorDataSpace(y), i);
-                     yp = hypre_StructVectorBoxData(y, i);
-
-                     if (temp == 0.0)
-                     {
-                        hypre_BoxGetSize(box, loop_size);
-
-                        hypre_BoxLoop1Begin(loop_size,
-                                            y_data_box, start, stride, yi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi
-#include "hypre_box_smp_forloop.h"
-                        hypre_BoxLoop1For(loopi, loopj, loopk, yi)
-                           {
-                              yp[yi] = 0.0;
-                           }
-                        hypre_BoxLoop1End(yi);
-                     }
-                     else
-                     {
-                        hypre_BoxGetSize(box, loop_size);
-
-                        hypre_BoxLoop1Begin(loop_size,
-                                            y_data_box, start, stride, yi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi
-#include "hypre_box_smp_forloop.h"
-                        hypre_BoxLoop1For(loopi, loopj, loopk, yi)
-                           {
-                              yp[yi] *= temp;
-                           }
-                        hypre_BoxLoop1End(yi);
-                     }
-                  }
-            }
          }
-         break;
-
-         case 1:
+         if (temp != 1.0)
          {
-            hypre_FinalizeIndtComputations(comm_handle);
-            compute_box_aa = hypre_ComputePkgDeptBoxes(compute_pkg);
+            boxes = hypre_StructGridBoxes(hypre_StructMatrixGrid(A));
+            hypre_ForBoxI(i, boxes)
+               {
+                  box   = hypre_BoxArrayBox(boxes, i);
+                  start = hypre_BoxIMin(box);
+
+                  y_data_box =
+                     hypre_BoxArrayBox(hypre_StructVectorDataSpace(y), i);
+                  yp = hypre_StructVectorBoxData(y, i);
+
+                  if (temp == 0.0)
+                  {
+                     hypre_BoxGetSize(box, loop_size);
+
+                     hypre_BoxLoop1Begin(loop_size,
+                                         y_data_box, start, stride, yi);
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi
+#include "hypre_box_smp_forloop.h"
+                     hypre_BoxLoop1For(loopi, loopj, loopk, yi)
+                        {
+                           yp[yi] = 0.0;
+                        }
+                     hypre_BoxLoop1End(yi);
+                  }
+                  else
+                  {
+                     hypre_BoxGetSize(box, loop_size);
+
+                     hypre_BoxLoop1Begin(loop_size,
+                                         y_data_box, start, stride, yi);
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi
+#include "hypre_box_smp_forloop.h"
+                     hypre_BoxLoop1For(loopi, loopj, loopk, yi)
+                        {
+                           yp[yi] *= temp;
+                        }
+                     hypre_BoxLoop1End(yi);
+                  }
+               }
          }
-         break;
+      }
+      break;
+
+      case 1:
+      {
+         hypre_FinalizeIndtComputations(comm_handle);
+         compute_box_aa = hypre_ComputePkgDeptBoxes(compute_pkg);
+      }
+      break;
       }
 
       /*--------------------------------------------------------------------
        * y += A*x
        *--------------------------------------------------------------------*/
 
-      hypre_ForBoxArrayI(i, compute_box_aa)
-         {
-            compute_box_a = hypre_BoxArrayArrayBoxArray(compute_box_aa, i);
+      if (constant_coefficient)
+      {
+         hypre_ForBoxArrayI(i, compute_box_aa)
+            {
+               compute_box_a = hypre_BoxArrayArrayBoxArray(compute_box_aa, i);
 
-            A_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
-            x_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
-            y_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(y), i);
+               A_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
+               x_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
+               y_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(y), i);
 
-            xp = hypre_StructVectorBoxData(x, i);
-            yp = hypre_StructVectorBoxData(y, i);
+               xp = hypre_StructVectorBoxData(x, i);
+               yp = hypre_StructVectorBoxData(y, i);
 
-            hypre_ForBoxI(j, compute_box_a)
-               {
-                  compute_box = hypre_BoxArrayBox(compute_box_a, j);
-
-                  hypre_BoxGetSize(compute_box, loop_size);
-                  start  = hypre_BoxIMin(compute_box);
-
-                  if (constant_coefficient)
+               hypre_ForBoxI(j, compute_box_a)
                   {
+                     compute_box = hypre_BoxArrayBox(compute_box_a, j);
+
+                     hypre_BoxGetSize(compute_box, loop_size);
+                     start  = hypre_BoxIMin(compute_box);
+
                      Ai = hypre_CCBoxIndexRank( A_data_box, start );
 
                      /* unroll up to depth MAX_DEPTH */
@@ -309,6 +325,13 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                            Ap4 = hypre_StructMatrixBoxData(A, i, si+4);
                            Ap5 = hypre_StructMatrixBoxData(A, i, si+5);
                            Ap6 = hypre_StructMatrixBoxData(A, i, si+6);
+                           AAp0 = Ap0[Ai]*alpha;
+                           AAp1 = Ap1[Ai]*alpha;
+                           AAp2 = Ap2[Ai]*alpha;
+                           AAp3 = Ap3[Ai]*alpha;
+                           AAp4 = Ap4[Ai]*alpha;
+                           AAp5 = Ap5[Ai]*alpha;
+                           AAp6 = Ap6[Ai]*alpha;
 
                            xoff0 = hypre_BoxOffsetDistance(x_data_box,
                                                            stencil_shape[si+0]);
@@ -333,13 +356,13 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                            hypre_BoxLoop2For(loopi, loopj, loopk, xi, yi)
                               {
                                  yp[yi] +=
-                                    Ap0[Ai] * xp[xi + xoff0] +
-                                    Ap1[Ai] * xp[xi + xoff1] +
-                                    Ap2[Ai] * xp[xi + xoff2] +
-                                    Ap3[Ai] * xp[xi + xoff3] +
-                                    Ap4[Ai] * xp[xi + xoff4] +
-                                    Ap5[Ai] * xp[xi + xoff5] +
-                                    Ap6[Ai] * xp[xi + xoff6];
+                                    AAp0 * xp[xi + xoff0] +
+                                    AAp1 * xp[xi + xoff1] +
+                                    AAp2 * xp[xi + xoff2] +
+                                    AAp3 * xp[xi + xoff3] +
+                                    AAp4 * xp[xi + xoff4] +
+                                    AAp5 * xp[xi + xoff5] +
+                                    AAp6 * xp[xi + xoff6];
                               }
                            hypre_BoxLoop2End(xi, yi);
                            break;
@@ -351,6 +374,12 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                            Ap3 = hypre_StructMatrixBoxData(A, i, si+3);
                            Ap4 = hypre_StructMatrixBoxData(A, i, si+4);
                            Ap5 = hypre_StructMatrixBoxData(A, i, si+5);
+                           AAp0 = Ap0[Ai]*alpha;
+                           AAp1 = Ap1[Ai]*alpha;
+                           AAp2 = Ap2[Ai]*alpha;
+                           AAp3 = Ap3[Ai]*alpha;
+                           AAp4 = Ap4[Ai]*alpha;
+                           AAp5 = Ap5[Ai]*alpha;
 
                            xoff0 = hypre_BoxOffsetDistance(x_data_box,
                                                            stencil_shape[si+0]);
@@ -373,12 +402,12 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                            hypre_BoxLoop2For(loopi, loopj, loopk, xi, yi)
                               {
                                  yp[yi] +=
-                                    Ap0[Ai] * xp[xi + xoff0] +
-                                    Ap1[Ai] * xp[xi + xoff1] +
-                                    Ap2[Ai] * xp[xi + xoff2] +
-                                    Ap3[Ai] * xp[xi + xoff3] +
-                                    Ap4[Ai] * xp[xi + xoff4] +
-                                    Ap5[Ai] * xp[xi + xoff5];
+                                    AAp0 * xp[xi + xoff0] +
+                                    AAp1 * xp[xi + xoff1] +
+                                    AAp2 * xp[xi + xoff2] +
+                                    AAp3 * xp[xi + xoff3] +
+                                    AAp4 * xp[xi + xoff4] +
+                                    AAp5 * xp[xi + xoff5];
                               }
                            hypre_BoxLoop2End(xi, yi);
                            break;
@@ -389,6 +418,11 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                            Ap2 = hypre_StructMatrixBoxData(A, i, si+2);
                            Ap3 = hypre_StructMatrixBoxData(A, i, si+3);
                            Ap4 = hypre_StructMatrixBoxData(A, i, si+4);
+                           AAp0 = Ap0[Ai]*alpha;
+                           AAp1 = Ap1[Ai]*alpha;
+                           AAp2 = Ap2[Ai]*alpha;
+                           AAp3 = Ap3[Ai]*alpha;
+                           AAp4 = Ap4[Ai]*alpha;
 
                            xoff0 = hypre_BoxOffsetDistance(x_data_box,
                                                            stencil_shape[si+0]);
@@ -409,11 +443,11 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                            hypre_BoxLoop2For(loopi, loopj, loopk, xi, yi)
                               {
                                  yp[yi] +=
-                                    Ap0[Ai] * xp[xi + xoff0] +
-                                    Ap1[Ai] * xp[xi + xoff1] +
-                                    Ap2[Ai] * xp[xi + xoff2] +
-                                    Ap3[Ai] * xp[xi + xoff3] +
-                                    Ap4[Ai] * xp[xi + xoff4];
+                                    AAp0 * xp[xi + xoff0] +
+                                    AAp1 * xp[xi + xoff1] +
+                                    AAp2 * xp[xi + xoff2] +
+                                    AAp3 * xp[xi + xoff3] +
+                                    AAp4 * xp[xi + xoff4];
                               }
                            hypre_BoxLoop2End(xi, yi);
                            break;
@@ -423,6 +457,10 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                            Ap1 = hypre_StructMatrixBoxData(A, i, si+1);
                            Ap2 = hypre_StructMatrixBoxData(A, i, si+2);
                            Ap3 = hypre_StructMatrixBoxData(A, i, si+3);
+                           AAp0 = Ap0[Ai]*alpha;
+                           AAp1 = Ap1[Ai]*alpha;
+                           AAp2 = Ap2[Ai]*alpha;
+                           AAp3 = Ap3[Ai]*alpha;
 
                            xoff0 = hypre_BoxOffsetDistance(x_data_box,
                                                            stencil_shape[si+0]);
@@ -441,10 +479,10 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                            hypre_BoxLoop2For(loopi, loopj, loopk, xi, yi)
                               {
                                  yp[yi] +=
-                                    Ap0[Ai] * xp[xi + xoff0] +
-                                    Ap1[Ai] * xp[xi + xoff1] +
-                                    Ap2[Ai] * xp[xi + xoff2] +
-                                    Ap3[Ai] * xp[xi + xoff3];
+                                    AAp0 * xp[xi + xoff0] +
+                                    AAp1 * xp[xi + xoff1] +
+                                    AAp2 * xp[xi + xoff2] +
+                                    AAp3 * xp[xi + xoff3];
                               }
                            hypre_BoxLoop2End(xi, yi);
                            break;
@@ -453,6 +491,9 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                            Ap0 = hypre_StructMatrixBoxData(A, i, si+0);
                            Ap1 = hypre_StructMatrixBoxData(A, i, si+1);
                            Ap2 = hypre_StructMatrixBoxData(A, i, si+2);
+                           AAp0 = Ap0[Ai]*alpha;
+                           AAp1 = Ap1[Ai]*alpha;
+                           AAp2 = Ap2[Ai]*alpha;
 
                            xoff0 = hypre_BoxOffsetDistance(x_data_box,
                                                            stencil_shape[si+0]);
@@ -469,9 +510,9 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                            hypre_BoxLoop2For(loopi, loopj, loopk, xi, yi)
                               {
                                  yp[yi] +=
-                                    Ap0[Ai] * xp[xi + xoff0] +
-                                    Ap1[Ai] * xp[xi + xoff1] +
-                                    Ap2[Ai] * xp[xi + xoff2];
+                                    AAp0 * xp[xi + xoff0] +
+                                    AAp1 * xp[xi + xoff1] +
+                                    AAp2 * xp[xi + xoff2];
                               }
                            hypre_BoxLoop2End(xi, yi);
                            break;
@@ -479,6 +520,8 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                         case 2:
                            Ap0 = hypre_StructMatrixBoxData(A, i, si+0);
                            Ap1 = hypre_StructMatrixBoxData(A, i, si+1);
+                           AAp0 = Ap0[Ai]*alpha;
+                           AAp1 = Ap1[Ai]*alpha;
 
                            xoff0 = hypre_BoxOffsetDistance(x_data_box,
                                                            stencil_shape[si+0]);
@@ -493,14 +536,15 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                            hypre_BoxLoop2For(loopi, loopj, loopk, xi, yi)
                               {
                                  yp[yi] +=
-                                    Ap0[Ai] * xp[xi + xoff0] +
-                                    Ap1[Ai] * xp[xi + xoff1];
+                                    AAp0 * xp[xi + xoff0] +
+                                    AAp1 * xp[xi + xoff1];
                               }
                            hypre_BoxLoop2End(xi, yi);
                            break;
 
                         case 1:
                            Ap0 = hypre_StructMatrixBoxData(A, i, si+0);
+                           AAp0 = Ap0[Ai]*alpha;
 
                            xoff0 = hypre_BoxOffsetDistance(x_data_box,
                                                            stencil_shape[si+0]);
@@ -513,14 +557,34 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                            hypre_BoxLoop2For(loopi, loopj, loopk, xi, yi)
                               {
                                  yp[yi] +=
-                                    Ap0[Ai] * xp[xi + xoff0];
+                                    AAp0 * xp[xi + xoff0];
                               }
                            hypre_BoxLoop2End(xi, yi);
                         }
                      }
                   }
-                  else
+            }
+      }
+      else
+      {
+         hypre_ForBoxArrayI(i, compute_box_aa)
+            {
+               compute_box_a = hypre_BoxArrayArrayBoxArray(compute_box_aa, i);
+
+               A_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
+               x_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
+               y_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(y), i);
+
+               xp = hypre_StructVectorBoxData(x, i);
+               yp = hypre_StructVectorBoxData(y, i);
+
+               hypre_ForBoxI(j, compute_box_a)
                   {
+                     compute_box = hypre_BoxArrayBox(compute_box_a, j);
+
+                     hypre_BoxGetSize(compute_box, loop_size);
+                     start  = hypre_BoxIMin(compute_box);
+
                      /* unroll up to depth MAX_DEPTH */
                      for (si = 0; si < stencil_size; si+= MAX_DEPTH)
                      {
@@ -759,22 +823,22 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                            break;
                         }
                      }
-                  }
 
-                  if (alpha != 1.0)
-                  {
-                     hypre_BoxLoop1Begin(loop_size,
-                                         y_data_box, start, stride, yi);
+                     if (alpha != 1.0)
+                     {
+                        hypre_BoxLoop1Begin(loop_size,
+                                            y_data_box, start, stride, yi);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi
 #include "hypre_box_smp_forloop.h"
-                     hypre_BoxLoop1For(loopi, loopj, loopk, yi)
-                        {
-                           yp[yi] *= alpha;
-                        }
-                     hypre_BoxLoop1End(yi);
+                        hypre_BoxLoop1For(loopi, loopj, loopk, yi)
+                           {
+                              yp[yi] *= alpha;
+                           }
+                        hypre_BoxLoop1End(yi);
+                     }
                   }
-               }
-         }
+            }
+      }
    }
    
    return ierr;

@@ -101,12 +101,10 @@ hypre_PrintCCBoxArrayData( FILE            *file,
    int              ierr = 0;
 
    hypre_Box       *box;
-   hypre_Box       *data_box;
                    
    int              datai;
                    
    hypre_IndexRef   start;
-   hypre_Index      stride;
                    
    int              i, j;
 
@@ -114,16 +112,13 @@ hypre_PrintCCBoxArrayData( FILE            *file,
     * Print data
     *----------------------------------------*/
 
-   hypre_SetIndex(stride, 1, 1, 1);
-
    hypre_ForBoxI(i, box_array)
       {
          box      = hypre_BoxArrayBox(box_array, i);
-         data_box = hypre_BoxArrayBox(data_space, i);
 
          start = hypre_BoxIMin(box);
 
-         datai = hypre_CCBoxIndexRank(data_box,start);
+         datai = hypre_CCBoxIndexRank_noargs();
 
          for (j = 0; j < num_values; j++)
          {
