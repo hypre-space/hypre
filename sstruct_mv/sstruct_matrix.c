@@ -503,6 +503,7 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
    int                   ncoeffs;
    double               *coeffs;
    int                   i, entry;
+   int                   proc, myproc;
 
    hypre_SStructGridFindMapEntry(grid, part, index, var, &map_entry);
    if (map_entry == NULL)
@@ -526,6 +527,14 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
              hypre_IndexD(index,0),
              hypre_IndexD(index,1),
              hypre_IndexD(index,2) );
+      return ierr;
+   }
+
+   /* return if row is not on this process; not an error */
+   hypre_SStructMapEntryGetProcess(map_entry, &proc);
+   MPI_Comm_rank(hypre_SStructGridComm(grid), &myproc);
+   if (proc != myproc)
+   {
       return ierr;
    }
 
@@ -630,6 +639,7 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
    int                   sy, sz;
    int                   row_base, col_base, val_base;
    int                   e, entry, ii, jj, i, j, k;
+   int                   proc, myproc;
 
    box = hypre_BoxCreate();
 
@@ -663,6 +673,14 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
          
       for (ii = 0; ii < nmap_entries; ii++)
       {
+         /* continue if rows are not on this process; not an error */
+         hypre_SStructMapEntryGetProcess(map_entries[ii], &proc);
+         MPI_Comm_rank(hypre_SStructGridComm(grid), &myproc);
+         if (proc != myproc)
+         {
+            continue;
+         }
+
          hypre_SStructMapEntryGetStrides(map_entries[ii], rs);
 
          hypre_CopyIndex(ilower, hypre_BoxIMin(box));
