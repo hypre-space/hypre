@@ -55,6 +55,7 @@ hypre_ParAMGSetup( void               *amg_vdata,
    int       coarsen_type;
    int       measure_type;
    int       fine_size;
+   double    size;
    int       not_finished_coarsening = 1;
    int       Setup_err_flag;
    int       coarse_threshold = 9;
@@ -213,8 +214,11 @@ hypre_ParAMGSetup( void               *amg_vdata,
       hypre_ParCSRMatrixSetNumNonzeros(A_H);
       A_array[level] = A_H;
 
-      if (coarsen_type > 0 && coarse_size >= (fine_size*75)/100)
+      size = ((double) fine_size )*.75;
+      if (coarsen_type > 0 && coarse_size >= (int) size)
+      {
 	coarsen_type = 0;      
+      }
 
       if ( (level+1 >= max_levels) || 
            (coarse_size == fine_size) || 
