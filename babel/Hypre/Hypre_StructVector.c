@@ -282,3 +282,21 @@ int  impl_Hypre_StructVector_Axpy(Hypre_StructVector this, double a, Hypre_Vecto
 
 } /* end impl_Hypre_StructVectorAxpy */
 
+
+/* ********************************************************
+ * impl_Hypre_StructVector_GetGlobalSize
+ **********************************************************/
+int  impl_Hypre_StructVector_GetGlobalSize(Hypre_StructVector this, int* size) {
+   printf("Hypre_StructVector_GetGlobalSize doesn't work. TO DO: implement this\n");
+   return 1;
+} /* end impl_Hypre_StructVector_GetGlobalSize */
+
+/* ********************************************************
+ * impl_Hypre_StructVector_GetMap
+ *       insert the library code below
+ **********************************************************/
+int  impl_Hypre_StructVector_GetMap(Hypre_StructVector this, Hypre_Map* map) {
+   printf("Hypre_StructVector_GetMap doesn't work. TO DO: implement this\n");
+   return 1;
+} /* end impl_Hypre_StructVector_GetMap */
+

@@ -100,6 +100,23 @@ int  impl_Hypre_StructVectorBuilder_SetNumGhost
    return HYPRE_StructVectorSetNumGhost( *V, num_ghost );
 } /* end impl_Hypre_StructVectorBuilderSetNumGhost */
 
+
+/* ********************************************************
+ * impl_Hypre_StructVectorBuilder_SetMap
+ **********************************************************/
+int  impl_Hypre_StructVectorBuilder_SetMap(Hypre_StructVectorBuilder this, Hypre_Map map) {
+   printf("Hypre_StructVectorBuilder_SetMap doesn't work. TO DO: implement this\n");
+   return 1;
+} /* end impl_Hypre_StructVectorBuilder_SetMap */
+
+/* ********************************************************
+ * impl_Hypre_StructVectorBuilder_GetMap
+ **********************************************************/
+int  impl_Hypre_StructVectorBuilder_GetMap(Hypre_StructVectorBuilder this, Hypre_Map* map) {
+   printf("Hypre_StructVectorBuilder_GetMap doesn't work. TO DO: implement this\n");
+   return 1;
+} /* end impl_Hypre_StructVectorBuilder_GetMap */
+
 /* ********************************************************
  * impl_Hypre_StructVectorBuilderGetConstructedObject
  **********************************************************/
