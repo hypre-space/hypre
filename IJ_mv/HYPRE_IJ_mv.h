@@ -26,6 +26,7 @@ extern "C" {
  *--------------------------------------------------------------------------*/
 
 typedef struct {int opaque;} *HYPRE_IJMatrix;
+typedef struct {int opaque;} *HYPRE_IJVector;
 
 /*--------------------------------------------------------------------------
  * Prototypes
