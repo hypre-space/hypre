@@ -147,7 +147,7 @@ fi
 
 DIST_DIR=`pwd`/${TAR_FILE%.tar.gz}
 SYS_TYPE=`uname -s`
-CONFIGURE="./nopoe ./configure --with-babel"
+CONFIGURE="./nopoe ./configure --without-blas --without-lapack"
 . ../env.blue
 
 #===========================================================================
