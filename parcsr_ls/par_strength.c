@@ -79,19 +79,24 @@
 
 int
 hypre_BoomerAMGCreateS(hypre_ParCSRMatrix    *A,
+                       int                   *dof_func,
                        double                 strength_threshold,
                        double                 max_row_sum,
                        hypre_ParCSRMatrix   **S_ptr)
 {
    MPI_Comm 	       comm            = hypre_ParCSRMatrixComm(A);
-
+   hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
+   hypre_ParCSRCommHandle  *comm_handle;
    hypre_CSRMatrix    *A_diag          = hypre_ParCSRMatrixDiag(A);
    int                *A_diag_i        = hypre_CSRMatrixI(A_diag);
    double             *A_diag_data     = hypre_CSRMatrixData(A_diag);
 
+
    hypre_CSRMatrix    *A_offd          = hypre_ParCSRMatrixOffd(A);
    int                *A_offd_i        = hypre_CSRMatrixI(A_offd);
    double             *A_offd_data;
+   int                *A_diag_j        = hypre_CSRMatrixJ(A_diag);
+   int                *A_offd_j        = hypre_CSRMatrixJ(A_offd);
 
    int 		      *row_starts      = hypre_ParCSRMatrixRowStarts(A);
    int                 num_variables   = hypre_CSRMatrixNumRows(A_diag);
@@ -115,6 +120,11 @@ hypre_BoomerAMGCreateS(hypre_ParCSRMatrix    *A,
                       
    int                 ierr = 0;
 
+   int                 *dof_func_offd;
+   int			num_sends;
+   int		       *int_buf_data;
+   int			index, start, j;
+   
    /*--------------------------------------------------------------
     * Compute a  ParCSR strength matrix, S.
     *
@@ -150,13 +160,45 @@ hypre_BoomerAMGCreateS(hypre_ParCSRMatrix    *A,
    S_diag_j = hypre_CSRMatrixJ(S_diag);
    S_offd_i = hypre_CSRMatrixI(S_offd);
 
+   dof_func_offd = NULL;
+
    if (num_cols_offd)
    {
         A_offd_data = hypre_CSRMatrixData(A_offd);
         hypre_CSRMatrixJ(S_offd) = hypre_CTAlloc(int, num_nonzeros_offd);
         S_offd_j = hypre_CSRMatrixJ(S_offd);
         hypre_ParCSRMatrixColMapOffd(S) = hypre_CTAlloc(int, num_cols_offd);
+        dof_func_offd = hypre_CTAlloc(int, num_cols_offd);
    }
+
+
+  /*-------------------------------------------------------------------
+    * Get the dof_func data for the off-processor columns
+    *-------------------------------------------------------------------*/
+
+   if (!comm_pkg)
+   {
+	hypre_MatvecCommPkgCreate(A);
+	comm_pkg = hypre_ParCSRMatrixCommPkg(A); 
+   }
+
+   num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
+   int_buf_data = hypre_CTAlloc(int, hypre_ParCSRCommPkgSendMapStart(comm_pkg,
+						num_sends));
+
+   index = 0;
+   for (i = 0; i < num_sends; i++)
+   {
+	start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
+	for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
+		int_buf_data[index++] 
+		 = dof_func[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
+   }
+	
+   comm_handle = hypre_ParCSRCommHandleCreate( 11, comm_pkg, int_buf_data, 
+	dof_func_offd);
+
+   hypre_ParCSRCommHandleDestroy(comm_handle);   
 
    /* give S same nonzero structure as A */
    hypre_ParCSRMatrixCopy(A,S,0);
@@ -174,26 +216,38 @@ hypre_BoomerAMGCreateS(hypre_ParCSRMatrix    *A,
       {
          for (jA = A_diag_i[i]+1; jA < A_diag_i[i+1]; jA++)
          {
-            row_scale = hypre_max(row_scale, A_diag_data[jA]);
-            row_sum += A_diag_data[jA];
+            if (dof_func[i] == dof_func[A_diag_j[jA]])
+            {
+               row_scale = hypre_max(row_scale, A_diag_data[jA]);
+               row_sum += A_diag_data[jA];
+            }
          }
          for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
          {
-            row_scale = hypre_max(row_scale, A_offd_data[jA]);
-            row_sum += A_offd_data[jA];
+            if (dof_func[i] == dof_func_offd[A_offd_j[jA]])
+            {
+               row_scale = hypre_max(row_scale, A_offd_data[jA]);
+               row_sum += A_offd_data[jA];
+            }
          }
       }
       else
       {
          for (jA = A_diag_i[i]+1; jA < A_diag_i[i+1]; jA++)
          {
-            row_scale = hypre_min(row_scale, A_diag_data[jA]);
-            row_sum += A_diag_data[jA];
+            if (dof_func[i] == dof_func[A_diag_j[jA]])
+            {
+               row_scale = hypre_min(row_scale, A_diag_data[jA]);
+               row_sum += A_diag_data[jA];
+            }
          }
          for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
          {
-            row_scale = hypre_min(row_scale, A_offd_data[jA]);
-            row_sum += A_offd_data[jA];
+            if (dof_func[i] == dof_func_offd[A_offd_j[jA]])
+            {
+               row_scale = hypre_min(row_scale, A_offd_data[jA]);
+               row_sum += A_offd_data[jA];
+            }
          }
       }
       row_sum = fabs( row_sum / diag );
@@ -218,14 +272,16 @@ hypre_BoomerAMGCreateS(hypre_ParCSRMatrix    *A,
          { 
             for (jA = A_diag_i[i]+1; jA < A_diag_i[i+1]; jA++)
             {
-               if (A_diag_data[jA] <= strength_threshold * row_scale)
+               if (A_diag_data[jA] <= strength_threshold * row_scale
+                   || dof_func[i] != dof_func[A_diag_j[jA]])
                {
                   S_diag_j[jA] = -1;
                }
             }
             for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
             {
-               if (A_offd_data[jA] <= strength_threshold * row_scale)
+               if (A_offd_data[jA] <= strength_threshold * row_scale
+                   || dof_func[i] != dof_func_offd[A_offd_j[jA]])
                {
                   S_offd_j[jA] = -1;
                }
@@ -235,14 +291,16 @@ hypre_BoomerAMGCreateS(hypre_ParCSRMatrix    *A,
          {
             for (jA = A_diag_i[i]+1; jA < A_diag_i[i+1]; jA++)
             {
-               if (A_diag_data[jA] >= strength_threshold * row_scale)
+               if (A_diag_data[jA] >= strength_threshold * row_scale
+                   || dof_func[i] != dof_func[A_diag_j[jA]])
                {
                   S_diag_j[jA] = -1;
                }
             }
             for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
             {
-               if (A_offd_data[jA] >= strength_threshold * row_scale)
+               if (A_offd_data[jA] >= strength_threshold * row_scale
+                   || dof_func[i] != dof_func_offd[A_offd_j[jA]])
                {
                   S_offd_j[jA] = -1;
                }
@@ -297,5 +355,9 @@ hypre_BoomerAMGCreateS(hypre_ParCSRMatrix    *A,
    hypre_ParCSRMatrixCommPkg(S) = NULL;
 
    *S_ptr        = S;
+
+   hypre_TFree(dof_func_offd);
+
    return (ierr);
 }
+

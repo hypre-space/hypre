@@ -89,6 +89,7 @@ FILES =\
  par_difconv.c\
  par_interp.c\
  par_coarsen.c\
+ par_coarse_parms.c\
  par_relax.c\
  par_indepset.c\
  par_laplace.c\

@@ -36,6 +36,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    hypre_ParVector     *Vtemp;
    hypre_ParCSRMatrix **P_array;
    int                **CF_marker_array;   
+   int                **dof_func_array;   
+   int                 *dof_func;
    double              *relax_weight;
    double               strong_threshold;
    double               max_row_sum;
@@ -56,6 +58,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    int       level;
    int       local_size, i;
    int       coarse_size;
+   int       local_coarse_size;
    int       coarsen_type;
    int       measure_type;
    int       setup_type;
@@ -66,7 +69,9 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    int       coarse_threshold = 9;
    int       j;
    int       num_procs,my_id;
-   int     *grid_relax_type = hypre_ParAMGDataGridRelaxType(amg_data);
+   int      *grid_relax_type = hypre_ParAMGDataGridRelaxType(amg_data);
+   int	    *coarse_dof_func;
+   int	    *coarse_pnts_global;
 
    double    wall_time;   /* for debugging instrumentation */
 
@@ -81,23 +86,28 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    setup_type = hypre_ParAMGDataSetupType(amg_data);
    debug_flag = hypre_ParAMGDataDebugFlag(amg_data);
    relax_weight = hypre_ParAMGDataRelaxWeight(amg_data);
+   dof_func = hypre_ParAMGDataDofFunc(amg_data);
    
    if (setup_type == 0) return Setup_err_flag;
 
    A_array = hypre_ParAMGDataAArray(amg_data);
    P_array = hypre_ParAMGDataPArray(amg_data);
    CF_marker_array = hypre_ParAMGDataCFMarkerArray(amg_data);
+   dof_func_array = hypre_ParAMGDataDofFuncArray(amg_data);
 
    grid_relax_type[3] = hypre_ParAMGDataUserCoarseRelaxType(amg_data); 
-   if (A_array || P_array || CF_marker_array)
+   if (A_array || P_array || CF_marker_array || dof_func_array)
    {
       for (j = 1; j < old_num_levels; j++)
       {
-        if (A_array[j])
-        {
-           hypre_ParCSRMatrixDestroy(A_array[j]);
-           A_array[j] = NULL;
-        }
+         if (A_array[j])
+         {
+            hypre_ParCSRMatrixDestroy(A_array[j]);
+            A_array[j] = NULL;
+         }
+
+         if (dof_func_array[j])
+            hypre_TFree(dof_func_array[j]);
       }
 
       for (j = 0; j < old_num_levels-1; j++)
@@ -119,9 +129,12 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       P_array = hypre_CTAlloc(hypre_ParCSRMatrix*, max_levels-1);
    if (CF_marker_array == NULL)
       CF_marker_array = hypre_CTAlloc(int*, max_levels-1);
+   if (dof_func_array == NULL)
+      dof_func_array = hypre_CTAlloc(int*, max_levels);
 
    hypre_ParCSRMatrixSetNumNonzeros(A);
    A_array[0] = A;
+   dof_func_array[0] = dof_func;
    /*----------------------------------------------------------
     * Initialize hypre_ParAMGData
     *----------------------------------------------------------*/
@@ -167,23 +180,23 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       }
       if (max_levels > 1)
       {
-	 hypre_BoomerAMGCreateS(A_array[level], 
+	 hypre_BoomerAMGCreateS(A_array[level], dof_func_array[level], 
 				strong_threshold, max_row_sum, &S);
          if (coarsen_type == 6)
          {
 	    hypre_BoomerAMGCoarsenFalgout(S, A_array[level], measure_type,
-                                    debug_flag, &CF_marker, &coarse_size); 
+                                    debug_flag, &CF_marker, &local_coarse_size); 
          }
          else if (coarsen_type)
          {
 	    hypre_BoomerAMGCoarsenRuge(S, A_array[level],
                                  measure_type, coarsen_type, debug_flag,
-                                 &CF_marker, &coarse_size); 
+                                 &CF_marker, &local_coarse_size); 
          }
          else
          {
 	    hypre_BoomerAMGCoarsen(S, A_array[level], 0,
-                             debug_flag, &CF_marker, &coarse_size); 
+                             debug_flag, &CF_marker, &local_coarse_size); 
          }
  
          if (debug_flag==1)
@@ -194,7 +207,13 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 	    fflush(NULL);
          }
 
+	 hypre_BoomerAMGCoarseParms(comm,
+		hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A_array[level])),
+			local_coarse_size,dof_func_array[level],
+			CF_marker,&coarse_dof_func,&coarse_pnts_global);
          CF_marker_array[level] = CF_marker;
+         dof_func_array[level+1] = coarse_dof_func;
+	 coarse_size = coarse_pnts_global[num_procs];
       
 #if DEBUG
    if (amg_ioutdat == -3)
@@ -219,26 +238,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    } 
 #endif
 
-         /*-------------------------------------------------------------
-          * Build prolongation matrix, P, and place in P_array[level] 
-          *--------------------------------------------------------------*/
-         if (debug_flag==1) wall_time = time_getWallclockSeconds();
-
-         hypre_BoomerAMGBuildInterp(A_array[level], CF_marker_array[level], S,
-                              debug_flag, trunc_factor, &P);
-
-         if (debug_flag==1)
-         {
-            wall_time = time_getWallclockSeconds() - wall_time;
-            printf("Proc = %d    Level = %d    Build Interp Time = %f\n",
-                       my_id,level, wall_time);
-	    fflush(NULL);
-         }
-
-         P_array[level] = P; 
-         hypre_ParCSRMatrixDestroy(S);
-         S = NULL;
-         coarse_size = hypre_ParCSRMatrixGlobalNumCols(P);
       }
       else
       {
@@ -253,8 +252,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
       /* if no coarse-grid, stop coarsening, and set the
        * coarsest solve to be a single sweep of Jacobi */
-      /* RDF/JEJ: Why is coarse_size being set twice? The following
-       * code should move up just behind the coarsening routines */
       if ((coarse_size == 0) ||
           (coarse_size == fine_size))
       {
@@ -268,8 +265,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 	    num_grid_sweeps[3] = 1;
 	    grid_relax_points[3][0] = 0; 
 	 }
-	 if (P_array)
-            hypre_ParCSRMatrixDestroy(P_array[level]);
+	 if (S)
+            hypre_ParCSRMatrixDestroy(S);
          if (level > 0)
          {
             /* note special case treatment of CF_marker is necessary
@@ -279,6 +276,28 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
          break; 
       }
+
+      /*-------------------------------------------------------------
+       * Build prolongation matrix, P, and place in P_array[level] 
+       *--------------------------------------------------------------*/
+
+      if (debug_flag==1) wall_time = time_getWallclockSeconds();
+
+      hypre_BoomerAMGBuildInterp(A_array[level], CF_marker_array[level], S,
+                 coarse_pnts_global, dof_func_array[level], 
+		 debug_flag, trunc_factor, &P);
+
+      if (debug_flag==1)
+      {
+         wall_time = time_getWallclockSeconds() - wall_time;
+         printf("Proc = %d    Level = %d    Build Interp Time = %f\n",
+                     my_id,level, wall_time);
+         fflush(NULL);
+      }
+
+      P_array[level] = P; 
+      hypre_ParCSRMatrixDestroy(S);
+      S = NULL;
 
       /*-------------------------------------------------------------
        * Build coarse-grid operator, A_array[level+1] by R*A*P
@@ -322,6 +341,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    num_levels = level+1;
    hypre_ParAMGDataNumLevels(amg_data) = num_levels;
    hypre_ParAMGDataCFMarkerArray(amg_data) = CF_marker_array;
+   hypre_ParAMGDataDofFuncArray(amg_data) = dof_func_array;
    hypre_ParAMGDataAArray(amg_data) = A_array;
    hypre_ParAMGDataPArray(amg_data) = P_array;
    hypre_ParAMGDataRArray(amg_data) = P_array;

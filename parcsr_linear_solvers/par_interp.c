@@ -1,4 +1,3 @@
-
 /*BHEADER**********************************************************************
  * (c) 1998   The Regents of the University of California
  *
@@ -17,6 +16,8 @@ int
 hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
                          int                  *CF_marker,
                          hypre_ParCSRMatrix   *S,
+                         int                  *num_cpts_global,
+                         int                  *dof_func,
                          int                   debug_flag,
                          double                trunc_factor,
                          hypre_ParCSRMatrix  **P_ptr)
@@ -50,6 +51,7 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
    int		      *col_map_offd_P;
 
    int             *CF_marker_offd;
+   int             *dof_func_offd;
 
    hypre_CSRMatrix *A_ext;
    
@@ -88,7 +90,6 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
    int              coarse_shift;
    int              num_cpts_local,total_global_cpts;
    int              num_cols_P_offd,my_first_cpt;
-   int             *num_cpts_global;
 
    int              i,i1,i2;
    int              j,jl,jj,jj1;
@@ -133,6 +134,7 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
    if (debug_flag==4) wall_time = time_getWallclockSeconds();
 
    CF_marker_offd = hypre_CTAlloc(int, num_cols_A_offd);
+   dof_func_offd = hypre_CTAlloc(int, num_cols_A_offd);
 
    if (!comm_pkg)
    {
@@ -155,6 +157,20 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
 	
    comm_handle = hypre_ParCSRCommHandleCreate( 11, comm_pkg, int_buf_data, 
 	CF_marker_offd);
+
+   hypre_ParCSRCommHandleDestroy(comm_handle);   
+
+   index = 0;
+   for (i = 0; i < num_sends; i++)
+   {
+	start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
+	for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
+		int_buf_data[index++] 
+		 = dof_func[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
+   }
+	
+   comm_handle = hypre_ParCSRCommHandleCreate( 11, comm_pkg, int_buf_data, 
+	dof_func_offd);
 
    hypre_ParCSRCommHandleDestroy(comm_handle);   
 
@@ -649,7 +665,8 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
                }
                else
                {
-               diagonal += A_diag_data[jj];
+		  if (dof_func[i] == dof_func[i1])
+                     diagonal += A_diag_data[jj];
                }
             }
             
@@ -660,7 +677,8 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
 
             else
             {
-               diagonal += A_diag_data[jj];
+	       if (dof_func[i] == dof_func[i1])
+                  diagonal += A_diag_data[jj];
             } 
 
          }    
@@ -776,7 +794,8 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
                   }
 		  else
                   {
-                    diagonal += A_offd_data[jj];
+                     if (dof_func[i] == dof_func_offd[i1])
+                        diagonal += A_offd_data[jj];
                   }
                }
             
@@ -787,7 +806,8 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
 
                else
                {
-                    diagonal += A_offd_data[jj];
+                  if (dof_func[i] == dof_func_offd[i1])
+                     diagonal += A_offd_data[jj];
                } 
 
             }
@@ -885,17 +905,17 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
             }
 	    /* normalize row of P */
 
-            if (scale != 0.)
-            {
-              scale = row_sum/scale;
-              if (scale != 1)
-              {
-   	         for (j = P_diag_i[i]; j < (P_diag_i[i+1]-num_lost); j++)
-      	            P_diag_data[j] *= scale;
-   	         for (j = P_offd_i[i]; j < (P_offd_i[i+1]-num_lost_offd); j++)
-      	            P_offd_data[j] *= scale;
-              }
-            }
+	    if (scale != 0.)
+	    {
+	     if (scale != row_sum)
+	     {
+   	       scale = row_sum/scale;
+   	       for (j = P_diag_i[i]; j < (P_diag_i[i+1]-num_lost); j++)
+      	          P_diag_data[j] *= scale;
+   	       for (j = P_offd_i[i]; j < (P_offd_i[i+1]-num_lost_offd); j++)
+      	          P_offd_data[j] *= scale;
+	     }
+	    }
          }
       }
       P_diag_i[n_fine] -= num_lost;
@@ -978,6 +998,7 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
    *P_ptr = P;
 
    hypre_TFree(CF_marker_offd);
+   hypre_TFree(dof_func_offd);
    hypre_TFree(int_buf_data);
    hypre_TFree(fine_to_coarse);
    hypre_TFree(fine_to_coarse_offd);

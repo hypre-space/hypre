@@ -434,3 +434,25 @@ HYPRE_BoomerAMGGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
    return( hypre_BoomerAMGGetRelResidualNorm( (void *) solver, rel_resid_norm ) );
 }
 
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetNumFunctions
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_BoomerAMGSetNumFunctions( HYPRE_Solver  solver,
+                              int          num_functions  )
+{
+   return( hypre_BoomerAMGSetNumFunctions( (void *) solver, num_functions ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetDofFunc
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_BoomerAMGSetDofFunc( HYPRE_Solver  solver,
+                              int          *dof_func  )
+{
+   return( hypre_BoomerAMGSetDofFunc( (void *) solver, dof_func ) );
+}
+
