@@ -704,9 +704,9 @@ void MLI_FEDataAgglomerateElemsLocal(MLI_Matrix *elemMatrix,
    /* that preserves nice geometric shapes                                */
    /* ------------------------------------------------------------------- */
 
-   macroIA = (int *) malloc( (localNElems/8+1) * sizeof(int) );
-   macroJA = (int *) malloc( (localNElems/8+1) * 216 * sizeof(int) );
-   macroAA = (int *) malloc( (localNElems/8+1) * 216 * sizeof(int) );
+   macroIA = (int *) malloc( (localNElems/4+1) * sizeof(int) );
+   macroJA = (int *) malloc( (localNElems/4+1) * 216 * sizeof(int) );
+   macroAA = (int *) malloc( (localNElems/4+1) * 216 * sizeof(int) );
 
    /* ------------------------------------------------------------------- */
    /* allocate memory for the output data (assume no more than 60 elements*/
@@ -993,8 +993,6 @@ void MLI_FEDataAgglomerateElemsLocal(MLI_Matrix *elemMatrix,
 
    printf("number of macroelements = %d (%d) : %e\n", nMacros, localNElems,
             (double) localNElems/nMacros);
-   for ( ii = 0; ii < localNElems; ii++ )
-      printf("macroLabel %6d = %6d\n", ii, macroLabels[ii]);
 
    (*macroLabelsOut) = macroLabels;
    free( macroLists );
