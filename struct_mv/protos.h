@@ -199,6 +199,7 @@ int zzz_GetStructVectorValues P((zzz_StructVector *vector , zzz_Index *grid_inde
 int zzz_SetStructVectorBoxValues P((zzz_StructVector *vector , zzz_Box *value_box , double *values ));
 int zzz_SetStructVectorConstantValues P((zzz_StructVector *vector , double values ));
 int zzz_ClearStructVectorGhostValues P((zzz_StructVector *vector ));
+int zzz_ClearStructVectorAllValues P((zzz_StructVector *vector ));
 int zzz_AssembleStructVector P((zzz_StructVector *vector ));
 void zzz_SetStructVectorNumGhost P((zzz_StructVector *vector , int *num_ghost ));
 void zzz_PrintStructVector P((char *filename , zzz_StructVector *vector , int all ));

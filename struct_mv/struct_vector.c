@@ -489,6 +489,33 @@ zzz_ClearStructVectorGhostValues( zzz_StructVector *vector )
 }
 
 /*--------------------------------------------------------------------------
+ * zzz_ClearStructVectorAllValues
+ *--------------------------------------------------------------------------*/
+
+int 
+zzz_ClearStructVectorAllValues( zzz_StructVector *vector )
+{
+   int               ierr;
+
+   int               data_size;
+   double           *data;
+
+   int               i;
+
+   /*-----------------------------------------------------------------------
+    * Set the vector coefficients
+    *-----------------------------------------------------------------------*/
+
+   data_size = zzz_StructVectorDataSize(vector);
+   data      = zzz_StructVectorData(vector);
+
+   for ( i=0; i < data_size; i++)
+      data[i] = 0.0;
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
  * zzz_AssembleStructVector
  *--------------------------------------------------------------------------*/
 
