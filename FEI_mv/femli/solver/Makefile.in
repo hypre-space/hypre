@@ -45,6 +45,8 @@ CXXFLAGS =\
  -I$(srcdir)/../../..\
  -I$(srcdir)/../../../utilities\
  -I$(srcdir)/../../../parcsr_mv\
+ -I$(srcdir)/../../../parcsr_ls\
+ -I$(srcdir)/../../../krylov\
  -I$(srcdir)/../../../seq_mv\
  -I$(srcdir)/../../../IJ_mv\
  ${CXXINCLUDES}\
@@ -57,6 +59,7 @@ HEADERS =\
  mli_solver_gs.h \
  mli_solver_sgs.h \
  mli_solver_bsgs.h \
+ mli_solver_hsgs.h \
  mli_solver_parasails.h \
  mli_solver_mls.h \
  mli_solver_chebyshev.h \
@@ -73,6 +76,7 @@ FILES =\
  mli_solver_gs.cxx \
  mli_solver_sgs.cxx \
  mli_solver_bsgs.cxx \
+ mli_solver_hsgs.cxx \
  mli_solver_parasails.cxx \
  mli_solver_mls.cxx \
  mli_solver_chebyshev.cxx \
