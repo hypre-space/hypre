@@ -9,6 +9,19 @@
 
 #include "headers.h"
 
+/* This forward reference seems necessary to prevent a problem with the
+   "headers" script... */
+void hypre_ParCSRMatrixExtractBExt_Arrays
+( int ** pB_ext_i, int ** pB_ext_j, double ** pB_ext_data, int ** pB_ext_row_map,
+  int * num_nonzeros,
+  int data, int find_row_map, MPI_Comm comm, hypre_ParCSRCommPkg * comm_pkg,
+  int num_cols_B, int num_recvs, int num_sends,
+  int first_col_diag, int first_row_index,
+  int * recv_vec_starts, int * send_map_starts, int * send_map_elmts,
+  int * diag_i, int * diag_j, int * offd_i, int * offd_j, int * col_map_offd,
+  double * diag_data, double * offd_data
+   );
+
 /* The following function was formerly part of hypre_ParMatmul
    but was removed so it can also be used for multiplication of
    Boolean matrices
@@ -20,7 +33,7 @@ void hypre_ParMatmul_RowSizes
   int * B_diag_i, int * B_diag_j, int * B_offd_i, int * B_offd_j,
   int * B_ext_i, int * B_ext_j, int * col_map_offd_B,
   int *C_diag_size, int *C_offd_size,
-  int num_rows_diag_A, int num_cols_offd_A,
+  int num_rows_diag_A, int num_cols_offd_A, int allsquare,
   int first_col_diag_B, int n_cols_B, int num_cols_offd_B, int num_cols_diag_B
    )
 {
@@ -37,12 +50,12 @@ void hypre_ParMatmul_RowSizes
         col_map_offd_B, B_offd_i, B_offd_j, B_ext_i, B_ext_j,
       Scalars computed: C_diag_size, C_offd_size
       Scalars needed:
-      num_rows_diag_A, num_rows_diag_A, num_cols_offd_A,
+      num_rows_diag_A, num_rows_diag_A, num_cols_offd_A, allsquare,
       first_col_diag_B, n_cols_B, num_cols_offd_B, num_cols_diag_B
    */
 
-   *C_diag_i = hypre_CTAlloc(int, num_cols_diag_B+1);
-   *C_offd_i = hypre_CTAlloc(int, num_cols_diag_B+1);
+   *C_diag_i = hypre_CTAlloc(int, num_rows_diag_A+1);
+   *C_offd_i = hypre_CTAlloc(int, num_rows_diag_A+1);
 
    last_col_diag_C = first_col_diag_B + num_cols_diag_B - 1;
 
@@ -61,13 +74,15 @@ void hypre_ParMatmul_RowSizes
    {
       
       /*--------------------------------------------------------------------
-       *  Set marker for diagonal entry, C_{i1,i1}. 
+       *  Set marker for diagonal entry, C_{i1,i1} (for square matrices). 
        *--------------------------------------------------------------------*/
  
-      (*B_marker)[i1+first_col_diag_B] = jj_count_diag;
       jj_row_begin_diag = jj_count_diag;
       jj_row_begin_offd = jj_count_offd;
-      jj_count_diag++;
+      if ( allsquare ) {
+         (*B_marker)[i1+first_col_diag_B] = jj_count_diag;
+         jj_count_diag++;
+      }
 
          /*-----------------------------------------------------------------
           *  Loop over entries in row i1 of A_offd.
@@ -174,8 +189,8 @@ void hypre_ParMatmul_RowSizes
       
    }
   
-   (*C_diag_i)[num_cols_diag_B] = jj_count_diag;
-   (*C_offd_i)[num_cols_diag_B] = jj_count_offd;
+   (*C_diag_i)[num_rows_diag_A] = jj_count_diag;
+   (*C_offd_i)[num_rows_diag_A] = jj_count_offd;
  
    /*-----------------------------------------------------------------------
     *  Allocate C_diag_data and C_diag_j arrays.
@@ -273,6 +288,7 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
    int		    count;
    int		    n_rows_A, n_cols_A;
    int		    n_rows_B, n_cols_B;
+   int              allsquare = 0;
 
    double           a_entry;
    double           a_b_product;
@@ -289,6 +305,8 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
 	printf(" Error! Incompatible matrix dimensions!\n");
 	return NULL;
    }
+   if ( n_rows_A==n_cols_A && n_rows_B==n_cols_B ) allsquare = 1;
+
    /*-----------------------------------------------------------------------
     *  Extract B_ext, i.e. portion of B that is stored on neighbor procs
     *  and needed locally for matrix matrix product 
@@ -332,7 +350,7 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
       B_diag_i, B_diag_j, B_offd_i, B_offd_j,
       B_ext_i, B_ext_j, col_map_offd_B,
       &C_diag_size, &C_offd_size,
-      num_rows_diag_A, num_cols_offd_A,
+      num_rows_diag_A, num_cols_offd_A, allsquare,
       first_col_diag_B, n_cols_B, num_cols_offd_B, num_cols_diag_B
       );
 
@@ -372,19 +390,21 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
     *  Loop over interior c-points.
     *-----------------------------------------------------------------------*/
     
-   for (i1 = 0; i1 < num_cols_diag_B; i1++)
+   for (i1 = 0; i1 < num_rows_diag_A; i1++)
    {
       
       /*--------------------------------------------------------------------
        *  Create diagonal entry, C_{i1,i1} 
        *--------------------------------------------------------------------*/
 
-      B_marker[i1+first_col_diag_B] = jj_count_diag;
       jj_row_begin_diag = jj_count_diag;
       jj_row_begin_offd = jj_count_offd;
-      C_diag_data[jj_count_diag] = zero;
-      C_diag_j[jj_count_diag] = i1;
-      jj_count_diag++;
+      if ( allsquare ) {
+         B_marker[i1+first_col_diag_B] = jj_count_diag;
+         C_diag_data[jj_count_diag] = zero;
+         C_diag_j[jj_count_diag] = i1;
+         jj_count_diag++;
+      }
 
          /*-----------------------------------------------------------------
           *  Loop over entries in row i1 of A_offd.
@@ -442,7 +462,7 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
          /*-----------------------------------------------------------------
           *  Loop over entries in row i1 of A_diag.
           *-----------------------------------------------------------------*/
-         
+
          for (jj2 = A_diag_i[i1]; jj2 < A_diag_i[i1+1]; jj2++)
          {
             i2 = A_diag_j[jj2];
@@ -577,6 +597,7 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
    but the code was removed so it can be used for a corresponding function
    for Boolean matrices
 */
+
 
 void hypre_ParCSRMatrixExtractBExt_Arrays
 ( int ** pB_ext_i, int ** pB_ext_j, double ** pB_ext_data, int ** pB_ext_row_map,

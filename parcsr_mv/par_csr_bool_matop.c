@@ -126,7 +126,7 @@ hypre_ParCSRBooleanMatrix *hypre_ParBooleanMatmul
       B_diag_i, B_diag_j, B_offd_i, B_offd_j,
       B_ext_i, B_ext_j, col_map_offd_B,
       &C_diag_size, &C_offd_size,
-      num_rows_diag_A, num_cols_offd_A,
+      num_rows_diag_A, num_cols_offd_A, 1,
       first_col_diag_B, n_cols_B, num_cols_offd_B, num_cols_diag_B
       );
 

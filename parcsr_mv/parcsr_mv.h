@@ -344,6 +344,9 @@ int main( int argc , char *argv []);
 /* driver_aat.c */
 int main( int argc , char *argv []);
 
+/* driver_ab.c */
+int main( int argc , char *argv []);
+
 /* driver_boolaat.c */
 int main( int argc , char *argv []);
 
@@ -360,6 +363,9 @@ int main( int argc , char *argv []);
 void hypre_ParAat_RowSizes( int **C_diag_i , int **C_offd_i , int *B_marker , int *A_diag_i , int *A_diag_j , int *A_offd_i , int *A_offd_j , int *A_col_map_offd , int *A_ext_i , int *A_ext_j , int *A_ext_row_map , int *C_diag_size , int *C_offd_size , int num_rows_diag_A , int num_cols_offd_A , int num_rows_A_ext , int first_col_diag_A , int first_row_index_A );
 hypre_ParCSRMatrix *hypre_ParCSRAAt( hypre_ParCSRMatrix *A );
 hypre_CSRMatrix *hypre_ParCSRMatrixExtractAExt( hypre_ParCSRMatrix *A , int data , int **pA_ext_row_map );
+
+/* par_csr_at.c */
+int proc_of_col( int col , int num_cols_diag , int num_procs , int *col_starts );
 
 /* par_csr_bool_matop.c */
 hypre_ParCSRBooleanMatrix *hypre_ParBooleanMatmul( hypre_ParCSRBooleanMatrix *A , hypre_ParCSRBooleanMatrix *B );
@@ -394,8 +400,8 @@ hypre_ParCSRBooleanMatrix *hypre_CSRBooleanMatrixToParCSRBooleanMatrix( MPI_Comm
 int BooleanGenerateDiagAndOffd( hypre_CSRBooleanMatrix *A , hypre_ParCSRBooleanMatrix *matrix , int first_col_diag , int last_col_diag );
 
 /* par_csr_matop.c */
-void hypre_ParMatmul_RowSizes( int **C_diag_i , int **C_offd_i , int **B_marker , int *A_diag_i , int *A_diag_j , int *A_offd_i , int *A_offd_j , int *B_diag_i , int *B_diag_j , int *B_offd_i , int *B_offd_j , int *B_ext_i , int *B_ext_j , int *col_map_offd_B , int *C_diag_size , int *C_offd_size , int num_rows_diag_A , int num_cols_offd_A , int first_col_diag_B , int n_cols_B , int num_cols_offd_B , int num_cols_diag_B );
-hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *B );
+void hypre_ParMatmul_RowSizes( int **C_diag_i , int **C_offd_i , int **B_marker , int *A_diag_i , int *A_diag_j , int *A_offd_i , int *A_offd_j , int *B_diag_i , int *B_diag_j , int *B_offd_i , int *B_offd_j , int *B_ext_i , int *B_ext_j , int *col_map_offd_B , int *C_diag_size , int *C_offd_size , int num_rows_diag_A , int num_cols_offd_A , int allsquare , int first_col_diag_B , int n_cols_B , int num_cols_offd_B , int num_cols_diag_B );
+hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix *A , 				 hypre_ParCSRMatrix *B );
 void hypre_ParCSRMatrixExtractBExt_Arrays( int **pB_ext_i , int **pB_ext_j , double **pB_ext_data , int **pB_ext_row_map , int *num_nonzeros , int data , int find_row_map , MPI_Comm comm , hypre_ParCSRCommPkg *comm_pkg , int num_cols_B , int num_recvs , int num_sends , int first_col_diag , int first_row_index , int *recv_vec_starts , int *send_map_starts , int *send_map_elmts , int *diag_i , int *diag_j , int *offd_i , int *offd_j , int *col_map_offd , double *diag_data , double *offd_data 
 );
 
@@ -494,11 +500,11 @@ const char *filename );
 
 
 int 
-hypre_ParCSRMatrixReadIJ( MPI_Comm 	 comm , 
-			 const char *filename , 
-			 int		 *base_i_ptr , 
-			 int		 *base_j_ptr , 
-			 hypre_ParCSRMatrix **matrix_ptr );
+hypre_ParCSRMatrixReadIJ( MPI_Comm comm , 
+const char *filename , 
+int		 *base_i_ptr , 
+int		 *base_j_ptr , 
+hypre_ParCSRMatrix **matrix_ptr );
 
 
 
@@ -572,7 +578,7 @@ int copy_data );
 
 int 
 hypre_ParCSRMatrixMatvec( double alpha , 
-	 hypre_ParCSRMatrix *A , 
+hypre_ParCSRMatrix *A , 
 hypre_ParVector *x , 
 double beta , 
 hypre_ParVector *y );
@@ -597,8 +603,8 @@ hypre_ParVector *y );
 
 hypre_ParVector *
 hypre_ParVectorCreate( MPI_Comm comm , 
-			int global_size , 
-			int *partitioning );
+int global_size , 
+int *partitioning );
 
 
 
@@ -624,7 +630,7 @@ int owns_data );
 
 int 
 hypre_ParVectorSetPartitioningOwner( hypre_ParVector *vector , 
-	 int owns_partitioning );
+int owns_partitioning );
 
 
 
