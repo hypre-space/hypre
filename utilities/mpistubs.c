@@ -48,6 +48,13 @@ MPI_Finalize( )
 }
 
 int
+MPI_Abort( MPI_Comm  comm,
+           int       errorcode )
+{
+   return(0);
+}
+
+int
 MPI_Comm_group( MPI_Comm   comm,
                 MPI_Group *group )
 {
@@ -74,6 +81,26 @@ int
 MPI_Comm_create( MPI_Comm  comm,
                  MPI_Group group,
                  MPI_Comm *newcomm )
+{
+   return(0);
+}
+
+int
+MPI_Get_count( MPI_Status    status,
+               MPI_Datatype  datatype,
+               int          *count    )
+{
+   return(0);
+}
+
+int
+MPI_Alltoall( void        *sendbuf,
+              int          sendcount,
+              MPI_Datatype sendtype,
+              void        *recvbuf,
+              int          recvcount,
+              MPI_Datatype recvtype,
+              MPI_Comm     comm     )
 {
    return(0);
 }
@@ -316,6 +343,16 @@ int
 MPI_Type_contiguous( int           count,
                      MPI_Datatype  oldtype,
                      MPI_Datatype *newtype     )
+{
+   return(0);
+}
+
+int
+MPI_Type_vector( int           count,
+                 int           blocklength,
+                 int           stride,
+                 MPI_Datatype  oldtype,
+                 MPI_Datatype *newtype     )
 {
    return(0);
 }
