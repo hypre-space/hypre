@@ -235,11 +235,6 @@ hypre_BoomerAMGDestroy( void *data )
    hypre_TFree(hypre_ParAMGDataUArray(amg_data));
    hypre_TFree(hypre_ParAMGDataAArray(amg_data));
    hypre_TFree(hypre_ParAMGDataPArray(amg_data));
-   if (hypre_ParAMGDataRestriction(amg_data))
-   {
-	hypre_TFree(hypre_ParAMGDataRArray(amg_data));
-        hypre_ParAMGDataRestriction(amg_data) = NULL;
-   }
    hypre_TFree(hypre_ParAMGDataCFMarkerArray(amg_data));
    hypre_TFree(hypre_ParAMGDataDofFuncArray(amg_data)[num_levels-1]);
    hypre_TFree(hypre_ParAMGDataDofFuncArray(amg_data));
