@@ -33,6 +33,11 @@ HEADERS =\
  sys_pfmg.h
 
 FILES =\
+ F90_HYPRE_sstruct_bicgstab.c\
+ F90_HYPRE_sstruct_gmres.c\
+ F90_HYPRE_sstruct_pcg.c\
+ F90_HYPRE_sstruct_split.c\
+ F90_HYPRE_sstruct_sys_pfmg.c\
  HYPRE_sstruct_bicgstab.c\
  HYPRE_sstruct_gmres.c\
  HYPRE_sstruct_pcg.c\

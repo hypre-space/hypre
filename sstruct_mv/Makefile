@@ -35,6 +35,11 @@ HEADERS =\
 
 FILES =\
  box_map.c\
+ F90_HYPRE_sstruct_graph.c\
+ F90_HYPRE_sstruct_grid.c\
+ F90_HYPRE_sstruct_matrix.c\
+ F90_HYPRE_sstruct_stencil.c\
+ F90_HYPRE_sstruct_vector.c\
  HYPRE_sstruct_graph.c\
  HYPRE_sstruct_grid.c\
  HYPRE_sstruct_matrix.c\
