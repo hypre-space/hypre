@@ -740,3 +740,218 @@ hypre_SMG2BuildRAPNoSym( hypre_StructMatrix *A,
    return ierr;
 }
 
+
+/*--------------------------------------------------------------------------
+ * hypre_SMG2RAPPeriodicSym 
+ *    Collapses stencil in periodic direction on coarsest grid.
+ *--------------------------------------------------------------------------*/
+ 
+
+int
+hypre_SMG2RAPPeriodicSym( hypre_StructMatrix *RAP,
+                          hypre_Index         cindex,
+                          hypre_Index         cstride )
+
+{
+
+   hypre_Index             index_temp;
+
+   hypre_StructGrid       *cgrid;
+   hypre_BoxArray         *cgrid_boxes;
+   hypre_Box              *cgrid_box;
+   hypre_IndexRef          cstart;
+   hypre_Index             stridec;
+   hypre_Index             loop_size;
+
+   int                  i;
+   int                  loopi, loopj, loopk;
+
+   hypre_Box              *RAP_data_box;
+
+   double               *rap_cc, *rap_cw, *rap_cs;
+   double               *rap_csw, *rap_cse;
+   double               *rap_ce, *rap_cn;
+   double               *rap_cnw, *rap_cne;
+
+   int                  iAc;
+   int                  iAcm1;
+
+   int                  xOffset;
+
+   double               zero = 0.0;
+
+   int                  ierr = 0;
+
+   hypre_SetIndex(stridec, 1, 1, 1);
+
+   cgrid = hypre_StructMatrixGrid(RAP);
+   cgrid_boxes = hypre_StructGridBoxes(cgrid);
+
+   if (hypre_IndexY(hypre_StructGridPeriodic(cgrid)) == 1)
+   {
+      hypre_AssembleStructMatrix(RAP);
+      hypre_ForBoxI(i, cgrid_boxes)
+      {
+         cgrid_box = hypre_BoxArrayBox(cgrid_boxes, i);
+   
+         cstart = hypre_BoxIMin(cgrid_box);
+
+         RAP_data_box =
+         hypre_BoxArrayBox(hypre_StructMatrixDataSpace(RAP), i);
+
+         hypre_SetIndex(index_temp,1,0,0);
+         xOffset = hypre_BoxOffsetDistance(RAP_data_box,index_temp); 
+
+         /*-----------------------------------------------------------------
+          * Extract pointers for coarse grid operator - always 9-point:
+          *-----------------------------------------------------------------*/
+         hypre_SetIndex(index_temp,0,0,0);
+         rap_cc = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+
+         hypre_SetIndex(index_temp,-1,0,0);
+         rap_cw = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+
+         hypre_SetIndex(index_temp,0,-1,0);
+         rap_cs = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+
+         hypre_SetIndex(index_temp,-1,-1,0);
+         rap_csw = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+
+         hypre_SetIndex(index_temp,1,-1,0);
+         rap_cse = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+
+         hypre_GetBoxSize(cgrid_box, loop_size);
+
+         hypre_BoxLoop1(loopi, loopj, loopk, loop_size,
+                      RAP_data_box, cstart, stridec, iAc,
+                      {
+                       iAcm1 = iAc - xOffset;
+
+                       rap_cw[iAc] += (rap_cse[iAcm1] + rap_csw[iAc]);
+   
+                       rap_cc[iAc] += (2.0 * rap_cs[iAc]);
+
+                      });
+
+         hypre_BoxLoop1(loopi, loopj, loopk, loop_size,
+                      RAP_data_box, cstart, stridec, iAc,
+                      {
+                       rap_csw[iAc] = zero;
+   
+                       rap_cs[iAc] = zero;
+
+                       rap_cse[iAc] = zero;
+                      });
+
+      } /* end ForBoxI */
+
+   }
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_SMG2RAPPeriodicNoSym 
+ *    Collapses stencil in periodic direction on coarsest grid.
+ *--------------------------------------------------------------------------*/
+ 
+int
+hypre_SMG2RAPPeriodicNoSym( hypre_StructMatrix *RAP,
+                            hypre_Index         cindex,
+                            hypre_Index         cstride )
+
+{
+
+   hypre_Index             index_temp;
+
+   hypre_StructGrid       *cgrid;
+   hypre_BoxArray         *cgrid_boxes;
+   hypre_Box              *cgrid_box;
+   hypre_IndexRef          cstart;
+   hypre_Index             stridec;
+   hypre_Index             loop_size;
+
+   int                  i;
+   int                  loopi, loopj, loopk;
+
+   hypre_Box              *RAP_data_box;
+
+   double               *rap_cc, *rap_cw, *rap_cs;
+   double               *rap_csw, *rap_cse;
+   double               *rap_ce, *rap_cn;
+   double               *rap_cnw, *rap_cne;
+
+   int                  iAc;
+
+   double               zero = 0.0;
+
+   int                  ierr = 0;
+
+   hypre_SetIndex(stridec, 1, 1, 1);
+
+   cgrid = hypre_StructMatrixGrid(RAP);
+   cgrid_boxes = hypre_StructGridBoxes(cgrid);
+
+   if (hypre_IndexY(hypre_StructGridPeriodic(cgrid)) == 1)
+   {
+      hypre_ForBoxI(i, cgrid_boxes)
+      {
+         cgrid_box = hypre_BoxArrayBox(cgrid_boxes, i);
+   
+         cstart = hypre_BoxIMin(cgrid_box);
+
+         RAP_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(RAP), i);
+
+         /*-----------------------------------------------------------------
+          * Extract pointers for coarse grid operator - always 9-point:
+          *-----------------------------------------------------------------*/
+         hypre_SetIndex(index_temp,0,0,0);
+         rap_cc = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+
+         hypre_SetIndex(index_temp,-1,0,0);
+         rap_cw = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+
+         hypre_SetIndex(index_temp,0,-1,0);
+         rap_cs = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+
+         hypre_SetIndex(index_temp,-1,-1,0);
+         rap_csw = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+
+         hypre_SetIndex(index_temp,1,-1,0);
+         rap_cse = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+
+         hypre_SetIndex(index_temp,1,0,0);
+         rap_ce = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+
+         hypre_SetIndex(index_temp,0,1,0);
+         rap_cn = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+
+         hypre_SetIndex(index_temp,1,1,0);
+         rap_cne = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+
+         hypre_SetIndex(index_temp,-1,1,0);
+         rap_cnw = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+
+
+         hypre_GetBoxSize(cgrid_box, loop_size);
+         hypre_BoxLoop1(loopi, loopj, loopk, loop_size,
+                      RAP_data_box, cstart, stridec, iAc,
+                      {
+                       rap_cw[iAc] += (rap_cnw[iAc] + rap_csw[iAc]);
+                       rap_cnw[iAc] = zero;
+                       rap_csw[iAc] = zero;
+   
+                       rap_cc[iAc] += (rap_cn[iAc] + rap_cs[iAc]);
+                       rap_cn[iAc] = zero;
+                       rap_cs[iAc] = zero;
+
+                       rap_ce[iAc] += (rap_cne[iAc] + rap_cse[iAc]);
+                       rap_cne[iAc] = zero;
+                       rap_cse[iAc] = zero;
+                      });
+
+      } /* end ForBoxI */
+
+   }
+   return ierr;
+}
+

@@ -93,6 +93,8 @@ hypre_SMGSetup( void               *smg_vdata,
    int                   b_num_ghost[]  = {0, 0, 0, 0, 0, 0};
    int                   x_num_ghost[]  = {0, 0, 0, 0, 0, 0};
                        
+   hypre_Index           periodic;
+
    int                   ierr = 0;
 #if DEBUG
    char                  filename[255];
@@ -201,6 +203,13 @@ hypre_SMGSetup( void               *smg_vdata,
       hypre_SetStructGridGlobalInfo(grid_l[l+1],
                                     all_boxes, processes, box_ranks,
                                     base_all_boxes, pindex, pstride);
+
+      /* set periodicity on coarser grid */
+      hypre_CopyIndex(hypre_StructGridPeriodic(grid_l[l]), periodic);
+      hypre_IndexD(periodic, cdir) =
+            (hypre_IndexD(periodic, cdir) + 1)/2;
+      hypre_SetStructGridPeriodic(grid_l[l+1], periodic);
+
       hypre_AssembleStructGrid(grid_l[l+1]);
    }
    num_levels = l + 1;

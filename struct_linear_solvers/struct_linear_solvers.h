@@ -314,11 +314,15 @@ int hypre_SMGSetStructVectorConstantValues P((hypre_StructVector *vector , doubl
 hypre_StructMatrix *hypre_SMG2NewRAPOp P((hypre_StructMatrix *R , hypre_StructMatrix *A , hypre_StructMatrix *PT ));
 int hypre_SMG2BuildRAPSym P((hypre_StructMatrix *A , hypre_StructMatrix *PT , hypre_StructMatrix *R , hypre_StructMatrix *RAP , hypre_Index cindex , hypre_Index cstride ));
 int hypre_SMG2BuildRAPNoSym P((hypre_StructMatrix *A , hypre_StructMatrix *PT , hypre_StructMatrix *R , hypre_StructMatrix *RAP , hypre_Index cindex , hypre_Index cstride ));
+int hypre_SMG2RAPPeriodicSym P((hypre_StructMatrix *RAP , hypre_Index cindex , hypre_Index cstride ));
+int hypre_SMG2RAPPeriodicNoSym P((hypre_StructMatrix *RAP , hypre_Index cindex , hypre_Index cstride ));
 
 /* smg3_setup_rap.c */
 hypre_StructMatrix *hypre_SMG3NewRAPOp P((hypre_StructMatrix *R , hypre_StructMatrix *A , hypre_StructMatrix *PT ));
 int hypre_SMG3BuildRAPSym P((hypre_StructMatrix *A , hypre_StructMatrix *PT , hypre_StructMatrix *R , hypre_StructMatrix *RAP , hypre_Index cindex , hypre_Index cstride ));
 int hypre_SMG3BuildRAPNoSym P((hypre_StructMatrix *A , hypre_StructMatrix *PT , hypre_StructMatrix *R , hypre_StructMatrix *RAP , hypre_Index cindex , hypre_Index cstride ));
+int hypre_SMG3RAPPeriodicSym P((hypre_StructMatrix *RAP , hypre_Index cindex , hypre_Index cstride ));
+int hypre_SMG3RAPPeriodicNoSym P((hypre_StructMatrix *RAP , hypre_Index cindex , hypre_Index cstride ));
 
 /* smg_intadd.c */
 void *hypre_SMGIntAddInitialize P((void ));

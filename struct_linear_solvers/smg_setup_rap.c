@@ -80,7 +80,20 @@ hypre_SMGSetupRAPOp( hypre_StructMatrix *R,
        *    For non-symmetric A, set upper triangular coefficients as well
        *--------------------------------------------------------------------*/
       if(!hypre_StructMatrixSymmetric(A))
+      {
          ierr += hypre_SMG2BuildRAPNoSym(A, PT, R, Ac, cindex, cstride);
+/*--------------------------------------------------------------------------
+ *    Collapse stencil for periodic probems on coarsest grid.
+ *--------------------------------------------------------------------------*/
+         ierr = hypre_SMG2RAPPeriodicNoSym(Ac, cindex, cstride);
+      }
+      else
+      {
+/*--------------------------------------------------------------------------
+ *    Collapse stencil for periodic problems on coarsest grid.
+ *--------------------------------------------------------------------------*/
+         ierr = hypre_SMG2RAPPeriodicSym(Ac, cindex, cstride);
+      }
 
       break;
 
@@ -95,7 +108,20 @@ hypre_SMGSetupRAPOp( hypre_StructMatrix *R,
        *    For non-symmetric A, set upper triangular coefficients as well
        *--------------------------------------------------------------------*/
       if(!hypre_StructMatrixSymmetric(A))
+      {
          ierr += hypre_SMG3BuildRAPNoSym(A, PT, R, Ac, cindex, cstride);
+/*--------------------------------------------------------------------------
+ *    Collapse stencil for periodic probems on coarsest grid.
+ *--------------------------------------------------------------------------*/
+         ierr = hypre_SMG3RAPPeriodicNoSym(Ac, cindex, cstride);
+      }
+      else
+      {
+/*--------------------------------------------------------------------------
+ *    Collapse stencil for periodic problems on coarsest grid.
+ *--------------------------------------------------------------------------*/
+         ierr = hypre_SMG3RAPPeriodicSym(Ac, cindex, cstride);
+      }
 
       break;
 
