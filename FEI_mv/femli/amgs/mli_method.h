@@ -43,23 +43,18 @@ class MLI_Method
 
 public :
 
-   MLI_Method( MPI_Comm comm ) 
-            { mpi_comm = comm; method_id = -1; 
-              strcpy(method_name, "MLI_NONE");}
-   virtual ~MLI_Method() {}
+   MLI_Method( MPI_Comm comm );
+   virtual ~MLI_Method();
 
-   virtual int setup( MLI *mli ) {(void) mli; return -1;}
-   virtual int setParams(char *name, int argc, char *argv[])
-               {(void) name; (void) argc; (void) argv; return -1;}
-   virtual int getParams(char *name, int *argc, char *argv[])
-               {(void) name; (void) argc; (void) argv; return -1;}
+   virtual int setup( MLI *mli );
+   virtual int setParams(char *name, int argc, char *argv[]);
+   virtual int getParams(char *name, int *argc, char *argv[]);
 
-   char     *getName() {return method_name;}
-   int      setName( char *in_name )                                      
-            {strcpy( method_name, in_name); return 0;}
-   int      setID( int in_id ) {method_id = in_id; return 0;}
-   int      getID()            {return method_id;}
-   MPI_Comm getComm()          {return mpi_comm;}
+   char     *getName();
+   int      setName( char *in_name );                                      
+   int      setID( int in_id );
+   int      getID();
+   MPI_Comm getComm();
 };
 
 extern MLI_Method *MLI_Method_CreateFromName(char *,MPI_Comm);
