@@ -260,7 +260,7 @@ hypre_CSRMatrixDeleteZeros( hypre_CSRMatrix *A, double tol)
 	{
 		for (j = A_i[i]; j < A_i[i+1]; j++)
 		{
-		   if (abs(A_data[j]) <= tol)
+		   if (fabs(A_data[j]) <= tol)
 		   {
 			pos_A++;
 		   }
