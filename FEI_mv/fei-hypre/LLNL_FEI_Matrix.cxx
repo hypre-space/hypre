@@ -1155,11 +1155,7 @@ void LLNL_FEI_Matrix::exchangeSubMatrices()
    for ( iP = 0; iP < nSends; iP++ ) 
    {
       MPI_Wait( &requests[iP], &status );
-#if PARALLEL
       sendProcs[iP] = status.MPI_SOURCE;
-#else
-      sendProcs[iP] = 0;
-#endif
    }
    if ( nSends > 0 ) 
    {
