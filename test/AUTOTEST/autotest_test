@@ -29,6 +29,7 @@ initialize_variables ()
   Run=2
   PurifytoFile="--with-purify-to-file"
   InsuretoFile="--with-insure-to-file"
+  PurifySelected=0
   InsureSelected=0
   if [ -z "$MAKE" -o "$MAKE" = "" ] ; then
     MAKE="make -i"
@@ -108,8 +109,8 @@ parse_arguments () {
     argcur=$arg
     case $arg in
       a) confbuildtest $OPTARG  " "             "default"   0 0 0 0 1 0 1;;
-      c) build $Build "all++"   "all++"         "test";;
       b) confbuildtest $OPTARG  "--with-babel"  "babel"     0 0 0 0 1 0 0;;
+      c) build $Build "all++"   "all++"         "test";;
       D) DEBUG_MODE="yes";;
       d) build $Build "all"     "docs"          "docs";;
       e) confbuildtest $OPTARG  "--enable-debug" "debug"    0 0 0 0 1 0 1;;
@@ -156,8 +157,8 @@ usage () {
   printf "%s\n" "-a opt   All; the (default) configure, make, and execute. Also"
   printf "         performs make struct, IJ, fei, all, nofei, and\n"
   printf "         fei++, followed by the runtest script (when opt=2).\n"
-  printf "%s\n" "-c       C++; make all++ (no configure, or execute)."
   printf "%s\n" "-b       Babel; configure --with-babel, make, and execute)."
+  printf "%s\n" "-c       C++; make all++ (no configure, or execute)."
   printf "%s\n" "-D       Turn on debug messages."
   printf "%s\n" "-d       Docs; make the documentation directory."
   printf "%s\n" "-e       Debug; configure --enable-debug, make, and execute)."
@@ -183,60 +184,57 @@ usage () {
 # Function for filtering misleading error messages
 #=============================================================================
 
+process_filter () {
+  ErrorFile=$1
+  shift
+  if (egrep "$@" $ErrorFile >/dev/null)
+  then          
+    mv $ErrorFile $ErrorFile.orig
+    egrep -v "$@" $ErrorFile.orig > $ErrorFile
+  fi
+}
 apply_error_filters () {
   ErrorFile=$1
-  if [ -s "${EFILE}" ] ; then
+  if [ -s "${ErrorFile}" ] ; then
     HOST=`hostname`
     case $HOST in
       fros*|blue*)
 ###   if [ "$HYPRE_ARCH" = "blue" ] ; then
-        if (egrep "=== End of Compilation|Compilation successful" $ErrorFile >/dev/null)
-        then                          # cleanup the problem with the xlf compiler
-          mv $ErrorFile $ErrorFile.orig
-          egrep -v "=== End of Compilation|Compilation successful" $ErrorFile.orig > $ErrorFile
-        fi
-        if (egrep "^ Guide   |: 0 errors in file" $ErrorFile >/dev/null)
-        then                          # cleanup the problem with the GuideC compiler
-          mv $ErrorFile $ErrorFile.orig
-          egrep -v "^ Guide   |: 0 errors in file" $ErrorFile.orig > $ErrorFile
-        fi
-        if (egrep "1500-030: (I) INFORMATION:" $ErrorFile >/dev/null)
-        then                          # cleanup the problem with the GuideC compiler
-          mv $ErrorFile $ErrorFile.orig
-          egrep -v "1500-030: (I) INFORMATION:" $ErrorFile.orig > $ErrorFile
-        fi
-        if (egrep "configure: WARNING: " $ErrorFile >/dev/null)
-        then                          # cleanup the problem with the GuideC compiler
-          mv $ErrorFile $ErrorFile.orig
-          egrep -v "configure: WARNING: " $ErrorFile.orig > $ErrorFile
-        fi
+        for ii in \
+          '=== End of Compilation'\
+          'Compilation successful'\
+          '^ Guide   '\
+          ': 0 errors in file'\
+          '1500-030: (I) INFORMATION:'
+        do process_filter $ErrorFile "${ii}"
+        done
 ###   fi   # blue
         ;;
       peng*)
-        if (egrep "^[A-Za-z0-9_]\.[cCf]$| remark: " $ErrorFile >/dev/null)
-        then                          # cleanup the problem with the GuideC compiler
-          mv $ErrorFile $ErrorFile.orig
-          egrep -v "^[A-Za-z0-9_]\.[cCf]$| remark: " $ErrorFile.orig > $ErrorFile
-        fi
+        for ii in \
+          '^[A-Za-z0-9_]\.[cCf]$'\
+          ' remark: '
+        do process_filter $ErrorFile "${ii}"
+        done
       ;;
       tux*)
-        if (egrep "(autoconf|automake|autoheader) has been disabled" $ErrorFile >/dev/null)
-        then                          # cleanup the problem with the GuideC compiler
-          mv $ErrorFile $ErrorFile.orig
-          egrep -v "(autoconf|automake|autoheader) has been disabled" $ErrorFile.orig > $ErrorFile
-        fi
-        if (egrep "configure: WARNING: Configuration for" $ErrorFile >/dev/null)
-        then                          # cleanup the problem with the GuideC compiler
-          mv $ErrorFile $ErrorFile.orig
-          egrep -v "configure: WARNING: Configuration for" $ErrorFile.orig > $ErrorFile
-        fi
+        for ii in \
+          '(autoconf|automake|autoheader) has been disabled'\
+          'configure: WARNING: Configuration for'
+        do process_filter $ErrorFile "${ii}"
+        done
       ;;
-      achi*)
-        if (egrep "Option -fexceptions passed to ld" $ErrorFile >/dev/null)
-        then                          # cleanup the problem with the xlf compiler
-          mv $ErrorFile $ErrorFile.orig
-          egrep -v "Option -fexceptions passed to ld" $ErrorFile.orig > $ErrorFile
-        fi
+      vivid*)
+        for ii in \
+          '.Xauthority'
+        do process_filter $ErrorFile "${ii}"
+        done
+      ;;
+      achi*|sunup*)
+        for ii in \
+          'Option -fexceptions passed to ld'
+        do process_filter $ErrorFile "${ii}"
+        done
       ;;
     esac
   fi
@@ -347,8 +345,9 @@ mail_summary () {
         ErrFile=`echo $j | sed -e 's/\.sh$/.err/'`
         OutFile=`echo $j | sed -e 's/\.sh$/.out/'`
 # look for non-zero length subtest, TEST_*/test.err.* files
-        if [ "$InsureSelected" = "0" ] ; then
+        if [ "$PurifySelected" = "0" -a "$InsureSelected" = "0" ] ; then
           for k in ${ErrFile}.*; do
+            apply_error_filters ${k}
             if [ -s "${k}" ] ; then
               if [ "$DEBUG_MODE" = "yes" ] ; then
                 printf "nonzero .err. file = ${k}\n"
@@ -366,6 +365,7 @@ mail_summary () {
 # look for all of the TEST_*/test.out.* files
           for k in ${OutFile}.*; do
 # look for non-zero length subtest, TEST_*/test.out.* files
+            apply_error_filters ${k}
             if [ -s "${OutFile}" ] ; then
               if [ "$DEBUG_MODE" = "yes" ] ; then
                 printf "nonzero .out. file = ${OutFile}\n"
@@ -381,6 +381,7 @@ mail_summary () {
         fi
         if [ "$TestCaseFailedFlag" = "0" ] ; then
 # look for a TEST_*/test.err files
+          apply_error_filters ${ErrFile}
           if [ -s "${ErrFile}" ] ; then
             if [ "$DEBUG_MODE" = "yes" ] ; then
               printf "nonzero .err file = ${ErrFile}\n"
@@ -513,6 +514,7 @@ MakeStr=$1	 MessageStr=$2
 MailGroup=$3
 if [ "$MessageStr" = "purify" ]
 then				# don't need extra purify status messages
+  PurifySelected=1
   $MAKE $MakeStr 1> ${Hdr}.${MessageStr}.${MakeStr}.log 2>&1
 elif [ "$MessageStr" = "insure" ]
 then				# don't need extra insure status messages
