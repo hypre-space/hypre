@@ -28,6 +28,9 @@ Version 1.8.2b released, 2003/10/22.
   convergence on some problems.
 - New optimizations in the smoothers in PFMG lead to as much as 30%
   faster times.
+- Added a new interpolation option to AMG that is useful for solving
+  hyperbolic equations.  It treats fine weak connections like fine
+  strong connections.
 
 Version 1.8.1b released, 2003/05/21.
 
