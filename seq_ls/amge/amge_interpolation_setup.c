@@ -52,6 +52,8 @@ int hypre_AMGeInterpolationSetup(hypre_CSRMatrix ***P_pointer,
 
 				 /* -------- PDEsystem information -------- */
 				 int system_size,
+				 int num_functions,
+
 				 int *i_dof_node_0, int *j_dof_node_0,
 				 int *i_node_dof_0, int *j_node_dof_0,
 
@@ -81,9 +83,9 @@ int hypre_AMGeInterpolationSetup(hypre_CSRMatrix ***P_pointer,
 
   int *i_dof_index;
 
+  int **dof_function;
 
-  int *i_AE_chord, *j_AE_chord;
-  double *a_AE_chord;
+
 					
 
   int **i_dof_node, **j_dof_node,
@@ -99,10 +101,6 @@ int hypre_AMGeInterpolationSetup(hypre_CSRMatrix ***P_pointer,
   int *i_AE_dof, *j_AE_dof;
   int *i_dof_AE, *j_dof_AE;
 
-  int **i_element_chord, **j_element_chord;
-  double **a_element_chord;
-
-  int **i_chord_dof, **j_chord_dof;
  
   int num_chords = Num_chords[0];
   int num_elements = Num_elements[0], num_dofs = Num_dofs[0], 
@@ -119,23 +117,15 @@ int hypre_AMGeInterpolationSetup(hypre_CSRMatrix ***P_pointer,
   for (l=0; l < level+1; l++)
     Num_dofs[l] = Num_nodes[l] * system_size;
 
+  dof_function = hypre_CTAlloc(int*, level+1);
 
-  i_element_chord = hypre_CTAlloc(int*, level+1);
 
-  j_element_chord = hypre_CTAlloc(int*, level+1);  
-  a_element_chord = hypre_CTAlloc(double*, level+1);  
+  ierr = hypre_DofFunction(&dof_function[0], Num_dofs[0], num_functions);
 
-  i_chord_dof = hypre_CTAlloc(int*, level+1);
-  j_chord_dof = hypre_CTAlloc(int*, level+1);
+  if (ierr == -1) printf("WRONG dof_function array ============= !\n"); 
+
+
  
-
-  i_element_chord[0] = i_element_chord_0;
-  j_element_chord[0] = j_element_chord_0;
-  a_element_chord[0] = a_element_chord_0;
-
-  i_chord_dof[0] = i_chord_dof_0; 
-  j_chord_dof[0] = j_chord_dof_0; 
-
 
   i_dof_node = hypre_CTAlloc(int*, level+1);
   j_dof_node = hypre_CTAlloc(int*, level+1);
@@ -164,12 +154,12 @@ int hypre_AMGeInterpolationSetup(hypre_CSRMatrix ***P_pointer,
   /* assemble initial fine matrix: * ------------------------------------- */
   ierr = hypre_AMGeMatrixAssemble(&Matrix[0],
 
-				  i_element_chord[0],
-				  j_element_chord[0],
-				  a_element_chord[0],
+				  i_element_chord_0,
+				  j_element_chord_0,
+				  a_element_chord_0,
 
-				  i_chord_dof[0], 
-				  j_chord_dof[0],
+				  i_chord_dof_0, 
+				  j_chord_dof_0,
 
 				  Num_elements[0], 
 				  Num_chords[0],
@@ -325,37 +315,6 @@ interpolation_step:
 
     }
 
-  /* assemble AE_matrices: -------------------------------------------- */
-
-
-  ierr = hypre_AMGeDomainElementSparseAssemble(i_AE_element,
-					       j_AE_element,
-					       Num_elements[l+1],
-
-					       i_element_chord[l],
-					       j_element_chord[l],
-					       a_element_chord[l],
-
-					       i_chord_dof[l], 
-					       j_chord_dof[l],
-
-					       &i_AE_chord,
-					       &j_AE_chord,
-					       &a_AE_chord,
-
-					       Num_elements[l], 
-					       Num_chords[l],
-					       num_dofs);
-
-
-  if (l > 0)
-    {
-      hypre_TFree(i_element_chord[l]);
-      hypre_TFree(j_element_chord[l]);
-      hypre_TFree(a_element_chord[l]);
-    }
-
-
   hypre_TFree(i_AE_element);
   hypre_TFree(j_AE_element);
 
@@ -365,16 +324,8 @@ interpolation_step:
 
   printf("\n\nB U I L D I N G  level[%d] I N T E R P O L A T I O N   M A T R I X\n", l);
 
+
   ierr = hypre_AMGeBuildInterpolation(&P[l],
-
-				      &i_element_chord[l+1],
-				      &j_element_chord[l+1],
-				      &a_element_chord[l+1],
-
-				      &i_chord_dof[l+1],
-				      &j_chord_dof[l+1],
-
-				      &Num_chords[l+1],
 
 				      i_AE_dof, j_AE_dof,
 				      i_dof_AE, j_dof_AE,
@@ -385,25 +336,19 @@ interpolation_step:
 				      i_dof_coarsedof[l],
 				      j_dof_coarsedof[l],
 
-				      i_AE_chord,
-				      j_AE_chord,
-				      a_AE_chord,
+				      Matrix[l],
 
-				      i_chord_dof[l], 
-				      j_chord_dof[l],
+				      dof_function[l],
+				      num_functions,
 
-				      Num_chords[l],
+				      &dof_function[l+1],
 
 				      Num_elements[l+1],
 				      num_dofs,
 				      num_coarsedofs);
 
 
-  if (l > 0)
-    {
-      hypre_TFree(i_chord_dof[l]);
-      hypre_TFree(j_chord_dof[l]);
-    }
+  hypre_TFree(dof_function[l]);
 
   if (system_size > 1)
     { 
@@ -426,9 +371,7 @@ interpolation_step:
 
   printf("nnz[%d]: %d\n", l+1, hypre_CSRMatrixI(Matrix[l+1])[num_coarsedofs]);
 
-  hypre_TFree(i_AE_chord);
-  hypre_TFree(j_AE_chord);
-  hypre_TFree(a_AE_chord);
+  Num_chords[l+1] = hypre_CSRMatrixI(Matrix[l+1])[num_coarsedofs];
 
 
   hypre_TFree(i_AE_dof);
@@ -458,6 +401,7 @@ interpolation_step:
   if (l < level && Num_nodes[l+1] > 0) goto interpolation_step;
  
   hypre_TFree(i_dof_index);
+  hypre_TFree(dof_function[l]);
 
   if (l > 0)
     {
@@ -466,15 +410,6 @@ interpolation_step:
     }
 
 
-  if (l > 0)
-    {
-      hypre_TFree(i_chord_dof[l]);
-      hypre_TFree(j_chord_dof[l]);
-
-      hypre_TFree(i_element_chord[l]);
-      hypre_TFree(j_element_chord[l]);
-      hypre_TFree(a_element_chord[l]);
-    }
 
 
   for (k=l+1; k <level+1; k++)
@@ -501,14 +436,6 @@ interpolation_step:
 
   hypre_TFree(i_dof_node);
   hypre_TFree(j_dof_node);
-
-  hypre_TFree(i_chord_dof);
-  hypre_TFree(j_chord_dof);
-
-  hypre_TFree(i_element_chord);
-
-  hypre_TFree(j_element_chord);
-  hypre_TFree(a_element_chord);
 
 
   return ierr; 
