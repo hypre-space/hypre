@@ -1511,8 +1511,8 @@ int MLI_Method_AMGSA::formGlobalGraph( hypre_ParCSRMatrix *Amat,
       rowLengths[irow] = 0;
       for (jcol = ADiagI[irow]; jcol < ADiagI[irow+1]; jcol++)
       {
-         jInd = ADiagJ[j];
-         if ( jInd != irow && ADiagA[jcol] != 0.0 ) rowLengths[irow]++;
+         cInd = ADiagJ[jcol];
+         if ( cInd != irow && ADiagA[jcol] != 0.0 ) rowLengths[irow]++;
       }
       if (nprocs > 1)
       {
@@ -1543,8 +1543,8 @@ int MLI_Method_AMGSA::formGlobalGraph( hypre_ParCSRMatrix *Amat,
       index  = startRow + irow;
       for (jcol = ADiagI[irow]; jcol < ADiagI[irow+1]; jcol++)
       {
-         jInd = ADiagJ[jcol];
-         if ( jInd != irow && ADiagA[jcol] != 0.0) 
+         cInd = ADiagJ[jcol];
+         if ( cInd != irow && ADiagA[jcol] != 0.0) 
          {
             colVal[length] = ADiagA[jcol];
             colInd[length++] = jInd + startRow;
@@ -1554,11 +1554,11 @@ int MLI_Method_AMGSA::formGlobalGraph( hypre_ParCSRMatrix *Amat,
       {
          for (jcol = AOffdI[irow]; jcol < AOffdI[irow+1]; jcol++)
          {
-            jInd = AOffdJ[jcol];
+            cInd = AOffdJ[jcol];
             if ( AOffdA[jcol] != 0.0) 
             {
                colVal[length] = AOffdA[jcol];
-               colInd[length++] = colMapOffd[jInd];
+               colInd[length++] = colMapOffd[cInd];
             }
          }
       }
