@@ -2,14 +2,14 @@
  * File:          bHYPRE_SStructParCSRVector_Impl.h
  * Symbol:        bHYPRE.SStructParCSRVector-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.8.2
- * SIDL Created:  20030401 14:47:20 PST
- * Generated:     20030401 14:47:30 PST
+ * Babel Version: 0.9.8
+ * sidl Created:  20050208 15:29:04 PST
+ * Generated:     20050208 15:29:08 PST
  * Description:   Server-side implementation for bHYPRE.SStructParCSRVector
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.8.2
+ * babel-version = 0.9.8
  * source-line   = 837
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -17,20 +17,20 @@
 #ifndef included_bHYPRE_SStructParCSRVector_Impl_h
 #define included_bHYPRE_SStructParCSRVector_Impl_h
 
-#ifndef included_SIDL_header_h
-#include "SIDL_header.h"
+#ifndef included_sidl_header_h
+#include "sidl_header.h"
 #endif
-#ifndef included_bHYPRE_SStructParCSRVector_h
-#include "bHYPRE_SStructParCSRVector.h"
+#ifndef included_bHYPRE_SStructGrid_h
+#include "bHYPRE_SStructGrid.h"
 #endif
-#ifndef included_SIDL_BaseInterface_h
-#include "SIDL_BaseInterface.h"
+#ifndef included_sidl_BaseInterface_h
+#include "sidl_BaseInterface.h"
 #endif
 #ifndef included_bHYPRE_Vector_h
 #include "bHYPRE_Vector.h"
 #endif
-#ifndef included_bHYPRE_SStructGrid_h
-#include "bHYPRE_SStructGrid.h"
+#ifndef included_bHYPRE_SStructParCSRVector_h
+#include "bHYPRE_SStructParCSRVector.h"
 #endif
 
 /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector._includes) */
@@ -124,7 +124,7 @@ impl_bHYPRE_SStructParCSRVector_Assemble(
 extern int32_t
 impl_bHYPRE_SStructParCSRVector_GetObject(
   bHYPRE_SStructParCSRVector,
-  SIDL_BaseInterface*);
+  sidl_BaseInterface*);
 
 extern int32_t
 impl_bHYPRE_SStructParCSRVector_SetGrid(
@@ -135,35 +135,35 @@ extern int32_t
 impl_bHYPRE_SStructParCSRVector_SetValues(
   bHYPRE_SStructParCSRVector,
   int32_t,
-  struct SIDL_int__array*,
+  struct sidl_int__array*,
   int32_t,
-  struct SIDL_double__array*);
+  struct sidl_double__array*);
 
 extern int32_t
 impl_bHYPRE_SStructParCSRVector_SetBoxValues(
   bHYPRE_SStructParCSRVector,
   int32_t,
-  struct SIDL_int__array*,
-  struct SIDL_int__array*,
+  struct sidl_int__array*,
+  struct sidl_int__array*,
   int32_t,
-  struct SIDL_double__array*);
+  struct sidl_double__array*);
 
 extern int32_t
 impl_bHYPRE_SStructParCSRVector_AddToValues(
   bHYPRE_SStructParCSRVector,
   int32_t,
-  struct SIDL_int__array*,
+  struct sidl_int__array*,
   int32_t,
-  struct SIDL_double__array*);
+  struct sidl_double__array*);
 
 extern int32_t
 impl_bHYPRE_SStructParCSRVector_AddToBoxValues(
   bHYPRE_SStructParCSRVector,
   int32_t,
-  struct SIDL_int__array*,
-  struct SIDL_int__array*,
+  struct sidl_int__array*,
+  struct sidl_int__array*,
   int32_t,
-  struct SIDL_double__array*);
+  struct sidl_double__array*);
 
 extern int32_t
 impl_bHYPRE_SStructParCSRVector_Gather(
@@ -173,7 +173,7 @@ extern int32_t
 impl_bHYPRE_SStructParCSRVector_GetValues(
   bHYPRE_SStructParCSRVector,
   int32_t,
-  struct SIDL_int__array*,
+  struct sidl_int__array*,
   int32_t,
   double*);
 
@@ -181,10 +181,10 @@ extern int32_t
 impl_bHYPRE_SStructParCSRVector_GetBoxValues(
   bHYPRE_SStructParCSRVector,
   int32_t,
-  struct SIDL_int__array*,
-  struct SIDL_int__array*,
+  struct sidl_int__array*,
+  struct sidl_int__array*,
   int32_t,
-  struct SIDL_double__array**);
+  struct sidl_double__array**);
 
 extern int32_t
 impl_bHYPRE_SStructParCSRVector_SetComplex(

@@ -2,14 +2,14 @@
  * File:          bHYPRE_SStructStencil_IOR.h
  * Symbol:        bHYPRE.SStructStencil-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.8.2
- * SIDL Created:  20030401 14:47:20 PST
- * Generated:     20030401 14:47:24 PST
+ * Babel Version: 0.9.8
+ * sidl Created:  20050208 15:29:05 PST
+ * Generated:     20050208 15:29:06 PST
  * Description:   Intermediate Object Representation for bHYPRE.SStructStencil
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.2
+ * babel-version = 0.9.8
  * source-line   = 1001
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -17,11 +17,11 @@
 #ifndef included_bHYPRE_SStructStencil_IOR_h
 #define included_bHYPRE_SStructStencil_IOR_h
 
-#ifndef included_SIDL_header_h
-#include "SIDL_header.h"
+#ifndef included_sidl_header_h
+#include "sidl_header.h"
 #endif
-#ifndef included_SIDL_BaseClass_IOR_h
-#include "SIDL_BaseClass_IOR.h"
+#ifndef included_sidl_BaseClass_IOR_h
+#include "sidl_BaseClass_IOR.h"
 #endif
 
 #ifdef __cplusplus
@@ -54,10 +54,10 @@ extern void bHYPRE_SStructStencil__IOR_version(int32_t *major, int32_t *minor);
  * Forward references for external classes and interfaces.
  */
 
-struct SIDL_BaseInterface__array;
-struct SIDL_BaseInterface__object;
-struct SIDL_ClassInfo__array;
-struct SIDL_ClassInfo__object;
+struct sidl_BaseInterface__array;
+struct sidl_BaseInterface__object;
+struct sidl_ClassInfo__array;
+struct sidl_ClassInfo__object;
 
 /*
  * Declare the method entry point vector.
@@ -74,23 +74,23 @@ struct bHYPRE_SStructStencil__epv {
     struct bHYPRE_SStructStencil__object* self);
   void (*f__dtor)(
     struct bHYPRE_SStructStencil__object* self);
-  /* Methods introduced in SIDL.BaseInterface-v0.8.2 */
+  /* Methods introduced in sidl.BaseInterface-v0.9.0 */
   void (*f_addRef)(
     struct bHYPRE_SStructStencil__object* self);
   void (*f_deleteRef)(
     struct bHYPRE_SStructStencil__object* self);
-  SIDL_bool (*f_isSame)(
+  sidl_bool (*f_isSame)(
     struct bHYPRE_SStructStencil__object* self,
-    struct SIDL_BaseInterface__object* iobj);
-  struct SIDL_BaseInterface__object* (*f_queryInt)(
-    struct bHYPRE_SStructStencil__object* self,
-    const char* name);
-  SIDL_bool (*f_isType)(
+    struct sidl_BaseInterface__object* iobj);
+  struct sidl_BaseInterface__object* (*f_queryInt)(
     struct bHYPRE_SStructStencil__object* self,
     const char* name);
-  struct SIDL_ClassInfo__object* (*f_getClassInfo)(
+  sidl_bool (*f_isType)(
+    struct bHYPRE_SStructStencil__object* self,
+    const char* name);
+  struct sidl_ClassInfo__object* (*f_getClassInfo)(
     struct bHYPRE_SStructStencil__object* self);
-  /* Methods introduced in SIDL.BaseClass-v0.8.2 */
+  /* Methods introduced in sidl.BaseClass-v0.9.0 */
   /* Methods introduced in bHYPRE.SStructStencil-v1.0.0 */
   int32_t (*f_SetNumDimSize)(
     struct bHYPRE_SStructStencil__object* self,
@@ -99,7 +99,7 @@ struct bHYPRE_SStructStencil__epv {
   int32_t (*f_SetEntry)(
     struct bHYPRE_SStructStencil__object* self,
     int32_t entry,
-    struct SIDL_int__array* offset,
+    struct sidl_int__array* offset,
     int32_t var);
 };
 
@@ -108,7 +108,7 @@ struct bHYPRE_SStructStencil__epv {
  */
 
 struct bHYPRE_SStructStencil__object {
-  struct SIDL_BaseClass__object      d_sidl_baseclass;
+  struct sidl_BaseClass__object      d_sidl_baseclass;
   struct bHYPRE_SStructStencil__epv* d_epv;
   void*                              d_data;
 };
@@ -120,13 +120,12 @@ struct bHYPRE_SStructStencil__external {
   struct bHYPRE_SStructStencil__object*
   (*createRemote)(const char *url);
 
-};
+struct sidl_BaseClass__epv*(*getSuperEPV)(void);};
 
 /*
  * This function returns a pointer to a static structure of
  * pointers to function entry points.  Its purpose is to provide
  * one-stop shopping for loading DLLs.
- * loading DLLs
  */
 
 const struct bHYPRE_SStructStencil__external*

@@ -2,14 +2,14 @@
  * File:          bHYPRE_BoomerAMG_Impl.c
  * Symbol:        bHYPRE.BoomerAMG-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.8.2
- * SIDL Created:  20030401 14:47:20 PST
- * Generated:     20030401 14:47:31 PST
+ * Babel Version: 0.9.8
+ * sidl Created:  20050208 15:29:05 PST
+ * Generated:     20050208 15:29:07 PST
  * Description:   Server-side implementation for bHYPRE.BoomerAMG
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.8.2
+ * babel-version = 0.9.8
  * source-line   = 1217
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -114,7 +114,7 @@
 
 void
 impl_bHYPRE_BoomerAMG__ctor(
-  bHYPRE_BoomerAMG self)
+  /*in*/ bHYPRE_BoomerAMG self)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG._ctor) */
   /* Insert the implementation of the constructor method here... */
@@ -143,7 +143,7 @@ impl_bHYPRE_BoomerAMG__ctor(
 
 void
 impl_bHYPRE_BoomerAMG__dtor(
-  bHYPRE_BoomerAMG self)
+  /*in*/ bHYPRE_BoomerAMG self)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG._dtor) */
   /* Insert the implementation of the destructor method here... */
@@ -169,7 +169,7 @@ impl_bHYPRE_BoomerAMG__dtor(
 
 int32_t
 impl_bHYPRE_BoomerAMG_SetCommunicator(
-  bHYPRE_BoomerAMG self, void* mpi_comm)
+  /*in*/ bHYPRE_BoomerAMG self, /*in*/ void* mpi_comm)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
@@ -192,7 +192,7 @@ impl_bHYPRE_BoomerAMG_SetCommunicator(
 
 int32_t
 impl_bHYPRE_BoomerAMG_SetIntParameter(
-  bHYPRE_BoomerAMG self, const char* name, int32_t value)
+  /*in*/ bHYPRE_BoomerAMG self, /*in*/ const char* name, /*in*/ int32_t value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetIntParameter) */
   /* Insert the implementation of the SetIntParameter method here... */
@@ -272,7 +272,7 @@ impl_bHYPRE_BoomerAMG_SetIntParameter(
 
 int32_t
 impl_bHYPRE_BoomerAMG_SetDoubleParameter(
-  bHYPRE_BoomerAMG self, const char* name, double value)
+  /*in*/ bHYPRE_BoomerAMG self, /*in*/ const char* name, /*in*/ double value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetDoubleParameter) */
   /* Insert the implementation of the SetDoubleParameter method here... */
@@ -320,7 +320,8 @@ impl_bHYPRE_BoomerAMG_SetDoubleParameter(
 
 int32_t
 impl_bHYPRE_BoomerAMG_SetStringParameter(
-  bHYPRE_BoomerAMG self, const char* name, const char* value)
+  /*in*/ bHYPRE_BoomerAMG self, /*in*/ const char* name,
+    /*in*/ const char* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetStringParameter) */
   /* Insert the implementation of the SetStringParameter method here... */
@@ -356,7 +357,8 @@ impl_bHYPRE_BoomerAMG_SetStringParameter(
 
 int32_t
 impl_bHYPRE_BoomerAMG_SetIntArray1Parameter(
-  bHYPRE_BoomerAMG self, const char* name, struct SIDL_int__array* value)
+  /*in*/ bHYPRE_BoomerAMG self, /*in*/ const char* name,
+    /*in*/ struct sidl_int__array* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetIntArray1Parameter) */
   /* Insert the implementation of the SetIntArray1Parameter method here... */
@@ -370,7 +372,7 @@ impl_bHYPRE_BoomerAMG_SetIntArray1Parameter(
    solver = data->solver;
    data1_c = value->d_firstElement;
 
-   dim = SIDL_int__array_dimen( value );
+   dim = sidl_int__array_dimen( value );
 
    if ( strcmp(name,"NumGridSweeps")==0 )
    {
@@ -406,7 +408,8 @@ impl_bHYPRE_BoomerAMG_SetIntArray1Parameter(
 
 int32_t
 impl_bHYPRE_BoomerAMG_SetIntArray2Parameter(
-  bHYPRE_BoomerAMG self, const char* name, struct SIDL_int__array* value)
+  /*in*/ bHYPRE_BoomerAMG self, /*in*/ const char* name,
+    /*in*/ struct sidl_int__array* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetIntArray2Parameter) */
   /* Insert the implementation of the SetIntArray2Parameter method here... */
@@ -419,15 +422,15 @@ impl_bHYPRE_BoomerAMG_SetIntArray2Parameter(
    data = bHYPRE_BoomerAMG__get_data( self );
    solver = data->solver;
 
-   dim = SIDL_int__array_dimen( value );
+   dim = sidl_int__array_dimen( value );
 
    if ( strcmp(name,"GridRelaxPoints")==0 )
    {
       assert( dim==2 );
-      lb0 = SIDL_int__array_lower( value, 0 );
-      ub0 = SIDL_int__array_upper( value, 0 );
-      lb1 = SIDL_int__array_lower( value, 1 );
-      ub1 = SIDL_int__array_upper( value, 1 );
+      lb0 = sidl_int__array_lower( value, 0 );
+      ub0 = sidl_int__array_upper( value, 0 );
+      lb1 = sidl_int__array_lower( value, 1 );
+      ub1 = sidl_int__array_upper( value, 1 );
       assert( lb0==0 );
       assert( lb1==0 );
       data2_c = hypre_CTAlloc(int *,ub0);
@@ -436,7 +439,7 @@ impl_bHYPRE_BoomerAMG_SetIntArray2Parameter(
          data2_c[i] = hypre_CTAlloc(int,ub1);
          for ( j=0; j<ub1; ++j )
          {
-            data2_c[i][j] = SIDL_int__array_get2( value, i, j );
+            data2_c[i][j] = sidl_int__array_get2( value, i, j );
          }
       }
       ierr += HYPRE_BoomerAMGSetGridRelaxPoints( solver, data2_c );
@@ -460,7 +463,8 @@ impl_bHYPRE_BoomerAMG_SetIntArray2Parameter(
 
 int32_t
 impl_bHYPRE_BoomerAMG_SetDoubleArray1Parameter(
-  bHYPRE_BoomerAMG self, const char* name, struct SIDL_double__array* value)
+  /*in*/ bHYPRE_BoomerAMG self, /*in*/ const char* name,
+    /*in*/ struct sidl_double__array* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetDoubleArray1Parameter) */
   /* Insert the implementation of the SetDoubleArray1Parameter method here... */
@@ -471,7 +475,7 @@ impl_bHYPRE_BoomerAMG_SetDoubleArray1Parameter(
    data = bHYPRE_BoomerAMG__get_data( self );
    solver = data->solver;
 
-   dim = SIDL_double__array_dimen( value );
+   dim = sidl_double__array_dimen( value );
 
    if ( strcmp(name,"RelaxWeight")==0 )
    {
@@ -498,7 +502,8 @@ impl_bHYPRE_BoomerAMG_SetDoubleArray1Parameter(
 
 int32_t
 impl_bHYPRE_BoomerAMG_SetDoubleArray2Parameter(
-  bHYPRE_BoomerAMG self, const char* name, struct SIDL_double__array* value)
+  /*in*/ bHYPRE_BoomerAMG self, /*in*/ const char* name,
+    /*in*/ struct sidl_double__array* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetDoubleArray2Parameter) */
   /* Insert the implementation of the SetDoubleArray2Parameter method here... */
@@ -516,7 +521,7 @@ impl_bHYPRE_BoomerAMG_SetDoubleArray2Parameter(
 
 int32_t
 impl_bHYPRE_BoomerAMG_GetIntValue(
-  bHYPRE_BoomerAMG self, const char* name, int32_t* value)
+  /*in*/ bHYPRE_BoomerAMG self, /*in*/ const char* name, /*out*/ int32_t* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.GetIntValue) */
   /* Insert the implementation of the GetIntValue method here... */
@@ -546,7 +551,7 @@ impl_bHYPRE_BoomerAMG_GetIntValue(
 
 int32_t
 impl_bHYPRE_BoomerAMG_GetDoubleValue(
-  bHYPRE_BoomerAMG self, const char* name, double* value)
+  /*in*/ bHYPRE_BoomerAMG self, /*in*/ const char* name, /*out*/ double* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.GetDoubleValue) */
   /* Insert the implementation of the GetDoubleValue method here... */
@@ -577,7 +582,7 @@ impl_bHYPRE_BoomerAMG_GetDoubleValue(
 
 int32_t
 impl_bHYPRE_BoomerAMG_Setup(
-  bHYPRE_BoomerAMG self, bHYPRE_Vector b, bHYPRE_Vector x)
+  /*in*/ bHYPRE_BoomerAMG self, /*in*/ bHYPRE_Vector b, /*in*/ bHYPRE_Vector x)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.Setup) */
   /* Insert the implementation of the Setup method here... */
@@ -650,7 +655,8 @@ impl_bHYPRE_BoomerAMG_Setup(
 
 int32_t
 impl_bHYPRE_BoomerAMG_Apply(
-  bHYPRE_BoomerAMG self, bHYPRE_Vector b, bHYPRE_Vector* x)
+  /*in*/ bHYPRE_BoomerAMG self, /*in*/ bHYPRE_Vector b,
+    /*inout*/ bHYPRE_Vector* x)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.Apply) */
   /* Insert the implementation of the Apply method here... */
@@ -733,7 +739,7 @@ impl_bHYPRE_BoomerAMG_Apply(
 
 int32_t
 impl_bHYPRE_BoomerAMG_SetOperator(
-  bHYPRE_BoomerAMG self, bHYPRE_Operator A)
+  /*in*/ bHYPRE_BoomerAMG self, /*in*/ bHYPRE_Operator A)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetOperator) */
   /* Insert the implementation of the SetOperator method here... */
@@ -769,7 +775,7 @@ impl_bHYPRE_BoomerAMG_SetOperator(
 
 int32_t
 impl_bHYPRE_BoomerAMG_SetTolerance(
-  bHYPRE_BoomerAMG self, double tolerance)
+  /*in*/ bHYPRE_BoomerAMG self, /*in*/ double tolerance)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetTolerance) */
   /* Insert the implementation of the SetTolerance method here... */
@@ -798,7 +804,7 @@ impl_bHYPRE_BoomerAMG_SetTolerance(
 
 int32_t
 impl_bHYPRE_BoomerAMG_SetMaxIterations(
-  bHYPRE_BoomerAMG self, int32_t max_iterations)
+  /*in*/ bHYPRE_BoomerAMG self, /*in*/ int32_t max_iterations)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetMaxIterations) */
   /* Insert the implementation of the SetMaxIterations method here... */
@@ -831,7 +837,7 @@ impl_bHYPRE_BoomerAMG_SetMaxIterations(
 
 int32_t
 impl_bHYPRE_BoomerAMG_SetLogging(
-  bHYPRE_BoomerAMG self, int32_t level)
+  /*in*/ bHYPRE_BoomerAMG self, /*in*/ int32_t level)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetLogging) */
   /* Insert the implementation of the SetLogging method here... */
@@ -868,7 +874,7 @@ impl_bHYPRE_BoomerAMG_SetLogging(
 
 int32_t
 impl_bHYPRE_BoomerAMG_SetPrintLevel(
-  bHYPRE_BoomerAMG self, int32_t level)
+  /*in*/ bHYPRE_BoomerAMG self, /*in*/ int32_t level)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetPrintLevel) */
   /* Insert the implementation of the SetPrintLevel method here... */
@@ -897,7 +903,7 @@ impl_bHYPRE_BoomerAMG_SetPrintLevel(
 
 int32_t
 impl_bHYPRE_BoomerAMG_GetNumIterations(
-  bHYPRE_BoomerAMG self, int32_t* num_iterations)
+  /*in*/ bHYPRE_BoomerAMG self, /*out*/ int32_t* num_iterations)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.GetNumIterations) */
   /* Insert the implementation of the GetNumIterations method here... */
@@ -926,7 +932,7 @@ impl_bHYPRE_BoomerAMG_GetNumIterations(
 
 int32_t
 impl_bHYPRE_BoomerAMG_GetRelResidualNorm(
-  bHYPRE_BoomerAMG self, double* norm)
+  /*in*/ bHYPRE_BoomerAMG self, /*out*/ double* norm)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.GetRelResidualNorm) */
   /* Insert the implementation of the GetRelResidualNorm method here... */

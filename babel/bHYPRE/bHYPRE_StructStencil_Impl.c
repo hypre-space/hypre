@@ -2,14 +2,14 @@
  * File:          bHYPRE_StructStencil_Impl.c
  * Symbol:        bHYPRE.StructStencil-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.8.2
- * SIDL Created:  20030401 14:47:20 PST
- * Generated:     20030401 14:47:32 PST
+ * Babel Version: 0.9.8
+ * sidl Created:  20050208 15:29:05 PST
+ * Generated:     20050208 15:29:08 PST
  * Description:   Server-side implementation for bHYPRE.StructStencil
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.8.2
+ * babel-version = 0.9.8
  * source-line   = 1088
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -44,7 +44,7 @@
 
 void
 impl_bHYPRE_StructStencil__ctor(
-  bHYPRE_StructStencil self)
+  /*in*/ bHYPRE_StructStencil self)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructStencil._ctor) */
   /* Insert the implementation of the constructor method here... */
@@ -60,7 +60,7 @@ impl_bHYPRE_StructStencil__ctor(
 
 void
 impl_bHYPRE_StructStencil__dtor(
-  bHYPRE_StructStencil self)
+  /*in*/ bHYPRE_StructStencil self)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructStencil._dtor) */
   /* Insert the implementation of the destructor method here... */
@@ -76,7 +76,7 @@ impl_bHYPRE_StructStencil__dtor(
 
 int32_t
 impl_bHYPRE_StructStencil_SetDimension(
-  bHYPRE_StructStencil self, int32_t dim)
+  /*in*/ bHYPRE_StructStencil self, /*in*/ int32_t dim)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructStencil.SetDimension) */
   /* Insert the implementation of the SetDimension method here... */
@@ -93,7 +93,7 @@ impl_bHYPRE_StructStencil_SetDimension(
 
 int32_t
 impl_bHYPRE_StructStencil_SetSize(
-  bHYPRE_StructStencil self, int32_t size)
+  /*in*/ bHYPRE_StructStencil self, /*in*/ int32_t size)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructStencil.SetSize) */
   /* Insert the implementation of the SetSize method here... */
@@ -110,7 +110,8 @@ impl_bHYPRE_StructStencil_SetSize(
 
 int32_t
 impl_bHYPRE_StructStencil_SetElement(
-  bHYPRE_StructStencil self, int32_t index, struct SIDL_int__array* offset)
+  /*in*/ bHYPRE_StructStencil self, /*in*/ int32_t index,
+    /*in*/ struct sidl_int__array* offset)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructStencil.SetElement) */
   /* Insert the implementation of the SetElement method here... */

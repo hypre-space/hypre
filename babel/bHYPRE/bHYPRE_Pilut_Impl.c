@@ -2,14 +2,14 @@
  * File:          bHYPRE_Pilut_Impl.c
  * Symbol:        bHYPRE.Pilut-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.8.2
- * SIDL Created:  20030401 14:47:20 PST
- * Generated:     20030401 14:47:32 PST
+ * Babel Version: 0.9.8
+ * sidl Created:  20050208 15:29:05 PST
+ * Generated:     20050208 15:29:08 PST
  * Description:   Server-side implementation for bHYPRE.Pilut
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.8.2
+ * babel-version = 0.9.8
  * source-line   = 1227
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -44,7 +44,7 @@
 
 void
 impl_bHYPRE_Pilut__ctor(
-  bHYPRE_Pilut self)
+  /*in*/ bHYPRE_Pilut self)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut._ctor) */
   /* Insert the implementation of the constructor method here... */
@@ -60,7 +60,7 @@ impl_bHYPRE_Pilut__ctor(
 
 void
 impl_bHYPRE_Pilut__dtor(
-  bHYPRE_Pilut self)
+  /*in*/ bHYPRE_Pilut self)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut._dtor) */
   /* Insert the implementation of the destructor method here... */
@@ -77,7 +77,7 @@ impl_bHYPRE_Pilut__dtor(
 
 int32_t
 impl_bHYPRE_Pilut_SetCommunicator(
-  bHYPRE_Pilut self, void* mpi_comm)
+  /*in*/ bHYPRE_Pilut self, /*in*/ void* mpi_comm)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
@@ -95,7 +95,7 @@ impl_bHYPRE_Pilut_SetCommunicator(
 
 int32_t
 impl_bHYPRE_Pilut_SetIntParameter(
-  bHYPRE_Pilut self, const char* name, int32_t value)
+  /*in*/ bHYPRE_Pilut self, /*in*/ const char* name, /*in*/ int32_t value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.SetIntParameter) */
   /* Insert the implementation of the SetIntParameter method here... */
@@ -113,7 +113,7 @@ impl_bHYPRE_Pilut_SetIntParameter(
 
 int32_t
 impl_bHYPRE_Pilut_SetDoubleParameter(
-  bHYPRE_Pilut self, const char* name, double value)
+  /*in*/ bHYPRE_Pilut self, /*in*/ const char* name, /*in*/ double value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.SetDoubleParameter) */
   /* Insert the implementation of the SetDoubleParameter method here... */
@@ -131,7 +131,7 @@ impl_bHYPRE_Pilut_SetDoubleParameter(
 
 int32_t
 impl_bHYPRE_Pilut_SetStringParameter(
-  bHYPRE_Pilut self, const char* name, const char* value)
+  /*in*/ bHYPRE_Pilut self, /*in*/ const char* name, /*in*/ const char* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.SetStringParameter) */
   /* Insert the implementation of the SetStringParameter method here... */
@@ -149,7 +149,8 @@ impl_bHYPRE_Pilut_SetStringParameter(
 
 int32_t
 impl_bHYPRE_Pilut_SetIntArray1Parameter(
-  bHYPRE_Pilut self, const char* name, struct SIDL_int__array* value)
+  /*in*/ bHYPRE_Pilut self, /*in*/ const char* name,
+    /*in*/ struct sidl_int__array* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.SetIntArray1Parameter) */
   /* Insert the implementation of the SetIntArray1Parameter method here... */
@@ -167,7 +168,8 @@ impl_bHYPRE_Pilut_SetIntArray1Parameter(
 
 int32_t
 impl_bHYPRE_Pilut_SetIntArray2Parameter(
-  bHYPRE_Pilut self, const char* name, struct SIDL_int__array* value)
+  /*in*/ bHYPRE_Pilut self, /*in*/ const char* name,
+    /*in*/ struct sidl_int__array* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.SetIntArray2Parameter) */
   /* Insert the implementation of the SetIntArray2Parameter method here... */
@@ -185,7 +187,8 @@ impl_bHYPRE_Pilut_SetIntArray2Parameter(
 
 int32_t
 impl_bHYPRE_Pilut_SetDoubleArray1Parameter(
-  bHYPRE_Pilut self, const char* name, struct SIDL_double__array* value)
+  /*in*/ bHYPRE_Pilut self, /*in*/ const char* name,
+    /*in*/ struct sidl_double__array* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.SetDoubleArray1Parameter) */
   /* Insert the implementation of the SetDoubleArray1Parameter method here... */
@@ -203,7 +206,8 @@ impl_bHYPRE_Pilut_SetDoubleArray1Parameter(
 
 int32_t
 impl_bHYPRE_Pilut_SetDoubleArray2Parameter(
-  bHYPRE_Pilut self, const char* name, struct SIDL_double__array* value)
+  /*in*/ bHYPRE_Pilut self, /*in*/ const char* name,
+    /*in*/ struct sidl_double__array* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.SetDoubleArray2Parameter) */
   /* Insert the implementation of the SetDoubleArray2Parameter method here... */
@@ -221,7 +225,7 @@ impl_bHYPRE_Pilut_SetDoubleArray2Parameter(
 
 int32_t
 impl_bHYPRE_Pilut_GetIntValue(
-  bHYPRE_Pilut self, const char* name, int32_t* value)
+  /*in*/ bHYPRE_Pilut self, /*in*/ const char* name, /*out*/ int32_t* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.GetIntValue) */
   /* Insert the implementation of the GetIntValue method here... */
@@ -239,7 +243,7 @@ impl_bHYPRE_Pilut_GetIntValue(
 
 int32_t
 impl_bHYPRE_Pilut_GetDoubleValue(
-  bHYPRE_Pilut self, const char* name, double* value)
+  /*in*/ bHYPRE_Pilut self, /*in*/ const char* name, /*out*/ double* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.GetDoubleValue) */
   /* Insert the implementation of the GetDoubleValue method here... */
@@ -258,7 +262,7 @@ impl_bHYPRE_Pilut_GetDoubleValue(
 
 int32_t
 impl_bHYPRE_Pilut_Setup(
-  bHYPRE_Pilut self, bHYPRE_Vector b, bHYPRE_Vector x)
+  /*in*/ bHYPRE_Pilut self, /*in*/ bHYPRE_Vector b, /*in*/ bHYPRE_Vector x)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.Setup) */
   /* Insert the implementation of the Setup method here... */
@@ -276,7 +280,7 @@ impl_bHYPRE_Pilut_Setup(
 
 int32_t
 impl_bHYPRE_Pilut_Apply(
-  bHYPRE_Pilut self, bHYPRE_Vector b, bHYPRE_Vector* x)
+  /*in*/ bHYPRE_Pilut self, /*in*/ bHYPRE_Vector b, /*inout*/ bHYPRE_Vector* x)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.Apply) */
   /* Insert the implementation of the Apply method here... */
@@ -294,7 +298,7 @@ impl_bHYPRE_Pilut_Apply(
 
 int32_t
 impl_bHYPRE_Pilut_SetOperator(
-  bHYPRE_Pilut self, bHYPRE_Operator A)
+  /*in*/ bHYPRE_Pilut self, /*in*/ bHYPRE_Operator A)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.SetOperator) */
   /* Insert the implementation of the SetOperator method here... */
@@ -312,10 +316,11 @@ impl_bHYPRE_Pilut_SetOperator(
 
 int32_t
 impl_bHYPRE_Pilut_SetTolerance(
-  bHYPRE_Pilut self, double tolerance)
+  /*in*/ bHYPRE_Pilut self, /*in*/ double tolerance)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.SetTolerance) */
   /* Insert the implementation of the SetTolerance method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(bHYPRE.Pilut.SetTolerance) */
 }
 
@@ -329,10 +334,11 @@ impl_bHYPRE_Pilut_SetTolerance(
 
 int32_t
 impl_bHYPRE_Pilut_SetMaxIterations(
-  bHYPRE_Pilut self, int32_t max_iterations)
+  /*in*/ bHYPRE_Pilut self, /*in*/ int32_t max_iterations)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.SetMaxIterations) */
   /* Insert the implementation of the SetMaxIterations method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(bHYPRE.Pilut.SetMaxIterations) */
 }
 
@@ -350,7 +356,7 @@ impl_bHYPRE_Pilut_SetMaxIterations(
 
 int32_t
 impl_bHYPRE_Pilut_SetLogging(
-  bHYPRE_Pilut self, int32_t level)
+  /*in*/ bHYPRE_Pilut self, /*in*/ int32_t level)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.SetLogging) */
   /* Insert the implementation of the SetLogging method here... */
@@ -372,7 +378,7 @@ impl_bHYPRE_Pilut_SetLogging(
 
 int32_t
 impl_bHYPRE_Pilut_SetPrintLevel(
-  bHYPRE_Pilut self, int32_t level)
+  /*in*/ bHYPRE_Pilut self, /*in*/ int32_t level)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.SetPrintLevel) */
   /* Insert the implementation of the SetPrintLevel method here... */
@@ -390,10 +396,11 @@ impl_bHYPRE_Pilut_SetPrintLevel(
 
 int32_t
 impl_bHYPRE_Pilut_GetNumIterations(
-  bHYPRE_Pilut self, int32_t* num_iterations)
+  /*in*/ bHYPRE_Pilut self, /*out*/ int32_t* num_iterations)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.GetNumIterations) */
   /* Insert the implementation of the GetNumIterations method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(bHYPRE.Pilut.GetNumIterations) */
 }
 
@@ -407,9 +414,10 @@ impl_bHYPRE_Pilut_GetNumIterations(
 
 int32_t
 impl_bHYPRE_Pilut_GetRelResidualNorm(
-  bHYPRE_Pilut self, double* norm)
+  /*in*/ bHYPRE_Pilut self, /*out*/ double* norm)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.GetRelResidualNorm) */
   /* Insert the implementation of the GetRelResidualNorm method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(bHYPRE.Pilut.GetRelResidualNorm) */
 }

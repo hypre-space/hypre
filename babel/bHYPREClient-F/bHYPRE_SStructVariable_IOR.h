@@ -2,14 +2,14 @@
  * File:          bHYPRE_SStructVariable_IOR.h
  * Symbol:        bHYPRE.SStructVariable-v1.0.0
  * Symbol Type:   enumeration
- * Babel Version: 0.8.2
- * SIDL Created:  20030401 14:47:46 PST
- * Generated:     20030401 14:47:49 PST
+ * Babel Version: 0.9.8
+ * sidl Created:  20050208 15:29:13 PST
+ * Generated:     20050208 15:29:15 PST
  * Description:   Intermediate Object Representation for bHYPRE.SStructVariable
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.2
+ * babel-version = 0.9.8
  * source-line   = 888
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -17,8 +17,8 @@
 #ifndef included_bHYPRE_SStructVariable_IOR_h
 #define included_bHYPRE_SStructVariable_IOR_h
 
-#ifndef included_SIDLType_h
-#include "SIDLType.h"
+#ifndef included_sidlType_h
+#include "sidlType.h"
 #endif
 #ifdef __cplusplus
 extern "C" {
@@ -73,16 +73,29 @@ extern "C" {
  * 
  */
 
+
+/* Opaque forward declaration of array struct */
+struct bHYPRE_SStructVariable__array;
+
 enum bHYPRE_SStructVariable__enum {
   bHYPRE_SStructVariable_UNDEFINED = -1,
+
   bHYPRE_SStructVariable_CELL      = 0,
+
   bHYPRE_SStructVariable_NODE      = 1,
+
   bHYPRE_SStructVariable_XFACE     = 2,
+
   bHYPRE_SStructVariable_YFACE     = 3,
+
   bHYPRE_SStructVariable_ZFACE     = 4,
+
   bHYPRE_SStructVariable_XEDGE     = 5,
+
   bHYPRE_SStructVariable_YEDGE     = 6,
+
   bHYPRE_SStructVariable_ZEDGE     = 7
+
 };
 
 #ifdef __cplusplus

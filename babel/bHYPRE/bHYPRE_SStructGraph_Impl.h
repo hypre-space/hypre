@@ -2,14 +2,14 @@
  * File:          bHYPRE_SStructGraph_Impl.h
  * Symbol:        bHYPRE.SStructGraph-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.8.2
- * SIDL Created:  20030401 14:47:20 PST
- * Generated:     20030401 14:47:31 PST
+ * Babel Version: 0.9.8
+ * sidl Created:  20050208 15:29:05 PST
+ * Generated:     20050208 15:29:07 PST
  * Description:   Server-side implementation for bHYPRE.SStructGraph
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.8.2
+ * babel-version = 0.9.8
  * source-line   = 1022
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -17,17 +17,17 @@
 #ifndef included_bHYPRE_SStructGraph_Impl_h
 #define included_bHYPRE_SStructGraph_Impl_h
 
-#ifndef included_SIDL_header_h
-#include "SIDL_header.h"
-#endif
-#ifndef included_bHYPRE_SStructGraph_h
-#include "bHYPRE_SStructGraph.h"
+#ifndef included_sidl_header_h
+#include "sidl_header.h"
 #endif
 #ifndef included_bHYPRE_SStructStencil_h
 #include "bHYPRE_SStructStencil.h"
 #endif
 #ifndef included_bHYPRE_SStructGrid_h
 #include "bHYPRE_SStructGrid.h"
+#endif
+#ifndef included_bHYPRE_SStructGraph_h
+#include "bHYPRE_SStructGraph.h"
 #endif
 
 /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGraph._includes) */
@@ -90,10 +90,10 @@ extern int32_t
 impl_bHYPRE_SStructGraph_AddEntries(
   bHYPRE_SStructGraph,
   int32_t,
-  struct SIDL_int__array*,
+  struct sidl_int__array*,
   int32_t,
   int32_t,
-  struct SIDL_int__array*,
+  struct sidl_int__array*,
   int32_t);
 
 #ifdef __cplusplus

@@ -17,19 +17,19 @@ CINCLUDES=@INCLUDES@ @MPIINCLUDE@
 CDEFS = 
  
 BABEL_RUNTIME_INCLUDES=\
-  -I$(top_srcdir)/babel-runtime/sidl\
-  -I$(top_builddir)/babel-runtime/sidl
+  -I$(HYPRE_SRC_TOP_DIR)/babel-runtime/sidl\
+  -I$(HYPRE_SRC_TOP_DIR)/babel-runtime/sidl
 
 CFLAGS =\
  ${C_COMPILE_FLAGS}\
  -I..\
- -I$(top_srcdir)\
- -I$(top_srcdir)/utilities\
- -I$(top_srcdir)/seq_mv\
- -I$(top_srcdir)/krylov\
- -I$(top_srcdir)/IJ_mv\
- -I$(top_srcdir)/parcsr_mv\
- -I$(top_srcdir)/parcsr_ls\
+ -I$(HYPRE_SRC_TOP_DIR)\
+ -I$(HYPRE_SRC_TOP_DIR)/utilities\
+ -I$(HYPRE_SRC_TOP_DIR)/seq_mv\
+ -I$(HYPRE_SRC_TOP_DIR)/krylov\
+ -I$(HYPRE_SRC_TOP_DIR)/IJ_mv\
+ -I$(HYPRE_SRC_TOP_DIR)/parcsr_mv\
+ -I$(HYPRE_SRC_TOP_DIR)/parcsr_ls\
  ${BABEL_RUNTIME_INCLUDES}\
  ${CINCLUDES}\
  ${CDEFS}
@@ -117,8 +117,8 @@ OBJS = ${FILES:.c=.o}
 all: libbHYPREClient-C.a
  
 install: all
-	@cp -f $(srcdir)/bHYPRE*.h $$HYPRE_INSTALL_DIR/include/.
-	@cp -f libbHYPRE*.a $$HYPRE_INSTALL_DIR/lib/.
+	@cp -f $(srcdir)/bHYPRE*.h ${HYPRE_BUILD_DIR}/include/.
+	@cp -f libbHYPRE*.a ${HYPRE_BUILD_DIR}/lib/.
  
 clean:
 	@rm -f *.o

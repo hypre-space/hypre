@@ -2,14 +2,14 @@
  * File:          bHYPRE_IJBuildVector_fStub.c
  * Symbol:        bHYPRE.IJBuildVector-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.8.2
- * SIDL Created:  20030401 14:47:45 PST
- * Generated:     20030401 14:48:04 PST
+ * Babel Version: 0.9.8
+ * sidl Created:  20050208 15:29:13 PST
+ * Generated:     20050208 15:29:17 PST
  * Description:   Client-side glue code for bHYPRE.IJBuildVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.2
+ * babel-version = 0.9.8
  * source-line   = 203
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -20,19 +20,19 @@
 
 #include <stddef.h>
 #include <stdlib.h>
-#include "SIDLfortran.h"
-#include "SIDL_header.h"
-#ifndef included_SIDL_interface_IOR_h
-#include "SIDL_interface_IOR.h"
+#include "sidlfortran.h"
+#include "sidl_header.h"
+#ifndef included_sidl_interface_IOR_h
+#include "sidl_interface_IOR.h"
 #endif
+#include <stdio.h>
 #include "babel_config.h"
 #ifdef SIDL_DYNAMIC_LIBRARY
-#include <stdio.h>
-#include "SIDL_Loader.h"
+#include "sidl_Loader.h"
 #endif
 #include "bHYPRE_IJBuildVector_IOR.h"
-#include "SIDL_BaseInterface_IOR.h"
-#include "SIDL_ClassInfo_IOR.h"
+#include "sidl_BaseInterface_IOR.h"
+#include "sidl_ClassInfo_IOR.h"
 
 /*
  * Cast method for interface and type conversions.
@@ -45,8 +45,8 @@ SIDLFortran77Symbol(bhypre_ijbuildvector__cast_f,BHYPRE_IJBUILDVECTOR__CAST_F,bH
   int64_t *retval
 )
 {
-  struct SIDL_BaseInterface__object  *_base =
-    (struct SIDL_BaseInterface__object *)(ptrdiff_t)*ref;
+  struct sidl_BaseInterface__object  *_base =
+    (struct sidl_BaseInterface__object *)(ptrdiff_t)*ref;
   if (_base) {
     *retval = (ptrdiff_t)(
       *_base->d_epv->f__cast)(
@@ -80,7 +80,7 @@ SIDLFortran77Symbol(bhypre_ijbuildvector__cast2_f,BHYPRE_IJBUILDVECTOR__CAST2_F,
     (struct bHYPRE_IJBuildVector__object*)
     (ptrdiff_t)(*self);
   _proxy_name =
-    SIDL_copy_fortran_str(SIDL_F77_STR(name),
+    sidl_copy_fortran_str(SIDL_F77_STR(name),
       SIDL_F77_STR_LEN(name));
   _epv = _proxy_self->d_epv;
   _proxy_retval = 
@@ -95,7 +95,7 @@ SIDLFortran77Symbol(bhypre_ijbuildvector__cast2_f,BHYPRE_IJBUILDVECTOR__CAST2_F,
 /*
  * <p>
  * Add one to the intrinsic reference count in the underlying object.
- * Object in <code>SIDL</code> have an intrinsic reference count.
+ * Object in <code>sidl</code> have an intrinsic reference count.
  * Objects continue to exist as long as the reference count is
  * positive. Clients should call this method whenever they
  * create another ongoing reference to an object or interface.
@@ -127,7 +127,7 @@ SIDLFortran77Symbol(bhypre_ijbuildvector_addref_f,BHYPRE_IJBUILDVECTOR_ADDREF_F,
 /*
  * Decrease by one the intrinsic reference count in the underlying
  * object, and delete the object if the reference is non-positive.
- * Objects in <code>SIDL</code> have an intrinsic reference count.
+ * Objects in <code>sidl</code> have an intrinsic reference count.
  * Clients should call this method whenever they remove a
  * reference to an object or interface.
  */
@@ -164,13 +164,13 @@ SIDLFortran77Symbol(bhypre_ijbuildvector_issame_f,BHYPRE_IJBUILDVECTOR_ISSAME_F,
 {
   struct bHYPRE_IJBuildVector__epv *_epv = NULL;
   struct bHYPRE_IJBuildVector__object* _proxy_self = NULL;
-  struct SIDL_BaseInterface__object* _proxy_iobj = NULL;
-  SIDL_bool _proxy_retval;
+  struct sidl_BaseInterface__object* _proxy_iobj = NULL;
+  sidl_bool _proxy_retval;
   _proxy_self =
     (struct bHYPRE_IJBuildVector__object*)
     (ptrdiff_t)(*self);
   _proxy_iobj =
-    (struct SIDL_BaseInterface__object*)
+    (struct sidl_BaseInterface__object*)
     (ptrdiff_t)(*iobj);
   _epv = _proxy_self->d_epv;
   _proxy_retval = 
@@ -183,7 +183,7 @@ SIDLFortran77Symbol(bhypre_ijbuildvector_issame_f,BHYPRE_IJBUILDVECTOR_ISSAME_F,
 
 /*
  * Check whether the object can support the specified interface or
- * class.  If the <code>SIDL</code> type name in <code>name</code>
+ * class.  If the <code>sidl</code> type name in <code>name</code>
  * is supported, then a reference to that object is returned with the
  * reference count incremented.  The callee will be responsible for
  * calling <code>deleteRef</code> on the returned object.  If
@@ -204,12 +204,12 @@ SIDLFortran77Symbol(bhypre_ijbuildvector_queryint_f,BHYPRE_IJBUILDVECTOR_QUERYIN
   struct bHYPRE_IJBuildVector__epv *_epv = NULL;
   struct bHYPRE_IJBuildVector__object* _proxy_self = NULL;
   char* _proxy_name = NULL;
-  struct SIDL_BaseInterface__object* _proxy_retval = NULL;
+  struct sidl_BaseInterface__object* _proxy_retval = NULL;
   _proxy_self =
     (struct bHYPRE_IJBuildVector__object*)
     (ptrdiff_t)(*self);
   _proxy_name =
-    SIDL_copy_fortran_str(SIDL_F77_STR(name),
+    sidl_copy_fortran_str(SIDL_F77_STR(name),
       SIDL_F77_STR_LEN(name));
   _epv = _proxy_self->d_epv;
   _proxy_retval = 
@@ -223,7 +223,7 @@ SIDLFortran77Symbol(bhypre_ijbuildvector_queryint_f,BHYPRE_IJBUILDVECTOR_QUERYIN
 
 /*
  * Return whether this object is an instance of the specified type.
- * The string name must be the <code>SIDL</code> type name.  This
+ * The string name must be the <code>sidl</code> type name.  This
  * routine will return <code>true</code> if and only if a cast to
  * the string type name would succeed.
  */
@@ -241,12 +241,12 @@ SIDLFortran77Symbol(bhypre_ijbuildvector_istype_f,BHYPRE_IJBUILDVECTOR_ISTYPE_F,
   struct bHYPRE_IJBuildVector__epv *_epv = NULL;
   struct bHYPRE_IJBuildVector__object* _proxy_self = NULL;
   char* _proxy_name = NULL;
-  SIDL_bool _proxy_retval;
+  sidl_bool _proxy_retval;
   _proxy_self =
     (struct bHYPRE_IJBuildVector__object*)
     (ptrdiff_t)(*self);
   _proxy_name =
-    SIDL_copy_fortran_str(SIDL_F77_STR(name),
+    sidl_copy_fortran_str(SIDL_F77_STR(name),
       SIDL_F77_STR_LEN(name));
   _epv = _proxy_self->d_epv;
   _proxy_retval = 
@@ -271,7 +271,7 @@ SIDLFortran77Symbol(bhypre_ijbuildvector_getclassinfo_f,BHYPRE_IJBUILDVECTOR_GET
 {
   struct bHYPRE_IJBuildVector__epv *_epv = NULL;
   struct bHYPRE_IJBuildVector__object* _proxy_self = NULL;
-  struct SIDL_ClassInfo__object* _proxy_retval = NULL;
+  struct sidl_ClassInfo__object* _proxy_retval = NULL;
   _proxy_self =
     (struct bHYPRE_IJBuildVector__object*)
     (ptrdiff_t)(*self);
@@ -373,7 +373,7 @@ SIDLFortran77Symbol(bhypre_ijbuildvector_assemble_f,BHYPRE_IJBUILDVECTOR_ASSEMBL
  * with that object, it must be returned from the problem
  * definition object. {\tt GetObject} performs this function.
  * At compile time, the type of the returned object is unknown.
- * Thus, the returned type is a SIDL.BaseInterface.
+ * Thus, the returned type is a sidl.BaseInterface.
  * QueryInterface or Cast must be used on the returned object to
  * convert it into a known type.
  * 
@@ -389,7 +389,7 @@ SIDLFortran77Symbol(bhypre_ijbuildvector_getobject_f,BHYPRE_IJBUILDVECTOR_GETOBJ
 {
   struct bHYPRE_IJBuildVector__epv *_epv = NULL;
   struct bHYPRE_IJBuildVector__object* _proxy_self = NULL;
-  struct SIDL_BaseInterface__object* _proxy_A = NULL;
+  struct sidl_BaseInterface__object* _proxy_A = NULL;
   _proxy_self =
     (struct bHYPRE_IJBuildVector__object*)
     (ptrdiff_t)(*self);
@@ -462,16 +462,16 @@ SIDLFortran77Symbol(bhypre_ijbuildvector_setvalues_f,BHYPRE_IJBUILDVECTOR_SETVAL
 {
   struct bHYPRE_IJBuildVector__epv *_epv = NULL;
   struct bHYPRE_IJBuildVector__object* _proxy_self = NULL;
-  struct SIDL_int__array* _proxy_indices = NULL;
-  struct SIDL_double__array* _proxy_values = NULL;
+  struct sidl_int__array* _proxy_indices = NULL;
+  struct sidl_double__array* _proxy_values = NULL;
   _proxy_self =
     (struct bHYPRE_IJBuildVector__object*)
     (ptrdiff_t)(*self);
   _proxy_indices =
-    (struct SIDL_int__array*)
+    (struct sidl_int__array*)
     (ptrdiff_t)(*indices);
   _proxy_values =
-    (struct SIDL_double__array*)
+    (struct sidl_double__array*)
     (ptrdiff_t)(*values);
   _epv = _proxy_self->d_epv;
   *retval = 
@@ -503,16 +503,16 @@ SIDLFortran77Symbol(bhypre_ijbuildvector_addtovalues_f,BHYPRE_IJBUILDVECTOR_ADDT
 {
   struct bHYPRE_IJBuildVector__epv *_epv = NULL;
   struct bHYPRE_IJBuildVector__object* _proxy_self = NULL;
-  struct SIDL_int__array* _proxy_indices = NULL;
-  struct SIDL_double__array* _proxy_values = NULL;
+  struct sidl_int__array* _proxy_indices = NULL;
+  struct sidl_double__array* _proxy_values = NULL;
   _proxy_self =
     (struct bHYPRE_IJBuildVector__object*)
     (ptrdiff_t)(*self);
   _proxy_indices =
-    (struct SIDL_int__array*)
+    (struct sidl_int__array*)
     (ptrdiff_t)(*indices);
   _proxy_values =
-    (struct SIDL_double__array*)
+    (struct sidl_double__array*)
     (ptrdiff_t)(*values);
   _epv = _proxy_self->d_epv;
   *retval = 
@@ -573,16 +573,16 @@ SIDLFortran77Symbol(bhypre_ijbuildvector_getvalues_f,BHYPRE_IJBUILDVECTOR_GETVAL
 {
   struct bHYPRE_IJBuildVector__epv *_epv = NULL;
   struct bHYPRE_IJBuildVector__object* _proxy_self = NULL;
-  struct SIDL_int__array* _proxy_indices = NULL;
-  struct SIDL_double__array* _proxy_values = NULL;
+  struct sidl_int__array* _proxy_indices = NULL;
+  struct sidl_double__array* _proxy_values = NULL;
   _proxy_self =
     (struct bHYPRE_IJBuildVector__object*)
     (ptrdiff_t)(*self);
   _proxy_indices =
-    (struct SIDL_int__array*)
+    (struct sidl_int__array*)
     (ptrdiff_t)(*indices);
   _proxy_values =
-    (struct SIDL_double__array*)
+    (struct sidl_double__array*)
     (ptrdiff_t)(*values);
   _epv = _proxy_self->d_epv;
   *retval = 
@@ -618,7 +618,7 @@ SIDLFortran77Symbol(bhypre_ijbuildvector_print_f,BHYPRE_IJBUILDVECTOR_PRINT_F,bH
     (struct bHYPRE_IJBuildVector__object*)
     (ptrdiff_t)(*self);
   _proxy_filename =
-    SIDL_copy_fortran_str(SIDL_F77_STR(filename),
+    sidl_copy_fortran_str(SIDL_F77_STR(filename),
       SIDL_F77_STR_LEN(filename));
   _epv = _proxy_self->d_epv;
   *retval = 
@@ -654,7 +654,7 @@ SIDLFortran77Symbol(bhypre_ijbuildvector_read_f,BHYPRE_IJBUILDVECTOR_READ_F,bHYP
     (struct bHYPRE_IJBuildVector__object*)
     (ptrdiff_t)(*self);
   _proxy_filename =
-    SIDL_copy_fortran_str(SIDL_F77_STR(filename),
+    sidl_copy_fortran_str(SIDL_F77_STR(filename),
       SIDL_F77_STR_LEN(filename));
   _proxy_comm =
     (void*)
@@ -679,7 +679,7 @@ SIDLFortran77Symbol(bhypre_ijbuildvector__array_createcol_f,
    int64_t *result)
 {
   *result = (ptrdiff_t)
-    SIDL_interface__array_createCol(*dimen, lower, upper);
+    sidl_interface__array_createCol(*dimen, lower, upper);
 }
 
 void
@@ -692,7 +692,7 @@ SIDLFortran77Symbol(bhypre_ijbuildvector__array_createrow_f,
    int64_t *result)
 {
   *result = (ptrdiff_t)
-    SIDL_interface__array_createRow(*dimen, lower, upper);
+    sidl_interface__array_createRow(*dimen, lower, upper);
 }
 
 void
@@ -701,7 +701,7 @@ SIDLFortran77Symbol(bhypre_ijbuildvector__array_create1d_f,
                   bHYPRE_IJBuildVector__array_create1d_f)
   (int32_t *len, int64_t *result)
 {
-  *result = (ptrdiff_t)SIDL_interface__array_create1d(*len);
+  *result = (ptrdiff_t)sidl_interface__array_create1d(*len);
 }
 
 void
@@ -710,7 +710,7 @@ SIDLFortran77Symbol(bhypre_ijbuildvector__array_create2dcol_f,
                   bHYPRE_IJBuildVector__array_create2dCol_f)
   (int32_t *m, int32_t *n, int64_t *result)
 {
-  *result = (ptrdiff_t)SIDL_interface__array_create2dCol(*m, *n);
+  *result = (ptrdiff_t)sidl_interface__array_create2dCol(*m, *n);
 }
 
 void
@@ -719,7 +719,7 @@ SIDLFortran77Symbol(bhypre_ijbuildvector__array_create2drow_f,
                   bHYPRE_IJBuildVector__array_create2dRow_f)
   (int32_t *m, int32_t *n, int64_t *result)
 {
-  *result = (ptrdiff_t)SIDL_interface__array_create2dRow(*m, *n);
+  *result = (ptrdiff_t)sidl_interface__array_create2dRow(*m, *n);
 }
 
 void
@@ -728,7 +728,7 @@ SIDLFortran77Symbol(bhypre_ijbuildvector__array_addref_f,
                   bHYPRE_IJBuildVector__array_addRef_f)
   (int64_t *array)
 {
-  SIDL_interface__array_addRef((struct SIDL_interface__array 
+  sidl_interface__array_addRef((struct sidl_interface__array 
     *)(ptrdiff_t)*array);
 }
 
@@ -738,7 +738,7 @@ SIDLFortran77Symbol(bhypre_ijbuildvector__array_deleteref_f,
                   bHYPRE_IJBuildVector__array_deleteRef_f)
   (int64_t *array)
 {
-  SIDL_interface__array_deleteRef((struct SIDL_interface__array 
+  sidl_interface__array_deleteRef((struct sidl_interface__array 
     *)(ptrdiff_t)*array);
 }
 
@@ -751,7 +751,7 @@ SIDLFortran77Symbol(bhypre_ijbuildvector__array_get1_f,
    int64_t *result)
 {
   *result = (ptrdiff_t)
-    SIDL_interface__array_get1((const struct SIDL_interface__array 
+    sidl_interface__array_get1((const struct sidl_interface__array 
       *)(ptrdiff_t)*array
     , *i1);
 }
@@ -766,7 +766,7 @@ SIDLFortran77Symbol(bhypre_ijbuildvector__array_get2_f,
    int64_t *result)
 {
   *result = (ptrdiff_t)
-    SIDL_interface__array_get2((const struct SIDL_interface__array 
+    sidl_interface__array_get2((const struct sidl_interface__array 
       *)(ptrdiff_t)*array
     , *i1, *i2);
 }
@@ -782,7 +782,7 @@ SIDLFortran77Symbol(bhypre_ijbuildvector__array_get3_f,
    int64_t *result)
 {
   *result = (ptrdiff_t)
-    SIDL_interface__array_get3((const struct SIDL_interface__array 
+    sidl_interface__array_get3((const struct sidl_interface__array 
       *)(ptrdiff_t)*array
     , *i1, *i2, *i3);
 }
@@ -799,9 +799,66 @@ SIDLFortran77Symbol(bhypre_ijbuildvector__array_get4_f,
    int64_t *result)
 {
   *result = (ptrdiff_t)
-    SIDL_interface__array_get4((const struct SIDL_interface__array 
+    sidl_interface__array_get4((const struct sidl_interface__array 
       *)(ptrdiff_t)*array
     , *i1, *i2, *i3, *i4);
+}
+
+void
+SIDLFortran77Symbol(bhypre_ijbuildvector__array_get5_f,
+                  BHYPRE_IJBUILDVECTOR__ARRAY_GET5_F,
+                  bHYPRE_IJBuildVector__array_get5_f)
+  (int64_t *array, 
+   int32_t *i1, 
+   int32_t *i2, 
+   int32_t *i3, 
+   int32_t *i4, 
+   int32_t *i5, 
+   int64_t *result)
+{
+  *result = (ptrdiff_t)
+    sidl_interface__array_get5((const struct sidl_interface__array 
+      *)(ptrdiff_t)*array
+    , *i1, *i2, *i3, *i4, *i5);
+}
+
+void
+SIDLFortran77Symbol(bhypre_ijbuildvector__array_get6_f,
+                  BHYPRE_IJBUILDVECTOR__ARRAY_GET6_F,
+                  bHYPRE_IJBuildVector__array_get6_f)
+  (int64_t *array, 
+   int32_t *i1, 
+   int32_t *i2, 
+   int32_t *i3, 
+   int32_t *i4, 
+   int32_t *i5, 
+   int32_t *i6, 
+   int64_t *result)
+{
+  *result = (ptrdiff_t)
+    sidl_interface__array_get6((const struct sidl_interface__array 
+      *)(ptrdiff_t)*array
+    , *i1, *i2, *i3, *i4, *i5, *i6);
+}
+
+void
+SIDLFortran77Symbol(bhypre_ijbuildvector__array_get7_f,
+                  BHYPRE_IJBUILDVECTOR__ARRAY_GET7_F,
+                  bHYPRE_IJBuildVector__array_get7_f)
+  (int64_t *array, 
+   int32_t *i1, 
+   int32_t *i2, 
+   int32_t *i3, 
+   int32_t *i4, 
+   int32_t *i5, 
+   int32_t *i6, 
+   int32_t *i7, 
+   int64_t *result)
+{
+  *result = (ptrdiff_t)
+    sidl_interface__array_get7((const struct sidl_interface__array 
+      *)(ptrdiff_t)*array
+    , *i1, *i2, *i3, *i4, *i5, *i6, *i7);
 }
 
 void
@@ -813,7 +870,7 @@ SIDLFortran77Symbol(bhypre_ijbuildvector__array_get_f,
    int64_t *result)
 {
   *result = (ptrdiff_t)
-    SIDL_interface__array_get((const struct SIDL_interface__array 
+    sidl_interface__array_get((const struct sidl_interface__array 
       *)(ptrdiff_t)*array, indices);
 }
 
@@ -825,8 +882,8 @@ SIDLFortran77Symbol(bhypre_ijbuildvector__array_set1_f,
    int32_t *i1,
    int64_t *value)
 {
-  SIDL_interface__array_set1((struct SIDL_interface__array *)(ptrdiff_t)*array
-  , *i1, (struct SIDL_BaseInterface__object *)(ptrdiff_t)*value);
+  sidl_interface__array_set1((struct sidl_interface__array *)(ptrdiff_t)*array
+  , *i1, (struct sidl_BaseInterface__object *)(ptrdiff_t)*value);
 }
 
 void
@@ -838,8 +895,8 @@ SIDLFortran77Symbol(bhypre_ijbuildvector__array_set2_f,
    int32_t *i2,
    int64_t *value)
 {
-  SIDL_interface__array_set2((struct SIDL_interface__array *)(ptrdiff_t)*array
-  , *i1, *i2, (struct SIDL_BaseInterface__object *)(ptrdiff_t)*value);
+  sidl_interface__array_set2((struct sidl_interface__array *)(ptrdiff_t)*array
+  , *i1, *i2, (struct sidl_BaseInterface__object *)(ptrdiff_t)*value);
 }
 
 void
@@ -852,8 +909,8 @@ SIDLFortran77Symbol(bhypre_ijbuildvector__array_set3_f,
    int32_t *i3,
    int64_t *value)
 {
-  SIDL_interface__array_set3((struct SIDL_interface__array *)(ptrdiff_t)*array
-  , *i1, *i2, *i3, (struct SIDL_BaseInterface__object *)(ptrdiff_t)*value);
+  sidl_interface__array_set3((struct sidl_interface__array *)(ptrdiff_t)*array
+  , *i1, *i2, *i3, (struct sidl_BaseInterface__object *)(ptrdiff_t)*value);
 }
 
 void
@@ -867,8 +924,62 @@ SIDLFortran77Symbol(bhypre_ijbuildvector__array_set4_f,
    int32_t *i4,
    int64_t *value)
 {
-  SIDL_interface__array_set4((struct SIDL_interface__array *)(ptrdiff_t)*array
-  , *i1, *i2, *i3, *i4, (struct SIDL_BaseInterface__object *)(ptrdiff_t)*value);
+  sidl_interface__array_set4((struct sidl_interface__array *)(ptrdiff_t)*array
+  , *i1, *i2, *i3, *i4, (struct sidl_BaseInterface__object *)(ptrdiff_t)*value);
+}
+
+void
+SIDLFortran77Symbol(bhypre_ijbuildvector__array_set5_f,
+                  BHYPRE_IJBUILDVECTOR__ARRAY_SET5_F,
+                  bHYPRE_IJBuildVector__array_set5_f)
+  (int64_t *array,
+   int32_t *i1,
+   int32_t *i2,
+   int32_t *i3,
+   int32_t *i4,
+   int32_t *i5,
+   int64_t *value)
+{
+  sidl_interface__array_set5((struct sidl_interface__array *)(ptrdiff_t)*array
+  , *i1, *i2, *i3, *i4, *i5,
+    (struct sidl_BaseInterface__object *)(ptrdiff_t)*value);
+}
+
+void
+SIDLFortran77Symbol(bhypre_ijbuildvector__array_set6_f,
+                  BHYPRE_IJBUILDVECTOR__ARRAY_SET6_F,
+                  bHYPRE_IJBuildVector__array_set6_f)
+  (int64_t *array,
+   int32_t *i1,
+   int32_t *i2,
+   int32_t *i3,
+   int32_t *i4,
+   int32_t *i5,
+   int32_t *i6,
+   int64_t *value)
+{
+  sidl_interface__array_set6((struct sidl_interface__array *)(ptrdiff_t)*array
+  , *i1, *i2, *i3, *i4, *i5, *i6,
+    (struct sidl_BaseInterface__object *)(ptrdiff_t)*value);
+}
+
+void
+SIDLFortran77Symbol(bhypre_ijbuildvector__array_set7_f,
+                  BHYPRE_IJBUILDVECTOR__ARRAY_SET7_F,
+                  bHYPRE_IJBuildVector__array_set7_f)
+  (int64_t *array,
+   int32_t *i1,
+   int32_t *i2,
+   int32_t *i3,
+   int32_t *i4,
+   int32_t *i5,
+   int32_t *i6,
+   int32_t *i7,
+   int64_t *value)
+{
+  sidl_interface__array_set7((struct sidl_interface__array *)(ptrdiff_t)*array
+  , *i1, *i2, *i3, *i4, *i5, *i6, *i7,
+    (struct sidl_BaseInterface__object *)(ptrdiff_t)*value);
 }
 
 void
@@ -879,8 +990,8 @@ SIDLFortran77Symbol(bhypre_ijbuildvector__array_set_f,
   int32_t indices[],
   int64_t *value)
 {
-  SIDL_interface__array_set((struct SIDL_interface__array *)(ptrdiff_t)*array,
-    indices, (struct SIDL_BaseInterface__object *)(ptrdiff_t)*value);
+  sidl_interface__array_set((struct sidl_interface__array *)(ptrdiff_t)*array,
+    indices, (struct sidl_BaseInterface__object *)(ptrdiff_t)*value);
 }
 
 void
@@ -890,7 +1001,7 @@ SIDLFortran77Symbol(bhypre_ijbuildvector__array_dimen_f,
   (int64_t *array, int32_t *result)
 {
   *result =
-    SIDL_interface__array_dimen((struct SIDL_interface__array 
+    sidl_interface__array_dimen((struct sidl_interface__array 
       *)(ptrdiff_t)*array);
 }
 
@@ -903,7 +1014,7 @@ SIDLFortran77Symbol(bhypre_ijbuildvector__array_lower_f,
    int32_t *result)
 {
   *result = 
-    SIDL_interface__array_lower((struct SIDL_interface__array 
+    sidl_interface__array_lower((struct sidl_interface__array 
       *)(ptrdiff_t)*array, *ind);
 }
 
@@ -916,7 +1027,20 @@ SIDLFortran77Symbol(bhypre_ijbuildvector__array_upper_f,
    int32_t *result)
 {
   *result = 
-    SIDL_interface__array_upper((struct SIDL_interface__array 
+    sidl_interface__array_upper((struct sidl_interface__array 
+      *)(ptrdiff_t)*array, *ind);
+}
+
+void
+SIDLFortran77Symbol(bhypre_ijbuildvector__array_length_f,
+                  BHYPRE_IJBUILDVECTOR__ARRAY_LENGTH_F,
+                  bHYPRE_IJBuildVector__array_length_f)
+  (int64_t *array,
+   int32_t *ind,
+   int32_t *result)
+{
+  *result = 
+    sidl_interface__array_length((struct sidl_interface__array 
       *)(ptrdiff_t)*array, *ind);
 }
 
@@ -929,7 +1053,7 @@ SIDLFortran77Symbol(bhypre_ijbuildvector__array_stride_f,
    int32_t *result)
 {
   *result = 
-    SIDL_interface__array_stride((struct SIDL_interface__array 
+    sidl_interface__array_stride((struct sidl_interface__array 
       *)(ptrdiff_t)*array, *ind);
 }
 
@@ -940,7 +1064,7 @@ SIDLFortran77Symbol(bhypre_ijbuildvector__array_iscolumnorder_f,
   (int64_t *array,
    SIDL_F77_Bool *result)
 {
-  *result = SIDL_interface__array_isColumnOrder((struct SIDL_interface__array 
+  *result = sidl_interface__array_isColumnOrder((struct sidl_interface__array 
     *)(ptrdiff_t)*array);
 }
 
@@ -951,7 +1075,7 @@ SIDLFortran77Symbol(bhypre_ijbuildvector__array_isroworder_f,
   (int64_t *array,
    SIDL_F77_Bool *result)
 {
-  *result = SIDL_interface__array_isRowOrder((struct SIDL_interface__array 
+  *result = sidl_interface__array_isRowOrder((struct sidl_interface__array 
     *)(ptrdiff_t)*array);
 }
 
@@ -962,9 +1086,9 @@ SIDLFortran77Symbol(bhypre_ijbuildvector__array_copy_f,
   (int64_t *src,
    int64_t *dest)
 {
-  SIDL_interface__array_copy((const struct SIDL_interface__array 
+  sidl_interface__array_copy((const struct sidl_interface__array 
     *)(ptrdiff_t)*src,
-                             (struct SIDL_interface__array *)(ptrdiff_t)*dest);
+                             (struct sidl_interface__array *)(ptrdiff_t)*dest);
 }
 
 void
@@ -973,7 +1097,7 @@ SIDLFortran77Symbol(bhypre_ijbuildvector__array_smartcopy_f,
                   bHYPRE_IJBuildVector__array_smartCopy_f)
   (int64_t *src)
 {
-  SIDL_interface__array_smartCopy((struct SIDL_interface__array 
+  sidl_interface__array_smartCopy((struct sidl_interface__array 
     *)(ptrdiff_t)*src);
 }
 
@@ -990,7 +1114,7 @@ SIDLFortran77Symbol(bhypre_ijbuildvector__array_slice_f,
    int64_t *result)
 {
   *result = (ptrdiff_t)
-    SIDL_interface__array_slice((struct SIDL_interface__array *)(ptrdiff_t)*src,
+    sidl_interface__array_slice((struct sidl_interface__array *)(ptrdiff_t)*src,
       *dimen, numElem, srcStart, srcStride, newStart);
 }
 
@@ -1004,7 +1128,7 @@ SIDLFortran77Symbol(bhypre_ijbuildvector__array_ensure_f,
    int64_t *result)
 {
   *result = (ptrdiff_t)
-    SIDL_interface__array_ensure((struct SIDL_interface__array 
+    sidl_interface__array_ensure((struct sidl_interface__array 
       *)(ptrdiff_t)*src,
     *dimen, *ordering);
 }

@@ -2,14 +2,14 @@
  * File:          bHYPRE_CoefficientAccess_IOR.c
  * Symbol:        bHYPRE.CoefficientAccess-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.8.2
- * SIDL Created:  20030401 14:47:34 PST
- * Generated:     20030401 14:47:38 PST
+ * Babel Version: 0.9.8
+ * sidl Created:  20050208 15:29:09 PST
+ * Generated:     20050208 15:29:10 PST
  * Description:   Intermediate Object Representation for bHYPRE.CoefficientAccess
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.2
+ * babel-version = 0.9.8
  * source-line   = 766
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -82,10 +82,10 @@ remote_bHYPRE_CoefficientAccess_deleteRef(
  * REMOTE METHOD STUB:isSame
  */
 
-static SIDL_bool
+static sidl_bool
 remote_bHYPRE_CoefficientAccess_isSame(
   void* self,
-  struct SIDL_BaseInterface__object* iobj)
+  struct sidl_BaseInterface__object* iobj)
 {
   return 0;
 }
@@ -94,19 +94,19 @@ remote_bHYPRE_CoefficientAccess_isSame(
  * REMOTE METHOD STUB:queryInt
  */
 
-static struct SIDL_BaseInterface__object*
+static struct sidl_BaseInterface__object*
 remote_bHYPRE_CoefficientAccess_queryInt(
   void* self,
   const char* name)
 {
-  return (struct SIDL_BaseInterface__object*) 0;
+  return (struct sidl_BaseInterface__object*) 0;
 }
 
 /*
  * REMOTE METHOD STUB:isType
  */
 
-static SIDL_bool
+static sidl_bool
 remote_bHYPRE_CoefficientAccess_isType(
   void* self,
   const char* name)
@@ -118,11 +118,11 @@ remote_bHYPRE_CoefficientAccess_isType(
  * REMOTE METHOD STUB:getClassInfo
  */
 
-static struct SIDL_ClassInfo__object*
+static struct sidl_ClassInfo__object*
 remote_bHYPRE_CoefficientAccess_getClassInfo(
   void* self)
 {
-  return (struct SIDL_ClassInfo__object*) 0;
+  return (struct sidl_ClassInfo__object*) 0;
 }
 
 /*
@@ -134,8 +134,8 @@ remote_bHYPRE_CoefficientAccess_GetRow(
   void* self,
   int32_t row,
   int32_t* size,
-  struct SIDL_int__array** col_ind,
-  struct SIDL_double__array** values)
+  struct sidl_int__array** col_ind,
+  struct sidl_double__array** values)
 {
   return 0;
 }

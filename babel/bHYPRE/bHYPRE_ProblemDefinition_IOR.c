@@ -2,14 +2,14 @@
  * File:          bHYPRE_ProblemDefinition_IOR.c
  * Symbol:        bHYPRE.ProblemDefinition-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.8.2
- * SIDL Created:  20030401 14:47:14 PST
- * Generated:     20030401 14:47:21 PST
+ * Babel Version: 0.9.8
+ * sidl Created:  20050208 15:29:04 PST
+ * Generated:     20050208 15:29:05 PST
  * Description:   Intermediate Object Representation for bHYPRE.ProblemDefinition
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.2
+ * babel-version = 0.9.8
  * source-line   = 42
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -82,10 +82,10 @@ remote_bHYPRE_ProblemDefinition_deleteRef(
  * REMOTE METHOD STUB:isSame
  */
 
-static SIDL_bool
+static sidl_bool
 remote_bHYPRE_ProblemDefinition_isSame(
   void* self,
-  struct SIDL_BaseInterface__object* iobj)
+  struct sidl_BaseInterface__object* iobj)
 {
   return 0;
 }
@@ -94,19 +94,19 @@ remote_bHYPRE_ProblemDefinition_isSame(
  * REMOTE METHOD STUB:queryInt
  */
 
-static struct SIDL_BaseInterface__object*
+static struct sidl_BaseInterface__object*
 remote_bHYPRE_ProblemDefinition_queryInt(
   void* self,
   const char* name)
 {
-  return (struct SIDL_BaseInterface__object*) 0;
+  return (struct sidl_BaseInterface__object*) 0;
 }
 
 /*
  * REMOTE METHOD STUB:isType
  */
 
-static SIDL_bool
+static sidl_bool
 remote_bHYPRE_ProblemDefinition_isType(
   void* self,
   const char* name)
@@ -118,11 +118,11 @@ remote_bHYPRE_ProblemDefinition_isType(
  * REMOTE METHOD STUB:getClassInfo
  */
 
-static struct SIDL_ClassInfo__object*
+static struct sidl_ClassInfo__object*
 remote_bHYPRE_ProblemDefinition_getClassInfo(
   void* self)
 {
-  return (struct SIDL_ClassInfo__object*) 0;
+  return (struct sidl_ClassInfo__object*) 0;
 }
 
 /*
@@ -166,7 +166,7 @@ remote_bHYPRE_ProblemDefinition_Assemble(
 static int32_t
 remote_bHYPRE_ProblemDefinition_GetObject(
   void* self,
-  struct SIDL_BaseInterface__object** A)
+  struct sidl_BaseInterface__object** A)
 {
   return 0;
 }

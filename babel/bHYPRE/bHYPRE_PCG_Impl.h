@@ -2,20 +2,36 @@
  * File:          bHYPRE_PCG_Impl.h
  * Symbol:        bHYPRE.PCG-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.8.2
- * SIDL Created:  20030401 14:47:20 PST
- * Generated:     20030401 14:47:30 PST
+ * Babel Version: 0.9.8
+ * sidl Created:  20050208 15:29:05 PST
+ * Generated:     20050208 15:29:08 PST
  * Description:   Server-side implementation for bHYPRE.PCG
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.8.2
+ * babel-version = 0.9.8
  * source-line   = 1237
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #ifndef included_bHYPRE_PCG_Impl_h
 #define included_bHYPRE_PCG_Impl_h
+
+#ifndef included_sidl_header_h
+#include "sidl_header.h"
+#endif
+#ifndef included_bHYPRE_Solver_h
+#include "bHYPRE_Solver.h"
+#endif
+#ifndef included_bHYPRE_PCG_h
+#include "bHYPRE_PCG.h"
+#endif
+#ifndef included_bHYPRE_Operator_h
+#include "bHYPRE_Operator.h"
+#endif
+#ifndef included_bHYPRE_Vector_h
+#include "bHYPRE_Vector.h"
+#endif
 
 /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG._includes) */
 /* Put additional include files here... */
@@ -24,22 +40,6 @@
 #include "krylov.h"
 #include "HYPRE_parcsr_ls.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.PCG._includes) */
-
-#ifndef included_SIDL_header_h
-#include "SIDL_header.h"
-#endif
-#ifndef included_bHYPRE_PCG_h
-#include "bHYPRE_PCG.h"
-#endif
-#ifndef included_bHYPRE_Operator_h
-#include "bHYPRE_Operator.h"
-#endif
-#ifndef included_bHYPRE_Solver_h
-#include "bHYPRE_Solver.h"
-#endif
-#ifndef included_bHYPRE_Vector_h
-#include "bHYPRE_Vector.h"
-#endif
 
 /*
  * Private data for class bHYPRE.PCG
@@ -129,25 +129,25 @@ extern int32_t
 impl_bHYPRE_PCG_SetIntArray1Parameter(
   bHYPRE_PCG,
   const char*,
-  struct SIDL_int__array*);
+  struct sidl_int__array*);
 
 extern int32_t
 impl_bHYPRE_PCG_SetIntArray2Parameter(
   bHYPRE_PCG,
   const char*,
-  struct SIDL_int__array*);
+  struct sidl_int__array*);
 
 extern int32_t
 impl_bHYPRE_PCG_SetDoubleArray1Parameter(
   bHYPRE_PCG,
   const char*,
-  struct SIDL_double__array*);
+  struct sidl_double__array*);
 
 extern int32_t
 impl_bHYPRE_PCG_SetDoubleArray2Parameter(
   bHYPRE_PCG,
   const char*,
-  struct SIDL_double__array*);
+  struct sidl_double__array*);
 
 extern int32_t
 impl_bHYPRE_PCG_GetIntValue(

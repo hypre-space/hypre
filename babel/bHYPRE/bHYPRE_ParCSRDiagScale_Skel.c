@@ -2,14 +2,14 @@
  * File:          bHYPRE_ParCSRDiagScale_Skel.c
  * Symbol:        bHYPRE.ParCSRDiagScale-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.8.2
- * SIDL Created:  20030401 14:47:20 PST
- * Generated:     20030401 14:47:31 PST
+ * Babel Version: 0.9.8
+ * sidl Created:  20050208 15:29:05 PST
+ * Generated:     20050208 15:29:07 PST
  * Description:   Server-side glue code for bHYPRE.ParCSRDiagScale
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.2
+ * babel-version = 0.9.8
  * source-line   = 1140
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -53,25 +53,25 @@ extern int32_t
 impl_bHYPRE_ParCSRDiagScale_SetIntArray1Parameter(
   bHYPRE_ParCSRDiagScale,
   const char*,
-  struct SIDL_int__array*);
+  struct sidl_int__array*);
 
 extern int32_t
 impl_bHYPRE_ParCSRDiagScale_SetIntArray2Parameter(
   bHYPRE_ParCSRDiagScale,
   const char*,
-  struct SIDL_int__array*);
+  struct sidl_int__array*);
 
 extern int32_t
 impl_bHYPRE_ParCSRDiagScale_SetDoubleArray1Parameter(
   bHYPRE_ParCSRDiagScale,
   const char*,
-  struct SIDL_double__array*);
+  struct sidl_double__array*);
 
 extern int32_t
 impl_bHYPRE_ParCSRDiagScale_SetDoubleArray2Parameter(
   bHYPRE_ParCSRDiagScale,
   const char*,
-  struct SIDL_double__array*);
+  struct sidl_double__array*);
 
 extern int32_t
 impl_bHYPRE_ParCSRDiagScale_GetIntValue(
@@ -134,75 +134,79 @@ impl_bHYPRE_ParCSRDiagScale_GetRelResidualNorm(
 
 static int32_t
 skel_bHYPRE_ParCSRDiagScale_SetIntArray1Parameter(
-  bHYPRE_ParCSRDiagScale self,
-  const char* name,
-  struct SIDL_int__array* value)
+  /*in*/ bHYPRE_ParCSRDiagScale self,
+  /*in*/ const char* name,
+  /*in*/ struct sidl_int__array* value)
 {
   int32_t _return;
-  struct SIDL_int__array* value_proxy = SIDL_int__array_ensure(value, 1,
-    SIDL_column_major_order);
+  struct sidl_int__array* value_proxy = sidl_int__array_ensure(value, 1,
+    sidl_column_major_order);
   _return =
     impl_bHYPRE_ParCSRDiagScale_SetIntArray1Parameter(
       self,
       name,
       value_proxy);
-  SIDL_int__array_deleteRef(value_proxy);
+  sidl_int__array_deleteRef(value_proxy);
   return _return;
 }
 
 static int32_t
 skel_bHYPRE_ParCSRDiagScale_SetIntArray2Parameter(
-  bHYPRE_ParCSRDiagScale self,
-  const char* name,
-  struct SIDL_int__array* value)
+  /*in*/ bHYPRE_ParCSRDiagScale self,
+  /*in*/ const char* name,
+  /*in*/ struct sidl_int__array* value)
 {
   int32_t _return;
-  struct SIDL_int__array* value_proxy = SIDL_int__array_ensure(value, 2,
-    SIDL_column_major_order);
+  struct sidl_int__array* value_proxy = sidl_int__array_ensure(value, 2,
+    sidl_column_major_order);
   _return =
     impl_bHYPRE_ParCSRDiagScale_SetIntArray2Parameter(
       self,
       name,
       value_proxy);
-  SIDL_int__array_deleteRef(value_proxy);
+  sidl_int__array_deleteRef(value_proxy);
   return _return;
 }
 
 static int32_t
 skel_bHYPRE_ParCSRDiagScale_SetDoubleArray1Parameter(
-  bHYPRE_ParCSRDiagScale self,
-  const char* name,
-  struct SIDL_double__array* value)
+  /*in*/ bHYPRE_ParCSRDiagScale self,
+  /*in*/ const char* name,
+  /*in*/ struct sidl_double__array* value)
 {
   int32_t _return;
-  struct SIDL_double__array* value_proxy = SIDL_double__array_ensure(value, 1,
-    SIDL_column_major_order);
+  struct sidl_double__array* value_proxy = sidl_double__array_ensure(value, 1,
+    sidl_column_major_order);
   _return =
     impl_bHYPRE_ParCSRDiagScale_SetDoubleArray1Parameter(
       self,
       name,
       value_proxy);
-  SIDL_double__array_deleteRef(value_proxy);
+  sidl_double__array_deleteRef(value_proxy);
   return _return;
 }
 
 static int32_t
 skel_bHYPRE_ParCSRDiagScale_SetDoubleArray2Parameter(
-  bHYPRE_ParCSRDiagScale self,
-  const char* name,
-  struct SIDL_double__array* value)
+  /*in*/ bHYPRE_ParCSRDiagScale self,
+  /*in*/ const char* name,
+  /*in*/ struct sidl_double__array* value)
 {
   int32_t _return;
-  struct SIDL_double__array* value_proxy = SIDL_double__array_ensure(value, 2,
-    SIDL_column_major_order);
+  struct sidl_double__array* value_proxy = sidl_double__array_ensure(value, 2,
+    sidl_column_major_order);
   _return =
     impl_bHYPRE_ParCSRDiagScale_SetDoubleArray2Parameter(
       self,
       name,
       value_proxy);
-  SIDL_double__array_deleteRef(value_proxy);
+  sidl_double__array_deleteRef(value_proxy);
   return _return;
 }
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 void
 bHYPRE_ParCSRDiagScale__set_epv(struct bHYPRE_ParCSRDiagScale__epv *epv)
@@ -233,6 +237,9 @@ bHYPRE_ParCSRDiagScale__set_epv(struct bHYPRE_ParCSRDiagScale__epv *epv)
   epv->f_GetNumIterations = impl_bHYPRE_ParCSRDiagScale_GetNumIterations;
   epv->f_GetRelResidualNorm = impl_bHYPRE_ParCSRDiagScale_GetRelResidualNorm;
 }
+#ifdef __cplusplus
+}
+#endif
 
 struct bHYPRE_ParCSRDiagScale__data*
 bHYPRE_ParCSRDiagScale__get_data(bHYPRE_ParCSRDiagScale self)

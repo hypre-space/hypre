@@ -2,14 +2,14 @@
  * File:          bHYPRE_IJParCSRVector_Impl.h
  * Symbol:        bHYPRE.IJParCSRVector-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.8.2
- * SIDL Created:  20030401 14:47:20 PST
- * Generated:     20030401 14:47:33 PST
+ * Babel Version: 0.9.8
+ * sidl Created:  20050208 15:29:04 PST
+ * Generated:     20050208 15:29:08 PST
  * Description:   Server-side implementation for bHYPRE.IJParCSRVector
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.8.2
+ * babel-version = 0.9.8
  * source-line   = 815
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -17,25 +17,25 @@
 #ifndef included_bHYPRE_IJParCSRVector_Impl_h
 #define included_bHYPRE_IJParCSRVector_Impl_h
 
+#ifndef included_sidl_header_h
+#include "sidl_header.h"
+#endif
+#ifndef included_bHYPRE_IJParCSRVector_h
+#include "bHYPRE_IJParCSRVector.h"
+#endif
+#ifndef included_sidl_BaseInterface_h
+#include "sidl_BaseInterface.h"
+#endif
+#ifndef included_bHYPRE_Vector_h
+#include "bHYPRE_Vector.h"
+#endif
+
 /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector._includes) */
 /* Put additional include files here... */
 #include "HYPRE_IJ_mv.h"
 #include "HYPRE.h"
 #include "utilities.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector._includes) */
-
-#ifndef included_SIDL_header_h
-#include "SIDL_header.h"
-#endif
-#ifndef included_SIDL_BaseInterface_h
-#include "SIDL_BaseInterface.h"
-#endif
-#ifndef included_bHYPRE_IJParCSRVector_h
-#include "bHYPRE_IJParCSRVector.h"
-#endif
-#ifndef included_bHYPRE_Vector_h
-#include "bHYPRE_Vector.h"
-#endif
 
 /*
  * Private data for class bHYPRE.IJParCSRVector
@@ -125,7 +125,7 @@ impl_bHYPRE_IJParCSRVector_Assemble(
 extern int32_t
 impl_bHYPRE_IJParCSRVector_GetObject(
   bHYPRE_IJParCSRVector,
-  SIDL_BaseInterface*);
+  sidl_BaseInterface*);
 
 extern int32_t
 impl_bHYPRE_IJParCSRVector_SetLocalRange(
@@ -137,15 +137,15 @@ extern int32_t
 impl_bHYPRE_IJParCSRVector_SetValues(
   bHYPRE_IJParCSRVector,
   int32_t,
-  struct SIDL_int__array*,
-  struct SIDL_double__array*);
+  struct sidl_int__array*,
+  struct sidl_double__array*);
 
 extern int32_t
 impl_bHYPRE_IJParCSRVector_AddToValues(
   bHYPRE_IJParCSRVector,
   int32_t,
-  struct SIDL_int__array*,
-  struct SIDL_double__array*);
+  struct sidl_int__array*,
+  struct sidl_double__array*);
 
 extern int32_t
 impl_bHYPRE_IJParCSRVector_GetLocalRange(
@@ -157,8 +157,8 @@ extern int32_t
 impl_bHYPRE_IJParCSRVector_GetValues(
   bHYPRE_IJParCSRVector,
   int32_t,
-  struct SIDL_int__array*,
-  struct SIDL_double__array**);
+  struct sidl_int__array*,
+  struct sidl_double__array**);
 
 extern int32_t
 impl_bHYPRE_IJParCSRVector_Print(

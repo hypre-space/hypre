@@ -2,14 +2,14 @@
  * File:          bHYPRE_SStructGraph_Impl.c
  * Symbol:        bHYPRE.SStructGraph-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.8.2
- * SIDL Created:  20030401 14:47:20 PST
- * Generated:     20030401 14:47:31 PST
+ * Babel Version: 0.9.8
+ * sidl Created:  20050208 15:29:05 PST
+ * Generated:     20050208 15:29:07 PST
  * Description:   Server-side implementation for bHYPRE.SStructGraph
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.8.2
+ * babel-version = 0.9.8
  * source-line   = 1022
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -41,7 +41,7 @@
 
 void
 impl_bHYPRE_SStructGraph__ctor(
-  bHYPRE_SStructGraph self)
+  /*in*/ bHYPRE_SStructGraph self)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGraph._ctor) */
   /* Insert the implementation of the constructor method here... */
@@ -57,7 +57,7 @@ impl_bHYPRE_SStructGraph__ctor(
 
 void
 impl_bHYPRE_SStructGraph__dtor(
-  bHYPRE_SStructGraph self)
+  /*in*/ bHYPRE_SStructGraph self)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGraph._dtor) */
   /* Insert the implementation of the destructor method here... */
@@ -74,10 +74,11 @@ impl_bHYPRE_SStructGraph__dtor(
 
 int32_t
 impl_bHYPRE_SStructGraph_SetGrid(
-  bHYPRE_SStructGraph self, bHYPRE_SStructGrid grid)
+  /*in*/ bHYPRE_SStructGraph self, /*in*/ bHYPRE_SStructGrid grid)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGraph.SetGrid) */
   /* Insert the implementation of the SetGrid method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructGraph.SetGrid) */
 }
 
@@ -92,11 +93,12 @@ impl_bHYPRE_SStructGraph_SetGrid(
 
 int32_t
 impl_bHYPRE_SStructGraph_SetStencil(
-  bHYPRE_SStructGraph self, int32_t part, int32_t var,
-    bHYPRE_SStructStencil stencil)
+  /*in*/ bHYPRE_SStructGraph self, /*in*/ int32_t part, /*in*/ int32_t var,
+    /*in*/ bHYPRE_SStructStencil stencil)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGraph.SetStencil) */
   /* Insert the implementation of the SetStencil method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructGraph.SetStencil) */
 }
 
@@ -116,11 +118,13 @@ impl_bHYPRE_SStructGraph_SetStencil(
 
 int32_t
 impl_bHYPRE_SStructGraph_AddEntries(
-  bHYPRE_SStructGraph self, int32_t part, struct SIDL_int__array* index,
-    int32_t var, int32_t to_part, struct SIDL_int__array* to_index,
-    int32_t to_var)
+  /*in*/ bHYPRE_SStructGraph self, /*in*/ int32_t part,
+    /*in*/ struct sidl_int__array* index, /*in*/ int32_t var,
+    /*in*/ int32_t to_part, /*in*/ struct sidl_int__array* to_index,
+    /*in*/ int32_t to_var)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGraph.AddEntries) */
   /* Insert the implementation of the AddEntries method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructGraph.AddEntries) */
 }

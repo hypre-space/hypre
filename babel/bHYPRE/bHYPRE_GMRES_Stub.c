@@ -2,30 +2,30 @@
  * File:          bHYPRE_GMRES_Stub.c
  * Symbol:        bHYPRE.GMRES-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.8.2
- * SIDL Created:  20030401 14:47:20 PST
- * Generated:     20030401 14:47:28 PST
+ * Babel Version: 0.9.8
+ * sidl Created:  20050208 15:29:05 PST
+ * Generated:     20050208 15:29:07 PST
  * Description:   Client-side glue code for bHYPRE.GMRES
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.2
+ * babel-version = 0.9.8
  * source-line   = 1247
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #include "bHYPRE_GMRES.h"
 #include "bHYPRE_GMRES_IOR.h"
-#ifndef included_SIDL_interface_IOR_h
-#include "SIDL_interface_IOR.h"
+#ifndef included_sidl_interface_IOR_h
+#include "sidl_interface_IOR.h"
 #endif
 #include <stddef.h>
-#include "SIDL_BaseInterface_IOR.h"
+#include "sidl_BaseInterface_IOR.h"
 #include "babel_config.h"
 #ifdef SIDL_DYNAMIC_LIBRARY
 #include <stdio.h>
 #include <stdlib.h>
-#include "SIDL_Loader.h"
+#include "sidl_Loader.h"
 #endif
 
 /*
@@ -46,10 +46,28 @@ static const struct bHYPRE_GMRES__external* _loadIOR(void)
 #ifdef SIDL_STATIC_LIBRARY
   _ior = bHYPRE_GMRES__externals();
 #else
-  const struct bHYPRE_GMRES__external*(*dll_f)(void) =
-    (const struct bHYPRE_GMRES__external*(*)(void)) SIDL_Loader_lookupSymbol(
-      "bHYPRE_GMRES__externals");
-  _ior = (dll_f ? (*dll_f)() : NULL);
+  sidl_DLL dll = sidl_DLL__create();
+  const struct bHYPRE_GMRES__external*(*dll_f)(void);
+  /* check global namespace for symbol first */
+  if (dll && sidl_DLL_loadLibrary(dll, "main:", TRUE, FALSE)) {
+    dll_f =
+      (const struct bHYPRE_GMRES__external*(*)(void)) sidl_DLL_lookupSymbol(
+        dll, "bHYPRE_GMRES__externals");
+    _ior = (dll_f ? (*dll_f)() : NULL);
+  }
+  if (dll) sidl_DLL_deleteRef(dll);
+  if (!_ior) {
+    dll = sidl_Loader_findLibrary("bHYPRE.GMRES",
+      "ior/impl", sidl_Scope_SCLSCOPE,
+      sidl_Resolve_SCLRESOLVE);
+    if (dll) {
+      dll_f =
+        (const struct bHYPRE_GMRES__external*(*)(void)) sidl_DLL_lookupSymbol(
+          dll, "bHYPRE_GMRES__externals");
+      _ior = (dll_f ? (*dll_f)() : NULL);
+      sidl_DLL_deleteRef(dll);
+    }
+  }
   if (!_ior) {
     fputs("Babel: unable to load the implementation for bHYPRE.GMRES; please set SIDL_DLL_PATH\n", stderr);
     exit(-1);
@@ -73,7 +91,7 @@ bHYPRE_GMRES__create()
 /*
  * <p>
  * Add one to the intrinsic reference count in the underlying object.
- * Object in <code>SIDL</code> have an intrinsic reference count.
+ * Object in <code>sidl</code> have an intrinsic reference count.
  * Objects continue to exist as long as the reference count is
  * positive. Clients should call this method whenever they
  * create another ongoing reference to an object or interface.
@@ -96,7 +114,7 @@ bHYPRE_GMRES_addRef(
 /*
  * Decrease by one the intrinsic reference count in the underlying
  * object, and delete the object if the reference is non-positive.
- * Objects in <code>SIDL</code> have an intrinsic reference count.
+ * Objects in <code>sidl</code> have an intrinsic reference count.
  * Clients should call this method whenever they remove a
  * reference to an object or interface.
  */
@@ -114,10 +132,10 @@ bHYPRE_GMRES_deleteRef(
  * object as this object.
  */
 
-SIDL_bool
+sidl_bool
 bHYPRE_GMRES_isSame(
   bHYPRE_GMRES self,
-  SIDL_BaseInterface iobj)
+  /*in*/ sidl_BaseInterface iobj)
 {
   return (*self->d_epv->f_isSame)(
     self,
@@ -126,7 +144,7 @@ bHYPRE_GMRES_isSame(
 
 /*
  * Check whether the object can support the specified interface or
- * class.  If the <code>SIDL</code> type name in <code>name</code>
+ * class.  If the <code>sidl</code> type name in <code>name</code>
  * is supported, then a reference to that object is returned with the
  * reference count incremented.  The callee will be responsible for
  * calling <code>deleteRef</code> on the returned object.  If
@@ -134,10 +152,10 @@ bHYPRE_GMRES_isSame(
  * returned.
  */
 
-SIDL_BaseInterface
+sidl_BaseInterface
 bHYPRE_GMRES_queryInt(
   bHYPRE_GMRES self,
-  const char* name)
+  /*in*/ const char* name)
 {
   return (*self->d_epv->f_queryInt)(
     self,
@@ -146,15 +164,15 @@ bHYPRE_GMRES_queryInt(
 
 /*
  * Return whether this object is an instance of the specified type.
- * The string name must be the <code>SIDL</code> type name.  This
+ * The string name must be the <code>sidl</code> type name.  This
  * routine will return <code>true</code> if and only if a cast to
  * the string type name would succeed.
  */
 
-SIDL_bool
+sidl_bool
 bHYPRE_GMRES_isType(
   bHYPRE_GMRES self,
-  const char* name)
+  /*in*/ const char* name)
 {
   return (*self->d_epv->f_isType)(
     self,
@@ -165,7 +183,7 @@ bHYPRE_GMRES_isType(
  * Return the meta-data about the class implementing this interface.
  */
 
-SIDL_ClassInfo
+sidl_ClassInfo
 bHYPRE_GMRES_getClassInfo(
   bHYPRE_GMRES self)
 {
@@ -181,7 +199,7 @@ bHYPRE_GMRES_getClassInfo(
 int32_t
 bHYPRE_GMRES_SetCommunicator(
   bHYPRE_GMRES self,
-  void* mpi_comm)
+  /*in*/ void* mpi_comm)
 {
   return (*self->d_epv->f_SetCommunicator)(
     self,
@@ -196,8 +214,8 @@ bHYPRE_GMRES_SetCommunicator(
 int32_t
 bHYPRE_GMRES_SetIntParameter(
   bHYPRE_GMRES self,
-  const char* name,
-  int32_t value)
+  /*in*/ const char* name,
+  /*in*/ int32_t value)
 {
   return (*self->d_epv->f_SetIntParameter)(
     self,
@@ -213,8 +231,8 @@ bHYPRE_GMRES_SetIntParameter(
 int32_t
 bHYPRE_GMRES_SetDoubleParameter(
   bHYPRE_GMRES self,
-  const char* name,
-  double value)
+  /*in*/ const char* name,
+  /*in*/ double value)
 {
   return (*self->d_epv->f_SetDoubleParameter)(
     self,
@@ -230,8 +248,8 @@ bHYPRE_GMRES_SetDoubleParameter(
 int32_t
 bHYPRE_GMRES_SetStringParameter(
   bHYPRE_GMRES self,
-  const char* name,
-  const char* value)
+  /*in*/ const char* name,
+  /*in*/ const char* value)
 {
   return (*self->d_epv->f_SetStringParameter)(
     self,
@@ -247,8 +265,8 @@ bHYPRE_GMRES_SetStringParameter(
 int32_t
 bHYPRE_GMRES_SetIntArray1Parameter(
   bHYPRE_GMRES self,
-  const char* name,
-  struct SIDL_int__array* value)
+  /*in*/ const char* name,
+  /*in*/ struct sidl_int__array* value)
 {
   return (*self->d_epv->f_SetIntArray1Parameter)(
     self,
@@ -264,8 +282,8 @@ bHYPRE_GMRES_SetIntArray1Parameter(
 int32_t
 bHYPRE_GMRES_SetIntArray2Parameter(
   bHYPRE_GMRES self,
-  const char* name,
-  struct SIDL_int__array* value)
+  /*in*/ const char* name,
+  /*in*/ struct sidl_int__array* value)
 {
   return (*self->d_epv->f_SetIntArray2Parameter)(
     self,
@@ -281,8 +299,8 @@ bHYPRE_GMRES_SetIntArray2Parameter(
 int32_t
 bHYPRE_GMRES_SetDoubleArray1Parameter(
   bHYPRE_GMRES self,
-  const char* name,
-  struct SIDL_double__array* value)
+  /*in*/ const char* name,
+  /*in*/ struct sidl_double__array* value)
 {
   return (*self->d_epv->f_SetDoubleArray1Parameter)(
     self,
@@ -298,8 +316,8 @@ bHYPRE_GMRES_SetDoubleArray1Parameter(
 int32_t
 bHYPRE_GMRES_SetDoubleArray2Parameter(
   bHYPRE_GMRES self,
-  const char* name,
-  struct SIDL_double__array* value)
+  /*in*/ const char* name,
+  /*in*/ struct sidl_double__array* value)
 {
   return (*self->d_epv->f_SetDoubleArray2Parameter)(
     self,
@@ -315,8 +333,8 @@ bHYPRE_GMRES_SetDoubleArray2Parameter(
 int32_t
 bHYPRE_GMRES_GetIntValue(
   bHYPRE_GMRES self,
-  const char* name,
-  int32_t* value)
+  /*in*/ const char* name,
+  /*out*/ int32_t* value)
 {
   return (*self->d_epv->f_GetIntValue)(
     self,
@@ -332,8 +350,8 @@ bHYPRE_GMRES_GetIntValue(
 int32_t
 bHYPRE_GMRES_GetDoubleValue(
   bHYPRE_GMRES self,
-  const char* name,
-  double* value)
+  /*in*/ const char* name,
+  /*out*/ double* value)
 {
   return (*self->d_epv->f_GetDoubleValue)(
     self,
@@ -350,8 +368,8 @@ bHYPRE_GMRES_GetDoubleValue(
 int32_t
 bHYPRE_GMRES_Setup(
   bHYPRE_GMRES self,
-  bHYPRE_Vector b,
-  bHYPRE_Vector x)
+  /*in*/ bHYPRE_Vector b,
+  /*in*/ bHYPRE_Vector x)
 {
   return (*self->d_epv->f_Setup)(
     self,
@@ -367,8 +385,8 @@ bHYPRE_GMRES_Setup(
 int32_t
 bHYPRE_GMRES_Apply(
   bHYPRE_GMRES self,
-  bHYPRE_Vector b,
-  bHYPRE_Vector* x)
+  /*in*/ bHYPRE_Vector b,
+  /*inout*/ bHYPRE_Vector* x)
 {
   return (*self->d_epv->f_Apply)(
     self,
@@ -384,7 +402,7 @@ bHYPRE_GMRES_Apply(
 int32_t
 bHYPRE_GMRES_SetOperator(
   bHYPRE_GMRES self,
-  bHYPRE_Operator A)
+  /*in*/ bHYPRE_Operator A)
 {
   return (*self->d_epv->f_SetOperator)(
     self,
@@ -399,7 +417,7 @@ bHYPRE_GMRES_SetOperator(
 int32_t
 bHYPRE_GMRES_SetTolerance(
   bHYPRE_GMRES self,
-  double tolerance)
+  /*in*/ double tolerance)
 {
   return (*self->d_epv->f_SetTolerance)(
     self,
@@ -414,7 +432,7 @@ bHYPRE_GMRES_SetTolerance(
 int32_t
 bHYPRE_GMRES_SetMaxIterations(
   bHYPRE_GMRES self,
-  int32_t max_iterations)
+  /*in*/ int32_t max_iterations)
 {
   return (*self->d_epv->f_SetMaxIterations)(
     self,
@@ -433,7 +451,7 @@ bHYPRE_GMRES_SetMaxIterations(
 int32_t
 bHYPRE_GMRES_SetLogging(
   bHYPRE_GMRES self,
-  int32_t level)
+  /*in*/ int32_t level)
 {
   return (*self->d_epv->f_SetLogging)(
     self,
@@ -452,7 +470,7 @@ bHYPRE_GMRES_SetLogging(
 int32_t
 bHYPRE_GMRES_SetPrintLevel(
   bHYPRE_GMRES self,
-  int32_t level)
+  /*in*/ int32_t level)
 {
   return (*self->d_epv->f_SetPrintLevel)(
     self,
@@ -467,7 +485,7 @@ bHYPRE_GMRES_SetPrintLevel(
 int32_t
 bHYPRE_GMRES_GetNumIterations(
   bHYPRE_GMRES self,
-  int32_t* num_iterations)
+  /*out*/ int32_t* num_iterations)
 {
   return (*self->d_epv->f_GetNumIterations)(
     self,
@@ -482,7 +500,7 @@ bHYPRE_GMRES_GetNumIterations(
 int32_t
 bHYPRE_GMRES_GetRelResidualNorm(
   bHYPRE_GMRES self,
-  double* norm)
+  /*out*/ double* norm)
 {
   return (*self->d_epv->f_GetRelResidualNorm)(
     self,
@@ -497,7 +515,7 @@ bHYPRE_GMRES_GetRelResidualNorm(
 int32_t
 bHYPRE_GMRES_SetPreconditioner(
   bHYPRE_GMRES self,
-  bHYPRE_Solver s)
+  /*in*/ bHYPRE_Solver s)
 {
   return (*self->d_epv->f_SetPreconditioner)(
     self,
@@ -515,7 +533,7 @@ bHYPRE_GMRES__cast(
   bHYPRE_GMRES cast = NULL;
 
   if (obj != NULL) {
-    SIDL_BaseInterface base = (SIDL_BaseInterface) obj;
+    sidl_BaseInterface base = (sidl_BaseInterface) obj;
     cast = (bHYPRE_GMRES) (*base->d_epv->f__cast)(
       base->d_object,
       "bHYPRE.GMRES");
@@ -536,240 +554,386 @@ bHYPRE_GMRES__cast2(
   void* cast = NULL;
 
   if (obj != NULL) {
-    SIDL_BaseInterface base = (SIDL_BaseInterface) obj;
+    sidl_BaseInterface base = (sidl_BaseInterface) obj;
     cast = (*base->d_epv->f__cast)(base->d_object, type);
   }
 
   return cast;
 }
 struct bHYPRE_GMRES__array*
-bHYPRE_GMRES__array_createCol(int32_t        dimen,
-                              const int32_t lower[],
-                              const int32_t upper[])
+bHYPRE_GMRES__array_createCol(
+  int32_t       dimen,
+  const int32_t lower[],
+  const int32_t upper[])
 {
-  return (struct bHYPRE_GMRES__array*)SIDL_interface__array_createCol(dimen,
+  return (struct bHYPRE_GMRES__array*)sidl_interface__array_createCol(dimen,
     lower, upper);
 }
 
 struct bHYPRE_GMRES__array*
-bHYPRE_GMRES__array_createRow(int32_t        dimen,
-                              const int32_t lower[],
-                              const int32_t upper[])
+bHYPRE_GMRES__array_createRow(
+  int32_t       dimen,
+  const int32_t lower[],
+  const int32_t upper[])
 {
-  return (struct bHYPRE_GMRES__array*)SIDL_interface__array_createRow(dimen,
+  return (struct bHYPRE_GMRES__array*)sidl_interface__array_createRow(dimen,
     lower, upper);
 }
 
 struct bHYPRE_GMRES__array*
 bHYPRE_GMRES__array_create1d(int32_t len)
 {
-  return (struct bHYPRE_GMRES__array*)SIDL_interface__array_create1d(len);
+  return (struct bHYPRE_GMRES__array*)sidl_interface__array_create1d(len);
+}
+
+struct bHYPRE_GMRES__array*
+bHYPRE_GMRES__array_create1dInit(
+  int32_t len, 
+  bHYPRE_GMRES* data)
+{
+  return (struct bHYPRE_GMRES__array*)sidl_interface__array_create1dInit(len,
+    (struct sidl_BaseInterface__object **)data);
 }
 
 struct bHYPRE_GMRES__array*
 bHYPRE_GMRES__array_create2dCol(int32_t m, int32_t n)
 {
-  return (struct bHYPRE_GMRES__array*)SIDL_interface__array_create2dCol(m, n);
+  return (struct bHYPRE_GMRES__array*)sidl_interface__array_create2dCol(m, n);
 }
 
 struct bHYPRE_GMRES__array*
 bHYPRE_GMRES__array_create2dRow(int32_t m, int32_t n)
 {
-  return (struct bHYPRE_GMRES__array*)SIDL_interface__array_create2dRow(m, n);
+  return (struct bHYPRE_GMRES__array*)sidl_interface__array_create2dRow(m, n);
 }
 
 struct bHYPRE_GMRES__array*
-bHYPRE_GMRES__array_borrow(bHYPRE_GMRES*firstElement,
-                           int32_t       dimen,
-const int32_t lower[],
-const int32_t upper[],
-const int32_t stride[])
+bHYPRE_GMRES__array_borrow(
+  bHYPRE_GMRES* firstElement,
+  int32_t       dimen,
+  const int32_t lower[],
+  const int32_t upper[],
+  const int32_t stride[])
 {
-  return (struct bHYPRE_GMRES__array*)SIDL_interface__array_borrow(
-    (struct SIDL_BaseInterface__object **)
+  return (struct bHYPRE_GMRES__array*)sidl_interface__array_borrow(
+    (struct sidl_BaseInterface__object **)
     firstElement, dimen, lower, upper, stride);
 }
 
 struct bHYPRE_GMRES__array*
-bHYPRE_GMRES__array_smartCopy(struct bHYPRE_GMRES__array *array)
+bHYPRE_GMRES__array_smartCopy(
+  struct bHYPRE_GMRES__array *array)
 {
   return (struct bHYPRE_GMRES__array*)
-    SIDL_interface__array_smartCopy((struct SIDL_interface__array *)array);
+    sidl_interface__array_smartCopy((struct sidl_interface__array *)array);
 }
 
 void
-bHYPRE_GMRES__array_addRef(struct bHYPRE_GMRES__array* array)
+bHYPRE_GMRES__array_addRef(
+  struct bHYPRE_GMRES__array* array)
 {
-  SIDL_interface__array_addRef((struct SIDL_interface__array *)array);
+  sidl_interface__array_addRef((struct sidl_interface__array *)array);
 }
 
 void
-bHYPRE_GMRES__array_deleteRef(struct bHYPRE_GMRES__array* array)
+bHYPRE_GMRES__array_deleteRef(
+  struct bHYPRE_GMRES__array* array)
 {
-  SIDL_interface__array_deleteRef((struct SIDL_interface__array *)array);
+  sidl_interface__array_deleteRef((struct sidl_interface__array *)array);
 }
 
 bHYPRE_GMRES
-bHYPRE_GMRES__array_get1(const struct bHYPRE_GMRES__array* array,
-                         const int32_t i1)
+bHYPRE_GMRES__array_get1(
+  const struct bHYPRE_GMRES__array* array,
+  const int32_t i1)
 {
   return (bHYPRE_GMRES)
-    SIDL_interface__array_get1((const struct SIDL_interface__array *)array
+    sidl_interface__array_get1((const struct sidl_interface__array *)array
     , i1);
 }
 
 bHYPRE_GMRES
-bHYPRE_GMRES__array_get2(const struct bHYPRE_GMRES__array* array,
-                         const int32_t i1,
-                         const int32_t i2)
+bHYPRE_GMRES__array_get2(
+  const struct bHYPRE_GMRES__array* array,
+  const int32_t i1,
+  const int32_t i2)
 {
   return (bHYPRE_GMRES)
-    SIDL_interface__array_get2((const struct SIDL_interface__array *)array
+    sidl_interface__array_get2((const struct sidl_interface__array *)array
     , i1, i2);
 }
 
 bHYPRE_GMRES
-bHYPRE_GMRES__array_get3(const struct bHYPRE_GMRES__array* array,
-                         const int32_t i1,
-                         const int32_t i2,
-                         const int32_t i3)
+bHYPRE_GMRES__array_get3(
+  const struct bHYPRE_GMRES__array* array,
+  const int32_t i1,
+  const int32_t i2,
+  const int32_t i3)
 {
   return (bHYPRE_GMRES)
-    SIDL_interface__array_get3((const struct SIDL_interface__array *)array
+    sidl_interface__array_get3((const struct sidl_interface__array *)array
     , i1, i2, i3);
 }
 
 bHYPRE_GMRES
-bHYPRE_GMRES__array_get4(const struct bHYPRE_GMRES__array* array,
-                         const int32_t i1,
-                         const int32_t i2,
-                         const int32_t i3,
-                         const int32_t i4)
+bHYPRE_GMRES__array_get4(
+  const struct bHYPRE_GMRES__array* array,
+  const int32_t i1,
+  const int32_t i2,
+  const int32_t i3,
+  const int32_t i4)
 {
   return (bHYPRE_GMRES)
-    SIDL_interface__array_get4((const struct SIDL_interface__array *)array
+    sidl_interface__array_get4((const struct sidl_interface__array *)array
     , i1, i2, i3, i4);
 }
 
 bHYPRE_GMRES
-bHYPRE_GMRES__array_get(const struct bHYPRE_GMRES__array* array,
-                        const int32_t indices[])
+bHYPRE_GMRES__array_get5(
+  const struct bHYPRE_GMRES__array* array,
+  const int32_t i1,
+  const int32_t i2,
+  const int32_t i3,
+  const int32_t i4,
+  const int32_t i5)
 {
   return (bHYPRE_GMRES)
-    SIDL_interface__array_get((const struct SIDL_interface__array *)array,
+    sidl_interface__array_get5((const struct sidl_interface__array *)array
+    , i1, i2, i3, i4, i5);
+}
+
+bHYPRE_GMRES
+bHYPRE_GMRES__array_get6(
+  const struct bHYPRE_GMRES__array* array,
+  const int32_t i1,
+  const int32_t i2,
+  const int32_t i3,
+  const int32_t i4,
+  const int32_t i5,
+  const int32_t i6)
+{
+  return (bHYPRE_GMRES)
+    sidl_interface__array_get6((const struct sidl_interface__array *)array
+    , i1, i2, i3, i4, i5, i6);
+}
+
+bHYPRE_GMRES
+bHYPRE_GMRES__array_get7(
+  const struct bHYPRE_GMRES__array* array,
+  const int32_t i1,
+  const int32_t i2,
+  const int32_t i3,
+  const int32_t i4,
+  const int32_t i5,
+  const int32_t i6,
+  const int32_t i7)
+{
+  return (bHYPRE_GMRES)
+    sidl_interface__array_get7((const struct sidl_interface__array *)array
+    , i1, i2, i3, i4, i5, i6, i7);
+}
+
+bHYPRE_GMRES
+bHYPRE_GMRES__array_get(
+  const struct bHYPRE_GMRES__array* array,
+  const int32_t indices[])
+{
+  return (bHYPRE_GMRES)
+    sidl_interface__array_get((const struct sidl_interface__array *)array,
       indices);
 }
 
 void
-bHYPRE_GMRES__array_set1(struct bHYPRE_GMRES__array* array,
-                         const int32_t i1,
-                         bHYPRE_GMRES const value)
+bHYPRE_GMRES__array_set1(
+  struct bHYPRE_GMRES__array* array,
+  const int32_t i1,
+  bHYPRE_GMRES const value)
 {
-  SIDL_interface__array_set1((struct SIDL_interface__array *)array
-  , i1, (struct SIDL_BaseInterface__object *)value);
+  sidl_interface__array_set1((struct sidl_interface__array *)array
+  , i1, (struct sidl_BaseInterface__object *)value);
 }
 
 void
-bHYPRE_GMRES__array_set2(struct bHYPRE_GMRES__array* array,
-                         const int32_t i1,
-                         const int32_t i2,
-                         bHYPRE_GMRES const value)
+bHYPRE_GMRES__array_set2(
+  struct bHYPRE_GMRES__array* array,
+  const int32_t i1,
+  const int32_t i2,
+  bHYPRE_GMRES const value)
 {
-  SIDL_interface__array_set2((struct SIDL_interface__array *)array
-  , i1, i2, (struct SIDL_BaseInterface__object *)value);
+  sidl_interface__array_set2((struct sidl_interface__array *)array
+  , i1, i2, (struct sidl_BaseInterface__object *)value);
 }
 
 void
-bHYPRE_GMRES__array_set3(struct bHYPRE_GMRES__array* array,
-                         const int32_t i1,
-                         const int32_t i2,
-                         const int32_t i3,
-                         bHYPRE_GMRES const value)
+bHYPRE_GMRES__array_set3(
+  struct bHYPRE_GMRES__array* array,
+  const int32_t i1,
+  const int32_t i2,
+  const int32_t i3,
+  bHYPRE_GMRES const value)
 {
-  SIDL_interface__array_set3((struct SIDL_interface__array *)array
-  , i1, i2, i3, (struct SIDL_BaseInterface__object *)value);
+  sidl_interface__array_set3((struct sidl_interface__array *)array
+  , i1, i2, i3, (struct sidl_BaseInterface__object *)value);
 }
 
 void
-bHYPRE_GMRES__array_set4(struct bHYPRE_GMRES__array* array,
-                         const int32_t i1,
-                         const int32_t i2,
-                         const int32_t i3,
-                         const int32_t i4,
-                         bHYPRE_GMRES const value)
+bHYPRE_GMRES__array_set4(
+  struct bHYPRE_GMRES__array* array,
+  const int32_t i1,
+  const int32_t i2,
+  const int32_t i3,
+  const int32_t i4,
+  bHYPRE_GMRES const value)
 {
-  SIDL_interface__array_set4((struct SIDL_interface__array *)array
-  , i1, i2, i3, i4, (struct SIDL_BaseInterface__object *)value);
+  sidl_interface__array_set4((struct sidl_interface__array *)array
+  , i1, i2, i3, i4, (struct sidl_BaseInterface__object *)value);
 }
 
 void
-bHYPRE_GMRES__array_set(struct bHYPRE_GMRES__array* array,
-                        const int32_t indices[],
-                        bHYPRE_GMRES const value)
+bHYPRE_GMRES__array_set5(
+  struct bHYPRE_GMRES__array* array,
+  const int32_t i1,
+  const int32_t i2,
+  const int32_t i3,
+  const int32_t i4,
+  const int32_t i5,
+  bHYPRE_GMRES const value)
 {
-  SIDL_interface__array_set((struct SIDL_interface__array *)array, indices,
-    (struct SIDL_BaseInterface__object *)value);
+  sidl_interface__array_set5((struct sidl_interface__array *)array
+  , i1, i2, i3, i4, i5, (struct sidl_BaseInterface__object *)value);
+}
+
+void
+bHYPRE_GMRES__array_set6(
+  struct bHYPRE_GMRES__array* array,
+  const int32_t i1,
+  const int32_t i2,
+  const int32_t i3,
+  const int32_t i4,
+  const int32_t i5,
+  const int32_t i6,
+  bHYPRE_GMRES const value)
+{
+  sidl_interface__array_set6((struct sidl_interface__array *)array
+  , i1, i2, i3, i4, i5, i6, (struct sidl_BaseInterface__object *)value);
+}
+
+void
+bHYPRE_GMRES__array_set7(
+  struct bHYPRE_GMRES__array* array,
+  const int32_t i1,
+  const int32_t i2,
+  const int32_t i3,
+  const int32_t i4,
+  const int32_t i5,
+  const int32_t i6,
+  const int32_t i7,
+  bHYPRE_GMRES const value)
+{
+  sidl_interface__array_set7((struct sidl_interface__array *)array
+  , i1, i2, i3, i4, i5, i6, i7, (struct sidl_BaseInterface__object *)value);
+}
+
+void
+bHYPRE_GMRES__array_set(
+  struct bHYPRE_GMRES__array* array,
+  const int32_t indices[],
+  bHYPRE_GMRES const value)
+{
+  sidl_interface__array_set((struct sidl_interface__array *)array, indices,
+    (struct sidl_BaseInterface__object *)value);
 }
 
 int32_t
-bHYPRE_GMRES__array_dimen(const struct bHYPRE_GMRES__array* array)
+bHYPRE_GMRES__array_dimen(
+  const struct bHYPRE_GMRES__array* array)
 {
-  return SIDL_interface__array_dimen((struct SIDL_interface__array *)array);
+  return sidl_interface__array_dimen((struct sidl_interface__array *)array);
 }
 
 int32_t
-bHYPRE_GMRES__array_lower(const struct bHYPRE_GMRES__array* array,
-                          const int32_t ind)
+bHYPRE_GMRES__array_lower(
+  const struct bHYPRE_GMRES__array* array,
+  const int32_t ind)
 {
-  return SIDL_interface__array_lower((struct SIDL_interface__array *)array,
+  return sidl_interface__array_lower((struct sidl_interface__array *)array,
     ind);
 }
 
 int32_t
-bHYPRE_GMRES__array_upper(const struct bHYPRE_GMRES__array* array,
-                          const int32_t ind)
+bHYPRE_GMRES__array_upper(
+  const struct bHYPRE_GMRES__array* array,
+  const int32_t ind)
 {
-  return SIDL_interface__array_upper((struct SIDL_interface__array *)array,
+  return sidl_interface__array_upper((struct sidl_interface__array *)array,
     ind);
 }
 
 int32_t
-bHYPRE_GMRES__array_stride(const struct bHYPRE_GMRES__array* array,
-                           const int32_t ind)
+bHYPRE_GMRES__array_length(
+  const struct bHYPRE_GMRES__array* array,
+  const int32_t ind)
 {
-  return SIDL_interface__array_stride((struct SIDL_interface__array *)array,
+  return sidl_interface__array_length((struct sidl_interface__array *)array,
+    ind);
+}
+
+int32_t
+bHYPRE_GMRES__array_stride(
+  const struct bHYPRE_GMRES__array* array,
+  const int32_t ind)
+{
+  return sidl_interface__array_stride((struct sidl_interface__array *)array,
     ind);
 }
 
 int
-bHYPRE_GMRES__array_isColumnOrder(const struct bHYPRE_GMRES__array* array)
+bHYPRE_GMRES__array_isColumnOrder(
+  const struct bHYPRE_GMRES__array* array)
 {
-  return SIDL_interface__array_isColumnOrder((struct SIDL_interface__array 
+  return sidl_interface__array_isColumnOrder((struct sidl_interface__array 
     *)array);
 }
 
 int
-bHYPRE_GMRES__array_isRowOrder(const struct bHYPRE_GMRES__array* array)
+bHYPRE_GMRES__array_isRowOrder(
+  const struct bHYPRE_GMRES__array* array)
 {
-  return SIDL_interface__array_isRowOrder((struct SIDL_interface__array 
+  return sidl_interface__array_isRowOrder((struct sidl_interface__array 
     *)array);
 }
 
 void
-bHYPRE_GMRES__array_copy(const struct bHYPRE_GMRES__array* src,
-                               struct bHYPRE_GMRES__array* dest)
+bHYPRE_GMRES__array_copy(
+  const struct bHYPRE_GMRES__array* src,
+  struct bHYPRE_GMRES__array* dest)
 {
-  SIDL_interface__array_copy((const struct SIDL_interface__array *)src,
-                             (struct SIDL_interface__array *)dest);
+  sidl_interface__array_copy((const struct sidl_interface__array *)src,
+                             (struct sidl_interface__array *)dest);
 }
 
 struct bHYPRE_GMRES__array*
-bHYPRE_GMRES__array_ensure(struct bHYPRE_GMRES__array* src,
-                           int32_t dimen,
-                           int     ordering)
+bHYPRE_GMRES__array_slice(
+  struct bHYPRE_GMRES__array* src,
+  int32_t        dimen,
+  const int32_t  numElem[],
+  const int32_t  *srcStart,
+  const int32_t  *srcStride,
+  const int32_t  *newStart)
 {
   return (struct bHYPRE_GMRES__array*)
-    SIDL_interface__array_ensure((struct SIDL_interface__array *)src, dimen,
+    sidl_interface__array_slice((struct sidl_interface__array *)src,
+                                dimen, numElem, srcStart, srcStride, newStart);
+}
+
+struct bHYPRE_GMRES__array*
+bHYPRE_GMRES__array_ensure(
+  struct bHYPRE_GMRES__array* src,
+  int32_t dimen,
+  int     ordering)
+{
+  return (struct bHYPRE_GMRES__array*)
+    sidl_interface__array_ensure((struct sidl_interface__array *)src, dimen,
       ordering);
 }
 

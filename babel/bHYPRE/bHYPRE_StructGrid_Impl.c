@@ -2,14 +2,14 @@
  * File:          bHYPRE_StructGrid_Impl.c
  * Symbol:        bHYPRE.StructGrid-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.8.2
- * SIDL Created:  20030401 14:47:20 PST
- * Generated:     20030401 14:47:32 PST
+ * Babel Version: 0.9.8
+ * sidl Created:  20050208 15:29:05 PST
+ * Generated:     20050208 15:29:07 PST
  * Description:   Server-side implementation for bHYPRE.StructGrid
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.8.2
+ * babel-version = 0.9.8
  * source-line   = 1101
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -41,7 +41,7 @@
 
 void
 impl_bHYPRE_StructGrid__ctor(
-  bHYPRE_StructGrid self)
+  /*in*/ bHYPRE_StructGrid self)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructGrid._ctor) */
   /* Insert the implementation of the constructor method here... */
@@ -57,7 +57,7 @@ impl_bHYPRE_StructGrid__ctor(
 
 void
 impl_bHYPRE_StructGrid__dtor(
-  bHYPRE_StructGrid self)
+  /*in*/ bHYPRE_StructGrid self)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructGrid._dtor) */
   /* Insert the implementation of the destructor method here... */
@@ -74,7 +74,7 @@ impl_bHYPRE_StructGrid__dtor(
 
 int32_t
 impl_bHYPRE_StructGrid_SetCommunicator(
-  bHYPRE_StructGrid self, void* mpi_comm)
+  /*in*/ bHYPRE_StructGrid self, /*in*/ void* mpi_comm)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructGrid.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
@@ -91,7 +91,7 @@ impl_bHYPRE_StructGrid_SetCommunicator(
 
 int32_t
 impl_bHYPRE_StructGrid_SetDimension(
-  bHYPRE_StructGrid self, int32_t dim)
+  /*in*/ bHYPRE_StructGrid self, /*in*/ int32_t dim)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructGrid.SetDimension) */
   /* Insert the implementation of the SetDimension method here... */
@@ -108,8 +108,8 @@ impl_bHYPRE_StructGrid_SetDimension(
 
 int32_t
 impl_bHYPRE_StructGrid_SetExtents(
-  bHYPRE_StructGrid self, struct SIDL_int__array* ilower,
-    struct SIDL_int__array* iupper)
+  /*in*/ bHYPRE_StructGrid self, /*in*/ struct sidl_int__array* ilower,
+    /*in*/ struct sidl_int__array* iupper)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructGrid.SetExtents) */
   /* Insert the implementation of the SetExtents method here... */
@@ -126,7 +126,7 @@ impl_bHYPRE_StructGrid_SetExtents(
 
 int32_t
 impl_bHYPRE_StructGrid_SetPeriodic(
-  bHYPRE_StructGrid self, struct SIDL_int__array* periodic)
+  /*in*/ bHYPRE_StructGrid self, /*in*/ struct sidl_int__array* periodic)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructGrid.SetPeriodic) */
   /* Insert the implementation of the SetPeriodic method here... */
@@ -143,7 +143,7 @@ impl_bHYPRE_StructGrid_SetPeriodic(
 
 int32_t
 impl_bHYPRE_StructGrid_Assemble(
-  bHYPRE_StructGrid self)
+  /*in*/ bHYPRE_StructGrid self)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructGrid.Assemble) */
   /* Insert the implementation of the Assemble method here... */

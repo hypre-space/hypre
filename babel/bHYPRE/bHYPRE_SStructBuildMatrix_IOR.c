@@ -2,14 +2,14 @@
  * File:          bHYPRE_SStructBuildMatrix_IOR.c
  * Symbol:        bHYPRE.SStructBuildMatrix-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.8.2
- * SIDL Created:  20030401 14:47:20 PST
- * Generated:     20030401 14:47:23 PST
+ * Babel Version: 0.9.8
+ * sidl Created:  20050208 15:29:04 PST
+ * Generated:     20050208 15:29:06 PST
  * Description:   Intermediate Object Representation for bHYPRE.SStructBuildMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.2
+ * babel-version = 0.9.8
  * source-line   = 276
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -82,10 +82,10 @@ remote_bHYPRE_SStructBuildMatrix_deleteRef(
  * REMOTE METHOD STUB:isSame
  */
 
-static SIDL_bool
+static sidl_bool
 remote_bHYPRE_SStructBuildMatrix_isSame(
   void* self,
-  struct SIDL_BaseInterface__object* iobj)
+  struct sidl_BaseInterface__object* iobj)
 {
   return 0;
 }
@@ -94,19 +94,19 @@ remote_bHYPRE_SStructBuildMatrix_isSame(
  * REMOTE METHOD STUB:queryInt
  */
 
-static struct SIDL_BaseInterface__object*
+static struct sidl_BaseInterface__object*
 remote_bHYPRE_SStructBuildMatrix_queryInt(
   void* self,
   const char* name)
 {
-  return (struct SIDL_BaseInterface__object*) 0;
+  return (struct sidl_BaseInterface__object*) 0;
 }
 
 /*
  * REMOTE METHOD STUB:isType
  */
 
-static SIDL_bool
+static sidl_bool
 remote_bHYPRE_SStructBuildMatrix_isType(
   void* self,
   const char* name)
@@ -118,11 +118,11 @@ remote_bHYPRE_SStructBuildMatrix_isType(
  * REMOTE METHOD STUB:getClassInfo
  */
 
-static struct SIDL_ClassInfo__object*
+static struct sidl_ClassInfo__object*
 remote_bHYPRE_SStructBuildMatrix_getClassInfo(
   void* self)
 {
-  return (struct SIDL_ClassInfo__object*) 0;
+  return (struct sidl_ClassInfo__object*) 0;
 }
 
 /*
@@ -166,7 +166,7 @@ remote_bHYPRE_SStructBuildMatrix_Assemble(
 static int32_t
 remote_bHYPRE_SStructBuildMatrix_GetObject(
   void* self,
-  struct SIDL_BaseInterface__object** A)
+  struct sidl_BaseInterface__object** A)
 {
   return 0;
 }
@@ -191,11 +191,11 @@ static int32_t
 remote_bHYPRE_SStructBuildMatrix_SetValues(
   void* self,
   int32_t part,
-  struct SIDL_int__array* index,
+  struct sidl_int__array* index,
   int32_t var,
   int32_t nentries,
-  struct SIDL_int__array* entries,
-  struct SIDL_double__array* values)
+  struct sidl_int__array* entries,
+  struct sidl_double__array* values)
 {
   return 0;
 }
@@ -208,12 +208,12 @@ static int32_t
 remote_bHYPRE_SStructBuildMatrix_SetBoxValues(
   void* self,
   int32_t part,
-  struct SIDL_int__array* ilower,
-  struct SIDL_int__array* iupper,
+  struct sidl_int__array* ilower,
+  struct sidl_int__array* iupper,
   int32_t var,
   int32_t nentries,
-  struct SIDL_int__array* entries,
-  struct SIDL_double__array* values)
+  struct sidl_int__array* entries,
+  struct sidl_double__array* values)
 {
   return 0;
 }
@@ -226,11 +226,11 @@ static int32_t
 remote_bHYPRE_SStructBuildMatrix_AddToValues(
   void* self,
   int32_t part,
-  struct SIDL_int__array* index,
+  struct sidl_int__array* index,
   int32_t var,
   int32_t nentries,
-  struct SIDL_int__array* entries,
-  struct SIDL_double__array* values)
+  struct sidl_int__array* entries,
+  struct sidl_double__array* values)
 {
   return 0;
 }
@@ -243,12 +243,12 @@ static int32_t
 remote_bHYPRE_SStructBuildMatrix_AddToBoxValues(
   void* self,
   int32_t part,
-  struct SIDL_int__array* ilower,
-  struct SIDL_int__array* iupper,
+  struct sidl_int__array* ilower,
+  struct sidl_int__array* iupper,
   int32_t var,
   int32_t nentries,
-  struct SIDL_int__array* entries,
-  struct SIDL_double__array* values)
+  struct sidl_int__array* entries,
+  struct sidl_double__array* values)
 {
   return 0;
 }

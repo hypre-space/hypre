@@ -2,30 +2,30 @@
  * File:          bHYPRE_IJParCSRMatrix_Stub.c
  * Symbol:        bHYPRE.IJParCSRMatrix-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.8.2
- * SIDL Created:  20030401 14:47:20 PST
- * Generated:     20030401 14:47:29 PST
+ * Babel Version: 0.9.8
+ * sidl Created:  20050208 15:29:04 PST
+ * Generated:     20050208 15:29:07 PST
  * Description:   Client-side glue code for bHYPRE.IJParCSRMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.2
+ * babel-version = 0.9.8
  * source-line   = 789
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #include "bHYPRE_IJParCSRMatrix.h"
 #include "bHYPRE_IJParCSRMatrix_IOR.h"
-#ifndef included_SIDL_interface_IOR_h
-#include "SIDL_interface_IOR.h"
+#ifndef included_sidl_interface_IOR_h
+#include "sidl_interface_IOR.h"
 #endif
 #include <stddef.h>
-#include "SIDL_BaseInterface_IOR.h"
+#include "sidl_BaseInterface_IOR.h"
 #include "babel_config.h"
 #ifdef SIDL_DYNAMIC_LIBRARY
 #include <stdio.h>
 #include <stdlib.h>
-#include "SIDL_Loader.h"
+#include "sidl_Loader.h"
 #endif
 
 /*
@@ -46,11 +46,30 @@ static const struct bHYPRE_IJParCSRMatrix__external* _loadIOR(void)
 #ifdef SIDL_STATIC_LIBRARY
   _ior = bHYPRE_IJParCSRMatrix__externals();
 #else
-  const struct bHYPRE_IJParCSRMatrix__external*(*dll_f)(void) =
-    (const struct bHYPRE_IJParCSRMatrix__external*(*)(void)) 
-      SIDL_Loader_lookupSymbol(
-      "bHYPRE_IJParCSRMatrix__externals");
-  _ior = (dll_f ? (*dll_f)() : NULL);
+  sidl_DLL dll = sidl_DLL__create();
+  const struct bHYPRE_IJParCSRMatrix__external*(*dll_f)(void);
+  /* check global namespace for symbol first */
+  if (dll && sidl_DLL_loadLibrary(dll, "main:", TRUE, FALSE)) {
+    dll_f =
+      (const struct bHYPRE_IJParCSRMatrix__external*(*)(void)) 
+        sidl_DLL_lookupSymbol(
+        dll, "bHYPRE_IJParCSRMatrix__externals");
+    _ior = (dll_f ? (*dll_f)() : NULL);
+  }
+  if (dll) sidl_DLL_deleteRef(dll);
+  if (!_ior) {
+    dll = sidl_Loader_findLibrary("bHYPRE.IJParCSRMatrix",
+      "ior/impl", sidl_Scope_SCLSCOPE,
+      sidl_Resolve_SCLRESOLVE);
+    if (dll) {
+      dll_f =
+        (const struct bHYPRE_IJParCSRMatrix__external*(*)(void)) 
+          sidl_DLL_lookupSymbol(
+          dll, "bHYPRE_IJParCSRMatrix__externals");
+      _ior = (dll_f ? (*dll_f)() : NULL);
+      sidl_DLL_deleteRef(dll);
+    }
+  }
   if (!_ior) {
     fputs("Babel: unable to load the implementation for bHYPRE.IJParCSRMatrix; please set SIDL_DLL_PATH\n", stderr);
     exit(-1);
@@ -74,7 +93,7 @@ bHYPRE_IJParCSRMatrix__create()
 /*
  * <p>
  * Add one to the intrinsic reference count in the underlying object.
- * Object in <code>SIDL</code> have an intrinsic reference count.
+ * Object in <code>sidl</code> have an intrinsic reference count.
  * Objects continue to exist as long as the reference count is
  * positive. Clients should call this method whenever they
  * create another ongoing reference to an object or interface.
@@ -97,7 +116,7 @@ bHYPRE_IJParCSRMatrix_addRef(
 /*
  * Decrease by one the intrinsic reference count in the underlying
  * object, and delete the object if the reference is non-positive.
- * Objects in <code>SIDL</code> have an intrinsic reference count.
+ * Objects in <code>sidl</code> have an intrinsic reference count.
  * Clients should call this method whenever they remove a
  * reference to an object or interface.
  */
@@ -115,10 +134,10 @@ bHYPRE_IJParCSRMatrix_deleteRef(
  * object as this object.
  */
 
-SIDL_bool
+sidl_bool
 bHYPRE_IJParCSRMatrix_isSame(
   bHYPRE_IJParCSRMatrix self,
-  SIDL_BaseInterface iobj)
+  /*in*/ sidl_BaseInterface iobj)
 {
   return (*self->d_epv->f_isSame)(
     self,
@@ -127,7 +146,7 @@ bHYPRE_IJParCSRMatrix_isSame(
 
 /*
  * Check whether the object can support the specified interface or
- * class.  If the <code>SIDL</code> type name in <code>name</code>
+ * class.  If the <code>sidl</code> type name in <code>name</code>
  * is supported, then a reference to that object is returned with the
  * reference count incremented.  The callee will be responsible for
  * calling <code>deleteRef</code> on the returned object.  If
@@ -135,10 +154,10 @@ bHYPRE_IJParCSRMatrix_isSame(
  * returned.
  */
 
-SIDL_BaseInterface
+sidl_BaseInterface
 bHYPRE_IJParCSRMatrix_queryInt(
   bHYPRE_IJParCSRMatrix self,
-  const char* name)
+  /*in*/ const char* name)
 {
   return (*self->d_epv->f_queryInt)(
     self,
@@ -147,15 +166,15 @@ bHYPRE_IJParCSRMatrix_queryInt(
 
 /*
  * Return whether this object is an instance of the specified type.
- * The string name must be the <code>SIDL</code> type name.  This
+ * The string name must be the <code>sidl</code> type name.  This
  * routine will return <code>true</code> if and only if a cast to
  * the string type name would succeed.
  */
 
-SIDL_bool
+sidl_bool
 bHYPRE_IJParCSRMatrix_isType(
   bHYPRE_IJParCSRMatrix self,
-  const char* name)
+  /*in*/ const char* name)
 {
   return (*self->d_epv->f_isType)(
     self,
@@ -166,7 +185,7 @@ bHYPRE_IJParCSRMatrix_isType(
  * Return the meta-data about the class implementing this interface.
  */
 
-SIDL_ClassInfo
+sidl_ClassInfo
 bHYPRE_IJParCSRMatrix_getClassInfo(
   bHYPRE_IJParCSRMatrix self)
 {
@@ -192,8 +211,8 @@ bHYPRE_IJParCSRMatrix_getClassInfo(
 int32_t
 bHYPRE_IJParCSRMatrix_SetDiagOffdSizes(
   bHYPRE_IJParCSRMatrix self,
-  struct SIDL_int__array* diag_sizes,
-  struct SIDL_int__array* offdiag_sizes)
+  /*in*/ struct sidl_int__array* diag_sizes,
+  /*in*/ struct sidl_int__array* offdiag_sizes)
 {
   return (*self->d_epv->f_SetDiagOffdSizes)(
     self,
@@ -209,11 +228,224 @@ bHYPRE_IJParCSRMatrix_SetDiagOffdSizes(
 int32_t
 bHYPRE_IJParCSRMatrix_SetCommunicator(
   bHYPRE_IJParCSRMatrix self,
-  void* mpi_comm)
+  /*in*/ void* mpi_comm)
 {
   return (*self->d_epv->f_SetCommunicator)(
     self,
     mpi_comm);
+}
+
+/*
+ * Set the int parameter associated with {\tt name}.
+ * 
+ */
+
+int32_t
+bHYPRE_IJParCSRMatrix_SetIntParameter(
+  bHYPRE_IJParCSRMatrix self,
+  /*in*/ const char* name,
+  /*in*/ int32_t value)
+{
+  return (*self->d_epv->f_SetIntParameter)(
+    self,
+    name,
+    value);
+}
+
+/*
+ * Set the double parameter associated with {\tt name}.
+ * 
+ */
+
+int32_t
+bHYPRE_IJParCSRMatrix_SetDoubleParameter(
+  bHYPRE_IJParCSRMatrix self,
+  /*in*/ const char* name,
+  /*in*/ double value)
+{
+  return (*self->d_epv->f_SetDoubleParameter)(
+    self,
+    name,
+    value);
+}
+
+/*
+ * Set the string parameter associated with {\tt name}.
+ * 
+ */
+
+int32_t
+bHYPRE_IJParCSRMatrix_SetStringParameter(
+  bHYPRE_IJParCSRMatrix self,
+  /*in*/ const char* name,
+  /*in*/ const char* value)
+{
+  return (*self->d_epv->f_SetStringParameter)(
+    self,
+    name,
+    value);
+}
+
+/*
+ * Set the int 1-D array parameter associated with {\tt name}.
+ * 
+ */
+
+int32_t
+bHYPRE_IJParCSRMatrix_SetIntArray1Parameter(
+  bHYPRE_IJParCSRMatrix self,
+  /*in*/ const char* name,
+  /*in*/ struct sidl_int__array* value)
+{
+  return (*self->d_epv->f_SetIntArray1Parameter)(
+    self,
+    name,
+    value);
+}
+
+/*
+ * Set the int 2-D array parameter associated with {\tt name}.
+ * 
+ */
+
+int32_t
+bHYPRE_IJParCSRMatrix_SetIntArray2Parameter(
+  bHYPRE_IJParCSRMatrix self,
+  /*in*/ const char* name,
+  /*in*/ struct sidl_int__array* value)
+{
+  return (*self->d_epv->f_SetIntArray2Parameter)(
+    self,
+    name,
+    value);
+}
+
+/*
+ * Set the double 1-D array parameter associated with {\tt name}.
+ * 
+ */
+
+int32_t
+bHYPRE_IJParCSRMatrix_SetDoubleArray1Parameter(
+  bHYPRE_IJParCSRMatrix self,
+  /*in*/ const char* name,
+  /*in*/ struct sidl_double__array* value)
+{
+  return (*self->d_epv->f_SetDoubleArray1Parameter)(
+    self,
+    name,
+    value);
+}
+
+/*
+ * Set the double 2-D array parameter associated with {\tt name}.
+ * 
+ */
+
+int32_t
+bHYPRE_IJParCSRMatrix_SetDoubleArray2Parameter(
+  bHYPRE_IJParCSRMatrix self,
+  /*in*/ const char* name,
+  /*in*/ struct sidl_double__array* value)
+{
+  return (*self->d_epv->f_SetDoubleArray2Parameter)(
+    self,
+    name,
+    value);
+}
+
+/*
+ * Set the int parameter associated with {\tt name}.
+ * 
+ */
+
+int32_t
+bHYPRE_IJParCSRMatrix_GetIntValue(
+  bHYPRE_IJParCSRMatrix self,
+  /*in*/ const char* name,
+  /*out*/ int32_t* value)
+{
+  return (*self->d_epv->f_GetIntValue)(
+    self,
+    name,
+    value);
+}
+
+/*
+ * Get the double parameter associated with {\tt name}.
+ * 
+ */
+
+int32_t
+bHYPRE_IJParCSRMatrix_GetDoubleValue(
+  bHYPRE_IJParCSRMatrix self,
+  /*in*/ const char* name,
+  /*out*/ double* value)
+{
+  return (*self->d_epv->f_GetDoubleValue)(
+    self,
+    name,
+    value);
+}
+
+/*
+ * (Optional) Do any preprocessing that may be necessary in
+ * order to execute {\tt Apply}.
+ * 
+ */
+
+int32_t
+bHYPRE_IJParCSRMatrix_Setup(
+  bHYPRE_IJParCSRMatrix self,
+  /*in*/ bHYPRE_Vector b,
+  /*in*/ bHYPRE_Vector x)
+{
+  return (*self->d_epv->f_Setup)(
+    self,
+    b,
+    x);
+}
+
+/*
+ * Apply the operator to {\tt b}, returning {\tt x}.
+ * 
+ */
+
+int32_t
+bHYPRE_IJParCSRMatrix_Apply(
+  bHYPRE_IJParCSRMatrix self,
+  /*in*/ bHYPRE_Vector b,
+  /*inout*/ bHYPRE_Vector* x)
+{
+  return (*self->d_epv->f_Apply)(
+    self,
+    b,
+    x);
+}
+
+/*
+ * The GetRow method will allocate space for its two output
+ * arrays on the first call.  The space will be reused on
+ * subsequent calls.  Thus the user must not delete them, yet
+ * must not depend on the data from GetRow to persist beyond the
+ * next GetRow call.
+ * 
+ */
+
+int32_t
+bHYPRE_IJParCSRMatrix_GetRow(
+  bHYPRE_IJParCSRMatrix self,
+  /*in*/ int32_t row,
+  /*out*/ int32_t* size,
+  /*out*/ struct sidl_int__array** col_ind,
+  /*out*/ struct sidl_double__array** values)
+{
+  return (*self->d_epv->f_GetRow)(
+    self,
+    row,
+    size,
+    col_ind,
+    values);
 }
 
 /*
@@ -254,7 +486,7 @@ bHYPRE_IJParCSRMatrix_Assemble(
  * with that object, it must be returned from the problem
  * definition object. {\tt GetObject} performs this function.
  * At compile time, the type of the returned object is unknown.
- * Thus, the returned type is a SIDL.BaseInterface.
+ * Thus, the returned type is a sidl.BaseInterface.
  * QueryInterface or Cast must be used on the returned object to
  * convert it into a known type.
  * 
@@ -263,7 +495,7 @@ bHYPRE_IJParCSRMatrix_Assemble(
 int32_t
 bHYPRE_IJParCSRMatrix_GetObject(
   bHYPRE_IJParCSRMatrix self,
-  SIDL_BaseInterface* A)
+  /*out*/ sidl_BaseInterface* A)
 {
   return (*self->d_epv->f_GetObject)(
     self,
@@ -297,10 +529,10 @@ bHYPRE_IJParCSRMatrix_GetObject(
 int32_t
 bHYPRE_IJParCSRMatrix_SetLocalRange(
   bHYPRE_IJParCSRMatrix self,
-  int32_t ilower,
-  int32_t iupper,
-  int32_t jlower,
-  int32_t jupper)
+  /*in*/ int32_t ilower,
+  /*in*/ int32_t iupper,
+  /*in*/ int32_t jlower,
+  /*in*/ int32_t jupper)
 {
   return (*self->d_epv->f_SetLocalRange)(
     self,
@@ -329,11 +561,11 @@ bHYPRE_IJParCSRMatrix_SetLocalRange(
 int32_t
 bHYPRE_IJParCSRMatrix_SetValues(
   bHYPRE_IJParCSRMatrix self,
-  int32_t nrows,
-  struct SIDL_int__array* ncols,
-  struct SIDL_int__array* rows,
-  struct SIDL_int__array* cols,
-  struct SIDL_double__array* values)
+  /*in*/ int32_t nrows,
+  /*in*/ struct sidl_int__array* ncols,
+  /*in*/ struct sidl_int__array* rows,
+  /*in*/ struct sidl_int__array* cols,
+  /*in*/ struct sidl_double__array* values)
 {
   return (*self->d_epv->f_SetValues)(
     self,
@@ -357,11 +589,11 @@ bHYPRE_IJParCSRMatrix_SetValues(
 int32_t
 bHYPRE_IJParCSRMatrix_AddToValues(
   bHYPRE_IJParCSRMatrix self,
-  int32_t nrows,
-  struct SIDL_int__array* ncols,
-  struct SIDL_int__array* rows,
-  struct SIDL_int__array* cols,
-  struct SIDL_double__array* values)
+  /*in*/ int32_t nrows,
+  /*in*/ struct sidl_int__array* ncols,
+  /*in*/ struct sidl_int__array* rows,
+  /*in*/ struct sidl_int__array* cols,
+  /*in*/ struct sidl_double__array* values)
 {
   return (*self->d_epv->f_AddToValues)(
     self,
@@ -381,10 +613,10 @@ bHYPRE_IJParCSRMatrix_AddToValues(
 int32_t
 bHYPRE_IJParCSRMatrix_GetLocalRange(
   bHYPRE_IJParCSRMatrix self,
-  int32_t* ilower,
-  int32_t* iupper,
-  int32_t* jlower,
-  int32_t* jupper)
+  /*out*/ int32_t* ilower,
+  /*out*/ int32_t* iupper,
+  /*out*/ int32_t* jlower,
+  /*out*/ int32_t* jupper)
 {
   return (*self->d_epv->f_GetLocalRange)(
     self,
@@ -404,9 +636,9 @@ bHYPRE_IJParCSRMatrix_GetLocalRange(
 int32_t
 bHYPRE_IJParCSRMatrix_GetRowCounts(
   bHYPRE_IJParCSRMatrix self,
-  int32_t nrows,
-  struct SIDL_int__array* rows,
-  struct SIDL_int__array** ncols)
+  /*in*/ int32_t nrows,
+  /*in*/ struct sidl_int__array* rows,
+  /*inout*/ struct sidl_int__array** ncols)
 {
   return (*self->d_epv->f_GetRowCounts)(
     self,
@@ -424,11 +656,11 @@ bHYPRE_IJParCSRMatrix_GetRowCounts(
 int32_t
 bHYPRE_IJParCSRMatrix_GetValues(
   bHYPRE_IJParCSRMatrix self,
-  int32_t nrows,
-  struct SIDL_int__array* ncols,
-  struct SIDL_int__array* rows,
-  struct SIDL_int__array* cols,
-  struct SIDL_double__array** values)
+  /*in*/ int32_t nrows,
+  /*in*/ struct sidl_int__array* ncols,
+  /*in*/ struct sidl_int__array* rows,
+  /*in*/ struct sidl_int__array* cols,
+  /*inout*/ struct sidl_double__array** values)
 {
   return (*self->d_epv->f_GetValues)(
     self,
@@ -453,7 +685,7 @@ bHYPRE_IJParCSRMatrix_GetValues(
 int32_t
 bHYPRE_IJParCSRMatrix_SetRowSizes(
   bHYPRE_IJParCSRMatrix self,
-  struct SIDL_int__array* sizes)
+  /*in*/ struct sidl_int__array* sizes)
 {
   return (*self->d_epv->f_SetRowSizes)(
     self,
@@ -469,7 +701,7 @@ bHYPRE_IJParCSRMatrix_SetRowSizes(
 int32_t
 bHYPRE_IJParCSRMatrix_Print(
   bHYPRE_IJParCSRMatrix self,
-  const char* filename)
+  /*in*/ const char* filename)
 {
   return (*self->d_epv->f_Print)(
     self,
@@ -485,226 +717,13 @@ bHYPRE_IJParCSRMatrix_Print(
 int32_t
 bHYPRE_IJParCSRMatrix_Read(
   bHYPRE_IJParCSRMatrix self,
-  const char* filename,
-  void* comm)
+  /*in*/ const char* filename,
+  /*in*/ void* comm)
 {
   return (*self->d_epv->f_Read)(
     self,
     filename,
     comm);
-}
-
-/*
- * Set the int parameter associated with {\tt name}.
- * 
- */
-
-int32_t
-bHYPRE_IJParCSRMatrix_SetIntParameter(
-  bHYPRE_IJParCSRMatrix self,
-  const char* name,
-  int32_t value)
-{
-  return (*self->d_epv->f_SetIntParameter)(
-    self,
-    name,
-    value);
-}
-
-/*
- * Set the double parameter associated with {\tt name}.
- * 
- */
-
-int32_t
-bHYPRE_IJParCSRMatrix_SetDoubleParameter(
-  bHYPRE_IJParCSRMatrix self,
-  const char* name,
-  double value)
-{
-  return (*self->d_epv->f_SetDoubleParameter)(
-    self,
-    name,
-    value);
-}
-
-/*
- * Set the string parameter associated with {\tt name}.
- * 
- */
-
-int32_t
-bHYPRE_IJParCSRMatrix_SetStringParameter(
-  bHYPRE_IJParCSRMatrix self,
-  const char* name,
-  const char* value)
-{
-  return (*self->d_epv->f_SetStringParameter)(
-    self,
-    name,
-    value);
-}
-
-/*
- * Set the int 1-D array parameter associated with {\tt name}.
- * 
- */
-
-int32_t
-bHYPRE_IJParCSRMatrix_SetIntArray1Parameter(
-  bHYPRE_IJParCSRMatrix self,
-  const char* name,
-  struct SIDL_int__array* value)
-{
-  return (*self->d_epv->f_SetIntArray1Parameter)(
-    self,
-    name,
-    value);
-}
-
-/*
- * Set the int 2-D array parameter associated with {\tt name}.
- * 
- */
-
-int32_t
-bHYPRE_IJParCSRMatrix_SetIntArray2Parameter(
-  bHYPRE_IJParCSRMatrix self,
-  const char* name,
-  struct SIDL_int__array* value)
-{
-  return (*self->d_epv->f_SetIntArray2Parameter)(
-    self,
-    name,
-    value);
-}
-
-/*
- * Set the double 1-D array parameter associated with {\tt name}.
- * 
- */
-
-int32_t
-bHYPRE_IJParCSRMatrix_SetDoubleArray1Parameter(
-  bHYPRE_IJParCSRMatrix self,
-  const char* name,
-  struct SIDL_double__array* value)
-{
-  return (*self->d_epv->f_SetDoubleArray1Parameter)(
-    self,
-    name,
-    value);
-}
-
-/*
- * Set the double 2-D array parameter associated with {\tt name}.
- * 
- */
-
-int32_t
-bHYPRE_IJParCSRMatrix_SetDoubleArray2Parameter(
-  bHYPRE_IJParCSRMatrix self,
-  const char* name,
-  struct SIDL_double__array* value)
-{
-  return (*self->d_epv->f_SetDoubleArray2Parameter)(
-    self,
-    name,
-    value);
-}
-
-/*
- * Set the int parameter associated with {\tt name}.
- * 
- */
-
-int32_t
-bHYPRE_IJParCSRMatrix_GetIntValue(
-  bHYPRE_IJParCSRMatrix self,
-  const char* name,
-  int32_t* value)
-{
-  return (*self->d_epv->f_GetIntValue)(
-    self,
-    name,
-    value);
-}
-
-/*
- * Get the double parameter associated with {\tt name}.
- * 
- */
-
-int32_t
-bHYPRE_IJParCSRMatrix_GetDoubleValue(
-  bHYPRE_IJParCSRMatrix self,
-  const char* name,
-  double* value)
-{
-  return (*self->d_epv->f_GetDoubleValue)(
-    self,
-    name,
-    value);
-}
-
-/*
- * (Optional) Do any preprocessing that may be necessary in
- * order to execute {\tt Apply}.
- * 
- */
-
-int32_t
-bHYPRE_IJParCSRMatrix_Setup(
-  bHYPRE_IJParCSRMatrix self,
-  bHYPRE_Vector b,
-  bHYPRE_Vector x)
-{
-  return (*self->d_epv->f_Setup)(
-    self,
-    b,
-    x);
-}
-
-/*
- * Apply the operator to {\tt b}, returning {\tt x}.
- * 
- */
-
-int32_t
-bHYPRE_IJParCSRMatrix_Apply(
-  bHYPRE_IJParCSRMatrix self,
-  bHYPRE_Vector b,
-  bHYPRE_Vector* x)
-{
-  return (*self->d_epv->f_Apply)(
-    self,
-    b,
-    x);
-}
-
-/*
- * The GetRow method will allocate space for its two output
- * arrays on the first call.  The space will be reused on
- * subsequent calls.  Thus the user must not delete them, yet
- * must not depend on the data from GetRow to persist beyond the
- * next GetRow call.
- * 
- */
-
-int32_t
-bHYPRE_IJParCSRMatrix_GetRow(
-  bHYPRE_IJParCSRMatrix self,
-  int32_t row,
-  int32_t* size,
-  struct SIDL_int__array** col_ind,
-  struct SIDL_double__array** values)
-{
-  return (*self->d_epv->f_GetRow)(
-    self,
-    row,
-    size,
-    col_ind,
-    values);
 }
 
 /*
@@ -718,7 +737,7 @@ bHYPRE_IJParCSRMatrix__cast(
   bHYPRE_IJParCSRMatrix cast = NULL;
 
   if (obj != NULL) {
-    SIDL_BaseInterface base = (SIDL_BaseInterface) obj;
+    sidl_BaseInterface base = (sidl_BaseInterface) obj;
     cast = (bHYPRE_IJParCSRMatrix) (*base->d_epv->f__cast)(
       base->d_object,
       "bHYPRE.IJParCSRMatrix");
@@ -739,29 +758,31 @@ bHYPRE_IJParCSRMatrix__cast2(
   void* cast = NULL;
 
   if (obj != NULL) {
-    SIDL_BaseInterface base = (SIDL_BaseInterface) obj;
+    sidl_BaseInterface base = (sidl_BaseInterface) obj;
     cast = (*base->d_epv->f__cast)(base->d_object, type);
   }
 
   return cast;
 }
 struct bHYPRE_IJParCSRMatrix__array*
-bHYPRE_IJParCSRMatrix__array_createCol(int32_t        dimen,
-                                       const int32_t lower[],
-                                       const int32_t upper[])
+bHYPRE_IJParCSRMatrix__array_createCol(
+  int32_t       dimen,
+  const int32_t lower[],
+  const int32_t upper[])
 {
   return (struct 
-    bHYPRE_IJParCSRMatrix__array*)SIDL_interface__array_createCol(dimen, lower,
+    bHYPRE_IJParCSRMatrix__array*)sidl_interface__array_createCol(dimen, lower,
     upper);
 }
 
 struct bHYPRE_IJParCSRMatrix__array*
-bHYPRE_IJParCSRMatrix__array_createRow(int32_t        dimen,
-                                       const int32_t lower[],
-                                       const int32_t upper[])
+bHYPRE_IJParCSRMatrix__array_createRow(
+  int32_t       dimen,
+  const int32_t lower[],
+  const int32_t upper[])
 {
   return (struct 
-    bHYPRE_IJParCSRMatrix__array*)SIDL_interface__array_createRow(dimen, lower,
+    bHYPRE_IJParCSRMatrix__array*)sidl_interface__array_createRow(dimen, lower,
     upper);
 }
 
@@ -769,230 +790,360 @@ struct bHYPRE_IJParCSRMatrix__array*
 bHYPRE_IJParCSRMatrix__array_create1d(int32_t len)
 {
   return (struct 
-    bHYPRE_IJParCSRMatrix__array*)SIDL_interface__array_create1d(len);
+    bHYPRE_IJParCSRMatrix__array*)sidl_interface__array_create1d(len);
+}
+
+struct bHYPRE_IJParCSRMatrix__array*
+bHYPRE_IJParCSRMatrix__array_create1dInit(
+  int32_t len, 
+  bHYPRE_IJParCSRMatrix* data)
+{
+  return (struct 
+    bHYPRE_IJParCSRMatrix__array*)sidl_interface__array_create1dInit(len,
+    (struct sidl_BaseInterface__object **)data);
 }
 
 struct bHYPRE_IJParCSRMatrix__array*
 bHYPRE_IJParCSRMatrix__array_create2dCol(int32_t m, int32_t n)
 {
   return (struct 
-    bHYPRE_IJParCSRMatrix__array*)SIDL_interface__array_create2dCol(m, n);
+    bHYPRE_IJParCSRMatrix__array*)sidl_interface__array_create2dCol(m, n);
 }
 
 struct bHYPRE_IJParCSRMatrix__array*
 bHYPRE_IJParCSRMatrix__array_create2dRow(int32_t m, int32_t n)
 {
   return (struct 
-    bHYPRE_IJParCSRMatrix__array*)SIDL_interface__array_create2dRow(m, n);
+    bHYPRE_IJParCSRMatrix__array*)sidl_interface__array_create2dRow(m, n);
 }
 
 struct bHYPRE_IJParCSRMatrix__array*
-bHYPRE_IJParCSRMatrix__array_borrow(bHYPRE_IJParCSRMatrix*firstElement,
-                                    int32_t       dimen,
-const int32_t lower[],
-const int32_t upper[],
-const int32_t stride[])
+bHYPRE_IJParCSRMatrix__array_borrow(
+  bHYPRE_IJParCSRMatrix* firstElement,
+  int32_t       dimen,
+  const int32_t lower[],
+  const int32_t upper[],
+  const int32_t stride[])
 {
-  return (struct bHYPRE_IJParCSRMatrix__array*)SIDL_interface__array_borrow(
-    (struct SIDL_BaseInterface__object **)
+  return (struct bHYPRE_IJParCSRMatrix__array*)sidl_interface__array_borrow(
+    (struct sidl_BaseInterface__object **)
     firstElement, dimen, lower, upper, stride);
 }
 
 struct bHYPRE_IJParCSRMatrix__array*
-bHYPRE_IJParCSRMatrix__array_smartCopy(struct bHYPRE_IJParCSRMatrix__array 
-  *array)
+bHYPRE_IJParCSRMatrix__array_smartCopy(
+  struct bHYPRE_IJParCSRMatrix__array *array)
 {
   return (struct bHYPRE_IJParCSRMatrix__array*)
-    SIDL_interface__array_smartCopy((struct SIDL_interface__array *)array);
+    sidl_interface__array_smartCopy((struct sidl_interface__array *)array);
 }
 
 void
-bHYPRE_IJParCSRMatrix__array_addRef(struct bHYPRE_IJParCSRMatrix__array* array)
+bHYPRE_IJParCSRMatrix__array_addRef(
+  struct bHYPRE_IJParCSRMatrix__array* array)
 {
-  SIDL_interface__array_addRef((struct SIDL_interface__array *)array);
+  sidl_interface__array_addRef((struct sidl_interface__array *)array);
 }
 
 void
-bHYPRE_IJParCSRMatrix__array_deleteRef(struct bHYPRE_IJParCSRMatrix__array* 
-  array)
+bHYPRE_IJParCSRMatrix__array_deleteRef(
+  struct bHYPRE_IJParCSRMatrix__array* array)
 {
-  SIDL_interface__array_deleteRef((struct SIDL_interface__array *)array);
+  sidl_interface__array_deleteRef((struct sidl_interface__array *)array);
 }
 
 bHYPRE_IJParCSRMatrix
-bHYPRE_IJParCSRMatrix__array_get1(const struct bHYPRE_IJParCSRMatrix__array* 
-  array,
-                                  const int32_t i1)
+bHYPRE_IJParCSRMatrix__array_get1(
+  const struct bHYPRE_IJParCSRMatrix__array* array,
+  const int32_t i1)
 {
   return (bHYPRE_IJParCSRMatrix)
-    SIDL_interface__array_get1((const struct SIDL_interface__array *)array
+    sidl_interface__array_get1((const struct sidl_interface__array *)array
     , i1);
 }
 
 bHYPRE_IJParCSRMatrix
-bHYPRE_IJParCSRMatrix__array_get2(const struct bHYPRE_IJParCSRMatrix__array* 
-  array,
-                                  const int32_t i1,
-                                  const int32_t i2)
+bHYPRE_IJParCSRMatrix__array_get2(
+  const struct bHYPRE_IJParCSRMatrix__array* array,
+  const int32_t i1,
+  const int32_t i2)
 {
   return (bHYPRE_IJParCSRMatrix)
-    SIDL_interface__array_get2((const struct SIDL_interface__array *)array
+    sidl_interface__array_get2((const struct sidl_interface__array *)array
     , i1, i2);
 }
 
 bHYPRE_IJParCSRMatrix
-bHYPRE_IJParCSRMatrix__array_get3(const struct bHYPRE_IJParCSRMatrix__array* 
-  array,
-                                  const int32_t i1,
-                                  const int32_t i2,
-                                  const int32_t i3)
+bHYPRE_IJParCSRMatrix__array_get3(
+  const struct bHYPRE_IJParCSRMatrix__array* array,
+  const int32_t i1,
+  const int32_t i2,
+  const int32_t i3)
 {
   return (bHYPRE_IJParCSRMatrix)
-    SIDL_interface__array_get3((const struct SIDL_interface__array *)array
+    sidl_interface__array_get3((const struct sidl_interface__array *)array
     , i1, i2, i3);
 }
 
 bHYPRE_IJParCSRMatrix
-bHYPRE_IJParCSRMatrix__array_get4(const struct bHYPRE_IJParCSRMatrix__array* 
-  array,
-                                  const int32_t i1,
-                                  const int32_t i2,
-                                  const int32_t i3,
-                                  const int32_t i4)
+bHYPRE_IJParCSRMatrix__array_get4(
+  const struct bHYPRE_IJParCSRMatrix__array* array,
+  const int32_t i1,
+  const int32_t i2,
+  const int32_t i3,
+  const int32_t i4)
 {
   return (bHYPRE_IJParCSRMatrix)
-    SIDL_interface__array_get4((const struct SIDL_interface__array *)array
+    sidl_interface__array_get4((const struct sidl_interface__array *)array
     , i1, i2, i3, i4);
 }
 
 bHYPRE_IJParCSRMatrix
-bHYPRE_IJParCSRMatrix__array_get(const struct bHYPRE_IJParCSRMatrix__array* 
-  array,
-                                 const int32_t indices[])
+bHYPRE_IJParCSRMatrix__array_get5(
+  const struct bHYPRE_IJParCSRMatrix__array* array,
+  const int32_t i1,
+  const int32_t i2,
+  const int32_t i3,
+  const int32_t i4,
+  const int32_t i5)
 {
   return (bHYPRE_IJParCSRMatrix)
-    SIDL_interface__array_get((const struct SIDL_interface__array *)array,
+    sidl_interface__array_get5((const struct sidl_interface__array *)array
+    , i1, i2, i3, i4, i5);
+}
+
+bHYPRE_IJParCSRMatrix
+bHYPRE_IJParCSRMatrix__array_get6(
+  const struct bHYPRE_IJParCSRMatrix__array* array,
+  const int32_t i1,
+  const int32_t i2,
+  const int32_t i3,
+  const int32_t i4,
+  const int32_t i5,
+  const int32_t i6)
+{
+  return (bHYPRE_IJParCSRMatrix)
+    sidl_interface__array_get6((const struct sidl_interface__array *)array
+    , i1, i2, i3, i4, i5, i6);
+}
+
+bHYPRE_IJParCSRMatrix
+bHYPRE_IJParCSRMatrix__array_get7(
+  const struct bHYPRE_IJParCSRMatrix__array* array,
+  const int32_t i1,
+  const int32_t i2,
+  const int32_t i3,
+  const int32_t i4,
+  const int32_t i5,
+  const int32_t i6,
+  const int32_t i7)
+{
+  return (bHYPRE_IJParCSRMatrix)
+    sidl_interface__array_get7((const struct sidl_interface__array *)array
+    , i1, i2, i3, i4, i5, i6, i7);
+}
+
+bHYPRE_IJParCSRMatrix
+bHYPRE_IJParCSRMatrix__array_get(
+  const struct bHYPRE_IJParCSRMatrix__array* array,
+  const int32_t indices[])
+{
+  return (bHYPRE_IJParCSRMatrix)
+    sidl_interface__array_get((const struct sidl_interface__array *)array,
       indices);
 }
 
 void
-bHYPRE_IJParCSRMatrix__array_set1(struct bHYPRE_IJParCSRMatrix__array* array,
-                                  const int32_t i1,
-                                  bHYPRE_IJParCSRMatrix const value)
+bHYPRE_IJParCSRMatrix__array_set1(
+  struct bHYPRE_IJParCSRMatrix__array* array,
+  const int32_t i1,
+  bHYPRE_IJParCSRMatrix const value)
 {
-  SIDL_interface__array_set1((struct SIDL_interface__array *)array
-  , i1, (struct SIDL_BaseInterface__object *)value);
+  sidl_interface__array_set1((struct sidl_interface__array *)array
+  , i1, (struct sidl_BaseInterface__object *)value);
 }
 
 void
-bHYPRE_IJParCSRMatrix__array_set2(struct bHYPRE_IJParCSRMatrix__array* array,
-                                  const int32_t i1,
-                                  const int32_t i2,
-                                  bHYPRE_IJParCSRMatrix const value)
+bHYPRE_IJParCSRMatrix__array_set2(
+  struct bHYPRE_IJParCSRMatrix__array* array,
+  const int32_t i1,
+  const int32_t i2,
+  bHYPRE_IJParCSRMatrix const value)
 {
-  SIDL_interface__array_set2((struct SIDL_interface__array *)array
-  , i1, i2, (struct SIDL_BaseInterface__object *)value);
+  sidl_interface__array_set2((struct sidl_interface__array *)array
+  , i1, i2, (struct sidl_BaseInterface__object *)value);
 }
 
 void
-bHYPRE_IJParCSRMatrix__array_set3(struct bHYPRE_IJParCSRMatrix__array* array,
-                                  const int32_t i1,
-                                  const int32_t i2,
-                                  const int32_t i3,
-                                  bHYPRE_IJParCSRMatrix const value)
+bHYPRE_IJParCSRMatrix__array_set3(
+  struct bHYPRE_IJParCSRMatrix__array* array,
+  const int32_t i1,
+  const int32_t i2,
+  const int32_t i3,
+  bHYPRE_IJParCSRMatrix const value)
 {
-  SIDL_interface__array_set3((struct SIDL_interface__array *)array
-  , i1, i2, i3, (struct SIDL_BaseInterface__object *)value);
+  sidl_interface__array_set3((struct sidl_interface__array *)array
+  , i1, i2, i3, (struct sidl_BaseInterface__object *)value);
 }
 
 void
-bHYPRE_IJParCSRMatrix__array_set4(struct bHYPRE_IJParCSRMatrix__array* array,
-                                  const int32_t i1,
-                                  const int32_t i2,
-                                  const int32_t i3,
-                                  const int32_t i4,
-                                  bHYPRE_IJParCSRMatrix const value)
+bHYPRE_IJParCSRMatrix__array_set4(
+  struct bHYPRE_IJParCSRMatrix__array* array,
+  const int32_t i1,
+  const int32_t i2,
+  const int32_t i3,
+  const int32_t i4,
+  bHYPRE_IJParCSRMatrix const value)
 {
-  SIDL_interface__array_set4((struct SIDL_interface__array *)array
-  , i1, i2, i3, i4, (struct SIDL_BaseInterface__object *)value);
+  sidl_interface__array_set4((struct sidl_interface__array *)array
+  , i1, i2, i3, i4, (struct sidl_BaseInterface__object *)value);
 }
 
 void
-bHYPRE_IJParCSRMatrix__array_set(struct bHYPRE_IJParCSRMatrix__array* array,
-                                 const int32_t indices[],
-                                 bHYPRE_IJParCSRMatrix const value)
+bHYPRE_IJParCSRMatrix__array_set5(
+  struct bHYPRE_IJParCSRMatrix__array* array,
+  const int32_t i1,
+  const int32_t i2,
+  const int32_t i3,
+  const int32_t i4,
+  const int32_t i5,
+  bHYPRE_IJParCSRMatrix const value)
 {
-  SIDL_interface__array_set((struct SIDL_interface__array *)array, indices,
-    (struct SIDL_BaseInterface__object *)value);
+  sidl_interface__array_set5((struct sidl_interface__array *)array
+  , i1, i2, i3, i4, i5, (struct sidl_BaseInterface__object *)value);
+}
+
+void
+bHYPRE_IJParCSRMatrix__array_set6(
+  struct bHYPRE_IJParCSRMatrix__array* array,
+  const int32_t i1,
+  const int32_t i2,
+  const int32_t i3,
+  const int32_t i4,
+  const int32_t i5,
+  const int32_t i6,
+  bHYPRE_IJParCSRMatrix const value)
+{
+  sidl_interface__array_set6((struct sidl_interface__array *)array
+  , i1, i2, i3, i4, i5, i6, (struct sidl_BaseInterface__object *)value);
+}
+
+void
+bHYPRE_IJParCSRMatrix__array_set7(
+  struct bHYPRE_IJParCSRMatrix__array* array,
+  const int32_t i1,
+  const int32_t i2,
+  const int32_t i3,
+  const int32_t i4,
+  const int32_t i5,
+  const int32_t i6,
+  const int32_t i7,
+  bHYPRE_IJParCSRMatrix const value)
+{
+  sidl_interface__array_set7((struct sidl_interface__array *)array
+  , i1, i2, i3, i4, i5, i6, i7, (struct sidl_BaseInterface__object *)value);
+}
+
+void
+bHYPRE_IJParCSRMatrix__array_set(
+  struct bHYPRE_IJParCSRMatrix__array* array,
+  const int32_t indices[],
+  bHYPRE_IJParCSRMatrix const value)
+{
+  sidl_interface__array_set((struct sidl_interface__array *)array, indices,
+    (struct sidl_BaseInterface__object *)value);
 }
 
 int32_t
-bHYPRE_IJParCSRMatrix__array_dimen(const struct bHYPRE_IJParCSRMatrix__array* 
-  array)
+bHYPRE_IJParCSRMatrix__array_dimen(
+  const struct bHYPRE_IJParCSRMatrix__array* array)
 {
-  return SIDL_interface__array_dimen((struct SIDL_interface__array *)array);
+  return sidl_interface__array_dimen((struct sidl_interface__array *)array);
 }
 
 int32_t
-bHYPRE_IJParCSRMatrix__array_lower(const struct bHYPRE_IJParCSRMatrix__array* 
-  array,
-                                   const int32_t ind)
+bHYPRE_IJParCSRMatrix__array_lower(
+  const struct bHYPRE_IJParCSRMatrix__array* array,
+  const int32_t ind)
 {
-  return SIDL_interface__array_lower((struct SIDL_interface__array *)array,
+  return sidl_interface__array_lower((struct sidl_interface__array *)array,
     ind);
 }
 
 int32_t
-bHYPRE_IJParCSRMatrix__array_upper(const struct bHYPRE_IJParCSRMatrix__array* 
-  array,
-                                   const int32_t ind)
+bHYPRE_IJParCSRMatrix__array_upper(
+  const struct bHYPRE_IJParCSRMatrix__array* array,
+  const int32_t ind)
 {
-  return SIDL_interface__array_upper((struct SIDL_interface__array *)array,
+  return sidl_interface__array_upper((struct sidl_interface__array *)array,
     ind);
 }
 
 int32_t
-bHYPRE_IJParCSRMatrix__array_stride(const struct bHYPRE_IJParCSRMatrix__array* 
-  array,
-                                    const int32_t ind)
+bHYPRE_IJParCSRMatrix__array_length(
+  const struct bHYPRE_IJParCSRMatrix__array* array,
+  const int32_t ind)
 {
-  return SIDL_interface__array_stride((struct SIDL_interface__array *)array,
+  return sidl_interface__array_length((struct sidl_interface__array *)array,
+    ind);
+}
+
+int32_t
+bHYPRE_IJParCSRMatrix__array_stride(
+  const struct bHYPRE_IJParCSRMatrix__array* array,
+  const int32_t ind)
+{
+  return sidl_interface__array_stride((struct sidl_interface__array *)array,
     ind);
 }
 
 int
-bHYPRE_IJParCSRMatrix__array_isColumnOrder(const struct 
-  bHYPRE_IJParCSRMatrix__array* array)
+bHYPRE_IJParCSRMatrix__array_isColumnOrder(
+  const struct bHYPRE_IJParCSRMatrix__array* array)
 {
-  return SIDL_interface__array_isColumnOrder((struct SIDL_interface__array 
+  return sidl_interface__array_isColumnOrder((struct sidl_interface__array 
     *)array);
 }
 
 int
-bHYPRE_IJParCSRMatrix__array_isRowOrder(const struct 
-  bHYPRE_IJParCSRMatrix__array* array)
+bHYPRE_IJParCSRMatrix__array_isRowOrder(
+  const struct bHYPRE_IJParCSRMatrix__array* array)
 {
-  return SIDL_interface__array_isRowOrder((struct SIDL_interface__array 
+  return sidl_interface__array_isRowOrder((struct sidl_interface__array 
     *)array);
 }
 
 void
-bHYPRE_IJParCSRMatrix__array_copy(const struct bHYPRE_IJParCSRMatrix__array* 
-  src,
-                                        struct bHYPRE_IJParCSRMatrix__array* 
-  dest)
+bHYPRE_IJParCSRMatrix__array_copy(
+  const struct bHYPRE_IJParCSRMatrix__array* src,
+  struct bHYPRE_IJParCSRMatrix__array* dest)
 {
-  SIDL_interface__array_copy((const struct SIDL_interface__array *)src,
-                             (struct SIDL_interface__array *)dest);
+  sidl_interface__array_copy((const struct sidl_interface__array *)src,
+                             (struct sidl_interface__array *)dest);
 }
 
 struct bHYPRE_IJParCSRMatrix__array*
-bHYPRE_IJParCSRMatrix__array_ensure(struct bHYPRE_IJParCSRMatrix__array* src,
-                                    int32_t dimen,
-                                    int     ordering)
+bHYPRE_IJParCSRMatrix__array_slice(
+  struct bHYPRE_IJParCSRMatrix__array* src,
+  int32_t        dimen,
+  const int32_t  numElem[],
+  const int32_t  *srcStart,
+  const int32_t  *srcStride,
+  const int32_t  *newStart)
 {
   return (struct bHYPRE_IJParCSRMatrix__array*)
-    SIDL_interface__array_ensure((struct SIDL_interface__array *)src, dimen,
+    sidl_interface__array_slice((struct sidl_interface__array *)src,
+                                dimen, numElem, srcStart, srcStride, newStart);
+}
+
+struct bHYPRE_IJParCSRMatrix__array*
+bHYPRE_IJParCSRMatrix__array_ensure(
+  struct bHYPRE_IJParCSRMatrix__array* src,
+  int32_t dimen,
+  int     ordering)
+{
+  return (struct bHYPRE_IJParCSRMatrix__array*)
+    sidl_interface__array_ensure((struct sidl_interface__array *)src, dimen,
       ordering);
 }
 

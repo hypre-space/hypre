@@ -2,14 +2,14 @@
  * File:          bHYPRE_StructGrid_Skel.c
  * Symbol:        bHYPRE.StructGrid-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.8.2
- * SIDL Created:  20030401 14:47:20 PST
- * Generated:     20030401 14:47:31 PST
+ * Babel Version: 0.9.8
+ * sidl Created:  20050208 15:29:05 PST
+ * Generated:     20050208 15:29:07 PST
  * Description:   Server-side glue code for bHYPRE.StructGrid
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.2
+ * babel-version = 0.9.8
  * source-line   = 1101
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -39,13 +39,13 @@ impl_bHYPRE_StructGrid_SetDimension(
 extern int32_t
 impl_bHYPRE_StructGrid_SetExtents(
   bHYPRE_StructGrid,
-  struct SIDL_int__array*,
-  struct SIDL_int__array*);
+  struct sidl_int__array*,
+  struct sidl_int__array*);
 
 extern int32_t
 impl_bHYPRE_StructGrid_SetPeriodic(
   bHYPRE_StructGrid,
-  struct SIDL_int__array*);
+  struct sidl_int__array*);
 
 extern int32_t
 impl_bHYPRE_StructGrid_Assemble(
@@ -53,40 +53,44 @@ impl_bHYPRE_StructGrid_Assemble(
 
 static int32_t
 skel_bHYPRE_StructGrid_SetExtents(
-  bHYPRE_StructGrid self,
-  struct SIDL_int__array* ilower,
-  struct SIDL_int__array* iupper)
+  /*in*/ bHYPRE_StructGrid self,
+  /*in*/ struct sidl_int__array* ilower,
+  /*in*/ struct sidl_int__array* iupper)
 {
   int32_t _return;
-  struct SIDL_int__array* ilower_proxy = SIDL_int__array_ensure(ilower, 1,
-    SIDL_column_major_order);
-  struct SIDL_int__array* iupper_proxy = SIDL_int__array_ensure(iupper, 1,
-    SIDL_column_major_order);
+  struct sidl_int__array* ilower_proxy = sidl_int__array_ensure(ilower, 1,
+    sidl_column_major_order);
+  struct sidl_int__array* iupper_proxy = sidl_int__array_ensure(iupper, 1,
+    sidl_column_major_order);
   _return =
     impl_bHYPRE_StructGrid_SetExtents(
       self,
       ilower_proxy,
       iupper_proxy);
-  SIDL_int__array_deleteRef(ilower_proxy);
-  SIDL_int__array_deleteRef(iupper_proxy);
+  sidl_int__array_deleteRef(ilower_proxy);
+  sidl_int__array_deleteRef(iupper_proxy);
   return _return;
 }
 
 static int32_t
 skel_bHYPRE_StructGrid_SetPeriodic(
-  bHYPRE_StructGrid self,
-  struct SIDL_int__array* periodic)
+  /*in*/ bHYPRE_StructGrid self,
+  /*in*/ struct sidl_int__array* periodic)
 {
   int32_t _return;
-  struct SIDL_int__array* periodic_proxy = SIDL_int__array_ensure(periodic, 1,
-    SIDL_column_major_order);
+  struct sidl_int__array* periodic_proxy = sidl_int__array_ensure(periodic, 1,
+    sidl_column_major_order);
   _return =
     impl_bHYPRE_StructGrid_SetPeriodic(
       self,
       periodic_proxy);
-  SIDL_int__array_deleteRef(periodic_proxy);
+  sidl_int__array_deleteRef(periodic_proxy);
   return _return;
 }
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 void
 bHYPRE_StructGrid__set_epv(struct bHYPRE_StructGrid__epv *epv)
@@ -99,6 +103,9 @@ bHYPRE_StructGrid__set_epv(struct bHYPRE_StructGrid__epv *epv)
   epv->f_SetPeriodic = skel_bHYPRE_StructGrid_SetPeriodic;
   epv->f_Assemble = impl_bHYPRE_StructGrid_Assemble;
 }
+#ifdef __cplusplus
+}
+#endif
 
 struct bHYPRE_StructGrid__data*
 bHYPRE_StructGrid__get_data(bHYPRE_StructGrid self)

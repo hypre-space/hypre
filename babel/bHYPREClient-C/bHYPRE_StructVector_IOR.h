@@ -2,14 +2,14 @@
  * File:          bHYPRE_StructVector_IOR.h
  * Symbol:        bHYPRE.StructVector-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.8.2
- * SIDL Created:  20030401 14:47:35 PST
- * Generated:     20030401 14:47:38 PST
+ * Babel Version: 0.9.8
+ * sidl Created:  20050208 15:29:09 PST
+ * Generated:     20050208 15:29:10 PST
  * Description:   Intermediate Object Representation for bHYPRE.StructVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.2
+ * babel-version = 0.9.8
  * source-line   = 1129
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -17,11 +17,8 @@
 #ifndef included_bHYPRE_StructVector_IOR_h
 #define included_bHYPRE_StructVector_IOR_h
 
-#ifndef included_SIDL_header_h
-#include "SIDL_header.h"
-#endif
-#ifndef included_SIDL_BaseClass_IOR_h
-#include "SIDL_BaseClass_IOR.h"
+#ifndef included_sidl_header_h
+#include "sidl_header.h"
 #endif
 #ifndef included_bHYPRE_ProblemDefinition_IOR_h
 #include "bHYPRE_ProblemDefinition_IOR.h"
@@ -31,6 +28,9 @@
 #endif
 #ifndef included_bHYPRE_Vector_IOR_h
 #include "bHYPRE_Vector_IOR.h"
+#endif
+#ifndef included_sidl_BaseClass_IOR_h
+#include "sidl_BaseClass_IOR.h"
 #endif
 
 #ifdef __cplusplus
@@ -60,14 +60,14 @@ extern void bHYPRE_StructVector__IOR_version(int32_t *major, int32_t *minor);
  * Forward references for external classes and interfaces.
  */
 
-struct SIDL_BaseInterface__array;
-struct SIDL_BaseInterface__object;
-struct SIDL_ClassInfo__array;
-struct SIDL_ClassInfo__object;
 struct bHYPRE_StructGrid__array;
 struct bHYPRE_StructGrid__object;
 struct bHYPRE_StructStencil__array;
 struct bHYPRE_StructStencil__object;
+struct sidl_BaseInterface__array;
+struct sidl_BaseInterface__object;
+struct sidl_ClassInfo__array;
+struct sidl_ClassInfo__object;
 
 /*
  * Declare the method entry point vector.
@@ -84,24 +84,23 @@ struct bHYPRE_StructVector__epv {
     struct bHYPRE_StructVector__object* self);
   void (*f__dtor)(
     struct bHYPRE_StructVector__object* self);
-  /* Methods introduced in SIDL.BaseInterface-v0.8.2 */
+  /* Methods introduced in sidl.BaseInterface-v0.9.0 */
   void (*f_addRef)(
     struct bHYPRE_StructVector__object* self);
   void (*f_deleteRef)(
     struct bHYPRE_StructVector__object* self);
-  SIDL_bool (*f_isSame)(
+  sidl_bool (*f_isSame)(
     struct bHYPRE_StructVector__object* self,
-    struct SIDL_BaseInterface__object* iobj);
-  struct SIDL_BaseInterface__object* (*f_queryInt)(
-    struct bHYPRE_StructVector__object* self,
-    const char* name);
-  SIDL_bool (*f_isType)(
+    struct sidl_BaseInterface__object* iobj);
+  struct sidl_BaseInterface__object* (*f_queryInt)(
     struct bHYPRE_StructVector__object* self,
     const char* name);
-  struct SIDL_ClassInfo__object* (*f_getClassInfo)(
+  sidl_bool (*f_isType)(
+    struct bHYPRE_StructVector__object* self,
+    const char* name);
+  struct sidl_ClassInfo__object* (*f_getClassInfo)(
     struct bHYPRE_StructVector__object* self);
-  /* Methods introduced in SIDL.BaseClass-v0.8.2 */
-  /* Methods introduced in SIDL.BaseInterface-v0.8.2 */
+  /* Methods introduced in sidl.BaseClass-v0.9.0 */
   /* Methods introduced in bHYPRE.ProblemDefinition-v1.0.0 */
   int32_t (*f_SetCommunicator)(
     struct bHYPRE_StructVector__object* self,
@@ -112,7 +111,7 @@ struct bHYPRE_StructVector__epv {
     struct bHYPRE_StructVector__object* self);
   int32_t (*f_GetObject)(
     struct bHYPRE_StructVector__object* self,
-    struct SIDL_BaseInterface__object** A);
+    struct sidl_BaseInterface__object** A);
   /* Methods introduced in bHYPRE.StructBuildVector-v1.0.0 */
   int32_t (*f_SetGrid)(
     struct bHYPRE_StructVector__object* self,
@@ -122,14 +121,13 @@ struct bHYPRE_StructVector__epv {
     struct bHYPRE_StructStencil__object* stencil);
   int32_t (*f_SetValue)(
     struct bHYPRE_StructVector__object* self,
-    struct SIDL_int__array* grid_index,
+    struct sidl_int__array* grid_index,
     double value);
   int32_t (*f_SetBoxValues)(
     struct bHYPRE_StructVector__object* self,
-    struct SIDL_int__array* ilower,
-    struct SIDL_int__array* iupper,
-    struct SIDL_double__array* values);
-  /* Methods introduced in SIDL.BaseInterface-v0.8.2 */
+    struct sidl_int__array* ilower,
+    struct sidl_int__array* iupper,
+    struct sidl_double__array* values);
   /* Methods introduced in bHYPRE.Vector-v1.0.0 */
   int32_t (*f_Clear)(
     struct bHYPRE_StructVector__object* self);
@@ -158,7 +156,7 @@ struct bHYPRE_StructVector__epv {
  */
 
 struct bHYPRE_StructVector__object {
-  struct SIDL_BaseClass__object           d_sidl_baseclass;
+  struct sidl_BaseClass__object           d_sidl_baseclass;
   struct bHYPRE_ProblemDefinition__object d_bhypre_problemdefinition;
   struct bHYPRE_StructBuildVector__object d_bhypre_structbuildvector;
   struct bHYPRE_Vector__object            d_bhypre_vector;
@@ -173,13 +171,12 @@ struct bHYPRE_StructVector__external {
   struct bHYPRE_StructVector__object*
   (*createRemote)(const char *url);
 
-};
+struct sidl_BaseClass__epv*(*getSuperEPV)(void);};
 
 /*
  * This function returns a pointer to a static structure of
  * pointers to function entry points.  Its purpose is to provide
  * one-stop shopping for loading DLLs.
- * loading DLLs
  */
 
 const struct bHYPRE_StructVector__external*

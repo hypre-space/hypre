@@ -2,14 +2,14 @@
  * File:          bHYPRE_StructBuildVector_IOR.c
  * Symbol:        bHYPRE.StructBuildVector-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.8.2
- * SIDL Created:  20030401 14:47:45 PST
- * Generated:     20030401 14:47:51 PST
+ * Babel Version: 0.9.8
+ * sidl Created:  20050208 15:29:13 PST
+ * Generated:     20050208 15:29:14 PST
  * Description:   Intermediate Object Representation for bHYPRE.StructBuildVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.2
+ * babel-version = 0.9.8
  * source-line   = 568
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -82,10 +82,10 @@ remote_bHYPRE_StructBuildVector_deleteRef(
  * REMOTE METHOD STUB:isSame
  */
 
-static SIDL_bool
+static sidl_bool
 remote_bHYPRE_StructBuildVector_isSame(
   void* self,
-  struct SIDL_BaseInterface__object* iobj)
+  struct sidl_BaseInterface__object* iobj)
 {
   return 0;
 }
@@ -94,19 +94,19 @@ remote_bHYPRE_StructBuildVector_isSame(
  * REMOTE METHOD STUB:queryInt
  */
 
-static struct SIDL_BaseInterface__object*
+static struct sidl_BaseInterface__object*
 remote_bHYPRE_StructBuildVector_queryInt(
   void* self,
   const char* name)
 {
-  return (struct SIDL_BaseInterface__object*) 0;
+  return (struct sidl_BaseInterface__object*) 0;
 }
 
 /*
  * REMOTE METHOD STUB:isType
  */
 
-static SIDL_bool
+static sidl_bool
 remote_bHYPRE_StructBuildVector_isType(
   void* self,
   const char* name)
@@ -118,11 +118,11 @@ remote_bHYPRE_StructBuildVector_isType(
  * REMOTE METHOD STUB:getClassInfo
  */
 
-static struct SIDL_ClassInfo__object*
+static struct sidl_ClassInfo__object*
 remote_bHYPRE_StructBuildVector_getClassInfo(
   void* self)
 {
-  return (struct SIDL_ClassInfo__object*) 0;
+  return (struct sidl_ClassInfo__object*) 0;
 }
 
 /*
@@ -166,7 +166,7 @@ remote_bHYPRE_StructBuildVector_Assemble(
 static int32_t
 remote_bHYPRE_StructBuildVector_GetObject(
   void* self,
-  struct SIDL_BaseInterface__object** A)
+  struct sidl_BaseInterface__object** A)
 {
   return 0;
 }
@@ -202,7 +202,7 @@ remote_bHYPRE_StructBuildVector_SetStencil(
 static int32_t
 remote_bHYPRE_StructBuildVector_SetValue(
   void* self,
-  struct SIDL_int__array* grid_index,
+  struct sidl_int__array* grid_index,
   double value)
 {
   return 0;
@@ -215,9 +215,9 @@ remote_bHYPRE_StructBuildVector_SetValue(
 static int32_t
 remote_bHYPRE_StructBuildVector_SetBoxValues(
   void* self,
-  struct SIDL_int__array* ilower,
-  struct SIDL_int__array* iupper,
-  struct SIDL_double__array* values)
+  struct sidl_int__array* ilower,
+  struct sidl_int__array* iupper,
+  struct sidl_double__array* values)
 {
   return 0;
 }

@@ -2,14 +2,14 @@
  * File:          bHYPRE_StructMatrix.h
  * Symbol:        bHYPRE.StructMatrix-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.8.2
- * SIDL Created:  20030401 14:47:35 PST
- * Generated:     20030401 14:47:43 PST
+ * Babel Version: 0.9.8
+ * sidl Created:  20050208 15:29:09 PST
+ * Generated:     20050208 15:29:11 PST
  * Description:   Client-side glue code for bHYPRE.StructMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.2
+ * babel-version = 0.9.8
  * source-line   = 1124
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -32,14 +32,8 @@ typedef struct bHYPRE_StructMatrix__object* bHYPRE_StructMatrix;
  * Includes for all header dependencies.
  */
 
-#ifndef included_SIDL_header_h
-#include "SIDL_header.h"
-#endif
-#ifndef included_SIDL_BaseInterface_h
-#include "SIDL_BaseInterface.h"
-#endif
-#ifndef included_SIDL_ClassInfo_h
-#include "SIDL_ClassInfo.h"
+#ifndef included_sidl_header_h
+#include "sidl_header.h"
 #endif
 #ifndef included_bHYPRE_StructGrid_h
 #include "bHYPRE_StructGrid.h"
@@ -49,6 +43,12 @@ typedef struct bHYPRE_StructMatrix__object* bHYPRE_StructMatrix;
 #endif
 #ifndef included_bHYPRE_Vector_h
 #include "bHYPRE_Vector.h"
+#endif
+#ifndef included_sidl_BaseInterface_h
+#include "sidl_BaseInterface.h"
+#endif
+#ifndef included_sidl_ClassInfo_h
+#include "sidl_ClassInfo.h"
 #endif
 
 #ifdef __cplusplus
@@ -63,30 +63,30 @@ bHYPRE_StructMatrix__create(void);
 
 void
 bHYPRE_StructMatrix_addRef(
-  bHYPRE_StructMatrix self);
+  /*in*/ bHYPRE_StructMatrix self);
 
 void
 bHYPRE_StructMatrix_deleteRef(
-  bHYPRE_StructMatrix self);
+  /*in*/ bHYPRE_StructMatrix self);
 
-SIDL_bool
+sidl_bool
 bHYPRE_StructMatrix_isSame(
-  bHYPRE_StructMatrix self,
-  SIDL_BaseInterface iobj);
+  /*in*/ bHYPRE_StructMatrix self,
+  /*in*/ sidl_BaseInterface iobj);
 
-SIDL_BaseInterface
+sidl_BaseInterface
 bHYPRE_StructMatrix_queryInt(
-  bHYPRE_StructMatrix self,
-  const char* name);
+  /*in*/ bHYPRE_StructMatrix self,
+  /*in*/ const char* name);
 
-SIDL_bool
+sidl_bool
 bHYPRE_StructMatrix_isType(
-  bHYPRE_StructMatrix self,
-  const char* name);
+  /*in*/ bHYPRE_StructMatrix self,
+  /*in*/ const char* name);
 
-SIDL_ClassInfo
+sidl_ClassInfo
 bHYPRE_StructMatrix_getClassInfo(
-  bHYPRE_StructMatrix self);
+  /*in*/ bHYPRE_StructMatrix self);
 
 /**
  * Set the MPI Communicator.
@@ -94,8 +94,8 @@ bHYPRE_StructMatrix_getClassInfo(
  */
 int32_t
 bHYPRE_StructMatrix_SetCommunicator(
-  bHYPRE_StructMatrix self,
-  void* mpi_comm);
+  /*in*/ bHYPRE_StructMatrix self,
+  /*in*/ void* mpi_comm);
 
 /**
  * Set the int parameter associated with {\tt name}.
@@ -103,9 +103,9 @@ bHYPRE_StructMatrix_SetCommunicator(
  */
 int32_t
 bHYPRE_StructMatrix_SetIntParameter(
-  bHYPRE_StructMatrix self,
-  const char* name,
-  int32_t value);
+  /*in*/ bHYPRE_StructMatrix self,
+  /*in*/ const char* name,
+  /*in*/ int32_t value);
 
 /**
  * Set the double parameter associated with {\tt name}.
@@ -113,9 +113,9 @@ bHYPRE_StructMatrix_SetIntParameter(
  */
 int32_t
 bHYPRE_StructMatrix_SetDoubleParameter(
-  bHYPRE_StructMatrix self,
-  const char* name,
-  double value);
+  /*in*/ bHYPRE_StructMatrix self,
+  /*in*/ const char* name,
+  /*in*/ double value);
 
 /**
  * Set the string parameter associated with {\tt name}.
@@ -123,9 +123,9 @@ bHYPRE_StructMatrix_SetDoubleParameter(
  */
 int32_t
 bHYPRE_StructMatrix_SetStringParameter(
-  bHYPRE_StructMatrix self,
-  const char* name,
-  const char* value);
+  /*in*/ bHYPRE_StructMatrix self,
+  /*in*/ const char* name,
+  /*in*/ const char* value);
 
 /**
  * Set the int 1-D array parameter associated with {\tt name}.
@@ -133,9 +133,9 @@ bHYPRE_StructMatrix_SetStringParameter(
  */
 int32_t
 bHYPRE_StructMatrix_SetIntArray1Parameter(
-  bHYPRE_StructMatrix self,
-  const char* name,
-  struct SIDL_int__array* value);
+  /*in*/ bHYPRE_StructMatrix self,
+  /*in*/ const char* name,
+  /*in*/ struct sidl_int__array* value);
 
 /**
  * Set the int 2-D array parameter associated with {\tt name}.
@@ -143,9 +143,9 @@ bHYPRE_StructMatrix_SetIntArray1Parameter(
  */
 int32_t
 bHYPRE_StructMatrix_SetIntArray2Parameter(
-  bHYPRE_StructMatrix self,
-  const char* name,
-  struct SIDL_int__array* value);
+  /*in*/ bHYPRE_StructMatrix self,
+  /*in*/ const char* name,
+  /*in*/ struct sidl_int__array* value);
 
 /**
  * Set the double 1-D array parameter associated with {\tt name}.
@@ -153,9 +153,9 @@ bHYPRE_StructMatrix_SetIntArray2Parameter(
  */
 int32_t
 bHYPRE_StructMatrix_SetDoubleArray1Parameter(
-  bHYPRE_StructMatrix self,
-  const char* name,
-  struct SIDL_double__array* value);
+  /*in*/ bHYPRE_StructMatrix self,
+  /*in*/ const char* name,
+  /*in*/ struct sidl_double__array* value);
 
 /**
  * Set the double 2-D array parameter associated with {\tt name}.
@@ -163,9 +163,9 @@ bHYPRE_StructMatrix_SetDoubleArray1Parameter(
  */
 int32_t
 bHYPRE_StructMatrix_SetDoubleArray2Parameter(
-  bHYPRE_StructMatrix self,
-  const char* name,
-  struct SIDL_double__array* value);
+  /*in*/ bHYPRE_StructMatrix self,
+  /*in*/ const char* name,
+  /*in*/ struct sidl_double__array* value);
 
 /**
  * Set the int parameter associated with {\tt name}.
@@ -173,9 +173,9 @@ bHYPRE_StructMatrix_SetDoubleArray2Parameter(
  */
 int32_t
 bHYPRE_StructMatrix_GetIntValue(
-  bHYPRE_StructMatrix self,
-  const char* name,
-  int32_t* value);
+  /*in*/ bHYPRE_StructMatrix self,
+  /*in*/ const char* name,
+  /*out*/ int32_t* value);
 
 /**
  * Get the double parameter associated with {\tt name}.
@@ -183,9 +183,9 @@ bHYPRE_StructMatrix_GetIntValue(
  */
 int32_t
 bHYPRE_StructMatrix_GetDoubleValue(
-  bHYPRE_StructMatrix self,
-  const char* name,
-  double* value);
+  /*in*/ bHYPRE_StructMatrix self,
+  /*in*/ const char* name,
+  /*out*/ double* value);
 
 /**
  * (Optional) Do any preprocessing that may be necessary in
@@ -194,9 +194,9 @@ bHYPRE_StructMatrix_GetDoubleValue(
  */
 int32_t
 bHYPRE_StructMatrix_Setup(
-  bHYPRE_StructMatrix self,
-  bHYPRE_Vector b,
-  bHYPRE_Vector x);
+  /*in*/ bHYPRE_StructMatrix self,
+  /*in*/ bHYPRE_Vector b,
+  /*in*/ bHYPRE_Vector x);
 
 /**
  * Apply the operator to {\tt b}, returning {\tt x}.
@@ -204,9 +204,9 @@ bHYPRE_StructMatrix_Setup(
  */
 int32_t
 bHYPRE_StructMatrix_Apply(
-  bHYPRE_StructMatrix self,
-  bHYPRE_Vector b,
-  bHYPRE_Vector* x);
+  /*in*/ bHYPRE_StructMatrix self,
+  /*in*/ bHYPRE_Vector b,
+  /*inout*/ bHYPRE_Vector* x);
 
 /**
  * Prepare an object for setting coefficient values, whether for
@@ -215,7 +215,7 @@ bHYPRE_StructMatrix_Apply(
  */
 int32_t
 bHYPRE_StructMatrix_Initialize(
-  bHYPRE_StructMatrix self);
+  /*in*/ bHYPRE_StructMatrix self);
 
 /**
  * Finalize the construction of an object before using, either
@@ -227,7 +227,7 @@ bHYPRE_StructMatrix_Initialize(
  */
 int32_t
 bHYPRE_StructMatrix_Assemble(
-  bHYPRE_StructMatrix self);
+  /*in*/ bHYPRE_StructMatrix self);
 
 /**
  * The problem definition interface is a {\it builder} that
@@ -236,70 +236,70 @@ bHYPRE_StructMatrix_Assemble(
  * with that object, it must be returned from the problem
  * definition object. {\tt GetObject} performs this function.
  * At compile time, the type of the returned object is unknown.
- * Thus, the returned type is a SIDL.BaseInterface.
+ * Thus, the returned type is a sidl.BaseInterface.
  * QueryInterface or Cast must be used on the returned object to
  * convert it into a known type.
  * 
  */
 int32_t
 bHYPRE_StructMatrix_GetObject(
-  bHYPRE_StructMatrix self,
-  SIDL_BaseInterface* A);
+  /*in*/ bHYPRE_StructMatrix self,
+  /*out*/ sidl_BaseInterface* A);
 
 /**
  * Method:  SetGrid[]
  */
 int32_t
 bHYPRE_StructMatrix_SetGrid(
-  bHYPRE_StructMatrix self,
-  bHYPRE_StructGrid grid);
+  /*in*/ bHYPRE_StructMatrix self,
+  /*in*/ bHYPRE_StructGrid grid);
 
 /**
  * Method:  SetStencil[]
  */
 int32_t
 bHYPRE_StructMatrix_SetStencil(
-  bHYPRE_StructMatrix self,
-  bHYPRE_StructStencil stencil);
+  /*in*/ bHYPRE_StructMatrix self,
+  /*in*/ bHYPRE_StructStencil stencil);
 
 /**
  * Method:  SetValues[]
  */
 int32_t
 bHYPRE_StructMatrix_SetValues(
-  bHYPRE_StructMatrix self,
-  struct SIDL_int__array* index,
-  int32_t num_stencil_indices,
-  struct SIDL_int__array* stencil_indices,
-  struct SIDL_double__array* values);
+  /*in*/ bHYPRE_StructMatrix self,
+  /*in*/ struct sidl_int__array* index,
+  /*in*/ int32_t num_stencil_indices,
+  /*in*/ struct sidl_int__array* stencil_indices,
+  /*in*/ struct sidl_double__array* values);
 
 /**
  * Method:  SetBoxValues[]
  */
 int32_t
 bHYPRE_StructMatrix_SetBoxValues(
-  bHYPRE_StructMatrix self,
-  struct SIDL_int__array* ilower,
-  struct SIDL_int__array* iupper,
-  int32_t num_stencil_indices,
-  struct SIDL_int__array* stencil_indices,
-  struct SIDL_double__array* values);
+  /*in*/ bHYPRE_StructMatrix self,
+  /*in*/ struct sidl_int__array* ilower,
+  /*in*/ struct sidl_int__array* iupper,
+  /*in*/ int32_t num_stencil_indices,
+  /*in*/ struct sidl_int__array* stencil_indices,
+  /*in*/ struct sidl_double__array* values);
 
 /**
  * Method:  SetNumGhost[]
  */
 int32_t
 bHYPRE_StructMatrix_SetNumGhost(
-  bHYPRE_StructMatrix self,
-  struct SIDL_int__array* num_ghost);
+  /*in*/ bHYPRE_StructMatrix self,
+  /*in*/ struct sidl_int__array* num_ghost);
 
 /**
  * Method:  SetSymmetric[]
  */
 int32_t
 bHYPRE_StructMatrix_SetSymmetric(
-  bHYPRE_StructMatrix self,
-  int32_t symmetric);
+  /*in*/ bHYPRE_StructMatrix self,
+  /*in*/ int32_t symmetric);
 
 /**
  * Cast method for interface and class type conversions.
@@ -317,17 +317,24 @@ bHYPRE_StructMatrix__cast2(
   const char* type);
 
 struct bHYPRE_StructMatrix__array*
-bHYPRE_StructMatrix__array_createCol(int32_t        dimen,
-                                     const int32_t lower[],
-                                     const int32_t upper[]);
+bHYPRE_StructMatrix__array_createCol(
+  int32_t       dimen,
+  const int32_t lower[],
+  const int32_t upper[]);
 
 struct bHYPRE_StructMatrix__array*
-bHYPRE_StructMatrix__array_createRow(int32_t        dimen,
-                                     const int32_t lower[],
-                                     const int32_t upper[]);
+bHYPRE_StructMatrix__array_createRow(
+  int32_t       dimen,
+  const int32_t lower[],
+  const int32_t upper[]);
 
 struct bHYPRE_StructMatrix__array*
 bHYPRE_StructMatrix__array_create1d(int32_t len);
+
+struct bHYPRE_StructMatrix__array*
+bHYPRE_StructMatrix__array_create1dInit(
+  int32_t len, 
+  bHYPRE_StructMatrix* data);
 
 struct bHYPRE_StructMatrix__array*
 bHYPRE_StructMatrix__array_create2dCol(int32_t m, int32_t n);
@@ -336,119 +343,206 @@ struct bHYPRE_StructMatrix__array*
 bHYPRE_StructMatrix__array_create2dRow(int32_t m, int32_t n);
 
 struct bHYPRE_StructMatrix__array*
-bHYPRE_StructMatrix__array_borrow(bHYPRE_StructMatrix*firstElement,
-                                  int32_t       dimen,
-const int32_t lower[],
-const int32_t upper[],
-const int32_t stride[]);
+bHYPRE_StructMatrix__array_borrow(
+  bHYPRE_StructMatrix* firstElement,
+  int32_t       dimen,
+  const int32_t lower[],
+  const int32_t upper[],
+  const int32_t stride[]);
 
 struct bHYPRE_StructMatrix__array*
-bHYPRE_StructMatrix__array_smartCopy(struct bHYPRE_StructMatrix__array *array);
+bHYPRE_StructMatrix__array_smartCopy(
+  struct bHYPRE_StructMatrix__array *array);
 
 void
-bHYPRE_StructMatrix__array_addRef(struct bHYPRE_StructMatrix__array* array);
+bHYPRE_StructMatrix__array_addRef(
+  struct bHYPRE_StructMatrix__array* array);
 
 void
-bHYPRE_StructMatrix__array_deleteRef(struct bHYPRE_StructMatrix__array* array);
+bHYPRE_StructMatrix__array_deleteRef(
+  struct bHYPRE_StructMatrix__array* array);
 
 bHYPRE_StructMatrix
-bHYPRE_StructMatrix__array_get1(const struct bHYPRE_StructMatrix__array* array,
-                                const int32_t i1);
+bHYPRE_StructMatrix__array_get1(
+  const struct bHYPRE_StructMatrix__array* array,
+  const int32_t i1);
 
 bHYPRE_StructMatrix
-bHYPRE_StructMatrix__array_get2(const struct bHYPRE_StructMatrix__array* array,
-                                const int32_t i1,
-                                const int32_t i2);
+bHYPRE_StructMatrix__array_get2(
+  const struct bHYPRE_StructMatrix__array* array,
+  const int32_t i1,
+  const int32_t i2);
 
 bHYPRE_StructMatrix
-bHYPRE_StructMatrix__array_get3(const struct bHYPRE_StructMatrix__array* array,
-                                const int32_t i1,
-                                const int32_t i2,
-                                const int32_t i3);
+bHYPRE_StructMatrix__array_get3(
+  const struct bHYPRE_StructMatrix__array* array,
+  const int32_t i1,
+  const int32_t i2,
+  const int32_t i3);
 
 bHYPRE_StructMatrix
-bHYPRE_StructMatrix__array_get4(const struct bHYPRE_StructMatrix__array* array,
-                                const int32_t i1,
-                                const int32_t i2,
-                                const int32_t i3,
-                                const int32_t i4);
+bHYPRE_StructMatrix__array_get4(
+  const struct bHYPRE_StructMatrix__array* array,
+  const int32_t i1,
+  const int32_t i2,
+  const int32_t i3,
+  const int32_t i4);
 
 bHYPRE_StructMatrix
-bHYPRE_StructMatrix__array_get(const struct bHYPRE_StructMatrix__array* array,
-                               const int32_t indices[]);
+bHYPRE_StructMatrix__array_get5(
+  const struct bHYPRE_StructMatrix__array* array,
+  const int32_t i1,
+  const int32_t i2,
+  const int32_t i3,
+  const int32_t i4,
+  const int32_t i5);
+
+bHYPRE_StructMatrix
+bHYPRE_StructMatrix__array_get6(
+  const struct bHYPRE_StructMatrix__array* array,
+  const int32_t i1,
+  const int32_t i2,
+  const int32_t i3,
+  const int32_t i4,
+  const int32_t i5,
+  const int32_t i6);
+
+bHYPRE_StructMatrix
+bHYPRE_StructMatrix__array_get7(
+  const struct bHYPRE_StructMatrix__array* array,
+  const int32_t i1,
+  const int32_t i2,
+  const int32_t i3,
+  const int32_t i4,
+  const int32_t i5,
+  const int32_t i6,
+  const int32_t i7);
+
+bHYPRE_StructMatrix
+bHYPRE_StructMatrix__array_get(
+  const struct bHYPRE_StructMatrix__array* array,
+  const int32_t indices[]);
 
 void
-bHYPRE_StructMatrix__array_set1(struct bHYPRE_StructMatrix__array* array,
-                                const int32_t i1,
-                                bHYPRE_StructMatrix const value);
+bHYPRE_StructMatrix__array_set1(
+  struct bHYPRE_StructMatrix__array* array,
+  const int32_t i1,
+  bHYPRE_StructMatrix const value);
 
 void
-bHYPRE_StructMatrix__array_set2(struct bHYPRE_StructMatrix__array* array,
-                                const int32_t i1,
-                                const int32_t i2,
-                                bHYPRE_StructMatrix const value);
+bHYPRE_StructMatrix__array_set2(
+  struct bHYPRE_StructMatrix__array* array,
+  const int32_t i1,
+  const int32_t i2,
+  bHYPRE_StructMatrix const value);
 
 void
-bHYPRE_StructMatrix__array_set3(struct bHYPRE_StructMatrix__array* array,
-                                const int32_t i1,
-                                const int32_t i2,
-                                const int32_t i3,
-                                bHYPRE_StructMatrix const value);
+bHYPRE_StructMatrix__array_set3(
+  struct bHYPRE_StructMatrix__array* array,
+  const int32_t i1,
+  const int32_t i2,
+  const int32_t i3,
+  bHYPRE_StructMatrix const value);
 
 void
-bHYPRE_StructMatrix__array_set4(struct bHYPRE_StructMatrix__array* array,
-                                const int32_t i1,
-                                const int32_t i2,
-                                const int32_t i3,
-                                const int32_t i4,
-                                bHYPRE_StructMatrix const value);
+bHYPRE_StructMatrix__array_set4(
+  struct bHYPRE_StructMatrix__array* array,
+  const int32_t i1,
+  const int32_t i2,
+  const int32_t i3,
+  const int32_t i4,
+  bHYPRE_StructMatrix const value);
 
 void
-bHYPRE_StructMatrix__array_set(struct bHYPRE_StructMatrix__array* array,
-                               const int32_t indices[],
-                               bHYPRE_StructMatrix const value);
+bHYPRE_StructMatrix__array_set5(
+  struct bHYPRE_StructMatrix__array* array,
+  const int32_t i1,
+  const int32_t i2,
+  const int32_t i3,
+  const int32_t i4,
+  const int32_t i5,
+  bHYPRE_StructMatrix const value);
+
+void
+bHYPRE_StructMatrix__array_set6(
+  struct bHYPRE_StructMatrix__array* array,
+  const int32_t i1,
+  const int32_t i2,
+  const int32_t i3,
+  const int32_t i4,
+  const int32_t i5,
+  const int32_t i6,
+  bHYPRE_StructMatrix const value);
+
+void
+bHYPRE_StructMatrix__array_set7(
+  struct bHYPRE_StructMatrix__array* array,
+  const int32_t i1,
+  const int32_t i2,
+  const int32_t i3,
+  const int32_t i4,
+  const int32_t i5,
+  const int32_t i6,
+  const int32_t i7,
+  bHYPRE_StructMatrix const value);
+
+void
+bHYPRE_StructMatrix__array_set(
+  struct bHYPRE_StructMatrix__array* array,
+  const int32_t indices[],
+  bHYPRE_StructMatrix const value);
 
 int32_t
-bHYPRE_StructMatrix__array_dimen(const struct bHYPRE_StructMatrix__array* 
-  array);
+bHYPRE_StructMatrix__array_dimen(
+  const struct bHYPRE_StructMatrix__array* array);
 
 int32_t
-bHYPRE_StructMatrix__array_lower(const struct bHYPRE_StructMatrix__array* array,
-                                 const int32_t ind);
+bHYPRE_StructMatrix__array_lower(
+  const struct bHYPRE_StructMatrix__array* array,
+  const int32_t ind);
 
 int32_t
-bHYPRE_StructMatrix__array_upper(const struct bHYPRE_StructMatrix__array* array,
-                                 const int32_t ind);
+bHYPRE_StructMatrix__array_upper(
+  const struct bHYPRE_StructMatrix__array* array,
+  const int32_t ind);
 
 int32_t
-bHYPRE_StructMatrix__array_stride(const struct bHYPRE_StructMatrix__array* 
-  array,
-                                  const int32_t ind);
+bHYPRE_StructMatrix__array_length(
+  const struct bHYPRE_StructMatrix__array* array,
+  const int32_t ind);
+
+int32_t
+bHYPRE_StructMatrix__array_stride(
+  const struct bHYPRE_StructMatrix__array* array,
+  const int32_t ind);
 
 int
-bHYPRE_StructMatrix__array_isColumnOrder(const struct 
-  bHYPRE_StructMatrix__array* array);
+bHYPRE_StructMatrix__array_isColumnOrder(
+  const struct bHYPRE_StructMatrix__array* array);
 
 int
-bHYPRE_StructMatrix__array_isRowOrder(const struct bHYPRE_StructMatrix__array* 
-  array);
-
-void
-bHYPRE_StructMatrix__array_slice(const struct bHYPRE_StructMatrix__array* src,
-                                       int32_t        dimen,
-                                       const int32_t  numElem[],
-                                       const int32_t  *srcStart,
-                                       const int32_t  *srcStride,
-                                       const int32_t  *newStart);
-
-void
-bHYPRE_StructMatrix__array_copy(const struct bHYPRE_StructMatrix__array* src,
-                                      struct bHYPRE_StructMatrix__array* dest);
+bHYPRE_StructMatrix__array_isRowOrder(
+  const struct bHYPRE_StructMatrix__array* array);
 
 struct bHYPRE_StructMatrix__array*
-bHYPRE_StructMatrix__array_ensure(struct bHYPRE_StructMatrix__array* src,
-                                  int32_t dimen,
-                                  int     ordering);
+bHYPRE_StructMatrix__array_slice(
+  struct bHYPRE_StructMatrix__array* src,
+  int32_t        dimen,
+  const int32_t  numElem[],
+  const int32_t  *srcStart,
+  const int32_t  *srcStride,
+  const int32_t  *newStart);
+
+void
+bHYPRE_StructMatrix__array_copy(
+  const struct bHYPRE_StructMatrix__array* src,
+  struct bHYPRE_StructMatrix__array* dest);
+
+struct bHYPRE_StructMatrix__array*
+bHYPRE_StructMatrix__array_ensure(
+  struct bHYPRE_StructMatrix__array* src,
+  int32_t dimen,
+  int     ordering);
 
 #ifdef __cplusplus
 }

@@ -2,14 +2,14 @@
  * File:          bHYPRE_ParCSRDiagScale_Impl.h
  * Symbol:        bHYPRE.ParCSRDiagScale-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.8.2
- * SIDL Created:  20030401 14:47:20 PST
- * Generated:     20030401 14:47:31 PST
+ * Babel Version: 0.9.8
+ * sidl Created:  20050208 15:29:05 PST
+ * Generated:     20050208 15:29:07 PST
  * Description:   Server-side implementation for bHYPRE.ParCSRDiagScale
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.8.2
+ * babel-version = 0.9.8
  * source-line   = 1140
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -17,15 +17,11 @@
 #ifndef included_bHYPRE_ParCSRDiagScale_Impl_h
 #define included_bHYPRE_ParCSRDiagScale_Impl_h
 
-/* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale._includes) */
-/* Put additional include files here... */
-#include "HYPRE.h"
-#include "utilities.h"
-#include "bHYPRE_IJParCSRMatrix.h"
-/* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale._includes) */
-
-#ifndef included_SIDL_header_h
-#include "SIDL_header.h"
+#ifndef included_sidl_header_h
+#include "sidl_header.h"
+#endif
+#ifndef included_bHYPRE_ParCSRDiagScale_h
+#include "bHYPRE_ParCSRDiagScale.h"
 #endif
 #ifndef included_bHYPRE_Operator_h
 #include "bHYPRE_Operator.h"
@@ -33,9 +29,13 @@
 #ifndef included_bHYPRE_Vector_h
 #include "bHYPRE_Vector.h"
 #endif
-#ifndef included_bHYPRE_ParCSRDiagScale_h
-#include "bHYPRE_ParCSRDiagScale.h"
-#endif
+
+/* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale._includes) */
+/* Put additional include files here... */
+#include "HYPRE.h"
+#include "utilities.h"
+#include "bHYPRE_IJParCSRMatrix.h"
+/* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale._includes) */
 
 /*
  * Private data for class bHYPRE.ParCSRDiagScale
@@ -105,25 +105,25 @@ extern int32_t
 impl_bHYPRE_ParCSRDiagScale_SetIntArray1Parameter(
   bHYPRE_ParCSRDiagScale,
   const char*,
-  struct SIDL_int__array*);
+  struct sidl_int__array*);
 
 extern int32_t
 impl_bHYPRE_ParCSRDiagScale_SetIntArray2Parameter(
   bHYPRE_ParCSRDiagScale,
   const char*,
-  struct SIDL_int__array*);
+  struct sidl_int__array*);
 
 extern int32_t
 impl_bHYPRE_ParCSRDiagScale_SetDoubleArray1Parameter(
   bHYPRE_ParCSRDiagScale,
   const char*,
-  struct SIDL_double__array*);
+  struct sidl_double__array*);
 
 extern int32_t
 impl_bHYPRE_ParCSRDiagScale_SetDoubleArray2Parameter(
   bHYPRE_ParCSRDiagScale,
   const char*,
-  struct SIDL_double__array*);
+  struct sidl_double__array*);
 
 extern int32_t
 impl_bHYPRE_ParCSRDiagScale_GetIntValue(

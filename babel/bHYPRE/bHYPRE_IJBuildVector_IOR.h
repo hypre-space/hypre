@@ -2,14 +2,14 @@
  * File:          bHYPRE_IJBuildVector_IOR.h
  * Symbol:        bHYPRE.IJBuildVector-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.8.2
- * SIDL Created:  20030401 14:47:20 PST
- * Generated:     20030401 14:47:21 PST
+ * Babel Version: 0.9.8
+ * sidl Created:  20050208 15:29:04 PST
+ * Generated:     20050208 15:29:06 PST
  * Description:   Intermediate Object Representation for bHYPRE.IJBuildVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.2
+ * babel-version = 0.9.8
  * source-line   = 203
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -17,8 +17,8 @@
 #ifndef included_bHYPRE_IJBuildVector_IOR_h
 #define included_bHYPRE_IJBuildVector_IOR_h
 
-#ifndef included_SIDL_header_h
-#include "SIDL_header.h"
+#ifndef included_sidl_header_h
+#include "sidl_header.h"
 #endif
 #ifdef __cplusplus
 extern "C" {
@@ -38,10 +38,10 @@ bHYPRE_IJBuildVector__remote(const char *url);
  * Forward references for external classes and interfaces.
  */
 
-struct SIDL_BaseInterface__array;
-struct SIDL_BaseInterface__object;
-struct SIDL_ClassInfo__array;
-struct SIDL_ClassInfo__object;
+struct sidl_BaseInterface__array;
+struct sidl_BaseInterface__object;
+struct sidl_ClassInfo__array;
+struct sidl_ClassInfo__object;
 
 /*
  * Declare the method entry point vector.
@@ -54,21 +54,21 @@ struct bHYPRE_IJBuildVector__epv {
     const char* name);
   void (*f__delete)(
     void* self);
-  /* Methods introduced in SIDL.BaseInterface-v0.8.2 */
+  /* Methods introduced in sidl.BaseInterface-v0.9.0 */
   void (*f_addRef)(
     void* self);
   void (*f_deleteRef)(
     void* self);
-  SIDL_bool (*f_isSame)(
+  sidl_bool (*f_isSame)(
     void* self,
-    struct SIDL_BaseInterface__object* iobj);
-  struct SIDL_BaseInterface__object* (*f_queryInt)(
-    void* self,
-    const char* name);
-  SIDL_bool (*f_isType)(
+    struct sidl_BaseInterface__object* iobj);
+  struct sidl_BaseInterface__object* (*f_queryInt)(
     void* self,
     const char* name);
-  struct SIDL_ClassInfo__object* (*f_getClassInfo)(
+  sidl_bool (*f_isType)(
+    void* self,
+    const char* name);
+  struct sidl_ClassInfo__object* (*f_getClassInfo)(
     void* self);
   /* Methods introduced in bHYPRE.ProblemDefinition-v1.0.0 */
   int32_t (*f_SetCommunicator)(
@@ -80,7 +80,7 @@ struct bHYPRE_IJBuildVector__epv {
     void* self);
   int32_t (*f_GetObject)(
     void* self,
-    struct SIDL_BaseInterface__object** A);
+    struct sidl_BaseInterface__object** A);
   /* Methods introduced in bHYPRE.IJBuildVector-v1.0.0 */
   int32_t (*f_SetLocalRange)(
     void* self,
@@ -89,13 +89,13 @@ struct bHYPRE_IJBuildVector__epv {
   int32_t (*f_SetValues)(
     void* self,
     int32_t nvalues,
-    struct SIDL_int__array* indices,
-    struct SIDL_double__array* values);
+    struct sidl_int__array* indices,
+    struct sidl_double__array* values);
   int32_t (*f_AddToValues)(
     void* self,
     int32_t nvalues,
-    struct SIDL_int__array* indices,
-    struct SIDL_double__array* values);
+    struct sidl_int__array* indices,
+    struct sidl_double__array* values);
   int32_t (*f_GetLocalRange)(
     void* self,
     int32_t* jlower,
@@ -103,8 +103,8 @@ struct bHYPRE_IJBuildVector__epv {
   int32_t (*f_GetValues)(
     void* self,
     int32_t nvalues,
-    struct SIDL_int__array* indices,
-    struct SIDL_double__array** values);
+    struct sidl_int__array* indices,
+    struct sidl_double__array** values);
   int32_t (*f_Print)(
     void* self,
     const char* filename);

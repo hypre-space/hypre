@@ -2,14 +2,14 @@
  * File:          bHYPRE_SStructParCSRVector_Skel.c
  * Symbol:        bHYPRE.SStructParCSRVector-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.8.2
- * SIDL Created:  20030401 14:47:20 PST
- * Generated:     20030401 14:47:30 PST
+ * Babel Version: 0.9.8
+ * sidl Created:  20050208 15:29:04 PST
+ * Generated:     20050208 15:29:08 PST
  * Description:   Server-side glue code for bHYPRE.SStructParCSRVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.2
+ * babel-version = 0.9.8
  * source-line   = 837
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -73,7 +73,7 @@ impl_bHYPRE_SStructParCSRVector_Assemble(
 extern int32_t
 impl_bHYPRE_SStructParCSRVector_GetObject(
   bHYPRE_SStructParCSRVector,
-  SIDL_BaseInterface*);
+  sidl_BaseInterface*);
 
 extern int32_t
 impl_bHYPRE_SStructParCSRVector_SetGrid(
@@ -84,35 +84,35 @@ extern int32_t
 impl_bHYPRE_SStructParCSRVector_SetValues(
   bHYPRE_SStructParCSRVector,
   int32_t,
-  struct SIDL_int__array*,
+  struct sidl_int__array*,
   int32_t,
-  struct SIDL_double__array*);
+  struct sidl_double__array*);
 
 extern int32_t
 impl_bHYPRE_SStructParCSRVector_SetBoxValues(
   bHYPRE_SStructParCSRVector,
   int32_t,
-  struct SIDL_int__array*,
-  struct SIDL_int__array*,
+  struct sidl_int__array*,
+  struct sidl_int__array*,
   int32_t,
-  struct SIDL_double__array*);
+  struct sidl_double__array*);
 
 extern int32_t
 impl_bHYPRE_SStructParCSRVector_AddToValues(
   bHYPRE_SStructParCSRVector,
   int32_t,
-  struct SIDL_int__array*,
+  struct sidl_int__array*,
   int32_t,
-  struct SIDL_double__array*);
+  struct sidl_double__array*);
 
 extern int32_t
 impl_bHYPRE_SStructParCSRVector_AddToBoxValues(
   bHYPRE_SStructParCSRVector,
   int32_t,
-  struct SIDL_int__array*,
-  struct SIDL_int__array*,
+  struct sidl_int__array*,
+  struct sidl_int__array*,
   int32_t,
-  struct SIDL_double__array*);
+  struct sidl_double__array*);
 
 extern int32_t
 impl_bHYPRE_SStructParCSRVector_Gather(
@@ -122,7 +122,7 @@ extern int32_t
 impl_bHYPRE_SStructParCSRVector_GetValues(
   bHYPRE_SStructParCSRVector,
   int32_t,
-  struct SIDL_int__array*,
+  struct sidl_int__array*,
   int32_t,
   double*);
 
@@ -130,10 +130,10 @@ extern int32_t
 impl_bHYPRE_SStructParCSRVector_GetBoxValues(
   bHYPRE_SStructParCSRVector,
   int32_t,
-  struct SIDL_int__array*,
-  struct SIDL_int__array*,
+  struct sidl_int__array*,
+  struct sidl_int__array*,
   int32_t,
-  struct SIDL_double__array**);
+  struct sidl_double__array**);
 
 extern int32_t
 impl_bHYPRE_SStructParCSRVector_SetComplex(
@@ -147,17 +147,17 @@ impl_bHYPRE_SStructParCSRVector_Print(
 
 static int32_t
 skel_bHYPRE_SStructParCSRVector_SetValues(
-  bHYPRE_SStructParCSRVector self,
-  int32_t part,
-  struct SIDL_int__array* index,
-  int32_t var,
-  struct SIDL_double__array* value)
+  /*in*/ bHYPRE_SStructParCSRVector self,
+  /*in*/ int32_t part,
+  /*in*/ struct sidl_int__array* index,
+  /*in*/ int32_t var,
+  /*in*/ struct sidl_double__array* value)
 {
   int32_t _return;
-  struct SIDL_int__array* index_proxy = SIDL_int__array_ensure(index, 1,
-    SIDL_column_major_order);
-  struct SIDL_double__array* value_proxy = SIDL_double__array_ensure(value, 1,
-    SIDL_column_major_order);
+  struct sidl_int__array* index_proxy = sidl_int__array_ensure(index, 1,
+    sidl_column_major_order);
+  struct sidl_double__array* value_proxy = sidl_double__array_ensure(value, 1,
+    sidl_column_major_order);
   _return =
     impl_bHYPRE_SStructParCSRVector_SetValues(
       self,
@@ -165,27 +165,27 @@ skel_bHYPRE_SStructParCSRVector_SetValues(
       index_proxy,
       var,
       value_proxy);
-  SIDL_int__array_deleteRef(index_proxy);
-  SIDL_double__array_deleteRef(value_proxy);
+  sidl_int__array_deleteRef(index_proxy);
+  sidl_double__array_deleteRef(value_proxy);
   return _return;
 }
 
 static int32_t
 skel_bHYPRE_SStructParCSRVector_SetBoxValues(
-  bHYPRE_SStructParCSRVector self,
-  int32_t part,
-  struct SIDL_int__array* ilower,
-  struct SIDL_int__array* iupper,
-  int32_t var,
-  struct SIDL_double__array* values)
+  /*in*/ bHYPRE_SStructParCSRVector self,
+  /*in*/ int32_t part,
+  /*in*/ struct sidl_int__array* ilower,
+  /*in*/ struct sidl_int__array* iupper,
+  /*in*/ int32_t var,
+  /*in*/ struct sidl_double__array* values)
 {
   int32_t _return;
-  struct SIDL_int__array* ilower_proxy = SIDL_int__array_ensure(ilower, 1,
-    SIDL_column_major_order);
-  struct SIDL_int__array* iupper_proxy = SIDL_int__array_ensure(iupper, 1,
-    SIDL_column_major_order);
-  struct SIDL_double__array* values_proxy = SIDL_double__array_ensure(values, 1,
-    SIDL_column_major_order);
+  struct sidl_int__array* ilower_proxy = sidl_int__array_ensure(ilower, 1,
+    sidl_column_major_order);
+  struct sidl_int__array* iupper_proxy = sidl_int__array_ensure(iupper, 1,
+    sidl_column_major_order);
+  struct sidl_double__array* values_proxy = sidl_double__array_ensure(values, 1,
+    sidl_column_major_order);
   _return =
     impl_bHYPRE_SStructParCSRVector_SetBoxValues(
       self,
@@ -194,25 +194,25 @@ skel_bHYPRE_SStructParCSRVector_SetBoxValues(
       iupper_proxy,
       var,
       values_proxy);
-  SIDL_int__array_deleteRef(ilower_proxy);
-  SIDL_int__array_deleteRef(iupper_proxy);
-  SIDL_double__array_deleteRef(values_proxy);
+  sidl_int__array_deleteRef(ilower_proxy);
+  sidl_int__array_deleteRef(iupper_proxy);
+  sidl_double__array_deleteRef(values_proxy);
   return _return;
 }
 
 static int32_t
 skel_bHYPRE_SStructParCSRVector_AddToValues(
-  bHYPRE_SStructParCSRVector self,
-  int32_t part,
-  struct SIDL_int__array* index,
-  int32_t var,
-  struct SIDL_double__array* value)
+  /*in*/ bHYPRE_SStructParCSRVector self,
+  /*in*/ int32_t part,
+  /*in*/ struct sidl_int__array* index,
+  /*in*/ int32_t var,
+  /*in*/ struct sidl_double__array* value)
 {
   int32_t _return;
-  struct SIDL_int__array* index_proxy = SIDL_int__array_ensure(index, 1,
-    SIDL_column_major_order);
-  struct SIDL_double__array* value_proxy = SIDL_double__array_ensure(value, 1,
-    SIDL_column_major_order);
+  struct sidl_int__array* index_proxy = sidl_int__array_ensure(index, 1,
+    sidl_column_major_order);
+  struct sidl_double__array* value_proxy = sidl_double__array_ensure(value, 1,
+    sidl_column_major_order);
   _return =
     impl_bHYPRE_SStructParCSRVector_AddToValues(
       self,
@@ -220,27 +220,27 @@ skel_bHYPRE_SStructParCSRVector_AddToValues(
       index_proxy,
       var,
       value_proxy);
-  SIDL_int__array_deleteRef(index_proxy);
-  SIDL_double__array_deleteRef(value_proxy);
+  sidl_int__array_deleteRef(index_proxy);
+  sidl_double__array_deleteRef(value_proxy);
   return _return;
 }
 
 static int32_t
 skel_bHYPRE_SStructParCSRVector_AddToBoxValues(
-  bHYPRE_SStructParCSRVector self,
-  int32_t part,
-  struct SIDL_int__array* ilower,
-  struct SIDL_int__array* iupper,
-  int32_t var,
-  struct SIDL_double__array* values)
+  /*in*/ bHYPRE_SStructParCSRVector self,
+  /*in*/ int32_t part,
+  /*in*/ struct sidl_int__array* ilower,
+  /*in*/ struct sidl_int__array* iupper,
+  /*in*/ int32_t var,
+  /*in*/ struct sidl_double__array* values)
 {
   int32_t _return;
-  struct SIDL_int__array* ilower_proxy = SIDL_int__array_ensure(ilower, 1,
-    SIDL_column_major_order);
-  struct SIDL_int__array* iupper_proxy = SIDL_int__array_ensure(iupper, 1,
-    SIDL_column_major_order);
-  struct SIDL_double__array* values_proxy = SIDL_double__array_ensure(values, 1,
-    SIDL_column_major_order);
+  struct sidl_int__array* ilower_proxy = sidl_int__array_ensure(ilower, 1,
+    sidl_column_major_order);
+  struct sidl_int__array* iupper_proxy = sidl_int__array_ensure(iupper, 1,
+    sidl_column_major_order);
+  struct sidl_double__array* values_proxy = sidl_double__array_ensure(values, 1,
+    sidl_column_major_order);
   _return =
     impl_bHYPRE_SStructParCSRVector_AddToBoxValues(
       self,
@@ -249,23 +249,23 @@ skel_bHYPRE_SStructParCSRVector_AddToBoxValues(
       iupper_proxy,
       var,
       values_proxy);
-  SIDL_int__array_deleteRef(ilower_proxy);
-  SIDL_int__array_deleteRef(iupper_proxy);
-  SIDL_double__array_deleteRef(values_proxy);
+  sidl_int__array_deleteRef(ilower_proxy);
+  sidl_int__array_deleteRef(iupper_proxy);
+  sidl_double__array_deleteRef(values_proxy);
   return _return;
 }
 
 static int32_t
 skel_bHYPRE_SStructParCSRVector_GetValues(
-  bHYPRE_SStructParCSRVector self,
-  int32_t part,
-  struct SIDL_int__array* index,
-  int32_t var,
-  double* value)
+  /*in*/ bHYPRE_SStructParCSRVector self,
+  /*in*/ int32_t part,
+  /*in*/ struct sidl_int__array* index,
+  /*in*/ int32_t var,
+  /*out*/ double* value)
 {
   int32_t _return;
-  struct SIDL_int__array* index_proxy = SIDL_int__array_ensure(index, 1,
-    SIDL_column_major_order);
+  struct sidl_int__array* index_proxy = sidl_int__array_ensure(index, 1,
+    sidl_column_major_order);
   _return =
     impl_bHYPRE_SStructParCSRVector_GetValues(
       self,
@@ -273,27 +273,27 @@ skel_bHYPRE_SStructParCSRVector_GetValues(
       index_proxy,
       var,
       value);
-  SIDL_int__array_deleteRef(index_proxy);
+  sidl_int__array_deleteRef(index_proxy);
   return _return;
 }
 
 static int32_t
 skel_bHYPRE_SStructParCSRVector_GetBoxValues(
-  bHYPRE_SStructParCSRVector self,
-  int32_t part,
-  struct SIDL_int__array* ilower,
-  struct SIDL_int__array* iupper,
-  int32_t var,
-  struct SIDL_double__array** values)
+  /*in*/ bHYPRE_SStructParCSRVector self,
+  /*in*/ int32_t part,
+  /*in*/ struct sidl_int__array* ilower,
+  /*in*/ struct sidl_int__array* iupper,
+  /*in*/ int32_t var,
+  /*inout*/ struct sidl_double__array** values)
 {
   int32_t _return;
-  struct SIDL_int__array* ilower_proxy = SIDL_int__array_ensure(ilower, 1,
-    SIDL_column_major_order);
-  struct SIDL_int__array* iupper_proxy = SIDL_int__array_ensure(iupper, 1,
-    SIDL_column_major_order);
-  struct SIDL_double__array* values_proxy = SIDL_double__array_ensure(*values,
-    1, SIDL_column_major_order);
-  SIDL_double__array_deleteRef(*values);
+  struct sidl_int__array* ilower_proxy = sidl_int__array_ensure(ilower, 1,
+    sidl_column_major_order);
+  struct sidl_int__array* iupper_proxy = sidl_int__array_ensure(iupper, 1,
+    sidl_column_major_order);
+  struct sidl_double__array* values_proxy = sidl_double__array_ensure(*values,
+    1, sidl_column_major_order);
+  sidl_double__array_deleteRef(*values);
   _return =
     impl_bHYPRE_SStructParCSRVector_GetBoxValues(
       self,
@@ -302,12 +302,16 @@ skel_bHYPRE_SStructParCSRVector_GetBoxValues(
       iupper_proxy,
       var,
       &values_proxy);
-  SIDL_int__array_deleteRef(ilower_proxy);
-  SIDL_int__array_deleteRef(iupper_proxy);
-  *values = SIDL_double__array_ensure(values_proxy, 1, SIDL_column_major_order);
-  SIDL_double__array_deleteRef(values_proxy);
+  sidl_int__array_deleteRef(ilower_proxy);
+  sidl_int__array_deleteRef(iupper_proxy);
+  *values = sidl_double__array_ensure(values_proxy, 1, sidl_column_major_order);
+  sidl_double__array_deleteRef(values_proxy);
   return _return;
 }
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 void
 bHYPRE_SStructParCSRVector__set_epv(struct bHYPRE_SStructParCSRVector__epv *epv)
@@ -335,6 +339,9 @@ bHYPRE_SStructParCSRVector__set_epv(struct bHYPRE_SStructParCSRVector__epv *epv)
   epv->f_SetComplex = impl_bHYPRE_SStructParCSRVector_SetComplex;
   epv->f_Print = impl_bHYPRE_SStructParCSRVector_Print;
 }
+#ifdef __cplusplus
+}
+#endif
 
 struct bHYPRE_SStructParCSRVector__data*
 bHYPRE_SStructParCSRVector__get_data(bHYPRE_SStructParCSRVector self)

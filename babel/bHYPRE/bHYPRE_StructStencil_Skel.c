@@ -2,14 +2,14 @@
  * File:          bHYPRE_StructStencil_Skel.c
  * Symbol:        bHYPRE.StructStencil-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.8.2
- * SIDL Created:  20030401 14:47:20 PST
- * Generated:     20030401 14:47:32 PST
+ * Babel Version: 0.9.8
+ * sidl Created:  20050208 15:29:05 PST
+ * Generated:     20050208 15:29:08 PST
  * Description:   Server-side glue code for bHYPRE.StructStencil
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.2
+ * babel-version = 0.9.8
  * source-line   = 1088
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -40,25 +40,29 @@ extern int32_t
 impl_bHYPRE_StructStencil_SetElement(
   bHYPRE_StructStencil,
   int32_t,
-  struct SIDL_int__array*);
+  struct sidl_int__array*);
 
 static int32_t
 skel_bHYPRE_StructStencil_SetElement(
-  bHYPRE_StructStencil self,
-  int32_t index,
-  struct SIDL_int__array* offset)
+  /*in*/ bHYPRE_StructStencil self,
+  /*in*/ int32_t index,
+  /*in*/ struct sidl_int__array* offset)
 {
   int32_t _return;
-  struct SIDL_int__array* offset_proxy = SIDL_int__array_ensure(offset, 1,
-    SIDL_column_major_order);
+  struct sidl_int__array* offset_proxy = sidl_int__array_ensure(offset, 1,
+    sidl_column_major_order);
   _return =
     impl_bHYPRE_StructStencil_SetElement(
       self,
       index,
       offset_proxy);
-  SIDL_int__array_deleteRef(offset_proxy);
+  sidl_int__array_deleteRef(offset_proxy);
   return _return;
 }
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 void
 bHYPRE_StructStencil__set_epv(struct bHYPRE_StructStencil__epv *epv)
@@ -69,6 +73,9 @@ bHYPRE_StructStencil__set_epv(struct bHYPRE_StructStencil__epv *epv)
   epv->f_SetSize = impl_bHYPRE_StructStencil_SetSize;
   epv->f_SetElement = skel_bHYPRE_StructStencil_SetElement;
 }
+#ifdef __cplusplus
+}
+#endif
 
 struct bHYPRE_StructStencil__data*
 bHYPRE_StructStencil__get_data(bHYPRE_StructStencil self)

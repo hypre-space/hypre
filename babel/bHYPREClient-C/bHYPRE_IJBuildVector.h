@@ -2,14 +2,14 @@
  * File:          bHYPRE_IJBuildVector.h
  * Symbol:        bHYPRE.IJBuildVector-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.8.2
- * SIDL Created:  20030401 14:47:34 PST
- * Generated:     20030401 14:47:40 PST
+ * Babel Version: 0.9.8
+ * sidl Created:  20050208 15:29:09 PST
+ * Generated:     20050208 15:29:12 PST
  * Description:   Client-side glue code for bHYPRE.IJBuildVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.2
+ * babel-version = 0.9.8
  * source-line   = 203
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -28,14 +28,14 @@ typedef struct bHYPRE_IJBuildVector__object* bHYPRE_IJBuildVector;
  * Includes for all header dependencies.
  */
 
-#ifndef included_SIDL_header_h
-#include "SIDL_header.h"
+#ifndef included_sidl_header_h
+#include "sidl_header.h"
 #endif
-#ifndef included_SIDL_BaseInterface_h
-#include "SIDL_BaseInterface.h"
+#ifndef included_sidl_BaseInterface_h
+#include "sidl_BaseInterface.h"
 #endif
-#ifndef included_SIDL_ClassInfo_h
-#include "SIDL_ClassInfo.h"
+#ifndef included_sidl_ClassInfo_h
+#include "sidl_ClassInfo.h"
 #endif
 
 #ifdef __cplusplus
@@ -44,48 +44,48 @@ extern "C" {
 
 void
 bHYPRE_IJBuildVector_addRef(
-  bHYPRE_IJBuildVector self);
+  /*in*/ bHYPRE_IJBuildVector self);
 
 void
 bHYPRE_IJBuildVector_deleteRef(
-  bHYPRE_IJBuildVector self);
+  /*in*/ bHYPRE_IJBuildVector self);
 
-SIDL_bool
+sidl_bool
 bHYPRE_IJBuildVector_isSame(
-  bHYPRE_IJBuildVector self,
-  SIDL_BaseInterface iobj);
+  /*in*/ bHYPRE_IJBuildVector self,
+  /*in*/ sidl_BaseInterface iobj);
 
-SIDL_BaseInterface
+sidl_BaseInterface
 bHYPRE_IJBuildVector_queryInt(
-  bHYPRE_IJBuildVector self,
-  const char* name);
+  /*in*/ bHYPRE_IJBuildVector self,
+  /*in*/ const char* name);
 
-SIDL_bool
+sidl_bool
 bHYPRE_IJBuildVector_isType(
-  bHYPRE_IJBuildVector self,
-  const char* name);
+  /*in*/ bHYPRE_IJBuildVector self,
+  /*in*/ const char* name);
 
-SIDL_ClassInfo
+sidl_ClassInfo
 bHYPRE_IJBuildVector_getClassInfo(
-  bHYPRE_IJBuildVector self);
+  /*in*/ bHYPRE_IJBuildVector self);
 
 int32_t
 bHYPRE_IJBuildVector_SetCommunicator(
-  bHYPRE_IJBuildVector self,
-  void* mpi_comm);
+  /*in*/ bHYPRE_IJBuildVector self,
+  /*in*/ void* mpi_comm);
 
 int32_t
 bHYPRE_IJBuildVector_Initialize(
-  bHYPRE_IJBuildVector self);
+  /*in*/ bHYPRE_IJBuildVector self);
 
 int32_t
 bHYPRE_IJBuildVector_Assemble(
-  bHYPRE_IJBuildVector self);
+  /*in*/ bHYPRE_IJBuildVector self);
 
 int32_t
 bHYPRE_IJBuildVector_GetObject(
-  bHYPRE_IJBuildVector self,
-  SIDL_BaseInterface* A);
+  /*in*/ bHYPRE_IJBuildVector self,
+  /*out*/ sidl_BaseInterface* A);
 
 /**
  * Set the local range for a vector object.  Each process owns
@@ -102,9 +102,9 @@ bHYPRE_IJBuildVector_GetObject(
  */
 int32_t
 bHYPRE_IJBuildVector_SetLocalRange(
-  bHYPRE_IJBuildVector self,
-  int32_t jlower,
-  int32_t jupper);
+  /*in*/ bHYPRE_IJBuildVector self,
+  /*in*/ int32_t jlower,
+  /*in*/ int32_t jupper);
 
 /**
  * Sets values in vector.  The arrays {\tt values} and {\tt
@@ -118,10 +118,10 @@ bHYPRE_IJBuildVector_SetLocalRange(
  */
 int32_t
 bHYPRE_IJBuildVector_SetValues(
-  bHYPRE_IJBuildVector self,
-  int32_t nvalues,
-  struct SIDL_int__array* indices,
-  struct SIDL_double__array* values);
+  /*in*/ bHYPRE_IJBuildVector self,
+  /*in*/ int32_t nvalues,
+  /*in*/ struct sidl_int__array* indices,
+  /*in*/ struct sidl_double__array* values);
 
 /**
  * Adds to values in vector.  Usage details are analogous to
@@ -132,10 +132,10 @@ bHYPRE_IJBuildVector_SetValues(
  */
 int32_t
 bHYPRE_IJBuildVector_AddToValues(
-  bHYPRE_IJBuildVector self,
-  int32_t nvalues,
-  struct SIDL_int__array* indices,
-  struct SIDL_double__array* values);
+  /*in*/ bHYPRE_IJBuildVector self,
+  /*in*/ int32_t nvalues,
+  /*in*/ struct sidl_int__array* indices,
+  /*in*/ struct sidl_double__array* values);
 
 /**
  * Returns range of the part of the vector owned by this
@@ -144,9 +144,9 @@ bHYPRE_IJBuildVector_AddToValues(
  */
 int32_t
 bHYPRE_IJBuildVector_GetLocalRange(
-  bHYPRE_IJBuildVector self,
-  int32_t* jlower,
-  int32_t* jupper);
+  /*in*/ bHYPRE_IJBuildVector self,
+  /*out*/ int32_t* jlower,
+  /*out*/ int32_t* jupper);
 
 /**
  * Gets values in vector.  Usage details are analogous to {\tt
@@ -157,10 +157,10 @@ bHYPRE_IJBuildVector_GetLocalRange(
  */
 int32_t
 bHYPRE_IJBuildVector_GetValues(
-  bHYPRE_IJBuildVector self,
-  int32_t nvalues,
-  struct SIDL_int__array* indices,
-  struct SIDL_double__array** values);
+  /*in*/ bHYPRE_IJBuildVector self,
+  /*in*/ int32_t nvalues,
+  /*in*/ struct sidl_int__array* indices,
+  /*inout*/ struct sidl_double__array** values);
 
 /**
  * Print the vector to file.  This is mainly for debugging
@@ -169,8 +169,8 @@ bHYPRE_IJBuildVector_GetValues(
  */
 int32_t
 bHYPRE_IJBuildVector_Print(
-  bHYPRE_IJBuildVector self,
-  const char* filename);
+  /*in*/ bHYPRE_IJBuildVector self,
+  /*in*/ const char* filename);
 
 /**
  * Read the vector from file.  This is mainly for debugging
@@ -179,9 +179,9 @@ bHYPRE_IJBuildVector_Print(
  */
 int32_t
 bHYPRE_IJBuildVector_Read(
-  bHYPRE_IJBuildVector self,
-  const char* filename,
-  void* comm);
+  /*in*/ bHYPRE_IJBuildVector self,
+  /*in*/ const char* filename,
+  /*in*/ void* comm);
 
 /**
  * Cast method for interface and class type conversions.
@@ -199,17 +199,24 @@ bHYPRE_IJBuildVector__cast2(
   const char* type);
 
 struct bHYPRE_IJBuildVector__array*
-bHYPRE_IJBuildVector__array_createCol(int32_t        dimen,
-                                      const int32_t lower[],
-                                      const int32_t upper[]);
+bHYPRE_IJBuildVector__array_createCol(
+  int32_t       dimen,
+  const int32_t lower[],
+  const int32_t upper[]);
 
 struct bHYPRE_IJBuildVector__array*
-bHYPRE_IJBuildVector__array_createRow(int32_t        dimen,
-                                      const int32_t lower[],
-                                      const int32_t upper[]);
+bHYPRE_IJBuildVector__array_createRow(
+  int32_t       dimen,
+  const int32_t lower[],
+  const int32_t upper[]);
 
 struct bHYPRE_IJBuildVector__array*
 bHYPRE_IJBuildVector__array_create1d(int32_t len);
+
+struct bHYPRE_IJBuildVector__array*
+bHYPRE_IJBuildVector__array_create1dInit(
+  int32_t len, 
+  bHYPRE_IJBuildVector* data);
 
 struct bHYPRE_IJBuildVector__array*
 bHYPRE_IJBuildVector__array_create2dCol(int32_t m, int32_t n);
@@ -218,128 +225,206 @@ struct bHYPRE_IJBuildVector__array*
 bHYPRE_IJBuildVector__array_create2dRow(int32_t m, int32_t n);
 
 struct bHYPRE_IJBuildVector__array*
-bHYPRE_IJBuildVector__array_borrow(bHYPRE_IJBuildVector*firstElement,
-                                   int32_t       dimen,
-const int32_t lower[],
-const int32_t upper[],
-const int32_t stride[]);
+bHYPRE_IJBuildVector__array_borrow(
+  bHYPRE_IJBuildVector* firstElement,
+  int32_t       dimen,
+  const int32_t lower[],
+  const int32_t upper[],
+  const int32_t stride[]);
 
 struct bHYPRE_IJBuildVector__array*
-bHYPRE_IJBuildVector__array_smartCopy(struct bHYPRE_IJBuildVector__array 
-  *array);
+bHYPRE_IJBuildVector__array_smartCopy(
+  struct bHYPRE_IJBuildVector__array *array);
 
 void
-bHYPRE_IJBuildVector__array_addRef(struct bHYPRE_IJBuildVector__array* array);
+bHYPRE_IJBuildVector__array_addRef(
+  struct bHYPRE_IJBuildVector__array* array);
 
 void
-bHYPRE_IJBuildVector__array_deleteRef(struct bHYPRE_IJBuildVector__array* 
-  array);
+bHYPRE_IJBuildVector__array_deleteRef(
+  struct bHYPRE_IJBuildVector__array* array);
 
 bHYPRE_IJBuildVector
-bHYPRE_IJBuildVector__array_get1(const struct bHYPRE_IJBuildVector__array* 
-  array,
-                                 const int32_t i1);
+bHYPRE_IJBuildVector__array_get1(
+  const struct bHYPRE_IJBuildVector__array* array,
+  const int32_t i1);
 
 bHYPRE_IJBuildVector
-bHYPRE_IJBuildVector__array_get2(const struct bHYPRE_IJBuildVector__array* 
-  array,
-                                 const int32_t i1,
-                                 const int32_t i2);
+bHYPRE_IJBuildVector__array_get2(
+  const struct bHYPRE_IJBuildVector__array* array,
+  const int32_t i1,
+  const int32_t i2);
 
 bHYPRE_IJBuildVector
-bHYPRE_IJBuildVector__array_get3(const struct bHYPRE_IJBuildVector__array* 
-  array,
-                                 const int32_t i1,
-                                 const int32_t i2,
-                                 const int32_t i3);
+bHYPRE_IJBuildVector__array_get3(
+  const struct bHYPRE_IJBuildVector__array* array,
+  const int32_t i1,
+  const int32_t i2,
+  const int32_t i3);
 
 bHYPRE_IJBuildVector
-bHYPRE_IJBuildVector__array_get4(const struct bHYPRE_IJBuildVector__array* 
-  array,
-                                 const int32_t i1,
-                                 const int32_t i2,
-                                 const int32_t i3,
-                                 const int32_t i4);
+bHYPRE_IJBuildVector__array_get4(
+  const struct bHYPRE_IJBuildVector__array* array,
+  const int32_t i1,
+  const int32_t i2,
+  const int32_t i3,
+  const int32_t i4);
 
 bHYPRE_IJBuildVector
-bHYPRE_IJBuildVector__array_get(const struct bHYPRE_IJBuildVector__array* array,
-                                const int32_t indices[]);
+bHYPRE_IJBuildVector__array_get5(
+  const struct bHYPRE_IJBuildVector__array* array,
+  const int32_t i1,
+  const int32_t i2,
+  const int32_t i3,
+  const int32_t i4,
+  const int32_t i5);
+
+bHYPRE_IJBuildVector
+bHYPRE_IJBuildVector__array_get6(
+  const struct bHYPRE_IJBuildVector__array* array,
+  const int32_t i1,
+  const int32_t i2,
+  const int32_t i3,
+  const int32_t i4,
+  const int32_t i5,
+  const int32_t i6);
+
+bHYPRE_IJBuildVector
+bHYPRE_IJBuildVector__array_get7(
+  const struct bHYPRE_IJBuildVector__array* array,
+  const int32_t i1,
+  const int32_t i2,
+  const int32_t i3,
+  const int32_t i4,
+  const int32_t i5,
+  const int32_t i6,
+  const int32_t i7);
+
+bHYPRE_IJBuildVector
+bHYPRE_IJBuildVector__array_get(
+  const struct bHYPRE_IJBuildVector__array* array,
+  const int32_t indices[]);
 
 void
-bHYPRE_IJBuildVector__array_set1(struct bHYPRE_IJBuildVector__array* array,
-                                 const int32_t i1,
-                                 bHYPRE_IJBuildVector const value);
+bHYPRE_IJBuildVector__array_set1(
+  struct bHYPRE_IJBuildVector__array* array,
+  const int32_t i1,
+  bHYPRE_IJBuildVector const value);
 
 void
-bHYPRE_IJBuildVector__array_set2(struct bHYPRE_IJBuildVector__array* array,
-                                 const int32_t i1,
-                                 const int32_t i2,
-                                 bHYPRE_IJBuildVector const value);
+bHYPRE_IJBuildVector__array_set2(
+  struct bHYPRE_IJBuildVector__array* array,
+  const int32_t i1,
+  const int32_t i2,
+  bHYPRE_IJBuildVector const value);
 
 void
-bHYPRE_IJBuildVector__array_set3(struct bHYPRE_IJBuildVector__array* array,
-                                 const int32_t i1,
-                                 const int32_t i2,
-                                 const int32_t i3,
-                                 bHYPRE_IJBuildVector const value);
+bHYPRE_IJBuildVector__array_set3(
+  struct bHYPRE_IJBuildVector__array* array,
+  const int32_t i1,
+  const int32_t i2,
+  const int32_t i3,
+  bHYPRE_IJBuildVector const value);
 
 void
-bHYPRE_IJBuildVector__array_set4(struct bHYPRE_IJBuildVector__array* array,
-                                 const int32_t i1,
-                                 const int32_t i2,
-                                 const int32_t i3,
-                                 const int32_t i4,
-                                 bHYPRE_IJBuildVector const value);
+bHYPRE_IJBuildVector__array_set4(
+  struct bHYPRE_IJBuildVector__array* array,
+  const int32_t i1,
+  const int32_t i2,
+  const int32_t i3,
+  const int32_t i4,
+  bHYPRE_IJBuildVector const value);
 
 void
-bHYPRE_IJBuildVector__array_set(struct bHYPRE_IJBuildVector__array* array,
-                                const int32_t indices[],
-                                bHYPRE_IJBuildVector const value);
+bHYPRE_IJBuildVector__array_set5(
+  struct bHYPRE_IJBuildVector__array* array,
+  const int32_t i1,
+  const int32_t i2,
+  const int32_t i3,
+  const int32_t i4,
+  const int32_t i5,
+  bHYPRE_IJBuildVector const value);
+
+void
+bHYPRE_IJBuildVector__array_set6(
+  struct bHYPRE_IJBuildVector__array* array,
+  const int32_t i1,
+  const int32_t i2,
+  const int32_t i3,
+  const int32_t i4,
+  const int32_t i5,
+  const int32_t i6,
+  bHYPRE_IJBuildVector const value);
+
+void
+bHYPRE_IJBuildVector__array_set7(
+  struct bHYPRE_IJBuildVector__array* array,
+  const int32_t i1,
+  const int32_t i2,
+  const int32_t i3,
+  const int32_t i4,
+  const int32_t i5,
+  const int32_t i6,
+  const int32_t i7,
+  bHYPRE_IJBuildVector const value);
+
+void
+bHYPRE_IJBuildVector__array_set(
+  struct bHYPRE_IJBuildVector__array* array,
+  const int32_t indices[],
+  bHYPRE_IJBuildVector const value);
 
 int32_t
-bHYPRE_IJBuildVector__array_dimen(const struct bHYPRE_IJBuildVector__array* 
-  array);
+bHYPRE_IJBuildVector__array_dimen(
+  const struct bHYPRE_IJBuildVector__array* array);
 
 int32_t
-bHYPRE_IJBuildVector__array_lower(const struct bHYPRE_IJBuildVector__array* 
-  array,
-                                  const int32_t ind);
+bHYPRE_IJBuildVector__array_lower(
+  const struct bHYPRE_IJBuildVector__array* array,
+  const int32_t ind);
 
 int32_t
-bHYPRE_IJBuildVector__array_upper(const struct bHYPRE_IJBuildVector__array* 
-  array,
-                                  const int32_t ind);
+bHYPRE_IJBuildVector__array_upper(
+  const struct bHYPRE_IJBuildVector__array* array,
+  const int32_t ind);
 
 int32_t
-bHYPRE_IJBuildVector__array_stride(const struct bHYPRE_IJBuildVector__array* 
-  array,
-                                   const int32_t ind);
+bHYPRE_IJBuildVector__array_length(
+  const struct bHYPRE_IJBuildVector__array* array,
+  const int32_t ind);
+
+int32_t
+bHYPRE_IJBuildVector__array_stride(
+  const struct bHYPRE_IJBuildVector__array* array,
+  const int32_t ind);
 
 int
-bHYPRE_IJBuildVector__array_isColumnOrder(const struct 
-  bHYPRE_IJBuildVector__array* array);
+bHYPRE_IJBuildVector__array_isColumnOrder(
+  const struct bHYPRE_IJBuildVector__array* array);
 
 int
-bHYPRE_IJBuildVector__array_isRowOrder(const struct 
-  bHYPRE_IJBuildVector__array* array);
-
-void
-bHYPRE_IJBuildVector__array_slice(const struct bHYPRE_IJBuildVector__array* src,
-                                        int32_t        dimen,
-                                        const int32_t  numElem[],
-                                        const int32_t  *srcStart,
-                                        const int32_t  *srcStride,
-                                        const int32_t  *newStart);
-
-void
-bHYPRE_IJBuildVector__array_copy(const struct bHYPRE_IJBuildVector__array* src,
-                                       struct bHYPRE_IJBuildVector__array* 
-  dest);
+bHYPRE_IJBuildVector__array_isRowOrder(
+  const struct bHYPRE_IJBuildVector__array* array);
 
 struct bHYPRE_IJBuildVector__array*
-bHYPRE_IJBuildVector__array_ensure(struct bHYPRE_IJBuildVector__array* src,
-                                   int32_t dimen,
-                                   int     ordering);
+bHYPRE_IJBuildVector__array_slice(
+  struct bHYPRE_IJBuildVector__array* src,
+  int32_t        dimen,
+  const int32_t  numElem[],
+  const int32_t  *srcStart,
+  const int32_t  *srcStride,
+  const int32_t  *newStart);
+
+void
+bHYPRE_IJBuildVector__array_copy(
+  const struct bHYPRE_IJBuildVector__array* src,
+  struct bHYPRE_IJBuildVector__array* dest);
+
+struct bHYPRE_IJBuildVector__array*
+bHYPRE_IJBuildVector__array_ensure(
+  struct bHYPRE_IJBuildVector__array* src,
+  int32_t dimen,
+  int     ordering);
 
 #ifdef __cplusplus
 }

@@ -2,14 +2,14 @@
  * File:          bHYPRE_SStructVector_Impl.c
  * Symbol:        bHYPRE.SStructVector-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.8.2
- * SIDL Created:  20030401 14:47:20 PST
- * Generated:     20030401 14:47:30 PST
+ * Babel Version: 0.9.8
+ * sidl Created:  20050208 15:29:05 PST
+ * Generated:     20050208 15:29:08 PST
  * Description:   Server-side implementation for bHYPRE.SStructVector
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.8.2
+ * babel-version = 0.9.8
  * source-line   = 1074
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -44,7 +44,7 @@
 
 void
 impl_bHYPRE_SStructVector__ctor(
-  bHYPRE_SStructVector self)
+  /*in*/ bHYPRE_SStructVector self)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector._ctor) */
   /* Insert the implementation of the constructor method here... */
@@ -60,7 +60,7 @@ impl_bHYPRE_SStructVector__ctor(
 
 void
 impl_bHYPRE_SStructVector__dtor(
-  bHYPRE_SStructVector self)
+  /*in*/ bHYPRE_SStructVector self)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector._dtor) */
   /* Insert the implementation of the destructor method here... */
@@ -77,10 +77,11 @@ impl_bHYPRE_SStructVector__dtor(
 
 int32_t
 impl_bHYPRE_SStructVector_Clear(
-  bHYPRE_SStructVector self)
+  /*in*/ bHYPRE_SStructVector self)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.Clear) */
   /* Insert the implementation of the Clear method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector.Clear) */
 }
 
@@ -94,10 +95,11 @@ impl_bHYPRE_SStructVector_Clear(
 
 int32_t
 impl_bHYPRE_SStructVector_Copy(
-  bHYPRE_SStructVector self, bHYPRE_Vector x)
+  /*in*/ bHYPRE_SStructVector self, /*in*/ bHYPRE_Vector x)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.Copy) */
   /* Insert the implementation of the Copy method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector.Copy) */
 }
 
@@ -115,10 +117,11 @@ impl_bHYPRE_SStructVector_Copy(
 
 int32_t
 impl_bHYPRE_SStructVector_Clone(
-  bHYPRE_SStructVector self, bHYPRE_Vector* x)
+  /*in*/ bHYPRE_SStructVector self, /*out*/ bHYPRE_Vector* x)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.Clone) */
   /* Insert the implementation of the Clone method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector.Clone) */
 }
 
@@ -132,10 +135,11 @@ impl_bHYPRE_SStructVector_Clone(
 
 int32_t
 impl_bHYPRE_SStructVector_Scale(
-  bHYPRE_SStructVector self, double a)
+  /*in*/ bHYPRE_SStructVector self, /*in*/ double a)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.Scale) */
   /* Insert the implementation of the Scale method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector.Scale) */
 }
 
@@ -149,10 +153,11 @@ impl_bHYPRE_SStructVector_Scale(
 
 int32_t
 impl_bHYPRE_SStructVector_Dot(
-  bHYPRE_SStructVector self, bHYPRE_Vector x, double* d)
+  /*in*/ bHYPRE_SStructVector self, /*in*/ bHYPRE_Vector x, /*out*/ double* d)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.Dot) */
   /* Insert the implementation of the Dot method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector.Dot) */
 }
 
@@ -166,10 +171,11 @@ impl_bHYPRE_SStructVector_Dot(
 
 int32_t
 impl_bHYPRE_SStructVector_Axpy(
-  bHYPRE_SStructVector self, double a, bHYPRE_Vector x)
+  /*in*/ bHYPRE_SStructVector self, /*in*/ double a, /*in*/ bHYPRE_Vector x)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.Axpy) */
   /* Insert the implementation of the Axpy method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector.Axpy) */
 }
 
@@ -183,10 +189,11 @@ impl_bHYPRE_SStructVector_Axpy(
 
 int32_t
 impl_bHYPRE_SStructVector_SetCommunicator(
-  bHYPRE_SStructVector self, void* mpi_comm)
+  /*in*/ bHYPRE_SStructVector self, /*in*/ void* mpi_comm)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector.SetCommunicator) */
 }
 
@@ -201,10 +208,11 @@ impl_bHYPRE_SStructVector_SetCommunicator(
 
 int32_t
 impl_bHYPRE_SStructVector_Initialize(
-  bHYPRE_SStructVector self)
+  /*in*/ bHYPRE_SStructVector self)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.Initialize) */
   /* Insert the implementation of the Initialize method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector.Initialize) */
 }
 
@@ -222,10 +230,11 @@ impl_bHYPRE_SStructVector_Initialize(
 
 int32_t
 impl_bHYPRE_SStructVector_Assemble(
-  bHYPRE_SStructVector self)
+  /*in*/ bHYPRE_SStructVector self)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.Assemble) */
   /* Insert the implementation of the Assemble method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector.Assemble) */
 }
 
@@ -236,7 +245,7 @@ impl_bHYPRE_SStructVector_Assemble(
  * with that object, it must be returned from the problem
  * definition object. {\tt GetObject} performs this function.
  * At compile time, the type of the returned object is unknown.
- * Thus, the returned type is a SIDL.BaseInterface.
+ * Thus, the returned type is a sidl.BaseInterface.
  * QueryInterface or Cast must be used on the returned object to
  * convert it into a known type.
  * 
@@ -247,10 +256,11 @@ impl_bHYPRE_SStructVector_Assemble(
 
 int32_t
 impl_bHYPRE_SStructVector_GetObject(
-  bHYPRE_SStructVector self, SIDL_BaseInterface* A)
+  /*in*/ bHYPRE_SStructVector self, /*out*/ sidl_BaseInterface* A)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.GetObject) */
   /* Insert the implementation of the GetObject method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector.GetObject) */
 }
 
@@ -264,10 +274,11 @@ impl_bHYPRE_SStructVector_GetObject(
 
 int32_t
 impl_bHYPRE_SStructVector_SetGrid(
-  bHYPRE_SStructVector self, bHYPRE_SStructGrid grid)
+  /*in*/ bHYPRE_SStructVector self, /*in*/ bHYPRE_SStructGrid grid)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.SetGrid) */
   /* Insert the implementation of the SetGrid method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector.SetGrid) */
 }
 
@@ -289,11 +300,13 @@ impl_bHYPRE_SStructVector_SetGrid(
 
 int32_t
 impl_bHYPRE_SStructVector_SetValues(
-  bHYPRE_SStructVector self, int32_t part, struct SIDL_int__array* index,
-    int32_t var, struct SIDL_double__array* value)
+  /*in*/ bHYPRE_SStructVector self, /*in*/ int32_t part,
+    /*in*/ struct sidl_int__array* index, /*in*/ int32_t var,
+    /*in*/ struct sidl_double__array* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.SetValues) */
   /* Insert the implementation of the SetValues method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector.SetValues) */
 }
 
@@ -315,12 +328,14 @@ impl_bHYPRE_SStructVector_SetValues(
 
 int32_t
 impl_bHYPRE_SStructVector_SetBoxValues(
-  bHYPRE_SStructVector self, int32_t part, struct SIDL_int__array* ilower,
-    struct SIDL_int__array* iupper, int32_t var,
-    struct SIDL_double__array* values)
+  /*in*/ bHYPRE_SStructVector self, /*in*/ int32_t part,
+    /*in*/ struct sidl_int__array* ilower,
+    /*in*/ struct sidl_int__array* iupper, /*in*/ int32_t var,
+    /*in*/ struct sidl_double__array* values)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.SetBoxValues) */
   /* Insert the implementation of the SetBoxValues method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector.SetBoxValues) */
 }
 
@@ -342,11 +357,13 @@ impl_bHYPRE_SStructVector_SetBoxValues(
 
 int32_t
 impl_bHYPRE_SStructVector_AddToValues(
-  bHYPRE_SStructVector self, int32_t part, struct SIDL_int__array* index,
-    int32_t var, struct SIDL_double__array* value)
+  /*in*/ bHYPRE_SStructVector self, /*in*/ int32_t part,
+    /*in*/ struct sidl_int__array* index, /*in*/ int32_t var,
+    /*in*/ struct sidl_double__array* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.AddToValues) */
   /* Insert the implementation of the AddToValues method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector.AddToValues) */
 }
 
@@ -368,12 +385,14 @@ impl_bHYPRE_SStructVector_AddToValues(
 
 int32_t
 impl_bHYPRE_SStructVector_AddToBoxValues(
-  bHYPRE_SStructVector self, int32_t part, struct SIDL_int__array* ilower,
-    struct SIDL_int__array* iupper, int32_t var,
-    struct SIDL_double__array* values)
+  /*in*/ bHYPRE_SStructVector self, /*in*/ int32_t part,
+    /*in*/ struct sidl_int__array* ilower,
+    /*in*/ struct sidl_int__array* iupper, /*in*/ int32_t var,
+    /*in*/ struct sidl_double__array* values)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.AddToBoxValues) */
   /* Insert the implementation of the AddToBoxValues method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector.AddToBoxValues) */
 }
 
@@ -387,10 +406,11 @@ impl_bHYPRE_SStructVector_AddToBoxValues(
 
 int32_t
 impl_bHYPRE_SStructVector_Gather(
-  bHYPRE_SStructVector self)
+  /*in*/ bHYPRE_SStructVector self)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.Gather) */
   /* Insert the implementation of the Gather method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector.Gather) */
 }
 
@@ -411,11 +431,13 @@ impl_bHYPRE_SStructVector_Gather(
 
 int32_t
 impl_bHYPRE_SStructVector_GetValues(
-  bHYPRE_SStructVector self, int32_t part, struct SIDL_int__array* index,
-    int32_t var, double* value)
+  /*in*/ bHYPRE_SStructVector self, /*in*/ int32_t part,
+    /*in*/ struct sidl_int__array* index, /*in*/ int32_t var,
+    /*out*/ double* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.GetValues) */
   /* Insert the implementation of the GetValues method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector.GetValues) */
 }
 
@@ -436,12 +458,14 @@ impl_bHYPRE_SStructVector_GetValues(
 
 int32_t
 impl_bHYPRE_SStructVector_GetBoxValues(
-  bHYPRE_SStructVector self, int32_t part, struct SIDL_int__array* ilower,
-    struct SIDL_int__array* iupper, int32_t var,
-    struct SIDL_double__array** values)
+  /*in*/ bHYPRE_SStructVector self, /*in*/ int32_t part,
+    /*in*/ struct sidl_int__array* ilower,
+    /*in*/ struct sidl_int__array* iupper, /*in*/ int32_t var,
+    /*inout*/ struct sidl_double__array** values)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.GetBoxValues) */
   /* Insert the implementation of the GetBoxValues method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector.GetBoxValues) */
 }
 
@@ -455,10 +479,11 @@ impl_bHYPRE_SStructVector_GetBoxValues(
 
 int32_t
 impl_bHYPRE_SStructVector_SetComplex(
-  bHYPRE_SStructVector self)
+  /*in*/ bHYPRE_SStructVector self)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.SetComplex) */
   /* Insert the implementation of the SetComplex method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector.SetComplex) */
 }
 
@@ -473,9 +498,11 @@ impl_bHYPRE_SStructVector_SetComplex(
 
 int32_t
 impl_bHYPRE_SStructVector_Print(
-  bHYPRE_SStructVector self, const char* filename, int32_t all)
+  /*in*/ bHYPRE_SStructVector self, /*in*/ const char* filename,
+    /*in*/ int32_t all)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.Print) */
   /* Insert the implementation of the Print method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector.Print) */
 }

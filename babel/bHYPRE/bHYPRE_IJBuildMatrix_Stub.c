@@ -2,36 +2,36 @@
  * File:          bHYPRE_IJBuildMatrix_Stub.c
  * Symbol:        bHYPRE.IJBuildMatrix-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.8.2
- * SIDL Created:  20030401 14:47:20 PST
- * Generated:     20030401 14:47:26 PST
+ * Babel Version: 0.9.8
+ * sidl Created:  20050208 15:29:04 PST
+ * Generated:     20050208 15:29:07 PST
  * Description:   Client-side glue code for bHYPRE.IJBuildMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.2
+ * babel-version = 0.9.8
  * source-line   = 85
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #include "bHYPRE_IJBuildMatrix.h"
 #include "bHYPRE_IJBuildMatrix_IOR.h"
-#ifndef included_SIDL_interface_IOR_h
-#include "SIDL_interface_IOR.h"
+#ifndef included_sidl_interface_IOR_h
+#include "sidl_interface_IOR.h"
 #endif
 #include <stddef.h>
-#include "SIDL_BaseInterface_IOR.h"
+#include "sidl_BaseInterface_IOR.h"
 #include "babel_config.h"
 #ifdef SIDL_DYNAMIC_LIBRARY
 #include <stdio.h>
 #include <stdlib.h>
-#include "SIDL_Loader.h"
+#include "sidl_Loader.h"
 #endif
 
 /*
  * <p>
  * Add one to the intrinsic reference count in the underlying object.
- * Object in <code>SIDL</code> have an intrinsic reference count.
+ * Object in <code>sidl</code> have an intrinsic reference count.
  * Objects continue to exist as long as the reference count is
  * positive. Clients should call this method whenever they
  * create another ongoing reference to an object or interface.
@@ -54,7 +54,7 @@ bHYPRE_IJBuildMatrix_addRef(
 /*
  * Decrease by one the intrinsic reference count in the underlying
  * object, and delete the object if the reference is non-positive.
- * Objects in <code>SIDL</code> have an intrinsic reference count.
+ * Objects in <code>sidl</code> have an intrinsic reference count.
  * Clients should call this method whenever they remove a
  * reference to an object or interface.
  */
@@ -72,10 +72,10 @@ bHYPRE_IJBuildMatrix_deleteRef(
  * object as this object.
  */
 
-SIDL_bool
+sidl_bool
 bHYPRE_IJBuildMatrix_isSame(
   bHYPRE_IJBuildMatrix self,
-  SIDL_BaseInterface iobj)
+  /*in*/ sidl_BaseInterface iobj)
 {
   return (*self->d_epv->f_isSame)(
     self->d_object,
@@ -84,7 +84,7 @@ bHYPRE_IJBuildMatrix_isSame(
 
 /*
  * Check whether the object can support the specified interface or
- * class.  If the <code>SIDL</code> type name in <code>name</code>
+ * class.  If the <code>sidl</code> type name in <code>name</code>
  * is supported, then a reference to that object is returned with the
  * reference count incremented.  The callee will be responsible for
  * calling <code>deleteRef</code> on the returned object.  If
@@ -92,10 +92,10 @@ bHYPRE_IJBuildMatrix_isSame(
  * returned.
  */
 
-SIDL_BaseInterface
+sidl_BaseInterface
 bHYPRE_IJBuildMatrix_queryInt(
   bHYPRE_IJBuildMatrix self,
-  const char* name)
+  /*in*/ const char* name)
 {
   return (*self->d_epv->f_queryInt)(
     self->d_object,
@@ -104,15 +104,15 @@ bHYPRE_IJBuildMatrix_queryInt(
 
 /*
  * Return whether this object is an instance of the specified type.
- * The string name must be the <code>SIDL</code> type name.  This
+ * The string name must be the <code>sidl</code> type name.  This
  * routine will return <code>true</code> if and only if a cast to
  * the string type name would succeed.
  */
 
-SIDL_bool
+sidl_bool
 bHYPRE_IJBuildMatrix_isType(
   bHYPRE_IJBuildMatrix self,
-  const char* name)
+  /*in*/ const char* name)
 {
   return (*self->d_epv->f_isType)(
     self->d_object,
@@ -123,7 +123,7 @@ bHYPRE_IJBuildMatrix_isType(
  * Return the meta-data about the class implementing this interface.
  */
 
-SIDL_ClassInfo
+sidl_ClassInfo
 bHYPRE_IJBuildMatrix_getClassInfo(
   bHYPRE_IJBuildMatrix self)
 {
@@ -139,7 +139,7 @@ bHYPRE_IJBuildMatrix_getClassInfo(
 int32_t
 bHYPRE_IJBuildMatrix_SetCommunicator(
   bHYPRE_IJBuildMatrix self,
-  void* mpi_comm)
+  /*in*/ void* mpi_comm)
 {
   return (*self->d_epv->f_SetCommunicator)(
     self->d_object,
@@ -184,7 +184,7 @@ bHYPRE_IJBuildMatrix_Assemble(
  * with that object, it must be returned from the problem
  * definition object. {\tt GetObject} performs this function.
  * At compile time, the type of the returned object is unknown.
- * Thus, the returned type is a SIDL.BaseInterface.
+ * Thus, the returned type is a sidl.BaseInterface.
  * QueryInterface or Cast must be used on the returned object to
  * convert it into a known type.
  * 
@@ -193,7 +193,7 @@ bHYPRE_IJBuildMatrix_Assemble(
 int32_t
 bHYPRE_IJBuildMatrix_GetObject(
   bHYPRE_IJBuildMatrix self,
-  SIDL_BaseInterface* A)
+  /*out*/ sidl_BaseInterface* A)
 {
   return (*self->d_epv->f_GetObject)(
     self->d_object,
@@ -227,10 +227,10 @@ bHYPRE_IJBuildMatrix_GetObject(
 int32_t
 bHYPRE_IJBuildMatrix_SetLocalRange(
   bHYPRE_IJBuildMatrix self,
-  int32_t ilower,
-  int32_t iupper,
-  int32_t jlower,
-  int32_t jupper)
+  /*in*/ int32_t ilower,
+  /*in*/ int32_t iupper,
+  /*in*/ int32_t jlower,
+  /*in*/ int32_t jupper)
 {
   return (*self->d_epv->f_SetLocalRange)(
     self->d_object,
@@ -259,11 +259,11 @@ bHYPRE_IJBuildMatrix_SetLocalRange(
 int32_t
 bHYPRE_IJBuildMatrix_SetValues(
   bHYPRE_IJBuildMatrix self,
-  int32_t nrows,
-  struct SIDL_int__array* ncols,
-  struct SIDL_int__array* rows,
-  struct SIDL_int__array* cols,
-  struct SIDL_double__array* values)
+  /*in*/ int32_t nrows,
+  /*in*/ struct sidl_int__array* ncols,
+  /*in*/ struct sidl_int__array* rows,
+  /*in*/ struct sidl_int__array* cols,
+  /*in*/ struct sidl_double__array* values)
 {
   return (*self->d_epv->f_SetValues)(
     self->d_object,
@@ -287,11 +287,11 @@ bHYPRE_IJBuildMatrix_SetValues(
 int32_t
 bHYPRE_IJBuildMatrix_AddToValues(
   bHYPRE_IJBuildMatrix self,
-  int32_t nrows,
-  struct SIDL_int__array* ncols,
-  struct SIDL_int__array* rows,
-  struct SIDL_int__array* cols,
-  struct SIDL_double__array* values)
+  /*in*/ int32_t nrows,
+  /*in*/ struct sidl_int__array* ncols,
+  /*in*/ struct sidl_int__array* rows,
+  /*in*/ struct sidl_int__array* cols,
+  /*in*/ struct sidl_double__array* values)
 {
   return (*self->d_epv->f_AddToValues)(
     self->d_object,
@@ -311,10 +311,10 @@ bHYPRE_IJBuildMatrix_AddToValues(
 int32_t
 bHYPRE_IJBuildMatrix_GetLocalRange(
   bHYPRE_IJBuildMatrix self,
-  int32_t* ilower,
-  int32_t* iupper,
-  int32_t* jlower,
-  int32_t* jupper)
+  /*out*/ int32_t* ilower,
+  /*out*/ int32_t* iupper,
+  /*out*/ int32_t* jlower,
+  /*out*/ int32_t* jupper)
 {
   return (*self->d_epv->f_GetLocalRange)(
     self->d_object,
@@ -334,9 +334,9 @@ bHYPRE_IJBuildMatrix_GetLocalRange(
 int32_t
 bHYPRE_IJBuildMatrix_GetRowCounts(
   bHYPRE_IJBuildMatrix self,
-  int32_t nrows,
-  struct SIDL_int__array* rows,
-  struct SIDL_int__array** ncols)
+  /*in*/ int32_t nrows,
+  /*in*/ struct sidl_int__array* rows,
+  /*inout*/ struct sidl_int__array** ncols)
 {
   return (*self->d_epv->f_GetRowCounts)(
     self->d_object,
@@ -354,11 +354,11 @@ bHYPRE_IJBuildMatrix_GetRowCounts(
 int32_t
 bHYPRE_IJBuildMatrix_GetValues(
   bHYPRE_IJBuildMatrix self,
-  int32_t nrows,
-  struct SIDL_int__array* ncols,
-  struct SIDL_int__array* rows,
-  struct SIDL_int__array* cols,
-  struct SIDL_double__array** values)
+  /*in*/ int32_t nrows,
+  /*in*/ struct sidl_int__array* ncols,
+  /*in*/ struct sidl_int__array* rows,
+  /*in*/ struct sidl_int__array* cols,
+  /*inout*/ struct sidl_double__array** values)
 {
   return (*self->d_epv->f_GetValues)(
     self->d_object,
@@ -383,7 +383,7 @@ bHYPRE_IJBuildMatrix_GetValues(
 int32_t
 bHYPRE_IJBuildMatrix_SetRowSizes(
   bHYPRE_IJBuildMatrix self,
-  struct SIDL_int__array* sizes)
+  /*in*/ struct sidl_int__array* sizes)
 {
   return (*self->d_epv->f_SetRowSizes)(
     self->d_object,
@@ -399,7 +399,7 @@ bHYPRE_IJBuildMatrix_SetRowSizes(
 int32_t
 bHYPRE_IJBuildMatrix_Print(
   bHYPRE_IJBuildMatrix self,
-  const char* filename)
+  /*in*/ const char* filename)
 {
   return (*self->d_epv->f_Print)(
     self->d_object,
@@ -415,8 +415,8 @@ bHYPRE_IJBuildMatrix_Print(
 int32_t
 bHYPRE_IJBuildMatrix_Read(
   bHYPRE_IJBuildMatrix self,
-  const char* filename,
-  void* comm)
+  /*in*/ const char* filename,
+  /*in*/ void* comm)
 {
   return (*self->d_epv->f_Read)(
     self->d_object,
@@ -435,7 +435,7 @@ bHYPRE_IJBuildMatrix__cast(
   bHYPRE_IJBuildMatrix cast = NULL;
 
   if (obj != NULL) {
-    SIDL_BaseInterface base = (SIDL_BaseInterface) obj;
+    sidl_BaseInterface base = (sidl_BaseInterface) obj;
     cast = (bHYPRE_IJBuildMatrix) (*base->d_epv->f__cast)(
       base->d_object,
       "bHYPRE.IJBuildMatrix");
@@ -456,29 +456,31 @@ bHYPRE_IJBuildMatrix__cast2(
   void* cast = NULL;
 
   if (obj != NULL) {
-    SIDL_BaseInterface base = (SIDL_BaseInterface) obj;
+    sidl_BaseInterface base = (sidl_BaseInterface) obj;
     cast = (*base->d_epv->f__cast)(base->d_object, type);
   }
 
   return cast;
 }
 struct bHYPRE_IJBuildMatrix__array*
-bHYPRE_IJBuildMatrix__array_createCol(int32_t        dimen,
-                                      const int32_t lower[],
-                                      const int32_t upper[])
+bHYPRE_IJBuildMatrix__array_createCol(
+  int32_t       dimen,
+  const int32_t lower[],
+  const int32_t upper[])
 {
   return (struct 
-    bHYPRE_IJBuildMatrix__array*)SIDL_interface__array_createCol(dimen, lower,
+    bHYPRE_IJBuildMatrix__array*)sidl_interface__array_createCol(dimen, lower,
     upper);
 }
 
 struct bHYPRE_IJBuildMatrix__array*
-bHYPRE_IJBuildMatrix__array_createRow(int32_t        dimen,
-                                      const int32_t lower[],
-                                      const int32_t upper[])
+bHYPRE_IJBuildMatrix__array_createRow(
+  int32_t       dimen,
+  const int32_t lower[],
+  const int32_t upper[])
 {
   return (struct 
-    bHYPRE_IJBuildMatrix__array*)SIDL_interface__array_createRow(dimen, lower,
+    bHYPRE_IJBuildMatrix__array*)sidl_interface__array_createRow(dimen, lower,
     upper);
 }
 
@@ -486,225 +488,360 @@ struct bHYPRE_IJBuildMatrix__array*
 bHYPRE_IJBuildMatrix__array_create1d(int32_t len)
 {
   return (struct 
-    bHYPRE_IJBuildMatrix__array*)SIDL_interface__array_create1d(len);
+    bHYPRE_IJBuildMatrix__array*)sidl_interface__array_create1d(len);
+}
+
+struct bHYPRE_IJBuildMatrix__array*
+bHYPRE_IJBuildMatrix__array_create1dInit(
+  int32_t len, 
+  bHYPRE_IJBuildMatrix* data)
+{
+  return (struct 
+    bHYPRE_IJBuildMatrix__array*)sidl_interface__array_create1dInit(len,
+    (struct sidl_BaseInterface__object **)data);
 }
 
 struct bHYPRE_IJBuildMatrix__array*
 bHYPRE_IJBuildMatrix__array_create2dCol(int32_t m, int32_t n)
 {
   return (struct 
-    bHYPRE_IJBuildMatrix__array*)SIDL_interface__array_create2dCol(m, n);
+    bHYPRE_IJBuildMatrix__array*)sidl_interface__array_create2dCol(m, n);
 }
 
 struct bHYPRE_IJBuildMatrix__array*
 bHYPRE_IJBuildMatrix__array_create2dRow(int32_t m, int32_t n)
 {
   return (struct 
-    bHYPRE_IJBuildMatrix__array*)SIDL_interface__array_create2dRow(m, n);
+    bHYPRE_IJBuildMatrix__array*)sidl_interface__array_create2dRow(m, n);
 }
 
 struct bHYPRE_IJBuildMatrix__array*
-bHYPRE_IJBuildMatrix__array_borrow(bHYPRE_IJBuildMatrix*firstElement,
-                                   int32_t       dimen,
-const int32_t lower[],
-const int32_t upper[],
-const int32_t stride[])
+bHYPRE_IJBuildMatrix__array_borrow(
+  bHYPRE_IJBuildMatrix* firstElement,
+  int32_t       dimen,
+  const int32_t lower[],
+  const int32_t upper[],
+  const int32_t stride[])
 {
-  return (struct bHYPRE_IJBuildMatrix__array*)SIDL_interface__array_borrow(
-    (struct SIDL_BaseInterface__object **)
+  return (struct bHYPRE_IJBuildMatrix__array*)sidl_interface__array_borrow(
+    (struct sidl_BaseInterface__object **)
     firstElement, dimen, lower, upper, stride);
 }
 
 struct bHYPRE_IJBuildMatrix__array*
-bHYPRE_IJBuildMatrix__array_smartCopy(struct bHYPRE_IJBuildMatrix__array *array)
+bHYPRE_IJBuildMatrix__array_smartCopy(
+  struct bHYPRE_IJBuildMatrix__array *array)
 {
   return (struct bHYPRE_IJBuildMatrix__array*)
-    SIDL_interface__array_smartCopy((struct SIDL_interface__array *)array);
+    sidl_interface__array_smartCopy((struct sidl_interface__array *)array);
 }
 
 void
-bHYPRE_IJBuildMatrix__array_addRef(struct bHYPRE_IJBuildMatrix__array* array)
+bHYPRE_IJBuildMatrix__array_addRef(
+  struct bHYPRE_IJBuildMatrix__array* array)
 {
-  SIDL_interface__array_addRef((struct SIDL_interface__array *)array);
+  sidl_interface__array_addRef((struct sidl_interface__array *)array);
 }
 
 void
-bHYPRE_IJBuildMatrix__array_deleteRef(struct bHYPRE_IJBuildMatrix__array* array)
+bHYPRE_IJBuildMatrix__array_deleteRef(
+  struct bHYPRE_IJBuildMatrix__array* array)
 {
-  SIDL_interface__array_deleteRef((struct SIDL_interface__array *)array);
+  sidl_interface__array_deleteRef((struct sidl_interface__array *)array);
 }
 
 bHYPRE_IJBuildMatrix
-bHYPRE_IJBuildMatrix__array_get1(const struct bHYPRE_IJBuildMatrix__array* 
-  array,
-                                 const int32_t i1)
+bHYPRE_IJBuildMatrix__array_get1(
+  const struct bHYPRE_IJBuildMatrix__array* array,
+  const int32_t i1)
 {
   return (bHYPRE_IJBuildMatrix)
-    SIDL_interface__array_get1((const struct SIDL_interface__array *)array
+    sidl_interface__array_get1((const struct sidl_interface__array *)array
     , i1);
 }
 
 bHYPRE_IJBuildMatrix
-bHYPRE_IJBuildMatrix__array_get2(const struct bHYPRE_IJBuildMatrix__array* 
-  array,
-                                 const int32_t i1,
-                                 const int32_t i2)
+bHYPRE_IJBuildMatrix__array_get2(
+  const struct bHYPRE_IJBuildMatrix__array* array,
+  const int32_t i1,
+  const int32_t i2)
 {
   return (bHYPRE_IJBuildMatrix)
-    SIDL_interface__array_get2((const struct SIDL_interface__array *)array
+    sidl_interface__array_get2((const struct sidl_interface__array *)array
     , i1, i2);
 }
 
 bHYPRE_IJBuildMatrix
-bHYPRE_IJBuildMatrix__array_get3(const struct bHYPRE_IJBuildMatrix__array* 
-  array,
-                                 const int32_t i1,
-                                 const int32_t i2,
-                                 const int32_t i3)
+bHYPRE_IJBuildMatrix__array_get3(
+  const struct bHYPRE_IJBuildMatrix__array* array,
+  const int32_t i1,
+  const int32_t i2,
+  const int32_t i3)
 {
   return (bHYPRE_IJBuildMatrix)
-    SIDL_interface__array_get3((const struct SIDL_interface__array *)array
+    sidl_interface__array_get3((const struct sidl_interface__array *)array
     , i1, i2, i3);
 }
 
 bHYPRE_IJBuildMatrix
-bHYPRE_IJBuildMatrix__array_get4(const struct bHYPRE_IJBuildMatrix__array* 
-  array,
-                                 const int32_t i1,
-                                 const int32_t i2,
-                                 const int32_t i3,
-                                 const int32_t i4)
+bHYPRE_IJBuildMatrix__array_get4(
+  const struct bHYPRE_IJBuildMatrix__array* array,
+  const int32_t i1,
+  const int32_t i2,
+  const int32_t i3,
+  const int32_t i4)
 {
   return (bHYPRE_IJBuildMatrix)
-    SIDL_interface__array_get4((const struct SIDL_interface__array *)array
+    sidl_interface__array_get4((const struct sidl_interface__array *)array
     , i1, i2, i3, i4);
 }
 
 bHYPRE_IJBuildMatrix
-bHYPRE_IJBuildMatrix__array_get(const struct bHYPRE_IJBuildMatrix__array* array,
-                                const int32_t indices[])
+bHYPRE_IJBuildMatrix__array_get5(
+  const struct bHYPRE_IJBuildMatrix__array* array,
+  const int32_t i1,
+  const int32_t i2,
+  const int32_t i3,
+  const int32_t i4,
+  const int32_t i5)
 {
   return (bHYPRE_IJBuildMatrix)
-    SIDL_interface__array_get((const struct SIDL_interface__array *)array,
+    sidl_interface__array_get5((const struct sidl_interface__array *)array
+    , i1, i2, i3, i4, i5);
+}
+
+bHYPRE_IJBuildMatrix
+bHYPRE_IJBuildMatrix__array_get6(
+  const struct bHYPRE_IJBuildMatrix__array* array,
+  const int32_t i1,
+  const int32_t i2,
+  const int32_t i3,
+  const int32_t i4,
+  const int32_t i5,
+  const int32_t i6)
+{
+  return (bHYPRE_IJBuildMatrix)
+    sidl_interface__array_get6((const struct sidl_interface__array *)array
+    , i1, i2, i3, i4, i5, i6);
+}
+
+bHYPRE_IJBuildMatrix
+bHYPRE_IJBuildMatrix__array_get7(
+  const struct bHYPRE_IJBuildMatrix__array* array,
+  const int32_t i1,
+  const int32_t i2,
+  const int32_t i3,
+  const int32_t i4,
+  const int32_t i5,
+  const int32_t i6,
+  const int32_t i7)
+{
+  return (bHYPRE_IJBuildMatrix)
+    sidl_interface__array_get7((const struct sidl_interface__array *)array
+    , i1, i2, i3, i4, i5, i6, i7);
+}
+
+bHYPRE_IJBuildMatrix
+bHYPRE_IJBuildMatrix__array_get(
+  const struct bHYPRE_IJBuildMatrix__array* array,
+  const int32_t indices[])
+{
+  return (bHYPRE_IJBuildMatrix)
+    sidl_interface__array_get((const struct sidl_interface__array *)array,
       indices);
 }
 
 void
-bHYPRE_IJBuildMatrix__array_set1(struct bHYPRE_IJBuildMatrix__array* array,
-                                 const int32_t i1,
-                                 bHYPRE_IJBuildMatrix const value)
+bHYPRE_IJBuildMatrix__array_set1(
+  struct bHYPRE_IJBuildMatrix__array* array,
+  const int32_t i1,
+  bHYPRE_IJBuildMatrix const value)
 {
-  SIDL_interface__array_set1((struct SIDL_interface__array *)array
-  , i1, (struct SIDL_BaseInterface__object *)value);
+  sidl_interface__array_set1((struct sidl_interface__array *)array
+  , i1, (struct sidl_BaseInterface__object *)value);
 }
 
 void
-bHYPRE_IJBuildMatrix__array_set2(struct bHYPRE_IJBuildMatrix__array* array,
-                                 const int32_t i1,
-                                 const int32_t i2,
-                                 bHYPRE_IJBuildMatrix const value)
+bHYPRE_IJBuildMatrix__array_set2(
+  struct bHYPRE_IJBuildMatrix__array* array,
+  const int32_t i1,
+  const int32_t i2,
+  bHYPRE_IJBuildMatrix const value)
 {
-  SIDL_interface__array_set2((struct SIDL_interface__array *)array
-  , i1, i2, (struct SIDL_BaseInterface__object *)value);
+  sidl_interface__array_set2((struct sidl_interface__array *)array
+  , i1, i2, (struct sidl_BaseInterface__object *)value);
 }
 
 void
-bHYPRE_IJBuildMatrix__array_set3(struct bHYPRE_IJBuildMatrix__array* array,
-                                 const int32_t i1,
-                                 const int32_t i2,
-                                 const int32_t i3,
-                                 bHYPRE_IJBuildMatrix const value)
+bHYPRE_IJBuildMatrix__array_set3(
+  struct bHYPRE_IJBuildMatrix__array* array,
+  const int32_t i1,
+  const int32_t i2,
+  const int32_t i3,
+  bHYPRE_IJBuildMatrix const value)
 {
-  SIDL_interface__array_set3((struct SIDL_interface__array *)array
-  , i1, i2, i3, (struct SIDL_BaseInterface__object *)value);
+  sidl_interface__array_set3((struct sidl_interface__array *)array
+  , i1, i2, i3, (struct sidl_BaseInterface__object *)value);
 }
 
 void
-bHYPRE_IJBuildMatrix__array_set4(struct bHYPRE_IJBuildMatrix__array* array,
-                                 const int32_t i1,
-                                 const int32_t i2,
-                                 const int32_t i3,
-                                 const int32_t i4,
-                                 bHYPRE_IJBuildMatrix const value)
+bHYPRE_IJBuildMatrix__array_set4(
+  struct bHYPRE_IJBuildMatrix__array* array,
+  const int32_t i1,
+  const int32_t i2,
+  const int32_t i3,
+  const int32_t i4,
+  bHYPRE_IJBuildMatrix const value)
 {
-  SIDL_interface__array_set4((struct SIDL_interface__array *)array
-  , i1, i2, i3, i4, (struct SIDL_BaseInterface__object *)value);
+  sidl_interface__array_set4((struct sidl_interface__array *)array
+  , i1, i2, i3, i4, (struct sidl_BaseInterface__object *)value);
 }
 
 void
-bHYPRE_IJBuildMatrix__array_set(struct bHYPRE_IJBuildMatrix__array* array,
-                                const int32_t indices[],
-                                bHYPRE_IJBuildMatrix const value)
+bHYPRE_IJBuildMatrix__array_set5(
+  struct bHYPRE_IJBuildMatrix__array* array,
+  const int32_t i1,
+  const int32_t i2,
+  const int32_t i3,
+  const int32_t i4,
+  const int32_t i5,
+  bHYPRE_IJBuildMatrix const value)
 {
-  SIDL_interface__array_set((struct SIDL_interface__array *)array, indices,
-    (struct SIDL_BaseInterface__object *)value);
+  sidl_interface__array_set5((struct sidl_interface__array *)array
+  , i1, i2, i3, i4, i5, (struct sidl_BaseInterface__object *)value);
+}
+
+void
+bHYPRE_IJBuildMatrix__array_set6(
+  struct bHYPRE_IJBuildMatrix__array* array,
+  const int32_t i1,
+  const int32_t i2,
+  const int32_t i3,
+  const int32_t i4,
+  const int32_t i5,
+  const int32_t i6,
+  bHYPRE_IJBuildMatrix const value)
+{
+  sidl_interface__array_set6((struct sidl_interface__array *)array
+  , i1, i2, i3, i4, i5, i6, (struct sidl_BaseInterface__object *)value);
+}
+
+void
+bHYPRE_IJBuildMatrix__array_set7(
+  struct bHYPRE_IJBuildMatrix__array* array,
+  const int32_t i1,
+  const int32_t i2,
+  const int32_t i3,
+  const int32_t i4,
+  const int32_t i5,
+  const int32_t i6,
+  const int32_t i7,
+  bHYPRE_IJBuildMatrix const value)
+{
+  sidl_interface__array_set7((struct sidl_interface__array *)array
+  , i1, i2, i3, i4, i5, i6, i7, (struct sidl_BaseInterface__object *)value);
+}
+
+void
+bHYPRE_IJBuildMatrix__array_set(
+  struct bHYPRE_IJBuildMatrix__array* array,
+  const int32_t indices[],
+  bHYPRE_IJBuildMatrix const value)
+{
+  sidl_interface__array_set((struct sidl_interface__array *)array, indices,
+    (struct sidl_BaseInterface__object *)value);
 }
 
 int32_t
-bHYPRE_IJBuildMatrix__array_dimen(const struct bHYPRE_IJBuildMatrix__array* 
-  array)
+bHYPRE_IJBuildMatrix__array_dimen(
+  const struct bHYPRE_IJBuildMatrix__array* array)
 {
-  return SIDL_interface__array_dimen((struct SIDL_interface__array *)array);
+  return sidl_interface__array_dimen((struct sidl_interface__array *)array);
 }
 
 int32_t
-bHYPRE_IJBuildMatrix__array_lower(const struct bHYPRE_IJBuildMatrix__array* 
-  array,
-                                  const int32_t ind)
+bHYPRE_IJBuildMatrix__array_lower(
+  const struct bHYPRE_IJBuildMatrix__array* array,
+  const int32_t ind)
 {
-  return SIDL_interface__array_lower((struct SIDL_interface__array *)array,
+  return sidl_interface__array_lower((struct sidl_interface__array *)array,
     ind);
 }
 
 int32_t
-bHYPRE_IJBuildMatrix__array_upper(const struct bHYPRE_IJBuildMatrix__array* 
-  array,
-                                  const int32_t ind)
+bHYPRE_IJBuildMatrix__array_upper(
+  const struct bHYPRE_IJBuildMatrix__array* array,
+  const int32_t ind)
 {
-  return SIDL_interface__array_upper((struct SIDL_interface__array *)array,
+  return sidl_interface__array_upper((struct sidl_interface__array *)array,
     ind);
 }
 
 int32_t
-bHYPRE_IJBuildMatrix__array_stride(const struct bHYPRE_IJBuildMatrix__array* 
-  array,
-                                   const int32_t ind)
+bHYPRE_IJBuildMatrix__array_length(
+  const struct bHYPRE_IJBuildMatrix__array* array,
+  const int32_t ind)
 {
-  return SIDL_interface__array_stride((struct SIDL_interface__array *)array,
+  return sidl_interface__array_length((struct sidl_interface__array *)array,
+    ind);
+}
+
+int32_t
+bHYPRE_IJBuildMatrix__array_stride(
+  const struct bHYPRE_IJBuildMatrix__array* array,
+  const int32_t ind)
+{
+  return sidl_interface__array_stride((struct sidl_interface__array *)array,
     ind);
 }
 
 int
-bHYPRE_IJBuildMatrix__array_isColumnOrder(const struct 
-  bHYPRE_IJBuildMatrix__array* array)
+bHYPRE_IJBuildMatrix__array_isColumnOrder(
+  const struct bHYPRE_IJBuildMatrix__array* array)
 {
-  return SIDL_interface__array_isColumnOrder((struct SIDL_interface__array 
+  return sidl_interface__array_isColumnOrder((struct sidl_interface__array 
     *)array);
 }
 
 int
-bHYPRE_IJBuildMatrix__array_isRowOrder(const struct 
-  bHYPRE_IJBuildMatrix__array* array)
+bHYPRE_IJBuildMatrix__array_isRowOrder(
+  const struct bHYPRE_IJBuildMatrix__array* array)
 {
-  return SIDL_interface__array_isRowOrder((struct SIDL_interface__array 
+  return sidl_interface__array_isRowOrder((struct sidl_interface__array 
     *)array);
 }
 
 void
-bHYPRE_IJBuildMatrix__array_copy(const struct bHYPRE_IJBuildMatrix__array* src,
-                                       struct bHYPRE_IJBuildMatrix__array* dest)
+bHYPRE_IJBuildMatrix__array_copy(
+  const struct bHYPRE_IJBuildMatrix__array* src,
+  struct bHYPRE_IJBuildMatrix__array* dest)
 {
-  SIDL_interface__array_copy((const struct SIDL_interface__array *)src,
-                             (struct SIDL_interface__array *)dest);
+  sidl_interface__array_copy((const struct sidl_interface__array *)src,
+                             (struct sidl_interface__array *)dest);
 }
 
 struct bHYPRE_IJBuildMatrix__array*
-bHYPRE_IJBuildMatrix__array_ensure(struct bHYPRE_IJBuildMatrix__array* src,
-                                   int32_t dimen,
-                                   int     ordering)
+bHYPRE_IJBuildMatrix__array_slice(
+  struct bHYPRE_IJBuildMatrix__array* src,
+  int32_t        dimen,
+  const int32_t  numElem[],
+  const int32_t  *srcStart,
+  const int32_t  *srcStride,
+  const int32_t  *newStart)
 {
   return (struct bHYPRE_IJBuildMatrix__array*)
-    SIDL_interface__array_ensure((struct SIDL_interface__array *)src, dimen,
+    sidl_interface__array_slice((struct sidl_interface__array *)src,
+                                dimen, numElem, srcStart, srcStride, newStart);
+}
+
+struct bHYPRE_IJBuildMatrix__array*
+bHYPRE_IJBuildMatrix__array_ensure(
+  struct bHYPRE_IJBuildMatrix__array* src,
+  int32_t dimen,
+  int     ordering)
+{
+  return (struct bHYPRE_IJBuildMatrix__array*)
+    sidl_interface__array_ensure((struct sidl_interface__array *)src, dimen,
       ordering);
 }
 

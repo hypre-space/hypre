@@ -2,14 +2,14 @@
  * File:          bHYPRE_PCG_Impl.c
  * Symbol:        bHYPRE.PCG-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.8.2
- * SIDL Created:  20030401 14:47:20 PST
- * Generated:     20030401 14:47:30 PST
+ * Babel Version: 0.9.8
+ * sidl Created:  20050208 15:29:05 PST
+ * Generated:     20050208 15:29:08 PST
  * Description:   Server-side implementation for bHYPRE.PCG
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.8.2
+ * babel-version = 0.9.8
  * source-line   = 1237
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -124,7 +124,7 @@ int impl_bHYPRE_PCG_Copy_Parameters_to_HYPRE_struct( bHYPRE_PCG self )
 
 void
 impl_bHYPRE_PCG__ctor(
-  bHYPRE_PCG self)
+  /*in*/ bHYPRE_PCG self)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG._ctor) */
   /* Insert the implementation of the constructor method here... */
@@ -169,7 +169,7 @@ impl_bHYPRE_PCG__ctor(
 
 void
 impl_bHYPRE_PCG__dtor(
-  bHYPRE_PCG self)
+  /*in*/ bHYPRE_PCG self)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG._dtor) */
   /* Insert the implementation of the destructor method here... */
@@ -205,7 +205,7 @@ impl_bHYPRE_PCG__dtor(
 
 int32_t
 impl_bHYPRE_PCG_SetCommunicator(
-  bHYPRE_PCG self, void* mpi_comm)
+  /*in*/ bHYPRE_PCG self, /*in*/ void* mpi_comm)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
@@ -229,7 +229,7 @@ impl_bHYPRE_PCG_SetCommunicator(
 
 int32_t
 impl_bHYPRE_PCG_SetIntParameter(
-  bHYPRE_PCG self, const char* name, int32_t value)
+  /*in*/ bHYPRE_PCG self, /*in*/ const char* name, /*in*/ int32_t value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.SetIntParameter) */
   /* Insert the implementation of the SetIntParameter method here... */
@@ -273,7 +273,7 @@ impl_bHYPRE_PCG_SetIntParameter(
 
 int32_t
 impl_bHYPRE_PCG_SetDoubleParameter(
-  bHYPRE_PCG self, const char* name, double value)
+  /*in*/ bHYPRE_PCG self, /*in*/ const char* name, /*in*/ double value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.SetDoubleParameter) */
   /* Insert the implementation of the SetDoubleParameter method here... */
@@ -319,7 +319,7 @@ impl_bHYPRE_PCG_SetDoubleParameter(
 
 int32_t
 impl_bHYPRE_PCG_SetStringParameter(
-  bHYPRE_PCG self, const char* name, const char* value)
+  /*in*/ bHYPRE_PCG self, /*in*/ const char* name, /*in*/ const char* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.SetStringParameter) */
   /* Insert the implementation of the SetStringParameter method here... */
@@ -339,7 +339,8 @@ impl_bHYPRE_PCG_SetStringParameter(
 
 int32_t
 impl_bHYPRE_PCG_SetIntArray1Parameter(
-  bHYPRE_PCG self, const char* name, struct SIDL_int__array* value)
+  /*in*/ bHYPRE_PCG self, /*in*/ const char* name,
+    /*in*/ struct sidl_int__array* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.SetIntArray1Parameter) */
   /* Insert the implementation of the SetIntArray1Parameter method here... */
@@ -357,7 +358,8 @@ impl_bHYPRE_PCG_SetIntArray1Parameter(
 
 int32_t
 impl_bHYPRE_PCG_SetIntArray2Parameter(
-  bHYPRE_PCG self, const char* name, struct SIDL_int__array* value)
+  /*in*/ bHYPRE_PCG self, /*in*/ const char* name,
+    /*in*/ struct sidl_int__array* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.SetIntArray2Parameter) */
   /* Insert the implementation of the SetIntArray2Parameter method here... */
@@ -375,7 +377,8 @@ impl_bHYPRE_PCG_SetIntArray2Parameter(
 
 int32_t
 impl_bHYPRE_PCG_SetDoubleArray1Parameter(
-  bHYPRE_PCG self, const char* name, struct SIDL_double__array* value)
+  /*in*/ bHYPRE_PCG self, /*in*/ const char* name,
+    /*in*/ struct sidl_double__array* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.SetDoubleArray1Parameter) */
   /* Insert the implementation of the SetDoubleArray1Parameter method here... */
@@ -393,7 +396,8 @@ impl_bHYPRE_PCG_SetDoubleArray1Parameter(
 
 int32_t
 impl_bHYPRE_PCG_SetDoubleArray2Parameter(
-  bHYPRE_PCG self, const char* name, struct SIDL_double__array* value)
+  /*in*/ bHYPRE_PCG self, /*in*/ const char* name,
+    /*in*/ struct sidl_double__array* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.SetDoubleArray2Parameter) */
   /* Insert the implementation of the SetDoubleArray2Parameter method here... */
@@ -411,7 +415,7 @@ impl_bHYPRE_PCG_SetDoubleArray2Parameter(
 
 int32_t
 impl_bHYPRE_PCG_GetIntValue(
-  bHYPRE_PCG self, const char* name, int32_t* value)
+  /*in*/ bHYPRE_PCG self, /*in*/ const char* name, /*out*/ int32_t* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.GetIntValue) */
   /* Insert the implementation of the GetIntValue method here... */
@@ -449,7 +453,7 @@ impl_bHYPRE_PCG_GetIntValue(
 
 int32_t
 impl_bHYPRE_PCG_GetDoubleValue(
-  bHYPRE_PCG self, const char* name, double* value)
+  /*in*/ bHYPRE_PCG self, /*in*/ const char* name, /*out*/ double* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.GetDoubleValue) */
   /* Insert the implementation of the GetDoubleValue method here... */
@@ -488,7 +492,7 @@ impl_bHYPRE_PCG_GetDoubleValue(
 
 int32_t
 impl_bHYPRE_PCG_Setup(
-  bHYPRE_PCG self, bHYPRE_Vector b, bHYPRE_Vector x)
+  /*in*/ bHYPRE_PCG self, /*in*/ bHYPRE_Vector b, /*in*/ bHYPRE_Vector x)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.Setup) */
   /* Insert the implementation of the Setup method here... */
@@ -603,7 +607,7 @@ impl_bHYPRE_PCG_Setup(
 
 int32_t
 impl_bHYPRE_PCG_Apply(
-  bHYPRE_PCG self, bHYPRE_Vector b, bHYPRE_Vector* x)
+  /*in*/ bHYPRE_PCG self, /*in*/ bHYPRE_Vector b, /*inout*/ bHYPRE_Vector* x)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.Apply) */
   /* Insert the implementation of the Apply method here... */
@@ -726,7 +730,7 @@ impl_bHYPRE_PCG_Apply(
 
 int32_t
 impl_bHYPRE_PCG_SetOperator(
-  bHYPRE_PCG self, bHYPRE_Operator A)
+  /*in*/ bHYPRE_PCG self, /*in*/ bHYPRE_Operator A)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.SetOperator) */
   /* Insert the implementation of the SetOperator method here... */
@@ -752,7 +756,7 @@ impl_bHYPRE_PCG_SetOperator(
 
 int32_t
 impl_bHYPRE_PCG_SetTolerance(
-  bHYPRE_PCG self, double tolerance)
+  /*in*/ bHYPRE_PCG self, /*in*/ double tolerance)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.SetTolerance) */
   /* Insert the implementation of the SetTolerance method here... */
@@ -778,7 +782,7 @@ impl_bHYPRE_PCG_SetTolerance(
 
 int32_t
 impl_bHYPRE_PCG_SetMaxIterations(
-  bHYPRE_PCG self, int32_t max_iterations)
+  /*in*/ bHYPRE_PCG self, /*in*/ int32_t max_iterations)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.SetMaxIterations) */
   /* Insert the implementation of the SetMaxIterations method here... */
@@ -808,7 +812,7 @@ impl_bHYPRE_PCG_SetMaxIterations(
 
 int32_t
 impl_bHYPRE_PCG_SetLogging(
-  bHYPRE_PCG self, int32_t level)
+  /*in*/ bHYPRE_PCG self, /*in*/ int32_t level)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.SetLogging) */
   /* Insert the implementation of the SetLogging method here... */
@@ -846,7 +850,7 @@ impl_bHYPRE_PCG_SetLogging(
 
 int32_t
 impl_bHYPRE_PCG_SetPrintLevel(
-  bHYPRE_PCG self, int32_t level)
+  /*in*/ bHYPRE_PCG self, /*in*/ int32_t level)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.SetPrintLevel) */
   /* Insert the implementation of the SetPrintLevel method here... */
@@ -880,7 +884,7 @@ impl_bHYPRE_PCG_SetPrintLevel(
 
 int32_t
 impl_bHYPRE_PCG_GetNumIterations(
-  bHYPRE_PCG self, int32_t* num_iterations)
+  /*in*/ bHYPRE_PCG self, /*out*/ int32_t* num_iterations)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.GetNumIterations) */
   /* Insert the implementation of the GetNumIterations method here... */
@@ -910,7 +914,7 @@ impl_bHYPRE_PCG_GetNumIterations(
 
 int32_t
 impl_bHYPRE_PCG_GetRelResidualNorm(
-  bHYPRE_PCG self, double* norm)
+  /*in*/ bHYPRE_PCG self, /*out*/ double* norm)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.GetRelResidualNorm) */
   /* Insert the implementation of the GetRelResidualNorm method here... */
@@ -940,7 +944,7 @@ impl_bHYPRE_PCG_GetRelResidualNorm(
 
 int32_t
 impl_bHYPRE_PCG_SetPreconditioner(
-  bHYPRE_PCG self, bHYPRE_Solver s)
+  /*in*/ bHYPRE_PCG self, /*in*/ bHYPRE_Solver s)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.SetPreconditioner) */
   /* Insert the implementation of the SetPreconditioner method here... */

@@ -2,14 +2,14 @@
  * File:          bHYPRE_SStructStencil_Impl.h
  * Symbol:        bHYPRE.SStructStencil-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.8.2
- * SIDL Created:  20030401 14:47:20 PST
- * Generated:     20030401 14:47:32 PST
+ * Babel Version: 0.9.8
+ * sidl Created:  20050208 15:29:05 PST
+ * Generated:     20050208 15:29:08 PST
  * Description:   Server-side implementation for bHYPRE.SStructStencil
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.8.2
+ * babel-version = 0.9.8
  * source-line   = 1001
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -17,8 +17,8 @@
 #ifndef included_bHYPRE_SStructStencil_Impl_h
 #define included_bHYPRE_SStructStencil_Impl_h
 
-#ifndef included_SIDL_header_h
-#include "SIDL_header.h"
+#ifndef included_sidl_header_h
+#include "sidl_header.h"
 #endif
 #ifndef included_bHYPRE_SStructStencil_h
 #include "bHYPRE_SStructStencil.h"
@@ -78,7 +78,7 @@ extern int32_t
 impl_bHYPRE_SStructStencil_SetEntry(
   bHYPRE_SStructStencil,
   int32_t,
-  struct SIDL_int__array*,
+  struct sidl_int__array*,
   int32_t);
 
 #ifdef __cplusplus

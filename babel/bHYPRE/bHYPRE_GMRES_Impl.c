@@ -2,14 +2,14 @@
  * File:          bHYPRE_GMRES_Impl.c
  * Symbol:        bHYPRE.GMRES-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.8.2
- * SIDL Created:  20030401 14:47:20 PST
- * Generated:     20030401 14:47:31 PST
+ * Babel Version: 0.9.8
+ * sidl Created:  20050208 15:29:05 PST
+ * Generated:     20050208 15:29:07 PST
  * Description:   Server-side implementation for bHYPRE.GMRES
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.8.2
+ * babel-version = 0.9.8
  * source-line   = 1247
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -41,6 +41,7 @@
 #include "bHYPRE_BoomerAMG_Impl.h"
 #include "bHYPRE_ParCSRDiagScale.h"
 #include "bHYPRE_ParCSRDiagScale_Impl.h"
+#include "bHYPRE_PCG_Impl.h"
 #include <assert.h>
 #include "mpi.h"
 
@@ -88,7 +89,7 @@ int impl_bHYPRE_GMRES_Copy_Parameters_to_HYPRE_struct( bHYPRE_GMRES self )
 
 void
 impl_bHYPRE_GMRES__ctor(
-  bHYPRE_GMRES self)
+  /*in*/ bHYPRE_GMRES self)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES._ctor) */
   /* Insert the implementation of the constructor method here... */
@@ -117,7 +118,7 @@ impl_bHYPRE_GMRES__ctor(
 
    /* set any other data components here */
 
-   bHYPRE_PCG__set_data( self, data );
+   bHYPRE_GMRES__set_data( self, data );
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES._ctor) */
 }
@@ -131,7 +132,7 @@ impl_bHYPRE_GMRES__ctor(
 
 void
 impl_bHYPRE_GMRES__dtor(
-  bHYPRE_GMRES self)
+  /*in*/ bHYPRE_GMRES self)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES._dtor) */
   /* Insert the implementation of the destructor method here... */
@@ -167,7 +168,7 @@ impl_bHYPRE_GMRES__dtor(
 
 int32_t
 impl_bHYPRE_GMRES_SetCommunicator(
-  bHYPRE_GMRES self, void* mpi_comm)
+  /*in*/ bHYPRE_GMRES self, /*in*/ void* mpi_comm)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
@@ -192,7 +193,7 @@ impl_bHYPRE_GMRES_SetCommunicator(
 
 int32_t
 impl_bHYPRE_GMRES_SetIntParameter(
-  bHYPRE_GMRES self, const char* name, int32_t value)
+  /*in*/ bHYPRE_GMRES self, /*in*/ const char* name, /*in*/ int32_t value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.SetIntParameter) */
   /* Insert the implementation of the SetIntParameter method here... */
@@ -241,7 +242,7 @@ impl_bHYPRE_GMRES_SetIntParameter(
 
 int32_t
 impl_bHYPRE_GMRES_SetDoubleParameter(
-  bHYPRE_GMRES self, const char* name, double value)
+  /*in*/ bHYPRE_GMRES self, /*in*/ const char* name, /*in*/ double value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.SetDoubleParameter) */
   /* Insert the implementation of the SetDoubleParameter method here... */
@@ -275,7 +276,7 @@ impl_bHYPRE_GMRES_SetDoubleParameter(
 
 int32_t
 impl_bHYPRE_GMRES_SetStringParameter(
-  bHYPRE_GMRES self, const char* name, const char* value)
+  /*in*/ bHYPRE_GMRES self, /*in*/ const char* name, /*in*/ const char* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.SetStringParameter) */
   /* Insert the implementation of the SetStringParameter method here... */
@@ -295,7 +296,8 @@ impl_bHYPRE_GMRES_SetStringParameter(
 
 int32_t
 impl_bHYPRE_GMRES_SetIntArray1Parameter(
-  bHYPRE_GMRES self, const char* name, struct SIDL_int__array* value)
+  /*in*/ bHYPRE_GMRES self, /*in*/ const char* name,
+    /*in*/ struct sidl_int__array* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.SetIntArray1Parameter) */
   /* Insert the implementation of the SetIntArray1Parameter method here... */
@@ -313,7 +315,8 @@ impl_bHYPRE_GMRES_SetIntArray1Parameter(
 
 int32_t
 impl_bHYPRE_GMRES_SetIntArray2Parameter(
-  bHYPRE_GMRES self, const char* name, struct SIDL_int__array* value)
+  /*in*/ bHYPRE_GMRES self, /*in*/ const char* name,
+    /*in*/ struct sidl_int__array* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.SetIntArray2Parameter) */
   /* Insert the implementation of the SetIntArray2Parameter method here... */
@@ -331,7 +334,8 @@ impl_bHYPRE_GMRES_SetIntArray2Parameter(
 
 int32_t
 impl_bHYPRE_GMRES_SetDoubleArray1Parameter(
-  bHYPRE_GMRES self, const char* name, struct SIDL_double__array* value)
+  /*in*/ bHYPRE_GMRES self, /*in*/ const char* name,
+    /*in*/ struct sidl_double__array* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.SetDoubleArray1Parameter) */
   /* Insert the implementation of the SetDoubleArray1Parameter method here... */
@@ -349,10 +353,12 @@ impl_bHYPRE_GMRES_SetDoubleArray1Parameter(
 
 int32_t
 impl_bHYPRE_GMRES_SetDoubleArray2Parameter(
-  bHYPRE_GMRES self, const char* name, struct SIDL_double__array* value)
+  /*in*/ bHYPRE_GMRES self, /*in*/ const char* name,
+    /*in*/ struct sidl_double__array* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.SetDoubleArray2Parameter) */
   /* Insert the implementation of the SetDoubleArray2Parameter method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.SetDoubleArray2Parameter) */
 }
 
@@ -366,7 +372,7 @@ impl_bHYPRE_GMRES_SetDoubleArray2Parameter(
 
 int32_t
 impl_bHYPRE_GMRES_GetIntValue(
-  bHYPRE_GMRES self, const char* name, int32_t* value)
+  /*in*/ bHYPRE_GMRES self, /*in*/ const char* name, /*out*/ int32_t* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.GetIntValue) */
   /* Insert the implementation of the GetIntValue method here... */
@@ -404,7 +410,7 @@ impl_bHYPRE_GMRES_GetIntValue(
 
 int32_t
 impl_bHYPRE_GMRES_GetDoubleValue(
-  bHYPRE_GMRES self, const char* name, double* value)
+  /*in*/ bHYPRE_GMRES self, /*in*/ const char* name, /*out*/ double* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.GetDoubleValue) */
   /* Insert the implementation of the GetDoubleValue method here... */
@@ -443,7 +449,7 @@ impl_bHYPRE_GMRES_GetDoubleValue(
 
 int32_t
 impl_bHYPRE_GMRES_Setup(
-  bHYPRE_GMRES self, bHYPRE_Vector b, bHYPRE_Vector x)
+  /*in*/ bHYPRE_GMRES self, /*in*/ bHYPRE_Vector b, /*in*/ bHYPRE_Vector x)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.Setup) */
   /* Insert the implementation of the Setup method here... */
@@ -558,7 +564,7 @@ impl_bHYPRE_GMRES_Setup(
 
 int32_t
 impl_bHYPRE_GMRES_Apply(
-  bHYPRE_GMRES self, bHYPRE_Vector b, bHYPRE_Vector* x)
+  /*in*/ bHYPRE_GMRES self, /*in*/ bHYPRE_Vector b, /*inout*/ bHYPRE_Vector* x)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.Apply) */
   /* Insert the implementation of the Apply method here... */
@@ -681,7 +687,7 @@ impl_bHYPRE_GMRES_Apply(
 
 int32_t
 impl_bHYPRE_GMRES_SetOperator(
-  bHYPRE_GMRES self, bHYPRE_Operator A)
+  /*in*/ bHYPRE_GMRES self, /*in*/ bHYPRE_Operator A)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.SetOperator) */
   /* Insert the implementation of the SetOperator method here... */
@@ -705,7 +711,7 @@ impl_bHYPRE_GMRES_SetOperator(
 
 int32_t
 impl_bHYPRE_GMRES_SetTolerance(
-  bHYPRE_GMRES self, double tolerance)
+  /*in*/ bHYPRE_GMRES self, /*in*/ double tolerance)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.SetTolerance) */
   /* Insert the implementation of the SetTolerance method here... */
@@ -731,7 +737,7 @@ impl_bHYPRE_GMRES_SetTolerance(
 
 int32_t
 impl_bHYPRE_GMRES_SetMaxIterations(
-  bHYPRE_GMRES self, int32_t max_iterations)
+  /*in*/ bHYPRE_GMRES self, /*in*/ int32_t max_iterations)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.SetMaxIterations) */
   /* Insert the implementation of the SetMaxIterations method here... */
@@ -761,7 +767,7 @@ impl_bHYPRE_GMRES_SetMaxIterations(
 
 int32_t
 impl_bHYPRE_GMRES_SetLogging(
-  bHYPRE_GMRES self, int32_t level)
+  /*in*/ bHYPRE_GMRES self, /*in*/ int32_t level)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.SetLogging) */
   /* Insert the implementation of the SetLogging method here... */
@@ -789,7 +795,7 @@ impl_bHYPRE_GMRES_SetLogging(
 
 int32_t
 impl_bHYPRE_GMRES_SetPrintLevel(
-  bHYPRE_GMRES self, int32_t level)
+  /*in*/ bHYPRE_GMRES self, /*in*/ int32_t level)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.SetPrintLevel) */
   /* Insert the implementation of the SetPrintLevel method here... */
@@ -823,7 +829,7 @@ impl_bHYPRE_GMRES_SetPrintLevel(
 
 int32_t
 impl_bHYPRE_GMRES_GetNumIterations(
-  bHYPRE_GMRES self, int32_t* num_iterations)
+  /*in*/ bHYPRE_GMRES self, /*out*/ int32_t* num_iterations)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.GetNumIterations) */
   /* Insert the implementation of the GetNumIterations method here... */
@@ -853,7 +859,7 @@ impl_bHYPRE_GMRES_GetNumIterations(
 
 int32_t
 impl_bHYPRE_GMRES_GetRelResidualNorm(
-  bHYPRE_GMRES self, double* norm)
+  /*in*/ bHYPRE_GMRES self, /*out*/ double* norm)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.GetRelResidualNorm) */
   /* Insert the implementation of the GetRelResidualNorm method here... */
@@ -883,7 +889,7 @@ impl_bHYPRE_GMRES_GetRelResidualNorm(
 
 int32_t
 impl_bHYPRE_GMRES_SetPreconditioner(
-  bHYPRE_GMRES self, bHYPRE_Solver s)
+  /*in*/ bHYPRE_GMRES self, /*in*/ bHYPRE_Solver s)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.SetPreconditioner) */
   /* Insert the implementation of the SetPreconditioner method here... */

@@ -2,14 +2,14 @@
  * File:          bHYPRE_Operator_IOR.h
  * Symbol:        bHYPRE.Operator-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.8.2
- * SIDL Created:  20030401 14:47:45 PST
- * Generated:     20030401 14:47:58 PST
+ * Babel Version: 0.9.8
+ * sidl Created:  20050208 15:29:13 PST
+ * Generated:     20050208 15:29:14 PST
  * Description:   Intermediate Object Representation for bHYPRE.Operator
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.2
+ * babel-version = 0.9.8
  * source-line   = 590
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -17,8 +17,8 @@
 #ifndef included_bHYPRE_Operator_IOR_h
 #define included_bHYPRE_Operator_IOR_h
 
-#ifndef included_SIDL_header_h
-#include "SIDL_header.h"
+#ifndef included_sidl_header_h
+#include "sidl_header.h"
 #endif
 #ifdef __cplusplus
 extern "C" {
@@ -44,12 +44,12 @@ bHYPRE_Operator__remote(const char *url);
  * Forward references for external classes and interfaces.
  */
 
-struct SIDL_BaseInterface__array;
-struct SIDL_BaseInterface__object;
-struct SIDL_ClassInfo__array;
-struct SIDL_ClassInfo__object;
 struct bHYPRE_Vector__array;
 struct bHYPRE_Vector__object;
+struct sidl_BaseInterface__array;
+struct sidl_BaseInterface__object;
+struct sidl_ClassInfo__array;
+struct sidl_ClassInfo__object;
 
 /*
  * Declare the method entry point vector.
@@ -62,21 +62,21 @@ struct bHYPRE_Operator__epv {
     const char* name);
   void (*f__delete)(
     void* self);
-  /* Methods introduced in SIDL.BaseInterface-v0.8.2 */
+  /* Methods introduced in sidl.BaseInterface-v0.9.0 */
   void (*f_addRef)(
     void* self);
   void (*f_deleteRef)(
     void* self);
-  SIDL_bool (*f_isSame)(
+  sidl_bool (*f_isSame)(
     void* self,
-    struct SIDL_BaseInterface__object* iobj);
-  struct SIDL_BaseInterface__object* (*f_queryInt)(
-    void* self,
-    const char* name);
-  SIDL_bool (*f_isType)(
+    struct sidl_BaseInterface__object* iobj);
+  struct sidl_BaseInterface__object* (*f_queryInt)(
     void* self,
     const char* name);
-  struct SIDL_ClassInfo__object* (*f_getClassInfo)(
+  sidl_bool (*f_isType)(
+    void* self,
+    const char* name);
+  struct sidl_ClassInfo__object* (*f_getClassInfo)(
     void* self);
   /* Methods introduced in bHYPRE.Operator-v1.0.0 */
   int32_t (*f_SetCommunicator)(
@@ -97,19 +97,19 @@ struct bHYPRE_Operator__epv {
   int32_t (*f_SetIntArray1Parameter)(
     void* self,
     const char* name,
-    struct SIDL_int__array* value);
+    struct sidl_int__array* value);
   int32_t (*f_SetIntArray2Parameter)(
     void* self,
     const char* name,
-    struct SIDL_int__array* value);
+    struct sidl_int__array* value);
   int32_t (*f_SetDoubleArray1Parameter)(
     void* self,
     const char* name,
-    struct SIDL_double__array* value);
+    struct sidl_double__array* value);
   int32_t (*f_SetDoubleArray2Parameter)(
     void* self,
     const char* name,
-    struct SIDL_double__array* value);
+    struct sidl_double__array* value);
   int32_t (*f_GetIntValue)(
     void* self,
     const char* name,

@@ -2,14 +2,14 @@
  * File:          bHYPRE_PreconditionedSolver_IOR.c
  * Symbol:        bHYPRE.PreconditionedSolver-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.8.2
- * SIDL Created:  20030401 14:47:20 PST
- * Generated:     20030401 14:47:24 PST
+ * Babel Version: 0.9.8
+ * sidl Created:  20050208 15:29:04 PST
+ * Generated:     20050208 15:29:06 PST
  * Description:   Intermediate Object Representation for bHYPRE.PreconditionedSolver
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.2
+ * babel-version = 0.9.8
  * source-line   = 756
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -83,10 +83,10 @@ remote_bHYPRE_PreconditionedSolver_deleteRef(
  * REMOTE METHOD STUB:isSame
  */
 
-static SIDL_bool
+static sidl_bool
 remote_bHYPRE_PreconditionedSolver_isSame(
   void* self,
-  struct SIDL_BaseInterface__object* iobj)
+  struct sidl_BaseInterface__object* iobj)
 {
   return 0;
 }
@@ -95,19 +95,19 @@ remote_bHYPRE_PreconditionedSolver_isSame(
  * REMOTE METHOD STUB:queryInt
  */
 
-static struct SIDL_BaseInterface__object*
+static struct sidl_BaseInterface__object*
 remote_bHYPRE_PreconditionedSolver_queryInt(
   void* self,
   const char* name)
 {
-  return (struct SIDL_BaseInterface__object*) 0;
+  return (struct sidl_BaseInterface__object*) 0;
 }
 
 /*
  * REMOTE METHOD STUB:isType
  */
 
-static SIDL_bool
+static sidl_bool
 remote_bHYPRE_PreconditionedSolver_isType(
   void* self,
   const char* name)
@@ -119,11 +119,11 @@ remote_bHYPRE_PreconditionedSolver_isType(
  * REMOTE METHOD STUB:getClassInfo
  */
 
-static struct SIDL_ClassInfo__object*
+static struct sidl_ClassInfo__object*
 remote_bHYPRE_PreconditionedSolver_getClassInfo(
   void* self)
 {
-  return (struct SIDL_ClassInfo__object*) 0;
+  return (struct sidl_ClassInfo__object*) 0;
 }
 
 /*
@@ -185,7 +185,7 @@ static int32_t
 remote_bHYPRE_PreconditionedSolver_SetIntArray1Parameter(
   void* self,
   const char* name,
-  struct SIDL_int__array* value)
+  struct sidl_int__array* value)
 {
   return 0;
 }
@@ -198,7 +198,7 @@ static int32_t
 remote_bHYPRE_PreconditionedSolver_SetIntArray2Parameter(
   void* self,
   const char* name,
-  struct SIDL_int__array* value)
+  struct sidl_int__array* value)
 {
   return 0;
 }
@@ -211,7 +211,7 @@ static int32_t
 remote_bHYPRE_PreconditionedSolver_SetDoubleArray1Parameter(
   void* self,
   const char* name,
-  struct SIDL_double__array* value)
+  struct sidl_double__array* value)
 {
   return 0;
 }
@@ -224,7 +224,7 @@ static int32_t
 remote_bHYPRE_PreconditionedSolver_SetDoubleArray2Parameter(
   void* self,
   const char* name,
-  struct SIDL_double__array* value)
+  struct sidl_double__array* value)
 {
   return 0;
 }

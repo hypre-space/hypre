@@ -2,14 +2,14 @@
  * File:          bHYPRE_StructStencil_IOR.c
  * Symbol:        bHYPRE.StructStencil-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.8.2
- * SIDL Created:  20030401 14:47:35 PST
- * Generated:     20030401 14:47:39 PST
+ * Babel Version: 0.9.8
+ * sidl Created:  20050208 15:29:09 PST
+ * Generated:     20050208 15:29:11 PST
  * Description:   Intermediate Object Representation for bHYPRE.StructStencil
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.2
+ * babel-version = 0.9.8
  * source-line   = 1088
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -18,17 +18,17 @@
 #include <stddef.h>
 #include <string.h>
 #include "bHYPRE_StructStencil_IOR.h"
-#ifndef included_SIDL_BaseClass_Impl_h
-#include "SIDL_BaseClass_Impl.h"
+#ifndef included_sidl_BaseClass_Impl_h
+#include "sidl_BaseClass_Impl.h"
 #endif
-#ifndef included_SIDL_BaseClass_h
-#include "SIDL_BaseClass.h"
+#ifndef included_sidl_BaseClass_h
+#include "sidl_BaseClass.h"
 #endif
-#ifndef included_SIDL_ClassInfo_h
-#include "SIDL_ClassInfo.h"
+#ifndef included_sidl_ClassInfo_h
+#include "sidl_ClassInfo.h"
 #endif
-#ifndef included_SIDL_ClassInfoI_h
-#include "SIDL_ClassInfoI.h"
+#ifndef included_sidl_ClassInfoI_h
+#include "sidl_ClassInfoI.h"
 #endif
 
 #ifndef NULL
@@ -45,7 +45,7 @@ static const int32_t s_IOR_MINOR_VERSION = 8;
  * Static variable to hold shared ClassInfo interface.
  */
 
-static SIDL_ClassInfo s_classInfo = NULL;
+static sidl_ClassInfo s_classInfo = NULL;
 static int s_classInfo_init = 1;
 
 /*
@@ -58,20 +58,27 @@ static int s_remote_initialized = 0;
 static struct bHYPRE_StructStencil__epv s_new__bhypre_structstencil;
 static struct bHYPRE_StructStencil__epv s_rem__bhypre_structstencil;
 
-static struct SIDL_BaseClass__epv  s_new__sidl_baseclass;
-static struct SIDL_BaseClass__epv* s_old__sidl_baseclass;
-static struct SIDL_BaseClass__epv  s_rem__sidl_baseclass;
+static struct sidl_BaseClass__epv  s_new__sidl_baseclass;
+static struct sidl_BaseClass__epv* s_old__sidl_baseclass;
+static struct sidl_BaseClass__epv  s_rem__sidl_baseclass;
 
-static struct SIDL_BaseInterface__epv  s_new__sidl_baseinterface;
-static struct SIDL_BaseInterface__epv* s_old__sidl_baseinterface;
-static struct SIDL_BaseInterface__epv  s_rem__sidl_baseinterface;
+static struct sidl_BaseInterface__epv  s_new__sidl_baseinterface;
+static struct sidl_BaseInterface__epv* s_old__sidl_baseinterface;
+static struct sidl_BaseInterface__epv  s_rem__sidl_baseinterface;
 
 /*
  * Declare EPV routines defined in the skeleton file.
  */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 extern void bHYPRE_StructStencil__set_epv(
   struct bHYPRE_StructStencil__epv* epv);
+#ifdef __cplusplus
+}
+#endif
 
 /*
  * CAST: dynamic type casting support.
@@ -84,13 +91,13 @@ static void* ior_bHYPRE_StructStencil__cast(
   void* cast = NULL;
 
   struct bHYPRE_StructStencil__object* s0 = self;
-  struct SIDL_BaseClass__object*       s1 = &s0->d_sidl_baseclass;
+  struct sidl_BaseClass__object*       s1 = &s0->d_sidl_baseclass;
 
   if (!strcmp(name, "bHYPRE.StructStencil")) {
     cast = (void*) s0;
-  } else if (!strcmp(name, "SIDL.BaseClass")) {
+  } else if (!strcmp(name, "sidl.BaseClass")) {
     cast = (void*) s1;
-  } else if (!strcmp(name, "SIDL.BaseInterface")) {
+  } else if (!strcmp(name, "sidl.BaseInterface")) {
     cast = (void*) &s1->d_sidl_baseinterface;
   }
 
@@ -117,11 +124,11 @@ static void bHYPRE_StructStencil__init_epv(
   struct bHYPRE_StructStencil__object* self)
 {
   struct bHYPRE_StructStencil__object* s0 = self;
-  struct SIDL_BaseClass__object*       s1 = &s0->d_sidl_baseclass;
+  struct sidl_BaseClass__object*       s1 = &s0->d_sidl_baseclass;
 
   struct bHYPRE_StructStencil__epv* epv = &s_new__bhypre_structstencil;
-  struct SIDL_BaseClass__epv*       e0  = &s_new__sidl_baseclass;
-  struct SIDL_BaseInterface__epv*   e1  = &s_new__sidl_baseinterface;
+  struct sidl_BaseClass__epv*       e0  = &s_new__sidl_baseclass;
+  struct sidl_BaseInterface__epv*   e1  = &s_new__sidl_baseinterface;
 
   s_old__sidl_baseinterface = s1->d_sidl_baseinterface.d_epv;
   s_old__sidl_baseclass     = s1->d_epv;
@@ -134,13 +141,13 @@ static void bHYPRE_StructStencil__init_epv(
     s1->d_epv->f_addRef;
   epv->f_deleteRef    = (void (*)(struct bHYPRE_StructStencil__object*)) 
     s1->d_epv->f_deleteRef;
-  epv->f_isSame       = (SIDL_bool (*)(struct bHYPRE_StructStencil__object*,
-    struct SIDL_BaseInterface__object*)) s1->d_epv->f_isSame;
-  epv->f_queryInt     = (struct SIDL_BaseInterface__object* (*)(struct 
+  epv->f_isSame       = (sidl_bool (*)(struct bHYPRE_StructStencil__object*,
+    struct sidl_BaseInterface__object*)) s1->d_epv->f_isSame;
+  epv->f_queryInt     = (struct sidl_BaseInterface__object* (*)(struct 
     bHYPRE_StructStencil__object*,const char*)) s1->d_epv->f_queryInt;
-  epv->f_isType       = (SIDL_bool (*)(struct bHYPRE_StructStencil__object*,
+  epv->f_isType       = (sidl_bool (*)(struct bHYPRE_StructStencil__object*,
     const char*)) s1->d_epv->f_isType;
-  epv->f_getClassInfo = (struct SIDL_ClassInfo__object* (*)(struct 
+  epv->f_getClassInfo = (struct sidl_ClassInfo__object* (*)(struct 
     bHYPRE_StructStencil__object*)) s1->d_epv->f_getClassInfo;
   epv->f_SetDimension = NULL;
   epv->f_SetSize      = NULL;
@@ -148,35 +155,43 @@ static void bHYPRE_StructStencil__init_epv(
 
   bHYPRE_StructStencil__set_epv(epv);
 
-  e0->f__cast        = (void* (*)(struct SIDL_BaseClass__object*,
+  e0->f__cast        = (void* (*)(struct sidl_BaseClass__object*,
     const char*)) epv->f__cast;
-  e0->f__delete      = (void (*)(struct SIDL_BaseClass__object*)) 
+  e0->f__delete      = (void (*)(struct sidl_BaseClass__object*)) 
     epv->f__delete;
-  e0->f_addRef       = (void (*)(struct SIDL_BaseClass__object*)) epv->f_addRef;
-  e0->f_deleteRef    = (void (*)(struct SIDL_BaseClass__object*)) 
+  e0->f_addRef       = (void (*)(struct sidl_BaseClass__object*)) epv->f_addRef;
+  e0->f_deleteRef    = (void (*)(struct sidl_BaseClass__object*)) 
     epv->f_deleteRef;
-  e0->f_isSame       = (SIDL_bool (*)(struct SIDL_BaseClass__object*,
-    struct SIDL_BaseInterface__object*)) epv->f_isSame;
-  e0->f_queryInt     = (struct SIDL_BaseInterface__object* (*)(struct 
-    SIDL_BaseClass__object*,const char*)) epv->f_queryInt;
-  e0->f_isType       = (SIDL_bool (*)(struct SIDL_BaseClass__object*,
+  e0->f_isSame       = (sidl_bool (*)(struct sidl_BaseClass__object*,
+    struct sidl_BaseInterface__object*)) epv->f_isSame;
+  e0->f_queryInt     = (struct sidl_BaseInterface__object* (*)(struct 
+    sidl_BaseClass__object*,const char*)) epv->f_queryInt;
+  e0->f_isType       = (sidl_bool (*)(struct sidl_BaseClass__object*,
     const char*)) epv->f_isType;
-  e0->f_getClassInfo = (struct SIDL_ClassInfo__object* (*)(struct 
-    SIDL_BaseClass__object*)) epv->f_getClassInfo;
+  e0->f_getClassInfo = (struct sidl_ClassInfo__object* (*)(struct 
+    sidl_BaseClass__object*)) epv->f_getClassInfo;
 
   e1->f__cast        = (void* (*)(void*,const char*)) epv->f__cast;
   e1->f__delete      = (void (*)(void*)) epv->f__delete;
   e1->f_addRef       = (void (*)(void*)) epv->f_addRef;
   e1->f_deleteRef    = (void (*)(void*)) epv->f_deleteRef;
-  e1->f_isSame       = (SIDL_bool (*)(void*,
-    struct SIDL_BaseInterface__object*)) epv->f_isSame;
-  e1->f_queryInt     = (struct SIDL_BaseInterface__object* (*)(void*,
+  e1->f_isSame       = (sidl_bool (*)(void*,
+    struct sidl_BaseInterface__object*)) epv->f_isSame;
+  e1->f_queryInt     = (struct sidl_BaseInterface__object* (*)(void*,
     const char*)) epv->f_queryInt;
-  e1->f_isType       = (SIDL_bool (*)(void*,const char*)) epv->f_isType;
-  e1->f_getClassInfo = (struct SIDL_ClassInfo__object* (*)(void*)) 
+  e1->f_isType       = (sidl_bool (*)(void*,const char*)) epv->f_isType;
+  e1->f_getClassInfo = (struct sidl_ClassInfo__object* (*)(void*)) 
     epv->f_getClassInfo;
 
   s_method_initialized = 1;
+}
+
+/*
+ * SUPER: return's parent's non-overrided EPV
+ */
+
+static struct sidl_BaseClass__epv* bHYPRE_StructStencil__super(void) {
+  return s_old__sidl_baseclass;
 }
 
 /*
@@ -184,38 +199,38 @@ static void bHYPRE_StructStencil__init_epv(
  */
 
 static void
-initClassInfo(SIDL_ClassInfo *info)
+initClassInfo(sidl_ClassInfo *info)
 {
   if (s_classInfo_init) {
-    SIDL_ClassInfoI impl;
+    sidl_ClassInfoI impl;
     s_classInfo_init = 0;
-    impl = SIDL_ClassInfoI__create();
-    s_classInfo = SIDL_ClassInfo__cast(impl);
+    impl = sidl_ClassInfoI__create();
+    s_classInfo = sidl_ClassInfo__cast(impl);
     if (impl) {
-      SIDL_ClassInfoI_setName(impl, "bHYPRE.StructStencil");
-      SIDL_ClassInfoI_setIORVersion(impl, s_IOR_MAJOR_VERSION,
+      sidl_ClassInfoI_setName(impl, "bHYPRE.StructStencil");
+      sidl_ClassInfoI_setIORVersion(impl, s_IOR_MAJOR_VERSION,
         s_IOR_MINOR_VERSION);
     }
   }
   if (s_classInfo) {
     if (*info) {
-      SIDL_ClassInfo_deleteRef(*info);
+      sidl_ClassInfo_deleteRef(*info);
     }
     *info = s_classInfo;
-    SIDL_ClassInfo_addRef(*info);
+    sidl_ClassInfo_addRef(*info);
   }
 }
 
 /*
- * initMetadata: store IOR version & class in SIDL.BaseClass's data
+ * initMetadata: store IOR version & class in sidl.BaseClass's data
  */
 
 static void
 initMetadata(struct bHYPRE_StructStencil__object* self)
 {
   if (self) {
-    struct SIDL_BaseClass__data *data = 
-      SIDL_BaseClass__get_data(SIDL_BaseClass__cast(self));
+    struct sidl_BaseClass__data *data = 
+      sidl_BaseClass__get_data(sidl_BaseClass__cast(self));
     if (data) {
       data->d_IOR_major_version = s_IOR_MAJOR_VERSION;
       data->d_IOR_minor_version = s_IOR_MINOR_VERSION;
@@ -247,9 +262,9 @@ void bHYPRE_StructStencil__init(
   struct bHYPRE_StructStencil__object* self)
 {
   struct bHYPRE_StructStencil__object* s0 = self;
-  struct SIDL_BaseClass__object*       s1 = &s0->d_sidl_baseclass;
+  struct sidl_BaseClass__object*       s1 = &s0->d_sidl_baseclass;
 
-  SIDL_BaseClass__init(s1);
+  sidl_BaseClass__init(s1);
 
   if (!s_method_initialized) {
     bHYPRE_StructStencil__init_epv(s0);
@@ -273,14 +288,14 @@ void bHYPRE_StructStencil__fini(
   struct bHYPRE_StructStencil__object* self)
 {
   struct bHYPRE_StructStencil__object* s0 = self;
-  struct SIDL_BaseClass__object*       s1 = &s0->d_sidl_baseclass;
+  struct sidl_BaseClass__object*       s1 = &s0->d_sidl_baseclass;
 
   (*(s0->d_epv->f__dtor))(s0);
 
   s1->d_sidl_baseinterface.d_epv = s_old__sidl_baseinterface;
   s1->d_epv                      = s_old__sidl_baseclass;
 
-  SIDL_BaseClass__fini(s1);
+  sidl_BaseClass__fini(s1);
 }
 
 /*
@@ -297,13 +312,13 @@ static const struct bHYPRE_StructStencil__external
 s_externalEntryPoints = {
   bHYPRE_StructStencil__new,
   bHYPRE_StructStencil__remote,
+  bHYPRE_StructStencil__super
 };
 
 /*
  * This function returns a pointer to a static structure of
  * pointers to function entry points.  Its purpose is to provide
  * one-stop shopping for loading DLLs.
- * loading DLLs
  */
 
 const struct bHYPRE_StructStencil__external*
@@ -357,10 +372,10 @@ remote_bHYPRE_StructStencil_deleteRef(
  * REMOTE METHOD STUB:isSame
  */
 
-static SIDL_bool
+static sidl_bool
 remote_bHYPRE_StructStencil_isSame(
   struct bHYPRE_StructStencil__object* self,
-  struct SIDL_BaseInterface__object* iobj)
+  struct sidl_BaseInterface__object* iobj)
 {
   return 0;
 }
@@ -369,19 +384,19 @@ remote_bHYPRE_StructStencil_isSame(
  * REMOTE METHOD STUB:queryInt
  */
 
-static struct SIDL_BaseInterface__object*
+static struct sidl_BaseInterface__object*
 remote_bHYPRE_StructStencil_queryInt(
   struct bHYPRE_StructStencil__object* self,
   const char* name)
 {
-  return (struct SIDL_BaseInterface__object*) 0;
+  return (struct sidl_BaseInterface__object*) 0;
 }
 
 /*
  * REMOTE METHOD STUB:isType
  */
 
-static SIDL_bool
+static sidl_bool
 remote_bHYPRE_StructStencil_isType(
   struct bHYPRE_StructStencil__object* self,
   const char* name)
@@ -393,11 +408,11 @@ remote_bHYPRE_StructStencil_isType(
  * REMOTE METHOD STUB:getClassInfo
  */
 
-static struct SIDL_ClassInfo__object*
+static struct sidl_ClassInfo__object*
 remote_bHYPRE_StructStencil_getClassInfo(
   struct bHYPRE_StructStencil__object* self)
 {
-  return (struct SIDL_ClassInfo__object*) 0;
+  return (struct sidl_ClassInfo__object*) 0;
 }
 
 /*
@@ -432,7 +447,7 @@ static int32_t
 remote_bHYPRE_StructStencil_SetElement(
   struct bHYPRE_StructStencil__object* self,
   int32_t index,
-  struct SIDL_int__array* offset)
+  struct sidl_int__array* offset)
 {
   return 0;
 }
@@ -444,8 +459,8 @@ remote_bHYPRE_StructStencil_SetElement(
 static void bHYPRE_StructStencil__init_remote_epv(void)
 {
   struct bHYPRE_StructStencil__epv* epv = &s_rem__bhypre_structstencil;
-  struct SIDL_BaseClass__epv*       e0  = &s_rem__sidl_baseclass;
-  struct SIDL_BaseInterface__epv*   e1  = &s_rem__sidl_baseinterface;
+  struct sidl_BaseClass__epv*       e0  = &s_rem__sidl_baseclass;
+  struct sidl_BaseInterface__epv*   e1  = &s_rem__sidl_baseinterface;
 
   epv->f__cast        = remote_bHYPRE_StructStencil__cast;
   epv->f__delete      = remote_bHYPRE_StructStencil__delete;
@@ -461,32 +476,32 @@ static void bHYPRE_StructStencil__init_remote_epv(void)
   epv->f_SetSize      = remote_bHYPRE_StructStencil_SetSize;
   epv->f_SetElement   = remote_bHYPRE_StructStencil_SetElement;
 
-  e0->f__cast        = (void* (*)(struct SIDL_BaseClass__object*,
+  e0->f__cast        = (void* (*)(struct sidl_BaseClass__object*,
     const char*)) epv->f__cast;
-  e0->f__delete      = (void (*)(struct SIDL_BaseClass__object*)) 
+  e0->f__delete      = (void (*)(struct sidl_BaseClass__object*)) 
     epv->f__delete;
-  e0->f_addRef       = (void (*)(struct SIDL_BaseClass__object*)) epv->f_addRef;
-  e0->f_deleteRef    = (void (*)(struct SIDL_BaseClass__object*)) 
+  e0->f_addRef       = (void (*)(struct sidl_BaseClass__object*)) epv->f_addRef;
+  e0->f_deleteRef    = (void (*)(struct sidl_BaseClass__object*)) 
     epv->f_deleteRef;
-  e0->f_isSame       = (SIDL_bool (*)(struct SIDL_BaseClass__object*,
-    struct SIDL_BaseInterface__object*)) epv->f_isSame;
-  e0->f_queryInt     = (struct SIDL_BaseInterface__object* (*)(struct 
-    SIDL_BaseClass__object*,const char*)) epv->f_queryInt;
-  e0->f_isType       = (SIDL_bool (*)(struct SIDL_BaseClass__object*,
+  e0->f_isSame       = (sidl_bool (*)(struct sidl_BaseClass__object*,
+    struct sidl_BaseInterface__object*)) epv->f_isSame;
+  e0->f_queryInt     = (struct sidl_BaseInterface__object* (*)(struct 
+    sidl_BaseClass__object*,const char*)) epv->f_queryInt;
+  e0->f_isType       = (sidl_bool (*)(struct sidl_BaseClass__object*,
     const char*)) epv->f_isType;
-  e0->f_getClassInfo = (struct SIDL_ClassInfo__object* (*)(struct 
-    SIDL_BaseClass__object*)) epv->f_getClassInfo;
+  e0->f_getClassInfo = (struct sidl_ClassInfo__object* (*)(struct 
+    sidl_BaseClass__object*)) epv->f_getClassInfo;
 
   e1->f__cast        = (void* (*)(void*,const char*)) epv->f__cast;
   e1->f__delete      = (void (*)(void*)) epv->f__delete;
   e1->f_addRef       = (void (*)(void*)) epv->f_addRef;
   e1->f_deleteRef    = (void (*)(void*)) epv->f_deleteRef;
-  e1->f_isSame       = (SIDL_bool (*)(void*,
-    struct SIDL_BaseInterface__object*)) epv->f_isSame;
-  e1->f_queryInt     = (struct SIDL_BaseInterface__object* (*)(void*,
+  e1->f_isSame       = (sidl_bool (*)(void*,
+    struct sidl_BaseInterface__object*)) epv->f_isSame;
+  e1->f_queryInt     = (struct sidl_BaseInterface__object* (*)(void*,
     const char*)) epv->f_queryInt;
-  e1->f_isType       = (SIDL_bool (*)(void*,const char*)) epv->f_isType;
-  e1->f_getClassInfo = (struct SIDL_ClassInfo__object* (*)(void*)) 
+  e1->f_isType       = (sidl_bool (*)(void*,const char*)) epv->f_isType;
+  e1->f_getClassInfo = (struct sidl_ClassInfo__object* (*)(void*)) 
     epv->f_getClassInfo;
 
   s_remote_initialized = 1;
@@ -504,7 +519,7 @@ bHYPRE_StructStencil__remote(const char *url)
       sizeof(struct bHYPRE_StructStencil__object));
 
   struct bHYPRE_StructStencil__object* s0 = self;
-  struct SIDL_BaseClass__object*       s1 = &s0->d_sidl_baseclass;
+  struct sidl_BaseClass__object*       s1 = &s0->d_sidl_baseclass;
 
   if (!s_remote_initialized) {
     bHYPRE_StructStencil__init_remote_epv();

@@ -2,14 +2,14 @@
  * File:          bHYPRE_SStructGrid_Impl.h
  * Symbol:        bHYPRE.SStructGrid-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.8.2
- * SIDL Created:  20030401 14:47:20 PST
- * Generated:     20030401 14:47:30 PST
+ * Babel Version: 0.9.8
+ * sidl Created:  20050208 15:29:05 PST
+ * Generated:     20050208 15:29:08 PST
  * Description:   Server-side implementation for bHYPRE.SStructGrid
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.8.2
+ * babel-version = 0.9.8
  * source-line   = 904
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
@@ -17,14 +17,14 @@
 #ifndef included_bHYPRE_SStructGrid_Impl_h
 #define included_bHYPRE_SStructGrid_Impl_h
 
-#ifndef included_SIDL_header_h
-#include "SIDL_header.h"
-#endif
-#ifndef included_bHYPRE_SStructVariable_h
-#include "bHYPRE_SStructVariable.h"
+#ifndef included_sidl_header_h
+#include "sidl_header.h"
 #endif
 #ifndef included_bHYPRE_SStructGrid_h
 #include "bHYPRE_SStructGrid.h"
+#endif
+#ifndef included_bHYPRE_SStructVariable_h
+#include "bHYPRE_SStructVariable.h"
 #endif
 
 /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGrid._includes) */
@@ -81,8 +81,8 @@ extern int32_t
 impl_bHYPRE_SStructGrid_SetExtents(
   bHYPRE_SStructGrid,
   int32_t,
-  struct SIDL_int__array*,
-  struct SIDL_int__array*);
+  struct sidl_int__array*,
+  struct sidl_int__array*);
 
 extern int32_t
 impl_bHYPRE_SStructGrid_SetVariable(
@@ -95,7 +95,7 @@ extern int32_t
 impl_bHYPRE_SStructGrid_AddVariable(
   bHYPRE_SStructGrid,
   int32_t,
-  struct SIDL_int__array*,
+  struct sidl_int__array*,
   int32_t,
   enum bHYPRE_SStructVariable__enum);
 
@@ -103,12 +103,12 @@ extern int32_t
 impl_bHYPRE_SStructGrid_SetNeighborBox(
   bHYPRE_SStructGrid,
   int32_t,
-  struct SIDL_int__array*,
-  struct SIDL_int__array*,
+  struct sidl_int__array*,
+  struct sidl_int__array*,
   int32_t,
-  struct SIDL_int__array*,
-  struct SIDL_int__array*,
-  struct SIDL_int__array*);
+  struct sidl_int__array*,
+  struct sidl_int__array*,
+  struct sidl_int__array*);
 
 extern int32_t
 impl_bHYPRE_SStructGrid_AddUnstructuredPart(
@@ -120,12 +120,12 @@ extern int32_t
 impl_bHYPRE_SStructGrid_SetPeriodic(
   bHYPRE_SStructGrid,
   int32_t,
-  struct SIDL_int__array*);
+  struct sidl_int__array*);
 
 extern int32_t
 impl_bHYPRE_SStructGrid_SetNumGhost(
   bHYPRE_SStructGrid,
-  struct SIDL_int__array*);
+  struct sidl_int__array*);
 
 #ifdef __cplusplus
 }
