@@ -316,12 +316,15 @@ int  impl_Hypre_StructVector_GetGlobalSize(Hypre_StructVector this, int* size) {
 int  impl_Hypre_StructVector_GetMap(Hypre_StructVector this, Hypre_Map* map) {
    int ierr = 0;
    array1int num_ghost;
+   int int1, int2;
    Hypre_StructuredGrid grid;
    Hypre_StructGrid mygrid;
    Hypre_MapStructuredVector mapsv;
    Hypre_MapStructuredVector * mapsvp = &mapsv;
    Hypre_MapStructVectorBuilder bldr = Hypre_MapStructVectorBuilder_New();
 
+   num_ghost.lower = &int1;
+   num_ghost.upper = &int2;
    num_ghost.lower[0] = 0;
    num_ghost.upper[0] = num_ghost.lower[0]; /* to signal no space in num_ghost */
    ierr += Hypre_StructVector_GetNumGhost( this, &num_ghost );
