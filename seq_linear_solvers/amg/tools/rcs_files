@@ -17,6 +17,7 @@ vector.h
 matrix.h
 convert_icf3d.c
 convert_ale3d.c
+kill_ones.c
 matrix.c
 read.c
 write.c
