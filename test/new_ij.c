@@ -114,7 +114,6 @@ main( int   argc,
    int      relax_up = -1;   
    int      relax_down = -1;   
    int      relax_order = 1;   
-   int      level;
    int      level_w = -1;
    int      level_ow = -1;
 /* int	    smooth_lev; */
