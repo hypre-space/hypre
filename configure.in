@@ -1361,9 +1361,28 @@ then
  if test -z "$CC" ; then
     AC_MSG_WARN([C compiler not found-- try setting --with-CC])
  fi
+ # environment variables to export:
+ # F77      Fortran 77 compiler
+ # CC       C compiler
+ # CXX      C++ compiler
+ # LD       linker (may not exist)
+ # FFLAGS=F77FLAGS  Fortran compiler options
+ # CFLAGS   C compiler options
+ # CFLAGS   C++ compiler options
+ # LDFLAGS  linker options (-L stuff)
+ # The Babel runtime configure file  also uses, among others, these environment
+ # variables which, I think, don't correspond to anything in the hypre configure
+ # file:  Fortran 90: F90, F90FLAGS; C preprocessor: CPP, CPPFLAGS
  export F77
  export CC
- # Other language environment variables should also be set here.
+ export CXX
+ export CFLAGS
+ export CXXFLAGS
+ export LDFLAGS
+ FFLAGS=$F77FLAGS; export FFLAGS
+ if test -n "$LD"; then
+    export LD
+ fi
 
 dnl We want to configure babel-runtime iff we get here.  It doesn't work to simply
 dnl put AC_CONFIG_SUBDIRS(babel-runtime) inside this if block, because the macro
