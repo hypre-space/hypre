@@ -439,7 +439,7 @@ main( int   argc,
    /* defaults for BoomerAMG */
    if (solver_id == 0 || solver_id == 1 || solver_id == 3 || solver_id == 5
 	|| solver_id == 9 || solver_id == 13 || solver_id == 14
- 	|| solver_id == 20)
+ 	|| solver_id == 15 || solver_id == 20)
    {
    strong_threshold = 0.25;
    trunc_factor = 0.;
@@ -545,7 +545,7 @@ main( int   argc,
          arg_index++;
         if (solver_id == 0 || solver_id == 1 || solver_id == 3 
 		|| solver_id == 5 || solver_id == 13 || solver_id == 14
-		|| solver_id == 9 || solver_id == 20)
+		|| solver_id == 15 || solver_id == 9 || solver_id == 20)
         {
          relax_weight[0] = atof(argv[arg_index++]);
          for (i=1; i < max_levels; i++)
@@ -700,7 +700,8 @@ main( int   argc,
       printf("       8=ParaSails-PCG     9=AMG-BiCGSTAB   \n");
       printf("       10=DS-BiCGSTAB     11=PILUT-BiCGSTAB \n");
       printf("       12=Schwarz-PCG     13=GSMG           \n");     
-      printf("       14=GSMG-PCG        18=ParaSails-GMRES\n");     
+      printf("       14=GSMG-PCG        15=GSMG-GMRES\n");     
+      printf("       18=ParaSails-GMRES\n");     
       printf("       20=Hybrid PCG/ DiagScale, AMG \n");
       printf("       43=Euclid-PCG      44=Euclid-GMRES   \n");
       printf("       45=Euclid-BICGSTAB\n");
@@ -1915,8 +1916,8 @@ main( int   argc,
     * Solve the system using GMRES 
     *-----------------------------------------------------------*/
 
-   if (solver_id == 3 || solver_id == 4 || solver_id == 7 
-                      || solver_id == 18 || solver_id == 44)
+   if (solver_id == 3 || solver_id == 4 || solver_id == 7 ||
+       solver_id == 15 || solver_id == 18 || solver_id == 44)
    {
       time_index = hypre_InitializeTiming("GMRES Setup");
       hypre_BeginTiming(time_index);
@@ -1997,6 +1998,76 @@ main( int   argc,
             HYPRE_ParCSRPilutSetFactorRowSize( pcg_precond,
                nonzeros_to_keep );
       }
+      else if (solver_id == 15)
+      {
+         /* use GSMG as preconditioner */
+
+      /* reset some smoother parameters */
+ 
+      /* fine grid */
+      num_grid_sweeps[0] = num_sweep;
+      grid_relax_type[0] = relax_default;
+      hypre_TFree (grid_relax_points[0]);
+      grid_relax_points[0] = hypre_CTAlloc(int, num_sweep);
+      for (i=0; i<num_sweep; i++)
+         grid_relax_points[0][i] = 0;
+ 
+      /* down cycle */
+      num_grid_sweeps[1] = num_sweep;
+      grid_relax_type[1] = relax_default;
+      hypre_TFree (grid_relax_points[1]);
+      grid_relax_points[1] = hypre_CTAlloc(int, num_sweep);
+      for (i=0; i<num_sweep; i++)
+         grid_relax_points[1][i] = 0;
+ 
+      /* up cycle */
+      num_grid_sweeps[2] = num_sweep;
+      grid_relax_type[2] = relax_default;
+      hypre_TFree (grid_relax_points[2]);
+      grid_relax_points[2] = hypre_CTAlloc(int, num_sweep);
+      for (i=0; i<num_sweep; i++)
+         grid_relax_points[2][i] = 0;
+ 
+      /* coarsest grid */
+      num_grid_sweeps[3] = 1;
+      grid_relax_type[3] = 9;
+      hypre_TFree (grid_relax_points[3]);
+      grid_relax_points[3] = hypre_CTAlloc(int, 1);
+      grid_relax_points[3][0] = 0;
+ 
+         if (myid == 0) printf("Solver: GSMG-GMRES\n");
+         HYPRE_BoomerAMGCreate(&pcg_precond); 
+         HYPRE_BoomerAMGSetGSMG(pcg_precond, 4); 
+         HYPRE_BoomerAMGSetGSMGNumSamples(pcg_precond, gsmg_samples);
+         HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);
+         HYPRE_BoomerAMGSetCoarsenType(pcg_precond, (hybrid*coarsen_type));
+         HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
+         HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
+         HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
+         HYPRE_BoomerAMGSetPrintLevel(pcg_precond, poutdat);
+         HYPRE_BoomerAMGSetPrintFileName(pcg_precond, "driver.out.log");
+         HYPRE_BoomerAMGSetMaxIter(pcg_precond, 1);
+         HYPRE_BoomerAMGSetCycleType(pcg_precond, cycle_type);
+         HYPRE_BoomerAMGSetNumGridSweeps(pcg_precond, num_grid_sweeps);
+         HYPRE_BoomerAMGSetGridRelaxType(pcg_precond, grid_relax_type);
+         HYPRE_BoomerAMGSetRelaxWeight(pcg_precond, relax_weight);
+         HYPRE_BoomerAMGSetSmoothOption(pcg_precond, smooth_option);
+         HYPRE_BoomerAMGSetSmoothNumSweep(pcg_precond, smooth_num_sweep);
+         HYPRE_BoomerAMGSetVariant(pcg_precond, variant);
+         HYPRE_BoomerAMGSetOverlap(pcg_precond, overlap);
+         HYPRE_BoomerAMGSetDomainType(pcg_precond, domain_type);
+         HYPRE_BoomerAMGSetSchwarzRlxWeight(pcg_precond, schwarz_rlx_weight);
+         HYPRE_BoomerAMGSetGridRelaxPoints(pcg_precond, grid_relax_points);
+         HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
+         HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
+         HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
+         if (num_functions > 1)
+            HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
+         HYPRE_GMRESSetPrecond(pcg_solver,
+                             (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,
+                             (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup,
+                                   pcg_precond);
+      }
       else if (solver_id == 18)
       {
          /* use ParaSails preconditioner */
@@ -2074,7 +2145,7 @@ main( int   argc,
 
       HYPRE_ParCSRGMRESDestroy(pcg_solver);
  
-      if (solver_id == 3)
+      if (solver_id == 3 || solver_id == 15)
       {
          HYPRE_BoomerAMGDestroy(pcg_precond);
       }
