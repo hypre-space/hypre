@@ -306,8 +306,9 @@ hypre_F90_IFACE(hypre_boomeramginitgridrelaxatn, HYPRE_BOOMERAMGINITGRIDRELAXATN
  * HYPRE_BoomerAMGFinalizeGridRelaxation
  *--------------------------------------------------------------------------*/
 
-hypre_F90_IFACE(hypre_boomeramgfingridrelaxatn, HYPRE_BOOMERAMGFINGRIDRELAXATN)
-                                               ( long int *num_grid_sweeps,
+void
+hypre_F90_IFACE(hypre_boomeramgfingridrelaxatn,
+                HYPRE_BOOMERAMGFINGRIDRELAXATN)( long int *num_grid_sweeps,
                                                  long int *grid_relax_type,
                                                  long int *grid_relax_points,
                                                  long int *relax_weights,
