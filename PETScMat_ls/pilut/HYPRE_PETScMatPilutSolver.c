@@ -206,6 +206,22 @@ int HYPRE_PETScMatPilutSolverSetup( HYPRE_PETScMatPilutSolver in_ptr,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_PETScMatPilutSolverApply
+ *   Exists solely because PETSc's PCApply function takes b and x in opposite
+ *   order than HYPRE_PETScMatPilutSolverSolve. Just a wrapper to the latter.
+ *--------------------------------------------------------------------------*/
+
+int HYPRE_PETScMatPilutSolverApply( HYPRE_PETScMatPilutSolver in_ptr,
+                                           Vec b, Vec x )
+{
+   int ierr=0;
+   ierr = HYPRE_PETScMatPilutSolverSolve(
+       in_ptr, x, b );
+
+   return(ierr);
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_PETScMatPilutSolverSolve
  *--------------------------------------------------------------------------*/
 

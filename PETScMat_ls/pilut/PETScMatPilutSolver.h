@@ -27,7 +27,7 @@
 #include "mat.h"
 #include "vec.h"
 
-#include "HYPRE.h"
+#include "../../includes/HYPRE.h"
 
 /*--------------------------------------------------------------------------
  * hypre_PETScMatPilutSolver
