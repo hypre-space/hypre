@@ -108,23 +108,8 @@
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
 
-/* Configured for Compacq */
-#undef HYPRE_ALPHA
-
-/* Configured for SGI */
-#undef HYPRE_IRIX64
-
-/* Configured for Linux */
-#undef HYPRE_LINUX
-
-/* Configured for IBM */
-#undef HYPRE_RS6000
-
 /* Disable MPI, enable serial codes */
 #undef HYPRE_SEQUENTIAL
-
-/* Configured for a Sun */
-#undef HYPRE_SOLARIS
 
 /* HYPRE timing routines are being used */
 #undef HYPRE_TIMING

@@ -89,8 +89,23 @@ $(ij_OBJECTS): $(ij_dependencies)
 
 # ij_mv, build
 ij_mv_SOURCES = ij_mv.c
-ij_mv_LDADD = $(ij_libraries)
-$(ij_mv_OBJECTS): $(ij_dependencies)
+ij_mv_libraries = \
+ -L$(libdir)\
+ -lHYPRE_parcsr_ls\
+ -lHYPRE_IJ_mv\
+ -lHYPRE_parcsr_mv\
+ -lHYPRE_seq_mv\
+ -lHYPRE_utilities
+ij_mv_LDADD = $(ij_mv_libraries)
+ij_mv_dependencies = \
+ $(includedir)/utilities.h\
+ $(includedir)/HYPRE.h\
+ $(includedir)/HYPRE_IJ_mv.h\
+ $(includedir)/HYPRE_parcsr_mv.h\
+ $(includedir)/HYPRE_parcsr_ls.h\
+ $(includedir)/parcsr_mv.h\
+ $(includedir)/krylov.h
+$(ij_mv_OBJECTS): $(ij_mv_dependencies)
 
 # new_ij, build
 new_ij_SOURCES = new_ij.c
@@ -180,10 +195,10 @@ $(f77_ij_OBJECTS): $(ij_dependencies)
 # f77_ij_mv
 f77_ij_mv_SOURCES = f77_ij_mv.f
 f77_ij_mv_LDADD = \
- $(ij_libraries)\
+ $(ij_mv_libraries)\
  @FLIBS@
 #f77_ij_mv_LDFLAGS = -static
-$(f77_ij_mv_OBJECTS): $(ij_dependencies)
+$(f77_ij_mv_OBJECTS): $(ij_mv_dependencies)
 
 # f77_struct
 f77_struct_SOURCES = f77_struct.f
@@ -255,8 +270,8 @@ $(ij_C___OBJECTS): $(ij_dependencies)
 
 # ij_mv.C++
 nodist_ij_mv_C___SOURCES = ij_mv.C++.cxx
-ij_mv_C___LDADD = $(ij_libraries)
-$(ij_mv_C___OBJECTS): $(ij_dependencies)
+ij_mv_C___LDADD = $(ij_mv_libraries)
+$(ij_mv_C___OBJECTS): $(ij_mv_dependencies)
 
 # new_ij.C++
 nodist_new_ij_C___SOURCES = new_ij.C++.cxx

@@ -90,14 +90,15 @@ AC_HELP_STRING([--with-babel],[use babel]),
     AC_CONFIG_SUBDIRS(babel-runtime)
   fi], [casc_using_babel=no]
 )
-dnl *BABEL-related header files, libraries and directories for those
-dnl * libraries
+dnl BABEL-related header files, libraries and directories for those
+dnl libraries
 AC_SUBST(BABEL_DIR)
 AC_SUBST(BABEL_HYPRE_INCLUDES)
 AC_SUBST(BABELLIBFLAGS)
 AC_SUBST(HYPRE_BABELLIBDIR)
 AC_SUBST(BABELDIR)
 
+dnl option to ignore the lib directory (speed-up builds/testing)
 AC_ARG_WITH(libdir,
 AC_HELP_STRING([--with-libdir],[build libHYPRE and libHYPRE_LSI libraries]),
 [ if test "$withval" = "no"; then
@@ -151,7 +152,7 @@ AC_HELP_STRING([--with-FEI_INC_DIR],
 )
 AM_CONDITIONAL([USE_FEI_INC_DIR_DEFAULT], [test "$FEI_INC_DIR_DEFINED" = "no"])
 
-# select compilers (unless strict_checking)
+dnl select compilers (unless strict_checking)
 if test "$casc_user_chose_compilers" != "yes" ; then
   if test "$casc_using_openmp" = "yes" ; then
     AC_CHECK_PROGS(CC, mpguidec icc pgcc xlc cc)
@@ -167,13 +168,13 @@ if test "$casc_user_chose_compilers" != "yes" ; then
     AC_CHECK_PROGS(F77, mpxlf mpf77 mpikf77 mpif77 ifc pgf77 xlf f77 kf77 fort77 f90 g77)
   fi
 fi
-# Checks for programs.
+dnl Checks for programs.
 AC_PROG_INSTALL
 AC_PROG_AWK
 AC_PROG_CPP
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
-# Checks for compilers.
+dnl Checks for compilers.
 AC_PROG_CC
 AC_PROG_CXX
 AC_PROG_F77
@@ -285,34 +286,8 @@ if test "$casc_using_mpi" = "no" ; then
 else
   ACX_CHECK_MPI(LIBS="$LIBS $MPILIBS")
 fi
-case "${host}" in
-  sparc-sun-solaris2*)
-    AC_DEFINE(HYPRE_SOLARIS, 1, [Configured for a Sun])
-    CSUPERLUFLAGS=-DAdd_
-  ;;
-  alpha*-*-linux* | *-*-linux* )
-    AC_DEFINE(HYPRE_LINUX, 1, [Configured for Linux])
-    CSUPERLUFLAGS=-DAdd_
-  ;;
-  alpha*-*-osf*)
-    AC_DEFINE(HYPRE_ALPHA, 1, [Configured for Compacq])
-    CSUPERLUFLAGS=-DAdd_
-  ;;
-  powerpc*-*-aix*)
-    AC_DEFINE(HYPRE_RS6000, 1, [Configured for IBM])
-    CSUPERLUFLAGS=-DNoChange
-  ;;
-  *-hp-hpux*)
-    CSUPERLUFLAGS=-DNoChange
-  ;;
-  mips-sgi-irix5*)
-    AC_DEFINE(HYPRE_IRIX64, 1, [Configured for SGI])
-    CSUPERLUFLAGS=-DAdd_
-  ;;
-esac
-AC_SUBST(CSUPERLUFLAGS)
 
-dnl * set generic default for blas usage
+dnl set generic default for blas/lapack usage
 ACX_BLAS([casc_user_chose_blas=yes;BLASLIBFLAGS=$BLAS_LIBS], 
   [casc_user_chose_blas=no;BLASLIBFLAGS="-lHYPRE_blas"]) 
 AM_CONDITIONAL([BLASNEEDED],[test "$casc_user_chose_blas" = no])
@@ -324,10 +299,10 @@ AC_SUBST(LAPACKLIBFLAGS)
 AC_CHECK_LIBM
 AC_SUBST(LIBM)
 
+dnl deal with libtool quirks
 CCLD="--tag=CC $CC"
 CXXLD="--tag=CXX $CXX"
 if test "$casc_using_debug" = "yes" ; then
-# deal with libtool quirks
   if test "$PREPEND" = "insure" ; then
     CCLD="--tag=CC $PREPEND $XCCFLAGS"
     CXXLD="--tag=CXX $PREPEND $XCXXFLAGS"
@@ -344,20 +319,20 @@ fi
 AC_SUBST(CCLD)
 AC_SUBST(CXXLD)
 
-dnl *MLI-related header files, libraries and directories for those
-dnl * libraries
+dnl MLI-related header files, libraries and directories for those
+dnl libraries
 AC_SUBST(MLI_DIR)
 AC_SUBST(MLILIBS)
 AC_SUBST(MLILIBDIRS)
 AC_SUBST(MLIINCLUDE)
 
-dnl *FEI-helper variables for installing libraries, and includes, and
-dnl * build options
+dnl FEI-helper variables for installing libraries, and includes, and
+dnl build options
 AC_SUBST(FEI_BASE_DIR)
 AC_SUBST(FEI_LIB_DIR)
 AC_SUBST(FEI_INC_DIR)
 
-# docs doesn't exist in this location in distribution subtree
+dnl skip docs, doesn't exist in this location in distribution subtree
 if test -d docs; then
   AC_CONFIG_FILES([docs/Makefile])
 # subsitute output variables in these files

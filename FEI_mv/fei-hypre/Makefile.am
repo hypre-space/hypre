@@ -50,7 +50,6 @@ noinst_HEADERS = \
 dependent_includes = $(include_HEADERS) $(noinst_HEADERS)
 
 AM_CPPFLAGS = -DHAVE_SUPERLU -DBOOL_NOT_SUPPORTED\
- $(CSUPERLUFLAGS)\
  -I$(top_srcdir)\
  -I$(top_builddir)/utilities\
  -I$(top_srcdir)/utilities\

@@ -445,7 +445,7 @@ then
             CFLAGS="-Aa -D_HPUX_SOURCE -O"
             ;;
           mips-sgi-irix6.[[4-9]]*)
-            CFLAGS="-O -64 -OPT:Olimit=0"
+            CFLAGS="-Ofast -64 -OPT:Olimit=0"
             if test "$casc_using_openmp" = "yes" ; then
               CFLAGS="$CFLAGS -mp"
             fi
@@ -511,7 +511,7 @@ then
             CXXFLAGS="-D_HPUX_SOURCE -O"
             ;;
           mips-sgi-irix6.[[4-9]]*)
-            CXXFLAGS="-O -64 -OPT:Olimit=0"
+            CXXFLAGS="-Ofast -64 -OPT:Olimit=0"
             if test "$casc_using_openmp" = "yes" ; then
               CXXFLAGS="$CXXFLAGS -mp"
             fi
@@ -573,7 +573,7 @@ then
             fi
             ;;
           mips-sgi-irix6.[[4-9]]*)
-            FFLAGS="-O -64"
+            FFLAGS="-Ofast -64  -OPT:Olimit=0"
             if test "$casc_using_openmp" = "yes" ; then
               FFLAGS="$FFLAGS -mp"
             fi
@@ -617,7 +617,8 @@ then
   if test "x${GCC}" = "xyes"
   then
     dnl **** default settings for gcc
-    CFLAGS="$CFLAGS -g"
+    CFLAGS="-g"
+    CFLAGS="$CFLAGS -Wall"
 ##  CFLAGS="$CFLAGS -fno-common -Wall -pedantic -Wpointer-arith -Wnested-externs"
 ##  dnl **** check for strength-reduce bug
 ##  ACX_GCC_STRENGTH_REDUCE(CFLAGS="$CFLAGS -fno-strength-reduce")
@@ -706,7 +707,7 @@ then
   if test "x${GXX}" = "xyes"
   then
     dnl **** default settings for gcc
-    CXXFLAGS="-g"
+    CXXFLAGS="-g -Wall"
   else
     case "${CXX}" in
       KCC|mpiKCC)
@@ -771,7 +772,7 @@ if test "x${casc_user_chose_fflags}" = "xno"
 then
   if test "x${G77}" = "xyes"
   then
-    FFLAGS="-g"
+    FFLAGS="-g -Wall"
   else
     case "${F77}" in
       kf77|mpikf77)
@@ -801,7 +802,7 @@ then
             fi
             ;;
           mips-sgi-irix6.[[4-9]]*)
-            FFLAGS="-g -64"
+            FFLAGS="-g -64 -OPT:Olimit=0"
             if test "$casc_using_openmp" = "yes" ; then
               FFLAGS="$FFLAGS -mp"
             fi

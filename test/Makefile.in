@@ -68,7 +68,7 @@ f77_ij_b_OBJECTS = $(am_f77_ij_b_OBJECTS)
 f77_ij_b_DEPENDENCIES = $(am__DEPENDENCIES_2)
 am_f77_ij_mv_OBJECTS = f77_ij_mv.$(OBJEXT)
 f77_ij_mv_OBJECTS = $(am_f77_ij_mv_OBJECTS)
-f77_ij_mv_DEPENDENCIES = $(am__DEPENDENCIES_2)
+f77_ij_mv_DEPENDENCIES = $(am__DEPENDENCIES_1)
 am_f77_struct_OBJECTS = f77_struct.$(OBJEXT)
 f77_struct_OBJECTS = $(am_f77_struct_OBJECTS)
 am__DEPENDENCIES_3 = $(am__DEPENDENCIES_1)
@@ -88,10 +88,10 @@ ij_b_OBJECTS = $(am_ij_b_OBJECTS)
 ij_b_DEPENDENCIES = $(am__DEPENDENCIES_2)
 am_ij_mv_OBJECTS = ij_mv.$(OBJEXT)
 ij_mv_OBJECTS = $(am_ij_mv_OBJECTS)
-ij_mv_DEPENDENCIES = $(am__DEPENDENCIES_2)
+ij_mv_DEPENDENCIES = $(am__DEPENDENCIES_1)
 nodist_ij_mv_C___OBJECTS = ij_mv.C++.$(OBJEXT)
 ij_mv_C___OBJECTS = $(nodist_ij_mv_C___OBJECTS)
-ij_mv_C___DEPENDENCIES = $(am__DEPENDENCIES_2)
+ij_mv_C___DEPENDENCIES = $(am__DEPENDENCIES_1)
 am_new_ij_OBJECTS = new_ij.$(OBJEXT)
 new_ij_OBJECTS = $(am_new_ij_OBJECTS)
 new_ij_DEPENDENCIES = $(am__DEPENDENCIES_2)
@@ -174,7 +174,6 @@ CCLD = @CCLD@
 CFLAGS = @CFLAGS@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
-CSUPERLUFLAGS = @CSUPERLUFLAGS@
 CXX = @CXX@
 CXXCPP = @CXXCPP@
 CXXFLAGS = @CXXFLAGS@
@@ -357,7 +356,24 @@ ij_dependencies = \
 
 # ij_mv, build
 ij_mv_SOURCES = ij_mv.c
-ij_mv_LDADD = $(ij_libraries)
+ij_mv_libraries = \
+ -L$(libdir)\
+ -lHYPRE_parcsr_ls\
+ -lHYPRE_IJ_mv\
+ -lHYPRE_parcsr_mv\
+ -lHYPRE_seq_mv\
+ -lHYPRE_utilities
+
+ij_mv_LDADD = $(ij_mv_libraries)
+ij_mv_dependencies = \
+ $(includedir)/utilities.h\
+ $(includedir)/HYPRE.h\
+ $(includedir)/HYPRE_IJ_mv.h\
+ $(includedir)/HYPRE_parcsr_mv.h\
+ $(includedir)/HYPRE_parcsr_ls.h\
+ $(includedir)/parcsr_mv.h\
+ $(includedir)/krylov.h
+
 
 # new_ij, build
 new_ij_SOURCES = new_ij.c
@@ -449,7 +465,7 @@ f77_ij_LDADD = \
 # f77_ij_mv
 f77_ij_mv_SOURCES = f77_ij_mv.f
 f77_ij_mv_LDADD = \
- $(ij_libraries)\
+ $(ij_mv_libraries)\
  @FLIBS@
 
 
@@ -519,7 +535,7 @@ ij_C___LDADD = $(ij_libraries)
 
 # ij_mv.C++
 nodist_ij_mv_C___SOURCES = ij_mv.C++.cxx
-ij_mv_C___LDADD = $(ij_libraries)
+ij_mv_C___LDADD = $(ij_mv_libraries)
 
 # new_ij.C++
 nodist_new_ij_C___SOURCES = new_ij.C++.cxx
@@ -921,7 +937,7 @@ uninstall-info: uninstall-info-recursive
 
 # automake will reorder
 $(ij_OBJECTS): $(ij_dependencies)
-$(ij_mv_OBJECTS): $(ij_dependencies)
+$(ij_mv_OBJECTS): $(ij_mv_dependencies)
 $(new_ij_OBJECTS): $(ij_dependencies)
 $(sstruct_OBJECTS): $(sstruct_dependencies)
 $(struct_OBJECTS): $(struct_dependencies)
@@ -929,14 +945,14 @@ $(fei_OBJECTS): $(fei_dependencies)
 #f77_ij_LDFLAGS = -static
 $(f77_ij_OBJECTS): $(ij_dependencies)
 #f77_ij_mv_LDFLAGS = -static
-$(f77_ij_mv_OBJECTS): $(ij_dependencies)
+$(f77_ij_mv_OBJECTS): $(ij_mv_dependencies)
 #f77_struct_LDFLAGS = -static
 $(f77_struct_OBJECTS): $(struct_dependencies)
 $(ij_b_OBJECTS): $(ij_b_dependencies)
 #f77_ij_b_LDFLAGS = -static
 $(f77_ij_b_OBJECTS): $(ij_b_dependencies)
 $(ij_C___OBJECTS): $(ij_dependencies)
-$(ij_mv_C___OBJECTS): $(ij_dependencies)
+$(ij_mv_C___OBJECTS): $(ij_mv_dependencies)
 $(new_ij_C___OBJECTS): $(ij_dependencies)
 $(sstruct_C___OBJECTS): $(sstruct_dependencies)
 $(struct_C___OBJECTS): $(struct_dependencies)
