@@ -165,7 +165,7 @@ int hypre_ParAMGCycleT P((void *amg_vdata , hypre_ParVector **F_array , hypre_Pa
 int hypre_ParAMGRelaxT P((hypre_ParCSRMatrix *A , hypre_ParVector *f , int *cf_marker , int relax_type , int relax_points , double relax_weight , hypre_ParVector *u , hypre_ParVector *Vtemp ));
 
 /* par_coarsen.c */
-int hypre_ParAMGCoarsen P((hypre_ParCSRMatrix *A , double strength_threshold , hypre_ParCSRMatrix **S_ptr , int **CF_marker_ptr , int *coarse_size_ptr ));
+int hypre_ParAMGCoarsen P((hypre_ParCSRMatrix *A , double strength_threshold , int debug_flag , hypre_ParCSRMatrix **S_ptr , int **CF_marker_ptr , int *coarse_size_ptr ));
 int hypre_ParAMGCoarsenRuge P((hypre_ParCSRMatrix *A , double strength_threshold , int measure_type , int coarsen_type , int debug_flag , hypre_ParCSRMatrix **S_ptr , int **CF_marker_ptr , int *coarse_size_ptr ));
 int hypre_ParAMGCoarsenFalgout P((hypre_ParCSRMatrix *A , double strength_threshold , int debug_flag , hypre_ParCSRMatrix **S_ptr , int **CF_marker_ptr , int *coarse_size_ptr ));
 
