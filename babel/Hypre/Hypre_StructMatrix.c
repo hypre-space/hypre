@@ -78,6 +78,14 @@ void  impl_Hypre_StructMatrix_print(Hypre_StructMatrix this) {
 
 
 /* ********************************************************
+ * impl_Hypre_StructMatrix_GetMap
+ **********************************************************/
+int  impl_Hypre_StructMatrix_GetMap(Hypre_StructMatrix this, Hypre_Map* map) {
+   printf("Hypre_StructMatrix_GetMap doesn't work. TO DO: implement this\n");
+   return 1;
+} /* end impl_Hypre_StructMatrix_GetMap */
+
+/* ********************************************************
  * impl_Hypre_StructMatrixApply
  **********************************************************/
 int impl_Hypre_StructMatrix_Apply
@@ -130,7 +138,8 @@ int  impl_Hypre_StructMatrix_GetDims(Hypre_StructMatrix this, int* m, int* n) {
 
 /* ********************************************************
  * impl_Hypre_StructMatrixGetLocalRange
-/* >>>>>>> TO DO: implement this
+/* This should _not_ be implemented unless we decide to provide (really,
+ * generate) all kinds of row and column information for a StructMatrix
  **********************************************************/
 int  impl_Hypre_StructMatrix_GetLocalRange
 ( Hypre_StructMatrix this, int* row_start, int* row_end,
@@ -146,6 +155,10 @@ int  impl_Hypre_StructMatrix_GetLocalRange
 int  impl_Hypre_StructMatrix_GetRow
 ( Hypre_StructMatrix this, int row, int* size, array1int* col_ind,
   array1double* values ) {
+   struct Hypre_StructMatrix_private_type *SMp = this->Hypre_StructMatrix_data;
+   HYPRE_StructMatrix *Hmat = SMp->hsmat;
+   hypre_StructMatrix *hmat = (hypre_StructMatrix *) *Hmat;
+
    printf("Hypre_StructMatrix_GetRow has not been implemented!\n");
    return 1;
 } /* end impl_Hypre_StructMatrixGetRow */

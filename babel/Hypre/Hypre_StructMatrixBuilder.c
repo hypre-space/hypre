@@ -116,6 +116,22 @@ int  impl_Hypre_StructMatrixBuilder_GetDims
 } /* end impl_Hypre_StructMatrixBuilderGetDims */
 
 /* ********************************************************
+ * impl_Hypre_StructMatrixBuilder_SetMap
+ **********************************************************/
+int  impl_Hypre_StructMatrixBuilder_SetMap(Hypre_StructMatrixBuilder this, Hypre_Map map) {
+   printf("Hypre_StructMatrixBuilder_SetMap doesn't work. TO DO: implement this\n" );
+   return 1;
+} /* end impl_Hypre_StructMatrixBuilder_SetMap */
+
+/* ********************************************************
+ * impl_Hypre_StructMatrixBuilder_GetMap
+ **********************************************************/
+int  impl_Hypre_StructMatrixBuilder_GetMap(Hypre_StructMatrixBuilder this, Hypre_Map* map) {
+   printf("Hypre_StructMatrixBuilder_GetMap doesn't work. TO DO: implement this\n" );
+   return 1;
+} /* end impl_Hypre_StructMatrixBuilder_GetMap */
+
+/* ********************************************************
  * impl_Hypre_StructMatrixBuilderGetConstructedObject
  **********************************************************/
 int  impl_Hypre_StructMatrixBuilder_GetConstructedObject
