@@ -196,11 +196,10 @@ AC_ARG_WITH(strict-checking, [\
 			  warnings can be suppressed using --diag_suppress
 			  and the error numbers provided by 
 			  --display_error_number],
-  [\
-  CC=kcc
+  [CC=kcc
   CXX=KCC
   CFLAGS="$CFLAGS --c --strict --lint --display_error_number"
-  CFLAGS="$CFLAGS  --diag_suppress 236,1018,1021,1023,1024"
+  CFLAGS="$CFLAGS --diag_suppress 236,826,1018,1021,1022,1023,1024,1030"
   CXXFLAGS="$CXXFLAGS --strict --lint --display_error_number"]
   casc_users_chose_compilers=yes
   casc_using_mpi=no
