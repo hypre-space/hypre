@@ -2795,10 +2795,6 @@ BuildParDifConv( int                  argc,
    ny = 10;
    nz = 10;
 
-   hinx = 1./(nx+1);
-   hiny = 1./(ny+1);
-   hinz = 1./(nz+1);
-
    P  = 1;
    Q  = num_procs;
    R  = 1;
@@ -2883,6 +2879,10 @@ BuildParDifConv( int                  argc,
    p = myid % P;
    q = (( myid - p)/P) % Q;
    r = ( myid - p - P*q)/( P*Q );
+
+   hinx = 1./(nx+1);
+   hiny = 1./(ny+1);
+   hinz = 1./(nz+1);
 
    /*-----------------------------------------------------------
     * Generate the matrix 
