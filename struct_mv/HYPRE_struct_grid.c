@@ -64,6 +64,28 @@ HYPRE_SetStructGridExtents( HYPRE_StructGrid  grid,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_SetStructGridPeriodicity
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_SetStructGridPeriodic( HYPRE_StructGrid  grid,
+                             int              *periodic)
+{
+   hypre_Index  new_periodic;
+
+   int          d;
+
+   hypre_ClearIndex(new_periodic);
+   for (d = 0; d < hypre_StructGridDim((hypre_StructGrid *) grid); d++)
+   {
+      hypre_IndexD(new_periodic, d) = periodic[d];
+   }
+
+   return ( hypre_SetStructGridPeriodic( (hypre_StructGrid *) grid,
+                                         new_periodic ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_AssembleStructGrid
  *--------------------------------------------------------------------------*/
 
