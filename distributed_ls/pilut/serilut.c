@@ -124,7 +124,7 @@ int SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
       w[0] = 0.0;
     }
 
-    ierr = HYPRE_RestoreDistributedMatrixRow( matrix, firstrow+ii, &row_size,
+    ierr = HYPRE_RestoreDistributedMatrixRow( matrix, firstrow+i, &row_size,
                &col_ind, &values);
 
     k = -1;
@@ -215,7 +215,7 @@ int SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
       w[0] = 0.0;
     }
 
-    ierr = HYPRE_RestoreDistributedMatrixRow( matrix, firstrow+ii, &row_size,
+    ierr = HYPRE_RestoreDistributedMatrixRow( matrix, firstrow+i, &row_size,
                &col_ind, &values);
 
     k = -1;
@@ -354,7 +354,7 @@ int FindStructuralUnion( HYPRE_DistributedMatrix matrix,
     }
 
     /* Restore row structure */
-    ierr = HYPRE_RestpreDistributedMatrixRow( matrix, firstrow+i, &row_size,
+    ierr = HYPRE_RestoreDistributedMatrixRow( matrix, firstrow+i, &row_size,
                &col_ind, NULL );
     if (ierr) return(ierr);
 
