@@ -342,6 +342,7 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
     *  Allocate C_offd_data and C_offd_j arrays.
     *-----------------------------------------------------------------------*/
  
+   last_col_diag_C = first_col_diag_B + num_cols_diag_B - 1;
    C_diag_data = hypre_CTAlloc(double, C_diag_size);
    C_diag_j    = hypre_CTAlloc(int, C_diag_size);
    if (C_offd_size)
