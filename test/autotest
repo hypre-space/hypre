@@ -1,4 +1,4 @@
-#!/usr/bin/sh
+#!/bin/sh
 #BHEADER***********************************************************************
 # (c) 1998   The Regents of the University of California
 #
@@ -72,7 +72,6 @@ cvs -q checkout -P linear_solvers 1> $0.checkout.log 2> $0.checkout.err
 echo "$HYPRE_CHECKOUT_EMAIL" > $0.checkout.err.email 
 chmod -fR ug+rw linear_solvers
 chgrp -fR hypre linear_solvers
-#export HYPRE_ARCH HYPRE_COMPILE_MACHINE HYPRE_RUN_MACHINE HYPRE_REMOTE_DIR
 
 #==============================================================================
 # Run test suites on remote machines
@@ -94,7 +93,7 @@ do
         HYPRE_COMPILE_MACHINE="perrin"
         HYPRE_RUN_MACHINE="perrin"
         HYPRE_REMOTE_DIR="/home/casc/software/hypre/autotest"
-	HYPRE_MACHINE_COMMANDS="-m -a 2 -dcxfy -t 1 -ns"
+	HYPRE_MACHINE_COMMANDS="-md -a 2 -cxfy -t 1 -ns"
         ./autotest_test $HYPRE_MACHINE_COMMANDS
         shift;;
     -compass)
@@ -118,7 +117,7 @@ do
         HYPRE_COMPILE_MACHINE="perrin"
         HYPRE_RUN_MACHINE="perrin"
         HYPRE_REMOTE_DIR="/home/casc/software/hypre/autotest"
-	HYPRE_MACHINE_COMMANDS="-m -q 2 -a 1 -dcxfy -t 1 -ns"
+	HYPRE_MACHINE_COMMANDS="-md -q 2 -a 1 -cxfy -t 1 -ns"
         ./autotest_test $HYPRE_MACHINE_COMMANDS
         shift;;
     -red)
