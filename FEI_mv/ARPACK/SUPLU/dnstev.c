@@ -5,7 +5,7 @@ void dnstev_(int *n,         int *nev,       char *which,
              double *sigmar, double *sigmai, int *colptr,
              int *rowind,    double *nzvals, double *dr,
              double *di,     double *z,      int *ldz,
-             int *info)
+             int *info,      double *tol)
 /*  Arguement list:
 
     n       (int*)    Dimension of the problem.  (INPUT)
@@ -79,7 +79,7 @@ void dnstev_(int *n,         int *nev,       char *which,
         strncmp(which,"sHift",5) == 0 ) {
         
         dninst_(n,  nev, sigmar, sigmai, colptr, rowind, nzvals,
-                dr, di, z, ldz, info);
+                dr, di, z, ldz, info, tol);
     }
     else if (strncmp(which,"LM",2) == 0 ||
              strncmp(which,"lm",2) == 0 || 

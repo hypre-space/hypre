@@ -29,7 +29,7 @@ extern double dlapy2_(double *, double *);
 void dninst_(int *n,         int *nev,    double *sigmar,
              double *sigmai, int *colptr, int *rowind, 
              double *nzvals, double *dr,  double *di,  
-             double *z,      int *ldz,    int *info)
+             double *z,      int *ldz,    int *info,     double *ptol)
 
 /*  Arguement list:
 
@@ -97,6 +97,9 @@ void dninst_(int *n,         int *nev,    double *sigmar,
 
     neqns = *n;
     *info = 0;
+    tol   = *ptol;
+    if ( tol < 1.0e-10 ) tol = 1.0e-10;
+    if ( tol > 1.0e-1  ) tol = 1.0e-1;
 
     if (*n - *nev < 2) {
        *info = -1000;
