@@ -2023,6 +2023,9 @@ unset ac_cv_lib_$ac_lib_var
    for casc_dir in \
  .\
  utilities\
+ parcsr_matrix_vector\
+ parcsr_linear_solvers\
+ seq_matrix_vector\
  struct_matrix_vector\
  struct_linear_solvers\
  test\
