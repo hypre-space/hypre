@@ -320,6 +320,17 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
       }
 
       //----------------------------------------------------------------
+      // put no boundary condition on the matrix (for diagnostics only)
+      //----------------------------------------------------------------
+
+      else if ( !strcasecmp(param1, "imposeNoBC") )
+      {
+         HYOutputLevel_ |= HYFEI_IMPOSENOBC;
+         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+            printf("       HYPRE_LSC::parameters imposeNoBC on\n");
+      }
+
+      //----------------------------------------------------------------
       // set matrix trunction threshold
       //----------------------------------------------------------------
 
@@ -393,6 +404,12 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
             printf("       HYPRE_LSC::parameters haveFEData = %d\n",
                    haveFEData_);
+      }
+      else if ( !strcasecmp(param1, "haveSFEI") )
+      {
+         haveFEData_ = 2;
+         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+            printf("       HYPRE_LSC::parameters haveSFEI\n");
       }
 
       //----------------------------------------------------------------
@@ -709,7 +726,7 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
          sscanf(params[i],"%s %lg", param, &ddictFillin_);
          if ( ddictFillin_ < 0.0 ) ddictFillin_ = 0.0;
          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
-            printf("       HYPRE_LSC::parameters ddictFillin = %d\n",
+            printf("       HYPRE_LSC::parameters ddictFillin = %e\n",
                    ddictFillin_);
       }
 
@@ -876,7 +893,7 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
          for ( k = 0; k < 3; k++ ) amgRelaxType_[k] = rtype;
          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
             printf("       HYPRE_LSC::parameters amgRelaxType = %s\n",
-                   params);
+                   param2);
       }
 
       //---------------------------------------------------------------
@@ -4742,7 +4759,7 @@ void HYPRE_LinSysCore::FE_initFields(int nFields, int *fieldSizes,
                                      int *fieldIDs)
 {
 #ifdef HAVE_MLI
-   if ( haveFEData_ && feData_ != NULL )
+   if ( haveFEData_ == 1 && feData_ != NULL )
       HYPRE_LSI_MLIFEDataInitFields(feData_,nFields,fieldSizes,fieldIDs);
 #else
    (void) nFields;
@@ -4761,7 +4778,7 @@ void HYPRE_LinSysCore::FE_initElemBlock(int nElems, int nNodesPerElem,
 {
 #ifdef HAVE_MLI
    int status;
-   if ( haveFEData_ && feData_ != NULL )
+   if ( haveFEData_ == 1 && feData_ != NULL )
    {
       status = HYPRE_LSI_MLIFEDataInitElemBlock(feData_, nElems, 
                            nNodesPerElem, numNodeFields, nodeFieldIDs);
@@ -4789,7 +4806,7 @@ void HYPRE_LinSysCore::FE_initElemNodeList(int elemID, int nNodesPerElem,
                                            int *nodeIDs)
 {
 #ifdef HAVE_MLI
-   if ( haveFEData_ && feData_ != NULL )
+   if ( haveFEData_ == 1 && feData_ != NULL )
       HYPRE_LSI_MLIFEDataInitElemNodeList(feData_, elemID, nNodesPerElem,
                                           nodeIDs);
 #else
@@ -4808,7 +4825,7 @@ void HYPRE_LinSysCore::FE_initSharedNodes(int nShared, int *sharedIDs,
                                         int *sharedPLengs, int **sharedProcs)
 {
 #ifdef HAVE_MLI
-   if ( haveFEData_ && feData_ != NULL )
+   if ( haveFEData_ == 1 && feData_ != NULL )
       HYPRE_LSI_MLIFEDataInitSharedNodes(feData_, nShared, sharedIDs,
                                          sharedPLengs, sharedProcs);
 #else
@@ -4827,7 +4844,7 @@ void HYPRE_LinSysCore::FE_initSharedNodes(int nShared, int *sharedIDs,
 void HYPRE_LinSysCore::FE_initComplete()
 {
 #ifdef HAVE_MLI
-   if ( haveFEData_ && feData_ != NULL )
+   if ( haveFEData_ == 1 && feData_ != NULL )
       HYPRE_LSI_MLIFEDataInitComplete(feData_);
 #endif
    return;
@@ -4841,7 +4858,7 @@ void HYPRE_LinSysCore::FE_loadElemMatrix(int elemID, int nNodes,
                          int *elemNodeList, int matDim, double **elemMat)
 {
 #ifdef HAVE_MLI
-   if ( haveFEData_ && feData_ != NULL )
+   if ( haveFEData_ == 1 && feData_ != NULL )
       HYPRE_LSI_MLIFEDataLoadElemMatrix(feData_, elemID, nNodes, elemNodeList,
                                         matDim, elemMat);
 #else

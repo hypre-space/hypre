@@ -290,9 +290,11 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
    rhsIDs_[0]          = 0;
    feData_             = NULL;
    haveFEData_         = 0;
-#ifdef HAVE_MLI
-   feData_             = (void *) HYPRE_LSI_MLIFEDataCreate(comm);
-#endif
+   feData_             = NULL;
+   MLI_NumNodes_       = 0;
+   MLI_FieldSize_      = 0;
+   MLI_NodalCoord_     = NULL;
+   MLI_EqnNumbers_     = NULL;
 }
 
 //***************************************************************************
@@ -479,8 +481,14 @@ HYPRE_LinSysCore::~HYPRE_LinSysCore()
    //-------------------------------------------------------------------
 
 #ifdef HAVE_MLI
-   HYPRE_LSI_MLIFEDataDestroy(feData_);
-   feData_ = NULL;
+   if ( feData_ != NULL ) 
+   {
+      if      (haveFEData_ == 1) HYPRE_LSI_MLIFEDataDestroy(feData_);
+      else if (haveFEData_ == 2) HYPRE_LSI_MLISFEIDestroy(feData_);
+      feData_ = NULL;
+   }
+   if ( MLI_NodalCoord_ != NULL ) delete [] MLI_NodalCoord_;
+   if ( MLI_EqnNumbers_ != NULL ) delete [] MLI_EqnNumbers_;
 #endif
 
    //-------------------------------------------------------------------
@@ -585,7 +593,8 @@ int HYPRE_LinSysCore::createMatricesAndVectors(int numGlobalEqns,
    if ( ( firstLocalEqn <= 0 ) || 
         ( firstLocalEqn+numLocalEqns-1) > numGlobalEqns)
    {
-      printf("%4d : createMatricesVectors: invalid local equation nos.\n");
+      printf("%4d : createMatricesVectors: invalid local equation nos.\n",
+             mypid_);
       exit(1);
    }
 
@@ -660,6 +669,24 @@ int HYPRE_LinSysCore::createMatricesAndVectors(int numGlobalEqns,
    ierr = HYPRE_IJVectorInitialize(HYx_);
    ierr = HYPRE_IJVectorAssemble(HYx_);
    assert(!ierr);
+
+   //-------------------------------------------------------------------
+   // reset fedata
+   //-------------------------------------------------------------------
+
+#ifdef HAVE_MLI
+   if ( feData_ != NULL ) 
+   {
+      if      (haveFEData_ == 1) HYPRE_LSI_MLIFEDataDestroy(feData_);
+      else if (haveFEData_ == 2) HYPRE_LSI_MLISFEIDestroy(feData_);
+      feData_ = NULL;
+      if ( MLI_NodalCoord_ != NULL ) delete [] MLI_NodalCoord_;
+      if ( MLI_EqnNumbers_ != NULL ) delete [] MLI_EqnNumbers_;
+      MLI_NodalCoord_ = NULL;
+      MLI_EqnNumbers_ = NULL;
+      MLI_NumNodes_ = 0;
+   }
+#endif
 
    //-------------------------------------------------------------------
    // for amge
@@ -749,18 +776,25 @@ int HYPRE_LinSysCore::setGlobalOffsets(int leng, int* nodeOffsets,
 // Grid related function : element node connectivities
 //---------------------------------------------------------------------------
 
-int HYPRE_LinSysCore::setConnectivities(GlobalID elemBlock, int numElements,
-                       int numNodesPerElem, const GlobalID* elemIDs,
+int HYPRE_LinSysCore::setConnectivities(GlobalID elemBlk, int nElems,
+                       int nNodesPerElem, const GlobalID* elemIDs,
                        const int* const* connNodes)
 {
-   (void) elemBlock;
-   (void) numElements;
-   (void) numNodesPerElem;
+#ifdef HAVE_MLI
+   if ( HYPreconID_ == HYMLI && haveFEData_ == 2 )
+   {
+      if (feData_ == NULL) feData_ = (void *) HYPRE_LSI_MLISFEICreate(comm_);
+      HYPRE_LSI_MLISFEIAddNumElems(feData_,elemBlk,nElems,nNodesPerElem);
+   }
+#else
+   (void) elemBlk;
+   (void) nElems;
+   (void) nNodesPerElem;
    (void) elemIDs;
    (void) connNodes;
    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) > 3 )
       printf("%4d : HYPRE_LSC::setConnectivities not implemented.\n",mypid_);
-
+#endif
    return (0);
 }
 
@@ -768,20 +802,27 @@ int HYPRE_LinSysCore::setConnectivities(GlobalID elemBlock, int numElements,
 // Grid related function : element stiffness matrix loading
 //---------------------------------------------------------------------------
 
-int HYPRE_LinSysCore::setStiffnessMatrices(GlobalID elemBlock, int numElems,
-                     const GlobalID* elemIDs,const double *const *const *stiff,
-                     int numEqnsPerElem, const int *const * eqnIndices)
+int HYPRE_LinSysCore::setStiffnessMatrices(GlobalID elemBlk, int nElems,
+              const GlobalID* elemIDs,const double *const *const *stiff,
+              int nEqnsPerElem, const int *const * eqnIndices)
 {
-   (void) elemBlock;
-   (void) numElems;
+#ifdef HAVE_MLI
+   if ( HYPreconID_ == HYMLI && feData_ != NULL )
+   {
+      HYPRE_LSI_MLISFEILoadElemMatrices(feData_,elemBlk,nElems,(int*)elemIDs,
+                           (double***)stiff,nEqnsPerElem,(int**)eqnIndices);
+   }
+#else
+   (void) elemBlk;
+   (void) nElems;
    (void) elemIDs;
    (void) stiff;
-   (void) numEqnsPerElem;
+   (void) nEqnsPerElem;
    (void) eqnIndices;
-
    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) > 3 )
       printf("%4d : HYPRE_LSC::setStiffnessMatrices not implemented.\n",
              mypid_);
+#endif
    return (0);
 }
 
@@ -1086,6 +1127,24 @@ int HYPRE_LinSysCore::resetMatrixAndVector(double setValue)
    }
 
    //-------------------------------------------------------------------
+   // reset fedata
+   //-------------------------------------------------------------------
+
+#ifdef HAVE_MLI
+   if ( feData_ != NULL ) 
+   {
+      if      (haveFEData_ == 1) HYPRE_LSI_MLIFEDataDestroy(feData_);
+      else if (haveFEData_ == 2) HYPRE_LSI_MLISFEIDestroy(feData_);
+      feData_ = NULL;
+      if ( MLI_NodalCoord_ != NULL ) delete [] MLI_NodalCoord_;
+      if ( MLI_EqnNumbers_ != NULL ) delete [] MLI_EqnNumbers_;
+      MLI_NodalCoord_ = NULL;
+      MLI_EqnNumbers_ = NULL;
+      MLI_NumNodes_ = 0;
+   }
+#endif
+
+   //-------------------------------------------------------------------
    // diagnostic message
    //-------------------------------------------------------------------
 
@@ -1172,6 +1231,24 @@ int HYPRE_LinSysCore::resetMatrix(double setValue)
       HYPRE_IJMatrixDestroy(HYnormalA_); 
       HYnormalA_ = NULL;
    }
+
+   //-------------------------------------------------------------------
+   // reset fedata
+   //-------------------------------------------------------------------
+
+#ifdef HAVE_MLI
+   if ( feData_ != NULL ) 
+   {
+      if      (haveFEData_ == 1) HYPRE_LSI_MLIFEDataDestroy(feData_);
+      else if (haveFEData_ == 2) HYPRE_LSI_MLISFEIDestroy(feData_);
+      feData_ = NULL;
+      if ( MLI_NodalCoord_ != NULL ) delete [] MLI_NodalCoord_;
+      if ( MLI_EqnNumbers_ != NULL ) delete [] MLI_EqnNumbers_;
+      MLI_NodalCoord_ = NULL;
+      MLI_EqnNumbers_ = NULL;
+      MLI_NumNodes_ = 0;
+   }
+#endif
 
    //-------------------------------------------------------------------
    // diagnostic message
@@ -1269,18 +1346,20 @@ int HYPRE_LinSysCore::sumIntoSystemMatrix(int row, int numValues,
 
    if ( systemAssembled_ == 1 )
    {
-      printf("sumIntoSystemMatrix ERROR : matrix already assembled\n");
+      printf("%4d : sumIntoSystemMatrix ERROR : matrix already assembled\n",
+             mypid_);
       exit(1);
    }
    if ( row < localStartRow_ || row > localEndRow_ )
    {
-      printf("sumIntoSystemMatrix ERROR : invalid row number %d.\n",row);
+      printf("%4d : sumIntoSystemMatrix ERROR : invalid row number %d.\n",
+             mypid_,row);
       exit(1);
    }
    localRow = row - localStartRow_;
    if ( numValues > rowLengths_[localRow] )
    {
-      printf("sumIntoSystemMatrix ERROR : row size too large.\n");
+      printf("%4d : sumIntoSystemMatrix ERROR : row size too large.\n",mypid_);
       exit(1);
    }
 
@@ -1295,7 +1374,7 @@ int HYPRE_LinSysCore::sumIntoSystemMatrix(int row, int numValues,
                                     rowLengths_[localRow]);
       if ( index < 0 )
       {
-         printf("%4d : sumIntoSystemMatrix ERROR - loading column");
+         printf("%4d : sumIntoSystemMatrix ERROR - loading column",mypid_);
          printf("      that has not been declared before - %d.\n",colIndex);
          for ( j = 0; j < rowLengths_[localRow]; j++ ) 
             printf("       available column index = %d\n",
@@ -1419,7 +1498,7 @@ int HYPRE_LinSysCore::sumIntoSystemMatrix(int numPtRows, const int* ptRows,
          while ( index < rowLeng && indptr[index] < colIndex ) index++; 
          if ( index >= rowLeng )
          {
-            printf("%4d : sumIntoSystemMatrix ERROR - loading column");
+            printf("%4d : sumIntoSystemMatrix ERROR - loading column",mypid_);
             printf("      that has not been declared before - %d.\n",
                    colIndex);
             for ( k = 0; k < rowLeng; k++ ) 
@@ -1979,7 +2058,7 @@ int HYPRE_LinSysCore::matrixLoadComplete()
 int HYPRE_LinSysCore::putNodalFieldData(int fieldID, int fieldSize,
                        int* nodeNumbers, int numNodes, const double* data)
 {
-   int    i, **nodeFieldIDs, nodeFieldID, numFields, *procNRows;
+   int    i, **nodeFieldIDs, nodeFieldID, numFields, *procNRows, nRows;
    int    blockID, *blockIDs, *eqnNumbers, *iTempArray, checkFieldSize;
    int    *aleNodeNumbers, j, index, newNumNodes;
    double *newData;
@@ -2039,9 +2118,23 @@ This should ultimately be taken out even for newer ale3d implementation
                }
             }
          }
-         HYPRE_LSI_MLILoadNodalCoordinates(HYPrecon_, newNumNodes, 
-                  checkFieldSize, eqnNumbers, fieldSize, (double *) newData,
-                  localEndRow_-localStartRow_+1);
+         nRows = localEndRow_ - localStartRow_ + 1;
+         if ( MLI_NodalCoord_ == NULL )
+         {
+            MLI_EqnNumbers_ = new int[nRows/fieldSize];
+            for (i=0; i<nRows/fieldSize; i++) 
+               MLI_EqnNumbers_[i] = localStartRow_ - 1 + i * fieldSize;
+            MLI_NodalCoord_ = new double[localEndRow_-localStartRow_+1];
+            for (i=0; i<nRows; i++) MLI_NodalCoord_[i] = -9999999.0;
+            MLI_FieldSize_  = fieldSize;
+            MLI_NumNodes_   = nRows / fieldSize;
+         }
+         for ( i = 0; i < numNodes; i++ )
+         {
+            index = eqnNumbers[i] - localStartRow_ + 1;
+            for ( j = 0; j < fieldSize; j++ ) 
+               MLI_NodalCoord_[index+j] = newData[i*fieldSize+j];
+         }
          delete [] eqnNumbers;
          delete [] newData;
       }    
@@ -2219,6 +2312,7 @@ int HYPRE_LinSysCore::enforceEssentialBC(int* globalEqn, double* alpha,
    // (this function should be called before matrixLoadComplete)
    //-------------------------------------------------------------------
 
+   if ( (HYOutputLevel_ & HYFEI_IMPOSENOBC) != 0 ) return 0;
    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 4 )
       printf("%4d : HYPRE_LSC::entering enforceEssentialBC.\n",mypid_);
    if ( systemAssembled_ )
@@ -2334,6 +2428,7 @@ int HYPRE_LinSysCore::enforceRemoteEssBCs(int numEqns, int* globalEqns,
    // (this function should be called before matrixLoadComplete)
    //-------------------------------------------------------------------
 
+   if ( (HYOutputLevel_ & HYFEI_IMPOSENOBC) != 0 ) return 0;
    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 4 )
       printf("%4d : HYPRE_LSC::entering enforceRemoteEssBC.\n",mypid_);
    if ( systemAssembled_ )
@@ -2405,6 +2500,7 @@ int HYPRE_LinSysCore::enforceOtherBC(int* globalEqn, double* alpha,
    // (this function should be called before matrixLoadComplete)
    //-------------------------------------------------------------------
 
+   if ( (HYOutputLevel_ & HYFEI_IMPOSENOBC) != 0 ) return 0;
    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 4 )
       printf("%4d : HYPRE_LSC::entering enforceOtherBC.\n",mypid_);
    if ( systemAssembled_ )
@@ -3474,7 +3570,8 @@ int HYPRE_LinSysCore::formResidual(double* values, int leng)
    }
    if ( ! systemAssembled_ )
    {
-      printf("%4d : HYPRE_LSC formResidual ERROR : system not assembled.\n");
+      printf("%4d : HYPRE_LSC formResidual ERROR : system not assembled.\n",
+             mypid_);
       exit(1);
    }
 
@@ -3772,8 +3869,18 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
          fclose(fp);
          MPI_Barrier(comm_);
       }
+      if ( MLI_NumNodes_ > 0 )
+      {
+         fp = fopen("rbm","w");
+         for (i = 0; i < MLI_NumNodes_; i++)
+            for (j = 0; j < MLI_FieldSize_; j++)
+               fprintf(fp,"%8d %25.16e\n", MLI_EqnNumbers_[i]+j+1, 
+                       MLI_NodalCoord_[i*3+j]);
+         fclose(fp);
+      }
       if ( HYOutputLevel_ & HYFEI_STOPAFTERPRINT ) exit(1);
    }
+
 #ifdef HAVE_AMGE
    if ( HYOutputLevel_ & HYFEI_PRINTFEINFO )
    {
@@ -3801,7 +3908,42 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
    
 #ifdef HAVE_MLI
    if ( HYPreconID_ == HYMLI && feData_ != NULL )
-      HYPRE_LSI_MLISetFEData( HYPrecon_, feData_ );
+   {
+      if (haveFEData_ == 1) HYPRE_LSI_MLISetFEData( HYPrecon_, feData_ );
+      if (haveFEData_ == 2) HYPRE_LSI_MLISetSFEI( HYPrecon_, feData_ );
+      if ( MLI_EqnNumbers_ != NULL )
+      {
+         int *iArray = new int[MLI_NumNodes_];
+         for (i = 0; i < MLI_NumNodes_; i++) iArray[i] = i;
+         HYPRE_LSI_qsort1a(MLI_EqnNumbers_, iArray, 0, MLI_NumNodes_-1);
+         double *tempNodalCoord = MLI_NodalCoord_; 
+         int ncount = 1;
+         for (i = 1; i < MLI_NumNodes_; i++) 
+            if (MLI_EqnNumbers_[i] != MLI_EqnNumbers_[ncount-1]) ncount++;
+         MLI_NodalCoord_ = new double[ncount*MLI_FieldSize_];
+         for (j = 0; j < MLI_FieldSize_; j++) 
+            MLI_NodalCoord_[j] = tempNodalCoord[iArray[0]*MLI_FieldSize_+j];
+         ncount = 1;
+         for (i = 1; i < MLI_NumNodes_; i++) 
+         {
+            if (MLI_EqnNumbers_[i] != MLI_EqnNumbers_[ncount-1]) 
+            {
+               MLI_EqnNumbers_[ncount] = MLI_EqnNumbers_[i];
+               for (j = 0; j < MLI_FieldSize_; j++) 
+                  MLI_NodalCoord_[ncount*MLI_FieldSize_+j] =
+                     tempNodalCoord[iArray[i]*MLI_FieldSize_+j];
+               ncount++;
+            }
+         }
+         MLI_NumNodes_ = ncount;
+         assert( MLI_NumNodes_ == (localEndRow_-localStartRow_+1) );
+         delete [] tempNodalCoord;
+         delete [] iArray;
+         HYPRE_LSI_MLILoadNodalCoordinates(HYPrecon_, MLI_NumNodes_, 
+                  MLI_FieldSize_, MLI_EqnNumbers_, MLI_FieldSize_, 
+                  MLI_NodalCoord_, localEndRow_-localStartRow_+1);
+      }
+   }
 #endif
 
    switch ( HYSolverID_ )

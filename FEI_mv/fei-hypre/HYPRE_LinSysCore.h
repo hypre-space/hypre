@@ -58,6 +58,7 @@ enum HYpreconID {HYIDENTITY,HYDIAGONAL,HYPILUT,HYPARASAILS,HYBOOMERAMG,HYML,
 #define HYFEI_AMGDEBUG              524288
 #define HYFEI_STOPAFTERPRINT       1048576
 #define HYFEI_PRINTPARCSRMAT       2097152
+#define HYFEI_IMPOSENOBC           4194304
 
 // *************************************************************************
 // class definition
@@ -646,6 +647,10 @@ class HYPRE_LinSysCore
    int             haveFEData_;
    Lookup          *lookup_;
    int             haveLookup_;
+   int             MLI_NumNodes_;
+   int             MLI_FieldSize_;
+   int             *MLI_EqnNumbers_;
+   double          *MLI_NodalCoord_;
 
    // ----------------------------------------------------------------------
    // temporary functions for testing purposes
