@@ -726,7 +726,7 @@ then
         test "$casc_using_mpi" = "yes"
      then
        CASC_CHECK_HEADER(mpi.h, /usr/local/mpi/include)
-       MPIINCLUDE="$MPIINCLUDE -I$INCLUDES"
+       MPIINCLUDE="$MPIINCLUDE $INCLUDES"
        CASC_ADD_LIB(mpi, main, /usr/local/mpi/lib, MPI)
        if test -z "$MPILIBS"
        then
@@ -786,7 +786,7 @@ then
      test "$casc_using_mpi" = "yes"
   then
     CASC_CHECK_HEADER(mpi.h, /usr/local/mpi/include)
-    MPIINCLUDE="$MPIINCLUDE -I$INCLUDES"
+    MPIINCLUDE="$MPIINCLUDE $INCLUDES"
     CASC_ADD_LIB(mpi, main, /usr/local/mpi/lib, MPI)
     if test -z "$MPILIBS"
     then

@@ -4797,7 +4797,7 @@ fi
 
    unset casc_header_found
 
-       MPIINCLUDE="$MPIINCLUDE -I$INCLUDES"
+       MPIINCLUDE="$MPIINCLUDE $INCLUDES"
        
    # define some macros to hopefully improve readability
    
@@ -5341,7 +5341,7 @@ fi
 
    unset casc_header_found
 
-    MPIINCLUDE="$MPIINCLUDE -I$INCLUDES"
+    MPIINCLUDE="$MPIINCLUDE $INCLUDES"
     
    # define some macros to hopefully improve readability
    
@@ -7376,7 +7376,7 @@ else
 echo "configure:7377: checking for Fortran libraries" >&5
             echo "      END" > conftest.f
   foutput=`${F77-f77} -v -o conftest conftest.f 2>&1`
-            xlf_p=`echo $foutput | sed -n -e '/xlfentry/p'`
+            xlf_p=`echo $foutput | grep xlfentry`
   if test -n "$xlf_p"; then
     foutput=`echo $foutput | sed 's/,/ /g'`
   fi
