@@ -462,11 +462,11 @@ int lsame_(char *ca, char *cb)
     } else if (zcode == 233 || zcode == 169) {
 	/* EBCDIC is assumed - ZCODE is the EBCDIC code of either lower or   
           upper case 'Z'. */
-	if (inta >= 129 && inta <= 137 || inta >= 145 && inta <= 153 || inta 
-		>= 162 && inta <= 169)
+	if ((inta >= 129 && inta <= 137) || (inta >= 145 && inta <= 153) || 
+                (inta >= 162 && inta <= 169))
 	    inta += 64;
-	if (intb >= 129 && intb <= 137 || intb >= 145 && intb <= 153 || intb 
-		>= 162 && intb <= 169)
+	if ((intb >= 129 && intb <= 137) || (intb >= 145 && intb <= 153) || 
+                (intb >= 162 && intb <= 169))
 	    intb += 64;
     } else if (zcode == 218 || zcode == 250) {
 	/* ASCII is assumed, on Prime machines - ZCODE is the ASCII code   
