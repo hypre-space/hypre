@@ -24,8 +24,8 @@
  
 hypre_StructMatrix *
 hypre_SMG2NewRAPOp( hypre_StructMatrix *R,
-                  hypre_StructMatrix *A,
-                  hypre_StructMatrix *PT )
+                    hypre_StructMatrix *A,
+                    hypre_StructMatrix *PT )
 {
    hypre_StructMatrix    *RAP;
 
@@ -33,15 +33,15 @@ hypre_SMG2NewRAPOp( hypre_StructMatrix *R,
 
    hypre_Index           *RAP_stencil_shape;
    hypre_StructStencil   *RAP_stencil;
-   int                  RAP_stencil_size;
-   int                  RAP_stencil_dim;
-   int                  RAP_num_ghost[] = {1, 1, 1, 1, 0, 0};
+   int                    RAP_stencil_size;
+   int                    RAP_stencil_dim;
+   int                    RAP_num_ghost[] = {1, 1, 1, 1, 0, 0};
 
    hypre_StructStencil   *A_stencil;
-   int                  A_stencil_size;
+   int                    A_stencil_size;
 
-   int                  j, i;
-   int                  stencil_rank;
+   int                    j, i;
+   int                    stencil_rank;
  
    RAP_stencil_dim = 2;
 
@@ -50,84 +50,84 @@ hypre_SMG2NewRAPOp( hypre_StructMatrix *R,
    A_stencil = hypre_StructMatrixStencil(A);
    A_stencil_size = hypre_StructStencilSize(A_stencil);
  
-/*--------------------------------------------------------------------------
- * Define RAP_stencil
- *--------------------------------------------------------------------------*/
+   /*-----------------------------------------------------------------------
+    * Define RAP_stencil
+    *-----------------------------------------------------------------------*/
 
    stencil_rank = 0;
 
-/*--------------------------------------------------------------------------
- * non-symmetric case
- *--------------------------------------------------------------------------*/
+   /*-----------------------------------------------------------------------
+    * non-symmetric case
+    *-----------------------------------------------------------------------*/
 
    if (!hypre_StructMatrixSymmetric(A))
    {
 
-/*--------------------------------------------------------------------------
- *    5 or 9 point fine grid stencil produces 9 point RAP
- *--------------------------------------------------------------------------*/
+      /*--------------------------------------------------------------------
+       * 5 or 9 point fine grid stencil produces 9 point RAP
+       *--------------------------------------------------------------------*/
       RAP_stencil_size = 9;
       RAP_stencil_shape = hypre_CTAlloc(hypre_Index, RAP_stencil_size);
       for (j = -1; j < 2; j++)
       {
-          for (i = -1; i < 2; i++)
-          {
+         for (i = -1; i < 2; i++)
+         {
 
-/*--------------------------------------------------------------------------
- *           Storage for 9 elements (c,w,e,n,s,sw,se,nw,se)
- *--------------------------------------------------------------------------*/
-             hypre_SetIndex(RAP_stencil_shape[stencil_rank],i,j,0);
-             stencil_rank++;
-          }
+            /*--------------------------------------------------------------
+             * Storage for 9 elements (c,w,e,n,s,sw,se,nw,se)
+             *--------------------------------------------------------------*/
+            hypre_SetIndex(RAP_stencil_shape[stencil_rank],i,j,0);
+            stencil_rank++;
+         }
       }
    }
 
-/*--------------------------------------------------------------------------
- * symmetric case
- *--------------------------------------------------------------------------*/
+   /*-----------------------------------------------------------------------
+    * symmetric case
+    *-----------------------------------------------------------------------*/
 
    else
    {
 
-/*--------------------------------------------------------------------------
- *    5 or 9 point fine grid stencil produces 9 point RAP
- *    Only store the lower triangular part + diagonal = 5 entries,
- *    lower triangular means the lower triangular part on the matrix
- *    in the standard lexicalgraphic ordering.
- *--------------------------------------------------------------------------*/
+      /*--------------------------------------------------------------------
+       * 5 or 9 point fine grid stencil produces 9 point RAP
+       * Only store the lower triangular part + diagonal = 5 entries,
+       * lower triangular means the lower triangular part on the matrix
+       * in the standard lexicalgraphic ordering.
+       *--------------------------------------------------------------------*/
       RAP_stencil_size = 5;
       RAP_stencil_shape = hypre_CTAlloc(hypre_Index, RAP_stencil_size);
       for (j = -1; j < 1; j++)
       {
-          for (i = -1; i < 2; i++)
-          {
+         for (i = -1; i < 2; i++)
+         {
 
-/*--------------------------------------------------------------------------
- *           Store 5 elements in (c,w,s,sw,se)
- *--------------------------------------------------------------------------*/
-             if( i+j <=0 )
-             {
-                hypre_SetIndex(RAP_stencil_shape[stencil_rank],i,j,0);
-                stencil_rank++;
-             }
-          }
+            /*--------------------------------------------------------------
+             * Store 5 elements in (c,w,s,sw,se)
+             *--------------------------------------------------------------*/
+            if( i+j <=0 )
+            {
+               hypre_SetIndex(RAP_stencil_shape[stencil_rank],i,j,0);
+               stencil_rank++;
+            }
+         }
       }
    }
 
    RAP_stencil = hypre_NewStructStencil(RAP_stencil_dim, RAP_stencil_size,
-                                      RAP_stencil_shape);
+                                        RAP_stencil_shape);
 
    RAP = hypre_NewStructMatrix(hypre_StructMatrixComm(A),
-                             coarse_grid, RAP_stencil);
+                               coarse_grid, RAP_stencil);
 
-/*--------------------------------------------------------------------------
- * Coarse operator in symmetric iff fine operator is
- *--------------------------------------------------------------------------*/
+   /*-----------------------------------------------------------------------
+    * Coarse operator in symmetric iff fine operator is
+    *-----------------------------------------------------------------------*/
    hypre_StructMatrixSymmetric(RAP) = hypre_StructMatrixSymmetric(A);
 
-/*--------------------------------------------------------------------------
- * Set number of ghost points - one one each boundary
- *--------------------------------------------------------------------------*/
+   /*-----------------------------------------------------------------------
+    * Set number of ghost points - one one each boundary
+    *-----------------------------------------------------------------------*/
    hypre_SetStructMatrixNumGhost(RAP, RAP_num_ghost);
 
    hypre_InitializeStructMatrixShell(RAP);
@@ -153,35 +153,35 @@ hypre_SMG2NewRAPOp( hypre_StructMatrix *R,
 
 int
 hypre_SMG2BuildRAPSym( hypre_StructMatrix *A,
-                     hypre_StructMatrix *PT,
-                     hypre_StructMatrix *R,
-                     hypre_StructMatrix *RAP,
-                     hypre_Index         cindex,
-                     hypre_Index         cstride )
+                       hypre_StructMatrix *PT,
+                       hypre_StructMatrix *R,
+                       hypre_StructMatrix *RAP,
+                       hypre_Index         cindex,
+                       hypre_Index         cstride )
 
 {
 
-   hypre_Index             index_temp;
+   hypre_Index           index_temp;
 
-   hypre_StructStencil    *fine_stencil;
+   hypre_StructStencil  *fine_stencil;
    int                   fine_stencil_size;
 
-   hypre_StructGrid       *cgrid;
-   hypre_BoxArray         *cgrid_boxes;
-   hypre_Box              *cgrid_box;
-   hypre_IndexRef          cstart;
-   hypre_Index             stridec;
-   hypre_Index             fstart;
-   hypre_IndexRef          stridef;
-   hypre_Index             loop_size;
+   hypre_StructGrid     *cgrid;
+   hypre_BoxArray       *cgrid_boxes;
+   hypre_Box            *cgrid_box;
+   hypre_IndexRef        cstart;
+   hypre_Index           stridec;
+   hypre_Index           fstart;
+   hypre_IndexRef        stridef;
+   hypre_Index           loop_size;
 
-   int                  i;
-   int                  loopi, loopj, loopk;
+   int                   i;
+   int                   loopi, loopj, loopk;
 
-   hypre_Box              *A_data_box;
-   hypre_Box              *PT_data_box;
-   hypre_Box              *R_data_box;
-   hypre_Box              *RAP_data_box;
+   hypre_Box            *A_data_box;
+   hypre_Box            *PT_data_box;
+   hypre_Box            *R_data_box;
+   hypre_Box            *RAP_data_box;
 
    double               *pa, *pb;
    double               *ra, *rb;
@@ -213,242 +213,242 @@ hypre_SMG2BuildRAPSym( hypre_StructMatrix *A,
    cgrid_boxes = hypre_StructGridBoxes(cgrid);
 
    hypre_ForBoxI(i, cgrid_boxes)
-   {
-      cgrid_box = hypre_BoxArrayBox(cgrid_boxes, i);
-
-      cstart = hypre_BoxIMin(cgrid_box);
-      hypre_SMGMapCoarseToFine(cstart, fstart, cindex, cstride) 
-
-      A_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
-      PT_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(PT), i);
-      R_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(R), i);
-      RAP_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(RAP), i);
-
-/*--------------------------------------------------------------------------
- * Extract pointers for interpolation operator:
- * pa is pointer for weight for f-point above c-point 
- * pb is pointer for weight for f-point below c-point 
- *--------------------------------------------------------------------------*/
-
-      hypre_SetIndex(index_temp,0,1,0);
-      pa = hypre_StructMatrixExtractPointerByIndex(PT, i, index_temp);
-
-      hypre_SetIndex(index_temp,0,-1,0);
-      pb = hypre_StructMatrixExtractPointerByIndex(PT, i, index_temp);
- 
-/*--------------------------------------------------------------------------
- * Extract pointers for restriction operator:
- * ra is pointer for weight for f-point above c-point 
- * rb is pointer for weight for f-point below c-point 
- *--------------------------------------------------------------------------*/
-
-      hypre_SetIndex(index_temp,0,1,0);
-      ra = hypre_StructMatrixExtractPointerByIndex(R, i, index_temp);
-
-      hypre_SetIndex(index_temp,0,-1,0);
-      rb = hypre_StructMatrixExtractPointerByIndex(R, i, index_temp);
- 
-/*--------------------------------------------------------------------------
- * Extract pointers for 5-point fine grid operator:
- * 
- * a_cc is pointer for center coefficient
- * a_cw is pointer for west coefficient
- * a_ce is pointer for east coefficient
- * a_cs is pointer for south coefficient
- * a_cn is pointer for north coefficient
- *--------------------------------------------------------------------------*/
-
-      hypre_SetIndex(index_temp,0,0,0);
-      a_cc = hypre_StructMatrixExtractPointerByIndex(A, i, index_temp);
-
-      hypre_SetIndex(index_temp,-1,0,0);
-      a_cw = hypre_StructMatrixExtractPointerByIndex(A, i, index_temp);
-
-      hypre_SetIndex(index_temp,1,0,0);
-      a_ce = hypre_StructMatrixExtractPointerByIndex(A, i, index_temp);
-
-      hypre_SetIndex(index_temp,0,-1,0);
-      a_cs = hypre_StructMatrixExtractPointerByIndex(A, i, index_temp);
-
-      hypre_SetIndex(index_temp,0,1,0);
-      a_cn = hypre_StructMatrixExtractPointerByIndex(A, i, index_temp);
-
-/*--------------------------------------------------------------------------
- * Extract additional pointers for 9-point fine grid operator:
- *
- * a_csw is pointer for southwest coefficient
- * a_cse is pointer for southeast coefficient
- * a_cnw is pointer for northwest coefficient
- * a_cne is pointer for northeast coefficient
- *--------------------------------------------------------------------------*/
-
-      if(fine_stencil_size > 5)
       {
+         cgrid_box = hypre_BoxArrayBox(cgrid_boxes, i);
+
+         cstart = hypre_BoxIMin(cgrid_box);
+         hypre_SMGMapCoarseToFine(cstart, fstart, cindex, cstride);
+
+         A_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
+         PT_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(PT), i);
+         R_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(R), i);
+         RAP_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(RAP), i);
+
+         /*-----------------------------------------------------------------
+          * Extract pointers for interpolation operator:
+          * pa is pointer for weight for f-point above c-point 
+          * pb is pointer for weight for f-point below c-point 
+          *-----------------------------------------------------------------*/
+
+         hypre_SetIndex(index_temp,0,1,0);
+         pa = hypre_StructMatrixExtractPointerByIndex(PT, i, index_temp);
+
+         hypre_SetIndex(index_temp,0,-1,0);
+         pb = hypre_StructMatrixExtractPointerByIndex(PT, i, index_temp);
+ 
+         /*-----------------------------------------------------------------
+          * Extract pointers for restriction operator:
+          * ra is pointer for weight for f-point above c-point 
+          * rb is pointer for weight for f-point below c-point 
+          *-----------------------------------------------------------------*/
+
+         hypre_SetIndex(index_temp,0,1,0);
+         ra = hypre_StructMatrixExtractPointerByIndex(R, i, index_temp);
+
+         hypre_SetIndex(index_temp,0,-1,0);
+         rb = hypre_StructMatrixExtractPointerByIndex(R, i, index_temp);
+ 
+         /*-----------------------------------------------------------------
+          * Extract pointers for 5-point fine grid operator:
+          * 
+          * a_cc is pointer for center coefficient
+          * a_cw is pointer for west coefficient
+          * a_ce is pointer for east coefficient
+          * a_cs is pointer for south coefficient
+          * a_cn is pointer for north coefficient
+          *-----------------------------------------------------------------*/
+
+         hypre_SetIndex(index_temp,0,0,0);
+         a_cc = hypre_StructMatrixExtractPointerByIndex(A, i, index_temp);
+
+         hypre_SetIndex(index_temp,-1,0,0);
+         a_cw = hypre_StructMatrixExtractPointerByIndex(A, i, index_temp);
+
+         hypre_SetIndex(index_temp,1,0,0);
+         a_ce = hypre_StructMatrixExtractPointerByIndex(A, i, index_temp);
+
+         hypre_SetIndex(index_temp,0,-1,0);
+         a_cs = hypre_StructMatrixExtractPointerByIndex(A, i, index_temp);
+
+         hypre_SetIndex(index_temp,0,1,0);
+         a_cn = hypre_StructMatrixExtractPointerByIndex(A, i, index_temp);
+
+         /*-----------------------------------------------------------------
+          * Extract additional pointers for 9-point fine grid operator:
+          *
+          * a_csw is pointer for southwest coefficient
+          * a_cse is pointer for southeast coefficient
+          * a_cnw is pointer for northwest coefficient
+          * a_cne is pointer for northeast coefficient
+          *-----------------------------------------------------------------*/
+
+         if(fine_stencil_size > 5)
+         {
+            hypre_SetIndex(index_temp,-1,-1,0);
+            a_csw = hypre_StructMatrixExtractPointerByIndex(A, i, index_temp);
+
+            hypre_SetIndex(index_temp,1,-1,0);
+            a_cse = hypre_StructMatrixExtractPointerByIndex(A, i, index_temp);
+
+            hypre_SetIndex(index_temp,-1,1,0);
+            a_cnw = hypre_StructMatrixExtractPointerByIndex(A, i, index_temp);
+
+            hypre_SetIndex(index_temp,1,1,0);
+            a_cne = hypre_StructMatrixExtractPointerByIndex(A, i, index_temp);
+
+         }
+
+         /*-----------------------------------------------------------------
+          * Extract pointers for coarse grid operator - always 9-point:
+          *
+          * We build only the lower triangular part (plus diagonal).
+          * 
+          * rap_cc is pointer for center coefficient (etc.)
+          *-----------------------------------------------------------------*/
+
+         hypre_SetIndex(index_temp,0,0,0);
+         rap_cc = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+
+         hypre_SetIndex(index_temp,-1,0,0);
+         rap_cw = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+
+         hypre_SetIndex(index_temp,0,-1,0);
+         rap_cs = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+
          hypre_SetIndex(index_temp,-1,-1,0);
-         a_csw = hypre_StructMatrixExtractPointerByIndex(A, i, index_temp);
+         rap_csw = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
 
          hypre_SetIndex(index_temp,1,-1,0);
-         a_cse = hypre_StructMatrixExtractPointerByIndex(A, i, index_temp);
+         rap_cse = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
 
-         hypre_SetIndex(index_temp,-1,1,0);
-         a_cnw = hypre_StructMatrixExtractPointerByIndex(A, i, index_temp);
+         /*-----------------------------------------------------------------
+          * Define offsets for fine grid stencil and interpolation
+          *
+          * In the BoxLoop below I assume iA and iP refer to data associated
+          * with the point which we are building the stencil for. The below
+          * Offsets are used in refering to data associated with other points. 
+          *-----------------------------------------------------------------*/
 
-         hypre_SetIndex(index_temp,1,1,0);
-         a_cne = hypre_StructMatrixExtractPointerByIndex(A, i, index_temp);
+         hypre_SetIndex(index_temp,0,1,0);
+         yOffsetA = hypre_BoxOffsetDistance(A_data_box,index_temp); 
+         yOffsetP = hypre_BoxOffsetDistance(PT_data_box,index_temp); 
+         hypre_SetIndex(index_temp,1,0,0);
+         xOffsetP = hypre_BoxOffsetDistance(PT_data_box,index_temp); 
 
-      }
+         /*-----------------------------------------------------------------
+          * Switch statement to direct control to apropriate BoxLoop depending
+          * on stencil size. Default is full 9-point.
+          *-----------------------------------------------------------------*/
 
-/*--------------------------------------------------------------------------
- * Extract pointers for coarse grid operator - always 9-point:
- *
- * We build only the lower triangular part (plus diagonal).
- * 
- * rap_cc is pointer for center coefficient (etc.)
- *--------------------------------------------------------------------------*/
+         switch (fine_stencil_size)
+         {
 
-      hypre_SetIndex(index_temp,0,0,0);
-      rap_cc = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+            /*--------------------------------------------------------------
+             * Loop for symmetric 5-point fine grid operator; produces a
+             * symmetric 9-point coarse grid operator. We calculate only the
+             * lower triangular stencil entries: (southwest, south, southeast,
+             * west, and center).
+             *--------------------------------------------------------------*/
 
-      hypre_SetIndex(index_temp,-1,0,0);
-      rap_cw = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+            case 5:
 
-      hypre_SetIndex(index_temp,0,-1,0);
-      rap_cs = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
-
-      hypre_SetIndex(index_temp,-1,-1,0);
-      rap_csw = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
-
-      hypre_SetIndex(index_temp,1,-1,0);
-      rap_cse = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
-
-/*--------------------------------------------------------------------------
- * Define offsets for fine grid stencil and interpolation
- *
- * In the BoxLoop below I assume iA and iP refer to data associated
- * with the point which we are building the stencil for. The below
- * Offsets are used in refering to data associated with other points. 
- *--------------------------------------------------------------------------*/
-
-      hypre_SetIndex(index_temp,0,1,0);
-      yOffsetA = hypre_BoxOffsetDistance(A_data_box,index_temp); 
-      yOffsetP = hypre_BoxOffsetDistance(PT_data_box,index_temp); 
-      hypre_SetIndex(index_temp,1,0,0);
-      xOffsetP = hypre_BoxOffsetDistance(PT_data_box,index_temp); 
-
-/*--------------------------------------------------------------------------
- * Switch statement to direct control to apropriate BoxLoop depending
- * on stencil size. Default is full 9-point.
- *--------------------------------------------------------------------------*/
-
-      switch (fine_stencil_size)
-      {
-
-/*--------------------------------------------------------------------------
- * Loop for symmetric 5-point fine grid operator; produces a symmetric
- * 9-point coarse grid operator. We calculate only the lower triangular
- * (plus diagonal) stencil entries (southwest, south, southeast, west,
- *  and center).
- *--------------------------------------------------------------------------*/
-
-              case 5:
-
-              hypre_GetBoxSize(cgrid_box, loop_size);
-              hypre_BoxLoop4(loopi, loopj, loopk, loop_size,
-                           PT_data_box, cstart, stridec, iP,
-                           R_data_box, cstart, stridec, iR,
-                           A_data_box, fstart, stridef, iA,
+            hypre_GetBoxSize(cgrid_box, loop_size);
+            hypre_BoxLoop4(loopi, loopj, loopk, loop_size,
+                           PT_data_box,  cstart, stridec, iP,
+                           R_data_box,   cstart, stridec, iR,
+                           A_data_box,   fstart, stridef, iA,
                            RAP_data_box, cstart, stridec, iAc,
                            {
-                            iAm1 = iA - yOffsetA;
-                            iAp1 = iA + yOffsetA;
+                              iAm1 = iA - yOffsetA;
+                              iAp1 = iA + yOffsetA;
 
-                            iP1 = iP - yOffsetP - xOffsetP;
-                            rap_csw[iAc] = rb[iR] * a_cw[iAm1] * pa[iP1];
+                              iP1 = iP - yOffsetP - xOffsetP;
+                              rap_csw[iAc] = rb[iR] * a_cw[iAm1] * pa[iP1];
 
-                            iP1 = iP - yOffsetP;
-                            rap_cs[iAc] = rb[iR] * a_cc[iAm1] * pa[iP1]
-                                        + rb[iR] * a_cs[iAm1]
-                                        +          a_cs[iA] * pa[iP1];
+                              iP1 = iP - yOffsetP;
+                              rap_cs[iAc] = rb[iR] * a_cc[iAm1] * pa[iP1]
+                                 +          rb[iR] * a_cs[iAm1]
+                                 +                   a_cs[iA]   * pa[iP1];
 
-                            iP1 = iP - yOffsetP + xOffsetP;
-                            rap_cse[iAc] = rb[iR] * a_ce[iAm1] * pa[iP1];
+                              iP1 = iP - yOffsetP + xOffsetP;
+                              rap_cse[iAc] = rb[iR] * a_ce[iAm1] * pa[iP1];
 
-                            iP1 = iP - xOffsetP;
-                            rap_cw[iAc] =          a_cw[iA]
-                                        + rb[iR] * a_cw[iAm1] * pb[iP1]
-                                        + ra[iR] * a_cw[iAp1] * pa[iP1];
+                              iP1 = iP - xOffsetP;
+                              rap_cw[iAc] =          a_cw[iA]
+                                 +          rb[iR] * a_cw[iAm1] * pb[iP1]
+                                 +          ra[iR] * a_cw[iAp1] * pa[iP1];
 
-                            rap_cc[iAc] =          a_cc[iA]
-                                        + rb[iR] * a_cc[iAm1] * pb[iP]
-                                        + ra[iR] * a_cc[iAp1] * pa[iP]
-                                        + rb[iR] * a_cn[iAm1]
-                                        + ra[iR] * a_cs[iAp1]
-                                        +          a_cs[iA] * pb[iP]
-                                        +          a_cn[iA] * pa[iP];
+                              rap_cc[iAc] =          a_cc[iA]
+                                 +          rb[iR] * a_cc[iAm1] * pb[iP]
+                                 +          ra[iR] * a_cc[iAp1] * pa[iP]
+                                 +          rb[iR] * a_cn[iAm1]
+                                 +          ra[iR] * a_cs[iAp1]
+                                 +                   a_cs[iA]   * pb[iP]
+                                 +                   a_cn[iA]   * pa[iP];
 
                            });
 
 
-              break;
+            break;
 
-/*--------------------------------------------------------------------------
- * Loop for symmetric 9-point fine grid operator; produces a symmetric
- * 9-point coarse grid operator. We calculate only the lower triangular
- * (plus diagonal) stencil entries (southwest, south, southeast, west,
- *  and center).
- *--------------------------------------------------------------------------*/
+            /*--------------------------------------------------------------
+             * Loop for symmetric 9-point fine grid operator; produces a
+             * symmetric 9-point coarse grid operator. We calculate only the
+             * lower triangular stencil entries: (southwest, south, southeast,
+             * west, and center).
+             *--------------------------------------------------------------*/
 
-              default:
+            default:
 
-              hypre_GetBoxSize(cgrid_box, loop_size);
-              hypre_BoxLoop4(loopi, loopj, loopk, loop_size,
-                           PT_data_box, cstart, stridec, iP,
-                           R_data_box, cstart, stridec, iR,
-                           A_data_box, fstart, stridef, iA,
+            hypre_GetBoxSize(cgrid_box, loop_size);
+            hypre_BoxLoop4(loopi, loopj, loopk, loop_size,
+                           PT_data_box,  cstart, stridec, iP,
+                           R_data_box,   cstart, stridec, iR,
+                           A_data_box,   fstart, stridef, iA,
                            RAP_data_box, cstart, stridec, iAc,
                            {
-                            iAm1 = iA - yOffsetA;
-                            iAp1 = iA + yOffsetA;
+                              iAm1 = iA - yOffsetA;
+                              iAp1 = iA + yOffsetA;
 
-                            iP1 = iP - yOffsetP - xOffsetP;
-                            rap_csw[iAc] = rb[iR] * a_cw[iAm1] * pa[iP1]
-                                         + rb[iR] * a_csw[iAm1]
-                                         +          a_csw[iA] * pa[iP1];
+                              iP1 = iP - yOffsetP - xOffsetP;
+                              rap_csw[iAc] = rb[iR] * a_cw[iAm1] * pa[iP1]
+                                 +           rb[iR] * a_csw[iAm1]
+                                 +                    a_csw[iA]  * pa[iP1];
 
-                            iP1 = iP - yOffsetP;
-                            rap_cs[iAc] = rb[iR] * a_cc[iAm1] * pa[iP1]
-                                        + rb[iR] * a_cs[iAm1]
-                                        +          a_cs[iA] * pa[iP1];
+                              iP1 = iP - yOffsetP;
+                              rap_cs[iAc] = rb[iR] * a_cc[iAm1] * pa[iP1]
+                                 +          rb[iR] * a_cs[iAm1]
+                                 +                   a_cs[iA]   * pa[iP1];
 
-                            iP1 = iP - yOffsetP + xOffsetP;
-                            rap_cse[iAc] = rb[iR] * a_ce[iAm1] * pa[iP1]
-                                         + rb[iR] * a_cse[iAm1]
-                                         +          a_cse[iA] * pa[iP1];
+                              iP1 = iP - yOffsetP + xOffsetP;
+                              rap_cse[iAc] = rb[iR] * a_ce[iAm1] * pa[iP1]
+                                 +           rb[iR] * a_cse[iAm1]
+                                 +                    a_cse[iA]  * pa[iP1];
 
-                            iP1 = iP - xOffsetP;
-                            rap_cw[iAc] =          a_cw[iA]
-                                        + rb[iR] * a_cw[iAm1] * pb[iP1]
-                                        + ra[iR] * a_cw[iAp1] * pa[iP1]
-                                        + rb[iR] * a_cnw[iAm1]
-                                        + ra[iR] * a_csw[iAp1]
-                                        +          a_csw[iA] * pb[iP1]
-                                        +          a_cnw[iA] * pa[iP1];
+                              iP1 = iP - xOffsetP;
+                              rap_cw[iAc] =          a_cw[iA]
+                                 +          rb[iR] * a_cw[iAm1] * pb[iP1]
+                                 +          ra[iR] * a_cw[iAp1] * pa[iP1]
+                                 +          rb[iR] * a_cnw[iAm1]
+                                 +          ra[iR] * a_csw[iAp1]
+                                 +                   a_csw[iA]  * pb[iP1]
+                                 +                   a_cnw[iA]  * pa[iP1];
 
-                            rap_cc[iAc] =          a_cc[iA]
-                                        + rb[iR] * a_cc[iAm1] * pb[iP]
-                                        + ra[iR] * a_cc[iAp1] * pa[iP]
-                                        + rb[iR] * a_cn[iAm1]
-                                        + ra[iR] * a_cs[iAp1]
-                                        +          a_cs[iA] * pb[iP]
-                                        +          a_cn[iA] * pa[iP];
+                              rap_cc[iAc] =          a_cc[iA]
+                                 +          rb[iR] * a_cc[iAm1] * pb[iP]
+                                 +          ra[iR] * a_cc[iAp1] * pa[iP]
+                                 +          rb[iR] * a_cn[iAm1]
+                                 +          ra[iR] * a_cs[iAp1]
+                                 +                   a_cs[iA]   * pb[iP]
+                                 +                   a_cn[iA]   * pa[iP];
 
                            });
 
-              break;
+            break;
 
-      } /* end switch statement */
+         } /* end switch statement */
 
-   } /* end ForBoxI */
+      } /* end ForBoxI */
 
    return ierr;
 }
@@ -458,35 +458,35 @@ hypre_SMG2BuildRAPSym( hypre_StructMatrix *A,
 
 int
 hypre_SMG2BuildRAPNoSym( hypre_StructMatrix *A,
-                       hypre_StructMatrix *PT,
-                       hypre_StructMatrix *R,
-                       hypre_StructMatrix *RAP,
-                       hypre_Index         cindex,
-                       hypre_Index         cstride )
+                         hypre_StructMatrix *PT,
+                         hypre_StructMatrix *R,
+                         hypre_StructMatrix *RAP,
+                         hypre_Index         cindex,
+                         hypre_Index         cstride )
 
 {
 
    hypre_Index             index_temp;
 
-   hypre_StructStencil    *fine_stencil;
+   hypre_StructStencil  *fine_stencil;
    int                   fine_stencil_size;
+                        
+   hypre_StructGrid     *cgrid;
+   hypre_BoxArray       *cgrid_boxes;
+   hypre_Box            *cgrid_box;
+   hypre_IndexRef        cstart;
+   hypre_Index           stridec;
+   hypre_Index           fstart;
+   hypre_IndexRef        stridef;
+   hypre_Index           loop_size;
 
-   hypre_StructGrid       *cgrid;
-   hypre_BoxArray         *cgrid_boxes;
-   hypre_Box              *cgrid_box;
-   hypre_IndexRef          cstart;
-   hypre_Index             stridec;
-   hypre_Index             fstart;
-   hypre_IndexRef          stridef;
-   hypre_Index             loop_size;
+   int                   i;
+   int                   loopi, loopj, loopk;
 
-   int                  i;
-   int                  loopi, loopj, loopk;
-
-   hypre_Box              *A_data_box;
-   hypre_Box              *PT_data_box;
-   hypre_Box              *R_data_box;
-   hypre_Box              *RAP_data_box;
+   hypre_Box            *A_data_box;
+   hypre_Box            *PT_data_box;
+   hypre_Box            *R_data_box;
+   hypre_Box            *RAP_data_box;
 
    double               *pa, *pb;
    double               *ra, *rb;
@@ -518,220 +518,220 @@ hypre_SMG2BuildRAPNoSym( hypre_StructMatrix *A,
    cgrid_boxes = hypre_StructGridBoxes(cgrid);
 
    hypre_ForBoxI(i, cgrid_boxes)
-   {
-      cgrid_box = hypre_BoxArrayBox(cgrid_boxes, i);
-
-      cstart = hypre_BoxIMin(cgrid_box);
-      hypre_SMGMapCoarseToFine(cstart, fstart, cindex, cstride)
-
-      A_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
-      PT_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(PT), i);
-      R_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(R), i);
-      RAP_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(RAP), i);
-
-/*--------------------------------------------------------------------------
- * Extract pointers for interpolation operator:
- * pa is pointer for weight for f-point above c-point 
- * pb is pointer for weight for f-point below c-point 
- *--------------------------------------------------------------------------*/
-
-      hypre_SetIndex(index_temp,0,1,0);
-      pa = hypre_StructMatrixExtractPointerByIndex(PT, i, index_temp);
-
-      hypre_SetIndex(index_temp,0,-1,0);
-      pb = hypre_StructMatrixExtractPointerByIndex(PT, i, index_temp);
- 
-/*--------------------------------------------------------------------------
- * Extract pointers for restriction operator:
- * ra is pointer for weight for f-point above c-point 
- * rb is pointer for weight for f-point below c-point 
- *--------------------------------------------------------------------------*/
-
-      hypre_SetIndex(index_temp,0,1,0);
-      ra = hypre_StructMatrixExtractPointerByIndex(R, i, index_temp);
-
-      hypre_SetIndex(index_temp,0,-1,0);
-      rb = hypre_StructMatrixExtractPointerByIndex(R, i, index_temp);
- 
-/*--------------------------------------------------------------------------
- * Extract pointers for 5-point fine grid operator:
- * 
- * a_cc is pointer for center coefficient
- * a_cw is pointer for west coefficient
- * a_ce is pointer for east coefficient
- * a_cs is pointer for south coefficient
- * a_cn is pointer for north coefficient
- *--------------------------------------------------------------------------*/
-
-      hypre_SetIndex(index_temp,0,0,0);
-      a_cc = hypre_StructMatrixExtractPointerByIndex(A, i, index_temp);
-
-      hypre_SetIndex(index_temp,-1,0,0);
-      a_cw = hypre_StructMatrixExtractPointerByIndex(A, i, index_temp);
-
-      hypre_SetIndex(index_temp,1,0,0);
-      a_ce = hypre_StructMatrixExtractPointerByIndex(A, i, index_temp);
-
-      hypre_SetIndex(index_temp,0,-1,0);
-      a_cs = hypre_StructMatrixExtractPointerByIndex(A, i, index_temp);
-
-      hypre_SetIndex(index_temp,0,1,0);
-      a_cn = hypre_StructMatrixExtractPointerByIndex(A, i, index_temp);
-
-/*--------------------------------------------------------------------------
- * Extract additional pointers for 9-point fine grid operator:
- *
- * a_csw is pointer for southwest coefficient
- * a_cse is pointer for southeast coefficient
- * a_cnw is pointer for northwest coefficient
- * a_cne is pointer for northeast coefficient
- *--------------------------------------------------------------------------*/
-
-      if(fine_stencil_size > 5)
       {
-         hypre_SetIndex(index_temp,-1,-1,0);
-         a_csw = hypre_StructMatrixExtractPointerByIndex(A, i, index_temp);
+         cgrid_box = hypre_BoxArrayBox(cgrid_boxes, i);
 
-         hypre_SetIndex(index_temp,1,-1,0);
-         a_cse = hypre_StructMatrixExtractPointerByIndex(A, i, index_temp);
+         cstart = hypre_BoxIMin(cgrid_box);
+         hypre_SMGMapCoarseToFine(cstart, fstart, cindex, cstride);
 
-         hypre_SetIndex(index_temp,-1,1,0);
-         a_cnw = hypre_StructMatrixExtractPointerByIndex(A, i, index_temp);
+         A_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
+         PT_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(PT), i);
+         R_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(R), i);
+         RAP_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(RAP), i);
+
+         /*-----------------------------------------------------------------
+          * Extract pointers for interpolation operator:
+          * pa is pointer for weight for f-point above c-point 
+          * pb is pointer for weight for f-point below c-point 
+          *-----------------------------------------------------------------*/
+
+         hypre_SetIndex(index_temp,0,1,0);
+         pa = hypre_StructMatrixExtractPointerByIndex(PT, i, index_temp);
+
+         hypre_SetIndex(index_temp,0,-1,0);
+         pb = hypre_StructMatrixExtractPointerByIndex(PT, i, index_temp);
+ 
+         /*-----------------------------------------------------------------
+          * Extract pointers for restriction operator:
+          * ra is pointer for weight for f-point above c-point 
+          * rb is pointer for weight for f-point below c-point 
+          *-----------------------------------------------------------------*/
+
+         hypre_SetIndex(index_temp,0,1,0);
+         ra = hypre_StructMatrixExtractPointerByIndex(R, i, index_temp);
+
+         hypre_SetIndex(index_temp,0,-1,0);
+         rb = hypre_StructMatrixExtractPointerByIndex(R, i, index_temp);
+ 
+         /*-----------------------------------------------------------------
+          * Extract pointers for 5-point fine grid operator:
+          * 
+          * a_cc is pointer for center coefficient
+          * a_cw is pointer for west coefficient
+          * a_ce is pointer for east coefficient
+          * a_cs is pointer for south coefficient
+          * a_cn is pointer for north coefficient
+          *-----------------------------------------------------------------*/
+
+         hypre_SetIndex(index_temp,0,0,0);
+         a_cc = hypre_StructMatrixExtractPointerByIndex(A, i, index_temp);
+
+         hypre_SetIndex(index_temp,-1,0,0);
+         a_cw = hypre_StructMatrixExtractPointerByIndex(A, i, index_temp);
+
+         hypre_SetIndex(index_temp,1,0,0);
+         a_ce = hypre_StructMatrixExtractPointerByIndex(A, i, index_temp);
+
+         hypre_SetIndex(index_temp,0,-1,0);
+         a_cs = hypre_StructMatrixExtractPointerByIndex(A, i, index_temp);
+
+         hypre_SetIndex(index_temp,0,1,0);
+         a_cn = hypre_StructMatrixExtractPointerByIndex(A, i, index_temp);
+
+         /*-----------------------------------------------------------------
+          * Extract additional pointers for 9-point fine grid operator:
+          *
+          * a_csw is pointer for southwest coefficient
+          * a_cse is pointer for southeast coefficient
+          * a_cnw is pointer for northwest coefficient
+          * a_cne is pointer for northeast coefficient
+          *-----------------------------------------------------------------*/
+
+         if(fine_stencil_size > 5)
+         {
+            hypre_SetIndex(index_temp,-1,-1,0);
+            a_csw = hypre_StructMatrixExtractPointerByIndex(A, i, index_temp);
+
+            hypre_SetIndex(index_temp,1,-1,0);
+            a_cse = hypre_StructMatrixExtractPointerByIndex(A, i, index_temp);
+
+            hypre_SetIndex(index_temp,-1,1,0);
+            a_cnw = hypre_StructMatrixExtractPointerByIndex(A, i, index_temp);
+
+            hypre_SetIndex(index_temp,1,1,0);
+            a_cne = hypre_StructMatrixExtractPointerByIndex(A, i, index_temp);
+
+         }
+
+         /*-----------------------------------------------------------------
+          * Extract pointers for coarse grid operator - always 9-point:
+          *
+          * We build only the upper triangular part.
+          *
+          * rap_ce is pointer for east coefficient (etc.)
+          *-----------------------------------------------------------------*/
+
+         hypre_SetIndex(index_temp,1,0,0);
+         rap_ce = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+
+         hypre_SetIndex(index_temp,0,1,0);
+         rap_cn = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
 
          hypre_SetIndex(index_temp,1,1,0);
-         a_cne = hypre_StructMatrixExtractPointerByIndex(A, i, index_temp);
+         rap_cne = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
 
-      }
+         hypre_SetIndex(index_temp,-1,1,0);
+         rap_cnw = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
 
-/*--------------------------------------------------------------------------
- * Extract pointers for coarse grid operator - always 9-point:
- *
- * We build only the upper triangular part.
- *
- * rap_ce is pointer for east coefficient (etc.)
- *--------------------------------------------------------------------------*/
+         /*-----------------------------------------------------------------
+          * Define offsets for fine grid stencil and interpolation
+          *
+          * In the BoxLoop below I assume iA and iP refer to data associated
+          * with the point which we are building the stencil for. The below
+          * Offsets are used in refering to data associated with other points. 
+          *-----------------------------------------------------------------*/
 
-      hypre_SetIndex(index_temp,1,0,0);
-      rap_ce = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+         hypre_SetIndex(index_temp,0,1,0);
+         yOffsetA = hypre_BoxOffsetDistance(A_data_box,index_temp); 
+         yOffsetP = hypre_BoxOffsetDistance(PT_data_box,index_temp); 
+         hypre_SetIndex(index_temp,1,0,0);
+         xOffsetP = hypre_BoxOffsetDistance(PT_data_box,index_temp); 
 
-      hypre_SetIndex(index_temp,0,1,0);
-      rap_cn = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+         /*-----------------------------------------------------------------
+          * Switch statement to direct control to apropriate BoxLoop depending
+          * on stencil size. Default is full 27-point.
+          *-----------------------------------------------------------------*/
 
-      hypre_SetIndex(index_temp,1,1,0);
-      rap_cne = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+         switch (fine_stencil_size)
+         {
 
-      hypre_SetIndex(index_temp,-1,1,0);
-      rap_cnw = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+            /*--------------------------------------------------------------
+             * Loop for 5-point fine grid operator; produces upper triangular
+             * part of 9-point coarse grid operator - excludes diagonal.
+             * stencil entries: (northeast, north, northwest, and east)
+             *--------------------------------------------------------------*/
 
-/*--------------------------------------------------------------------------
- * Define offsets for fine grid stencil and interpolation
- *
- * In the BoxLoop below I assume iA and iP refer to data associated
- * with the point which we are building the stencil for. The below
- * Offsets are used in refering to data associated with other points. 
- *--------------------------------------------------------------------------*/
+            case 5:
 
-      hypre_SetIndex(index_temp,0,1,0);
-      yOffsetA = hypre_BoxOffsetDistance(A_data_box,index_temp); 
-      yOffsetP = hypre_BoxOffsetDistance(PT_data_box,index_temp); 
-      hypre_SetIndex(index_temp,1,0,0);
-      xOffsetP = hypre_BoxOffsetDistance(PT_data_box,index_temp); 
-
-/*--------------------------------------------------------------------------
- * Switch statement to direct control to apropriate BoxLoop depending
- * on stencil size. Default is full 27-point.
- *--------------------------------------------------------------------------*/
-
-      switch (fine_stencil_size)
-      {
-
-/*--------------------------------------------------------------------------
- * Loop for 5-point fine grid operator; produces upper triangular
- * part of 9-point coarse grid operator - excludes diagonal.
- * stencil entries: (northeast, north, northwest, and east)
- *--------------------------------------------------------------------------*/
-
-              case 5:
-
-              hypre_GetBoxSize(cgrid_box, loop_size);
-              hypre_BoxLoop4(loopi, loopj, loopk, loop_size,
-                           PT_data_box, cstart, stridec, iP,
-                           R_data_box, cstart, stridec, iR,
-                           A_data_box, fstart, stridef, iA,
+            hypre_GetBoxSize(cgrid_box, loop_size);
+            hypre_BoxLoop4(loopi, loopj, loopk, loop_size,
+                           PT_data_box,  cstart, stridec, iP,
+                           R_data_box,   cstart, stridec, iR,
+                           A_data_box,   fstart, stridef, iA,
                            RAP_data_box, cstart, stridec, iAc,
                            {
-                            iAm1 = iA - yOffsetA;
-                            iAp1 = iA + yOffsetA;
+                              iAm1 = iA - yOffsetA;
+                              iAp1 = iA + yOffsetA;
 
-                            iP1 = iP + yOffsetP + xOffsetP;
-                            rap_cne[iAc] = ra[iR] * a_ce[iAp1] * pb[iP1];
+                              iP1 = iP + yOffsetP + xOffsetP;
+                              rap_cne[iAc] = ra[iR] * a_ce[iAp1] * pb[iP1];
 
-                            iP1 = iP + yOffsetP;
-                            rap_cn[iAc] = ra[iR] * a_cc[iAp1] * pb[iP1]
-                                        + ra[iR] * a_cn[iAp1]
-                                        +          a_cn[iA] * pb[iP1];
+                              iP1 = iP + yOffsetP;
+                              rap_cn[iAc] = ra[iR] * a_cc[iAp1] * pb[iP1]
+                                 +          ra[iR] * a_cn[iAp1]
+                                 +                   a_cn[iA]   * pb[iP1];
 
-                            iP1 = iP + yOffsetP - xOffsetP;
-                            rap_cnw[iAc] = ra[iR] * a_cw[iAp1] * pb[iP1];
+                              iP1 = iP + yOffsetP - xOffsetP;
+                              rap_cnw[iAc] = ra[iR] * a_cw[iAp1] * pb[iP1];
 
-                            iP1 = iP + xOffsetP;
-                            rap_ce[iAc] =          a_ce[iA]
-                                        + rb[iR] * a_ce[iAm1] * pb[iP1]
-                                        + ra[iR] * a_ce[iAp1] * pa[iP1];
+                              iP1 = iP + xOffsetP;
+                              rap_ce[iAc] =          a_ce[iA]
+                                 +          rb[iR] * a_ce[iAm1] * pb[iP1]
+                                 +          ra[iR] * a_ce[iAp1] * pa[iP1];
 
                            });
 
-              break;
+            break;
 
-/*--------------------------------------------------------------------------
- * Loop for 9-point fine grid operator; produces upper triangular
- * part of 9-point coarse grid operator - excludes diagonal.
- * stencil entries: (northeast, north, northwest, and east)
- *--------------------------------------------------------------------------*/
+            /*--------------------------------------------------------------
+             * Loop for 9-point fine grid operator; produces upper triangular
+             * part of 9-point coarse grid operator - excludes diagonal.
+             * stencil entries: (northeast, north, northwest, and east)
+             *--------------------------------------------------------------*/
 
-              default:
+            default:
 
-              hypre_GetBoxSize(cgrid_box, loop_size);
-              hypre_BoxLoop4(loopi, loopj, loopk, loop_size,
-                           PT_data_box, cstart, stridec, iP,
-                           R_data_box, cstart, stridec, iR,
-                           A_data_box, fstart, stridef, iA,
+            hypre_GetBoxSize(cgrid_box, loop_size);
+            hypre_BoxLoop4(loopi, loopj, loopk, loop_size,
+                           PT_data_box,  cstart, stridec, iP,
+                           R_data_box,   cstart, stridec, iR,
+                           A_data_box,   fstart, stridef, iA,
                            RAP_data_box, cstart, stridec, iAc,
                            {
-                            iAm1 = iA - yOffsetA;
-                            iAp1 = iA + yOffsetA;
+                              iAm1 = iA - yOffsetA;
+                              iAp1 = iA + yOffsetA;
 
-                            iP1 = iP + yOffsetP + xOffsetP;
-                            rap_cne[iAc] = ra[iR] * a_ce[iAp1] * pb[iP1]
-                                         + ra[iR] * a_cne[iAp1]
-                                         +          a_cne[iA] * pb[iP1];
+                              iP1 = iP + yOffsetP + xOffsetP;
+                              rap_cne[iAc] = ra[iR] * a_ce[iAp1] * pb[iP1]
+                                 +           ra[iR] * a_cne[iAp1]
+                                 +                    a_cne[iA]  * pb[iP1];
 
-                            iP1 = iP + yOffsetP;
-                            rap_cn[iAc] = ra[iR] * a_cc[iAp1] * pb[iP1]
-                                        + ra[iR] * a_cn[iAp1]
-                                        +          a_cn[iA] * pb[iP1];
+                              iP1 = iP + yOffsetP;
+                              rap_cn[iAc] = ra[iR] * a_cc[iAp1] * pb[iP1]
+                                 +          ra[iR] * a_cn[iAp1]
+                                 +                   a_cn[iA]   * pb[iP1];
 
-                            iP1 = iP + yOffsetP - xOffsetP;
-                            rap_cnw[iAc] = ra[iR] * a_cw[iAp1] * pb[iP1]
-                                         + ra[iR] * a_cnw[iAp1]
-                                         +          a_cnw[iA] * pb[iP1];
+                              iP1 = iP + yOffsetP - xOffsetP;
+                              rap_cnw[iAc] = ra[iR] * a_cw[iAp1] * pb[iP1]
+                                 +           ra[iR] * a_cnw[iAp1]
+                                 +                    a_cnw[iA]  * pb[iP1];
 
-                            iP1 = iP + xOffsetP;
-                            rap_ce[iAc] =          a_ce[iA]
-                                        + rb[iR] * a_ce[iAm1] * pb[iP1]
-                                        + ra[iR] * a_ce[iAp1] * pa[iP1]
-                                        + rb[iR] * a_cne[iAm1]
-                                        + ra[iR] * a_cse[iAp1]
-                                        +          a_cse[iA] * pb[iP1]
-                                        +          a_cne[iA] * pa[iP1];
+                              iP1 = iP + xOffsetP;
+                              rap_ce[iAc] =          a_ce[iA]
+                                 +          rb[iR] * a_ce[iAm1] * pb[iP1]
+                                 +          ra[iR] * a_ce[iAp1] * pa[iP1]
+                                 +          rb[iR] * a_cne[iAm1]
+                                 +          ra[iR] * a_cse[iAp1]
+                                 +                   a_cse[iA]  * pb[iP1]
+                                 +                   a_cne[iA]  * pa[iP1];
 
                            });
 
-              break;
+            break;
 
-      } /* end switch statement */
+         } /* end switch statement */
 
-   } /* end ForBoxI */
+      } /* end ForBoxI */
 
    return ierr;
 }

@@ -71,14 +71,14 @@ hypre_SMGSetupRAPOp( hypre_StructMatrix *R,
 
       case 2:
 
-/*--------------------------------------------------------------------------
- *    Set lower triangular (+ diagonal) coefficients
- *--------------------------------------------------------------------------*/
+      /*--------------------------------------------------------------------
+       *    Set lower triangular (+ diagonal) coefficients
+       *--------------------------------------------------------------------*/
       ierr = hypre_SMG2BuildRAPSym(A, PT, R, Ac, cindex, cstride);
 
-/*--------------------------------------------------------------------------
- *    For non-symmetric A, set upper triangular coefficients as well
- *--------------------------------------------------------------------------*/
+      /*--------------------------------------------------------------------
+       *    For non-symmetric A, set upper triangular coefficients as well
+       *--------------------------------------------------------------------*/
       if(!hypre_StructMatrixSymmetric(A))
          ierr += hypre_SMG2BuildRAPNoSym(A, PT, R, Ac, cindex, cstride);
 
@@ -86,14 +86,14 @@ hypre_SMGSetupRAPOp( hypre_StructMatrix *R,
 
       case 3:
 
-/*--------------------------------------------------------------------------
- *    Set lower triangular (+ diagonal) coefficients
- *--------------------------------------------------------------------------*/
+      /*--------------------------------------------------------------------
+       *    Set lower triangular (+ diagonal) coefficients
+       *--------------------------------------------------------------------*/
       ierr = hypre_SMG3BuildRAPSym(A, PT, R, Ac, cindex, cstride);
 
-/*--------------------------------------------------------------------------
- *    For non-symmetric A, set upper triangular coefficients as well
- *--------------------------------------------------------------------------*/
+      /*--------------------------------------------------------------------
+       *    For non-symmetric A, set upper triangular coefficients as well
+       *--------------------------------------------------------------------*/
       if(!hypre_StructMatrixSymmetric(A))
          ierr += hypre_SMG3BuildRAPNoSym(A, PT, R, Ac, cindex, cstride);
 
