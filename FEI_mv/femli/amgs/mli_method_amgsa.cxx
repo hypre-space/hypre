@@ -1495,7 +1495,8 @@ int MLI_Method_AMGSA::printStatistics(MLI *mli)
    if ( mypid == 0 )
    {
       printf("\t********************************************************\n");
-      dtemp = dtotNnz / dfineNnz;
+      if ( fineNnz > 1000000000 ) dtemp = dtotNnz / dfineNnz;
+      else                        dtemp = dtotNnz / (double) fineNnz;
       printf("\t*** Amat complexity  = %e\n", dtemp);
       dtemp = (double) totNRows / (double) fineNRows;
       printf("\t*** grid complexity  = %e\n", dtemp);
