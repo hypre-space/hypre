@@ -90,6 +90,7 @@ main( int   argc,
    int first_local_col, last_local_col;
    int size, *col_ind;
    int local_num_vars;
+   int variant, overlap, domain_type;
    double *values;
 
    /* parameters for BoomerAMG */
@@ -244,6 +245,12 @@ main( int   argc,
       {
          arg_index++;
          build_rhs_type      = 3;
+         build_rhs_arg_index = arg_index;
+      }    
+      else if ( strcmp(argv[arg_index], "-rhszero") == 0 )
+      {
+         arg_index++;
+         build_rhs_type      = 5;
          build_rhs_arg_index = arg_index;
       }    
       else if ( strcmp(argv[arg_index], "-cljp") == 0 )
@@ -428,6 +435,12 @@ main( int   argc,
    grid_relax_points[3][0] = 0;
    }
 
+   /* defaults for Schwarz */
+
+   variant = 0;  /* multiplicative */
+   overlap = 1;  /* 1 layer overlap */
+   domain_type = 2; /* through agglomeration */
+
    /* defaults for GMRES */
 
    k_dim = 5;
@@ -486,6 +499,21 @@ main( int   argc,
          arg_index++;
          ioutdat  = atoi(argv[arg_index++]);
       }
+      else if ( strcmp(argv[arg_index], "-var") == 0 )
+      {
+         arg_index++;
+         variant  = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-ov") == 0 )
+      {
+         arg_index++;
+         overlap  = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-dt") == 0 )
+      {
+         arg_index++;
+         domain_type  = atoi(argv[arg_index++]);
+      }
       else if ( strcmp(argv[arg_index], "-mu") == 0 )
       {
          arg_index++;
@@ -536,6 +564,7 @@ main( int   argc,
       printf("       9=AMG-BiCGSTAB    \n");
       printf("       10=DS-BiCGSTAB    \n");
       printf("       11=PILUT-BiCGSTAB \n");
+      printf("       12=Schwarz-PCG \n");
       printf("       18=ParaSails-GMRES\n");     
       printf("       43=Euclid-PCG\n");
       printf("       44=Euclid-GMRES\n");
@@ -848,6 +877,17 @@ main( int   argc,
 
       HYPRE_ParVectorSetConstantValues(x, 0.0);
    }
+   else if ( build_rhs_type == 5 )
+   {
+
+      HYPRE_ParVectorCreate(MPI_COMM_WORLD, global_n, part_x, &x);
+      HYPRE_ParVectorInitialize(x);
+      HYPRE_ParVectorSetConstantValues(x, 1.0);
+
+      HYPRE_ParVectorCreate(MPI_COMM_WORLD, global_n, part_b, &b);
+      HYPRE_ParVectorInitialize(b);
+      HYPRE_ParVectorSetConstantValues(b, 0.0);
+   }
    else /* if ( build_rhs_type == 0 ) */
    {
       HYPRE_ParVectorCreate(MPI_COMM_WORLD, global_n, part_b, &b);
@@ -930,6 +970,9 @@ main( int   argc,
       HYPRE_BoomerAMGSetMaxLevels(amg_solver, max_levels);
       HYPRE_BoomerAMGSetMaxRowSum(amg_solver, max_row_sum);
       HYPRE_BoomerAMGSetDebugFlag(amg_solver, debug_flag);
+      HYPRE_BoomerAMGSetVariant(amg_solver, variant);
+      HYPRE_BoomerAMGSetOverlap(amg_solver, overlap);
+      HYPRE_BoomerAMGSetDomainType(amg_solver, domain_type);
       HYPRE_BoomerAMGSetNumFunctions(amg_solver, num_functions);
       if (num_functions > 1)
 	 HYPRE_BoomerAMGSetDofFunc(amg_solver, dof_func);
@@ -965,7 +1008,8 @@ main( int   argc,
     * Solve the system using PCG 
     *-----------------------------------------------------------*/
 
-   if (solver_id == 1 || solver_id == 2 || solver_id == 8 || solver_id == 43)
+   if (solver_id == 1 || solver_id == 2 || solver_id == 8 || 
+	solver_id == 12 || solver_id == 43)
    {
       time_index = hypre_InitializeTiming("PCG Setup");
       hypre_BeginTiming(time_index);
@@ -980,6 +1024,7 @@ main( int   argc,
       if (solver_id == 1)
       {
          /* use BoomerAMG as preconditioner */
+	 ioutdat = 1;
          if (myid == 0) printf("Solver: AMG-PCG\n");
          HYPRE_BoomerAMGCreate(&pcg_precond); 
          HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);
@@ -998,6 +1043,9 @@ main( int   argc,
          HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
          HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
+         HYPRE_BoomerAMGSetVariant(pcg_precond, variant);
+         HYPRE_BoomerAMGSetOverlap(pcg_precond, overlap);
+         HYPRE_BoomerAMGSetDomainType(pcg_precond, domain_type);
          if (num_functions > 1)
             HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
          HYPRE_PCGSetPrecond(pcg_solver,
@@ -1029,6 +1077,22 @@ main( int   argc,
          HYPRE_PCGSetPrecond(pcg_solver,
                              (HYPRE_PtrToSolverFcn) HYPRE_ParCSRParaSailsSolve,
                              (HYPRE_PtrToSolverFcn) HYPRE_ParCSRParaSailsSetup,
+                                   pcg_precond);
+	 hypre_TFree(smooth_option);
+      }
+      else if (solver_id == 12)
+      {
+         /* use ParaSails preconditioner */
+         if (myid == 0) printf("Solver: Schwarz-PCG\n");
+
+	 HYPRE_SchwarzCreate(&pcg_precond);
+	 HYPRE_SchwarzSetVariant(pcg_precond, variant);
+	 HYPRE_SchwarzSetOverlap(pcg_precond, overlap);
+	 HYPRE_SchwarzSetDomainType(pcg_precond, domain_type);
+
+         HYPRE_PCGSetPrecond(pcg_solver,
+                             (HYPRE_PtrToSolverFcn) HYPRE_SchwarzSolve,
+                             (HYPRE_PtrToSolverFcn) HYPRE_SchwarzSetup,
                                    pcg_precond);
 	 hypre_TFree(smooth_option);
       }
@@ -1099,6 +1163,10 @@ main( int   argc,
       {
 	 HYPRE_ParCSRParaSailsDestroy(pcg_precond);
       }
+      else if (solver_id == 12)
+      {
+	 HYPRE_SchwarzDestroy(pcg_precond);
+      }
       else if (solver_id == 43)
       {
         HYPRE_ParCSREuclidPrintParams(pcg_precond);
@@ -1153,6 +1221,9 @@ main( int   argc,
          HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
          HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
+         HYPRE_BoomerAMGSetVariant(pcg_precond, variant);
+         HYPRE_BoomerAMGSetOverlap(pcg_precond, overlap);
+         HYPRE_BoomerAMGSetDomainType(pcg_precond, domain_type);
          if (num_functions > 1)
             HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
          HYPRE_GMRESSetPrecond(pcg_solver,
@@ -1334,6 +1405,9 @@ main( int   argc,
          HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
          HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
+         HYPRE_BoomerAMGSetVariant(pcg_precond, variant);
+         HYPRE_BoomerAMGSetOverlap(pcg_precond, overlap);
+         HYPRE_BoomerAMGSetDomainType(pcg_precond, domain_type);
          if (num_functions > 1)
             HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
          HYPRE_BiCGSTABSetPrecond(pcg_solver,
@@ -1485,6 +1559,9 @@ main( int   argc,
          HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
          HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
+         HYPRE_BoomerAMGSetVariant(pcg_precond, variant);
+         HYPRE_BoomerAMGSetOverlap(pcg_precond, overlap);
+         HYPRE_BoomerAMGSetDomainType(pcg_precond, domain_type);
          if (num_functions > 1)
             HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
          HYPRE_CGNRSetPrecond(pcg_solver,
