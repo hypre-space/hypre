@@ -222,9 +222,9 @@ hypre_MatvecCommPkgCreate_core (
 
    )
 {
-   int	i, j, j2, k;
+   int	i, j;
    int	num_procs, my_id, proc_num, num_elmts;
-   int	local_info, index, index2, offset, offd_col;
+   int	local_info, offd_col;
    int	*proc_mark, *proc_add, *tmp, *recv_buf, *displs, *info;
    /* outputs: */
    int  num_recvs, * recv_procs, * recv_vec_starts;
@@ -310,7 +310,6 @@ hypre_MatvecCommPkgCreate_core (
 
 
    j = 0;
-   j2 = 0;
    if (num_recvs) recv_vec_starts[0] = 0;
    for (i=0; i < num_recvs; i++)
    {
