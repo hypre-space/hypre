@@ -26,7 +26,6 @@ to supply options to insure through the .psrc file.
     CFLAGS="$CFLAGS -g"
     CXXFLAGS="$CXXFLAGS -g"
     casc_using_debug=yes
-    casc_using_mpi=no
     ;;
   no) casc_user_chose_compilers=no
     ;;
@@ -36,7 +35,6 @@ to supply options to insure through the .psrc file.
     XCCFLAGS="$withval"
     XCXXFLAGS="$withval"
     casc_using_debug=yes
-    casc_using_mpi=no
     ;;
 esac])
 
@@ -98,7 +96,6 @@ To redirect output to the Viewer, use FLAGS="-windows=yes".
     CFLAGS="$CFLAGS -g"
     CXXFLAGS="$CXXFLAGS -g"
     casc_using_debug=yes
-    casc_using_mpi=no
     ;;
   no) casc_user_chose_compilers=no
     ;;
@@ -108,7 +105,6 @@ To redirect output to the Viewer, use FLAGS="-windows=yes".
     XCCFLAGS="$withval"
     XCXXFLAGS="$withval"
     casc_using_debug=yes
-    casc_using_mpi=no
     ;;
 esac])
 AC_ARG_WITH([purify-to-file],
@@ -122,7 +118,6 @@ AC_HELP_STRING(
     XCCFLAGS="-log-file=purify.log -append-logfile=yes -best-effort"
     XCXXFLAGS="-log-file=purify.log -append-logfile=yes -best-effort"
     casc_using_debug=yes
-    casc_using_mpi=no
     ;;
   no) casc_user_chose_compilers=no
     ;;
@@ -132,7 +127,6 @@ AC_HELP_STRING(
     XCCFLAGS="-log-file=purify.log -append-logfile=yes -best-effort"
     XCXXFLAGS="-log-file=purify.log -append-logfile=yes -best-effort"
     casc_using_debug=yes
-    casc_using_mpi=no
     ;;
 esac])
 ])
