@@ -27,9 +27,9 @@
 /* 
  * Function prototypes 
  */
-void dusolve(int, int, double*, double*);
-void dlsolve(int, int, double*, double*);
-void dmatvec(int, int, int, double*, double*, double*);
+void sludusolve(int, int, double*, double*);
+void sludlsolve(int, int, double*, double*);
+void sludmatvec(int, int, int, double*, double*, double*);
 
 
 void
@@ -208,8 +208,8 @@ dgstrs (char *trans, SuperMatrix *L, SuperMatrix *U,
 #else		
 		for (j = 0; j < nrhs; j++) {
 		    rhs_work = &Bmat[j*ldb];
-		    dlsolve (nsupr, nsupc, &Lval[luptr], &rhs_work[fsupc]);
-		    dmatvec (nsupr, nrow, nsupc, &Lval[luptr+nsupc],
+		    sludlsolve (nsupr, nsupc, &Lval[luptr], &rhs_work[fsupc]);
+		    sludmatvec (nsupr, nrow, nsupc, &Lval[luptr+nsupc],
 			    &rhs_work[fsupc], &work[0] );
 
 		    iptr = istart + nsupc;
@@ -261,7 +261,7 @@ dgstrs (char *trans, SuperMatrix *L, SuperMatrix *U,
 #endif
 #else		
 		for (j = 0; j < nrhs; j++)
-		    dusolve ( nsupr, nsupc, &Lval[luptr], &Bmat[fsupc+j*ldb] );
+		    sludusolve (nsupr, nsupc, &Lval[luptr], &Bmat[fsupc+j*ldb]);
 #endif		
 	    }
 

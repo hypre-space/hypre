@@ -20,9 +20,9 @@ extern int dtrsv_(char *,char *,char *,int *,double *,int *,double *,int *);
 /* 
  * Function prototypes 
  */
-void dusolve(int, int, double*, double*);
-void dlsolve(int, int, double*, double*);
-void dmatvec(int, int, int, double*, double*, double*);
+void sludusolve(int, int, double*, double*);
+void sludlsolve(int, int, double*, double*);
+void sludmatvec(int, int, int, double*, double*, double*);
 
 
 int
@@ -162,9 +162,9 @@ sp_dtrsv(char *uplo, char *trans, char *diag, SuperMatrix *L,
 		       	&nsupr, &x[fsupc], &incx, &beta, &work[0], &incy);
 #endif
 #else
-		    dlsolve ( nsupr, nsupc, &Lval[luptr], &x[fsupc]);
+		    sludlsolve ( nsupr, nsupc, &Lval[luptr], &x[fsupc]);
 		
-		    dmatvec ( nsupr, nsupr-nsupc, nsupc, &Lval[luptr+nsupc],
+		    sludmatvec ( nsupr, nsupr-nsupc, nsupc, &Lval[luptr+nsupc],
 			&x[fsupc], &work[0] );
 #endif		
 		
@@ -207,7 +207,7 @@ sp_dtrsv(char *uplo, char *trans, char *diag, SuperMatrix *L,
 		       &x[fsupc], &incx);
 #endif
 #else		
-		    dusolve ( nsupr, nsupc, &Lval[luptr], &x[fsupc] );
+		    sludusolve ( nsupr, nsupc, &Lval[luptr], &x[fsupc] );
 #endif		
 
 		    for (jcol = fsupc; jcol < L_FST_SUPC(k+1); jcol++) {
