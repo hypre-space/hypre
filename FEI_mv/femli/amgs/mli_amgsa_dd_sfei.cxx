@@ -57,10 +57,10 @@ extern "C"
 
 int MLI_Method_AMGSA::setupSFEIBasedNullSpaces( MLI *mli ) 
 {
-   int          k, iN, iD, iR, level, mypid, nElems, elemNNodes;
+   int          k, k2, iN, iD, iR, level, mypid, nElems, elemNNodes;
    int          iE, iN2, **elemNodeLists, *elemNodeList1D, totalNNodes;
    int          *partition, localStartRow, localNRows, *newElemNodeList;
-   int          *orderArray, eMatDim, newNNodes, *elemNodeList, count;
+   int          eMatDim, newNNodes, *elemNodeList, count, *orderArray;
    int          csrNrows, *csrIA, *csrJA, offset, rowSize;
    int          rowInd, colInd, colOffset, rowLeng, start, nSubdomains;
    double       **elemMatrices, *elemMat, *csrAA;
@@ -115,12 +115,20 @@ int MLI_Method_AMGSA::setupSFEIBasedNullSpaces( MLI *mli )
    free( partition );
 
    /* --------------------------------------------------------------- */
-   /* initialize null space vector                                    */
+   /* initialize null space vector and aggregation label              */
    /* --------------------------------------------------------------- */
   
    if ( nullspaceVec_ != NULL ) delete [] nullspaceVec_;
    nullspaceVec_ = new double[localNRows*nullspaceDim_];
    assert( nullspaceLen_ == localNRows );
+   if ( saLabels_ == NULL ) 
+   {
+      saLabels_ = new int*[maxLevels_];
+      for ( k = 0; k < maxLevels_; k++ ) saLabels_[k] = NULL;
+   }
+   if ( saLabels_[0] != NULL ) delete [] saLabels_[0];
+   saLabels_[0] = new int[localNRows];
+   for ( k = 0; k < localNRows; k++ ) saLabels_[0][k] = -1;
 
    /* --------------------------------------------------------------- */
    /* fetch SFEI information (nElems,elemIDs,elemNNodes,elemNodeLists)*/
@@ -144,35 +152,44 @@ int MLI_Method_AMGSA::setupSFEIBasedNullSpaces( MLI *mli )
       /* external nodes)                                        */
       /* ------------------------------------------------------ */
 
+      orderArray = new int[totalNNodes];
       newElemNodeList = new int[totalNNodes];
-      orderArray      = new int[totalNNodes];
-      for (iN = 0; iN < totalNNodes; iN++) 
+      for ( iN = 0; iN < totalNNodes; iN++ ) 
       {
          orderArray[iN] = iN;
          newElemNodeList[iN] = elemNodeList1D[iN];
       }
-      MLI_Utils_IntQSort2(newElemNodeList, orderArray, 0, totalNNodes-1);
-      newNNodes = 1;
+      MLI_Utils_IntQSort2(newElemNodeList,orderArray,0,totalNNodes-1);
+      elemNodeList1D[orderArray[0]] = 0;
+      newNNodes = 0;
       for ( iN = 1; iN < totalNNodes; iN++ )
       {
-         if (newElemNodeList[iN] != newElemNodeList[newNNodes-1]) 
-            newElemNodeList[newNNodes++] = newElemNodeList[iN];
+         if (newElemNodeList[iN] == newElemNodeList[newNNodes]) 
+            elemNodeList1D[orderArray[iN]] = newNNodes;
+         else 
+         {
+            newNNodes++;
+            elemNodeList1D[orderArray[iN]] = newNNodes;
+            newElemNodeList[newNNodes] = newElemNodeList[iN];
+         }
       }
+      if ( totalNNodes > 0 ) newNNodes++;
+      delete [] orderArray;
+      delete [] newElemNodeList;
 
       /* -------------------------------------------------------- */
       /* allocate and initialize subdomain matrix                 */
       /* -------------------------------------------------------- */
 
       eMatDim  = elemNNodes;
-      rowSize  = elemNNodes * 4;
+      rowSize  = elemNNodes * 8;
       csrNrows = newNNodes;
       csrIA    = new int[csrNrows+1];
       csrJA    = new int[csrNrows*rowSize];
       assert( csrJA != NULL );
       csrAA    = new double[csrNrows*rowSize];
       assert( csrAA != NULL );
-      csrIA[0] = 0;
-      for (iR = 1; iR < csrNrows; iR++) csrIA[iR] = csrIA[iR-1] + rowSize;
+      for (iR = 0; iR < csrNrows; iR++) csrIA[iR] = iR * rowSize;
 
       /* -------------------------------------------------------- */
       /* construct CSR matrix (with holes)                        */
@@ -184,17 +201,16 @@ int MLI_Method_AMGSA::setupSFEIBasedNullSpaces( MLI *mli )
          elemNodeList = elemNodeLists[iE];
          for ( iN = 0; iN < elemNNodes; iN++ )
          {
-            colInd = elemNodeList[iN];
-            colInd = MLI_Utils_BinarySearch(colInd,elemNodeList1D,newNNodes);
+            colInd = elemNodeList1D[iN+iE*elemNNodes];
             colOffset = eMatDim * iN;
             for ( iN2 = 0; iN2 < elemNNodes; iN2++ )
             {
-               rowInd = elemNodeList[iN2];
                if ( elemMat[colOffset+iN2] != 0.0 )
                {
+                  rowInd = elemNodeList1D[iN2+iE*elemNNodes];
                   offset = csrIA[rowInd]++;
                   csrJA[offset] = colInd;
-                  csrAA[offset] = elemMat[rowInd+colOffset];
+                  csrAA[offset] = elemMat[iN2+colOffset];
                }
             }
          }
@@ -205,7 +221,6 @@ int MLI_Method_AMGSA::setupSFEIBasedNullSpaces( MLI *mli )
       /* -------------------------------------------------------- */
 
       offset = 0;
-      csrIA[0] = 0;
       for ( iR = 0; iR < csrNrows; iR++ )
       {
          if ( csrIA[iR] > rowSize * (iR+1) )
@@ -217,29 +232,31 @@ int MLI_Method_AMGSA::setupSFEIBasedNullSpaces( MLI *mli )
             exit(1);
          }
          rowLeng = csrIA[iR] - iR * rowSize;
+         csrIA[iR] = offset;
          start = iR * rowSize;
+
          MLI_Utils_IntQSort2a(&(csrJA[start]),&(csrAA[start]),0,rowLeng-1);
          count = start;
-         for ( iD = start+1; iD < start+rowLeng; iD++ )
+         for ( k = start+1; k < start+rowLeng; k++ )
          {
-            if ( csrJA[iD] == csrJA[count] ) csrAA[count] += csrAA[iD]; 
+            if ( csrJA[k] == csrJA[count] ) csrAA[count] += csrAA[k]; 
             else
             {
                count++;
-               csrJA[count] = csrJA[iD];
-               csrAA[count] = csrAA[iD];
+               csrJA[count] = csrJA[k];
+               csrAA[count] = csrAA[k];
             }
          }
          if ( rowLeng > 0 ) count = count - start + 1;
          else               count = 0;
-         for ( iD = offset; iD < offset+count; iD++ )
+         for ( k = 0; k < count; k++ )
          {
-            csrJA[iD] = csrJA[start+iD];
-            csrAA[iD] = csrAA[start+iD];
+            csrJA[offset+k] = csrJA[start+k];
+            csrAA[offset+k] = csrAA[start+k];
          }
          offset += count;
-         csrIA[iR+1] = offset;
       }
+      csrIA[csrNrows] = offset;
 
       /* -------------------------------------------------------- */
       /* change from base-0 to base-1 indexing for Fortran call   */
@@ -247,12 +264,19 @@ int MLI_Method_AMGSA::setupSFEIBasedNullSpaces( MLI *mli )
 
       for ( iR = 0; iR < csrIA[csrNrows]; iR++ ) csrJA[iR]++;
       for ( iR = 0; iR <= csrNrows; iR++ ) csrIA[iR]++;
+#if 1
+      FILE *fptr = fopen("arpackMat", "w");
+      for ( iR = 0; iR < csrNrows; iR++ ) 
+         for ( k = csrIA[iR]; k < csrIA[iR+1]; k++ )
+            fprintf(fptr,"A(%10d,%10d) = %18.10e\n",iR,csrJA[k],csrAA[k]);
+      fclose(fptr);
+#endif
 
       /* -------------------------------------------------------- */
       /* compute near null spaces                                 */
       /* -------------------------------------------------------- */
 
-      strcpy( which, "shift" );
+      strcpy( which, "Shift" );
       eigenR = new double[nullspaceDim_+1];
       eigenI = new double[nullspaceDim_+1];
       eigenV = new double[csrNrows*(nullspaceDim_+1)];
@@ -263,15 +287,20 @@ int MLI_Method_AMGSA::setupSFEIBasedNullSpaces( MLI *mli )
       sigmaI = 0.0e-1;
       dnstev_(&csrNrows, &nullspaceDim_, which, &sigmaR, &sigmaI, 
            csrIA, csrJA, csrAA, eigenR, eigenI, eigenV, &csrNrows, &info);
+      if ( mypid == 0 && outputLevel_ > 0 && iD == 0 )
+      {
+         for ( k = 0; k < nullspaceDim_; k++ )
+         printf("\tARPACK eigenvalues %2d = %e\n", k, eigenR[k]);
+      }
 #else
       printf("MLI_Method_AMGSA::FATAL ERROR : ARPACK not installed.\n");
       exit(1);
 #endif
 
-      strcpy( which, "destroy" );
+//    strcpy( which, "destroy" );
 #ifdef MLI_ARPACK
-      dnstev_(&csrNrows, &nullspaceDim_, which, &sigmaR, &sigmaI, 
-              csrIA, csrJA, csrAA, eigenR, eigenI, eigenV, &csrNrows, &info);
+//    dnstev_(&csrNrows, &nullspaceDim_, which, &sigmaR, &sigmaI, 
+//            csrIA, csrJA, csrAA, eigenR, eigenI, eigenV, &csrNrows, &info);
 #else
       printf("MLI_Method_AMGSA::FATAL ERROR : ARPACK not installed.\n");
       exit(1);
@@ -282,31 +311,45 @@ int MLI_Method_AMGSA::setupSFEIBasedNullSpaces( MLI *mli )
       delete [] csrIA;
       delete [] csrJA;
       delete [] csrAA;
-      delete [] orderArray;
-      delete [] elemNodeList1D;
 
       /* -------------------------------------------------------- */
       /* load the null space vectors                              */
       /* -------------------------------------------------------- */
 
-      for ( iN = 0; iN < totalNNodes; iN++ )
+      if ( nullspaceLen_ == 0 ) nullspaceLen_ = localNRows;
+      if ( nullspaceVec_ == NULL ) 
+         nullspaceVec_ = new double[nullspaceLen_ * nullspaceDim_];
+      for ( iE = 0; iE < nElems; iE++ )
       {
-         rowInd = newElemNodeList[iN];
-         rowInd -= localStartRow;
-         if ( rowInd >= 0 && rowInd < localNRows )
+         elemNodeList = elemNodeLists[iE];
+         for ( iN = 0; iN < elemNNodes; iN++ )
          {
-            for ( k = 0; k < nullspaceDim_; k++ )
-               nullspaceVec_[rowInd+k*nullspaceLen_] = 
-                     eigenV[iN+k*csrNrows];
+            rowInd = elemNodeList[iN] - localStartRow;
+            if ( rowInd >= 0 && rowInd < localNRows )
+            {
+               saLabels_[0][rowInd] = iD;
+               colInd = elemNodeList1D[iE*elemNNodes+iN];
+               for ( k = 0; k < nullspaceDim_; k++ )
+                  nullspaceVec_[rowInd+k*nullspaceLen_] = 
+                        eigenV[colInd+k*csrNrows];
+            }
          }
       }
+      delete [] elemNodeList1D;
+#if 0
+      FILE *fptr2 = fopen("arpackEigenV", "w");
+      for ( k = 0; k < nullspaceDim_; k++ ) 
+         for ( k2 = 0; k2 < nullspaceLen_; k2++ )
+            fprintf(fptr2,"%10d %18.10\n", saLabels_[0][k2], 
+                    nullspaceVec_[nullspaceLen_*k+k2]);
+      fclose(fptr2);
+#endif
 
       /* -------------------------------------------------------- */
       /* clean up                                                 */
       /* -------------------------------------------------------- */
 
       delete [] eigenV;
-      delete [] newElemNodeList;
    }
 
 #ifdef MLI_DEBUG_DETAILED
