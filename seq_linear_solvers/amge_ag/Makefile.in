@@ -58,6 +58,7 @@ FILES =\
  matrix_topology.c\
  AMGe_matrix_topology.c\
  amge_initial_graphs.c\
+ amge_initial_triangular_elements_graphs.c\
  boundarysurfaces.c\
  amge_coarsen_topology.c\
  transpose_matrix_create.c\
