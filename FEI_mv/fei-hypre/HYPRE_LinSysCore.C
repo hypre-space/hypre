@@ -85,6 +85,7 @@ extern "C" {
 
    int   getMatrixCSR(HYPRE_IJMatrix,int nrows,int nnz,int*,int*,double*);
    int   HYPRE_LSI_Search(int*, int, int);
+   int   HYPRE_LSI_Sort(int*, int, int *, double *);
    void  HYPRE_LSI_Get_IJAMatrixFromFile(double **val, int **ia, int **ja, 
                   int *N, double **rhs, char *matfile, char *rhsfile);
 
@@ -1228,6 +1229,14 @@ void HYPRE_LinSysCore::createMatricesAndVectors(int numGlobalEqns,
           delete [] HYbs_;
           HYbs_ = NULL;
        }
+       if (reducedA_ != NULL) {HYPRE_IJMatrixDestroy(reducedA_); reducedA_ = NULL;}
+       if (reducedB_ != NULL) {HYPRE_IJVectorDestroy(reducedB_); reducedB_ = NULL;}
+       if (reducedX_ != NULL) {HYPRE_IJVectorDestroy(reducedX_); reducedX_ = NULL;}
+       if (reducedR_ != NULL) {HYPRE_IJVectorDestroy(reducedR_); reducedR_ = NULL;}
+       if (HYA21_    != NULL) {HYPRE_IJMatrixDestroy(HYA21_);    HYA21_    = NULL;}
+       if (HYA12_    != NULL) {HYPRE_IJMatrixDestroy(HYA12_);    HYA12_    = NULL;}
+       if (HYinvA22_ != NULL) {HYPRE_IJMatrixDestroy(HYinvA22_); HYinvA22_ = NULL;}
+       A21NRows_ = A21NCols_ = reducedAStartRow_ = 0;
     }
 
     //-------------------------------------------------------------------
@@ -1571,6 +1580,19 @@ void HYPRE_LinSysCore::resetMatrixAndVector(double s)
     assert(!ierr);
 
     //-------------------------------------------------------------------
+    // clean the reducetion stuff
+    //-------------------------------------------------------------------
+
+    if (reducedA_ != NULL) {HYPRE_IJMatrixDestroy(reducedA_); reducedA_ = NULL;}
+    if (reducedB_ != NULL) {HYPRE_IJVectorDestroy(reducedB_); reducedB_ = NULL;}
+    if (reducedX_ != NULL) {HYPRE_IJVectorDestroy(reducedX_); reducedX_ = NULL;}
+    if (reducedR_ != NULL) {HYPRE_IJVectorDestroy(reducedR_); reducedR_ = NULL;}
+    if (HYA21_    != NULL) {HYPRE_IJMatrixDestroy(HYA21_);    HYA21_    = NULL;}
+    if (HYA12_    != NULL) {HYPRE_IJMatrixDestroy(HYA12_);    HYA12_    = NULL;}
+    if (HYinvA22_ != NULL) {HYPRE_IJMatrixDestroy(HYinvA22_); HYinvA22_ = NULL;}
+    A21NRows_ = A21NCols_ = reducedAStartRow_ = 0;
+
+    //-------------------------------------------------------------------
     // allocate space for storing the matrix coefficient
     //-------------------------------------------------------------------
 
@@ -1588,7 +1610,7 @@ void HYPRE_LinSysCore::resetMatrixAndVector(double s)
 }
 
 //***************************************************************************
-// new function to reset matrix and vectors independently
+// new function to reset matrix independently
 //---------------------------------------------------------------------------
 
 void HYPRE_LinSysCore::resetMatrix(double s) 
@@ -1609,6 +1631,19 @@ void HYPRE_LinSysCore::resetMatrix(double s)
     systemAssembled_ = 0;
     schurReductionCreated_ = 0;
     projectCurrSize_ = 0;
+
+    //-------------------------------------------------------------------
+    // clean the reducetion stuff
+    //-------------------------------------------------------------------
+
+    if (reducedA_ != NULL) {HYPRE_IJMatrixDestroy(reducedA_); reducedA_ = NULL;}
+    if (reducedB_ != NULL) {HYPRE_IJVectorDestroy(reducedB_); reducedB_ = NULL;}
+    if (reducedX_ != NULL) {HYPRE_IJVectorDestroy(reducedX_); reducedX_ = NULL;}
+    if (reducedR_ != NULL) {HYPRE_IJVectorDestroy(reducedR_); reducedR_ = NULL;}
+    if (HYA21_    != NULL) {HYPRE_IJMatrixDestroy(HYA21_);    HYA21_    = NULL;}
+    if (HYA12_    != NULL) {HYPRE_IJMatrixDestroy(HYA12_);    HYA12_    = NULL;}
+    if (HYinvA22_ != NULL) {HYPRE_IJMatrixDestroy(HYinvA22_); HYinvA22_ = NULL;}
+    A21NRows_ = A21NCols_ = reducedAStartRow_ = 0;
 
     //-------------------------------------------------------------------
     // for now, since HYPRE does not yet support
@@ -1640,6 +1675,10 @@ void HYPRE_LinSysCore::resetMatrix(double s)
        printf("%4d : HYPRE_LSC::leaving  resetMatrix.\n", mypid_);
     }
 }
+
+//***************************************************************************
+// new function to reset vectors independently
+//---------------------------------------------------------------------------
 
 void HYPRE_LinSysCore::resetRHSVector(double s) 
 {
@@ -5221,12 +5260,20 @@ void HYPRE_LinSysCore::putIntoMappedMatrix(int row, int numValues,
        if ( mapFromSolnList_ != NULL ) mappedCol = mapFromSolnList2_[ind2];
        else                            mappedCol = colIndex;
 
-       colIndices_[localRow][index] = mappedCol + 1;
-       colValues_[localRow][index++] = values[i];
+       ind2 = HYPRE_LSI_Search(colIndices_[localRow],mappedCol,index);
+       if ( ind2 >= 0 ) 
+          colValues_[localRow][ind2] = values[i];
+       else
+       {
+          ind2 = index;
+          colIndices_[localRow][index] = mappedCol + 1;
+          colValues_[localRow][index++] = values[i];
+          HYPRE_LSI_Sort(colIndices_[localRow],index,NULL,colValues_[localRow]);
+       }
        if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 0 )
           printf("%4d : putIntoMappedMatrix : row, col = %8d %8d %e\n",
-                 mypid_, localRow, colIndices_[localRow][index-1],
-                 colValues_[localRow][index-1]);
+                 mypid_, localRow, colIndices_[localRow][ind2],
+                 colValues_[localRow][ind2]);
     }
     rowLengths_[localRow] = newLeng;
 }
