@@ -13,7 +13,6 @@
 srcdir = @srcdir@
 VPATH = @srcdir@
  
- 
 CC = @CC@
  
 CINCLUDES=@INCLUDES@ @MPIINCLUDE@
@@ -39,7 +38,7 @@ LFLAGS =\
  -L.\
  -L../seq_matrix_vector\
  -L../utilities\
- -lHYPRE_parmv\
+ -lHYPRE_parcsr_mv\
  -lHYPRE_mv\
  -lHYPRE_utilities\
  -lmpe\
@@ -51,14 +50,20 @@ HEADERS =\
  headers.h\
  par_csr_matrix.h\
  par_vector.h\
- protos.h
+ hypre_parcsr_mv.h\
+ HYPRE_parcsr_mv.h
 
 FILES =\
+ driver.c\
+ driver_matmul.c\
+ driver_matvec.c\
  communication.c\
  par_csr_matop.c\
  par_csr_matrix.c\
  par_csr_matvec.c\
- par_vector.c
+ par_vector.c\
+ HYPRE_parcsr_matrix.c\
+ HYPRE_parcsr_vector.c
 
 OBJS = ${FILES:.c=.o}
 
@@ -66,36 +71,34 @@ OBJS = ${FILES:.c=.o}
 # Targets
 ##################################################################
 
-all: libHYPRE_parmv.a
+all: libHYPRE_parcsr_mv.a
  
 install: all
-	@cp -f HYPRE_*.h hypre_*.h $$HYPRE_INSTALL_DIR/include
-	@cp -f libHYPRE_*.a $$HYPRE_INSTALL_DIR/lib
  
 clean:
 	@rm -f *.o
 
 veryclean: clean
-	@rm -f libHYPRE_parmv.a
-	@rm -f test test_matvec test_matmul
+	@rm -f driver driver_matvec driver_matmul
+	@rm -f libHYPRE_parcsr_mv.a
 
 ##################################################################
 # Rules
 ##################################################################
 
-test: driver.o libHYPRE_parmv.a 
+driver: driver.o libHYPRE_parcsr_mv.a 
 	@echo  "Linking" $@ "... "
-	${CC} -o test driver.o ${LFLAGS} 
+	${CC} -o driver driver.o ${LFLAGS} 
 
-test_matvec: driver_matvec.o libHYPRE_parmv.a
+driver_matvec: driver_matvec.o libHYPRE_parcsr_mv.a
 	@echo  "Linking" $@ "... "
-	${CC} -o test_matvec driver_matvec.o ${LFLAGS} 
+	${CC} -o driver_matvec driver_matvec.o ${LFLAGS} 
 
-test_matmul: driver_matmul.o libHYPRE_parmv.a
+driver_matmul: driver_matmul.o libHYPRE_parcsr_mv.a
 	@echo  "Linking" $@ "... "
-	${CC} -o test_matmul driver_matmul.o ${LFLAGS} 
+	${CC} -o driver_matmul driver_matmul.o ${LFLAGS} 
 
-libHYPRE_parmv.a: ${OBJS}
+libHYPRE_parcsr_mv.a: ${OBJS}
 	@echo  "Building $@ ... "
 	ar -ru $@ ${OBJS}
 	ranlib $@
@@ -109,8 +112,4 @@ ${OBJS}: ${HEADERS}
 .c.o:
 	@echo "Making (c) " $@
 	@${CC} -o $@ -c ${CFLAGS} $<
-
-.f.${AMG_ARCH}.o:
-	@echo "Making (f) " $@
-	@${F77} -o $@ -c ${FFLAGS} $<
 

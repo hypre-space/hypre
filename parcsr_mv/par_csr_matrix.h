@@ -15,6 +15,9 @@
  *
  *****************************************************************************/
 
+#ifndef hypre_PAR_CSR_MATRIX_HEADER
+#define hypre_PAR_CSR_MATRIX_HEADER
+
 /*--------------------------------------------------------------------------
  * Parallel CSR Matrix
  *--------------------------------------------------------------------------*/
@@ -70,4 +73,12 @@ typedef struct
 #define hypre_ParCSRMatrixOwnsData(matrix)        ((matrix) -> owns_data)
 #define hypre_ParCSRMatrixOwnsRowStarts(matrix)   ((matrix) -> owns_row_starts)
 #define hypre_ParCSRMatrixOwnsColStarts(matrix)   ((matrix) -> owns_col_starts)
+#define hypre_ParCSRMatrixNumRows(matrix) \
+hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(matrix))
+#define hypre_ParCSRMatrixNumCols(matrix) \
+hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(matrix))
 
+/* need to add */
+#define hypre_ParCSRMatrixNumNonzeros(matrix) 1
+
+#endif

@@ -99,7 +99,7 @@ main( int   argc,
     * Do an inner product vector* tmp_vector
     *-----------------------------------------------------------*/
 
-   prod = hypre_ParInnerProd(MPI_COMM_WORLD, vector1, tmp_vector);
+   prod = hypre_ParInnerProd(vector1, tmp_vector);
 
    printf (" prod: %8.2f \n", prod);
 

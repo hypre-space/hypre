@@ -253,10 +253,11 @@ hypre_ParAxpy( double        alpha,
  * hypre_ParInnerProd
  *--------------------------------------------------------------------------*/
 
-double   hypre_ParInnerProd( MPI_Comm comm,
-			     hypre_ParVector *x,
-                             hypre_ParVector *y )
+double
+hypre_ParInnerProd( hypre_ParVector *x,
+                    hypre_ParVector *y )
 {
+   MPI_Comm      comm    = hypre_ParVectorComm(x);
    hypre_Vector *x_local = hypre_ParVectorLocalVector(x);
    hypre_Vector *y_local = hypre_ParVectorLocalVector(y);
            

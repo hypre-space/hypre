@@ -1,0 +1,57 @@
+#!/bin/sh
+#BHEADER***********************************************************************
+# (c) 1998   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+INTERNAL_HEADER=hypre_parcsr_mv.h
+
+#===========================================================================
+# Include guards and other includes
+#===========================================================================
+
+cat > $INTERNAL_HEADER <<@
+
+#include "HYPRE_parcsr_mv.h"
+
+#ifndef hypre_PARCSR_MV_HEADER
+#define hypre_PARCSR_MV_HEADER
+
+#include "hypre_utilities.h"
+#include "mpe.h"                   /* need to get rid of this */
+#include "hypre_mv.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+@
+
+#===========================================================================
+# Structures and prototypes
+#===========================================================================
+
+cat communication.h           >> $INTERNAL_HEADER	
+cat par_vector.h              >> $INTERNAL_HEADER	
+cat par_csr_matrix.h          >> $INTERNAL_HEADER	
+
+mkproto *.c                   >> $INTERNAL_HEADER
+
+#===========================================================================
+# Include guards
+#===========================================================================
+
+cat >> $INTERNAL_HEADER <<@
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif
+
+@
+

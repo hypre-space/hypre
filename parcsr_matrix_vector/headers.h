@@ -11,23 +11,6 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "mpi.h"
-#include "mpe.h"
-
-#include "communication.h"
-#include "../utilities/hypre_utilities.h"
-#include "../seq_matrix_vector/HYPRE_mv.h"
- 
-#include "../seq_matrix_vector/csr_matrix.h"
-#include "../seq_matrix_vector/mapped_matrix.h"
-#include "../seq_matrix_vector/multiblock_matrix.h"
-#include "../seq_matrix_vector/vector.h"
- 
-#include "../seq_matrix_vector/protos.h"
-
-#include "par_vector.h"
-#include "par_csr_matrix.h"
-
-#include "protos.h"
+#include "hypre_parcsr_mv.h"
 
 
