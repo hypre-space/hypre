@@ -102,20 +102,21 @@ hypre_SMGResidualSetup( void               *residual_vdata,
    base_points = hypre_DuplicateBoxArray(hypre_StructGridBoxes(grid));
    hypre_ProjectBoxArray(base_points, base_index, base_stride);
 
-   hypre_GetComputeInfo(&send_boxes, &recv_boxes,
+   hypre_GetComputeInfo(grid, stencil,
+                        &send_boxes, &recv_boxes,
                         &send_processes, &recv_processes,
-                        &indt_boxes, &dept_boxes,
-                        grid, stencil);
+                        &indt_boxes, &dept_boxes);
 
    hypre_ProjectBoxArrayArray(indt_boxes, base_index, base_stride);
    hypre_ProjectBoxArrayArray(dept_boxes, base_index, base_stride);
 
-   compute_pkg = hypre_NewComputePkg(send_boxes, recv_boxes,
-                                     unit_stride, unit_stride,
-                                     send_processes, recv_processes,
-                                     indt_boxes, dept_boxes,
-                                     base_stride, grid,
-                                     hypre_StructVectorDataSpace(x), 1);
+   hypre_NewComputePkg(send_boxes, recv_boxes,
+                       unit_stride, unit_stride,
+                       send_processes, recv_processes,
+                       indt_boxes, dept_boxes,
+                       base_stride, grid,
+                       hypre_StructVectorDataSpace(x), 1,
+                       &compute_pkg);
 
    /*----------------------------------------------------------
     * Set up the residual data structure
@@ -223,7 +224,7 @@ hypre_SMGResidual( void               *residual_vdata,
          case 0:
          {
             xp0 = hypre_StructVectorData(x);
-            comm_handle = hypre_InitializeIndtComputations(compute_pkg, xp0);
+            hypre_InitializeIndtComputations(compute_pkg, xp0, &comm_handle);
             compute_box_aa = hypre_ComputePkgIndtBoxes(compute_pkg);
 
             /*----------------------------------------

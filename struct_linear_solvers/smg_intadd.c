@@ -107,10 +107,10 @@ hypre_SMGIntAddSetup( void               *intadd_vdata,
    hypre_CopyIndex(stencil_PT_shape[1], stencil_shape[0]);
    stencil = hypre_NewStructStencil(stencil_dim, stencil_size, stencil_shape);
 
-   hypre_GetComputeInfo(&send_boxes, &recv_boxes,
+   hypre_GetComputeInfo(grid, stencil,
+                        &send_boxes, &recv_boxes,
                         &temp_send_processes, &temp_recv_processes,
-                        &indt_boxes, &dept_boxes,
-                        grid, stencil);
+                        &indt_boxes, &dept_boxes);
 
    hypre_FreeStructStencil(stencil);
 
@@ -145,12 +145,13 @@ hypre_SMGIntAddSetup( void               *intadd_vdata,
    hypre_TFree(temp_send_processes);
    hypre_TFree(temp_recv_processes);
 
-   compute_pkg = hypre_NewComputePkg(send_boxes, recv_boxes,
-                                     stride, stride,
-                                     send_processes, recv_processes,
-                                     indt_boxes, dept_boxes,
-                                     stride, grid,
-                                     hypre_StructVectorDataSpace(e), 1);
+   hypre_NewComputePkg(send_boxes, recv_boxes,
+                       stride, stride,
+                       send_processes, recv_processes,
+                       indt_boxes, dept_boxes,
+                       stride, grid,
+                       hypre_StructVectorDataSpace(e), 1,
+                       &compute_pkg);
 
    /*----------------------------------------------------------
     * Set up the coarse points BoxArray
@@ -305,7 +306,7 @@ hypre_SMGIntAdd( void               *intadd_vdata,
          case 0:
          {
             ep = hypre_StructVectorData(e);
-            comm_handle = hypre_InitializeIndtComputations(compute_pkg, ep);
+            hypre_InitializeIndtComputations(compute_pkg, ep, &comm_handle);
             compute_box_aa = hypre_ComputePkgIndtBoxes(compute_pkg);
          }
          break;

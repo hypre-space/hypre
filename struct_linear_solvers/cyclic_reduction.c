@@ -622,41 +622,41 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
       hypre_CycRedSetFIndex(base_index, base_stride, l, cdir, findex);
       hypre_CycRedSetStride(base_index, base_stride, l, cdir, stride);
 
-      hypre_GetComputeInfo(&send_boxes, &recv_boxes,
+      hypre_GetComputeInfo(grid_l[l], hypre_StructMatrixStencil(A_l[l]),
+                           &send_boxes, &recv_boxes,
                            &send_processes, &recv_processes,
-                           &indt_boxes, &dept_boxes,
-                           grid_l[l], hypre_StructMatrixStencil(A_l[l]));
+                           &indt_boxes, &dept_boxes);
  
       /* down-cycle */
       hypre_ProjectBoxArrayArray(send_boxes, findex, stride);
       hypre_ProjectBoxArrayArray(recv_boxes, findex, stride);
       hypre_ProjectBoxArrayArray(indt_boxes, cindex, stride);
       hypre_ProjectBoxArrayArray(dept_boxes, cindex, stride);
-      down_compute_pkg_l[l] =
-         hypre_NewComputePkg(send_boxes, recv_boxes,
-                             stride, stride,
-                             send_processes, recv_processes,
-                             indt_boxes, dept_boxes,
-                             stride, grid_l[l],
-                             hypre_StructVectorDataSpace(x_l[l]), 1);
+      hypre_NewComputePkg(send_boxes, recv_boxes,
+                          stride, stride,
+                          send_processes, recv_processes,
+                          indt_boxes, dept_boxes,
+                          stride, grid_l[l],
+                          hypre_StructVectorDataSpace(x_l[l]), 1,
+                          &down_compute_pkg_l[l]);
 
-      hypre_GetComputeInfo(&send_boxes, &recv_boxes,
+      hypre_GetComputeInfo(grid_l[l], hypre_StructMatrixStencil(A_l[l]),
+                           &send_boxes, &recv_boxes,
                            &send_processes, &recv_processes,
-                           &indt_boxes, &dept_boxes,
-                           grid_l[l], hypre_StructMatrixStencil(A_l[l]));
+                           &indt_boxes, &dept_boxes);
 
       /* up-cycle */
       hypre_ProjectBoxArrayArray(send_boxes, cindex, stride);
       hypre_ProjectBoxArrayArray(recv_boxes, cindex, stride);
       hypre_ProjectBoxArrayArray(indt_boxes, findex, stride);
       hypre_ProjectBoxArrayArray(dept_boxes, findex, stride);
-      up_compute_pkg_l[l] =
-         hypre_NewComputePkg(send_boxes, recv_boxes,
-                             stride, stride,
-                             send_processes, recv_processes,
-                             indt_boxes, dept_boxes,
-                             stride, grid_l[l],
-                             hypre_StructVectorDataSpace(x_l[l]), 1);
+      hypre_NewComputePkg(send_boxes, recv_boxes,
+                          stride, stride,
+                          send_processes, recv_processes,
+                          indt_boxes, dept_boxes,
+                          stride, grid_l[l],
+                          hypre_StructVectorDataSpace(x_l[l]), 1,
+                          &up_compute_pkg_l[l]);
    }
 
    (cyc_red_data -> down_compute_pkg_l) = down_compute_pkg_l;
@@ -876,8 +876,8 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
             case 0:
             {
                xp = hypre_StructVectorData(x_l[l]);
-               comm_handle =
-                  hypre_InitializeIndtComputations(down_compute_pkg_l[l], xp);
+               hypre_InitializeIndtComputations(down_compute_pkg_l[l], xp,
+                                                &comm_handle);
                compute_box_aa =
                   hypre_ComputePkgIndtBoxes(down_compute_pkg_l[l]);
             }
@@ -991,8 +991,8 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
             case 0:
             {
                xp = hypre_StructVectorData(x_l[l]);
-               comm_handle =
-                  hypre_InitializeIndtComputations(up_compute_pkg_l[l], xp);
+               hypre_InitializeIndtComputations(up_compute_pkg_l[l], xp,
+                                                &comm_handle);
                compute_box_aa =
                   hypre_ComputePkgIndtBoxes(up_compute_pkg_l[l]);
             }

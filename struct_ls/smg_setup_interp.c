@@ -213,22 +213,22 @@ hypre_SMGSetupInterpOp( void               *relax_data,
        *-----------------------------------------------------*/
 
       hypre_CopyIndex(PT_stencil_shape[si], compute_pkg_stencil_shape[0]);
-      hypre_GetComputeInfo(&send_boxes, &recv_boxes,
+      hypre_GetComputeInfo(fgrid, compute_pkg_stencil,
+                           &send_boxes, &recv_boxes,
                            &send_processes, &recv_processes,
-                           &indt_boxes, &dept_boxes,
-                           fgrid, compute_pkg_stencil);
+                           &indt_boxes, &dept_boxes);
  
       hypre_ProjectBoxArrayArray(send_boxes, findex, stride);
       hypre_ProjectBoxArrayArray(recv_boxes, findex, stride);
       hypre_ProjectBoxArrayArray(indt_boxes, cindex, stride);
       hypre_ProjectBoxArrayArray(dept_boxes, cindex, stride);
-      compute_pkg =
-         hypre_NewComputePkg(send_boxes, recv_boxes,
-                             stride, stride,
-                             send_processes, recv_processes,
-                             indt_boxes, dept_boxes,
-                             stride, fgrid,
-                             hypre_StructVectorDataSpace(x), 1);
+      hypre_NewComputePkg(send_boxes, recv_boxes,
+                          stride, stride,
+                          send_processes, recv_processes,
+                          indt_boxes, dept_boxes,
+                          stride, fgrid,
+                          hypre_StructVectorDataSpace(x), 1,
+                          &compute_pkg);
 
       /*-----------------------------------------------------
        * Copy coefficients from x into P^T
@@ -241,7 +241,7 @@ hypre_SMGSetupInterpOp( void               *relax_data,
             case 0:
             {
                xp = hypre_StructVectorData(x);
-               comm_handle = hypre_InitializeIndtComputations(compute_pkg, xp);
+               hypre_InitializeIndtComputations(compute_pkg, xp, &comm_handle);
                compute_box_aa = hypre_ComputePkgIndtBoxes(compute_pkg);
             }
             break;

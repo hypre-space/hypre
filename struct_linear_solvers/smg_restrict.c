@@ -84,22 +84,23 @@ hypre_SMGRestrictSetup( void               *restrict_vdata,
    grid    = hypre_StructVectorGrid(r);
    stencil = hypre_StructMatrixStencil(R);
 
-   hypre_GetComputeInfo(&send_boxes, &recv_boxes,
+   hypre_GetComputeInfo(grid, stencil,
+                        &send_boxes, &recv_boxes,
                         &send_processes, &recv_processes,
-                        &indt_boxes, &dept_boxes,
-                        grid, stencil);
+                        &indt_boxes, &dept_boxes);
 
    hypre_ProjectBoxArrayArray(send_boxes, findex, stride);
    hypre_ProjectBoxArrayArray(recv_boxes, findex, stride);
    hypre_ProjectBoxArrayArray(indt_boxes, cindex, stride);
    hypre_ProjectBoxArrayArray(dept_boxes, cindex, stride);
 
-   compute_pkg = hypre_NewComputePkg(send_boxes, recv_boxes,
-                                     stride, stride,
-                                     send_processes, recv_processes,
-                                     indt_boxes, dept_boxes,
-                                     stride, grid,
-                                     hypre_StructVectorDataSpace(r), 1);
+   hypre_NewComputePkg(send_boxes, recv_boxes,
+                       stride, stride,
+                       send_processes, recv_processes,
+                       indt_boxes, dept_boxes,
+                       stride, grid,
+                       hypre_StructVectorDataSpace(r), 1,
+                       &compute_pkg);
 
    /*----------------------------------------------------------
     * Set up the intadd data structure
@@ -190,7 +191,7 @@ hypre_SMGRestrict( void               *restrict_vdata,
          case 0:
          {
             rp = hypre_StructVectorData(r);
-            comm_handle = hypre_InitializeIndtComputations(compute_pkg, rp);
+            hypre_InitializeIndtComputations(compute_pkg, rp, &comm_handle);
             compute_box_aa = hypre_ComputePkgIndtBoxes(compute_pkg);
          }
          break;
