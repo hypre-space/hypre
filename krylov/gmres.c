@@ -82,10 +82,11 @@ hypre_GMRESCreate( hypre_GMRESFunctions *gmres_functions )
    (gmres_data -> tol)            = 1.0e-06;
    (gmres_data -> min_iter)       = 0;
    (gmres_data -> max_iter)       = 1000;
-   (gmres_data -> rel_change)   = 0;
+   (gmres_data -> rel_change)     = 0;
    (gmres_data -> stop_crit)      = 0; /* rel. residual norm */
    (gmres_data -> precond_data)   = NULL;
-   (gmres_data -> logging)        = 0;
+   (gmres_data -> printlevel)     = 0;
+   (gmres_data -> log_level)      = 0;
    (gmres_data -> p)              = NULL;
    (gmres_data -> r)              = NULL;
    (gmres_data -> w)              = NULL;
@@ -109,7 +110,7 @@ hypre_GMRESDestroy( void *gmres_vdata )
  
    if (gmres_data)
    {
-      if ((gmres_data -> logging) > 0)
+      if ( (gmres_data->log_level>0) || (gmres_data->printlevel) > 0 )
       {
          hypre_TFreeF( gmres_data -> norms, gmres_functions );
       }
@@ -128,6 +129,19 @@ hypre_GMRESDestroy( void *gmres_vdata )
    }
  
    return(ierr);
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_GMRESGetResidual
+ *--------------------------------------------------------------------------*/
+
+int hypre_GMRESGetResidual( void *gmres_vdata, void **residual )
+{
+   /* returns a pointer to the residual vector */
+   int ierr = 0;
+   hypre_GMRESData  *gmres_data     = gmres_vdata;
+   *residual = gmres_data->r;
+   return ierr;
 }
 
 /*--------------------------------------------------------------------------
@@ -173,10 +187,12 @@ hypre_GMRESSetup( void *gmres_vdata,
     * Allocate space for log info
     *-----------------------------------------------------*/
  
-   if ((gmres_data -> logging) > 0)
+   if ( (gmres_data->log_level)>0 || (gmres_data->printlevel) > 0 )
    {
       if ((gmres_data -> norms) == NULL)
          (gmres_data -> norms) = hypre_CTAllocF(double, max_iter + 1,gmres_functions);
+   }
+   if ( (gmres_data->printlevel) > 0 ) {
       if ((gmres_data -> log_file_name) == NULL)
          (gmres_data -> log_file_name) = "gmres.out.log";
    }
@@ -211,8 +227,9 @@ hypre_GMRESSolve(void  *gmres_vdata,
    int 	           (*precond)()   = (gmres_functions -> precond);
    int 	            *precond_data = (gmres_data -> precond_data);
 
-   /* logging variables */
-   int             logging        = (gmres_data -> logging);
+   int             printlevel     = (gmres_data -> printlevel);
+   int             log_level      = (gmres_data -> log_level);
+
    double         *norms          = (gmres_data -> norms);
 /* not used yet   char           *log_file_name  = (gmres_data -> log_file_name);*/
 /*   FILE           *fp; */
@@ -236,10 +253,10 @@ hypre_GMRESSolve(void  *gmres_vdata,
    guard_zero_residual = 0.0;
 
    (*(gmres_functions->CommInfo))(A,&my_id,&num_procs);
-   if (logging > 0)
+   if ( log_level>0 || printlevel>0 )
    {
       norms          = (gmres_data -> norms);
-/* not used yet      log_file_name  = (gmres_data -> log_file_name);*/
+      /* not used yet      log_file_name  = (gmres_data -> log_file_name);*/
       /* fp = fopen(log_file_name,"w"); */
    }
 
@@ -256,8 +273,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
 
    (*(gmres_functions->CopyVector))(b,p[0]);
 
-/* compute initial residual */
-
+   /* compute initial residual */
    (*(gmres_functions->Matvec))(matvec_data,-1.0, A, x, 1.0, p[0]);
    r_norm = sqrt((*(gmres_functions->InnerProd))(p[0],p[0]));
    if ( r_norm!=r_norm ) {
@@ -270,10 +286,10 @@ hypre_GMRESSolve(void  *gmres_vdata,
       return ierr;
    }
    b_norm = sqrt((*(gmres_functions->InnerProd))(b,b));
-   if (logging > 0)
+   if ( log_level>0 || printlevel>0 )
    {
       norms[0] = r_norm;
-      if (logging > 1 && my_id == 0)
+      if ( printlevel>1 && my_id == 0 )
       {
   	 printf("L2 norm of b: %e\n", b_norm);
          if (b_norm == 0.0)
@@ -299,7 +315,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
    if ( stop_crit && !rel_change )
       epsilon = accuracy;
 
-   if (logging > 1 && my_id == 0)
+   if ( printlevel>1 && my_id == 0 )
    {
       if (b_norm > 0.0)
          {printf("=============================================\n\n");
@@ -334,7 +350,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
 		r_norm = sqrt((*(gmres_functions->InnerProd))(r,r));
 		if (r_norm <= epsilon)
                 {
-                  if (logging > 1 && my_id == 0)
+                  if ( printlevel>1 && my_id == 0)
                   {
                      printf("\n\n");
                      printf("Final L2 norm of residual: %e\n\n", r_norm);
@@ -384,10 +400,10 @@ hypre_GMRESSolve(void  *gmres_vdata,
 		/* determine residual norm */
 		hh[i-1][i-1] = c[i-1]*hh[i-1][i-1] + s[i-1]*hh[i][i-1];
 		r_norm = fabs(rs[i]);
-		if (logging > 0)
+		if ( printlevel>0 )
 		{
 		   norms[iter] = r_norm;
-                   if (logging > 1 && my_id == 0)
+                   if ( printlevel>1 && my_id == 0 )
    		   {
       		      if (b_norm > 0.0)
              	         printf("% 5d    %e    %f   %e\n", iter, 
@@ -432,7 +448,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
 		r_norm = sqrt( (*(gmres_functions->InnerProd))(r,r) );
 		if (r_norm <= epsilon)
                 {
-                   if (logging > 1 && my_id == 0)
+                   if ( printlevel>1 && my_id == 0 )
                    {
                       printf("\n\n");
                       printf("Final L2 norm of residual: %e\n\n", r_norm);
@@ -470,7 +486,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
 		(*(gmres_functions->Axpy))(rs[j],p[j],p[0]);	
    }
 
-   if (logging > 1 && my_id == 0)
+   if ( printlevel>1 && my_id == 0 )
           printf("\n\n"); 
 
    (gmres_data -> num_iterations) = iter;
@@ -628,17 +644,33 @@ hypre_GMRESGetPrecond( void         *gmres_vdata,
 }
  
 /*--------------------------------------------------------------------------
- * hypre_GMRESSetLogging
+ * hypre_PCGSetPrintLevel
  *--------------------------------------------------------------------------*/
- 
+
 int
-hypre_GMRESSetLogging( void *gmres_vdata,
-                       int   logging)
+hypre_GMRESSetPrintLevel( void *gmres_vdata,
+                        int   level)
 {
    hypre_GMRESData *gmres_data = gmres_vdata;
-   int              ierr = 0;
+   int            ierr = 0;
  
-   (gmres_data -> logging) = logging;
+   (gmres_data -> printlevel) = level;
+ 
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_GMRESSetLogLevel
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_GMRESSetLogLevel( void *gmres_vdata,
+                      int   level)
+{
+   hypre_GMRESData *gmres_data = gmres_vdata;
+   int            ierr = 0;
+ 
+   (gmres_data -> log_level) = level;
  
    return ierr;
 }

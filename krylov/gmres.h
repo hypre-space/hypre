@@ -97,7 +97,7 @@ typedef struct
    void  *w;
    void  **p;
 
-   void  *matvec_data;
+   void    *matvec_data;
    void    *precond_data;
 
    hypre_GMRESFunctions * functions;
@@ -105,8 +105,8 @@ typedef struct
    /* log info (always logged) */
    int      num_iterations;
  
-   /* additional log info (logged when `logging' > 0) */
-   int      logging;
+   int     printlevel; /* printing when printlevel>0 */
+   int     log_level;  /* extra computations for logging when log_level>0 */
    double  *norms;
    char    *log_file_name;
 

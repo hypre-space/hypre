@@ -157,9 +157,35 @@ HYPRE_GMRESGetPrecond( HYPRE_Solver  solver,
 
 int
 HYPRE_GMRESSetLogging( HYPRE_Solver solver,
-                             int logging)
+                             int level)
 {
-   return( hypre_GMRESSetLogging( (void *) solver, logging ) );
+   int ierr = 0;
+   ierr += hypre_GMRESSetPrintLevel( (void *) solver, level );
+   ierr += hypre_GMRESSetLogLevel( (void *) solver, level );
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_GMRESSetPrintLevel
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_GMRESSetPrintLevel( HYPRE_Solver solver,
+                        int          level )
+{
+   return( hypre_GMRESSetPrintLevel( (void *) solver, level ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_GMRESSetLogLevel
+ * soon will not be needed, as SetLogging will be identical
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_GMRESSetLogLevel( HYPRE_Solver solver,
+                     int          level )
+{
+   return( hypre_GMRESSetLogLevel( (void *) solver, level ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -183,3 +209,14 @@ HYPRE_GMRESGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
 {
    return( hypre_GMRESGetFinalRelativeResidualNorm( (void *) solver, norm ) );
 }
+
+/*--------------------------------------------------------------------------
+ * HYPRE_GMRESGetResidual
+ *--------------------------------------------------------------------------*/
+
+int HYPRE_GMRESGetResidual( HYPRE_Solver solver, void **residual )
+{
+   /* returns a pointer to the residual vector */
+   return hypre_GMRESGetResidual( (void *) solver, residual );
+}
+

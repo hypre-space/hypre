@@ -489,7 +489,7 @@ typedef struct
    void  *w;
    void  **p;
 
-   void  *matvec_data;
+   void    *matvec_data;
    void    *precond_data;
 
    hypre_GMRESFunctions * functions;
@@ -497,8 +497,8 @@ typedef struct
    /* log info (always logged) */
    int      num_iterations;
  
-   /* additional log info (logged when `logging' > 0) */
-   int      logging;
+   int     printlevel; /* printing when printlevel>0 */
+   int     log_level;  /* extra computations for logging when log_level>0 */
    double  *norms;
    char    *log_file_name;
 
@@ -777,6 +777,7 @@ int hypre_CGNRGetFinalRelativeResidualNorm( void *cgnr_vdata , double *relative_
 hypre_GMRESFunctions *hypre_GMRESFunctionsCreate( char *(*CAlloc )(int count ,int elt_size ), int (*Free )(char *ptr ), int (*CommInfo )(void *A ,int *my_id ,int *num_procs ), void *(*CreateVector )(void *vector ), void *(*CreateVectorArray )(int size ,void *vectors ), int (*DestroyVector )(void *vector ), void *(*MatvecCreate )(void *A ,void *x ), int (*Matvec )(void *matvec_data ,double alpha ,void *A ,void *x ,double beta ,void *y ), int (*MatvecDestroy )(void *matvec_data ), double (*InnerProd )(void *x ,void *y ), int (*CopyVector )(void *x ,void *y ), int (*ClearVector )(void *x ), int (*ScaleVector )(double alpha ,void *x ), int (*Axpy )(double alpha ,void *x ,void *y ), int (*PrecondSetup )(void *vdata ,void *A ,void *b ,void *x ), int (*Precond )(void *vdata ,void *A ,void *b ,void *x ));
 void *hypre_GMRESCreate( hypre_GMRESFunctions *gmres_functions );
 int hypre_GMRESDestroy( void *gmres_vdata );
+int hypre_GMRESGetResidual( void *gmres_vdata , void **residual );
 int hypre_GMRESSetup( void *gmres_vdata , void *A , void *b , void *x );
 int hypre_GMRESSolve( void *gmres_vdata , void *A , void *b , void *x );
 int hypre_GMRESSetKDim( void *gmres_vdata , int k_dim );
@@ -787,7 +788,8 @@ int hypre_GMRESSetRelChange( void *gmres_vdata , int rel_change );
 int hypre_GMRESSetStopCrit( void *gmres_vdata , double stop_crit );
 int hypre_GMRESSetPrecond( void *gmres_vdata , int (*precond )(), int (*precond_setup )(), void *precond_data );
 int hypre_GMRESGetPrecond( void *gmres_vdata , HYPRE_Solver *precond_data_ptr );
-int hypre_GMRESSetLogging( void *gmres_vdata , int logging );
+int hypre_GMRESSetPrintLevel( void *gmres_vdata , int level );
+int hypre_GMRESSetLogLevel( void *gmres_vdata , int level );
 int hypre_GMRESGetNumIterations( void *gmres_vdata , int *num_iterations );
 int hypre_GMRESGetFinalRelativeResidualNorm( void *gmres_vdata , double *relative_residual_norm );
 
@@ -830,9 +832,12 @@ int HYPRE_GMRESSetStopCrit( HYPRE_Solver solver , int stop_crit );
 int HYPRE_GMRESSetRelChange( HYPRE_Solver solver , int rel_change );
 int HYPRE_GMRESSetPrecond( HYPRE_Solver solver , HYPRE_PtrToSolverFcn precond , HYPRE_PtrToSolverFcn precond_setup , HYPRE_Solver precond_solver );
 int HYPRE_GMRESGetPrecond( HYPRE_Solver solver , HYPRE_Solver *precond_data_ptr );
-int HYPRE_GMRESSetLogging( HYPRE_Solver solver , int logging );
+int HYPRE_GMRESSetLogging( HYPRE_Solver solver , int level );
+int HYPRE_GMRESSetPrintLevel( HYPRE_Solver solver , int level );
+int HYPRE_GMRESSetLogLevel( HYPRE_Solver solver , int level );
 int HYPRE_GMRESGetNumIterations( HYPRE_Solver solver , int *num_iterations );
 int HYPRE_GMRESGetFinalRelativeResidualNorm( HYPRE_Solver solver , double *norm );
+int HYPRE_GMRESGetResidual( HYPRE_Solver solver , void **residual );
 
 /* HYPRE_pcg.c */
 int HYPRE_PCGSetup( HYPRE_Solver solver , HYPRE_Matrix A , HYPRE_Vector b , HYPRE_Vector x );
