@@ -2733,6 +2733,10 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
     *                  move k to the list in LoL with measure one
     *                  greater than it occupies (creating new LoL
     *                  entry if necessary)
+    *        3) For each point, j,  in S_diag_i,
+    *                  move j to the list in LoL with measure one
+    *                  smaller than it occupies (creating new LoL
+    *                  entry if necessary)
     *
     ****************************************************************/
 
@@ -2774,6 +2778,20 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
                                  nabor_two, lists, where);
                }
             }
+         }
+      }
+      for (j = S_diag_i[index]; j < S_diag_i[index+1]; j++)
+      {
+         nabor = S_diag_j[j];
+         if (CF_marker[nabor] == UNDECIDED)
+         {
+            measure = i_measure_array[nabor];
+
+            remove_point(&LoL_head, &LoL_tail, measure, nabor, lists, where);
+
+            i_measure_array[nabor] = --measure;
+
+            enter_on_lists(&LoL_head, &LoL_tail, measure, nabor, lists, where);
          }
       }
    }
@@ -2977,6 +2995,7 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
    num_data = 0;
    for (i = 0; i < num_sends; i++)
    {
+      start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
       num_data += hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1)-start;
       for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
       {
