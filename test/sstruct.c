@@ -878,6 +878,17 @@ DistributeData( ProblemData   global_data,
                         pdata.graph_index_maps[i][d]  = dmap;
                         pdata.graph_index_signs[i][d] = sign;
                      }
+                     for (d = 3; d < 9; d++)
+                     {
+                        pdata.graph_ilowers[i][d] =
+                           pdata.graph_ilowers[entry][d];
+                        pdata.graph_iuppers[i][d] =
+                           pdata.graph_iuppers[entry][d];
+                        pdata.graph_to_ilowers[i][d] =
+                           pdata.graph_to_ilowers[entry][d];
+                        pdata.graph_to_iuppers[i][d] =
+                           pdata.graph_to_iuppers[entry][d];
+                     }
                      pdata.graph_vars[i]     = pdata.graph_vars[entry];
                      pdata.graph_to_parts[i] = pdata.graph_to_parts[entry];
                      pdata.graph_to_vars[i]  = pdata.graph_to_vars[entry];
@@ -912,6 +923,13 @@ DistributeData( ProblemData   global_data,
                         pdata.matrix_iuppers[i][d] = int_iupper[d];
                         pdata.matrix_strides[i][d] =
                            pdata.matrix_strides[entry][d];
+                     }
+                     for (d = 3; d < 9; d++)
+                     {
+                        pdata.matrix_ilowers[i][d] =
+                           pdata.matrix_ilowers[entry][d];
+                        pdata.matrix_iuppers[i][d] =
+                           pdata.matrix_iuppers[entry][d];
                      }
                      pdata.matrix_vars[i]    = pdata.matrix_vars[entry];
                      pdata.matrix_entries[i]  = pdata.matrix_entries[entry];
