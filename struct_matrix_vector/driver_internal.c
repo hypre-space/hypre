@@ -37,9 +37,9 @@ main( int   argc,
    /* Initialize MPI */
    MPI_Init(&argc, &argv);
 
-   MPI_Comm_size(MPI_COMM_WORLD, &num_procs );
-   MPI_Comm_rank(MPI_COMM_WORLD, &myid );
    MPI_Comm_dup(MPI_COMM_WORLD, comm);
+   MPI_Comm_size(*comm, &num_procs );
+   MPI_Comm_rank(*comm, &myid );
 
    cegdb(&argc, &argv, myid);
 

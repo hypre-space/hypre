@@ -61,7 +61,7 @@ zzz_NewAssembledStructGrid( MPI_Comm      *comm,
 
    grid = zzz_TAlloc(zzz_StructGrid, 1);
 
-   MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
+   MPI_Comm_rank(*comm, &my_rank);
 
    global_size = 0;
    local_size = 0;
@@ -155,6 +155,8 @@ zzz_SetStructGridExtents( zzz_StructGrid  *grid,
 void 
 zzz_AssembleStructGrid( zzz_StructGrid *grid )
 {
+   MPI_Comm       *comm = zzz_StructGridComm(grid);
+
    zzz_StructGrid *new_grid;
    zzz_BoxArray   *all_boxes;
    int            *processes;
@@ -177,8 +179,8 @@ zzz_AssembleStructGrid( zzz_StructGrid *grid )
 
    boxes = zzz_StructGridBoxes(grid);
 
-   MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
-   MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
+   MPI_Comm_size(*comm, &num_procs);
+   MPI_Comm_rank(*comm, &my_rank);
 
    /* allocate sendbuf */
    sendcount = 7*zzz_BoxArraySize(boxes);
@@ -188,7 +190,7 @@ zzz_AssembleStructGrid( zzz_StructGrid *grid )
    recvcounts = zzz_TAlloc(int, num_procs);
    displs = zzz_TAlloc(int, num_procs);
    MPI_Allgather(&sendcount, 1, MPI_INT,
-		 recvcounts, 1, MPI_INT, MPI_COMM_WORLD);
+		 recvcounts, 1, MPI_INT, *comm);
    displs[0] = 0;
    recvbuf_size = recvcounts[0];
    for (i = 1; i < num_procs; i++)
@@ -216,7 +218,7 @@ zzz_AssembleStructGrid( zzz_StructGrid *grid )
 
    /* get global grid info */
    MPI_Allgatherv(sendbuf, sendcount, MPI_INT,
-		  recvbuf, recvcounts, displs, MPI_INT, MPI_COMM_WORLD);
+		  recvbuf, recvcounts, displs, MPI_INT, *comm);
 
    /* sort recvbuf by process rank? */
 

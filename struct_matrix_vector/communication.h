@@ -27,6 +27,8 @@ typedef struct
    int                **send_box_ranks;
    int                **recv_box_ranks;
 
+   MPI_Comm            *comm;
+
    int                  num_sends;
    int                 *send_processes;
    MPI_Datatype        *send_types;
@@ -57,6 +59,8 @@ typedef struct
                                              
 #define zzz_CommPkgSendBoxRanks(comm_pkg)    (comm_pkg -> send_box_ranks)
 #define zzz_CommPkgRecvBoxRanks(comm_pkg)    (comm_pkg -> recv_box_ranks)
+
+#define zzz_CommPkgComm(comm_pkg)            (comm_pkg -> comm)
 
 #define zzz_CommPkgNumSends(comm_pkg)        (comm_pkg -> num_sends)
 #define zzz_CommPkgSendProcesses(comm_pkg)   (comm_pkg -> send_processes)

@@ -407,6 +407,8 @@ zzz_NewCommPkg( zzz_SBoxArrayArray  *send_sboxes,
                 zzz_BoxArray        *data_space,
                 int                  num_values     )
 {
+   MPI_Comm            *comm = zzz_StructGridComm(grid);
+
    /* output variables */
    zzz_CommPkg         *comm_pkg;
                        
@@ -464,7 +466,7 @@ zzz_NewCommPkg( zzz_SBoxArrayArray  *send_sboxes,
     * Second time through, compute recv package info.
     *---------------------------------------------------------*/
 
-   MPI_Comm_size(MPI_COMM_WORLD, &num_procs );
+   MPI_Comm_size(*comm, &num_procs );
 
    box_ranks = zzz_StructGridBoxRanks(grid);
    processes = zzz_StructGridProcesses(grid);
@@ -690,6 +692,8 @@ zzz_NewCommPkg( zzz_SBoxArrayArray  *send_sboxes,
    zzz_CommPkgSendBoxRanks(comm_pkg)  = send_box_ranks;
    zzz_CommPkgRecvBoxRanks(comm_pkg)  = recv_box_ranks;
 
+   zzz_CommPkgComm(comm_pkg)          = comm;
+
    zzz_CommPkgNumSends(comm_pkg)      = pkg_num_sends;
    zzz_CommPkgSendProcesses(comm_pkg) = pkg_send_processes;
    zzz_CommPkgSendTypes(comm_pkg)     = pkg_send_types;
@@ -779,6 +783,7 @@ zzz_CommHandle *
 zzz_InitializeCommunication( zzz_CommPkg *comm_pkg,
                              double      *data     )
 {
+   MPI_Comm        *comm = zzz_CommPkgComm(comm_pkg);
    int              num_requests;
    MPI_Request     *requests;
 
@@ -803,7 +808,7 @@ zzz_InitializeCommunication( zzz_CommPkg *comm_pkg,
       MPI_Irecv(vdata, 1,
                 zzz_CommPkgRecvType(comm_pkg, i), 
                 zzz_CommPkgRecvProcess(comm_pkg, i), 
-		0, MPI_COMM_WORLD, &requests[j++]);
+		0, *comm, &requests[j++]);
    }
 
    for(i = 0; i < zzz_CommPkgNumSends(comm_pkg); i++)
@@ -811,7 +816,7 @@ zzz_InitializeCommunication( zzz_CommPkg *comm_pkg,
       MPI_Isend(vdata, 1,
                 zzz_CommPkgSendType(comm_pkg, i), 
                 zzz_CommPkgSendProcess(comm_pkg, i), 
-		0, MPI_COMM_WORLD, &requests[j++]);
+		0, *comm, &requests[j++]);
    }
 
    return ( zzz_NewCommHandle(num_requests, requests) );
