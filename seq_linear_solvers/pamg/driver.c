@@ -208,8 +208,8 @@ main( int   argc,
       num_grid_sweeps[0] = 2;
       grid_relax_type[0] = 0; 
       grid_relax_points[0] = hypre_CTAlloc(int, 2); 
-      grid_relax_points[0][0] = 1;
-      grid_relax_points[0][1] = -1;
+      grid_relax_points[0][0] = -1;
+      grid_relax_points[0][1] = 1;
 
       /* down cycle */
       num_grid_sweeps[1] = 2;
@@ -405,7 +405,7 @@ BuildLaplacian( int               argc,
    /*-----------------------------------------------------------
     * Parse command line
     *-----------------------------------------------------------*/
- 
+   arg_index = 0; 
    while (arg_index < argc)
    {
       if ( strcmp(argv[arg_index], "-n") == 0 )
@@ -431,7 +431,7 @@ BuildLaplacian( int               argc,
       }
       else
       {
-         break;
+         arg_index++;
       }
    }
 
