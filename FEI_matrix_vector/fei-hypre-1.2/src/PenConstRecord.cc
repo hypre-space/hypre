@@ -49,13 +49,11 @@ PenConstRecord::~PenConstRecord() {
         delete [] numColsNodeWeights_;
     }
 
-    if (numColsNodeWeights_ != NULL) {
-        delete [] numColsNodeWeights_;
-    }
-    
     if (CRFieldList_ != NULL) {
         delete [] CRFieldList_;
     }
+
+    delete [] CRConstValue_;
 
     return;
 }

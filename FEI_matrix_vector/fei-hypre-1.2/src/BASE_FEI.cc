@@ -1,16 +1,15 @@
+#include <math.h>
 #include <iostream.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 
-/*#changes made to conform to HYPRE */
-/*#ifdef FEI_SER */
-/*#include <mpiuni/mpi.h> */
-/*#else */
-/*#include <mpi.h> */
-/*#endif */
-#include "../../utilities/utilities.h"
+#ifdef FEI_SER
+#include <mpiuni/mpi.h>
+#else
+#include <mpi.h>
+#endif
 
 #include "other/basicTypes.h"
 
@@ -87,9 +86,6 @@ BASE_FEI::BASE_FEI(MPI_Comm comm, LinearSystemCore* linSysCore, int masterRank)
     MPI_Comm_rank(comm_, &localRank_);
     MPI_Comm_size(comm_, &numProcs_);
 
-    solveCounter_ = 1;
-    internalFei_ = 0;
-
     numRHSs_ = 1;
     rhsIDs_ = new int[numRHSs_];
     rhsIDs_[0] = 0;
@@ -101,7 +97,6 @@ BASE_FEI::BASE_FEI(MPI_Comm comm, LinearSystemCore* linSysCore, int masterRank)
     storeBCNodeSets = 0;       // number of bc node sets
     storeSharedNodeSets = 0;   // number of shared node sets
     storeExtNodeSets = 0;      // number of external node sets
-    storeNumCRMultRecords = 0; // number of Lagrange constraint records
     storeNumCRPenRecords = 0;  // number of penalty constraint records
 
 //  some data for consistency checking (some of these not yet utilized)
@@ -175,6 +170,12 @@ int BASE_FEI::initSolveStep(int numElemBlocks, int solveType) {
 
     debugOutput("initSolveStep");
 
+    if (debugOutput_) {
+       fprintf(debugFile_, "   numElemBlocks: %d, solveType: %d\n",
+               numElemBlocks, solveType);
+       fflush(debugFile_);
+    }
+
     if (!problemStructureAllocated_) {
         problemStructure_ = new ProblemStructure(localRank_);
         problemStructureAllocated_ = true;
@@ -236,6 +237,16 @@ int BASE_FEI::initFields(int numFields,
 
     debugOutput("initFields");
 
+    if (debugOutput_) {
+       fprintf(debugFile_, "   numFields: %d\n", numFields);
+       for(int i=0; i<numFields; i++) {
+          fprintf(debugFile_,
+                  "      cardFields[%d] (fieldSize): %d, fieldIDs[%d], %d\n",
+                  i, cardFields[i], i, fieldIDs[i]);
+       }
+       fflush(debugFile_);
+    }
+
     assert (numFields > 0);
 
     if (!problemStructureAllocated_) {
@@ -279,15 +290,29 @@ int BASE_FEI::beginInitElemBlock(GlobalID elemBlockID,
 
     debugOutput("beginInitElemBlock");
 
+    if (debugOutput_) {
+       fprintf(debugFile_, "   elemBlockID: %d\n", (int)elemBlockID);
+       fprintf(debugFile_, "    numNodesPerElement: %d\n", numNodesPerElement);
+       for(int i=0; i<numNodesPerElement; i++) {
+          fprintf(debugFile_, "      fieldsPerNode[%d]: %d, fieldIDs: ",
+                  i, numElemFields[i]);
+          for(int j=0; j<numElemFields[i]; j++) {
+             fprintf(debugFile_, "%d ", elemFieldIDs[i][j]);
+          }
+          fprintf(debugFile_, "\n");
+       }
+       fprintf(debugFile_, "   interleaveStrategy: %d\n", interleaveStrategy);
+       fprintf(debugFile_, "   lumpingStrategy: %d\n", lumpingStrategy);
+       fprintf(debugFile_, "   numElemDOF: %d\n", numElemDOF);
+       fprintf(debugFile_, "   numElemSets: %d\n", numElemSets);
+       fprintf(debugFile_, "   numElemTotal: %d\n", numElemTotal);
+       fflush(debugFile_);
+    }
+
     int j;
 
     problemStructure_->addBlockID(elemBlockID);
     currentBlock = &(problemStructure_->getBlockDescriptor(elemBlockID));
-
-    if (debugOutput_) {
-        fprintf(debugFile_,"elemBlock %d, numElemSets %d\n",
-                (int)elemBlockID,numElemSets);
-    }
 
     currentBlock->setGlobalBlockID(elemBlockID);
     currentBlock->setNumNodesPerElement(numNodesPerElement);
@@ -334,7 +359,8 @@ int BASE_FEI::beginInitElemBlock(GlobalID elemBlockID,
     
 //  create data structures for storage of element ID and topology info
 
-    problemStructure_->allocateConnectivityTable(elemBlockID);
+    if (numElemTotal > 0)
+       problemStructure_->allocateConnectivityTable(elemBlockID);
 
     if (numElemDOF > 0) {
        currentBlock->setNumElemDOFPerElement(numElemDOF);
@@ -364,17 +390,27 @@ int BASE_FEI::initElemSet(int numElems,
 
     baseTime_ = MPI_Wtime();
 
+    debugOutput("initElemSet");
+
+    int numNodes = currentBlock->getNumNodesPerElement();
+
     if (debugOutput_) {
-        fprintf(debugFile_,"trace: initElemSet, numElems: %d", numElems);
-        fprintf(debugFile_,", currentBlockID: %d\n",currentElemBlockID);
+        fprintf(debugFile_,"   numElems: %d    (currentBlockID: %d)\n",
+                numElems, currentElemBlockID);
+        for(int i=0; i<numElems; i++) {
+           fprintf(debugFile_, "      elemID[%d]: %d\n", i, (int)elemIDs[i]);
+           fprintf(debugFile_, "         nodes: ");
+           for(int j=0; j<numNodes; j++) {
+              fprintf(debugFile_, "%d ", (int)elemConn[i][j]);
+           }
+           fprintf(debugFile_, "\n");
+        }
         fflush(debugFile_);
     }
 
     numWorksetsStored[currentElemBlockIndex]++;
     
     if (numElems <= 0) return(0); //zero-length workset, do nothing.
-
-    int myNumNodes = currentBlock->getNumNodesPerElement();
 
 //
 //  the "start" variable gives us the offset to the next open index in the
@@ -393,7 +429,7 @@ int BASE_FEI::initElemSet(int numElems,
         elemIndex = start + i;
         assert (elemIndex < connTable.numElems); // debug - don't overrun list
         elemIDList[elemIndex] = elemIDs[i];
-        for (int j = 0; j < myNumNodes; j++) {
+        for (int j = 0; j < numNodes; j++) {
             conn[elemIndex][j] = elemConn[i][j];
 
             flagNodeAsActive(elemConn[i][j]);
@@ -443,28 +479,19 @@ int BASE_FEI::beginInitNodeSets(int numSharedNodeSets,
 
     baseTime_ = MPI_Wtime();
 
+    debugOutput("beginInitNodeSets");
+
     if (debugOutput_) {
-        fprintf(debugFile_,"beginInitNodeSets, numSharedNodeSets: %d",
-                numSharedNodeSets);
-        fprintf(debugFile_,", numExtNodeSets: %d\n",
-                numExtNodeSets);
+        fprintf(debugFile_,"   numSharedNodeSets: %d, numExtNodeSets: %d\n",
+                numSharedNodeSets, numExtNodeSets);
         fflush(debugFile_);
     }
 
 //  store the node set parameters
 
-    if (debugOutput_) {
-        fprintf(debugFile_,"proc %d, numSharedNodeSets: %d\n",localRank_,
-            numSharedNodeSets);
-    }
     storeSharedNodeSets = numSharedNodeSets;
     currentSharedNodeSet = 0;
  
- 
-    if (debugOutput_) {
-        fprintf(debugFile_,"proc %d, numExtNodeSets: %d\n",localRank_,
-            numExtNodeSets);
-    }
     storeExtNodeSets = numExtNodeSets;
     currentExtNodeSet = 0;
 
@@ -472,7 +499,6 @@ int BASE_FEI::beginInitNodeSets(int numSharedNodeSets,
 
     return(0);
 }
-
 
 //------------------------------------------------------------------------------
 int BASE_FEI::initSharedNodeSet(const GlobalID *sharedNodeIDs,  
@@ -486,13 +512,17 @@ int BASE_FEI::initSharedNodeSet(const GlobalID *sharedNodeIDs,
 
     baseTime_ = MPI_Wtime();
 
+    debugOutput("initSharedNodeSet");
  
     if (debugOutput_) {
-        fprintf(debugFile_,"initSharedNodeSet: lenSharedNodeIDs: %d\n",
-                lenSharedNodeIDs);
+        fprintf(debugFile_,"   numSharedNodes: %d\n", lenSharedNodeIDs);
         for(int i=0; i<lenSharedNodeIDs; i++){
-            fprintf(debugFile_, "-- sharedNode[%d]: %d\n",i,
+            fprintf(debugFile_, "   sharedNode[%d]: %d procs: ",i,
                     (int)sharedNodeIDs[i]);
+            for(int j=0; j<lenSharedProcIDs[i]; j++) {
+               fprintf(debugFile_, "%d ", sharedProcIDs[i][j]);
+            }
+            fprintf(debugFile_,"\n");
         }
         fflush(debugFile_);
     }
@@ -512,7 +542,6 @@ int BASE_FEI::initSharedNodeSet(const GlobalID *sharedNodeIDs,
     return(0);
 }
 
-
 //------------------------------------------------------------------------------
 int BASE_FEI::initExtNodeSet(const GlobalID *extNodeIDs,
                              int lenExtNodeIDs, 
@@ -524,10 +553,18 @@ int BASE_FEI::initExtNodeSet(const GlobalID *extNodeIDs,
 
     baseTime_ = MPI_Wtime();
 
+    debugOutput("initExtNodeSet");
  
     if (debugOutput_) {
-        fprintf(debugFile_,"trace: initExtNodeSet\n");
-        fprintf(debugFile_,"--- getting %d nodes.\n",lenExtNodeIDs);
+        fprintf(debugFile_,"   numExtNodes: %d\n", lenExtNodeIDs);
+        for(int i=0; i<lenExtNodeIDs; i++){
+            fprintf(debugFile_, "   extNode[%d]: %d procs: ",i,
+                    (int)extNodeIDs[i]);
+            for(int j=0; j<lenExtProcIDs[i]; j++) {
+               fprintf(debugFile_, "%d ", extProcIDs[i][j]);
+            }
+            fprintf(debugFile_,"\n");
+        }
         fflush(debugFile_);
     }
 
@@ -613,6 +650,24 @@ int BASE_FEI::initCRMult(const GlobalID *const *CRMultNodeTable,
     baseTime_ = MPI_Wtime();
 
     debugOutput("initCRMult");
+
+    if (debugOutput_) {
+       fprintf(debugFile_, "   numMultCRs: %d\n", numMultCRs);
+       fprintf(debugFile_, "   node table:\n");
+       int i;
+       for(i=0; i<numMultCRs; i++) {
+          fprintf(debugFile_, "      ");
+          for(int j=0; j<lenCRNodeList; j++) {
+             fprintf(debugFile_, "%d ", (int)CRMultNodeTable[i][j]);
+          }
+          fprintf(debugFile_, "\n");
+       }
+       fprintf(debugFile_, "   field list:\n      ");
+       for(i=0; i<lenCRNodeList; i++)
+          fprintf(debugFile_, "%d ", CRFieldList[i]);
+       fprintf(debugFile_, "\n");
+       fflush(debugFile_);
+    }
 
     int i, j, k;
 
@@ -1088,9 +1143,10 @@ void BASE_FEI::storeNodalColumnCoefs(int eqn, NodeDescriptor& node,
 //This function stores the coeficients for 'node' at 'fieldID' at the correct
 //column indices in row 'eqn' of the system matrix.
 //
-   if ((localStartRow_ > eqn) || (eqn > localEndRow_)) return;
 
    int eqnNumber = node.getFieldEqnNumber(fieldID);
+
+   if ((localStartRow_ > eqn) || (eqn > localEndRow_)) return;
 
    FieldRecord* fieldRoster = problemStructure_->getFieldRosterPtr();
    int index = problemStructure_->getFieldRosterIndex(fieldID);
@@ -1575,6 +1631,11 @@ int BASE_FEI::setActiveNodeEqnInfo() {
    int numNodes = problemStructure_->getNumActiveNodes();
    NodeDescriptor* actNodes = problemStructure_->getActiveNodesPtr();
 
+   if (debugOutput_) {
+      fprintf(debugFile_, "   number of active nodes: %d\n", numNodes);
+      fflush(debugFile_);
+   }
+
    FieldRecord* fieldRoster = problemStructure_->getFieldRosterPtr();
 
    NodeCommMgr& nodeCommMgr = problemStructure_->getNodeCommMgr();
@@ -1630,8 +1691,10 @@ int BASE_FEI::setActiveNodeEqnInfo() {
             eqnNumber = localStartRow_ + numEqns;
 
             if (e2nFile != NULL) {
-               fprintf(e2nFile, "%d %d\n", eqnNumber,
-                       (int)actNodes[i].getGlobalNodeID());
+               for(int l=0; l<numFieldParams; l++) {
+                  fprintf(e2nFile, "%d %d\n", eqnNumber+l,
+                          (int)actNodes[i].getGlobalNodeID());
+               }
             }
 
             numEqns += numFieldParams;
@@ -1800,12 +1863,18 @@ int BASE_FEI::resetSystem(double s) {
     //clear away any boundary condition data.
     bcManager_->clearAllBCs();
 
-    if (debugOutput_ && (solveCounter_>1)){
-        //if debug output is 'on' and we've already completed at least one
-        //solve, reset the debug output file.
+    //clear away the values in the eqnCommMgr.
+    
+    EqnCommMgr& eqnCommMgr = problemStructure_->getEqnCommMgr();
 
-        setDebugOutput(debugPath_, debugFileName_);
-    }
+    eqnCommMgr.resetCoefs();
+
+//    if (debugOutput_ && (solveCounter_>1)){
+//        //if debug output is 'on' and we've already completed at least one
+//        //solve, reset the debug output file.
+//
+//        setDebugOutput(debugPath_, debugFileName_);
+//    }
  
     debugOutput("leaving resetSystem");
 
@@ -1821,6 +1890,11 @@ int BASE_FEI::beginLoadNodeSets(int numBCNodeSets) {
 //  tasks: start the loading of nodal loading information
 //
     debugOutput("beginLoadNodeSets");
+
+    if (debugOutput_) {
+       fprintf(debugFile_, "   numBCNodeSets: %d\n", numBCNodeSets);
+       fflush(debugFile_);
+    }
 
     (void)numBCNodeSets; // this prevents "unused variable" warnings
 
@@ -1854,6 +1928,28 @@ int BASE_FEI::loadBCSet(const GlobalID *BCNodeSet,
 
    int index = problemStructure_->getFieldRosterIndex(BCFieldID);
    int size = fieldRoster[index].getNumFieldParams();
+
+   if (debugOutput_) {
+      fprintf(debugFile_, "   numBCNodes: %d\n", lenBCNodeSet);
+      for(int i=0; i<lenBCNodeSet; i++) {
+         fprintf(debugFile_,
+                 "      nodeID[%d]: %d, fieldID: %d, fieldSize: %d\n",
+                 i, (int)BCNodeSet[i], BCFieldID, size);
+         int j;
+         fprintf(debugFile_, "         alpha: ");
+         for(j=0; j<size; j++)
+            fprintf(debugFile_, "%le ", alphaBCDataTable[i][j]);
+         fprintf(debugFile_,"\n");
+         fprintf(debugFile_, "         beta: ");
+         for(j=0; j<size; j++)
+            fprintf(debugFile_, "%le ", betaBCDataTable[i][j]);
+         fprintf(debugFile_,"\n");
+         fprintf(debugFile_, "         gamma: ");
+         for(j=0; j<size; j++)
+            fprintf(debugFile_, "%le ", gammaBCDataTable[i][j]);
+         fprintf(debugFile_,"\n");
+      }
+   }
 
    //simply loop over the BC nodes, adding the bc data arrays to
    //the bcManager class.
@@ -2060,7 +2156,6 @@ int BASE_FEI::loadElemSet(int elemSetID,
                                               &remoteEqnOffsets[0],
                                               &remoteProcs[0],
                                               numRemoteEqns);
-
       if (elemFormat != 0) {
          packSharedStiffness(&remoteEqnOffsets[0], &remoteProcs[0],
                              numRemoteEqns, &scatterIndices[0],
@@ -2117,9 +2212,25 @@ int BASE_FEI::loadElemSetMatrix(int elemSetID,
 
    (void)elemConn;
 
+   //  number of rows per element array in this block
+   int numElemRows = currentBlock->getNumEqnsPerElement();
+
+   debugOutput("loadElemSetMatrix");
+
    if (debugOutput_) {
-      fprintf(debugFile_,"loadElemSetMatrix, numElems: %d\n", numElems);
-      fprintf(debugFile_,"currentElemBlockID: %d\n",(int)currentElemBlockID);
+      fprintf(debugFile_,"   numElems: %d  (currentBlockID: %d)\n",
+              numElems, currentElemBlockID);
+      for(int i=0; i<numElems; i++) {
+         fprintf(debugFile_, "   elemID[%d]: %d\n", i, (int)elemIDs[i]);
+         fprintf(debugFile_, "   stiffness:\n");
+         for(int j=0; j<numElemRows; j++) {
+            fprintf(debugFile_, "   ");
+            for(int k=0; k<numElemRows; k++) {
+               fprintf(debugFile_, "%f ", elemStiffness[i][j][k]);
+            }
+            fprintf(debugFile_, "\n");
+         }
+      }
       fflush(debugFile_);
    }
 
@@ -2130,14 +2241,6 @@ int BASE_FEI::loadElemSetMatrix(int elemSetID,
    if (numElems <= 0) return(0); //zero-length workset, do nothing.
 
    int i, k;
-
-   //  number of rows per element array in this block
-   int numElemRows = currentBlock->getNumEqnsPerElement();
-
-   if (debugOutput_) {
-      fprintf(debugFile_,"numElemRows: %d\n", numElemRows);
-      fflush(debugFile_);
-   }
 
    // scatter indices into the system matrix
    IntArray scatterIndices(numElemRows);
@@ -2399,6 +2502,8 @@ void BASE_FEI::getBCEqns(IntArray& essEqns, RealArray& essAlpha,
                    IntArray& otherEqns, RealArray& otherAlpha,
                    RealArray& otherBeta, RealArray& otherGamma) {
 
+   double eps = 1.e-18;
+
    int numBCNodes = bcManager_->getNumBCNodes();
 
    GlobalID* BCNodeIDs = bcManager_->getBCNodeIDsPtr();
@@ -2435,7 +2540,7 @@ void BASE_FEI::getBCEqns(IntArray& essEqns, RealArray& essAlpha,
 
             //is it an essential bc in the current solution component direction?
 
-            if ((thisAlpha != 0.0) && (thisBeta == 0.0)) {
+            if ((fabs(thisAlpha) > eps) && (fabs(thisBeta) <= eps)) {
 
                int ind = -1, insert = 0;
                if (essEqns.size() > 0) {
@@ -2464,7 +2569,7 @@ void BASE_FEI::getBCEqns(IntArray& essEqns, RealArray& essAlpha,
                //gonna add terms to the diagonal and the rhs vector and hope
                //for the best...
 
-               if (thisBeta != 0.0) {
+               if (fabs(thisBeta) > eps) {
 
                   int ind = -1, insert = 0;
                   if (otherEqns.size() > 0) {
@@ -2490,10 +2595,6 @@ void BASE_FEI::getBCEqns(IntArray& essEqns, RealArray& essAlpha,
                      otherBeta.append(thisBeta);
                      otherGamma.append(thisGamma);
                   }
-               }
-               else {
-                  cerr << "\n\ninconsistent BC specification, node :"
-                       << (int)BCNodeIDs[i] << endl;
                }
             }
          }//for(k<fieldSize)loop
@@ -2694,6 +2795,24 @@ int BASE_FEI::loadCRMult(int CRMultID,
 
    debugOutput("loadCRMult");
 
+    if (debugOutput_) {
+       fprintf(debugFile_, "   CRMultID: %d, numMultCRs: %d\n",
+               CRMultID, numMultCRs);
+       fprintf(debugFile_, "   node table:\n");
+       int i;
+       for(i=0; i<numMultCRs; i++) {
+          fprintf(debugFile_, "      ");
+          for(int j=0; j<lenCRNodeList; j++) {
+             fprintf(debugFile_, "%d ", (int)CRNodeTable[i][j]);
+          }
+          fprintf(debugFile_, "\n");
+       }
+       fprintf(debugFile_, "   field list:\n      ");
+       for(i=0; i<lenCRNodeList; i++)
+          fprintf(debugFile_, "%d ", CRFieldList[i]);
+       fprintf(debugFile_, "\n");
+       fflush(debugFile_);
+    }
    int i;
 
    int lenList = ceqn_MultConstraints[CRMultID].getLenCRNodeList();
@@ -3003,8 +3122,8 @@ void BASE_FEI::parameters(int numParams, char **paramStrings) {
 
       if ( Utils::getParam("debugOutput",numParams,paramStrings,param) == 1){
          char *name = new char[32];
-         sprintf(name, "BASE_FEI%d_debug.slv%d.%d.%d",
-                 internalFei_, solveCounter_, numProcs_, localRank_);
+         sprintf(name, "BASE_FEI%d_debug.%d.%d",
+                 internalFei_, numProcs_, localRank_);
          setDebugOutput(param, name);
          delete [] name;
       }
@@ -3078,6 +3197,8 @@ int BASE_FEI::iterateToSolve(int& status) {
 
    debugOutput("   calling matrixLoadComplete");
 
+//#### Tong : changed here 
+   implementAllBCs();
    linSysCore_->matrixLoadComplete();
 
 // now we will implement the boundary conditions. This can be done after
@@ -3085,7 +3206,6 @@ int BASE_FEI::iterateToSolve(int& status) {
 // only the coefficient values.
 //
 
-   implementAllBCs();
 
    debugOutput("in iterateToSolve, calling launchSolver...");
  

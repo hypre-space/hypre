@@ -6,13 +6,11 @@
 #include "src/NodeDescriptor.h"
 #include "src/FieldRecord.h"
 
-/* changes to conform to HYPRE */
-/*#ifdef FEI_SER */
-/*#include "mpiuni/mpi.h" */
-/*#else */
-/*#include <mpi.h> */
-/*#endif */
-#include "../../utilities/utilities.h"
+#ifdef FEI_SER
+#include "mpiuni/mpi.h"
+#else
+#include <mpi.h>
+#endif
 
 #include <../isis-mv/IntArray.h>
 #include <../isis-mv/GlobalIDArray.h>

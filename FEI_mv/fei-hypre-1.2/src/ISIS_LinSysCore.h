@@ -150,6 +150,8 @@ class ISIS_LinSysCore: public LinearSystemCore {
    //function for launching the linear solver
    void launchSolver(int& solveStatus, int& iterations);
 
+   void writeSystem(char* name);
+
  private:        //functions
 
    //functions for selecting solver/preconditioner
@@ -207,6 +209,9 @@ class ISIS_LinSysCore: public LinearSystemCore {
    char* debugPath_;
    char* debugFileName_;
    FILE* debugFile_;
+
+   bool dumpMatrix_;
+   char* matrixPath_;
 };
 
 #endif

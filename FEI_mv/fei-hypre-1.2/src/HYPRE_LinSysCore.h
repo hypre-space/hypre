@@ -159,6 +159,8 @@ class HYPRE_LinSysCore: public LinearSystemCore {
    //function for launching the linear solver
    void launchSolver(int& solveStatus, int& iterations);
 
+   void  writeSystem(char *);
+
    void  loadConstraintNumbers(int, int*);
    void  buildReducedSystem();
 
@@ -193,8 +195,22 @@ class HYPRE_LinSysCore: public LinearSystemCore {
    HYPRE_IJVector  *HYbs_;
    HYPRE_IJVector  HYx_;
    HYPRE_IJVector  HYr_;
+
+   HYPRE_IJMatrix  reducedA_;
+   HYPRE_IJVector  reducedB_;
+   HYPRE_IJVector  reducedX_;
+   HYPRE_IJVector  reducedR_;
+   HYPRE_IJMatrix  HYA21_;
+   HYPRE_IJMatrix  HYinvA22_;
+
+   HYPRE_IJMatrix  currA_;
+   HYPRE_IJVector  currB_;
+   HYPRE_IJVector  currX_;
+   HYPRE_IJVector  currR_;
+
    int             matrixVectorsCreated_;
    int             systemAssembled_;
+   int             systemReduced_;
 
    int             numGlobalRows_;
    int             localStartRow_;
@@ -221,6 +237,7 @@ class HYPRE_LinSysCore: public LinearSystemCore {
    int             maxIterations_;
    int             finalResNorm_;
    double          tolerance_;
+   int             normAbsRel_;
 
    int             gmresDim_;
    int             amgCoarsenType_;

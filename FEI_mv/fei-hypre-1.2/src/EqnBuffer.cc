@@ -119,7 +119,7 @@ int EqnBuffer::isInIndices(int eqn) {
 
 //==============================================================================
 void EqnBuffer::addEqn(int eqnNumber, const double* coefs, const int* indices,
-                       int len) {
+                       int len, bool accumulate) {
    int insertPoint = -1;
    int index = Utils::sortedIntListFind(eqnNumber, eqnNumbers_,
                                         numEqns_, &insertPoint);
@@ -130,7 +130,7 @@ void EqnBuffer::addEqn(int eqnNumber, const double* coefs, const int* indices,
       //if so, insert the index/coef pairs, or add them to ones already in
       //place, as appropriate.
 
-      internalAddEqn(index, coefs, indices, len);
+      internalAddEqn(index, coefs, indices, len, accumulate);
    }
    else {
       //if eqnNumber was not already present, add this equation number to
@@ -152,13 +152,14 @@ void EqnBuffer::addEqn(int eqnNumber, const double* coefs, const int* indices,
 
       Utils::intListInsert(1, insertPoint, eqnLengths_, tmp);
 
-      internalAddEqn(insertPoint, &(coefs[1]), &(indices[1]), len-1);
+      internalAddEqn(insertPoint, &(coefs[1]), &(indices[1]), len-1,
+                     accumulate);
    }
 }
 
 //==============================================================================
 void EqnBuffer::internalAddEqn(int index, const double* coefs,
-                               const int* indices, int len) {
+                               const int* indices, int len, bool accumulate) {
 //
 //Private EqnBuffer function. We can safely assume that this function is only
 //called if indices_ and coefs_ already contain an 'index'th row.
@@ -180,7 +181,20 @@ void EqnBuffer::internalAddEqn(int index, const double* coefs,
       else {
          //indices[i] was already there so sum in this coef.
 
-         coefRow[position] += coefs[i];
+         if (accumulate) coefRow[position] += coefs[i];
+         else coefRow[position] = coefs[i];
+      }
+   }
+}
+
+//==============================================================================
+void EqnBuffer::resetCoefs() {
+   for(int i=0; i<numEqns_; i++) {
+      for(int j=0; j<eqnLengths_[i]; j++) {
+         coefs_[i][j] = 0.0;
+      }
+      for(int k=0; k<numRHSs_; k++) {
+         rhsCoefs_[i][k] = 0.0;
       }
    }
 }
@@ -206,7 +220,8 @@ void EqnBuffer::addIndices(int eqnNumber, const int* indices, int len) {
       //if so, insert the indices, or add them to ones already in
       //place, as appropriate.
 
-      internalAddEqn(index, dummyCoefs, indices, len);
+      bool accumulate = true;
+      internalAddEqn(index, dummyCoefs, indices, len, accumulate);
    }
    else {
       //if eqnNumber was not already present, insert this equation number at 
@@ -230,8 +245,9 @@ void EqnBuffer::addIndices(int eqnNumber, const int* indices, int len) {
 
       Utils::intListInsert(1, insertPoint, eqnLengths_, tmp);
 
+      bool accumulate = true;
       internalAddEqn(insertPoint, &(dummyCoefs[1]), &(indices[1]),
-                     len-1);
+                     len-1, accumulate);
    }
 
    delete [] dummyCoefs;

@@ -1,13 +1,11 @@
 #include <stdlib.h>
 #include <iostream.h>
 
-/* changes made to conform to HYPRE */
-/*#ifdef FEI_SER*/
-/*#include "mpiuni/mpi.h"*/
-/*#else*/
-/*#include <mpi.h>*/
-/*#endif*/
-#include "../../utilities/utilities.h"
+#ifdef FEI_SER
+#include "mpiuni/mpi.h"
+#else
+#include <mpi.h>
+#endif
 
 #include "other/basicTypes.h"
 

@@ -72,8 +72,6 @@ void BCManager::consolidateBCs() {
 
    numBCNodes_ = countBCNodes();
 
-   setFieldsPerNode();
-
    setFieldTables();
 
    allocateAlphaBetaGamma();
@@ -166,28 +164,6 @@ int BCManager::countBCNodes() {
 }
 
 //==============================================================================
-void BCManager::setFieldsPerNode() {
-//
-//Allocate the fieldsPerNode_ list, and set its contents with the number of
-//fields per distinct node that have BCs specified.
-//
-   if (fieldsPerNode_ != NULL) delete [] fieldsPerNode_;
-
-   fieldsPerNode_ = new int[numBCNodes_];
-
-   for(int i=0; i<numBCNodes_; i++) {
-      fieldsPerNode_[i] = 0;
-   }
-
-   int tmp;
-   for(int j=0; j<lenBCList_; j++) {
-      int index = Utils::sortedGlobalIDListFind(bcList_[j]->getNodeID(),
-                                                BCNodeIDs_, numBCNodes_, &tmp);
-      fieldsPerNode_[index]++;
-   }
-}
-
-//==============================================================================
 void BCManager::setFieldTables() {
 //
 //Allocate the bcFieldIDs_ and bcFieldSizes_ tables, then run through the
@@ -195,12 +171,12 @@ void BCManager::setFieldTables() {
 //
    bcFieldIDs_ = new int*[numBCNodes_];
    bcFieldSizes_ = new int*[numBCNodes_];
-   int* lengths = new int[numBCNodes_];
+   fieldsPerNode_ = new int[numBCNodes_];
 
    for(int i=0; i<numBCNodes_; i++) {
-      bcFieldIDs_[i] = new int[fieldsPerNode_[i]];
-      bcFieldSizes_[i] = new int[fieldsPerNode_[i]];
-      lengths[i] = 0;
+      bcFieldIDs_[i] = NULL;
+      bcFieldSizes_[i] = NULL;
+      fieldsPerNode_[i] = 0;
    }
 
    int ins;
@@ -208,14 +184,20 @@ void BCManager::setFieldTables() {
       int index = Utils::sortedGlobalIDListFind(bcList_[j]->getNodeID(),
                                                 BCNodeIDs_, numBCNodes_, &ins);
 
+      int tmp = fieldsPerNode_[index];
       int index2 = Utils::sortedIntListInsert(bcList_[j]->getFieldID(),
                                                    bcFieldIDs_[index],
-                                                   lengths[index]);
+                                                   fieldsPerNode_[index]);
 
-      bcFieldSizes_[index][index2] = bcList_[j]->getFieldSize(); 
+      int size = bcList_[j]->getFieldSize();
+
+      if (tmp < fieldsPerNode_[index]) {
+         Utils::intListInsert(size, index2, bcFieldSizes_[index], tmp);
+      }
+      else {
+         bcFieldSizes_[index][index2] = size;
+      }
    }
-
-   delete [] lengths;
 }
 
 //==============================================================================

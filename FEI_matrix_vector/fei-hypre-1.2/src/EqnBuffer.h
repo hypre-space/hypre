@@ -23,14 +23,16 @@ class EqnBuffer {
    int isInIndices(int eqn);
 
    void addEqn(int eqnNumber, const double* coefs, const int* indices,
-               int len);
+               int len, bool accumulate);
+
+   void resetCoefs();
 
    void addIndices(int eqnNumber, const int* indices, int len);
 
  private:
    void deleteMemory();
    void internalAddEqn(int index, const double* coefs,
-                       const int* indices, int len);
+                       const int* indices, int len, bool accumulate);
 
    int numEqns_;
    int* eqnNumbers_;

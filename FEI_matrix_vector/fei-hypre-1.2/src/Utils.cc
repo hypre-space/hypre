@@ -405,7 +405,7 @@ void Utils::doubleTableInsertRow(double* newRow, int whichRow,
 }
 
 //==============================================================================
-void Utils::appendIntList(int** list, int* lenList, int newItem){
+void Utils::appendIntList(int newItem, int*& list, int& lenList){
 /*
    This function appends an integer to a list of integers.
    Yeah, yeah, I know, this should be a template.
@@ -413,19 +413,19 @@ void Utils::appendIntList(int** list, int* lenList, int newItem){
     int i;
 
     //first we allocate the new list
-    int* newList = new int[*lenList+1];
+    int* newList = new int[lenList+1];
 
     //now we copy the old stuff into the new list
-    for(i=0; i<(*lenList); i++) newList[i] = (*list)[i];
+    for(i=0; i<lenList; i++) newList[i] = list[i];
 
     //now put in the new item
-    newList[*lenList] = newItem;
+    newList[lenList] = newItem;
 
     //and finally delete the old memory and set the pointer to
     //point to the new memory
-    if (*lenList > 0) delete [] (*list);
-    *list = newList;
-    (*lenList) += 1;
+    if (lenList > 0) delete [] list;
+    list = newList;
+    lenList += 1;
 
     return;
 }

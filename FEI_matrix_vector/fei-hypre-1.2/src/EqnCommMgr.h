@@ -112,6 +112,8 @@ class EqnCommMgr {
 
    double* sendEqnSolnPtr() {return(sendEqnSoln_);};
 
+   void resetCoefs();
+
    void exchangeEssBCs(int* essEqns, int numEssEqns, double* essAlpha,
                        double* essGamma, MPI_Comm comm);
 
@@ -127,7 +129,7 @@ class EqnCommMgr {
    int getNumRecvEqns(ProcEqns* sendProcEqns, MPI_Comm comm);
    void exchangeEqnBuffers(MPI_Comm comm, ProcEqns* sendProcEqns,
                            EqnBuffer* sendEqns, ProcEqns* recvProcEqns,
-                           EqnBuffer* recvEqns);
+                           EqnBuffer* recvEqns, bool accumulate);
 
    int localProc_;
 

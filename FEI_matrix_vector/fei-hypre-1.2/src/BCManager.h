@@ -32,7 +32,6 @@ class BCManager {
 
  private:
    int countBCNodes();
-   void setFieldsPerNode();
    void setFieldTables();
    void allocateAlphaBetaGamma();
    void copyOverAlphaBetaGamma();

@@ -30,7 +30,7 @@ class Utils {
    static void doubleTableInsertRow(double* newRow, int whichRow,
                                     double**& table, int& numRows);
 
-   static void appendIntList(int **list, int* lenList, int newItem);
+   static void appendIntList(int newItem, int*& list, int& lenList);
 
    static void appendGlobalIDList(GlobalID **list, int* lenList, GlobalID newItem);
 

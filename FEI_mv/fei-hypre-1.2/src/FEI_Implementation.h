@@ -377,6 +377,8 @@ class FEI_Implementation : public FEI {
     void allocateInternalFEIs();
     void allocateInternalFEIs(int numMatrices, int* matrixIDs,
                               int* numRHSs, int** rhsIDs);
+    void debugOut(char* msg);
+    void debugOut(char* msg, int whichFEI);
 
     LinearSystemCore* constructorLinSysCore_;
     LinearSystemCore** linSysCore_;

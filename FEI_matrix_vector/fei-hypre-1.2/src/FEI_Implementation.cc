@@ -4,13 +4,11 @@
 #include <string.h>
 #include <assert.h>
 
-/* changes made to conform to HYPRE */
-/* #ifdef FEI_SER */
-/* #include <mpiuni/mpi.h> */
-/* #else */
-/* #include <mpi.h> */
-/* #endif */
-#include "utilities/utilities.h"
+#ifdef FEI_SER
+#include <mpiuni/mpi.h>
+#else
+#include <mpi.h>
+#endif
 
 #include "other/basicTypes.h"
 #include "fei.h"
@@ -158,37 +156,45 @@ FEI_Implementation::~FEI_Implementation() {
 
 //------------------------------------------------------------------------------
 int FEI_Implementation::setMatrixID(int matID){
-    index_current_fei_ = -1;
 
-    if (!initPhaseIsComplete_) {
-        cerr << "FEI_Implementation::setMatrixID: WARNING, setting the matrix "
-           << "ID before the init phase is complete, will produce undefined"
-           << " behavior. A single init phase automatically applies to all "
-           << "matrices being assembled." << endl;
-    }
+   debugOut("setMatrixID");
 
-    for(int i=0; i<numInternalFEIs_; i++){
-        if (feiIDs_[i] == matID) index_current_fei_ = i;
-    }
+   index_current_fei_ = -1;
 
-    if (debugOutput_) {
-        fprintf(debugFile_,"setMatrixID, ID: %d, ind: %d\n",
-                matID, index_current_fei_);
-        fflush(debugFile_);
-    }
+   if (!initPhaseIsComplete_) {
+      cerr << "FEI_Implementation::setMatrixID: WARNING, setting the matrix "
+         << "ID before the init phase is complete, will produce undefined"
+         << " behavior. A single init phase automatically applies to all "
+         << "matrices being assembled." << endl;
+   }
 
-    //if matID wasn't found, return non-zero (error)
-    if (index_current_fei_ == -1) {
-        cerr << "FEI_Implementation::setMatrixID: ERROR, invalid matrix ID supplied"
-             << endl;
-        return(1);
-    }
+   for(int i=0; i<numInternalFEIs_; i++){
+      if (feiIDs_[i] == matID) index_current_fei_ = i;
+   }
 
-    return(0);
+   if (debugOutput_) {
+      fprintf(debugFile_,"--- ID: %d, ind: %d\n",
+              matID, index_current_fei_);
+      fflush(debugFile_);
+   }
+
+   //if matID wasn't found, return non-zero (error)
+   if (index_current_fei_ == -1) {
+      cerr << "FEI_Implementation::setMatrixID: ERROR, invalid matrix ID "
+           << "supplied" << endl;
+      debugOut("leaving setMatrixID, ERROR");
+      return(1);
+   }
+
+   debugOut("leaving setMatrixID");
+
+   return(0);
 }
 
 //------------------------------------------------------------------------------
 int FEI_Implementation::setRHSID(int rhsID){
+
+    debugOut("setRHSID");
 
     bool found = false;
 
@@ -203,7 +209,7 @@ int FEI_Implementation::setRHSID(int rhsID){
     }
 
     if (debugOutput_) {
-        fprintf(debugFile_,"setRHSID, ID: %d, row: %d, ind: %d\n",
+        fprintf(debugFile_,"--- ID: %d, row: %d, ind: %d\n",
                 rhsID, index_current_rhs_row_, index_current_rhs_);
         fflush(debugFile_);
     }
@@ -211,8 +217,11 @@ int FEI_Implementation::setRHSID(int rhsID){
     if (!found) {
         cerr << "FEI_Implementation::setRHSID: ERROR, invalid RHS ID supplied"
              << endl;
+        debugOut("leaving setRHSID, ERROR");
         return(1);
     }
+
+    debugOut("leaving setRHSID");
 
     return(0);
 }
@@ -225,8 +234,10 @@ int FEI_Implementation::initSolveStep(int numElemBlocks, int solveType) {
 
     baseTime_ = MPI_Wtime();
 
+    debugOut("initSolveStep");
+
     if (debugOutput_) {
-        fprintf(debugFile_,"initSolveStep: numElemBlocks: %d, solveType: %d\n",
+        fprintf(debugFile_,"--- numElemBlocks: %d, solveType: %d\n",
                 numElemBlocks, solveType);
         fflush(debugFile_);
     }
@@ -285,6 +296,8 @@ int FEI_Implementation::initSolveStep(int numElemBlocks, int solveType) {
         else fei_[i]->setProblemStructure(probStruc);
     }
 
+    debugOut("leaving initSolveStep");
+
     wTime_ += MPI_Wtime() - baseTime_;
 
     return(0);
@@ -317,10 +330,7 @@ int FEI_Implementation::initFields(int numFields,
 
     baseTime_ = MPI_Wtime();
 
-    if (debugOutput_) {
-        fprintf(debugFile_,"initFields\n");
-        fflush(debugFile_);
-    }
+    debugOut("initFields", index_soln_fei_);
 
     if (internalFEIsAllocated_){
        fei_[index_soln_fei_]->initFields(numFields, cardFields, fieldIDs);
@@ -328,6 +338,8 @@ int FEI_Implementation::initFields(int numFields,
     else {
         notAllocatedAbort("FEI_Implementation::initFields");
     }
+
+    debugOut("leaving initFields");
 
     wTime_ += MPI_Wtime() - baseTime_;
 
@@ -352,11 +364,7 @@ int FEI_Implementation::beginInitElemBlock(GlobalID elemBlockID,
 
     baseTime_ = MPI_Wtime();
 
-    if (debugOutput_) {
-        fprintf(debugFile_,"beginInitElemBlock, -> fei[%d]\n",
-                index_current_fei_);
-        fflush(debugFile_);
-    }
+    debugOut("beginInitElemBlock", index_soln_fei_);
 
     if (internalFEIsAllocated_){
         fei_[index_soln_fei_]->beginInitElemBlock(elemBlockID,
@@ -372,6 +380,8 @@ int FEI_Implementation::beginInitElemBlock(GlobalID elemBlockID,
     else {
         notAllocatedAbort("FEI_Implementation::beginInitElemBlock");
     }
+
+    debugOut("leaving beginInitElemBlock");
 
     wTime_ += MPI_Wtime() - baseTime_;
 
@@ -392,10 +402,7 @@ int FEI_Implementation::initElemSet(int numElems,
 
     baseTime_ = MPI_Wtime();
 
-    if (debugOutput_) {
-        fprintf(debugFile_,"initElemSet, numElems: %d\n", numElems);
-        fflush(debugFile_);
-    }
+    debugOut("initElemSet", index_soln_fei_);
 
     if (internalFEIsAllocated_){
         fei_[index_soln_fei_]->initElemSet(numElems, 
@@ -405,6 +412,8 @@ int FEI_Implementation::initElemSet(int numElems,
     else {
         notAllocatedAbort("FEI_Implementation::initElemSet");
     }
+
+    debugOut("leaving initElemSet");
 
     wTime_ += MPI_Wtime() - baseTime_;
 
@@ -419,10 +428,7 @@ int FEI_Implementation::endInitElemBlock() {
 
     baseTime_ = MPI_Wtime();
 
-    if (debugOutput_) {
-        fprintf(debugFile_,"endInitElemBlock\n");
-        fflush(debugFile_);
-    }
+    debugOut("endInitElemBlock", index_soln_fei_);
 
     if (internalFEIsAllocated_){
         fei_[index_soln_fei_]->endInitElemBlock();
@@ -430,6 +436,8 @@ int FEI_Implementation::endInitElemBlock() {
     else {
         notAllocatedAbort("FEI_Implementation::endInitElemBlock");
     }
+
+    debugOut("leaving endInitElemBlock");
 
     wTime_ += MPI_Wtime() - baseTime_;
 
@@ -446,10 +454,7 @@ int FEI_Implementation::beginInitNodeSets(int numSharedNodeSets,
 
     baseTime_ = MPI_Wtime();
 
-    if (debugOutput_) {
-        fprintf(debugFile_,"beginInitNodeSets\n");
-        fflush(debugFile_);
-    }
+    debugOut("beginInitNodeSets", index_soln_fei_);
 
     if (internalFEIsAllocated_){
         fei_[index_soln_fei_]->beginInitNodeSets(numSharedNodeSets,
@@ -458,6 +463,8 @@ int FEI_Implementation::beginInitNodeSets(int numSharedNodeSets,
     else {
         notAllocatedAbort("FEI_Implementation::beginInitNodeSets");
     }
+
+    debugOut("leaving beginInitNodeSets");
 
     wTime_ += MPI_Wtime() - baseTime_;
 
@@ -477,10 +484,7 @@ int FEI_Implementation::initSharedNodeSet(const GlobalID *sharedNodeIDs,
 
     baseTime_ = MPI_Wtime();
 
-    if (debugOutput_) {
-        fprintf(debugFile_,"initSharedNodeSet\n");
-        fflush(debugFile_);
-    }
+    debugOut("initSharedNodeSet", index_soln_fei_);
 
     if (internalFEIsAllocated_){
         fei_[index_soln_fei_]->initSharedNodeSet(sharedNodeIDs,
@@ -492,16 +496,14 @@ int FEI_Implementation::initSharedNodeSet(const GlobalID *sharedNodeIDs,
         notAllocatedAbort("FEI_Implementation::initSharedNodeSet");
     }
  
+    debugOut("leaving initSharedNodeSet");
+
     wTime_ += MPI_Wtime() - baseTime_;
 
     return(0);
 }
 
-
 //------------------------------------------------------------------------------
-//
-// store the input parameters in the externalNodes_ object...
-//
 int FEI_Implementation::initExtNodeSet(const GlobalID *extNodeIDs,
                              int lenExtNodeIDs, 
                              const int *const *extProcIDs,
@@ -509,11 +511,7 @@ int FEI_Implementation::initExtNodeSet(const GlobalID *extNodeIDs,
 
     baseTime_ = MPI_Wtime();
 
-    if (debugOutput_) {
-        fprintf(debugFile_,"initExtNodeSet\n");
-        fprintf(debugFile_,"--- getting %d nodes.\n",lenExtNodeIDs);
-        fflush(debugFile_);
-    }
+    debugOut("initExtNodeSet", index_soln_fei_);
 
     if (internalFEIsAllocated_){
         fei_[index_soln_fei_]->initExtNodeSet(extNodeIDs,
@@ -524,6 +522,8 @@ int FEI_Implementation::initExtNodeSet(const GlobalID *extNodeIDs,
     else {
         notAllocatedAbort("FEI_Implementation::initExtNodeSet");
     }
+
+    debugOut("leaving initExtNodeSet");
 
     wTime_ += MPI_Wtime() - baseTime_;
 
@@ -539,10 +539,7 @@ int FEI_Implementation::endInitNodeSets() {
 
     baseTime_ = MPI_Wtime();
 
-    if (debugOutput_) {
-        fprintf(debugFile_,"endInitNodeSets\n");
-        fflush(debugFile_);
-    }
+    debugOut("leaving endInitNodeSets", index_soln_fei_);
 
     if (internalFEIsAllocated_){
         fei_[index_soln_fei_]->endInitNodeSets();
@@ -551,6 +548,8 @@ int FEI_Implementation::endInitNodeSets() {
         notAllocatedAbort("FEI_Implementation::endInitNodeSets");
     }
     
+    debugOut("leaving endInitNodeSets");
+
     wTime_ += MPI_Wtime() - baseTime_;
 
     return(0);
@@ -797,10 +796,7 @@ int FEI_Implementation::endLoadNodeSets() {
 //  tasks: complete the loading of nodal loading information
 //
 
-    if (debugOutput_) {
-        fprintf(debugFile_,"endLoadNodeSets\n");
-        fflush(debugFile_);
-    }
+    debugOut("endLoadNodeSets");
 
     if (internalFEIsAllocated_){
         int index = index_current_fei_;
@@ -811,6 +807,8 @@ int FEI_Implementation::endLoadNodeSets() {
     else {
         notAllocatedAbort("FEI_Implementation::endLoadNodeSets");
     }
+
+    debugOut("leaving endLoadNodeSets");
 
     return(0);
 }
@@ -826,10 +824,7 @@ int FEI_Implementation::beginLoadElemBlock(GlobalID elemBlockID,
 
     baseTime_ = MPI_Wtime();
 
-    if (debugOutput_) {
-        fprintf(debugFile_,"beginLoadElemBlock\n");
-        fflush(debugFile_);
-    }
+    debugOut("beginLoadElemBlock", index_current_fei_);
 
     if (internalFEIsAllocated_){
         fei_[index_current_fei_]->beginLoadElemBlock(elemBlockID,
@@ -839,6 +834,8 @@ int FEI_Implementation::beginLoadElemBlock(GlobalID elemBlockID,
     else {
         notAllocatedAbort("FEI_Implementation::beginLoadElemBlock");
     }
+
+    debugOut("leaving beginLoadElemBlock");
 
     wTime_ += MPI_Wtime() - baseTime_;
 
@@ -1263,11 +1260,8 @@ void FEI_Implementation::parameters(int numParams, char **paramStrings) {
 
     baseTime_ = MPI_Wtime();
 
-    if (debugOutput_) {
-        fprintf(debugFile_,"parameters\n");
-        fflush(debugFile_);
-    }
- 
+    debugOut("parameters");
+
     if (internalFEIsAllocated_){
         for(int i=0; i<numInternalFEIs_; i++){
             fei_[i]->parameters(numParams, paramStrings);
@@ -1275,9 +1269,7 @@ void FEI_Implementation::parameters(int numParams, char **paramStrings) {
     }
 
     if (numParams == 0 || paramStrings == NULL) {
-        if (debugOutput_) {
-            fprintf(debugFile_,"FEI_Implementation::parameters: no parameters.\n");
-        }
+        debugOut("--- no parameters");
     }
     else {
         // take a copy of these parameters, for later use.
@@ -1293,13 +1285,13 @@ void FEI_Implementation::parameters(int numParams, char **paramStrings) {
         }
 
         if ( Utils::getParam("debugOutput",numParams,paramStrings,param) == 1){
-            setDebugOutput(param,"FEI_Implementation_debug");
+            setDebugOutput(param,"FEI_Impl_debug");
         }
 
         if (debugOutput_) {
-           fprintf(debugFile_,"FEI_Implementation::parameters: numParams %d\n",numParams);
+           fprintf(debugFile_,"--- numParams %d\n",numParams);
            for(int i=0; i<numParams; i++){
-               fprintf(debugFile_,"---paramStrings[%d]: %s\n",i,
+               fprintf(debugFile_,"----- paramStrings[%d]: %s\n",i,
                        paramStrings[i]);
            }
         }
@@ -1307,10 +1299,7 @@ void FEI_Implementation::parameters(int numParams, char **paramStrings) {
 
     wTime_ += MPI_Wtime() - baseTime_;
 
-    if (debugOutput_) {
-        fprintf(debugFile_,"leaving parameters function\n");
-        fflush(debugFile_);
-    }
+    debugOut("leaving parameters");
  
     return;
 }
@@ -1341,7 +1330,8 @@ void FEI_Implementation::setDebugOutput(char* path, char* name){
 
     char* dbFileName = new char[pathLength + nameLength + 24];
 
-    sprintf(dbFileName,"%s/%s.%d.%d", path,name,solveCounter_,localRank_);
+    sprintf(dbFileName,"%s/%s.slv%d.%d.%d", path,name,solveCounter_,numProcs_,
+            localRank_);
 
     debugOutput_ = 1;
     debugFile_ = fopen(dbFileName,"w");
@@ -1358,10 +1348,7 @@ int FEI_Implementation::iterateToSolve(int& status) {
 
    baseTime_ = MPI_Wtime();
 
-   if (debugOutput_) {
-      fprintf(debugFile_,"in iterateToSolve...\n");
-      fflush(debugFile_);
-   }
+   debugOut("iterateToSolve", index_soln_fei_);
  
    buildLinearSystem();
 
@@ -1377,12 +1364,9 @@ int FEI_Implementation::iterateToSolve(int& status) {
       aggregateSystemFormed_ = false;
    }
 
-    if (debugOutput_) {
-        fprintf(debugFile_,"leaving iterateToSolve\n");
-        fflush(debugFile_);
-    }
+   debugOut("leaving iterateToSolve");
  
-    return(err);
+   return(err);
 }
              
 //------------------------------------------------------------------------------
@@ -1744,6 +1728,8 @@ void FEI_Implementation::buildLinearSystem(){
 //to give to a solver. (If we're just doing a standard single Ax=b
 //system solve, then there's nothing to do here.)
 //
+   debugOut("   buildLinearSystem");
+
    if (solveType_ == 2){
       //solveType_ == 2 means this is a linear-combination solve --
       //i.e., we're solving an aggregate system which is the sum of
@@ -1755,10 +1741,13 @@ void FEI_Implementation::buildLinearSystem(){
          aggregateSystem();
       }
    }
+   debugOut("   leaving buildLinearSystem");
 }
 
 //------------------------------------------------------------------------------
 void FEI_Implementation::aggregateSystem() { 
+
+   debugOut("   aggregateSystem");
 
    if (soln_fei_matrix_ == NULL) {
       soln_fei_matrix_ = new Data();
@@ -1809,6 +1798,8 @@ void FEI_Implementation::aggregateSystem() {
    }
 
    aggregateSystemFormed_ = true;
+
+   debugOut("   leaving aggregateSystem");
 }
 
 //==============================================================================
@@ -1908,6 +1899,22 @@ void FEI_Implementation::allocateInternalFEIs(){
    }
    else {
       needParametersAbort("FEI_Implementation::allocateInternalFEIs");
+   }
+}
+
+//==============================================================================
+void FEI_Implementation::debugOut(char* msg) {
+   if (debugOutput_) {
+      fprintf(debugFile_,"%s\n", msg);
+      fflush(debugFile_);
+   }
+}
+
+//==============================================================================
+void FEI_Implementation::debugOut(char* msg, int whichFEI) {
+   if (debugOutput_) {
+      fprintf(debugFile_,"%s, -> fei[%d]\n", msg, whichFEI);
+      fflush(debugFile_);
    }
 }
 

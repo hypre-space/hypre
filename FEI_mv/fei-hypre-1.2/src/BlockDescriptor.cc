@@ -111,7 +111,7 @@ void BlockDescriptor::allocateFieldIDsTable() {
 int** BlockDescriptor::fieldIDsTablePtr() {
 
    if (!fieldIDsAllocated_) {
-      cerr << "BlockDescriptor::fieldIDsTablePtr: ERROR, fieldIDs not"
+      cerr << "BlockDescriptor::fieldIDsTablePtr: WARNING, fieldIDs not"
            << " allocated. Returning NULL." << endl;
       return(NULL);
    }
@@ -151,13 +151,14 @@ bool BlockDescriptor::containsField(int fieldID) {
 
 //==============================================================================
 void BlockDescriptor::setNumElemDOFPerElement(int numDOF) {
-   if (numElements_ <= 0) {
-      cerr << "BlockDescriptor::setNumElemDOFPerElement: ERROR, "
-           << "numElements_ <= 0." << endl;
-      return;
-   }
 
    numElemDOFPerElement_ = numDOF;
+
+//   if (numElements_ <= 0) {
+//      cerr << "BlockDescriptor::setNumElemDOFPerElement: WARNING, "
+//           << "numElements_ <= 0." << endl;
+//      return;
+//   }
 
    elemDOFEqnNumbers_ = new int[numElements_];
 

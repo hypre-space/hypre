@@ -51,7 +51,9 @@ ISIS_LinSysCore::ISIS_LinSysCore(MPI_Comm comm)
    debugFileCounter_(0),
    debugPath_(NULL),
    debugFileName_(NULL),
-   debugFile_(NULL)
+   debugFile_(NULL),
+   dumpMatrix_(false),
+   matrixPath_(NULL)
 {
    masterProc_ = 0;
    MPI_Comm_size(comm_, &numProcs_);
@@ -107,6 +109,10 @@ ISIS_LinSysCore::~ISIS_LinSysCore() {
       delete [] debugFileName_;
    }
 
+   if (dumpMatrix_) {
+      delete [] matrixPath_;
+   }
+
    delete [] solverName_;
    delete [] precondName_;
 }
@@ -138,14 +144,26 @@ void ISIS_LinSysCore::parameters(int numParams, char** params) {
          sscanf(param,"%d", &outputLevel_);
       }
 
+      if ( Utils::getParam("dumpMatrix",numParams,params,param) == 1){
+         dumpMatrix_ = true;
+         delete [] matrixPath_;
+         matrixPath_ = new char[strlen(param)+1];
+         sprintf(matrixPath_, param);
+      }
+
       if ( Utils::getParam("debugOutput",numParams,params,param) == 1){
          char *name = new char[64];
 
-         sprintf(name, "ISIS_LinSysCore_debug.%d.%d.file%d",
+         sprintf(name, "ISIS_LSC_debug.%d.%d.file%d",
                  numProcs_, thisProc_, debugFileCounter_);
          debugFileCounter_++;
 
          setDebugOutput(param,name);
+
+         dumpMatrix_ = true;
+         delete [] matrixPath_;
+         matrixPath_ = new char[strlen(param)+1];
+         sprintf(matrixPath_, param);
 
          delete [] name;
       }
@@ -309,6 +327,7 @@ void ISIS_LinSysCore::matrixLoadComplete() {
 
     debugOutput("matrixLoadComplete");
 
+    A_ptr_->writeToFile("A_preload.mtx");
     A_ptr_->fillComplete();
 
     debugOutput("leaving matrixLoadComplete");
@@ -340,8 +359,7 @@ void ISIS_LinSysCore::enforceEssentialBC(int* globalEqn,
 
    for(int i=0; i<len; i++) {
 
-      //if globalEqn[i] isn't local, then the processor that owns it
-      //should be running this code too. Otherwise there's trouble...
+      //if globalEqn[i] is local, we'll diagonalize the row and column.
 
       if ((localStartRow_ <= globalEqn[i]) && (globalEqn[i] <= localEndRow_)){
          rowLength = A_ptr_->rowLength(globalEqn[i]);
@@ -394,7 +412,17 @@ void ISIS_LinSysCore::enforceEssentialBC(int* globalEqn,
 void ISIS_LinSysCore::enforceRemoteEssBCs(int numEqns, int* globalEqns,
                                           int** colIndices, int* colIndLen,
                                           double** coefs) {
+//
+//globalEqns should hold eqns that are owned locally, but which contain
+//column indices (the ones in colIndices) which are from remote equations
+//on which essential boundary-conditions need to be enforced.
+//
+//This function will only make the modification if the above conditions
+//hold -- i.e., the equation is a locally-owned equation, and the column
+//index is NOT a locally owned equation.
+//
    for(int i=0; i<numEqns; i++) {
+
       if ((globalEqns[i] < localStartRow_) || (globalEqns[i] > localEndRow_)) {
          continue;
       }
@@ -405,10 +433,13 @@ void ISIS_LinSysCore::enforceRemoteEssBCs(int numEqns, int* globalEqns,
 
       for(int j=0; j<colIndLen[i]; j++) {
          for(int k=0; k<rowLen; k++) {
+           if ((colIndices[i][j] < localStartRow_) ||
+               (colIndices[i][j] > localEndRow_)) {
             if (AcolInds[k] == colIndices[i][j]) {
                (*b_ptr_)[globalEqns[i]] -= Acoefs[k]*coefs[i][j];
                Acoefs[k] = 0.0;
             }
+           }
          }
       }
    }
@@ -725,6 +756,19 @@ void ISIS_LinSysCore::selectPreconditioner(char* name) {
 }
 
 //==============================================================================
+void ISIS_LinSysCore::writeSystem(char* name) {
+   char matname[256];
+   sprintf(matname,"%s/A_%s.mtx.slv%d.np%d", debugPath_, name, solveCounter_,
+           numProcs_);
+   A_ptr_->writeToFile(matname);
+   if (numRHSs_>0) {
+      sprintf(matname,"%s/b_%s.txt.slv%d.np%d", debugPath_, name,
+              solveCounter_, numProcs_);
+      b_ptr_->writeToFile(matname);
+   }
+}
+
+//==============================================================================
 void ISIS_LinSysCore::launchSolver(int& solveStatus, int& iterations) {
 //
 //This function does any last-second setup required for the
@@ -737,16 +781,16 @@ void ISIS_LinSysCore::launchSolver(int& solveStatus, int& iterations) {
 
    solveCounter_++;
 
-   if (debugOutput_) {
+   if (dumpMatrix_) {
       char matname[256];
-      sprintf(matname,"%s/A_ISIS.mtx.slv%d.np%d", debugPath_, solveCounter_,
+      sprintf(matname,"%s/A_ISIS.mtx.slv%d.np%d", matrixPath_, solveCounter_,
               numProcs_);
       A_ptr_->writeToFile(matname);
-      sprintf(matname,"%s/x_ISIS.txt.pre-slv%d.np%d", debugPath_,
+      sprintf(matname,"%s/x_ISIS.txt.pre-slv%d.np%d", matrixPath_,
               solveCounter_, numProcs_);
       x_->writeToFile(matname);
       if (numRHSs_>0) {
-         sprintf(matname,"%s/b_ISIS.txt.slv%d.np%d", debugPath_, solveCounter_,
+         sprintf(matname,"%s/b_ISIS.txt.slv%d.np%d", matrixPath_, solveCounter_,
                  numProcs_);
          b_ptr_->writeToFile(matname);
       }
@@ -785,9 +829,9 @@ void ISIS_LinSysCore::launchSolver(int& solveStatus, int& iterations) {
 
    iterations = pSolver_->iterations();
 
-   if (debugOutput_) {
+   if (dumpMatrix_) {
       char vecname[256];
-      sprintf(vecname,"%s/x_ISIS.txt.soln%d.np%d", debugPath_, solveCounter_,
+      sprintf(vecname,"%s/x_ISIS.txt.soln%d.np%d", matrixPath_, solveCounter_,
               numProcs_);
       x_->writeToFile(vecname);
    }

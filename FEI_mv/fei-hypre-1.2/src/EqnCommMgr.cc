@@ -294,14 +294,16 @@ void EqnCommMgr::exchangeEqns(MPI_Comm comm) {
 //equations (both indices and coefficients) among all participating processors.
 //
 
+   bool accumulate = true;
+
    exchangeEqnBuffers(comm, sendProcEqns_, sendEqns_,
-                      recvProcEqns_, recvEqns_);
+                      recvProcEqns_, recvEqns_, accumulate);
 }
 
 //==============================================================================
 void EqnCommMgr::exchangeEqnBuffers(MPI_Comm comm, ProcEqns* sendProcEqns,
                               EqnBuffer* sendEqns, ProcEqns* recvProcEqns,
-                              EqnBuffer* recvEqns) {
+                              EqnBuffer* recvEqns, bool accumulate) {
 //
 //This function performs the communication necessary to exchange remote
 //equations (both indices and coefficients) among all participating processors.
@@ -435,7 +437,7 @@ void EqnCommMgr::exchangeEqnBuffers(MPI_Comm comm, ProcEqns* sendProcEqns,
          double* coefs = &(recvProcEqnCoefs[index][offset]);
          int len = recvProcEqnLengths[index][j];
 
-         recvEqns->addEqn(eqn, coefs, indices, len);
+         recvEqns->addEqn(eqn, coefs, indices, len, accumulate);
 
          offset += len;
       }
@@ -539,7 +541,8 @@ void EqnCommMgr::exchangeSoln(MPI_Comm comm) {
 void EqnCommMgr::addSendEqn(int eqnNumber, int destProc,
                             const double* coefs, const int* indices, int num) {
    (void)destProc;
-   sendEqns_->addEqn(eqnNumber, coefs, indices, num);
+   bool accumulate = true;
+   sendEqns_->addEqn(eqnNumber, coefs, indices, num, accumulate);
 }
 
 //==============================================================================
@@ -574,6 +577,17 @@ void EqnCommMgr::addSendIndices(int eqnNumber, int destProc,
 }
 
 //==============================================================================
+void EqnCommMgr::resetCoefs() {
+   recvEqns_->resetCoefs();
+   sendEqns_->resetCoefs();
+
+   int numRecvEqns = recvEqns_->getNumEqns();
+   for(int i=0; i<numRecvEqns; i++) {
+      solnValues_[i] = 0.0;
+   }
+}
+
+//==============================================================================
 void EqnCommMgr::exchangeEssBCs(int* essEqns, int numEssEqns,double* essAlpha,
                                 double* essGamma, MPI_Comm comm) {
    delete essBCEqns_;
@@ -585,22 +599,37 @@ void EqnCommMgr::exchangeEssBCs(int* essEqns, int numEssEqns,double* essAlpha,
    int** _sendIndices = sendEqns_->indicesPtr();
    int* _sendEqnNumbers = sendEqns_->eqnNumbersPtr();
    int* _sendEqnLengths = sendEqns_->lengthsPtr();
+   int _numSendEqns = sendEqns_->getNumEqns();
 
    //check to see if any of the essEqns are in the sendIndices_ table.
    //the ones that are, will need to be sent to other processors.
 
    int i;
+   bool accumulate = false;
+
    for(i=0; i<numEssEqns; i++) {
-      int index = sendEqns_->isInIndices(essEqns[i]);
 
-      if (index >= 0) {
-         int proc = getSendProcNumber(_sendEqnNumbers[index]);
+      for(int j=0; j<_numSendEqns; j++) {
 
-         double coef = essGamma[i]/essAlpha[i];
+         int ins = -1;
+         int index = Utils::sortedIntListFind(essEqns[i], _sendIndices[j],
+                                              _sendEqnLengths[j], &ins);
 
-         sendEssEqns->addEqn(_sendEqnNumbers[index], &coef, &(essEqns[i]), 1);
+         if (index >= 0) {
+            int proc = getSendProcNumber(_sendEqnNumbers[j]);
 
-         essSendProcEqns->addEqn(_sendEqnNumbers[index], proc);
+            double coef = essGamma[i]/essAlpha[i];
+
+            sendEssEqns->addEqn(_sendEqnNumbers[j], &coef,
+                                &(essEqns[i]), 1, accumulate);
+
+            essSendProcEqns->addEqn(_sendEqnNumbers[j], proc);
+
+            for(int k=0; k<_sendEqnLengths[j]; k++) {
+               essBCEqns_->addEqn(_sendIndices[j][k], &coef, &(essEqns[i]), 1,
+                                  accumulate);
+            }
+         }
       }
    }
 
@@ -675,7 +704,7 @@ void EqnCommMgr::exchangeEssBCs(int* essEqns, int numEssEqns,double* essAlpha,
    delete [] lenRequests;
 
    exchangeEqnBuffers(comm, essSendProcEqns, sendEssEqns,
-                      essRecvProcEqns, essBCEqns_);
+                      essRecvProcEqns, essBCEqns_, accumulate);
 
    delete sendEssEqns;
    delete essSendProcEqns;

@@ -108,6 +108,8 @@ class LinearSystemCore {
 
    //function for launching the linear solver
    virtual void launchSolver(int& solveStatus, int& iterations) = 0;
+
+   virtual void writeSystem(char* name) = 0;
 };
 
 #endif
