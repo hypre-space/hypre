@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "f2c.h"
 
 /* Subroutine */ int dpotrf_(char *uplo, integer *n, doublereal *a, integer *
@@ -1314,7 +1315,6 @@ e
    ===================================================================== 
 */
 
-#include <stdio.h>
     printf("** On entry to %6s, parameter number %2i had an illegal value\n",
 		srname, *info);
 
