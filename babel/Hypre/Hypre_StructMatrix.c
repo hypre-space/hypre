@@ -136,29 +136,3 @@ int  impl_Hypre_StructMatrix_GetDims(Hypre_StructMatrix this, int* m, int* n) {
    return 0;
 } /* end impl_Hypre_StructMatrixGetDims */
 
-/* ********************************************************
- * impl_Hypre_StructMatrixGetRow
-/* >>>>>>> taken out of interface; delete after next Babel run
- **********************************************************/
-int  impl_Hypre_StructMatrix_GetRow
-( Hypre_StructMatrix this, int row, int* size, array1int* col_ind,
-  array1double* values ) {
-   struct Hypre_StructMatrix_private_type *SMp = this->Hypre_StructMatrix_data;
-   HYPRE_StructMatrix *Hmat = SMp->hsmat;
-   hypre_StructMatrix *hmat = (hypre_StructMatrix *) *Hmat;
-
-   printf("Hypre_StructMatrix_GetRow has not been implemented!\n");
-   return 1;
-} /* end impl_Hypre_StructMatrixGetRow */
-
-/* ********************************************************
- * impl_Hypre_StructMatrixRestoreRow
-/* >>>>>>> taken out of interface; delete after next Babel run
- **********************************************************/
-int  impl_Hypre_StructMatrix_RestoreRow
-( Hypre_StructMatrix this, int row, int size, array1int col_ind,
-  array1double values) {
-   printf("Hypre_StructMatrix_RestoreRow has not been implemented!\n");
-   return 1;
-} /* end impl_Hypre_StructMatrixRestoreRow */
-
