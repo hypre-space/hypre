@@ -28,9 +28,13 @@
 
 #ifdef HYPRE_USING_ESSL
 #include <essl.h>
+#else
+void hypre_F90_NAME(dpotrf)(char *, int *, double *, int *, int *);
+void hypre_F90_NAME(dpotrs)(char *, int *, int *, double *, int *, double *, 
+  int *, int *);
 #endif
 
-double beta = 1.e-9; /* load balance factor */
+double parasails_loadbal_beta = 1.e-9; /* load balance factor */
 
 /******************************************************************************
  *
@@ -934,7 +938,7 @@ void ParaSailsSetupPattern(ParaSails *ps, double thresh, int num_levels)
     ConstructPatternForEachRow(ps->pruned_rows, ps->num_levels, ps->M,
 	&ps->num_replies, &cost); /* returned num_replies is no longer used */
 
-    ps->load_bal = LoadBalDonate(ps->A->comm, ps->M, cost, beta);
+    ps->load_bal = LoadBalDonate(ps->A->comm, ps->M, cost, parasails_loadbal_beta);
 }
 
 /*--------------------------------------------------------------------------
