@@ -56,6 +56,8 @@ hypre_SStructVariableGetOffset( HYPRE_SStructVariable  vartype,
       case HYPRE_SSTRUCT_VARIABLE_ZEDGE:
       hypre_SetIndex(varoffset, 1, 1, 0);
       break;
+      case HYPRE_SSTRUCT_VARIABLE_UNDEFINED:
+      break;
    }
    for (d = ndim; d < 3; d++)
    {
