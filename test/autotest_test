@@ -95,24 +95,24 @@ parse_arguments () {
   do
     argcur=$arg
     case $arg in
-      a) confbuildtest $OPTARG  " "             "default"   1 1 1 1 1 1;;
-      b) confbuildtest $OPTARG  " "             "beta"      0 0 0 0 1 1;;
+      a) confbuildtest $OPTARG  " "             "default"   1 1 1 1 1 1 1;;
+      b) confbuildtest $OPTARG  " "             "beta"      0 0 0 0 0 1 1;;
       c) build $Build "all++"   "all++"         "test";;
       d) build $Build " "       "docs"          "docs";;
       f) build $Build "all77"   "all77"         "test";;
       h) usage; exit 2;;
       m) HYPRE_SEND_MAIL="yes"; MailOpt="-mail";;
      +m) HYPRE_SEND_MAIL="no"; MailOpt="";;
-      n) confbuildtest $Build   "--without-MPI" "no_mpi"    1 1 0 1 1 0;;
-      o) confbuildtest $OPTARG  "--with-openmp" "openmp"    0 0 0 0 1 0;;
-      p) confbuildtest $OPTARG  "--with-petac"  "petac"     0 0 0 1 0 0;;
+      n) confbuildtest $Build   "--without-MPI" "no_mpi"    1 1 1 0 1 1 0;;
+      o) confbuildtest $OPTARG  "--with-openmp" "openmp"    0 0 0 0 0 1 0;;
+      p) confbuildtest $OPTARG  "--with-petac"  "petac"     0 0 0 0 1 0 0;;
       q) confbuildtest $OPTARG  "--with-purify-to-file" \
-                                                "purify"    0 0 0 1 0 1;;
-     +q) confbuildtest $OPTARG  "--with-purify" "purify"    0 0 0 1 0 1;;
+                                                "purify"    0 0 0 0 1 0 1;;
+     +q) confbuildtest $OPTARG  "--with-purify" "purify"    0 0 0 0 1 0 1;;
       r) HYPRE_RUN_MACHINE=$OPTARG;;
       s) confbuildtest $Build   "--with-strict-checking" \
-                                         "strict_checking"  1 1 1 1 1 0;;
-      t) confbuildtest $OPTARG "--with-pthreads" "pthreads" 1 0 0 0 0 0;;
+                                         "strict_checking"  1 1 1 1 1 1 0;;
+      t) confbuildtest $OPTARG "--with-pthreads" "pthreads" 1 0 0 0 0 0 0;;
       x) build $Build   "beta++" "beta++" "test";;
       y) build $Build   "beta77" "beta77" "test";;
       :) echo "$0: \"$argcur\" requires a value"; exit 2;;
@@ -221,8 +221,8 @@ echo "$MailGroup" > ${Hdr}.${MessageStr}.${MakeOpt}.err.email
 confbuildtest () 
 {
 BuildOpt=$1	 ConfigOption=$2	 MessageStr=$3
-StructOpt=$4	 IJOpt=$5	 FeiOpt=$6
-MakeOpt=$7	 BetaOpt=$8	 NoFeiOpt=$9
+StructOpt=$4	 SstructOpt=$5	 IJOpt=$6	 FeiOpt=$7
+MakeOpt=$8	 BetaOpt=$9	 NoFeiOpt=${10}
 if [ ${BuildOpt} -ne $Skip ]
 then
   seconds; TIME=$SECS
@@ -241,6 +241,11 @@ then
       makeit "struct" $MessageStr "$HYPRE_STRUCT_EMAIL"
     fi
 
+    if [ $SstructOpt -ne $Skip ]
+    then
+      makeit "sstruct" $MessageStr "$HYPRE_STRUCT_EMAIL"
+    fi
+
     if [ $IJOpt -ne $Skip ]
     then
       makeit "IJ" $MessageStr "$HYPRE_IJ_EMAIL"
@@ -253,12 +258,12 @@ then
 
     if [ $MakeOpt -ne $Skip ]
     then
-      makeit "all" $MessageStr "$HYPRE_ALL_EMAIL"
+      makeit "all" $MessageStr "$HYPRE_DEFAULT_EMAIL"
     fi
 
     if [ $BetaOpt -ne $Skip ]
     then
-      makeit "beta" $MessageStr "$HYPRE_ALL_EMAIL"
+      makeit "beta" $MessageStr "$HYPRE_DEFAULT_EMAIL"
     fi
   fi
   if [ ${BuildOpt} -eq $Run ]
