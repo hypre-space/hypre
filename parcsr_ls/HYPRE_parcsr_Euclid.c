@@ -13,6 +13,8 @@
 #include "../distributed_ls/Euclid/Euclid_dh.h"
 #include "../distributed_ls/Euclid/Mem_dh.h"
 #include "../distributed_ls/Euclid/io_dh.h"
+#include "../distributed_ls/Euclid/TimeLog_dh.h"
+#include "../distributed_ls/Euclid/Parser_dh.h"
 
 /*------------------------------------------------------------------
  * Error checking
