@@ -50,7 +50,7 @@ echo "dwalker@llnl.gov rfalgout@llnl.gov" > $0.checkout.err.email
 
 cd $HYPRE_AUTOTEST_DIR/linear_solvers
 rm config.cache
-./configure 1> $0.configure.log 2> $0.configure.err
+./configure --with-timing 1> $0.configure.log 2> $0.configure.err
 echo "dwalker@llnl.gov rfalgout@llnl.gov elliott22@llnl.gov" > $0.configure.err.email 
 
 make veryclean
@@ -105,7 +105,7 @@ echo "dwalker@llnl.gov rfalgout@llnl.gov" > $0.beta++.err.email
 
 cd $HYPRE_AUTOTEST_DIR/linear_solvers
 rm config.cache
-./configure --with-pthreads 1> $0.configure_threads.log 2> $0.configure_threads.err
+./configure --with-timing --with-pthreads 1> $0.configure_threads.log 2> $0.configure_threads.err
 echo "dwalker@llnl.gov rfalgout@llnl.gov elliott22@llnl.gov" > $0.configure_threads.err.email 
 
 make veryclean
@@ -139,7 +139,7 @@ make beta
 
 cd $HYPRE_AUTOTEST_DIR/linear_solvers
 rm config.cache
-./configure --without-MPI 1> $0.configure_no_mpi.log 2> $0.configure_no_mpi.err
+./configure --with-timing --without-MPI 1> $0.configure_no_mpi.log 2> $0.configure_no_mpi.err
 echo "dwalker@llnl.gov rfalgout@llnl.gov elliott22@llnl.gov" > $0.configure_no_mpi.err.email 
 
 make veryclean
@@ -260,8 +260,7 @@ scp -r linear_solvers ${HYPRE_COMPILE_MACHINE}:${HYPRE_REMOTE_DIR}
 ssh ${HYPRE_COMPILE_MACHINE} "\
     (\
 	cd ${HYPRE_REMOTE_DIR}/linear_solvers;\
-	rm config.cache;\
-	./configure;\
+	./configure --with-timing;\
 	make beta;\
     )"
 
