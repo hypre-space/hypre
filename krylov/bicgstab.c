@@ -225,7 +225,7 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
    int        iter; 
    int        my_id, num_procs;
    double     alpha, beta, gamma, epsilon, temp, res, r_norm, b_norm;
-   double     epsmac = 1.e-16; 
+   double     epsmac = 1.e-128; 
    double     ieee_check = 0.;
    double     cf_ave_0 = 0.0;
    double     cf_ave_1 = 0.0;
