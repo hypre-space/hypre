@@ -18,25 +18,17 @@
 #include "Matrix.h"
 #include "ParaSails.h"
 
-#ifdef ESSL
-#include <essl.h>
-#else
 double ddot_(int *, double *, int *, double *, int *);
 void dcopy_(int *, double *, int *, double *, int *);
 void dscal_(int *, double *, double *, int *);
 void daxpy_(int *, double *, double *, int *, double *, int *);
-#endif
 
 static double InnerProd(int n, double *x, double *y, MPI_Comm comm)
 {
     double local_result, result;
 
-#ifdef ESSL
-    local_result = ddot(n, x, 1, y, 1);
-#else
     int one = 1;
     local_result = ddot_(&n, x, &one, y, &one);
-#endif
 
     MPI_Allreduce(&local_result, &result, 1, MPI_DOUBLE, MPI_SUM, comm);
 
@@ -45,32 +37,20 @@ static double InnerProd(int n, double *x, double *y, MPI_Comm comm)
 
 static void CopyVector(int n, double *x, double *y)
 {
-#ifdef ESSL
-    dcopy(n, x, 1, y, 1);
-#else
     int one = 1;
     dcopy_(&n, x, &one, y, &one);
-#endif
 }
 
 static void ScaleVector(int n, double alpha, double *x)
 {
-#ifdef ESSL
-    dscal(n, alpha, x, 1);
-#else
     int one = 1;
     dscal_(&n, &alpha, x, &one);
-#endif
 }
 
 static void Axpy(int n, double alpha, double *x, double *y)
 {
-#ifdef ESSL
-    daxpy(n, alpha, x, 1, y, 1);
-#else
     int one = 1;
     daxpy_(&n, &alpha, x, &one, y, &one);
-#endif
 }
 
 /* use NULL for ps if unpreconditioned */

@@ -24,8 +24,9 @@
 #include "OrderStat.h"
 #include "LoadBal.h"
 #include "ParaSails.h"
+#include "fortran.h"
 
-#ifdef ESSL
+#ifdef HYPRE_USING_ESSL
 #include <essl.h>
 #endif
 
@@ -672,7 +673,7 @@ static void ComputeValues(StoredRows *stored_rows, Matrix *mat,
 
     int inserted;
 
-#ifndef ESSL
+#ifndef HYPRE_USING_ESSL
     char uplo = 'L';
     int one = 1;
     int info;
@@ -701,7 +702,7 @@ static void ComputeValues(StoredRows *stored_rows, Matrix *mat,
     index = (int *) malloc(i * sizeof(int));
     local = (int *) malloc(i * sizeof(int));
 
-#ifdef ESSL
+#ifdef HYPRE_USING_ESSL
     ahat = (double *) malloc(maxlen*(maxlen+1)/2 * sizeof(double));
 #else
     ahat = (double *) malloc(maxlen*maxlen * sizeof(double));
@@ -721,7 +722,7 @@ static void ComputeValues(StoredRows *stored_rows, Matrix *mat,
 	}
 
 	/* Initialize ahat to zero */
-#ifdef ESSL
+#ifdef HYPRE_USING_ESSL
         bzero(ahat, len*(len+1)/2 * sizeof(double));
 #else
         bzero(ahat, len*len * sizeof(double));
@@ -737,7 +738,7 @@ static void ComputeValues(StoredRows *stored_rows, Matrix *mat,
         for (i=0; i<len; i++)
         {
             StoredRowsGet(stored_rows, ind[i], &len2, &ind2, &val2);
-#ifdef ESSL
+#ifdef HYPRE_USING_ESSL
             for (j=0; j<len2; j++)
             {
                 loc = HashLookup(hash, ind2[j]);
@@ -786,12 +787,12 @@ static void ComputeValues(StoredRows *stored_rows, Matrix *mat,
         val[local[loc]] = 1.0;
 
         time0 = MPI_Wtime();
-#ifdef ESSL
+#ifdef HYPRE_USING_ESSL
         dppf(ahat, len, 1);
         dpps(ahat, len, val, 1);
 #else
 	/* Solve local linear system - factor phase */
-        dpotrf_(&uplo, &len, ahat, &len, &info);
+        hypre_F90_NAME(dpotrf)(&uplo, &len, ahat, &len, &info);
         if (info != 0)
         {
 	    printf("ParaSails: row %d, dpotrf returned %d.\n", row, info);
@@ -802,7 +803,7 @@ static void ComputeValues(StoredRows *stored_rows, Matrix *mat,
         }
 
 	/* Solve local linear system - solve phase */
-        dpotrs_(&uplo, &len, &one, ahat, &len, val, &len, &info);
+        hypre_F90_NAME(dpotrs)(&uplo, &len, &one, ahat, &len, val, &len, &info);
         if (info != 0)
         {
 	    printf("ParaSails: row %d, dpotrs returned %d.\n", row, info);
