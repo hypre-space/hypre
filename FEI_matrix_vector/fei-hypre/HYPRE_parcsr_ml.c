@@ -417,34 +417,34 @@ int HYPRE_ParCSRMLSetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
        switch ( link->pre )
        {
           case 0 :
-             ML_Gen_SmootherJacobi(ml, level, ML_PRESMOOTHER, sweeps, wght);
+             ML_Gen_Smoother_Jacobi(ml, level, ML_PRESMOOTHER, sweeps, wght);
              break;
           case 1 :
-             ML_Gen_SmootherGaussSeidel(ml, level, ML_PRESMOOTHER, sweeps);
+             ML_Gen_Smoother_GaussSeidel(ml, level, ML_PRESMOOTHER, sweeps, 1.0);
              break;
           case 2 :
-             ML_Gen_SmootherSymGaussSeidel(ml,level,ML_PRESMOOTHER,sweeps,1.0);
+             ML_Gen_Smoother_SymGaussSeidel(ml,level,ML_PRESMOOTHER,sweeps,1.0);
              break;
           case 3 :
              Nblocks = ML_Aggregate_Get_AggrCount( link->ml_ag, level );
              ML_Aggregate_Get_AggrMap( link->ml_ag, level, &blockList );
-             ML_Gen_SmootherVBlockJacobi(ml,level,ML_PRESMOOTHER,
+             ML_Gen_Smoother_VBlockJacobi(ml,level,ML_PRESMOOTHER,
                                          sweeps, wght, Nblocks, blockList);
              break;
           case 4 :
              Nblocks = ML_Aggregate_Get_AggrCount( link->ml_ag, level );
              ML_Aggregate_Get_AggrMap( link->ml_ag, level, &blockList );
-             ML_Gen_SmootherVBlockSymGaussSeidel(ml,level, ML_PRESMOOTHER, 
-                                         sweeps, Nblocks, blockList);
+             ML_Gen_Smoother_VBlockSymGaussSeidel(ml,level, ML_PRESMOOTHER, 
+                                         sweeps, 1.0, Nblocks, blockList);
              break;
           case 5 :
              Nblocks = ML_Aggregate_Get_AggrCount( link->ml_ag, level );
              ML_Aggregate_Get_AggrMap( link->ml_ag, level, &blockList );
-             ML_Gen_SmootherVBlockSymGaussSeidelSequential(ml,level,
-                                  ML_PRESMOOTHER, sweeps, Nblocks, blockList);
+             ML_Gen_Smoother_VBlockSymGaussSeidelSequential(ml,level,
+                                  ML_PRESMOOTHER, sweeps, 1.0, Nblocks, blockList);
              break;
           case 6 :
-             ML_Gen_SmootherOverlappedDomainDecomp(ml,level, ML_PRESMOOTHER); 
+             ML_Gen_Smoother_OverlappedDomainDecomp(ml,level, ML_PRESMOOTHER); 
              break;
        }
 
@@ -452,37 +452,37 @@ int HYPRE_ParCSRMLSetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
        switch ( link->post )
        {
           case 0 :
-             ML_Gen_SmootherJacobi(ml, level, ML_POSTSMOOTHER, sweeps, wght);
+             ML_Gen_Smoother_Jacobi(ml, level, ML_POSTSMOOTHER, sweeps, wght);
              break;
           case 1 :
-             ML_Gen_SmootherGaussSeidel(ml, level, ML_POSTSMOOTHER, sweeps);
+             ML_Gen_Smoother_GaussSeidel(ml, level, ML_POSTSMOOTHER, sweeps, 1.0);
              break;
           case 2 :
-             ML_Gen_SmootherSymGaussSeidel(ml,level,ML_POSTSMOOTHER,sweeps,1.0);
+             ML_Gen_Smoother_SymGaussSeidel(ml,level,ML_POSTSMOOTHER,sweeps,1.0);
              break;
           case 3 :
              Nblocks = ML_Aggregate_Get_AggrCount( link->ml_ag, level );
              ML_Aggregate_Get_AggrMap( link->ml_ag, level, &blockList );
-             ML_Gen_SmootherVBlockJacobi(ml,level,ML_POSTSMOOTHER,
+             ML_Gen_Smoother_VBlockJacobi(ml,level,ML_POSTSMOOTHER,
                                          sweeps, wght, Nblocks, blockList);
              break;
           case 4 :
              Nblocks = ML_Aggregate_Get_AggrCount( link->ml_ag, level );
              ML_Aggregate_Get_AggrMap( link->ml_ag, level, &blockList );
-             ML_Gen_SmootherVBlockSymGaussSeidel(ml,level,ML_POSTSMOOTHER,
-                                              sweeps, Nblocks, blockList);
+             ML_Gen_Smoother_VBlockSymGaussSeidel(ml,level,ML_POSTSMOOTHER,
+                                              sweeps, 1.0, Nblocks, blockList);
              break;
           case 5 :
              Nblocks = ML_Aggregate_Get_AggrCount( link->ml_ag, level );
              ML_Aggregate_Get_AggrMap( link->ml_ag, level, &blockList );
-             ML_Gen_SmootherVBlockSymGaussSeidelSequential(ml,level,
-                                  ML_POSTSMOOTHER, sweeps, Nblocks, blockList);
+             ML_Gen_Smoother_VBlockSymGaussSeidelSequential(ml,level,
+                                  ML_POSTSMOOTHER, sweeps, 1.0, Nblocks, blockList);
              break;
        }
     }
 
     ML_Gen_CoarseSolverSuperLU(ml, coarsest_level);
-    /*ML_Gen_SmootherGaussSeidel(ml, coarsest_level, ML_PRESMOOTHER, 100);*/
+    /*ML_Gen_Smoother_GaussSeidel(ml, coarsest_level, ML_PRESMOOTHER, 100, 1.0);*/
 
     ML_Gen_Solver(ml, ML_MGV, nlevels-1, coarsest_level);
    
