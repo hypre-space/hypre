@@ -533,7 +533,8 @@ int HYPRE_LSI_MLISolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
 extern "C"
 int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
 {
-   int           mypid;
+   int           mypid, i;
+   double        weight;
    MPI_Comm      mpiComm;
    HYPRE_LSI_MLI *mli_object;
    char          param1[256], param2[256], param3[256];
@@ -616,11 +617,46 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
       sscanf(paramString,"%s %s %s", param1, param2, param3);
       strcpy( mli_object->coarseSolver_, param3 );
    }
+   else if ( !strcasecmp(param2, "smootherWeight") )
+   {
+      sscanf(paramString,"%s %s %e",param1,param2,&weight);
+      if ( weight <= 0.0 || weight > 2.0 ) weight = 1.0; 
+      if ( mli_object->preNSweeps_ > 0 ) 
+      {
+         if ( mli_object->preSmootherWts_ != NULL ) 
+            delete [] mli_object->preSmootherWts_; 
+         mli_object->preSmootherWts_ = new double[mli_object->preNSweeps_];
+         for ( i = 0; i < mli_object->preNSweeps_; i++ )
+            mli_object->preSmootherWts_[i] = weight;
+         mli_object->postNSweeps_ = mli_object->preNSweeps_;  
+         if ( mli_object->postSmootherWts_ != NULL ) 
+            delete [] mli_object->postSmootherWts_; 
+         mli_object->postSmootherWts_ = new double[mli_object->preNSweeps_];
+         for ( i = 0; i < mli_object->preNSweeps_; i++ )
+            mli_object->postSmootherWts_[i] = weight;
+      }
+   }
    else if ( !strcasecmp(param2, "numSweeps") )
    {
       sscanf(paramString,"%s %s %d",param1,param2,&(mli_object->preNSweeps_));
       if ( mli_object->preNSweeps_ <= 0 ) mli_object->preNSweeps_ = 1;
       mli_object->postNSweeps_ = mli_object->preNSweeps_; 
+      if ( mli_object->preSmootherWts_ != NULL ) 
+      {
+         weight = mli_object->preSmootherWts_[0];
+         delete [] mli_object->preSmootherWts_; 
+         mli_object->preSmootherWts_ = new double[mli_object->preNSweeps_];
+         for ( i = 0; i < mli_object->preNSweeps_; i++ )
+            mli_object->preSmootherWts_[i] = weight;
+      }
+      if ( mli_object->postSmootherWts_ != NULL ) 
+      {
+         weight = mli_object->postSmootherWts_[0];
+         delete [] mli_object->postSmootherWts_; 
+         mli_object->postSmootherWts_ = new double[mli_object->postNSweeps_];
+         for ( i = 0; i < mli_object->postNSweeps_; i++ )
+            mli_object->postSmootherWts_[i] = weight;
+      }
    }
    else if ( !strcasecmp(param2, "minCoarseSize") )
    {
@@ -1006,7 +1042,7 @@ int HYPRE_LSI_MLI_SetMethod( HYPRE_Solver solver, char *paramString )
 /*--------------------------------------------------------------------------*/
 
 /*
-#define FEI_2.5
+#define FEI_250
 */
 
 extern "C"
@@ -1016,7 +1052,7 @@ int HYPRE_LSI_MLILoadNodalCoordinates(HYPRE_Solver solver, int nNodes,
    int           iN, iD, eqnInd, mypid;
    double        *nCoords;
    MPI_Comm      mpiComm;
-#ifdef FEI_2.5
+#ifdef FEI_250
    int           iMax, iMin, offFlag;
 #else
    int           iP, nprocs, *nodeProcMap, *iTempArray;
@@ -1051,7 +1087,7 @@ int HYPRE_LSI_MLILoadNodalCoordinates(HYPRE_Solver solver, int nNodes,
    /* of the changes made to FEI 2.5.0                         */
    /* -------------------------------------------------------- */ 
 
-#ifdef FEI_2.5
+#ifdef FEI_250
    mpiComm = mli_object->mpiComm_;
    MPI_Comm_rank( mpiComm, &mypid );
    mli_object->spaceDim_ = nDim;
