@@ -9,7 +9,6 @@ main( int   argc,
       char *argv[] )
 {
   FILE *f;
-  int Problem;                              /* number of file to read from */
 
   int ierr;
   int i,j,k,l,m;
@@ -73,6 +72,9 @@ main( int   argc,
   int system_size;
 
 
+  int num_functions;
+
+
   int *i_dof_node_0, *j_dof_node_0;
   int *i_node_dof_0, *j_node_dof_0;
 
@@ -109,7 +111,7 @@ main( int   argc,
     *aux, *v_coarse, *w_coarse, *d_coarse, *v_fine, *w_fine, *d_fine;
   int max_iter = 1000;
   int coarse_level; 
-  int nu = 1;  /* not used ------------------------------------------------ */
+  int nu = 2;  
 
   double reduction_factor;
 
@@ -134,7 +136,6 @@ main( int   argc,
 
 
   Max_level = 25;
-  Problem = 400;
 
 
   /*
@@ -145,10 +146,10 @@ main( int   argc,
   node_on_boundary_file = hypre_CTAlloc(char, 1);
   */
 
-  element_node_file = "/home/panayot/linear_solvers/seq_ls/amge/charles/element_node";
-  element_matrix_file = "/home/panayot/linear_solvers/seq_ls/amge/charles/element_chord";
+  element_node_file = "/home/panayot/linear_solvers/seq_linear_solvers/amge/charles/element_node";
+  element_matrix_file = "/home/panayot/linear_solvers/seq_linear_solvers/amge/charles/element_chord";
   /* coordinates_file = "coordinates"; */
-  node_on_boundary_file = "/home/panayot/linear_solvers/seq_ls/amge/charles/node_on_boundary";
+  node_on_boundary_file = "/home/panayot/linear_solvers/seq_linear_solvers/amge/charles/node_on_boundary";
 
 
   /*-----------------------------------------------------------
@@ -164,7 +165,6 @@ main( int   argc,
       if ( strcmp(argv[arg_index], "-fromfile") == 0 )
 	{
 	  arg_index++;
-	  Problem = -1;
 	  element_node_file_type = 1;
 
 
@@ -277,6 +277,13 @@ main( int   argc,
 
 				 element_node_file);
 
+
+  for (i=0; i < num_elements; i++)
+    for (j=i_element_node_0[i]; j < i_element_node_0[i+1]; j++)
+      j_element_node_0[j]++;
+
+
+
   hypre_TFree(i_boundarysurface_node);
   hypre_TFree(j_boundarysurface_node);
 
@@ -289,6 +296,7 @@ main( int   argc,
     fscanf(f, "%ld\n", &i_node_on_boundary[i]);
 
   fclose(f);  
+
 
   Num_nodes[0] = num_nodes;
   Num_elements[0] = num_elements;
@@ -311,8 +319,6 @@ main( int   argc,
 				       Max_level);
 
 
-  max_level = level;
-
   if (coordinates_file != NULL)
     {
       ierr = hypre_AMGe2dGraphics(A,
@@ -328,7 +334,13 @@ main( int   argc,
     }
 
   
+
+
+  max_level = level;
+
   printf("END AMGeMatrixTopologySetup; =================================\n");
+
+
 
 
 
@@ -351,9 +363,12 @@ main( int   argc,
 
   printf("END AMGeCoarsenodeSetup; =================================\n");
 
+  
 
   /* ELEMENT MATRICES READ: ============================================ */
   system_size = 1;
+
+  num_functions = 3; 
 
   ierr = compute_dof_node(&i_dof_node_0, &j_dof_node_0,
 			  Num_nodes[0], system_size, &num_dofs);
@@ -421,6 +436,7 @@ main( int   argc,
 				    Num_elements[0], Num_dofs[0]);
 
 
+
   ierr = hypre_AMGeInterpolationSetup(&P,
 
 				      &Matrix,
@@ -453,6 +469,8 @@ main( int   argc,
 
 				 /* -------- PDEsystem information -------- */
 				      system_size,
+				      num_functions,
+
 				      i_dof_node_0, j_dof_node_0,
 				      i_node_dof_0, j_node_dof_0,
 
@@ -473,6 +491,7 @@ main( int   argc,
   hypre_TFree(j_dof_node_0);
 
   printf("END AMGeInterpolationSetup; =================================\n");
+
 
   ierr = hypre_AMGeSmootherSetup(&i_ILUdof_to_dof,
 
@@ -501,6 +520,7 @@ main( int   argc,
 
   hypre_TFree(i_node_dof_0);
   hypre_TFree(j_node_dof_0);
+
 
 
   for (l=0; l < level+1; l++)
@@ -630,7 +650,6 @@ main( int   argc,
     }
 
   printf("\n\n===============================================================\n");
-  printf("                      Problem: %d \n", Problem);
   printf(" ------- V_cycle & nested dissection ILU(1) smoothing: --------\n");
   printf("================================================================\n");
 
@@ -675,7 +694,13 @@ main( int   argc,
 
   hypre_TFree(r);
   hypre_TFree(aux);
-
+  for (l=0; l < level+1; l++)
+    if (Num_dofs[l] > 0)
+      {
+	printf("\n------------ level: %d --------------\n", level);
+	printf("num_dofs: %d, num_elements: %d, nnz: %d\n",
+	       Num_dofs[l], Num_elements[l], Num_chords[l]);
+      }
 
   for (l=0; l < level+1; l++)
     if (Num_dofs[l] > 0)
