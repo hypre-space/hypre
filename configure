@@ -1339,7 +1339,7 @@ if test "${with_strict_checking+set}" = set; then
   CC=kcc
  CXX=KCC
  CFLAGS="$CFLAGS --c --strict --lint --display_error_number"
- CFLAGS="$CFLAGS --diag_suppress 236,826,1018,1021,1022,1023,1024,1030,1041"
+ CFLAGS="$CFLAGS --diag_suppress 45,236,450,826,1018,1021,1022,1023,1024,1030,1041"
  CXXFLAGS="$CXXFLAGS --strict --lint --display_error_number"
  casc_users_chose_compilers=yes
  casc_using_mpi=no
@@ -9392,16 +9392,7 @@ CXX="$PREPEND $CXX"
  krylov\
  matrix_matrix\
  mli\
- mli/amgs\
- mli/base\
- mli/cintface\
- mli/fedata\
- mli/lib\
  mli/matrix\
- mli/solver\
- mli/util\
- mli/vector\
- mli/test\
  parcsr_ls\
  parcsr_mv\
  PETSc_ls\
