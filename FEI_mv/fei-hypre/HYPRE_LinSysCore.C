@@ -14,10 +14,11 @@
 #include <assert.h>
 
 #include "utilities/utilities.h"
+#ifndef NOFEI
 #include "base/Data.h"
 #include "base/basicTypes.h"
-#include "base/Utils.h"
 #include "base/LinearSystemCore.h"
+#endif
 #include "HYPRE_LinSysCore.h"
 
 #define abs(x) (((x) > 0.0) ? x : -(x))
@@ -34,6 +35,29 @@
 #include "dsp_defs.h"
 #include "util.h"
 #endif
+
+//---------------------------------------------------------------------------
+// getParam subroutine borrowed from the Sandia's FEI implementation
+//---------------------------------------------------------------------------
+
+int getParam(const char* flag,int numParams,char** strings,char* param) 
+{
+    char temp[64];
+
+    if (flag == 0 || strings == 0)
+        return(0); // flag or strings is the NULL pointer
+
+    for (int i = 0; i<numParams; i++) {
+        if (strings[i] != 0)  { // check for NULL pointer
+            if (strncmp(flag, strings[i], strlen(flag)) == 0) {
+                // flag found
+                sscanf(strings[i], "%s %s", temp, param);
+                return(1);
+            }
+        }
+    }
+    return(0);  // flag was not found in strings
+}
 
 //---------------------------------------------------------------------------
 // These are external functions needed internally here
@@ -364,7 +388,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
     // output level
     //-------------------------------------------------------------------
 
-    if ( Utils::getParam("outputLevel",numParams,params,param) == 1)
+    if ( getParam("outputLevel",numParams,params,param) == 1)
     {
        sscanf(param,"%d", &HYOutputLevel_);
        if ( HYOutputLevel_ < 0 ) HYOutputLevel_ = 0;
@@ -380,7 +404,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
     // special output level
     //-------------------------------------------------------------------
 
-    if ( Utils::getParam("setDebug",numParams,params,param) == 1)
+    if ( getParam("setDebug",numParams,params,param) == 1)
     {
        sscanf(param,"%s", &param2);
        if (!strcmp(param2, "reduce1")) HYOutputLevel_ |= HYFEI_SLIDEREDUCE1;
@@ -401,7 +425,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
     // perform Schur complement reduction
     //-------------------------------------------------------------------
 
-    if ( Utils::getParam("schurReduction",numParams,params,param) == 1)
+    if ( getParam("schurReduction",numParams,params,param) == 1)
     {
        schurReduction_ = 1;
        nParamsFound++;
@@ -415,7 +439,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
     // set number of constraints 
     //-------------------------------------------------------------------
 
-    if ( Utils::getParam("nConstraints",numParams,params,param) == 1)
+    if ( getParam("nConstraints",numParams,params,param) == 1)
     {
        sscanf(param,"%d", &nConstraints_);
        nParamsFound++;
@@ -429,7 +453,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
     // which solver to pick : cg, gmres, superlu, superlux, y12m
     //-------------------------------------------------------------------
 
-    if ( Utils::getParam("solver",numParams,params,param) == 1)
+    if ( getParam("solver",numParams,params,param) == 1)
     {
        sscanf(param,"%s",HYSolverName_);
        selectSolver(HYSolverName_);
@@ -444,7 +468,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
     // for GMRES, the restart size
     //-------------------------------------------------------------------
 
-    if ( Utils::getParam("gmresDim",numParams,params,param) == 1)
+    if ( getParam("gmresDim",numParams,params,param) == 1)
     {
        sscanf(param,"%d", &gmresDim_);
        if ( gmresDim_ < 1 ) gmresDim_ = 100;
@@ -459,7 +483,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
     // which preconditioner : diagonal, pilut, boomeramg, parasails
     //-------------------------------------------------------------------
 
-    if ( Utils::getParam("preconditioner",numParams,params,param) == 1)
+    if ( getParam("preconditioner",numParams,params,param) == 1)
     {
        sscanf(param,"%s",param2);
        if ( !strcmp(param2, "reuse" ) ) HYPreconReuse_ = 1;
@@ -480,7 +504,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
     // maximum number of iterations for pcg or gmres
     //-------------------------------------------------------------------
 
-    if (Utils::getParam("maxIterations",numParams,params,param) == 1)
+    if (getParam("maxIterations",numParams,params,param) == 1)
     {
        sscanf(param,"%d", &maxIterations_);
        nParamsFound++;
@@ -495,7 +519,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
     // tolerance as termination criterion
     //-------------------------------------------------------------------
 
-    if (Utils::getParam("tolerance",numParams,params,param) == 1)
+    if (getParam("tolerance",numParams,params,param) == 1)
     {
        sscanf(param,"%lg", &tolerance_);
        nParamsFound++;
@@ -510,7 +534,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
     // pilut preconditioner : max number of nonzeros to keep per row
     //-------------------------------------------------------------------
 
-    if (Utils::getParam("pilutRowSize",numParams,params,param) == 1)
+    if (getParam("pilutRowSize",numParams,params,param) == 1)
     {
        sscanf(param,"%d", &pilutRowSize_);
        if ( pilutRowSize_ < 1 ) pilutRowSize_ = 50;
@@ -526,7 +550,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
     // pilut preconditioner : threshold to drop small nonzeros
     //-------------------------------------------------------------------
 
-    if (Utils::getParam("pilutDropTol",numParams,params,param) == 1)
+    if (getParam("pilutDropTol",numParams,params,param) == 1)
     {
        sscanf(param,"%lg", &pilutDropTol_);
        if (pilutDropTol_<0.0 || pilutDropTol_ >=1.0) pilutDropTol_ = 0.0;
@@ -542,7 +566,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
     // DDILUT preconditioner : amount of fillin (0 == same as A)
     //-------------------------------------------------------------------
 
-    if (Utils::getParam("ddilutFillin",numParams,params,param) == 1)
+    if (getParam("ddilutFillin",numParams,params,param) == 1)
     {
        sscanf(param,"%lg", &ddilutFillin_);
        if ( ddilutFillin_ < 0.0 ) ddilutFillin_ = 0.0;
@@ -558,7 +582,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
     // DDILUT preconditioner : threshold to drop small nonzeros
     //-------------------------------------------------------------------
 
-    if (Utils::getParam("ddilutDropTol",numParams,params,param) == 1)
+    if (getParam("ddilutDropTol",numParams,params,param) == 1)
     {
        sscanf(param,"%lg", &ddilutDropTol_);
        if (ddilutDropTol_<0.0 || ddilutDropTol_ >=1.0) ddilutDropTol_ = 0.0;
@@ -574,7 +598,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
     // superlu : ordering to use (natural, mmd)
     //-------------------------------------------------------------------
 
-    if (Utils::getParam("superluOrdering",numParams,params,param) == 1)
+    if (getParam("superluOrdering",numParams,params,param) == 1)
     {
        sscanf(param,"%s", &param2);
        if      ( !strcmp(param2, "natural" ) ) superluOrdering_ = 0;
@@ -592,7 +616,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
     // superlu : scaling none ('N') or both col/row ('B')
     //-------------------------------------------------------------------
 
-    if (Utils::getParam("superluScale",numParams,params,param) == 1)
+    if (getParam("superluScale",numParams,params,param) == 1)
     {
        sscanf(param,"%s", &param2);
        if      ( !strcmp(param2, "y" ) ) superluScale_[0] = 'B';
@@ -609,7 +633,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
     // amg preconditoner : coarsening type 
     //-------------------------------------------------------------------
 
-    if (Utils::getParam("amgCoarsenType",numParams,params,param) == 1)
+    if (getParam("amgCoarsenType",numParams,params,param) == 1)
     {
        sscanf(param,"%s", param2);
        if      ( !strcmp(param2, "ruge" ) )    amgCoarsenType_ = 1;
@@ -627,7 +651,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
     // amg preconditoner : no of relaxation sweeps per level
     //-------------------------------------------------------------------
 
-    if (Utils::getParam("amgNumSweeps",numParams,params,param) == 1)
+    if (getParam("amgNumSweeps",numParams,params,param) == 1)
     {
        sscanf(param,"%d", &nsweeps);
        if ( nsweeps < 1 ) nsweeps = 1;
@@ -644,7 +668,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
     // amg preconditoner : which smoother to use
     //-------------------------------------------------------------------
 
-    if (Utils::getParam("amgRelaxType",numParams,params,param) == 1)
+    if (getParam("amgRelaxType",numParams,params,param) == 1)
     {
        sscanf(param,"%s", param2);
        if      ( !strcmp(param2, "jacobi" ) ) rtype = 2;
@@ -666,7 +690,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
     // amg preconditoner : damping factor for Jacobi smoother
     //-------------------------------------------------------------------
 
-    if (Utils::getParam("amgRelaxWeight",numParams,params,param) == 1)
+    if (getParam("amgRelaxWeight",numParams,params,param) == 1)
     {
        sscanf(param,"%lg", &weight);
        if ( weight < 0.0 || weight > 1.0 ) weight = 0.5;
@@ -683,7 +707,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
     // amg preconditoner : threshold to determine strong coupling
     //-------------------------------------------------------------------
 
-    if (Utils::getParam("amgStrongThreshold",numParams,params,param) == 1)
+    if (getParam("amgStrongThreshold",numParams,params,param) == 1)
     {
        sscanf(param,"%lg", &amgStrongThreshold_);
        if ( amgStrongThreshold_ < 0.0 || amgStrongThreshold_ > 1.0 )
@@ -700,7 +724,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
     // parasails preconditoner : threshold ( >= 0.0 )
     //-------------------------------------------------------------------
 
-    if (Utils::getParam("parasailsThreshold",numParams,params,param) == 1)
+    if (getParam("parasailsThreshold",numParams,params,param) == 1)
     {
        sscanf(param,"%lg", &parasailsThreshold_);
        if ( parasailsThreshold_ < 0.0 ) parasailsThreshold_ = 0.1;
@@ -716,7 +740,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
     // parasails preconditoner : nlevels ( >= 0)
     //-------------------------------------------------------------------
 
-    if (Utils::getParam("parasailsNlevels",numParams,params,param) == 1)
+    if (getParam("parasailsNlevels",numParams,params,param) == 1)
     {
        sscanf(param,"%d", &parasailsNlevels_);
        if ( parasailsNlevels_ < 0 ) parasailsNlevels_ = 1;
@@ -732,7 +756,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
     // parasails preconditoner : filter
     //-------------------------------------------------------------------
 
-    if (Utils::getParam("parasailsFilter",numParams,params,param) == 1)
+    if (getParam("parasailsFilter",numParams,params,param) == 1)
     {
        sscanf(param,"%lg", &parasailsFilter_);
 
@@ -748,7 +772,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
     // parasails preconditoner : loadbal
     //-------------------------------------------------------------------
 
-    if (Utils::getParam("parasailsLoadbal",numParams,params,param) == 1)
+    if (getParam("parasailsLoadbal",numParams,params,param) == 1)
     {
        sscanf(param,"%lg", &parasailsLoadbal_);
 
@@ -764,7 +788,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
     // parasails preconditoner : symmetry flag (1 - symm, 0 - nonsym) 
     //-------------------------------------------------------------------
 
-    if (Utils::getParam("parasailsSymmetric",numParams,params,param) == 1)
+    if (getParam("parasailsSymmetric",numParams,params,param) == 1)
     {
        parasailsSym_ = 1;
        nParamsFound++;
@@ -774,7 +798,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
                  parasailsSym_);
        }
     }
-    if (Utils::getParam("parasailsUnSymmetric",numParams,params,param) == 1)
+    if (getParam("parasailsUnSymmetric",numParams,params,param) == 1)
     {
        parasailsSym_ = 0;
        nParamsFound++;
@@ -789,7 +813,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
     // parasails preconditoner : reuse flag
     //-------------------------------------------------------------------
 
-    if (Utils::getParam("parasailsReuse",numParams,params,param) == 1)
+    if (getParam("parasailsReuse",numParams,params,param) == 1)
     {
        sscanf(param,"%d", &parasailsReuse_);
        nParamsFound++;
@@ -804,7 +828,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
     // mlpack preconditoner : no of relaxation sweeps per level
     //-------------------------------------------------------------------
 
-    if (Utils::getParam("mlNumPresweeps",numParams,params,param) == 1)
+    if (getParam("mlNumPresweeps",numParams,params,param) == 1)
     {
        sscanf(param,"%d", &nsweeps);
        if ( nsweeps < 1 ) nsweeps = 1;
@@ -816,7 +840,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
                  nsweeps);
        }
     }
-    if (Utils::getParam("mlNumPostsweeps",numParams,params,param) == 1)
+    if (getParam("mlNumPostsweeps",numParams,params,param) == 1)
     {
        sscanf(param,"%d", &nsweeps);
        if ( nsweeps < 1 ) nsweeps = 1;
@@ -828,7 +852,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
                  nsweeps);
        }
     }
-    if (Utils::getParam("mlNumSweeps",numParams,params,param) == 1)
+    if (getParam("mlNumSweeps",numParams,params,param) == 1)
     {
        sscanf(param,"%d", &nsweeps);
        if ( nsweeps < 1 ) nsweeps = 1;
@@ -846,7 +870,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
     // mlpack preconditoner : which smoother to use
     //-------------------------------------------------------------------
 
-    if (Utils::getParam("mlPresmootherType",numParams,params,param) == 1)
+    if (getParam("mlPresmootherType",numParams,params,param) == 1)
     {
        sscanf(param,"%s", param2);
        rtype = 1;
@@ -865,7 +889,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
                  param2);
        }
     }
-    if (Utils::getParam("mlPostsmootherType",numParams,params,param) == 1)
+    if (getParam("mlPostsmootherType",numParams,params,param) == 1)
     {
        sscanf(param,"%s", param2);
        rtype = 1;
@@ -883,7 +907,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
                  param2);
        }
     }
-    if (Utils::getParam("mlRelaxType",numParams,params,param) == 1)
+    if (getParam("mlRelaxType",numParams,params,param) == 1)
     {
        sscanf(param,"%s", param2);
        rtype = 1;
@@ -909,7 +933,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
     // mlpack preconditoner : damping factor for Jacobi smoother
     //-------------------------------------------------------------------
 
-    if (Utils::getParam("mlRelaxWeight",numParams,params,param) == 1)
+    if (getParam("mlRelaxWeight",numParams,params,param) == 1)
     {
        sscanf(param,"%lg", &weight);
        if ( weight < 0.0 || weight > 1.0 ) weight = 0.5;
@@ -926,7 +950,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
     // mlpack preconditoner : threshold to determine strong coupling
     //-------------------------------------------------------------------
 
-    if (Utils::getParam("mlStrongThreshold",numParams,params,param) == 1)
+    if (getParam("mlStrongThreshold",numParams,params,param) == 1)
     {
        sscanf(param,"%lg", &mlStrongThreshold_);
        if ( mlStrongThreshold_ < 0.0 || mlStrongThreshold_ > 1.0 )
@@ -1652,18 +1676,21 @@ void HYPRE_LinSysCore::enforceOtherBC(int* globalEqn, double* alpha,
 // put the pointer to the A matrix into the Data object
 //---------------------------------------------------------------------------
 
+#ifndef NOFEI
 void HYPRE_LinSysCore::getMatrixPtr(Data& data) 
 {
    (void) data;
    printf("HYPRE_LinSysCore::getmatrixPtr - not implemented yet.\n");
    exit(1);
 }
+#endif
 
 //***************************************************************************
 //Overwrites the current internal matrix with a scaled copy of the
 //input argument.
 //---------------------------------------------------------------------------
 
+#ifndef NOFEI
 void HYPRE_LinSysCore::copyInMatrix(double scalar, const Data& data) 
 {
     (void) scalar;
@@ -1671,11 +1698,13 @@ void HYPRE_LinSysCore::copyInMatrix(double scalar, const Data& data)
     printf("HYPRE_LinSysCore::copyInMatrix - not implemented yet.\n");
     exit(1);
 }
+#endif
 
 //***************************************************************************
 //Passes out a scaled copy of the current internal matrix.
 //---------------------------------------------------------------------------
 
+#ifndef NOFEI
 void HYPRE_LinSysCore::copyOutMatrix(double scalar, Data& data) 
 {
     (void) scalar;
@@ -1683,11 +1712,13 @@ void HYPRE_LinSysCore::copyOutMatrix(double scalar, Data& data)
     printf("HYPRE_LinSysCore::copyOutMatrix - not implemented yet.\n");
     exit(1);
 }
+#endif
 
 //***************************************************************************
 // add nonzero entries into the matrix data structure
 //---------------------------------------------------------------------------
 
+#ifndef NOFEI
 void HYPRE_LinSysCore::sumInMatrix(double scalar, const Data& data) 
 {
     (void) scalar;
@@ -1695,11 +1726,13 @@ void HYPRE_LinSysCore::sumInMatrix(double scalar, const Data& data)
     printf("HYPRE_LinSysCore::sumInMatrix - not implemented yet.\n");
     exit(1);
 }
+#endif
 
 //***************************************************************************
 // get the data pointer for the right hand side
 //---------------------------------------------------------------------------
 
+#ifndef NOFEI
 void HYPRE_LinSysCore::getRHSVectorPtr(Data& data) 
 {
     if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
@@ -1715,9 +1748,11 @@ void HYPRE_LinSysCore::getRHSVectorPtr(Data& data)
        printf("%4d : HYPRE_LinSysCore::leaving  getRHSVectorPtr.\n",mypid_);
     }
 }
+#endif
 
 //***************************************************************************
 
+#ifndef NOFEI
 void HYPRE_LinSysCore::copyInRHSVector(double scalar, const Data& data) 
 {
     if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
@@ -1748,9 +1783,11 @@ void HYPRE_LinSysCore::copyInRHSVector(double scalar, const Data& data)
        printf("%4d : HYPRE_LinSysCore::leaving  copyInRHSVector.\n",mypid_);
     }
 }
+#endif
 
 //***************************************************************************
 
+#ifndef NOFEI
 void HYPRE_LinSysCore::copyOutRHSVector(double scalar, Data& data) 
 {
     int ierr;
@@ -1785,9 +1822,11 @@ void HYPRE_LinSysCore::copyOutRHSVector(double scalar, Data& data)
        printf("%4d : HYPRE_LinSysCore::leaving  copyOutRHSVector.\n",mypid_);
     }
 }
+#endif 
 
 //***************************************************************************
 
+#ifndef NOFEI
 void HYPRE_LinSysCore::sumInRHSVector(double scalar, const Data& data) 
 {
     if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
@@ -1814,9 +1853,11 @@ void HYPRE_LinSysCore::sumInRHSVector(double scalar, const Data& data)
        printf("%4d : HYPRE_LinSysCore::leaving  sumInRHSVector.\n",mypid_);
     }
 }
+#endif 
 
 //***************************************************************************
 
+#ifndef NOFEI
 void HYPRE_LinSysCore::destroyMatrixData(Data& data) 
 {
     if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
@@ -1837,9 +1878,11 @@ void HYPRE_LinSysCore::destroyMatrixData(Data& data)
        printf("%4d : HYPRE_LinSysCore::leaving  destroyMatrixData.\n",mypid_);
     }
 }
+#endif 
 
 //***************************************************************************
 
+#ifndef NOFEI
 void HYPRE_LinSysCore::destroyVectorData(Data& data) 
 {
     if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
@@ -1861,6 +1904,7 @@ void HYPRE_LinSysCore::destroyVectorData(Data& data)
        printf("%4d : HYPRE_LinSysCore::leaving  destroyVectorData.\n",mypid_);
     }
 }
+#endif 
 
 //***************************************************************************
 

@@ -20,9 +20,9 @@
 // -------------------------------------------------------------------------
 
 #include "HYPRE.h"
-#include "IJ_matrix_vector/HYPRE_IJ_mv.h"
-#include "parcsr_matrix_vector/HYPRE_parcsr_mv.h"
-#include "parcsr_linear_solvers/HYPRE_parcsr_ls.h"
+#include "../../IJ_matrix_vector/HYPRE_IJ_mv.h"
+#include "../../parcsr_matrix_vector/HYPRE_parcsr_mv.h"
+#include "../../parcsr_linear_solvers/HYPRE_parcsr_ls.h"
 
 // *************************************************************************
 // local enumerations and defines
@@ -139,7 +139,9 @@ class HYPRE_LinSysCore
    // matrix (e.g., de-allocation upon destruction). 
    // ----------------------------------------------------------------------
 
+#ifndef NOFEI
    void getMatrixPtr(Data& data);
+#endif
 
    // ----------------------------------------------------------------------
    // copyInMatrix:
@@ -147,7 +149,9 @@ class HYPRE_LinSysCore
    // by the coefficient 'scalar'.
    // ----------------------------------------------------------------------
 
+#ifndef NOFEI
    void copyInMatrix(double scalar, const Data& data);
+#endif
 
    // ----------------------------------------------------------------------
    // copyOutMatrix:
@@ -155,7 +159,9 @@ class HYPRE_LinSysCore
    // 'scalar'.
    // ----------------------------------------------------------------------
 
+#ifndef NOFEI
    void copyOutMatrix(double scalar, Data& data);
+#endif
 
    // ----------------------------------------------------------------------
    // sumInMatrix:
@@ -163,31 +169,39 @@ class HYPRE_LinSysCore
    // matrix, scaling the input by the coefficient 'scalar'.
    // ----------------------------------------------------------------------
 
+#ifndef NOFEI
    void sumInMatrix(double scalar, const Data& data);
+#endif 
 
    // ----------------------------------------------------------------------
    // get/setRHSVectorPtr:
    // the same semantics apply here as for the matrixPtr functions above.
    // ----------------------------------------------------------------------
 
+#ifndef NOFEI
    void getRHSVectorPtr(Data& data);
+#endif 
 
    // ----------------------------------------------------------------------
    // copyInRHSVector/copyOutRHSVector/sumInRHSVector:
    // the same semantics apply here as for the matrix functions above.
    // ----------------------------------------------------------------------
 
+#ifndef NOFEI
    void copyInRHSVector(double scalar, const Data& data);
    void copyOutRHSVector(double scalar, Data& data);
    void sumInRHSVector(double scalar, const Data& data);
+#endif 
 
    // ----------------------------------------------------------------------
    // destroyMatrixData/destroyVectorData:
    // Utility function for destroying the matrix (or vector) in Data
    // ----------------------------------------------------------------------
 
+#ifndef NOFEI
    void destroyMatrixData(Data& data);
    void destroyVectorData(Data& data);
+#endif 
 
    // ----------------------------------------------------------------------
    // functions for managing multiple rhs vectors
