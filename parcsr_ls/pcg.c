@@ -255,7 +255,7 @@ hypre_PCGSolve( void *pcg_vdata,
    int             i = 0, j;
    int             ierr = 0;
    char		  *log_file_name;
-   FILE		  *fp;
+/*   FILE		  *fp; */
 
    /*-----------------------------------------------------------------------
     * Start pcg solve
@@ -264,7 +264,8 @@ hypre_PCGSolve( void *pcg_vdata,
    if (logging > 0)
    {
       log_file_name = (pcg_data -> log_file_name);
-      fp = fopen(log_file_name,"w");
+/*      fp
+ = fopen(log_file_name,"w"); */
    }
 
    /* compute eps */
@@ -346,10 +347,10 @@ hypre_PCGSolve( void *pcg_vdata,
 
 #if 0
       if (two_norm)
-	 fprintf(fp,"Iter (%d): ||r||_2 = %e, ||r||_2/||b||_2 = %e\n",
+	 printf("Iter (%d): ||r||_2 = %e, ||r||_2/||b||_2 = %e\n",
 		i, sqrt(i_prod), (bi_prod ? sqrt(i_prod/bi_prod) : 0));
       else
-	 fprintf(fp,"Iter (%d): ||r||_C = %e, ||r||_C/||b||_C = %e\n",
+	 printf("Iter (%d): ||r||_C = %e, ||r||_C/||b||_C = %e\n",
 		i, sqrt(i_prod), (bi_prod ? sqrt(i_prod/bi_prod) : 0));
 #endif
  
@@ -386,10 +387,10 @@ hypre_PCGSolve( void *pcg_vdata,
 
 #if 0
    if (two_norm)
-      fprintf(fp, "Iterations = %d: ||r||_2 = %e, ||r||_2/||b||_2 = %e\n",
+      printf("Iterations = %d: ||r||_2 = %e, ||r||_2/||b||_2 = %e\n",
 	     i, sqrt(i_prod), (bi_prod ? sqrt(i_prod/bi_prod) : 0));
    else
-      fprintf(fp, "Iterations = %d: ||r||_C = %e, ||r||_C/||b||_C = %e\n",
+      printf("Iterations = %d: ||r||_C = %e, ||r||_C/||b||_C = %e\n",
 	     i, sqrt(i_prod), (bi_prod ? sqrt(i_prod/bi_prod) : 0));
 #endif
 
@@ -401,20 +402,23 @@ hypre_PCGSolve( void *pcg_vdata,
    {
       if (two_norm)
       {
-         fprintf(fp,"Iters       ||r||_2      conv.rate  ||r||_2/||b||_2\n");
-         fprintf(fp,"-----    ------------    ---------  ------------ \n");
+         printf("\n\n");
+         printf("Iters       ||r||_2      conv.rate  ||r||_2/||b||_2\n");
+         printf("-----    ------------    ---------  ------------ \n");
       }
       else
       {
-         fprintf(fp,"Iters       ||r||_C      conv.rate  ||r||_C/||b||_C\n");
-         fprintf(fp,"-----    ------------    ---------  ------------ \n");
+         printf("\n\n");
+         printf("Iters       ||r||_C      conv.rate  ||r||_C/||b||_C\n");
+         printf("-----    ------------    ---------  ------------ \n");
       }
       for (j = 1; j <= i; j++)
       {
-         fprintf(fp,"% 5d    %e    %f   %e\n", j, norms[j], norms[j]/ 
+         printf("% 5d    %e    %f   %e\n", j, norms[j], norms[j]/ 
 		norms[j-1], rel_norms[j]);
       }
-      fclose(fp);
+      printf("\n\n");
+      /* fclose(fp); */
    }
 
    (pcg_data -> num_iterations) = i;
