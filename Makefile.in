@@ -53,7 +53,7 @@ HYPRE_FEI_DIRS =\
 HYPRE_FEI_LIBFILES =\
  libHYPRE_parcsr_ls.a  libHYPRE_DistributedMatrix.a \
  libHYPRE_parcsr_mv.a  libHYPRE_FEI.a \
- libHYPRE_seq_mv.a     libHYPRE_IJ_mv.a libkrylov.a \
+ libHYPRE_seq_mv.a     libHYPRE_IJ_mv.a libHYPRE_krylov.a \
  libHYPRE_DistributedMatrixPilutSolver.a \
  libHYPRE_utilities.a  libHYPRE_MatrixMatrix.a libHYPRE_ParaSails.a\
  libHYPRE_Euclid.a     libHYPRE_mli.a
