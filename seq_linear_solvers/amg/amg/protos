@@ -22,6 +22,7 @@ FILES="
  amg.c
  amg_params.c
  amg_cycle.c
+ amg_relax.c
  amg_setup.c
  amg_solve.c
  vector.c

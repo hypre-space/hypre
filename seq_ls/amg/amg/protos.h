@@ -39,6 +39,10 @@ void amg_SetXP P((double *xp , void *data ));
 void amg_SetYP P((double *yp , void *data ));
 void amg_SetZP P((double *zp , void *data ));
 
+/* amg_relax.c */
+int amg_Relax P((Vector *u , Vector *f , Matrix *A , VectorInt *ICG , VectorInt *IV , int min_point , int max_point , int point_type , int relax_type , double *D_mat , double *S_vec ));
+int gselim P((double *A , double *x , int n ));
+
 /* amg_setup.c */
 int amg_Setup P((Matrix *A , void *data ));
 
@@ -60,10 +64,6 @@ void MatvecT P((double alpha , Matrix *A , Vector *x , double beta , Vector *y )
 /* random.c */
 void SeedRand P((int seed ));
 double Rand P((void ));
-
-/* relaxC.c */
-int RelaxC P((Vector *u , Vector *f , Matrix *A , VectorInt *ICG , VectorInt *IV , int min_point , int max_point , int point_type , int relax_type , double *D_mat , double *S_vec ));
-int gselim P((double *A , double *x , int n ));
 
 /* vector.c */
 Vector *NewVector P((double *data , int size ));
