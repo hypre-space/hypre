@@ -149,6 +149,7 @@ hypre_ParAMGSetup( void               *amg_vdata,
     *-----------------------------------------------------------------------*/
 
    num_levels = level+1;
+   if (coarse_size == fine_size) num_levels = level;
    hypre_ParAMGDataNumLevels(amg_data) = num_levels;
    hypre_ParAMGDataCFMarkerArray(amg_data) = CF_marker_array;
    hypre_ParAMGDataAArray(amg_data) = A_array;
