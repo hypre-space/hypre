@@ -142,4 +142,10 @@
 12/18/02    2.0.0R26
             - add Kaczmarz smoother
             - correct a bug in mli_solver_gs.C
+12/19/02    2.5.0R1
+            - change major revision number to reflect use of fei-2.5.0
+            - fix a bug with fgmres variable preconditioning
+            - change normal equation to construct it in launch stage
+            - put null detection in gmres
+
 
