@@ -54,11 +54,11 @@ DIRS="$DIRS \
   amg_fdrive \
   amgdriver \
   config \
-  port \
   tools"
 
-DIRS="$DIRS \
-  port/seq"
+# add this later
+#DIRS="$DIRS \
+#  port/seq"
 
 #=======================================================
 # Create the directory structure:
