@@ -49,6 +49,8 @@ cat amg_linklist.h             >> $INTERNAL_HEADER
 
 mkproto amg_linklist.c         >> $INTERNAL_HEADER
 		          
+mkproto binsearch.c         >> $INTERNAL_HEADER
+		          
 #===========================================================================
 # Include guards
 #===========================================================================

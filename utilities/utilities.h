@@ -726,6 +726,17 @@ hypre_LinkList create_elt P((int Item ));
 void enter_on_lists P((hypre_LinkList *LoL_head_ptr , hypre_LinkList *LoL_tail_ptr , int measure , int index , int *lists , int *where ));
 
 #undef P
+#ifdef __STDC__
+# define	P(s) s
+#else
+# define P(s) ()
+#endif
+
+
+/* binsearch.c */
+int hypre_BinarySearch P((int *list , int value , int list_length ));
+
+#undef P
 
 #ifdef __cplusplus
 }
