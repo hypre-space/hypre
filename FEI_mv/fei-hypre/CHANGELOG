@@ -154,4 +154,10 @@
             - fix SGS problem with relaxation parameter
             - add diagnostics (print rnorm) tool to SGS
             - add window option for strcasecmp in fei-hypre and femli
-
+01/14/03    2.5.0R3
+            - add scale matrix function (not done yet)
+            - fix nodal coordinate passing
+            - mli works now even local_nrows =0 for some processors
+            - amgrs not work perfectly since matrixTranspose not working
+              right.
+            - add diagnostics to SGS smoother
