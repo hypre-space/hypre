@@ -11,8 +11,7 @@
 
 int
 hypre_GetCommPkgRTFromCommPkgA( hypre_ParCSRMatrix *RT,
-			       	hypre_ParCSRMatrix *A,
-			  	int *partitioning)
+			       	hypre_ParCSRMatrix *A)
 {
    MPI_Comm comm = hypre_ParCSRMatrixComm(RT);
    hypre_CommPkg *comm_pkg_A = hypre_ParCSRMatrixCommPkg(A);
@@ -30,6 +29,7 @@ hypre_GetCommPkgRTFromCommPkgA( hypre_ParCSRMatrix *RT,
    int *send_map_elmts_RT;   */
 
    int *col_map_offd_RT = hypre_ParCSRMatrixColMapOffd(RT);
+   int *partitioning = hypre_ParCSRMatrixColStarts(RT);
    int num_cols_offd_RT = hypre_CSRMatrixNumCols( hypre_ParCSRMatrixOffd(RT));
 
    int i, j;
@@ -243,8 +243,7 @@ hypre_GenerateSendMapAndCommPkg(MPI_Comm comm, int num_sends, int num_recvs,
 
 int
 hypre_GenerateRAPCommPkg( hypre_ParCSRMatrix *RAP,
-			  hypre_ParCSRMatrix *A,
-			  int *partitioning)
+			  hypre_ParCSRMatrix *A)
 {
    MPI_Comm comm = hypre_ParCSRMatrixComm(RAP);
    hypre_CommPkg *comm_pkg_A = hypre_ParCSRMatrixCommPkg(A);
@@ -262,6 +261,7 @@ hypre_GenerateRAPCommPkg( hypre_ParCSRMatrix *RAP,
    int *send_map_elmts_RAP;   */
 
    int *col_map_offd_RAP = hypre_ParCSRMatrixColMapOffd(RAP);
+   int *partitioning = hypre_ParCSRMatrixRowStarts(RAP);
    int num_cols_offd_RAP = hypre_CSRMatrixNumCols( hypre_ParCSRMatrixOffd(RAP));
 
    int i, j, k, cnt;
