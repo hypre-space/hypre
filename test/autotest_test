@@ -30,7 +30,7 @@ initialize_variables ()
   if test ! "${HYPRE_AUTOTEST_DIR}"
   then
     HYPRE_AUTOTEST_DIR=`pwd`
-  else
+  else			# assume we're executing from autotest
     if [ ! -d ${HYPRE_AUTOTEST_DIR} ]
     then
       if [ ! -d ./linear_solvers ]
@@ -40,8 +40,16 @@ initialize_variables ()
       fi
     fi
   fi
-  StdBuildDir=${HYPRE_AUTOTEST_DIR}/linear_solvers
-  StdTestDir=${HYPRE_AUTOTEST_DIR}/linear_solvers/test
+  if [ -d ${HYPRE_AUTOTEST_DIR}/linear_solvers/test ]
+  then
+    SRC=linear_solvers
+  fi
+  if [ -d ${HYPRE_AUTOTEST_DIR}/src/test ]
+  then
+    SRC=src
+  fi
+  StdBuildDir=${HYPRE_AUTOTEST_DIR}/${SRC}
+  StdTestDir=${HYPRE_AUTOTEST_DIR}/${SRC}/test
 #
 # Define HYPRE_ARCH
 #
@@ -163,9 +171,9 @@ mail_errors () {
     echo "Autotest mailing error messages"
     cd $HYPRE_AUTOTEST_DIR
     for i in *.err \
-        linear_solvers/*.err \
-        linear_solvers/test/*.err \
-        linear_solvers/docs/*.err
+        ${SRC}/*.err \
+        ${SRC}/test/*.err \
+        ${SRC}/docs/*.err
     do 
       if test -s "$i"
       then 
@@ -254,17 +262,17 @@ then
     if [ $NoFeiOpt -ne $Skip ]
     then
       $MAKE nofei
-      cd $HYPRE_AUTOTEST_DIR/linear_solvers/test
+      cd $HYPRE_AUTOTEST_DIR/${SRC}/test
       $MAKE fei++
     fi
     if test ! "${HYPRE_RUN_MACHINE}"
     then
-      cd $HYPRE_AUTOTEST_DIR/linear_solvers/test
+      cd $HYPRE_AUTOTEST_DIR/${SRC}/test
       ./test_drivers.sh $MailOpt
     else
       ssh ${HYPRE_RUN_MACHINE} "\
       (\
-        cd ${HYPRE_AUTOTEST_DIR}/linear_solvers/test;\
+        cd ${HYPRE_AUTOTEST_DIR}/${SRC}/test;\
         . ./env.${HYPRE_ARCH};\
         ./test_drivers.sh $MailOpt\
     )"
