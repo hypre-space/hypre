@@ -11,6 +11,7 @@ main( int   argc,
       char *argv[] )
 {
    int                 arg_index;
+   int                 time_index;
    int                 print_usage;
    int                 build_matrix_type;
    int                 build_matrix_arg_index;
@@ -43,10 +44,10 @@ main( int   argc,
     * Initialize some stuff
     *-----------------------------------------------------------*/
 
-#if 0 
    /* Initialize MPI */
    MPI_Init(&argc, &argv);
 
+#if 0 
    MPI_Comm_size(MPI_COMM_WORLD, &num_procs );
    MPI_Comm_rank(MPI_COMM_WORLD, &myid );
 #endif
@@ -337,6 +338,9 @@ main( int   argc,
          }
       }
 
+      time_index = hypre_InitializeTiming("Setup");
+      hypre_BeginTiming(time_index);
+
       amg_solver = HYPRE_AMGInitialize();
       HYPRE_AMGSetCoarsenType(amg_solver, coarsen_type);
       HYPRE_AMGSetStrongThreshold(amg_solver, strong_threshold);
@@ -348,9 +352,21 @@ main( int   argc,
       HYPRE_AMGSetRelaxWeight(amg_solver, relax_weight);
       HYPRE_AMGSetMaxLevels(amg_solver, 25);
       HYPRE_AMGSetup(amg_solver, A, b, x);
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+ 
+      time_index = hypre_InitializeTiming("Solve");
+      hypre_BeginTiming(time_index);
 
       HYPRE_AMGSolve(amg_solver, A, b, x);
 
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+ 
       HYPRE_AMGFinalize(amg_solver);
    }
 
@@ -381,9 +397,9 @@ main( int   argc,
 /*
    hypre_FinalizeMemoryDebug();
 */
-#if 0
    /* Finalize MPI */
    MPI_Finalize();
+#if 0
 #endif
 
    return (0);
