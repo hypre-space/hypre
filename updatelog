@@ -18,8 +18,10 @@
 
 New internal installation: V2000-01-14
 
-- First new user-level change goes here.
+- New AddToValues and AddToBoxValues routines for Struct interface.
 
-- Second new user-level change goes here.
-
-...
+- Fairly extensive changes to SMG/PFMG codes to fix setup phase
+  scalability problems.  These changes should result in slightly
+  slower setup phase times for small-scale problems, but much
+  improved setup phase times for very large-scale (greater than
+  1000 processors) problems.
