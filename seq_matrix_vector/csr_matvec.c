@@ -29,9 +29,12 @@ hypre_Matvec( double           alpha,
    int        *A_i      = hypre_CSRMatrixI(A);
    int        *A_j      = hypre_CSRMatrixJ(A);
    int         num_rows = hypre_CSRMatrixNumRows(A);
+   int         num_cols = hypre_CSRMatrixNumCols(A);
 
    double     *x_data = hypre_VectorData(x);
    double     *y_data = hypre_VectorData(y);
+   int         x_size = hypre_VectorSize(x);
+   int         y_size = hypre_VectorSize(y);
 
    double      temp;
 
