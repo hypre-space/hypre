@@ -31,8 +31,8 @@ CINCLUDES=@INCLUDES@ @MPIINCLUDE@
 CXXINCLUDES=@INCLUDES@ @MPIINCLUDE@
 #CDEFS = -DHYPRE_NO_PTHREAD_MANGLING -DSUPERLU -DMLPACK
 #CXXDEFS = -DHYPRE_NO_PTHREAD_MANGLING -DSUPERLU -DMLPACK
-CDEFS = -DHYPRE_NO_PTHREAD_MANGLING 
-CXXDEFS = -DHYPRE_NO_PTHREAD_MANGLING 
+CDEFS = -DHYPRE_NO_PTHREAD_MANGLING  -DBOOL_NOT_SUPPORTED
+CXXDEFS = -DHYPRE_NO_PTHREAD_MANGLING  -DBOOL_NOT_SUPPORTED
 
 CFLAGS = -w ${C_COMPILE_FLAGS} \
  ${CDEFS}\
@@ -93,14 +93,16 @@ LFLAGS =\
 
 FILES = HYPRE_LinSysCore.C cfei_hypre.C hypre_slide_reduce.C \
         hypre_schur_reduce.C hypre_lsi_misc.c hypre_lsi_ddamg.C \
-        HYPRE_parcsr_ml.c hypre_lsi_ddilut.c hypre_lsi_amge.c
+        HYPRE_parcsr_ml.c hypre_lsi_ddilut.c hypre_lsi_amge.c \
+        HYPRE_parcsr_bicgstabl.c bicgstabl.c 
 
 TEMP = ${FILES:.c=.o}
 OBJS = ${TEMP:.C=.o}
 
 FILESV12 = HYPRE_LinSysCore.C hypre_slide_reduce.C \
            hypre_schur_reduce.C hypre_lsi_misc.c hypre_lsi_ddamg.C \
-           HYPRE_parcsr_ml.c hypre_lsi_ddilut.c
+           HYPRE_parcsr_ml.c hypre_lsi_ddilut.c \
+           HYPRE_parcsr_bicgstabl.c bicgstabl.c 
 
 TEMPV12 = ${FILESV12:.c=.o}
 OBJSV12 = ${TEMPV12:.C=.o}

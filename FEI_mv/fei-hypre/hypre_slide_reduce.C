@@ -15,8 +15,15 @@
 #include "utilities/utilities.h"
 #include "base/Data.h"
 #include "base/basicTypes.h"
-#include "base/Utils.h"
+//#include "base/Utils.h"
+
+#if defined(FEI_V13) || defined(FEI_V14)
+#include "base1.4/LinearSystemCore.h"
+#else
 #include "base/LinearSystemCore.h"
+#include "base/LSC.h"
+#endif
+
 #include "HYPRE.h"
 #include "../../IJ_matrix_vector/HYPRE_IJ_mv.h"
 #include "../../parcsr_matrix_vector/HYPRE_parcsr_mv.h"

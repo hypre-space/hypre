@@ -6,13 +6,13 @@
 
 #include "base/basicTypes.h"
 #include "base/Data.h"
-#include "base/LinearSystemCore.h"
-
-#ifdef FEI_V12
-#include "src/cfei.h"
+#if defined(FEI_V13) || defined(FEI_V14)
+#include "base1.4/LinearSystemCore.h"
 #else
-#include "base/cfei.h"
+#include "base/LinearSystemCore.h"
+#include "base/LSC.h"
 #endif
+#include "base/cfei.h"
 
 #include "cfei_hypre.h"
 #include "HYPRE.h"

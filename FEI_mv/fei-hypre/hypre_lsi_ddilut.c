@@ -296,15 +296,13 @@ int HYPRE_LSI_DDIlutSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
    HYPRE_LSI_DDIlutDecompose(ilut_ptr,mh_mat,total_recv_leng,recv_lengths,
                              int_buf, dble_buf, map,map2, offset);
 
-   /*
-   if ( mypid == 0 )
+   if ( mypid == 0 && ilut_ptr->outputLevel > 1 )
    {
       for ( i = 0; i < ilut_ptr->extNrows; i++ )
          for ( j = ilut_ptr->mat_ia[i]; j < ilut_ptr->mat_ia[i+1]; j++ )
             printf("LA(%d,%d) = %e;\n", i+1, ilut_ptr->mat_ja[j]+1,
                    ilut_ptr->mat_aa[j]);
    }
-   */
 
    ilut_ptr->mh_mat = mh_mat;
    if ( mh_mat->rowptr != NULL ) free (mh_mat->rowptr);
