@@ -42,6 +42,7 @@ hypre_SysPFMGCreate( MPI_Comm  comm )
    (sys_pfmg_data -> num_post_relax) = 1;
    (sys_pfmg_data -> skip_relax)     = 1;
    (sys_pfmg_data -> logging)        = 0;
+   (sys_pfmg_data -> print_level)    = 0;
 
    /* initialize */
    (sys_pfmg_data -> num_levels) = -1;
@@ -284,6 +285,22 @@ hypre_SysPFMGSetLogging( void *sys_pfmg_vdata,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_SysPFMGSetPrintLevel
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_SysPFMGSetPrintLevel( void *sys_pfmg_vdata,
+                            int   print_level)
+{
+   hypre_SysPFMGData *sys_pfmg_data = sys_pfmg_vdata;
+   int                ierr = 0;
+ 
+   (sys_pfmg_data -> print_level) = print_level;
+ 
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_SysPFMGGetNumIterations
  *--------------------------------------------------------------------------*/
 
@@ -312,19 +329,23 @@ hypre_SysPFMGPrintLogging( void *sys_pfmg_vdata,
    int                i;
    int                num_iterations  = (sys_pfmg_data -> num_iterations);
    int                logging   = (sys_pfmg_data -> logging);
+   int                print_level   = (sys_pfmg_data -> print_level);
    double            *norms     = (sys_pfmg_data -> norms);
    double            *rel_norms = (sys_pfmg_data -> rel_norms);
 
    if (myid == 0)
    {
-      if (logging > 0)
-      {
-         for (i = 0; i < num_iterations; i++)
+     if (print_level > 0 )
+     {
+         if (logging > 0)
          {
-            printf("Residual norm[%d] = %e   ",i,norms[i]);
-            printf("Relative residual norm[%d] = %e\n",i,rel_norms[i]);
+            for (i = 0; i < num_iterations; i++)
+            {
+              printf("Residual norm[%d] = %e   ",i,norms[i]);
+              printf("Relative residual norm[%d] = %e\n",i,rel_norms[i]);
+            }
          }
-      }
+     }
    }
   
    return ierr;

@@ -142,6 +142,7 @@ HYPRE_SStructPCGSetLogging( HYPRE_SStructSolver solver,
    return( HYPRE_PCGSetLogging( (HYPRE_Solver) solver, logging ) );
 }
 
+
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
