@@ -14,7 +14,7 @@ srcdir = @srcdir@
 VPATH = @srcdir@
 
 ONLINE_OPTS =\
- -split 1\
+ -split 2\
  -show_section_numbers\
  -bottom_navigation
 

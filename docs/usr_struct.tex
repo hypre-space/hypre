@@ -13,7 +13,11 @@ interface (\code{IJ}) described in Chapters \ref{chapter-FEI} and
 \ref{chapter-IJ}.
 
 Figure \ref{fig-fv-grid} gives an example of the type of grid
-currently supported by the \code{Struct} interface.
+currently supported by the \code{Struct} interface.  The interface
+uses a finite-difference or finite-volume style, and currently
+supports only scalar PDEs (i.e., one unknown per gridpoint).  There is
+an effort to extend it to use a finite-element style (similar to the
+\code{FEI}, but on structured grids), and to support PDE systems.
 \begin{figure}
 \centering
 \includegraphics[width=4in]{fv_grid.eps}
@@ -21,10 +25,6 @@ currently supported by the \code{Struct} interface.
 An example 2D finite-volume grid, distributed accross two processors.}
 \label{fig-fv-grid}
 \end{figure}
-The interface uses a finite-difference or finite-volume style, and
-currently supports only scalar PDEs (i.e., one unknown per gridpoint).
-There is an effort to extend it to use a finite-element style (similar
-to the \code{FEI}, but on structured grids), and to support PDE systems.
 
 There are four basic steps involved in setting up the linear system
 to be solved:
@@ -32,7 +32,7 @@ to be solved:
 \item set up the grid,
 \item set up the stencil,
 \item set up the matrix,
-\item set up the right-hand-side.
+\item set up the right-hand-side vector.
 \end{itemize}
 To describe each of these steps in more detail, consider solving the
 2D Laplacian problem
@@ -58,19 +58,18 @@ The grid is described via a global {\em index space}, i.e., via
 integer tuples (triples in 3D).  The integers may have any value,
 negative or positive.  The global indexes allow \hypre{} to discern
 how data is related spatially, and how it is distributed across the
-parallel machine.
+parallel machine.  Each process describes that portion of the grid
+that it ``owns'', one {\em box} at a time.  For example, in the
+figure, the global grid can be described in terms of three boxes, two
+owned by process 0, and one owned by process 1.  A box is described in
+terms of a lower and upper index.
 
-Each process describes that portion of the grid that it ``owns'', one
-{\em box} at a time.  For example, in the figure, the global grid can
-be described in terms of three boxes, two owned by process 0, and one
-owned by process 1.  A box is described in terms of a lower and upper
-index.  On process 0, the following code will set up the grid shown in
-the figure (code for process 1 is similar).
+On process 0, the following code will set up the grid shown in the
+figure (the code for process 1 is similar).
 \begin{display}
 \begin{verbatim}
 
 HYPRE_StructGrid  grid;
-
 int               ilower[2][2] = {{-3, 1}, {0, 1}};
 int               iupper[2][2] = {{-1, 2}, {2, 4}};
 
@@ -83,20 +82,23 @@ HYPRE_StructGridAssemble(grid);
 
 \end{verbatim}
 \end{display}
-
 The \code{HYPRE_StructGridCreate()} routine creates an empty 2D grid
 object that lives on the \code{MPI_COMM_WORLD} communicator.  The
 \code{HYPRE_StructGridSetExtents()} routine adds a new box to the grid.
 The \code{HYPRE_StructGridAssemble()} routine is a collective call
 (i.e., must be called on all processes), and finalizes the grid
-assembly, making the grid ``ready for use'' elsewhere.
+assembly, making the grid ``ready to use''.
 
 %==========================================================================
 
 \section{Setting Up the Stencil}
 \label{Setting Up the Stencil}
 
-Here is the 5-pt stencil description
+The geometry of the discretization stencil is described by an array of
+integer tuples in 2D (triples in 3D), each representing a relative
+offset (in index space) from some gridpoint on the grid.  For example,
+the geometry of the 5-pt stencil for the example problem being
+considered can be represented in the following way:
 \begin{equation}\label{eqn-stencil-description}
 \left [
 \begin{array}{ccc}
@@ -114,7 +116,12 @@ S_1 & S_0 & S_2 \\
 \end{array}
 \right ] .
 \end{equation}
-On process 0, the following code will set up the stencil in
+In (\ref{eqn-stencil-description}), the $(0,0)$ entry represents the
+``center'' coefficient, and is the 0th entry in the array ($S_0$).
+The $(0,-1)$ entry represents the ``south'' coefficient, and is the
+3rd entry in the array ($S_3$).  And so on.
+
+On process 0 or 1, the following code will set up the stencil in
 (\ref{eqn-stencil-description}).
 \begin{display}
 \begin{verbatim}
@@ -132,25 +139,38 @@ for (s = 0; s < 5; s++)
 
 \end{verbatim}
 \end{display}
+The \code{HYPRE_StructStencilCreate()} routine creates an empty 2D,
+5-pt stencil object.  The \code{HYPRE_StructStencilSetElement()}
+routine defines the geometry of the stencil, and assigns the array
+numbers for each of the stencil entries.  None of the calls are
+collective calls.
 
 %==========================================================================
 
 \section{Setting Up the Matrix}
 \label{Setting Up the Matrix}
 
-Here is the 5-pt stencil for the Laplacian
+The matrix is set up in terms of the grid and stencil objects
+described in Sections
+\ref{Setting Up the Grid} and \ref{Setting Up the Stencil} above.
+The coefficients associated with each stencil entry will typically
+vary from gridpoint to gridpoint, but in the example problem being
+considered, they are as follows over the entire grid (except at
+boundaries; see below):
 \begin{equation}\label{eqn-stencil-laplacian}
 \left [
 \begin{array}{ccc}
-   & -1 &    \\
--1 &  4 & -1 \\
-   & -1 &   
+    & -1 &    \\
+ -1 &  4 & -1 \\
+    & -1 &    
 \end{array}
 \right ] .
 \end{equation}
+
 On process 0, the following code will set up matrix values associated
 with the center ($S_0$) and south ($S_3$) stencil entries in
-(\ref{eqn-stencil-description}) / (\ref{eqn-stencil-laplacian}).
+(\ref{eqn-stencil-description}) / (\ref{eqn-stencil-laplacian})
+(boundaries are ignored here temporarily).
 \begin{display}
 \begin{verbatim}
 
@@ -173,17 +193,75 @@ HYPRE_StructMatrixSetBoxValues(A, ilower[0], iupper[0], 2,
 HYPRE_StructMatrixSetBoxValues(A, ilower[1], iupper[1], 2,
                                stencil_indices, values);
 
+/* set boundary conditions */
+...
+
 HYPRE_StructMatrixAssemble(A);
+
+\end{verbatim}
+\end{display}
+The \code{HYPRE_StructMatrixCreate()} routine creates an empty matrix
+object.  The \code{HYPRE_StructMatrixInitialize()} routine indicates
+that the matrix coefficients (or values) are ready to be set.  This
+routine may or may not involve the allocation of memory for the
+coefficient data, depending on the implementation.  The optional
+\code{Set} routines mentioned later in this chapter and in the
+Reference Manual, should be called before this step.  The
+\code{HYPRE_StructMatrixSetBoxValues()} routine sets the matrix
+coefficients for some set of stencil entries over the gridpoints in
+some box.  Note that the box need not correspond to any of the boxes
+used to create the grid, but values should be set for all gridpoints
+that this process ``owns''.  The \code{HYPRE_StructMatrixAssemble()}
+routine is a collective call (i.e., must be called on all processes),
+and finalizes the matrix assembly, making the matrix ``ready to use''.
+
+Matrix coefficients that reach outside of the boundary should be set
+to zero.  For efficiency reasons, \hypre{} does not do this
+automatically.  The most natural time to insure this is when the
+boundary conditions are being set, and this is most naturally done
+after the coefficients on the grid's interior have been set.  For
+example, during the implementation of the Dirichlet boundary condition
+on the lower boundary of the grid in Figure \ref{fig-fv-grid}, the
+``south'' coefficient must be set to zero.  To do this on process 0,
+the following code could be used:
+\begin{display}
+\begin{verbatim}
+
+int  ilower[2] = {-3, 1};
+int  iupper[2] = { 2, 1};
+
+/* create matrix and set interior coefficients */
+...
+
+/* implement boundary conditions */
+...
+
+for (i = 0; i < 12; i++)
+{
+   values[i] =  0.0;
+}
+
+i = 3;
+HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, 1, &i, values);
+
+/* complete implementation of boundary conditions */
+...
 
 \end{verbatim}
 \end{display}
 
 %==========================================================================
 
-\section{Setting Up the Right-Hand-Side}
-\label{Setting Up the Right-Hand-Side}
+\section{Setting Up the Right-Hand-Side Vector}
+\label{Setting Up the Right-Hand-Side Vector}
 
-On process 0, the following code will set up right-hand-side.
+The right-hand-side vector is set up similarly to the matrix set up
+described in Section \ref{Setting Up the Matrix} above.  The main
+difference is that there is no stencil (note that a stencil currently
+does appear in the interface, but this will eventually be removed).
+
+On process 0, the following code will set up the right-hand-side
+vector values.
 \begin{display}
 \begin{verbatim}
 
@@ -207,5 +285,74 @@ HYPRE_StructVectorAssemble(b);
 \end{verbatim}
 \end{display}
 
+The \code{HYPRE_StructVectorCreate()} routine creates an empty vector
+object.  The \code{HYPRE_StructVectorInitialize()} routine indicates
+that the vector coefficients (or values) are ready to be set.  This
+routine follows the same rules as its corresponding \code{Matrix}
+routine.  The \code{HYPRE_StructVectorSetBoxValues()} routine sets the
+vector coefficients over the gridpoints in some box, and again,
+follows the same rules as its corresponding \code{Matrix} routine.
+The \code{HYPRE_StructVectorAssemble()} routine is a collective call
+(i.e., must be called on all processes), and finalizes the vector
+assembly, making the vector ``ready to use''.
+
 %==========================================================================
 
+\section{Symmetric Matrices}
+\label{Symmetric Matrices}
+
+Some solvers and matrix storage schemes provide capabilities for
+significantly reducing memory usage when the coefficient matrix is
+symmetric.  In this situation, each off-diagonal coefficient appears
+twice in the matrix, but only one copy needs to be stored.  The
+\code{Struct} interface provides support for matrix and solver
+implementations that use symmetric storage via the
+\code{HYPRE_StructMatrixSetSymmetric()} routine.
+
+To describe this in more detail, consider again the 5-pt finite-volume
+discretization of (\ref{eqn-laplacian}) on the grid pictured in Figure
+\ref{fig-fv-grid}.  Because the discretization is symmetric, only half
+of the off-diagonal coefficients need to be stored.  To turn symmetric
+storage on, the following line of code needs to be inserted somewhere
+between the \code{HYPRE_StructMatrixCreate()} and
+\code{HYPRE_StructMatrixInitialize()} calls.
+\begin{display}
+\begin{verbatim}
+
+HYPRE_StructMatrixSetSymmetric(A, 1);
+
+\end{verbatim}
+\end{display}
+Note that symmetric storage may or may not actually be used, depending
+on the underlying storage scheme.  Currently in \hypre{}, symmetric
+storage is always used when indicated.
+
+To most efficiently utilize the \code{Struct} interface for symmetric
+matrices, notice also that only half of the off-diagonal coefficients
+need to be set.  To do this for the example being considered, we
+simply need to redefine the 5-pt stencil of Section
+\ref{Setting Up the Stencil} to an ``appropriate'' 3-pt stencil, then
+set matrix coefficients (as in Section \ref{Setting Up the Matrix})
+for these three stencil elements {\em only}.  For example, we could
+use the following stencil
+\begin{equation}\label{eqn-symmetric-stencil}
+\left [
+\begin{array}{ccc}
+ & ( 0, 1) &         \\
+ & ( 0, 0) & ( 1, 0) \\
+ &         &        
+\end{array}
+\right ]
+\equiv
+\left [
+\begin{array}{ccc}
+ & S_2 &     \\
+ & S_0 & S_1 \\
+ &     &    
+\end{array}
+\right ] .
+\end{equation}
+This 3-pt stencil provides enough information to recover the full 5-pt
+stencil geometry and associated matrix coefficients.
+
+%==========================================================================
