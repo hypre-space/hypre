@@ -49,30 +49,43 @@ unset F77
 casc_user_chose_compilers=no
 casc_user_chose_mpi=no
 casc_using_pthreads=no
-casc_using_purify=no
 
 AC_ARG_WITH(CC,
-   [  --with-CC=ARG           manually set C compiler to ARG],
+   [  --with-CC=ARG		manually set C compiler to ARG],
    CC=$withval
    casc_user_chose_compilers=yes)
 
 AC_ARG_WITH(CXX,
-   [  --with-CXX=ARG          manually set C++ compiler to ARG],
+   [  --with-CXX=ARG		manually set C++ compiler to ARG],
    CXX=$withval
    casc_user_chose_compilers=yes)
 
 AC_ARG_WITH(F77,
-   [  --with-f77=ARG          manually set f77 compiler to ARG],
+   [  --with-f77=ARG		manually set f77 compiler to ARG],
    F77=$withval
    casc_user_chose_compilers=yes)
 
-AC_ARG_WITH(mpi-include, [  --with-mpi-include=DIR  mpi.h is in DIR],
+AC_ARG_WITH(CFLAGS,
+   [  --with-CFLAGS=ARG         manually set c compiler flags],
+   CFLAGS=$withval)
+
+AC_ARG_WITH(CXXFLAGS,
+   [  --with-CXXFLAGS=ARG	manually set c++ compiler flags],
+   CXXFLAGS=$withval)
+
+AC_ARG_WITH(F77FLAGS,
+   [  --with-F77FLAGS=ARG       manually set f77 compiler flags],
+   F77FLAGS=$withval)
+
+
+AC_ARG_WITH(mpi-include, 
+   [  --with-mpi-include=DIR    mpi.h is in DIR],
             for mpi_dir in $withval; do
                MPIINCLUDE="$MPIINCLUDE -I$withval"
             done; casc_user_chose_mpi=yes)
 
 AC_ARG_WITH(mpi-libs,
-[  --with-mpi-libs=LIBS    LIBS is space-separated list of library names 
+[  --with-mpi-libs=LIBS		LIBS is space-separated list of library names 
                           needed for MPI, e.g. \"nsl socket mpi\"],  
             for mpi_lib in $withval; do
                MPILIBS="$MPILIBS -l$mpi_lib"
@@ -80,33 +93,59 @@ AC_ARG_WITH(mpi-libs,
 
 AC_ARG_WITH(mpi-lib-dirs,
 [  --with-mpi-lib-dirs=DIRS
-                      DIRS is space-separated list of directories
+                      		DIRS is space-separated list of directories
                       containing the libraries specified by
                       \`--with-mpi-libs', e.g \"/usr/lib /usr/local/mpi/lib\"],
             for mpi_lib_dir in $withval; do
                MPILIBDIRS="-L$mpi_lib_dir $MPILIBDIRS"
             done; casc_user_chose_mpi=yes)
 
-
 AC_ARG_WITH(mpi-flags,
-[  --with-mpi-flags=FLAGS	FLAGS is space-separated list of 
-		whatever flags other than -l and -L are needed 
-		to link with mpi libraries],
-            MPIFLAGS=$withval)
+[  --with-mpi-flags=FLAGS	FLAGS is a space seperated list of whatever
+			flags other than -l and -L are needed to link with
+			MPI libraries-- Does not de-activate auto search
+			for other MPI information],
+ 	MPIFLAGS=$withval)
 
 
 AC_ARG_WITH(purify,
-   [  --with-purify          use purify-- finds mpi for use with non MPICH compiler],
-	casc_using_purify=yes
-        casc_user_chose_compilers=yes
-	casc_user_chose_mpi=yes
-	CC=gcc
-	MPIINCLUDE="$MPIINCLUDE -I/usr/local/mpi/mpich/lib/solaris/ch_p4 -I/usr/local/mpi/mpich/include"
-	MPILIBS="$MPILIBS -lpmpich -lmpich -lsocket -lnsl -lpthread"
-	MPILIBDIRS="-L/usr/local/mpi/mpich/lib/solaris/ch_p4 $MPILIBDIRS"
-   
-)
+   [  --with-purify          	assign gcc if not already set by user and 
+				prepends "purify" to compile/link line],
+	if test "$casc_user_chose_compilers" = "no"
+	then
+  	  CC=gcc
+	  CXX=g++
+	  CFLAGS="$CFLAGS -g"
+	  CXXFLAGS="$CXXFLAGS -g"
+	  casc_user_chose_compilers=yes
+	fi
+	PREPEND=purify)
+      
 
+
+AC_ARG_WITH(cegdb,
+   [  --with-cegdb          	assign gcc and -g and link in -lcegdb and include cegdb.h],
+  	CC=gcc
+	CXX=g++
+	casc_users_chose_compilers=yes
+	CFLAGS="$CFLAGS -g"
+	CXXFLAGS="$CXXFLAGS -g"
+	CASC_CHECK_HEADER(cegdb.h, /home/casc/include,
+	  CASC_ADD_LIB(cegdb, cegdb, /home/casc/lib, LD)
+	))
+
+
+AC_ARG_WITH(gdb,
+   [  --with-gdb          assign gcc and -g and link in -lgdb and include
+			gdb.h],
+  	CC=gcc
+	CXX=g++
+	casc_users_chose_compilers=yes
+	CFLAGS="$CFLAGS -g"
+	CXXFLAGS="$CXXFLAGS -g"
+	CASC_CHECK_HEADER(gdb.h, /usr/local/include /usr/include,
+	  CASC_ADD_LIB(gdb, gdb, /usr/local/lib /usr/lib, LD)
+	))
 
 dnl *********************************************************************
 dnl * If the user has specified any other command line options (without-MPI, 
@@ -167,6 +206,9 @@ dnl * AC_PROG_CXX, and AC_PROG_F77). Depending on the compiler chosen,
 dnl * flags are set as needed. The supported platforms are IRIX, DEC alpha,
 dnl * sun/solaris, IBM rs6000, Intel ??, and SGI ??. 
 dnl *********************************************************************
+
+if test -z "$CC"
+then
 
 case $HOSTNAME in
    sasn100 )
@@ -232,7 +274,7 @@ case $HOSTNAME in
    ;;
 	
 esac
-   
+fi   
 
 if test -z "$CC"
 then
@@ -481,6 +523,17 @@ AC_PROG_CPP
 AC_PROG_CXXCPP
 CASC_PROG_FPP
 
+
+if test "$casc_user_chose_compilers" = "yes" &&
+   test "$casc_using_mpi" = "yes" && 
+   test "$casc_user_chose_mpi" = "no"
+then
+  HYPRE_FIND_MPI
+fi
+
+
+
+
 dnl *********************************************************************
 dnl * This macro uses the values assigned to CASC_SET_COPT and 
 dnl * CASC_SET_CDEBUG (and C++ and Fortan counterparts) to set either
@@ -489,23 +542,10 @@ dnl * on the command line.  If neither is selected then all selected
 dnl * flags remain on.
 dnl *********************************************************************
 
-CASC_OPT_DEBUG_CHOICES
-
-
-dnl *********************************************************************
-dnl * When debugging was chosen, look for debugging libraries and headers,
-dnl * if they are available.  Note that if neither debug or opt is chosen
-dnl * or if both debug and opt are chosen OPTCHOICE is set to O.
-dnl * adds -l flags to LDLIBS, adds -L flags to LDLIBDIRS, if necessary
-dnl *********************************************************************
-
-if test "$OPTCHOICE" = "g"
+if test "$casc_user_chose_compilers" = "no"
 then
-   CASC_CHECK_HEADER(cegdb.h, /home/casc/include,
-      CASC_ADD_LIB(cegdb, cegdb, /home/casc/lib, LD)
-   )
+  CASC_OPT_DEBUG_CHOICES
 fi
-
 
 dnl *********************************************************************
 dnl * Add flags to LIBS and LIBDIRS
@@ -536,6 +576,10 @@ AC_SUBST(LDLIBS)
 AC_SUBST(LDLIBDIRS)
 AC_SUBST(ARCH)
 AC_SUBST(RANLIB)
+AC_SUBST(CFLAGS)
+AC_SUBST(CXXFLAGS)
+AC_SUBST(F77FLAGS)
+AC_SUBST(PREPEND)
 
 dnl *********************************************************************
 dnl * Use CASC_CONFIG_OUTPUT_LIST with AC_OUTPUT if you want to handle the
