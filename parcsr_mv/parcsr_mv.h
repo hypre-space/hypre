@@ -293,6 +293,7 @@ int hypre_ParCSRMatrixSetRowStartsOwner( hypre_ParCSRMatrix *matrix , int owns_r
 int hypre_ParCSRMatrixSetColStartsOwner( hypre_ParCSRMatrix *matrix , int owns_col_starts );
 hypre_ParCSRMatrix *hypre_ParCSRMatrixRead( MPI_Comm comm , char *file_name );
 int hypre_ParCSRMatrixPrint( hypre_ParCSRMatrix *matrix , char *file_name );
+int hypre_ParCSRMatrixPrintIJ( hypre_ParCSRMatrix *matrix , char *filename );
 int hypre_ParCSRMatrixGetLocalRange( hypre_ParCSRMatrix *matrix , int *row_start , int *row_end , int *col_start , int *col_end );
 int hypre_ParCSRMatrixGetRow( hypre_ParCSRMatrix *mat , int row , int *size , int **col_ind , double **values );
 int hypre_ParCSRMatrixRestoreRow( hypre_ParCSRMatrix *matrix , int row , int *size , int **col_ind , double **values );
