@@ -197,18 +197,29 @@ usage () {
 apply_error_filters () {
   ErrorFile=$1
   if [ -s "${EFILE}" ] ; then
-    if [ "$HYPRE_ARCH" = "blue" ] ; then
-      if (egrep "=== End of Compilation|Compilation successful" $ErrorFile >/dev/null)
-      then                          # cleanup the problem with the xlf compiler
-        mv $ErrorFile $ErrorFile.orig
-        egrep -v "=== End of Compilation|Compilation successful" $ErrorFile.orig > $ErrorFile
-      fi
-      if (egrep "^ Guide   |: 0 errors in file" $ErrorFile >/dev/null)
-      then                          # cleanup the problem with the GuideC compiler
-        mv $ErrorFile $ErrorFile.orig
-        egrep -v "^ Guide   |: 0 errors in file" $ErrorFile.orig > $ErrorFile
-      fi
-    fi   # blue
+    HOST=`hostname`
+    case $HOST in
+      fros*|blue*)
+###   if [ "$HYPRE_ARCH" = "blue" ] ; then
+        if (egrep "=== End of Compilation|Compilation successful" $ErrorFile >/dev/null)
+        then                          # cleanup the problem with the xlf compiler
+          mv $ErrorFile $ErrorFile.orig
+          egrep -v "=== End of Compilation|Compilation successful" $ErrorFile.orig > $ErrorFile
+        fi
+        if (egrep "^ Guide   |: 0 errors in file" $ErrorFile >/dev/null)
+        then                          # cleanup the problem with the GuideC compiler
+          mv $ErrorFile $ErrorFile.orig
+          egrep -v "^ Guide   |: 0 errors in file" $ErrorFile.orig > $ErrorFile
+        fi
+###   fi   # blue
+        ;;
+      peng*)
+        if (egrep "^[A-Za-z0-9_]\.[cCf]$| remark: " $ErrorFile >/dev/null)
+        then                          # cleanup the problem with the GuideC compiler
+          mv $ErrorFile $ErrorFile.orig
+          egrep -v "^[A-Za-z0-9_]\.[cCf]$| remark: " $ErrorFile.orig > $ErrorFile
+        fi
+      ;;
   fi
 }
 

@@ -247,7 +247,7 @@ do
         HYPRE_COMPILE_MACHINE="ilx"
         HYPRE_RUN_MACHINE="ilx"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/i686-pc-linux-gnu-ilx/AUTOTEST"
-	HYPRE_MACHINE_COMMANDS="-mns -a 2 -dcxfy"
+	HYPRE_MACHINE_COMMANDS="-mnsa 2 -dcxfy"
         HYPRE_MESSAGE='OTHER[gcc-2.96]'
 	perform_test
         shift;;
@@ -268,7 +268,7 @@ do
         HYPRE_COMPILE_MACHINE="pengra"
         HYPRE_RUN_MACHINE="pengra"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/i686-pc-linux-gnu-pengra/AUTOTEST"
-	HYPRE_MACHINE_COMMANDS="-mns -a 2 -dcxfy"
+	HYPRE_MACHINE_COMMANDS="-mna 2 -dcxfy"
         HYPRE_MESSAGE='OTHER[icc-6.0]'
 	perform_test
         shift;;
