@@ -326,19 +326,12 @@ HYPRE_ParCSRMatrix GenerateDifConv( MPI_Comm comm , int nx , int ny , int nz , i
 
 /* par_gsmg.c */
 int hypre_BoomerAMGSetGSMG( void *data , int par );
-int hypre_ParCSRMatrixLocalScale( hypre_ParCSRMatrix *S );
-void read_tgo( void *data , double *x , double *y , double *z );
 int hypre_ParCSRMatrixClone( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix **Sp , int copy_data );
 int hypre_ParCSRMatrixFillSmooth( int nsamples , double *samples , hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *A , int num_functions , int *dof_func );
-int hypre_ParCSRMatrixFillSmoothIncrementally( int nsamples , double *samples , hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *A , double thresh );
 double hypre_ParCSRMatrixChooseThresh( hypre_ParCSRMatrix *S );
 int hypre_ParCSRMatrixThreshold( hypre_ParCSRMatrix *A , double thresh );
-int hypre_BoomerAMGCreateSmoothDirs( void *datay , hypre_ParCSRMatrix *A , int num_sweeps , double thresh , int level , int num_functions , int *dof_func , hypre_ParCSRMatrix **S_ptr );
-int hypre_BoomerAMGBuildInterpLinear( void *data , hypre_ParCSRMatrix *P , int *CF_marker );
-int is_strong( hypre_ParCSRMatrix *S , int i , int j );
-double mat_entry( hypre_ParCSRMatrix *S , int i , int j );
-int hypre_BoomerAMGBuildInterpLinearIndirect( void *data , hypre_ParCSRMatrix *A , int *CF_marker , hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *P );
-int hypre_BoomerAMGBuildInterpWithSmoothnessFactor( void *data , hypre_ParCSRMatrix *A , int *CF_marker , hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *P );
+int hypre_BoomerAMGCreateSmoothDirs( void *amg_vdata, hypre_ParCSRMatrix *A , int num_sweeps , double thresh , int level , int num_functions , int *dof_func , hypre_ParCSRMatrix **S_ptr );
+int hypre_BoomerAMGBuildInterpGSMG( hypre_ParCSRMatrix *A, int *CF_marker, hypre_ParCSRMatrix *S, int *num_cpts_global, int num_functions, int *dof_func, int debug_flag, double trunc_factor, hypre_ParCSRMatrix **P_ptr );
 
 /* par_indepset.c */
 int hypre_BoomerAMGIndepSetInit( hypre_ParCSRMatrix *S , double *measure_array );

@@ -271,7 +271,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 	 }
 	 else
 	 {
-	    hypre_BoomerAMGCreateSmoothDirs(amg_vdata, A_array[level],
+	    hypre_BoomerAMGCreateSmoothDirs(amg_data, A_array[level],
 	       hypre_ParAMGDataNumGridSweeps(amg_data)[1], strong_threshold, 
                level, num_functions, dof_func_array[level], &S);
 	 }
@@ -381,38 +381,17 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
       if (debug_flag==1) wall_time = time_getWallclockSeconds();
 
-/*
-      hypre_BoomerAMGBuildInterp(A_array[level], CF_marker_array[level], S,
+      if (hypre_ParAMGDataGSMG(amg_data) == 0)
+      {
+          hypre_BoomerAMGBuildInterp(A_array[level], CF_marker_array[level], S,
                  coarse_pnts_global, num_functions, dof_func_array[level], 
 		 debug_flag, trunc_factor, &P);
-*/
-
-      if (hypre_ParAMGDataGSMG(amg_data) == 1)
+      }
+      else
       {
-          hypre_BoomerAMGBuildInterpLinear(amg_vdata, P, 
-              CF_marker_array[level]);
-      } 
-      else if (hypre_ParAMGDataGSMG(amg_data) == 2) 
-      {
-          hypre_BoomerAMGBuildInterpLinearIndirect(amg_vdata, 
-              A_array[level], CF_marker_array[level], S, P);
-      } 
-      else if (hypre_ParAMGDataGSMG(amg_data) == 3) 
-      {
-          ; /* do nothing - standard interpolation */
-      } 
-      else if (hypre_ParAMGDataGSMG(amg_data) == 4) 
-      {
-printf("Calling hypre_BoomerAMGBuildInterpGSMG\n");
-
-          hypre_BoomerAMGBuildInterpGSMG(A_array[level], 
-                 CF_marker_array[level], S,
+          hypre_BoomerAMGBuildInterpGSMG(NULL, CF_marker_array[level], S,
                  coarse_pnts_global, num_functions, dof_func_array[level], 
 		 debug_flag, trunc_factor, &P);
-/*
-          hypre_BoomerAMGBuildInterpWithSmoothnessFactor(amg_vdata, 
-              A_array[level], CF_marker_array[level], S, P);
-*/
       }
 
       if (debug_flag==1)

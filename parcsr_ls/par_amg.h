@@ -83,16 +83,7 @@ typedef struct
    double            *Vtemp_local_data;
    int                cycle_op_count;                                                   
    /* fields used by GSMG */
-   int                 gsmg;         /* gsmg=4 indicates algebraic GSMG */
-   double             *gsi_x;
-   double             *gsi_y;
-   double             *gsi_z;
-   int                *gsi_map1;
-   int                *gsi_map2;
-   int                *p_index;
-   int                *gsi_f2c;
-   hypre_ParCSRMatrix *Sfactors;
-   char               *tgofilename;
+   int                 gsmg; /* nonzero indicates use of GSMG */
 
    /* log info */
    int      log_level;
