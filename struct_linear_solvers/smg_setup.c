@@ -226,8 +226,12 @@ hypre_SMGSetup( void               *smg_vdata,
       }
       else
       {
+         R_l[l] = PT_l[l];
+#if 0
+         /* Allow R != PT for non symmetric case */
          R_l[l]   = hypre_SMGNewRestrictOp(A_l[l], grid_l[l+1], cdir);
          data_size += hypre_StructMatrixDataSize(R_l[l]);
+#endif
       }
 
       A_l[l+1] = hypre_SMGNewRAPOp(R_l[l], A_l[l], PT_l[l]);
@@ -268,11 +272,14 @@ hypre_SMGSetup( void               *smg_vdata,
       hypre_InitializeStructMatrixData(PT_l[l], data);
       data += hypre_StructMatrixDataSize(PT_l[l]);
 
+#if 0
+      /* Allow R != PT for non symmetric case */
       if (!hypre_StructMatrixSymmetric(A))
       {
          hypre_InitializeStructMatrixData(R_l[l], data);
          data += hypre_StructMatrixDataSize(R_l[l]);
       }
+#endif
 
       hypre_InitializeStructMatrixData(A_l[l+1], data);
       data += hypre_StructMatrixDataSize(A_l[l+1]);
@@ -372,9 +379,12 @@ hypre_SMGSetup( void               *smg_vdata,
                            cindex, stride, findex, stride);
 
       /* set up the restriction operator */
+#if 0
+      /* Allow R != PT for non symmetric case */
       if (!hypre_StructMatrixSymmetric(A))
          hypre_SMGSetupRestrictOp(A_l[l], R_l[l], tx_l[l], cdir,
                                   cindex, stride);
+#endif
 
       /* set up the restriction routine */
       restrict_data_l[l] = hypre_SMGRestrictInitialize();
