@@ -759,9 +759,9 @@ fi
 
    echo $ac_n "checking the architecture""... $ac_c" 1>&6
 
-   if test -z "$ARCH"; then
+         if test -z "$ARCH"; then
 
-      casc_tarch_dir=
+                        casc_tarch_dir=
       for casc_dir in $srcdir $srcdir/.. $srcdir/../..; do
          if test -f $casc_dir/tarch; then
             casc_tarch_dir=$casc_dir
@@ -770,25 +770,25 @@ fi
          fi
       done
 
-      if test -z "$casc_tarch_dir"; then
-         echo "cannot find tarch, using \$HOSTTYPE as the architecture"
+                  if test -z "$casc_tarch_dir"; then
+         echo "configure: warning: cannot find tarch" 1>&2
          ARCH=$HOSTTYPE
       else
          ARCH="`$casc_tarch`"
 
-         if test -z "$ARCH" -o "$ARCH" = "unknown"; then
+         if test -z "$ARCH" || test -z "$ARCH" = "unknown"; then
             ARCH=$HOSTTYPE
          fi
       fi
 
-      if test -z "$ARCH"; then
+            if test -z "$ARCH"; then
          ARCH=unknown
-         echo "architecture is unknown"
+         echo "configure: warning: architecture is unknown" 1>&2
       else
-         echo $ARCH
+         echo "$ac_t""$ARCH" 1>&6
       fi    
    else
-      echo $ARCH
+      echo "$ac_t""$ARCH" 1>&6
    fi
 
    
@@ -922,7 +922,9 @@ if test "$casc_using_mpi" = "yes"; then
    # Check whether --with-mpi-include or --without-mpi-include was given.
 if test "${with_mpi_include+set}" = set; then
   withval="$with_mpi_include"
-  MPIINCLUDE=-I$withval; casc_user_chose_mpi=yes
+  for mpi_dir in $withval; do
+                  MPIINCLUDE="$MPIINCLUDE -I$withval"
+               done; casc_user_chose_mpi=yes
 fi
 
 
@@ -1001,12 +1003,12 @@ fi
          echo "configure: warning: no acceptable mpicc found in \$PATH" 1>&2
          
 
-   
+         
 
    if test -z "$casc_mpi_libs"; then
       
 
-      case $ARCH in
+            case $ARCH in
 
          sun4 | solaris)
             case $F77 in
@@ -1024,7 +1026,8 @@ fi
                *)
 
                   if test -z "$casc_mpi_include_dir"; then
-                     casc_mpi_include_dir=/usr/local/mpi/mpich/include
+                     MPIINCLUDE="-I/usr/local/mpi/mpich/include \
+                                 -I/usr/local/mpi/mpich/lib/solaris/ch_p4"
                   fi
 
                   if test -z "$casc_mpi_lib_dirs"; then
@@ -1035,18 +1038,19 @@ fi
                casc_mpi_libs="nsl socket mpi";;
                esac
 
-            ac_safe=`echo "$casc_mpi_include_dir/mpi.h" | tr './\055' '___'`
+            if test -z "$MPIINCLUDE"; then
+               ac_safe=`echo "$casc_mpi_include_dir/mpi.h" | tr './\055' '___'`
 echo $ac_n "checking for $casc_mpi_include_dir/mpi.h""... $ac_c" 1>&6
 if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1045 "configure"
+#line 1049 "configure"
 #include "confdefs.h"
 #include <$casc_mpi_include_dir/mpi.h>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:1050: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:1054: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -1064,8 +1068,9 @@ if eval "test \"`echo '$ac_cv_header_'$ac_safe`\" = yes"; then
 else
   echo "$ac_t""no" 1>&6
 fi
- ;;
 
+            fi
+         ;;
 
          alpha)
             if test -z "$casc_mpi_include_dir"; then
@@ -1077,12 +1082,12 @@ if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1081 "configure"
+#line 1086 "configure"
 #include "confdefs.h"
 #include <$casc_mpi_include_dir/mpi.h>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:1086: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:1091: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -1119,12 +1124,12 @@ if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1123 "configure"
+#line 1128 "configure"
 #include "confdefs.h"
 #include <$casc_mpi_include_dir/mpi.h>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:1128: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:1133: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -1162,12 +1167,12 @@ if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1166 "configure"
+#line 1171 "configure"
 #include "confdefs.h"
 #include <$casc_mpi_include_dir/mpi.h>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:1171: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:1176: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -1204,12 +1209,12 @@ if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1208 "configure"
+#line 1213 "configure"
 #include "confdefs.h"
 #include <$casc_mpi_include_dir/mpi.h>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:1213: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:1218: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -1237,8 +1242,12 @@ fi
 
       for casc_lib in $casc_mpi_libs; do
          
+   # define some macros to hopefully improve readability
    
    
+
+   # check for the library from first argument.  If linking is successful
+   # the first time, the job is done, otherwise loop through DIRECTORY-LIST
    echo $ac_n "checking for -l$casc_lib""... $ac_c" 1>&6
 ac_lib_var=`echo $casc_lib'_'main | tr './+\055' '__p_'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
@@ -1247,7 +1256,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="$MPILIBDIRS $MPILIBS $LIBS -l$casc_lib"
 cat > conftest.$ac_ext <<EOF
-#line 1251 "configure"
+#line 1260 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1255,7 +1264,7 @@ int t() {
 main()
 ; return 0; }
 EOF
-if { (eval echo configure:1259: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
+if { (eval echo configure:1268: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -1287,7 +1296,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-L$casc_lib_dir $MPILIBDIRS $MPILIBS -l$casc_lib $LIBS -l$casc_lib"
 cat > conftest.$ac_ext <<EOF
-#line 1291 "configure"
+#line 1300 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1295,7 +1304,7 @@ int t() {
 main()
 ; return 0; }
 EOF
-if { (eval echo configure:1299: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
+if { (eval echo configure:1308: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -1326,6 +1335,7 @@ unset ac_cv_lib_$ac_lib_var
 fi
 unset ac_cv_lib_$ac_lib_var
                                                
+   # ACTION-IF-NOT_FOUND for when the library is found nowhere
    
 
    unset casc_lib_found
@@ -1360,14 +1370,13 @@ unset ac_cv_lib_$ac_lib_var
             echo "configure: warning: MPI not found - must set manually using --with flags" 1>&2
          fi
 
-      
+            
       else      
 
          
          echo $ac_n "checking for location of mpi.h""... $ac_c" 1>&6
 
-         cat > mpconftest.c << EOF
-#include <stdio.h>
+                           cat > mpconftest.c << EOF
 #include "mpi.h"
 
 main(int argc, char **argv)
@@ -1386,7 +1395,7 @@ EOF
          casc_flags=
          casc_lmpi_exists=no
 
-         
+                  
          for casc_command in "$MPICC -show" "$MPICC -v" "$MPICC -#" "$MPICC"; do
 
             casc_this_output=`$casc_command mpconftest.c -o mpconftest 2>&1`
@@ -1408,7 +1417,15 @@ EOF
 
          rm -rf mpconftest*
 
-                  if test "$casc_lmpi_exists" = "no"; then
+                  echo "main() {}" > cc_conftest.c
+         cc_output=`${CC-cc} -v -o cc_conftest cc_conftest.c 2>&1`
+         xlc_p=`echo $cc_output | grep xlcentry`
+         if test -n "$xlc_p"; then
+            casc_compiler_is_xlc=yes
+         fi 
+         rm -rf cc_conftest*
+
+                           if test "$casc_lmpi_exists" = "no"; then
             casc_mplibs="-lmpi"
          else
             casc_mplibs=
@@ -1416,7 +1433,9 @@ EOF
 
          casc_want_arg=
 
-                  for casc_arg in $casc_mpoutput; do
+                                                                                                            
+         for casc_arg in $casc_mpoutput; do
+
             casc_old_want_arg=$casc_want_arg
             casc_want_arg=  
 
@@ -1432,6 +1451,19 @@ EOF
             '')
                case $casc_arg in
                /*.a)
+                  exists=false
+                  for f in $casc_flags; do
+                     if test x$casc_arg = x$f; then
+                        exists=true
+                     fi
+                  done
+                  if $exists; then
+                     casc_arg=
+                  else
+                     casc_flags="$casc_flags $casc_arg"
+                  fi
+               ;;
+               -binitfini:poe_remote_main)
                   exists=false
                   for f in $casc_flags; do
                      if test x$casc_arg = x$f; then
@@ -1496,7 +1528,7 @@ EOF
 
             ;;
             -[lLRI])
-               casc_arg="casc_old_want_arg $arg"
+               casc_arg="casc_old_want_arg $casc_arg"
             ;;
             -u)
                casc_arg="-u $casc_arg"
@@ -1514,44 +1546,81 @@ EOF
             ;;
             esac
 
-                        if test -n "$casc_arg"; then
+                                    if test -n "$casc_arg"; then
                case $casc_arg in
                -I*)
 
-                  if test -z "$MPIINCLUDE"; then
+                                                      if test -z "$MPIINCLUDE"; then
+                     casc_cppflags="$casc_cppflags $casc_arg"
                      casc_include_dir=`echo "$casc_arg" | sed 's/-I//g'`
 
-                     if test -f "$casc_include_dir/mpi.h"; then
-                        MPIINCLUDE=$casc_arg
-                     else
-                        casc_arg=
-                     fi
+                     SAVE_CPPFLAGS="$CPPFLAGS"
+                     CPPFLAGS="$casc_cppflags"
+                     
+                     unset ac_cv_header_mpi_h
+                     ac_safe=`echo "mpi.h" | tr './\055' '___'`
+echo $ac_n "checking for mpi.h""... $ac_c" 1>&6
+if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  cat > conftest.$ac_ext <<EOF
+#line 1568 "configure"
+#include "confdefs.h"
+#include <mpi.h>
+EOF
+ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
+{ (eval echo configure:1573: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+ac_err=`grep -v '^ *+' conftest.out`
+if test -z "$ac_err"; then
+  rm -rf conftest*
+  eval "ac_cv_header_$ac_safe=yes"
+else
+  echo "$ac_err" >&5
+  rm -rf conftest*
+  eval "ac_cv_header_$ac_safe=no"
+fi
+rm -f conftest*
+fi
+if eval "test \"`echo '$ac_cv_header_'$ac_safe`\" = yes"; then
+  echo "$ac_t""yes" 1>&6
+  MPIINCLUDE="$casc_cppflags"
+else
+  echo "$ac_t""no" 1>&6
+fi
+
+
+                                          CPPFLAGS="$SAVE_CPPFLAGS"
+
                   else
                      casc_arg=
                   fi
                ;;
                -[LR]*)
 
-                  casc_mplibdirs="$casc_mplibdirs $casc_arg"
+                                    casc_mplibdirs="$casc_mplibdirs $casc_arg"
                ;;
                -l* | /*)
 
-                  casc_mplibs="$casc_mplibs $casc_arg"
+                                    casc_mplibs="$casc_mplibs $casc_arg"
+               ;;
+               -binitfini:poe_remote_main)
+                  if test "$casc_compiler_is_xlc" = "yes"; then
+                     casc_mpflags="$casc_mpflags $casc_arg"
+                  fi
                ;;
                *)
-                  casc_mpflags="$casc_mpflags $casc_arg"
+                                    casc_mpflags="$casc_mpflags $casc_arg"
                ;;
                esac
 
-               LIBS_SAVE=$LIBS
+                              LIBS_SAVE=$LIBS
                LIBS="$MPIINCLUDE $casc_mpflags $casc_mplibdirs $casc_mplibs"
 
                
 
                                                             cat > conftest.$ac_ext <<EOF
-#line 1553 "configure"
+#line 1623 "configure"
 #include "confdefs.h"
-#include <stdio.h>
 #include "mpi.h"
 
 int main() { return 0; }
@@ -1566,7 +1635,7 @@ int rank, size;
 
 ; return 0; }
 EOF
-if { (eval echo configure:1570: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
+if { (eval echo configure:1639: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
   rm -rf conftest*
   casc_result=yes
 fi
@@ -1586,7 +1655,7 @@ rm -f conftest*
          MPILIBDIRS=$casc_mplibdirs
          MPIFLAGS="$MPIFLAGS $casc_mpflags"
 
-                                    
+                                             
 
          echo "$ac_t""$MPIINCLUDE" 1>&6
          echo $ac_n "checking for MPI library directories""... $ac_c" 1>&6
@@ -1609,12 +1678,6 @@ rm -f conftest*
       HYPREDEFS="$HYPREDEFS -DHYPRE_SEQUENTIAL"
    else
       TIMERDEFS="$TIMERDEFS -DTIMER_USE_MPI"
-      case $ARCH in
-      	 sun4 | solaris)
-            MPIINCLUDE="-I/usr/local/mpi/mpich/include"
-            MPIINCLUDE="$MPIINCLUDE -I/usr/local/mpi/mpich/lib/solaris/ch_p4"
-      	 ;;
-      esac
    fi
 fi
 
@@ -1622,8 +1685,12 @@ fi
 if test "$OPTCHOICE" = "g"; then
 
    
+   # define some macros to hopefully improve readability
    
    
+
+   # check for the library from first argument.  If linking is successful
+   # the first time, the job is done, otherwise loop through DIRECTORY-LIST
    echo $ac_n "checking for -lcegdb""... $ac_c" 1>&6
 ac_lib_var=`echo cegdb'_'cegdb | tr './+\055' '__p_'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
@@ -1632,7 +1699,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="$LDLIBDIRS $LDLIBS $LIBS -lcegdb"
 cat > conftest.$ac_ext <<EOF
-#line 1636 "configure"
+#line 1703 "configure"
 #include "confdefs.h"
 /* Override any gcc2 internal prototype to avoid an error.  */
 /* We use char because int might match the return type of a gcc2
@@ -1644,7 +1711,7 @@ int t() {
 cegdb()
 ; return 0; }
 EOF
-if { (eval echo configure:1648: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
+if { (eval echo configure:1715: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -1676,7 +1743,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-L$casc_lib_dir $LDLIBDIRS $LDLIBS -lcegdb $LIBS -lcegdb"
 cat > conftest.$ac_ext <<EOF
-#line 1680 "configure"
+#line 1747 "configure"
 #include "confdefs.h"
 /* Override any gcc2 internal prototype to avoid an error.  */
 /* We use char because int might match the return type of a gcc2
@@ -1688,7 +1755,7 @@ int t() {
 cegdb()
 ; return 0; }
 EOF
-if { (eval echo configure:1692: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
+if { (eval echo configure:1759: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -1719,6 +1786,7 @@ unset ac_cv_lib_$ac_lib_var
 fi
 unset ac_cv_lib_$ac_lib_var
                                                
+   # ACTION-IF-NOT_FOUND for when the library is found nowhere
    
 
    unset casc_lib_found
@@ -1730,25 +1798,26 @@ unset ac_cv_lib_$ac_lib_var
 
    if test "$ARCH" != "alpha"; then
       
-   for casc_dir in '' /usr/include /usr/local/include \
+            for casc_dir in '' /usr/include /usr/local/include \
                                    /home/casc/include ; do
       if test -n "$casc_dir"; then
          casc_header=$casc_dir/dmalloc.h
       else
          casc_header=dmalloc.h
       fi
-      ac_safe=`echo "$casc_header" | tr './\055' '___'`
+
+            ac_safe=`echo "$casc_header" | tr './\055' '___'`
 echo $ac_n "checking for $casc_header""... $ac_c" 1>&6
 if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1747 "configure"
+#line 1816 "configure"
 #include "confdefs.h"
 #include <$casc_header>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:1752: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:1821: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -1767,8 +1836,12 @@ if eval "test \"`echo '$ac_cv_header_'$ac_safe`\" = yes"; then
          fi
          casc_header_found=yes
          
+   # define some macros to hopefully improve readability
    
    
+
+   # check for the library from first argument.  If linking is successful
+   # the first time, the job is done, otherwise loop through DIRECTORY-LIST
    echo $ac_n "checking for -ldmalloc""... $ac_c" 1>&6
 ac_lib_var=`echo dmalloc'_'malloc | tr './+\055' '__p_'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
@@ -1777,7 +1850,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="$LDLIBDIRS $LDLIBS $LIBS -ldmalloc"
 cat > conftest.$ac_ext <<EOF
-#line 1781 "configure"
+#line 1854 "configure"
 #include "confdefs.h"
 /* Override any gcc2 internal prototype to avoid an error.  */
 /* We use char because int might match the return type of a gcc2
@@ -1789,7 +1862,7 @@ int t() {
 malloc()
 ; return 0; }
 EOF
-if { (eval echo configure:1793: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
+if { (eval echo configure:1866: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -1823,7 +1896,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-L$casc_lib_dir $LDLIBDIRS $LDLIBS -ldmalloc $LIBS -ldmalloc"
 cat > conftest.$ac_ext <<EOF
-#line 1827 "configure"
+#line 1900 "configure"
 #include "confdefs.h"
 /* Override any gcc2 internal prototype to avoid an error.  */
 /* We use char because int might match the return type of a gcc2
@@ -1835,7 +1908,7 @@ int t() {
 malloc()
 ; return 0; }
 EOF
-if { (eval echo configure:1839: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
+if { (eval echo configure:1912: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -1868,6 +1941,7 @@ unset ac_cv_lib_$ac_lib_var
 fi
 unset ac_cv_lib_$ac_lib_var
                                                
+   # ACTION-IF-NOT_FOUND for when the library is found nowhere
    
 
    unset casc_lib_found
@@ -1885,7 +1959,7 @@ fi
 
    done
 
-   
+      
 
    unset casc_header_found
 
@@ -1894,8 +1968,12 @@ fi
 
 
 
+   # define some macros to hopefully improve readability
    
    
+
+   # check for the library from first argument.  If linking is successful
+   # the first time, the job is done, otherwise loop through DIRECTORY-LIST
    echo $ac_n "checking for -lm""... $ac_c" 1>&6
 ac_lib_var=`echo m'_'main | tr './+\055' '__p_'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
@@ -1904,7 +1982,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="$LIBDIRS $LIBS $LIBS -lm"
 cat > conftest.$ac_ext <<EOF
-#line 1908 "configure"
+#line 1986 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1912,7 +1990,7 @@ int t() {
 main()
 ; return 0; }
 EOF
-if { (eval echo configure:1916: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
+if { (eval echo configure:1994: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -1944,7 +2022,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-L$casc_lib_dir $LIBDIRS $LIBS -lm $LIBS -lm"
 cat > conftest.$ac_ext <<EOF
-#line 1948 "configure"
+#line 2026 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1952,7 +2030,7 @@ int t() {
 main()
 ; return 0; }
 EOF
-if { (eval echo configure:1956: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
+if { (eval echo configure:2034: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -1983,6 +2061,7 @@ unset ac_cv_lib_$ac_lib_var
 fi
 unset ac_cv_lib_$ac_lib_var
                                                
+   # ACTION-IF-NOT_FOUND for when the library is found nowhere
    
 
    unset casc_lib_found
@@ -2015,18 +2094,19 @@ unset ac_cv_lib_$ac_lib_var
 
 
 
-   
+         
 
    if test -z "$srcdir"; then
       srcdir=.
    fi
-   if test -n ""; then
+
+      if test -n ""; then
       casc_output_file=
    else   
       casc_output_file=Makefile
    fi   
       
-   for casc_dir in \
+      for casc_dir in \
  .\
  utilities\
  parcsr_matrix_vector\
