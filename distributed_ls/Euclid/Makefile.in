@@ -13,7 +13,7 @@ srcdir = @srcdir@
 VPATH = @srcdir@
 
 ########Euclid specific macros:
-PCPACK_DIR = `pwd`
+PCPACK_DIR = $(srcdir)
 EUCLID_CFLAGS =  -DMPI_MODE -DMPI_TIMING -DUSING_MPI -DHYPRE_GET_ROW \
                  -DHYPRE_MODE -DOPTIMIZED_DH
 EUCLID_INCLUDES = -I$(srcdir)/include -Iinclude
@@ -118,11 +118,10 @@ install: all
 
 clean:
 	@cd src; rm -f *.o
-	@rm -f *.o driver *a
+	@rm -f *.o driver
 
 veryclean: clean
-	@cd src; rm -f *.o libHYPRE_*.a
-	@rm -f *.o driver *a
+	@rm -f libHYPRE_*.a
 
 
 ##################################################################
