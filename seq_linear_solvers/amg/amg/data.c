@@ -22,7 +22,7 @@
 
 AMGData   *amg_NewData(levmax, ncg, ecg, nwt, ewt, nstr,
 		       ncyc, mu, ntrlx, iprlx, ierlx, iurlx,
-		       ioutdat, 
+		       ioutdat, cycle_op_count,
 		       log_file_name)
 int     levmax;
 int     ncg;
@@ -37,6 +37,7 @@ int    *iprlx;
 int    *ierlx;
 int    *iurlx;
 int     ioutdat;
+int     cycle_op_count;
 char   *log_file_name;
 {
    AMGData  *amg_data;
@@ -58,6 +59,7 @@ char   *log_file_name;
    AMGDataIURLX(amg_data)   = iurlx;
    				    
    AMGDataIOutDat(amg_data) = ioutdat;
+   AMGDataCycleOpCount(amg_data) = cycle_op_count;
 
    sprintf(AMGDataLogFileName(amg_data), "%s", log_file_name); 
 
