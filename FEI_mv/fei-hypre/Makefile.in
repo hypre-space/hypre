@@ -13,8 +13,6 @@ HYPRE_ARCH = @ARCH@
 
 srcdir = @srcdir@
 
-all: lib
-
 CC = @CC@
 CXX = @CXX@
 
@@ -90,7 +88,8 @@ LFLAGS =\
 FILES = HYPRE_LinSysCore.C cfei_hypre.C hypre_fei_reduce.C hypre_fei_schur.C \
         hypre_fei_misc.C hypre_fei_ddamg.C HYPRE_parcsr_ml.c
 
-OBJS = ${FILES:.c=.o} ${FILES:.C=.o}
+TEMP = ${FILES:.c=.o}
+OBJS = ${TEMP:.C=.o}
 
 ##################################################################
 # Main rules
