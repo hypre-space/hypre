@@ -8,23 +8,25 @@
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
- * Common.h header file - partially used to hide HYPRE-specific definitions
- * from the rest of the ParaSails source.  Also used for common definitions
- * and parameters.
+ * Common.h header file - common definitions and parameters; also hides
+ * HYPRE-specific definitions
  *
  *****************************************************************************/
 
-#ifndef _COMMON_H
-#define _COMMON_H
-
 #include <stdio.h>
 
-#if 1 /* HYPRE */
+#if 0 /* HYPRE */
 #include "HYPRE_config.h"
 #include "utilities.h"
+#include "fortran.h"
+#define ESSL HYPRE_USING_ESSL
 #else
 #include "mpi.h"
+#define hypre_F90_NAME(name) name##_
 #endif
+
+#ifndef _COMMON_H
+#define _COMMON_H
 
 #define MAX_NPES          1024
 #define ROW_REQ_TAG        222
@@ -32,8 +34,10 @@
 #define ROW_REPV_TAG       224
 #define DIAG_VALS_TAG      225
 #define DIAG_INDS_TAG      226
-#define ROWPATT_MAXLEN   50021 /* a prime number */
+#define ROWPATT_MAXLEN   50021
+/*
 #define DIAGSCALE_MAXLEN 50021
+*/
 
 #ifndef ABS
 #define ABS(x) (((x)<0)?(-(x)):(x))

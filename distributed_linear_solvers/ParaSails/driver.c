@@ -76,14 +76,14 @@ int main(int argc, char *argv[])
     beg_row = (int) ((double)(mype*n) / npes) + 1; /* assumes 1-based */
     end_row = (int) ((double)((mype+1)* n) / npes);
 
-#ifdef EMSOLVE
-    beg_row--;
-    end_row--;
-#else
     if (mype == 0)
         assert(beg_row == 1);
     if (mype == npes-1)
         assert(end_row == n);
+
+#ifdef EMSOLVE
+    beg_row--;
+    end_row--;
 #endif
 
     x = (double *) malloc((end_row-beg_row+1) * sizeof(double));
@@ -108,26 +108,29 @@ int main(int argc, char *argv[])
             x[i] = 0.0;
 
 #if ONE_TIME
-        selparam = 0.75;
+        selparam = 0.00;
 	nlevels = 1;
+	filter = 0.0;
+        parasails_loadbal_beta = 0.0;
 #else
-	fflush(NULL);
-        MPI_Barrier(MPI_COMM_WORLD);
-
         if (mype == 0)
         {
-            printf("Enter parameters selparam (0.75), nlevels (1), filter (0.1): ");
-            scanf("%lf %d %lf", &selparam, &nlevels, &filter);
+            printf("Enter parameters selparam (0.75), nlevels (1), "
+	        "filter (0.1), beta (0.0): ");
+	    fflush(NULL);
+            scanf("%lf %d %lf %lf", &selparam, &nlevels, 
+		&filter, &parasails_loadbal_beta);
 	}
 
 	MPI_Bcast(&selparam, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 	MPI_Bcast(&nlevels,  1, MPI_INT,    0, MPI_COMM_WORLD);
 	MPI_Bcast(&filter,   1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	MPI_Bcast(&parasails_loadbal_beta, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
         if (nlevels < 0)
             break;
 #endif
-        parasails_loadbal_beta=0.9;
+
         if (mype == 0) 
 	{
             printf("selparam %f, nlevels %d, filter %f, beta %f\n", 
@@ -138,6 +141,9 @@ int main(int argc, char *argv[])
         MPI_Barrier(MPI_COMM_WORLD);
         time0 = MPI_Wtime();
         ps = ParaSailsCreate(A);
+
+        ParaSailsSetSym(ps, 0);
+
         thresh = ParaSailsSelectThresh(ps, selparam);
 /*thresh=10.0;*/
         if (mype == 0) 
@@ -154,7 +160,7 @@ int main(int argc, char *argv[])
             printf("%s\n", argv[1]);
             printf("Inumber of nonzeros: %d (%.2f)\n", i, i/(double)j);
         }
-        /*MatrixPrint(ps->M, "M");*/
+        /* MatrixPrint(ps->M, "M"); */
 
         /* filtration step */
         filter = ParaSailsSelectFilter(ps, filter);
@@ -165,14 +171,16 @@ int main(int argc, char *argv[])
         if (mype == 0) 
             printf("nonz after filter : %d (%.2f)\n", i, i/(double)j);
 
+	ParaSailsComplete(ps);
+
         time0 = MPI_Wtime();
-        PCG_ParaSails(A, ps, b, x, 1.e-8, 1500);
+        /* PCG_ParaSails(A, ps, b, x, 1.e-8, 2); */
+        FGMRES_ParaSails(A, ps, b, x, 50, 1.e-8, 1500);
         time1 = MPI_Wtime();
 	solve_time = time1-time0;
 
 	report_times(MPI_COMM_WORLD, setup_time, solve_time);
 
-        MatrixMatvecComplete(A); /* convert matrix back to global numbering */
         ParaSailsDestroy(ps);
 
 #if ONE_TIME

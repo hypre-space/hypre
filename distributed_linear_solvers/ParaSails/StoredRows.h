@@ -14,7 +14,6 @@
 
 #include <stdio.h>
 #include "Mem.h"
-#include "Hash.h"
 #include "Matrix.h"
 
 #ifndef _STOREDROWS_H
@@ -23,8 +22,10 @@
 typedef struct
 {
     Matrix   *mat;   /* the matrix corresponding to the rows stored here */
-    Hash     *hash;  /* hash table for accessing */
     Mem      *mem;   /* storage for arrays, indices, and values */
+
+    int      size;
+    int      num_loc;
 
     int     *len;
     int    **ind;

@@ -14,26 +14,31 @@
  *****************************************************************************/
 
 #include <stdlib.h>
+#include <assert.h>
 #include "Common.h"
-#include "Hash.h"
 #include "RowPatt.h"
 
 /*--------------------------------------------------------------------------
  * RowPattCreate - Return (a pointer to) a pattern of a row with a maximum
  * of "maxlen" nonzeros.  "maxlen" should actually be about double the 
  * maximum expected, since it is the size of a hash table.
+ *
+ * Merge uses local indices.
  *--------------------------------------------------------------------------*/
 
 RowPatt *RowPattCreate(int maxlen)
 {
+    int i;
     RowPatt *p = (RowPatt *) malloc(sizeof(RowPatt));
 
     p->maxlen   = maxlen;
     p->len      = 0;
     p->prev_len = 0;
     p->ind      = (int *) malloc((maxlen) * sizeof(int));
-    p->back     = (int *) malloc((maxlen) * sizeof(int));
-    p->hash     = HashCreate(maxlen);
+    p->mark     = (int *) malloc((maxlen) * sizeof(int));
+
+    for (i=0; i<maxlen; i++)
+        p->mark[i] = -1;
 
     return p;
 }
@@ -45,8 +50,7 @@ RowPatt *RowPattCreate(int maxlen)
 void RowPattDestroy(RowPatt *p)
 {
     free(p->ind);
-    free(p->back);
-    HashDestroy(p->hash);
+    free(p->mark);
     free(p);
 }
 
@@ -56,7 +60,11 @@ void RowPattDestroy(RowPatt *p)
 
 void RowPattReset(RowPatt *p)
 {
-    HashReset(p->hash, p->len, p->back);
+    int i;
+
+    for (i=0; i<p->len; i++)
+        p->mark[p->ind[i]] = -1;
+
     p->len      = 0;
     p->prev_len = 0;
 }
@@ -67,18 +75,20 @@ void RowPattReset(RowPatt *p)
 
 void RowPattMerge(RowPatt *p, int len, int *ind)
 {
-    int i, index, inserted;
+    int i;
 
     for (i=0; i<len; i++)
     {
-        index = HashInsert(p->hash, ind[i], &inserted);
+	assert(ind[i] < p->maxlen);
 
-        if (inserted)
-        {
-	    p->back[p->len] = index;
+	if (p->mark[ind[i]] == -1)
+	{
+	    assert(p->len < p->maxlen);
+
+	    p->mark[ind[i]] = p->len;
             p->ind[p->len] = ind[i];
             p->len++;
-        }
+	}
     }
 }
 
@@ -88,23 +98,25 @@ void RowPattMerge(RowPatt *p, int len, int *ind)
  * that are less than "beg" or greater than "end".
  *--------------------------------------------------------------------------*/
 
-void RowPattMergeExt(RowPatt *p, int len, int *ind, int beg, int end)
+void RowPattMergeExt(RowPatt *p, int len, int *ind, int num_loc)
 {
     int i, index, inserted;
 
     for (i=0; i<len; i++)
     {
-        if (ind[i] < beg || ind[i] > end)
-	{
-            index = HashInsert(p->hash, ind[i], &inserted);
+        if (ind[i] < num_loc)
+	    continue;
 
-            if (inserted)
-            {
-	        p->back[p->len] = index;
-                p->ind[p->len] = ind[i];
-                p->len++;
-            }
-        }
+	assert(ind[i] < p->maxlen);
+
+	if (p->mark[ind[i]] == -1)
+	{
+	    assert(p->len < p->maxlen);
+
+	    p->mark[ind[i]] = p->len;
+            p->ind[p->len] = ind[i];
+            p->len++;
+	}
     }
 }
 
@@ -133,5 +145,3 @@ void RowPattPrevLevel(RowPatt *p, int *lenp, int **indp)
 
     p->prev_len = p->len;
 }
-
-

@@ -50,6 +50,7 @@ HEADERS =\
  LoadBal.h\
  Matrix.h\
  Mem.h\
+ Numbering.h\
  OrderStat.h\
  ParaSails.h\
  PrunedRows.h\
@@ -59,11 +60,13 @@ HEADERS =\
 FILES =\
  ConjGrad.c\
  DiagScale.c\
+ FlexGmres.c\
  HYPRE_ParaSails.c\
  Hash.c\
  LoadBal.c\
  Matrix.c\
  Mem.c\
+ Numbering.c\
  OrderStat.c\
  ParaSails.c\
  PrunedRows.c\

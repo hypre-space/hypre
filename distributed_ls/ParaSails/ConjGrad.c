@@ -167,9 +167,7 @@ void PCG_ParaSails(Matrix *mat, ParaSails *ps, double *b, double *x,
    ScaleVector(n, -1.0, r);  /* r = -r */
    Axpy(n, 1.0, b, r);       /* r = r + b */
    i_prod = InnerProd(n, r, r, comm);
+
    if (mype == 0)
       printf("Iter (%d): computed rrn    : %e\n", i, sqrt(i_prod/bi_prod));
-
-   /* num_iterations = i; */
 }
-

@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include "Common.h"
 #include "Matrix.h"
+#include "Numbering.h"
 #include "LoadBal.h"
 
 /*--------------------------------------------------------------------------
@@ -129,8 +130,8 @@ void LoadBalInit(MPI_Comm comm, double local_cost, double beta,
  * Caller must free the allocated buffers.
  *--------------------------------------------------------------------------*/
 
-void LoadBalDonorSend(MPI_Comm comm, Matrix *mat, int num_given, 
-  const int *donor_data_pe, const double *donor_data_cost, 
+void LoadBalDonorSend(MPI_Comm comm, Matrix *mat, Numbering *numb,
+  int num_given, const int *donor_data_pe, const double *donor_data_cost, 
   DonorData *donor_data, int *local_beg_row, MPI_Request *request)
 {
     int send_beg_row, send_end_row;
@@ -158,7 +159,7 @@ void LoadBalDonorSend(MPI_Comm comm, Matrix *mat, int num_given,
         {
             send_end_row++;
             assert(send_end_row <= mat->end_row);
-            MatrixGetRow(mat, send_end_row, &len, &ind, &val);
+            MatrixGetRow(mat, send_end_row - mat->beg_row, &len, &ind, &val);
             accum += (double) len*len*len;
             buflen += (len+1); /* additional one for row length */
         }
@@ -179,9 +180,10 @@ void LoadBalDonorSend(MPI_Comm comm, Matrix *mat, int num_given,
 
         for (row=send_beg_row; row<=send_end_row; row++)
         {
-            MatrixGetRow(mat, row, &len, &ind, &val);
+            MatrixGetRow(mat, row - mat->beg_row, &len, &ind, &val);
             *bufferp++ = len;
-            memcpy(bufferp, ind, len*sizeof(int)); /* copy into buffer */
+            /* memcpy(bufferp, ind, len*sizeof(int)); */ /* copy into buffer */
+	    NumberingLocalToGlobal(numb, len, ind, bufferp);
             bufferp += len;
         }
 
@@ -197,7 +199,8 @@ void LoadBalDonorSend(MPI_Comm comm, Matrix *mat, int num_given,
  * The message structure is: beg_row, end_row, len1, indices1, len2, ....
  *--------------------------------------------------------------------------*/
 
-void LoadBalRecipRecv(MPI_Comm comm, int num_taken, RecipData *recip_data)
+void LoadBalRecipRecv(MPI_Comm comm, Numbering *numb,
+  int num_taken, RecipData *recip_data)
 {
     int i, row;
     int source, count;
@@ -224,9 +227,10 @@ void LoadBalRecipRecv(MPI_Comm comm, int num_taken, RecipData *recip_data)
 
 	/* Set the indices of the local matrix containing donated rows */
 
-        for (row=beg_row; row<=end_row; row++)
+        for (row=0; row<=end_row - beg_row; row++)
         {
             len = *bufferp++;
+	    NumberingGlobalToLocal(numb, len, bufferp, bufferp);
             MatrixSetRow(recip_data[i].mat, row, len, bufferp, NULL);
             bufferp += len;
         }
@@ -257,7 +261,7 @@ void LoadBalRecipSend(MPI_Comm comm, int num_taken,
 
         /* Find size of output buffer */
 	buflen = 0;
-        for (row=mat->beg_row; row<=mat->end_row; row++)
+        for (row=0; row<=mat->end_row - mat->beg_row; row++)
         {
             MatrixGetRow(mat, row, &len, &ind, &val);
 	    buflen += len;
@@ -268,7 +272,7 @@ void LoadBalRecipSend(MPI_Comm comm, int num_taken,
 	/* Construct send buffer */
 
 	bufferp = recip_data[i].buffer;
-        for (row=mat->beg_row; row<=mat->end_row; row++)
+        for (row=0; row<=mat->end_row - mat->beg_row; row++)
         {
             MatrixGetRow(mat, row, &len, &ind, &val);
             memcpy(bufferp, val, len*sizeof(double)); /* copy into buffer */
@@ -320,7 +324,7 @@ void LoadBalDonorRecv(MPI_Comm comm, Matrix *mat,
 	bufferp = buffer;
         for (row=donor_data[j].beg_row; row<=donor_data[j].end_row; row++)
         {
-            MatrixGetRow(mat, row, &len, &ind, &val);
+            MatrixGetRow(mat, row - mat->beg_row, &len, &ind, &val);
 	    memcpy(val, bufferp, len*sizeof(double)); /* copy into matrix */
             bufferp += len;
         }
@@ -332,8 +336,8 @@ void LoadBalDonorRecv(MPI_Comm comm, Matrix *mat,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-LoadBal *LoadBalDonate(MPI_Comm comm, Matrix *mat, double local_cost, 
-  double beta)
+LoadBal *LoadBalDonate(MPI_Comm comm, Matrix *mat, Numbering *numb,
+  double local_cost, double beta)
 {
     LoadBal *p;
     int i, npes;
@@ -358,13 +362,13 @@ LoadBal *LoadBalDonate(MPI_Comm comm, Matrix *mat, double local_cost,
     requests = (MPI_Request *) malloc(p->num_given * sizeof(MPI_Request));
     statuses = (MPI_Status  *) malloc(p->num_given * sizeof(MPI_Status));
 
-    LoadBalDonorSend(comm, mat, p->num_given,
+    LoadBalDonorSend(comm, mat, numb, p->num_given,
         donor_data_pe, donor_data_cost, p->donor_data, &p->beg_row, requests);
 
     free(donor_data_pe);
     free(donor_data_cost);
 
-    LoadBalRecipRecv(comm, p->num_taken, p->recip_data);
+    LoadBalRecipRecv(comm, numb, p->num_taken, p->recip_data);
 
     MPI_Waitall(p->num_given, requests, statuses);
 

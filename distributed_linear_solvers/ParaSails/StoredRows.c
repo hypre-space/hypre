@@ -8,12 +8,10 @@
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
- * StoredRows - Collection of rows that are cached on the local processor.
- * Direct access to these rows is available, and is accomplished through
- * a hash table.
- *
- * The local rows are not actually stored in the data structure, but the
- * StoredRowsGet function will retrieve it directly from the matrix.
+ * StoredRows - Local storage of rows from other processors.  Although only
+ * off-processor rows are stored, if an on-processor row is requested, it
+ * is returned by referring to the local matrix.  Local indexing is used to
+ * access the stored rows.
  *
  *****************************************************************************/
 
@@ -21,20 +19,21 @@
 #include <assert.h>
 #include "Common.h"
 #include "Mem.h"
-#include "Hash.h"
 #include "Matrix.h"
 #include "StoredRows.h"
 
 /*--------------------------------------------------------------------------
  * StoredRowsCreate - Return (a pointer to) a stored rows object.
  *
- * mat        - matrix used for returning local rows (input)
- * size       - size of the hash table used for storing pointers to the
- *              external rows to be stored; should be about double the 
- *              expected number of rows to be stored; StoredRows returns
- *              local rows directly from the local part of the matrix,
- *              so the number of these rows does not need to be included
- *              in the size of the hash table (input)
+ * mat  - matrix used for returning on-processor rows (input)
+ * size - the maximum number of (off-processor) rows that can be stored 
+ *        (input).  See below for more a precise description.
+ *
+ * A slot is available for "size" off-processor rows.  The slot for the
+ * row with local index i is (i - num_loc).  Therefore, if max_i is the
+ * largest local index expected, then size should be set to 
+ * (max_i - num_loc + 1).  StoredRows will automatically increase its 
+ * size if a row with a larger local index needs to be put in StoredRows.
  *--------------------------------------------------------------------------*/
 
 StoredRows *StoredRowsCreate(Matrix *mat, int size)
@@ -42,12 +41,14 @@ StoredRows *StoredRowsCreate(Matrix *mat, int size)
     StoredRows *p = (StoredRows *) malloc(sizeof(StoredRows));
 
     p->mat  = mat;
-    p->hash = HashCreate(size);
     p->mem  = MemCreate();
 
-    p->len = (int *)     MemAlloc(p->mem, size * sizeof(int));
-    p->ind = (int **)    MemAlloc(p->mem, size * sizeof(int *));
-    p->val = (double **) MemAlloc(p->mem, size * sizeof(double *));
+    p->size = size;
+    p->num_loc = mat->end_row - mat->beg_row + 1;
+
+    p->len = (int *)     calloc(size,  sizeof(int));
+    p->ind = (int **)    malloc(size * sizeof(int *));
+    p->val = (double **) malloc(size * sizeof(double *));
 
     p->count = 0;
 
@@ -60,8 +61,10 @@ StoredRows *StoredRowsCreate(Matrix *mat, int size)
 
 void StoredRowsDestroy(StoredRows *p)
 {
-    HashDestroy(p->hash);
     MemDestroy(p->mem);
+    free(p->len);
+    free(p->ind);
+    free(p->val);
     free(p);
 }
 
@@ -93,20 +96,32 @@ double *StoredRowsAllocVal(StoredRows *p, int len)
 
 void StoredRowsPut(StoredRows *p, int index, int len, int *ind, double *val)
 {
-    int loc, inserted;
+    int i = index - p->num_loc;
 
-    if (p->mat->beg_row <= index && index <= p->mat->end_row)
+    /* Reallocate if necessary */
+    if (i > p->size)
     {
-        printf("StoredRowsPut: index %d is a local row.\n", index);
-        PARASAILS_EXIT;
+        int j;
+        int newsize;
+
+	newsize = i+1000;
+        p->len = (int *)     realloc(p->len, newsize * sizeof(int));
+        p->ind = (int **)    realloc(p->ind, newsize * sizeof(int *));
+        p->val = (double **) realloc(p->val, newsize * sizeof(double *));
+
+	/* set lengths to zero */
+        for (j=p->size; j<newsize; j++)
+	    p->len[j] = 0;
+
+        p->size = newsize;
     }
 
-    loc = HashInsert(p->hash, index, &inserted);
-    assert(inserted);
+    /* check that row has not been put already */
+    assert(p->len[i] == 0);
 
-    p->len[loc] = len;
-    p->ind[loc] = ind;
-    p->val[loc] = val;
+    p->len[i] = len;
+    p->ind[i] = ind;
+    p->val[i] = val;
 
     p->count++;
 }
@@ -119,23 +134,16 @@ void StoredRowsPut(StoredRows *p, int index, int len, int *ind, double *val)
 void StoredRowsGet(StoredRows *p, int index, int *lenp, int **indp, 
   double **valp)
 {
-    if (p->mat->beg_row <= index && index <= p->mat->end_row)
+    if (index < p->num_loc)
     {
         MatrixGetRow(p->mat, index, lenp, indp, valp);
     }
     else
     {
-        int loc = HashLookup(p->hash, index);
+	index = index - p->num_loc;
 
-        if (loc == HASH_NOTFOUND)
-        {
-            printf("StoredRowsGet: index %d not found in hash table.\n", index);
-            PARASAILS_EXIT;
-        }
-
-        *lenp = p->len[loc];
-        *indp = p->ind[loc];
-        *valp = p->val[loc];
+        *lenp = p->len[index];
+        *indp = p->ind[index];
+        *valp = p->val[index];
     }
 }
-

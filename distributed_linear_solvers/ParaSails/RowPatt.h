@@ -13,19 +13,17 @@
  *****************************************************************************/
 
 #include <stdio.h>
-#include "Hash.h"
 
 #ifndef _ROWPATT_H
 #define _ROWPATT_H
 
 typedef struct
 {
-    int   maxlen;
-    int   len;
-    int   prev_len;
-    int  *ind;
-    int  *back;
-    Hash *hash;
+    int  maxlen;
+    int  len;
+    int  prev_len;
+    int *ind;
+    int *mark;
 }
 RowPatt;
 
@@ -33,7 +31,7 @@ RowPatt *RowPattCreate(int maxlen);
 void RowPattDestroy(RowPatt *p);
 void RowPattReset(RowPatt *p);
 void RowPattMerge(RowPatt *p, int len, int *ind);
-void RowPattMergeExt(RowPatt *p, int len, int *ind, int beg, int end);
+void RowPattMergeExt(RowPatt *p, int len, int *ind, int num_loc);
 void RowPattGet(RowPatt *p, int *lenp, int **indp);
 void RowPattPrevLevel(RowPatt *p, int *lenp, int **indp);
 

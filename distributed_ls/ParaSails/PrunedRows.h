@@ -13,6 +13,7 @@
  *****************************************************************************/
 
 #include <stdio.h>
+#include "Mem.h"
 #include "DiagScale.h"
 
 #ifndef _PRUNEDROWS_H
@@ -20,11 +21,9 @@
 
 typedef struct
 {
-    Matrix   *mat;   /* the matrix corresponding to the rows stored here */
-    Hash     *hash;  /* hash table for accessing */
     Mem      *mem;   /* storage for arrays, indices, and values */
+    int      size;
 
-    int      num_local;
     int     *len;
     int    **ind;
 }

@@ -15,20 +15,21 @@
 #include <stdio.h>
 #include "Hash.h"
 #include "Matrix.h"
+#include "Numbering.h"
 
 #ifndef _DIAGSCALE_H
 #define _DIAGSCALE_H
 
 typedef struct
 {
-    Hash   *hash;
-    double *local_diags;
-    double *ext_diags;
+    Matrix    *mat;
+    double    *local_diags;
+    double    *ext_diags;
 }
 DiagScale;
 
 DiagScale *DiagScaleCreate(Matrix *mat);
 void DiagScaleDestroy(DiagScale *p);
-double DiagScaleGet(DiagScale *p, Matrix *mat, int global_index);
+double DiagScaleGet(DiagScale *p, int global_index);
 
 #endif /* _DIAGSCALE_H */

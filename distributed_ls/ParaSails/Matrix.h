@@ -15,7 +15,7 @@
 #include <stdio.h>
 #include "Common.h"
 #include "Mem.h"
-#include "Hash.h"
+#include "Numbering.h"
 
 #ifndef _MATRIX_H
 #define _MATRIX_H
@@ -35,29 +35,23 @@ typedef struct
     int    **inds;
     double **vals;
 
-    int     matvec_setup;
-
-    double *recvbuf;
-    double *sendbuf;
-
-    int     recvlen;
-
-    int     sendlen;
-    int    *sendind;
-
     int     num_recv;
     int     num_send;
 
-    int    *global_to_local;
-    int    *local_to_global;
+    int     sendlen;
+    int     recvlen;
 
-    Hash   *hash_numbering;
+    int    *sendind;
+    double *sendbuf;
+    double *recvbuf;
 
     MPI_Request *recv_req;
     MPI_Request *send_req;
     MPI_Request *recv_req2;
     MPI_Request *send_req2;
     MPI_Status  *statuses;
+
+    Numbering *numb;
 }
 Matrix;
 
@@ -72,8 +66,10 @@ void MatrixRead(Matrix *mat, char *filename);
 void RhsRead(double *rhs, Matrix *mat, char *filename);
 int  MatrixNnz(Matrix *mat);
 
+Numbering *MatrixNumbering(Matrix *mat);
+Numbering *MatrixNumberingCreate(Matrix *mat, int size);
+void MatrixComplete(Matrix *mat);
 void MatrixMatvec(Matrix *mat, double *x, double *y);
 void MatrixMatvecTrans(Matrix *mat, double *x, double *y);
-void MatrixMatvecComplete(Matrix *mat);
 
 #endif /* _MATRIX_H */

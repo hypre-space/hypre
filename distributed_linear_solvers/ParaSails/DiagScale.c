@@ -18,6 +18,7 @@
 #include "Common.h"
 #include "Hash.h"
 #include "Matrix.h"
+#include "Numbering.h"
 #include "RowPatt.h"
 #include "DiagScale.h"
 #include "OrderStat.h"
@@ -44,7 +45,7 @@ static void ExchangeDiagEntries(MPI_Comm comm, Matrix *mat, int reqlen,
     MPI_Request request;
     int i, j, this_pe;
 
-    shell_sort(reqlen, reqind);
+    /*shell_sort(reqlen, reqind);*/
 
     *num_requests = 0;
 
@@ -150,9 +151,6 @@ DiagScale *DiagScaleCreate(Matrix *mat)
     int row, i, j, num_requests;
     int len, *ind;
     double *val;
-    RowPatt *patt;
-    double *diags;
-    int inserted;
 
     DiagScale *p = (DiagScale *) malloc(sizeof(DiagScale));
 
@@ -160,36 +158,32 @@ DiagScale *DiagScaleCreate(Matrix *mat)
     p->local_diags = (double *) 
         malloc((mat->end_row - mat->beg_row + 1) * sizeof(double));
 
-    /* Extract the local diagonal entries and 
-       merge pattern of all local rows to determine what we need */
-
-    patt = RowPattCreate(DIAGSCALE_MAXLEN);
-
-    for (row=mat->beg_row; row<=mat->end_row; row++)
+    /* Extract the local diagonal entries */
+    for (row=0; row<=mat->end_row - mat->beg_row; row++)
     {
-        MatrixGetRow(mat, row, &len, &ind, &val);
-	RowPattMergeExt(patt, len, ind, mat->beg_row, mat->end_row);
+	MatrixGetRow(mat, row, &len, &ind, &val);
 
-        p->local_diags[row - mat->beg_row] = 1.0; /* in case no diag entry */
+        p->local_diags[row] = 1.0; /* in case no diag entry */
 
         for (j=0; j<len; j++)
         {
             if (ind[j] == row)
             {
-                p->local_diags[row - mat->beg_row] = val[j];
+                p->local_diags[row] = val[j];
                 break;
             }
         }
     }
 
-    /* Get the list of diagonal indices that we need;
-       (ind is an array stored in patt, so do not destroy patt yet) */
-    RowPattGet(patt, &len, &ind);
+    /* Get the list of diagonal indices that we need.
+       This is simply the external indices */
+    len = mat->numb->num_ext;
+    ind = &mat->numb->local_to_global[mat->numb->num_loc];
 
     /* buffer for receiving diagonal values from other processors */
-    diags = (double *) malloc(len * sizeof(double));
+    p->ext_diags = (double *) malloc(len * sizeof(double));
 
-    ExchangeDiagEntries(mat->comm, mat, len, ind, diags, &num_requests, 
+    ExchangeDiagEntries(mat->comm, mat, len, ind, p->ext_diags, &num_requests, 
         requests);
 
     ExchangeDiagEntriesServer(mat->comm, mat, p->local_diags, num_requests);
@@ -197,19 +191,7 @@ DiagScale *DiagScaleCreate(Matrix *mat)
     /* Wait for all replies */
     MPI_Waitall(num_requests, requests, statuses);
 
-    /* Storage and indexing mechanism for external diagonal entries */
-    p->ext_diags = (double *) malloc((2*len+1) * sizeof(double));
-    p->hash  = HashCreate(2*len+1);
-
-    /* loop over replies buffer and put into hash table */
-    for (i=0; i<len; i++)
-    {
-        j = HashInsert(p->hash, ind[i], &inserted);
-	p->ext_diags[j] = diags[i];
-    }
-
-    RowPattDestroy(patt);
-    free(diags);
+    p->mat  = mat;
 
     return p;
 }
@@ -220,8 +202,6 @@ DiagScale *DiagScaleCreate(Matrix *mat)
 
 void DiagScaleDestroy(DiagScale *p)
 {
-    HashDestroy(p->hash);
-
     free(p->local_diags);
     free(p->ext_diags);
 
@@ -229,18 +209,21 @@ void DiagScaleDestroy(DiagScale *p)
 }
 
 /*--------------------------------------------------------------------------
- * DiagScaleGet -  Returns scale factor given a global index,
+ * DiagScaleGet -  Returns scale factor given a row number in local indexing.
  * The factor is the reciprocal of the square root of the diagonal entry.
  *--------------------------------------------------------------------------*/
 
-double DiagScaleGet(DiagScale *p, Matrix *mat, int global_index)
+double DiagScaleGet(DiagScale *p, int index)
 {
-    int index;
+    int offset = p->mat->end_row - p->mat->beg_row + 1;
 
-    if (mat->beg_row <= global_index && global_index <= mat->end_row)
-        return 1.0 / sqrt(ABS(p->local_diags[global_index - mat->beg_row]));
-
-    index = HashLookup(p->hash, global_index);
-
-    return 1.0 / sqrt(ABS(p->ext_diags[index]));
+    if (index < offset)
+    {
+        return 1.0 / sqrt(ABS(p->local_diags[index]));
+    }
+    else
+    {
+        /* NumberingGlobalToLocal(p->mat->numb, 1, &index, &index); */
+        return 1.0 / sqrt(ABS(p->ext_diags[index - offset]));
+    }
 }

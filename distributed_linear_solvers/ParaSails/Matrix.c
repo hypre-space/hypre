@@ -24,9 +24,7 @@
 #include <assert.h>
 #include "Common.h"
 #include "Matrix.h"
-
-/* prototypes for some static functions used in this file */
-static void MatrixMatvecSetup(Matrix *mat);
+#include "Numbering.h"
 
 /*--------------------------------------------------------------------------
  * MatrixCreate - Return (a pointer to) a matrix object.
@@ -63,7 +61,20 @@ Matrix *MatrixCreate(MPI_Comm comm, int beg_row, int end_row)
     MPI_Allgather(&beg_row, 1, MPI_INT, mat->beg_rows, 1, MPI_INT, comm);
     MPI_Allgather(&end_row, 1, MPI_INT, mat->end_rows, 1, MPI_INT, comm);
 
-    mat->matvec_setup = 0;
+    mat->num_recv = 0;
+    mat->num_send = 0;
+
+    mat->recv_req  = NULL;
+    mat->send_req  = NULL;
+    mat->recv_req2 = NULL;
+    mat->send_req2 = NULL;
+    mat->statuses  = NULL;
+ 
+    mat->sendind = NULL;
+    mat->sendbuf = NULL;
+    mat->recvbuf = NULL;
+
+    mat->numb = NULL;
 
     return mat;
 }
@@ -98,7 +109,20 @@ Matrix *MatrixCreateLocal(int beg_row, int end_row)
     mat->beg_rows = NULL;
     mat->end_rows = NULL;
 
-    mat->matvec_setup = 0;
+    mat->num_recv = 0;
+    mat->num_send = 0;
+
+    mat->recv_req  = NULL;
+    mat->send_req  = NULL;
+    mat->recv_req2 = NULL;
+    mat->send_req2 = NULL;
+    mat->statuses  = NULL;
+
+    mat->sendind = NULL;
+    mat->sendbuf = NULL;
+    mat->recvbuf = NULL;
+
+    mat->numb = NULL;
 
     return mat;
 }
@@ -109,10 +133,29 @@ Matrix *MatrixCreateLocal(int beg_row, int end_row)
 
 void MatrixDestroy(Matrix *mat)
 {
-    if (mat->matvec_setup)
-        MatrixMatvecComplete(mat);
+    int i;
+
+    for (i=0; i<mat->num_recv; i++)
+        MPI_Request_free(&mat->recv_req[i]);
+
+    for (i=0; i<mat->num_send; i++)
+        MPI_Request_free(&mat->send_req[i]);
+
+    free(mat->recv_req);
+    free(mat->send_req);
+    free(mat->recv_req2);
+    free(mat->send_req2);
+    free(mat->statuses);
+
+    free(mat->sendind);
+    free(mat->sendbuf);
+    free(mat->recvbuf);
 
     MemDestroy(mat->mem);
+
+    if (mat->numb)
+        NumberingDestroy(mat->numb);
+
     free(mat);
 }
 
@@ -125,17 +168,15 @@ void MatrixDestroy(Matrix *mat)
 
 void MatrixSetRow(Matrix *mat, int row, int len, int *ind, double *val)
 {
-    int local_row = row - mat->beg_row;
-
-    mat->lens[local_row] = len;
-    mat->inds[local_row] = (int *) MemAlloc(mat->mem, len*sizeof(int));
-    mat->vals[local_row] = (double *) MemAlloc(mat->mem, len*sizeof(double));
+    mat->lens[row] = len;
+    mat->inds[row] = (int *) MemAlloc(mat->mem, len*sizeof(int));
+    mat->vals[row] = (double *) MemAlloc(mat->mem, len*sizeof(double));
 
     if (ind != NULL)
-        memcpy(mat->inds[local_row], ind, len*sizeof(int));
+        memcpy(mat->inds[row], ind, len*sizeof(int));
 
     if (val != NULL)
-        memcpy(mat->vals[local_row], val, len*sizeof(double));
+        memcpy(mat->vals[row], val, len*sizeof(double));
 }
 
 /*--------------------------------------------------------------------------
@@ -144,11 +185,9 @@ void MatrixSetRow(Matrix *mat, int row, int len, int *ind, double *val)
 
 void MatrixGetRow(Matrix *mat, int row, int *lenp, int **indp, double **valp)
 {
-    int local_row = row - mat->beg_row;
-
-    *lenp = mat->lens[local_row];
-    *indp = mat->inds[local_row];
-    *valp = mat->vals[local_row];
+    *lenp = mat->lens[row];
+    *indp = mat->inds[row];
+    *valp = mat->vals[row];
 }
 
 /*--------------------------------------------------------------------------
@@ -219,12 +258,13 @@ void MatrixPrint(Matrix *mat, char *filename)
 	if (mype == pe)
 	{
 
-            for (row=mat->beg_row; row<=mat->end_row; row++)
+            for (row=0; row<=mat->end_row - mat->beg_row; row++)
             {
                 MatrixGetRow(mat, row, &len, &ind, &val);
 
                 for (i=0; i<len; i++)
-                    fprintf(file, "%d %d %.14e\n", row, ind[i], val[i]);
+                    fprintf(file, "%d %d %.14e\n", 
+			row + mat->beg_row, ind[i], val[i]);
             }
 	}
 
@@ -315,7 +355,7 @@ static void MatrixReadMaster(Matrix *mat, char *filename)
 	if (row != curr_row)
 	{
 	    /* store this row */
-	    MatrixSetRow(mat, curr_row, len, ind, val);
+	    MatrixSetRow(mat, curr_row - mat->beg_row, len, ind, val);
 
 	    curr_row = row;
 
@@ -332,7 +372,7 @@ static void MatrixReadMaster(Matrix *mat, char *filename)
 
     /* Store the final row */
     if (ret == EOF || row > mat->end_row)
-	MatrixSetRow(mat, mat->end_row, len, ind, val);
+	MatrixSetRow(mat, mat->end_row - mat->beg_row, len, ind, val);
 
     fclose(file);
 
@@ -381,7 +421,7 @@ static void MatrixReadSlave(Matrix *mat, char *filename)
 	if (row != curr_row)
 	{
 	    /* store this row */
-	    MatrixSetRow(mat, curr_row, len, ind, val);
+	    MatrixSetRow(mat, curr_row - mat->beg_row, len, ind, val);
 
 	    curr_row = row;
 
@@ -398,7 +438,7 @@ static void MatrixReadSlave(Matrix *mat, char *filename)
 
     /* Store the final row */
     if (ret == EOF || row > mat->end_row)
-	MatrixSetRow(mat, mat->end_row, len, ind, val);
+	MatrixSetRow(mat, mat->end_row - mat->beg_row, len, ind, val);
 
     fclose(file);
     time1 = MPI_Wtime();
@@ -426,6 +466,8 @@ void MatrixRead(Matrix *mat, char *filename)
 	MatrixReadSlave(mat, filename);
     time1 = MPI_Wtime();
     printf("%d: Time for reading matrix: %f\n", mype, time1-time0);
+
+    MatrixComplete(mat);
 }
 
 /*--------------------------------------------------------------------------
@@ -493,128 +535,9 @@ void RhsRead(double *rhs, Matrix *mat, char *filename)
     free(buffer);
 }
 
-
 /*--------------------------------------------------------------------------
- * GetExternalIndices - Return the external indices in the array
- * "local_to_global" and also construct a hash table "hash" and the array
- * "global_to_local" which are required to convert from global indexing
- * to local indexing.  The number of external indices is returned through
- * "lenp".
- *
- * local_to_global = external indices using base 0 (input buffer filled on out)
- * global_to_local = indexed by hash table (input buffer filled on output)
- *
- * These buffers must be able to hold all the external indices of this 
- * processor.  Max 30000 hardcoded.
+ * SetupReceives
  *--------------------------------------------------------------------------*/
-
-static void GetExternalIndices(Matrix *mat, int *lenp,
-  int *local_to_global, int *global_to_local, Hash *hash)
-{
-    int row, i, len, *ind, index, inserted;
-    double *val;
-    int num_external = 0;
-    int num_local = mat->end_row - mat->beg_row + 1;
-
-    for (row=mat->beg_row; row<=mat->end_row; row++)
-    {
-        MatrixGetRow(mat, row, &len, &ind, &val);
-
-	for (i=0; i<len; i++)
-	{
-	    /* only interested in external indices */
-	    if (ind[i] < mat->beg_row || ind[i] > mat->end_row)
-	    {
-                index = HashInsert(hash, ind[i], &inserted);
-
-                if (inserted)
-                    local_to_global[num_external++] = ind[i];
-	    }
-	}
-    }
-
-    /* sort the indices */
-    shell_sort(num_external, local_to_global);
-
-    /* Redo the hash table for the sorted indices */
-    /* HashReset(hash, num_external, local_to_global); */
-    for (i=0; i<hash->size; i++)
-        hash->keys[i] = HASH_EMPTY;
-
-    for (i=0; i<num_external; i++)
-    {
-        index = HashInsert(hash, local_to_global[i], &inserted);
-        global_to_local[index] = i + num_local;
-    }
-
-    *lenp = num_external;
-}
-
-/*--------------------------------------------------------------------------
- * ConvertToLocalIndices - Convert the indices in matrix "mat" from global
- * indexing to local indexing.  This function is only called by 
- * MatrixMatvecSetup.  Assumes the input matrix uses global indexing.
- * "hash" and "global_to_local" contain information required to do the
- * conversion.  The conversion of the matrix indices is performed in place.
- *--------------------------------------------------------------------------*/
-
-static void ConvertToLocalIndices(Matrix *mat, Hash *hash, int *global_to_local)
-{
-    int row, len, *ind, i, index;
-    double *val;
-
-    for (row=mat->beg_row; row<=mat->end_row; row++)
-    {
-        MatrixGetRow(mat, row, &len, &ind, &val);
-
-        for (i=0; i<len; i++)
-        {
-	    if (ind[i] < mat->beg_row || ind[i] > mat->end_row)
-	    {
-		index = HashLookup(hash, ind[i]);
-		ind[i] = global_to_local[index];
-	    }
-	    else
-	    {
-		ind[i] -= mat->beg_row;
-	    }
-	}
-    }
-}
-
-/*--------------------------------------------------------------------------
- * ConvertToGlobalIndices - Convert the indices in matrix "mat" from local
- * indexing to global indexing.  This function is only called by 
- * MatrixMatvecComplete.  Assumes the input matrix uses local indexing.
- * "hash" and "local_to_global" contain information required to do the
- * conversion.
- *--------------------------------------------------------------------------*/
-
-static void ConvertToGlobalIndices(Matrix *mat, Hash *hash, 
-  int *local_to_global)
-{
-    int row, i, len, *ind;
-    double *val;
-
-    int num_local = mat->end_row - mat->beg_row + 1;
-
-    for (row=mat->beg_row; row<=mat->end_row; row++)
-    {
-        MatrixGetRow(mat, row, &len, &ind, &val);
-
-        for (i=0; i<len; i++)
-        {
-	    if (ind[i] >= num_local)
-	    {
-		ind[i] = local_to_global[ind[i] - num_local];
-	    }
-	    else
-	    {
-		ind[i] += mat->beg_row;
-	    }
-	}
-    }
-}
 
 static void SetupReceives(Matrix *mat, int reqlen, int *reqind, int *outlist)
 {
@@ -659,16 +582,15 @@ static void SetupReceives(Matrix *mat, int reqlen, int *reqind, int *outlist)
         MPI_Send_init(&mat->recvbuf[i+num_local], j-i, MPI_DOUBLE, this_pe, 666,
 	    comm, &mat->send_req2[mat->num_recv]);
 
-#ifdef DEBUG
-printf("%d: recv_init(%d) to %d at %d of len %d\n", mype, mat->num_recv,
-this_pe, i, j-i);
-#endif
-
         mat->num_recv++;
     }
 }
 
-/* this func waits for all receives to complete */
+/*--------------------------------------------------------------------------
+ * SetupSends
+ * this func waits for all receives to complete 
+ *--------------------------------------------------------------------------*/
+
 static void SetupSends(Matrix *mat, int *inlist)
 {
     int i, j, k, mype, npes;
@@ -708,11 +630,6 @@ static void SetupSends(Matrix *mat, int *inlist)
 	    MPI_Recv_init(&mat->sendbuf[j], inlist[i], MPI_DOUBLE, i, 666, comm,
 		&mat->recv_req2[mat->num_send]);
 
-#ifdef DEBUG
-printf("%d: send_init(%d) to %d at %d of len %d\n", mype, mat->num_send,
-i, j, inlist[i]);
-#endif
-
 	    mat->num_send++;
 	    j += inlist[i];
 	}
@@ -729,8 +646,11 @@ i, j, inlist[i]);
         mat->sendind[i] -= mat->beg_row;
 }
 
+/*--------------------------------------------------------------------------
+ * MatrixComplete
+ *--------------------------------------------------------------------------*/
 
-static void MatrixMatvecSetup(Matrix *mat)
+void MatrixComplete(Matrix *mat)
 {
     int mype, npes, len;
     int *outlist, *inlist;
@@ -739,8 +659,6 @@ static void MatrixMatvecSetup(Matrix *mat)
     int row, i, *ind;
     double *val;
     int num_external = 0;
-
-    mat->matvec_setup = 1;
 
     MPI_Comm_rank(mat->comm, &mype);
     MPI_Comm_size(mat->comm, &npes);
@@ -756,7 +674,7 @@ static void MatrixMatvecSetup(Matrix *mat)
 
     /* determine number of external indices, and use as upper bound to
        number of unique external indices */
-    for (row=mat->beg_row; row<=mat->end_row; row++)
+    for (row=0; row<=mat->end_row - mat->beg_row; row++)
     {
         MatrixGetRow(mat, row, &len, &ind, &val);
 	for (i=0; i<len; i++)
@@ -766,22 +684,12 @@ static void MatrixMatvecSetup(Matrix *mat)
 	}
     }
 
-    mat->global_to_local = (int *) malloc(num_external * sizeof(int));
-    mat->local_to_global = (int *) malloc(num_external * sizeof(int));
+    /* Create Numbering object */
+    mat->numb = MatrixNumberingCreate(mat, 
+        num_external + mat->end_row - mat->beg_row + 1000);
 
-    mat->hash_numbering = HashCreate(num_external);
-
-    GetExternalIndices(mat, &len, mat->local_to_global, 
-        mat->global_to_local, mat->hash_numbering);
-
-/*
-    printf("allocated %d, but needed %d\n", num_external, len);
-    fflush(stdout);
-*/
-
-    ConvertToLocalIndices(mat, mat->hash_numbering, mat->global_to_local);
-
-    SetupReceives(mat, len, mat->local_to_global, outlist);
+    SetupReceives(mat, mat->numb->num_ind - mat->numb->num_loc,
+        &mat->numb->local_to_global[mat->numb->num_loc], outlist);
 
     MPI_Alltoall(outlist, 1, MPI_INT, inlist, 1, MPI_INT, mat->comm);
 
@@ -789,40 +697,19 @@ static void MatrixMatvecSetup(Matrix *mat)
 
     free(outlist);
     free(inlist);
+
+    /* Convert to local indices */
+    for (row=0; row<=mat->end_row - mat->beg_row; row++)
+    {
+        MatrixGetRow(mat, row, &len, &ind, &val);
+	NumberingGlobalToLocal(mat->numb, len, ind, ind);
+    }
 }
 
-
-void MatrixMatvecComplete(Matrix *mat)
-{
-    int i;
-
-    mat->matvec_setup = 0;
-
-    /* Change back to local numbering */
-    ConvertToGlobalIndices(mat, mat->hash_numbering, mat->local_to_global);
-    HashDestroy(mat->hash_numbering);
-
-    for (i=0; i<mat->num_recv; i++)
-        MPI_Request_free(&mat->recv_req[i]);
-
-    for (i=0; i<mat->num_send; i++)
-        MPI_Request_free(&mat->send_req[i]);
-
-    free(mat->recv_req);
-    free(mat->send_req);
-    free(mat->statuses);
-
-    free(mat->global_to_local);
-    free(mat->local_to_global);
-
-    free(mat->sendind);
-    free(mat->sendbuf);
-    free(mat->recvbuf);
-}
-
-
-
-/* could be done in place */
+/*--------------------------------------------------------------------------
+ * MatrixMatvec
+ * can be done in place
+ *--------------------------------------------------------------------------*/
 
 void MatrixMatvec(Matrix *mat, double *x, double *y)
 {
@@ -830,9 +717,9 @@ void MatrixMatvec(Matrix *mat, double *x, double *y)
     double *val, temp;
     int num_local = mat->end_row - mat->beg_row + 1;
 
-    /* Change to local numbering and set up persistent communications */
-    if (!mat->matvec_setup)
-        MatrixMatvecSetup(mat);
+    /* Set up persistent communications */
+
+    /* Assumes MatrixComplete has been called */
 
     /* Put components of x into the right outgoing buffers */
     for (i=0; i<mat->sendlen; i++)
@@ -848,7 +735,7 @@ void MatrixMatvec(Matrix *mat, double *x, double *y)
     MPI_Waitall(mat->num_recv, mat->recv_req, mat->statuses);
 
     /* do the multiply */
-    for (row=mat->beg_row; row<=mat->end_row; row++)
+    for (row=0; row<=mat->end_row - mat->beg_row; row++)
     {
         MatrixGetRow(mat, row, &len, &ind, &val);
 
@@ -857,13 +744,16 @@ void MatrixMatvec(Matrix *mat, double *x, double *y)
 	{
 	    temp = temp + val[i] * mat->recvbuf[ind[i]];
 	}
-	y[row-mat->beg_row] = temp;
+	y[row] = temp;
     } 
 
     MPI_Waitall(mat->num_send, mat->send_req, mat->statuses);
 }
 
-/* can be done in place */
+/*--------------------------------------------------------------------------
+ * MatrixMatvecTrans
+ * can be done in place
+ *--------------------------------------------------------------------------*/
 
 void MatrixMatvecTrans(Matrix *mat, double *x, double *y)
 {
@@ -871,9 +761,9 @@ void MatrixMatvecTrans(Matrix *mat, double *x, double *y)
     double *val, temp;
     int num_local = mat->end_row - mat->beg_row + 1;
 
-    /* Change to local numbering and set up persistent communications */
-    if (!mat->matvec_setup)
-        MatrixMatvecSetup(mat);
+    /* Set up persistent communications */
+
+    /* Assumes MatrixComplete has been called */
 
     /* Post receives for local parts of the solution y */
     MPI_Startall(mat->num_send, mat->recv_req2);
@@ -883,13 +773,13 @@ void MatrixMatvecTrans(Matrix *mat, double *x, double *y)
         mat->recvbuf[i] = 0.0;
 
     /* do the multiply */
-    for (row=mat->beg_row; row<=mat->end_row; row++)
+    for (row=0; row<=mat->end_row - mat->beg_row; row++)
     {
         MatrixGetRow(mat, row, &len, &ind, &val);
 
         for (i=0; i<len; i++)
         {
-            mat->recvbuf[ind[i]] += val[i] * x[row-mat->beg_row];
+            mat->recvbuf[ind[i]] += val[i] * x[row];
         }
     }
 
@@ -909,3 +799,105 @@ void MatrixMatvecTrans(Matrix *mat, double *x, double *y)
 
     MPI_Waitall(mat->num_recv, mat->send_req2, mat->statuses);
 }
+
+/*--------------------------------------------------------------------------
+ * MatrixNumbering - return numbering object stored in matrix
+ *--------------------------------------------------------------------------*/
+
+Numbering *MatrixNumbering(Matrix *mat)
+{
+    return mat->numb;
+}
+
+/*--------------------------------------------------------------------------
+ * MatrixNumberingCreate - Return (a pointer to) a numbering object.
+ * size = maximum number of indices (size of local_to_global array)
+ * size is also the maximum number of external indices (size will actually
+ * be much larger than the number of external indices, but its hash table
+ * needs to be this large.
+ *
+ * local indices start at 0
+ * 0 .. num_loc-1, num_loc .. num_ind-1
+ *
+ * "local_to_global" and also construct a hash table "hash" and the array
+ * "global_to_local" which are required to convert from global indexing
+ * to local indexing.  The number of external indices is returned through
+ * "lenp".
+ *
+ * local_to_global = external indices using base 0 (input buffer filled on out)
+ * global_to_local = indexed by hash table (input buffer filled on output)
+ *
+ * new:
+for each row of the matrix, call
+NumberingGlobalToLocal, which will update the numbering object.
+However, we want the numbers from a processor to be contiguous.
+So, we want to sort the global indices in the local_to_global list,
+and this means we have to reconstruct global_to_local and the hash
+table.  This means we only need to construct local to global initially.
+IS THERE ANY other way of doing this?
+
+ *--------------------------------------------------------------------------*/
+
+Numbering *MatrixNumberingCreate(Matrix *mat, int size)
+{
+    Numbering *numb = (Numbering *) malloc(sizeof(Numbering));
+    int row, i, len, *ind, index, inserted;
+    double *val;
+    int num_external = 0;
+    int *local_to_global; /* temp pointer */
+
+    numb->size    = size;
+    numb->beg_row = mat->beg_row;
+    numb->end_row = mat->end_row;
+    numb->num_loc = mat->end_row - mat->beg_row + 1;
+    numb->num_ind = mat->end_row - mat->beg_row + 1;
+    numb->num_ext = -1; /* not set yet */
+
+    numb->local_to_global = (int *) malloc(size * sizeof(int));
+    numb->global_to_local = (int *) malloc(size * sizeof(int));
+    numb->hash            = HashCreate(size);
+
+    /* Set up the local part of local_to_global */
+    for (i=0; i<numb->num_loc; i++)
+        numb->local_to_global[i] = mat->beg_row + i;
+
+    /* Set up pointer to external part of local_to_global array */
+    local_to_global = &numb->local_to_global[numb->num_loc];
+
+    /* Fill local_to_global array */
+    for (row=0; row<=mat->end_row - mat->beg_row; row++)
+    {
+        MatrixGetRow(mat, row, &len, &ind, &val);
+
+        for (i=0; i<len; i++)
+        {
+            /* Only interested in external indices */
+	    if (ind[i] < mat->beg_row || ind[i] > mat->end_row)
+            {
+                index = HashInsert(numb->hash, ind[i], &inserted);
+
+                if (inserted)
+                    local_to_global[num_external++] = ind[i];
+            }
+        }
+    }
+
+    /* Sort the indices */
+    shell_sort(num_external, local_to_global);
+
+    /* Redo the hash table for the sorted indices */
+    for (i=0; i<numb->hash->size; i++)
+        numb->hash->keys[i] = HASH_EMPTY;
+
+    for (i=0; i<num_external; i++)
+    {
+        index = HashInsert(numb->hash, local_to_global[i], &inserted);
+        numb->global_to_local[index] = i + numb->num_loc;
+    }
+
+    numb->num_ind += num_external;
+    numb->num_ext = num_external;
+
+    return numb;
+}
+

@@ -45,8 +45,8 @@ typedef struct
 }
 LoadBal;
 
-LoadBal *LoadBalDonate(MPI_Comm comm, Matrix *mat, double local_cost, 
-  double beta);
+LoadBal *LoadBalDonate(MPI_Comm comm, Matrix *mat, Numbering *numb,
+  double local_cost, double beta);
 void LoadBalReturn(LoadBal *p, MPI_Comm comm, Matrix *mat);
 
 #endif /* _LOADBAL_H */
