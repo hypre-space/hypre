@@ -102,6 +102,7 @@ typedef struct
 
    /* log info (always logged) */
    int      num_iterations;
+   double   rel_residual_norm;
 
    /* additional log info (logged when `logging' > 0) */
    int      logging;

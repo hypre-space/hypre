@@ -227,6 +227,7 @@ hypre_PCGSolve( void *pcg_vdata,
    int           (*precond)()   = (pcg_functions -> precond);
    void           *precond_data = (pcg_data -> precond_data);
    int             logging      = (pcg_data -> logging);
+   double          rel_res_norm = (pcg_data -> rel_residual_norm);
    double         *norms        = (pcg_data -> norms);
    double         *rel_norms    = (pcg_data -> rel_norms);
                 
@@ -477,6 +478,10 @@ hypre_PCGSolve( void *pcg_vdata,
       printf("\n\n");
 
    (pcg_data -> num_iterations) = i;
+   if (bi_prod > 0.0)
+      (pcg_data -> rel_residual_norm) = sqrt(i_prod/bi_prod);
+   else
+      (pcg_data -> rel_residual_norm) = 0.0;
 
    return ierr;
 }
@@ -689,17 +694,11 @@ hypre_PCGGetFinalRelativeResidualNorm( void   *pcg_vdata,
 {
    hypre_PCGData *pcg_data = pcg_vdata;
 
-   int            num_iterations  = (pcg_data -> num_iterations);
-   int            logging         = (pcg_data -> logging);
-   double        *rel_norms       = (pcg_data -> rel_norms);
+   double         rel_residual_norm = (pcg_data -> rel_residual_norm);
 
    int            ierr = -1;
    
-   if (logging > 0)
-   {
-      *relative_residual_norm = rel_norms[num_iterations];
-      ierr = 0;
-   }
+  *relative_residual_norm = rel_residual_norm;
    
    return ierr;
 }
