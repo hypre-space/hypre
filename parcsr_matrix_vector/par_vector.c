@@ -218,7 +218,7 @@ hypre_SetParVectorRandomValues( hypre_ParVector *v,
    MPI_Comm 	comm = hypre_ParVectorComm(v);
    MPI_Comm_rank(comm,&my_id); 
 
-   seed *= ++my_id;
+   seed *= (my_id+1);
            
    return hypre_SetVectorRandomValues(v_local,seed);
 }
