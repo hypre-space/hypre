@@ -49,6 +49,8 @@ ParaSails *ParaSailsCreate(MPI_Comm comm, int beg_row, int end_row, int sym);
 void ParaSailsDestroy(ParaSails *ps);
 void ParaSailsSetupPattern(ParaSails *ps, Matrix *A, 
   double thresh, int num_levels);
+void ParaSailsSetupPatternExt(ParaSails *ps, Matrix *A, 
+  double thresh_global, double thresh_local, int num_levels);
 void ParaSailsSetupValues(ParaSails *ps, Matrix *A, double filter);
 void ParaSailsApply(ParaSails *ps, double *u, double *v);
 void ParaSailsStats(ParaSails *ps, Matrix *A);

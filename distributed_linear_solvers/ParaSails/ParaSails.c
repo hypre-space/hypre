@@ -33,7 +33,7 @@
 #include <essl.h>
 #else
 void hypre_F90_NAME(dpotrf)(char *, int *, double *, int *, int *);
-void hypre_F90_NAME(dpotrs)(char *, int *, int *, double *, int *, double *, 
+void hypre_F90_NAME(dpotrs)(char *, int *, int *, double *, int *, double *,
   int *, int *);
 void hypre_F90_NAME(dgels)(char *, int *, int *, int *, double *, int *,
   double *, int *, double *, int *, int *);
@@ -47,7 +47,7 @@ void hypre_F90_NAME(dgels)(char *, int *, int *, int *, double *, int *,
 
 /*--------------------------------------------------------------------------
  * FindNumReplies - Find the number of replies that this processor should
- * expect.  The input "replies_list" is an array that indicates what 
+ * expect.  The input "replies_list" is an array that indicates what
  * processors were sent a message from the local processor.  An Allreduce
  * operation determines the total number of messages sent to the local
  * processor.
@@ -74,7 +74,7 @@ int FindNumReplies(MPI_Comm comm, int *replies_list)
 
 /*--------------------------------------------------------------------------
  * SendRequests - Given a list of indices "reqind" of length "reqlen",
- * send a sublist to the appropriate processors, thereby requesting 
+ * send a sublist to the appropriate processors, thereby requesting
  * the rows (for example) corresponding to these indices.  The number
  * of requests made is returned in "num_requests".
  *
@@ -85,13 +85,13 @@ int FindNumReplies(MPI_Comm comm, int *replies_list)
  * num_requests - number of requests made (output)
  * replies_list - if non-null, on input this should be a buffer initialized
  *          to zero of size the number of nonzero entries.  On output this
- *          buffer contains a 1 in position i if a request was made to 
- *          processor i.  This array can be used to count (using 
+ *          buffer contains a 1 in position i if a request was made to
+ *          processor i.  This array can be used to count (using
  *          MPI_AllReduce) the number of requests made to the current
  *          processor when the communication pattern is nonsymmetric.
  *--------------------------------------------------------------------------*/
 
-static void SendRequests(MPI_Comm comm, Matrix *mat, int reqlen, int *reqind, 
+static void SendRequests(MPI_Comm comm, Matrix *mat, int reqlen, int *reqind,
   int *num_requests, int *replies_list)
 {
     MPI_Request request;
@@ -103,7 +103,7 @@ static void SendRequests(MPI_Comm comm, Matrix *mat, int reqlen, int *reqind,
 
     for (i=0; i<reqlen; i=j) /* j is set below */
     {
-	/* The processor that owns the row with index reqind[i] */
+        /* The processor that owns the row with index reqind[i] */
         this_pe = MatrixRowPe(mat, reqind[i]);
 
         /* Figure out other rows we need from this_pe */
@@ -127,23 +127,23 @@ static void SendRequests(MPI_Comm comm, Matrix *mat, int reqlen, int *reqind,
 }
 
 /*--------------------------------------------------------------------------
- * ReceiveRequest - Receive a request sent with SendRequests by another 
- * processor.  This function should be placed inside a loop which is 
+ * ReceiveRequest - Receive a request sent with SendRequests by another
+ * processor.  This function should be placed inside a loop which is
  * executed once for every request that this processor expects to receive.
  * This is the number of requests this processor made in SendRequests
  * in the symmetric case.
  *
  * comm   - MPI communicator (input)
  * source - number of the processor that sent the message (output)
- * buffer - buffer provided by the user.  On output, it contains a 
+ * buffer - buffer provided by the user.  On output, it contains a
  *          list of indices.  Buffer will be reallocated if too small
  *          (input/output)
- * buflen - size of the buffer (input).  Size will be updated if buffer 
+ * buflen - size of the buffer (input).  Size will be updated if buffer
  *          is too small (input/output)
  * count  - number of indices in the output buffer (output)
  *--------------------------------------------------------------------------*/
 
-static void ReceiveRequest(MPI_Comm comm, int *source, int **buffer, 
+static void ReceiveRequest(MPI_Comm comm, int *source, int **buffer,
   int *buflen, int *count)
 {
     MPI_Status status;
@@ -154,16 +154,16 @@ static void ReceiveRequest(MPI_Comm comm, int *source, int **buffer,
 
     if (*count > *buflen)
     {
-	free(*buffer);
-	*buflen = *count;
-	*buffer = (int *) malloc(*buflen * sizeof(int));
+        free(*buffer);
+        *buflen = *count;
+        *buffer = (int *) malloc(*buflen * sizeof(int));
     }
 
     MPI_Recv(*buffer, *count, MPI_INT, *source, ROW_REQ_TAG, comm, &status);
 }
 
 /*--------------------------------------------------------------------------
- * SendReplyPrunedRows - Send a reply of pruned rows for each request 
+ * SendReplyPrunedRows - Send a reply of pruned rows for each request
  * received by this processor using ReceiveRequest.
  *
  * comm    - MPI communicator (input)
@@ -173,7 +173,7 @@ static void ReceiveRequest(MPI_Comm comm, int *source, int **buffer,
  * pruned_rows - the pruned_rows object where the pruned rows reside (input)
  * mem     - pointer to memory object used for reply buffers (input)
  * request - request handle of send (output)
- * 
+ *
  * The function allocates space for each send buffer using "mem", and the
  * caller must free this space when all the sends have completed..
  *
@@ -193,7 +193,7 @@ static void SendReplyPrunedRows(MPI_Comm comm, Numbering *numb,
     sendbacksize = count+1; /* length of header part */
     for (j=0; j<count; j++)
     {
-	NumberingGlobalToLocal(numb, 1, &buffer[j], &temp);
+        NumberingGlobalToLocal(numb, 1, &buffer[j], &temp);
         PrunedRowsGet(pruned_rows, temp, &len, &ind);
         sendbacksize += (len+1);  /* add one for the row length */
     }
@@ -214,12 +214,12 @@ static void SendReplyPrunedRows(MPI_Comm comm, Numbering *numb,
 
     for (j=0; j<count; j++)
     {
-	NumberingGlobalToLocal(numb, 1, &buffer[j], &temp);
+        NumberingGlobalToLocal(numb, 1, &buffer[j], &temp);
         PrunedRowsGet(pruned_rows, temp, &len, &ind);
 
         *indbufp++ = len;
         /* memcpy(indbufp, ind, sizeof(int)*len); */
- 	NumberingLocalToGlobal(numb, len, ind, indbufp);
+        NumberingLocalToGlobal(numb, len, ind, indbufp);
         indbufp += len;
     }
 
@@ -265,7 +265,7 @@ static void ReceiveReplyPrunedRows(MPI_Comm comm, Numbering *numb,
     for (j=0; j<num_rows; j++)
     {
         len = *ind++;
-	NumberingGlobalToLocal(numb, len, ind, ind);
+        NumberingGlobalToLocal(numb, len, ind, ind);
         PrunedRowsPut(pruned_rows, row_nums[j], len, ind);
         RowPattMergeExt(patt, len, ind, numb->num_loc);
         ind += len;
@@ -273,7 +273,7 @@ static void ReceiveReplyPrunedRows(MPI_Comm comm, Numbering *numb,
 }
 
 /*--------------------------------------------------------------------------
- * SendReplyStoredRows - Send a reply of stored rows for each request 
+ * SendReplyStoredRows - Send a reply of stored rows for each request
  * received by this processor using ReceiveRequest.
  *
  * comm    - MPI communicator (input)
@@ -283,7 +283,7 @@ static void ReceiveReplyPrunedRows(MPI_Comm comm, Numbering *numb,
  * stored_rows - the stored_rows object where the rows reside (input)
  * mem     - pointer to memory object used for reply buffers (input)
  * request - request handle of send (output)
- * 
+ *
  * The function allocates space for each send buffer using "mem", and the
  * caller must free this space when all the sends have completed..
  *
@@ -307,7 +307,7 @@ static void SendReplyStoredRows(MPI_Comm comm, Numbering *numb,
     sendbacksize = count+1; /* length of header part */
     for (j=0; j<count; j++)
     {
-	NumberingGlobalToLocal(numb, 1, &buffer[j], &temp);
+        NumberingGlobalToLocal(numb, 1, &buffer[j], &temp);
         StoredRowsGet(stored_rows, temp, &len, &ind, &val);
         sendbacksize += (len+1);  /* add one for the row length */
     }
@@ -331,12 +331,12 @@ static void SendReplyStoredRows(MPI_Comm comm, Numbering *numb,
 
     for (j=0; j<count; j++)
     {
-	NumberingGlobalToLocal(numb, 1, &buffer[j], &temp);
+        NumberingGlobalToLocal(numb, 1, &buffer[j], &temp);
         StoredRowsGet(stored_rows, temp, &len, &ind, &val);
 
         *indbufp++ = len;
         /* memcpy(indbufp, ind, sizeof(int)*len); */
-	NumberingLocalToGlobal(numb, len, ind, indbufp);
+        NumberingLocalToGlobal(numb, len, ind, indbufp);
         memcpy(valbufp, val, sizeof(double)*len);
         indbufp += len;
         valbufp += len;
@@ -390,7 +390,7 @@ static void ReceiveReplyStoredRows(MPI_Comm comm, Numbering *numb,
     for (j=0; j<num_rows; j++)
     {
         len = *ind++;
-	NumberingGlobalToLocal(numb, len, ind, ind);
+        NumberingGlobalToLocal(numb, len, ind, ind);
         StoredRowsPut(stored_rows, row_nums[j], len, ind, val);
         ind += len;
         val += len;
@@ -450,7 +450,7 @@ static void ExchangePrunedRows(MPI_Comm comm, Matrix *M, Numbering *numb,
         /* Get list of indices that were just merged */
         RowPattPrevLevel(patt, &len, &ind);
 
-	/* Convert local row numbers to global row numbers */
+        /* Convert local row numbers to global row numbers */
         NumberingLocalToGlobal(numb, len, ind, ind);
 
         replies_list = (int *) calloc(npes, sizeof(int));
@@ -471,8 +471,200 @@ static void ExchangePrunedRows(MPI_Comm comm, Matrix *M, Numbering *numb,
 
         for (i=0; i<num_requests; i++)
         {
-	    /* Will also merge the pattern of received rows into "patt" */
+            /* Will also merge the pattern of received rows into "patt" */
             ReceiveReplyPrunedRows(comm, numb, pruned_rows, patt);
+        }
+
+        MPI_Waitall(num_replies, requests, statuses);
+        MemDestroy(mem);
+    }
+
+    RowPattDestroy(patt);
+    free(buffer);
+    free(requests);
+    free(statuses);
+}
+
+/*--------------------------------------------------------------------------
+ * ExchangePrunedRowsExt
+ *--------------------------------------------------------------------------*/
+
+static void ExchangePrunedRowsExt(MPI_Comm comm, Matrix *M, Numbering *numb,
+  PrunedRows *pruned_rows_global, PrunedRows *pruned_rows_local, int num_levels)
+{
+    RowPatt *patt;
+    int row, len, *ind;
+
+    int num_requests;
+    int source;
+
+    int bufferlen;
+    int *buffer;
+
+    int level;
+
+    int i;
+    int count;
+    MPI_Request *requests;
+    MPI_Status *statuses;
+    int npes;
+    int num_replies, *replies_list;
+
+    Mem *mem;
+
+    MPI_Comm_size(comm, &npes);
+    requests = (MPI_Request *) malloc(npes * sizeof(MPI_Request));
+    statuses = (MPI_Status *) malloc(npes * sizeof(MPI_Status));
+
+    /* Merged pattern of pruned rows on this processor */
+
+    patt = RowPattCreate(PARASAILS_MAXLEN);
+
+    for (row=0; row<=M->end_row - M->beg_row; row++)
+    {
+        PrunedRowsGet(pruned_rows_global, row, &len, &ind);
+        RowPattMergeExt(patt, len, ind, numb->num_loc);
+    }
+
+    /* Loop to construct pattern of pruned rows on this processor */
+
+    bufferlen = 10; /* size will grow if get a long msg */
+    buffer = (int *) malloc(bufferlen * sizeof(int));
+
+    for (level=0; level<=num_levels; level++)  /* MUST DO THIS AT LEAST ONCE */
+    {
+        mem = (Mem *) MemCreate();
+
+        /* Get list of indices that were just merged */
+        RowPattPrevLevel(patt, &len, &ind);
+
+        /* Convert local row numbers to global row numbers */
+        NumberingLocalToGlobal(numb, len, ind, ind);
+
+        replies_list = (int *) calloc(npes, sizeof(int));
+
+        SendRequests(comm, M, len, ind, &num_requests, replies_list);
+
+        num_replies = FindNumReplies(comm, replies_list);
+        free(replies_list);
+
+        for (i=0; i<num_replies; i++)
+        {
+            /* Receive count indices stored in buffer */
+            ReceiveRequest(comm, &source, &buffer, &bufferlen, &count);
+
+            SendReplyPrunedRows(comm, numb, source, buffer, count,
+                pruned_rows_local, mem, &requests[i]);
+        }
+
+        for (i=0; i<num_requests; i++)
+        {
+            /* Will also merge the pattern of received rows into "patt" */
+            ReceiveReplyPrunedRows(comm, numb, pruned_rows_local, patt);
+        }
+
+        MPI_Waitall(num_replies, requests, statuses);
+        MemDestroy(mem);
+    }
+
+    RowPattDestroy(patt);
+    free(buffer);
+    free(requests);
+    free(statuses);
+}
+
+/*--------------------------------------------------------------------------
+ * ExchangePrunedRowsExt2 - part 2 of the algorithm
+ *--------------------------------------------------------------------------*/
+
+static void ExchangePrunedRowsExt2(MPI_Comm comm, Matrix *M, Numbering *numb,
+  PrunedRows *pruned_rows_global, PrunedRows *pruned_rows_local, int num_levels)
+{
+    RowPatt *patt;
+    int row, len, *ind;
+
+    int num_requests;
+    int source;
+
+    int bufferlen;
+    int *buffer;
+
+    int level;
+
+    int i;
+    int count;
+    MPI_Request *requests;
+    MPI_Status *statuses;
+    int npes;
+    int num_replies, *replies_list;
+
+    Mem *mem;
+
+    MPI_Comm_size(comm, &npes);
+    requests = (MPI_Request *) malloc(npes * sizeof(MPI_Request));
+    statuses = (MPI_Status *) malloc(npes * sizeof(MPI_Status));
+
+    /* Merged pattern of pruned rows on this processor */
+
+    patt = RowPattCreate(PARASAILS_MAXLEN);
+
+    for (row=0; row<=M->end_row - M->beg_row; row++)
+    {
+        PrunedRowsGet(pruned_rows_local, row, &len, &ind);
+        RowPattMergeExt(patt, len, ind, numb->num_loc);
+    }
+
+    /* Compute powers with local matrix - no communication is needed */
+
+    for (level=1; level<=num_levels; level++)
+    {
+        int lenprev, *indprev;
+
+        /* Get the indices that were just added */
+        RowPattPrevLevel(patt, &lenprev, &indprev);
+
+        for (i=0; i<lenprev; i++)
+        {
+            PrunedRowsGet(pruned_rows_local, indprev[i], &len, &ind);
+            RowPattMergeExt(patt, len, ind, numb->num_loc);
+        }
+    }
+
+    /* Now get rows from pruned_rows_global */
+
+    bufferlen = 10; /* size will grow if get a long msg */
+    buffer = (int *) malloc(bufferlen * sizeof(int));
+
+    /* DO THIS ONCE */
+    {
+        mem = (Mem *) MemCreate();
+
+	/* Get list of indices - these are all nonlocal indices */
+        RowPattGet(patt, &len, &ind);
+
+        /* Convert local row numbers to global row numbers */
+        NumberingLocalToGlobal(numb, len, ind, ind);
+
+        replies_list = (int *) calloc(npes, sizeof(int));
+
+        SendRequests(comm, M, len, ind, &num_requests, replies_list);
+
+        num_replies = FindNumReplies(comm, replies_list);
+        free(replies_list);
+
+        for (i=0; i<num_replies; i++)
+        {
+            /* Receive count indices stored in buffer */
+            ReceiveRequest(comm, &source, &buffer, &bufferlen, &count);
+
+            SendReplyPrunedRows(comm, numb, source, buffer, count,
+                pruned_rows_global, mem, &requests[i]);
+        }
+
+        for (i=0; i<num_requests; i++)
+        {
+            /* Will also merge the pattern of received rows into "patt" */
+            ReceiveReplyPrunedRows(comm, numb, pruned_rows_global, patt);
         }
 
         MPI_Waitall(num_replies, requests, statuses);
@@ -489,7 +681,7 @@ static void ExchangePrunedRows(MPI_Comm comm, Matrix *M, Numbering *numb,
  * ExchangeStoredRows
  *--------------------------------------------------------------------------*/
 
-static void ExchangeStoredRows(MPI_Comm comm, Matrix *A, Matrix *M, 
+static void ExchangeStoredRows(MPI_Comm comm, Matrix *A, Matrix *M,
   Numbering *numb, StoredRows *stored_rows, LoadBal *load_bal)
 {
     RowPatt *patt;
@@ -528,7 +720,7 @@ static void ExchangeStoredRows(MPI_Comm comm, Matrix *A, Matrix *M,
 
     for (i=0; i<load_bal->num_taken; i++)
     {
-      for (row=0; row <= load_bal->recip_data[i].mat->end_row - 
+      for (row=0; row <= load_bal->recip_data[i].mat->end_row -
                          load_bal->recip_data[i].mat->beg_row; row++)
       {
         MatrixGetRow(load_bal->recip_data[i].mat, row, &len, &ind, &val);
@@ -556,16 +748,16 @@ static void ExchangeStoredRows(MPI_Comm comm, Matrix *A, Matrix *M,
 
     for (i=0; i<num_replies; i++)
     {
-	/* Receive count indices stored in buffer */
+        /* Receive count indices stored in buffer */
         ReceiveRequest(comm, &source, &buffer, &bufferlen, &count);
 
-	SendReplyStoredRows(comm, numb, source, buffer, count, 
+        SendReplyStoredRows(comm, numb, source, buffer, count,
             stored_rows, mem, &requests[i]);
     }
 
     for (i=0; i<num_requests; i++)
     {
-	ReceiveReplyStoredRows(comm, numb, stored_rows);
+        ReceiveReplyStoredRows(comm, numb, stored_rows);
     }
 
     MPI_Waitall(num_replies, requests, statuses);
@@ -582,7 +774,7 @@ static void ExchangeStoredRows(MPI_Comm comm, Matrix *A, Matrix *M,
 /*--------------------------------------------------------------------------
  * ConstructPatternForEachRow
  *
- * pruned_rows - pruned rows, used for constructing row patterns (input) 
+ * pruned_rows - pruned rows, used for constructing row patterns (input)
  * num_levels  - number of levels in pattern (input)
  * M           - matrix where the row patterns will be stored (input/output).
  *               This is the approximate inverse with lower triangular pattern
@@ -623,11 +815,11 @@ static void ConstructPatternForEachRow(int symmetric, PrunedRows *pruned_rows,
 
         RowPattGet(row_patt, &len, &ind);
 
-	/* do reset here, because now we mess with ind array */
+        /* do reset here, because now we mess with ind array */
         RowPattReset(row_patt);
 
-	if (symmetric)
-	{
+        if (symmetric)
+        {
             /* Store the lower triangular part of row pattern into the matrix */
             j = 0;
             for (i=0; i<len; i++)
@@ -636,7 +828,7 @@ static void ConstructPatternForEachRow(int symmetric, PrunedRows *pruned_rows,
                     ind[j++] = ind[i];
             }
             len = j;
-	}
+        }
 
         /* Store structure of row in matrix M */
         /* Following statement allocates space but does not store values */
@@ -656,6 +848,132 @@ static void ConstructPatternForEachRow(int symmetric, PrunedRows *pruned_rows,
 #endif
 
     RowPattDestroy(row_patt);
+}
+
+/*--------------------------------------------------------------------------
+ * ConstructPatternForEachRowExt - extended version
+ *
+ * pruned_rows - pruned rows, used for constructing row patterns (input)
+ * num_levels  - number of levels in pattern (input)
+ * M           - matrix where the row patterns will be stored (input/output).
+ *               This is the approximate inverse with lower triangular pattern
+ *--------------------------------------------------------------------------*/
+
+static void ConstructPatternForEachRowExt(int symmetric, 
+  PrunedRows *pruned_rows_global, PrunedRows *pruned_rows_local, 
+  int num_levels, Numbering *numb, Matrix *M, double *costp)
+{
+    int row, len, *ind, level, lenprev, *indprev;
+    int i, j;
+    RowPatt *row_patt;
+    RowPatt *row_patt2;
+    int nnz = 0;
+    int npes;
+
+    MPI_Comm_size(M->comm, &npes);
+    *costp = 0.0;
+
+    row_patt = RowPattCreate(PARASAILS_MAXLEN);
+    row_patt2 = RowPattCreate(PARASAILS_MAXLEN);
+
+    for (row=0; row<=M->end_row - M->beg_row; row++)
+    {
+        /* Get initial pattern for row */
+        PrunedRowsGet(pruned_rows_global, row, &len, &ind);
+        RowPattMerge(row_patt, len, ind);
+
+        /* Loop */
+        for (level=0; level<=num_levels; level++) /* at least once */
+        {
+            /* Get the indices that were just added */
+            RowPattPrevLevel(row_patt, &lenprev, &indprev);
+
+            for (i=0; i<lenprev; i++)
+            {
+                PrunedRowsGet(pruned_rows_local, indprev[i], &len, &ind);
+                RowPattMerge(row_patt, len, ind);
+            }
+        }
+
+        /***********************
+	 * Now do the transpose 
+	 ***********************/
+
+        /* Get initial pattern for row */
+        PrunedRowsGet(pruned_rows_local, row, &len, &ind);
+        RowPattMerge(row_patt2, len, ind);
+
+        /* Loop */
+        for (level=1; level<=num_levels; level++)
+        {
+            /* Get the indices that were just added */
+            RowPattPrevLevel(row_patt2, &lenprev, &indprev);
+
+            for (i=0; i<lenprev; i++)
+            {
+                PrunedRowsGet(pruned_rows_local, indprev[i], &len, &ind);
+                RowPattMerge(row_patt2, len, ind);
+            }
+        }
+
+	/* One more merge, with pruned_rows_global */
+        RowPattGet(row_patt2, &lenprev, &indprev);
+        for (i=0; i<lenprev; i++)
+        {
+            PrunedRowsGet(pruned_rows_global, indprev[i], &len, &ind);
+            RowPattMerge(row_patt2, len, ind);
+        }
+
+
+        /****************************
+	 * Merge the two row patterns
+	 ****************************/
+
+        RowPattGet(row_patt2, &len, &ind);
+        RowPattMerge(row_patt, len, ind);
+
+        /****************************
+	 * Done computing pattern!
+	 ****************************/
+
+	/* get the indices in the pattern */
+        RowPattGet(row_patt, &len, &ind);
+
+        /* do reset here, because now we mess with ind array */
+        RowPattReset(row_patt);
+        RowPattReset(row_patt2);
+
+        if (symmetric)
+        {
+            /* Store the lower triangular part of row pattern into the matrix */
+            j = 0;
+            for (i=0; i<len; i++)
+            {
+                if (numb->local_to_global[ind[i]] <= numb->local_to_global[row])
+                    ind[j++] = ind[i];
+            }
+            len = j;
+        }
+
+        /* Store structure of row in matrix M */
+        /* Following statement allocates space but does not store values */
+        MatrixSetRow(M, row+M->beg_row, len, ind, NULL);
+
+        nnz += len;
+        (*costp) += (double) len*len*len;
+    }
+
+#ifdef PARASAILS_DEBUG
+    {
+    int mype;
+    MPI_Comm_rank(MPI_COMM_WORLD, &mype);
+    printf("%d: nnz: %10d  ********* cost %7.1e\n", mype, nnz, *costp);
+    fflush(NULL);
+    }
+#endif
+
+    RowPattDestroy(row_patt);
+    RowPattDestroy(row_patt2);
 }
 
 /*--------------------------------------------------------------------------
@@ -685,7 +1003,7 @@ static void ComputeValuesSym(StoredRows *stored_rows, Matrix *mat,
     /* Allocate and initialize full length marker array */
     marker = (int *) malloc(numb->num_ind * sizeof(int));
     for (i=0; i<numb->num_ind; i++)
-	marker[i] = -1;
+        marker[i] = -1;
 
     /* Determine the length of the longest row of M on this processor */
     /* This determines the maximum storage required for the ahat matrix */
@@ -705,12 +1023,12 @@ static void ComputeValuesSym(StoredRows *stored_rows, Matrix *mat,
     /* Compute values for row "row" of approximate inverse */
     for (row=local_beg_row; row<=mat->end_row; row++)
     {
-	/* Retrieve local indices */
+        /* Retrieve local indices */
         MatrixGetRow(mat, row - mat->beg_row, &len, &ind, &val);
 
-	/* Fill marker array in locations of local indices */
-	for (i=0; i<len; i++)
-	    marker[ind[i]] = i;
+        /* Fill marker array in locations of local indices */
+        for (i=0; i<len; i++)
+            marker[ind[i]] = i;
 
         /* Initialize ahat to zero */
 #ifdef ESSL
@@ -726,7 +1044,7 @@ static void ComputeValuesSym(StoredRows *stored_rows, Matrix *mat,
         for (i=0; i<len; i++)
         {
             StoredRowsGet(stored_rows, ind[i], &len2, &ind2, &val2);
-	    assert(len2 > 0);
+            assert(len2 > 0);
 
 #ifdef ESSL
             for (j=0; j<len2; j++)
@@ -752,41 +1070,41 @@ static void ComputeValuesSym(StoredRows *stored_rows, Matrix *mat,
 #endif
         }
 
-	if (symmetric == 2)
-	{
+        if (symmetric == 2)
+        {
 #ifdef ESSL
             printf("Symmetric precon for nonsym problem not yet available\n");
             printf("for ESSL version.  Please contact the author.\n");
             PARASAILS_EXIT;
 #else
-	    int k, kk;
-	    k = 0;
-	    for (i=0; i<len; i++)
-	    {
-		for (j=0; j<len; j++)
-		{
-		    kk = j*len + i;
-		    ahat[k] = (ahat[k] + ahat[kk]) / 2.0;
-		    k++;
-		}
-	    }
+            int k, kk;
+            k = 0;
+            for (i=0; i<len; i++)
+            {
+                for (j=0; j<len; j++)
+                {
+                    kk = j*len + i;
+                    ahat[k] = (ahat[k] + ahat[kk]) / 2.0;
+                    k++;
+                }
+            }
 #endif
-	}
+        }
 
         time1 = MPI_Wtime();
         timea += (time1-time0);
-	ahatcost += (double) (len*len2);
+        ahatcost += (double) (len*len2);
 
         /* Set the right-hand side */
         bzero((char *) val, len*sizeof(double));
-	NumberingGlobalToLocal(numb, 1, &row, &loc);
-	loc = marker[loc];
-	assert(loc != -1);
-	val[loc] = 1.0;
+        NumberingGlobalToLocal(numb, 1, &row, &loc);
+        loc = marker[loc];
+        assert(loc != -1);
+        val[loc] = 1.0;
 
-	/* Reset marker array */
-	for (i=0; i<len; i++)
-	    marker[ind[i]] = -1;
+        /* Reset marker array */
+        for (i=0; i<len; i++)
+            marker[ind[i]] = -1;
 
         time0 = MPI_Wtime();
 
@@ -832,7 +1150,7 @@ static void ComputeValuesSym(StoredRows *stored_rows, Matrix *mat,
     int mype;
     MPI_Comm_rank(MPI_COMM_WORLD, &mype);
     printf("%d: Time for ahat: %f, for local solves: %f\n", mype, timea, timet);
-    printf("%d: ahatcost: %7.1e, numrows: %d, maxlen: %d\n", 
+    printf("%d: ahatcost: %7.1e, numrows: %d, maxlen: %d\n",
         mype, ahatcost, mat->end_row-local_beg_row+1, maxlen);
     fflush(NULL);
     }
@@ -870,11 +1188,11 @@ static void ComputeValuesNonsym(StoredRows *stored_rows, Matrix *mat,
 #endif
 
     /* Allocate and initialize marker array */
-    /* Since numb already knows about the indices of the external rows that 
+    /* Since numb already knows about the indices of the external rows that
        will be needed, numb_ind is the maximum size of the marker array */
     marker = (int *) malloc(numb->num_ind * sizeof(int));
     for (i=0; i<numb->num_ind; i++)
-	marker[i] = -1;
+        marker[i] = -1;
 
     bhat = (double *) malloc(bhat_size * sizeof(double));
     ahat = (double *) malloc(ahat_size * sizeof(double));
@@ -885,45 +1203,45 @@ static void ComputeValuesNonsym(StoredRows *stored_rows, Matrix *mat,
     {
         time0 = MPI_Wtime();
 
-	/* Retrieve local indices */
+        /* Retrieve local indices */
         MatrixGetRow(mat, row - mat->beg_row, &len, &ind, &val);
 
-	npat = 0;
+        npat = 0;
 
-	/* Put the diagonal entry into the marker array */
-	NumberingGlobalToLocal(numb, 1, &row, &loc);
-	marker[loc] = npat;
-	patt[npat++] = loc;
+        /* Put the diagonal entry into the marker array */
+        NumberingGlobalToLocal(numb, 1, &row, &loc);
+        marker[loc] = npat;
+        patt[npat++] = loc;
 
-	/* Fill marker array */
+        /* Fill marker array */
         for (i=0; i<len; i++)
         {
             StoredRowsGet(stored_rows, ind[i], &len2, &ind2, &val2);
-	    assert(len2 > 0);
+            assert(len2 > 0);
 
             for (j=0; j<len2; j++)
             {
                 loc = marker[ind2[j]];
 
                 if (loc == -1)
-		{
-		    marker[ind2[j]] = npat;
-		    if (npat >= pattsize)
-		    {
-			pattsize = npat + 1000;
-			patt = (int *) realloc(patt, pattsize*sizeof(int));
-		    }
-		    patt[npat++] = ind2[j];
-		}
+                {
+                    marker[ind2[j]] = npat;
+                    if (npat >= pattsize)
+                    {
+                        pattsize = npat + 1000;
+                        patt = (int *) realloc(patt, pattsize*sizeof(int));
+                    }
+                    patt[npat++] = ind2[j];
+                }
             }
         }
 
-	if (len*npat > ahat_size)
-	{
-	    free(ahat);
-	    ahat_size = len*npat;
+        if (len*npat > ahat_size)
+        {
+            free(ahat);
+            ahat_size = len*npat;
             ahat = (double *) malloc(ahat_size * sizeof(double));
-	}
+        }
 
         /* Initialize ahat to zero */
         bzero((char *) ahat, len*npat * sizeof(double));
@@ -945,33 +1263,33 @@ static void ComputeValuesNonsym(StoredRows *stored_rows, Matrix *mat,
         time1 = MPI_Wtime();
         timea += (time1-time0);
 
-	/* Reallocate bhat if necessary */
-	if (npat > bhat_size)
-	{
-	    free(bhat);
-	    bhat_size = npat;
+        /* Reallocate bhat if necessary */
+        if (npat > bhat_size)
+        {
+            free(bhat);
+            bhat_size = npat;
             bhat = (double *) malloc(bhat_size * sizeof(double));
-	}
+        }
 
         /* Set the right-hand side, bhat */
         bzero((char *) bhat, npat*sizeof(double));
-	NumberingGlobalToLocal(numb, 1, &row, &loc);
+        NumberingGlobalToLocal(numb, 1, &row, &loc);
         loc = marker[loc];
         assert(loc != -1);
         bhat[loc] = 1.0;
 
-	/* Reset marker array */
-	for (i=0; i<npat; i++)
-	    marker[patt[i]] = -1;
+        /* Reset marker array */
+        for (i=0; i<npat; i++)
+            marker[patt[i]] = -1;
 
         time0 = MPI_Wtime();
 
 #ifdef ESSL
-	/* rhs in bhat, and put solution in val */
+        /* rhs in bhat, and put solution in val */
         dgells(0, ahat, npat, bhat, npat, val, len, NULL, 1.e-12, npat, len, 1,
             &info, work, work_size);
 #else
-	/* rhs in bhat, and put solution in bhat */
+        /* rhs in bhat, and put solution in bhat */
         hypre_F90_NAME(dgels)(&trans, &npat, &len, &one, ahat, &npat,
             bhat, &npat, work, &work_size, &info);
 
@@ -983,7 +1301,7 @@ static void ComputeValuesNonsym(StoredRows *stored_rows, Matrix *mat,
             PARASAILS_EXIT;
         }
 
-	/* Copy result into row */
+        /* Copy result into row */
         for (j=0; j<len; j++)
             val[j] = bhat[j];
 #endif
@@ -1008,15 +1326,15 @@ static void ComputeValuesNonsym(StoredRows *stored_rows, Matrix *mat,
 }
 
 /*--------------------------------------------------------------------------
- * SelectThresh - select a threshold for the preconditioner pattern.  
- * The threshold attempts to be chosen such that approximately (1-param) of 
+ * SelectThresh - select a threshold for the preconditioner pattern.
+ * The threshold attempts to be chosen such that approximately (1-param) of
  * all the matrix elements is larger than this threshold.  This is accomplished
- * by finding the element in each row that is smaller than (1-param) of the 
- * elements in that row, and averaging these elements over all rows.  The 
+ * by finding the element in each row that is smaller than (1-param) of the
+ * elements in that row, and averaging these elements over all rows.  The
  * threshold is selected on the diagonally scaled matrix.
  *--------------------------------------------------------------------------*/
 
-static double SelectThresh(MPI_Comm comm, Matrix *A, DiagScale *diag_scale, 
+static double SelectThresh(MPI_Comm comm, Matrix *A, DiagScale *diag_scale,
   double param)
 {
     int row, len, *ind, i, npes;
@@ -1024,7 +1342,7 @@ static double SelectThresh(MPI_Comm comm, Matrix *A, DiagScale *diag_scale,
     double localsum = 0.0, sum;
     double temp;
 
-    /* Buffer for storing the values in each row when computing the 
+    /* Buffer for storing the values in each row when computing the
        i-th smallest element - buffer will grow if necessary */
     double *buffer;
     int buflen = 10;
@@ -1034,26 +1352,26 @@ static double SelectThresh(MPI_Comm comm, Matrix *A, DiagScale *diag_scale,
     {
         MatrixGetRow(A, row, &len, &ind, &val);
 
-	if (len > buflen)
-	{
-	    free(buffer);
-	    buflen = len;
+        if (len > buflen)
+        {
+            free(buffer);
+            buflen = len;
             buffer = (double *) malloc(buflen * sizeof(double));
-	}
+        }
 
-	/* Copy the scaled absolute values into a work buffer */
+        /* Copy the scaled absolute values into a work buffer */
         temp = DiagScaleGet(diag_scale, row);
-	for (i=0; i<len; i++)
-	{
-	    buffer[i] = temp*ABS(val[i])*DiagScaleGet(diag_scale, ind[i]);
-	    if (ind[i] == row)
-		buffer[i] = 0.0; /* diagonal is not same scale as off-diag */
-	}
+        for (i=0; i<len; i++)
+        {
+            buffer[i] = temp*ABS(val[i])*DiagScaleGet(diag_scale, ind[i]);
+            if (ind[i] == row)
+                buffer[i] = 0.0; /* diagonal is not same scale as off-diag */
+        }
 
         /* Compute which element to select */
-	i = (int) (len * param) + 1;
+        i = (int) (len * param) + 1;
 
-	/* Select the i-th smallest element */
+        /* Select the i-th smallest element */
         localsum += randomized_select(buffer, 0, len-1, i);
     }
 
@@ -1078,7 +1396,7 @@ static double SelectFilter(MPI_Comm comm, Matrix *M, DiagScale *diag_scale,
     double localsum = 0.0, sum;
     double temp = 1.0;
 
-    /* Buffer for storing the values in each row when computing the 
+    /* Buffer for storing the values in each row when computing the
        i-th smallest element - buffer will grow if necessary */
     double *buffer;
     int buflen = 10;
@@ -1088,28 +1406,28 @@ static double SelectFilter(MPI_Comm comm, Matrix *M, DiagScale *diag_scale,
     {
         MatrixGetRow(M, row, &len, &ind, &val);
 
-	if (len > buflen)
-	{
-	    free(buffer);
-	    buflen = len;
+        if (len > buflen)
+        {
+            free(buffer);
+            buflen = len;
             buffer = (double *) malloc(buflen * sizeof(double));
-	}
+        }
 
-	if (symmetric == 0)
+        if (symmetric == 0)
             temp = 1. / DiagScaleGet(diag_scale, row);
 
-	/* Copy the scaled absolute values into a work buffer */
-	for (i=0; i<len; i++)
-	{
-	    buffer[i] = temp * ABS(val[i]) / DiagScaleGet(diag_scale, ind[i]);
-	    if (ind[i] == row)
-	        buffer[i] = 0.0;
-	}
+        /* Copy the scaled absolute values into a work buffer */
+        for (i=0; i<len; i++)
+        {
+            buffer[i] = temp * ABS(val[i]) / DiagScaleGet(diag_scale, ind[i]);
+            if (ind[i] == row)
+                buffer[i] = 0.0;
+        }
 
         /* Compute which element to select */
-	i = (int) (len * param) + 1;
+        i = (int) (len * param) + 1;
 
-	/* Select the i-th smallest element */
+        /* Select the i-th smallest element */
         localsum += randomized_select(buffer, 0, len-1, i);
     }
 
@@ -1129,7 +1447,7 @@ static double SelectFilter(MPI_Comm comm, Matrix *M, DiagScale *diag_scale,
  * with load balancing - the old cost estimate would be incorrect.
  *--------------------------------------------------------------------------*/
 
-static void FilterValues(Matrix *M, Matrix *F, DiagScale *diag_scale, 
+static void FilterValues(Matrix *M, Matrix *F, DiagScale *diag_scale,
   double filter, int symmetric, double *newcostp)
 {
     int i, j;
@@ -1144,21 +1462,21 @@ static void FilterValues(Matrix *M, Matrix *F, DiagScale *diag_scale,
         j = 0;
         for (i=0; i<len; i++)
         {
-	    if (symmetric == 0)
+            if (symmetric == 0)
                 temp = 1. / DiagScaleGet(diag_scale, row);
 
-            if (temp * ABS(val[i]) / DiagScaleGet(diag_scale, ind[i]) >= filter 
-	      || row == ind[i])
-	    {
+            if (temp * ABS(val[i]) / DiagScaleGet(diag_scale, ind[i]) >= filter
+              || row == ind[i])
+            {
                 val[j] = val[i];
                 ind[j] = ind[i];
-		j++;
-	    }
+                j++;
+            }
         }
 
         MatrixSetRow(F, row+F->beg_row, j, ind, val);
 
-	cost += (double) j*j*j;
+        cost += (double) j*j*j;
     }
 
     *newcostp = cost;
@@ -1183,40 +1501,40 @@ static void Rescale(Matrix *M, StoredRows *stored_rows, int num_ind)
     {
         MatrixGetRow(M, row, &len, &ind, &val);
 
-	accum = 0.0;
+        accum = 0.0;
 
-	/* Loop over nonzeros in row */
+        /* Loop over nonzeros in row */
         for (j=0; j<len; j++)
         {
-	    /* Get the row of A corresponding to current nonzero */
+            /* Get the row of A corresponding to current nonzero */
             StoredRowsGet(stored_rows, ind[j], &len2, &ind2, &val2);
 
-	    /* Scatter nonzeros of A */
-	    for (i=0; i<len2; i++)
-	    {
-		assert(ind2[i] < num_ind);
-		w[ind2[i]] = val2[i];
-	    }
+            /* Scatter nonzeros of A */
+            for (i=0; i<len2; i++)
+            {
+                assert(ind2[i] < num_ind);
+                w[ind2[i]] = val2[i];
+            }
 
-	    /* Form inner product of current row with this row */
-	    prod = 0.0;
-	    for (i=0; i<len; i++)
-	    {
-		assert(ind[i] < num_ind);
-		prod += val[i] * w[ind[i]];
-	    }
+            /* Form inner product of current row with this row */
+            prod = 0.0;
+            for (i=0; i<len; i++)
+            {
+                assert(ind[i] < num_ind);
+                prod += val[i] * w[ind[i]];
+            }
 
-	    accum += val[j] * prod;
+            accum += val[j] * prod;
 
-	    /* Reset workspace */
-	    for (i=0; i<len2; i++)
-		w[ind2[i]] = 0.0;
+            /* Reset workspace */
+            for (i=0; i<len2; i++)
+                w[ind2[i]] = 0.0;
         }
 
-	/* Scale the row */
-	accum = 1./sqrt(accum);
+        /* Scale the row */
+        accum = 1./sqrt(accum);
         for (j=0; j<len; j++)
-	    val[j] *= accum;
+            val[j] *= accum;
     }
 }
 
@@ -1289,7 +1607,7 @@ void ParaSailsDestroy(ParaSails *ps)
  * ParaSailsSetupPattern - Set up a pattern for the ParaSails preconditioner.
  *--------------------------------------------------------------------------*/
 
-void ParaSailsSetupPattern(ParaSails *ps, Matrix *A, 
+void ParaSailsSetupPattern(ParaSails *ps, Matrix *A,
   double thresh, int num_levels)
 {
     DiagScale  *diag_scale;
@@ -1310,17 +1628,68 @@ void ParaSailsSetupPattern(ParaSails *ps, Matrix *A,
     diag_scale = DiagScaleCreate(A, A->numb);
 
     if (ps->thresh < 0.0)
-	ps->thresh = SelectThresh(ps->comm, A, diag_scale, -ps->thresh);
+        ps->thresh = SelectThresh(ps->comm, A, diag_scale, -ps->thresh);
 
     pruned_rows = PrunedRowsCreate(A, PARASAILS_NROWS, diag_scale, ps->thresh);
 
     ExchangePrunedRows(ps->comm, A, ps->numb, pruned_rows, ps->num_levels);
 
-    ConstructPatternForEachRow(ps->symmetric, pruned_rows, ps->num_levels, 
+    ConstructPatternForEachRow(ps->symmetric, pruned_rows, ps->num_levels,
         ps->numb, ps->M, &ps->cost);
 
     DiagScaleDestroy(diag_scale);
     PrunedRowsDestroy(pruned_rows);
+
+    time1 = MPI_Wtime();
+    ps->setup_pattern_time = time1 - time0;
+}
+
+/*--------------------------------------------------------------------------
+ * ParaSailsSetupPatternExt - Set up a pattern for the ParaSails preconditioner.
+ * Extended version.
+ *--------------------------------------------------------------------------*/
+
+void ParaSailsSetupPatternExt(ParaSails *ps, Matrix *A,
+  double thresh_global, double thresh_local, int num_levels)
+{
+    DiagScale  *diag_scale;
+    PrunedRows *pruned_rows_global;
+    PrunedRows *pruned_rows_local;
+    double time0, time1;
+
+    time0 = MPI_Wtime();
+
+    ps->thresh     = thresh_global*1000000.+thresh_local; /* dummy */
+    ps->num_levels = num_levels;
+
+    if (ps->numb) NumberingDestroy(ps->numb);
+    ps->numb = NumberingCreateCopy(A->numb);
+
+    if (ps->M) MatrixDestroy(ps->M);
+    ps->M = MatrixCreate(ps->comm, ps->beg_row, ps->end_row);
+
+    diag_scale = DiagScaleCreate(A, A->numb);
+
+    if (ps->thresh < 0.0)
+        ps->thresh = SelectThresh(ps->comm, A, diag_scale, -ps->thresh);
+
+    pruned_rows_global = PrunedRowsCreate(A, PARASAILS_NROWS, diag_scale, 
+         thresh_global);
+    pruned_rows_local = PrunedRowsCreate(A, PARASAILS_NROWS, diag_scale, 
+         thresh_local);
+
+    ExchangePrunedRowsExt(ps->comm, A, ps->numb, 
+        pruned_rows_global, pruned_rows_local, ps->num_levels);
+
+    ExchangePrunedRowsExt2(ps->comm, A, ps->numb, 
+        pruned_rows_global, pruned_rows_local, ps->num_levels);
+
+    ConstructPatternForEachRowExt(ps->symmetric, pruned_rows_global,
+	pruned_rows_local, ps->num_levels, ps->numb, ps->M, &ps->cost);
+
+    DiagScaleDestroy(diag_scale);
+    PrunedRowsDestroy(pruned_rows_global);
+    PrunedRowsDestroy(pruned_rows_local);
 
     time1 = MPI_Wtime();
     ps->setup_pattern_time = time1 - time0;
@@ -1344,7 +1713,7 @@ void ParaSailsSetupValues(ParaSails *ps, Matrix *A, double filter)
 
     time0 = MPI_Wtime();
 
-    /* 
+    /*
      * If the preconditioner matrix has its own numbering object, then we
      * assume it is in its own local numbering, and we change the numbering
      * in the matrix to the ParaSails numbering.
@@ -1354,14 +1723,14 @@ void ParaSailsSetupValues(ParaSails *ps, Matrix *A, double filter)
     {
         for (row=0; row<=ps->M->end_row - ps->M->beg_row; row++)
         {
-	   MatrixGetRow(ps->M, row, &len, &ind, &val);
-	   NumberingLocalToGlobal(ps->M->numb, len, ind, ind);
-	   NumberingGlobalToLocal(ps->numb,    len, ind, ind);
+           MatrixGetRow(ps->M, row, &len, &ind, &val);
+           NumberingLocalToGlobal(ps->M->numb, len, ind, ind);
+           NumberingGlobalToLocal(ps->numb,    len, ind, ind);
         }
     }
 
-    load_bal = LoadBalDonate(ps->comm, ps->M, ps->numb, ps->cost, 
-	ps->loadbal_beta);
+    load_bal = LoadBalDonate(ps->comm, ps->M, ps->numb, ps->cost,
+        ps->loadbal_beta);
 
     stored_rows = StoredRowsCreate(A, PARASAILS_NROWS);
 
@@ -1370,14 +1739,14 @@ void ParaSailsSetupValues(ParaSails *ps, Matrix *A, double filter)
     if (ps->symmetric)
     {
         ComputeValuesSym(stored_rows, ps->M, load_bal->beg_row, ps->numb,
-	    ps->symmetric);
+            ps->symmetric);
 
         for (i=0; i<load_bal->num_taken; i++)
         {
-            ComputeValuesSym(stored_rows, 
+            ComputeValuesSym(stored_rows,
                 load_bal->recip_data[i].mat,
-	        load_bal->recip_data[i].mat->beg_row, ps->numb,
-		ps->symmetric);
+                load_bal->recip_data[i].mat->beg_row, ps->numb,
+                ps->symmetric);
         }
     }
     else
@@ -1386,9 +1755,9 @@ void ParaSailsSetupValues(ParaSails *ps, Matrix *A, double filter)
 
         for (i=0; i<load_bal->num_taken; i++)
         {
-            ComputeValuesNonsym(stored_rows, 
-		load_bal->recip_data[i].mat,
-	        load_bal->recip_data[i].mat->beg_row, ps->numb);
+            ComputeValuesNonsym(stored_rows,
+                load_bal->recip_data[i].mat,
+                load_bal->recip_data[i].mat->beg_row, ps->numb);
         }
     }
 
@@ -1404,26 +1773,26 @@ void ParaSailsSetupValues(ParaSails *ps, Matrix *A, double filter)
     if (ps->filter != 0.0)
     {
         DiagScale *diag_scale = DiagScaleCreate(A, ps->numb);
-        Matrix    *filtered_matrix = MatrixCreate(ps->comm, 
-	                                 ps->beg_row, ps->end_row);
+        Matrix    *filtered_matrix = MatrixCreate(ps->comm,
+                                         ps->beg_row, ps->end_row);
 
-	if (ps->filter < 0.0)
-	    ps->filter = SelectFilter(ps->comm, ps->M, diag_scale, -ps->filter,
-	        ps->symmetric);
+        if (ps->filter < 0.0)
+            ps->filter = SelectFilter(ps->comm, ps->M, diag_scale, -ps->filter,
+                ps->symmetric);
 
-	FilterValues(ps->M, filtered_matrix, diag_scale, ps->filter,
-	    ps->symmetric, &ps->cost);
+        FilterValues(ps->M, filtered_matrix, diag_scale, ps->filter,
+            ps->symmetric, &ps->cost);
 
         DiagScaleDestroy(diag_scale);
         MatrixDestroy(ps->M);
         ps->M = filtered_matrix;
 
-	/* Rescale if factored preconditioner */
+        /* Rescale if factored preconditioner */
         if (ps->symmetric != 0)
             Rescale(ps->M, stored_rows, ps->numb->num_ind);
     }
 
-    /* 
+    /*
      * If the preconditioner matrix has its own numbering object, then we
      * change the numbering in the matrix to this numbering.  If not, then
      * we put the preconditioner matrix in global numbering, and call
@@ -1433,21 +1802,21 @@ void ParaSailsSetupValues(ParaSails *ps, Matrix *A, double filter)
 
     if (ps->M->numb != NULL)
     {
-	/* Convert to own numbering system */
+        /* Convert to own numbering system */
         for (row=0; row<=ps->M->end_row - ps->M->beg_row; row++)
         {
-	    MatrixGetRow(ps->M, row, &len, &ind, &val);
-	    NumberingLocalToGlobal(ps->numb,    len, ind, ind);
-	    NumberingGlobalToLocal(ps->M->numb, len, ind, ind);
+            MatrixGetRow(ps->M, row, &len, &ind, &val);
+            NumberingLocalToGlobal(ps->numb,    len, ind, ind);
+            NumberingGlobalToLocal(ps->M->numb, len, ind, ind);
         }
     }
     else
     {
-	/* Convert to global numbering system and call MatrixComplete */
+        /* Convert to global numbering system and call MatrixComplete */
         for (row=0; row<=ps->M->end_row - ps->M->beg_row; row++)
         {
-	    MatrixGetRow(ps->M, row, &len, &ind, &val);
-	    NumberingLocalToGlobal(ps->numb, len, ind, ind);
+            MatrixGetRow(ps->M, row, &len, &ind, &val);
+            NumberingLocalToGlobal(ps->numb, len, ind, ind);
         }
 
         MatrixComplete(ps->M);
@@ -1511,13 +1880,13 @@ void ParaSailsStats(ParaSails *ps, Matrix *A)
     if (ps->symmetric)
     {
         n = ps->end_rows[npes-1] - ps->beg_rows[0] + 1;
-	nnza = (nnza - n) / 2 + n;
+        nnza = (nnza - n) / 2 + n;
     }
 
-    MPI_Allreduce(&ps->setup_pattern_time, &max_pattern_time, 
-	1, MPI_DOUBLE, MPI_MAX, comm);
-    MPI_Allreduce(&ps->setup_values_time, &max_values_time, 
-	1, MPI_DOUBLE, MPI_MAX, comm);
+    MPI_Allreduce(&ps->setup_pattern_time, &max_pattern_time,
+        1, MPI_DOUBLE, MPI_MAX, comm);
+    MPI_Allreduce(&ps->setup_values_time, &max_values_time,
+        1, MPI_DOUBLE, MPI_MAX, comm);
     MPI_Allreduce(&ps->cost, &max_cost, 1, MPI_DOUBLE, MPI_MAX, comm);
 
     if (!mype)
@@ -1527,7 +1896,7 @@ void ParaSailsStats(ParaSails *ps, Matrix *A)
     MPI_Gather(&temp, 1, MPI_DOUBLE, setup_times, 1, MPI_DOUBLE, 0, comm);
 
     if (mype)
-	return;
+        return;
 
     if (ps->symmetric == 0)
         max_cost *= 8.0;  /* nonsymmetric method is harder */
@@ -1539,7 +1908,7 @@ void ParaSailsStats(ParaSails *ps, Matrix *A)
     for (i=0; i<npes; i++)
     {
         printf("%3d: %8.1f\n", i, setup_times[i]);
-	temp += setup_times[i];
+        temp += setup_times[i];
     }
     printf("ave: %8.1f\n", temp / (double) npes);
 
