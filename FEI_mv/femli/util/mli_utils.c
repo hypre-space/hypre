@@ -1050,6 +1050,54 @@ int MLI_Utils_QR(double *qArray, double *rArray, int nrows, int ncols)
 }
 
 /***************************************************************************
+ * perform SVD factorization
+ *
+ * Inputs:  
+ *    uArray = input matrix (array of length m*n)
+ *    m = number of rows of input matrix
+ *    n = number of cols of input matrix
+ *
+ * Outputs: 
+ *    uArray = min(m,n) by m; left singular vectors
+ *    sArray = min(m,n) singular values (decreasing order)
+ *    vtArray = min(m,n) rows of transpose of 
+ *
+ * Work space: 
+ *    workArray = array of length workLen
+ *    workLen   = suggest 5*(m+n)
+ *--------------------------------------------------------------------------*/
+
+#include "fortran.h"
+ 
+int MLI_Utils_SVD(double *uArray, double *sArray, double *vtArray, 
+    double *workArray, int m, int n, int workLen)
+{
+    /* prototype */
+#if 0
+    void hypre_F90_NAME_BLAS(dgesvd, DGESVD)(char *, char *, integer *, 
+        integer *, doublereal *, int *, doublereal *, doublereal *, integer *, 
+        doublereal *, integer *, doublereal *, integer *, integer *);
+#endif
+#ifndef MIN
+#define MIN(a,b) ((a)<(b)?(a):(b))
+#endif
+
+    void hypre_F90_NAME_BLAS(dgesvd, DGESVD)(char *, char *, int *, 
+        int *, double *, int *, double *, double *, int *, 
+        double *, int *, double *, int *, int *);
+
+    char jobu  = 'O'; /* overwrite input with U */
+    char jobvt = 'S'; /* return rows of V in vtArray */
+    int  dim = MIN(m,n);
+    int  info;
+
+    hypre_F90_NAME_BLAS(dgesvd, DGESVD)(&jobu, &jobvt, &m, &n, uArray,
+        &m, sArray, NULL, &m, vtArray, &dim, workArray, &workLen, &info);
+
+    return info;
+}
+
+/***************************************************************************
  * read a matrix file and create a hypre_ParCSRMatrix from it
  *--------------------------------------------------------------------------*/
  

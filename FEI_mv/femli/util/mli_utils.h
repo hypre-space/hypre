@@ -70,6 +70,8 @@ int    MLI_Utils_HypreMatrixComputeRAP(void *P, void *A, void **RAP);
 int    MLI_Utils_HypreMatrixCompress(void *A, int blksize, void **A2);
 int    MLI_Utils_HypreBoolMatrixDecompress(void *S, int, void **S2, void *A);
 int    MLI_Utils_QR(double *Q, double *R, int nrows, int ncols);
+int    MLI_Utils_SVD(double *uArray, double *sArray, double *vtArray,
+                 double *workArray, int m, int n, int workLen);
 int    MLI_Utils_HypreMatrixReadTuminFormat(char *filename, MPI_Comm comm, 
                  int blksize, void **mat, int flag, double **scaleVec);
 int    MLI_Utils_HypreMatrixReadIJAFormat(char *filename, MPI_Comm comm, 
