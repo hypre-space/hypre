@@ -32,10 +32,24 @@ TOOLS =
 #endif !TOOLSDIR
 
 #EXTRA_DIRS = $(BABELDIR) $(SEQLS) $(TOOLS) test
+if BLASNEEDED
+BLASDIR = blas
+else !BLASNEEDED
+BLASDIR = 
+endif !BLASNEEDED
+
+if LAPACKNEEDED
+LAPACKDIR = lapack
+else !LAPACKNEEDED
+LAPACKDIR = 
+endif !LAPACKNEEDED
+
 ## We need `.' in SUBDIRS because we want `check' to build `.' before
 ## tests.
 SUBDIRS = . config\
- blas lapack utilities\
+ $(BLASDIR)\
+ $(LAPACKDIR)\
+ utilities\
  krylov\
  struct_mv struct_ls\
  sstruct_mv sstruct_ls\

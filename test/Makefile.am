@@ -23,6 +23,8 @@ AM_CPPFLAGS = \
  -DHYPRE_TIMING\
  -I$(includedir)
 
+AM_CXXFLAGS = -DMPICH_SKIP_MPICXX
+
 AM_FFLAGS = \
  -I$(includedir)
 
