@@ -10,6 +10,10 @@
 
 #include "superlu_util.h"
 
+/* local prototypes */
+void copy_mem_int ( int howmany , void *old , void *new );
+void user_bcopy ( char *src , char *dest , int bytes );
+
 /*
  * Set up pointers for integer working arrays.
  */

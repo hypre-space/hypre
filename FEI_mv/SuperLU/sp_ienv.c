@@ -1,5 +1,8 @@
 #include "dsp_defs.h"
 
+/* local prototype */
+int sp_ienv ( int ispec );
+
 /*
  * File name:		sp_ienv.c
  * History:             Modified from lapack routine ILAENV

@@ -9,6 +9,12 @@
 #include "superlu_util.h"
 #include "colamd.h"
 
+/* local prototypes */
+void get_colamd ( const int m , const int n , const int nnz , int *colptr , int *rowind , int *perm_c );
+void getata ( const int m , const int n , const int nz , int *colptr , int *rowind , int *atanz , int **ata_colptr , int **ata_rowind );
+void a_plus_at ( const int n , const int nz , int *colptr , int *rowind , int *bnz , int **b_colptr , int **b_rowind );
+void get_perm_c ( int ispec , SuperMatrix *A , int *perm_c );
+
 extern int  genmmd_(int *, int *, int *, int *, int *, int *, int *, 
 		    int *, int *, int *, int *, int *);
 

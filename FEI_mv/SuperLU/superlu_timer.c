@@ -8,6 +8,7 @@
  *
  */
 
+double SuperLU_timer_ ( void );
 
 #ifdef SUN 
 /*

@@ -392,7 +392,7 @@ sp_dgemv(char *trans, double alpha, SuperMatrix *A, double *x,
     }
 
     /* Quick return if possible. */
-    if (A->nrow == 0 || A->ncol == 0 || alpha == 0. && beta == 1.)
+    if (A->nrow == 0 || A->ncol == 0 || (alpha == 0. && beta == 1.))
 	return 0;
 
     /* Set  LENX  and  LENY, the lengths of the vectors x and y, and set 

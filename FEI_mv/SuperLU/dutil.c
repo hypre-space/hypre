@@ -1,5 +1,3 @@
-
-
 /*
  * -- SuperLU routine (version 2.0) --
  * Univ. of California Berkeley, Xerox Palo Alto Research Center,
@@ -23,6 +21,11 @@
 #include <math.h>
 #include "dsp_defs.h"
 #include "superlu_util.h"
+
+/* local prototypes */
+void dprint_lu_col ( char *msg , int jcol , int pivrow , int *xprune , GlobalLU_t *Glu );
+void dcheck_tempv ( int n , double *tempv );
+void dPrintPerf ( SuperMatrix *L , SuperMatrix *U , mem_usage_t *mem_usage , double rpg , double rcond , double *ferr , double *berr , char *equed );
 
 void
 dCreate_CompCol_Matrix(SuperMatrix *A, int m, int n, int nnz, 
@@ -467,10 +470,11 @@ dPrintPerf(SuperMatrix *L, SuperMatrix *U, mem_usage_t *mem_usage,
 
 
 
-print_double_vec(char *what, int n, double *vec)
+int print_double_vec(char *what, int n, double *vec)
 {
     int i;
     printf("%s: n %d\n", what, n);
     for (i = 0; i < n; ++i) printf("%d\t%f\n", i, vec[i]);
+    return 0;
 }
 

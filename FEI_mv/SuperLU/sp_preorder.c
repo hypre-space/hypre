@@ -142,7 +142,7 @@ sp_preorder(char *refact,  SuperMatrix *A, int *perm_c,
 
 }
 
-check_perm(char *what, int n, int *perm)
+int check_perm(char *what, int n, int *perm)
 {
     register int i;
     int          *marker;
@@ -158,4 +158,5 @@ check_perm(char *what, int n, int *perm)
     }
 
     SUPERLU_FREE(marker);
+    return 0;
 }

@@ -24,6 +24,14 @@
 #include "dsp_defs.h"
 #include "superlu_util.h"
 
+void StatFree ( void );
+flops_t LUFactFlops ( void );
+flops_t LUSolveFlops ( void );
+float SpaSize ( int n , int np , float sum_npw );
+float DenseSize ( int n , float sum_nw );
+int print_int_vec ( char *what , int n , int *vec );
+int PrintInt10 ( char *name , int len , int *x );
+
 /* 
  * Global statistics variale
  */
