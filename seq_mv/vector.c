@@ -178,6 +178,8 @@ hypre_VectorSetConstantValues( hypre_Vector *v,
    int      ierr  = 0;
 
 
+#define HYPRE_SMP_PRIVATE i
+#include "../utilities/hypre_smp_forloop.h"
    for (i = 0; i < size; i++)
       vector_data[i] = value;
 
@@ -202,6 +204,7 @@ hypre_VectorSetRandomValues( hypre_Vector *v,
    int      ierr  = 0;
    hypre_SeedRand(seed);
 
+/* RDF: threading this loop may cause problems because of hypre_Rand() */
    for (i = 0; i < size; i++)
       vector_data[i] = 2.0 * hypre_Rand() - 1.0;
 
@@ -245,6 +248,8 @@ hypre_VectorScale( double        alpha,
            
    int      ierr = 0;
 
+#define HYPRE_SMP_PRIVATE i
+#include "../utilities/hypre_smp_forloop.h"
    for (i = 0; i < size; i++)
       y_data[i] *= alpha;
 
@@ -268,6 +273,8 @@ hypre_VectorAxpy( double        alpha,
            
    int      ierr = 0;
 
+#define HYPRE_SMP_PRIVATE i
+#include "../utilities/hypre_smp_forloop.h"
    for (i = 0; i < size; i++)
       y_data[i] += alpha * x_data[i];
 
@@ -289,9 +296,13 @@ double   hypre_VectorInnerProd( hypre_Vector *x,
 
    double      result = 0.0;
 
+#define HYPRE_SMP_PRIVATE i
+#define HYPRE_SMP_REDUCTION_OP +
+#define HYPRE_SMP_REDUCTION_VARS result
+#include "../utilities/hypre_smp_forloop.h"
    for (i = 0; i < size; i++)
       result += y_data[i] * x_data[i];
-  
+
    return result;
 }
 

@@ -68,6 +68,8 @@ hypre_CSRMatrixMatvec( double           alpha,
 
    if (alpha == 0.0)
    {
+#define HYPRE_SMP_PRIVATE i
+#include "../utilities/hypre_smp_forloop.h"
       for (i = 0; i < num_rows; i++)
 	 y_data[i] *= beta;
 
@@ -84,11 +86,15 @@ hypre_CSRMatrixMatvec( double           alpha,
    {
       if (temp == 0.0)
       {
+#define HYPRE_SMP_PRIVATE i
+#include "../utilities/hypre_smp_forloop.h"
 	 for (i = 0; i < num_rows; i++)
 	    y_data[i] = 0.0;
       }
       else
       {
+#define HYPRE_SMP_PRIVATE i
+#include "../utilities/hypre_smp_forloop.h"
 	 for (i = 0; i < num_rows; i++)
 	    y_data[i] *= temp;
       }
@@ -98,6 +104,8 @@ hypre_CSRMatrixMatvec( double           alpha,
     * y += A*x
     *-----------------------------------------------------------------*/
 
+#define HYPRE_SMP_PRIVATE i,jj,j
+#include "../utilities/hypre_smp_forloop.h"
    for (i = 0; i < num_rows; i++)
    {
       for (jj = A_i[i]; jj < A_i[i+1]; jj++)
@@ -113,6 +121,8 @@ hypre_CSRMatrixMatvec( double           alpha,
 
    if (alpha != 1.0)
    {
+#define HYPRE_SMP_PRIVATE i
+#include "../utilities/hypre_smp_forloop.h"
       for (i = 0; i < num_rows; i++)
 	 y_data[i] *= alpha;
    }
@@ -177,6 +187,8 @@ hypre_CSRMatrixMatvecT( double           alpha,
 
    if (alpha == 0.0)
    {
+#define HYPRE_SMP_PRIVATE i
+#include "../utilities/hypre_smp_forloop.h"
       for (i = 0; i < num_cols; i++)
 	 y_data[i] *= beta;
 
@@ -193,11 +205,15 @@ hypre_CSRMatrixMatvecT( double           alpha,
    {
       if (temp == 0.0)
       {
+#define HYPRE_SMP_PRIVATE i
+#include "../utilities/hypre_smp_forloop.h"
 	 for (i = 0; i < num_cols; i++)
 	    y_data[i] = 0.0;
       }
       else
       {
+#define HYPRE_SMP_PRIVATE i
+#include "../utilities/hypre_smp_forloop.h"
 	 for (i = 0; i < num_cols; i++)
 	    y_data[i] *= temp;
       }
@@ -207,6 +223,7 @@ hypre_CSRMatrixMatvecT( double           alpha,
     * y += A^T*x
     *-----------------------------------------------------------------*/
 
+/* RDF: have to think about how to thread this loop */
    for (i = 0; i < num_rows; i++)
    {
       for (jj = A_i[i]; jj < A_i[i+1]; jj++)
@@ -222,6 +239,8 @@ hypre_CSRMatrixMatvecT( double           alpha,
 
    if (alpha != 1.0)
    {
+#define HYPRE_SMP_PRIVATE i
+#include "../utilities/hypre_smp_forloop.h"
       for (i = 0; i < num_cols; i++)
 	 y_data[i] *= alpha;
    }

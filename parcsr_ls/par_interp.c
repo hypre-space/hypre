@@ -196,6 +196,10 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
     num_cpts_global = hypre_CTAlloc(int, num_procs+1);
     num_cpts_local = 0;
 
+#define HYPRE_SMP_PRIVATE i
+#define HYPRE_SMP_REDUCTION_OP +
+#define HYPRE_SMP_REDUCTION_VARS num_cpts_local
+#include "../utilities/hypre_smp_forloop.h"
     for (i = 0; i < n_fine; i++)
     {
        if (CF_marker[i] >= 0) num_cpts_local++;
@@ -239,6 +243,8 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
    coarse_counter = 0;
 
    fine_to_coarse = hypre_CTAlloc(int, n_fine);
+#define HYPRE_SMP_PRIVATE i
+#include "../utilities/hypre_smp_forloop.h"
    for (i = 0; i < n_fine; i++) fine_to_coarse[i] = -1;
 
    jj_counter = start_indexing;
@@ -247,7 +253,8 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
    /*-----------------------------------------------------------------------
     *  Loop over fine grid.
     *-----------------------------------------------------------------------*/
-    
+
+/* RDF: this looks a little tricky, but doable */
    for (i = 0; i < n_fine; i++)
    {
       
@@ -293,7 +300,6 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
       }
    }
 
-
    /*-----------------------------------------------------------------------
     *  Allocate  arrays.
     *-----------------------------------------------------------------------*/
@@ -322,11 +328,15 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
    jj_counter = start_indexing;
    jj_counter_offd = start_indexing;
 
+#define HYPRE_SMP_PRIVATE i
+#include "../utilities/hypre_smp_forloop.h"
    for (i = 0; i < n_fine; i++)
    {      
       P_marker[i] = -1;
    }
  
+#define HYPRE_SMP_PRIVATE i
+#include "../utilities/hypre_smp_forloop.h"
    for (i = 0; i < num_cols_A_offd; i++)
    {      
       P_marker_offd[i] = -1;
@@ -350,6 +360,8 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
 
    fine_to_coarse_offd = hypre_CTAlloc(int, num_cols_A_offd); 
 
+#define HYPRE_SMP_PRIVATE i
+#include "../utilities/hypre_smp_forloop.h"
    for (i = 0; i < n_fine; i++) fine_to_coarse[i] += my_first_cpt;
    index = 0;
    for (i = 0; i < num_sends; i++)

@@ -135,6 +135,8 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
           * Copy current approximation into temporary vector.
           *-----------------------------------------------------------------*/
          
+#define HYPRE_SMP_PRIVATE i
+#include "../utilities/hypre_smp_forloop.h"
          for (i = 0; i < n; i++)
          {
             Vtemp_data[i] = u_data[i];
@@ -151,6 +153,8 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
 
          if (relax_points == 0)
          {
+#define HYPRE_SMP_PRIVATE i,ii,jj,res
+#include "../utilities/hypre_smp_forloop.h"
             for (i = 0; i < n; i++)
             {
 
@@ -183,6 +187,8 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
 
          else
          {
+#define HYPRE_SMP_PRIVATE i,ii,jj,res
+#include "../utilities/hypre_smp_forloop.h"
             for (i = 0; i < n; i++)
             {
 
@@ -232,6 +238,8 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
           *-----------------------------------------------------------------*/
  
             hypre_ParCSRMatrixMatvec(-1.0,A, u, 1.0, Vtemp);
+#define HYPRE_SMP_PRIVATE i
+#include "../utilities/hypre_smp_forloop.h"
             for (i = 0; i < n; i++)
             {
  
@@ -292,6 +300,9 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
 
          if (relax_points == 0)
          {
+/* RDF: This is doable.  Add an additional outer loop that manually
+ * breaks up the i-loop into NumThreads parts.  Do the interior
+ * of each one of these with GS, and the boundary with Jacobi */
             for (i = 0; i < n; i++)	/* interior points first */
             {
 
@@ -323,6 +334,9 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
 
          else
          {
+/* RDF: This is doable.  Add an additional outer loop that manually
+ * breaks up the i-loop into NumThreads parts.  Do the interior
+ * of each one of these with GS, and the boundary with Jacobi */
             for (i = 0; i < n; i++) /* relax interior points */
             {
 
@@ -536,6 +550,9 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
           *-----------------------------------------------------------------*/
           if (relax_points == 0)
           {
+/* RDF: This is doable.  Add an additional outer loop that manually
+ * breaks up the i-loop into NumThreads parts.  Do the interior
+ * of each one of these with GS, and the boundary with Jacobi */
             for (i = 0; i < n; i++)	
             {
 

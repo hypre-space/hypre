@@ -258,6 +258,8 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
    /* give S same nonzero structure as A */
    hypre_ParCSRMatrixCopy(A,S,0);
 
+#define HYPRE_SMP_PRIVATE i,diag,row_scale,row_sum,jA
+#include "../utilities/hypre_smp_forloop.h"
    for (i = 0; i < num_variables; i++)
    {
       diag = A_diag_data[A_diag_i[i]];
@@ -356,6 +358,7 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
     * that builds interpolation would have to be modified first.
     *----------------------------------------------------------------*/
 
+/* RDF: not sure if able to thread this loop */
    jS = 0;
    for (i = 0; i < num_variables; i++)
    {
@@ -372,6 +375,7 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
    S_diag_i[num_variables] = jS;
    hypre_CSRMatrixNumNonzeros(S_diag) = jS;
 
+/* RDF: not sure if able to thread this loop */
    jS = 0;
    for (i = 0; i < num_variables; i++)
    {
