@@ -362,6 +362,8 @@ hypre_ParAMGSetupStats( void               *amg_vdata,
    }
        
 
+   hypre_TFree(send_buff);
+   hypre_TFree(gather_buff);
    
    fclose(fp);
    return(0);
