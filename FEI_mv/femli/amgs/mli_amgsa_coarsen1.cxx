@@ -976,7 +976,7 @@ int MLI_Method_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
     * Phase 1 : form aggregates
     *-----------------------------------------------------------------*/
 
-   for ( irow = 1; irow < localNRows; irow++ )
+   for ( irow = 0; irow < localNRows; irow++ )
    {
       if ( nodeStat[irow] == MLI_METHOD_AMGSA_READY )
       {
