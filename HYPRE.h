@@ -24,8 +24,6 @@
  * Constants
  *--------------------------------------------------------------------------*/
 
-#define HYPRE_PETSC_VECTOR 33
-
 #define HYPRE_PETSC_MAT_PARILUT_SOLVER 22
 
 #define HYPRE_PARILUT      872
