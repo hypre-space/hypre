@@ -25,6 +25,7 @@
 #include "../solver/mli_gs.h"
 #include "../amgs/mli_method.h"
 #include "../fedata/mli_fedata.h"
+#include "../fedata/mli_fedata_utils.h"
 
 /*****************************************************************************
  * CMLI : constructor 
@@ -466,6 +467,162 @@ extern "C" int MLI_FEDataDestroy( CMLI_FEData *cfedata )
       if ( fedata == NULL ) err = 1;
       else if ( cfedata->owner_ ) delete fedata;
       free( cfedata );
+   }
+   return err;
+}
+
+/*****************************************************************************
+ * create element node matrix from FEData 
+ *---------------------------------------------------------------------------*/
+
+extern "C" int MLI_FEDataGetElemNodeHypreMatrix( CMLI_FEData *cfedata,
+                   MPI_Comm comm, void ** mat )
+{
+   int                err=0;
+   MLI_FEData         *fedata;
+   HYPRE_ParCSRMatrix *element_node;
+
+   if ( cfedata == NULL ) err = 1;
+   else
+   {
+      fedata = (MLI_FEData *) cfedata->fedata_;
+      if ( fedata == NULL ) err = 1;
+      else 
+      {
+         MLI_FEData_GetParCSRelement_node(comm, *fedata, 
+                            (hypre_ParCSRMatrix_struct **) &element_node);
+         (*mat) = element_node;
+      }
+   }
+   return err;
+}
+
+/*****************************************************************************
+ * create element face matrix from FEData 
+ *---------------------------------------------------------------------------*/
+
+extern "C" int MLI_FEDataGetElemFaceHypreMatrix( CMLI_FEData *cfedata,
+                   MPI_Comm comm, void ** mat )
+{
+   int                err=0;
+   MLI_FEData         *fedata;
+   HYPRE_ParCSRMatrix *element_face;
+
+   if ( cfedata == NULL ) err = 1;
+   else
+   {
+      fedata = (MLI_FEData *) cfedata->fedata_;
+      if ( fedata == NULL ) err = 1;
+      else 
+      {
+         MLI_FEData_GetParCSRelement_face(comm, *fedata, 
+                            (hypre_ParCSRMatrix_struct **) &element_face);
+         (*mat) = element_face;
+      }
+   }
+   return err;
+}
+
+/*****************************************************************************
+ * create face node matrix from FEData 
+ *---------------------------------------------------------------------------*/
+
+extern "C" int MLI_FEDataGetFaceNodeHypreMatrix( CMLI_FEData *cfedata,
+                   MPI_Comm comm, void ** mat )
+{
+   int                err=0;
+   MLI_FEData         *fedata;
+   HYPRE_ParCSRMatrix *face_node;
+
+   if ( cfedata == NULL ) err = 1;
+   else
+   {
+      fedata = (MLI_FEData *) cfedata->fedata_;
+      if ( fedata == NULL ) err = 1;
+      else 
+      {
+         MLI_FEData_GetParCSRface_node(comm, *fedata, 
+                            (hypre_ParCSRMatrix_struct **) &face_node);
+         (*mat) = face_node;
+      }
+   }
+   return err;
+}
+
+/*****************************************************************************
+ * create node element matrix from FEData 
+ *---------------------------------------------------------------------------*/
+
+extern "C" int MLI_FEDataGetNodeElemHypreMatrix( CMLI_FEData *cfedata,
+                   MPI_Comm comm, void ** mat )
+{
+   int                err=0;
+   MLI_FEData         *fedata;
+   HYPRE_ParCSRMatrix *node_element;
+
+   if ( cfedata == NULL ) err = 1;
+   else
+   {
+      fedata = (MLI_FEData *) cfedata->fedata_;
+      if ( fedata == NULL ) err = 1;
+      else 
+      {
+         MLI_FEData_GetParCSRnode_element(comm, *fedata,
+                            (hypre_ParCSRMatrix_struct **) &node_element);
+         (*mat) = node_element;
+      }
+   }
+   return err;
+}
+
+/*****************************************************************************
+ * create face element matrix from FEData 
+ *---------------------------------------------------------------------------*/
+
+extern "C" int MLI_FEDataGetFaceElemHypreMatrix( CMLI_FEData *cfedata,
+                   MPI_Comm comm, void ** mat )
+{
+   int                err=0;
+   MLI_FEData         *fedata;
+   HYPRE_ParCSRMatrix *face_element;
+
+   if ( cfedata == NULL ) err = 1;
+   else
+   {
+      fedata = (MLI_FEData *) cfedata->fedata_;
+      if ( fedata == NULL ) err = 1;
+      else 
+      {
+         MLI_FEData_GetParCSRface_element(comm, *fedata,
+                            (hypre_ParCSRMatrix_struct **) &face_element);
+         (*mat) = face_element;
+      }
+   }
+   return err;
+}
+
+/*****************************************************************************
+ * create node face matrix from FEData 
+ *---------------------------------------------------------------------------*/
+
+extern "C" int MLI_FEDataGetNodeFaceHypreMatrix( CMLI_FEData *cfedata,
+                   MPI_Comm comm, void ** mat )
+{
+   int                err=0;
+   MLI_FEData         *fedata;
+   HYPRE_ParCSRMatrix *node_face;
+
+   if ( cfedata == NULL ) err = 1;
+   else
+   {
+      fedata = (MLI_FEData *) cfedata->fedata_;
+      if ( fedata == NULL ) err = 1;
+      else 
+      {
+         MLI_FEData_GetParCSRnode_face(comm, *fedata,
+                            (hypre_ParCSRMatrix_struct **) &node_face);
+         (*mat) = node_face;
+      }
    }
    return err;
 }

@@ -123,6 +123,17 @@ CMLI_FEData *MLI_FEDataCreate(MPI_Comm comm, void *fedata, char *name);
 
 int MLI_FEDataDestroy(CMLI_FEData *fedata);
 
+/* ---------------------------------------------------------------- */
+/* create topological matrices                                      */
+/* ---------------------------------------------------------------- */
+
+int MLI_FEDataGetElemNodeHypreMatrix(CMLI_FEData *, MPI_Comm, void **mat);
+int MLI_FEDataGetElemFaceHypreMatrix(CMLI_FEData *, MPI_Comm, void **mat);
+int MLI_FEDataGetFaceNodeHypreMatrix(CMLI_FEData *, MPI_Comm, void **mat);
+int MLI_FEDataGetNodeElemHypreMatrix(CMLI_FEData *, MPI_Comm, void **mat);
+int MLI_FEDataGetFaceElemHypreMatrix(CMLI_FEData *, MPI_Comm, void **mat);
+int MLI_FEDataGetNodeFaceHypreMatrix(CMLI_FEData *, MPI_Comm, void **mat);
+
 /* **************************************************************** */
 /* constructor and destructor for a "C" MLI matrix object           */
 /* ---------------------------------------------------------------- */
