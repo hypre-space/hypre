@@ -65,7 +65,7 @@ void* Mem_dhMalloc(Mem_dh m, size_t size)
   address = PRIVATE_MALLOC(s);
 
   if (address == NULL) {
-    sprintf(msgBuf_dh, "PRIVATE_MALLOC failed; totalMem = %g; requested additional = %i", m->totalMem, s);
+    sprintf(msgBuf_dh, "PRIVATE_MALLOC failed; totalMem = %g; requested additional = %i", m->totalMem, (int)s);
     SET_ERROR(NULL, msgBuf_dh);
   }
 
