@@ -171,6 +171,7 @@ fi
 	    UPDATE/src/linear_solvers/struct_linear_solvers \
 	    UPDATE/src/linear_solvers/test
 	rm -f update
+        chmod $HYPRE_INSTALL_PERMISSIONS UPDATE.tar
     fi
 
     if [ ! -f UPDATE/VERSION_NAME ]
