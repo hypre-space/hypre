@@ -2816,6 +2816,11 @@ hypre_ParAMGCoarsenRugeLoL( hypre_ParCSRMatrix    *A,
                      my_id, wall_time); 
    }
 
+   hypre_TFree(lists);
+   hypre_TFree(where);
+   hypre_TFree(LoL_head);
+   hypre_TFree(LoL_tail);
+
    /* second pass, check fine points for coarse neighbors 
       for coarsen_type = 2, the second pass includes
       off-processore boundary points */
