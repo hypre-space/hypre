@@ -29,7 +29,7 @@ MLI_Solver_MLS::MLI_Solver_MLS() : MLI_Solver(MLI_SOLVER_MLS_ID)
    mli_Wtemp = NULL;
    mli_Ytemp = NULL;
    max_eigen = -1.0;
-   mlsDeg    = 1;
+   mlsDeg    = 2;
    mlsBoost  = 1.1;
    mlsOver   = 1.1;
    for ( int i = 0; i < 5; i++ ) mlsOm[i] = 0.0;
@@ -58,7 +58,7 @@ int MLI_Solver_MLS::setup(MLI_Matrix *mat)
 {
    int    i, j, nGrid, MAX_DEG=5, nSamples=20000;
    double cosData0, cosData1, coord;
-   double sample[40000], gridStep, rho, ddeg;
+   double sample, gridStep, rho, rho2, ddeg;
    double pi=4.e0 * atan(1.e0); /* 3.141592653589793115998e0; */
 
    /*-----------------------------------------------------------------
@@ -78,11 +78,12 @@ int MLI_Solver_MLS::setup(MLI_Matrix *mat)
 
    for ( i = 0; i < MAX_DEG; i++ ) mlsOm[i] = 0.e0;
    ddeg = (double) mlsDeg;
+   rho  = mlsOver * max_eigen;
    cosData1 = 1.e0 / (2.e0 * ddeg + 1.e0);
    for ( i = 0; i < mlsDeg; i++ ) 
    {
       cosData0 = 2.e0 * (double)(i+1) * pi;
-      mlsOm[i] = 2.e0 / (max_eigen * (1.e0 - cos(cosData0 * cosData1)));
+      mlsOm[i] = 2.e0 / (rho * (1.e0 - cos(cosData0 * cosData1)));
    }
    mlsCf[0] = + mlsOm[0] + mlsOm[1] + mlsOm[2] + mlsOm[3] + mlsOm[4];
    mlsCf[1] = -(mlsOm[0]*mlsOm[1] + mlsOm[0]*mlsOm[2]
@@ -102,21 +103,43 @@ int MLI_Solver_MLS::setup(MLI_Matrix *mat)
               + mlsOm[1]*mlsOm[2]*mlsOm[3]*mlsOm[4]);
    mlsCf[4] = mlsOm[0] * mlsOm[1] * mlsOm[2] * mlsOm[3] * mlsOm[4];
 
-   gridStep = max_eigen / (double) nSamples;
-   nGrid    = (int) min(rint(max_eigen/gridStep)+1, nSamples);
-
-   for ( i = 0; i < nGrid; i++ ) 
+   if ( mlsDeg == 1 )
    {
-      coord   = (double)(i+1) * gridStep;
-      sample[i] = 1.e0 - mlsOm[0] * coord;
-      for ( j = 1; j < mlsDeg; j++) sample[i] *= sample[i] * coord;
+      gridStep = rho / (double) nSamples;
+      nGrid    = (int) min(rint(rho/gridStep)+1, nSamples);
+
+      rho2 = 0.e0;
+      for ( i = 0; i < nGrid; i++ ) 
+      {
+         coord  = (double)(i+1) * gridStep;
+         sample = 1.e0 - mlsOm[0] * coord;
+         for ( j = 1; j < mlsDeg; j++) sample *= sample * coord;
+         if (sample > rho2) rho2 = sample;
+      }
+      /* this original code seems not as good
+      rho2 = 4.0e0/(27.e0 * mlsOm[0]);
+      */
    }
-   rho = 0.e0;
-   for ( i = 0; i < nGrid; i++ ) if (sample[i] > rho) rho = sample[i];
+   else if ( mlsDeg > 1 )
+   {
+      gridStep = rho / (double) nSamples;
+      nGrid    = (int) min(rint(rho/gridStep)+1, nSamples);
+
+      rho2 = 0.e0;
+      for ( i = 0; i < nGrid; i++ ) 
+      {
+         coord  = (double)(i+1) * gridStep;
+         sample = 1.e0 - mlsOm[0] * coord;
+         for ( j = 1; j < mlsDeg; j++) sample *= sample * coord;
+         sample *= sample * coord;
+         if (sample > rho2) rho2 = sample;
+      }
+   }
+
    if ( mlsDeg < 2) mlsBoost = 1.029e0;
    else             mlsBoost = 1.025e0;
-   rho *= mlsBoost;
-   mlsOm2 = 2.e0 / ( rho * (1.e0 - cos((2.e0 * pi)/3.e0)));
+   rho2 *= mlsBoost;
+   mlsOm2 = 2.e0 / rho2;
 
    /*-----------------------------------------------------------------
     * allocate temporary vectors
