@@ -511,6 +511,7 @@ class HYPRE_LinSysCore
    // ----------------------------------------------------------------------
 
    int             amgCoarsenType_;
+   int             amgMeasureType_;
    int             amgNumSweeps_[4];
    int             amgRelaxType_[4];
    double          amgRelaxWeight_[25];

@@ -192,6 +192,7 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
     gmresDim_           = 100;  // restart size in GMRES
 
     amgCoarsenType_     = 0;    // default coarsening
+    amgMeasureType_     = 0;    // local measure
     amgNumSweeps_[0]    = 1;    // no. of sweeps for fine grid
     amgNumSweeps_[1]    = 1;    // no. of presmoothing sweeps 
     amgNumSweeps_[2]    = 1;    // no. of postsmoothing sweeps 
@@ -902,9 +903,28 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
        else if ( !strcmp(param1, "amgCoarsenType") )
        {
           sscanf(params[i],"%s %s", param, param2);
-          if      ( !strcmp(param2, "ruge" ) )    amgCoarsenType_ = 1;
+          if      ( !strcmp(param2, "cljp" ) )    amgCoarsenType_ = 0;
+          else if ( !strcmp(param2, "ruge" ) )    amgCoarsenType_ = 1;
+          else if ( !strcmp(param2, "ruge3c" ) )  amgCoarsenType_ = 4;
           else if ( !strcmp(param2, "falgout" ) ) amgCoarsenType_ = 6;
-          else if ( !strcmp(param2, "default" ) ) amgCoarsenType_ = 0;
+          else                                    amgCoarsenType_ = 0;
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+          {
+             printf("       HYPRE_LSC::parameters amgCoarsenType = %s\n",
+                    param2);
+          }
+       }
+
+       //----------------------------------------------------------------
+       // amg preconditoner : measure 
+       //----------------------------------------------------------------
+
+       else if ( !strcmp(param1, "amgMeasureType") )
+       {
+          sscanf(params[i],"%s %s", param, param2);
+          if      ( !strcmp(param2, "local" ) )   amgMeasureType_ = 0;
+          else if ( !strcmp(param2, "global" ) )  amgMeasureType_ = 1;
+          else                                    amgMeasureType_ = 0;
           if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
           {
              printf("       HYPRE_LSC::parameters amgCoarsenType = %s\n",
@@ -1299,6 +1319,26 @@ void HYPRE_LinSysCore::createMatricesAndVectors(int numGlobalEqns,
        printf("%4d : HYPRE_LSC::entering createMatricesAndVectors.\n",mypid_);
        printf("%4d : HYPRE_LSC::startrow, endrow = %d %d\n",mypid_,
                      firstLocalEqn, firstLocalEqn+numLocalEqns-1);
+    }
+
+    //-------------------------------------------------------------------
+    // clean up previously allocated matrix
+    //-------------------------------------------------------------------
+
+    if ( rowLengths_ != NULL ) delete [] rowLengths_;
+    if ( colIndices_ != NULL )
+    {
+       int nrows = localEndRow_ - localStartRow_ + 1;
+       for ( i = 0; i < nrows; i++ )
+          if ( colIndices_[i] != NULL ) delete [] colIndices_[i];
+       delete [] colIndices_;
+    }
+    if ( colValues_ != NULL )
+    {
+       int nrows = localEndRow_ - localStartRow_ + 1;
+       for ( i = 0; i < nrows; i++ )
+          if ( colValues_[i] != NULL ) delete [] colValues_[i];
+       delete [] colValues_;
     }
 
     //-------------------------------------------------------------------
@@ -3671,6 +3711,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
 
              case HYBOOMERAMG :
                   HYPRE_BoomerAMGSetCoarsenType(HYPrecon_, amgCoarsenType_);
+                  HYPRE_BoomerAMGSetMeasureType(HYPrecon_, amgMeasureType_);
                   HYPRE_BoomerAMGSetStrongThreshold(HYPrecon_,
                                                     amgStrongThreshold_);
                   num_sweeps = hypre_CTAlloc(int,4);
@@ -3687,6 +3728,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
                   {
                      printf("AMG coarsen type = %d\n", amgCoarsenType_);
+                     printf("AMG measure type = %d\n", amgMeasureType_);
                      printf("AMG threshold    = %e\n", amgStrongThreshold_);
                      printf("AMG numsweeps    = %d\n", amgNumSweeps_[0]);
                      printf("AMG relax type   = %d\n", amgRelaxType_[0]);
@@ -3939,6 +3981,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
 
              case HYBOOMERAMG :
                   HYPRE_BoomerAMGSetCoarsenType(HYPrecon_, amgCoarsenType_);
+                  HYPRE_BoomerAMGSetMeasureType(HYPrecon_, amgMeasureType_);
                   HYPRE_BoomerAMGSetStrongThreshold(HYPrecon_,
                                                     amgStrongThreshold_);
                   num_sweeps = hypre_CTAlloc(int,4);
@@ -3955,6 +3998,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
                   {
                      printf("AMG coarsen type = %d\n", amgCoarsenType_);
+                     printf("AMG measure type = %d\n", amgMeasureType_);
                      printf("AMG threshold    = %e\n", amgStrongThreshold_);
                      printf("AMG numsweeps    = %d\n", amgNumSweeps_[0]);
                      printf("AMG relax type   = %d\n", amgRelaxType_[0]);
@@ -4205,6 +4249,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
 
              case HYBOOMERAMG :
                   HYPRE_BoomerAMGSetCoarsenType(HYPrecon_, amgCoarsenType_);
+                  HYPRE_BoomerAMGSetMeasureType(HYPrecon_, amgMeasureType_);
                   HYPRE_BoomerAMGSetStrongThreshold(HYPrecon_,
                                                     amgStrongThreshold_);
                   num_sweeps = hypre_CTAlloc(int,4);
@@ -4221,6 +4266,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
                   {
                      printf("AMG coarsen type = %d\n", amgCoarsenType_);
+                     printf("AMG measure type = %d\n", amgMeasureType_);
                      printf("AMG threshold    = %e\n", amgStrongThreshold_);
                      printf("AMG numsweeps    = %d\n", amgNumSweeps_[0]);
                      printf("AMG relax type   = %d\n", amgRelaxType_[0]);
@@ -4468,6 +4514,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
 
              case HYBOOMERAMG :
                   HYPRE_BoomerAMGSetCoarsenType(HYPrecon_, amgCoarsenType_);
+                  HYPRE_BoomerAMGSetMeasureType(HYPrecon_, amgMeasureType_);
                   HYPRE_BoomerAMGSetStrongThreshold(HYPrecon_,
                                                     amgStrongThreshold_);
                   num_sweeps = hypre_CTAlloc(int,4);
@@ -4484,6 +4531,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
                   {
                      printf("AMG coarsen type = %d\n", amgCoarsenType_);
+                     printf("AMG measure type = %d\n", amgMeasureType_);
                      printf("AMG threshold    = %e\n", amgStrongThreshold_);
                      printf("AMG numsweeps    = %d\n", amgNumSweeps_[0]);
                      printf("AMG relax type   = %d\n", amgRelaxType_[0]);
@@ -4726,6 +4774,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
 
              case HYBOOMERAMG :
                   HYPRE_BoomerAMGSetCoarsenType(HYPrecon_, amgCoarsenType_);
+                  HYPRE_BoomerAMGSetMeasureType(HYPrecon_, amgMeasureType_);
                   HYPRE_BoomerAMGSetStrongThreshold(HYPrecon_,
                                                     amgStrongThreshold_);
                   num_sweeps = hypre_CTAlloc(int,4);
@@ -4742,6 +4791,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
                   {
                      printf("AMG coarsen type = %d\n", amgCoarsenType_);
+                     printf("AMG measure type = %d\n", amgMeasureType_);
                      printf("AMG threshold    = %e\n", amgStrongThreshold_);
                      printf("AMG numsweeps    = %d\n", amgNumSweeps_[0]);
                      printf("AMG relax type   = %d\n", amgRelaxType_[0]);
@@ -4984,6 +5034,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
 
              case HYBOOMERAMG :
                   HYPRE_BoomerAMGSetCoarsenType(HYPrecon_, amgCoarsenType_);
+                  HYPRE_BoomerAMGSetMeasureType(HYPrecon_, amgMeasureType_);
                   HYPRE_BoomerAMGSetStrongThreshold(HYPrecon_,
                                                     amgStrongThreshold_);
                   num_sweeps = hypre_CTAlloc(int,4);
@@ -5000,6 +5051,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
                   {
                      printf("AMG coarsen type = %d\n", amgCoarsenType_);
+                     printf("AMG measure type = %d\n", amgMeasureType_);
                      printf("AMG threshold    = %e\n", amgStrongThreshold_);
                      printf("AMG numsweeps    = %d\n", amgNumSweeps_[0]);
                      printf("AMG relax type   = %d\n", amgRelaxType_[0]);
@@ -5276,6 +5328,7 @@ void HYPRE_LinSysCore::solveUsingBoomeramg(int& status)
     x_csr = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(currX_);
 
     HYPRE_BoomerAMGSetCoarsenType(HYSolver_, amgCoarsenType_);
+    HYPRE_BoomerAMGSetMeasureType(HYPrecon_, amgMeasureType_);
     HYPRE_BoomerAMGSetStrongThreshold(HYSolver_, amgStrongThreshold_);
 
     num_sweeps = hypre_CTAlloc(int,4);
@@ -5293,6 +5346,7 @@ void HYPRE_LinSysCore::solveUsingBoomeramg(int& status)
     if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
     {
        printf("Boomeramg coarsen type = %d\n", amgCoarsenType_);
+       printf("Boomeramg measure type = %d\n", amgMeasureType_);
        printf("Boomeramg threshold    = %e\n", amgStrongThreshold_);
        printf("Boomeramg numsweeps    = %d\n", amgNumSweeps_[0]);
        printf("Boomeramg relax type   = %d\n", amgRelaxType_[0]);
