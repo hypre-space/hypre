@@ -780,6 +780,8 @@ main( int   argc,
     *-----------------------------------------------------------*/
 
    HYPRE_SStructGridDestroy(grid);
+   HYPRE_SStructStencilDestroy(Cstencil);
+   HYPRE_SStructStencilDestroy(Nstencil);
    HYPRE_SStructGraphDestroy(graph);
    HYPRE_SStructMatrixDestroy(A);
    HYPRE_SStructVectorDestroy(b);
@@ -796,6 +798,11 @@ main( int   argc,
    hypre_TFree(Ciupper);
    hypre_TFree(Nilower);
    hypre_TFree(Niupper);
+
+   hypre_TFree(CCvalues);
+   hypre_TFree(CNvalues);
+   hypre_TFree(NNvalues);
+   hypre_TFree(NCvalues);
 
    hypre_FinalizeMemoryDebug();
 

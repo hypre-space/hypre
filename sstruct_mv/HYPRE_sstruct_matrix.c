@@ -55,7 +55,7 @@ HYPRE_SStructMatrixCreate( MPI_Comm              comm,
 
    hypre_SStructMatrixComm(matrix)  = comm;
    hypre_SStructMatrixNDim(matrix)  = hypre_SStructGraphNDim(graph);
-   hypre_SStructMatrixGraph(matrix) = graph;
+   hypre_SStructGraphRef(graph, &hypre_SStructMatrixGraph(matrix));
 
    /* compute S/U-matrix split & pmatrices */
    nparts = hypre_SStructGraphNParts(graph);
@@ -140,7 +140,7 @@ HYPRE_SStructMatrixCreate( MPI_Comm              comm,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructMatrixDestroy TODO
+ * HYPRE_SStructMatrixDestroy
  *--------------------------------------------------------------------------*/
 
 int 
@@ -148,7 +148,43 @@ HYPRE_SStructMatrixDestroy( HYPRE_SStructMatrix matrix )
 {
    int ierr = 0;
 
-   HYPRE_IJMatrixDestroy(hypre_SStructMatrixIJMatrix(matrix));
+   hypre_SStructGraph     *graph;
+   int                  ***splits;
+   int                     nparts;
+   hypre_SStructPMatrix  **pmatrices;
+   hypre_SStructPGrid     *pgrid;
+   int                     nvars;
+   int                     part, var;
+
+   if (matrix)
+   {
+      hypre_SStructMatrixRefCount(matrix) --;
+      if (hypre_SStructMatrixRefCount(matrix) == 0)
+      {
+         graph        = hypre_SStructMatrixGraph(matrix);
+         splits       = hypre_SStructMatrixSplits(matrix);
+         nparts       = hypre_SStructMatrixNParts(matrix);
+         pmatrices    = hypre_SStructMatrixPMatrices(matrix);
+         for (part = 0; part < nparts; part++)
+         {
+            pgrid = hypre_SStructGraphPGrid(graph, part);
+            nvars = hypre_SStructPGridNVars(pgrid);
+            for (var = 0; var < nvars; var++)
+            {
+               hypre_TFree(splits[part][var]);
+            }
+            hypre_TFree(splits[part]);
+            hypre_SStructPMatrixDestroy(pmatrices[part]);
+         }
+         HYPRE_SStructGraphDestroy(graph);
+         hypre_TFree(splits);
+         hypre_TFree(pmatrices);
+         HYPRE_IJMatrixDestroy(hypre_SStructMatrixIJMatrix(matrix));
+         hypre_TFree(hypre_SStructMatrixSEntries(matrix));
+         hypre_TFree(hypre_SStructMatrixUEntries(matrix));
+         hypre_TFree(matrix);
+      }
+   }
 
    return ierr;
 }

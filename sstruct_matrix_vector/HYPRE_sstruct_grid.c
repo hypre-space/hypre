@@ -67,20 +67,32 @@ HYPRE_SStructGridCreate( MPI_Comm           comm,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructGridDestroy TODO
+ * HYPRE_SStructGridDestroy
  *--------------------------------------------------------------------------*/
 
 int
 HYPRE_SStructGridDestroy( HYPRE_SStructGrid grid )
 {
    int ierr = 0;
-   int i;
+
+   int                  nparts;
+   hypre_SStructPGrid **pgrids;
+   int                  part;
 
    if (grid)
    {
       hypre_SStructGridRefCount(grid) --;
       if (hypre_SStructGridRefCount(grid) == 0)
       {
+         nparts  = hypre_SStructGridNParts(grid);
+         pgrids  = hypre_SStructGridPGrids(grid);
+         hypre_TFree(hypre_SStructGridOffsets(grid));
+         for (part = 0; part < nparts; part++)
+         {
+            hypre_SStructPGridDestroy(pgrids[part]);
+         }
+         hypre_TFree(pgrids);
+         hypre_TFree(grid);
       }
    }
 

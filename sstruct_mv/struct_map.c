@@ -206,7 +206,7 @@ hypre_StructMapCreate( hypre_StructGrid   *sgrid,
 
    hypre_TFree(box_offsets);
 
-   hypre_TFree(boxes);
+   hypre_BoxArrayDestroy(boxes);
       
    *map_ptr = map;
       
@@ -223,16 +223,19 @@ hypre_StructMapDestroy( hypre_StructMap *map )
    int ierr = 0;
    int d;
 
-   hypre_TFree(hypre_StructMapEntries(map));
-   hypre_TFree(hypre_StructMapProcs(map));
-   hypre_TFree(hypre_StructMapTable(map));
-
-   for (d = 0; d < 3; d++)
+   if (map)
    {
-      hypre_TFree(hypre_StructMapIndexesD(map, d));
-   }
+      hypre_TFree(hypre_StructMapEntries(map));
+      hypre_TFree(hypre_StructMapProcs(map));
+      hypre_TFree(hypre_StructMapTable(map));
+      
+      for (d = 0; d < 3; d++)
+      {
+         hypre_TFree(hypre_StructMapIndexesD(map, d));
+      }
 
-   hypre_TFree(map);
+      hypre_TFree(map);
+   }
 
    return ierr;
 }

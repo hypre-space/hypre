@@ -36,7 +36,7 @@ HYPRE_SStructVectorCreate( MPI_Comm              comm,
 
    hypre_SStructVectorComm(vector) = comm;
    hypre_SStructVectorNDim(vector) = hypre_SStructGridNDim(grid);
-   hypre_SStructVectorGrid(vector) = grid;
+   hypre_SStructGridRef(grid, &hypre_SStructVectorGrid(vector));
    nparts = hypre_SStructGridNParts(grid);
    hypre_SStructVectorNParts(vector) = nparts;
    pvectors = hypre_TAlloc(hypre_SStructPVector *, nparts);
@@ -60,13 +60,35 @@ HYPRE_SStructVectorCreate( MPI_Comm              comm,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructVectorDestroy TODO
+ * HYPRE_SStructVectorDestroy
  *--------------------------------------------------------------------------*/
 
 int 
 HYPRE_SStructVectorDestroy( HYPRE_SStructVector vector )
 {
    int ierr = 0;
+
+   int                    nparts;
+   hypre_SStructPVector **pvectors;
+   int                    part;
+
+   if (vector)
+   {
+      hypre_SStructVectorRefCount(vector) --;
+      if (hypre_SStructVectorRefCount(vector) == 0)
+      {
+         HYPRE_SStructGridDestroy(hypre_SStructVectorGrid(vector));
+         nparts   = hypre_SStructVectorNParts(vector);
+         pvectors = hypre_SStructVectorPVectors(vector);
+         for (part = 0; part < nparts; part++)
+         {
+            hypre_SStructPVectorDestroy(pvectors[part]);
+         }
+         hypre_TFree(pvectors);
+         HYPRE_IJVectorDestroy(hypre_SStructVectorIJVector(vector));
+         hypre_TFree(vector);
+      }
+   }
 
    return ierr;
 }

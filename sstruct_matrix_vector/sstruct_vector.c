@@ -55,13 +55,29 @@ hypre_SStructPVectorCreate( MPI_Comm               comm,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructPVectorDestroy TODO
+ * hypre_SStructPVectorDestroy
  *--------------------------------------------------------------------------*/
 
 int 
 hypre_SStructPVectorDestroy( hypre_SStructPVector *pvector )
 {
    int ierr = 0;
+
+   int                  nvars;
+   hypre_StructVector **svectors;
+   int                  var;
+
+   if (pvector)
+   {
+      nvars     = hypre_SStructPVectorNVars(pvector);
+      svectors = hypre_SStructPVectorSVectors(pvector);
+      for (var = 0; var < nvars; var++)
+      {
+         hypre_StructVectorDestroy(svectors[var]);
+      }
+      hypre_TFree(svectors);
+      hypre_TFree(pvector);
+   }
 
    return ierr;
 }
@@ -355,7 +371,7 @@ hypre_SStructVectorConvert( hypre_SStructVector  *vector,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructVectorRestore TODO
+ * hypre_SStructVectorRestore
  *
  * Copy values from parvector to vector
  *--------------------------------------------------------------------------*/

@@ -62,7 +62,7 @@ hypre_SStructPMatrixCreate( MPI_Comm               comm,
    /* create sstencils */
    smaps     = hypre_TAlloc(int *, nvars);
    sstencils = hypre_TAlloc(hypre_StructStencil **, nvars);
-   new_sizes  = hypre_CTAlloc(int, nvars);
+   new_sizes  = hypre_TAlloc(int, nvars);
    new_shapes = hypre_TAlloc(hypre_Index *, nvars);
    size = 0;
    for (vi = 0; vi < nvars; vi++)
@@ -71,6 +71,7 @@ hypre_SStructPMatrixCreate( MPI_Comm               comm,
       for (vj = 0; vj < nvars; vj++)
       {
          sstencils[vi][vj] = NULL;
+         new_sizes[vj] = 0;
       }
 
       sstencil       = hypre_SStructStencilSStencil(stencils[vi]);
@@ -145,13 +146,48 @@ hypre_SStructPMatrixCreate( MPI_Comm               comm,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructPMatrixDestroy TODO
+ * hypre_SStructPMatrixDestroy
  *--------------------------------------------------------------------------*/
 
 int 
 hypre_SStructPMatrixDestroy( hypre_SStructPMatrix *pmatrix )
 {
    int ierr = 0;
+
+   hypre_SStructStencil  **stencils;
+   int                     nvars;
+   int                   **smaps;
+   hypre_StructStencil  ***sstencils;
+   hypre_StructMatrix   ***smatrices;
+   int                    *sentries;
+   int                     vi, vj;
+
+   if (pmatrix)
+   {
+      stencils  = hypre_SStructPMatrixStencils(pmatrix);
+      nvars     = hypre_SStructPMatrixNVars(pmatrix);
+      smaps     = hypre_SStructPMatrixSMaps(pmatrix);
+      sstencils = hypre_SStructPMatrixSStencils(pmatrix);
+      smatrices = hypre_SStructPMatrixSMatrices(pmatrix);
+      for (vi = 0; vi < nvars; vi++)
+      {
+         HYPRE_SStructStencilDestroy(stencils[vi]);
+         hypre_TFree(smaps[vi]);
+         for (vj = 0; vj < nvars; vj++)
+         {
+            hypre_StructStencilDestroy(sstencils[vi][vj]);
+            hypre_StructMatrixDestroy(smatrices[vi][vj]);
+         }
+         hypre_TFree(sstencils[vi]);
+         hypre_TFree(smatrices[vi]);
+      }
+      hypre_TFree(stencils);
+      hypre_TFree(smaps);
+      hypre_TFree(sstencils);
+      hypre_TFree(smatrices);
+      hypre_TFree(hypre_SStructPMatrixSEntries(pmatrix));
+      hypre_TFree(pmatrix);
+   }
 
    return ierr;
 }
@@ -375,6 +411,7 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
       }
    }
    ierr += HYPRE_IJMatrixSetRowSizes (ijmatrix, (const int *) row_sizes);
+   hypre_TFree(row_sizes);
 
    ierr += HYPRE_IJMatrixInitialize(ijmatrix);
 
@@ -526,6 +563,8 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
          }
       }
    }
+
+   hypre_BoxDestroy(box);
 
    return ierr;
 }

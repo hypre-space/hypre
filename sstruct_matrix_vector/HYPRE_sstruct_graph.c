@@ -66,7 +66,7 @@ HYPRE_SStructGraphCreate( MPI_Comm             comm,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructGraphDestroy  TODO
+ * HYPRE_SStructGraphDestroy
  *--------------------------------------------------------------------------*/
 
 int
@@ -74,29 +74,46 @@ HYPRE_SStructGraphDestroy( HYPRE_SStructGraph graph )
 {
    int  ierr = 0;
 
-   hypre_SStructGrid       *grid;
+   int                     nparts;
+   hypre_SStructPGrid    **pgrids;
    hypre_SStructStencil ***stencils;
-   hypre_SStructPGrid     *pgrid;
-   int                     part, var;
+   int                     nUventries;
+   int                    *iUventries;
+   hypre_SStructUVEntry  **Uventries;
+   hypre_SStructUVEntry   *Uventry;
+   int                     nvars;
+   int                     part, var, i;
 
    if (graph)
    {
       hypre_SStructGraphRefCount(graph) --;
       if (hypre_SStructGraphRefCount(graph) == 0)
       {
-         grid     = hypre_SStructGraphGrid(graph);
+         nparts   = hypre_SStructGraphNParts(graph);
+         pgrids   = hypre_SStructGraphPGrids(graph);
          stencils = hypre_SStructGraphStencils(graph);
-         for (part = 0; part < hypre_SStructGridNParts(grid); part++)
+         nUventries = hypre_SStructGraphNUVEntries(graph);
+         iUventries = hypre_SStructGraphIUVEntries(graph);
+         Uventries  = hypre_SStructGraphUVEntries(graph);
+         HYPRE_SStructGridDestroy(hypre_SStructGraphGrid(graph));
+         for (part = 0; part < nparts; part++)
          {
-            pgrid = hypre_SStructGridPGrid(grid, part);
-            for (var = 0; var < hypre_SStructPGridNVars(pgrid); var++)
+            nvars = hypre_SStructPGridNVars(pgrids[part]);
+            for (var = 0; var < nvars; var++)
             {
                HYPRE_SStructStencilDestroy(stencils[part][var]);
             }
             hypre_TFree(stencils[part]);
          }
-         HYPRE_SStructGridDestroy(grid);
          hypre_TFree(stencils);
+         for (i = 0; i < nUventries; i++)
+         {
+            Uventry = Uventries[iUventries[i]];
+            hypre_TFree(hypre_SStructUVEntryUEntries(Uventry));
+            hypre_TFree(Uventry);
+         }
+         hypre_TFree(iUventries);
+         hypre_TFree(Uventries);
          hypre_TFree(graph);
       }
    }
