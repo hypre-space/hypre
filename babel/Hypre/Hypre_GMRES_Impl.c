@@ -42,6 +42,7 @@
 #include "Hypre_ParCSRDiagScale.h"
 #include "Hypre_ParCSRDiagScale_Impl.h"
 #include <assert.h>
+#include "mpi.h"
 
 /* >>> To do: impl_Hypre_GMRES_Copy_Parameters_from_HYPRE_struct (see
  * comments in Hypre_PCG_Impl.c). */
@@ -94,7 +95,7 @@ impl_Hypre_GMRES__ctor(
 
    struct Hypre_GMRES__data * data;
    data = hypre_CTAlloc( struct Hypre_GMRES__data, 1 );
-   data -> comm = (MPI_Comm)NULL;
+   data -> comm = MPI_COMM_NULL;
    data -> solver = NULL;
    data -> matrix = NULL;
    data -> vector_type = NULL;
@@ -437,7 +438,7 @@ impl_Hypre_GMRES_Setup(
    data = Hypre_GMRES__get_data( self );
    comm = data->comm;
    /* SetCommunicator should have been called earlier */
-   assert( comm != (MPI_Comm)NULL );
+   assert( comm != MPI_COMM_NULL );
    mat = data->matrix;
    /* SetOperator should have been called earlier */
    assert( mat != NULL );
@@ -555,7 +556,7 @@ impl_Hypre_GMRES_Apply(
    data = Hypre_GMRES__get_data( self );
    comm = data->comm;
    /* SetCommunicator should have been called earlier */
-   assert( comm != (MPI_Comm)NULL );
+   assert( comm != MPI_COMM_NULL );
    mat = data->matrix;
    /* SetOperator should have been called earlier */
    assert( mat != NULL );

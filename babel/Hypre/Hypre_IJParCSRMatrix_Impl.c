@@ -36,6 +36,7 @@
 #include <assert.h>
 #include "Hypre_IJParCSRVector_Impl.h"
 #include "HYPRE_parcsr_mv.h"
+#include "mpi.h"
 /* DO-NOT-DELETE splicer.end(Hypre.IJParCSRMatrix._includes) */
 
 /*
@@ -58,7 +59,7 @@ impl_Hypre_IJParCSRMatrix__ctor(
    /* data = (struct Hypre_IJParCSRMatrix__data *)
       malloc( sizeof ( struct Hypre_IJParCSRMatrix__data ) ); */
 
-   data -> comm = (MPI_Comm)NULL;
+   data -> comm = MPI_COMM_NULL;
    data -> ij_A = NULL;
 
    Hypre_IJParCSRMatrix__set_data( self, data );
@@ -553,7 +554,7 @@ impl_Hypre_IJParCSRMatrix_SetLocalRange(
 
    ij_A = data -> ij_A;
 
-   if ( data-> comm == (MPI_Comm)NULL )    
+   if ( data -> comm == MPI_COMM_NULL )    
    {
 #ifdef HYPRE_DEBUG
       printf("Set Communicator must be called before Create in IJBuilder\n");

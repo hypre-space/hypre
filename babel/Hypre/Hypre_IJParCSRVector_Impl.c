@@ -36,6 +36,7 @@
 #include <assert.h>
 #include "parcsr_mv.h"
 #include "Hypre_IJBuildVector.h"
+#include "mpi.h"
 /* DO-NOT-DELETE splicer.end(Hypre.IJParCSRVector._includes) */
 
 /*
@@ -54,7 +55,7 @@ impl_Hypre_IJParCSRVector__ctor(
 
    struct Hypre_IJParCSRVector__data * data;
    data = hypre_CTAlloc( struct Hypre_IJParCSRVector__data, 1 );
-   data -> comm = (MPI_Comm)NULL;
+   data -> comm = MPI_COMM_NULL;
    data -> ij_b = NULL;
    Hypre_IJParCSRVector__set_data( self, data );
 
@@ -231,7 +232,7 @@ impl_Hypre_IJParCSRVector_SetLocalRange(
    data = Hypre_IJParCSRVector__get_data( self );
    ij_b = data -> ij_b;
    /* SetCommunicator should be called before Create */
-   assert( data->comm != (MPI_Comm)NULL );
+   assert( data->comm != MPI_COMM_NULL );
 
    ierr = HYPRE_IJVectorCreate( data->comm, jlower, jupper, &ij_b );
    ierr += HYPRE_IJVectorSetObjectType( ij_b, HYPRE_PARCSR );
