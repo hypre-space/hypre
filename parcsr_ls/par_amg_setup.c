@@ -146,14 +146,14 @@ hypre_ParAMGSetup( void               *amg_vdata,
    {
       F_array[j] =
          hypre_CreateParVector(hypre_ParCSRMatrixComm(A_array[j]),
-                               hypre_ParCSRMatrixNumRows(A_array[j]),
+                               hypre_ParCSRMatrixGlobalNumRows(A_array[j]),
                                hypre_ParCSRMatrixRowStarts(A_array[j]));
       hypre_InitializeParVector(F_array[j]);
       hypre_SetParVectorPartitioningOwner(F_array[j],0);
 
       U_array[j] =
          hypre_CreateParVector(hypre_ParCSRMatrixComm(A_array[j]),
-                               hypre_ParCSRMatrixNumRows(A_array[j]),
+                               hypre_ParCSRMatrixGlobalNumRows(A_array[j]),
                                hypre_ParCSRMatrixRowStarts(A_array[j]));
       hypre_InitializeParVector(U_array[j]);
       hypre_SetParVectorPartitioningOwner(U_array[j],0);
