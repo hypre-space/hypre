@@ -81,4 +81,6 @@
             - major reorganization of the block preconditioning module
 12/05/01    2.0.1R9
             - fix several memory leaks
+12/19/01    2.0.1R10
+            - add links to MLI
  
