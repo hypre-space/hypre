@@ -25,6 +25,7 @@ int
 main( int   argc,
       char *argv[] )
 {
+   MPI_Comm           *comm;
    int                 vector_num_ghost[6] = { 0, 0, 0, 0, 0, 0};
 
    zzz_StructVector   *vector_root, **sub_vectors;
@@ -61,6 +62,7 @@ main( int   argc,
 
    MPI_Comm_size(MPI_COMM_WORLD, &num_procs );
    MPI_Comm_rank(MPI_COMM_WORLD, &myid );
+   MPI_Comm_dup(MPI_COMM_WORLD, comm);
 
    cegdb(&argc, &argv, myid);
 
@@ -109,14 +111,14 @@ main( int   argc,
 
    /* read grid info */
    fscanf(file_root, "\nGrid:\n");
-   grid_root = zzz_ReadStructGrid(file_root);
+   grid_root = zzz_ReadStructGrid(comm, file_root);
    dim = zzz_StructGridDim(grid_root);
 
    /*----------------------------------------
     * Initialize the vector
     *----------------------------------------*/
 
-   vector_root = zzz_NewStructVector(&MPI_COMM_WORLD, grid_root);
+   vector_root = zzz_NewStructVector(comm, grid_root);
    zzz_SetStructVectorNumGhost(vector_root, vector_num_ghost);
    zzz_InitializeStructVector(vector_root);
 
@@ -183,7 +185,7 @@ main( int   argc,
 	   for (i = 0; i < sub_i; i++)
 	     {
 	       i_file += 1;
-	       sub_grids[i_file] = zzz_NewStructGrid(&MPI_COMM_WORLD, dim);
+	       sub_grids[i_file] = zzz_NewStructGrid(comm, dim);
 
 	       zzz_IndexX(ilower) = imin + i*del_i;
 	       zzz_IndexY(ilower) = jmin + j*del_j;
@@ -218,8 +220,7 @@ main( int   argc,
 	       zzz_AssembleStructGrid(sub_grids[i_file]);
 
 	       sub_vectors[i_file] = 
-		 zzz_NewStructVector(&MPI_COMM_WORLD, 
-				     sub_grids[i_file]); 
+		 zzz_NewStructVector(comm, sub_grids[i_file]); 
 	       zzz_SetStructVectorNumGhost(sub_vectors[i_file], 
 					   vector_num_ghost); 
 	       zzz_InitializeStructVector(sub_vectors[i_file]);
@@ -278,6 +279,13 @@ main( int   argc,
 
    zzz_FreeStructGrid(zzz_StructVectorGrid(vector_root));
    zzz_FreeStructVector(vector_root);
+   for (i_file = 0; i_file < num_files; i_file++)
+     {
+       zzz_FreeStructGrid(zzz_StructVectorGrid(sub_vectors[i_file]));
+       zzz_FreeStructVector(sub_vectors[i_file]);
+     }
+   zzz_TFree(sub_grids);
+   zzz_TFree(sub_vectors);
 
    /* malloc debug stuff */
    malloc_verify(0);
