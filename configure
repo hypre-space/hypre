@@ -7945,6 +7945,7 @@ subdirs="$config_babel_runtime"
  IJ_mv\
  krylov\
  matrix_matrix\
+ parcsr_es/LOBPCG\
  parcsr_ls\
  parcsr_mv\
  PETSc_ls\
