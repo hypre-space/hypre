@@ -34,14 +34,14 @@ HYPRE_IJ_DIRS =\
 
 #These are the directories for FEI interface
 HYPRE_FEI_DIRS =\
- FEI_matrix_vector/fei-hypre\
- FEI_matrix_vector/fei-base\
- FEI_matrix_vector/isis-mv ${HYPRE_IJ_DIRS}
+ FEI_matrix_vector/fei-hypre ${HYPRE_IJ_DIRS}
+# FEI_matrix_vector/fei-base\
+# FEI_matrix_vector/isis-mv 
 
 HYPRE_FEI_LIBFILES =\
- libFEI_BASE.a         libHYPRE_ls.a           libHYPRE_DistributedMatrix.a \
- libHYPRE_mv.a         libHYPRE_parcsr_ls.a    libHYPRE_FEI.a \
- libHYPRE_parcsr_mv.a  libHYPRE_seq_mv.a       libHYPRE_IJ_mv.a \
+ libHYPRE_parcsr_ls.a  libHYPRE_DistributedMatrix.a \
+ libHYPRE_parcsr_mv.a  libHYPRE_FEI.a \
+ libHYPRE_seq_mv.a     libHYPRE_IJ_mv.a \
  libHYPRE_utilities.a  libHYPRE_MatrixMatrix.a libHYPRE_ParaSails.a \
  libHYPRE_DistributedMatrixPilutSolver.a  
 
@@ -123,11 +123,13 @@ fei: base
 	done; \
 	mkdir -p hypre/tmp; \
 	mv -f hypre/lib/*.a hypre/tmp; \
+	mv hypre/tmp/libHYPRE_blas.a hypre/lib; \
 	for i in ${HYPRE_FEI_LIBFILES}; \
 	do \
-	   ar x hypre/tmp/$$i; \
+	   (cd hypre/tmp; ar x $$i; rm -f ___*;) \
 	done; \
-	ar ruv /hypre/lib/libHYPRE_FEI.a; \
+	(cd hypre/tmp; ar ru ../lib/libHYPRE_LSI.a *.o;); \
+	rm -rf hypre/tmp; \
 	echo ""
 
 base:
