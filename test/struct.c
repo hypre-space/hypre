@@ -75,6 +75,7 @@ main( int   argc,
    int                 n_pre, n_post;
    int                 nblocks ;
    int                 skip;
+   int                 relax;
    int                 jump;
 
    int               **iupper;
@@ -91,15 +92,17 @@ main( int   argc,
    int                 i, s;
    int                 ix, iy, iz, ib;
 
-   int             read_fromfile_param;
-   int             read_fromfile_index;
-   int             read_rhsfromfile_param;
-   int             read_rhsfromfile_index;
-   int             read_x0fromfile_param;
-   int             read_x0fromfile_index;
-   int             periodx0[3] = {0,0,0};
-   int             *readperiodic;
-   int             sum;
+   int                 read_fromfile_param;
+   int                 read_fromfile_index;
+   int                 read_rhsfromfile_param;
+   int                 read_rhsfromfile_index;
+   int                 read_x0fromfile_param;
+   int                 read_x0fromfile_index;
+   int                 periodx0[3] = {0,0,0};
+   int                *readperiodic;
+   int                 sum;
+
+   int                 print_system = 0;
 
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -129,8 +132,9 @@ main( int   argc,
  
    dim = 3;
 
-   skip = 0;
-   jump = 0;
+   skip  = 0;
+   relax = 1;
+   jump  = 0;
 
    nx = 10;
    ny = 10;
@@ -226,41 +230,10 @@ main( int   argc,
          cy = atof(argv[arg_index++]);
          cz = atof(argv[arg_index++]);
       }
-      else if ( strcmp(argv[arg_index], "-v") == 0 )
-      {
-         arg_index++;
-         n_pre = atoi(argv[arg_index++]);
-         n_post = atoi(argv[arg_index++]);
-      }
       else if ( strcmp(argv[arg_index], "-d") == 0 )
       {
          arg_index++;
          dim = atoi(argv[arg_index++]);
-      }
-      else if ( strcmp(argv[arg_index], "-skip") == 0 )
-      {
-         arg_index++;
-         skip = atoi(argv[arg_index++]);
-      }
-      else if ( strcmp(argv[arg_index], "-jump") == 0 )
-      {
-         arg_index++;
-         jump = atoi(argv[arg_index++]);
-      }
-      else if ( strcmp(argv[arg_index], "-solver") == 0 )
-      {
-         arg_index++;
-         solver_id = atoi(argv[arg_index++]);
-      }
-      else if ( strcmp(argv[arg_index], "-solver_type") == 0 )
-      {
-         arg_index++;
-         solver_type = atoi(argv[arg_index++]);
-      }
-      else if ( strcmp(argv[arg_index], "-cf") == 0 )
-      {
-         arg_index++;
-         cf_tol = atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-fromfile") == 0 )
       {
@@ -279,6 +252,47 @@ main( int   argc,
          arg_index++;
          read_x0fromfile_param = 1;
          read_x0fromfile_index = arg_index;
+      }
+      else if ( strcmp(argv[arg_index], "-solver") == 0 )
+      {
+         arg_index++;
+         solver_id = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-v") == 0 )
+      {
+         arg_index++;
+         n_pre = atoi(argv[arg_index++]);
+         n_post = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-relax") == 0 )
+      {
+         arg_index++;
+         relax = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-skip") == 0 )
+      {
+         arg_index++;
+         skip = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-jump") == 0 )
+      {
+         arg_index++;
+         jump = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-solver_type") == 0 )
+      {
+         arg_index++;
+         solver_type = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-cf") == 0 )
+      {
+         arg_index++;
+         cf_tol = atof(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-print") == 0 )
+      {
+         arg_index++;
+         print_system = 1;
       }
       else if ( strcmp(argv[arg_index], "-help") == 0 )
       {
@@ -302,46 +316,52 @@ main( int   argc,
       printf("\n");
       printf("Usage: %s [<options>]\n", argv[0]);
       printf("\n");
-      printf("  -n <nx> <ny> <nz>    : problem size per block\n");
-      printf("  -P <Px> <Py> <Pz>    : processor topology\n");
-      printf("  -b <bx> <by> <bz>    : blocking per processor\n");
-      printf("  -p <px> <py> <pz>    : periodicity in each dimension\n");
-      printf("  -c <cx> <cy> <cz>    : diffusion coefficients\n");
-      printf("  -v <n_pre> <n_post>  : number of pre and post relaxations\n");
-      printf("  -d <dim>             : problem dimension (2 or 3)\n");
-      printf("  -skip <s>            : skip some relaxation in PFMG (0 or 1)\n");
-      printf("  -jump <num>          : num levels to jump in SparseMSG\n");
-      printf("  -fromfile <name>     : prefix name for matrixfiles\n");
-      printf("  -rhsfromfile <name>  : prefix name for rhsfiles\n");
-      printf("  -x0fromfile <name>   : prefix name for firstguessfiles\n");
-      printf("  -solver <ID>         : solver ID (default = 0)\n");
-      printf("                         0  - SMG\n");
-      printf("                         1  - PFMG\n");
-      printf("                         2  - SparseMSG\n");
-      printf("                         10 - CG with SMG precond\n");
-      printf("                         11 - CG with PFMG precond\n");
-      printf("                         12 - CG with SparseMSG precond\n");
-      printf("                         17 - CG with 2-step Jacobi\n");
-      printf("                         18 - CG with diagonal scaling\n");
-      printf("                         19 - CG\n");
-      printf("                         20 - Hybrid with SMG precond\n");
-      printf("                         21 - Hybrid with PFMG precond\n");
-      printf("                         22 - Hybrid with SparseMSG precond\n");
-      printf("                         30 - GMRES with SMG precond\n");
-      printf("                         31 - GMRES with PFMG precond\n");
-      printf("                         32 - GMRES with SparseMSG precond\n");
-      printf("                         37 - GMRES with 2-step Jacobi\n");
-      printf("                         38 - GMRES with diagonal scaling\n");
-      printf("                         39 - GMRES\n");
-      printf("                         40 - BiCGSTAB with SMG precond\n");
-      printf("                         41 - BiCGSTAB with PFMG precond\n");
-      printf("                         42 - BiCGSTAB with SparseMSG precond\n");
-      printf("                         47 - BiCGSTAB with 2-step Jacobi\n");
-      printf("                         48 - BiCGSTAB with diagonal scaling\n");
-      printf("                         49 - BiCGSTAB\n");
-      printf("  -solver_type <ID>    : solver type for Hybrid(default = PCG)\n");
-      printf("                         2 - GMRES\n");
-      printf("  -cf <cf>             : convergence factor for Hybrid\n");
+      printf("  -n <nx> <ny> <nz>   : problem size per block\n");
+      printf("  -P <Px> <Py> <Pz>   : processor topology\n");
+      printf("  -b <bx> <by> <bz>   : blocking per processor\n");
+      printf("  -p <px> <py> <pz>   : periodicity in each dimension\n");
+      printf("  -c <cx> <cy> <cz>   : diffusion coefficients\n");
+      printf("  -d <dim>            : problem dimension (2 or 3)\n");
+      printf("  -fromfile <name>    : prefix name for matrixfiles\n");
+      printf("  -rhsfromfile <name> : prefix name for rhsfiles\n");
+      printf("  -x0fromfile <name>  : prefix name for firstguessfiles\n");
+      printf("  -solver <ID>        : solver ID\n");
+      printf("                        0  - SMG (default)\n");
+      printf("                        1  - PFMG\n");
+      printf("                        2  - SparseMSG\n");
+      printf("                        10 - CG with SMG precond\n");
+      printf("                        11 - CG with PFMG precond\n");
+      printf("                        12 - CG with SparseMSG precond\n");
+      printf("                        17 - CG with 2-step Jacobi\n");
+      printf("                        18 - CG with diagonal scaling\n");
+      printf("                        19 - CG\n");
+      printf("                        20 - Hybrid with SMG precond\n");
+      printf("                        21 - Hybrid with PFMG precond\n");
+      printf("                        22 - Hybrid with SparseMSG precond\n");
+      printf("                        30 - GMRES with SMG precond\n");
+      printf("                        31 - GMRES with PFMG precond\n");
+      printf("                        32 - GMRES with SparseMSG precond\n");
+      printf("                        37 - GMRES with 2-step Jacobi\n");
+      printf("                        38 - GMRES with diagonal scaling\n");
+      printf("                        39 - GMRES\n");
+      printf("                        40 - BiCGSTAB with SMG precond\n");
+      printf("                        41 - BiCGSTAB with PFMG precond\n");
+      printf("                        42 - BiCGSTAB with SparseMSG precond\n");
+      printf("                        47 - BiCGSTAB with 2-step Jacobi\n");
+      printf("                        48 - BiCGSTAB with diagonal scaling\n");
+      printf("                        49 - BiCGSTAB\n");
+      printf("  -v <n_pre> <n_post> : number of pre and post relaxations\n");
+      printf("  -relax <r>          : relaxation type\n");
+      printf("                        0 - Jacobi\n");
+      printf("                        1 - Weighted Jacobi (default)\n");
+      printf("                        2 - R/B Gauss-Seidel\n");
+      printf("                        3 - R/B Gauss-Seidel (nonsymmetric)\n");
+      printf("  -skip <s>           : skip levels in PFMG (0 or 1)\n");
+      printf("  -jump <num>         : num levels to jump in SparseMSG\n");
+      printf("  -solver_type <ID>   : solver type for Hybrid\n");
+      printf("                        1 - PCG (default)\n");
+      printf("                        2 - GMRES\n");
+      printf("  -cf <cf>            : convergence factor for Hybrid\n");
       printf("\n");
    }
 
@@ -631,10 +651,6 @@ main( int   argc,
       SetStencilBndry(A,grid,periodic); 
       HYPRE_StructMatrixAssemble(A);
 
-#if 0
-      HYPRE_StructMatrixPrint("drive.out.A", A, 0);
-#endif
-
       /*-----------------------------------------------------------
        * Set up the linear system
        *-----------------------------------------------------------*/
@@ -651,20 +667,12 @@ main( int   argc,
       AddValuesVector(grid,b,periodic,1.0);
       HYPRE_StructVectorAssemble(b);
 
-#if 0
-      HYPRE_StructVectorPrint("drive.out.b", b, 0);
-#endif
-   
       HYPRE_StructVectorCreate(MPI_COMM_WORLD, grid, &x);
       HYPRE_StructVectorInitialize(x);
     
   
       AddValuesVector(grid,x,periodx0,0.0);
       HYPRE_StructVectorAssemble(x);
-
-#if 0
-      HYPRE_StructVectorPrint("drive.out.x0", x, 0);
-#endif
 
       /* finishing the setup of linear system here extreme case
        * end of if sum == 0 
@@ -732,13 +740,6 @@ main( int   argc,
            
             SetStencilBndry(A,readgrid,readperiodic); 
             HYPRE_StructMatrixAssemble(A);
-
-#if 0
-            HYPRE_StructVectorPrint("drive.readout.b", b, 0);
-            HYPRE_StructVectorPrint("drive.readout.x0", x, 0);
-            HYPRE_StructMatrixPrint("drive.readout.A", A, 0);
-#endif
-
          }   
          /* done with one case rhs=1 x0 = 0  */
 
@@ -786,13 +787,6 @@ main( int   argc,
 
             SetStencilBndry(A,readgrid,readperiodic); 
             HYPRE_StructMatrixAssemble(A);
-
-#if 0
-            HYPRE_StructVectorPrint("drive.readout.b", b, 0);
-            HYPRE_StructVectorPrint("drive.readout.x0", x, 0);
-            HYPRE_StructMatrixPrint("drive.readout.A", A, 0);
-#endif
-
 	 }
          /* done with one case rhs=0 x0 = 1  */
          
@@ -842,11 +836,6 @@ main( int   argc,
 
             SetStencilBndry(A,readgrid,readperiodic); 
             HYPRE_StructMatrixAssemble(A);
-#if 0
-            HYPRE_StructVectorPrint("drive.readout.x0", x, 0);
-            HYPRE_StructVectorPrint("drive.readout.b", b, 0);  
-            HYPRE_StructMatrixPrint("drive.readout.A", A, 0);
-#endif
 	 }
          /* done with one case rhs=1 x0 = 1  */
       }
@@ -891,13 +880,6 @@ main( int   argc,
             HYPRE_StructVectorInitialize(x);
             AddValuesVector(readgrid,x,periodx0,0.0);
             HYPRE_StructVectorAssemble(x);
-
-
-#if 0
-            HYPRE_StructVectorPrint("drive.readout.x0", x, 0);
-            HYPRE_StructVectorPrint("drive.readout.b", b, 0);
-            HYPRE_StructMatrixPrint("drive.readout.A", A, 0);
-#endif
 	 }
 
          if ((read_rhsfromfile_param == 0) && (read_x0fromfile_param > 0))
@@ -922,11 +904,6 @@ main( int   argc,
             HYPRE_StructVectorInitialize(b);
             AddValuesVector(readgrid,b,readperiodic,1.0);
             HYPRE_StructVectorAssemble(b);
-#if 0
-            HYPRE_StructVectorPrint("drive.readout.x0", x, 0);
-            HYPRE_StructVectorPrint("drive.readout.b", b, 0);
-            HYPRE_StructMatrixPrint("drive.readout.A", A, 0);
-#endif          
 	 }
 
          if ((read_rhsfromfile_param == 0) && (read_x0fromfile_param == 0))
@@ -942,13 +919,6 @@ main( int   argc,
             HYPRE_StructVectorInitialize(x);
             AddValuesVector(readgrid,x,periodx0,0.0);
             HYPRE_StructVectorAssemble(x); 
-
-#if 0
-            HYPRE_StructVectorPrint("drive.readout.x0", x, 0);
-            HYPRE_StructVectorPrint("drive.readout.b", b, 0);
-            HYPRE_StructMatrixPrint("drive.readout.A", A, 0);
-#endif
-		  
 	 }   
       }
       /* finish the read of matrix  */
@@ -962,6 +932,17 @@ main( int   argc,
    hypre_PrintTiming("Struct Interface", MPI_COMM_WORLD);
    hypre_FinalizeTiming(time_index);
    hypre_ClearTiming();
+
+   /*-----------------------------------------------------------
+    * Print out the system and initial guess
+    *-----------------------------------------------------------*/
+
+   if (print_system)
+   {
+      HYPRE_StructMatrixPrint("struct.out.A", A, 0);
+      HYPRE_StructVectorPrint("struct.out.b", b, 0);
+      HYPRE_StructVectorPrint("struct.out.x0", x, 0);
+   }
 
    /*-----------------------------------------------------------
     * Solve the system using SMG
@@ -1018,8 +999,7 @@ main( int   argc,
       HYPRE_StructPFMGSetMaxIter(solver, 50);
       HYPRE_StructPFMGSetTol(solver, 1.0e-06);
       HYPRE_StructPFMGSetRelChange(solver, 0);
-      /* weighted Jacobi = 1; red-black GS = 2 */
-      HYPRE_StructPFMGSetRelaxType(solver, 1);
+      HYPRE_StructPFMGSetRelaxType(solver, relax);
       HYPRE_StructPFMGSetNumPreRelax(solver, n_pre);
       HYPRE_StructPFMGSetNumPostRelax(solver, n_post);
       HYPRE_StructPFMGSetSkipRelax(solver, skip);
@@ -1062,8 +1042,7 @@ main( int   argc,
       HYPRE_StructSparseMSGSetJump(solver, jump);
       HYPRE_StructSparseMSGSetTol(solver, 1.0e-06);
       HYPRE_StructSparseMSGSetRelChange(solver, 0);
-      /* weighted Jacobi = 1; red-black GS = 2 */
-      HYPRE_StructSparseMSGSetRelaxType(solver, 1);
+      HYPRE_StructSparseMSGSetRelaxType(solver, relax);
       HYPRE_StructSparseMSGSetNumPreRelax(solver, n_pre);
       HYPRE_StructSparseMSGSetNumPostRelax(solver, n_post);
       HYPRE_StructSparseMSGSetPrintLevel(solver, 1);
@@ -1132,8 +1111,7 @@ main( int   argc,
          HYPRE_StructPFMGSetMaxIter(precond, 1);
          HYPRE_StructPFMGSetTol(precond, 0.0);
          HYPRE_StructPFMGSetZeroGuess(precond);
-         /* weighted Jacobi = 1; red-black GS = 2 */
-         HYPRE_StructPFMGSetRelaxType(precond, 1);
+         HYPRE_StructPFMGSetRelaxType(precond, relax);
          HYPRE_StructPFMGSetNumPreRelax(precond, n_pre);
          HYPRE_StructPFMGSetNumPostRelax(precond, n_post);
          HYPRE_StructPFMGSetSkipRelax(precond, skip);
@@ -1154,8 +1132,7 @@ main( int   argc,
          HYPRE_StructSparseMSGSetJump(precond, jump);
          HYPRE_StructSparseMSGSetTol(precond, 0.0);
          HYPRE_StructSparseMSGSetZeroGuess(precond);
-         /* weighted Jacobi = 1; red-black GS = 2 */
-         HYPRE_StructSparseMSGSetRelaxType(precond, 1);
+         HYPRE_StructSparseMSGSetRelaxType(precond, relax);
          HYPRE_StructSparseMSGSetNumPreRelax(precond, n_pre);
          HYPRE_StructSparseMSGSetNumPostRelax(precond, n_post);
          HYPRE_StructSparseMSGSetPrintLevel(precond, 0);
@@ -1287,8 +1264,7 @@ main( int   argc,
          HYPRE_StructPFMGSetMaxIter(precond, 1);
          HYPRE_StructPFMGSetTol(precond, 0.0);
          HYPRE_StructPFMGSetZeroGuess(precond);
-         /* weighted Jacobi = 1; red-black GS = 2 */
-         HYPRE_StructPFMGSetRelaxType(precond, 1);
+         HYPRE_StructPFMGSetRelaxType(precond, relax);
          HYPRE_StructPFMGSetNumPreRelax(precond, n_pre);
          HYPRE_StructPFMGSetNumPostRelax(precond, n_post);
          HYPRE_StructPFMGSetSkipRelax(precond, skip);
@@ -1309,8 +1285,7 @@ main( int   argc,
          HYPRE_StructSparseMSGSetMaxIter(precond, 1);
          HYPRE_StructSparseMSGSetTol(precond, 0.0);
          HYPRE_StructSparseMSGSetZeroGuess(precond);
-         /* weighted Jacobi = 1; red-black GS = 2 */
-         HYPRE_StructSparseMSGSetRelaxType(precond, 1);
+         HYPRE_StructSparseMSGSetRelaxType(precond, relax);
          HYPRE_StructSparseMSGSetNumPreRelax(precond, n_pre);
          HYPRE_StructSparseMSGSetNumPostRelax(precond, n_post);
          HYPRE_StructSparseMSGSetPrintLevel(precond, 0);
@@ -1397,8 +1372,7 @@ main( int   argc,
          HYPRE_StructPFMGSetMaxIter(precond, 1);
          HYPRE_StructPFMGSetTol(precond, 0.0);
          HYPRE_StructPFMGSetZeroGuess(precond);
-         /* weighted Jacobi = 1; red-black GS = 2 */
-         HYPRE_StructPFMGSetRelaxType(precond, 1);
+         HYPRE_StructPFMGSetRelaxType(precond, relax);
          HYPRE_StructPFMGSetNumPreRelax(precond, n_pre);
          HYPRE_StructPFMGSetNumPostRelax(precond, n_post);
          HYPRE_StructPFMGSetSkipRelax(precond, skip);
@@ -1419,8 +1393,7 @@ main( int   argc,
          HYPRE_StructSparseMSGSetJump(precond, jump);
          HYPRE_StructSparseMSGSetTol(precond, 0.0);
          HYPRE_StructSparseMSGSetZeroGuess(precond);
-         /* weighted Jacobi = 1; red-black GS = 2 */
-         HYPRE_StructSparseMSGSetRelaxType(precond, 1);
+         HYPRE_StructSparseMSGSetRelaxType(precond, relax);
          HYPRE_StructSparseMSGSetNumPreRelax(precond, n_pre);
          HYPRE_StructSparseMSGSetNumPostRelax(precond, n_post);
          HYPRE_StructSparseMSGSetPrintLevel(precond, 0);
@@ -1542,8 +1515,7 @@ main( int   argc,
          HYPRE_StructPFMGSetMaxIter(precond, 1);
          HYPRE_StructPFMGSetTol(precond, 0.0);
          HYPRE_StructPFMGSetZeroGuess(precond);
-         /* weighted Jacobi = 1; red-black GS = 2 */
-         HYPRE_StructPFMGSetRelaxType(precond, 1);
+         HYPRE_StructPFMGSetRelaxType(precond, relax);
          HYPRE_StructPFMGSetNumPreRelax(precond, n_pre);
          HYPRE_StructPFMGSetNumPostRelax(precond, n_post);
          HYPRE_StructPFMGSetSkipRelax(precond, skip);
@@ -1564,8 +1536,7 @@ main( int   argc,
          HYPRE_StructSparseMSGSetJump(precond, jump);
          HYPRE_StructSparseMSGSetTol(precond, 0.0);
          HYPRE_StructSparseMSGSetZeroGuess(precond);
-         /* weighted Jacobi = 1; red-black GS = 2 */
-         HYPRE_StructSparseMSGSetRelaxType(precond, 1);
+         HYPRE_StructSparseMSGSetRelaxType(precond, relax);
          HYPRE_StructSparseMSGSetNumPreRelax(precond, n_pre);
          HYPRE_StructSparseMSGSetNumPostRelax(precond, n_post);
          HYPRE_StructSparseMSGSetPrintLevel(precond, 0);
@@ -1651,9 +1622,10 @@ main( int   argc,
     * Print the solution and other info
     *-----------------------------------------------------------*/
 
-#if 0
-   HYPRE_StructVectorPrint("drive.out.x", x, 0);
-#endif
+   if (print_system)
+   {
+      HYPRE_StructVectorPrint("struct.out.x", x, 0);
+   }
 
    if (myid == 0)
    {
