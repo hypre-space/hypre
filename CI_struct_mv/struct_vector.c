@@ -193,7 +193,6 @@ hypre_RetrievalOnStructInterfaceVector( hypre_StructInterfaceVector *vector )
    else
       return(-1);
 
-   return(ierr);
 }
 
 /*--------------------------------------------------------------------------
@@ -212,7 +211,6 @@ hypre_RetrievalOffStructInterfaceVector( hypre_StructInterfaceVector *vector )
    else
       return(-1);
 
-   return(ierr);
 }
 
 /*--------------------------------------------------------------------------
@@ -237,7 +235,6 @@ hypre_GetStructInterfaceVectorValue( hypre_StructInterfaceVector *vector,
    else
       return(-1);
 
-   return(ierr);
 }
 
 

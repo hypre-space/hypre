@@ -33,6 +33,7 @@ LOCALFILES =\
  struct_stencil.c\
  struct_matrix.c\
  struct_matrix_PETSc.c\
+ struct_matrix_ParCSR.c\
  struct_vector.c\
  struct_vector_PETSc.c
 
