@@ -37,10 +37,10 @@ endif !BLASNEEDED
 if LAPACKNEEDED
 LAPACKDIR = lapack
 LAPACKFILES = \
- $(top_srcdir)/dgels.c\
- $(top_srcdir)/dsyev.c\
- $(top_srcdir)/dsygv.c\
- $(top_srcdir)/lapack_utils.c
+ $(top_srcdir)/lapack/dgels.c\
+ $(top_srcdir)/lapack/dsyev.c\
+ $(top_srcdir)/lapack/dsygv.c\
+ $(top_srcdir)/lapack/lapack_utils.c
 else !LAPACKNEEDED
 LAPACKDIR = 
 LAPACKFILES =
