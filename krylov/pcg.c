@@ -437,7 +437,7 @@ hypre_PCGSolve( void *pcg_vdata,
             printf("Iters       ||r||_2     conv.rate\n");
             printf("-----    ------------   ---------\n");
             for (j = 1; j <= i; j++) {
-               printf("% 5d    %e    %f    %e\n", j, norms[j],
+               printf("% 5d    %e    %f\n", j, norms[j],
                       norms[j]/norms[j-1] );
             }
          }
