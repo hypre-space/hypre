@@ -90,6 +90,8 @@ do
         fi
     else
         echo "ERROR ${i} test suite did not compile..."
+        echo "${i} does not exist" > ${i}.log
+        echo "test suite not run, check for compile errors." >> ${i}.log
         echo "${i} does not exist" > ${i}.err
         echo "test suite not run, check for compile errors." >> ${i}.err
     fi
