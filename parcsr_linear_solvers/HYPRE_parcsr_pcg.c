@@ -71,8 +71,8 @@ HYPRE_ParCSRPCGSetup( HYPRE_Solver solver,
 int 
 HYPRE_ParCSRPCGSolve( HYPRE_Solver solver,
                       HYPRE_Matrix A,
-                      HYPRE_ParVector b,
-                      HYPRE_ParVector x      )
+                      HYPRE_Vector b,
+                      HYPRE_Vector x      )
 {
    return( HYPRE_PCGSolve( solver, A, b, x ) );
 }
