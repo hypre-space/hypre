@@ -30,6 +30,8 @@
 #include "Hypre_MPI_Com.h"
 #include "Hypre_PCG_Skel.h"
 #include "Hypre_PCG_Data.h"
+#include "Hypre_GMRES_Skel.h"
+#include "Hypre_GMRES_Data.h"
 
 # define	P(s) s
 
@@ -92,6 +94,8 @@ main( int   argc,
    Hypre_ParAMG        AMG_Solver;
    Hypre_PCG           PCG_Solver;
    Hypre_Solver        PCG_Precond;
+   Hypre_GMRES         GMRES_Solver;
+   Hypre_Solver        GMRES_Precond;
 
    HYPRE_ParVector     b;
    HYPRE_ParVector     x;
@@ -574,6 +578,34 @@ main( int   argc,
    time_index = hypre_InitializeTiming("IJ Interface");
    hypre_BeginTiming(time_index);
 
+/* jfp 0400: The following matrix build functions are interfaces to
+   hypre-level functions which do the work, and return pointers to new
+   HYPRE-level objects.  We have the following options for Babelizing them:
+
+   1. Use these functions, then stick the HYPRE matrix into the Babel
+   interface's Hypre matrix.  That is what I'm doing now.  Advantage: quick,
+   simple, not-too-dirty way to convert the HYPRE-level driver into
+   something which can test most of the new Babel interfaces.
+   Disadvantages: some parts of the Babel interface are not tested, notably
+   matrix element loading functions. The need to do this suggests that we
+   need to put more into the Babel interface.  This cannot be done in
+   Fortran.
+
+   2. Redo the hypre-level matrix build functions using the Babel interface,
+   e.g. InsertBlock.  This is feasible, but involves a lot of time for
+   little payoff (it's just a demo).
+
+   3. Write an interface to each of the existing construction functions.
+   This messes up the SIDL file to an extent which overwhelms any advantages.
+
+   4. Write a generic interface to construction functions.  Implement it by
+   dispatching to one of these functions.  I don't have a good argument
+   against this, but I don't feel good about it - it feels like it's not
+   a real change, it just hides things.
+
+   Most of the above comments apply to vector building as well.
+*/
+
    if ( build_matrix_type == 0 )
    {
       BuildParFromFile(argc, argv, build_matrix_arg_index, &parcsr_A);
@@ -993,6 +1025,7 @@ main( int   argc,
          Hypre_ParAMG_SetDoubleParameter( AMG_Solver, "strong threshold",
                                           strong_threshold );
          Hypre_ParAMG_SetIntParameter( AMG_Solver, "max iter", 1 );
+         Hypre_ParAMG_SetIntParameter( AMG_Solver, "logging", ioutdat );
          Hypre_ParAMG_SetStringParameter( AMG_Solver, "log file name",
                                           "driver.out.log" );
          Hypre_ParAMG_SetIntParameter( AMG_Solver, "cycle type", cycle_type );
@@ -1129,17 +1162,49 @@ main( int   argc,
       time_index = hypre_InitializeTiming("GMRES Setup");
       hypre_BeginTiming(time_index);
  
+      GMRES_Solver = Hypre_GMRES_Constructor( Hcomm );
+      ierr += Hypre_GMRES_SetIntParameter( GMRES_Solver, "k_dim", k_dim );
+      ierr += Hypre_GMRES_SetIntParameter( GMRES_Solver, "max iter", 100 );
+      ierr += Hypre_GMRES_SetDoubleParameter( GMRES_Solver, "tol", tol );
+      ierr += Hypre_GMRES_SetIntParameter( GMRES_Solver, "logging", 1 );
+      
+/*
       HYPRE_ParCSRGMRESCreate(MPI_COMM_WORLD, &pcg_solver);
       HYPRE_ParCSRGMRESSetKDim(pcg_solver, k_dim);
       HYPRE_ParCSRGMRESSetMaxIter(pcg_solver, 100);
       HYPRE_ParCSRGMRESSetTol(pcg_solver, tol);
       HYPRE_ParCSRGMRESSetLogging(pcg_solver, 1);
- 
+*/ 
       if (solver_id == 3)
       {
          /* use BoomerAMG as preconditioner */
          if (myid == 0) printf("Solver: AMG-GMRES\n");
 
+         AMG_Solver = Hypre_ParAMG_Constructor( Hcomm );
+         GMRES_Precond = (Hypre_Solver) Hypre_ParAMG_castTo(
+            AMG_Solver, "Hypre_Solver" );
+         Hypre_ParAMG_SetIntParameter( AMG_Solver, "coarsen type",
+                                       (hybrid*coarsen_type) );
+         Hypre_ParAMG_SetIntParameter( AMG_Solver, "measure type", measure_type );
+         Hypre_ParAMG_SetDoubleParameter( AMG_Solver, "strong threshold",
+                                          strong_threshold );
+         Hypre_ParAMG_SetIntParameter( AMG_Solver, "logging", ioutdat );
+         Hypre_ParAMG_SetStringParameter( AMG_Solver, "log file name",
+                                          "driver.out.log" );
+         Hypre_ParAMG_SetIntParameter( AMG_Solver, "max iter", 1 );
+         Hypre_ParAMG_SetIntParameter( AMG_Solver, "cycle type", cycle_type );
+         Hypre_ParAMG_SetIntArrayParameter( AMG_Solver, "num grid sweeps",
+                                            Num_Grid_Sweeps );
+         Hypre_ParAMG_SetIntArrayParameter( AMG_Solver, "grid relax type",
+                                            Grid_Relax_Type );
+         Hypre_ParAMG_SetDoubleArrayParameter( AMG_Solver, "relax weight",
+                                               Relax_Weight );
+         Hypre_ParAMG_SetIntArray2Parameter( AMG_Solver, "grid relax points",
+                                             Grid_Relax_Points );
+         Hypre_ParAMG_SetIntParameter( AMG_Solver, "max levels", max_levels );
+         Hypre_ParAMG_SetIntParameter( AMG_Solver, "debug", debug_flag );
+
+/*
          HYPRE_ParAMGCreate(&pcg_precond); 
          HYPRE_ParAMGSetCoarsenType(pcg_precond, (hybrid*coarsen_type));
          HYPRE_ParAMGSetMeasureType(pcg_precond, measure_type);
@@ -1152,10 +1217,17 @@ main( int   argc,
          HYPRE_ParAMGSetRelaxWeight(pcg_precond, relax_weight);
          HYPRE_ParAMGSetGridRelaxPoints(pcg_precond, grid_relax_points);
          HYPRE_ParAMGSetMaxLevels(pcg_precond, max_levels);
+*/
+         linop = (Hypre_LinearOperator) Hypre_ParCSRMatrix_castTo(
+            ij_matrix_Hypre, "Hypre_LinearOperator" );
+         Hypre_ParAMG_Setup( AMG_Solver, linop, b_HypreV, x_HypreV );
+         Hypre_GMRES_SetPreconditioner( GMRES_Solver, GMRES_Precond );
+/*
          HYPRE_ParCSRGMRESSetPrecond(pcg_solver,
                                      HYPRE_ParAMGSolve,
                                      HYPRE_ParAMGSetup,
                                      pcg_precond);
+*/
       }
       else if (solver_id == 4)
       {
@@ -1192,7 +1264,11 @@ main( int   argc,
                nonzeros_to_keep );
       }
  
-      HYPRE_ParCSRGMRESSetup(pcg_solver, A, b, x);
+      linop = (Hypre_LinearOperator) Hypre_ParCSRMatrix_castTo(
+         ij_matrix_Hypre, "Hypre_LinearOperator" );
+
+      ierr += Hypre_GMRES_Setup( GMRES_Solver, linop, b_HypreV, x_HypreV );
+/*      HYPRE_ParCSRGMRESSetup(pcg_solver, A, b, x); */
  
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
@@ -1202,15 +1278,22 @@ main( int   argc,
       time_index = hypre_InitializeTiming("GMRES Solve");
       hypre_BeginTiming(time_index);
  
-      HYPRE_ParCSRGMRESSolve(pcg_solver, A, b, x);
+      Hypre_GMRES_Apply( GMRES_Solver, b_HypreV, &x_HypreV );
+/*      HYPRE_ParCSRGMRESSolve(pcg_solver, A, b, x); */
  
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
  
-      HYPRE_ParCSRGMRESGetNumIterations(pcg_solver, &num_iterations);
+      ierr += Hypre_GMRES_GetConvergenceInfo(
+         GMRES_Solver, "number of iterations", pdouble );
+      num_iterations = *pdouble;
+      ierr += Hypre_GMRES_GetConvergenceInfo(
+         GMRES_Solver, "relative residual norm", &final_res_norm );
+/*      HYPRE_ParCSRGMRESGetNumIterations(pcg_solver, &num_iterations);
       HYPRE_ParCSRGMRESGetFinalRelativeResidualNorm(pcg_solver,&final_res_norm);
+*/
 #if SECOND_TIME
       /* run a second time to check for memory leaks */
       HYPRE_ParVectorSetRandomValues(x, 775);
@@ -1218,11 +1301,13 @@ main( int   argc,
       HYPRE_ParCSRGMRESSolve(pcg_solver, A, b, x);
 #endif
 
-      HYPRE_ParCSRGMRESDestroy(pcg_solver);
+      Hypre_GMRES_destructor( GMRES_Solver );
+/*      HYPRE_ParCSRGMRESDestroy(pcg_solver); */
  
       if (solver_id == 3)
       {
-         HYPRE_ParAMGDestroy(pcg_precond);
+         Hypre_ParAMG_destructor( AMG_Solver );
+/*         HYPRE_ParAMGDestroy(pcg_precond);*/
       }
 
       if (solver_id == 7)
