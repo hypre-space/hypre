@@ -7,8 +7,8 @@
 #define hypre_PARCSR_LS_HEADER
 
 #include "utilities.h"
-#include "../seq_matrix_vector/seq_matrix_vector.h"
-#include "../parcsr_matrix_vector/parcsr_matrix_vector.h"
+#include "seq_matrix_vector.h"
+#include "parcsr_matrix_vector.h"
 
 #ifdef __cplusplus
 extern "C" {
