@@ -1233,8 +1233,8 @@ hypre_PointRelax( void               *relax_vdata,
       }
       else
       {
-         /*         hypre_StructCopy(t, x);*/
-         hypre_relax_copy( relax_data, t, x );
+          /* hypre_relax_copy( relax_data, t, x );*/
+         hypre_StructCopy(t, x);
       }
 
       p    = (p + 1) % num_pointsets;
