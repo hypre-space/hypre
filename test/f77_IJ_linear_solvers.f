@@ -37,13 +37,12 @@ c-----------------------------------------------------------------------
       integer             debug_flag, ioutdat, cycle_type, k_dim
       integer             num_rows
 
-      integer             i, zero, one, maxiter, num_iterations
-      integer             num_grid_sweeps(4), grid_relax_type(4)
+      integer             zero, one, maxiter, num_iterations
       integer             generate_matrix, generate_rhs
       character           matfile(32), rhsfile(32)
 
       double precision    tol, convtol
-      double precision    final_res_norm, relax_weight(MAXLEVELS)
+      double precision    final_res_norm
       double precision    strong_threshold, trunc_factor, drop_tol
                      
 c     HYPRE_ParCSRMatrix  A
@@ -59,7 +58,10 @@ c     HYPRE_Solver        precond
 
       integer*8           solver
       integer*8           precond
-      integer*8           grid_relax_points(4)
+      integer*8           num_grid_sweeps
+      integer*8           grid_relax_type
+      integer*8           grid_relax_points
+      integer*8           relax_weights
       integer*8           row_starts
 
       double precision    values(4)
@@ -328,13 +330,15 @@ c Set defaults for BoomerAMG
         call HYPRE_ParAMGInitGridRelaxation(num_grid_sweeps,
      &                                      grid_relax_type,
      &                                      grid_relax_points,
-     &                                      coarsen_type, ierr)
+     &                                      coarsen_type,
+     &                                      relax_weights,
+     &                                      MAXLEVELS,ierr)
         call HYPRE_ParAMGSetNumGridSweeps(solver,
      &                                    num_grid_sweeps, ierr)
         call HYPRE_ParAMGSetGridRelaxType(solver,
      &                                    grid_relax_type, ierr)
         call HYPRE_ParAMGSetRelaxWeight(solver,
-     &                                  relax_weight, ierr)
+     &                                  relax_weights, ierr)
         call HYPRE_ParAMGSetGridRelaxPoints(solver,
      &                                      grid_relax_points, ierr)
         call HYPRE_ParAMGSetMaxLevels(solver, MAXLEVELS, ierr)
@@ -382,10 +386,6 @@ c Set defaults for BoomerAMG
           trunc_factor = 0.0
           cycle_type = 1
 
-          do i = 1, MAXLEVELS
-            relax_weight(i) = 0.0
-          enddo
-
           call HYPRE_ParAMGCreate(precond, ierr)
 
           call HYPRE_ParAMGSetCoarsenType(precond,
@@ -408,7 +408,9 @@ c         call HYPRE_ParAMGSetTruncFactor(precond, trunc_factor, ierr)
           call HYPRE_ParAMGInitGridRelaxation(num_grid_sweeps,
      &                                        grid_relax_type,
      &                                        grid_relax_points,
-     &                                        coarsen_type, ierr)
+     &                                        coarsen_type,
+     &                                        relax_weights,
+     &                                        MAXLEVELS,ierr)
 
           call HYPRE_ParAMGSetNumGridSweeps(precond,
      &                                      num_grid_sweeps, ierr)
@@ -417,7 +419,7 @@ c         call HYPRE_ParAMGSetTruncFactor(precond, trunc_factor, ierr)
      &                                      grid_relax_type, ierr)
 
           call HYPRE_ParAMGSetRelaxWeight(precond,
-     &                                    relax_weight, ierr)
+     &                                    relax_weights, ierr)
 
           call HYPRE_ParAMGSetGridRelaxPoints(precond,
      &                                        grid_relax_points, ierr)

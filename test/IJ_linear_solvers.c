@@ -295,13 +295,14 @@ main( int   argc,
    trunc_factor = 0.0;
    cycle_type = 1;
 
-   num_grid_sweeps = hypre_CTAlloc(int,4);
-   grid_relax_type = hypre_CTAlloc(int,4);
+   num_grid_sweeps   = hypre_CTAlloc(int,4);
+   grid_relax_type   = hypre_CTAlloc(int,4);
    grid_relax_points = hypre_CTAlloc(int *,4);
-   relax_weight = hypre_CTAlloc(double,max_levels);
+   relax_weight      = hypre_CTAlloc(double, max_levels);
 
    for (i=0; i < max_levels; i++)
 	relax_weight[i] = 0.0;
+
    if (coarsen_type == 5)
    {
       /* fine grid */
