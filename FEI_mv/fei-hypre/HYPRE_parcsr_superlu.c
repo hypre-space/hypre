@@ -18,7 +18,7 @@
 #include "utilities/utilities.h"
 #include "HYPRE.h"
 #include "parcsr_mv/parcsr_mv.h"
-#include "parcsr_ls/parcsr_ls.h"
+#include "parcsr_ls/HYPRE_parcsr_ls.h"
 
 /*---------------------------------------------------------------------------
  * SUPERLU include files
