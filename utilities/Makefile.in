@@ -73,6 +73,7 @@ UTILITIES_FILES =\
  timing.c\
  amg_linklist.c\
  binsearch.c\
+ qsplit.c\
  umalloc_local.c\
  qsort.c\
  random.c
