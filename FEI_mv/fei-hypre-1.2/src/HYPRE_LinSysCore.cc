@@ -166,7 +166,7 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
     mlPresmootherType_  = 2;    // default symmetric Gauss-Seidel
     mlPostsmootherType_ = 2;    // default symmetric Gauss-Seidel
     mlRelaxWeight_      = 0.5;
-    mlStrongThreshold_  = 0.25;
+    mlStrongThreshold_  = 0.0;
 
     rhsIDs_             = new int[1];
     rhsIDs_[0]          = 0;
@@ -407,6 +407,18 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
        sscanf(param,"%s", &param2);
        if      ( !strcmp(param2, "y" ) ) superluScale_[0] = 'B';
        else                              superluScale_[0] = 'N';
+    }
+
+    //-------------------------------------------------------------------
+    // amg preconditoner : coarsening type 
+    //-------------------------------------------------------------------
+
+    if (Utils::getParam("amgCoarsenType",numParams,params,param) == 1)
+    {
+       sscanf(param,"%s", param2);
+       if      ( !strcmp(param2, "ruge" ) )    amgCoarsenType_ = 1;
+       else if ( !strcmp(param2, "falgout" ) ) amgCoarsenType_ = 6;
+       else if ( !strcmp(param2, "default" ) ) amgCoarsenType_ = 0;
     }
 
     //-------------------------------------------------------------------
@@ -1548,9 +1560,9 @@ void HYPRE_LinSysCore::selectSolver(char* name)
        if ( HYSolverID_ == HYGMRES ) HYPRE_ParCSRGMRESDestroy(HYSolver_);
     }
 
-    //--------------------------------------------------
+    //-------------------------------------------------------------------
     // check for the validity of the solver name
-    //--------------------------------------------------
+    //-------------------------------------------------------------------
 
     if ( !strcmp(name, "cg"  ) )
     {
@@ -1584,9 +1596,9 @@ void HYPRE_LinSysCore::selectSolver(char* name)
        HYSolverID_ = HYGMRES;
     }
 
-    //--------------------------------------------------
+    //-------------------------------------------------------------------
     // instantiate solver
-    //--------------------------------------------------
+    //-------------------------------------------------------------------
 
     switch ( HYSolverID_ )
     {
@@ -1622,9 +1634,9 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
            mypid_, name);
 #endif
 
-    //--------------------------------------------------
+    //-------------------------------------------------------------------
     // if already been allocated, destroy it first
-    //--------------------------------------------------
+    //-------------------------------------------------------------------
 
     if ( HYPrecon_ != NULL )
     {
@@ -1643,9 +1655,9 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
 #endif
     }
 
-    //--------------------------------------------------
+    //-------------------------------------------------------------------
     // check for the validity of the preconditioner name
-    //--------------------------------------------------
+    //-------------------------------------------------------------------
 
     if ( !strcmp(name, "diagonal"  ) )
     {
@@ -1691,9 +1703,9 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
     }
     if ( HYSolverID_ != HYPCG && HYSolverID_ != HYGMRES ) HYPreconID_ = HYNONE;
 
-    //--------------------------------------------------
+    //-------------------------------------------------------------------
     // instantiate preconditioner
-    //--------------------------------------------------
+    //-------------------------------------------------------------------
 
     switch ( HYPreconID_ )
     {
@@ -1749,9 +1761,15 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
     printf("%4d : HYPRE_LinSysCore::entering launchSolver.\n", mypid_);
 #endif
 
-    //--------------------------------------------------
+    //-------------------------------------------------------------------
+    // if user loads in constraints, form reduced system
+    //-------------------------------------------------------------------
+
+    if ( nConstraints_ != 0 ) buildReducedSystem();
+
+    //-------------------------------------------------------------------
     // fetch matrix and vector pointers
-    //--------------------------------------------------
+    //-------------------------------------------------------------------
 
     A_csr  = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(currA_);
     x_csr  = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(currX_);
@@ -1797,9 +1815,9 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
 
 #endif
 
-    //--------------------------------------------------
+    //-------------------------------------------------------------------
     // choose PCG or GMRES
-    //--------------------------------------------------
+    //-------------------------------------------------------------------
 
     status = 1;
 
@@ -1992,7 +2010,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   for ( i = 0; i < 25; i++ ) relax_wt[i] = amgRelaxWeight_[i];
                   HYPRE_ParAMGSetRelaxWeight(HYPrecon_, relax_wt);
 #ifdef DEBUG
-                  HYPRE_ParAMGSetIOutDat(HYPrecon_, 2);
+                  //HYPRE_ParAMGSetIOutDat(HYPrecon_, 2);
                   if ( mypid_ == 0 )
                   {
                      printf("AMG coarsen type = %d\n", amgCoarsenType_);
@@ -2041,6 +2059,8 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
           HYPRE_ParCSRGMRESSetKDim(HYSolver_, gmresDim_);
           HYPRE_ParCSRGMRESSetMaxIter(HYSolver_, maxIterations_);
           HYPRE_ParCSRGMRESSetTol(HYSolver_, tolerance_);
+          //if ( normAbsRel_ == 0 ) HYPRE_ParCSRCGNRSetStopCrit(HYsolver_,0);
+          //else                    HYPRE_ParCSRCGNRSetStopCrit(HYsolver_,1);
           HYPRE_ParCSRGMRESSetup(HYSolver_, A_csr, b_csr, x_csr);
           HYPRE_ParCSRGMRESSolve(HYSolver_, A_csr, b_csr, x_csr);
           HYPRE_ParCSRGMRESGetNumIterations(HYSolver_, &num_iterations);
@@ -2663,6 +2683,10 @@ void HYPRE_LinSysCore::loadConstraintNumbers(int nConstr, int *constrList)
        {
           constrList_ = new int[nConstr];
           for (int i = 0; i < nConstr; i++) constrList_[i] = constrList[i];
+#ifdef DEBUG
+          for (int i = 0; i < nConstr; i++) 
+             printf("Constraint %5d(%5d) = %d\n",i,nConstr,constrList_[i]);
+#endif
        }
     }
 }
@@ -2970,7 +2994,8 @@ void HYPRE_LinSysCore::buildReducedSystem()
     // compose candidate slave list (if not given by loadSlaveList func)
     //------------------------------------------------------------------
 
-    if ( nConstraints_ > 0 && constrList_ == NULL )
+    //if ( nConstraints_ > 0 && constrList_ == NULL )
+    if ( nConstraints_ > 0 )
     {
        constrList_ = new int[EndRow-nConstraints_-StartRow+1];
        nSlaves = 0;
@@ -3039,7 +3064,7 @@ void HYPRE_LinSysCore::buildReducedSystem()
                     searchIndex = colInd[j];
                  }
                  searchCount++;
-                 //if ( searchCount >= 3 ) break;
+                 if ( searchCount >= 3 ) break;
                  //if (colIndex < searchIndex && colIndex > searchMax)
                  //if (colIndex < searchIndex )
                  //   searchIndex = colIndex; 
@@ -3051,6 +3076,8 @@ void HYPRE_LinSysCore::buildReducedSystem()
        {
           selectedList[nSelected++] = searchIndex;
           //selectedList[nSelected++] = constrList_[searchIndex];
+          printf("constraint %4d : slave node found = %d\n",nSelected-1,
+                                   searchIndex);
           searchMax = searchIndex;
        } else {
           printf("%d : buildReducedSystem::ERROR - constraint number", mypid_);
@@ -4312,7 +4339,7 @@ void fei_hypre_test(int argc, char *argv[])
        H.sumIntoRHSVector(1, &rhs[i], &index);
     }
     delete [] rhs;
-    H.buildReducedSystem();
+    H.nConstraints_ = 182;
 
     //------------------------------------------------------------------
     // set other parameters
@@ -4346,7 +4373,7 @@ void fei_hypre_test(int argc, char *argv[])
     H.parameters(1, &paramString);
     strcpy(paramString, "mlRelaxWeight 0.5");
     H.parameters(1, &paramString);
-    strcpy(paramString, "mlStrongThreshold 0.12");
+    strcpy(paramString, "mlStrongThreshold 0.08");
     H.parameters(1, &paramString);
 
     strcpy(paramString, "parasailsNlevels 1");
