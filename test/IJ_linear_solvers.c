@@ -13,6 +13,22 @@
 #include "HYPRE_IJ_mv.h"
 #include "HYPRE_parcsr_ls.h"
 
+#ifdef __STDC__
+# define	P(s) s
+#else
+# define P(s) ()
+#endif
+
+
+int BuildParFromFile P((int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr ));
+int BuildParLaplacian P((int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr ));
+int BuildParDifConv P((int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr ));
+int BuildParFromOneFile P((int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr ));
+int BuildRhsParFromOneFile P((int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix A , HYPRE_ParVector *b_ptr ));
+int BuildParLaplacian9pt P((int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr ));
+int BuildParLaplacian27pt P((int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr ));
+
+#undef P
  
 int
 main( int   argc,
@@ -34,8 +50,7 @@ main( int   argc,
    double              norm;
    double              final_res_norm;
 
-   HYPRE_IJMatrix      ij_matrix;
-   HYPRE_IJVector      ij_b;
+   HYPRE_IJMatrix      ij_matrix; HYPRE_IJVector      ij_b;
    HYPRE_IJVector      ij_x;
    /* concrete underlying type for ij_matrix defaults to parcsr. AJC. */
    int                 ij_matrix_storage_type=HYPRE_PARCSR;
@@ -1289,8 +1304,8 @@ BuildParLaplacian( int                  argc,
       values[0] += 2.0*cz;
    }
 
-   A = (HYPRE_ParCSRMatrix) GenerateLaplacian(MPI_COMM_WORLD,
-                               nx, ny, nz, P, Q, R, p, q, r, values);
+   A = (HYPRE_ParCSRMatrix) GenerateLaplacian(MPI_COMM_WORLD, 
+		nx, ny, nz, P, Q, R, p, q, r, values);
 
    hypre_TFree(values);
 
