@@ -61,6 +61,7 @@ UTILITIES_HEADERS =\
  timing.h\
  umalloc_local.h\
  utilities.h\
+ amg_linklist.h\
  HYPRE_utilities.h
 
 UTILITIES_FILES =\
@@ -71,6 +72,7 @@ UTILITIES_FILES =\
  threading.c\
  timer.c\
  timing.c\
+ amg_linklist.c\
  umalloc_local.c\
  random.c
 
