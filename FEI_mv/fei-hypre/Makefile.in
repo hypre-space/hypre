@@ -5,7 +5,7 @@
 # notice, contact person, and disclaimer.
 #EHEADER***********************************************************************
 
-.SUFFIXES: .C .c .f .o
+.SUFFIXES: .cxx .c .f .o
 
 HYPRE_ARCH = @ARCH@
 
@@ -94,19 +94,20 @@ LFLAGS =\
  ${MPILIBFLAGS} ${MPI_LIBS} ${LIBFLAGS} ${LDLIBFLAGS}\
  -ldxml -lm
 
-FILES = HYPRE_LinSysCore.C HYPRE_LSC_aux.C cfei_hypre.C hypre_slide_reduce.C \
-        hypre_schur_reduce.C hypre_lsi_misc.c hypre_lsi_ddamg.C \
+FILES = HYPRE_LinSysCore.cxx HYPRE_LSC_aux.cxx cfei_hypre.cxx \
+        hypre_slide_reduce.cxx \
+        hypre_schur_reduce.cxx hypre_lsi_misc.c hypre_lsi_ddamg.cxx \
         HYPRE_LSI_ml.c HYPRE_LSI_ddilut.c hypre_lsi_amge.c \
         HYPRE_parcsr_bicgstabl.c bicgstabl.c \
         HYPRE_LSI_poly.c HYPRE_LSI_ddict.c HYPRE_parcsr_TFQmr.c \
         TFQmr.c HYPRE_parcsr_bicgs.c bicgs.c HYPRE_LSI_schwarz.c \
-        HYPRE_LSI_blkprec.C HYPRE_parcsr_symqmr.c SymQMR.c \
-        HYPRE_parcsr_fgmres.c fgmres.c HYPRE_LSI_mli.C \
-        HYPRE_SlideReduction.C HYPRE_LSI_UZAWA.C HYPRE_LSI_Dsuperlu.c \
-        HYPRE_parcsr_lsicg.c lsicg.c FEI_HYPRE_Impl.C
+        HYPRE_LSI_blkprec.cxx HYPRE_parcsr_symqmr.c SymQMR.c \
+        HYPRE_parcsr_fgmres.c fgmres.c HYPRE_LSI_mli.cxx \
+        HYPRE_SlideReduction.cxx HYPRE_LSI_UZAWA.cxx HYPRE_LSI_Dsuperlu.c \
+        HYPRE_parcsr_lsicg.c lsicg.c FEI_HYPRE_Impl.cxx
 
 TEMP = ${FILES:.c=.o}
-OBJS = ${TEMP:.C=.o}
+OBJS = ${TEMP:.cxx=.o}
 
 ##################################################################
 # Main rules
@@ -150,7 +151,7 @@ veryclean: clean
 # Generic rules
 ##################################################################
 
-.C.o:
+.cxx.o:
 	${CXX} -o $@ ${DEFINES} -c ${CXXFLAGS} $<
 
 .c.o:
