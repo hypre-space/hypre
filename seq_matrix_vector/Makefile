@@ -14,15 +14,18 @@ HEADERS =\
  HYPRE_mv.h\
  csr_matrix.h\
  mapped_matrix.h\
- multiblock_matrix.h
+ multiblock_matrix.h\
+ vector.h
 
 FILES =\
  HYPRE_csr_matrix.c\
  HYPRE_mapped_matrix.c\
  HYPRE_multiblock_matrix.c\
  csr_matrix.c\
+ csr_matvec.c\
  mapped_matrix.c\
- multiblock_matrix.c
+ multiblock_matrix.c\
+ vector.c
 
 OBJS = ${FILES:.c=.o}
 
