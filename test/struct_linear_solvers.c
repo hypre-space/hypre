@@ -1124,7 +1124,7 @@ main( int   argc,
     * Print the solution and other info
     *-----------------------------------------------------------*/
 
-#if 0
+#if 1
    HYPRE_StructVectorPrint("driver.out.x", x, 0);
 #endif
 
