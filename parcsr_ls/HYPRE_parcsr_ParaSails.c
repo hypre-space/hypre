@@ -38,6 +38,8 @@ typedef struct
     HYPRE_ParaSails obj;
     double          thresh;
     int             nlevels;
+    double          filter;
+    int             sym;
 }
 Secret;
 
@@ -61,6 +63,8 @@ HYPRE_ParCSRParaSailsCreate( MPI_Comm comm, HYPRE_Solver *solver )
    secret->obj     = (HYPRE_ParaSails) NULL;
    secret->thresh  = 0.1; /* defaults */
    secret->nlevels = 1;
+   secret->filter  = 0.0; /* 0.05 has been suggested */
+   secret->sym     = 1;   /* defaults is symmetric */
 
    *solver = (HYPRE_Solver) secret;
 
@@ -108,7 +112,8 @@ HYPRE_ParCSRParaSailsSetup( HYPRE_Solver solver,
    ierr = HYPRE_ParaSailsCreate(secret->comm, matrix, &secret->obj);
    if (ierr) return ierr;
 
-   ierr = HYPRE_ParaSailsSetup(secret->obj, secret->thresh, secret->nlevels);
+   ierr = HYPRE_ParaSailsSetup(secret->obj, secret->sym, secret->thresh, 
+       secret->nlevels, secret->filter);
 
    return ierr;
 }
@@ -149,6 +154,37 @@ HYPRE_ParCSRParaSailsSetParams(HYPRE_Solver solver,
 
    secret->thresh  = thresh;
    secret->nlevels = nlevels;
+
+   return 0;
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRParaSailsSetFilter - Set the filter parameter.
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParCSRParaSailsSetFilter(HYPRE_Solver solver, 
+                    double filter)
+{
+   Secret *secret = (Secret *) solver;
+
+   secret->filter = filter;
+
+   return 0;
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRParaSailsSetSym - Set whether the matrix is symmetric:
+ * nonzero = symmetric, 0 = nonsymmetric.
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParCSRParaSailsSetSym(HYPRE_Solver solver, 
+                    int sym)
+{
+   Secret *secret = (Secret *) solver;
+
+   secret->sym = sym;
 
    return 0;
 }

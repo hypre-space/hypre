@@ -129,6 +129,9 @@ int HYPRE_ParCSRParaSailsDestroy P((HYPRE_Solver solver ));
 int HYPRE_ParCSRParaSailsSetup P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x ));
 int HYPRE_ParCSRParaSailsSolve P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x ));
 int HYPRE_ParCSRParaSailsSetParams P((HYPRE_Solver solver , double thresh , int nlevels ));
+int HYPRE_ParCSRParaSailsSetFilter P((HYPRE_Solver solver, double filter));
+int
+HYPRE_ParCSRParaSailsSetSym P((HYPRE_Solver solver, int sym));
 
 /* par_laplace.c */
 HYPRE_ParCSRMatrix GenerateLaplacian P((MPI_Comm comm , int nx , int ny , int nz
