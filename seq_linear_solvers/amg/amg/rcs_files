@@ -19,6 +19,7 @@ headers.h
 iinvert.f
 matrix.c
 matrix.h
+matvec.f
 misc.f
 opdfn.f
 outprt.f
