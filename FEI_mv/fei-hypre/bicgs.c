@@ -213,7 +213,6 @@ int hypre_BiCGSSolve(void  *bicgs_vdata, void  *A, void  *b, void  *x)
    if (logging > 0)
    {
       norms          = (bicgs_data -> norms);
-      log_file_name  = (bicgs_data -> log_file_name);
    }
 
    /* initialize work arrays */

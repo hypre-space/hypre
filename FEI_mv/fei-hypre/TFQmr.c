@@ -226,7 +226,6 @@ int hypre_TFQmrSolve(void  *tfqmr_vdata, void  *A, void  *b, void  *x)
    if (logging > 0)
    {
       norms          = (tfqmr_data -> norms);
-      log_file_name  = (tfqmr_data -> log_file_name);
    }
 
    /* initialize work arrays */
