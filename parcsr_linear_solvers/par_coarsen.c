@@ -175,6 +175,13 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *parA,
    S_offd = hypre_ParCSRMatrixOffd(parS);
    S_offd_i = hypre_CSRMatrixI(S_offd);
 
+   if (num_cols_offd)
+   {
+   	A_offd_data = hypre_CSRMatrixData(A_offd);
+   	S_offd_j = hypre_CSRMatrixJ(S_offd);
+   	S_offd_data = hypre_CSRMatrixData(S_offd);
+   }
+
    for (i = 0; i < num_variables; i++)
    {
       diag = A_diag_data[A_diag_i[i]];
