@@ -1,3 +1,11 @@
+#BHEADER***********************************************************************
+# (c) 1996   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
 
 SHELL=/bin/sh
 export SHELL
@@ -6,11 +14,12 @@ export SHELL
 # Parse generic arguments
 #=============================================================================
 
+AMG_ALL_FLAG=1
+
 if [ -n "$1" ]
 then
 
    AMG_ARGS=""
-   AMG_ALL_FLAG=1
    
    while [ -n "$1" ]
    do

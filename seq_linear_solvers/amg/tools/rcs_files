@@ -1,0 +1,13 @@
+Makefile
+amgstrip
+build
+convert_icf3d.c
+general.h
+io.h
+matrix.c
+matrix.h
+read.c
+readysmp.m
+vector.c
+vector.h
+write.c
