@@ -49,7 +49,7 @@ LFLAGS =\
 HEADERS =\
  headers.h\
  par_amg.h\
- hypre_parcsr_ls.h\
+ parcsr_ls.h\
  HYPRE_parcsr_ls.h
 
 FILES =\
@@ -64,6 +64,7 @@ FILES =\
  par_relax.c\
  par_indepset.c\
  par_laplace.c\
+ par_laplace_9pt.c\
  par_rap.c\
  par_rap_communication.c\
  random.c\
