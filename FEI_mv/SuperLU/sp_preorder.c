@@ -158,5 +158,5 @@ check_perm(char *what, int n, int *perm)
     }
 
     SUPERLU_FREE(marker);
-    return 0;
+    return;
 }

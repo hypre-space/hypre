@@ -109,7 +109,7 @@ sp_dtrsv(char *uplo, char *trans, char *diag, SuperMatrix *L,
     else if ( U->nrow != U->ncol || U->nrow < 0 ) *info = -5;
     if ( *info ) {
 	i = -(*info);
-	xerbla_("sp_dtrsv", &i);
+	xerbla_("sp_dtrsv ", &i);
 	return 0;
     }
 

@@ -23,6 +23,12 @@
 #include "dsp_defs.h"
 #include "superlu_util.h"
 
+/* 
+ * Function prototypes 
+ */
+void dlsolve(int, int, double*, double*);
+void dmatvec(int, int, int, double*, double*, double*);
+
 
 /*
  * Performs numeric block updates within the relaxed snode. 

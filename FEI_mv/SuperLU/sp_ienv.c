@@ -56,7 +56,7 @@ sp_ienv(int ispec)
 
     /* Invalid value for ISPEC */
     i = 1;
-    xerbla_("sp_ienv", &i);
+    xerbla_("sp_ienv ", &i);
     return 0;
 
 } /* sp_ienv_ */
