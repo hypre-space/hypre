@@ -339,13 +339,11 @@ function PostProcess
     if [[ -f purify.log ]]
     then
       mv purify.log $InputFile.purify.log
-      mv $InputFile.err $InputFile.err.log
-      grep -i hypre_ $InputFile.purify.log > $InputFile.err
+      grep -i hypre_ $InputFile.purify.log >> $InputFile.err
     elif [[ -f insure.log ]]
     then
       mv insure.log $InputFile.insure.log
-      mv $InputFile.err $InputFile.err.log
-      grep -i hypre_ $InputFile.insure.log > $InputFile.err
+      grep -i hypre_ $InputFile.insure.log >> $InputFile.err
     fi
   fi
   cd $SavePWD
