@@ -22,58 +22,60 @@
 
 typedef struct MLI_ElemBlock_Struct
 {
-   int    numLocalElems_;      /* number of elements in this block */
-   int    *elemGlobalIDs_;     /* element global IDs in this block */
-   int    *elemGlobalIDAux_;   /* for conversion to local IDs */
-   int    elemNumNodes_;       /* number of nodes per elements */
-   int    **elemNodeIDList_;   /* element node list (global IDs) */
-   int    elemNumFields_;      /* number of element fields */
-   int    *elemFieldIDs_;      /* a list of element field IDs */
-   int    elemDOF_;            /* element degree of freedom */
-   int    elemStiffDim_;       /* element stiffness matrix dimension */
-   double **elemStiffMat_;     /* element stiffness matrices */
-   int    *elemNumNS_;         /* element number of nullspace vectors */
-   double **elemNullSpace_;    /* element null space vectors */
-   double *elemVolume_;        /* element volumes */
-   int    *elemMaterial_;      /* element materials */
-   int    *elemParentIDs_;     /* element parentIDs */
+   int    numLocalElems_;        /* number of elements in this block */
+   int    *elemGlobalIDs_;       /* element global IDs in this block */
+   int    *elemGlobalIDAux_;     /* for conversion to local IDs */
+   int    elemNumNodes_;         /* number of nodes per elements */
+   int    **elemNodeIDList_;     /* element node list (global IDs) */
+   int    elemNumFields_;        /* number of element fields */
+   int    *elemFieldIDs_;        /* a list of element field IDs */
+   int    elemDOF_;              /* element degree of freedom */
+   int    elemStiffDim_;         /* element stiffness matrix dimension */
+   double **elemStiffMat_;       /* element stiffness matrices */
+   int    *elemNumNS_;           /* element number of nullspace vectors */
+   double **elemNullSpace_;      /* element null space vectors */
+   double *elemVolume_;          /* element volumes */
+   int    *elemMaterial_;        /* element materials */
+   int    *elemParentIDs_;       /* element parentIDs */
    double **elemLoads_;
    double **elemSol_;
-   int    elemNumFaces_;       /* number of faces in an element */
-   int    **elemFaceIDList_;   /* element face global ID lists */
+   int    elemNumFaces_;         /* number of faces in an element */
+   int    **elemFaceIDList_;     /* element face global ID lists */
    int    elemNumBCs_;
    int    *elemBCIDList_;
    char   **elemBCFlagList_;
    double **elemBCValues_;
    int    elemOffset_;
 
-   int    numLocalNodes_;      /* number of internal nodes */
-   int    numExternalNodes_;   /* number of external nodes */
-   int    *nodeGlobalIDs_;     /* a list of node global IDs */
-   int    nodeNumFields_;      /* number of node fields */
-   int    *nodeFieldIDs_;      /* a list of node field IDs */
-   int    nodeDOF_;            /* nodal degree of freedom */
-   double *nodeCoordinates_;   /* a list of nodal coordinates */
-   int    nodeNumBCs_;         /* number of node BCs */
-   int    *nodeBCIDList_;      /* a list of BC node global IDs */
-   char   **nodeBCFlagList_;   /* a list of node BC flags */
-   double **nodeBCValues_;     /* node BCs */
-   int    numSharedNodes_;     /* number of shared nodes */
-   int    *sharedNodeIDs_;     /* shared node global IDs */
-   int    *sharedNodeNProcs_;  /* number of processors each node is shared*/
-   int    **sharedNodeProc_;   /* processor IDs for shared nodes */
-   int    nodeOffset_;         /* node processor offset */
+   int    numLocalNodes_;        /* number of internal nodes */
+   int    numExternalNodes_;     /* number of external nodes */
+   int    *nodeGlobalIDs_;       /* a list of node global IDs */
+   int    nodeNumFields_;        /* number of node fields */
+   int    *nodeFieldIDs_;        /* a list of node field IDs */
+   int    nodeDOF_;              /* nodal degree of freedom */
+   double *nodeCoordinates_;     /* a list of nodal coordinates */
+   int    nodeNumBCs_;           /* number of node BCs */
+   int    *nodeBCIDList_;        /* a list of BC node global IDs */
+   char   **nodeBCFlagList_;     /* a list of node BC flags */
+   double **nodeBCValues_;       /* node BCs */
+   int    numSharedNodes_;       /* number of shared nodes */
+   int    *sharedNodeIDs_;       /* shared node global IDs */
+   int    *sharedNodeNProcs_;    /* number of processors each node is shared*/
+   int    **sharedNodeProc_;     /* processor IDs for shared nodes */
+   int    *nodeExtNewGlobalIDs_; /* processor IDs for shared nodes */
+   int    nodeOffset_;           /* node processor offset */
 
-   int    numLocalFaces_;      /* number of local faces */
-   int    numExternalFaces_;   /* number of external faces (local element)*/
-   int    *faceGlobalIDs_;     /* a list of face global IDs */
-   int    faceNumNodes_;       /* number of nodes in a face */
-   int    **faceNodeIDList_;   /* face node list */
-   int    numSharedFaces_;     /* number of shared faces */
-   int    *sharedFaceIDs_;     /* shared face IDs */
-   int    *sharedFaceNProcs_;  /* number of processors each face is shared*/
-   int    **sharedFaceProc_;   /* processor IDs of shared faces */
-   int    faceOffset_;         /* face global offsets */
+   int    numLocalFaces_;        /* number of local faces */
+   int    numExternalFaces_;     /* number of external faces (local element)*/
+   int    *faceGlobalIDs_;       /* a list of face global IDs */
+   int    faceNumNodes_;         /* number of nodes in a face */
+   int    **faceNodeIDList_;     /* face node list */
+   int    numSharedFaces_;       /* number of shared faces */
+   int    *sharedFaceIDs_;       /* shared face IDs */
+   int    *sharedFaceNProcs_;    /* number of processors each face is shared*/
+   int    **sharedFaceProc_;     /* processor IDs of shared faces */
+   int    *faceExtNewGlobalIDs_; /* processor IDs for shared nodes */
+   int    faceOffset_;           /* face global offsets */
 
    int    initComplete_;
 }
@@ -282,10 +284,6 @@ public :
 
    int getNumNodes(int& nNodes);
 
-   int getNumLocalNodes(int& nNodes);
-
-   int getNumExternalNodes(int& nNodes);
-
    int getNodeBlockGlobalIDs(int nNodes, int *nGlobalIDs);
 
    int getNodeNumFields(int &numFields); 
@@ -309,9 +307,7 @@ public :
    // get face information
    // -------------------------------------------------------------------------
 
-   int getNumLocalFaces(int& nfaces);
-
-   int getNumExternalFaces(int& nfaces);
+   int getNumFaces(int& nfaces);
 
    int getFaceBlockGlobalIDs(int nFaces, int *fGlobalIDs);
 
@@ -342,7 +338,7 @@ public :
    // other functions
    // -------------------------------------------------------------------------
 
-   int specializedRequests(char *param_string, int argc, char **argv);
+   int impSpecificRequests(char *param_string, int argc, char **argv);
 
    int readFromFile(char *filename);
 

@@ -225,8 +225,6 @@ int MLI_FEData::initElemBlock(int nElems, int nNodesPerElem,
    currBlock->nodeFieldIDs_  = new int[nodeNumFields];
    for ( i = 0; i < nodeNumFields; i++ ) 
       currBlock->nodeFieldIDs_[i] = nodeFieldIDs[i]; 
-for ( i = 0; i < nodeNumFields; i++ ) 
-printf("nodeFieldID = %d\n", nodeFieldIDs[i]);
 
    // -------------------------------------------------------------
    // --- store element level data
@@ -335,14 +333,12 @@ int MLI_FEData::initElemBlockNodeLists(int nElems,
    length = nNodesPerElem * spaceDimension_ * nElems;
    currBlock->nodeCoordinates_ =  new double[length];
    length = nNodesPerElem * spaceDimension_;
-printf("length = %d\n", length);
    for ( i = 0; i < nElems; i++ ) 
    {
       for ( j = 0; j < length; j++ ) 
       {
          index = currBlock->elemGlobalIDAux_[i];
          currBlock->nodeCoordinates_[i*length+j] = coord[index][j];
-printf("coord %d %d = %e\n", i, j, currBlock->nodeCoordinates_[i*length+j]);
       }
    }
    return 1;
@@ -367,6 +363,7 @@ int MLI_FEData::initSharedNodes(int nNodes, int *nGlobalIDs,
       cout << "initSharedNodes ERROR : nNodes <= 0.\n";
       exit(1);
    }
+   currBlock = elemBlockList_[currentElemBlock_];
    if ( currBlock->sharedNodeIDs_ != NULL )
       cout << "initSharedNodes WARNING : already initialized (1) ?\n";
    if ( currBlock->sharedNodeNProcs_ != NULL )
@@ -378,7 +375,6 @@ int MLI_FEData::initSharedNodes(int nNodes, int *nGlobalIDs,
    // --- allocate space for shared node information
    // -------------------------------------------------------------
 
-   currBlock = elemBlockList_[currentElemBlock_];
    currBlock->numSharedNodes_   = nNodes;
    currBlock->sharedNodeIDs_    = new int[nNodes];
    currBlock->sharedNodeNProcs_ = new int[nNodes];
@@ -664,8 +660,6 @@ int MLI_FEData::initComplete()
    for ( i = 1; i < temp_cnt; i++ )
       if ( nodeArray[i] != nodeArray[i-1] )
          nodeArray[totalNodes++] = nodeArray[i];
-for ( i = 0; i < totalNodes; i++ )
-printf("nodeArray %d = %d\n", i, nodeArray[i]);
 
    // -------------------------------------------------------------
    // --- search for external nodes
@@ -676,8 +670,6 @@ printf("nodeArray %d = %d\n", i, nodeArray[i]);
    sharedNodeIDs    = currBlock->sharedNodeIDs_;
    sharedNodeNProcs = currBlock->sharedNodeNProcs_;
    sharedNodeProc   = currBlock->sharedNodeProc_;
-for ( i = 0; i < numSharedNodes; i++ )
-printf("sharedNodeID %d = %d\n", i, sharedNodeIDs[i]);
 
    nExtNodes = 0;
    for ( i = 0; i < numSharedNodes; i++ )
@@ -721,6 +713,26 @@ printf("sharedNodeID %d = %d\n", i, sharedNodeIDs[i]);
          currBlock->nodeGlobalIDs_[temp_cnt++] = - nodeArray[i];
    }
    delete [] nodeArray;
+
+   // -------------------------------------------------------------
+   // --- create an aux array for holding mapped external node IDs
+   // -------------------------------------------------------------
+
+/*
+   for ( i = 0; i < numSharedNodes; i++ )
+   {
+      index = searchNode( sharedNodeList[i] ) - nNodes;
+      if ( index >= 0 )
+      {
+         sndrcvReg[i] = 0; // recv
+         pnum  = mypid;
+         for ( j = 0; j < sharedNodeNProcs[i]; j++ )
+            if ( sharedNodeProc[i][j] < pnum ) pnum = sharedNodeProc[i][j];
+         owner[index] = pnum;
+      }
+      else sndrcvReg[i] = 0; // send
+   }
+*/
 
    // -------------------------------------------------------------
    // --- now that the node list if finalized, shuffle the coordinates
@@ -2450,28 +2462,6 @@ int MLI_FEData::getNumNodes(int& nNodes)
 }
 
 //*************************************************************************
-// get number of local nodes 
-//-------------------------------------------------------------------------
-
-int MLI_FEData::getNumLocalNodes(int& nNodes)
-{
-   MLI_ElemBlock *currBlock = elemBlockList_[currentElemBlock_];
-   nNodes = currBlock->numLocalNodes_;
-   return 1;
-}
-
-//*************************************************************************
-// get number of external nodes 
-//-------------------------------------------------------------------------
-
-int MLI_FEData::getNumExternalNodes(int& nNodes)
-{
-   MLI_ElemBlock *currBlock = elemBlockList_[currentElemBlock_];
-   nNodes = currBlock->numExternalNodes_;
-   return 1;
-}
-
-//*************************************************************************
 // get all node globalIDs 
 //-------------------------------------------------------------------------
 
@@ -2704,34 +2694,18 @@ int MLI_FEData::getSharedNodeProcs(int nNodes, int *numProcs,
 }
 
 //*************************************************************************
-// get number of local faces 
+// get number of faces 
 //-------------------------------------------------------------------------
 
-int MLI_FEData::getNumLocalFaces(int &nFaces)
+int MLI_FEData::getNumFaces(int &nFaces)
 {
    MLI_ElemBlock *currBlock = elemBlockList_[currentElemBlock_];
    if ( ! currBlock->initComplete_ )
    {
-      cout << "getNumLocalFaces ERROR : initialization not complete.\n";
+      cout << "getNumFaces ERROR : initialization not complete.\n";
       exit(1);
    }
-   nFaces = currBlock->numLocalFaces_;
-   return 1;
-}
-
-//*************************************************************************
-// get number of external faces 
-//-------------------------------------------------------------------------
-
-int MLI_FEData::getNumExternalFaces(int &nFaces)
-{
-   MLI_ElemBlock *currBlock = elemBlockList_[currentElemBlock_];
-   if ( ! currBlock->initComplete_ )
-   {
-      cout << "getNumExternalFaces ERROR : initialization not complete.\n";
-      exit(1);
-   }
-   nFaces = currBlock->numExternalFaces_;
+   nFaces = currBlock->numLocalFaces_ + currBlock->numExternalFaces_;
    return 1;
 }
 
@@ -2938,7 +2912,7 @@ int MLI_FEData::getFaceNodeList(int fGlobalID, int nNodes, int *nodeList)
       exit(1);
    }
    for ( int i = 0; i < nNodes; i++ )
-     nodeList[i] = currBlock->faceNodeIDList_[index][i];
+      nodeList[i] = currBlock->faceNodeIDList_[index][i];
    
    return 1;
 }
@@ -2968,65 +2942,178 @@ int MLI_FEData::getShapeFuncInterpolant(int elemID, int nNodes,
 }
 
 //*************************************************************************
-// get specific (specified by data_key) information in data
+// implementation specific requests
 //-------------------------------------------------------------------------
 
-int MLI_FEData::specializedRequests(char *data_key, int argc, char **argv)
+int MLI_FEData::impSpecificRequests(char *data_key, int argc, char **argv)
 {
-   int           i, j, index, nNodes, mypid, numprocs, *offset;
-   MPI_Request   request;
-   MPI_Status    Status;
-   char          param_string[100];
+   int           mypid, nprocs;
    MLI_ElemBlock *currBlock = elemBlockList_[currentElemBlock_];
   
-   MPI_Comm_size(MPI_COMM_WORLD, &mypid);
-   MPI_Comm_size(MPI_COMM_WORLD, &numprocs);
+   // -------------------------------------------------------------
+   // --- error checking
+   // -------------------------------------------------------------
 
-   if ( ! strcmp("elem_offset",data_key) )
+   if ( ! currBlock->initComplete_ )
+   {
+      cout << "impSpecificRequests ERROR : call initComplete first.\n";
+      exit(1);
+   }
+
+   // -------------------------------------------------------------
+   // --- output help menu 
+   // -------------------------------------------------------------
+
+   MPI_Comm_size( mpiComm_, &mypid);
+   MPI_Comm_size( mpiComm_, &nprocs);
+
+   if ( ! strcmp("help",data_key) )
+   {
+      cout << "impSpecifRequests : Available requests are \n";
+      cout << "    getElemOffset : get element processor offset \n";
+      cout << "                  argc    - >= 1.\n";
+      cout << "                  argv[0] - (int *) of length 1.\n";
+      cout << "    getNodeOffset : get node processor offset \n";
+      cout << "                  argc    - >= 1.\n";
+      cout << "                  argv[0] - (int *) of length 1.\n";
+      cout << "    getFaceOffset : get face processor offset \n";
+      cout << "                  argc    - >= 1.\n";
+      cout << "                  argv[0] - (int *) of length 1.\n";
+      cout << "    getNumExtNodes : get number of external nodes \n";
+      cout << "                  argc    - >= 1.\n";
+      cout << "                  argv[0] - (int *) of length 1.\n";
+      cout << "    getNumExtFaces : get number of external faces \n";
+      cout << "                  argc    - >= 1.\n";
+      cout << "                  argv[0] - (int *) of length 1.\n";
+      cout << "    getExtNodeNewGlobalIDs : get  external nodes' mapped IDs \n";
+      cout << "                  argc    - >= 1.\n";
+      cout << "                  argv[0] - (int *) of length nNnodesExt.\n";
+      cout << "    getExtFaceNewGlobalIDs : get  external faces' mapped IDs \n";
+      cout << "                  argc    - >= 1.\n";
+      cout << "                  argv[0] - (int *) of length nNnodesExt.\n";
+      return 1;
+   }
+
+   // -------------------------------------------------------------
+   // --- process requests
+   // -------------------------------------------------------------
+
+   // --- get element processor offset
+
+   if ( ! strcmp("getElemOffset",data_key) )
    {
       if ( argc < 1 ) 
       {
-         cout << "specializedRequests ERROR : elem_offset - argc < 1.\n";
+         cout << "implSpecificRequests ERROR : getElemOffset - argc < 1.\n";
          exit(1);
       } 
-      offset = (int *) argv[0];
+      int *offset = (int *) argv[0];
       (*offset) = currBlock->elemOffset_;
       return 1;
    }
-   else if ( ! strcmp("node_offset", data_key) )
+
+   // --- get node processor offset
+
+   else if ( ! strcmp("getNodeOffset", data_key) )
    {
       if ( argc < 1 ) 
       {
-         cout << "specializedRequests ERROR : node_offset - argc < 1.\n";
+         cout << "impSpecificRequests ERROR : getNodeOffset - argc < 1.\n";
          exit(1);
       } 
-      offset = (int *) argv[0];
+      int *offset = (int *) argv[0];
       (*offset) = currBlock->nodeOffset_;
       return 1;
    }
-   else if ( ! strcmp("face_offset", data_key) )
+
+   // --- get face processor offset
+
+   else if ( ! strcmp("getFaceOffset", data_key) )
    {
       if ( argc < 1 ) 
       {
-         cout << "specializedRequests ERROR : face_offset - argc < 1.\n";
+         cout << "impSpecificRequests ERROR : getFaceOffset - argc < 1.\n";
          exit(1);
       } 
-      offset = (int *) argv[0];
+      int *offset = (int *) argv[0];
       (*offset) = currBlock->faceOffset_;
       return 1;
    }
-   else if ( ! strcmp("update_node_elements",data_key) )
+
+   // --- get number of external nodes (to my processor)
+
+   else if ( ! strcmp("getNumExtNodes", data_key) )
+   {
+      if ( argc < 1 ) 
+      {
+         cout << "impSpecificRequests ERROR : getNumExtNodes - argc < 1.\n";
+         exit(1);
+      } 
+      int *nNodesExt = (int *) argv[0];
+      (*nNodesExt) = currBlock->numExternalNodes_;
+      return 1;
+   }
+
+   // --- get number of external faces (to my processor)
+
+   else if ( ! strcmp("getNumExtFaces", data_key) )
+   {
+      if ( argc < 1 ) 
+      {
+         cout << "impSpecificRequests ERROR : getNumExtFaces - argc < 1.\n";
+         exit(1);
+      } 
+      int *nFacesExt = (int *) argv[0];
+      (*nFacesExt) = currBlock->numExternalFaces_;
+      return 1;
+   }
+
+   // --- get the mapped globalIDs of external nodes
+
+   else if ( ! strcmp("getExtNodeNewGlobalIDs", data_key) )
+   {
+      if ( argc < 1 ) 
+      {
+         cout << "impSpecificRequests ERROR : getExtNodeNewGlobalIDs - argc<1\n";
+         exit(1);
+      } 
+      int *newGlobalIDs = (int *) argv[0];
+      for ( int i = 0; i < currBlock->numExternalNodes_; i++ )
+         newGlobalIDs[i] = currBlock->nodeExtNewGlobalIDs_[i];
+      return 1;
+   }
+
+   // --- get the mapped globalIDs of external faces
+
+   else if ( ! strcmp("getExtFaceNewGlobalIDs", data_key) )
+   {
+      if ( argc < 1 ) 
+      {
+         cout << "impSpecificRequests ERROR : getExtFaceNewGlobalIDs - argc<1\n";
+         exit(1);
+      } 
+      int *newGlobalIDs = (int *) argv[0];
+      for ( int i = 0; i < currBlock->numExternalFaces_; i++ )
+         newGlobalIDs[i] = currBlock->faceExtNewGlobalIDs_[i];
+      return 1;
+   }
+
+   // --- create node element matrix (given local nodeExt element matrix)
+
+   else if ( ! strcmp("updateNodeElemMatrix",data_key) )
    {
       MPI_Barrier(mpiComm_);
 
-      int Buf[100];
-      int *ncols = (int *) argv[0], **cols = (int **) argv[1], n;
+      int i, j, index, n, pnum, Buf[100];
+      int *ncols = (int *) argv[0], **cols = (int **) argv[1];
       int *ind = new int[currBlock->numSharedNodes_];
       int *columns, l, k, *p;
+      MPI_Request request;
+      MPI_Status  Status;
       
       // get the owners for the external nodes
 
-      int nNodes = currBlock->numLocalNodes_, pnum;
+      int nNodes = currBlock->numLocalNodes_;
       int nNodesExt = currBlock->numExternalNodes_;
       int *nodeList = currBlock->nodeGlobalIDs_;
       int *sharedNodeList = currBlock->sharedNodeIDs_;
@@ -3036,19 +3123,22 @@ int MLI_FEData::specializedRequests(char *data_key, int argc, char **argv)
       int *owner = new int [nNodesExt];
       for ( i = 0; i < numSharedNodes; i++ )
       {
-         index = searchNode( sharedNodeList[i] );
-         pnum  = 1000000;
-         for ( j = 0; j < sharedNodeNProcs[i]; j++ )
-            if ( currBlock->sharedNodeProc_[i][j] < pnum )
-               pnum = currBlock->sharedNodeProc_[i][j];
-         owner[index] = pnum;
+         index = searchNode( sharedNodeList[i] ) - nNodes;
+         if ( index >= 0 )
+         {
+            pnum  = mypid;
+            for ( j = 0; j < sharedNodeNProcs[i]; j++ )
+               if ( currBlock->sharedNodeProc_[i][j] < pnum )
+                  pnum = currBlock->sharedNodeProc_[i][j];
+            owner[index] = pnum;
+         }
       }
 
       // external nodes send with which elements are connected
 
       for ( i = 0; i < nNodesExt; i++ )
          MPI_Isend(cols[i+nNodes], ncols[i+nNodes], MPI_INT, 
-                   owner[i], nodeList[i+nNodes], MPI_COMM_WORLD, &request);
+                   owner[i], nodeList[i+nNodes], mpiComm_, &request);
       
       // owners of shared nodes receive data
 
@@ -3079,18 +3169,23 @@ int MLI_FEData::specializedRequests(char *data_key, int argc, char **argv)
       delete [] owner;
       return 1;
    }
-   else if ( !strcmp("update_face_elements",data_key) )
+
+   // --- create face element matrix (given local faceExt element matrix)
+
+   else if ( !strcmp("updatefaceElemMatrix",data_key) )
    {
       MPI_Barrier(MPI_COMM_WORLD);
 
-      int Buf[100];
-      int *ncols = (int *) argv[0], **cols = (int **) argv[1], n;
+      int i, j, index, n, pnum, Buf[100];
+      int *ncols = (int *) argv[0], **cols = (int **) argv[1];
       int *ind = new int[currBlock->numSharedFaces_];
       int *columns, l, k, *p;
+      MPI_Request request;
+      MPI_Status  Status;
       
       // get the owners for the external faces
 
-      int nFaces = currBlock->numLocalFaces_, pnum;
+      int nFaces = currBlock->numLocalFaces_;
       int nFacesExt = currBlock->numExternalFaces_;
       int *faceList = currBlock->faceGlobalIDs_;
       int *sharedFaceList = currBlock->sharedFaceIDs_;
@@ -3100,19 +3195,22 @@ int MLI_FEData::specializedRequests(char *data_key, int argc, char **argv)
       int *owner = new int [nFacesExt];
       for ( i = 0; i < numSharedFaces; i++ )
       {
-         index = searchFace( sharedFaceList[i] );
-         pnum  = 1000000;
-         for ( j = 0; j < sharedFaceNProcs[i]; j++ )
-            if ( currBlock->sharedFaceProc_[i][j] < pnum )
-               pnum = currBlock->sharedFaceProc_[i][j];
-         owner[index] = pnum;
+         index = searchFace( sharedFaceList[i] ) - nFaces;
+         if ( index >= 0 )
+         {
+            pnum  = mypid;
+            for ( j = 0; j < sharedFaceNProcs[i]; j++ )
+               if ( currBlock->sharedFaceProc_[i][j] < pnum )
+                  pnum = currBlock->sharedFaceProc_[i][j];
+            owner[index] = pnum;
+         }
       }
       
       // external faces send with which elements are connected
 
       for ( i = 0; i < nFacesExt; i++ )
          MPI_Isend(cols[i+nFaces], ncols[i+nFaces], MPI_INT, 
-                   owner[i], faceList[i+nFaces], MPI_COMM_WORLD, &request);
+                   owner[i], faceList[i+nFaces], mpiComm_, &request);
       
       // owners of shared faces receive data
 
@@ -3156,7 +3254,7 @@ int MLI_FEData::readFromFile(char *infile)
 {
    int    i, j, k, nNodes, nodeDOF, index, length, nNodesPerElem;
    int    numFields, *fieldIDs=NULL, *fieldSizes=NULL, nElems_check;
-   int    nElems, *elemIDs=NULL, eMatDim;
+   int    index2, nElems, *elemIDs=NULL, eMatDim;
    int    nodeNumFields, *nodeFieldIDs=NULL;
    int    elemNumFields, *elemFieldIDs=NULL;
    int    *nodeIDs=NULL, **IDLists=NULL, *numProcs=NULL, **procLists=NULL;
@@ -3232,12 +3330,7 @@ int MLI_FEData::readFromFile(char *infile)
    if ( fp != NULL )
    {
       fgets(inputString, 100, fp);
-      printf( "%s", inputString);
-      while ( inputString[0] == '#' ) 
-      {
-         fgets(inputString, 100, fp);
-         printf("%s", inputString);
-      }
+      while ( inputString[0] == '#' ) fgets(inputString, 100, fp);
       sscanf(inputString, "%d", &nNodes);
       fscanf(fp, "%d", &spaceDim);
       nodeIDs    = new int[nNodes];
@@ -3253,7 +3346,8 @@ int MLI_FEData::readFromFile(char *infile)
       nodeIDAux = new int[nNodes];
       for (i = 0; i < nNodes; i++) nodeIDAux[i] = i; 
       newCoords = new double*[nElems];
-      for (i = 0; i < nElems; i++) newCoords[i] = new double[nNodesPerElem]; 
+      for (i = 0; i < nElems; i++) 
+         newCoords[i] = new double[nNodesPerElem*spaceDim]; 
 
       intQSort2(nodeIDs, nodeIDAux, 0, nNodes-1);
       for (i = 0; i < nElems; i++) 
@@ -3267,7 +3361,10 @@ int MLI_FEData::readFromFile(char *infile)
                exit(1);
             }
             for (k = 0; k < spaceDim; k++) 
-               newCoords[i][j*spaceDim+k] = nodeCoords[index*spaceDim+k];
+            {
+               index2 = nodeIDAux[index];
+               newCoords[i][j*spaceDim+k] = nodeCoords[index2*spaceDim+k];
+            }
          }
       }
    }
@@ -3314,12 +3411,7 @@ int MLI_FEData::readFromFile(char *infile)
    if ( fp != NULL )
    {
       fgets(inputString, 100, fp);
-      printf( "%s", inputString);
-      while ( inputString[0] == '#' ) 
-      {
-         fgets(inputString, 100, fp);
-         printf("%s", inputString);
-      }
+      while ( inputString[0] == '#' ) fgets(inputString, 100, fp);
       sscanf(inputString, "%d", &nNodes);
       nodeIDs   = new int[nNodes];
       numProcs  = new int[nNodes];
@@ -3351,12 +3443,7 @@ int MLI_FEData::readFromFile(char *infile)
       exit(1);
    }
    fgets(inputString, 100, fp);
-   printf( "%s", inputString);
-   while ( inputString[0] == '#' ) 
-   {
-      fgets(inputString, 100, fp);
-      printf("%s", inputString);
-   }
+   while ( inputString[0] == '#' ) fgets(inputString, 100, fp);
    sscanf(inputString, "%d", &nElems_check);
    if ( nElems_check != nElems )
    {
@@ -3388,12 +3475,7 @@ int MLI_FEData::readFromFile(char *infile)
    if ( fp != NULL )
    {
       fgets(inputString, 100, fp);
-      printf( "%s", inputString);
-      while ( inputString[0] == '#' ) 
-      {
-         fgets(inputString, 100, fp);
-         printf("%s", inputString);
-      }
+      while ( inputString[0] == '#' ) fgets(inputString, 100, fp);
       sscanf(inputString, "%d %d", &nNodes, &nodeDOF);
       nodeIDs = new int[nNodes];
       nodeBCFlags = new char*[nNodes];
@@ -3548,9 +3630,6 @@ int MLI_FEData::writeToFile(char *infile)
          for (j = 0; j < spaceDimension_; j++) 
             fprintf(fp, "%20.12e",
                     currBlock->nodeCoordinates_[i*spaceDimension_+j]);
-for (j = 0; j < spaceDimension_; j++) 
-printf("%20.12e",currBlock->nodeCoordinates_[i*spaceDimension_+j]);
-printf("\n");
          fprintf(fp,"\n");
       }
       fclose(fp);
@@ -3698,60 +3777,62 @@ int MLI_FEData::createElemBlock(int blockID)
    // -------------------------------------------------------------
 
    currBlock = elemBlockList_[blockID];
-   currBlock->numLocalElems_    = 0;
-   currBlock->elemGlobalIDs_    = NULL;
-   currBlock->elemGlobalIDAux_  = NULL;
-   currBlock->elemNumFields_    = 0;
-   currBlock->elemFieldIDs_     = NULL;
-   currBlock->elemDOF_          = 0;
-   currBlock->elemNumNodes_     = 0;
-   currBlock->elemNodeIDList_   = NULL;
-   currBlock->elemStiffDim_     = 0;
-   currBlock->elemStiffMat_     = NULL;
-   currBlock->elemNumNS_        = NULL;
-   currBlock->elemNullSpace_    = NULL;
-   currBlock->elemVolume_       = NULL;
-   currBlock->elemMaterial_     = NULL;
-   currBlock->elemParentIDs_    = NULL;
-   currBlock->elemLoads_        = NULL;
-   currBlock->elemSol_          = NULL;
-   currBlock->elemNumFaces_     = 0;
-   currBlock->elemFaceIDList_   = NULL;
-   currBlock->elemNumBCs_       = 0;
-   currBlock->elemBCIDList_     = NULL;
-   currBlock->elemBCFlagList_   = NULL;
-   currBlock->elemBCValues_     = NULL;
-   currBlock->elemOffset_       = 0;
+   currBlock->numLocalElems_       = 0;
+   currBlock->elemGlobalIDs_       = NULL;
+   currBlock->elemGlobalIDAux_     = NULL;
+   currBlock->elemNumFields_       = 0;
+   currBlock->elemFieldIDs_        = NULL;
+   currBlock->elemDOF_             = 0;
+   currBlock->elemNumNodes_        = 0;
+   currBlock->elemNodeIDList_      = NULL;
+   currBlock->elemStiffDim_        = 0;
+   currBlock->elemStiffMat_        = NULL;
+   currBlock->elemNumNS_           = NULL;
+   currBlock->elemNullSpace_       = NULL;
+   currBlock->elemVolume_          = NULL;
+   currBlock->elemMaterial_        = NULL;
+   currBlock->elemParentIDs_       = NULL;
+   currBlock->elemLoads_           = NULL;
+   currBlock->elemSol_             = NULL;
+   currBlock->elemNumFaces_        = 0;
+   currBlock->elemFaceIDList_      = NULL;
+   currBlock->elemNumBCs_          = 0;
+   currBlock->elemBCIDList_        = NULL;
+   currBlock->elemBCFlagList_      = NULL;
+   currBlock->elemBCValues_        = NULL;
+   currBlock->elemOffset_          = 0;
 
-   currBlock->numLocalFaces_    = 0;
-   currBlock->numExternalFaces_ = 0;
-   currBlock->faceGlobalIDs_    = NULL;
-   currBlock->faceNumNodes_     = 0;
-   currBlock->faceNodeIDList_   = NULL;
-   currBlock->numSharedFaces_   = 0;
-   currBlock->sharedFaceIDs_    = NULL;
-   currBlock->sharedFaceNProcs_ = NULL;
-   currBlock->sharedFaceProc_   = NULL;
-   currBlock->faceOffset_       = 0;
+   currBlock->numLocalNodes_       = 0;
+   currBlock->numExternalNodes_    = 0;
+   currBlock->nodeGlobalIDs_       = NULL;
+   currBlock->nodeNumFields_       = 0;
+   currBlock->nodeFieldIDs_        = NULL;
+   currBlock->nodeDOF_             = 0;
+   currBlock->nodeCoordinates_     = NULL;
+   currBlock->nodeNumBCs_          = 0;
+   currBlock->nodeBCIDList_        = NULL;
+   currBlock->nodeBCFlagList_      = NULL;
+   currBlock->nodeBCValues_        = NULL;
+   currBlock->numSharedNodes_      = 0;
+   currBlock->sharedNodeIDs_       = NULL;
+   currBlock->sharedNodeNProcs_    = NULL;
+   currBlock->sharedNodeProc_      = NULL;
+   currBlock->nodeExtNewGlobalIDs_ = NULL;
+   currBlock->nodeOffset_          = 0;
 
-   currBlock->numLocalNodes_    = 0;
-   currBlock->numExternalNodes_ = 0;
-   currBlock->nodeGlobalIDs_    = NULL;
-   currBlock->nodeNumFields_    = 0;
-   currBlock->nodeFieldIDs_     = NULL;
-   currBlock->nodeDOF_          = 0;
-   currBlock->nodeCoordinates_  = NULL;
-   currBlock->nodeNumBCs_       = 0;
-   currBlock->nodeBCIDList_     = NULL;
-   currBlock->nodeBCFlagList_   = NULL;
-   currBlock->nodeBCValues_     = NULL;
-   currBlock->numSharedNodes_   = 0;
-   currBlock->sharedNodeIDs_    = NULL;
-   currBlock->sharedNodeNProcs_ = NULL;
-   currBlock->sharedNodeProc_   = NULL;
-   currBlock->nodeOffset_       = 0;
+   currBlock->numLocalFaces_       = 0;
+   currBlock->numExternalFaces_    = 0;
+   currBlock->faceGlobalIDs_       = NULL;
+   currBlock->faceNumNodes_        = 0;
+   currBlock->faceNodeIDList_      = NULL;
+   currBlock->numSharedFaces_      = 0;
+   currBlock->sharedFaceIDs_       = NULL;
+   currBlock->sharedFaceNProcs_    = NULL;
+   currBlock->sharedFaceProc_      = NULL;
+   currBlock->faceExtNewGlobalIDs_ = NULL;
+   currBlock->faceOffset_          = 0;
 
-   currBlock->initComplete_     = 0;
+   currBlock->initComplete_        = 0;
    return 0;
 }
 
@@ -3842,29 +3923,6 @@ int MLI_FEData::deleteElemBlock(int blockID)
    currBlock->elemNumBCs_       = 0;
    currBlock->elemOffset_       = 0;
 
-   if (currBlock->faceGlobalIDs_ != NULL) delete [] currBlock->faceGlobalIDs_;
-   if (currBlock->faceNodeIDList_ != NULL) 
-   {
-      int nFaces = currBlock->numLocalFaces_ + currBlock->numExternalFaces_;
-      for ( int i = 0; i < nFaces; i++ )
-         delete [] currBlock->faceNodeIDList_[i];
-      delete [] currBlock->faceNodeIDList_;
-   }
-   if (currBlock->sharedFaceIDs_ != NULL) delete [] currBlock->sharedFaceIDs_;
-   if (currBlock->sharedFaceNProcs_ != NULL) 
-      delete [] currBlock->sharedFaceNProcs_;
-   if (currBlock->sharedFaceProc_ != NULL) 
-   {
-      for ( int i = 0; i < currBlock->numSharedFaces_; i++ )
-         delete [] currBlock->sharedFaceProc_[i];
-      delete [] currBlock->sharedFaceProc_;
-   }
-   currBlock->numLocalFaces_    = 0;
-   currBlock->numExternalFaces_ = 0;
-   currBlock->faceNumNodes_     = 0;
-   currBlock->numSharedFaces_   = 0;
-   currBlock->faceOffset_       = 0;
-
    if (currBlock->nodeGlobalIDs_ != NULL) delete [] currBlock->nodeGlobalIDs_;
    if (currBlock->nodeFieldIDs_ != NULL) delete [] currBlock->nodeFieldIDs_;
    if (currBlock->nodeCoordinates_ != NULL) 
@@ -3888,6 +3946,8 @@ int MLI_FEData::deleteElemBlock(int blockID)
          delete [] currBlock->sharedNodeProc_[i];
       delete [] currBlock->sharedNodeProc_;
    }
+   if ( currBlock->nodeExtNewGlobalIDs_ != NULL )
+      delete [] currBlock->nodeExtNewGlobalIDs_;
    currBlock->numLocalNodes_    = 0;
    currBlock->numExternalNodes_ = 0;
    currBlock->nodeNumFields_    = 0;
@@ -3895,6 +3955,31 @@ int MLI_FEData::deleteElemBlock(int blockID)
    currBlock->nodeNumBCs_       = 0;
    currBlock->numSharedNodes_   = 0;
    currBlock->nodeOffset_       = 0;
+
+   if (currBlock->faceGlobalIDs_ != NULL) delete [] currBlock->faceGlobalIDs_;
+   if (currBlock->faceNodeIDList_ != NULL) 
+   {
+      int nFaces = currBlock->numLocalFaces_ + currBlock->numExternalFaces_;
+      for ( int i = 0; i < nFaces; i++ )
+         delete [] currBlock->faceNodeIDList_[i];
+      delete [] currBlock->faceNodeIDList_;
+   }
+   if (currBlock->sharedFaceIDs_ != NULL) delete [] currBlock->sharedFaceIDs_;
+   if (currBlock->sharedFaceNProcs_ != NULL) 
+      delete [] currBlock->sharedFaceNProcs_;
+   if (currBlock->sharedFaceProc_ != NULL) 
+   {
+      for ( int i = 0; i < currBlock->numSharedFaces_; i++ )
+         delete [] currBlock->sharedFaceProc_[i];
+      delete [] currBlock->sharedFaceProc_;
+   }
+   if ( currBlock->faceExtNewGlobalIDs_ != NULL )
+      delete [] currBlock->faceExtNewGlobalIDs_;
+   currBlock->numLocalFaces_    = 0;
+   currBlock->numExternalFaces_ = 0;
+   currBlock->faceNumNodes_     = 0;
+   currBlock->numSharedFaces_   = 0;
+   currBlock->faceOffset_       = 0;
 
    currBlock->initComplete_     = 0;
    return 0;

@@ -599,19 +599,6 @@ public :
    virtual int getNumNodes(int& nNodes) 
                            {return -1;}
 
-   /** Return the number of local nodes 
-       @param (output) nNodes - number of nodes "owned" by "this" processor 
-   */
-   virtual int getNumLocalNodes(int& nNodes) 
-                                {return -1;}
-
-   /** Return the number of external nodes 
-       @param (output) nNodes - number of nodes used but not "owned" by 
-                                "this" processor 
-   */
-   virtual int getNumExternalNodes(int& nNodes) 
-                                   {return -1;}
-
    /** Return the global node IDs corresponding to local IDs from 0 to nNodes-1 
        with nNodes is the parameter returned from getNumNodes
        @param (input)  nNodes     - total no. of nodes (checking)
@@ -703,17 +690,11 @@ public :
    // get face information
    // =========================================================================
 
-   /** Return the number of faces local to my processor 
-       @param (output) nFaces - number of local faces
+   /** Return the number of faces in my processor 
+       @param (output) nFaces - number of faces
    */
-   virtual int getNumLocalFaces(int& nfaces) 
-                                {return -1;}
-
-   /** Return the number of faces used locally but external to my processor 
-       @param (output) nFaces - number of external faces
-   */
-   virtual int getNumExternalFaces(int& nfaces) 
-                                   {return -1;}
+   virtual int getNumFaces(int& nfaces) 
+                           {return -1;}
 
    /** Return the global IDs of all internal and external faces
        @param (input)  nFaces     - number of external faces
@@ -805,14 +786,14 @@ public :
    // other functions
    // -------------------------------------------------------------------------
 
-   /** This function is used to set specific data to specific implementation
+   /** This function is used to get/set implementation-specific data 
        of a derived FEBase object. 
        @param (input)        param_string - command string
        @param (input)        argc         - dimension of argv
        @param (input/output) argv         - data
        returns the number of arguments returned, if appropriate.
    */
-   virtual int specializedRequests(char *param_string, 
+   virtual int impSpecificRequests(char *param_string, 
                                    int argc, 
                                    char **argv) 
                                    {return -1;}
