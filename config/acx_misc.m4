@@ -243,14 +243,11 @@ Currently this macro knows about GCC, and KCC.]),
     CXXFLAGS="$CXXFLAGS -A --display_error_number -Minform,inform"
     casc_using_debug=yes
   elif test "x$CC" = "xxlc"; then
-    CFLAGS="$CFLAGS -qinfo=all"
-    CFLAGS="$CFLAGS -qsuppress=1506-290:1506-293:1506-412:1506-454"
-    CFLAGS="$CFLAGS:1506-456:1506-460:1506-464:1506-465:1506-733"
-    CXXFLAGS="$CXXFLAGS  -qinfo=all"
-    CXXFLAGS="$CXXFLAGS -qsuppress=1506-290:1506-293:1506-412:1506-454"
-    CXXFLAGS="$CXXFLAGS:1506-456:1506-460:1506-464:1506-465:1506-733"
+    CFLAGS="$CFLAGS -qinfo=dcl:eff:pro:rea:ret:use"
+    CXXFLAGS="$CXXFLAGS  -qinfo=dcl:eff:obs:pro:rea:ret:use"
     casc_using_debug=yes
-  elif test "x$CC" = "xKCC"; then
+    casc_using_mpi=no
+  elif test "x$CC" = "xKCC" || test "x$CC" = "xkcc"; then
     CFLAGS="$CFLAGS --c --strict --lint --display_error_number"
     CFLAGS="$CFLAGS --diag_suppress 45,236,450,826"
     CFLAGS="$CFLAGS,1018,1021,1022,1023,1024,1030,1041"
