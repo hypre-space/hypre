@@ -1292,26 +1292,25 @@ void HYPRE_LinSysCore::buildSchurReducedSystem()
     } 
 
     //******************************************************************
-    // the nSchur should have been initialized by users already
-    // (We expect this should be greater than 0)
-    // If not, will perform an automatic search
+    // perform an automatic search for nSchur
     //------------------------------------------------------------------
 
     nSchur = 0;
-    for ( i = EndRow; i >= StartRow; i-- ) 
+    for ( i = StartRow; i <= EndRow; i++ )
     {
        HYPRE_ParCSRMatrixGetRow(A_csr,i,&rowSize,&colInd,&colVal);
        searchIndex = globalNRows + 1;
-       for (j = 0; j < rowSize; j++) 
+       for (j = 0; j < rowSize; j++)
        {
           colIndex = colInd[j];
-          if ( colIndex < searchIndex && colVal[j] != 0.0 ) 
+          if ( colIndex < searchIndex && colVal[j] != 0.0 )
              searchIndex = colIndex;
        }
        HYPRE_ParCSRMatrixRestoreRow(A_csr,i,&rowSize,&colInd,&colVal);
-       if ( searchIndex < i ) nSchur++;
-       else                   break;
+       if ( searchIndex >= i ) nSchur++;
+       else                    break;
     }
+    nSchur = EndRow - StartRow + 1 - nSchur;
     MPI_Allreduce(&nSchur, &globalNSchur, 1, MPI_INT, MPI_SUM,comm_);
        
     if ( HYOutputLevel_ & HYFEI_SCHURREDUCE1 )

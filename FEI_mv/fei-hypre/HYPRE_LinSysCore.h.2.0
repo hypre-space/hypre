@@ -5,7 +5,7 @@
 #ifndef _HYPRE_LinSysCore_h_
 #define _HYPRE_LinSysCore_h_
 
-#define HYPRE_FEI_Version() "FEI/HYPRE 2.0.0R4"
+#define HYPRE_FEI_Version() "FEI/HYPRE 2.0.0R5"
 
 // *************************************************************************
 // system libraries used
@@ -377,9 +377,12 @@ class HYPRE_LinSysCore
    int    HYPRE_Schur_Search(int,int,int*,int*,int,int);
    void   buildSchurReducedRHS();
    double buildSchurReducedSoln();
+   void   computeAConjProjection(HYPRE_ParCSRMatrix A_csr, HYPRE_ParVector x, 
+                                 HYPRE_ParVector b);
    void   computeMinResProjection(HYPRE_ParCSRMatrix A_csr, HYPRE_ParVector x, 
                                   HYPRE_ParVector b);
-   void   addToProjectionSpace(HYPRE_IJVector x, HYPRE_IJVector b);
+   void   addToAConjProjectionSpace(HYPRE_IJVector x, HYPRE_IJVector b);
+   void   addToMinResProjectionSpace(HYPRE_IJVector x, HYPRE_IJVector b);
    char  *getVersion();
    void   beginCreateMapFromSoln();
    void   endCreateMapFromSoln();
@@ -481,7 +484,7 @@ class HYPRE_LinSysCore
    int             slideReduction_;
    int             schurReduction_;
    int             schurReductionCreated_;
-   int             minResProjection_;
+   int             projectScheme_;
    int             projectSize_;
    int             projectCurrSize_;
 
