@@ -20,7 +20,7 @@ c-----------------------------------------------------------------------
       parameter (MAXBLKS=32)
       parameter (MAXDIM=3)
       parameter (MAXLEVELS=25)
-      parameter (HYPRE_PARCSR=797997)
+      parameter (HYPRE_PARCSR=5555)
 
       integer             num_procs, myid
 
@@ -138,34 +138,34 @@ c
 c     read( 5, *) n_pre
 c     read( 5, *) n_post
 c
-      write(6,*) 'Generate matrix? !0 yes, 0 no (from file)'
+c     write(6,*) 'Generate matrix? !0 yes, 0 no (from file)'
       read(5,*) generate_matrix
 
       if (generate_matrix .eq. 0) then
-        write(6,*) 'What file to use for matrix (<= 32 chars)?'
+c       write(6,*) 'What file to use for matrix (<= 32 chars)?'
         read(5,*) matfile
       endif
 
-      write(6,*) 'Generate right-hand side? !0 yes, 0 no (from file)'
+c     write(6,*) 'Generate right-hand side? !0 yes, 0 no (from file)'
       read(5,*) generate_rhs
 
       if (generate_rhs .eq. 0) then
-        write(6,*)
-     &    'What file to use for right-hand side (<= 32 chars)?'
+c       write(6,*)
+c    &    'What file to use for right-hand side (<= 32 chars)?'
         read(5,*) rhsfile
       endif
 
-      write(6,*) 'What solver_id?'
-      write(6,*) '0 AMG, 2 GMRES, 3 AMG-GMRES, 4 DSGMRES'
-      write(6,*) '7 PILUT-GMRES, 8 PARASAILS-GMRES'
+c     write(6,*) 'What solver_id?'
+c     write(6,*) '0 AMG, 2 GMRES, 3 AMG-GMRES, 4 DSGMRES'
+c     write(6,*) '7 PILUT-GMRES, 8 PARASAILS-GMRES'
       read(5,*) solver_id
 
       if (solver_id .eq. 7) then
-        write(6,*) 'What drop tolerance?  <0 do not drop'
+c       write(6,*) 'What drop tolerance?  <0 do not drop'
         read(5,*) drop_tol
       endif
  
-      write(6,*) 'What relative residual norm tolerance?'
+c     write(6,*) 'What relative residual norm tolerance?'
       read(5,*) tol
 
 c     close( 5 )
