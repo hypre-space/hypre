@@ -2,4 +2,4 @@
 
 SUBDIRS = . lib
 DIST_SUBDIRS = . krylov lib multivector sstruct_ls parcsr_ls struct_ls \
-               utilities test
+               utilities 
