@@ -128,7 +128,8 @@ FILES = \
  $(top_srcdir)/FEI_mv/femli/util/mli_utils.c\
  $(top_srcdir)/FEI_mv/femli/amgs/mli_amgsa_calib.cxx\
  $(top_srcdir)/FEI_mv/femli/amgs/mli_amgsa_coarsen1.cxx\
- $(top_srcdir)/FEI_mv/femli/amgs/mli_amgsa_substructure.cxx\
+ $(top_srcdir)/FEI_mv/femli/amgs/mli_amgsa_dd_fedata.cxx\
+ $(top_srcdir)/FEI_mv/femli/amgs/mli_amgsa_dd_sfei.cxx\
  $(top_srcdir)/FEI_mv/femli/amgs/mli_method.cxx\
  $(top_srcdir)/FEI_mv/femli/amgs/mli_method_amgrs.cxx\
  $(top_srcdir)/FEI_mv/femli/amgs/mli_method_amgsa.cxx\
