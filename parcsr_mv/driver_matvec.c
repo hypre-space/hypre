@@ -40,7 +40,8 @@ main( int   argc,
 	matrix = hypre_ReadCSRMatrix("input");
    	printf(" read input\n");
    }
-   par_matrix = hypre_CSRMatrixToParCSRMatrix(MPI_COMM_WORLD, matrix);
+   par_matrix = hypre_CSRMatrixToParCSRMatrix(MPI_COMM_WORLD, matrix, NULL,
+		NULL);
    printf(" converted\n");
 
    hypre_PrintParCSRMatrix(par_matrix,"matrix");

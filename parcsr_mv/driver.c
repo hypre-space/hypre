@@ -52,7 +52,7 @@ main( int   argc,
    for (i=0; i < global_size; i++)
 	data2[i] = i+1;
 
-   vector2 = hypre_VectorToParVector(MPI_COMM_WORLD,local_vector2);
+   vector2 = hypre_VectorToParVector(MPI_COMM_WORLD,local_vector2,NULL);
 
    hypre_PrintParVector(vector2, "Convert");
 
@@ -91,7 +91,7 @@ main( int   argc,
 
    prod = hypre_ParInnerProd(MPI_COMM_WORLD, vector1, tmp_vector);
 
-   if (my_id == 0) printf (" prod: %8.2f \n", prod);
+   printf (" prod: %8.2f \n", prod);
 
    /*-----------------------------------------------------------
     * Finalize things
