@@ -1,15 +1,18 @@
-To create the smoothed aggregation multigrid method,
+To create the smoothed aggregation or Ruge Stuben AMG methods,
 
 1. instantiate the method (create smoothed aggregation AMG context)
 
-   method = new MLI_MethodAgent( comm );
-   method->createMethod( name );
+   method = MLI_Method_CreateFromName( methodName, comm );
   
    where
-      name = MLI_METHOD_AMGSA 
+      name = "AMGSA", "AMGRS", .. 
       comm = a MPI communicator
 
-2. set the desired SA AMG parameters 
+   or
+
+   method = MLI_Method_CreateFromID( methodID, comm );
+
+2. set the desired AMG parameters 
 
    method->setParams( param_string, argc, argv );
 
