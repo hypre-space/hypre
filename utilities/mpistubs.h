@@ -126,7 +126,7 @@ int MPI_Comm_group P((MPI_Comm comm , MPI_Group *group ));
 int MPI_Comm_dup P((MPI_Comm comm , MPI_Comm *newcomm ));
 int MPI_Group_incl P((MPI_Group group , int n , int *ranks , MPI_Group *newgroup ));
 int MPI_Comm_create P((MPI_Comm comm , MPI_Group group , MPI_Comm *newcomm ));
-int MPI_Get_count P((MPI_Status status , MPI_Datatype datatype , int *count ));
+int MPI_Get_count P((MPI_Status *status , MPI_Datatype datatype , int *count ));
 int MPI_Alltoall P((void *sendbuf , int sendcount , MPI_Datatype sendtype , void *recvbuf , int recvcount , MPI_Datatype recvtype , MPI_Comm comm ));
 int MPI_Allgather P((void *sendbuf , int sendcount , MPI_Datatype sendtype , void *recvbuf , int recvcount , MPI_Datatype recvtype , MPI_Comm comm ));
 int MPI_Allgatherv P((void *sendbuf , int sendcount , MPI_Datatype sendtype , void *recvbuf , int *recvcounts , int *displs , MPI_Datatype recvtype , MPI_Comm comm ));

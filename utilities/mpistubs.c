@@ -86,7 +86,7 @@ MPI_Comm_create( MPI_Comm  comm,
 }
 
 int
-MPI_Get_count( MPI_Status    status,
+MPI_Get_count( MPI_Status   *status,
                MPI_Datatype  datatype,
                int          *count    )
 {
