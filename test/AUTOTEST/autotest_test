@@ -204,11 +204,11 @@ apply_error_filters () {
       fros*|blue*)
 ###   if [ "$HYPRE_ARCH" = "blue" ] ; then
         for ii in \
-          '=== End of Compilation'\
-          'Compilation successful'\
-          '^ Guide   '\
-          ': 0 errors in file'\
-          '1500-030: (I) INFORMATION:'
+          '===\ End\ of\ Compilation'\
+          'Compilation\ successful'\
+          '^\ Guide\ \ \ '\
+          ':\ 0\ errors\ in\ file'\
+          '1500-030:\ \(I\)\ INFORMATION:'
         do process_filter $ErrorFile "${ii}"
         done
 ###   fi   # blue
@@ -216,26 +216,27 @@ apply_error_filters () {
       peng*)
         for ii in \
           '^[A-Za-z0-9_]\.[cCf]$'\
-          ' remark: '
+          '\ remark:\ '
         do process_filter $ErrorFile "${ii}"
         done
       ;;
       tux*)
         for ii in \
-          '(autoconf|automake|autoheader) has been disabled'\
-          'configure: WARNING: Configuration for'
+          '(autoconf|automake|autoheader)\ has\ been\ disabled'\
+          'configure:\ WARNING:\ Configuration\ for'
         do process_filter $ErrorFile "${ii}"
         done
       ;;
       vivid*)
         for ii in \
-          '.Xauthority'
+          'xauth:\ \ error\ in\ locking\ authority\ file\ '
         do process_filter $ErrorFile "${ii}"
         done
       ;;
       achi*|sunup*)
         for ii in \
-          'Option -fexceptions passed to ld'
+          'Option\ -fexceptions\ passed\ to\ ld'\
+          'configure:\ WARNING:\ Configuration\ for'
         do process_filter $ErrorFile "${ii}"
         done
       ;;
