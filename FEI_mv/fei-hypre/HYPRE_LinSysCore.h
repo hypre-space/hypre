@@ -13,7 +13,7 @@
 #ifndef _HYPRE_LinSysCore_h_
 #define _HYPRE_LinSysCore_h_
 
-#define HYPRE_FEI_Version() "FEI/HYPRE 2.0.1R24"
+#define HYPRE_FEI_Version() "FEI/HYPRE 2.0.1R25"
 
 // *************************************************************************
 // system libraries used
@@ -566,6 +566,7 @@ class HYPRE_LinSysCore
    HYPRE_Solver    HYSolver_;
    HYsolverID      HYSolverID_;
    int             gmresDim_;
+   int             fgmresUpdateTol_;
    int             maxIterations_;
    int             finalResNorm_;
    double          tolerance_;

@@ -203,6 +203,7 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
    //-------------------------------------------------------------------
 
    gmresDim_           = 100;  // restart size in GMRES
+   fgmresUpdateTol_    = 0;
 
    amgCoarsenType_     = 0;    // default coarsening
    amgMeasureType_     = 0;    // local measure
@@ -3808,7 +3809,11 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                 printf("***************************************************\n");
               HYPRE_ParCSRFGMRESSetLogging(HYSolver_, 1);
            }
+
            HYPRE_ParCSRFGMRESSetup(HYSolver_, A_csr, b_csr, x_csr);
+           if ( fgmresUpdateTol_ && HYPreconID_ == HYBLOCK )
+              HYPRE_ParCSRFGMRESUpdatePrecondTolerance(HYSolver_, 
+                      HYPRE_LSI_BlockPrecondSetA11Tolerance);
            MPI_Barrier( comm_ );
            ptime  = LSC_Wtime();
            HYPRE_ParCSRFGMRESSolve(HYSolver_, A_csr, b_csr, x_csr);

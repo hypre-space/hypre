@@ -32,6 +32,7 @@ extern int  hypre_FGMRESGetPrecond(void *, HYPRE_Solver *);
 extern int  hypre_FGMRESSetLogging(void *, int);
 extern int  hypre_FGMRESGetNumIterations(void *, int *);
 extern int  hypre_FGMRESGetFinalRelativeResidualNorm(void *,double *);
+extern int  hypre_FGMRESUpdaterecondTolerance(void *, int (*update_tol)());
 
 /******************************************************************************
  *
@@ -158,5 +159,15 @@ int HYPRE_ParCSRFGMRESGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
                                                     double *norm   )
 {
    return( hypre_FGMRESGetFinalRelativeResidualNorm( (void *) solver, norm ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRFGMRESUpdatePrecondTolerance
+ *--------------------------------------------------------------------------*/
+
+int HYPRE_ParCSRFGMRESUpdatePrecondTolerance( HYPRE_Solver  solver,
+          int (*update_tol)(HYPRE_Solver sol, double ) )
+{
+   return( hypre_FGMRESUpdatePrecondTolerance(solver, update_tol) );
 }
 

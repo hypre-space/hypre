@@ -51,6 +51,9 @@ extern int HYPRE_ParCSRFGMRESGetNumIterations(HYPRE_Solver solver,
 extern int HYPRE_ParCSRFGMRESGetFinalRelativeResidualNorm(HYPRE_Solver solver,
                                                           double *norm );
 
+extern int HYPRE_ParCSRFGMRESUpdatePrecondTolerance(HYPRE_Solver  solver,
+                             int (*set_tolerance)(HYPRE_Solver sol, double));
+
 #ifdef __cplusplus
 }
 #endif

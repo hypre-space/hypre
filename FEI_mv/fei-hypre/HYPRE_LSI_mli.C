@@ -151,7 +151,7 @@ int HYPRE_LSI_MLICreate( MPI_Comm comm, HYPRE_Solver *solver )
    mli_object->coarseSolverWts_     = NULL;
    mli_object->minCoarseSize_       = 1;
    mli_object->nodeDOF_             = 1;
-   mli_object->spaceDim_            = 3;
+   mli_object->spaceDim_            = 1;
    mli_object->nSpaceDim_           = 1;
    mli_object->localNEqns_          = 0;
    mli_object->nCoordinates_        = NULL;

@@ -38,6 +38,7 @@ extern int HYPRE_LSI_BlockPrecondSetup(HYPRE_Solver solver,HYPRE_ParCSRMatrix A,
                                        HYPRE_ParVector b,HYPRE_ParVector x);
 extern int HYPRE_LSI_BlockPrecondSolve(HYPRE_Solver solver,HYPRE_ParCSRMatrix A,
                                        HYPRE_ParVector b, HYPRE_ParVector x);
+extern int HYPRE_LSI_BlockPrecondSetA11Tolerance(HYPRE_Solver solver, double);
 
 #ifdef __cplusplus
 }

@@ -136,5 +136,7 @@
             - add nonsymmetric AMG
             - correct bug in matrix_mult : put diag in front
             - add better matrix transpose function
-
+12/03/02    2.0.0R25
+            - add variable tolerance for block preconditioning
+            - fix autotest bug (unused variables) in mli_method_amgrs.C
 

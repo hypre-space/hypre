@@ -43,6 +43,8 @@ typedef struct
    int      logging;
    double  *norms;
    char    *log_file_name;
+   int     precond_tol_update;
+   int     (*precond_update_tol)();
 
 } hypre_FGMRESData;
 
@@ -58,22 +60,24 @@ void *hypre_FGMRESCreate()
  
    /* set defaults */
 
-   (fgmres_data -> k_dim)          = 5;
-   (fgmres_data -> tol)            = 1.0e-06;
-   (fgmres_data -> max_iter)       = 1000;
-   (fgmres_data -> stop_crit)      = 0; /* rel. residual norm */
-   (fgmres_data -> precond)        = hypre_ParKrylovIdentity;
-   (fgmres_data -> precond_setup)  = hypre_ParKrylovIdentitySetup;
-   (fgmres_data -> precond_data)   = NULL;
-   (fgmres_data -> logging)        = 0;
-   (fgmres_data -> p)              = NULL;
-   (fgmres_data -> z)              = NULL;
-   (fgmres_data -> r)              = NULL;
-   (fgmres_data -> w)              = NULL;
-   (fgmres_data -> matvec_data)    = NULL;
-   (fgmres_data -> norms)          = NULL;
-   (fgmres_data -> log_file_name)  = NULL;
-   (fgmres_data -> logging)        = 0;
+   (fgmres_data -> k_dim)              = 5;
+   (fgmres_data -> tol)                = 1.0e-06;
+   (fgmres_data -> max_iter)           = 1000;
+   (fgmres_data -> stop_crit)          = 0; /* rel. residual norm */
+   (fgmres_data -> precond)            = hypre_ParKrylovIdentity;
+   (fgmres_data -> precond_setup)      = hypre_ParKrylovIdentitySetup;
+   (fgmres_data -> precond_data)       = NULL;
+   (fgmres_data -> logging)            = 0;
+   (fgmres_data -> p)                  = NULL;
+   (fgmres_data -> z)                  = NULL;
+   (fgmres_data -> r)                  = NULL;
+   (fgmres_data -> w)                  = NULL;
+   (fgmres_data -> matvec_data)        = NULL;
+   (fgmres_data -> norms)              = NULL;
+   (fgmres_data -> log_file_name)      = NULL;
+   (fgmres_data -> logging)            = 0;
+   (fgmres_data -> precond_tol_update) = 0;
+   (fgmres_data -> precond_update_tol) = NULL;
    return (void *) fgmres_data;
 }
 
@@ -176,12 +180,12 @@ int hypre_FGMRESSolve(void  *fgmres_vdata, void  *A, void  *b, void  *x)
    int             logging        = (fgmres_data -> logging);
    double         *norms          = (fgmres_data -> norms);
    
+   int 	           tol_update     = (fgmres_data -> precond_tol_update);
+   int 	           (*update_tol)()= (fgmres_data -> precond_update_tol);
+
    int	           i, j, k, ierr = 0, iter, my_id, num_procs;
    double          *rs, **hh, *c, *s, t;
    double          epsilon, gamma, r_norm, b_norm, x_norm, epsmac = 1.e-16; 
-   double          guard_zero_residual; 
-
-   guard_zero_residual = 0.0;
 
    hypre_ParKrylovCommInfo(A,&my_id,&num_procs);
 
@@ -261,6 +265,10 @@ int hypre_FGMRESSolve(void  *fgmres_vdata, void  *A, void  *b, void  *x)
          i++;
          iter++;
          hypre_ParKrylovClearVector(z[i-1]);
+
+         if ( tol_update != 0 && update_tol != NULL ) 
+            update_tol(precond_data,r_norm/b_norm);
+
          precond(precond_data, A, p[i-1], z[i-1]);
          hypre_ParKrylovMatvec(matvec_data, 1.0, A, z[i-1], 0.0, p[i]);
 
@@ -479,6 +487,20 @@ int hypre_FGMRESGetFinalRelativeResidualNorm(void *fgmres_vdata,
  
    *relative_residual_norm = (fgmres_data -> rel_residual_norm);
    
+   return ierr;
+} 
+
+/*--------------------------------------------------------------------------
+ * hypre_FGMRESUpdatePrecondTolerance
+ *--------------------------------------------------------------------------*/
+ 
+int hypre_FGMRESUpdatePrecondTolerance(void *fgmres_vdata, int (*update_tol)())
+{
+   int 		    ierr = 0;
+   hypre_FGMRESData *fgmres_data = fgmres_vdata;
+ 
+   (fgmres_data -> precond_tol_update) = 1;
+   (fgmres_data -> precond_update_tol) = update_tol;
    return ierr;
 } 
 

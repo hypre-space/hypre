@@ -497,6 +497,18 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
       }
 
       //----------------------------------------------------------------
+      // for FGMRES, tell it to update the convergence criterion of its
+      // preconditioner, if it is Block preconditioning
+      //----------------------------------------------------------------
+
+      else if ( !strcasecmp(param1, "fgmresUpdateTol") )
+      {
+         fgmresUpdateTol_ = 1;
+         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+            printf("       HYPRE_LSC::parameters fgmresUpdateTol on\n");
+      }
+
+      //----------------------------------------------------------------
       // for GMRES, the convergence criterion 
       //----------------------------------------------------------------
 

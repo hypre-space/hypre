@@ -220,6 +220,28 @@ int HYPRE_LSI_BlockPrecondSolve(HYPRE_Solver solver, HYPRE_ParCSRMatrix Amat,
    return err;
 }
 
+//------------------------------------------------------------------------------
+
+extern "C" int HYPRE_LSI_BlockPrecondSetA11Tolerance(HYPRE_Solver solver,
+                                                     double tol)
+{
+   int    err=0;
+   double tol2;
+   char   paramString[30];
+
+   HYPRE_LSI_BlockPrecond *cprecon = (HYPRE_LSI_BlockPrecond *) solver;
+   if ( cprecon == NULL ) err = 1;
+   else
+   {
+      HYPRE_LSI_BlockP *precon = (HYPRE_LSI_BlockP *) cprecon->precon;
+      tol2 = tol;
+      if ( tol2 > 0.1 ) tol2 = 0.1;
+      sprintf( paramString, "blockP A11Tolerance %e", tol2 );
+      err = precon->setParams(paramString);
+   }
+   return err;
+}
+
 //******************************************************************************
 //******************************************************************************
 //******************************************************************************
@@ -1309,6 +1331,8 @@ int HYPRE_LSI_BlockP::solve(HYPRE_ParVector fvec, HYPRE_ParVector xvec)
    //------------------------------------------------------------------
    // solve them according to the requested scheme 
    //------------------------------------------------------------------
+
+   HYPRE_ParCSRPCGSetTol( A11Solver_, A11Params_.Tol_ );
 
    switch (scheme_)
    {
