@@ -231,10 +231,13 @@ int MLI::setMethod( MLI_Method *object )
 
 int MLI::setup()
 {
-   int nlevels, status=0;
+   int  nlevels, status=0;
+   char param_string[100];
 
    curr_iter      = 0;
    build_time     = MLI_Utils_WTime();
+   sprintf( param_string, "setOutputLevel %d", output_level );
+   method_ptr->setParams(param_string, 0, NULL);
    nlevels        = method_ptr->setup(this);
    coarsest_level = nlevels - 1;
    build_time = MLI_Utils_WTime() - build_time;
