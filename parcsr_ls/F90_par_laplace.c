@@ -31,7 +31,7 @@ hypre_F90_IFACE(hypre_generatelaplacian)( int      *comm,
                                           int      *q,
                                           int      *r,
                                           double   *value,
-                                          long int *matrix
+                                          long int *matrix,
                                           int      *ierr   )
 
 {
