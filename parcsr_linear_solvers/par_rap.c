@@ -319,12 +319,13 @@ int hypre_BoomerAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
     *  are more than one processor and nonzero elements in R_offd
     *-----------------------------------------------------------------------*/
 
-  jj_count = hypre_CTAlloc(int, hypre_NumThreads);
   P_mark_array = hypre_CTAlloc(int *, hypre_NumThreads);
   A_mark_array = hypre_CTAlloc(int *, hypre_NumThreads);
 
   if (num_cols_offd_RT)
   {
+   jj_count = hypre_CTAlloc(int, hypre_NumThreads);
+
 #define HYPRE_SMP_PRIVATE i,ii,ic,i1,i2,i3,jj1,jj2,jj3,ns,ne,size,rest,jj_counter,jj_row_begining,A_marker,P_marker
 #include "../utilities/hypre_smp_forloop.h"
    for (ii = 0; ii < hypre_NumThreads; ii++)
