@@ -170,8 +170,6 @@ void HYPRE_SLE::deleteLinearAlgebraCore()
 //with the linear algebra library. i.e., do initial allocations, etc.
 // Rows and columns are 1-based.
 
-const int partit[] = {0, 3, 6};//UNDONE kludge
-
 void HYPRE_SLE::createLinearAlgebraCore(int globalNumEqns,
   int localStartRow, int localEndRow, int localStartCol, int localEndCol)
 {
@@ -192,8 +190,7 @@ void HYPRE_SLE::createLinearAlgebraCore(int globalNumEqns,
     assert(!ierr);
     ierr = HYPRE_IJVectorSetLocalStorageType(b, HYPRE_PARCSR);
     assert(!ierr);
-//  ierr = HYPRE_IJVectorSetLocalPartitioning(b, localStartRow-1, localEndRow);
-    ierr = HYPRE_IJVectorSetPartitioning(b, partit);
+    ierr = HYPRE_IJVectorSetLocalPartitioning(b, localStartRow-1, localEndRow);
     assert(!ierr);
     ierr = HYPRE_IJVectorInitialize(b);
     assert(!ierr);
@@ -204,8 +201,7 @@ void HYPRE_SLE::createLinearAlgebraCore(int globalNumEqns,
     assert(!ierr);
     ierr = HYPRE_IJVectorSetLocalStorageType(x, HYPRE_PARCSR);
     assert(!ierr);
-//  ierr = HYPRE_IJVectorSetLocalPartitioning(x, localStartRow-1, localEndRow);
-    ierr = HYPRE_IJVectorSetPartitioning(x, partit);
+    ierr = HYPRE_IJVectorSetLocalPartitioning(x, localStartRow-1, localEndRow);
     assert(!ierr);
     ierr = HYPRE_IJVectorInitialize(x);
     assert(!ierr);
@@ -549,10 +545,6 @@ void fei_hypre_test(int argc, char *argv[])
 
     H.resetMatrixAndVector(0.0);
     
-/*
-fflush(stdout);
-MPI_Barrier(MPI_COMM_WORLD);
-*/
     MPI_Finalize();
 
     // note implicit call to destructor at end of scope
