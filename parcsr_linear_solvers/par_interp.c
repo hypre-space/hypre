@@ -18,6 +18,7 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
                          int                  *CF_marker,
                          hypre_ParCSRMatrix   *S,
                          int                   debug_flag,
+                         double                trunc_factor,
                          hypre_ParCSRMatrix  **P_ptr)
 {
 
@@ -702,11 +703,11 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
             max_coef = 0;
             for (j = P_diag_i[i]; j < P_diag_i[i+1]; j++)
                max_coef = (max_coef < fabs(P_diag_data[j])) ? 
-				P_diag_data[j] : max_coef;
+				fabs(P_diag_data[j]) : max_coef;
             for (j = P_offd_i[i]; j < P_offd_i[i+1]; j++)
                max_coef = (max_coef < fabs(P_offd_data[j])) ? 
-				P_offd_data[j] : max_coef;
-            max_coef *= 0.25;
+				fabs(P_offd_data[j]) : max_coef;
+            max_coef *= trunc_factor;
 
             start_j = P_diag_i[i];
             P_diag_i[i] -= num_lost;
@@ -715,7 +716,7 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
             for (j = start_j; j < P_diag_i[i+1]; j++)
             {
 	       row_sum += P_diag_data[now_checking];
-               if (P_diag_data[now_checking] < max_coef)
+               if (fabs(P_diag_data[now_checking]) < max_coef)
                {
                   num_lost++;
                   now_checking++;
@@ -736,7 +737,7 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
             for (j = start_j; j < P_offd_i[i+1]; j++)
             {
 	       row_sum += P_offd_data[now_checking_offd];
-               if (P_offd_data[now_checking_offd] < max_coef)
+               if (fabs(P_offd_data[now_checking_offd]) < max_coef)
                {
                   num_lost_offd++;
                   now_checking_offd++;
@@ -753,10 +754,13 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
 	    /* normalize row of P */
 
    	    scale = row_sum/scale;
-   	    for (j = P_diag_i[i]; j < (P_diag_i[i+1]-num_lost); j++)
-      	       P_diag_data[j] *= scale;
-   	    for (j = P_offd_i[i]; j < (P_offd_i[i+1]-num_lost_offd); j++)
-      	       P_offd_data[j] *= scale;
+	    if (scale != 1)
+	    {
+   	       for (j = P_diag_i[i]; j < (P_diag_i[i+1]-num_lost); j++)
+      	          P_diag_data[j] *= scale;
+   	       for (j = P_offd_i[i]; j < (P_offd_i[i+1]-num_lost_offd); j++)
+      	          P_offd_data[j] *= scale;
+	    }
          }
       }
       P_diag_i[n_fine] -= num_lost;
