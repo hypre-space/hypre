@@ -840,6 +840,7 @@ dnl jfp: temporary, until Babel has been installed somewhere:
  -I../hypre/include\
  -I../babel/Hypre\
  -I../babel\
+ -I../babel/babel\
  -I../babel/babel_stubs_c\
  -I${BABEL_DIR}\
  -I${BABEL_DIR}/babel"
