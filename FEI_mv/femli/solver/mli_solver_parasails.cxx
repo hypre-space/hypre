@@ -24,14 +24,19 @@ MLI_Solver_ParaSails::MLI_Solver_ParaSails(char *name) : MLI_Solver(name)
 #ifdef MLI_PARASAILS
    Amat_            = NULL;
    ps_              = NULL;
-   nlevels_         = 1;     /* number of levels */
-   symmetric_       = 1;     /* symmetric */
+   nlevels_         = 2;     /* number of levels */
+   symmetric_       = 0;     /* nonsymmetric */
    transpose_       = 0;     /* non-transpose */
-   correction_      = 0.8;   /* 0.8 confirmed a good value for 4-8 proc */
+   correction_      = 1.0;   /* 0.8 confirmed a good value for 4-8 proc */
    threshold_       = 1.0e-4;
    filter_          = 1.0e-4;
    loadbal_         = 0;        /* no load balance */
    zeroInitialGuess_ = 0;
+   ownAmat_          = 0;
+   numFpts_          = 0;
+   fpList_           = NULL;
+   auxVec2_          = NULL;
+   auxVec3_          = NULL;
 #else
    printf("MLI_Solver_ParaSails::constructor - ParaSails smoother ");
    printf("not available.\n");
@@ -49,6 +54,10 @@ MLI_Solver_ParaSails::~MLI_Solver_ParaSails()
    if ( ps_ != NULL ) ParaSailsDestroy(ps_);
    ps_ = NULL;
 #endif
+   if (ownAmat_ == 1 && Amat_ != NULL) delete Amat_;
+   if (fpList_ != NULL) delete fpList_;
+   if (auxVec2_ != NULL) delete auxVec2_;
+   if (auxVec3_ != NULL) delete auxVec3_;
 }
 
 /******************************************************************************
@@ -59,11 +68,14 @@ int MLI_Solver_ParaSails::setup(MLI_Matrix *Amat_in)
 {
 #ifdef MLI_PARASAILS
    hypre_ParCSRMatrix *A;
-   int                *partition, mypid, start_row, end_row;
-   int                row, row_length, *col_indices;
+   int                *partition, mypid, nprocs, start_row, end_row;
+   int                row, row_length, *col_indices, globalNRows;
    double             *col_values;
+   char               *paramString;
    Matrix             *mat;
    MPI_Comm           comm;
+   MLI_Function       *funcPtr;
+   hypre_ParVector    *hypreVec;
 
    /*-----------------------------------------------------------------
     * fetch machine and matrix parameters
@@ -73,9 +85,11 @@ int MLI_Solver_ParaSails::setup(MLI_Matrix *Amat_in)
    A = (hypre_ParCSRMatrix *) Amat_->getMatrix();
    comm = hypre_ParCSRMatrixComm(A);
    MPI_Comm_rank(comm,&mypid);  
+   MPI_Comm_size(comm,&nprocs);  
    HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) A, &partition);
    start_row = partition[mypid];
    end_row   = partition[mypid+1] - 1;
+   globalNRows = partition[nprocs];
 
    /*-----------------------------------------------------------------
     * construct a ParaSails matrix
@@ -106,7 +120,31 @@ int MLI_Solver_ParaSails::setup(MLI_Matrix *Amat_in)
     *-----------------------------------------------------------------*/
 
    MatrixDestroy(mat);
+
+   /*-----------------------------------------------------------------
+    * set up other auxiliary vectors
+    *-----------------------------------------------------------------*/
+
+   funcPtr = (MLI_Function *) malloc( sizeof( MLI_Function ) );
+   MLI_Utils_HypreParVectorGetDestroyFunc(funcPtr);
+   paramString = new char[20];
+   strcpy( paramString, "HYPRE_ParVector" );
+
+   HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) A, &partition);
+   hypreVec = hypre_ParVectorCreate(comm, globalNRows, partition);
+   hypre_ParVectorInitialize(hypreVec);
+   auxVec2_ = new MLI_Vector(hypreVec, paramString, funcPtr);
+
+   HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) A, &partition);
+   hypreVec = hypre_ParVectorCreate(comm, globalNRows, partition);
+   hypre_ParVectorInitialize(hypreVec);
+   auxVec3_ = new MLI_Vector(hypreVec, paramString, funcPtr);
+
+   delete [] paramString;
+
+   free( funcPtr );
    return 0;
+
 #else
    (void) Amat_in;
    printf("MLI_Solver_ParaSails::setup ERROR - ParaSails smoother ");
@@ -122,9 +160,32 @@ int MLI_Solver_ParaSails::setup(MLI_Matrix *Amat_in)
 
 int MLI_Solver_ParaSails::solve(MLI_Vector *f_in, MLI_Vector *u_in)
 {
+   int             i;
+   double          *fData, *f2Data, *u2Data, *uData;
+   hypre_ParVector *f2, *u2, *f, *u;
 #ifdef MLI_PARASAILS
-   if (transpose_) return (applyParaSailsTrans( f_in, u_in ));
-   else            return (applyParaSails( f_in, u_in ));
+   if (numFpts_ == 0)
+   {
+      if (transpose_) return (applyParaSailsTrans( f_in, u_in ));
+      else            return (applyParaSails( f_in, u_in ));
+   }
+   else
+   {
+      f2 = (hypre_ParVector *) auxVec2_->getVector();
+      u2 = (hypre_ParVector *) auxVec3_->getVector();
+      f  = (hypre_ParVector *) f_in->getVector();
+      u  = (hypre_ParVector *) u_in->getVector();
+      fData  = hypre_VectorData(hypre_ParVectorLocalVector(f));
+      uData  = hypre_VectorData(hypre_ParVectorLocalVector(u));
+      f2Data = hypre_VectorData(hypre_ParVectorLocalVector(f2));
+      u2Data = hypre_VectorData(hypre_ParVectorLocalVector(u2));
+      for (i = 0; i < numFpts_; i++) f2Data[i] = fData[fpList_[i]]; 
+      for (i = 0; i < numFpts_; i++) u2Data[i] = uData[fpList_[i]]; 
+      if (transpose_) applyParaSailsTrans(auxVec2_, auxVec3_);
+      else            applyParaSails(auxVec2_, auxVec3_);
+      for (i = 0; i < numFpts_; i++) uData[fpList_[i]] = u2Data[i]; 
+   }
+   return 0;
 #else
    (void) f_in;
    (void) u_in;
@@ -141,6 +202,7 @@ int MLI_Solver_ParaSails::solve(MLI_Vector *f_in, MLI_Vector *u_in)
 
 int MLI_Solver_ParaSails::setParams(char *paramString, int argc, char **argv)
 {
+   int  i, *fList;
    char param1[100];
 
    sscanf(paramString, "%s", param1);
@@ -171,6 +233,27 @@ int MLI_Solver_ParaSails::setParams(char *paramString, int argc, char **argv)
    else if ( !strcmp(param1, "zeroInitialGuess") )
    {
       zeroInitialGuess_ = 1;
+   }
+   else if ( !strcmp(paramString, "setFptList") )
+   {
+      if ( argc != 2 ) 
+      {
+         printf("MLI_Solver_Jacobi::setParams ERROR : needs 2 args.\n");
+         return 1;
+      }
+      numFpts_ = *(int*)  argv[0];
+      fList = (int*) argv[1];
+      if ( fpList_ != NULL ) delete [] fpList_;
+      fpList_ = NULL;
+      if (numFpts_ <= 0) return 0;
+      fpList_ = new int[numFpts_];;
+      for ( i = 0; i < numFpts_; i++ ) fpList_[i] = fList[i];
+      return 0;
+   }
+   else if ( !strcmp(paramString, "ownAmat") )
+   {
+      ownAmat_ = 1;
+      return 0;
    }
    else if ( strcmp(param1, "relaxWeight") )
    {   
