@@ -30,11 +30,10 @@ void hypre_ParAat_RowSizes
 /* computes the sizes of the rows of C = A * A^T.
    Out: int** C_diag_i, C_offd_i
    Workspace provided: int * B_marker
-   In: int* A_diag_i, A_diag_j, A_offd_i, A_offd_j, A_ext_i, A_ext_j
+   In: int* A_diag_i, A_diag_j, A_offd_i, A_offd_j, A_ext_i, A_ext_j, A_ext_row_map
    Out: int* C_diag_size, C_offd_size
    In: int num_rows_diag_A, num_cols_offd_A, num_rows_offd_A_ext, first_row_index_A
 */
-   /* This was formerly the first pass of hypre_ParMatmul */
 {
    /* There are 3 CSRMatrix or CSRBooleanMatrix objects behind the arrays here:
       A_diag, A_offd, and A_ext.  That's 9 possiable X*Y combinations.
@@ -42,9 +41,6 @@ void hypre_ParAat_RowSizes
       have any entries because by definition diag and offd have different
       columns.  So we have to do 4:
       offd*ext, diag*diag, diag*ext, and offd*offd.
-      We could take advantage of symmetry in A*A^T to get offd*diag counts from
-      the existing diag*offd .  But for a first cut it looks simpler to just
-      do it over again.
    */
    int i1, i2, i3, jj2, jj3;
    int jj_count_diag, jj_count_offd, jj_row_begin_diag, jj_row_begin_offd;
@@ -75,7 +71,6 @@ void hypre_ParAat_RowSizes
        *--------------------------------------------------------------------*/
  
       B_marker[i1] = jj_count_diag;
-/* was      B_marker[i1+first_row_index_A] = jj_count_diag;*/
       jj_row_begin_diag = jj_count_diag;
       jj_row_begin_offd = jj_count_offd;
       jj_count_diag++;
@@ -293,8 +288,8 @@ void hypre_ParAat_RowSizes
  * Note that C does not own the partitionings
  *--------------------------------------------------------------------------*/
 /* There are lots of possible optimizations.  There is excess communication
-   going on, and off-diagonal matrix elements are computed twice without
-   taking advantage of symmetry, and probably more things. */
+   going on, nothing is being done to take advantage of symmetry, and probably
+   more things. */
 
 hypre_ParCSRMatrix *hypre_ParCSRAAt( hypre_ParCSRMatrix  *A )
 {
@@ -398,14 +393,12 @@ hypre_ParCSRMatrix *hypre_ParCSRAAt( hypre_ParCSRMatrix  *A )
    *  Allocate marker array.
     *-----------------------------------------------------------------------*/
 
-/* was   B_marker = hypre_CTAlloc(int, num_rows_A_ext); */
    B_marker = hypre_CTAlloc(int, num_rows_diag_A+num_rows_A_ext );
 
    /*-----------------------------------------------------------------------
     *  Initialize some stuff.
     *-----------------------------------------------------------------------*/
 
-/* was   for (i1 = 0; i1 < num_rows_A_ext; i1++) */
    for ( i1=0; i1<num_rows_diag_A+num_rows_A_ext; ++i1 )
    {      
       B_marker[i1] = -1;
@@ -460,7 +453,6 @@ hypre_ParCSRMatrix *hypre_ParCSRAAt( hypre_ParCSRMatrix  *A )
 
    jj_count_diag = start_indexing;
    jj_count_offd = start_indexing;
-/* was   for (i1 = 0; i1 < num_rows_A_ext; i1++) */
    for ( i1=0; i1<num_rows_diag_A+num_rows_A_ext; ++i1 )
    {      
       B_marker[i1] = -1;
@@ -478,7 +470,6 @@ hypre_ParCSRMatrix *hypre_ParCSRAAt( hypre_ParCSRMatrix  *A )
        *--------------------------------------------------------------------*/
 
       B_marker[i1] = jj_count_diag;
-/* was      B_marker[i1+first_row_index_A] = jj_count_diag; */
       jj_row_begin_diag = jj_count_diag;
       jj_row_begin_offd = jj_count_offd;
       C_diag_data[jj_count_diag] = zero;
@@ -489,13 +480,13 @@ hypre_ParCSRMatrix *hypre_ParCSRAAt( hypre_ParCSRMatrix  *A )
        *  Loop over entries in row i1 of A_offd.
        *-----------------------------------------------------------------*/
          
-   /* There are 3 CSRMatrix or CSRBooleanMatrix objects here:
-      A_diag, A_offd, and A_ext.  That's 9 possiable X*Y combinations.  But
-      ext*ext, ext*diag, and ext*offd belong to another processor.
-      diag*offd and offd*diag don't count - never share a column by definition.
-      So we have to do 4 cases:
-      diag*ext, offd*ext, diag*diag, and offd*offd.
-   */
+      /* There are 3 CSRMatrix or CSRBooleanMatrix objects here:
+         A_diag, A_offd, and A_ext.  That's 9 possiable X*Y combinations.  But
+         ext*ext, ext*diag, and ext*offd belong to another processor.
+         diag*offd and offd*diag don't count - never share a column by definition.
+         So we have to do 4 cases:
+         diag*ext, offd*ext, diag*diag, and offd*offd.
+      */
 
       for (jj2 = A_diag_i[i1]; jj2 < A_diag_i[i1+1]; jj2++)
       {
@@ -509,7 +500,8 @@ hypre_ParCSRMatrix *hypre_ParCSRAAt( hypre_ParCSRMatrix  *A )
           *  For now, for each row i3 of A_ext we crudely check _all_
           *  columns to see whether one matches i2.
           *  For each entry (i2,i3) of (A_ext)^T, add A(i1,i2)*A(i3,i2)
-          *  to C(i1,i3) .  This contributes to the offd block of C.
+          *  to C(i1,i3) .  This contributes to both the diag and offd
+          *  blocks of C.
           *-----------------------------------------------------------*/
 
          for ( i3=0; i3<num_rows_A_ext; i3++ ) {
@@ -566,7 +558,8 @@ hypre_ParCSRMatrix *hypre_ParCSRAAt( hypre_ParCSRMatrix  *A )
              *  For now, for each row i3 of A_ext we crudely check _all_
              *  columns to see whether one matches i2.
              *  For each entry (i2,i3) of (A_ext)^T, add A(i1,i2)*A(i3,i2)
-             *  to C(i1,i3) .  This contributes to the offd block of C.
+             *  to C(i1,i3) .  This contributes to both the diag and offd
+             *  blocks of C.
              *-----------------------------------------------------------*/
 
             for ( i3=0; i3<num_rows_A_ext; i3++ ) {
@@ -712,7 +705,7 @@ hypre_ParCSRMatrix *hypre_ParCSRAAt( hypre_ParCSRMatrix  *A )
          }     /* end of if (num_cols_offd_A) */
 
       }        /* end of fourth and last i2 loop */
-#if 0
+#if 0          /* debugging printout */
          printf("end of i1 loop: i1=%i jj_count_diag=%i\n", i1, jj_count_diag );
          printf("  C_diag_j=");
          for ( jj3=0; jj3<jj_count_diag; ++jj3) printf("%i ",C_diag_j[jj3]);
@@ -805,8 +798,6 @@ hypre_ParCSRMatrix *hypre_ParCSRAAt( hypre_ParCSRMatrix  *A )
  * processors and needed for multiplying A^T with the local part of A. The rows
  * are returned as CSRMatrix.  A row map for A_ext (like the ParCSRColMap) is
  * returned through the third argument.
- * >>>>...CommPkgT(A) should identify all rows of A^T needed for A*A^T (that is
- * generally a bigger set than ...CommPkg(A), the rows of B needed for A*B)
  *--------------------------------------------------------------------------*/
 
 hypre_CSRMatrix * 
@@ -824,6 +815,8 @@ hypre_ParCSRMatrixExtractAExt( hypre_ParCSRMatrix *A, int data,
    int *col_map_offd = hypre_ParCSRMatrixColMapOffd(A);
 
    hypre_ParCSRCommPkg *comm_pkg = hypre_ParCSRMatrixCommPkgT(A);
+   /* ... CommPkgT(A) should identify all rows of A^T needed for A*A^T (that is
+    * generally a bigger set than ...CommPkg(A), the rows of B needed for A*B) */
    int num_recvs = hypre_ParCSRCommPkgNumRecvs(comm_pkg);
    int *recv_vec_starts = hypre_ParCSRCommPkgRecvVecStarts(comm_pkg);
    int num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);

@@ -4,7 +4,7 @@ void RowsWithColumn
 ( int * rowmin, int * rowmax, int column, hypre_ParCSRMatrix * A )
 /* Finds rows of A which have a nonzero at the given (global) column number.
    Sets rowmin to the minimum (local) row number of such rows, and rowmax
-   to the max. */
+   to the max.  If there are no such rows, will return rowmax<0<=rowmin */
 {
    hypre_CSRMatrix * diag = hypre_ParCSRMatrixDiag(A);
    hypre_CSRMatrix * offd = hypre_ParCSRMatrixOffd(A);
@@ -292,12 +292,9 @@ hypre_MatTCommPkgCreate ( hypre_ParCSRMatrix *A)
       if ( i!=my_id ) { recv_procs[j2] = i; j2++; };
    };
 
-/* old code:
-   recv_vec_starts[j2+1] = recv_vec_starts[j2]+proc_mark[i]; */
-
 /* Compute recv_vec_starts.
    The real job is, for each processor p, to figure out how many rows
-   p will send to me (me=this processor).  I know how many (and which)
+   p will send to me (me=this processor).  I now know how many (and which)
    rows I will send to each p.  Indeed, if send_procs[index]=p, then the
    number is send_map_starts[index+1]-send_map_starts[index].
    More communication is needed.
