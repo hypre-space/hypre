@@ -60,7 +60,16 @@ void Hypre_StructJacobi_destructor(Hypre_StructJacobi this) {
  * impl_Hypre_StructJacobiApply
  **********************************************************/
 int  impl_Hypre_StructJacobi_Apply
-(Hypre_StructJacobi this, Hypre_StructVector b, Hypre_StructVector* x) {
+(Hypre_StructJacobi this, Hypre_Vector b, Hypre_Vector* x) {
+/* old args:
+ (Hypre_StructJacobi this, Hypre_StructVector b, Hypre_StructVector* x)
+*/
+
+   Hypre_StructVector SVb, SVx;
+   struct Hypre_StructVector_private_type * SVbp;
+   HYPRE_StructVector * Vb;
+   struct Hypre_StructVector_private_type * SVxp;
+   HYPRE_StructVector * Vx;
 
    struct Hypre_StructJacobi_private_type *HSJp = this->d_table;
    HYPRE_StructSolver *S = HSJp->hssolver;
@@ -69,11 +78,16 @@ int  impl_Hypre_StructJacobi_Apply
    struct Hypre_StructMatrix_private_type *SMp = A->d_table;
    HYPRE_StructMatrix *MA = SMp->hsmat;
 
-   struct Hypre_StructVector_private_type *SVbp = b->d_table;
-   HYPRE_StructVector *Vb = SVbp->hsvec;
+   SVb = (Hypre_StructVector) Hypre_Vector_castTo( b, "Hypre_StructVector" );
+   if ( SVb==NULL ) return -1;
+   SVx = (Hypre_StructVector) Hypre_Vector_castTo( *x, "Hypre_StructVector" );
+   if ( SVb==NULL ) return -1;
 
-   struct Hypre_StructVector_private_type *SVxp = (*x)->d_table;
-   HYPRE_StructVector *Vx = SVxp->hsvec;
+   SVbp = SVb->d_table;
+   Vb = SVbp->hsvec;
+
+   SVxp = SVx->d_table;
+   Vx = SVxp->hsvec;
 
    return HYPRE_StructJacobiSolve( *S, *MA, *Vb, *Vx );
 
@@ -82,17 +96,21 @@ int  impl_Hypre_StructJacobi_Apply
 /* ********************************************************
  * impl_Hypre_StructJacobiGetSystemOperator
  **********************************************************/
-Hypre_StructMatrix  impl_Hypre_StructJacobi_GetSystemOperator
-(Hypre_StructJacobi this) {
+Hypre_LinearOperator  impl_Hypre_StructJacobi_GetSystemOperator
+(Hypre_StructJacobi this) 
+{
+   Hypre_StructMatrix SM = this->d_table->hsmatrix;
+   Hypre_LinearOperator LO = (Hypre_LinearOperator)
+      Hypre_StructMatrix_castTo( SM, "Hypre_LinearOperator" );
 
-   return this->d_table->hsmatrix;
+   return LO;
 
 } /* end impl_Hypre_StructJacobiGetSystemOperator */
 
 /* ********************************************************
  * impl_Hypre_StructJacobiGetResidual
  **********************************************************/
-Hypre_StructVector  impl_Hypre_StructJacobi_GetResidual(Hypre_StructJacobi this) {
+Hypre_Vector  impl_Hypre_StructJacobi_GetResidual(Hypre_StructJacobi this) {
   
   /*
     The present StructJacobi code in Hypre doesn't provide a residual.
@@ -106,7 +124,7 @@ Hypre_StructVector  impl_Hypre_StructJacobi_GetResidual(Hypre_StructJacobi this)
     doesn't work.
   */
 
-   Hypre_StructVector vec = Hypre_StructVector_new();
+   Hypre_Vector vec = Hypre_Vector_new();
 
    printf( "called Hypre_StructJacobi_GetResidual, which doesn't work!\n");
 
@@ -224,11 +242,11 @@ int  impl_Hypre_StructJacobi_New(Hypre_StructJacobi this, Hypre_MPI_Com comm) {
 
 /* the StructSolver this inherits from keeps its own pointer to the
    underlying HYPRE object.  Make sure they are the same.
-*/
    Hypre_StructSolver HSS = Hypre_StructJacobi_castTo
       ( this, "Hypre_StructSolver" );
    struct Hypre_StructSolver_private_type *HSSp = HSS->d_table;
    HSSp->hssolver = S;
+*/
 
    return HYPRE_StructJacobiCreate( *C, S );
 
@@ -238,22 +256,46 @@ int  impl_Hypre_StructJacobi_New(Hypre_StructJacobi this, Hypre_MPI_Com comm) {
  * impl_Hypre_StructJacobiSetup
  **********************************************************/
 int  impl_Hypre_StructJacobi_Setup
-(Hypre_StructJacobi this, Hypre_StructMatrix A, Hypre_StructVector b,
- Hypre_StructVector x) {
+(Hypre_StructJacobi this, Hypre_LinearOperator A, Hypre_Vector b,
+ Hypre_Vector x) {
+
+/* We try cast the arguments to the data types which can really be used by the
+   HYPRE struct Jacobi solver.  If they can't be cast, return an error flag.
+   It the cast succeeds, pull out the pointers and call the HYPRE struct Jacobi
+   setup function.  The argument list we would really like for this function is:
+ (Hypre_StructSMG this, Hypre_StructMatrix A, Hypre_StructVector b,
+  Hypre_StructVector x)
+ */
+
+   Hypre_StructMatrix SM;
+   Hypre_StructVector SVb, SVx;
+   struct Hypre_StructMatrix_private_type * SMp;
+   HYPRE_StructMatrix * MA;
+   struct Hypre_StructVector_private_type * SVbp;
+   HYPRE_StructVector * Vb;
+   struct Hypre_StructVector_private_type * SVxp;
+   HYPRE_StructVector * Vx;
 
    struct Hypre_StructJacobi_private_type *HSJp = this->d_table;
    HYPRE_StructSolver *S = HSJp->hssolver;
 
-   struct Hypre_StructMatrix_private_type *SMp = A->d_table;
-   HYPRE_StructMatrix *MA = SMp->hsmat;
+   SM = (Hypre_StructMatrix) Hypre_LinearOperator_castTo( A, "Hypre_StructMatrix" );
+   if ( SM==NULL ) return -1;
+   SVb = (Hypre_StructVector) Hypre_Vector_castTo( b, "Hypre_StructVector" );
+   if ( SVb==NULL ) return -1;
+   SVx = (Hypre_StructVector) Hypre_Vector_castTo( x, "Hypre_StructVector" );
+   if ( SVb==NULL ) return -1;
 
-   struct Hypre_StructVector_private_type *SVbp = b->d_table;
-   HYPRE_StructVector *Vb = SVbp->hsvec;
+   SMp = SM->d_table;
+   MA = SMp->hsmat;
 
-   struct Hypre_StructVector_private_type *SVxp = x->d_table;
-   HYPRE_StructVector *Vx = SVxp->hsvec;
+   SVbp = SVb->d_table;
+   Vb = SVbp->hsvec;
 
-   this->d_table->hsmatrix = A;
+   SVxp = SVx->d_table;
+   Vx = SVxp->hsvec;
+
+   this->d_table->hsmatrix = SM;
 
    return HYPRE_StructJacobiSetup( *S, *MA, *Vb, *Vx );
 

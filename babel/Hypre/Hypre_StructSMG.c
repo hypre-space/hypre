@@ -44,9 +44,11 @@ void Hypre_StructSMG_destructor(Hypre_StructSMG this) {
 
 /* ********************************************************
  * impl_Hypre_StructSMGApply
+ * This function only works if the provided Hypre_Vector's
+ * are really Hypre_StructVector's.  That requirement is checked.
  **********************************************************/
 int  impl_Hypre_StructSMG_Apply
-(Hypre_StructSMG this, Hypre_StructVector b, Hypre_StructVector* x) {
+(Hypre_StructSMG this, Hypre_Vector b, Hypre_Vector* x) {
    struct Hypre_StructSMG_private_type *HSMGp = this->d_table;
    HYPRE_StructSolver *S = HSMGp->hssolver;
 
@@ -54,11 +56,21 @@ int  impl_Hypre_StructSMG_Apply
    struct Hypre_StructMatrix_private_type *SMp = A->d_table;
    HYPRE_StructMatrix *MA = SMp->hsmat;
 
-   struct Hypre_StructVector_private_type *SVbp = b->d_table;
-   HYPRE_StructVector *Vb = SVbp->hsvec;
+   Hypre_StructVector Sb, Sx;
+   struct Hypre_StructVector_private_type *SVbp, *SVxp;
+   HYPRE_StructVector *Vb, *Vx;
 
-   struct Hypre_StructVector_private_type *SVxp = (*x)->d_table;
-   HYPRE_StructVector *Vx = SVxp->hsvec;
+   Sb = (Hypre_StructVector) Hypre_Vector_castTo( b, "Hypre_StructVector" );
+   if ( Sb == NULL ) return -1;
+
+   Sx = (Hypre_StructVector) Hypre_Vector_castTo( *x, "Hypre_StructVector" );
+   if ( Sx == NULL ) return -1;
+
+   SVbp = Sb->d_table;
+   Vb = SVbp->hsvec;
+
+   SVxp = Sx->d_table;
+   Vx = SVxp->hsvec;
 
    return HYPRE_StructSMGSolve( *S, *MA, *Vb, *Vx );
 } /* end impl_Hypre_StructSMGApply */
@@ -66,17 +78,20 @@ int  impl_Hypre_StructSMG_Apply
 /* ********************************************************
  * impl_Hypre_StructSMGGetSystemOperator
  **********************************************************/
-Hypre_StructMatrix  impl_Hypre_StructSMG_GetSystemOperator
-(Hypre_StructSMG this) {
+Hypre_LinearOperator
+impl_Hypre_StructSMG_GetSystemOperator( Hypre_StructSMG this ) {
 
-   return this->d_table->hsmatrix;
-
+   Hypre_StructMatrix mat =  this->d_table->hsmatrix;
+   
+   return (Hypre_LinearOperator)
+      Hypre_StructMatrix_castTo( mat, "Hypre_LinearOperator" );
 } /* end impl_Hypre_StructSMGGetSystemOperator */
 
 /* ********************************************************
  * impl_Hypre_StructSMGGetResidual
  **********************************************************/
-Hypre_StructVector  impl_Hypre_StructSMG_GetResidual(Hypre_StructSMG this) {
+Hypre_Vector
+impl_Hypre_StructSMG_GetResidual(Hypre_StructSMG this) {
   
   /*
     The present HYPRE_struct_smg.c code in Hypre doesn't provide a residual.
@@ -88,7 +103,7 @@ Hypre_StructVector  impl_Hypre_StructSMG_GetResidual(Hypre_StructSMG this) {
     doesn't work.
   */
 
-   Hypre_StructVector vec = Hypre_StructVector_new();
+   Hypre_Vector vec = Hypre_Vector_new();
 
    printf( "called Hypre_StructSMG_GetResidual, which doesn't work!\n");
 
@@ -219,35 +234,63 @@ int impl_Hypre_StructSMG_New(Hypre_StructSMG this, Hypre_MPI_Com comm) {
 
 /* the StructSolver this inherits from keeps its own pointer to the
    underlying HYPRE object.  Make sure they are the same.
-*/
+ JFP 10mar2000: StructSolver may not be needed any more, as Cal's new PCG
+ _only_ uses interfaces.
    Hypre_StructSolver HSS = Hypre_StructSMG_castTo
       ( this, "Hypre_StructSolver" );
    struct Hypre_StructSolver_private_type *HSSp = HSS->d_table;
    HSSp->hssolver = S;
+*/
 
    return HYPRE_StructSMGCreate( *C, S );
 } /* end impl_Hypre_StructSMGNew */
 
 /* ********************************************************
  * impl_Hypre_StructSMGSetup
+ * A really has to be Hypre_StructMatrix, and b,x really have to be
+ * Hypre_StructVector We check for that.
  **********************************************************/
-int impl_Hypre_StructSMG_Setup
-(Hypre_StructSMG this, Hypre_StructMatrix A, Hypre_StructVector b,
- Hypre_StructVector x) {
+int  impl_Hypre_StructSMG_Setup
+( Hypre_StructSMG this, Hypre_LinearOperator A, Hypre_Vector b, Hypre_Vector x)
+{
+   
+/* We try cast the arguments to the data types which can really be used by the
+   HYPRE SMG.  If they can't be cast, return an error flag.  It the cast
+   succeeds, pull out the pointers and call the HYPRE SMG setup function.
+   The argument list we would really like for this function is:
+ (Hypre_StructSMG this, Hypre_StructMatrix A, Hypre_StructVector b,
+  Hypre_StructVector x)
+ */
+
+   Hypre_StructMatrix SM;
+   Hypre_StructVector SVb, SVx;
+   struct Hypre_StructMatrix_private_type * SMp;
+   HYPRE_StructMatrix * MA;
+   struct Hypre_StructVector_private_type * SVbp;
+   HYPRE_StructVector * Vb;
+   struct Hypre_StructVector_private_type * SVxp;
+   HYPRE_StructVector * Vx;
 
    struct Hypre_StructSMG_private_type *HSMGp = this->d_table;
    HYPRE_StructSolver *S = HSMGp->hssolver;
 
-   struct Hypre_StructMatrix_private_type *SMp = A->d_table;
-   HYPRE_StructMatrix *MA = SMp->hsmat;
+   SM = (Hypre_StructMatrix) Hypre_LinearOperator_castTo( A, "Hypre_StructMatrix" );
+   if ( SM==NULL ) return -1;
+   SVb = (Hypre_StructVector) Hypre_Vector_castTo( b, "Hypre_StructVector" );
+   if ( SVb==NULL ) return -1;
+   SVx = (Hypre_StructVector) Hypre_Vector_castTo( x, "Hypre_StructVector" );
+   if ( SVb==NULL ) return -1;
 
-   struct Hypre_StructVector_private_type *SVbp = b->d_table;
-   HYPRE_StructVector *Vb = SVbp->hsvec;
+   SMp = SM->d_table;
+   MA = SMp->hsmat;
 
-   struct Hypre_StructVector_private_type *SVxp = x->d_table;
-   HYPRE_StructVector *Vx = SVxp->hsvec;
+   SVbp = SVb->d_table;
+   Vb = SVbp->hsvec;
 
-   this->d_table->hsmatrix = A;
+   SVxp = SVx->d_table;
+   Vx = SVxp->hsvec;
+
+   this->d_table->hsmatrix = SM;
 
    return HYPRE_StructSMGSetup( *S, *MA, *Vb, *Vx );
 } /* end impl_Hypre_StructSMGSetup */
