@@ -723,21 +723,21 @@ case $ARCH in
       if test "$casc_using_mpi" = "no" ; then
         AC_CHECK_PROGS(CC, cc gcc kcc)
       else
-        AC_CHECK_PROGS(CC, mpicc)
+        AC_CHECK_PROGS(CC, mpcc mpicc)
       fi
     fi
     if test -z "$CXX"; then
       if test "$casc_using_mpi" = "no" ; then
         AC_CHECK_PROGS(CXX, CC g++)
       else
-        AC_CHECK_PROGS(CXX, mpiCC)
+        AC_CHECK_PROGS(CXX, mpCC mpiCC)
       fi
     fi
     if test -z "$F77"; then
       if test "$casc_using_mpi" = "no" ; then
         AC_CHECK_PROGS(F77, f77 g77)
       else
-        AC_CHECK_PROGS(F77, mpif77)
+        AC_CHECK_PROGS(F77, mpf77 mpif77)
       fi
     fi
 
@@ -748,7 +748,11 @@ case $ARCH in
       CASC_SET_CXXOPT(-O -DMPICH_SKIP_MPICXX)
     fi
     if test -z "$F77FLAGS"; then
-      CASC_SET_FOPT(-O -silent)
+      if test "$F77" != "g77"
+        CASC_SET_FOPT(-O -silent)
+      else
+        CASC_SET_FOPT(-O)
+      fi
     fi
     if test "$casc_user_chose_mpi" = "no" &&
         test "$casc_using_mpi" = "yes" &&
