@@ -60,17 +60,25 @@
  * hypre_AMGCoarsen
  *--------------------------------------------------------------------------*/
 
-int hypre_AMGCoarsen(A, strong_threshold, CF_marker)
+int hypre_AMGCoarsen(A, strong_threshold, CF_marker_ptr, S_ptr)
 
 hypre_CSRMatrix    *A;
-int                *CF_marker;
+int               **CF_marker_ptr;
 double              strong_threshold;
+hypre_CSRMatrix   **S_ptr;
 
 {
    double       *A_data = hypre_CSRMatrixData(A);
    int          *A_i = hypre_CSRMatrixI(A);
    int          *A_j = hypre_CSRMatrixJ(A);
    int           num_variables = hypre_CSRMatrixNumRows(A);
+
+   int          *CF_marker;
+
+   hypre_CSRMatrix *S;
+
+   hypre_CSRMatrix *ST;
+   double  *matx_data;
 
    /*--------------------------------------------------------------
     * CSR components of the transpose of the "strength matrix", S,
@@ -89,6 +97,9 @@ double              strong_threshold;
    int          *ST_data;  /* ST_data will be type double in future */
    int          *ST_i;
    int          *ST_j;   
+ 
+   int          *S_i;
+   int          *S_j;
 
    double       *measure_array;
 
@@ -224,6 +235,31 @@ double              strong_threshold;
    }
    ST_i[num_variables] -= num_lost;
 
+   /*------------------------------------------------------------
+    * Create and load the ST array, which will be used to find
+    * the transpose, S, which is returned.
+    *-----------------------------------------------------------*/
+
+   ST = hypre_CreateCSRMatrix(num_variables, num_variables, NULL);
+
+   matx_data = hypre_CTAlloc(double,ST_i[num_variables]);
+   for (i=0;i<ST_i[num_variables];i++)
+   {
+      matx_data[i] = (double) ST_data[i];
+   }
+
+   hypre_CSRMatrixData(ST) = matx_data;
+   hypre_CSRMatrixI(ST)    = ST_i;
+   hypre_CSRMatrixJ(ST)    = ST_j;
+   hypre_CSRMatrixOwnsData(ST) = 1; 
+
+   hypre_CSRMatrixTranspose(ST, S_ptr);
+   S = *S_ptr;
+
+   S_i = hypre_CSRMatrixI(S);
+   S_j = hypre_CSRMatrixJ(S);
+
+
    /*----------------------------------------------------------
     * Compute "measures" for the fine-grid points,
     * and store in measure_array.
@@ -261,7 +297,7 @@ double              strong_threshold;
        *------------------------------------------------*/
 
       IS_size = 0;
-      hypre_AMGIndepSet(ST_data, ST_i, ST_j, num_variables, 
+      hypre_AMGIndepSet(ST_i, ST_j, S_i, S_j, num_variables, 
                         measure_array, &IS_array[IS_start], &IS_size);
 
       /* check to see whether there are any points left */
@@ -278,13 +314,36 @@ double              strong_threshold;
       for (i = IS_start; i < IS_start + IS_size; i++)
       {
          Cpoint = IS_array[i];
-         if (CF_marker[Cpoint] == 0) /* point isn't already C or F */
+         if (CF_marker[Cpoint] <= 0) /* point isn't already C */
          {
+            if (CF_marker[Cpoint] == 0)
+                --num_pts_not_assigned;
+            
             CF_marker[Cpoint] = 1;
-            --num_pts_not_assigned;
-         
+                   
             /*---------------------------------------------
-             * Heuristic:  1 goes here 
+             * Heuristic: C-pts don't need to interpolate
+             * from neighbors they strongly depend on.
+             *
+             * for each S(Cpoint,nabor) in the Cpoint row of S
+             *    (i.e., points that Cpoint strongly depends on)
+             * {
+             *   subtract 1 from measure_array[nabor] and
+             *   remove edge S(Cpoint,nabor)
+             * }
+             *
+             * Notes:
+             * - Since S is stored by columns, in order
+             *   to loop through a row of S, we need to loop
+             *   through rows of A, then check that there is
+             *   a corresponding nonzero entry in S.
+             *
+             * TO BE IMPLEMENTED LATER:
+             * - To remove edge s_ij from S, we can replace
+             *   it with the last column entry in the jth
+             *   column, and decrement the size of this
+             *   column (we need to keep an extra vector
+             *   around with the column sizes to do this).
              *---------------------------------------------*/
 
             for (j = A_i[Cpoint]+1; j < A_i[Cpoint+1]; j++)
@@ -293,11 +352,13 @@ double              strong_threshold;
 
                for (k = ST_i[nabor]; k < ST_i[nabor+1]; k++)
                {
-                  if(ST_j[k] == Cpoint) /* Cpoint depends on nabor */
+                                   /* Cpoint depends on nabor */
+                  if(ST_j[k] == Cpoint && ST_data[k] != -1)
                   {
                      measure_array[nabor]--;
-                     if (measure_array[nabor] == 0)  /* mark as fine point */
+                     if (measure_array[nabor] == 0 && CF_marker[nabor] != 1)
                      {
+                                       /* mark as fine point */
                         CF_marker[nabor] = -1;
                         --num_pts_not_assigned; 
                      }
@@ -308,9 +369,31 @@ double              strong_threshold;
                }
             }            
             
-            /*---------------------------------------------
-             * Heuristic: 2 goes here
-             *---------------------------------------------*/
+         /*-------------------------------------------------------------------
+          * Heuristic: neighbors that depend strongly on
+          * a C-pt can get good interpolation data from
+          * that C-pt, and hence are less dependent on
+          * each other.
+          *
+          * for nabor that Cpoint influences, i.e S(nabor,Cpoint) not zero
+          * (in the Cpoint column of S, or Cpoint row of ST,
+          * {
+          *    remove edge S(nabor,Cpoint)
+          * 
+          *    for each S(nabor,nabor_two) in the nabor row of S (points
+          *                        that point nabor strongly depends on)
+          *    {
+          *        if point S(nabor_two,Cpoint) is nonzero (Cpoint  also
+          *                             strongly influences point nabor_two),
+          *       {
+          *           subtract 1 from measure_array[nabor] and remove 
+          *           edge S(nabor,nabor_two)
+          *       }
+          *    } 
+          *    set measure_array[Cpoint] to 0
+          *  }
+          *
+          *------------------------------------------------------------------*/
 
             for (n = ST_i[Cpoint]; n < ST_i[Cpoint+1]; ++n)
             {
@@ -329,14 +412,19 @@ double              strong_threshold;
                           if (ST_j[m] == nabor_two)
                           {
                                      /* nabor_two DOES depend on Cpoint */
-                             ST_data[j] = -1;
-                             --measure_array[nabor];
-                             if (measure_array[nabor] == 0) 
+                             if (ST_data[j] != -1)
                              {
-                                     /* new fine point */
-                                CF_marker[nabor] = -1;
-                                --num_pts_not_assigned; 
-                             }        
+                                ST_data[j] = -1;
+                                --measure_array[nabor];
+                                /* if (measure_array[nabor] == 0) */
+                                if (measure_array[nabor] == 0 \
+                                        && CF_marker[nabor] != 1) 
+                                {
+                                        /* new fine point */
+                                   CF_marker[nabor] = -1;
+                                   --num_pts_not_assigned; 
+                                }        
+                             }
                              break;  /* possible since ST is ordered */
                           }
                        }    
@@ -350,7 +438,7 @@ double              strong_threshold;
       IS_start += IS_size;
    }
 
-#if 1
+#if 0
 /* Prints st.matx, st.coarse files, so that Matlab can display them */
    {
 
@@ -369,6 +457,9 @@ double              strong_threshold;
       fclose(fp);
    }
 #endif
+
+   hypre_DestroyCSRMatrix(ST);
+   *CF_marker_ptr = CF_marker;
 
    return(0);
 }
