@@ -511,8 +511,8 @@ hypre_KrylovSolve( void *pcg_vdata,
          }
          for (j = 1; j <= i; j++)
          {
-            printf("% 5d    %e    %f   %e\n", j, norms[j], norms[j]/ 
-		norms[j-1]);
+            printf("% 5d    %e    %f   %e\n",
+                   j, norms[j], norms[j], norms[j-1]);
          }
          printf("\n\n");};
       /* fclose(fp);}; */
