@@ -566,6 +566,7 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
    MPI_Comm          comm  = hypre_StructGridComm(fgrid);
    int               dim   = hypre_StructGridDim(fgrid);
    hypre_BoxArray   *boxes;
+   hypre_Index       periodic;
 
    hypre_Box        *box;
                     
@@ -588,7 +589,14 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
    /* set boxes */
    hypre_StructGridSetBoxes(cgrid, boxes);
 
-   hypre_StructGridSetPeriodic(cgrid, hypre_StructGridPeriodic(fgrid));
+   /* adjust periodicity */
+   hypre_CopyIndex(hypre_StructGridPeriodic(fgrid), periodic);
+   for (i = 0; i < dim; i++)
+   {
+      hypre_IndexD(periodic,i) /= hypre_IndexD(stride,i);
+   }
+
+   hypre_StructGridSetPeriodic(cgrid, periodic);
 
    hypre_StructGridAssemble(cgrid);
 
