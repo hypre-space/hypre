@@ -57,11 +57,11 @@ extern "C"
 
 int MLI_Method_AMGSA::setupSFEIBasedNullSpaces( MLI *mli ) 
 {
-   int          i, j, k, iN, iD, iR, level, mypid, nElems, elemNNodes;
+   int          k, iN, iD, iR, level, mypid, nElems, elemNNodes;
    int          iE, iN2, **elemNodeLists, *elemNodeList1D, totalNNodes;
    int          *partition, localStartRow, localNRows, *newElemNodeList;
    int          *orderArray, eMatDim, newNNodes, *elemNodeList, count;
-   int          csrNrows, *csrIA, *csrJA, sInd1, sInd2, offset, rowSize;
+   int          csrNrows, *csrIA, *csrJA, offset, rowSize;
    int          rowInd, colInd, colOffset, rowLeng, start, nSubdomains;
    double       **elemMatrices, *elemMat, *csrAA;
    double       *eigenR, *eigenI, *eigenV;

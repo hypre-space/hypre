@@ -527,7 +527,7 @@ printf("SeqSuperLU setParam : nSubProblems = %d\n", nSubProblems_);
 int MLI_Solver_SeqSuperLU::setupBlockColoring()
 {
    int                 i, j, k, nSends, mypid, nprocs, myRowOffset, nEntries;
-   int                 *procNRows, gNRows, *globalGI, *globalGJ, start; 
+   int                 *procNRows, gNRows, *globalGI, *globalGJ; 
    int                 *localGI, *localGJ, *offsets, globalOffset, gRowCnt; 
    int                 searchIndex, searchStatus;
    MPI_Comm            comm;
@@ -620,13 +620,13 @@ printf("Graph %d = %d\n",i, GDiagJ[j]);
    /*---------------------------------------------------------------*/
 
    int    extNCols, mapStart, mapEnd, mapIndex, *AOffdI, *AOffdJ;
-   double *sBuffer=NULL, *rBuffer=NULL, *AOffdA, localNRows;
+   int    localNRows;
+   double *sBuffer=NULL, *rBuffer=NULL;
 
    localNRows = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
    AOffd    = hypre_ParCSRMatrixOffd(A);
    AOffdI   = hypre_CSRMatrixI(AOffd);
    AOffdJ   = hypre_CSRMatrixJ(AOffd);
-   AOffdA   = hypre_CSRMatrixData(AOffd);
    extNCols = hypre_CSRMatrixNumCols(AOffd);
    nSends   = hypre_ParCSRCommPkgNumSends(commPkg);
    if (extNCols > 0) rBuffer = new double[extNCols];
