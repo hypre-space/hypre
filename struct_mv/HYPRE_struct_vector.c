@@ -12,10 +12,14 @@
  *
  *****************************************************************************/
 
+#ifdef HYPRE_USE_PTHREADS
 #define NO_PTHREAD_MANGLING
+#endif
 
 #include "headers.h"
+#ifdef HYPRE_USE_PTHREADS
 #include "threading.h"
+#endif
 
 /*--------------------------------------------------------------------------
  * HYPRE_NewStructVector
@@ -112,14 +116,6 @@ HYPRE_GetStructVectorValues( HYPRE_StructVector  vector,
  * HYPRE_SetStructVectorBoxValues
  *--------------------------------------------------------------------------*/
 
-typedef struct {
-   HYPRE_StructVector  vector;
-   int                *ilower;
-   int                *iupper;
-   double             *values;
-   int                *returnvalue;
-} HYPRE_SetStructVectorBoxValuesArgs;
-
 int 
 HYPRE_SetStructVectorBoxValues( HYPRE_StructVector  vector,
                                 int                *ilower,
@@ -151,6 +147,15 @@ HYPRE_SetStructVectorBoxValues( HYPRE_StructVector  vector,
 
    return (ierr);
 }
+
+#ifdef HYPRE_USE_PTHREADS
+typedef struct {
+   HYPRE_StructVector  vector;
+   int                *ilower;
+   int                *iupper;
+   double             *values;
+   int                *returnvalue;
+} HYPRE_SetStructVectorBoxValuesArgs;
 
 void
 HYPRE_SetStructVectorBoxValuesVoidPtr( void *argptr )
@@ -192,18 +197,11 @@ HYPRE_SetStructVectorBoxValuesPush( HYPRE_StructVector  vector,
 
    return returnvalue;
 }
+#endif
 
 /*--------------------------------------------------------------------------
  * HYPRE_GetStructVectorBoxValues
  *--------------------------------------------------------------------------*/
-
-typedef struct {
-   HYPRE_StructVector  vector;
-   int                *ilower;
-   int                *iupper;
-   double            **values_ptr;
-   int                *returnvalue;
-} HYPRE_GetStructVectorBoxValuesArgs;
 
 int 
 HYPRE_GetStructVectorBoxValues( HYPRE_StructVector  vector,
@@ -237,6 +235,15 @@ HYPRE_GetStructVectorBoxValues( HYPRE_StructVector  vector,
 
    return (ierr);
 }
+
+#ifdef HYPRE_USE_PTHREADS
+typedef struct {
+   HYPRE_StructVector  vector;
+   int                *ilower;
+   int                *iupper;
+   double            **values_ptr;
+   int                *returnvalue;
+} HYPRE_GetStructVectorBoxValuesArgs;
 
 void
 HYPRE_GetStructVectorBoxValuesVoidPtr( void *argptr )
@@ -278,6 +285,7 @@ HYPRE_GetStructVectorBoxValuesPush( HYPRE_StructVector  vector,
 
    return returnvalue;
 }
+#endif
 
 /*--------------------------------------------------------------------------
  * HYPRE_AssembleStructVector
@@ -316,12 +324,6 @@ HYPRE_SetStructVectorNumGhost( HYPRE_StructVector  vector,
  * HYPRE_SetStructVectorConstantValues
  *--------------------------------------------------------------------------*/
 
-typedef struct {
-   HYPRE_StructVector  vector;
-   double              values;
-   int                *returnvalue;
-} HYPRE_SetStructVectorConstantValuesArgs;
- 
 int
 HYPRE_SetStructVectorConstantValues( HYPRE_StructVector  vector,
                                      double              values )
@@ -330,6 +332,13 @@ HYPRE_SetStructVectorConstantValues( HYPRE_StructVector  vector,
                                                 values) );
 }
 
+#ifdef HYPRE_USE_PTHREADS
+typedef struct {
+   HYPRE_StructVector  vector;
+   double              values;
+   int                *returnvalue;
+} HYPRE_SetStructVectorConstantValuesArgs;
+ 
 void
 HYPRE_SetStructVectorConstantValuesVoidPtr( void *argptr )
 {
@@ -365,6 +374,7 @@ HYPRE_SetStructVectorConstantValuesPush( HYPRE_StructVector  vector,
 
    return returnvalue;
 }
+#endif
 
 /*--------------------------------------------------------------------------
  * HYPRE_GetMigrateStructVectorCommPkg

@@ -12,11 +12,14 @@
  *
  *****************************************************************************/
 
+#ifdef HYPRE_USE_PTHREADS
 #define NO_PTHREAD_MANGLING
+#endif
 
 #include "headers.h"
+#ifdef HYPRE_USE_PTHREADS
 #include "threading.h"
-
+#endif
 /*--------------------------------------------------------------------------
  * HYPRE_NewStructMatrix
  *--------------------------------------------------------------------------*/
@@ -46,17 +49,17 @@ HYPRE_FreeStructMatrix( HYPRE_StructMatrix matrix )
  * HYPRE_InitializeStructMatrix
  *--------------------------------------------------------------------------*/
 
-typedef struct {
-   HYPRE_StructMatrix matrix;
-   int *returnvalue;
-} HYPRE_InitializeStructMatrixArgs;
-
-
 int
 HYPRE_InitializeStructMatrix( HYPRE_StructMatrix matrix )
 {
    return ( hypre_InitializeStructMatrix( (hypre_StructMatrix *) matrix ) );
 }
+
+#ifdef HYPRE_USE_PTHREADS
+typedef struct {
+   HYPRE_StructMatrix matrix;
+   int *returnvalue;
+} HYPRE_InitializeStructMatrixArgs;
 
 void
 HYPRE_InitializeStructMatrixVoidPtr( void *argptr)
@@ -88,7 +91,7 @@ HYPRE_InitializeStructMatrixPush( HYPRE_StructMatrix matrix )
 
    return returnvalue;
 }
-
+#endif
 
 
 /*--------------------------------------------------------------------------
@@ -128,17 +131,6 @@ HYPRE_SetStructMatrixValues( HYPRE_StructMatrix  matrix,
  * HYPRE_SetStructMatrixBoxValues
  *--------------------------------------------------------------------------*/
 
-typedef struct {
-   HYPRE_StructMatrix  matrix;
-   int                *ilower;
-   int                *iupper;
-   int                 num_stencil_indices;
-   int                *stencil_indices;
-   double             *values;
-   int                *returnvalue;
-} HYPRE_SetStructMatrixBoxValuesArgs;
-
-
 int 
 HYPRE_SetStructMatrixBoxValues( HYPRE_StructMatrix  matrix,
                                 int                *ilower,
@@ -175,6 +167,17 @@ HYPRE_SetStructMatrixBoxValues( HYPRE_StructMatrix  matrix,
 
    return (ierr);
 }
+
+#ifdef HYPRE_USE_PTHREADS
+typedef struct {
+   HYPRE_StructMatrix  matrix;
+   int                *ilower;
+   int                *iupper;
+   int                 num_stencil_indices;
+   int                *stencil_indices;
+   double             *values;
+   int                *returnvalue;
+} HYPRE_SetStructMatrixBoxValuesArgs;
 
 void
 HYPRE_SetStructMatrixBoxValuesVoidPtr( void *argptr)
@@ -220,7 +223,7 @@ HYPRE_SetStructMatrixBoxValuesPush( HYPRE_StructMatrix matrix,
 
    return returnvalue;
 }
-
+#endif
 
 
 /*--------------------------------------------------------------------------
@@ -270,12 +273,6 @@ HYPRE_SetStructMatrixSymmetric( HYPRE_StructMatrix  matrix,
  * HYPRE_PrintStructMatrix
  *--------------------------------------------------------------------------*/
 
-typedef struct {
-   char *filename;
-   HYPRE_StructMatrix matrix;
-   int all;
-} HYPRE_PrintStructMatrixArgs;
-
 void 
 HYPRE_PrintStructMatrix( char               *filename,
                          HYPRE_StructMatrix  matrix,
@@ -283,6 +280,13 @@ HYPRE_PrintStructMatrix( char               *filename,
 {
    hypre_PrintStructMatrix( filename, (hypre_StructMatrix *) matrix, all );
 }
+
+#ifdef HYPRE_USE_PTHREADS
+typedef struct {
+   char *filename;
+   HYPRE_StructMatrix matrix;
+   int all;
+} HYPRE_PrintStructMatrixArgs;
 
 void
 HYPRE_PrintStructMatrixVoidPtr( void *argptr )
@@ -312,3 +316,4 @@ HYPRE_PrintStructMatrixPush( char               *filename,
 
    hypre_work_wait();
 }
+#endif
