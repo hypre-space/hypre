@@ -194,12 +194,12 @@ else
 fi
 if [ "$1" = "-automake" ]
 then
-  if [ -x linear_solvers/config/bootstrap ] ; then
-    (PATH=$HOME/mnt/`/usr/casc/hypre/config.guess`/bin:$PATH;\
-    cd linear_solvers;\
-    config/bootstrap)
+##if [ -x linear_solvers/config/bootstrap ] ; then
+##  (PATH=$HOME/mnt/`/usr/casc/hypre/config.guess`/bin:$PATH;\
+##  cd linear_solvers;\
+##  config/bootstrap)
     AUTOMAKEMODE=yes
-  fi
+##fi
   shift
 fi
 chmod -fR a+rX,u+w,go-w linear_solvers
@@ -234,12 +234,12 @@ do
 ##	perform_test
         shift;;
     -automake)
-        if [ -x linear_solvers/config/bootstrap ] ; then
-  	  (PATH=$HOME/mnt/`/usr/casc/hypre/config.guess`/bin:$PATH;\
-          cd linear_solvers;\
-          config/bootstrap)
+##      if [ -x linear_solvers/config/bootstrap ] ; then
+##	  (PATH=$HOME/mnt/`/usr/casc/hypre/config.guess`/bin:$PATH;\
+##        cd linear_solvers;\
+##        config/bootstrap)
           AUTOMAKEMODE=yes
-        fi
+##      fi
         shift;;
     -blue | -bluemp)
         HYPRE_ARCH="blue"
