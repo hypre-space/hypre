@@ -1,0 +1,5 @@
+/** @name	Makefile Standards
+
+Hypre is using Autoconf for installation.  (See Installation Procedures section).  This requires that a file called Makefile.in be created in each directory.  These files will generate Makefiles when the configure script is run at the top-level directory.  See example Makefile.in to see how it difeers from a conventional MAkefile.
+
+*/

@@ -1,0 +1,68 @@
+/** @name	Autotest Procedures
+//@{
+What is autotest?
+\newline
+----------------------------------------------------------------------------
+\newline
+Autotest is a set of driver programs and scripts set up as a cron job to test daily code changes.
+
+How is autotest structured?
+\newline
+----------------------------------------------------------------------------
+
+\newline
+The /linear_solvers/test/ subdirectory (in the repository) contain
+1.) various driver programs (.c files)
+2.) bourne shell scripts to run the driver programs
+3.) test_drivers.sh script calls all other scripts and writes their results to a file autotest.log.
+4.) the autotest script-- this copy is not used by the cron job however.
+
+The /home/casc/software/hypre/autotest directory contains
+1.) the autotest script which is used by the cron job.
+2.) the linear_solvers directory which autotest checks out of the repository
+3.) Autotest script checks out the repository, configures, makes the library,
+calls the test_drivers.sh script in the newly checked out directory structure, 
+and sets permissions.  This file should seldom change.
+
+Features of autotest
+\newline
+----------------------------------------------------------------------------
+\newline
+1.) works with the autoconfig infrastructure.
+2.) test suites can be added/removed easily.
+3.) identify failure/success of a test (future feature)
+4.) email code developers of test failure (future feature)
+5.) test on all target platforms (future feature)
+
+How to modify autotest
+\newline
+----------------------------------------------------------------------------
+\newline
+1.) create and test a driver program -- somedriver.c
+2.) create and test a Bourne shell script to run the driver -- somedriver.sh
+3.) append the following to the test_drivers.sh file
+HYPRE_SOMEDRIVER_LOG_FILE=''somedriver.log''
+./somedriver.sh >> $HYPRE_SOMEDRIVER_LOG_FILE
+4.) modify the Makefile.in file in the test subdirectory as follows:
+add the necessary information to LFLAGS = \ section
+add the necessary target information to the TARGETS section
+add the necessary rules to the RULES section
+5.) modify the /linear_solvers/ Makefile.in file as follows:
+add the necessary information to the HYPRE_DIRS =\ section
+6.) modify the /linear_solvers/ configure.in file as follows
+add information to the AC_OUTPUT section (first one)
+add information to the CASC_CONFIG_OUTPUT_LIST section
+add information to the final AC_OUTPUT section
+7.) To test the changes 
+in linear_solvers directory type 
+>autoconf
+>configure
+>make
+>cd test
+>test_driver.sh
+>cd /home/casc/software/hypre/autotest/linear_solvers/test/
+look at somedriver.log for correct output.
+8.)if everything went well commit all added and modified files.  There is no need to modify autotest or the crontab file.
+
+*/
+//@}
