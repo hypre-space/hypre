@@ -139,6 +139,7 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
          }
  
    	 hypre_ParCSRCommHandleDestroy(comm_handle);
+         comm_handle = NULL;
 
          /*-----------------------------------------------------------------
           * Relax all points.
@@ -273,6 +274,7 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
           * Copy current approximation into temporary vector.
           *-----------------------------------------------------------------*/
    	 hypre_ParCSRCommHandleDestroy(comm_handle);
+         comm_handle = NULL;
 
          /*-----------------------------------------------------------------
           * Relax all points.
@@ -698,7 +700,9 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
 	    hypre_TFree(A_mat); 
             hypre_TFree(b_vec);
             hypre_CSRMatrixDestroy(A_CSR);
+            A_CSR = NULL;
             hypre_VectorDestroy(f_vector);
+            f_vector = NULL;
          
          }
       }

@@ -254,7 +254,11 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
 	    P_ext_diag_data[cnt_diag++] = Ps_ext_data[j];
          }
    }
-   if (num_procs > 1) hypre_CSRMatrixDestroy(Ps_ext);
+   if (num_procs > 1)
+   {
+      hypre_CSRMatrixDestroy(Ps_ext);
+      Ps_ext = NULL;
+   }
 
    if (P_ext_offd_size || num_cols_offd_P)
    {
@@ -750,7 +754,10 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
         RAP_ext_size = RAP_ext_i[hypre_CSRMatrixNumRows(RAP_ext)];
    }
    if (num_cols_offd_RT)
-   	hypre_CSRMatrixDestroy(RAP_int);
+   {
+      hypre_CSRMatrixDestroy(RAP_int);
+      RAP_int = NULL;
+   }
  
    RAP_diag_i = hypre_CTAlloc(int, num_cols_diag_P+1);
    RAP_offd_i = hypre_CTAlloc(int, num_cols_diag_P+1);
@@ -1390,11 +1397,19 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
     *-----------------------------------------------------------------------*/
 
    hypre_CSRMatrixDestroy(R_diag);
+   R_diag = NULL;
+
    if (num_cols_offd_RT) 
-	hypre_CSRMatrixDestroy(R_offd);
+   {
+      hypre_CSRMatrixDestroy(R_offd);
+      R_offd = NULL;
+   }
 
    if (num_sends_RT || num_recvs_RT) 
-	hypre_CSRMatrixDestroy(RAP_ext);
+   {
+      hypre_CSRMatrixDestroy(RAP_ext);
+      RAP_ext = NULL;
+   }
 
    hypre_TFree(P_marker);   
    hypre_TFree(A_marker);
@@ -1558,6 +1573,7 @@ hypre_ExchangeRAPData( 	hypre_CSRMatrix *RAP_int,
    hypre_ParCSRCommPkgRecvProcs(tmp_comm_pkg) = send_procs;
 
    hypre_ParCSRCommHandleDestroy(comm_handle);
+   comm_handle = NULL;
 
 /*--------------------------------------------------------------------------
  * compute num_nonzeros for RAP_ext
@@ -1586,6 +1602,7 @@ hypre_ExchangeRAPData( 	hypre_CSRMatrix *RAP_int,
    comm_handle = hypre_ParCSRCommHandleCreate(1,tmp_comm_pkg,RAP_int_data,
 					RAP_ext_data);
    hypre_ParCSRCommHandleDestroy(comm_handle);
+   comm_handle = NULL;
 
    comm_handle = hypre_ParCSRCommHandleCreate(11,tmp_comm_pkg,RAP_int_j,
 					RAP_ext_j);
@@ -1599,6 +1616,7 @@ hypre_ExchangeRAPData( 	hypre_CSRMatrix *RAP_int,
    }
 
    hypre_ParCSRCommHandleDestroy(comm_handle); 
+   comm_handle = NULL;
 
    hypre_TFree(jdata_recv_vec_starts);
    hypre_TFree(jdata_send_map_starts);

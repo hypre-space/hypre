@@ -84,13 +84,19 @@ hypre_ParAMGSetup( void               *amg_vdata,
       for (j = 1; j < old_num_levels; j++)
       {
         if (A_array[j] != NULL)
+        {
            hypre_ParCSRMatrixDestroy(A_array[j]);
+           A_array[j] = NULL;
+        }
       }
 
       for (j = 0; j < old_num_levels-1; j++)
       {
          if (P_array[j] != NULL)
+         {
             hypre_ParCSRMatrixDestroy(P_array[j]);
+            P_array[j] = NULL;
+         }
 
          if (CF_marker_array[j] != NULL)
             hypre_TFree(CF_marker_array[j]);
@@ -193,6 +199,7 @@ hypre_ParAMGSetup( void               *amg_vdata,
 
       P_array[level] = P; 
       hypre_ParCSRMatrixDestroy(S);
+      S = NULL;
       coarse_size = hypre_ParCSRMatrixGlobalNumCols(P);
 
       /* if no coarse-grid, stop coarsening */
@@ -256,6 +263,7 @@ hypre_ParAMGSetup( void               *amg_vdata,
    if (Vtemp != NULL)
    {
       hypre_ParVectorDestroy(Vtemp);
+      Vtemp = NULL;
    }
 
    Vtemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_array[0]),
@@ -273,9 +281,15 @@ hypre_ParAMGSetup( void               *amg_vdata,
       for (j = 1; j < old_num_levels; j++)
       {
          if (F_array[j] != NULL)
+         {
             hypre_ParVectorDestroy(F_array[j]);
+            F_array[j] = NULL;
+         }
          if (U_array[j] != NULL)
+         {
             hypre_ParVectorDestroy(U_array[j]);
+            U_array[j] = NULL;
+         }
       }
    }
 

@@ -667,7 +667,9 @@ int  hypre_ParAMGRelaxT( hypre_ParCSRMatrix *A,
 	    hypre_TFree(A_mat); 
             hypre_TFree(b_vec);
             hypre_CSRMatrixDestroy(A_CSR);
+            A_CSR = NULL;
             hypre_VectorDestroy(f_vector);
+            f_vector = NULL;
          
          }
       }
