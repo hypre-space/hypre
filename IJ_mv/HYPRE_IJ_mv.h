@@ -84,7 +84,9 @@ int HYPRE_IJMatrixCreate(MPI_Comm        comm,
 int HYPRE_IJMatrixDestroy(HYPRE_IJMatrix matrix);
 
 /**
- * Prepare a matrix object for setting coefficient values.
+ * Prepare a matrix object for setting coefficient values.  This
+ * routine will also re-initialize an already assembled matrix,
+ * allowing users to modify coefficient values.
  **/
 int HYPRE_IJMatrixInitialize(HYPRE_IJMatrix matrix);
 
@@ -249,7 +251,9 @@ int HYPRE_IJVectorCreate(MPI_Comm        comm,
 int HYPRE_IJVectorDestroy(HYPRE_IJVector vector);
 
 /**
- * Prepare a vector object for setting coefficient values.
+ * Prepare a vector object for setting coefficient values.  This
+ * routine will also re-initialize an already assembled vector,
+ * allowing users to modify coefficient values.
  **/
 int HYPRE_IJVectorInitialize(HYPRE_IJVector vector);
 
