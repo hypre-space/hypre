@@ -38,7 +38,7 @@ hypre_CSRMatrixMatvec( double           alpha,
 
    double      temp;
 
-   int         i, j, jj;
+   int         i, jj;
 
    int         ierr = 0;
 
@@ -104,7 +104,7 @@ hypre_CSRMatrixMatvec( double           alpha,
     * y += A*x
     *-----------------------------------------------------------------*/
 
-#define HYPRE_SMP_PRIVATE i,jj,j
+#define HYPRE_SMP_PRIVATE i,jj
 #include "../utilities/hypre_smp_forloop.h"
    for (i = 0; i < num_rows; i++)
    {
