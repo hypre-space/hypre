@@ -18,6 +18,12 @@
 #include "parcsr_mv/parcsr_mv.h"
 #include "parcsr_ls/HYPRE_parcsr_ls.h"
 
+/******************************************************************************
+ *
+ * HYPRE_ParCSRBiCGS interface
+ *
+ *****************************************************************************/
+
 extern void * hypre_BiCGSCreate();
 extern int hypre_BiCGSDestroy(void *);
 extern int hypre_BiCGSSetup(void *, void *, void *, void *);

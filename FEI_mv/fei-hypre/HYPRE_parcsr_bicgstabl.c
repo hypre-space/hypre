@@ -24,6 +24,20 @@
  *
  *****************************************************************************/
 
+extern void *hypre_BiCGSTABLCreate();
+extern int  hypre_BiCGSTABLDestroy(void *);
+extern int  hypre_BiCGSTABLSetup(void *, void *, void *, void *);
+extern int  hypre_BiCGSTABLSolve(void *, void *, void *, void *);
+extern int  hypre_BiCGSTABLSetTol(void *, double);
+extern int  hypre_BiCGSTABLSetSize(void *, int);
+extern int  hypre_BiCGSTABLSetMaxIter(void *, int);
+extern int  hypre_BiCGSTABLSetStopCrit(void *, double);
+extern int  hypre_BiCGSTABLSetPrecond(void *, int (*precond)(),
+                               int (*precond_setup)(), void *);
+extern int  hypre_BiCGSTABLSetLogging(void *, int);
+extern int  hypre_BiCGSTABLGetNumIterations(void *,int *);
+extern int  hypre_BiCGSTABLGetFinalRelativeResidualNorm(void *, double *);
+
 /*--------------------------------------------------------------------------
  * HYPRE_ParCSRBiCGSTABLCreate
  *--------------------------------------------------------------------------*/
