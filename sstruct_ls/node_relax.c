@@ -210,7 +210,6 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
 
    hypre_StructStencil   *sstencil;
    hypre_Index           *sstencil_shape;
-   int                    sstencil_count;
    int                    sstencil_size;
 
    hypre_StructStencil   *sstencil_union;
