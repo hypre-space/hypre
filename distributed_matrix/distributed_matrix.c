@@ -232,7 +232,7 @@ int
 hypre_PrintDistributedMatrix( hypre_DistributedMatrix *matrix )
 {
    if ( hypre_DistributedMatrixLocalStorageType(matrix) == HYPRE_PETSC_MATRIX )
-      ;//return( hypre_PrintDistributedMatrixPETSc( matrix ) );
+      return( hypre_PrintDistributedMatrixPETSc( matrix ) );
    else if ( hypre_DistributedMatrixLocalStorageType(matrix) == HYPRE_ISIS_MATRIX )
       return( hypre_PrintDistributedMatrixISIS( matrix ) );
    else
@@ -249,7 +249,7 @@ hypre_GetDistributedMatrixLocalRange( hypre_DistributedMatrix *matrix,
                              int *end )
 {
    if ( hypre_DistributedMatrixLocalStorageType(matrix) == HYPRE_PETSC_MATRIX )
-      ;//return( hypre_GetDistributedMatrixLocalRangePETSc( matrix, start, end ) );
+      return( hypre_GetDistributedMatrixLocalRangePETSc( matrix, start, end ) );
    else if ( hypre_DistributedMatrixLocalStorageType(matrix) == HYPRE_ISIS_MATRIX )
       return( hypre_GetDistributedMatrixLocalRangeISIS( matrix, start, end ) );
    else
@@ -268,7 +268,7 @@ hypre_GetDistributedMatrixRow( hypre_DistributedMatrix *matrix,
                              double **values )
 {
    if ( hypre_DistributedMatrixLocalStorageType(matrix) == HYPRE_PETSC_MATRIX )
-      ;//return( hypre_GetDistributedMatrixRowPETSc( matrix, row, size, col_ind, values ) );
+      return( hypre_GetDistributedMatrixRowPETSc( matrix, row, size, col_ind, values ) );
    else if ( hypre_DistributedMatrixLocalStorageType(matrix) == HYPRE_ISIS_MATRIX )
       return( hypre_GetDistributedMatrixRowISIS( matrix, row, size, col_ind, values ) );
    else
@@ -287,7 +287,7 @@ hypre_RestoreDistributedMatrixRow( hypre_DistributedMatrix *matrix,
                              double **values )
 {
    if ( hypre_DistributedMatrixLocalStorageType(matrix) == HYPRE_PETSC_MATRIX )
-      ;//return( hypre_RestoreDistributedMatrixRowPETSc( matrix, row, size, col_ind, values ) );
+      return( hypre_RestoreDistributedMatrixRowPETSc( matrix, row, size, col_ind, values ) );
    else if ( hypre_DistributedMatrixLocalStorageType(matrix) == HYPRE_ISIS_MATRIX )
       return( hypre_RestoreDistributedMatrixRowISIS( matrix, row, size, col_ind, values ) );
    else
