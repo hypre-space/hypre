@@ -138,33 +138,31 @@ void     *data;
    AMGDataIURLX(amg_data) = iurlx;
 }
 
-		  		      
+
 /*--------------------------------------------------------------------------
- * Routines to set the output parameters
+ * Routine to set up logging 
  *--------------------------------------------------------------------------*/
 
-void      amg_SetIOutDat(ioutdat, data)
+void      amg_SetLogging(ioutdat, log_file_name, data)
 int       ioutdat;
-void     *data;
-{
-   AMGData  *amg_data = data;
- 
-   AMGDataIOutDat(amg_data) = ioutdat;
-}
-
-
-				      
-/*--------------------------------------------------------------------------
- * Routine to set the log file name
- *--------------------------------------------------------------------------*/
-
-void      amg_SetLogFileName(log_file_name, data)
 char     *log_file_name;
 void     *data;
 {
+   FILE *fp;
+
    AMGData  *amg_data = data;
  
-   sprintf(AMGDataLogFileName(amg_data), "%s", log_file_name);
+   AMGDataIOutDat(amg_data) = ioutdat;
+   if (ioutdat > 0)
+   {
+      if (*log_file_name == 0)  
+         sprintf(AMGDataLogFileName(amg_data), "%s", "amg.out.log");
+      else
+         sprintf(AMGDataLogFileName(amg_data), "%s", log_file_name); 
+       
+   fp = fopen(AMGDataLogFileName(amg_data),"w");
+   fclose(fp);
+   }
 }
 
 
