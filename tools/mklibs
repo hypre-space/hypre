@@ -96,15 +96,6 @@ build_alpha ()
 HYPRE_INSTALL_PERMISSIONS="a+rX,ug+w"
 
 #=============================================================================
-# Set install directories:
-#=============================================================================
-
-HYPRE_CASC_INSTALL_DIR="/home/casc/software/hypre"
-HYPRE_DEC_INSTALL_DIR="/usr/apps/hypre"
-HYPRE_BLUE_INSTALL_DIR="/usr/apps/hypre"
-HYPRE_RED_INSTALL_DIR="/usr/apps/hypre"
-
-#=============================================================================
 # Parse arguments
 #=============================================================================
 
