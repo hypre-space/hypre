@@ -227,6 +227,7 @@ EOF
     cat $ErrorFile >> $ErrorFile.orig
     mv $ErrorFile.tmp $ErrorFile 
   fi
+}
 multi_line_delete () {
   if [ "$DEBUG_MODE" = "yes" ] ; then
     set -xv
