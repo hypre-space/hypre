@@ -187,7 +187,8 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
    hypre_Index         imax;
    int                 alloc_size;
 
-   double              diff, distance, perimeter_count, cperimeter_count;
+   double              perimeter_count, cperimeter_count;
+   /*double              diff, distance, perimeter_count, cperimeter_count;*/
                       
    int                *iarray;
    int                *jrecv;
