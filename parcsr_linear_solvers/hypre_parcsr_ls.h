@@ -52,9 +52,9 @@ int main P((int argc , char *argv []));
 /* driver_rap.c */
 int main P((int argc , char *argv []));
 
-/* indepset.c */
+/* par_indepset.c */
 int hypre_InitParAMGIndepSet P((hypre_ParCSRMatrix *parS , double *measure_array ));
-int hypre_ParAMGIndepSet P((hypre_ParCSRMatrix *parS , double *measure_array , int *graph_array , int graph_array_size , int *IS_marker ));
+int hypre_ParAMGIndepSet P((hypre_ParCSRMatrix *parS , hypre_CSRMatrix *S_ext , double *measure_array , int *graph_array , int graph_array_size , int *IS_marker ));
 
 /* par_amg.c */
 void *hypre_ParAMGInitialize P((void ));

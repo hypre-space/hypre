@@ -62,7 +62,7 @@ FILES =\
  par_interp.c\
  par_coarsen.c\
  par_relax.c\
- indepset.c\
+ par_indepset.c\
  par_laplace.c\
  par_rap.c\
  par_rap_communication.c\
