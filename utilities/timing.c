@@ -146,9 +146,9 @@ zzz_BeginTiming( int time_index )
       zzz_TimingWallTime(time_index) -= zzz_TimingWallCount;
       zzz_TimingCPUTime(time_index)  -= zzz_TimingCPUCount;
       zzz_TimingFLOPS(time_index)    -= zzz_TimingFLOPCount;
-      zzz_TimingState(time_index)     = 1;
       zzz_StartTiming();
    }
+   zzz_TimingState(time_index) ++;
 }
 
 /*--------------------------------------------------------------------------
@@ -161,13 +161,13 @@ zzz_EndTiming( int time_index )
    if (zzz_global_timing == NULL)
       return;
 
-   if (zzz_TimingState(time_index) != 0)
+   zzz_TimingState(time_index) --;
+   if (zzz_TimingState(time_index) == 0)
    {
       zzz_StopTiming();
       zzz_TimingWallTime(time_index) += zzz_TimingWallCount;
       zzz_TimingCPUTime(time_index)  += zzz_TimingCPUCount;
       zzz_TimingFLOPS(time_index)    += zzz_TimingFLOPCount;
-      zzz_TimingState(time_index)     = 0;
       zzz_StartTiming();
    }
 }
@@ -237,28 +237,36 @@ zzz_FinalizeTiming( int time_index )
    if (zzz_global_timing == NULL)
       return;
 
-   if ((time_index < (zzz_global_timing -> size)) &&
-       (zzz_TimingNumRegs(time_index) == 1)         )
+   if (time_index < (zzz_global_timing -> size))
    {
-      zzz_TFree(zzz_TimingName(time_index));
-      (zzz_global_timing -> size) --;
-      for (i = time_index; i < (zzz_global_timing -> size); i++)
+      if (zzz_TimingNumRegs(time_index) == 1)
       {
-         zzz_TimingWallTime(i) = zzz_TimingWallTime(i+1);
-         zzz_TimingCPUTime(i)  = zzz_TimingCPUTime(i+1);
-         zzz_TimingFLOPS(i)    = zzz_TimingFLOPS(i+1);
-         zzz_TimingName(i)     = zzz_TimingName(i+1);
-      }
+         zzz_TFree(zzz_TimingName(time_index));
+         (zzz_global_timing -> size) --;
+         for (i = time_index; i < (zzz_global_timing -> size); i++)
+         {
+            zzz_TimingWallTime(i) = zzz_TimingWallTime(i+1);
+            zzz_TimingCPUTime(i)  = zzz_TimingCPUTime(i+1);
+            zzz_TimingFLOPS(i)    = zzz_TimingFLOPS(i+1);
+            zzz_TimingName(i)     = zzz_TimingName(i+1);
+            zzz_TimingState(i)    = zzz_TimingState(i+1);
+            zzz_TimingNumRegs(i)  = zzz_TimingNumRegs(i+1);
+         }
 
-      if ((zzz_global_timing -> size) == 0)
+         if ((zzz_global_timing -> size) == 0)
+         {
+            zzz_TFree(zzz_global_timing -> wall_time);
+            zzz_TFree(zzz_global_timing -> cpu_time);
+            zzz_TFree(zzz_global_timing -> flops);
+            zzz_TFree(zzz_global_timing -> name);
+            zzz_TFree(zzz_global_timing -> state);
+            zzz_TFree(zzz_global_timing);
+            zzz_global_timing = NULL;
+         }
+      }
+      else
       {
-         zzz_TFree(zzz_global_timing -> wall_time);
-         zzz_TFree(zzz_global_timing -> cpu_time);
-         zzz_TFree(zzz_global_timing -> flops);
-         zzz_TFree(zzz_global_timing -> name);
-         zzz_TFree(zzz_global_timing -> state);
-         zzz_TFree(zzz_global_timing);
-         zzz_global_timing = NULL;
+         zzz_TimingNumRegs(time_index) --;
       }
    }
 }
