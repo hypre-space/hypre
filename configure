@@ -3550,7 +3550,7 @@ done
         elif test "$CC" = "icc" ; then
           
    if test -z "$COPT"; then
-      COPT="-O3 -xW -tpp7 -prefetch -Zp16"
+      COPT="-O3 -xW -tpp7"
    fi
    
 
@@ -3574,7 +3574,7 @@ done
         elif test "$CXX" = "icc" ; then
           
    if test -z "$CXXOPT"; then
-      CXXOPT="-O3 -xW -tpp7 -prefetch -Zp16"
+      CXXOPT="-O3 -xW -tpp7"
    fi
    
 
@@ -3598,7 +3598,7 @@ done
         elif test "$F77" = "ifc" ; then
           
    if test -z "$FOPT"; then
-      FOPT="-O3 -xW -tpp7 -prefetch -Zp16"
+      FOPT="-O3 -xW -tpp7"
    fi
    
 
@@ -3623,7 +3623,7 @@ done
         elif test "$CC" = "icc" ; then
           
    if test -z "$COPT"; then
-      COPT="-O3 -openmp -xW -tpp7 -prefetch -Zp16"
+      COPT="-O3 -openmp -xW -tpp7"
    fi
    
 
@@ -3647,7 +3647,7 @@ done
         elif test "$CXX" = "icc" ; then
           
    if test -z "$CXXOPT"; then
-      CXXOPT="-O3 -openmp -xW -tpp7 -prefetch -Zp16"
+      CXXOPT="-O3 -openmp -xW -tpp7"
    fi
    
 
@@ -3671,7 +3671,7 @@ done
         elif test "$F77" = "ifc" ; then
           
    if test -z "$FOPT"; then
-      FOPT="-O3 -openmp -xW -tpp7 -prefetch -Zp16"
+      FOPT="-O3 -openmp -xW -tpp7"
    fi
    
 

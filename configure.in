@@ -738,7 +738,7 @@ case $ARCH in
         if test "$CC" = "pgcc" ; then
           CASC_SET_COPT(-fast)
         elif test "$CC" = "icc" ; then
-          CASC_SET_COPT(-O3 -xW -tpp7 -prefetch -Zp16)
+          CASC_SET_COPT(-O3 -xW -tpp7)
         else
           CASC_SET_COPT(-O)
         fi
@@ -747,7 +747,7 @@ case $ARCH in
         if test "$CXX" = "pgCC" ; then
           CASC_SET_CXXOPT(-fast)
         elif test "$CXX" = "icc" ; then
-          CASC_SET_CXXOPT(-O3 -xW -tpp7 -prefetch -Zp16)
+          CASC_SET_CXXOPT(-O3 -xW -tpp7)
         else
           CASC_SET_CXXOPT(-O)
         fi
@@ -756,7 +756,7 @@ case $ARCH in
         if test "$F77" = "pgf77" ; then
           CASC_SET_FOPT(-fast)
         elif test "$F77" = "ifc" ; then
-          CASC_SET_FOPT(-O3 -xW -tpp7 -prefetch -Zp16)
+          CASC_SET_FOPT(-O3 -xW -tpp7)
         else
           CASC_SET_FOPT(-O)
         fi
@@ -766,7 +766,7 @@ case $ARCH in
         if test "$CC" = "pgcc" ; then
           CASC_SET_COPT(-fast -mp)
         elif test "$CC" = "icc" ; then
-          CASC_SET_COPT(-O3 -openmp -xW -tpp7 -prefetch -Zp16)
+          CASC_SET_COPT(-O3 -openmp -xW -tpp7)
         else
           CASC_SET_COPT(-O)
         fi
@@ -775,7 +775,7 @@ case $ARCH in
         if test "$CXX" = "pgCC" ; then
           CASC_SET_CXXOPT(-fast -mp)
         elif test "$CXX" = "icc" ; then
-          CASC_SET_CXXOPT(-O3 -openmp -xW -tpp7 -prefetch -Zp16)
+          CASC_SET_CXXOPT(-O3 -openmp -xW -tpp7)
         else
           CASC_SET_CXXOPT(-O)
         fi
@@ -784,7 +784,7 @@ case $ARCH in
         if test "$F77" = "pgf77" ; then
           CASC_SET_FOPT(-fast -mp)
         elif test "$F77" = "ifc" ; then
-          CASC_SET_FOPT(-O3 -openmp -xW -tpp7 -prefetch -Zp16)
+          CASC_SET_FOPT(-O3 -openmp -xW -tpp7)
         else
           CASC_SET_FOPT(-O)
         fi
