@@ -1,8 +1,12 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 # Set VERSION so we only need to edit in one place (i.e., here)
+m4_define(HYPRE_NAME, hypre)
 m4_define(HYPRE_VERSION, 1.8.3b)
-m4_define(HYPRE_DATE, 2003/10/22 23:46:36)
+m4_define(HYPRE_DATE, 2003/10/22)
+m4_define(HYPRE_TIME, 23:46:36)
+m4_define(HYPRE_DATETIME, HYPRE_DATE HYPRE_TIME)
+m4_define(HYPRE_BUGS,http://www-casc.llnl.gov/bugs/enter_bug.cgi?product=HYPRE)
 m4_define(HYPRE_TOP_SRC_DIR, `pwd`)
 
 # Variable Initialization
@@ -24,7 +28,7 @@ BABELDIR=""
 
 AC_PREREQ(2.59)
 AC_REVISION($Id$)
-AC_INIT([hypre], HYPRE_VERSION, [http://www-casc.llnl.gov/bugs/enter_bug.cgi?product=HYPRE], [hypre])
+AC_INIT(HYPRE_NAME, HYPRE_VERSION, HYPRE_BUGS, HYPRE_NAME)
 AC_CONFIG_HEADER([HYPRE_config.h:config/HYPRE_config.h.in])
 AC_COPYRIGHT([This work was produced at the University of California,
 Lawrence Livermore National Laboratory (UC LLNL) under contract
@@ -46,8 +50,11 @@ AM_INIT_AUTOMAKE([1.8 foreign no-dependencies no-installinfo no-installman no-te
 dnl Change the default prefix (/usr/local) to ./hypre
 AC_PREFIX_DEFAULT("HYPRE_TOP_SRC_DIR/hypre")
 m4_pattern_allow([HYPRE_[A-Z_]+])
-PACKAGE_DATETIME="HYPRE_DATE"
-AC_SUBST(PACKAGE_DATETIME)
+AC_DEFINE([PACKAGE_DATE], ["HYPRE_DATE"], [Date of release])
+AC_DEFINE([PACKAGE_TIME], ["HYPRE_TIME"], [Time of release])
+AC_DEFINE([PACKAGE_DATETIME], ["HYPRE_DATETIME"], [Date and time of release])
+PACKAGE_DATETIME=HYPRE_DATETIME
+AC_SUBST([PACKAGE_DATETIME])
 
 if test "x$CFLAGS" != "x" ; then
   casc_user_chose_cflags=yes
@@ -246,7 +253,7 @@ AC_SUBST(LIBTOOL_DEPS)
 
 # Checks for header files.
 #AC_PATH_X
-AC_HEADER_DIRENT
+#AC_HEADER_DIRENT
 AC_HEADER_STDC
 AC_HEADER_SYS_WAIT
 AC_CHECK_HEADERS([float.h inttypes.h limits.h malloc.h memory.h stddef.h stdlib.h string.h strings.h sys/param.h sys/time.h unistd.h])
@@ -330,9 +337,11 @@ if test "$casc_using_debug" = "yes" ; then
   if test "$PREPEND" = "insure" ; then
     CCLD="--tag=CC $PREPEND $XCCFLAGS"
     CXXLD="--tag=CXX $PREPEND $XCXXFLAGS"
+    LIBS="$LIBS $FLIBS"
   elif test "$PREPEND" = "purify" ; then
     CCLD="--tag=CC $PREPEND $XCCFLAGS $CC"
     CXXLD="--tag=CXX $PREPEND $XCXXFLAGS $CXX"
+    LIBS="$LIBS $FLIBS"
   fi
 else
   ACX_OPTIMIZATION_FLAGS
@@ -363,8 +372,7 @@ AC_SUBST(FEI_INC_DIR)
 # subsitute output variables in these files
 AC_CONFIG_FILES([
   docs/bref_manual.dxx
-  docs/ref_manual.dxx
-  utilities/HYPRE_utilities.h])
+  docs/ref_manual.dxx])
 
 AC_CONFIG_FILES([
   Makefile
@@ -430,12 +438,6 @@ if test "$casc_using_babel" = "yes"; then
   fi
 fi
 AC_SUBST(BABELDIR)
-if test "$casc_using_libdir" = "yes"; then
-  if test -d lib; then
-    AC_CONFIG_FILES([lib/Makefile])
-  fi
-fi
-AM_CONDITIONAL([LIBDIRNEEDED],[test "$casc_using_libdir" = yes])
 #if test "$casc_using_mli" = "yes"; then
 #  if test -d mli; then
 #    AC_CONFIG_FILES([mli/Makefile
@@ -457,4 +459,10 @@ AM_CONDITIONAL([LIBDIRNEEDED],[test "$casc_using_libdir" = yes])
 #  AC_CONFIG_FILES([tools/Makefile])
 #fi
 #AM_CONDITIONAL(TOOLSDIR, test -d tools)
+if test "$casc_using_libdir" = "yes"; then
+  if test -d lib; then
+    AC_CONFIG_FILES([lib/Makefile])
+  fi
+fi
+AM_CONDITIONAL([LIBDIRNEEDED],[test "$casc_using_libdir" = yes])
 AC_OUTPUT
