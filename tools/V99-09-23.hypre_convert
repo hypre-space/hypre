@@ -8,7 +8,7 @@
 #        mkdir BACKUP
 #        cp * BACKUP
 #
-#   2) Type 'hypre_convert <files>'
+#   2) Type 'V99-09-23.hypre_convert <files>'
 #
 ##################################################################
 

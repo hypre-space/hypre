@@ -8,7 +8,7 @@
 #        mkdir BACKUP
 #        cp * BACKUP
 #
-#   2) Type 'hypre_convert_boomeramg <files>'
+#   2) Type 'V2000-05-31.hypre_convert <files>'
 #
 ##################################################################
 
