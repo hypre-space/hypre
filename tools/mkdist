@@ -131,6 +131,7 @@ HYPRE_INSTALL_DIR=`pwd`"/$HYPRE_DIR"
   cd $HYPRE_INSTALL_DIR
   cp src/linear_solvers/COPYRIGHT_and_DISCLAIMER .
   cp src/linear_solvers/CHANGELOG .
+  cp src/linear_solvers/README .
 )
 
 # pop 'linear_solvers' directory to 'src'
