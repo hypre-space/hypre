@@ -20,6 +20,7 @@
 
 #include <stdio.h>
 #include <math.h>
+#include <HYPRE_config.h>
 #include "dsp_defs.h"
 #include "util.h"
 

@@ -23,7 +23,9 @@ F77_COMPILE_FLAGS=@F77FLAGS@
 CINCLUDES=@INCLUDES@
 
 CFLAGS =\
+ -I../..\
  -I$(srcdir)\
+ -I$(srcdir)/../..\
  ${C_COMPILE_FLAGS}\
  ${C_SUPERLU_FLAGS}\
  ${CINCLUDES}
