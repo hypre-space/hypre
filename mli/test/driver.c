@@ -13,9 +13,9 @@ int main(int argc, char **argv)
 
    int                j, nx=27, ny=27, P, Q, p, q, nprocs, mypid, start_row;
    int                *partition, global_size, local_size, nsweeps;
-   int                ndofs=3, null_dim=3, test_prob=1, solver=1;
+   int                ndofs=3, null_dim=6, test_prob=1, solver=1, scale_flag=1;
    char               *targv[10];
-   double             *values, *null_vects;
+   double             *values, *null_vects, *scale_vec;
    HYPRE_ParCSRMatrix HYPRE_A;
    hypre_ParCSRMatrix *hypre_A;
    hypre_ParVector    *sol, *rhs;
@@ -57,7 +57,8 @@ int main(int argc, char **argv)
    }
    else if ( test_prob == 1 )
    {
-      MLI_Utils_HypreMatrixRead(".data",MPI_COMM_WORLD,ndofs,(void **) &HYPRE_A);
+      MLI_Utils_HypreMatrixRead(".data",MPI_COMM_WORLD,ndofs,(void **) &HYPRE_A,
+                                scale_flag, &scale_vec);
       hypre_A = (hypre_ParCSRMatrix *) HYPRE_A;
       HYPRE_ParCSRMatrixGetRowPartitioning(HYPRE_A, &partition);
       global_size = partition[nprocs];
@@ -71,6 +72,16 @@ int main(int argc, char **argv)
                               local_size, start_row, &null_vects[local_size]);
       MLI_Utils_DoubleVectorRead("rigid_body_mode03",MPI_COMM_WORLD,
                               local_size, start_row, &null_vects[local_size*2]);
+      if ( scale_flag )
+      {
+         for ( j = 0; j < local_size; j++ ) 
+            scale_vec[j] = sqrt(scale_vec[j]); 
+         for ( j = 0; j < local_size; j++ ) null_vects[j] *= scale_vec[j]; 
+         for ( j = 0; j < local_size; j++ ) 
+            null_vects[local_size+j] *= scale_vec[j]; 
+         for ( j = 0; j < local_size; j++ ) 
+            null_vects[2*local_size+j] *= scale_vec[j]; 
+      }
       if ( null_dim > 3 )
       {
          MLI_Utils_DoubleVectorRead("rigid_body_mode04",MPI_COMM_WORLD,
@@ -79,6 +90,15 @@ int main(int argc, char **argv)
                               local_size, start_row, &null_vects[local_size*4]);
          MLI_Utils_DoubleVectorRead("rigid_body_mode06",MPI_COMM_WORLD,
                               local_size, start_row, &null_vects[local_size*5]);
+         if ( scale_flag )
+         {
+            for ( j = 0; j < local_size; j++ ) 
+               null_vects[3*local_size+j] *= scale_vec[j]; 
+            for ( j = 0; j < local_size; j++ ) 
+               null_vects[4*local_size+j] *= scale_vec[j]; 
+            for ( j = 0; j < local_size; j++ ) 
+               null_vects[5*local_size+j] *= scale_vec[j]; 
+         }
       }
    }
 
@@ -108,20 +128,20 @@ int main(int argc, char **argv)
    cmli_mat = MLI_MatrixCreate((void*) hypre_A,"HYPRE_ParCSR",func_ptr);
    free( func_ptr );
    cmli = MLI_Create( MPI_COMM_WORLD );
-   cmli_method = MLI_MethodCreate( "MLI_AMGSA_CALIB", MPI_COMM_WORLD );
 /*
-   cmli_method = MLI_MethodCreate( "MLI_AMGSA", MPI_COMM_WORLD );
+   cmli_method = MLI_MethodCreate( "MLI_AMGSA_CALIB", MPI_COMM_WORLD );
 */
+   cmli_method = MLI_MethodCreate( "MLI_AMGSA", MPI_COMM_WORLD );
    nsweeps = 10;
    targv[0] = (char *) &nsweeps;
    targv[1] = (char *) NULL;
-   MLI_MethodSetParams( cmli_method, "setNumLevels 2", 0, NULL );
-   MLI_MethodSetParams( cmli_method, "setPreSmoother SGS", 2, targv );
-   MLI_MethodSetParams( cmli_method, "setPostSmoother SGS", 2, targv );
+   MLI_MethodSetParams( cmli_method, "setNumLevels 3", 0, NULL );
+   MLI_MethodSetParams( cmli_method, "setPreSmoother MLS", 2, targv );
+   MLI_MethodSetParams( cmli_method, "setPostSmoother MLS", 2, targv );
    nsweeps = 20;
    targv[0] = (char *) &nsweeps;
    targv[1] = (char *) NULL;
-   MLI_MethodSetParams( cmli_method, "setCoarseSolver SGS", 2, targv );
+   MLI_MethodSetParams( cmli_method, "setCoarseSolver SuperLU", 2, targv );
    MLI_MethodSetParams( cmli_method, "setCalibrationSize 1", 0, NULL );
    if ( test_prob == 1 )
    {
