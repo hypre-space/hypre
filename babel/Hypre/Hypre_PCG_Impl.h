@@ -58,6 +58,7 @@ struct Hypre_PCG__data {
    int maxiter;
    int relchange;
    int twonorm;
+   int log_level;
    int printlevel;
    int stop_crit;
 

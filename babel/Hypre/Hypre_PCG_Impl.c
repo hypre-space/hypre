@@ -57,9 +57,8 @@ int impl_Hypre_PCG_Copy_Parameters_to_HYPRE_struct( Hypre_PCG self )
    ierr += HYPRE_PCGSetTwoNorm( solver, data->twonorm );
    ierr += HYPRE_PCGSetStopCrit( solver, data->stop_crit );
 
-   ierr += HYPRE_PCGSetLogging( solver, data->printlevel );
-   /* <<<< ...this will have to be changed to SetPrintLevel when PCG logging<<<>>>
-      <<<< is brought up to the new standard <<<>>>*/
+   ierr += HYPRE_PCGSetPrintLevel( solver, data->printlevel );
+   ierr += HYPRE_PCGSetLogLevel( solver, data->log_level );
 
    return ierr;
 }
@@ -342,7 +341,44 @@ impl_Hypre_PCG_GetResidual(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.PCG.GetResidual) */
   /* Insert the implementation of the GetResidual method here... */
-   /* >>>>>>>>>>>> TO DO <<<<<<<<<<<<<<<<< */
+   int ierr = 0;
+   void * objectr;
+   char *vector_type;
+   HYPRE_Solver solver;
+   struct Hypre_PCG__data * data;
+
+   /* declarations for ParCSR matrix/vector type: */
+   struct Hypre_ParCSRVector__data * datar;
+   Hypre_ParCSRVector HypreP_r;
+   HYPRE_ParVector rr;
+   HYPRE_ParVector rr2;
+   HYPRE_ParVector * prr = &rr2;
+   HYPRE_IJVector ij_r;
+
+   data = Hypre_PCG__get_data( self );
+   solver = data->solver;
+   vector_type = data -> vector_type;
+
+   if ( vector_type=="ParVector" ) {
+      HypreP_r = Hypre_Vector__cast2
+         ( Hypre_Vector_queryInterface( *r, "Hypre.ParCSRVector"),
+           "Hypre.ParCSRVector" );
+      assert( HypreP_r!=NULL );
+      datar = Hypre_ParCSRVector__get_data( HypreP_r );
+      ij_r = datar -> ij_b;
+      ierr += HYPRE_IJVectorGetObject( ij_r, &objectr );
+      rr = (HYPRE_ParVector) objectr;
+
+      ierr += HYPRE_PCGGetResidual( solver, prr );
+      HYPRE_ParVectorCopy( *prr, rr );
+   }
+   else {
+      /* Unsupported vector type */
+      ++ierr;
+      return ierr;
+   }
+
+   return ierr;
   /* DO-NOT-DELETE splicer.end(Hypre.PCG.GetResidual) */
 }
 
@@ -499,6 +535,14 @@ impl_Hypre_PCG_SetIntParameter(
       /* this parameter is obsolete but still supported */
       data -> stop_crit = value;
    }
+   else if ( strcmp(name,"PrintLevel")==0 || strcmp(name,"Print Level")==0 ) {
+      /* also settable through SetPrintLevel */
+      data -> printlevel = value;
+   }
+   else if ( strcmp(name,"LogLevel")==0 || strcmp(name,"Log Level")==0 ) {
+      /* also settable through SetLogging */
+      data -> log_level = value;
+   }
    /* Set other parameters here. */
    else ierr=1;
 
@@ -520,10 +564,20 @@ impl_Hypre_PCG_SetLogging(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.PCG.SetLogging) */
   /* Insert the implementation of the SetLogging method here... */
-   /* So far there is no logging, so just return (withoug an error).
-      >>> This will need to be changed once GetResidual is implemented <<<
+   /* The normal way to implement this function would be to call the corresponding
+      HYPRE function to set the print level.  That can't always be done because the
+      HYPRE struct may not exist.  The HYPRE struct may not exist because it can't
+      be created until we know the vector type - and that is not known until Apply
+      is first called.  So what we do is save the print level in a cache belonging to
+      this Babel interface, and copy it into the HYPRE struct once Apply is called.
    */
-   return 0;
+   int ierr = 0;
+   struct Hypre_PCG__data * data;
+   data = Hypre_PCG__get_data( self );
+
+   data -> log_level = level;
+
+   return ierr;
   /* DO-NOT-DELETE splicer.end(Hypre.PCG.SetLogging) */
 }
 
