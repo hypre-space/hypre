@@ -656,7 +656,8 @@ hypre_StructMatrixSetValues( hypre_StructMatrix *matrix,
 /*--------------------------------------------------------------------------
  * (action > 0): add-to values
  * (action = 0): set values
- * (action < 0): get values and zero out
+ * (action =-1): get values and zero out
+ * (action <-1): get values
  * should not be called to set a constant-coefficient part of the matrix,
  *   call hypre_StructMatrixSetConstantValues instead
  *--------------------------------------------------------------------------*/
@@ -776,7 +777,10 @@ hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix,
                         datai = hypre_CCBoxIndexRank(data_box,data_start);
                         dvali = hypre_BoxIndexRank(dval_box,dval_start);
                         values[dvali] = datap[datai];
-                        datap[datai] = 0;
+                        if (action == -1)
+                        {
+                           datap[datai] = 0;
+                        }
                      }
 
                   }
@@ -821,7 +825,10 @@ hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix,
                         hypre_BoxLoop2For(loopi, loopj, loopk, datai, dvali)
                            {
                               values[dvali] = datap[datai];
-                              datap[datai] = 0;
+                              if (action == -1)
+                              {
+                                  datap[datai] = 0;
+                              }
                            }
                         hypre_BoxLoop2End(datai, dvali);
                      }
@@ -844,7 +851,8 @@ hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix,
 /*--------------------------------------------------------------------------
  * (action > 0): add-to values
  * (action = 0): set values
- * (action < 0): get values and zero out
+ * (action =-1): get values and zero out
+ * (action <-1): get values
  * should be called to set a constant-coefficient part of the matrix
  *--------------------------------------------------------------------------*/
 
@@ -962,7 +970,7 @@ hypre_StructMatrixSetConstantValues( hypre_StructMatrix *matrix,
                      ierr += hypre_StructMatrixSetBoxValues(
                                 matrix, box,
                                 num_stencil_indices, stencil_indices,
-                                values, action );
+                                values, -1);
                   }
                   else
                   {  /* non-center, like constant_coefficient==1 */
