@@ -912,6 +912,16 @@ DistributeData( ProblemData   global_data,
          pdata.max_boxsize = 0;
       }
 
+      if (pdata.glue_nboxes == 0)
+      {
+         hypre_TFree(pdata.glue_ilowers);
+         hypre_TFree(pdata.glue_iuppers);
+         hypre_TFree(pdata.glue_nbor_parts);
+         hypre_TFree(pdata.glue_nbor_ilowers);
+         hypre_TFree(pdata.glue_nbor_iuppers);
+         hypre_TFree(pdata.glue_index_maps);
+      }
+
       if (pdata.graph_nentries == 0)
       {
          hypre_TFree(pdata.graph_ilowers);
