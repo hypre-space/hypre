@@ -515,6 +515,7 @@ class HYPRE_LinSysCore
    HYPRE_Solver    HYPrecon_;
    HYpreconID      HYPreconID_;
    int             HYPreconReuse_;
+   int             HYPreconSetup_;
 
    // ----------------------------------------------------------------------
    // preconditioner specific variables

@@ -40,4 +40,7 @@
 04/24/01    2.0.0R8
             - add Euclid preconditioner
             - create an amgDebug flag for boomeramg diagnostics
+04/25/01    2.0.0R8
+            - make preconditioner reuse more usable
+            - make A-conjugate projection restart instead of truncation
 

@@ -137,6 +137,7 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
                   tolerance_(1.0e-6),
                   normAbsRel_(0),
                   systemAssembled_(0),
+                  HYPreconSetup_(0),
                   slideReduction_(0),
                   schurReduction_(0),
                   schurReductionCreated_(0),
@@ -455,7 +456,7 @@ LinearSystemCore* HYPRE_LinSysCore::clone()
 
 int HYPRE_LinSysCore::parameters(int numParams, char **params)
 {
-    int    i, k, nsweeps, rtype, olevel;
+    int    i, k, nsweeps, rtype, olevel, reuse=0;
     double weight, dtemp;
     char   param[256], param1[256], param2[80];
 
@@ -709,7 +710,7 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
        else if ( !strcmp(param1, "precond_reuse") )
        {
           sscanf(params[i],"%s %s", param, param2);
-          if      ( !strcmp(param2, "on" ) )  HYPreconReuse_ = 1;
+          if      ( !strcmp(param2, "on" ) )  HYPreconReuse_ = reuse = 1;
           else                                HYPreconReuse_ = 0;
           if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
           {
@@ -725,7 +726,7 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
        else if ( !strcmp(param1, "preconditioner") )
        {
           sscanf(params[i],"%s %s", param, param2);
-          if      (!strcmp(param2, "reuse" )) HYPreconReuse_ = 1;
+          if      (!strcmp(param2, "reuse" )) HYPreconReuse_ = reuse = 1;
           else if (!strcmp(param2, "parasails_reuse")) parasailsReuse_ = 1;
           else
           {
@@ -1383,6 +1384,7 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
           }
        }
     }
+    if ( reuse == 1 ) HYPreconReuse_ = 1; 
 
     if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
     {
@@ -3434,7 +3436,7 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
        printf("%4d : HYPRE_LSC::entering selectPreconditioner = %s.\n",
               mypid_, name);
     }
-    HYPreconReuse_ = 0;
+    HYPreconSetup_ = 0;
     parasailsReuse_ = 0;
 
     //-------------------------------------------------------------------
@@ -3876,7 +3878,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
              case HYDIAGONAL :
                   if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
                      printf("Diagonal preconditioning \n");
-                  if ( HYPreconReuse_ == 1 )
+                  if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
                   {
                      HYPRE_ParCSRPCGSetPrecond(HYSolver_,
                                     HYPRE_ParCSRDiagScale,
@@ -3887,6 +3889,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                      HYPRE_ParCSRPCGSetPrecond(HYSolver_,
                                     HYPRE_ParCSRDiagScale,
                                     HYPRE_ParCSRDiagScaleSetup,HYPrecon_);
+                     HYPreconSetup_ = 1;
                   }
                   break;
 
@@ -3914,7 +3917,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   if ( HYOutputLevel_ & HYFEI_DDILUT )
                      HYPRE_LSI_DDICTSetOutputLevel(HYPrecon_,2);
 
-                  if ( HYPreconReuse_ == 1 )
+                  if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
                   {
                      HYPRE_ParCSRPCGSetPrecond(HYSolver_,HYPRE_LSI_DDICTSolve,
                                       HYPRE_DummyFunction, HYPrecon_);
@@ -3923,6 +3926,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   {
                      HYPRE_ParCSRPCGSetPrecond(HYSolver_,HYPRE_LSI_DDICTSolve,
                                       HYPRE_LSI_DDICTSetup, HYPrecon_);
+                     HYPreconSetup_ = 1;
                   }
                   break;
 
@@ -3933,15 +3937,24 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   HYPRE_LSI_SchwarzSetILUTFillin(HYPrecon_,schwarzFillin_);
                   HYPRE_LSI_SchwarzSetNBlocks(HYPrecon_, schwarzNblocks_);
                   HYPRE_LSI_SchwarzSetBlockSize(HYPrecon_, schwarzBlksize_);
-                  HYPRE_ParCSRPCGSetPrecond(HYSolver_,HYPRE_LSI_SchwarzSolve,
-                                            HYPRE_LSI_SchwarzSetup, HYPrecon_);
+                  if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
+                  {
+                     HYPRE_ParCSRPCGSetPrecond(HYSolver_,HYPRE_LSI_SchwarzSolve,
+                                               HYPRE_DummyFunction, HYPrecon_);
+                  }
+                  else
+                  {
+                     HYPRE_ParCSRPCGSetPrecond(HYSolver_,HYPRE_LSI_SchwarzSolve,
+                                               HYPRE_LSI_SchwarzSetup, HYPrecon_);
+                     HYPreconSetup_ = 1;
+                  }
                   break;
 
              case HYPOLY :
                   if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
                      printf("Polynomial preconditioning - order = %d\n",polyOrder_);
                   HYPRE_LSI_PolySetOrder(HYPrecon_, polyOrder_);
-                  if ( HYPreconReuse_ == 1 )
+                  if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
                   {
                      HYPRE_ParCSRPCGSetPrecond(HYSolver_,HYPRE_LSI_PolySolve,
                                       HYPRE_DummyFunction, HYPrecon_);
@@ -3950,6 +3963,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   {
                      HYPRE_ParCSRPCGSetPrecond(HYSolver_,HYPRE_LSI_PolySolve,
                                       HYPRE_LSI_PolySetup, HYPrecon_);
+                     HYPreconSetup_ = 1;
                   }
                   break;
 
@@ -3972,7 +3986,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   {
                      HYPRE_ParCSRParaSailsSetLogging(HYPrecon_, 1);
                   }
-                  if ( HYPreconReuse_ == 1 )
+                  if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
                   {
                      HYPRE_ParCSRPCGSetPrecond(HYSolver_,
                                     HYPRE_ParCSRParaSailsSolve,
@@ -3983,6 +3997,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                      HYPRE_ParCSRPCGSetPrecond(HYSolver_,
                                     HYPRE_ParCSRParaSailsSolve,
                                     HYPRE_ParCSRParaSailsSetup, HYPrecon_);
+                     HYPreconSetup_ = 1;
                   }
                   break;
 
@@ -4016,7 +4031,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                      HYPRE_BoomerAMGSetDebugFlag(HYPrecon_, 0);
                      HYPRE_BoomerAMGSetIOutDat(HYPrecon_, 3);
                   }
-                  if ( HYPreconReuse_ == 1 )
+                  if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
                   {
                      HYPRE_ParCSRPCGSetPrecond(HYSolver_, HYPRE_BoomerAMGSolve,
                                     HYPRE_DummyFunction, HYPrecon_);
@@ -4025,6 +4040,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   {
                      HYPRE_ParCSRPCGSetPrecond(HYSolver_, HYPRE_BoomerAMGSolve,
                                     HYPRE_BoomerAMGSetup, HYPrecon_);
+                     HYPreconSetup_ = 1;
                   }
                   break;
 
@@ -4046,7 +4062,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   HYPRE_ParCSRMLSetPreSmoother(HYPrecon_,mlPresmootherType_);
                   HYPRE_ParCSRMLSetPostSmoother(HYPrecon_,mlPostsmootherType_);
                   HYPRE_ParCSRMLSetDampingFactor(HYPrecon_,mlRelaxWeight_);
-                  if ( HYPreconReuse_ == 1 )
+                  if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
                   {
                      HYPRE_ParCSRPCGSetPrecond(HYSolver_, HYPRE_ParCSRMLSolve,
                                     HYPRE_DummyFunction, HYPrecon_);
@@ -4055,8 +4071,8 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   {
                      HYPRE_ParCSRPCGSetPrecond(HYSolver_, HYPRE_ParCSRMLSolve,
                                     HYPRE_ParCSRMLSetup, HYPrecon_);
+                     HYPreconSetup_ = 1;
                   }
-
                   if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
                   {
                      printf("ML strong threshold = %e\n", mlStrongThreshold_);
@@ -4123,7 +4139,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
              case HYDIAGONAL :
                   if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
                      printf("Diagonal preconditioning \n");
-                  if ( HYPreconReuse_ == 1 )
+                  if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
                   {
                      HYPRE_ParCSRGMRESSetPrecond(HYSolver_,
                                       HYPRE_ParCSRDiagScale,
@@ -4134,6 +4150,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                      HYPRE_ParCSRGMRESSetPrecond(HYSolver_,
                                       HYPRE_ParCSRDiagScale,
                                       HYPRE_ParCSRDiagScaleSetup, HYPrecon_);
+                     HYPreconSetup_ = 1;
                   }
                   break;
 
@@ -4146,7 +4163,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   }
                   HYPRE_ParCSRPilutSetFactorRowSize(HYPrecon_,pilutFillin_);
                   HYPRE_ParCSRPilutSetDropTolerance(HYPrecon_,pilutDropTol_);
-                  if ( HYPreconReuse_ == 1 )
+                  if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
                   {
                      HYPRE_ParCSRGMRESSetPrecond(HYSolver_,
                                       HYPRE_ParCSRPilutSolve,
@@ -4157,6 +4174,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                      HYPRE_ParCSRGMRESSetPrecond(HYSolver_,
                                       HYPRE_ParCSRPilutSolve,
                                       HYPRE_ParCSRPilutSetup, HYPrecon_);
+                     HYPreconSetup_ = 1;
                   }
                   break;
 
@@ -4172,7 +4190,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   if ( HYOutputLevel_ & HYFEI_DDILUT )
                      HYPRE_LSI_DDIlutSetOutputLevel(HYPrecon_,2);
 
-                  if ( HYPreconReuse_ == 1 )
+                  if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
                   {
                      HYPRE_ParCSRGMRESSetPrecond(HYSolver_,HYPRE_LSI_DDIlutSolve,
                                       HYPRE_DummyFunction, HYPrecon_);
@@ -4181,6 +4199,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   {
                      HYPRE_ParCSRGMRESSetPrecond(HYSolver_,HYPRE_LSI_DDIlutSolve,
                                          HYPRE_LSI_DDIlutSetup, HYPrecon_);
+                     HYPreconSetup_ = 1;
                   }
                   break;
 
@@ -4196,7 +4215,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   if ( HYOutputLevel_ & HYFEI_DDILUT )
                      HYPRE_LSI_DDICTSetOutputLevel(HYPrecon_,2);
 
-                  if ( HYPreconReuse_ == 1 )
+                  if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
                   {
                      HYPRE_ParCSRGMRESSetPrecond(HYSolver_,HYPRE_LSI_DDICTSolve,
                                       HYPRE_DummyFunction, HYPrecon_);
@@ -4205,6 +4224,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   {
                      HYPRE_ParCSRGMRESSetPrecond(HYSolver_,HYPRE_LSI_DDICTSolve,
                                       HYPRE_LSI_DDICTSetup, HYPrecon_);
+                     HYPreconSetup_ = 1;
                   }
                   break;
 
@@ -4215,15 +4235,24 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   HYPRE_LSI_SchwarzSetILUTFillin(HYPrecon_,schwarzFillin_);
                   HYPRE_LSI_SchwarzSetNBlocks(HYPrecon_, schwarzNblocks_);
                   HYPRE_LSI_SchwarzSetBlockSize(HYPrecon_, schwarzBlksize_);
-                  HYPRE_ParCSRGMRESSetPrecond(HYSolver_,HYPRE_LSI_SchwarzSolve,
-                                              HYPRE_LSI_SchwarzSetup, HYPrecon_);
+                  if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
+                  {
+                     HYPRE_ParCSRGMRESSetPrecond(HYSolver_,HYPRE_LSI_SchwarzSolve,
+                                                 HYPRE_DummyFunction, HYPrecon_);
+                  }
+                  else
+                  {
+                     HYPRE_ParCSRGMRESSetPrecond(HYSolver_,HYPRE_LSI_SchwarzSolve,
+                                                 HYPRE_LSI_SchwarzSetup, HYPrecon_);
+                     HYPreconSetup_ = 1;
+                  }
                   break;
 
              case HYPOLY :
                   if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
                      printf("Polynomial preconditioning - order = %d\n",polyOrder_);
                   HYPRE_LSI_PolySetOrder(HYPrecon_, polyOrder_);
-                  if ( HYPreconReuse_ == 1 )
+                  if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
                   {
                      HYPRE_ParCSRGMRESSetPrecond(HYSolver_,HYPRE_LSI_PolySolve,
                                       HYPRE_DummyFunction, HYPrecon_);
@@ -4232,6 +4261,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   {
                      HYPRE_ParCSRGMRESSetPrecond(HYSolver_,HYPRE_LSI_PolySolve,
                                       HYPRE_LSI_PolySetup, HYPrecon_);
+                     HYPreconSetup_ = 1;
                   }
                   break;
 
@@ -4254,8 +4284,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   {
                      HYPRE_ParCSRParaSailsSetLogging(HYPrecon_, 1);
                   }
-
-                  if ( HYPreconReuse_ == 1 )
+                  if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
                   {
                      HYPRE_ParCSRGMRESSetPrecond(HYSolver_,
                                       HYPRE_ParCSRParaSailsSolve,
@@ -4266,6 +4295,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                      HYPRE_ParCSRGMRESSetPrecond(HYSolver_,
                                       HYPRE_ParCSRParaSailsSolve,
                                       HYPRE_ParCSRParaSailsSetup, HYPrecon_);
+                     HYPreconSetup_ = 1;
                   }
                   break;
 
@@ -4299,7 +4329,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                      HYPRE_BoomerAMGSetDebugFlag(HYPrecon_, 0);
                      HYPRE_BoomerAMGSetIOutDat(HYPrecon_, 3);
                   }
-                  if ( HYPreconReuse_ == 1 )
+                  if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
                   {
                      HYPRE_ParCSRGMRESSetPrecond(HYSolver_,HYPRE_BoomerAMGSolve,
                                       HYPRE_DummyFunction, HYPrecon_);
@@ -4308,12 +4338,13 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   {
                      HYPRE_ParCSRGMRESSetPrecond(HYSolver_, HYPRE_BoomerAMGSolve,
                                       HYPRE_BoomerAMGSetup, HYPrecon_);
+                     HYPreconSetup_ = 1;
                   }
                   break;
 
              case HYEUCLID :
                   HYPRE_ParCSREuclidSetParams(HYPrecon_,euclidargc_*2,euclidargv_);
-                  if ( HYPreconReuse_ == 1 )
+                  if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
                   {
                      HYPRE_ParCSRGMRESSetPrecond(HYSolver_,HYPRE_ParCSREuclidSolve,
                                       HYPRE_DummyFunction, HYPrecon_);
@@ -4322,6 +4353,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   {
                      HYPRE_ParCSRGMRESSetPrecond(HYSolver_,HYPRE_ParCSREuclidSolve,
                                       HYPRE_ParCSREuclidSetup, HYPrecon_);
+                     HYPreconSetup_ = 1;
                   }
                   break;
 
@@ -4337,7 +4369,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   HYPRE_ParCSRMLSetPreSmoother(HYPrecon_,mlPresmootherType_);
                   HYPRE_ParCSRMLSetPostSmoother(HYPrecon_,mlPostsmootherType_);
                   HYPRE_ParCSRMLSetDampingFactor(HYPrecon_, mlRelaxWeight_);
-                  if ( HYPreconReuse_ == 1 )
+                  if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
                   {
                      HYPRE_ParCSRGMRESSetPrecond(HYSolver_,HYPRE_ParCSRMLSolve,
                                       HYPRE_DummyFunction, HYPrecon_);
@@ -4346,6 +4378,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   {
                      HYPRE_ParCSRGMRESSetPrecond(HYSolver_,HYPRE_ParCSRMLSolve,
                                       HYPRE_ParCSRMLSetup, HYPrecon_);
+                     HYPreconSetup_ = 1;
                   }
 
                   if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
@@ -4412,7 +4445,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
              case HYDIAGONAL :
                   if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
                      printf("Diagonal preconditioning \n");
-                  if ( HYPreconReuse_ == 1 )
+                  if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
                   {
                      HYPRE_ParCSRBiCGSTABSetPrecond(HYSolver_,
                                       HYPRE_ParCSRDiagScale,
@@ -4423,6 +4456,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                      HYPRE_ParCSRBiCGSTABSetPrecond(HYSolver_,
                                       HYPRE_ParCSRDiagScale,
                                       HYPRE_ParCSRDiagScaleSetup, HYPrecon_);
+                     HYPreconSetup_ = 1;
                   }
                   break;
 
@@ -4435,7 +4469,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   }
                   HYPRE_ParCSRPilutSetFactorRowSize(HYPrecon_,pilutFillin_);
                   HYPRE_ParCSRPilutSetDropTolerance(HYPrecon_,pilutDropTol_);
-                  if ( HYPreconReuse_ == 1 )
+                  if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
                   {
                      HYPRE_ParCSRBiCGSTABSetPrecond(HYSolver_,
                                       HYPRE_ParCSRPilutSolve,
@@ -4446,6 +4480,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                      HYPRE_ParCSRBiCGSTABSetPrecond(HYSolver_,
                                       HYPRE_ParCSRPilutSolve,
                                       HYPRE_ParCSRPilutSetup, HYPrecon_);
+                     HYPreconSetup_ = 1;
                   }
                   break;
 
@@ -4461,7 +4496,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   if ( HYOutputLevel_ & HYFEI_DDILUT )
                      HYPRE_LSI_DDIlutSetOutputLevel(HYPrecon_,2);
 
-                  if ( HYPreconReuse_ == 1 )
+                  if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
                   {
                      HYPRE_ParCSRBiCGSTABSetPrecond(HYSolver_,
                          HYPRE_LSI_DDIlutSolve,HYPRE_DummyFunction,HYPrecon_);
@@ -4470,6 +4505,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   {
                      HYPRE_ParCSRBiCGSTABSetPrecond(HYSolver_,
                          HYPRE_LSI_DDIlutSolve,HYPRE_LSI_DDIlutSetup,HYPrecon_);
+                     HYPreconSetup_ = 1;
                   }
                   break;
 
@@ -4485,7 +4521,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   if ( HYOutputLevel_ & HYFEI_DDILUT )
                      HYPRE_LSI_DDICTSetOutputLevel(HYPrecon_,2);
 
-                  if ( HYPreconReuse_ == 1 )
+                  if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
                   {
                      HYPRE_ParCSRBiCGSTABSetPrecond(HYSolver_,HYPRE_LSI_DDICTSolve,
                                       HYPRE_DummyFunction, HYPrecon_);
@@ -4494,6 +4530,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   {
                      HYPRE_ParCSRBiCGSTABSetPrecond(HYSolver_,HYPRE_LSI_DDICTSolve,
                                       HYPRE_LSI_DDICTSetup, HYPrecon_);
+                     HYPreconSetup_ = 1;
                   }
                   break;
 
@@ -4504,15 +4541,24 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   HYPRE_LSI_SchwarzSetILUTFillin(HYPrecon_,schwarzFillin_);
                   HYPRE_LSI_SchwarzSetNBlocks(HYPrecon_, schwarzNblocks_);
                   HYPRE_LSI_SchwarzSetBlockSize(HYPrecon_, schwarzBlksize_);
-                  HYPRE_ParCSRBiCGSTABSetPrecond(HYSolver_,HYPRE_LSI_SchwarzSolve,
-                                              HYPRE_LSI_SchwarzSetup, HYPrecon_);
+                  if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
+                  {
+                     HYPRE_ParCSRBiCGSTABSetPrecond(HYSolver_,HYPRE_LSI_SchwarzSolve,
+                                                    HYPRE_DummyFunction, HYPrecon_);
+                  }
+                  else
+                  {
+                     HYPRE_ParCSRBiCGSTABSetPrecond(HYSolver_,HYPRE_LSI_SchwarzSolve,
+                                                    HYPRE_LSI_SchwarzSetup, HYPrecon_);
+                     HYPreconSetup_ = 1;
+                  }
                   break;
 
              case HYPOLY :
                   if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
                      printf("Polynomial preconditioning - order = %d\n",polyOrder_);
                   HYPRE_LSI_PolySetOrder(HYPrecon_, polyOrder_);
-                  if ( HYPreconReuse_ == 1 )
+                  if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
                   {
                      HYPRE_ParCSRBiCGSTABSetPrecond(HYSolver_,HYPRE_LSI_PolySolve,
                                       HYPRE_DummyFunction, HYPrecon_);
@@ -4521,6 +4567,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   {
                      HYPRE_ParCSRBiCGSTABSetPrecond(HYSolver_,HYPRE_LSI_PolySolve,
                                       HYPRE_LSI_PolySetup, HYPrecon_);
+                     HYPreconSetup_ = 1;
                   }
                   break;
 
@@ -4544,7 +4591,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                      HYPRE_ParCSRParaSailsSetLogging(HYPrecon_, 1);
                   }
 
-                  if ( HYPreconReuse_ == 1 )
+                  if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
                   {
                      HYPRE_ParCSRBiCGSTABSetPrecond(HYSolver_,
                                       HYPRE_ParCSRParaSailsSolve,
@@ -4555,6 +4602,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                      HYPRE_ParCSRBiCGSTABSetPrecond(HYSolver_,
                                       HYPRE_ParCSRParaSailsSolve,
                                       HYPRE_ParCSRParaSailsSetup, HYPrecon_);
+                     HYPreconSetup_ = 1;
                   }
                   break;
 
@@ -4588,7 +4636,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                      HYPRE_BoomerAMGSetDebugFlag(HYPrecon_, 0);
                      HYPRE_BoomerAMGSetIOutDat(HYPrecon_, 3);
                   }
-                  if ( HYPreconReuse_ == 1 )
+                  if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
                   {
                      HYPRE_ParCSRBiCGSTABSetPrecond(HYSolver_,
                          HYPRE_BoomerAMGSolve, HYPRE_DummyFunction, HYPrecon_);
@@ -4597,12 +4645,13 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   {
                      HYPRE_ParCSRBiCGSTABSetPrecond(HYSolver_, 
                          HYPRE_BoomerAMGSolve, HYPRE_BoomerAMGSetup, HYPrecon_);
+                     HYPreconSetup_ = 1;
                   }
                   break;
 
              case HYEUCLID :
                   HYPRE_ParCSREuclidSetParams(HYPrecon_,euclidargc_*2,euclidargv_);
-                  if ( HYPreconReuse_ == 1 )
+                  if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
                   {
                      HYPRE_ParCSRBiCGSTABSetPrecond(HYSolver_,
                                                     HYPRE_ParCSREuclidSolve,
@@ -4615,6 +4664,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                                                     HYPRE_ParCSREuclidSolve,
                                                     HYPRE_ParCSREuclidSetup, 
                                                     HYPrecon_);
+                     HYPreconSetup_ = 1;
                   }
                   break;
 
@@ -4630,7 +4680,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   HYPRE_ParCSRMLSetPreSmoother(HYPrecon_,mlPresmootherType_);
                   HYPRE_ParCSRMLSetPostSmoother(HYPrecon_,mlPostsmootherType_);
                   HYPRE_ParCSRMLSetDampingFactor(HYPrecon_, mlRelaxWeight_);
-                  if ( HYPreconReuse_ == 1 )
+                  if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
                   {
                      HYPRE_ParCSRBiCGSTABSetPrecond(HYSolver_,
                          HYPRE_ParCSRMLSolve, HYPRE_DummyFunction, HYPrecon_);
@@ -4639,8 +4689,8 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   {
                      HYPRE_ParCSRBiCGSTABSetPrecond(HYSolver_,
                          HYPRE_ParCSRMLSolve, HYPRE_ParCSRMLSetup, HYPrecon_);
+                     HYPreconSetup_ = 1;
                   }
-
                   if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
                   {
                      printf("ML strong threshold = %e\n", mlStrongThreshold_);
@@ -4704,7 +4754,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
              case HYDIAGONAL :
                   if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
                      printf("Diagonal preconditioning \n");
-                  if ( HYPreconReuse_ == 1 )
+                  if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
                   {
                      HYPRE_ParCSRBiCGSTABLSetPrecond(HYSolver_,
                                       HYPRE_ParCSRDiagScale,
@@ -4715,6 +4765,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                      HYPRE_ParCSRBiCGSTABLSetPrecond(HYSolver_,
                                       HYPRE_ParCSRDiagScale,
                                       HYPRE_ParCSRDiagScaleSetup, HYPrecon_);
+                     HYPreconSetup_ = 1;
                   }
                   break;
 
@@ -4727,7 +4778,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   }
                   HYPRE_ParCSRPilutSetFactorRowSize(HYPrecon_,pilutFillin_);
                   HYPRE_ParCSRPilutSetDropTolerance(HYPrecon_,pilutDropTol_);
-                  if ( HYPreconReuse_ == 1 )
+                  if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
                   {
                      HYPRE_ParCSRBiCGSTABLSetPrecond(HYSolver_,
                                       HYPRE_ParCSRPilutSolve,
@@ -4738,6 +4789,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                      HYPRE_ParCSRBiCGSTABLSetPrecond(HYSolver_,
                                       HYPRE_ParCSRPilutSolve,
                                       HYPRE_ParCSRPilutSetup, HYPrecon_);
+                     HYPreconSetup_ = 1;
                   }
                   break;
 
@@ -4753,7 +4805,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   if ( HYOutputLevel_ & HYFEI_DDILUT )
                      HYPRE_LSI_DDIlutSetOutputLevel(HYPrecon_,2);
 
-                  if ( HYPreconReuse_ == 1 )
+                  if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
                   {
                      HYPRE_ParCSRBiCGSTABLSetPrecond(HYSolver_,
                          HYPRE_LSI_DDIlutSolve,HYPRE_DummyFunction,HYPrecon_);
@@ -4762,6 +4814,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   {
                      HYPRE_ParCSRBiCGSTABLSetPrecond(HYSolver_,
                          HYPRE_LSI_DDIlutSolve,HYPRE_LSI_DDIlutSetup,HYPrecon_);
+                     HYPreconSetup_ = 1;
                   }
                   break;
 
@@ -4777,7 +4830,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   if ( HYOutputLevel_ & HYFEI_DDILUT )
                      HYPRE_LSI_DDICTSetOutputLevel(HYPrecon_,2);
 
-                  if ( HYPreconReuse_ == 1 )
+                  if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
                   {
                      HYPRE_ParCSRBiCGSTABLSetPrecond(HYSolver_,HYPRE_LSI_DDICTSolve,
                                       HYPRE_DummyFunction, HYPrecon_);
@@ -4786,6 +4839,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   {
                      HYPRE_ParCSRBiCGSTABLSetPrecond(HYSolver_,HYPRE_LSI_DDICTSolve,
                                       HYPRE_LSI_DDICTSetup, HYPrecon_);
+                     HYPreconSetup_ = 1;
                   }
                   break;
 
@@ -4796,15 +4850,24 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   HYPRE_LSI_SchwarzSetILUTFillin(HYPrecon_,schwarzFillin_);
                   HYPRE_LSI_SchwarzSetNBlocks(HYPrecon_, schwarzNblocks_);
                   HYPRE_LSI_SchwarzSetBlockSize(HYPrecon_, schwarzBlksize_);
-                  HYPRE_ParCSRBiCGSTABLSetPrecond(HYSolver_,HYPRE_LSI_SchwarzSolve,
-                                              HYPRE_LSI_SchwarzSetup, HYPrecon_);
+                  if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
+                  {
+                     HYPRE_ParCSRBiCGSTABLSetPrecond(HYSolver_,HYPRE_LSI_SchwarzSolve,
+                                                     HYPRE_DummyFunction, HYPrecon_);
+                  }
+                  else
+                  {
+                     HYPRE_ParCSRBiCGSTABLSetPrecond(HYSolver_,HYPRE_LSI_SchwarzSolve,
+                                                    HYPRE_LSI_SchwarzSetup, HYPrecon_);
+                     HYPreconSetup_ = 1;
+                  }
                   break;
 
              case HYPOLY :
                   if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
                      printf("Polynomial preconditioning - order = %d\n",polyOrder_);
                   HYPRE_LSI_PolySetOrder(HYPrecon_, polyOrder_);
-                  if ( HYPreconReuse_ == 1 )
+                  if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
                   {
                      HYPRE_ParCSRBiCGSTABLSetPrecond(HYSolver_,HYPRE_LSI_PolySolve,
                                       HYPRE_DummyFunction, HYPrecon_);
@@ -4813,6 +4876,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   {
                      HYPRE_ParCSRBiCGSTABLSetPrecond(HYSolver_,HYPRE_LSI_PolySolve,
                                       HYPRE_LSI_PolySetup, HYPrecon_);
+                     HYPreconSetup_ = 1;
                   }
                   break;
 
@@ -4836,7 +4900,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                      HYPRE_ParCSRParaSailsSetLogging(HYPrecon_, 1);
                   }
 
-                  if ( HYPreconReuse_ == 1 )
+                  if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
                   {
                      HYPRE_ParCSRBiCGSTABLSetPrecond(HYSolver_,
                                       HYPRE_ParCSRParaSailsSolve,
@@ -4847,6 +4911,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                      HYPRE_ParCSRBiCGSTABLSetPrecond(HYSolver_,
                                       HYPRE_ParCSRParaSailsSolve,
                                       HYPRE_ParCSRParaSailsSetup, HYPrecon_);
+                     HYPreconSetup_ = 1;
                   }
                   break;
 
@@ -4880,7 +4945,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                      HYPRE_BoomerAMGSetDebugFlag(HYPrecon_, 0);
                      HYPRE_BoomerAMGSetIOutDat(HYPrecon_, 3);
                   }
-                  if ( HYPreconReuse_ == 1 )
+                  if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
                   {
                      HYPRE_ParCSRBiCGSTABLSetPrecond(HYSolver_,
                          HYPRE_BoomerAMGSolve, HYPRE_DummyFunction, HYPrecon_);
@@ -4889,12 +4954,13 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   {
                      HYPRE_ParCSRBiCGSTABLSetPrecond(HYSolver_, 
                          HYPRE_BoomerAMGSolve, HYPRE_BoomerAMGSetup, HYPrecon_);
+                     HYPreconSetup_ = 1;
                   }
                   break;
 
              case HYEUCLID :
                   HYPRE_ParCSREuclidSetParams(HYPrecon_,euclidargc_*2,euclidargv_);
-                  if ( HYPreconReuse_ == 1 )
+                  if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
                   {
                      HYPRE_ParCSRBiCGSTABLSetPrecond(HYSolver_,
                                                      HYPRE_ParCSREuclidSolve,
@@ -4907,6 +4973,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                                                      HYPRE_ParCSREuclidSolve,
                                                      HYPRE_ParCSREuclidSetup, 
                                                      HYPrecon_);
+                     HYPreconSetup_ = 1;
                   }
                   break;
 
@@ -4922,7 +4989,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   HYPRE_ParCSRMLSetPreSmoother(HYPrecon_,mlPresmootherType_);
                   HYPRE_ParCSRMLSetPostSmoother(HYPrecon_,mlPostsmootherType_);
                   HYPRE_ParCSRMLSetDampingFactor(HYPrecon_, mlRelaxWeight_);
-                  if ( HYPreconReuse_ == 1 )
+                  if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
                   {
                      HYPRE_ParCSRBiCGSTABLSetPrecond(HYSolver_,
                          HYPRE_ParCSRMLSolve, HYPRE_DummyFunction, HYPrecon_);
@@ -4931,6 +4998,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   {
                      HYPRE_ParCSRBiCGSTABLSetPrecond(HYSolver_,
                          HYPRE_ParCSRMLSolve, HYPRE_ParCSRMLSetup, HYPrecon_);
+                     HYPreconSetup_ = 1;
                   }
 
                   if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
@@ -4996,7 +5064,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
              case HYDIAGONAL :
                   if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
                      printf("Diagonal preconditioning \n");
-                  if ( HYPreconReuse_ == 1 )
+                  if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
                   {
                      HYPRE_ParCSRTFQmrSetPrecond(HYSolver_,HYPRE_ParCSRDiagScale,
                                       HYPRE_DummyFunction, HYPrecon_);
@@ -5005,6 +5073,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   {
                      HYPRE_ParCSRTFQmrSetPrecond(HYSolver_,HYPRE_ParCSRDiagScale,
                                       HYPRE_ParCSRDiagScaleSetup, HYPrecon_);
+                     HYPreconSetup_ = 1;
                   }
                   break;
 
@@ -5017,7 +5086,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   }
                   HYPRE_ParCSRPilutSetFactorRowSize(HYPrecon_,pilutFillin_);
                   HYPRE_ParCSRPilutSetDropTolerance(HYPrecon_,pilutDropTol_);
-                  if ( HYPreconReuse_ == 1 )
+                  if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
                   {
                      HYPRE_ParCSRTFQmrSetPrecond(HYSolver_,HYPRE_ParCSRPilutSolve,
                                       HYPRE_DummyFunction, HYPrecon_);
@@ -5026,6 +5095,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   {
                      HYPRE_ParCSRTFQmrSetPrecond(HYSolver_,HYPRE_ParCSRPilutSolve,
                                       HYPRE_ParCSRPilutSetup, HYPrecon_);
+                     HYPreconSetup_ = 1;
                   }
                   break;
 
@@ -5040,7 +5110,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   if ( HYOutputLevel_ & HYFEI_DDILUT )
                      HYPRE_LSI_DDIlutSetOutputLevel(HYPrecon_,2);
 
-                  if ( HYPreconReuse_ == 1 )
+                  if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
                   {
                      HYPRE_ParCSRTFQmrSetPrecond(HYSolver_,HYPRE_LSI_DDIlutSolve,
                                  HYPRE_DummyFunction,HYPrecon_);
@@ -5049,6 +5119,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   {
                      HYPRE_ParCSRTFQmrSetPrecond(HYSolver_,HYPRE_LSI_DDIlutSolve,
                                  HYPRE_LSI_DDIlutSetup,HYPrecon_);
+                     HYPreconSetup_ = 1;
                   }
                   break;
 
@@ -5064,7 +5135,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   if ( HYOutputLevel_ & HYFEI_DDILUT )
                      HYPRE_LSI_DDICTSetOutputLevel(HYPrecon_,2);
 
-                  if ( HYPreconReuse_ == 1 )
+                  if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
                   {
                      HYPRE_ParCSRTFQmrSetPrecond(HYSolver_,HYPRE_LSI_DDICTSolve,
                                       HYPRE_DummyFunction, HYPrecon_);
@@ -5073,6 +5144,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   {
                      HYPRE_ParCSRTFQmrSetPrecond(HYSolver_,HYPRE_LSI_DDICTSolve,
                                       HYPRE_LSI_DDICTSetup, HYPrecon_);
+                     HYPreconSetup_ = 1;
                   }
                   break;
 
@@ -5083,15 +5155,24 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   HYPRE_LSI_SchwarzSetILUTFillin(HYPrecon_,schwarzFillin_);
                   HYPRE_LSI_SchwarzSetNBlocks(HYPrecon_, schwarzNblocks_);
                   HYPRE_LSI_SchwarzSetBlockSize(HYPrecon_, schwarzBlksize_);
-                  HYPRE_ParCSRTFQmrSetPrecond(HYSolver_,HYPRE_LSI_SchwarzSolve,
-                                              HYPRE_LSI_SchwarzSetup, HYPrecon_);
+                  if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
+                  {
+                     HYPRE_ParCSRTFQmrSetPrecond(HYSolver_,HYPRE_LSI_SchwarzSolve,
+                                                 HYPRE_DummyFunction, HYPrecon_);
+                  }
+                  else
+                  {
+                     HYPRE_ParCSRTFQmrSetPrecond(HYSolver_,HYPRE_LSI_SchwarzSolve,
+                                                 HYPRE_LSI_SchwarzSetup, HYPrecon_);
+                     HYPreconSetup_ = 1;
+                  }
                   break;
 
              case HYPOLY :
                   if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
                      printf("Polynomial preconditioning - order = %d\n",polyOrder_);
                   HYPRE_LSI_PolySetOrder(HYPrecon_, polyOrder_);
-                  if ( HYPreconReuse_ == 1 )
+                  if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
                   {
                      HYPRE_ParCSRTFQmrSetPrecond(HYSolver_,HYPRE_LSI_PolySolve,
                                       HYPRE_DummyFunction, HYPrecon_);
@@ -5100,6 +5181,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   {
                      HYPRE_ParCSRTFQmrSetPrecond(HYSolver_,HYPRE_LSI_PolySolve,
                                       HYPRE_LSI_PolySetup, HYPrecon_);
+                     HYPreconSetup_ = 1;
                   }
                   break;
 
@@ -5122,8 +5204,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   {
                      HYPRE_ParCSRParaSailsSetLogging(HYPrecon_, 1);
                   }
-
-                  if ( HYPreconReuse_ == 1 )
+                  if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
                   {
                      HYPRE_ParCSRTFQmrSetPrecond(HYSolver_,
                                       HYPRE_ParCSRParaSailsSolve,
@@ -5134,6 +5215,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                      HYPRE_ParCSRTFQmrSetPrecond(HYSolver_,
                                       HYPRE_ParCSRParaSailsSolve,
                                       HYPRE_ParCSRParaSailsSetup, HYPrecon_);
+                     HYPreconSetup_ = 1;
                   }
                   break;
 
@@ -5167,7 +5249,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                      HYPRE_BoomerAMGSetDebugFlag(HYPrecon_, 0);
                      HYPRE_BoomerAMGSetIOutDat(HYPrecon_, 3);
                   }
-                  if ( HYPreconReuse_ == 1 )
+                  if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
                   {
                      HYPRE_ParCSRTFQmrSetPrecond(HYSolver_,
                          HYPRE_BoomerAMGSolve, HYPRE_DummyFunction, HYPrecon_);
@@ -5176,12 +5258,13 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   {
                      HYPRE_ParCSRTFQmrSetPrecond(HYSolver_, 
                          HYPRE_BoomerAMGSolve, HYPRE_BoomerAMGSetup, HYPrecon_);
+                     HYPreconSetup_ = 1;
                   }
                   break;
 
              case HYEUCLID :
                   HYPRE_ParCSREuclidSetParams(HYPrecon_,euclidargc_*2,euclidargv_);
-                  if ( HYPreconReuse_ == 1 )
+                  if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
                   {
                      HYPRE_ParCSRTFQmrSetPrecond(HYSolver_,
                                                  HYPRE_ParCSREuclidSolve,
@@ -5194,6 +5277,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                                                  HYPRE_ParCSREuclidSolve,
                                                  HYPRE_ParCSREuclidSetup, 
                                                  HYPrecon_);
+                     HYPreconSetup_ = 1;
                   }
                   break;
 
@@ -5209,7 +5293,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   HYPRE_ParCSRMLSetPreSmoother(HYPrecon_,mlPresmootherType_);
                   HYPRE_ParCSRMLSetPostSmoother(HYPrecon_,mlPostsmootherType_);
                   HYPRE_ParCSRMLSetDampingFactor(HYPrecon_, mlRelaxWeight_);
-                  if ( HYPreconReuse_ == 1 )
+                  if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
                   {
                      HYPRE_ParCSRTFQmrSetPrecond(HYSolver_,
                          HYPRE_ParCSRMLSolve, HYPRE_DummyFunction, HYPrecon_);
@@ -5218,8 +5302,8 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   {
                      HYPRE_ParCSRTFQmrSetPrecond(HYSolver_,
                          HYPRE_ParCSRMLSolve, HYPRE_ParCSRMLSetup, HYPrecon_);
+                     HYPreconSetup_ = 1;
                   }
-
                   if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
                   {
                      printf("ML strong threshold = %e\n", mlStrongThreshold_);
@@ -5283,7 +5367,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
              case HYDIAGONAL :
                   if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
                      printf("Diagonal preconditioning \n");
-                  if ( HYPreconReuse_ == 1 )
+                  if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
                   {
                      HYPRE_ParCSRBiCGSSetPrecond(HYSolver_,HYPRE_ParCSRDiagScale,
                                       HYPRE_DummyFunction, HYPrecon_);
@@ -5292,6 +5376,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   {
                      HYPRE_ParCSRBiCGSSetPrecond(HYSolver_,HYPRE_ParCSRDiagScale,
                                       HYPRE_ParCSRDiagScaleSetup, HYPrecon_);
+                     HYPreconSetup_ = 1;
                   }
                   break;
 
@@ -5304,7 +5389,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   }
                   HYPRE_ParCSRPilutSetFactorRowSize(HYPrecon_,pilutFillin_);
                   HYPRE_ParCSRPilutSetDropTolerance(HYPrecon_,pilutDropTol_);
-                  if ( HYPreconReuse_ == 1 )
+                  if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
                   {
                      HYPRE_ParCSRBiCGSSetPrecond(HYSolver_,HYPRE_ParCSRPilutSolve,
                                       HYPRE_DummyFunction, HYPrecon_);
@@ -5313,6 +5398,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   {
                      HYPRE_ParCSRBiCGSSetPrecond(HYSolver_,HYPRE_ParCSRPilutSolve,
                                       HYPRE_ParCSRPilutSetup, HYPrecon_);
+                     HYPreconSetup_ = 1;
                   }
                   break;
 
@@ -5327,7 +5413,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   if ( HYOutputLevel_ & HYFEI_DDILUT )
                      HYPRE_LSI_DDIlutSetOutputLevel(HYPrecon_,2);
 
-                  if ( HYPreconReuse_ == 1 )
+                  if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
                   {
                      HYPRE_ParCSRBiCGSSetPrecond(HYSolver_,HYPRE_LSI_DDIlutSolve,
                                  HYPRE_DummyFunction,HYPrecon_);
@@ -5336,6 +5422,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   {
                      HYPRE_ParCSRBiCGSSetPrecond(HYSolver_,HYPRE_LSI_DDIlutSolve,
                                  HYPRE_LSI_DDIlutSetup,HYPrecon_);
+                     HYPreconSetup_ = 1;
                   }
                   break;
 
@@ -5351,7 +5438,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   if ( HYOutputLevel_ & HYFEI_DDILUT )
                      HYPRE_LSI_DDICTSetOutputLevel(HYPrecon_,2);
 
-                  if ( HYPreconReuse_ == 1 )
+                  if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
                   {
                      HYPRE_ParCSRBiCGSSetPrecond(HYSolver_,HYPRE_LSI_DDICTSolve,
                                       HYPRE_DummyFunction, HYPrecon_);
@@ -5360,6 +5447,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   {
                      HYPRE_ParCSRBiCGSSetPrecond(HYSolver_,HYPRE_LSI_DDICTSolve,
                                       HYPRE_LSI_DDICTSetup, HYPrecon_);
+                     HYPreconSetup_ = 1;
                   }
                   break;
 
@@ -5370,15 +5458,24 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   HYPRE_LSI_SchwarzSetILUTFillin(HYPrecon_,schwarzFillin_);
                   HYPRE_LSI_SchwarzSetNBlocks(HYPrecon_, schwarzNblocks_);
                   HYPRE_LSI_SchwarzSetBlockSize(HYPrecon_, schwarzBlksize_);
-                  HYPRE_ParCSRBiCGSSetPrecond(HYSolver_,HYPRE_LSI_SchwarzSolve,
-                                              HYPRE_LSI_SchwarzSetup, HYPrecon_);
+                  if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
+                  {
+                     HYPRE_ParCSRBiCGSSetPrecond(HYSolver_,HYPRE_LSI_SchwarzSolve,
+                                                 HYPRE_DummyFunction, HYPrecon_);
+                  }
+                  else
+                  {
+                     HYPRE_ParCSRBiCGSSetPrecond(HYSolver_,HYPRE_LSI_SchwarzSolve,
+                                                 HYPRE_LSI_SchwarzSetup, HYPrecon_);
+                     HYPreconSetup_ = 1;
+                  }
                   break;
 
              case HYPOLY :
                   if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
                      printf("Polynomial preconditioning - order = %d\n",polyOrder_);
                   HYPRE_LSI_PolySetOrder(HYPrecon_, polyOrder_);
-                  if ( HYPreconReuse_ == 1 )
+                  if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
                   {
                      HYPRE_ParCSRBiCGSSetPrecond(HYSolver_,HYPRE_LSI_PolySolve,
                                       HYPRE_DummyFunction, HYPrecon_);
@@ -5387,6 +5484,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   {
                      HYPRE_ParCSRBiCGSSetPrecond(HYSolver_,HYPRE_LSI_PolySolve,
                                       HYPRE_LSI_PolySetup, HYPrecon_);
+                     HYPreconSetup_ = 1;
                   }
                   break;
 
@@ -5409,8 +5507,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   {
                      HYPRE_ParCSRParaSailsSetLogging(HYPrecon_, 1);
                   }
-
-                  if ( HYPreconReuse_ == 1 )
+                  if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
                   {
                      HYPRE_ParCSRBiCGSSetPrecond(HYSolver_,
                                       HYPRE_ParCSRParaSailsSolve,
@@ -5421,6 +5518,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                      HYPRE_ParCSRBiCGSSetPrecond(HYSolver_,
                                       HYPRE_ParCSRParaSailsSolve,
                                       HYPRE_ParCSRParaSailsSetup, HYPrecon_);
+                     HYPreconSetup_ = 1;
                   }
                   break;
 
@@ -5454,7 +5552,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                      HYPRE_BoomerAMGSetDebugFlag(HYPrecon_, 0);
                      HYPRE_BoomerAMGSetIOutDat(HYPrecon_, 3);
                   }
-                  if ( HYPreconReuse_ == 1 )
+                  if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
                   {
                      HYPRE_ParCSRBiCGSSetPrecond(HYSolver_,
                          HYPRE_BoomerAMGSolve, HYPRE_DummyFunction, HYPrecon_);
@@ -5463,12 +5561,13 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   {
                      HYPRE_ParCSRBiCGSSetPrecond(HYSolver_, 
                          HYPRE_BoomerAMGSolve, HYPRE_BoomerAMGSetup, HYPrecon_);
+                     HYPreconSetup_ = 1;
                   }
                   break;
 
              case HYEUCLID :
                   HYPRE_ParCSREuclidSetParams(HYPrecon_,euclidargc_*2,euclidargv_);
-                  if ( HYPreconReuse_ == 1 )
+                  if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
                   {
                      HYPRE_ParCSRBiCGSSetPrecond(HYSolver_,
                                                  HYPRE_ParCSREuclidSolve,
@@ -5481,6 +5580,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                                                  HYPRE_ParCSREuclidSolve,
                                                  HYPRE_ParCSREuclidSetup, 
                                                  HYPrecon_);
+                     HYPreconSetup_ = 1;
                   }
                   break;
 
@@ -5496,7 +5596,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   HYPRE_ParCSRMLSetPreSmoother(HYPrecon_,mlPresmootherType_);
                   HYPRE_ParCSRMLSetPostSmoother(HYPrecon_,mlPostsmootherType_);
                   HYPRE_ParCSRMLSetDampingFactor(HYPrecon_, mlRelaxWeight_);
-                  if ( HYPreconReuse_ == 1 )
+                  if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
                   {
                      HYPRE_ParCSRBiCGSSetPrecond(HYSolver_,
                          HYPRE_ParCSRMLSolve, HYPRE_DummyFunction, HYPrecon_);
@@ -5505,8 +5605,8 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   {
                      HYPRE_ParCSRBiCGSSetPrecond(HYSolver_,
                          HYPRE_ParCSRMLSolve, HYPRE_ParCSRMLSetup, HYPrecon_);
+                     HYPreconSetup_ = 1;
                   }
-
                   if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
                   {
                      printf("ML strong threshold = %e\n", mlStrongThreshold_);
@@ -6999,15 +7099,16 @@ void HYPRE_LinSysCore::addToAConjProjectionSpace(HYPRE_IJVector xvec,
 
     if ( projectCurrSize_ >= projectSize_ )
     {
-       projectCurrSize_--;
-       tmpxvec = HYpxs_[0];
-       for ( i = 0; i < projectCurrSize_; i++ )
-       {
-          HYpxs_[i] = HYpxs_[i+1];
-          projectionMatrix_[0][i] = projectionMatrix_[0][i+1];
-       }
-       projectionMatrix_[0][projectSize_-1] = 0.0;
-       HYpxs_[projectCurrSize_] = tmpxvec;
+       //projectCurrSize_--;
+       //tmpxvec = HYpxs_[0];
+       //for ( i = 0; i < projectCurrSize_; i++ )
+       //{
+       //   HYpxs_[i] = HYpxs_[i+1];
+       //   projectionMatrix_[0][i] = projectionMatrix_[0][i+1];
+       //}
+       //projectionMatrix_[0][projectSize_-1] = 0.0;
+       //HYpxs_[projectCurrSize_] = tmpxvec;
+       projectCurrSize_ = 0;
     }
 
     //-----------------------------------------------------------------------
