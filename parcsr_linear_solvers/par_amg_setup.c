@@ -22,6 +22,8 @@ hypre_ParAMGSetup( void               *amg_vdata,
                    hypre_ParVector    *f,
                    hypre_ParVector    *u         )
 {
+   MPI_Comm 	      comm = hypre_ParCSRMatrixComm(A); 
+
    hypre_ParAMGData   *amg_data = amg_vdata;
 
    /* Data Structure variables */
@@ -51,6 +53,10 @@ hypre_ParAMGSetup( void               *amg_vdata,
    int       Setup_err_flag;
    int       coarse_threshold = 9;
    int       j;
+   int       num_procs,my_id;
+
+   MPI_Comm_size(comm, &num_procs);   
+   MPI_Comm_rank(comm,&my_id);
 
    max_levels = hypre_ParAMGDataMaxLevels(amg_data);
    amg_ioutdat = hypre_ParAMGDataIOutDat(amg_data);
@@ -164,14 +170,14 @@ hypre_ParAMGSetup( void               *amg_vdata,
    hypre_ParAMGDataFArray(amg_data) = F_array;
    hypre_ParAMGDataUArray(amg_data) = U_array;
 
-#if 0 /* add later */
    /*-----------------------------------------------------------------------
     * Print some stuff
     *-----------------------------------------------------------------------*/
 
    if (amg_ioutdat == 1 || amg_ioutdat == 3)
-      hypre_ParAMGSetupStats(amg_data);
+      hypre_ParAMGSetupStats(amg_data,A);
 
+#if 0 /* add later */
    if (amg_ioutdat == -3)
    {  
       char     fnam[255];

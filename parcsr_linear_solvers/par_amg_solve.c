@@ -26,6 +26,11 @@ hypre_ParAMGSolve( void               *amg_vdata,
                    hypre_ParVector    *f,
                    hypre_ParVector    *u         )
 {
+
+   MPI_Comm 	      comm = hypre_ParCSRMatrixComm(A);   
+   hypre_CommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
+   hypre_CommHandle  *comm_handle;
+
    hypre_ParAMGData   *amg_data = amg_vdata;
 
    /* Data Structure variables */
@@ -52,6 +57,7 @@ hypre_ParAMGSolve( void               *amg_vdata,
    int      cycle_count;
    int      total_coeffs;
    int      total_variables;
+   int      num_procs, my_id;
 
    double   alpha = 1.0;
    double   beta = -1.0;
@@ -66,6 +72,9 @@ hypre_ParAMGSolve( void               *amg_vdata,
    double   old_resid;
 
    hypre_ParVector  *Vtemp;
+
+   MPI_Comm_size(comm, &num_procs);   
+   MPI_Comm_rank(comm,&my_id);
 
    amg_ioutdat   = hypre_ParAMGDataIOutDat(amg_data);
    file_name     = hypre_ParAMGDataLogFileName(amg_data);
@@ -104,9 +113,9 @@ hypre_ParAMGSolve( void               *amg_vdata,
     *    Write the solver parameters
     *-----------------------------------------------------------------------*/
 
-#if 0 /* not yet implemented */
-   if (amg_ioutdat > 1)
-      hypre_WriteSolverParams(amg_data); 
+#if 1 /* not yet implemented */
+   if (my_id == 0 && amg_ioutdat > 1)
+      hypre_WriteParAMGSolverParams(amg_data); 
 #endif
 
 
@@ -126,7 +135,7 @@ hypre_ParAMGSolve( void               *amg_vdata,
     *     open the log file and write some initial info
     *-----------------------------------------------------------------------*/
 
-   if (amg_ioutdat >= 0)
+   if (my_id == 0 && amg_ioutdat >= 0)
    { 
       fp = fopen(file_name, "a");
 
@@ -150,7 +159,7 @@ hypre_ParAMGSolve( void               *amg_vdata,
       relative_resid = resid_nrm_init / rhs_norm;
    }
 
-   if (amg_ioutdat == 1 || amg_ioutdat == 3)
+   if (my_id ==0 && (amg_ioutdat == 1 || amg_ioutdat == 3))
    {     
       fprintf(fp,"                                            relative\n");
       fprintf(fp,"               residual        factor       residual\n");
@@ -190,7 +199,7 @@ hypre_ParAMGSolve( void               *amg_vdata,
 
       ++cycle_count;
 
-      if (amg_ioutdat == 1 || amg_ioutdat == 3)
+      if (my_id == 0 && (amg_ioutdat == 1 || amg_ioutdat == 3))
       { 
          fprintf(fp,"    Cycle %2d   %e    %f     %e \n", cycle_count,
                  resid_nrm, conv_factor, relative_resid);
@@ -218,7 +227,7 @@ hypre_ParAMGSolve( void               *amg_vdata,
    operat_cmplxty = ((double) total_coeffs) / ((double) num_coeffs[0]);
    cycle_cmplxty = ((double) cycle_op_count) / ((double) num_coeffs[0]);
 
-   if (amg_ioutdat >= 0)
+   if (my_id == 0 && amg_ioutdat >= 0)
    {
       if (Solve_err_flag == 1)
       {
@@ -237,7 +246,7 @@ hypre_ParAMGSolve( void               *amg_vdata,
     * Close the output file (if open)
     *----------------------------------------------------------*/
 
-   if (amg_ioutdat >= 0)
+   if (my_id == 0 && amg_ioutdat >= 0)
    { 
       fclose(fp); 
    }
