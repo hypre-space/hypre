@@ -998,7 +998,7 @@ main( int   argc,
       HYPRE_StructGMRESCreate(MPI_COMM_WORLD, &solver);
       HYPRE_GMRESSetMaxIter( (HYPRE_Solver)solver, 50 );
       HYPRE_GMRESSetTol( (HYPRE_Solver)solver, 1.0e-06 );
-      HYPRE_GMRESSetRelChange( (HYPRE_Solver)solver, 1 );
+      HYPRE_GMRESSetRelChange( (HYPRE_Solver)solver, 0 );
       HYPRE_GMRESSetLogging( (HYPRE_Solver)solver, 1 );
 
       if (solver_id == 30)
