@@ -7,6 +7,7 @@
 # $Revision$
 #EHEADER***********************************************************************
 
+default: lib
 
 .SUFFIXES:
 .SUFFIXES: .c .f .o
@@ -35,6 +36,11 @@ include ../bmakes/base
 # Main rules
 ##################################################################
 
+lib: $(PROTOS) ${OBJS}
+	@echo  "Building $@ ... "
+	@ar -ru libHYPRE_CI_ls.a ${OBJS}
+	@ranlib libHYPRE_CI_ls.a
+
 driver: driver.o libHYPRE.a
 	@echo  "Linking" $@ "... "
 	${CC} -o driver driver.o ${LFLAGS}
@@ -42,11 +48,6 @@ driver: driver.o libHYPRE.a
 link:
 	rm driver
 	make driver
-
-lib: $(PROTOS) ${OBJS}
-	@echo  "Building $@ ... "
-	@ar -ru libHYPRE_StructSolver.a ${OBJS}
-	@ranlib libHYPRE_StructSolver.a
 
 ${OBJS}: ${HEADERS}
 
