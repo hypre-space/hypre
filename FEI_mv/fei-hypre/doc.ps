@@ -7,7 +7,7 @@
 %%EndComments
 %DVIPSCommandLine: dvips -o doc.ps doc.dvi
 %DVIPSParameters: dpi=600, compressed
-%DVIPSSource:  TeX output 2000.05.11:1350
+%DVIPSSource:  TeX output 2000.05.24:1223
 %%BeginProcSet: texc.pro
 %!
 /TeXDict 300 dict def TeXDict begin /N{def}def /B{bind def}N /S{exch}N
@@ -935,55 +935,60 @@ b(Users)27 b(who)g(w)m(ould)f(lik)m(e)g(to)i(set)g(up)e(the)h
 (HYPRE/FEI)h(on)f(their)f(o)m(wn)h(should)f(do)h(the)88
 677 y(follo)m(wing)i(\(if)h(either)g(the)g(Sup)s(erLU)f(or)h(ML)g(pac)m
 (k)-5 b(age)33 b(is)c(desired,)g(a)i(few)f(mo)s(di\014cations)f(ha)m(v)
-m(e)i(to)g(b)s(e)f(done\))h(:)199 886 y(1.)47 b(obtain)29
-b(the)i(HYPRE)f(and)g(FEI)g(source)h(co)s(des,)199 1073
+m(e)i(to)g(b)s(e)f(done\))h(:)199 856 y(1.)47 b(obtain)29
+b(the)i(HYPRE)f(and)g(FEI)g(source)h(co)s(des,)199 1033
 y(2.)47 b(go)31 b(in)m(to)f(the)h(FEI)f(directory)354
-1259 y(\(a\))47 b(mo)s(dify)29 b(the)i Ff(Mak)m(e\014le)h
+1210 y(\(a\))47 b(mo)s(dify)29 b(the)i Ff(Mak)m(e\014le)h
 Fg(to)g(add)f(a)g(new)g(install)e(option)i Ff(fei-HYPRE)g
 Fg(with)f(the)h(follo)m(wing)f(t)m(w)m(o)j(lines)516
-1372 y(\(ma)m(yb)s(e)d(with)f(a)i(few)f(other)h Ff(echo)g
-Fg(statemen)m(ts\))i(:)595 1517 y Fe(\017)46 b Ff(cd)30
-b(base;)h(mak)m(e)595 1646 y Fe(\017)46 b Ff(a)m(r)30
-b(rs)g(libFEI)p 1111 1646 28 4 v 33 w(BASE.a)f(base/*.o)349
-1791 y Fg(\(b\))46 b(mo)s(dify)28 b(the)j Ff(mak)m(e.options)h
+1322 y(\(ma)m(yb)s(e)d(with)f(a)i(few)f(other)h Ff(echo)g
+Fg(statemen)m(ts\))i(:)595 1457 y Fe(\017)46 b Ff(cd)30
+b(base;)h(mak)m(e)595 1581 y Fe(\017)46 b Ff(a)m(r)30
+b(rs)g(libFEI)p 1111 1581 28 4 v 33 w(BASE.a)f(base/*.o)349
+1716 y Fg(\(b\))46 b(mo)s(dify)28 b(the)j Ff(mak)m(e.options)h
 Fg(\014le)d(to)i(use)f(the)h(appropriate)e(compilers)359
-1936 y(\(c\))47 b(do)30 b(a)h Ff(mak)m(e)p Fg(,)g(whic)m(h)e(will)f
-(create)k(the)f Ff(libFEI)p 2055 1936 V 32 w(BASE.a)e
-Fg(\014le)349 2081 y(\(d\))46 b(cop)m(y)31 b(the)f Ff(libFEI)p
-1111 2081 V 33 w(BASE.a)f Fg(\014le)g(in)m(to)i(y)m(our)f(o)m(wn)g
-Ff(lib)g Fg(directory)359 2226 y(\(e\))47 b(cop)m(y)25
+1851 y(\(c\))47 b(go)32 b(in)m(to)g(the)f Ff(base)h Fg(directory)-8
+b(,)32 b(mo)s(dify)e(the)h Ff(BASE)p 2281 1851 V 32 w(FEI.C)h
+Fg(\014le)f Ff(iterateT)-8 b(oSolve)32 b Fg(function)e(b)m(y)i(sw)m
+(ap-)516 1964 y(ping)d(the)h(t)m(w)m(o)i(function)d(calls)g
+Ff(matrixLoadComplete)j Fg(and)d Ff(implementAllBCs)p
+Fg(.)349 2099 y(\(d\))46 b(do)30 b(a)h Ff(mak)m(e)p Fg(,)g(whic)m(h)e
+(will)f(create)k(the)f Ff(libFEI)p 2055 2099 V 32 w(BASE.a)e
+Fg(\014le)359 2234 y(\(e\))47 b(cop)m(y)31 b(the)f Ff(libFEI)p
+1111 2234 V 33 w(BASE.a)f Fg(\014le)g(in)m(to)i(y)m(our)f(o)m(wn)g
+Ff(lib)g Fg(directory)365 2369 y(\(f)7 b(\))46 b(cop)m(y)25
 b(the)g(follo)m(wing)f(include)e(\014les)i(from)h(the)g(FEI)g
 Ff(base)g Fg(directory)f(to)i(y)m(our)e(o)m(wn)h Ff(include)g
-Fg(directory)516 2339 y(:)40 b Ff(cfei.h)p Fg(,)31 b
-Ff(basicT)-8 b(yp)s(es.h)199 2525 y Fg(3.)47 b(go)31
-b(in)m(to)f(the)h Ff(linea)m(r)p 986 2525 V 32 w(solvers)g
-Fg(directory)354 2712 y(\(a\))47 b(issue)28 b(a)j Ff(con\014gure)g
+Fg(directory)516 2482 y(:)40 b Ff(cfei.h)p Fg(,)31 b
+Ff(basicT)-8 b(yp)s(es.h)199 2659 y Fg(3.)47 b(go)31
+b(in)m(to)f(the)h Ff(linea)m(r)p 986 2659 V 32 w(solvers)g
+Fg(directory)354 2835 y(\(a\))47 b(issue)28 b(a)j Ff(con\014gure)g
 Fg(\(with)e(options)g(lik)m(e)g(whic)m(h)g(C)g(compiler)f(to)j(use)f
-(and)f(where)g(the)h(MPI)g(include)516 2825 y(and)f(library)f
-(directories)i(are\))349 2969 y(\(b\))46 b(do)35 b(a)i
+(and)f(where)g(the)h(MPI)g(include)516 2948 y(and)f(library)f
+(directories)i(are\))349 3083 y(\(b\))46 b(do)35 b(a)i
 Ff(mak)m(e)g(fei)f Fg(to)h(mak)m(e)f(the)h(HYPRE)f(LinearSystemCore)f
 (library)e(\014le,)k(after)f(whic)m(h)f(the)h Ff(lib-)516
-3082 y(HYPRE)p 817 3082 V 32 w(LSI.a)31 b Fg(\014le)e(can)i(b)s(e)f
-(found)f(in)g(the)h Ff(linea)m(r)p 2231 3082 V 33 w(solvers/hyp)m
-(re/lib)i Fg(directory)359 3227 y(\(c\))47 b(cop)m(y)31
-b(the)f Ff(libHYPRE)p 1276 3227 V 32 w(LSI.a)h Fg(\014le)e(in)m(to)i(y)
-m(our)f(o)m(wn)g Ff(lib)g Fg(directory)349 3372 y(\(d\))46
+3196 y(HYPRE)p 817 3196 V 32 w(LSI.a)31 b Fg(\014le)e(can)i(b)s(e)f
+(found)f(in)g(the)h Ff(linea)m(r)p 2231 3196 V 33 w(solvers/hyp)m
+(re/lib)i Fg(directory)359 3331 y(\(c\))47 b(cop)m(y)31
+b(the)f Ff(libHYPRE)p 1276 3331 V 32 w(LSI.a)h Fg(\014le)e(in)m(to)i(y)
+m(our)f(o)m(wn)g Ff(lib)g Fg(directory)349 3466 y(\(d\))46
 b(cop)m(y)34 b(the)g(follo)m(wing)e(include)f(\014les)i(from)g(the)h
-Ff(linea)m(r)p 2366 3372 V 33 w(solvers/FEI)p 2825 3372
-V 34 w(matrix)p 3103 3372 V 32 w(vecto)m(r/fei-hyp)m(re)i
-Fg(direc-)516 3485 y(tory)30 b(to)h(y)m(our)g(o)m(wn)f
-Ff(include)h Fg(directory)e(:)41 b Ff(cfei)p 2101 3485
+Ff(linea)m(r)p 2366 3466 V 33 w(solvers/FEI)p 2825 3466
+V 34 w(matrix)p 3103 3466 V 32 w(vecto)m(r/fei-hyp)m(re)i
+Fg(direc-)516 3579 y(tory)30 b(to)h(y)m(our)g(o)m(wn)f
+Ff(include)h Fg(directory)e(:)41 b Ff(cfei)p 2101 3579
 V 33 w(hyp)m(re.h)p Fg(,)32 b Ff(cfei-hyp)m(re.h)229
-3694 y Fg(A)c(\014nal)e(touc)m(h)h(will)e(b)s(e)i(to)h(mak)m(e)g(sure)e
+3758 y Fg(A)c(\014nal)e(touc)m(h)h(will)e(b)s(e)i(to)h(mak)m(e)g(sure)e
 (y)m(our)h(application)f(has)h(an)g Ff(include)g Fg(and)g(an)g
-Ff(lib)g Fg(path)f(to)i(the)g Ff(include)88 3807 y Fg(and)i
+Ff(lib)g Fg(path)f(to)i(the)g Ff(include)88 3871 y Fg(and)i
 Ff(lib)g Fg(directories)f(created)j(ab)s(o)m(v)m(e.)88
-4050 y Fd(3.1)113 b(Linking)36 b(with)h(the)g(library)f(\014les)88
-4222 y Fg(T)-8 b(o)44 b(link)d(FEI)i(and)f(HYPRE)h(in)m(to)g(the)h
+4110 y Fd(3.1)113 b(Linking)36 b(with)h(the)g(library)f(\014les)88
+4281 y Fg(T)-8 b(o)44 b(link)d(FEI)i(and)f(HYPRE)h(in)m(to)g(the)h
 (executable,)j(the)c(follo)m(wing)f(has)g(to)i(b)s(e)f(attac)m(hed)i
-(to)e(the)h(linking)88 4335 y(command)30 b(:)419 4544
+(to)e(the)h(linking)88 4394 y(command)30 b(:)419 4573
 y Ff(-L$)p Fe(f)p Ff(LIBP)-8 b(A)g(TH)p Fe(g)33 b Ff(-lFEI)p
-1218 4544 V 33 w(BASE)c(-lHYPRE)p 1855 4544 V 33 w(LSI)88
+1218 4573 V 33 w(BASE)c(-lHYPRE)p 1855 4573 V 33 w(LSI)88
 4753 y Fg(along)f(with)f(all)g(the)h(other)g(libraries,)e(where)i
 Ff(LIBP)-8 b(A)g(TH)28 b Fg(is)g(where)f(y)m(ou)h(store)h(the)f(HYPRE)g
 (and)f(FEI)h(librara)m(y)88 4866 y(\014les.)229 4978
@@ -1055,32 +1060,31 @@ g(a)i(\014le\),)h(and)d Ff(ddilut)g Fg(\(output)316 3216
 y(diagnostic)29 b(information)g(for)h(DDIlut)g(preconditioner)f
 (setup\).)88 3403 y Fb(sc)m(h)m(urReduction)48 b Fg(-)30
 b(turns)g(on)g(the)g(Sc)m(h)m(ur)g(reduction)g(mo)s(de.)88
-3591 y Fb(nConstrain)m(ts)35 b(xxx)46 b Fg(-)29 b(turns)e(on)h(the)h
-(slide)e(reduction)g(mo)s(de)h(giv)m(en)h(xxx)f(as)h(the)g(n)m(um)m(b)s
-(er)e(of)i(constrain)m(ts)f(in)316 3704 y(the)i(lo)s(cal)g(pro)s
-(cessor.)88 3892 y Fb(solv)m(er)36 b(xxx)46 b Fg(-)31
-b(where)e(xxx)i(sp)s(eci\014es)e(one)h(of)h Ff(cg)p Fg(,)g
-Ff(gmres)p Fg(,)h Ff(sup)s(erlu)p Fg(,)e(or)g Ff(sup)s(erlux)p
-Fg(.)40 b(The)30 b(default)g(is)f Ff(gmres)p Fg(.)88
-4079 y Fb(gmresDim)34 b(xxx)46 b Fg(-)27 b(where)f(xxx)h(is)f(an)g(in)m
-(teger)h(sp)s(ecifying)e(the)i(v)-5 b(alue)26 b(of)h(m)f(in)f
-(restarted)j(GMRES\(m\).)39 b(The)316 4192 y(default)29
-b(v)-5 b(alue)30 b(is)f(100.)88 4380 y Fb(maxItxxx)45
-b Fg(-)32 b(where)g(xxx)g(is)f(an)h(in)m(teger)h(sp)s(ecifying)d(the)i
-(maxim)m(um)f(n)m(um)m(b)s(er)g(of)i(iterations)e(p)s(ermitted)g(for)
-316 4493 y(CG)f(or)g(GMRES.)h(The)f(default)f(v)-5 b(alue)30
-b(is)f(1000.)88 4680 y Fb(tolerance)35 b(xxx)46 b Fg(-)28
-b(where)f(xxx)g(is)f(a)i(\015oating)f(p)s(oin)m(t)f(n)m(um)m(b)s(er)g
-(sp)s(ecifying)f(the)j(termination)e(criterion)g(for)h(CG)316
-4793 y(or)j(GMRES.)g(The)g(default)g(v)-5 b(alue)30 b(is)f(1.0E-6.)88
-4981 y Fb(preconditioner)36 b(xxx)46 b Fg(-)38 b(where)e(xxx)h(is)f
-(one)i(of)f Ff(diagonal)p Fg(,)i Ff(pilut)p Fg(,)f Ff(pa)m(rasails)p
-Fg(,)g Ff(b)s(o)s(omeramg)p Fg(,)i(or)d Ff(ddilut)p Fg(.)60
-b(The)316 5094 y(default)37 b(is)h Ff(diagonal)p Fg(.)65
-b(Another)38 b(option)g(for)h(xxx)f(is)g Ff(reuse)h Fg(whic)m(h)e(allo)
-m(ws)h(the)h(preconditioner)d(to)k(b)s(e)316 5207 y(reused)29
-b(\(this)h(is)f(to)i(b)s(e)f(set)h(after)g(a)g(preconditioner)d(has)i
-(b)s(een)g(set)h(up)e(already\).)2014 5566 y(3)p eop
+3591 y Fb(slideReduction)47 b Fg(-)31 b(turns)e(on)h(the)h(slide)d
+(reduction)i(mo)s(de.)88 3779 y Fb(solv)m(er)36 b(xxx)46
+b Fg(-)31 b(where)e(xxx)i(sp)s(eci\014es)e(one)h(of)h
+Ff(cg)p Fg(,)g Ff(gmres)p Fg(,)h Ff(sup)s(erlu)p Fg(,)e(or)g
+Ff(sup)s(erlux)p Fg(.)40 b(The)30 b(default)g(is)f Ff(gmres)p
+Fg(.)88 3966 y Fb(gmresDim)34 b(xxx)46 b Fg(-)27 b(where)f(xxx)h(is)f
+(an)g(in)m(teger)h(sp)s(ecifying)e(the)i(v)-5 b(alue)26
+b(of)h(m)f(in)f(restarted)j(GMRES\(m\).)39 b(The)316
+4079 y(default)29 b(v)-5 b(alue)30 b(is)f(100.)88 4267
+y Fb(maxIterations)34 b(xxx)46 b Fg(-)30 b(where)g(xxx)g(is)f(an)h(in)m
+(teger)g(sp)s(ecifying)e(the)j(maxim)m(um)e(n)m(um)m(b)s(er)g(of)h
+(iterations)g(p)s(er-)316 4380 y(mitted)g(for)g(CG)g(or)g(GMRES.)h(The)
+f(default)f(v)-5 b(alue)30 b(is)g(1000.)88 4567 y Fb(tolerance)35
+b(xxx)46 b Fg(-)28 b(where)f(xxx)g(is)f(a)i(\015oating)f(p)s(oin)m(t)f
+(n)m(um)m(b)s(er)g(sp)s(ecifying)f(the)j(termination)e(criterion)g(for)
+h(CG)316 4680 y(or)j(GMRES.)g(The)g(default)g(v)-5 b(alue)30
+b(is)f(1.0E-6.)88 4868 y Fb(preconditioner)36 b(xxx)46
+b Fg(-)38 b(where)e(xxx)h(is)f(one)i(of)f Ff(diagonal)p
+Fg(,)i Ff(pilut)p Fg(,)f Ff(pa)m(rasails)p Fg(,)g Ff(b)s(o)s(omeramg)p
+Fg(,)i(or)d Ff(ddilut)p Fg(.)60 b(The)316 4981 y(default)37
+b(is)h Ff(diagonal)p Fg(.)65 b(Another)38 b(option)g(for)h(xxx)f(is)g
+Ff(reuse)h Fg(whic)m(h)e(allo)m(ws)h(the)h(preconditioner)d(to)k(b)s(e)
+316 5094 y(reused)29 b(\(this)h(is)f(to)i(b)s(e)f(set)h(after)g(a)g
+(preconditioner)d(has)i(b)s(een)g(set)h(up)e(already\).)2014
+5566 y(3)p eop
 %%Page: 4 4
 4 3 bop 88 23 a Fb(pilutRo)m(wSize)36 b(xxx)46 b Fg(-)35
 b(where)f(xxx)h(is)e(an)i(in)m(teger)g(sp)s(ecifying)e(the)i(maxim)m
