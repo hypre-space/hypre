@@ -394,8 +394,8 @@ HYPRE_BoomerAMGSetSmoothNumSweep( HYPRE_Solver  solver,
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_BoomerAMGSetPrintlevel( HYPRE_Solver solver,
-                        int          print_level  )
+HYPRE_BoomerAMGSetPrintLevel( HYPRE_Solver solver,
+                              int          print_level  )
 {
    return( hypre_BoomerAMGSetPrintLevel( (void *) solver, print_level ) );
 }
