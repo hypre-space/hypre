@@ -161,6 +161,8 @@ int HYPRE_PETScSolverParILUTSetup( HYPRE_PETScSolverParILUT in_ptr,
 
    ierr = SLESGetKSP(sles,&ksp); CHKERRA(ierr);
 
+   ierr = KSPSetMonitor(ksp,KSPDefaultSMonitor,(void *)0);CHKERRQ(ierr);
+
    ierr = SLESGetPC(sles,&pc); CHKERRA(ierr);
 
    ierr = PCGetOperators( pc, &SystemMatrix, &PreconditionerMatrix, &MatStructureFlag ); 

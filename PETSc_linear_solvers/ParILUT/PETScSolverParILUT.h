@@ -33,7 +33,7 @@
 
 /* type and prototype declarations for object used in this implementation */
 #include "HYPRE_PETScMatPilutSolver_types.h"
-#include "HYPRE_PETScMatPilutSolver_protos.h
+#include "HYPRE_PETScMatPilutSolver_protos.h"
 
 
 /* type definition for member SlesOwner in ParILUTData structure */

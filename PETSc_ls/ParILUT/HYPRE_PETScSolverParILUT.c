@@ -213,9 +213,13 @@ int HYPRE_PETScSolverParILUTSolve( HYPRE_PETScSolverParILUT in_ptr,
       (hypre_PETScSolverParILUT *) in_ptr;
 
 
+   ierr = SLESView (hypre_PETScSolverParILUTSles( solver ), 
+                     VIEWER_STDOUT_SELF); CHKERRA(idumb);
+
    ierr = SLESSolve(
        hypre_PETScSolverParILUTSles( solver ), b, x, 
        &(hypre_PETScSolverParILUTNumIts(solver)) );
+
 
    return(ierr);
 }
