@@ -15,6 +15,7 @@ CFLAGS =\
  -I../IJ_matrix_vector\
  -I../seq_matrix_vector\
  -I../parcsr_matrix_vector\
+ -I../parcsr_linear_solvers\
  -I../CI_struct_matrix_vector\
  ${CINCLUDES}\
  ${CDEFS}
@@ -58,6 +59,41 @@ libHYPRE_structIJ_mv.a: ${OBJS}
 	${RANLIB} $@
 
 ${OBJS}: ${HEADERS}
+
+##################################################################
+# Rules for test driver
+##################################################################
+
+MPILIBFLAGS = @MPILIBDIRS@ @MPILIBS@ @MPIFLAGS@ 
+LIBFLAGS = @LIBDIRS@ @LIBS@
+LDLIBFLAGS = @LDLIBDIRS@ @LDLIBS@
+BLASLIBFLAGS =  @BLASLIBFLAGS@
+X11_LIB      = -L/usr/openwin/lib -lX11
+PETSCLIBFLAGS = @PETSCLIBDIRS@ @PETSCLIBS@ ${X11_LIB}
+
+LFLAGS =\
+ -L.\
+ -L../hypre/lib\
+ -L../CI_struct_matrix_vector\
+ -lHYPRE_structIJ_mv \
+ -lHYPRE_CI_mv \
+ -lHYPRE_ls\
+ -lHYPRE_mv\
+ -lHYPRE_parcsr_ls\
+ -lHYPRE_DistributedMatrixPilutSolver \
+ -lHYPRE_ParaSails \
+ -lHYPRE_MatrixMatrix \
+ -lHYPRE_DistributedMatrix \
+ -lHYPRE_IJ_mv\
+ -lHYPRE_parcsr_mv\
+ -lHYPRE_seq_mv\
+ -lHYPRE_utilities\
+ ${PETSCLIBFLAGS} \
+ ${BLASLIBFLAGS} \
+ ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
+
+driver: driver.o
+	${CC} -o driver driver.o ${LFLAGS}
 
 ##################################################################
 # Generic rules
