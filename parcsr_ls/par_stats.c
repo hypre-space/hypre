@@ -397,7 +397,7 @@ hypre_ParAMGSetupStats( void               *amg_vdata,
        }
    }
        
-   printf("\n\n");
+   if (my_id == 0) printf("\n\n");
 
    hypre_TFree(send_buff);
    hypre_TFree(gather_buff);
