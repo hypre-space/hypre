@@ -57,7 +57,8 @@ then
     if [ -s "${i}.err" ]
     then
 	RECIPIENTS=`cat ${i}.email`
-	$HYPRE_MAIL -s "Error(s) in ${i} test suite" $RECIPIENTS < ${i}.err
+        SUBJECT="Error(s) in ${i} test suite ($HYPRE_ARCH)"
+	$HYPRE_MAIL -s "$SUBJECT" $RECIPIENTS < ${i}.err
     fi
     done
 fi
