@@ -54,6 +54,19 @@ int HYPRE_ParCSRPCGGetFinalRelativeResidualNorm P((HYPRE_Solver solver , double 
 int HYPRE_ParCSRDiagScaleSetup P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector y , HYPRE_ParVector x ));
 int HYPRE_ParCSRDiagScale P((HYPRE_Solver solver , HYPRE_ParCSRMatrix HA , HYPRE_ParVector Hy , HYPRE_ParVector Hx ));
  
+/* HYPRE_parcsr_gmres.c */
+int HYPRE_ParCSRGMRESInitialize P((MPI_Comm comm , HYPRE_Solver *solver ));
+int HYPRE_ParCSRGMRESFinalize P((HYPRE_Solver solver ));
+int HYPRE_ParCSRGMRESSetup P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x ));
+int HYPRE_ParCSRGMRESSolve P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x ));
+int HYPRE_ParCSRGMRESSetKDim P((HYPRE_Solver solver , int k_dim ));
+int HYPRE_ParCSRGMRESSetTol P((HYPRE_Solver solver , double tol ));
+int HYPRE_ParCSRGMRESSetMaxIter P((HYPRE_Solver solver , int max_iter ));
+int HYPRE_ParCSRGMRESSetPrecond P((HYPRE_Solver solver , int (*precond )(), int (*precond_setup )(), void *precond_data ));
+int HYPRE_ParCSRGMRESSetLogging P((HYPRE_Solver solver , int logging ));
+int HYPRE_ParCSRGMRESGetNumIterations P((HYPRE_Solver solver , int *num_iterations));
+int HYPRE_ParCSRGMRESGetFinalRelativeResidualNorm P((HYPRE_Solver solver , double *norm ));
+
 /* driver.c */
 int main P((int argc , char *argv []));
 int BuildParFromFile P((int argc , char *argv [], int arg_index , hypre_ParCSRMatrix **A_ptr ));
@@ -66,6 +79,19 @@ int main P((int argc , char *argv []));
 
 /* driver_rap.c */
 int main P((int argc , char *argv []));
+
+/* gmres.c */
+void *hypre_GMRESInitialize P((void ));
+int hypre_GMRESFinalize P((void *gmres_vdata ));
+int hypre_GMRESSetup P((void *gmres_vdata , void *A , void *b , void *x ));
+int hypre_GMRESSolve P((void *gmres_vdata , void *A , void *b , void *x ));
+int hypre_GMRESSetKDim P((void *gmres_vdata , int k_diM ));
+int hypre_GMRESSetTol P((void *gmres_vdata , double tol ));
+int hypre_GMRESSetMaxIter P((void *gmres_vdata , int max_iter ));
+int hypre_GMRESSetPrecond P((void *gmres_vdata , int (*precond )(), int (*precond_setup )(), void *precond_data ));
+int hypre_GMRESSetLogging P((void *gmres_vdata , int logging ));
+int hypre_GMRESGetNumIterations P((void *gmres_vdata , int *num_iterations ));
+int hypre_GMRESGetFinalRelativeResidualNorm P((void *gmres_vdata , double *relative_residual_norm ));
 
 /* par_amg.c */
 void *hypre_ParAMGInitialize P((void ));
@@ -158,6 +184,7 @@ int hypre_PCGGetFinalRelativeResidualNorm P((void *pcg_vdata , double *relative_
 char *hypre_PCGCAlloc P((int count , int elt_size ));
 int hypre_PCGFree P((char *ptr ));
 void *hypre_PCGNewVector P((void *vvector ));
+void *hypre_PCGNewVectorArray P((int n, void *vvector ));
 int hypre_PCGFreeVector P((void *vvector ));
 void *hypre_PCGMatvecInitialize P((void *A , void *x ));
 int hypre_PCGMatvec P((void *matvec_data , double alpha , void *A , void *x , double beta , void *y ));
