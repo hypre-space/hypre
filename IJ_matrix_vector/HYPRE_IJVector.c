@@ -707,6 +707,28 @@ HYPRE_GetIJVectorLocalStorageType( HYPRE_IJVector IJvector, int *type )
    return(ierr);
 }
 
+/*--------------------------------------------------------------------------
+ * HYPRE_GetIJVectorLocalStorage
+ *--------------------------------------------------------------------------*/
+
+/**
+Returns a pointer to an underlying vector type used to implement IJVector.
+Assumes that the implementation has an underlying vector, so it would not
+work with a direct implementation of IJVector. 
+
+@return integer error code
+@param IJVector [IN]
+The vector to be pointed to.
+*/
+
+void *
+HYPRE_GetIJVectorLocalStorage( HYPRE_IJVector IJvector )
+{
+   hypre_IJVector *vector = (hypre_IJVector *) IJvector;
+
+   return( hypre_IJVectorLocalStorage(vector) );
+}
+
 /*********************************************************************************/
 /* The following are routines that are not generally used by or supported for users */
 
@@ -736,26 +758,4 @@ hypre_RefIJVector( HYPRE_IJVector IJvector, HYPRE_IJVector *reference )
    *reference = IJvector;
 
    return(ierr);
-}
-
-/*--------------------------------------------------------------------------
- * hypre_GetIJVectorLocalStorage
- *--------------------------------------------------------------------------*/
-
-/**
-Returns a pointer to an underlying vector type used to implement IJVector.
-Assumes that the implementation has an underlying vector, so it would not
-work with a direct implementation of IJVector. 
-
-@return integer error code
-@param IJVector [IN]
-The vector to be pointed to.
-*/
-
-void *
-hypre_GetIJVectorLocalStorage( HYPRE_IJVector IJvector )
-{
-   hypre_IJVector *vector = (hypre_IJVector *) IJvector;
-
-   return( hypre_IJVectorLocalStorage(vector) );
 }
