@@ -96,6 +96,11 @@ hypre_AMGSetup( void            *amg_vdata,
 	 hypre_AMGCoarsenRuge(A_array[level], strong_threshold,
                        &S, &CF_marker, &coarse_size); 
       }
+      else if (coarsen_type == 2)
+      {
+	 hypre_AMGCoarsenRugeLoL(A_array[level], strong_threshold,
+                       &S, &CF_marker, &coarse_size); 
+      }
       else
       {
          hypre_AMGCoarsen(A_array[level], strong_threshold,
@@ -113,6 +118,11 @@ hypre_AMGSetup( void            *amg_vdata,
 
       hypre_AMGBuildInterp(A_array[level], CF_marker_array[level], S, &P);
       P_array[level] = P; 
+
+      if (amg_ioutdat == 5 && level == 0)
+      {
+         hypre_PrintCSRMatrix(S,"S_mat");
+      }
       hypre_DestroyCSRMatrix(S);
  
       /*-------------------------------------------------------------
