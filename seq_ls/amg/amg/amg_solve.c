@@ -94,14 +94,13 @@ void        *data;
    F_array[0] = f;
    U_array[0] = u;
 
-
    for (j = 1; j < num_levels; j++)
    {
        F_array[j] = NewVector(&(f->data[levv[j]-1]), num_variables[j]);
        U_array[j] = NewVector(&(u->data[levv[j]-1]), num_variables[j]);
    }
 
-/**************  The following doesn't seem to work right yet 
+/*********  the following does not work at this time 
 
    for (j = 1; j < num_levels; j++)
    {
@@ -111,8 +110,9 @@ void        *data;
        tmpvec = ctalloc(double, num_variables[j]);
        U_array[j] = NewVector(tmpvec, num_variables[j]);
    }
-**************/
-   
+
+*************/ 
+  
 
 /*--------------------------------------------------------------------------
  *    Write the solver parameters
