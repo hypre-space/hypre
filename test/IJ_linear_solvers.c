@@ -97,7 +97,7 @@ main( int   argc,
    int    **grid_relax_points;
    int      relax_default;
    double  *relax_weight; 
-   double   tol = 1.0e-6;
+   double   tol = 1.0e-6, pc_tol = 0.;
 
    /* parameters for PILUT */
    double   drop_tol = -1;
@@ -896,6 +896,7 @@ main( int   argc,
          /* use BoomerAMG as preconditioner */
          if (myid == 0) printf("Solver: AMG-PCG\n");
          HYPRE_BoomerAMGCreate(&pcg_precond); 
+         HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);
          HYPRE_BoomerAMGSetCoarsenType(pcg_precond, (hybrid*coarsen_type));
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
@@ -947,7 +948,8 @@ main( int   argc,
         return(-1);
       }
       else 
-        printf("HYPRE_ParCSRPCGGetPrecond got good precond\n");
+        if (myid == 0)
+          printf("HYPRE_ParCSRPCGGetPrecond got good precond\n");
       HYPRE_ParCSRPCGSetup(pcg_solver, A, b, x);
  
       hypre_EndTiming(time_index);
@@ -1007,7 +1009,7 @@ main( int   argc,
  
       HYPRE_ParCSRGMRESCreate(MPI_COMM_WORLD, &pcg_solver);
       HYPRE_ParCSRGMRESSetKDim(pcg_solver, k_dim);
-      HYPRE_ParCSRGMRESSetMaxIter(pcg_solver, 100);
+      HYPRE_ParCSRGMRESSetMaxIter(pcg_solver, 1000);
       HYPRE_ParCSRGMRESSetTol(pcg_solver, tol);
       HYPRE_ParCSRGMRESSetLogging(pcg_solver, 1);
  
@@ -1017,6 +1019,7 @@ main( int   argc,
          if (myid == 0) printf("Solver: AMG-GMRES\n");
 
          HYPRE_BoomerAMGCreate(&pcg_precond); 
+         HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);
          HYPRE_BoomerAMGSetCoarsenType(pcg_precond, (hybrid*coarsen_type));
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
@@ -1091,7 +1094,8 @@ main( int   argc,
         return(-1);
       }
       else
-        printf("HYPRE_ParCSRGMRESGetPrecond got good precond\n");
+        if (myid == 0)
+          printf("HYPRE_ParCSRGMRESGetPrecond got good precond\n");
       HYPRE_ParCSRGMRESSetup(pcg_solver, A, b, x);
  
       hypre_EndTiming(time_index);
@@ -1152,7 +1156,7 @@ main( int   argc,
       hypre_BeginTiming(time_index);
  
       HYPRE_ParCSRBiCGSTABCreate(MPI_COMM_WORLD, &pcg_solver);
-      HYPRE_ParCSRBiCGSTABSetMaxIter(pcg_solver, 100);
+      HYPRE_ParCSRBiCGSTABSetMaxIter(pcg_solver, 1000);
       HYPRE_ParCSRBiCGSTABSetTol(pcg_solver, tol);
       HYPRE_ParCSRBiCGSTABSetLogging(pcg_solver, 1);
  
@@ -1162,6 +1166,7 @@ main( int   argc,
          if (myid == 0) printf("Solver: AMG-BiCGSTAB\n");
 
          HYPRE_BoomerAMGCreate(&pcg_precond); 
+         HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);
          HYPRE_BoomerAMGSetCoarsenType(pcg_precond, (hybrid*coarsen_type));
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
@@ -1281,6 +1286,7 @@ main( int   argc,
          if (myid == 0) printf("Solver: AMG-CGNR\n");
 
          HYPRE_BoomerAMGCreate(&pcg_precond); 
+         HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);
          HYPRE_BoomerAMGSetCoarsenType(pcg_precond, (hybrid*coarsen_type));
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
@@ -1320,7 +1326,8 @@ main( int   argc,
         return(-1);
       }
       else
-        printf("HYPRE_ParCSRCGNRGetPrecond got good precond\n");
+        if (myid == 0)
+          printf("HYPRE_ParCSRCGNRGetPrecond got good precond\n");
       HYPRE_ParCSRCGNRSetup(pcg_solver, A, b, x);
  
       hypre_EndTiming(time_index);
@@ -2013,7 +2020,7 @@ BuildParLaplacian9pt( int                  argc,
    return (0);
 }
 /*----------------------------------------------------------------------
- * Build 27-point laplacian in 3D, 
+ * Build 27-point laplacian in 3D,
  * Parameters given in command line.
  *----------------------------------------------------------------------*/
 
