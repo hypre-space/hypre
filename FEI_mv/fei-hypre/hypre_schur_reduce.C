@@ -1201,6 +1201,7 @@ void HYPRE_LinSysCore::buildSchurReducedRHS()
     currA_    = reducedA_;
     currB_    = reducedB_;
     currR_    = reducedR_;
+    HYPRE_IJVectorZeroLocalComponents(reducedX);
     currX_    = reducedX_;
 
     if ( mypid_ == 0 && (HYOutputLevel_ & HYFEI_SCHURREDUCE1) )
