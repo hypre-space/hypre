@@ -170,6 +170,11 @@ hypre_max(0, (hypre_BoxIMaxD(box, d) - hypre_BoxIMinD(box, d) + 1))
  hypre_IndexZ(index)>=hypre_BoxIMinZ(box) &&\
  hypre_IndexZ(index)<=hypre_BoxIMaxZ(box) )
 
+
+#define hypre_IndexDInBoxP( index, d, box ) (\
+ hypre_IndexD(index, d)>=hypre_BoxIMinD(box, d) &&\
+ hypre_IndexD(index, d)<=hypre_BoxIMaxD(box, d) )
+
 #define hypre_CopyBox(box1, box2) \
 ( hypre_CopyIndex(hypre_BoxIMin(box1), hypre_BoxIMin(box2)),\
   hypre_CopyIndex(hypre_BoxIMax(box1), hypre_BoxIMax(box2)) )
@@ -1704,6 +1709,10 @@ int hypre_BoxGetSize( hypre_Box *box , hypre_Index size );
 int hypre_BoxGetStrideSize( hypre_Box *box , hypre_Index stride , hypre_Index size );
 int hypre_BoxGetStrideVolume( hypre_Box *box , hypre_Index stride , int *volume_ptr );
 int hypre_BoxExpand( hypre_Box *box , int *numexp );
+int hypre_DeleteMultipleBoxes( hypre_BoxArray *box_array , int *indices , int num );
+int hypre_MaxIndexPosition( hypre_Index index , int *position );
+int hypre_MinIndexPosition( hypre_Index index , int *position );
+int hypre_BoxExpandConstant( hypre_Box *box , int expand );
 
 /* box_neighbors.c */
 int hypre_RankLinkCreate( int rank , int prank , hypre_RankLink **rank_link_ptr );
