@@ -352,7 +352,8 @@ hypre_IJMatrixInsertRowParCSR(hypre_IJMatrix *matrix,
    int num_procs, my_id;
    int row_local;
    int col_0, col_n;
-   int i, temp;
+   int i;
+   double temp;
    int *indx_diag, *indx_offd;
    int **aux_j;
    int *local_j;
@@ -500,7 +501,7 @@ hypre_IJMatrixAddToRowParCSR(hypre_IJMatrix *matrix,
    int num_procs, my_id;
    int row_local;
    int col_0, col_n;
-   int i, temp;
+   int i;
    int *indx_diag, *indx_offd;
    int **aux_j;
    int *local_j;
