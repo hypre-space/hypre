@@ -182,7 +182,7 @@ main( int   argc,
 
    while ( (arg_index < argc) && (!print_usage) )
    {
-      if ( strcmp(argv[arg_index], "-fromijfile") == 0 )
+      if ( strcmp(argv[arg_index], "-fromfile") == 0 )
       {
          arg_index++;
          build_matrix_type      = -1;
@@ -657,12 +657,12 @@ main( int   argc,
       printf("\n");
       printf("Usage: %s [<options>]\n", argv[0]);
       printf("\n");
-      printf("  -fromijfile <filename>     : ");
-      printf("matrix read in IJ format from distributed files\n");
+      printf("  -fromfile <filename>       : ");
+      printf("matrix read from multiple files (IJ format)\n");
       printf("  -fromparcsrfile <filename> : ");
-      printf("matrix read in ParCSR format from distributed files\n");
+      printf("matrix read from multiple files (ParCSR format)\n");
       printf("  -fromonecsrfile <filename> : ");
-      printf("matrix read in CSR format from a file on one processor\n");
+      printf("matrix read from a single file (CSR format)\n");
       printf("\n");
       printf("  -laplacian [<options>] : build 5pt 2D laplacian problem (default) \n");
       printf("  -9pt [<opts>]          : build 9pt 2D laplacian problem\n");
@@ -677,8 +677,10 @@ main( int   argc,
       printf("  -storage_low           : allocates not enough storage for aux struct\n");
       printf("  -concrete_parcsr       : use parcsr matrix type as concrete type\n");
       printf("\n");
-      printf("  -rhsfromfile           : rhs read in IJ form from distributed files\n");
-      printf("  -rhsfromonefile        : rhs read from a file one one processor\n");
+      printf("  -rhsfromfile           : ");
+      printf("rhs read from multiple files (IJ format)\n");
+      printf("  -rhsfromonefile        : ");
+      printf("rhs read from a single file (CSR format)\n");
       printf("  -rhsrand               : rhs is random vector\n");
       printf("  -rhsisone              : rhs is vector with unit components (default)\n");
       printf("  -xisone                : solution of all ones\n");
@@ -687,9 +689,10 @@ main( int   argc,
       printf("  -dt <val>              : specify finite backward Euler time step\n");
       printf("                         :    -rhsfromfile, -rhsfromonefile, -rhsrand,\n");
       printf("                         :    -rhsrand, or -xisone will be ignored\n");
-      printf("  -srcfromfile           : backward Euler source read in IJ form from distributed files\n");
+      printf("  -srcfromfile           : ");
+      printf("backward Euler source read from multiple files (IJ format)\n");
       printf("  -srcfromonefile        : ");
-      printf("backward Euler source read from a file on one processor\n");
+      printf("backward Euler source read from a single file (IJ format)\n");
       printf("  -srcrand               : ");
       printf("backward Euler source is random vector with components in range 0 - 1\n");
       printf("  -srcisone              : ");
