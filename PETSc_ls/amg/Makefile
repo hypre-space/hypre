@@ -15,6 +15,7 @@ HEADERS =\
  headers.h
 
 FILES =\
+ SPamg.c\
  amg.c\
  amg_setup.c\
  coarsen.c\

@@ -31,18 +31,14 @@ FILES =\
 
 OBJS = ${FILES:.c=.o}
 
-CC = gcc
-F77 = /home/casc/g77/bin/g77
+CC = cc
 
 CFLAGS =\
  -I/usr/local/include\
  -I/home/casc/include\
  -I/usr/local/mpi/mpich/include\
- -I../..\
- -g -Wall -DHYPRE_MEMORY_DMALLOC
-#-g -Wall  
+ -I../..
 
-FFLAGS = -g
 
 LFLAGS =\
  -L/usr/local/lib\
@@ -57,7 +53,6 @@ LFLAGS =\
  -lHYPRE_memory\
  -lf2c\
  -lcegdb\
- -ldmalloc\
  -lm
 
 ##################################################################
