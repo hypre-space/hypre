@@ -16,8 +16,8 @@
 #define HYPRE_LS_HEADER
 
 #include "HYPRE_utilities.h"
-#include "../seq_matrix_vector/HYPRE_seq_mv.h"
-#include "../parcsr_matrix_vector/HYPRE_parcsr_mv.h"
+#include "HYPRE_seq_mv.h"
+#include "HYPRE_parcsr_mv.h"
 
 #ifdef __cplusplus
 extern "C" {
