@@ -31,20 +31,31 @@ HYPRE_EXTRA_DIRS =\
 HYPRE_DOCS =\
  docs
 
-#These are the directories that can be run without MPI
-HYPRE_SEQ_DIRS =\
+#These are the directories for structured matrices
+HYPRE_STRUCT_DIRS =\
  utilities\
  struct_matrix_vector\
- struct_linear_solvers\
- test\
+ struct_linear_solvers
+
+#These are the directories for sequential structured matrices
+HYPRE_SEQ_DIRS =\
+ utilities\
  seq_matrix_vector\
- docs\
- seq_linear_solvers/pamg\
-# bmakes
+ seq_linear_solvers
+
+#These are the directories for parallel compressed sparse row
+HYPRE_PARCSR_DIRS =\
+ utilities\
+ parcsr_matrix_vector\
+ parcsr_linear_solvers
+
+#These are the directories for the conceptual structured interface
+#HYPRE_CI_STRUCT_DIRS =\
+# bmakes 
 
 all:
 	@ \
-	for i in ${HYPRE_DIRS} ${HYPRE_EXTRA_DIRS} ${HYPRE_DOCS}; \
+	for i in ${HYPRE_DIRS}; \
 	do \
 	  if [ -d $$i ]; \
 	  then \
@@ -54,17 +65,6 @@ all:
 	  fi; \
 	done
 
-seq:
-	@ \
-	for i in ${HYPRE_SEQ_DIRS}; \
-	do \
-	  if [ -d $$i ]; \
-	  then \
-	    echo "Making $$i ..."; \
-	    (cd $$i; make); \
-	    echo ""; \
-	  fi; \
-	done
 
 install:
 	@ \
@@ -120,7 +120,7 @@ veryclean:
 	done
 
 
-hypre:
+beta:
 	@ \
 	for i in ${HYPRE_DIRS} ${HYPRE_EXTRA_DIRS}; \
 	do \
@@ -132,9 +132,60 @@ hypre:
 	  fi; \
 	done
 
-doc:
+docs:
 	@ \
 	for i in ${HYPRE_DOCS}; \
+	do \
+	  if [ -d $$i ]; \
+	  then \
+	    echo "Making $$i ..."; \
+	    (cd $$i; make); \
+	    echo ""; \
+	  fi; \
+	done
+
+
+struct:
+	@ \
+	for i in ${HYPRE_STRUCT_DIRS}; \
+	do \
+	  if [ -d $$i ]; \
+	  then \
+	    echo "Making $$i ..."; \
+	    (cd $$i; make); \
+	    echo ""; \
+	  fi; \
+	done
+
+
+parcsr:
+	@ \
+	for i in ${HYPRE_PARCSR_DIRS}; \
+	do \
+	  if [ -d $$i ]; \
+	  then \
+	    echo "Making $$i ..."; \
+	    (cd $$i; make); \
+	    echo ""; \
+	  fi; \
+	done
+
+
+ci_struct:
+	@ \
+	for i in ${HYPRE_CI_STRUCT_DIRS}; \
+	do \
+	  if [ -d $$i ]; \
+	  then \
+	    echo "Making $$i ..."; \
+	    (cd $$i; make); \
+	    echo ""; \
+	  fi; \
+	done
+
+seq:
+	@ \
+	for i in ${HYPRE_SEQ_DIRS}; \
 	do \
 	  if [ -d $$i ]; \
 	  then \
