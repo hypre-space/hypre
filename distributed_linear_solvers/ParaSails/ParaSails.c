@@ -10,7 +10,6 @@
  *
  * ParaSails - Parallel sparse approximate inverse least squares.
  *
- * 10-20-99 Change send replies to use separate send buffers.
  *****************************************************************************/
 
 #include <stdlib.h>
@@ -28,6 +27,12 @@
 #ifdef ESSL
 #include <essl.h>
 #endif
+
+/******************************************************************************
+ *
+ * ParaSails private functions
+ *
+ *****************************************************************************/
 
 /*--------------------------------------------------------------------------
  * SendRequests - Given a list of indices "reqind" of length "reqlen",
@@ -772,9 +777,21 @@ static void ComputeValues(StoredRows *stored_rows, Matrix *mat)
 
 /******************************************************************************
  *
- * Public ParaSails functions begin here.
+ * ParaSails public functions
+ *
+ * After creating a ParaSails object, the preconditioner requires two set up
+ * steps:  one for the pattern, and one for the numerical values.  Once the
+ * pattern has been set up, the numerical values can be set up for different
+ * matrices, i.e., ParaSailsSetupValues can be called again with a different
+ * matrix, and used in another iterative solve.
  *
  *****************************************************************************/
+
+/*--------------------------------------------------------------------------
+ * ParaSailsCreate - Return (a pointer to) a ParaSails preconditioner object.
+ * The input matrix "A" is the matrix that will be used for setting up the 
+ * sparsity pattern of the preconditioner.
+ *--------------------------------------------------------------------------*/
 
 ParaSails *ParaSailsCreate(Matrix *A)
 {
@@ -795,6 +812,10 @@ ParaSails *ParaSailsCreate(Matrix *A)
     return ps;
 }
 
+/*--------------------------------------------------------------------------
+ * ParaSailsDestroy - Destroy a ParaSails object "ps".
+ *--------------------------------------------------------------------------*/
+
 void ParaSailsDestroy(ParaSails *ps)
 {
     if (ps->pruned_rows)
@@ -808,6 +829,12 @@ void ParaSailsDestroy(ParaSails *ps)
 
     free(ps);
 }
+
+/*--------------------------------------------------------------------------
+ * ParaSailsSetupPattern - Set up a pattern for the ParaSails preconditioner.
+ * The pattern is defined by the matrix used in the Create call, and by the
+ * input parameters "thresh" and "num_levels".
+ *--------------------------------------------------------------------------*/
 
 void ParaSailsSetupPattern(ParaSails *ps, double thresh, int num_levels)
 {
@@ -844,6 +871,13 @@ void ParaSailsSetupPattern(ParaSails *ps, double thresh, int num_levels)
 #endif
 }
 
+/*--------------------------------------------------------------------------
+ * ParaSailsSetupValues - Compute the numerical values of the ParaSails
+ * preconditioner, for the pattern set up using ParaSailsSetupPattern.
+ * This function may be called repeatedly with different input matrices
+ * "A", for which a preconditioner is constructed.
+ *--------------------------------------------------------------------------*/
+
 void ParaSailsSetupValues(ParaSails *ps, Matrix *A)
 {
     /* if this is a new matrix, then we need to get a new stored_rows obj */
@@ -870,6 +904,18 @@ void ParaSailsSetupValues(ParaSails *ps, Matrix *A)
 #endif
 }
 
+/*--------------------------------------------------------------------------
+ * ParaSailsApply - Apply the ParaSails preconditioner
+ *
+ * ps - input ParaSails object
+ * u  - input array of doubles
+ * v  - output array of doubles
+ *
+ * Although this computation can be done in place, it typically will not
+ * be used this way, since the caller usually needs to preserve the input
+ * vector.
+ *--------------------------------------------------------------------------*/
+
 void ParaSailsApply(ParaSails *ps, double *u, double *v)
 {
     MatrixMatvec(ps->M, u, v);      /* need to preserve u */
@@ -877,13 +923,12 @@ void ParaSailsApply(ParaSails *ps, double *u, double *v)
 }
 
 /*--------------------------------------------------------------------------
- * ParaSailsSelectThresh - select a threshold for the sparse approximate inverse
- * pattern.  The threshold attempts to be chosen such that approximately 
- * 1/4 of all the matrix elements is larger than this threshold.  This
- * is accomplished by finding the element in each row that is smaller than
- * 1/4 of the elements in that row, and averaging these elements over all
- * rows.  The threshold is selected on the diagonally scaled matrix.
- * param = 0.75 for the above comments.
+ * ParaSailsSelectThresh - select a threshold for the preconditioner pattern.  
+ * The threshold attempts to be chosen such that approximately (1-param) of 
+ * all the matrix elements is larger than this threshold.  This is accomplished
+ * by finding the element in each row that is smaller than (1-param) of the 
+ * elements in that row, and averaging these elements over all rows.  The 
+ * threshold is selected on the diagonally scaled matrix.
  *--------------------------------------------------------------------------*/
 
 double ParaSailsSelectThresh(ParaSails *ps, double param)
