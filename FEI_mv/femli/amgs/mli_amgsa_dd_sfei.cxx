@@ -951,7 +951,8 @@ int MLI_Method_AMGSA::setupExtendedDomainDecomp( MLI *mli )
    MLI_Matrix *mli_PSmat;
 
    //sprintf( paramString, "SeqSuperLU" );
-   sprintf( paramString, "CGMLI" );
+   if (!strcmp(preSmoother_, "CGMLI")) sprintf(paramString, "CGMLI");
+   else                                sprintf(paramString, "CGAMG");
    smootherPtr = MLI_Solver_CreateFromName(paramString);
    sprintf( paramString, "numSweeps 10000" );
    smootherPtr->setParams(paramString, 0, NULL);
