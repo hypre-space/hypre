@@ -13,6 +13,8 @@
 #include "krylov.h"
 #define habs(x) ((x)>=0 ? x : -x)
 
+HYPRE_ParCSRMatrix GenerateLaplacian9pt(MPI_Comm, int, int, int, int, int, 
+                                        int, double *);
 int GenerateConvectionDiffusion3D(MPI_Comm, int, int, int, int, int, int,
                       int, int, int, double, double, double *, 
                       HYPRE_ParCSRMatrix *,HYPRE_ParVector*);
@@ -37,7 +39,7 @@ int main(int argc, char **argv)
    char               argStr[40];
    double             *values, *nullVecs, *scaleVec, *colVal, *gscaleVec;
    double             *rhsVector=NULL, alpha, beta, *weights, Lvalue=4.0;
-   double             epsilon=0.001, Pweight;
+   double             epsilon=0.001, Pweight, dtemp;
    HYPRE_IJMatrix     newIJA;
    HYPRE_IJVector     IJrhs;
    HYPRE_ParCSRMatrix HYPREA;
@@ -61,39 +63,51 @@ int main(int argc, char **argv)
     * problem setup
     * ------------------------------------------------------------- */
 
+/*
    if ( mypid == 0 )
    {
       printf("Which test problem (0-6) : ");
       scanf("%d", &testProb);
    }
    MPI_Bcast(&testProb, 1, MPI_INT, 0, MPI_COMM_WORLD);
+*/
+testProb = 0;
    if ( testProb < 0 ) testProb = 0;
    if ( testProb > 6 ) testProb = 6;
    if ( testProb != 1 && testProb != 6)
    {
+/*
       if ( mypid == 0 )
       {
          printf("nx = ny = ? ");
          scanf("%d", &nx);
       }
       MPI_Bcast(&nx, 1, MPI_INT, 0, MPI_COMM_WORLD);
+*/
+      nx = 96;
       ny = nx;
+      nz = nx;
    }
 
    /* --- Test problem 1 --- */
    if ( testProb == 0 )
    {
-      P = 1;
-      Q = nprocs;
-      R = 1;
+      dtemp = (double) nprocs;
+      dtemp = pow(dtemp,1.0000001/3.0);
+      R = (int) (dtemp);
+      dtemp = (double) nprocs / (double) R;
+      dtemp = pow(dtemp,1.0000001/2.0);
+      Q = (int) (dtemp);
+      P = nprocs/R/Q;
       p = mypid % P;
       q = (( mypid - p)/P) % Q;
       r = ( mypid - p - P*q)/( P*Q );
-      values = (double *) calloc(4, sizeof(double));
-      values[3] = -0.0;
+      values = (double *) calloc(9, sizeof(double));
+      values[3] = -1.0;
       values[2] = -1.0;
       values[1] = -1.0;
-      values[0] = 4.00;
+      values[0] = 6.00;
+/*
       if ( mypid == 0 )
       {
          printf("enter alpha : ");
@@ -106,14 +120,51 @@ int main(int argc, char **argv)
       MPI_Bcast(&alpha, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
       MPI_Bcast(&beta, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
       MPI_Bcast(&fdScheme, 1, MPI_INT, 0, MPI_COMM_WORLD);
+*/
+alpha = 0.0;
+beta = 0.0;
+fdScheme = 1;
+printf("generate problem\n");
       if (fdScheme == 0)
          GenerateConvectionDiffusion3D2(MPI_COMM_WORLD,nx,ny,nz,P,Q,R,p, 
                         q, r, alpha, beta, values, &HYPREA, 
                         (HYPRE_ParVector *) &rhs); 
-      else
+      else if (fdScheme == 1)
          GenerateConvectionDiffusion3D(MPI_COMM_WORLD,nx,ny,nz,P,Q,R,p, 
                         q, r, alpha, beta, values, &HYPREA, 
                         (HYPRE_ParVector *) &rhs); 
+      else
+      {
+         values[8] = -1.0;
+         values[7] = -1.0;
+         values[6] = -1.0;
+         values[5] = -1.0;
+         values[4] = 8.0;
+         values[3] = -1.0;
+         values[2] = -1.0;
+         values[1] = -1.0;
+         values[0] = 8.0;
+         dtemp = (double) nprocs;
+         dtemp = pow(dtemp,1.0000001/2.0);
+         Q = (int) (dtemp);
+         P = nprocs/Q;
+         p = mypid % P;
+         q = ((mypid - p)/P) % Q;
+         HYPREA = (HYPRE_ParCSRMatrix) GenerateLaplacian9pt(MPI_COMM_WORLD,
+                                  nx, ny, P, Q, p, q, values);
+         HYPRE_ParCSRMatrixGetRowPartitioning(HYPREA, &partition);
+         HYPRE_IJVectorCreate(MPI_COMM_WORLD, partition[mypid],
+                              partition[mypid+1]-1, &IJrhs);
+         free( partition );
+         HYPRE_IJVectorSetObjectType(IJrhs, HYPRE_PARCSR);
+         HYPRE_IJVectorInitialize(IJrhs);
+         HYPRE_IJVectorAssemble(IJrhs);
+         HYPRE_IJVectorGetObject(IJrhs, (void**) &rhs);
+         HYPRE_IJVectorSetObjectType(IJrhs, -1);
+         HYPRE_IJVectorDestroy(IJrhs);
+         hypre_ParVectorSetConstantValues( rhs, 1.0 );
+      }
+printf("generate problem done\n");
       free( values );
       HYPRE_ParCSRMatrixGetRowPartitioning(HYPREA, &partition);
       globalSize = partition[nprocs];
@@ -601,12 +652,15 @@ int main(int argc, char **argv)
    cmliMat = MLI_MatrixCreate((void*) hypreA,"HYPRE_ParCSR",funcPtr);
    free( funcPtr );
    cmli = MLI_Create( MPI_COMM_WORLD );
+/*
    if ( mypid == 0 )
    {
       printf("Which AMG to use (0 - RSAMG, 1 - SAAMG, 2 - CRAMG) : ");
       scanf("%d", &amgMethod);
    }
    MPI_Bcast(&amgMethod, 1, MPI_INT, 0, MPI_COMM_WORLD);
+*/
+amgMethod = 1;
    if       (amgMethod == 0) strcpy(methodName, "AMGRS");
    else  if (amgMethod == 1) strcpy(methodName, "AMGSA");
    else                      strcpy(methodName, "AMGCR");
@@ -641,7 +695,7 @@ int main(int argc, char **argv)
       MLI_MethodSetParams(cmliMethod, "setPostSmoother Jacobi", 2, targv);
       free(weights);
       //MLI_MethodSetParams(cmliMethod, "setCoarsenScheme cljp", 0, NULL);
-      MLI_MethodSetParams(cmliMethod, "setStrengthThreshold 0.2", 0, NULL);
+      MLI_MethodSetParams(cmliMethod, "setStrengthThreshold 0.5", 0, NULL);
       if ( mypid == 0 )
       {
          printf("RSAMG smootherPrintRNorm ? (0 for no, 1 for yes) = ");
@@ -672,20 +726,26 @@ MLI_MethodSetParams(cmliMethod, "useInjectionForR", 0, NULL);
    }
    else if (! strcmp(methodName, "AMGSA"))
    {
+/*
       if ( mypid == 0 )
       {
          printf("SAAMG number of sweeps = ");
          scanf("%d", &nsweeps);
       }
       MPI_Bcast(&nsweeps, 1, MPI_INT, 0, MPI_COMM_WORLD);
+*/
+nsweeps = 1;
       if ( nsweeps <= 0 ) nsweeps = 1;
       weights = (double *) malloc( sizeof(double)*nsweeps );
+/*
       if ( mypid == 0 )
       {
          printf("SAAMG relaxation weights = ");
          scanf("%lg", &weights[0]);
       }
       MPI_Bcast(&weights[0], 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+*/
+weights[0] = 1.0;
       if ( weights[0] <= 0.0 ) weights[0] = 1.0; 
       for ( j = 1; j < nsweeps; j++ ) weights[j] = weights[0];
       targv[0] = (char *) &nsweeps;
@@ -695,21 +755,28 @@ MLI_MethodSetParams(cmliMethod, "useInjectionForR", 0, NULL);
       free(weights);
       MLI_MethodSetParams(cmliMethod, "setStrengthThreshold 0.08", 0, NULL);
       MLI_MethodSetParams(cmliMethod, "setCalibrationSize 0", 0, NULL);
+      MLI_MethodSetParams(cmliMethod, "useSAMGDDExt", 0, NULL);
+/*
       if ( mypid == 0 )
       {
          printf("SAAMG Pweight weights = ");
          scanf("%lg", &Pweight);
       }
       MPI_Bcast(&Pweight, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+*/
+Pweight = 0.0;
       if ( Pweight < 0.0 ) Pweight = 0.0;
       sprintf( argStr, "setPweight %e", Pweight);
       MLI_MethodSetParams(cmliMethod, argStr, 0, NULL);
+/*
       if ( mypid == 0 )
       {
          printf("SAAMG nonsymmetric ? (0 for no, 1 for yes) = ");
          scanf("%d", &j);
       }
       MPI_Bcast(&j, 1, MPI_INT, 0, MPI_COMM_WORLD);
+*/
+j = 0;
       if ( j != 0 )
          MLI_MethodSetParams(cmliMethod, "useNonsymmetric", 0, NULL);
    }
@@ -788,12 +855,15 @@ MLI_MethodSetParams(cmliMethod, "useInjectionForR", 0, NULL);
    MLI_SetSystemMatrix(cmli, 0, cmliMat);
    MLI_SetOutputLevel(cmli, 2);
 
+/*
    if ( mypid == 0 )
    {
       printf("outer Krylov solver (0 - none, 1 - CG, 2 - GMRES) : ");
       scanf("%d", &solver);
    }
    MPI_Bcast(&solver, 1, MPI_INT, 0, MPI_COMM_WORLD);
+*/
+solver = 2;
    if ( solver < 0 ) solver = 0;
    if ( solver > 2 ) solver = 2;
 
@@ -818,6 +888,8 @@ MLI_MethodSetParams(cmliMethod, "useInjectionForR", 0, NULL);
    MLI_VectorDestroy( csol );
    MLI_VectorDestroy( crhs );
    MLI_MethodDestroy( cmliMethod );
+   MPI_Barrier(MPI_COMM_WORLD);
+   exit(0);
    MPI_Finalize();
    return 0;
 }
@@ -1205,6 +1277,7 @@ int GenerateConvectionDiffusion3D2( MPI_Comm comm, int nx, int ny, int nz,
    MPI_Comm_size(comm,&num_procs);
    MPI_Comm_rank(comm,&my_id);
 
+printf("nx,ny,nz = %d %d %d\n", nx, ny, nz);
    grid_size = nx*ny*nz;
 
    hypre_GeneratePartitioning(nx,P,&nx_part);
