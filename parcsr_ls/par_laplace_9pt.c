@@ -258,7 +258,7 @@ GenerateLaplacian9pt( MPI_Comm comm,
 	    {
 	       if (ix) 
 	       { 
-                  offd_j[o_cnt] = map2(ix-1,iy-1,p-1,q,P,Q,
+                  offd_j[o_cnt] = hypre_map2(ix-1,iy-1,p-1,q,P,Q,
                                    nx_part,ny_part,global_part);
                   offd_data[o_cnt++] = value[1];
 	       } 
@@ -274,7 +274,7 @@ GenerateLaplacian9pt( MPI_Comm comm,
 	    {
 	       if (ix+1 < nx)
 	       { 
-		  offd_j[o_cnt] = map2(ix+1,iy-1,p+1,q,P,Q,
+		  offd_j[o_cnt] = hypre_map2(ix+1,iy-1,p+1,q,P,Q,
                                    nx_part,ny_part,global_part);
                   offd_data[o_cnt++] = value[1];
 	       } 
@@ -286,28 +286,28 @@ GenerateLaplacian9pt( MPI_Comm comm,
             {
 	       if (ix > nx_part[p])
 	       {
-                  offd_j[o_cnt] = map2(ix-1,iy-1,p,q-1,P,Q,
+                  offd_j[o_cnt] = hypre_map2(ix-1,iy-1,p,q-1,P,Q,
                                    nx_part,ny_part,global_part);
                   offd_data[o_cnt++] = value[1];
 	       }
 	       else if (ix)
 	       {
-                  offd_j[o_cnt] = map2(ix-1,iy-1,p-1,q-1,P,Q,
+                  offd_j[o_cnt] = hypre_map2(ix-1,iy-1,p-1,q-1,P,Q,
                                    nx_part,ny_part,global_part);
                   offd_data[o_cnt++] = value[1];
 	       }
-               offd_j[o_cnt] = map2(ix,iy-1,p,q-1,P,Q,
+               offd_j[o_cnt] = hypre_map2(ix,iy-1,p,q-1,P,Q,
                                    nx_part,ny_part,global_part);
                offd_data[o_cnt++] = value[1];
 	       if (ix < nx_part[p+1]-1)
 	       {
-                  offd_j[o_cnt] = map2(ix+1,iy-1,p,q-1,P,Q,
+                  offd_j[o_cnt] = hypre_map2(ix+1,iy-1,p,q-1,P,Q,
                                    nx_part,ny_part,global_part);
                   offd_data[o_cnt++] = value[1];
 	       }
 	       else if (ix+1 < nx)
 	       {
-                  offd_j[o_cnt] = map2(ix+1,iy-1,p+1,q-1,P,Q,
+                  offd_j[o_cnt] = hypre_map2(ix+1,iy-1,p+1,q-1,P,Q,
                                    nx_part,ny_part,global_part);
                   offd_data[o_cnt++] = value[1];
 	       }
@@ -322,7 +322,7 @@ GenerateLaplacian9pt( MPI_Comm comm,
          {
             if (ix) 
             {
-               offd_j[o_cnt] = map2(ix-1,iy,p-1,q,P,Q,
+               offd_j[o_cnt] = hypre_map2(ix-1,iy,p-1,q,P,Q,
                                    nx_part,ny_part,global_part);
                offd_data[o_cnt++] = value[1];
             }
@@ -336,7 +336,7 @@ GenerateLaplacian9pt( MPI_Comm comm,
          {
             if (ix+1 < nx) 
             {
-               offd_j[o_cnt] = map2(ix+1,iy,p+1,q,P,Q,
+               offd_j[o_cnt] = hypre_map2(ix+1,iy,p+1,q,P,Q,
                                    nx_part,ny_part,global_part);
                offd_data[o_cnt++] = value[1];
             }
@@ -352,7 +352,7 @@ GenerateLaplacian9pt( MPI_Comm comm,
 	    {
 	       if (ix) 
                {
-                  offd_j[o_cnt] = map2(ix-1,iy+1,p-1,q,P,Q,
+                  offd_j[o_cnt] = hypre_map2(ix-1,iy+1,p-1,q,P,Q,
                                    nx_part,ny_part,global_part);
                   offd_data[o_cnt++] = value[1];
                }
@@ -368,7 +368,7 @@ GenerateLaplacian9pt( MPI_Comm comm,
 	    {
 	       if (ix+1 < nx)
 	       { 
-                  offd_j[o_cnt] = map2(ix+1,iy+1,p+1,q,P,Q,
+                  offd_j[o_cnt] = hypre_map2(ix+1,iy+1,p+1,q,P,Q,
                                    nx_part,ny_part,global_part);
                   offd_data[o_cnt++] = value[1];
 	       } 
@@ -380,28 +380,28 @@ GenerateLaplacian9pt( MPI_Comm comm,
             {
 	       if (ix > nx_part[p])
 	       {
-                  offd_j[o_cnt] = map2(ix-1,iy+1,p,q+1,P,Q,
+                  offd_j[o_cnt] = hypre_map2(ix-1,iy+1,p,q+1,P,Q,
                                    nx_part,ny_part,global_part);
                   offd_data[o_cnt++] = value[1];
 	       }
 	       else if (ix)
 	       {
-                  offd_j[o_cnt] = map2(ix-1,iy+1,p-1,q+1,P,Q,
+                  offd_j[o_cnt] = hypre_map2(ix-1,iy+1,p-1,q+1,P,Q,
                                    nx_part,ny_part,global_part);
                   offd_data[o_cnt++] = value[1];
 	       }
-               offd_j[o_cnt] = map2(ix,iy+1,p,q+1,P,Q,
+               offd_j[o_cnt] = hypre_map2(ix,iy+1,p,q+1,P,Q,
                                    nx_part,ny_part,global_part);
                offd_data[o_cnt++] = value[1];
 	       if (ix < nx_part[p+1]-1)
 	       {
-                  offd_j[o_cnt] = map2(ix+1,iy+1,p,q+1,P,Q,
+                  offd_j[o_cnt] = hypre_map2(ix+1,iy+1,p,q+1,P,Q,
                                    nx_part,ny_part,global_part);
                   offd_data[o_cnt++] = value[1];
 	       }
 	       else if (ix < nx-1)
 	       {
-                  offd_j[o_cnt] = map2(ix+1,iy+1,p+1,q+1,P,Q,
+                  offd_j[o_cnt] = hypre_map2(ix+1,iy+1,p+1,q+1,P,Q,
                                    nx_part,ny_part,global_part);
                   offd_data[o_cnt++] = value[1];
 	       }
@@ -476,7 +476,7 @@ GenerateLaplacian9pt( MPI_Comm comm,
  *--------------------------------------------------------------------------*/
 
 int
-map2( int  ix,
+hypre_map2( int  ix,
       int  iy,
       int  p,
       int  q,

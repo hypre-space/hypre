@@ -750,7 +750,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
       	          {
       	             if (ix) 
       	             {
-      		        offd_j[o_cnt] = map3(ix-1,iy-1,iz-1,p-1,q,r,P,Q,R,
+      		        offd_j[o_cnt] = hypre_map3(ix-1,iy-1,iz-1,p-1,q,r,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		        offd_data[o_cnt++] = value[1];
       	             }
@@ -766,7 +766,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
       	          {
       	             if (ix+1 < nx) 
       	             {
-      		        offd_j[o_cnt] = map3(ix+1,iy-1,iz-1,p+1,q,r,P,Q,R,
+      		        offd_j[o_cnt] = hypre_map3(ix+1,iy-1,iz-1,p+1,q,r,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		        offd_data[o_cnt++] = value[1];
       	             }
@@ -778,28 +778,28 @@ GenerateLaplacian27pt(MPI_Comm comm,
                   {
       	             if (ix > nx_part[p])
       	             {
-      		        offd_j[o_cnt] = map3(ix-1,iy-1,iz-1,p,q-1,r,P,Q,R,
+      		        offd_j[o_cnt] = hypre_map3(ix-1,iy-1,iz-1,p,q-1,r,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		        offd_data[o_cnt++] = value[1];
       	             }
       	             else if (ix)
       	             {
-      		        offd_j[o_cnt] = map3(ix-1,iy-1,iz-1,p-1,q-1,r,P,Q,R,
+      		        offd_j[o_cnt] = hypre_map3(ix-1,iy-1,iz-1,p-1,q-1,r,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		        offd_data[o_cnt++] = value[1];
       	             }
-      		     offd_j[o_cnt] = map3(ix,iy-1,iz-1,p,q-1,r,P,Q,R,
+      		     offd_j[o_cnt] = hypre_map3(ix,iy-1,iz-1,p,q-1,r,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		     offd_data[o_cnt++] = value[1];
       	             if (ix < nx_part[p+1]-1)
       	             {
-      		        offd_j[o_cnt] = map3(ix+1,iy-1,iz-1,p,q-1,r,P,Q,R,
+      		        offd_j[o_cnt] = hypre_map3(ix+1,iy-1,iz-1,p,q-1,r,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		        offd_data[o_cnt++] = value[1];
       	             }
       	             else if (ix < nx-1)
       	             {
-      		        offd_j[o_cnt] = map3(ix+1,iy-1,iz-1,p+1,q-1,r,P,Q,R,
+      		        offd_j[o_cnt] = hypre_map3(ix+1,iy-1,iz-1,p+1,q-1,r,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		        offd_data[o_cnt++] = value[1];
       	             }
@@ -814,7 +814,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
                {
                   if (ix) 
                   {
-      		     offd_j[o_cnt] = map3(ix-1,iy,iz-1,p-1,q,r,P,Q,R,
+      		     offd_j[o_cnt] = hypre_map3(ix-1,iy,iz-1,p-1,q,r,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		     offd_data[o_cnt++] = value[1];
                   }
@@ -830,7 +830,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
                {
                   if (ix+1 < nx) 
                   {
-      		     offd_j[o_cnt] = map3(ix+1,iy,iz-1,p+1,q,r,P,Q,R,
+      		     offd_j[o_cnt] = hypre_map3(ix+1,iy,iz-1,p+1,q,r,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		     offd_data[o_cnt++] = value[1];
                   }
@@ -846,7 +846,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
       	          {
       	             if (ix) 
                      {
-      		        offd_j[o_cnt] = map3(ix-1,iy+1,iz-1,p-1,q,r,P,Q,R,
+      		        offd_j[o_cnt] = hypre_map3(ix-1,iy+1,iz-1,p-1,q,r,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		        offd_data[o_cnt++] = value[1];
                      }
@@ -862,7 +862,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
       	          {
       	             if (ix+1 < nx) 
                      {
-      		        offd_j[o_cnt] = map3(ix+1,iy+1,iz-1,p+1,q,r,P,Q,R,
+      		        offd_j[o_cnt] = hypre_map3(ix+1,iy+1,iz-1,p+1,q,r,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		        offd_data[o_cnt++] = value[1];
                      }
@@ -874,28 +874,28 @@ GenerateLaplacian27pt(MPI_Comm comm,
                   {
       	             if (ix > nx_part[p])
       	             {
-      		        offd_j[o_cnt] = map3(ix-1,iy+1,iz-1,p,q+1,r,P,Q,R,
+      		        offd_j[o_cnt] = hypre_map3(ix-1,iy+1,iz-1,p,q+1,r,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		        offd_data[o_cnt++] = value[1];
       	             }
       	             else if (ix)
       	             {
-      		        offd_j[o_cnt] = map3(ix-1,iy+1,iz-1,p-1,q+1,r,P,Q,R,
+      		        offd_j[o_cnt] = hypre_map3(ix-1,iy+1,iz-1,p-1,q+1,r,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		        offd_data[o_cnt++] = value[1];
       	             }
-      		     offd_j[o_cnt] = map3(ix,iy+1,iz-1,p,q+1,r,P,Q,R,
+      		     offd_j[o_cnt] = hypre_map3(ix,iy+1,iz-1,p,q+1,r,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		     offd_data[o_cnt++] = value[1];
       	             if (ix < nx_part[p+1]-1)
       	             {
-      		        offd_j[o_cnt] = map3(ix+1,iy+1,iz-1,p,q+1,r,P,Q,R,
+      		        offd_j[o_cnt] = hypre_map3(ix+1,iy+1,iz-1,p,q+1,r,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		        offd_data[o_cnt++] = value[1];
       	             }
       	             else if (ix < nx-1)
       	             {
-      		        offd_j[o_cnt] = map3(ix+1,iy+1,iz-1,p+1,q+1,r,P,Q,R,
+      		        offd_j[o_cnt] = hypre_map3(ix+1,iy+1,iz-1,p+1,q+1,r,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		        offd_data[o_cnt++] = value[1];
       	             }
@@ -910,7 +910,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
                   {
       	             if (ix > nx_part[p])
       	             {
-      		        offd_j[o_cnt] = map3(ix-1,iy-1,iz-1,p,q,r-1,P,Q,R,
+      		        offd_j[o_cnt] = hypre_map3(ix-1,iy-1,iz-1,p,q,r-1,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		        offd_data[o_cnt++] = value[1];
       	             }
@@ -918,17 +918,17 @@ GenerateLaplacian27pt(MPI_Comm comm,
       	             {
       	                if (ix) 
       	                {
-      		           offd_j[o_cnt] = map3(ix-1,iy-1,iz-1,p-1,q,r-1,P,Q,R,
+      		           offd_j[o_cnt] = hypre_map3(ix-1,iy-1,iz-1,p-1,q,r-1,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		           offd_data[o_cnt++] = value[1];
       	                }
       	             }
-      		     offd_j[o_cnt] = map3(ix,iy-1,iz-1,p,q,r-1,P,Q,R,
+      		     offd_j[o_cnt] = hypre_map3(ix,iy-1,iz-1,p,q,r-1,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		     offd_data[o_cnt++] = value[1];
       	             if (ix < nx_part[p+1]-1)
       	             {
-      		        offd_j[o_cnt] = map3(ix+1,iy-1,iz-1,p,q,r-1,P,Q,R,
+      		        offd_j[o_cnt] = hypre_map3(ix+1,iy-1,iz-1,p,q,r-1,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		        offd_data[o_cnt++] = value[1];
       	             }
@@ -936,7 +936,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
       	             {
       	                if (ix+1 < nx) 
       	                {
-      		           offd_j[o_cnt] = map3(ix+1,iy-1,iz-1,p+1,q,r-1,P,Q,R,
+      		           offd_j[o_cnt] = hypre_map3(ix+1,iy-1,iz-1,p+1,q,r-1,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		           offd_data[o_cnt++] = value[1];
       	                }
@@ -948,28 +948,28 @@ GenerateLaplacian27pt(MPI_Comm comm,
                      {
       	                if (ix > nx_part[p])
       	                {
-      		           offd_j[o_cnt] = map3(ix-1,iy-1,iz-1,p,q-1,r-1,P,Q,R,
+      		           offd_j[o_cnt] = hypre_map3(ix-1,iy-1,iz-1,p,q-1,r-1,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		           offd_data[o_cnt++] = value[1];
       	                }
       	                else if (ix)
       	                {
-      		           offd_j[o_cnt] =map3(ix-1,iy-1,iz-1,p-1,q-1,r-1,P,Q,R,
+      		           offd_j[o_cnt] =hypre_map3(ix-1,iy-1,iz-1,p-1,q-1,r-1,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		           offd_data[o_cnt++] = value[1];
       	                }
-      		        offd_j[o_cnt] = map3(ix,iy-1,iz-1,p,q-1,r-1,P,Q,R,
+      		        offd_j[o_cnt] = hypre_map3(ix,iy-1,iz-1,p,q-1,r-1,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		        offd_data[o_cnt++] = value[1];
       	                if (ix < nx_part[p+1]-1)
       	                {
-      		           offd_j[o_cnt] = map3(ix+1,iy-1,iz-1,p,q-1,r-1,P,Q,R,
+      		           offd_j[o_cnt] = hypre_map3(ix+1,iy-1,iz-1,p,q-1,r-1,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		           offd_data[o_cnt++] = value[1];
       	                }
       	                else if (ix < nx-1)
       	                {
-      		           offd_j[o_cnt] =map3(ix+1,iy-1,iz-1,p+1,q-1,r-1,P,Q,R,
+      		           offd_j[o_cnt] =hypre_map3(ix+1,iy-1,iz-1,p+1,q-1,r-1,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		           offd_data[o_cnt++] = value[1];
       	                }
@@ -977,7 +977,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
                   }
                   if (ix > nx_part[p]) 
                   {
-      		     offd_j[o_cnt] =map3(ix-1,iy,iz-1,p,q,r-1,P,Q,R,
+      		     offd_j[o_cnt] =hypre_map3(ix-1,iy,iz-1,p,q,r-1,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		     offd_data[o_cnt++] = value[1];
                   }
@@ -985,17 +985,17 @@ GenerateLaplacian27pt(MPI_Comm comm,
                   {
                      if (ix) 
                      {
-      		        offd_j[o_cnt] =map3(ix-1,iy,iz-1,p-1,q,r-1,P,Q,R,
+      		        offd_j[o_cnt] =hypre_map3(ix-1,iy,iz-1,p-1,q,r-1,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		        offd_data[o_cnt++] = value[1];
                      }
                   }
-      		  offd_j[o_cnt] =map3(ix,iy,iz-1,p,q,r-1,P,Q,R,
+      		  offd_j[o_cnt] =hypre_map3(ix,iy,iz-1,p,q,r-1,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		  offd_data[o_cnt++] = value[1];
                   if (ix+1 < nx_part[p+1]) 
                   {
-      		     offd_j[o_cnt] =map3(ix+1,iy,iz-1,p,q,r-1,P,Q,R,
+      		     offd_j[o_cnt] =hypre_map3(ix+1,iy,iz-1,p,q,r-1,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		     offd_data[o_cnt++] = value[1];
                   }
@@ -1003,7 +1003,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
                   {
                      if (ix+1 < nx) 
                      {
-      		        offd_j[o_cnt] =map3(ix+1,iy,iz-1,p+1,q,r-1,P,Q,R,
+      		        offd_j[o_cnt] =hypre_map3(ix+1,iy,iz-1,p+1,q,r-1,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		        offd_data[o_cnt++] = value[1];
                      }
@@ -1012,7 +1012,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
                   {
       	             if (ix > nx_part[p])
       	             {
-      		        offd_j[o_cnt] =map3(ix-1,iy+1,iz-1,p,q,r-1,P,Q,R,
+      		        offd_j[o_cnt] =hypre_map3(ix-1,iy+1,iz-1,p,q,r-1,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		        offd_data[o_cnt++] = value[1];
       	             }
@@ -1020,17 +1020,17 @@ GenerateLaplacian27pt(MPI_Comm comm,
       	             {
       	                if (ix) 
       	                {
-      		           offd_j[o_cnt] =map3(ix-1,iy+1,iz-1,p-1,q,r-1,P,Q,R,
+      		           offd_j[o_cnt] =hypre_map3(ix-1,iy+1,iz-1,p-1,q,r-1,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		           offd_data[o_cnt++] = value[1];
       	                }
       	             }
-      		     offd_j[o_cnt] =map3(ix,iy+1,iz-1,p,q,r-1,P,Q,R,
+      		     offd_j[o_cnt] =hypre_map3(ix,iy+1,iz-1,p,q,r-1,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		     offd_data[o_cnt++] = value[1];
       	             if (ix < nx_part[p+1]-1)
       	             {
-      		        offd_j[o_cnt] =map3(ix+1,iy+1,iz-1,p,q,r-1,P,Q,R,
+      		        offd_j[o_cnt] =hypre_map3(ix+1,iy+1,iz-1,p,q,r-1,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		        offd_data[o_cnt++] = value[1];
       	             }
@@ -1038,7 +1038,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
       	             {
       	                if (ix+1 < nx) 
       	                {
-      		           offd_j[o_cnt] =map3(ix+1,iy+1,iz-1,p+1,q,r-1,P,Q,R,
+      		           offd_j[o_cnt] =hypre_map3(ix+1,iy+1,iz-1,p+1,q,r-1,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		           offd_data[o_cnt++] = value[1];
       	                }
@@ -1050,28 +1050,28 @@ GenerateLaplacian27pt(MPI_Comm comm,
                      {
       	                if (ix > nx_part[p])
       	                {
-      		           offd_j[o_cnt] =map3(ix-1,iy+1,iz-1,p,q+1,r-1,P,Q,R,
+      		           offd_j[o_cnt] =hypre_map3(ix-1,iy+1,iz-1,p,q+1,r-1,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		           offd_data[o_cnt++] = value[1];
       	                }
       	                else if (ix)
       	                {
-      		           offd_j[o_cnt] =map3(ix-1,iy+1,iz-1,p-1,q+1,r-1,P,Q,R,
+      		           offd_j[o_cnt] =hypre_map3(ix-1,iy+1,iz-1,p-1,q+1,r-1,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		           offd_data[o_cnt++] = value[1];
       	                }
-      		        offd_j[o_cnt] =map3(ix,iy+1,iz-1,p,q+1,r-1,P,Q,R,
+      		        offd_j[o_cnt] =hypre_map3(ix,iy+1,iz-1,p,q+1,r-1,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		        offd_data[o_cnt++] = value[1];
       	                if (ix < nx_part[p+1]-1)
       	                {
-      		           offd_j[o_cnt] =map3(ix+1,iy+1,iz-1,p,q+1,r-1,P,Q,R,
+      		           offd_j[o_cnt] =hypre_map3(ix+1,iy+1,iz-1,p,q+1,r-1,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		           offd_data[o_cnt++] = value[1];
       	                }
       	                else if (ix < nx-1)
       	                {
-      		           offd_j[o_cnt] =map3(ix+1,iy+1,iz-1,p+1,q+1,r-1,P,Q,R,
+      		           offd_j[o_cnt] =hypre_map3(ix+1,iy+1,iz-1,p+1,q+1,r-1,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		           offd_data[o_cnt++] = value[1];
       	                }
@@ -1090,7 +1090,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
    	       {
    	          if (ix) 
    	          {
-      		     offd_j[o_cnt] =map3(ix-1,iy-1,iz,p-1,q,r,P,Q,R,
+      		     offd_j[o_cnt] =hypre_map3(ix-1,iy-1,iz,p-1,q,r,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		     offd_data[o_cnt++] = value[1];
    	          }
@@ -1106,7 +1106,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
    	       {
    	          if (ix+1 < nx) 
    	          {
-      		     offd_j[o_cnt] =map3(ix+1,iy-1,iz,p+1,q,r,P,Q,R,
+      		     offd_j[o_cnt] =hypre_map3(ix+1,iy-1,iz,p+1,q,r,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		     offd_data[o_cnt++] = value[1];
    	          }
@@ -1118,28 +1118,28 @@ GenerateLaplacian27pt(MPI_Comm comm,
                {
    	          if (ix > nx_part[p])
    	          {
-      		     offd_j[o_cnt] =map3(ix-1,iy-1,iz,p,q-1,r,P,Q,R,
+      		     offd_j[o_cnt] =hypre_map3(ix-1,iy-1,iz,p,q-1,r,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		     offd_data[o_cnt++] = value[1];
    	          }
    	          else if (ix)
    	          {
-      		     offd_j[o_cnt] =map3(ix-1,iy-1,iz,p-1,q-1,r,P,Q,R,
+      		     offd_j[o_cnt] =hypre_map3(ix-1,iy-1,iz,p-1,q-1,r,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		     offd_data[o_cnt++] = value[1];
    	          }
-      		  offd_j[o_cnt] =map3(ix,iy-1,iz,p,q-1,r,P,Q,R,
+      		  offd_j[o_cnt] =hypre_map3(ix,iy-1,iz,p,q-1,r,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		  offd_data[o_cnt++] = value[1];
    	          if (ix < nx_part[p+1]-1)
    	          {
-      		     offd_j[o_cnt] =map3(ix+1,iy-1,iz,p,q-1,r,P,Q,R,
+      		     offd_j[o_cnt] =hypre_map3(ix+1,iy-1,iz,p,q-1,r,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		     offd_data[o_cnt++] = value[1];
    	          }
    	          else if (ix < nx-1)
    	          {
-      		     offd_j[o_cnt] =map3(ix+1,iy-1,iz,p+1,q-1,r,P,Q,R,
+      		     offd_j[o_cnt] =hypre_map3(ix+1,iy-1,iz,p+1,q-1,r,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		     offd_data[o_cnt++] = value[1];
    	          }
@@ -1154,7 +1154,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
             {
                if (ix) 
                {
-      		  offd_j[o_cnt] =map3(ix-1,iy,iz,p-1,q,r,P,Q,R,
+      		  offd_j[o_cnt] =hypre_map3(ix-1,iy,iz,p-1,q,r,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		  offd_data[o_cnt++] = value[1];
                }
@@ -1168,7 +1168,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
             {
                if (ix+1 < nx) 
                {
-      		  offd_j[o_cnt] =map3(ix+1,iy,iz,p+1,q,r,P,Q,R,
+      		  offd_j[o_cnt] =hypre_map3(ix+1,iy,iz,p+1,q,r,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		  offd_data[o_cnt++] = value[1];
                }
@@ -1184,7 +1184,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
    	       {
    	          if (ix) 
                   {
-      		     offd_j[o_cnt] =map3(ix-1,iy+1,iz,p-1,q,r,P,Q,R,
+      		     offd_j[o_cnt] =hypre_map3(ix-1,iy+1,iz,p-1,q,r,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		     offd_data[o_cnt++] = value[1];
                   }
@@ -1200,7 +1200,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
    	       {
    	          if (ix+1 < nx) 
                   {
-      		     offd_j[o_cnt] =map3(ix+1,iy+1,iz,p+1,q,r,P,Q,R,
+      		     offd_j[o_cnt] =hypre_map3(ix+1,iy+1,iz,p+1,q,r,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		     offd_data[o_cnt++] = value[1];
                   }
@@ -1212,28 +1212,28 @@ GenerateLaplacian27pt(MPI_Comm comm,
                {
    	          if (ix > nx_part[p])
    	          {
-      		     offd_j[o_cnt] =map3(ix-1,iy+1,iz,p,q+1,r,P,Q,R,
+      		     offd_j[o_cnt] =hypre_map3(ix-1,iy+1,iz,p,q+1,r,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		     offd_data[o_cnt++] = value[1];
    	          }
    	          else if (ix)
    	          {
-      		     offd_j[o_cnt] =map3(ix-1,iy+1,iz,p-1,q+1,r,P,Q,R,
+      		     offd_j[o_cnt] =hypre_map3(ix-1,iy+1,iz,p-1,q+1,r,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		     offd_data[o_cnt++] = value[1];
    	          }
-      		  offd_j[o_cnt] =map3(ix,iy+1,iz,p,q+1,r,P,Q,R,
+      		  offd_j[o_cnt] =hypre_map3(ix,iy+1,iz,p,q+1,r,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		  offd_data[o_cnt++] = value[1];
    	          if (ix < nx_part[p+1]-1)
    	          {
-      		     offd_j[o_cnt] =map3(ix+1,iy+1,iz,p,q+1,r,P,Q,R,
+      		     offd_j[o_cnt] =hypre_map3(ix+1,iy+1,iz,p,q+1,r,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		     offd_data[o_cnt++] = value[1];
    	          }
    	          else if (ix < nx-1)
    	          {
-      		     offd_j[o_cnt] =map3(ix+1,iy+1,iz,p+1,q+1,r,P,Q,R,
+      		     offd_j[o_cnt] =hypre_map3(ix+1,iy+1,iz,p+1,q+1,r,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		     offd_data[o_cnt++] = value[1];
    	          }
@@ -1252,7 +1252,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
       	          {
       	             if (ix) 
    	             {
-      		        offd_j[o_cnt] =map3(ix-1,iy-1,iz+1,p-1,q,r,P,Q,R,
+      		        offd_j[o_cnt] =hypre_map3(ix-1,iy-1,iz+1,p-1,q,r,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		        offd_data[o_cnt++] = value[1];
    	             }
@@ -1268,7 +1268,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
       	          {
       	             if (ix+1 < nx) 
    	             {
-      		        offd_j[o_cnt] =map3(ix+1,iy-1,iz+1,p+1,q,r,P,Q,R,
+      		        offd_j[o_cnt] =hypre_map3(ix+1,iy-1,iz+1,p+1,q,r,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		        offd_data[o_cnt++] = value[1];
    	             }
@@ -1280,28 +1280,28 @@ GenerateLaplacian27pt(MPI_Comm comm,
                   {
       	             if (ix > nx_part[p])
       	             {
-      		        offd_j[o_cnt] =map3(ix-1,iy-1,iz+1,p,q-1,r,P,Q,R,
+      		        offd_j[o_cnt] =hypre_map3(ix-1,iy-1,iz+1,p,q-1,r,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		        offd_data[o_cnt++] = value[1];
       	             }
       	             else if (ix)
       	             {
-      		        offd_j[o_cnt] =map3(ix-1,iy-1,iz+1,p-1,q-1,r,P,Q,R,
+      		        offd_j[o_cnt] =hypre_map3(ix-1,iy-1,iz+1,p-1,q-1,r,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		        offd_data[o_cnt++] = value[1];
       	             }
-      		     offd_j[o_cnt] =map3(ix,iy-1,iz+1,p,q-1,r,P,Q,R,
+      		     offd_j[o_cnt] =hypre_map3(ix,iy-1,iz+1,p,q-1,r,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		     offd_data[o_cnt++] = value[1];
       	             if (ix < nx_part[p+1]-1)
       	             {
-      		        offd_j[o_cnt] =map3(ix+1,iy-1,iz+1,p,q-1,r,P,Q,R,
+      		        offd_j[o_cnt] =hypre_map3(ix+1,iy-1,iz+1,p,q-1,r,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		        offd_data[o_cnt++] = value[1];
       	             }
       	             else if (ix < nx-1)
       	             {
-      		        offd_j[o_cnt] =map3(ix+1,iy-1,iz+1,p+1,q-1,r,P,Q,R,
+      		        offd_j[o_cnt] =hypre_map3(ix+1,iy-1,iz+1,p+1,q-1,r,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		        offd_data[o_cnt++] = value[1];
       	             }
@@ -1316,7 +1316,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
                {
                   if (ix) 
                   {
-      		     offd_j[o_cnt] =map3(ix-1,iy,iz+1,p-1,q,r,P,Q,R,
+      		     offd_j[o_cnt] =hypre_map3(ix-1,iy,iz+1,p-1,q,r,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		     offd_data[o_cnt++] = value[1];
                   }
@@ -1332,7 +1332,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
                {
                   if (ix+1 < nx) 
                   {
-      		     offd_j[o_cnt] =map3(ix+1,iy,iz+1,p+1,q,r,P,Q,R,
+      		     offd_j[o_cnt] =hypre_map3(ix+1,iy,iz+1,p+1,q,r,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		     offd_data[o_cnt++] = value[1];
                   }
@@ -1348,7 +1348,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
       	          {
       	             if (ix) 
                      {
-      		        offd_j[o_cnt] =map3(ix-1,iy+1,iz+1,p-1,q,r,P,Q,R,
+      		        offd_j[o_cnt] =hypre_map3(ix-1,iy+1,iz+1,p-1,q,r,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		        offd_data[o_cnt++] = value[1];
                      }
@@ -1364,7 +1364,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
       	          {
       	             if (ix+1 < nx) 
                      {
-      		        offd_j[o_cnt] =map3(ix+1,iy+1,iz+1,p+1,q,r,P,Q,R,
+      		        offd_j[o_cnt] =hypre_map3(ix+1,iy+1,iz+1,p+1,q,r,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		        offd_data[o_cnt++] = value[1];
                      }
@@ -1376,28 +1376,28 @@ GenerateLaplacian27pt(MPI_Comm comm,
                   {
       	             if (ix > nx_part[p])
       	             {
-      		        offd_j[o_cnt] =map3(ix-1,iy+1,iz+1,p,q+1,r,P,Q,R,
+      		        offd_j[o_cnt] =hypre_map3(ix-1,iy+1,iz+1,p,q+1,r,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		        offd_data[o_cnt++] = value[1];
       	             }
       	             else if (ix)
       	             {
-      		        offd_j[o_cnt] =map3(ix-1,iy+1,iz+1,p-1,q+1,r,P,Q,R,
+      		        offd_j[o_cnt] =hypre_map3(ix-1,iy+1,iz+1,p-1,q+1,r,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		        offd_data[o_cnt++] = value[1];
       	             }
-      		     offd_j[o_cnt] =map3(ix,iy+1,iz+1,p,q+1,r,P,Q,R,
+      		     offd_j[o_cnt] =hypre_map3(ix,iy+1,iz+1,p,q+1,r,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		     offd_data[o_cnt++] = value[1];
       	             if (ix < nx_part[p+1]-1)
       	             {
-      		        offd_j[o_cnt] =map3(ix+1,iy+1,iz+1,p,q+1,r,P,Q,R,
+      		        offd_j[o_cnt] =hypre_map3(ix+1,iy+1,iz+1,p,q+1,r,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		        offd_data[o_cnt++] = value[1];
       	             }
       	             else if (ix < nx-1)
       	             {
-      		        offd_j[o_cnt] =map3(ix+1,iy+1,iz+1,p+1,q+1,r,P,Q,R,
+      		        offd_j[o_cnt] =hypre_map3(ix+1,iy+1,iz+1,p+1,q+1,r,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		        offd_data[o_cnt++] = value[1];
       	             }
@@ -1412,7 +1412,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
                   {
       	             if (ix > nx_part[p])
       	             {
-      		        offd_j[o_cnt] =map3(ix-1,iy-1,iz+1,p,q,r+1,P,Q,R,
+      		        offd_j[o_cnt] =hypre_map3(ix-1,iy-1,iz+1,p,q,r+1,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		        offd_data[o_cnt++] = value[1];
       	             }
@@ -1420,17 +1420,17 @@ GenerateLaplacian27pt(MPI_Comm comm,
       	             {
       	                if (ix) 
       	                {
-      		           offd_j[o_cnt] =map3(ix-1,iy-1,iz+1,p-1,q,r+1,P,Q,R,
+      		           offd_j[o_cnt] =hypre_map3(ix-1,iy-1,iz+1,p-1,q,r+1,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		           offd_data[o_cnt++] = value[1];
       	                }
       	             }
-      		     offd_j[o_cnt] =map3(ix,iy-1,iz+1,p,q,r+1,P,Q,R,
+      		     offd_j[o_cnt] =hypre_map3(ix,iy-1,iz+1,p,q,r+1,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		     offd_data[o_cnt++] = value[1];
       	             if (ix < nx_part[p+1]-1)
       	             {
-      		        offd_j[o_cnt] =map3(ix+1,iy-1,iz+1,p,q,r+1,P,Q,R,
+      		        offd_j[o_cnt] =hypre_map3(ix+1,iy-1,iz+1,p,q,r+1,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		        offd_data[o_cnt++] = value[1];
       	             }
@@ -1438,7 +1438,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
       	             {
       	                if (ix+1 < nx) 
       	                {
-      		           offd_j[o_cnt] =map3(ix+1,iy-1,iz+1,p+1,q,r+1,P,Q,R,
+      		           offd_j[o_cnt] =hypre_map3(ix+1,iy-1,iz+1,p+1,q,r+1,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		           offd_data[o_cnt++] = value[1];
       	                }
@@ -1450,28 +1450,28 @@ GenerateLaplacian27pt(MPI_Comm comm,
                      {
       	                if (ix > nx_part[p])
       	                {
-      		           offd_j[o_cnt] =map3(ix-1,iy-1,iz+1,p,q-1,r+1,P,Q,R,
+      		           offd_j[o_cnt] =hypre_map3(ix-1,iy-1,iz+1,p,q-1,r+1,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		           offd_data[o_cnt++] = value[1];
       	                }
       	                else if (ix)
       	                {
-      		           offd_j[o_cnt] =map3(ix-1,iy-1,iz+1,p-1,q-1,r+1,P,Q,R,
+      		           offd_j[o_cnt] =hypre_map3(ix-1,iy-1,iz+1,p-1,q-1,r+1,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		           offd_data[o_cnt++] = value[1];
       	                }
-      		        offd_j[o_cnt] =map3(ix,iy-1,iz+1,p,q-1,r+1,P,Q,R,
+      		        offd_j[o_cnt] =hypre_map3(ix,iy-1,iz+1,p,q-1,r+1,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		        offd_data[o_cnt++] = value[1];
       	                if (ix < nx_part[p+1]-1)
       	                {
-      		           offd_j[o_cnt] =map3(ix+1,iy-1,iz+1,p,q-1,r+1,P,Q,R,
+      		           offd_j[o_cnt] =hypre_map3(ix+1,iy-1,iz+1,p,q-1,r+1,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		           offd_data[o_cnt++] = value[1];
       	                }
       	                else if (ix < nx-1)
       	                {
-      		           offd_j[o_cnt] =map3(ix+1,iy-1,iz+1,p+1,q-1,r+1,P,Q,R,
+      		           offd_j[o_cnt] =hypre_map3(ix+1,iy-1,iz+1,p+1,q-1,r+1,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		           offd_data[o_cnt++] = value[1];
       	                }
@@ -1479,7 +1479,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
                   }
                   if (ix > nx_part[p]) 
                   {
-      		     offd_j[o_cnt] =map3(ix-1,iy,iz+1,p,q,r+1,P,Q,R,
+      		     offd_j[o_cnt] =hypre_map3(ix-1,iy,iz+1,p,q,r+1,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		     offd_data[o_cnt++] = value[1];
                   }
@@ -1487,17 +1487,17 @@ GenerateLaplacian27pt(MPI_Comm comm,
                   {
                      if (ix) 
                      {
-      		        offd_j[o_cnt] =map3(ix-1,iy,iz+1,p-1,q,r+1,P,Q,R,
+      		        offd_j[o_cnt] =hypre_map3(ix-1,iy,iz+1,p-1,q,r+1,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		        offd_data[o_cnt++] = value[1];
                      }
                   }
-      		  offd_j[o_cnt] =map3(ix,iy,iz+1,p,q,r+1,P,Q,R,
+      		  offd_j[o_cnt] =hypre_map3(ix,iy,iz+1,p,q,r+1,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		  offd_data[o_cnt++] = value[1];
                   if (ix+1 < nx_part[p+1]) 
                   {
-      		     offd_j[o_cnt] =map3(ix+1,iy,iz+1,p,q,r+1,P,Q,R,
+      		     offd_j[o_cnt] =hypre_map3(ix+1,iy,iz+1,p,q,r+1,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		     offd_data[o_cnt++] = value[1];
                   }
@@ -1505,7 +1505,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
                   {
                      if (ix+1 < nx) 
                      {
-      		        offd_j[o_cnt] =map3(ix+1,iy,iz+1,p+1,q,r+1,P,Q,R,
+      		        offd_j[o_cnt] =hypre_map3(ix+1,iy,iz+1,p+1,q,r+1,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		        offd_data[o_cnt++] = value[1];
                      }
@@ -1514,7 +1514,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
                   {
       	             if (ix > nx_part[p])
       	             {
-      		        offd_j[o_cnt] =map3(ix-1,iy+1,iz+1,p,q,r+1,P,Q,R,
+      		        offd_j[o_cnt] =hypre_map3(ix-1,iy+1,iz+1,p,q,r+1,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		        offd_data[o_cnt++] = value[1];
       	             }
@@ -1522,17 +1522,17 @@ GenerateLaplacian27pt(MPI_Comm comm,
       	             {
       	                if (ix) 
       	                {
-      		           offd_j[o_cnt] =map3(ix-1,iy+1,iz+1,p-1,q,r+1,P,Q,R,
+      		           offd_j[o_cnt] =hypre_map3(ix-1,iy+1,iz+1,p-1,q,r+1,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		           offd_data[o_cnt++] = value[1];
       	                }
       	             }
-      		     offd_j[o_cnt] =map3(ix,iy+1,iz+1,p,q,r+1,P,Q,R,
+      		     offd_j[o_cnt] =hypre_map3(ix,iy+1,iz+1,p,q,r+1,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		     offd_data[o_cnt++] = value[1];
       	             if (ix < nx_part[p+1]-1)
       	             {
-      		        offd_j[o_cnt] =map3(ix+1,iy+1,iz+1,p,q,r+1,P,Q,R,
+      		        offd_j[o_cnt] =hypre_map3(ix+1,iy+1,iz+1,p,q,r+1,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		        offd_data[o_cnt++] = value[1];
       	             }
@@ -1540,7 +1540,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
       	             {
       	                if (ix+1 < nx) 
       	                {
-      		           offd_j[o_cnt] =map3(ix+1,iy+1,iz+1,p+1,q,r+1,P,Q,R,
+      		           offd_j[o_cnt] =hypre_map3(ix+1,iy+1,iz+1,p+1,q,r+1,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		           offd_data[o_cnt++] = value[1];
       	                }
@@ -1552,28 +1552,28 @@ GenerateLaplacian27pt(MPI_Comm comm,
                      {
       	                if (ix > nx_part[p])
       	                {
-      		           offd_j[o_cnt] =map3(ix-1,iy+1,iz+1,p,q+1,r+1,P,Q,R,
+      		           offd_j[o_cnt] =hypre_map3(ix-1,iy+1,iz+1,p,q+1,r+1,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		           offd_data[o_cnt++] = value[1];
       	                }
       	                else if (ix)
       	                {
-      		           offd_j[o_cnt] =map3(ix-1,iy+1,iz+1,p-1,q+1,r+1,P,Q,R,
+      		           offd_j[o_cnt] =hypre_map3(ix-1,iy+1,iz+1,p-1,q+1,r+1,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		           offd_data[o_cnt++] = value[1];
       	                }
-      		        offd_j[o_cnt] =map3(ix,iy+1,iz+1,p,q+1,r+1,P,Q,R,
+      		        offd_j[o_cnt] =hypre_map3(ix,iy+1,iz+1,p,q+1,r+1,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		        offd_data[o_cnt++] = value[1];
       	                if (ix < nx_part[p+1]-1)
       	                {
-      		           offd_j[o_cnt] =map3(ix+1,iy+1,iz+1,p,q+1,r+1,P,Q,R,
+      		           offd_j[o_cnt] =hypre_map3(ix+1,iy+1,iz+1,p,q+1,r+1,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		           offd_data[o_cnt++] = value[1];
       	                }
       	                else if (ix < nx-1)
       	                {
-      		           offd_j[o_cnt] =map3(ix+1,iy+1,iz+1,p+1,q+1,r+1,P,Q,R,
+      		           offd_j[o_cnt] =hypre_map3(ix+1,iy+1,iz+1,p+1,q+1,r+1,P,Q,R,
 					nx_part,ny_part,nz_part,global_part);
       		           offd_data[o_cnt++] = value[1];
       	                }
@@ -1652,7 +1652,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
  *--------------------------------------------------------------------------*/
 
 int
-map3( int  ix,
+hypre_map3( int  ix,
       int  iy,
       int  iz,
       int  p,

@@ -215,7 +215,7 @@ GenerateLaplacian( MPI_Comm comm,
             {
                if (iz) 
                {
-                  offd_j[o_cnt] = map(ix,iy,iz-1,p,q,r-1,P,Q,R,
+                  offd_j[o_cnt] = hypre_map(ix,iy,iz-1,p,q,r-1,P,Q,R,
                                       nx_part,ny_part,nz_part,global_part);
                   offd_data[o_cnt++] = value[3];
                }
@@ -229,7 +229,7 @@ GenerateLaplacian( MPI_Comm comm,
             {
                if (iy) 
                {
-                  offd_j[o_cnt] = map(ix,iy-1,iz,p,q-1,r,P,Q,R,
+                  offd_j[o_cnt] = hypre_map(ix,iy-1,iz,p,q-1,r,P,Q,R,
                                       nx_part,ny_part,nz_part,global_part);
                   offd_data[o_cnt++] = value[2];
                }
@@ -243,7 +243,7 @@ GenerateLaplacian( MPI_Comm comm,
             {
                if (ix) 
                {
-                  offd_j[o_cnt] = map(ix-1,iy,iz,p-1,q,r,P,Q,R,
+                  offd_j[o_cnt] = hypre_map(ix-1,iy,iz,p-1,q,r,P,Q,R,
                                       nx_part,ny_part,nz_part,global_part);
                   offd_data[o_cnt++] = value[1];
                }
@@ -257,7 +257,7 @@ GenerateLaplacian( MPI_Comm comm,
             {
                if (ix+1 < nx) 
                {
-                  offd_j[o_cnt] = map(ix+1,iy,iz,p+1,q,r,P,Q,R,
+                  offd_j[o_cnt] = hypre_map(ix+1,iy,iz,p+1,q,r,P,Q,R,
                                       nx_part,ny_part,nz_part,global_part);
                   offd_data[o_cnt++] = value[1];
                }
@@ -271,7 +271,7 @@ GenerateLaplacian( MPI_Comm comm,
             {
                if (iy+1 < ny) 
                {
-                  offd_j[o_cnt] = map(ix,iy+1,iz,p,q+1,r,P,Q,R,
+                  offd_j[o_cnt] = hypre_map(ix,iy+1,iz,p,q+1,r,P,Q,R,
                                       nx_part,ny_part,nz_part,global_part);
                   offd_data[o_cnt++] = value[2];
                }
@@ -285,7 +285,7 @@ GenerateLaplacian( MPI_Comm comm,
             {
                if (iz+1 < nz) 
                {
-                  offd_j[o_cnt] = map(ix,iy,iz+1,p,q,r+1,P,Q,R,
+                  offd_j[o_cnt] = hypre_map(ix,iy,iz+1,p,q,r+1,P,Q,R,
                                       nx_part,ny_part,nz_part,global_part);
                   offd_data[o_cnt++] = value[3];
                }
@@ -342,7 +342,7 @@ GenerateLaplacian( MPI_Comm comm,
  *--------------------------------------------------------------------------*/
 
 int
-map( int  ix,
+hypre_map( int  ix,
      int  iy,
      int  iz,
      int  p,
