@@ -141,6 +141,7 @@ fi
 
 DIST_DIR=`pwd`/${TAR_FILE%.tar.gz}
 SYS_TYPE=`uname -s`
+CONFIGURE="./configure --with-babel"
 
 #===========================================================================
 # Build and do a temporary install in the UPDATE subdirectory
@@ -155,7 +156,7 @@ then
         HYPRE_INSTALL_DIR=$DIST_DIR
         export HYPRE_INSTALL_DIR
         cd src
-        ./configure
+        $CONFIGURE
         make install
         make veryclean
     )
@@ -165,7 +166,7 @@ then
 	mkdir -p $HYPRE_INSTALL_DIR
         
         cd src
-        ./configure --enable-debug
+        $CONFIGURE --enable-debug
         make install
         make veryclean
     )
@@ -180,7 +181,7 @@ then
 	mkdir -p $HYPRE_INSTALL_DIR
         
         cd src
-        ./configure --without-MPI --with-COMM_SIMPLE
+        $CONFIGURE --without-MPI --with-COMM_SIMPLE
         make install
         make veryclean
     )
@@ -190,7 +191,7 @@ then
 	mkdir -p $HYPRE_INSTALL_DIR
         
         cd src
-        ./configure --without-MPI --with-COMM_SIMPLE --enable-debug
+        $CONFIGURE --without-MPI --with-COMM_SIMPLE --enable-debug
         make install
         make veryclean
     )
@@ -209,7 +210,7 @@ then
 	mkdir -p $HYPRE_INSTALL_DIR
         
         cd src
-        ./configure --with-openmp
+        $CONFIGURE --with-openmp
         make install
         make veryclean
     )
@@ -219,7 +220,7 @@ then
 	mkdir -p $HYPRE_INSTALL_DIR
         
         cd src
-        ./configure --with-openmp --enable-debug
+        $CONFIGURE --with-openmp --enable-debug
         make install
         make veryclean
     )
