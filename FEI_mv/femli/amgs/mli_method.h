@@ -39,7 +39,7 @@ class MLI_Method
 {
    char     methodName_[200];
    int      methodID_;
-   MPI_Comm mpi_comm;
+   MPI_Comm mpiComm_;
 
 public :
 
