@@ -1,8 +1,8 @@
 /*
  * File:          SIDL_BaseInterface_IOR.c
- * Symbol:        SIDL.BaseInterface-v0.8.1
+ * Symbol:        SIDL.BaseInterface-v0.8.2
  * Symbol Type:   interface
- * Babel Version: 0.8.0
+ * Babel Version: 0.8.2
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Intermediate Object Representation for SIDL.BaseInterface
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.0
+ * babel-version = 0.8.2
  */
 
 #include <stdlib.h>
@@ -136,6 +136,17 @@ remote_SIDL_BaseInterface_isType(
 }
 
 /*
+ * REMOTE METHOD STUB:getClassInfo
+ */
+
+static struct SIDL_ClassInfo__object*
+remote_SIDL_BaseInterface_getClassInfo(
+  void* self)
+{
+  return (struct SIDL_ClassInfo__object*) 0;
+}
+
+/*
  * REMOTE EPV: create remote entry point vectors (EPVs).
  */
 
@@ -143,13 +154,14 @@ static void SIDL_BaseInterface__init_remote_epv(void)
 {
   struct SIDL_BaseInterface__epv* epv = &s_rem__sidl_baseinterface;
 
-  epv->f__cast     = remote_SIDL_BaseInterface__cast;
-  epv->f__delete   = remote_SIDL_BaseInterface__delete;
-  epv->f_addRef    = remote_SIDL_BaseInterface_addRef;
-  epv->f_deleteRef = remote_SIDL_BaseInterface_deleteRef;
-  epv->f_isSame    = remote_SIDL_BaseInterface_isSame;
-  epv->f_queryInt  = remote_SIDL_BaseInterface_queryInt;
-  epv->f_isType    = remote_SIDL_BaseInterface_isType;
+  epv->f__cast        = remote_SIDL_BaseInterface__cast;
+  epv->f__delete      = remote_SIDL_BaseInterface__delete;
+  epv->f_addRef       = remote_SIDL_BaseInterface_addRef;
+  epv->f_deleteRef    = remote_SIDL_BaseInterface_deleteRef;
+  epv->f_isSame       = remote_SIDL_BaseInterface_isSame;
+  epv->f_queryInt     = remote_SIDL_BaseInterface_queryInt;
+  epv->f_isType       = remote_SIDL_BaseInterface_isType;
+  epv->f_getClassInfo = remote_SIDL_BaseInterface_getClassInfo;
   s_remote_initialized = 1;
 }
 

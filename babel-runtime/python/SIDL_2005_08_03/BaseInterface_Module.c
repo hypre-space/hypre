@@ -1,8 +1,8 @@
 /*
  * File:          BaseInterface_Module.c
- * Symbol:        SIDL.BaseInterface-v0.8.1
+ * Symbol:        SIDL.BaseInterface-v0.8.2
  * Symbol Type:   interface
- * Babel Version: 0.8.0
+ * Babel Version: 0.8.2
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   implement a C extension type for a SIDL extendable
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.0
+ * babel-version = 0.8.2
  */
 
 /*
@@ -47,7 +47,7 @@
 
 
 /**
- * Symbol "SIDL.BaseInterface" (version 0.8.1)
+ * Symbol "SIDL.BaseInterface" (version 0.8.2)
  * 
  * Every interface in <code>SIDL</code> implicitly inherits
  * from <code>BaseInterface</code>, and it is implemented
@@ -70,6 +70,7 @@
 #ifndef included_SIDL_interface_IOR_h
 #include "SIDL_interface_IOR.h"
 #endif
+#include "SIDL_ClassInfo_Module.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -229,6 +230,35 @@ pStub_BaseInterface_isType(PyObject *_self, PyObject *_args,                  \
 }
 
 static PyObject *
+pStub_BaseInterface_getClassInfo(PyObject *_self, PyObject *_args,            \
+  PyObject *_kwdict) {
+  PyObject *_return_value = NULL;
+  struct SIDL_BaseInterface__object *_self_ior =
+    ((struct SIDL_BaseInterface__object *)
+     SIDL_Cast(_self, "SIDL.BaseInterface"));
+  if (_self_ior) {
+    static char *_kwlist[] = {
+      NULL
+    };
+    const int _okay = PyArg_ParseTupleAndKeywords(
+      _args, _kwdict, 
+      "", _kwlist);
+    if (_okay) {
+      struct SIDL_ClassInfo__object* _return = NULL;
+      _return = (*(_self_ior->d_epv->f_getClassInfo))(_self_ior->d_object);
+      _return_value = Py_BuildValue(
+        "O&",
+        (void *)SIDL_ClassInfo__wrap, _return);
+    }
+  }
+  else {
+    PyErr_SetString(PyExc_TypeError, 
+      "self pointer is not a SIDL.BaseInterface");
+  }
+  return _return_value;
+}
+
+static PyObject *
 _createCast(PyObject *self, PyObject *args) {
   struct SIDL_BaseInterface__object *optarg = NULL;
   int _okay = PyArg_ParseTuple(args, "O&",                                    \
@@ -283,6 +313,16 @@ object, and delete the object if the reference is non-positive.\n\
 Objects in <code>SIDL</code> have an intrinsic reference count.\n\
 Clients should call this method whenever they remove a\n\
 reference to an object or interface."
+   },
+  { "getClassInfo", (PyCFunction)pStub_BaseInterface_getClassInfo,
+  (METH_VARARGS | METH_KEYWORDS),
+"\
+getClassInfo()\n\
+RETURNS\n\
+   (SIDL.ClassInfo _return)\n\
+\n\
+\
+Return the meta-data about the class implementing this interface."
    },
   { "isSame", (PyCFunction)pStub_BaseInterface_isSame,
   (METH_VARARGS | METH_KEYWORDS),
@@ -514,4 +554,5 @@ by <code>BaseClass</code> below."
   if (PyErr_Occurred()) {
     Py_FatalError("Error importing Numeric Python module.");
   }
+  SIDL_ClassInfo__import();
 }

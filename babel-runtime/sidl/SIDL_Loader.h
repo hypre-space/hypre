@@ -1,8 +1,8 @@
 /*
  * File:          SIDL_Loader.h
- * Symbol:        SIDL.Loader-v0.8.1
+ * Symbol:        SIDL.Loader-v0.8.2
  * Symbol Type:   class
- * Babel Version: 0.8.0
+ * Babel Version: 0.8.2
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side glue code for SIDL.Loader
@@ -32,14 +32,14 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.0
+ * babel-version = 0.8.2
  */
 
 #ifndef included_SIDL_Loader_h
 #define included_SIDL_Loader_h
 
 /**
- * Symbol "SIDL.Loader" (version 0.8.1)
+ * Symbol "SIDL.Loader" (version 0.8.2)
  * 
  * Class <code>Loader</code> manages dyanamic loading and symbol name
  * resolution for the SIDL runtime system.  The <code>Loader</code> class
@@ -480,6 +480,76 @@ int
 SIDL_Loader__array_isRowOrder(const struct SIDL_Loader__array* array);
 
 /**
+ * Create a sub-array of another array. This resulting
+ * array shares data with the original array. The new
+ * array can be of the same dimension or potentially
+ * less assuming the original array has dimension
+ * greater than 1.  If you are removing dimension,
+ * indicate the dimensions to remove by setting
+ * numElem[i] to zero for any dimension i wthat should
+ * go away in the new array.  The meaning of each
+ * argument is covered below.
+ * 
+ * src       the array to be created will be a subset
+ *           of this array. If this argument is NULL,
+ *           NULL will be returned. The array returned
+ *           borrows data from src, so modifying src or
+ *           the returned array will modify both
+ *           arrays.
+ * 
+ * dimen     this argument must be greater than zero
+ *           and less than or equal to the dimension of
+ *           src. An illegal value will cause a NULL
+ *           return value.
+ * 
+ * numElem   this specifies how many elements from src
+ *           should be taken in each dimension. A zero
+ *           entry indicates that the dimension should
+ *           not appear in the new array.  This
+ *           argument should be an array with an entry
+ *           for each dimension of src.  Passing NULL
+ *           here will cause NULL to be returned.  If
+ *           srcStart[i] + numElem[i]*srcStride[i] is
+ *           greater than upper[i] for src or if
+ *           srcStart[i] + numElem[i]*srcStride[i] is
+ *           less than lower[i] for src, NULL will be
+ *           returned.
+ * 
+ * srcStart  this array holds the coordinates of the
+ *           first element of the new array. If this
+ *           argument is NULL, the first element of src
+ *           will be the first element of the new
+ *           array. If non-NULL, this argument should
+ *           be an array with an entry for each
+ *           dimension of src.  If srcStart[i] is less
+ *           than lower[i] for the array src, NULL will
+ *           be returned.
+ * 
+ * srcStride this array lets you specify the stride
+ *           between elements in each dimension of
+ *           src. This stride is relative to the
+ *           coordinate system of the src array. If
+ *           this argument is NULL, the stride is taken
+ *           to be one in each dimension.  If non-NULL,
+ *           this argument should be an array with an
+ *           entry for each dimension of src.
+ * 
+ * newLower  this argument is like lower in a create
+ *           method. It sets the coordinates for the
+ *           first element in the new array.  If this
+ *           argument is NULL, the values indicated by
+ *           srcStart will be used. If non-NULL, this
+ *           should be an array with dimen elements.
+ */
+void
+SIDL_Loader__array_slice(const struct SIDL_Loader__array* src,
+                               int32_t        dimen,
+                               const int32_t  numElem[],
+                               const int32_t  *srcStart,
+                               const int32_t  *srcStride,
+                               const int32_t  *newStart);
+
+/**
  * Copy the contents of one array (src) to a second array
  * (dest). For the copy to take place, both arrays must
  * exist and be of the same dimension. This method will
@@ -530,7 +600,7 @@ SIDL_Loader__array_copy(const struct SIDL_Loader__array* src,
 struct SIDL_Loader__array*
 SIDL_Loader__array_ensure(struct SIDL_Loader__array* src,
                           int32_t dimen,
-int     ordering);
+                          int     ordering);
 
 #ifdef __cplusplus
 }

@@ -1,8 +1,8 @@
 /*
  * File:          SIDL_BaseException_IOR.h
- * Symbol:        SIDL.BaseException-v0.8.1
+ * Symbol:        SIDL.BaseException-v0.8.2
  * Symbol Type:   class
- * Babel Version: 0.8.0
+ * Babel Version: 0.8.2
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Intermediate Object Representation for SIDL.BaseException
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.0
+ * babel-version = 0.8.2
  */
 
 #ifndef included_SIDL_BaseException_IOR_h
@@ -50,7 +50,7 @@ extern "C" {
 #endif
 
 /*
- * Symbol "SIDL.BaseException" (version 0.8.1)
+ * Symbol "SIDL.BaseException" (version 0.8.2)
  * 
  * Every exception inherits from <code>BaseException</code>.  This class
  * provides basic functionality to get and set error messages and stack
@@ -96,7 +96,7 @@ struct SIDL_BaseException__epv {
     struct SIDL_BaseException__object* self);
   void (*f__dtor)(
     struct SIDL_BaseException__object* self);
-  /* Methods introduced in SIDL.BaseInterface-v0.8.1 */
+  /* Methods introduced in SIDL.BaseInterface-v0.8.2 */
   void (*f_addRef)(
     struct SIDL_BaseException__object* self);
   void (*f_deleteRef)(
@@ -110,10 +110,10 @@ struct SIDL_BaseException__epv {
   SIDL_bool (*f_isType)(
     struct SIDL_BaseException__object* self,
     const char* name);
-  /* Methods introduced in SIDL.BaseClass-v0.8.1 */
   struct SIDL_ClassInfo__object* (*f_getClassInfo)(
     struct SIDL_BaseException__object* self);
-  /* Methods introduced in SIDL.BaseException-v0.8.1 */
+  /* Methods introduced in SIDL.BaseClass-v0.8.2 */
+  /* Methods introduced in SIDL.BaseException-v0.8.2 */
   char* (*f_getNote)(
     struct SIDL_BaseException__object* self);
   void (*f_setNote)(

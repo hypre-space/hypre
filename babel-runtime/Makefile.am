@@ -31,7 +31,7 @@
 ## Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 AUTOMAKE_OPTIONS = foreign no-dependencies no-installinfo	\
-                   no-installman no-texinfo.tex 1.5
+                   no-installman no-texinfo.tex 1.7
 
 SUBDIRS = bin config sidl java
 
@@ -79,7 +79,7 @@ all-local-python: all-local-python1
 clean-local-python: clean-local-python1
 endif
 
-dist-hook: dist-hook-python
+dist-hook: sidl/libsidl.la dist-hook-python
 
 if SUPPORT_PYTHON
 all-local: all-local-python
@@ -90,6 +90,9 @@ else
 all-local clean-local install-data-am uninstall-am:
 	@echo "Python not supported"
 endif
+
+sidl/libsidl.la:
+	@-cd sidl && $(MAKE) libsidl.la
 
 all-local-python1: python/babel-stamp
 python/babel-stamp: $(PYTHONISHFILES)

@@ -1,8 +1,8 @@
 /*
  * File:          SIDL_ClassInfoI_Impl.c
- * Symbol:        SIDL.ClassInfoI-v0.8.1
+ * Symbol:        SIDL.ClassInfoI-v0.8.2
  * Symbol Type:   class
- * Babel Version: 0.8.0
+ * Babel Version: 0.8.2
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Server-side implementation for SIDL.ClassInfoI
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.8.0
+ * babel-version = 0.8.2
  */
 
 /*
@@ -41,7 +41,7 @@
  */
 
 /*
- * Symbol "SIDL.ClassInfoI" (version 0.8.1)
+ * Symbol "SIDL.ClassInfoI" (version 0.8.2)
  * 
  * An implementation of the <code>ClassInfo</code> interface. This provides
  * methods to set all the attributes that are read-only in the

@@ -215,9 +215,10 @@ SIDLFortran77Symbol(sidl_bool__array_get1_f,
    int32_t *i1,
    SIDL_bool *result)
 {
-  *result = 
+  SIDL_bool tmp =
     SIDL_bool__array_get1((struct SIDL_bool__array *)(ptrdiff_t)*array,
      *i1);
+  *result = (tmp ? SIDL_F77_TRUE : SIDL_F77_FALSE);
 }
 
 void
@@ -228,9 +229,10 @@ SIDLFortran77Symbol(sidl_bool__array_set1_f,
    int32_t *i1,
    SIDL_bool *value)
 {
+  SIDL_bool tmp = ((*value == SIDL_F77_TRUE) ? TRUE : FALSE);
   SIDL_bool__array_set1((struct SIDL_bool__array *)(ptrdiff_t)*array,
    *i1,
-   *value);
+   tmp);
 }
 
 void
@@ -242,10 +244,11 @@ SIDLFortran77Symbol(sidl_bool__array_get2_f,
    int32_t *i2,
    SIDL_bool *result)
 {
-  *result = 
+  SIDL_bool tmp =
     SIDL_bool__array_get2((struct SIDL_bool__array *)(ptrdiff_t)*array,
      *i1,
      *i2);
+  *result = (tmp ? SIDL_F77_TRUE : SIDL_F77_FALSE);
 }
 
 void
@@ -257,10 +260,11 @@ SIDLFortran77Symbol(sidl_bool__array_set2_f,
    int32_t *i2,
    SIDL_bool *value)
 {
+  SIDL_bool tmp = ((*value == SIDL_F77_TRUE) ? TRUE : FALSE);
   SIDL_bool__array_set2((struct SIDL_bool__array *)(ptrdiff_t)*array,
    *i1,
    *i2,
-   *value);
+   tmp);
 }
 
 void
@@ -273,11 +277,12 @@ SIDLFortran77Symbol(sidl_bool__array_get3_f,
    int32_t *i3,
    SIDL_bool *result)
 {
-  *result = 
+  SIDL_bool tmp =
     SIDL_bool__array_get3((struct SIDL_bool__array *)(ptrdiff_t)*array,
      *i1,
      *i2,
      *i3);
+  *result = (tmp ? SIDL_F77_TRUE : SIDL_F77_FALSE);
 }
 
 void
@@ -290,11 +295,12 @@ SIDLFortran77Symbol(sidl_bool__array_set3_f,
    int32_t *i3,
    SIDL_bool *value)
 {
+  SIDL_bool tmp = ((*value == SIDL_F77_TRUE) ? TRUE : FALSE);
   SIDL_bool__array_set3((struct SIDL_bool__array *)(ptrdiff_t)*array,
    *i1,
    *i2,
    *i3,
-   *value);
+   tmp);
 }
 
 void
@@ -308,12 +314,13 @@ SIDLFortran77Symbol(sidl_bool__array_get4_f,
    int32_t *i4,
    SIDL_bool *result)
 {
-  *result = 
+  SIDL_bool tmp =
     SIDL_bool__array_get4((struct SIDL_bool__array *)(ptrdiff_t)*array,
      *i1,
      *i2,
      *i3,
      *i4);
+  *result = (tmp ? SIDL_F77_TRUE : SIDL_F77_FALSE);
 }
 
 void
@@ -327,12 +334,13 @@ SIDLFortran77Symbol(sidl_bool__array_set4_f,
    int32_t *i4,
    SIDL_bool *value)
 {
+  SIDL_bool tmp = ((*value == SIDL_F77_TRUE) ? TRUE : FALSE);
   SIDL_bool__array_set4((struct SIDL_bool__array *)(ptrdiff_t)*array,
    *i1,
    *i2,
    *i3,
    *i4,
-   *value);
+   tmp);
 }
 
 void
@@ -341,7 +349,8 @@ SIDLFortran77Symbol(sidl_bool__array_set_f,
                     SIDL_bool__array_set_f)
   (int64_t *array, int32_t indices[], SIDL_bool *value)
 {
-  SIDL_bool__array_set((struct SIDL_bool__array *)(ptrdiff_t)*array, indices,  *value);
+  SIDL_bool tmp = ((*value == SIDL_F77_TRUE) ? TRUE : FALSE);
+  SIDL_bool__array_set((struct SIDL_bool__array *)(ptrdiff_t)*array, indices, tmp);
 }
 
 void
@@ -350,8 +359,9 @@ SIDLFortran77Symbol(sidl_bool__array_get_f,
                     SIDL_bool__array_get_f)
   (int64_t *array, int32_t indices[], SIDL_bool *value)
 {
-  *value = 
+  SIDL_bool tmp = 
      SIDL_bool__array_get((struct SIDL_bool__array *)(ptrdiff_t)*array, indices);
+  *value = (tmp ? SIDL_F77_TRUE : SIDL_F77_FALSE);
 }
 
 void
@@ -3146,6 +3156,16 @@ SIDLFortran77Symbol(sidl_char__array_deleteref_f,
 
 
 void
+SIDLFortran77Symbol(sidl_char__array_addref_f,
+                    SIDL_CHAR__ARRAY_ADDREF_F,
+                    SIDL_char__array_addRef_f)
+  (int64_t *array)
+{
+  SIDL_char__array_addRef((struct SIDL_char__array*)(ptrdiff_t)*array);
+}
+
+
+void
 SIDLFortran77Symbol(sidl_string__array_createcol_f,
                     SIDL_STRING__ARRAY_CREATECOL_F,
                     SIDL_string__array_createCol_f)
@@ -3316,6 +3336,16 @@ SIDLFortran77Symbol(sidl_string__array_deleteref_f,
   (int64_t *array)
 {
   SIDL_string__array_deleteRef((struct SIDL_string__array*)(ptrdiff_t)*array);
+}
+
+
+void
+SIDLFortran77Symbol(sidl_string__array_addref_f,
+                    SIDL_STRING__ARRAY_ADDREF_F,
+                    SIDL_string__array_addRef_f)
+  (int64_t *array)
+{
+  SIDL_string__array_addRef((struct SIDL_string__array*)(ptrdiff_t)*array);
 }
 
 
@@ -4029,9 +4059,10 @@ SIDLFortran90Symbol(sidl_bool__array_get1_m,
    int32_t *i1,
    SIDL_bool *result)
 {
-  *result = 
+  SIDL_bool tmp =
     SIDL_bool__array_get1((struct SIDL_bool__array *)(ptrdiff_t)*array,
      *i1);
+  *result = (tmp ? SIDL_F90_TRUE : SIDL_F90_FALSE);
 }
 
 void
@@ -4042,9 +4073,10 @@ SIDLFortran90Symbol(sidl_bool__array_set1_m,
    int32_t *i1,
    SIDL_bool *value)
 {
+  SIDL_bool tmp = ((*value == SIDL_F90_TRUE) ? TRUE : FALSE);
   SIDL_bool__array_set1((struct SIDL_bool__array *)(ptrdiff_t)*array,
    *i1,
-   *value);
+   tmp);
 }
 
 void
@@ -4056,10 +4088,11 @@ SIDLFortran90Symbol(sidl_bool__array_get2_m,
    int32_t *i2,
    SIDL_bool *result)
 {
-  *result = 
+  SIDL_bool tmp =
     SIDL_bool__array_get2((struct SIDL_bool__array *)(ptrdiff_t)*array,
      *i1,
      *i2);
+  *result = (tmp ? SIDL_F90_TRUE : SIDL_F90_FALSE);
 }
 
 void
@@ -4071,10 +4104,11 @@ SIDLFortran90Symbol(sidl_bool__array_set2_m,
    int32_t *i2,
    SIDL_bool *value)
 {
+  SIDL_bool tmp = ((*value == SIDL_F90_TRUE) ? TRUE : FALSE);
   SIDL_bool__array_set2((struct SIDL_bool__array *)(ptrdiff_t)*array,
    *i1,
    *i2,
-   *value);
+   tmp);
 }
 
 void
@@ -4087,11 +4121,12 @@ SIDLFortran90Symbol(sidl_bool__array_get3_m,
    int32_t *i3,
    SIDL_bool *result)
 {
-  *result = 
+  SIDL_bool tmp =
     SIDL_bool__array_get3((struct SIDL_bool__array *)(ptrdiff_t)*array,
      *i1,
      *i2,
      *i3);
+  *result = (tmp ? SIDL_F90_TRUE : SIDL_F90_FALSE);
 }
 
 void
@@ -4104,11 +4139,12 @@ SIDLFortran90Symbol(sidl_bool__array_set3_m,
    int32_t *i3,
    SIDL_bool *value)
 {
+  SIDL_bool tmp = ((*value == SIDL_F90_TRUE) ? TRUE : FALSE);
   SIDL_bool__array_set3((struct SIDL_bool__array *)(ptrdiff_t)*array,
    *i1,
    *i2,
    *i3,
-   *value);
+   tmp);
 }
 
 void
@@ -4122,12 +4158,13 @@ SIDLFortran90Symbol(sidl_bool__array_get4_m,
    int32_t *i4,
    SIDL_bool *result)
 {
-  *result = 
+  SIDL_bool tmp =
     SIDL_bool__array_get4((struct SIDL_bool__array *)(ptrdiff_t)*array,
      *i1,
      *i2,
      *i3,
      *i4);
+  *result = (tmp ? SIDL_F90_TRUE : SIDL_F90_FALSE);
 }
 
 void
@@ -4141,12 +4178,13 @@ SIDLFortran90Symbol(sidl_bool__array_set4_m,
    int32_t *i4,
    SIDL_bool *value)
 {
+  SIDL_bool tmp = ((*value == SIDL_F90_TRUE) ? TRUE : FALSE);
   SIDL_bool__array_set4((struct SIDL_bool__array *)(ptrdiff_t)*array,
    *i1,
    *i2,
    *i3,
    *i4,
-   *value);
+   tmp);
 }
 
 void
@@ -4155,7 +4193,8 @@ SIDLFortran90Symbol(sidl_bool__array_set_m,
                     SIDL_bool__array_set_m)
   (int64_t *array, int32_t indices[], SIDL_bool *value)
 {
-  SIDL_bool__array_set((struct SIDL_bool__array *)(ptrdiff_t)*array, indices,  *value);
+  SIDL_bool tmp = ((*value == SIDL_F90_TRUE) ? TRUE : FALSE);
+  SIDL_bool__array_set((struct SIDL_bool__array *)(ptrdiff_t)*array, indices, tmp);
 }
 
 void
@@ -4164,8 +4203,9 @@ SIDLFortran90Symbol(sidl_bool__array_get_m,
                     SIDL_bool__array_get_m)
   (int64_t *array, int32_t indices[], SIDL_bool *value)
 {
-  *value = 
+  SIDL_bool tmp = 
      SIDL_bool__array_get((struct SIDL_bool__array *)(ptrdiff_t)*array, indices);
+  *value = (tmp ? SIDL_F90_TRUE : SIDL_F90_FALSE);
 }
 
 void
@@ -6960,6 +7000,16 @@ SIDLFortran90Symbol(sidl_char__array_deleteref_m,
 
 
 void
+SIDLFortran90Symbol(sidl_char__array_addref_m,
+                    SIDL_CHAR__ARRAY_ADDREF_M,
+                    SIDL_char__array_addRef_m)
+  (int64_t *array)
+{
+  SIDL_char__array_addRef((struct SIDL_char__array*)(ptrdiff_t)*array);
+}
+
+
+void
 SIDLFortran90Symbol(sidl_string__array_createcol_m,
                     SIDL_STRING__ARRAY_CREATECOL_M,
                     SIDL_string__array_createCol_m)
@@ -7130,6 +7180,16 @@ SIDLFortran90Symbol(sidl_string__array_deleteref_m,
   (int64_t *array)
 {
   SIDL_string__array_deleteRef((struct SIDL_string__array*)(ptrdiff_t)*array);
+}
+
+
+void
+SIDLFortran90Symbol(sidl_string__array_addref_m,
+                    SIDL_STRING__ARRAY_ADDREF_M,
+                    SIDL_string__array_addRef_m)
+  (int64_t *array)
+{
+  SIDL_string__array_addRef((struct SIDL_string__array*)(ptrdiff_t)*array);
 }
 
 

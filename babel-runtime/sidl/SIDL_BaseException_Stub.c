@@ -1,8 +1,8 @@
 /*
  * File:          SIDL_BaseException_Stub.c
- * Symbol:        SIDL.BaseException-v0.8.1
+ * Symbol:        SIDL.BaseException-v0.8.2
  * Symbol Type:   class
- * Babel Version: 0.8.0
+ * Babel Version: 0.8.2
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side glue code for SIDL.BaseException
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.0
+ * babel-version = 0.8.2
  */
 
 #include "SIDL_BaseException.h"
@@ -684,7 +684,7 @@ SIDL_BaseException__array_copy(const struct SIDL_BaseException__array* src,
 struct SIDL_BaseException__array*
 SIDL_BaseException__array_ensure(struct SIDL_BaseException__array* src,
                                  int32_t dimen,
-int     ordering)
+                                 int     ordering)
 {
   return (struct SIDL_BaseException__array*)
     SIDL_interface__array_ensure((struct SIDL_interface__array *)src, dimen,

@@ -137,6 +137,16 @@ SUPPORT_SHARED_TRUE = @SUPPORT_SHARED_TRUE@
 SUPPORT_STATIC_FALSE = @SUPPORT_STATIC_FALSE@
 SUPPORT_STATIC_TRUE = @SUPPORT_STATIC_TRUE@
 VERSION = @VERSION@
+WHICH_CC = @WHICH_CC@
+WHICH_CXX = @WHICH_CXX@
+WHICH_F77 = @WHICH_F77@
+WHICH_JAR = @WHICH_JAR@
+WHICH_JAVA = @WHICH_JAVA@
+WHICH_JAVAC = @WHICH_JAVAC@
+WHICH_JAVAH = @WHICH_JAVAH@
+WHICH_PYTHON = @WHICH_PYTHON@
+WITH_SIDLX_FALSE = @WITH_SIDLX_FALSE@
+WITH_SIDLX_TRUE = @WITH_SIDLX_TRUE@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_CXX = @ac_ct_CXX@
 ac_ct_F77 = @ac_ct_F77@
@@ -183,7 +193,7 @@ target_vendor = @target_vendor@
 uudecode = @uudecode@
 
 AUTOMAKE_OPTIONS = foreign no-dependencies no-installinfo	\
-                   no-installman no-texinfo.tex 1.5
+                   no-installman no-texinfo.tex 1.7
 
 
 noinst_SCRIPTS = copy.sh remove.sh

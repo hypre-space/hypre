@@ -43,7 +43,7 @@ msgs="
 #
 # Basic startup stuff
 #
-AC_INIT(babel-runtime, 0.8.0, components@llnl.gov)
+AC_INIT(babel-runtime, 0.8.2, components@llnl.gov)
 AC_CONFIG_SRCDIR([sidl/SIDLArray.h])
 AC_CONFIG_AUX_DIR([config])
 AC_CANONICAL_TARGET
@@ -152,6 +152,16 @@ AM_CONDITIONAL(SUPPORT_SHARED, test "X$enable_shared" != "Xno")
 if test "X$enable_static" = "Xno"; then
   AC_DEFINE(SIDL_DYNAMIC_LIBRARY, 1, [Define SIDL_DYNAMIC_LIBRARY to force dynamic loading of libraries])
 fi
+
+############################################################
+#
+# Experimental sidl extensions
+#
+if test -z "$with_sidlx"; then
+  with_sidlx=no
+fi
+AC_ARG_WITH(sidlx,   [  --with-sidlx            enable experimental (undocumented) libsidlx.{a,so}])
+AM_CONDITIONAL(WITH_SIDLX, test "X$with_sidlx" != "Xno" )
 
 ############################################################
 #

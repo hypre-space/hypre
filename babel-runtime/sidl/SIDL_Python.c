@@ -38,7 +38,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
 #include <stdio.h>
 #include <stdlib.h>
 
-#if HAVE_LIBDL && defined(PYTHON_SHARED_LIBRARY)
+#if HAVE_LIBDL
 
 /* dynamic linking with dlopen/dlsym */
 
@@ -88,13 +88,16 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
 void SIDL_Python_Init(void)
 {
   static int python_notinitialized = 1;
+#ifdef PYTHON_SHARED_LIBRARY
+  static const char libName[] = PYTHON_SHARED_LIBRARY;
+#endif
+  static const char initName[] = "Py_Initialize";
+  static const char finalName[] = "Py_Finalize";
+  void (*pyinit)(void);
+  void *handle;
   if (python_notinitialized) {
-    static const char libName[] = PYTHON_SHARED_LIBRARY;
-    static const char initName[] = "Py_Initialize";
-    static const char finalName[] = "Py_Finalize";
     /* search the previous loaded global namespace */
-    void *handle = dlopen(0, LT_GLOBAL | LT_LAZY_OR_NOW);
-    void (*pyinit)(void);
+    handle = dlopen(0, LT_GLOBAL | LT_LAZY_OR_NOW);
     if (handle) {
       pyinit = (void (*)(void))dlsym(handle, initName);
       if (pyinit) {
@@ -108,6 +111,7 @@ void SIDL_Python_Init(void)
     }
 
     if (python_notinitialized) {
+#ifdef PYTHON_SHARED_LIBRARY
       handle = dlopen(libName, LT_GLOBAL | LT_LAZY_OR_NOW);
       if (handle) {
         pyinit = (void (*)(void))dlsym(handle, initName);
@@ -127,6 +131,12 @@ void SIDL_Python_Init(void)
       } else {
         fprintf(stderr, "Babel: Error: Unable to load library %s: %s", libName, dlerror());
       }
+#else
+      fprintf(stderr, "Babel: Error: Unable to initialize Python.\n\
+The BABEL runtime library was not configured for Python support,\n\
+and Python is not already loaded into the global symbol space.\n");
+      python_notinitialized = 0;
+#endif
     }
   }
 }
@@ -136,11 +146,10 @@ void SIDL_Python_Init(void)
 void SIDL_Python_Init(void)
 {
   static int python_notinitialized = 1;
-  if (python_notinitialized) {
-    fprintf(stderr, "Babel: Error: Unable to initialize Python.\n\
-The BABEL runtime library was not configured for Python support.\n");
-    python_notinitialized = 0;
-  }
+  fprintf(stderr, "Babel: Error: Unable to initialize Python.\n\
+The BABEL runtime is not able to initialize Python because it\n\
+has no support for loading shared libraries.\n");
+  python_notinitialized = 0;
+  
 }
-
 #endif

@@ -145,6 +145,16 @@ SUPPORT_STATIC_FALSE = @SUPPORT_STATIC_FALSE@
 SUPPORT_STATIC_TRUE = @SUPPORT_STATIC_TRUE@
 
 VERSION = @VERSION@
+WHICH_CC = @WHICH_CC@
+WHICH_CXX = @WHICH_CXX@
+WHICH_F77 = @WHICH_F77@
+WHICH_JAR = @WHICH_JAR@
+WHICH_JAVA = @WHICH_JAVA@
+WHICH_JAVAC = @WHICH_JAVAC@
+WHICH_JAVAH = @WHICH_JAVAH@
+WHICH_PYTHON = @WHICH_PYTHON@
+WITH_SIDLX_FALSE = @WITH_SIDLX_FALSE@
+WITH_SIDLX_TRUE = @WITH_SIDLX_TRUE@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_CXX = @ac_ct_CXX@
 ac_ct_F77 = @ac_ct_F77@
@@ -191,9 +201,16 @@ target_vendor = @target_vendor@
 uudecode = @uudecode@
 
 AUTOMAKE_OPTIONS = foreign no-dependencies no-installinfo	\
-                   no-installman no-texinfo.tex 1.5
+                   no-installman no-texinfo.tex 1.7
 
-data_DATA = sidl.sidl
+@WITH_SIDLX_TRUE@SIDLX_SIDL = sidlx.sidl
+@WITH_SIDLX_FALSE@SIDLX_SIDL = 
+@WITH_SIDLX_TRUE@SRCDIR_SIDLX_SIDL = $(srcdir)/sidlx.sidl
+@WITH_SIDLX_FALSE@SRCDIR_SIDLX_SIDL = 
+@WITH_SIDLX_TRUE@LIBSIDLX = libsidlx.la
+@WITH_SIDLX_FALSE@LIBSIDLX = 
+
+data_DATA = sidl.sidl $(SIDLX_SIDL)
 @SUPPORT_FORTRAN77_FALSE@@SUPPORT_FORTRAN90_TRUE@FORTRAN_SOURCES = SIDLfortran.c SIDLfortarray.c
 
 @SUPPORT_FORTRAN77_TRUE@FORTRAN_SOURCES = SIDLfortran.c SIDLfortarray.c
@@ -208,7 +225,7 @@ data_DATA = sidl.sidl
 SRCS_EXCLUDED = $(FORTRAN_EXCLUDED) $(PYTHON_EXCLUDED) $(JAVA_EXCLUDED)
 SRCS_INCLUDED = $(FORTRAN_SOURCES) $(PYTHON_SOURCES) $(JAVA_SOURCES)
 
-lib_LTLIBRARIES = libsidl.la
+lib_LTLIBRARIES = libsidl.la $(LIBSIDLX)
 include_HEADERS = $(HEADERS_INSTALL)
 
 execincldir = $(exec_prefix)/include
@@ -219,8 +236,39 @@ libsidl_la_DEPENDENCIES = $(HEADERS_BABEL) $(OBJECTS_BABEL) $(OBJECTS_SPLICE)
 libsidl_la_LIBADD = $(OBJECTS_BABEL) $(OBJECTS_SPLICE) $(LIBADD_DL)
 libsidl_la_LDFLAGS = -no-undefined -release $(VERSION)
 
+nodist_libsidlx_la_SOURCES = $(SIDLX_SRCS)
+libsidlx_la_DEPENDENCIES = $(SIDLX_HDRS) libsidl.la
+libsidlx_la_LIBADD = 
+libsidlx_la_LDFLAGS = -no-undefined -release $(VERSION)
+
 AM_CPPFLAGS = -DHAVE_LTDL $(JNI_INCLUDES)
 EXTRA_DIST = $(data_DATA) $(RUNTIME_ONLY_FILES) ltdl.h ignore_me.h.in babel.make
+
+@WITH_SIDLX_TRUE@SIDLX_SRCS = sidlx_io_IOException_Impl.c  sidlx_io_IOException_Skel.c \
+@WITH_SIDLX_TRUE@	sidlx_io_IOException_IOR.c sidlx_io_IOException_Stub.c \
+@WITH_SIDLX_TRUE@	sidlx_io_IStream_IOR.c sidlx_io_IStream_Stub.c sidlx_io_OStream_IOR.c sidlx_io_OStream_Stub.c \
+@WITH_SIDLX_TRUE@	sidlx_io_Serializable_IOR.c sidlx_io_Serializable_Stub.c \
+@WITH_SIDLX_TRUE@	sidlx_rmi_SimpleServer_Impl.c sidlx_rmi_SimpleServer_Skel.c sidlx_rmi_SimpleServer_IOR.c sidlx_rmi_SimpleServer_Stub.c \
+@WITH_SIDLX_TRUE@	sidlx_rmi_SimpleOrb_Impl.c sidlx_rmi_SimpleOrb_Skel.c sidlx_rmi_SimpleOrb_IOR.c sidlx_rmi_SimpleOrb_Stub.c \
+@WITH_SIDLX_TRUE@	sidlx_rmi_EchoServer_Impl.c sidlx_rmi_EchoServer_Skel.c sidlx_rmi_EchoServer_IOR.c sidlx_rmi_EchoServer_Stub.c 
+
+
+@WITH_SIDLX_FALSE@SIDLX_SRCS = 
+
+@WITH_SIDLX_TRUE@SIDLX_HDRS = sidlx.h                      sidlx_io_OStream_IOR.h 	\
+@WITH_SIDLX_TRUE@	sidlx_io.h                   sidlx_IOR.h 			\
+@WITH_SIDLX_TRUE@	sidlx_io_IOException.h       sidlx_io_Serializable.h 		\
+@WITH_SIDLX_TRUE@	sidlx_io_IOException_Impl.h  sidlx_io_Serializable_IOR.h	\
+@WITH_SIDLX_TRUE@	sidlx_io_IOException_IOR.h   sidlx_rmi.h			\
+@WITH_SIDLX_TRUE@	sidlx_io_IOR.h               sidlx_rmi_IOR.h			\
+@WITH_SIDLX_TRUE@	sidlx_io_IStream.h           sidlx_rmi_SimpleOrb.h		\
+@WITH_SIDLX_TRUE@	sidlx_io_IStream_IOR.h       sidlx_rmi_SimpleOrb_Impl.h		\
+@WITH_SIDLX_TRUE@	sidlx_io_OStream.h           sidlx_rmi_SimpleOrb_IOR.h		\
+@WITH_SIDLX_TRUE@	sidlx_rmi_SimpleServer.h     sidlx_rmi_SimpleServer_Impl.h	\
+@WITH_SIDLX_TRUE@	sidlx_rmi_SimpleServer_IOR.h sidlx_rmi_EchoServer.h		\
+@WITH_SIDLX_TRUE@	sidlx_rmi_EchoServer_Impl.h  sidlx_rmi_EchoServer_IOR.h
+
+@WITH_SIDLX_FALSE@SIDLX_HDRS = 
 
 HEADERS_ABBREV = \
 	SIDL_bool_fAbbrev.h \
@@ -411,6 +459,31 @@ am__objects_4 = $(am__objects_1) $(am__objects_2) $(am__objects_3) \
 	SIDL_opaque_IOR.lo SIDL_string_IOR.lo SIDL_interface_IOR.lo
 am_libsidl_la_OBJECTS = $(am__objects_4) ltdl.lo
 libsidl_la_OBJECTS = $(am_libsidl_la_OBJECTS)
+@WITH_SIDLX_TRUE@am__objects_5 = sidlx_io_IOException_Impl.lo \
+@WITH_SIDLX_TRUE@	sidlx_io_IOException_Skel.lo \
+@WITH_SIDLX_TRUE@	sidlx_io_IOException_IOR.lo \
+@WITH_SIDLX_TRUE@	sidlx_io_IOException_Stub.lo \
+@WITH_SIDLX_TRUE@	sidlx_io_IStream_IOR.lo \
+@WITH_SIDLX_TRUE@	sidlx_io_IStream_Stub.lo \
+@WITH_SIDLX_TRUE@	sidlx_io_OStream_IOR.lo \
+@WITH_SIDLX_TRUE@	sidlx_io_OStream_Stub.lo \
+@WITH_SIDLX_TRUE@	sidlx_io_Serializable_IOR.lo \
+@WITH_SIDLX_TRUE@	sidlx_io_Serializable_Stub.lo \
+@WITH_SIDLX_TRUE@	sidlx_rmi_SimpleServer_Impl.lo \
+@WITH_SIDLX_TRUE@	sidlx_rmi_SimpleServer_Skel.lo \
+@WITH_SIDLX_TRUE@	sidlx_rmi_SimpleServer_IOR.lo \
+@WITH_SIDLX_TRUE@	sidlx_rmi_SimpleServer_Stub.lo \
+@WITH_SIDLX_TRUE@	sidlx_rmi_SimpleOrb_Impl.lo \
+@WITH_SIDLX_TRUE@	sidlx_rmi_SimpleOrb_Skel.lo \
+@WITH_SIDLX_TRUE@	sidlx_rmi_SimpleOrb_IOR.lo \
+@WITH_SIDLX_TRUE@	sidlx_rmi_SimpleOrb_Stub.lo \
+@WITH_SIDLX_TRUE@	sidlx_rmi_EchoServer_Impl.lo \
+@WITH_SIDLX_TRUE@	sidlx_rmi_EchoServer_Skel.lo \
+@WITH_SIDLX_TRUE@	sidlx_rmi_EchoServer_IOR.lo \
+@WITH_SIDLX_TRUE@	sidlx_rmi_EchoServer_Stub.lo
+@WITH_SIDLX_FALSE@am__objects_5 =
+nodist_libsidlx_la_OBJECTS = $(am__objects_5)
+libsidlx_la_OBJECTS = $(nodist_libsidlx_la_OBJECTS)
 
 DEFAULT_INCLUDES =  -I. -I$(srcdir) -I.
 depcomp =
@@ -429,7 +502,7 @@ HEADERS = $(include_HEADERS) $(nodist_execincl_HEADERS)
 
 DIST_COMMON = $(include_HEADERS) $(srcdir)/babel.make Makefile.am \
 	Makefile.in babel_config.h.in
-SOURCES = $(libsidl_la_SOURCES)
+SOURCES = $(libsidl_la_SOURCES) $(nodist_libsidlx_la_SOURCES)
 
 all: babel_config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
@@ -488,6 +561,8 @@ clean-libLTLIBRARIES:
 	done
 libsidl.la: $(libsidl_la_OBJECTS) $(libsidl_la_DEPENDENCIES) 
 	$(LINK) -rpath $(libdir) $(libsidl_la_LDFLAGS) $(libsidl_la_OBJECTS) $(libsidl_la_LIBADD) $(LIBS)
+libsidlx.la: $(libsidlx_la_OBJECTS) $(libsidlx_la_DEPENDENCIES) 
+	$(LINK) -rpath $(libdir) $(libsidlx_la_LDFLAGS) $(libsidlx_la_OBJECTS) $(libsidlx_la_LIBADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT) core *.core
@@ -692,7 +767,7 @@ clean-am: clean-generic clean-libLTLIBRARIES clean-libtool clean-local \
 distclean: distclean-am
 
 distclean-am: clean-am distclean-compile distclean-generic distclean-hdr \
-	distclean-libtool distclean-tags
+	distclean-libtool distclean-local distclean-tags
 
 dvi: dvi-am
 
@@ -735,9 +810,9 @@ uninstall-am: uninstall-dataDATA uninstall-includeHEADERS \
 .PHONY: CTAGS GTAGS all all-am check check-am clean clean-generic \
 	clean-libLTLIBRARIES clean-libtool clean-local ctags distclean \
 	distclean-compile distclean-generic distclean-hdr \
-	distclean-libtool distclean-tags distdir dvi dvi-am info \
-	info-am install install-am install-data install-data-am \
-	install-dataDATA install-exec install-exec-am \
+	distclean-libtool distclean-local distclean-tags distdir dvi \
+	dvi-am info info-am install install-am install-data \
+	install-data-am install-dataDATA install-exec install-exec-am \
 	install-includeHEADERS install-info install-info-am \
 	install-libLTLIBRARIES install-man \
 	install-nodist_execinclHEADERS install-strip installcheck \
@@ -764,17 +839,20 @@ $(HEADERS_INSTALL) $(HEADERS_BABEL) $(SOURCES_BABEL): babel-stamp
 @BABEL_RUNTIME_ONLY_FALSE@	touch babel-compile
 @BABEL_RUNTIME_ONLY_FALSE@	$(MAKE) $(AM_MAKEFLAGS) $(OBJECTS_BABEL) $(OBJECTS_SPLICE)
 
-@BABEL_RUNTIME_ONLY_FALSE@babel-stamp: $(srcdir)/sidl.sidl
+@BABEL_RUNTIME_ONLY_FALSE@babel-stamp: $(srcdir)/sidl.sidl $(SRCDIR_SIDLX_SIDL)
 @BABEL_RUNTIME_ONLY_FALSE@	$(SHELL) $(top_srcdir)/bin/copy.sh $(srcdir) . $(HEADERS_HAND) $(HEADERS_ABBREV)
 @BABEL_RUNTIME_ONLY_FALSE@	$(SHELL) ../../bin/babel --suppress-timestamp --no-default-repository\
-@BABEL_RUNTIME_ONLY_FALSE@	  --generate-sidl-stdlib --vpath=$(srcdir) $(srcdir)/sidl.sidl
+@BABEL_RUNTIME_ONLY_FALSE@	  --generate-sidl-stdlib --vpath=$(srcdir) $(srcdir)/sidl.sidl $(SRCDIR_SIDLX_SIDL)
 @BABEL_RUNTIME_ONLY_FALSE@	touch babel-stamp
 
 @BABEL_RUNTIME_ONLY_FALSE@clean-local:
 @BABEL_RUNTIME_ONLY_FALSE@	$(RM) -f $(HEADERS_BABEL) $(OBJECTS_BABEL) $(SOURCES_BABEL)
-@BABEL_RUNTIME_ONLY_FALSE@	$(RM) -f babel_config.h babel-stamp babel-compile stamp-h1
+@BABEL_RUNTIME_ONLY_FALSE@	$(RM) -f babel-stamp babel-compile stamp-h1
 @BABEL_RUNTIME_ONLY_FALSE@	$(SHELL) $(top_srcdir)/bin/remove.sh $(srcdir) $(FILES_COPY)
 @BABEL_RUNTIME_ONLY_FALSE@	test "X$(srcdir)" = "X." || rm -f babel.make
+
+distclean-local:
+	$(RM) -f babel_config.h
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

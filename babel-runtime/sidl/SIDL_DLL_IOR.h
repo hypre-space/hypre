@@ -1,8 +1,8 @@
 /*
  * File:          SIDL_DLL_IOR.h
- * Symbol:        SIDL.DLL-v0.8.1
+ * Symbol:        SIDL.DLL-v0.8.2
  * Symbol Type:   class
- * Babel Version: 0.8.0
+ * Babel Version: 0.8.2
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Intermediate Object Representation for SIDL.DLL
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.0
+ * babel-version = 0.8.2
  */
 
 #ifndef included_SIDL_DLL_IOR_h
@@ -50,7 +50,7 @@ extern "C" {
 #endif
 
 /*
- * Symbol "SIDL.DLL" (version 0.8.1)
+ * Symbol "SIDL.DLL" (version 0.8.2)
  * 
  * The <code>DLL</code> class encapsulates access to a single
  * dynamically linked library.  DLLs are loaded at run-time using
@@ -99,7 +99,7 @@ struct SIDL_DLL__epv {
     struct SIDL_DLL__object* self);
   void (*f__dtor)(
     struct SIDL_DLL__object* self);
-  /* Methods introduced in SIDL.BaseInterface-v0.8.1 */
+  /* Methods introduced in SIDL.BaseInterface-v0.8.2 */
   void (*f_addRef)(
     struct SIDL_DLL__object* self);
   void (*f_deleteRef)(
@@ -113,10 +113,10 @@ struct SIDL_DLL__epv {
   SIDL_bool (*f_isType)(
     struct SIDL_DLL__object* self,
     const char* name);
-  /* Methods introduced in SIDL.BaseClass-v0.8.1 */
   struct SIDL_ClassInfo__object* (*f_getClassInfo)(
     struct SIDL_DLL__object* self);
-  /* Methods introduced in SIDL.DLL-v0.8.1 */
+  /* Methods introduced in SIDL.BaseClass-v0.8.2 */
+  /* Methods introduced in SIDL.DLL-v0.8.2 */
   SIDL_bool (*f_loadLibrary)(
     struct SIDL_DLL__object* self,
     const char* uri);

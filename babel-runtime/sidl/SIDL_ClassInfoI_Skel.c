@@ -1,8 +1,8 @@
 /*
  * File:          SIDL_ClassInfoI_Skel.c
- * Symbol:        SIDL.ClassInfoI-v0.8.1
+ * Symbol:        SIDL.ClassInfoI-v0.8.2
  * Symbol Type:   class
- * Babel Version: 0.8.0
+ * Babel Version: 0.8.2
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Server-side glue code for SIDL.ClassInfoI
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.0
+ * babel-version = 0.8.2
  */
 
 #include "SIDL_ClassInfoI_IOR.h"

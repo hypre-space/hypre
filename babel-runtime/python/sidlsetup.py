@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 # Python setup.py to build SIDL python support libraries
 #
-# Copyright (c) 2000-2001, The Regents of the University of Calfornia.
+# Copyright (c) 2000-2003, The Regents of the University of Calfornia.
 # Produced at the Lawrence Livermore National Laboratory.
 # Written by the Components Team <components@llnl.gov>
 # UCRL-CODE-2002-054
@@ -48,7 +48,7 @@ for i in old_argv:
       
 setup(name="babel",
       author="Tom Epperly",
-      version="0.8.0",
+      version="0.8.2",
       description="Build Python support extension modules for SIDL",
       author_email="components@llnl.gov",
       url="http://www.llnl.gov/CASC/components/",

@@ -37,7 +37,7 @@
  * and every class implicitly inherits from <code>SIDL.BaseClass</code>.
  * 
  */
-package SIDL version 0.8.1 {
+package SIDL version 0.8.2 {
 
   /**
    * Every interface in <code>SIDL</code> implicitly inherits
@@ -95,6 +95,11 @@ package SIDL version 0.8.1 {
      * the string type name would succeed.
      */
     bool isType(in string name);
+
+    /**
+     * Return the meta-data about the class implementing this interface.
+     */
+    ClassInfo getClassInfo();
   }
 
   /**

@@ -1,8 +1,8 @@
 /*
  * File:          SIDL_Loader_Stub.c
- * Symbol:        SIDL.Loader-v0.8.1
+ * Symbol:        SIDL.Loader-v0.8.2
  * Symbol Type:   class
- * Babel Version: 0.8.0
+ * Babel Version: 0.8.2
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side glue code for SIDL.Loader
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.0
+ * babel-version = 0.8.2
  */
 
 #include "SIDL_Loader.h"
@@ -732,7 +732,7 @@ SIDL_Loader__array_copy(const struct SIDL_Loader__array* src,
 struct SIDL_Loader__array*
 SIDL_Loader__array_ensure(struct SIDL_Loader__array* src,
                           int32_t dimen,
-int     ordering)
+                          int     ordering)
 {
   return (struct SIDL_Loader__array*)
     SIDL_interface__array_ensure((struct SIDL_interface__array *)src, dimen,

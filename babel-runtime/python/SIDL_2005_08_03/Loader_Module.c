@@ -1,8 +1,8 @@
 /*
  * File:          Loader_Module.c
- * Symbol:        SIDL.Loader-v0.8.1
+ * Symbol:        SIDL.Loader-v0.8.2
  * Symbol Type:   class
- * Babel Version: 0.8.0
+ * Babel Version: 0.8.2
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   implement a C extension type for a SIDL extendable
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.0
+ * babel-version = 0.8.2
  */
 
 /*
@@ -47,7 +47,7 @@
 
 
 /**
- * Symbol "SIDL.Loader" (version 0.8.1)
+ * Symbol "SIDL.Loader" (version 0.8.2)
  * 
  * Class <code>Loader</code> manages dyanamic loading and symbol name
  * resolution for the SIDL runtime system.  The <code>Loader</code> class

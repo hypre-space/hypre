@@ -326,6 +326,9 @@
 /* one underscore after Fortran 90 symbols */
 #undef SIDL_F90_ONE_UNDERSCORE
 
+/* Size in bytes for a F90 pointer to a derived type */
+#undef SIDL_F90_POINTER_SIZE
+
 /* Fortran 90 strings lengths immediately follow string */
 #undef SIDL_F90_STR_LEN_FAR
 

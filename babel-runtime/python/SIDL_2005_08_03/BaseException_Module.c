@@ -1,8 +1,8 @@
 /*
  * File:          BaseException_Module.c
- * Symbol:        SIDL.BaseException-v0.8.1
+ * Symbol:        SIDL.BaseException-v0.8.2
  * Symbol Type:   class
- * Babel Version: 0.8.0
+ * Babel Version: 0.8.2
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   implement a C extension type for a SIDL extendable
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.0
+ * babel-version = 0.8.2
  */
 
 /*
@@ -47,7 +47,7 @@
 
 
 /**
- * Symbol "SIDL.BaseException" (version 0.8.1)
+ * Symbol "SIDL.BaseException" (version 0.8.2)
  * 
  * Every exception inherits from <code>BaseException</code>.  This class
  * provides basic functionality to get and set error messages and stack

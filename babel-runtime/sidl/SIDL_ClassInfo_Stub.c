@@ -1,8 +1,8 @@
 /*
  * File:          SIDL_ClassInfo_Stub.c
- * Symbol:        SIDL.ClassInfo-v0.8.1
+ * Symbol:        SIDL.ClassInfo-v0.8.2
  * Symbol Type:   interface
- * Babel Version: 0.8.0
+ * Babel Version: 0.8.2
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side glue code for SIDL.ClassInfo
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.0
+ * babel-version = 0.8.2
  */
 
 #include "SIDL_ClassInfo.h"
@@ -132,6 +132,18 @@ SIDL_ClassInfo_isType(
   return (*self->d_epv->f_isType)(
     self->d_object,
     name);
+}
+
+/*
+ * Return the meta-data about the class implementing this interface.
+ */
+
+SIDL_ClassInfo
+SIDL_ClassInfo_getClassInfo(
+  SIDL_ClassInfo self)
+{
+  return (*self->d_epv->f_getClassInfo)(
+    self->d_object);
 }
 
 /*
@@ -588,7 +600,7 @@ SIDL_ClassInfo__array_copy(const struct SIDL_ClassInfo__array* src,
 struct SIDL_ClassInfo__array*
 SIDL_ClassInfo__array_ensure(struct SIDL_ClassInfo__array* src,
                              int32_t dimen,
-int     ordering)
+                             int     ordering)
 {
   return (struct SIDL_ClassInfo__array*)
     SIDL_interface__array_ensure((struct SIDL_interface__array *)src, dimen,

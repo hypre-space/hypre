@@ -1,8 +1,8 @@
 /*
  * File:          SIDL_BaseClass_Impl.c
- * Symbol:        SIDL.BaseClass-v0.8.1
+ * Symbol:        SIDL.BaseClass-v0.8.2
  * Symbol Type:   class
- * Babel Version: 0.8.0
+ * Babel Version: 0.8.2
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Server-side implementation for SIDL.BaseClass
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.8.0
+ * babel-version = 0.8.2
  */
 
 /*
@@ -41,7 +41,7 @@
  */
 
 /*
- * Symbol "SIDL.BaseClass" (version 0.8.1)
+ * Symbol "SIDL.BaseClass" (version 0.8.2)
  * 
  * Every class implicitly inherits from <code>BaseClass</code>.  This
  * class implements the methods in <code>BaseInterface</code>.

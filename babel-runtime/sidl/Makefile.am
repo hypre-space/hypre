@@ -31,10 +31,20 @@
 ## Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 AUTOMAKE_OPTIONS = foreign no-dependencies no-installinfo	\
-                   no-installman no-texinfo.tex 1.5
+                   no-installman no-texinfo.tex 1.7
 
 VERSION=@VERSION@
-data_DATA = sidl.sidl
+if WITH_SIDLX
+SIDLX_SIDL=sidlx.sidl
+SRCDIR_SIDLX_SIDL=$(srcdir)/sidlx.sidl
+LIBSIDLX=libsidlx.la
+else
+SIDLX_SIDL=
+SRCDIR_SIDLX_SIDL=
+LIBSIDLX=
+endif
+
+data_DATA = sidl.sidl $(SIDLX_SIDL)
 
 if SUPPORT_FORTRAN77 
 FORTRAN_SOURCES = SIDLfortran.c SIDLfortarray.c
@@ -61,7 +71,7 @@ endif
 SRCS_EXCLUDED = $(FORTRAN_EXCLUDED) $(PYTHON_EXCLUDED) $(JAVA_EXCLUDED)
 SRCS_INCLUDED = $(FORTRAN_SOURCES) $(PYTHON_SOURCES) $(JAVA_SOURCES)
 
-lib_LTLIBRARIES = libsidl.la
+lib_LTLIBRARIES = libsidl.la $(LIBSIDLX)
 include_HEADERS = $(HEADERS_INSTALL)
 
 execincldir = $(exec_prefix)/include
@@ -72,8 +82,41 @@ libsidl_la_DEPENDENCIES = $(HEADERS_BABEL) $(OBJECTS_BABEL) $(OBJECTS_SPLICE)
 libsidl_la_LIBADD = $(OBJECTS_BABEL) $(OBJECTS_SPLICE) $(LIBADD_DL)
 libsidl_la_LDFLAGS = -no-undefined -release $(VERSION)
 
+nodist_libsidlx_la_SOURCES = $(SIDLX_SRCS)
+libsidlx_la_DEPENDENCIES = $(SIDLX_HDRS) libsidl.la
+libsidlx_la_LIBADD = 
+libsidlx_la_LDFLAGS = -no-undefined -release $(VERSION)
+
 AM_CPPFLAGS = -DHAVE_LTDL $(JNI_INCLUDES)
 EXTRA_DIST = $(data_DATA) $(RUNTIME_ONLY_FILES) ltdl.h ignore_me.h.in babel.make
+
+if WITH_SIDLX
+
+SIDLX_SRCS = sidlx_io_IOException_Impl.c  sidlx_io_IOException_Skel.c \
+	sidlx_io_IOException_IOR.c sidlx_io_IOException_Stub.c \
+	sidlx_io_IStream_IOR.c sidlx_io_IStream_Stub.c sidlx_io_OStream_IOR.c sidlx_io_OStream_Stub.c \
+	sidlx_io_Serializable_IOR.c sidlx_io_Serializable_Stub.c \
+	sidlx_rmi_SimpleServer_Impl.c sidlx_rmi_SimpleServer_Skel.c sidlx_rmi_SimpleServer_IOR.c sidlx_rmi_SimpleServer_Stub.c \
+	sidlx_rmi_SimpleOrb_Impl.c sidlx_rmi_SimpleOrb_Skel.c sidlx_rmi_SimpleOrb_IOR.c sidlx_rmi_SimpleOrb_Stub.c \
+	sidlx_rmi_EchoServer_Impl.c sidlx_rmi_EchoServer_Skel.c sidlx_rmi_EchoServer_IOR.c sidlx_rmi_EchoServer_Stub.c 
+
+SIDLX_HDRS = sidlx.h                      sidlx_io_OStream_IOR.h 	\
+	sidlx_io.h                   sidlx_IOR.h 			\
+	sidlx_io_IOException.h       sidlx_io_Serializable.h 		\
+	sidlx_io_IOException_Impl.h  sidlx_io_Serializable_IOR.h	\
+	sidlx_io_IOException_IOR.h   sidlx_rmi.h			\
+	sidlx_io_IOR.h               sidlx_rmi_IOR.h			\
+	sidlx_io_IStream.h           sidlx_rmi_SimpleOrb.h		\
+	sidlx_io_IStream_IOR.h       sidlx_rmi_SimpleOrb_Impl.h		\
+	sidlx_io_OStream.h           sidlx_rmi_SimpleOrb_IOR.h		\
+	sidlx_rmi_SimpleServer.h     sidlx_rmi_SimpleServer_Impl.h	\
+	sidlx_rmi_SimpleServer_IOR.h sidlx_rmi_EchoServer.h		\
+	sidlx_rmi_EchoServer_Impl.h  sidlx_rmi_EchoServer_IOR.h
+
+else
+SIDLX_SRCS =
+SIDLX_HDRS =
+endif
 
 HEADERS_ABBREV = \
 	SIDL_bool_fAbbrev.h \
@@ -226,18 +269,22 @@ babel-compile: babel-stamp
 	touch babel-compile
 	$(MAKE) $(AM_MAKEFLAGS) $(OBJECTS_BABEL) $(OBJECTS_SPLICE)
 
-babel-stamp: $(srcdir)/sidl.sidl
+babel-stamp: $(srcdir)/sidl.sidl $(SRCDIR_SIDLX_SIDL)
 	$(SHELL) $(top_srcdir)/bin/copy.sh $(srcdir) . $(HEADERS_HAND) $(HEADERS_ABBREV)
 	$(SHELL) ../../bin/babel --suppress-timestamp --no-default-repository\
-	  --generate-sidl-stdlib --vpath=$(srcdir) $(srcdir)/sidl.sidl
+	  --generate-sidl-stdlib --vpath=$(srcdir) $(srcdir)/sidl.sidl $(SRCDIR_SIDLX_SIDL)
 	touch babel-stamp
 
 clean-local:
 	$(RM) -f $(HEADERS_BABEL) $(OBJECTS_BABEL) $(SOURCES_BABEL)
-	$(RM) -f babel_config.h babel-stamp babel-compile stamp-h1
+	$(RM) -f babel-stamp babel-compile stamp-h1
 	$(SHELL) $(top_srcdir)/bin/remove.sh $(srcdir) $(FILES_COPY)
 	test "X$(srcdir)" = "X." || rm -f babel.make
+
 endif
+
+distclean-local:
+	$(RM) -f babel_config.h
 
 AUTOHEADER = @AUTOHEADER@ \
 	     && cd config \

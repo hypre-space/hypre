@@ -1,8 +1,8 @@
 /*
  * File:          SIDL_DLL_Skel.c
- * Symbol:        SIDL.DLL-v0.8.1
+ * Symbol:        SIDL.DLL-v0.8.2
  * Symbol Type:   class
- * Babel Version: 0.8.0
+ * Babel Version: 0.8.2
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Server-side glue code for SIDL.DLL
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.0
+ * babel-version = 0.8.2
  */
 
 #include "SIDL_DLL_IOR.h"

@@ -1,8 +1,8 @@
 /*
  * File:          SIDL_ClassInfo_IOR.c
- * Symbol:        SIDL.ClassInfo-v0.8.1
+ * Symbol:        SIDL.ClassInfo-v0.8.2
  * Symbol Type:   interface
- * Babel Version: 0.8.0
+ * Babel Version: 0.8.2
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Intermediate Object Representation for SIDL.ClassInfo
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.0
+ * babel-version = 0.8.2
  */
 
 #include <stdlib.h>
@@ -136,6 +136,17 @@ remote_SIDL_ClassInfo_isType(
 }
 
 /*
+ * REMOTE METHOD STUB:getClassInfo
+ */
+
+static struct SIDL_ClassInfo__object*
+remote_SIDL_ClassInfo_getClassInfo(
+  void* self)
+{
+  return (struct SIDL_ClassInfo__object*) 0;
+}
+
+/*
  * REMOTE METHOD STUB:getName
  */
 
@@ -172,6 +183,7 @@ static void SIDL_ClassInfo__init_remote_epv(void)
   epv->f_isSame        = remote_SIDL_ClassInfo_isSame;
   epv->f_queryInt      = remote_SIDL_ClassInfo_queryInt;
   epv->f_isType        = remote_SIDL_ClassInfo_isType;
+  epv->f_getClassInfo  = remote_SIDL_ClassInfo_getClassInfo;
   epv->f_getName       = remote_SIDL_ClassInfo_getName;
   epv->f_getIORVersion = remote_SIDL_ClassInfo_getIORVersion;
   s_remote_initialized = 1;

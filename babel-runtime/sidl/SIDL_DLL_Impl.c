@@ -1,8 +1,8 @@
 /*
  * File:          SIDL_DLL_Impl.c
- * Symbol:        SIDL.DLL-v0.8.1
+ * Symbol:        SIDL.DLL-v0.8.2
  * Symbol Type:   class
- * Babel Version: 0.8.0
+ * Babel Version: 0.8.2
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Server-side implementation for SIDL.DLL
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.8.0
+ * babel-version = 0.8.2
  */
 
 /*
@@ -41,7 +41,7 @@
  */
 
 /*
- * Symbol "SIDL.DLL" (version 0.8.1)
+ * Symbol "SIDL.DLL" (version 0.8.2)
  * 
  * The <code>DLL</code> class encapsulates access to a single
  * dynamically linked library.  DLLs are loaded at run-time using

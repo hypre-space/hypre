@@ -1,8 +1,8 @@
 /*
  * File:          SIDL_BaseClass_IOR.c
- * Symbol:        SIDL.BaseClass-v0.8.1
+ * Symbol:        SIDL.BaseClass-v0.8.2
  * Symbol Type:   class
- * Babel Version: 0.8.0
+ * Babel Version: 0.8.2
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Intermediate Object Representation for SIDL.BaseClass
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.0
+ * babel-version = 0.8.2
  */
 
 #include <stdlib.h>
@@ -145,15 +145,17 @@ static void SIDL_BaseClass__init_epv(
 
   SIDL_BaseClass__set_epv(epv);
 
-  e0->f__cast     = (void* (*)(void*,const char*)) epv->f__cast;
-  e0->f__delete   = (void (*)(void*)) epv->f__delete;
-  e0->f_addRef    = (void (*)(void*)) epv->f_addRef;
-  e0->f_deleteRef = (void (*)(void*)) epv->f_deleteRef;
-  e0->f_isSame    = (SIDL_bool (*)(void*,
+  e0->f__cast        = (void* (*)(void*,const char*)) epv->f__cast;
+  e0->f__delete      = (void (*)(void*)) epv->f__delete;
+  e0->f_addRef       = (void (*)(void*)) epv->f_addRef;
+  e0->f_deleteRef    = (void (*)(void*)) epv->f_deleteRef;
+  e0->f_isSame       = (SIDL_bool (*)(void*,
     struct SIDL_BaseInterface__object*)) epv->f_isSame;
-  e0->f_queryInt  = (struct SIDL_BaseInterface__object* (*)(void*,
+  e0->f_queryInt     = (struct SIDL_BaseInterface__object* (*)(void*,
     const char*)) epv->f_queryInt;
-  e0->f_isType    = (SIDL_bool (*)(void*,const char*)) epv->f_isType;
+  e0->f_isType       = (SIDL_bool (*)(void*,const char*)) epv->f_isType;
+  e0->f_getClassInfo = (struct SIDL_ClassInfo__object* (*)(void*)) 
+    epv->f_getClassInfo;
 
   s_method_initialized = 1;
 }
@@ -390,15 +392,17 @@ static void SIDL_BaseClass__init_remote_epv(void)
   epv->f_isType       = remote_SIDL_BaseClass_isType;
   epv->f_getClassInfo = remote_SIDL_BaseClass_getClassInfo;
 
-  e0->f__cast     = (void* (*)(void*,const char*)) epv->f__cast;
-  e0->f__delete   = (void (*)(void*)) epv->f__delete;
-  e0->f_addRef    = (void (*)(void*)) epv->f_addRef;
-  e0->f_deleteRef = (void (*)(void*)) epv->f_deleteRef;
-  e0->f_isSame    = (SIDL_bool (*)(void*,
+  e0->f__cast        = (void* (*)(void*,const char*)) epv->f__cast;
+  e0->f__delete      = (void (*)(void*)) epv->f__delete;
+  e0->f_addRef       = (void (*)(void*)) epv->f_addRef;
+  e0->f_deleteRef    = (void (*)(void*)) epv->f_deleteRef;
+  e0->f_isSame       = (SIDL_bool (*)(void*,
     struct SIDL_BaseInterface__object*)) epv->f_isSame;
-  e0->f_queryInt  = (struct SIDL_BaseInterface__object* (*)(void*,
+  e0->f_queryInt     = (struct SIDL_BaseInterface__object* (*)(void*,
     const char*)) epv->f_queryInt;
-  e0->f_isType    = (SIDL_bool (*)(void*,const char*)) epv->f_isType;
+  e0->f_isType       = (SIDL_bool (*)(void*,const char*)) epv->f_isType;
+  e0->f_getClassInfo = (struct SIDL_ClassInfo__object* (*)(void*)) 
+    epv->f_getClassInfo;
 
   s_remote_initialized = 1;
 }

@@ -523,50 +523,6 @@ AC_PROVIDE([$0])dnl
 
 
 
-dnl *** file: config/autoconf-archive-macros/ac_prog_jar.m4
-
-
-dnl *** Downloaded from http://gnu.wwc.edu/software/ac-archive/Java_Support/ac_prog_jar.m4***
-dnl @synopsis AC_PROG_JAR
-dnl
-dnl AC_PROG_JAR tests for an existing jar program. It uses the environment
-dnl variable JAR then tests in sequence various common jar programs.
-dnl
-dnl If you want to force a specific compiler:
-dnl
-dnl - at the configure.in level, set JAR=yourcompiler before calling
-dnl AC_PROG_JAR
-dnl
-dnl - at the configure level, setenv JAR
-dnl
-dnl You can use the JAR variable in your Makefile.in, with @JAR@.
-dnl
-dnl Note: This macro depends on the autoconf M4 macros for Java programs.
-dnl It is VERY IMPORTANT that you download that whole set, some
-dnl macros depend on other. Unfortunately, the autoconf archive does not
-dnl support the concept of set of macros, so I had to break it for
-dnl submission.
-dnl
-dnl The general documentation of those macros, as well as the sample
-dnl configure.in, is included in the AC_PROG_JAVA macro.
-dnl
-dnl @author Egon Willighagen <egonw@sci.kun.nl>
-dnl @version $Id$
-dnl
-AC_DEFUN([AC_PROG_JAR],[
-AC_REQUIRE([AC_EXEEXT])dnl
-if test "x$JAVAPREFIX" = x; then
-        test "x$JAR" = x && AC_CHECK_PROGS(JAR, jar$EXEEXT)
-else
-        test "x$JAR" = x && AC_CHECK_PROGS(JAR, jar, $JAVAPREFIX)
-fi
-test "x$JAR" = x && AC_MSG_ERROR([no acceptable jar program found in \$PATH])
-AC_PROVIDE([$0])dnl
-])
-
-
-
-
 dnl *** file: config/autoconf-archive-macros/ac_prog_javadoc.m4
 
 
@@ -982,6 +938,44 @@ fi
 
 
 
+dnl *** file: config/llnl-ac-macros/llnl_which_prog.m4
+
+dnl @synopsis LLNL_WHICH_PROG(WHICH_VARIABLE)
+dnl  
+dnl Searches for VARIABLE in PATH.   sets WHICH_VARIABLE to the absolute path of VARIABLE.
+dnl
+dnl @author Gary Kumfert
+
+AC_DEFUN(LLNL_WHICH_PROG,
+[
+which_progvar=$1
+progvar=`echo $which_progvar | sed -e 's/^WHICH_//'`
+eval "$which_progvar="
+progval=`eval echo \\$$progvar`
+case $progval in 
+  /*)#already absolute path... just verify it exists
+    if test -e "$progval"; then
+      eval "$which_progvar=$progval"
+    fi
+    ;;
+  *)# marching through PATH
+    cpath=`echo $PATH | sed -e 's/:/ /g'`
+    for i in $cpath; do 
+      if test -e "$i/$progval"; then
+        eval "$which_progvar=$i/$progval"
+        break;
+      fi;
+    done;
+    ;;
+esac  
+which_progval=`eval echo \\$$which_progvar`
+$1=$which_progval
+AC_SUBST($1)
+])
+
+
+
+
 dnl *** file: config/llnl-ac-macros/llnl_check_autoconf.m4
 
 dnl
@@ -1128,6 +1122,55 @@ AC_DEFUN(LLNL_CHECK_LONG_LONG,
 )])
 
 
+
+
+dnl *** file: config/llnl-ac-macros/llnl_prog_jar.m4
+AC_DEFUN([LLNL_CHECK_JAR],
+[dnl make sure jar accepts -u
+    cp /dev/null conftest1.class && \
+    cp /dev/null conftest2.class && \
+    $1 cf conftest.jar conftest1.class >/dev/null 2>&1 && 
+    $1 uf conftest.jar conftest2.class >/dev/null 2>&1])
+
+# AC_PATH_PROG(VARIABLE, PROG-TO-CHECK-FOR, [VALUE-IF-NOT-FOUND], [PATH])
+# -----------------------------------------------------------------------
+AC_DEFUN([LLNL_PROG_JAR],
+[# Extract the first word of "$2", so it can be a program name with args.
+set dummy $2; ac_word=$[2]
+AC_MSG_CHECKING([for $ac_word])
+AC_CACHE_VAL([ac_cv_path_$1],
+[case $$1 in
+  [[\\/]]* | ?:[[\\/]]*)
+  ac_cv_path_$1="$$1" # Let the user override the test with a path.
+  ;;
+  *)
+  _AS_PATH_WALK([$4],
+[for ac_exec_ext in '' $ac_executable_extensions; do
+  if AS_EXECUTABLE_P(["$as_dir/$ac_word$ac_exec_ext"]) && \
+     LLNL_CHECK_JAR([$as_dir/$ac_word$ac_exec_ext]); then
+    ac_cv_path_$1="$as_dir/$ac_word$ac_exec_ext"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&AS_MESSAGE_LOG_FD
+    break 2
+  fi
+done
+rm -f conftest1.class conftest2.class conftest.jar])
+dnl If no 3rd arg is given, leave the cache variable unset,
+dnl so LLNL_PROG_JAR will keep looking.
+m4_ifvaln([$3],
+[  test -z "$ac_cv_path_$1" && ac_cv_path_$1="$3"])dnl
+  ;;
+esac])dnl
+AC_SUBST([$1], [$ac_cv_path_$1])
+if test -n "$$1"; then
+  AC_MSG_RESULT([$$1])
+else
+  AC_MSG_RESULT([no])
+  AC_MSG_ERROR([Babel requires a version of jar (the Java archive tool) 
+that supports the -u option. If you have such a jar and configure did
+not find it, try setting the JAR environment variable to the absolute
+path of jar.])
+fi
+])# LLNL_PROG_JAR
 
 
 dnl *** file: config/llnl-ac-macros/llnl_cxx_library_ldflags.m4
@@ -1304,8 +1347,8 @@ AC_TRY_LINK(,[
         write (*,*) value
 ],[
 sidl_cv_f77_true=`./conftest$ac_exeext`
-],[AC_MSG_WARN([Unable to determine integer value of F77 .true.])
-	echo "the program generates"  `./conftest$ac_exeext`])
+],[echo "the program generates"  `./conftest$ac_exeext`
+   AC_MSG_ERROR([Unable to determine integer value of F77 .true.])])
 AC_LANG_POP(Fortran 77)dnl])
 
 AC_CACHE_CHECK([the integer value of F77's .false.], sidl_cv_f77_false,[dnl
@@ -1320,7 +1363,8 @@ AC_TRY_LINK(,[
 	write (*,*) value
 ],[
 sidl_cv_f77_false=`./conftest$ac_exeext`
-],[AC_MSG_WARN([Unable to determine integer value of F77 .false.])])
+],[echo "the program generates"  `./conftest$ac_exeext`
+   AC_MSG_ERROR([Unable to determine integer value of F77 .false.])])
 AC_LANG_POP(Fortran 77)dnl
 ])
 
@@ -1516,7 +1560,8 @@ AC_TRY_LINK(,[
   write (*,*) value
 ],[dnl
 sidl_cv_f90_true=`./conftest$ac_exeext`
-],[AC_MSG_WARN([Unable to determine integer value of F90 .true.])])
+],[
+AC_MSG_ERROR([Unable to determine integer value of F90 .true.])])
 AC_LANG_POP(Fortran 90)dnl])
 
 AC_CACHE_CHECK([the integer value of F90's .false.], sidl_cv_f90_false,[dnl
@@ -1531,7 +1576,8 @@ AC_TRY_LINK(,[
   write (*,*) value
 ],[dnl
 sidl_cv_f90_false=`./conftest$ac_exeext`
-],[AC_MSG_WARN([Unable to determine integer value of F90 .false.])])
+],[echo "the program generates"  `./conftest$ac_exeext`
+   AC_MSG_ERROR([Unable to determine integer value of F90 .false.])])
 AC_LANG_POP(Fortran 90)dnl
 ])
 
@@ -1975,6 +2021,7 @@ AU_DEFUN([ac_cv_prog_g90],
 # lf95 is the Lahey-Fujitsu compiler.
 # epcf90 is the "Edinburgh Portable Compiler" F90.
 # fort is the Compaq Fortran 90 (now 95) compiler for Tru64 and Linux/Alpha.
+# ifc is the Intel IA32 Fortran 90 compiler
 AC_DEFUN([AC_PROG_F90],
 [AC_LANG_PUSH(Fortran 90)dnl
 AC_ARG_VAR([F90],      [Fortran 90 compiler command])dnl
@@ -1982,7 +2029,7 @@ AC_ARG_VAR([F90FLAGS], [Fortran 90 compiler flags])dnl
 _AC_ARG_VAR_LDFLAGS()dnl
 AC_CHECK_TOOLS(F90,
       [m4_default([$1],
-                  [f90 xlf90 pgf90 epcf90 f95 xlf95 lf95 fort g95])])
+                  [f90 xlf90 pgf90 epcf90 ifc f95 xlf95 lf95 fort g95])])
 
 #
 # LLNL:  Added to be consistent with F77
@@ -3491,6 +3538,83 @@ AC_SUBST(F90LIBS)
 ])
 
 
+dnl *** file: config/llnl-ac-macros/llnl_f90_pointer_size.m4
+# LLNL_F90_POINTER_SIZE
+# ---------------------
+# Try to determine the size of a F90 pointer to a derived type
+# Note the size of a pointer may depend on the type of thing
+# it is pointing to. :-(
+#
+AC_DEFUN([LLNL_F90_POINTER_SIZE],
+[AC_REQUIRE([AC_PROG_F90])dnl
+AC_REQUIRE([AC_F90_LIBRARY_LDFLAGS])dnl
+AC_REQUIRE([LLNL_F90_NAME_MANGLING])dnl
+AC_CACHE_CHECK([for Fortran 90 pointer to derived type size],
+	ac_cv_f90_pointer_size,
+[AC_LANG_PUSH(C)dnl
+  case $ac_cv_f90_mangling in
+    "lower case, no underscore"*)
+       ac_cv_f90_pointer_func="pointerdiff";;
+    "lower case, underscore"*)
+       ac_cv_f90_pointer_func="pointerdiff_";;
+    "upper case, no underscore"*)
+       ac_cv_f90_pointer_func="POINTERDIFF";;
+    "upper case, underscore"*)
+       ac_cv_f90_pointer_func="POINTERDIFF_";;
+    "mixed case, no underscore"*)
+       ac_cv_f90_pointer_func="pointerdiff";;
+    "mixed case, underscore"*)
+       ac_cv_f90_pointer_func="pointerdiff_";;
+     *)
+  	AC_MSG_ERROR([unknown Fortran 90 name-mangling scheme])
+	;;
+  esac
+  AC_COMPILE_IFELSE(
+   [#include <stdio.h>
+#ifdef __cplusplus
+extern "C" 
+#endif
+void $ac_cv_f90_pointer_func(char *p1, char *p2)
+{
+  printf("%ld\n", (long)(p2 - p1));
+}
+],
+   [mv conftest.$ac_objext cf90_test.$ac_objext
+
+    AC_LANG_PUSH(Fortran 90)dnl
+    ac_save_LIBS=$LIBS
+    LIBS="cf90_test.$ac_objext $LIBS"
+    AC_TRY_LINK(,[
+  implicit none
+  type foo 
+    integer :: data
+  end type foo
+
+  type foowrap
+    type(foo), pointer :: foop
+  end type foowrap
+
+  external pointerdiff
+  type(foowrap), dimension(2) :: fooa
+  call pointerdiff(fooa(1), fooa(2))
+],[dnl
+      ac_cv_f90_pointer_size=`./conftest$ac_exeext`
+],[
+      AC_MSG_ERROR([Unable to determine pointer size])
+    ])
+    LIBS=$ac_save_LIBS
+    AC_LANG_POP(Fortran 90)dnl
+    rm -f cf90_test* conftest*
+   ])
+  AC_LANG_POP(C)dnl
+  ])
+
+AC_DEFINE_UNQUOTED(SIDL_F90_POINTER_SIZE, $ac_cv_f90_pointer_size,
+[Size in bytes for a F90 pointer to a derived type])
+])
+# LLNL_F90_POINTER_SIZE
+
+
 dnl *** file: config/llnl-ac-macros/llnl_confirm_babel_c_support.m4
 dnl
 dnl @synopsis LLNL_CONFIRM_BABEL_C_SUPPORT
@@ -3507,6 +3631,7 @@ AC_DEFUN([LLNL_CONFIRM_BABEL_C_SUPPORT], [
   # C Compiler
   #
   AC_PROG_CC
+  LLNL_WHICH_PROG(WHICH_CC)
   # a. Libraries (existence)
   # b. Header Files.
   AC_HEADER_DIRENT
@@ -3578,7 +3703,8 @@ AC_DEFUN([LLNL_CONFIRM_BABEL_F77_SUPPORT], [
   else
     msgs="$msgs
 	  Fortran77 enabled.";
-  fi 
+  fi
+  LLNL_WHICH_PROG(WHICH_F77) 
 ])
 
 
@@ -3619,6 +3745,7 @@ AC_DEFUN([LLNL_CONFIRM_BABEL_F90_SUPPORT], [
         LLNL_SORT_F90LIBS
         LLNL_F90_NAME_MANGLING
         LLNL_F90_C_CONFIG
+	LLNL_F90_POINTER_SIZE
     else
 	AC_WARN([Disabling F90 Support])
         with_fortran90="broken"	
@@ -3638,6 +3765,7 @@ AC_DEFUN([LLNL_CONFIRM_BABEL_F90_SUPPORT], [
     AC_DEFINE(FORTRAN90_DISABLED, 1, [If defined, F90 support was disabled at configure time])
   fi
   AM_CONDITIONAL(SUPPORT_FORTRAN90, test "X$with_fortran90" = "Xyes")
+  LLNL_WHICH_PROG(WHICH_PYTHON)
 ])
 
 
@@ -3704,6 +3832,7 @@ AC_DEFUN([LLNL_CONFIRM_BABEL_CXX_SUPPORT2], [
     msgs="$msgs
   	  C++ enabled.";
   fi
+  LLNL_WHICH_PROG(WHICH_CXX)
 ])
 
 
@@ -3761,6 +3890,8 @@ AC_DEFUN([LLNL_CONFIRM_BABEL_PYTHON_SUPPORT], [
   if (test "X$with_python" = "Xno") || (test "X$llnl_python_shared_library_found" != "Xyes"); then
     AC_DEFINE(PYTHON_SERVER_DISABLED, 1, [If defined, server-side Python support was disabled at configure time])
   fi;
+
+  LLNL_WHICH_PROG(WHICH_PYTHON)
 ])
 
 
@@ -3799,7 +3930,8 @@ AC_DEFUN([LLNL_CONFIRM_BABEL_JAVA_SUPPORT], [
   AC_CHECK_CLASSPATH
   AC_PROG_JAVAC
   AC_PROG_JAVA
-  AC_PROG_JAR
+  LLNL_PROG_JAR(JAR, jar)
+  
   LLNL_PROG_JDB
   AC_TRY_COMPILE_JAVA
   if test "X$with_java" != "Xno"; then
@@ -3822,6 +3954,10 @@ AC_DEFUN([LLNL_CONFIRM_BABEL_JAVA_SUPPORT], [
     msgs="$msgs
   	  Java enabled.";
   fi 
+  LLNL_WHICH_PROG(WHICH_JAVA)
+  LLNL_WHICH_PROG(WHICH_JAVAC)
+  LLNL_WHICH_PROG(WHICH_JAR)
+  LLNL_WHICH_PROG(WHICH_JAVAH)
 ])
 
 
@@ -5349,7 +5485,7 @@ else
       # Warning - without using the other runtime loading flags (-brtl),
       # -berok will link without error, but may produce a broken library.
       allow_undefined_flag='-berok'
-      hardcode_libdir_flag_spec='${wl}-blibpath:$libdir:/usr/lib:/lib'
+      hardcode_libdir_flag_spec='${wl}-blibpath:$libdir:/usr/lib:/lib -brtl ' #gkk added -brtl
       archive_expsym_cmds="\$CC"' -o $output_objdir/$soname $libobjs $deplibs $compiler_flags `if test "x${allow_undefined_flag}" != "x"; then echo "${wl}${allow_undefined_flag}"; else :; fi` '"\${wl}$no_entry_flag \${wl}$exp_sym_flag:\$export_symbols $shared_flag"
     else
       if test "$host_cpu" = ia64; then

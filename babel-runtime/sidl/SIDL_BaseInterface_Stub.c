@@ -1,8 +1,8 @@
 /*
  * File:          SIDL_BaseInterface_Stub.c
- * Symbol:        SIDL.BaseInterface-v0.8.1
+ * Symbol:        SIDL.BaseInterface-v0.8.2
  * Symbol Type:   interface
- * Babel Version: 0.8.0
+ * Babel Version: 0.8.2
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side glue code for SIDL.BaseInterface
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.0
+ * babel-version = 0.8.2
  */
 
 #include "SIDL_BaseInterface.h"
@@ -131,6 +131,18 @@ SIDL_BaseInterface_isType(
   return (*self->d_epv->f_isType)(
     self->d_object,
     name);
+}
+
+/*
+ * Return the meta-data about the class implementing this interface.
+ */
+
+SIDL_ClassInfo
+SIDL_BaseInterface_getClassInfo(
+  SIDL_BaseInterface self)
+{
+  return (*self->d_epv->f_getClassInfo)(
+    self->d_object);
 }
 
 /*
@@ -568,7 +580,7 @@ SIDL_BaseInterface__array_copy(const struct SIDL_BaseInterface__array* src,
 struct SIDL_BaseInterface__array*
 SIDL_BaseInterface__array_ensure(struct SIDL_BaseInterface__array* src,
                                  int32_t dimen,
-int     ordering)
+                                 int     ordering)
 {
   return (struct SIDL_BaseInterface__array*)
     SIDL_interface__array_ensure((struct SIDL_interface__array *)src, dimen,
