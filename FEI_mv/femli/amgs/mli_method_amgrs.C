@@ -248,7 +248,7 @@ int MLI_Method_AMGRS::setup( MLI *mli )
       /* ------create strength matrix----------------------------------- */
 
       num_nodes = local_nrows / nodeDOF_;
-      if ( (num_nodes * nodeDOF_) != local_nrows )
+      if ( level == 0 && (num_nodes * nodeDOF_) != local_nrows )
       {
          printf("\tMLI_Method_AMGRS::setup - nrows not divisible by dof.\n");
          printf("\tMLI_Method_AMGRS::setup - revert nodeDOF to 1.\n");
