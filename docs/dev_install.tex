@@ -11,7 +11,7 @@ maintained by members of the Scalable Linear Solvers project:
    \item intended to give users access to relatively recent changes.
    \item updated somewhat frequently (about once a week).
    \item may be relatively unstable.
-   \item one old installation is retained.
+   \item three old installation is retained.
    \item installed on:
       \begin{itemize}
       \item CASC Sun workstation cluster
@@ -23,7 +23,7 @@ maintained by members of the Scalable Linear Solvers project:
    \item intended to give users consistent access across several platforms.
    \item updated less frequently than internal installation.
    \item should be relatively stable.
-   \item a few old installations are retained.
+   \item three old installations are retained.
    \item installed on:
       \begin{itemize}
        \item CASC Sun workstation cluster
@@ -46,39 +46,48 @@ rfalgout@llnl.gov to get on either list.
 \label{Installation Procedures}
 
 All installations are done with the \file{update} Bourne-shell script
-located in the top-level directory of the \hypre{} repository.  To
-get general usage info, do \kbd{update -help}.
+located in the top-level directory of the \hypre{} repository.  Typing
+\kbd{update -help} will give general usage info.
 \begin{itemize}
 
 \item Internal installation: (on CASC cluster only)
 \begin{enumerate}
 
-   \item Do \kbd{update internal} - this checks out the current
-   version of the repository, tags it with a date (file
-   \file{VERSION_DATE}), compiles it, temporarily installs it, and
-   sets the permissions of the temporary installation to appropriate
-   values.  This also creates the tar file \file{UPDATE.tar},
-   currently only used in the external installation.
+   \item \kbd{update internal} - This checks out the current version
+   of the repository, tags it with a date (file \file{VERSION_DATE}),
+   compiles the documentation, compiles the source (pure MPI and
+   possibly threaded also), temporarily installs it, and sets the
+   permissions of the temporary installation to appropriate values.
+   This also creates the tar file \file{UPDATE.tar}, currently only
+   used in the external installation.
   
-   \item Do \kbd{update internal install} - this saves the previously
+   \item \kbd{update internal install} - This saves the previously
    installed version, moves the temporary installation into its
    correct location, and possibly deletes some older installations.
   
-   \item Note that step 1 is not actually needed, but is recommended in case
-   something doesn't work as planned (e.g., failed checkout, failed
-   compile, ...).  Also, step 1 provides the opportunity to test the
-   library in non-CASC codes such as ARES or ALE3D via the temporary
-   installation in the \file{UPDATE} subdirectory.
+   \item Note that step 1 is not actually needed, but is recommended
+   in case something doesn't work as planned (e.g., failed checkout,
+   failed compile, etc.).  Also, step 1 provides the opportunity to
+   test the library in non-CASC codes such as ARES or ALE3D via the
+   temporary installation in the \file{UPDATE} subdirectory.
   
    \item Send email to appropriate users indicating the update.
+   Browse the \file{updatelog.linear_solvers} file to assemble a list
+   of changes since the last update.
 
 \end{enumerate}
 
 \item External installation: (on CASC cluster)
 \begin{enumerate}
 
-   \item Do \kbd{update external}
-   \item Do \kbd{update external install}
+   \item \kbd{update external}
+
+   \item \kbd{update external install}
+
+   \item Note that this automatically copies the \file{UPDATE.tar}
+   file from the internal installation to use here.  That is, the
+   external installation is always the same as some version of the
+   internal installation.
 
 \end{enumerate}
 
@@ -87,12 +96,21 @@ e.g. the Compass cluster)
 \begin{enumerate}
 
    \item FTP the file \file{UPDATE.tar} to west (for example), and put it
-   in the install directory (do \kbd{update -dirs} for a list).
-   \item Do \kbd{tar xf UPDATE.tar}
-   \item Do \kbd{update external -dec}
-   \item Do \kbd{update external -dec install}
+   in the install directory (typing \kbd{update -dirs} will give a list).
+
+   \item \kbd{tar xf UPDATE.tar}
+
+   \item \kbd{update external -dec}
+
+   \item \kbd{update external -dec install}
 
 \end{enumerate}
+
+\item Doublecheck the permissions on some of the files to make sure that
+they are set correctly.  The installation should be world-readable,
+and should give write access to people in the \file{hypre} group.  If
+you find something is not getting set correctly, fix manually, and
+report to the person maintaining the \file{update} script.
 
 \end{itemize}
 
