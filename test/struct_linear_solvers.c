@@ -38,6 +38,7 @@ main( int   argc,
 
    HYPRE_StructSolver  smg_solver;
    HYPRE_StructSolver  pcg_solver;
+   HYPRE_StructSolver  hybrid_solver;
    HYPRE_StructSolver  pcg_precond;
    int                 num_iterations;
    int                 time_index;
@@ -522,7 +523,7 @@ main( int   argc,
     * Solve the system using PCG
     *-----------------------------------------------------------*/
 
-   if (solver_id > 0)
+   if (solver_id > 0 && solver_id < 19)
    {
       time_index = hypre_InitializeTiming("PCG Setup");
       hypre_BeginTiming(time_index);
@@ -589,6 +590,29 @@ main( int   argc,
       {
          HYPRE_StructSMGFinalize(pcg_precond);
       }
+   }
+
+   /*-----------------------------------------------------------
+    * Hybrid Solver
+    *-----------------------------------------------------------*/
+   if (solver_id > 19)
+   {
+      HYPRE_StructHybridInitialize(MPI_COMM_WORLD, &hybrid_solver);
+      HYPRE_StructHybridSetMaxDSIterations(hybrid_solver, 100);
+      HYPRE_StructHybridSetMaxMGIterations(hybrid_solver, 50);
+      HYPRE_StructHybridSetTol(hybrid_solver, 1.0e-06);
+      HYPRE_StructHybridSetConvergenceTol(hybrid_solver, 0.90);
+      HYPRE_StructHybridSetTwoNorm(hybrid_solver, 1);
+      HYPRE_StructHybridSetRelChange(hybrid_solver, 0);
+      HYPRE_StructHybridSetLogging(hybrid_solver, 1);
+
+      HYPRE_StructHybridSetup(hybrid_solver, A, b, x);
+
+      HYPRE_StructHybridSolve(hybrid_solver, A, b, x);
+
+      HYPRE_StructHybridGetNumIterations(hybrid_solver, &num_iterations);
+      HYPRE_StructHybridGetFinalRelativeResidualNorm(hybrid_solver, &final_res_norm);
+      HYPRE_StructHybridFinalize(hybrid_solver);
    }
 
    /*-----------------------------------------------------------
