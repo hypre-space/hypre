@@ -46,6 +46,7 @@ HYPRE_SEQ_DIRS =\
 #These are the directories for parallel compressed sparse row
 HYPRE_PARCSR_DIRS =\
  utilities\
+ seq_matrix_vector\
  parcsr_matrix_vector\
  parcsr_linear_solvers
 
