@@ -37,6 +37,8 @@ main( int   argc,
    int               solve_err_flag;
    int               num_fine;
 
+   int               cycle_type;
+
 /*----------------------------------------------------
    int     *num_grid_sweeps;  
    int     *grid_relax_type;   
@@ -63,9 +65,9 @@ main( int   argc,
        grid_relax_points[3][j] = 0;
 ----------------------------------------------------*/
 
-   if (argc < 3)
+   if (argc < 4)
    {
-      fprintf(stderr, "Usage:  interpdrive <file> <strong_threshold>\n");
+      fprintf(stderr, "Usage:  SPamg <file> <strong_threshold>  <mu>\n");
       exit(1);
    }
 
@@ -80,10 +82,13 @@ main( int   argc,
     *-------------------------------------------------------*/
            
    strong_threshold = atof(argv[2]);
+   cycle_type = atoi(argv[3]);
+   
 
    amg_data = hypre_AMGInitialize();
    hypre_AMGSetStrongThreshold(strong_threshold, amg_data);
    hypre_AMGSetLogging(3,"amg.out.log",amg_data);
+   hypre_AMGSetCycleType(cycle_type, amg_data);
 
 /*--------------  
    hypre_AMGSetNumGridSweeps(num_grid_sweeps, amg_data);
