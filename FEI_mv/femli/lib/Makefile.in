@@ -87,6 +87,7 @@ HEADERS = \
  $(srcdir)/../solver/mli_solver_bjacobi.h\
  $(srcdir)/../solver/mli_solver_bsgs.h\
  $(srcdir)/../solver/mli_solver_cg.h\
+ $(srcdir)/../solver/mli_solver_gmres.h\
  $(srcdir)/../solver/mli_solver_chebyshev.h\
  $(srcdir)/../solver/mli_solver_gs.h\
  $(srcdir)/../solver/mli_solver.h\
@@ -134,6 +135,7 @@ FILES = \
  ../solver/mli_solver_mls.cxx\
  ../solver/mli_solver_chebyshev.cxx\
  ../solver/mli_solver_cg.cxx\
+ ../solver/mli_solver_gmres.cxx\
  ../solver/mli_solver_kaczmarz.cxx\
  ../solver/mli_solver_superlu.cxx\
  ../solver/mli_solver_seqsuperlu.cxx\

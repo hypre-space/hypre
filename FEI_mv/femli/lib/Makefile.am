@@ -53,6 +53,7 @@ FILES = \
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_mls.cxx\
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_chebyshev.cxx\
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_cg.cxx\
+ $(top_srcdir)/FEI_mv/femli/solver/mli_solver_gmres.cxx\
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_kaczmarz.cxx\
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_superlu.cxx\
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_seqsuperlu.cxx\
@@ -86,6 +87,7 @@ FILES = \
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_mls.h\
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_chebyshev.h\
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_cg.h\
+ $(top_srcdir)/FEI_mv/femli/solver/mli_solver_gmres.h\
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_kaczmarz.h\
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_superlu.h\
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_seqsuperlu.h\
