@@ -24,7 +24,7 @@ HYPRE_SStructPCGCreate( MPI_Comm             comm,
 {
    hypre_PCGFunctions * pcg_functions =
       hypre_PCGFunctionsCreate(
-         hypre_CAlloc, hypre_SStructKrylovFree,
+         hypre_CAlloc, hypre_SStructKrylovFree, hypre_SStructKrylovCommInfo,
          hypre_SStructKrylovCreateVector,
          hypre_SStructKrylovDestroyVector, hypre_SStructKrylovMatvecCreate,
          hypre_SStructKrylovMatvec, hypre_SStructKrylovMatvecDestroy,
