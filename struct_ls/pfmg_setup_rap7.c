@@ -210,6 +210,7 @@ hypre_PFMGBuildCoarseOp7( hypre_StructMatrix *A,
    int                   zOffsetP; 
                       
    int                   ierr = 0;
+   int                   bdy;
 
    stridef = cstride;
    hypre_SetIndex(stridec, 1, 1, 1);
@@ -538,29 +539,38 @@ hypre_PFMGBuildCoarseOp7( hypre_StructMatrix *A,
                      /* The boundary is not done in a separate loop because we
                         don't have a better way to get the parts of A_dbox and
                         RAP_dbox which correspond to the boundary parts of cgrid_box */
+                     bdy = 0;  /* so we don't treat this point as a boundary pt twice */
                      hypre_BoxLoopGetIndex( box_index, base_index, loopi, loopj, loopk );
                      hypre_ForBoxI(cbi, cboundarya)
                         {
                            cg_bdy_box = hypre_BoxArrayBox( cboundarya, cbi);
-                           if ( hypre_IndexInBoxP( box_index, cg_bdy_box ) )
+                           if ( hypre_IndexInBoxP( box_index, cg_bdy_box ) && bdy==0 )
                            {  /* we're in a boundary (in the above direction) */
                               rap_cc[iAc] += above;
                               rap_cc[iAc] -= a_ac[iA_offd];
                               rap_cc[iAc] -= 0.5*diagp;
+                              bdy = 1;
+                              break;
                            }
                         }
+                     if ( bdy == 0 )
                      hypre_ForBoxI(cbi, cboundaryb)
                         {
                            cg_bdy_box = hypre_BoxArrayBox( cboundarya, cbi);
-                           if ( hypre_IndexInBoxP( box_index, cg_bdy_box ) )
+                           if ( hypre_IndexInBoxP( box_index, cg_bdy_box ) && bdy==0 )
                            {  /* we're in a boundary (in the below direction) */
                               rap_cc[iAc] += below;
                               rap_cc[iAc] -= a_bc[iA_offd];
                               rap_cc[iAc] -= 0.5*diagm;
+                              bdy = 1;
+                              break;
                            }
                         }
                   }
                hypre_BoxLoop2End(iA, iAc);
+
+               hypre_BoxArrayDestroy(cboundarya);
+               hypre_BoxArrayDestroy(cboundaryb);
 
             }
 

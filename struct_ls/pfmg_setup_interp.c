@@ -256,7 +256,6 @@ hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
             {
                /* simply force P to be constant coefficient, all 0.5's */
                Pi = hypre_CCBoxIndexRank(P_dbox,startc);
-               center  = 0.0;
                Pp0[Pi] = 0.5;
                Pp1[Pi] = 0.5;
             }

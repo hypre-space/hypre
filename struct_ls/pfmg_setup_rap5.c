@@ -196,6 +196,7 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
    int                   yOffsetP; 
                       
    int                   ierr = 0;
+   int                   bdy;
 
    stridef = cstride;
    hypre_SetIndex(stridec, 1, 1, 1);
@@ -454,7 +455,6 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
                hypre_BoxBoundaryDG( cgrid_box, cgrid, cboundarys, cboundaryn, cdir );
                /* ... cgrid_box comes from the grid, so there are no ghost zones
                   involved here */
-
                /* new diagonal (variable) elements...*/
                hypre_BoxLoop2Begin(loop_size,
                                    A_dbox, fstart, stridef, iA,
@@ -469,29 +469,38 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
                      diagm = a_cc[iAm1] + diagcorr;
                      diagp = a_cc[iAp1] + diagcorr;
                      rap_cc[iAc] = a_cc[iA] + diagcorr + diag + 0.5*( diagm+diagp );
+                     bdy = 0;  /* so we don't treat this point as a boundary pt twice */
                      hypre_BoxLoopGetIndex( box_index, base_index, loopi, loopj, loopk );
                      hypre_ForBoxI(cbi, cboundarys)
                         {
                            cg_bdy_box = hypre_BoxArrayBox( cboundarys, cbi);
-                           if ( hypre_IndexInBoxP( box_index, cg_bdy_box ) )
+                           if ( hypre_IndexInBoxP( box_index, cg_bdy_box ) && bdy==0 )
                            {  /* we're in a boundary (in the south direction) */
                               rap_cc[iAc] += south;
                               rap_cc[iAc] -= a_cs[iA_offd];
                               rap_cc[iAc] -= 0.5*diagm;
+                              bdy = 1;
+                              break;
                            }
                         }
+                     if ( bdy == 0 )
                      hypre_ForBoxI(cbi, cboundaryn)
                         {
                            cg_bdy_box = hypre_BoxArrayBox( cboundaryn, cbi);
-                           if ( hypre_IndexInBoxP( box_index, cg_bdy_box ) )
+                           if ( hypre_IndexInBoxP( box_index, cg_bdy_box ) && bdy==0 )
                            {  /* we're in a boundary (in the north direction) */
                               rap_cc[iAc] += north;
                               rap_cc[iAc] -= a_cn[iA_offd];
                               rap_cc[iAc] -= 0.5*diagp;
+                              bdy = 1;
+                              break;
                            }
                         }
                   }
                hypre_BoxLoop2End(iA, iAc);
+
+               hypre_BoxArrayDestroy(cboundaryn);
+               hypre_BoxArrayDestroy(cboundarys);
 
             }
 
