@@ -5,8 +5,8 @@
 hypre_CommHandle *
 hypre_InitializeCommunication( int 	      job,
 			       hypre_CommPkg *comm_pkg,
-                               double        *send_data,
-                               double        *recv_data )
+                               void          *send_data, 
+                               void          *recv_data )
 {
    int                  num_sends = hypre_CommPkgNumSends(comm_pkg);
    int                  num_recvs = hypre_CommPkgNumRecvs(comm_pkg);
@@ -35,12 +35,14 @@ hypre_InitializeCommunication( int 	      job,
    {
    case  1:
    {
+	double *d_send_data = (double *) send_data;
+	double *d_recv_data = (double *) recv_data;
    	for (i = 0; i < num_recvs; i++)
    	{
       		ip = hypre_CommPkgRecvProc(comm_pkg, i); 
       		vec_start = hypre_CommPkgRecvVecStart(comm_pkg,i);
       		vec_len = hypre_CommPkgRecvVecStart(comm_pkg,i+1)-vec_start;
-      		MPI_Irecv(&recv_data[vec_start], vec_len, MPI_DOUBLE,
+      		MPI_Irecv(&d_recv_data[vec_start], vec_len, MPI_DOUBLE,
 			ip, 0, comm, &requests[j++]);
    	}
    	for (i = 0; i < num_sends; i++)
@@ -48,19 +50,21 @@ hypre_InitializeCommunication( int 	      job,
 	    vec_start = hypre_CommPkgSendMapStart(comm_pkg, i);
 	    vec_len = hypre_CommPkgSendMapStart(comm_pkg, i+1)-vec_start;
       	    ip = hypre_CommPkgSendProc(comm_pkg, i); 
-   	    MPI_Isend(&send_data[vec_start], vec_len, MPI_DOUBLE,
+   	    MPI_Isend(&d_send_data[vec_start], vec_len, MPI_DOUBLE,
 			ip, 0, comm, &requests[j++]);
    	}
 	break;
    }
    case  2:
    {
+	double *d_send_data = (double *) send_data;
+	double *d_recv_data = (double *) recv_data;
    	for (i = 0; i < num_sends; i++)
    	{
 	    vec_start = hypre_CommPkgSendMapStart(comm_pkg, i);
 	    vec_len = hypre_CommPkgSendMapStart(comm_pkg, i+1) - vec_start;
       	    ip = hypre_CommPkgSendProc(comm_pkg, i); 
-   	    MPI_Irecv(&recv_data[vec_start], vec_len, MPI_DOUBLE,
+   	    MPI_Irecv(&d_recv_data[vec_start], vec_len, MPI_DOUBLE,
 			ip, 0, comm, &requests[j++]);
    	}
    	for (i = 0; i < num_recvs; i++)
@@ -68,7 +72,51 @@ hypre_InitializeCommunication( int 	      job,
       		ip = hypre_CommPkgRecvProc(comm_pkg, i); 
       		vec_start = hypre_CommPkgRecvVecStart(comm_pkg,i);
       		vec_len = hypre_CommPkgRecvVecStart(comm_pkg,i+1)-vec_start;
-      		MPI_Isend(&send_data[vec_start], vec_len, MPI_DOUBLE, 
+      		MPI_Isend(&d_send_data[vec_start], vec_len, MPI_DOUBLE,
+			ip, 0, comm, &requests[j++]);
+   	}
+	break;
+   }
+   case  11:
+   {
+	int *i_send_data = (int *) send_data;
+	int *i_recv_data = (int *) recv_data;
+   	for (i = 0; i < num_recvs; i++)
+   	{
+      		ip = hypre_CommPkgRecvProc(comm_pkg, i); 
+      		vec_start = hypre_CommPkgRecvVecStart(comm_pkg,i);
+      		vec_len = hypre_CommPkgRecvVecStart(comm_pkg,i+1)-vec_start;
+      		MPI_Irecv(&i_recv_data[vec_start], vec_len, MPI_INT,
+			ip, 0, comm, &requests[j++]);
+   	}
+   	for (i = 0; i < num_sends; i++)
+   	{
+	    vec_start = hypre_CommPkgSendMapStart(comm_pkg, i);
+	    vec_len = hypre_CommPkgSendMapStart(comm_pkg, i+1)-vec_start;
+      	    ip = hypre_CommPkgSendProc(comm_pkg, i); 
+   	    MPI_Isend(&i_send_data[vec_start], vec_len, MPI_INT,
+			ip, 0, comm, &requests[j++]);
+   	}
+	break;
+   }
+   case  12:
+   {
+	int *i_send_data = (int *) send_data;
+	int *i_recv_data = (int *) recv_data;
+   	for (i = 0; i < num_sends; i++)
+   	{
+	    vec_start = hypre_CommPkgSendMapStart(comm_pkg, i);
+	    vec_len = hypre_CommPkgSendMapStart(comm_pkg, i+1) - vec_start;
+      	    ip = hypre_CommPkgSendProc(comm_pkg, i); 
+   	    MPI_Irecv(&i_recv_data[vec_start], vec_len, MPI_INT,
+			ip, 0, comm, &requests[j++]);
+   	}
+   	for (i = 0; i < num_recvs; i++)
+   	{
+      		ip = hypre_CommPkgRecvProc(comm_pkg, i); 
+      		vec_start = hypre_CommPkgRecvVecStart(comm_pkg,i);
+      		vec_len = hypre_CommPkgRecvVecStart(comm_pkg,i+1)-vec_start;
+      		MPI_Isend(&i_send_data[vec_start], vec_len, MPI_INT,
 			ip, 0, comm, &requests[j++]);
    	}
 	break;
@@ -158,8 +206,8 @@ hypre_GenerateMatvecCommunicationInfo ( hypre_ParCSRMatrix *A,
    int  row_len = hypre_ParCSRMatrixGlobalNumCols(A);	
    int	num_cols_diag = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(A));
    int	num_cols_offd = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(A));
-   int  no_row_part = 0;
-   int  no_col_part = 0;
+   int no_row_part_starts = 0;
+   int no_col_part_starts = 0;
 
    MPI_Comm_size(comm, &num_procs);  
    MPI_Comm_rank(comm, &my_id);
@@ -173,7 +221,7 @@ hypre_GenerateMatvecCommunicationInfo ( hypre_ParCSRMatrix *A,
 
    if (!row_part_starts)
    {
-	no_row_part = 1;
+	no_row_part_starts = 1;
    	row_part_starts = hypre_CTAlloc(int, num_procs+1);
 
    	for (i=0; i < num_procs; i++)
@@ -187,7 +235,7 @@ hypre_GenerateMatvecCommunicationInfo ( hypre_ParCSRMatrix *A,
 
    if (!col_part_starts)
    {
-	no_col_part = 1;
+	no_col_part_starts = 1;
    	col_part_starts = hypre_CTAlloc(int, num_procs+1);
 
    	for (i=0; i < num_procs; i++)
@@ -356,8 +404,8 @@ hypre_GenerateMatvecCommunicationInfo ( hypre_ParCSRMatrix *A,
    hypre_TFree(recv_buf);
    hypre_TFree(displs);
    hypre_TFree(info);
-   if (no_row_part) hypre_TFree(row_part_starts);
-   if (no_col_part) hypre_TFree(col_part_starts);
+   if (no_row_part_starts) hypre_TFree(row_part_starts);
+   if (no_col_part_starts) hypre_TFree(col_part_starts);
  
    return ierr;
 }
