@@ -109,7 +109,7 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
                   colValues_(NULL),
                   selectedList_(NULL),
                   selectedListAux_(NULL),
-                  HYOutputLevel_(2)
+                  HYOutputLevel_(0)
 {
     //-------------------------------------------------------------------
     // find my processor ID 
@@ -159,7 +159,8 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
     pilutMaxNnzPerRow_  = 0;    // register the max NNZ/per in matrix A
 
     parasailsNlevels_   = 1;
-    parasailsThreshold_ = 0.05;
+    parasailsThreshold_ = 0.0;
+    parasailsFilter_    = 0.01;
 
     superluOrdering_    = 0;    // natural ordering in SuperLU
     superluScale_[0]    = 'N';  // no scaling in SuperLUX
@@ -671,6 +672,24 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
        {
           printf("HYPRE_LinSysCore::parameters parasailsNlevels = %d\n",
                  parasailsNlevels_);
+       }
+#endif
+    }
+
+    //-------------------------------------------------------------------
+    // parasails preconditoner : filter (0.004-0.05)
+    //-------------------------------------------------------------------
+
+    if (Utils::getParam("parasailsFilter",numParams,params,param) == 1)
+    {
+       sscanf(param,"%lg", &parasailsFilter_);
+       if ( parasailsFilter_ < 0.0 ) parasailsFilter_ = 0.0;
+       nParamsFound++;
+#ifdef DEBUG
+       if ( mypid_ == 0 )
+       {
+          printf("HYPRE_LinSysCore::parameters parasailsFilter = %e\n",
+                 parasailsFilter_);
        }
 #endif
     }
@@ -2313,6 +2332,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   {
                      printf("ParaSails - nlevels   = %d\n", parasailsNlevels_);
                      printf("ParaSails - threshold = %e\n", parasailsThreshold_);
+                     printf("ParaSails - filter    = %e\n", parasailsFilter_);
                   }
                   HYPRE_ParCSRParaSailsSetParams(HYPrecon_,
                                                  parasailsThreshold_,
@@ -2320,6 +2340,10 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   if ( parasailsThreshold_ == 0.0 ) 
                   {
                      HYPRE_ParCSRParaSailsSelectThresh(HYPrecon_, 0.9);
+                  }
+                  if ( parasailsFilter_ > 0.0 ) 
+                  {
+                     HYPRE_ParCSRParaSailsSetFilter(HYPrecon_,parasailsFilter_);
                   }
                   HYPRE_ParCSRPCGSetPrecond(HYSolver_,
                                             HYPRE_ParCSRParaSailsSolve,
@@ -2350,6 +2374,8 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                      printf("AMG relax type   = %d\n", amgRelaxType_[0]);
                      printf("AMG relax weight = %e\n", amgRelaxWeight_[0]);
                   }
+                  if ( HYOutputLevel_ > 2 && mypid_ == 0 )
+                     HYPRE_ParAMGSetIOutDat(HYPrecon_, 2);
                   HYPRE_ParCSRPCGSetPrecond(HYSolver_, HYPRE_ParAMGSolve,
                                    HYPRE_ParAMGSetup, HYPrecon_);
                   break;
@@ -2441,9 +2467,9 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
              case HYPARASAILS :
                   if ( HYOutputLevel_ > 0 && mypid_ == 0 )
                   {
-                     printf("ParaSails WARNING - use with SPD system only.\n");
                      printf("ParaSails - nlevels   = %d\n", parasailsNlevels_);
                      printf("ParaSails - threshold = %e\n", parasailsThreshold_);
+                     printf("ParaSails - filter    = %e\n", parasailsFilter_);
                   }
                   HYPRE_ParCSRParaSailsSetSym(HYPrecon_,0);
                   HYPRE_ParCSRParaSailsSetParams(HYPrecon_,
@@ -2452,6 +2478,10 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   if ( parasailsThreshold_ == 0.0 ) 
                   {
                      HYPRE_ParCSRParaSailsSelectThresh(HYPrecon_, 0.9);
+                  }
+                  if ( parasailsFilter_ > 0.0 ) 
+                  {
+                     HYPRE_ParCSRParaSailsSetFilter(HYPrecon_,parasailsFilter_);
                   }
                   HYPRE_ParCSRGMRESSetPrecond(HYSolver_,
                                             HYPRE_ParCSRParaSailsSolve,
