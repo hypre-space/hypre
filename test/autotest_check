@@ -27,7 +27,7 @@
 
 RECIPIENTS="\
  rfalgout@llnl.gov\
- treadway@llnl.gov"
+ treadway1@llnl.gov"
 
 HYPRE_MAIL=/usr/bin/mailx
 

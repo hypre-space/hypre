@@ -159,16 +159,20 @@ do
         fi
 	perform_test
         shift;;
-    -tc | -tcmp)
+    -tc )
         HYPRE_ARCH="dec"
         HYPRE_COMPILE_MACHINE="tc01"
         HYPRE_RUN_MACHINE="tc01"
         HYPRE_REMOTE_DIR="/usr/gapps/hypre/alphaev56-dec-osf5.1/AUTOTEST"
-        if [ "$1" = "-tc" ] ; then
-	  HYPRE_MACHINE_COMMANDS="-m -o 1 -a 2 -cf"
-        else
-	  HYPRE_MACHINE_COMMANDS="-m -o 2 -cf"
-        fi
+	HYPRE_MACHINE_COMMANDS="-m -o 1 -a 2 -cf"
+	perform_test
+        shift;;
+    -tcmp)
+        HYPRE_ARCH="dec"
+        HYPRE_COMPILE_MACHINE="tc10"
+        HYPRE_RUN_MACHINE="tc10"
+        HYPRE_REMOTE_DIR="/usr/gapps/hypre/alphaev56-dec-osf5.1/AUTOTEST"
+	HYPRE_MACHINE_COMMANDS="-m -o 2 -cf"
 	perform_test
         shift;;
     -tux)
