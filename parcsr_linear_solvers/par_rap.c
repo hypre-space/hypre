@@ -1379,8 +1379,8 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
    }
    if (num_procs > 1)
    {
-   	/* hypre_GenerateRAPCommPkg(RAP, A); */
-   	hypre_MatvecCommPkgCreate(RAP); 
+   	hypre_GenerateRAPCommPkg(RAP, A); 
+   	/* hypre_MatvecCommPkgCreate(RAP); */
    }
 
    *RAP_ptr = RAP;
@@ -1515,7 +1515,7 @@ hypre_ExchangeRAPData( 	hypre_CSRMatrix *RAP_int,
 /*--------------------------------------------------------------------------
  * recompute RAP_int_i so that RAP_int_i[j+1] contains the number of
  * elements of row j (to be determined through send_map_elmnts on the
- * receiving end0
+ * receiving end)
  *--------------------------------------------------------------------------*/
 
    if (num_recvs)
@@ -1526,9 +1526,10 @@ hypre_ExchangeRAPData( 	hypre_CSRMatrix *RAP_int,
    	num_cols = hypre_CSRMatrixNumCols(RAP_int);
    }
 
-   for (i=0; i < num_recvs+1; i++)
+   jdata_recv_vec_starts[0] = 0;
+   for (i=0; i < num_recvs; i++)
    {
-	jdata_recv_vec_starts[i] = RAP_int_i[recv_vec_starts[i]];
+	jdata_recv_vec_starts[i+1] = RAP_int_i[recv_vec_starts[i+1]];
    }
  
    for (i=num_recvs; i > 0; i--)
@@ -1538,8 +1539,16 @@ hypre_ExchangeRAPData( 	hypre_CSRMatrix *RAP_int,
 /*--------------------------------------------------------------------------
  * initialize communication 
  *--------------------------------------------------------------------------*/
-   comm_handle = hypre_ParCSRCommHandleCreate(12,comm_pkg_RT,
+
+   if (num_recvs && num_sends)
+      comm_handle = hypre_ParCSRCommHandleCreate(12,comm_pkg_RT,
 		&RAP_int_i[1], &RAP_ext_i[1]);
+   else if (num_recvs)
+      comm_handle = hypre_ParCSRCommHandleCreate(12,comm_pkg_RT,
+		&RAP_int_i[1], NULL);
+   else if (num_sends)
+      comm_handle = hypre_ParCSRCommHandleCreate(12,comm_pkg_RT,
+		NULL, &RAP_ext_i[1]);
 
    tmp_comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg, 1);
    hypre_ParCSRCommPkgComm(tmp_comm_pkg) = comm;
