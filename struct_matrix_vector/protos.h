@@ -170,6 +170,7 @@ void hypre_ReadBoxArrayData P((FILE *file , hypre_BoxArray *box_array , hypre_Bo
 /* struct_matrix.c */
 double *hypre_StructMatrixExtractPointerByIndex P((hypre_StructMatrix *matrix , int b , hypre_Index index ));
 hypre_StructMatrix *hypre_NewStructMatrix P((MPI_Comm comm , hypre_StructGrid *grid , hypre_StructStencil *user_stencil ));
+int hypre_FreeStructMatrixShell P((hypre_StructMatrix *matrix ));
 int hypre_FreeStructMatrix P((hypre_StructMatrix *matrix ));
 int hypre_InitializeStructMatrixShell P((hypre_StructMatrix *matrix ));
 void hypre_InitializeStructMatrixData P((hypre_StructMatrix *matrix , double *data ));

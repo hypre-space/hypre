@@ -76,20 +76,21 @@ hypre_SMGFinalize( void *smg_vdata )
       hypre_TFree(smg_data -> restrict_data_l);
       hypre_TFree(smg_data -> intadd_data_l);
  
-      hypre_FreeStructVector(smg_data -> tb_l[0]);
-      hypre_FreeStructVector(smg_data -> tx_l[0]);
+      hypre_FreeStructVectorShell(smg_data -> tb_l[0]);
+      hypre_FreeStructVectorShell(smg_data -> tx_l[0]);
       for (l = 0; l < ((smg_data -> num_levels) - 1); l++)
       {
          hypre_FreeStructGrid(smg_data -> grid_l[l+1]);
-         hypre_FreeStructMatrix(smg_data -> A_l[l+1]);
-         hypre_FreeStructMatrix(smg_data -> PT_l[l]);
+         hypre_FreeStructMatrixShell(smg_data -> A_l[l+1]);
+         hypre_FreeStructMatrixShell(smg_data -> PT_l[l]);
          if (!hypre_StructMatrixSymmetric(smg_data -> A_l[0]))
-            hypre_FreeStructMatrix(smg_data -> R_l[l]);
-         hypre_FreeStructVector(smg_data -> b_l[l+1]);
-         hypre_FreeStructVector(smg_data -> x_l[l+1]);
+            hypre_FreeStructMatrixShell(smg_data -> R_l[l]);
+         hypre_FreeStructVectorShell(smg_data -> b_l[l+1]);
+         hypre_FreeStructVectorShell(smg_data -> x_l[l+1]);
          hypre_FreeStructVectorShell(smg_data -> tb_l[l+1]);
          hypre_FreeStructVectorShell(smg_data -> tx_l[l+1]);
       }
+      hypre_TFree(smg_data -> data);
       hypre_TFree(smg_data -> grid_l);
       hypre_TFree(smg_data -> A_l);
       hypre_TFree(smg_data -> PT_l);

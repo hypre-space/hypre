@@ -276,7 +276,7 @@ char *argv[];
     * Print the solution and other info
     *-----------------------------------------------------------*/
 
-#if 0
+#if 1
    hypre_PrintStructVector("zout_x", x, 0);
 #endif
 

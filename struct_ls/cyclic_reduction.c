@@ -84,6 +84,7 @@ typedef struct
    hypre_SBoxArray     **fine_points_l;
    hypre_SBoxArray     **coarse_points_l;
 
+   double               *data;
    hypre_StructMatrix  **A_l;
    hypre_StructVector  **x_l;
 
@@ -206,7 +207,7 @@ hypre_CycRedNewCoarseOp( hypre_StructMatrix *A,
    Ac_num_ghost[2*cdir + 1] = 1;
    hypre_SetStructMatrixNumGhost(Ac, Ac_num_ghost);
 
-   hypre_InitializeStructMatrix(Ac);
+   hypre_InitializeStructMatrixShell(Ac);
  
    return Ac;
 }
@@ -392,6 +393,8 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
    hypre_SBoxArray        *base_points;
    hypre_SBoxArray       **fine_points_l;
    hypre_SBoxArray       **coarse_points_l;
+   double                 *data;
+   int                     data_size = 0;
    hypre_StructMatrix    **A_l;
    hypre_StructVector    **x_l;
    hypre_ComputePkg      **down_compute_pkg_l;
@@ -567,11 +570,25 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
    for (l = 0; l < (num_levels - 1); l++)
    {
       A_l[l+1] = hypre_CycRedNewCoarseOp(A_l[l], grid_l[l+1], cdir);
+      data_size += hypre_StructMatrixDataSize(A_l[l+1]);
 
       x_l[l+1] = hypre_NewStructVector(comm, grid_l[l+1]);
       hypre_SetStructVectorNumGhost(x_l[l+1], x_num_ghost);
-      hypre_InitializeStructVector(x_l[l+1]);
+      hypre_InitializeStructVectorShell(x_l[l+1]);
+      data_size += hypre_StructVectorDataSize(x_l[l+1]);
+   }
+
+   data = hypre_CTAlloc(double, data_size);
+   (cyc_red_data -> data) = data;
+
+   for (l = 0; l < (num_levels - 1); l++)
+   {
+      hypre_InitializeStructMatrixData(A_l[l+1], data);
+      data += hypre_StructMatrixDataSize(A_l[l+1]);
+
+      hypre_InitializeStructVectorData(x_l[l+1], data);
       hypre_AssembleStructVector(x_l[l+1]);
+      data += hypre_StructVectorDataSize(x_l[l+1]);
    }
 
    (cyc_red_data -> A_l)  = A_l;
@@ -1082,12 +1099,13 @@ hypre_CyclicReductionFinalize( void *cyc_red_vdata )
          hypre_FreeStructGrid(cyc_red_data -> grid_l[l+1]);
          hypre_FreeSBoxArray(cyc_red_data -> fine_points_l[l]);
          hypre_FreeSBoxArray(cyc_red_data -> coarse_points_l[l]);
-         hypre_FreeStructMatrix(cyc_red_data -> A_l[l+1]);
-         hypre_FreeStructVector(cyc_red_data -> x_l[l+1]);
+         hypre_FreeStructMatrixShell(cyc_red_data -> A_l[l+1]);
+         hypre_FreeStructVectorShell(cyc_red_data -> x_l[l+1]);
          hypre_FreeComputePkg(cyc_red_data -> down_compute_pkg_l[l]);
          hypre_FreeComputePkg(cyc_red_data -> up_compute_pkg_l[l]);
       }
       hypre_FreeSBoxArray(cyc_red_data -> fine_points_l[l]);
+      hypre_TFree(cyc_red_data -> data);
       hypre_TFree(cyc_red_data -> grid_l);
       hypre_TFree(cyc_red_data -> fine_points_l);
       hypre_TFree(cyc_red_data -> coarse_points_l);

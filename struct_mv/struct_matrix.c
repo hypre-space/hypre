@@ -66,11 +66,11 @@ hypre_NewStructMatrix( MPI_Comm             comm,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_FreeStructMatrix
+ * hypre_FreeStructMatrixShell
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_FreeStructMatrix( hypre_StructMatrix *matrix )
+hypre_FreeStructMatrixShell( hypre_StructMatrix *matrix )
 {
    int  ierr = 0;
 
@@ -83,7 +83,6 @@ hypre_FreeStructMatrix( hypre_StructMatrix *matrix )
       hypre_ForBoxI(i, hypre_StructMatrixDataSpace(matrix))
          hypre_TFree(hypre_StructMatrixDataIndices(matrix)[i]);
       hypre_TFree(hypre_StructMatrixDataIndices(matrix));
-      hypre_TFree(hypre_StructMatrixData(matrix));
 
       hypre_FreeBoxArray(hypre_StructMatrixDataSpace(matrix));
 
@@ -92,6 +91,24 @@ hypre_FreeStructMatrix( hypre_StructMatrix *matrix )
       hypre_FreeStructStencil(hypre_StructMatrixStencil(matrix));
 
       hypre_TFree(matrix);
+   }
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_FreeStructMatrix
+ *--------------------------------------------------------------------------*/
+
+int 
+hypre_FreeStructMatrix( hypre_StructMatrix *matrix )
+{
+   int  ierr = 0;
+
+   if (matrix)
+   {
+      hypre_TFree(hypre_StructMatrixData(matrix));
+      hypre_FreeStructMatrixShell(matrix);
    }
 
    return ierr;

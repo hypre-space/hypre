@@ -42,10 +42,10 @@ typedef struct
 
    hypre_StructGrid    **grid_l;
                     
+   double               *data;
    hypre_StructMatrix  **A_l;
    hypre_StructMatrix  **PT_l;
    hypre_StructMatrix  **R_l;
-                    
    hypre_StructVector  **b_l;
    hypre_StructVector  **x_l;
 
