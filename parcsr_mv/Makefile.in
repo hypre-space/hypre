@@ -47,6 +47,7 @@ LFLAGS =\
 HEADERS =\
  communication.h\
  headers.h\
+ fortran.h\
  par_csr_matrix.h\
  par_vector.h\
  parcsr_matrix_vector.h\

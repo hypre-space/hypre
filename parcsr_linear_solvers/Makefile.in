@@ -68,6 +68,7 @@ LFLAGS =\
  
 HEADERS =\
  headers.h\
+ fortran.h\
  par_amg.h\
  parcsr_linear_solvers.h\
  HYPRE_parcsr_ls.h
