@@ -704,6 +704,7 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
       hypre_PCGSetTwoNorm(pcg_solver, two_norm);
       hypre_PCGSetRelChange(pcg_solver, rel_change);
       hypre_PCGSetLogging(pcg_solver, logging);
+      hypre_PCGSetConvergenceFactorTol(pcg_solver, 0.0);
 
       /* Setup preconditioner */
       if (pcg_default)
