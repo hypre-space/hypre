@@ -2663,6 +2663,12 @@ int HYPRE_LinSysCore::putInitialGuess(const int* eqnNumbers,
    delete [] localInds;
 
    //-------------------------------------------------------------------
+   // inject the initial guess into reduced systems, if any
+   //-------------------------------------------------------------------
+
+   if ( schurReduction_ == 1 ) buildSchurInitialGuess();
+
+   //-------------------------------------------------------------------
    // diagnostic message
    //-------------------------------------------------------------------
 

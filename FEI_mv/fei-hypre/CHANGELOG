@@ -113,7 +113,8 @@
             - improve on MLI's SGS and BSGS smoothers 
             - add LSICG 
             - consolidate setupPrecon and correct a few include problems
-09/04/02    2.0.0R20
+09/18/02    2.0.0R20
             - take out iostream.h again because it creates problem on solaris
             - improve slideReduction for intersecting slide surfaces
+            - fix resetInitialGuess for Schur reduction
 

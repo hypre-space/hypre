@@ -907,7 +907,7 @@ void HYPRE_LinSysCore::buildSchurReducedSystem()
     HYPRE_ParCSRMatrixDestroy(S_csr);
 
     //------------------------------------------------------------------
-    // create the reduced x, right hand side and r
+    // create and initialize the reduced x, and create the reduced r
     //------------------------------------------------------------------
 
     ierr = HYPRE_IJVectorCreate(comm_,CStartRow,CStartRow+CNRows-1,&reducedX_);
@@ -915,6 +915,8 @@ void HYPRE_LinSysCore::buildSchurReducedSystem()
     ierr = HYPRE_IJVectorInitialize(reducedX_);
     ierr = HYPRE_IJVectorAssemble(reducedX_);
     assert(!ierr);
+    buildSchurInitialGuess();
+
     ierr = HYPRE_IJVectorCreate(comm_,CStartRow,CStartRow+CNRows-1,&reducedR_);
     ierr = HYPRE_IJVectorSetObjectType(reducedR_, HYPRE_PARCSR);
     ierr = HYPRE_IJVectorInitialize(reducedR_);
@@ -1118,6 +1120,66 @@ double HYPRE_LinSysCore::buildSchurReducedSoln()
     HYPRE_IJVectorDestroy(R1); 
     HYPRE_IJVectorDestroy(x2); 
     return rnorm;
+}
+
+//*****************************************************************************
+// form initial solution for the reduced system
+//-----------------------------------------------------------------------------
+
+void HYPRE_LinSysCore::buildSchurInitialGuess()
+{
+    int    i, ierr,StartRow, EndRow, nSchur, *partition, searchIndex, rowIndex;
+    double ddata;
+    HYPRE_ParVector hypre_x;
+
+    //------------------------------------------------------------------
+    // initial set up 
+    //------------------------------------------------------------------
+
+    if ( HYA21_ == NULL || HYinvA22_ == NULL )
+    {
+       printf("buildSchurInitialGuess WARNING : A21 or A22 absent.\n");
+       return;
+    }
+    if (reducedX_ == HYx_ || reducedX_ == NULL || reducedA_ == NULL) return;
+
+    StartRow  = localStartRow_ - 1;
+    EndRow    = localEndRow_ - 1;
+    nSchur    = A21NCols_;
+    HYPRE_IJVectorGetObject(reducedX_, (void **) &hypre_x);
+    partition = hypre_ParVectorPartitioning((hypre_ParVector *) hypre_x);
+    rowIndex  = partition[mypid_];
+
+    //------------------------------------------------------------------
+    // injecting initial guesses
+    //------------------------------------------------------------------
+
+    if ( selectedList_ != NULL )
+    {
+       for ( i = StartRow; i <= EndRow; i++ ) 
+       {
+          searchIndex = hypre_BinarySearch(selectedList_, i, nSchur);
+          if ( searchIndex < 0 )
+          {
+             HYPRE_IJVectorGetValues(HYx_, 1, &i, &ddata);
+             ierr = HYPRE_IJVectorSetValues(reducedX_, 1, 
+                        (const int *) &rowIndex, (const double *) &ddata);
+             assert( !ierr );
+             rowIndex++;
+          }
+       } 
+    } 
+    else
+    {
+       for ( i = StartRow; i <= EndRow-nSchur; i++ ) 
+       {
+          HYPRE_IJVectorGetValues(HYx_, 1, &i, &ddata);
+          ierr = HYPRE_IJVectorSetValues(reducedX_, 1, 
+                       (const int *) &rowIndex, (const double *) &ddata);
+          assert( !ierr );
+          rowIndex++;
+       } 
+    } 
 }
 
 //*****************************************************************************

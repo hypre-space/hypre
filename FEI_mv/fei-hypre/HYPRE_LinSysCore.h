@@ -443,6 +443,7 @@ class HYPRE_LinSysCore
    void   buildSlideReducedSystemPartC(int*,int*,int,int,int*,int*,
                                        HYPRE_ParCSRMatrix);
    void   buildSchurReducedRHS();
+   void   buildSchurInitialGuess();
    double buildSchurReducedSoln();
    void   computeAConjProjection(HYPRE_ParCSRMatrix A_csr, HYPRE_ParVector x, 
                                  HYPRE_ParVector b);
