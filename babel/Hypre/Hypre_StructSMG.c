@@ -60,6 +60,8 @@ int  impl_Hypre_StructSMG_Apply
    struct Hypre_StructVector_private_type *SVbp, *SVxp;
    HYPRE_StructVector *Vb, *Vx;
 
+   printf( "starting impl_Hypre_StructSMG_Apply\n" );
+
    Sb = (Hypre_StructVector) Hypre_Vector_castTo( b, "Hypre_StructVector" );
    if ( Sb == NULL ) return -1;
 
@@ -130,7 +132,7 @@ int  impl_Hypre_StructSMG_GetConvergenceInfo
       return ierr;
    }
 
-   printf( "Hypre_StructJacobi_GetConvergenceInfo does not recognize name ~s\n", name );
+   printf( "Hypre_StructJacobi_GetConvergenceInfo does not recognize name %s\n", name );
 
    return 1;
 } /* end impl_Hypre_StructSMGGetConvergenceInfo */
@@ -141,7 +143,7 @@ int  impl_Hypre_StructSMG_GetConvergenceInfo
 double  impl_Hypre_StructSMG_GetDoubleParameter(Hypre_StructSMG this, char* name) {
    double value;
    int ivalue;
-   printf( "Hypre_StructJacobi_GetDoubleParameter does not recognize name ~s\n", name );
+   printf( "Hypre_StructJacobi_GetDoubleParameter does not recognize name %s\n", name );
    return 0;
 } /* end impl_Hypre_StructSMGGetDoubleParameter */
 
@@ -151,7 +153,7 @@ double  impl_Hypre_StructSMG_GetDoubleParameter(Hypre_StructSMG this, char* name
 int  impl_Hypre_StructSMG_GetIntParameter(Hypre_StructSMG this, char* name) {
    double value;
    int ivalue;
-   printf( "Hypre_StructJacobi_GetIntParameter does not recognize name ~s\n", name );
+   printf( "Hypre_StructJacobi_GetIntParameter does not recognize name %s\n", name );
    return 1;
 } /* end impl_Hypre_StructSMGGetIntParameter */
 

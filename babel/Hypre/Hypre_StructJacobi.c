@@ -166,7 +166,7 @@ int  impl_Hypre_StructJacobi_GetConvergenceInfo
  * impl_Hypre_StructJacobiGetDoubleParameter
  **********************************************************/
 double  impl_Hypre_StructJacobi_GetDoubleParameter(Hypre_StructJacobi this, char* name) {
-   printf( "Hypre_StructJacobi_GetDoubleParameter does not recognize name ~s\n", name );
+   printf( "Hypre_StructJacobi_GetDoubleParameter does not recognize name %s\n", name );
    return 0;
 } /* end impl_Hypre_StructJacobiGetDoubleParameter */
 
@@ -174,7 +174,7 @@ double  impl_Hypre_StructJacobi_GetDoubleParameter(Hypre_StructJacobi this, char
  * impl_Hypre_StructJacobiGetIntParameter
  **********************************************************/
 int  impl_Hypre_StructJacobi_GetIntParameter(Hypre_StructJacobi this, char* name) {
-   printf( "Hypre_StructJacobi_GetIntParameter does not recognize name ~s\n", name );
+   printf( "Hypre_StructJacobi_GetIntParameter does not recognize name %s\n", name );
    return 0;
 } /* end impl_Hypre_StructJacobiGetIntParameter */
 
