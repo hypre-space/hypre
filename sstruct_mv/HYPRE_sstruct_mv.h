@@ -362,7 +362,8 @@ int HYPRE_SStructMatrixInitialize(HYPRE_SStructMatrix matrix);
  * NOTE: The entries in this routine must all be of the same type:
  * either stencil or non-stencil, but not both.  Also, if they are
  * stencil entries, they must all represent couplings to the same
- * variable type.
+ * variable type (there are no such restrictions for non-stencil
+ * entries).
  *
  * @param param [IN] ... 
  **/
@@ -381,8 +382,11 @@ int HYPRE_SStructMatrixSetValues(HYPRE_SStructMatrix  matrix,
  * the associated variables.  This means that some data will be
  * multiply defined.
  *
- * NOTE: The entries in this routine must all be of stencil type.
- * Also, they must all represent couplings to the same variable type.
+ * NOTE: The entries in this routine must all be of the same type:
+ * either stencil or non-stencil, but not both.  Also, if they are
+ * stencil entries, they must all represent couplings to the same
+ * variable type (there are no such restrictions for non-stencil
+ * entries).
  *
  * @param param [IN] ...
  **/
