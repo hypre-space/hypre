@@ -522,7 +522,7 @@ main( int   argc,
          arg_index++;
          overlap  = atoi(argv[arg_index++]);
       }
-      else if ( strcmp(argv[arg_index], "-dt") == 0 )
+      else if ( strcmp(argv[arg_index], "-dom") == 0 )
       {
          arg_index++;
          domain_type  = atoi(argv[arg_index++]);
