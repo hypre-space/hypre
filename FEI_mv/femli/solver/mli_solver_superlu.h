@@ -19,7 +19,7 @@
 #include "solver/mli_solver.h"
 
 /******************************************************************************
- * data structure for the Gauss Seidel relaxation scheme
+ * data structure for the SuperLU solution scheme
  *---------------------------------------------------------------------------*/
 
 class MLI_Solver_SuperLU : public MLI_Solver

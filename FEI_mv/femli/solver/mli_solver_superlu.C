@@ -233,7 +233,7 @@ int MLI_Solver_SuperLU::setup( MLI_Matrix *Amat )
 
 /* ****************************************************************************
  * This subroutine calls the SuperLU subroutine to perform LU 
- * factorization of a given matrix
+ * backward substitution 
  * --------------------------------------------------------------------------*/
 
 int MLI_Solver_SuperLU::solve( MLI_Vector *f_in, MLI_Vector *u_in )
