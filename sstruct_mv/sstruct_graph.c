@@ -52,7 +52,7 @@ hypre_SStructGraphFindUVEntry( hypre_SStructGraph    *graph,
    hypre_SStructGridFindMapEntry(grid, part, index, var, &map_entry);
    hypre_SStructMapEntryGetGlobalRank(map_entry, index, &rank, type);
 
-   if (type == HYPRE_SSTRUCT)
+   if (type == HYPRE_SSTRUCT || type ==  HYPRE_STRUCT)
    {
     rank -= hypre_SStructGridGhstartRank(grid);
    }
@@ -110,7 +110,7 @@ hypre_SStructGraphFindBoxEndpt(hypre_SStructGraph    *graph,
                                           type);
    }
 
-   if (type == HYPRE_SSTRUCT)
+   if (type == HYPRE_SSTRUCT || type ==  HYPRE_STRUCT)
    {
     rank -= hypre_SStructGridGhstartRank(grid);
    }
