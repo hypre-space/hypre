@@ -62,17 +62,17 @@ ps: usr_ps dev_ps ref_ps
 
 pdf: usr_pdf dev_pdf ref_pdf
 
-usr: usr_html usr_ps
+usr: usr_html usr_ps usr_pdf
 usr_html: HYPRE_usr_manual/usr_manual.html
 usr_ps: HYPRE_usr_manual.ps
 usr_pdf: HYPRE_usr_manual.pdf
 
-dev: dev_html dev_ps
+dev: dev_html dev_ps def_pdf
 dev_html: HYPRE_dev_manual/dev_manual.html
 dev_ps: HYPRE_dev_manual.ps
 dev_pdf: HYPRE_dev_manual.pdf
 
-ref: ref_html ref_ps
+ref: ref_html ref_ps ref_pdf
 ref_html: HYPRE_ref_manual/index.html
 ref_ps: HYPRE_ref_manual.ps
 ref_pdf: HYPRE_ref_manual.pdf
