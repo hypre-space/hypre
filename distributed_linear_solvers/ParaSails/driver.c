@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
     double max_setup_time, max_solve_time;
 
     double *x, *b;
-    int i;
+    int i, niter;
     double thresh;
     int nlevels;
     double filter;
@@ -159,10 +159,14 @@ int main(int argc, char *argv[])
         MPI_Barrier(MPI_COMM_WORLD);
         time0 = MPI_Wtime();
 
+	niter = 1500;
+        if (MatrixNnz(ps->M) == n) /* if diagonal preconditioner */
+	    niter = 5000;
+
         if (symmetric == 1)
-            PCG_ParaSails(A, ps, b, x, 1.e-8, 1700);
+            PCG_ParaSails(A, ps, b, x, 1.e-8, niter);
 	else
-            FGMRES_ParaSails(A, ps, b, x, 50, 1.e-8, 1500);
+            FGMRES_ParaSails(A, ps, b, x, 50, 1.e-8, niter);
 
         time1 = MPI_Wtime();
 	solve_time = time1-time0;
