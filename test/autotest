@@ -84,7 +84,7 @@ do
 	  HYPRE_MACHINE_COMMANDS="-ml -o 1 -a 2 -cf"
         else
           SUBMSG="from OpenMP"
-	  HYPRE_MACHINE_COMMANDS="-ml -o 2 -cf"
+	  HYPRE_MACHINE_COMMANDS="-ml -o 2"
         fi
 	perform_test
         shift;;
@@ -97,7 +97,7 @@ do
 	HYPRE_MACHINE_COMMANDS="-ml -o 1 -a 2 -cf"
         else
           SUBMSG="from OpenMP"
-	  HYPRE_MACHINE_COMMANDS="-ml -o 2 -cf"
+	  HYPRE_MACHINE_COMMANDS="-ml -o 2"
         fi
 	perform_test
         shift;;
@@ -118,7 +118,7 @@ do
         if [ "$1" = "-compass" ] ; then
 	  HYPRE_MACHINE_COMMANDS="-m -r $HYPRE_RUN_MACHINE -o 1 -a 2 -cf"
         else
-	  HYPRE_MACHINE_COMMANDS="-m -r $HYPRE_RUN_MACHINE -o 2 -cf"
+	  HYPRE_MACHINE_COMMANDS="-m -r $HYPRE_RUN_MACHINE -o 2"
         fi
 	perform_test
         shift;;
@@ -130,7 +130,7 @@ do
         if [ "$1" = "-gps" ] ; then
 	  HYPRE_MACHINE_COMMANDS="-ml -r $HYPRE_RUN_MACHINE -o 1 -a 2 -cf"
         else
-	  HYPRE_MACHINE_COMMANDS="-m -r $HYPRE_RUN_MACHINE -o 2 -cf"
+	  HYPRE_MACHINE_COMMANDS="-m -r $HYPRE_RUN_MACHINE -o 2"
         fi
 	perform_test
         shift;;
@@ -147,7 +147,7 @@ do
         HYPRE_COMPILE_MACHINE="tux03"
         HYPRE_RUN_MACHINE="tux03"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST"
-	HYPRE_MACHINE_COMMANDS="-m -i 2 -dt 1 -nsa 1 -cxfy"
+	HYPRE_MACHINE_COMMANDS="-m -dt 1 -nsa 1 -cxfy -i 2"
 	print_header
         ./autotest_test $HYPRE_MACHINE_COMMANDS
         shift;;
@@ -156,7 +156,7 @@ do
         HYPRE_COMPILE_MACHINE="perrin"
         HYPRE_RUN_MACHINE="perrin"
         HYPRE_REMOTE_DIR="/home/casc/software/hypre/autotest"
-	HYPRE_MACHINE_COMMANDS="-m -q 2 -dt 1 -nsa 1 -cxfy"
+	HYPRE_MACHINE_COMMANDS="-m -dt 1 -nsa 1 -cxfy -q 2"
 	print_header
         ./autotest_test $HYPRE_MACHINE_COMMANDS
         shift;;
@@ -185,7 +185,7 @@ do
 	  HYPRE_MACHINE_COMMANDS="-ml -o 1 -a 2 -cf"
         else
           SUBMSG="from OpenMP"
-	  HYPRE_MACHINE_COMMANDS="-ml -a 1 -cf -o 2 -cf"
+	  HYPRE_MACHINE_COMMANDS="-ml -o 2"
         fi
 	perform_test
         shift;;
@@ -203,7 +203,7 @@ do
         HYPRE_RUN_MACHINE="tc10"
         HYPRE_REMOTE_DIR="/usr/gapps/hypre/alphaev56-dec-osf5.1/AUTOTEST"
         SUBMSG="from OpenMP"
-	HYPRE_MACHINE_COMMANDS="-ml -o 2 -cf"
+	HYPRE_MACHINE_COMMANDS="-ml -o 2"
 	perform_test
         shift;;
     -tux)
