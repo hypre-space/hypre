@@ -60,6 +60,7 @@ typedef struct
    ProblemIndex          *graph_to_iuppers;
    int                   *graph_to_vars;
    Index                 *graph_index_maps;
+   Index                 *graph_index_signs;
    int                   *graph_entries;
    double                *graph_values;
    int                   *graph_boxsizes;
@@ -235,6 +236,16 @@ ReadData( char         *filename,
                               pdata.ilowers[pdata.nboxes]);
             SScanProblemIndex(sdata_ptr, &sdata_ptr,
                               pdata.iuppers[pdata.nboxes]);
+            if ( (pdata.ilowers[pdata.nboxes][3]*
+                  pdata.ilowers[pdata.nboxes][4]*
+                  pdata.ilowers[pdata.nboxes][5] != 0) ||
+                 (pdata.iuppers[pdata.nboxes][3]*
+                  pdata.iuppers[pdata.nboxes][4]*
+                  pdata.iuppers[pdata.nboxes][5] != 1) )
+            {
+               printf("Error: Invalid use of `+-' in GridSetExtents\n");
+               exit(1);
+            }
             pdata.boxsizes[pdata.nboxes] = 1;
             for (i = 0; i < 3; i++)
             {
@@ -333,6 +344,8 @@ ReadData( char         *filename,
                   hypre_TReAlloc(pdata.graph_to_vars, int, size);
                pdata.graph_index_maps =
                   hypre_TReAlloc(pdata.graph_index_maps, Index, size);
+               pdata.graph_index_signs =
+                  hypre_TReAlloc(pdata.graph_index_signs, Index, size);
                pdata.graph_entries =
                   hypre_TReAlloc(pdata.graph_entries, int, size);
                pdata.graph_values =
@@ -356,6 +369,15 @@ ReadData( char         *filename,
                strtol(sdata_ptr, &sdata_ptr, 10);
             SScanIntArray(sdata_ptr, &sdata_ptr, 3,
                           pdata.graph_index_maps[pdata.graph_nentries]);
+            for (i = 0; i < 3; i++)
+            {
+               pdata.graph_index_signs[pdata.graph_nentries][i] = 1;
+               if ( pdata.graph_to_iuppers[pdata.graph_nentries][i] <
+                    pdata.graph_to_ilowers[pdata.graph_nentries][i] )
+               {
+                  pdata.graph_index_signs[pdata.graph_nentries][i] = -1;
+               }
+            }
             pdata.graph_entries[pdata.graph_nentries] =
                strtol(sdata_ptr, &sdata_ptr, 10);
             pdata.graph_values[pdata.graph_nentries] =
@@ -400,22 +422,334 @@ ReadData( char         *filename,
 }
  
 /*--------------------------------------------------------------------------
- * Distribute routine
+ * Distribute routines
  *--------------------------------------------------------------------------*/
+
+int
+MapProblemIndex( ProblemIndex index,
+                 Index        m )
+{
+   index[0] = m[0]*index[0] + (m[0]-1)*index[3];
+   index[1] = m[1]*index[1] + (m[1]-1)*index[4];
+   index[2] = m[2]*index[2] + (m[2]-1)*index[5];
+
+   return 0;
+}
+
+int
+IntersectBoxes( ProblemIndex ilower1,
+                ProblemIndex iupper1,
+                ProblemIndex ilower2,
+                ProblemIndex iupper2,
+                ProblemIndex int_ilower,
+                ProblemIndex int_iupper )
+{
+   int d, size;
+
+   size = 1;
+   for (d = 0; d < 3; d++)
+   {
+      int_ilower[d] = hypre_max(ilower1[d], ilower2[d]);
+      int_iupper[d] = hypre_min(iupper1[d], iupper2[d]);
+      size *= hypre_max(0, (int_iupper[d] - int_ilower[d]));
+   }
+
+   return size;
+}
 
 int
 DistributeData( ProblemData   global_data,
                 Index        *refine,
-                Index        *block,
                 Index        *distribute,
+                Index        *block,
+                int           num_procs,
                 int           myid,
                 ProblemData  *data_ptr )
 {
-   /*ProblemData        data;*/
+   ProblemData      data = global_data;
+   ProblemPartData  pdata;
+   int             *pool_procs;
+   int              np, pid;
+   int              pool, part, box, entry, p, q, r, i, d, dmap, sign, size;
+   Index            m, mmap, n;
+   ProblemIndex     int_ilower, int_iupper;
 
-   /* TODO */
+   /* determine first process number in each pool */
+   pool_procs = hypre_CTAlloc(int, (data.npools+1));
+   for (part = 0; part < data.nparts; part++)
+   {
+      pool = data.pools[part] + 1;
+      np = distribute[part][0] * distribute[part][1] * distribute[part][2];
+      pool_procs[pool] = hypre_max(pool_procs[pool], np);
 
-   *data_ptr = global_data; 
+   }
+   pool_procs[0] = 0;
+   for (pool = 1; part < (data.npools + 1); pool++)
+   {
+      pool_procs[pool] = pool_procs[pool - 1] + pool_procs[pool];
+   }
+
+   /* check number of processes */
+   if (pool_procs[data.npools] != num_procs)
+   {
+      printf("Error: Invalid number of processes or process topology \n");
+      exit(1);
+   }
+
+   /* modify part data */
+   for (part = 0; part < data.nparts; part++)
+   {
+      pdata = data.pdata[part];
+      pool  = data.pools[part];
+      np  = distribute[part][0] * distribute[part][1] * distribute[part][2];
+      pid = myid - pool_procs[pool];
+
+      if ( (pid < 0) || (pid >= np) )
+      {
+         /* none of this part data lives on this process */
+         pdata.nboxes = 0;
+         pdata.graph_nentries = 0;
+      }
+      else
+      {
+         /* refine boxes */
+         m[0] = refine[part][0];
+         m[1] = refine[part][1];
+         m[2] = refine[part][2];
+         if ( (m[0] * m[1] * m[2]) > 1)
+         {
+            for (box = 0; box < pdata.nboxes; box++)
+            {
+               MapProblemIndex(pdata.ilowers[box], m);
+               MapProblemIndex(pdata.iuppers[box], m);
+            }
+
+            for (entry = 0; entry < pdata.graph_nentries; entry++)
+            {
+               MapProblemIndex(pdata.graph_ilowers[entry], m);
+               MapProblemIndex(pdata.graph_iuppers[entry], m);
+               mmap[0] = m[pdata.graph_index_maps[entry][0]];
+               mmap[1] = m[pdata.graph_index_maps[entry][1]];
+               mmap[2] = m[pdata.graph_index_maps[entry][2]];
+               MapProblemIndex(pdata.graph_to_ilowers[entry], mmap);
+               MapProblemIndex(pdata.graph_to_iuppers[entry], mmap);
+            }
+         }
+
+         /* refine and distribute boxes */
+         m[0] = distribute[part][0];
+         m[1] = distribute[part][1];
+         m[2] = distribute[part][2];
+         if ( (m[0] * m[1] * m[2]) > 1)
+         {
+            p = pid % m[0];
+            q = ((pid - p) / m[0]) % m[1];
+            r = (pid - p - q*m[0]) / (m[0]*m[1]);
+
+            for (box = 0; box < pdata.nboxes; box++)
+            {
+               n[0] = pdata.iuppers[box][0] - pdata.ilowers[box][0] + 1;
+               n[1] = pdata.iuppers[box][1] - pdata.ilowers[box][1] + 1;
+               n[2] = pdata.iuppers[box][2] - pdata.ilowers[box][2] + 1;
+
+               MapProblemIndex(pdata.ilowers[box], m);
+               MapProblemIndex(pdata.iuppers[box], m);
+               pdata.iuppers[box][0] = pdata.ilowers[box][0] + n[0] - 1;
+               pdata.iuppers[box][1] = pdata.ilowers[box][1] + n[1] - 1;
+               pdata.iuppers[box][2] = pdata.ilowers[box][2] + n[2] - 1;
+
+               pdata.ilowers[box][0] = pdata.ilowers[box][0] + p*n[0];
+               pdata.ilowers[box][1] = pdata.ilowers[box][1] + q*n[1];
+               pdata.ilowers[box][2] = pdata.ilowers[box][2] + r*n[2];
+               pdata.iuppers[box][0] = pdata.iuppers[box][0] + p*n[0];
+               pdata.iuppers[box][1] = pdata.iuppers[box][1] + q*n[1];
+               pdata.iuppers[box][2] = pdata.iuppers[box][2] + r*n[2];
+            }
+
+            i = 0;
+            for (entry = 0; entry < pdata.graph_nentries; entry++)
+            {
+               MapProblemIndex(pdata.graph_ilowers[entry], m);
+               MapProblemIndex(pdata.graph_iuppers[entry], m);
+               mmap[0] = m[pdata.graph_index_maps[entry][0]];
+               mmap[1] = m[pdata.graph_index_maps[entry][1]];
+               mmap[2] = m[pdata.graph_index_maps[entry][2]];
+               MapProblemIndex(pdata.graph_to_ilowers[entry], mmap);
+               MapProblemIndex(pdata.graph_to_iuppers[entry], mmap);
+
+               for (box = 0; box < pdata.nboxes; box++)
+               {
+                  size = IntersectBoxes(pdata.graph_ilowers[entry],
+                                        pdata.graph_iuppers[entry],
+                                        pdata.ilowers[box],
+                                        pdata.iuppers[box],
+                                        int_ilower, int_iupper);
+                  if (size > 0)
+                  {
+                     /* if there is an intersection, it is the only one */
+                     for (d = 0; d < 3; d++)
+                     {
+                        dmap = pdata.graph_index_maps[entry][d];
+                        sign = pdata.graph_index_signs[entry][d];
+                        pdata.graph_to_iuppers[i][dmap] =
+                           pdata.graph_to_ilowers[entry][dmap] + sign *
+                           (int_iupper[d] - pdata.graph_ilowers[entry][d]);
+                        pdata.graph_to_ilowers[i][dmap] =
+                           pdata.graph_ilowers[entry][dmap] + sign *
+                           (int_ilower[d] - pdata.graph_ilowers[entry][d]);
+                        pdata.graph_ilowers[i][d] = int_ilower[d];
+                        pdata.graph_ilowers[i][d] = int_iupper[d];
+                        pdata.graph_index_maps[i][d]  = dmap;
+                        pdata.graph_index_signs[i][d] = sign;
+                     }
+                     pdata.graph_vars[i]     = pdata.graph_vars[entry];
+                     pdata.graph_to_parts[i] = pdata.graph_to_parts[entry];
+                     pdata.graph_to_vars[i]  = pdata.graph_to_vars[entry];
+                     pdata.graph_entries[i]  = pdata.graph_entries[entry];
+                     pdata.graph_values[i]   = pdata.graph_values[entry];
+                     i++;
+                     break;
+                  }
+               }
+            }
+            pdata.graph_nentries = i;
+         }
+
+         /* refine and block boxes */
+         m[0] = block[part][0];
+         m[1] = block[part][1];
+         m[2] = block[part][2];
+         if ( (m[0] * m[1] * m[2]) > 1)
+         {
+            pdata.ilowers = hypre_TReAlloc(pdata.ilowers, ProblemIndex,
+                                           m[0]*m[1]*m[2]*pdata.nboxes);
+            pdata.iuppers = hypre_TReAlloc(pdata.iuppers, ProblemIndex,
+                                           m[0]*m[1]*m[2]*pdata.nboxes);
+            for (box = 0; box < pdata.nboxes; box++)
+            {
+               n[0] = pdata.iuppers[box][0] - pdata.ilowers[box][0] + 1;
+               n[1] = pdata.iuppers[box][1] - pdata.ilowers[box][1] + 1;
+               n[2] = pdata.iuppers[box][2] - pdata.ilowers[box][2] + 1;
+
+               MapProblemIndex(pdata.ilowers[box], m);
+
+               MapProblemIndex(pdata.iuppers[box], m);
+               pdata.iuppers[box][0] = pdata.ilowers[box][0] + n[0] - 1;
+               pdata.iuppers[box][1] = pdata.ilowers[box][1] + n[1] - 1;
+               pdata.iuppers[box][2] = pdata.ilowers[box][2] + n[2] - 1;
+
+               i = box;
+               for (r = 0; r < m[2]; r++)
+               {
+                  for (q = 0; q < m[1]; q++)
+                  {
+                     for (p = 0; p < m[0]; p++)
+                     {
+                        pdata.ilowers[i][0] = pdata.ilowers[box][0] + p*n[0];
+                        pdata.ilowers[i][1] = pdata.ilowers[box][1] + q*n[1];
+                        pdata.ilowers[i][2] = pdata.ilowers[box][2] + r*n[2];
+                        pdata.iuppers[i][0] = pdata.iuppers[box][0] + p*n[0];
+                        pdata.iuppers[i][1] = pdata.iuppers[box][1] + q*n[1];
+                        pdata.iuppers[i][2] = pdata.iuppers[box][2] + r*n[2];
+                        i += pdata.nboxes;
+                     }
+                  }
+               }
+            }
+            pdata.nboxes *= m[0]*m[1]*m[2];
+
+            for (entry = 0; entry < pdata.graph_nentries; entry++)
+            {
+               MapProblemIndex(pdata.graph_ilowers[entry], m);
+               MapProblemIndex(pdata.graph_iuppers[entry], m);
+               mmap[0] = m[pdata.graph_index_maps[entry][0]];
+               mmap[1] = m[pdata.graph_index_maps[entry][1]];
+               mmap[2] = m[pdata.graph_index_maps[entry][2]];
+               MapProblemIndex(pdata.graph_to_ilowers[entry], mmap);
+               MapProblemIndex(pdata.graph_to_iuppers[entry], mmap);
+            }
+         }
+
+         /* map remaining ilowers & iuppers */
+         m[0] = refine[part][0] * block[part][0] * distribute[part][0];
+         m[1] = refine[part][1] * block[part][1] * distribute[part][1];
+         m[2] = refine[part][2] * block[part][2] * distribute[part][2];
+         if ( (m[0] * m[1] * m[2]) > 1)
+         {
+            for (box = 0; box < pdata.glue_nboxes; box++)
+            {
+               MapProblemIndex(pdata.glue_ilowers[box], m);
+               MapProblemIndex(pdata.glue_iuppers[box], m);
+               mmap[0] = m[pdata.glue_index_maps[box][0]];
+               mmap[1] = m[pdata.glue_index_maps[box][1]];
+               mmap[2] = m[pdata.glue_index_maps[box][2]];
+               MapProblemIndex(pdata.glue_nbor_ilowers[box], mmap);
+               MapProblemIndex(pdata.glue_nbor_iuppers[box], mmap);
+            }
+         }
+
+         /* compute box sizes, etc. */
+         pdata.max_boxsize = 0;
+         for (box = 0; box < pdata.nboxes; box++)
+         {
+            pdata.boxsizes[box] = 1;
+            for (i = 0; i < 3; i++)
+            {
+               pdata.boxsizes[box] *=
+                  (pdata.iuppers[box][i] - pdata.ilowers[box][i] + 2);
+            }
+            pdata.max_boxsize =
+               hypre_max(pdata.max_boxsize, pdata.boxsizes[box]);
+         }
+         for (box = 0; box < pdata.graph_nentries; box++)
+         {
+            pdata.graph_boxsizes[box] = 1;
+            for (i = 0; i < 3; i++)
+            {
+               pdata.graph_boxsizes[box] *=
+                  (pdata.graph_iuppers[box][i] -
+                   pdata.graph_ilowers[box][i] + 1);
+            }
+         }
+      }
+
+      if (pdata.nboxes == 0)
+      {
+         hypre_TFree(pdata.ilowers);
+         hypre_TFree(pdata.iuppers);
+         hypre_TFree(pdata.boxsizes);
+         pdata.max_boxsize = 0;
+      }
+
+      if (pdata.graph_nentries == 0)
+      {
+         hypre_TFree(pdata.graph_ilowers);
+         hypre_TFree(pdata.graph_iuppers);
+         hypre_TFree(pdata.graph_vars);
+         hypre_TFree(pdata.graph_to_parts);
+         hypre_TFree(pdata.graph_to_ilowers);
+         hypre_TFree(pdata.graph_to_iuppers);
+         hypre_TFree(pdata.graph_to_vars);
+         hypre_TFree(pdata.graph_index_maps);
+         hypre_TFree(pdata.graph_index_signs);
+         hypre_TFree(pdata.graph_entries);
+         hypre_TFree(pdata.graph_values);
+         hypre_TFree(pdata.graph_boxsizes);
+      }
+
+      data.pdata[part] = pdata;
+   }
+
+   data.max_boxsize = 0;
+   for (part = 0; part < data.nparts; part++)
+   {
+      data.max_boxsize =
+         hypre_max(data.max_boxsize, data.pdata[part].max_boxsize);
+   }
+
+   hypre_TFree(pool_procs);
+
+   *data_ptr = data; 
    return 0;
 }
 
@@ -476,6 +810,7 @@ DestroyData( ProblemData   data )
          hypre_TFree(pdata.graph_to_iuppers);
          hypre_TFree(pdata.graph_to_vars);
          hypre_TFree(pdata.graph_index_maps);
+         hypre_TFree(pdata.graph_index_signs);
          hypre_TFree(pdata.graph_entries);
          hypre_TFree(pdata.graph_values);
          hypre_TFree(pdata.graph_boxsizes);
@@ -569,8 +904,8 @@ PrintUsage( char *progname,
       printf("\n");
       printf("  -pt <pt1> <pt2> ... : set part(s) for subsequent options\n");
       printf("  -r <rx> <ry> <rz>   : refine part(s)\n");
-      printf("  -b <bx> <by> <bz>   : refine and block part(s)\n");
       printf("  -P <Px> <Py> <Pz>   : refine and distribute part(s)\n");
+      printf("  -b <bx> <by> <bz>   : refine and block part(s)\n");
       printf("  -solver <ID>        : solver ID (default = 0)\n");
       printf("                        30 - GMRES with SMG split precond\n");
       printf("                        31 - GMRES with PFMG split precond\n");
@@ -600,8 +935,8 @@ main( int   argc,
    int                   nparts;
    int                  *parts;
    Index                *refine;
-   Index                *block;
    Index                *distribute;
+   Index                *block;
    int                   solver_id;
                         
    HYPRE_SStructGrid     grid;
@@ -668,16 +1003,16 @@ main( int   argc,
 
    parts      = hypre_TAlloc(int, nparts);
    refine     = hypre_TAlloc(Index, nparts);
-   block      = hypre_TAlloc(Index, nparts);
    distribute = hypre_TAlloc(Index, nparts);
+   block      = hypre_TAlloc(Index, nparts);
    for (part = 0; part < nparts; part++)
    {
       parts[part] = part;
       for (j = 0; j < 3; j++)
       {
          refine[part][j]     = 1;
-         block[part][j]      = 1;
          distribute[part][j] = 1;
+         block[part][j]      = 1;
       }
    }
 
@@ -713,20 +1048,6 @@ main( int   argc,
          }
          arg_index += 3;
       }
-      else if ( strcmp(argv[arg_index], "-b") == 0 )
-      {
-         arg_index++;
-         for (i = 0; i < nparts; i++)
-         {
-            part = parts[i];
-            k = arg_index;
-            for (j = 0; j < 3; j++)
-            {
-               block[part][j] = atoi(argv[k++]);
-            }
-         }
-         arg_index += 3;
-      }
       else if ( strcmp(argv[arg_index], "-P") == 0 )
       {
          arg_index++;
@@ -737,6 +1058,20 @@ main( int   argc,
             for (j = 0; j < 3; j++)
             {
                distribute[part][j] = atoi(argv[k++]);
+            }
+         }
+         arg_index += 3;
+      }
+      else if ( strcmp(argv[arg_index], "-b") == 0 )
+      {
+         arg_index++;
+         for (i = 0; i < nparts; i++)
+         {
+            part = parts[i];
+            k = arg_index;
+            for (j = 0; j < 3; j++)
+            {
+               block[part][j] = atoi(argv[k++]);
             }
          }
          arg_index += 3;
@@ -772,7 +1107,8 @@ main( int   argc,
     * Distribute data
     *-----------------------------------------------------------*/
 
-   DistributeData(global_data, refine, block, distribute, myid, &data);
+   DistributeData(global_data, refine, distribute, block,
+                  num_procs, myid, &data);
 
    /*-----------------------------------------------------------
     * Synchronize so that timings make sense
@@ -854,8 +1190,9 @@ main( int   argc,
                   for (i = 0; i < 3; i++)
                   {
                      j = pdata.graph_index_maps[entry][i];
-                     to_index[j] = pdata.graph_to_ilowers[entry][j] +
-                        index[i] - pdata.graph_ilowers[entry][i];
+                     k = pdata.graph_index_signs[entry][i];
+                     to_index[j] = pdata.graph_to_ilowers[entry][j] + k *
+                        (index[i] - pdata.graph_ilowers[entry][i]);
                   }
                   to_index_ptr[0] = to_index;
                   HYPRE_SStructGraphAddEntries(graph, part, index,
@@ -1291,8 +1628,8 @@ main( int   argc,
 
    hypre_TFree(parts);
    hypre_TFree(refine);
-   hypre_TFree(block);
    hypre_TFree(distribute);
+   hypre_TFree(block);
 
    hypre_FinalizeMemoryDebug();
 
