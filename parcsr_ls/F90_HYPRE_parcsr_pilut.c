@@ -21,7 +21,7 @@ hypre_F90_IFACE(hypre_parcsrpilutinitialize)( int      *comm,
 
 {
    *ierr = (int) ( HYPRE_ParCSRPilutInitialize( (MPI_Comm)       *comm,
-                                                (HYPRE_Solver *) solver ) );
+                                                (HYPRE_Solver *)  solver ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -84,26 +84,26 @@ hypre_F90_IFACE(hypre_parcsrpilutsetmaxiter)( long int *solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParCSRPilutSetDropTolerance
+ * HYPRE_ParCSRPilutSetDropTol
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_parcsrpilutsetdroptolerance)( long int *solver,
-                                                    double   *tol,
-                                                    int      *ierr      )
+hypre_F90_IFACE(hypre_parcsrpilutsetdroptol)( long int *solver,
+                                              double   *tol,
+                                              int      *ierr    )
 {
    *ierr = (int) ( HYPRE_ParCSRPilutSetDropTolerance( (HYPRE_Solver) *solver, 
                                                       (double)       *tol     ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParCSRPilutSetFactorRowSize
+ * HYPRE_ParCSRPilutSetFacRowSize
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_parcsrpilutsetfactorrowsize)( long int *solver,
-                                                    int      *size,
-                                                    int      *ierr    )
+hypre_F90_IFACE(hypre_parcsrpilutsetfacrowsize)( long int *solver,
+                                                 int      *size,
+                                                 int      *ierr    )
 {
    *ierr = (int) ( HYPRE_ParCSRPilutSetFactorRowSize( (HYPRE_Solver) *solver,
                                                       (int)          *size    ) );
