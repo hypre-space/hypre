@@ -1723,17 +1723,10 @@ int HYPRE_LinSysCore::matrixLoadComplete()
 #ifdef HAVE_MLI
    if ( haveFEData_ && feData_ != NULL )
    {
-      int    nDim;
-      double *nSpaces=NULL;
-      char   filename[100];
-
-      HYPRE_LSI_MLIFEDataConstructNullSpace( feData_ );
-      HYPRE_LSI_MLIFEDataGetNullSpacePtr( feData_, &nSpaces, &leng, &nDim );
-      if ( HYPreconID_ == HYMLI && nSpaces != NULL )
-         HYPRE_LSI_MLISetNullSpace( HYPrecon_, 3, nDim, nSpaces, leng );
+      char filename[100];
       if ( (HYOutputLevel_ & HYFEI_PRINTFEINFO) )
       {
-         sprintf( filename, "fedata.%d", mypid_);
+         strcpy( filename, "fedata" );
          HYPRE_LSI_MLIFEDataWriteToFile( feData_, filename );
       }
    }
