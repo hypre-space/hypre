@@ -7,7 +7,7 @@ noinst_LIBRARIES = libhypre_class.a
 libhypre_class_a_SOURCES = ${PREBUILT_SRCS} ${GENERATED_SRCS} ${PREBUILT_HDRS} ${GENERATED_HDRS}
 #libhypre_class_a_HEADERS = 
 
-HYPRE_INCLUDES = -I../../hypre/include -I../../struct_matrix_vector
+HYPRE_INCLUDES = -I../../hypre/include -I../../struct_matrix_vector -I../babel_stubs_c
 # BABEL_INCLUDES  = -I${BABELDIR}/include -I${BABELDIR}/include/babel
 BABEL_INCLUDES = -I${BABELDIR}/babel-0.4.0/source/runtime/  -I${BABELDIR}/babel-0.4.0/source/runtime/babel
 INCLUDES = -I.. ${HYPRE_INCLUDES} ${BABEL_INCLUDES} 
@@ -87,7 +87,22 @@ GENERATED_SRCS = Hypre_Box_Skel.c\
 	Hypre_ParCSRVector_Stub.c\
 	Hypre_ParCSRMatrix_Stub.c\
 	Hypre_ParCSRVectorBuilder_Stub.c\
-	Hypre_ParCSRMatrixBuilder_Stub.c
+	Hypre_ParCSRMatrixBuilder_Stub.c\
+	Hypre_IJMatrixBuilder_Stub.c\
+	Hypre_IJVectorBuilder_Stub.c\
+	Hypre_LinearOperator_Stub.c\
+	Hypre_Operator_Stub.c\
+	Hypre_PreconditionedSolverBuilder_Stub.c\
+	Hypre_PreconditionedSolver_Stub.c\
+	Hypre_RowAccess_Stub.c\
+	Hypre_SolverBuilder_Stub.c\
+	Hypre_Solver_Stub.c\
+	Hypre_Stencil_Stub.c\
+	Hypre_StructuredGridBuilder_Stub.c\
+	Hypre_StructuredGridMatrixBuilder_Stub.c\
+	Hypre_StructuredGridVectorBuilder_Stub.c\
+	Hypre_StructuredGrid_Stub.c\
+	Hypre_Vector_Stub.c
 
 GENERATED_HDRS = Hypre.h\
 	Hypre_Box_IOR.h\
