@@ -143,6 +143,7 @@ hypre_F90_IFACE(hypre_parcsrpcgsetprecond, HYPRE_PARCSRPCGSETPRECOND)( long int 
     * 1 - set up a ds preconditioner
     * 2 - set up an amg preconditioner
     * 3 - set up a pilut preconditioner
+    * 4 - set up a ParaSails preconditioner
     *------------------------------------------------------------*/
 
    if (*precond_id == 0)
@@ -171,6 +172,14 @@ hypre_F90_IFACE(hypre_parcsrpcgsetprecond, HYPRE_PARCSRPCGSETPRECOND)( long int 
                                (HYPRE_Solver) *solver,
                                HYPRE_ParCSRPilutSolve,
                                HYPRE_ParCSRPilutSetup,
+                               (void *)       *precond_solver) );
+   }
+   else if (*precond_id == 4)
+   {
+      *ierr = (int) ( HYPRE_ParCSRPCGSetPrecond(
+                               (HYPRE_Solver) *solver,
+                               HYPRE_ParaSailsSolve,
+                               HYPRE_ParaSailsSetup,
                                (void *)       *precond_solver) );
    }
    else
