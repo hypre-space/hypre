@@ -43,6 +43,7 @@ LFLAGS =\
 
 
 HEADERS =\
+ Common.h\
  ConjGrad.h\
  DiagScale.h\
  HYPRE_ParaSails.h\
