@@ -123,7 +123,7 @@ void MLI_FEDataConstructElemNodeMatrix(MPI_Comm comm, MLI_FEData *fedata,
    HYPRE_IJMatrixSetObjectType(IJMat, -1);
    HYPRE_IJMatrixDestroy(IJMat);
    funcPtr = new MLI_Function();
-   MLI_Utils_HypreMatrixGetDestroyFunc(funcPtr);
+   MLI_Utils_HypreParCSRMatrixGetDestroyFunc(funcPtr);
    sprintf(paramString, "HYPRE_ParCSR" );
    (*mli_mat) = new MLI_Matrix( CSRMat, paramString, funcPtr );
 }
@@ -208,7 +208,7 @@ void MLI_FEDataConstructElemFaceMatrix(MPI_Comm comm, MLI_FEData *fedata,
    HYPRE_IJMatrixSetObjectType(IJMat, -1);
    HYPRE_IJMatrixDestroy(IJMat);
    funcPtr = new MLI_Function();
-   MLI_Utils_HypreMatrixGetDestroyFunc(funcPtr);
+   MLI_Utils_HypreParCSRMatrixGetDestroyFunc(funcPtr);
    sprintf(param_string, "HYPRE_ParCSR" );
    (*mli_mat) = new MLI_Matrix( CSRMat, param_string, funcPtr );
 }
@@ -298,7 +298,7 @@ void MLI_FEDataConstructFaceNodeMatrix(MPI_Comm comm, MLI_FEData *fedata,
    HYPRE_IJMatrixSetObjectType(IJMat, -1);
    HYPRE_IJMatrixDestroy(IJMat);
    funcPtr = new MLI_Function();
-   MLI_Utils_HypreMatrixGetDestroyFunc(funcPtr);
+   MLI_Utils_HypreParCSRMatrixGetDestroyFunc(funcPtr);
    sprintf(param_string, "HYPRE_ParCSR" );
    (*mli_mat) = new MLI_Matrix( CSRMat, param_string, funcPtr );
 }
@@ -420,7 +420,7 @@ void MLI_FEDataConstructNodeElemMatrix(MPI_Comm comm, MLI_FEData *fedata,
    HYPRE_IJMatrixSetObjectType(IJMat, -1);
    HYPRE_IJMatrixDestroy(IJMat);
    funcPtr = new MLI_Function();
-   MLI_Utils_HypreMatrixGetDestroyFunc(funcPtr);
+   MLI_Utils_HypreParCSRMatrixGetDestroyFunc(funcPtr);
    sprintf(param_string, "HYPRE_ParCSR" );
    (*mli_mat) = new MLI_Matrix( CSRMat, param_string, funcPtr );
 }
@@ -536,7 +536,7 @@ void MLI_FEDataConstructFaceElemMatrix(MPI_Comm comm, MLI_FEData *fedata,
    HYPRE_IJMatrixSetObjectType(IJMat, -1);
    HYPRE_IJMatrixDestroy(IJMat);
    funcPtr = new MLI_Function();
-   MLI_Utils_HypreMatrixGetDestroyFunc(funcPtr);
+   MLI_Utils_HypreParCSRMatrixGetDestroyFunc(funcPtr);
    sprintf(param_string, "HYPRE_ParCSR" );
    (*mli_mat) = new MLI_Matrix( CSRMat, param_string, funcPtr );
 }
@@ -658,7 +658,7 @@ void MLI_FEDataConstructNodeFaceMatrix(MPI_Comm comm, MLI_FEData *fedata,
    HYPRE_IJMatrixSetObjectType(IJMat, -1);
    HYPRE_IJMatrixDestroy(IJMat);
    funcPtr = new MLI_Function();
-   MLI_Utils_HypreMatrixGetDestroyFunc(funcPtr);
+   MLI_Utils_HypreParCSRMatrixGetDestroyFunc(funcPtr);
    sprintf(param_string, "HYPRE_ParCSR" );
    (*mli_mat) = new MLI_Matrix( CSRMat, param_string, funcPtr );
 }

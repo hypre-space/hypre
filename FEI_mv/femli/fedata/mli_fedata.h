@@ -6,8 +6,8 @@
  *
  *********************************************************************EHEADER*/
 
-#ifndef __MLIFEDATAH__
-#define __MLIFEDATAH__
+#ifndef __MLIFEDATA_H__
+#define __MLIFEDATA_H__
 
 #include "utilities/utilities.h"
 #include "fedata/mli_festruct.h"
