@@ -806,6 +806,7 @@ int MLI_Utils_HypreMatrixCompress(void *Amat, int blksize, void **Amat2)
                }
             }
             newSize = k + 1;
+            for ( j = 0; j < newSize; j++ ) newVal[j] = sqrt(newVal[j]);
          }
          else
          {
