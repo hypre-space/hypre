@@ -2,23 +2,44 @@
 \chapter{Installation}
 \label{Installation}
 
-There are two types of \hypre{} installations that are updated and
+There are three types of \hypre{} installations that are updated and
 maintained by members of the Scalable Linear Solvers project:
 \begin{enumerate}
 
-\item The "internal" installation:
+\item The "alpha" installation (designated by an "a" in the version number):
    \begin{itemize}
    \item intended to give users access to relatively recent changes.
-   \item updated somewhat frequently (about once a week).
+   \item updated somewhat frequently.
    \item may be relatively unstable.
    \item three old installations are retained.
    \item installed on:
       \begin{itemize}
       \item CASC Sun workstation cluster
+      \item CASC Linux workstation cluster
       \end{itemize}
    \end{itemize}
 
-\item The "external" installation:
+\item The "beta" installation (designated by an "b" in the version number):
+   \begin{itemize}
+   \item intended to give users access to relatively recent changes.
+   \item intended to give users consistent access across several platforms.
+   \item may be relatively unstable.
+   \item three old installations are retained.
+   \item installed on:
+      \begin{itemize}
+       \item CASC Sun workstation cluster
+       \item CASC Linux workstation cluster
+       \item Compass Compaq cluster
+       \item TeraCluster Compaq cluster
+       \item Linux TeraCluster Compaq cluster
+       \item Blue-Pacific
+       \item Forest DEC cluster  (classified)
+       \item Blue(Sky)-Pacific   (classified)
+       \item White               (classified)
+      \end{itemize}
+   \end{itemize}
+
+\item The general release installation:
    \begin{itemize}
    \item intended to give users consistent access across several platforms.
    \item updated less frequently than internal installation.
@@ -27,91 +48,87 @@ maintained by members of the Scalable Linear Solvers project:
    \item installed on:
       \begin{itemize}
        \item CASC Sun workstation cluster
-       \item Compass DEC cluster
+       \item CASC Linux workstation cluster
+       \item Compass Compaq cluster
+       \item TeraCluster Compaq cluster
+       \item Linux TeraCluster Compaq cluster
        \item Blue-Pacific
        \item Forest DEC cluster  (classified)
        \item Blue(Sky)-Pacific   (classified)
+       \item White               (classified)
       \end{itemize}
    \end{itemize}
 
 \end{enumerate}
 
-Rob Falgout is maintaining two lists of users who want to receive
-notification of installation updates: one for "internal" updates and
-one for "external" updates.  Users should send email to Rob at
-rfalgout@llnl.gov to get on either list.
+Two mailing list are available to inform users of the hypre
+linear solver library when new releases become available.
+Announcements about general releases made on the `hypre-announce'
+mailing list, and announcements about beta releases are made on the
+`hypre-beta-announce' list. 
+
+Subscriptions to either mailing list is handled throught the LLNL
+Majordomo list server, Majordomo@lists.llnl.gov.i To add yourself
+to a mailing list, send mail to <Majordomo@list.llnl.gov> with
+the following command in the body of the email message:
+
+ subscribe hypre-announce
+
+or
+
+ subscribe hypre-beta-announce
 
 %==========================================================================
 \section{Installation Procedures}
 \label{Installation Procedures}
 
-All installations are done with the \file{update} Bourne-shell script
-located in the top-level directory of the \hypre{} repository.  Typing
-\kbd{update -help} will give general usage info.
-\begin{itemize}
+The installation is broken down into 2 parts: 
+  \item building the distribution (tar file)
+  \item installation
 
-\item Internal installation: (on CASC cluster only)
+Build the \hypre{} distribution:
+
 \begin{enumerate}
 
    \item Set the version number in \file{utilities/HYPRE_utilities.h}.
-  
-   \item \kbd{update internal} - This checks out the current version
-   of the repository, compiles the source (pure MPI, threaded, and
-   debugging versions), temporarily installs it, and sets the
-   permissions of the temporary installation to appropriate values.
-   This also creates the tar file \file{UPDATE.tar}, currently only
-   used in the external installation.
-  
-   \item \kbd{update internal install} - This saves the previously
-   installed version, moves the temporary installation into its
-   correct location, and possibly deletes some older installations.
-  
-   \item Note that step 1 is not actually needed, but is recommended
-   in case something doesn't work as planned (e.g., failed checkout,
-   failed compile, etc.).  Also, step 1 provides the opportunity to
-   test the library in non-CASC codes via the temporary installation
-   in the \file{UPDATE} subdirectory.
-  
-   \item Send email to appropriate users indicating the update.
-   Browse the \file{updatelog.linear_solvers} file to assemble a list
-   of changes since the last update.
+   The version number, by convension, use the following syntax "M.mm.rr".
+   Where the "M" is the major release number, "mm" is the minor
+   relases number, and the "rr" an update number. Alpha, and Beta 
+   releases are denoted by the following sytanx "M.nn.rra" for 
+   alpha releases, and "M.nn.rrb" for beta releases. The version 
+   number is used for the name of the release creation and is used
+   in the tar file name and root directory for the distribution.
+
+   \item Create a symbolic tag for the current version
+   of the cvs repository. To create a generat release enter:
+   kbd{cvs rtag -b VM-nn-rr linear_solvers}. Note that a
+   general release requires that the cvs rtag branch option.
+   Version numbers are mapped into a valid rtag branch name by the
+   following conversion, "VM-nn-rr", note: the leading (capital)
+   "V" and the version number separated with "-" replacing
+   the "."s. This convension will over come the strict cvs
+   tag name restrictions (e.g., begin with a letter, and no "."'s).
+   The version information during the install will be derived
+   from the main trunk archive using the information in the
+   file utilites/HYPRE_utilites.h. Alpha, and Beta releases
+   are denoted by the following sytanx "VM-nn-rr-a" for alpha
+   releases, and "VM-nn-rr-b" for beta releases. An alpha or
+   beta release do not make branches in the repository. For a beta
+   release the command would be similar to: 
+   kbd{cvs rtag VM-nn-rrb linear_solvers}. Optionally, an rtag
+   can be made relative to a date or time. For example set the
+   rtag relative to last midnight enter:
+   kbd{cvs rtag -D 0:0 VM-nn-rrb linear_solvers}.
+
+   \item The distribution is created with the \file{mkdist} 
+   Bourne-shell script located in the tools directory of the 
+   \hypre{} repository.  Typing \kbd{mkdist -help} will give 
+   general usage info. Enter: \kbd{mkdist VM-nn-rr}. This checks 
+   out the rtag version (step 2 above) from the repository,
+   reorganizes the file structure, build the documentation,
+   and creates the tar file \file{hypre-M.nn.rr.tar.gz}.
 
 \end{enumerate}
-
-\item External installation: (on CASC cluster)
-\begin{enumerate}
-
-   \item \kbd{update external}
-
-   \item \kbd{update external install}
-
-   \item Note that this automatically copies the \file{UPDATE.tar}
-   file from the internal installation to use here.  That is, the
-   external installation is always the same as some version of the
-   internal installation.
-
-\end{enumerate}
-
-\item External installation: (on all other supported machines,
-e.g. the Compass cluster)
-\begin{enumerate}
-
-   \item FTP the file \file{UPDATE.tar} to west (for example), and put it
-   in the install directory (typing \kbd{update -dirs} will give a list).
-
-   \item \kbd{tar xf UPDATE.tar}
-
-   \item \kbd{update external -dec}
-
-   \item \kbd{update external -dec install}
-
-\end{enumerate}
-
-\item Doublecheck the permissions on some of the files to make sure that
-they are set correctly.  The installation should be world-readable,
-and should give write access to people in the \file{hypre} group.  If
-you find something is not getting set correctly, fix manually, and
-report to the person maintaining the \file{update} script.
 
 \end{itemize}
 
