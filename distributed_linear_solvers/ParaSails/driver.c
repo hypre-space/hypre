@@ -5,7 +5,7 @@
 #include "ParaSails.h"
 #include "ConjGrad.h"
 
-extern double beta;
+extern double parasails_loadbal_beta;
 
 void report_times(MPI_Comm comm, double setup_time, double solve_time)
 {
@@ -127,11 +127,11 @@ int main(int argc, char *argv[])
         if (nlevels < 0)
             break;
 #endif
-        beta=0.9;
+        parasails_loadbal_beta=0.9;
         if (mype == 0) 
 	{
             printf("selparam %f, nlevels %d, filter %f, beta %f\n", 
-		selparam, nlevels, filter, beta);
+		selparam, nlevels, filter, parasails_loadbal_beta);
             fflush(stdout);
 	}
 
