@@ -42,6 +42,7 @@ main( int   argc,
    int     *num_grid_sweeps;  
    int     *grid_relax_type;   
    int    **grid_relax_points;
+   int      relax_default;
    double   relax_weight; 
 
    /* parameters for GMRES */
@@ -67,6 +68,7 @@ main( int   argc,
    build_matrix_arg_index = argc;
    build_rhs_type = 0;
    build_rhs_arg_index = argc;
+   relax_default = 0;
 
    solver_id = 0;
 
@@ -127,8 +129,12 @@ main( int   argc,
          arg_index++;
          build_rhs_type      = 3;
          build_rhs_arg_index = arg_index;
-      }  
-      else if ( strcmp(argv[arg_index], "-help") == 0 )
+      }    
+      else if ( strcmp(argv[arg_index], "-rlx") == 0 )
+      {
+         arg_index++;
+         relax_default = atoi(argv[arg_index++]);
+      }      else if ( strcmp(argv[arg_index], "-help") == 0 )
       {
          print_usage = 1;
       }
@@ -149,21 +155,21 @@ main( int   argc,
 
    /* fine grid */
    num_grid_sweeps[0] = 2;
-   grid_relax_type[0] = 0; 
+   grid_relax_type[0] = relax_default; 
    grid_relax_points[0] = hypre_CTAlloc(int, 2); 
    grid_relax_points[0][0] = -1;
    grid_relax_points[0][1] = 1;
 
    /* down cycle */
    num_grid_sweeps[1] = 2;
-   grid_relax_type[1] = 0; 
+   grid_relax_type[1] = relax_default; 
    grid_relax_points[1] = hypre_CTAlloc(int, 2); 
    grid_relax_points[1][0] = 1;
    grid_relax_points[1][1] = -1;
 
    /* up cycle */
    num_grid_sweeps[2] = 2;
-   grid_relax_type[2] = 0; 
+   grid_relax_type[2] = relax_default; 
    grid_relax_points[2] = hypre_CTAlloc(int, 2); 
    grid_relax_points[2][0] = -1;
    grid_relax_points[2][1] = 1;
