@@ -109,6 +109,7 @@ clean:
 	rm -f *.o
 
 distclean: clean
+	rm -f Makefile
 
 #################################################################
 # Rules
