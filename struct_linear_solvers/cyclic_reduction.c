@@ -206,7 +206,10 @@ hypre_CycRedNewCoarseOp( hypre_StructMatrix *A,
     *-----------------------------------------------*/
 
    Ac_num_ghost[2*cdir]     = 1;
-   Ac_num_ghost[2*cdir + 1] = 1;
+   if (!hypre_StructMatrixSymmetric(A))
+   {
+     Ac_num_ghost[2*cdir + 1] = 1;
+   }
    hypre_SetStructMatrixNumGhost(Ac, Ac_num_ghost);
 
    hypre_InitializeStructMatrixShell(Ac);
