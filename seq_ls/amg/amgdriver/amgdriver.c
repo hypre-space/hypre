@@ -68,28 +68,17 @@ char *argv[];
    solver = NewSolver(file_name);
 
    /*-------------------------------------------------------
-    * Debugging prints
-    *-------------------------------------------------------*/
-#if 0
-   sprintf(file_name, "%s.ysmp", GlobalsOutFileName);
-   WriteYSMP(file_name, ProblemA(problem));
-
-   sprintf(file_name, "%s.initu", GlobalsOutFileName);
-   WriteVec(file_name, ProblemU(problem));
-
-   sprintf(file_name, "%s.rhs", GlobalsOutFileName);
-   WriteVec(file_name, ProblemF(problem));
-#endif
-
-   /*-------------------------------------------------------
     * Write initial logging info
     *-------------------------------------------------------*/
 
-   fp = fopen(GlobalsLogFileName, "w");
-   fclose(fp);
+   if (SolverAMGIOutDat(solver) != 0)
+   {
+      fp = fopen(GlobalsLogFileName, "w");
+      fclose(fp);
 
-   WriteProblem(GlobalsLogFileName, problem);
-   WriteSolver(GlobalsLogFileName, solver);
+      WriteProblem(GlobalsLogFileName, problem);
+      WriteSolver(GlobalsLogFileName, solver);
+   }
 
    /*-------------------------------------------------------
     * Call the solver
