@@ -14,7 +14,7 @@
 #
 #=============================================================================
 
-Version V1.3.0.b released.
+Version V1.3.0.b released, 2000/10/11.
 
 - The number of threads to use in an OpenMP run can now be specified via
   either the OMP_NUM_THREADS environment variable, or by the routine
@@ -24,9 +24,9 @@ Version V1.3.0.b released.
   all capitals (e.g., Cray fortran compilers).  To use, specify the
   '--with-CFLAGS=-DHYPRE_CRAY' option on the 'configure' line.
 
-Version V1.2.0 released.
+Version V1.2.0 released, 2000/09/22.
 
-Version V1.1.0 released.
+Version V1.1.0 released, 2000/09/07.
 
 - Setup time for PILUT has been dramatically reduced in the case of
   very small drop tolerances, and memory problems that were causing
@@ -49,7 +49,7 @@ Version V1.1.0 released.
 - The main header files have been restructured to be more readable.
   They will soon include full documentation for their interfaces.
 
-New internal installation: V1.0.0
+New internal installation: V1.0.0, 2000/07/06
 
 - Now installing both optimized and debugging versions of the library.
   The optimized library is in the usual place; the debugging library
