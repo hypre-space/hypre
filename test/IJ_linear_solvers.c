@@ -22,8 +22,9 @@ int BuildParFromFile P((int argc , char *argv [], int arg_index , HYPRE_ParCSRMa
 int BuildParLaplacian P((int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr ));
 int BuildParDifConv P((int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr ));
 int BuildParFromOneFile P((int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr ));
+int BuildFuncsFromFiles P((int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix A , int **dof_func_ptr ));
+int BuildFuncsFromOneFile P((int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix A , int **dof_func_ptr ));
 int BuildRhsParFromOneFile P((int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix A , HYPRE_ParVector *b_ptr ));
-int BuildFuncsFromOneFile P((int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr ));
 int BuildParLaplacian9pt P((int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr ));
 int BuildParLaplacian27pt P((int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr ));
 
@@ -43,6 +44,7 @@ main( int   argc,
    int                 build_rhs_type;
    int                 build_rhs_arg_index;
    int                 build_funcs_type;
+   int                 build_funcs_arg_index;
    int                 solver_id;
    int                 ioutdat;
    int                 debug_flag;
@@ -137,6 +139,7 @@ main( int   argc,
    build_rhs_type = 0;
    build_rhs_arg_index = argc;
    build_funcs_type = 0;
+   build_funcs_arg_index = argc;
    relax_default = 3;
    debug_flag = 0;
 
@@ -169,6 +172,18 @@ main( int   argc,
          arg_index++;
          build_matrix_type      = 2;
          build_matrix_arg_index = arg_index;
+      }
+      else if ( strcmp(argv[arg_index], "-funcsfromonefile") == 0 )
+      {
+         arg_index++;
+         build_funcs_type      = 1;
+         build_funcs_arg_index = arg_index;
+      }
+      else if ( strcmp(argv[arg_index], "-funcsfromfile") == 0 )
+      {
+         arg_index++;
+         build_funcs_type      = 2;
+         build_funcs_arg_index = arg_index;
       }
       else if ( strcmp(argv[arg_index], "-laplacian") == 0 )
       {
@@ -857,9 +872,13 @@ main( int   argc,
    if (num_functions > 1)
    {
       dof_func = NULL;
-      if (build_funcs_type)
+      if (build_funcs_type == 1)
       {
-         printf (" Not implemented yet!");
+	 BuildFuncsFromOneFile(argc, argv, build_funcs_arg_index, A, &dof_func);
+      }
+      else if (build_funcs_type == 2)
+      {
+	 BuildFuncsFromFiles(argc, argv, build_funcs_arg_index, A, &dof_func);
       }
       else
       {
@@ -1988,6 +2007,124 @@ BuildParFromOneFile( int                  argc,
    *A_ptr = A;
 
    if (myid == 0) HYPRE_CSRMatrixDestroy(A_CSR);
+
+   return (0);
+}
+
+/*----------------------------------------------------------------------
+ * Build Function array from files on different processors
+ *----------------------------------------------------------------------*/
+
+int
+BuildFuncsFromFiles(    int                  argc,
+                        char                *argv[],
+                        int                  arg_index,
+                        HYPRE_ParCSRMatrix   A,
+                        int                **dof_func_ptr     )
+{
+/*----------------------------------------------------------------------
+ * Build Function array from files on different processors
+ *----------------------------------------------------------------------*/
+
+	printf (" Feature is not implemented yet!\n");	
+	return(0);
+
+}
+
+
+int
+BuildFuncsFromOneFile(  int                  argc,
+                        char                *argv[],
+                        int                  arg_index,
+                        HYPRE_ParCSRMatrix   A,
+                        int                **dof_func_ptr     )
+{
+   char           *filename;
+
+   int             myid, num_procs;
+   int            *partitioning;
+   int            *dof_func;
+   int            *dof_func_local;
+   int             i, j;
+   int             local_size, global_size;
+   MPI_Request	  *requests;
+   MPI_Status	  *status, status0;
+   MPI_Comm	   comm;
+
+   /*-----------------------------------------------------------
+    * Initialize some stuff
+    *-----------------------------------------------------------*/
+
+   comm = MPI_COMM_WORLD;
+   MPI_Comm_rank(MPI_COMM_WORLD, &myid );
+   MPI_Comm_size(MPI_COMM_WORLD, &num_procs );
+
+   /*-----------------------------------------------------------
+    * Parse command line
+    *-----------------------------------------------------------*/
+
+   if (arg_index < argc)
+   {
+      filename = argv[arg_index];
+   }
+   else
+   {
+      printf("Error: No filename specified \n");
+      exit(1);
+   }
+
+   /*-----------------------------------------------------------
+    * Print driver parameters
+    *-----------------------------------------------------------*/
+ 
+   if (myid == 0)
+   {
+      FILE *fp;
+      printf("  Funcs FromFile: %s\n", filename);
+
+      /*-----------------------------------------------------------
+       * read in the data
+       *-----------------------------------------------------------*/
+      fp = fopen(filename, "r");
+
+      fscanf(fp, "%d", &global_size);
+      dof_func = hypre_CTAlloc(int, global_size);
+
+      for (j = 0; j < global_size; j++)
+      {
+         fscanf(fp, "%d", &dof_func[j]);
+      }
+
+      fclose(fp);
+ 
+   }
+   HYPRE_ParCSRMatrixGetRowPartitioning(A, &partitioning);
+   local_size = partitioning[myid+1]-partitioning[myid];
+   dof_func_local = hypre_CTAlloc(int,local_size);
+
+   if (myid == 0)
+   {
+        requests = hypre_CTAlloc(MPI_Request,num_procs-1);
+        status = hypre_CTAlloc(MPI_Status,num_procs-1);
+        j = 0;
+        for (i=1; i < num_procs; i++)
+                MPI_Isend(&dof_func[partitioning[i]],
+		partitioning[i+1]-partitioning[i],
+                MPI_INT, i, 0, comm, &requests[j++]);
+        for (i=0; i < local_size; i++)
+                dof_func_local[i] = dof_func[i];
+        MPI_Waitall(num_procs-1,requests, status);
+        hypre_TFree(requests);
+        hypre_TFree(status);
+   }
+   else
+   {
+        MPI_Recv(dof_func_local,local_size,MPI_INT,0,0,comm,&status0);
+   }
+
+   *dof_func_ptr = dof_func_local;
+
+   if (myid == 0) hypre_TFree(dof_func);
 
    return (0);
 }
