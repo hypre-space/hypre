@@ -27,6 +27,63 @@ usage ()
   printf "usage: $0 {-g|-b|-a} HypreArchiveFile [install]\n"
 }
 
+build_general ()
+{
+  HYPRE_INSTALL_DIR=$DIST_DIR/..
+  for i in bin debug docs include lib src
+  do
+    rm -fR $HYPRE_INSTALL_DIR/$i
+    ln -s $DIST_DIR/$i ../$i
+  done
+  for i in threads
+  do
+    if [ -d $DIST_DIR/$i ]
+    then
+      rm -fR $HYPRE_INSTALL_DIR/$i
+      ln -s $DIST_DIR/$i $HYPRE_INSTALL_DIR/$i
+    fi
+  done
+}
+
+build_beta ()
+{
+  HYPRE_INSTALL_DIR=$DIST_DIR/../beta
+  for i in bin debug docs include lib src
+  do
+    rm -fR $HYPRE_INSTALL_DIR/$i
+    ln -s $DIST_DIR/$i $HYPRE_INSTALL_DIR/$i
+  done
+  for i in threads
+  do
+    if [ -d $DIST_DIR/$i ]
+    then
+      rm -fR $HYPRE_INSTALL_DIR/$i
+      ln -s $DIST_DIR/$i $HYPRE_INSTALL_DIR/$i
+    fi
+  done
+}
+
+build_alpha ()
+{
+  if [ "$SYS_TYPE" = "SunOS" ]
+  then
+    HYPRE_INSTALL_DIR=$DIST_DIR/../alpha
+    for i in bin debug docs include lib src
+    do
+      rm -fR $HYPRE_INSTALL_DIR/$i
+      ln -s $DIST_DIR/$i $HYPRE_INSTALL_DIR/$i
+    done
+    for i in threads
+    do
+      if [ -d $DIST_DIR/$i ]
+      then
+        rm -fR $HYPRE_INSTALL_DIR/$i
+        ln -s $DIST_DIR/$i $HYPRE_INSTALL_DIR/$i
+      fi
+    done
+  fi
+}
+
 # Define install permissions:
 #   - give everybody read/execute permission
 #   - give user/group write permission
@@ -112,9 +169,10 @@ then
 fi
 
 # MPI + threads version. (Do this only once)
-if [ "$SYS_TYPE" != "SunOS" ] &&
-   [ ! -d threads/lib ]
+if [ ! -d threads/lib ]
 then
+  if [ "$SYS_TYPE" != "SunOS" ]
+  then
     (
         HYPRE_INSTALL_DIR=$DIST_DIR/threads
         export HYPRE_INSTALL_DIR
@@ -135,61 +193,20 @@ then
         make install
         make veryclean
     )
+  fi
 fi
 
 if [ "$3" = "install" ]
 then
-  if [ "$OPTION" = "-g" ]
-  then
-    HYPRE_INSTALL_DIR=$DIST_DIR/..
-    for i in bin debug docs include lib src
-    do
-      rm -fR $HYPRE_INSTALL_DIR/$i
-      ln -s $DIST_DIR/$i ../$i
-    done
-    for i in threads
-    do
-      if [ -d $DIST_DIR/$i ]
-      then
-        rm -fR $HYPRE_INSTALL_DIR/$i
-        ln -s $DIST_DIR/$i $HYPRE_INSTALL_DIR/$i
-      fi
-    done
-  fi
-  if [ "$OPTION" = "-g" ] || [ "$OPTION" = "-b" ]
-  then
-    HYPRE_INSTALL_DIR=$DIST_DIR/../beta
-    for i in bin debug docs include lib src
-    do
-      rm -fR $HYPRE_INSTALL_DIR/$i
-      ln -s $DIST_DIR/$i $HYPRE_INSTALL_DIR/$i
-    done
-    for i in threads
-    do
-      if [ -d $DIST_DIR/$i ]
-      then
-        rm -fR $HYPRE_INSTALL_DIR/$i
-        ln -s $DIST_DIR/$i $HYPRE_INSTALL_DIR/$i
-      fi
-    done
-  fi
-  if [ "$SYS_TYPE" = "SunOS" ]
-  then
-    HYPRE_INSTALL_DIR=$DIST_DIR/../alpha
-    for i in bin debug docs include lib src
-    do
-      rm -fR $HYPRE_INSTALL_DIR/$i
-      ln -s $DIST_DIR/$i $HYPRE_INSTALL_DIR/$i
-    done
-    for i in threads
-    do
-      if [ -d $DIST_DIR/$i ]
-      then
-        rm -fR $HYPRE_INSTALL_DIR/$i
-        ln -s $DIST_DIR/$i $HYPRE_INSTALL_DIR/$i
-      fi
-    done
-  fi
+  case "$OPTION"
+  in
+    -g) build_general
+        build_beta
+        build_alpha ;;
+    -b) build_beta
+        build_alpha ;;
+    -a) build_alpha ;;
+   esac
 fi
 
 chmod -fR $HYPRE_INSTALL_PERMISSIONS $DIST_DIR
