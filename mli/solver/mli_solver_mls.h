@@ -22,7 +22,16 @@
 class MLI_Solver_MLS : public MLI_Solver
 {
    MLI_Matrix  *Amat;
+   MLI_Vector  *mli_Vtemp;
+   MLI_Vector  *mli_Wtemp;
+   MLI_Vector  *mli_Ytemp;
    double      max_eigen;
+   int         mlsDeg; /* degree for current level */
+   double      mlsBoost;
+   double      mlsOver;
+   double      mlsOm[5];
+   double      mlsOm2;
+   double      mlsCf[5];
 
 public :
 

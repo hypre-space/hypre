@@ -10,10 +10,13 @@
 #include <string.h>
 #include <iostream.h>
 #include <stdio.h>
+#include <math.h>
 
 #include "mli_solver_mls.h"
 #include "../base/mli_defs.h"
 #include "parcsr_mv/parcsr_mv.h"
+
+#define min(x,y) (((x) < (y)) ? (x) : (y))
 
 /******************************************************************************
  * constructor
@@ -22,7 +25,16 @@
 MLI_Solver_MLS::MLI_Solver_MLS() : MLI_Solver(MLI_SOLVER_MLS_ID)
 {
    Amat      = NULL;
+   mli_Vtemp = NULL;
+   mli_Wtemp = NULL;
+   mli_Ytemp = NULL;
    max_eigen = -1.0;
+   mlsDeg    = 2;
+   mlsBoost  = 1.1;
+   mlsOver   = 1.1;
+   for ( int i = 0; i < 5; i++ ) mlsOm[i] = 0.0;
+   mlsOm2    = 1.8;
+   for ( int i = 0; i < 5; i++ ) mlsCf[i] = 0.0;
 }
 
 /******************************************************************************
@@ -32,15 +44,90 @@ MLI_Solver_MLS::MLI_Solver_MLS() : MLI_Solver(MLI_SOLVER_MLS_ID)
 MLI_Solver_MLS::~MLI_Solver_MLS()
 {
    Amat = NULL;
+   if ( mli_Vtemp != NULL ) delete mli_Vtemp;
+   if ( mli_Wtemp != NULL ) delete mli_Wtemp;
+   if ( mli_Ytemp != NULL ) delete mli_Ytemp;
 }
 
 /******************************************************************************
  * set up the smoother
+ * (This setup is modified from Marian Brezina's code in ML)
  *---------------------------------------------------------------------------*/
 
 int MLI_Solver_MLS::setup(MLI_Matrix *mat)
 {
+   int    i, j, nGrid, MAX_DEG=5, nSamples=20000;
+   double cosData0, cosData1, coord;
+   double sample[40000], gridStep, rho, ddeg;
+   double pi=4.e0 * atan(1.e0); /* 3.141592653589793115998e0; */
+
+   /*-----------------------------------------------------------------
+    * check that proper spectral radius is passed in
+    *-----------------------------------------------------------------*/
+
    Amat = mat;
+   if ( max_eigen == 0.0 )
+   {
+      cout << "MLI_Solver_MLS ERROR : max_eigen <= 0.0.\n";
+      exit(1);
+   }
+
+   /*-----------------------------------------------------------------
+    * compute the coefficients
+    *-----------------------------------------------------------------*/
+
+   for ( i = 0; i < MAX_DEG; i++ ) mlsOm[i] = 0.e0;
+   ddeg = (double) mlsDeg;
+   cosData1 = 1.e0 / (2.e0 * ddeg + 1.e0);
+   for ( i = 0; i < mlsDeg; i++ ) 
+   {
+      cosData0 = 2.e0 * (double)(i+1) * pi;
+      mlsOm[i] = 2.e0 / (max_eigen * (1.e0 - cos(cosData0 * cosData1)));
+   }
+   mlsCf[0] = + mlsOm[0] + mlsOm[1] + mlsOm[2] + mlsOm[3] + mlsOm[4];
+   mlsCf[1] = -(mlsOm[0]*mlsOm[1] + mlsOm[0]*mlsOm[2]
+              + mlsOm[0]*mlsOm[3] + mlsOm[0]*mlsOm[4]
+              + mlsOm[1]*mlsOm[2] + mlsOm[1]*mlsOm[3]
+              + mlsOm[1]*mlsOm[4] + mlsOm[2]*mlsOm[3]
+              + mlsOm[2]*mlsOm[4] + mlsOm[3]*mlsOm[4]);
+   mlsCf[2] = +(mlsOm[0]*mlsOm[1]*mlsOm[2] + mlsOm[0]*mlsOm[1]*mlsOm[3]
+              + mlsOm[0]*mlsOm[1]*mlsOm[4] + mlsOm[0]*mlsOm[2]*mlsOm[3]
+              + mlsOm[0]*mlsOm[2]*mlsOm[4] + mlsOm[0]*mlsOm[3]*mlsOm[4]
+              + mlsOm[1]*mlsOm[2]*mlsOm[3] + mlsOm[1]*mlsOm[2]*mlsOm[4]
+              + mlsOm[1]*mlsOm[3]*mlsOm[4] + mlsOm[2]*mlsOm[3]*mlsOm[4]);
+   mlsCf[3] = -(mlsOm[0]*mlsOm[1]*mlsOm[2]*mlsOm[3]
+              + mlsOm[0]*mlsOm[1]*mlsOm[2]*mlsOm[4]
+              + mlsOm[0]*mlsOm[1]*mlsOm[3]*mlsOm[4]
+              + mlsOm[0]*mlsOm[2]*mlsOm[3]*mlsOm[4]
+              + mlsOm[1]*mlsOm[2]*mlsOm[3]*mlsOm[4]);
+   mlsCf[4] = mlsOm[0] * mlsOm[1] * mlsOm[2] * mlsOm[3] * mlsOm[4];
+
+   gridStep = max_eigen / (double) nSamples;
+   nGrid    = (int) min(rint(max_eigen/gridStep)+1, nSamples);
+
+   for ( i = 0; i < nGrid; i++ ) 
+   {
+      coord   = (double)(i+1) * gridStep;
+      sample[i] = 1.e0 - mlsOm[0] * coord;
+      for ( j = 1; j < mlsDeg; j++) sample[i] *= sample[i] * coord;
+   }
+   rho = 0.e0;
+   for ( i = 0; i < nGrid; i++ ) if (sample[i] > rho) rho = sample[i];
+   if ( mlsDeg < 2) mlsBoost = 1.029e0;
+   else             mlsBoost = 1.025e0;
+   rho *= mlsBoost;
+   mlsOm2 = 2.e0 / ( rho * (1.e0 - cos((2.e0 * pi)/3.e0)));
+
+   /*-----------------------------------------------------------------
+    * allocate temporary vectors
+    *-----------------------------------------------------------------*/
+
+   if ( mli_Vtemp != NULL ) delete mli_Vtemp;
+   if ( mli_Wtemp != NULL ) delete mli_Wtemp;
+   if ( mli_Ytemp != NULL ) delete mli_Ytemp;
+   mli_Vtemp = mat->createVector();
+   mli_Wtemp = mat->createVector();
+   mli_Ytemp = mat->createVector();
    return 0;
 }
 
@@ -52,13 +139,12 @@ int MLI_Solver_MLS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
 {
    hypre_ParCSRMatrix  *A;
    hypre_CSRMatrix     *A_diag;
-   hypre_Vector        *u_local, *Vtemp_local;
-   hypre_ParVector     *Vtemp, *Wtemp, *f, *u;
-   int                 i, n, global_size, *partitioning1, *partitioning2;
-   int                 *A_diag_i, num_procs;
-   double              *A_diag_data, omega, omega2, *u_data, *Vtemp_data;
-   double              mls_over=1.1, mls_boost=1.019, alpha;
-   MPI_Comm            comm;
+   hypre_Vector        *u_local, *Vtemp_local, *Wtemp_local, *Ytemp_local;
+   hypre_ParVector     *Vtemp, *Wtemp, *Ytemp, *f, *u;
+   int                 i, nrows, deg;
+   double              omega, coef, *u_data, *Vtemp_data;
+   double              *Wtemp_data, *Ytemp_data;
+   void                *void_vector;
 
    /*-----------------------------------------------------------------
     * check that proper spectral radius is passed in
@@ -75,88 +161,143 @@ int MLI_Solver_MLS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
     *-----------------------------------------------------------------*/
 
    A               = (hypre_ParCSRMatrix *) Amat->getMatrix();
-   comm            = hypre_ParCSRMatrixComm(A);
    A_diag          = hypre_ParCSRMatrixDiag(A);
-   A_diag_data     = hypre_CSRMatrixData(A_diag);
-   A_diag_i        = hypre_CSRMatrixI(A_diag);
-   n               = hypre_CSRMatrixNumRows(A_diag);
+   nrows           = hypre_CSRMatrixNumRows(A_diag);
    f               = (hypre_ParVector *) f_in->getVector();
    u               = (hypre_ParVector *) u_in->getVector();
    u_local         = hypre_ParVectorLocalVector(u);
    u_data          = hypre_VectorData(u_local);
-   MPI_Comm_size(comm,&num_procs);  
    
    /*-----------------------------------------------------------------
     * create temporary vector
     *-----------------------------------------------------------------*/
 
-   global_size   = hypre_ParVectorGlobalSize(f);
-   partitioning1 = hypre_ParVectorPartitioning(f);
-   partitioning2 = hypre_CTAlloc( int, num_procs+1 );
-   for ( i = 0; i <= num_procs; i++ ) partitioning2[i] = partitioning1[i];
-   Vtemp = hypre_ParVectorCreate(comm, global_size, partitioning2);
-   hypre_ParVectorInitialize(Vtemp);
+   Vtemp       = (hypre_ParVector *) mli_Vtemp->getVector();
    Vtemp_local = hypre_ParVectorLocalVector(Vtemp);
    Vtemp_data  = hypre_VectorData(Vtemp_local);
-   partitioning2 = hypre_CTAlloc( int, num_procs+1 );
-   for ( i = 0; i <= num_procs; i++ ) partitioning2[i] = partitioning1[i];
-   Wtemp = hypre_ParVectorCreate(comm, global_size, partitioning2);
-   hypre_ParVectorInitialize(Wtemp);
+
+   Wtemp       = (hypre_ParVector *) mli_Wtemp->getVector();
+   Wtemp_local = hypre_ParVectorLocalVector(Wtemp);
+   Wtemp_data  = hypre_VectorData(Wtemp_local);
+
+   Ytemp       = (hypre_ParVector *) mli_Ytemp->getVector();
+   Ytemp_local = hypre_ParVectorLocalVector(Ytemp);
+   Ytemp_data  = hypre_VectorData(Ytemp_local);
 
    /*-----------------------------------------------------------------
     * Perform MLS iterations
     *-----------------------------------------------------------------*/
  
-   omega  = 2.0 / (max_eigen * 1.5 * mls_over);
-   omega2 = (1 - omega * max_eigen * mls_over);
-   omega2 = omega2 * omega2 * max_eigen * mls_over;
-
-   /* u = u + omega * (f - A u) */
-
-   hypre_ParVectorCopy(f,Vtemp); 
-   hypre_ParCSRMatrixMatvec(-1.0, A, u, 1.0, Vtemp);
-   alpha = omega * mls_over;
-
-#define HYPRE_SMP_PRIVATE i
-#include "utilities/hypre_smp_forloop.h"
-   for (i = 0; i < n; i++)
-   {
-      if (A_diag_data[A_diag_i[i]] != 0.0) u_data[i] += (alpha*Vtemp_data[i]);
-   }
-
-   /* compute residual Vtemp = f - A u */
+   /* compute  Vtemp = f - A u */
 
    hypre_ParVectorCopy(f,Vtemp); 
    hypre_ParCSRMatrixMatvec(-1.0, A, u, 1.0, Vtemp);
 
-   /* compute residual Wtemp = (I - omega * A) Vtemp */
+   if ( mlsDeg == 1 )
+   {
+      coef = mlsCf[0] * mlsOver;
 
-   alpha = omega;
-   hypre_ParVectorCopy(Vtemp,Wtemp); 
-   hypre_ParCSRMatrixMatvec(-alpha, A, Vtemp, 1.0, Wtemp);
-
-   /* compute residual Vtemp = (I - omega * A) Wtemp */
-
-   hypre_ParVectorCopy(Wtemp,Vtemp); 
-   hypre_ParCSRMatrixMatvec(-omega, A, Wtemp, 1.0, Vtemp);
-
-   /* compute u = u + alpha * Vtemp */
-
-   alpha = 2.0 / (omega2 * mls_boost) * mls_over;
+      /* u = u + coef * Vtemp */
 
 #define HYPRE_SMP_PRIVATE i
 #include "utilities/hypre_smp_forloop.h"
-   for (i = 0; i < n; i++)
-   {
-      if (A_diag_data[A_diag_i[i]] != 0.0) u_data[i] += (alpha*Vtemp_data[i]);
+      for (i = 0; i < nrows; i++) u_data[i] += ( coef * Vtemp_data[i] );
+
+      /* compute residual Vtemp = A u - f */
+
+      hypre_ParVectorCopy(f,Vtemp); 
+      hypre_ParCSRMatrixMatvec(1.0, A, u, -1.0, Vtemp);
+
+      /* compute residual Wtemp = (I - omega * A) Vtemp */
+
+      hypre_ParVectorCopy(Vtemp,Wtemp); 
+      for ( deg = 0; deg < mlsDeg; deg++ ) 
+      {
+         omega = mlsOm[deg];
+         hypre_ParCSRMatrixMatvec(-omega, A, Vtemp, 1.0, Wtemp);
+      }
+
+      /* compute residual Vtemp = (I - omega * A) Wtemp */
+
+      hypre_ParVectorCopy(Wtemp,Vtemp); 
+      for ( deg = mlsDeg-1; deg > -1; deg-- ) 
+      {
+         omega = mlsOm[deg];
+         hypre_ParCSRMatrixMatvec(-omega, A, Wtemp, 1.0, Vtemp);
+      }
+
+      /* compute u = u - coef * Vtemp */
+
+      coef = mlsOver * mlsOm2;
+
+#define HYPRE_SMP_PRIVATE i
+#include "utilities/hypre_smp_forloop.h"
+      for (i = 0; i < nrows; i++) u_data[i] -= ( coef * Vtemp_data[i] );
+
    }
+   else
+   {
+      /* Ytemp = coef * Vtemp */
 
-   /*-----------------------------------------------------------------
-    * clean up and return
-    *-----------------------------------------------------------------*/
+      coef = mlsCf[0];
 
-   hypre_ParVectorDestroy( Vtemp ); 
-   hypre_ParVectorDestroy( Wtemp ); 
+#define HYPRE_SMP_PRIVATE i
+#include "utilities/hypre_smp_forloop.h"
+         for (i = 0; i < nrows; i++) Ytemp_data[i] = ( coef * Vtemp_data[i] );
+
+      /* Wtemp = coef * Vtemp */
+
+      for ( deg = 1; deg < deg; deg++ ) 
+      {
+         hypre_ParCSRMatrixMatvec(1.0, A, Vtemp, -1.0, Wtemp);
+         coef = mlsCf[deg-1];
+
+#define HYPRE_SMP_PRIVATE i
+#include "utilities/hypre_smp_forloop.h"
+         for (i = 0; i < nrows; i++) 
+         {
+            Vtemp_data[i] = Wtemp_data[i];
+            Ytemp_data[i] += ( coef * Wtemp_data[i] );
+         }
+
+      }
+
+#define HYPRE_SMP_PRIVATE i
+#include "utilities/hypre_smp_forloop.h"
+       for (i = 0; i < nrows; i++) u_data[i] += ( mlsOver * Ytemp_data[i] );
+
+      /* compute residual Vtemp = A u - f */
+
+      hypre_ParVectorCopy(f,Vtemp); 
+      hypre_ParCSRMatrixMatvec(1.0, A, u, -1.0, Vtemp);
+
+      /* compute residual Wtemp = (I - omega * A) Vtemp */
+
+      hypre_ParVectorCopy(Vtemp,Wtemp); 
+      for ( deg = 0; deg < mlsDeg; deg++ ) 
+      {
+         omega = mlsOm[deg];
+         hypre_ParCSRMatrixMatvec(-omega, A, Vtemp, 1.0, Wtemp);
+      }
+
+      /* compute residual Vtemp = (I - omega * A) Wtemp */
+
+      hypre_ParVectorCopy(Wtemp,Vtemp); 
+      for ( deg = mlsDeg-1; deg > -1; deg-- ) 
+      {
+         omega = mlsOm[deg];
+         hypre_ParCSRMatrixMatvec(-omega, A, Wtemp, 1.0, Vtemp);
+      }
+
+      /* compute u = u - coef * Vtemp */
+
+      coef = mlsOver * mlsOm2;
+
+#define HYPRE_SMP_PRIVATE i
+#include "utilities/hypre_smp_forloop.h"
+      for (i = 0; i < nrows; i++) u_data[i] -= ( coef * Vtemp_data[i] );
+
+   }
 
    return(0); 
 }
