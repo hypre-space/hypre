@@ -40,6 +40,7 @@ int hypre_HybridSetTol( void *hybrid_vdata , double tol );
 int hypre_HybridSetConvergenceTol( void *hybrid_vdata , double cf_tol );
 int hypre_HybridSetDSCGMaxIter( void *hybrid_vdata , int dscg_max_its );
 int hypre_HybridSetPCGMaxIter( void *hybrid_vdata , int pcg_max_its );
+int hypre_HybridSetPCGAbsoluteTolFactor( void *hybrid_vdata , double pcg_atolf );
 int hypre_HybridSetTwoNorm( void *hybrid_vdata , int two_norm );
 int hypre_HybridSetStopCrit( void *hybrid_vdata , int stop_crit );
 int hypre_HybridSetRelChange( void *hybrid_vdata , int rel_change );
@@ -47,7 +48,7 @@ int hypre_HybridSetSolverType( void *hybrid_vdata , int solver_type );
 int hypre_HybridSetKDim( void *hybrid_vdata , int k_dim );
 int hypre_HybridSetPrecond( void *pcg_vdata , int (*pcg_precond_solve )(), int (*pcg_precond_setup )(), void *pcg_precond );
 int hypre_HybridSetLogging( void *hybrid_vdata , int logging );
-int hypre_HybridSetPrintLevel( void *hybrid_vdata , int level );
+int hypre_HybridSetPrintLevel( void *hybrid_vdata , int print_level );
 int hypre_HybridGetNumIterations( void *hybrid_vdata , int *num_its );
 int hypre_HybridGetDSCGNumIterations( void *hybrid_vdata , int *dscg_num_its );
 int hypre_HybridGetPCGNumIterations( void *hybrid_vdata , int *pcg_num_its );
@@ -78,10 +79,9 @@ int HYPRE_StructGMRESSetTol( HYPRE_StructSolver solver , double tol );
 int HYPRE_StructGMRESSetMaxIter( HYPRE_StructSolver solver , int max_iter );
 int HYPRE_StructGMRESSetPrecond( HYPRE_StructSolver solver , HYPRE_PtrToStructSolverFcn precond , HYPRE_PtrToStructSolverFcn precond_setup , HYPRE_StructSolver precond_solver );
 int HYPRE_StructGMRESSetLogging( HYPRE_StructSolver solver , int logging );
-int HYPRE_StructGMRESSetPrintLevel( HYPRE_StructSolver solver , int level );
+int HYPRE_StructGMRESSetPrintLevel( HYPRE_StructSolver solver , int print_level );
 int HYPRE_StructGMRESGetNumIterations( HYPRE_StructSolver solver , int *num_iterations );
 int HYPRE_StructGMRESGetFinalRelativeResidualNorm( HYPRE_StructSolver solver , double *norm );
-int HYPRE_StructGMRESGetResidual( HYPRE_StructSolver solver , void **residual );
 
 /* HYPRE_struct_hybrid.c */
 int HYPRE_StructHybridCreate( MPI_Comm comm , HYPRE_StructSolver *solver );
@@ -92,6 +92,7 @@ int HYPRE_StructHybridSetTol( HYPRE_StructSolver solver , double tol );
 int HYPRE_StructHybridSetConvergenceTol( HYPRE_StructSolver solver , double cf_tol );
 int HYPRE_StructHybridSetDSCGMaxIter( HYPRE_StructSolver solver , int dscg_max_its );
 int HYPRE_StructHybridSetPCGMaxIter( HYPRE_StructSolver solver , int pcg_max_its );
+int HYPRE_StructHybridSetPCGAbsoluteTolFactor( HYPRE_StructSolver solver , double pcg_atolf );
 int HYPRE_StructHybridSetTwoNorm( HYPRE_StructSolver solver , int two_norm );
 int HYPRE_StructHybridSetStopCrit( HYPRE_StructSolver solver , int stop_crit );
 int HYPRE_StructHybridSetRelChange( HYPRE_StructSolver solver , int rel_change );
@@ -128,10 +129,9 @@ int HYPRE_StructPCGSetTwoNorm( HYPRE_StructSolver solver , int two_norm );
 int HYPRE_StructPCGSetRelChange( HYPRE_StructSolver solver , int rel_change );
 int HYPRE_StructPCGSetPrecond( HYPRE_StructSolver solver , HYPRE_PtrToStructSolverFcn precond , HYPRE_PtrToStructSolverFcn precond_setup , HYPRE_StructSolver precond_solver );
 int HYPRE_StructPCGSetLogging( HYPRE_StructSolver solver , int logging );
-int HYPRE_StructPCGSetPrintLevel( HYPRE_StructSolver solver , int level );
+int HYPRE_StructPCGSetPrintLevel( HYPRE_StructSolver solver , int print_level );
 int HYPRE_StructPCGGetNumIterations( HYPRE_StructSolver solver , int *num_iterations );
 int HYPRE_StructPCGGetFinalRelativeResidualNorm( HYPRE_StructSolver solver , double *norm );
-int HYPRE_StructPCGGetResidual( HYPRE_StructSolver solver , void **residual );
 int HYPRE_StructDiagScaleSetup( HYPRE_StructSolver solver , HYPRE_StructMatrix A , HYPRE_StructVector y , HYPRE_StructVector x );
 int HYPRE_StructDiagScale( HYPRE_StructSolver solver , HYPRE_StructMatrix HA , HYPRE_StructVector Hy , HYPRE_StructVector Hx );
 
@@ -170,7 +170,6 @@ int HYPRE_StructSMGSetNumPreRelax( HYPRE_StructSolver solver , int num_pre_relax
 int HYPRE_StructSMGSetNumPostRelax( HYPRE_StructSolver solver , int num_post_relax );
 int HYPRE_StructSMGSetLogging( HYPRE_StructSolver solver , int logging );
 int HYPRE_StructSMGSetPrintLevel( HYPRE_StructSolver solver , int print_level );
-
 int HYPRE_StructSMGGetNumIterations( HYPRE_StructSolver solver , int *num_iterations );
 int HYPRE_StructSMGGetFinalRelativeResidualNorm( HYPRE_StructSolver solver , double *norm );
 
