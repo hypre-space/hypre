@@ -101,7 +101,7 @@ void setup_(int *, int *, double *, int *, double *, int *,
 	  AMGS01DataLevA(amgs01_data),\
 	  AMGS01DataLevB(amgs01_data),\
 	  AMGS01DataLevV(amgs01_data),\
-	  AMGS01DataLevP(amgs01_data),\
+	  AMGS01DataLevPI(amgs01_data),\
 	  AMGS01DataLevI(amgs01_data),\
 	  AMGS01DataNumA(amgs01_data),\
 	  AMGS01DataNumB(amgs01_data),\

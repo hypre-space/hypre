@@ -72,6 +72,7 @@ typedef struct
    int     *levb;
    int     *levv;
    int     *levp;
+   int     *levpi;
    int     *levi;
    int     *numa;
    int     *numb;
@@ -129,6 +130,7 @@ typedef struct
 #define AMGS01DataLevB(amgs01_data)        ((amgs01_data) -> levb)
 #define AMGS01DataLevV(amgs01_data)        ((amgs01_data) -> levv)
 #define AMGS01DataLevP(amgs01_data)        ((amgs01_data) -> levp)
+#define AMGS01DataLevPI(amgs01_data)       ((amgs01_data) -> levpi)
 #define AMGS01DataLevI(amgs01_data)        ((amgs01_data) -> levi)
 #define AMGS01DataNumA(amgs01_data)        ((amgs01_data) -> numa)
 #define AMGS01DataNumB(amgs01_data)        ((amgs01_data) -> numb)

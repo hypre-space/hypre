@@ -69,6 +69,8 @@ Data        *data;
    int     *levv;
    int     *levp;
    int     *levi;
+/* veh test levpi */
+   int     *levpi;
    int     *numa;
    int     *numb;
    int     *numv;
@@ -175,6 +177,7 @@ Data        *data;
    levv       = ctalloc(int, num_levels);
    levp       = ctalloc(int, num_levels);
    levi       = ctalloc(int, num_levels);
+   levpi      = ctalloc(int, num_levels);
    numa       = ctalloc(int, num_levels);
    numb       = ctalloc(int, num_levels);
    numv       = ctalloc(int, num_levels);
@@ -185,6 +188,7 @@ Data        *data;
       levb[j] = ib[imin[j]-1];
       levv[j] = imin[j];
       levp[j] = ipmn[j];
+      levpi[j] = ipmn[j] + j;
       levi[j] = imin[j] + j;
       numa[j] = ia[imax[j]+1-1]-ia[imin[j]-1];
       numb[j] = ib[imax[j]+1-1]-ib[imin[j]-1];
@@ -197,7 +201,8 @@ Data        *data;
    AMGS01DataLevA(amgs01_data)   = leva;
    AMGS01DataLevB(amgs01_data)   = levb;
    AMGS01DataLevV(amgs01_data)   = levv;
-   AMGS01DataLevP(amgs01_data)   = levp;
+   AMGS01DataLevP(amgs01_data)   = levp;   
+   AMGS01DataLevPI(amgs01_data)  = levpi;
    AMGS01DataLevI(amgs01_data)   = levi;
    AMGS01DataNumA(amgs01_data)   = numa;
    AMGS01DataNumB(amgs01_data)   = numb;
@@ -209,12 +214,17 @@ Data        *data;
     *----------------------------------------------------------*/
    
    /* make room for `num(j)+1' entry in `ia' and `ib' */
+   /* veh also make room for `num(j)+1' entry in iv */
    for (j = num_levels-1; j > 0; j--)
    {
       for (k = numv[j]; k >= 0; k--)
       {
 	 ia[levi[j]+k-1] = ia[levv[j]+k-1];
 	 ib[levi[j]+k-1] = ib[levv[j]+k-1];
+      }
+      for (k = nump[j]; k >= 0; k--)
+      {
+	 iv[levpi[j]+k-1] = iv[levp[j]+k-1];
       }
    }
    
@@ -262,7 +272,7 @@ Data        *data;
    decr = numv[0];
    for (j = 1; j < num_levels; j++)
    {
-      for (k = levp[j]; k < levp[j] + nump[j]; k++)
+      for (k = levpi[j]; k < levpi[j] + nump[j] + 1; k++)
       {
 	 iv[k-1] -= decr;
       }
