@@ -130,7 +130,8 @@ hypre_AMGSetup( void            *amg_vdata,
       else if (coarsen_type == 2)
       {
 	 hypre_AMGCoarsenRugeLoL(A_array[level], strong_threshold,
-                       &S, &CF_marker, &coarse_size); 
+				 dof_func_array[level],
+				 &S, &CF_marker, &coarse_size); 
       }
       else if (coarsen_type == 3)
       {
@@ -167,6 +168,7 @@ hypre_AMGSetup( void            *amg_vdata,
       {
 	  if (coarsen_type == 3)
              hypre_AMGBuildRBMInterp(A_array[level], 
+
                                   CF_marker_array[level], 
                                   A_array[level], 
                                   dof_func_array[level],
@@ -191,13 +193,14 @@ hypre_AMGSetup( void            *amg_vdata,
       }
       else 
       {
-          hypre_AMGBuildInterp(A_array[level], CF_marker_array[level], S, &P);
+	hypre_AMGBuildInterp(A_array[level], CF_marker_array[level], S, &P);
       }
+
+      printf("END computing level %d interpolation matrix; =======\n", level);
 
       dof_func_array[level+1] = coarse_dof_func;
       P_array[level] = P; 
       
-
       if (amg_ioutdat == 5 && level == 0)
       {
          hypre_CSRMatrixPrint(S,"S_mat");
@@ -285,4 +288,5 @@ hypre_AMGSetup( void            *amg_vdata,
    Setup_err_flag = 0;
    return(Setup_err_flag);
 }  
+
 
