@@ -65,6 +65,9 @@ extern int  HYPRE_LSI_DDIlutComposeOverlappedMatrix(MH_Matrix *, int *,
 extern int  HYPRE_LSI_ILUTDecompose(HYPRE_LSI_Schwarz *sch_ptr);
 extern void qsort0(int *, int, int);
 extern int  HYPRE_LSI_SplitDSort(double*,int,int*,int);
+extern int  MH_ExchBdry(double *, void *);
+extern int  HYPRE_LSI_Search(int *, int, int);
+
 #define habs(x) ((x) > 0 ? (x) : -(x))
 
 /*--------------------------------------------------------------------------
@@ -225,7 +228,7 @@ int HYPRE_LSI_SchwarzSetILUTFillin(HYPRE_Solver solver, double fillin)
 int HYPRE_LSI_SchwarzSolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix Amat,
                             HYPRE_ParVector b,   HYPRE_ParVector x )
 {
-   int               i, j, k, cnt, blk, index, max_blk_size, nrows;
+   int               i, j, cnt, blk, index, max_blk_size, nrows;
    int               ntimes, Nrows, extNrows, nblocks, *indptr, column;
    int               *aux_mat_ia, *aux_mat_ja, *mat_ia, *mat_ja, *idiag;
    double            *dbuffer, *aux_mat_aa, *solbuf, *xbuffer;
@@ -443,7 +446,7 @@ int HYPRE_LSI_SchwarzSolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix Amat,
 int HYPRE_LSI_SchwarzSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
                            HYPRE_ParVector b,   HYPRE_ParVector x )
 {
-   int               i, j, offset, total_recv_leng, *recv_lengths=NULL;
+   int               i, offset, total_recv_leng, *recv_lengths=NULL;
    int               *int_buf=NULL, mypid, nprocs, overlap_flag=1,*parray;
    int               *map=NULL, *map2=NULL, *row_partition=NULL,*parray2;
    double            *dble_buf=NULL;
@@ -547,9 +550,9 @@ int HYPRE_LSI_SchwarzDecompose(HYPRE_LSI_Schwarz *sch_ptr,MH_Matrix *Amat,
    int               **bmat_ia, **bmat_ja, output_level;
    int               mypid, *blk_size, index, **blk_indices, **aux_bmat_ia;
    int               ncnt, rownum, offset, Nrows, extNrows, **aux_bmat_ja;
-   int               *tmp_blk_leng, *cols, blknum, *blkinfo, rowleng;
+   int               *tmp_blk_leng, *cols, rowleng;
    int               nblocks, col_ind, init_size, aux_nnz, max_blk_size;
-   int               *tmp_indices, cur_off_row, nrows, length;
+   int               *tmp_indices, cur_off_row, length;
    double            *mat_aa, *vals, **aux_bmat_aa, **bmat_aa;
 
    /* --------------------------------------------------------- */

@@ -333,7 +333,6 @@ int MH_GetRow(void *obj, int N_requested_rows, int requested_rows[],
     int    *rowptr      = Amat->rowptr;
     int    *colInd      = Amat->colnum;
     double *colVal      = Amat->values;
-    int    *mapList     = Amat->map;
 
     ncnt = 0;
     for ( i = 0; i < N_requested_rows; i++ )
@@ -984,15 +983,17 @@ int HYPRE_LSI_MLSetBGSBlockSize( HYPRE_Solver solver, int size  )
 int HYPRE_LSI_MLConstructMHMatrix(HYPRE_ParCSRMatrix A, MH_Matrix *mh_mat,
                              MPI_Comm comm, int *partition,MH_Context *obj) 
 {
-    int         i, j, index, my_id, nprocs, msgid, *tempCnt;
-    int         sendProcCnt, *sendLeng, *sendProc, **sendList;
-    int         recvProcCnt, *recvLeng, *recvProc;
+    int         i, j, index, my_id, nprocs;
     int         rowLeng, *colInd, startRow, endRow, localEqns;
     int         *diagSize, *offdiagSize, externLeng, *externList, ncnt, nnz;
     int         *rowptr, *columns, num_bdry;
     double      *colVal, *values;
+#ifndef HYPRE_SEQUENTIAL
+    int         sendProcCnt, *sendLeng, *sendProc, **sendList;
+    int         recvProcCnt, *recvLeng, *recvProc, *tempcnt, msgid;
     MPI_Request *Request;
     MPI_Status  status;
+#endif
 
     /* -------------------------------------------------------- */
     /* get machine information and local matrix information     */
