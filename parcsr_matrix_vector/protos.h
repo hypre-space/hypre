@@ -55,7 +55,7 @@ hypre_ParCSRMatrix *hypre_CSRMatrixToParCSRMatrix P((MPI_Comm comm,
 int GenerateDiagAndOffd P((hypre_CSRMatrix *A, hypre_ParCSRMatrix *matrix,
 	int first_col_diag, int last_col_diag));
 hypre_CSRMatrix *hypre_MergeDiagAndOffd P((hypre_ParCSRMatrix *par_matrix));
-hypre_CSRMatrix *hypre_ParCSRMatrixToCSRMatrixAll P((MPI_Comm,
+hypre_CSRMatrix *hypre_ParCSRMatrixToCSRMatrixAll P((
 	hypre_ParCSRMatrix *par_matrix));
  
 /* par_csr_matvec.c */
