@@ -120,21 +120,6 @@ hypre_F90_IFACE(hypre_setijvectorlocalsize)( long int *vector,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_QueryIJVectorInsertionSem
- *--------------------------------------------------------------------------*/
- 
-void
-hypre_F90_IFACE(hypre_queryijvectorinsertionsem)( long int *vector,
-                                                  int      *level,
-                                                  int      *ierr    )
-{
-   *ierr = (int) ( HYPRE_QueryIJVectorInsertionSemantics(
-                         (HYPRE_IJVector) *vector,
-                         (int *)           level   ) );
-
-}
-
-/*--------------------------------------------------------------------------
  * HYPRE_SetIJVectorLocalComponents
  *--------------------------------------------------------------------------*/
 
