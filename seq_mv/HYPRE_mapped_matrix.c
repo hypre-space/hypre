@@ -110,7 +110,7 @@ HYPRE_GetMappedMatrixMatrix( HYPRE_MappedMatrix matrix )
 int
 HYPRE_SetMappedMatrixMatrix( HYPRE_MappedMatrix matrix, void *matrix_data )
 {
-   return( hypre_SetMappedMatrixColMap( (hypre_MappedMatrix *) matrix, matrix_data ) );
+   return( hypre_SetMappedMatrixMatrix( (hypre_MappedMatrix *) matrix, matrix_data ) );
 }
 
 /*--------------------------------------------------------------------------
