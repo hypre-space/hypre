@@ -18,9 +18,9 @@
 
 #include <string.h>
 #include <iostream.h>
-#include "../base/mli_defs.h"
-#include "mli_method.h"
-#include "mli_method_amgsa.h"
+#include "base/mli_defs.h"
+#include "amgs/mli_method.h"
+#include "amgs/mli_method_amgsa.h"
 
 /*****************************************************************************
  * create a method from method name

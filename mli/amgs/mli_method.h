@@ -21,7 +21,7 @@
 
 #include <mpi.h>
 #include "utilities/utilities.h"
-#include "../base/mli.h"
+#include "base/mli.h"
 
 class MLI;
 

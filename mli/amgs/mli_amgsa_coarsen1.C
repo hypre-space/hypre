@@ -23,8 +23,8 @@
 #include "seq_mv/seq_mv.h"
 #include "parcsr_mv/parcsr_mv.h"
 
-#include "mli_method_amgsa.h"
-#include "../util/mli_utils.h"
+#include "amgs/mli_method_amgsa.h"
+#include "util/mli_utils.h"
  
 // *********************************************************************
 // local defines

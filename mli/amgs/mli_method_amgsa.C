@@ -10,12 +10,12 @@
 #include <iostream.h>
 #include <assert.h>
 #include "HYPRE.h"
-#include "../util/mli_utils.h"
-#include "../matrix/mli_matrix.h"
-#include "../vector/mli_vector.h"
-#include "../solver/mli_solver.h"
-#include "../base/mli_defs.h"
-#include "mli_method_amgsa.h"
+#include "util/mli_utils.h"
+#include "matrix/mli_matrix.h"
+#include "vector/mli_vector.h"
+#include "solver/mli_solver.h"
+#include "base/mli_defs.h"
+#include "amgs/mli_method_amgsa.h"
  
 /* ********************************************************************* *
  * constructor
