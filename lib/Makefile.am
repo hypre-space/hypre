@@ -278,6 +278,7 @@ FILES = \
  $(top_srcdir)/parcsr_ls/par_rap.c\
  $(top_srcdir)/parcsr_ls/par_rap_communication.c\
  $(top_srcdir)/parcsr_ls/par_relax.c\
+ $(top_srcdir)/parcsr_ls/par_relax_interface.c\
  $(top_srcdir)/parcsr_ls/par_scaled_matnorm.c\
  $(top_srcdir)/parcsr_ls/par_schwarz.c\
  $(top_srcdir)/parcsr_ls/par_stats.c\
