@@ -39,7 +39,7 @@ LFLAGS =\
  -L../seq_matrix_vector\
  -L../utilities\
  -lHYPRE_parcsr_mv\
- -lHYPRE_mv\
+ -lHYPRE_seq_mv\
  -lHYPRE_utilities\
  ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
  
@@ -66,7 +66,13 @@ FILES =\
  F90_HYPRE_parcsr_matrix.c\
  F90_HYPRE_parcsr_vector.c
 
+DRIVER_FILES =\
+ driver.c\
+ driver_matmul.c\
+ driver_matvec.c
+
 OBJS = ${FILES:.c=.o}
+DRIVER_OBJS = ${DRIVER_FILES:.c=.o}
 
 ##################################################################
 # Targets
@@ -74,6 +80,18 @@ OBJS = ${FILES:.c=.o}
 
 all: libHYPRE_parcsr_mv.a
  
+driver: driver.o libHYPRE_parcsr_mv.a 
+	@echo  "Linking" $@ "... "
+	${CC} -o driver driver.o ${LFLAGS} 
+ 
+driver_matvec: driver_matvec.o libHYPRE_parcsr_mv.a
+	@echo  "Linking" $@ "... "
+	${CC} -o driver_matvec driver_matvec.o ${LFLAGS} 
+ 
+driver_matmul: driver_matmul.o libHYPRE_parcsr_mv.a
+	@echo  "Linking" $@ "... "
+	${CC} -o driver_matmul driver_matmul.o ${LFLAGS} 
+
 install: all
 	@cp -f HYPRE_*.h parcsr_matrix_vector.h $$HYPRE_INSTALL_DIR/include/.
 	@cp -f libHYPRE_*.a $$HYPRE_INSTALL_DIR/lib/.
@@ -83,6 +101,7 @@ clean:
 
 veryclean: clean
 	@rm -f libHYPRE_parcsr_mv.a
+	@rm -f driver driver_matvec driver_matmul
 
 ##################################################################
 # Rules
@@ -94,6 +113,8 @@ libHYPRE_parcsr_mv.a: ${OBJS}
 	@RANLIB@ $@
 
 ${OBJS}: ${HEADERS}
+
+${DRIVER_OBJS}: ${HEADERS}
 
 ##################################################################
 # Generic rules
