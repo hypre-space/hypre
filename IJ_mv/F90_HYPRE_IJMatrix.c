@@ -81,7 +81,7 @@ hypre_F90_IFACE(hypre_ijmatrixdistribute, HYPRE_IJMATRIXDISTRIBUTE)( long int *m
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SetIJMatrixLocalStorageT
+ * HYPRE_SetIJMatrixLocalStorageTy
  *--------------------------------------------------------------------------*/
 
 void 
@@ -137,7 +137,7 @@ hypre_F90_IFACE(hypre_ijmatrixsetdiagrowsizes, HYPRE_IJMATRIXSETDIAGROWSIZES)( l
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_IJMatrixSetOffDiagRowSizes
+ * HYPRE_IJMatrixSetOffDiagRowSize
  *--------------------------------------------------------------------------*/
  
 void
@@ -228,6 +228,130 @@ hypre_F90_IFACE(hypre_ijmatrixinsertrow, HYPRE_IJMATRIXINSERTROW)( long int *mat
                                             (const double *)  values   ) );
 
 } 
+
+/*--------------------------------------------------------------------------
+ * HYPRE_IJMatrixAddToRow
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_ijmatrixaddtorow, HYPRE_IJMATRIXADDTOROW)( long int *matrix,
+                                           int      *n,
+                                           int      *row,
+                                           int      *cols,
+                                           double   *values,
+                                           int      *ierr    )
+{
+   *ierr = (int) ( HYPRE_IJMatrixAddToRow( (HYPRE_IJMatrix) *matrix,
+                                             (int)            *n,
+                                             (int)            *row,
+                                             (const int *)     cols,
+                                             (const double *)  values  ) );
+
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_IJMatrixAddToRowAfter
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_ijmatrixaddtorowafter, HYPRE_IJMATRIXADDTOROWAFTER)( long int *matrix,
+                                           int      *n,
+                                           int      *row,
+                                           int      *cols,
+                                           double   *values,
+                                           int      *ierr    )
+{
+   *ierr = (int) ( HYPRE_IJMatrixAddToRowAfter( (HYPRE_IJMatrix) *matrix,
+                                             (int)            *n,
+                                             (int)            *row,
+                                             (const int *)     cols,
+                                             (const double *)  values  ) );
+
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_IJMatrixSetValues
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_ijmatrixsetvalues, HYPRE_IJMATRIXSETVALUES)( long int *matrix,
+                                           int      *n,
+                                           int      *row,
+                                           int      *cols,
+                                           double   *values,
+                                           int      *ierr    )
+{
+   *ierr = (int) ( HYPRE_IJMatrixSetValues( (HYPRE_IJMatrix) *matrix,
+                                             (int)            *n,
+                                             (int)            *row,
+                                             (const int *)     cols,
+                                             (const double *)  values  ) );
+
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_IJMatrixAddToValues
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_ijmatrixaddtovalues, HYPRE_IJMATRIXADDTOVALUES)( long int *matrix,
+                                           int      *n,
+                                           int      *row,
+                                           int      *cols,
+                                           double   *values,
+                                           int      *ierr    )
+{
+   *ierr = (int) ( HYPRE_IJMatrixAddToValues( (HYPRE_IJMatrix) *matrix,
+                                             (int)            *n,
+                                             (int)            *row,
+                                             (const int *)     cols,
+                                             (const double *)  values  ) );
+
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_IJMatrixSetBlockValues
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_ijmatrixsetblockvalues, HYPRE_IJMATRIXSETBLOCKVALUES)( long int *matrix,
+                                           int      *m,
+                                           int      *n,
+                                           int      *rows,
+                                           int      *cols,
+                                           double   *values,
+                                           int      *ierr    )
+{
+   *ierr = (int) ( HYPRE_IJMatrixSetBlockValues( (HYPRE_IJMatrix) *matrix,
+                                             (int)            *m,
+                                             (int)            *n,
+                                             (const int *)     rows,
+                                             (const int *)     cols,
+                                             (const double *)  values  ) );
+
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_IJMatrixAddToBlockValues
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_ijmatrixaddtoblockvalues, HYPRE_IJMATRIXADDTOBLOCKVALUES)( long int *matrix,
+                                           int      *m,
+                                           int      *n,
+                                           int      *rows,
+                                           int      *cols,
+                                           double   *values,
+                                           int      *ierr    )
+{
+   *ierr = (int) ( HYPRE_IJMatrixAddToBlockValues( (HYPRE_IJMatrix) *matrix,
+                                             (int)            *m,
+                                             (int)            *n,
+                                             (const int *)     rows,
+                                             (const int *)     cols,
+                                             (const double *)  values  ) );
+
+}
 
 /*--------------------------------------------------------------------------
  * HYPRE_IJMatrixGetLocalStorage
