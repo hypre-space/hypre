@@ -229,29 +229,29 @@ hypre_BoomerAMGDestroy( void *data )
    if (hypre_ParAMGDataNumGridSweeps(amg_data))
    {
       hypre_TFree (hypre_ParAMGDataNumGridSweeps(amg_data));
-      /* hypre_ParAMGDataNumGridSweeps(amg_data) = NULL; */
+      hypre_ParAMGDataNumGridSweeps(amg_data) = NULL; 
    }
    if (hypre_ParAMGDataGridRelaxType(amg_data))
    {
       hypre_TFree (hypre_ParAMGDataGridRelaxType(amg_data));
-      /* hypre_ParAMGDataGridRelaxType(amg_data) = NULL; */
+      hypre_ParAMGDataGridRelaxType(amg_data) = NULL; 
    }
    if (hypre_ParAMGDataRelaxWeight(amg_data))
    {
       hypre_TFree (hypre_ParAMGDataRelaxWeight(amg_data));
-      /* hypre_ParAMGDataRelaxWeight(amg_data) = NULL; */
+      hypre_ParAMGDataRelaxWeight(amg_data) = NULL; 
    }
    if (hypre_ParAMGDataOmega(amg_data))
    {
       hypre_TFree (hypre_ParAMGDataOmega(amg_data));
-      /* hypre_ParAMGDataOmega(amg_data) = NULL; */
+      hypre_ParAMGDataOmega(amg_data) = NULL; 
    }
    if (hypre_ParAMGDataGridRelaxPoints(amg_data))
    {
       for (i=0; i < 4; i++)
    	hypre_TFree (hypre_ParAMGDataGridRelaxPoints(amg_data)[i]);
       hypre_TFree (hypre_ParAMGDataGridRelaxPoints(amg_data));
-      /* hypre_ParAMGDataGridRelaxPoints(amg_data) = NULL; */
+      hypre_ParAMGDataGridRelaxPoints(amg_data) = NULL; 
    }
    for (i=1; i < num_levels; i++)
    {
@@ -260,7 +260,6 @@ hypre_BoomerAMGDestroy( void *data )
 	hypre_ParCSRMatrixDestroy(hypre_ParAMGDataAArray(amg_data)[i]);
 	hypre_ParCSRMatrixDestroy(hypre_ParAMGDataPArray(amg_data)[i-1]);
 	hypre_TFree(hypre_ParAMGDataCFMarkerArray(amg_data)[i-1]);
-	hypre_TFree(hypre_ParAMGDataDofFuncArray(amg_data)[i-1]);
    }
    /* see comments in par_coarsen.c regarding special case for CF_marker */
    if (num_levels == 1)
@@ -273,9 +272,14 @@ hypre_BoomerAMGDestroy( void *data )
    hypre_TFree(hypre_ParAMGDataAArray(amg_data));
    hypre_TFree(hypre_ParAMGDataPArray(amg_data));
    hypre_TFree(hypre_ParAMGDataCFMarkerArray(amg_data));
-   hypre_TFree(hypre_ParAMGDataDofFuncArray(amg_data)[num_levels-1]);
-   hypre_TFree(hypre_ParAMGDataDofFuncArray(amg_data));
 
+   if (hypre_ParAMGDataDofFuncArray(amg_data))
+   {
+      for (i=0; i < num_levels; i++)
+	 hypre_TFree(hypre_ParAMGDataDofFuncArray(amg_data)[i]);
+      hypre_TFree(hypre_ParAMGDataDofFuncArray(amg_data));
+      hypre_ParAMGDataDofFuncArray(amg_data) = NULL;
+   }
    if (hypre_ParAMGDataRestriction(amg_data))
    {
       hypre_TFree(hypre_ParAMGDataRArray(amg_data));
