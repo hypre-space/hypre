@@ -1,9 +1,10 @@
 Makefile
 params.amg
+build
+lx
 amg.f
 amgs01.f
 bsetup.f
-build*
 cforce.f
 color.f
 crsgd.f
@@ -14,7 +15,6 @@ form.f
 icf3drv.f
 iinvert.f
 input.f
-lapn*
 lapn.f
 memoryx.f
 misc.f
