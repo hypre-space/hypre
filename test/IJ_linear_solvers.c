@@ -134,7 +134,7 @@ main( int   argc,
    /* parameters for GSMG */
    int      gsmg_samples = 5;
 
-   int      print_matrix = 0;
+   int      print_system = 0;
 
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -637,6 +637,11 @@ main( int   argc,
          arg_index++;
          gsmg_samples  = atoi(argv[arg_index++]);
       }
+      else if ( strcmp(argv[arg_index], "-print") == 0 )
+      {
+         arg_index++;
+         print_system = 1;
+      }
       else
       {
          arg_index++;
@@ -747,7 +752,8 @@ main( int   argc,
       printf("\n");  
       printf("  -dbg <val>             : set debug flag\n");
       printf("       0=no debugging\n       1=internal timing\n       2=interpolation truncation\n       3=more detailed timing in coarsening routine\n");
-      printf("  -print_matrix         : print the matrix to a file\n");
+      printf("\n");
+      printf("  -print                 : print out the system\n");
       printf("\n");
 
       exit(1);
@@ -809,9 +815,6 @@ main( int   argc,
       return(-1);
    }
 
-   if ( print_matrix )
-      HYPRE_ParCSRMatrixPrint( parcsr_A, "matout" );
-
    time_index = hypre_InitializeTiming("Spatial operator");
    hypre_BeginTiming(time_index);
 
@@ -826,9 +829,6 @@ main( int   argc,
 
      local_num_rows = last_local_row - first_local_row + 1;
      local_num_cols = last_local_col - first_local_col + 1;
-
-     ierr = HYPRE_IJMatrixInitialize( ij_A );
-
    }
    else
    {
@@ -1404,6 +1404,17 @@ main( int   argc,
       }
    }
  
+   /*-----------------------------------------------------------
+    * Print out the system and initial guess
+    *-----------------------------------------------------------*/
+
+   if (print_system)
+   {
+      HYPRE_IJMatrixPrint(ij_A, "IJ.out.A");
+      HYPRE_IJVectorPrint(ij_b, "IJ.out.b");
+      HYPRE_IJVectorPrint(ij_x, "IJ.out.x0");
+   }
+
    /*-----------------------------------------------------------
     * Solve the system using the hybrid solver
     *-----------------------------------------------------------*/
