@@ -207,7 +207,7 @@ hypre_CGNRSolve(void *cgnr_vdata,
    int             ierr = 0;
    int             my_id, num_procs;
    int             x_not_set = 1;
-   char		  *log_file_name;
+   /* char		  *log_file_name; */
 
    /*-----------------------------------------------------------------------
     * Start cgnr solve
