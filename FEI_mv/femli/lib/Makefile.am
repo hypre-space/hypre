@@ -80,6 +80,7 @@ FILES = \
  $(top_srcdir)/FEI_mv/femli/base/mli.cxx\
  $(top_srcdir)/FEI_mv/femli/base/mli_oneLevel.cxx\
  $(top_srcdir)/FEI_mv/femli/cintface/cmli.cxx\
+ $(top_srcdir)/FEI_mv/femli/fedata/mli_febase.cxx\
  $(top_srcdir)/FEI_mv/femli/fedata/mli_fedata.cxx\
  $(top_srcdir)/FEI_mv/femli/fedata/mli_fedata_utils.cxx\
  $(top_srcdir)/FEI_mv/femli/fedata/mli_sfei.cxx\

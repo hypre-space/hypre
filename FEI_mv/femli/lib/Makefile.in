@@ -71,6 +71,7 @@ am__libHYPRE_mli_a_SOURCES_DIST =  \
 	$(top_srcdir)/FEI_mv/femli/base/mli.cxx \
 	$(top_srcdir)/FEI_mv/femli/base/mli_oneLevel.cxx \
 	$(top_srcdir)/FEI_mv/femli/cintface/cmli.cxx \
+	$(top_srcdir)/FEI_mv/femli/fedata/mli_febase.cxx \
 	$(top_srcdir)/FEI_mv/femli/fedata/mli_fedata.cxx \
 	$(top_srcdir)/FEI_mv/femli/fedata/mli_fedata_utils.cxx \
 	$(top_srcdir)/FEI_mv/femli/fedata/mli_sfei.cxx \
@@ -101,7 +102,8 @@ am__objects_1 = mli_utils.$(OBJEXT) mli_amgsa_calib.$(OBJEXT) \
 	mli_amgsa_dd_sfei.$(OBJEXT) mli_method.$(OBJEXT) \
 	mli_method_amgcr.$(OBJEXT) mli_method_amgrs.$(OBJEXT) \
 	mli_method_amgsa.$(OBJEXT) mli.$(OBJEXT) \
-	mli_oneLevel.$(OBJEXT) cmli.$(OBJEXT) mli_fedata.$(OBJEXT) \
+	mli_oneLevel.$(OBJEXT) cmli.$(OBJEXT) \
+        mli_febase.$(OBJEXT) mli_fedata.$(OBJEXT) \
 	mli_fedata_utils.$(OBJEXT) mli_sfei.$(OBJEXT) \
 	mli_mapper.$(OBJEXT) mli_matrix.$(OBJEXT) \
 	mli_matrix_mult.$(OBJEXT) mli_matrix_utils.$(OBJEXT) \
@@ -132,6 +134,7 @@ am__libHYPRE_mli_la_SOURCES_DIST =  \
 	$(top_srcdir)/FEI_mv/femli/base/mli.cxx \
 	$(top_srcdir)/FEI_mv/femli/base/mli_oneLevel.cxx \
 	$(top_srcdir)/FEI_mv/femli/cintface/cmli.cxx \
+	$(top_srcdir)/FEI_mv/femli/fedata/mli_febase.cxx \
 	$(top_srcdir)/FEI_mv/femli/fedata/mli_fedata.cxx \
 	$(top_srcdir)/FEI_mv/femli/fedata/mli_fedata_utils.cxx \
 	$(top_srcdir)/FEI_mv/femli/fedata/mli_sfei.cxx \
@@ -160,7 +163,7 @@ am__libHYPRE_mli_la_SOURCES_DIST =  \
 am__objects_2 = mli_utils.lo mli_amgsa_calib.lo mli_amgsa_coarsen1.lo \
 	mli_amgsa_dd_fedata.lo mli_amgsa_dd_sfei.lo mli_method.lo \
 	mli_method_amgcr.lo mli_method_amgrs.lo mli_method_amgsa.lo \
-	mli.lo mli_oneLevel.lo cmli.lo mli_fedata.lo \
+	mli.lo mli_oneLevel.lo cmli.lo mli_febase.lo mli_fedata.lo \
 	mli_fedata_utils.lo mli_sfei.lo mli_mapper.lo mli_matrix.lo \
 	mli_matrix_mult.lo mli_matrix_utils.lo mli_solver.lo \
 	mli_solver_jacobi.lo mli_solver_bjacobi.lo mli_solver_gs.lo \
@@ -405,6 +408,7 @@ FILES = \
  $(top_srcdir)/FEI_mv/femli/base/mli.cxx\
  $(top_srcdir)/FEI_mv/femli/base/mli_oneLevel.cxx\
  $(top_srcdir)/FEI_mv/femli/cintface/cmli.cxx\
+ $(top_srcdir)/FEI_mv/femli/fedata/mli_febase.cxx\
  $(top_srcdir)/FEI_mv/femli/fedata/mli_fedata.cxx\
  $(top_srcdir)/FEI_mv/femli/fedata/mli_fedata_utils.cxx\
  $(top_srcdir)/FEI_mv/femli/fedata/mli_sfei.cxx\
@@ -658,6 +662,15 @@ cmli.obj: $(top_srcdir)/FEI_mv/femli/cintface/cmli.cxx
 
 cmli.lo: $(top_srcdir)/FEI_mv/femli/cintface/cmli.cxx
 	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o cmli.lo `test -f '$(top_srcdir)/FEI_mv/femli/cintface/cmli.cxx' || echo '$(srcdir)/'`$(top_srcdir)/FEI_mv/femli/cintface/cmli.cxx
+
+mli_febase.o: $(top_srcdir)/FEI_mv/femli/fedata/mli_febase.cxx
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mli_febase.o `test -f '$(top_srcdir)/FEI_mv/femli/fedata/mli_febase.cxx' || echo '$(srcdir)/'`$(top_srcdir)/FEI_mv/femli/fedata/mli_febase.cxx
+
+mli_febase.obj: $(top_srcdir)/FEI_mv/femli/fedata/mli_febase.cxx
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mli_febase.obj `if test -f '$(top_srcdir)/FEI_mv/femli/fedata/mli_febase.cxx'; then $(CYGPATH_W) '$(top_srcdir)/FEI_mv/femli/fedata/mli_febase.cxx'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/FEI_mv/femli/fedata/mli_febase.cxx'; fi`
+
+mli_febase.lo: $(top_srcdir)/FEI_mv/femli/fedata/mli_febase.cxx
+	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mli_febase.lo `test -f '$(top_srcdir)/FEI_mv/femli/fedata/mli_febase.cxx' || echo '$(srcdir)/'`$(top_srcdir)/FEI_mv/femli/fedata/mli_febase.cxx
 
 mli_fedata.o: $(top_srcdir)/FEI_mv/femli/fedata/mli_fedata.cxx
 	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mli_fedata.o `test -f '$(top_srcdir)/FEI_mv/femli/fedata/mli_fedata.cxx' || echo '$(srcdir)/'`$(top_srcdir)/FEI_mv/femli/fedata/mli_fedata.cxx
