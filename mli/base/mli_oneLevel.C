@@ -31,6 +31,7 @@ MLI_OneLevel::MLI_OneLevel( MLI *mli )
    mli_object    = mli;
    level_num     = -1;
    fedata        = NULL;
+   nodeEqnMap    = NULL;
    Amat          = NULL;
    Rmat          = NULL;
    Pmat          = NULL;
