@@ -338,7 +338,7 @@ case $HOSTNAME in
            CASC_ADD_LIB(mpi, main, /opt/intel/tflop/TF99_2.6.1/tflops/cougar/lib/puma, MPI)
            if test -z "$MPILIBS"
            then
-                AC_MSG_WARN([MPI not found-- must set manually using --with-flags])
+                AC_MSG_WARN([MPI not found--in sasn100 test-must set manually using --with-flags])
            fi
         fi
      fi
@@ -375,7 +375,7 @@ case $HOSTNAME in
            CASC_ADD_LIB(mpi, main, /cougar/lib/puma, MPI)
            if test -z "$MPILIBS"
            then
-                AC_MSG_WARN([MPI not found-- must set manually using --with-flags])
+                AC_MSG_WARN([MPI not found--in janus test-must set manually using --with-flags])
            fi
         fi
      fi
@@ -411,7 +411,7 @@ case $HOSTNAME in
            CASC_ADD_LIB(mpi, main, /usr/lib, MPI)
            if test -z "$MPILIBS"
            then
-                AC_MSG_WARN([MPI not found-- must set manually using --with-flags])
+                AC_MSG_WARN([MPI not found--in nirvana test-must set manually using --with-flags])
            fi
         fi
      fi
@@ -496,11 +496,13 @@ then
        CASC_CHECK_HEADER(mpi.h, /usr/include)
        MPIINCLUDE="$MPIINCLUDE $INCLUDES"
        CASC_ADD_LIB(rt, main, /usr/lib)
-       HYPRE_ADD_LIB(mpi, main, /usr/opt/MPI170/lib, MPI, ,
-         CASC_ADD_LIB(mpi, main, /usr/lib, MPI) )
+dnl * there seem to be a problem here
+dnl *  HYPRE_ADD_LIB(mpi, main, /usr/opt/MPI170/lib, MPI, ,
+dnl *    CASC_ADD_LIB(mpi, main, /usr/lib, MPI) )
+       CASC_ADD_LIB(mpi, main, /usr/lib, MPI) )
        if test -z "$MPILIBS"
        then
-         AC_MSG_WARN([MPI not found-- must set manually using --with-flags])
+         AC_MSG_WARN([MPI not found--in alpha test-must set manually using --with-flags])
        fi
      fi
 
@@ -638,7 +640,7 @@ then
        CASC_ADD_LIB(mpi, main, /usr/local/mpi/lib, MPI)
        if test -z "$MPILIBS"
        then
-         AC_MSG_WARN([MPI not found-- must set manually using --with-flags])
+         AC_MSG_WARN([MPI not found--in IRIX64 test-must set manually using --with-flags])
        fi
      fi
 
@@ -698,7 +700,7 @@ then
     CASC_ADD_LIB(mpi, main, /usr/local/mpi/lib, MPI)
     if test -z "$MPILIBS"
     then
-      AC_MSG_WARN([MPI not found-- must set manually using --with-flags])
+      AC_MSG_WARN([MPI not found--in default test-must set manually using --with-flags])
     fi
   fi
 
