@@ -127,7 +127,7 @@ package Hypre {
    };
    
    interface Stencil {
-      int SetElement( in int element_index, inout array<int,1> element_offset );
+      int SetElement( in int element_index, in array<int,1> element_offset );
    };
 
    interface Solver extends LinearOperator {
@@ -179,7 +179,7 @@ package Hypre {
 // begins by calling a constructor.
 //
 // If you use a separate builder, the way things work is:
-//  builder's Babel constructor() makes a builder
+//  builder's Constructor() makes a builder
 //  builder's New(...) makes an object and does basic initialization
 //  builder's Set functions put data into the new object
 //  builder's Setup(...) finishes building the object
@@ -228,7 +228,7 @@ package Hypre {
    class StructStencil implements Stencil 
    {
       void print();
-      int SetElement( in int element_index, inout array<int,1> element_offset );
+      int SetElement( in int element_index, in array<int,1> element_offset );
       int New( in int dimension, in int size );
       static StructStencil Constructor( in int dimension, in int size );
       int Setup();
@@ -354,6 +354,7 @@ package Hypre {
       int Scale( in double a );        
       int Dot( in Vector x, out double d );
       int Axpy( in double a, in Vector x );
+      int GetPartitioning( out array<int,1> partitioning );
    };
 
    // ---------------- Solver and related classes
