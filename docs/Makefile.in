@@ -150,16 +150,16 @@ vref_manual.tex: vref_manual.dxx
 
 vref_manual.dxx: ref_manual.dxx
 	@ \
-	VNUM=`$(srcdir)/utilities/version -number`; \
-	VDATE=`$(srcdir)/utilities/version -date`; \
+	VNUM=`$(srcdir)/../utilities/version -number`; \
+	VDATE=`$(srcdir)/../utilities/version -date`; \
 	sed "s/HYPREVersion/$$VNUM/g" ref_manual.dxx > vref_manual.dxx
 
 ##########
 
 version.tex:
 	@ \
-	VNUM=`$(srcdir)/utilities/version -number`; \
-	VDATE=`$(srcdir)/utilities/version -date`; \
+	VNUM=`$(srcdir)/../utilities/version -number`; \
+	VDATE=`$(srcdir)/../utilities/version -date`; \
 	echo "\def\HYPREVersion{$$VNUM}" > version.tex; \
 	echo "\def\HYPREVersionDate{$$VDATE}" >> version.tex
 
