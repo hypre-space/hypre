@@ -411,7 +411,7 @@ hypre_ParAMGSetLogging( void     *data,
    FILE *fp;
 
    hypre_ParAMGDataIOutDat(amg_data) = ioutdat;
-   if (ioutdat > 0)
+/*   if (ioutdat > 0)
    {
       if (*log_file_name == 0)  
          sprintf(hypre_ParAMGDataLogFileName(amg_data), "%s", "amg.out.log");
@@ -421,7 +421,7 @@ hypre_ParAMGSetLogging( void     *data,
       fp = fopen(hypre_ParAMGDataLogFileName(amg_data),"w");
       fclose(fp);
    }
-
+*/
    return (ierr);
 }
 
