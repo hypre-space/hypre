@@ -216,7 +216,7 @@ hypre_PFMG2BuildRAPSym( hypre_StructMatrix *A,
    int                   iR;
                       
    int                   yOffsetA, yOffsetA_diag, yOffsetA_offd; 
-   int                   xOffsetP, xOffsetA_diag, xOffsetA_offd; 
+   int                   xOffsetP; 
    int                   yOffsetP; 
                       
    int                   ierr = 0;

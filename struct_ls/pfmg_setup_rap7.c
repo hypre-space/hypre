@@ -194,16 +194,15 @@ hypre_PFMGBuildCoarseOp7( hypre_StructMatrix *A,
 
    double               *a_cc, *a_cw, *a_ce, *a_cs, *a_cn;
    double               *a_ac, *a_bc;
-   double               a_cw_cc, a_ce_cc, a_cs_cc, a_cn_cc, a_ac_cc, a_bc_cc;
 
    double               *rap_cc, *rap_cw, *rap_cs;
    double               *rap_ce, *rap_cn;
    double               *rap_ac, *rap_bc;
    double                west, east;
    double                south, north;
-   double                diag, deltadiag, diagb, diagcorr, diagm, diagp, above, below;
+   double                diag, diagcorr, diagm, diagp, above, below;
 
-   int                   iA, iAm1, iAp1, iA_offd, iA_offd_m1, iA_offd_p1;
+   int                   iA, iAm1, iAp1, iA_offd;
    int                   iAc;
    int                   iP, iPm1, iPp1;
                       

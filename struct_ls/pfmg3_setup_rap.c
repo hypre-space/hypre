@@ -230,11 +230,11 @@ hypre_PFMG3BuildRAPSym( hypre_StructMatrix *A,
    double                a_cse_offd, a_cse_offdm1, a_cse_offdp1;
    double                a_cn_offdm1, a_cne_offdm1, a_cnw_offdm1;
    double                a_cw_offd, a_cw_offdm1, a_cw_offdp1;
-   double                a_ce_offd, a_ce_offdm1;
+   double                a_ce_offdm1;
    double                a_ac_offd, a_ac_offdm1;
    double                a_aw_offd, a_aw_offdm1;
    double                a_as_offd, a_as_offdm1;
-   double                a_asw_offd, a_asw_offdm1, a_asw_offdp1;
+   double                a_asw_offd, a_asw_offdm1;
    double                a_ase_offd, a_ase_offdm1;
    double                a_bc_offd, a_bc_offdm1, a_bc_offdp1;
    double                a_be_offd, a_be_offdm1;

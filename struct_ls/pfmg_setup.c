@@ -588,10 +588,13 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
             diag_exists = 0;
             for (si = 0; si < stencil_size; si++)
             {
-               if (si != diag_rank)
-                  /* constant coeff part of matrix, same as constant_coefficient==1 */
+               if (si == diag_rank)
                {
-                  diag_exists == 1;
+                  diag_exists = 1;
+               }
+               else
+               {
+                  /* constant coeff part of matrix, same as constant_coefficient==1 */
                   Ap = hypre_StructMatrixBoxData(A, i, si);
 
                   /* x-direction */
