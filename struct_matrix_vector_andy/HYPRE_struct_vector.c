@@ -160,5 +160,23 @@ int
 HYPRE_GetStructInterfaceVectorValue( HYPRE_StructInterfaceVector vector, 
        int *index, double *value )
 {
-   return( hypre_GetStructInterfaceVectorValue( (hypre_StructInterfaceVector *) vector, index, value ) );
+   int ierr=0;
+   int d;
+   hypre_Index         *new_grid_index;
+
+   new_grid_index = hypre_NewIndex();
+   for (d = 0;
+	d < hypre_StructGridDim(hypre_StructInterfaceVectorStructGrid
+           ((hypre_StructInterfaceVector *) vector));
+	d++)
+   {
+      hypre_IndexD(new_grid_index, d) = index[d];
+   }
+
+   ierr = hypre_GetStructInterfaceVectorValue
+          ( (hypre_StructInterfaceVector *) vector, new_grid_index, value );
+
+   hypre_FreeIndex(new_grid_index);
+
+   return(ierr);
 }

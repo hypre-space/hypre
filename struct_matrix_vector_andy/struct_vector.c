@@ -163,7 +163,7 @@ hypre_RetrievalOnStructInterfaceVector( hypre_StructInterfaceVector *vector )
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_RetreivalOffStructInterfaceVector( hypre_StructInterfaceVector *vector )
+hypre_RetrievalOffStructInterfaceVector( hypre_StructInterfaceVector *vector )
 {
    int ierr = 0;
 
@@ -182,14 +182,15 @@ hypre_RetreivalOffStructInterfaceVector( hypre_StructInterfaceVector *vector )
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_GetStructInterfaceVector( hypre_StructInterfaceVector *vector, 
-      int *index, double *value )
+hypre_GetStructInterfaceVectorValue( hypre_StructInterfaceVector *vector, 
+      hypre_Index *index, double *value )
 {
    int ierr = 0;
 
-   if ( !hypre_StructInterfaceVectorRetrievalOn(vector) )
+   if ( hypre_StructInterfaceVectorRetrievalOn(vector) == 0 )
    {
      ierr = -1;
+     printf("GetStructInterfaceVectorValue ERROR\n");
      return(ierr);
    }
 

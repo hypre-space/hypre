@@ -19,7 +19,7 @@
  *--------------------------------------------------------------------------*/
 
 hypre_StructGrid *
-hypre_NewStructGrid( int dim )
+hypre_NewStructGrid( MPI_Comm context, int dim )
 {
    hypre_StructGrid    *grid;
 
@@ -27,6 +27,7 @@ hypre_NewStructGrid( int dim )
 
    grid = hypre_CTAlloc(hypre_StructGrid, 1);
 
+   hypre_StructGridContext(grid)  = context;
    hypre_StructGridAllBoxes(grid)  = NULL;
    hypre_StructGridProcesses(grid) = NULL;
    hypre_StructGridBoxes(grid)     = hypre_NewBoxArray();

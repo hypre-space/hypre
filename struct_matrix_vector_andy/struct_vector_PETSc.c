@@ -244,7 +244,7 @@ hypre_RetrievalOffStructInterfaceVectorPETSc( hypre_StructInterfaceVector *vecto
 
 int 
 hypre_GetStructInterfaceVectorPETScValue( 
-       hypre_StructInterfaceVector *vector, int *index, double *value )
+       hypre_StructInterfaceVector *vector, hypre_Index *index, double *value )
 {
    int  ierr=0;
 #ifdef PETSC_AVAILABLE

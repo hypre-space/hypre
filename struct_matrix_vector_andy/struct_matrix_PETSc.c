@@ -133,9 +133,10 @@ hypre_SetStructInterfaceMatrixPETScCoeffs( hypre_StructInterfaceMatrix *struct_m
 
 	    ierr = MatSetValues ( PETSc_matrix, 1, &row_coord, 1, &col_coord,
 				  &(coeffs[i]), INSERT_VALUES );    
-            /* ADD THE FOLLOWING LINE FOR SYMMETRIC MATRICES...     
-	    ierr = MatSetValues ( *PETSc_matrix, 1, &col_coord, 1, &row_coord,
-				  &(coeffs[i]), INSERT_VALUES );    */      
+            /* ADD THE FOLLOWING LINE FOR SYMMETRIC MATRICES...     */
+            if (row_coord != col_coord)
+	       ierr = MatSetValues ( PETSc_matrix, 1, &col_coord, 1, &row_coord,
+				  &(coeffs[i]), INSERT_VALUES );    
 	 }
 
       } /*End of "if coeff not equal to zero" */

@@ -22,6 +22,8 @@
 
 typedef struct
 {
+   MPI_Comm         context;
+
    hypre_BoxArray  *all_boxes;    /* Array of all grid boxes in the grid */
    int           *processes;    /* Processes corresponding to grid boxes */
 
@@ -39,6 +41,7 @@ typedef struct
  * Accessor macros: hypre_StructGrid
  *--------------------------------------------------------------------------*/
 
+#define hypre_StructGridContext(grid)       ((grid) -> context)
 #define hypre_StructGridAllBoxes(grid)      ((grid) -> all_boxes)
 #define hypre_StructGridProcesses(grid)     ((grid) -> processes)
 #define hypre_StructGridBoxes(grid)         ((grid) -> boxes)

@@ -6,7 +6,7 @@
 
 
 /* HYPRE_struct_grid.c */
-HYPRE_StructGrid HYPRE_NewStructGrid P((int dim ));
+HYPRE_StructGrid HYPRE_NewStructGrid P((MPI_Comm context, int dim ));
 void HYPRE_FreeStructGrid P((HYPRE_StructGrid grid ));
 void HYPRE_SetStructGridExtents P((HYPRE_StructGrid grid , int *ilower , int *iupper ));
 void HYPRE_AssembleStructGrid P((HYPRE_StructGrid grid ));

@@ -15,7 +15,6 @@
 #endif
 
 #include "mpi.h"
-#include "HYPRE.h"
 
 #include "box.h"
 #include "struct_stencil.h"
@@ -25,6 +24,7 @@
 #include "struct_matrix.h"
 #include "struct_vector.h"
 
+#include "HYPRE.h"
 #include "hypre_protos.h"
 #include "internal_protos.h"
 
