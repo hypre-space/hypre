@@ -144,8 +144,8 @@ cd $HYPRE_INSTALL_DIR
 if [ "$HYPRE_ARCH" = "casc" ] &&
    [ "$HYPRE_INSTALL_TYPE" = "internal" ]
 then
-    # update only if no VERSION_DATE file
-    if [ ! -f UPDATE/VERSION_DATE ]
+    # update only if no VERSION_NAME file
+    if [ ! -f UPDATE/VERSION_NAME ]
     then
         # create directory UPDATE and protect
         mkdir -p UPDATE
@@ -177,10 +177,15 @@ then
             (cd tools; make install; make veryclean)
         )
     
-        # store a representative date for this version of the source
-        date > UPDATE/VERSION_DATE
-        # store a representative name for this version
-        date '+V%Y-%m-%d' > UPDATE/VERSION_NAME
+        # store version info
+        (
+            cd UPDATE
+            src/linear_solvers/utilities/version > VERSION
+            # store version name with syntax VX.XX.XX (for sorting purposes)
+            src/linear_solvers/utilities/version -number | \
+                awk 'BEGIN {FS="."} {printf "V%d.%02d.%02d\n",$1,$2,$3}' \
+                > VERSION_NAME
+        )
 
         # create the UPDATE.tar file
         echo "creating the UPDATE.tar file ..."
@@ -349,7 +354,7 @@ then
     echo "removing old installations ..."
     NUM_COPIES=3
     # note: `*' will expand alphabetically in the Bourne shell
-    set - V[1-8]*
+    set - V[0-8]*
     COUNT=`expr $# - $NUM_COPIES`
     while [ $COUNT -gt 0 ]
     do
