@@ -10,8 +10,8 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <assert.h>
-#include <string.h>
 #include <strings.h>
+#include <string.h>
 #include <malloc.h>
 #include <ctype.h>
 
