@@ -28,7 +28,7 @@
 // local enumerations and defines
 // -------------------------------------------------------------------------
 
-enum HYsolverID {HYPCG,HYGMRES,HYSUPERLU,HYSUPERLUX,HYY12M};
+enum HYsolverID {HYPCG,HYGMRES,HYSUPERLU,HYSUPERLUX,HYY12M,HYAMGE};
 enum HYpreconID {HYDIAGONAL,HYPILUT,HYPARASAILS,HYBOOMERAMG,HYNONE,HYML,
                  HYDDILUT};
 
@@ -299,6 +299,7 @@ class HYPRE_LinSysCore
    void  solveUsingSuperLU(int&);
    void  solveUsingSuperLUX(int&);
    void  solveUsingY12M(int&);
+   void  solveUsingAMGe(int&);
 
  private:        //variables
 

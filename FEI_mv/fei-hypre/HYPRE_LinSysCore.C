@@ -84,6 +84,9 @@ extern "C" {
    void y12maf_(int*,int*,double*,int*,int*,int*,int*,double*,
                 int*,int*, double*,int*,double*,int*);
 #endif
+#ifdef HAVE_AMGE
+    int HYPRE_LSI_AMGeSolve( double *rhs, double *sol ); 
+#endif
 }
 
 //***************************************************************************
@@ -1529,6 +1532,21 @@ void HYPRE_LinSysCore::enforceEssentialBC(int* globalEqn, double* alpha,
           HYPRE_IJVectorSetLocalComponents(HYb_,1,&eqnNum,NULL,&rhs_term);
        }
     }
+
+    //-------------------------------------------------------------------
+    // set up the AMGe Dirichlet boundary conditions
+    //-------------------------------------------------------------------
+
+#ifdef HAVE_AMGE
+    if ( HYSolverID_ == HYAMGE )
+    {
+       colInd = new int[leng];
+       for( i = 0; i < leng; i++ ) colInd[i] = globalEqn[i] - 1;
+       HYPRE_LSI_AMGeSetBoundary( leng, colInd );
+       delete [] colInd;
+    } 
+#endif
+
     if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
     {
        printf("%4d : HYPRE_LinSysCore::leaving  enforceEssentialBC.\n",mypid_);
@@ -2127,6 +2145,11 @@ void HYPRE_LinSysCore::selectSolver(char* name)
     {
        strcpy( HYSolverName_, name );
        HYSolverID_ = HYY12M;
+    }
+    else if ( !strcmp(name, "amge") )
+    {
+       strcpy( HYSolverName_, name );
+       HYSolverID_ = HYAMGE;
     }
     else
     {
@@ -2990,6 +3013,20 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
           exit(1);
           break; 
 #endif
+
+       //----------------------------------------------------------------
+       // choose AMGE (single processor) 
+       //----------------------------------------------------------------
+
+#ifdef HAVE_AMGE
+       case HYAMGE :
+
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
+             printf("%4d : launchSolver(AMGe)\n",mypid_);
+          solveUsingAMGe(iterations);
+          break;
+#endif
+
     }
 
     //*******************************************************************
@@ -3632,6 +3669,100 @@ void HYPRE_LinSysCore::solveUsingY12M(int& status)
 #endif
 
 }
+
+//***************************************************************************
+// this function solve the incoming linear system using Y12M
+//---------------------------------------------------------------------------
+
+void HYPRE_LinSysCore::solveUsingAMGe(int &iterations)
+{
+    int                i, nrows, ierr, *ind_array, status;
+    double             rnorm, *rhs, *sol;
+    HYPRE_ParCSRMatrix A_csr;
+    HYPRE_ParVector    r_csr;
+    HYPRE_ParVector    b_csr;
+    HYPRE_ParVector    x_csr;
+
+#ifdef HAVE_AMGE
+    //------------------------------------------------------------------
+    // available for sequential processing only for now
+    //------------------------------------------------------------------
+
+    if ( numProcs_ > 1 )
+    {
+       printf("solveUsingAMGE ERROR - too many processors.\n");
+       iterations = 0;
+       return;
+    }
+
+    //------------------------------------------------------------------
+    // need to construct a CSR matrix, and the column indices should
+    // have been stored in colIndices and rowLengths
+    //------------------------------------------------------------------
+      
+    if ( localStartRow_ != 1 )
+    {
+       printf("solveUsingAMGe ERROR - row does not start at 1.\n");
+       status = -1;
+       return;
+    }
+    if (slideReduction_  == 1) 
+         nrows = localEndRow_ - 2 * nConstraints_;
+    else if (slideReduction_  == 2) 
+         nrows = localEndRow_ - nConstraints_;
+    else if (schurReduction_ == 1) 
+         nrows = localEndRow_ - localStartRow_ + 1 - A21NRows_;
+    else nrows = localEndRow_;
+
+    //------------------------------------------------------------------
+    // set up the right hand side
+    //------------------------------------------------------------------
+
+    ind_array = new int[nrows];
+    for ( i = 0; i < nrows; i++ ) ind_array[i] = i;
+    rhs = new double[nrows];
+    ierr = HYPRE_IJVectorGetLocalComponents(currB_,nrows,ind_array,NULL,rhs);
+    assert(!ierr);
+
+    //------------------------------------------------------------------
+    // call Y12M to solve the linear system
+    //------------------------------------------------------------------
+
+    sol = new double[nrows];
+    status = HYPRE_LSI_AMGeSolve( rhs, sol ); 
+ 
+    //------------------------------------------------------------------
+    // postprocessing
+    //------------------------------------------------------------------
+
+    ierr = HYPRE_IJVectorSetLocalComponents(currX_,nrows,ind_array,NULL,sol);
+    assert(!ierr);
+    x_csr  = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(currX_);
+    r_csr  = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(currR_);
+    b_csr  = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(currB_);
+    ierr = HYPRE_ParVectorCopy( b_csr, r_csr );
+    assert(!ierr);
+    ierr = HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
+    assert(!ierr);
+    ierr = HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
+    assert(!ierr);
+    rnorm = sqrt( rnorm );
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )
+       printf("HYPRE_LinSysCore::solveUsingY12M - final norm = %e.\n", rnorm);
+
+    //------------------------------------------------------------------
+    // clean up 
+    //------------------------------------------------------------------
+
+    delete [] ind_array; 
+    delete [] rhs; 
+    delete [] sol; 
+#else
+    printf("HYPRE_LinSysCore::solveUsingAMGe - not available.\n");
+#endif
+
+}
+
 
 //***************************************************************************
 // this function loads in the constraint numbers for reduction

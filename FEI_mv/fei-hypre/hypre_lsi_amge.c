@@ -1,6 +1,34 @@
+/*BHEADER**********************************************************************
+ * (c) 1999   The Regents of the University of California
+ *
+ * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+ * notice, contact person, and disclaimer.
+ *
+ * $Revision$
+ *********************************************************************EHEADER*/
+/******************************************************************************
+ *
+ * HYPRE_LSI_AMGE interface
+ *
+ *****************************************************************************/
+
+#ifdef HAVE_AMGE
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
+
+#include "utilities/utilities.h"
+#include "HYPRE.h"
+
+/* ********************************************************************* */
+/* local variables to this module                                        */
+/* ********************************************************************* */
+
 int    *i_element_node_0;
 int    *i_element_node_0;
 int    num_nodes, num_elements;
+int    *i_node_on_boundary;
 int    system_size=1, num_dofs;
 int    element_count=0;
 int    temp_elemat_cnt;
@@ -10,49 +38,58 @@ double **temp_elem_data;
 /* ********************************************************************* */
 /* constructor                                                           */
 /* ********************************************************************* */
+
 int HYPRE_LSI_AMGeCreate()
 {
-   i_element_node_0 = NULL;
-   j_element_node_0 = NULL;
-   num_nodes = 0;
-   num_elements = 0;
-   system_size = 1;
-   num_dofs = 0;
-   element_count = 0;
-   temp_elemat_cnt = 0;
-   temp_elem_node = NULL;
+   i_element_node_0   = NULL;
+   j_element_node_0   = NULL;
+   num_nodes          = 0;
+   num_elements       = 0;
+   system_size        = 1;
+   num_dofs           = 0;
+   element_count      = 0;
+   temp_elemat_cnt    = 0;
+   temp_elem_node     = NULL;
    temp_elem_node_cnt = NULL;
-   temp_elem_data = NULL;
+   temp_elem_data     = NULL;
+   i_node_on_boundary = NULL;
    return 0;
 }
 
 /* ********************************************************************* */
 /* destructor                                                            */
 /* ********************************************************************* */
+
 int HYPRE_LSI_AMGeDestroy()
 {
    int i;
 
-   if ( i_element_node_0 != NULL ) free( i_element_node_0 );
-   if ( j_element_node_0 != NULL ) free( j_element_node_0 );
-   temp_elem_node = NULL;
-   temp_elem_node_cnt = NULL;
-   temp_elem_data = NULL;
+   if ( i_element_node_0   != NULL ) free( i_element_node_0 );
+   if ( j_element_node_0   != NULL ) free( j_element_node_0 );
+   if ( i_node_on_boundary != NULL ) free( i_node_on_boundary );
    if ( temp_elem_node_cnt != NULL ) free( temp_elem_node_cnt );
    for ( i = 0; i < num_elements; i++ )
    {
       if ( temp_elem_node[i] != NULL ) free( temp_elem_node[i] );
       if ( temp_elem_data[i] != NULL ) free( temp_elem_data[i] );
    }
+   temp_elem_node     = NULL;
+   temp_elem_node_cnt = NULL;
+   temp_elem_data     = NULL;
    return 0;
 }
 
 /* ********************************************************************* */
 /* set the number of nodes in the finest grid                            */
 /* ********************************************************************* */
+
 int HYPRE_LSI_AMGeSetNNodes(int nNodes)
 {
+   int i;
+
    num_nodes = nNodes;
+   i_node_on_boundary = (int *) malloc(nNodes * sizeof(int));
+   for ( i = 0; i < nNodes; i++ ) i_node_on_boundary[i] = -1;
    return 0;
 }
 
@@ -83,6 +120,18 @@ int HYPRE_LSI_AMGeSetNElements(int nElems)
 int HYPRE_LSI_AMGeSetSystemSize(int size)
 {
    system_size = size;
+   return 0;
+}
+
+/* ********************************************************************* */
+/* set boundary condition                                                */
+/* ********************************************************************* */
+
+int HYPRE_LSI_AMGeSetBoundary(int size, int *list)
+{
+   int i;
+
+   for ( i = 0; i < size; i++ ) i_node_on_boundary[list[i]] = 0;
    return 0;
 }
 
@@ -120,7 +169,7 @@ int HYPRE_LSI_AMGePutRoW(int row, int length, const double *colVal,
 /* Solve                                                                 */
 /* ********************************************************************* */
 
-int HYPRE_LSI_AMGESolve()
+int HYPRE_LSI_AMGESolve(double *rhs, double *x)
 {
    int *Num_nodes, *Num_elements, *Num_dofs;
 
@@ -263,7 +312,8 @@ int HYPRE_LSI_AMGESolve()
    }
 
    /* -------------------------------------------------------------- */
-   /* get element_dof information                         */
+   /* get element_dof information                                    */
+   /* -------------------------------------------------------------- */
 
    ierr = transpose_matrix_create(&i_node_dof_0, &j_node_dof_0,
                    i_dof_node_0, j_dof_node_0, Num_dofs[0], Num_nodes[0]);
@@ -276,13 +326,13 @@ int HYPRE_LSI_AMGESolve()
    }
    else
       ierr = matrix_matrix_product(&i_element_dof_0, &j_element_dof_0,
-                i_element_node_0, j_element_node_0, i_node_dof_0, j_node_dof_0,
+                i_element_node_0,j_element_node_0,i_node_dof_0,j_node_dof_0,
                 Num_elements[0], Num_nodes[0], Num_dofs[0]);
 
 
-
-   
-   /* store element matrices in element_chord format */
+   /* -------------------------------------------------------------- */
+   /* store element matrices in element_chord format                 */
+   /* -------------------------------------------------------------- */
 
    ierr = hypre_AMGeElementMatrixDof(i_element_dof_0, j_element_dof_0,
                 element_data, &i_element_chord_0, &j_element_chord_0,
@@ -341,9 +391,180 @@ int HYPRE_LSI_AMGESolve()
    hypre_TFree(i_block_node);
    hypre_TFree(j_block_node);
 
+   /* ===================================================================== */
+   /* =================== S O L U T I O N   P A R T: ====================== */
+   /* ===================================================================== */
+
+   /* one V(1,1) --cycle as preconditioner in PCG: ======================== */
+   /* ILU solve pre--smoothing, ILU solve post--smoothing; ================ */
+
+   w = hypre_CTAlloc(double*, level+1); 
+   d = hypre_CTAlloc(double*, level+1);
+
+   for (l=0; l < level+1; l++)
+   {
+      Num_dofs[l] = Num_nodes[l] * system_size;
+      if (Num_dofs[l] > 0)
+      {
+	  w[l] = hypre_CTAlloc(double, Num_dofs[l]);
+	  d[l] = hypre_CTAlloc(double, Num_dofs[l]);
+      }
+      else
+      {
+	  level = l-1;
+	  break;
+      }
+   }
+
+   num_dofs = Num_dofs[0];
+
+   /*x = hypre_CTAlloc(double, num_dofs);  */
+   /*rhs = hypre_CTAlloc(double, num_dofs);*/
+
+   r = hypre_CTAlloc(double, num_dofs); 
+   aux = hypre_CTAlloc(double, num_dofs);
+   v_fine = hypre_CTAlloc(double, num_dofs);
+   w_fine = hypre_CTAlloc(double, num_dofs);
+   d_fine = hypre_CTAlloc(double, num_dofs);
+
+   coarse_level = level;
+   v_coarse = hypre_CTAlloc(double, Num_dofs[coarse_level]);
+   w_coarse = hypre_CTAlloc(double, Num_dofs[coarse_level]);
+   d_coarse = hypre_CTAlloc(double, Num_dofs[coarse_level]);
+
+   for (l=0; l < level; l++)
+   {
+      printf("\n\n=======================================================\n");
+      printf("             Testing level[%d] PCG solve:                  \n",l);
+      printf("===========================================================\n");
+ 
+      for (i=0; i < Num_dofs[l]; i++) x[i] = 0.e0;
+
+      /* for (i=0; i < Num_dofs[l]; i++) rhs[i] = rand(); */
+
+      i_dof_dof_a = hypre_CSRMatrixI(Matrix[l]);
+      j_dof_dof_a = hypre_CSRMatrixJ(Matrix[l]);
+      a_dof_dof   = hypre_CSRMatrixData(Matrix[l]);
+
+      ierr = hypre_ILUsolve(x, i_ILUdof_to_dof[l], i_ILUdof_ILUdof[l],
+	           j_ILUdof_ILUdof[l], LD_data[l], i_ILUdof_ILUdof_t[l],
+                   j_ILUdof_ILUdof_t[l], U_data[l], rhs, Num_dofs[l]);
+
+      ierr = hypre_ILUpcg(x, rhs, a_dof_dof, i_dof_dof_a, j_dof_dof_a,
+                   i_ILUdof_to_dof[l], i_ILUdof_ILUdof[l], j_ILUdof_ILUdof[l],
+                   LD_data[l], i_ILUdof_ILUdof_t[l], j_ILUdof_ILUdof_t[l],
+                   U_data[l], v_fine, w_fine, d_fine, max_iter, Num_dofs[l]);
+
+      printf("\n\n=======================================================\n");
+      printf("             END test PCG solve:                           \n");
+      printf("===========================================================\n");
+ 
+   }
+
+   printf("\n\n===============================================================\n");
+   printf("                      Problem: %d \n", Problem);
+   printf(" ------- V_cycle & nested dissection ILU(1) smoothing: --------\n");
+   printf("================================================================\n");
+
+   num_dofs = Num_dofs[0];
+
+   /* for (i=0; i < num_dofs; i++) rhs[i] = rand(); */
+  
+   ierr = hypre_VcycleILUpcg(x, rhs, w, d, &reduction_factor, Matrix,
+                i_ILUdof_to_dof, i_ILUdof_ILUdof, j_ILUdof_ILUdof, LD_data,
+                i_ILUdof_ILUdof_t, j_ILUdof_ILUdof_t, U_data, P, aux, r, 
+                v_fine, w_fine, d_fine, max_iter, v_coarse, w_coarse, d_coarse, 
+                nu, level, coarse_level, Num_dofs);
+
+   /* hypre_TFree(x);   */
+   /* hypre_TFree(rhs); */
+
+   hypre_TFree(r);
+   hypre_TFree(aux);
+
+   for (l=0; l < level+1; l++)
+      if (Num_dofs[l] > 0)
+      {
+	hypre_TFree(w[l]);
+	hypre_TFree(d[l]);
+	hypre_CSRMatrixDestroy(Matrix[l]);
+      }
+
+   for (l=0; l < max_level; l++)
+   {
+      hypre_TFree(i_node_coarsenode[l]);
+      hypre_TFree(j_node_coarsenode[l]);
+
+      hypre_TFree(i_node_neighbor_coarsenode[l]);
+      hypre_TFree(j_node_neighbor_coarsenode[l]);
+
+      if (system_size == 1 &&Num_dofs[l+1] > 0)
+      {
+	  hypre_CSRMatrixI(P[l]) = NULL;
+	  hypre_CSRMatrixJ(P[l]) = NULL;
+      }
+  
+   }
+   for (l=0; l < level; l++)
+   {
+      hypre_TFree(i_ILUdof_to_dof[l]);
+      hypre_TFree(i_ILUdof_ILUdof[l]);
+      hypre_TFree(j_ILUdof_ILUdof[l]);
+      hypre_TFree(LD_data[l]);
+      hypre_TFree(i_ILUdof_ILUdof_t[l]);
+      hypre_TFree(j_ILUdof_ILUdof_t[l]);
+      hypre_TFree(U_data[l]);
+      hypre_CSRMatrixDestroy(P[l]);
+
+   }
+
+   hypre_TFree(v_fine);
+   hypre_TFree(w_fine);
+   hypre_TFree(d_fine);
+   hypre_TFree(w);
+   hypre_TFree(d);
+
+   hypre_TFree(v_coarse);
+   hypre_TFree(w_coarse);
+   hypre_TFree(d_coarse);
+
+   for (l=0; l < max_level+1; l++)
+      hypre_DestroyAMGeMatrixTopology(A[l]);
+
+   hypre_TFree(Num_nodes);
+   hypre_TFree(Num_elements);
+   hypre_TFree(Num_dofs);
+   hypre_TFree(Num_blocks);
+   hypre_TFree(Num_chords);
+
+   hypre_TFree(i_chord_dof_0);
+   hypre_TFree(j_chord_dof_0);
+
+   hypre_TFree(i_element_chord_0);
+   hypre_TFree(j_element_chord_0);
+   hypre_TFree(a_element_chord_0);
+
+   hypre_TFree(P);
+   hypre_TFree(Matrix);
+   hypre_TFree(A);
+
+   hypre_TFree(i_ILUdof_to_dof);
+   hypre_TFree(i_ILUdof_ILUdof);
+   hypre_TFree(j_ILUdof_ILUdof);
+   hypre_TFree(LD_data);
+
+   hypre_TFree(i_ILUdof_ILUdof_t);
+   hypre_TFree(j_ILUdof_ILUdof_t);
+   hypre_TFree(U_data);
+
+   hypre_TFree(i_node_coarsenode);
+   hypre_TFree(j_node_coarsenode);
+
+   hypre_TFree(i_node_neighbor_coarsenode);
+   hypre_TFree(j_node_neighbor_coarsenode);
+
    return 0;
 }
 
-
-
+#endif
 
