@@ -24,7 +24,8 @@ HYPRE_EXTRA_DIRS =\
  seq_matrix_vector\
  parcsr_matrix_vector\
  parcsr_linear_solvers\
- seq_linear_solvers/pamg
+ seq_linear_solvers/pamg\
+ docs
 
 all:
 	@ \
@@ -90,4 +91,7 @@ veryclean:
 	    (cd $$i; make veryclean); \
 	  fi; \
 	done
+
+
+
 
